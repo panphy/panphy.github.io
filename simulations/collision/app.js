@@ -4,6 +4,16 @@ const ui = {
     startBtn: document.getElementById('startBtn'),
     addBtn: document.getElementById('addBtn'),
     resetBtn: document.getElementById('resetBtn'),
+    launchBtn: document.getElementById('launchBtn'),
+    pauseBtn: document.getElementById('pauseBtn'),
+    stepBtn: document.getElementById('stepBtn'),
+    speedSelect: document.getElementById('speedSelect'),
+    dataPanel: document.getElementById('dataPanel'),
+    dataToggle: document.getElementById('dataToggle'),
+    trailsToggle: document.getElementById('trailsToggle'),
+    arrowsToggle: document.getElementById('arrowsToggle'),
+    physicsStepperGrid: document.getElementById('physicsStepperGrid'),
+    gravityHelp: document.getElementById('gravityHelp'),
     controlsToggle: document.getElementById('controlsToggle'),
     controlsPanel: document.getElementById('controlsPanel'),
     controlsClose: document.getElementById('controlsClose'),
@@ -14,10 +24,6 @@ const ui = {
     oneDToggle: document.getElementById('oneDToggle'),
     sensitivityRange: document.getElementById('sensitivityRange'),
     sensitivityValue: document.getElementById('sensitivityValue'),
-    gravityRange: document.getElementById('gravityRange'),
-    gravityValue: document.getElementById('gravityValue'),
-    airDragRange: document.getElementById('airDragRange'),
-    airDragValue: document.getElementById('airDragValue'),
     ballControlsSection: document.getElementById('ballControlsSection'),
     ballControlsCount: document.getElementById('ballControlsCount'),
     ballControlsList: document.getElementById('ballControlsList'),
@@ -183,9 +189,30 @@ const state = {
     boundaryMode: 'walls',
     oneD: false,
     sensitivity: 1.0,
-    gravity: 0.0,
-    airDrag: 0.0,
+    gravity: 0.0, // m/s^2
+    airDrag: 0.0, // 1/s
+    ballRestitution: 1.0,
+    wallRestitution: 1.0,
+    paused: false,
+    timeScale: 1,
+    pendingStep: false,
+    showData: false,
+    showTrails: false,
+    showArrows: false,
+    mirrored: true,
+    lastCollision: null,
+    lastHandIds: [],
+    prevHandPalms: [],
+    nextHandId: 0,
+    handsUpdated: false,
+    tipsDirty: false,
+    tipTimeMs: 0,
+    stageWidth: 0,
+    stageHeight: 0,
+    coverTransform: { sx: 1, sy: 1, ox: 0, oy: 0 },
     statusMessage: 'Camera is off.',
+    statusIsError: false,
+    statusBeforePause: null,
     nextTrackingErrorReportAt: 0,
     selectedSphere: null,
     lastDrawVideoTime: -1,
@@ -332,7 +359,6 @@ async function ensureHandTrackingDeps() {
 const SPHERE_RADIUS = 0.18;
 const PLANE_Z = 0;
 const MAX_SPHERES = 3;
-const IDEAL_WALL_RESTITUTION = 1.0;
 const PHYSICS_SUBSTEPS = 3;
 const PHYSICS_SUBSTEPS_1D = 6;
 const COLLISION_SOLVER_POSITION_ITERATIONS = 3;
@@ -341,16 +367,36 @@ const COLLISION_SOLVER_POSITION_ITERATIONS_1D = 10;
 const COLLISION_SOLVER_VELOCITY_ITERATIONS_1D = 7;
 const ONE_D_STACK_STABILIZATION_PASSES = 4;
 const COLLISION_SEPARATION_EPSILON = SPHERE_RADIUS * 0.004;
-const GRAVITY_SCALE = 9.81;
 const MIN_SPHERE_MASS = 0.2;
 const MAX_SPHERE_MASS = 5.0;
 const DEFAULT_SPHERE_MASS = 1.0;
-const MIN_SPHERE_RESTITUTION = 0.0;
-const MAX_SPHERE_RESTITUTION = 1.0;
-const DEFAULT_SPHERE_RESTITUTION = 1.0;
+const MIN_RESTITUTION = 0.0;
+const MAX_RESTITUTION = 1.0;
+const MAX_GRAVITY = 20.0;
+const MAX_AIR_DRAG = 1.0;
+const MAX_LAUNCH_SPEED = 5.0;
+// Hand pushes and throws are capped so tracking glitches cannot fling a ball across the stage.
+const MAX_HAND_SPEED = 6.0;
+// Safety cap for free motion (e.g. endless free fall in wrap mode) so balls cannot tunnel.
+const MAX_SPHERE_SPEED = 15.0;
+// Ball-ball approach speed needed before a collision is logged in the data panel.
+const COLLISION_LOG_MIN_SPEED = 0.15;
+const SPHERE_PALETTE = [0xF97316, 0x38BDF8, 0xE879F9];
+const TRAIL_LENGTH = 120;
+const TRAIL_MIN_STEP = 0.004;
+const ARROW_SECONDS = 0.35;
+const ARROW_MAX_LENGTH = 1.2;
+const ARROW_MIN_SPEED = 0.02;
+const FIXED_STEP_SECONDS = 1 / 60;
+let nextSphereId = 1;
 
-function randomHexColor() {
-    return Math.floor(Math.random() * 0x1000000);
+function pickSphereColor() {
+    for (const color of SPHERE_PALETTE) {
+        if (!spheres.some((sphere) => sphere.colorHex === color)) {
+            return color;
+        }
+    }
+    return SPHERE_PALETTE[spheres.length % SPHERE_PALETTE.length];
 }
 
 function darkenHexColor(colorValue, factor = 0.3) {
@@ -415,10 +461,6 @@ const REAL_INTERACTION_PROFILE = {
     spring: 112,
     damping: 6.4,
     correction: 0.64,
-    restitution: 0.9,
-    stickPull: 0,
-    stickCapture: 0,
-    maxSpeed: 3.2,
     velocityTransfer: 0.58
 };
 
@@ -467,7 +509,7 @@ const handGripStates = new Map();
 function renderHudInfo(force = false) {
     const fpsText = state.running ? state.fps.toFixed(0) : '--';
     const nextText =
-        `${state.statusMessage} | FPS: ${fpsText} | Hands: ${state.handsCount} | Tips: ${state.tipCount} | Contacts: ${state.contactsCount} | Spheres: ${spheres.length}`;
+        `${state.statusMessage} | FPS: ${fpsText} | Hands: ${state.handsCount} | Tips: ${state.tipCount} | Contacts: ${state.contactsCount} | Balls: ${spheres.length}`;
     if (!force && state.lastHudText === nextText) {
         return;
     }
@@ -477,6 +519,7 @@ function renderHudInfo(force = false) {
 
 function setStatus(message, isError = false) {
     state.statusMessage = message;
+    state.statusIsError = isError;
     ui.statusMetrics.classList.toggle('status-error', isError);
     renderHudInfo(true);
 }
@@ -492,11 +535,7 @@ function getInteractionProfile() {
         spring: base.spring * powerScale,
         damping: base.damping,
         correction: base.correction,
-        airDrag: Math.max(0, Math.min(1.0, state.airDrag)),
-        restitution: base.restitution,
-        stickPull: base.stickPull,
-        stickCapture: base.stickCapture,
-        maxSpeed: base.maxSpeed,
+        airDrag: Math.max(0, Math.min(MAX_AIR_DRAG, state.airDrag)),
         velocityTransfer: base.velocityTransfer * powerScale
     };
 }
@@ -509,71 +548,175 @@ function updateSensitivityLabel() {
     ui.sensitivityValue.textContent = `${state.sensitivity.toFixed(1)}x`;
 }
 
-function updateGravityLabel() {
-    ui.gravityValue.textContent = `${state.gravity.toFixed(2)}g`;
-}
-
-function updateAirDragLabel() {
-    ui.airDragValue.textContent = state.airDrag.toFixed(2);
-}
-
 function clampSphereMass(value) {
     return Math.max(MIN_SPHERE_MASS, Math.min(MAX_SPHERE_MASS, value));
 }
 
-function clampSphereRestitution(value) {
-    return Math.max(MIN_SPHERE_RESTITUTION, Math.min(MAX_SPHERE_RESTITUTION, value));
-}
-
-function formatSphereMass(value) {
-    return `${value.toFixed(1)} kg`;
-}
-
-function formatSphereRestitution(value) {
-    return value.toFixed(2);
+function clampRestitution(value) {
+    return Math.max(MIN_RESTITUTION, Math.min(MAX_RESTITUTION, value));
 }
 
 function toCssHexColor(colorValue) {
     return `#${colorValue.toString(16).padStart(6, '0')}`;
 }
 
-function createBallSliderControl({
-    sphereNumber,
+// --- Stepper control: tap for an exact step, hold to ramp, or type a value. ---
+
+const STEPPER_HOLD_DELAY_MS = 400;
+const STEPPER_REPEAT_START_MS = 140;
+const STEPPER_REPEAT_MIN_MS = 45;
+let stepperIdCounter = 0;
+
+function roundToDecimals(value, decimals) {
+    const factor = 10 ** decimals;
+    return Math.round(value * factor) / factor;
+}
+
+function createStepper({
     labelText,
-    valueText,
+    labelSub = '',
+    unitText = '',
     min,
     max,
     step,
+    decimals,
     value,
-    onInput
+    ariaLabel = labelText,
+    onChange
 }) {
-    const label = document.createElement('label');
-    label.className = 'control-block';
+    const id = `stepper-${++stepperIdCounter}`;
+    const block = document.createElement('div');
+    block.className = 'control-block stepper-block';
 
     const row = document.createElement('span');
     row.className = 'control-label-row';
-
-    const labelEl = document.createElement('span');
+    const labelEl = document.createElement('label');
     labelEl.className = 'control-label';
+    labelEl.htmlFor = id;
     labelEl.textContent = labelText;
+    if (labelSub) {
+        const subEl = document.createElement('sub');
+        subEl.textContent = labelSub;
+        labelEl.appendChild(subEl);
+    }
+    row.appendChild(labelEl);
+    if (unitText) {
+        const unitEl = document.createElement('span');
+        unitEl.className = 'stepper-unit';
+        unitEl.textContent = unitText;
+        row.appendChild(unitEl);
+    }
 
-    const valueEl = document.createElement('span');
-    valueEl.className = 'value-badge';
-    valueEl.textContent = valueText;
+    const stepper = document.createElement('div');
+    stepper.className = 'stepper';
 
-    row.append(labelEl, valueEl);
+    const minusBtn = document.createElement('button');
+    minusBtn.type = 'button';
+    minusBtn.className = 'stepper-btn';
+    minusBtn.textContent = '\u2212';
+    minusBtn.setAttribute('aria-label', `Decrease ${ariaLabel}`);
 
     const input = document.createElement('input');
-    input.type = 'range';
+    input.type = 'number';
+    input.id = id;
+    input.inputMode = 'decimal';
     input.min = String(min);
     input.max = String(max);
-    input.step = String(step);
-    input.value = String(value);
-    input.setAttribute('aria-label', `${labelText} for Sphere ${sphereNumber}`);
-    input.addEventListener('input', () => onInput(input, valueEl));
+    input.step = 'any';
+    input.className = 'stepper-input mono';
 
-    label.append(row, input);
-    return label;
+    const plusBtn = document.createElement('button');
+    plusBtn.type = 'button';
+    plusBtn.className = 'stepper-btn';
+    plusBtn.textContent = '+';
+    plusBtn.setAttribute('aria-label', `Increase ${ariaLabel}`);
+
+    stepper.append(minusBtn, input, plusBtn);
+    block.append(row, stepper);
+
+    let current = value;
+    const display = (next) => {
+        input.value = next.toFixed(decimals);
+    };
+    const commit = (next) => {
+        const clamped = roundToDecimals(Math.max(min, Math.min(max, next)), decimals);
+        current = clamped;
+        display(clamped);
+        onChange(clamped);
+    };
+    display(current);
+
+    input.addEventListener('change', () => {
+        const parsed = Number(input.value);
+        if (input.value.trim() === '' || !Number.isFinite(parsed)) {
+            display(current);
+            return;
+        }
+        commit(parsed);
+    });
+    input.addEventListener('keydown', (event) => {
+        if (event.key === 'Enter') {
+            input.blur();
+        }
+    });
+
+    const bindButton = (btn, direction) => {
+        let holdTimer = 0;
+        let repeatDelay = STEPPER_REPEAT_START_MS;
+        const stepOnce = () => {
+            // Move to the next multiple of the step, so a typed 0.33 steps to 0.35 or 0.30.
+            const ratio = current / step;
+            const onGrid = Math.abs(ratio - Math.round(ratio)) < 1e-6;
+            const nextIndex = onGrid
+                ? Math.round(ratio) + direction
+                : (direction > 0 ? Math.ceil(ratio) : Math.floor(ratio));
+            commit(nextIndex * step);
+        };
+        const stopHold = () => {
+            clearTimeout(holdTimer);
+            holdTimer = 0;
+        };
+        const repeat = () => {
+            stepOnce();
+            repeatDelay = Math.max(STEPPER_REPEAT_MIN_MS, repeatDelay * 0.85);
+            holdTimer = setTimeout(repeat, repeatDelay);
+        };
+        btn.addEventListener('pointerdown', (event) => {
+            if (btn.disabled || (event.pointerType === 'mouse' && event.button !== 0)) {
+                return;
+            }
+            event.preventDefault();
+            stepOnce();
+            repeatDelay = STEPPER_REPEAT_START_MS;
+            stopHold();
+            holdTimer = setTimeout(repeat, STEPPER_HOLD_DELAY_MS);
+        });
+        btn.addEventListener('pointerup', stopHold);
+        btn.addEventListener('pointerleave', stopHold);
+        btn.addEventListener('pointercancel', stopHold);
+        btn.addEventListener('click', (event) => {
+            // Keyboard activation (Enter/Space) reports detail 0; pointer taps were handled on pointerdown.
+            if (event.detail === 0) {
+                stepOnce();
+            }
+        });
+    };
+    bindButton(minusBtn, -1);
+    bindButton(plusBtn, 1);
+
+    return {
+        element: block,
+        setValue(next) {
+            current = next;
+            display(next);
+        },
+        setDisabled(disabled) {
+            minusBtn.disabled = disabled;
+            plusBtn.disabled = disabled;
+            input.disabled = disabled;
+            block.classList.toggle('is-disabled', disabled);
+        }
+    };
 }
 
 function renderBallControls() {
@@ -584,12 +727,9 @@ function renderBallControls() {
     ui.ballControlsCount.textContent = `${spheres.length} / ${MAX_SPHERES}`;
     ui.ballControlsList.innerHTML = '';
 
-    if (spheres.length === 0) {
-        return;
-    }
-
     for (let index = 0; index < spheres.length; index++) {
         const sphere = spheres[index];
+        const ballName = `Ball ${index + 1}`;
         const card = document.createElement('article');
         card.className = 'ball-control-card';
 
@@ -602,66 +742,75 @@ function renderBallControls() {
 
         const title = document.createElement('span');
         title.className = 'ball-control-title';
-        title.textContent = `Sphere ${index + 1}`;
+        title.textContent = ballName;
 
         header.append(colorDot, title);
         card.appendChild(header);
 
-        const sphereNumber = index + 1;
+        const grid = document.createElement('div');
+        grid.className = 'ball-control-grid';
 
-        const massControl = createBallSliderControl({
-            sphereNumber,
+        const massStepper = createStepper({
             labelText: 'Mass',
-            valueText: formatSphereMass(sphere.mass),
+            unitText: 'kg',
             min: MIN_SPHERE_MASS,
             max: MAX_SPHERE_MASS,
             step: 0.1,
+            decimals: 1,
             value: sphere.mass,
-            onInput: (inputEl, valueEl) => {
-                const nextValue = Number(inputEl.value);
-                if (!Number.isFinite(nextValue)) {
-                    return;
-                }
-                sphere.mass = clampSphereMass(nextValue);
-                valueEl.textContent = formatSphereMass(sphere.mass);
-                inputEl.value = sphere.mass.toFixed(1);
+            ariaLabel: `mass of ${ballName}`,
+            onChange: (next) => {
+                sphere.mass = clampSphereMass(next);
             }
         });
+        grid.appendChild(massStepper.element);
 
-        const restitutionControl = createBallSliderControl({
-            sphereNumber,
-            labelText: 'Coeff. of restitution',
-            valueText: formatSphereRestitution(sphere.restitution),
-            min: MIN_SPHERE_RESTITUTION,
-            max: MAX_SPHERE_RESTITUTION,
-            step: 0.01,
-            value: sphere.restitution,
-            onInput: (inputEl, valueEl) => {
-                const nextValue = Number(inputEl.value);
-                if (!Number.isFinite(nextValue)) {
-                    return;
-                }
-                sphere.restitution = clampSphereRestitution(nextValue);
-                valueEl.textContent = formatSphereRestitution(sphere.restitution);
-                inputEl.value = sphere.restitution.toFixed(2);
+        const vxStepper = createStepper({
+            labelText: 'Launch v',
+            labelSub: state.oneD ? '' : 'x',
+            unitText: 'm/s',
+            min: -MAX_LAUNCH_SPEED,
+            max: MAX_LAUNCH_SPEED,
+            step: 0.1,
+            decimals: 2,
+            value: sphere.launchVelocity.x,
+            ariaLabel: `launch velocity${state.oneD ? '' : ' x'} of ${ballName}`,
+            onChange: (next) => {
+                sphere.launchVelocity.x = next;
             }
         });
+        grid.appendChild(vxStepper.element);
 
-        const sliderRow = document.createElement('div');
-        sliderRow.className = 'ball-control-grid';
-        sliderRow.append(massControl, restitutionControl);
+        if (!state.oneD) {
+            const vyStepper = createStepper({
+                labelText: 'Launch v',
+                labelSub: 'y',
+                unitText: 'm/s',
+                min: -MAX_LAUNCH_SPEED,
+                max: MAX_LAUNCH_SPEED,
+                step: 0.1,
+                decimals: 2,
+                value: sphere.launchVelocity.y,
+                ariaLabel: `launch velocity y of ${ballName}`,
+                onChange: (next) => {
+                    sphere.launchVelocity.y = next;
+                }
+            });
+            grid.appendChild(vyStepper.element);
+        }
 
-        card.appendChild(sliderRow);
+        card.appendChild(grid);
         ui.ballControlsList.appendChild(card);
     }
 }
 
 function updateMetrics(now) {
     if ((now - state.lastHudUpdateAt) < HUD_UPDATE_INTERVAL_MS) {
-        return;
+        return false;
     }
     state.lastHudUpdateAt = now;
     renderHudInfo();
+    return true;
 }
 
 function getOneDWallsSphereCapacity() {
@@ -675,7 +824,9 @@ function getOneDWallsSphereCapacity() {
 function updateAddBtnState() {
     const oneDCapacity = Math.min(MAX_SPHERES, getOneDWallsSphereCapacity());
     const maxAllowedSpheres = (state.oneD && state.boundaryMode === 'walls') ? oneDCapacity : MAX_SPHERES;
-    ui.addBtn.disabled = !state.running || spheres.length >= maxAllowedSpheres;
+    ui.addBtn.disabled = spheres.length >= maxAllowedSpheres;
+    ui.resetBtn.disabled = spheres.length === 0;
+    ui.launchBtn.disabled = spheres.length === 0;
 }
 
 function updateStartButtonState() {
@@ -696,6 +847,9 @@ function resizeStage() {
     camera3d.updateProjectionMatrix();
     cachedViewBounds = null;
     cachedViewBoundsFrame = -1;
+    state.stageWidth = rect.width;
+    state.stageHeight = rect.height;
+    state.tipsDirty = true;
 
     ui.tipCanvas.width = Math.max(1, Math.round(rect.width));
     ui.tipCanvas.height = Math.max(1, Math.round(rect.height));
@@ -707,11 +861,47 @@ function resizeStage() {
 
     if (state.oneD && state.boundaryMode === 'walls') {
         stabilizeOneDWallPacking();
-        for (const sphere of spheres) {
-            sphere.group.position.set(sphere.position.x, sphere.position.y, PLANE_Z);
-        }
+        syncSphereMeshes();
     }
     updateAddBtnState();
+}
+
+// The video is shown with `object-fit: cover`, so it is scaled and cropped to fill the stage.
+// Landmarks are normalised to the video frame; this maps them to normalised stage coordinates.
+function updateCoverTransform() {
+    const videoWidth = ui.video.videoWidth;
+    const videoHeight = ui.video.videoHeight;
+    const stageWidth = state.stageWidth;
+    const stageHeight = state.stageHeight;
+    const transform = state.coverTransform;
+    if (!videoWidth || !videoHeight || !stageWidth || !stageHeight) {
+        transform.sx = 1;
+        transform.sy = 1;
+        transform.ox = 0;
+        transform.oy = 0;
+        return;
+    }
+    const scale = Math.max(stageWidth / videoWidth, stageHeight / videoHeight);
+    const shownWidth = videoWidth * scale;
+    const shownHeight = videoHeight * scale;
+    transform.sx = shownWidth / stageWidth;
+    transform.sy = shownHeight / stageHeight;
+    transform.ox = (stageWidth - shownWidth) / (2 * stageWidth);
+    transform.oy = (stageHeight - shownHeight) / (2 * stageHeight);
+}
+
+function videoToStageX(x) {
+    return (x * state.coverTransform.sx) + state.coverTransform.ox;
+}
+
+function videoToStageY(y) {
+    return (y * state.coverTransform.sy) + state.coverTransform.oy;
+}
+
+function syncSphereMeshes() {
+    for (const sphere of spheres) {
+        sphere.group.position.set(sphere.position.x, sphere.position.y, PLANE_Z);
+    }
 }
 
 let cachedViewBounds = null;
@@ -745,91 +935,337 @@ function createSphere(colorHex) {
     const group = new THREE.Group();
     group.add(mesh, wire);
 
+    const trailPositions = new Float32Array(TRAIL_LENGTH * 3);
+    const trailGeometry = new THREE.BufferGeometry();
+    trailGeometry.setAttribute('position', new THREE.BufferAttribute(trailPositions, 3));
+    trailGeometry.setDrawRange(0, 0);
+    const trailMaterial = new THREE.LineBasicMaterial({
+        color: colorHex,
+        transparent: true,
+        opacity: 0.7
+    });
+    const trail = new THREE.Line(trailGeometry, trailMaterial);
+    trail.frustumCulled = false;
+    trail.visible = false;
+
+    const arrow = new THREE.ArrowHelper(
+        new THREE.Vector3(1, 0, 0),
+        new THREE.Vector3(0, 0, PLANE_Z),
+        0.3,
+        0xffffff,
+        0.08,
+        0.06
+    );
+    for (const part of [arrow.line, arrow.cone]) {
+        part.material.depthTest = false;
+        part.material.transparent = true;
+        part.renderOrder = 10;
+    }
+    arrow.visible = false;
+
     return {
+        id: nextSphereId++,
         colorHex,
         group,
         material,
+        trail,
+        trailPositions,
+        trailCount: 0,
+        arrow,
         position: new THREE.Vector3(0, 0, PLANE_Z),
         spawnPosition: new THREE.Vector3(0, 0, PLANE_Z),
+        // Launch velocity in screen convention: +x is right, +y is up.
+        launchVelocity: new THREE.Vector2(0, 0),
         prevSubstepX: 0,
         integratedSubstepX: 0,
         prevSubstepY: 0,
         velocity: new THREE.Vector3(0, 0, 0),
         mass: DEFAULT_SPHERE_MASS,
-        restitution: DEFAULT_SPHERE_RESTITUTION,
         contactCount: 0
     };
 }
 
-function addSphere() {
+// The stage is mirrored for front cameras, so screen-right is world -x in that case.
+function screenXSign() {
+    return state.mirrored ? -1 : 1;
+}
+
+function getMaxAllowedSpheres() {
     const oneDCapacity = Math.min(MAX_SPHERES, getOneDWallsSphereCapacity());
-    const maxAllowedSpheres = (state.oneD && state.boundaryMode === 'walls') ? oneDCapacity : MAX_SPHERES;
-    if (spheres.length >= maxAllowedSpheres) {
-        return;
-    }
+    return (state.oneD && state.boundaryMode === 'walls') ? oneDCapacity : MAX_SPHERES;
+}
 
-    const colorHex = randomHexColor();
-    const sphere = createSphere(colorHex);
-
-    // Place at random position within inner 60% of view bounds
+function findSpawnPosition(out) {
     const bounds = getViewBounds();
     const rangeX = bounds.halfWidth * 0.6;
     const rangeY = state.oneD ? 0 : bounds.halfHeight * 0.6;
-    sphere.position.set(
-        (Math.random() * 2 - 1) * rangeX,
-        rangeY === 0 ? 0 : (Math.random() * 2 - 1) * rangeY,
-        PLANE_Z
-    );
-    sphere.spawnPosition.copy(sphere.position);
+    const minGap = (SPHERE_RADIUS * 2) + (SPHERE_RADIUS * 0.25);
+    let best = null;
+    let bestClearance = -Infinity;
+    for (let attempt = 0; attempt < 40; attempt++) {
+        const x = (Math.random() * 2 - 1) * rangeX;
+        const y = rangeY === 0 ? 0 : (Math.random() * 2 - 1) * rangeY;
+        let clearance = Infinity;
+        for (const other of spheres) {
+            clearance = Math.min(clearance, Math.hypot(other.position.x - x, other.position.y - y));
+        }
+        if (clearance >= minGap) {
+            out.set(x, y, PLANE_Z);
+            return;
+        }
+        if (clearance > bestClearance) {
+            bestClearance = clearance;
+            best = { x, y };
+        }
+    }
+    out.set(best ? best.x : 0, best ? best.y : 0, PLANE_Z);
+}
+
+function placeSphere(sphere, x, y) {
+    sphere.position.set(x, state.oneD ? 0 : y, PLANE_Z);
     sphere.prevSubstepX = sphere.position.x;
     sphere.integratedSubstepX = sphere.position.x;
     sphere.prevSubstepY = sphere.position.y;
     sphere.group.position.copy(sphere.position);
+}
 
-    scene.add(sphere.group);
+function createAndAddSphere() {
+    const sphere = createSphere(pickSphereColor());
+    scene.add(sphere.group, sphere.trail, sphere.arrow);
     spheres.push(sphere);
+    return sphere;
+}
+
+function addSphere() {
+    if (spheres.length >= getMaxAllowedSpheres()) {
+        return;
+    }
+
+    const spawn = new THREE.Vector3();
+    findSpawnPosition(spawn);
+    const sphere = createAndAddSphere();
+    placeSphere(sphere, spawn.x, spawn.y);
+    sphere.spawnPosition.copy(sphere.position);
+
     if (state.oneD && state.boundaryMode === 'walls') {
         stabilizeOneDWallPacking();
-        sphere.group.position.set(sphere.position.x, sphere.position.y, PLANE_Z);
-        for (const existing of spheres) {
-            existing.group.position.set(existing.position.x, existing.position.y, PLANE_Z);
-        }
+        syncSphereMeshes();
     }
+    clearTrail(sphere);
     renderBallControls();
     updateAddBtnState();
 
     const count = spheres.length;
-    setStatus(`Sphere ${count} added.${count < MAX_SPHERES ? ' Add more or start pushing!' : ' Max reached.'}`);
+    setStatus(`Ball ${count} added.${count < MAX_SPHERES ? ' Add more or start pushing!' : ' Max reached.'}`);
+}
+
+function clearHandInteractionState() {
+    activeContacts.clear();
+    tipHistory.clear();
+    handGripStates.clear();
+    frameGrippedSpheres.clear();
+    releaseHandSuppression.clear();
+}
+
+// Return every ball to its start position. With `withLaunch`, give each its launch velocity.
+function restoreStartPositions(withLaunch) {
+    deselectSphere();
+    const xSign = screenXSign();
+    for (const sphere of spheres) {
+        placeSphere(sphere, sphere.spawnPosition.x, sphere.spawnPosition.y);
+        if (withLaunch) {
+            sphere.velocity.set(
+                sphere.launchVelocity.x * xSign,
+                state.oneD ? 0 : sphere.launchVelocity.y,
+                0
+            );
+        } else {
+            sphere.velocity.set(0, 0, 0);
+        }
+        sphere.contactCount = 0;
+        sphere.group.rotation.set(0, 0, 0);
+    }
+    if (state.oneD && state.boundaryMode === 'walls') {
+        stabilizeOneDWallPacking();
+    }
+    syncSphereMeshes();
+    clearAllTrails();
+    clearHandInteractionState();
+    state.lastCollision = null;
+    updateAddBtnState();
+    renderDataPanel(true);
 }
 
 function resetAll() {
     if (spheres.length === 0) {
-        setStatus('No spheres to reset. Press "Add Ball" to create one.');
+        setStatus('No balls to reset. Press "Add Ball" to create one.');
         return;
     }
+    restoreStartPositions(false);
+    setStatus('Motion reset. Balls restored to their starting positions.');
+}
 
-    deselectSphere();
-    for (const sphere of spheres) {
-        sphere.position.copy(sphere.spawnPosition);
-        sphere.prevSubstepX = sphere.position.x;
-        sphere.integratedSubstepX = sphere.position.x;
-        sphere.prevSubstepY = sphere.position.y;
-        sphere.velocity.set(0, 0, 0);
-        sphere.contactCount = 0;
-        sphere.group.position.set(sphere.position.x, sphere.position.y, PLANE_Z);
-        sphere.group.rotation.set(0, 0, 0);
+function launchAll() {
+    if (spheres.length === 0) {
+        setStatus('No balls to launch. Press "Add Ball" or pick a preset.');
+        return;
     }
-    activeContacts.clear();
-    tipHistory.clear();
-    handGripStates.clear();
-    releaseHandSuppression.clear();
-    updateAddBtnState();
-    setStatus(`Motion reset. Spheres restored to their starting positions.`);
+    restoreStartPositions(true);
+    if (state.paused) {
+        setStatus('Launched. Press play to run the collision.');
+    } else {
+        setStatus('Launched from the start positions.');
+    }
+}
+
+// --- Presets: 1D set-ups that run without the camera. Positions are fractions of the half-width. ---
+
+const PRESETS = {
+    elasticEqual: {
+        label: 'Elastic collision, equal masses',
+        ballRestitution: 1,
+        balls: [
+            { x: -0.6, mass: 1.0, v: 1.0 },
+            { x: 0.15, mass: 1.0, v: 0 }
+        ]
+    },
+    heavyLight: {
+        label: 'Heavy ball hits a light ball',
+        ballRestitution: 1,
+        balls: [
+            { x: -0.6, mass: 4.0, v: 1.0 },
+            { x: 0.15, mass: 1.0, v: 0 }
+        ]
+    },
+    perfectlyInelastic: {
+        label: 'Perfectly inelastic collision',
+        ballRestitution: 0,
+        balls: [
+            { x: -0.6, mass: 1.0, v: 1.0 },
+            { x: 0.15, mass: 1.0, v: 0 }
+        ]
+    },
+    cradle: {
+        label: "Newton's cradle",
+        ballRestitution: 1,
+        balls: [
+            { x: -0.7, mass: 1.0, v: 1.0 },
+            { x: 0.05, mass: 1.0, v: 0, touchPrevious: false },
+            { x: null, mass: 1.0, v: 0, touchPrevious: true }
+        ]
+    }
+};
+
+function applyPreset(name) {
+    const preset = PRESETS[name];
+    if (!preset) {
+        return;
+    }
+    removeAllSpheres();
+
+    state.oneD = true;
+    ui.oneDToggle.checked = true;
+    state.boundaryMode = 'walls';
+    ui.wallsToggle.checked = true;
+    updateBoundaryModeUI();
+    setBallRestitution(preset.ballRestitution);
+    setWallRestitution(1);
+    setGravity(0);
+    setAirDrag(0);
+    updateOneDDependentUI();
+
+    const bounds = getViewBounds();
+    const xLimit = Math.max(0.2, bounds.halfWidth - SPHERE_RADIUS);
+    const touchGap = (SPHERE_RADIUS * 2) + (COLLISION_SEPARATION_EPSILON * 2);
+    const xSign = screenXSign();
+    let previousScreenX = 0;
+    for (const spec of preset.balls) {
+        const sphere = createAndAddSphere();
+        const screenX = spec.touchPrevious
+            ? previousScreenX + touchGap
+            : Math.max(-xLimit, Math.min(xLimit, spec.x * bounds.halfWidth));
+        previousScreenX = screenX;
+        sphere.mass = spec.mass;
+        sphere.launchVelocity.set(spec.v, 0);
+        placeSphere(sphere, screenX * xSign, 0);
+        sphere.spawnPosition.copy(sphere.position);
+    }
+    stabilizeOneDWallPacking();
+    for (const sphere of spheres) {
+        sphere.spawnPosition.copy(sphere.position);
+    }
+
+    renderBallControls();
+    restoreStartPositions(true);
+    setStatus(`Preset: ${preset.label}.${state.paused ? ' Press play to run it.' : ''}`);
+}
+
+// --- Trails and velocity arrows ---
+
+function clearTrail(sphere) {
+    sphere.trailCount = 0;
+    sphere.trail.geometry.setDrawRange(0, 0);
+}
+
+function clearAllTrails() {
+    for (const sphere of spheres) {
+        clearTrail(sphere);
+    }
+}
+
+function updateTrail(sphere) {
+    const positions = sphere.trailPositions;
+    const x = sphere.position.x;
+    const y = sphere.position.y;
+    if (sphere.trailCount > 0) {
+        const lastIndex = (sphere.trailCount - 1) * 3;
+        const jump = Math.hypot(x - positions[lastIndex], y - positions[lastIndex + 1]);
+        if (jump < TRAIL_MIN_STEP) {
+            return;
+        }
+        if (jump > SPHERE_RADIUS * 4) {
+            // Wrapped across an edge: start a fresh trail instead of drawing a line across the stage.
+            sphere.trailCount = 0;
+        }
+    }
+    if (sphere.trailCount >= TRAIL_LENGTH) {
+        positions.copyWithin(0, 3);
+        sphere.trailCount = TRAIL_LENGTH - 1;
+    }
+    const index = sphere.trailCount * 3;
+    positions[index] = x;
+    positions[index + 1] = y;
+    positions[index + 2] = PLANE_Z;
+    sphere.trailCount += 1;
+    sphere.trail.geometry.attributes.position.needsUpdate = true;
+    sphere.trail.geometry.setDrawRange(0, sphere.trailCount);
+}
+
+const arrowDirection = new THREE.Vector3();
+
+function updateOverlays(advanced) {
+    for (const sphere of spheres) {
+        sphere.trail.visible = state.showTrails;
+        if (state.showTrails && advanced) {
+            updateTrail(sphere);
+        }
+
+        const speed = Math.hypot(sphere.velocity.x, sphere.velocity.y);
+        const showArrow = state.showArrows && speed >= ARROW_MIN_SPEED;
+        sphere.arrow.visible = showArrow;
+        if (showArrow) {
+            arrowDirection.set(sphere.velocity.x / speed, sphere.velocity.y / speed, 0);
+            sphere.arrow.position.set(sphere.position.x, sphere.position.y, PLANE_Z);
+            sphere.arrow.setDirection(arrowDirection);
+            const length = Math.min(ARROW_MAX_LENGTH, SPHERE_RADIUS + (speed * ARROW_SECONDS));
+            sphere.arrow.setLength(length, 0.08, 0.06);
+        }
+    }
 }
 
 function landmarkToPlane(landmark, out) {
-    const ndcX = (landmark.x * 2) - 1;
-    const ndcY = -((landmark.y * 2) - 1);
+    const ndcX = (videoToStageX(landmark.x) * 2) - 1;
+    const ndcY = -((videoToStageY(landmark.y) * 2) - 1);
 
     scratch.rayPoint.set(ndcX, ndcY, 0.5).unproject(camera3d);
     scratch.rayDir.copy(scratch.rayPoint).sub(camera3d.position);
@@ -857,7 +1293,9 @@ function getTipObject() {
     return tipPool[tipPoolIndex++];
 }
 
-function trackPoint(key, landmark, now, tips) {
+// `timeMs` is the capture time of the detection. Velocity is only updated when a new detection
+// arrives (`updateVelocity`); on other frames positions are re-mapped but velocity is kept.
+function trackPoint(key, landmark, timeMs, tips, updateVelocity) {
     if (!landmarkToPlane(landmark, scratch.tipWorld)) {
         return;
     }
@@ -868,27 +1306,30 @@ function trackPoint(key, landmark, now, tips) {
     let velX = 0;
     let velY = 0;
     const prev = tipHistory.get(key);
-    if (prev) {
-        const elapsed = (now - prev.time) / 1000;
-        if (elapsed > 0 && elapsed < TIP_VELOCITY_MAX_ELAPSED) {
-            const rawVelX = (worldX - prev.worldX) / elapsed;
-            const rawVelY = (worldY - prev.worldY) / elapsed;
-            // EMA smoothing to reduce landmark noise
-            const alpha = 0.55;
-            velX = prev.velX !== undefined
-                ? alpha * rawVelX + (1 - alpha) * prev.velX
-                : rawVelX;
-            velY = prev.velY !== undefined
-                ? alpha * rawVelY + (1 - alpha) * prev.velY
-                : rawVelY;
+    if (prev && !updateVelocity) {
+        velX = prev.velX;
+        velY = prev.velY;
+        prev.worldX = worldX;
+        prev.worldY = worldY;
+    } else {
+        if (prev) {
+            const elapsed = (timeMs - prev.time) / 1000;
+            if (elapsed > 0 && elapsed < TIP_VELOCITY_MAX_ELAPSED) {
+                const rawVelX = (worldX - prev.worldX) / elapsed;
+                const rawVelY = (worldY - prev.worldY) / elapsed;
+                // EMA smoothing to reduce landmark noise
+                const alpha = 0.55;
+                velX = alpha * rawVelX + (1 - alpha) * prev.velX;
+                velY = alpha * rawVelY + (1 - alpha) * prev.velY;
+            }
         }
+        tipHistory.set(key, { worldX, worldY, velX, velY, time: timeMs });
     }
 
-    tipHistory.set(key, { worldX, worldY, velX, velY, time: now });
     const tipObj = getTipObject();
     tipObj.key = key;
-    tipObj.x = landmark.x;
-    tipObj.y = landmark.y;
+    tipObj.x = videoToStageX(landmark.x);
+    tipObj.y = videoToStageY(landmark.y);
     tipObj.worldX = worldX;
     tipObj.worldY = worldY;
     tipObj.velX = velX;
@@ -1036,14 +1477,57 @@ function extractReliableHands(result) {
     return reliableHands;
 }
 
-function collectTrackedTips() {
-    const now = performance.now();
+// Match detected hands to the previous frame's hands by palm position, so each hand keeps a
+// stable id even when the tracker reorders its results or drops a hand.
+const HAND_MATCH_MAX_DISTANCE = 0.25;
+
+function assignHandIds(hands) {
+    const palms = hands.map((hand) => getPalmLandmark(hand));
+    const ids = new Array(hands.length).fill(null);
+    const pairs = [];
+    for (let i = 0; i < palms.length; i++) {
+        if (!palms[i]) {
+            continue;
+        }
+        for (let j = 0; j < state.prevHandPalms.length; j++) {
+            const prev = state.prevHandPalms[j];
+            const dist = Math.hypot(palms[i].x - prev.x, palms[i].y - prev.y);
+            if (dist <= HAND_MATCH_MAX_DISTANCE) {
+                pairs.push({ i, j, dist });
+            }
+        }
+    }
+    pairs.sort((a, b) => a.dist - b.dist);
+    const usedPrev = new Set();
+    for (const pair of pairs) {
+        if (ids[pair.i] !== null || usedPrev.has(pair.j)) {
+            continue;
+        }
+        ids[pair.i] = state.prevHandPalms[pair.j].id;
+        usedPrev.add(pair.j);
+    }
+    const nextPalms = [];
+    for (let i = 0; i < hands.length; i++) {
+        if (ids[i] === null) {
+            ids[i] = state.nextHandId++;
+        }
+        if (palms[i]) {
+            nextPalms.push({ id: ids[i], x: palms[i].x, y: palms[i].y });
+        }
+    }
+    state.prevHandPalms = nextPalms;
+    return ids;
+}
+
+function collectTrackedTips(updateVelocity) {
+    const timeMs = state.tipTimeMs;
     const tips = [];
     seenKeys.clear();
     tipPoolIndex = 0;
 
     for (let handIndex = 0; handIndex < state.lastHands.length; handIndex++) {
         const hand = state.lastHands[handIndex];
+        const handId = state.lastHandIds[handIndex];
         // Fingertips
         for (let i = 0; i < FINGERTIP_POINTS.length; i++) {
             const tipIndex = FINGERTIP_POINTS[i];
@@ -1051,16 +1535,16 @@ function collectTrackedTips() {
             if (!landmark) {
                 continue;
             }
-            const key = `${handIndex}-${tipIndex}`;
+            const key = `${handId}-${tipIndex}`;
             seenKeys.add(key);
-            trackPoint(key, landmark, now, tips);
+            trackPoint(key, landmark, timeMs, tips, updateVelocity);
         }
 
         const palmLandmark = getPalmLandmark(hand);
         if (palmLandmark) {
-            const key = `${handIndex}-palm`;
+            const key = `${handId}-palm`;
             seenKeys.add(key);
-            trackPoint(key, palmLandmark, now, tips);
+            trackPoint(key, palmLandmark, timeMs, tips, updateVelocity);
         }
     }
 
@@ -1112,8 +1596,8 @@ function drawTrackedTips() {
                 continue;
             }
             tipCtx.beginPath();
-            tipCtx.moveTo(lmA.x * width, lmA.y * height);
-            tipCtx.lineTo(lmB.x * width, lmB.y * height);
+            tipCtx.moveTo(videoToStageX(lmA.x) * width, videoToStageY(lmA.y) * height);
+            tipCtx.lineTo(videoToStageX(lmB.x) * width, videoToStageY(lmB.y) * height);
             tipCtx.stroke();
         }
 
@@ -1125,7 +1609,7 @@ function drawTrackedTips() {
                 continue;
             }
             tipCtx.beginPath();
-            tipCtx.arc(lm.x * width, lm.y * height, 3, 0, Math.PI * 2);
+            tipCtx.arc(videoToStageX(lm.x) * width, videoToStageY(lm.y) * height, 3, 0, Math.PI * 2);
             tipCtx.fill();
         }
     }
@@ -1183,7 +1667,6 @@ const PALM_IMPULSE_SCALE = 1.12;
 const PALM_IDLE_SUPPRESS_MIN_OPEN_FINGERS = 4;
 const PALM_IDLE_SUPPRESS_MAX_SPEED = 0.18;
 const MAX_PUSH_ACCEL = 50.0;
-const MAX_IMPULSE = 25.0;
 const SHELL_IMPULSE_BOOST = 1.15;
 const TIP_VELOCITY_MAX_ELAPSED = 0.12;
 const FINGER_OPEN_RATIO = {
@@ -1373,21 +1856,31 @@ function countFingertipsNearSphere(hand, sphere, radius) {
 function holdSphereAtWorld(sphere, worldX, worldY, velX, velY) {
     const clampedVelX = Math.max(-GRIP_MAX_HOLD_SPEED, Math.min(GRIP_MAX_HOLD_SPEED, velX || 0));
     const clampedVelY = state.oneD ? 0 : Math.max(-GRIP_MAX_HOLD_SPEED, Math.min(GRIP_MAX_HOLD_SPEED, velY || 0));
-    sphere.position.x = worldX;
-    sphere.position.y = state.oneD ? 0 : worldY;
+    let heldX = worldX;
+    let heldY = state.oneD ? 0 : worldY;
+    if (state.boundaryMode === 'walls') {
+        // A held ball stays inside the walls rather than snapping back on release.
+        const bounds = getViewBounds();
+        const xLimit = Math.max(0.2, bounds.halfWidth - SPHERE_RADIUS);
+        const yLimit = Math.max(0.2, bounds.halfHeight - SPHERE_RADIUS);
+        heldX = Math.max(-xLimit, Math.min(xLimit, heldX));
+        heldY = Math.max(-yLimit, Math.min(yLimit, heldY));
+    }
+    sphere.position.x = heldX;
+    sphere.position.y = heldY;
     sphere.velocity.x = clampedVelX;
     sphere.velocity.y = clampedVelY;
-    sphere.group.position.set(worldX, worldY, PLANE_Z);
+    sphere.group.position.set(heldX, heldY, PLANE_Z);
     sphere.contactCount += 1;
     return true;
 }
 
-function holdSphereWithHand(sphere, handIndex, palmLandmark, gripState) {
+function holdSphereWithHand(sphere, handId, palmLandmark, gripState) {
     if (!landmarkToPlane(palmLandmark, scratch.gripWorld)) {
         return false;
     }
 
-    const palmTipData = tipHistory.get(`${handIndex}-palm`);
+    const palmTipData = tipHistory.get(`${handId}-palm`);
     let velX = 0;
     let velY = 0;
     if (palmTipData) {
@@ -1446,7 +1939,9 @@ function shouldHoldGripFromMemory(gripState) {
     return Math.max(carrySpeed, sphereSpeed) <= GRIP_MEMORY_HOLD_MAX_SPEED;
 }
 
-function applyTipForces(dt, profile) {
+// `dt` is real elapsed time (grip timers, tracking prediction); `simDt` is simulation time,
+// which differs from `dt` in slow motion.
+function applyTipForces(dt, simDt, profile) {
     frameGrippedSpheres.clear();
     updateReleaseHandSuppression(dt);
     if (spheres.length === 0) {
@@ -1465,7 +1960,8 @@ function applyTipForces(dt, profile) {
     const visibleHands = new Set();
     const idleOpenPalmHands = new Set();
     for (let handIndex = 0; handIndex < state.lastHands.length; handIndex++) {
-        const handKey = String(handIndex);
+        const handId = state.lastHandIds[handIndex];
+        const handKey = String(handId);
         visibleHands.add(handKey);
         const hand = state.lastHands[handIndex];
         if (state.oneD) {
@@ -1477,7 +1973,7 @@ function applyTipForces(dt, profile) {
         if (!gripPose) {
             const fallbackPalm = getPalmLandmark(hand);
             if (gripState && gripState.sphere && fallbackPalm) {
-                if (holdSphereWithHand(gripState.sphere, handIndex, fallbackPalm, gripState)) {
+                if (holdSphereWithHand(gripState.sphere, handId, fallbackPalm, gripState)) {
                     frameGrippedSpheres.add(gripState.sphere);
                 }
             } else if (gripState && gripState.sphere) {
@@ -1500,7 +1996,7 @@ function applyTipForces(dt, profile) {
             clearGripState(gripState);
         }
 
-        const palmTipData = tipHistory.get(`${handIndex}-palm`);
+        const palmTipData = tipHistory.get(`${handId}-palm`);
         const palmSpeed = palmTipData ? Math.hypot(palmTipData.velX, palmTipData.velY) : 0;
         if (
             !gripState.sphere &&
@@ -1519,7 +2015,7 @@ function applyTipForces(dt, profile) {
 
             if (gripState.openFrames >= GRIP_RELEASE_FRAMES) {
                 releaseGripState(gripState);
-            } else if (holdSphereWithHand(gripState.sphere, handIndex, gripPose.palmLandmark, gripState)) {
+            } else if (holdSphereWithHand(gripState.sphere, handId, gripPose.palmLandmark, gripState)) {
                 frameGrippedSpheres.add(gripState.sphere);
             }
             continue;
@@ -1577,7 +2073,7 @@ function applyTipForces(dt, profile) {
             gripState.closedFrames = 0;
             gripState.openFrames = 0;
             gripState.lostFrames = 0;
-            if (holdSphereWithHand(closestSphere, handIndex, gripPose.palmLandmark, gripState)) {
+            if (holdSphereWithHand(closestSphere, handId, gripPose.palmLandmark, gripState)) {
                 frameGrippedSpheres.add(closestSphere);
             } else {
                 clearGripState(gripState);
@@ -1665,7 +2161,7 @@ function applyTipForces(dt, profile) {
 
             totalContacts += 1;
             sphere.contactCount += 1;
-            const contactKey = `${tip.key}:${si}`;
+            const contactKey = `${tip.key}:${sphere.id}`;
             newContacts.add(contactKey);
 
             if (distance < 0.000001) {
@@ -1703,10 +2199,10 @@ function applyTipForces(dt, profile) {
                 pushAccel = Math.min(pushAccel, MAX_PUSH_ACCEL);
 
                 sphere.position.x += nxF * corePenetration * profile.correction * contactScale;
-                sphere.velocity.x += nxF * pushAccel * dt * contactScale;
+                sphere.velocity.x += nxF * pushAccel * simDt * contactScale;
                 if (!state.oneD) {
                     sphere.position.y += nyF * corePenetration * profile.correction * contactScale;
-                    sphere.velocity.y += nyF * pushAccel * dt * contactScale;
+                    sphere.velocity.y += nyF * pushAccel * simDt * contactScale;
                 }
             }
 
@@ -1721,27 +2217,25 @@ function applyTipForces(dt, profile) {
                     if (isPalm) {
                         impulse *= PALM_IMPULSE_SCALE;
                     }
-                    impulse = Math.min(impulse, MAX_IMPULSE);
+                    impulse = Math.min(impulse, MAX_HAND_SPEED);
                     sphere.velocity.x += nxF * impulse * contactScale;
                     if (!state.oneD) {
                         sphere.velocity.y += nyF * impulse * contactScale;
                     }
                 }
             }
+        }
+    }
 
-            if (!isPalm && profile.stickPull > 0 && corePenetration > 0 && distance > 0.000001) {
-                const toTipX = tip.worldX - sphere.position.x;
-                const invDistance = 1 / distance;
-                const stickFactor = corePenetration / profile.contactRadius;
-                const stickAccel = profile.stickPull / sphereMass;
-                sphere.velocity.x += toTipX * invDistance * stickAccel * stickFactor * dt * contactScale;
-                sphere.position.x += toTipX * profile.stickCapture * stickFactor * dt * contactScale;
-                if (!state.oneD) {
-                    const toTipY = tip.worldY - sphere.position.y;
-                    sphere.velocity.y += toTipY * invDistance * stickAccel * stickFactor * dt * contactScale;
-                    sphere.position.y += toTipY * profile.stickCapture * stickFactor * dt * contactScale;
-                }
-            }
+    // Cap speeds produced by hand pushes so tracking glitches cannot fling balls.
+    for (const sphere of spheres) {
+        if (sphere.contactCount === 0 || frameGrippedSpheres.has(sphere)) {
+            continue;
+        }
+        const speed = Math.hypot(sphere.velocity.x, sphere.velocity.y);
+        if (speed > MAX_HAND_SPEED) {
+            sphere.velocity.x *= MAX_HAND_SPEED / speed;
+            sphere.velocity.y *= MAX_HAND_SPEED / speed;
         }
     }
 
@@ -1788,22 +2282,32 @@ function constrainSphereToView(sphere, profile) {
 
     const xLimit = Math.max(0.2, bounds.halfWidth - SPHERE_RADIUS);
     const yLimit = Math.max(0.2, bounds.halfHeight - SPHERE_RADIUS);
-    const restitution = IDEAL_WALL_RESTITUTION * clampSphereRestitution(sphere.restitution);
+    const restitution = clampRestitution(state.wallRestitution);
 
+    // Only bounce a ball that is moving into the wall. A ball pushed past the wall by the
+    // overlap solver while already moving away keeps its speed.
     if (sphere.position.x > xLimit) {
         sphere.position.x = xLimit;
-        sphere.velocity.x = -Math.abs(sphere.velocity.x) * restitution;
+        if (sphere.velocity.x > 0) {
+            sphere.velocity.x = -sphere.velocity.x * restitution;
+        }
     } else if (sphere.position.x < -xLimit) {
         sphere.position.x = -xLimit;
-        sphere.velocity.x = Math.abs(sphere.velocity.x) * restitution;
+        if (sphere.velocity.x < 0) {
+            sphere.velocity.x = -sphere.velocity.x * restitution;
+        }
     }
 
     if (sphere.position.y > yLimit) {
         sphere.position.y = yLimit;
-        sphere.velocity.y = -Math.abs(sphere.velocity.y) * restitution;
+        if (sphere.velocity.y > 0) {
+            sphere.velocity.y = -sphere.velocity.y * restitution;
+        }
     } else if (sphere.position.y < -yLimit) {
         sphere.position.y = -yLimit;
-        sphere.velocity.y = Math.abs(sphere.velocity.y) * restitution;
+        if (sphere.velocity.y < 0) {
+            sphere.velocity.y = -sphere.velocity.y * restitution;
+        }
     }
 
     sphere.position.z = PLANE_Z;
@@ -1980,6 +2484,44 @@ function getSweptCollisionNormal2D(a, b, diameter) {
     };
 }
 
+// Collisions found during the current substep, keyed by pair, for the data panel.
+const substepCollisions = new Map();
+
+function recordCollisionImpulse(a, b, pairRestitution, beforeVelocities) {
+    const key = `${a.id}-${b.id}`;
+    let event = substepCollisions.get(key);
+    if (!event) {
+        event = {
+            a,
+            b,
+            massA: clampSphereMass(a.mass),
+            massB: clampSphereMass(b.mass),
+            restitution: pairRestitution,
+            before: beforeVelocities,
+            after: null
+        };
+        substepCollisions.set(key, event);
+    }
+    event.after = {
+        ax: a.velocity.x,
+        ay: a.velocity.y,
+        bx: b.velocity.x,
+        by: b.velocity.y
+    };
+}
+
+function finishSubstepCollisions() {
+    if (substepCollisions.size === 0) {
+        return;
+    }
+    let latest = null;
+    for (const event of substepCollisions.values()) {
+        latest = event;
+    }
+    state.lastCollision = latest;
+    substepCollisions.clear();
+}
+
 function resolveSphereCollisions(applyVelocity = true) {
     const diameter = SPHERE_RADIUS * 2;
     const diameterSq = diameter * diameter;
@@ -2045,6 +2587,7 @@ function resolveSphereCollisions(applyVelocity = true) {
             if (penetration <= 0 && !applyVelocity) {
                 continue;
             }
+            // Pinned balls (held or selected) are not moved by position correction.
             const invMassA = aPinned ? 0 : (1 / clampSphereMass(a.mass));
             const invMassB = bPinned ? 0 : (1 / clampSphereMass(b.mass));
             const invMassSum = invMassA + invMassB;
@@ -2085,16 +2628,30 @@ function resolveSphereCollisions(applyVelocity = true) {
                 continue;
             }
 
-            const pairRestitution = Math.min(
-                clampSphereRestitution(a.restitution),
-                clampSphereRestitution(b.restitution)
-            );
-            const impulse = (-(1 + pairRestitution) * relVelN) / invMassSum;
-            a.velocity.x -= impulse * nx * invMassA;
-            b.velocity.x += impulse * nx * invMassB;
+            // A ball held in the hand collides with its own mass (the other ball responds as it
+            // would to a free ball moving at the hand's speed). A selected ball is frozen in place,
+            // so it acts as an immovable obstacle.
+            const velInvMassA = a === state.selectedSphere ? 0 : (1 / clampSphereMass(a.mass));
+            const velInvMassB = b === state.selectedSphere ? 0 : (1 / clampSphereMass(b.mass));
+            const velInvMassSum = velInvMassA + velInvMassB;
+            if (velInvMassSum <= 0) {
+                continue;
+            }
+
+            const pairRestitution = clampRestitution(state.ballRestitution);
+            const shouldLog = !aPinned && !bPinned && -relVelN >= COLLISION_LOG_MIN_SPEED;
+            const beforeVelocities = shouldLog
+                ? { ax: a.velocity.x, ay: a.velocity.y, bx: b.velocity.x, by: b.velocity.y }
+                : null;
+            const impulse = (-(1 + pairRestitution) * relVelN) / velInvMassSum;
+            a.velocity.x -= impulse * nx * velInvMassA;
+            b.velocity.x += impulse * nx * velInvMassB;
             if (!is1D) {
-                a.velocity.y -= impulse * ny * invMassA;
-                b.velocity.y += impulse * ny * invMassB;
+                a.velocity.y -= impulse * ny * velInvMassA;
+                b.velocity.y += impulse * ny * velInvMassB;
+            }
+            if (shouldLog || substepCollisions.has(`${a.id}-${b.id}`)) {
+                recordCollisionImpulse(a, b, pairRestitution, beforeVelocities);
             }
         }
     }
@@ -2118,12 +2675,20 @@ function updatePhysics(dt, profile) {
         }
 
         for (const sphere of spheres) {
+            if (sphere === state.selectedSphere) {
+                sphere.velocity.set(0, 0, 0);
+            }
             if (isPinnedSphere(sphere)) {
                 continue;
             }
 
             if (!state.oneD) {
-                sphere.velocity.y -= state.gravity * GRAVITY_SCALE * subDt;
+                sphere.velocity.y -= state.gravity * subDt;
+            }
+            const speed = Math.hypot(sphere.velocity.x, sphere.velocity.y);
+            if (speed > MAX_SPHERE_SPEED) {
+                sphere.velocity.x *= MAX_SPHERE_SPEED / speed;
+                sphere.velocity.y *= MAX_SPHERE_SPEED / speed;
             }
             sphere.position.x += sphere.velocity.x * subDt;
             if (!state.oneD) {
@@ -2159,6 +2724,7 @@ function updatePhysics(dt, profile) {
                 }
             }
         }
+        finishSubstepCollisions();
         if (state.oneD && state.boundaryMode === 'walls') {
             stabilizeOneDWallPacking();
         }
@@ -2183,14 +2749,43 @@ function updateGlow(dt) {
     }
 }
 
-function step(now) {
-    if (!state.running) {
+function detectHands(now) {
+    if (!state.running || !state.handLandmarker || ui.video.readyState < HTMLMediaElement.HAVE_CURRENT_DATA) {
         return;
     }
+    const currentVideoTime = ui.video.currentTime;
+    if (currentVideoTime === state.lastVideoTime || now < state.nextHandDetectAt) {
+        return;
+    }
+    state.lastVideoTime = currentVideoTime;
+    state.handsUpdated = true;
+    // Time tip velocities by the video frame time, not the render frame time.
+    state.tipTimeMs = currentVideoTime * 1000;
+    try {
+        const result = state.handLandmarker.detectForVideo(ui.video, now);
+        const hands = extractReliableHands(result);
+        state.lastHandIds = assignHandIds(hands);
+        state.lastHands = hands;
+        state.nextHandDetectAt = now + (hands.length > 0 ? 0 : HAND_TRACKING_IDLE_INTERVAL_MS);
+    } catch (error) {
+        state.lastHands = [];
+        state.lastHandIds = [];
+        state.nextHandDetectAt = now + HAND_TRACKING_IDLE_INTERVAL_MS;
+        if (now >= state.nextTrackingErrorReportAt) {
+            state.nextTrackingErrorReportAt = now + 2000;
+            const message = error && error.message ? error.message : String(error);
+            console.error('Hand tracking frame failed:', error);
+            setStatus(`Tracking hiccup: ${message}. Continuing...`, true);
+        }
+    }
+}
+
+// The loop always runs so presets and launched balls work without the camera.
+function step(now) {
+    requestAnimationFrame(step);
 
     if (document.hidden) {
-        state.lastFrameTime = now;
-        requestAnimationFrame(step);
+        state.lastFrameTime = 0;
         return;
     }
 
@@ -2198,7 +2793,6 @@ function step(now) {
 
     if (!state.lastFrameTime) {
         state.lastFrameTime = now;
-        requestAnimationFrame(step);
         return;
     }
     const dt = Math.min((now - state.lastFrameTime) / 1000, 1 / 20);
@@ -2206,39 +2800,276 @@ function step(now) {
     const instantFps = 1 / Math.max(dt, 0.0001);
     state.fps = state.fps ? (state.fps * 0.9) + (instantFps * 0.1) : instantFps;
 
-    if (state.handLandmarker && ui.video.readyState >= HTMLMediaElement.HAVE_CURRENT_DATA) {
-        const currentVideoTime = ui.video.currentTime;
-        if (currentVideoTime !== state.lastVideoTime && now >= state.nextHandDetectAt) {
-            state.lastVideoTime = currentVideoTime;
-            try {
-                const result = state.handLandmarker.detectForVideo(ui.video, now);
-                state.lastHands = extractReliableHands(result);
-                state.nextHandDetectAt = now + (state.lastHands.length > 0 ? 0 : HAND_TRACKING_IDLE_INTERVAL_MS);
-            } catch (error) {
-                state.lastHands = [];
-                state.nextHandDetectAt = now + HAND_TRACKING_IDLE_INTERVAL_MS;
-                if (now >= state.nextTrackingErrorReportAt) {
-                    state.nextTrackingErrorReportAt = now + 2000;
-                    const message = error && error.message ? error.message : String(error);
-                    console.error('Hand tracking frame failed:', error);
-                    setStatus(`Tracking hiccup: ${message}. Continuing...`, true);
-                }
-            }
-        }
+    state.handsUpdated = false;
+    detectHands(now);
+    updateCoverTransform();
+    if (state.handsUpdated || state.tipsDirty) {
+        state.trackedTips = collectTrackedTips(state.handsUpdated);
+        state.tipsDirty = false;
+    }
+    state.handsCount = state.lastHands.length;
+    state.tipCount = state.trackedTips.length;
+
+    const profile = getInteractionProfile();
+    let simDt = 0;
+    if (!state.paused) {
+        simDt = dt * state.timeScale;
+    } else if (state.pendingStep) {
+        simDt = FIXED_STEP_SECONDS;
+        state.pendingStep = false;
     }
 
-    state.handsCount = state.lastHands.length;
-    state.trackedTips = collectTrackedTips();
-    state.tipCount = state.trackedTips.length;
-    const profile = getInteractionProfile();
-    state.contactsCount = applyTipForces(dt, profile);
-    updatePhysics(dt, profile);
+    if (simDt > 0) {
+        state.contactsCount = state.paused ? 0 : applyTipForces(dt, simDt, profile);
+        updatePhysics(simDt, profile);
+    } else {
+        state.contactsCount = 0;
+    }
     updateGlow(dt);
+    updateOverlays(simDt > 0);
     drawTrackedTips();
-    updateMetrics(now);
+    if (updateMetrics(now) || (state.paused && simDt > 0)) {
+        renderDataPanel();
+    }
     renderer.render(scene, camera3d);
+}
 
-    requestAnimationFrame(step);
+// --- Data panel: velocity, momentum and kinetic energy (screen convention: +x right, +y up). ---
+
+const MINUS_SIGN = '\u2212';
+
+function formatSigned(value, decimals = 2) {
+    const rounded = roundToDecimals(value, decimals);
+    if (rounded === 0) {
+        return (0).toFixed(decimals);
+    }
+    return `${rounded > 0 ? '+' : MINUS_SIGN}${Math.abs(rounded).toFixed(decimals)}`;
+}
+
+function formatVector(x, y, decimals = 2) {
+    if (state.oneD) {
+        return formatSigned(x, decimals);
+    }
+    return `(${formatSigned(x, decimals)}, ${formatSigned(y, decimals)})`;
+}
+
+function getBallLabel(sphere) {
+    const index = spheres.indexOf(sphere);
+    return index >= 0 ? `Ball ${index + 1}` : 'Removed ball';
+}
+
+function describeRestitution(e) {
+    if (e >= 0.995) {
+        return 'Elastic (e = 1): kinetic energy conserved';
+    }
+    if (e <= 0.005) {
+        return 'Perfectly inelastic (e = 0)';
+    }
+    return `Inelastic (e = ${e.toFixed(2)})`;
+}
+
+function buildCollisionHtml(event) {
+    const xSign = screenXSign();
+    const pBeforeX = ((event.massA * event.before.ax) + (event.massB * event.before.bx)) * xSign;
+    const pBeforeY = (event.massA * event.before.ay) + (event.massB * event.before.by);
+    const pAfterX = ((event.massA * event.after.ax) + (event.massB * event.after.bx)) * xSign;
+    const pAfterY = (event.massA * event.after.ay) + (event.massB * event.after.by);
+    const keBefore = 0.5 * ((event.massA * ((event.before.ax ** 2) + (event.before.ay ** 2))) +
+        (event.massB * ((event.before.bx ** 2) + (event.before.by ** 2))));
+    const keAfter = 0.5 * ((event.massA * ((event.after.ax ** 2) + (event.after.ay ** 2))) +
+        (event.massB * ((event.after.bx ** 2) + (event.after.by ** 2))));
+    const keChange = keBefore > 1e-9 ? ((keAfter - keBefore) / keBefore) * 100 : 0;
+    const keChangeText = Math.abs(keChange) < 0.05 ? '0%' : `${formatSigned(keChange, 0)}%`;
+    return `
+        <div class="data-collision">
+            <div class="data-title">Last collision: ${getBallLabel(event.a)} &harr; ${getBallLabel(event.b)}</div>
+            <div class="data-line"><span>Total p</span><span>${formatVector(pBeforeX, pBeforeY)} &rarr; ${formatVector(pAfterX, pAfterY)} kg&middot;m/s</span></div>
+            <div class="data-line"><span>Total KE</span><span>${keBefore.toFixed(2)} &rarr; ${keAfter.toFixed(2)} J (${keChangeText})</span></div>
+            <div class="data-verdict">${describeRestitution(event.restitution)}</div>
+        </div>`;
+}
+
+let lastDataPanelHtml = '';
+
+function renderDataPanel(force = false) {
+    if (!state.showData) {
+        return;
+    }
+    const xSign = screenXSign();
+    let html;
+    if (spheres.length === 0) {
+        html = '<div class="data-empty">Add a ball or pick a preset to see its data.</div>';
+    } else {
+        const vHeading = state.oneD ? 'v' : 'v (x, y)';
+        const pHeading = state.oneD ? 'p' : 'p (x, y)';
+        let rows = `
+            <div class="data-row data-head">
+                <span>Ball</span><span>${vHeading} m/s</span><span>${pHeading} kg&middot;m/s</span><span>KE J</span>
+            </div>`;
+        let totalPx = 0;
+        let totalPy = 0;
+        let totalKe = 0;
+        spheres.forEach((sphere, index) => {
+            const mass = clampSphereMass(sphere.mass);
+            const vx = sphere.velocity.x * xSign;
+            const vy = state.oneD ? 0 : sphere.velocity.y;
+            const px = mass * vx;
+            const py = mass * vy;
+            const ke = 0.5 * mass * ((vx * vx) + (vy * vy));
+            totalPx += px;
+            totalPy += py;
+            totalKe += ke;
+            rows += `
+            <div class="data-row">
+                <span><i class="data-dot" style="background:${toCssHexColor(sphere.colorHex)}"></i>${index + 1}</span>
+                <span>${formatVector(vx, vy)}</span><span>${formatVector(px, py)}</span><span>${ke.toFixed(2)}</span>
+            </div>`;
+        });
+        rows += `
+            <div class="data-row data-total">
+                <span>Total</span><span></span><span>${formatVector(totalPx, totalPy)}</span><span>${totalKe.toFixed(2)}</span>
+            </div>`;
+        html = `<div class="data-table${state.oneD ? '' : ' is-2d'}">${rows}</div>`;
+        html += state.lastCollision
+            ? buildCollisionHtml(state.lastCollision)
+            : '<div class="data-empty">No ball&ndash;ball collision yet.</div>';
+    }
+    if (force || lastDataPanelHtml !== html) {
+        lastDataPanelHtml = html;
+        ui.dataPanel.innerHTML = html;
+    }
+}
+
+// --- Playback, display and physics settings ---
+
+function setPaused(paused) {
+    state.paused = paused;
+    state.pendingStep = false;
+    ui.pauseBtn.innerHTML = paused ? '&#x25B6;&#xFE0E;' : '&#x23F8;&#xFE0E;';
+    ui.pauseBtn.setAttribute('aria-label', paused ? 'Play' : 'Pause');
+    ui.pauseBtn.setAttribute('title', paused ? 'Play' : 'Pause');
+    ui.stepBtn.disabled = !paused;
+    ui.stage.classList.toggle('is-paused', paused);
+    if (paused) {
+        clearAllGripStates(false);
+        activeContacts.clear();
+        for (const sphere of spheres) {
+            sphere.contactCount = 0;
+        }
+        state.statusBeforePause = { message: state.statusMessage, isError: state.statusIsError };
+        setStatus('Paused. Use the step button to advance one frame.');
+    } else {
+        const previous = state.statusBeforePause;
+        state.statusBeforePause = null;
+        if (previous) {
+            setStatus(previous.message, previous.isError);
+        } else {
+            setStatus('Running.');
+        }
+    }
+}
+
+const physicsSteppers = {};
+
+function buildPhysicsSteppers() {
+    physicsSteppers.ballRestitution = createStepper({
+        labelText: 'Ball\u2013ball e',
+        min: MIN_RESTITUTION,
+        max: MAX_RESTITUTION,
+        step: 0.05,
+        decimals: 2,
+        value: state.ballRestitution,
+        ariaLabel: 'coefficient of restitution between balls',
+        onChange: (next) => {
+            state.ballRestitution = next;
+        }
+    });
+    physicsSteppers.wallRestitution = createStepper({
+        labelText: 'Wall e',
+        min: MIN_RESTITUTION,
+        max: MAX_RESTITUTION,
+        step: 0.05,
+        decimals: 2,
+        value: state.wallRestitution,
+        ariaLabel: 'coefficient of restitution with the walls',
+        onChange: (next) => {
+            state.wallRestitution = next;
+        }
+    });
+    physicsSteppers.gravity = createStepper({
+        labelText: 'Gravity',
+        unitText: 'm/s\u00B2',
+        min: 0,
+        max: MAX_GRAVITY,
+        step: 0.1,
+        decimals: 2,
+        value: state.gravity,
+        ariaLabel: 'gravitational field strength',
+        onChange: (next) => {
+            state.gravity = next;
+        }
+    });
+    physicsSteppers.airDrag = createStepper({
+        labelText: 'Air drag',
+        unitText: '1/s',
+        min: 0,
+        max: MAX_AIR_DRAG,
+        step: 0.01,
+        decimals: 2,
+        value: state.airDrag,
+        ariaLabel: 'air drag',
+        onChange: (next) => {
+            state.airDrag = next;
+        }
+    });
+    ui.physicsStepperGrid.append(
+        physicsSteppers.ballRestitution.element,
+        physicsSteppers.wallRestitution.element,
+        physicsSteppers.gravity.element,
+        physicsSteppers.airDrag.element
+    );
+}
+
+function setBallRestitution(value) {
+    state.ballRestitution = clampRestitution(value);
+    physicsSteppers.ballRestitution.setValue(state.ballRestitution);
+}
+
+function setWallRestitution(value) {
+    state.wallRestitution = clampRestitution(value);
+    physicsSteppers.wallRestitution.setValue(state.wallRestitution);
+}
+
+function setGravity(value) {
+    state.gravity = Math.max(0, Math.min(MAX_GRAVITY, value));
+    physicsSteppers.gravity.setValue(state.gravity);
+}
+
+function setAirDrag(value) {
+    state.airDrag = Math.max(0, Math.min(MAX_AIR_DRAG, value));
+    physicsSteppers.airDrag.setValue(state.airDrag);
+}
+
+function updateOneDDependentUI() {
+    physicsSteppers.gravity.setDisabled(state.oneD);
+    ui.gravityHelp.hidden = !state.oneD;
+    renderBallControls();
+    updateAddBtnState();
+    renderDataPanel(true);
+}
+
+// Rear cameras are not mirrored; front cameras are shown mirror-image like a mirror.
+function updateMirrorForStream(stream) {
+    const track = stream ? stream.getVideoTracks()[0] : null;
+    let isRearCamera = false;
+    if (track) {
+        const settings = typeof track.getSettings === 'function' ? track.getSettings() : {};
+        isRearCamera = settings.facingMode === 'environment' ||
+            /\b(back|rear|environment)\b/i.test(track.label || '');
+    }
+    state.mirrored = !isRearCamera;
+    ui.stage.classList.toggle('no-mirror', isRearCamera);
+    renderDataPanel(true);
 }
 
 // Raycaster for mouse/touch selection
@@ -2272,8 +3103,8 @@ function handleStageClick(event) {
         return;
     }
 
-    // The stage is mirrored in CSS (`scaleX(-1)`), so pointer x must be mirrored for raycasting.
-    mouseVector.x = (1 - normalizedX) * 2 - 1;
+    // The stage is mirrored in CSS (`scaleX(-1)`) for front cameras, so pointer x must be mirrored too.
+    mouseVector.x = (state.mirrored ? (1 - normalizedX) : normalizedX) * 2 - 1;
     mouseVector.y = -(normalizedY * 2 - 1);
 
     raycaster.setFromCamera(mouseVector, camera3d);
@@ -2287,6 +3118,8 @@ function handleStageClick(event) {
         const hitSphere = spheres.find(s => s.group.children[0] === hitMesh);
 
         if (hitSphere) {
+            // Stop the follow-up mousedown from moving focus off the dialog's Cancel button.
+            event.preventDefault();
             selectSphere(hitSphere);
         }
     } else {
@@ -2294,7 +3127,10 @@ function handleStageClick(event) {
     }
 }
 
+let focusBeforeSelection = null;
+
 function selectSphere(sphere) {
+    focusBeforeSelection = document.activeElement;
     state.selectedSphere = sphere;
     sphere.velocity.set(0, 0, 0);
     ui.selectionOverlay.style.display = 'flex';
@@ -2302,42 +3138,75 @@ function selectSphere(sphere) {
 }
 
 function deselectSphere() {
+    const wasOpen = ui.selectionOverlay.style.display !== 'none';
     state.selectedSphere = null;
     ui.selectionOverlay.style.display = 'none';
+    if (wasOpen && focusBeforeSelection && document.contains(focusBeforeSelection) &&
+        typeof focusBeforeSelection.focus === 'function') {
+        focusBeforeSelection.focus();
+    }
+    focusBeforeSelection = null;
+}
+
+function handleSelectionOverlayKeydown(event) {
+    if (event.key === 'Escape') {
+        event.preventDefault();
+        deselectSphere();
+        return;
+    }
+    if (event.key === 'Tab') {
+        const first = ui.removeTargetBtn;
+        const last = ui.cancelTargetBtn;
+        if (event.shiftKey && document.activeElement === first) {
+            event.preventDefault();
+            last.focus();
+        } else if (!event.shiftKey && document.activeElement === last) {
+            event.preventDefault();
+            first.focus();
+        }
+    }
+}
+
+function disposeSphere(sphere) {
+    clearGripReferencesToSphere(sphere);
+    scene.remove(sphere.group, sphere.trail, sphere.arrow);
+    sphere.material.dispose();
+    sphere.trail.geometry.dispose();
+    sphere.trail.material.dispose();
+    sphere.arrow.dispose();
+    if (state.lastCollision && (state.lastCollision.a === sphere || state.lastCollision.b === sphere)) {
+        state.lastCollision = null;
+    }
 }
 
 function removeSelectedSphere() {
-    if (state.selectedSphere) {
-        clearGripReferencesToSphere(state.selectedSphere);
-        scene.remove(state.selectedSphere.group);
-        state.selectedSphere.material.dispose();
-        const idx = spheres.indexOf(state.selectedSphere);
-        if (idx > -1) {
-            spheres.splice(idx, 1);
-        }
-        deselectSphere();
-        renderBallControls();
-        updateAddBtnState();
+    const target = state.selectedSphere;
+    if (!target) {
+        return;
     }
+    disposeSphere(target);
+    const idx = spheres.indexOf(target);
+    if (idx > -1) {
+        spheres.splice(idx, 1);
+    }
+    deselectSphere();
+    renderBallControls();
+    updateAddBtnState();
+    renderDataPanel(true);
+    setStatus('Ball removed.');
 }
 
 function removeAllSpheres() {
-    if (spheres.length === 0) {
-        return;
-    }
     deselectSphere();
     for (const sphere of spheres) {
-        clearGripReferencesToSphere(sphere);
-        scene.remove(sphere.group);
-        sphere.material.dispose();
+        disposeSphere(sphere);
     }
     spheres.length = 0;
+    state.lastCollision = null;
     renderBallControls();
-    activeContacts.clear();
-    tipHistory.clear();
-    handGripStates.clear();
-    releaseHandSuppression.clear();
+    clearHandInteractionState();
     updateAddBtnState();
+    renderDataPanel(true);
 }
 
 async function createHandLandmarker() {
@@ -2411,13 +3280,28 @@ async function switchCamera(deviceId) {
             video: buildVideoConstraints(deviceId),
             audio: false
         });
+        if (!state.running) {
+            // The camera was stopped while the new one was opening.
+            nextStream.getTracks().forEach((track) => track.stop());
+            return;
+        }
         ui.video.srcObject = nextStream;
         await ui.video.play();
+        if (!state.running) {
+            nextStream.getTracks().forEach((track) => track.stop());
+            ui.video.srcObject = null;
+            return;
+        }
         state.stream = nextStream;
         state.lastVideoTime = -1;
         state.lastDrawVideoTime = -1;
         state.nextHandDetectAt = 0;
         state.tipOverlayVisible = false;
+        state.tipsDirty = true;
+        state.prevHandPalms = [];
+        tipHistory.clear();
+        activeContacts.clear();
+        updateMirrorForStream(nextStream);
 
         if (previousStream && previousStream !== nextStream) {
             previousStream.getTracks().forEach((track) => track.stop());
@@ -2435,6 +3319,9 @@ async function switchCamera(deviceId) {
         console.error('Camera switch failed:', error);
         if (nextStream) {
             nextStream.getTracks().forEach((track) => track.stop());
+        }
+        if (!state.running) {
+            return;
         }
 
         const hasLivePreviousStream =
@@ -2467,7 +3354,7 @@ async function switchCamera(deviceId) {
             setStatus(`Could not switch camera: ${message}`, true);
         }
     } finally {
-        ui.cameraSelect.disabled = ui.cameraSelect.options.length <= 1;
+        ui.cameraSelect.disabled = !state.running || ui.cameraSelect.options.length <= 1;
     }
 }
 
@@ -2481,6 +3368,8 @@ function setStreamTracksEnabled(enabled) {
     }
 }
 
+let statusBeforeHidden = null;
+
 function handleVisibilityChange() {
     if (!state.running) {
         return;
@@ -2491,6 +3380,9 @@ function handleVisibilityChange() {
         state.lastFrameTime = 0;
         state.lastDrawVideoTime = -1;
         state.nextHandDetectAt = 0;
+        if (!statusBeforeHidden) {
+            statusBeforeHidden = { message: state.statusMessage, isError: state.statusIsError };
+        }
         setStatus('Paused in background to save battery.');
         return;
     }
@@ -2505,7 +3397,13 @@ function handleVisibilityChange() {
             console.warn('Could not resume camera playback after background pause:', error);
         });
     }
-    setStatus('Ready.');
+    const previous = statusBeforeHidden;
+    statusBeforeHidden = null;
+    if (previous) {
+        setStatus(previous.message, previous.isError);
+    } else {
+        setStatus('Ready.');
+    }
 }
 
 async function startCameraAndTracking() {
@@ -2565,6 +3463,7 @@ async function startCameraAndTracking() {
         }
         await ui.video.play();
         await populateCameraList();
+        updateMirrorForStream(state.stream);
         const activeDeviceId = getActiveStreamDeviceId();
         if (activeDeviceId) {
             savePreferredCameraId(activeDeviceId);
@@ -2603,14 +3502,15 @@ async function startCameraAndTracking() {
 
     resizeStage();
     state.running = true;
-    state.lastFrameTime = performance.now();
+    state.lastVideoTime = -1;
     state.nextHandDetectAt = 0;
     state.lastHudUpdateAt = 0;
+    state.tipsDirty = true;
+    state.prevHandPalms = [];
     if (spheres.length === 0) {
         addSphere();
     }
     updateAddBtnState();
-    ui.resetBtn.disabled = false;
     ui.startBtn.disabled = false;
     updateStartButtonState();
     if (document.hidden) {
@@ -2619,12 +3519,11 @@ async function startCameraAndTracking() {
     } else {
         setStatus('Ready.');
     }
-    requestAnimationFrame(step);
 }
 
+// Stopping the camera keeps the balls and their settings; the simulation keeps running.
 function stopCameraAndTracking() {
     state.running = false;
-    state.lastFrameTime = 0;
     state.fps = 0;
     state.lastVideoTime = -1;
     state.lastDrawVideoTime = -1;
@@ -2632,11 +3531,18 @@ function stopCameraAndTracking() {
     state.lastHudUpdateAt = 0;
     state.tipOverlayVisible = false;
     state.lastHands = [];
+    state.lastHandIds = [];
+    state.prevHandPalms = [];
     state.handsCount = 0;
     state.tipCount = 0;
     state.contactsCount = 0;
     state.trackedTips = [];
     state.nextTrackingErrorReportAt = 0;
+    clearAllGripStates(false);
+    clearHandInteractionState();
+    for (const sphere of spheres) {
+        sphere.contactCount = 0;
+    }
 
     if (state.handLandmarker && typeof state.handLandmarker.close === 'function') {
         try {
@@ -2655,15 +3561,11 @@ function stopCameraAndTracking() {
     ui.cameraSelect.innerHTML = '<option value="">Default</option>';
     ui.cameraSelect.disabled = true;
 
-    removeAllSpheres();
-    ui.resetBtn.disabled = true;
-
     if (tipCtx) {
         tipCtx.clearRect(0, 0, ui.tipCanvas.width, ui.tipCanvas.height);
     }
-    renderer.render(scene, camera3d);
     updateStartButtonState();
-    setStatus('Camera stopped.');
+    setStatus('Camera stopped. The balls keep running without hand tracking.');
 }
 
 async function handleStartStopClick() {
@@ -2677,6 +3579,35 @@ async function handleStartStopClick() {
 ui.startBtn.addEventListener('click', handleStartStopClick);
 ui.addBtn.addEventListener('click', addSphere);
 ui.resetBtn.addEventListener('click', resetAll);
+ui.launchBtn.addEventListener('click', launchAll);
+ui.pauseBtn.addEventListener('click', () => setPaused(!state.paused));
+ui.stepBtn.addEventListener('click', () => {
+    if (state.paused) {
+        state.pendingStep = true;
+    }
+});
+ui.speedSelect.addEventListener('change', () => {
+    const nextValue = Number(ui.speedSelect.value);
+    state.timeScale = Number.isFinite(nextValue) && nextValue > 0 ? nextValue : 1;
+    setStatus(state.timeScale === 1 ? 'Normal speed.' : `Slow motion: ${state.timeScale}\u00D7 speed.`);
+});
+for (const presetBtn of document.querySelectorAll('[data-preset]')) {
+    presetBtn.addEventListener('click', () => applyPreset(presetBtn.dataset.preset));
+}
+ui.dataToggle.addEventListener('change', () => {
+    state.showData = ui.dataToggle.checked;
+    ui.dataPanel.hidden = !state.showData;
+    renderDataPanel(true);
+});
+ui.trailsToggle.addEventListener('change', () => {
+    state.showTrails = ui.trailsToggle.checked;
+    clearAllTrails();
+    updateOverlays(false);
+});
+ui.arrowsToggle.addEventListener('change', () => {
+    state.showArrows = ui.arrowsToggle.checked;
+    updateOverlays(false);
+});
 ui.controlsToggle.addEventListener('click', openControls);
 ui.controlsClose.addEventListener('click', closeControls);
 ui.fullscreenBtn.addEventListener('click', toggleFullscreen);
@@ -2684,6 +3615,10 @@ ui.fullscreenBtn.addEventListener('click', toggleFullscreen);
 ui.stage.addEventListener('pointerdown', handleStageClick);
 ui.removeTargetBtn.addEventListener('click', removeSelectedSphere);
 ui.cancelTargetBtn.addEventListener('click', deselectSphere);
+ui.selectionOverlay.addEventListener('keydown', handleSelectionOverlayKeydown);
+ui.video.addEventListener('resize', () => {
+    state.tipsDirty = true;
+});
 
 ui.hud.classList.remove('hidden');
 
@@ -2697,9 +3632,7 @@ ui.wallsToggle.addEventListener('change', () => {
     updateBoundaryModeUI();
     if (state.oneD && state.boundaryMode === 'walls') {
         stabilizeOneDWallPacking();
-        for (const sphere of spheres) {
-            sphere.group.position.set(sphere.position.x, sphere.position.y, PLANE_Z);
-        }
+        syncSphereMeshes();
     }
     updateAddBtnState();
     if (state.boundaryMode === 'wrap') {
@@ -2712,23 +3645,22 @@ ui.oneDToggle.addEventListener('change', () => {
     state.oneD = ui.oneDToggle.checked;
     if (state.oneD) {
         clearAllGripStates(false);
+        // Keep each ball's 2D start height so Reset restores it after leaving 1D mode.
         for (const sphere of spheres) {
             sphere.position.y = 0;
             sphere.velocity.y = 0;
-            sphere.spawnPosition.y = 0;
             sphere.group.position.y = 0;
         }
         if (state.boundaryMode === 'walls') {
             stabilizeOneDWallPacking();
-            for (const sphere of spheres) {
-                sphere.group.position.set(sphere.position.x, sphere.position.y, PLANE_Z);
-            }
+            syncSphereMeshes();
         }
-        setStatus('1D mode: spheres move horizontally only.');
+        clearAllTrails();
+        setStatus('1D mode: balls move horizontally only.');
     } else {
         setStatus('2D mode restored.');
     }
-    updateAddBtnState();
+    updateOneDDependentUI();
 });
 ui.sensitivityRange.addEventListener('input', () => {
     const nextValue = Number(ui.sensitivityRange.value);
@@ -2738,23 +3670,6 @@ ui.sensitivityRange.addEventListener('input', () => {
     state.sensitivity = Math.max(0.6, Math.min(2.0, nextValue));
     updateSensitivityLabel();
 });
-ui.gravityRange.addEventListener('input', () => {
-    const nextValue = Number(ui.gravityRange.value);
-    if (!Number.isFinite(nextValue)) {
-        return;
-    }
-    state.gravity = Math.max(0, Math.min(2.0, nextValue));
-    updateGravityLabel();
-});
-ui.airDragRange.addEventListener('input', () => {
-    const nextValue = Number(ui.airDragRange.value);
-    if (!Number.isFinite(nextValue)) {
-        return;
-    }
-    state.airDrag = Math.max(0, Math.min(1.0, nextValue));
-    updateAirDragLabel();
-});
-
 window.addEventListener('resize', scheduleResizeStage);
 window.addEventListener('orientationchange', scheduleResizeStage);
 if (window.visualViewport && typeof window.visualViewport.addEventListener === 'function') {
@@ -2793,14 +3708,17 @@ ui.oneDToggle.checked = state.oneD;
 updateBoundaryModeUI();
 ui.sensitivityRange.value = state.sensitivity.toFixed(1);
 updateSensitivityLabel();
-ui.gravityRange.value = state.gravity.toFixed(2);
-updateGravityLabel();
-ui.airDragRange.value = state.airDrag.toFixed(2);
-updateAirDragLabel();
-renderBallControls();
+ui.dataToggle.checked = state.showData;
+ui.trailsToggle.checked = state.showTrails;
+ui.arrowsToggle.checked = state.showArrows;
+ui.dataPanel.hidden = !state.showData;
+buildPhysicsSteppers();
+updateOneDDependentUI();
+setPaused(false);
 updateStartButtonState();
 renderHudInfo();
 updateFullscreenUI();
 resizeStage();
-renderer.render(scene, camera3d);
+setStatus('Camera is off.');
+requestAnimationFrame(step);
 startCameraAndTracking();
