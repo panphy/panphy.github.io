@@ -9,6 +9,7 @@ const ui = {
     stepBtn: document.getElementById('stepBtn'),
     speedSelect: document.getElementById('speedSelect'),
     dataPanel: document.getElementById('dataPanel'),
+    dataPanelDock: document.getElementById('dataPanelDock'),
     dataToggle: document.getElementById('dataToggle'),
     trailsToggle: document.getElementById('trailsToggle'),
     arrowsToggle: document.getElementById('arrowsToggle'),
@@ -125,7 +126,26 @@ function scheduleResizeStage() {
     });
 }
 
+// On narrow screens the stage is too small to overlay the data panel, so it docks below the
+// stage. In fullscreen it always sits inside the stage.
+const DATA_PANEL_DOCK_QUERY = window.matchMedia('(max-width: 640px)');
+
+function placeDataPanel() {
+    const docked = DATA_PANEL_DOCK_QUERY.matches && !isFullscreenActive();
+    const parent = docked ? ui.dataPanelDock : ui.stage;
+    if (ui.dataPanel.parentElement !== parent) {
+        parent.appendChild(ui.dataPanel);
+    }
+    ui.dataPanel.classList.toggle('is-docked', docked);
+    syncDataPanelDock();
+}
+
+function syncDataPanelDock() {
+    ui.dataPanelDock.hidden = ui.dataPanel.parentElement !== ui.dataPanelDock || ui.dataPanel.hidden;
+}
+
 function updateFullscreenUI() {
+    placeDataPanel();
     const active = isFullscreenActive();
     ui.fullscreenBtn.innerHTML = active ? '&#x2716;' : '&#x26F6;';
     ui.fullscreenBtn.setAttribute('aria-label', active ? 'Exit full screen' : 'Enter full screen');
@@ -2835,22 +2855,24 @@ function step(now) {
 }
 
 // --- Data panel: velocity, momentum and kinetic energy (screen convention: +x right, +y up). ---
+// Values sit in aligned, right-justified columns; 2D splits each vector into x and y columns.
 
 const MINUS_SIGN = '\u2212';
 
-function formatSigned(value, decimals = 2) {
+function formatNumber(value, decimals = 2) {
     const rounded = roundToDecimals(value, decimals);
     if (rounded === 0) {
         return (0).toFixed(decimals);
     }
-    return `${rounded > 0 ? '+' : MINUS_SIGN}${Math.abs(rounded).toFixed(decimals)}`;
+    return `${rounded < 0 ? MINUS_SIGN : ''}${Math.abs(rounded).toFixed(decimals)}`;
 }
 
-function formatVector(x, y, decimals = 2) {
-    if (state.oneD) {
-        return formatSigned(x, decimals);
+function formatPercentChange(value) {
+    const rounded = Math.round(value);
+    if (rounded === 0) {
+        return '0%';
     }
-    return `(${formatSigned(x, decimals)}, ${formatSigned(y, decimals)})`;
+    return `${rounded > 0 ? '+' : MINUS_SIGN}${Math.abs(rounded)}%`;
 }
 
 function getBallLabel(sphere) {
@@ -2860,7 +2882,7 @@ function getBallLabel(sphere) {
 
 function describeRestitution(e) {
     if (e >= 0.995) {
-        return 'Elastic (e = 1): kinetic energy conserved';
+        return 'Elastic (e = 1)';
     }
     if (e <= 0.005) {
         return 'Perfectly inelastic (e = 0)';
@@ -2868,24 +2890,97 @@ function describeRestitution(e) {
     return `Inelastic (e = ${e.toFixed(2)})`;
 }
 
+const DATA_RULE = '<span class="data-rule" aria-hidden="true"></span>';
+
+function dataCell(text, className = '') {
+    return `<span class="data-cell${className ? ` ${className}` : ''}">${text}</span>`;
+}
+
+// Momentum columns for one vector: one column in 1D, x and y in 2D.
+function vectorCells(x, y, className = '') {
+    return state.oneD
+        ? dataCell(formatNumber(x), className)
+        : dataCell(formatNumber(x), className) + dataCell(formatNumber(y), className);
+}
+
+function buildBallTableHtml() {
+    const xSign = screenXSign();
+    const is2D = !state.oneD;
+    let html = '';
+    if (is2D) {
+        html += dataCell('', 'data-group') +
+            dataCell('Velocity <em>m/s</em>', 'data-group data-span-2') +
+            dataCell('Momentum <em>kg&middot;m/s</em>', 'data-group data-span-2') +
+            dataCell('KE', 'data-group');
+        html += dataCell('Ball', 'data-head data-label') +
+            dataCell('x', 'data-head') + dataCell('y', 'data-head') +
+            dataCell('x', 'data-head') + dataCell('y', 'data-head') +
+            dataCell('J', 'data-head');
+    } else {
+        html += dataCell('Ball', 'data-head data-label') +
+            dataCell('v <em>m/s</em>', 'data-head') +
+            dataCell('p <em>kg&middot;m/s</em>', 'data-head') +
+            dataCell('KE <em>J</em>', 'data-head');
+    }
+    html += DATA_RULE;
+
+    let totalPx = 0;
+    let totalPy = 0;
+    let totalKe = 0;
+    spheres.forEach((sphere, index) => {
+        const mass = clampSphereMass(sphere.mass);
+        const vx = sphere.velocity.x * xSign;
+        const vy = is2D ? sphere.velocity.y : 0;
+        const ke = 0.5 * mass * ((vx * vx) + (vy * vy));
+        totalPx += mass * vx;
+        totalPy += mass * vy;
+        totalKe += ke;
+        const dot = `<i class="data-dot" style="background:${toCssHexColor(sphere.colorHex)}"></i>`;
+        html += dataCell(`${dot}${index + 1}`, 'data-label') +
+            vectorCells(vx, vy) +
+            vectorCells(mass * vx, mass * vy) +
+            dataCell(ke.toFixed(2));
+    });
+
+    const velocityGap = is2D ? dataCell('', 'data-total') + dataCell('', 'data-total') : dataCell('', 'data-total');
+    html += DATA_RULE;
+    html += dataCell('Total', 'data-label data-total') +
+        velocityGap +
+        vectorCells(totalPx, totalPy, 'data-total') +
+        dataCell(totalKe.toFixed(2), 'data-total');
+
+    return `<div class="data-grid ${is2D ? 'is-2d' : 'is-1d'}">${html}</div>`;
+}
+
 function buildCollisionHtml(event) {
     const xSign = screenXSign();
-    const pBeforeX = ((event.massA * event.before.ax) + (event.massB * event.before.bx)) * xSign;
-    const pBeforeY = (event.massA * event.before.ay) + (event.massB * event.before.by);
-    const pAfterX = ((event.massA * event.after.ax) + (event.massB * event.after.bx)) * xSign;
-    const pAfterY = (event.massA * event.after.ay) + (event.massB * event.after.by);
-    const keBefore = 0.5 * ((event.massA * ((event.before.ax ** 2) + (event.before.ay ** 2))) +
-        (event.massB * ((event.before.bx ** 2) + (event.before.by ** 2))));
-    const keAfter = 0.5 * ((event.massA * ((event.after.ax ** 2) + (event.after.ay ** 2))) +
-        (event.massB * ((event.after.bx ** 2) + (event.after.by ** 2))));
+    const is2D = !state.oneD;
+    const momentum = (v) => ({
+        x: ((event.massA * v.ax) + (event.massB * v.bx)) * xSign,
+        y: (event.massA * v.ay) + (event.massB * v.by)
+    });
+    const kineticEnergy = (v) => 0.5 * ((event.massA * ((v.ax ** 2) + (v.ay ** 2))) +
+        (event.massB * ((v.bx ** 2) + (v.by ** 2))));
+    const pBefore = momentum(event.before);
+    const pAfter = momentum(event.after);
+    const keBefore = kineticEnergy(event.before);
+    const keAfter = kineticEnergy(event.after);
     const keChange = keBefore > 1e-9 ? ((keAfter - keBefore) / keBefore) * 100 : 0;
-    const keChangeText = Math.abs(keChange) < 0.05 ? '0%' : `${formatSigned(keChange, 0)}%`;
+
+    let html = dataCell('', 'data-head data-label');
+    html += is2D
+        ? dataCell('p<sub>x</sub>', 'data-head') + dataCell('p<sub>y</sub>', 'data-head')
+        : dataCell('p <em>kg&middot;m/s</em>', 'data-head');
+    html += dataCell(is2D ? 'KE' : 'KE <em>J</em>', 'data-head');
+    html += DATA_RULE;
+    html += dataCell('Before', 'data-label') + vectorCells(pBefore.x, pBefore.y) + dataCell(keBefore.toFixed(2));
+    html += dataCell('After', 'data-label') + vectorCells(pAfter.x, pAfter.y) + dataCell(keAfter.toFixed(2));
+
     return `
         <div class="data-collision">
-            <div class="data-title">Last collision: ${getBallLabel(event.a)} &harr; ${getBallLabel(event.b)}</div>
-            <div class="data-line"><span>Total p</span><span>${formatVector(pBeforeX, pBeforeY)} &rarr; ${formatVector(pAfterX, pAfterY)} kg&middot;m/s</span></div>
-            <div class="data-line"><span>Total KE</span><span>${keBefore.toFixed(2)} &rarr; ${keAfter.toFixed(2)} J (${keChangeText})</span></div>
-            <div class="data-verdict">${describeRestitution(event.restitution)}</div>
+            <div class="data-title">Last collision <span>${getBallLabel(event.a)} &harr; ${getBallLabel(event.b)}</span></div>
+            <div class="data-grid data-collision-grid ${is2D ? 'is-2d' : 'is-1d'}">${html}</div>
+            <div class="data-verdict">${describeRestitution(event.restitution)}<span>KE change ${formatPercentChange(keChange)}</span></div>
         </div>`;
 }
 
@@ -2895,41 +2990,11 @@ function renderDataPanel(force = false) {
     if (!state.showData) {
         return;
     }
-    const xSign = screenXSign();
     let html;
     if (spheres.length === 0) {
         html = '<div class="data-empty">Add a ball or pick a preset to see its data.</div>';
     } else {
-        const vHeading = state.oneD ? 'v' : 'v (x, y)';
-        const pHeading = state.oneD ? 'p' : 'p (x, y)';
-        let rows = `
-            <div class="data-row data-head">
-                <span>Ball</span><span>${vHeading} m/s</span><span>${pHeading} kg&middot;m/s</span><span>KE J</span>
-            </div>`;
-        let totalPx = 0;
-        let totalPy = 0;
-        let totalKe = 0;
-        spheres.forEach((sphere, index) => {
-            const mass = clampSphereMass(sphere.mass);
-            const vx = sphere.velocity.x * xSign;
-            const vy = state.oneD ? 0 : sphere.velocity.y;
-            const px = mass * vx;
-            const py = mass * vy;
-            const ke = 0.5 * mass * ((vx * vx) + (vy * vy));
-            totalPx += px;
-            totalPy += py;
-            totalKe += ke;
-            rows += `
-            <div class="data-row">
-                <span><i class="data-dot" style="background:${toCssHexColor(sphere.colorHex)}"></i>${index + 1}</span>
-                <span>${formatVector(vx, vy)}</span><span>${formatVector(px, py)}</span><span>${ke.toFixed(2)}</span>
-            </div>`;
-        });
-        rows += `
-            <div class="data-row data-total">
-                <span>Total</span><span></span><span>${formatVector(totalPx, totalPy)}</span><span>${totalKe.toFixed(2)}</span>
-            </div>`;
-        html = `<div class="data-table${state.oneD ? '' : ' is-2d'}">${rows}</div>`;
+        html = buildBallTableHtml();
         html += state.lastCollision
             ? buildCollisionHtml(state.lastCollision)
             : '<div class="data-empty">No ball&ndash;ball collision yet.</div>';
@@ -3597,6 +3662,7 @@ for (const presetBtn of document.querySelectorAll('[data-preset]')) {
 ui.dataToggle.addEventListener('change', () => {
     state.showData = ui.dataToggle.checked;
     ui.dataPanel.hidden = !state.showData;
+    syncDataPanelDock();
     renderDataPanel(true);
 });
 ui.trailsToggle.addEventListener('change', () => {
@@ -3676,6 +3742,9 @@ if (window.visualViewport && typeof window.visualViewport.addEventListener === '
     window.visualViewport.addEventListener('resize', scheduleResizeStage);
 }
 document.addEventListener('fullscreenchange', updateFullscreenUI);
+if (typeof DATA_PANEL_DOCK_QUERY.addEventListener === 'function') {
+    DATA_PANEL_DOCK_QUERY.addEventListener('change', placeDataPanel);
+}
 document.addEventListener('webkitfullscreenchange', updateFullscreenUI);
 document.addEventListener('visibilitychange', handleVisibilityChange);
 if ('ResizeObserver' in window) {
@@ -3712,6 +3781,7 @@ ui.dataToggle.checked = state.showData;
 ui.trailsToggle.checked = state.showTrails;
 ui.arrowsToggle.checked = state.showArrows;
 ui.dataPanel.hidden = !state.showData;
+placeDataPanel();
 buildPhysicsSteppers();
 updateOneDDependentUI();
 setPaused(false);
