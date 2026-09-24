@@ -302,9 +302,14 @@ h1, h2, h3 { overflow-wrap: break-word; hyphens: auto; }
 .cd .pt { fill: var(--spark); stroke: var(--ink); stroke-width: 2; }
 .cd text.tick { font: 600 11px/1 Arial, Helvetica, sans-serif; fill: #4b5563; }
 .cd text.axis-label { font: 800 12px/1 Arial, Helvetica, sans-serif; }
-.cd .wire-brown { stroke: #8a4b1f; stroke-width: 9; }
-.cd .wire-blue { stroke: #2563b8; stroke-width: 9; }
-.cd .sheath { fill: #d9d4c7; stroke: var(--ink); }
+.circuit-figure .cable-cutaway { max-height: none; }
+.cable-key { display: flex; flex-wrap: wrap; gap: 7px 14px; }
+.cable-key > span { display: inline-flex; align-items: center; gap: 4px; white-space: nowrap; }
+.cable-key i { display: inline-block; width: 16px; height: 10px; margin-right: 2px; border: 1px solid var(--ink); border-radius: 6px; }
+.cable-key-live { background: #915328; }
+.cable-key-neutral { background: #2876be; }
+.cable-key-earth { background: repeating-linear-gradient(135deg, #318b47 0 5px, #f7d83b 5px 10px); }
+.cable-caption { display: block; margin-top: 8px; font-weight: 500; }
 
 .symbol-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(104px, 1fr)); gap: 8px; margin: 16px 0 4px; }
 .symbol-tile { margin: 0; padding: 8px 6px 9px; border: 2px solid var(--ink); background: var(--diagram-bg); text-align: center; }
