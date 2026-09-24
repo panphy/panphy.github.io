@@ -328,7 +328,7 @@ h1, h2, h3 { overflow-wrap: break-word; hyphens: auto; }
 .grid-route ol { list-style: none; margin: 0; padding: 0; display: grid; gap: 16px; }
 .grid-route > ol { position: relative; }
 .grid-route > ol::before { content: ""; position: absolute; z-index: 1; left: 25px; top: 26px; bottom: 26px; width: 4px; background: var(--ink); }
-.grid-stage { position: relative; display: grid; grid-template-columns: 54px minmax(0, 1fr); gap: 12px; align-items: start; }
+.grid-route .grid-stage { position: relative; margin: 0; padding: 0; display: grid; grid-template-columns: 54px minmax(0, 1fr); gap: 12px; align-items: start; }
 .grid-stage + .grid-stage::after, .grid-band + .grid-stage::after, .grid-band ol > .grid-stage:first-child::after { content: ""; position: absolute; z-index: 2; left: 18px; top: -12px; border-inline: 9px solid transparent; border-top: 10px solid var(--ink); }
 .grid-icon { position: relative; z-index: 3; width: 54px; height: 54px; display: grid; place-items: center; border: 2px solid var(--ink); border-radius: 50%; background: #fff; }
 .grid-icon svg { width: 40px; height: 40px; fill: none; stroke: var(--ink); stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; }
@@ -345,7 +345,8 @@ h1, h2, h3 { overflow-wrap: break-word; hyphens: auto; }
 .grid-pd.pd-low { background: #d7f0b0; }
 .grid-pd.pd-mid { background: #ffe89a; }
 .grid-pd.pd-high { background: #d9480f; border-color: #d9480f; color: #fff; }
-.grid-band { position: relative; margin: 4px -6px; padding: 10px 6px 12px; border: 2px dashed #1479a8; border-radius: 14px; background: #e9f7fb; }
+/* Negative margin cancels border + padding so band icons sit on the same rail as the others. */
+.grid-route .grid-band { position: relative; margin: 4px -8px; padding: 10px 6px 12px; border: 2px dashed #1479a8; border-radius: 14px; background: #e9f7fb; }
 .grid-band-tag { display: block; margin: 0 4px 14px 66px; font-size: 11px; font-weight: 700; color: #0f5f85; line-height: 1.2; }
 .grid-band-tag strong { margin-right: 5px; font-size: 11px; font-weight: 900; letter-spacing: .1em; text-transform: uppercase; color: var(--navy); }
 
