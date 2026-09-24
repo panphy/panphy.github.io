@@ -10,19 +10,23 @@ Browser-based physics tools, simulations, classroom utilities, and games for lea
 - **Simulations:** waves, states of matter, atomic models, relativity, and collisions.
 - **Teacher utilities:** a classroom timer and camera visualizer.
 - **Games and demos:** spelling practice and an ASCII camera.
-- **Year 9 Physics:** school-specific teaching and revision resources, available by direct link.
+- **GCSE Physics:** school-specific unit companions and revision flashcards, available by direct link.
 
-### Year 9 Physics
+### GCSE Physics
 
-[Work Like a Physicist](https://panphy.github.io/year9phy/unit01/) includes a student companion site, revision guides, test preparation, a workbook, lesson plans, and a teaching deck. See the [unit overview](year9phy/unit01/README.md) for materials and editable sources.
+The [GCSE Physics hub](https://panphy.github.io/misc/gcsephy/) collects the author's school curriculum resources:
 
-These public, open-source resources follow the author's school curriculum. They are intentionally outside the general homepage catalogue, but teachers and students are welcome to use and adapt them.
+- **Year 9 · [Work Like a Physicist](https://panphy.github.io/misc/gcsephy/year9phy/unit01/):** a student companion site, revision guides, test preparation, a workbook, lesson plans, and a teaching deck. See the [unit overview](misc/gcsephy/year9phy/unit01/README.md) for materials and editable sources.
+- **Year 10 · [Electric Circuits](https://panphy.github.io/misc/gcsephy/year10phy/unit01/):** revision notes, practice questions, and an Exam Zone for AQA GCSE electricity. See the [unit overview](misc/gcsephy/year10phy/unit01/README.md).
+- **Flashcards:** physics retrieval practice for Combined and Separate Science.
+
+These public, open-source resources are intentionally outside the general homepage catalogue, but teachers and students are welcome to use and adapt them. The old `/year9phy/unit01/` and `/misc/gcse_phy/` addresses redirect to the new locations.
 
 ## Offline use
 
 Most published tools and simulations support offline use once their required files have been cached. Visit online first and check the homepage's **Offline Ready** indicator before relying on an app offline. Normal updates appear through an update prompt.
 
-All pages under `fun/`, `beta/`, and `misc/` require internet access. Supabase features, such as leaderboards, also stay online-only. The Year 9 companion supports offline caching despite not appearing on the homepage.
+All pages under `fun/`, `beta/`, and `misc/`, including the GCSE Physics resources, require internet access. Supabase features, such as leaderboards, also stay online-only.
 
 ## Run locally
 
@@ -47,14 +51,15 @@ Open [localhost:8000](http://localhost:8000). A static server is needed to test 
 | `fun/` | Network-only games and demos |
 | `beta/` | Work in progress, listed in `beta/index.html` |
 | `misc/` | Unlisted resources, inventoried in `misc/index.html` |
-| `year9phy/` | Public school-specific curriculum resources |
+| `misc/gcsephy/` | GCSE Physics curriculum resources and flashcards, inventoried in `misc/gcsephy/index.html` |
+| `year9phy/`, `misc/gcse_phy/` | Redirect pages for old addresses only |
 | `.github/workflows/` | Repository automation |
 
 ## Contributing
 
 Fixes, usability improvements, and new educational tools are welcome. Keep changes lightweight, independently usable, and accessible on classroom devices.
 
-- New pages normally start in `beta/`; keep the beta and misc inventories current. Year 9 curriculum work stays in `year9phy/`.
+- New pages normally start in `beta/`; keep the beta, misc and GCSE Physics inventories current. School curriculum work goes in `misc/gcsephy/`.
 - When changing a precached file, bump `BUILD_ID` in `sw.js`. Published offline apps need their required assets in `ASSETS_TO_CACHE` and their homepage checks in `OFFLINE_CARD_REQUIREMENTS`.
 - Check affected browser flows, including mobile layouts and offline behavior where relevant. PanPhyPlot data or fitting changes also require its dependency-free regression checks (Node.js):
 
