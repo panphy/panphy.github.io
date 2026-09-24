@@ -13,15 +13,10 @@ document.addEventListener("DOMContentLoaded", function() {
 
 	function updateAppChromeTheme(theme) {
 		const themeColorMeta = document.querySelector('meta[name="theme-color"]');
-		const appleStatusBarMeta = document.querySelector('meta[name="apple-mobile-web-app-status-bar-style"]');
 		const isDarkTheme = theme === 'dark';
 
 		if (themeColorMeta) {
 			themeColorMeta.setAttribute('content', isDarkTheme ? '#111110' : '#F8F6F1');
-		}
-
-		if (appleStatusBarMeta) {
-			appleStatusBarMeta.setAttribute('content', isDarkTheme ? 'black-translucent' : 'default');
 		}
 	}
 

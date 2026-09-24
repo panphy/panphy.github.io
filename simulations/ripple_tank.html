@@ -18,9 +18,7 @@
       if (hasDarkPreference) {
         document.documentElement.setAttribute('data-theme', 'dark');
         var tc = document.querySelector('meta[name="theme-color"]');
-        var sb = document.querySelector('meta[name="apple-mobile-web-app-status-bar-style"]');
         if (tc) tc.setAttribute('content', '#111110');
-        if (sb) sb.setAttribute('content', 'black-translucent');
       }
     })();
   </script>
@@ -1827,15 +1825,12 @@
       document.documentElement.setAttribute('data-theme', next);
 
       const tc = document.querySelector('meta[name="theme-color"]');
-      const sb = document.querySelector('meta[name="apple-mobile-web-app-status-bar-style"]');
       if (next === 'dark') {
         localStorage.setItem('ripple-tank-dark', '1');
         if (tc) tc.setAttribute('content', '#111110');
-        if (sb) sb.setAttribute('content', 'black-translucent');
       } else {
         localStorage.removeItem('ripple-tank-dark');
         if (tc) tc.setAttribute('content', '#F8F6F1');
-        if (sb) sb.setAttribute('content', 'default');
       }
 
       updateThemeIcon();

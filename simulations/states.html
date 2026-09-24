@@ -14,9 +14,7 @@
         if (localStorage.getItem('panphy-dark')) {
           document.documentElement.setAttribute('data-theme', 'dark');
           var tc = document.querySelector('meta[name="theme-color"]');
-          var sb = document.querySelector('meta[name="apple-mobile-web-app-status-bar-style"]');
           if (tc) tc.setAttribute('content', '#111110');
-          if (sb) sb.setAttribute('content', 'black-translucent');
         }
       } catch (error) {
         // Storage can be blocked; the page stays in the light theme.
