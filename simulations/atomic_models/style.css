@@ -91,7 +91,7 @@ button:focus-visible, a:focus-visible, #viewer:focus-visible { outline: 3px soli
 /* Floating banner */
 .banner {
   position: sticky;
-  top: 0;
+  top: var(--standalone-top);
   z-index: 20;
   display: grid;
   grid-template-columns: 1fr auto 1fr;

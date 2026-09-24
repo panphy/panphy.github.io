@@ -195,12 +195,12 @@ a:visited {
 /* Pseudo-fullscreen fallback (iPadOS without Fullscreen API) */
 #outputPane.pseudo-fullscreen {
   position: fixed;
-  top: 0;
+  top: var(--standalone-top);
   left: 0;
   width: 100vw;
-  height: 100vh;
-  height: 100svh;
-  height: 100dvh;
+  height: calc(100vh - var(--standalone-top));
+  height: calc(100svh - var(--standalone-top));
+  height: calc(100dvh - var(--standalone-top));
   max-width: none;
   max-height: none;
   border: none;
@@ -283,7 +283,7 @@ a:visited {
   display: flex;
   gap: 8px;
   position: fixed;
-  top: 16px;
+  top: calc(16px + var(--standalone-top));
   right: 16px;
   z-index: 10000;
   opacity: 1;

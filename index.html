@@ -9,6 +9,7 @@
     <meta name="theme-color" content="#F8F6F1">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <link rel="stylesheet" href="/assets/standalone-top.css">
     <script>
     (function() {
       if (localStorage.getItem('panphy-dark')) {
@@ -173,7 +174,7 @@
            ======================================== */
         nav {
             position: fixed;
-            top: calc(12px + env(safe-area-inset-top, 0px));
+            top: calc(12px + max(env(safe-area-inset-top, 0px), var(--standalone-top)));
             left: 50%;
             transform: translateX(-50%);
             display: flex;
@@ -1908,7 +1909,8 @@
         };
         const OFFLINE_COMMON_ASSETS = [
             '/assets/theme-toggle.css',
-            '/assets/theme-toggle.js'
+            '/assets/theme-toggle.js',
+            '/assets/standalone-top.css'
         ];
         const OFFLINE_APP_PATHS = Object.keys(OFFLINE_CARD_REQUIREMENTS);
         const OFFLINE_REQUIRED_ASSETS = [...new Set(
