@@ -33,7 +33,7 @@ For a new or promoted general published app:
 
 Network-only apps omit registration and offline requirements. Public support/reference pages may use the service worker without a homepage listing.
 
-`gcsephy/` is exempt from beta placement, general app styling, and homepage promotion. Do not add it to root `index.html`, `ASSETS_TO_CACHE` or `OFFLINE_CARD_REQUIREMENTS` unless requested. Its absence from the catalogue does not make it private. The root `year9phy/unit01/` and `misc/gcse_phy/` paths hold redirect pages for old links only.
+`gcsephy/` is exempt from beta placement, general app styling, and homepage promotion. Do not add it to root `index.html`, `ASSETS_TO_CACHE` or `OFFLINE_CARD_REQUIREMENTS` unless requested. Its absence from the catalogue does not make it private.
 
 ## Service worker
 
@@ -42,7 +42,6 @@ Network-only apps omit registration and offline requirements. Public support/ref
 - `/beta`, `/misc`, `/fun`, `/gcsephy`, and Supabase API calls remain network-only. Other resources can also be runtime-cached; do not assume an uncached resource is available offline.
 - Keep `APP_VERSIONS` and app-group detection aligned. Entries currently use `BUILD_ID`, which is also the fallback version.
 - Preserve user-approved activation for normal updates. Keep precache repair limited to missing entries and rate-limited by the landing page.
-- When changing worker routing or activation, preserve the legacy `/year9phy/unit01` trailing-slash redirect before cache lookup and the one-time legacy-cache migration limited to affected Year 9 clients (redirect pages at the old address must not trigger it).
 
 ## Code and interface conventions
 

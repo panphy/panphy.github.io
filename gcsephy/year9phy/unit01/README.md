@@ -68,7 +68,7 @@ The shape is deliberate: **Lessons 1–2 build the language, 3–5 build the tec
 
 ## The companion site
 
-**Address: <https://panphy.github.io/gcsephy/year9phy/unit01/>** (the old `/year9phy/unit01/` address redirects here)
+**Address: <https://panphy.github.io/gcsephy/year9phy/unit01/>**
 
 A student-facing lesson companion and revision hub covering the same seven lesson sections. Students can use it alongside the workbook in class, to catch up after an absence, to revise independently, or to prepare for the end-of-unit test. Nothing in the taught unit depends on it.
 
