@@ -4,7 +4,7 @@
   const questions = window.EXAM_QUESTIONS || [];
   const sub = window.Diagrams.sub;
   const totalMarks = questions.reduce((sum, question) => sum + question.marks, 0);
-  const BRAND = '<span class="brand-mark">EC</span><span>Electric Circuits</span>';
+  const BRAND = '<span>Electric Circuits</span>';
 
   if (!questions.length) {
     document.body.innerHTML = '<main class="loading-message"><div><p>Exam Zone could not be loaded.</p><p><a class="button primary" href="../">Return to all missions</a></p></div></main>';
