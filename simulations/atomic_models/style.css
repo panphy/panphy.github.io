@@ -252,7 +252,7 @@ h3 { font-size: .88rem; margin: 0; }
 .question .choices button[data-result=reveal] { border: 2px dashed var(--correct-border); }
 .question .feedback { min-height: 1.5em; margin: 12px 0 4px; font-weight: 600; color: var(--text-main); font-size: .86rem; }
 .q-actions { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; justify-content: space-between; }
-.question .next-button { background: var(--brand-accent-strong); border-color: var(--brand-accent-strong); color: #fff; }
+.question button.next-button { background: var(--brand-accent-strong); border-color: var(--brand-accent-strong); color: #fff; }
 [data-theme="dark"] .question .next-button { background: var(--brand-accent); border-color: var(--brand-accent); color: #0B1F1D; }
 .q-dots { display: flex; gap: 6px; margin-top: 10px; color: var(--text-secondary); font-size: .9rem; }
 .q-dots .star { color: var(--brand-primary); }
