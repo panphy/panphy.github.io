@@ -558,6 +558,7 @@
               "The graph curves over and gets less steep: each extra volt gives a smaller increase in current. It looks the same with the p.d. reversed.",
             ],
             figure: D.ivSketch("lamp", "Filament lamp: resistance increases as the filament temperature increases."),
+            componentImages: [{ file: "filament-lamp.jpg", label: "Filament lamp", alt: "Clear glass filament lamp with a visible coiled wire inside" }],
             remember: "Explain the curve using temperature, not just ‘the resistance goes up’.",
           },
           {
@@ -567,6 +568,10 @@
               "In the forward direction almost no current flows until the p.d. reaches about 0.6 V; after that, the current rises steeply. An LED (light-emitting diode) behaves the same way and emits light when current flows.",
             ],
             figure: D.ivSketch("diode", "Diode: current flows one way only; very high resistance in reverse."),
+            componentImages: [
+              { file: "diode.jpg", label: "Diode", alt: "Black cylindrical diode with a silver polarity band and two wire leads" },
+              { file: "led.jpg", label: "LED", alt: "Red light-emitting diode with a rounded plastic case and two wire leads" },
+            ],
           },
           {
             title: "Thermistor",
@@ -580,6 +585,7 @@
               series: [{ fn: (x) => 0.9 * Math.exp(-2.6 * x) + 0.05, from: 0.03, to: 1 }],
               caption: "Hotter thermistor → lower resistance.",
             }),
+            componentImages: [{ file: "thermistor.jpg", label: "Thermistor", alt: "Small black bead thermistor with two wire leads" }],
           },
           {
             title: "Light-dependent resistor (LDR)",
@@ -593,6 +599,7 @@
               series: [{ fn: (x) => 0.9 * Math.exp(-2.6 * x) + 0.05, from: 0.03, to: 1 }],
               caption: "Brighter light → lower resistance.",
             }),
+            componentImages: [{ file: "ldr.jpg", label: "LDR", alt: "Round light-dependent resistor with a dark zigzag track and two wire leads" }],
           },
           {
             title: "Required practical: I–V characteristics",
