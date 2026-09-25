@@ -54,11 +54,15 @@
       ? `<p class="remember-note"><strong>Remember:</strong> ${sub(section.remember)}</p>`
       : "";
     const ht = section.ht ? '<span class="ht-flag">HT</span>' : "";
+    const componentImages = section.componentImages?.length
+      ? `<div class="component-gallery" aria-label="Component appearance">${section.componentImages.map((component) => `
+          <figure class="component-photo"><img src="../../assets/components/${component.file}" alt="${component.alt}" loading="lazy" width="768" height="768"><figcaption>${component.label}</figcaption></figure>`).join("")}</div>`
+      : "";
 
     return `
       <article class="revision-card">
         <div class="revision-card-heading"><span>${String(sectionIndex + 1).padStart(2, "0")}</span><h3>${sub(section.title)}${ht}</h3></div>
-        <div class="revision-copy">${paragraphs}${equationBlock(section.equation)}${section.figure || ""}${points}${formula}${remember}</div>
+        <div class="revision-copy">${paragraphs}${equationBlock(section.equation)}${componentImages}${section.figure || ""}${points}${formula}${remember}</div>
       </article>`;
   }).join("");
 

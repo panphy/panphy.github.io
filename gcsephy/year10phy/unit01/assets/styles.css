@@ -275,6 +275,10 @@ h1, h2, h3 { overflow-wrap: break-word; hyphens: auto; }
 
 /* diagrams */
 .circuit-figure { margin: 18px 0 6px; padding: 12px; background: var(--diagram-bg); border: 2px solid var(--ink); }
+.component-gallery { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 150px), 1fr)); gap: 12px; margin: 18px 0 6px; }
+.component-photo { margin: 0; border: 2px solid var(--ink); background: #f9f7f2; }
+.component-photo img { display: block; width: 100%; height: 168px; object-fit: contain; }
+.component-photo figcaption { padding: 7px 10px; border-top: 1px solid var(--line); color: var(--ink); font-size: 12px; font-weight: 900; text-transform: uppercase; letter-spacing: .06em; }
 .circuit-figure svg { display: block; width: 100%; height: auto; max-height: 340px; }
 .circuit-figure figcaption { margin-top: 8px; padding-top: 8px; border-top: 1px solid var(--line); font-size: 12px; font-weight: 700; color: var(--muted); line-height: 1.4; }
 .question-stimulus .circuit-figure, .question-card > .circuit-figure { max-width: 520px; }
