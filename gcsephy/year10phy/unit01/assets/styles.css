@@ -406,3 +406,51 @@ h1, h2, h3 { overflow-wrap: break-word; hyphens: auto; }
 }
 
 @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } * { transition: none !important; } }
+
+/* equation triangles page */
+.tri-steps { margin: 22px 0 0; padding: 15px 0 0 20px; border-top: 2px solid; line-height: 1.5; font-weight: 700; }
+.tri-steps b { font-weight: 900; }
+.tri-section { padding: 90px clamp(22px, 6vw, 90px) 100px; }
+.tri-example { max-width: 880px; margin-bottom: 44px; padding: 24px 26px; border: 2px solid var(--ink); background: #fffdf8; line-height: 1.6; font-size: 17px; }
+.tri-example p { margin: 0 0 12px; }
+.tri-example .eyebrow { margin-bottom: 14px; }
+.tri-example .tri-tip { margin: 0; padding-top: 12px; border-top: 1px solid var(--line); color: var(--muted); font-size: 15px; }
+.tri-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 340px), 1fr)); gap: 22px; }
+.tri-card { --accent: var(--spark); display: flex; flex-direction: column; padding: 22px; border: 2px solid var(--ink); background: #fffdf8; box-shadow: 7px 7px 0 var(--accent); }
+.tri-card.cyan { --accent: var(--cyan); }.tri-card.copper { --accent: var(--copper); }.tri-card.violet { --accent: var(--violet); }.tri-card.leaf { --accent: var(--leaf); }
+.tri-head { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; }
+.tri-head h3 { margin: 0; font: 900 clamp(26px, 3vw, 34px)/1 "Arial Black", Arial, sans-serif; letter-spacing: -.03em; }
+.tri-head span { font-size: 11px; font-weight: 900; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); white-space: nowrap; }
+.tri-body { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 16px; align-items: center; margin-top: 16px; }
+.tri-svg { width: 100%; height: auto; display: block; }
+.tri-edge { fill: color-mix(in srgb, var(--accent) 30%, #fffdf8); stroke: var(--ink); stroke-width: 4; stroke-linejoin: round; }
+.tri-div { fill: none; stroke: var(--ink); stroke-width: 3; }
+.tri-letter { cursor: pointer; }
+.tri-letter text { font: 900 40px/1 "Arial Black", Arial, sans-serif; text-anchor: middle; fill: var(--ink); }
+.tri-cover, .tri-q { opacity: 0; transition: opacity .15s; }
+.tri-letter.covered .tri-cover { opacity: 1; fill: var(--ink); }
+.tri-letter.covered .tri-q { opacity: 1; fill: var(--spark); }
+.tri-letter.covered .tri-sym { opacity: 0; }
+.tri-ask { margin: 0 0 8px; font-size: 12px; font-weight: 900; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); }
+.tri-btns { display: flex; flex-direction: column; gap: 8px; }
+.tri-btn { display: flex; align-items: baseline; gap: 10px; min-height: 48px; padding: 8px 12px; border: 2px solid var(--ink); border-radius: 4px; background: white; color: var(--ink); font-weight: 900; font-size: 20px; text-align: left; cursor: pointer; }
+.tri-btn small { font-size: 13px; font-weight: 700; color: var(--muted); }
+.tri-btn:hover { background: color-mix(in srgb, var(--accent) 25%, white); }
+.tri-btn:focus-visible { outline: 3px solid var(--cyan); outline-offset: 2px; }
+.tri-btn[aria-pressed="true"] { background: var(--ink); color: white; }
+.tri-btn[aria-pressed="true"] small { color: #d4deec; }
+.tri-result { min-height: 2.6em; margin: 12px 0 0; color: var(--muted); font-size: 14px; font-weight: 700; line-height: 1.4; }
+.tri-result.shown { color: var(--ink); font: 900 18px/1.3 "Arial Black", Arial, sans-serif; }
+.tri-forms { list-style: none; margin: 18px 0 0; padding: 14px 0 0; border-top: 1px solid var(--line); display: grid; gap: 6px; }
+.tri-forms li { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 4px 12px; padding: 6px 8px; border-radius: 4px; }
+.tri-forms li span { font-weight: 900; }
+.tri-forms li small { color: var(--muted); font-size: 12px; }
+.tri-forms li.active { background: color-mix(in srgb, var(--accent) 35%, white); }
+.tri-section > .toolkit-note { margin-top: 40px; }
+.tri-back { margin-top: 30px; }
+.toolkit-link { display: inline-flex; align-items: center; gap: 12px; min-height: 48px; margin-top: 22px; padding: 10px 16px; border: 2px solid var(--ink); border-radius: 4px; background: #fffdf8; font-size: 14px; font-weight: 900; }
+.toolkit-link:hover { background: var(--spark); }
+@media (max-width: 420px) {
+  .tri-body { grid-template-columns: 1fr; }
+  .tri-svg { max-width: 220px; margin: 0 auto; }
+}

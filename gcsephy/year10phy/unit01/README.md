@@ -43,6 +43,7 @@ All questions are original. Circuit diagrams and graphs are drawn as inline SVG 
 |---|---|
 | `index.html` | Unit home: missions, equation toolkit, Exam Zone link, resources |
 | `lesson/<slug>/index.html` | Thin shells; `assets/site.js` renders each mission from `assets/lessons.js` |
+| `equation-triangles/index.html` | Optional rearranging help: interactive equation triangles, linked from the toolkit (`assets/triangles.js`) |
 | `exam-zone/index.html` | Shell; `assets/exam-zone.js` renders `assets/exam-questions.js` |
 | `assets/diagrams.js` | Circuit-symbol, circuit-diagram and graph helpers (`Diagrams.circuit`, `graph`, `ivSketch`, `symbolGrid`) |
 | `assets/styles.css` | Adapted from the Year 9 companion stylesheet with an electric palette |
