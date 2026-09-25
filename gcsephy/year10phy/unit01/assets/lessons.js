@@ -54,7 +54,7 @@
             formula: "0.25 A for 2.0 minutes → t = 120 s → Q = 0.25 × 120 = 30 C",
           },
           {
-            title: "Electrons and conventional current",
+            title: "Electrons and conven&shy;tional current",
             paragraphs: [
               "In the wires outside the cell, electrons move from the negative terminal towards the positive terminal.",
               "Circuit arrows show conventional current, which points from positive to negative. The direction was chosen long before the electron was discovered, and it has stayed as the standard.",
@@ -450,6 +450,7 @@
           },
           {
             title: "Required practical: length of a wire",
+            practical: "resistance/#part-a",
             paragraphs: [
               "Tape a thin wire along a metre ruler. Connect one crocodile clip at 0 cm and move the other to change the length. Record the ammeter and voltmeter readings at each length and calculate R = V ÷ I.",
             ],
@@ -602,7 +603,8 @@
             componentImages: [{ file: "ldr.jpg", label: "LDR", alt: "Round light-dependent resistor with a dark zigzag track and two leads emerging from behind the disc" }],
           },
           {
-            title: "Required practical: I–V characteristics",
+            title: "Required practical: I–V charac&shy;teristics",
+            practical: "iv-characteristics/",
             paragraphs: [
               "Connect the component in series with an ammeter, a variable resistor and a power supply, with a voltmeter across the component. Adjust the variable resistor to take readings of current and p.d.; then reverse the power supply connections and repeat to get negative values.",
             ],
@@ -757,7 +759,8 @@
             ],
           },
           {
-            title: "Required practical: resistor combinations",
+            title: "Required practical: resistor combi&shy;nations",
+            practical: "resistance/#part-b",
             paragraphs: [
               "Measure V and I for one resistor, then for two identical resistors in series, then in parallel. Calculate R_total = V ÷ I each time.",
             ],
@@ -1005,7 +1008,7 @@
             remember: "Square the current first. Doubling the current makes the power four times as big.",
           },
           {
-            title: "Energy transferred",
+            title: "Energy trans&shy;ferred",
             paragraphs: [
               "The energy an appliance transfers depends on its power and how long it is switched on. It can also be found from the charge and the p.d.",
             ],
@@ -1043,7 +1046,7 @@
             ],
           },
           {
-            title: "Transformer equation",
+            title: "Trans&shy;former equation",
             ht: true,
             paragraphs: [
               "For a transformer that is 100% efficient, the power in equals the power out. You do not need to know how a transformer is built.",

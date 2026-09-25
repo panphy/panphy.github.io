@@ -59,10 +59,24 @@
           <figure class="component-photo"><img src="../../assets/components/${component.file}" alt="${component.alt}" loading="lazy" width="768" height="768"><figcaption>${component.label}</figcaption></figure>`).join("")}</div>`
       : "";
 
+    const heading = `<div class="revision-card-heading"><span>${String(sectionIndex + 1).padStart(2, "0")}</span><h3>${sub(section.title)}${ht}</h3></div>`;
+    const copy = `<div class="revision-copy">${paragraphs}${equationBlock(section.equation)}${componentImages}${section.figure || ""}${points}${formula}${remember}</div>`;
+
+    // Required-practical cards open the full practical page.
+    if (section.practical) {
+      return `
+      <a class="revision-card practical-link" href="../../practical/${section.practical}">
+        ${heading}
+        <span class="practical-badge">Full practical page</span>
+        ${copy}
+        <span class="practical-cta"><span>Open practical: method, tables, questions, PDF</span><span aria-hidden="true">→</span></span>
+      </a>`;
+    }
+
     return `
       <article class="revision-card">
-        <div class="revision-card-heading"><span>${String(sectionIndex + 1).padStart(2, "0")}</span><h3>${sub(section.title)}${ht}</h3></div>
-        <div class="revision-copy">${paragraphs}${equationBlock(section.equation)}${componentImages}${section.figure || ""}${points}${formula}${remember}</div>
+        ${heading}
+        ${copy}
       </article>`;
   }).join("");
 

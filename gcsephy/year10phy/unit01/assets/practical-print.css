@@ -1,0 +1,105 @@
+/* A4 worksheet styling for required practicals, matching the virtual labs worksheet:
+   plain headings, grey-headed tables, open answer space and a running footer. */
+@page {
+  size: A4;
+  margin: 16mm 16mm 18mm;
+  @bottom-right { font-family: Calibri, Carlito, "Segoe UI", Arial, sans-serif; font-size: 8pt; color: #222; }
+}
+
+:root { --ink: #111; --rule: #c9ced3; --head: #e3e9ee; --ans: #1b5fae; --diagram-bg: #fff; }
+* { box-sizing: border-box; }
+html { background: #d9dcdf; }
+body { margin: 0; color: var(--ink); font: 10.5pt/1.42 Arial, "Liberation Sans", Helvetica, sans-serif; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+main { padding: 12mm 0; }
+.sheet { width: 210mm; min-height: 297mm; margin: 0 auto 10mm; padding: 16mm 16mm 18mm; background: white; box-shadow: 0 2px 10px rgba(0,0,0,.18); }
+
+h1, h2, .cover-title { font-family: Calibri, Carlito, "Segoe UI", "Helvetica Neue", Arial, sans-serif; font-weight: 700; }
+h1 { margin: 0 0 2.5mm; font-size: 19pt; line-height: 1.15; }
+.cover-title { margin-top: 4mm; font-size: 24pt; }
+.part-label { margin-right: 4mm; }
+h2 { margin: 0 0 2.5mm; font-size: 12.5pt; line-height: 1.2; break-after: avoid; }
+h2 .num { display: inline-block; min-width: 6mm; }
+p { margin: 0 0 2.5mm; }
+.subtitle { margin-bottom: 5mm; font-size: 10.5pt; }
+.block { margin: 0 0 5mm; padding-bottom: 1mm; break-inside: avoid; }
+ul, ol { margin: 0 0 2.5mm; padding-left: 6mm; }
+li { margin: 0 0 1.4mm; }
+
+/* cover */
+.field { display: flex; align-items: flex-end; gap: 2mm; margin: 5mm 0 0; font-size: 11.5pt; }
+.field span { flex: 1; border-bottom: 1px solid var(--ink); height: 5mm; }
+.field span.short { flex: .6; }
+.motto { margin: 7mm 0 3mm; font-size: 11pt; }
+.online { margin-bottom: 7mm; color: #1f6f8b; }
+.equation { margin: 3mm 0 0; padding: 3mm 4mm; border: 1px solid var(--rule); border-left: 3px solid var(--ink); background: #f5f7f8; }
+.equation b { font-size: 13pt; }
+.apparatus { columns: 2; column-gap: 8mm; }
+.apparatus li { break-inside: avoid; }
+.ans-flag { display: inline-block; margin-left: 2mm; padding: .6mm 2.5mm; border: 1.5px solid var(--ans); border-radius: 1.5mm; color: var(--ans); font-size: 12pt; vertical-align: middle; }
+
+/* tables */
+.grid-table { width: 100%; margin: 2mm 0 3mm; border-collapse: collapse; font-size: 10pt; }
+.grid-table th, .grid-table td { padding: 1.6mm 2.4mm; border: 1px solid var(--rule); text-align: left; vertical-align: middle; }
+.grid-table th { background: var(--head); font-weight: 700; }
+.grid-table td { height: 8.6mm; }
+.grid-table.grouped thead tr:first-child th { text-align: center; background: #d4dde4; }
+.grid-table.vars td { height: auto; vertical-align: top; }
+
+/* questions */
+.question { margin: 0 0 4mm; border-bottom: 1px solid var(--rule); break-inside: avoid; }
+.question .prompt { margin-bottom: 1.5mm; }
+.question .prompt b { margin-right: 1.5mm; }
+.marks { white-space: nowrap; font-weight: 700; }
+.kind { display: inline-block; margin-right: 1mm; padding: .2mm 1.6mm; border: 1px solid var(--ink); font-size: 8pt; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; vertical-align: 1px; }
+.space { padding-bottom: 2mm; }
+
+/* notes and figures */
+.note { margin: 1mm 0 4mm; padding: 2.5mm 3.5mm; border-left: 3px solid var(--ink); background: #f5f7f8; }
+.steps li { padding-left: 1mm; }
+.figures { margin: 0 0 4mm; break-inside: avoid; }
+.figures.two { display: grid; grid-template-columns: 1fr 1fr; gap: 6mm; align-items: start; }
+.circuit-figure { margin: 0; text-align: center; }
+.circuit-figure svg { display: block; width: 100%; max-height: 64mm; margin: 0 auto; }
+.figures:not(.two) .circuit-figure svg { width: 72%; max-height: 70mm; }
+.circuit-figure figcaption { margin-top: 1.5mm; color: #444; font-size: 8.8pt; line-height: 1.35; }
+.cd { stroke: var(--ink); fill: none; stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round; }
+.cd .mask { fill: var(--diagram-bg); stroke: none; }
+.cd .body rect, .cd .body circle { fill: var(--diagram-bg); }
+.cd .fill, .cd .dot { fill: var(--ink); stroke: none; }
+.cd .thick { stroke-width: 4.5; }
+.cd .dash { stroke-dasharray: 3 4; }
+.cd text { fill: var(--ink); stroke: none; font: 700 13px/1 Arial, Helvetica, sans-serif; }
+.cd text.meter-letter { font: 900 14px/1 Arial, Helvetica, sans-serif; }
+.cd text.note { font-weight: 700; fill: #333; }
+.cd .ruler { fill: #f1f1f1; stroke-width: 1.5; }
+.cd .ruler-tick { stroke-width: 1.2; }
+.cd .dim { stroke-width: 1.5; }
+
+/* graph paper */
+.graph-paper { display: block; margin: 2mm auto 3mm; overflow: visible; }
+.graph-paper line.minor { stroke: #d9dee2; stroke-width: .15; }
+.graph-paper line.major { stroke: #9aa4ad; stroke-width: .3; }
+.graph-paper line.axis { stroke: var(--ink); stroke-width: .55; }
+.graph-paper text { font-family: Arial, Helvetica, sans-serif; fill: var(--ink); }
+.graph-paper .axis-label { font-size: 3.5px; font-weight: 700; }
+.graph-paper .tick { font-size: 3px; }
+.graph-paper .fit { fill: none; stroke: var(--ans); stroke-width: .5; }
+.graph-paper .mark { fill: none; stroke: var(--ans); stroke-width: .45; }
+
+/* answer version */
+.ans, .ans-text, .graph-paper .ans-fill { color: var(--ans); fill: var(--ans); }
+.ans { font-weight: 700; }
+.ans-text { padding-top: .5mm; font-size: 10pt; }
+.ans-text p { margin: 0 0 1.5mm; }
+.ans-text ul { margin: 1mm 0 2mm; }
+.ans-text li { margin-bottom: .8mm; }
+
+.sheet-index { max-width: 640px; margin: 0 auto; padding: 40px 24px; background: white; }
+.sheet-index li { margin: 10px 0; }
+
+@media print {
+  html { background: none; }
+  main { padding: 0; }
+  .sheet { width: auto; min-height: 0; margin: 0; padding: 0; box-shadow: none; break-after: page; }
+  .sheet:last-child { break-after: auto; }
+}
