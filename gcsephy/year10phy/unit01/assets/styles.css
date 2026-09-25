@@ -24,10 +24,6 @@ button, summary { font: inherit; }
   justify-content: space-between; background: var(--navy); color: white; border-bottom: 1px solid rgba(255,255,255,.15);
 }
 .brand { display: inline-flex; align-items: center; gap: 12px; font-weight: 800; letter-spacing: -.02em; }
-.brand-mark {
-  width: 42px; height: 42px; display: grid; place-items: center; border: 2px solid currentColor; border-radius: 50%;
-  font: 900 11px/1 Arial; letter-spacing: .08em; transform: rotate(-6deg);
-}
 .nav-pill { border: 1px solid rgba(255,255,255,.35); padding: 10px 15px; border-radius: 999px; font-size: 13px; font-weight: 800; }
 .nav-pill:hover { background: white; color: var(--navy); }
 
@@ -239,7 +235,7 @@ button, summary { font: inherit; }
 }
 
 @media (max-width: 680px) {
-  .topbar { min-height: 66px; }.brand > span:last-child { display: none; }.nav-pill { font-size: 11px; }
+  .topbar { min-height: 66px; }.nav-pill { font-size: 11px; }
   .hero { min-height: auto; padding-block: 54px 70px; }.hero h1 { font-size: clamp(58px,18vw,88px); }.hero-intro { font-size: 18px; }
   .circuit-card { box-shadow: 9px 10px 0 var(--cyan); }
   .machine-note { display: none; }.stamp { right: -8px; top: -4px; width: 84px; height: 84px; font-size: 11px; }

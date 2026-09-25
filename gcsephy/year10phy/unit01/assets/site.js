@@ -9,7 +9,7 @@
   const lesson = lessons.find((item) => item.slug === slug);
   const LAB_PDF = "../../Y10 Electricity Virtual Labs.pdf";
   const PHET = "https://phet.colorado.edu/sims/html/circuit-construction-kit-dc/latest/circuit-construction-kit-dc_all.html";
-  const BRAND = '<span class="brand-mark">EC</span><span>Electric Circuits</span>';
+  const BRAND = '<span>Electric Circuits</span>';
   const PANPHY_FOOTER = `
         <div class="panphy-footer-row">
           <a class="panphy-home-link" href="/" aria-label="Visit the PanPhy Labs landing page"><img src="/assets/favicon.png" width="30" height="30" alt=""></a>

@@ -42,7 +42,7 @@
   document.body.innerHTML = `
     <main class="lesson-page coral exam-page">
       <nav class="topbar lesson-nav" aria-label="Exam Zone navigation">
-        <a class="brand" href="../"><span class="brand-mark">WLP</span><span>Work Like a Physicist</span></a>
+        <a class="brand" href="../"><span>Work Like a Physicist</span></a>
         <a class="nav-pill" href="../#missions">All missions</a>
       </nav>
       <header class="lesson-hero exam-hero">
@@ -85,7 +85,7 @@
       </nav>
       <footer class="site-footer">
         <div class="unit-footer-row">
-          <div class="brand"><span class="brand-mark">WLP</span><span>Work Like a Physicist</span></div>
+          <div class="brand"><span>Work Like a Physicist</span></div>
           <p>Attempt. Hint. Mark. Improve.</p><a href="#top">Back to top ↑</a>
         </div>
         <div class="panphy-footer-row">

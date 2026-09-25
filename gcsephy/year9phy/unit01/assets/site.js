@@ -79,7 +79,7 @@
   document.body.innerHTML = `
     <main class="lesson-page ${lesson.colour}">
       <nav class="topbar lesson-nav" aria-label="Lesson navigation">
-        <a class="brand" href="../../"><span class="brand-mark">WLP</span><span>Work Like a Physicist</span></a>
+        <a class="brand" href="../../"><span>Work Like a Physicist</span></a>
         <a class="nav-pill" href="../../#missions">All missions</a>
       </nav>
       <header class="lesson-hero">
@@ -138,7 +138,7 @@
       <nav class="lesson-pagination" aria-label="Previous and next lessons">${previousLink}${nextLink}</nav>
       <footer class="site-footer">
         <div class="unit-footer-row">
-          <div class="brand"><span class="brand-mark">WLP</span><span>Work Like a Physicist</span></div>
+          <div class="brand"><span>Work Like a Physicist</span></div>
           <p>Attempt. Hint. Check. Improve.</p><a href="../../#missions">All missions ↑</a>
         </div>
         <div class="panphy-footer-row">
