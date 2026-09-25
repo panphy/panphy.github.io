@@ -613,6 +613,7 @@
               dots: [[140, 160], [240, 160]],
               caption: "Swap the lamp for a resistor or a diode to test each component.",
             }),
+            componentImages: [{ file: "variable-resistor.jpg", label: "Variable resistor (rheostat)", alt: "Sliding variable resistor with a wire-wound ceramic tube, adjustable contact and three terminals" }],
             points: [
               "Keep the resistor's temperature constant (small currents, switch off between readings).",
               "For the diode, add a protective resistor in series and use small p.d. steps near 0.6 V.",
