@@ -47,6 +47,8 @@ All questions are original. Circuit diagrams and graphs are drawn as inline SVG 
 | `assets/diagrams.js` | Circuit-symbol, circuit-diagram and graph helpers (`Diagrams.circuit`, `graph`, `ivSketch`, `symbolGrid`) |
 | `assets/styles.css` | Adapted from the Year 9 companion stylesheet with an electric palette |
 | `Y10 Electricity Virtual Labs.pdf` | The class worksheet; missions deep-link to its pages |
+| `Y10 Electricity Virtual Labs (Ans).pdf` | Worksheet answers, linked from the unit home Resources section |
+| `Y10 Electricity Virtual Labs Teacher Guide.pdf` | Teacher guide; hosted for direct download, not linked from any page |
 
 To edit content, change `assets/lessons.js` or `assets/exam-questions.js`. There is no build step.
 

@@ -385,6 +385,9 @@ h1, h2, h3 { overflow-wrap: break-word; hyphens: auto; }
 .toolkit-card.given { background: #f1edff; }
 .toolkit-note { margin: 22px 0 0; color: var(--muted); font-size: 14px; line-height: 1.55; max-width: 880px; }
 .resource-card.phet { background: var(--cyan); }
+.resource-card.answers { grid-column: span 2; min-height: 0; background: #f1edff; }
+.resource-card.answers h3 { margin-top: 22px; }
+@media (max-width: 680px) { .resource-card.answers { grid-column: auto; } }
 
 @media (max-width: 1000px) {
   .toolkit-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
