@@ -19,7 +19,7 @@ PanPhy Labs is a static GitHub Pages PWA for physics tools, simulations, classro
 | `fun/` | Games and playful demos | May be listed publicly; always network-only |
 | `beta/` | New work unless publication is requested | Maintain `beta/index.html`; no service-worker registration or caching |
 | `misc/` | Unlisted pages and resources | Maintain links and short descriptions in `misc/index.html`; no registration or caching |
-| `gcsephy/` | Public school-specific GCSE curriculum resources (`year9phy/`, `year10phy/`) and flashcards | Direct-link access, outside the root catalogue; maintain `gcsephy/index.html`; network-only in root `sw.js`; pages load `/gcsephy/sw-register.js`, whose `/gcsephy/`-scoped worker revalidates every request and stores nothing |
+| `gcsephy/` | Public school-specific GCSE curriculum resources (`year9phy/`, `year10phy/`) | Direct-link access, outside the root catalogue; maintain `gcsephy/index.html`; network-only in root `sw.js`; pages load `/gcsephy/sw-register.js`, whose `/gcsephy/`-scoped worker revalidates every request and stores nothing |
 
 Keep beta/misc inventories current when adding, moving, renaming, or removing entries. Supporting app files do not need separate entries.
 
