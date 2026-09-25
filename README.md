@@ -10,7 +10,8 @@ Browser-based physics tools, simulations, classroom utilities, and games for lea
 - **Simulations:** waves, states of matter, atomic models, relativity, and collisions.
 - **Teacher utilities:** a classroom timer and camera visualizer.
 - **Games and demos:** spelling practice and an ASCII camera.
-- **GCSE Physics:** school-specific unit companions and revision flashcards, available by direct link.
+- **GCSE Physics:** school-specific unit companions, available by direct link.
+- **Physics flashcards:** [Combined and Separate Science retrieval practice](beta/phy_flashcard/phy_flashcard.html) in beta.
 
 ### GCSE Physics
 
@@ -18,7 +19,6 @@ The [GCSE Physics hub](https://panphy.app/gcsephy/) collects the author's school
 
 - **Year 9 · [Work Like a Physicist](https://panphy.app/gcsephy/year9phy/unit01/):** a student companion site, revision guides, test preparation, a workbook, lesson plans, and a teaching deck. See the [unit overview](gcsephy/year9phy/unit01/README.md) for materials and editable sources.
 - **Year 10 · [Electric Circuits](https://panphy.app/gcsephy/year10phy/unit01/):** revision notes, practice questions, and an Exam Zone for AQA GCSE electricity. See the [unit overview](gcsephy/year10phy/unit01/README.md).
-- **Flashcards:** physics retrieval practice for Combined and Separate Science.
 
 These public, open-source resources are intentionally outside the general homepage catalogue, but teachers and students are welcome to use and adapt them.
 
@@ -51,9 +51,9 @@ Open [localhost:8000](http://localhost:8000). A static server is needed to test 
 | `assets/` | Shared controls, icons, and service-worker registration |
 | `tools/`, `simulations/`, `for_teachers/` | Published educational apps |
 | `fun/` | Network-only games and demos |
-| `beta/` | Work in progress, listed in `beta/index.html` |
+| `beta/` | Trial apps and physics flashcards, listed in `beta/index.html` |
 | `misc/` | Unlisted resources, inventoried in `misc/index.html` |
-| `gcsephy/` | GCSE Physics curriculum resources and flashcards, inventoried in `gcsephy/index.html`; `sw.js` and `sw-register.js` keep them fresh |
+| `gcsephy/` | GCSE Physics curriculum resources, inventoried in `gcsephy/index.html`; `sw.js` and `sw-register.js` keep them fresh |
 | `.github/workflows/` | Repository automation |
 
 ## Contributing
