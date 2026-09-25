@@ -1,0 +1,240 @@
+Chapter number,Topic number,Topic,Paper number,Questions,Answers
+Chapter 5,Topic 2,Electricity in the home,Paper 1,Why is the current provided by a cell called a direct current (d.c.)?,only flows in one direction
+Chapter 5,Topic 2,Electricity in the home,Paper 1,What is an alternating current (a.c.)?,current that repeatedly reverses direction
+Chapter 5,Topic 2,Electricity in the home,Paper 1,What kind of current is supplied by mains electricity?,alternating current
+Chapter 5,Topic 2,Electricity in the home,Paper 1,What is the frequency and voltage of mains electricity?,"50 Hz, 230 V"
+Chapter 5,Topic 2,Electricity in the home,Paper 1,"What colours are the live, neutral, and earth wires in a three-core cable?","live = brown, neutral = blue, earth = green and yellow stripes"
+Chapter 5,Topic 2,Electricity in the home,Paper 1,What is the function of the live wire in a three-core cable?,carries the alternating potential difference from the supply
+Chapter 5,Topic 2,Electricity in the home,Paper 1,What is the function of the neutral wire in a three-core cable?,Completes the circuit and carries current back to the supply.
+Chapter 5,Topic 2,Electricity in the home,Paper 1,What is the function of the earth wire in a three-core cable?,"Carries fault current to earth, causing the fuse or circuit breaker to disconnect the supply."
+Chapter 5,Topic 2,Electricity in the home,Paper 1,When is there a current in the earth wire?,If a fault connects the live wire to the earthed case.
+Chapter 5,Topic 2,Electricity in the home,Paper 1,Why is the live wire dangerous?,"Touching it can drive current through a person to earth, causing electric shock."
+Chapter 5,Topic 2,Electricity in the home,Paper 1,What is the National Grid?,nationwide network of cables and transformers that link power stations to customers
+Chapter 5,Topic 2,Electricity in the home,Paper 1,What are step-up transformers used for in the National Grid?,increase the p.d. from the power station to the transmission cables
+Chapter 5,Topic 2,Electricity in the home,Paper 1,What are step-down transformers used for in the National Grid?,Reduce the transmission p.d. to the 230 V mains supply.
+Chapter 5,Topic 2,Electricity in the home,Paper 1,Why does the National Grid use a high transmission voltage?,"At the same power, higher p.d. means lower current and less heating loss in the cables."
+Chapter 5,Topic 2,Electricity in the home,Paper 1,What two things does energy transfer to an appliance depend on?,power of appliance; time it is switched on for
+Chapter 5,Topic 2,Electricity in the home,Paper 1,"What are the units for power, current, potential difference, and resistance?","watts (W), amps (A), volts (V), ohms (Ω)"
+Chapter 6,Topic 3,Molecules and matter,Paper 1,Which two quantities do you need to measure to find the density of a solid or liquid?,mass and volume
+Chapter 6,Topic 3,Molecules and matter,Paper 1,What happens to the particles in a substance if its temperature is increased?,"Their average kinetic energy increases, so they move faster."
+Chapter 6,Topic 3,Molecules and matter,Paper 1,Why are changes of state physical changes?,No new substance forms; reversing the change restores the original material.
+Chapter 6,Topic 3,Molecules and matter,Paper 1,Why is the mass of a substance conserved when it changes state?,the number of particles does not change
+Chapter 6,Topic 3,Molecules and matter,Paper 1,What is the internal energy of a substance?,the total kinetic energy and potential energy of all the particles in the substance
+Chapter 6,Topic 3,Molecules and matter,Paper 1,Why does temperature stay constant during a change of state?,"Energy changes the particles’ potential energy, not their average kinetic energy."
+Chapter 6,Topic 3,Molecules and matter,Paper 1,What is the name given to the energy transferred when a substance changes state?,latent heat
+Chapter 6,Topic 3,Molecules and matter,Paper 1,What is the specific latent heat of a substance?,the energy required to change the state of one kilogram with no temperature change
+Chapter 6,Topic 3,Molecules and matter,Paper 1,What is the specific latent heat of fusion of a substance?,"the energy to change 1 kg from solid to liquid at its melting point, with no temperature change"
+Chapter 6,Topic 3,Molecules and matter,Paper 1,What is the specific latent heat of vaporisation of a substance?,"the energy to change 1 kg from liquid to vapour at its boiling point, with no temperature change"
+Chapter 6,Topic 3,Molecules and matter,Paper 1,"On a temperature–time graph, what do the flat (horizontal) sections show?",times when the substance is changing state and temperature is not changing
+Chapter 6,Topic 3,Molecules and matter,Paper 1,What property of a gas is related to the average kinetic energy of its particles?,Temperature: higher temperature means higher average kinetic energy.
+Chapter 6,Topic 3,Molecules and matter,Paper 1,What causes the pressure of a gas on a surface?,the force of gas particles hitting the surface
+Chapter 6,Topic 3,Molecules and matter,Paper 1,Give two reasons why the pressure of a gas in a sealed container increases if its temperature is increased.,Particles hit the walls more often and transfer more momentum in each collision.
+Chapter 6,Topic 3,Molecules and matter,Paper 1,Give two reasons why the temperature of a gas increases if it is compressed quickly.,Work done on the gas increases its internal energy; little energy escapes during rapid compression.
+Chapter 6,Topic 3,Molecules and matter,Paper 1,Why does increasing a gas’s volume lower its pressure at constant temperature?,"Particles travel further between wall collisions, so there are fewer collisions each second."
+Chapter 1,Topic 1,Conservation and dissipation of energy,Paper 1,Name five common energy stores.,"kinetic, gravitational potential, elastic potential, thermal, chemical"
+Chapter 1,Topic 1,Conservation and dissipation of energy,Paper 1,Name four ways energy can be transferred.,"by heating, by waves, by electric current, by forces doing work"
+Chapter 1,Topic 1,Conservation and dissipation of energy,Paper 1,What is a system?,an object or group of objects
+Chapter 1,Topic 1,Conservation and dissipation of energy,Paper 1,What is a closed system?,A system with no energy transfer to or from its surroundings.
+Chapter 1,Topic 1,Conservation and dissipation of energy,Paper 1,What is work done?,Energy transferred when a force moves an object through a distance.
+Chapter 1,Topic 1,Conservation and dissipation of energy,Paper 1,What is the unit for energy?,joules (J)
+Chapter 1,Topic 1,Conservation and dissipation of energy,Paper 1,What is one joule of work?,the work done when a force of 1 N moves an object 1 m in the direction of the force
+Chapter 1,Topic 1,Conservation and dissipation of energy,Paper 1,Describe the energy transfer when a moving car slows down.,Energy moves from the car’s kinetic store to the thermal stores of the brakes and surroundings.
+Chapter 1,Topic 1,Conservation and dissipation of energy,Paper 1,Describe the energy transfer when an electric kettle is used to heat water.,Electric current heats the element; energy then transfers by heating to the water.
+Chapter 1,Topic 1,Conservation and dissipation of energy,Paper 1,Describe the energy transfer when a ball is fired using an elastic band.,Energy transfers from the band’s elastic potential store to the ball’s kinetic store.
+Chapter 1,Topic 1,Conservation and dissipation of energy,Paper 1,Describe the energy transfer when a battery‑powered toy car is used.,Chemical energy in the battery transfers electrically to the car’s kinetic store; some warms the surroundings.
+Chapter 1,Topic 1,Conservation and dissipation of energy,Paper 1,Describe the energy transfer when a falling apple hits the ground.,Apple kinetic store to thermal stores of the apple and ground; some energy leaves as sound.
+Chapter 1,Topic 1,Conservation and dissipation of energy,Paper 1,Name the unit that represents one joule transferred per second.,watt (W)
+Chapter 1,Topic 1,Conservation and dissipation of energy,Paper 1,A motor is 30% efficient. What does that mean?,30% of energy is usefully transferred; 70% is dissipated
+Chapter 10,Topic 5,Forces and motion,Paper 2,What is stopping distance?,Thinking distance plus braking distance.
+Chapter 10,Topic 5,Forces and motion,Paper 2,What is thinking distance?,Distance travelled during the driver’s reaction time.
+Chapter 10,Topic 5,Forces and motion,Paper 2,What is braking distance?,Distance travelled after the brakes are applied.
+Chapter 10,Topic 5,Forces and motion,Paper 2,"What is the relationship between stopping distance, thinking distance, and braking distance?",stopping distance = thinking distance + braking distance
+Chapter 10,Topic 5,Forces and motion,Paper 2,Does the speed of a vehicle have a bigger effect on braking distance or thinking distance?,braking distance
+Chapter 10,Topic 5,Forces and motion,Paper 2,"At fixed reaction time, which stopping-distance component is proportional to speed?",Thinking distance.
+Chapter 10,Topic 5,Forces and motion,Paper 2,What are three factors that can affect the braking distance of a vehicle?,"speed, road conditions, condition of tyres and brakes"
+Chapter 10,Topic 5,Forces and motion,Paper 2,What can happen if the braking force used to stop a vehicle is very large?,The brakes may overheat or the wheels may skid.
+Chapter 10,Topic 5,Forces and motion,Paper 2,What is the law of conservation of momentum?,"in a closed system, total momentum before an event equals total momentum after"
+Chapter 10,Topic 5,Forces and motion,Paper 2,"For constant mass, what does mΔv represent?",The change in momentum.
+Chapter 10,Topic 5,Forces and motion,Paper 2,How is the force acting on an object related to its momentum?,force on an object = rate of change of momentum
+Chapter 10,Topic 5,Forces and motion,Paper 2,What are examples of everyday safety features which increase the time for the change in momentum?,"Airbags, seat belts, crumple zones and helmets."
+Chapter 10,Topic 5,Forces and motion,Paper 2,What is elastic deformation?,object returns to original shape and size when forces are removed
+Chapter 10,Topic 5,Forces and motion,Paper 2,What is inelastic deformation?,object does not return to original shape/size when forces are removed
+Chapter 10,Topic 5,Forces and motion,Paper 2,How do you find the spring constant from a force–extension graph of a spring?,find the gradient of the straight‑line section
+Chapter 12,Topic 6,Wave properties,Paper 2,What is a transverse wave?,oscillations/vibrations are perpendicular to the direction of energy transfer
+Chapter 12,Topic 6,Wave properties,Paper 2,What is a longitudinal wave?,oscillations/vibrations are parallel to the direction of energy transfer
+Chapter 12,Topic 6,Wave properties,Paper 2,Give an example of a transverse wave.,electromagnetic waves
+Chapter 12,Topic 6,Wave properties,Paper 2,Give an example of a longitudinal wave.,sound waves
+Chapter 12,Topic 6,Wave properties,Paper 2,What is a compression?,Region of a longitudinal wave where particles are close together.
+Chapter 12,Topic 6,Wave properties,Paper 2,What is a rarefaction?,Region of a longitudinal wave where particles are further apart.
+Chapter 12,Topic 6,Wave properties,Paper 2,What is the amplitude of a wave?,maximum displacement of a point on the wave from its undisturbed position
+Chapter 12,Topic 6,Wave properties,Paper 2,What is the wavelength of a wave?,distance from a point on one wave to the equivalent point on the adjacent wave
+Chapter 12,Topic 6,Wave properties,Paper 2,What is the frequency of a wave?,number of waves passing a fixed point per second
+Chapter 12,Topic 6,Wave properties,Paper 2,What unit is frequency measured in?,hertz (Hz)
+Chapter 12,Topic 6,Wave properties,Paper 2,What property of a wave always stays the same when it travels from one medium to another?,frequency
+Chapter 12,Topic 6,Wave properties,Paper 2,What rule do waves follow when they reflect off a surface?,angle of incidence = angle of reflection
+Chapter 12,Topic 6,Wave properties,Paper 2,What may happen to a wave transmitted into a different medium?,"Its speed may change, causing refraction if it enters at an angle."
+Chapter 12,Topic 6,Wave properties,Paper 2,What happens when waves are absorbed by a substance?,energy of the wave is transferred to energy stores of the substance
+Chapter 13,Topic 6,EM spectrum,Paper 2,Are electromagnetic (EM) waves longitudinal or transverse waves?,transverse
+Chapter 13,Topic 6,EM spectrum,Paper 2,Explain why EM waves are not mechanical waves.,They can travel through a vacuum.
+Chapter 13,Topic 6,EM spectrum,Paper 2,What do EM waves transfer from their source to an absorber?,energy
+Chapter 13,Topic 6,EM spectrum,Paper 2,List the EM spectrum in order of decreasing wavelength.,"radio, microwave, infrared, visible, ultraviolet, X‑rays, gamma"
+Chapter 13,Topic 6,EM spectrum,Paper 2,Which part of the EM spectrum can humans see?,visible light
+Chapter 13,Topic 6,EM spectrum,Paper 2,How can electromagnetic waves be produced?,By accelerating electric charges; gamma rays can also come from nuclear changes.
+Chapter 13,Topic 6,EM spectrum,Paper 2,How are gamma rays produced?,"changes in the nucleus of an atom (e.g., radioactive decay)"
+Chapter 13,Topic 6,EM spectrum,Paper 2,How can radio waves be produced?,oscillations in an electrical circuit
+Chapter 13,Topic 6,EM spectrum,Paper 2,How can we detect radio waves?,An aerial absorbs the waves and produces an alternating current of the same frequency.
+Chapter 13,Topic 6,EM spectrum,Paper 2,What are radio waves used for?,"transmitting television, mobile phone, and Bluetooth signals"
+Chapter 13,Topic 6,EM spectrum,Paper 2,What are microwaves used for?,satellite communications; cooking food
+Chapter 13,Topic 6,EM spectrum,Paper 2,What is infrared radiation used for?,"heating, remote controls, infrared cameras, cooking food"
+Chapter 13,Topic 6,EM spectrum,Paper 2,Which high-frequency EM waves can damage body cells?,"Ultraviolet, X-rays and gamma rays."
+Chapter 13,Topic 6,EM spectrum,Paper 2,What are the hazards of being exposed to ultraviolet radiation?,"Skin damage, including sunburn and increased skin-cancer risk; eye damage."
+Chapter 13,Topic 6,EM spectrum,Paper 2,Why are X‑rays used for medical imaging?,"Bone absorbs more X-rays than soft tissue, creating image contrast."
+Chapter 13,Topic 6,EM spectrum,Paper 2,Why are gamma rays used for treating cancer and sterilising medical equipment?,High doses kill cancer cells and microorganisms.
+Chapter 14,Topic 6,Light,Paper 2,What is the difference between a concave and convex lens?,convex bulges out in the middle; concave is thinner in the middle than at the edges
+Chapter 14,Topic 6,Light,Paper 2,What does a convex lens do to parallel rays of light?,light converges at the principal focus
+Chapter 14,Topic 6,Light,Paper 2,What does a concave lens do to parallel rays of light?,light diverges so rays appear to come from the principal focus
+Chapter 14,Topic 6,Light,Paper 2,What is the focal length of a lens?,distance from the centre of the lens to the principal focus
+Chapter 14,Topic 6,Light,Paper 2,What kind of images do concave and convex lenses produce?,concave = virtual; convex = real or virtual
+Chapter 14,Topic 6,Light,Paper 2,What determines the colour of monochromatic light?,Its frequency (or its wavelength in a vacuum).
+Chapter 14,Topic 6,Light,Paper 2,What four things can happen to visible light when it hits an object?,"transmitted, absorbed, reflected, refracted"
+Chapter 14,Topic 6,Light,Paper 2,What is the difference between specular and diffuse reflection?,specular from smooth surfaces; diffuse from rough surfaces
+Chapter 14,Topic 6,Light,Paper 2,What words describe an object that transmits visible light?,transparent or translucent
+Chapter 14,Topic 6,Light,Paper 2,Why does an object appear opaque?,does not transmit visible light – absorbs and reflects it
+Chapter 14,Topic 6,Light,Paper 2,How do colour filters work?,absorb certain wavelengths; transmit others
+Chapter 14,Topic 6,Light,Paper 2,What is refraction?,A change in wave direction caused by a change in speed at a boundary.
+Chapter 14,Topic 6,Light,Paper 2,"If a wave slows as it enters a medium at an angle, which way does it bend?",Towards the normal.
+Chapter 4,Topic 2,Electric circuits,Paper 1,What is electric current?,rate of flow of charge
+Chapter 4,Topic 2,Electric circuits,Paper 1,"What units are charge, current, and time measured in?","coulombs (C), amperes (A), seconds (s) respectively"
+Chapter 4,Topic 2,Electric circuits,Paper 1,"In a single-loop circuit, what is the same at every point?",The current.
+Chapter 4,Topic 2,Electric circuits,Paper 1,What must there be in a closed circuit so that electrical charge can flow?,source of potential difference (p.d.)
+Chapter 4,Topic 2,Electric circuits,Paper 1,Which two factors does current depend on and what are their units?,resistance in ohms (Ω); p.d. in volts (V)
+Chapter 4,Topic 2,Electric circuits,Paper 1,What happens to the current if the resistance is increased but the p.d. stays the same?,current decreases
+Chapter 4,Topic 2,Electric circuits,Paper 1,What is an ohmic conductor?,"Current is proportional to p.d. at constant temperature, so resistance stays constant."
+Chapter 4,Topic 2,Electric circuits,Paper 1,What happens to the resistance of a filament lamp as its temperature increases?,resistance increases
+Chapter 4,Topic 2,Electric circuits,Paper 1,What happens to the resistance of a thermistor as its temperature increases?,resistance decreases
+Chapter 4,Topic 2,Electric circuits,Paper 1,What happens to the resistance of an LDR when light intensity increases?,resistance decreases
+Chapter 4,Topic 2,Electric circuits,Paper 1,What are the main features of a series circuit?,same current through each component; p.d. shared; total resistance is the sum
+Chapter 4,Topic 2,Electric circuits,Paper 1,What are the main features of parallel resistors?,Equal p.d. across branches; branch currents add; total resistance is less than any branch resistance.
+Chapter 3,Topic 1,Energy resources,Paper 1,What is a non-renewable energy resource?,A resource used faster than it is replaced; it will eventually run out.
+Chapter 3,Topic 1,Energy resources,Paper 1,What is a renewable energy resource?,A resource that is replenished as it is used.
+Chapter 3,Topic 1,Energy resources,Paper 1,Name the main renewable and non-renewable energy resources.,"Renewable: solar, tidal, wave, wind, geothermal, biofuel, hydroelectric. Non-renewable: coal, oil, gas, nuclear fuel."
+Chapter 3,Topic 1,Energy resources,Paper 1,What are the main advantages of using coal as an energy resource?,Reliable; electricity output can be adjusted to demand.
+Chapter 3,Topic 1,Energy resources,Paper 1,What are the main disadvantages of using coal as an energy resource?,Finite fuel; burning it releases CO₂ and air pollutants.
+Chapter 3,Topic 1,Energy resources,Paper 1,What are the main advantages of using nuclear fuel as an energy resource?,Much energy from little fuel; reliable output; very low CO₂ emissions during operation.
+Chapter 3,Topic 1,Energy resources,Paper 1,What are the main disadvantages of using nuclear fuel as an energy resource?,Radioactive waste needs safe storage; construction and decommissioning are costly.
+Chapter 3,Topic 1,Energy resources,Paper 1,What are the main advantages of using solar energy?,Renewable; no fuel cost or direct emissions while operating.
+Chapter 3,Topic 1,Energy resources,Paper 1,What are the main disadvantages of using solar energy?,No electricity at night; output falls in cloudy weather; installation can be costly.
+Chapter 3,Topic 1,Energy resources,Paper 1,What are the main advantages of using tidal power?,Predictable tides; no fuel cost or direct emissions while operating.
+Chapter 3,Topic 1,Energy resources,Paper 1,What are the main disadvantages of using tidal power?,High construction cost; may disrupt habitats and shipping; output varies with the tides.
+Chapter 3,Topic 1,Energy resources,Paper 1,What are the main advantages of using wave turbines?,Renewable; no fuel cost or direct emissions while operating.
+Chapter 3,Topic 1,Energy resources,Paper 1,What are the main disadvantages of using wave turbines?,Output depends on waves; installation is costly and may affect marine life or shipping.
+Chapter 3,Topic 1,Energy resources,Paper 1,What are the main disadvantages of using wind turbines?,Output depends on wind; turbines may cause noise or visual impacts.
+Chapter 3,Topic 1,Energy resources,Paper 1,What are the advantages and disadvantages of geothermal energy?,Advantages: reliable and low direct emissions. Disadvantages: costly to install and location-dependent.
+Chapter 3,Topic 1,Energy resources,Paper 1,What are the advantages and disadvantages of biofuels?,Advantages: fuel can be stored and replaced. Disadvantages: growing it uses land and may cause emissions.
+Chapter 3,Topic 1,Energy resources,Paper 1,What are the advantages and disadvantages of hydroelectric power?,Advantages: controllable output and no fuel cost. Disadvantages: dams are costly and can flood habitats.
+Chapter 7,Topic 4,Radioactivity,Paper 1,Describe the basic structure of an atom.,"nucleus containing protons and neutrons, with electrons in fixed energy levels/shells"
+Chapter 7,Topic 4,Radioactivity,Paper 1,Describe the plum pudding model of the atom.,sphere of positive charge with negative electrons embedded in it
+Chapter 7,Topic 4,Radioactivity,Paper 1,"What charges do protons, neutrons, and electrons carry?","protons = positive, neutrons = no charge, electrons = negative"
+Chapter 7,Topic 4,Radioactivity,Paper 1,Why do atoms have no overall charge?,equal numbers of positive protons and negative electrons
+Chapter 7,Topic 4,Radioactivity,Paper 1,What is the radius of an atom?,around 1×10⁻¹⁰ m
+Chapter 7,Topic 4,Radioactivity,Paper 1,What is ionisation?,An atom gains or loses electrons and becomes an ion.
+Chapter 7,Topic 4,Radioactivity,Paper 1,What is the mass number of an element?,number of protons + number of neutrons
+Chapter 7,Topic 4,Radioactivity,Paper 1,Which particle do atoms of the same element always have the same number of?,protons
+Chapter 7,Topic 4,Radioactivity,Paper 1,What are isotopes?,atoms of the same element with different numbers of neutrons
+Chapter 7,Topic 4,Radioactivity,Paper 1,What were two main conclusions from the alpha particle scattering experiment?,"Most of the atom is empty space; a tiny, positively charged nucleus contains most of its mass."
+Chapter 7,Topic 4,Radioactivity,Paper 1,What are the three types of nuclear radiation?,"alpha, beta, gamma"
+Chapter 7,Topic 4,Radioactivity,Paper 1,Which type of nuclear radiation is the most ionising?,alpha
+Chapter 7,Topic 4,Radioactivity,Paper 1,"How far do alpha, beta and gamma radiation travel through air?","Alpha: a few cm. Beta: around 1 m. Gamma: much further, with no fixed range."
+Chapter 7,Topic 4,Radioactivity,Paper 1,What are the equation symbols for alpha and beta particles?,⁴₂He (α) and ⁰₋₁e (β⁻).
+Chapter 7,Topic 4,Radioactivity,Paper 1,What is meant by the half‑life of a radioactive source?,"Time for half the unstable nuclei to decay, or for the source’s count rate above background to halve."
+Chapter 7,Topic 4,Radioactivity,Paper 1,What is radioactive contamination?,unwanted presence of substances containing radioactive atoms on or in materials
+Chapter 7,Topic 4,Radioactivity,Paper 1,Where does background radiation come from?,"rocks, cosmic rays, fallout from weapons testing, nuclear accidents"
+Chapter 7,Topic 4,Radioactivity,Paper 1,Why are gamma‑emitting sources used for medical tracers and imaging?,gamma passes through body with relatively less damage to cells
+Chapter 7,Topic 4,Radioactivity,Paper 1,What is nuclear fusion?,when two light nuclei join to make a heavier one
+Chapter 7,Topic 4,Radioactivity,Paper 1,How can neutron-induced nuclear fission occur?,"A heavy nucleus absorbs a neutron, splits into two smaller nuclei and releases energy and more neutrons."
+Chapter 11,Topic 5,Force and pressure,Paper 2,What is a fluid?,a substance that can flow (liquid or gas)
+Chapter 11,Topic 5,Force and pressure,Paper 2,What is the unit of pressure equal to one newton per square metre?,pascal (Pa)
+Chapter 11,Topic 5,Force and pressure,Paper 2,Why does the pressure in a liquid increase with depth?,pressure at a point is due to weight of liquid above that point
+Chapter 11,Topic 5,Force and pressure,Paper 2,Why does the pressure in a liquid depend on the liquid’s density?,weight of a liquid depends on its density
+Chapter 11,Topic 5,Force and pressure,Paper 2,What is upthrust?,upward resultant force due to greater pressure on the bottom surface than the top
+Chapter 11,Topic 5,Force and pressure,Paper 2,"If weight and upthrust are the only forces on a fully submerged object and they are equal, what is its vertical acceleration?",Zero.
+Chapter 11,Topic 5,Force and pressure,Paper 2,What will an object do if its weight is greater than the upthrust?,sink
+Chapter 11,Topic 5,Force and pressure,Paper 2,Why does an object denser than a fluid sink in it?,Its weight exceeds the upthrust when fully submerged.
+Chapter 11,Topic 5,Force and pressure,Paper 2,Why does an object less dense than a fluid float in it?,"When fully submerged, upthrust exceeds its weight; it rises until the forces balance."
+Chapter 11,Topic 5,Force and pressure,Paper 2,Does a partially submerged object experience greater pressure on its bottom or top surface?,bottom
+Chapter 11,Topic 5,Force and pressure,Paper 2,What is the Earth’s atmosphere?,the layer of air that surrounds the Earth
+Chapter 11,Topic 5,Force and pressure,Paper 2,What is atmospheric pressure caused by?,air molecules colliding with surfaces
+Chapter 11,Topic 5,Force and pressure,Paper 2,Why does atmospheric pressure decrease with increased altitude?,less weight of air above; lower air density at higher altitude
+Chapter 11,Topic 5,Force and pressure,Paper 2,How does the height of the atmosphere compare to the Earth’s radius?,it is much smaller
+Chapter 15,Topic 7,Electromagnetism,Paper 2,What is a magnetic field?,the region around a magnet where a magnetic material experiences a force
+Chapter 15,Topic 7,Electromagnetism,Paper 2,What happens when like and unlike poles are brought together?,like repel; unlike attract
+Chapter 15,Topic 7,Electromagnetism,Paper 2,What happens to the strength of a magnetic field with distance from the magnet?,decreases
+Chapter 15,Topic 7,Electromagnetism,Paper 2,Where is a magnet’s field strongest?,at the poles
+Chapter 15,Topic 7,Electromagnetism,Paper 2,"Outside a magnet, which way do magnetic field lines point?",From north to south.
+Chapter 15,Topic 7,Electromagnetism,Paper 2,What does the spacing of magnetic field lines indicate?,closer lines = stronger field
+Chapter 15,Topic 7,Electromagnetism,Paper 2,What is a permanent magnet?,material that produces its own magnetic field
+Chapter 15,Topic 7,Electromagnetism,Paper 2,What is an induced magnet?,material that becomes magnetic when placed in a magnetic field
+Chapter 15,Topic 7,Electromagnetism,Paper 2,What does a magnetic compass contain?,small bar magnet
+Chapter 15,Topic 7,Electromagnetism,Paper 2,What is produced around a wire when an electric current flows?,a magnetic field
+Chapter 15,Topic 7,Electromagnetism,Paper 2,What factors affect field strength around a straight wire?,size of current; distance from wire
+Chapter 15,Topic 7,Electromagnetism,Paper 2,What effect does shaping a current‑carrying wire into a solenoid have?,increases magnetic field strength
+Chapter 15,Topic 7,Electromagnetism,Paper 2,How can the field inside a solenoid be increased?,put an iron core inside
+Chapter 15,Topic 7,Electromagnetism,Paper 2,What does Fleming’s left‑hand rule show?,"relative orientation of force, current, and magnetic field for the motor effect"
+Chapter 15,Topic 7,Electromagnetism,Paper 2,What is the symbol for magnetic flux density and its unit?,B; tesla (T)
+Chapter 15,Topic 7,Electromagnetism,Paper 2,What is the motor effect?,A current-carrying conductor experiences a force in a magnetic field.
+Chapter 15,Topic 7,Electromagnetism,Paper 2,What causes the motor effect?,interaction between the field from the current and the external magnetic field
+Chapter 15,Topic 7,Electromagnetism,Paper 2,What do loudspeakers and headphones do?,use the motor effect to convert current variations into sound waves
+Chapter 2,Topic 1,Energy transfer by heating,Paper 1,What does a material’s thermal conductivity tell you?,how well it conducts heat
+Chapter 2,Topic 1,Energy transfer by heating,Paper 1,Which materials have low thermal conductivity?,thermal insulators
+Chapter 2,Topic 1,Energy transfer by heating,Paper 1,Give three factors that determine the rate of thermal energy transfer through a material.,thermal conductivity; temperature difference; thickness
+Chapter 2,Topic 1,Energy transfer by heating,Paper 1,What factors affect the rate of heat loss from a building?,thickness and thermal conductivity of walls/roof; temperature difference
+Chapter 2,Topic 1,Energy transfer by heating,Paper 1,Define specific heat capacity.,Energy needed to raise the temperature of 1 kg of a substance by 1 °C.
+Chapter 16,Topic 8,Space,Paper 2,What are the main objects in our Solar System?,"Sun, (eight) planets, dwarf planets, moons, asteroids, comets"
+Chapter 16,Topic 8,Space,Paper 2,What kind of object is the Sun?,star
+Chapter 16,Topic 8,Space,Paper 2,Which galaxy is the Solar System in?,the Milky Way
+Chapter 16,Topic 8,Space,Paper 2,What do all stars start off as?,a huge cloud of gas and dust called a nebula
+Chapter 16,Topic 8,Space,Paper 2,Which force forms a protostar from a nebula?,gravity
+Chapter 16,Topic 8,Space,Paper 2,What outward effect does fusion have in a star?,Energy released by fusion produces outward pressure that opposes gravity.
+Chapter 16,Topic 8,Space,Paper 2,How does a main sequence star remain stable?,outward forces from fusion balance gravitational forces
+Chapter 16,Topic 8,Space,Paper 2,What determines a star’s life cycle?,mass
+Chapter 16,Topic 8,Space,Paper 2,What is the life cycle of a Sun‑like star?,protostar → main sequence → red giant → white dwarf → black dwarf
+Chapter 16,Topic 8,Space,Paper 2,What is the life cycle of a much more massive star?,protostar → main sequence → red supergiant → supernova → neutron star or black hole (if mass high enough)
+Chapter 16,Topic 8,Space,Paper 2,How do stars form elements up to iron?,By fusion of lighter nuclei.
+Chapter 16,Topic 8,Space,Paper 2,Which elements are only produced in a supernova?,elements heavier than iron
+Chapter 16,Topic 8,Space,Paper 2,How are elements distributed throughout the universe?,by massive stars going supernova
+Chapter 16,Topic 8,Space,Paper 2,How does gravity change velocity but not speed in circular orbits?,gravity provides centripetal force; direction changes but speed may be constant
+Chapter 16,Topic 8,Space,Paper 2,How can a satellite move into a stable orbit with a different speed?,Change to an orbit of a different radius.
+Chapter 16,Topic 8,Space,Paper 2,What is red‑shift?,wavelengths appear longer if the source moves away from the observer
+Chapter 16,Topic 8,Space,Paper 2,What evidence suggests the universe is expanding?,more distant galaxies show greater red‑shift (moving away faster)
+Chapter 16,Topic 8,Space,Paper 2,What is the name of the theory for the origin of the universe?,the Big Bang theory
+Chapter 8,Topic 5,Forces in balance,Paper 2,What is a scalar quantity?,only has a size (magnitude)
+Chapter 8,Topic 5,Forces in balance,Paper 2,What is a vector quantity?,has both a size and direction
+Chapter 8,Topic 5,Forces in balance,Paper 2,What is a force?,a push or pull that acts on an object due to interaction with another object
+Chapter 8,Topic 5,Forces in balance,Paper 2,Is force a vector or scalar quantity?,vector
+Chapter 8,Topic 5,Forces in balance,Paper 2,What is a contact force?,"when objects are physically touching (e.g., friction, air‑resistance, tension, normal contact)"
+Chapter 8,Topic 5,Forces in balance,Paper 2,What is a non‑contact force?,"when objects are physically separated (e.g., gravitational, electrostatic, magnetic)"
+Chapter 8,Topic 5,Forces in balance,Paper 2,What is the same about the interaction pair when two objects interact?,They have equal magnitude and act on different objects.
+Chapter 8,Topic 5,Forces in balance,Paper 2,What is different about the interaction pair when two objects interact?,They act in opposite directions.
+Chapter 8,Topic 5,Forces in balance,Paper 2,What is the resultant force if forces on an object are balanced?,zero
+Chapter 8,Topic 5,Forces in balance,Paper 2,What is the centre of mass?,the point through which the weight of an object can be considered to act
+Chapter 8,Topic 5,Forces in balance,Paper 2,What is the turning effect of a force called?,a moment
+Chapter 8,Topic 5,Forces in balance,Paper 2,What about the moments on a balanced object?,sum of clockwise moments = sum of anticlockwise moments
+Chapter 8,Topic 5,Forces in balance,Paper 2,How does a lever reduce the force needed for a given moment?,by increasing the distance from the pivot
+Chapter 8,Topic 5,Forces in balance,Paper 2,What happens to the moment when a small gear drives a large gear?,moment is increased
+Chapter 8,Topic 5,Forces in balance,Paper 2,What does Newton’s First Law say?,an object’s velocity changes only if a resultant force acts
+Chapter 8,Topic 5,Forces in balance,Paper 2,What is the resultant force on an object that remains at rest?,Zero.
+Chapter 8,Topic 5,Forces in balance,Paper 2,What is the resultant force on an object moving at steady speed in a straight line?,zero
+Chapter 8,Topic 5,Forces in balance,Paper 2,What does Newton’s Third Law say?,when two objects interact they exert equal and opposite forces on each other
+Chapter 9,Topic 5,Motion,Paper 2,How do you find the speed from a distance–time graph if the object is accelerating?,Find the gradient of a tangent at that point.
+Chapter 9,Topic 5,Motion,Paper 2,What is the difference between speed and velocity?,speed is a scalar; velocity is a vector (has direction)
+Chapter 9,Topic 5,Motion,Paper 2,"What factors affect the speed a person walks, runs, or cycles?","age, fitness, terrain, distance travelled"
+Chapter 9,Topic 5,Motion,Paper 2,"What are typical speeds for walking, running, and cycling?","1.5 m/s, 3.0 m/s, 6.0 m/s"
+Chapter 9,Topic 5,Motion,Paper 2,What are typical speeds of a car and a train?,13–30 m/s and ~50 m/s respectively
+Chapter 9,Topic 5,Motion,Paper 2,What is a typical speed for sound in air?,330 m/s
+Chapter 9,Topic 5,Motion,Paper 2,What is acceleration?,change in velocity per second
+Chapter 9,Topic 5,Motion,Paper 2,What is the unit of acceleration?,m/s²
+Chapter 9,Topic 5,Motion,Paper 2,How can an object be accelerating at steady speed?,if its direction is changing
+Chapter 9,Topic 5,Motion,Paper 2,Does negative acceleration always mean an object is slowing down?,No. It slows down only when acceleration is opposite to its velocity.
+Chapter 9,Topic 5,Motion,Paper 2,What does the gradient of a distance–time graph give?,speed
+Chapter 9,Topic 5,Motion,Paper 2,What does the gradient of a velocity–time graph give?,acceleration
+Chapter 9,Topic 5,Motion,Paper 2,What does the area under a velocity–time graph give?,"Displacement; for distance, add the magnitudes of the areas above and below the time axis."
