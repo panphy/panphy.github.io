@@ -645,16 +645,10 @@ function fitDistance(halfWidth) {
   const halfHeight = Math.tan(THREE.MathUtils.degToRad(camera.fov / 2));
   return halfWidth / (halfHeight * Math.min(1, camera.aspect));
 }
-const BEAM_DIRECTION = new THREE.Vector3(0, 0.3, 1).normalize();
-function beamDistance() {
-  // Wide enough to show the incoming beam and the scattered paths.
-  return THREE.MathUtils.clamp(fitDistance(7), 13, 24);
-}
 function resetView() {
   cameraTween = null;
   controls.reset();
-  if (beam) camera.position.copy(BEAM_DIRECTION).multiplyScalar(beamDistance());
-  else camera.position.copy(HOME_DIRECTION).multiplyScalar(Math.max(9.08, fitDistance(3.3)));
+  camera.position.copy(HOME_DIRECTION).multiplyScalar(Math.max(9.08, fitDistance(3.3)));
   controls.update();
   select(null);
   if (state.orbitalFocus) {
@@ -759,7 +753,7 @@ function startBeam() {
   $('beam-stats').hidden = false;
   updateBeamStats();
   if (!state.playing) setPlaying(true);
-  flyTo({ direction: BEAM_DIRECTION, distance: beamDistance() });
+  flyTo({ direction: new THREE.Vector3(0, 0.3, 1), distance: THREE.MathUtils.clamp(fitDistance(7), 13, 24) });
   readout.textContent = `${PARTICLES.alpha} They arrive evenly from the left as a wide, parallel beam. Dashed paths are extra shots aimed at the ${aimTarget()}.`;
 }
 function stopBeam() {
