@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="description" content="Explore alpha, beta and gamma decay in interactive 3D. Watch unstable nuclei decay, balance nuclear equations, test penetration and measure half-life.">
+  <meta name="theme-color" content="#F8F6F1">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <link rel="stylesheet" href="/assets/standalone-top.css">
+  <script>
+  (function() {
+    var dark = false;
+    try { dark = !!localStorage.getItem('nuclear-decay-dark'); } catch (error) {}
+    if (dark) {
+      document.documentElement.setAttribute('data-theme', 'dark');
+      var tc = document.querySelector('meta[name="theme-color"]');
+      if (tc) tc.setAttribute('content', '#111110');
+    }
+  })();
+  </script>
+  <title>Nuclear Decay — PanPhy Labs</title>
+  <link rel="icon" type="image/png" href="/assets/favicon.png">
+  <link rel="apple-touch-icon" href="/assets/apple-touch-icon.png">
+  <link rel="stylesheet" href="nuclear_decay/style.css">
+  <link rel="stylesheet" href="/assets/theme-toggle.css">
+  <link rel="stylesheet" href="/assets/fullscreen-button.css">
+  <script src="/assets/theme-toggle.js"></script>
+  <script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/"}}</script>
+</head>
+<body data-mode="alpha">
+  <header class="banner">
+    <a class="banner-logo" href="/" aria-label="PanPhy Labs home"><img src="/assets/panphy.png" alt="PanPhy Labs" width="38" height="38"></a>
+    <div class="banner-title">Nuclear Decay</div>
+    <div class="banner-actions">
+      <button id="theme-button" type="button" data-panphy-theme-toggle aria-label="Toggle light/dark theme" title="Toggle between light and dark themes"></button>
+    </div>
+  </header>
+  <script>window.PanPhyThemeToggle.mount(document.getElementById('theme-button'), { darkStorageKey: 'nuclear-decay-dark' });</script>
+  <main>
+    <div class="intro"><div><p class="eyebrow">THE NUCLEUS LAB / UNSTABLE BY NATURE</p><h1>Unstable nucleus.<br>Random decay<span>!</span></h1></div><p>Trigger it. Balance it. Block it.<br>Explore three kinds of radiation and the clock of half-life.</p></div>
+    <nav class="models" aria-label="Choose a type of decay">
+      <button type="button" data-mode="alpha" aria-pressed="true"><span>01 / α</span><strong>Alpha decay</strong><small>Americium-241</small></button>
+      <button type="button" data-mode="beta" aria-pressed="false"><span>02 / β⁻</span><strong>Beta decay</strong><small>Carbon-14</small></button>
+      <button type="button" data-mode="gamma" aria-pressed="false"><span>03 / γ</span><strong>Gamma emission</strong><small>Technetium-99m</small></button>
+      <button type="button" data-mode="halflife" aria-pressed="false"><span>04 / T½</span><strong>Half-life</strong><small>A random sample</small></button>
+    </nav>
+    <div class="lab-strip">
+      <span>YOUR MISSION <b>Find out what changes.</b></span>
+      <span class="progress-group"><span id="progress" class="mono">0 / 4 discoveries unlocked</span><button type="button" id="reset-progress" class="link-button">Reset progress</button></span>
+    </div>
+    <section class="workspace" aria-label="Nuclear decay explorer">
+      <div class="viewer-panel" id="viewer-panel">
+        <div class="viewer-heading"><span id="scene-title">ALPHA DECAY</span><span class="scale">NOT TO SCALE</span><button id="fullscreen" class="panphy-fullscreen-button" type="button" aria-controls="viewer-panel" aria-pressed="false" aria-label="Enter fullscreen" title="Enter fullscreen"><svg class="panphy-fs-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M4 9V4h5M15 4h5v5M20 15v5h-5M9 20H4v-5"/></svg></button></div>
+        <div id="viewer" tabindex="0" role="img" aria-label="Interactive 3D nucleus. Drag or use arrow keys to rotate; scroll, pinch or plus and minus keys to zoom.">
+          <p id="load-status" role="status">Loading the 3D model…</p>
+          <div class="legend overlay" aria-label="Legend">
+            <span data-legend="proton"><i class="proton">+</i> Proton</span>
+            <span data-legend="neutron"><i class="neutron">0</i> Neutron</span>
+            <span data-legend="alpha"><i class="alpha">α</i> Alpha particle</span>
+            <span data-legend="electron"><i class="electron">β</i> Beta particle (electron)</span>
+            <span data-legend="antineutrino"><i class="antineutrino">ν̄</i> Antineutrino</span>
+            <span data-legend="gamma"><i class="gamma">γ</i> Gamma ray</span>
+            <span data-legend="undecayed"><i class="undecayed"></i> <span id="undecayed-label">Undecayed nucleus</span></span>
+            <span data-legend="decayed"><i class="decayed"></i> <span id="decayed-label">Decayed nucleus</span></span>
+          </div>
+          <p class="gesture overlay" aria-hidden="true">Drag to rotate · Pinch or scroll to zoom</p>
+          <div class="beam-stats overlay mono" id="beam-stats" hidden></div>
+          <div class="equation overlay" id="equation" aria-live="polite"></div>
+          <div class="graph overlay" id="graph" hidden><canvas id="graph-canvas" aria-label="Graph of undecayed nuclei against time" role="img"></canvas><p class="graph-stats mono" id="graph-stats"></p></div>
+        </div>
+        <p class="particle-readout mono" id="particle-readout" role="status">Tap a particle to discover its job.</p>
+        <div class="toolbar" aria-label="View controls">
+          <button type="button" id="motion" class="primary" aria-pressed="true"><svg viewBox="0 0 24 24" aria-hidden="true"><path id="motion-icon" d="M7 5h3v14H7zM14 5h3v14h-3z"/></svg><span id="motion-label">Pause motion</span></button>
+          <button type="button" id="reset">Reset view</button>
+          <button type="button" id="decay" class="experiment">Decay this nucleus</button>
+          <button type="button" id="penetration" class="experiment" aria-pressed="false">Test penetration</button>
+          <button type="button" id="step-half" class="experiment" hidden>Run one half-life</button>
+          <button type="button" id="reset-sample" hidden>Reset sample</button>
+        </div>
+        <div class="sample-controls" id="sample-controls" hidden>
+          <label>Isotope
+            <select id="isotope">
+              <option value="radon">Radon-220 (α, T½ 55.6 s)</option>
+              <option value="iodine" selected>Iodine-131 (β, T½ 8.02 days)</option>
+              <option value="cobalt">Cobalt-60 (β, T½ 5.27 years)</option>
+              <option value="carbon">Carbon-14 (β, T½ 5730 years)</option>
+            </select>
+          </label>
+          <label>Sample size
+            <select id="sample-size">
+              <option value="100">100 nuclei</option>
+              <option value="400" selected>400 nuclei</option>
+              <option value="900">900 nuclei</option>
+            </select>
+          </label>
+        </div>
+        <p id="action-hint"></p>
+      </div>
+      <aside aria-live="polite">
+        <p class="eyebrow" id="mode-date">α · AMERICIUM-241</p><h2 id="mode-heading">The nucleus throws out a helium nucleus.</h2>
+        <p id="description">An alpha particle is two protons and two neutrons: a helium nucleus. The nucleus loses 4 from its mass number and 2 from its atomic number, so it becomes a different element. Americium-241 is the source inside many smoke alarms.</p>
+        <div class="idea"><h3>🔎 Your observation mission</h3><p id="look">Press “Decay this nucleus”. Watch two protons and two neutrons group together and leave. Then read the equation: the top numbers and the bottom numbers both still add up. The new nucleus recoils a little the other way.</p></div>
+        <h3>What does it mean?</h3><p id="evidence">Alpha particles are large and have a +2 charge, so they collide with many atoms and are strongly ionising. That also means they lose energy fast: a few centimetres of air or a sheet of paper stops them. Try “Test penetration”.</p>
+        <div class="question" id="mode-quiz"></div>
+      </aside>
+    </section>
+    <section class="final-challenge" aria-labelledby="final-title">
+      <div class="final-intro"><p class="eyebrow">FINAL CHALLENGE</p><h2 id="final-title">Put it all together.</h2><p id="final-status">Unlock all four discoveries to open the final challenge.</p></div>
+      <div class="question" id="final-quiz" hidden></div>
+    </section>
+    <section class="reality"><span aria-hidden="true">↗</span><div><h2>A model is an explanation, not a photograph.</h2><p>Protons and neutrons are drawn as coloured balls packed together; real nucleons are not hard spheres, and colours and sizes are chosen to help you see the ideas. A nucleus is about 1/100 000 of an atom’s width; the electrons around the atom are not shown. Every motion is slowed down enormously: real alpha particles leave at about 5% of the speed of light, beta particles at up to 99%, and gamma rays travel at the speed of light.</p><p>“Decay this nucleus” makes one nucleus decay on demand so that you can watch it. Real decay is random: nothing can make a particular nucleus decay, or predict when it will. Americium-241 has a half-life of 432 years, carbon-14 5730 years and technetium-99m 6.0 hours. In the half-life view, one half-life always takes a few seconds on screen, whatever the isotope. Beta-minus decay also releases an antineutrino, which is beyond GCSE; it is drawn faintly. Technetium-99m emits almost only gamma rays, a reason it is chosen as a medical tracer.</p><p>Penetration ranges are typical classroom values: alpha is stopped by a sheet of paper or a few centimetres of air; beta by a few millimetres of aluminium; gamma is reduced, but never stopped completely, by several centimetres of lead. In the test, a quarter of the gamma rays get through the lead to show this; the real fraction depends on the thickness.</p></div></section>
+  </main>
+  <footer><span>PanPhy Labs · Nuclear decay (beta)</span><a href="/beta/">Beta index</a></footer>
+  <noscript><p class="no-script">Enable JavaScript to explore the 3D models. The descriptions remain available above.</p></noscript>
+  <script type="module">import('./nuclear_decay/app.js').catch(error => { console.error(error); document.getElementById('load-status').hidden = false; document.getElementById('load-status').textContent = 'The 3D viewer could not load. Check your internet connection and reload. You can still read the explanation on this page.'; });</script>
+</body>
+</html>
