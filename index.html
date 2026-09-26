@@ -1184,7 +1184,7 @@
                     <button class="filter-button" type="button" data-filter="for_teachers" aria-pressed="false">Teachers</button>
                     <button class="filter-button" type="button" data-filter="fun" aria-pressed="false">Fun</button>
                 </div>
-                <span class="sr-only" id="results-status" aria-live="polite">16 apps shown.</span>
+                <span class="sr-only" id="results-status" aria-live="polite">17 apps shown.</span>
             </div>
         </div>
     </section>
@@ -1267,7 +1267,7 @@
             </div>
             <div class="section-summary">
                 <p>Interactive models for exploring waves, mechanics, matter, and relativity.</p>
-                <span class="section-count">7 apps</span>
+                <span class="section-count">8 apps</span>
             </div>
         </div>
         <div class="grid">
@@ -1334,6 +1334,17 @@
                 <div class="card-body">
                     <h3>Atomic Models</h3>
                     <p>Explore four atomic models in 3D and see how our picture of the atom changed.</p>
+                </div>
+                <span class="card-cta">Launch sim</span>
+            </a>
+            <a class="card" href="/simulations/nuclear_decay.html" data-search="nuclear decay radioactivity radioactive alpha beta gamma radiation nucleus isotope unstable nuclear equations penetration paper aluminium lead half-life americium carbon-14 technetium 3d">
+                <div class="card-top">
+                    <span class="card-icon" aria-hidden="true">α β γ</span>
+                    <span class="card-type">Nuclear physics</span>
+                </div>
+                <div class="card-body">
+                    <h3>Nuclear Decay</h3>
+                    <p>Watch alpha, beta and gamma decay in 3D, balance equations and measure half-life.</p>
                 </div>
                 <span class="card-cta">Launch sim</span>
             </a>
@@ -1869,6 +1880,19 @@
                 '/simulations/atomic_models/app.js',
                 '/simulations/atomic_models/content.js',
                 '/simulations/atomic_models/quiz.js',
+                '/assets/theme-toggle.css',
+                '/assets/theme-toggle.js',
+                '/assets/panphy.png',
+                'https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js',
+                'https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/controls/OrbitControls.js'
+            ],
+            '/simulations/nuclear_decay.html': [
+                '/simulations/nuclear_decay.html',
+                '/assets/fullscreen-button.css',
+                '/simulations/nuclear_decay/style.css',
+                '/simulations/nuclear_decay/app.js',
+                '/simulations/nuclear_decay/content.js',
+                '/simulations/nuclear_decay/quiz.js',
                 '/assets/theme-toggle.css',
                 '/assets/theme-toggle.js',
                 '/assets/panphy.png',

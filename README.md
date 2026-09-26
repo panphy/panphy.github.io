@@ -7,7 +7,7 @@ Browser-based physics tools, simulations, classroom utilities, and games for lea
 ## Explore
 
 - **Tools:** graph plotting and curve fitting, Markdown editing, motion tracking, sound analysis, and tone generation.
-- **Simulations:** waves, states of matter, atomic models, relativity, and collisions.
+- **Simulations:** waves, states of matter, atomic models, nuclear decay, relativity, and collisions.
 - **Teacher utilities:** a classroom timer and camera visualizer.
 - **Games and demos:** spelling practice and an ASCII camera.
 - **GCSE Physics:** school-specific unit companions, available by direct link.

@@ -1,4 +1,4 @@
-const BUILD_ID = '2026-09-25T10:02:01Z';
+const BUILD_ID = '2026-09-26T19:41:56Z';
 const APP_VERSIONS = {
   core: BUILD_ID,
   panphymd: BUILD_ID,
@@ -13,6 +13,7 @@ const APP_VERSIONS = {
   lorentz: BUILD_ID,
   collision: BUILD_ID,
   atomic_models: BUILD_ID,
+  nuclear_decay: BUILD_ID,
   timer: BUILD_ID,
   visualizer: BUILD_ID
 };
@@ -95,6 +96,11 @@ const ASSETS_TO_CACHE = [
   '/simulations/atomic_models/app.js',
   '/simulations/atomic_models/content.js',
   '/simulations/atomic_models/quiz.js',
+  '/simulations/nuclear_decay.html',
+  '/simulations/nuclear_decay/style.css',
+  '/simulations/nuclear_decay/app.js',
+  '/simulations/nuclear_decay/content.js',
+  '/simulations/nuclear_decay/quiz.js',
   'https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js',
   'https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/controls/OrbitControls.js',
   '/simulations/ripple_tank.html',
