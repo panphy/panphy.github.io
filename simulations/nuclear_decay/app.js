@@ -1115,18 +1115,11 @@ function fitDistance(halfWidth) {
 function resetView() {
   cameraTween = null;
   controls.reset();
-  if (test) {
-    const radius = nucleus.radius;
-    const end = test.slabs[2].end;
-    controls.target.set((end - radius) / 2, 0, 0);
-    camera.position.copy(new THREE.Vector3(0.12, 0.38, 1).normalize().multiplyScalar(fitDistance((end + radius) / 2 + 0.5))).add(controls.target);
-  } else {
-    const direction = state.mode === 'halflife' ? new THREE.Vector3(0, 1.6, 1) : new THREE.Vector3(0, 1.2, 9);
-    // Portrait half-life views frame the tray more tightly and lift it clear of the legend.
-    const portraitSample = state.mode === 'halflife' && camera.aspect < 1;
-    if (portraitSample) controls.target.set(0, -0.5, 0.5);
-    camera.position.copy(direction.normalize().multiplyScalar(fitDistance(portraitSample ? 3.1 : HOME_HALF_WIDTH[state.mode]))).add(controls.target);
-  }
+  const direction = state.mode === 'halflife' ? new THREE.Vector3(0, 1.6, 1) : new THREE.Vector3(0, 1.2, 9);
+  // Portrait half-life views frame the tray more tightly and lift it clear of the legend.
+  const portraitSample = state.mode === 'halflife' && camera.aspect < 1;
+  if (portraitSample) controls.target.set(0, -0.5, 0.5);
+  camera.position.copy(direction.normalize().multiplyScalar(fitDistance(portraitSample ? 3.1 : HOME_HALF_WIDTH[state.mode]))).add(controls.target);
   controls.update();
   select(null);
 }
