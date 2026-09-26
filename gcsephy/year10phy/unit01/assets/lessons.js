@@ -7,8 +7,146 @@
   window.LESSONS = [
     // ------------------------------------------------------------------ 1
     {
-      slug: "charge-and-current",
+      slug: "build-and-measure",
       number: "01",
+      shortTitle: "Build & measure",
+      title: "Build & measure",
+      mission: "Wire it like a physicist",
+      intro:
+        "Start here. Find out what every circuit needs, learn the standard symbols, draw a circuit diagram that anyone can build, and put an ammeter in the right place to measure the current.",
+      colour: "leaf",
+      icon: "A",
+      spec: "AQA 6.2.1.1 · Sep 4.2.1.1",
+      unlocks: ["complete circuits", "standard circuit symbols", "ammeter in series"],
+      keyRule: "No complete loop, no current. Draw with a ruler, and connect the ammeter in series.",
+      phet: true,
+      lab: { label: "Meters", page: 1, range: "1–2" },
+      revision: {
+        summary:
+          "A circuit needs a source of energy and a complete loop. Circuit diagrams use standard symbols so anyone can build your circuit, and an ammeter measures the current when it is connected in series.",
+        sections: [
+          {
+            title: "What a circuit needs",
+            paragraphs: [
+              "A <strong>circuit</strong> is a complete loop that charge can flow around. It needs a source of energy, such as a cell or battery, and a loop of conducting wire with no gaps.",
+              "The wires are already full of charge before you switch on. The cell pushes all of it round at once, so a lamp lights the moment the loop is completed. A gap anywhere, such as an open switch or a loose wire, stops the current everywhere in the loop.",
+            ],
+            figure: D.circuit({
+              w: 360, h: 200,
+              wires: [LOOP],
+              parts: [["battery", 110, 40, "h", "battery"], ["switchClosed", 250, 40, "h", "switch"], ["lamp", 180, 150, "h", "lamp", "b"]],
+              caption: "A complete loop: battery, closed switch and lamp.",
+            }),
+            remember: "No complete loop, no current. Opening the switch makes a gap, so the lamp goes out.",
+          },
+          {
+            title: "Standard circuit symbols",
+            paragraphs: [
+              "You need to recognise and draw all of these. On a cell, the longer line is the positive terminal. A battery is two or more cells joined together. You will meet the components in the bottom rows in later missions.",
+            ],
+            figure: D.symbolGrid([
+              ["cell", "Cell"], ["battery", "Battery"], ["switchOpen", "Switch (open)"], ["switchClosed", "Switch (closed)"],
+              ["resistor", "Resistor"], ["lamp", "Lamp"], ["ammeter", "Ammeter"], ["voltmeter", "Voltmeter"],
+              ["variable", "Variable resistor"], ["fuse", "Fuse"], ["diode", "Diode"], ["led", "LED"],
+              ["thermistor", "Thermistor"], ["ldr", "LDR"],
+            ]),
+            remember: "Draw wires with a ruler, as straight lines with right-angle corners, and leave no gaps.",
+          },
+          {
+            title: "Drawing a circuit diagram",
+            paragraphs: ["Anyone should be able to build your circuit from your diagram. Follow these rules every time."],
+            points: [
+              "Use a pencil and a ruler.",
+              "Draw wires as straight lines with right-angle corners.",
+              "Leave no gaps: every wire joins something at both ends.",
+              "Put each symbol in the wire, so the wire goes into it on both sides.",
+              "Write values such as 6 V or 10 Ω next to the symbol.",
+            ],
+            figure: D.circuit({
+              w: 360, h: 200,
+              wires: [LOOP],
+              parts: [["battery", 110, 40, "h", "6 V"], ["switchClosed", 250, 40, "h"], ["lamp", 110, 150, "h"], ["resistor", 250, 150, "h", "10 Ω", "b"]],
+              caption: "A neat circuit diagram: ruler, right angles, no gaps, values labelled.",
+            }),
+          },
+          {
+            title: "Measuring current with an ammeter",
+            paragraphs: [
+              "The current is measured in amperes (A) with an <strong>ammeter</strong>. It goes <strong>in series</strong>, in the same loop as the component, so the same charge flows through it. An ideal ammeter has almost no resistance, so it does not change the current.",
+              "A circuit with just one loop is a <strong>series circuit</strong>. Everything in that loop is in series.",
+            ],
+            figure: D.circuit({
+              w: 360, h: 200,
+              wires: [LOOP],
+              parts: [["cell", 180, 40, "h"], ["lamp", 120, 150, "h", "lamp", "b"], ["ammeter", 240, 150, "h", "0.20 A", "b"]],
+              caption: "The ammeter is in the same loop as the lamp.",
+            }),
+            remember: "Ammeter in series. You will meet the voltmeter, which goes in parallel, in Mission 3.",
+          },
+        ],
+        mistakes: [
+          ["Leaving a small gap where two wires meet.", "Every wire must join at both ends, or no current flows anywhere."],
+          ["Drawing the wire past a symbol instead of into it.", "The wire must go into the symbol on both sides."],
+          ["Drawing the ammeter beside the loop.", "The ammeter is part of the loop: connect it in series."],
+        ],
+        vocabulary: [
+          ["Circuit", "A complete loop that charge can flow around."],
+          ["Component", "A part of a circuit that does a job, such as a lamp, resistor or switch."],
+          ["Cell", "A source of energy for a circuit; the longer line on its symbol is the positive terminal."],
+          ["Battery", "Two or more cells joined together."],
+          ["Ammeter", "Measures current; connected in series; very low resistance."],
+          ["Series", "Connected one after another in the same loop."],
+        ],
+      },
+      questions: [
+        {
+          type: "Practice",
+          prompt: "Name the components labelled A, B, C and D.",
+          figure: D.circuit({
+            w: 360, h: 200,
+            wires: [LOOP],
+            parts: [["cell", 110, 40, "h", "A"], ["switchOpen", 250, 40, "h", "B"], ["resistor", 110, 150, "h", "D", "b"], ["lamp", 250, 150, "h", "C", "b"]],
+          }),
+          hint: "Look for the long and short lines, the gap, the circle with a cross and the rectangle.",
+          answer: "A: <strong>cell</strong>. B: <strong>open switch</strong>. C: <strong>lamp</strong>. D: <strong>resistor</strong>.",
+        },
+        {
+          type: "Practice",
+          prompt: "Will the lamp in the circuit above light? Explain your answer.",
+          hint: "Look at component B. Is the loop complete?",
+          answer: "No. Switch B is open, so there is a gap in the loop. Charge cannot flow all the way round, so there is no current anywhere in the circuit.",
+        },
+        {
+          type: "Practice",
+          prompt: "Describe where an ammeter must be connected to measure the current through a lamp, and explain why.",
+          hint: "Which charge does the ammeter need to count?",
+          answer: "In <strong>series</strong> with the lamp, in the same loop. The same charge then flows through both the ammeter and the lamp, so the ammeter reads the current through the lamp.",
+        },
+        {
+          type: "Practice",
+          prompt: "A student's circuit diagram has a slanted wire, a gap between two wires, and a lamp drawn next to the wire rather than in it. Explain how to correct each mistake.",
+          hint: "Think about the drawing rules: ruler, right angles, no gaps, symbols in the wire.",
+          answer: "Redraw the slanted wire as straight lines with right-angle corners; join the two wires so there is no gap; draw the lamp symbol in the wire, so the wire goes into it on both sides.",
+        },
+        {
+          type: "AQA-style",
+          marks: 3,
+          prompt: "Draw a circuit diagram to show a battery, a closed switch, a lamp and an ammeter connected in series.",
+          hint: "One loop, standard symbols, ammeter in the loop.",
+          answer: "Correct symbols for the battery, closed switch and lamp (1 mark); an ammeter symbol in the same loop (1 mark); one complete loop with no gaps (1 mark)." + D.circuit({
+            w: 360, h: 200,
+            wires: [LOOP],
+            parts: [["battery", 110, 40, "h"], ["switchClosed", 250, 40, "h"], ["lamp", 120, 150, "h"], ["ammeter", 240, 150, "h"]],
+            caption: "One correct answer.",
+          }),
+        },
+      ],
+    },
+
+    // ------------------------------------------------------------------ 2
+    {
+      slug: "charge-and-current",
+      number: "02",
       shortTitle: "Charge on the move",
       title: "Charge on the move",
       mission: "Measure the flow",
@@ -134,10 +272,10 @@
       ],
     },
 
-    // ------------------------------------------------------------------ 2
+    // ------------------------------------------------------------------ 3
     {
       slug: "potential-difference",
-      number: "02",
+      number: "03",
       shortTitle: "Energy per coulomb",
       title: "Energy per coulomb",
       mission: "Follow the energy",
@@ -185,6 +323,10 @@
               "A p.d. compares two points, so a voltmeter has two leads. Connect it <strong>across</strong> the component, in parallel, with one lead on each side.",
               "Both probes on the same piece of wire read about 0 V, because almost no energy is transferred along a connecting wire.",
             ],
+            points: [
+              "Voltmeter wrongly in series: it blocks the current; the reading is close to the battery p.d. and the current is nearly zero.",
+              "Negative reading: the meter's leads are the wrong way round.",
+            ],
             figure: D.circuit({
               w: 360, h: 240,
               wires: [LOOP, "M130 150 V205 H230 V150"],
@@ -212,6 +354,7 @@
         mistakes: [
           ["“Current and voltage are the same thing.”", "Current is charge per second. p.d. is energy per coulomb."],
           ["“The voltage at the resistor.”", "“The p.d. across the resistor”: always two points."],
+          ["Voltmeter connected in series with the lamp.", "Voltmeter in parallel, across the lamp."],
           ["“The charge is used up in the lamp.”", "The charge carries on round the loop. Its energy is transferred in the lamp."],
         ],
         vocabulary: [
@@ -263,22 +406,33 @@
           hint: "In a series loop, the p.d.s across the components add up to the battery p.d.",
           answer: "p.d. across resistor = 9.0 − 5.5 = <strong>3.5 V</strong> (1 mark). Each coulomb gains 9.0 J in the battery (1 mark). That energy is shared between the components, so 5.5 J per coulomb is transferred in the lamp and the remaining 3.5 J per coulomb in the resistor (1 mark).",
         },
+        {
+          type: "Practice",
+          prompt: "A student builds this circuit to measure the p.d. across a lamp. The lamp does not light and the voltmeter reads almost 6 V. Explain what is wrong.",
+          figure: D.circuit({
+            w: 360, h: 200,
+            wires: [LOOP],
+            parts: [["battery", 180, 40, "h", "6 V"], ["lamp", 120, 150, "h", "lamp", "b"], ["voltmeter", 240, 150, "h", "voltmeter", "b"]],
+          }),
+          hint: "What is special about a voltmeter's resistance, and where should it go?",
+          answer: "The voltmeter has been connected in series. Its very high resistance lets almost no current flow, so the lamp does not light, and nearly all of the battery p.d. is across the voltmeter. It should be connected in parallel, across the lamp.",
+        },
       ],
     },
 
-    // ------------------------------------------------------------------ 3
+    // ------------------------------------------------------------------ 4
     {
       slug: "resistance",
-      number: "03",
+      number: "04",
       shortTitle: "Resistance & V = IR",
       title: "Resistance & V = IR",
       mission: "Control the current",
       intro:
-        "Resistance is how strongly a component opposes the current. Put p.d., current and resistance together in one rule and you can predict any simple circuit before you build it.",
+        "Resistance is how strongly a component opposes the current. Put p.d., current and resistance together in one rule and you can predict any simple circuit before you build it. Then measure it yourself in the wire-length required practical.",
       colour: "copper",
       icon: "Ω",
-      spec: "AQA 6.2.1.3, 6.2.1.4 · Sep 4.2.1.3, 4.2.1.4",
-      unlocks: ["V = I R", "Ohm's law", "why metals have resistance"],
+      spec: "AQA 6.2.1.3, 6.2.1.4, RP 15 · Sep 4.2.1.3, 4.2.1.4, RP 3",
+      unlocks: ["V = I R", "Ohm's law", "why metals have resistance", "required practical: wire length"],
       keyRule: "V = I R. The greater the resistance, the smaller the current for the same p.d.",
       phet: true,
       lab: { label: "Lab 3", page: 12, range: "12–16" },
@@ -339,11 +493,46 @@
             ],
             remember: "Resistance explains why wires, heaters and lamp filaments get warm.",
           },
+          {
+            title: "A circuit to measure resistance",
+            paragraphs: [
+              "Measure the current through the component and the p.d. across it at the same time, then calculate R = V ÷ I. A variable resistor lets you change the current to take several readings.",
+            ],
+            figure: D.circuit({
+              w: 380, h: 250,
+              wires: ["M40 40 H340 V160 H40 Z", "M140 160 V215 H240 V160"],
+              parts: [["battery", 120, 40, "h", "battery"], ["variable", 250, 40, "h", "variable resistor"], ["ammeter", 40, 100, "v"], ["resistor", 190, 160, "h", "component"], ["voltmeter", 190, 215, "h"]],
+              dots: [[140, 160], [240, 160]],
+              caption: "Ammeter in series with the component; voltmeter across it; variable resistor to change the current.",
+            }),
+            remember: "Take several pairs of readings, calculate R for each, then find a mean or plot a graph.",
+          },
+          {
+            title: "Required practical: length of a wire",
+            practical: "resistance/#part-a",
+            paragraphs: [
+              "Tape a thin wire along a metre ruler. Connect one crocodile clip at 0 cm and move the other to change the length. Record the ammeter and voltmeter readings at each length and calculate R = V ÷ I.",
+            ],
+            points: [
+              "Independent: length. Dependent: resistance. Control: material, thickness (diameter), temperature.",
+              "Use a low p.d. and switch off between readings so the wire does not heat up.",
+              "Plot resistance against length. A straight line through the origin shows R is directly proportional to length.",
+            ],
+            figure: D.graph({
+              w: 360, h: 240, x: [0, 100, 20], y: [0, 5, 1],
+              xLabel: "length / cm", yLabel: "resistance / Ω",
+              series: [{ fn: (x) => 0.05 * x, from: 0, to: 100 }, { points: [[20, 1.0], [40, 2.1], [60, 2.9], [80, 4.1], [100, 5.0]] }],
+              caption: "Typical results: resistance is directly proportional to the length of the wire.",
+            }),
+            remember: "Longer wire → more collisions between electrons and ions → higher resistance.",
+          },
         ],
         mistakes: [
           ["R = V × I", "R = V ÷ I. Check the units: volts ÷ amps = ohms."],
           ["Using 250 mA as 250 in V = I R.", "Convert to amps: 250 mA = 0.25 A."],
           ["“Every component has a fixed resistance.”", "Only ohmic conductors at constant temperature do."],
+          ["“The results were wrong because of human error.”", "Name the mechanism, e.g. the wire heated up, so its resistance increased."],
+          ["Measuring length from the edge of the clip by eye each time.", "Measure to the same contact point of the crocodile clip every time."],
         ],
         vocabulary: [
           ["Resistance", "The opposition to current; the ratio of p.d. to current. Measured in ohms, Ω."],
@@ -351,6 +540,8 @@
           ["Ohmic conductor", "A conductor where current is directly proportional to p.d. at constant temperature."],
           ["Directly proportional", "Doubling one quantity doubles the other; the graph is a straight line through the origin."],
           ["Ion lattice", "The regular arrangement of positive ions in a metal that electrons collide with."],
+          ["Variable resistor", "A resistor whose resistance can be adjusted to change the current."],
+          ["Control variable", "A variable kept the same so it cannot affect the result."],
         ],
       },
       questions: [
@@ -387,118 +578,11 @@
           hint: "Describe what the electrons do, what the ions do, and what changes when the metal gets hotter.",
           answer: "Current in the wire is a flow of free electrons (1 mark). The electrons collide with the positive ions in the metal lattice, which opposes their flow (1 mark). At a higher temperature the ions vibrate more (1 mark), so the electrons collide with them more often, so fewer electrons pass per second for the same p.d. and the resistance is higher (1 mark).",
         },
-      ],
-    },
-
-    // ------------------------------------------------------------------ 4
-    {
-      slug: "build-and-measure",
-      number: "04",
-      shortTitle: "Build & measure",
-      title: "Build & measure",
-      mission: "Wire it like a physicist",
-      intro:
-        "Read a circuit diagram, place the meters correctly and design an experiment to measure resistance, including the required practical on the length of a wire.",
-      colour: "leaf",
-      icon: "A",
-      spec: "AQA 6.2.1.1, RP 15 · Sep 4.2.1.1, RP 3",
-      unlocks: ["standard circuit symbols", "ammeter series · voltmeter parallel", "required practical: wire length"],
-      keyRule: "Ammeter in series. Voltmeter in parallel. Resistance = p.d. ÷ current.",
-      phet: true,
-      lab: { label: "Meters", page: 1, range: "1–2" },
-      revision: {
-        summary:
-          "Circuit diagrams use standard symbols so anyone can build your circuit. Meters only give true readings if they are connected the right way.",
-        sections: [
-          {
-            title: "Standard circuit symbols",
-            paragraphs: [
-              "You need to recognise and draw all of these. On a cell, the longer line is the positive terminal. A battery is two or more cells joined together.",
-            ],
-            figure: D.symbolGrid([
-              ["cell", "Cell"], ["battery", "Battery"], ["switchOpen", "Switch (open)"], ["switchClosed", "Switch (closed)"],
-              ["resistor", "Resistor"], ["variable", "Variable resistor"], ["lamp", "Lamp"], ["fuse", "Fuse"],
-              ["diode", "Diode"], ["led", "LED"], ["thermistor", "Thermistor"], ["ldr", "LDR"],
-              ["ammeter", "Ammeter"], ["voltmeter", "Voltmeter"],
-            ]),
-            remember: "Draw wires with a ruler, as straight lines with right-angle corners, and leave no gaps.",
-          },
-          {
-            title: "Placing the meters",
-            paragraphs: [
-              "An <strong>ammeter</strong> measures the current through a component. It goes in <strong>series</strong>, in the same loop, so the same charge flows through it. An ideal ammeter has almost no resistance, so it does not change the current.",
-              "A <strong>voltmeter</strong> measures the p.d. across a component. It goes in <strong>parallel</strong>, one lead on each side. An ideal voltmeter has a very high resistance, so almost no current flows through it.",
-            ],
-            points: [
-              "Voltmeter wrongly in series: it blocks the current; the reading is close to the battery p.d. and the current is nearly zero.",
-              "Negative reading: the meter's leads are the wrong way round.",
-            ],
-          },
-          {
-            title: "A circuit to measure resistance",
-            paragraphs: [
-              "Measure the current through the component and the p.d. across it at the same time, then calculate R = V ÷ I. A variable resistor lets you change the current to take several readings.",
-            ],
-            figure: D.circuit({
-              w: 380, h: 250,
-              wires: ["M40 40 H340 V160 H40 Z", "M140 160 V215 H240 V160"],
-              parts: [["battery", 120, 40, "h", "battery"], ["variable", 250, 40, "h", "variable resistor"], ["ammeter", 40, 100, "v"], ["resistor", 190, 160, "h", "component"], ["voltmeter", 190, 215, "h"]],
-              dots: [[140, 160], [240, 160]],
-              caption: "Ammeter in series with the component; voltmeter across it; variable resistor to change the current.",
-            }),
-            remember: "Take several pairs of readings, calculate R for each, then find a mean or plot a graph.",
-          },
-          {
-            title: "Required practical: length of a wire",
-            practical: "resistance/#part-a",
-            paragraphs: [
-              "Tape a thin wire along a metre ruler. Connect one crocodile clip at 0 cm and move the other to change the length. Record the ammeter and voltmeter readings at each length and calculate R = V ÷ I.",
-            ],
-            points: [
-              "Independent: length. Dependent: resistance. Control: material, thickness (diameter), temperature.",
-              "Use a low p.d. and switch off between readings so the wire does not heat up.",
-              "Plot resistance against length. A straight line through the origin shows R is directly proportional to length.",
-            ],
-            figure: D.graph({
-              w: 360, h: 240, x: [0, 100, 20], y: [0, 5, 1],
-              xLabel: "length / cm", yLabel: "resistance / Ω",
-              series: [{ fn: (x) => 0.05 * x, from: 0, to: 100 }, { points: [[20, 1.0], [40, 2.1], [60, 2.9], [80, 4.1], [100, 5.0]] }],
-              caption: "Typical results: resistance is directly proportional to the length of the wire.",
-            }),
-            remember: "Longer wire → more collisions between electrons and ions → higher resistance.",
-          },
-        ],
-        mistakes: [
-          ["Voltmeter connected in series with the lamp.", "Voltmeter in parallel, across the lamp."],
-          ["“The results were wrong because of human error.”", "Name the mechanism, e.g. the wire heated up, so its resistance increased."],
-          ["Measuring length from the edge of the clip by eye each time.", "Measure to the same contact point of the crocodile clip every time."],
-        ],
-        vocabulary: [
-          ["Ammeter", "Measures current; connected in series; very low resistance."],
-          ["Voltmeter", "Measures p.d.; connected in parallel; very high resistance."],
-          ["Variable resistor", "A resistor whose resistance can be adjusted to change the current."],
-          ["Series", "Connected one after another in the same loop."],
-          ["Parallel", "Connected on separate branches between the same two points."],
-          ["Control variable", "A variable kept the same so it cannot affect the result."],
-        ],
-      },
-      questions: [
         {
           type: "Practice",
           prompt: "Describe where an ammeter and a voltmeter should be connected to find the resistance of a lamp.",
           hint: "One meter must have the same current flowing through it. The other must compare the two ends of the lamp.",
           answer: "The ammeter goes in series with the lamp, in the same loop. The voltmeter goes in parallel across the lamp, one lead on each side. Then R = V ÷ I.",
-        },
-        {
-          type: "Practice",
-          prompt: "A student builds this circuit to measure the p.d. across a lamp. The lamp does not light and the voltmeter reads almost 6 V. Explain what is wrong.",
-          figure: D.circuit({
-            w: 360, h: 200,
-            wires: [LOOP],
-            parts: [["battery", 180, 40, "h", "6 V"], ["lamp", 120, 150, "h", "lamp", "b"], ["voltmeter", 240, 150, "h", "voltmeter", "b"]],
-          }),
-          hint: "What is special about a voltmeter's resistance, and where should it go?",
-          answer: "The voltmeter has been connected in series. Its very high resistance lets almost no current flow, so the lamp does not light, and nearly all of the battery p.d. is across the voltmeter. It should be connected in parallel, across the lamp.",
         },
         {
           type: "Practice",
@@ -526,158 +610,8 @@
 
     // ------------------------------------------------------------------ 5
     {
-      slug: "iv-characteristics",
-      number: "05",
-      shortTitle: "I–V characteristics",
-      title: "I–V charac&shy;teristics",
-      mission: "Read a component's fingerprint",
-      intro:
-        "Every component has its own current–p.d. graph. Learn to recognise the resistor, the filament lamp and the diode, and explain how thermistors and LDRs switch real devices on and off.",
-      colour: "violet",
-      icon: "I–V",
-      spec: "AQA 6.2.1.4, RP 16 · Sep 4.2.1.4, RP 4",
-      unlocks: ["resistor · lamp · diode graphs", "thermistors and LDRs", "required practical: I–V"],
-      keyRule: "Only an ohmic conductor at constant temperature gives a straight line through the origin. For everything else, R changes.",
-      phet: true,
-      revision: {
-        summary:
-          "An I–V graph shows how the current through a component changes with the p.d. across it. Its shape tells you whether the resistance stays constant.",
-        sections: [
-          {
-            title: "Reading an I–V graph",
-            paragraphs: [
-              "Current goes on the y-axis and p.d. on the x-axis. Negative values mean the component has been connected the other way round.",
-              "Find the resistance at any point with R = V ÷ I, using that point's readings.",
-            ],
-            figure: D.ivSketch("resistor", "Fixed resistor (constant temperature): a straight line through the origin, so R is constant."),
-            points: ["Straight line through the origin → ohmic, constant R.", "Curve → the resistance changes as the current changes."],
-          },
-          {
-            title: "Filament lamp",
-            paragraphs: [
-              "As the current increases, the filament gets hotter. The metal ions vibrate more, so electrons collide with them more often and the resistance increases.",
-              "The graph curves over and gets less steep: each extra volt gives a smaller increase in current. It looks the same with the p.d. reversed.",
-            ],
-            figure: D.ivSketch("lamp", "Filament lamp: resistance increases as the filament temperature increases."),
-            componentImages: [{ file: "filament-lamp.jpg", label: "Filament lamp", alt: "Clear glass filament lamp with a visible coiled wire inside" }],
-            remember: "Explain the curve using temperature, not just ‘the resistance goes up’.",
-          },
-          {
-            title: "Diode (and LED)",
-            paragraphs: [
-              "A diode lets current flow in one direction only. In the reverse direction it has a very high resistance, so the current is practically zero.",
-              "In the forward direction almost no current flows until the p.d. reaches about 0.6 V; after that, the current rises steeply. An LED (light-emitting diode) behaves the same way and emits light when current flows.",
-            ],
-            figure: D.ivSketch("diode", "Diode: current flows one way only; very high resistance in reverse."),
-            componentImages: [
-              { file: "diode.jpg", label: "Diode", alt: "Black cylindrical diode with a silver polarity band and two wire leads" },
-              { file: "led.jpg", label: "LED", alt: "Red light-emitting diode with a rounded plastic case and two wire leads" },
-            ],
-          },
-          {
-            title: "Thermistor",
-            paragraphs: [
-              "The resistance of a thermistor decreases as its temperature increases.",
-              "Use: temperature-sensing circuits such as a thermostat. As the room warms, the thermistor's resistance falls, the current changes, and the circuit switches the heating off.",
-            ],
-            figure: D.graph({
-              sketch: true, w: 300, h: 210, x: [0, 1], y: [0, 1],
-              xLabel: "temperature", yLabel: "resistance",
-              series: [{ fn: (x) => 0.9 * Math.exp(-2.6 * x) + 0.05, from: 0.03, to: 1 }],
-              caption: "Hotter thermistor → lower resistance.",
-            }),
-            componentImages: [{ file: "thermistor.jpg", label: "Thermistor", alt: "Small black bead thermistor with two wire leads" }],
-          },
-          {
-            title: "Light-dependent resistor (LDR)",
-            paragraphs: [
-              "The resistance of an LDR decreases as the light intensity increases. In the dark its resistance is very high.",
-              "Use: circuits that switch lights on when it gets dark, such as street lights and garden lights. As it gets darker the LDR's resistance rises and the circuit turns the lamp on.",
-            ],
-            figure: D.graph({
-              sketch: true, w: 300, h: 210, x: [0, 1], y: [0, 1],
-              xLabel: "light intensity", yLabel: "resistance",
-              series: [{ fn: (x) => 0.9 * Math.exp(-2.6 * x) + 0.05, from: 0.03, to: 1 }],
-              caption: "Brighter light → lower resistance.",
-            }),
-            componentImages: [{ file: "ldr.jpg", label: "LDR", alt: "Round light-dependent resistor with a dark zigzag track and two leads emerging from behind the disc" }],
-          },
-          {
-            title: "Required practical: I–V charac&shy;teristics",
-            practical: "iv-characteristics/",
-            paragraphs: [
-              "Connect the component in series with an ammeter, a variable resistor and a power supply, with a voltmeter across the component. Adjust the variable resistor to take readings of current and p.d.; then reverse the power supply connections and repeat to get negative values.",
-            ],
-            figure: D.circuit({
-              w: 380, h: 250,
-              wires: ["M40 40 H340 V160 H40 Z", "M140 160 V215 H240 V160"],
-              parts: [["battery", 120, 40, "h", "power supply"], ["variable", 250, 40, "h", "variable resistor"], ["ammeter", 40, 100, "v"], ["lamp", 190, 160, "h", "test component"], ["voltmeter", 190, 215, "h"]],
-              dots: [[140, 160], [240, 160]],
-              caption: "Swap the lamp for a resistor or a diode to test each component.",
-            }),
-            componentImages: [{ file: "variable-resistor.jpg", label: "Variable resistor (rheostat)", alt: "Sliding variable resistor with a wire-wound ceramic tube, adjustable contact and three terminals" }],
-            points: [
-              "Keep the resistor's temperature constant (small currents, switch off between readings).",
-              "For the diode, add a protective resistor in series and use small p.d. steps near 0.6 V.",
-              "Plot current (y-axis) against p.d. (x-axis) for positive and negative values.",
-            ],
-          },
-        ],
-        mistakes: [
-          ["“The lamp's graph curves because the lamp is faulty.”", "It curves because the filament heats up, increasing its resistance."],
-          ["“A thermistor's resistance increases when it gets hot.”", "The resistance of a thermistor decreases as temperature increases."],
-          ["“A diode has zero resistance.”", "A diode has a very high resistance in reverse, and conducts well forward only above about 0.6 V."],
-        ],
-        vocabulary: [
-          ["I–V characteristic", "A graph of current against p.d. for a component."],
-          ["Filament lamp", "A lamp whose resistance increases as its filament gets hotter."],
-          ["Diode", "A component that lets current flow in one direction only."],
-          ["Thermistor", "A resistor whose resistance decreases as temperature increases."],
-          ["LDR", "Light-dependent resistor: resistance decreases as light intensity increases."],
-          ["Linear / non-linear", "A straight-line graph / a curved graph."],
-        ],
-      },
-      questions: [
-        {
-          type: "Practice",
-          prompt: "Which component has this behaviour: no current in one direction, and almost no current in the other direction until the p.d. reaches about 0.6 V?",
-          options: ["Filament lamp", "Diode", "Thermistor", "Fixed resistor"],
-          hint: "Which component only lets current flow one way?",
-          answer: "<strong>B — Diode.</strong> It has a very high resistance in reverse and conducts forward only above about 0.6 V.",
-        },
-        {
-          type: "Practice",
-          prompt: "A filament lamp has a current of 0.20 A at 2.0 V and 0.35 A at 6.0 V. Calculate its resistance at each p.d. and explain the difference.",
-          hint: "Use R = V ÷ I at each point. Then think about what happens to the filament as the current increases.",
-          answer: "At 2.0 V: R = 2.0 ÷ 0.20 = 10 Ω. At 6.0 V: R = 6.0 ÷ 0.35 = 17 Ω. The larger current heats the filament, its ions vibrate more, electrons collide more often, so the resistance increases.",
-        },
-        {
-          type: "Practice",
-          prompt: "A thermistor is part of a fire-alarm circuit. What happens to the thermistor's resistance and to the current through it as the room gets hotter?",
-          hint: "Thermistor: temperature up → resistance …?",
-          answer: "As the temperature increases the thermistor's resistance decreases, so (for the same p.d.) the current through it increases. The larger current can be used to trigger the alarm.",
-        },
-        {
-          type: "AQA-style",
-          marks: 6,
-          prompt: "Describe a method to obtain the I–V characteristic of a filament lamp for both positive and negative values of p.d.",
-          hint: "Circuit, how you change the current, what you record, how you get negative values, what you plot.",
-          answer: "Indicative content (6 marks, level-marked):<br>• Connect the lamp in series with an ammeter, a variable resistor and a power supply/battery.<br>• Connect a voltmeter in parallel across the lamp.<br>• Adjust the variable resistor to change the current; record the current and p.d. for each setting.<br>• Take a range of readings, e.g. at least 6–8, from 0 V up to the lamp's rated p.d.<br>• Reverse the connections to the power supply and repeat to obtain negative values.<br>• Repeat readings and calculate means.<br>• Plot current (y-axis) against p.d. (x-axis) and draw a smooth curve of best fit.",
-        },
-        {
-          type: "AQA-style",
-          marks: 3,
-          prompt: "A garden light uses an LDR to switch its lamp on automatically. Explain how the LDR's resistance changes at dusk and why this makes it useful here.",
-          hint: "Link light intensity → resistance → current in the sensing circuit.",
-          answer: "As it gets darker the light intensity falls (1 mark), so the resistance of the LDR increases (1 mark). This change in resistance changes the current/p.d. in the sensing circuit, which switches the lamp on when it is dark (1 mark).",
-        },
-      ],
-    },
-
-    // ------------------------------------------------------------------ 6
-    {
       slug: "series-and-parallel",
-      number: "06",
+      number: "05",
       shortTitle: "Series & parallel",
       title: "Series & parallel",
       mission: "Crack any network",
@@ -840,131 +774,160 @@
       ],
     },
 
-    // ------------------------------------------------------------------ 7
+    // ------------------------------------------------------------------ 6
     {
-      slug: "mains-electricity",
-      number: "07",
-      shortTitle: "Mains & safety",
-      title: "Mains & safety",
-      mission: "Stay safe at 230 V",
+      slug: "iv-characteristics",
+      number: "06",
+      shortTitle: "I–V characteristics",
+      title: "I–V charac&shy;teristics",
+      mission: "Read a component's fingerprint",
       intro:
-        "The sockets at home do not behave like a battery. Learn how alternating mains differs from direct current, what each wire in a plug does, and why the live wire is dangerous.",
-      colour: "copper",
-      icon: "~",
-      spec: "AQA 6.2.3 · Sep 4.2.3",
-      unlocks: ["ac vs dc", "230 V · 50 Hz", "live · neutral · earth"],
-      keyRule: "UK mains is ac at about 230 V and 50 Hz. Live: brown. Neutral: blue. Earth: green and yellow.",
+        "Every component has its own current–p.d. graph. Learn to recognise the resistor, the filament lamp and the diode, and explain how thermistors and LDRs switch real devices on and off.",
+      colour: "violet",
+      icon: "I–V",
+      spec: "AQA 6.2.1.4, RP 16 · Sep 4.2.1.4, RP 4",
+      unlocks: ["resistor · lamp · diode graphs", "thermistors and LDRs", "required practical: I–V"],
+      keyRule: "Only an ohmic conductor at constant temperature gives a straight line through the origin. For everything else, R changes.",
+      phet: true,
       revision: {
         summary:
-          "Cells and batteries supply direct p.d.; the mains supplies alternating p.d. Three-core cables and the earth wire keep people safe from the live wire.",
+          "An I–V graph shows how the current through a component changes with the p.d. across it. Its shape tells you whether the resistance stays constant.",
         sections: [
           {
-            title: "Direct and alternating p.d.",
+            title: "Reading an I–V graph",
             paragraphs: [
-              "A <strong>direct</strong> p.d. (dc) always acts in the same direction, so the current flows one way only. Cells and batteries supply dc.",
-              "An <strong>alternating</strong> p.d. (ac) keeps reversing direction, so the current keeps changing direction too. The mains supply is ac.",
+              "Current goes on the y-axis and p.d. on the x-axis. Negative values mean the component has been connected the other way round.",
+              "Find the resistance at any point with R = V ÷ I, using that point's readings.",
+            ],
+            figure: D.ivSketch("resistor", "Fixed resistor (constant temperature): a straight line through the origin, so R is constant."),
+            points: ["Straight line through the origin → ohmic, constant R.", "Curve → the resistance changes as the current changes."],
+          },
+          {
+            title: "Filament lamp",
+            paragraphs: [
+              "As the current increases, the filament gets hotter. The metal ions vibrate more, so electrons collide with them more often and the resistance increases.",
+              "The graph curves over and gets less steep: each extra volt gives a smaller increase in current. It looks the same with the p.d. reversed.",
+            ],
+            figure: D.ivSketch("lamp", "Filament lamp: resistance increases as the filament temperature increases."),
+            componentImages: [{ file: "filament-lamp.jpg", label: "Filament lamp", alt: "Clear glass filament lamp with a visible coiled wire inside" }],
+            remember: "Explain the curve using temperature, not just ‘the resistance goes up’.",
+          },
+          {
+            title: "Diode (and LED)",
+            paragraphs: [
+              "A diode lets current flow in one direction only. In the reverse direction it has a very high resistance, so the current is practically zero.",
+              "In the forward direction almost no current flows until the p.d. reaches about 0.6 V; after that, the current rises steeply. An LED (light-emitting diode) behaves the same way and emits light when current flows.",
+            ],
+            figure: D.ivSketch("diode", "Diode: current flows one way only; very high resistance in reverse."),
+            componentImages: [
+              { file: "diode.jpg", label: "Diode", alt: "Black cylindrical diode with a silver polarity band and two wire leads" },
+              { file: "led.jpg", label: "LED", alt: "Red light-emitting diode with a rounded plastic case and two wire leads" },
+            ],
+          },
+          {
+            title: "Thermistor",
+            paragraphs: [
+              "The resistance of a thermistor decreases as its temperature increases.",
+              "Use: temperature-sensing circuits such as a thermostat. As the room warms, the thermistor's resistance falls, the current changes, and the circuit switches the heating off.",
             ],
             figure: D.graph({
-              sketch: true, w: 340, h: 220, x: [0, 1], y: [-1, 1],
-              xLabel: "time", yLabel: "p.d.",
-              series: [{ fn: () => 0.45, from: 0, to: 0.8, cls: "curve-2" }, { fn: (x) => 0.85 * Math.sin(2 * Math.PI * 2.5 * x), from: 0, to: 0.8 }],
-              notes: [[0.86, 0.41, "dc", "start", "cool"], [0.37, -0.82, "ac", "start", "hot"]],
-              caption: "dc (blue) stays positive and constant; ac (orange) keeps reversing direction.",
+              sketch: true, w: 300, h: 210, x: [0, 1], y: [0, 1],
+              xLabel: "temperature", yLabel: "resistance",
+              series: [{ fn: (x) => 0.9 * Math.exp(-2.6 * x) + 0.05, from: 0.03, to: 1 }],
+              caption: "Hotter thermistor → lower resistance.",
             }),
+            componentImages: [{ file: "thermistor.jpg", label: "Thermistor", alt: "Small black bead thermistor with two wire leads" }],
           },
           {
-            title: "The UK mains supply",
-            paragraphs: ["Mains electricity in UK homes is an ac supply."],
+            title: "Light-dependent resistor (LDR)",
+            paragraphs: [
+              "The resistance of an LDR decreases as the light intensity increases. In the dark its resistance is very high.",
+              "Use: circuits that switch lights on when it gets dark, such as street lights and garden lights. As it gets darker the LDR's resistance rises and the circuit turns the lamp on.",
+            ],
+            figure: D.graph({
+              sketch: true, w: 300, h: 210, x: [0, 1], y: [0, 1],
+              xLabel: "light intensity", yLabel: "resistance",
+              series: [{ fn: (x) => 0.9 * Math.exp(-2.6 * x) + 0.05, from: 0.03, to: 1 }],
+              caption: "Brighter light → lower resistance.",
+            }),
+            componentImages: [{ file: "ldr.jpg", label: "LDR", alt: "Round light-dependent resistor with a dark zigzag track and two leads emerging from behind the disc" }],
+          },
+          {
+            title: "Required practical: I–V charac&shy;teristics",
+            practical: "iv-characteristics/",
+            paragraphs: [
+              "Connect the component in series with an ammeter, a variable resistor and a power supply, with a voltmeter across the component. Adjust the variable resistor to take readings of current and p.d.; then reverse the power supply connections and repeat to get negative values.",
+            ],
+            figure: D.circuit({
+              w: 380, h: 250,
+              wires: ["M40 40 H340 V160 H40 Z", "M140 160 V215 H240 V160"],
+              parts: [["battery", 120, 40, "h", "power supply"], ["variable", 250, 40, "h", "variable resistor"], ["ammeter", 40, 100, "v"], ["lamp", 190, 160, "h", "test component"], ["voltmeter", 190, 215, "h"]],
+              dots: [[140, 160], [240, 160]],
+              caption: "Swap the lamp for a resistor or a diode to test each component.",
+            }),
+            componentImages: [{ file: "variable-resistor.jpg", label: "Variable resistor (rheostat)", alt: "Sliding variable resistor with a wire-wound ceramic tube, adjustable contact and three terminals" }],
             points: [
-              "Frequency: <strong>50 Hz</strong>, meaning 50 complete cycles every second.",
-              "p.d.: about <strong>230 V</strong>.",
-              "Most appliances connect to it through a three-core cable.",
-            ],
-            remember: "Learn both numbers together: 230 V, 50 Hz.",
-          },
-          {
-            title: "Three-core cable",
-            paragraphs: [
-              "Each wire has insulation of a set colour, so anyone wiring a plug can identify it.",
-            ],
-            figure: D.threeCoreCable(),
-            points: [
-              "<strong>Live</strong> (brown): carries the alternating p.d. from the supply.",
-              "<strong>Neutral</strong> (blue): completes the circuit; at, or close to, 0 V.",
-              "<strong>Earth</strong> (green and yellow): a safety wire at 0 V that stops the appliance becoming live. It only carries a current if there is a fault.",
-            ],
-            remember: "The p.d. between the live wire and earth is about 230 V.",
-          },
-          {
-            title: "Why the live wire is dangerous",
-            paragraphs: [
-              "Your body is at earth potential, 0 V. Touching the live wire puts a p.d. of about 230 V across you, so a current flows through your body to earth: an electric shock that can kill.",
-              "This is true <strong>even when the switch is open</strong>. The switch only breaks the circuit through the appliance; the live wire is still connected to the supply and is still at 230 V.",
-            ],
-            remember: "Switched off does not mean safe. Isolate the supply before touching any wiring.",
-          },
-          {
-            title: "The earth wire keeps you safe",
-            paragraphs: [
-              "Any connection between the live wire and earth is dangerous. With a low-resistance path, a very large current flows, which can cause heating and fire, or a shock if the path is through a person.",
-              "Appliances with metal cases have the case connected to the earth wire. If a fault lets the live wire touch the case, a large current flows through the earth wire instead of through the user. This quickly melts the fuse in the live wire (or trips a circuit breaker), disconnecting the appliance.",
+              "Keep the resistor's temperature constant (small currents, switch off between readings).",
+              "For the diode, add a protective resistor in series and use small p.d. steps near 0.6 V.",
+              "Plot current (y-axis) against p.d. (x-axis) for positive and negative values.",
             ],
           },
         ],
         mistakes: [
-          ["“The neutral wire never carries current.”", "The neutral completes the circuit and carries current in normal use. It is the earth wire that only carries current in a fault."],
-          ["“If the switch is off, the wires are safe.”", "The live wire is still at about 230 V while it is connected to the supply."],
-          ["“The earth wire is at 230 V.”", "The earth wire is at 0 V."],
+          ["“The lamp's graph curves because the lamp is faulty.”", "It curves because the filament heats up, increasing its resistance."],
+          ["“A thermistor's resistance increases when it gets hot.”", "The resistance of a thermistor decreases as temperature increases."],
+          ["“A diode has zero resistance.”", "A diode has a very high resistance in reverse, and conducts well forward only above about 0.6 V."],
         ],
         vocabulary: [
-          ["Direct current (dc)", "Current that flows in one direction only."],
-          ["Alternating current (ac)", "Current that repeatedly reverses direction."],
-          ["Frequency", "The number of complete cycles per second. Measured in hertz, Hz."],
-          ["Live wire", "Brown; carries the alternating p.d. from the supply."],
-          ["Neutral wire", "Blue; completes the circuit; at or near 0 V."],
-          ["Earth wire", "Green and yellow; safety wire at 0 V; carries current only if there is a fault."],
+          ["I–V characteristic", "A graph of current against p.d. for a component."],
+          ["Filament lamp", "A lamp whose resistance increases as its filament gets hotter."],
+          ["Diode", "A component that lets current flow in one direction only."],
+          ["Thermistor", "A resistor whose resistance decreases as temperature increases."],
+          ["LDR", "Light-dependent resistor: resistance decreases as light intensity increases."],
+          ["Linear / non-linear", "A straight-line graph / a curved graph."],
         ],
       },
       questions: [
         {
           type: "Practice",
-          prompt: "Give the colour of the insulation on the live, neutral and earth wires in a three-core cable.",
-          hint: "One colour, another colour, and a striped pair.",
-          answer: "Live: <strong>brown</strong>. Neutral: <strong>blue</strong>. Earth: <strong>green and yellow stripes</strong>.",
+          prompt: "Which component has this behaviour: no current in one direction, and almost no current in the other direction until the p.d. reaches about 0.6 V?",
+          options: ["Filament lamp", "Diode", "Thermistor", "Fixed resistor"],
+          hint: "Which component only lets current flow one way?",
+          answer: "<strong>B — Diode.</strong> It has a very high resistance in reverse and conducts forward only above about 0.6 V.",
         },
         {
           type: "Practice",
-          prompt: "State the frequency and the p.d. of the UK mains supply.",
-          hint: "Two numbers, with units.",
-          answer: "Frequency <strong>50 Hz</strong>; p.d. about <strong>230 V</strong>.",
+          prompt: "A filament lamp has a current of 0.20 A at 2.0 V and 0.35 A at 6.0 V. Calculate its resistance at each p.d. and explain the difference.",
+          hint: "Use R = V ÷ I at each point. Then think about what happens to the filament as the current increases.",
+          answer: "At 2.0 V: R = 2.0 ÷ 0.20 = 10 Ω. At 6.0 V: R = 6.0 ÷ 0.35 = 17 Ω. The larger current heats the filament, its ions vibrate more, electrons collide more often, so the resistance increases.",
         },
         {
           type: "Practice",
-          prompt: "Explain the difference between a direct p.d. and an alternating p.d.",
-          hint: "Think about the direction of the p.d. and of the current it drives.",
-          answer: "A direct p.d. always acts in the same direction, so the current flows in one direction only. An alternating p.d. repeatedly reverses direction, so the current repeatedly changes direction.",
+          prompt: "A thermistor is part of a fire-alarm circuit. What happens to the thermistor's resistance and to the current through it as the room gets hotter?",
+          hint: "Thermistor: temperature up → resistance …?",
+          answer: "As the temperature increases the thermistor's resistance decreases, so (for the same p.d.) the current through it increases. The larger current can be used to trigger the alarm.",
+        },
+        {
+          type: "AQA-style",
+          marks: 6,
+          prompt: "Describe a method to obtain the I–V characteristic of a filament lamp for both positive and negative values of p.d.",
+          hint: "Circuit, how you change the current, what you record, how you get negative values, what you plot.",
+          answer: "Indicative content (6 marks, level-marked):<br>• Connect the lamp in series with an ammeter, a variable resistor and a power supply/battery.<br>• Connect a voltmeter in parallel across the lamp.<br>• Adjust the variable resistor to change the current; record the current and p.d. for each setting.<br>• Take a range of readings, e.g. at least 6–8, from 0 V up to the lamp's rated p.d.<br>• Reverse the connections to the power supply and repeat to obtain negative values.<br>• Repeat readings and calculate means.<br>• Plot current (y-axis) against p.d. (x-axis) and draw a smooth curve of best fit.",
         },
         {
           type: "AQA-style",
           marks: 3,
-          prompt: "Explain why touching the live wire of a lamp can be dangerous even when the lamp is switched off.",
-          hint: "What is the potential of the live wire, what is the potential of your body, and what does the switch actually do?",
-          answer: "The live wire is still connected to the supply, so it is still at about 230 V even when the switch is open (1 mark). The person is at 0 V/earth potential, so there is a large p.d. across their body (1 mark). A current flows through the person to earth, causing an electric shock (1 mark).",
-        },
-        {
-          type: "AQA-style",
-          marks: 4,
-          prompt: "A toaster has a metal case connected to the earth wire. A fault makes the live wire touch the case. Explain how the earth wire protects someone who touches the toaster.",
-          hint: "Where does the current go instead of through the person, and what happens to the fuse?",
-          answer: "The earth wire connects the case to earth, at 0 V, so the case cannot stay at a high p.d. (1 mark). The earth wire has a low resistance, so a large current flows from the live wire through the case to earth (1 mark), rather than through the person (1 mark). The large current melts the fuse in the live wire (or trips a circuit breaker), disconnecting the supply (1 mark).",
+          prompt: "A garden light uses an LDR to switch its lamp on automatically. Explain how the LDR's resistance changes at dusk and why this makes it useful here.",
+          hint: "Link light intensity → resistance → current in the sensing circuit.",
+          answer: "As it gets darker the light intensity falls (1 mark), so the resistance of the LDR increases (1 mark). This change in resistance changes the current/p.d. in the sensing circuit, which switches the lamp on when it is dark (1 mark).",
         },
       ],
     },
 
-    // ------------------------------------------------------------------ 8
+    // ------------------------------------------------------------------ 7
     {
       slug: "power-and-national-grid",
-      number: "08",
+      number: "07",
       shortTitle: "Power & the Grid",
       title: "Power & the National Grid",
       mission: "Count the joules",
@@ -1117,6 +1080,127 @@
           answer: "I_s = (V_p × I_p) ÷ V_s (1 mark) = (25 000 × 800) ÷ 400 000 (1 mark) = <strong>50 A</strong> (1 mark).",
         },
       ],
+    },    // ------------------------------------------------------------------ 8
+    {
+      slug: "mains-electricity",
+      number: "08",
+      shortTitle: "Mains & safety",
+      title: "Mains & safety",
+      mission: "Stay safe at 230 V",
+      intro:
+        "The sockets at home do not behave like a battery. Learn how alternating mains differs from direct current, what each wire in a plug does, and why the live wire is dangerous.",
+      colour: "copper",
+      icon: "~",
+      spec: "AQA 6.2.3 · Sep 4.2.3",
+      unlocks: ["ac vs dc", "230 V · 50 Hz", "live · neutral · earth"],
+      keyRule: "UK mains is ac at about 230 V and 50 Hz. Live: brown. Neutral: blue. Earth: green and yellow.",
+      revision: {
+        summary:
+          "Cells and batteries supply direct p.d.; the mains supplies alternating p.d. Three-core cables and the earth wire keep people safe from the live wire.",
+        sections: [
+          {
+            title: "Direct and alternating p.d.",
+            paragraphs: [
+              "A <strong>direct</strong> p.d. (dc) always acts in the same direction, so the current flows one way only. Cells and batteries supply dc.",
+              "An <strong>alternating</strong> p.d. (ac) keeps reversing direction, so the current keeps changing direction too. The mains supply is ac.",
+            ],
+            figure: D.graph({
+              sketch: true, w: 340, h: 220, x: [0, 1], y: [-1, 1],
+              xLabel: "time", yLabel: "p.d.",
+              series: [{ fn: () => 0.45, from: 0, to: 0.8, cls: "curve-2" }, { fn: (x) => 0.85 * Math.sin(2 * Math.PI * 2.5 * x), from: 0, to: 0.8 }],
+              notes: [[0.86, 0.41, "dc", "start", "cool"], [0.37, -0.82, "ac", "start", "hot"]],
+              caption: "dc (blue) stays positive and constant; ac (orange) keeps reversing direction.",
+            }),
+          },
+          {
+            title: "The UK mains supply",
+            paragraphs: ["Mains electricity in UK homes is an ac supply."],
+            points: [
+              "Frequency: <strong>50 Hz</strong>, meaning 50 complete cycles every second.",
+              "p.d.: about <strong>230 V</strong>.",
+              "Most appliances connect to it through a three-core cable.",
+            ],
+            remember: "Learn both numbers together: 230 V, 50 Hz.",
+          },
+          {
+            title: "Three-core cable",
+            paragraphs: [
+              "Each wire has insulation of a set colour, so anyone wiring a plug can identify it.",
+            ],
+            figure: D.threeCoreCable(),
+            points: [
+              "<strong>Live</strong> (brown): carries the alternating p.d. from the supply.",
+              "<strong>Neutral</strong> (blue): completes the circuit; at, or close to, 0 V.",
+              "<strong>Earth</strong> (green and yellow): a safety wire at 0 V that stops the appliance becoming live. It only carries a current if there is a fault.",
+            ],
+            remember: "The p.d. between the live wire and earth is about 230 V.",
+          },
+          {
+            title: "Why the live wire is dangerous",
+            paragraphs: [
+              "Your body is at earth potential, 0 V. Touching the live wire puts a p.d. of about 230 V across you, so a current flows through your body to earth: an electric shock that can kill.",
+              "This is true <strong>even when the switch is open</strong>. The switch only breaks the circuit through the appliance; the live wire is still connected to the supply and is still at 230 V.",
+            ],
+            remember: "Switched off does not mean safe. Isolate the supply before touching any wiring.",
+          },
+          {
+            title: "The earth wire keeps you safe",
+            paragraphs: [
+              "Any connection between the live wire and earth is dangerous. With a low-resistance path, a very large current flows, which can cause heating and fire, or a shock if the path is through a person.",
+              "Appliances with metal cases have the case connected to the earth wire. If a fault lets the live wire touch the case, a large current flows through the earth wire instead of through the user. This quickly melts the fuse in the live wire (or trips a circuit breaker), disconnecting the appliance.",
+            ],
+          },
+        ],
+        mistakes: [
+          ["“The neutral wire never carries current.”", "The neutral completes the circuit and carries current in normal use. It is the earth wire that only carries current in a fault."],
+          ["“If the switch is off, the wires are safe.”", "The live wire is still at about 230 V while it is connected to the supply."],
+          ["“The earth wire is at 230 V.”", "The earth wire is at 0 V."],
+        ],
+        vocabulary: [
+          ["Direct current (dc)", "Current that flows in one direction only."],
+          ["Alternating current (ac)", "Current that repeatedly reverses direction."],
+          ["Frequency", "The number of complete cycles per second. Measured in hertz, Hz."],
+          ["Live wire", "Brown; carries the alternating p.d. from the supply."],
+          ["Neutral wire", "Blue; completes the circuit; at or near 0 V."],
+          ["Earth wire", "Green and yellow; safety wire at 0 V; carries current only if there is a fault."],
+        ],
+      },
+      questions: [
+        {
+          type: "Practice",
+          prompt: "Give the colour of the insulation on the live, neutral and earth wires in a three-core cable.",
+          hint: "One colour, another colour, and a striped pair.",
+          answer: "Live: <strong>brown</strong>. Neutral: <strong>blue</strong>. Earth: <strong>green and yellow stripes</strong>.",
+        },
+        {
+          type: "Practice",
+          prompt: "State the frequency and the p.d. of the UK mains supply.",
+          hint: "Two numbers, with units.",
+          answer: "Frequency <strong>50 Hz</strong>; p.d. about <strong>230 V</strong>.",
+        },
+        {
+          type: "Practice",
+          prompt: "Explain the difference between a direct p.d. and an alternating p.d.",
+          hint: "Think about the direction of the p.d. and of the current it drives.",
+          answer: "A direct p.d. always acts in the same direction, so the current flows in one direction only. An alternating p.d. repeatedly reverses direction, so the current repeatedly changes direction.",
+        },
+        {
+          type: "AQA-style",
+          marks: 3,
+          prompt: "Explain why touching the live wire of a lamp can be dangerous even when the lamp is switched off.",
+          hint: "What is the potential of the live wire, what is the potential of your body, and what does the switch actually do?",
+          answer: "The live wire is still connected to the supply, so it is still at about 230 V even when the switch is open (1 mark). The person is at 0 V/earth potential, so there is a large p.d. across their body (1 mark). A current flows through the person to earth, causing an electric shock (1 mark).",
+        },
+        {
+          type: "AQA-style",
+          marks: 4,
+          prompt: "A toaster has a metal case connected to the earth wire. A fault makes the live wire touch the case. Explain how the earth wire protects someone who touches the toaster.",
+          hint: "Where does the current go instead of through the person, and what happens to the fuse?",
+          answer: "The earth wire connects the case to earth, at 0 V, so the case cannot stay at a high p.d. (1 mark). The earth wire has a low resistance, so a large current flows from the live wire through the case to earth (1 mark), rather than through the person (1 mark). The large current melts the fuse in the live wire (or trips a circuit breaker), disconnecting the supply (1 mark).",
+        },
+      ],
     },
+
+
   ];
 })();

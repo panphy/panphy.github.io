@@ -284,7 +284,7 @@ h1, h2, h3 { overflow-wrap: break-word; hyphens: auto; }
 .question-stimulus .circuit-figure, .question-card > .circuit-figure { max-width: 520px; }
 .cd { stroke: var(--ink); fill: none; stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round; }
 .cd .mask { fill: var(--diagram-bg); stroke: none; }
-.cd .body rect, .cd .body circle { fill: var(--diagram-bg); }
+.cd .body rect, .cd .body circle:not(.dot) { fill: var(--diagram-bg); }
 .cd .fill { fill: var(--ink); stroke: none; }
 .cd .thick { stroke-width: 4.5; }
 .cd .dash { stroke-dasharray: 3 4; }
@@ -389,6 +389,7 @@ h1, h2, h3 { overflow-wrap: break-word; hyphens: auto; }
 .toolkit-card.given { background: #f1edff; }
 .toolkit-note { margin: 22px 0 0; color: var(--muted); font-size: 14px; line-height: 1.55; max-width: 880px; }
 .resource-card.phet { background: var(--cyan); }
+.resource-card.workbook { background: var(--leaf); }
 .resource-card.answers { grid-column: span 2; min-height: 0; background: #f1edff; }
 .resource-card.answers h3 { margin-top: 22px; }
 @media (max-width: 680px) { .resource-card.answers { grid-column: auto; } }
