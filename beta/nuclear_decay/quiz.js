@@ -31,7 +31,7 @@ export function setSummary(progress, key, questions) {
 
 // Inline SVG icons, drawn in the current text colour.
 const ICONS = {
-  trophy: '<svg class="icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M7 4h10v5a5 5 0 0 1-10 0z"/><path d="M7 6H4v1a3 3 0 0 0 3 3M17 6h3v1a3 3 0 0 1-3 3M12 14v4M8 20h8M9.5 18h5"/></svg>'
+  trophy: '<svg class="icon" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:1.15em;height:1.15em;vertical-align:-0.2em" aria-hidden="true" focusable="false"><path d="M7 4h10v5a5 5 0 0 1-10 0z"/><path d="M7 6H4v1a3 3 0 0 0 3 3M17 6h3v1a3 3 0 0 1-3 3M12 14v4M8 20h8M9.5 18h5"/></svg>'
 };
 
 function el(tag, className, text) {
