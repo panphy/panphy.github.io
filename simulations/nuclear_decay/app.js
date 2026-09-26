@@ -1229,10 +1229,6 @@ $('step-half').addEventListener('click', () => {
   readout.textContent = `PREDICT FIRST · ${sample.remaining} undecayed now. About ${formatCount(sample.remaining / 2)} should remain after one more half-life.`;
   setSampleRunning(true, next);
 });
-$('reset-sample').addEventListener('click', () => {
-  buildMode(false);
-  readout.textContent = DEFAULT_READOUT.halflife();
-});
 for (const id of ['isotope', 'sample-size']) {
   $(id).addEventListener('change', () => {
     buildMode(false);
@@ -1304,7 +1300,8 @@ function selectMode(mode, animate = true) {
   $('decay').hidden = halfLife;
   $('penetration').hidden = halfLife;
   $('step-half').hidden = !halfLife;
-  $('reset-sample').hidden = !halfLife;
+  // Half-life has a single Reset that clears the sample and the view.
+  $('reset').textContent = halfLife ? 'Reset' : 'Reset view';
   $('sample-controls').hidden = !halfLife;
   $('action-hint').textContent = data.hint;
   readout.textContent = DEFAULT_READOUT[mode]();
