@@ -64,7 +64,7 @@ li { margin: 0 0 1.4mm; }
 .circuit-figure figcaption { margin-top: 1.5mm; color: #444; font-size: 8.8pt; line-height: 1.35; }
 .cd { stroke: var(--ink); fill: none; stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round; }
 .cd .mask { fill: var(--diagram-bg); stroke: none; }
-.cd .body rect, .cd .body circle { fill: var(--diagram-bg); }
+.cd .body rect, .cd .body circle:not(.dot) { fill: var(--diagram-bg); }
 .cd .fill, .cd .dot { fill: var(--ink); stroke: none; }
 .cd .thick { stroke-width: 4.5; }
 .cd .dash { stroke-dasharray: 3 4; }

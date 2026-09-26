@@ -18,7 +18,7 @@ Browser-based physics tools, simulations, classroom utilities, and games for lea
 The [GCSE Physics hub](https://panphy.app/gcsephy/) collects the author's school curriculum resources:
 
 - **Year 9 · [Work Like a Physicist](https://panphy.app/gcsephy/year9phy/unit01/):** a student companion site, revision guides, test preparation, a workbook, lesson plans, and a teaching deck. See the [unit overview](gcsephy/year9phy/unit01/README.md) for materials and editable sources.
-- **Year 10 · [Electric Circuits](https://panphy.app/gcsephy/year10phy/unit01/):** revision notes, practice questions, and an Exam Zone for AQA GCSE electricity. See the [unit overview](gcsephy/year10phy/unit01/README.md).
+- **Year 10 · [Electric Circuits](https://panphy.app/gcsephy/year10phy/unit01/):** revision notes, practice questions, an Exam Zone for AQA GCSE electricity, and a four-part student workbook with answer editions and a teacher guide. See the [unit overview](gcsephy/year10phy/unit01/README.md).
 
 These public, open-source resources are intentionally outside the general homepage catalogue, but teachers and students are welcome to use and adapt them.
 

@@ -74,7 +74,7 @@
       aim: "Use circuit diagrams to set up circuits that investigate the factors affecting resistance: the length of a wire at constant temperature, and combinations of resistors in series and parallel.",
       keyRule: "Resistance = p.d. ÷ current. Keep the wire cool.",
       equation: { eq: "R = V ÷ I", words: "resistance = potential difference ÷ current", units: "R in ohms (Ω) · V in volts (V) · I in amperes (A)" },
-      missions: [["build-and-measure", "Mission 4 · Build & measure"], ["series-and-parallel", "Mission 6 · Series & parallel"]],
+      missions: [["resistance", "Mission 4 · Resistance & V = IR"], ["series-and-parallel", "Mission 5 · Series & parallel"]],
       pdf: "Y10 Required Practical - Resistance.pdf",
       answersPdf: "Y10 Required Practical - Resistance (Ans).pdf",
       apparatus: [
@@ -311,7 +311,7 @@
       aim: "Use circuit diagrams to construct circuits that investigate the I–V characteristics of a filament lamp, a diode and a resistor at constant temperature.",
       keyRule: "Current on the y-axis, p.d. on the x-axis. Reverse the supply for negative values.",
       equation: { eq: "R = V ÷ I", words: "resistance = potential difference ÷ current", units: "R in ohms (Ω) · V in volts (V) · I in amperes (A)" },
-      missions: [["iv-characteristics", "Mission 5 · I–V characteristics"]],
+      missions: [["iv-characteristics", "Mission 6 · I–V characteristics"]],
       pdf: "Y10 Required Practical - IV Characteristics.pdf",
       answersPdf: "Y10 Required Practical - IV Characteristics (Ans).pdf",
       apparatus: [

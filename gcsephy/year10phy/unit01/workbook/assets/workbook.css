@@ -1,0 +1,358 @@
+/* A4 print styles for the Electric Circuits student workbook and teacher guide.
+   The look follows the companion site (navy, spark yellow, cyan, copper; Arial Black
+   display type; ink outlines) but stays readable when photocopied in greyscale. */
+@page {
+  size: A4;
+  margin: 13mm 14mm 15mm;
+  @bottom-left { content: var(--foot-left, ""); font: 7.5pt Arial, sans-serif; color: #56606e; }
+  @bottom-right { content: counter(page); font: 700 8pt Arial, sans-serif; color: #0a1326; }
+}
+@page cover { margin: 0; @bottom-left { content: none; } @bottom-right { content: none; } }
+
+:root {
+  --navy: #0a1326; --ink: #0a1326; --muted: #56606e; --paper: #fbf9f3;
+  --spark: #ffd23f; --spark-t: #fff5cc; --cyan: #3fd0e8; --cyan-t: #e2f7fb;
+  --copper: #ff8a4c; --copper-t: #ffece2; --violet: #a996ff; --violet-t: #efebff;
+  --leaf: #b8ec58; --leaf-t: #eef9dc; --rule: #b9c1ca; --ans: #1558b0;
+  --diagram-bg: #fff; --accent: var(--spark); --accent-t: var(--spark-t);
+}
+* { box-sizing: border-box; }
+html { background: #d9dcdf; }
+body { margin: 0; color: var(--ink); font: 10pt/1.38 Arial, "Liberation Sans", Helvetica, sans-serif; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+.book { width: 210mm; margin: 0 auto; background: white; padding: 13mm 14mm 15mm; }
+p { margin: 0 0 2.2mm; }
+ul, ol { margin: 0 0 2.2mm; padding-left: 5.5mm; }
+li { margin-bottom: 1mm; }
+sub, sup { line-height: 0; }
+strong { font-weight: 700; }
+.display { font-family: "Arial Black", "Arial", sans-serif; font-weight: 900; text-transform: uppercase; letter-spacing: -.02em; }
+
+/* ----- cover ----- */
+.cover { page: cover; break-after: page; position: relative; height: 297mm; margin: -13mm -14mm 0; padding: 22mm 20mm; background: var(--navy); color: white; overflow: hidden; }
+.cover::before { content: ""; position: absolute; inset: 0; opacity: .16; background-image: linear-gradient(#44a8c8 1px, transparent 1px), linear-gradient(90deg, #44a8c8 1px, transparent 1px); background-size: 12mm 12mm; }
+.cover > * { position: relative; }
+.cover .eyebrow { font: 900 9pt/1 Arial, sans-serif; letter-spacing: .2em; text-transform: uppercase; color: var(--spark); }
+.cover h1 { margin: 8mm 0 0; font: 900 64pt/.82 "Arial Black", Arial, sans-serif; text-transform: uppercase; letter-spacing: -.06em; }
+.cover h1 em { font-style: normal; color: var(--spark); }
+.cover .lede { max-width: 135mm; margin: 9mm 0 0; font-size: 14pt; line-height: 1.45; color: #d5deeb; }
+.cover-circuit { margin: 12mm 0 0; width: 170mm; }
+.cover-circuit svg { width: 100%; display: block; }
+.cover .edition { display: inline-block; margin-top: 6mm; padding: 1.8mm 4mm; border: 2px solid var(--copper); color: var(--copper); font: 900 11pt/1 Arial, sans-serif; letter-spacing: .12em; text-transform: uppercase; }
+.cover-fields { position: absolute; left: 20mm; right: 20mm; bottom: 22mm; display: grid; grid-template-columns: 1fr 1fr; gap: 7mm 10mm; padding: 7mm 8mm; border: 2px solid rgba(255,255,255,.55); background: rgba(10,19,38,.7); }
+.cover-fields div { font: 900 7.5pt/1 Arial, sans-serif; letter-spacing: .15em; text-transform: uppercase; color: #a8b8cc; }
+.cover-fields div span { display: block; height: 9mm; border-bottom: 1.5px solid #8ea2ba; }
+
+/* ----- running pages ----- */
+.page-title { margin: 0 0 1.5mm; font: 900 22pt/1 "Arial Black", Arial, sans-serif; text-transform: uppercase; letter-spacing: -.035em; }
+.page-intro { margin-bottom: 4mm; color: #333c48; font-size: 10.8pt; }
+.new-page { break-before: page; }
+.eyebrow { font: 900 7.5pt/1 Arial, sans-serif; letter-spacing: .18em; text-transform: uppercase; color: var(--muted); }
+
+/* how-to page */
+.legend { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 2.5mm; margin: 3mm 0 4mm; }
+.legend > div { display: grid; grid-template-columns: 11mm 1fr; gap: 3mm; align-items: start; padding: 3mm; border: 1.5px solid var(--ink); }
+.legend b { display: block; font: 900 9pt/1.2 Arial, sans-serif; text-transform: uppercase; letter-spacing: .06em; }
+.legend p { margin: 1mm 0 0; font-size: 9.3pt; line-height: 1.35; }
+.route { width: 100%; border-collapse: collapse; font-size: 9.3pt; }
+.route th, .route td { padding: 1.1mm 2mm; border-bottom: 1px solid var(--rule); text-align: left; vertical-align: top; }
+.route th { font: 900 7.5pt Arial, sans-serif; text-transform: uppercase; letter-spacing: .1em; border-bottom: 2px solid var(--ink); }
+.route td:first-child { width: 10mm; font: 900 12pt "Arial Black", Arial, sans-serif; }
+.route .tag { display: inline-block; margin-left: 1.5mm; padding: 0 1.5mm; border: 1px solid var(--ink); font-size: 7pt; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; background: var(--leaf-t); }
+
+/* section icons */
+.ico { width: 11mm; height: 11mm; border: 2px solid var(--ink); border-radius: 50%; display: grid; place-items: center; background: var(--c, white); flex: none; }
+.ico svg { width: 6.2mm; height: 6.2mm; fill: none; stroke: var(--ink); stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; }
+.ico.sm { width: 8mm; height: 8mm; border-width: 1.6px; }
+.ico.sm svg { width: 4.6mm; height: 4.6mm; }
+
+/* ----- lesson opener ----- */
+.lesson { break-before: page; }
+.opener { position: relative; display: grid; grid-template-columns: 30mm 1fr; gap: 0 5mm; padding: 6mm 6mm 5mm; background: var(--navy); color: white; overflow: hidden; }
+.opener::after { content: ""; position: absolute; right: 0; top: 0; bottom: 0; width: 5mm; background: var(--accent); }
+.opener .num { font: 900 50pt/.8 "Arial Black", Arial, sans-serif; color: var(--accent); letter-spacing: -.05em; }
+.opener .num small { display: block; margin-bottom: 2mm; font: 900 7pt/1 Arial, sans-serif; letter-spacing: .2em; color: #a8b8cc; }
+.opener h2 { margin: 1mm 0 2mm; font: 900 20pt/1 "Arial Black", Arial, sans-serif; text-transform: uppercase; letter-spacing: -.035em; }
+.opener .spec { font-size: 8pt; color: #a8b8cc; letter-spacing: .04em; }
+.big-q { grid-column: 1 / -1; margin: 4mm 0 0; padding: 3mm 4mm; background: var(--spark); color: var(--ink); border: 2px solid var(--ink); box-shadow: 1.6mm 1.6mm 0 var(--accent); font-size: 11pt; font-weight: 700; line-height: 1.35; transform: rotate(-.4deg); }
+.big-q::before { content: "Big question  "; font: 900 7.5pt/1 Arial, sans-serif; letter-spacing: .16em; text-transform: uppercase; }
+.opener-foot { display: grid; grid-template-columns: 1.35fr 1fr; gap: 4mm; margin: 3mm 0 2mm; }
+.goals, .online { padding: 3mm 3.5mm; border: 1.5px solid var(--ink); font-size: 9.4pt; }
+.goals h3, .online h3 { margin: 0 0 1.5mm; font: 900 7.5pt/1 Arial, sans-serif; letter-spacing: .16em; text-transform: uppercase; }
+.goals ul { margin: 0; padding-left: 4.5mm; }
+.goals li { margin-bottom: .6mm; }
+.online { background: var(--cyan-t); }
+.online p { margin: 0 0 1mm; line-height: 1.3; }
+.online .url { font: 700 7.6pt/1.25 Arial, sans-serif; word-break: normal; color: #0f5f85; }
+.keywords { display: flex; flex-wrap: wrap; gap: 1.5mm; margin-top: 2mm; }
+.keywords span { padding: .6mm 2mm; border: 1px solid var(--ink); border-radius: 99px; background: white; font-size: 8pt; font-weight: 700; }
+
+/* ----- section headers ----- */
+.sec { display: flex; align-items: center; gap: 3mm; margin: 4mm 0 2.5mm; padding-bottom: 1.5mm; border-bottom: 2.5px solid var(--ink); break-after: avoid; }
+.sec h3 { margin: 0; font: 900 13pt/1 "Arial Black", Arial, sans-serif; text-transform: uppercase; letter-spacing: -.02em; }
+.sec .kind { font: 900 7pt/1 Arial, sans-serif; letter-spacing: .18em; text-transform: uppercase; color: var(--muted); display: block; margin-bottom: 1mm; }
+.sec .aside { margin-left: auto; font-size: 8.5pt; color: var(--muted); text-align: right; max-width: 70mm; line-height: 1.3; }
+.sec.do-now { --c: var(--cyan); }
+.sec.learn { --c: var(--spark); }
+.sec.try { --c: var(--copper); }
+.sec.lab { --c: var(--leaf); }
+.sec.exam { --c: var(--violet); }
+.sec.revise { --c: var(--navy); }
+.sec.revise .ico svg { stroke: white; }
+.sub { margin: 4mm 0 2mm; font: 900 10.5pt/1.2 Arial, sans-serif; text-transform: uppercase; letter-spacing: .03em; break-after: avoid; }
+.sub::before { content: ""; display: inline-block; width: 2.4mm; height: 2.4mm; margin-right: 2mm; background: var(--accent); border: 1.2px solid var(--ink); vertical-align: .2mm; }
+
+/* do now strip */
+.do-now-box { display: grid; grid-template-columns: repeat(3, 1fr); gap: 3mm; break-inside: avoid; }
+.do-now-box > div { padding: 2.5mm 3mm; border: 1.5px solid var(--ink); background: var(--cyan-t); font-size: 9.3pt; line-height: 1.35; }
+.do-now-box b { display: block; font: 900 8pt/1 Arial, sans-serif; margin-bottom: 1mm; }
+.do-now-box .lines { margin-top: 1.5mm; background-color: white; }
+
+/* learn blocks */
+.split { display: grid; grid-template-columns: 1fr 1fr; gap: 5mm; align-items: center; margin: 1mm 0 3mm; break-inside: avoid; }
+.split.wide-fig { grid-template-columns: .9fr 1.1fr; }
+.split.narrow-fig { grid-template-columns: 1.35fr .65fr; }
+.split > div > :last-child { margin-bottom: 0; }
+.figs { display: grid; gap: 4mm; margin: 1mm 0 3mm; align-items: start; break-inside: avoid; }
+.figs.c2 { grid-template-columns: 1fr 1fr; }
+.figs.c3 { grid-template-columns: repeat(3, 1fr); }
+.figs.c4 { grid-template-columns: repeat(4, 1fr); }
+.circuit-figure { margin: 0; text-align: center; break-inside: avoid; }
+.circuit-figure svg { display: block; width: 100%; max-height: 62mm; margin: 0 auto; }
+.circuit-figure figcaption { margin-top: 1mm; color: #333c48; font-size: 8.4pt; line-height: 1.3; }
+.fig-small .circuit-figure svg { max-height: 40mm; }
+.fig-mid .circuit-figure svg { max-height: 50mm; }
+.pic svg { display: block; width: 100%; }
+.key { margin: 2mm 0 3mm; padding: 2.8mm 3.5mm 2.8mm 11mm; position: relative; border: 2px solid var(--ink); background: var(--spark-t); break-inside: avoid; }
+.key::before { content: "!"; position: absolute; left: 3mm; top: 2.6mm; width: 5.5mm; height: 5.5mm; border-radius: 50%; background: var(--spark); border: 1.5px solid var(--ink); display: grid; place-items: center; font: 900 9pt/1 Arial, sans-serif; }
+.key > :last-child { margin-bottom: 0; }
+.model { margin: 2mm 0 3mm; padding: 3mm 3.5mm; border: 2px dashed var(--ink); border-radius: 3mm; break-inside: avoid; }
+.model h4 { margin: 0 0 1.5mm; font: 900 8pt/1 Arial, sans-serif; letter-spacing: .14em; text-transform: uppercase; }
+.model .breaks { margin: 1.5mm 0 0; padding-top: 1.5mm; border-top: 1px solid var(--rule); font-size: 9pt; color: #333c48; }
+.model .breaks::before { content: "Where the model breaks: "; font-weight: 700; }
+.eq-card { display: grid; grid-template-columns: auto 1fr; gap: 1mm 5mm; align-items: center; margin: 2mm 0 3mm; padding: 3mm 4mm; border: 2px solid var(--ink); box-shadow: 1.4mm 1.4mm 0 var(--accent); background: white; break-inside: avoid; }
+.eq-card .eq { grid-row: span 3; font: 900 19pt/1 "Arial Black", Arial, sans-serif; letter-spacing: -.02em; white-space: nowrap; }
+.eq-card .words { font-weight: 700; }
+.eq-card .units { font-size: 9pt; color: #333c48; }
+.eq-card .re { font-size: 9pt; }
+.compare { width: 100%; border-collapse: collapse; margin: 1mm 0 3mm; font-size: 9.4pt; break-inside: avoid; }
+.compare th, .compare td { padding: 1.8mm 2.4mm; border: 1.2px solid var(--ink); text-align: left; vertical-align: top; }
+.compare thead th { background: var(--navy); color: white; font-size: 8.4pt; letter-spacing: .06em; text-transform: uppercase; }
+.compare tbody th { background: var(--accent-t); width: 26mm; }
+.compare td.blank { height: 9mm; }
+
+/* worked example + your turn */
+.worked { display: grid; grid-template-columns: 1fr 1fr; margin: 2mm 0 3.5mm; border: 2px solid var(--ink); break-inside: avoid; }
+.worked > div { padding: 3mm 3.5mm; }
+.worked > div + div { border-left: 2px dashed var(--ink); background: #fffdf6; }
+.worked h4 { margin: 0 0 1.5mm; font: 900 8pt/1 Arial, sans-serif; letter-spacing: .14em; text-transform: uppercase; }
+.worked > div:first-child h4 { color: var(--ink); }
+.worked .q { margin-bottom: 2mm; font-size: 9.6pt; font-weight: 700; line-height: 1.35; }
+.step { display: grid; grid-template-columns: 17mm 1fr; gap: 2mm; align-items: end; min-height: 7.4mm; border-bottom: 1px solid var(--rule); font-size: 9.6pt; }
+.step span:first-child { font: 900 6.8pt/1.6 Arial, sans-serif; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); padding-bottom: 1mm; }
+.step span:last-child { padding-bottom: .8mm; }
+.step:last-child { border-bottom: 0; }
+.step.final span:last-child { font-weight: 700; }
+.worked .yt .step span:last-child { color: var(--ans); font-weight: 700; }
+
+/* questions */
+.qs { counter-reset: none; }
+.question { position: relative; margin: 0 0 3mm; padding-left: 9mm; break-inside: avoid; }
+.question > .qn { position: absolute; left: 0; top: -.4mm; width: 6.6mm; height: 6.6mm; border: 1.6px solid var(--ink); border-radius: 50%; display: grid; place-items: center; font: 900 8.6pt/1 Arial, sans-serif; background: var(--accent); }
+.question .prompt { margin-bottom: 1.5mm; }
+.question .marks { float: right; margin-left: 3mm; font-weight: 700; white-space: nowrap; }
+.question .type { display: inline-block; margin-right: 1.5mm; padding: .1mm 1.5mm; border: 1px solid var(--ink); font: 700 6.8pt/1.5 Arial, sans-serif; letter-spacing: .08em; text-transform: uppercase; vertical-align: .3mm; background: white; }
+.lines { position: relative; min-height: calc(var(--n, 2) * 7.5mm); background: repeating-linear-gradient(to bottom, transparent 0 7.2mm, var(--rule) 7.2mm 7.5mm); line-height: 7.5mm; padding-top: .8mm; }
+.box { min-height: var(--h, 30mm); border: 1.5px solid var(--rule); background: #fff; position: relative; padding: 2mm 3mm; }
+.box.grid-bg { background-image: radial-gradient(circle, #c6ccd3 .45mm, transparent .5mm); background-size: 5mm 5mm; }
+.frame { display: grid; grid-template-columns: 22mm 1fr; border: 1.5px solid var(--rule); }
+.frame > span { display: flex; align-items: center; min-height: 8mm; padding: 0 2.5mm; border-bottom: 1px solid var(--rule); font-size: 9.4pt; }
+.frame > span:nth-child(odd) { font: 900 6.8pt/1.2 Arial, sans-serif; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); background: #f5f6f2; }
+.frame > span:nth-last-child(-n+2) { border-bottom: 0; }
+.frame .unit { margin-left: auto; padding-left: 3mm; color: var(--muted); font-size: 8pt; }
+.starter { margin: 0 0 1mm; font-size: 9pt; color: #333c48; font-style: italic; }
+.mcq { display: grid; grid-template-columns: repeat(var(--cols, 2), 1fr); gap: 1.5mm 4mm; margin: 1mm 0 0; padding: 0; list-style: none; }
+.mcq li { display: flex; gap: 2.5mm; align-items: flex-start; margin: 0; font-size: 9.8pt; }
+.mcq li::before { content: ""; flex: none; width: 4.2mm; height: 4.2mm; margin-top: .3mm; border: 1.5px solid var(--ink); background: white; }
+.mcq li.correct::before { background: var(--ans); box-shadow: inset 0 0 0 1mm white; }
+.blank { display: inline-block; min-width: var(--w, 26mm); border-bottom: 1.3px solid var(--ink); text-align: center; line-height: 1.25; padding: 0 1mm; }
+.fill { line-height: 2.05; }
+.bank { display: flex; flex-wrap: wrap; gap: 1.5mm; margin: 1.5mm 0 1mm; }
+.bank::before { content: "Word bank"; font: 900 6.8pt/1.9 Arial, sans-serif; letter-spacing: .14em; text-transform: uppercase; color: var(--muted); margin-right: 1mm; }
+.bank span { padding: .3mm 2.2mm; border: 1.2px dashed var(--ink); font-size: 9pt; font-weight: 700; }
+.say { position: relative; margin: 1mm 0 2.5mm 14mm; padding: 2.4mm 3.2mm; border: 1.8px solid var(--ink); border-radius: 3mm; background: var(--copper-t); font-size: 9.8pt; line-height: 1.35; }
+.say::before { content: attr(data-who); position: absolute; left: -14mm; top: 50%; transform: translateY(-50%); width: 11mm; height: 11mm; border: 1.8px solid var(--ink); border-radius: 50%; background: var(--spark); display: grid; place-items: center; font: 900 7pt/1 Arial, sans-serif; text-align: center; }
+.say::after { content: ""; position: absolute; left: -2.6mm; top: 50%; width: 3.6mm; height: 3.6mm; transform: translateY(-50%) rotate(45deg); background: var(--copper-t); border-left: 1.8px solid var(--ink); border-bottom: 1.8px solid var(--ink); }
+.options-row { display: grid; grid-template-columns: repeat(var(--cols, 4), 1fr); gap: 3mm; margin: 1mm 0 2mm; }
+.options-row > div { border: 1.5px solid var(--ink); padding: 1.5mm; text-align: center; font-size: 9pt; }
+.options-row > div b { display: block; text-align: left; font-size: 8.5pt; }
+.options-row .circle-choice { display: flex; justify-content: center; gap: 3mm; margin-top: 1mm; font-weight: 700; }
+.options-row .circle-choice span { padding: .2mm 2.2mm; border-radius: 99px; border: 1px solid transparent; }
+.options-row .circle-choice span.correct { border-color: var(--ans); color: var(--ans); border-width: 1.6px; }
+.order { list-style: none; padding: 0; margin: 1mm 0 0; display: grid; gap: 1.5mm; }
+.order li { display: grid; grid-template-columns: 9mm 1fr; align-items: center; margin: 0; padding: 1.4mm 2.5mm 1.4mm 0; border: 1.3px solid var(--ink); font-size: 9.4pt; }
+.order li::before { content: attr(data-a); height: 100%; min-height: 6mm; display: grid; place-items: center; border-right: 1.3px solid var(--ink); margin-right: 2.5mm; font-weight: 900; color: var(--ans); }
+.symbol-quiz { display: grid; grid-template-columns: repeat(var(--cols, 6), 1fr); gap: 2mm; margin: 1mm 0; }
+.symbol-quiz > div { border: 1.5px solid var(--ink); text-align: center; background: white; }
+.symbol-quiz svg { display: block; width: 100%; height: 15mm; }
+.symbol-quiz .name { min-height: 7mm; border-top: 1px solid var(--rule); font-size: 8.4pt; font-weight: 700; display: grid; place-items: center; padding: .6mm; }
+.symbol-quiz .draw { height: 15mm; }
+.sym-bank { display: grid; grid-template-columns: repeat(7, 1fr); gap: 1.8mm; margin: 1mm 0 3mm; break-inside: avoid; }
+.sym-bank figure { margin: 0; border: 1.5px solid var(--ink); background: white; text-align: center; }
+.sym-bank figure.later { border-style: dashed; background: #fafafa; }
+.sym-bank svg { display: block; width: 100%; height: 12.5mm; }
+.sym-bank figcaption { padding: .8mm .6mm 1.2mm; border-top: 1px solid var(--rule); font: 700 7.4pt/1.2 Arial, sans-serif; }
+.sym-bank figcaption small { display: block; font-weight: 400; color: #333c48; font-size: 6.8pt; margin-top: .4mm; }
+.sym-legend { font-size: 8.4pt; color: var(--muted); margin: -1.5mm 0 3mm; }
+
+/* data tables */
+.data { width: 100%; border-collapse: collapse; margin: 1mm 0 2.5mm; font-size: 9.4pt; break-inside: avoid; }
+.data th, .data td { padding: 1.2mm 2.2mm; border: 1.2px solid var(--ink); text-align: center; height: 7.6mm; }
+.data th { background: var(--accent-t); font-size: 8.6pt; }
+.data td.given { font-weight: 700; background: #f7f7f4; }
+.data td .ans { font-size: 9pt; }
+
+/* graph paper */
+.graph-paper { display: block; margin: 1mm auto 2.5mm; overflow: visible; break-inside: avoid; }
+.graph-paper line.minor { stroke: #d6dbe0; stroke-width: .15; }
+.graph-paper line.major { stroke: #99a3ad; stroke-width: .3; }
+.graph-paper line.axis { stroke: var(--ink); stroke-width: .55; }
+.graph-paper text { font-family: Arial, Helvetica, sans-serif; fill: var(--ink); }
+.graph-paper .axis-label { font-size: 3.4px; font-weight: 700; }
+.graph-paper .tick { font-size: 2.9px; }
+.graph-paper .fit { fill: none; stroke: var(--ans); stroke-width: .5; }
+.graph-paper .mark { fill: none; stroke: var(--ans); stroke-width: .45; }
+
+/* exam corner */
+.exam-card { padding: 3.5mm 4mm 1mm; border: 2px solid var(--ink); background: var(--violet-t); break-inside: avoid; }
+.exam-card .question:last-child { margin-bottom: 2mm; }
+.exam-card .question .lines, .exam-card .question .box { background-color: white; }
+.tip { margin: 2mm 0 2.5mm; padding: 2mm 3mm; border-left: 4px solid var(--violet); background: white; font-size: 9pt; }
+.tip::before { content: "Get the marks: "; font-weight: 900; }
+
+/* revise it */
+.revise-card { display: grid; grid-template-columns: 1.15fr .85fr; border: 2px solid var(--ink); break-inside: avoid; }
+.revise-card > div { padding: 3mm 3.5mm; }
+.revise-card > div + div { border-left: 2px solid var(--ink); background: #f6f7f9; }
+.revise-card h4 { margin: 0 0 1.6mm; font: 900 7.5pt/1 Arial, sans-serif; letter-spacing: .15em; text-transform: uppercase; }
+.revise-card ul { margin: 0; padding-left: 4.5mm; font-size: 9.3pt; line-height: 1.35; }
+.revise-card li { margin-bottom: 1mm; }
+.cando { list-style: none; padding: 0 !important; margin: 0; }
+.cando li { display: grid; grid-template-columns: 1fr auto; gap: 2mm; align-items: center; padding: 1.2mm 0; border-bottom: 1px solid var(--rule); font-size: 8.8pt; line-height: 1.3; }
+.cando li:last-child { border-bottom: 0; }
+.rag { display: flex; gap: 1.2mm; }
+.rag i { width: 4.2mm; height: 4.2mm; border-radius: 50%; border: 1.3px solid var(--ink); }
+.rag i:nth-child(1) { background: #ffd9d0; }
+.rag i:nth-child(2) { background: #ffefb0; }
+.rag i:nth-child(3) { background: #dff3c2; }
+.recall { margin-top: 3mm; display: grid; grid-template-columns: repeat(2, 1fr); gap: 0 5mm; break-inside: avoid; }
+.recall h4 { grid-column: 1 / -1; margin: 0 0 1mm; font: 900 7.5pt/1 Arial, sans-serif; letter-spacing: .15em; text-transform: uppercase; }
+.recall p { margin: 0; padding: 1.6mm 0; border-bottom: 1px dotted var(--rule); font-size: 9pt; }
+.recall p b { margin-right: 1.5mm; }
+
+/* lab record */
+.lab-card { padding: 3mm 3.5mm 1mm; border: 2px solid var(--ink); background: var(--leaf-t); break-inside: avoid; margin-bottom: 3mm; }
+.lab-card .lines, .lab-card .box, .lab-card .data { background-color: white; }
+.lab-card .data td { background: white; }
+.lab-card .data td.given { background: #f7f7f4; }
+.safety { margin: 1.5mm 0 3mm; padding: 2.5mm 3mm 2mm 3mm; border: 2px solid var(--ink); background: repeating-linear-gradient(135deg, var(--spark) 0 3mm, var(--ink) 3mm 4.5mm) left / 3mm 100% no-repeat, white; padding-left: 7mm; font-size: 9.3pt; break-inside: avoid; }
+.safety h4 { margin: 0 0 1mm; font: 900 7.5pt/1 Arial, sans-serif; letter-spacing: .15em; text-transform: uppercase; }
+.safety ul { margin: 0; }
+.steps { counter-reset: s; list-style: none; padding: 0; margin: 1mm 0 3mm; }
+.steps li { position: relative; padding-left: 8mm; margin-bottom: 1.6mm; font-size: 9.6pt; }
+.steps li::before { counter-increment: s; content: counter(s); position: absolute; left: 0; top: .2mm; width: 5.2mm; height: 5.2mm; border-radius: 50%; background: var(--ink); color: white; display: grid; place-items: center; font: 900 7.5pt/1 Arial, sans-serif; }
+.vars { width: 100%; border-collapse: collapse; font-size: 9.3pt; margin: 1mm 0 3mm; break-inside: avoid; }
+.vars th, .vars td { border: 1.2px solid var(--ink); padding: 1.5mm 2.5mm; text-align: left; height: 8mm; }
+.vars th { width: 38mm; background: var(--leaf-t); }
+
+/* answers edition */
+.ans { color: var(--ans); font-weight: 700; }
+.lines .ans, .box .ans { display: block; font-weight: 700; line-height: 7.5mm; font-size: 9.6pt; }
+.box .ans { line-height: 1.4; }
+.ans-note { margin-top: 1mm; color: var(--ans); font-size: 9pt; font-weight: 700; line-height: 1.35; }
+/* The student edition keeps the answers' space but not the answers, so both editions
+   paginate identically and page numbers match. Hidden text is not written to the PDF. */
+body:not(.answers) .ans, body:not(.answers) .ans-note, body:not(.answers) .ans-only { visibility: hidden !important; }
+body.answers .order li::before { content: attr(data-a); }
+body:not(.answers) .order li::before { content: ""; }
+body:not(.answers) .mcq li.correct::before { background: white; box-shadow: none; }
+body:not(.answers) .circle-choice span.correct { border-color: transparent !important; color: inherit !important; }
+
+/* toolkit page */
+.toolkit { display: grid; grid-template-columns: 1fr 1fr; gap: 3.5mm; }
+.tool { display: grid; grid-template-columns: 1fr auto; gap: 1mm 3mm; padding: 3mm 3.5mm; border: 2px solid var(--ink); break-inside: avoid; }
+.tool .eq { font: 900 16pt/1.05 "Arial Black", Arial, sans-serif; letter-spacing: -.02em; }
+.tool .words { grid-column: 1; font-size: 9pt; font-weight: 700; }
+.tool .units { grid-column: 1 / -1; font-size: 8.4pt; color: #333c48; }
+.tool .lesson-tag { grid-row: 1; grid-column: 2; align-self: start; padding: .3mm 1.8mm; border: 1.2px solid var(--ink); font: 900 7pt/1.5 Arial, sans-serif; background: var(--spark-t); }
+.tool .recall-cover { grid-column: 1 / -1; margin-top: 1mm; padding-top: 1.2mm; border-top: 1px dashed var(--rule); font-size: 8.4pt; color: var(--muted); }
+.units-table { width: 100%; border-collapse: collapse; font-size: 9.2pt; margin: 2mm 0; }
+.units-table th, .units-table td { border: 1.2px solid var(--ink); padding: 1.3mm 2.2mm; text-align: left; }
+.units-table th { background: var(--navy); color: white; font-size: 8pt; letter-spacing: .06em; text-transform: uppercase; }
+.method-steps { display: grid; grid-template-columns: repeat(4, 1fr); gap: 2mm; margin: 2mm 0 3mm; }
+.method-steps div { padding: 2.2mm; border: 1.5px solid var(--ink); font-size: 8.8pt; line-height: 1.3; background: var(--spark-t); }
+.method-steps b { display: block; font: 900 12pt/1 "Arial Black", Arial, sans-serif; margin-bottom: 1mm; }
+
+/* review, glossary, tracker */
+.glossary { columns: 2; column-gap: 7mm; font-size: 9pt; line-height: 1.35; }
+.glossary p { break-inside: avoid; margin: 0 0 1.6mm; }
+.tracker { width: 100%; border-collapse: collapse; font-size: 8.8pt; }
+.tracker th, .tracker td { border-bottom: 1px solid var(--rule); padding: 1.3mm 2mm; text-align: left; vertical-align: middle; }
+.tracker th { font: 900 7pt Arial, sans-serif; letter-spacing: .1em; text-transform: uppercase; border-bottom: 2px solid var(--ink); }
+.tracker .lesson-row td { padding-top: 2.5mm; font-weight: 900; border-bottom: 1.5px solid var(--ink); background: #f6f7f9; }
+.tracker td.rag-cell { width: 20mm; }
+.fix-log { width: 100%; border-collapse: collapse; font-size: 9pt; }
+.fix-log th, .fix-log td { border: 1.2px solid var(--ink); padding: 1.5mm 2mm; height: 11mm; text-align: left; vertical-align: top; }
+.fix-log th { height: auto; background: var(--violet-t); font-size: 8.2pt; }
+.quick-answers { columns: 2; column-gap: 7mm; font-size: 8.6pt; line-height: 1.35; }
+.quick-answers div { break-inside: avoid; margin-bottom: 2.2mm; }
+.quick-answers b { display: block; font: 900 8pt/1.3 Arial, sans-serif; text-transform: uppercase; letter-spacing: .06em; border-bottom: 1.5px solid var(--ink); margin-bottom: .8mm; }
+
+@media screen {
+  body { padding: 8mm 0; }
+  .book { box-shadow: 0 2px 12px rgba(0,0,0,.2); }
+  .cover { margin: -13mm -14mm 13mm; }
+  .lesson, .new-page { margin-top: 10mm; padding-top: 10mm; border-top: 3px dashed #c3c8cf; }
+  .screen-bar { position: sticky; top: 0; z-index: 9; display: flex; gap: 4mm; justify-content: center; margin: -8mm 0 8mm; padding: 3mm; background: var(--navy); color: white; font-size: 10pt; }
+  .screen-bar a { color: var(--spark); font-weight: 700; }
+}
+@media print {
+  html { background: none; }
+  body { padding: 0; }
+  .book { width: auto; padding: 0; margin: 0; }
+  .cover { margin: 0; }
+  .screen-bar { display: none; }
+}
+.cover-stats { display: flex; gap: 8mm; margin-top: 14mm; }
+.cover-stats div { font: 900 8pt/1.2 Arial, sans-serif; letter-spacing: .12em; text-transform: uppercase; color: #a8b8cc; }
+.cover-stats b { display: block; font: 900 30pt/1 "Arial Black", Arial, sans-serif; color: var(--cyan); letter-spacing: -.03em; }
+.revise-card { break-inside: auto; }
+.revise-card > div { break-inside: avoid; }
+.keep { break-inside: avoid; }
+.route td { font-size: 8.6pt; line-height: 1.25; }
+.route td:first-child { font-size: 10pt; }
+.legend p { font-size: 8.6pt; }
+.cover-part { margin-top: 9mm; font: 900 20pt/1.1 "Arial Black", Arial, sans-serif; text-transform: uppercase; letter-spacing: -.02em; }
+.cover-part b { display: inline-block; margin-right: 4mm; padding: 1mm 3mm; background: var(--spark); color: var(--navy); }
+.cover-part span { display: block; margin-top: 3mm; font: 700 11pt/1 Arial, sans-serif; letter-spacing: .12em; color: var(--cyan); }
+.cover-lessons { margin: 7mm 0 0; padding-left: 9mm; font-size: 12.5pt; line-height: 1.7; color: #fff; }
+.cover-lessons li::marker { color: var(--spark); font-weight: 900; }
+.cover-lessons li.extra { list-style: none; margin-left: -9mm; margin-top: 2mm; color: #a8b8cc; font-size: 10.5pt; }
+.route tr.other td { color: #8a929c; }
+.route tr.other td strong { font-weight: 400; }
+.tracker-flow { margin-top: 8mm; }
+.tracker-flow > .eyebrow, .tracker-flow > .page-title, .tracker-flow > .page-intro { break-after: avoid; }
+.tracker-flow .tracker, .tracker-flow .quick-answers > div { break-inside: avoid; }
+
+/* equation triangles */
+.eq-card.has-tri { grid-template-columns: auto 1fr auto; }
+.eq-card .tri-mini { grid-column: 3; grid-row: 1 / span 3; align-self: center; }
+.tri-svg { display: block; height: auto; }
+.tri-how { display: grid; grid-template-columns: 1fr 1fr; gap: 4mm; align-items: start; margin: 1mm 0 3mm; padding: 3mm 3.5mm; border: 2px solid var(--ink); background: var(--spark-t); }
+.tri-steps p { margin: 0 0 1.4mm; font-size: 9.2pt; }
+.tri-steps b { display: inline-grid; place-items: center; width: 5mm; height: 5mm; margin-right: 2mm; border-radius: 50%; background: var(--ink); color: white; font-size: 7.5pt; }
+.tri-note { margin: 0; font-size: 8.8pt; line-height: 1.35; color: #333c48; }
+.tri-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 3mm; margin-bottom: 3mm; }
+.tri-card { display: grid; grid-template-columns: 25mm 1fr; gap: 2.5mm; align-items: center; padding: 2.5mm; border: 1.5px solid var(--ink); break-inside: avoid; }
+.tri-name { font: 900 10pt/1.1 "Arial Black", Arial, sans-serif; margin-bottom: 1mm; }
+.tri-card ul { list-style: none; margin: 0; padding: 0; }
+.tri-card li { margin: 0 0 .6mm; font-size: 8.6pt; line-height: 1.25; font-weight: 700; }
