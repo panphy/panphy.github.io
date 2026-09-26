@@ -264,6 +264,8 @@ aside { border-left: 1px solid var(--card-border); padding: 26px; background: va
 aside h2 { font-size: 1.9rem; line-height: 1.15; margin: 10px 0 14px; }
 aside p { color: var(--text-secondary); font-size: .92rem; margin: 8px 0 20px; }
 h3 { font-size: .88rem; margin: 0; }
+.icon { width: 1.15em; height: 1.15em; vertical-align: -0.2em; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.idea h3 .icon { color: var(--brand-accent-strong); }
 .idea { border-left: 3px solid var(--brand-accent); border-radius: 0 12px 12px 0; padding: 13px 16px; margin: 20px 0; background: var(--muted-bg); }
 .idea p { margin: 6px 0 0; }
 

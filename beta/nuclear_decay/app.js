@@ -1327,7 +1327,7 @@ $('isotope').addEventListener('change', () => {
 // ---------- Progress ----------
 const progress = loadProgress();
 const quiz = new Quiz($('mode-quiz'), { questionSets: QUESTIONS, progress, title: '✦ Unlock this discovery', completeText: '✦ Discovery unlocked!', onChange: updateProgress });
-const finalQuiz = new Quiz($('final-quiz'), { questionSets: QUESTIONS, progress, title: '✦ Final challenge', completeText: '🏆 Nucleus expert!', onChange: updateProgress });
+const finalQuiz = new Quiz($('final-quiz'), { questionSets: QUESTIONS, progress, title: '✦ Final challenge', completeText: 'Nucleus expert!', completeIcon: 'trophy', onChange: updateProgress });
 function updateProgress() {
   saveProgress(progress);
   const unlocked = MODE_ORDER.filter(mode => setSummary(progress, mode, QUESTIONS[mode]).complete);
