@@ -992,7 +992,15 @@ function setPlaying(playing) {
   $('motion-icon').setAttribute('d', playing ? 'M7 5h3v14H7zM14 5h3v14h-3z' : 'M8 5v14l11-7z');
 }
 $('motion').addEventListener('click', () => setPlaying(!state.playing));
-$('reset').addEventListener('click', resetView);
+function resetScene() {
+  // Stop any running demonstration, then return to the model's default view.
+  stopBeam();
+  endExcite();
+  state.inspectIndex = 0;
+  resetView();
+  readout.textContent = DEFAULT_READOUT[state.model];
+}
+$('reset').addEventListener('click', resetScene);
 $('inspect').addEventListener('click', () => {
   if (state.model === 'cloud') {
     const keys = Object.keys(ORBITALS);
@@ -1036,8 +1044,8 @@ viewer.addEventListener('keydown', event => {
     '=': () => nudgeCamera(0, 0, 0.88),
     '-': () => nudgeCamera(0, 0, 1.14),
     _: () => nudgeCamera(0, 0, 1.14),
-    Home: resetView,
-    0: resetView
+    Home: resetScene,
+    0: resetScene
   };
   if (!actions[event.key]) return;
   event.preventDefault();

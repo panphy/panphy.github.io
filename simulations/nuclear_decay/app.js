@@ -1203,7 +1203,13 @@ $('motion').addEventListener('click', () => {
   if (state.mode === 'halflife') setSampleRunning(!sample.running);
   else setPlaying(!state.playing);
 });
-$('reset').addEventListener('click', resetView);
+function resetScene() {
+  // Stop any decay, penetration test or sample run, then return to the default view.
+  buildMode(false);
+  resetView();
+  readout.textContent = DEFAULT_READOUT[state.mode]();
+}
+$('reset').addEventListener('click', resetScene);
 $('decay').addEventListener('click', () => {
   if (decay?.phase === 'done') {
     buildMode(false);
@@ -1244,8 +1250,8 @@ viewer.addEventListener('keydown', event => {
     '=': () => nudgeCamera(0, 0, 0.88),
     '-': () => nudgeCamera(0, 0, 1.14),
     _: () => nudgeCamera(0, 0, 1.14),
-    Home: resetView,
-    0: resetView
+    Home: resetScene,
+    0: resetScene
   };
   if (!actions[event.key]) return;
   event.preventDefault();
