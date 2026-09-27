@@ -213,7 +213,8 @@
         const phase = (p + i * 0.4) * Math.PI;
         // A negative period runs the middle orbit the other way: Rutherford gave no direction.
         if (animate) s += orbiter(cx, cy, rx, ry, phase, (i === 1 ? -1 : 1) * (7 + i * 1.5), tilt, er);
-        else s += ball(...orbitPoint(cx, cy, rx, ry, phase, tilt), er, 'electron');
+        // Still icons put electrons at the orbit ends, evenly spaced so none look paired.
+        else s += ball(...orbitPoint(cx, cy, rx, ry, Math.round(p) * Math.PI, tilt), er, 'electron');
       });
     });
     return s;
