@@ -28,8 +28,8 @@ const ABSORBERS = [
 // Alpha, beta and gamma share one pace: a build-up of about a second, then the radiation leaves at the same speed.
 const EMISSION_SPEED = 3.0;
 // The alpha particle speeds up steadily from rest while it forms, so its speed never dips.
-const ALPHA_GATHER_TIME = 1.0;
-const ALPHA_ACCELERATION = 2.2;
+const ALPHA_GATHER_TIME = 0.7;
+const ALPHA_ACCELERATION = 4.3;
 const ALPHA_MAX_SPEED = EMISSION_SPEED;
 const BETA_GLOW_TIME = 1.2;
 const BETA_CHANGE_TIME = 1.0;
