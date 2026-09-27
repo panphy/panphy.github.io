@@ -218,7 +218,7 @@
       keywords: ["charge (C)", "current (A)", "coulomb", "ampere", "electron", "conventional current"],
       online: { label: "Mission 2 · Charge on the move", path: "lesson/charge-and-current/", text: "Revision notes and 5 practice questions with worked answers." },
       doNow: [
-        ["Draw the symbols for a cell and a lamp.", "Cell: long thin line and short thick line. Lamp: circle with a cross."],
+        ["Draw the symbols for a cell and a lamp.", "Cell: a long line and a shorter line (the long line is +). Lamp: circle with a cross."],
         ["How must an ammeter be connected?", "In series (in the loop)."],
         ["Give two reasons why a lamp in a circuit might not light.", "Open switch; gap or loose wire; broken bulb; no cell."],
       ],

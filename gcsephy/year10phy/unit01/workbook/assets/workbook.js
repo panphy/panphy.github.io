@@ -56,7 +56,7 @@
   };
 
   // Standard symbol on a short wire, reusing the site's drawing helper.
-  const symbolSvg = (type) => D.circuit({ w: 104, h: 64, wires: ["M4 40 H100"], parts: [[type, 52, 40, "h"]] })
+  const symbolSvg = (type) => D.circuit({ w: 104, h: 70, wires: ["M4 45 H100"], extra: `<g transform="translate(52 45)">${D.keySymbol(type)}</g>` })
     .replace(/<figure[^>]*>/, "").replace("</figure>", "");
 
   /* Graph paper drawn in millimetres: 2 mm minor and 1 cm major squares.
