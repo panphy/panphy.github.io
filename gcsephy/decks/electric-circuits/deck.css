@@ -111,7 +111,8 @@
 
 /* Teaching diagrams on slides 8, 9, 21 and 49 */
 .cd .intro-wire { stroke-width: 4; }
-.cd .wire-fill { fill: #f6e2cf; stroke-width: 3; }
+.cd .wire-section { fill: #f2d2ae; stroke-width: 3; }
+.cd .wire-edge { stroke: #a15c29; stroke-width: 2; opacity: .7; }
 .cd text.diagram-label { font: 800 16px/1 Arial, Helvetica, sans-serif; }
 .cd text.diagram-equation { font: 900 18px/1 Arial, Helvetica, sans-serif; }
 .cd text.diagram-arrow { font: 900 26px/1 Arial, Helvetica, sans-serif; fill: #d9480f; }
@@ -122,5 +123,36 @@
 .cd .ion-vibration { stroke: #d9480f; stroke-width: 1.6; }
 .cd .electron-track { stroke: #1479a8; stroke-width: 3.4; stroke-dasharray: 7 4; }
 .cd .collision-dot { fill: #d9480f; stroke: #fff; stroke-width: 1.5; }
-.cd .fault-contact { stroke: #95582f; stroke-width: 5; }
-.cd .fault-flow { stroke: #d9480f; stroke-width: 3; stroke-dasharray: 7 5; }
+
+/* Slide 49: the presenter starts the fault sequence on demand. */
+.fig > .earth-demo { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: stretch; }
+.earth-demo > svg { display: block; width: 100%; flex: 1; min-height: 0; }
+.earth-controls { display: flex; align-items: center; gap: 18px; padding: 4px 10px 8px; }
+.earth-play { flex: none; min-height: 76px; padding: 8px 16px; border: 2px solid var(--ink); background: var(--hi); color: var(--ink); font: 900 16px Arial, Helvetica, sans-serif; cursor: pointer; box-shadow: 4px 4px 0 var(--ink); }
+.earth-play:hover, .earth-play:focus-visible { background: #ffe07a; }
+.earth-play:focus-visible { outline: 4px solid var(--hot); outline-offset: 3px; }
+.earth-play:disabled { opacity: .6; cursor: wait; }
+.earth-status { margin: 0; font: 800 17px/1.25 Arial, Helvetica, sans-serif; color: var(--ink); }
+.cd .fuse-box { fill: var(--diagram-bg); }
+.cd .fuse-wire, .cd .fuse-gap { stroke-width: 3; }
+.cd .fuse-gap, .cd .fault-contact, .cd .fault-spark, .cd .fault-trace { visibility: hidden; }
+.cd .fault-contact { stroke: #95582f; stroke-width: 6; }
+.cd .fault-spark { fill: #ffd54a; stroke: var(--ink); stroke-width: 2; }
+.cd .fault-trace { fill: none; stroke: #d9480f; stroke-width: 7; stroke-linecap: round; stroke-linejoin: round; stroke-dasharray: 100; stroke-dashoffset: 100; }
+.fault-active .fault-contact, .fault-active .fault-spark, .fault-active .fault-trace { visibility: visible; }
+.fault-active .fault-trace { animation: trace-earth-fault 1.6s ease-out forwards; }
+.fuse-blown .fault-contact, .fuse-blown .fuse-gap { visibility: visible; }
+.fuse-blown .fuse-wire { visibility: hidden; }
+@keyframes trace-earth-fault { to { stroke-dashoffset: 0; } }
+@media (prefers-reduced-motion: reduce) { .fault-active .fault-trace { animation-duration: .01s; } }
+.thumb-slide .earth-controls { display: none; }
+
+@media print {
+  .earth-play { display: none; }
+  .earth-demo .fault-contact, .earth-demo .fault-spark, .earth-demo .fault-trace { visibility: visible; }
+  .earth-demo .fault-trace { animation: none; stroke-dashoffset: 0; }
+  .earth-demo .fuse-wire { visibility: visible; }
+  .earth-demo .fuse-gap { visibility: hidden; }
+  .earth-demo .earth-status { font-size: 0; }
+  .earth-demo .earth-status::after { content: "Fault current flows to earth and the fuse melts."; font-size: 17px; }
+}
