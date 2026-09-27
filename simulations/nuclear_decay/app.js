@@ -25,15 +25,17 @@ const ABSORBERS = [
   { key: 'aluminium', label: 'Aluminium', gap: 1.0, thickness: 0.14 },
   { key: 'lead', label: 'Lead', gap: 1.1, thickness: 0.55 }
 ];
-// Alpha, beta and gamma share one pace: a build-up of about a second, then the radiation leaves at the same speed.
+// Alpha, beta and gamma share one pace: a build-up of about a second, then the radiation leaves at the same
+// on-screen speed. Each view is framed to its nucleus, so speeds scale with that mode's home half-width.
 const EMISSION_SPEED = 3.0;
+const emissionSpeed = mode => EMISSION_SPEED * HOME_HALF_WIDTH[mode] / HOME_HALF_WIDTH.beta;
 // The alpha particle speeds up steadily from rest while it forms, so its speed never dips.
 const ALPHA_GATHER_TIME = 0.7;
-const ALPHA_ACCELERATION = 4.3;
-const ALPHA_MAX_SPEED = EMISSION_SPEED;
+const ALPHA_ACCELERATION = 6;
+const ALPHA_MAX_SPEED = emissionSpeed('alpha');
 const BETA_GLOW_TIME = 1.2;
 const BETA_CHANGE_TIME = 1.0;
-const BETA_ELECTRON_SPEED = EMISSION_SPEED;
+const BETA_ELECTRON_SPEED = emissionSpeed('beta');
 const BETA_ANTINEUTRINO_SPEED = 2.6;
 const GAMMA_EXCITE_TIME = 1.2;
 const GAMMA_RELAX_TIME = 1.0;
@@ -705,7 +707,7 @@ function stepGamma() {
       let time = 0;
       addFlyer(wave, straightFlight(wave, {
         direction: d.direction,
-        speed: EMISSION_SPEED,
+        speed: emissionSpeed('gamma'),
         range: 8,
         getPosition: () => centre,
         move: step => centre.addScaledVector(d.direction, step),
