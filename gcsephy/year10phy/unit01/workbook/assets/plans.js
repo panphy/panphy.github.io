@@ -23,8 +23,8 @@
       <p class="page-intro">Twelve 50-minute lessons, written for students with <strong>no prior knowledge of electricity</strong>. Each lesson has a matching section in the student workbook and a mission on the companion website.</p>
       <h4 class="sub">How the three resources fit together</h4>
       <table class="compare"><thead><tr><th>Resource</th><th>Used for</th></tr></thead><tbody>
-        <tr><th>Student workbook</th><td>Four self-contained parts (Lessons 1–4, 5–7, 8–10, 11–12 with the Unit review and a Physics-only static electricity page), each with its own toolkit, key words, tracker and quick answers. Every lesson: explanations, worked examples, graded practice, lab records, an exam question and a revision box. It is the students' classwork book and their revision guide.</td></tr>
-        <tr><th>Answer edition</th><td>Same pages and page numbers as each part, with answers in blue. For marking, and for release to students for self-marking if you choose.</td></tr>
+        <tr><th>Student workbook</th><td>One booklet per lesson (12 pt text, wide writing lines), each with its toolkit, key words and quick answers, plus a Unit review booklet with the static electricity page (Physics only) and progress tracker. Every lesson: explanations, worked examples, graded practice, lab records, an exam question and a revision box. It is the students' classwork book and their revision guide.</td></tr>
+        <tr><th>Answer edition</th><td>Same pages and page numbers as each booklet, with answers in blue. For marking, and for release to students for self-marking if you choose.</td></tr>
         <tr><th>Companion website</th><td>${SITE}: homework and revision. Missions carry more questions with hints and worked answers; the Exam Zone is for the end of the unit.</td></tr>
         <tr><th>Virtual labs, RP sheets</th><td>Lessons 2–4 use the Virtual Labs worksheet (PhET) for the full investigation; the workbook holds a short record. Lab 3 plots current against p.d., as AQA does. Lessons 5, 7 and 9 have full required-practical pages on the website.</td></tr>
       </tbody></table>
