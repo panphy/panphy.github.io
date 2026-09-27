@@ -1,0 +1,717 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="robots" content="noindex, nofollow">
+  <meta name="description" content="Teaching slides for AQA GCSE Physics atomic structure: the atom, changing atomic models, nuclear radiation and half-life.">
+  <meta name="theme-color" content="#F8F6F1">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <link rel="stylesheet" href="/assets/standalone-top.css">
+  <script>
+  (function() {
+    var dark = false;
+    try { dark = !!localStorage.getItem('atoms-radiation-deck-dark'); } catch (error) {}
+    if (dark) {
+      document.documentElement.setAttribute('data-theme', 'dark');
+      var tc = document.querySelector('meta[name="theme-color"]');
+      if (tc) tc.setAttribute('content', '#111110');
+    }
+  })();
+  </script>
+  <title>Atoms and Nuclear Radiation · GCSE Physics</title>
+  <link rel="icon" type="image/png" href="/assets/favicon.png">
+  <link rel="apple-touch-icon" href="/assets/apple-touch-icon.png">
+  <link rel="stylesheet" href="deck.css">
+  <link rel="stylesheet" href="/assets/theme-toggle.css">
+  <link rel="stylesheet" href="/assets/fullscreen-button.css">
+  <script src="/assets/theme-toggle.js"></script>
+  <script src="/gcsephy/sw-register.js" defer></script>
+</head>
+<body>
+  <header class="banner">
+    <a class="banner-logo" href="/gcsephy/" aria-label="GCSE Physics resources"><img src="/assets/panphy.png" alt="PanPhy Labs" width="38" height="38"></a>
+    <div class="banner-title">Atoms &amp; Nuclear Radiation</div>
+    <div class="banner-actions">
+      <button id="fullscreen" class="panphy-fullscreen-button" type="button" aria-pressed="false" aria-label="Present fullscreen" title="Present fullscreen (F)"><svg class="panphy-fs-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M4 9V4h5M15 4h5v5M20 15v5h-5M9 20H4v-5"/></svg></button>
+      <button id="theme-button" type="button" data-panphy-theme-toggle aria-label="Toggle light/dark theme" title="Toggle between light and dark themes"></button>
+    </div>
+  </header>
+  <script>window.PanPhyThemeToggle.mount(document.getElementById('theme-button'), { darkStorageKey: 'atoms-radiation-deck-dark' });</script>
+
+  <main class="stage" id="stage">
+    <div class="deck" id="deck">
+
+      <!-- 1 · Title -->
+      <section class="slide title" data-title="Atoms and Nuclear Radiation">
+        <div class="title-grid">
+          <div>
+            <p class="eyebrow">AQA GCSE Physics · 4.4 Atomic structure</p>
+            <h1>Tiny atom.<br>Big ideas<span>!</span></h1>
+            <p class="lead">Inside the atom · Changing models<br>Nuclear radiation · Half-life</p>
+            <div class="chips">
+              <a class="chip on" href="/simulations/atomic_models.html" target="_blank" rel="noopener">Atomic Models sim ↗</a>
+              <a class="chip on" href="/simulations/nuclear_decay.html" target="_blank" rel="noopener">Nuclear Decay sim ↗</a>
+            </div>
+          </div>
+          <div class="fig" data-fig="hero"></div>
+        </div>
+      </section>
+
+      <!-- 2 · Roadmap -->
+      <section class="slide" data-title="Lesson map">
+        <p class="eyebrow">The journey</p>
+        <h2>Three big questions<span>.</span></h2>
+        <div class="cards fill" style="grid-template-columns: repeat(3, 1fr);">
+          <div class="card">
+            <div class="fig" data-fig="mini-neutron" style="height: 250px;"></div>
+            <p class="eyebrow">Part 01</p>
+            <h3>What is inside an atom?</h3>
+            <p>Particles · size · isotopes · ions</p>
+          </div>
+          <div class="card">
+            <div class="fig" data-fig="mini-plum" style="height: 250px;"></div>
+            <p class="eyebrow">Part 02</p>
+            <h3>How do we know?</h3>
+            <p>Plum pudding → nuclear → Bohr</p>
+          </div>
+          <div class="card">
+            <div class="fig" data-fig="mini-decay" style="height: 250px;"></div>
+            <p class="eyebrow">Part 03</p>
+            <h3>What do unstable nuclei do?</h3>
+            <p>Alpha · beta · gamma · half-life</p>
+          </div>
+        </div>
+        <div class="slide-foot"><span>ATOMS &amp; NUCLEAR RADIATION</span><span data-page></span></div>
+      </section>
+
+      <!-- Section 1 -->
+      <section class="slide section" data-title="Part 1: Inside the atom">
+        <div class="title-grid">
+          <div>
+            <p class="eyebrow">Part 01</p>
+            <h1>Inside the atom<span>.</span></h1>
+            <p class="lead">Protons · neutrons · electrons</p>
+          </div>
+          <div class="fig" data-fig="carbon-nucleus"></div>
+        </div>
+        <div class="slide-foot"><span>ATOMS &amp; NUCLEAR RADIATION</span><span data-page></span></div>
+      </section>
+
+      <section class="slide" data-title="Particles in an atom">
+        <p class="eyebrow">Inside the atom</p>
+        <h2>Three particles<span>.</span></h2>
+        <div class="stack center">
+          <table class="facts big">
+            <thead><tr><th>Particle</th><th>Relative charge</th><th>Relative mass</th><th>Where?</th></tr></thead>
+            <tbody>
+              <tr><td><span class="icon-cell"><span class="fig" data-fig="ball" data-kind="proton"></span>Proton</span></td><td class="num">+1</td><td class="num">1</td><td>Nucleus</td></tr>
+              <tr><td><span class="icon-cell"><span class="fig" data-fig="ball" data-kind="neutron"></span>Neutron</span></td><td class="num">0</td><td class="num">1</td><td>Nucleus</td></tr>
+              <tr><td><span class="icon-cell"><span class="fig" data-fig="ball" data-kind="electron"></span>Electron</span></td><td class="num">−1</td><td>Very small</td><td>Energy levels around the nucleus</td></tr>
+            </tbody>
+          </table>
+          <div class="idea"><b>Atom = neutral.</b> Number of electrons = number of protons.</div>
+        </div>
+        <div class="slide-foot"><span>ATOMS &amp; NUCLEAR RADIATION</span><span data-page></span></div>
+      </section>
+
+      <section class="slide" data-title="Size of an atom">
+        <p class="eyebrow">Inside the atom</p>
+        <h2>Mostly empty space<span>.</span></h2>
+        <div class="split wide-fig">
+          <ul class="points">
+            <li>Atom radius ≈ <b>1 × 10⁻¹⁰ m</b></li>
+            <li>Nucleus radius <b>&lt; 1/10 000</b> of the atom’s</li>
+            <li>Almost all the <b>mass</b> is in the nucleus</li>
+            <li>Electrons at different distances: <b>energy levels</b></li>
+          </ul>
+          <div class="panel">
+            <div class="panel-head"><span>AN ATOM</span><span class="pill">NOT TO SCALE</span></div>
+            <div class="fig" data-fig="scale"></div>
+          </div>
+        </div>
+        <div class="slide-foot"><span>ATOMS &amp; NUCLEAR RADIATION</span><span data-page></span></div>
+      </section>
+
+      <section class="slide" data-title="Atomic number and mass number">
+        <p class="eyebrow">Inside the atom</p>
+        <h2>Reading the symbol<span>.</span></h2>
+        <div class="split">
+          <div class="stack">
+            <ul class="points">
+              <li><b>Atomic number</b> = number of protons</li>
+              <li><b>Mass number</b> = protons + neutrons</li>
+              <li>Neutrons = mass no. − atomic no.</li>
+              <li>Protons decide the <b>element</b></li>
+            </ul>
+            <div class="idea step">Try: <span class="nuc"><span class="nums"><span>23</span><span>11</span></span>Na</span> → <b>11 p · 12 n · 11 e</b></div>
+          </div>
+          <div class="panel">
+            <div class="panel-head"><span>NUCLEAR NOTATION</span></div>
+            <div class="fig" data-fig="notation"></div>
+          </div>
+        </div>
+        <div class="slide-foot"><span>ATOMS &amp; NUCLEAR RADIATION</span><span data-page></span></div>
+      </section>
+
+      <section class="slide" data-title="Isotopes">
+        <p class="eyebrow">Inside the atom</p>
+        <h2>Isotopes<span>.</span></h2>
+        <div class="stack">
+          <ul class="points" style="grid-template-columns: 1fr 1fr; gap: 16px 40px;">
+            <li>Same element: <b>same protons</b></li>
+            <li><b>Different</b> numbers of neutrons</li>
+            <li>So different <b>mass numbers</b></li>
+            <li>Some are <b>unstable</b>: carbon-14</li>
+          </ul>
+          <div class="panel fill">
+            <div class="panel-head"><span>ISOTOPES OF CARBON</span><span class="pill">NOT TO SCALE</span></div>
+            <div class="fig" data-fig="isotopes"></div>
+          </div>
+        </div>
+        <div class="slide-foot"><span>ATOMS &amp; NUCLEAR RADIATION</span><span data-page></span></div>
+      </section>
+
+      <section class="slide" data-title="Atoms and ions">
+        <p class="eyebrow">Inside the atom</p>
+        <h2>Atoms and ions<span>.</span></h2>
+        <div class="split wide-fig">
+          <ul class="points">
+            <li>Atom: electrons = protons</li>
+            <li>So <b>no overall charge</b></li>
+            <li>Lose outer electron(s) → <b>positive ion</b></li>
+            <li>The nucleus does <b>not</b> change</li>
+          </ul>
+          <div class="panel">
+            <div class="panel-head"><span>LITHIUM</span><span class="pill">NOT TO SCALE</span></div>
+            <div class="fig" data-fig="ion"></div>
+          </div>
+        </div>
+        <div class="slide-foot"><span>ATOMS &amp; NUCLEAR RADIATION</span><span data-page></span></div>
+      </section>
+
+      <!-- Section 2 -->
+      <section class="slide section" data-title="Part 2: How the model changed">
+        <div class="title-grid">
+          <div>
+            <p class="eyebrow">Part 02</p>
+            <h1>How the model changed<span>.</span></h1>
+            <p class="lead">New evidence → new model</p>
+          </div>
+          <div class="fig" data-fig="rutherford"></div>
+        </div>
+        <div class="slide-foot"><span>ATOMS &amp; NUCLEAR RADIATION</span><span data-page></span></div>
+      </section>
+
+      <section class="slide" data-title="Timeline of atomic models">
+        <p class="eyebrow">Changing models</p>
+        <h2>A model that kept changing<span>.</span></h2>
+        <div class="stack center">
+          <div class="timeline">
+            <div class="tl"><div class="fig" data-fig="mini-solid"></div><span class="year">Before 1897</span><h3>Solid spheres</h3><p>Tiny spheres · cannot be divided</p></div>
+            <div class="tl"><div class="fig" data-fig="mini-plum"></div><span class="year">1904</span><h3>Plum pudding</h3><p>After the electron was discovered</p></div>
+            <div class="tl"><div class="fig" data-fig="mini-nuclear"></div><span class="year">1911</span><h3>Nuclear model</h3><p>From alpha scattering</p></div>
+            <div class="tl"><div class="fig" data-fig="mini-bohr"></div><span class="year">1913</span><h3>Bohr model</h3><p>Electrons in energy levels</p></div>
+            <div class="tl"><div class="fig" data-fig="mini-proton"></div><span class="year">c. 1920</span><h3>Protons</h3><p>Positive charge in small particles</p></div>
+            <div class="tl"><div class="fig" data-fig="mini-neutron"></div><span class="year">1932</span><h3>Neutrons</h3><p>Chadwick’s evidence</p></div>
+          </div>
+          <div class="idea">The <a href="/simulations/atomic_models.html" target="_blank" rel="noopener">Atomic Models sim ↗</a> also shows the 1926 electron cloud: <b>not needed for GCSE</b>.</div>
+        </div>
+        <div class="slide-foot"><span>ATOMS &amp; NUCLEAR RADIATION</span><span data-page></span></div>
+      </section>
+
+      <section class="slide" data-title="Plum pudding model">
+        <p class="eyebrow">Thomson · 1904</p>
+        <h2>The plum pudding model<span>.</span></h2>
+        <div class="split">
+          <div class="stack">
+            <ul class="points">
+              <li>Electron discovered → atoms <b>can be divided</b></li>
+              <li>A <b>ball of positive charge</b></li>
+              <li><b>Negative electrons</b> embedded in it</li>
+              <li><b>No nucleus</b></li>
+            </ul>
+            <a class="try" href="/simulations/atomic_models.html" target="_blank" rel="noopener">Try it: Atomic Models sim ↗</a>
+          </div>
+          <div class="panel">
+            <div class="panel-head"><span>PLUM PUDDING MODEL</span><span class="pill">NOT TO SCALE</span></div>
+            <div class="fig" data-fig="plum"></div>
+            <div class="legend"><span><i class="electron">−</i> Electron</span><span><i class="positive">+</i> Positive charge (spread)</span></div>
+          </div>
+        </div>
+        <div class="slide-foot"><span>ATOMS &amp; NUCLEAR RADIATION</span><span data-page></span></div>
+      </section>
+
+      <section class="slide" data-title="Alpha scattering experiment">
+        <p class="eyebrow">Rutherford, Geiger &amp; Marsden · 1909–1911</p>
+        <h2>The alpha scattering experiment<span>.</span></h2>
+        <div class="split wide-fig">
+          <ul class="points">
+            <li>Fire <b class="t-alpha">alpha particles</b> (+) at thin <b>gold foil</b></li>
+            <li>Count them at <b>all angles</b></li>
+            <li>Plum pudding predicts: all pass through</li>
+            <li>Only <b>tiny</b> deflections expected</li>
+          </ul>
+          <div class="panel">
+            <div class="panel-head"><span>ALPHA SCATTERING</span><span class="pill">NOT TO SCALE</span></div>
+            <div class="fig" data-fig="scatter"></div>
+          </div>
+        </div>
+        <div class="slide-foot"><span>ATOMS &amp; NUCLEAR RADIATION</span><span data-page></span></div>
+      </section>
+
+      <section class="slide" data-title="Alpha scattering results">
+        <p class="eyebrow">Evidence → conclusion</p>
+        <h2>What they saw. What it means<span>.</span></h2>
+        <div class="split">
+          <div class="obs">
+            <div class="obs-head"><span>OBSERVATION</span><span>CONCLUSION</span></div>
+            <div class="obs-row"><div>Most went <b>straight through</b></div><span class="to">→</span><div>Atom is mostly <b>empty space</b></div></div>
+            <div class="obs-row step"><div>Some were <b>deflected</b></div><span class="to">→</span><div>Centre is <b>positively charged</b></div></div>
+            <div class="obs-row step"><div>A very few <b>bounced back</b></div><span class="to">→</span><div><b>Mass concentrated</b> in a tiny centre</div></div>
+          </div>
+          <div class="panel">
+            <div class="panel-head"><span>CLOSE-UP</span><span class="pill">NOT TO SCALE</span></div>
+            <div class="fig" data-fig="scatter-zoom"></div>
+          </div>
+        </div>
+        <div class="slide-foot"><span>ATOMS &amp; NUCLEAR RADIATION</span><span data-page></span></div>
+      </section>
+
+      <section class="slide" data-title="Nuclear model">
+        <p class="eyebrow">Rutherford · 1911</p>
+        <h2>The nuclear model<span>.</span></h2>
+        <div class="split">
+          <ul class="points">
+            <li>A tiny, dense <b>nucleus</b> at the centre</li>
+            <li>The nucleus is <b>positive</b></li>
+            <li>Almost all the <b>mass</b> is in it</li>
+            <li><b>Electrons</b> outside the nucleus</li>
+            <li>Replaced the plum pudding model</li>
+          </ul>
+          <div class="panel">
+            <div class="panel-head"><span>NUCLEAR MODEL</span><span class="pill">NOT TO SCALE</span></div>
+            <div class="fig" data-fig="rutherford"></div>
+            <div class="legend"><span><i class="electron">−</i> Electron</span><span><i class="positive">+</i> Nucleus (positive)</span></div>
+          </div>
+        </div>
+        <div class="slide-foot"><span>ATOMS &amp; NUCLEAR RADIATION</span><span data-page></span></div>
+      </section>
+
+      <section class="slide" data-title="Comparing the models">
+        <p class="eyebrow">Compare</p>
+        <h2>Plum pudding vs nuclear<span>.</span></h2>
+        <div class="stack center">
+        <table class="facts big">
+          <thead><tr><th></th><th><span class="icon-cell"><span class="fig" data-fig="mini-plum" style="width: 96px; height: 96px;"></span>Plum pudding</span></th><th><span class="icon-cell"><span class="fig" data-fig="mini-nuclear" style="width: 96px; height: 96px;"></span>Nuclear model</span></th></tr></thead>
+          <tbody>
+            <tr><td>Positive charge</td><td>Spread through the atom</td><td>In a tiny nucleus</td></tr>
+            <tr><td>Mass</td><td>Spread through the atom</td><td>Concentrated in the nucleus</td></tr>
+            <tr><td>Empty space?</td><td>No</td><td>Mostly empty space</td></tr>
+            <tr><td>Electrons</td><td>Embedded in the positive ball</td><td>Outside the nucleus</td></tr>
+          </tbody>
+        </table>
+        </div>
+        <div class="slide-foot"><span>ATOMS &amp; NUCLEAR RADIATION</span><span data-page></span></div>
+      </section>
+
+      <section class="slide" data-title="Bohr model">
+        <p class="eyebrow">Bohr · 1913</p>
+        <h2>The Bohr model<span>.</span></h2>
+        <div class="split">
+          <div class="stack">
+            <ul class="points">
+              <li>Bohr <b>adapted</b> the nuclear model</li>
+              <li>Electrons orbit at <b>specific distances</b></li>
+              <li>These are <b>energy levels</b></li>
+              <li>His <b>calculations agreed</b> with experiments</li>
+            </ul>
+            <div class="idea">Carbon: <b>2</b> electrons in n = 1 · <b>4</b> in n = 2</div>
+          </div>
+          <div class="panel">
+            <div class="panel-head"><span>BOHR MODEL · CARBON-12</span><span class="pill">NOT TO SCALE</span></div>
+            <div class="fig" data-fig="bohr"></div>
+            <div class="legend"><span><i class="electron">−</i> Electron</span><span><i class="proton">+</i> Proton</span><span><i class="neutron">0</i> Neutron</span></div>
+          </div>
+        </div>
+        <div class="slide-foot"><span>ATOMS &amp; NUCLEAR RADIATION</span><span data-page></span></div>
+      </section>
+
+      <section class="slide" data-title="Energy levels and EM radiation">
+        <p class="eyebrow">Energy levels</p>
+        <h2>Electrons can change level<span>.</span></h2>
+        <div class="stack">
+          <ul class="points" style="grid-template-columns: 1fr 1fr; gap: 16px 40px;">
+            <li><b>Absorb</b> EM radiation → move <b>further out</b></li>
+            <li><b>Emit</b> EM radiation → move <b>closer in</b></li>
+          </ul>
+          <div class="panel fill">
+            <div class="panel-head"><span>CHANGING ENERGY LEVEL</span><span class="pill">NOT TO SCALE</span></div>
+            <div class="fig" data-fig="levels"></div>
+            <div class="legend"><span><i class="electron">−</i> Electron</span><span><i class="photon">~</i> EM radiation</span></div>
+          </div>
+        </div>
+        <div class="slide-foot"><span>ATOMS &amp; NUCLEAR RADIATION</span><span data-page></span></div>
+      </section>
+
+      <section class="slide" data-title="Protons and neutrons">
+        <p class="eyebrow">Filling in the nucleus</p>
+        <h2>Protons, then neutrons<span>.</span></h2>
+        <div class="split">
+          <ul class="points">
+            <li>Later experiments: positive charge is in small particles: <b class="t-proton">protons</b></li>
+            <li>Each proton: the <b>same</b> positive charge</li>
+            <li><b>James Chadwick</b> (1932): evidence for <b class="t-neutron">neutrons</b></li>
+            <li>About <b>20 years</b> after the nucleus was accepted</li>
+          </ul>
+          <div class="panel">
+            <div class="panel-head"><span>CARBON-12 NUCLEUS</span><span class="pill">NOT TO SCALE</span></div>
+            <div class="fig" data-fig="carbon-nucleus"></div>
+            <div class="legend"><span><i class="proton">+</i> Proton</span><span><i class="neutron">0</i> Neutron</span></div>
+          </div>
+        </div>
+        <div class="slide-foot"><span>ATOMS &amp; NUCLEAR RADIATION</span><span data-page></span></div>
+      </section>
+
+      <section class="slide" data-title="Why models change">
+        <p class="eyebrow">Working scientifically</p>
+        <h2>Why models change<span>.</span></h2>
+        <div class="split">
+          <ul class="points">
+            <li>A model must explain the <b>evidence</b></li>
+            <li>It makes <b>predictions</b> we can test</li>
+            <li>New evidence can <b>change or replace</b> it</li>
+            <li>Results are <b>published</b> and <b>peer reviewed</b></li>
+          </ul>
+          <div class="panel">
+            <div class="panel-head"><span>THE SCIENCE CYCLE</span></div>
+            <div class="fig" data-fig="cycle"></div>
+          </div>
+        </div>
+        <div class="slide-foot"><span>ATOMS &amp; NUCLEAR RADIATION</span><span data-page></span></div>
+      </section>
+
+      <section class="slide" data-title="Quick check: atoms and models">
+        <p class="eyebrow">Quick check</p>
+        <h2>Atoms and models<span>.</span></h2>
+        <div class="quiz fill">
+          <div class="q"><p><span class="n">01</span>What is in the nucleus?</p><div class="ans step">Protons and neutrons</div></div>
+          <div class="q"><p><span class="n">02</span>How many neutrons in <span class="nuc"><span class="nums"><span>37</span><span>17</span></span>Cl</span>?</p><div class="ans step">37 − 17 = 20</div></div>
+          <div class="q"><p><span class="n">03</span>Why did most alpha particles pass straight through?</p><div class="ans step">The atom is mostly empty space</div></div>
+          <div class="q"><p><span class="n">04</span>Why did a very few bounce back?</p><div class="ans step">Tiny, dense, positive nucleus</div></div>
+          <div class="q"><p><span class="n">05</span>An electron absorbs EM radiation. What happens?</p><div class="ans step">Moves to a higher energy level (further out)</div></div>
+          <div class="q"><p><span class="n">06</span>Who gave evidence for the neutron?</p><div class="ans step">James Chadwick</div></div>
+        </div>
+        <div class="slide-foot"><span class="reveal-hint">PRESS → TO REVEAL EACH ANSWER</span><span data-page></span></div>
+      </section>
+
+      <!-- Section 3 -->
+      <section class="slide section" data-title="Part 3: Nuclear radiation">
+        <div class="title-grid">
+          <div>
+            <p class="eyebrow">Part 03</p>
+            <h1>Nuclear radiation<span>.</span></h1>
+            <p class="lead">Alpha · beta · gamma · half-life</p>
+          </div>
+          <div class="fig" data-fig="mini-decay"></div>
+        </div>
+        <div class="slide-foot"><span>ATOMS &amp; NUCLEAR RADIATION</span><span data-page></span></div>
+      </section>
+
+      <section class="slide" data-title="Radioactive decay">
+        <p class="eyebrow">Unstable nuclei</p>
+        <h2>Radioactive decay<span>.</span></h2>
+        <div class="split">
+          <ul class="points">
+            <li>Unstable nuclei give out <b>radiation</b></li>
+            <li>They become <b>more stable</b></li>
+            <li>Decay is <b>random</b></li>
+            <li><b>Activity</b>: decays per second, in <b>becquerel (Bq)</b></li>
+            <li><b>Count rate</b>: decays a detector records per second</li>
+          </ul>
+          <div class="panel">
+            <div class="panel-head"><span>DECAY AND DETECTION</span><span class="pill">NOT TO SCALE</span></div>
+            <div class="fig" data-fig="decay-intro"></div>
+            <div class="legend"><span><i class="alpha">α</i> Alpha</span><span><i class="electron">β</i> Beta</span><span><i class="photon">γ</i> Gamma</span><span><i class="neutron">n</i> Neutron</span></div>
+          </div>
+        </div>
+        <div class="slide-foot"><span>ATOMS &amp; NUCLEAR RADIATION</span><span data-page></span></div>
+      </section>
+
+      <section class="slide" data-title="Alpha decay">
+        <p class="eyebrow"><span class="nocase">α</span> · Americium-241</p>
+        <h2>Alpha decay<span>.</span></h2>
+        <div class="split">
+          <div class="stack center">
+            <ul class="points">
+              <li><b>2 protons + 2 neutrons</b></li>
+              <li>Same as a <b>helium nucleus</b></li>
+              <li>Mass number <b>− 4</b></li>
+              <li>Atomic number <b>− 2</b> → new element</li>
+            </ul>
+            <div>
+              <div class="equation"><span class="nuc"><span class="nums"><span>241</span><span>95</span></span>Am</span><span class="op">→</span><span class="nuc"><span class="nums"><span>237</span><span>93</span></span>Np</span><span class="op">+</span><span class="nuc alpha"><span class="nums"><span>4</span><span>2</span></span>He</span></div>
+              <p class="eq-check">TOP: 241 = 237 + 4 <b>✓</b> · BOTTOM: 95 = 93 + 2 <b>✓</b></p>
+            </div>
+          </div>
+          <div class="panel">
+            <div class="panel-head"><span>ALPHA DECAY</span><span class="pill">SIMPLIFIED · NOT TO SCALE</span></div>
+            <div class="fig" data-fig="alpha"></div>
+            <div class="legend"><span><i class="proton">+</i> Proton</span><span><i class="neutron">0</i> Neutron</span><span><i class="alpha">α</i> Alpha particle</span></div>
+          </div>
+        </div>
+        <div class="slide-foot"><span>ATOMS &amp; NUCLEAR RADIATION</span><span data-page></span></div>
+      </section>
+
+      <section class="slide" data-title="Beta decay">
+        <p class="eyebrow"><span class="nocase">β⁻</span> · Carbon-14</p>
+        <h2>Beta decay<span>.</span></h2>
+        <div class="split">
+          <div class="stack center">
+            <ul class="points">
+              <li>A <b>neutron → proton + electron</b></li>
+              <li>The fast <b class="t-electron">electron</b> leaves the nucleus</li>
+              <li>Mass number <b>unchanged</b></li>
+              <li>Atomic number <b>+ 1</b> → new element</li>
+            </ul>
+            <div>
+              <div class="equation"><span class="nuc"><span class="nums"><span>14</span><span>6</span></span>C</span><span class="op">→</span><span class="nuc"><span class="nums"><span>14</span><span>7</span></span>N</span><span class="op">+</span><span class="nuc electron"><span class="nums"><span>0</span><span>−1</span></span>e</span></div>
+              <p class="eq-check">TOP: 14 = 14 + 0 <b>✓</b> · BOTTOM: 6 = 7 + (−1) <b>✓</b></p>
+            </div>
+          </div>
+          <div class="panel">
+            <div class="panel-head"><span>BETA DECAY</span><span class="pill">NOT TO SCALE</span></div>
+            <div class="fig" data-fig="beta"></div>
+            <div class="legend"><span><i class="proton">+</i> Proton</span><span><i class="neutron">0</i> Neutron</span><span><i class="electron">β</i> Beta particle (electron)</span></div>
+          </div>
+        </div>
+        <div class="slide-foot"><span>ATOMS &amp; NUCLEAR RADIATION</span><span data-page></span></div>
+      </section>
+
+      <section class="slide" data-title="Gamma emission">
+        <p class="eyebrow"><span class="nocase">γ</span> · Technetium-99m</p>
+        <h2>Gamma emission<span>.</span></h2>
+        <div class="split">
+          <div class="stack center">
+            <ul class="points">
+              <li><b class="t-photon">EM radiation</b> from the nucleus</li>
+              <li>The nucleus loses <b>energy</b> only</li>
+              <li>Mass number <b>unchanged</b></li>
+              <li>Atomic number <b>unchanged</b></li>
+            </ul>
+            <div>
+              <div class="equation"><span class="nuc"><span class="nums"><span>99m</span><span>43</span></span>Tc</span><span class="op">→</span><span class="nuc"><span class="nums"><span>99</span><span>43</span></span>Tc</span><span class="op">+</span><span class="nuc gamma">γ</span></div>
+              <p class="eq-check">SAME PROTONS · SAME NEUTRONS · LESS ENERGY <b>✓</b></p>
+            </div>
+          </div>
+          <div class="panel">
+            <div class="panel-head"><span>GAMMA EMISSION</span><span class="pill">SIMPLIFIED · NOT TO SCALE</span></div>
+            <div class="fig" data-fig="gamma"></div>
+            <div class="legend"><span><i class="proton">+</i> Proton</span><span><i class="neutron">0</i> Neutron</span><span><i class="photon">γ</i> Gamma ray</span></div>
+          </div>
+        </div>
+        <div class="slide-foot"><span>ATOMS &amp; NUCLEAR RADIATION</span><span data-page></span></div>
+      </section>
+
+      <section class="slide" data-title="Nuclear equations">
+        <p class="eyebrow">Nuclear equations</p>
+        <h2>What changes<span>?</span></h2>
+        <div class="stack">
+          <table class="facts">
+            <thead><tr><th>Emitted</th><th>Symbol</th><th>Mass number</th><th>Atomic number</th></tr></thead>
+            <tbody>
+              <tr><td class="t-alpha">Alpha</td><td><span class="nuc alpha"><span class="nums"><span>4</span><span>2</span></span>He</span></td><td class="num">− 4</td><td class="num">− 2</td></tr>
+              <tr><td class="t-electron">Beta</td><td><span class="nuc electron"><span class="nums"><span>0</span><span>−1</span></span>e</span></td><td>No change</td><td class="num">+ 1</td></tr>
+              <tr><td class="t-photon">Gamma</td><td><span class="nuc gamma">γ</span></td><td>No change</td><td>No change</td></tr>
+              <tr><td class="t-neutron">Neutron</td><td><span class="nuc"><span class="nums"><span>1</span><span>0</span></span>n</span></td><td class="num">− 1</td><td>No change</td></tr>
+            </tbody>
+          </table>
+          <div class="eq-row">
+            <div class="idea step">Complete: <span class="nuc"><span class="nums"><span>226</span><span>88</span></span>Ra</span> → <span class="nuc"><span class="nums"><span>222</span><span>86</span></span>Rn</span> + <b>?</b></div>
+            <div class="idea step">226 − 222 = 4 · 88 − 86 = 2 → <span class="nuc alpha"><span class="nums"><span>4</span><span>2</span></span>He</span> <b>alpha</b></div>
+          </div>
+        </div>
+        <div class="slide-foot"><span>ATOMS &amp; NUCLEAR RADIATION</span><span data-page></span></div>
+      </section>
+
+      <section class="slide" data-title="Comparing alpha, beta and gamma">
+        <p class="eyebrow">Compare</p>
+        <h2>Alpha, beta, gamma<span>.</span></h2>
+        <div class="stack center">
+        <table class="facts big">
+          <thead><tr><th></th><th class="t-alpha"><span class="nocase">α</span> Alpha</th><th class="t-electron"><span class="nocase">β</span> Beta</th><th class="t-photon"><span class="nocase">γ</span> Gamma</th></tr></thead>
+          <tbody>
+            <tr><td>What is it?</td><td>Helium nucleus</td><td>Fast electron</td><td>EM wave</td></tr>
+            <tr><td>Charge</td><td class="num">+2</td><td class="num">−1</td><td class="num">0</td></tr>
+            <tr><td>Ionising</td><td><b>Strongly</b></td><td>Moderately</td><td>Weakly</td></tr>
+            <tr><td>Range in air</td><td>A few cm</td><td>Up to a few m</td><td>Very far</td></tr>
+            <tr><td>Stopped by</td><td>Paper · skin</td><td>A few mm of aluminium</td><td>Thick lead · concrete (reduced)</td></tr>
+          </tbody>
+        </table>
+        </div>
+        <div class="slide-foot"><span>ATOMS &amp; NUCLEAR RADIATION</span><span data-page></span></div>
+      </section>
+
+      <section class="slide" data-title="Penetration">
+        <p class="eyebrow">Penetration</p>
+        <h2>What stops each one<span>?</span></h2>
+        <div class="stack">
+          <div class="panel fill">
+            <div class="panel-head"><span>PENETRATION TEST</span><span class="pill">NOT TO SCALE</span></div>
+            <div class="fig" data-fig="penetration"></div>
+          </div>
+          <div class="idea"><b>More ionising → less penetrating.</b> Alpha loses its energy fastest. <a href="/simulations/nuclear_decay.html" target="_blank" rel="noopener">Test it in the Nuclear Decay sim ↗</a></div>
+        </div>
+        <div class="slide-foot"><span>ATOMS &amp; NUCLEAR RADIATION</span><span data-page></span></div>
+      </section>
+
+      <section class="slide" data-title="Choosing a source">
+        <p class="eyebrow">Uses</p>
+        <h2>Choosing the right source<span>.</span></h2>
+        <div class="stack center">
+          <div class="uses">
+            <div class="card use"><div class="fig" data-fig="use-smoke"></div><p class="eyebrow">Alpha</p><h3>Smoke alarm</h3><p>Ionises air · smoke blocks it · long half-life</p></div>
+            <div class="card use"><div class="fig" data-fig="use-gauge"></div><p class="eyebrow">Beta</p><h3>Thickness gauge</h3><p>Partly absorbed by paper · count rate shows thickness</p></div>
+            <div class="card use"><div class="fig" data-fig="use-tracer"></div><p class="eyebrow">Gamma</p><h3>Medical tracer</h3><p>Passes out of the body · weakly ionising · short half-life</p></div>
+          </div>
+          <div class="idea">Choose by: <b>penetration</b> · <b>ionising power</b> · <b>half-life</b></div>
+        </div>
+        <div class="slide-foot"><span>ATOMS &amp; NUCLEAR RADIATION</span><span data-page></span></div>
+      </section>
+
+      <section class="slide" data-title="Half-life">
+        <p class="eyebrow">Half-life</p>
+        <h2>Half-life<span>.</span></h2>
+        <div class="split">
+          <div class="stack">
+            <ul class="points">
+              <li>Time for the number of unstable nuclei to <b>halve</b></li>
+              <li>Or: time for the <b>count rate</b> (activity) to halve</li>
+              <li>Same time for <b>every</b> halving</li>
+            </ul>
+            <div class="idea">Iodine-131: half-life ≈ <b>8 days</b></div>
+          </div>
+          <div class="panel">
+            <div class="panel-head"><span>DECAY CURVE · IODINE-131</span></div>
+            <div class="fig" data-fig="half-life"></div>
+          </div>
+        </div>
+        <div class="slide-foot"><span>ATOMS &amp; NUCLEAR RADIATION</span><span data-page></span></div>
+      </section>
+
+      <section class="slide" data-title="Half-life calculations">
+        <p class="eyebrow">Half-life</p>
+        <h2>Using half-life<span>.</span></h2>
+        <div class="cards fill calc" style="grid-template-columns: repeat(3, 1fr);">
+          <div class="card">
+            <p class="eyebrow">From a graph</p>
+            <h3>Find the half-life</h3>
+            <ul class="points tight" style="margin-top: 18px;">
+              <li>Read the start value</li>
+              <li>Halve it</li>
+              <li>Read across, then down</li>
+              <li class="step"><b>400 → 200</b> at <b>8 days</b></li>
+            </ul>
+          </div>
+          <div class="card">
+            <p class="eyebrow">Count the halvings</p>
+            <h3>T½ = 8 days · 24 days?</h3>
+            <ul class="points tight" style="margin-top: 18px;">
+              <li>24 ÷ 8 = <b>3</b> half-lives</li>
+              <li class="step">400 → 200 → 100 → <b>50</b></li>
+            </ul>
+          </div>
+          <div class="card">
+            <p class="eyebrow">As a ratio <span class="ht">HT</span></p>
+            <h3>Net decline</h3>
+            <ul class="points tight" style="margin-top: 18px;">
+              <li>Left after n half-lives: <b>(½)ⁿ</b></li>
+              <li class="step">3 half-lives: <b>⅛ left</b></li>
+              <li class="step">Net decline: <b>⅞</b></li>
+            </ul>
+          </div>
+        </div>
+        <div class="slide-foot"><span>ATOMS &amp; NUCLEAR RADIATION</span><span data-page></span></div>
+      </section>
+
+      <section class="slide" data-title="Random decay">
+        <p class="eyebrow">Random · but predictable</p>
+        <h2>Random decay<span>.</span></h2>
+        <div class="stack">
+          <ul class="points" style="grid-template-columns: repeat(3, 1fr); gap: 16px 34px;">
+            <li>Can’t predict <b>which</b> nucleus or <b>when</b></li>
+            <li>Large samples → predictable <b>half-life</b></li>
+            <li>Small samples → counts <b>vary</b></li>
+          </ul>
+          <div class="panel fill">
+            <div class="panel-head"><span>64 NUCLEI</span></div>
+            <div class="fig" data-fig="random"></div>
+            <div class="legend"><span><i class="undecayed"></i> Undecayed nucleus</span><span><i class="decayed"></i> Decayed nucleus</span></div>
+          </div>
+        </div>
+        <div class="slide-foot"><span>ATOMS &amp; NUCLEAR RADIATION</span><span data-page></span></div>
+      </section>
+
+      <section class="slide" data-title="Contamination and irradiation">
+        <p class="eyebrow">Staying safe</p>
+        <h2>Contamination vs irradiation<span>.</span></h2>
+        <div class="stack">
+          <div class="panel fill">
+            <div class="fig" data-fig="exposure"></div>
+          </div>
+          <div class="chips" style="margin-top: 0; justify-content: center;">
+            <span class="chip">Gloves · tongs</span><span class="chip">Keep your distance</span><span class="chip">Short exposure</span><span class="chip">Lead-lined storage</span><span class="chip">Dosimeter badge</span>
+          </div>
+        </div>
+        <div class="slide-foot"><span>ATOMS &amp; NUCLEAR RADIATION</span><span data-page></span></div>
+      </section>
+
+      <section class="slide" data-title="Quick check: nuclear radiation">
+        <p class="eyebrow">Quick check</p>
+        <h2>Nuclear radiation<span>.</span></h2>
+        <div class="quiz fill">
+          <div class="q"><p><span class="n">01</span>Complete: <span class="nuc"><span class="nums"><span>210</span><span>84</span></span>Po</span> → <span class="nuc"><span class="nums"><span>206</span><span>82</span></span>Pb</span> + ?</p><div class="ans step"><span class="nuc"><span class="nums"><span>4</span><span>2</span></span>He</span> · alpha</div></div>
+          <div class="q"><p><span class="n">02</span>Beta decay: change in atomic number?</p><div class="ans step">+1 · a neutron becomes a proton</div></div>
+          <div class="q"><p><span class="n">03</span>Which radiation is most ionising?</p><div class="ans step">Alpha</div></div>
+          <div class="q"><p><span class="n">04</span>What stops beta radiation?</p><div class="ans step">A few mm of aluminium</div></div>
+          <div class="q"><p><span class="n">05</span>Half-life 6 hours. Fraction left after 18 hours?</p><div class="ans step">3 half-lives → ⅛</div></div>
+          <div class="q"><p><span class="n">06</span>Does irradiated food become radioactive?</p><div class="ans step">No · irradiation is not contamination</div></div>
+        </div>
+        <div class="slide-foot"><span class="reveal-hint">PRESS → TO REVEAL EACH ANSWER</span><span data-page></span></div>
+      </section>
+
+      <section class="slide" data-title="Key words">
+        <p class="eyebrow">Summary</p>
+        <h2>Key words<span>.</span></h2>
+        <div class="terms fill">
+          <div class="term"><b>Nucleus</b><span>Protons + neutrons · tiny · most of the mass</span></div>
+          <div class="term"><b>Isotopes</b><span>Same protons · different neutrons</span></div>
+          <div class="term"><b>Ion</b><span>Atom that has lost electrons: positive</span></div>
+          <div class="term"><b>Energy level</b><span>Fixed distance for electrons</span></div>
+          <div class="term"><b>Alpha</b><span>Helium nucleus · A − 4 · Z − 2</span></div>
+          <div class="term"><b>Beta</b><span>Fast electron · A same · Z + 1</span></div>
+          <div class="term"><b>Gamma</b><span>EM radiation · no change to A or Z</span></div>
+          <div class="term"><b>Activity</b><span>Decays per second · becquerel (Bq)</span></div>
+          <div class="term"><b>Half-life</b><span>Time for nuclei or count rate to halve</span></div>
+          <div class="term"><b>Random</b><span>Can’t predict which nucleus or when</span></div>
+          <div class="term"><b>Irradiation</b><span>Exposed to radiation · not radioactive</span></div>
+          <div class="term"><b>Contamination</b><span>Radioactive atoms on or in an object</span></div>
+        </div>
+        <div class="slide-foot"><span>ATOMS &amp; NUCLEAR RADIATION</span><span data-page></span></div>
+      </section>
+
+    </div>
+  </main>
+
+  <nav class="controls" aria-label="Slide controls">
+    <button type="button" id="prev" aria-label="Previous slide"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg></button>
+    <span class="counter" id="counter" aria-live="polite"></span>
+    <button type="button" id="next" aria-label="Next slide"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 5l7 7-7 7"/></svg></button>
+  </nav>
+  <div class="progress" aria-hidden="true"><span id="progress-bar"></span></div>
+
+  <script src="figures.js"></script>
+  <script src="deck.js"></script>
+</body>
+</html>
