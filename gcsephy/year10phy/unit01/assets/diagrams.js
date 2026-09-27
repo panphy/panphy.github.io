@@ -33,7 +33,8 @@
 
   const diagonal = '<line x1="-18" y1="14" x2="12" y2="-9"/>';
 
-  // half: half-length of the wire gap; size: clearance used when placing labels.
+  // half: where the wire meets the symbol (the mask hides the wire inside it, so the
+  // wire runs into the outer stroke); size: clearance used when placing labels.
   const SYMBOLS = {
     resistor: { half: 20, size: 9, body: '<rect x="-20" y="-8" width="40" height="16"/>' },
     fuse: { half: 20, size: 8, body: '<rect x="-20" y="-7" width="40" height="14"/><line x1="-20" y1="0" x2="20" y2="0"/>' },
@@ -52,9 +53,9 @@
     motor: { half: 12, size: 13, body: '<circle r="12"/>', letter: "M" },
     // Cell and battery follow AQA 8463 §4.2.1.1: long (+) and short plates drawn at
     // the same weight; a battery is two cells joined by a dashed line.
-    cell: { half: 6, size: 16, body: '<line x1="-3.5" y1="-15" x2="-3.5" y2="15"/><line x1="3.5" y1="-8" x2="3.5" y2="8"/>' },
+    cell: { half: 3.5, size: 16, body: '<line x1="-3.5" y1="-15" x2="-3.5" y2="15"/><line x1="3.5" y1="-8" x2="3.5" y2="8"/>' },
     battery: {
-      half: 23, size: 16,
+      half: 21.5, size: 16,
       body: '<line x1="-21.5" y1="-15" x2="-21.5" y2="15"/><line x1="-14.5" y1="-8" x2="-14.5" y2="8"/>'
         + '<line x1="-10.5" y1="0" x2="-8.6" y2="0"/><line x1="-4.1" y1="0" x2="-2.2" y2="0"/><line x1="2.2" y1="0" x2="4.1" y2="0"/><line x1="8.6" y1="0" x2="10.5" y2="0"/>'
         + '<line x1="14.5" y1="-15" x2="14.5" y2="15"/><line x1="21.5" y1="-8" x2="21.5" y2="8"/>',
@@ -66,8 +67,8 @@
       half: 12, size: 24,
       body: `<circle r="12"/><line x1="-12" y1="0" x2="12" y2="0"/><g style="stroke-width:1.8"><path d="M-5.5 -6.8 L-5.5 6.8 L6.2 0 Z"/><line x1="6.2" y1="-6.2" x2="6.2" y2="6.2"/></g>${arrowLine(7.8, -12.6, 17.8, -21.2, 4.5, 2.4, 1.6)}${arrowLine(12.2, -8.2, 22.4, -17.2, 4.5, 2.4, 1.6)}`,
     },
-    switchOpen: { half: 16, size: 13, body: '<circle class="dot" cx="-14" cy="0" r="2.6"/><circle class="dot" cx="14" cy="0" r="2.6"/><line x1="-14" y1="0" x2="12" y2="-13"/>' },
-    switchClosed: { half: 16, size: 8, body: '<circle class="dot" cx="-14" cy="0" r="2.6"/><circle class="dot" cx="14" cy="0" r="2.6"/><line x1="-14" y1="0" x2="14" y2="0"/>' },
+    switchOpen: { half: 14, size: 13, body: '<circle class="dot" cx="-14" cy="0" r="2.6"/><circle class="dot" cx="14" cy="0" r="2.6"/><line x1="-14" y1="0" x2="12" y2="-13"/>' },
+    switchClosed: { half: 14, size: 8, body: '<circle class="dot" cx="-14" cy="0" r="2.6"/><circle class="dot" cx="14" cy="0" r="2.6"/><line x1="-14" y1="0" x2="14" y2="0"/>' },
     ac: { half: 12, size: 13, body: '<circle r="12"/><path d="M-7 0 C-5 -8, -1 -8, 0 0 S5 8, 7 0"/>' },
   };
 
@@ -77,7 +78,7 @@
     if (!symbol) return "";
     const angle = ANGLES[dir] ?? 0;
     const vertical = dir === "v" || dir === "v-";
-    let svg = `<g transform="translate(${x} ${y}) rotate(${angle})"><rect class="mask" x="${-symbol.half - 1}" y="-4" width="${2 * symbol.half + 2}" height="8"/><g class="body">${symbol.body}</g></g>`;
+    let svg = `<g transform="translate(${x} ${y}) rotate(${angle})"><rect class="mask" x="${-symbol.half}" y="-4" width="${2 * symbol.half}" height="8"/><g class="body">${symbol.body}</g></g>`;
     if (symbol.letter) svg += `<text class="meter-letter" x="${x}" y="${y + 5}" text-anchor="middle">${symbol.letter}</text>`;
     if (label) {
       const gap = symbol.size + 7;
@@ -219,14 +220,19 @@
   }
 
   // In symbol keys, circle symbols are drawn as large as the LDR's circle (r 22)
-  // so their insides are easy to read; strokes keep their width (.cd .scaled).
+  // so their insides are easy to read. Line widths are divided by the scale so
+  // they match every other symbol.
   const KEY_SCALE = { lamp: 22 / 12, ammeter: 22 / 12, voltmeter: 22 / 12, diode: 22 / 12, led: 22 / 12 };
+  const STROKE = 2.5;
 
   // One symbol at the origin, as drawn in a symbol key.
   function keySymbol(type) {
     const part = drawPart([type, 0, 0, "h"]);
     const k = KEY_SCALE[type];
-    return k ? `<g class="scaled" transform="scale(${k.toFixed(4)})">${part}</g>` : part;
+    if (!k) return part;
+    const w = (width) => (width / k).toFixed(3);
+    const body = part.replace(/stroke-width:\s*([\d.]+)/g, (_, width) => `stroke-width:${w(+width)}`);
+    return `<g transform="scale(${k.toFixed(4)})" style="stroke-width:${w(STROKE)}">${body}</g>`;
   }
 
   function symbolGrid(items) {
