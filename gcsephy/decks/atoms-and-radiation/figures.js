@@ -54,8 +54,8 @@
       [y, z] = [y * Math.cos(b) - z * Math.sin(b), y * Math.sin(b) + z * Math.cos(b)];
       return [x, y, z];
     });
-    if (count > 6) return turn(rand() * TAU, rand() * TAU);
-    // Tiny clusters (an alpha particle): choose a view where no nucleon hides behind another.
+    if (count > 7) return turn(rand() * TAU, rand() * TAU);
+    // Tiny clusters (alpha, lithium): choose a view where no nucleon hides behind another.
     let best = null, bestGap = -1;
     for (let t = 0; t < 40; t++) {
       const view = turn(rand() * TAU, rand() * TAU);
@@ -202,7 +202,7 @@
       s += arrow(262, 300, 440, 300, 'text-secondary', 2.5) + `<line x1="250" y1="290" x2="250" y2="310" class="tick"/>`;
       s += text(345, 288, 'radius ≈ 1 × 10⁻¹⁰ m', 'lbl mono halo');
       s += text(250, 372, 'mostly empty space', 'lbl italic halo');
-      s += `<circle cx="645" cy="130" r="100" class="inset"/>` + cluster(645, 130, 5, 6, 24);
+      s += `<circle cx="645" cy="130" r="100" class="inset"/>` + cluster(645, 130, 3, 4, 24);
       s += text(645, 262, 'the nucleus', 'lbl strong') + text(645, 288, 'radius < 1/10 000', 'lbl mono') + text(645, 310, 'of the atom’s radius', 'lbl mono');
       return svg('0 0 760 460', s, 'An atom of radius about 1 times 10 to the minus 10 metres, with a tiny nucleus at the centre');
     },
@@ -249,7 +249,7 @@
     'mini-plum': () => svg('0 0 160 160', plumPudding(80, 80, 64, 9, 16), 'Plum pudding model'),
     'mini-nuclear': () => svg('0 0 160 160', nuclearAtom(80, 80, 70, 24, 10, 6, false), 'Nuclear model'),
     'mini-bohr': () => {
-      let s = ring(80, 80, 40) + ring(80, 80, 70) + cluster(80, 80, 3, 3, 11);
+      let s = ring(80, 80, 40) + ring(80, 80, 70) + cluster(80, 80, 6, 6, 11);
       [0, Math.PI].forEach(p => { s += ball(80 + 40 * Math.cos(p + 0.6), 80 + 40 * Math.sin(p + 0.6), 7, 'electron'); });
       [0.25, 0.75, 1.25, 1.75].forEach(p => { s += ball(80 + 70 * Math.cos(p * Math.PI), 80 + 70 * Math.sin(p * Math.PI), 7, 'electron'); });
       return svg('0 0 160 160', s, 'Bohr model');
