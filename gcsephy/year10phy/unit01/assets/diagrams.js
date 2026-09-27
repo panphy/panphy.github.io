@@ -31,16 +31,15 @@
     return `<line x1="${x1}" y1="${y1}" x2="${ex.toFixed(2)}" y2="${ey.toFixed(2)}" style="stroke-width:${stroke}"/>${arrowHead(x2, y2, dx, dy, head, width)}`;
   }
 
-  const diagonal = '<line x1="-18" y1="14" x2="12" y2="-9"/>';
-
   // half: where the wire meets the symbol (the mask hides the wire inside it, so the
   // wire runs into the outer stroke); size: clearance used when placing labels.
   const SYMBOLS = {
     resistor: { half: 20, size: 9, body: '<rect x="-20" y="-8" width="40" height="16"/>' },
     fuse: { half: 20, size: 8, body: '<rect x="-20" y="-7" width="40" height="14"/><line x1="-20" y1="0" x2="20" y2="0"/>' },
+    // As AQA 8463 §4.2.1.1: a 45° arrow from below the box to well above it.
     variable: {
-      half: 20, size: 15,
-      body: `<rect x="-20" y="-8" width="40" height="16"/>${diagonal}${arrowHead(18, -13.5, 30, -22.5, 8, 4)}`,
+      half: 20, size: 21,
+      body: `<rect x="-20" y="-8" width="40" height="16"/><line x1="-18" y1="18" x2="16.8" y2="-16.8"/>${arrowHead(23, -23, 1, -1, 9, 4)}`,
     },
     thermistor: { half: 20, size: 15, body: '<rect x="-20" y="-8" width="40" height="16"/><path d="M-27 15 H-18 L18 -15"/>' },
     ldr: {
