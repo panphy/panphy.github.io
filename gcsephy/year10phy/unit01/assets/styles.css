@@ -402,6 +402,8 @@ h1, h2, h3 { overflow-wrap: break-word; hyphens: auto; }
 .toolkit-note { margin: 22px 0 0; color: var(--muted); font-size: 14px; line-height: 1.55; max-width: 880px; }
 .resource-card.phet { background: var(--cyan); }
 .resource-card.workbook { background: var(--leaf); }
+.resource-card.practical { background: #fffdf7; }
+.resource-card p em { font-style: normal; font-weight: 700; color: var(--ink); }
 .resource-card.answers { grid-column: span 2; min-height: 0; background: #f1edff; }
 .resource-card.answers h3 { margin-top: 22px; }
 @media (max-width: 680px) { .resource-card.answers { grid-column: auto; } }
@@ -499,6 +501,13 @@ h1, h2, h3 { overflow-wrap: break-word; hyphens: auto; }
 .practical-figures { display: grid; gap: 18px; }
 .practical-figures.two { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 .practical-figures .circuit-figure { margin: 0; }
+.practical-sketches { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 14px; margin-top: 12px; }
+.practical-sketches .circuit-figure { margin: 0; }
+.practical-sketches figcaption { font-weight: 800; }
+.keywords-table th { width: 38%; }
+.practical-checklist { margin: 14px 0 0; padding: 0; list-style: none; display: grid; gap: 10px; color: #303b48; font-size: 15px; line-height: 1.45; }
+.practical-checklist li { display: grid; grid-template-columns: 22px 1fr; gap: 10px; align-items: start; }
+.practical-checklist li::before { content: ""; width: 18px; height: 18px; margin-top: 1px; border: 2px solid var(--ink); border-radius: 3px; background: #fffef9; }
 .practical-note { margin: 0 !important; line-height: 1.55; }
 .table-scroll { overflow-x: auto; }
 .practical-table, .variables-table { margin-top: 16px; }
@@ -541,6 +550,7 @@ a.practical-link:focus-visible { outline: 4px solid var(--cyan); outline-offset:
   .practical-pair, .practical-figures.two { grid-template-columns: 1fr; }
   .practical-page .lesson-pagination a:only-child { grid-column: auto; }
   .variables-table { min-width: 480px; }
+  .variables-table.keywords-table { min-width: 0; }
 }
 
 /* keep cards inside their columns: long words must not widen a card */
