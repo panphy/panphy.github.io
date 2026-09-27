@@ -1,0 +1,110 @@
+/* Electric Circuits deck: diagram rules copied from the Year 10 companion
+   stylesheet (gcsephy/year10phy/unit01/assets/styles.css) so the shared
+   Diagrams helpers draw identically, with sizes adjusted for 1600 × 900 slides. */
+
+.cd { stroke: var(--ink); fill: none; stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round; }
+.cd .mask { fill: var(--diagram-bg); stroke: none; }
+.cd .body rect, .cd .body circle:not(.dot) { fill: var(--diagram-bg); }
+.cd .fill { fill: var(--ink); stroke: none; }
+.cd .thick { stroke-width: 4.5; }
+.cd .dash { stroke-dasharray: 3 4; }
+.cd .dot { fill: var(--ink); stroke: none; }
+.cd text { fill: var(--ink); stroke: none; font: 700 13px/1 Arial, Helvetica, sans-serif; }
+.cd text.meter-letter { font: 900 14px/1 Arial, Helvetica, sans-serif; }
+.cd text.note { font-weight: 800; fill: #3a4452; }
+.cd text.hot { fill: #b44a12; }
+.cd text.cool { fill: #1479a8; }
+.cd .flow { fill: #d9480f; stroke: none; }
+.cd .flow-line { stroke: #d9480f; stroke-width: 2; }
+.cd .electron { fill: #1479a8; stroke: none; }
+.cd .electron-line { stroke: #1479a8; stroke-width: 2; }
+.cd .grid { stroke: rgba(10, 19, 38, .1); stroke-width: 1; }
+.cd .axis { stroke-width: 2.2; }
+.cd .curve { stroke: #d9480f; stroke-width: 3.2; }
+.cd .curve-2 { stroke: #1479a8; stroke-width: 3.2; }
+.cd .pt { fill: var(--hi); stroke: var(--ink); stroke-width: 2; }
+.cd text.tick { font: 600 11px/1 Arial, Helvetica, sans-serif; fill: #4b5563; }
+.cd text.axis-label { font: 800 12px/1 Arial, Helvetica, sans-serif; }
+.cd .charge-dot { fill: var(--cyan); stroke: var(--ink); stroke-width: 2; }
+
+/* Extra pictures drawn for the deck in the same style */
+.cd .e-dot { fill: #4aa3d8; stroke: var(--ink); stroke-width: 1.6; }
+.cd .e-minus { stroke: #fff; stroke-width: 2; }
+.cd .gate { stroke: #d9480f; stroke-width: 2.4; stroke-dasharray: 6 5; }
+.cd .case { fill: #dfe3e8; stroke-width: 3; }
+.cd .w-live { stroke: #95582f; stroke-width: 6; }
+.cd .w-neutral { stroke: #2876be; stroke-width: 6; }
+.cd .w-earth { stroke-width: 6; }
+.cd .inner { stroke-width: 2.5; }
+.cd .heater { fill: #fdebe1; stroke-width: 2.5; }
+.cd .spark { fill: var(--hi); stroke: var(--ink); stroke-width: 1.5; }
+
+.cd text { font-size: 13px; }
+.fig > .circuit-figure .cable-key { display: flex; flex-wrap: wrap; gap: 8px 22px; font-size: 20px; }
+.cable-key > span { display: inline-flex; align-items: center; gap: 6px; white-space: nowrap; }
+.cable-key i { display: inline-block; width: 26px; height: 14px; margin-right: 4px; border: 2px solid var(--ink); border-radius: 8px; }
+.cable-key-live { background: #915328; }
+.cable-key-neutral { background: #2876be; }
+.cable-key-earth { background: repeating-linear-gradient(135deg, #318b47 0 6px, #f7d83b 6px 12px); }
+.cable-caption { display: block; margin-top: 6px; font-weight: 500; }
+
+/* Symbol grid */
+.fig-html .symbol-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 14px; margin: 0; }
+.symbol-tile { margin: 0; padding: 12px 8px 12px; border: 2px solid var(--ink); background: var(--diagram-bg); text-align: center; box-shadow: 5px 5px 0 rgba(7, 22, 47, .1); }
+.symbol-tile svg { display: block; width: 100%; height: 110px; }
+.symbol-tile figcaption { margin-top: 8px; font-size: 18px; font-weight: 900; letter-spacing: .03em; text-transform: uppercase; line-height: 1.15; }
+
+/* National Grid route (Diagrams.nationalGrid), scaled up */
+.fig-html .circuit-figure { margin: 0; padding: 0; border: 0; background: none; }
+.grid-route ol { list-style: none; margin: 0; padding: 0; display: grid; gap: 18px; }
+.grid-route > ol { position: relative; }
+.grid-route > ol::before { content: ""; position: absolute; z-index: 1; left: 34px; top: 36px; bottom: 36px; width: 5px; background: var(--ink); }
+.grid-route .grid-stage { position: relative; margin: 0; padding: 0; display: grid; grid-template-columns: 72px minmax(0, 1fr); gap: 16px; align-items: center; }
+.grid-stage + .grid-stage::after, .grid-band + .grid-stage::after, .grid-band ol > .grid-stage:first-child::after { content: ""; position: absolute; z-index: 2; left: 25px; top: -16px; border-inline: 11px solid transparent; border-top: 13px solid var(--ink); }
+.grid-icon { position: relative; z-index: 3; width: 72px; height: 72px; display: grid; place-items: center; border: 2px solid var(--ink); border-radius: 50%; background: #fff; }
+.grid-icon svg { width: 54px; height: 54px; fill: none; stroke: var(--ink); stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; }
+.grid-icon .coil { stroke: #b8660b; stroke-width: 2.6; }
+.grid-icon .bolt { fill: var(--hi); stroke-width: 1.5; }
+.grid-stage-up .grid-icon { background: #fff4c7; }
+.grid-stage-cables .grid-icon { background: #fdebe1; }
+.grid-stage-down .grid-icon { background: #e2f7fb; }
+.grid-stage-homes .grid-icon { background: #eaf7d5; }
+.grid-text { font-size: 21px; line-height: 1.3; }
+.grid-head { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 10px; margin-bottom: 3px; }
+.grid-head strong { font-size: 17px; letter-spacing: .08em; text-transform: uppercase; }
+.grid-pd { padding: 2px 9px; border: 2px solid var(--ink); border-radius: 999px; font: 800 15px/1.3 Arial, Helvetica, sans-serif; white-space: nowrap; }
+.grid-pd.pd-low { background: #d7f0b0; }
+.grid-pd.pd-mid { background: #ffe89a; }
+.grid-pd.pd-high { background: #d9480f; border-color: #d9480f; color: #fff; }
+.grid-route .grid-band { position: relative; margin: 2px -10px; padding: 12px 8px 14px; border: 2px dashed #1479a8; border-radius: 16px; background: #e9f7fb; }
+.grid-band-tag { display: block; margin: 0 4px 12px 86px; font-size: 16px; font-weight: 700; color: #0f5f85; line-height: 1.2; }
+.grid-band-tag strong { margin-right: 6px; font-size: 16px; font-weight: 900; letter-spacing: .1em; text-transform: uppercase; color: var(--navy); }
+
+/* Hero circuit card (companion home page) */
+.machine { position: relative; display: grid; place-items: center; height: 640px; }
+.circuit-card { width: 540px; padding: 26px; background: var(--paper); color: var(--ink); transform: rotate(2deg); box-shadow: 18px 18px 0 var(--cyan); }
+.circuit-card .plot-label { padding-bottom: 12px; border-bottom: 2px solid; font: 900 15px Arial, sans-serif; letter-spacing: .2em; }
+.circuit-card svg { display: block; width: 100%; height: auto; margin-top: 16px; background: var(--diagram-bg); }
+.circuit-card p { margin: 18px 0 0; font: 900 28px/1.08 var(--display); text-transform: uppercase; letter-spacing: -.04em; }
+.machine .sticky.one { left: -20px; top: 90px; transform: rotate(-8deg); box-shadow: 5px 5px 0 var(--cyan); }
+.machine .sticky.two { right: -30px; bottom: 120px; transform: rotate(7deg); box-shadow: 5px 5px 0 var(--cyan); }
+.machine .stamp { right: -16px; top: 40px; border-color: var(--hot); color: var(--hot); }
+
+/* Section card with a diagram */
+.case-card .fig { height: 300px; margin-top: 16px; background: var(--diagram-bg); border: 2px solid var(--ink); }
+.case-card .fig > .circuit-figure { padding: 10px; }
+.case-card .big-eq { margin: 18px 0 6px; padding: 20px; border: 2px solid var(--ink); background: var(--navy); color: var(--hi); font: 900 64px/1 var(--display); text-align: center; letter-spacing: -.02em; }
+
+/* Equation toolkit */
+.toolkit { display: grid; grid-template-columns: repeat(4, 1fr); gap: 18px; }
+.tool { display: flex; flex-direction: column; gap: 8px; padding: 20px 22px; border: 2px solid var(--ink); background: var(--card); box-shadow: 6px 6px 0 var(--accent); }
+.tool .eq { font: 900 38px/1.05 var(--display); letter-spacing: -.03em; }
+.tool .words { font-size: 19px; font-weight: 800; }
+.tool .units { font-size: 17px; color: var(--muted); line-height: 1.35; }
+.tool .where { margin-top: auto; padding-top: 10px; border-top: 1px solid var(--line); font: 900 13px Arial, sans-serif; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); }
+.tool.given { background: #f1edff; }
+.ht { display: inline-block; margin-left: 10px; padding: 3px 9px; border: 2px solid var(--ink); background: var(--hot); color: var(--ink); font: 900 14px Arial, sans-serif; letter-spacing: .1em; vertical-align: middle; }
+
+/* Two sketch cards side by side */
+.sketch-card { display: flex; flex-direction: column; }
+.sketch-card .fig { flex: 1; min-height: 0; height: auto; margin: 10px 0 12px; }
