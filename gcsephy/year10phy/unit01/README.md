@@ -72,7 +72,7 @@ Headless Chrome may not exit on its own once the PDF is written; stop it when th
 
 ## Hosting notes
 
-The unit lives under `gcsephy/`, outside the homepage catalogue. It is marked `noindex` and network-only: it does not register the root service worker (its pages load `/gcsephy/sw-register.js`, which only revalidates requests), is not in `ASSETS_TO_CACHE`, and the worker never caches `/gcsephy/` requests. It is listed in `gcsephy/index.html`.
+The unit lives under `gcsephy/`, outside the homepage catalogue. It is marked `noindex` and network-only: it does not register the root service worker (its pages load `/gcsephy/sw-register.js`, which only revalidates requests and offers a Reload banner when an open page changes), is not in `ASSETS_TO_CACHE`, and the worker never caches `/gcsephy/` requests. It is listed in `gcsephy/index.html`.
 
 ---
 
