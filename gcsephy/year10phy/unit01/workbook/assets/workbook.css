@@ -1,3 +1,5 @@
+@import url('/gcsephy/assets/fonts/archivo-black.css');
+
 /* A4 print styles for the Electric Circuits student workbook and teacher guide.
    The look follows the companion site (navy, spark yellow, cyan, copper; Arial Black
    display type; ink outlines) but stays readable when photocopied in greyscale. */
@@ -25,14 +27,14 @@ ul, ol { margin: 0 0 2.2mm; padding-left: 5.5mm; }
 li { margin-bottom: 1mm; }
 sub, sup { line-height: 0; }
 strong { font-weight: 700; }
-.display { font-family: "Arial Black", "Arial", sans-serif; font-weight: 900; text-transform: uppercase; letter-spacing: -.02em; }
+.display { font-family: "Arial Black", "Archivo Black", "Arial", sans-serif; font-weight: 900; text-transform: uppercase; letter-spacing: -.02em; }
 
 /* ----- cover ----- */
 .cover { page: cover; break-after: page; position: relative; display: flex; flex-direction: column; height: 297mm; margin: -13mm -14mm 0; padding: 20mm 20mm 18mm; background: var(--navy); color: white; overflow: hidden; }
 .cover::before { content: ""; position: absolute; inset: 0; opacity: .16; background-image: linear-gradient(#44a8c8 1px, transparent 1px), linear-gradient(90deg, #44a8c8 1px, transparent 1px); background-size: 12mm 12mm; }
 .cover > * { position: relative; }
 .cover .eyebrow { font: 900 10pt/1 Arial, sans-serif; letter-spacing: .2em; text-transform: uppercase; color: var(--spark); }
-.cover h1 { margin: 7mm 0 0; font: 900 58pt/.82 "Arial Black", Arial, sans-serif; text-transform: uppercase; letter-spacing: -.06em; }
+.cover h1 { margin: 7mm 0 0; font: 900 58pt/.82 "Arial Black", "Archivo Black", Arial, sans-serif; text-transform: uppercase; letter-spacing: -.06em; }
 .cover h1 em { font-style: normal; color: var(--spark); }
 .cover .lede { max-width: 150mm; margin: 7mm 0 0; font-size: 15pt; line-height: 1.45; color: #d5deeb; }
 .cover-sub { margin: 7mm 0 0; font: 900 10pt/1 Arial, sans-serif; letter-spacing: .16em; text-transform: uppercase; color: var(--cyan); }
@@ -46,7 +48,7 @@ strong { font-weight: 700; }
 .cover-fields div span { display: block; height: 10mm; border-bottom: 1.5px solid #8ea2ba; }
 
 /* ----- running pages ----- */
-.page-title { margin: 0 0 1.5mm; font: 900 22pt/1 "Arial Black", Arial, sans-serif; text-transform: uppercase; letter-spacing: -.035em; }
+.page-title { margin: 0 0 1.5mm; font: 900 22pt/1 "Arial Black", "Archivo Black", Arial, sans-serif; text-transform: uppercase; letter-spacing: -.035em; }
 .page-intro { margin-bottom: 4mm; color: #333c48; font-size: 10.8pt; }
 .new-page { break-before: page; }
 .eyebrow { font: 900 7.5pt/1 Arial, sans-serif; letter-spacing: .18em; text-transform: uppercase; color: var(--muted); }
@@ -59,7 +61,7 @@ strong { font-weight: 700; }
 .route { width: 100%; border-collapse: collapse; font-size: 9.3pt; }
 .route th, .route td { padding: 1.1mm 2mm; border-bottom: 1px solid var(--rule); text-align: left; vertical-align: top; }
 .route th { font: 900 7.5pt Arial, sans-serif; text-transform: uppercase; letter-spacing: .1em; border-bottom: 2px solid var(--ink); }
-.route td:first-child { width: 10mm; font: 900 12pt "Arial Black", Arial, sans-serif; }
+.route td:first-child { width: 10mm; font: 900 12pt "Arial Black", "Archivo Black", Arial, sans-serif; }
 .route .tag { display: inline-block; margin-left: 1.5mm; padding: 0 1.5mm; border: 1px solid var(--ink); font-size: 7pt; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; background: var(--leaf-t); }
 
 /* section icons */
@@ -72,9 +74,9 @@ strong { font-weight: 700; }
 .lesson { break-before: page; }
 .opener { position: relative; display: grid; grid-template-columns: 30mm 1fr; gap: 0 5mm; padding: 6mm 6mm 5mm; background: var(--navy); color: white; overflow: hidden; }
 .opener::after { content: ""; position: absolute; right: 0; top: 0; bottom: 0; width: 5mm; background: var(--accent); }
-.opener .num { font: 900 50pt/.8 "Arial Black", Arial, sans-serif; color: var(--accent); letter-spacing: -.05em; }
+.opener .num { font: 900 50pt/.8 "Arial Black", "Archivo Black", Arial, sans-serif; color: var(--accent); letter-spacing: -.05em; }
 .opener .num small { display: block; margin-bottom: 2mm; font: 900 7pt/1 Arial, sans-serif; letter-spacing: .2em; color: #a8b8cc; }
-.opener h2 { margin: 1mm 0 2mm; font: 900 20pt/1 "Arial Black", Arial, sans-serif; text-transform: uppercase; letter-spacing: -.035em; }
+.opener h2 { margin: 1mm 0 2mm; font: 900 20pt/1 "Arial Black", "Archivo Black", Arial, sans-serif; text-transform: uppercase; letter-spacing: -.035em; }
 .opener .spec { font-size: 8pt; color: #a8b8cc; letter-spacing: .04em; }
 .big-q { grid-column: 1 / -1; margin: 4mm 0 0; padding: 3mm 4mm; background: var(--spark); color: var(--ink); border: 2px solid var(--ink); box-shadow: 1.6mm 1.6mm 0 var(--accent); font-size: 11pt; font-weight: 700; line-height: 1.35; transform: rotate(-.4deg); }
 .big-q::before { content: "Big question  "; font: 900 7.5pt/1 Arial, sans-serif; letter-spacing: .16em; text-transform: uppercase; }
@@ -91,7 +93,7 @@ strong { font-weight: 700; }
 
 /* ----- section headers ----- */
 .sec { display: flex; align-items: center; gap: 3mm; margin: 4mm 0 2.5mm; padding-bottom: 1.5mm; border-bottom: 2.5px solid var(--ink); break-after: avoid; }
-.sec h3 { margin: 0; font: 900 13pt/1 "Arial Black", Arial, sans-serif; text-transform: uppercase; letter-spacing: -.02em; }
+.sec h3 { margin: 0; font: 900 13pt/1 "Arial Black", "Archivo Black", Arial, sans-serif; text-transform: uppercase; letter-spacing: -.02em; }
 .sec .kind { font: 900 7pt/1 Arial, sans-serif; letter-spacing: .18em; text-transform: uppercase; color: var(--muted); display: block; margin-bottom: 1mm; }
 .sec .aside { margin-left: auto; font-size: 8.5pt; color: var(--muted); text-align: right; max-width: 70mm; line-height: 1.3; }
 .sec.do-now { --c: var(--cyan); }
@@ -133,7 +135,7 @@ strong { font-weight: 700; }
 .model .breaks { margin: 1.5mm 0 0; padding-top: 1.5mm; border-top: 1px solid var(--rule); font-size: 9pt; color: #333c48; }
 .model .breaks::before { content: "Where the model breaks: "; font-weight: 700; }
 .eq-card { display: grid; grid-template-columns: auto 1fr; gap: 1mm 5mm; align-items: center; margin: 2mm 0 3mm; padding: 3mm 4mm; border: 2px solid var(--ink); box-shadow: 1.4mm 1.4mm 0 var(--accent); background: white; break-inside: avoid; }
-.eq-card .eq { grid-row: span 3; font: 900 19pt/1 "Arial Black", Arial, sans-serif; letter-spacing: -.02em; white-space: nowrap; }
+.eq-card .eq { grid-row: span 3; font: 900 19pt/1 "Arial Black", "Archivo Black", Arial, sans-serif; letter-spacing: -.02em; white-space: nowrap; }
 .eq-card .words { font-weight: 700; }
 .eq-card .units { font-size: 9pt; color: #333c48; }
 .eq-card .re { font-size: 9pt; }
@@ -284,7 +286,7 @@ body:not(.answers) .circle-choice span.correct { border-color: transparent !impo
 /* toolkit page */
 .toolkit { display: grid; grid-template-columns: 1fr 1fr; gap: 3.5mm; }
 .tool { display: grid; grid-template-columns: 1fr auto; gap: 1mm 3mm; padding: 3mm 3.5mm; border: 2px solid var(--ink); break-inside: avoid; }
-.tool .eq { font: 900 16pt/1.05 "Arial Black", Arial, sans-serif; letter-spacing: -.02em; }
+.tool .eq { font: 900 16pt/1.05 "Arial Black", "Archivo Black", Arial, sans-serif; letter-spacing: -.02em; }
 .tool .words { grid-column: 1; font-size: 9pt; font-weight: 700; }
 .tool .units { grid-column: 1 / -1; font-size: 8.4pt; color: #333c48; }
 .tool .lesson-tag { grid-row: 1; grid-column: 2; align-self: start; padding: .3mm 1.8mm; border: 1.2px solid var(--ink); font: 900 7pt/1.5 Arial, sans-serif; background: var(--spark-t); }
@@ -294,7 +296,7 @@ body:not(.answers) .circle-choice span.correct { border-color: transparent !impo
 .units-table th { background: var(--navy); color: white; font-size: 8pt; letter-spacing: .06em; text-transform: uppercase; }
 .method-steps { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 2mm; margin: 2mm 0 3mm; }
 .method-steps div { padding: 2.2mm; border: 1.5px solid var(--ink); font-size: 8.8pt; line-height: 1.3; background: var(--spark-t); }
-.method-steps b { display: block; font: 900 12pt/1 "Arial Black", Arial, sans-serif; margin-bottom: 1mm; }
+.method-steps b { display: block; font: 900 12pt/1 "Arial Black", "Archivo Black", Arial, sans-serif; margin-bottom: 1mm; }
 
 /* review, glossary, tracker */
 .glossary { columns: 2; column-gap: 7mm; font-size: 9pt; line-height: 1.35; }
@@ -328,7 +330,7 @@ body:not(.answers) .circle-choice span.correct { border-color: transparent !impo
 }
 .cover-stats { display: flex; gap: 8mm; margin-top: 12mm; }
 .cover-stats div { font: 900 8pt/1.2 Arial, sans-serif; letter-spacing: .12em; text-transform: uppercase; color: #a8b8cc; }
-.cover-stats b { display: block; font: 900 30pt/1 "Arial Black", Arial, sans-serif; color: var(--cyan); letter-spacing: -.03em; }
+.cover-stats b { display: block; font: 900 30pt/1 "Arial Black", "Archivo Black", Arial, sans-serif; color: var(--cyan); letter-spacing: -.03em; }
 .revise-card { break-inside: auto; }
 .revise-card > div { break-inside: avoid; }
 .keep { break-inside: avoid; }
@@ -336,14 +338,14 @@ body:not(.answers) .circle-choice span.correct { border-color: transparent !impo
 .route .map-line { color: #56606e; }
 .route-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0 6mm; margin: 0; padding: 0; list-style: none; border-top: 2px solid var(--ink); }
 .route-grid li { display: grid; grid-template-columns: 9mm minmax(0, 1fr); align-items: baseline; margin: 0; padding: 1.2mm 0; border-bottom: 1px solid var(--rule); font-size: 8.6pt; line-height: 1.3; color: #8a929c; }
-.route-grid li b { font: 900 10pt "Arial Black", Arial, sans-serif; }
+.route-grid li b { font: 900 10pt "Arial Black", "Archivo Black", Arial, sans-serif; }
 .route-grid li.this { color: var(--ink); background: var(--spark-t); font-weight: 700; }
 .route-grid li.this b { padding-left: 1mm; }
 .route-grid .map-line { display: block; font-weight: 400; color: #333c48; }
 .route-grid .tag { display: inline-block; margin-left: 1.5mm; padding: 0 1.2mm; border: 1px solid currentColor; font-size: 6.8pt; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; }
 .route td:first-child { font-size: 10pt; }
 .legend p { font-size: 8.6pt; }
-.cover-part { margin-top: 8mm; font: 900 22pt/1.15 "Arial Black", Arial, sans-serif; text-transform: uppercase; letter-spacing: -.02em; }
+.cover-part { margin-top: 8mm; font: 900 22pt/1.15 "Arial Black", "Archivo Black", Arial, sans-serif; text-transform: uppercase; letter-spacing: -.02em; }
 .cover-part b { display: inline-block; margin-right: 4mm; padding: 1mm 3mm; background: var(--spark); color: var(--navy); }
 .cover-part span { display: block; margin-top: 3mm; font: 700 11pt/1 Arial, sans-serif; letter-spacing: .12em; text-transform: uppercase; color: var(--leaf); }
 .cover-lessons { margin: 3mm 0 0; padding-left: 7mm; font-size: 13pt; line-height: 1.55; color: #fff; }
@@ -363,7 +365,7 @@ body:not(.answers) .circle-choice span.correct { border-color: transparent !impo
 .tri-note { margin: 0; font-size: 8.8pt; line-height: 1.35; color: #333c48; }
 .tri-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 3mm; margin-bottom: 3mm; }
 .tri-card { display: grid; grid-template-columns: 25mm 1fr; gap: 2.5mm; align-items: center; padding: 2.5mm; border: 1.5px solid var(--ink); break-inside: avoid; }
-.tri-name { font: 900 10pt/1.1 "Arial Black", Arial, sans-serif; margin-bottom: 1mm; }
+.tri-name { font: 900 10pt/1.1 "Arial Black", "Archivo Black", Arial, sans-serif; margin-bottom: 1mm; }
 .tri-card ul { list-style: none; margin: 0; padding: 0; }
 .tri-card li { margin: 0 0 .6mm; font-size: 8.6pt; line-height: 1.25; font-weight: 700; }
 

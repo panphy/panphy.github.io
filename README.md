@@ -32,6 +32,8 @@ All pages under `fun/`, `beta/`, `misc/`, and `gcsephy/` require internet access
 
 `gcsephy/` pages register their own small service worker (`gcsephy/sw.js`, scoped to `/gcsephy/`). It stores nothing; it makes every page and asset request revalidate with the server, so edits appear on the next load instead of after the browser's 10-minute HTTP cache. If the network drops, it falls back to the browser's existing copy.
 
+Year 9 and Year 10 GCSE pages keep their own visual style. Their heavy headings use Arial Black where available and a locally hosted Archivo Black fallback on devices that cannot render it; the GCSE worker does not store the font in Cache Storage.
+
 ## Run locally
 
 The served site uses HTML, CSS, and vanilla JavaScript, with no framework, bundler, or build step. GitHub Pages serves the files directly; a service worker handles offline caching, and selected online features use Supabase.
