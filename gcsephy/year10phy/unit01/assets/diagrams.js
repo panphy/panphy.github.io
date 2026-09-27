@@ -218,14 +218,20 @@
     </figure>`;
   }
 
-  // opts.scale: { type: factor } enlarges chosen symbols; strokes keep their width.
-  function symbolGrid(items, opts = {}) {
-    const scales = opts.scale || {};
+  // In symbol keys, circle symbols are drawn as large as the LDR's circle (r 22)
+  // so their insides are easy to read; strokes keep their width (.cd .scaled).
+  const KEY_SCALE = { lamp: 22 / 12, ammeter: 22 / 12, voltmeter: 22 / 12, diode: 22 / 12, led: 22 / 12 };
+
+  // One symbol at the origin, as drawn in a symbol key.
+  function keySymbol(type) {
+    const part = drawPart([type, 0, 0, "h"]);
+    const k = KEY_SCALE[type];
+    return k ? `<g class="scaled" transform="scale(${k.toFixed(4)})">${part}</g>` : part;
+  }
+
+  function symbolGrid(items) {
     const tiles = items.map(([type, name]) => {
-      const k = scales[type] || 1;
-      const part = drawPart([type, 0, 0, "h"]);
-      const body = k === 1 ? part : `<g class="scaled" transform="scale(${k})">${part}</g>`;
-      const svg = `<svg class="cd" viewBox="-52 -46 104 70" aria-hidden="true"><path d="M-48 0 H48"/>${body}</svg>`;
+      const svg = `<svg class="cd" viewBox="-52 -46 104 70" aria-hidden="true"><path d="M-48 0 H48"/>${keySymbol(type)}</svg>`;
       return `<figure class="symbol-tile">${svg}<figcaption>${name}</figcaption></figure>`;
     }).join("");
     return `<div class="symbol-grid" role="list">${tiles}</div>`;
@@ -340,5 +346,5 @@
     return `<svg class="icon icon-${name}" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="${ICON_PATHS[name]}"/></svg>`;
   }
 
-  window.Diagrams = { circuit, threeCoreCable, nationalGrid, symbolGrid, graph, ivSketch, IV, sub, icon };
+  window.Diagrams = { circuit, threeCoreCable, nationalGrid, symbolGrid, keySymbol, graph, ivSketch, IV, sub, icon };
 })();
