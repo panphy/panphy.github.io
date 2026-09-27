@@ -19,6 +19,7 @@
       spec: "AQA 6.2.1.1 · Sep 4.2.1.1",
       unlocks: ["complete circuits", "standard circuit symbols", "ammeter in series"],
       keyRule: "No complete loop, no current. Draw with a ruler, and connect the ammeter in series.",
+      workbook: [[1, "Complete circuits and symbols"]],
       phet: true,
       lab: { label: "Meters", page: 1, range: "1–2" },
       revision: {
@@ -157,6 +158,7 @@
       spec: "AQA 6.2.1.2 · Sep 4.2.1.2",
       unlocks: ["current as a rate", "Q = I t", "electrons vs conventional current"],
       keyRule: "Q = I t. Current is the rate of flow of charge, and it is the same at every point in a single loop.",
+      workbook: [[2, "Current and charge"]],
       phet: true,
       lab: { label: "Lab 1", page: 3, range: "3–6" },
       revision: {
@@ -286,6 +288,7 @@
       spec: "AQA 6.2.1.3, 6.2.4.2 · Sep 4.2.1.3, 4.2.4.2",
       unlocks: ["p.d. as energy per coulomb", "E = Q V", "measuring p.d. across"],
       keyRule: "V = E ÷ Q. One volt is one joule of energy transferred per coulomb of charge.",
+      workbook: [[3, "Potential difference"]],
       phet: true,
       lab: { label: "Lab 2", page: 7, range: "7–11" },
       revision: {
@@ -434,6 +437,7 @@
       spec: "AQA 6.2.1.3, 6.2.1.4, RP 15 · Sep 4.2.1.3, 4.2.1.4, RP 3",
       unlocks: ["V = I R", "Ohm's law", "why metals have resistance", "required practical: wire length"],
       keyRule: "V = I R. The greater the resistance, the smaller the current for the same p.d.",
+      workbook: [[4, "Resistance and V = IR"]],
       phet: true,
       lab: { label: "Lab 3", page: 12, range: "12–16" },
       revision: {
@@ -622,6 +626,7 @@
       spec: "AQA 6.2.2, RP 15 · Sep 4.2.2, RP 3",
       unlocks: ["series rules", "parallel rules", "R_total = R₁ + R₂"],
       keyRule: "Series: same current, p.d. shared, R_total = R₁ + R₂. Parallel: same p.d., currents add, R_total is less than the smallest resistor.",
+      workbook: [[6, "Series and parallel circuits"]],
       phet: true,
       lab: { label: "Lab 2", page: 9, range: "9–10" },
       revision: {
@@ -788,6 +793,7 @@
       spec: "AQA 6.2.1.4, RP 16 · Sep 4.2.1.4, RP 4",
       unlocks: ["resistor · lamp · diode graphs", "thermistors and LDRs", "required practical: I–V"],
       keyRule: "Only an ohmic conductor at constant temperature gives a straight line through the origin. For everything else, R changes.",
+      workbook: [[8, "I-V graphs"], [10, "Thermistors, LDRs and sensors"]],
       phet: true,
       revision: {
         summary:
@@ -938,6 +944,7 @@
       spec: "AQA 6.2.4 · Sep 4.2.4",
       unlocks: ["P = V I and P = I² R", "E = P t", "step-up · step-down transformers"],
       keyRule: "P = V I = I² R and E = P t. High p.d. means low current, so less energy is wasted heating the cables.",
+      workbook: [[11, "Power and energy transfer"], [12, "Mains, safety and the National Grid"]],
       revision: {
         summary:
           "Power is the rate of energy transfer. The energy an appliance transfers depends on its power and how long it is on.",
@@ -1094,6 +1101,7 @@
       spec: "AQA 6.2.3 · Sep 4.2.3",
       unlocks: ["ac vs dc", "230 V · 50 Hz", "live · neutral · earth"],
       keyRule: "UK mains is ac at about 230 V and 50 Hz. Live: brown. Neutral: blue. Earth: green and yellow.",
+      workbook: [[12, "Mains, safety and the National Grid"]],
       revision: {
         summary:
           "Cells and batteries supply direct p.d.; the mains supplies alternating p.d. Three-core cables and the earth wire keep people safe from the live wire.",

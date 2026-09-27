@@ -151,6 +151,8 @@
     ...practical.parts.map((part, i) => `<a href="#${part.id}"><span>${String(i + 2).padStart(2, "0")}</span><strong>${part.label}${part.id === "exam" ? "" : `: ${sub(part.title)}`}</strong></a>`),
     `<a href="${pdfHref(practical.pdf)}" target="_blank" rel="noopener"><span>PDF</span><strong>Worksheet</strong></a>`,
   ].join("");
+  const workbookHref = ([n, title]) => `../../workbook/pdf/${encodeURI(`Electric Circuits - Year 10 Workbook - Lesson ${String(n).padStart(2, "0")} - ${title}.pdf`)}`;
+  const workbookLinks = (practical.workbook || []).map((entry) => `<a class="workbook-link" href="${workbookHref(entry)}" target="_blank" rel="noopener">Workbook lesson ${entry[0]} <span aria-hidden="true">${icon("up-right")}</span></a>`).join("");
   const missionLinks = practical.missions.map(([missionSlug, label]) => `<a class="workbook-link" href="../../lesson/${missionSlug}/">${label} <span aria-hidden="true">${icon("right")}</span></a>`).join("");
   const pagination = practical.missions.map(([missionSlug, label], i) => i === 0
     ? `<a href="../../lesson/${missionSlug}/"><span>${icon("left")} Back to the notes</span><strong>${label.split(" · ")[1]}</strong></a>`
@@ -185,7 +187,7 @@
           <p class="eyebrow dark">Before you start</p>
           <h2>Know the aim.<br>Stay safe.</h2>
           <p>Read the whole method before you build anything. Fill in the tables and questions on this page or in the printed worksheet.</p>
-          ${missionLinks}
+          ${workbookLinks}${missionLinks}
         </div>
         <div class="practical-content">
           <article class="revision-card practical-card">${cardHeading(1, "Aim")}
