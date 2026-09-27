@@ -141,7 +141,7 @@
       let s = rect(30, 30, 330, 170, 'f-accent box pop') + t(195, 74, 'INDEPENDENT', 'lab') + t(195, 124, 'I CHANGE', 'big') + t(195, 172, 'pendulum length / cm', 'body-t');
       s += rect(600, 30, 330, 170, 'f-cyan box pop') + t(765, 74, 'DEPENDENT', 'lab') + t(765, 124, 'I MEASURE', 'big') + t(765, 172, 'time period / s', 'body-t');
       s += arrow(378, 115, 582, 115, 'arrow thick') + t(480, 98, 'affects?', 'body-t');
-      s += t(480, 262, 'CONTROL  ·  I KEEP THE SAME', 'lab');
+      s += t(480, 262, 'CONTROL: I KEEP THE SAME', 'lab');
       ['release angle', 'bob mass', 'timing method'].forEach((name, i) => {
         const x = 70 + i * 290;
         s += rect(x, 290, 250, 76, 'f-card box');
@@ -153,13 +153,13 @@
     // Continuous and categoric data.
     dataTypes: () => {
       const X = v => 70 + v * 82;
-      let s = t(40, 36, 'CONTINUOUS  ·  ANY VALUE ON A SCALE', 'lab', 'start');
+      let s = t(40, 36, 'CONTINUOUS: ANY VALUE ON A SCALE', 'lab', 'start');
       s += `<path class="axis" d="M${X(0)} 110H${X(10) + 10}"/>`;
       for (let v = 0; v <= 10; v++) s += line(X(v), 110, X(v), 124, 'ink') + t(X(v), 150, v, 'tick-t');
       for (let v = 0; v < 10; v += 0.5) if (v % 1) s += line(X(v), 110, X(v), 118, 'ink thin');
       s += t(X(10) + 30, 150, 'cm', 'tick-t', 'start');
       [[3.2, '3.2 cm'], [4.75, '4.75 cm'], [7.9, '7.9 cm']].forEach(([v, lab]) => { s += dot(X(v), 110, 11) + t(X(v), 88, lab, 'body-t small'); });
-      s += t(40, 222, 'CATEGORIC  ·  NAMED GROUPS', 'lab', 'start');
+      s += t(40, 222, 'CATEGORIC: NAMED GROUPS', 'lab', 'start');
       ['sponge', 'cloth', 'rubber mat', 'cardboard'].forEach((name, i) => {
         const x = 40 + i * 225;
         s += rect(x, 246, 195, 70, 'f-card box') + t(x + 97, 290, name, 'body-t');
@@ -181,7 +181,7 @@
       // Mini bar chart
       s += `<path class="axis" d="M540 216V430H870"/>`;
       [[565, 300], [640, 250], [715, 350], [790, 280]].forEach(([x, y]) => { s += rect(x, y, 52, 430 - y, 'f-accent box'); });
-      s += t(705, 470, 'BAR CHART  ·  GAPS', 'lab');
+      s += t(705, 470, 'BAR CHART WITH GAPS', 'lab');
       return svg(960, 490, s, 'Decision: a continuous independent variable needs a line graph; a categoric independent variable needs a bar chart with gaps between the bars');
     },
 
@@ -234,7 +234,7 @@
       s += `<g transform="translate(${f(tx)} ${f(ty)}) rotate(${f(ang * 180 / Math.PI)})"><rect x="-42" y="-40" width="86" height="30" class="f-accent box" rx="4"/>${dot(-24, -8, 9, 'wheel')}${dot(26, -8, 9, 'wheel')}</g>`;
       const [s1x, s1y] = at(0.1), [s2x, s2y] = at(0.1, 34);
       s += line(s1x, s1y, s2x, s2y, 'tape') + t(s2x - 8, s2y - 14, 'start line', 'body-t small', 'end');
-      s += t(230, 236, 'release · no push', 'body-t', 'start');
+      s += t(230, 236, 'release, no push', 'body-t', 'start');
       s += `<g transform="translate(720 420)"><rect x="-42" y="-40" width="86" height="30" class="ghost-box" rx="4"/><circle cx="-24" cy="-8" r="9" class="ghost"/><circle cx="26" cy="-8" r="9" class="ghost"/></g>`;
       s += rect(440, 424, 400, 14, 'f-alt box');
       for (let i = 0; i <= 40; i++) s += line(440 + i * 10, 424, 440 + i * 10, i % 5 ? 430 : 434, 'ink thin');
@@ -251,7 +251,7 @@
         const { s, X, Y } = axes({ x0, y0: 40, w: 330, h: 300, xr: [0, 30, 5], yr: [0, ymax, step], xEvery: 2, yEvery: 2, grid: true });
         return s + pts.map(([a, b]) => cross(X(a), Y(b), 7)).join('') +
           (good ? tick(x0 + 118, 420, 'yes') : cross2(x0 + 108, 414)) +
-          t(x0 + 140, 424, good ? '10 per square · fills the grid' : '20 per square · points squashed', 'lab small', 'start');
+          t(x0 + 140, 424, good ? '10 per square, fills the grid' : '20 per square, points squashed', 'lab small', 'start');
       };
       return svg(960, 440, panel(90, 200, 20, false) + panel(570, 90, 10, true), 'The same five points plotted on a y-axis going up in 20s, squashed into the bottom of the grid, and on a y-axis going up in 10s, filling the grid');
     },
@@ -312,7 +312,7 @@
 
     // Folded paper helicopter: illustrated model and experiment cues.
     helicopter: () => {
-      let s = t(450, 40, 'PAPER HELICOPTER · FOLDED MODEL', 'lab');
+      let s = t(450, 40, 'PAPER HELICOPTER: FOLDED MODEL', 'lab');
       s += rect(35, 65, 830, 405, 'heli-backdrop', 18);
       s += `<image href="images/paper-helicopter-simple.png" x="80" y="55" width="740" height="390" preserveAspectRatio="xMidYMid meet"/>`;
       s += line(45, 480, 855, 480, 'grid');
