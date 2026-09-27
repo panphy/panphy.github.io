@@ -211,7 +211,8 @@
     [0, 60, -60].forEach((tilt, i) => {
       [0.3, 1.3].forEach(p => {
         const phase = (p + i * 0.4) * Math.PI;
-        if (animate) s += orbiter(cx, cy, rx, ry, phase, 7 + i * 1.5, tilt, er);
+        // A negative period runs the middle orbit the other way: Rutherford gave no direction.
+        if (animate) s += orbiter(cx, cy, rx, ry, phase, (i === 1 ? -1 : 1) * (7 + i * 1.5), tilt, er);
         else s += ball(...orbitPoint(cx, cy, rx, ry, phase, tilt), er, 'electron');
       });
     });
