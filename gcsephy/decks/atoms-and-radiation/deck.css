@@ -135,8 +135,9 @@ button:focus-visible, a:focus-visible { outline: 3px solid var(--focus); outline
 .icon-button { display: inline-grid; place-items: center; width: 44px; height: 44px; padding: 0; border: 1px solid transparent; border-radius: 12px; background: transparent; color: var(--brand-primary); transition: background-color .18s ease; }
 [data-theme="dark"] .icon-button { color: var(--brand-accent); }
 .icon-button:hover { background: color-mix(in srgb, var(--brand-primary), transparent 92%); }
-.icon-button svg { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
-.icon-button[aria-pressed="true"] svg rect { fill: color-mix(in srgb, currentColor, transparent 75%); }
+.icon-button svg { width: 24px; height: 24px; fill: none; stroke: currentColor; stroke-width: 2.3; stroke-linecap: round; stroke-linejoin: round; }
+.icon-button .pane { fill: currentColor; stroke: none; opacity: 0; transition: opacity .18s ease; }
+.icon-button[aria-pressed="true"] .pane { opacity: .3; }
 
 /* Slide thumbnails: shown beside the stage unless presenting fullscreen. */
 .thumbs {
