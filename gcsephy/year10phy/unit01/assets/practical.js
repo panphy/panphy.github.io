@@ -4,6 +4,7 @@
   const practicals = window.PRACTICALS || [];
   const D = window.Diagrams;
   const sub = D.sub;
+  const icon = D.icon;
   const pathParts = window.location.pathname.split("/").filter(Boolean);
   const practicalIndex = pathParts.lastIndexOf("practical");
   const slug = practicalIndex >= 0 ? pathParts[practicalIndex + 1] : "";
@@ -77,7 +78,7 @@
         </label>
         <div class="reveal-row">
           <details class="reveal hint-reveal"><summary><span>Hint</span><b>+</b></summary><div><p>${sub(block.hint)}</p></div></details>
-          <details class="reveal answer-reveal"><summary><span>Answer</span><b>✓</b></summary><div>${/^</.test(block.answer) ? sub(block.answer) : `<p>${sub(block.answer)}</p>`}</div></details>
+          <details class="reveal answer-reveal"><summary><span>Answer</span><b>${icon("check")}</b></summary><div>${/^</.test(block.answer) ? sub(block.answer) : `<p>${sub(block.answer)}</p>`}</div></details>
         </div>
       </article>`;
   };
@@ -104,7 +105,7 @@
           <article class="revision-card practical-card">${cardHeading(number, `${block.title}${block.title === "Results" ? "" : ": results"}`)}
             ${block.text ? `<p class="practical-text">${sub(block.text)}</p>` : ""}
             <div class="table-scroll">${inputTable(block)}</div>
-            <details class="reveal answer-reveal example-reveal"><summary><span>Example results</span><b>✓</b></summary><div><p>Typical results from this practical. Yours will be different; use your own readings in your answers.</p><div class="table-scroll">${answerTable(block)}</div></div></details>
+            <details class="reveal answer-reveal example-reveal"><summary><span>Example results</span><b>${icon("check")}</b></summary><div><p>Typical results from this practical. Yours will be different; use your own readings in your answers.</p><div class="table-scroll">${answerTable(block)}</div></div></details>
           </article>`;
       case "graph": {
         const ex = block.example;
@@ -117,7 +118,7 @@
           <article class="revision-card practical-card">${cardHeading(number, block.title)}
             <p class="practical-text">${sub(block.text)}</p>
             <p class="practical-text muted">Draw it on graph paper or on the grid in the worksheet PDF. Put <strong>${block.yLabel}</strong> on the vertical axis and <strong>${block.xLabel}</strong> on the horizontal axis.</p>
-            <details class="reveal answer-reveal example-reveal"><summary><span>Example graph</span><b>✓</b></summary><div>${figure}</div></details>
+            <details class="reveal answer-reveal example-reveal"><summary><span>Example graph</span><b>${icon("check")}</b></summary><div>${figure}</div></details>
           </article>`;
       }
       case "question":
@@ -150,11 +151,11 @@
     ...practical.parts.map((part, i) => `<a href="#${part.id}"><span>${String(i + 2).padStart(2, "0")}</span><strong>${part.label}${part.id === "exam" ? "" : `: ${sub(part.title)}`}</strong></a>`),
     `<a href="${pdfHref(practical.pdf)}" target="_blank" rel="noopener"><span>PDF</span><strong>Worksheet</strong></a>`,
   ].join("");
-  const missionLinks = practical.missions.map(([missionSlug, label]) => `<a class="workbook-link" href="../../lesson/${missionSlug}/">${label} <span>→</span></a>`).join("");
+  const missionLinks = practical.missions.map(([missionSlug, label]) => `<a class="workbook-link" href="../../lesson/${missionSlug}/">${label} <span aria-hidden="true">${icon("right")}</span></a>`).join("");
   const pagination = practical.missions.map(([missionSlug, label], i) => i === 0
-    ? `<a href="../../lesson/${missionSlug}/"><span>← Back to the notes</span><strong>${label.split(" · ")[1]}</strong></a>`
-    : `<a class="next-link" href="../../lesson/${missionSlug}/"><span>Related notes →</span><strong>${label.split(" · ")[1]}</strong></a>`).join("")
-    + (practical.missions.length === 1 ? '<a class="next-link" href="../../exam-zone/"><span>Ready to test yourself? →</span><strong>Enter the Exam Zone</strong></a>' : "");
+    ? `<a href="../../lesson/${missionSlug}/"><span>${icon("left")} Back to the notes</span><strong>${label.split(" · ")[1]}</strong></a>`
+    : `<a class="next-link" href="../../lesson/${missionSlug}/"><span>Related notes ${icon("right")}</span><strong>${label.split(" · ")[1]}</strong></a>`).join("")
+    + (practical.missions.length === 1 ? `<a class="next-link" href="../../exam-zone/"><span>Ready to test yourself? ${icon("right")}</span><strong>Enter the Exam Zone</strong></a>` : "");
 
   document.body.innerHTML = `
     <main class="lesson-page practical-page ${practical.colour}">
@@ -175,8 +176,8 @@
       </header>
       <section class="unlock-strip practical-downloads" aria-label="Download the worksheet">
         <strong>Worksheet PDF</strong>
-        <a href="${pdfHref(practical.pdf)}" target="_blank" rel="noopener">Student worksheet <span aria-hidden="true">↓</span></a>
-        <a href="${pdfHref(practical.answersPdf)}" target="_blank" rel="noopener">Answers <span aria-hidden="true">↓</span></a>
+        <a href="${pdfHref(practical.pdf)}" target="_blank" rel="noopener">Student worksheet <span aria-hidden="true">${icon("down")}</span></a>
+        <a href="${pdfHref(practical.answersPdf)}" target="_blank" rel="noopener">Answers <span aria-hidden="true">${icon("down")}</span></a>
       </section>
       <nav class="lesson-tools practical-tools" aria-label="Sections of this practical">${tools}</nav>
       <section class="practical-section" id="before">
@@ -210,7 +211,7 @@
       <footer class="site-footer">
         <div class="unit-footer-row">
           <div class="brand">${BRAND}</div>
-          <p>Follow the charge. Track the energy.</p><a href="#before">Back to top ↑</a>
+          <p>Follow the charge. Track the energy.</p><a href="#before">Back to top ${icon("up")}</a>
         </div>${PANPHY_FOOTER}
       </footer>
     </main>`;

@@ -618,7 +618,7 @@
       intro:
         "One loop or several branches? The rules for current, p.d. and resistance change completely. Learn both sets and use them to solve multi-step circuit problems.",
       colour: "cyan",
-      icon: "⫴",
+      icon: D.icon("parallel"),
       spec: "AQA 6.2.2, RP 15 · Sep 4.2.2, RP 3",
       unlocks: ["series rules", "parallel rules", "R_total = R₁ + R₂"],
       keyRule: "Series: same current, p.d. shared, R_total = R₁ + R₂. Parallel: same p.d., currents add, R_total is less than the smallest resistor.",
