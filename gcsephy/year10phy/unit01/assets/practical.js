@@ -74,7 +74,7 @@
         <h3>${sub(block.prompt)}</h3>
         <label class="working-area" for="${id}">
           <span class="working-label"><strong>Your answer</strong><small>Saved on this device as you type.</small></span>
-          <textarea id="${id}" data-save="${block.id}" rows="${rows}" placeholder="${isExam ? "Write the method as numbered steps…" : "Use your results in your answer…"}"></textarea>
+          <textarea id="${id}" data-save="${block.id}" rows="${rows}" placeholder="${isExam ? "Write the method as numbered steps…" : block.frame ? "Equation: … Substitute: … Answer (with unit): …" : "Use your results in your answer…"}"></textarea>
         </label>
         <div class="reveal-row">
           <details class="reveal hint-reveal"><summary><span>Hint</span><b>+</b></summary><div><p>${sub(block.hint)}</p></div></details>
@@ -83,8 +83,33 @@
       </article>`;
   };
 
+  const sketches = (block, withCurves) => `<div class="practical-sketches n${block.items.length}">${block.items.map((item) => D.graph({
+    w: 220, h: 170, sketch: true, x: item.x, y: item.y, xLabel: item.xLabel, yLabel: item.yLabel,
+    series: withCurves ? [{ fn: item.fn, to: item.to }] : [],
+    caption: item.label, label: `Axes to sketch: ${item.yLabel} against ${item.xLabel}`,
+  })).join("")}</div>`;
+
   const renderBlock = (block, number) => {
     switch (block.type) {
+      case "keywords":
+        return `
+          <article class="revision-card practical-card">${cardHeading(number, block.title)}
+            <div class="table-scroll"><table class="data-table variables-table keywords-table"><tbody>${block.rows.map(([term, meaning]) => `<tr><th scope="row">${term}</th><td>${sub(meaning)}</td></tr>`).join("")}</tbody></table></div>
+          </article>`;
+      case "sketch":
+        return `
+          <article class="revision-card practical-card">${cardHeading(number, block.title)}
+            <p class="practical-text">${sub(block.text)}</p>
+            <p class="practical-text muted">Sketch on paper or in the worksheet PDF, then compare.</p>
+            ${sketches(block, false)}
+            <details class="reveal answer-reveal example-reveal"><summary><span>Expected shapes</span><b>${icon("check")}</b></summary><div>${sketches(block, true)}<p>${sub(block.caption)}</p></div></details>
+          </article>`;
+      case "checklist":
+        return `
+          <article class="revision-card practical-card">${cardHeading(number, block.title)}
+            ${block.text ? `<p class="practical-text">${sub(block.text)}</p>` : ""}
+            <ul class="practical-checklist">${block.items.map((item) => `<li>${sub(item)}</li>`).join("")}</ul>
+          </article>`;
       case "variables":
         return `
           <article class="revision-card practical-card">${cardHeading(number, block.title)}
@@ -102,7 +127,7 @@
         return `<p class="remember-note practical-note">${sub(block.html)}</p>`;
       case "table":
         return `
-          <article class="revision-card practical-card">${cardHeading(number, `${block.title}${block.title === "Results" ? "" : ": results"}`)}
+          <article class="revision-card practical-card">${cardHeading(number, block.heading || `${block.title}${block.title === "Results" ? "" : ": results"}`)}
             ${block.text ? `<p class="practical-text">${sub(block.text)}</p>` : ""}
             <div class="table-scroll">${inputTable(block)}</div>
             <details class="reveal answer-reveal example-reveal"><summary><span>Example results</span><b>${icon("check")}</b></summary><div><p>Typical results from this practical. Yours will be different; use your own readings in your answers.</p><div class="table-scroll">${answerTable(block)}</div></div></details>
@@ -131,7 +156,7 @@
   const renderPart = (part, partIndex) => {
     let number = 0;
     const blocks = part.blocks.map((block) => {
-      if (["variables", "steps", "table", "graph"].includes(block.type)) number += 1;
+      if (["variables", "steps", "table", "graph", "keywords", "sketch", "checklist"].includes(block.type)) number += 1;
       return renderBlock(block, number);
     }).join("");
     return `
@@ -146,6 +171,11 @@
   };
 
   const equation = practical.equation;
+  let beforeNumber = 3;
+  const beforeBlocks = (practical.before || []).map((block) => {
+    if (block.type !== "question") beforeNumber += 1;
+    return renderBlock(block, beforeNumber);
+  }).join("");
   const tools = [
     '<a href="#before"><span>01</span><strong>Before you start</strong></a>',
     ...practical.parts.map((part, i) => `<a href="#${part.id}"><span>${String(i + 2).padStart(2, "0")}</span><strong>${part.label}${part.id === "exam" ? "" : `: ${sub(part.title)}`}</strong></a>`),
@@ -202,6 +232,7 @@
               <ul class="practical-list">${practical.safety.map((item) => `<li>${sub(item)}</li>`).join("")}</ul>
             </article>
           </div>
+          ${beforeBlocks}
         </div>
       </section>
       ${practical.parts.map(renderPart).join("")}

@@ -1,13 +1,16 @@
 /* Required practical content. assets/practical.js renders each practical as a web
    page; assets/practical-print.js renders the same content as the A4 worksheet that
    is saved as the downloadable PDF. Block types: variables, steps, figures, note,
-   table, graph, question and page (a page break in the printed worksheet only).
+   table, graph, question, keywords, sketch, checklist and page (a page break in the
+   printed worksheet only). `before` blocks follow the safety list; a question with
+   `frame: true` gets Equation / Substitute / Answer lines in the printed worksheet.
    In tables a string is printed in the cell and null is a cell for the student;
    `answers` holds example results in the same shape. */
 (function () {
   "use strict";
 
   const D = window.Diagrams;
+  const P = window.PracticalDiagrams;
 
   // Shared circuit drawings.
   const wireCircuit = D.circuit({
@@ -59,6 +62,14 @@
     label: "Diode circuit: power supply, variable resistor, ammeter, protective resistor and diode in series; voltmeter across the diode only",
   });
 
+  const KEY_WORDS = [
+    ["Independent variable", "The variable you change."],
+    ["Dependent variable", "The variable you measure."],
+    ["Control variable", "A variable you keep the same, so the test is fair."],
+    ["Resolution", "The smallest change a meter can show, for example 0.01 A."],
+    ["Anomalous result", "A result that does not fit the pattern of the others."],
+  ];
+
   const lamp = (v) => Math.sign(v) * 0.112 * Math.abs(v) ** 0.55;
   const diode = (v) => 7e-6 * (Math.exp(v / 0.045) - 1);
 
@@ -93,6 +104,29 @@
         "Switch off between readings. This also stops the wire heating up.",
         "Keep the p.d. low. Never connect the wire straight across the supply without the ammeter in the circuit.",
       ],
+      before: [
+        {
+          type: "keywords",
+          title: "Key words",
+          rows: [...KEY_WORDS, ["Line of best fit", "One straight line (or smooth curve) drawn as close as possible to all the points."]],
+        },
+        {
+          type: "sketch",
+          id: "predict",
+          title: "Predict",
+          text: "Sketch how you think the resistance of the wire will change as its length increases.",
+          items: [{ label: "Your prediction", x: [0, 1], y: [0, 1], xLabel: "length", yLabel: "resistance", fn: (x) => 0.85 * x }],
+          caption: "Expected: a straight line through the origin. Resistance is directly proportional to length.",
+        },
+        {
+          type: "question",
+          id: "p1",
+          prompt: "Give a reason for your prediction.",
+          lines: 2,
+          hint: "Think about what the electrons collide with as they move through the wire. What changes when the wire is longer?",
+          answer: "A longer wire has more metal ions along the electrons' path, so there are more collisions. Doubling the length should double the resistance.",
+        },
+      ],
       parts: [
         {
           id: "part-a",
@@ -123,11 +157,12 @@
               ],
             },
             { type: "figures", items: [wireCircuit] },
+            { type: "page" },
+            { type: "figures", items: [P.wireBench()] },
             {
               type: "note",
               html: "<strong>Measure carefully.</strong> Measure each length to the same contact point on the crocodile clips, and read the ruler at eye level.",
             },
-            { type: "page" },
             {
               type: "table",
               id: "wire",
@@ -140,6 +175,7 @@
                 [null, "1.48", "0.43", "3.44"], [null, "1.54", "0.39", "3.95"], [null, "1.58", "0.35", "4.51"], [null, "1.62", "0.32", "5.06"], [null, "1.65", "0.29", "5.69"],
               ],
             },
+            { type: "page" },
             {
               type: "question",
               id: "a1",
@@ -148,6 +184,7 @@
               hint: "Compare the resistance at 20 cm with the resistance at 40 cm. What happens when the length doubles?",
               answer: "As the length increases, the resistance increases. Doubling the length roughly doubles the resistance (for example, 1.22 Ω at 20 cm and 2.32 Ω at 40 cm).",
             },
+            { type: "figures", items: [P.graphSkills()] },
             { type: "page" },
             {
               type: "graph",
@@ -206,6 +243,40 @@
               hint: "Think about what electrons collide with as they move through a metal.",
               answer: "Electrons collide with the ions in the metal as they move through the wire. In a longer wire there are more ions along the path, so there are more collisions and the electrons are opposed more. The resistance is greater.",
             },
+            { type: "page" },
+            {
+              type: "question",
+              id: "a7",
+              prompt: "A 30 cm length of the wire had a p.d. of 1.19 V across it and a current of 0.67 A through it. Calculate its resistance.",
+              frame: true,
+              lines: 3,
+              hint: "Write R = V ÷ I, put in the numbers, then give the answer with its unit.",
+              answer: "R = V ÷ I = 1.19 ÷ 0.67 = 1.78 Ω (1.8 Ω to 2 significant figures).",
+            },
+            {
+              type: "question",
+              id: "a8",
+              prompt: "The ammeter shows readings such as 0.67 A. What is the resolution of the ammeter?",
+              lines: 1,
+              hint: "What is the smallest step the display can change by?",
+              answer: "0.01 A. The display shows two decimal places, so the smallest change it can show is 0.01 A.",
+            },
+            {
+              type: "question",
+              id: "a9",
+              prompt: "Look at your graph. Identify any anomalous result, or state that there are none. What should you do with an anomalous result?",
+              lines: 3,
+              hint: "Is any point clearly further from the line than the others?",
+              answer: "An anomalous result is a point well away from the line of best fit. Circle it, leave it out when drawing the line, and repeat that reading if there is time.",
+            },
+            {
+              type: "question",
+              id: "a10",
+              prompt: "Suggest one improvement to the method. Explain how it would make the results better.",
+              lines: 3,
+              hint: "Think about repeats, the heating of the wire, or how the length is measured.",
+              answer: "Any one, with its reason: repeat each reading and calculate a mean, which reduces the effect of random errors and helps spot anomalies; use a lower p.d. or switch off for longer between readings, so the temperature of the wire stays constant; use more lengths (for example every 5 cm) to show the pattern more clearly.",
+            },
           ],
         },
         {
@@ -222,6 +293,14 @@
                 ["Dependent", "Total resistance of the arrangement", "Measure V and I, then calculate R = V ÷ I"],
                 ["Control", "The resistors and the supply setting", "Use the same two resistors and supply throughout"],
               ],
+            },
+            {
+              type: "question",
+              id: "b0",
+              prompt: "Before you measure: predict the total resistance of R₁ and R₂ in series, and in parallel. Is each one bigger or smaller than one resistor on its own?",
+              lines: 2,
+              hint: "In series the charge passes through both resistors. In parallel it has two paths to choose from.",
+              answer: "Series: bigger than either resistor (about R₁ + R₂, so about 20 Ω for two 10 Ω resistors). Parallel: smaller than either resistor (about 5 Ω for two 10 Ω resistors).",
             },
             {
               type: "steps",
@@ -262,6 +341,8 @@
               hint: "Is the parallel value bigger or smaller than each resistor on its own?",
               answer: "The parallel resistance (5.0 Ω in the example) is less than the resistance of either resistor on its own. For two identical resistors it is about half the resistance of one.",
             },
+            { type: "page" },
+            { type: "figures", items: [P.currentPaths()] },
             {
               type: "question",
               id: "b3",
@@ -277,6 +358,15 @@
               lines: 3,
               hint: "In series, add the resistances. In parallel, each new branch is another path.",
               answer: "Three in series: about 3 × 10 Ω = 30 Ω. Adding more resistors in parallel keeps decreasing the total resistance, because each one adds another path for the current.",
+            },
+            {
+              type: "question",
+              id: "b5",
+              prompt: "A 22 Ω resistor and a 47 Ω resistor are connected in series to a 6.0 V supply. Calculate the total resistance, then the current.",
+              frame: true,
+              lines: 4,
+              hint: "First R_total = R₁ + R₂. Then use I = V ÷ R_total.",
+              answer: "R_total = 22 + 47 = 69 Ω. I = V ÷ R = 6.0 ÷ 69 = 0.087 A.",
             },
           ],
         },
@@ -295,6 +385,19 @@
               lines: 12,
               hint: "Cover the circuit, what you measure, how you find R, how you change the length, and how you keep the test fair.",
               answer: "<strong>Marking points (level of response):</strong><ul><li>Tape the wire to a metre ruler and connect crocodile clips to it.</li><li>Connect an ammeter in series and a voltmeter in parallel across the length of wire between the clips.</li><li>Measure the length between the clips with the ruler.</li><li>Record the p.d. and current, and calculate R = V ÷ I.</li><li>Change the length (for example, in 10 cm steps up to 100 cm) and repeat.</li><li>Keep the temperature constant: low p.d. and switch off between readings.</li><li>Use the same wire (material and diameter); repeat readings, find means and plot R against length.</li></ul>Level 3 (5–6 marks): a clear, logical method that would give valid results. Level 2 (3–4 marks): most steps, but not fully logical or detailed. Level 1 (1–2 marks): some relevant steps.",
+            },
+            {
+              type: "checklist",
+              title: "Check your answer",
+              text: "When you have finished, tick each point your method includes.",
+              items: [
+                "A circuit: ammeter in series, voltmeter across the wire",
+                "Measure the length between the clips with a ruler",
+                "Record V and I; calculate R = V ÷ I",
+                "Change the length in equal steps over a wide range",
+                "Same wire; low p.d. and switch off between readings",
+                "Repeat readings; plot R against length",
+              ],
             },
           ],
         },
@@ -331,6 +434,25 @@
         "Do not go above the lamp's rated p.d. (for example 6 V).",
         "Always use the protective resistor with the diode, so the current stays small.",
       ],
+      before: [
+        {
+          type: "keywords",
+          title: "Key words",
+          rows: [...KEY_WORDS, ["I–V characteristic", "A graph of current (y-axis) against p.d. (x-axis) for a component."], ["Ohmic conductor", "A component whose current is directly proportional to the p.d. at constant temperature."]],
+        },
+        {
+          type: "sketch",
+          id: "predict",
+          title: "Predict",
+          text: "Sketch the I–V graph you expect for each component. Show both positive and negative p.d.",
+          items: [
+            { label: "Fixed resistor", x: [-1, 1], y: [-1, 1], xLabel: "V", yLabel: "I", fn: D.IV.resistor },
+            { label: "Filament lamp", x: [-1, 1], y: [-1, 1], xLabel: "V", yLabel: "I", fn: D.IV.lamp },
+            { label: "Diode", x: [-1, 1], y: [-1, 1], xLabel: "V", yLabel: "I", fn: D.IV.diode, to: 0.74 },
+          ],
+          caption: "Expected: a straight line through the origin; an S-shaped curve; no current in reverse, then a steep rise.",
+        },
+      ],
       parts: [
         {
           id: "method",
@@ -360,9 +482,15 @@
               ],
             },
             { type: "figures", items: [ivCircuit, diodeCircuit] },
+            { type: "page" },
+            { type: "figures", items: [P.reverseSupply(), P.diodeWay()] },
             {
               type: "note",
               html: "<strong>Why reverse the supply?</strong> An I–V graph shows both directions. Reversing the connections gives the negative half of the graph.",
+            },
+            {
+              type: "note",
+              html: "<strong>Using the variable resistor.</strong> Start at its highest resistance, so the p.d. across the component is small. Lower its resistance a step at a time to increase the p.d.",
             },
           ],
         },
@@ -385,10 +513,11 @@
               type: "table",
               id: "lamp",
               title: "Filament lamp",
-              columns: ["p.d. / V", "Current / A", "p.d. / V", "Current / A"],
-              groups: [["Forward", 2], ["Reversed (negative)", 2]],
-              rows: Array.from({ length: 6 }, () => [null, null, null, null]),
-              answers: [["0.5", "0.08", "−0.5", "−0.08"], ["1.0", "0.11", "−1.0", "−0.11"], ["2.0", "0.16", "−2.0", "−0.17"], ["3.0", "0.21", "−3.0", "−0.20"], ["4.5", "0.26", "−4.5", "−0.26"], ["6.0", "0.30", "−6.0", "−0.30"]],
+              text: "Calculate the resistance, R = V ÷ I, for each forward reading.",
+              columns: ["p.d. / V", "Current / A", "Resistance / Ω", "p.d. / V", "Current / A"],
+              groups: [["Forward", 3], ["Reversed (negative)", 2]],
+              rows: Array.from({ length: 6 }, () => [null, null, null, null, null]),
+              answers: [["0.5", "0.08", "6.3", "−0.5", "−0.08"], ["1.0", "0.11", "9.1", "−1.0", "−0.11"], ["2.0", "0.16", "12.5", "−2.0", "−0.17"], ["3.0", "0.21", "14.3", "−3.0", "−0.20"], ["4.5", "0.26", "17.3", "−4.5", "−0.26"], ["6.0", "0.30", "20.0", "−6.0", "−0.30"]],
             },
             { type: "page" },
             {
@@ -441,7 +570,8 @@
               type: "question",
               id: "r2",
               prompt: "Calculate the resistance of the fixed resistor using one pair of your readings.",
-              lines: 2,
+              frame: true,
+              lines: 3,
               hint: "Use R = V ÷ I with a p.d. and the current measured at that p.d.",
               answer: "For example, R = V ÷ I = 6.0 ÷ 0.60 = 10 Ω.",
             },
@@ -470,6 +600,8 @@
               hint: "Use R = V ÷ I twice: once for your first reading and once for your last.",
               answer: "Example: at 0.5 V, R = 0.5 ÷ 0.08 ≈ 6 Ω. At 6.0 V, R = 6.0 ÷ 0.30 = 20 Ω. The resistance of the lamp increases as the p.d. (and current) increases.",
             },
+            { type: "page" },
+            { type: "figures", items: [P.filament()] },
             {
               type: "question",
               id: "l2",
@@ -520,6 +652,46 @@
               hint: "Look at how quickly the diode's current changes between 0.5 V and 0.7 V.",
               answer: "The current changes very quickly over a small range of p.d. near 0.6 V. Small steps give more points there, so the shape of the curve can be drawn accurately.",
             },
+            { type: "page" },
+            {
+              type: "table",
+              id: "summary",
+              title: "Summary",
+              heading: "Compare the three components",
+              text: "Complete the table using your three graphs.",
+              columns: ["Component", "Shape of the I–V graph", "As the p.d. increases, the resistance…", "Ohmic?"],
+              rows: [["Fixed resistor", null, null, null], ["Filament lamp", null, null, null], ["Diode", null, null, null]],
+              answers: [
+                [null, "Straight line through the origin", "stays the same", "Yes"],
+                [null, "S-shaped curve through the origin", "increases (the filament gets hotter)", "No"],
+                [null, "Zero current in reverse; steep rise above about 0.6 V", "is very high in reverse; falls quickly once it conducts", "No"],
+              ],
+            },
+            {
+              type: "question",
+              id: "e1",
+              prompt: "A lamp has a p.d. of 4.5 V across it and a current of 0.26 A through it. Calculate its resistance.",
+              frame: true,
+              lines: 3,
+              hint: "Use R = V ÷ I and give the unit.",
+              answer: "R = V ÷ I = 4.5 ÷ 0.26 = 17 Ω (17.3 Ω).",
+            },
+            {
+              type: "question",
+              id: "e2",
+              prompt: "Why were readings also taken with the supply reversed?",
+              lines: 2,
+              hint: "Does every component behave the same way in both directions?",
+              answer: "To see whether the component behaves the same way when the current flows in the opposite direction. The resistor and lamp do; the diode does not, because it only lets current flow one way.",
+            },
+            {
+              type: "question",
+              id: "e3",
+              prompt: "At the highest p.d. the fixed resistor felt warm. Suggest how this would affect the top end of its I–V graph.",
+              lines: 3,
+              hint: "What happens to the resistance of a metal when it gets hotter? What does that do to the current?",
+              answer: "As the resistor warms up, its resistance increases, so the current is a little lower than expected. The top of the line bends slightly towards the p.d. axis instead of staying straight. Switching off between readings avoids this.",
+            },
           ],
         },
         {
@@ -537,6 +709,19 @@
               lines: 12,
               hint: "Cover the circuit, how you change the p.d., what you record, how you get negative values and how you present the results.",
               answer: "<strong>Marking points (level of response):</strong><ul><li>Connect the lamp in series with an ammeter, a variable resistor and a power supply.</li><li>Connect a voltmeter in parallel across the lamp.</li><li>Adjust the variable resistor (or supply) to change the p.d.</li><li>Record the p.d. and current for a range of values, for example in 1 V steps.</li><li>Do not exceed the lamp's rated p.d.</li><li>Reverse the connections to the power supply and repeat, recording negative values.</li><li>Plot a graph of current (y-axis) against p.d. (x-axis) and draw a smooth curve.</li></ul>Level 3 (5–6 marks): a clear, logical method that would give valid results. Level 2 (3–4 marks): most steps, but not fully logical or detailed. Level 1 (1–2 marks): some relevant steps.",
+            },
+            {
+              type: "checklist",
+              title: "Check your answer",
+              text: "When you have finished, tick each point your method includes.",
+              items: [
+                "A circuit: lamp, ammeter and variable resistor in series",
+                "Voltmeter connected across the lamp only",
+                "Change the p.d. with the variable resistor, in steps",
+                "Record the current at each p.d.; stay below the rated p.d.",
+                "Reverse the supply and record negative values",
+                "Plot current (y) against p.d. (x); draw a smooth curve",
+              ],
             },
           ],
         },

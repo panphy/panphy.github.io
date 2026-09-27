@@ -96,27 +96,44 @@
     const marks = block.marks ? ` <span class="marks">[${block.marks} mark${block.marks === 1 ? "" : "s"}]</span>` : "";
     const kind = block.kind ? `<span class="kind">${block.kind}</span> ` : "";
     const answerHtml = answers ? `<div class="ans-text">${/^</.test(block.answer) ? sub(block.answer) : `<p>${sub(block.answer)}</p>`}</div>` : "";
+    // Calculation frame: the answer version shows the worked answer instead.
+    const space = block.frame && !answers
+      ? `<div class="frame">${["Equation", "Substitute", "Answer"].map((label) => `<p class="frame-line"><span>${label}</span><i></i>${label === "Answer" ? "<em>unit</em><i class=\"unit\"></i>" : ""}</p>`).join("")}</div>`
+      : `<div class="space" style="min-height:${block.lines * 8}mm">${answerHtml}</div>`;
     return `
       <div class="question">
         <p class="prompt">${kind}<b>Q${questionNumber}</b> ${sub(block.prompt)}${marks}</p>
-        <div class="space" style="min-height:${block.lines * 8}mm">${answerHtml}</div>
+        ${space}
       </div>`;
   };
 
+  const sketchHtml = (block) => `<div class="sketches n${block.items.length}">${block.items.map((item) => window.Diagrams.graph({
+    w: 220, h: 170, sketch: true, x: item.x, y: item.y, xLabel: item.xLabel, yLabel: item.yLabel,
+    series: answers ? [{ fn: item.fn, to: item.to, cls: "curve" }] : [],
+    caption: item.label, label: `Axes to sketch: ${item.yLabel} against ${item.xLabel}`,
+  })).join("")}</div>`;
+
   const renderBlock = (block, number) => {
     switch (block.type) {
+      case "keywords":
+        return `<section class="block">${h2(number, block.title)}
+          <table class="grid-table vars keywords"><tbody>${block.rows.map(([term, meaning]) => `<tr><td><b>${term}</b></td><td>${sub(meaning)}</td></tr>`).join("")}</tbody></table></section>`;
+      case "sketch":
+        return `<section class="block">${h2(number, block.title)}<p>${sub(block.text)}</p>${sketchHtml(block)}${answers && block.caption ? `<p class="ans-text">${sub(block.caption)}</p>` : ""}</section>`;
+      case "checklist":
+        return `<section class="block checklist-block">${h2(number, block.title)}${block.text ? `<p>${sub(block.text)}</p>` : ""}<ul class="checklist">${block.items.map((item) => `<li>${sub(item)}</li>`).join("")}</ul></section>`;
       case "variables":
         return `<section class="block">${h2(number, block.title)}
           <table class="grid-table vars"><thead><tr><th>Variable</th><th>What it is</th><th>How</th></tr></thead>
           <tbody>${block.rows.map(([kind, what, how]) => `<tr><td><b>${kind}</b></td><td>${sub(what)}</td><td>${sub(how)}</td></tr>`).join("")}</tbody></table></section>`;
       case "steps":
-        return `<section class="block">${h2(number, block.title)}<ol class="steps">${block.items.map((item) => `<li>${sub(item)}</li>`).join("")}</ol></section>`;
+        return `<section class="block">${h2(number, block.title)}<ol class="steps tick">${block.items.map((item) => `<li>${sub(item)}</li>`).join("")}</ol></section>`;
       case "figures":
         return `<div class="figures${block.items.length > 1 ? " two" : ""}">${block.items.join("")}</div>`;
       case "note":
         return `<p class="note">${sub(block.html)}</p>`;
       case "table":
-        return `<section class="block">${h2(number, block.title === "Results" ? "Results" : `Results: ${block.title.toLowerCase()}`)}${block.text ? `<p>${sub(block.text)}</p>` : ""}${tableHtml(block)}</section>`;
+        return `<section class="block">${h2(number, block.heading || (block.title === "Results" ? "Results" : `Results: ${block.title.toLowerCase()}`))}${block.text ? `<p>${sub(block.text)}</p>` : ""}${tableHtml(block)}</section>`;
       case "graph":
         return `<section class="block">${h2(number, block.title)}<p>${sub(block.text)}</p>${graphSvg(block)}</section>`;
       case "question":
@@ -140,6 +157,14 @@
     <section class="block">${h2(3, "Safety")}<ul>${practical.safety.map((item) => `<li>${sub(item)}</li>`).join("")}</ul></section>`;
   pages.push(cover);
 
+  if (practical.before?.length) {
+    let number = 3;
+    pages.push(`<h1>Before you start</h1><p class="subtitle">Learn the key words, then make a prediction before you build anything.</p>${practical.before.map((block) => {
+      if (block.type !== "question") number += 1;
+      return renderBlock(block, number);
+    }).join("")}`);
+  }
+
   practical.parts.forEach((part) => {
     const heading = `<h1><span class="part-label">${part.label}</span>${sub(part.title)}</h1>`;
     let page = `${heading}<p class="subtitle">${part.label} • ${practical.title} • ${sub(part.summary)}</p>`;
@@ -150,7 +175,7 @@
         page = heading;
         return;
       }
-      if (["variables", "steps", "table", "graph"].includes(block.type)) number += 1;
+      if (["variables", "steps", "table", "graph", "keywords", "sketch", "checklist"].includes(block.type)) number += 1;
       page += renderBlock(block, number);
     });
     pages.push(page);
