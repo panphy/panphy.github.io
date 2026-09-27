@@ -309,6 +309,21 @@
 
     bohr: () => svg('0 0 560 560', bohrAtom(280, 270, true), 'Bohr model of carbon: 2 electrons in energy level n = 1 and 4 in n = 2'),
 
+    'bohr-then-now': () => {
+      let s = '';
+      [[200, false], [640, true]].forEach(([cx, modern]) => {
+        const cy = 190;
+        s += ring(cx, cy, 82) + ring(cx, cy, 158);
+        s += modern ? cluster(cx, cy, 6, 6, 18) : ball(cx, cy, 26, 'positive');
+        [0.6, 0.6 + Math.PI].forEach(p => { s += ball(cx + 82 * Math.cos(p), cy + 82 * Math.sin(p), 12, 'electron'); });
+        [0.25, 0.75, 1.25, 1.75].forEach(p => { s += ball(cx + 158 * Math.cos(p * Math.PI), cy + 158 * Math.sin(p * Math.PI), 12, 'electron'); });
+        s += text(cx, 392, modern ? 'today' : 'Bohr, 1913', 'lbl display');
+        s += text(cx, 422, modern ? '6 protons + 6 neutrons' : 'one positive nucleus', 'lbl mono');
+      });
+      s += arrow(378, 190, 462, 190, 'text-secondary', 3) + text(420, 172, 'later', 'lbl mono small');
+      return svg('0 0 840 440', s, 'Carbon atom as Bohr pictured it in 1913, with one positive nucleus, and today, with 6 protons and 6 neutrons');
+    },
+
     levels: () => {
       let s = '';
       [[240, true], [720, false]].forEach(([cx, absorb]) => {
