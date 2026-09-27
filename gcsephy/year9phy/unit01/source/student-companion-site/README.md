@@ -2,7 +2,7 @@
 
 This is the original Sites/React source for the Year 9 student companion. It contains seven lessons and 28 questions. The published, build-free GitHub Pages edition is maintained in [the unit's static site](../../index.html), [lesson pages](../../lesson/) and [assets](../../assets/). Edit those files for current student-facing content; this directory is preserved as source history.
 
-See the [source archive README](../README.md) for the history bundle and the teaching-deck records.
+See the [source archive README](../README.md) for the history bundle and other archive notes.
 
 ## Source map
 

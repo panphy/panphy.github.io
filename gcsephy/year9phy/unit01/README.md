@@ -27,7 +27,7 @@ The skills are the ones every required practical from here to Year 13 will lean 
 | `Lesson 1 …` to `Lessons 7-8 …` (seven PDFs) | The lesson plans, formatted for reading | Read before teaching. This is the detail behind each lesson |
 | `md files/` | The same seven lesson plans in editable Markdown | Edit these master copies when revising a plan, then re-export the matching PDF |
 | `index.html`, `lesson/` and `assets/` | Static online student companion | Open `index.html`, or visit this folder's published web address |
-| `source/` | Original editable website plus teaching-deck media, source notes and attribution records | Keep this when moving or backing up the project |
+| `source/` | Original Sites/React companion-site source and its Git history | Keep this when moving or backing up the project |
 
 ## Working copy and source of truth
 
@@ -36,7 +36,7 @@ This repository is the working copy of the unit. The lesson plans, workbook and 
 - The files in `md files/` are the editable masters for the lesson plans. Keep each Markdown file and its exported PDF in step.
 - The HTML and JavaScript in `../../decks/work-like-a-physicist/` are the editable teaching-deck source.
 - `index.html`, `lesson/` and `assets/` are the editable source for the static companion website.
-- `source/` preserves the original website plus historical PowerPoint image assets, source notes, attribution records and photo-credit maintenance script. No PowerPoint deck is maintained in this repository.
+- `source/` preserves the original Sites/React companion site and its Git history.
 - `Work Like a Physicist - Year 9 Student Workbook.pdf` is currently stored only as a PDF. If an editable source is recreated, add it to this directory and document it here.
 
 ### How the parts fit together
@@ -199,12 +199,6 @@ Use the lesson plans for teaching guidance. The HTML deck reveals selected answe
 
 ---
 
-## Images in the deck
-
-The current HTML deck uses diagrams and illustrations maintained in `../../decks/work-like-a-physicist/`. The photo credits and source notes in `source/teaching-deck/` describe the historical PowerPoint and are retained as attribution records.
-
----
-
 ## What is included in this repository
 
 - the seven lesson-plan PDFs
@@ -213,7 +207,7 @@ The current HTML deck uses diagrams and illustrations maintained in `../../decks
 - the HTML teaching deck in `../../decks/work-like-a-physicist/`
 - this overview
 - the static student companion site, including seven workbook-matched revision guides, all seven missions and 40 questions
-- curated source material containing the original Sites/React website, its four-commit history, historical PowerPoint image assets, attribution records and the photo-credit maintenance script
+- the original Sites/React companion-site source and its four-commit Git history
 
 Dependency folders, build output, caches and rendered production previews are intentionally not included because they can be regenerated. Any future editable source or production record needed to maintain the unit should be added to this repository before its separate working copy is removed.
 
