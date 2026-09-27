@@ -57,7 +57,7 @@ Open [localhost:8000](http://localhost:8000). A static server is needed to test 
 | `fun/` | Network-only games and demos |
 | `beta/` | Trial apps and physics flashcards, listed in `beta/index.html` |
 | `misc/` | Unlisted resources, inventoried in `misc/index.html` |
-| `gcsephy/` | GCSE Physics curriculum resources, inventoried in `gcsephy/index.html`; `sw.js` and `sw-register.js` keep them fresh |
+| `gcsephy/` | GCSE Physics curriculum resources, inventoried in `gcsephy/index.html`; `sw.js` and `sw-register.js` keep them fresh and offer a Reload banner when an open page changes |
 | `.github/workflows/` | Repository automation |
 
 ## Contributing
