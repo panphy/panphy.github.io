@@ -16,9 +16,9 @@ npm install
 npm run dev
 ```
 
-Node 22 or newer is required. `.openai/hosting.json` retains the original Sites project identifier; it is project metadata, not a credential.
+Node 22.13 or newer is required by the archived project's `package.json`. `.openai/hosting.json` retains the original Sites project identifier; it is project metadata, not a credential.
 
-The archived source still builds successfully with its pinned dependencies. Its two original `npm test` checks belong to the starter scaffold and expect preview-only files that were not part of the finished project, so use `npm run build` as the source-build check. The live GitHub Pages edition has been checked separately.
+The archived source has pinned dependencies. Its two original `npm test` checks belong to the starter scaffold and expect preview-only files that were not part of the finished project, so use `npm run build` as the source-build check. The live GitHub Pages edition is maintained separately.
 
 `student-companion-site-history.bundle` is a portable backup of the original four-commit Git history. It can be restored with:
 

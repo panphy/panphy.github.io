@@ -52,7 +52,7 @@ Each lesson in the workbook runs: opener (big question, goals, key words, websit
 - **Explanations students can revise from.** Each idea has an explanation, a model with its limitation, and a diagram drawn with the website's helper.
 - **Graded practice.** Worked example → your turn → framed calculations → unframed → challenge, with varied formats (spot the mistake, circle the answer, ordering, student claims to correct).
 - **Self-checking.** Quick answers at the back of each booklet, answer editions, and links to the website's worked answers.
-- **Equations are learned.** This cohort sits GCSE in 2028; AQA has confirmed equation sheets only up to 2027. The toolkit asks students to learn each equation in words and symbols, gives equation triangles as rearranging help, and the Unit review starts with a recall challenge.
+- **Equations are understood and practised.** [AQA confirms that equation sheets will continue from 2028 for the lifetime of the current GCSE qualifications](https://www.aqa.org.uk/news/gcse-maths-sciences-formulae-equation-sheets-2027-28). The toolkit still teaches each equation in words and symbols, gives equation triangles as rearranging help, and the Unit review includes a recall challenge.
 - **No QR codes.** Students do not usually have phones in lessons, so each lesson opener gives the mission name and web address as text.
 - **Build.** HTML printed from Chrome, the same approach as the site's practical worksheets. This replaced an earlier ReportLab generator and Markdown lesson plans, which were drafted in `beta/unit01_resources/` and are in the git history.
 
