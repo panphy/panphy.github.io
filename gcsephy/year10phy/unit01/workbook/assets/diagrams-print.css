@@ -39,7 +39,7 @@
 
 /* big equation display */
 .equation-block { margin: 18px 0 6px; padding: 16px 18px; border: 2px solid var(--ink); background: var(--navy); color: white; box-shadow: 5px 5px 0 var(--accent); }
-.equation-block .eq { display: block; font: 900 clamp(24px, 3vw, 32px)/1.1 "Arial Black", Arial, sans-serif; letter-spacing: -.02em; color: var(--spark); }
+.equation-block .eq { display: block; font: 900 clamp(24px, 3vw, 32px)/1.1 "Arial Black", "Archivo Black", Arial, sans-serif; letter-spacing: -.02em; color: var(--spark); }
 .equation-block .eq-words { display: block; margin-top: 6px; font-size: 13px; font-weight: 800; color: #d4deec; }
 .equation-block .eq-units { display: block; margin-top: 10px; padding-top: 10px; border-top: 1px solid rgba(255,255,255,.2); font-size: 12px; line-height: 1.5; color: #b9c5d6; }
 .equation-block .eq-flag { display: inline-block; margin-top: 10px; padding: 4px 7px; border: 1px solid rgba(255,255,255,.4); font-size: 10px; font-weight: 900; letter-spacing: .1em; text-transform: uppercase; }
