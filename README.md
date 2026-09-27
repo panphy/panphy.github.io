@@ -26,6 +26,8 @@ These public, open-source resources are intentionally outside the general homepa
 
 Most published tools and simulations support offline use once their required files have been cached. Visit online first and check the homepage's **Offline Ready** indicator before relying on an app offline. Normal updates appear through an update prompt.
 
+Published pages share locally hosted Manrope, DM Serif Display, and IBM Plex Mono fonts in `assets/fonts/`. Their WOFF2 files are precached (about 336 KB total), so the same typography remains available offline.
+
 All pages under `fun/`, `beta/`, `misc/`, and `gcsephy/` require internet access. Supabase features, such as leaderboards, also stay online-only.
 
 `gcsephy/` pages register their own small service worker (`gcsephy/sw.js`, scoped to `/gcsephy/`). It stores nothing; it makes every page and asset request revalidate with the server, so edits appear on the next load instead of after the browser's 10-minute HTTP cache. If the network drops, it falls back to the browser's existing copy.
@@ -48,7 +50,7 @@ Open [localhost:8000](http://localhost:8000). A static server is needed to test 
 | --- | --- |
 | `index.html` | General app catalogue and offline readiness indicators |
 | `sw.js`, `manifest.json` | Caching, updates, and PWA configuration |
-| `assets/` | Shared controls, icons, and service-worker registration |
+| `assets/` | Shared controls, icons, locally hosted fonts, and service-worker registration |
 | `tools/`, `simulations/`, `for_teachers/` | Published educational apps |
 | `fun/` | Network-only games and demos |
 | `beta/` | Trial apps and physics flashcards, listed in `beta/index.html` |

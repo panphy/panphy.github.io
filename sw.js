@@ -1,4 +1,4 @@
-const BUILD_ID = '2026-09-26T21:19:39Z';
+const BUILD_ID = '2026-09-27T10:16:38Z';
 const APP_VERSIONS = {
   core: BUILD_ID,
   panphymd: BUILD_ID,
@@ -38,6 +38,32 @@ const ASSETS_TO_CACHE = [
   '/assets/fullscreen-button.css',
   '/assets/fullscreen-button.js',
   '/assets/standalone-top.css',
+  '/assets/fonts/fonts.css',
+  '/assets/fonts/dm-serif-display-italic-400-latin-ext.woff2',
+  '/assets/fonts/dm-serif-display-italic-400-latin.woff2',
+  '/assets/fonts/dm-serif-display-normal-400-latin-ext.woff2',
+  '/assets/fonts/dm-serif-display-normal-400-latin.woff2',
+  '/assets/fonts/ibm-plex-mono-normal-400-cyrillic-ext.woff2',
+  '/assets/fonts/ibm-plex-mono-normal-400-cyrillic.woff2',
+  '/assets/fonts/ibm-plex-mono-normal-400-latin-ext.woff2',
+  '/assets/fonts/ibm-plex-mono-normal-400-latin.woff2',
+  '/assets/fonts/ibm-plex-mono-normal-400-vietnamese.woff2',
+  '/assets/fonts/ibm-plex-mono-normal-500-cyrillic-ext.woff2',
+  '/assets/fonts/ibm-plex-mono-normal-500-cyrillic.woff2',
+  '/assets/fonts/ibm-plex-mono-normal-500-latin-ext.woff2',
+  '/assets/fonts/ibm-plex-mono-normal-500-latin.woff2',
+  '/assets/fonts/ibm-plex-mono-normal-500-vietnamese.woff2',
+  '/assets/fonts/ibm-plex-mono-normal-600-cyrillic-ext.woff2',
+  '/assets/fonts/ibm-plex-mono-normal-600-cyrillic.woff2',
+  '/assets/fonts/ibm-plex-mono-normal-600-latin-ext.woff2',
+  '/assets/fonts/ibm-plex-mono-normal-600-latin.woff2',
+  '/assets/fonts/ibm-plex-mono-normal-600-vietnamese.woff2',
+  '/assets/fonts/manrope-normal-400-800-cyrillic-ext.woff2',
+  '/assets/fonts/manrope-normal-400-800-cyrillic.woff2',
+  '/assets/fonts/manrope-normal-400-800-greek.woff2',
+  '/assets/fonts/manrope-normal-400-800-latin-ext.woff2',
+  '/assets/fonts/manrope-normal-400-800-latin.woff2',
+  '/assets/fonts/manrope-normal-400-800-vietnamese.woff2',
   '/manifest.json',
 
   // Tools
