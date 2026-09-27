@@ -209,12 +209,12 @@
     let s = [0, 60, -60].map(t => ellipse(cx, cy, rx, ry, t)).join('');
     s += ball(cx, cy, nr, 'positive');
     [0, 60, -60].forEach((tilt, i) => {
-      [0.3, 1.3].forEach(p => {
-        const phase = (p + i * 0.4) * Math.PI;
+      [0, 1].forEach(p => {
+        // Start at the orbit ends, evenly spaced so none look paired (and stay so with reduced motion).
+        const phase = p * Math.PI;
         // A negative period runs the middle orbit the other way: Rutherford gave no direction.
         if (animate) s += orbiter(cx, cy, rx, ry, phase, (i === 1 ? -1 : 1) * (7 + i * 1.5), tilt, er);
-        // Still icons put electrons at the orbit ends, evenly spaced so none look paired.
-        else s += ball(...orbitPoint(cx, cy, rx, ry, Math.round(p) * Math.PI, tilt), er, 'electron');
+        else s += ball(...orbitPoint(cx, cy, rx, ry, phase, tilt), er, 'electron');
       });
     });
     return s;
