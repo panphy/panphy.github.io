@@ -22,7 +22,7 @@ The skills are the ones every required practical from here to Year 13 will lean 
 
 | File | What it is | What to do with it |
 |---|---|---|
-| `Work Like a Physicist - Year 9 Teaching Deck.pptx` | 65-slide teaching deck covering all eight lessons | **Open the speaker notes before you teach.** The slides are deliberately sparse; the teaching is in the notes |
+| [`../../decks/work-like-a-physicist/index.html`](../../decks/work-like-a-physicist/index.html) | 50-slide HTML teaching deck covering all eight lessons | Present in a browser; advance to reveal answers and teaching points |
 | `Work Like a Physicist - Year 9 Student Workbook.pdf` | 40-page A4 student workbook, one per student for the whole unit | Print double-sided. Students keep the same workbook for all eight lessons |
 | `Lesson 1 …` to `Lessons 7-8 …` (seven PDFs) | The lesson plans, formatted for reading | Read before teaching. This is the detail behind each lesson |
 | `md files/` | The same seven lesson plans in editable Markdown | Edit these master copies when revising a plan, then re-export the matching PDF |
@@ -31,19 +31,19 @@ The skills are the ones every required practical from here to Year 13 will lean 
 
 ## Working copy and source of truth
 
-This `gcsephy/year9phy/unit01/` directory is the **authoritative and only working copy** of the project. Make future changes here and commit them to the repository; do not assume that a separate original authoring folder exists.
+This repository is the working copy of the unit. The lesson plans, workbook and student companion are here; the teaching deck is maintained in `gcsephy/decks/work-like-a-physicist/`.
 
 - The files in `md files/` are the editable masters for the lesson plans. Keep each Markdown file and its exported PDF in step.
-- `Work Like a Physicist - Year 9 Teaching Deck.pptx` is the editable teaching-deck master.
+- The HTML and JavaScript in `../../decks/work-like-a-physicist/` are the editable teaching-deck source.
 - `index.html`, `lesson/` and `assets/` are the editable source for the static companion website.
-- `source/` preserves the original website plus teaching-deck image assets, source notes, attribution records and the photo-credit maintenance script. The superseded starter PowerPoint and its generation script are not retained; the finished deck above is the only PowerPoint master.
+- `source/` preserves the original website plus historical PowerPoint image assets, source notes, attribution records and photo-credit maintenance script. No PowerPoint deck is maintained in this repository.
 - `Work Like a Physicist - Year 9 Student Workbook.pdf` is currently stored only as a PDF. If an editable source is recreated, add it to this directory and document it here.
 
 ### How the parts fit together
 
 - **Lesson plans** — the full detail: objectives, vocabulary, activities, expected answers, teacher notes.
-- **Teaching deck** — what goes on the board, plus roughly a thousand words of teaching notes per slide: what to say, what to ask, the common wrong answer, and the workbook answers.
-- **Student workbook** — where students actually write. Slides refer to workbook task numbers, so the two are designed to be used together.
+- **Teaching deck** — browser-based slides with diagrams, questions and reveal steps for classroom discussion.
+- **Student workbook** — where students actually write. The lesson plans and workbook tasks are designed to be used together.
 - **Companion site** — optional, for students: revision, practice questions and catch-up outside the lesson.
 
 You can teach from the deck alone in a pinch. You cannot teach it well without the workbook in students' hands, because every task assumes they are writing into it. The site is a bonus, not a dependency — the unit works completely without it.
@@ -88,7 +88,7 @@ The intended sequence is printed on each lesson page: *review the notes → use 
 
 The answers are visible to students by design — this is a revision tool, not an assessment. If you want to set questions from it as unseen homework, copy the prompts out rather than sending the link.
 
-This hosted copy is a static site and does not need a build step or server-side runtime. It lives under `gcsephy/`, which is network-only: it does not register the service worker or work offline.
+This hosted copy is a static site and does not need a build step or server-side runtime. It lives under `gcsephy/`, which is network-only and uses a separate freshness worker without offline caching.
 
 ---
 
@@ -173,8 +173,8 @@ It covers, at Year 9 level, the investigative skills that GCSE specifications as
 **Freely swappable**
 
 - **The practicals.** Any categoric investigation works for Lesson 3; any continuous one works for Lesson 4. Use what your prep room actually has.
-- **The case studies** opening each lesson. They are there to buy two minutes of attention. If you have a better story, tell yours. (If you swap one out, drop the photo and its credit line with it.)
-- **The timings.** There are none printed on the slides, deliberately — pacing is your call and a visible clock only adds pressure. Suggested timings sit in the speaker notes and are meant to be ignored freely.
+- **The case studies** opening each lesson. They are there to buy two minutes of attention. If you have a better story, tell yours, and update any associated image and credit.
+- **The timings.** There are none printed on the slides, deliberately — pacing is your call and a visible clock only adds pressure.
 - **Individual tasks.** Most lessons have more material than fifty minutes allows. Cutting a task is expected, not a failure.
 
 **Differentiation already built in**
@@ -195,24 +195,13 @@ One workbook per student, kept for all eight lessons. It is designed so that eve
 - Printed grid paper wherever a graph is needed, so no separate graph paper is required.
 - A glossary, a "write this instead of that" phrase table, and a progress tracker at the back.
 
-Answers to the workbook tasks are in the deck's speaker notes only — nothing is revealed on the board unless you choose to reveal it.
+Use the lesson plans for teaching guidance. The HTML deck reveals selected answers only when you advance its steps.
 
 ---
 
 ## Images in the deck
 
-Each lesson opens with a real case study, and seven of those slides carry a photograph. Four are real photographs of the events described, credited on the slide itself:
-
-| Slide | Image | Credit |
-|---|---|---|
-| 4 | The OPERA detector under construction, 2005 | MhieR / Wikimedia Commons, **CC BY-SA 3.0** |
-| 37 | Farman, Gardiner and Shanklin with a Dobson ozone spectrophotometer | Chris Gilbert / British Antarctic Survey |
-| 46 | NASA's Ingenuity helicopter on Mars | NASA/JPL-Caltech/ASU/MSSS |
-| 53 | LIGO Hanford from the air | Caltech/MIT/LIGO Lab |
-
-The remaining three case slides (13, 21, 29 — the energy-drink study, the helmet drop test, the stunt ramp) use **AI-generated illustrations**, not photographs of real events. They are there to set a scene, and it is worth being straight with a class about that if anyone asks.
-
-**If you redistribute the deck**, keep the credit lines on the slides. The Wikimedia image is CC BY-SA, which requires attribution and share-alike; the BAS, NASA and LIGO images are used with credit as educational material. Full attribution and source notes are preserved in `source/teaching-deck/photo-credits.txt` and `source/teaching-deck/source-notes.txt`.
+The current HTML deck uses diagrams and illustrations maintained in `../../decks/work-like-a-physicist/`. The photo credits and source notes in `source/teaching-deck/` describe the historical PowerPoint and are retained as attribution records.
 
 ---
 
@@ -221,10 +210,10 @@ The remaining three case slides (13, 21, 29 — the energy-drink study, the helm
 - the seven lesson-plan PDFs
 - the seven editable Markdown lesson-plan masters
 - the student workbook PDF
-- the teaching deck
+- the HTML teaching deck in `../../decks/work-like-a-physicist/`
 - this overview
 - the static student companion site, including seven workbook-matched revision guides, all seven missions and 40 questions
-- curated source material containing the original Sites/React website, its four-commit history, teaching-deck image assets, attribution records and the photo-credit maintenance script
+- curated source material containing the original Sites/React website, its four-commit history, historical PowerPoint image assets, attribution records and the photo-credit maintenance script
 
 Dependency folders, build output, caches and rendered production previews are intentionally not included because they can be regenerated. Any future editable source or production record needed to maintain the unit should be added to this repository before its separate working copy is removed.
 
