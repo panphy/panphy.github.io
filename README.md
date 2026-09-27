@@ -17,8 +17,9 @@ Browser-based physics tools, simulations, classroom utilities, and games for lea
 
 The [GCSE Physics hub](https://panphy.app/gcsephy/) collects the author's school curriculum resources:
 
-- **Year 9 · [Work Like a Physicist](https://panphy.app/gcsephy/year9phy/unit01/):** a student companion site, revision guides, test preparation, a workbook, lesson plans, and a teaching deck. See the [unit overview](gcsephy/year9phy/unit01/README.md) for materials and editable sources.
-- **Year 10 · [Electric Circuits](https://panphy.app/gcsephy/year10phy/unit01/):** revision notes, practice questions, an Exam Zone for AQA GCSE electricity, and a four-part student workbook with answer editions and a teacher guide. See the [unit overview](gcsephy/year10phy/unit01/README.md).
+- **Year 9 · [Work Like a Physicist](https://panphy.app/gcsephy/year9phy/unit01/):** a student companion site, revision guides, Exam Zone, 40-page workbook, lesson plans, and a [50-slide HTML teaching deck](https://panphy.app/gcsephy/decks/work-like-a-physicist/). See the [unit overview](gcsephy/year9phy/unit01/README.md) for materials and editable sources.
+- **Year 10 · [Electric Circuits](https://panphy.app/gcsephy/year10phy/unit01/):** revision notes, practice questions, an Exam Zone, required-practical resources, a twelve-lesson workbook with answer editions and a teacher guide, and an [HTML teaching deck](https://panphy.app/gcsephy/decks/electric-circuits/). See the [unit overview](gcsephy/year10phy/unit01/README.md).
+- **Year 11 · [Atoms and Nuclear Radiation](https://panphy.app/gcsephy/year11phy/unit01/):** a ten-lesson workbook with answer editions and a unit review, alongside an [HTML teaching deck](https://panphy.app/gcsephy/decks/atoms-and-radiation/). See the [workbook overview](gcsephy/year11phy/unit01/README.md).
 
 These public, open-source resources are intentionally outside the general homepage catalogue, but teachers and students are welcome to use and adapt them.
 
