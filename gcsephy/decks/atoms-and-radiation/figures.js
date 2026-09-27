@@ -311,10 +311,11 @@
         ['M140,214 L720,214', 'straight'], ['M140,246 L720,246', 'straight'], ['M140,222 L720,222', 'straight'], ['M140,238 L720,238', 'straight'],
         ['M140,226 L520,226 L712,170', 'deflect'], ['M140,234 L520,234 L706,306', 'deflect'], ['M140,230 L520,230 L338,148', 'bounce']
       ];
-      paths.forEach(([d, kind], i) => {
+      s += '<g class="scatter-static">';
+      paths.forEach(([d, kind]) => {
         s += `<path d="${d}" class="alpha-path ${kind}" marker-end="url(#m-alpha)"/>`;
-        s += `<g class="mover"><circle r="7" fill="url(#g-alpha)"/><animateMotion dur="${kind === 'bounce' ? 3.2 : 2.6}s" begin="-${f(i * 0.45)}s" repeatCount="indefinite" path="${d}"/></g>`;
       });
+      s += '</g><g class="scatter-live"></g>';
       s += `<rect x="516" y="96" width="8" height="268" rx="3" style="fill:var(--gold)"/>` + text(520, 84, 'thin gold foil', 'lbl strong');
       s += text(330, 132, 'bounce back', 'lbl', 'middle', 'style="fill:var(--alpha)"');
       s += text(760, 164, 'small', 'lbl', 'start', 'style="fill:var(--alpha)"') + text(760, 186, 'deflection', 'lbl', 'start', 'style="fill:var(--alpha)"');

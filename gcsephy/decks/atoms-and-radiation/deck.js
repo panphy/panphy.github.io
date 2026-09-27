@@ -3,7 +3,7 @@
 (() => {
   const SLIDE_W = 1600;
   const SLIDE_H = 900;
-  const state = { index: 0, slides: [], orbitFrame: 0 };
+  const state = { index: 0, slides: [], orbitFrame: 0, scatter: null };
 
   const deck = document.getElementById('deck');
   const stage = document.getElementById('stage');
@@ -54,6 +54,7 @@
     });
     if (location.hash !== `#${n}`) history.replaceState(null, '', `#${n}`);
     document.title = `${slide.dataset.title || 'Atoms and Nuclear Radiation'} · GCSE Physics`;
+    setScatterActive();
   }
 
   function next() {
@@ -165,10 +166,84 @@
     requestAnimationFrame(fit);
   }
 
+  const SVG_NS = 'http://www.w3.org/2000/svg';
+  const SCATTER_INTERVAL = 420;
+
+  function setScatterActive() {
+    const scatter = state.scatter;
+    if (!scatter) return;
+    const active = scatter.svg.closest('.slide').classList.contains('active') && !reduceMotion.matches;
+    if (active === scatter.active) return;
+    scatter.active = active;
+    scatter.svg.classList.toggle('scatter-playing', active);
+    scatter.group.replaceChildren();
+    scatter.particles = [];
+    scatter.lastSpawn = null;
+  }
+
+  function spawnAlpha(time) {
+    const scatter = state.scatter;
+    const slot = scatter.count++ % 20;
+    const kind = slot === 19 ? 'bounce' : [4, 11, 17].includes(slot) ? 'deflect' : 'straight';
+    const startY = 210 + Math.random() * 40;
+    let d;
+    if (kind === 'straight') {
+      d = `M140,${startY} L720,${startY}`;
+    } else if (kind === 'deflect') {
+      const direction = Math.random() < .5 ? -1 : 1;
+      const endY = startY + direction * (28 + Math.random() * 48);
+      d = `M140,${startY} L520,${startY} L${700 + Math.random() * 20},${endY}`;
+    } else {
+      const direction = Math.random() < .5 ? -1 : 1;
+      const endY = startY + direction * (70 + Math.random() * 35);
+      d = `M140,${startY} L${490 + Math.random() * 25},${startY} L${315 + Math.random() * 55},${endY}`;
+    }
+    const path = document.createElementNS(SVG_NS, 'path');
+    path.setAttribute('d', d);
+    path.setAttribute('class', `alpha-path ${kind}`);
+    const particle = document.createElementNS(SVG_NS, 'circle');
+    particle.setAttribute('r', '7');
+    particle.setAttribute('fill', 'url(#g-alpha)');
+    scatter.group.append(path, particle);
+    const length = path.getTotalLength();
+    path.style.strokeDasharray = String(length);
+    path.style.strokeDashoffset = String(length);
+    scatter.particles.push({ path, particle, length, born: time, kind, travel: kind === 'bounce' ? 2900 : 2400 });
+  }
+
+  function animateScatter(time) {
+    const scatter = state.scatter;
+    if (!scatter?.active) return;
+    if (scatter.lastSpawn === null || time - scatter.lastSpawn >= SCATTER_INTERVAL) {
+      spawnAlpha(time);
+      scatter.lastSpawn = time;
+    }
+    scatter.particles = scatter.particles.filter(item => {
+      const age = time - item.born;
+      const hold = item.kind === 'straight' ? 500 : 1400;
+      const fade = item.kind === 'straight' ? 800 : 1500;
+      if (age >= item.travel + hold + fade) {
+        item.path.remove();
+        item.particle.remove();
+        return false;
+      }
+      const progress = Math.min(age / item.travel, 1);
+      const point = item.path.getPointAtLength(item.length * progress);
+      item.path.style.strokeDashoffset = String(item.length * (1 - progress));
+      item.particle.setAttribute('cx', point.x);
+      item.particle.setAttribute('cy', point.y);
+      item.particle.style.visibility = progress < 1 ? 'visible' : 'hidden';
+      const fadeProgress = Math.max(0, (age - item.travel - hold) / fade);
+      item.path.style.opacity = String((item.kind === 'straight' ? .55 : .95) * (1 - fadeProgress));
+      return true;
+    });
+  }
+
   // Move electrons around their orbits on the visible slide only.
   function animateOrbits(time) {
     state.orbitFrame = requestAnimationFrame(animateOrbits);
     if (reduceMotion.matches) return;
+    animateScatter(time);
     const slide = state.slides[state.index];
     slide.querySelectorAll('[data-orbit]').forEach(node => {
       const [cx, cy, rx, ry, phase, period, tilt] = node.dataset.orbit.split(',').map(Number);
@@ -180,6 +255,8 @@
   function init() {
     window.DeckFigures.render();
     state.slides = [...deck.querySelectorAll('.slide')];
+    const scatterSvg = deck.querySelector('[data-fig="scatter"] svg');
+    state.scatter = { svg: scatterSvg, group: scatterSvg.querySelector('.scatter-live'), particles: [], lastSpawn: null, count: 0, active: false };
     state.slides.forEach((slide, i) => {
       const foot = slide.querySelector('.slide-foot [data-page]');
       if (foot) foot.textContent = String(i + 1).padStart(2, '0');
@@ -203,6 +280,7 @@
     stage.addEventListener('touchstart', onTouchStart, { passive: true });
     stage.addEventListener('touchend', onTouchEnd, { passive: true });
     window.addEventListener('resize', fit);
+    reduceMotion.addEventListener('change', setScatterActive);
     window.addEventListener('hashchange', () => {
       const n = parseInt(location.hash.slice(1), 10);
       if (Number.isFinite(n) && n - 1 !== state.index) show(n - 1);
