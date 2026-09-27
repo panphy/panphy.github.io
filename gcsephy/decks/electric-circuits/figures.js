@@ -11,7 +11,9 @@
   const head = (x, y, a, cls = 'flow') => `<g transform="translate(${x} ${y}) rotate(${a})"><path class="${cls}" d="M7 0 L-5 -6 L-5 6 Z"/></g>`;
   const fall = x => 0.9 * Math.exp(-2.6 * x) + 0.05;
   // Lattice geometry for the slide 21 simulation (panel-local units).
-  const LAT = { top: 56, w: 230, h: 156, ionR: 10, eR: 5, rows: [82, 134, 186], cols: [27, 71, 115, 159, 203] };
+  // The panel is one repeating tile of the lattice: electrons leaving one edge
+  // come back in at the opposite edge, so there are no walls.
+  const LAT = { top: 56, w: 230, h: 156, ionR: 10, eR: 5, rows: [0, 52, 104], cols: [23, 69, 115, 161, 207] };
 
   const FIGURES = {
     // Mission 1
@@ -59,20 +61,24 @@
 
     // Mission 4
     ohmic: () => D.graph({ w: 360, h: 250, x: [0, 6, 1], y: [0, 0.6, 0.1], xLabel: 'potential difference / V', yLabel: 'current / A', series: [{ fn: x => 0.1 * x, from: 0, to: 6 }, { points: [[1, 0.1], [2, 0.2], [3, 0.3], [4, 0.4], [5, 0.5], [6, 0.6]] }], caption: 'A 10 Ω resistor: every point gives V ÷ I = 10 Ω.' }),
-    // Two live panels (see startLattice): ions in hot metal vibrate more, so the
-    // electrons collide more often and fewer get through each second.
+    // Two live panels driven by latticeModel. Same slow vibration rate in both;
+    // the hot ions swing further, so electrons hit them more often.
     ions: () => {
       let s = '';
       [['cool', 14, 'COOL METAL', 'ions vibrate a little'], ['hot', 276, 'HOT METAL', 'ions vibrate a lot']].forEach(([kind, x0, title, sub]) => {
-        s += `<g data-panel="${kind}" data-x0="${x0}">`;
-        s += txt(x0 + 115, 24, title, `lattice-title ${kind === 'hot' ? 'hot' : 'cool'}`) + txt(x0 + 115, 42, sub, 'note');
-        s += `<rect x="${x0}" y="${LAT.top}" width="${LAT.w}" height="${LAT.h}" rx="10" class="lattice-panel ${kind}"/>`;
-        LAT.rows.forEach(y => LAT.cols.forEach(cx => {
-          s += `<g class="ion" transform="translate(${x0 + cx} ${y})"><circle r="${LAT.ionR}" class="lattice-ion"/><path d="M-5 0 h10 M0 -5 v10" class="lattice-ion-plus"/></g>`;
+        const tone = kind === 'hot' ? 'hot' : 'cool';
+        s += txt(x0 + 115, 24, title, `lattice-title ${tone}`) + txt(x0 + 115, 42, sub, 'note');
+        s += `<clipPath id="lattice-clip-${kind}"><rect width="${LAT.w}" height="${LAT.h}" rx="10" style="visibility:visible"/></clipPath>`;
+        s += `<g data-panel="${kind}" transform="translate(${x0} ${LAT.top})">`;
+        s += `<rect width="${LAT.w}" height="${LAT.h}" rx="10" class="lattice-panel ${kind}"/>`;
+        s += `<g clip-path="url(#lattice-clip-${kind})">`;
+        // The top row is drawn again along the bottom edge (its wrapped copy).
+        [...LAT.rows, LAT.h].forEach((y, r) => LAT.cols.forEach((x, c) => {
+          s += `<g class="ion" data-ion="${(r % LAT.rows.length) * LAT.cols.length + c}" data-dy="${r === LAT.rows.length ? LAT.h : 0}" transform="translate(${x} ${y})"><circle r="${LAT.ionR}" class="lattice-ion"/><path d="M-5 0 h10 M0 -5 v10" class="lattice-ion-plus"/></g>`;
         }));
-        s += `<g class="electrons"></g>`;
-        s += txt(x0 + 115, 238, 'electrons through: 0', `lattice-count ${kind === 'hot' ? 'hot' : 'cool'}`);
-        s += `</g>`;
+        s += `<g class="electrons"></g></g>`;
+        s += `<rect width="${LAT.w}" height="${LAT.h}" rx="10" class="lattice-edge"/></g>`;
+        s += txt(x0 + 115, 238, 'electrons through: 0', `lattice-count ${tone}`);
       });
       s += `<line x1="200" y1="258" x2="320" y2="258" class="electron-line"/>` + head(326, 258, 0, 'electron') + txt(340, 262, 'electron flow', 'note cool', 'start');
       return svg(520, 272, s, 'Two panels of metal ions with free electrons flowing through. In the cool metal the ions vibrate a little and electrons pass easily. In the hot metal the ions vibrate a lot, electrons collide more often and fewer get through: higher resistance.');
@@ -125,91 +131,129 @@
     }
   };
 
-  // Slide 21: a simple Drude-style picture. Electrons are pushed to the right,
-  // bounce off vibrating ions and speed up again; the counters show how many
-  // cross each panel. Runs only while its slide is showing.
+  // Slide 21 model, in panel units. Electrons move at a steady speed; the p.d.
+  // gradually turns them towards +x. Hitting an ion bounces them off it (in the
+  // ion's frame), then their speed settles back to normal as energy is handed
+  // to the lattice. Ions vibrate about fixed sites, slowed
+  // right down so the class can watch; temperature sets the amplitude.
+  const LATTICE_PHYSICS = { speed: 55, turn: 1.4, freq: 0.5 };
+  function latticeModel(amp, count = 6) {
+    const { w, h, ionR, eR } = LAT;
+    const { speed, turn, freq } = LATTICE_PHYSICS;
+    const ions = [];
+    LAT.rows.forEach(by => LAT.cols.forEach(bx => ions.push({
+      bx, by, x: bx, y: by, vx: 0, vy: 0, hitUntil: -1,
+      f: freq * (0.8 + Math.random() * 0.4), px: Math.random() * 6.3, py: Math.random() * 6.3
+    })));
+    const lanes = [h / 6, h / 2, 5 * h / 6];
+    const electrons = Array.from({ length: count }, (_, i) => {
+      const a = (Math.random() - 0.5) * 0.8;
+      return { x: (i + Math.random() * 0.6) * w / count, y: lanes[i % 3] + (Math.random() - 0.5) * 8, vx: speed * Math.cos(a), vy: speed * Math.sin(a) };
+    });
+    const model = { ions, electrons, through: 0, collisions: 0, t: 0 };
+    const wrapDiff = (d, L) => d - L * Math.round(d / L);
+    model.step = dt => {
+      const t = (model.t += dt);
+      ions.forEach(ion => {
+        const wx = 2 * Math.PI * ion.f, wy = wx * 1.3;
+        ion.x = ion.bx + amp * Math.sin(wx * t + ion.px);
+        ion.y = ion.by + amp * Math.sin(wy * t + ion.py);
+        ion.vx = amp * wx * Math.cos(wx * t + ion.px);
+        ion.vy = amp * wy * Math.cos(wy * t + ion.py);
+      });
+      electrons.forEach(e => {
+        // A steady push along +x at constant speed turns the velocity at a rate
+        // proportional to sin(angle): a bounced-back electron turns round slowly.
+        // After a bounce the speed settles back to normal as energy passes to the lattice.
+        let ang = Math.atan2(e.vy, e.vx);
+        ang -= turn * Math.sin(ang) * dt;
+        const v = Math.hypot(e.vx, e.vy) + (speed - Math.hypot(e.vx, e.vy)) * 2.5 * dt;
+        e.vx = v * Math.cos(ang); e.vy = v * Math.sin(ang);
+        e.x += e.vx * dt; e.y += e.vy * dt;
+        if (e.x >= w) { e.x -= w; model.through += 1; }
+        if (e.x < 0) { e.x += w; model.through -= 1; }
+        e.y -= h * Math.floor(e.y / h);
+        ions.forEach(ion => {
+          const dx = wrapDiff(e.x - ion.x, w), dy = wrapDiff(e.y - ion.y, h);
+          const d = Math.hypot(dx, dy), min = eR + ionR;
+          if (d >= min || d === 0) return;
+          const nx = dx / d, ny = dy / d;
+          e.x += nx * (min - d); e.y += ny * (min - d);
+          const ux = e.vx - ion.vx, uy = e.vy - ion.vy, un = ux * nx + uy * ny;
+          if (un >= 0) return;
+          // Bounce off in the ion's frame, then back to the lab frame.
+          e.vx = ux - 2 * un * nx + ion.vx; e.vy = uy - 2 * un * ny + ion.vy;
+          // Limit the kick from a fast ion so the rebound stays easy to follow.
+          const kick = Math.hypot(e.vx, e.vy) / (1.5 * speed);
+          if (kick > 1) { e.vx /= kick; e.vy /= kick; }
+          ion.hitUntil = t + 0.3;
+          model.collisions += 1;
+        });
+      });
+    };
+    return model;
+  }
+
   function startLattice(fig) {
     const slide = fig.closest('.slide');
     const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     const NS = 'http://www.w3.org/2000/svg';
-    const PUSH = 70, THERMAL = 30, N = 7;
     const panels = [...fig.querySelectorAll('[data-panel]')].map(g => {
       const hot = g.dataset.panel === 'hot';
-      const x0 = +g.dataset.x0;
-      const ions = [...g.querySelectorAll('.ion')].map((el, i) => ({
-        el, circle: el.firstChild, bx: x0 + LAT.cols[i % 5], by: LAT.rows[Math.floor(i / 5)],
-        px: Math.random() * 6.3, py: Math.random() * 6.3, x: 0, y: 0, hitUntil: 0
-      }));
+      const ionEls = [...g.querySelectorAll('.ion')].map(el => ({ el, k: +el.dataset.ion, dy: +el.dataset.dy }));
       const layer = g.querySelector('.electrons');
-      const electrons = Array.from({ length: N }, () => {
+      return { amp: hot ? 8 : 1.5, ionEls, layer, label: g.parentNode.querySelector(`.lattice-count.${hot ? 'hot' : 'cool'}`) };
+    });
+    const reset = () => panels.forEach(p => {
+      p.model = latticeModel(p.amp);
+      // Run briefly first so a still frame (thumbnail, print, reduced motion)
+      // already shows the hot ions displaced from their sites.
+      for (let k = 0; k < 120; k += 1) p.model.step(1 / 120);
+      p.model.through = 0;
+      p.layer.innerHTML = '';
+      // Each electron is drawn at up to four wrapped positions so it slides
+      // smoothly off one edge and on at the other.
+      p.eEls = p.model.electrons.map(() => [0, 1, 2, 3].map(() => {
         const el = document.createElementNS(NS, 'g');
         el.innerHTML = `<circle r="${LAT.eR}" class="e-dot"/><line x1="-3" x2="3" class="e-minus"/>`;
-        layer.appendChild(el);
-        return { el };
+        p.layer.appendChild(el);
+        return el;
+      }));
+      p.shown = -1;
+    });
+    const draw = () => panels.forEach(p => {
+      const { ions, electrons, t, through } = p.model;
+      p.ionEls.forEach(({ el, k, dy }) => {
+        const ion = ions[k];
+        el.setAttribute('transform', `translate(${ion.x.toFixed(1)} ${(ion.y + dy).toFixed(1)})`);
+        el.firstChild.classList.toggle('hit', t < ion.hitUntil);
       });
-      return { hot, x0, amp: hot ? 7.5 : 1, freq: hot ? 7 : 5, ions, electrons, count: 0, label: g.querySelector('.lattice-count') };
-    });
-    const channels = [64, 108, 160, 204];
-    const place = (p, e, x) => {
-      e.x = x; e.y = channels[Math.floor(Math.random() * channels.length)] + (Math.random() - .5) * 6;
-      e.vx = PUSH; e.vy = (Math.random() - .5) * THERMAL;
-    };
-    const reset = () => panels.forEach(p => {
-      p.count = 0; p.label.textContent = 'electrons through: 0';
-      p.electrons.forEach((e, i) => place(p, e, p.x0 + 8 + i * (LAT.w - 16) / N + Math.random() * 20));
-    });
-    const draw = t => panels.forEach(p => {
-      p.ions.forEach(ion => {
-        ion.x = ion.bx + p.amp * Math.sin(2 * Math.PI * p.freq * t + ion.px);
-        ion.y = ion.by + p.amp * Math.sin(2 * Math.PI * p.freq * 1.3 * t + ion.py);
-        ion.el.setAttribute('transform', `translate(${ion.x.toFixed(1)} ${ion.y.toFixed(1)})`);
-        ion.circle.classList.toggle('hit', t < ion.hitUntil);
-      });
-      p.electrons.forEach(e => e.el.setAttribute('transform', `translate(${e.x.toFixed(1)} ${e.y.toFixed(1)})`));
-    });
-    const step = (t, dt) => panels.forEach(p => {
-      const left = p.x0 + LAT.eR, right = p.x0 + LAT.w - LAT.eR;
-      const top = LAT.top + LAT.eR, bottom = LAT.top + LAT.h - LAT.eR;
-      p.electrons.forEach(e => {
-        // The p.d. keeps pushing electrons right; random thermal jiggle up and down.
-        e.vx += (PUSH - e.vx) * 2.2 * dt;
-        e.vy += ((Math.random() - .5) * 600 - e.vy * 3) * dt;
-        e.x += e.vx * dt; e.y += e.vy * dt;
-        if (e.y < top) { e.y = top; e.vy = Math.abs(e.vy); }
-        if (e.y > bottom) { e.y = bottom; e.vy = -Math.abs(e.vy); }
-        p.ions.forEach(ion => {
-          const dx = e.x - ion.x, dy = e.y - ion.y, d = Math.hypot(dx, dy), min = LAT.eR + LAT.ionR;
-          if (d >= min || d === 0) return;
-          const nx = dx / d, ny = dy / d, vn = e.vx * nx + e.vy * ny;
-          e.x = ion.x + nx * min; e.y = ion.y + ny * min;
-          if (vn < 0) {
-            // Bounce off the ion and lose most of the forward speed.
-            e.vx = (e.vx - 2 * vn * nx) * 0.6; e.vy = (e.vy - 2 * vn * ny) * 0.6;
-            ion.hitUntil = t + 0.18;
-          }
+      electrons.forEach((e, i) => {
+        const xs = [e.x, e.x < LAT.eR ? e.x + LAT.w : e.x > LAT.w - LAT.eR ? e.x - LAT.w : null];
+        const ys = [e.y, e.y < LAT.eR ? e.y + LAT.h : e.y > LAT.h - LAT.eR ? e.y - LAT.h : null];
+        p.eEls[i].forEach((el, k) => {
+          const x = xs[k & 1], y = ys[k >> 1];
+          el.style.display = x === null || y === null ? 'none' : '';
+          if (x !== null && y !== null) el.setAttribute('transform', `translate(${x.toFixed(1)} ${y.toFixed(1)})`);
         });
-        if (e.x > right) {
-          p.count += 1;
-          p.label.textContent = `electrons through: ${p.count}`;
-          place(p, e, left);
-        } else if (e.x < left) { e.x = left; e.vx = Math.abs(e.vx); }
       });
+      if (through !== p.shown) { p.shown = through; p.label.textContent = `electrons through: ${Math.max(0, through)}`; }
     });
     reset();
-    draw(0);
+    draw();
     if (reduced || !slide) return;
-    let raf = 0, last = 0, t = 0;
+    let raf = 0, last = 0;
     const frame = now => {
       const dt = Math.min((now - last) / 1000, 0.05);
       last = now;
-      // Small sub-steps keep fast bounces from tunnelling through ions.
-      for (let k = 0; k < 4; k += 1) { t += dt / 4; step(t, dt / 4); }
-      draw(t);
+      // Sub-steps stop a fast bounce skipping through an ion.
+      for (let k = 0; k < 4; k += 1) panels.forEach(p => p.model.step(dt / 4));
+      draw();
       raf = requestAnimationFrame(frame);
     };
     const sync = () => {
       const on = slide.classList.contains('active');
-      if (on && !raf) { reset(); t = 0; last = performance.now(); raf = requestAnimationFrame(frame); }
+      if (on && !raf) { reset(); last = performance.now(); raf = requestAnimationFrame(frame); }
       if (!on && raf) { cancelAnimationFrame(raf); raf = 0; }
     };
     new MutationObserver(sync).observe(slide, { attributes: true, attributeFilter: ['class'] });
@@ -224,5 +268,5 @@
     });
   }
 
-  window.DeckFigures = { render };
+  window.DeckFigures = { render, latticeModel };
 })();

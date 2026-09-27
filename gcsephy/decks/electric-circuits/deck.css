@@ -120,7 +120,8 @@
 @keyframes e-jig { from { transform: translateY(-3px); } to { transform: translateY(3px); } }
 
 /* Mission 4: live lattice simulation (cool vs hot metal) */
-.cd .lattice-panel { stroke-width: 2.5; }
+.cd .lattice-panel { stroke: none; }
+.cd .lattice-edge { fill: none; stroke-width: 2.5; }
 .cd .lattice-panel.cool { fill: #e8f4fa; }
 .cd .lattice-panel.hot { fill: #fdebe1; }
 .cd .lattice-ion { fill: #f7d278; stroke-width: 1.6; transition: fill .15s; }
@@ -131,3 +132,7 @@
 
 .thumb-slide .cd .e-drift, .thumb-slide .cd .e-jig { animation: none; }
 @media (prefers-reduced-motion: reduce) { .cd .e-drift, .cd .e-jig { animation: none; } }
+
+/* Proportionality sign, drawn because the display fonts have no ∝ glyph */
+.prop { display: inline-block; width: .9em; height: .56em; vertical-align: .02em; fill: none; stroke: currentColor; stroke-width: 2.4; stroke-linecap: round; }
+h2 .prop { stroke-width: 3.4; }
