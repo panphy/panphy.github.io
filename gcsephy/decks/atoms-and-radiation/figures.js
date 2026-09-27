@@ -368,7 +368,8 @@
         const k = absorb ? 1 : -1;
         s += arrow(from[0] + 13 * k * Math.cos(a), from[1] + 13 * k * Math.sin(a), to[0] - 16 * k * Math.cos(a), to[1] - 16 * k * Math.sin(a), 'brand-accent', 3);
         if (absorb) s += wave(cx - 200, cy - 170, p1[0] - 16, p1[1] - 10, { cycles: 5 });
-        else s += wave(p1[0] + 14, p1[1] - 12, cx + 215, cy - 185, { cycles: 5 });
+        // Leave to the lower right so the wave stays clear of the electron's path inward.
+        else s += wave(p1[0] + 15, p1[1] + 7, cx + 225, cy + 30, { cycles: 5 });
         s += text(cx, 38, absorb ? 'ABSORBS EM RADIATION' : 'EMITS EM RADIATION', 'lbl mono strong a');
         s += text(cx, 402, absorb ? 'moves further out' : 'moves closer in', 'lbl display');
         s += text(cx, 432, absorb ? 'higher energy level' : 'lower energy level', 'lbl mono');
