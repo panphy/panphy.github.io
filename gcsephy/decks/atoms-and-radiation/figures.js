@@ -26,18 +26,81 @@
     return `<g><circle cx="${f(x)}" cy="${f(y)}" r="${r}" fill="url(#g-${kind})"/>${text}</g>`;
   }
 
-  // Sunflower packing: protons spread evenly, centre nucleons drawn on top.
-  function cluster(cx, cy, protons, neutrons, r) {
-    const total = protons + neutrons;
-    const spacing = r * 1.2;
-    const items = [];
-    for (let i = 0; i < total; i++) {
-      const kind = Math.floor((i + 1) * protons / total) > Math.floor(i * protons / total) ? 'proton' : 'neutron';
-      const d = total > 1 ? spacing * Math.sqrt(i + 0.5) : 0;
-      const a = i * 2.39996;
-      items.push(ball(cx + d * Math.cos(a), cy + d * Math.sin(a), r, kind));
+  // Nucleons packed like the sims: random points in 3D relaxed until the
+  // spheres just touch, turned to a random angle, then drawn back to front.
+  function packNucleus(count, rand) {
+    const points = Array.from({ length: count }, () => {
+      const z = rand() * 2 - 1, phi = rand() * TAU, s = Math.sqrt(1 - z * z), m = 2.4 * Math.cbrt(rand());
+      return [s * Math.cos(phi) * m, s * Math.sin(phi) * m, z * m];
+    });
+    for (let step = 0; step < 300; step++) {
+      for (let i = 0; i < count; i++) {
+        for (let j = i + 1; j < count; j++) {
+          const g = [0, 1, 2].map(k => points[j][k] - points[i][k]);
+          const len = Math.hypot(...g) || 1e-6;
+          const overlap = 2 - len;
+          if (overlap > 0) {
+            const push = (overlap / 2 + 1e-4) / len;
+            for (let k = 0; k < 3; k++) { points[j][k] += g[k] * push; points[i][k] -= g[k] * push; }
+          }
+        }
+      }
+      points.forEach(point => { for (let k = 0; k < 3; k++) point[k] *= 0.985; });
     }
-    return items.reverse().join('');
+    const centre = [0, 1, 2].map(k => points.reduce((sum, point) => sum + point[k], 0) / count);
+    const turn = (a, b) => points.map(point => {
+      let [x, y, z] = point.map((v, k) => v - centre[k]);
+      [x, z] = [x * Math.cos(a) + z * Math.sin(a), -x * Math.sin(a) + z * Math.cos(a)];
+      [y, z] = [y * Math.cos(b) - z * Math.sin(b), y * Math.sin(b) + z * Math.cos(b)];
+      return [x, y, z];
+    });
+    if (count > 6) return turn(rand() * TAU, rand() * TAU);
+    // Tiny clusters (an alpha particle): choose a view where no nucleon hides behind another.
+    let best = null, bestGap = -1;
+    for (let t = 0; t < 40; t++) {
+      const view = turn(rand() * TAU, rand() * TAU);
+      let gap = Infinity;
+      for (let i = 0; i < count; i++) for (let j = i + 1; j < count; j++) gap = Math.min(gap, Math.hypot(view[i][0] - view[j][0], view[i][1] - view[j][1]));
+      if (gap > bestGap) { bestGap = gap; best = view; }
+    }
+    return best;
+  }
+
+  // Spread protons evenly from front to back so the visible face shows a fair mix.
+  function depthMixedKinds(order, protons, neutrons, rand) {
+    const kinds = [];
+    let placed = 0;
+    order.forEach((index, k) => {
+      const target = (k + 0.3 + rand() * 0.4) * protons / (protons + neutrons);
+      const isProton = placed < protons && (target >= placed + 0.5 || order.length - k === protons - placed);
+      if (isProton) placed++;
+      kinds[index] = isProton ? 'proton' : 'neutron';
+    });
+    return kinds;
+  }
+
+  // base: [protons, neutrons] of a parent nucleus to reuse, so a beta daughter
+  // keeps the parent's arrangement with front neutrons turned into protons.
+  function cluster(cx, cy, protons, neutrons, r, { base = [protons, neutrons], highlight = false } = {}) {
+    const count = base[0] + base[1];
+    const rand = seeded(base[0] * 131 + base[1] * 17 + 5);
+    const points = packNucleus(count, rand);
+    const order = points.map((point, i) => i).sort((i, j) => points[i][2] - points[j][2]);
+    const kinds = depthMixedKinds([...order].reverse(), base[0], base[1], rand);
+    const changed = new Set();
+    for (let k = order.length - 1; k >= 0 && changed.size < protons - base[0]; k--) {
+      if (kinds[order[k]] === 'neutron') { kinds[order[k]] = 'proton'; changed.add(order[k]); }
+    }
+    const depth = 16;
+    const back = Math.min(...points.map(point => point[2])) || -1;
+    return order.map(i => {
+      const [x, y, z] = points[i];
+      const scale = depth / (depth - z);
+      const px = cx + x * r * scale, py = cy + y * r * scale, pr = f(r * scale);
+      const ring = highlight && changed.has(i) ? `<circle cx="${f(px)}" cy="${f(py)}" r="${f(pr + 4)}" class="changed"/>` : '';
+      const shade = z < 0 ? `<circle cx="${f(px)}" cy="${f(py)}" r="${pr}" class="depth" style="opacity:${f(0.28 * z / back * 100) / 100}"/>` : '';
+      return ball(px, py, pr, kinds[i]) + shade + ring;
+    }).join('');
   }
 
   const shadow = (x, y, rx) => `<ellipse cx="${x}" cy="${y}" rx="${rx}" ry="${f(rx * 0.16)}" fill="url(#g-shadow)"/>`;
@@ -91,7 +154,7 @@
     let s = shadow(cx, cy + 250, 170);
     s += ring(cx, cy, 120) + ring(cx, cy, 225);
     if (labels) s += text(cx + 128, cy - 96, 'n = 1', 'lbl mono', 'start') + text(cx + 190, cy - 170, 'n = 2', 'lbl mono', 'start');
-    s += cluster(cx, cy, 6, 6, 15);
+    s += cluster(cx, cy, 6, 6, 22);
     [0, Math.PI].forEach(p => { s += orbiter(cx, cy, 120, 120, p, 9); });
     [0.25, 0.75, 1.25, 1.75].forEach(p => { s += orbiter(cx, cy, 225, 225, p * Math.PI, 18); });
     return s;
@@ -139,7 +202,7 @@
       s += arrow(262, 300, 440, 300, 'text-secondary', 2.5) + `<line x1="250" y1="290" x2="250" y2="310" class="tick"/>`;
       s += text(345, 288, 'radius ≈ 1 × 10⁻¹⁰ m', 'lbl mono halo');
       s += text(250, 372, 'mostly empty space', 'lbl italic halo');
-      s += `<circle cx="645" cy="130" r="100" class="inset"/>` + cluster(645, 130, 5, 6, 15);
+      s += `<circle cx="645" cy="130" r="100" class="inset"/>` + cluster(645, 130, 5, 6, 24);
       s += text(645, 262, 'the nucleus', 'lbl strong') + text(645, 288, 'radius < 1/10 000', 'lbl mono') + text(645, 310, 'of the atom’s radius', 'lbl mono');
       return svg('0 0 760 460', s, 'An atom of radius about 1 times 10 to the minus 10 metres, with a tiny nucleus at the centre');
     },
@@ -159,7 +222,7 @@
       const data = [[160, 6, '12'], [480, 7, '13'], [800, 8, '14']];
       let s = '';
       data.forEach(([x, n, a]) => {
-        s += shadow(x, 290, 90) + cluster(x, 170, 6, n, 18);
+        s += shadow(x, 290, 90) + cluster(x, 170, 6, n, 30);
         s += text(x, 334, `carbon-${a}`, 'lbl display');
         s += `<text x="${x}" y="366" class="lbl mono" text-anchor="middle"><tspan class="t-proton">6 p</tspan> · <tspan class="t-neutron">${n} n</tspan></text>`;
       });
@@ -170,7 +233,7 @@
       let s = '';
       [[230, false], [730, true]].forEach(([cx, ion]) => {
         s += ring(cx, 200, 85) + ring(cx, 200, 150, ion ? 'stroke-dasharray="6 7" opacity=".45"' : '');
-        s += cluster(cx, 200, 3, 4, 14);
+        s += cluster(cx, 200, 3, 4, 20);
         s += orbiter(cx, 200, 85, 85, 0.2, 8) + orbiter(cx, 200, 85, 85, 0.2 + Math.PI, 8);
         if (!ion) s += orbiter(cx, 200, 150, 150, 3.9, 14);
       });
@@ -186,17 +249,17 @@
     'mini-plum': () => svg('0 0 160 160', plumPudding(80, 80, 64, 9, 16), 'Plum pudding model'),
     'mini-nuclear': () => svg('0 0 160 160', nuclearAtom(80, 80, 70, 24, 10, 6, false), 'Nuclear model'),
     'mini-bohr': () => {
-      let s = ring(80, 80, 40) + ring(80, 80, 70) + cluster(80, 80, 3, 3, 8);
+      let s = ring(80, 80, 40) + ring(80, 80, 70) + cluster(80, 80, 3, 3, 11);
       [0, Math.PI].forEach(p => { s += ball(80 + 40 * Math.cos(p + 0.6), 80 + 40 * Math.sin(p + 0.6), 7, 'electron'); });
       [0.25, 0.75, 1.25, 1.75].forEach(p => { s += ball(80 + 70 * Math.cos(p * Math.PI), 80 + 70 * Math.sin(p * Math.PI), 7, 'electron'); });
       return svg('0 0 160 160', s, 'Bohr model');
     },
-    'mini-proton': () => svg('0 0 160 160', cluster(80, 80, 6, 0, 17), 'Protons in the nucleus'),
-    'mini-neutron': () => svg('0 0 160 160', cluster(80, 80, 6, 6, 14), 'Protons and neutrons in the nucleus'),
+    'mini-proton': () => svg('0 0 160 160', cluster(80, 80, 6, 0, 24), 'Protons in the nucleus'),
+    'mini-neutron': () => svg('0 0 160 160', cluster(80, 80, 6, 6, 21), 'Protons and neutrons in the nucleus'),
 
     'mini-decay': () => {
-      let s = `<circle cx="80" cy="92" r="72" fill="url(#g-glow)" class="pulse"/>` + cluster(80, 92, 6, 7, 11);
-      s += arrow(122, 64, 146, 48, 'alpha', 2) + cluster(168, 34, 2, 2, 8);
+      let s = `<circle cx="80" cy="92" r="72" fill="url(#g-glow)" class="pulse"/>` + cluster(80, 92, 6, 7, 14);
+      s += arrow(122, 64, 146, 48, 'alpha', 2) + cluster(170, 34, 2, 2, 10);
       s += wave(120, 118, 192, 146, { cycles: 3, amp: 5 });
       return svg('0 0 200 170', s, 'An unstable nucleus emitting radiation');
     },
@@ -228,7 +291,7 @@
     },
 
     'scatter-zoom': () => {
-      let s = cluster(370, 230, 8, 10, 10) + text(370, 318, 'gold nucleus (+)', 'lbl strong');
+      let s = cluster(350, 230, 8, 10, 18) + text(350, 318, 'gold nucleus (+)', 'lbl strong');
       const paths = [
         ['M20,410 L600,410', 'far away: straight on', 600, 396, 'end'],
         ['M20,168 L220,168 C300,168 330,146 380,104 L470,32', 'close: repelled, deflected', 482, 40, 'start'],
@@ -251,7 +314,7 @@
       [[240, true], [720, false]].forEach(([cx, absorb]) => {
         const cy = 215, a = -0.75;
         const p1 = [cx + 75 * Math.cos(a), cy + 75 * Math.sin(a)], p2 = [cx + 150 * Math.cos(a), cy + 150 * Math.sin(a)];
-        s += ring(cx, cy, 75) + ring(cx, cy, 150) + cluster(cx, cy, 3, 3, 9);
+        s += ring(cx, cy, 75) + ring(cx, cy, 150) + cluster(cx, cy, 3, 3, 14);
         s += text(cx - 75, cy + 5, 'n=1', 'lbl mono small', 'middle') + text(cx - 150, cy + 5, 'n=2', 'lbl mono small', 'middle');
         const [from, to] = absorb ? [p1, p2] : [p2, p1];
         s += `<circle cx="${f(from[0])}" cy="${f(from[1])}" r="12" class="ghost"/>`;
@@ -267,7 +330,7 @@
       return svg('0 0 960 450', s, 'An electron absorbs electromagnetic radiation and moves to a higher energy level; it emits radiation when it moves to a lower level');
     },
 
-    'carbon-nucleus': () => svg('0 0 460 420', shadow(230, 392, 150) + cluster(230, 200, 6, 6, 32), 'Carbon-12 nucleus: 6 protons and 6 neutrons'),
+    'carbon-nucleus': () => svg('0 0 460 420', shadow(230, 392, 150) + cluster(230, 200, 6, 6, 44), 'Carbon-12 nucleus: 6 protons and 6 neutrons'),
 
     cycle: () => {
       const nodes = [[310, 60, 'Model'], [520, 230, 'Prediction'], [310, 400, 'Experiment'], [100, 230, 'New evidence']];
@@ -287,8 +350,8 @@
     },
 
     'decay-intro': () => {
-      let s = `<circle cx="210" cy="210" r="150" fill="url(#g-glow)"/>` + cluster(210, 210, 14, 18, 12);
-      s += cluster(395, 80, 2, 2, 10) + arrow(300, 150, 362, 100, 'alpha', 2.5) + text(395, 42, 'α', 'lbl greek', 'middle', 'style="fill:var(--alpha)"');
+      let s = `<circle cx="210" cy="210" r="150" fill="url(#g-glow)"/>` + cluster(210, 210, 14, 18, 24);
+      s += cluster(395, 80, 2, 2, 14) + arrow(300, 150, 362, 100, 'alpha', 2.5) + text(395, 42, 'α', 'lbl greek', 'middle', 'style="fill:var(--alpha)"');
       s += ball(415, 210, 11, 'electron') + arrow(315, 210, 395, 210, 'electron', 2.5) + text(415, 180, 'β', 'lbl greek', 'middle', 'style="fill:var(--electron)"');
       s += wave(305, 262, 420, 330, { cycles: 4 }) + text(446, 350, 'γ', 'lbl greek', 'middle', 'style="fill:var(--photon)"');
       s += ball(318, 382, 11, 'neutron') + arrow(270, 318, 306, 368, 'neutron', 2.5) + text(346, 402, 'n', 'lbl greek', 'start', 'style="fill:var(--neutron)"');
@@ -301,10 +364,10 @@
     },
 
     alpha: () => {
-      let s = shadow(150, 300, 100) + cluster(150, 190, 12, 16, 13);
+      let s = shadow(150, 300, 100) + cluster(150, 190, 12, 16, 21);
       s += arrow(260, 190, 330, 190, 'text-secondary', 3);
-      s += shadow(440, 300, 95) + cluster(440, 200, 10, 14, 13);
-      s += `<line x1="530" y1="160" x2="598" y2="112" class="trail" style="stroke:var(--alpha)"/>` + cluster(636, 86, 2, 2, 14);
+      s += shadow(440, 300, 95) + cluster(440, 200, 10, 14, 21);
+      s += `<line x1="530" y1="160" x2="598" y2="112" class="trail" style="stroke:var(--alpha)"/>` + cluster(636, 86, 2, 2, 19);
       s += text(150, 344, 'americium-241', 'lbl display') + text(150, 372, '95 p · 146 n', 'lbl mono');
       s += text(440, 344, 'neptunium-237', 'lbl display') + text(440, 372, '93 p · 144 n', 'lbl mono');
       s += text(636, 162, 'alpha particle', 'lbl display') + text(636, 190, '2 p · 2 n', 'lbl mono');
@@ -312,9 +375,9 @@
     },
 
     beta: () => {
-      let s = shadow(140, 262, 100) + cluster(140, 150, 6, 8, 17);
+      let s = shadow(140, 262, 100) + cluster(140, 150, 6, 8, 26);
       s += arrow(250, 150, 320, 150, 'text-secondary', 3);
-      s += shadow(430, 262, 100) + cluster(430, 150, 7, 7, 17);
+      s += shadow(430, 262, 100) + cluster(430, 150, 7, 7, 26, { base: [6, 8], highlight: true });
       s += `<line x1="528" y1="120" x2="616" y2="78" class="trail" style="stroke:var(--electron)"/>` + ball(640, 68, 14, 'electron') + text(640, 30, 'beta particle', 'lbl strong');
       s += text(140, 300, 'carbon-14', 'lbl display') + text(140, 328, '6 p · 8 n', 'lbl mono');
       s += text(430, 300, 'nitrogen-14', 'lbl display') + text(430, 328, '7 p · 7 n', 'lbl mono');
@@ -324,9 +387,9 @@
     },
 
     gamma: () => {
-      let s = `<circle cx="150" cy="180" r="140" fill="url(#g-glow)" class="pulse"/>` + cluster(150, 180, 10, 13, 14);
+      let s = `<circle cx="150" cy="180" r="140" fill="url(#g-glow)" class="pulse"/>` + cluster(150, 180, 10, 13, 22);
       s += arrow(262, 180, 330, 180, 'text-secondary', 3);
-      s += shadow(440, 290, 90) + cluster(440, 180, 10, 13, 14);
+      s += shadow(440, 290, 90) + cluster(440, 180, 10, 13, 22);
       s += wave(540, 150, 700, 56, { cycles: 5, amp: 10 }) + text(650, 140, 'gamma ray', 'lbl strong', 'middle', 'style="fill:var(--photon)"');
       s += text(150, 334, 'technetium-99m', 'lbl display') + text(150, 362, 'extra energy', 'lbl mono');
       s += text(440, 334, 'technetium-99', 'lbl display') + text(440, 362, 'same p and n', 'lbl mono');

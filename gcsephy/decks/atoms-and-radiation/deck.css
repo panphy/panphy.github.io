@@ -390,6 +390,8 @@ table.facts.big { font-size: 34px; }
 .guide.accent { stroke: var(--brand-accent); stroke-width: 2.2; opacity: 1; }
 .tick { stroke: var(--text-secondary); stroke-width: 2.5; }
 .inset { fill: var(--card-bg); stroke: var(--card-border); stroke-width: 2; }
+.depth { fill: #000; pointer-events: none; }
+.changed { fill: none; stroke: var(--brand-accent); stroke-width: 3; }
 .ghost { fill: none; stroke: var(--electron); stroke-width: 2; stroke-dasharray: 4 4; opacity: .7; }
 .wave { fill: none; stroke-width: 3; stroke-linecap: round; stroke-linejoin: round; }
 .trail { stroke-width: 3; stroke-dasharray: 3 9; stroke-linecap: round; opacity: .7; }
