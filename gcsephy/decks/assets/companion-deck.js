@@ -47,9 +47,12 @@
     progress.style.width = `${(n / total) * 100}%`;
     prevButton.disabled = state.index === 0;
     nextButton.disabled = state.index === total - 1 && !hiddenSteps(slide).length;
+    // Keyboard focus in the sidebar follows the current slide, so no ring is left on the old thumbnail.
+    const thumbFocused = thumbs.contains(document.activeElement);
     thumbs.querySelectorAll('.thumb').forEach((thumb, i) => {
       const current = i === state.index;
       thumb.setAttribute('aria-current', String(current));
+      if (current && thumbFocused && document.activeElement !== thumb) thumb.focus({ preventScroll: true });
       if (current && document.body.classList.contains('show-thumbs')) thumb.scrollIntoView({ block: 'nearest' });
     });
     if (location.hash !== `#${n}`) history.replaceState(null, '', `#${n}`);
@@ -112,7 +115,11 @@
       const holder = button.querySelector('.thumb-slide');
       holder.appendChild(copy);
       holder.inert = true;
-      button.addEventListener('click', () => show(i));
+      button.addEventListener('click', event => {
+        show(i);
+        // Mouse and touch clicks drop focus so arrow keys later do not reveal a focus ring here.
+        if (event.detail) button.blur();
+      });
       thumbs.appendChild(button);
     });
   }
