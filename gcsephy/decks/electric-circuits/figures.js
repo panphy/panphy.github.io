@@ -38,14 +38,16 @@
       return svg(540, 280, s, 'A battery drives moving electrons around a complete loop through a lamp. Current can be found by counting charge passing one point each second.');
     },
     chargeRate: () => {
-      let s = `<rect x="24" y="72" width="490" height="112" rx="54" class="wire-fill"/>`;
-      s += `<path d="M269 48 V205" class="gate"/>` + txt(269, 32, 'one point in the wire', 'diagram-label hot');
-      [[70, 111], [100, 150], [135, 112], [165, 150], [200, 111], [228, 150], [312, 111], [345, 151], [379, 112], [413, 151], [464, 112]].forEach(([x, y]) => {
+      let s = txt(270, 38, 'SECTION OF METAL WIRE', 'diagram-label');
+      s += `<rect x="22" y="68" width="496" height="136" class="wire-section"/>`;
+      s += `<path d="M22 82 H518 M22 190 H518" class="wire-edge"/>`;
+      [[66, 111], [108, 161], [157, 117], [202, 163], [252, 110], [295, 160], [344, 116], [389, 164], [439, 111], [483, 159]].forEach(([x, y]) => {
         s += `<circle cx="${x}" cy="${y}" r="10" class="e-dot"/><path d="M${x-5} ${y} h10" class="e-minus"/>`;
       });
-      s += `<path d="M418 217 H315" class="electron-line"/>` + head(306, 217, 180, 'electron') + txt(365, 240, 'electrons drift', 'diagram-label cool');
-      s += `<path d="M269 188 V227" class="gate"/>` + txt(269, 271, 'If 1 C passes in 1 s  →  1 A', 'diagram-equation');
-      return svg(540, 290, s, 'Current is measured at one point in a wire. If one coulomb of charge passes that point in one second, the current is one ampere.');
+      s += `<path d="M399 228 H288" class="electron-line"/>` + head(280, 228, 180, 'electron');
+      s += txt(344, 254, 'electrons move', 'diagram-label cool');
+      s += txt(270, 287, '1 C of charge in 1 s  →  1 A', 'diagram-equation');
+      return svg(540, 310, s, 'A straight section of metal wire containing free electrons. Electrons move through the wire. A flow of one coulomb of charge each second is a current of one ampere.');
     },
     conventional: () => D.circuit({
       w: 360, h: 200, wires: [LOOP], parts: [['cell', 180, 40, 'h'], ['resistor', 180, 150, 'h', 'resistor', 'b']],
@@ -115,29 +117,27 @@
     acdc: () => D.graph({ sketch: true, w: 340, h: 220, x: [0, 1], y: [-1, 1], xLabel: 'time', yLabel: 'p.d.', series: [{ fn: () => 0.45, from: 0, to: 0.8, cls: 'curve-2' }, { fn: x => 0.85 * Math.sin(2 * Math.PI * 2.5 * x), from: 0, to: 0.8 }], notes: [[0.86, 0.41, 'dc', 'start', 'cool'], [0.37, -0.82, 'ac', 'start', 'hot']], caption: 'dc (blue): one direction. ac (orange): keeps reversing.' }),
     cable: () => D.threeCoreCable(),
 
-    // Earth wire in a fault: the current takes the earth path and the fuse melts.
+    // Click to trace the fault current, then show the fuse opening the circuit.
     earthFault: () => {
       let s = `<defs><pattern id="deck-earth" width="14" height="14" patternUnits="userSpaceOnUse" patternTransform="rotate(40)"><rect width="14" height="14" fill="#258044"/><rect width="7" height="14" fill="#f7d83b"/></pattern></defs>`;
-      s += `<rect x="300" y="43" width="185" height="188" rx="11" class="case"/>`;
-      s += txt(392, 30, 'earthed metal case', 'diagram-label');
-      // The intact appliance circuit runs from live, through the heater, to neutral.
-      s += `<path d="M25 83 H320 V118 H349" class="w-live"/>`;
-      s += `<path d="M25 157 H455 V118 H426" class="w-neutral"/>`;
-      s += `<rect x="349" y="103" width="77" height="30" class="heater"/>`;
-      s += txt(387, 127, 'heater', 'diagram-label');
-      s += `<g transform="translate(155 83)"><rect class="mask" x="-22" y="-8" width="44" height="16"/><g class="body"><rect x="-21" y="-8" width="42" height="16"/><path d="M-17 0 H17"/></g></g>`;
-      s += txt(155, 63, 'fuse', 'diagram-label');
-      // A fault puts live in contact with the case. The protective earth offers a low-resistance return.
-      s += `<path d="M320 83 V61 H325" class="fault-contact"/>`;
-      s += `<path d="M320 61 l8 -13 l2 10 l12 -5 l-6 10 l12 5 l-13 3 l3 12 l-10 -8 l-8 9 l1 -13 l-12 -3 z" class="spark"/>`;
-      s += `<path d="M300 209 H82" class="w-earth" style="stroke:url(#deck-earth)"/>`;
-      s += `<circle cx="300" cy="209" r="6" class="dot"/>`;
-      s += `<path d="M82 209 V235 M65 235 H99 M71 243 H93 M77 251 H87"/>`;
-      s += txt(25, 69, 'LIVE', 'diagram-label', 'start') + txt(25, 146, 'NEUTRAL', 'diagram-label', 'start') + txt(82, 194, 'EARTH', 'diagram-label', 'start');
-      s += `<path d="M225 83 H294 M332 70 H463 V209 H306 M285 209 H126" class="fault-flow"/>`;
-      [[259,83,0],[463,148,90],[238,209,180]].forEach(([x,y,a]) => s += head(x,y,a));
-      s += txt(255, 277, 'Fault current → earth → fuse melts', 'diagram-equation hot');
-      return svg(510, 295, s, 'A live wire faults against the earthed metal case of a heater. A large fault current runs through the case and protective earth, causing the fuse in the live wire to melt.');
+      s += `<rect x="313" y="46" width="208" height="213" rx="11" class="case"/>`;
+      s += txt(417, 31, 'METAL CASE', 'diagram-label');
+      s += `<path d="M27 108 H360 V151 H389" class="w-live"/>`;
+      s += `<path d="M27 210 H478 V151 H460" class="w-neutral"/>`;
+      s += `<path d="M95 281 H313 V237" class="w-earth" style="stroke:url(#deck-earth)"/>`;
+      s += `<circle cx="313" cy="237" r="6" class="dot"/>`;
+      s += `<path d="M95 281 V299 M79 299 H111 M84 306 H106 M89 313 H101"/>`;
+      s += `<rect x="389" y="136" width="71" height="30" class="heater"/>` + txt(424, 157, 'heater', 'diagram-label');
+      s += `<g class="fuse" transform="translate(182 108)"><rect class="mask" x="-23" y="-10" width="46" height="20"/><rect x="-22" y="-9" width="44" height="18" class="fuse-box"/><path d="M-18 0 H18" class="fuse-wire"/><path d="M-18 0 H-5 M5 0 H18" class="fuse-gap"/></g>`;
+      s += txt(182, 84, 'fuse', 'diagram-label');
+      s += txt(27, 92, 'LIVE', 'diagram-label', 'start') + txt(27, 194, 'NEUTRAL', 'diagram-label', 'start') + txt(95, 266, 'EARTH', 'diagram-label', 'start');
+      s += `<path d="M360 108 V57" class="fault-contact"/>`;
+      s += `<path d="M360 51 l7 -10 l3 9 l10 -4 l-5 9 l9 5 l-10 2 l3 10 l-9 -7 l-7 8 v-11 l-10 -3 z" class="fault-spark"/>`;
+      s += `<path d="M206 108 H360 V48 H313 V237 H95" class="fault-trace" pathLength="100"/>`;
+      return `<div class="earth-demo" data-earth-demo>
+        ${svg(550, 330, s, 'Appliance circuit with live, neutral, protective earth, a fuse and an earthed metal case. Play the animation to see a live-to-case fault and the fuse response.')}
+        <div class="earth-controls"><button class="earth-play" type="button">Play fault animation</button><p class="earth-status" role="status" aria-live="polite">Normal: current goes through the heater.</p></div>
+      </div>`;
     }
   };
 
@@ -148,5 +148,30 @@
     });
   }
 
-  window.DeckFigures = { render };
+  function initEarthFault() {
+    const demo = document.querySelector('[data-earth-demo]');
+    if (!demo) return;
+    const button = demo.querySelector('.earth-play');
+    const status = demo.querySelector('.earth-status');
+    let timer;
+    button.addEventListener('click', () => {
+      clearTimeout(timer);
+      demo.classList.remove('fault-active', 'fuse-blown');
+      // Restart the traced route when replaying the demonstration.
+      void demo.offsetWidth;
+      demo.classList.add('fault-active');
+      status.textContent = 'Fault: live touches the case. Current flows to earth.';
+      button.disabled = true;
+      const delay = window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 100 : 2200;
+      timer = setTimeout(() => {
+        demo.classList.remove('fault-active');
+        demo.classList.add('fuse-blown');
+        status.textContent = 'Fuse melts: the circuit opens and current stops.';
+        button.textContent = 'Replay animation';
+        button.disabled = false;
+      }, delay);
+    });
+  }
+
+  window.DeckFigures = { render: () => { render(); initEarthFault(); } };
 })();
