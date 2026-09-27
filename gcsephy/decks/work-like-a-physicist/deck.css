@@ -55,18 +55,7 @@
 .wf .board { fill: #c8a46a; stroke: var(--ink); stroke-width: 3; stroke-linejoin: round; }
 .wf .wheel { fill: var(--ink); stroke: none; }
 .wf .tape { stroke: #1479a8; stroke-width: 6; stroke-linecap: round; }
-.wf .paper { fill: var(--card); stroke: var(--ink); stroke-width: 3; stroke-linejoin: round; }
-.wf .cut { stroke: #c2410c; stroke-width: 3; stroke-dasharray: 9 7; }
-.wf .fold { stroke: #1479a8; stroke-width: 3; stroke-dasharray: 3 6; stroke-linecap: round; }
-.wf .clip { fill: none; stroke: #6b7280; stroke-width: 5; }
-.wf .heli-wing-back { fill: #9ddce9; stroke: var(--ink); stroke-width: 4; stroke-linejoin: round; }
-.wf .heli-wing-front { fill: #fffaf0; stroke: var(--ink); stroke-width: 4; stroke-linejoin: round; }
-.wf .heli-wing-fold { fill: #76b6c7; stroke: var(--ink); stroke-width: 3; stroke-linejoin: round; }
-.wf .heli-body-front { fill: #fff8e5; stroke: var(--ink); stroke-width: 4; stroke-linejoin: round; }
-.wf .heli-body-side { fill: #d4d8de; stroke: var(--ink); stroke-width: 4; stroke-linejoin: round; }
-.wf .heli-body-fold { fill: #dcebdc; stroke: var(--ink); stroke-width: 3; stroke-linejoin: round; }
-.wf .heli-clip { fill: none; stroke: #59687a; stroke-width: 9; stroke-linecap: round; stroke-linejoin: round; }
-.wf .heli-shadow { fill: rgba(7, 22, 47, .12); }
+.wf .heli-backdrop { fill: #e8f2f5; }
 .wf .tag { fill: var(--hi); stroke: var(--ink); stroke-width: 3; }
 .wf .lab { font: 900 23px Arial, sans-serif; letter-spacing: .08em; }
 .wf .lab.small { font-size: 20px; }
@@ -79,13 +68,11 @@
 .wf .muted-t { fill: var(--muted); font-weight: 600; }
 .wf .cyan-t { fill: #1479a8; }
 .wf .hot-t { fill: #c2410c; }
-.wf .cut-t { fill: #c2410c; }
 
-/* Match the three data-set colours in the table and its notes to the plot. */
-.data .set-a th, .set-a > b { background: #c9ee49; color: var(--ink); }
-.data .set-b th, .set-b > b { background: #ff795e; color: var(--ink); }
-.data .set-c th, .set-c > b { background: #42cbe8; color: var(--ink); }
-.points .set-a > b, .points .set-b > b, .points .set-c > b { display: inline-block; min-width: 1.4em; padding: 0 4px; border-radius: 3px; }
+/* Match the data-set bullets and table keys to the plot. */
+.data .set-a th, .points .set-a::before { background: #c9ee49; }
+.data .set-b th, .points .set-b::before { background: #ff795e; }
+.data .set-c th, .points .set-c::before { background: #42cbe8; }
 
 /* Hero plot card (companion home page) */
 .machine { position: relative; display: grid; place-items: center; height: 640px; }

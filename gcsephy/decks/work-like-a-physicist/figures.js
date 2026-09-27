@@ -310,34 +310,16 @@
       return svg(880, 600, out, 'Annotated line graph: 1 title, 2 axis labels with units, 3 even scale, 4 small crosses, 5 one best-fit line, 6 outlier circled');
     },
 
-    // Paper helicopter: template and flight.
+    // Folded paper helicopter: illustrated model and experiment cues.
     helicopter: () => {
-      let s = t(160, 30, 'TEMPLATE', 'lab');
-      s += `<path class="paper" d="M60 50H260V250H212V280H188V470H132V280H108V250H60Z"/>`;
-      s += line(160, 50, 160, 250, 'cut') + line(60, 250, 108, 250, 'cut') + line(212, 250, 260, 250, 'cut');
-      s += line(60, 250, 160, 250, 'fold') + line(160, 250, 260, 250, 'fold');
-      s += arrow(38, 150, 38, 54, 'arrow') + arrow(38, 150, 38, 246, 'arrow') + t(28, 156, 'L', 'big small-big', 'end');
-      s += `<rect x="146" y="430" width="28" height="56" rx="12" class="clip"/>`;
-      s += t(186, 520, 'paperclip', 'body-t small', 'start');
-      s += t(290, 110, 'cut', 'body-t small cut-t', 'start') + t(290, 250, 'fold wings', 'body-t small', 'start') + t(290, 276, 'opposite ways', 'body-t small', 'start');
-      // Folded paper model in perspective: broad, shaded blades and a visible folded body.
-      s += t(660, 30, 'FOLDED MODEL', 'lab');
-      s += `<ellipse cx="650" cy="520" rx="100" ry="16" class="heli-shadow"/>`;
-      s += `<path class="heli-wing-back" d="M642 142L735 58L800 92L690 177Z"/>`;
-      s += `<path class="heli-wing-fold" d="M735 58L800 92L792 109L690 177Z"/>`;
-      s += `<path class="heli-wing-front" d="M651 143L539 80L488 111L612 190Z"/>`;
-      s += `<path class="heli-wing-fold" d="M539 80L488 111L502 129L612 190Z"/>`;
-      s += `<path class="heli-body-side" d="M665 160L681 172V343L665 355Z"/>`;
-      s += `<path class="heli-body-front" d="M619 169L665 160V355L619 343Z"/>`;
-      s += `<path class="heli-body-fold" d="M619 169L642 160L681 172L665 186Z"/>`;
-      s += `<path class="heli-clip" d="M634 330V387Q634 405 651 405Q668 405 668 387V345Q668 334 659 334Q650 334 650 345V386"/>`;
-      s += `<path class="arrow" d="M570 58Q650 19 733 45"/><path class="head" d="M747 52L728 35L732 57Z"/>`;
-      s += `<circle cx="494" cy="419" r="39" class="f-card box"/><rect x="484" y="369" width="20" height="13" class="f-muted box"/>`;
-      s += t(494, 427, '1.50 s', 'lab small') + t(494, 480, 'time the fall', 'body-t small');
-      s += t(650, 439, 'paperclip adds weight', 'body-t small');
-      s += line(820, 184, 820, 510, 'trend dash') + line(455, 530, 880, 530, 'floor');
-      s += t(805, 482, 'same drop height', 'body-t small', 'end');
-      return svg(900, 560, s, 'Paper helicopter template with wing length L and cut and fold lines; a three-dimensional folded paper model with two broad blades, weighted body and paperclip, falling from a fixed height');
+      let s = t(450, 40, 'PAPER HELICOPTER · FOLDED MODEL', 'lab');
+      s += rect(35, 65, 830, 405, 'heli-backdrop', 18);
+      s += `<image href="images/paper-helicopter-3d.png" x="80" y="55" width="740" height="425" preserveAspectRatio="xMidYMid meet"/>`;
+      s += line(45, 480, 855, 480, 'grid');
+      s += t(165, 520, 'CHANGE', 'lab small') + t(165, 548, 'wing length L', 'body-t small');
+      s += t(450, 520, 'CONTROL', 'lab small') + t(450, 548, 'same drop height', 'body-t small');
+      s += t(735, 520, 'MEASURE', 'lab small') + t(735, 548, 'fall time', 'body-t small');
+      return svg(900, 560, s, 'Three-dimensional illustration of a folded paper helicopter with broad opposite wings and a paperclip; change wing length, keep the drop height the same, and measure fall time');
     },
 
     // Wing length against fall time, with a reading between points.
