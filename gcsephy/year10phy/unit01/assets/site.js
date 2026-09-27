@@ -142,7 +142,9 @@
   const fourthTool = lesson.lab
     ? `<a href="${labHref}" target="_blank" rel="noopener"><span>PDF</span><strong>${lesson.lab.label} · pp. ${lesson.lab.range}</strong></a>`
     : lesson.phet ? phetTool : "";
+  const workbookHref = ([n, title]) => `../../workbook/pdf/${encodeURI(`Electric Circuits - Year 10 Workbook - Lesson ${String(n).padStart(2, "0")} - ${title}.pdf`)}`;
   const labLink = [
+    ...(lesson.workbook || []).map((entry) => `<a class="workbook-link" href="${workbookHref(entry)}" target="_blank" rel="noopener">Workbook lesson ${entry[0]} <span aria-hidden="true">${icon("up-right")}</span></a>`),
     lesson.lab ? `<a class="workbook-link" href="${labHref}" target="_blank" rel="noopener">Virtual labs pp. ${lesson.lab.range} <span aria-hidden="true">${icon("up-right")}</span></a>` : "",
     lesson.phet ? `<a class="workbook-link" href="${PHET}" target="_blank" rel="noopener">Try it in PhET <span aria-hidden="true">${icon("up-right")}</span></a>` : ""
   ].join("");
