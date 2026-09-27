@@ -218,9 +218,14 @@
     </figure>`;
   }
 
-  function symbolGrid(items) {
+  // opts.scale: { type: factor } enlarges chosen symbols; strokes keep their width.
+  function symbolGrid(items, opts = {}) {
+    const scales = opts.scale || {};
     const tiles = items.map(([type, name]) => {
-      const svg = `<svg class="cd" viewBox="-52 -46 104 70" aria-hidden="true"><path d="M-48 0 H48"/>${drawPart([type, 0, 0, "h"])}</svg>`;
+      const k = scales[type] || 1;
+      const part = drawPart([type, 0, 0, "h"]);
+      const body = k === 1 ? part : `<g class="scaled" transform="scale(${k})">${part}</g>`;
+      const svg = `<svg class="cd" viewBox="-52 -46 104 70" aria-hidden="true"><path d="M-48 0 H48"/>${body}</svg>`;
       return `<figure class="symbol-tile">${svg}<figcaption>${name}</figcaption></figure>`;
     }).join("");
     return `<div class="symbol-grid" role="list">${tiles}</div>`;
