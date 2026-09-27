@@ -315,10 +315,10 @@
       paths.forEach(([d, kind]) => {
         s += `<path d="${d}" class="alpha-path ${kind}" marker-end="url(#m-alpha)"/>`;
       });
-      s += '</g><g class="scatter-live"></g>';
-      s += `<rect x="516" y="96" width="8" height="268" rx="3" style="fill:var(--gold)"/>` + text(520, 84, 'thin gold foil', 'lbl strong');
       s += text(330, 132, 'bounce back', 'lbl', 'middle', 'style="fill:var(--alpha)"');
       s += text(760, 164, 'small', 'lbl', 'start', 'style="fill:var(--alpha)"') + text(760, 186, 'deflection', 'lbl', 'start', 'style="fill:var(--alpha)"');
+      s += '</g><g class="scatter-live"></g>';
+      s += `<rect x="516" y="96" width="8" height="268" rx="3" style="fill:var(--gold)"/>` + text(520, 84, 'thin gold foil', 'lbl strong');
       s += text(760, 236, 'straight', 'lbl', 'start', 'style="fill:var(--alpha)"') + text(760, 258, 'through', 'lbl', 'start', 'style="fill:var(--alpha)"');
       return svg('0 0 900 460', s, 'Alpha scattering: alpha particles fired at thin gold foil. Most pass straight through, some are deflected, a very few bounce back');
     },
