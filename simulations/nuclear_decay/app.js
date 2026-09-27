@@ -25,6 +25,13 @@ const ABSORBERS = [
   { key: 'aluminium', label: 'Aluminium', gap: 1.0, thickness: 0.14 },
   { key: 'lead', label: 'Lead', gap: 1.1, thickness: 0.55 }
 ];
+const ALPHA_GATHER_TIME = 0.9;
+const ALPHA_GATHER_DISTANCE = 0.45;
+// Beta decay is slowed further than alpha so that the neutron change and the electron are easy to follow.
+const BETA_GLOW_TIME = 1.6;
+const BETA_CHANGE_TIME = 1.4;
+const BETA_ELECTRON_SPEED = 2.4;
+const BETA_ANTINEUTRINO_SPEED = 2.0;
 const TEST_SPEED = { alpha: 2.2, beta: 3.4, gamma: 4.6 };
 const GAMMA_THROUGH_LEAD = 0.25;
 
@@ -414,7 +421,8 @@ function stepNucleus(delta) {
     nucleon.mesh.position.copy(nucleon.home).addScaledVector(nucleon.axis, wobble);
   }
   if (nucleus.excited) {
-    nucleus.glow.material.opacity = (palette.dark ? 0.32 : 0.22) + 0.1 * Math.sin(state.time * 5);
+    // Light mode uses normal blending and only the halo's rim shows past the nucleus, so it needs more opacity.
+    nucleus.glow.material.opacity = palette.dark ? 0.32 + 0.1 * Math.sin(state.time * 5) : 0.6 + 0.15 * Math.sin(state.time * 5);
   }
 }
 function countKinds() {
@@ -518,7 +526,8 @@ function prepareAlpha() {
   const ranked = [...nucleus.nucleons].sort((a, b) => b.home.dot(local) - a.home.dot(local));
   const chosen = [...ranked.filter(n => n.kind === 'proton').slice(0, 2), ...ranked.filter(n => n.kind === 'neutron').slice(0, 2)];
   nucleus.nucleons = nucleus.nucleons.filter(n => !chosen.includes(n));
-  const centre = decay.direction.clone().multiplyScalar(nucleus.radius + 0.12);
+  // The cluster forms at the surface while it is already being pushed out.
+  const centre = decay.direction.clone().multiplyScalar(nucleus.radius - NUCLEON_RADIUS);
   const tetra = [[1, 1, 1], [1, -1, -1], [-1, 1, -1], [-1, -1, 1]].map(v => new THREE.Vector3(...v).normalize().multiplyScalar(NUCLEON_RADIUS * 1.2));
   decay.alpha = chosen.map((nucleon, i) => {
     nucleon.mesh.material = nucleon.mesh.material.clone();
@@ -528,7 +537,9 @@ function prepareAlpha() {
     return { mesh: nucleon.mesh, from: nucleon.mesh.position.clone(), offset: tetra[i] };
   });
   decay.centre = centre;
-  readout.textContent = 'ALPHA DECAY · Two protons and two neutrons group together at the edge of the nucleus…';
+  decay.travelled = 0;
+  decay.speed = 0;
+  readout.textContent = 'ALPHA DECAY · Two protons and two neutrons group together and are pushed out of the nucleus…';
 }
 function prepareBeta() {
   const local = toLocal(decay.direction);
@@ -550,18 +561,24 @@ function stepDecay(delta) {
 function stepAlpha() {
   const d = decay;
   if (d.phase === 'prepare') {
-    const k = ease(Math.min(1, d.t / 1.0));
-    for (const part of d.alpha) part.mesh.position.lerpVectors(part.from, d.centre.clone().add(part.offset), k);
-    if (d.t >= 1.0) {
+    // The cluster speeds up from rest as it forms, so gathering flows straight into the emission.
+    const u = Math.min(1, d.t / ALPHA_GATHER_TIME);
+    d.travelled = ALPHA_GATHER_DISTANCE * u * u;
+    d.speed = 2 * ALPHA_GATHER_DISTANCE * u / ALPHA_GATHER_TIME;
+    const moving = d.centre.clone().addScaledVector(d.direction, d.travelled);
+    const k = ease(u);
+    for (const part of d.alpha) part.mesh.position.lerpVectors(part.from, moving.clone().add(part.offset), k);
+    const mother = MODES.alpha.daughter.A;
+    nucleus.group.position.copy(d.direction).multiplyScalar(-d.travelled * 4 / mother);
+    if (u >= 1) {
       // Build the alpha particle and let the electrostatic repulsion push it away.
       const group = new THREE.Group();
-      group.position.copy(d.centre);
+      group.position.copy(moving);
       group.userData.radius = NUCLEON_RADIUS * 2.3;
       for (const part of d.alpha) group.attach(part.mesh);
       group.add(glow(palette.alpha, 1.4));
-      const mother = MODES.alpha.daughter.A;
-      let speed = 0;
-      let travelled = 0;
+      let speed = d.speed;
+      let travelled = d.travelled;
       const flyer = addFlyer(group, straightFlight(group, {
         direction: d.direction,
         speed: 1,
@@ -597,11 +614,12 @@ function stepBeta() {
   const d = decay;
   const mesh = d.neutron.mesh;
   if (d.phase === 'prepare') {
-    const k = Math.min(1, d.t / 1.1);
+    const k = Math.min(1, d.t / BETA_GLOW_TIME);
     mesh.material.emissiveIntensity = 0.04 + 0.9 * k * (0.6 + 0.4 * Math.sin(d.t * 18));
     d.spark.material.opacity = 0.8 * k;
-    if (d.t >= 1.1) {
+    if (d.t >= BETA_GLOW_TIME) {
       d.phase = 'change';
+      readout.textContent = 'BETA DECAY · The neutron changes into a proton, and a fast electron is created and shoots out…';
       d.t = 0;
       // A new proton appears where the neutron was while the neutron fades.
       const proton = new THREE.Mesh(nucleus.geometry, nucleus.materials.proton.clone());
@@ -614,7 +632,7 @@ function stepBeta() {
       emitBetaParticles(mesh);
     }
   } else if (d.phase === 'change') {
-    const k = Math.min(1, d.t / 0.6);
+    const k = Math.min(1, d.t / BETA_CHANGE_TIME);
     setOpacity(mesh, 1 - k);
     setOpacity(d.proton, k);
     d.proton.position.copy(mesh.position);
@@ -643,7 +661,7 @@ function emitBetaParticles(from) {
   addFlyer(trail, straightFlight(trail, { direction: decay.direction, speed: 0, range: 7, getPosition: () => electron.position }));
   addFlyer(electron, straightFlight(electron, {
     direction: decay.direction,
-    speed: 5.5,
+    speed: BETA_ELECTRON_SPEED,
     range: 7,
     onFrame: () => {
       history.unshift(electron.position.clone());
@@ -664,14 +682,14 @@ function emitBetaParticles(from) {
   antineutrino.position.copy(start);
   antineutrino.add(glow(palette.antineutrino, 0.35));
   setOpacity(antineutrino, 0.6);
-  addFlyer(antineutrino, straightFlight(antineutrino, { direction, speed: 4.5, range: 7 }), 'antineutrino');
+  addFlyer(antineutrino, straightFlight(antineutrino, { direction, speed: BETA_ANTINEUTRINO_SPEED, range: 7 }), 'antineutrino');
 }
 function stepGamma() {
   const d = decay;
   if (d.phase === 'prepare') {
     const k = Math.min(1, d.t / 0.8);
     nucleus.jiggle = 0.04 + 0.03 * k;
-    nucleus.glow.material.opacity = (palette.dark ? 0.35 : 0.25) + 0.3 * k;
+    nucleus.glow.material.opacity = palette.dark ? 0.35 + 0.3 * k : 0.65 + 0.35 * k;
     if (d.t >= 0.8) {
       d.phase = 'relax';
       d.t = 0;
