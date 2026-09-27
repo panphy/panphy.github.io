@@ -310,5 +310,24 @@
     });
   }
 
-  window.Diagrams = { circuit, threeCoreCable, nationalGrid, symbolGrid, graph, ivSketch, IV, sub };
+  // Stroke icons (24 × 24, currentColor) used in place of arrow and tick glyphs,
+  // which some devices draw as colour emoji. Sized in em by .icon in styles.css.
+  const ICON_PATHS = {
+    "right": "M5 12h14M13 6l6 6-6 6",
+    "left": "M19 12H5M11 6l-6 6 6 6",
+    "up": "M12 19V5M6 11l6-6 6 6",
+    "down": "M12 5v14M6 13l6 6 6-6",
+    "down-right": "M7 7l10 10M17 9v8H9",
+    "up-right": "M7 17L17 7M9 7h8v8",
+    "return": "M9 14L4 9l5-5M4 9h10.5a5.5 5.5 0 0 1 0 11H11",
+    "check": "M5 12.5l4.5 4.5L19 7",
+    "parallel": "M1 12h3M20 12h3M4 5v14M20 5v14M4 5h4M16 5h4M4 19h4M16 19h4M8 3h8v4H8zM8 17h8v4H8z",
+    "triangle": "M12 3.5L21.5 20h-19zM7.2 12h9.6M12 12v8"
+  };
+
+  function icon(name) {
+    return `<svg class="icon icon-${name}" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="${ICON_PATHS[name]}"/></svg>`;
+  }
+
+  window.Diagrams = { circuit, threeCoreCable, nationalGrid, symbolGrid, graph, ivSketch, IV, sub, icon };
 })();

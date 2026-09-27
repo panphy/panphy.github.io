@@ -3,6 +3,7 @@
 
   const questions = window.EXAM_QUESTIONS || [];
   const sub = window.Diagrams.sub;
+  const icon = window.Diagrams.icon;
   const totalMarks = questions.reduce((sum, question) => sum + question.marks, 0);
   const BRAND = '<span>Electric Circuits</span>';
 
@@ -40,7 +41,7 @@
         </label>
         <div class="reveal-row">
           <details class="reveal hint-reveal"><summary><span>Hint</span><b>+</b></summary><div><p>${sub(question.hint)}</p></div></details>
-          <details class="reveal answer-reveal"><summary><span>Marking points</span><b>✓</b></summary><div><p>${sub(question.answer)}</p></div></details>
+          <details class="reveal answer-reveal"><summary><span>Marking points</span><b>${icon("check")}</b></summary><div><p>${sub(question.answer)}</p></div></details>
         </div>
       </article>`;
   }).join("");
@@ -65,7 +66,7 @@
         </div>
       </header>
       <section class="unlock-strip" aria-label="Exam Zone summary">
-        <strong>Exam Zone</strong><span>✓ ${questions.length} fresh questions</span><span>✓ ${totalMarks} marks</span><span>✓ multiple choice to six-mark methods</span>
+        <strong>Exam Zone</strong><span>${icon("check")} ${questions.length} fresh questions</span><span>${icon("check")} ${totalMarks} marks</span><span>${icon("check")} multiple choice to six-mark methods</span>
       </section>
       <section class="question-section exam-question-section">
         <div class="question-intro">
@@ -86,13 +87,13 @@
         <div><p class="eyebrow">Revision complete?</p><h2>Can you apply the physics when the context changes?</h2><p>Return to any answer where you missed a marking point, then explain the correction aloud without looking.</p></div>
       </section>
       <nav class="lesson-pagination" aria-label="Continue revising">
-        <a href="../#missions"><span>← Choose a mission</span><strong>Review one topic</strong></a>
-        <a class="next-link" href="../#toolkit"><span>Equation toolkit →</span><strong>Check your equations</strong></a>
+        <a href="../#missions"><span>${icon("left")} Choose a mission</span><strong>Review one topic</strong></a>
+        <a class="next-link" href="../#toolkit"><span>Equation toolkit ${icon("right")}</span><strong>Check your equations</strong></a>
       </nav>
       <footer class="site-footer">
         <div class="unit-footer-row">
           <div class="brand">${BRAND}</div>
-          <p>Attempt. Hint. Mark. Improve.</p><a href="#top">Back to top ↑</a>
+          <p>Attempt. Hint. Mark. Improve.</p><a href="#top">Back to top ${icon("up")}</a>
         </div>
         <div class="panphy-footer-row">
           <a class="panphy-home-link" href="/" aria-label="Visit the PanPhy Labs landing page"><img src="/assets/favicon.png" width="30" height="30" alt=""></a>

@@ -3,6 +3,7 @@
 
   const lessons = window.LESSONS || [];
   const sub = window.Diagrams.sub;
+  const icon = window.Diagrams.icon;
   const pathParts = window.location.pathname.split("/").filter(Boolean);
   const lessonIndex = pathParts.lastIndexOf("lesson");
   const slug = lessonIndex >= 0 ? pathParts[lessonIndex + 1] : "";
@@ -31,7 +32,7 @@
   if (description) description.content = lesson.intro;
 
   const revision = lesson.revision;
-  const skills = lesson.unlocks.map((skill) => `<span>✓ ${sub(skill)}</span>`).join("");
+  const skills = lesson.unlocks.map((skill) => `<span>${icon("check")} ${sub(skill)}</span>`).join("");
   const labHref = lesson.lab ? `${LAB_PDF}#page=${lesson.lab.page}` : "";
 
   const equationBlock = (eq) => eq ? `
@@ -69,7 +70,7 @@
         ${heading}
         <span class="practical-badge">Full practical page</span>
         ${copy}
-        <span class="practical-cta"><span>Open practical: method, tables, questions, PDF</span><span aria-hidden="true">→</span></span>
+        <span class="practical-cta"><span>Open practical: method, tables, questions, PDF</span><span aria-hidden="true">${icon("right")}</span></span>
       </a>`;
     }
 
@@ -125,25 +126,25 @@
         </label>
         <div class="reveal-row">
           <details class="reveal hint-reveal"><summary><span>Hint</span><b>+</b></summary><div><p>${sub(question.hint)}</p></div></details>
-          <details class="reveal answer-reveal"><summary><span>Answer</span><b>✓</b></summary><div><p>${sub(question.answer)}</p></div></details>
+          <details class="reveal answer-reveal"><summary><span>Answer</span><b>${icon("check")}</b></summary><div><p>${sub(question.answer)}</p></div></details>
         </div>
       </article>`;
   }).join("");
 
   const previousLink = previous
-    ? `<a href="../${previous.slug}/"><span>← Previous mission</span><strong>${previous.shortTitle}</strong></a>`
-    : '<a href="../../"><span>← Unit home</span><strong>Follow the charge</strong></a>';
+    ? `<a href="../${previous.slug}/"><span>${icon("left")} Previous mission</span><strong>${previous.shortTitle}</strong></a>`
+    : `<a href="../../"><span>${icon("left")} Unit home</span><strong>Follow the charge</strong></a>`;
   const nextLink = next
-    ? `<a class="next-link" href="../${next.slug}/"><span>Next mission →</span><strong>${next.shortTitle}</strong></a>`
-    : '<a class="next-link" href="../../exam-zone/"><span>Unit complete →</span><strong>Enter the Exam Zone</strong></a>';
+    ? `<a class="next-link" href="../${next.slug}/"><span>Next mission ${icon("right")}</span><strong>${next.shortTitle}</strong></a>`
+    : `<a class="next-link" href="../../exam-zone/"><span>Unit complete ${icon("right")}</span><strong>Enter the Exam Zone</strong></a>`;
 
   const phetTool = `<a href="${PHET}" target="_blank" rel="noopener"><span>Sim</span><strong>PhET circuit lab</strong></a>`;
   const fourthTool = lesson.lab
     ? `<a href="${labHref}" target="_blank" rel="noopener"><span>PDF</span><strong>${lesson.lab.label} · pp. ${lesson.lab.range}</strong></a>`
     : lesson.phet ? phetTool : "";
   const labLink = [
-    lesson.lab ? `<a class="workbook-link" href="${labHref}" target="_blank" rel="noopener">Virtual labs pp. ${lesson.lab.range} <span>↗</span></a>` : "",
-    lesson.phet ? `<a class="workbook-link" href="${PHET}" target="_blank" rel="noopener">Try it in PhET <span>↗</span></a>` : ""
+    lesson.lab ? `<a class="workbook-link" href="${labHref}" target="_blank" rel="noopener">Virtual labs pp. ${lesson.lab.range} <span aria-hidden="true">${icon("up-right")}</span></a>` : "",
+    lesson.phet ? `<a class="workbook-link" href="${PHET}" target="_blank" rel="noopener">Try it in PhET <span aria-hidden="true">${icon("up-right")}</span></a>` : ""
   ].join("");
 
   document.body.innerHTML = `
@@ -212,7 +213,7 @@
       <footer class="site-footer">
         <div class="unit-footer-row">
           <div class="brand">${BRAND}</div>
-          <p>Follow the charge. Track the energy.</p><a href="../../#missions">All missions ↑</a>
+          <p>Follow the charge. Track the energy.</p><a href="../../#missions">All missions ${icon("up")}</a>
         </div>${PANPHY_FOOTER}
       </footer>
     </main>`;
