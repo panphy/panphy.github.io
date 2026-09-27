@@ -29,6 +29,52 @@
   // Nucleons packed like the sims: random points in 3D relaxed until the
   // spheres just touch, turned to a random angle, then drawn back to front.
   function packNucleus(count, rand) {
+    const points = count > 40 ? latticeBall(count, rand) : relaxedBall(count, rand);
+    const centre = [0, 1, 2].map(k => points.reduce((sum, point) => sum + point[k], 0) / count);
+    const turn = (a, b) => points.map(point => {
+      let [x, y, z] = point.map((v, k) => v - centre[k]);
+      [x, z] = [x * Math.cos(a) + z * Math.sin(a), -x * Math.sin(a) + z * Math.cos(a)];
+      [y, z] = [y * Math.cos(b) - z * Math.sin(b), y * Math.sin(b) + z * Math.cos(b)];
+      return [x, y, z];
+    });
+    if (count > 7) return turn(rand() * TAU, rand() * TAU);
+    // Tiny clusters (alpha, lithium): choose a view where no nucleon hides behind another.
+    let best = null, bestGap = -1;
+    for (let t = 0; t < 40; t++) {
+      const view = turn(rand() * TAU, rand() * TAU);
+      let gap = Infinity;
+      for (let i = 0; i < count; i++) for (let j = i + 1; j < count; j++) gap = Math.min(gap, Math.hypot(view[i][0] - view[j][0], view[i][1] - view[j][1]));
+      if (gap > bestGap) { bestGap = gap; best = view; }
+    }
+    return best;
+  }
+
+  // Heavy nuclei (hundreds of nucleons) are too slow to relax from scratch, so
+  // start from a close packing, shake it so no rows show, then push apart.
+  function latticeBall(count, rand) {
+    const n = Math.ceil(Math.cbrt(count)) + 2, grid = [];
+    for (let i = -n; i <= n; i++) for (let j = -n; j <= n; j++) for (let k = -n; k <= n; k++) {
+      if ((i + j + k) % 2 === 0) grid.push([i, j, k].map(v => v * Math.SQRT2 * 1.04));
+    }
+    const points = grid.sort((p, q) => Math.hypot(...p) - Math.hypot(...q)).slice(0, count)
+      .map(point => point.map(v => v + (rand() - 0.5) * 0.9));
+    for (let step = 0; step < 24; step++) {
+      for (let i = 0; i < count; i++) {
+        const p = points[i];
+        for (let j = i + 1; j < count; j++) {
+          const q = points[j], dx = q[0] - p[0], dy = q[1] - p[1], dz = q[2] - p[2];
+          const d2 = dx * dx + dy * dy + dz * dz;
+          if (d2 >= 4) continue;
+          const len = Math.sqrt(d2) || 1e-6, push = ((2 - len) / 2 + 1e-4) / len;
+          q[0] += dx * push; q[1] += dy * push; q[2] += dz * push;
+          p[0] -= dx * push; p[1] -= dy * push; p[2] -= dz * push;
+        }
+      }
+    }
+    return points;
+  }
+
+  function relaxedBall(count, rand) {
     const points = Array.from({ length: count }, () => {
       const z = rand() * 2 - 1, phi = rand() * TAU, s = Math.sqrt(1 - z * z), m = 2.4 * Math.cbrt(rand());
       return [s * Math.cos(phi) * m, s * Math.sin(phi) * m, z * m];
@@ -47,23 +93,7 @@
       }
       points.forEach(point => { for (let k = 0; k < 3; k++) point[k] *= 0.985; });
     }
-    const centre = [0, 1, 2].map(k => points.reduce((sum, point) => sum + point[k], 0) / count);
-    const turn = (a, b) => points.map(point => {
-      let [x, y, z] = point.map((v, k) => v - centre[k]);
-      [x, z] = [x * Math.cos(a) + z * Math.sin(a), -x * Math.sin(a) + z * Math.cos(a)];
-      [y, z] = [y * Math.cos(b) - z * Math.sin(b), y * Math.sin(b) + z * Math.cos(b)];
-      return [x, y, z];
-    });
-    if (count > 7) return turn(rand() * TAU, rand() * TAU);
-    // Tiny clusters (alpha, lithium): choose a view where no nucleon hides behind another.
-    let best = null, bestGap = -1;
-    for (let t = 0; t < 40; t++) {
-      const view = turn(rand() * TAU, rand() * TAU);
-      let gap = Infinity;
-      for (let i = 0; i < count; i++) for (let j = i + 1; j < count; j++) gap = Math.min(gap, Math.hypot(view[i][0] - view[j][0], view[i][1] - view[j][1]));
-      if (gap > bestGap) { bestGap = gap; best = view; }
-    }
-    return best;
+    return points;
   }
 
   // Spread protons evenly from front to back so the visible face shows a fair mix.
@@ -291,7 +321,7 @@
     },
 
     'scatter-zoom': () => {
-      let s = cluster(350, 230, 8, 10, 18) + text(350, 318, 'gold nucleus (+)', 'lbl strong');
+      let s = ball(350, 230, 42, 'positive') + text(350, 318, 'gold nucleus (+)', 'lbl strong');
       const paths = [
         ['M20,410 L600,410', 'far away: straight on', 600, 396, 'end'],
         ['M20,168 L220,168 C300,168 330,146 380,104 L470,32', 'close: repelled, deflected', 482, 40, 'start'],
@@ -379,10 +409,10 @@
     },
 
     alpha: () => {
-      let s = shadow(150, 300, 100) + cluster(150, 190, 12, 16, 21);
+      let s = shadow(150, 300, 100) + cluster(150, 190, 95, 146, 10);
       s += arrow(260, 190, 330, 190, 'text-secondary', 3);
-      s += shadow(440, 300, 95) + cluster(440, 200, 10, 14, 21);
-      s += `<line x1="530" y1="160" x2="598" y2="112" class="trail" style="stroke:var(--alpha)"/>` + cluster(636, 86, 2, 2, 19);
+      s += shadow(440, 300, 95) + cluster(440, 200, 93, 144, 10);
+      s += `<line x1="530" y1="160" x2="598" y2="112" class="trail" style="stroke:var(--alpha)"/>` + cluster(636, 86, 2, 2, 10);
       s += text(150, 344, 'americium-241', 'lbl display') + text(150, 372, '95 p · 146 n', 'lbl mono');
       s += text(440, 344, 'neptunium-237', 'lbl display') + text(440, 372, '93 p · 144 n', 'lbl mono');
       s += text(636, 162, 'alpha particle', 'lbl display') + text(636, 190, '2 p · 2 n', 'lbl mono');
@@ -402,9 +432,9 @@
     },
 
     gamma: () => {
-      let s = `<circle cx="150" cy="180" r="140" fill="url(#g-glow)" class="pulse"/>` + cluster(150, 180, 10, 13, 22);
+      let s = `<circle cx="150" cy="180" r="140" fill="url(#g-glow)" class="pulse"/>` + cluster(150, 180, 43, 56, 14);
       s += arrow(262, 180, 330, 180, 'text-secondary', 3);
-      s += shadow(440, 290, 90) + cluster(440, 180, 10, 13, 22);
+      s += shadow(440, 290, 90) + cluster(440, 180, 43, 56, 14);
       s += wave(540, 150, 700, 56, { cycles: 5, amp: 10 }) + text(650, 140, 'gamma ray', 'lbl strong', 'middle', 'style="fill:var(--photon)"');
       s += text(150, 334, 'technetium-99m', 'lbl display') + text(150, 362, 'extra energy', 'lbl mono');
       s += text(440, 334, 'technetium-99', 'lbl display') + text(440, 362, 'same p and n', 'lbl mono');
