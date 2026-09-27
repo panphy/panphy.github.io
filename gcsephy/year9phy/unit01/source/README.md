@@ -1,6 +1,6 @@
 # Editable source archive
 
-This folder preserves the important authoring material from the original local project. Rebuildable dependency folders, virtual environments, rendered previews and caches are intentionally excluded.
+This folder preserves the original student companion-site source and Git history. Rebuildable dependency folders, virtual environments, rendered previews and caches are intentionally excluded.
 
 ## Student companion website
 
@@ -26,15 +26,9 @@ The archived source has pinned dependencies. Its two original `npm test` checks 
 git clone student-companion-site-history.bundle restored-student-companion-site
 ```
 
-## Teaching deck
-
-`teaching-deck/` contains historical case-study image assets, image source and prompt records, and a photo-credit script from the former PowerPoint workflow.
-
-The PowerPoint file is no longer in this repository. The current teaching deck is the [HTML deck](../../../decks/work-like-a-physicist/index.html). The archived photo-credit script requires a separately supplied PowerPoint file and is retained for provenance.
-
 ## Original project documentation
 
-`original-project-readme.md` is the detailed README from the local project before it was converted into the hosted GitHub Pages layout.
+`original-project-readme.md` is the historical README from the local project. Its old inventory is superseded by the [current unit README](../README.md).
 
 ## Intentionally excluded
 
@@ -43,4 +37,4 @@ The PowerPoint file is no longer in this repository. The current teaching deck i
 - rendered slide previews, inspection output and layout dumps
 - operating-system files such as `.DS_Store`
 
-All of these can be regenerated from the preserved source and final teaching files.
+These generated files are not needed to maintain the published static site.
