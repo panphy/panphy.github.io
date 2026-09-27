@@ -146,11 +146,12 @@ button:focus-visible, a:focus-visible { outline: 3px solid var(--focus); outline
   left: 0;
   bottom: 0;
   z-index: 15;
-  width: calc(var(--thumb-w) + 40px);
+  width: calc(var(--thumb-w) + 68px);
   display: none;
   flex-direction: column;
   gap: 12px;
   padding: 16px 12px 24px max(12px, env(safe-area-inset-left));
+  overflow-x: hidden;
   overflow-y: auto;
   overscroll-behavior: contain;
   border-right: 1px solid var(--nav-border);
@@ -160,8 +161,8 @@ button:focus-visible, a:focus-visible { outline: 3px solid var(--focus); outline
   scrollbar-width: thin;
 }
 body.show-thumbs .thumbs { display: flex; }
-body.show-thumbs .stage { left: calc(var(--thumb-w) + 40px); }
-body.show-thumbs .controls { left: calc(50% + (var(--thumb-w) + 40px) / 2); }
+body.show-thumbs .stage { left: calc(var(--thumb-w) + 68px); }
+body.show-thumbs .controls { left: calc(50% + (var(--thumb-w) + 68px) / 2); }
 .thumb { display: flex; gap: 8px; align-items: flex-start; padding: 0; border: 0; background: none; text-align: left; }
 .thumb-num { width: 20px; flex: none; padding-top: 2px; font: 600 12px var(--font-mono); color: var(--text-secondary); text-align: right; }
 .thumb-frame { position: relative; width: var(--thumb-w); height: calc(var(--thumb-w) * 9 / 16); flex: none; overflow: hidden; border: 2px solid var(--card-border); border-radius: 10px; background: var(--bg-color); transition: border-color .15s; }

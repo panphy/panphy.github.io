@@ -122,11 +122,12 @@ sub, sup { line-height: 0; }
   left: 0;
   bottom: 0;
   z-index: 15;
-  width: 224px;
+  width: 252px;
   display: none;
   flex-direction: column;
   gap: 14px;
   padding: 18px 12px 28px max(12px, env(safe-area-inset-left));
+  overflow-x: hidden;
   overflow-y: auto;
   overscroll-behavior: contain;
   border-right: 1px solid rgba(255, 255, 255, .15);
@@ -135,8 +136,8 @@ sub, sup { line-height: 0; }
   scrollbar-color: rgba(255, 255, 255, .25) transparent;
 }
 body.show-thumbs .thumbs { display: flex; }
-body.show-thumbs .stage { left: 224px; }
-body.show-thumbs .controls { left: calc(50% + 112px); }
+body.show-thumbs .stage { left: 252px; }
+body.show-thumbs .controls { left: calc(50% + 126px); }
 .thumb { display: flex; gap: 8px; align-items: flex-start; padding: 0; border: 0; background: none; text-align: left; }
 .thumb-num { width: 20px; flex: none; padding-top: 2px; font: 900 12px Arial, sans-serif; color: rgba(255, 255, 255, .5); text-align: right; }
 .thumb-frame { position: relative; width: 184px; height: 103.5px; flex: none; overflow: hidden; border: 2px solid rgba(255, 255, 255, .22); background: var(--paper); transition: border-color .15s, box-shadow .15s; }
