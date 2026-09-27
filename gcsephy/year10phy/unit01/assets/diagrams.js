@@ -22,13 +22,13 @@
     return `<path class="${cls || "fill"}" d="M${tipX.toFixed(2)} ${tipY.toFixed(2)} L${(bx + px).toFixed(2)} ${(by + py).toFixed(2)} L${(bx - px).toFixed(2)} ${(by - py).toFixed(2)} Z"/>`;
   }
 
-  function arrowLine(x1, y1, x2, y2) {
+  function arrowLine(x1, y1, x2, y2, head = 7, width = 3.5, stroke = 2) {
     const dx = x2 - x1;
     const dy = y2 - y1;
     const mag = Math.hypot(dx, dy);
-    const ex = x2 - (dx / mag) * 5;
-    const ey = y2 - (dy / mag) * 5;
-    return `<line x1="${x1}" y1="${y1}" x2="${ex.toFixed(2)}" y2="${ey.toFixed(2)}" stroke-width="2"/>${arrowHead(x2, y2, dx, dy, 7, 3.5)}`;
+    const ex = x2 - (dx / mag) * head * 0.7;
+    const ey = y2 - (dy / mag) * head * 0.7;
+    return `<line x1="${x1}" y1="${y1}" x2="${ex.toFixed(2)}" y2="${ey.toFixed(2)}" style="stroke-width:${stroke}"/>${arrowHead(x2, y2, dx, dy, head, width)}`;
   }
 
   const diagonal = '<line x1="-18" y1="14" x2="12" y2="-9"/>';
@@ -59,10 +59,12 @@
         + '<line x1="-10.5" y1="0" x2="-8.6" y2="0"/><line x1="-4.1" y1="0" x2="-2.2" y2="0"/><line x1="2.2" y1="0" x2="4.1" y2="0"/><line x1="8.6" y1="0" x2="10.5" y2="0"/>'
         + '<line x1="14.5" y1="-15" x2="14.5" y2="15"/><line x1="21.5" y1="-8" x2="21.5" y2="8"/>',
     },
-    diode: { half: 12, size: 11, body: '<line x1="-12" y1="0" x2="12" y2="0"/><path class="fill" d="M-9 -9 L-9 9 L7 0 Z"/><line x1="8" y1="-9" x2="8" y2="9"/>' },
+    // Diode and LED follow AQA 8463 §4.2.1.1: an open triangle and bar inside a circle,
+    // with the wire running through; the LED adds two arrows pointing out.
+    diode: { half: 12, size: 13, body: '<circle r="12"/><line x1="-12" y1="0" x2="12" y2="0"/><g style="stroke-width:1.8"><path d="M-5.5 -6.8 L-5.5 6.8 L6.2 0 Z"/><line x1="6.2" y1="-6.2" x2="6.2" y2="6.2"/></g>' },
     led: {
-      half: 12, size: 22,
-      body: `<line x1="-12" y1="0" x2="12" y2="0"/><path class="fill" d="M-9 -9 L-9 9 L7 0 Z"/><line x1="8" y1="-9" x2="8" y2="9"/>${arrowLine(-2, -12, 7, -23)}${arrowLine(5, -12, 14, -23)}`,
+      half: 12, size: 24,
+      body: `<circle r="12"/><line x1="-12" y1="0" x2="12" y2="0"/><g style="stroke-width:1.8"><path d="M-5.5 -6.8 L-5.5 6.8 L6.2 0 Z"/><line x1="6.2" y1="-6.2" x2="6.2" y2="6.2"/></g>${arrowLine(7.8, -12.6, 17.8, -21.2, 4.5, 2.4, 1.6)}${arrowLine(12.2, -8.2, 22.4, -17.2, 4.5, 2.4, 1.6)}`,
     },
     switchOpen: { half: 16, size: 13, body: '<circle class="dot" cx="-14" cy="0" r="2.6"/><circle class="dot" cx="14" cy="0" r="2.6"/><line x1="-14" y1="0" x2="12" y2="-13"/>' },
     switchClosed: { half: 16, size: 8, body: '<circle class="dot" cx="-14" cy="0" r="2.6"/><circle class="dot" cx="14" cy="0" r="2.6"/><line x1="-14" y1="0" x2="14" y2="0"/>' },

@@ -162,10 +162,11 @@
       <line x1="30" y1="50" x2="100" y2="50" stroke="#9ca3af" stroke-width="3"/><line x1="200" y1="50" x2="270" y2="50" stroke="#9ca3af" stroke-width="3"/>
       <rect x="100" y="34" width="100" height="32" rx="6" fill="#1f2937" stroke="${INK}" stroke-width="1.5"/>
       <rect x="176" y="34" width="12" height="32" fill="#d1d5db"/>
-      ${pointer(182, 70, 182, 118)}${t(206, 94, "band", { size: 10, weight: 600, anchor: "start" })}
+      ${pointer(182, 70, 182, 110)}${t(206, 94, "band", { size: 10, weight: 600, anchor: "start" })}
       ${t(30, 118, "symbol", { size: 11, anchor: "start" })}
       <line x1="30" y1="140" x2="270" y2="140" stroke="${INK}" stroke-width="2.5"/>
-      <path d="M160 124 L160 156 L180 140 Z" fill="${INK}"/><line x1="182" y1="124" x2="182" y2="156" stroke="${INK}" stroke-width="2.5"/>
+      <circle cx="171" cy="140" r="24" fill="none" stroke="${INK}" stroke-width="2.5"/>
+      <path d="M160 126.4 L160 153.6 L182 140 Z" fill="none" stroke="${INK}" stroke-width="2.5" stroke-linejoin="round"/><line x1="182" y1="127.6" x2="182" y2="152.4" stroke="${INK}" stroke-width="2.5"/>
       ${arrow(60, 186, 240, 186, RED)}
       ${tl(150, 206, ["It conducts when the current flows", "towards the band (the bar)."], { size: 11, weight: 600 })}`;
     return art({
