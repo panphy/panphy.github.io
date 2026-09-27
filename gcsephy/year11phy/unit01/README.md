@@ -18,7 +18,7 @@ Ten 50-minute lessons for AQA GCSE Physics 4.4.1–4.4.2 and Combined Science: T
 | `assets/content/reference.js` | Toolkit, unit review, extension pages and glossary; builds `window.UNIT` |
 | `assets/workbook.js` | Renderer (adapted from the Year 10 Electric Circuits workbook) |
 | `assets/workbook.css` | Print styles in the deck's look |
-| `assets/figures-print.css` | The deck's figure styles for print; keep in step with `deck.css` |
+| `assets/figures-print.css` | The deck's figure styles for print; keep in step with `../../decks/atoms-and-radiation/deck.css` |
 | `build-pdfs.sh` | Rebuilds all the PDFs with headless Chrome; name booklets (`3 7 review`) to rebuild only those |
 
 Diagrams come from the deck itself: `workbook.html` loads `/gcsephy/decks/atoms-and-radiation/figures.js`, which exports its figures and drawing parts as `window.DeckFigures`. Rebuild the PDFs after changing a deck figure the workbook uses.
