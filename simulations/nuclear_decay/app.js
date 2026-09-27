@@ -25,8 +25,10 @@ const ABSORBERS = [
   { key: 'aluminium', label: 'Aluminium', gap: 1.0, thickness: 0.14 },
   { key: 'lead', label: 'Lead', gap: 1.1, thickness: 0.55 }
 ];
-const ALPHA_GATHER_TIME = 0.9;
-const ALPHA_GATHER_DISTANCE = 0.45;
+// The alpha particle speeds up steadily from rest while it forms, so its speed never dips.
+const ALPHA_GATHER_TIME = 0.6;
+const ALPHA_ACCELERATION = 5;
+const ALPHA_MAX_SPEED = 4.2;
 // Beta decay is slowed further than alpha so that the neutron change and the electron are easy to follow.
 const BETA_GLOW_TIME = 1.6;
 const BETA_CHANGE_TIME = 1.4;
@@ -554,22 +556,25 @@ function prepareBeta() {
 function stepDecay(delta) {
   if (!decay || decay.phase === 'done') return;
   decay.t += delta;
-  if (decay.mode === 'alpha') stepAlpha();
+  if (decay.mode === 'alpha') stepAlpha(delta);
   else if (decay.mode === 'beta') stepBeta();
   else stepGamma();
 }
-function stepAlpha() {
+function advanceAlpha(d, delta) {
+  d.speed = Math.min(ALPHA_MAX_SPEED, d.speed + ALPHA_ACCELERATION * delta);
+  d.travelled += d.speed * delta;
+  // Momentum conservation: the daughter recoils 4/237 as far the other way.
+  nucleus.group.position.copy(d.direction).multiplyScalar(-d.travelled * 4 / MODES.alpha.daughter.A);
+}
+function stepAlpha(delta) {
   const d = decay;
   if (d.phase === 'prepare') {
-    // The cluster speeds up from rest as it forms, so gathering flows straight into the emission.
+    // The nucleons close in on a centre that is already accelerating out of the nucleus.
+    advanceAlpha(d, delta);
     const u = Math.min(1, d.t / ALPHA_GATHER_TIME);
-    d.travelled = ALPHA_GATHER_DISTANCE * u * u;
-    d.speed = 2 * ALPHA_GATHER_DISTANCE * u / ALPHA_GATHER_TIME;
     const moving = d.centre.clone().addScaledVector(d.direction, d.travelled);
     const k = ease(u);
     for (const part of d.alpha) part.mesh.position.lerpVectors(part.from, moving.clone().add(part.offset), k);
-    const mother = MODES.alpha.daughter.A;
-    nucleus.group.position.copy(d.direction).multiplyScalar(-d.travelled * 4 / mother);
     if (u >= 1) {
       // Build the alpha particle and let the electrostatic repulsion push it away.
       const group = new THREE.Group();
@@ -577,21 +582,19 @@ function stepAlpha() {
       group.userData.radius = NUCLEON_RADIUS * 2.3;
       for (const part of d.alpha) group.attach(part.mesh);
       group.add(glow(palette.alpha, 1.4));
-      let speed = d.speed;
-      let travelled = d.travelled;
+      // This frame has already been advanced above, so the flight takes over from the next one.
+      let handedOver = false;
       const flyer = addFlyer(group, straightFlight(group, {
         direction: d.direction,
         speed: 1,
         range: 6,
         move: () => {},
         onFrame: delta => {
-          speed += (4.2 - speed) * (1 - Math.exp(-delta / 0.35));
-          travelled += speed * delta;
-          group.position.copy(d.centre).addScaledVector(d.direction, travelled);
+          if (handedOver) advanceAlpha(d, delta);
+          handedOver = true;
+          group.position.copy(d.centre).addScaledVector(d.direction, d.travelled);
           group.rotation.x += delta * 1.5;
           group.rotation.y += delta * 2;
-          // Momentum conservation: the daughter recoils 4/237 as far the other way.
-          nucleus.group.position.copy(d.direction).multiplyScalar(-travelled * 4 / mother);
         }
       }));
       // Pick the whole alpha particle through any of its nucleons.
