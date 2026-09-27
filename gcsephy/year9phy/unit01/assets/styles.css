@@ -26,6 +26,19 @@ button, summary { font: inherit; }
 .nav-pill { border: 1px solid rgba(255,255,255,.35); padding: 10px 15px; border-radius: 999px; font-size: 13px; font-weight: 800; }
 .nav-pill:hover { background: white; color: var(--navy); }
 
+/* Stroke icons (see assets/icons.js) that replace arrow, tick and badge glyphs. */
+.icon { width: 1em; height: 1em; flex: none; display: inline-block; vertical-align: -.14em; fill: none; stroke: currentColor; stroke-width: 2.6; stroke-linecap: round; stroke-linejoin: round; }
+.icon .icon-fill { fill: currentColor; stroke: none; }
+.arrow .icon, .workbook-link span .icon, .reveal summary b .icon { width: .9em; height: .9em; stroke-width: 2.4; }
+.button span, .workbook-link span { display: inline-flex; }
+.button .icon { width: 1.15em; height: 1.15em; }
+.lesson-pagination span .icon, .unlock-strip span .icon { width: 1.3em; height: 1.3em; stroke-width: 2.8; }
+.lesson-icon .icon { width: 36px; height: 36px; stroke-width: 1.8; }
+.dossier-icon .icon { width: 38px; height: 38px; stroke-width: 1.8; }
+.reveal summary b { display: inline-flex; }
+/* Open reveals rotate the badge 45deg; keep the tick upright. */
+.reveal[open] summary b .icon-check { transform: rotate(-45deg); }
+
 .hero {
   min-height: 680px; padding: 86px clamp(22px, 6vw, 90px); background: var(--navy); color: white;
   display: grid; grid-template-columns: minmax(0, 1.08fr) minmax(380px, .92fr); gap: 7vw; align-items: center;
@@ -185,7 +198,7 @@ button, summary { font: inherit; }
 .answer-code { margin-top: 34px; display: grid; grid-template-columns: 36px 1fr; gap: 15px 14px; align-items: start; }
 .answer-code > span { width: 34px; height: 34px; border: 2px solid; border-radius: 50%; display: grid; place-items: center; font-weight: 900; background: var(--accent); }
 .answer-code p { margin: 0; font-size: 14px; color: var(--muted); line-height: 1.35; }.answer-code strong { color: var(--ink); }
-.question-list { display: grid; gap: 22px; }
+.question-list { display: grid; grid-template-columns: minmax(0, 1fr); gap: 22px; }
 .question-card { background: #fffdf8; border: 2px solid var(--ink); padding: clamp(22px,4vw,38px); box-shadow: 6px 6px 0 rgba(7,22,47,.12); }
 .question-meta { display: flex; align-items: center; gap: 10px; margin-bottom: 22px; }
 .practice-tag, .exam-tag { font-size: 10px; font-weight: 900; letter-spacing: .12em; text-transform: uppercase; padding: 7px 9px; border: 2px solid var(--ink); background: var(--accent); }
@@ -240,7 +253,7 @@ button, summary { font: inherit; }
   .lesson-hero { grid-template-columns: 1fr; }.lesson-dossier { max-width: 520px; }
   .lesson-tools { grid-template-columns: repeat(2, 1fr); }.lesson-tools a:nth-child(2) { border-right: 0; }.lesson-tools a:nth-child(-n+2) { border-bottom: 1px solid var(--line); }
   .revision-section { grid-template-columns: 1fr; }.revision-intro { position: static; }.revision-intro > p:not(.eyebrow) { max-width: 650px; }.workbook-link { max-width: 430px; }
-  .question-section { grid-template-columns: 1fr; }.question-intro { position: static; }.answer-code { max-width: 450px; }
+  .question-section { grid-template-columns: minmax(0, 1fr); }.question-intro { position: static; }.answer-code { max-width: 450px; }
 }
 
 @media (max-width: 680px) {

@@ -8,7 +8,7 @@ window.LESSONS = [
     intro:
       "Every measurement has doubt hiding inside it. Learn to spot random and systematic errors, calculate uncertainty and explain why precise does not always mean accurate.",
     colour: "lime",
-    icon: "±",
+    icon: "plus-minus",
     unlocks: ["precision vs accuracy", "half-range uncertainty", "random & systematic error"],
     keyRule: "Uncertainty = (maximum − minimum) ÷ 2",
     revision: {
@@ -122,7 +122,7 @@ window.LESSONS = [
     intro:
       "Name the thing you change, the thing you measure and what must stay the same. Then let the independent variable choose the graph.",
     colour: "cyan",
-    icon: "x→y",
+    icon: "variables",
     unlocks: ["independent variables", "continuous vs categoric", "line graph or bar chart"],
     keyRule: "Continuous independent variable → line graph. Categoric independent variable → bar chart.",
     revision: {
@@ -233,7 +233,7 @@ window.LESSONS = [
     intro:
       "Drop the same ball onto different materials, repeat each measurement and use a bar chart to reveal the best shock absorber.",
     colour: "coral",
-    icon: "↓",
+    icon: "drop",
     unlocks: ["three trials and a mean", "results tables", "bar chart quality"],
     keyRule: "The best shock absorber gives the lowest mean bounce height.",
     revision: {
@@ -345,7 +345,7 @@ window.LESSONS = [
     intro:
       "Collect continuous data from a trolley and ramp, calculate means, choose sensible scales and plot a line graph that another scientist can read.",
     colour: "violet",
-    icon: "↗",
+    icon: "line-graph",
     unlocks: ["continuous data", "axes, units & scales", "accurate plotting"],
     keyRule: "Independent variable on x. Dependent variable on y. Units on both.",
     revision: {
@@ -458,7 +458,7 @@ window.LESSONS = [
     intro:
       "Experimental points rarely behave perfectly. Draw a best-fit line, challenge suspicious results and write a conclusion that follows the evidence.",
     colour: "yellow",
-    icon: "••/",
+    icon: "best-fit",
     unlocks: ["best-fit lines", "outlier decisions", "evidence-led conclusions"],
     keyRule: "Check or repeat an outlier before deciding what to do with it.",
     revision: {
@@ -573,7 +573,7 @@ window.LESSONS = [
     intro:
       "Plan, measure, process and present a paper-helicopter investigation with less scaffolding. This is your chance to prove you can use the whole physicist toolkit.",
     colour: "cyan",
-    icon: "⌁",
+    icon: "helicopter",
     unlocks: ["independent planning", "table design", "evaluation"],
     keyRule: "Change one variable, measure one variable, control everything else you reasonably can.",
     revision: {
@@ -686,7 +686,7 @@ window.LESSONS = [
     intro:
       "Choose a safe, testable question; get your plan approved; collect repeated results; then present and defend your conclusion as a research team.",
     colour: "coral",
-    icon: "?",
+    icon: "search",
     unlocks: ["testable questions", "team investigation", "defensible conclusions"],
     keyRule: "A strong question is specific, measurable and written: ‘How does X affect Y?’",
     revision: {
