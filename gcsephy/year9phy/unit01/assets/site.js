@@ -2,6 +2,7 @@
   "use strict";
 
   const lessons = window.LESSONS || [];
+  const icon = window.Icons.icon;
   const pathParts = window.location.pathname.split("/").filter(Boolean);
   const lessonIndex = pathParts.lastIndexOf("lesson");
   const slug = lessonIndex >= 0 ? pathParts[lessonIndex + 1] : "";
@@ -20,7 +21,7 @@
   document.title = `${lesson.shortTitle} | Work Like a Physicist`;
   if (description) description.content = lesson.intro;
 
-  const skills = lesson.unlocks.map((skill) => `<span>✓ ${skill}</span>`).join("");
+  const skills = lesson.unlocks.map((skill) => `<span>${icon("check")} ${skill}</span>`).join("");
   const revision = lesson.revision;
   const workbookHref = `../../Work Like a Physicist - Year 9 Student Workbook.pdf#page=${revision.pageStart}`;
   const revisionCards = revision.sections.map((section, sectionIndex) => {
@@ -64,17 +65,17 @@
         </label>
         <div class="reveal-row">
           <details class="reveal hint-reveal"><summary><span>Hint</span><b>+</b></summary><div><p>${question.hint}</p></div></details>
-          <details class="reveal answer-reveal"><summary><span>Answer</span><b>✓</b></summary><div><p>${question.answer}</p></div></details>
+          <details class="reveal answer-reveal"><summary><span>Answer</span><b>${icon("check")}</b></summary><div><p>${question.answer}</p></div></details>
         </div>
       </article>`;
   }).join("");
 
   const previousLink = previous
-    ? `<a href="../${previous.slug}/"><span>← Previous mission</span><strong>${previous.shortTitle}</strong></a>`
-    : '<a href="../../"><span>← Unit home</span><strong>Evidence, not guesses</strong></a>';
+    ? `<a href="../${previous.slug}/"><span>${icon("left")} Previous mission</span><strong>${previous.shortTitle}</strong></a>`
+    : `<a href="../../"><span>${icon("left")} Unit home</span><strong>Evidence, not guesses</strong></a>`;
   const nextLink = next
-    ? `<a class="next-link" href="../${next.slug}/"><span>Next mission →</span><strong>${next.shortTitle}</strong></a>`
-    : '<a class="next-link" href="../../"><span>Unit complete →</span><strong>Return to mission control</strong></a>';
+    ? `<a class="next-link" href="../${next.slug}/"><span>Next mission ${icon("right")}</span><strong>${next.shortTitle}</strong></a>`
+    : `<a class="next-link" href="../../"><span>Unit complete ${icon("right")}</span><strong>Return to mission control</strong></a>`;
 
   document.body.innerHTML = `
     <main class="lesson-page ${lesson.colour}">
@@ -88,7 +89,7 @@
           <h1>${lesson.title}</h1><p>${lesson.intro}</p>
         </div>
         <div class="lesson-dossier">
-          <span class="dossier-icon">${lesson.icon}</span><p>Mission brief</p><strong>${lesson.mission}</strong>
+          <span class="dossier-icon" aria-hidden="true">${icon(lesson.icon)}</span><p>Mission brief</p><strong>${lesson.mission}</strong>
           <div class="dossier-rule">${lesson.keyRule}</div>
         </div>
       </header>
@@ -104,7 +105,7 @@
           <p class="eyebrow dark">Workbook-matched revision</p>
           <h2>Learn it.<br>Use it.</h2>
           <p>${revision.summary}</p>
-          <a class="workbook-link" href="${workbookHref}" target="_blank" rel="noopener">Open workbook pages ${revision.pageRange} <span>↗</span></a>
+          <a class="workbook-link" href="${workbookHref}" target="_blank" rel="noopener">Open workbook pages ${revision.pageRange} <span aria-hidden="true">${icon("up-right")}</span></a>
           <div class="revision-route" aria-label="Three ways to use these notes">
             <p><strong>Lesson companion</strong><br>Read the matching card as you complete each workbook task.</p>
             <p><strong>Revision hub</strong><br>Cover the notes and explain each heading from memory.</p>
@@ -139,7 +140,7 @@
       <footer class="site-footer">
         <div class="unit-footer-row">
           <div class="brand"><span>Work Like a Physicist</span></div>
-          <p>Attempt. Hint. Check. Improve.</p><a href="../../#missions">All missions ↑</a>
+          <p>Attempt. Hint. Check. Improve.</p><a href="../../#missions">All missions ${icon("up")}</a>
         </div>
         <div class="panphy-footer-row">
           <a class="panphy-home-link" href="/" aria-label="Visit the PanPhy Labs landing page"><img src="/assets/favicon.png" width="30" height="30" alt=""></a>
