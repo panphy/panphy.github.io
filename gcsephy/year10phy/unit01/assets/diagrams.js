@@ -50,10 +50,14 @@
     ammeter: { half: 12, size: 13, body: '<circle r="12"/>', letter: "A" },
     voltmeter: { half: 12, size: 13, body: '<circle r="12"/>', letter: "V" },
     motor: { half: 12, size: 13, body: '<circle r="12"/>', letter: "M" },
-    cell: { half: 6, size: 16, body: '<line x1="-4" y1="-15" x2="-4" y2="15"/><line class="thick" x1="4" y1="-8" x2="4" y2="8"/>' },
+    // Cell and battery follow AQA 8463 §4.2.1.1: long (+) and short plates drawn at
+    // the same weight; a battery is two cells joined by a dashed line.
+    cell: { half: 6, size: 16, body: '<line x1="-3.5" y1="-15" x2="-3.5" y2="15"/><line x1="3.5" y1="-8" x2="3.5" y2="8"/>' },
     battery: {
-      half: 18, size: 16,
-      body: '<line x1="-16" y1="-15" x2="-16" y2="15"/><line class="thick" x1="-9" y1="-8" x2="-9" y2="8"/><line class="dash" x1="-4" y1="0" x2="3" y2="0"/><line x1="9" y1="-15" x2="9" y2="15"/><line class="thick" x1="16" y1="-8" x2="16" y2="8"/>',
+      half: 23, size: 16,
+      body: '<line x1="-21.5" y1="-15" x2="-21.5" y2="15"/><line x1="-14.5" y1="-8" x2="-14.5" y2="8"/>'
+        + '<line x1="-10.5" y1="0" x2="-8.6" y2="0"/><line x1="-4.1" y1="0" x2="-2.2" y2="0"/><line x1="2.2" y1="0" x2="4.1" y2="0"/><line x1="8.6" y1="0" x2="10.5" y2="0"/>'
+        + '<line x1="14.5" y1="-15" x2="14.5" y2="15"/><line x1="21.5" y1="-8" x2="21.5" y2="8"/>',
     },
     diode: { half: 12, size: 11, body: '<line x1="-12" y1="0" x2="12" y2="0"/><path class="fill" d="M-9 -9 L-9 9 L7 0 Z"/><line x1="8" y1="-9" x2="8" y2="9"/>' },
     led: {
