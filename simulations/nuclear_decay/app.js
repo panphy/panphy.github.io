@@ -25,15 +25,18 @@ const ABSORBERS = [
   { key: 'aluminium', label: 'Aluminium', gap: 1.0, thickness: 0.14 },
   { key: 'lead', label: 'Lead', gap: 1.1, thickness: 0.55 }
 ];
+// Alpha, beta and gamma share one pace: a build-up of about a second, then the radiation leaves at the same speed.
+const EMISSION_SPEED = 3.0;
 // The alpha particle speeds up steadily from rest while it forms, so its speed never dips.
-const ALPHA_GATHER_TIME = 0.6;
-const ALPHA_ACCELERATION = 5;
-const ALPHA_MAX_SPEED = 4.2;
-// Beta decay is slowed further than alpha so that the neutron change and the electron are easy to follow.
-const BETA_GLOW_TIME = 1.6;
-const BETA_CHANGE_TIME = 1.4;
-const BETA_ELECTRON_SPEED = 2.4;
-const BETA_ANTINEUTRINO_SPEED = 2.0;
+const ALPHA_GATHER_TIME = 1.0;
+const ALPHA_ACCELERATION = 2.2;
+const ALPHA_MAX_SPEED = EMISSION_SPEED;
+const BETA_GLOW_TIME = 1.2;
+const BETA_CHANGE_TIME = 1.0;
+const BETA_ELECTRON_SPEED = EMISSION_SPEED;
+const BETA_ANTINEUTRINO_SPEED = 2.6;
+const GAMMA_EXCITE_TIME = 1.2;
+const GAMMA_RELAX_TIME = 1.0;
 const TEST_SPEED = { alpha: 2.2, beta: 3.4, gamma: 4.6 };
 const GAMMA_THROUGH_LEAD = 0.25;
 
@@ -690,10 +693,10 @@ function emitBetaParticles(from) {
 function stepGamma() {
   const d = decay;
   if (d.phase === 'prepare') {
-    const k = Math.min(1, d.t / 0.8);
+    const k = Math.min(1, d.t / GAMMA_EXCITE_TIME);
     nucleus.jiggle = 0.04 + 0.03 * k;
     nucleus.glow.material.opacity = palette.dark ? 0.35 + 0.3 * k : 0.65 + 0.35 * k;
-    if (d.t >= 0.8) {
+    if (d.t >= GAMMA_EXCITE_TIME) {
       d.phase = 'relax';
       d.t = 0;
       nucleus.excited = false;
@@ -702,7 +705,7 @@ function stepGamma() {
       let time = 0;
       addFlyer(wave, straightFlight(wave, {
         direction: d.direction,
-        speed: 6,
+        speed: EMISSION_SPEED,
         range: 8,
         getPosition: () => centre,
         move: step => centre.addScaledVector(d.direction, step),
@@ -716,7 +719,7 @@ function stepGamma() {
       d.startOpacity = nucleus.glow.material.opacity;
     }
   } else if (d.phase === 'relax') {
-    const k = Math.min(1, d.t / 0.8);
+    const k = Math.min(1, d.t / GAMMA_RELAX_TIME);
     nucleus.jiggle = 0.07 - 0.058 * k;
     nucleus.glow.material.opacity = d.startOpacity * (1 - k);
     if (k >= 1) finishDecay();
