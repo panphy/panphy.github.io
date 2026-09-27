@@ -370,6 +370,9 @@ table.facts.compare { table-layout: fixed; font-size: 30px; }
 .equation .op { color: var(--text-secondary); font-weight: 400; }
 .eq-row { display: grid; grid-template-columns: 1fr 1fr; gap: 22px; }
 .eq-row .idea { display: flex; align-items: center; gap: 12px; }
+.calc { display: grid; grid-template-columns: auto auto; column-gap: 14px; row-gap: 2px; align-items: baseline; }
+.calc > span:nth-child(even) { text-align: right; }
+.calc-label { font: 600 .62em var(--font-mono); letter-spacing: .1em; text-transform: uppercase; color: var(--text-secondary); }
 .idea .nuc { font-size: 1.25em; }
 .facts .nuc { font-size: 1.3em; }
 .eq-check { margin: 10px 0 0; text-align: center; font: 600 20px var(--font-mono); color: var(--text-secondary); }
