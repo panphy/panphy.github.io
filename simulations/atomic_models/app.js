@@ -333,7 +333,8 @@ function buildRutherford() {
     const tilt = (i % 3 - 1) * 0.9;
     const mesh = makeElectron();
     atom.add(mesh);
-    electrons.push({ mesh, radius, angle: i * Math.PI / 3, tilt, speed: 0.6 });
+    // Rutherford gave no direction, so the middle path runs the other way.
+    electrons.push({ mesh, radius, angle: i * Math.PI / 3, tilt, speed: i % 3 === 1 ? -0.6 : 0.6 });
     pickables.push({ object: mesh, kind: 'electron' });
     // Each path is shared by two electrons on opposite sides: illustrative, not quantised.
     if (i < 3) ring(radius, palette.line, 0.5, tilt);
