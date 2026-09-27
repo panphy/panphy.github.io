@@ -246,7 +246,7 @@
       s += arrow(190, 96, 250, 128, 'brand-primary', 2.5);
       s += text(30, 322, 'ATOMIC NUMBER', 'lbl mono strong z', 'start') + text(30, 348, 'number of protons', 'lbl', 'start');
       s += arrow(200, 320, 262, 272, 'brand-accent', 2.5);
-      s += text(560, 176, 'carbon-12', 'lbl display', 'start') + text(560, 210, '6 p · 6 n · 6 e', 'lbl mono', 'start');
+      s += text(560, 176, 'carbon-12', 'lbl display', 'start') + text(560, 210, '6 p, 6 n, 6 e', 'lbl mono', 'start');
       return svg('0 0 760 380', s, 'Nuclear notation for carbon-12: mass number 12 at the top left, atomic number 6 at the bottom left');
     },
 
@@ -256,7 +256,7 @@
       data.forEach(([x, n, a]) => {
         s += shadow(x, 290, 90) + cluster(x, 170, 6, n, 30);
         s += text(x, 334, `carbon-${a}`, 'lbl display');
-        s += `<text x="${x}" y="366" class="lbl mono" text-anchor="middle"><tspan class="t-proton">6 p</tspan> · <tspan class="t-neutron">${n} n</tspan></text>`;
+        s += `<text x="${x}" y="366" class="lbl mono" text-anchor="middle"><tspan class="t-proton">6 p</tspan>, <tspan class="t-neutron">${n} n</tspan></text>`;
       });
       return svg('0 0 960 390', s, 'Nuclei of carbon-12, carbon-13 and carbon-14: all have 6 protons but 6, 7 and 8 neutrons');
     },
@@ -272,8 +272,8 @@
       s += ball(905, 60, 12, 'electron') + arrow(845, 118, 890, 74, 'electron', 2.5);
       s += text(905, 32, 'outer e⁻ lost', 'lbl', 'end');
       s += arrow(410, 200, 540, 200, 'text-secondary', 3) + text(475, 182, 'loses 1 e⁻', 'lbl mono');
-      s += text(230, 400, 'lithium atom', 'lbl display') + text(230, 432, '3 p · 3 e → charge 0', 'lbl mono');
-      s += text(730, 400, 'lithium ion, Li⁺', 'lbl display') + text(730, 432, '3 p · 2 e → charge +1', 'lbl mono');
+      s += text(230, 400, 'lithium atom', 'lbl display') + text(230, 432, '3 p, 3 e → charge 0', 'lbl mono');
+      s += text(730, 400, 'lithium ion, Li⁺', 'lbl display') + text(730, 432, '3 p, 2 e → charge +1', 'lbl mono');
       return svg('0 0 960 450', s, 'A lithium atom loses its outer electron to become a positive ion');
     },
 
@@ -417,9 +417,9 @@
       s += arrow(260, 190, 330, 190, 'text-secondary', 3);
       s += shadow(440, 300, 95) + cluster(440, 200, 93, 144, 10);
       s += `<line x1="530" y1="160" x2="598" y2="112" class="trail" style="stroke:var(--alpha)"/>` + cluster(636, 86, 2, 2, 10);
-      s += text(150, 344, 'americium-241', 'lbl display') + text(150, 372, '95 p · 146 n', 'lbl mono');
-      s += text(440, 344, 'neptunium-237', 'lbl display') + text(440, 372, '93 p · 144 n', 'lbl mono');
-      s += text(636, 162, 'alpha particle', 'lbl display') + text(636, 190, '2 p · 2 n', 'lbl mono');
+      s += text(150, 344, 'americium-241', 'lbl display') + text(150, 372, '95 p, 146 n', 'lbl mono');
+      s += text(440, 344, 'neptunium-237', 'lbl display') + text(440, 372, '93 p, 144 n', 'lbl mono');
+      s += text(636, 162, 'alpha particle', 'lbl display') + text(636, 190, '2 p, 2 n', 'lbl mono');
       return svg('0 0 720 400', s, 'Alpha decay: americium-241 emits an alpha particle of 2 protons and 2 neutrons and becomes neptunium-237');
     },
 
@@ -428,8 +428,8 @@
       s += arrow(250, 150, 320, 150, 'text-secondary', 3);
       s += shadow(430, 262, 100) + cluster(430, 150, 7, 7, 26, { base: [6, 8], highlight: true });
       s += `<line x1="528" y1="120" x2="616" y2="78" class="trail" style="stroke:var(--electron)"/>` + ball(640, 68, 14, 'electron') + text(640, 30, 'beta particle', 'lbl strong');
-      s += text(140, 300, 'carbon-14', 'lbl display') + text(140, 328, '6 p · 8 n', 'lbl mono');
-      s += text(430, 300, 'nitrogen-14', 'lbl display') + text(430, 328, '7 p · 7 n', 'lbl mono');
+      s += text(140, 300, 'carbon-14', 'lbl display') + text(140, 328, '6 p, 8 n', 'lbl mono');
+      s += text(430, 300, 'nitrogen-14', 'lbl display') + text(430, 328, '7 p, 7 n', 'lbl mono');
       s += `<rect x="120" y="356" width="480" height="96" rx="18" class="inset"/>` + text(150, 410, 'IN THE NUCLEUS', 'lbl mono small', 'start');
       s += ball(342, 404, 20, 'neutron') + arrow(368, 404, 404, 404, 'text-secondary', 2.5) + ball(432, 404, 20, 'proton') + text(480, 414, '+', 'lbl display') + ball(528, 404, 14, 'electron');
       return svg('0 0 720 460', s, 'Beta decay: a neutron turns into a proton and a fast electron; carbon-14 becomes nitrogen-14');
@@ -450,7 +450,7 @@
       s += `<rect x="300" y="52" width="7" height="326" rx="2" style="fill:var(--paper);stroke:var(--input-border)"/>`;
       s += `<rect x="520" y="52" width="18" height="326" rx="3" style="fill:var(--aluminium)"/>`;
       s += `<rect x="730" y="52" width="52" height="326" rx="4" style="fill:var(--lead)"/>`;
-      s += text(303, 36, 'paper', 'lbl mono strong') + text(529, 36, 'aluminium · few mm', 'lbl mono strong') + text(756, 36, 'lead · several cm', 'lbl mono strong');
+      s += text(303, 36, 'paper', 'lbl mono strong') + text(529, 36, 'aluminium, few mm', 'lbl mono strong') + text(756, 36, 'lead, several cm', 'lbl mono strong');
       s += `<line x1="90" y1="125" x2="294" y2="125" class="lane" style="stroke:var(--alpha)"/>` + ball(150, 125, 14, 'alpha') + ball(232, 125, 14, 'alpha');
       s += text(318, 110, 'stopped', 'lbl small', 'start', 'style="fill:var(--alpha)"');
       s += `<line x1="90" y1="215" x2="514" y2="215" class="lane" style="stroke:var(--electron)"/>` + [160, 290, 420].map(x => ball(x, 215, 10, 'electron')).join('');
