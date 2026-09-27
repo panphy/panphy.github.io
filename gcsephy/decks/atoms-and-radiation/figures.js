@@ -360,7 +360,7 @@
       [[240, true], [720, false]].forEach(([cx, absorb]) => {
         const cy = 215, a = -0.75;
         const p1 = [cx + 75 * Math.cos(a), cy + 75 * Math.sin(a)], p2 = [cx + 150 * Math.cos(a), cy + 150 * Math.sin(a)];
-        s += ring(cx, cy, 75) + ring(cx, cy, 150) + cluster(cx, cy, 3, 3, 14);
+        s += ring(cx, cy, 75) + ring(cx, cy, 150) + ball(cx, cy, 16, 'proton');
         s += text(cx - 75, cy + 5, 'n=1', 'lbl mono small', 'middle') + text(cx - 150, cy + 5, 'n=2', 'lbl mono small', 'middle');
         const [from, to] = absorb ? [p1, p2] : [p2, p1];
         s += `<circle cx="${f(from[0])}" cy="${f(from[1])}" r="12" class="ghost"/>`;
@@ -374,7 +374,7 @@
         s += text(cx, 402, absorb ? 'moves further out' : 'moves closer in', 'lbl display');
         s += text(cx, 432, absorb ? 'higher energy level' : 'lower energy level', 'lbl mono');
       });
-      return svg('0 0 960 450', s, 'An electron absorbs electromagnetic radiation and moves to a higher energy level; it emits radiation when it moves to a lower level');
+      return svg('0 0 960 450', s, 'Hydrogen atom: an electron absorbs electromagnetic radiation and moves to a higher energy level; it emits radiation when it moves to a lower level');
     },
 
     'carbon-nucleus': () => svg('0 0 460 420', shadow(230, 392, 150) + cluster(230, 200, 6, 6, 44), 'Carbon-12 nucleus: 6 protons and 6 neutrons'),
