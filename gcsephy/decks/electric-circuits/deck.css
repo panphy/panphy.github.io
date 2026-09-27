@@ -108,3 +108,26 @@
 /* Two sketch cards side by side */
 .sketch-card { display: flex; flex-direction: column; }
 .sketch-card .fig { flex: 1; min-height: 0; height: auto; margin: 10px 0 12px; }
+
+/* Mission 2: a length of copper wire with drifting free electrons */
+.cd .wire-body { stroke: #6b3514; stroke-width: 2.5; }
+.cd .wire-face { fill: #f0b27c; stroke: #6b3514; stroke-width: 2.5; }
+.cd .wire-ion { fill: #fbe3c6; stroke: #7a3f18; stroke-width: 1.4; }
+.cd .wire-ion-plus { stroke: #7a3f18; stroke-width: 1.6; }
+.cd .e-drift { animation: e-drift 14s linear infinite; }
+.cd .e-jig { animation: e-jig 1.1s ease-in-out infinite alternate; }
+@keyframes e-drift { to { transform: translateX(-380px); } }
+@keyframes e-jig { from { transform: translateY(-3px); } to { transform: translateY(3px); } }
+
+/* Mission 4: live lattice simulation (cool vs hot metal) */
+.cd .lattice-panel { stroke-width: 2.5; }
+.cd .lattice-panel.cool { fill: #e8f4fa; }
+.cd .lattice-panel.hot { fill: #fdebe1; }
+.cd .lattice-ion { fill: #f7d278; stroke-width: 1.6; transition: fill .15s; }
+.cd .lattice-ion.hit { fill: #ff8a3d; }
+.cd .lattice-ion-plus { stroke-width: 1.8; }
+.cd text.lattice-title { font: 900 15px/1 Arial, Helvetica, sans-serif; letter-spacing: .06em; }
+.cd text.lattice-count { font: 800 14px/1 Arial, Helvetica, sans-serif; }
+
+.thumb-slide .cd .e-drift, .thumb-slide .cd .e-jig { animation: none; }
+@media (prefers-reduced-motion: reduce) { .cd .e-drift, .cd .e-jig { animation: none; } }
