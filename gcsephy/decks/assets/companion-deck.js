@@ -13,6 +13,10 @@
   const prevButton = document.getElementById('prev');
   const nextButton = document.getElementById('next');
   const fullscreenButton = document.getElementById('fullscreen');
+  const thumbs = document.getElementById('thumbs');
+  const thumbsToggle = document.getElementById('thumbs-toggle');
+  const THUMB_W = 184;
+  const THUMBS_KEY = `${document.body.dataset.deckKey || 'companion'}-deck-thumbs-hidden`;
   const deckTitle = document.body.dataset.deckTitle || document.title;
 
   function fit() {
@@ -43,6 +47,11 @@
     progress.style.width = `${(n / total) * 100}%`;
     prevButton.disabled = state.index === 0;
     nextButton.disabled = state.index === total - 1 && !hiddenSteps(slide).length;
+    thumbs.querySelectorAll('.thumb').forEach((thumb, i) => {
+      const current = i === state.index;
+      thumb.setAttribute('aria-current', String(current));
+      if (current && document.body.classList.contains('show-thumbs')) thumb.scrollIntoView({ block: 'nearest' });
+    });
     if (location.hash !== `#${n}`) history.replaceState(null, '', `#${n}`);
     const name = slide.dataset.title;
     document.title = name && name !== deckTitle ? `${name} · ${deckTitle}` : deckTitle;
@@ -81,8 +90,42 @@
       case 'Home': event.preventDefault(); show(0); break;
       case 'End': event.preventDefault(); show(state.slides.length - 1); break;
       case 'f': case 'F': toggleFullscreen(); break;
+      case 't': case 'T': setThumbs(!document.body.classList.contains('show-thumbs')); break;
       default: break;
     }
+  }
+
+  // Thumbnails are scaled copies of each slide, with steps shown and motion removed.
+  function buildThumbs() {
+    const scale = THUMB_W / SLIDE_W;
+    state.slides.forEach((slide, i) => {
+      const button = document.createElement('button');
+      button.type = 'button';
+      button.className = 'thumb';
+      button.setAttribute('aria-label', `Slide ${i + 1}: ${slide.dataset.title || ''}`);
+      const copy = slide.cloneNode(true);
+      copy.classList.remove('active');
+      copy.removeAttribute('aria-hidden');
+      copy.querySelectorAll('[id]').forEach(node => node.removeAttribute('id'));
+      copy.querySelectorAll('.charge-dot').forEach(node => node.remove());
+      button.innerHTML = `<span class="thumb-num">${i + 1}</span><span class="thumb-frame" aria-hidden="true"><span class="thumb-slide" style="transform: scale(${scale})"></span></span>`;
+      const holder = button.querySelector('.thumb-slide');
+      holder.appendChild(copy);
+      holder.inert = true;
+      button.addEventListener('click', () => show(i));
+      thumbs.appendChild(button);
+    });
+  }
+
+  function setThumbs(visible, remember = true) {
+    document.body.classList.toggle('show-thumbs', visible);
+    thumbsToggle.setAttribute('aria-pressed', String(visible));
+    thumbsToggle.setAttribute('aria-label', visible ? 'Hide slide thumbnails' : 'Show slide thumbnails');
+    if (remember) {
+      try { if (visible) localStorage.removeItem(THUMBS_KEY); else localStorage.setItem(THUMBS_KEY, '1'); } catch (error) {}
+    }
+    fit();
+    if (visible) thumbs.querySelector('[aria-current="true"]')?.scrollIntoView({ block: 'center' });
   }
 
   // Swipe left / right on touch screens.
@@ -126,6 +169,10 @@
       const foot = slide.querySelector('.slide-foot [data-page]');
       if (foot) foot.textContent = String(i + 1).padStart(2, '0');
     });
+    buildThumbs();
+    let thumbsHidden = false;
+    try { thumbsHidden = !!localStorage.getItem(THUMBS_KEY); } catch (error) {}
+    setThumbs(!thumbsHidden, false);
     const fromHash = parseInt(location.hash.slice(1), 10);
     show(Number.isFinite(fromHash) ? fromHash - 1 : 0);
     fit();
@@ -133,6 +180,7 @@
     prevButton.addEventListener('click', prev);
     nextButton.addEventListener('click', next);
     fullscreenButton.addEventListener('click', toggleFullscreen);
+    thumbsToggle.addEventListener('click', () => setThumbs(!document.body.classList.contains('show-thumbs')));
     if (!(document.documentElement.requestFullscreen || document.documentElement.webkitRequestFullscreen)) fullscreenButton.hidden = true;
     document.addEventListener('keydown', onKey);
     document.addEventListener('fullscreenchange', onFullscreenChange);
