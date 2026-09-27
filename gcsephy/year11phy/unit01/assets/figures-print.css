@@ -1,0 +1,56 @@
+/* The teaching deck's figure styles (gcsephy/decks/atoms-and-radiation/deck.css, light theme),
+   copied for print so the workbook's diagrams look like the slides. Keep in step with deck.css.
+   Animation is dropped: moving alpha particles are hidden and pulses and drawn lines stay still. */
+:root {
+  --text-main: #1B1B1B; --text-secondary: #5F5954; --brand-primary: #C2410C; --brand-accent: #0D9488; --brand-accent-strong: #0F766E;
+  --card-bg: #ffffff; --card-border: #E8E4DD; --muted-bg: #F3F0EA; --input-border: #D8D3CB; --viewer-bg: #F1EEE7;
+  --electron: #1675BB; --positive: #B7791F; --proton: #D45132; --neutron: #657481; --alpha: #B5179E; --photon: #7C3AED;
+  --undecayed: #D45132; --decayed: #9DB4B0; --paper: #EFE6CF; --aluminium: #AEB9C4; --lead: #4A5360; --gold: #C9A227;
+  --solid: #9A948C; --object: #6E9F45;
+}
+.svg-defs { position: absolute; width: 0; height: 0; overflow: hidden; }
+.dfig .sym { fill: #fff; text-anchor: middle; dominant-baseline: central; font-family: 'Manrope', sans-serif; font-weight: 800; }
+.dfig .lbl { font-family: 'Manrope', sans-serif; font-size: 20px; fill: var(--text-secondary); }
+.dfig .lbl.mono { font-family: 'IBM Plex Mono', monospace; font-size: 18px; }
+.dfig .lbl.small { font-size: 16px; }
+.dfig .lbl.strong { font-weight: 700; fill: var(--text-main); }
+.dfig .lbl.display { font-family: 'DM Serif Display', serif; font-size: 28px; fill: var(--text-main); }
+.dfig .lbl.italic { font-style: italic; }
+.dfig .halo { paint-order: stroke; stroke: var(--viewer-bg); stroke-width: 6px; stroke-linejoin: round; }
+.dfig .lbl.greek { font-family: 'DM Serif Display', serif; font-size: 34px; }
+.dfig .lbl.readout { font-family: 'IBM Plex Mono', monospace; font-size: 40px; font-weight: 600; fill: var(--text-main); }
+.dfig .lbl.a, .dfig .big-num.a { fill: var(--brand-primary); }
+.dfig .lbl.z, .dfig .big-num.z { fill: var(--brand-accent-strong); }
+.dfig .big-symbol { font-family: 'DM Serif Display', serif; font-size: 230px; fill: var(--text-main); }
+.dfig .big-num { font-family: 'IBM Plex Mono', monospace; font-size: 84px; font-weight: 600; }
+.dfig .orbit { fill: none; stroke: var(--text-secondary); stroke-opacity: .45; stroke-width: 1.8; }
+.dfig .guide { fill: none; stroke: var(--text-secondary); stroke-width: 1.5; stroke-dasharray: 5 6; opacity: .7; }
+.dfig .guide.accent { stroke: var(--brand-accent); stroke-width: 2.2; opacity: 1; }
+.dfig .tick { stroke: var(--text-secondary); stroke-width: 2.5; }
+.dfig .inset { fill: var(--card-bg); stroke: var(--card-border); stroke-width: 2; }
+.dfig .depth { fill: #000; }
+.dfig .changed { fill: none; stroke: var(--brand-accent); stroke-width: 3; }
+.dfig .ghost { fill: none; stroke: var(--electron); stroke-width: 2; stroke-dasharray: 4 4; opacity: .7; }
+.dfig .wave { fill: none; stroke-width: 3; stroke-linecap: round; stroke-linejoin: round; }
+.dfig .trail { stroke-width: 3; stroke-dasharray: 3 9; stroke-linecap: round; opacity: .7; }
+.dfig .lane { stroke-width: 3; opacity: .35; }
+.dfig .alpha-path { fill: none; stroke: var(--alpha); stroke-width: 2.5; opacity: .6; }
+.dfig .alpha-path.deflect, .dfig .alpha-path.bounce { opacity: .95; }
+.dfig .detector { fill: none; stroke: var(--brand-accent); stroke-width: 3; stroke-dasharray: 2 8; stroke-linecap: round; opacity: .8; }
+.dfig .flow { fill: none; stroke: var(--brand-accent); stroke-width: 3; }
+.dfig .node { fill: var(--card-bg); stroke: var(--card-border); stroke-width: 2; }
+.dfig .node.hot { stroke: var(--brand-primary); stroke-width: 3; }
+.dfig .cable { fill: none; stroke: var(--text-secondary); stroke-width: 3; }
+.dfig .axis { stroke: var(--text-main); stroke-width: 2.5; }
+.dfig .curve { fill: none; stroke: var(--undecayed); stroke-width: 5; stroke-linecap: round; }
+.dfig .roller { fill: var(--muted-bg); stroke: var(--input-border); stroke-width: 2; }
+.dfig .body { fill: var(--muted-bg); stroke: var(--input-border); stroke-width: 2; }
+.dfig .stem { fill: none; stroke: #6B4F2A; stroke-width: 5; stroke-linecap: round; }
+.dfig .divider { stroke: var(--card-border); stroke-width: 2; }
+.dfig .mover { display: none; }
+/* Workbook additions drawn with the deck's parts: answer boxes and label leaders. */
+.dfig .blank-box { fill: #fff; stroke: var(--text-main); stroke-width: 2; }
+.dfig .leader { stroke: var(--text-main); stroke-width: 1.8; }
+.dfig .ans-lbl { font-family: 'Manrope', sans-serif; font-size: 20px; font-weight: 700; fill: #1558b0; }
+.dfig .ans-path { fill: none; stroke: #1558b0; stroke-width: 3; stroke-linecap: round; }
+body:not(.answers) .dfig .ans-lbl, body:not(.answers) .dfig .ans-path { visibility: hidden; }

@@ -541,5 +541,11 @@
     });
   }
 
-  window.DeckFigures = { render, orbitPoint };
+  // The Year 11 workbooks (gcsephy/year11phy/unit01) print these figures and build their own
+  // diagrams from the same parts, so the booklets match the slides.
+  window.DeckFigures = {
+    render, orbitPoint, defs: sharedDefs,
+    figure: (name, data = {}) => FIGURES[name]({ dataset: data }),
+    parts: { svg, ball, cluster, shadow, arrow, wave, text, ring, ellipse, orbiter, seeded, bohrAtom, plumPudding, nuclearAtom }
+  };
 })();

@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="robots" content="noindex, nofollow">
+  <meta name="theme-color" content="#F8F6F1">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <title>Workbook | Atoms and Nuclear Radiation</title>
+  <link rel="icon" type="image/png" href="/assets/favicon.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="/assets/apple-touch-icon.png">
+  <link rel="stylesheet" href="/assets/standalone-top.css">
+  <link rel="stylesheet" href="/assets/fonts/fonts.css">
+  <script src="/gcsephy/sw-register.js" defer></script>
+  <style>
+    :root { color-scheme: light; --ink: #1B1B1B; --muted: #5F5954; --paper: #F8F6F1; --dots: #E4DFD4; --line: #E8E4DD; --orange: #C2410C; --teal: #0D9488; --teal-s: #0F766E; }
+    * { box-sizing: border-box; }
+    body { margin: 0; padding-top: var(--standalone-top, 0px); font: 16px/1.55 'Manrope', system-ui, sans-serif; color: var(--ink); background-color: var(--paper); background-image: radial-gradient(var(--dots) 1px, transparent 1px); background-size: 28px 28px; }
+    header, main { max-width: 980px; margin: 0 auto; padding: 0 16px; }
+    header { padding-top: 2.5rem; }
+    .back { display: inline-flex; align-items: center; gap: .4rem; min-height: 48px; color: var(--teal-s); font-weight: 700; text-decoration: none; }
+    .eyebrow { margin: 1.2rem 0 0; font: 600 .78rem/1.4 'IBM Plex Mono', monospace; letter-spacing: .16em; text-transform: uppercase; color: var(--orange); }
+    h1 { margin: .4rem 0 .8rem; font: 400 clamp(2.3rem, 7vw, 3.8rem)/1.02 'DM Serif Display', Georgia, serif; }
+    h1 span, h2 span { color: var(--orange); }
+    header p { max-width: 44rem; margin: 0; color: #3a3632; font-size: 1.08rem; }
+    h2 { margin: 2.6rem 0 1rem; font: 400 1.8rem/1.1 'DM Serif Display', Georgia, serif; }
+    .cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(270px, 1fr)); gap: 1rem; }
+    .card { display: flex; flex-direction: column; padding: 1.1rem 1.2rem 1rem; border: 1px solid var(--line); border-radius: 18px; background: #fff; box-shadow: 0 4px 16px rgba(0,0,0,.05); }
+    .card .num { font: 600 .74rem 'IBM Plex Mono', monospace; letter-spacing: .14em; text-transform: uppercase; color: var(--orange); }
+    .card h3 { margin: .2rem 0 .3rem; font: 400 1.35rem/1.15 'DM Serif Display', Georgia, serif; }
+    .card p { margin: 0 0 .6rem; color: var(--muted); font-size: .93rem; line-height: 1.45; }
+    .card .links { display: flex; flex-wrap: wrap; gap: .2rem 1.2rem; margin-top: auto; }
+    .card .links a { display: inline-flex; align-items: center; min-height: 48px; color: var(--teal-s); font-weight: 700; }
+    .card.review { border-color: #c4b3ef; background: #faf8ff; }
+    .note { margin: 2.2rem 0 3rem; padding: 1rem 1.2rem; border-left: 5px solid var(--teal); border-radius: 0 14px 14px 0; background: #fff; }
+    .note a { color: var(--teal-s); font-weight: 700; }
+    a:focus-visible { outline: 3px solid var(--teal-s); outline-offset: 3px; border-radius: 4px; }
+  </style>
+</head>
+<body>
+  <header>
+    <a class="back" href="/gcsephy/">← GCSE Physics resources</a>
+    <p class="eyebrow">Year 11 Physics · AQA GCSE · Unit 1</p>
+    <h1>Atoms &amp; Nuclear Radiation<span>.</span></h1>
+    <p>The classwork book for the ten lessons, with one booklet for each lesson. Use it in lessons, then revise from it at home with the teaching slides and simulations.</p>
+  </header>
+  <main>
+    <h2>Lesson booklets<span>.</span></h2>
+    <div class="cards" id="cards"></div>
+    <p class="note"><strong>How to revise with it:</strong> read the “Learn it” pages, cover them and answer the “Cover the page” questions, check with the quick answers at the back, then go through the matching <a href="/gcsephy/decks/atoms-and-radiation/">teaching slides</a> and try the <a href="/simulations/atomic_models.html">Atomic Models</a> and <a href="/simulations/nuclear_decay.html">Nuclear Decay</a> simulations. The answer editions have the same page numbers as the workbooks, so you can check your work page by page.</p>
+  </main>
+  <script>
+    // [number, title, pages, what it covers]; the PDFs are built by build-pdfs.sh.
+    const BOOKLETS = [
+      [1, 'Inside the atom', 10, 'Protons, neutrons and electrons, the size of an atom, atomic and mass numbers'],
+      [2, 'Isotopes and ions', 10, 'Same element, different neutrons; atoms that lose outer electrons'],
+      [3, 'From plum pudding to the nucleus', 10, 'The plum pudding model, alpha scattering and the nuclear model'],
+      [4, 'Energy levels and the nucleus', 10, 'The Bohr model, absorbing and emitting EM radiation, protons and neutrons'],
+      [5, 'Radioactive decay', 11, 'Unstable nuclei, activity and count rate, alpha, beta, gamma and neutrons'],
+      [6, 'Nuclear equations', 10, 'Symbols for each radiation; balancing mass and atomic numbers'],
+      [7, 'Properties and uses of radiation', 10, 'Ionising power, range and penetration; choosing the right source'],
+      [8, 'Half-life and random decay', 12, 'Random but predictable; half-life from a decay curve; a virtual lab'],
+      [9, 'Half-life calculations', 11, 'Counting half-lives, half-life from data, net decline as a ratio (Higher)'],
+      [10, 'Contamination and irradiation', 11, 'Hazards inside and outside the body, precautions and peer review'],
+    ];
+    const base = 'pdf/' + encodeURIComponent('Atoms and Nuclear Radiation - Year 11 Workbook - ');
+    const file = (name, answers) => `${base}${encodeURIComponent(name + (answers ? ' (Answers)' : ''))}.pdf`;
+    const card = (label, title, text, name, review) => `<article class="card${review ? ' review' : ''}"><span class="num">${label}</span><h3>${title}</h3><p>${text}</p>
+      <div class="links"><a href="${file(name)}">Workbook PDF</a><a href="${file(name, true)}">Answers PDF</a></div></article>`;
+    document.getElementById('cards').innerHTML = BOOKLETS.map(([n, title, pages, text]) =>
+      card(`Lesson ${n} · ${pages} pages`, title, text, `Lesson ${String(n).padStart(2, '0')} - ${title}`)).join('') +
+      card('After Lesson 10 · 16 pages', 'Unit review', 'Mixed exam practice (42 marks), a fix-it log, all the key words, a progress tracker and extension pages for GCSE Physics: background radiation, medical uses, fission and fusion.', 'Unit review', true);
+  </script>
+</body>
+</html>
