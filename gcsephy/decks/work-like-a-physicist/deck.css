@@ -1,0 +1,108 @@
+/* Work Like a Physicist deck: diagram classes and the hero plot card from the
+   Year 9 companion site (gcsephy/year9phy/unit01/assets/styles.css). */
+
+.wf { font-family: Arial, Helvetica, sans-serif; }
+.wf text { fill: var(--ink); stroke: none; }
+.wf .ink { stroke: var(--ink); stroke-width: 3; fill: none; stroke-linecap: round; }
+.wf .ink.thin { stroke-width: 2; }
+.wf .axis { stroke: var(--ink); stroke-width: 4; fill: none; stroke-linecap: square; }
+.wf .grid { stroke: rgba(7, 22, 47, .1); stroke-width: 1.5; }
+.wf .floor { stroke: var(--ink); stroke-width: 4; }
+.wf .box { stroke: var(--ink); stroke-width: 3; }
+.wf .box.pop { filter: drop-shadow(7px 7px 0 var(--ink)); }
+.wf .f-accent { fill: var(--accent); }
+.wf .f-hi { fill: var(--hi); }
+.wf .f-cyan { fill: var(--cyan); }
+.wf .f-alt { fill: var(--alt); }
+.wf .f-card { fill: var(--card); }
+.wf .f-paper { fill: var(--paper); }
+.wf .f-muted { fill: #d4d8de; }
+.wf .ring { stroke: var(--ink); stroke-width: 3; }
+.wf .pt { fill: var(--hi); stroke: var(--ink); stroke-width: 4; }
+.wf .hit { fill: var(--hot); stroke: var(--ink); stroke-width: 3; }
+.wf .cross { stroke: var(--ink); stroke-width: 4; stroke-linecap: round; fill: none; }
+.wf .trend { stroke: var(--cyan); stroke-width: 6; fill: none; stroke-linecap: round; }
+.wf .trend.dash { stroke-width: 4; stroke-dasharray: 10 9; }
+.wf .zigzag { stroke: var(--hot); stroke-width: 5; fill: none; stroke-linejoin: round; }
+.wf .guide { stroke: var(--ink); stroke-width: 2.5; stroke-dasharray: 8 7; fill: none; }
+.wf .band { fill: var(--cyan); opacity: .25; stroke: var(--cyan); stroke-width: 2; }
+.wf .mean-line { stroke: var(--ink); stroke-width: 4; }
+.wf .bracket { stroke: var(--ink); stroke-width: 3; fill: none; }
+.wf .arrow { stroke: var(--ink); stroke-width: 3.5; fill: none; stroke-linecap: round; }
+.wf .head { fill: var(--ink); stroke: none; }
+.wf .arrow.thick { stroke-width: 5; }
+.wf .arrow.cyan { stroke: #1479a8; }
+.wf .head.cyan { fill: #1479a8; }
+.wf .arrow.hot { stroke: #c2410c; }
+.wf .head.hot { fill: #c2410c; }
+.wf .arrow.dash-arrow { stroke-dasharray: 7 7; }
+.wf .out-ring { fill: none; stroke: var(--hot); stroke-width: 5; }
+.wf .yes-mark { stroke: var(--right); stroke-width: 6; fill: none; stroke-linecap: round; stroke-linejoin: round; }
+.wf .no-mark { stroke: var(--wrong); stroke-width: 6; fill: none; stroke-linecap: round; }
+.wf .ruler { fill: #f3e2b3; stroke: var(--ink); stroke-width: 3; }
+.wf .pencil { fill: var(--alt); stroke: var(--ink); stroke-width: 3; stroke-linejoin: round; }
+.wf .lead { fill: var(--ink); }
+.wf .ball { fill: var(--hot); stroke: var(--ink); stroke-width: 3; }
+.wf .ghost { fill: none; stroke: var(--ink); stroke-width: 3; stroke-dasharray: 6 6; }
+.wf .ghost-box { fill: none; stroke: var(--ink); stroke-width: 3; stroke-dasharray: 7 6; }
+.wf .foam { fill: var(--ink); opacity: .35; }
+.wf .board { fill: #c8a46a; stroke: var(--ink); stroke-width: 3; stroke-linejoin: round; }
+.wf .wheel { fill: var(--ink); stroke: none; }
+.wf .tape { stroke: #1479a8; stroke-width: 6; stroke-linecap: round; }
+.wf .paper { fill: var(--card); stroke: var(--ink); stroke-width: 3; stroke-linejoin: round; }
+.wf .cut { stroke: #c2410c; stroke-width: 3; stroke-dasharray: 9 7; }
+.wf .fold { stroke: #1479a8; stroke-width: 3; stroke-dasharray: 3 6; stroke-linecap: round; }
+.wf .clip { fill: none; stroke: #6b7280; stroke-width: 5; }
+.wf .tag { fill: var(--hi); stroke: var(--ink); stroke-width: 3; }
+.wf .lab { font: 900 23px Arial, sans-serif; letter-spacing: .08em; }
+.wf .lab.small { font-size: 20px; }
+.wf .big { font: 900 36px var(--display); letter-spacing: -.02em; }
+.wf .big.small-big { font-size: 28px; }
+.wf .body-t { font: 700 23px Arial, sans-serif; }
+.wf .body-t.small { font-size: 20px; }
+.wf .tick-t { font: 600 20px Arial, sans-serif; fill: #4b5563; }
+.wf .axis-t { font: 800 23px Arial, sans-serif; }
+.wf .muted-t { fill: var(--muted); font-weight: 600; }
+.wf .cyan-t { fill: #1479a8; }
+.wf .hot-t { fill: #c2410c; }
+.wf .cut-t { fill: #c2410c; }
+
+/* Hero plot card (companion home page) */
+.machine { position: relative; display: grid; place-items: center; height: 640px; }
+.plot-card { width: 500px; padding: 26px; background: var(--paper); color: var(--ink); transform: rotate(2deg); box-shadow: 18px 18px 0 var(--cyan); }
+.plot-label { padding-bottom: 12px; border-bottom: 2px solid; font: 900 15px Arial, sans-serif; letter-spacing: .2em; }
+.plot-card p { margin: 20px 0 0; font: 900 28px/1.08 var(--display); text-transform: uppercase; letter-spacing: -.04em; }
+.chart { position: relative; height: 320px; margin: 22px 6px 0 22px; border-left: 4px solid var(--navy); border-bottom: 4px solid var(--navy); background-image: linear-gradient(rgba(7, 22, 47, .08) 1px, transparent 1px), linear-gradient(90deg, rgba(7, 22, 47, .08) 1px, transparent 1px); background-size: 48px 48px; overflow: hidden; }
+.chart .point { position: absolute; z-index: 2; width: 18px; height: 18px; border: 5px solid var(--navy); border-radius: 50%; background: var(--hi); transform: translate(-50%, 50%); }
+.chart .p1 { left: 10%; bottom: 12%; } .chart .p2 { left: 27%; bottom: 28%; } .chart .p3 { left: 45%; bottom: 43%; } .chart .p4 { left: 65%; bottom: 61%; } .chart .p5 { left: 86%; bottom: 80%; }
+.chart .point.outlier { left: 62%; bottom: 27%; width: 24px; height: 24px; background: var(--hot); }
+.chart .trend { position: absolute; left: -5%; bottom: 47%; width: 112%; height: 6px; background: var(--cyan); transform: rotate(-39deg); }
+.machine .sticky.one { left: -10px; top: 70px; transform: rotate(-8deg); }
+.machine .sticky.two { right: -20px; bottom: 110px; transform: rotate(7deg); }
+.machine .stamp { right: -10px; top: 20px; }
+
+/* Outlier decision route */
+.route { display: grid; grid-template-columns: repeat(4, 1fr); gap: 34px; }
+.route > div { position: relative; padding: 18px 20px; border: 2px solid var(--ink); background: var(--card); font-size: 24px; font-weight: 700; line-height: 1.25; box-shadow: 6px 6px 0 rgba(7, 22, 47, .12); }
+.route > div b { display: block; margin-bottom: 6px; font: 900 15px Arial, sans-serif; letter-spacing: .16em; text-transform: uppercase; color: var(--muted); }
+.route > div:not(:last-child)::after { content: ""; position: absolute; right: -30px; top: 50%; border-block: 12px solid transparent; border-left: 16px solid var(--ink); transform: translateY(-50%); }
+.route > div.go { background: var(--accent); }
+.outcomes { display: grid; grid-template-columns: 1fr 1fr; gap: 26px; }
+
+/* Evaluation chain */
+.chain { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 40px; }
+.chain .card { position: relative; }
+.chain .card:not(:last-child)::after { content: ""; position: absolute; right: -36px; top: 50%; border-block: 13px solid transparent; border-left: 18px solid var(--ink); transform: translateY(-50%); }
+.chain .card p { color: var(--ink); font-weight: 700; }
+
+/* Project path */
+.path { display: grid; grid-template-columns: repeat(7, 1fr); gap: 12px; }
+.path > div { display: flex; flex-direction: column; align-items: center; gap: 12px; text-align: center; font-size: 21px; font-weight: 800; line-height: 1.15; }
+.path > div i { display: grid; place-items: center; width: 64px; height: 64px; border: 2px solid var(--ink); border-radius: 50%; background: var(--accent); font: 900 22px Arial, sans-serif; font-style: normal; }
+.path > div.gate i { background: var(--navy); color: var(--hi); }
+
+/* Fill-in frames */
+.frame { padding: 18px 24px; border: 2px dashed var(--ink); background: var(--card); font-size: 25px; line-height: 1.55; }
+.frame .blank { display: inline-block; min-width: 120px; border-bottom: 3px solid var(--ink); }
+.frame .blank.s { min-width: 70px; }
+.frame b { font-weight: 900; }
