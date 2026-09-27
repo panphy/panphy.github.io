@@ -72,9 +72,10 @@
       s += t(X(1.21), 24, 'TRUE VALUE ≈ 1.21 s', 'lab small cyan-t');
       sets.forEach(([name, vals], i) => {
         const y = 80 + i * 82;
-        s += t(40, y + 8, `SET ${name}`, 'lab', 'start');
+        const setClass = `set-${name.toLowerCase()}`;
+        s += t(40, y + 8, `SET ${name}`, `lab ${setClass}-t`, 'start');
         s += line(170, y, 860, y, 'grid');
-        vals.forEach((v, k) => { s += dot(X(v), y + (vals.indexOf(v) !== k ? 14 : 0), 12); });
+        vals.forEach((v, k) => { s += dot(X(v), y + (vals.indexOf(v) !== k ? 14 : 0), 12, `pt ${setClass}`); });
       });
       s += `<path class="axis" d="M170 300H866"/>`;
       for (let v = 0.9; v <= 1.5001; v += 0.1) s += line(X(v), 300, X(v), 311, 'ink') + t(X(v), 338, v.toFixed(1), 'tick-t');
@@ -104,8 +105,8 @@
       let s = line(240, 40, 240, 212, 'trend dash') + t(240, 28, 'TRUE VALUE', 'lab small cyan-t');
       s += pts.map(([dx, y]) => dot(240 + dx, y, 12)).join('');
       s += `<path class="axis" d="M30 212H450"/>`;
-      s += arrow(210, 250, 110, 250, 'arrow hot') + arrow(270, 250, 370, 250, 'arrow hot');
-      s += t(240, 257, 'BOTH WAYS', 'lab small', 'middle');
+      s += arrow(155, 242, 65, 242, 'arrow hot') + arrow(325, 242, 415, 242, 'arrow hot');
+      s += t(240, 272, 'BOTH WAYS', 'lab small');
       return svg(480, 280, s, 'Random error: readings scattered on both sides of the true value');
     },
 
@@ -115,7 +116,7 @@
       let s = line(160, 40, 160, 212, 'trend dash') + t(160, 28, 'TRUE VALUE', 'lab small cyan-t');
       s += pts.map(([dx, y]) => dot(330 + dx, y, 12)).join('');
       s += `<path class="axis" d="M30 212H450"/>`;
-      s += arrow(170, 250, 320, 250, 'arrow hot') + t(245, 272, 'SAME SHIFT EVERY TIME', 'lab small');
+      s += arrow(170, 242, 320, 242, 'arrow hot') + t(245, 272, 'SAME SHIFT EVERY TIME', 'lab small');
       return svg(480, 280, s, 'Systematic error: readings grouped together but all shifted the same way from the true value');
     },
 
@@ -123,7 +124,6 @@
     rulers: () => {
       const X = cm => 90 + cm * 100;
       let s = `<path class="pencil" d="M${X(0)} 56H${X(6.6)}L${X(7.3)} 78L${X(6.6)} 100H${X(0)}Z"/><path class="ink" d="M${X(6.6)} 56V100"/><path class="lead" d="M${X(7.05)} 70L${X(7.3)} 78L${X(7.05)} 86Z"/>`;
-      s += line(X(7.3), 40, X(7.3), 318, 'trend dash');
       s += rect(X(0) - 20, 128, 860, 58, 'ruler');
       for (let c = 0; c <= 8; c++) s += line(X(c), 128, X(c), 156, 'ink') + t(X(c), 178, c, 'tick-t');
       s += rect(X(0) - 20, 250, 860, 58, 'ruler');
@@ -131,6 +131,7 @@
       for (let c = 0; c <= 8; c++) s += t(X(c), 300, c, 'tick-t');
       s += t(70, 222, 'RULER WITH 1 cm MARKS  →  about 7 cm', 'lab', 'start');
       s += t(70, 344, 'RULER WITH 1 mm MARKS  →  7.3 cm', 'lab', 'start');
+      s += line(X(7.3), 40, X(7.3), 318, 'trend dash');
       return svg(980, 360, s, 'The same pencil against a ruler marked in centimetres, reading about 7 cm, and a ruler marked in millimetres, reading 7.3 cm');
     },
 
@@ -199,7 +200,7 @@
       s += dot(430, Y(50) - 22, 22, 'ball') + t(470, Y(50) - 30, 'release from 50 cm', 'body-t', 'start') + t(470, Y(50) - 2, 'no push', 'body-t muted-t', 'start');
       s += arrow(430, Y(50) + 8, 430, 508, 'arrow dash-arrow');
       s += `<circle cx="490" cy="${f(Y(24) - 22)}" r="22" class="ghost"/>`;
-      s += `<path class="arrow" d="M446 506 Q470 ${f(Y(24) + 30)} 482 ${f(Y(24) + 6)}"/>`;
+      s += arrow(490, 508, 490, Y(24) + 6, 'arrow hot');
       s += line(310, Y(24), 470, Y(24), 'trend dash');
       s += t(530, Y(24) - 50, 'bounce height', 'lab', 'start') + t(530, Y(24) - 22, 'read at the ball', 'body-t muted-t', 'start') + t(530, Y(24) + 4, 'bottom, eye level', 'body-t muted-t', 'start');
       s += t(60, 40, 'metre ruler: 0 at the material surface', 'body-t', 'start');
@@ -319,16 +320,24 @@
       s += `<rect x="146" y="430" width="28" height="56" rx="12" class="clip"/>`;
       s += t(186, 520, 'paperclip', 'body-t small', 'start');
       s += t(290, 110, 'cut', 'body-t small cut-t', 'start') + t(290, 250, 'fold wings', 'body-t small', 'start') + t(290, 276, 'opposite ways', 'body-t small', 'start');
-      // Flight
-      const hx = 590;
-      s += `<path class="paper" d="M${hx - 12} 120H${hx + 12}V200H${hx - 12}Z"/><path class="paper" d="M${hx} 120L${hx - 88} 76L${hx - 92} 92L${hx - 10} 132Z"/><path class="paper" d="M${hx} 120L${hx + 88} 76L${hx + 92} 92L${hx + 10} 132Z"/>`;
-      s += `<rect x="${hx - 9}" y="188" width="18" height="30" rx="8" class="clip"/>`;
-      s += `<path class="arrow" d="M${hx - 70} 52 A90 26 0 0 1 ${hx + 60} 50"/><path class="head" d="M${hx + 76} 56L${hx + 54} 40L${hx + 56} 62Z"/>`;
-      s += line(hx, 232, hx, 520, 'trend dash') + line(430, 530, 890, 530, 'floor');
-      s += arrow(760, 300, 760, 108, 'arrow') + arrow(760, 340, 760, 526, 'arrow') + t(772, 316, 'drop height', 'body-t', 'start') + t(772, 342, 'same every time', 'body-t muted-t', 'start');
-      s += `<circle cx="470" cy="380" r="44" class="f-card box"/><rect x="460" y="322" width="20" height="14" class="f-muted box"/>` + t(470, 388, '1.50 s', 'lab small');
-      s += t(470, 452, 'time: release', 'body-t small') + t(470, 476, 'to landing', 'body-t small');
-      return svg(900, 560, s, 'Paper helicopter template with wing length L, cut and fold lines and a paperclip; the helicopter spins as it falls from a fixed drop height while the fall is timed');
+      // Folded paper model in perspective: broad, shaded blades and a visible folded body.
+      s += t(660, 30, 'FOLDED MODEL', 'lab');
+      s += `<ellipse cx="650" cy="520" rx="100" ry="16" class="heli-shadow"/>`;
+      s += `<path class="heli-wing-back" d="M642 142L735 58L800 92L690 177Z"/>`;
+      s += `<path class="heli-wing-fold" d="M735 58L800 92L792 109L690 177Z"/>`;
+      s += `<path class="heli-wing-front" d="M651 143L539 80L488 111L612 190Z"/>`;
+      s += `<path class="heli-wing-fold" d="M539 80L488 111L502 129L612 190Z"/>`;
+      s += `<path class="heli-body-side" d="M665 160L681 172V343L665 355Z"/>`;
+      s += `<path class="heli-body-front" d="M619 169L665 160V355L619 343Z"/>`;
+      s += `<path class="heli-body-fold" d="M619 169L642 160L681 172L665 186Z"/>`;
+      s += `<path class="heli-clip" d="M634 330V387Q634 405 651 405Q668 405 668 387V345Q668 334 659 334Q650 334 650 345V386"/>`;
+      s += `<path class="arrow" d="M570 58Q650 19 733 45"/><path class="head" d="M747 52L728 35L732 57Z"/>`;
+      s += `<circle cx="494" cy="419" r="39" class="f-card box"/><rect x="484" y="369" width="20" height="13" class="f-muted box"/>`;
+      s += t(494, 427, '1.50 s', 'lab small') + t(494, 480, 'time the fall', 'body-t small');
+      s += t(650, 439, 'paperclip adds weight', 'body-t small');
+      s += line(820, 184, 820, 510, 'trend dash') + line(455, 530, 880, 530, 'floor');
+      s += t(805, 482, 'same drop height', 'body-t small', 'end');
+      return svg(900, 560, s, 'Paper helicopter template with wing length L and cut and fold lines; a three-dimensional folded paper model with two broad blades, weighted body and paperclip, falling from a fixed height');
     },
 
     // Wing length against fall time, with a reading between points.
