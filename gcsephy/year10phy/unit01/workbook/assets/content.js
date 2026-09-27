@@ -37,19 +37,32 @@
     caption: "The same circuit as a circuit diagram.",
   });
 
+  // A piece of metal wire: three rows of fixed positive ions, all inside the wire,
+  // with free electrons in the gaps between them. With `zigzag`, one electron's path
+  // changes direction each time it touches an ion (a collision).
   function metal(zigzag) {
+    const R = 10;
+    const ion = (r, c) => [26 + c * 40 + (r % 2) * 20, 30 + r * 36];
     let ions = "";
-    for (let r = 0; r < 3; r += 1) for (let c = 0; c < 8; c += 1) {
-      const x = 30 + c * 34 + (r % 2) * 17, y = 32 + r * 34;
-      ions += `<circle cx="${x}" cy="${y}" r="11" fill="#ffe4d4" stroke="#b44a12" stroke-width="1.6"/><text x="${x}" y="${y + 5}" text-anchor="middle" font-family="Arial" font-weight="900" font-size="14" fill="#b44a12">+</text>`;
+    for (let r = 0; r < 3; r += 1) for (let c = 0; c < 7; c += 1) {
+      const [x, y] = ion(r, c);
+      ions += `<circle cx="${x}" cy="${y}" r="${R}" fill="#ffe4d4" stroke="#b44a12" stroke-width="1.6"/><text x="${x}" y="${y + 5}" text-anchor="middle" font-family="Arial" font-weight="900" font-size="14" fill="#b44a12">+</text>`;
     }
-    const electrons = [[47, 49], [115, 16], [150, 82], [190, 50], [230, 16], [258, 84], [82, 84], [290, 50]].map(([x, y]) => `<circle cx="${x}" cy="${y}" r="4.5" fill="#1479a8"/>`).join("");
-    const path = zigzag
-      ? '<path d="M10 58 L47 49 L64 70 L100 66 L115 88 L150 82 L168 60 L190 50 L208 70 L246 66 L258 84 L300 78" fill="none" stroke="#1479a8" stroke-width="2" stroke-dasharray="4 3"/>'
-      : '<path d="M20 124 H290" stroke="#1479a8" stroke-width="2.5"/><path d="M290 124 l-9 -5 v10 Z" fill="#1479a8"/><text x="155" y="140" text-anchor="middle" font-family="Arial" font-weight="700" font-size="11" fill="#1479a8">electrons drift this way</text>';
-    return `<figure class="circuit-figure pic"><svg viewBox="0 0 310 ${zigzag ? 110 : 146}" role="img" aria-label="Positive metal ions in a regular pattern with free electrons moving between them">
-      <rect x="4" y="12" width="302" height="${zigzag ? 90 : 90}" rx="6" fill="#f5f6f2" stroke="#0a1326" stroke-width="2"/>${ions}${electrons}${path}</svg>
-      <figcaption>${zigzag ? "A free electron bumps into ions as it moves: this is resistance." : "Inside a metal wire: fixed positive ions (orange) and free electrons (blue)."}</figcaption></figure>`;
+    const dot = ([x, y]) => `<circle cx="${x}" cy="${y}" r="4.5" fill="#1479a8"/>`;
+    let extra;
+    if (zigzag) {
+      // Each corner is the top or bottom edge of an ion: [row, column, side].
+      const hits = [[0, 0, 1], [1, 0, -1], [0, 1, 1], [2, 1, -1], [1, 1, 1], [2, 2, -1], [1, 2, 1], [2, 3, -1], [0, 3, 1], [1, 3, -1], [0, 4, 1], [1, 4, -1], [0, 5, 1], [2, 5, -1], [1, 5, 1], [2, 6, -1], [1, 6, 1]];
+      const pts = [[8, 48], ...hits.map(([r, c, s]) => { const [x, y] = ion(r, c); return [x, y + s * (R + 1)]; }), [302, 84]];
+      extra = `<polyline points="${pts.map((p) => p.join(",")).join(" ")}" fill="none" stroke="#1479a8" stroke-width="2" stroke-dasharray="4 3" stroke-linejoin="round"/>` +
+        [[46, 90], [166, 42], [226, 78]].map(dot).join("") + dot([294, 83]);
+    } else {
+      extra = [[46, 42], [106, 54], [86, 90], [146, 78], [166, 42], [206, 90], [226, 78], [266, 54]].map(dot).join("") +
+        '<path d="M20 140 H290" stroke="#1479a8" stroke-width="2.5"/><path d="M292 140 l-10 -5.5 v11 Z" fill="#1479a8"/><text x="155" y="157" text-anchor="middle" font-family="Arial" font-weight="700" font-size="12" fill="#1479a8">free electrons drift this way</text>';
+    }
+    return `<figure class="circuit-figure pic"><svg viewBox="0 0 310 ${zigzag ? 128 : 162}" role="img" aria-label="${zigzag ? "A free electron zigzags through the wire, changing direction each time it hits a fixed positive ion" : "Three rows of fixed positive ions inside a metal wire, with free electrons in the gaps between them"}">
+      <rect x="4" y="10" width="302" height="112" rx="6" fill="#f5f6f2" stroke="#0a1326" stroke-width="2"/>${ions}${extra}</svg>
+      <figcaption>${zigzag ? "A free electron collides with the ions as it moves through the wire: this is resistance." : "Inside a metal wire: fixed positive ions (orange) and free electrons (blue)."}</figcaption></figure>`;
   }
 
   const threeAmmeters = D.circuit({
@@ -93,16 +106,22 @@
   const seriesLamps = D.circuit({ w: 300, h: 170, wires: ["M40 40 H260 V130 H40 Z"], parts: [["cell", 150, 40, "h"], ["lamp", 110, 130, "h"], ["lamp", 190, 130, "h"]], caption: "Series: one loop." });
   const parallelLamps = D.circuit({ w: 300, h: 190, wires: ["M40 40 H260 V120 H40 Z", "M90 120 V165 H210 V120"], parts: [["cell", 150, 40, "h"], ["lamp", 150, 120, "h"], ["lamp", 150, 165, "h"]], dots: [[90, 120], [210, 120]], caption: "Parallel: two branches." });
 
+  // Resistance-wire practical. The test wire (copper) is taped along a metre ruler. The
+  // circuit joins it at the fixed clip (0 cm) and the sliding clip, so only the length L
+  // between the clips is in the circuit; the voltmeter is connected across that length.
   const wireCircuit = D.circuit({
-    w: 420, h: 250,
-    wires: ["M40 40 H380 V170 H40 Z", "M110 170 V222 H300 V170"],
-    parts: [["battery", 130, 40, "h", "power supply (about 2 V)"], ["switchOpen", 290, 40, "h", "switch"], ["ammeter", 40, 105, "v"], ["voltmeter", 205, 222, "h"]],
-    dots: [[110, 170], [300, 170]],
-    notes: [[205, 116, "length L"], [103, 194, "fixed clip", "end"], [307, 194, "sliding clip", "start"], [205, 162, "test wire"]],
-    extra: '<rect class="ruler" x="92" y="128" width="236" height="14"/>' +
-      Array.from({ length: 11 }, (_, i) => `<line class="ruler-tick" x1="${110 + i * 19}" y1="128" x2="${110 + i * 19}" y2="${i % 5 === 0 ? 138 : 134}"/>`).join("") +
-      '<line class="dim" x1="112" y1="122" x2="298" y2="122"/><path class="fill" d="M110 122 L118 118 L118 126 Z"/><path class="fill" d="M300 122 L292 118 L292 126 Z"/>',
-    caption: "The wire is taped along a metre ruler. The voltmeter is connected across the wire between the two clips.",
+    w: 420, h: 262,
+    wires: ["M40 40 H380 V150 H300 V168", "M40 40 V150 H110 V168", "M110 150 V110 H300 V150"],
+    parts: [["battery", 150, 40, "h", "power supply (about 2 V)"], ["switchOpen", 290, 40, "h", "switch"], ["ammeter", 40, 95, "v"], ["voltmeter", 205, 110, "h"]],
+    dots: [[110, 150], [300, 150]],
+    notes: [[205, 222, "length L"], [110, 246, "fixed clip (0 cm)"], [300, 246, "sliding clip"], [362, 176, "test", "start"], [362, 190, "wire", "start"]],
+    extra: '<rect class="ruler" x="84" y="176" width="272" height="16"/>' +
+      Array.from({ length: 13 }, (_, i) => `<line class="ruler-tick" x1="${110 + i * 19}" y1="176" x2="${110 + i * 19}" y2="${i % 5 === 0 ? 186 : 182}"/>`).join("") +
+      '<line x1="88" y1="172" x2="352" y2="172" stroke="#b44a12" stroke-width="3.5"/>' +
+      '<path class="fill" d="M104 165 H116 L110 172 Z"/><path class="fill" d="M294 165 H306 L300 172 Z"/>' +
+      '<line class="dim" x1="110" y1="196" x2="110" y2="212"/><line class="dim" x1="300" y1="196" x2="300" y2="212"/>' +
+      '<line class="dim" x1="112" y1="205" x2="298" y2="205"/><path class="fill" d="M110 205 L118 201 L118 209 Z"/><path class="fill" d="M300 205 L292 201 L292 209 Z"/>',
+    caption: "The test wire is taped along a metre ruler. Only the length L between the clips is in the circuit, and the voltmeter is connected across it.",
   });
 
   const rpSeries = D.circuit({
@@ -207,7 +226,7 @@
       learn: [
         { t: "split", cls: "wide-fig", left: [{ t: "fig", h: metal(false) }], right: [
           { t: "p", h: "Metals contain <strong>free electrons</strong>: tiny particles with a negative charge that can move between the atoms. The wires are full of them <em>before</em> you switch on." },
-          { t: "p", h: "The cell pushes on all of them at once, so the whole loop starts moving together, just like the bike chain. The lamp lights straight away, even though each electron only drifts a few millimetres per second." },
+          { t: "p", h: "The cell pushes on all of them at once, so the whole loop starts moving together, just like the bike chain. The lamp lights straight away, even though each electron only drifts along at less than a millimetre per second." },
         ] },
         { t: "p", h: "Charge is measured in <strong>coulombs (C)</strong>. One electron has a tiny charge: it takes about 6 × 10<sup>18</sup> (six billion billion) electrons to make 1 C." },
         { t: "sub", h: "Current is a rate" },
@@ -298,7 +317,7 @@
       ] },
       exam: [
         { tip: "Explaining a p.d. needs two ideas: energy (joules) and per coulomb of charge.", p: "A 9.0 V battery moves 20 C of charge around a circuit. Calculate the energy transferred by the battery.", marks: 2, frame: [["Equation"], ["Substitute"], ["Answer", "unit:"]], frameA: ["E = Q V", "E = 20 × 9.0", "180 J"] },
-        { p: "A voltmeter across one resistor in this circuit reads 3.0 V. Explain what this reading means.", marks: 2, lines: 2, a: "3.0 J of energy is transferred (1) to the resistor for every coulomb of charge passing through it (1)." },
+        { p: "A voltmeter connected across a resistor reads 3.0 V. Explain what this reading means.", marks: 2, lines: 2, a: "3.0 J of energy is transferred (1) to the resistor for every coulomb of charge passing through it (1)." },
       ],
       summary: ["p.d. is the <strong>energy transferred per coulomb</strong>: 1 V = 1 J/C.", "A voltmeter goes <strong>across</strong> a component (in parallel).", "<strong>E = Q V</strong>", "Charge is not used up; energy is transferred.", "In a series loop, the component p.d.s add up to the supply p.d."],
       recall: [["What is potential difference?", "Energy transferred per coulomb of charge."], ["How is a voltmeter connected?", "In parallel, across the component."], ["Write the equation linking energy, charge and p.d.", "E = Q V"], ["A 6 V battery; one of two series lamps has 2 V across it. What does the other have?", "4 V"]],
@@ -342,7 +361,7 @@
         { t: "q", type: "Supported", p: "A current of 0.20 A flows through a 15 Ω resistor. Calculate the p.d. across it.", frame: [["Equation"], ["Substitute"], ["Answer", "unit:"]], frameA: ["V = I R", "V = 0.20 × 15", "3.0 V"] },
         { t: "q", type: "On your own", p: "A 220 Ω resistor has 5.5 V across it. Calculate the current in mA.", lines: 2, a: "I = V ÷ R = 5.5 ÷ 220 = 0.025 A = 25 mA" },
         { t: "q", p: "A student measures a component. Complete the table, plot the points and draw a line of best fit.", table: { head: ["p.d. / V", "current / A", "V ÷ I / Ω"], rows: [["1.0", "0.05", null], ["2.0", "0.10", null], ["3.0", "0.15", null], ["4.0", "0.20", null]], ans: [[null, null, "20"], [null, null, "20"], [null, null, "20"], [null, null, "20"]] },
-          graph: { w: 60, h: 50, x: [1, 1], y: [0.05, 1], xLabel: "p.d. / V", yLabel: "current / A", points: [[1, 0.05], [2, 0.1], [3, 0.15], [4, 0.2]], fit: [[0, 0], [5.5, 0.275]] },
+          graph: { w: 60, h: 50, x: [1, 1], y: [0.05, 1], xLabel: "p.d. / V", yLabel: "current / A", points: [[1, 0.05], [2, 0.1], [3, 0.15], [4, 0.2]], fit: [[0, 0], [5, 0.25]] },
           after: [{ t: "p", h: "Is the component an ohmic conductor? Use the table and the graph." }], lines: 2, a: "Yes: V ÷ I is constant (20 Ω) and the graph is a straight line through the origin, so current is directly proportional to p.d." },
         { t: "q", p: "Explain why a resistor only has a constant resistance if its temperature stays the same.", lines: 3, starter: "If the resistor gets hotter, the ions …", a: "If it heats up, the ions vibrate more, so the electrons collide with them more often and the resistance increases. So R is only constant at constant temperature." },
       ],
@@ -513,7 +532,7 @@
       ],
       learnTitle: "Reading component fingerprints",
       learn: [
-        { t: "split", left: [{ t: "p", h: "On an <strong>I–V graph</strong>, current (I) goes up the side and p.d. (V) goes along the bottom." }, { t: "p", h: "Negative values mean the component is connected <strong>the other way round</strong>, so the current flows the other way." }, { t: "key", h: "To find the resistance at any point, read V and I and use <strong>R = V ÷ I</strong>. Do not use the gradient." }], right: [{ t: "fig", cls: "fig-small", h: D.graph({ sketch: true, w: 300, h: 220, x: [-1, 1, 1], y: [-1, 1, 1], xLabel: "p.d. / V", yLabel: "current / A", series: [{ fn: (x) => 0.8 * x, from: -1, to: 1 }], notes: [[0.12, 0.85, "forward: + V, + I"], [-0.95, -0.55, "reversed:"], [-0.95, -0.7, "− V, − I"]] }) }] },
+        { t: "split", left: [{ t: "p", h: "On an <strong>I–V graph</strong>, current (I) goes up the side and p.d. (V) goes along the bottom." }, { t: "p", h: "Negative values mean the component is connected <strong>the other way round</strong>, so the current flows the other way." }, { t: "key", h: "To find the resistance at any point, read V and I and use <strong>R = V ÷ I</strong>. Do not use the gradient." }], right: [{ t: "fig", cls: "fig-small", h: D.graph({ sketch: true, w: 300, h: 220, x: [-1, 1, 1], y: [-1, 1, 1], xLabel: "p.d. / V", yLabel: "current / A", series: [{ fn: (x) => 0.8 * x, from: -1, to: 1 }], notes: [[0.08, 0.74, "forward:"], [0.08, 0.59, "+ V, + I"], [-0.5, -0.74, "reversed:"], [-0.5, -0.89, "− V, − I"]] }) }] },
         { t: "figs", cols: 3, items: [
           D.ivSketch("resistor", "<strong>Fixed resistor</strong>: straight line through the origin. Constant resistance (at constant temperature)."),
           D.ivSketch("lamp", "<strong>Filament lamp</strong>: gets less steep. Resistance increases as the filament heats up."),
@@ -566,7 +585,7 @@
       lab: { title: "Results", aside: "Answer edition: example results. Your values will differ.", blocks: [
         { t: "lab", blocks: [
           { t: "q", p: "Aim for these p.d.s. Record the actual p.d. if it is slightly different.", table: { head: ["p.d. / V", "Resistor: current / A", "Lamp: current / A"], rows: ["−6.0", "−4.0", "−2.0", "−1.0", "0", "1.0", "2.0", "4.0", "6.0"].map((v) => [v, null, null]), ans: [[null, "−0.30", "−0.30"], [null, "−0.20", "−0.27"], [null, "−0.10", "−0.20"], [null, "−0.05", "−0.12"], [null, "0", "0"], [null, "0.05", "0.12"], [null, "0.10", "0.20"], [null, "0.20", "0.27"], [null, "0.30", "0.30"]] } },
-          { t: "q", p: "Plot both components on the same axes. Use a different symbol for each, and add a key.", graph: { w: 120, h: 80, origin: "centre", x: [1, 1], y: [0.1, 1], xLabel: "p.d. / V", yLabel: "current / A", points: [[-6, -0.3], [-4, -0.27], [-2, -0.2], [-1, -0.12], [1, 0.12], [2, 0.2], [4, 0.27], [6, 0.3]], fit: lampFn, fitRange: [-6, 6] } },
+          { t: "q", p: "Plot both components on the same axes. Use a different symbol for each, and add a key.", graph: { w: 120, h: 80, origin: "centre", x: [1, 1], y: [0.1, 1], xLabel: "p.d. / V", yLabel: "current / A", points: [[-6, -0.3], [-4, -0.27], [-2, -0.2], [-1, -0.12], [1, 0.12], [2, 0.2], [4, 0.27], [6, 0.3]], fit: lampFn, fitRange: [-6, 6], points2: [[-6, -0.3], [-4, -0.2], [-2, -0.1], [-1, -0.05], [1, 0.05], [2, 0.1], [4, 0.2], [6, 0.3]], fit2: [[-6, -0.3], [6, 0.3]] }, a: "Crosses and curve: filament lamp. Circles and dashed straight line: fixed resistor." },
           { t: "q", p: "Diode (with protective resistor).", table: { head: ["p.d. / V", "−1.0", "0", "0.2", "0.4", "0.5", "0.6", "0.65", "0.7"], rows: [["current / mA", null, null, null, null, null, null, null, null]], ans: [[null, "0", "0", "0", "0", "0.5", "3.0", "8.0", "20"]] }, after: [{ t: "p", h: "Sketch the shape of the diode graph from your readings." }], box: 30, grid: true, a: D.ivSketch("diode") },
         ] },
       ] },
@@ -651,7 +670,8 @@
         { t: "eq", eq: "E = P t", words: "energy transferred = power × time", units: "E in joules (J) · P in watts (W) · t in seconds (s)", re: "Convert kW → W (× 1000) and minutes or hours → seconds first." },
         { t: "worked", q: "A 2.0 kW kettle is on for 3.0 minutes. Calculate the energy transferred.", steps: [["Know", "P = 2000 W, t = 180 s"], ["Equation", "E = P t"], ["Substitute", "E = 2000 × 180"], ["Answer", "E = 360 000 J"]],
           yt: { q: "A 1.2 kW hairdryer is used for 10 minutes. Calculate the energy transferred.", steps: [["Know", "P = 1200 W, t = 600 s"], ["Equation", "E = P t"], ["Substitute", "E = 1200 × 600"], ["Answer", "E = 720 000 J"]] } },
-        { t: "split", left: [{ t: "eq", eq: "P = V I", words: "power = p.d. × current", units: "P in W · V in V · I in A" }], right: [{ t: "eq", eq: "P = I² R", words: "power = current² × resistance", units: "P in W · I in A · R in Ω" }] },
+        { t: "eq", eq: "P = V I", words: "power = p.d. × current", units: "P in watts (W) · V in volts (V) · I in amperes (A)" },
+        { t: "eq", eq: "P = I² R", words: "power = current² × resistance", units: "P in watts (W) · I in amperes (A) · R in ohms (Ω)" },
         { t: "worked", q: "A heater on the 230 V mains draws a current of 4.0 A. Calculate its power.", steps: [["Equation", "P = V I"], ["Substitute", "P = 230 × 4.0"], ["Answer", "P = 920 W"]],
           yt: { q: "A current of 3.0 A flows through a 20 Ω resistor. Calculate the power.", steps: [["Equation", "P = I² R"], ["Substitute", "P = 3.0² × 20 = 9.0 × 20"], ["Answer", "P = 180 W"]] } },
         { t: "key", h: "In P = I² R, <strong>square the current first</strong>. Doubling the current makes the heating <strong>four times</strong> bigger: that is why cables carrying big currents get hot." },
@@ -692,7 +712,7 @@
         { t: "sub", h: "Direct and alternating p.d." },
         { t: "figs", cols: 2, cls: "fig-small", items: [
           D.graph({ sketch: true, w: 300, h: 190, x: [0, 1, 1], y: [-1, 1, 1], xLabel: "time", yLabel: "p.d.", series: [{ fn: () => 0.6, from: 0, to: 1 }], caption: "<strong>dc</strong> from a cell or battery: the p.d. stays in one direction, so the current flows one way." }),
-          D.graph({ sketch: true, w: 300, h: 190, x: [0, 1, 1], y: [-1, 1, 1], xLabel: "time", yLabel: "p.d.", series: [{ fn: (x) => 0.75 * Math.sin(4 * Math.PI * x), from: 0, to: 1 }], caption: "<strong>ac</strong> from the mains: the p.d. keeps reversing, so the current keeps changing direction." }),
+          D.graph({ sketch: true, w: 300, h: 190, x: [0, 1, 1], y: [-1, 1, 1], xLabel: "time", xLabelAbove: true, yLabel: "p.d.", series: [{ fn: (x) => 0.75 * Math.sin(4 * Math.PI * x), from: 0, to: 1 }], caption: "<strong>ac</strong> from the mains: the p.d. keeps reversing, so the current keeps changing direction." }),
         ] },
         { t: "key", h: "<strong>UK mains:</strong> alternating current (ac), about <strong>230 V</strong>, frequency <strong>50 Hz</strong> (50 complete cycles every second)." },
         { t: "sub", h: "Inside a plug cable" },
@@ -707,7 +727,7 @@
       ],
       try: [
         { t: "q", p: "Which graph shows ac and which shows dc? Circle one for each.", options: { cols: 2, items: [
-          { label: "Graph A", fig: D.graph({ sketch: true, w: 260, h: 150, x: [0, 1, 1], y: [-1, 1, 1], xLabel: "time", yLabel: "p.d.", series: [{ fn: (x) => 0.7 * Math.sin(6 * Math.PI * x), from: 0, to: 1 }] }), choice: ["ac", "dc"], c: 0 },
+          { label: "Graph A", fig: D.graph({ sketch: true, w: 260, h: 150, x: [0, 1, 1], y: [-1, 1, 1], xLabel: "time", xLabelAbove: true, yLabel: "p.d.", series: [{ fn: (x) => 0.7 * Math.sin(6 * Math.PI * x), from: 0, to: 1 }] }), choice: ["ac", "dc"], c: 0 },
           { label: "Graph B", fig: D.graph({ sketch: true, w: 260, h: 150, x: [0, 1, 1], y: [-1, 1, 1], xLabel: "time", yLabel: "p.d.", series: [{ fn: () => 0.45, from: 0, to: 1 }] }), choice: ["ac", "dc"], c: 1 },
         ] } },
         { t: "q", p: "Complete the sentences.", fill: "UK mains electricity is [[alternating]] with a p.d. of about [[230|16]] V and a frequency of [[50|14]] Hz. The [[live]] wire is brown, the [[neutral]] wire is blue and the [[earth]] wire is green and yellow.", bank: ["alternating", "direct", "230", "50", "live", "neutral", "earth"] },
@@ -807,12 +827,5 @@
     ["Voltmeter", "Measures p.d. Connected in parallel, across a component.", 3],
   ];
 
-  const parts = [
-    { n: 1, title: "Charge, energy and resistance", lessons: [1, 2, 3, 4], blurb: "From your first circuit to V = I R: circuits and symbols, current, potential difference and resistance." },
-    { n: 2, title: "Measuring and combining", lessons: [5, 6, 7], blurb: "The resistance practical, and the rules for series and parallel circuits." },
-    { n: 3, title: "Component behaviour", lessons: [8, 9, 10], blurb: "I–V graphs, the I–V practical, and sensors: thermistors and LDRs." },
-    { n: 4, title: "Power, mains and the grid", lessons: [11, 12], blurb: "Power and energy, mains safety and the National Grid, then the unit review.", review: true },
-  ];
-
-  window.UNIT = { lessons, equations, review, staticExt, glossary, parts };
+  window.UNIT = { lessons, equations, review, staticExt, glossary };
 })();

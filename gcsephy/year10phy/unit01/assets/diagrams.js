@@ -256,7 +256,8 @@
     if (sketch) {
       out += arrowHead(X(xmax) + 6, y0, 1, 0, 9, 4.5);
       out += arrowHead(x0, Y(ymax) - 6, 0, -1, 9, 4.5);
-      out += `<text class="axis-label" x="${X(xmax)}" y="${y0 + 18}" text-anchor="end">${spec.xLabel || ""}</text>`;
+      // xLabelAbove keeps the label clear of a curve that dips below the axis at the right-hand end.
+      out += `<text class="axis-label" x="${X(xmax)}" y="${spec.xLabelAbove ? y0 - 8 : y0 + 18}" text-anchor="end">${spec.xLabel || ""}</text>`;
       out += `<text class="axis-label" x="${x0 + 9}" y="${Y(ymax) + 4}" text-anchor="start">${spec.yLabel || ""}</text>`;
     } else {
       out += `<text class="axis-label" x="${(X(xmin) + X(xmax)) / 2}" y="${h - 8}" text-anchor="middle">${spec.xLabel || ""}</text>`;

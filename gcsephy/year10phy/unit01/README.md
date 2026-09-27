@@ -57,7 +57,7 @@ All questions are original. Circuit diagrams and graphs are drawn as inline SVG 
 | `Y10 Electricity Virtual Labs.pdf` | The class worksheet; missions deep-link to its pages |
 | `Y10 Electricity Virtual Labs (Ans).pdf` | Worksheet answers, linked from the unit home Resources section |
 | `Y10 Electricity Virtual Labs Teacher Guide.pdf` | Teacher guide; hosted for direct download, not linked from any page |
-| `workbook/` | Twelve-lesson student workbook in four printable parts, answer editions and a teacher guide, linked from the unit home Resources section. See [`workbook/README.md`](workbook/README.md) |
+| `workbook/` | Twelve-lesson student workbook (one printable booklet per lesson, plus a unit review booklet), answer editions and a teacher guide, linked from the unit home Resources section. See [`workbook/README.md`](workbook/README.md) |
 
 To edit content, change `assets/lessons.js`, `assets/exam-questions.js` or `assets/practicals.js`. There is no build step for the site. The workbook PDFs are printed from `workbook/workbook.html` and `workbook/teacher-guide.html` with `workbook/build-pdfs.sh`; the workbook uses `assets/diagrams.js`, so rebuild its PDFs after changing a circuit symbol.
 
