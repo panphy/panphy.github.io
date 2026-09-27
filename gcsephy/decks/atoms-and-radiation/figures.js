@@ -209,9 +209,9 @@
 
     notation: () => {
       let s = text(372, 262, 'C', 'big-symbol', 'start');
-      s += text(356, 138, '12', 'big-num a', 'end') + text(356, 262, '6', 'big-num z', 'end');
+      s += text(356, 162, '12', 'big-num a', 'end') + text(356, 262, '6', 'big-num z', 'end');
       s += text(30, 60, 'MASS NUMBER', 'lbl mono strong a', 'start') + text(30, 86, 'protons + neutrons', 'lbl', 'start');
-      s += arrow(190, 96, 250, 112, 'brand-primary', 2.5);
+      s += arrow(190, 96, 250, 128, 'brand-primary', 2.5);
       s += text(30, 322, 'ATOMIC NUMBER', 'lbl mono strong z', 'start') + text(30, 348, 'number of protons', 'lbl', 'start');
       s += arrow(200, 320, 262, 272, 'brand-accent', 2.5);
       s += text(560, 176, 'carbon-12', 'lbl display', 'start') + text(560, 210, '6 p · 6 n · 6 e', 'lbl mono', 'start');
