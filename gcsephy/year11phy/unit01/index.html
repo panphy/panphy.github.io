@@ -40,7 +40,7 @@
 <body>
   <header>
     <a class="back" href="/gcsephy/">← GCSE Physics resources</a>
-    <p class="eyebrow">Year 11 Physics · AQA GCSE · Unit 1</p>
+    <p class="eyebrow">Year 11 Physics, AQA GCSE, Unit 1</p>
     <h1>Atoms &amp; Nuclear Radiation<span>.</span></h1>
     <p>The classwork book for the ten lessons, with one booklet for each lesson. Use it in lessons, then revise from it at home with the teaching slides and simulations.</p>
   </header>
@@ -68,8 +68,8 @@
     const card = (label, title, text, name, review) => `<article class="card${review ? ' review' : ''}"><span class="num">${label}</span><h3>${title}</h3><p>${text}</p>
       <div class="links"><a href="${file(name)}">Workbook PDF</a><a href="${file(name, true)}">Answers PDF</a></div></article>`;
     document.getElementById('cards').innerHTML = BOOKLETS.map(([n, title, pages, text]) =>
-      card(`Lesson ${n} · ${pages} pages`, title, text, `Lesson ${String(n).padStart(2, '0')} - ${title}`)).join('') +
-      card('After Lesson 10 · 16 pages', 'Unit review', 'Mixed exam practice (42 marks), a fix-it log, all the key words, a progress tracker and extension pages for GCSE Physics: background radiation, medical uses, fission and fusion.', 'Unit review', true);
+      card(`Lesson ${n}, ${pages} pages`, title, text, `Lesson ${String(n).padStart(2, '0')} - ${title}`)).join('') +
+      card('After Lesson 10, 16 pages', 'Unit review', 'Mixed exam practice (42 marks), a fix-it log, all the key words, a progress tracker and extension pages for GCSE Physics: background radiation, medical uses, fission and fusion.', 'Unit review', true);
   </script>
 </body>
 </html>

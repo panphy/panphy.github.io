@@ -54,7 +54,7 @@
       </nav>
       <header class="lesson-hero exam-hero">
         <div class="lesson-heading">
-          <p class="eyebrow"><span>Independent revision</span> · Whole unit</p>
+          <p class="eyebrow"><span>Independent revision</span>: Whole unit</p>
           <h1>Exam Zone</h1>
           <p>Fresh contexts, new numbers and every topic in the unit, from charge flow to the National Grid. Treat it as a mock paper section.</p>
         </div>

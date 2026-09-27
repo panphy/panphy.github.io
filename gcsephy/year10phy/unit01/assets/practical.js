@@ -185,8 +185,8 @@
   const workbookLinks = (practical.workbook || []).map((entry) => `<a class="workbook-link" href="${workbookHref(entry)}" target="_blank" rel="noopener">Workbook lesson ${entry[0]} <span aria-hidden="true">${icon("up-right")}</span></a>`).join("");
   const missionLinks = practical.missions.map(([missionSlug, label]) => `<a class="workbook-link" href="../../lesson/${missionSlug}/">${label} <span aria-hidden="true">${icon("right")}</span></a>`).join("");
   const pagination = practical.missions.map(([missionSlug, label], i) => i === 0
-    ? `<a href="../../lesson/${missionSlug}/"><span>${icon("left")} Back to the notes</span><strong>${label.split(" · ")[1]}</strong></a>`
-    : `<a class="next-link" href="../../lesson/${missionSlug}/"><span>Related notes ${icon("right")}</span><strong>${label.split(" · ")[1]}</strong></a>`).join("")
+    ? `<a href="../../lesson/${missionSlug}/"><span>${icon("left")} Back to the notes</span><strong>${label.split(": ")[1]}</strong></a>`
+    : `<a class="next-link" href="../../lesson/${missionSlug}/"><span>Related notes ${icon("right")}</span><strong>${label.split(": ")[1]}</strong></a>`).join("")
     + (practical.missions.length === 1 ? `<a class="next-link" href="../../exam-zone/"><span>Ready to test yourself? ${icon("right")}</span><strong>Enter the Exam Zone</strong></a>` : "");
 
   document.body.innerHTML = `
@@ -197,7 +197,7 @@
       </nav>
       <header class="lesson-hero">
         <div class="lesson-heading">
-          <p class="eyebrow"><span>Required practical</span> · ${practical.rp}</p>
+          <p class="eyebrow"><span>Required practical</span>: ${practical.rp}</p>
           <h1>${practical.heroTitle || practical.title}</h1><p>${practical.intro}</p>
           <span class="spec-chip">${practical.spec}</span>
         </div>

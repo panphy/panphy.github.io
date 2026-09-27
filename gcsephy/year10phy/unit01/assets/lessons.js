@@ -16,7 +16,7 @@
         "Start here. Find out what every circuit needs, learn the standard symbols, draw a circuit diagram that anyone can build, and put an ammeter in the right place to measure the current.",
       colour: "leaf",
       icon: "A",
-      spec: "AQA 6.2.1.1 · Sep 4.2.1.1",
+      spec: "AQA 6.2.1.1; Sep 4.2.1.1",
       unlocks: ["complete circuits", "standard circuit symbols", "ammeter in series"],
       keyRule: "No complete loop, no current. Draw with a ruler, and connect the ammeter in series.",
       workbook: [[1, "Complete circuits and symbols"]],
@@ -155,7 +155,7 @@
         "Current is not ‘electricity’ in general. It is a rate: how much charge passes a point every second. Learn what moves, which way it goes and why none of it gets used up.",
       colour: "cyan",
       icon: "Q",
-      spec: "AQA 6.2.1.2 · Sep 4.2.1.2",
+      spec: "AQA 6.2.1.2; Sep 4.2.1.2",
       unlocks: ["current as a rate", "Q = I t", "electrons vs conventional current"],
       keyRule: "Q = I t. Current is the rate of flow of charge, and it is the same at every point in a single loop.",
       workbook: [[2, "Current and charge"]],
@@ -187,7 +187,7 @@
             equation: {
               eq: "Q = I t",
               words: "charge flow = current × time",
-              units: "Q in coulombs (C) · I in amperes (A) · t in seconds (s)",
+              units: "Q in coulombs (C), I in amperes (A), t in seconds (s)",
               flag: "Recall and apply",
             },
             points: ["Rearranged: I = Q ÷ t and t = Q ÷ I.", "Always convert time to seconds first: minutes × 60, hours × 3600."],
@@ -285,7 +285,7 @@
         "Current tells you how fast the charge flows. Potential difference tells you how much energy each coulomb transfers. Keep the two ideas separate and circuits start to make sense.",
       colour: "spark",
       icon: "V",
-      spec: "AQA 6.2.1.3, 6.2.4.2 · Sep 4.2.1.3, 4.2.4.2",
+      spec: "AQA 6.2.1.3, 6.2.4.2; Sep 4.2.1.3, 4.2.4.2",
       unlocks: ["p.d. as energy per coulomb", "E = Q V", "measuring p.d. across"],
       keyRule: "V = E ÷ Q. One volt is one joule of energy transferred per coulomb of charge.",
       workbook: [[3, "Potential difference"]],
@@ -314,7 +314,7 @@
             equation: {
               eq: "E = Q V",
               words: "energy transferred = charge flow × potential difference",
-              units: "E in joules (J) · Q in coulombs (C) · V in volts (V)",
+              units: "E in joules (J), Q in coulombs (C), V in volts (V)",
               flag: "Recall and apply",
             },
             points: ["Rearranged: V = E ÷ Q and Q = E ÷ V.", "Two-step questions often give current and time. Find Q = I t first, then use E = Q V."],
@@ -434,7 +434,7 @@
         "Resistance is how strongly a component opposes the current. Put p.d., current and resistance together in one rule and you can predict any simple circuit before you build it. Then measure it yourself in the wire-length required practical.",
       colour: "copper",
       icon: "Ω",
-      spec: "AQA 6.2.1.3, 6.2.1.4, RP 15 · Sep 4.2.1.3, 4.2.1.4, RP 3",
+      spec: "AQA 6.2.1.3, 6.2.1.4, RP 15; Sep 4.2.1.3, 4.2.1.4, RP 3",
       unlocks: ["V = I R", "Ohm's law", "why metals have resistance", "required practical: wire length"],
       keyRule: "V = I R. The greater the resistance, the smaller the current for the same p.d.",
       workbook: [[4, "Resistance and V = IR"]],
@@ -462,7 +462,7 @@
             equation: {
               eq: "V = I R",
               words: "potential difference = current × resistance",
-              units: "V in volts (V) · I in amperes (A) · R in ohms (Ω)",
+              units: "V in volts (V), I in amperes (A), R in ohms (Ω)",
               flag: "Recall and apply",
             },
             points: [
@@ -623,7 +623,7 @@
         "One loop or several branches? The rules for current, p.d. and resistance change completely. Learn both sets and use them to solve multi-step circuit problems.",
       colour: "cyan",
       icon: D.icon("parallel"),
-      spec: "AQA 6.2.2, RP 15 · Sep 4.2.2, RP 3",
+      spec: "AQA 6.2.2, RP 15; Sep 4.2.2, RP 3",
       unlocks: ["series rules", "parallel rules", "R_total = R₁ + R₂"],
       keyRule: "Series: same current, p.d. shared, R_total = R₁ + R₂. Parallel: same p.d., currents add, R_total is less than the smallest resistor.",
       workbook: [[6, "Series and parallel circuits"]],
@@ -647,7 +647,7 @@
             figure: D.circuit({
               w: 360, h: 205,
               wires: [LOOP],
-              parts: [["battery", 180, 40, "h", "12 V"], ["ammeter", 40, 95, "v", "1.0 A", "r"], ["resistor", 120, 150, "h", "4 Ω · 4 V", "b"], ["resistor", 240, 150, "h", "8 Ω · 8 V", "b"]],
+              parts: [["battery", 180, 40, "h", "12 V"], ["ammeter", 40, 95, "v", "1.0 A", "r"], ["resistor", 120, 150, "h", "4 Ω, 4 V", "b"], ["resistor", 240, 150, "h", "8 Ω, 8 V", "b"]],
               caption: "R_total = 4 + 8 = 12 Ω, so I = 12 ÷ 12 = 1.0 A. p.d.s: 1.0 × 4 = 4 V and 1.0 × 8 = 8 V.",
             }),
           },
@@ -665,7 +665,7 @@
             figure: D.circuit({
               w: 360, h: 225,
               wires: ["M40 40 H320 V185 H40 Z", "M40 115 H320"],
-              parts: [["battery", 180, 40, "h", "6 V"], ["ammeter", 40, 77, "v", "3 A", "r"], ["resistor", 180, 115, "h", "3 Ω · 2 A"], ["resistor", 180, 185, "h", "6 Ω · 1 A", "b"]],
+              parts: [["battery", 180, 40, "h", "6 V"], ["ammeter", 40, 77, "v", "3 A", "r"], ["resistor", 180, 115, "h", "3 Ω, 2 A"], ["resistor", 180, 185, "h", "6 Ω, 1 A", "b"]],
               dots: [[40, 115], [320, 115]],
               caption: "Each branch has 6 V across it: 6 ÷ 3 = 2 A and 6 ÷ 6 = 1 A. Total current = 2 + 1 = 3 A.",
             }),
@@ -717,7 +717,7 @@
         ],
         goFurther: {
           title: "Calculating parallel resistance",
-          kicker: "Go further · beyond the AQA GCSE spec",
+          kicker: "Go further: beyond the AQA GCSE spec",
           html: `<p>AQA does not ask you to calculate the total resistance of resistors in parallel, but it is a useful tool, especially if you are heading for separate physics or A level.</p>
             <div class="equation-block"><span class="eq">1 / R_total = 1 / R₁ + 1 / R₂</span><span class="eq-words">For two resistors this simplifies to R_total = (R₁ × R₂) ÷ (R₁ + R₂): “product over sum”.</span></div>
             <p><strong>Example:</strong> 3 Ω and 6 Ω in parallel → R_total = (3 × 6) ÷ (3 + 6) = 18 ÷ 9 = 2 Ω.</p>
@@ -790,8 +790,8 @@
         "Every component has its own current–p.d. graph. Learn to recognise the resistor, the filament lamp and the diode, and explain how thermistors and LDRs switch real devices on and off.",
       colour: "violet",
       icon: "I–V",
-      spec: "AQA 6.2.1.4, RP 16 · Sep 4.2.1.4, RP 4",
-      unlocks: ["resistor · lamp · diode graphs", "thermistors and LDRs", "required practical: I–V"],
+      spec: "AQA 6.2.1.4, RP 16; Sep 4.2.1.4, RP 4",
+      unlocks: ["resistor, lamp and diode graphs", "thermistors and LDRs", "required practical: I–V"],
       keyRule: "Only an ohmic conductor at constant temperature gives a straight line through the origin. For everything else, R changes.",
       workbook: [[8, "I-V graphs"], [10, "Thermistors, LDRs and sensors"]],
       phet: true,
@@ -941,8 +941,8 @@
         "Power is how fast energy is transferred. Use it to compare appliances, work out energy costs in joules and explain why the National Grid sends electricity at very high potential differences.",
       colour: "spark",
       icon: "P",
-      spec: "AQA 6.2.4 · Sep 4.2.4",
-      unlocks: ["P = V I and P = I² R", "E = P t", "step-up · step-down transformers"],
+      spec: "AQA 6.2.4; Sep 4.2.4",
+      unlocks: ["P = V I and P = I² R", "E = P t", "step-up and step-down transformers"],
       keyRule: "P = V I = I² R and E = P t. High p.d. means low current, so less energy is wasted heating the cables.",
       workbook: [[11, "Power and energy transfer"], [12, "Mains, safety and the National Grid"]],
       revision: {
@@ -957,7 +957,7 @@
             equation: {
               eq: "P = V I",
               words: "power = potential difference × current",
-              units: "P in watts (W) · V in volts (V) · I in amperes (A)",
+              units: "P in watts (W), V in volts (V), I in amperes (A)",
               flag: "Recall and apply",
             },
             points: ["1 W = 1 J transferred per second.", "1 kW = 1000 W."],
@@ -971,7 +971,7 @@
             equation: {
               eq: "P = I² R",
               words: "power = (current)² × resistance",
-              units: "P in watts (W) · I in amperes (A) · R in ohms (Ω)",
+              units: "P in watts (W), I in amperes (A), R in ohms (Ω)",
               flag: "Recall and apply",
             },
             formula: "2.0 A through 15 Ω → P = 2.0² × 15 = 60 W",
@@ -985,8 +985,8 @@
             equation: {
               eq: "E = P t",
               words: "energy transferred = power × time",
-              units: "E in joules (J) · P in watts (W) · t in seconds (s)",
-              flag: "Recall and apply · also E = Q V",
+              units: "E in joules (J), P in watts (W), t in seconds (s)",
+              flag: "Recall and apply; also E = Q V",
             },
             formula: "2.0 kW kettle for 3.0 min → E = 2000 × 180 = 360 000 J",
             remember: "Watts and seconds give joules. Convert kW to W and minutes to s first.",
@@ -1024,8 +1024,8 @@
             equation: {
               eq: "V_p I_p = V_s I_s",
               words: "p.d. across primary × current in primary = p.d. across secondary × current in secondary",
-              units: "p = primary coil (input) · s = secondary coil (output)",
-              flag: "Higher tier · given on the equation sheet",
+              units: "p = primary coil (input), s = secondary coil (output)",
+              flag: "Higher tier: given on the equation sheet",
             },
             formula: "25 kV, 400 A in; 400 kV out → I_s = (25 000 × 400) ÷ 400 000 = 25 A",
             remember: "Step up the p.d. and the current steps down by the same factor.",
@@ -1098,8 +1098,8 @@
         "The sockets at home do not behave like a battery. Learn how alternating mains differs from direct current, what each wire in a plug does, and why the live wire is dangerous.",
       colour: "copper",
       icon: "~",
-      spec: "AQA 6.2.3 · Sep 4.2.3",
-      unlocks: ["ac vs dc", "230 V · 50 Hz", "live · neutral · earth"],
+      spec: "AQA 6.2.3; Sep 4.2.3",
+      unlocks: ["ac vs dc", "230 V, 50 Hz", "live, neutral, earth"],
       keyRule: "UK mains is ac at about 230 V and 50 Hz. Live: brown. Neutral: blue. Earth: green and yellow.",
       workbook: [[12, "Mains, safety and the National Grid"]],
       revision: {

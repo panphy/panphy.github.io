@@ -7,7 +7,7 @@
   window.EXAM_QUESTIONS = [
     // Round 1
     {
-      section: "Round 1 · Charge, p.d. and resistance",
+      section: "Round 1: Charge, p.d. and resistance",
       skill: "Recall",
       marks: 1,
       prompt: "Which quantity is defined as the energy transferred per unit charge?",
@@ -16,7 +16,7 @@
       answer: "<strong>B — Potential difference</strong> (1 mark). 1 V = 1 J/C.",
     },
     {
-      section: "Round 1 · Charge, p.d. and resistance",
+      section: "Round 1: Charge, p.d. and resistance",
       skill: "Calculation",
       marks: 3,
       prompt: "A torch bulb carries a current of 0.15 A for 4.0 minutes. Calculate the charge that flows through the bulb.",
@@ -24,7 +24,7 @@
       answer: "t = 4.0 × 60 = 240 s (1 mark). Q = I t = 0.15 × 240 (1 mark) = <strong>36 C</strong> (1 mark).",
     },
     {
-      section: "Round 1 · Charge, p.d. and resistance",
+      section: "Round 1: Charge, p.d. and resistance",
       skill: "Multi-step",
       marks: 4,
       prompt: "A 12 Ω resistor has a current of 0.50 A through it for 60 s. Calculate (a) the p.d. across the resistor and (b) the energy transferred to the resistor.",
@@ -32,7 +32,7 @@
       answer: "(a) V = I R = 0.50 × 12 = <strong>6.0 V</strong> (1 mark).<br>(b) Q = I t = 0.50 × 60 = 30 C (1 mark). E = Q V = 30 × 6.0 (1 mark) = <strong>180 J</strong> (1 mark).",
     },
     {
-      section: "Round 1 · Charge, p.d. and resistance",
+      section: "Round 1: Charge, p.d. and resistance",
       skill: "Explain",
       marks: 3,
       prompt: "A student says: “Current and potential difference measure the same thing.” Explain why the student is wrong.",
@@ -42,7 +42,7 @@
 
     // Round 2
     {
-      section: "Round 2 · Components and graphs",
+      section: "Round 2: Components and graphs",
       skill: "Graph reading",
       marks: 3,
       stimulus: D.ivSketch("diode", "I–V graph for component X."),
@@ -51,7 +51,7 @@
       answer: "Component X is a diode (1 mark). For negative p.d. the current is zero (1 mark) because the diode has a very high resistance in the reverse direction / only lets current flow one way (1 mark).",
     },
     {
-      section: "Round 2 · Components and graphs",
+      section: "Round 2: Components and graphs",
       skill: "Data analysis",
       marks: 4,
       stimulus: `<table class="data-table"><caption>Readings for a filament lamp</caption><thead><tr><th>p.d. / V</th><th>1.0</th><th>4.0</th><th>8.0</th></tr></thead><tbody><tr><th>current / A</th><td>0.20</td><td>0.40</td><td>0.50</td></tr></tbody></table>`,
@@ -60,7 +60,7 @@
       answer: "R = 5.0 Ω, 10 Ω and 16 Ω, so the resistance increases as the current increases (1 mark for calculations, 1 mark for the trend). A larger current heats the filament (1 mark). The ions vibrate more, so electrons collide with them more often, increasing the resistance (1 mark).",
     },
     {
-      section: "Round 2 · Components and graphs",
+      section: "Round 2: Components and graphs",
       skill: "Application",
       marks: 3,
       stimulus: D.circuit({
@@ -75,7 +75,7 @@
 
     // Round 3
     {
-      section: "Round 3 · Series and parallel",
+      section: "Round 3: Series and parallel",
       skill: "Calculation",
       marks: 4,
       stimulus: D.circuit({
@@ -88,7 +88,7 @@
       answer: "R_total = 4.0 + 8.0 = 12 Ω (1 mark). I = 6.0 ÷ 12 = <strong>0.50 A</strong> (1 mark). V = I R = 0.50 × 8.0 (1 mark) = <strong>4.0 V</strong> (1 mark).",
     },
     {
-      section: "Round 3 · Series and parallel",
+      section: "Round 3: Series and parallel",
       skill: "Calculation",
       marks: 4,
       stimulus: D.circuit({
@@ -102,7 +102,7 @@
       answer: "Each branch has 12 V across it (1 mark). A₁ = 12 ÷ 6.0 = <strong>2.0 A</strong> (1 mark). Other branch = 12 ÷ 12 = 1.0 A (1 mark). A₀ = 2.0 + 1.0 = <strong>3.0 A</strong> (1 mark).",
     },
     {
-      section: "Round 3 · Series and parallel",
+      section: "Round 3: Series and parallel",
       skill: "Recall",
       marks: 1,
       prompt: "Two 10 Ω resistors are connected in parallel. Which is the total resistance?",
@@ -111,7 +111,7 @@
       answer: "<strong>D — 5 Ω</strong> (1 mark). It is the only option less than 10 Ω.",
     },
     {
-      section: "Round 3 · Series and parallel",
+      section: "Round 3: Series and parallel",
       skill: "Required practical",
       marks: 6,
       prompt: "Describe a method to investigate how the total resistance of a circuit changes when identical resistors are added (a) in series and (b) in parallel.",
@@ -121,7 +121,7 @@
 
     // Round 4
     {
-      section: "Round 4 · Mains and power",
+      section: "Round 4: Mains and power",
       skill: "Recall",
       marks: 3,
       prompt: "Name the wire in a three-core cable that is green and yellow. State its potential and explain its purpose.",
@@ -129,7 +129,7 @@
       answer: "Earth wire (1 mark). It is at 0 V (1 mark). It is a safety wire that stops the appliance's case becoming live; it only carries a current if there is a fault (1 mark).",
     },
     {
-      section: "Round 4 · Mains and power",
+      section: "Round 4: Mains and power",
       skill: "Graph reading",
       marks: 2,
       stimulus: D.graph({
@@ -143,7 +143,7 @@
       answer: "ac, because the p.d. repeatedly reverses direction / becomes negative (1 mark). Maximum p.d. = <strong>6 V</strong> (1 mark).",
     },
     {
-      section: "Round 4 · Mains and power",
+      section: "Round 4: Mains and power",
       skill: "Calculation",
       marks: 5,
       prompt: "A microwave oven has a power of 800 W and runs on the 230 V mains. (a) Calculate the current. (b) Calculate the energy transferred in 4.5 minutes.",
@@ -151,7 +151,7 @@
       answer: "(a) I = P ÷ V = 800 ÷ 230 (1 mark) = <strong>3.5 A</strong> (1 mark).<br>(b) t = 4.5 × 60 = 270 s (1 mark). E = P t = 800 × 270 (1 mark) = <strong>216 000 J</strong> (1 mark).",
     },
     {
-      section: "Round 4 · Mains and power",
+      section: "Round 4: Mains and power",
       skill: "Calculation",
       marks: 3,
       prompt: "A power cable has a resistance of 0.50 Ω and carries a current of 20 A. Calculate the power wasted heating the cable. How would this change if the current were halved?",
@@ -159,7 +159,7 @@
       answer: "P = I² R = 20² × 0.50 (1 mark) = <strong>200 W</strong> (1 mark). Halving the current makes the power a quarter: 10² × 0.50 = <strong>50 W</strong> (1 mark).",
     },
     {
-      section: "Round 4 · Mains and power",
+      section: "Round 4: Mains and power",
       skill: "Explain",
       marks: 4,
       prompt: "Describe the roles of step-up and step-down transformers in the National Grid.",
@@ -167,7 +167,7 @@
       answer: "Step-up transformers are used between the power station and the transmission cables (1 mark). They increase the p.d. so the current is lower for the same power, which reduces energy losses from heating the cables (1 mark). Step-down transformers are used between the transmission cables and consumers (1 mark). They decrease the p.d. to a much lower, safer value (about 230 V) for use in homes (1 mark).",
     },
     {
-      section: "Round 4 · Mains and power",
+      section: "Round 4: Mains and power",
       skill: "Calculation",
       tier: "HT",
       marks: 3,

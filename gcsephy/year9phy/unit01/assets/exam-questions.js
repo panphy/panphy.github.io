@@ -1,6 +1,6 @@
 window.EXAM_QUESTIONS = [
   {
-    section: "Round 1 · Data and uncertainty",
+    section: "Round 1: Data and uncertainty",
     skill: "Calculation",
     marks: 4,
     stimulus: `
@@ -14,7 +14,7 @@ window.EXAM_QUESTIONS = [
     answer: "<strong>Mean:</strong> (8.72 + 8.64 + 8.68) ÷ 3 = 8.68 s (2 marks).<br><strong>Uncertainty:</strong> (8.72 − 8.64) ÷ 2 = 0.04 s (1 mark).<br><strong>Reported result:</strong> 8.68 ± 0.04 s (1 mark).",
   },
   {
-    section: "Round 1 · Data and uncertainty",
+    section: "Round 1: Data and uncertainty",
     skill: "Errors",
     marks: 3,
     prompt: "A newton meter reads 0.3 N when nothing is attached. A student then obtains three identical force readings. Identify the type of error, explain why repeats do not remove it, and give one suitable improvement.",
@@ -22,7 +22,7 @@ window.EXAM_QUESTIONS = [
     answer: "It is a systematic error (1 mark). Every reading is shifted by the same amount, so repeating and averaging retain the offset (1 mark). Zero or calibrate the newton meter before use, or correct each reading for the measured zero offset (1 mark).",
   },
   {
-    section: "Round 1 · Data and uncertainty",
+    section: "Round 1: Data and uncertainty",
     skill: "Variables",
     marks: 4,
     prompt: "A student investigates how the length of a metal wire affects its extension when a load is attached. State the independent variable, the dependent variable, one control variable and the most suitable graph.",
@@ -30,7 +30,7 @@ window.EXAM_QUESTIONS = [
     answer: "Independent variable: wire length (1 mark). Dependent variable: extension of the wire (1 mark). A valid control is the load, wire material, wire diameter or starting temperature (1 mark). Use a line graph because wire length is continuous (1 mark).",
   },
   {
-    section: "Round 1 · Data and uncertainty",
+    section: "Round 1: Data and uncertainty",
     skill: "Graph choice",
     marks: 4,
     prompt: "A student wraps identical ice cubes in foil, cotton, paper and bubble wrap, then repeats the measurements and calculates a mean melting time. State the most suitable graph and what should be shown on each axis. Explain your graph choice.",
@@ -38,7 +38,7 @@ window.EXAM_QUESTIONS = [
     answer: "Use a bar chart (1 mark) because wrapping material is a categoric independent variable (1 mark). Put wrapping material on the x-axis (1 mark) and mean melting time, with a suitable time unit, on the y-axis (1 mark).",
   },
   {
-    section: "Round 2 · Patterns and evidence",
+    section: "Round 2: Patterns and evidence",
     skill: "Means and outliers",
     marks: 4,
     stimulus: `
@@ -52,7 +52,7 @@ window.EXAM_QUESTIONS = [
     answer: "Foam total = 9 + 11 + 10 = 30 cm (1 mark), so mean = 30 ÷ 3 = 10 cm (1 mark). The likely outlier is 44 cm for cardboard (1 mark). Check the recording and method, then repeat that reading before deciding; exclude it only if there is evidence of a problem (1 mark).",
   },
   {
-    section: "Round 2 · Patterns and evidence",
+    section: "Round 2: Patterns and evidence",
     skill: "Conclusion",
     marks: 3,
     stimulus: `
@@ -66,7 +66,7 @@ window.EXAM_QUESTIONS = [
     answer: "As canopy area increases, mean fall time increases (1 mark). For example, increasing area from 100 cm² to 400 cm² increased mean fall time from 1.2 s to 3.0 s (2 marks for a correct quantitative comparison with units).",
   },
   {
-    section: "Round 2 · Patterns and evidence",
+    section: "Round 2: Patterns and evidence",
     skill: "Best fit",
     marks: 5,
     stimulus: `
@@ -80,7 +80,7 @@ window.EXAM_QUESTIONS = [
     answer: "x-axis: pendulum length / cm (1 mark). y-axis: time period / s (1 mark). The likely outlier is (60 cm, 2.7 s) (1 mark). Draw one smooth curve or straight trend appropriate to the other points, with points reasonably balanced around it (1 mark), rather than joining points dot-to-dot or forcing the line through the outlier (1 mark).",
   },
   {
-    section: "Round 2 · Patterns and evidence",
+    section: "Round 2: Patterns and evidence",
     skill: "Graph choice",
     marks: 4,
     prompt: "Investigation A changes a load from 50 g to 250 g and measures spring extension. Investigation B compares the friction force produced by four shoe-sole materials. State the best graph for each investigation and justify both choices.",
@@ -88,7 +88,7 @@ window.EXAM_QUESTIONS = [
     answer: "Investigation A needs a line graph (1 mark) because load is continuous (1 mark). Investigation B needs a bar chart (1 mark) because shoe-sole material is categoric (1 mark).",
   },
   {
-    section: "Round 3 · Planning and evaluation",
+    section: "Round 3: Planning and evaluation",
     skill: "Method",
     marks: 6,
     prompt: "Plan an investigation to determine how the release height of a trolley on a fixed ramp affects the time it takes to travel a marked 1.0 m section after leaving the ramp. Your method should produce valid, reliable and safe results.",
@@ -96,7 +96,7 @@ window.EXAM_QUESTIONS = [
     answer: "Indicative marking points: use at least five measured release heights over a sensible range; mark a fixed 1.0 m timing section after the ramp; release the trolley without pushing, ideally with a gate; time the section using light gates or a consistent stopwatch method; keep the trolley, fixed ramp, surface and timing distance controlled; repeat at least three times at each height and calculate a mean; keep the run area clear and stop the trolley safely. Award up to 6 marks for a coherent, repeatable method.",
   },
   {
-    section: "Round 3 · Planning and evaluation",
+    section: "Round 3: Planning and evaluation",
     skill: "Evaluation",
     marks: 4,
     prompt: "A student launches a paper aeroplane by hand and measures its flight distance. The evaluation says only, ‘There was human error.’ Explain the specific problem, its likely effect, a matching improvement and one way to improve reliability.",
@@ -104,7 +104,7 @@ window.EXAM_QUESTIONS = [
     answer: "Hand launches vary in force, speed and angle (1 mark), causing random variation in flight distance and making comparisons less fair (1 mark). Use a mechanical or elastic launcher set to the same extension and angle each time (1 mark). Repeat each condition at least three times and calculate a mean (1 mark).",
   },
   {
-    section: "Round 3 · Planning and evaluation",
+    section: "Round 3: Planning and evaluation",
     skill: "Precision",
     marks: 4,
     stimulus: `
@@ -118,7 +118,7 @@ window.EXAM_QUESTIONS = [
     answer: "Group A: (48.4 − 48.2) ÷ 2 = ±0.1 cm (1 mark). Group B: (48.8 − 47.8) ÷ 2 = ±0.5 cm (1 mark). Group A is more precise (1 mark) because its uncertainty/spread is smaller (1 mark).",
   },
   {
-    section: "Round 3 · Planning and evaluation",
+    section: "Round 3: Planning and evaluation",
     skill: "Evidence and reliability",
     marks: 5,
     stimulus: `

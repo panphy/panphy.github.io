@@ -159,7 +159,7 @@
         <path d="M215 165 C250 172 269 194 299 213 C319 228 340 227 357 216 C382 205 407 224 424 242" stroke="#fff5b3"/>
       </g>
     </svg>`;
-    const caption = `<span class="cable-key"><span><i class="cable-key-live"></i><strong>Live</strong> · brown</span><span><i class="cable-key-neutral"></i><strong>Neutral</strong> · blue</span><span><i class="cable-key-earth"></i><strong>Earth</strong> · green &amp; yellow</span></span><span class="cable-caption">The outer sheath holds all three insulated wires together.</span>`;
+    const caption = `<span class="cable-key"><span><i class="cable-key-live"></i><strong>Live</strong>: brown</span><span><i class="cable-key-neutral"></i><strong>Neutral</strong>: blue</span><span><i class="cable-key-earth"></i><strong>Earth</strong>: green &amp; yellow</span></span><span class="cable-caption">The outer sheath holds all three insulated wires together.</span>`;
     return figure(svg, caption, "Cutaway of a three-core cable: a dark outer sheath surrounds brown live, blue neutral, and green and yellow earth wires, which fan out from the open end");
   }
 

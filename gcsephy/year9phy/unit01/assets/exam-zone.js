@@ -48,7 +48,7 @@
       </nav>
       <header class="lesson-hero exam-hero">
         <div class="lesson-heading">
-          <p class="eyebrow"><span>Independent revision</span> · Fresh challenge set</p>
+          <p class="eyebrow"><span>Independent revision</span>: Fresh challenge set</p>
           <h1>Exam Zone</h1>
           <p>Different questions. Different data. The same scientific habits you will need when the context changes.</p>
         </div>
