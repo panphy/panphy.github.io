@@ -314,7 +314,7 @@
     helicopter: () => {
       let s = t(450, 40, 'PAPER HELICOPTER · FOLDED MODEL', 'lab');
       s += rect(35, 65, 830, 405, 'heli-backdrop', 18);
-      s += `<image href="images/paper-helicopter-3d.png" x="80" y="55" width="740" height="425" preserveAspectRatio="xMidYMid meet"/>`;
+      s += `<image href="images/paper-helicopter-simple.png" x="80" y="55" width="740" height="390" preserveAspectRatio="xMidYMid meet"/>`;
       s += line(45, 480, 855, 480, 'grid');
       s += t(165, 520, 'CHANGE', 'lab small') + t(165, 548, 'wing length L', 'body-t small');
       s += t(450, 520, 'CONTROL', 'lab small') + t(450, 548, 'same drop height', 'body-t small');
