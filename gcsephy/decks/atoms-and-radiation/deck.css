@@ -467,6 +467,7 @@ table.facts.compare { table-layout: fixed; font-size: 30px; }
 .alpha-path { fill: none; stroke: var(--alpha); stroke-width: 2.5; opacity: .5; }
 .alpha-path.deflect, .alpha-path.bounce { opacity: .95; }
 .scatter-playing .scatter-static { display: none; }
+.scatter-label { fill: var(--alpha); }
 .detector { fill: none; stroke: var(--brand-accent); stroke-width: 3; stroke-dasharray: 2 8; stroke-linecap: round; opacity: .8; }
 .flow { fill: none; stroke: var(--brand-accent); stroke-width: 3; }
 .node { fill: var(--card-bg); stroke: var(--card-border); stroke-width: 2; }

@@ -186,17 +186,26 @@
     const slot = scatter.count++ % 20;
     const kind = slot === 19 ? 'bounce' : [4, 11, 17].includes(slot) ? 'deflect' : 'straight';
     const startY = 210 + Math.random() * 40;
-    let d;
+    let d, labelX, labelY, turnLength = 0;
     if (kind === 'straight') {
       d = `M140,${startY} L720,${startY}`;
     } else if (kind === 'deflect') {
       const direction = Math.random() < .5 ? -1 : 1;
       const endY = startY + direction * (28 + Math.random() * 48);
-      d = `M140,${startY} L520,${startY} L${700 + Math.random() * 20},${endY}`;
+      const endX = 700 + Math.random() * 20;
+      d = `M140,${startY} L520,${startY} L${endX},${endY}`;
+      turnLength = 380;
+      labelX = (520 + endX) / 2;
+      labelY = (startY + endY) / 2 + direction * 30;
     } else {
       const direction = Math.random() < .5 ? -1 : 1;
       const endY = startY + direction * (70 + Math.random() * 35);
-      d = `M140,${startY} L${490 + Math.random() * 25},${startY} L${315 + Math.random() * 55},${endY}`;
+      const turnX = 490 + Math.random() * 25;
+      const endX = 315 + Math.random() * 55;
+      d = `M140,${startY} L${turnX},${startY} L${endX},${endY}`;
+      turnLength = turnX - 140;
+      labelX = endX;
+      labelY = endY + direction * 25;
     }
     const path = document.createElementNS(SVG_NS, 'path');
     path.setAttribute('d', d);
@@ -205,10 +214,21 @@
     particle.setAttribute('r', '7');
     particle.setAttribute('fill', 'url(#g-alpha)');
     scatter.group.append(path, particle);
+    let label = null;
+    if (kind !== 'straight') {
+      label = document.createElementNS(SVG_NS, 'text');
+      label.setAttribute('x', labelX);
+      label.setAttribute('y', labelY);
+      label.setAttribute('text-anchor', 'middle');
+      label.setAttribute('class', 'lbl scatter-label');
+      label.textContent = kind === 'bounce' ? 'bounce back' : 'small deflection';
+      label.style.visibility = 'hidden';
+      scatter.group.append(label);
+    }
     const length = path.getTotalLength();
     path.style.strokeDasharray = String(length);
     path.style.strokeDashoffset = String(length);
-    scatter.particles.push({ path, particle, length, born: time, kind, travel: kind === 'bounce' ? 2900 : 2400 });
+    scatter.particles.push({ path, particle, label, length, turnLength, born: time, kind, travel: kind === 'bounce' ? 2900 : 2400 });
   }
 
   function animateScatter(time) {
@@ -225,6 +245,7 @@
       if (age >= item.travel + hold + fade) {
         item.path.remove();
         item.particle.remove();
+        item.label?.remove();
         return false;
       }
       const progress = Math.min(age / item.travel, 1);
@@ -234,7 +255,12 @@
       item.particle.setAttribute('cy', point.y);
       item.particle.style.visibility = progress < 1 ? 'visible' : 'hidden';
       const fadeProgress = Math.max(0, (age - item.travel - hold) / fade);
-      item.path.style.opacity = String((item.kind === 'straight' ? .55 : .95) * (1 - fadeProgress));
+      const opacity = String((item.kind === 'straight' ? .55 : .95) * (1 - fadeProgress));
+      item.path.style.opacity = opacity;
+      if (item.label) {
+        item.label.style.visibility = item.length * progress >= item.turnLength ? 'visible' : 'hidden';
+        item.label.style.opacity = opacity;
+      }
       return true;
     });
   }
