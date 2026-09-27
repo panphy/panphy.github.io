@@ -19,6 +19,12 @@
 .wf .f-muted { fill: #d4d8de; }
 .wf .ring { stroke: var(--ink); stroke-width: 3; }
 .wf .pt { fill: var(--hi); stroke: var(--ink); stroke-width: 4; }
+.wf .pt.set-a { fill: #c9ee49; }
+.wf .pt.set-b { fill: #ff795e; }
+.wf .pt.set-c { fill: #42cbe8; }
+.wf text.set-a-t { fill: #527600; }
+.wf text.set-b-t { fill: #b9341c; }
+.wf text.set-c-t { fill: #086988; }
 .wf .hit { fill: var(--hot); stroke: var(--ink); stroke-width: 3; }
 .wf .cross { stroke: var(--ink); stroke-width: 4; stroke-linecap: round; fill: none; }
 .wf .trend { stroke: var(--cyan); stroke-width: 6; fill: none; stroke-linecap: round; }
@@ -49,10 +55,7 @@
 .wf .board { fill: #c8a46a; stroke: var(--ink); stroke-width: 3; stroke-linejoin: round; }
 .wf .wheel { fill: var(--ink); stroke: none; }
 .wf .tape { stroke: #1479a8; stroke-width: 6; stroke-linecap: round; }
-.wf .paper { fill: var(--card); stroke: var(--ink); stroke-width: 3; stroke-linejoin: round; }
-.wf .cut { stroke: #c2410c; stroke-width: 3; stroke-dasharray: 9 7; }
-.wf .fold { stroke: #1479a8; stroke-width: 3; stroke-dasharray: 3 6; stroke-linecap: round; }
-.wf .clip { fill: none; stroke: #6b7280; stroke-width: 5; }
+.wf .heli-backdrop { fill: #e8f2f5; }
 .wf .tag { fill: var(--hi); stroke: var(--ink); stroke-width: 3; }
 .wf .lab { font: 900 23px Arial, sans-serif; letter-spacing: .08em; }
 .wf .lab.small { font-size: 20px; }
@@ -65,7 +68,11 @@
 .wf .muted-t { fill: var(--muted); font-weight: 600; }
 .wf .cyan-t { fill: #1479a8; }
 .wf .hot-t { fill: #c2410c; }
-.wf .cut-t { fill: #c2410c; }
+
+/* Match the data-set bullets and table keys to the plot. */
+.data .set-a th, .points .set-a::before { background: #c9ee49; }
+.data .set-b th, .points .set-b::before { background: #ff795e; }
+.data .set-c th, .points .set-c::before { background: #42cbe8; }
 
 /* Hero plot card (companion home page) */
 .machine { position: relative; display: grid; place-items: center; height: 640px; }

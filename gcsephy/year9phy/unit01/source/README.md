@@ -28,9 +28,9 @@ git clone student-companion-site-history.bundle restored-student-companion-site
 
 ## Teaching deck
 
-`teaching-deck/` contains the original pre-image PowerPoint template, the seven case-study image assets, image source and prompt records, and the scripts used to assemble and credit the final teaching deck.
+`teaching-deck/` contains historical case-study image assets, image source and prompt records, and a photo-credit script from the former PowerPoint workflow.
 
-The finished PowerPoint remains at `../Work Like a Physicist - Year 9 Teaching Deck.pptx`. Keep the on-slide credits when redistributing it. The scripts use OpenAI's presentation-authoring runtime and are preserved primarily for provenance and future editing.
+The PowerPoint file is no longer in this repository. The current teaching deck is the [HTML deck](../../../decks/work-like-a-physicist/index.html). The archived photo-credit script requires a separately supplied PowerPoint file and is retained for provenance.
 
 ## Original project documentation
 

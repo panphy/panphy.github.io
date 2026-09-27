@@ -1,5 +1,7 @@
 # Work Like a Physicist
 
+> Historical project README. Its PowerPoint inventory describes the original project and is not the current repository inventory; see [`../README.md`](../README.md) for the maintained HTML deck.
+
 **Year 9 Physics · Collecting, Processing and Presenting Data · eight lessons**
 
 A complete unit on how to produce evidence other people will accept. Lesson plans, a student booklet, a teaching deck and an online companion site — ready to pick up and run, or to pull apart and rebuild for your own classes.
