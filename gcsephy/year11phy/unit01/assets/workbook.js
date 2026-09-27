@@ -18,7 +18,7 @@
   if (answers) document.body.classList.add("answers");
 
   const which = ONE ? `Lesson ${ONE.n}` : REVIEW ? "Unit review" : "";
-  const footer = `Atoms & Nuclear Radiation · Year 11 workbook${which ? ` · ${which}` : ""}${answers ? " · ANSWERS" : ""}`;
+  const footer = `Atoms & Nuclear Radiation, Year 11 workbook${which ? `: ${which}` : ""}${answers ? " (ANSWERS)" : ""}`;
   const pageStyle = document.createElement("style");
   pageStyle.textContent = `@page { @bottom-left { content: "${footer}"; } } @page cover { @bottom-left { content: none; } }`;
   document.head.appendChild(pageStyle);
@@ -239,10 +239,10 @@
       middle = `<p class="lede">What is inside an atom, how do we know, and what do unstable nuclei do? ${U.lessons.length} lessons: learn with it in class and revise from it at home.</p>
       <div class="cover-stats"><div><b>${U.lessons.length}</b>lessons</div><div><b>3</b>big questions</div><div><b>2</b>simulations</div></div>`;
     }
-    return `<section class="cover"><div class="eyebrow">Year 11 Physics · AQA GCSE · ${ONE ? `Lesson ${ONE.n} of ${U.lessons.length}` : REVIEW ? "Unit review" : "Unit booklet"}</div>
+    return `<section class="cover"><div class="eyebrow">Year 11 Physics, AQA GCSE, ${ONE ? `Lesson ${ONE.n} of ${U.lessons.length}` : REVIEW ? "Unit review" : "Unit booklet"}</div>
       <h1>Atoms &amp; Nuclear<br>Radiation<span class="dot">.</span></h1>
       ${middle}
-      ${answers ? '<div class="edition">Answer edition · for teachers and self-marking</div>' : ""}
+      ${answers ? '<div class="edition">Answer edition for teachers and self-marking</div>' : ""}
       <div class="cover-foot">
         <div class="cover-art dfig">${F.figure("hero")}</div>
         <div class="cover-fields"><div>Name<span></span></div><div>Class<span></span></div><div>Teacher<span></span></div><div>Target grade<span></span></div></div>
@@ -264,10 +264,10 @@
       <p class="page-intro">${ONE && ONE.n > 1 ? `This is the booklet for <strong>Lesson ${ONE.n}</strong> of the Atoms and Nuclear Radiation unit. It builds on the lessons before it; the “Do now” questions and the quick answers at the back help you check what you remember.` : "This unit starts from the atoms you met in Key Stage 3 and in chemistry, then asks how we know what is inside them and what happens when a nucleus is unstable."} Keep it: it is your classwork book <em>and</em> your revision guide.</p>
       <div class="legend">${items.map(([k, name, text]) => `<div>${icon(k)}<div><b>${name}</b><p>${text}</p></div></div>`).join("")}</div>
       <div class="key"><strong>Revising at home?</strong> (1) Read the Learn it pages. (2) Cover them and answer the “Cover the page” questions in Revise it. (3) Check with the quick answers at the back. (4) Go through the matching slides in the teaching deck, and try the simulations.</div>
-      <h4 class="sub">The route through the unit${ONE ? " · this lesson is highlighted" : ""}</h4>
-      ${ONE ? `<ol class="route-grid">${U.lessons.map((l) => `<li class="${l.n === ONE.n ? "this" : ""}"><b>${pad(l.n)}</b><span>${l.title}${l.n === ONE.n ? `<span class="map-line">${l.mapLine} · slides ${l.deck.slides}</span>` : ""}</span></li>`).join("")}</ol>`
+      <h4 class="sub">The route through the unit${ONE ? " (this lesson is highlighted)" : ""}</h4>
+      ${ONE ? `<ol class="route-grid">${U.lessons.map((l) => `<li class="${l.n === ONE.n ? "this" : ""}"><b>${pad(l.n)}</b><span>${l.title}${l.n === ONE.n ? `<span class="map-line">${l.mapLine} (slides ${l.deck.slides})</span>` : ""}</span></li>`).join("")}</ol>`
         : `<table class="route"><thead><tr><th>#</th><th>Lesson</th><th>Slides</th></tr></thead><tbody>${rows}</tbody></table>`}
-      <p style="margin-top:3mm;font-size:8.8pt;color:#5F5954">Teaching deck: <strong>${DECK}</strong> · Simulations: <strong>panphy.app/simulations/atomic_models.html</strong> and <strong>panphy.app/simulations/nuclear_decay.html</strong></p>
+      <p style="margin-top:3mm;font-size:8.8pt;color:#5F5954">Teaching deck: <strong>${DECK}</strong>. Simulations: <strong>panphy.app/simulations/atomic_models.html</strong> and <strong>panphy.app/simulations/nuclear_decay.html</strong></p>
     </section>`;
   }
 
@@ -282,9 +282,9 @@
   function review() {
     qNum = 0;
     return `<section class="lesson" style="--accent:var(--photon);--accent-t:var(--photon-t)">
-      <div class="eyebrow">After Lesson ${U.lessons.length} · at home or in class</div><h2 class="page-title">${titleDot("Unit review")}</h2>
+      <div class="eyebrow">After Lesson ${U.lessons.length}, at home or in class</div><h2 class="page-title">${titleDot("Unit review")}</h2>
       <p class="page-intro">Mixed questions from the whole unit, like a real exam. Try each question without looking back. Then mark it with your teacher's answers and fill in the “fix it” log.</p>
-      ${secHead("exam", "Mixed exam practice", `${U.review.reduce((s, q) => s + (q.marks || 0), 0)} marks · about 50 minutes`)}
+      ${secHead("exam", "Mixed exam practice", `${U.review.reduce((s, q) => s + (q.marks || 0), 0)} marks, about 50 minutes`)}
       ${U.review.map((q) => question(q)).join("")}
       ${keep(`${secHead("revise", "Fix-it log", "Turn every lost mark into a target.")}
       <table class="fix-log"><thead><tr><th style="width:14mm">Q</th><th>What went wrong?</th><th>The correct physics (or method) is…</th><th style="width:26mm">Lesson to revisit</th></tr></thead>
@@ -304,22 +304,22 @@
     if (!words.length) return "";
     return `<section class="${ONE ? "tracker-flow" : "new-page"}"><div class="eyebrow">Reference</div><h2 class="page-title">${titleDot(`Key words${ONE ? " from this lesson" : ""}`)}</h2>
       <p class="page-intro">Learn the meaning and spelling. In exams, precise words earn marks: say “nucleus”, not “middle”, and “unstable nucleus”, not “unstable atom”.</p>
-      <div class="glossary${ONE ? " one" : ""}">${words.map(([k, v]) => `<p><strong>${k}</strong> · ${v}</p>`).join("")}</div></section>`;
+      <div class="glossary${ONE ? " one" : ""}">${words.map(([k, v]) => `<p><strong>${k}</strong>: ${v}</p>`).join("")}</div></section>`;
   }
 
   function tracker() {
-    const rows = U.lessons.map((l) => `<tr class="lesson-row"><td colspan="2">${pad(l.n)} · ${l.title}</td></tr>` +
+    const rows = U.lessons.map((l) => `<tr class="lesson-row"><td colspan="2">${pad(l.n)}: ${l.title}</td></tr>` +
       l.cando.map((c) => `<tr><td>${c}</td><td class="rag-cell"><span class="rag"><i></i><i></i><i></i></span></td></tr>`).join("")).join("");
     return `<section class="new-page"><div class="eyebrow">Finish</div><h2 class="page-title">${titleDot("Progress tracker")}</h2>
       <p class="page-intro">Colour one circle for each statement: <strong>red</strong> = not yet, <strong>amber</strong> = getting there, <strong>green</strong> = I can do this without help. Revisit your reds first.</p>
-      <table class="tracker"><thead><tr><th>I can…</th><th>R · A · G</th></tr></thead><tbody>${rows}</tbody></table></section>`;
+      <table class="tracker"><thead><tr><th>I can…</th><th>R / A / G</th></tr></thead><tbody>${rows}</tbody></table></section>`;
   }
 
   function quickAnswers() {
     const list = (arr) => `<ol>${arr.map(([, a]) => `<li>${a}</li>`).join("")}</ol>`;
     return `<section class="${ONE ? "tracker-flow" : "new-page"}"><div class="eyebrow">Check yourself</div><h2 class="page-title">${titleDot("Quick answers")}</h2>
       <p class="page-intro">Answers to the “Do now” and “Cover the page” questions, so you can check yourself when revising. Answers to the longer questions are in the answer edition.</p>
-      <div class="quick-answers${ONE ? " one" : ""}">${LESSONS.map((l) => `<div>${ONE ? "" : `<b class="lesson-name">Lesson ${l.n} · ${l.title}</b>`}
+      <div class="quick-answers${ONE ? " one" : ""}">${LESSONS.map((l) => `<div>${ONE ? "" : `<b class="lesson-name">Lesson ${l.n}: ${l.title}</b>`}
         <h4>Do now</h4>${list(l.doNow)}<h4>Cover the page</h4>${list(l.recall)}</div>`).join("")}</div></section>`;
   }
 
@@ -330,7 +330,7 @@
   const here = ONE ? `lesson=${ONE.n}` : REVIEW ? "review" : "";
   const nav = [["", "all"], ...U.lessons.map((l) => [`lesson=${l.n}`, String(l.n)]), ["review", "review"]]
     .map(([key, name]) => (key === here ? `<b>${name}</b>` : `<a href="${link(key, answers)}">${name}</a>`)).join(" ");
-  const bar = `<div class="screen-bar">Print preview · Booklet: ${nav} · <a href="${link(here, !answers)}">${answers ? "Student edition" : "Answer edition"}</a> · print with Chrome, A4, headers and footers off</div>`;
+  const bar = `<div class="screen-bar">Print preview. Booklet: ${nav}. <a href="${link(here, !answers)}">${answers ? "Student edition" : "Answer edition"}</a>. Print with Chrome, A4, headers and footers off</div>`;
   const body = ONE ? cover() + howTo() + lesson(ONE) + toolkit() + glossary() + quickAnswers()
     : REVIEW ? cover() + toolkit() + review() + U.extension.map(extension).join("") + glossary() + tracker()
     : cover() + howTo() + toolkit() + LESSONS.map(lesson).join("") + review() + U.extension.map(extension).join("") + glossary() + tracker() + quickAnswers();

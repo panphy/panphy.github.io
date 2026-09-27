@@ -13,7 +13,7 @@
     // ============================================================ 6
     {
       n: 6, accent: "positive", title: "Nuclear equations",
-      spec: "AQA Physics 4.4.2.2 · Combined Science 6.4.2.2",
+      spec: "AQA Physics 4.4.2.2; Combined Science 6.4.2.2",
       mapLine: "Symbols for each radiation, balancing mass and atomic numbers",
       big: "Radium-226 decays and becomes radon, a completely different element. How can we predict exactly which nucleus it turns into?",
       goals: ["use the symbols for alpha, beta, gamma and neutron radiation", "balance a nuclear equation using mass numbers and atomic numbers", "work out the new nucleus after alpha or beta decay", "explain the effect of each decay on the mass and charge of the nucleus"],
@@ -31,9 +31,9 @@
         { t: "p", h: "An electron has almost no mass, so its top number is 0. Its charge is −1, so its bottom number is −1. When a neutron (charge 0) turns into a proton (charge +1), the beta particle carries away the −1: the charges still balance." },
         { t: "key", h: "In every nuclear equation, the <strong>top numbers add up to the same total</strong> on both sides, and so do the <strong>bottom numbers</strong>. If the atomic number changes, a <strong>new element</strong> forms." },
         { t: "sub", h: "The three equations from the slides" },
-        { t: "html", h: EQ([N(241, 95, "Am"), ARROW, N(237, 93, "Np"), "+", ALPHA], "alpha · top: 241 = 237 + 4 · bottom: 95 = 93 + 2") },
-        { t: "html", h: EQ([N(14, 6, "C"), ARROW, N(14, 7, "N"), "+", BETA], "beta · top: 14 = 14 + 0 · bottom: 6 = 7 + (−1)") },
-        { t: "html", h: EQ([N("99m", 43, "Tc"), ARROW, N(99, 43, "Tc"), "+", GAMMA], "gamma · the ‘m’ means the nucleus has extra energy · A and Z do not change") },
+        { t: "html", h: EQ([N(241, 95, "Am"), ARROW, N(237, 93, "Np"), "+", ALPHA], "Alpha. Top: 241 = 237 + 4; bottom: 95 = 93 + 2") },
+        { t: "html", h: EQ([N(14, 6, "C"), ARROW, N(14, 7, "N"), "+", BETA], "Beta. Top: 14 = 14 + 0; bottom: 6 = 7 + (−1)") },
+        { t: "html", h: EQ([N("99m", 43, "Tc"), ARROW, N(99, 43, "Tc"), "+", GAMMA], "Gamma. The ‘m’ means the nucleus has extra energy; A and Z do not change") },
         { t: "worked", q: `Radium-226, ${N(226, 88, "Ra")}, emits an alpha particle and becomes radon (Rn). Write the equation.`, steps: [["Top", "226 − 4 = 222"], ["Bottom", "88 − 2 = 86"], ["New nucleus", N(222, 86, "Rn")], ["Equation", `${N(226, 88, "Ra")} → ${N(222, 86, "Rn")} + ${ALPHA}`]],
           yt: { q: `Uranium-238, ${N(238, 92, "U")}, emits an alpha particle and becomes thorium (Th). Write the equation.`, steps: [["Top", "238 − 4 = 234"], ["Bottom", "92 − 2 = 90"], ["New nucleus", N(234, 90, "Th")], ["Equation", `${N(238, 92, "U")} → ${N(234, 90, "Th")} + ${ALPHA}`]] } },
         { t: "worked", q: `Strontium-90, ${N(90, 38, "Sr")}, emits a beta particle and becomes yttrium (Y). Write the equation.`, steps: [["Top", "90 − 0 = 90"], ["Bottom", "38 + 1 = 39"], ["New nucleus", N(90, 39, "Y")], ["Equation", `${N(90, 38, "Sr")} → ${N(90, 39, "Y")} + ${BETA}`]],
@@ -66,7 +66,7 @@
     // ============================================================ 7
     {
       n: 7, accent: "object", title: "Properties and uses of radiation",
-      spec: "AQA Physics 4.4.2.1 · Combined Science 6.4.2.1",
+      spec: "AQA Physics 4.4.2.1; Combined Science 6.4.2.1",
       mapLine: "Ionising power, range and penetration; choosing the right source",
       big: "A smoke alarm uses alpha radiation, a paper mill uses beta and a hospital uses gamma. Why not use the same radiation for all three?",
       goals: ["compare the ionising power, range in air and penetration of alpha, beta and gamma", "explain why more ionising radiation is less penetrating", "identify radiation from absorber data", "choose a suitable source for a use and justify the choice"],
@@ -85,7 +85,7 @@
         { t: "fig", h: deckFig("penetration", "", "", 50) },
         { t: "key", h: "<strong>More ionising → less penetrating.</strong> Alpha loses its energy fastest, so it is stopped most easily. Gamma ionises weakly, so it travels furthest." },
         { t: "sub", h: "Choosing the right source" },
-        { t: "figs", cols: 3, items: [deckFig("use-smoke", "<b>Alpha · smoke alarm</b><br>Alpha ionises the air, so a small current flows. Smoke absorbs the alpha particles, the current falls and the alarm sounds.", "", 34), deckFig("use-gauge", "<b>Beta · thickness gauge</b><br>Paper absorbs some beta. If the paper gets thicker, the count rate falls, and the rollers adjust.", "", 34), deckFig("use-tracer", "<b>Gamma · medical tracer</b><br>Gamma passes out of the body to a detector and is only weakly ionising.", "", 34)] },
+        { t: "figs", cols: 3, items: [deckFig("use-smoke", "<b>Alpha: smoke alarm</b><br>Alpha ionises the air, so a small current flows. Smoke absorbs the alpha particles, the current falls and the alarm sounds.", "", 34), deckFig("use-gauge", "<b>Beta: thickness gauge</b><br>Paper absorbs some beta. If the paper gets thicker, the count rate falls, and the rollers adjust.", "", 34), deckFig("use-tracer", "<b>Gamma: medical tracer</b><br>Gamma passes out of the body to a detector and is only weakly ionising.", "", 34)] },
         { t: "p", h: "To choose a source, think about <strong>penetration</strong> (must it pass through something, or be stopped?), <strong>ionising power</strong>, and <strong>half-life</strong>: how long it keeps giving out radiation (Lesson 8)." },
         { t: "sub", h: "Identifying radiation from absorbers" },
         { t: "p", h: "A detector measures the count rate from a source as different absorbers are placed in between. The background count rate is 30 counts per minute." },
@@ -113,7 +113,7 @@
     // ============================================================ 8
     {
       n: 8, accent: "electron", title: "Half-life and random decay",
-      spec: "AQA Physics 4.4.2.3 · Combined Science 6.4.2.3",
+      spec: "AQA Physics 4.4.2.3; Combined Science 6.4.2.3",
       mapLine: "Random but predictable, defining half-life, reading a decay curve",
       big: "You cannot predict when one nucleus will decay. So how can we say that half of a sample of iodine-131 will be left after 8 days?",
       goals: ["explain why decay is random but a large sample is predictable", "define half-life in two ways", "find the half-life from a decay curve", "plot a decay curve from data"],
@@ -154,9 +154,9 @@
         { t: "q", say: ["Leo", "After two half-lives, all of the sample has decayed."], p: "Explain what is wrong with Leo's statement.", lines: 2, a: "After one half-life half is left; after two half-lives, a quarter (half of a half) is left, not zero." },
         { t: "q", p: "A student has a sample of only 100 nuclei. After one half-life, 44 are left, not 50. Explain why.", lines: 2, a: "Decay is random. In a small sample the number that decay varies a lot around the expected half; a larger sample would be closer to 50%." },
       ],
-      lab: { title: "Virtual lab: modelling half-life", aside: "Nuclear Decay simulation · tab 04 Half-life. No computer? Use 100 coins: each throw is one half-life; remove the heads.", blocks: [
+      lab: { title: "Virtual lab: modelling half-life", aside: "Nuclear Decay simulation, tab 04 (Half-life). No computer? Use 100 coins: each throw is one half-life; remove the heads.", blocks: [
         { t: "lab", blocks: [
-          { t: "html", h: "<ul><li>" + ["Open tab <strong>04 · Half-life</strong>. Choose <strong>Iodine-131</strong> and <strong>400 nuclei</strong>.", "Before each step, write the number you expect. Then press <strong>Run one half-life</strong> and record the number left.", "Repeat until 5 half-lives have passed."].join("</li><li>") + "</li></ul>" },
+          { t: "html", h: "<ul><li>" + ["Open tab <strong>04 Half-life</strong>. Choose <strong>Iodine-131</strong> and <strong>400 nuclei</strong>.", "Before each step, write the number you expect. Then press <strong>Run one half-life</strong> and record the number left.", "Repeat until 5 half-lives have passed."].join("</li><li>") + "</li></ul>" },
           { t: "q", p: "Record your results.", table: { head: ["Half-lives", "0", "1", "2", "3", "4", "5"], rows: [["Expected number left", "400", null, null, null, null, null], ["Number left (your run)", "400", null, null, null, null, null]], ans: [[null, null, "200", "100", "50", "25", "12.5"], [null, null, "e.g. 206", "e.g. 97", "e.g. 51", "e.g. 27", "e.g. 13"]] } },
           { t: "q", p: "Plot your results. Draw a smooth curve of best fit.", graph: { w: 130, h: 80, x: [0.5, 2], y: [50, 1], xLabel: "number of half-lives", yLabel: "nuclei left", points: [[0, 400], [1, 206], [2, 97], [3, 51], [4, 27], [5, 13]], fit: (n) => 400 * Math.pow(2, -n), fitRange: [0, 6] } },
           { t: "q", p: "Now run the simulation again with <strong>100 nuclei</strong>. How is the graph different? Explain why.", lines: 2, a: "It is more ragged: the numbers left are further from exact halves. With fewer nuclei, the random nature of decay has a bigger effect." },
@@ -174,7 +174,7 @@
     // ============================================================ 9
     {
       n: 9, accent: "alpha", title: "Half-life calculations",
-      spec: "AQA Physics 4.4.2.3 · Combined Science 6.4.2.3 · Higher tier: net decline",
+      spec: "AQA Physics 4.4.2.3; Combined Science 6.4.2.3; Higher tier: net decline",
       mapLine: "Counting half-lives, finding a half-life from data, net decline as a ratio (HT)",
       big: "A hospital uses iodine-131, with a half-life of 8 days. How long before less than 1% of it is left, and why does that matter?",
       goals: ["count half-lives to find how much is left", "find a half-life from data", "find how long it takes to fall to a given value", "(Higher) work out the net decline as a ratio"],
@@ -221,7 +221,7 @@
     // ============================================================ 10
     {
       n: 10, accent: "photon", title: "Contamination and irradiation",
-      spec: "AQA Physics 4.4.2.4 · Combined Science 6.4.2.4",
+      spec: "AQA Physics 4.4.2.4; Combined Science 6.4.2.4",
       mapLine: "Two ways to be exposed, hazards inside and outside the body, staying safe, peer review",
       big: "Supermarkets can sell food treated with gamma rays to kill bacteria. Does eating it make you radioactive?",
       goals: ["explain the difference between irradiation and contamination", "compare the hazards of alpha, beta and gamma inside and outside the body", "describe precautions for working with radioactive sources", "explain why studies of radiation effects are published and peer reviewed"],

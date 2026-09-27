@@ -8,16 +8,16 @@
   // ---------- toolkit: facts and methods to learn, shown up to each booklet's lesson ----------
   const toolkit = [
     { lesson: 1, title: "The three particles", h: table(["Particle", "Charge", "Mass", "Where"], [["Proton", "+1", "1", "nucleus"], ["Neutron", "0", "1", "nucleus"], ["Electron", "−1", "very small", "energy levels"]]) },
-    { lesson: 1, title: "Reading the symbol", h: `<p style="font-size:14pt;margin:0 0 1.5mm">${N("A", "Z", "X")} e.g. ${N(23, 11, "Na")}</p><ul><li>Z, atomic number = protons</li><li>A, mass number = protons + neutrons</li><li>neutrons = A − Z · in an atom, electrons = Z</li><li>Atom radius ≈ 1 × 10<sup>−10</sup> m; nucleus radius &lt; 1/10 000 of that</li></ul>` },
+    { lesson: 1, title: "Reading the symbol", h: `<p style="font-size:14pt;margin:0 0 1.5mm">${N("A", "Z", "X")} e.g. ${N(23, 11, "Na")}</p><ul><li>Z, atomic number = protons</li><li>A, mass number = protons + neutrons</li><li>neutrons = A − Z; in an atom, electrons = Z</li><li>Atom radius ≈ 1 × 10<sup>−10</sup> m; nucleus radius &lt; 1/10 000 of that</li></ul>` },
     { lesson: 2, title: "Isotopes and ions", h: "<ul><li><strong>Isotopes</strong>: same number of protons, different numbers of neutrons.</li><li><strong>Positive ion</strong>: an atom that has lost one or more outer electrons. The nucleus is unchanged.</li></ul>" },
     { lesson: 3, title: "Alpha scattering", h: table(["Observation", "Conclusion"], [["most straight through", "mostly empty space"], ["some deflected", "positive centre"], ["a very few bounced back", "mass in a tiny centre"]]) },
-    { lesson: 4, title: "Models and energy levels", h: "<ul><li>1897 electron · 1904 plum pudding · 1911 nuclear · 1913 Bohr · 1932 neutron (Chadwick)</li><li><strong>Absorb</strong> EM radiation → higher level, further out.</li><li><strong>Emit</strong> EM radiation → lower level, closer in.</li></ul>" },
-    { lesson: 5, title: "Nuclear radiation", h: "<ul><li>Unstable nuclei decay at <strong>random</strong> to become more stable.</li><li><strong>Activity</strong>: decays per second, in becquerel (Bq). <strong>Count rate</strong>: decays recorded per second by a detector.</li><li>α: 2p + 2n · β: fast electron, a neutron → proton · γ: EM radiation · n: a neutron</li></ul>" },
+    { lesson: 4, title: "Models and energy levels", h: "<ul><li>1897 electron → 1904 plum pudding → 1911 nuclear → 1913 Bohr → 1932 neutron (Chadwick)</li><li><strong>Absorb</strong> EM radiation → higher level, further out.</li><li><strong>Emit</strong> EM radiation → lower level, closer in.</li></ul>" },
+    { lesson: 5, title: "Nuclear radiation", h: "<ul><li>Unstable nuclei decay at <strong>random</strong> to become more stable.</li><li><strong>Activity</strong>: decays per second, in becquerel (Bq). <strong>Count rate</strong>: decays recorded per second by a detector.</li><li>α: 2p + 2n; β: fast electron, a neutron → proton; γ: EM radiation; n: a neutron</li></ul>" },
     { lesson: 6, wide: true, title: "Nuclear equations", h: `<div class="split top" style="margin:0"><div>${table(["Emitted", "Symbol", "Mass no.", "Atomic no."], [["alpha", ALPHA, "− 4", "− 2"], ["beta", BETA, "no change", "+ 1"], ["gamma", GAMMA, "no change", "no change"], ["neutron", NEUTRON, "− 1", "no change"]])}</div><div><p>Top numbers balance; bottom numbers balance.</p>${EQ([N(226, 88, "Ra"), "→", N(222, 86, "Rn"), "+", ALPHA])}${EQ([N(14, 6, "C"), "→", N(14, 7, "N"), "+", BETA])}</div></div>` },
     { lesson: 7, wide: true, title: "Properties of radiation", h: table(["", "Alpha", "Beta", "Gamma"], [["Ionising", "strongly", "moderately", "weakly"], ["Range in air", "a few cm", "a few m", "very far"], ["Stopped by", "paper, skin", "a few mm of aluminium", "reduced by thick lead or concrete"], ["Typical use", "smoke alarm", "thickness gauge", "medical tracer"]]) + "<p style='margin:1.5mm 0 0'>More ionising → less penetrating.</p>" },
     { lesson: 8, title: "Half-life from a graph", h: "<ol><li>Read the start value.</li><li>Halve it.</li><li>Across to the curve, down to the time axis.</li><li>Check with a second halving.</li></ol>" },
     { lesson: 9, title: "Half-life calculations", h: "<ul><li>Number of half-lives = time ÷ half-life.</li><li>After <em>n</em> half-lives, (½)<sup><em>n</em></sup> is left: ½, ¼, ⅛, 1/16…</li><li><strong>HT</strong> net decline = initial − final; as a ratio of the initial, 1 − (½)<sup><em>n</em></sup>: ½, ¾, ⅞…</li></ul>" },
-    { lesson: 10, title: "Contamination and irradiation", h: "<ul><li><strong>Irradiation</strong>: exposed to radiation; does not become radioactive.</li><li><strong>Contamination</strong>: radioactive atoms on or in an object.</li><li>Outside the body γ is most hazardous; inside, α is.</li><li>Tongs · distance · short time · lead · dosimeter.</li></ul>" },
+    { lesson: 10, title: "Contamination and irradiation", h: "<ul><li><strong>Irradiation</strong>: exposed to radiation; does not become radioactive.</li><li><strong>Contamination</strong>: radioactive atoms on or in an object.</li><li>Outside the body γ is most hazardous; inside, α is.</li><li>Tongs, distance, short time, lead, dosimeter.</li></ul>" },
   ];
 
   // ---------- unit review ----------
@@ -44,7 +44,7 @@
   // ---------- separate Physics extension pages ----------
   const extension = [
     {
-      eyebrow: "Separate Physics only · AQA 4.4.3", title: "Background radiation and medical uses",
+      eyebrow: "Separate Physics only (AQA 4.4.3)", title: "Background radiation and medical uses",
       intro: "Only for students taking GCSE Physics (separate science). Combined Science students can skip these pages.",
       learn: [
         { t: "sub", h: "Background radiation" },
@@ -63,7 +63,7 @@
       ],
     },
     {
-      eyebrow: "Separate Physics only · AQA 4.4.4", title: "Nuclear fission and fusion",
+      eyebrow: "Separate Physics only (AQA 4.4.4)", title: "Nuclear fission and fusion",
       intro: "Only for students taking GCSE Physics (separate science). These ideas build on nuclear equations (Lesson 6).",
       learn: [
         { t: "sub", h: "Nuclear fission" },

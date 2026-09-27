@@ -14,13 +14,13 @@
   if (!practical) {
     document.title = "Practical worksheets | Electric Circuits";
     document.body.innerHTML = `<main class="sheet-index"><h1>Required practical worksheets</h1><ul>${practicals.map((item) => `
-      <li><strong>${item.title}</strong> · <a href="?rp=${item.slug}">Worksheet</a> · <a href="?rp=${item.slug}&amp;answers">Answers</a></li>`).join("")}</ul></main>`;
+      <li><strong>${item.title}</strong>: <a href="?rp=${item.slug}">Worksheet</a>, <a href="?rp=${item.slug}&amp;answers">Answers</a></li>`).join("")}</ul></main>`;
     return;
   }
 
   const docTitle = `Required practical: ${practical.title}${answers ? " (answers)" : ""}`;
   document.title = docTitle;
-  const footer = `Required practical • ${practical.title}${answers ? " • Answers" : ""}  •  `;
+  const footer = `Required practical: ${practical.title}${answers ? " (Answers)" : ""}, page `;
   const pageStyle = document.createElement("style");
   pageStyle.textContent = `@page { @bottom-right { content: "${footer}" counter(page); } }`;
   document.head.appendChild(pageStyle);
@@ -146,7 +146,7 @@
   const pages = [];
   const cover = `
     <h1 class="cover-title">Required practical: ${practical.title}${answers ? ' <span class="ans-flag">Answers</span>' : ""}</h1>
-    <p class="subtitle">Year 10 GCSE Physics • AQA ${practical.rp}</p>
+    <p class="subtitle">Year 10 GCSE Physics, AQA ${practical.rp}</p>
     <p class="field">Name <span></span></p>
     <p class="field">Class <span></span> Date <span class="short"></span></p>
     <p class="motto">Plan. Measure. Explain.<br>Work in pairs. Read the whole method before you build anything.</p>
@@ -167,7 +167,7 @@
 
   practical.parts.forEach((part) => {
     const heading = `<h1><span class="part-label">${part.label}</span>${sub(part.title)}</h1>`;
-    let page = `${heading}<p class="subtitle">${part.label} • ${practical.title} • ${sub(part.summary)}</p>`;
+    let page = `${heading}<p class="subtitle">${practical.title}, ${part.label}: ${sub(part.summary)}</p>`;
     let number = 0;
     part.blocks.forEach((block) => {
       if (block.type === "page") {

@@ -140,7 +140,7 @@
 
   const phetTool = `<a href="${PHET}" target="_blank" rel="noopener"><span>Sim</span><strong>PhET circuit lab</strong></a>`;
   const fourthTool = lesson.lab
-    ? `<a href="${labHref}" target="_blank" rel="noopener"><span>PDF</span><strong>${lesson.lab.label} · pp. ${lesson.lab.range}</strong></a>`
+    ? `<a href="${labHref}" target="_blank" rel="noopener"><span>PDF</span><strong>${lesson.lab.label}, pp. ${lesson.lab.range}</strong></a>`
     : lesson.phet ? phetTool : "";
   const workbookHref = ([n, title]) => `../../workbook/pdf/${encodeURI(`Electric Circuits - Year 10 Workbook - Lesson ${String(n).padStart(2, "0")} - ${title}.pdf`)}`;
   const labLink = [
@@ -157,7 +157,7 @@
       </nav>
       <header class="lesson-hero">
         <div class="lesson-heading">
-          <p class="eyebrow"><span>Mission ${lesson.number}</span> · Year 10 physics</p>
+          <p class="eyebrow"><span>Mission ${lesson.number}</span>, Year 10 physics</p>
           <h1>${lesson.title}</h1><p>${lesson.intro}</p>
           <span class="spec-chip">${lesson.spec}</span>
         </div>

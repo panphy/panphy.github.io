@@ -11,7 +11,7 @@
     // ============================================================ 1
     {
       n: 1, accent: "proton", title: "Inside the atom",
-      spec: "AQA Physics 4.4.1.1–4.4.1.2 · Combined Science 6.4.1.1–6.4.1.2",
+      spec: "AQA Physics 4.4.1.1–4.4.1.2; Combined Science 6.4.1.1–6.4.1.2",
       mapLine: "Protons, neutrons and electrons, the size of an atom, atomic and mass numbers",
       big: "Everything around you is made of atoms, yet an atom is almost entirely empty space. So what is actually in there?",
       goals: ["describe the charge, mass and position of protons, neutrons and electrons", "state the size of an atom and of its nucleus", "explain why an atom has no overall charge", "use atomic and mass numbers to find the numbers of each particle"],
@@ -43,8 +43,8 @@
         { t: "split", cls: "wide-fig", left: [{ t: "fig", h: deckFig("notation", "", "", 44) }], right: [
           { t: "html", h: "<ul><li>The <strong>atomic number</strong> (bottom) is the number of <strong>protons</strong>. It decides which element the atom is.</li><li>The <strong>mass number</strong> (top) is the number of <strong>protons + neutrons</strong>.</li><li>Number of neutrons = mass number − atomic number.</li><li>In an atom, number of electrons = number of protons.</li></ul>" },
         ] },
-        { t: "worked", q: `How many protons, neutrons and electrons are in an atom of ${N(23, 11, "Na")}?`, steps: [["Protons", "atomic number = 11"], ["Neutrons", "23 − 11 = 12"], ["Electrons", "same as protons = 11"], ["Answer", "11 p · 12 n · 11 e"]],
-          yt: { q: `How many protons, neutrons and electrons are in an atom of ${N(27, 13, "Al")}?`, steps: [["Protons", "13"], ["Neutrons", "27 − 13 = 14"], ["Electrons", "13"], ["Answer", "13 p · 14 n · 13 e"]] } },
+        { t: "worked", q: `How many protons, neutrons and electrons are in an atom of ${N(23, 11, "Na")}?`, steps: [["Protons", "atomic number = 11"], ["Neutrons", "23 − 11 = 12"], ["Electrons", "same as protons = 11"], ["Answer", "11 p, 12 n, 11 e"]],
+          yt: { q: `How many protons, neutrons and electrons are in an atom of ${N(27, 13, "Al")}?`, steps: [["Protons", "13"], ["Neutrons", "27 − 13 = 14"], ["Electrons", "13"], ["Answer", "13 p, 14 n, 13 e"]] } },
       ],
       try: [
         { t: "q", p: "Complete the sentences using the word bank.", fill: "At the centre of an atom is a tiny [[nucleus]]. It contains [[protons]] and [[neutrons]]. [[Electrons|30]] are arranged in energy levels around it. A proton has a relative charge of [[+1|14]] and an electron has a relative charge of [[−1|14]]. Almost all of the [[mass]] of the atom is in the nucleus.", bank: ["nucleus", "protons", "neutrons", "Electrons", "mass", "+1", "−1", "0", "charge"] },
@@ -67,7 +67,7 @@
     // ============================================================ 2
     {
       n: 2, accent: "electron", title: "Isotopes and ions",
-      spec: "AQA Physics 4.4.1.2 · Combined Science 6.4.1.2",
+      spec: "AQA Physics 4.4.1.2; Combined Science 6.4.1.2",
       mapLine: "Same element, different neutrons; atoms that lose outer electrons",
       big: "Carbon-12 and carbon-14 are both carbon, but only carbon-14 is radioactive. What is different about them?",
       goals: ["explain what isotopes are", "compare isotopes using nuclear notation", "describe how an atom becomes a positive ion", "say what changes, and what does not, when an ion forms"],
@@ -86,7 +86,7 @@
         { t: "compare", head: ["Isotope", "Symbol", "Protons", "Neutrons", "Stable?"], rows: [["carbon-12", N(12, 6, "C"), "6", "6", "stable"], ["carbon-13", N(13, 6, "C"), "6", "7", "stable"], ["carbon-14", N(14, 6, "C"), "6", "8", "unstable: radioactive"]] },
         { t: "key", h: "Isotopes: <strong>same protons, different neutrons</strong>. Some isotopes have an <strong>unstable</strong> nucleus: it gives out radiation. You will meet this in Lesson 5." },
         { t: "sub", h: "Hydrogen's three isotopes" },
-        { t: "figs", cols: 3, items: [dfig(nucleus(1, 0, 18, "1 p · 0 n"), "hydrogen-1", "", 26), dfig(nucleus(1, 1, 18, "1 p · 1 n"), "hydrogen-2 (deuterium)", "", 26), dfig(nucleus(1, 2, 18, "1 p · 2 n"), "hydrogen-3 (tritium): unstable", "", 26)] },
+        { t: "figs", cols: 3, items: [dfig(nucleus(1, 0, 18, "1 p, 0 n"), "hydrogen-1", "", 26), dfig(nucleus(1, 1, 18, "1 p, 1 n"), "hydrogen-2 (deuterium)", "", 26), dfig(nucleus(1, 2, 18, "1 p, 2 n"), "hydrogen-3 (tritium): unstable", "", 26)] },
         { t: "sub", h: "Ions" },
         { t: "fig", h: deckFig("ion", "", "", 50) },
         { t: "split", cls: "top", left: [
@@ -106,7 +106,7 @@
         ] }, starter: "Explain your answer for pair B.", lines: 1, a: "Different numbers of protons (6 and 7), so they are different elements, even though the mass numbers are the same." },
         { t: "q", type: "Supported", p: "Chlorine has two common isotopes. Complete the table.", table: { head: ["Isotope", "Symbol", "Protons", "Neutrons", "Electrons"], rows: [["chlorine-35", N(35, 17, "Cl"), null, null, null], ["chlorine-37", N(37, 17, "Cl"), null, null, null]], ans: [[null, null, "17", "18", "17"], [null, null, "17", "20", "17"]] } },
         { t: "q", p: "The diagrams show three nuclei. Which two are isotopes of the same element? Explain how you know.", options: { cols: 3, items: [
-          { label: "P", fig: nucleus(3, 3, 16, "3 p · 3 n") }, { label: "Q", fig: nucleus(4, 3, 16, "4 p · 3 n") }, { label: "R", fig: nucleus(3, 4, 16, "3 p · 4 n") },
+          { label: "P", fig: nucleus(3, 3, 16, "3 p, 3 n") }, { label: "Q", fig: nucleus(4, 3, 16, "4 p, 3 n") }, { label: "R", fig: nucleus(3, 4, 16, "3 p, 4 n") },
         ] }, lines: 2, a: "P and R: both have 3 protons (the same element, lithium) but different numbers of neutrons (3 and 4)." },
         { t: "q", p: "Complete the sentences.", fill: "When an atom loses an outer electron it becomes a [[positive]] ion. The number of [[protons]] does not change, so it is still the same [[element]]. The ion has more [[protons]] than [[electrons]].", bank: ["positive", "negative", "protons", "neutrons", "electrons", "element"] },
         { t: "q", type: "On your own", p: "Complete the table. Write <em>atom</em> or <em>ion</em>, and the overall charge.", table: { head: ["Protons", "Neutrons", "Electrons", "Atom or ion?", "Overall charge"], rows: [["11", "12", "11", null, null], ["11", "12", "10", null, null], ["20", "20", "18", null, null], ["8", "8", "8", null, null]], ans: [[null, null, null, "atom", "0"], [null, null, null, "ion", "+1"], [null, null, null, "ion", "+2"], [null, null, null, "atom", "0"]] } },
@@ -125,7 +125,7 @@
     // ============================================================ 3
     {
       n: 3, accent: "alpha", title: "From plum pudding to the nucleus",
-      spec: "AQA Physics 4.4.1.3 · Combined Science 6.4.1.3",
+      spec: "AQA Physics 4.4.1.3; Combined Science 6.4.1.3",
       mapLine: "The plum pudding model, alpha scattering and the nuclear model",
       big: "Nobody has ever seen inside an atom. So how did scientists find out that almost all of its mass is squeezed into a tiny nucleus?",
       goals: ["describe the plum pudding model and why it was proposed", "describe the alpha particle scattering experiment", "explain how each result led to the nuclear model", "compare the plum pudding and nuclear models"],
@@ -178,7 +178,7 @@
     // ============================================================ 4
     {
       n: 4, accent: "photon", title: "Energy levels and the nucleus",
-      spec: "AQA Physics 4.4.1.2–4.4.1.3 · Combined Science 6.4.1.2–6.4.1.3",
+      spec: "AQA Physics 4.4.1.2–4.4.1.3; Combined Science 6.4.1.2–6.4.1.3",
       mapLine: "The Bohr model, absorbing and emitting EM radiation, protons and neutrons, why models change",
       big: "Neon signs glow red and sodium street lamps glow orange. Each element gives out its own colours of light. What are its electrons doing?",
       goals: ["describe Bohr's model of electrons in energy levels", "explain how electrons change level when they absorb or emit electromagnetic radiation", "describe how protons and then neutrons were discovered", "explain why scientific models change"],
@@ -235,7 +235,7 @@
     // ============================================================ 5
     {
       n: 5, accent: "teal", title: "Radioactive decay",
-      spec: "AQA Physics 4.4.2.1 · Combined Science 6.4.2.1",
+      spec: "AQA Physics 4.4.2.1; Combined Science 6.4.2.1",
       mapLine: "Unstable nuclei, activity and count rate, alpha, beta, gamma and neutron radiation",
       big: "A smoke alarm contains a radioactive source. Nothing switches it on, yet it gives out radiation for hundreds of years. Why?",
       goals: ["explain why some nuclei give out radiation", "describe radioactive decay as random", "define activity and count rate", "describe what alpha, beta, gamma and neutron radiation are, and how each changes the nucleus"],
@@ -273,7 +273,7 @@
         { t: "q", say: ["Ava", "Beta particles are electrons knocked out of the energy levels, so beta decay just turns the atom into an ion."], p: "Explain what is wrong with Ava's statement.", lines: 3, a: "A beta particle comes from the nucleus: a neutron turns into a proton and a fast electron is emitted. The nucleus gains a proton, so the atom becomes a different element; it is not just an ion." },
         { t: "q", type: "Challenge", p: "A Geiger–Müller tube records 1800 counts in 1 minute. (a) Calculate the count rate in counts per second. (b) Suggest why the activity of the source is greater than this count rate.", lines: 3, a: "(a) 1800 ÷ 60 = 30 counts per second. (b) Radiation goes out in all directions, so only some of it enters the tube; some is absorbed by the air or the tube wall before it is detected." },
       ],
-      lab: { title: "Virtual lab: watch a nucleus decay", aside: "Nuclear Decay simulation · tabs 01 to 03", blocks: [
+      lab: { title: "Virtual lab: watch a nucleus decay", aside: "Nuclear Decay simulation, tabs 01 to 03", blocks: [
         { t: "lab", blocks: [
           { t: "p", h: "Open the <strong>Nuclear Decay</strong> simulation. For each tab, press <strong>Decay this nucleus</strong> and read the equation it shows." },
           { t: "q", p: "Record what happens.", table: { head: ["Tab", "Parent nucleus", "What leaves the nucleus?", "Change in mass number", "Change in atomic number", "New nucleus"], rows: [["01 α", "americium-241", null, null, null, null], ["02 β", "carbon-14", null, null, null, null], ["03 γ", "technetium-99m", null, null, null, null]], ans: [[null, null, "alpha particle (He nucleus)", "−4", "−2", "neptunium-237"], [null, null, "beta particle (electron)", "0", "+1", "nitrogen-14"], [null, null, "gamma ray", "0", "0", "technetium-99"]] } },

@@ -85,7 +85,7 @@
       </nav>
       <header class="lesson-hero">
         <div class="lesson-heading">
-          <p class="eyebrow"><span>Mission ${lesson.number}</span> · Skills lab</p>
+          <p class="eyebrow"><span>Mission ${lesson.number}</span>: Skills lab</p>
           <h1>${lesson.title}</h1><p>${lesson.intro}</p>
         </div>
         <div class="lesson-dossier">

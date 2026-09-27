@@ -155,12 +155,12 @@
     // ============================================================ 1
     {
       n: 1, accent: "spark", title: "Complete circuits and symbols",
-      spec: "AQA Combined 6.2.1.1 · Physics 4.2.1.1",
+      spec: "AQA Combined 6.2.1.1; Physics 4.2.1.1",
       mapLine: "What a circuit needs, circuit symbols and drawing rules, measuring current",
       big: "Your torch won't switch on. The bulb is fine and the batteries are new. What could be wrong?",
       goals: ["explain why a lamp only lights in a complete loop", "recognise and draw standard circuit symbols", "turn a real circuit into a neat circuit diagram", "connect an ammeter in series to measure current"],
       keywords: ["circuit", "component", "cell", "battery", "switch", "circuit diagram", "series", "ammeter"],
-      online: { label: "Mission 1 · Build & measure", path: "lesson/build-and-measure/", text: "Notes on circuits, symbols and drawing rules, with 5 practice questions and worked answers." },
+      online: { label: "Mission 1: Build & measure", path: "lesson/build-and-measure/", text: "Notes on circuits, symbols and drawing rules, with 5 practice questions and worked answers." },
       doNow: [
         ["Name two things that run on a battery and two that plug into the wall.", "e.g. torch, phone; kettle, TV."],
         ["When a lamp is on, what do you think is moving in the wires?", "Tiny charged particles (electrons): you learn this today."],
@@ -211,12 +211,12 @@
     // ============================================================ 2
     {
       n: 2, accent: "cyan", title: "Current and charge",
-      spec: "AQA Combined 6.2.1.2 · Physics 4.2.1.2 · Virtual Lab 1",
+      spec: "AQA Combined 6.2.1.2; Physics 4.2.1.2; Virtual Lab 1",
       mapLine: "Current as a rate of flow of charge, Q = I t, current is not used up",
       big: "Flick a switch and the lamp lights instantly, yet each electron drifts through the wire slower than a snail. How can both be true?",
       goals: ["describe current as the rate of flow of charge", "use Q = I t, with time in seconds", "explain why the current is the same everywhere in a single loop"],
       keywords: ["charge (C)", "current (A)", "coulomb", "ampere", "electron", "conventional current"],
-      online: { label: "Mission 2 · Charge on the move", path: "lesson/charge-and-current/", text: "Revision notes and 5 practice questions with worked answers." },
+      online: { label: "Mission 2: Charge on the move", path: "lesson/charge-and-current/", text: "Revision notes and 5 practice questions with worked answers." },
       doNow: [
         ["Draw the symbols for a cell and a lamp.", "Cell: a long line and a shorter line (the long line is +). Lamp: circle with a cross."],
         ["How must an ammeter be connected?", "In series (in the loop)."],
@@ -233,7 +233,7 @@
         { t: "p", h: "<strong>Current</strong> is the <strong>rate of flow of charge</strong>: how many coulombs pass a point <em>each second</em>." },
         { t: "model", title: "Think of a ticket barrier", h: "Count the people going through a station barrier each second. The current is like the number of people <em>per second</em>, not the number of people in the station.", breaks: "people can stop or change direction on their own; in a single loop all the charges move together." },
         { t: "key", h: "<strong>1 ampere = 1 coulomb per second.</strong> A current of 0.5 A means 0.5 C of charge passes a point every second." },
-        { t: "eq", eq: "Q = I t", words: "charge flow = current × time", units: "Q in coulombs (C) · I in amperes (A) · t in seconds (s)", re: "Rearranged: I = Q ÷ t and t = Q ÷ I" },
+        { t: "eq", eq: "Q = I t", words: "charge flow = current × time", units: "Q in coulombs (C), I in amperes (A), t in seconds (s)", re: "Rearranged: I = Q ÷ t and t = Q ÷ I" },
         { t: "worked", q: "A current of 0.40 A flows for 3.0 minutes. Calculate the charge that flows.", steps: [["Know", "I = 0.40 A, t = 3.0 × 60 = 180 s"], ["Equation", "Q = I t"], ["Substitute", "Q = 0.40 × 180"], ["Answer", "Q = 72 C"]],
           yt: { q: "A current of 0.50 A flows for 4.0 minutes. Calculate the charge that flows.", steps: [["Know", "I = 0.50 A, t = 240 s"], ["Equation", "Q = I t"], ["Substitute", "Q = 0.50 × 240"], ["Answer", "Q = 120 C"]] } },
         { t: "sub", h: "Current is not used up" },
@@ -269,12 +269,12 @@
     // ============================================================ 3
     {
       n: 3, accent: "copper", title: "Potential difference",
-      spec: "AQA Combined 6.2.1.3, 6.2.4.2 · Physics 4.2.1.3, 4.2.4.2 · Virtual Lab 2",
+      spec: "AQA Combined 6.2.1.3, 6.2.4.2; Physics 4.2.1.3, 4.2.4.2; Virtual Lab 2",
       mapLine: "p.d. as energy per coulomb, voltmeters, E = Q V, p.d.s add in series",
       big: "An AA battery says 1.5 V. A car battery says 12 V. What is that number actually telling you?",
       goals: ["explain p.d. as the energy transferred per coulomb", "connect a voltmeter in parallel across a component", "use E = Q V", "explain why the p.d.s in a loop add up to the supply p.d."],
       keywords: ["potential difference (p.d.)", "volt (V)", "voltmeter", "parallel", "energy", "joule (J)"],
-      online: { label: "Mission 3 · Energy per coulomb", path: "lesson/potential-difference/", text: "Revision notes and 5 practice questions with worked answers." },
+      online: { label: "Mission 3: Energy per coulomb", path: "lesson/potential-difference/", text: "Revision notes and 5 practice questions with worked answers." },
       doNow: [
         ["What is current?", "The rate of flow of charge."],
         ["0.50 A flows for 20 s. How much charge flows?", "Q = 0.50 × 20 = 10 C"],
@@ -287,7 +287,7 @@
         { t: "sub", h: "What a volt means" },
         { t: "p", h: "<strong>Potential difference (p.d.)</strong> is the <strong>energy transferred per coulomb</strong> of charge between two points. It is measured in <strong>volts (V)</strong>. People often call it ‘voltage’." },
         { t: "key", h: "<strong>1 volt = 1 joule per coulomb.</strong> A p.d. of 6 V across a lamp means 6 J of energy is transferred to the lamp by every 1 C of charge that passes through it." },
-        { t: "eq", eq: "E = Q V", words: "energy transferred = charge × potential difference", units: "E in joules (J) · Q in coulombs (C) · V in volts (V)", re: "Rearranged: V = E ÷ Q and Q = E ÷ V" },
+        { t: "eq", eq: "E = Q V", words: "energy transferred = charge × potential difference", units: "E in joules (J), Q in coulombs (C), V in volts (V)", re: "Rearranged: V = E ÷ Q and Q = E ÷ V" },
         { t: "worked", q: "6.0 C of charge passes through a lamp with 12 V across it. Calculate the energy transferred.", steps: [["Know", "Q = 6.0 C, V = 12 V"], ["Equation", "E = Q V"], ["Substitute", "E = 6.0 × 12"], ["Answer", "E = 72 J"]],
           yt: { q: "A heater transfers 360 J while 30 C passes through it. Calculate the p.d. across it.", steps: [["Know", "E = 360 J, Q = 30 C"], ["Equation", "V = E ÷ Q"], ["Substitute", "V = 360 ÷ 30"], ["Answer", "V = 12 V"]] } },
         { t: "sub", h: "Measuring p.d.: the voltmeter" },
@@ -327,12 +327,12 @@
     // ============================================================ 4
     {
       n: 4, accent: "violet", title: "Resistance and V = I R",
-      spec: "AQA Combined 6.2.1.3–6.2.1.4 · Physics 4.2.1.3–4.2.1.4 · Virtual Lab 3",
+      spec: "AQA Combined 6.2.1.3–6.2.1.4; Physics 4.2.1.3–4.2.1.4; Virtual Lab 3",
       mapLine: "Resistance, V = I R, ohmic conductors, why heating raises resistance",
       big: "A dimmer switch makes a lamp glow less brightly. What is it actually changing?",
       goals: ["describe resistance and its unit, the ohm (Ω)", "use V = I R, including mA and kΩ", "recognise an ohmic conductor from data or a graph", "explain why heating a metal increases its resistance"],
       keywords: ["resistance", "ohm (Ω)", "ohmic conductor", "directly proportional", "variable resistor"],
-      online: { label: "Mission 4 · Resistance & V = IR", path: "lesson/resistance/", text: "Revision notes and 5 practice questions with worked answers." },
+      online: { label: "Mission 4: Resistance & V = IR", path: "lesson/resistance/", text: "Revision notes and 5 practice questions with worked answers." },
       doNow: [
         ["What does ‘6 V across a lamp’ mean?", "6 J of energy is transferred per coulomb."],
         ["Which meter measures p.d., and how is it connected?", "Voltmeter, in parallel (across)."],
@@ -345,7 +345,7 @@
           D.circuit({ w: 300, h: 170, wires: ["M40 40 H260 V130 H40 Z"], parts: [["battery", 150, 40, "h", "6 V"], ["resistor", 110, 130, "h", "10 Ω", "b"], ["ammeter", 200, 130, "h", "0.60 A", "b"]], caption: "Smaller resistance, bigger current." }),
           D.circuit({ w: 300, h: 170, wires: ["M40 40 H260 V130 H40 Z"], parts: [["battery", 150, 40, "h", "6 V"], ["resistor", 110, 130, "h", "20 Ω", "b"], ["ammeter", 200, 130, "h", "0.30 A", "b"]], caption: "Double the resistance, half the current." }),
         ] },
-        { t: "eq", eq: "V = I R", words: "potential difference = current × resistance", units: "V in volts (V) · I in amperes (A) · R in ohms (Ω)", re: "Rearranged: I = V ÷ R and R = V ÷ I" },
+        { t: "eq", eq: "V = I R", words: "potential difference = current × resistance", units: "V in volts (V), I in amperes (A), R in ohms (Ω)", re: "Rearranged: I = V ÷ R and R = V ÷ I" },
         { t: "worked", q: "A resistor has 6.0 V across it and a current of 0.30 A through it. Calculate its resistance.", steps: [["Know", "V = 6.0 V, I = 0.30 A"], ["Equation", "R = V ÷ I"], ["Substitute", "R = 6.0 ÷ 0.30"], ["Answer", "R = 20 Ω"]],
           yt: { q: "A lamp has 12 V across it and 0.40 A through it. Calculate its resistance.", steps: [["Know", "V = 12 V, I = 0.40 A"], ["Equation", "R = V ÷ I"], ["Substitute", "R = 12 ÷ 0.40"], ["Answer", "R = 30 Ω"]] } },
         { t: "worked", q: "A 150 Ω resistor has 3.0 V across it. Calculate the current in milliamps (mA).", steps: [["Equation", "I = V ÷ R"], ["Substitute", "I = 3.0 ÷ 150"], ["Answer", "I = 0.020 A"], ["Convert", "0.020 × 1000 = 20 mA"]],
@@ -384,12 +384,12 @@
     // ============================================================ 5
     {
       n: 5, accent: "leaf", rp: "Required practical", title: "Resistance of a wire",
-      spec: "AQA Combined RP 15 · Physics RP 3 · Part A",
+      spec: "AQA Combined RP 15; Physics RP 3; Part A",
       mapLine: "Required practical: how the length of a wire affects its resistance",
       big: "If you double the length of a wire, what happens to its resistance?",
       goals: ["set up a circuit to find resistance from V and I", "identify and control the variables", "record, process and graph results", "write a conclusion using evidence"],
       keywords: ["independent variable", "dependent variable", "control variable", "anomaly", "line of best fit"],
-      online: { label: "Required practical · Resistance", path: "practical/resistance/", text: "Method, example results and a printable worksheet (Part A)." },
+      online: { label: "Required practical: Resistance", path: "practical/resistance/", text: "Method, example results and a printable worksheet (Part A)." },
       order: ["doNow", "learn", "lab", "try", "exam", "revise"],
       doNow: [
         ["Calculate R for 1.2 V and 0.40 A.", "R = 1.2 ÷ 0.40 = 3.0 Ω"],
@@ -430,12 +430,12 @@
     // ============================================================ 6
     {
       n: 6, accent: "spark", title: "Series and parallel circuits",
-      spec: "AQA Combined 6.2.2 · Physics 4.2.2",
+      spec: "AQA Combined 6.2.2; Physics 4.2.2",
       mapLine: "Current, p.d. and resistance rules for series and parallel circuits",
       big: "When one bulb in your kitchen blows, why don't all the other lights in the house go out?",
       goals: ["tell series and parallel circuits apart", "use the rules for current and p.d. in each", "calculate total resistance in series", "explain why adding a parallel branch lowers the total resistance"],
       keywords: ["series", "parallel", "branch", "junction", "total resistance"],
-      online: { label: "Mission 5 · Series & parallel", path: "lesson/series-and-parallel/", text: "Revision notes, 6 practice questions and a go-further box." },
+      online: { label: "Mission 5: Series & parallel", path: "lesson/series-and-parallel/", text: "Revision notes, 6 practice questions and a go-further box." },
       doNow: [
         ["0.50 A flows through a 12 Ω resistor. Calculate the p.d.", "V = 0.50 × 12 = 6.0 V"],
         ["How does the resistance of a wire depend on its length?", "Directly proportional."],
@@ -476,12 +476,12 @@
     // ============================================================ 7
     {
       n: 7, accent: "copper", rp: "Required practical", title: "Resistors in series and parallel",
-      spec: "AQA Combined RP 15 · Physics RP 3 · Part B",
+      spec: "AQA Combined RP 15; Physics RP 3; Part B",
       mapLine: "Required practical: measure total resistance of two resistors in series and in parallel",
       big: "Two identical resistors, three ways to connect them. Which arrangement lets the most current flow?",
       goals: ["measure the total resistance of resistors in series and in parallel", "compare results with R_total = R₁ + R₂", "explain the results using paths and current", "evaluate the measurements"],
       keywords: ["total resistance", "prediction", "uncertainty", "resolution", "evaluate"],
-      online: { label: "Required practical · Resistance (Part B)", path: "practical/resistance/", text: "Method, example results and a printable worksheet (Part B)." },
+      online: { label: "Required practical: Resistance (Part B)", path: "practical/resistance/", text: "Method, example results and a printable worksheet (Part B)." },
       order: ["doNow", "learn", "lab", "try", "exam", "revise"],
       doNow: [
         ["Total resistance of 10 Ω and 15 Ω in series?", "25 Ω"],
@@ -519,12 +519,12 @@
     // ============================================================ 8
     {
       n: 8, accent: "violet", title: "I–V graphs",
-      spec: "AQA Combined 6.2.1.4 · Physics 4.2.1.4",
+      spec: "AQA Combined 6.2.1.4; Physics 4.2.1.4",
       mapLine: "I–V graphs of a fixed resistor, filament lamp and diode",
       big: "Every component has a ‘fingerprint’: the shape of its I–V graph. Could you identify a component from its graph alone?",
       goals: ["read an I–V graph, including negative values", "sketch and recognise the graphs for a fixed resistor, a filament lamp and a diode", "calculate the resistance at a point with R = V ÷ I", "explain the shape of each graph"],
       keywords: ["I–V characteristic", "filament lamp", "diode", "LED", "forward", "reverse"],
-      online: { label: "Mission 6 · I–V characteristics", path: "lesson/iv-characteristics/", text: "Revision notes with graphs and 5 practice questions." },
+      online: { label: "Mission 6: I–V characteristics", path: "lesson/iv-characteristics/", text: "Revision notes with graphs and 5 practice questions." },
       doNow: [
         ["What is an ohmic conductor?", "Current ∝ p.d. at constant temperature (constant resistance)."],
         ["Why does a metal's resistance increase when it gets hot?", "Ions vibrate more, so more collisions."],
@@ -563,12 +563,12 @@
     // ============================================================ 9
     {
       n: 9, accent: "leaf", rp: "Required practical", title: "Investigating I–V characteristics",
-      spec: "AQA Combined RP 16 · Physics RP 4",
+      spec: "AQA Combined RP 16; Physics RP 4",
       mapLine: "Required practical: measure the I–V characteristics of a resistor, lamp and diode",
       big: "Can you produce the fingerprint graphs of a resistor, a lamp and a diode yourself?",
       goals: ["set up a circuit to vary the p.d. and measure the current", "take readings in both directions, safely", "plot an I–V graph with positive and negative values", "describe how the method changes for a diode"],
       keywords: ["variable resistor", "protective resistor", "reverse", "range", "interval"],
-      online: { label: "Required practical · I–V characteristics", path: "practical/iv-characteristics/", text: "Method, example results, graphs and a printable worksheet." },
+      online: { label: "Required practical: I–V characteristics", path: "practical/iv-characteristics/", text: "Method, example results, graphs and a printable worksheet." },
       order: ["doNow", "learn", "lab", "try", "exam", "revise"],
       doNow: [
         ["Sketch the I–V graph shape for a diode.", "Zero current for negative p.d.; almost none until a small positive p.d., then rises steeply."],
@@ -608,12 +608,12 @@
     // ============================================================ 10
     {
       n: 10, accent: "cyan", title: "Thermistors, LDRs and sensors",
-      spec: "AQA Combined 6.2.1.4, 6.2.2 · Physics 4.2.1.4, 4.2.2",
+      spec: "AQA Combined 6.2.1.4, 6.2.2; Physics 4.2.1.4, 4.2.2",
       mapLine: "How thermistors and LDRs respond to temperature and light, and sensor circuits",
       big: "How does a streetlight know it's getting dark, and how does a fire alarm know the room is hot?",
       goals: ["describe how a thermistor's resistance changes with temperature", "describe how an LDR's resistance changes with light intensity", "predict the current in a sensor circuit", "choose the right sensor for a job"],
       keywords: ["thermistor", "LDR", "light intensity", "sensor"],
-      online: { label: "Mission 6 · Thermistor and LDR", path: "lesson/iv-characteristics/", text: "Read the ‘Thermistor’ and ‘Light-dependent resistor’ sections and their questions." },
+      online: { label: "Mission 6: Thermistor and LDR", path: "lesson/iv-characteristics/", text: "Read the ‘Thermistor’ and ‘Light-dependent resistor’ sections and their questions." },
       doNow: [
         ["Which component's I–V graph gets less steep?", "Filament lamp."],
         ["At a fixed p.d., what happens to the current if the resistance doubles?", "It halves."],
@@ -651,12 +651,12 @@
     // ============================================================ 11
     {
       n: 11, accent: "spark", title: "Power and energy transfer",
-      spec: "AQA Combined 6.2.4.1–6.2.4.2 · Physics 4.2.4.1–4.2.4.2",
+      spec: "AQA Combined 6.2.4.1–6.2.4.2; Physics 4.2.4.1–4.2.4.2",
       mapLine: "Power, E = P t, P = V I, P = I² R, energy transfers in appliances",
       big: "Which transfers more energy: a 3 kW kettle boiling for 3 minutes, or a 10 W LED lamp left on for 5 hours?",
       goals: ["describe power as the energy transferred per second", "use E = P t, P = V I and P = I² R with the right units", "describe the energy transfers in everyday appliances", "choose the right equation for a question"],
       keywords: ["power", "watt (W)", "kilowatt (kW)", "energy transferred", "power rating"],
-      online: { label: "Mission 7 · Power & the National Grid", path: "lesson/power-and-national-grid/", text: "Read the power and energy sections, then try questions 1–4." },
+      online: { label: "Mission 7: Power & the National Grid", path: "lesson/power-and-national-grid/", text: "Read the power and energy sections, then try questions 1–4." },
       doNow: [
         ["5.0 C passes through a 12 V lamp. How much energy is transferred?", "E = Q V = 60 J"],
         ["2.0 A flows for 1 minute. How much charge flows?", "Q = 2.0 × 60 = 120 C"],
@@ -667,11 +667,11 @@
         { t: "p", h: "<strong>Power</strong> is the <strong>energy transferred per second</strong>. It is measured in <strong>watts (W)</strong>: 1 W = 1 J per second. A 2000 W (2 kW) kettle transfers 2000 J of energy every second." },
         { t: "compare", head: ["Appliance", "Typical power", "Energy transferred each second"], rows: [["LED lamp", "10 W", "10 J"], ["Laptop", "60 W", "60 J"], ["Hairdryer", "1.2 kW = 1200 W", "1200 J"], ["Kettle", "2.2 kW = 2200 W", "2200 J"], ["Electric shower", "9 kW = 9000 W", "9000 J"]] },
         { t: "p", h: "Every appliance transfers energy electrically from the mains to other energy stores: a kettle to the <strong>thermal store</strong> of the water; a hairdryer's fan to <strong>kinetic</strong> energy and its heater to thermal; a phone charger to the <strong>chemical store</strong> of the battery." },
-        { t: "eq", eq: "E = P t", words: "energy transferred = power × time", units: "E in joules (J) · P in watts (W) · t in seconds (s)", re: "Convert kW → W (× 1000) and minutes or hours → seconds first." },
+        { t: "eq", eq: "E = P t", words: "energy transferred = power × time", units: "E in joules (J), P in watts (W), t in seconds (s)", re: "Convert kW → W (× 1000) and minutes or hours → seconds first." },
         { t: "worked", q: "A 2.0 kW kettle is on for 3.0 minutes. Calculate the energy transferred.", steps: [["Know", "P = 2000 W, t = 180 s"], ["Equation", "E = P t"], ["Substitute", "E = 2000 × 180"], ["Answer", "E = 360 000 J"]],
           yt: { q: "A 1.2 kW hairdryer is used for 10 minutes. Calculate the energy transferred.", steps: [["Know", "P = 1200 W, t = 600 s"], ["Equation", "E = P t"], ["Substitute", "E = 1200 × 600"], ["Answer", "E = 720 000 J"]] } },
-        { t: "eq", eq: "P = V I", words: "power = p.d. × current", units: "P in watts (W) · V in volts (V) · I in amperes (A)" },
-        { t: "eq", eq: "P = I² R", words: "power = current² × resistance", units: "P in watts (W) · I in amperes (A) · R in ohms (Ω)" },
+        { t: "eq", eq: "P = V I", words: "power = p.d. × current", units: "P in watts (W), V in volts (V), I in amperes (A)" },
+        { t: "eq", eq: "P = I² R", words: "power = current² × resistance", units: "P in watts (W), I in amperes (A), R in ohms (Ω)" },
         { t: "worked", q: "A heater on the 230 V mains draws a current of 4.0 A. Calculate its power.", steps: [["Equation", "P = V I"], ["Substitute", "P = 230 × 4.0"], ["Answer", "P = 920 W"]],
           yt: { q: "A current of 3.0 A flows through a 20 Ω resistor. Calculate the power.", steps: [["Equation", "P = I² R"], ["Substitute", "P = 3.0² × 20 = 9.0 × 20"], ["Answer", "P = 180 W"]] } },
         { t: "key", h: "In P = I² R, <strong>square the current first</strong>. Doubling the current makes the heating <strong>four times</strong> bigger: that is why cables carrying big currents get hot." },
@@ -696,7 +696,7 @@
     // ============================================================ 12
     {
       n: 12, accent: "copper", title: "Mains, safety and the National Grid",
-      spec: "AQA Combined 6.2.3, 6.2.4.3 · Physics 4.2.3, 4.2.4.3",
+      spec: "AQA Combined 6.2.3, 6.2.4.3; Physics 4.2.3, 4.2.4.3",
       mapLine: "ac and dc, 230 V 50 Hz mains, three-core cable, earthing, the National Grid",
       big: "Pylon cables carry up to 400 000 V. Why so high, and why do we only get 230 V at the plug?",
       goals: ["describe the difference between ac and dc", "state the UK mains values: 230 V, 50 Hz", "explain how the earth wire and fuse protect you", "explain why the National Grid uses very high p.d.s"],
@@ -723,7 +723,7 @@
         { t: "steps", items: ["A fault makes the live wire touch the metal case.", "The earth wire connects the case to earth through a very low resistance.", "A very large current flows from the live wire, through the case and earth wire, to earth.", "The large current melts the fuse (or trips the circuit breaker).", "The live wire is disconnected, so the case is safe to touch."] },
         { t: "sub", h: "The National Grid" },
         { t: "split", left: [{ t: "p", h: "The <strong>National Grid</strong> is a nationwide system of cables and transformers linking power stations to homes and businesses." }, { t: "p", h: "<strong>Step-up transformers</strong> raise the p.d. to as much as 400 kV. For the same power (<strong>P = V I</strong>), a higher p.d. means a <strong>smaller current</strong>. A smaller current means much less heating in the cables (<strong>P = I² R</strong>), so less energy is wasted: the grid is <strong>efficient</strong>." }, { t: "p", h: "<strong>Step-down transformers</strong> then lower the p.d. to 230 V, which is safer for homes." }], right: [{ t: "fig", h: D.nationalGrid() }] },
-        { t: "eq", eq: "V<sub>p</sub> I<sub>p</sub> = V<sub>s</sub> I<sub>s</sub>", words: "Higher tier only: for an ideal transformer, power in = power out", units: "p = primary (input) coil · s = secondary (output) coil" },
+        { t: "eq", eq: "V<sub>p</sub> I<sub>p</sub> = V<sub>s</sub> I<sub>s</sub>", words: "Higher tier only: for an ideal transformer, power in = power out", units: "p = primary (input) coil, s = secondary (output) coil" },
       ],
       try: [
         { t: "q", p: "Which graph shows ac and which shows dc? Circle one for each.", options: { cols: 2, items: [
@@ -748,13 +748,13 @@
 
   // ---------- reference data ----------
   const equations = [
-    { eq: "Q = I t", words: "charge flow = current × time", units: "C, A, s", re: "I = Q ÷ t · t = Q ÷ I", lesson: 2 },
-    { eq: "E = Q V", words: "energy transferred = charge × p.d.", units: "J, C, V", re: "V = E ÷ Q · Q = E ÷ V", lesson: 3 },
-    { eq: "V = I R", words: "p.d. = current × resistance", units: "V, A, Ω", re: "I = V ÷ R · R = V ÷ I", lesson: 4 },
+    { eq: "Q = I t", words: "charge flow = current × time", units: "C, A, s", re: "I = Q ÷ t and t = Q ÷ I", lesson: 2 },
+    { eq: "E = Q V", words: "energy transferred = charge × p.d.", units: "J, C, V", re: "V = E ÷ Q and Q = E ÷ V", lesson: 3 },
+    { eq: "V = I R", words: "p.d. = current × resistance", units: "V, A, Ω", re: "I = V ÷ R and R = V ÷ I", lesson: 4 },
     { eq: "R<sub>total</sub> = R₁ + R₂", words: "total resistance in series", units: "Ω", re: "(series only)", lesson: 6 },
-    { eq: "P = V I", words: "power = p.d. × current", units: "W, V, A", re: "V = P ÷ I · I = P ÷ V", lesson: 11 },
-    { eq: "P = I² R", words: "power = current² × resistance", units: "W, A, Ω", re: "R = P ÷ I² · I = √(P ÷ R)", lesson: 11 },
-    { eq: "E = P t", words: "energy transferred = power × time", units: "J, W, s", re: "P = E ÷ t · t = E ÷ P", lesson: 11 },
+    { eq: "P = V I", words: "power = p.d. × current", units: "W, V, A", re: "V = P ÷ I and I = P ÷ V", lesson: 11 },
+    { eq: "P = I² R", words: "power = current² × resistance", units: "W, A, Ω", re: "R = P ÷ I² and I = √(P ÷ R)", lesson: 11 },
+    { eq: "E = P t", words: "energy transferred = power × time", units: "J, W, s", re: "P = E ÷ t and t = E ÷ P", lesson: 11 },
     { eq: "V<sub>p</sub> I<sub>p</sub> = V<sub>s</sub> I<sub>s</sub>", words: "transformer: power in = power out (Higher tier)", units: "V, A", re: "I<sub>s</sub> = V<sub>p</sub> I<sub>p</sub> ÷ V<sub>s</sub>", lesson: 12, ht: true },
   ];
 

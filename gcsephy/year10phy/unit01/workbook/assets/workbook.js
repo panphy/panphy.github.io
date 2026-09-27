@@ -20,7 +20,7 @@
   if (answers) document.body.classList.add("answers");
 
   const which = ONE ? `Lesson ${ONE.n}` : REVIEW ? "Unit review" : "";
-  const footer = `Electric Circuits · Year 10 workbook${which ? ` · ${which}` : ""}${answers ? " · ANSWERS" : ""}`;
+  const footer = `Electric Circuits, Year 10 workbook${which ? `: ${which}` : ""}${answers ? " (ANSWERS)" : ""}`;
   const pageStyle = document.createElement("style");
   pageStyle.textContent = `@page { @bottom-left { content: "${footer}"; } } @page cover { @bottom-left { content: none; } }`;
   document.head.appendChild(pageStyle);
@@ -311,10 +311,10 @@
       middle = `<p class="lede">Charge, energy and resistance: twelve lessons, from your first circuit to confident exam answers. Learn with it in class and revise from it at home.</p>
       <div class="cover-stats"><div><b>12</b>lessons</div><div><b>3</b>required practicals</div><div><b>3</b>virtual labs</div><div><b>1</b>companion website</div></div>`;
     }
-    return `<section class="cover"><div class="eyebrow">Year 10 Physics · AQA GCSE · ${ONE ? `Lesson ${ONE.n} of ${U.lessons.length}` : REVIEW ? "Unit review" : "Unit booklet"}</div>
+    return `<section class="cover"><div class="eyebrow">Year 10 Physics, AQA GCSE, ${ONE ? `Lesson ${ONE.n} of ${U.lessons.length}` : REVIEW ? "Unit review" : "Unit booklet"}</div>
       <h1>Electric<br><em>Circuits</em></h1>
       ${middle}
-      ${answers ? '<div class="edition">Answer edition · for teachers and self-marking</div>' : ""}
+      ${answers ? '<div class="edition">Answer edition for teachers and self-marking</div>' : ""}
       <div class="cover-foot">
         <div class="cover-circuit" style="--ink:#fff;--diagram-bg:#0a1326">${art.replace('class="cd"', 'class="cd" style="stroke:#fff"')}</div>
         <div class="cover-fields"><div>Name<span></span></div><div>Class<span></span></div><div>Teacher<span></span></div><div>Target grade<span></span></div></div>
@@ -336,10 +336,10 @@
       <p class="page-intro">${ONE && ONE.n > 1 ? `This is the booklet for <strong>Lesson ${ONE.n}</strong> of the Electric Circuits unit. It builds on the lessons before it; the “Do now” questions and the quick answers at the back help you check what you remember.` : "This booklet assumes you have <strong>never studied electricity before</strong>. Every lesson starts from the ideas you already have and builds one step at a time."} Keep it: it is your classwork book <em>and</em> your revision guide.</p>
       <div class="legend">${items.map(([k, name, text]) => `<div>${icon(k)}<div><b>${name}</b><p>${text}</p></div></div>`).join("")}</div>
       <div class="key"><strong>Revising at home?</strong> (1) Read the Learn it pages. (2) Cover them and answer the “Cover the page” questions in Revise it. (3) Check with the quick answers at the back. (4) Do the matching mission on the companion website, which has more questions with answers.</div>
-      <h4 class="sub">The route through the unit${ONE ? ` · this lesson is highlighted` : ""}</h4>
-      ${ONE ? `<ol class="route-grid">${U.lessons.map((l) => `<li class="${l.n === ONE.n ? "this" : ""}"><b>${pad(l.n)}</b><span>${l.title}${l.rp ? '<span class="tag">RP</span>' : ""}${l.n === ONE.n ? `<span class="map-line">${l.mapLine} · ${l.online.label}</span>` : ""}</span></li>`).join("")}</ol>`
+      <h4 class="sub">The route through the unit${ONE ? ` (this lesson is highlighted)` : ""}</h4>
+      ${ONE ? `<ol class="route-grid">${U.lessons.map((l) => `<li class="${l.n === ONE.n ? "this" : ""}"><b>${pad(l.n)}</b><span>${l.title}${l.rp ? '<span class="tag">RP</span>' : ""}${l.n === ONE.n ? `<span class="map-line">${l.mapLine} (${l.online.label})</span>` : ""}</span></li>`).join("")}</ol>`
         : `<table class="route"><thead><tr><th>#</th><th>Lesson</th><th>Companion website</th></tr></thead><tbody>${rows}</tbody></table>`}
-      <p style="margin-top:3mm;font-size:9pt;color:#56606e">Companion website: <strong>panphy.app/gcsephy/year10phy/unit01</strong> · missions, interactive equation triangles, required-practical pages and the Exam Zone.</p>
+      <p style="margin-top:3mm;font-size:9pt;color:#56606e">Companion website: <strong>panphy.app/gcsephy/year10phy/unit01</strong>: missions, interactive equation triangles, required-practical pages and the Exam Zone.</p>
     </section>`;
   }
 
@@ -355,7 +355,7 @@
       <tr><td>minutes → seconds</td><td>× 60</td><td>3.0 min = 180 s</td></tr>
       <tr><td>hours → seconds</td><td>× 3600</td><td>2.0 h = 7200 s</td></tr>
       <tr><td>milliamps (mA) → amps (A)</td><td>÷ 1000</td><td>250 mA = 0.25 A</td></tr>
-      <tr><td>kilowatts (kW) → watts (W) · kilohms (kΩ) → ohms (Ω)</td><td>× 1000</td><td>2.2 kW = 2200 W</td></tr>
+      <tr><td>kilowatts (kW) → watts (W); kilohms (kΩ) → ohms (Ω)</td><td>× 1000</td><td>2.2 kW = 2200 W</td></tr>
       <tr><td>kilovolts (kV) → volts (V)</td><td>× 1000</td><td>400 kV = 400 000 V</td></tr></tbody></table>
       ${triangleSection(met)}
       <p style="font-size:9pt;color:#56606e">Interactive version: <strong>panphy.app/gcsephy/year10phy/unit01/equation-triangles</strong>.</p></section>`;
@@ -364,11 +364,11 @@
   function review() {
     qNum = 0;
     return `<section class="lesson" style="--accent:var(--violet);--accent-t:var(--violet-t)">
-      <div class="eyebrow">After Lesson 12 · at home or in class</div><h2 class="page-title">Unit review</h2>
+      <div class="eyebrow">After Lesson 12, at home or in class</div><h2 class="page-title">Unit review</h2>
       <p class="page-intro">Mixed questions from the whole unit, like a real exam. Try each question without looking back. Then mark it with your teacher's answers and fill in the “fix it” log.</p>
       ${secHead("doNow", "Equation recall challenge", "Cover the toolkit page first.")}
       ${question({ p: "Write each equation in symbols. Then give the unit of every quantity in it.", table: { head: ["Equation in words", "In symbols", "Units"], rows: U.equations.filter((e) => !e.ht).map((e) => [e.words, null, null]), ans: U.equations.filter((e) => !e.ht).map((e) => [null, e.eq, e.units]) } })}
-      ${secHead("exam", "Mixed exam practice", `${U.review.reduce((s, q) => s + (q.marks || 0), 0)} marks · about 50 minutes`)}
+      ${secHead("exam", "Mixed exam practice", `${U.review.reduce((s, q) => s + (q.marks || 0), 0)} marks, about 50 minutes`)}
       ${U.review.map((q) => question(q)).join("")}
       ${keep(`${secHead("revise", "Fix-it log", "Turn every lost mark into a target.")}
       <table class="fix-log"><thead><tr><th style="width:14mm">Q</th><th>What went wrong?</th><th>The correct physics (or method) is…</th><th style="width:26mm">Lesson to revisit</th></tr></thead>
@@ -379,7 +379,7 @@
     const S = U.staticExt;
     qNum = 0;
     return `<section class="lesson" style="--accent:var(--cyan);--accent-t:var(--cyan-t)">
-      <div class="eyebrow">Separate Physics only · AQA 4.2.5</div><h2 class="page-title">Extension: static electricity</h2>
+      <div class="eyebrow">Separate Physics only (AQA 4.2.5)</div><h2 class="page-title">Extension: static electricity</h2>
       <p class="page-intro">Only for students taking GCSE Physics (separate science). Combined Science students can skip this page.</p>
       ${renderBlocks(S.learn)}${S.questions.map((q) => question(q)).join("")}</section>`;
   }
@@ -389,22 +389,22 @@
     if (!words.length) return "";
     return `<section class="${ONE ? "tracker-flow" : "new-page"}"><div class="eyebrow">Reference</div><h2 class="page-title">Key words${ONE ? " from this lesson" : ""}</h2>
       <p class="page-intro">Learn the meaning and spelling. In exams, precise words earn marks: say “p.d. across” and “current through”.</p>
-      <div class="glossary${ONE ? " one" : ""}">${words.map(([k, v]) => `<p><strong>${k}</strong> · ${v}</p>`).join("")}</div></section>`;
+      <div class="glossary${ONE ? " one" : ""}">${words.map(([k, v]) => `<p><strong>${k}</strong>: ${v}</p>`).join("")}</div></section>`;
   }
 
   function tracker() {
-    const rows = U.lessons.map((l) => `<tr class="lesson-row"><td colspan="2">${pad(l.n)} · ${l.title}</td></tr>` +
+    const rows = U.lessons.map((l) => `<tr class="lesson-row"><td colspan="2">${pad(l.n)}: ${l.title}</td></tr>` +
       l.cando.map((c) => `<tr><td>${c}</td><td class="rag-cell"><span class="rag"><i></i><i></i><i></i></span></td></tr>`).join("")).join("");
     return `<section class="new-page"><div class="eyebrow">Finish</div><h2 class="page-title">Progress tracker</h2>
       <p class="page-intro">Colour one circle for each statement: <strong>red</strong> = not yet, <strong>amber</strong> = getting there, <strong>green</strong> = I can do this without help. Revisit your reds first.</p>
-      <table class="tracker"><thead><tr><th>I can…</th><th>R · A · G</th></tr></thead><tbody>${rows}</tbody></table></section>`;
+      <table class="tracker"><thead><tr><th>I can…</th><th>R / A / G</th></tr></thead><tbody>${rows}</tbody></table></section>`;
   }
 
   function quickAnswers() {
     const list = (arr) => `<ol>${arr.map(([, a]) => `<li>${a}</li>`).join("")}</ol>`;
     return `<section class="${ONE ? "tracker-flow" : "new-page"}"><div class="eyebrow">Check yourself</div><h2 class="page-title">Quick answers</h2>
       <p class="page-intro">Answers to the “Do now” and “Cover the page” questions, so you can check yourself when revising. Answers to the longer questions are in your teacher's answer edition.</p>
-      <div class="quick-answers${ONE ? " one" : ""}">${LESSONS.map((l) => `<div>${ONE ? "" : `<b>Lesson ${l.n} · ${l.title}</b>`}
+      <div class="quick-answers${ONE ? " one" : ""}">${LESSONS.map((l) => `<div>${ONE ? "" : `<b>Lesson ${l.n}: ${l.title}</b>`}
         <h4>Do now</h4>${list(l.doNow)}<h4>Cover the page</h4>${list(l.recall)}</div>`).join("")}</div></section>`;
   }
 
@@ -414,7 +414,7 @@
   const here = ONE ? `lesson=${ONE.n}` : REVIEW ? "review" : "";
   const nav = [["", "all"], ...U.lessons.map((l) => [`lesson=${l.n}`, String(l.n)]), ["review", "review"]]
     .map(([key, name]) => (key === here ? `<b>${name}</b>` : `<a href="${link(key, answers)}">${name}</a>`)).join(" ");
-  const bar = `<div class="screen-bar">Print preview · Booklet: ${nav} · <a href="${link(here, !answers)}">${answers ? "Student edition" : "Answer edition"}</a> · print with Chrome, A4, headers and footers off</div>`;
+  const bar = `<div class="screen-bar">Print preview. Booklet: ${nav}. <a href="${link(here, !answers)}">${answers ? "Student edition" : "Answer edition"}</a>. Print with Chrome, A4, headers and footers off</div>`;
   const body = ONE ? cover() + howTo() + lesson(ONE) + (U.equations.some((e) => e.lesson <= LAST) ? toolkit() : "") + glossary() + quickAnswers()
     : REVIEW ? cover() + toolkit() + review() + staticExtension() + glossary() + tracker()
     : cover() + howTo() + toolkit() + LESSONS.map(lesson).join("") + review() + staticExtension() + glossary() + tracker() + quickAnswers();

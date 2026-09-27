@@ -9,7 +9,7 @@
   const SITE = "panphy.app/gcsephy/year10phy/unit01/";
 
   const style = document.createElement("style");
-  style.textContent = '@page { @bottom-left { content: "Electric Circuits · Year 10 teacher guide"; } }';
+  style.textContent = '@page { @bottom-left { content: "Electric Circuits, Year 10 teacher guide"; } }';
   document.head.appendChild(style);
   document.title = only ? `Lesson ${only} plan | Electric Circuits` : "Electric Circuits - Year 10 Teacher Guide";
 
@@ -18,8 +18,8 @@
   function overview() {
     const rows = U.lessons.map((l) => `<tr><td>${l.n}</td><td><strong>${l.title}</strong>${l.rp ? `<span class="tag">${l.rp}</span>` : ""}<br><span style="color:#56606e">${l.mapLine}</span></td><td>${l.online.label}</td></tr>`).join("");
     return `<section>
-      <div class="eyebrow">Year 10 Physics · AQA GCSE Combined Science: Trilogy (Higher) and Physics</div>
-      <h1 class="page-title">Electric Circuits · Teacher guide</h1>
+      <div class="eyebrow">Year 10 Physics, AQA GCSE Combined Science: Trilogy (Higher) and Physics</div>
+      <h1 class="page-title">Electric Circuits: Teacher guide</h1>
       <p class="page-intro">Twelve 50-minute lessons, written for students with <strong>no prior knowledge of electricity</strong>. Each lesson has a matching section in the student workbook and a mission on the companion website.</p>
       <h4 class="sub">How the three resources fit together</h4>
       <table class="compare"><thead><tr><th>Resource</th><th>Used for</th></tr></thead><tbody>
@@ -47,7 +47,7 @@
     const mis = p.misconceptions.map(([m, fix]) => `<tr><td>${m}</td><td>${fix}</td></tr>`).join("");
     return `<section class="lesson" style="--accent:var(--${l.accent});--accent-t:var(--${l.accent}-t)">
       <header class="opener"><div class="num"><small>Lesson</small>${String(l.n).padStart(2, "0")}</div>
-      <div><h2>${l.title}</h2><div class="spec">${l.spec} · 50 minutes</div></div><div class="big-q">${l.big}</div></header>
+      <div><h2>${l.title}</h2><div class="spec">${l.spec}; 50 minutes</div></div><div class="big-q">${l.big}</div></header>
       <div class="opener-foot"><div class="goals"><h3>Students will be able to</h3>${list(l.goals)}</div>
       <div class="online"><div><h3>Why this lesson, here</h3><p>${p.why}</p></div></div></div>
       <h4 class="sub">Preparation and equipment</h4><p>${p.prep}</p>
