@@ -108,3 +108,19 @@
 /* Two sketch cards side by side */
 .sketch-card { display: flex; flex-direction: column; }
 .sketch-card .fig { flex: 1; min-height: 0; height: auto; margin: 10px 0 12px; }
+
+/* Teaching diagrams on slides 8, 9, 21 and 49 */
+.cd .intro-wire { stroke-width: 4; }
+.cd .wire-fill { fill: #f6e2cf; stroke-width: 3; }
+.cd text.diagram-label { font: 800 16px/1 Arial, Helvetica, sans-serif; }
+.cd text.diagram-equation { font: 900 18px/1 Arial, Helvetica, sans-serif; }
+.cd text.diagram-arrow { font: 900 26px/1 Arial, Helvetica, sans-serif; fill: #d9480f; }
+.cd .cool-metal { fill: #eef6fb; stroke-width: 2; }
+.cd .hot-metal { fill: #fff1e6; stroke-width: 2; }
+.cd .metal-ion { fill: #f7d278; stroke-width: 1.8; }
+.cd text.ion-plus { font: 900 15px/1 Arial, Helvetica, sans-serif; }
+.cd .ion-vibration { stroke: #d9480f; stroke-width: 1.6; }
+.cd .electron-track { stroke: #1479a8; stroke-width: 3.4; stroke-dasharray: 7 4; }
+.cd .collision-dot { fill: #d9480f; stroke: #fff; stroke-width: 1.5; }
+.cd .fault-contact { stroke: #95582f; stroke-width: 5; }
+.cd .fault-flow { stroke: #d9480f; stroke-width: 3; stroke-dasharray: 7 5; }
