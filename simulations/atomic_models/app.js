@@ -883,7 +883,7 @@ function updateBeamStats() {
 // ---------- Bohr excitation ----------
 // WebGL ignores line widths, so photon waves are drawn as a thin ribbon facing the camera.
 const WAVE_POINTS = 90;
-const WAVE_HALF_WIDTH = 0.018;
+const WAVE_HALF_WIDTH = 0.008;
 function waveRibbonGeometry() {
   const geometry = new THREE.BufferGeometry().setAttribute('position', new THREE.BufferAttribute(new Float32Array(WAVE_POINTS * 2 * 3), 3));
   const index = [];
