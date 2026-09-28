@@ -86,7 +86,7 @@
 .circuit-card .plot-label { padding-bottom: 12px; border-bottom: 2px solid; font: 900 18px Arial, sans-serif; letter-spacing: .2em; }
 .circuit-card svg { display: block; width: 100%; height: auto; margin-top: 16px; background: var(--diagram-bg); }
 .circuit-card p { margin: 18px 0 0; font: 900 28px/1.08 var(--display); text-transform: uppercase; letter-spacing: -.04em; }
-.machine .sticky.one { left: -20px; top: 90px; transform: rotate(-8deg); box-shadow: 5px 5px 0 var(--cyan); }
+.machine .sticky.one { left: -30px; top: 6px; transform: rotate(-6deg); box-shadow: 5px 5px 0 var(--cyan); }
 .machine .sticky.two { right: -30px; bottom: 120px; transform: rotate(7deg); box-shadow: 5px 5px 0 var(--cyan); }
 .machine .stamp { right: -16px; top: 40px; border-color: var(--hot); color: var(--hot); }
 
