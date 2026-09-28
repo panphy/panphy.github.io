@@ -1441,6 +1441,8 @@ function resize() {
   camera.aspect = width / height;
   camera.updateProjectionMatrix();
   if (sample) drawGraph();
+  // Resizing clears the canvas, so redraw now rather than show a blank frame.
+  renderer.render(scene, camera);
 }
 const resizeObserver = new ResizeObserver(resize);
 resizeObserver.observe(viewer);
