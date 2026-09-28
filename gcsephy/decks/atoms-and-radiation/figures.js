@@ -327,7 +327,7 @@
       let s = ball(350, 230, 42, 'positive') + text(350, 318, 'gold nucleus (+)', 'lbl strong');
       const paths = [
         ['M20,410 L600,410', 'far away: straight on', 600, 396, 'end'],
-        ['M20,168 L220,168 C300,168 330,146 380,104 L470,32', 'close: repelled, deflected', 482, 40, 'start'],
+        ['M20,168 L220,168 C300,168 330,146 380,104 L470,32', 'close: repelled, deflected', 462, 22, 'end'],
         ['M20,236 L278,236 Q306,229 278,222 L40,190', 'head-on: bounces back', 20, 272, 'start']
       ];
       paths.forEach(([d, label, x, y, anchor], i) => {
@@ -439,7 +439,7 @@
       let s = `<circle cx="150" cy="180" r="140" fill="url(#g-glow)" class="pulse"/>` + cluster(150, 180, 43, 56, 14);
       s += arrow(262, 180, 330, 180, 'text-secondary', 3);
       s += shadow(440, 290, 90) + cluster(440, 180, 43, 56, 14);
-      s += wave(540, 150, 700, 56, { cycles: 5, amp: 10 }) + text(650, 140, 'gamma ray', 'lbl strong', 'middle', 'style="fill:var(--photon)"');
+      s += wave(540, 150, 700, 56, { cycles: 5, amp: 10 }) + text(640, 66, 'gamma ray', 'lbl strong', 'end', 'style="fill:var(--photon)"');
       s += text(150, 334, 'technetium-99m', 'lbl display') + text(150, 362, 'extra energy', 'lbl mono');
       s += text(440, 334, 'technetium-99', 'lbl display') + text(440, 362, 'same p and n', 'lbl mono');
       return svg('0 0 720 400', s, 'Gamma emission: an excited technetium-99m nucleus gives out a gamma ray; its protons and neutrons do not change');
@@ -450,7 +450,7 @@
       s += `<rect x="300" y="52" width="7" height="326" rx="2" style="fill:var(--paper);stroke:var(--input-border)"/>`;
       s += `<rect x="520" y="52" width="18" height="326" rx="3" style="fill:var(--aluminium)"/>`;
       s += `<rect x="730" y="52" width="52" height="326" rx="4" style="fill:var(--lead)"/>`;
-      s += text(303, 36, 'paper', 'lbl mono strong') + text(529, 36, 'aluminium, few mm', 'lbl mono strong') + text(756, 36, 'lead, several cm', 'lbl mono strong');
+      s += text(303, 30, 'paper', 'lbl mono strong') + text(529, 22, 'aluminium', 'lbl mono strong') + text(529, 46, 'few mm', 'lbl mono') + text(756, 22, 'lead', 'lbl mono strong') + text(756, 46, 'several cm', 'lbl mono');
       s += `<line x1="90" y1="125" x2="294" y2="125" class="lane" style="stroke:var(--alpha)"/>` + ball(150, 125, 14, 'alpha') + ball(232, 125, 14, 'alpha');
       s += text(318, 110, 'stopped', 'lbl small', 'start', 'style="fill:var(--alpha)"');
       s += `<line x1="90" y1="215" x2="514" y2="215" class="lane" style="stroke:var(--electron)"/>` + [160, 290, 420].map(x => ball(x, 215, 10, 'electron')).join('');

@@ -57,14 +57,14 @@
 .wf .tape { stroke: #1479a8; stroke-width: 6; stroke-linecap: round; }
 .wf .heli-backdrop { fill: #e8f2f5; }
 .wf .tag { fill: var(--hi); stroke: var(--ink); stroke-width: 3; }
-.wf .lab { font: 900 23px Arial, sans-serif; letter-spacing: .08em; }
-.wf .lab.small { font-size: 20px; }
-.wf .big { font: 900 36px var(--display); letter-spacing: -.02em; }
-.wf .big.small-big { font-size: 28px; }
-.wf .body-t { font: 700 23px Arial, sans-serif; }
-.wf .body-t.small { font-size: 20px; }
-.wf .tick-t { font: 600 20px Arial, sans-serif; fill: #4b5563; }
-.wf .axis-t { font: 800 23px Arial, sans-serif; }
+.wf .lab { font: 900 28px Arial, sans-serif; letter-spacing: .06em; }
+.wf .lab.small { font-size: 25px; }
+.wf .big { font: 900 40px var(--display); letter-spacing: -.02em; }
+.wf .big.small-big { font-size: 32px; }
+.wf .body-t { font: 700 28px Arial, sans-serif; }
+.wf .body-t.small { font-size: 25px; }
+.wf .tick-t { font: 600 25px Arial, sans-serif; fill: #4b5563; }
+.wf .axis-t { font: 800 28px Arial, sans-serif; }
 .wf .muted-t { fill: var(--muted); font-weight: 600; }
 .wf .cyan-t { fill: #1479a8; }
 .wf .hot-t { fill: #c2410c; }
@@ -77,7 +77,7 @@
 /* Hero plot card (companion home page) */
 .machine { position: relative; display: grid; place-items: center; height: 640px; }
 .plot-card { width: 500px; padding: 26px; background: var(--paper); color: var(--ink); transform: rotate(2deg); box-shadow: 18px 18px 0 var(--cyan); }
-.plot-label { padding-bottom: 12px; border-bottom: 2px solid; font: 900 15px Arial, sans-serif; letter-spacing: .2em; }
+.plot-label { padding-bottom: 12px; border-bottom: 2px solid; font: 900 18px Arial, sans-serif; letter-spacing: .2em; }
 .plot-card p { margin: 20px 0 0; font: 900 28px/1.08 var(--display); text-transform: uppercase; letter-spacing: -.04em; }
 .chart { position: relative; height: 320px; margin: 22px 6px 0 22px; border-left: 4px solid var(--navy); border-bottom: 4px solid var(--navy); background-image: linear-gradient(rgba(7, 22, 47, .08) 1px, transparent 1px), linear-gradient(90deg, rgba(7, 22, 47, .08) 1px, transparent 1px); background-size: 48px 48px; overflow: hidden; }
 .chart .point { position: absolute; z-index: 2; width: 18px; height: 18px; border: 5px solid var(--navy); border-radius: 50%; background: var(--hi); transform: translate(-50%, 50%); }
@@ -90,8 +90,8 @@
 
 /* Outlier decision route */
 .route { display: grid; grid-template-columns: repeat(4, 1fr); gap: 34px; }
-.route > div { position: relative; padding: 18px 20px; border: 2px solid var(--ink); background: var(--card); font-size: 24px; font-weight: 700; line-height: 1.25; box-shadow: 6px 6px 0 rgba(7, 22, 47, .12); }
-.route > div b { display: block; margin-bottom: 6px; font: 900 15px Arial, sans-serif; letter-spacing: .16em; text-transform: uppercase; color: var(--muted); }
+.route > div { position: relative; padding: 18px 20px; border: 2px solid var(--ink); background: var(--card); font-size: 28px; font-weight: 700; line-height: 1.25; box-shadow: 6px 6px 0 rgba(7, 22, 47, .12); }
+.route > div b { display: block; margin-bottom: 6px; font: 900 18px Arial, sans-serif; letter-spacing: .16em; text-transform: uppercase; color: var(--muted); }
 .route > div:not(:last-child)::after { content: ""; position: absolute; right: -30px; top: 50%; border-block: 12px solid transparent; border-left: 16px solid var(--ink); transform: translateY(-50%); }
 .route > div.go { background: var(--accent); }
 .outcomes { display: grid; grid-template-columns: 1fr 1fr; gap: 26px; }
@@ -104,12 +104,12 @@
 
 /* Project path */
 .path { display: grid; grid-template-columns: repeat(7, 1fr); gap: 12px; }
-.path > div { display: flex; flex-direction: column; align-items: center; gap: 12px; text-align: center; font-size: 21px; font-weight: 800; line-height: 1.15; }
-.path > div i { display: grid; place-items: center; width: 64px; height: 64px; border: 2px solid var(--ink); border-radius: 50%; background: var(--accent); font: 900 22px Arial, sans-serif; font-style: normal; }
+.path > div { display: flex; flex-direction: column; align-items: center; gap: 12px; text-align: center; font-size: 25px; font-weight: 800; line-height: 1.15; }
+.path > div i { display: grid; place-items: center; width: 72px; height: 72px; border: 2px solid var(--ink); border-radius: 50%; background: var(--accent); font: 900 26px Arial, sans-serif; font-style: normal; }
 .path > div.gate i { background: var(--navy); color: var(--hi); }
 
 /* Fill-in frames */
-.frame { padding: 18px 24px; border: 2px dashed var(--ink); background: var(--card); font-size: 25px; line-height: 1.55; }
+.frame { padding: 18px 24px; border: 2px dashed var(--ink); background: var(--card); font-size: 29px; line-height: 1.55; }
 .frame .blank { display: inline-block; min-width: 120px; border-bottom: 3px solid var(--ink); }
 .frame .blank.s { min-width: 70px; }
 .frame b { font-weight: 900; }

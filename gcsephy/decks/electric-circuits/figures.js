@@ -10,6 +10,9 @@
   const txt = (x, y, s, cls = '', anchor = 'middle') => `<text x="${x}" y="${y}" class="${cls}" text-anchor="${anchor}">${s}</text>`;
   const head = (x, y, a, cls = 'flow') => `<g transform="translate(${x} ${y}) rotate(${a})"><path class="${cls}" d="M7 0 L-5 -6 L-5 6 Z"/></g>`;
   const fall = x => 0.9 * Math.exp(-2.6 * x) + 0.05;
+  // The practical diagrams set label sizes inline for the companion pages;
+  // enlarge them so they read from the back of a room.
+  const bigger = (markup, k) => markup.replace(/(font:\s*\d+ )(\d+(?:\.\d+)?)px/g, (m, pre, px) => `${pre}${Math.round(px * k * 10) / 10}px`);
   // Lattice geometry for the slide 21 simulation (panel-local units).
   // The panel is one repeating tile of the lattice: electrons leaving one edge
   // come back in at the opposite edge, so there are no walls.
@@ -85,7 +88,7 @@
     },
     measureR: () => D.circuit({ w: 380, h: 250, wires: ['M40 40 H340 V160 H40 Z', 'M140 160 V215 H240 V160'], parts: [['battery', 120, 40, 'h', 'battery'], ['variable', 250, 40, 'h', 'variable resistor'], ['ammeter', 40, 100, 'v'], ['resistor', 190, 160, 'h', 'component'], ['voltmeter', 190, 215, 'h']], dots: [[140, 160], [240, 160]], caption: 'Ammeter in series, voltmeter across; variable resistor changes the current.' }),
     wireBench: () => P.wireBench(),
-    graphSkills: () => P.graphSkills(),
+    graphSkills: () => bigger(P.graphSkills(), 1.25),
 
     // Mission 5
     series: () => D.circuit({ w: 360, h: 205, wires: [LOOP], parts: [['battery', 180, 40, 'h', '12 V'], ['ammeter', 40, 95, 'v', '1.0 A', 'r'], ['resistor', 120, 150, 'h', '4 Ω, 4 V', 'b'], ['resistor', 240, 150, 'h', '8 Ω, 8 V', 'b']], caption: 'R_total = 4 + 8 = 12 Ω, I = 12 ÷ 12 = 1.0 A' }),
@@ -101,8 +104,8 @@
     ldr: () => D.graph({ sketch: true, w: 300, h: 210, x: [0, 1], y: [0, 1], xLabel: 'light intensity', yLabel: 'resistance', series: [{ fn: fall, from: 0.03, to: 1 }], caption: 'Brighter → lower resistance.' }),
     sensor: () => D.circuit({ w: 360, h: 200, wires: [LOOP], parts: [['battery', 180, 40, 'h', '6.0 V'], ['ldr', 110, 150, 'h', 'LDR', 'b'], ['resistor', 200, 150, 'h', 'fixed', 'b'], ['ammeter', 280, 150, 'h', '', 'b']], caption: 'LDR in series with a fixed resistor and an ammeter.' }),
     ivCircuit: () => D.circuit({ w: 380, h: 250, wires: ['M40 40 H340 V160 H40 Z', 'M140 160 V215 H240 V160'], parts: [['battery', 120, 40, 'h', 'power supply'], ['variable', 250, 40, 'h', 'variable resistor'], ['ammeter', 40, 100, 'v'], ['lamp', 190, 160, 'h', 'test component'], ['voltmeter', 190, 215, 'h']], dots: [[140, 160], [240, 160]], caption: 'Swap the lamp for a resistor or a diode.' }),
-    reverse: () => P.reverseSupply(),
-    diodeWay: () => P.diodeWay(),
+    reverse: () => bigger(P.reverseSupply(), 1.25),
+    diodeWay: () => bigger(P.diodeWay(), 1.25),
 
     // Mission 7
     grid: () => D.nationalGrid(),
@@ -115,7 +118,7 @@
     earthFault: () => {
       const earthStripe = 'stroke:url(#deck-earth)';
       let s = `<defs><pattern id="deck-earth" width="14" height="14" patternUnits="userSpaceOnUse" patternTransform="rotate(40)"><rect width="14" height="14" fill="#258044" stroke="none"/><rect width="7" height="14" fill="#f7d83b" stroke="none"/></pattern></defs>`;
-      s += `<rect x="300" y="36" width="190" height="200" rx="10" class="case"/>` + txt(395, 26, 'metal case', 'note');
+      s += `<rect x="300" y="36" width="190" height="200" rx="10" class="case"/>` + txt(395, 18, 'metal case', 'note');
       s += `<path d="M24 76 H300" class="w-live"/><path d="M24 136 H300" class="w-neutral"/><path d="M60 196 H300" style="${earthStripe}" class="w-earth"/>`;
       s += `<g transform="translate(150 76)"><rect class="mask" x="-21" y="-5" width="42" height="10"/><g class="body"><rect x="-20" y="-7" width="40" height="14"/><line x1="-20" y1="0" x2="20" y2="0"/></g></g>` + txt(150, 58, 'fuse', 'note');
       s += txt(24, 64, 'LIVE', 'note', 'start') + txt(24, 124, 'NEUTRAL', 'note', 'start') + txt(60, 184, 'EARTH', 'note', 'start');

@@ -66,39 +66,39 @@
 
     // Repeated times grouped by data set, with a common time scale.
     dataSets: () => {
-      const Y = v => 300 - (v - 0.85) / 0.65 * 250;
+      const Y = v => 470 - (v - 0.85) / 0.65 * 420;
       const sets = [['A', [1.20, 1.22, 1.21]], ['B', [1.05, 1.47, 1.12]], ['C', [0.91, 0.92, 0.91]]];
       let s = '';
       for (let v = 0.9; v <= 1.5001; v += 0.1) {
-        s += line(150, Y(v), 860, Y(v), 'grid') + t(132, Y(v) + 6, v.toFixed(1), 'tick-t', 'end');
+        s += line(120, Y(v), 680, Y(v), 'grid') + t(104, Y(v) + 8, v.toFixed(1), 'tick-t', 'end');
       }
-      s += `<path class="axis" d="M150 34V300H866"/>`;
+      s += `<path class="axis" d="M120 30V470H686"/>`;
       sets.forEach(([name, vals], i) => {
-        const x = 270 + i * 245;
+        const x = 220 + i * 180;
         const setClass = `set-${name.toLowerCase()}`;
-        s += t(x, 338, `SET ${name}`, `lab ${setClass}-t`);
-        vals.forEach(v => { s += dot(x, Y(v), 9, `pt ${setClass}`); });
+        s += t(x, 512, `SET ${name}`, `lab ${setClass}-t`);
+        vals.forEach(v => { s += dot(x, Y(v), 12, `pt ${setClass}`); });
       });
-      s += t(515, 376, 'Data set', 'axis-t');
-      s += t(0, 0, 'Time / s', 'axis-t', 'middle', 'transform="translate(56 170) rotate(-90)"');
-      s += `<g class="step" data-step-order="-1">${line(150, Y(1.21), 860, Y(1.21), 'trend dash')}${t(850, Y(1.21) - 12, 'TRUE VALUE ≈ 1.21 s', 'lab small cyan-t', 'end')}</g>`;
-      return svg(900, 390, s, 'Dot plot of three data sets on the horizontal axis and repeated times on the vertical axis: set A close together near 1.21 s, set B spread from 1.05 to 1.47 s, set C close together near 0.91 s');
+      s += t(400, 552, 'Data set', 'axis-t');
+      s += t(0, 0, 'Time / s', 'axis-t', 'middle', 'transform="translate(34 250) rotate(-90)"');
+      s += `<g class="step" data-step-order="-1">${line(120, Y(1.21), 680, Y(1.21), 'trend dash')}${t(676, Y(1.21) - 14, 'TRUE VALUE ≈ 1.21 s', 'lab small cyan-t', 'end')}</g>`;
+      return svg(700, 566, s, 'Dot plot of three data sets on the horizontal axis and repeated times on the vertical axis: set A close together near 1.21 s, set B spread from 1.05 to 1.47 s, set C close together near 0.91 s');
     },
 
     // Mean ± half the range on a number line.
     uncertainty: () => {
-      const X = v => 80 + (v - 1.18) / 0.09 * 760;
+      const X = v => 60 + (v - 1.18) / 0.09 * 680;
       const mean = 1.2233;
-      let s = `<rect x="${f(X(mean - 0.025))}" y="100" width="${f(X(mean + 0.025) - X(mean - 0.025))}" height="120" class="band"/>`;
-      s += `<path class="bracket" d="M${f(X(1.2))} 84V64H${f(X(1.25))}V84"/>` + t((X(1.2) + X(1.25)) / 2, 50, 'RANGE = 1.25 − 1.20 = 0.05 s', 'lab');
-      [1.20, 1.22, 1.25].forEach(v => { s += cross(X(v), 160, 12); });
-      s += line(X(mean), 108, X(mean), 212, 'mean-line');
-      s += arrow(X(mean), 236, X(mean - 0.025), 236, 'arrow cyan') + arrow(X(mean), 236, X(mean + 0.025), 236, 'arrow cyan');
-      s += t(X(mean + 0.025) + 14, 243, '± 0.025 s', 'lab small', 'start');
-      s += `<path class="axis" d="M70 280H850"/>`;
-      for (let v = 1.18; v <= 1.2701; v += 0.01) s += line(X(v), 280, X(v), 292, 'ink') + t(X(v), 320, v.toFixed(2), 'tick-t');
-      s += t(460, 362, 'Time / s', 'axis-t');
-      return svg(900, 376, s, 'Three readings, 1.20, 1.22 and 1.25 seconds, on a number line; range 0.05 s; mean 1.22 s with an uncertainty band of plus or minus 0.025 s');
+      let s = `<rect x="${f(X(mean - 0.025))}" y="120" width="${f(X(mean + 0.025) - X(mean - 0.025))}" height="140" class="band"/>`;
+      s += `<path class="bracket" d="M${f(X(1.2))} 102V80H${f(X(1.25))}V102"/>` + t((X(1.2) + X(1.25)) / 2, 62, 'RANGE = 1.25 − 1.20 = 0.05 s', 'lab');
+      [1.20, 1.22, 1.25].forEach(v => { s += cross(X(v), 190, 14); });
+      s += line(X(mean), 128, X(mean), 252, 'mean-line');
+      s += arrow(X(mean), 290, X(mean - 0.025), 290, 'arrow cyan') + arrow(X(mean), 290, X(mean + 0.025), 290, 'arrow cyan');
+      s += t(X(mean + 0.025) + 14, 299, '± 0.025 s', 'lab small', 'start');
+      s += `<path class="axis" d="M50 340H750"/>`;
+      for (let v = 1.18; v <= 1.2701; v += 0.01) s += line(X(v), 340, X(v), 354, 'ink') + t(X(v), 386, v.toFixed(2), 'tick-t');
+      s += t(400, 436, 'Time / s', 'axis-t');
+      return svg(800, 452, s, 'Three readings, 1.20, 1.22 and 1.25 seconds, on a number line; range 0.05 s; mean 1.22 s with an uncertainty band of plus or minus 0.025 s');
     },
 
     // Random error: spread both ways around the true value.
@@ -140,40 +140,40 @@
     // Independent, dependent and control variables.
     variables: () => {
       const lock = (x, y) => `<path class="ink" d="M${x - 9} ${y}v-8a9 9 0 0 1 18 0v8"/>${rect(x - 14, y, 28, 22, 'f-alt box', 3)}`;
-      let s = rect(30, 30, 330, 170, 'f-accent box pop') + t(195, 74, 'INDEPENDENT', 'lab') + t(195, 124, 'I CHANGE', 'big') + t(195, 172, 'pendulum length / cm', 'body-t');
-      s += rect(600, 30, 330, 170, 'f-cyan box pop') + t(765, 74, 'DEPENDENT', 'lab') + t(765, 124, 'I MEASURE', 'big') + t(765, 172, 'time period / s', 'body-t');
-      s += arrow(378, 115, 582, 115, 'arrow thick') + t(480, 98, 'affects?', 'body-t');
-      s += t(480, 262, 'CONTROL: I KEEP THE SAME', 'lab');
+      let s = rect(20, 20, 310, 170, 'f-accent box pop') + t(175, 64, 'INDEPENDENT', 'lab') + t(175, 118, 'I CHANGE', 'big') + t(175, 166, 'pendulum length / cm', 'body-t small');
+      s += rect(470, 20, 310, 170, 'f-cyan box pop') + t(625, 64, 'DEPENDENT', 'lab') + t(625, 118, 'I MEASURE', 'big') + t(625, 166, 'time period / s', 'body-t small');
+      s += arrow(342, 112, 458, 112, 'arrow thick') + t(400, 92, 'affects?', 'body-t small');
+      s += t(400, 262, 'CONTROL: I KEEP THE SAME', 'lab');
       ['release angle', 'bob mass', 'timing method'].forEach((name, i) => {
-        const x = 70 + i * 290;
-        s += rect(x, 290, 250, 76, 'f-card box');
-        s += lock(x + 40, 324) + t(x + 72, 338, name, 'body-t', 'start');
+        const y = 288 + i * 80;
+        s += rect(190, y, 420, 64, 'f-card box');
+        s += lock(234, y + 26) + t(274, y + 42, name, 'body-t', 'start');
       });
-      return svg(960, 390, s, 'Independent variable, pendulum length, affects the dependent variable, time period; control variables release angle, bob mass and timing method are kept the same');
+      return svg(800, 540, s, 'Independent variable, pendulum length, affects the dependent variable, time period; control variables release angle, bob mass and timing method are kept the same');
     },
 
     // Continuous and categoric data.
     dataTypes: () => {
-      const X = v => 70 + v * 82;
-      let s = t(40, 36, 'CONTINUOUS: ANY VALUE ON A SCALE', 'lab', 'start');
-      s += `<path class="axis" d="M${X(0)} 110H${X(10) + 10}"/>`;
-      for (let v = 0; v <= 10; v++) s += line(X(v), 110, X(v), 124, 'ink') + t(X(v), 150, v, 'tick-t');
-      for (let v = 0; v < 10; v += 0.5) if (v % 1) s += line(X(v), 110, X(v), 118, 'ink thin');
-      s += t(X(10) + 30, 150, 'cm', 'tick-t', 'start');
-      [[3.2, '3.2 cm'], [4.75, '4.75 cm'], [7.9, '7.9 cm']].forEach(([v, lab]) => { s += dot(X(v), 110, 11) + t(X(v), 88, lab, 'body-t small'); });
-      s += t(40, 222, 'CATEGORIC: NAMED GROUPS', 'lab', 'start');
+      const X = v => 50 + v * 66;
+      let s = t(20, 40, 'CONTINUOUS: ANY VALUE ON A SCALE', 'lab', 'start');
+      s += `<path class="axis" d="M${X(0)} 150H${X(10) + 10}"/>`;
+      for (let v = 0; v <= 10; v++) s += line(X(v), 150, X(v), 166, 'ink') + t(X(v), 196, v, 'tick-t');
+      for (let v = 0; v < 10; v += 0.5) if (v % 1) s += line(X(v), 150, X(v), 159, 'ink thin');
+      s += t(X(10) + 24, 196, 'cm', 'tick-t', 'start');
+      [[3.2, '3.2 cm'], [4.75, '4.75 cm'], [7.9, '7.9 cm']].forEach(([v, lab]) => { s += dot(X(v), 150, 13) + t(X(v), 122, lab, 'body-t small'); });
+      s += t(20, 280, 'CATEGORIC: NAMED GROUPS', 'lab', 'start');
       ['sponge', 'cloth', 'rubber mat', 'cardboard'].forEach((name, i) => {
-        const x = 40 + i * 225;
-        s += rect(x, 246, 195, 70, 'f-card box') + t(x + 97, 290, name, 'body-t');
+        const x = 20 + i * 195;
+        s += rect(x, 305, 175, 80, 'f-card box') + t(x + 87.5, 355, name, 'body-t');
       });
-      s += t(480, 362, 'No value between “cloth” and “rubber mat”', 'body-t muted-t');
-      return svg(960, 380, s, 'Continuous data on a number line can take values such as 3.2, 4.75 and 7.9 centimetres; categoric data are named groups such as sponge, cloth, rubber mat and cardboard');
+      s += t(400, 440, 'No value between “cloth” and “rubber mat”', 'body-t muted-t');
+      return svg(800, 460, s, 'Continuous data on a number line can take values such as 3.2, 4.75 and 7.9 centimetres; categoric data are named groups such as sponge, cloth, rubber mat and cardboard');
     },
 
     // The independent variable chooses the graph.
     graphChoice: () => {
-      let s = rect(300, 14, 360, 70, 'f-card box pop') + t(480, 58, 'INDEPENDENT VARIABLE?', 'lab');
-      s += arrow(380, 90, 250, 150, 'arrow thick') + arrow(580, 90, 710, 150, 'arrow thick');
+      let s = rect(220, 14, 520, 70, 'f-card box pop') + t(480, 59, 'INDEPENDENT VARIABLE?', 'lab');
+      s += arrow(340, 90, 250, 150, 'arrow thick') + arrow(620, 90, 710, 150, 'arrow thick');
       s += t(245, 186, 'CONTINUOUS', 'big small-big') + t(715, 186, 'CATEGORIC', 'big small-big');
       // Mini line graph
       s += `<path class="axis" d="M90 216V430H420"/>`;
@@ -206,22 +206,23 @@
       s += line(310, Y(24), 470, Y(24), 'trend dash');
       s += t(530, Y(24) - 50, 'bounce height', 'lab', 'start') + t(530, Y(24) - 22, 'read at the ball', 'body-t muted-t', 'start') + t(530, Y(24) + 4, 'bottom, eye level', 'body-t muted-t', 'start');
       s += t(60, 40, 'metre ruler: 0 at the material surface', 'body-t', 'start');
-      return svg(660, 620, s, 'Drop test: a ball released from 50 cm beside a clamped metre ruler onto a material; the bounce height is read at eye level');
+      return svg(800, 620, s, 'Drop test: a ball released from 50 cm beside a clamped metre ruler onto a material; the bounce height is read at eye level');
     },
 
     // Bar chart of mean bounce heights.
     barChart: () => {
       const data = [['sponge', 13], ['cardboard', 30], ['cloth', 23], ['rubber mat', 38], ['bubble wrap', 17]];
-      const { s: grid, Y } = axes({ x0: 130, y0: 60, w: 740, h: 380, xr: [0, 5, 5], yr: [0, 40, 5], yEvery: 2, showX: false, xLabel: 'Material', yLabel: 'Mean bounce height / cm' });
+      const { s: grid, Y } = axes({ x0: 130, y0: 60, w: 740, h: 380, xr: [0, 5, 5], yr: [0, 40, 5], yEvery: 2, showX: false, yLabel: 'Mean bounce height / cm' });
       let s = grid;
       data.forEach(([name, v], i) => {
         const x = 130 + 30 + i * 148;
         s += rect(x, Y(v), 100, Y(0) - Y(v), i === 0 ? 'f-accent box' : 'f-card box');
         s += t(x + 50, Y(v) - 12, v, 'lab small');
-        s += t(x + 50, 470, name, 'body-t small');
+        name.split(' ').forEach((word, k) => { s += t(x + 50, 474 + k * 28, word, 'body-t small'); });
       });
+      s += t(500, 552, 'Material', 'axis-t');
       s += t(500, 30, 'Mean bounce height for each material', 'lab');
-      return svg(900, 540, s, 'Bar chart of mean bounce height: sponge 13 cm, cardboard 30 cm, cloth 23 cm, rubber mat 38 cm, bubble wrap 17 cm; bars equal width with gaps');
+      return svg(900, 570, s, 'Bar chart of mean bounce height: sponge 13 cm, cardboard 30 cm, cloth 23 cm, rubber mat 38 cm, bubble wrap 17 cm; bars equal width with gaps');
     },
 
     // Trolley and ramp.
@@ -250,12 +251,12 @@
     scale: () => {
       const pts = [[5, 20], [10, 37], [15, 52], [20, 66], [25, 80]];
       const panel = (x0, ymax, step, good) => {
-        const { s, X, Y } = axes({ x0, y0: 40, w: 330, h: 300, xr: [0, 30, 5], yr: [0, ymax, step], xEvery: 2, yEvery: 2, grid: true });
+        const { s, X, Y } = axes({ x0, y0: 40, w: 400, h: 300, xr: [0, 30, 5], yr: [0, ymax, step], xEvery: 2, yEvery: 2, grid: true });
         return s + pts.map(([a, b]) => cross(X(a), Y(b), 7)).join('') +
-          (good ? tick(x0 + 118, 420, 'yes') : cross2(x0 + 108, 414)) +
-          t(x0 + 140, 424, good ? '10 per square, fills the grid' : '20 per square, points squashed', 'lab small', 'start');
+          (good ? tick(x0 + 12, 420, 'yes') : cross2(x0 + 4, 414)) +
+          t(x0 + 36, 424, good ? '10 per square, fills the grid' : '20 per square, points squashed', 'lab small', 'start');
       };
-      return svg(960, 440, panel(90, 200, 20, false) + panel(570, 90, 10, true), 'The same five points plotted on a y-axis going up in 20s, squashed into the bottom of the grid, and on a y-axis going up in 10s, filling the grid');
+      return svg(1300, 440, panel(120, 200, 20, false) + panel(780, 90, 10, true), 'The same five points plotted on a y-axis going up in 20s, squashed into the bottom of the grid, and on a y-axis going up in 10s, filling the grid');
     },
 
     // Plotted means for the ramp, crosses only.
@@ -281,11 +282,11 @@
         }
         return out + pts.map(([a, b]) => cross(X(a), Y(b), 7)).join('');
       };
-      let s = panel(50, straight, 'dot') + panel(370, straight, 'line') + panel(690, curved, 'curve');
-      s += cross2(80, 318) + t(100, 326, 'DOT-TO-DOT', 'lab', 'start');
-      s += tick(400, 318) + t(420, 326, 'STRAIGHT BEST FIT', 'lab', 'start');
-      s += tick(720, 318) + t(740, 326, 'CURVED BEST FIT', 'lab', 'start');
-      return svg(960, 350, s, 'Three graphs of the same kind of data: a zig-zag dot-to-dot line is wrong; a straight best-fit line and a smooth curved best-fit line are right');
+      let s = panel(90, straight, 'dot') + panel(520, straight, 'line') + panel(950, curved, 'curve');
+      s += cross2(110, 318) + t(132, 327, 'DOT-TO-DOT', 'lab', 'start');
+      s += tick(510, 318) + t(532, 327, 'STRAIGHT BEST FIT', 'lab', 'start');
+      s += tick(960, 318) + t(982, 327, 'CURVED BEST FIT', 'lab', 'start');
+      return svg(1300, 350, s, 'Three graphs of the same kind of data: a zig-zag dot-to-dot line is wrong; a straight best-fit line and a smooth curved best-fit line are right');
     },
 
     // Ramp data with one point that does not fit.
@@ -308,7 +309,7 @@
       out += pts.map(([a, b]) => cross(X(a), Y(b), 9)).join('');
       out += `<circle cx="${f(X(20))}" cy="${f(Y(96))}" r="26" class="out-ring"/>`;
       out += t(480, 38, 'Mean distance travelled against ramp height', 'lab');
-      out += tag(1, 110, 32) + tag(2, 352, 505) + tag(3, X(30) + 36, Y(0) + 22) + tag(4, X(15) - 34, Y(52) - 30) + tag(5, X(27) + 22, Y(95) + 12) + tag(6, X(20) + 44, Y(96) - 14);
+      out += tag(1, 110, 32) + tag(2, 330, 505) + tag(3, X(30) + 46, Y(0) + 22) + tag(4, X(15) - 34, Y(52) - 30) + tag(5, X(27) + 22, Y(95) + 12) + tag(6, X(20) + 44, Y(96) - 14);
       return svg(880, 600, out, 'Annotated line graph: 1 title, 2 axis labels with units, 3 even scale, 4 small crosses, 5 one best-fit line, 6 outlier circled');
     },
 
