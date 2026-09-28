@@ -735,15 +735,15 @@ function alphaForce(position, target) {
   return target.copy(position).multiplyScalar(ALPHA_K / (soft * Math.sqrt(soft)));
 }
 const BEAM_RADIUS = 2.6; // Slightly wider than the atom: every part of it is hit evenly.
-// In the nuclear views, one extra alpha is quietly aimed close to the nucleus every few
-// seconds. With an even beam a bounce-back is rare, so without these shots a student could
-// watch for a long time before seeing one. They are drawn exactly like the rest of the beam
+// In the nuclear views, one extra alpha is quietly aimed close to the nucleus now and
+// then. With an even beam a bounce-back is uncommon, so without these shots a student
+// could watch for a while before seeing one. They are drawn exactly like the rest of the beam
 // on purpose: the sim illustrates the idea (a tiny, dense nucleus can turn an alpha back),
 // not the real rates, so there is no need to point the extra shots out. Their entry points
 // are spread over a narrow band so they scatter by different amounts (some bounce back,
 // some turn sharply) instead of retracing one path. The plum pudding view needs none: the
 // even beam already shows every alpha passing almost straight through.
-const AIMED_INTERVAL = 5; // Seconds between the extra shots.
+const AIMED_INTERVAL = 15; // Seconds between the extra shots.
 const AIMED_RADIUS = 0.24; // About 40% of these come within the >90° bounce-back range.
 const TRAIL_SAMPLE = 1 / 60; // Seconds between trail points, whatever the display's frame rate.
 function startBeam() {
