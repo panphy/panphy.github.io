@@ -84,7 +84,7 @@
 .chart .p1 { left: 10%; bottom: 12%; } .chart .p2 { left: 27%; bottom: 28%; } .chart .p3 { left: 45%; bottom: 43%; } .chart .p4 { left: 65%; bottom: 61%; } .chart .p5 { left: 86%; bottom: 80%; }
 .chart .point.outlier { left: 62%; bottom: 27%; width: 24px; height: 24px; background: var(--hot); }
 .chart .trend { position: absolute; left: -5%; bottom: 47%; width: 112%; height: 6px; background: var(--cyan); transform: rotate(-39deg); }
-.machine .sticky.one { left: -10px; top: 70px; transform: rotate(-8deg); }
+.machine .sticky.one { left: -20px; top: 4px; transform: rotate(-6deg); }
 .machine .sticky.two { right: -20px; bottom: 110px; transform: rotate(7deg); }
 .machine .stamp { right: -10px; top: 20px; }
 
