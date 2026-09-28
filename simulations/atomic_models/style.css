@@ -28,6 +28,7 @@
   --proton: #D45132;
   --neutron: #657481;
   --alpha: #B5179E;
+  --alpha-deflected: #0E9F6E;
   --photon: #7C3AED;
   --correct-bg: #E5F2EA;
   --correct-border: #3F7A55;
@@ -62,6 +63,7 @@
   --proton: #EF6A48;
   --neutron: #8C9AA6;
   --alpha: #E879F9;
+  --alpha-deflected: #34D399;
   --photon: #A78BFA;
   --correct-bg: #183324;
   --correct-border: #4ADE80;
@@ -197,6 +199,7 @@ body[data-model=bohr] .legend .positive, body[data-model=cloud] .legend .positiv
 body[data-model=rutherford] .legend .positive { background: #D99A36; }
 .legend .neutron { background: var(--neutron); }
 .legend .alpha { background: var(--alpha); }
+.legend .deflected { background: var(--alpha-deflected); }
 .legend .photon { background: var(--photon); }
 .legend .cloud-dot { background: radial-gradient(circle, var(--electron) 0 2px, transparent 2.5px) 0 0 / 6px 6px, color-mix(in srgb, var(--electron), transparent 80%); }
 .gesture { top: 8px; left: 10px; margin: 0; color: var(--text-secondary); }

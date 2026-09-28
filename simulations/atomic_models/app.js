@@ -120,6 +120,7 @@ function readPalette() {
     proton: color('--proton'),
     neutron: color('--neutron'),
     alpha: color('--alpha'),
+    deflected: color('--alpha-deflected'),
     photon: color('--photon'),
     line: color('--text-secondary'),
     accent: color('--brand-accent'),
@@ -750,6 +751,7 @@ function startBeam() {
   $('alpha').setAttribute('aria-pressed', 'true');
   $('alpha').textContent = 'Stop the beam';
   $('alpha-legend').hidden = false;
+  $('deflected-legend').hidden = state.model === 'plum';
   $('action-hint').textContent = state.model === 'plum'
     ? 'Spread-out positive charge only nudges the alpha particles: they all pass almost straight through.'
     : 'Most alpha particles pass straight through. A few pass close to the nucleus and are deflected or bounce back.';
@@ -766,6 +768,7 @@ function stopBeam() {
   $('alpha').setAttribute('aria-pressed', 'false');
   $('alpha').textContent = 'Fire alpha particles';
   $('alpha-legend').hidden = true;
+  $('deflected-legend').hidden = true;
   $('action-hint').textContent = MODELS[state.model].hint;
 }
 function randomEntry(radius) {
@@ -782,11 +785,22 @@ function spawnAlpha(aimed) {
   mesh.add(glow(palette.alpha, 0.4));
   const geometry = new THREE.BufferGeometry();
   geometry.setAttribute('position', new THREE.BufferAttribute(new Float32Array(240 * 3), 3));
+  // RGBA per point: the path changes colour once the alpha has been turned, and finished
+  // paths fade their incoming leg separately from the outgoing one.
+  geometry.setAttribute('color', new THREE.BufferAttribute(new Float32Array(240 * 4), 4));
   geometry.setDrawRange(0, 0);
-  const material = new THREE.LineBasicMaterial({ color: palette.alpha, transparent: true, opacity: 0.8 });
+  const material = new THREE.LineBasicMaterial({ vertexColors: true, transparent: true });
   const trail = new THREE.Line(geometry, material);
   beamGroup.add(mesh, trail);
-  beam.alphas.push({ position, velocity: new THREE.Vector3(ALPHA_SPEED, 0, 0), mesh, trail, count: 0 });
+  beam.alphas.push({ position, velocity: new THREE.Vector3(ALPHA_SPEED, 0, 0), mesh, trail, count: 0, turnedAt: -1 });
+}
+const TURNED_ANGLE = 10; // Degrees: beyond this the path is drawn in the deflected colour.
+function fadeTrail(alpha, incoming, outgoing) {
+  const colors = alpha.trail.geometry.attributes.color;
+  for (let i = 0; i < alpha.count; i += 1) {
+    colors.setW(i, alpha.turnedAt >= 0 && i >= alpha.turnedAt ? outgoing : incoming);
+  }
+  colors.needsUpdate = true;
 }
 const force = new THREE.Vector3();
 function integrate(position, velocity, duration, maxStep) {
@@ -825,19 +839,26 @@ function stepBeam(delta) {
   for (const alpha of [...beam.alphas]) {
     integrate(alpha.position, alpha.velocity, delta, 0.02);
     alpha.mesh.position.copy(alpha.position);
-    const positions = alpha.trail.geometry.attributes.position;
+    const { position: positions, color: colors } = alpha.trail.geometry.attributes;
     if (alpha.count < positions.count) {
+      if (alpha.turnedAt < 0 && deflection(alpha.velocity) > TURNED_ANGLE) alpha.turnedAt = alpha.count;
+      const shade = alpha.turnedAt >= 0 ? palette.deflected : palette.alpha;
       positions.setXYZ(alpha.count, alpha.position.x, alpha.position.y, alpha.position.z);
+      colors.setXYZW(alpha.count, shade.r, shade.g, shade.b, 0.8);
       alpha.count += 1;
       alpha.trail.geometry.setDrawRange(0, alpha.count);
       positions.needsUpdate = true;
+      colors.needsUpdate = true;
       alpha.trail.geometry.computeBoundingSphere();
     }
     if (alpha.position.length() > 7.5) {
       const angle = deflection(alpha.velocity);
       disposeObject(alpha.mesh);
       beamGroup.remove(alpha.mesh);
-      alpha.trail.material.opacity = angle > 10 ? 0.55 : 0.2;
+      // Deflected paths keep a clear outgoing leg but only a faint incoming one, so the
+      // incoming legs of shots near the nucleus do not stack up into a dense central beam.
+      if (angle > TURNED_ANGLE) fadeTrail(alpha, 0.1, angle > 90 ? 0.75 : 0.55);
+      else fadeTrail(alpha, 0.2, 0.2);
       // Rare bounce-backs are kept separately so common paths never push them off screen.
       keepPath(angle > 90 ? beam.backHistory : beam.history, alpha.trail, angle > 90 ? 4 : 36);
       beam.alphas.splice(beam.alphas.indexOf(alpha), 1);
