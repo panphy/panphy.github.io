@@ -118,7 +118,7 @@ let excite = null;
 // Rutherford view with the beam on: the electrons drift outward and fade, since at the
 // nucleus's drawn size they would really be hundreds of metres away. t runs 0 → 1.
 const spread = { t: 0, target: 0 };
-const SPREAD_TIME = 1.5;
+const SPREAD_TIME = 3;
 const SPREAD_DISTANCE = 2.5; // Extra orbit radii travelled while fading out.
 
 function readPalette() {
@@ -752,7 +752,7 @@ function alphaForce(position, target) {
   const screen = Math.exp(-r / SCREENING) * (1 + r / SCREENING);
   return target.copy(position).multiplyScalar(NUCLEAR_K * screen / (soft * Math.sqrt(soft)));
 }
-const BEAM_RADIUS = 2.6; // Slightly wider than the atom: every part of it is hit evenly.
+const BEAM_RADIUS = 4; // Wider than the atom, so nearly all of the beam (about 95%) passes almost straight.
 // In the nuclear views, one extra alpha is quietly aimed close to the nucleus now and
 // then. With an even beam a bounce-back is uncommon, so without these shots a student
 // could watch for a while before seeing one. They are drawn exactly like the rest of the beam
@@ -775,7 +775,7 @@ function startBeam() {
     ? 'Spread-out positive charge only nudges the alpha particles: they all pass almost straight through.'
     : 'Most alpha particles pass straight through. A few pass close to the nucleus and are deflected or bounce back.';
   if (!state.playing) setPlaying(true);
-  flyTo({ direction: new THREE.Vector3(0, 0.3, 1), distance: THREE.MathUtils.clamp(fitDistance(7), 13, 24) });
+  flyTo({ direction: new THREE.Vector3(0, 0.3, 1), distance: THREE.MathUtils.clamp(fitDistance(7), 15, 24) });
   readout.textContent = `${PARTICLES.alpha} They arrive from the left as a wide, parallel beam.`;
   if (state.model === 'rutherford') {
     select(null);
@@ -828,17 +828,23 @@ function randomEntry(radius) {
   return new THREE.Vector3(-6, b * Math.cos(angle), b * Math.sin(angle));
 }
 // In a 3D beam, alphas passing far in front of or behind the nucleus can look as if they go
-// straight through it undeflected. In the nuclear views each alpha is faded by how far its
-// line of approach lies from the nucleus along the current view direction, so only paths
-// that really pass close to the nucleus are drawn at full strength over it.
+// straight through it undeflected. In the nuclear views an alpha whose line of approach
+// appears on screen to cross the nucleus is faded by how far it really lies in front of or
+// behind it, so only paths that truly pass close are drawn at full strength over it. Paths
+// that visibly pass above or below the nucleus are left alone.
 const DEPTH_CLEAR = 0.3; // Depth offsets up to this stay at full strength.
 const DEPTH_FADE = 1.2; // Extra depth over which a path fades to its minimum.
 const DEPTH_MIN = 0.15;
+const SCREEN_NEAR = 0.4; // On-screen offsets up to this appear to cross the nucleus.
+const SCREEN_CLEAR = 0.9; // Beyond this on-screen offset a path is never faded.
 const viewDirection = new THREE.Vector3();
 function depthFade(offset) {
   if (state.model === 'plum') return 1;
   const depth = Math.abs(offset.dot(viewDirection));
-  return THREE.MathUtils.clamp(1 - (depth - DEPTH_CLEAR) / DEPTH_FADE, DEPTH_MIN, 1);
+  const onScreen = Math.sqrt(Math.max(0, offset.lengthSq() - depth * depth));
+  const overlap = THREE.MathUtils.clamp((SCREEN_CLEAR - onScreen) / (SCREEN_CLEAR - SCREEN_NEAR), 0, 1);
+  const byDepth = THREE.MathUtils.clamp(1 - (depth - DEPTH_CLEAR) / DEPTH_FADE, DEPTH_MIN, 1);
+  return 1 - overlap * (1 - byDepth);
 }
 function applyDepthFade() {
   viewDirection.subVectors(camera.position, controls.target).normalize();
@@ -869,7 +875,7 @@ function spawnAlpha(aimed) {
   beamGroup.add(mesh, trail);
   beam.alphas.push({ position, velocity: new THREE.Vector3(ALPHA_SPEED, 0, 0), mesh, trail, offset: trail.userData.offset, glowBase: mesh.children[0].material.opacity, count: 0, turnedAt: -1, sampleTimer: 0 });
 }
-const TURNED_ANGLE = 10; // Degrees: beyond this the path is drawn in the deflected colour.
+const TURNED_ANGLE = 20; // Degrees: beyond this the path is drawn in the deflected colour.
 function fadeTrail(alpha, incoming, outgoing) {
   const colors = alpha.trail.geometry.attributes.color;
   for (let i = 0; i < alpha.count; i += 1) {
@@ -903,9 +909,9 @@ function stepBeam(delta) {
   if (!beam) return;
   beam.timer -= delta;
   beam.aimTimer -= delta;
-  if (beam.timer <= 0 && beam.alphas.length < 12) {
+  if (beam.timer <= 0 && beam.alphas.length < 28) {
     spawnAlpha(false);
-    beam.timer = 0.32;
+    beam.timer = 0.135; // Keeps the beam as dense as before over its wider cross-section.
   }
   if (beam.aimTimer <= 0) {
     if (state.model !== 'plum') spawnAlpha(true);
@@ -935,10 +941,10 @@ function stepBeam(delta) {
       beamGroup.remove(alpha.mesh);
       // Deflected paths keep a clear outgoing leg but only a faint incoming one, so the
       // incoming legs of shots near the nucleus do not stack up into a dense central beam.
-      if (angle > TURNED_ANGLE) fadeTrail(alpha, 0.1, angle > 90 ? 0.75 : 0.55);
-      else fadeTrail(alpha, 0.2, 0.2);
+      if (angle > TURNED_ANGLE) fadeTrail(alpha, 0.1, angle > 90 ? 0.75 : 0.4);
+      else fadeTrail(alpha, 0.3, 0.3);
       // Rare bounce-backs are kept separately so common paths never push them off screen.
-      keepPath(angle > 90 ? beam.backHistory : beam.history, alpha.trail, angle > 90 ? 4 : 36);
+      keepPath(angle > 90 ? beam.backHistory : beam.history, alpha.trail, angle > 90 ? 4 : 60);
       beam.alphas.splice(beam.alphas.indexOf(alpha), 1);
     }
   }
