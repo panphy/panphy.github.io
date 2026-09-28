@@ -69,12 +69,12 @@
         </div>
         <p class="particle-readout mono" id="particle-readout" role="status">Tap a particle to discover its job.</p>
         <div class="toolbar" aria-label="View controls">
-          <button type="button" id="motion" class="primary" aria-pressed="true"><svg viewBox="0 0 24 24" aria-hidden="true"><path id="motion-icon" d="M7 5h3v14H7zM14 5h3v14h-3z"/></svg><span id="motion-label">Pause motion</span></button>
+          <button type="button" id="motion" class="primary" aria-pressed="true"><svg viewBox="0 0 24 24" aria-hidden="true"><path id="motion-icon" d="M7 5h3v14H7zM14 5h3v14h-3z"/></svg><span id="motion-label" data-reserve="Pause motion">Pause motion</span></button>
           <button type="button" id="reset">Reset view</button>
-          <button type="button" id="inspect">Inspect an electron</button>
+          <button type="button" id="inspect" data-reserve="Inspect an electron">Inspect an electron</button>
           <button type="button" id="nucleus">Explore the centre</button>
-          <button type="button" id="alpha" class="experiment" aria-pressed="false">Fire alpha particles</button>
-          <button type="button" id="excite" class="experiment" hidden>Excite an electron</button>
+          <button type="button" id="alpha" class="experiment" aria-pressed="false" data-reserve="Fire alpha particles">Fire alpha particles</button>
+          <button type="button" id="excite" class="experiment" data-reserve="Excite an electron" hidden>Excite an electron</button>
         </div>
         <p id="action-hint"></p>
       </div>
