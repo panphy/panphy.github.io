@@ -68,8 +68,7 @@
     dataSets: () => {
       const X = v => 170 + (v - 0.85) / 0.65 * 690;
       const sets = [['A', [1.20, 1.22, 1.21]], ['B', [1.05, 1.47, 1.12]], ['C', [0.91, 0.92, 0.91]]];
-      let s = line(X(1.21), 34, X(1.21), 300, 'trend dash');
-      s += t(X(1.21), 24, 'TRUE VALUE ≈ 1.21 s', 'lab small cyan-t');
+      let s = '';
       sets.forEach(([name, vals], i) => {
         const y = 80 + i * 82;
         const setClass = `set-${name.toLowerCase()}`;
@@ -80,6 +79,7 @@
       s += `<path class="axis" d="M170 300H866"/>`;
       for (let v = 0.9; v <= 1.5001; v += 0.1) s += line(X(v), 300, X(v), 311, 'ink') + t(X(v), 338, v.toFixed(1), 'tick-t');
       s += t(515, 376, 'Time / s', 'axis-t');
+      s += `<g class="step" data-step-order="-1">${line(X(1.21), 34, X(1.21), 300, 'trend dash')}${t(X(1.21), 24, 'TRUE VALUE ≈ 1.21 s', 'lab small cyan-t')}</g>`;
       return svg(900, 390, s, 'Dot plot of three sets of repeated times: set A close together near 1.21 s, set B spread from 1.05 to 1.47 s, set C close together near 0.91 s');
     },
 
