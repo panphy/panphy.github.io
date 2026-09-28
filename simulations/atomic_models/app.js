@@ -740,11 +740,11 @@ const BEAM_RADIUS = 2.6; // Slightly wider than the atom: every part of it is hi
 // could watch for a while before seeing one. They are drawn exactly like the rest of the beam
 // on purpose: the sim illustrates the idea (a tiny, dense nucleus can turn an alpha back),
 // not the real rates, so there is no need to point the extra shots out. Their entry points
-// are spread over a narrow band so they scatter by different amounts (some bounce back,
+// are spread over a small disc so they scatter in different directions (some bounce back,
 // some turn sharply) instead of retracing one path. The plum pudding view needs none: the
 // even beam already shows every alpha passing almost straight through.
-const AIMED_INTERVAL = 15; // Seconds between the extra shots.
-const AIMED_RADIUS = 0.24; // About 40% of these come within the >90° bounce-back range.
+const AIMED_INTERVAL = 8; // Seconds between the extra shots.
+const AIMED_RADIUS = 0.15; // About 40% of these come within the >90° bounce-back range.
 const TRAIL_SAMPLE = 1 / 60; // Seconds between trail points, whatever the display's frame rate.
 function startBeam() {
   stopBeam();
@@ -772,16 +772,39 @@ function stopBeam() {
   $('deflected-legend').hidden = true;
   $('action-hint').textContent = MODELS[state.model].hint;
 }
-function randomEntry(halfWidth) {
-  // Uniform across a thin sheet of the beam level with the nucleus and facing the camera.
-  // A full 3D beam looked wrong: alphas passing far in front of or behind the nucleus
-  // appeared to go straight through it undeflected, right after a real close pass bounced.
-  return new THREE.Vector3(-6, (Math.random() * 2 - 1) * halfWidth, 0);
+function randomEntry(radius) {
+  // Uniform over the beam's cross-section, as when the beam is far wider than an atom.
+  const b = radius * Math.sqrt(Math.random());
+  const angle = Math.random() * Math.PI * 2;
+  return new THREE.Vector3(-6, b * Math.cos(angle), b * Math.sin(angle));
+}
+// In a 3D beam, alphas passing far in front of or behind the nucleus can look as if they go
+// straight through it undeflected. In the nuclear views each alpha is faded by how far its
+// line of approach lies from the nucleus along the current view direction, so only paths
+// that really pass close to the nucleus are drawn at full strength over it.
+const DEPTH_CLEAR = 0.3; // Depth offsets up to this stay at full strength.
+const DEPTH_FADE = 1.2; // Extra depth over which a path fades to its minimum.
+const DEPTH_MIN = 0.15;
+const viewDirection = new THREE.Vector3();
+function depthFade(offset) {
+  if (state.model === 'plum') return 1;
+  const depth = Math.abs(offset.dot(viewDirection));
+  return THREE.MathUtils.clamp(1 - (depth - DEPTH_CLEAR) / DEPTH_FADE, DEPTH_MIN, 1);
+}
+function applyDepthFade() {
+  viewDirection.subVectors(camera.position, controls.target).normalize();
+  for (const alpha of beam.alphas) {
+    const fadeFactor = depthFade(alpha.offset);
+    alpha.trail.material.opacity = fadeFactor;
+    alpha.mesh.material.opacity = fadeFactor;
+    alpha.mesh.children[0].material.opacity = alpha.glowBase * fadeFactor;
+  }
+  for (const trail of [...beam.history, ...beam.backHistory]) trail.material.opacity = depthFade(trail.userData.offset);
 }
 function spawnAlpha(aimed) {
   // Extra shots enter near the axis; otherwise they look and behave like any other alpha.
   const position = randomEntry(aimed ? AIMED_RADIUS : BEAM_RADIUS);
-  const mesh = new THREE.Mesh(new THREE.SphereGeometry(0.07, 16, 12), new THREE.MeshStandardMaterial({ color: palette.alpha, emissive: palette.alpha, emissiveIntensity: 0.3 }));
+  const mesh = new THREE.Mesh(new THREE.SphereGeometry(0.07, 16, 12), new THREE.MeshStandardMaterial({ color: palette.alpha, emissive: palette.alpha, emissiveIntensity: 0.3, transparent: true }));
   mesh.position.copy(position);
   mesh.add(glow(palette.alpha, 0.4));
   const geometry = new THREE.BufferGeometry();
@@ -792,8 +815,10 @@ function spawnAlpha(aimed) {
   geometry.setDrawRange(0, 0);
   const material = new THREE.LineBasicMaterial({ vertexColors: true, transparent: true });
   const trail = new THREE.Line(geometry, material);
+  // The sideways offset of the line of approach, used for the depth fade.
+  trail.userData.offset = new THREE.Vector3(0, position.y, position.z);
   beamGroup.add(mesh, trail);
-  beam.alphas.push({ position, velocity: new THREE.Vector3(ALPHA_SPEED, 0, 0), mesh, trail, count: 0, turnedAt: -1, sampleTimer: 0 });
+  beam.alphas.push({ position, velocity: new THREE.Vector3(ALPHA_SPEED, 0, 0), mesh, trail, offset: trail.userData.offset, glowBase: mesh.children[0].material.opacity, count: 0, turnedAt: -1, sampleTimer: 0 });
 }
 const TURNED_ANGLE = 10; // Degrees: beyond this the path is drawn in the deflected colour.
 function fadeTrail(alpha, incoming, outgoing) {
@@ -1201,5 +1226,7 @@ function frame(time) {
   stepCamera(delta);
   if (halo.parent) halo.material.opacity = 0.28 + 0.14 * Math.sin(time / 220);
   controls.update();
+  // Every frame, even when paused, since rotating the view changes what lies in front.
+  if (beam) applyDepthFade();
   renderer.render(scene, camera);
 }
