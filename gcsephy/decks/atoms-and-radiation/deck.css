@@ -432,9 +432,11 @@ table.facts.compare { table-layout: fixed; font-size: 30px; }
 .reveal-hint { font: 600 20px var(--font-mono); letter-spacing: .08em; color: var(--text-secondary); }
 
 /* Summary */
-.terms { display: grid; grid-template-columns: repeat(4, 1fr); gap: 18px; }
-.term { padding: 20px 22px; border: 1px solid var(--card-border); border-radius: 18px; background: var(--card-bg); box-shadow: var(--card-shadow); }
-.term b { display: block; font-family: var(--font-display); font-weight: 400; font-size: 34px; color: var(--brand-primary); }
+/* Bottom margin keeps the last row of cards clear of the slide footer. */
+.terms { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 30px; }
+h2:has(+ .terms) { margin-bottom: 24px; }
+.term { padding: 16px 20px; border: 1px solid var(--card-border); border-radius: 18px; background: var(--card-bg); box-shadow: var(--card-shadow); }
+.term b { display: block; font-family: var(--font-display); font-weight: 400; font-size: 32px; color: var(--brand-primary); }
 .term span { display: block; font-size: 26px; color: var(--text-secondary); line-height: 1.3; position: relative; padding-left: 24px; }
 .term span + span { margin-top: 4px; }
 .term b + span { margin-top: 6px; }
