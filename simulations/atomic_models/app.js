@@ -743,7 +743,7 @@ const BEAM_RADIUS = 2.6; // Slightly wider than the atom: every part of it is hi
 // are spread over a small disc so they scatter in different directions (some bounce back,
 // some turn sharply) instead of retracing one path. The plum pudding view needs none: the
 // even beam already shows every alpha passing almost straight through.
-const AIMED_INTERVAL = 15; // Seconds between the extra shots.
+const AIMED_INTERVAL = 8; // Seconds between the extra shots.
 const AIMED_RADIUS = 0.15; // About 40% of these come within the >90° bounce-back range.
 const TRAIL_SAMPLE = 1 / 60; // Seconds between trail points, whatever the display's frame rate.
 function startBeam() {
