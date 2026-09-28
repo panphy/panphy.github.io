@@ -960,6 +960,7 @@
   let isStarting = false;
   let sampleRate;
   const fftSize = 2048;
+  const AUDIO_RESUME_TIMEOUT_MS = 1000;
   const MICROPHONE_CONSTRAINTS = {
     audio: {
       autoGainControl: false,
@@ -1260,8 +1261,14 @@
     }
 
     if (audioContext.state !== 'running') {
-      await audioContext.resume();
+      // Without a user gesture, some browsers (e.g. Brave) leave resume()
+      // pending indefinitely, so don't wait on it forever.
+      await Promise.race([
+        audioContext.resume().catch(() => {}),
+        new Promise((resolve) => setTimeout(resolve, AUDIO_RESUME_TIMEOUT_MS))
+      ]);
     }
+    return audioContext.state === 'running';
   }
 
   function applyDeviceId(constraints) {
@@ -1319,7 +1326,7 @@
       // Watch for the track ending (e.g. device unplugged while running)
       setupTrackEndedListeners(stream);
 
-      await ensureAudioContextRunning();
+      const contextRunning = await ensureAudioContextRunning();
 
       if (!analyzer) {
         analyzer = audioContext.createAnalyser();
@@ -1335,6 +1342,12 @@
 
       source = audioContext.createMediaStreamSource(microphoneStream);
       source.connect(analyzer);
+
+      if (!contextRunning) {
+        // Audio is blocked until a user gesture: stay ready so the next
+        // Start (or Space) press resumes the context via the fast path.
+        return;
+      }
 
       isRunning = true;
       toggleBtn.textContent = 'Pause';
@@ -1404,7 +1417,10 @@
       pauseSpectrum();
     } else if (analyzer && source && microphoneStream) {
       // Fast resume: mic stream is still alive, just unpause
-      await ensureAudioContextRunning();
+      if (!(await ensureAudioContextRunning())) {
+        alert('Audio is blocked by the browser. Please allow audio/autoplay for this site and tap Start again.');
+        return;
+      }
       isRunning = true;
       toggleBtn.textContent = 'Pause';
       exportSpectrumBtn.disabled = true;
