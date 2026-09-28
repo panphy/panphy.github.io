@@ -1,4 +1,4 @@
-const BUILD_ID = '2026-09-28T14:27:58Z';
+const BUILD_ID = '2026-09-28T14:56:04Z';
 const APP_VERSIONS = {
   core: BUILD_ID,
   panphymd: BUILD_ID,

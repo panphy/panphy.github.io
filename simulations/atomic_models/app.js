@@ -26,7 +26,13 @@ const CLOUD_NUCLEUS_SCALE = 0.6;
 const BOHR_RADII = [1.0, 1.95, 2.9];
 const POSITIVE_RADIUS = { plum: PLUM_RADIUS, rutherford: RUTHERFORD_NUCLEUS, bohr: BOHR_NUCLEUS, cloud: BOHR_NUCLEUS * CLOUD_NUCLEUS_SCALE };
 const ALPHA_SPEED = 4;
-const ALPHA_K = 1.5; // Same total positive charge in both models; only its spread differs.
+const ALPHA_K = 1.5; // Plum pudding: the positive charge spread through the whole atom.
+// Nucleus: a stronger charge screened by the electrons outside it, so the push is strong
+// close in (a head-on alpha turns back about 0.45 from the centre, clear of the enlarged
+// nucleus and the alpha's own size) but weak further out, where most alphas pass almost
+// straight through. Near the atom's edge the push matches the plum pudding's.
+const NUCLEAR_K = 9;
+const SCREENING = 0.5;
 const TRANSITION_TIME = 1.3;
 const EXCITE_PHASES = [['in', 1.4], ['up', 0.6], ['stay', 1.6], ['down', 0.5], ['out', 1.4]];
 
@@ -732,7 +738,8 @@ function alphaForce(position, target) {
     return target.copy(position).multiplyScalar(scale);
   }
   const soft = r * r + 0.0004;
-  return target.copy(position).multiplyScalar(ALPHA_K / (soft * Math.sqrt(soft)));
+  const screen = Math.exp(-r / SCREENING) * (1 + r / SCREENING);
+  return target.copy(position).multiplyScalar(NUCLEAR_K * screen / (soft * Math.sqrt(soft)));
 }
 const BEAM_RADIUS = 2.6; // Slightly wider than the atom: every part of it is hit evenly.
 // In the nuclear views, one extra alpha is quietly aimed close to the nucleus now and
@@ -744,7 +751,7 @@ const BEAM_RADIUS = 2.6; // Slightly wider than the atom: every part of it is hi
 // some turn sharply) instead of retracing one path. The plum pudding view needs none: the
 // even beam already shows every alpha passing almost straight through.
 const AIMED_INTERVAL = 8; // Seconds between the extra shots.
-const AIMED_RADIUS = 0.15; // About 40% of these come within the >90° bounce-back range.
+const AIMED_RADIUS = 0.43; // About 40% of these come within the >90° bounce-back range.
 const TRAIL_SAMPLE = 1 / 60; // Seconds between trail points, whatever the display's frame rate.
 function startBeam() {
   stopBeam();
