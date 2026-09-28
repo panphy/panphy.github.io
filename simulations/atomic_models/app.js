@@ -881,25 +881,53 @@ function updateBeamStats() {
 }
 
 // ---------- Bohr excitation ----------
-const photonMaterial = new THREE.LineBasicMaterial({ transparent: true, opacity: 0.95 });
-const photon = new THREE.Line(new THREE.BufferGeometry().setAttribute('position', new THREE.BufferAttribute(new Float32Array(90 * 3), 3)), photonMaterial);
+// WebGL ignores line widths, so photon waves are drawn as a thin ribbon facing the camera.
+const WAVE_POINTS = 90;
+const WAVE_HALF_WIDTH = 0.018;
+function waveRibbonGeometry() {
+  const geometry = new THREE.BufferGeometry().setAttribute('position', new THREE.BufferAttribute(new Float32Array(WAVE_POINTS * 2 * 3), 3));
+  const index = [];
+  for (let i = 0; i < WAVE_POINTS - 1; i++) {
+    const a = i * 2;
+    index.push(a, a + 1, a + 2, a + 1, a + 3, a + 2);
+  }
+  geometry.setIndex(index);
+  return geometry;
+}
+function setWaveRibbon(geometry, points, view) {
+  const positions = geometry.attributes.position;
+  const tangent = new THREE.Vector3();
+  const normal = new THREE.Vector3();
+  for (let i = 0; i < points.length; i++) {
+    tangent.subVectors(points[Math.min(i + 1, points.length - 1)], points[Math.max(i - 1, 0)]);
+    normal.crossVectors(tangent, view);
+    if (normal.lengthSq() < 1e-10) normal.set(0, 1, 0);
+    normal.normalize().multiplyScalar(WAVE_HALF_WIDTH);
+    const p = points[i];
+    positions.setXYZ(i * 2, p.x + normal.x, p.y + normal.y, p.z + normal.z);
+    positions.setXYZ(i * 2 + 1, p.x - normal.x, p.y - normal.y, p.z - normal.z);
+  }
+  positions.needsUpdate = true;
+}
+const wavePoints = Array.from({ length: WAVE_POINTS }, () => new THREE.Vector3());
+const photonMaterial = new THREE.MeshBasicMaterial({ transparent: true, opacity: 0.95, side: THREE.DoubleSide });
+const photon = new THREE.Mesh(waveRibbonGeometry(), photonMaterial);
 photon.visible = false;
 photon.frustumCulled = false;
 scene.add(photon);
 function drawPhoton(centre, direction, time) {
-  const positions = photon.geometry.attributes.position;
   const view = camera.position.clone().sub(centre).normalize();
   const side = new THREE.Vector3().crossVectors(direction, view);
   if (side.lengthSq() < 1e-4) side.set(0, 1, 0);
   side.normalize();
   const length = 1.3;
-  for (let i = 0; i < positions.count; i++) {
-    const s = (i / (positions.count - 1) - 0.5) * length;
+  for (let i = 0; i < WAVE_POINTS; i++) {
+    const s = (i / (WAVE_POINTS - 1) - 0.5) * length;
     const envelope = Math.cos(Math.PI * s / length) ** 2;
     const wave = 0.13 * envelope * Math.sin(s / length * Math.PI * 12 - time * 18);
-    positions.setXYZ(i, centre.x + direction.x * s + side.x * wave, centre.y + direction.y * s + side.y * wave, centre.z + direction.z * s + side.z * wave);
+    wavePoints[i].set(centre.x + direction.x * s + side.x * wave, centre.y + direction.y * s + side.y * wave, centre.z + direction.z * s + side.z * wave);
   }
-  positions.needsUpdate = true;
+  setWaveRibbon(photon.geometry, wavePoints, view);
   photon.visible = true;
 }
 function renderEnergyDiagram(counts = [2, 4, 0], arrow = null) {
