@@ -115,6 +115,11 @@ let transition = null;
 let cameraTween = null;
 let beam = null;
 let excite = null;
+// Rutherford view with the beam on: the electrons drift outward and fade, since at the
+// nucleus's drawn size they would really be hundreds of metres away. t runs 0 → 1.
+const spread = { t: 0, target: 0 };
+const SPREAD_TIME = 1.5;
+const SPREAD_DISTANCE = 2.5; // Extra orbit radii travelled while fading out.
 
 function readPalette() {
   const styles = getComputedStyle(document.documentElement);
@@ -286,6 +291,7 @@ function clearAtom() {
   pickables = [];
   fadeables = [];
   bohrRings = [];
+  spread.t = 0;
   positiveBody = null;
   cloud = null;
 }
@@ -346,6 +352,8 @@ function buildRutherford() {
     // Each path is shared by two electrons on opposite sides: illustrative, not quantised.
     if (i < 3) ring(radius, palette.line, 0.5, tilt);
   }
+  // The boundary and orbit guides fade out with the electrons when the beam is on.
+  for (const material of fadeables) material.userData.spread = true;
 }
 
 function bohrSpeed(radius) {
@@ -525,6 +533,7 @@ function ease(k) {
 function applyOpacity(k) {
   for (const material of fadeables) {
     let factor = k;
+    if (material.userData.spread) factor *= 1 - ease(spread.t);
     if (cloud && material.isPointsMaterial && state.orbitalFocus) {
       factor *= cloud.some(item => item.key === state.orbitalFocus && item.points.material === material) ? 1 : 0.06;
     }
@@ -596,7 +605,8 @@ function positionElectrons() {
       electron.mesh.position.copy(electron.home).addScaledVector(electron.dir, 0.07 * Math.sin(state.time * 5 + electron.phase));
       continue;
     }
-    orbitPosition(electron.radius, electron.angle, electron.tilt, electron.mesh.position);
+    const outward = electron.bohr || reducedMotion ? 1 : 1 + SPREAD_DISTANCE * ease(spread.t);
+    orbitPosition(electron.radius * outward, electron.angle, electron.tilt, electron.mesh.position);
     const trail = trails[index];
     if (!trail) continue;
     const positions = trail.geometry.attributes.position;
@@ -694,6 +704,7 @@ function pick(clientX, clientY) {
   let best = null;
   let backdrop = null;
   for (const item of pickables) {
+    if (!item.object.visible) continue;
     item.object.getWorldPosition(worldPosition);
     item.object.getWorldScale(worldScale);
     projected.copy(worldPosition).project(camera);
@@ -766,6 +777,34 @@ function startBeam() {
   if (!state.playing) setPlaying(true);
   flyTo({ direction: new THREE.Vector3(0, 0.3, 1), distance: THREE.MathUtils.clamp(fitDistance(7), 13, 24) });
   readout.textContent = `${PARTICLES.alpha} They arrive from the left as a wide, parallel beam.`;
+  if (state.model === 'rutherford') {
+    select(null);
+    spread.target = 1;
+    $('electron-legend').hidden = true;
+    readout.textContent = PARTICLES.farElectrons;
+  }
+}
+function stepSpread(delta) {
+  if (spread.t === spread.target) return;
+  const step = delta / SPREAD_TIME;
+  spread.t = spread.target > spread.t ? Math.min(spread.target, spread.t + step) : Math.max(spread.target, spread.t - step);
+  applySpread();
+}
+function applySpread() {
+  const k = ease(spread.t);
+  for (const { mesh } of electrons) {
+    const fading = k > 0;
+    if (mesh.material.transparent !== fading) {
+      mesh.material.transparent = fading;
+      mesh.material.needsUpdate = true;
+    }
+    mesh.material.opacity = 1 - k;
+    const glowSprite = mesh.children[0];
+    glowSprite.userData.base ??= glowSprite.material.opacity;
+    glowSprite.material.opacity = glowSprite.userData.base * (1 - k);
+    mesh.visible = k < 1;
+  }
+  if (!transition) applyOpacity(1);
 }
 function stopBeam() {
   for (const child of [...beamGroup.children]) {
@@ -773,6 +812,9 @@ function stopBeam() {
     beamGroup.remove(child);
   }
   beam = null;
+  spread.target = 0;
+  $('electron-legend').hidden = state.model === 'cloud';
+  if (readout.textContent === PARTICLES.farElectrons) readout.textContent = DEFAULT_READOUT[state.model];
   $('alpha').setAttribute('aria-pressed', 'false');
   $('alpha').textContent = 'Fire alpha particles';
   $('alpha-legend').hidden = true;
@@ -1062,6 +1104,8 @@ $('inspect').addEventListener('click', () => {
     flyTo({ direction: new THREE.Vector3(0.45, 0.7, 1), distance: [4.5, 9, 9][state.orbitalIndex] });
     return;
   }
+  // Bring the Rutherford electrons back into view before inspecting one.
+  if (beam && state.model === 'rutherford') stopBeam();
   const electron = electrons[state.inspectIndex++ % electrons.length];
   select(electron.mesh, describe('electron'));
   const direction = electron.mesh.position.clone().normalize().add(new THREE.Vector3(0, 0.35, 0.6)).normalize();
@@ -1182,10 +1226,14 @@ window.addEventListener('panphy:theme-change', () => {
   palette = readPalette();
   applyThemeToPersistent();
   const hadBeam = Boolean(beam);
+  const spreadT = spread.t;
   stopBeam();
   endExcite();
   buildAtom(false);
   if (hadBeam) startBeam();
+  // Rebuilding resets the electrons; keep them where they were rather than replay the drift.
+  spread.t = spreadT;
+  applySpread();
 });
 document.fonts?.ready.then(() => {
   // Redraw canvas labels once the mono font has loaded.
@@ -1228,6 +1276,7 @@ function frame(time) {
     stepBeam(delta);
     stepExcite(delta);
   }
+  stepSpread(delta);
   positionElectrons();
   stepTransition(delta);
   stepCamera(delta);
