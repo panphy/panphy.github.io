@@ -56,7 +56,8 @@ export const PARTICLES = {
   cloudNucleus: 'NUCLEUS · 6 protons + 6 neutrons. Enlarged here: it is about 1/100 000 of the atom’s width.',
   pudding: 'POSITIVE CHARGE · Spread evenly through the whole atom. There is no nucleus in this model.',
   noNucleus: 'NO NUCLEUS · You are inside the atom now. Positive charge fills the whole pudding. That is the big difference from the later models.',
-  alpha: 'ALPHA PARTICLE · Charge +2 · A helium nucleus, about 7300 times the electron’s mass. Fast and heavy, so only strong forces can turn it.'
+  alpha: 'ALPHA PARTICLE · Charge +2 · A helium nucleus, about 7300 times the electron’s mass. Fast and heavy, so only strong forces can turn it.',
+  farElectrons: 'TO SCALE · If the nucleus were as big as it looks here, the electrons would be hundreds of metres away. Electrons are so light that they barely affect the alpha particles, so they are moved out of view while the beam runs.'
 };
 
 export const ORBITALS = {
