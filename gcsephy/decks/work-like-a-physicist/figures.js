@@ -77,7 +77,7 @@
         const x = 270 + i * 245;
         const setClass = `set-${name.toLowerCase()}`;
         s += t(x, 338, `SET ${name}`, `lab ${setClass}-t`);
-        vals.forEach((v, k) => { s += dot(x + (k - 1) * 24, Y(v), 12, `pt ${setClass}`); });
+        vals.forEach(v => { s += dot(x, Y(v), 9, `pt ${setClass}`); });
       });
       s += t(515, 376, 'Data set', 'axis-t');
       s += t(0, 0, 'Time / s', 'axis-t', 'middle', 'transform="translate(56 170) rotate(-90)"');
