@@ -225,6 +225,10 @@ body[data-model=rutherford] .legend .positive { background: #D99A36; }
   transition: border-color .15s, background .15s;
 }
 .toolbar button:hover { border-color: var(--brand-accent); background: var(--muted-bg); }
+/* Buttons whose label changes keep the width of their widest label, so the toolbar does not jump. */
+.toolbar [data-reserve] { display: inline-grid; justify-items: center; align-content: center; }
+.toolbar [data-reserve]::after { content: attr(data-reserve); height: 0; overflow: hidden; visibility: hidden; }
+.toolbar [data-reserve][hidden] { display: none; }
 .toolbar button.primary { display: inline-flex; align-items: center; gap: 8px; min-width: 160px; justify-content: center; background: var(--text-main); color: var(--bg-color); border-color: var(--text-main); }
 .toolbar button.primary svg { width: 16px; height: 16px; fill: currentColor; }
 .toolbar button.experiment { border-color: color-mix(in srgb, var(--brand-primary), transparent 50%); color: var(--brand-primary); }
