@@ -226,25 +226,53 @@ function makeElectron() {
   mesh.add(glow(palette.electron, 0.5));
   return mesh;
 }
+// WebGL ignores line widths, so photon waves are drawn as a thin ribbon facing the camera.
+const WAVE_POINTS = 90;
+const WAVE_HALF_WIDTH = 0.018;
+function waveRibbonGeometry() {
+  const geometry = new THREE.BufferGeometry().setAttribute('position', new THREE.BufferAttribute(new Float32Array(WAVE_POINTS * 2 * 3), 3));
+  const index = [];
+  for (let i = 0; i < WAVE_POINTS - 1; i++) {
+    const a = i * 2;
+    index.push(a, a + 1, a + 2, a + 1, a + 3, a + 2);
+  }
+  geometry.setIndex(index);
+  return geometry;
+}
+function setWaveRibbon(geometry, points, view) {
+  const positions = geometry.attributes.position;
+  const tangent = new THREE.Vector3();
+  const normal = new THREE.Vector3();
+  for (let i = 0; i < points.length; i++) {
+    tangent.subVectors(points[Math.min(i + 1, points.length - 1)], points[Math.max(i - 1, 0)]);
+    normal.crossVectors(tangent, view);
+    if (normal.lengthSq() < 1e-10) normal.set(0, 1, 0);
+    normal.normalize().multiplyScalar(WAVE_HALF_WIDTH);
+    const p = points[i];
+    positions.setXYZ(i * 2, p.x + normal.x, p.y + normal.y, p.z + normal.z);
+    positions.setXYZ(i * 2 + 1, p.x - normal.x, p.y - normal.y, p.z - normal.z);
+  }
+  positions.needsUpdate = true;
+}
+const wavePoints = Array.from({ length: WAVE_POINTS }, () => new THREE.Vector3());
 function makeWave(color, opacity = 0.95) {
-  const line = new THREE.Line(new THREE.BufferGeometry().setAttribute('position', new THREE.BufferAttribute(new Float32Array(90 * 3), 3)), new THREE.LineBasicMaterial({ color, transparent: true, opacity }));
+  const line = new THREE.Mesh(waveRibbonGeometry(), new THREE.MeshBasicMaterial({ color, transparent: true, opacity, side: THREE.DoubleSide }));
   line.frustumCulled = false;
   line.userData.radius = 0.35;
   return line;
 }
 function drawWave(line, centre, direction, time, length = 1.1) {
-  const positions = line.geometry.attributes.position;
   const view = camera.position.clone().sub(centre).normalize();
   const side = new THREE.Vector3().crossVectors(direction, view);
   if (side.lengthSq() < 1e-4) side.set(0, 1, 0);
   side.normalize();
-  for (let i = 0; i < positions.count; i++) {
-    const s = (i / (positions.count - 1) - 0.5) * length;
+  for (let i = 0; i < WAVE_POINTS; i++) {
+    const s = (i / (WAVE_POINTS - 1) - 0.5) * length;
     const envelope = Math.cos(Math.PI * s / length) ** 2;
     const wave = 0.12 * envelope * Math.sin(s / length * Math.PI * 12 - time * 18);
-    positions.setXYZ(i, centre.x + direction.x * s + side.x * wave, centre.y + direction.y * s + side.y * wave, centre.z + direction.z * s + side.z * wave);
+    wavePoints[i].set(centre.x + direction.x * s + side.x * wave, centre.y + direction.y * s + side.y * wave, centre.z + direction.z * s + side.z * wave);
   }
-  positions.needsUpdate = true;
+  setWaveRibbon(line.geometry, wavePoints, view);
 }
 function random(seed) {
   // Deterministic pseudo-random numbers so layouts stay the same between visits.
