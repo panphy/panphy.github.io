@@ -19,6 +19,8 @@ const TRANSITION_TIME = 0.6;
 const SCREEN_HALF_LIFE = 4; // Seconds on screen for one half-life, whatever the isotope.
 const MAX_HALF_LIVES = 6;
 const HOME_HALF_WIDTH = { alpha: 2.9, beta: 1.6, gamma: 2.4, halflife: 3.8 };
+// The alpha, beta and gamma home views sit further back than their framing so the radiation stays in view longer.
+const DECAY_ZOOM_OUT = 1.35;
 // Penetration test: typical classroom absorbers (thicknesses are illustrative).
 const ABSORBERS = [
   { key: 'paper', label: 'Paper', gap: 1.0, thickness: 0.03 },
@@ -1173,7 +1175,7 @@ function resetView() {
   // Portrait half-life views frame the tray more tightly and lift it clear of the legend.
   const portraitSample = state.mode === 'halflife' && camera.aspect < 1;
   if (portraitSample) controls.target.set(0, -0.5, 0.5);
-  camera.position.copy(direction.normalize().multiplyScalar(fitDistance(portraitSample ? 3.1 : HOME_HALF_WIDTH[state.mode]))).add(controls.target);
+  camera.position.copy(direction.normalize().multiplyScalar(fitDistance(portraitSample ? 3.1 : HOME_HALF_WIDTH[state.mode] * (state.mode === 'halflife' ? 1 : DECAY_ZOOM_OUT)))).add(controls.target);
   controls.update();
   select(null);
 }
