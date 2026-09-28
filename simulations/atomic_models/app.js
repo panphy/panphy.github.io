@@ -752,7 +752,7 @@ function alphaForce(position, target) {
   const screen = Math.exp(-r / SCREENING) * (1 + r / SCREENING);
   return target.copy(position).multiplyScalar(NUCLEAR_K * screen / (soft * Math.sqrt(soft)));
 }
-const BEAM_RADIUS = 2.6; // Slightly wider than the atom: every part of it is hit evenly.
+const BEAM_RADIUS = 4; // Wider than the atom, so nearly all of the beam (about 95%) passes almost straight.
 // In the nuclear views, one extra alpha is quietly aimed close to the nucleus now and
 // then. With an even beam a bounce-back is uncommon, so without these shots a student
 // could watch for a while before seeing one. They are drawn exactly like the rest of the beam
@@ -775,7 +775,7 @@ function startBeam() {
     ? 'Spread-out positive charge only nudges the alpha particles: they all pass almost straight through.'
     : 'Most alpha particles pass straight through. A few pass close to the nucleus and are deflected or bounce back.';
   if (!state.playing) setPlaying(true);
-  flyTo({ direction: new THREE.Vector3(0, 0.3, 1), distance: THREE.MathUtils.clamp(fitDistance(7), 13, 24) });
+  flyTo({ direction: new THREE.Vector3(0, 0.3, 1), distance: THREE.MathUtils.clamp(fitDistance(7), 15, 24) });
   readout.textContent = `${PARTICLES.alpha} They arrive from the left as a wide, parallel beam.`;
   if (state.model === 'rutherford') {
     select(null);
@@ -909,9 +909,9 @@ function stepBeam(delta) {
   if (!beam) return;
   beam.timer -= delta;
   beam.aimTimer -= delta;
-  if (beam.timer <= 0 && beam.alphas.length < 12) {
+  if (beam.timer <= 0 && beam.alphas.length < 28) {
     spawnAlpha(false);
-    beam.timer = 0.32;
+    beam.timer = 0.135; // Keeps the beam as dense as before over its wider cross-section.
   }
   if (beam.aimTimer <= 0) {
     if (state.model !== 'plum') spawnAlpha(true);
@@ -944,7 +944,7 @@ function stepBeam(delta) {
       if (angle > TURNED_ANGLE) fadeTrail(alpha, 0.1, angle > 90 ? 0.75 : 0.4);
       else fadeTrail(alpha, 0.3, 0.3);
       // Rare bounce-backs are kept separately so common paths never push them off screen.
-      keepPath(angle > 90 ? beam.backHistory : beam.history, alpha.trail, angle > 90 ? 4 : 36);
+      keepPath(angle > 90 ? beam.backHistory : beam.history, alpha.trail, angle > 90 ? 4 : 60);
       beam.alphas.splice(beam.alphas.indexOf(alpha), 1);
     }
   }
