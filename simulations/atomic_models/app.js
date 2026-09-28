@@ -740,11 +740,12 @@ const BEAM_RADIUS = 2.6; // Slightly wider than the atom: every part of it is hi
 // watch for a long time before seeing one. They are drawn exactly like the rest of the beam
 // on purpose: the sim illustrates the idea (a tiny, dense nucleus can turn an alpha back),
 // not the real rates, so there is no need to point the extra shots out. Their entry points
-// are spread over a small disc so they scatter in different directions (some bounce back,
+// are spread over a narrow band so they scatter by different amounts (some bounce back,
 // some turn sharply) instead of retracing one path. The plum pudding view needs none: the
 // even beam already shows every alpha passing almost straight through.
 const AIMED_INTERVAL = 5; // Seconds between the extra shots.
-const AIMED_RADIUS = 0.15; // About 40% of these come within the >90° bounce-back range.
+const AIMED_RADIUS = 0.24; // About 40% of these come within the >90° bounce-back range.
+const TRAIL_SAMPLE = 1 / 60; // Seconds between trail points, whatever the display's frame rate.
 function startBeam() {
   stopBeam();
   beam = { alphas: [], history: [], backHistory: [], timer: 0, aimTimer: 1.5 };
@@ -771,11 +772,11 @@ function stopBeam() {
   $('deflected-legend').hidden = true;
   $('action-hint').textContent = MODELS[state.model].hint;
 }
-function randomEntry(radius) {
-  // Uniform over the beam's cross-section, as when the beam is far wider than an atom.
-  const b = radius * Math.sqrt(Math.random());
-  const angle = Math.random() * Math.PI * 2;
-  return new THREE.Vector3(-6, b * Math.cos(angle), b * Math.sin(angle));
+function randomEntry(halfWidth) {
+  // Uniform across a thin sheet of the beam level with the nucleus and facing the camera.
+  // A full 3D beam looked wrong: alphas passing far in front of or behind the nucleus
+  // appeared to go straight through it undeflected, right after a real close pass bounced.
+  return new THREE.Vector3(-6, (Math.random() * 2 - 1) * halfWidth, 0);
 }
 function spawnAlpha(aimed) {
   // Extra shots enter near the axis; otherwise they look and behave like any other alpha.
@@ -792,7 +793,7 @@ function spawnAlpha(aimed) {
   const material = new THREE.LineBasicMaterial({ vertexColors: true, transparent: true });
   const trail = new THREE.Line(geometry, material);
   beamGroup.add(mesh, trail);
-  beam.alphas.push({ position, velocity: new THREE.Vector3(ALPHA_SPEED, 0, 0), mesh, trail, count: 0, turnedAt: -1 });
+  beam.alphas.push({ position, velocity: new THREE.Vector3(ALPHA_SPEED, 0, 0), mesh, trail, count: 0, turnedAt: -1, sampleTimer: 0 });
 }
 const TURNED_ANGLE = 10; // Degrees: beyond this the path is drawn in the deflected colour.
 function fadeTrail(alpha, incoming, outgoing) {
@@ -840,7 +841,10 @@ function stepBeam(delta) {
     integrate(alpha.position, alpha.velocity, delta, 0.02);
     alpha.mesh.position.copy(alpha.position);
     const { position: positions, color: colors } = alpha.trail.geometry.attributes;
-    if (alpha.count < positions.count) {
+    // Sampling by time, not per frame, so 120 Hz displays do not fill the trail halfway.
+    alpha.sampleTimer -= delta;
+    if (alpha.count < positions.count && alpha.sampleTimer <= 0) {
+      alpha.sampleTimer += TRAIL_SAMPLE;
       if (alpha.turnedAt < 0 && deflection(alpha.velocity) > TURNED_ANGLE) alpha.turnedAt = alpha.count;
       const shade = alpha.turnedAt >= 0 ? palette.deflected : palette.alpha;
       positions.setXYZ(alpha.count, alpha.position.x, alpha.position.y, alpha.position.z);
