@@ -64,23 +64,25 @@
       return svg(1000, 380, s, 'Four targets: precise and accurate; precise but not accurate; accurate on average but not precise; neither precise nor accurate');
     },
 
-    // Three data sets on one time axis.
+    // Repeated times grouped by data set, with a common time scale.
     dataSets: () => {
-      const X = v => 170 + (v - 0.85) / 0.65 * 690;
+      const Y = v => 300 - (v - 0.85) / 0.65 * 250;
       const sets = [['A', [1.20, 1.22, 1.21]], ['B', [1.05, 1.47, 1.12]], ['C', [0.91, 0.92, 0.91]]];
-      let s = line(X(1.21), 34, X(1.21), 300, 'trend dash');
-      s += t(X(1.21), 24, 'TRUE VALUE ≈ 1.21 s', 'lab small cyan-t');
+      let s = '';
+      for (let v = 0.9; v <= 1.5001; v += 0.1) {
+        s += line(150, Y(v), 860, Y(v), 'grid') + t(132, Y(v) + 6, v.toFixed(1), 'tick-t', 'end');
+      }
+      s += `<path class="axis" d="M150 34V300H866"/>`;
       sets.forEach(([name, vals], i) => {
-        const y = 80 + i * 82;
+        const x = 270 + i * 245;
         const setClass = `set-${name.toLowerCase()}`;
-        s += t(40, y + 8, `SET ${name}`, `lab ${setClass}-t`, 'start');
-        s += line(170, y, 860, y, 'grid');
-        vals.forEach((v, k) => { s += dot(X(v), y + (vals.indexOf(v) !== k ? 14 : 0), 12, `pt ${setClass}`); });
+        s += t(x, 338, `SET ${name}`, `lab ${setClass}-t`);
+        vals.forEach(v => { s += dot(x, Y(v), 9, `pt ${setClass}`); });
       });
-      s += `<path class="axis" d="M170 300H866"/>`;
-      for (let v = 0.9; v <= 1.5001; v += 0.1) s += line(X(v), 300, X(v), 311, 'ink') + t(X(v), 338, v.toFixed(1), 'tick-t');
-      s += t(515, 376, 'Time / s', 'axis-t');
-      return svg(900, 390, s, 'Dot plot of three sets of repeated times: set A close together near 1.21 s, set B spread from 1.05 to 1.47 s, set C close together near 0.91 s');
+      s += t(515, 376, 'Data set', 'axis-t');
+      s += t(0, 0, 'Time / s', 'axis-t', 'middle', 'transform="translate(56 170) rotate(-90)"');
+      s += `<g class="step" data-step-order="-1">${line(150, Y(1.21), 860, Y(1.21), 'trend dash')}${t(850, Y(1.21) - 12, 'TRUE VALUE ≈ 1.21 s', 'lab small cyan-t', 'end')}</g>`;
+      return svg(900, 390, s, 'Dot plot of three data sets on the horizontal axis and repeated times on the vertical axis: set A close together near 1.21 s, set B spread from 1.05 to 1.47 s, set C close together near 0.91 s');
     },
 
     // Mean ± half the range on a number line.

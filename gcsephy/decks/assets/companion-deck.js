@@ -29,7 +29,10 @@
     deck.style.transform = `translate(${left}px, ${top}px) scale(${scale})`;
   }
 
-  const hiddenSteps = slide => [...slide.querySelectorAll('.step:not(.shown)')];
+  // A figure can sit later in the markup while revealing before nearby text.
+  const orderedSteps = slide => [...slide.querySelectorAll('.step')]
+    .sort((a, b) => Number(a.dataset.stepOrder || 0) - Number(b.dataset.stepOrder || 0));
+  const hiddenSteps = slide => orderedSteps(slide).filter(step => !step.classList.contains('shown'));
 
   function show(index, { fromEnd = false } = {}) {
     state.index = Math.max(0, Math.min(state.slides.length - 1, index));
@@ -73,7 +76,7 @@
 
   function prev() {
     const slide = state.slides[state.index];
-    const shown = slide.querySelectorAll('.step.shown');
+    const shown = orderedSteps(slide).filter(step => step.classList.contains('shown'));
     if (shown.length) {
       shown[shown.length - 1].classList.remove('shown');
       nextButton.disabled = false;
