@@ -270,13 +270,20 @@ function randomDirection(rand = Math.random) {
 // ---------- Floor shadow and helpers that persist between models ----------
 const floorShadow = new THREE.Mesh(new THREE.PlaneGeometry(6, 6), new THREE.MeshBasicMaterial({ map: shadowTexture, transparent: true, depthWrite: false }));
 floorShadow.rotation.x = -Math.PI / 2;
-floorShadow.position.y = -2.9;
+const FLOOR_Y = -2.9;
+floorShadow.position.y = FLOOR_Y;
 floorShadow.raycast = () => {};
 scene.add(floorShadow);
+function zoomShadow(scale = 1, opacity = 1) {
+  // During the Rutherford zoom the floor drops away and the shadow grows with the electrons.
+  floorShadow.scale.setScalar(scale);
+  floorShadow.position.y = FLOOR_Y * scale;
+  floorShadow.material.opacity = (palette.dark ? 0.7 : 0.25) * opacity;
+}
 const halo = new THREE.Mesh(new THREE.SphereGeometry(1, 24, 16), new THREE.MeshBasicMaterial({ transparent: true, opacity: 0.35, side: THREE.BackSide, depthWrite: false }));
 halo.raycast = () => {};
 function applyThemeToPersistent() {
-  floorShadow.material.opacity = palette.dark ? 0.7 : 0.25;
+  zoomShadow();
   halo.material.color.copy(palette.accent);
 }
 applyThemeToPersistent();
@@ -303,6 +310,7 @@ function clearAtom() {
   bohrRings = [];
   spread.t = 0;
   zoomRings = [];
+  zoomShadow();
   positiveBody = null;
   cloud = null;
 }
@@ -819,6 +827,7 @@ function applySpread() {
     mesh.visible = opacity > 0;
   }
   for (const line of zoomRings) line.scale.setScalar(scale);
+  zoomShadow(scale, opacity);
   if (!transition) applyOpacity(1);
 }
 function stopBeam() {
@@ -922,6 +931,8 @@ function keepPath(list, line, limit) {
 }
 function stepBeam(delta) {
   if (!beam) return;
+  // In the Rutherford view, fire only once the electrons have zoomed fully out of view.
+  if (state.model === 'rutherford' && spread.t < 1) return;
   beam.timer -= delta;
   beam.aimTimer -= delta;
   if (beam.timer <= 0 && beam.alphas.length < 28) {
