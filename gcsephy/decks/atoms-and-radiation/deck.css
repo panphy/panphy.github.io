@@ -435,7 +435,11 @@ table.facts.compare { table-layout: fixed; font-size: 30px; }
 .terms { display: grid; grid-template-columns: repeat(4, 1fr); gap: 18px; }
 .term { padding: 20px 22px; border: 1px solid var(--card-border); border-radius: 18px; background: var(--card-bg); box-shadow: var(--card-shadow); }
 .term b { display: block; font-family: var(--font-display); font-weight: 400; font-size: 34px; color: var(--brand-primary); }
-.term span { display: block; font-size: 26px; color: var(--text-secondary); line-height: 1.3; }
+.term span { display: block; font-size: 26px; color: var(--text-secondary); line-height: 1.3; position: relative; padding-left: 24px; }
+.term span + span { margin-top: 4px; }
+.term b + span { margin-top: 6px; }
+/* Same dot as .points bullets, scaled to the card text. */
+.term span::before { content: ""; position: absolute; left: 2px; top: .5em; width: 10px; height: 10px; border-radius: 50%; background: var(--brand-accent); box-shadow: 0 0 0 4px color-mix(in srgb, var(--brand-accent), transparent 80%); }
 
 /* SVG styling */
 .sym { fill: #fff; text-anchor: middle; dominant-baseline: central; font-family: var(--font-body); font-weight: 800; }
