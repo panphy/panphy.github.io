@@ -241,7 +241,8 @@ body.viewer-expanded { overflow: hidden; }
 .sample-controls select { min-height: 48px; padding: 8px 12px; border: 1px solid var(--input-border); border-radius: 12px; background: var(--card-bg); color: var(--text-main); font: 600 .85rem var(--font-body); }
 .sample-controls select:focus-visible { outline: 3px solid var(--focus); outline-offset: 3px; }
 
-.particle-readout { margin: 0 0 12px; min-height: 58px; padding: 10px 14px; border-radius: 12px; border-left: 3px solid var(--brand-accent); background: var(--card-bg); color: var(--text-main); font-size: .8rem; line-height: 1.55; }
+/* Room for three lines, so a longer message does not shrink the 3D view. */
+.particle-readout { margin: 0 0 12px; min-height: calc(4.65em + 20px); padding: 10px 14px; border-radius: 12px; border-left: 3px solid var(--brand-accent); background: var(--card-bg); color: var(--text-main); font-size: .8rem; line-height: 1.55; }
 .toolbar { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; }
 .toolbar button, .question button:not(.link-button) {
   min-height: 48px;
