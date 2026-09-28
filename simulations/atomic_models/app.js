@@ -115,11 +115,21 @@ let transition = null;
 let cameraTween = null;
 let beam = null;
 let excite = null;
-// Rutherford view with the beam on: the electrons drift outward and fade, since at the
-// nucleus's drawn size they would really be hundreds of metres away. t runs 0 → 1.
+// Rutherford view with the beam on: the view zooms in on the nucleus, so the electrons and
+// their orbit guides grow together and pass out of view, since at the nucleus's drawn size
+// they would really be hundreds of metres away. t runs 0 → 1.
 const spread = { t: 0, target: 0 };
 const SPREAD_TIME = 3;
-const SPREAD_DISTANCE = 2.5; // Extra orbit radii travelled while fading out.
+const ZOOM_FACTOR = 6; // How much the electron system grows by the end of the zoom.
+let zoomRings = [];
+function spreadScale() {
+  // Geometric growth reads as a steady zoom rather than a push outward.
+  return reducedMotion ? 1 : ZOOM_FACTOR ** ease(spread.t);
+}
+function spreadOpacity() {
+  // Stay solid until the electrons near the edge of the view, then fade.
+  return 1 - THREE.MathUtils.smoothstep(ease(spread.t), reducedMotion ? 0 : 0.35, 1);
+}
 
 function readPalette() {
   const styles = getComputedStyle(document.documentElement);
@@ -292,6 +302,7 @@ function clearAtom() {
   fadeables = [];
   bohrRings = [];
   spread.t = 0;
+  zoomRings = [];
   positiveBody = null;
   cloud = null;
 }
@@ -354,6 +365,7 @@ function buildRutherford() {
   }
   // The boundary and orbit guides fade out with the electrons when the beam is on.
   for (const material of fadeables) material.userData.spread = true;
+  zoomRings = atom.children.filter(child => child.isLine);
 }
 
 function bohrSpeed(radius) {
@@ -533,7 +545,7 @@ function ease(k) {
 function applyOpacity(k) {
   for (const material of fadeables) {
     let factor = k;
-    if (material.userData.spread) factor *= 1 - ease(spread.t);
+    if (material.userData.spread) factor *= spreadOpacity();
     if (cloud && material.isPointsMaterial && state.orbitalFocus) {
       factor *= cloud.some(item => item.key === state.orbitalFocus && item.points.material === material) ? 1 : 0.06;
     }
@@ -605,7 +617,7 @@ function positionElectrons() {
       electron.mesh.position.copy(electron.home).addScaledVector(electron.dir, 0.07 * Math.sin(state.time * 5 + electron.phase));
       continue;
     }
-    const outward = electron.bohr || reducedMotion ? 1 : 1 + SPREAD_DISTANCE * ease(spread.t);
+    const outward = electron.bohr ? 1 : spreadScale();
     orbitPosition(electron.radius * outward, electron.angle, electron.tilt, electron.mesh.position);
     const trail = trails[index];
     if (!trail) continue;
@@ -791,19 +803,22 @@ function stepSpread(delta) {
   applySpread();
 }
 function applySpread() {
-  const k = ease(spread.t);
+  const scale = spreadScale();
+  const opacity = spreadOpacity();
   for (const { mesh } of electrons) {
-    const fading = k > 0;
+    mesh.scale.setScalar(scale);
+    const fading = opacity < 1;
     if (mesh.material.transparent !== fading) {
       mesh.material.transparent = fading;
       mesh.material.needsUpdate = true;
     }
-    mesh.material.opacity = 1 - k;
+    mesh.material.opacity = opacity;
     const glowSprite = mesh.children[0];
     glowSprite.userData.base ??= glowSprite.material.opacity;
-    glowSprite.material.opacity = glowSprite.userData.base * (1 - k);
-    mesh.visible = k < 1;
+    glowSprite.material.opacity = glowSprite.userData.base * opacity;
+    mesh.visible = opacity > 0;
   }
+  for (const line of zoomRings) line.scale.setScalar(scale);
   if (!transition) applyOpacity(1);
 }
 function stopBeam() {
