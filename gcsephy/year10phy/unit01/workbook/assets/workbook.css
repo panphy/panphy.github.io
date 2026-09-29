@@ -351,7 +351,7 @@ body:not(.answers) .circle-choice span.correct { border-color: transparent !impo
 .cover-lessons { margin: 3mm 0 0; padding-left: 7mm; font-size: 13pt; line-height: 1.55; color: #fff; }
 .cover-lessons li { margin-bottom: 1.5mm; }
 .cover-lessons li::marker { color: var(--spark); font-weight: 900; }
-.tracker-flow { margin-top: 8mm; }
+.tracker-flow { margin-top: 5mm; }
 .tracker-flow > .eyebrow, .tracker-flow > .page-title, .tracker-flow > .page-intro { break-after: avoid; }
 .tracker-flow .tracker, .tracker-flow .quick-answers > div { break-inside: avoid; }
 
@@ -375,7 +375,7 @@ body:not(.answers) .circle-choice span.correct { border-color: transparent !impo
 .book:not(.guide) > section:not(.cover) { zoom: 1.2; }
 .book:not(.guide) .graph-paper { zoom: .8333; }
 .glossary.one { columns: 1; }
-.glossary.one p { margin-bottom: 2.5mm; }
+.glossary.one p { margin-bottom: 1.6mm; }
 .quick-answers h4 { margin: 2mm 0 1mm; font: 900 8pt/1.2 Arial, sans-serif; letter-spacing: .12em; text-transform: uppercase; }
 .quick-answers ol { margin: 0 0 1mm; padding-left: 5mm; }
 .quick-answers li { margin-bottom: .8mm; }
