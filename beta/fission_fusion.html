@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="description" content="Explore nuclear fission and fusion in interactive 3D. Split a uranium nucleus, run a chain reaction, fuse hydrogen nuclei and see why both release energy.">
+  <meta name="theme-color" content="#F8F6F1">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="robots" content="noindex">
+  <link rel="stylesheet" href="/assets/standalone-top.css">
+  <script>
+  (function() {
+    var dark = false;
+    try { dark = !!localStorage.getItem('fission-fusion-dark'); } catch (error) {}
+    if (dark) {
+      document.documentElement.setAttribute('data-theme', 'dark');
+      var tc = document.querySelector('meta[name="theme-color"]');
+      if (tc) tc.setAttribute('content', '#111110');
+    }
+  })();
+  </script>
+  <title>Fission and Fusion — PanPhy Labs</title>
+  <link rel="icon" type="image/png" href="/assets/favicon.png">
+  <link rel="apple-touch-icon" href="/assets/apple-touch-icon.png">
+  <link rel="stylesheet" href="fission_fusion/style.css">
+  <link rel="stylesheet" href="/assets/theme-toggle.css">
+  <link rel="stylesheet" href="/assets/fullscreen-button.css">
+  <script src="/assets/theme-toggle.js"></script>
+  <script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/"}}</script>
+</head>
+<body data-mode="fission">
+  <header class="banner">
+    <a class="banner-logo" href="/" aria-label="PanPhy Labs home"><img src="/assets/panphy.png" alt="PanPhy Labs" width="38" height="38"></a>
+    <div class="banner-title">Fission and Fusion</div>
+    <div class="banner-actions">
+      <button id="theme-button" type="button" data-panphy-theme-toggle aria-label="Toggle light/dark theme" title="Toggle between light and dark themes"></button>
+    </div>
+  </header>
+  <script>window.PanPhyThemeToggle.mount(document.getElementById('theme-button'), { darkStorageKey: 'fission-fusion-dark' });</script>
+  <main>
+    <div class="intro"><div><p class="eyebrow">THE NUCLEUS LAB / ENERGY FROM THE NUCLEUS</p><h1>Split it. Join it.<br>Release energy<span>!</span></h1></div><p>Fire a neutron. Run a chain reaction. Heat hydrogen until it fuses.<br>Then find out why both release energy.</p></div>
+    <nav class="models" aria-label="Choose a nuclear reaction">
+      <button type="button" data-mode="fission" aria-pressed="true"><span>01 / SPLIT</span><strong>Nuclear fission</strong><small>Uranium-235</small></button>
+      <button type="button" data-mode="chain" aria-pressed="false"><span>02 / CHAIN</span><strong>Chain reaction</strong><small>A block of fuel</small></button>
+      <button type="button" data-mode="fusion" aria-pressed="false"><span>03 / JOIN</span><strong>Nuclear fusion</strong><small>Deuterium + tritium</small></button>
+      <button type="button" data-mode="energy" aria-pressed="false"><span>04 / ENERGY</span><strong>Binding energy</strong><small>Why energy is released</small></button>
+    </nav>
+    <div class="lab-strip">
+      <span>YOUR MISSION <b>Find out where the energy comes from.</b></span>
+      <span class="progress-group"><span id="progress" class="mono">0 / 4 discoveries unlocked</span><button type="button" id="reset-progress" class="link-button">Reset progress</button></span>
+    </div>
+    <section class="workspace" aria-label="Nuclear fission and fusion explorer">
+      <div class="viewer-panel" id="viewer-panel">
+        <div class="viewer-heading"><span id="scene-title">NUCLEAR FISSION</span><span class="scale">NOT TO SCALE</span><button id="fullscreen" class="panphy-fullscreen-button" type="button" aria-controls="viewer-panel" aria-pressed="false" aria-label="Enter fullscreen" title="Enter fullscreen"><svg class="panphy-fs-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M4 9V4h5M15 4h5v5M20 15v5h-5M9 20H4v-5"/></svg></button></div>
+        <div id="viewer" tabindex="0" role="img" aria-label="Interactive 3D nucleus. Drag or use arrow keys to rotate; scroll, pinch or plus and minus keys to zoom.">
+          <p id="load-status" role="status">Loading the 3D model…</p>
+          <div class="legend overlay" aria-label="Legend">
+            <span data-legend="proton"><i class="proton">+</i> Proton</span>
+            <span data-legend="neutron"><i class="neutron">0</i> Neutron</span>
+            <span data-legend="gamma"><i class="gamma">γ</i> Gamma ray</span>
+            <span data-legend="fuel"><i class="undecayed"></i> Uranium-235 fuel</span>
+            <span data-legend="spent"><i class="decayed"></i> Spent fuel</span>
+            <span data-legend="u238"><i class="u238"></i> Uranium-238</span>
+            <span data-legend="rod"><i class="rod"></i> Control rod</span>
+          </div>
+          <p class="gesture overlay" aria-hidden="true">Drag to rotate · Pinch or scroll to zoom</p>
+          <div class="equation overlay" id="equation" aria-live="polite"></div>
+          <div class="graph overlay" id="graph" hidden><canvas id="graph-canvas" aria-label="Graph" role="img"></canvas><p class="graph-stats mono" id="graph-stats"></p></div>
+          <div class="bea" id="bea" hidden>
+            <canvas id="bea-canvas" role="img" aria-label="Graph of binding energy per nucleon against mass number"></canvas>
+            <div class="bea-stats mono" id="bea-stats"></div>
+          </div>
+        </div>
+        <p class="particle-readout mono" id="particle-readout" role="status">Tap a particle to discover its job.</p>
+        <div class="toolbar" aria-label="View controls">
+          <button type="button" id="motion" class="primary" aria-pressed="true"><svg viewBox="0 0 24 24" aria-hidden="true"><path id="motion-icon" d="M7 5h3v14H7zM14 5h3v14h-3z"/></svg><span id="motion-label" data-reserve="Continue motion">Pause motion</span></button>
+          <button type="button" id="reset" data-reserve="Reset view">Reset view</button>
+          <button type="button" id="fire" class="experiment" data-reserve="Fire 5 more neutrons">Fire a neutron</button>
+        </div>
+        <div class="sample-controls" id="controls-chain" hidden>
+          <div class="field" role="group" aria-labelledby="rods-label">
+            <span id="rods-label">Control rods</span>
+            <div class="stepper"><button type="button" id="rods-minus" aria-label="Remove one control rod">−</button><output id="rods-out" class="mono" aria-live="polite">0 of 6</output><button type="button" id="rods-plus" aria-label="Insert one control rod">+</button></div>
+          </div>
+          <label>Fuel
+            <select id="enrichment">
+              <option value="1">100% uranium-235</option>
+              <option value="0.85" selected>85% uranium-235, 15% uranium-238</option>
+              <option value="0.7">70% uranium-235, 30% uranium-238</option>
+            </select>
+          </label>
+        </div>
+        <div class="sample-controls" id="controls-fusion" hidden>
+          <div class="field" role="group" aria-labelledby="temp-label">
+            <span id="temp-label">Temperature (million °C)</span>
+            <div class="stepper"><button type="button" id="temp-minus" aria-label="Lower the temperature by 10 million degrees">−</button><input type="number" id="temp-input" class="mono" min="10" max="200" step="10" value="50" inputmode="numeric" aria-label="Temperature in millions of degrees Celsius"><button type="button" id="temp-plus" aria-label="Raise the temperature by 10 million degrees">+</button></div>
+          </div>
+        </div>
+        <div class="sample-controls" id="controls-energy" hidden>
+          <div class="field" role="group" aria-labelledby="reaction-label">
+            <span id="reaction-label">Reaction</span>
+            <div class="choice-row">
+              <button type="button" data-reaction="fission" aria-pressed="true">Fission of uranium</button>
+              <button type="button" data-reaction="fusion" aria-pressed="false">D–T fusion</button>
+            </div>
+          </div>
+        </div>
+        <p id="action-hint"></p>
+      </div>
+      <aside aria-live="polite">
+        <p class="eyebrow" id="mode-date">FISSION · URANIUM-235</p><h2 id="mode-heading">A slow neutron splits a heavy nucleus in two.</h2>
+        <p id="description"></p>
+        <div class="idea"><h3><svg class="icon" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:1.15em;height:1.15em;vertical-align:-0.2em" aria-hidden="true" focusable="false"><circle cx="10.5" cy="10.5" r="6.5"/><path d="M15.3 15.3 21 21"/></svg> Your observation mission</h3><p id="look"></p></div>
+        <h3>What does it mean?</h3><p id="evidence"></p>
+        <div class="question" id="mode-quiz"></div>
+      </aside>
+    </section>
+    <section class="final-challenge" aria-labelledby="final-title">
+      <div class="final-intro"><p class="eyebrow">FINAL CHALLENGE</p><h2 id="final-title">Put it all together.</h2><p id="final-status">Unlock all four discoveries to open the final challenge.</p></div>
+      <div class="question" id="final-quiz" hidden></div>
+    </section>
+    <section class="reality"><span aria-hidden="true">↗</span><div><h2>A model is an explanation, not a photograph.</h2><p>Protons and neutrons are drawn as coloured balls packed together; real nucleons are not hard spheres, and colours and sizes are chosen to help you see the ideas. A nucleus is about 1/100 000 of an atom’s width. Every motion is slowed down enormously: real fission fragments leave at about 3% of the speed of light, and fission takes far less than a billionth of a second.</p><p>In the fission view every one of the 236 nucleons is drawn, and the numbers of protons and neutrons in the fragments are exact: 92 + 143 + 1 = 56 + 85 + 36 + 56 + 3. Real fission is random: uranium-236 can split in dozens of different ways, and this is just one of them. The energy of about 170 MeV is shared out as the kinetic energy of the fragments and neutrons, plus gamma rays and later radioactive decay of the fragments.</p><p>The chain reaction is a simplified model: neutrons fly in straight lines and are absorbed with fixed probabilities, and a real reactor also needs a moderator to slow the neutrons down. The fuel percentages are chosen to show the behaviour, not to match real reactor fuel or bombs. The fusion view uses a simple classical model of two repelling nuclei. In reality the barrier is about 0.4 MeV, far more than the average thermal energy at 100 million °C; fusion happens because the fastest nuclei reach the barrier and quantum tunnelling helps them through. Fusion in the Sun proceeds by a different route, starting from hydrogen-1, and each nucleus waits billions of years to react.</p></div></section>
+  </main>
+  <footer><span>PanPhy Labs · Fission and fusion (beta)</span><a href="/">More PanPhy Labs apps</a></footer>
+  <noscript><p class="no-script">Enable JavaScript to explore the 3D models. The descriptions remain available above.</p></noscript>
+  <script type="module">import('./fission_fusion/app.js').catch(error => { console.error(error); document.getElementById('load-status').hidden = false; document.getElementById('load-status').textContent = 'The 3D viewer could not load. Check your internet connection and reload. You can still read the explanation on this page.'; });</script>
+</body>
+</html>
