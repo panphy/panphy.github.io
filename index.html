@@ -670,6 +670,12 @@
             letter-spacing: -0.02em;
         }
 
+        .card-icon svg {
+            display: block;
+            width: 30px;
+            height: 30px;
+        }
+
         .card-type {
             color: var(--text-secondary);
             font-family: var(--font-mono);
@@ -1328,7 +1334,14 @@
             </a>
             <a class="card" href="/simulations/atomic_models.html" data-search="atom atomic models plum pudding thomson rutherford bohr schrodinger electron cloud orbitals quantum gold foil alpha scattering nucleus protons neutrons electrons shells energy levels photon matter 3d">
                 <div class="card-top">
-                    <span class="card-icon" aria-hidden="true">⚛</span>
+                    <span class="card-icon" aria-hidden="true">
+                        <svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.7" focusable="false">
+                            <ellipse cx="16" cy="16" rx="12" ry="5.5"/>
+                            <ellipse cx="16" cy="16" rx="12" ry="5.5" transform="rotate(60 16 16)"/>
+                            <ellipse cx="16" cy="16" rx="12" ry="5.5" transform="rotate(120 16 16)"/>
+                            <circle cx="16" cy="16" r="2.3" fill="currentColor" stroke="none"/>
+                        </svg>
+                    </span>
                     <span class="card-type">Atomic physics</span>
                 </div>
                 <div class="card-body">
@@ -1350,7 +1363,18 @@
             </a>
             <a class="card" href="/simulations/fission_fusion.html" data-search="nuclear fission fusion uranium chain reaction hydrogen deuterium tritium binding energy nucleus neutron 3d">
                 <div class="card-top">
-                    <span class="card-icon" aria-hidden="true">⚛</span>
+                    <span class="card-icon" aria-hidden="true">
+                        <svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" focusable="false">
+                            <circle cx="6" cy="8" r="3"/>
+                            <path d="M11 8h5m-2-2 2 2-2 2"/>
+                            <circle cx="23" cy="5" r="2.5"/>
+                            <circle cx="23" cy="11" r="2.5"/>
+                            <circle cx="6" cy="21" r="2.5"/>
+                            <circle cx="6" cy="27" r="2.5"/>
+                            <path d="M11 24h5m-2-2 2 2-2 2"/>
+                            <circle cx="23" cy="24" r="3"/>
+                        </svg>
+                    </span>
                     <span class="card-type">Nuclear physics</span>
                 </div>
                 <div class="card-body">
