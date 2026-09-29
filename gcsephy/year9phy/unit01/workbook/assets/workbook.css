@@ -1,0 +1,203 @@
+@import url('/gcsephy/assets/fonts/year9-workbook-fonts.css');
+
+/* A4 print styles for the Year 9 "Work Like a Physicist" student workbook.
+   Every .page is exactly one A4 sheet (see content.js: one array per page), so the
+   page count and page breaks never depend on how the browser flows the text.
+   workbook.js flags any page whose content is taller than the sheet.
+   Type sizes follow the original PDF: Lato 9.5 pt body, Poppins headings. */
+@page { size: A4; margin: 0; }
+
+:root {
+  --navy: #1d3557; --navy-2: #2d4363; --blue: #2f6f9f; --orange: #d97706; --gold: #f0b849;
+  --tint-blue: #eaf1f7; --tint-orange: #fdf3e3; --tint-grey: #f4f5f7; --rule: #c8cdd4; --line: #b7bfcb;
+  --ink: #1d2733; --muted: #6b7684; --cell: #fbfcfd;
+}
+* { box-sizing: border-box; }
+html { background: #d9dcdf; }
+body { margin: 0; color: var(--ink); word-spacing: .3pt; font: 9.5pt/14.5pt Lato, Arial, Helvetica, sans-serif; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+p { margin: 0 0 9pt; }
+b, strong { font-weight: 700; }
+ul, ol { margin: 0; padding: 0; }
+.head-font { font-family: Poppins, Lato, Arial, sans-serif; }
+
+/* ----- sheet ----- */
+.page { position: relative; width: 210mm; height: 297mm; margin: 0 auto 8mm; padding: 56.5pt 43pt 0; overflow: hidden; background: #fff; break-after: page; break-inside: avoid; }
+.page:last-child { break-after: auto; }
+.page.overflow { outline: 3px solid #d00; }
+.run-head { position: absolute; left: 43pt; right: 43pt; top: 41pt; display: flex; justify-content: space-between; font: 700 7.5pt/10pt Poppins, Arial, sans-serif; letter-spacing: .15em; text-transform: uppercase; color: var(--navy); }
+.run-head span:last-child { font: 400 7.5pt/10pt Lato, Arial, sans-serif; letter-spacing: .14em; color: var(--muted); }
+.run-foot { position: absolute; left: 43pt; right: 43pt; top: 815pt; display: flex; justify-content: space-between; align-items: baseline; font: 7.5pt/10pt Helvetica, Arial, sans-serif; color: var(--navy); }
+.run-foot b { font: 700 8.5pt/10pt Poppins, Arial, sans-serif; }
+
+/* ----- cover ----- */
+.page.cover { padding: 0; background: var(--navy); color: #fff; }
+.cover-in { position: absolute; left: 56pt; right: 56pt; top: 70pt; }
+.cover .eyebrow { font: 400 10pt/1 Poppins, Arial, sans-serif; letter-spacing: .3em; text-transform: uppercase; color: var(--gold); }
+.cover h1 { margin: 21pt 0 0; font: 700 40pt/1.02 Poppins, Arial, sans-serif; letter-spacing: -.015em; }
+.cover .lede { max-width: 130mm; margin: 12pt 0 0; font: 400 13pt/1.45 Lato, Arial, sans-serif; color: #dfe7f0; }
+.cover .bar { width: 56pt; height: 3.5pt; margin: 27pt 0 25pt; background: var(--gold); }
+.cover .quote { max-width: 121mm; margin: 0; font: italic 400 12.5pt/1.5 Lora, Georgia, serif; color: #e8eef5; }
+.cover .quote-by { margin: 8pt 0 0; font: 9pt/1 Lato, Arial, sans-serif; color: #b9c7d8; }
+.cover-fields { position: absolute; left: 56pt; right: 56pt; top: 676pt; display: grid; grid-template-columns: 1fr 1fr; gap: 22pt 18pt; padding: 22pt 22pt 22pt; border: 1.4pt solid #4a6b91; border-radius: 2pt; background: var(--navy-2); }
+.cover-fields div { font: 400 6.5pt/1 Poppins, Arial, sans-serif; letter-spacing: .25em; text-transform: uppercase; color: #b9c7d8; }
+.cover-fields span { display: block; height: 15pt; border-bottom: 1.4pt solid #6f8fb1; }
+.cover-note { position: absolute; left: 56pt; top: 799pt; font: 400 7pt/1 Lato, Arial, sans-serif; letter-spacing: .1em; text-transform: uppercase; color: #b9c7d8; }
+
+/* ----- lesson title block ----- */
+.page.lead { padding-top: 56.5pt; }
+.badge { display: inline-block; margin: 0 0 9pt; padding: 6.5pt 9pt 6.5pt; border-radius: 3pt; background: var(--navy); color: #fff; font: 700 7.5pt/7pt Poppins, Arial, sans-serif; letter-spacing: .21em; text-transform: uppercase; }
+.title { margin: 0; color: var(--navy); font: 700 21pt/25pt Poppins, Arial, sans-serif; letter-spacing: -.015em; }
+.subtitle { margin: 4pt 0 0; font: 400 10pt/14pt Lato, Arial, sans-serif; color: var(--muted); }
+.title-rule { height: 0; margin: 9pt 0 15pt; border-top: 2px solid var(--navy); }
+
+/* ----- case + mission ----- */
+.case { margin: 0 0 15pt; padding: 17pt 19pt 17pt; border-radius: 5pt; background: var(--navy); color: #fff; }
+.case .eyebrow, .box .eyebrow { font: 400 7.5pt/9pt Poppins, Arial, sans-serif; letter-spacing: .25em; text-transform: uppercase; }
+.case .eyebrow { color: var(--gold); }
+.case h3 { margin: 9pt 0 7pt; font: 700 13pt/16pt Poppins, Arial, sans-serif; }
+.case p { margin: 0 0 7.7pt; color: #e6ecf3; }
+.case p.punch { margin: 10pt 0 0; font: 700 10pt/14pt Poppins, Arial, sans-serif; color: var(--gold); }
+.mission { margin: 0 0 20pt; padding: 12pt 15pt 8pt; border: 1px solid var(--rule); border-left: 3.4pt solid var(--orange); border-radius: 2pt; background: #fff; }
+.mission .eyebrow { font: 700 8pt/10pt Poppins, Arial, sans-serif; letter-spacing: .22em; text-transform: uppercase; color: var(--orange); }
+.mission ul { margin: 6pt 0 0; padding: 0; list-style: none; }
+.mission li { position: relative; margin: 0 0 2.75pt; padding-left: 14pt; line-height: 14.5pt; }
+.mission li::before { content: "•"; position: absolute; left: 4pt; }
+
+/* ----- task headings ----- */
+.task { display: flex; align-items: center; gap: 10pt; margin: 15pt 0 7pt; padding-bottom: 4pt; border-bottom: 1.4px solid var(--rule); }
+.task:first-child, .run-head + .task { margin-top: 0; }
+.task .n { flex: none; min-width: 16.5pt; height: 16.5pt; padding: 0 4pt; display: grid; place-items: center; border-radius: 9pt; background: var(--blue); color: #fff; font: 700 9pt/1 Poppins, Arial, sans-serif; }
+.task h2 { margin: 0; color: var(--navy); font: 700 11.5pt/16pt Poppins, Arial, sans-serif; }
+.task .tag { margin-left: auto; font: 400 8pt/10pt Poppins, Arial, sans-serif; letter-spacing: .11em; text-transform: uppercase; color: var(--muted); }
+
+/* ----- writing ----- */
+.q { margin: 0 0 3pt; }
+.ql { margin-right: 4pt; font-weight: 700; color: var(--blue); }
+.lines { margin: 0 0 9pt; }
+.lines i { display: block; height: 19.75pt; border-bottom: 1.1pt solid var(--line); }
+.lines i:first-child { height: 20.5pt; }
+.blank { display: inline-block; min-width: var(--w, 30mm); height: 1em; border-bottom: 1.1px solid #8f99a6; vertical-align: -.1em; }
+
+/* ----- tables ----- */
+.tbl { width: 100%; margin: 0 0 9pt; border-collapse: collapse; table-layout: fixed; font-size: 9pt; line-height: 13pt; }
+.tbl th { padding: 7pt 7pt 6.5pt; background: var(--navy); color: #fff; font: 700 8.5pt/11pt Poppins, Arial, sans-serif; letter-spacing: 0; text-align: left; vertical-align: middle; }
+.tbl td { height: var(--rh, 27pt); padding: 4pt 7pt; border: .6pt solid var(--rule); background: var(--cell); vertical-align: middle; }
+.tbl th.r, .tbl td.r { text-align: right; }
+.tbl th.c, .tbl td.c { text-align: center; }
+.tbl td.k { background: var(--navy); border-color: var(--navy); color: #fff; font: 700 8.5pt/12pt Poppins, Arial, sans-serif; letter-spacing: .01em; }
+.tbl.bf td:first-child, .tbl.steps td:first-child { font-weight: 700; }
+.tbl.kv td { height: var(--rh, 25.7pt); }
+.tbl.steps td { height: 27pt; background: #fff; }
+.tbl.steps td:first-child { width: 22pt; text-align: center; }
+.tbl.tight td { height: 23pt; }
+.box-cell { width: 12pt; height: 12pt; margin: 0 auto; border: 1.3px solid #5c6672; border-radius: 1.5pt; background: #fff; }
+.tbl.checks td { height: 28.7pt; }
+.tbl.checks th { padding-top: 8.5pt; padding-bottom: 8pt; }
+.tbl .tick { font: 700 8.5pt/1 "DejaVu Sans", "Apple Symbols", Lato, sans-serif; }
+.tbl.rag td.c { font: 400 10pt/1 Arial, "DejaVu Sans", sans-serif; letter-spacing: .3em; color: #444; word-spacing: 0; }
+.tbl.rag td:first-child { text-align: center; color: var(--blue); font-weight: 700; }
+.tbl.rag th { text-align: center; }
+.tbl.rag th:nth-child(2) { text-align: left; }
+
+/* ----- boxes ----- */
+.box { margin: 0 0 11pt; padding: 11pt 14pt 9pt; border-radius: 3.5pt; background: var(--tint-blue); }
+.box .eyebrow { display: block; margin: 0 0 8pt; color: var(--blue); }
+.box p { margin: 0 0 5.5pt; }
+.box p:last-child { margin-bottom: 0; }
+.box.orange { border-radius: 0 3.5pt 3.5pt 0; border-left: 3.4pt solid var(--orange); background: var(--tint-orange); }
+.box.orange .eyebrow { color: #b45f04; }
+.box ol { margin: 0; padding: 0; list-style: none; }
+.box li { margin: 0; }
+.box li:last-child { margin-top: 6pt; }
+.key { margin: 0 0 10pt; padding: 13pt 16pt 12pt; border: 2px solid var(--navy); border-radius: 2pt; background: #fff; text-align: center; color: var(--navy); }
+.key .big { margin: 0; font: 700 12pt/17pt Poppins, Arial, sans-serif; }
+.key .small { margin: 3pt 0 0; font: 500 10pt/14pt Poppins, Arial, sans-serif; }
+.key .small i { font-style: italic; }
+.key .label { margin: 0 0 5pt; font: 500 10pt/13pt Poppins, Arial, sans-serif; letter-spacing: .04em; text-transform: uppercase; }
+.duo { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 13pt; margin: 0 0 22pt; }
+.duo .box { margin: 0; height: 100%; }
+.split { display: grid; grid-template-columns: var(--cols, 1fr 1fr); gap: 0 var(--gap, 6mm); margin: 0 0 9pt; align-items: start; }
+.split > div > :last-child { margin-bottom: 0; }
+.note { margin: 0 0 6pt; font: 400 8pt/11pt Lato, Arial, sans-serif; color: var(--muted); }
+.aside { font-size: 9.5pt; line-height: 14.5pt; }
+.split .lines { margin-bottom: 0; }
+
+/* ----- graph / drawing boxes ----- */
+.draw { position: relative; height: var(--h, 100mm); margin: 0 0 5pt; border: 1.6pt solid var(--navy); background: #fff; }
+.draw-foot { display: grid; grid-template-columns: 56% minmax(0, 1fr); gap: 12pt; font: 400 8.5pt/12pt Poppins, Arial, sans-serif; color: var(--muted); }
+.draw-foot .tl { padding-bottom: 2pt; border-bottom: 1.2px dashed #9aa4b0; }
+.draw-foot .r { text-align: left; }
+
+/* ----- labelled rules ----- */
+.fields { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0 14pt; margin: 0 0 9pt; }
+.fields i { display: block; height: 28pt; border-bottom: 1.5pt solid var(--line); }
+
+/* ----- sentence starters ----- */
+.starters { margin: 0 0 8pt; }
+.starters .s { margin: 0 0 5pt; padding: 2.5pt 0 2.5pt 8pt; border-left: 3pt solid #cfd4db; line-height: 14.5pt; }
+.starters .s .lines { width: 86%; margin: 0; }
+.starters .s .lines i { height: 15pt; }
+
+/* ----- checkpoint + take it home ----- */
+.checkpoint { margin: 0 0 12pt; padding: 15pt 14pt 10pt; border: 1.6px dashed var(--blue); border-radius: 5pt; background: #f8fafc; }
+.checkpoint .eyebrow { margin: 0 0 9pt; font: 700 8pt/10pt Poppins, Arial, sans-serif; letter-spacing: .22em; text-transform: uppercase; color: var(--blue); }
+.checkpoint .item { margin: 0 0 9pt; }
+.checkpoint .item:last-child { margin-bottom: 0; }
+.checkpoint .lines { margin: 0; }
+.checkpoint .lines i { height: 18.5pt; }
+.checkpoint .lines i:first-child { height: 30pt; }
+.home { margin: 0 0 12pt; padding: 11pt 14pt 8pt; border-left: 3.4pt solid var(--orange); border-radius: 0 3.5pt 3.5pt 0; background: var(--tint-orange); }
+.home .eyebrow { display: block; margin: 0 0 6pt; font: 700 7.5pt/9pt Poppins, Arial, sans-serif; letter-spacing: .22em; text-transform: uppercase; color: #b45f04; }
+.home p { margin: 0 0 5pt; }
+.home .lines { margin: 0 0 8pt; }
+.home .lines:last-child { margin-bottom: 0; }
+.home .lines i { height: 18.5pt; border-bottom-color: #c3c9d0; }
+.home .lines i:first-child { height: 27pt; }
+.home .qs { margin: 0 0 4pt; }
+.home .qs b { color: var(--blue); }
+
+/* ----- glossary ----- */
+.gloss th { background: var(--blue); }
+.gloss td:first-child { color: var(--navy); }
+.run-head + .h3 { margin-top: 0; }
+.h3 { margin: 12pt 0 5pt; color: var(--navy); font: 700 12pt/16pt Poppins, Arial, sans-serif; }
+.sub-note { margin: 0 0 7pt; font: 400 9pt/12pt Lato, Arial, sans-serif; color: var(--muted); }
+.sentence { margin: 21pt 0 0; padding: 13pt 16pt 12pt; border: 1.6px solid var(--navy); border-radius: 4pt; text-align: center; color: var(--navy); }
+.sentence .k { font: 500 10pt/13pt Poppins, Arial, sans-serif; letter-spacing: .03em; text-transform: uppercase; }
+.sentence .v { margin: 6pt 0 0; font: 700 12pt/17pt Poppins, Arial, sans-serif; }
+.credit { margin: 21pt 0 0; text-align: center; font: italic 8.5pt/10pt Helvetica, Arial, sans-serif; color: #414c5a; }
+
+/* ----- how-to / toolkit ----- */
+.lesson-list { width: 100%; margin: 0 0 12pt; border-collapse: collapse; font-size: 9.5pt; }
+.lesson-list td { height: 27pt; padding: 0; border-bottom: 1px solid var(--rule); vertical-align: middle; }
+.lesson-list td:first-child { width: 25mm; color: var(--orange); font: 700 8.5pt/1 Poppins, Arial, sans-serif; }
+.lesson-list td:nth-child(2) { width: 64mm; color: var(--navy); font: 600 10pt/1.2 Lato, Arial, sans-serif; }
+.lesson-list td:last-child { color: #4b5563; font-size: 9pt; }
+.lesson-list tr:last-child td { border-bottom: 2px solid var(--rule); }
+.split.toolkit { display: grid; grid-template-columns: 1fr 1fr; gap: 0 17pt; }
+.toolkit h4 { margin: 12pt 0 6pt; padding-bottom: 3pt; border-bottom: 1.5px solid var(--orange); color: var(--navy); font: 700 11pt/14pt Poppins, Arial, sans-serif; }
+.toolkit h4:first-child { margin-top: 0; }
+.toolkit .tbl { margin-bottom: 12pt; }
+.toolkit .tbl td { height: 26.5pt; padding: 6pt 7pt; }
+.toolkit .tbl.checks td { height: 28.7pt; }
+.toolkit p { margin: 0 0 5pt; }
+.toolkit p.note { font-size: 8pt; margin-bottom: 14pt; }
+.eq { margin: 0 0 6pt; padding: 8pt 12pt; background: var(--tint-grey); text-align: center; font: 400 11pt/16pt Lora, Georgia, serif; }
+
+/* ----- screen only ----- */
+@media screen {
+  body { padding: 8mm 0 2mm; }
+  .page { box-shadow: 0 2px 12px rgba(0, 0, 0, .22); }
+  .screen-bar { position: sticky; top: 0; z-index: 9; display: flex; gap: 4mm; justify-content: center; margin: -8mm 0 8mm; padding: 3mm; background: var(--navy); color: #fff; font-size: 9pt; }
+  .screen-bar a { color: var(--gold); font-weight: 700; }
+}
+@media print {
+  html { background: none; }
+  body { padding: 0; }
+  .page { margin: 0; box-shadow: none; }
+  .screen-bar { display: none; }
+}
+
+.ar { display: inline-block; margin: 0 1pt; font: 700 1.05em/1 Menlo, "DejaVu Sans", Arial, sans-serif; }
+p.it { font-style: italic; }
+p + .duo, .key + .duo { margin-top: 22pt; }
