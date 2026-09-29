@@ -7,7 +7,6 @@
   <meta name="theme-color" content="#F8F6F1">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
-  <meta name="robots" content="noindex">
   <link rel="stylesheet" href="/assets/standalone-top.css">
   <script>
   (function() {
@@ -23,6 +22,7 @@
   <title>Fission and Fusion — PanPhy Labs</title>
   <link rel="icon" type="image/png" href="/assets/favicon.png">
   <link rel="apple-touch-icon" href="/assets/apple-touch-icon.png">
+  <script src="/assets/sw-register.js" defer></script>
   <link rel="stylesheet" href="fission_fusion/style.css">
   <link rel="stylesheet" href="/assets/theme-toggle.css">
   <link rel="stylesheet" href="/assets/fullscreen-button.css">
@@ -122,7 +122,7 @@
     </section>
     <section class="reality"><span aria-hidden="true">↗</span><div><h2>A model is an explanation, not a photograph.</h2><p>Protons and neutrons are drawn as coloured balls packed together; real nucleons are not hard spheres, and colours and sizes are chosen to help you see the ideas. A nucleus is about 1/100 000 of an atom’s width. Every motion is slowed down enormously: real fission fragments leave at about 3% of the speed of light, and fission takes far less than a billionth of a second.</p><p>In the fission view every one of the 236 nucleons is drawn, and the numbers of protons and neutrons in the fragments are exact: 92 + 143 + 1 = 56 + 85 + 36 + 56 + 3. Real fission is random: uranium-236 can split in dozens of different ways, and this is just one of them. The energy of about 170 MeV is shared out as the kinetic energy of the fragments and neutrons, plus gamma rays and later radioactive decay of the fragments.</p><p>The chain reaction is a simplified model: neutrons fly in straight lines and are absorbed with fixed probabilities, and a real reactor also needs a moderator to slow the neutrons down. The fuel percentages are chosen to show the behaviour, not to match real reactor fuel or bombs. The fusion view uses a simple classical model of two repelling nuclei. In reality the barrier is about 0.4 MeV, far more than the average thermal energy at 100 million °C; fusion happens because the fastest nuclei reach the barrier and quantum tunnelling helps them through. Fusion in the Sun proceeds by a different route, starting from hydrogen-1, and each nucleus waits billions of years to react.</p></div></section>
   </main>
-  <footer><span>PanPhy Labs · Fission and fusion (beta)</span><a href="/">More PanPhy Labs apps</a></footer>
+  <footer><span>PanPhy Labs · Fission and fusion</span><a href="/">More PanPhy Labs apps</a></footer>
   <noscript><p class="no-script">Enable JavaScript to explore the 3D models. The descriptions remain available above.</p></noscript>
   <script type="module">import('./fission_fusion/app.js').catch(error => { console.error(error); document.getElementById('load-status').hidden = false; document.getElementById('load-status').textContent = 'The 3D viewer could not load. Check your internet connection and reload. You can still read the explanation on this page.'; });</script>
 </body>
