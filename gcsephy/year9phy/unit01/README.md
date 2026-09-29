@@ -24,6 +24,7 @@ The skills are the ones every required practical from here to Year 13 will lean 
 |---|---|---|
 | [`../../decks/work-like-a-physicist/index.html`](../../decks/work-like-a-physicist/index.html) | 50-slide HTML teaching deck covering all eight lessons | Present in a browser; advance to reveal answers and teaching points |
 | `Work Like a Physicist - Year 9 Student Workbook.pdf` | 40-page A4 student workbook, one per student for the whole unit | Print double-sided. Students keep the same workbook for all eight lessons |
+| `workbook/` | Editable source of the student workbook (HTML, CSS, JavaScript) | Edit `workbook/assets/content.js`, then run `sh build-pdf.sh` to re-export the PDF. See `workbook/README.md` |
 | `Lesson 1 …` to `Lessons 7-8 …` (seven PDFs) | The lesson plans, formatted for reading | Read before teaching. This is the detail behind each lesson |
 | `md files/` | The same seven lesson plans in editable Markdown | Edit these master copies when revising a plan, then re-export the matching PDF |
 | `index.html`, `lesson/` and `assets/` | Static online student companion | Open `index.html`, or visit this folder's published web address |
@@ -37,7 +38,7 @@ This repository is the working copy of the unit. The lesson plans, workbook and 
 - The HTML and JavaScript in `../../decks/work-like-a-physicist/` are the editable teaching-deck source.
 - `index.html`, `lesson/` and `assets/` are the editable source for the static companion website.
 - `source/` preserves the original Sites/React companion site and its Git history.
-- `Work Like a Physicist - Year 9 Student Workbook.pdf` is currently stored only as a PDF. If an editable source is recreated, add it to this directory and document it here.
+- `workbook/` is the editable source of the student workbook. It was rebuilt from the published PDF after the original source was lost; edit `workbook/assets/content.js` and re-export with `workbook/build-pdf.sh`, and keep the PDF and its source in step.
 
 ### How the parts fit together
 
@@ -203,7 +204,7 @@ Use the lesson plans for teaching guidance. The HTML deck reveals selected answe
 
 - the seven lesson-plan PDFs
 - the seven editable Markdown lesson-plan masters
-- the student workbook PDF
+- the student workbook PDF and its editable source in `workbook/`
 - the HTML teaching deck in `../../decks/work-like-a-physicist/`
 - this overview
 - the static student companion site, including seven workbook-matched revision guides, all seven missions and 40 questions
