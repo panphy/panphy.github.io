@@ -230,7 +230,7 @@ body.final-wave-active {
 
 .game-bar {
   position: fixed;
-  top: max(14px, env(safe-area-inset-top));
+  top: calc(max(14px, env(safe-area-inset-top)) + var(--standalone-top, 0px));
   left: 14px;
   right: 14px;
   z-index: 12;
@@ -519,7 +519,7 @@ body.is-running:not(.is-paused) .game-bar {
 
 .hud-grid {
   position: fixed;
-  top: calc(max(14px, env(safe-area-inset-top)) + 82px);
+  top: calc(max(14px, env(safe-area-inset-top)) + var(--standalone-top, 0px) + 82px);
   left: 14px;
   z-index: 11;
   display: grid;
@@ -530,7 +530,7 @@ body.is-running:not(.is-paused) .game-bar {
 }
 
 body.is-running:not(.is-paused) .hud-grid {
-  top: max(14px, env(safe-area-inset-top));
+  top: calc(max(14px, env(safe-area-inset-top)) + var(--standalone-top, 0px));
 }
 
 .readout {
@@ -1366,7 +1366,7 @@ body.is-running:not(.is-paused) .hud-grid {
   }
 
   .hud-grid {
-    top: calc(max(14px, env(safe-area-inset-top)) + 72px);
+    top: calc(max(14px, env(safe-area-inset-top)) + var(--standalone-top, 0px) + 72px);
     grid-template-columns: repeat(2, minmax(0, 1fr));
     width: calc(100vw - 28px);
   }
@@ -2225,6 +2225,7 @@ body:not(.time-frozen) #gameCanvas {
   right: 0;
   bottom: 0;
   height: 100vh;
+  height: 100dvh;
   z-index: 4;
   opacity: 0;
   background: radial-gradient(ellipse 80vw 55vh at 50% 100%,
@@ -2745,7 +2746,7 @@ body.battery-saver .potion-bar {
 
 .sw-leaderboard {
   position: fixed;
-  top: calc(max(14px, env(safe-area-inset-top)) + 82px);
+  top: calc(max(14px, env(safe-area-inset-top)) + var(--standalone-top, 0px) + 82px);
   right: 14px;
   z-index: 11;
   width: min(210px, calc(100vw - 28px));
@@ -2761,7 +2762,7 @@ body.battery-saver .potion-bar {
 }
 
 body.is-running:not(.is-paused) .sw-leaderboard {
-  top: max(14px, env(safe-area-inset-top));
+  top: calc(max(14px, env(safe-area-inset-top)) + var(--standalone-top, 0px));
 }
 
 .sw-leaderboard-header {

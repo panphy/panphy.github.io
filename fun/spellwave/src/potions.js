@@ -296,10 +296,15 @@ export function createPotionSystem({
     }
   }
 
-  function blockLeak() {
+  // A leaking minion costs one charge; a leaking boss is a lethal hit and
+  // shatters the whole shield.
+  function blockLeak(isBoss = false) {
     if (!shieldActive) return false;
-    shieldActive = false;
-    shieldFadeTimer = 1.0; // Start Z-scale fade out
+    shieldCharges = isBoss ? 0 : shieldCharges - 1;
+    if (shieldCharges <= 0) {
+      shieldActive = false;
+      shieldFadeTimer = 1.0; // Start Z-scale fade out
+    }
     return true;
   }
 

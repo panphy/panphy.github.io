@@ -306,6 +306,19 @@ export function createSpellwaveAudio({
     return context;
   }
 
+  // Hidden tabs must not keep playing the idle/menu music.
+  function suspendAudio() {
+    if (audioContext && audioContext.state === 'running') {
+      audioContext.suspend().catch(() => {});
+    }
+  }
+
+  function wakeAudio() {
+    if (audioContext && audioContext.state === 'suspended') {
+      audioContext.resume().catch(() => {});
+    }
+  }
+
   function playTone(frequency, duration, options = {}) {
     const context = resumeAudio();
     if (!context || !masterGain) return;
@@ -930,6 +943,8 @@ export function createSpellwaveAudio({
     toggleEnabled,
     updateAudioButton,
     resumeAudio,
+    suspendAudio,
+    wakeAudio,
     startMusicLoop,
     stopMusicLoop,
     playToggleSound,

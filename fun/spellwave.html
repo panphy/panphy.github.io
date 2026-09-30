@@ -3,12 +3,14 @@
 
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <meta name="theme-color" content="#07120f">
   <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
   <title>Spellwave | PanPhy Labs</title>
   <link rel="icon" type="image/png" href="../assets/favicon.png">
+  <link rel="stylesheet" href="../assets/standalone-top.css">
+  <style>:root { --standalone-top-bg: #07120f; }</style>
   <link rel="stylesheet" href="./spellwave/src/styles.css">
   <script
     id="supabaseScript"
@@ -16,12 +18,6 @@
     defer
   ></script>
   <script>
-    let lastTouchEnd = 0;
-    document.addEventListener('touchend', (event) => {
-      const now = Date.now();
-      if (now - lastTouchEnd <= 300) event.preventDefault();
-      lastTouchEnd = now;
-    }, { passive: false });
     document.addEventListener('gesturestart', (event) => event.preventDefault(), { passive: false });
     document.addEventListener('gesturechange', (event) => event.preventDefault(), { passive: false });
     document.addEventListener('gestureend', (event) => event.preventDefault(), { passive: false });
@@ -158,7 +154,7 @@
     </aside>
 
     <div class="sw-initials-modal" id="swInitialsModal" role="dialog" aria-modal="true" aria-labelledby="swInitialsTitle" hidden>
-      <div class="sw-initials-card">
+      <div class="sw-initials-card" id="swInitialsCard">
         <p class="sw-modal-kicker">Top Wizard</p>
         <h2 id="swInitialsTitle">Enter the Tome</h2>
         <div class="sw-modal-score" id="swModalScore">0</div>
