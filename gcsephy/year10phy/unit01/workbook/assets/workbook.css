@@ -43,9 +43,9 @@ strong { font-weight: 700; }
 .cover-circuit { width: 150mm; margin: 0 0 10mm; }
 .cover-circuit svg { width: 100%; display: block; }
 .cover .edition { align-self: flex-start; margin-top: 6mm; padding: 1.8mm 4mm; border: 2px solid var(--copper); color: var(--copper); font: 900 11pt/1 Arial, sans-serif; letter-spacing: .12em; text-transform: uppercase; }
-.cover-fields { display: grid; grid-template-columns: 1fr 1fr; gap: 6mm 10mm; padding: 6mm 8mm; border: 2px solid rgba(255,255,255,.55); background: rgba(10,19,38,.85); }
-.cover-fields div { font: 900 9pt/1 Arial, sans-serif; letter-spacing: .15em; text-transform: uppercase; color: #a8b8cc; }
-.cover-fields div span { display: block; height: 10mm; border-bottom: 1.5px solid #8ea2ba; }
+.cover-fields { display: grid; grid-template-columns: 1fr 1fr; gap: 6mm 10mm; padding: 6mm 8mm; border: 2px solid var(--spark); background: #eef3f9; }
+.cover-fields div { font: 900 9pt/1 Arial, sans-serif; letter-spacing: .15em; text-transform: uppercase; color: var(--navy); }
+.cover-fields div span { display: block; height: 10mm; border-bottom: 1.5px solid var(--navy); }
 
 /* ----- running pages ----- */
 .page-title { margin: 0 0 1.5mm; font: 900 22pt/1 "Arial Black", "Archivo Black", Arial, sans-serif; text-transform: uppercase; letter-spacing: -.035em; }
