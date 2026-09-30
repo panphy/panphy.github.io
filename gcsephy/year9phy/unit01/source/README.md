@@ -26,10 +26,6 @@ The archived source has pinned dependencies. Its two original `npm test` checks 
 git clone student-companion-site-history.bundle restored-student-companion-site
 ```
 
-## Original project documentation
-
-`original-project-readme.md` is the historical README from the local project. Its old inventory is superseded by the [current unit README](../README.md).
-
 ## Intentionally excluded
 
 - `.venv/`, `node_modules/` and package caches
