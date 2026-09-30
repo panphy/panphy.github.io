@@ -989,10 +989,12 @@ function decayInSample(index) {
   sample.mesh.instanceColor.needsUpdate = true;
   const spark = sparkPool.find(item => item.age >= 1);
   if (spark) {
-    // Emit the decay particle in a random direction across the tray (alpha slower than beta).
+    // Emit the decay particle in a uniformly random direction on the upper hemisphere, so none pass through the tray.
+    const up = Math.random();
+    const across = Math.sqrt(1 - up * up);
     const angle = Math.random() * Math.PI * 2;
     const speed = sample.isotope.emits === 'alpha' ? 1.6 : 3;
-    spark.velocity.set(Math.cos(angle) * speed, 0.25 * speed, Math.sin(angle) * speed);
+    spark.velocity.set(Math.cos(angle) * across, up, Math.sin(angle) * across).multiplyScalar(speed);
     spark.age = 0;
     spark.sprite.position.copy(sample.positions[index]);
     spark.sprite.visible = true;
