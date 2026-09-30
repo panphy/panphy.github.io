@@ -2,7 +2,7 @@
 
 [Open PanPhy Labs](https://panphy.app/)
 
-Browser-based physics tools, simulations, classroom utilities, and games for learning by doing. The project grew out of a classroom constraint: students and teachers on school-managed devices often cannot install software. These apps run directly in the browser.
+Browser-based physics tools, simulations, classroom utilities and games. Students and teachers on school-managed devices often cannot install software, so everything runs in the browser.
 
 ## Explore
 
@@ -25,27 +25,19 @@ These public, open-source resources are intentionally outside the general homepa
 
 ## Offline use
 
-Most published tools and simulations support offline use once their required files have been cached. Visit online first and check the homepage's **Offline Ready** indicator before relying on an app offline. Normal updates appear through an update prompt.
+Most published tools and simulations work offline once cached: visit online first and check the homepage's **Offline Ready** indicator. Updates appear through an update prompt. Shared fonts in `assets/fonts/` are precached (about 336 KB).
 
-Published pages share locally hosted Manrope, DM Serif Display, and IBM Plex Mono fonts in `assets/fonts/`. Their WOFF2 files are precached (about 336 KB total), so the same typography remains available offline.
-
-All pages under `fun/`, `beta/`, `misc/`, and `gcsephy/` require internet access. Supabase features, such as leaderboards, also stay online-only.
-
-`gcsephy/` pages register their own small service worker (`gcsephy/sw.js`, scoped to `/gcsephy/`). It stores nothing; it makes every page and asset request revalidate with the server, so edits appear on the next load instead of after the browser's 10-minute HTTP cache. If the network drops, it falls back to the browser's existing copy.
-
-Year 9 and Year 10 GCSE pages keep their own visual style. Their heavy headings use Arial Black where available and a locally hosted Archivo Black fallback on devices that cannot render it; the GCSE worker does not store the font in Cache Storage.
+Pages under `fun/`, `beta/`, `misc/` and `gcsephy/` need internet access, as do Supabase features such as leaderboards. `gcsephy/` registers its own small worker (`gcsephy/sw.js`), which stores nothing and only revalidates requests so edits appear on the next load.
 
 ## Run locally
 
-The served site uses HTML, CSS, and vanilla JavaScript, with no framework, bundler, or build step. GitHub Pages serves the files directly; a service worker handles offline caching, and selected online features use Supabase.
-
-From the repository root, run:
+The site is plain HTML, CSS and vanilla JavaScript with no build step. From the repository root:
 
 ```bash
 python3 -m http.server 8000
 ```
 
-Open [localhost:8000](http://localhost:8000). A static server is needed to test absolute paths and service workers. Use a fresh browser context or an uncached local origin when checking changes so old cached files do not mask them. No npm installation is required to serve the site.
+Open [localhost:8000](http://localhost:8000). A static server is needed for absolute paths and service workers; use a fresh browser context so cached files do not mask changes.
 
 ## Repository map
 
@@ -58,23 +50,18 @@ Open [localhost:8000](http://localhost:8000). A static server is needed to test 
 | `fun/` | Network-only games and demos |
 | `beta/` | Trial apps and physics flashcards, listed in `beta/index.html` |
 | `misc/` | Unlisted resources, inventoried in `misc/index.html` |
-| `gcsephy/` | GCSE Physics curriculum resources, inventoried in `gcsephy/index.html`; `sw.js` and `sw-register.js` keep them fresh and offer a Reload banner when an open page changes |
+| `gcsephy/` | GCSE Physics curriculum resources, inventoried in `gcsephy/index.html` |
 | `.github/workflows/` | Repository automation |
 
 ## Contributing
 
-Fixes, usability improvements, and new educational tools are welcome. Keep changes lightweight, independently usable, and accessible on classroom devices.
+Fixes, improvements and new educational tools are welcome. Keep changes lightweight, independently usable and accessible on classroom devices.
 
-- New pages normally start in `beta/`; keep the beta, misc and GCSE Physics inventories current. School curriculum work goes in `gcsephy/`, and new pages there include `<script src="/gcsephy/sw-register.js" defer></script>`.
-- When changing a precached file, bump `BUILD_ID` in `sw.js`. Published offline apps need their required assets in `ASSETS_TO_CACHE` and their homepage checks in `OFFLINE_CARD_REQUIREMENTS`.
-- Check affected browser flows, including mobile layouts and offline behavior where relevant. PanPhyPlot data or fitting changes also require its dependency-free regression checks (Node.js):
-
-  ```bash
-  node --test tools/panphyplot/tests/regression.test.cjs
-  ```
-
-- Use a `codex/` or `claude/` feature branch and a pull request; `main` auto-deploys to production.
-- [AGENTS.md](AGENTS.md) and [CLAUDE.md](CLAUDE.md) contain equivalent assistant guidance and the publishing checklist. Keep them aligned when changing project rules.
+- New pages normally start in `beta/`; keep the beta, misc and GCSE Physics inventories current.
+- After changing a precached file, bump `BUILD_ID` in `sw.js`. Offline apps also need `ASSETS_TO_CACHE` and `OFFLINE_CARD_REQUIREMENTS` entries.
+- Check affected flows on mobile and offline. For PanPhyPlot data or fitting changes, run `node --test tools/panphyplot/tests/regression.test.cjs`.
+- Use a `codex/` or `claude/` branch and a pull request; `main` auto-deploys.
+- [AGENTS.md](AGENTS.md) and [CLAUDE.md](CLAUDE.md) hold the full rules and publishing checklist; keep them aligned.
 
 ## Contact
 

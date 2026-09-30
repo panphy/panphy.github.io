@@ -55,6 +55,10 @@ Network-only apps omit registration and offline requirements. Public support/ref
 - Beta and `gcsephy/` pages are exempt from the general visual style; the collision simulation retains its dark camera-based design.
 - For flex-based Three.js canvases, use `renderer.setSize(w, h, false)` with CSS `height: 0; flex: 1; min-height: 0` to avoid sizing feedback loops.
 
+## Documentation
+
+- Before finishing any change, review every README in the repository (`git ls-files | grep -i readme`) that could be affected — file maps, commands, counts, links, page numbers — and update those that are stale. Keep READMEs concise: state what a folder is, how to build or edit it, and what is not obvious; leave out history and anything the code already shows.
+
 ## Verification
 
 - Serve locally with `python3 -m http.server 8000` and open `http://localhost:8000`. Use an uncached origin or clean browser context to avoid stale service-worker content.

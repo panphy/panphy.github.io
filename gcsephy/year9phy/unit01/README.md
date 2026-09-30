@@ -6,15 +6,9 @@ A complete unit on how to produce evidence other people will accept. Lesson plan
 
 ---
 
-## What the unit is actually for
+## What the unit is for
 
-Anyone can have an opinion about how the world works. A physicist has to do something harder: produce evidence that convinces people who were not there and who may not want to believe them.
-
-That is the whole unit. Not equations — evidence.
-
-Over eight lessons students learn to take a measurement they can defend, spot the errors hiding inside their own results, and turn a page of messy numbers into a graph that makes the pattern obvious. By the end they design, run and defend an investigation of their own.
-
-The skills are the ones every required practical from here to Year 13 will lean on: variables, repeats, means, uncertainty, precision versus accuracy, random versus systematic error, graph choice, best-fit lines, outliers, conclusions and evaluations. Teaching them properly once, in a unit of their own, is far cheaper than re-teaching them badly inside every practical that follows.
+Producing evidence that convinces people who were not there. Over eight lessons students learn to take a measurement they can defend, spot errors in their own results, and turn messy numbers into a graph that shows the pattern, then design, run and defend their own investigation. The skills (variables, repeats, means, uncertainty, precision versus accuracy, random versus systematic error, graph choice, best-fit lines, outliers, conclusions, evaluations) underpin every required practical to Year 13, so it pays to teach them once, properly.
 
 ---
 
@@ -29,24 +23,14 @@ The skills are the ones every required practical from here to Year 13 will lean 
 | `index.html`, `lesson/` and `assets/` | Static online student companion | Open `index.html`, or visit this folder's published web address |
 | `source/` | Original Sites/React companion-site source and its Git history | Keep this when moving or backing up the project |
 
-## Working copy and source of truth
+## Sources and how the parts fit
 
-This repository is the working copy of the unit. The lesson plans, workbook and student companion are here; the teaching deck is maintained in `gcsephy/decks/work-like-a-physicist/`.
+- `teaching-guides/source/*.md` are the editable masters of the lesson plans; rebuild the PDFs with `teaching-guides/build-pdf.sh` and keep the two in step.
+- The teaching deck source is `../../decks/work-like-a-physicist/`.
+- `workbook/assets/content.js` is the workbook source (rebuilt from the published PDF after the original was lost); re-export with `workbook/build-pdf.sh` and keep the PDF in step.
+- `index.html`, `lesson/` and `assets/` are the static companion site; `source/` archives the original Sites/React version.
 
-- The Markdown files in `teaching-guides/source/` are the editable masters for the lesson plans. The PDFs beside them are rebuilt from those files with `teaching-guides/build-pdf.sh`; keep the two in step.
-- The HTML and JavaScript in `../../decks/work-like-a-physicist/` are the editable teaching-deck source.
-- `index.html`, `lesson/` and `assets/` are the editable source for the static companion website.
-- `source/` preserves the original Sites/React companion site and its Git history.
-- `workbook/` is the editable source of the student workbook. It was rebuilt from the published PDF after the original source was lost; edit `workbook/assets/content.js` and re-export with `workbook/build-pdf.sh`, and keep the PDF and its source in step.
-
-### How the parts fit together
-
-- **Lesson plans** — the full detail: objectives, vocabulary, activities, expected answers, teacher notes.
-- **Teaching deck** — browser-based slides with diagrams, questions and reveal steps for classroom discussion.
-- **Student workbook** — where students actually write. The lesson plans and workbook tasks are designed to be used together.
-- **Companion site** — optional, for students: revision, practice questions and catch-up outside the lesson.
-
-You can teach from the deck alone in a pinch. You cannot teach it well without the workbook in students' hands, because every task assumes they are writing into it. The site is a bonus, not a dependency — the unit works completely without it.
+Lesson plans give objectives, vocabulary, activities, answers and teacher notes. The deck gives slides and reveal steps. The workbook is where students write, and every task assumes they have it. The companion site is an optional extra; the unit works without it.
 
 ---
 
@@ -70,25 +54,13 @@ The shape is deliberate: **Lessons 1–2 build the language, 3–5 build the tec
 
 **Address: <https://panphy.app/gcsephy/year9phy/unit01/>**
 
-A student-facing lesson companion and revision hub covering the same seven lesson sections. Students can use it alongside the workbook in class, to catch up after an absence, to revise independently, or to prepare for the end-of-unit test. Nothing in the taught unit depends on it.
+A student revision hub for use alongside the workbook, after an absence, or before the end-of-unit test:
 
-**What is on it**
+- a page per lesson with workbook-matched notes, key vocabulary and a link to the relevant workbook pages
+- 40 questions: four in each of seven missions, plus 12 AQA-style Exam Zone questions worth 50 marks with fresh contexts
+- a hint and full worked answer for every question, hidden behind a click, and a typing area so students attempt first
 
-- A page per lesson with **workbook-matched revision notes**, key vocabulary and a direct link to the relevant workbook pages.
-- The notes cover the same variables, calculations, practical methods, graph rules, conclusions and evaluation language as workbook pages 4–38.
-- **40 questions in total** — four questions in each of the seven missions, plus 12 separate AQA-style Exam Zone questions worth 50 marks. The Exam Zone uses fresh contexts and does not repeat mission questions.
-- Every question has a **hint** and a **full worked answer**, both hidden behind a click.
-- A typing area for each question, so students write their own attempt before revealing anything.
-
-**How students are meant to use it**
-
-The intended sequence is printed on each lesson page: *review the notes → use the matching workbook pages → attempt the questions → hint if stuck → check → improve.* The answers show the working and where the marks fall, so it rewards attempting first and punishes nothing.
-
-**A note for teachers**
-
-The answers are visible to students by design — this is a revision tool, not an assessment. If you want to set questions from it as unseen homework, copy the prompts out rather than sending the link.
-
-This hosted copy is a static site and does not need a build step or server-side runtime. It lives under `gcsephy/`, which is network-only and uses a separate freshness worker without offline caching.
+Answers are visible by design; to set questions as unseen homework, copy the prompts rather than sharing the link. The site is static and lives under `gcsephy/`, which is network-only.
 
 ---
 
@@ -139,23 +111,9 @@ Lesson 3. Several groups every year draw a perfect bar chart and then invert the
 
 ## Where this sits in the curriculum
 
-This is a **working scientifically** unit rather than a content unit. It carries no new physics — the practicals are vehicles for the skills.
+A working-scientifically unit with no new physics; the practicals are vehicles for skills GCSE assesses in every required practical: variables, fair tests, repeats and means, **uncertainty as half the range**, precision/accuracy/resolution, random versus systematic error, graph choice with scales and units, best-fit lines, anomalies, conclusions and evaluations. When students write "human error" in Year 10, send them back to this workbook.
 
-It covers, at Year 9 level, the investigative skills that GCSE specifications assess across every required practical:
-
-- identifying independent, dependent and control variables
-- planning a fair test and judging whether a question is testable
-- repeat readings, means, and why repeats are taken at all
-- **uncertainty estimated as half the range** — the AQA-style treatment, deliberately kept simple
-- precision, accuracy and resolution as distinct ideas
-- random versus systematic error, and why repeats fix only one of them
-- selecting and drawing the correct graph, with scales, labels and units
-- best-fit lines, anomalies and outliers
-- conclusions supported by evidence, and evaluations naming realistic improvements
-
-**What it feeds into.** Every required practical from Year 10 onwards. When students write an evaluation next year and reach for "human error", send them back to this workbook — the structure does not change, only the context. The glossary and the graph checklist at the back are designed to stay useful long after the unit ends.
-
-**Assessment points.** Lesson 6 and Lessons 7–8 both carry success-criteria checklists in the student workbook, written in the same words a marker would use. Students self-assess against them first; that conversation is usually more useful than the mark itself. Lesson 6 is the natural point to collect books if you want a formal assessment.
+**Assessment points.** Lesson 6 and Lessons 7–8 carry success-criteria checklists in the workbook, worded as a marker would. Lesson 6 is the natural point to collect books.
 
 ---
 
@@ -186,29 +144,9 @@ It covers, at Year 9 level, the investigative skills that GCSE specifications as
 
 ---
 
-## A note on the student workbook
+## The student workbook
 
-One workbook per student, kept for all eight lessons. It is designed so that everything a student needs is inside it:
-
-- **Page 3, The Physicist's Toolkit** — every rule, formula and checklist on one page. Tell them to fold the corner; they will come back to it constantly.
-- Each lesson follows the same four-part shape: **The Case → Your Mission → the numbered Tasks → Checkpoint.** Students always know where they are.
-- Printed grid paper wherever a graph is needed, so no separate graph paper is required.
-- A glossary, a "write this instead of that" phrase table, and a progress tracker at the back.
-
-Use the lesson plans for teaching guidance. The HTML deck reveals selected answers only when you advance its steps.
-
----
-
-## What is included in this repository
-
-- the seven lesson-plan PDFs and their editable Markdown masters and print styles in `teaching-guides/`
-- the student workbook PDF and its editable source in `workbook/`
-- the HTML teaching deck in `../../decks/work-like-a-physicist/`
-- this overview
-- the static student companion site, including seven workbook-matched revision guides, all seven missions and 40 questions
-- the original Sites/React companion-site source and its four-commit Git history
-
-Dependency folders, build output, caches and rendered production previews are intentionally not included because they can be regenerated. Any future editable source or production record needed to maintain the unit should be added to this repository before its separate working copy is removed.
+One per student for all eight lessons. Page 3, *The Physicist's Toolkit*, holds every rule, formula and checklist. Each lesson follows The Case → Your Mission → numbered Tasks → Checkpoint, with printed grid paper for graphs and a glossary, "write this instead of that" table and progress tracker at the back.
 
 ---
 
