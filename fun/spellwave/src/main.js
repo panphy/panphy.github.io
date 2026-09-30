@@ -4,8 +4,9 @@ import { createSeasonalEffects } from './seasonal-effects.js';
 import { createPotionSystem } from './potions.js';
 import { ALL_WORDS, EASY_WORDS, HARD_WORDS, MEDIUM_WORDS, EQUATION_WORDS } from './question-bank.js';
 import { createEndingFX } from './ending-fx.js';
+import { createLeaderboard } from './leaderboard.js';
 import { createEnemyMesh, createMimicChestMesh, blockMesh } from './enemy-meshes.js';
-import { getInputCharacters, isMathOperatorInput, buildSearchPrompt, buildAltSearchPrompts, buildHintMask, getBossQuestionHintRange, escapeHtml, wrapSups, buildHintPart, buildTwoWordLimit, shouldUseVocabularyPromptLimit, promptIndexForProgress } from './prompt-utils.js';
+import { pickTarget, getInputCharacters, isMathOperatorInput, buildSearchPrompt, buildAltSearchPrompts, buildHintMask, getBossQuestionHintRange, escapeHtml, wrapSups, buildHintPart, buildTwoWordLimit, shouldUseVocabularyPromptLimit, promptIndexForProgress } from './prompt-utils.js';
 
 const canvas = document.getElementById('gameCanvas');
 const labelsLayer = document.getElementById('labelsLayer');
@@ -52,29 +53,9 @@ const endStreak = document.getElementById('endStreak');
 const endMimics = document.getElementById('endMimics');
 const endHealth = document.getElementById('endHealth');
 const endTime = document.getElementById('endTime');
-const supabaseScript = document.getElementById('supabaseScript');
-const swScoreList = document.getElementById('swScoreList');
-const swLeaderboardStatus = document.getElementById('swLeaderboardStatus');
-const swInitialsModal = document.getElementById('swInitialsModal');
-const swInitialsInput = document.getElementById('swInitialsInput');
-const swInitialsError = document.getElementById('swInitialsError');
-const swSubmitInitials = document.getElementById('swSubmitInitials');
-const swSkipInitials = document.getElementById('swSkipInitials');
-const swModalScore = document.getElementById('swModalScore');
-
 
 const STORAGE_KEY = 'panphySpellwaveBestV1';
 const AUDIO_STORAGE_KEY = 'panphySpellwaveAudioV1';
-const SW_SUPABASE_URL = 'https://ldkgodxalwuvkqygchns.supabase.co';
-const SW_SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imxka2dvZHhhbHd1dmtxeWdjaG5zIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njk3NzEyNTgsImV4cCI6MjA4NTM0NzI1OH0.PZ3rbRZCfwzniQgq5RiZ9cikPNvdYwr9uGYNwN6xQKY';
-const SW_LEADERBOARD_TABLE = 'spellwave_leaderboard';
-const SW_SUBMIT_SCORE_RPC = 'submit_spellwave_score';
-const SW_SCORE_FIELD = 'score';
-const SW_LEADERBOARD_CACHE_KEY = 'spellwaveLeaderboardCacheV1';
-const SW_LEADERBOARD_SIZE = 5;
-const SW_MIN_SCORE = 1;
-const SW_MAX_SCORE = 9999999;
-const SW_HIGHLIGHT_MS = 6000;
 const MAX_DELTA = 0.06;
 const IDLE_FRAME_INTERVAL = 100; // ~10 fps when not actively playing
 const WALL_Z = 4.6;
@@ -105,9 +86,6 @@ const EMBER_HEIGHT_DELTAS = 1819600217;
 const PARTICLE_GRAVITY_COEFFS = 2242416284;
 const GAME_PROFILE = {
   phaseLabel: 'Spellwave',
-  normalBase: 7,
-  normalGrowth: 1,
-  normalMax: 16,
   enemyLimit: 11,
   speedMultiplier: 0.94,
   waveSpeedBonus: 0.075,
@@ -121,7 +99,6 @@ const GAME_PROFILE = {
 };
 const NORMAL_ENEMY_TARGETS = [7, 8, 10, 11, 12, 13, 14, 15, 16, 16];
 const NORMAL_TYPING_BUDGETS = [58, 72, 88, 106, 124, 142, 158, 174, 188, 202];
-const NORMAL_TYPING_BUDGET_GROWTH = 14;
 const ACTIVE_TYPING_PRESSURE_BASE = 36;
 const ACTIVE_TYPING_PRESSURE_GROWTH = 4;
 const ACTIVE_TYPING_PRESSURE_MAX = 58;
@@ -475,11 +452,6 @@ let rafId = null;
 let isTimeoutScheduled = false;
 let batterySaver = false;
 const BATTERY_SAVER_STORAGE_KEY = 'spellwave_battery_saver_active';
-let swSupabaseClient = null;
-let swTopScores = [];
-let swRecentSubmission = null;
-let swPendingScore = 0;
-let swIsSubmitting = false;
 
 let elapsed = 0;
 let mistakeTimer = 0;
@@ -521,6 +493,8 @@ const {
   toggleEnabled: toggleAudioEnabled,
   updateAudioButton,
   resumeAudio,
+  suspendAudio,
+  wakeAudio,
   startMusicLoop,
   stopMusicLoop,
   playToggleSound,
@@ -558,6 +532,12 @@ const {
   getTypedLength: () => typedBuffer.length,
   pathLanes: PATH_LANES,
 });
+
+const leaderboard = createLeaderboard({
+  formatScore,
+  onModalClose: () => { if (mode === 'running') focusKeyboard(); },
+});
+leaderboard.init();
 
 const rendererState = createRenderer();
 const renderer = rendererState.renderer;
@@ -652,39 +632,6 @@ createLifeMeter();
 bestValue.textContent = formatScore(bestScore);
 messageScore.textContent = `Best ${formatScore(bestScore)}`;
 updateAudioButton();
-swInitSupabaseClient();
-const swCachedBoard = swLoadLeaderboardCache();
-if (swCachedBoard && swCachedBoard.scores.length > 0) {
-  swTopScores = swMergeRecentSubmission(swNormalizeCachedScores(swCachedBoard.scores));
-  swRenderTopScores();
-} else {
-  swRenderLoadingScores();
-}
-swFetchTopScores({ preferRemote: true, showLoading: false });
-if (supabaseScript) {
-  supabaseScript.addEventListener('load', () => {
-    swFetchTopScores({ preferRemote: true, showLoading: false });
-  });
-}
-if (swInitialsInput) {
-  swInitialsInput.addEventListener('input', (event) => {
-    event.target.value = event.target.value.toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 3);
-    if (swInitialsError) swInitialsError.textContent = '';
-  });
-  swInitialsInput.addEventListener('keydown', (event) => {
-    if (event.key === 'Enter') {
-      event.preventDefault();
-      event.stopPropagation();
-      swHandleSubmitInitials();
-    }
-  });
-}
-if (swSubmitInitials) {
-  swSubmitInitials.addEventListener('click', swHandleSubmitInitials);
-}
-if (swSkipInitials) {
-  swSkipInitials.addEventListener('click', () => swHideInitialsModal());
-}
 setPauseButtonState(true, true);
 updateFullscreenButton();
 updatePhaseDisplay();
@@ -759,7 +706,9 @@ document.addEventListener('visibilitychange', () => {
   if (document.hidden) {
     if (mode === 'running') pauseGame();
     cancelFrame();
+    suspendAudio();
   } else {
+    wakeAudio();
     lastFrameTime = 0;
     scheduleFrame();
   }
@@ -770,9 +719,8 @@ document.addEventListener('pointerdown', () => {
 });
 
 keyboardInput.addEventListener('beforeinput', handleBeforeInput);
-keyboardInput.addEventListener('input', () => {
-  keyboardInput.value = '';
-});
+keyboardInput.addEventListener('input', resetKeyboardInput);
+keyboardInput.addEventListener('compositionend', () => { composedText = ''; });
 
 resizeRenderer();
 batterySaver = loadBatterySaverSetting();
@@ -810,6 +758,7 @@ function startGame() {
   }
 
   const transitionFromGameOver = mode === 'gameover' || mode === 'ending';
+  leaderboard.hideModal();
   playStartSound();
   clearEnemies();
   clearEffects();
@@ -932,10 +881,15 @@ function endGame() {
   renderRunGlossary();
   updatePhaseDisplay();
   updateHud(true);
-  swHandleLeaderboard(score);
+  submitRunToLeaderboard();
   // Restart the idle frame loop — endGame can arrive via the boss_killing timeout,
   // during which scheduleFrame refuses to run and the loop is left dead.
   scheduleFrame();
+}
+
+function submitRunToLeaderboard() {
+  if (godModeUsedThisRun || potionCheatUsedThisRun || finalWaveCheatUsedThisRun) return;
+  leaderboard.handleScore(score);
 }
 
 function showMessage(kicker, title, scoreText, buttonText, copyText) {
@@ -977,10 +931,10 @@ function showWebGLUnavailable() {
 }
 
 function handleKeyDown(event) {
-  if (swIsInitialsModalOpen()) {
+  if (leaderboard.isModalOpen()) {
     if (event.key === 'Escape') {
       event.preventDefault();
-      swHideInitialsModal();
+      leaderboard.hideModal();
     }
     return;
   }
@@ -1061,16 +1015,39 @@ function handleKeyDown(event) {
   }
 
   if (event.key.length === 1) {
+    // Let Space activate a focused button/link instead of swallowing it.
+    if (event.key === ' ' && event.target !== keyboardInput && event.target.closest && event.target.closest('button, a')) return;
     event.preventDefault();
     enterCharacter(event.key);
   }
+}
+
+// The input always holds one invisible sentinel character so Backspace has
+// something to delete on mobile keyboards that skip events for an empty field.
+const INPUT_SENTINEL = '\u200b';
+let composedText = '';
+
+function resetKeyboardInput() {
+  keyboardInput.value = INPUT_SENTINEL;
+  try { keyboardInput.setSelectionRange(INPUT_SENTINEL.length, INPUT_SENTINEL.length); } catch {}
 }
 
 function handleBeforeInput(event) {
   if (mode !== 'running') return;
   resumeAudio();
 
-  if (event.inputType === 'deleteContentBackward') {
+  // IME composition (e.g. Android suggestion keyboards) reports the whole
+  // composing word each time, so enter only the characters added since the last event.
+  if (event.inputType === 'insertCompositionText' && typeof event.data === 'string') {
+    const data = event.data;
+    const fresh = data.startsWith(composedText) ? data.slice(composedText.length) : data.slice(-1);
+    composedText = data;
+    for (const character of fresh) enterCharacter(character);
+    return;
+  }
+  composedText = '';
+
+  if (event.inputType === 'deleteContentBackward' || event.inputType === 'deleteWordBackward') {
     event.preventDefault();
     typedBuffer = typedBuffer.slice(0, -1);
     playBackspaceSound();
@@ -1100,7 +1077,7 @@ function enterCharacter(character) {
 
     if (nextMatches.length > 0) {
       typedBuffer = next;
-      activeTarget = chooseTarget(nextMatches);
+      activeTarget = pickTarget(nextMatches, next);
       if (activeTarget._matchedSearchPrompt === typedBuffer) {
         defeatEnemy(activeTarget);
       } else {
@@ -1196,18 +1173,7 @@ function defeatEnemy(enemy) {
     return;
   }
 
-  const promptValue = enemy.prompt.replace(/\s/g, '');
-  streak += 1;
-  if (streak > peakStreak) peakStreak = streak;
-  defeatedCount += 1;
-  if (enemy.isBoss) bossesDefeated += 1;
-  const points = enemy.type.score + promptValue.length * 12 + Math.min(streak, 10) * 8;
-  const healed = enemy.isMedic ? Math.min(MEDIC_HEAL_AMOUNT, MAX_LIFE - health) : 0;
-  score += points;
-  if (healed > 0) health += healed;
-  if (!encounteredTerms.some(t => t.term === enemy.prompt)) {
-    encounteredTerms.push({ term: enemy.prompt, definition: enemy.definition, isEquation: enemy.isEquation, defeated: true });
-  }
+  const { points, healed } = awardKill(enemy);
   spawnScorePopup(points, enemy, healed);
   if (enemy.isMedic) playHealSound(healed);
   else playDefeatSound(enemy);
@@ -1221,6 +1187,24 @@ function defeatEnemy(enemy) {
   updateTypedDisplay();
 }
 
+
+// Score is based on the characters the player actually types (hidden words only
+// on limited prompts), not the full displayed text.
+function awardKill(enemy) {
+  const typedLength = Math.max(1, enemy.searchPrompt.length);
+  streak += 1;
+  if (streak > peakStreak) peakStreak = streak;
+  defeatedCount += 1;
+  if (enemy.isBoss) bossesDefeated += 1;
+  const points = enemy.type.score + typedLength * 12 + Math.min(streak, 10) * 8;
+  const healed = enemy.isMedic ? Math.min(MEDIC_HEAL_AMOUNT, MAX_LIFE - health) : 0;
+  score += points;
+  if (healed > 0) health += healed;
+  if (!encounteredTerms.some(t => t.term === enemy.prompt)) {
+    encounteredTerms.push({ term: enemy.prompt, definition: enemy.definition, isEquation: enemy.isEquation, defeated: true });
+  }
+  return { points, healed };
+}
 
 function leakEnemy(enemy) {
   if (enemy.isMedic) {
@@ -1262,7 +1246,7 @@ function leakEnemy(enemy) {
   const wasActiveTarget = activeTarget === enemy;
   let wasBlocked = false;
   if (!godMode && enemy.damage > 0 && potionsSystem.isShieldActive()) {
-    wasBlocked = potionsSystem.blockLeak();
+    wasBlocked = potionsSystem.blockLeak(enemy.isBoss);
   }
 
   if (wasBlocked) {
@@ -2307,15 +2291,11 @@ function updatePhaseDisplay() {
 }
 
 function getNormalEnemyTarget(wave) {
-  const profile = currentDifficulty();
-  if (wave <= NORMAL_ENEMY_TARGETS.length) return NORMAL_ENEMY_TARGETS[wave - 1];
-  return Math.min(profile.normalMax, profile.normalBase + Math.max(0, wave - 1) * profile.normalGrowth);
+  return NORMAL_ENEMY_TARGETS[Math.min(wave, NORMAL_ENEMY_TARGETS.length) - 1];
 }
 
 function getNormalWaveTypingBudget(wave) {
-  if (wave <= NORMAL_TYPING_BUDGETS.length) return NORMAL_TYPING_BUDGETS[wave - 1];
-  const overflow = wave - NORMAL_TYPING_BUDGETS.length;
-  return NORMAL_TYPING_BUDGETS[NORMAL_TYPING_BUDGETS.length - 1] + overflow * NORMAL_TYPING_BUDGET_GROWTH;
+  return NORMAL_TYPING_BUDGETS[Math.min(wave, NORMAL_TYPING_BUDGETS.length) - 1];
 }
 
 function getActiveTypingPressureLimit() {
@@ -2380,17 +2360,13 @@ function getEnemyLimit() {
 function getEnemySpeed(enemy) {
   const profile = currentDifficulty();
   const wavePressure = Math.max(0, waveSet - 1) * profile.waveSpeedBonus;
-  const effectiveWavePressure = enemy.isFinalWaveNormal
-    ? Math.max(0, 9 - 1) * profile.waveSpeedBonus
-    : wavePressure;
   const longPromptPenalty = Math.max(0, enemy.searchPrompt.length - (enemy.isBoss ? 6 : 8));
   const lengthFactor = THREE.MathUtils.clamp(
     1 / (1 + longPromptPenalty * (enemy.isBoss ? 0.08 : 0.06)),
     enemy.isBoss ? 0.55 : 0.58,
     1
   );
-  const finalWaveMultiplier = enemy.isFinalWaveNormal ? 1.1 : 1;
-  return (enemy.speed + effectiveWavePressure) * profile.speedMultiplier * lengthFactor * finalWaveMultiplier;
+  return (enemy.speed + wavePressure) * profile.speedMultiplier * lengthFactor;
 }
 
 function updateTypedDisplay() {
@@ -2411,8 +2387,6 @@ function spawnEnemy(options = {}) {
     ? chooseMedicPrompt()
     : isMimic
     ? chooseMimicPrompt()
-    : options.isFinalWaveNormal
-    ? chooseFinalWaveNormalPrompt()
     : choosePrompt();
 
   const isEquationPrompt = !!wordData.isEquation;
@@ -2542,7 +2516,6 @@ function spawnEnemy(options = {}) {
     isMedic,
     isMimic,
     isClimaxBoss,
-    isFinalWaveNormal: !!options.isFinalWaveNormal,
     lidOpenProgress: 0,
     hasOpened: false,
     isFlying,
@@ -3313,7 +3286,7 @@ function hasActiveEquationPrefix() {
 }
 
 function chooseTarget(matches) {
-  return [...matches].sort((a, b) => b.group.position.z - a.group.position.z || a.searchPrompt.length - b.searchPrompt.length)[0];
+  return pickTarget(matches, typedBuffer);
 }
 
 function isEnemyTargetable(enemy) {
@@ -3559,16 +3532,6 @@ function chooseMedicPrompt() {
   return usablePool[Math.floor(Math.random() * usablePool.length)];
 }
 
-function chooseFinalWaveNormalPrompt() {
-  const nearExisting = new Set(enemies.map((enemy) => enemy.prompt));
-  const pool = EASY_WORDS;
-  for (let attempt = 0; attempt < 8; attempt += 1) {
-    const entry = pool[Math.floor(Math.random() * pool.length)];
-    if (!nearExisting.has(entry.term)) return entry;
-  }
-  return pool[Math.floor(Math.random() * pool.length)];
-}
-
 function currentKeywordPool() {
   if (waveSet >= 5) return [...MEDIUM_WORDS, ...HARD_WORDS];
   if (waveSet >= 3) return [...EASY_WORDS, ...MEDIUM_WORDS];
@@ -3782,6 +3745,7 @@ function formatAccuracySummary() {
 }
 
 function focusKeyboard() {
+  if (keyboardInput.value !== INPUT_SENTINEL) resetKeyboardInput();
   keyboardInput.focus({ preventScroll: true });
 }
 
@@ -4104,10 +4068,12 @@ function startWaveCleared() {
 let endingStartTime = 0;
 let endingTimers = [];
 let victorySoundPlayed = false;
+let endingLeaderboardOffered = false;
 
 function startEndingSequence() {
   mode = 'ending';
   victorySoundPlayed = false;
+  endingLeaderboardOffered = false;
   startMusicLoop(false);
   document.body.classList.remove('is-running');
   document.body.classList.remove('final-wave-active');
@@ -4180,7 +4146,10 @@ function showEndingStatsScreen(finalStats) {
     playVictoryFinaleSound();
     victorySoundPlayed = true;
   }
-  swHandleLeaderboard(score);
+  if (!endingLeaderboardOffered) {
+    endingLeaderboardOffered = true;
+    submitRunToLeaderboard();
+  }
 }
 
 function animateCounter(el, from, to, duration, format = v => String(v)) {
@@ -4637,6 +4606,7 @@ function clearChainLightningTimers() {
     window.clearTimeout(entry.id);
   }
   chainLightningTimers = [];
+  if (lightningFlash) lightningFlash.style.opacity = '0';
 }
 
 // Pausing must not let the chain sequence resolve behind the pause overlay,
@@ -4736,18 +4706,7 @@ function defeatEnemyChainBurst(enemy) {
     return;
   }
 
-  const promptValue = enemy.prompt.replace(/\s/g, '');
-  streak += 1;
-  if (streak > peakStreak) peakStreak = streak;
-  defeatedCount += 1;
-  if (enemy.isBoss) bossesDefeated += 1;
-  const points = enemy.type.score + promptValue.length * 12 + Math.min(streak, 10) * 8;
-  const healed = enemy.isMedic ? Math.min(MEDIC_HEAL_AMOUNT, MAX_LIFE - health) : 0;
-  score += points;
-  if (healed > 0) health += healed;
-  if (!encounteredTerms.some(t => t.term === enemy.prompt)) {
-    encounteredTerms.push({ term: enemy.prompt, definition: enemy.definition, isEquation: enemy.isEquation, defeated: true });
-  }
+  const { points, healed } = awardKill(enemy);
 
   spawnScorePopup(points, enemy, healed);
   
@@ -4869,317 +4828,3 @@ potionSlots.forEach((slot, index) => {
     potionsSystem.activatePotionSlot(index);
   });
 });
-
-// ── Spellwave Leaderboard ─────────────────────────────────────────────
-
-function swInitSupabaseClient() {
-  if (swSupabaseClient) return swSupabaseClient;
-  try {
-    const sb = window.supabase || window.Supabase || null;
-    if (sb && typeof sb.createClient === 'function' && SW_SUPABASE_URL && SW_SUPABASE_ANON_KEY) {
-      swSupabaseClient = sb.createClient(SW_SUPABASE_URL, SW_SUPABASE_ANON_KEY);
-    }
-  } catch (e) {
-    console.warn('Supabase init failed:', e);
-  }
-  return swSupabaseClient;
-}
-
-function swWaitForSupabaseClient({ timeoutMs = 4000, intervalMs = 200 } = {}) {
-  return new Promise((resolve) => {
-    const startedAt = Date.now();
-    const check = () => {
-      const client = swInitSupabaseClient();
-      if (client || Date.now() - startedAt >= timeoutMs) { resolve(client); return; }
-      setTimeout(check, intervalMs);
-    };
-    check();
-  });
-}
-
-function swGetRestHeaders(accessToken = null) {
-  return {
-    apikey: SW_SUPABASE_ANON_KEY,
-    Authorization: `Bearer ${accessToken || SW_SUPABASE_ANON_KEY}`,
-    'Content-Type': 'application/json',
-  };
-}
-
-function swLoadLeaderboardCache() {
-  try {
-    const raw = localStorage.getItem(SW_LEADERBOARD_CACHE_KEY);
-    if (!raw) return null;
-    const parsed = JSON.parse(raw);
-    return parsed && Array.isArray(parsed.scores) ? parsed : null;
-  } catch { return null; }
-}
-
-function swSaveLeaderboardCache(scores) {
-  try {
-    localStorage.setItem(SW_LEADERBOARD_CACHE_KEY, JSON.stringify({ scores: scores || [], savedAt: Date.now() }));
-  } catch {}
-}
-
-function swSetStatus(text) {
-  if (swLeaderboardStatus) swLeaderboardStatus.textContent = text;
-}
-
-function swSanitizeScore(value) {
-  const n = Math.round(Number(value));
-  if (!Number.isFinite(n) || n < SW_MIN_SCORE || n > SW_MAX_SCORE) return null;
-  return n;
-}
-
-function swNormalizeScores(entries) {
-  return (entries || []).map((e) => {
-    const val = swSanitizeScore(e[SW_SCORE_FIELD]);
-    if (val === null) return null;
-    return { initials: e.initials, score: val };
-  }).filter(Boolean);
-}
-
-function swNormalizeCachedScores(entries) {
-  return (entries || []).map((e) => {
-    const val = swSanitizeScore(e.score);
-    if (val === null) return null;
-    return { initials: e.initials, score: val };
-  }).filter(Boolean);
-}
-
-function swRegisterRecentSubmission(initials, scoreValue) {
-  swRecentSubmission = {
-    initials: initials.toUpperCase(),
-    score: scoreValue,
-    expiresAt: Date.now() + SW_HIGHLIGHT_MS,
-  };
-}
-
-function swHasRecentSubmission(entry) {
-  if (!swRecentSubmission) return false;
-  if (Date.now() > swRecentSubmission.expiresAt) { swRecentSubmission = null; return false; }
-  return entry && entry.initials === swRecentSubmission.initials && entry.score === swRecentSubmission.score;
-}
-
-function swMergeRecentSubmission(entries) {
-  if (!swRecentSubmission) return entries || [];
-  if (Date.now() > swRecentSubmission.expiresAt) { swRecentSubmission = null; return entries || []; }
-  const list = Array.isArray(entries) ? [...entries] : [];
-  if (!list.some((e) => swHasRecentSubmission(e))) {
-    list.push({ initials: swRecentSubmission.initials, score: swRecentSubmission.score });
-  }
-  list.sort((a, b) => b.score - a.score);
-  return list.slice(0, SW_LEADERBOARD_SIZE);
-}
-
-function swIsSameLeaderboard(a, b) {
-  if (!Array.isArray(a) || !Array.isArray(b) || a.length !== b.length) return false;
-  for (let i = 0; i < a.length; i++) {
-    if (a[i].initials !== b[i].initials || Number(a[i].score) !== Number(b[i].score)) return false;
-  }
-  return true;
-}
-
-function swCheckIfHighScore(newScore) {
-  if (swTopScores.length < SW_LEADERBOARD_SIZE) return true;
-  return newScore > (swTopScores[swTopScores.length - 1]?.score ?? 0);
-}
-
-async function swFetchTopScoresRest() {
-  const url = new URL(`${SW_SUPABASE_URL}/rest/v1/${SW_LEADERBOARD_TABLE}`);
-  url.searchParams.set('select', `initials,${SW_SCORE_FIELD}`);
-  url.searchParams.set('order', `${SW_SCORE_FIELD}.desc`);
-  url.searchParams.set('limit', String(SW_LEADERBOARD_SIZE));
-  const response = await fetch(url.toString(), { method: 'GET', headers: swGetRestHeaders() });
-  if (!response.ok) throw new Error(`REST fetch failed: ${response.status}`);
-  return response.json();
-}
-
-async function swSubmitScoreRest(initials, scoreValue, accessToken = null) {
-  const response = await fetch(`${SW_SUPABASE_URL}/rest/v1/rpc/${SW_SUBMIT_SCORE_RPC}`, {
-    method: 'POST',
-    headers: { ...swGetRestHeaders(accessToken), Prefer: 'return=minimal' },
-    body: JSON.stringify({ initials: initials.toUpperCase(), score: scoreValue }),
-  });
-  if (!response.ok) throw new Error(`RPC insert failed: ${response.status}`);
-  return true;
-}
-
-async function swFetchTopScores({ preferRemote = false, showLoading = true } = {}) {
-  if (showLoading) swRenderLoadingScores();
-  const cachedScores = swNormalizeCachedScores(swLoadLeaderboardCache()?.scores || []);
-  let client = swInitSupabaseClient();
-  if (!client && preferRemote) client = await swWaitForSupabaseClient();
-  try {
-    let fetched = [];
-    if (client) {
-      const { data, error } = await client
-        .from(SW_LEADERBOARD_TABLE)
-        .select(`initials, ${SW_SCORE_FIELD}`)
-        .order(SW_SCORE_FIELD, { ascending: false })
-        .limit(SW_LEADERBOARD_SIZE);
-      if (error) throw error;
-      fetched = swNormalizeScores(data || []);
-    } else {
-      fetched = swNormalizeScores(await swFetchTopScoresRest());
-    }
-    const merged = swMergeRecentSubmission(fetched);
-    if (!swIsSameLeaderboard(fetched, cachedScores) || swTopScores.length === 0) {
-      swTopScores = merged;
-      swRenderTopScores();
-      swSaveLeaderboardCache(fetched);
-    }
-    swSetStatus('Live');
-  } catch (err) {
-    console.warn('Supabase fetch failed, retrying with REST:', err);
-    try {
-      const fetched = swNormalizeScores(await swFetchTopScoresRest());
-      const merged = swMergeRecentSubmission(fetched);
-      if (!swIsSameLeaderboard(fetched, cachedScores) || swTopScores.length === 0) {
-        swTopScores = merged;
-        swRenderTopScores();
-        swSaveLeaderboardCache(fetched);
-      }
-      swSetStatus('Live');
-    } catch (restErr) {
-      console.error('Leaderboard fetch failed:', restErr);
-      swSetStatus('Offline');
-      if (swTopScores.length === 0) swRenderLoadingScores();
-    }
-  }
-}
-
-async function swSubmitScore(initials, scoreValue) {
-  let client = swInitSupabaseClient();
-  if (!client) client = await swWaitForSupabaseClient();
-  let accessToken = null;
-  try {
-    if (client?.auth) {
-      const { data } = await client.auth.getSession();
-      accessToken = data?.session?.access_token || null;
-      if (!accessToken) {
-        const { data: authData } = await client.auth.signInAnonymously();
-        accessToken = authData?.session?.access_token || null;
-      }
-    }
-  } catch {}
-  try {
-    if (client) {
-      const { error } = await client.rpc(SW_SUBMIT_SCORE_RPC, {
-        initials: initials.toUpperCase(),
-        score: scoreValue,
-      });
-      if (error) throw error;
-    } else {
-      await swSubmitScoreRest(initials, scoreValue, accessToken);
-    }
-    swRegisterRecentSubmission(initials, scoreValue);
-    swTopScores = swMergeRecentSubmission(swTopScores);
-    swRenderTopScores();
-    swSaveLeaderboardCache(swTopScores);
-    setTimeout(() => swFetchTopScores({ preferRemote: true, showLoading: false }), 800);
-    return true;
-  } catch (err) {
-    console.warn('Submit failed, retrying with REST:', err);
-    try {
-      await swSubmitScoreRest(initials, scoreValue, accessToken);
-      swRegisterRecentSubmission(initials, scoreValue);
-      swTopScores = swMergeRecentSubmission(swTopScores);
-      swRenderTopScores();
-      swSaveLeaderboardCache(swTopScores);
-      setTimeout(() => swFetchTopScores({ preferRemote: true, showLoading: false }), 800);
-      return true;
-    } catch (restErr) {
-      console.error('Score submit failed:', restErr);
-      return false;
-    }
-  }
-}
-
-function swRenderTopScores() {
-  if (!swScoreList) return;
-  swScoreList.innerHTML = '';
-  if (swTopScores.length === 0) {
-    const li = document.createElement('li');
-    li.className = 'sw-loading';
-    li.textContent = 'No scores yet';
-    swScoreList.appendChild(li);
-    return;
-  }
-  swTopScores.forEach((entry) => {
-    const li = document.createElement('li');
-    const initials = typeof entry === 'object' ? entry.initials : '???';
-    const scoreVal = typeof entry === 'object' ? entry.score : entry;
-    if (swHasRecentSubmission({ initials, score: scoreVal })) li.classList.add('sw-highlight');
-    const initialsSpan = document.createElement('span');
-    initialsSpan.className = 'sw-initials';
-    initialsSpan.textContent = initials;
-    const scoreSpan = document.createElement('span');
-    scoreSpan.className = 'sw-score-val';
-    scoreSpan.textContent = formatScore(scoreVal);
-    li.append(initialsSpan, scoreSpan);
-    swScoreList.appendChild(li);
-  });
-}
-
-function swRenderLoadingScores() {
-  if (swScoreList) swScoreList.innerHTML = '<li class="sw-loading">Loading…</li>';
-}
-
-function swIsInitialsModalOpen() {
-  return Boolean(swInitialsModal && !swInitialsModal.hidden);
-}
-
-function swShowInitialsModal(scoreValue) {
-  if (!swInitialsModal || !swInitialsInput || !swSubmitInitials || !swModalScore) return;
-  swPendingScore = scoreValue;
-  swModalScore.textContent = formatScore(scoreValue);
-  swInitialsInput.value = '';
-  if (swInitialsError) swInitialsError.textContent = '';
-  swSubmitInitials.disabled = false;
-  swSubmitInitials.textContent = 'Submit Score';
-  swInitialsModal.hidden = false;
-  setTimeout(() => swInitialsInput.focus(), 100);
-}
-
-function swHideInitialsModal() {
-  if (!swInitialsModal) return;
-  swInitialsModal.hidden = true;
-  swIsSubmitting = false;
-}
-
-async function swHandleSubmitInitials() {
-  if (swIsSubmitting || !swInitialsInput || !swSubmitInitials) return;
-  const initials = swInitialsInput.value.trim().toUpperCase();
-  if (!/^[A-Z0-9]{3}$/.test(initials)) {
-    if (swInitialsError) swInitialsError.textContent = 'Enter exactly 3 letters or numbers';
-    swInitialsInput.focus();
-    return;
-  }
-  swIsSubmitting = true;
-  swSubmitInitials.disabled = true;
-  swSubmitInitials.textContent = 'Submitting…';
-  const sanitized = swSanitizeScore(swPendingScore);
-  if (sanitized === null) {
-    if (swInitialsError) swInitialsError.textContent = 'Score could not be submitted.';
-    swIsSubmitting = false;
-    swSubmitInitials.disabled = false;
-    swSubmitInitials.textContent = 'Submit Score';
-    return;
-  }
-  const success = await swSubmitScore(initials, sanitized);
-  if (success) {
-    swHideInitialsModal();
-  } else {
-    if (swInitialsError) swInitialsError.textContent = 'Failed to submit. Try again.';
-    swIsSubmitting = false;
-    swSubmitInitials.disabled = false;
-  }
-  swSubmitInitials.textContent = 'Submit Score';
-}
-
-function swHandleLeaderboard(finalScore) {
-  if (godModeUsedThisRun || potionCheatUsedThisRun || finalWaveCheatUsedThisRun) return;
-  const sanitized = swSanitizeScore(finalScore);
-  if (sanitized === null) return;
-  if (swCheckIfHighScore(sanitized)) swShowInitialsModal(sanitized);
-}

@@ -12,6 +12,13 @@ const SPELLING_ALTS = [
   ['magnetise', 'magnetize'],
   ['analyse', 'analyze'],
   ['polarise', 'polarize'],
+  ['polarisation', 'polarization'],
+  ['magnetisation', 'magnetization'],
+  ['neutralise', 'neutralize'],
+  ['vapourise', 'vaporize'],
+  ['aluminium', 'aluminum'],
+  ['sulphur', 'sulfur'],
+  ['grey', 'gray'],
 ];
 
 const SUPERSCRIPT_MAP = { '⁰': '0', '¹': '1', '²': '2', '³': '3', '⁴': '4', '⁵': '5', '⁶': '6', '⁷': '7', '⁸': '8', '⁹': '9' };
@@ -38,10 +45,12 @@ const LOW_VALUE_ANSWER_WORDS = new Set([
 
 const LONG_VOCAB_LIMIT_LENGTH = 16;
 
+// Typeable characters are a-z, 0-9 and = + - * / . ; accented letters are folded
+// to their base letter and everything else (spaces, punctuation, symbols) is skipped.
 function normalizeCharacter(character, options = {}) {
   if (/\s/.test(character)) return '';
   if (SUPERSCRIPT_MAP[character]) return SUPERSCRIPT_MAP[character];
-  const normalized = character.toLowerCase();
+  const normalized = character.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
   if (normalized === '×') return options.multiplicationAlias ? 'x' : '';
   if (normalized === '*') return options.multiplicationAlias ? 'x' : '';
   return /^[a-z0-9=+\-*/.]$/.test(normalized) ? normalized : '';
@@ -220,7 +229,18 @@ function promptIndexForProgress(term, progress, options = {}) {
   return term.length;
 }
 
+// Choose which enemy a typed prefix applies to. A target whose prompt is exactly
+// complete always wins, so a short word can't be blocked by a nearer, longer word
+// that merely starts the same way. Otherwise prefer the nearest (largest z).
+function pickTarget(matches, typed) {
+  const byDepth = (a, b) => b.group.position.z - a.group.position.z || a.searchPrompt.length - b.searchPrompt.length;
+  const complete = matches.filter(enemy => enemy._matchedSearchPrompt === typed);
+  const pool = complete.length > 0 ? complete : matches;
+  return [...pool].sort(byDepth)[0];
+}
+
 export {
+  pickTarget,
   getInputCharacters,
   isMathOperatorInput,
   buildSearchPrompt,
