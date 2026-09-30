@@ -922,10 +922,10 @@ function buildSample() {
   sparkPool.length = 0;
   const sparkColor = isotope.emits === 'alpha' ? palette.alpha : palette.electron;
   for (let i = 0; i < 70; i++) {
-    const spark = glow(sparkColor, 0.3, 0);
+    const spark = glow(sparkColor, 0.4, 0);
     spark.visible = false;
     sparks.add(spark);
-    sparkPool.push({ sprite: spark, age: 1 });
+    sparkPool.push({ sprite: spark, age: 1, velocity: new THREE.Vector3() });
   }
   sample = {
     isotope, size, mesh, tray, positions, radius,
@@ -934,8 +934,7 @@ function buildSample() {
     t: 0,
     history: [[0, size]],
     running: false,
-    stopAt: null,
-    pops: []
+    stopAt: null
   };
   $('undecayed-label').textContent = `Undecayed ${isotope.name.toLowerCase()}`;
   $('decayed-label').textContent = `Decayed (now ${isotope.daughter})`;
@@ -953,7 +952,6 @@ function recolourSample() {
 }
 function stepSample(delta) {
   if (!sample) return;
-  const matrix = new THREE.Matrix4();
   if (sample.running) {
     let dt = delta / SCREEN_HALF_LIFE;
     const limit = sample.stopAt ?? MAX_HALF_LIVES;
@@ -975,18 +973,12 @@ function stepSample(delta) {
     updateSampleStats();
     drawGraph();
   }
-  for (const pop of [...sample.pops]) {
-    pop.age += delta;
-    const k = Math.min(1, pop.age / 0.35);
-    sample.mesh.setMatrixAt(pop.index, matrix.makeScale(1, 1, 1).setPosition(sample.positions[pop.index]).multiply(new THREE.Matrix4().makeScale(1.6 - 0.6 * k, 1.6 - 0.6 * k, 1.6 - 0.6 * k)));
-    if (k >= 1) sample.pops.splice(sample.pops.indexOf(pop), 1);
-  }
-  sample.mesh.instanceMatrix.needsUpdate = true;
+  // Emitted particles fly straight out and fade; they do not rise or grow.
   for (const spark of sparkPool) {
     if (spark.age >= 1) continue;
-    spark.age += delta / 0.7;
-    spark.sprite.position.y += delta * 1.6;
-    spark.sprite.material.opacity = Math.max(0, 1 - spark.age) * (palette.dark ? 0.9 : 0.7);
+    spark.age += delta / 0.6;
+    spark.sprite.position.addScaledVector(spark.velocity, delta);
+    spark.sprite.material.opacity = Math.max(0, 1 - spark.age) * (palette.dark ? 0.95 : 0.8);
     spark.sprite.visible = spark.age < 1;
   }
 }
@@ -995,9 +987,12 @@ function decayInSample(index) {
   sample.remaining -= 1;
   sample.mesh.setColorAt(index, palette.decayed);
   sample.mesh.instanceColor.needsUpdate = true;
-  sample.pops.push({ index, age: 0 });
   const spark = sparkPool.find(item => item.age >= 1);
   if (spark) {
+    // Emit the decay particle in a random direction across the tray (alpha slower than beta).
+    const angle = Math.random() * Math.PI * 2;
+    const speed = sample.isotope.emits === 'alpha' ? 1.6 : 3;
+    spark.velocity.set(Math.cos(angle) * speed, 0.25 * speed, Math.sin(angle) * speed);
     spark.age = 0;
     spark.sprite.position.copy(sample.positions[index]);
     spark.sprite.visible = true;
