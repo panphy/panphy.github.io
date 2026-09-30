@@ -6,10 +6,10 @@ Browser-based physics tools, simulations, classroom utilities, and games for lea
 
 ## Explore
 
-- **Tools:** graph plotting and curve fitting, Markdown editing, motion tracking, sound analysis, and tone generation.
-- **Simulations:** waves, states of matter, atomic models, nuclear decay, [fission and fusion](simulations/fission_fusion.html), relativity, and collisions.
-- **Teacher utilities:** a classroom timer and camera visualizer.
-- **Games and demos:** spelling practice and an ASCII camera.
+- **Tools:** [PanPhyMD](tools/panphymd.html) for Markdown editing, [PanPhyPlot](tools/panphyplot.html) for graph plotting and curve fitting, [Motion Tracker](tools/motion_tracker.html), [Sound Analyzer](tools/sound_analyzer.html), and [Tone Generator](tools/tone_generator.html).
+- **Simulations:** [Virtual Ripple Tank](simulations/ripple_tank.html), [Wave Superposition](simulations/superposition.html), [Standing Wave](simulations/standing_wave.html), [Collision Lab](simulations/collision.html), [States of Matter](simulations/states.html), [Atomic Models](simulations/atomic_models.html), [Nuclear Decay](simulations/nuclear_decay.html), [Fission and Fusion](simulations/fission_fusion.html), and [Lorentz Transform](simulations/lorentz.html).
+- **Teacher utilities:** [Exam Timer](for_teachers/timer.html) and [Camera Visualizer](for_teachers/visualizer.html).
+- **Games and demos:** [Spellwave](fun/spellwave.html) and [ASCII Camera](fun/ascii_cam.html).
 - **GCSE Physics:** school-specific unit companions, available by direct link.
 - **Physics flashcards:** [Combined and Separate Science retrieval practice](beta/phy_flashcard/phy_flashcard.html) in beta.
 
