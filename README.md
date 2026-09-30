@@ -33,7 +33,7 @@ Pages under `fun/`, `beta/`, `misc/` and `gcsephy/` need internet access, as do 
 
 | Path | Contents |
 | --- | --- |
-| `index.html` | General app catalogue with topic filters (cards use `data-topic` and optional `data-flag`) and offline readiness indicators |
+| `index.html` | General app catalogue with topic filters (cards use `data-topic`) and offline readiness indicators |
 | `sw.js`, `manifest.json` | Caching, updates, and PWA configuration |
 | `assets/` | Shared controls, icons, locally hosted fonts, and service-worker registration |
 | `tools/`, `simulations/`, `for_teachers/` | Published educational apps |
