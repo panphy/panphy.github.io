@@ -12,8 +12,23 @@
     <link rel="stylesheet" href="/assets/standalone-top.css">
     <script>
     (function() {
-      if (localStorage.getItem('panphy-dark')) {
-        document.documentElement.setAttribute('data-theme', 'dark');
+      var root = document.documentElement;
+      root.classList.add('js');
+      var dark = false;
+      try {
+        if (localStorage.getItem('panphy-dark')) {
+          dark = true;
+        } else if (!localStorage.getItem('panphy-light') &&
+                   window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+          // First visit: follow the device setting and store it so every app page matches.
+          dark = true;
+          localStorage.setItem('panphy-dark', 'true');
+        }
+      } catch (error) {
+        dark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+      }
+      if (dark) {
+        root.setAttribute('data-theme', 'dark');
         var tc = document.querySelector('meta[name="theme-color"]');
         if (tc) tc.setAttribute('content', '#111110');
       }
@@ -66,8 +81,8 @@
             --btn-text: #F8F6F1;
 
             --status-check: #2563eb;
-            --status-ready: #0f9d58;
-            --status-warning: #d97706;
+            --status-ready: #0b7a43;
+            --status-warning: #b45309;
             --status-error: #dc2626;
 
             --section-num-color: rgba(194, 65, 12, 0.06);
@@ -133,6 +148,33 @@
 
         html {
             scroll-behavior: smooth;
+        }
+
+        .skip-link {
+            position: fixed;
+            top: calc(8px + var(--standalone-top));
+            left: 8px;
+            z-index: 2000;
+            padding: 0.7rem 1rem;
+            color: var(--btn-text);
+            background: var(--btn-bg);
+            border-radius: 10px;
+            font-weight: 700;
+            font-size: 0.85rem;
+            text-decoration: none;
+            transform: translateY(-200%);
+        }
+
+        .skip-link:focus {
+            transform: none;
+        }
+
+        main {
+            display: block;
+        }
+
+        main:focus {
+            outline: none;
         }
 
         body {
@@ -224,6 +266,17 @@
             color: var(--text-main);
         }
 
+        nav a:focus-visible,
+        .theme-toggle button:focus-visible,
+        .filter-button:focus-visible,
+        .clear-search:focus-visible,
+        .topic-suggestion:focus-visible,
+        .back-to-top:focus-visible,
+        footer a:focus-visible {
+            outline: 3px solid color-mix(in srgb, var(--brand-primary) 55%, transparent);
+            outline-offset: 2px;
+        }
+
         nav a:hover::after {
             transform: translateX(-50%) scaleX(1);
         }
@@ -269,23 +322,22 @@
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            padding: 7rem 1.5rem 5rem;
+            padding: 6.5rem 1.5rem 2.5rem;
             text-align: center;
             position: relative;
-            min-height: 60vh;
         }
 
         .logo {
-            height: 72px;
+            height: 60px;
             width: auto;
-            margin-bottom: 1.5rem;
+            margin-bottom: 1.1rem;
             filter: drop-shadow(0 2px 8px rgba(0, 0, 0, 0.08));
             animation: heroFadeUp 0.8s ease-out both;
         }
 
         header h1 {
             font-family: var(--font-display);
-            font-size: 4.5rem;
+            font-size: 3.8rem;
             font-weight: 400;
             margin: 0;
             letter-spacing: -0.02em;
@@ -305,7 +357,7 @@
             width: 48px;
             height: 2px;
             background: var(--brand-primary);
-            margin: 1.4rem auto;
+            margin: 1.1rem auto;
             border-radius: 1px;
             animation: heroFadeUp 0.8s ease-out 0.24s both;
             transition: background-color 0.4s ease;
@@ -314,7 +366,7 @@
         header p {
             font-size: 1.15rem;
             color: var(--text-secondary);
-            max-width: 520px;
+            max-width: 560px;
             margin: 0;
             font-weight: 500;
             animation: heroFadeUp 0.8s ease-out 0.32s both;
@@ -327,7 +379,7 @@
             position: relative;
             z-index: 2;
             max-width: 1180px;
-            margin: 0 auto 5rem;
+            margin: 0 auto 4rem;
             padding: 0 1.5rem;
         }
 
@@ -434,12 +486,29 @@
             box-shadow: 0 0 0 3px color-mix(in srgb, var(--brand-primary) 14%, transparent);
         }
 
+        .catalogue-search input:focus-visible {
+            outline: 2px solid var(--brand-primary);
+            outline-offset: 2px;
+        }
+
         .filter-row {
             display: flex;
             gap: 0.4rem;
             margin-top: 0.65rem;
+            padding: 3px;
+            margin-left: -3px;
+            margin-right: -3px;
             overflow-x: auto;
             scrollbar-width: none;
+        }
+
+        .filter-row.has-more {
+            -webkit-mask-image: linear-gradient(to right, #000 calc(100% - 36px), transparent);
+            mask-image: linear-gradient(to right, #000 calc(100% - 36px), transparent);
+        }
+
+        .filter-row[data-row="topic"] {
+            margin-top: 0.15rem;
         }
 
         .filter-row::-webkit-scrollbar {
@@ -466,6 +535,22 @@
             color: var(--text-main);
             background: color-mix(in srgb, var(--brand-primary) 9%, transparent);
             border-color: color-mix(in srgb, var(--brand-primary) 45%, var(--card-border));
+        }
+
+        .offline-status {
+            margin: 0.7rem 0 0;
+            color: var(--text-secondary);
+            font-family: var(--font-mono);
+            font-size: 0.7rem;
+            letter-spacing: 0.02em;
+        }
+
+        .offline-status[hidden] {
+            display: none;
+        }
+
+        .offline-status[data-state="ready"] {
+            color: var(--status-ready);
         }
 
         /* ========================================
@@ -540,12 +625,8 @@
             font-weight: 500;
             letter-spacing: 0.1em;
             text-transform: uppercase;
-            color: var(--brand-primary);
-            padding: 0.3rem 0.6rem;
-            border: 1px solid var(--brand-primary);
-            border-radius: 4px;
-            opacity: 0.7;
-            transition: color 0.4s ease, border-color 0.4s ease;
+            color: var(--text-secondary);
+            transition: color 0.4s ease;
         }
 
         .section-summary {
@@ -604,8 +685,6 @@
             min-height: 248px;
             color: var(--text-main);
             text-decoration: none;
-            opacity: 0;
-            transform: translateY(28px);
             transition: opacity 0.6s ease-out,
                         transform 0.6s ease-out,
                         border-color 0.3s ease,
@@ -617,7 +696,12 @@
             display: none;
         }
 
-        .card.revealed {
+        .js .card {
+            opacity: 0;
+            transform: translateY(28px);
+        }
+
+        .js .card.revealed {
             opacity: 1;
             transform: translateY(0);
         }
@@ -635,7 +719,7 @@
             border-color: color-mix(in srgb, var(--card-icon-color) 55%, var(--card-border));
         }
 
-        .card.revealed:hover {
+        .js .card.revealed:hover {
             transform: translateY(-5px);
         }
 
@@ -685,6 +769,31 @@
             text-transform: uppercase;
         }
 
+        .card-flag {
+            position: absolute;
+            right: 1.35rem;
+            bottom: 1.3rem;
+            z-index: 2;
+            padding: 0.2rem 0.45rem;
+            color: var(--brand-primary);
+            background: color-mix(in srgb, var(--brand-primary) 10%, transparent);
+            border-radius: 5px;
+            font-family: var(--font-mono);
+            font-size: 0.6rem;
+            font-weight: 600;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+        }
+
+        .card-note {
+            display: block;
+            margin-top: 0.6rem;
+            color: var(--text-secondary);
+            font-family: var(--font-mono);
+            font-size: 0.68rem;
+            letter-spacing: 0.02em;
+        }
+
         .card-body {
             position: relative;
             z-index: 1;
@@ -722,7 +831,7 @@
             -webkit-backdrop-filter: blur(8px);
             color: var(--text-secondary);
             font-family: var(--font-mono);
-            font-size: 9px;
+            font-size: 11px;
             line-height: 1.1;
             font-weight: 500;
             letter-spacing: 0.04em;
@@ -777,6 +886,16 @@
             text-transform: uppercase;
         }
 
+        .card-cta::after {
+            content: '\2192';
+            margin-left: 0.45rem;
+            transition: transform 0.25s ease;
+        }
+
+        .card:hover .card-cta::after {
+            transform: translateX(4px);
+        }
+
         #simulations .card,
         #fun .card {
             --card-icon-bg: rgba(13, 148, 136, 0.11);
@@ -816,6 +935,31 @@
             color: var(--text-secondary);
         }
 
+        .topic-suggestions {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 0.4rem;
+            margin: 0 0 1.25rem;
+        }
+
+        .topic-suggestion {
+            min-height: 40px;
+            padding: 0.45rem 0.8rem;
+            color: var(--text-main);
+            background: transparent;
+            border: 1px solid var(--card-border);
+            border-radius: 9px;
+            cursor: pointer;
+            font: 700 0.7rem var(--font-sans);
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+        }
+
+        .topic-suggestion:hover {
+            border-color: color-mix(in srgb, var(--brand-primary) 45%, var(--card-border));
+        }
+
         .clear-search {
             min-height: 44px;
             padding: 0.65rem 1rem;
@@ -827,6 +971,48 @@
             font: 700 0.75rem var(--font-sans);
             letter-spacing: 0.05em;
             text-transform: uppercase;
+        }
+
+        .back-to-top {
+            position: fixed;
+            right: calc(14px + env(safe-area-inset-right, 0px));
+            bottom: calc(14px + env(safe-area-inset-bottom, 0px));
+            z-index: 900;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 48px;
+            height: 48px;
+            padding: 0;
+            color: var(--brand-primary);
+            background: var(--nav-bg);
+            border: 1px solid var(--nav-border);
+            border-radius: 14px;
+            box-shadow: 0 4px 24px rgba(0, 0, 0, 0.08);
+            backdrop-filter: blur(14px);
+            -webkit-backdrop-filter: blur(14px);
+            cursor: pointer;
+            touch-action: manipulation;
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(8px);
+            transition: opacity 0.25s ease, transform 0.25s ease, visibility 0.25s;
+        }
+
+        .back-to-top.visible {
+            opacity: 1;
+            visibility: visible;
+            transform: none;
+        }
+
+        .back-to-top svg {
+            width: 22px;
+            height: 22px;
+            fill: none;
+            stroke: currentColor;
+            stroke-width: 2;
+            stroke-linecap: round;
+            stroke-linejoin: round;
         }
 
         /* ========================================
@@ -976,19 +1162,31 @@
 
         @media (max-width: 768px) {
             header {
-                padding: 6rem 1.5rem 3.5rem;
-                min-height: 50vh;
+                padding: 5.25rem 1.5rem 1.5rem;
             }
 
             header h1 {
-                font-size: 2.8rem;
+                font-size: 2.6rem;
+            }
+
+            .logo {
+                height: 48px;
+                margin-bottom: 0.8rem;
+            }
+
+            header p {
+                font-size: 1rem;
+            }
+
+            .hero-rule {
+                margin: 0.8rem auto;
             }
 
             nav {
                 width: calc(100vw - 16px);
                 max-width: 760px;
                 display: grid;
-                grid-template-columns: repeat(5, minmax(0, 1fr)) auto auto;
+                grid-template-columns: repeat(5, minmax(max-content, 1fr)) auto auto;
                 align-items: center;
                 gap: 0.1rem;
                 padding: 0.3rem 0.35rem;
@@ -998,7 +1196,7 @@
 
             nav a {
                 margin: 0;
-                padding: 0.4rem 0.2rem;
+                padding: 0.4rem 0.3rem;
                 font-size: 0.68rem;
                 text-align: center;
                 letter-spacing: 0.03em;
@@ -1048,17 +1246,26 @@
             }
 
             .catalogue-intro {
-                margin-bottom: 4rem;
+                margin-bottom: 3rem;
             }
 
             .catalogue-bar {
                 grid-template-columns: 1fr;
-                gap: 1rem;
+                gap: 0.75rem;
                 padding: 1rem;
             }
 
             .catalogue-copy {
                 padding: 0.25rem 0.2rem;
+            }
+
+            .catalogue-copy p,
+            .catalogue-kicker {
+                display: none;
+            }
+
+            .catalogue-copy h2 {
+                margin: 0;
             }
 
             .about-panel {
@@ -1077,6 +1284,11 @@
         }
 
         @media (max-width: 480px) {
+            .card-flag {
+                right: 1.2rem;
+                bottom: 1.15rem;
+            }
+
             nav a {
                 font-size: 0.62rem;
                 letter-spacing: 0;
@@ -1120,13 +1332,19 @@
         }
 
         @media (prefers-reduced-motion: reduce) {
+            html {
+                scroll-behavior: auto;
+            }
+
             *, *::before, *::after {
                 animation-duration: 0.01ms !important;
                 animation-iteration-count: 1 !important;
                 transition-duration: 0.01ms !important;
             }
 
-            .card {
+            .js .card,
+            .card:hover,
+            .js .card.revealed:hover {
                 opacity: 1;
                 transform: none;
             }
@@ -1139,11 +1357,12 @@
 </head>
 
 <body>
+    <a class="skip-link" href="#main">Skip to apps</a>
     <div class="spacetime-bg" aria-hidden="true">
         <canvas id="spacetime-canvas"></canvas>
     </div>
 
-    <nav>
+    <nav aria-label="Sections">
         <a href="#tools">Tools</a>
         <a href="#simulations">Sims</a>
         <a href="#for_teachers">Teachers</a>
@@ -1165,12 +1384,13 @@
     </nav>
 
     <header>
-        <img src="/assets/panphy.png" alt="PanPhy Logo" class="logo" onerror="this.style.display='none'">
+        <img src="/assets/panphy.png" alt="" class="logo" onerror="this.style.display='none'">
         <h1>PanPhy Labs</h1>
         <div class="hero-rule"></div>
-        <p>Physics apps, tools, sims, and some random stuff.</p>
+        <p>Free physics tools and simulations for the classroom, plus a few playful experiments.</p>
     </header>
 
+    <main id="main" tabindex="-1">
     <section class="catalogue-intro" aria-labelledby="catalogue-title">
         <div class="catalogue-bar">
             <div class="catalogue-copy">
@@ -1183,13 +1403,24 @@
                     <span class="sr-only">Search PanPhy apps</span>
                     <input id="catalogue-search" type="search" placeholder="Search waves, graphs, sound..." autocomplete="off">
                 </label>
-                <div class="filter-row" aria-label="Filter apps by category">
+                <div class="filter-row" data-row="category" role="group" aria-label="Filter apps by category">
                     <button class="filter-button" type="button" data-filter="all" aria-pressed="true">All</button>
                     <button class="filter-button" type="button" data-filter="tools" aria-pressed="false">Tools</button>
                     <button class="filter-button" type="button" data-filter="simulations" aria-pressed="false">Simulations</button>
                     <button class="filter-button" type="button" data-filter="for_teachers" aria-pressed="false">Teachers</button>
                     <button class="filter-button" type="button" data-filter="fun" aria-pressed="false">Fun</button>
                 </div>
+                <div class="filter-row" data-row="topic" role="group" aria-label="Filter apps by topic">
+                    <button class="filter-button" type="button" data-topic-filter="all" aria-pressed="true">Any topic</button>
+                    <button class="filter-button" type="button" data-topic-filter="waves" aria-pressed="false">Waves</button>
+                    <button class="filter-button" type="button" data-topic-filter="sound" aria-pressed="false">Sound</button>
+                    <button class="filter-button" type="button" data-topic-filter="mechanics" aria-pressed="false">Mechanics</button>
+                    <button class="filter-button" type="button" data-topic-filter="matter" aria-pressed="false">Matter</button>
+                    <button class="filter-button" type="button" data-topic-filter="atomic" aria-pressed="false">Atomic &amp; nuclear</button>
+                    <button class="filter-button" type="button" data-topic-filter="relativity" aria-pressed="false">Relativity</button>
+                    <button class="filter-button" type="button" data-topic-filter="data" aria-pressed="false">Data &amp; video</button>
+                </div>
+                <p class="offline-status" id="offline-status" hidden></p>
                 <span class="sr-only" id="results-status" aria-live="polite">18 apps shown.</span>
             </div>
         </div>
@@ -1218,10 +1449,11 @@
                 </div>
                 <span class="card-cta">Open editor</span>
             </a>
-            <a class="card" href="/tools/panphyplot.html" data-search="graphs graphing plotting uncertainty best fit data analysis">
+            <a class="card" href="/tools/panphyplot.html" data-search="graphs graphing plotting uncertainty best fit data analysis" data-topic="data" data-flag="featured">
                 <div class="card-top">
                     <span class="card-icon" aria-hidden="true">x,y</span>
                     <span class="card-type">Data analysis</span>
+                    <span class="card-flag">Featured</span>
                 </div>
                 <div class="card-body">
                     <h3>PanPhyPlot</h3>
@@ -1229,7 +1461,7 @@
                 </div>
                 <span class="card-cta">Plot data</span>
             </a>
-            <a class="card" href="/tools/motion_tracker.html" data-search="video frames motion tracking position velocity movement">
+            <a class="card" href="/tools/motion_tracker.html" data-search="video frames motion tracking position velocity movement" data-topic="data mechanics">
                 <div class="card-top">
                     <span class="card-icon" aria-hidden="true">Δx</span>
                     <span class="card-type">Video analysis</span>
@@ -1240,7 +1472,7 @@
                 </div>
                 <span class="card-cta">Track motion</span>
             </a>
-            <a class="card" href="/tools/sound_analyzer.html" data-search="sound audio frequency spectrum waveform microphone">
+            <a class="card" href="/tools/sound_analyzer.html" data-search="sound audio frequency spectrum waveform microphone" data-topic="sound waves">
                 <div class="card-top">
                     <span class="card-icon" aria-hidden="true">Hz</span>
                     <span class="card-type">Audio analysis</span>
@@ -1248,10 +1480,11 @@
                 <div class="card-body">
                     <h3>Sound Analyzer</h3>
                     <p>Visualize live audio as a frequency spectrum and waveform.</p>
+                    <span class="card-note">Uses microphone</span>
                 </div>
                 <span class="card-cta">Analyze sound</span>
             </a>
-            <a class="card" href="/tools/tone_generator.html" data-search="sound audio tone sine frequency mixing dual channel">
+            <a class="card" href="/tools/tone_generator.html" data-search="sound audio tone sine frequency mixing dual channel" data-topic="sound waves">
                 <div class="card-top">
                     <span class="card-icon" aria-hidden="true">~</span>
                     <span class="card-type">Audio tool</span>
@@ -1277,10 +1510,11 @@
             </div>
         </div>
         <div class="grid">
-            <a class="card" href="/simulations/ripple_tank.html" data-search="waves ripple interference refraction diffraction water 3d">
+            <a class="card" href="/simulations/ripple_tank.html" data-search="waves ripple interference refraction diffraction water 3d gcse a-level" data-topic="waves" data-flag="featured">
                 <div class="card-top">
                     <span class="card-icon" aria-hidden="true">λ</span>
                     <span class="card-type">Wave lab</span>
+                    <span class="card-flag">Featured</span>
                 </div>
                 <div class="card-body">
                     <h3>Virtual Ripple Tank</h3>
@@ -1288,7 +1522,7 @@
                 </div>
                 <span class="card-cta">Launch sim</span>
             </a>
-            <a class="card" href="/simulations/superposition.html" data-search="waves superposition interference addition phase amplitude">
+            <a class="card" href="/simulations/superposition.html" data-search="waves superposition interference addition phase amplitude gcse a-level" data-topic="waves">
                 <div class="card-top">
                     <span class="card-icon" aria-hidden="true">Σ</span>
                     <span class="card-type">Wave lab</span>
@@ -1299,7 +1533,7 @@
                 </div>
                 <span class="card-cta">Launch sim</span>
             </a>
-            <a class="card" href="/simulations/standing_wave.html" data-search="waves standing nodes antinodes boundary conditions harmonics">
+            <a class="card" href="/simulations/standing_wave.html" data-search="waves standing nodes antinodes boundary conditions harmonics gcse a-level" data-topic="waves">
                 <div class="card-top">
                     <span class="card-icon" aria-hidden="true">nλ</span>
                     <span class="card-type">Wave lab</span>
@@ -1310,7 +1544,7 @@
                 </div>
                 <span class="card-cta">Launch sim</span>
             </a>
-            <a class="card" href="/simulations/collision.html" data-search="collision mechanics momentum kinetic energy camera motion">
+            <a class="card" href="/simulations/collision.html" data-search="collision mechanics momentum kinetic energy camera motion gcse a-level" data-topic="mechanics">
                 <div class="card-top">
                     <span class="card-icon" aria-hidden="true">mv</span>
                     <span class="card-type">Mechanics</span>
@@ -1318,10 +1552,11 @@
                 <div class="card-body">
                     <h3>Collision Lab</h3>
                     <p>Experiment with collision physics using interactive, real-time motion.</p>
+                    <span class="card-note">Uses camera</span>
                 </div>
                 <span class="card-cta">Launch sim</span>
             </a>
-            <a class="card" href="/simulations/states.html" data-search="states matter solid liquid gas particles phase change temperature melting boiling freezing">
+            <a class="card" href="/simulations/states.html" data-search="states matter solid liquid gas particles phase change temperature melting boiling freezing gcse" data-topic="matter">
                 <div class="card-top">
                     <span class="card-icon" aria-hidden="true">S/L/G</span>
                     <span class="card-type">Particle model</span>
@@ -1332,7 +1567,7 @@
                 </div>
                 <span class="card-cta">Launch sim</span>
             </a>
-            <a class="card" href="/simulations/atomic_models.html" data-search="atom atomic models plum pudding thomson rutherford bohr schrodinger electron cloud orbitals quantum gold foil alpha scattering nucleus protons neutrons electrons shells energy levels photon matter 3d">
+            <a class="card" href="/simulations/atomic_models.html" data-search="atom atomic models plum pudding thomson rutherford bohr schrodinger electron cloud orbitals quantum gold foil alpha scattering nucleus protons neutrons electrons shells energy levels photon matter 3d gcse a-level" data-topic="atomic">
                 <div class="card-top">
                     <span class="card-icon" aria-hidden="true">
                         <svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.7" focusable="false">
@@ -1350,10 +1585,11 @@
                 </div>
                 <span class="card-cta">Launch sim</span>
             </a>
-            <a class="card" href="/simulations/nuclear_decay.html" data-search="nuclear decay radioactivity radioactive alpha beta gamma radiation nucleus isotope unstable nuclear equations penetration paper aluminium lead half-life americium carbon-14 technetium 3d">
+            <a class="card" href="/simulations/nuclear_decay.html" data-search="nuclear decay radioactivity radioactive alpha beta gamma radiation nucleus isotope unstable nuclear equations penetration paper aluminium lead half-life americium carbon-14 technetium 3d gcse a-level" data-topic="atomic" data-flag="new">
                 <div class="card-top">
                     <span class="card-icon" aria-hidden="true">α β γ</span>
                     <span class="card-type">Nuclear physics</span>
+                    <span class="card-flag">New</span>
                 </div>
                 <div class="card-body">
                     <h3>Nuclear Decay</h3>
@@ -1361,7 +1597,7 @@
                 </div>
                 <span class="card-cta">Launch sim</span>
             </a>
-            <a class="card" href="/simulations/fission_fusion.html" data-search="nuclear fission fusion uranium chain reaction hydrogen deuterium tritium binding energy nucleus neutron 3d">
+            <a class="card" href="/simulations/fission_fusion.html" data-search="nuclear fission fusion uranium chain reaction hydrogen deuterium tritium binding energy nucleus neutron 3d gcse a-level" data-topic="atomic" data-flag="new">
                 <div class="card-top">
                     <span class="card-icon" aria-hidden="true">
                         <svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" focusable="false">
@@ -1376,6 +1612,7 @@
                         </svg>
                     </span>
                     <span class="card-type">Nuclear physics</span>
+                    <span class="card-flag">New</span>
                 </div>
                 <div class="card-body">
                     <h3>Fission and Fusion</h3>
@@ -1383,7 +1620,7 @@
                 </div>
                 <span class="card-cta">Launch sim</span>
             </a>
-            <a class="card" href="/simulations/lorentz.html" data-search="relativity lorentz spacetime inertial frames special relativity">
+            <a class="card" href="/simulations/lorentz.html" data-search="relativity lorentz spacetime inertial frames special relativity a-level" data-topic="relativity">
                 <div class="card-top">
                     <span class="card-icon" aria-hidden="true">γ</span>
                     <span class="card-type">Relativity</span>
@@ -1428,6 +1665,7 @@
                 <div class="card-body">
                     <h3>Camera Visualizer</h3>
                     <p>Project your device camera to the big screen, then snap and sketch.</p>
+                    <span class="card-note">Uses camera</span>
                 </div>
                 <span class="card-cta">Use camera</span>
             </a>
@@ -1465,15 +1703,22 @@
                 <div class="card-body">
                     <h3>ASCII Camera</h3>
                     <p>See yourself in 8-bit colour ASCII characters.</p>
+                    <span class="card-note">Uses camera</span>
                 </div>
                 <span class="card-cta">Open camera</span>
             </a>
         </div>
     </section>
 
-    <section class="no-results" id="no-results" aria-live="polite" hidden>
+    <section class="no-results" id="no-results" hidden>
         <h2>No matching apps yet.</h2>
-        <p>Try a broader search or return to the full collection.</p>
+        <p>Try a broader search, or start from a topic.</p>
+        <div class="topic-suggestions">
+            <button class="topic-suggestion" type="button" data-suggest="waves">Waves</button>
+            <button class="topic-suggestion" type="button" data-suggest="sound">Sound</button>
+            <button class="topic-suggestion" type="button" data-suggest="nuclear">Nuclear</button>
+            <button class="topic-suggestion" type="button" data-suggest="graphs">Graphs</button>
+        </div>
         <button class="clear-search" id="clear-search" type="button">Show all apps</button>
     </section>
 
@@ -1495,41 +1740,98 @@
             </div>
         </div>
     </section>
+    </main>
+
+    <button class="back-to-top" id="back-to-top" type="button" aria-label="Back to top">
+        <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 19V5M5 12l7-7 7 7"/></svg>
+    </button>
 
     <footer>
         <p>&copy; 2026 PanPhy Labs</p>
         <p>
             <a href="mailto:panphylabs@icloud.com">Contact Me</a>
             <span class="footer-sep">·</span>
+            <a href="mailto:panphylabs@icloud.com?subject=PanPhy%20Labs%20feedback">Feedback / Report a Bug</a>
+            <span class="footer-sep">·</span>
             <a href="https://buymeacoffee.com/panphy" target="_blank" rel="noopener noreferrer">Support My Projects</a>
         </p>
     </footer>
 
     <script>
-        // Search and category filtering
+        // Search, category and topic filtering (state mirrored in the URL: ?q=&cat=&topic=)
         (function () {
             var searchInput = document.getElementById('catalogue-search');
-            var filterButtons = Array.from(document.querySelectorAll('.filter-button'));
+            var filterButtons = Array.from(document.querySelectorAll('.filter-button[data-filter]'));
+            var topicButtons = Array.from(document.querySelectorAll('.filter-button[data-topic-filter]'));
+            var filterRows = Array.from(document.querySelectorAll('.filter-row'));
             var appSections = Array.from(document.querySelectorAll('.app-section'));
             var noResults = document.getElementById('no-results');
             var clearSearchButton = document.getElementById('clear-search');
             var resultsStatus = document.getElementById('results-status');
             var activeFilter = 'all';
+            var activeTopic = 'all';
 
             if (!searchInput || !appSections.length) return;
 
+            // Give each card a concise accessible name and description.
+            document.querySelectorAll('.card').forEach(function (card, index) {
+                var title = card.querySelector('h3');
+                var desc = card.querySelector('.card-body p');
+                if (title) {
+                    title.id = 'card-title-' + index;
+                    card.setAttribute('aria-labelledby', title.id);
+                }
+                if (desc) {
+                    desc.id = 'card-desc-' + index;
+                    card.setAttribute('aria-describedby', desc.id);
+                }
+            });
+
+            // Lower-case, unify UK/US spellings and hyphens so "analyser" finds "Analyzer".
             function normalize(value) {
-                return String(value || '').toLowerCase().trim();
+                return String(value || '')
+                    .toLowerCase()
+                    .replace(/[-_]+/g, ' ')
+                    .replace(/colour/g, 'color')
+                    .replace(/centre/g, 'center')
+                    .replace(/metre/g, 'meter')
+                    .replace(/yse/g, 'yze')
+                    .replace(/is(e|ed|er|ers|es|ing|ation)\b/g, 'iz$1')
+                    .replace(/\s+/g, ' ')
+                    .trim();
+            }
+
+            function cardMatchesTopic(card) {
+                if (activeTopic === 'all') return true;
+                return (card.dataset.topic || '').split(' ').indexOf(activeTopic) !== -1;
             }
 
             function updateButtons() {
+                // A topic replaces the category filter, so no category shows as active.
                 filterButtons.forEach(function (button) {
-                    button.setAttribute('aria-pressed', String(button.dataset.filter === activeFilter));
+                    button.setAttribute('aria-pressed', String(activeTopic === 'all' && button.dataset.filter === activeFilter));
+                });
+                topicButtons.forEach(function (button) {
+                    button.setAttribute('aria-pressed', String(button.dataset.topicFilter === activeTopic));
                 });
             }
 
+            function syncUrl() {
+                try {
+                    var params = new URLSearchParams();
+                    if (searchInput.value.trim()) params.set('q', searchInput.value.trim());
+                    if (activeFilter !== 'all') params.set('cat', activeFilter);
+                    if (activeTopic !== 'all') params.set('topic', activeTopic);
+                    var qs = params.toString();
+                    history.replaceState(null, '', location.pathname + (qs ? '?' + qs : '') + location.hash);
+                } catch (error) {
+                    // URL sync is a convenience only.
+                }
+            }
+
             function applyFilters() {
-                var query = normalize(searchInput.value);
+                var words = normalize(searchInput.value).split(' ').filter(Boolean);
+                var filtering = words.length > 0 || activeFilter !== 'all' || activeTopic !== 'all';
                 var visibleTotal = 0;
 
                 appSections.forEach(function (section) {
@@ -1538,13 +1840,15 @@
                     var visibleInSection = 0;
 
                     section.querySelectorAll('.card').forEach(function (card) {
-                        var searchableText = normalize(card.textContent + ' ' + card.dataset.search);
-                        var matches = sectionMatches && (!query || searchableText.indexOf(query) !== -1);
+                        var searchableText = normalize(card.textContent + ' ' + card.dataset.search + ' ' + (card.dataset.topic || ''));
+                        var matches = sectionMatches && cardMatchesTopic(card) && words.every(function (word) {
+                            return searchableText.indexOf(word) !== -1;
+                        });
                         card.hidden = !matches;
                         if (matches) {
                             visibleInSection += 1;
                             visibleTotal += 1;
-                            if (query || activeFilter !== 'all') {
+                            if (filtering) {
                                 card.classList.add('revealed');
                             }
                         }
@@ -1558,12 +1862,33 @@
                 });
 
                 noResults.hidden = visibleTotal !== 0;
-                resultsStatus.textContent = visibleTotal + (visibleTotal === 1 ? ' app shown.' : ' apps shown.');
+                resultsStatus.textContent = visibleTotal === 0
+                    ? 'No apps match.'
+                    : visibleTotal + (visibleTotal === 1 ? ' app shown.' : ' apps shown.');
+                syncUrl();
+            }
+
+            function resetAll() {
+                searchInput.value = '';
+                activeFilter = 'all';
+                activeTopic = 'all';
+                updateButtons();
+                applyFilters();
             }
 
             filterButtons.forEach(function (button) {
                 button.addEventListener('click', function () {
                     activeFilter = button.dataset.filter;
+                    activeTopic = 'all';
+                    updateButtons();
+                    applyFilters();
+                });
+            });
+
+            topicButtons.forEach(function (button) {
+                button.addEventListener('click', function () {
+                    activeTopic = button.dataset.topicFilter;
+                    if (activeTopic !== 'all') activeFilter = 'all';
                     updateButtons();
                     applyFilters();
                 });
@@ -1577,24 +1902,90 @@
                 }
             });
 
+            document.addEventListener('keydown', function (event) {
+                var target = event.target;
+                var typing = target && (target.isContentEditable || /^(INPUT|TEXTAREA|SELECT)$/.test(target.tagName));
+                if (event.key === '/' && !typing && !event.metaKey && !event.ctrlKey && !event.altKey) {
+                    event.preventDefault();
+                    searchInput.focus();
+                    searchInput.select();
+                }
+            });
+
             clearSearchButton.addEventListener('click', function () {
-                searchInput.value = '';
-                activeFilter = 'all';
-                updateButtons();
-                applyFilters();
+                resetAll();
                 searchInput.focus();
+            });
+
+            document.querySelectorAll('.topic-suggestion').forEach(function (button) {
+                button.addEventListener('click', function () {
+                    activeFilter = 'all';
+                    activeTopic = 'all';
+                    searchInput.value = button.dataset.suggest;
+                    updateButtons();
+                    applyFilters();
+                });
             });
 
             document.querySelectorAll('nav a[href^="#"]').forEach(function (link) {
                 link.addEventListener('click', function () {
                     var targetId = link.getAttribute('href').slice(1);
                     if (appSections.some(function (section) { return section.id === targetId; })) {
-                        searchInput.value = '';
-                        activeFilter = 'all';
-                        updateButtons();
-                        applyFilters();
+                        resetAll();
                     }
                 });
+            });
+
+            // Fade the right edge of a chip row while more chips are off-screen.
+            function updateRowFade(row) {
+                row.classList.toggle('has-more', row.scrollWidth - row.clientWidth - row.scrollLeft > 4);
+            }
+            filterRows.forEach(function (row) {
+                row.addEventListener('scroll', function () { updateRowFade(row); }, { passive: true });
+                updateRowFade(row);
+            });
+            window.addEventListener('resize', function () { filterRows.forEach(updateRowFade); });
+            window.addEventListener('load', function () { filterRows.forEach(updateRowFade); });
+
+            // Restore a shared link such as /?q=waves&cat=simulations&topic=waves
+            try {
+                var params = new URLSearchParams(location.search);
+                var validCats = filterButtons.map(function (b) { return b.dataset.filter; });
+                var validTopics = topicButtons.map(function (b) { return b.dataset.topicFilter; });
+                if (params.get('q')) searchInput.value = params.get('q');
+                if (validCats.indexOf(params.get('cat')) !== -1) activeFilter = params.get('cat');
+                if (validTopics.indexOf(params.get('topic')) !== -1) activeTopic = params.get('topic');
+                if (activeTopic !== 'all') activeFilter = 'all';
+                if (params.toString()) {
+                    updateButtons();
+                    applyFilters();
+                }
+            } catch (error) {
+                // Ignore malformed query strings.
+            }
+        })();
+
+        // Back-to-top button
+        (function () {
+            var button = document.getElementById('back-to-top');
+            if (!button) return;
+            var reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+            function update() {
+                button.classList.toggle('visible', window.scrollY > window.innerHeight * 1.2);
+            }
+            window.addEventListener('scroll', update, { passive: true });
+            button.addEventListener('click', function () {
+                window.scrollTo({ top: 0, behavior: reduced ? 'auto' : 'smooth' });
+            });
+            update();
+        })();
+
+        // Hide the fullscreen button where the browser cannot fullscreen a page (e.g. iPhone)
+        (function () {
+            var root = document.documentElement;
+            if (root.requestFullscreen || root.webkitRequestFullscreen) return;
+            document.querySelectorAll('[data-panphy-fullscreen]').forEach(function (button) {
+                button.style.setProperty('display', 'none', 'important');
             });
         })();
     </script>
@@ -1622,7 +2013,8 @@
 
             var running = false;
             var lastFrameTime = 0;
-            var frameInterval = 1000 / 60;
+            var coarsePointer = window.matchMedia('(pointer: coarse)').matches;
+            var frameInterval = coarsePointer ? 1000 / 30 : 1000 / 60;
             var idleThreshold = 0.5;
 
             function wake() {
@@ -1671,6 +2063,8 @@
                 handlePointerInput(e.clientX, e.clientY);
             });
             document.addEventListener('touchmove', function (e) {
+                // Scrolling with a finger should not keep the grid animating.
+                if (coarsePointer) return;
                 handlePointerInput(e.touches[0].clientX, e.touches[0].clientY);
             }, { passive: true });
             document.addEventListener('touchstart', function (e) {
@@ -1834,14 +2228,22 @@
         const DARK_THEME_KEY = "panphy-dark";
         const LIGHT_THEME_KEY = "panphy-light";
 
-        const currentTheme = localStorage.getItem(DARK_THEME_KEY) ?
-            "dark" :
-            localStorage.getItem(LIGHT_THEME_KEY) ?
-                "light" :
-                "light";
+        function storeTheme(theme) {
+            try {
+                if (theme === 'dark') {
+                    localStorage.setItem(DARK_THEME_KEY, 'true');
+                    localStorage.removeItem(LIGHT_THEME_KEY);
+                } else {
+                    localStorage.setItem(LIGHT_THEME_KEY, 'true');
+                    localStorage.removeItem(DARK_THEME_KEY);
+                }
+            } catch (error) {
+                // The visible theme still changes when storage is unavailable.
+            }
+        }
 
-        document.documentElement.setAttribute('data-theme', currentTheme);
-        updateAppChromeTheme(currentTheme);
+        // The head script has already chosen the theme (stored choice or device setting).
+        updateAppChromeTheme(document.documentElement.getAttribute('data-theme'));
 
         function updateAppChromeTheme(theme) {
             const themeColorMeta = document.querySelector('meta[name="theme-color"]');
@@ -1858,17 +2260,10 @@
 
         themeButton.addEventListener('click', function () {
             let theme = document.documentElement.getAttribute('data-theme');
-            if (theme === 'light') {
-                document.documentElement.setAttribute('data-theme', 'dark');
-                localStorage.setItem(DARK_THEME_KEY, 'true');
-                localStorage.removeItem(LIGHT_THEME_KEY);
-                updateAppChromeTheme('dark');
-            } else {
-                document.documentElement.setAttribute('data-theme', 'light');
-                localStorage.setItem(LIGHT_THEME_KEY, 'true');
-                localStorage.removeItem(DARK_THEME_KEY);
-                updateAppChromeTheme('light');
-            }
+            const next = theme === 'light' ? 'dark' : 'light';
+            document.documentElement.setAttribute('data-theme', next);
+            storeTheme(next);
+            updateAppChromeTheme(next);
         });
 
         const OFFLINE_CARD_REQUIREMENTS = {
@@ -2021,6 +2416,10 @@
         const offlineCardPills = new Map();
         const OFFLINE_REPAIR_RETRY_MS = 60 * 1000;
 
+        const OFFLINE_POLL_MS = 3000;
+        const OFFLINE_POLL_MAX = 40;
+        const offlineStatus = document.getElementById('offline-status');
+        let offlinePollCount = 0;
         let offlineReadyPollId = 0;
         let offlineReadinessUpdateInFlight = false;
         let lastOfflineRepairAttempt = 0;
@@ -2103,10 +2502,24 @@
                 setCardOfflineState(pill, 'checking', '');
             });
 
+            updateOfflineStatus(readyApps, OFFLINE_APP_PATHS.length);
+
             return {
                 readyApps,
                 totalApps: OFFLINE_APP_PATHS.length
             };
+        }
+
+        function updateOfflineStatus(readyApps, totalApps) {
+            if (!offlineStatus) return;
+            offlineStatus.hidden = false;
+            if (readyApps === totalApps) {
+                offlineStatus.dataset.state = 'ready';
+                offlineStatus.textContent = '\u2713 All ' + totalApps + ' offline-capable apps are saved on this device.';
+            } else {
+                offlineStatus.dataset.state = 'saving';
+                offlineStatus.textContent = 'Saving apps for offline use: ' + readyApps + ' of ' + totalApps + ' ready.';
+            }
         }
 
         function requestOfflineCacheRepair() {
@@ -2184,7 +2597,16 @@
             initOfflineCardPills();
             updateOfflineReadiness();
             if (!offlineReadyPollId) {
-                offlineReadyPollId = setInterval(updateOfflineReadiness, 3000);
+                offlineReadyPollId = setInterval(function () {
+                    offlinePollCount += 1;
+                    // Stop polling if an asset never caches; online/visibility events still re-check.
+                    if (offlinePollCount > OFFLINE_POLL_MAX) {
+                        clearInterval(offlineReadyPollId);
+                        offlineReadyPollId = 0;
+                        return;
+                    }
+                    updateOfflineReadiness();
+                }, OFFLINE_POLL_MS);
             }
             window.addEventListener('online', updateOfflineReadiness);
             window.addEventListener('offline', updateOfflineReadiness);
