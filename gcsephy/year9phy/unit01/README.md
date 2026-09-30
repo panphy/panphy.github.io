@@ -25,8 +25,7 @@ The skills are the ones every required practical from here to Year 13 will lean 
 | [`../../decks/work-like-a-physicist/index.html`](../../decks/work-like-a-physicist/index.html) | 50-slide HTML teaching deck covering all eight lessons | Present in a browser; advance to reveal answers and teaching points |
 | `Work Like a Physicist - Year 9 Student Workbook.pdf` | 40-page A4 student workbook, one per student for the whole unit | Print double-sided. Students keep the same workbook for all eight lessons |
 | `workbook/` | Editable source of the student workbook (HTML, CSS, JavaScript) | Edit `workbook/assets/content.js`, then run `sh build-pdf.sh` to re-export the PDF. See `workbook/README.md` |
-| `Lesson 1 …` to `Lessons 7-8 …` (seven PDFs) | The lesson plans, formatted for reading | Read before teaching. This is the detail behind each lesson |
-| `md files/` | The same seven lesson plans in editable Markdown | Edit these master copies when revising a plan, then re-export the matching PDF |
+| `teaching-guides/` | The seven lesson-plan PDFs (`Lesson 1 …` to `Lessons 7-8 …`) and their editable source | Read the PDFs before teaching; they are the detail behind each lesson. Edit `teaching-guides/source/*.md`, then run `sh build-pdf.sh`. See `teaching-guides/README.md` |
 | `index.html`, `lesson/` and `assets/` | Static online student companion | Open `index.html`, or visit this folder's published web address |
 | `source/` | Original Sites/React companion-site source and its Git history | Keep this when moving or backing up the project |
 
@@ -34,7 +33,7 @@ The skills are the ones every required practical from here to Year 13 will lean 
 
 This repository is the working copy of the unit. The lesson plans, workbook and student companion are here; the teaching deck is maintained in `gcsephy/decks/work-like-a-physicist/`.
 
-- The files in `md files/` are the editable masters for the lesson plans. Keep each Markdown file and its exported PDF in step.
+- The Markdown files in `teaching-guides/source/` are the editable masters for the lesson plans. The PDFs beside them are rebuilt from those files with `teaching-guides/build-pdf.sh`; keep the two in step.
 - The HTML and JavaScript in `../../decks/work-like-a-physicist/` are the editable teaching-deck source.
 - `index.html`, `lesson/` and `assets/` are the editable source for the static companion website.
 - `source/` preserves the original Sites/React companion site and its Git history.
@@ -183,7 +182,7 @@ It covers, at Year 9 level, the investigative skills that GCSE specifications as
 - Support: scaffolded tables are printed in the workbook for Lessons 3, 4 and 7–8.
 - Stretch: every lesson has a marked stretch task; Lesson 6 asks students to design their own table from nothing, and to read a prediction off their own best-fit line.
 
-**If you revise a lesson plan**, edit its Markdown master in `md files/` and re-export the matching PDF so the pair stays in step.
+**If you revise a lesson plan**, edit its Markdown master in `teaching-guides/source/` and re-export the PDFs with `teaching-guides/build-pdf.sh` so they stay in step.
 
 ---
 
@@ -202,8 +201,7 @@ Use the lesson plans for teaching guidance. The HTML deck reveals selected answe
 
 ## What is included in this repository
 
-- the seven lesson-plan PDFs
-- the seven editable Markdown lesson-plan masters
+- the seven lesson-plan PDFs and their editable Markdown masters and print styles in `teaching-guides/`
 - the student workbook PDF and its editable source in `workbook/`
 - the HTML teaching deck in `../../decks/work-like-a-physicist/`
 - this overview
