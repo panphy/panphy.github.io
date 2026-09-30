@@ -38,9 +38,9 @@ ul, ol { margin: 0; padding: 0; }
 .cover .bar { width: 56pt; height: 3.5pt; margin: 27pt 0 25pt; background: var(--gold); }
 .cover .quote { max-width: 121mm; margin: 0; font: italic 400 12.5pt/1.5 Lora, Georgia, serif; color: #e8eef5; }
 .cover .quote-by { margin: 8pt 0 0; font: 9pt/1 Lato, Arial, sans-serif; color: #b9c7d8; }
-.cover-fields { position: absolute; left: 56pt; right: 56pt; top: 676pt; display: grid; grid-template-columns: 1fr 1fr; gap: 22pt 18pt; padding: 22pt 22pt 22pt; border: 1.4pt solid #4a6b91; border-radius: 2pt; background: var(--navy-2); }
-.cover-fields div { font: 400 6.5pt/1 Poppins, Arial, sans-serif; letter-spacing: .25em; text-transform: uppercase; color: #b9c7d8; }
-.cover-fields span { display: block; height: 15pt; border-bottom: 1.4pt solid #6f8fb1; }
+.cover-fields { position: absolute; left: 56pt; right: 56pt; top: 676pt; display: grid; grid-template-columns: 1fr 1fr; gap: 22pt 18pt; padding: 22pt 22pt 22pt; border: 1.4pt solid var(--gold); border-radius: 2pt; background: #eef3f9; }
+.cover-fields div { font: 400 6.5pt/1 Poppins, Arial, sans-serif; letter-spacing: .25em; text-transform: uppercase; color: var(--navy); }
+.cover-fields span { display: block; height: 15pt; border-bottom: 1.4pt solid var(--navy); }
 .cover-note { position: absolute; left: 56pt; top: 799pt; font: 400 7pt/1 Lato, Arial, sans-serif; letter-spacing: .1em; text-transform: uppercase; color: #b9c7d8; }
 
 /* ----- lesson title block ----- */
