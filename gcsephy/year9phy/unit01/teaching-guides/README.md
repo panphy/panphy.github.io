@@ -1,19 +1,15 @@
 # Year 9 teaching guides
 
-The seven lesson plans for *Work Like a Physicist*, as printable A4 PDFs, with the source they are built from.
+The seven lesson plans for *Work Like a Physicist* as printable A4 PDFs (lessons 7 and 8 share one plan), plus their source.
 
 | File | Use |
 |---|---|
-| `Lesson 1 - …pdf` to `Lessons 7-8 - …pdf` | The guides to read before teaching (lesson 7 and 8 share one plan) |
-| `source/*.md` | **All the words.** One Markdown file per guide. Edit these to change a guide |
-| `guide.html` | Renders one guide in the browser: `guide.html?lesson=3` (1 to 7) |
-| `assets/guide.css`, `assets/guide.js` | Print styles (A4, Helvetica/Arial, navy headings, footer "Prepared by YPL" and page number) and the small Markdown renderer |
-| `build-pdf.sh` | Prints all seven pages to PDF with headless Chrome |
+| `Lesson 1 - …pdf` to `Lessons 7-8 - …pdf` | The guides to read before teaching |
+| `source/*.md` | Editable text, one file per guide |
+| `guide.html` | Browser preview: `guide.html?lesson=3` (1 to 7) |
+| `assets/guide.css`, `assets/guide.js` | Print styles and the small Markdown renderer |
+| `build-pdf.sh` | Prints all seven PDFs with headless Chrome |
 
-## Editing
+To edit: serve the repository root (`python3 -m http.server 8000`), edit `source/`, preview at <http://localhost:8000/gcsephy/year9phy/unit01/teaching-guides/guide.html?lesson=1>, then run `sh build-pdf.sh` here (needs Chrome).
 
-1. Serve the repository root: `python3 -m http.server 8000`.
-2. Edit a file in `source/` and preview it at <http://localhost:8000/gcsephy/year9phy/unit01/teaching-guides/guide.html?lesson=1> (change the number for the other guides).
-3. Rebuild the PDFs: run `sh build-pdf.sh` from this folder (needs Google Chrome). It overwrites the seven PDFs beside it.
-
-The renderer supports the Markdown the guides use: `#`/`##`/`###` headings, paragraphs, `-` and `1.` lists, `>` quote boxes (end a line with two spaces for a line break) and `|` tables with `:---:` / `---:` alignment. Add support in `assets/guide.js` before using anything else.
+The renderer supports `#`–`###` headings, paragraphs, `-` and `1.` lists, `>` quote boxes (two trailing spaces for a line break) and `|` tables with `:---:` / `---:` alignment. Add support in `assets/guide.js` before using anything else.
