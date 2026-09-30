@@ -17,7 +17,3 @@ The seven lesson plans for *Work Like a Physicist*, as printable A4 PDFs, with t
 3. Rebuild the PDFs: run `sh build-pdf.sh` from this folder (needs Google Chrome). It overwrites the seven PDFs beside it.
 
 The renderer supports the Markdown the guides use: `#`/`##`/`###` headings, paragraphs, `-` and `1.` lists, `>` quote boxes (end a line with two spaces for a line break) and `|` tables with `:---:` / `---:` alignment. Add support in `assets/guide.js` before using anything else.
-
-## History
-
-The guides were originally generated from these Markdown files with ReportLab, and that generator was not kept. They were rebuilt in HTML/CSS with the same look; the wording is unchanged.
