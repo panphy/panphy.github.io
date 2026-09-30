@@ -55,6 +55,8 @@
            ======================================== */
         :root {
             color-scheme: light;
+            --about-tint: 7%;
+            --about-border: 30%;
             --font-sans: 'Manrope', sans-serif;
             --font-display: 'DM Serif Display', serif;
             --font-mono: 'IBM Plex Mono', monospace;
@@ -91,6 +93,8 @@
 
         [data-theme="dark"] {
             color-scheme: dark;
+            --about-tint: 10%;
+            --about-border: 35%;
             --bg-color: #111110;
             --bg-pattern: #1A1A18;
             --text-main: #EDEBE8;
@@ -276,8 +280,6 @@
         nav a:focus-visible,
         .theme-toggle button:focus-visible,
         .filter-button:focus-visible,
-        .clear-search:focus-visible,
-        .topic-suggestion:focus-visible,
         .back-to-top:focus-visible,
         footer a:focus-visible {
             outline: 3px solid color-mix(in srgb, var(--brand-primary) 55%, transparent);
@@ -438,72 +440,11 @@
             min-width: 0;
         }
 
-        .catalogue-search {
-            position: relative;
-            display: block;
-        }
-
-        .catalogue-search::before {
-            content: '';
-            position: absolute;
-            top: 50%;
-            left: 1.05rem;
-            width: 10px;
-            height: 10px;
-            border: 2px solid var(--brand-primary);
-            border-radius: 50%;
-            transform: translateY(-50%);
-            pointer-events: none;
-        }
-
-        .catalogue-search::after {
-            content: '';
-            position: absolute;
-            top: 50%;
-            left: 1.7rem;
-            width: 7px;
-            height: 2px;
-            background: var(--brand-primary);
-            border-radius: 2px;
-            transform: translateY(4px) rotate(45deg);
-            transform-origin: left center;
-            pointer-events: none;
-        }
-
-        .catalogue-search input {
-            width: 100%;
-            min-height: 48px;
-            padding: 0.75rem 1rem 0.75rem 2.8rem;
-            color: var(--text-main);
-            background: var(--bg-color);
-            border: 1px solid var(--card-border);
-            border-radius: 12px;
-            outline: none;
-            font: 600 0.9rem var(--font-sans);
-            transition: border-color 0.2s ease, box-shadow 0.2s ease, background-color 0.4s ease;
-        }
-
-        .catalogue-search input::placeholder {
-            color: var(--text-secondary);
-            font-weight: 500;
-        }
-
-        .catalogue-search input:focus {
-            border-color: var(--brand-primary);
-            box-shadow: 0 0 0 3px color-mix(in srgb, var(--brand-primary) 14%, transparent);
-        }
-
-        .catalogue-search input:focus-visible {
-            outline: 2px solid var(--brand-primary);
-            outline-offset: 2px;
-        }
-
         .filter-row {
             display: flex;
             gap: 0.4rem;
-            margin-top: 0.65rem;
             padding: 6px;
-            margin: 0.65rem -6px -6px;
+            margin: -6px -6px 0;
             overflow-x: auto;
             scrollbar-width: none;
         }
@@ -923,70 +864,6 @@
             --card-icon-color: var(--brand-secondary);
         }
 
-        .no-results {
-            max-width: 760px;
-            margin: 0 auto 5.5rem;
-            padding: 2.5rem 1.5rem;
-            text-align: center;
-            background: var(--card-bg);
-            border: 1px dashed var(--card-border);
-            border-radius: 18px;
-        }
-
-        .no-results[hidden] {
-            display: none;
-        }
-
-        .no-results h2 {
-            margin: 0 0 0.5rem;
-            font-family: var(--font-display);
-            font-size: 1.75rem;
-            font-weight: 400;
-        }
-
-        .no-results p {
-            margin: 0 0 1.25rem;
-            color: var(--text-secondary);
-        }
-
-        .topic-suggestions {
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: center;
-            gap: 0.4rem;
-            margin: 0 0 1.25rem;
-        }
-
-        .topic-suggestion {
-            min-height: 40px;
-            padding: 0.45rem 0.8rem;
-            color: var(--text-main);
-            background: transparent;
-            border: 1px solid var(--card-border);
-            border-radius: 9px;
-            cursor: pointer;
-            font: 700 0.7rem var(--font-sans);
-            letter-spacing: 0.05em;
-            text-transform: uppercase;
-        }
-
-        .topic-suggestion:hover {
-            border-color: color-mix(in srgb, var(--brand-primary) 45%, var(--card-border));
-        }
-
-        .clear-search {
-            min-height: 44px;
-            padding: 0.65rem 1rem;
-            color: var(--btn-text);
-            background: var(--btn-bg);
-            border: 0;
-            border-radius: 11px;
-            cursor: pointer;
-            font: 700 0.75rem var(--font-sans);
-            letter-spacing: 0.05em;
-            text-transform: uppercase;
-        }
-
         .back-to-top {
             position: fixed;
             right: calc(10px + env(safe-area-inset-right, 0px));
@@ -1037,13 +914,12 @@
             grid-template-columns: minmax(230px, 0.75fr) minmax(0, 1.25fr);
             gap: 3rem;
             padding: 2.5rem;
-            background: var(--card-bg);
-            background: color-mix(in srgb, var(--card-bg) 90%, transparent);
+            background: var(--bg-color);
+            background: color-mix(in srgb, var(--brand-accent) var(--about-tint), var(--bg-color));
             border: 1px solid var(--card-border);
+            border: 1px solid color-mix(in srgb, var(--brand-accent) var(--about-border), var(--card-border));
             border-radius: 18px;
-            box-shadow: var(--card-shadow);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
+            box-shadow: none;
         }
 
         .about-panel h2 {
@@ -1341,8 +1217,7 @@
         @media (pointer: coarse) {
             nav a,
             .theme-toggle button,
-            .filter-button,
-            .clear-search {
+            .filter-button {
                 min-height: 44px;
             }
         }
@@ -1412,13 +1287,9 @@
             <div class="catalogue-copy">
                 <span class="catalogue-kicker">Explore the collection</span>
                 <h2 id="catalogue-title">Find the right physics app.</h2>
-                <p>Search by topic or browse the collection by purpose.</p>
+                <p>Browse the collection by topic.</p>
             </div>
             <div class="catalogue-tools">
-                <label class="catalogue-search">
-                    <span class="sr-only">Search PanPhy apps</span>
-                    <input id="catalogue-search" type="search" placeholder="Search waves, graphs, sound..." autocomplete="off">
-                </label>
                 <div class="filter-row" role="group" aria-label="Filter apps by topic">
                     <button class="filter-button" type="button" data-topic-filter="all" aria-pressed="true">Any topic</button>
                     <button class="filter-button" type="button" data-topic-filter="waves" aria-pressed="false">Waves</button>
@@ -1447,7 +1318,7 @@
             </div>
         </div>
         <div class="grid">
-            <a class="card" href="/tools/panphymd.html" data-search="markdown latex equations writing notes editor">
+            <a class="card" href="/tools/panphymd.html">
                 <div class="card-top">
                     <span class="card-icon" aria-hidden="true">MD</span>
                     <span class="card-type">Editor</span>
@@ -1458,7 +1329,7 @@
                 </div>
                 <span class="card-cta">Open editor</span>
             </a>
-            <a class="card" href="/tools/panphyplot.html" data-search="graphs graphing plotting uncertainty best fit data analysis" data-topic="data" data-flag="featured">
+            <a class="card" href="/tools/panphyplot.html" data-topic="data" data-flag="featured">
                 <div class="card-top">
                     <span class="card-icon" aria-hidden="true">x,y</span>
                     <span class="card-type">Data analysis</span>
@@ -1470,7 +1341,7 @@
                 </div>
                 <span class="card-cta">Plot data</span>
             </a>
-            <a class="card" href="/tools/motion_tracker.html" data-search="video frames motion tracking position velocity movement" data-topic="data mechanics">
+            <a class="card" href="/tools/motion_tracker.html" data-topic="data mechanics">
                 <div class="card-top">
                     <span class="card-icon" aria-hidden="true">Δx</span>
                     <span class="card-type">Video analysis</span>
@@ -1481,7 +1352,7 @@
                 </div>
                 <span class="card-cta">Track motion</span>
             </a>
-            <a class="card" href="/tools/sound_analyzer.html" data-search="sound audio frequency spectrum waveform microphone" data-topic="sound waves">
+            <a class="card" href="/tools/sound_analyzer.html" data-topic="sound waves">
                 <div class="card-top">
                     <span class="card-icon" aria-hidden="true">Hz</span>
                     <span class="card-type">Audio analysis</span>
@@ -1493,7 +1364,7 @@
                 </div>
                 <span class="card-cta">Analyze sound</span>
             </a>
-            <a class="card" href="/tools/tone_generator.html" data-search="sound audio tone sine frequency mixing dual channel" data-topic="sound waves">
+            <a class="card" href="/tools/tone_generator.html" data-topic="sound waves">
                 <div class="card-top">
                     <span class="card-icon" aria-hidden="true">~</span>
                     <span class="card-type">Audio tool</span>
@@ -1519,7 +1390,7 @@
             </div>
         </div>
         <div class="grid">
-            <a class="card" href="/simulations/ripple_tank.html" data-search="waves ripple interference refraction diffraction water 3d gcse a-level" data-topic="waves" data-flag="featured">
+            <a class="card" href="/simulations/ripple_tank.html" data-topic="waves" data-flag="featured">
                 <div class="card-top">
                     <span class="card-icon" aria-hidden="true">λ</span>
                     <span class="card-type">Wave lab</span>
@@ -1531,7 +1402,7 @@
                 </div>
                 <span class="card-cta">Launch sim</span>
             </a>
-            <a class="card" href="/simulations/superposition.html" data-search="waves superposition interference addition phase amplitude gcse a-level" data-topic="waves">
+            <a class="card" href="/simulations/superposition.html" data-topic="waves">
                 <div class="card-top">
                     <span class="card-icon" aria-hidden="true">Σ</span>
                     <span class="card-type">Wave lab</span>
@@ -1542,7 +1413,7 @@
                 </div>
                 <span class="card-cta">Launch sim</span>
             </a>
-            <a class="card" href="/simulations/standing_wave.html" data-search="waves standing nodes antinodes boundary conditions harmonics gcse a-level" data-topic="waves">
+            <a class="card" href="/simulations/standing_wave.html" data-topic="waves">
                 <div class="card-top">
                     <span class="card-icon" aria-hidden="true">nλ</span>
                     <span class="card-type">Wave lab</span>
@@ -1553,7 +1424,7 @@
                 </div>
                 <span class="card-cta">Launch sim</span>
             </a>
-            <a class="card" href="/simulations/collision.html" data-search="collision mechanics momentum kinetic energy camera motion gcse a-level" data-topic="mechanics">
+            <a class="card" href="/simulations/collision.html" data-topic="mechanics">
                 <div class="card-top">
                     <span class="card-icon" aria-hidden="true">mv</span>
                     <span class="card-type">Mechanics</span>
@@ -1565,7 +1436,7 @@
                 </div>
                 <span class="card-cta">Launch sim</span>
             </a>
-            <a class="card" href="/simulations/states.html" data-search="states matter solid liquid gas particles phase change temperature melting boiling freezing gcse" data-topic="matter">
+            <a class="card" href="/simulations/states.html" data-topic="matter">
                 <div class="card-top">
                     <span class="card-icon" aria-hidden="true">S/L/G</span>
                     <span class="card-type">Particle model</span>
@@ -1576,7 +1447,7 @@
                 </div>
                 <span class="card-cta">Launch sim</span>
             </a>
-            <a class="card" href="/simulations/atomic_models.html" data-search="atom atomic models plum pudding thomson rutherford bohr schrodinger electron cloud orbitals quantum gold foil alpha scattering nucleus protons neutrons electrons shells energy levels photon matter 3d gcse a-level" data-topic="atomic">
+            <a class="card" href="/simulations/atomic_models.html" data-topic="atomic">
                 <div class="card-top">
                     <span class="card-icon" aria-hidden="true">
                         <svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.7" focusable="false">
@@ -1594,7 +1465,7 @@
                 </div>
                 <span class="card-cta">Launch sim</span>
             </a>
-            <a class="card" href="/simulations/nuclear_decay.html" data-search="nuclear decay radioactivity radioactive alpha beta gamma radiation nucleus isotope unstable nuclear equations penetration paper aluminium lead half-life americium carbon-14 technetium 3d gcse a-level" data-topic="atomic" data-flag="new">
+            <a class="card" href="/simulations/nuclear_decay.html" data-topic="atomic" data-flag="new">
                 <div class="card-top">
                     <span class="card-icon" aria-hidden="true">α β γ</span>
                     <span class="card-type">Nuclear physics</span>
@@ -1606,7 +1477,7 @@
                 </div>
                 <span class="card-cta">Launch sim</span>
             </a>
-            <a class="card" href="/simulations/fission_fusion.html" data-search="nuclear fission fusion uranium chain reaction hydrogen deuterium tritium binding energy nucleus neutron 3d gcse a-level" data-topic="atomic" data-flag="new">
+            <a class="card" href="/simulations/fission_fusion.html" data-topic="atomic" data-flag="new">
                 <div class="card-top">
                     <span class="card-icon" aria-hidden="true">
                         <svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" focusable="false">
@@ -1629,7 +1500,7 @@
                 </div>
                 <span class="card-cta">Launch sim</span>
             </a>
-            <a class="card" href="/simulations/lorentz.html" data-search="relativity lorentz spacetime inertial frames special relativity a-level" data-topic="relativity">
+            <a class="card" href="/simulations/lorentz.html" data-topic="relativity">
                 <div class="card-top">
                     <span class="card-icon" aria-hidden="true">γ</span>
                     <span class="card-type">Relativity</span>
@@ -1655,7 +1526,7 @@
             </div>
         </div>
         <div class="grid">
-            <a class="card" href="/for_teachers/timer.html" data-search="teacher exam assessment timer extra time classroom clock">
+            <a class="card" href="/for_teachers/timer.html">
                 <div class="card-top">
                     <span class="card-icon" aria-hidden="true">T</span>
                     <span class="card-type">Assessment</span>
@@ -1666,7 +1537,7 @@
                 </div>
                 <span class="card-cta">Open timer</span>
             </a>
-            <a class="card" href="/for_teachers/visualizer.html" data-search="teacher camera visualizer projector classroom demonstration annotate sketch">
+            <a class="card" href="/for_teachers/visualizer.html">
                 <div class="card-top">
                     <span class="card-icon" aria-hidden="true">Cam</span>
                     <span class="card-type">Classroom</span>
@@ -1693,7 +1564,7 @@
             </div>
         </div>
         <div class="grid">
-            <a class="card" href="/fun/spellwave.html" data-search="game typing spellwave spells monsters keyboard play">
+            <a class="card" href="/fun/spellwave.html">
                 <div class="card-top">
                     <span class="card-icon" aria-hidden="true">ABC</span>
                     <span class="card-type">Typing game</span>
@@ -1704,7 +1575,7 @@
                 </div>
                 <span class="card-cta">Play now</span>
             </a>
-            <a class="card" href="/fun/ascii_cam.html" data-search="ascii camera webcam 8 bit text characters creative">
+            <a class="card" href="/fun/ascii_cam.html">
                 <div class="card-top">
                     <span class="card-icon" aria-hidden="true">TXT</span>
                     <span class="card-type">Creative camera</span>
@@ -1717,18 +1588,6 @@
                 <span class="card-cta">Open camera</span>
             </a>
         </div>
-    </section>
-
-    <section class="no-results" id="no-results" hidden>
-        <h2>No matching apps yet.</h2>
-        <p>Try a broader search, or start from a topic.</p>
-        <div class="topic-suggestions">
-            <button class="topic-suggestion" type="button" data-suggest-topic="waves">Waves</button>
-            <button class="topic-suggestion" type="button" data-suggest-topic="sound">Sound</button>
-            <button class="topic-suggestion" type="button" data-suggest-topic="atomic">Atomic &amp; nuclear</button>
-            <button class="topic-suggestion" type="button" data-suggest-topic="data">Data &amp; video</button>
-        </div>
-        <button class="clear-search" id="clear-search" type="button">Show all apps</button>
     </section>
 
     <section class="section" id="about" data-section="05">
@@ -1767,18 +1626,15 @@
     </footer>
 
     <script>
-        // Search and topic filtering (state mirrored in the URL: ?q=&topic=)
+        // Topic filtering (state mirrored in the URL: ?topic=)
         (function () {
-            var searchInput = document.getElementById('catalogue-search');
             var topicButtons = Array.from(document.querySelectorAll('.filter-button[data-topic-filter]'));
             var filterRows = Array.from(document.querySelectorAll('.filter-row'));
             var appSections = Array.from(document.querySelectorAll('.app-section'));
-            var noResults = document.getElementById('no-results');
-            var clearSearchButton = document.getElementById('clear-search');
             var resultsStatus = document.getElementById('results-status');
             var activeTopic = 'all';
 
-            if (!searchInput || !appSections.length) return;
+            if (!appSections.length) return;
 
             // Give each card a concise accessible name and description.
             document.querySelectorAll('.card').forEach(function (card, index) {
@@ -1794,20 +1650,6 @@
                 }
             });
 
-            // Lower-case, unify UK/US spellings and hyphens so "analyser" finds "Analyzer".
-            function normalize(value) {
-                return String(value || '')
-                    .toLowerCase()
-                    .replace(/[-_]+/g, ' ')
-                    .replace(/colour/g, 'color')
-                    .replace(/centre/g, 'center')
-                    .replace(/metre/g, 'meter')
-                    .replace(/yse/g, 'yze')
-                    .replace(/is(e|ed|er|ers|es|ing|ation)\b/g, 'iz$1')
-                    .replace(/\s+/g, ' ')
-                    .trim();
-            }
-
             function cardMatchesTopic(card) {
                 if (activeTopic === 'all') return true;
                 return (card.dataset.topic || '').split(' ').indexOf(activeTopic) !== -1;
@@ -1821,34 +1663,26 @@
 
             function syncUrl() {
                 try {
-                    var params = new URLSearchParams();
-                    if (searchInput.value.trim()) params.set('q', searchInput.value.trim());
-                    if (activeTopic !== 'all') params.set('topic', activeTopic);
-                    var qs = params.toString();
-                    history.replaceState(null, '', location.pathname + (qs ? '?' + qs : '') + location.hash);
+                    var qs = activeTopic !== 'all' ? '?topic=' + encodeURIComponent(activeTopic) : '';
+                    history.replaceState(null, '', location.pathname + qs + location.hash);
                 } catch (error) {
                     // URL sync is a convenience only.
                 }
             }
 
             function applyFilters() {
-                var words = normalize(searchInput.value).split(' ').filter(Boolean);
-                var filtering = words.length > 0 || activeTopic !== 'all';
                 var visibleTotal = 0;
 
                 appSections.forEach(function (section) {
                     var visibleInSection = 0;
 
                     section.querySelectorAll('.card').forEach(function (card) {
-                        var searchableText = normalize(card.textContent + ' ' + card.dataset.search + ' ' + (card.dataset.topic || ''));
-                        var matches = cardMatchesTopic(card) && words.every(function (word) {
-                            return searchableText.indexOf(word) !== -1;
-                        });
+                        var matches = cardMatchesTopic(card);
                         card.hidden = !matches;
                         if (matches) {
                             visibleInSection += 1;
                             visibleTotal += 1;
-                            if (filtering) {
+                            if (activeTopic !== 'all') {
                                 card.classList.add('revealed');
                             }
                         }
@@ -1861,65 +1695,28 @@
                     }
                 });
 
-                noResults.hidden = visibleTotal !== 0;
-                resultsStatus.textContent = visibleTotal === 0
-                    ? 'No apps match.'
-                    : visibleTotal + (visibleTotal === 1 ? ' app shown.' : ' apps shown.');
+                resultsStatus.textContent = visibleTotal + (visibleTotal === 1 ? ' app shown.' : ' apps shown.');
                 syncUrl();
             }
 
-            function resetAll() {
-                searchInput.value = '';
-                activeTopic = 'all';
+            function setTopic(topic) {
+                activeTopic = topic;
                 updateButtons();
                 applyFilters();
             }
 
             topicButtons.forEach(function (button) {
                 button.addEventListener('click', function () {
-                    activeTopic = button.dataset.topicFilter;
-                    updateButtons();
-                    applyFilters();
+                    setTopic(button.dataset.topicFilter);
                 });
             });
 
-            searchInput.addEventListener('input', applyFilters);
-            searchInput.addEventListener('keydown', function (event) {
-                if (event.key === 'Escape' && searchInput.value) {
-                    searchInput.value = '';
-                    applyFilters();
-                }
-            });
-
-            document.addEventListener('keydown', function (event) {
-                var target = event.target;
-                var typing = target && (target.isContentEditable || /^(INPUT|TEXTAREA|SELECT)$/.test(target.tagName));
-                if (event.key === '/' && !typing && !event.metaKey && !event.ctrlKey && !event.altKey) {
-                    event.preventDefault();
-                    searchInput.focus();
-                    searchInput.select();
-                }
-            });
-
-            clearSearchButton.addEventListener('click', function () {
-                resetAll();
-                searchInput.focus();
-            });
-
-            document.querySelectorAll('.topic-suggestion').forEach(function (button) {
-                button.addEventListener('click', function () {
-                    activeTopic = button.dataset.suggestTopic;
-                    searchInput.value = '';
-                    updateButtons();
-                    applyFilters();
-                });
-            });
-
+            // Jumping to a section from the nav always shows every app.
             document.querySelectorAll('nav a[href^="#"]').forEach(function (link) {
                 link.addEventListener('click', function () {
                     var targetId = link.getAttribute('href').slice(1);
                     if (appSections.some(function (section) { return section.id === targetId; })) {
-                        resetAll();
+                        setTopic('all');
                     }
                 });
             });
@@ -1935,16 +1732,11 @@
             window.addEventListener('resize', function () { filterRows.forEach(updateRowFade); });
             window.addEventListener('load', function () { filterRows.forEach(updateRowFade); });
 
-            // Restore a shared link such as /?q=waves&topic=waves
+            // Restore a shared link such as /?topic=waves
             try {
-                var params = new URLSearchParams(location.search);
-                var validTopics = topicButtons.map(function (b) { return b.dataset.topicFilter; });
-                if (params.get('q')) searchInput.value = params.get('q');
-                if (validTopics.indexOf(params.get('topic')) !== -1) activeTopic = params.get('topic');
-                if (params.toString()) {
-                    updateButtons();
-                    applyFilters();
-                }
+                var topic = new URLSearchParams(location.search).get('topic');
+                var valid = topicButtons.some(function (b) { return b.dataset.topicFilter === topic; });
+                if (valid && topic !== 'all') setTopic(topic);
             } catch (error) {
                 // Ignore malformed query strings.
             }
