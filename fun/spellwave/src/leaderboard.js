@@ -9,7 +9,8 @@ const SCORE_FIELD = 'score';
 const CACHE_KEY = 'spellwaveLeaderboardCacheV1';
 const BOARD_SIZE = 5;
 const MIN_SCORE = 1;
-const MAX_SCORE = 9999999;
+// Matches the server check (spellwave_score_range); the highest legitimate run is ~67.6k.
+const MAX_SCORE = 70000;
 const HIGHLIGHT_MS = 6000;
 
 export function createLeaderboard({ formatScore, onModalClose = () => {} }) {
