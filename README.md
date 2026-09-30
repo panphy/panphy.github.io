@@ -29,16 +29,6 @@ Most published tools and simulations work offline once cached: visit online firs
 
 Pages under `fun/`, `beta/`, `misc/` and `gcsephy/` need internet access, as do Supabase features such as leaderboards. `gcsephy/` registers its own small worker (`gcsephy/sw.js`), which stores nothing and only revalidates requests so edits appear on the next load.
 
-## Run locally
-
-The site is plain HTML, CSS and vanilla JavaScript with no build step. From the repository root:
-
-```bash
-python3 -m http.server 8000
-```
-
-Open [localhost:8000](http://localhost:8000). A static server is needed for absolute paths and service workers; use a fresh browser context so cached files do not mask changes.
-
 ## Repository map
 
 | Path | Contents |
@@ -52,16 +42,6 @@ Open [localhost:8000](http://localhost:8000). A static server is needed for abso
 | `misc/` | Unlisted resources, inventoried in `misc/index.html` |
 | `gcsephy/` | GCSE Physics curriculum resources, inventoried in `gcsephy/index.html` |
 | `.github/workflows/` | Repository automation |
-
-## Contributing
-
-Fixes, improvements and new educational tools are welcome. Keep changes lightweight, independently usable and accessible on classroom devices.
-
-- New pages normally start in `beta/`; keep the beta, misc and GCSE Physics inventories current.
-- After changing a precached file, bump `BUILD_ID` in `sw.js`. Offline apps also need `ASSETS_TO_CACHE` and `OFFLINE_CARD_REQUIREMENTS` entries.
-- Check affected flows on mobile and offline. For PanPhyPlot data or fitting changes, run `node --test tools/panphyplot/tests/regression.test.cjs`.
-- Use a `codex/` or `claude/` branch and a pull request; `main` auto-deploys.
-- [AGENTS.md](AGENTS.md) and [CLAUDE.md](CLAUDE.md) hold the full rules and publishing checklist; keep them aligned.
 
 ## Contact
 
