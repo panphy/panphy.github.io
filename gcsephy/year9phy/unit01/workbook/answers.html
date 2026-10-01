@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex, nofollow">
+  <title>Work Like a Physicist - Year 9 Student Workbook (Answers)</title>
+  <link rel="stylesheet" href="assets/answers.css">
+  <link rel="icon" type="image/png" href="/assets/favicon.png">
+  <script src="assets/answers.js"></script>
+  <script src="/gcsephy/sw-register.js" defer></script>
+</head>
+<body>
+  <main id="answers"></main>
+  <script>
+    (function () {
+      const A = window.ANSWERS;
+      document.getElementById("answers").innerHTML =
+        `<header class="top"><p class="eyebrow">Year 9 Physics · Answers</p><h1>Work Like a Physicist</h1><p class="sub">Student workbook: answers</p><p class="intro">${A.intro}</p></header>` +
+        A.sections.map((s) => `<section class="lesson"><h2><span>${s.title}</span><em>Workbook ${s.pages}</em></h2>${s.items.map((i) => `<div class="item"><div class="ref">${i[0]}</div><div class="ans">${i[1]}</div></div>`).join("")}</section>`).join("");
+      document.documentElement.dataset.ready = "1";
+    })();
+  </script>
+</body>
+</html>

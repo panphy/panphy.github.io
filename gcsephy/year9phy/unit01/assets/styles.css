@@ -280,3 +280,6 @@ button, summary { font: inherit; }
 }
 
 @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } * { transition: none !important; } }
+.resource-card.answers { grid-column: span 2; min-height: 0; background: #f1edff; }
+.resource-card.answers h3 { margin-top: 22px; }
+@media (max-width: 680px) { .resource-card.answers { grid-column: auto; } }

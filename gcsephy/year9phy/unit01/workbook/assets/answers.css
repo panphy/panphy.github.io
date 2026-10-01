@@ -1,0 +1,30 @@
+@import url('/gcsephy/assets/fonts/year9-workbook-fonts.css');
+
+/* Answer key for the Year 9 workbook: flowing A4, one lesson per section. */
+@page { size: A4; margin: 16mm 15mm 18mm; @bottom-center { content: "Work Like a Physicist · Year 9 Workbook · Answers · " counter(page); font: 7.5pt Helvetica, Arial, sans-serif; color: #1d3557; } }
+:root { --navy: #1d3557; --blue: #2f6f9f; --tint: #eaf1f7; --rule: #c8cdd4; --ink: #1d2733; --muted: #6b7684; }
+* { box-sizing: border-box; }
+html { background: #d9dcdf; }
+body { margin: 0; color: var(--ink); font: 9.5pt/13.5pt Lato, Arial, Helvetica, sans-serif; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+main { max-width: 210mm; margin: 0 auto; background: #fff; padding: 16mm 15mm; }
+.top { margin-bottom: 8mm; padding-bottom: 5mm; border-bottom: 3px solid var(--navy); }
+.eyebrow { margin: 0 0 3mm; font: 700 8pt/10pt Poppins, Arial, sans-serif; letter-spacing: .15em; text-transform: uppercase; color: var(--blue); }
+h1 { margin: 0; font: 700 26pt/30pt Poppins, Arial, sans-serif; color: var(--navy); }
+.sub { margin: 1mm 0 4mm; font: 600 12pt/16pt Poppins, Arial, sans-serif; color: var(--muted); }
+.intro { margin: 0; }
+.lesson { break-before: page; }
+.lesson:first-of-type { break-before: auto; }
+h2 { display: flex; justify-content: space-between; align-items: baseline; gap: 8mm; margin: 0 0 4mm; padding: 2.5mm 4mm; background: var(--navy); color: #fff; font: 600 12pt/16pt Poppins, Arial, sans-serif; }
+h2 em { font: 400 8.5pt/12pt Lato, Arial, sans-serif; font-style: normal; letter-spacing: .08em; text-transform: uppercase; white-space: nowrap; }
+.item { display: grid; grid-template-columns: 31mm 1fr; gap: 4mm; padding: 2.4mm 0; border-bottom: 1px solid var(--rule); break-inside: avoid; }
+.ref { font: 700 8pt/11pt Poppins, Arial, sans-serif; color: var(--navy); }
+.ans { color: var(--ink); }
+.ans ul { list-style: none; }
+.ans li { margin: 0 0 1.2mm; }
+.ans .s { margin: 1.5mm 0 0; font-size: 8pt; color: var(--muted); }
+.t { width: 100%; border-collapse: collapse; margin: 1mm 0; font-size: 8.5pt; line-height: 11.5pt; }
+.t th { padding: 1.2mm 2mm; background: var(--tint); border: 1px solid var(--rule); text-align: left; font-weight: 700; }
+.t td { padding: 1.2mm 2mm; border: 1px solid var(--rule); vertical-align: top; }
+.t.num td:not(:first-child), .t.num th:not(:first-child) { text-align: right; }
+@media screen { html { padding: 8mm 0; } }
+@media print { html { background: none; } main { max-width: none; padding: 0; } }
