@@ -10,6 +10,7 @@ PanPhy Labs is a static GitHub Pages PWA for physics tools, simulations, classro
 - Preserve unrelated user changes and existing functionality. UI changes and file removals should serve the requested task; ask before destructive changes outside that scope.
 - Keep tool state (such as `.agents/` and `.claude/`) local and ignored. Put scratch files outside the repository where practical, and clean up temporary files you created.
 - `main` is production and auto-deploys to GitHub Pages. Use `codex/` or `claude/` feature branches and pull requests for merges to `main`.
+- Default request for finalizing changes: "Verify the changes, commit and push, create a PR, merge once checks pass, then clean up." When the user asks for "commit, push, merge and cleanup", follow this workflow, including the PR. Review the diff and run applicable checks before merging; after a successful merge, return to an up-to-date `main` and remove the task's feature branch and temporary worktrees, preserving unrelated work.
 
 ## Page placement and publishing
 
