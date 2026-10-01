@@ -18,7 +18,8 @@ Producing evidence that convinces people who were not there. Over eight lessons 
 |---|---|---|
 | [`../../decks/work-like-a-physicist/index.html`](../../decks/work-like-a-physicist/index.html) | 50-slide HTML teaching deck covering all eight lessons | Present in a browser; advance to reveal answers and teaching points |
 | `Work Like a Physicist - Year 9 Student Workbook.pdf` | 40-page A4 student workbook, one per student for the whole unit | Print double-sided. Students keep the same workbook for all eight lessons |
-| `workbook/` | Editable source of the student workbook (HTML, CSS, JavaScript) | Edit `workbook/assets/content.js`, then run `sh build-pdf.sh` to re-export the PDF. See `workbook/README.md` |
+| `Work Like a Physicist - Year 9 Student Workbook (Answers).pdf` | Answer key for the workbook, by lesson, task and workbook page; linked from the companion site's Resources section | Mark with it, or let students self-check. Practical tasks give sample data |
+| `workbook/` | Editable source of the student workbook and its answers (HTML, CSS, JavaScript) | Edit `workbook/assets/content.js` (or `answers.js` for the answers), then run `sh build-pdf.sh` (or `sh build-answers-pdf.sh`). See `workbook/README.md` |
 | `teaching-guides/` | The seven lesson-plan PDFs (`Lesson 1 …` to `Lessons 7-8 …`) and their editable source | Read the PDFs before teaching; they are the detail behind each lesson. Edit `teaching-guides/source/*.md`, then run `sh build-pdf.sh`. See `teaching-guides/README.md` |
 | `index.html`, `lesson/` and `assets/` | Static online student companion | Open `index.html`, or visit this folder's published web address |
 | `source/` | Original Sites/React companion-site source and its Git history | Keep this when moving or backing up the project |
@@ -59,6 +60,7 @@ A student revision hub for use alongside the workbook, after an absence, or befo
 - a page per lesson with workbook-matched notes, key vocabulary and a link to the relevant workbook pages
 - 40 questions: four in each of seven missions, plus 12 AQA-style Exam Zone questions worth 50 marks with fresh contexts
 - a hint and full worked answer for every question, hidden behind a click, and a typing area so students attempt first
+- links to the printable workbook and its answers PDF
 
 Answers are visible by design; to set questions as unseen homework, copy the prompts rather than sharing the link. The site is static and lives under `gcsephy/`, which is network-only.
 

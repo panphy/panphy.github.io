@@ -10,6 +10,8 @@ Editable source for `../Work Like a Physicist - Year 9 Student Workbook.pdf`, th
 | `assets/workbook.css`, `assets/workbook.js` | Print styles; renderer that builds A4 pages and flags overflow |
 | `workbook.html` | Preview of all 40 pages |
 | `build-pdf.sh` | Prints the PDF with headless Chrome and checks the page count |
+| `answers.html`, `assets/answers.js`, `assets/answers.css` | Answer key: one entry per task and part, with workbook page numbers (not a page-for-page copy) |
+| `build-answers-pdf.sh` | Prints `../Work Like a Physicist - Year 9 Student Workbook (Answers).pdf` |
 | `../../../assets/fonts/year9-workbook-fonts.css` | Poppins, Lato and Lora (OFL) |
 
 ## Editing
@@ -18,7 +20,7 @@ Editable source for `../Work Like a Physicist - Year 9 Student Workbook.pdf`, th
 2. Edit `assets/content.js` and reload. An overflowing page gets a red outline (`document.documentElement.dataset.overflow` lists it); shorten text or reduce `lines`.
 3. Run `sh build-pdf.sh` from this folder (needs Chrome and Ghostscript). It overwrites the PDF and warns if the page count is not 40.
 
-The unit README, lesson plans and companion site cite workbook page numbers (e.g. "pages 4–38"); update them if pages are added or removed.
+The unit README, lesson plans, companion site and the answers (`assets/answers.js`) cite workbook page numbers (e.g. "pages 4–38"); update them if pages are added or removed, or if a question changes, then rebuild the answers PDF.
 
 ## `content.js` format
 
