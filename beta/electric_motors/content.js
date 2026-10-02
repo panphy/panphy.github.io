@@ -21,8 +21,8 @@ export const MODES = {
     level: 'GCSE · A LEVEL · IB DP',
     heading: 'Two forces turn a coil. A split ring keeps it turning.',
     description: 'A coil of wire sits between two magnetic poles. Current flows one way along one side of the coil and the opposite way along the other side, so the two sides are pushed in opposite directions: up on one side, down on the other. This pair of forces makes a turning effect (a moment) that spins the coil. Every half turn, the split-ring commutator swaps the connections, so the current in the coil reverses and the coil keeps turning the same way.',
-    look: 'Switch the motor on and follow the force arrows as the coil turns. When is the turning effect largest? Watch the gaps in the split ring pass the brushes. Then switch to plain rings (no commutator): the coil rocks to a stop instead of spinning.',
-    evidence: 'The turning effect is greatest when the plane of the coil is parallel to the field, and zero when the coil is vertical, because then the forces point straight through the axle. The coil’s momentum carries it past this point, and the commutator reverses the current just in time. More current, more turns or a stronger magnet make the motor turn faster.',
+    look: 'Switch the motor on and watch the end view. Half-ring A (purple) is joined to coil side A, and half-ring B (green) to side B. Turn on “Pause at each swap” to stop the motor just as the halves change brushes. Compare the side on the right before and after each swap. Then switch to plain rings (no commutator): the coil rocks to a stop instead of spinning.',
+    evidence: 'Each half-ring touches the + brush for half a turn, then the − brush for the next half. So whichever side of the coil is on the right always gets current in the same direction and is always pushed the same way. That keeps the turning effect in one direction. The swap happens when the coil is vertical: there the forces point straight through the axle and have no turning effect, and the coil’s momentum carries it past. The turning effect is greatest when the plane of the coil is parallel to the field. More current, more turns or a stronger magnet make the motor turn faster.',
     deeper: 'The torque on a coil of N turns and area A is T = BANI cos θ, where θ is the angle between the plane of the coil and the field. The spinning coil also acts as a generator: it produces a back emf that opposes the supply. A motor draws a large current when it starts and a smaller one at full speed.',
     hint: 'Switch the motor on, then change the turns, current or field and compare the speed.'
   },
@@ -60,7 +60,7 @@ export const PARTS = {
   supply: 'DC SUPPLY · Drives a current one way round the circuit. Conventional current flows from + to −.',
   coil: 'COIL · Many turns of insulated copper wire. Each turn feels the same pair of forces, so more turns give a bigger turning effect.',
   axle: 'AXLE · The coil turns about this axis. A force that points straight through the axle has no turning effect.',
-  commutator: 'SPLIT-RING COMMUTATOR · Two half-rings, each joined to one end of the coil. Every half turn they swap brushes, reversing the current in the coil.',
+  commutator: 'SPLIT-RING COMMUTATOR · Two half-rings, each joined to one end of the coil: A (purple) to side A, B (green) to side B. Every half turn they swap brushes, reversing the current in the coil.',
   sliprings: 'SLIP RINGS · Two complete rings. Each end of the coil always touches the same brush, so the coil gets whatever current the supply gives it.',
   brush: 'BRUSH · A carbon block that presses on the rotating ring to carry current in and out. Carbon conducts and slides smoothly.',
   ac: 'AC SUPPLY · The current changes direction twice every cycle. In the UK, mains electricity has a frequency of 50 Hz.',
@@ -71,7 +71,7 @@ export const PARTS = {
   cage: 'SQUIRREL-CAGE ROTOR · Copper bars joined by end rings. The rotating field induces currents in the bars (bright = current out of the front, blue = into it).',
   resultant: 'RESULTANT FIELD · The fields of the three coil pairs add up to one field of constant strength that rotates once per supply cycle.',
   force: 'FORCE · At right angles to both the current and the field (Fleming’s left-hand rule).',
-  current: 'CURRENT · The moving arrows show conventional current, from + to −.'
+  current: 'CURRENT · The glowing beads flow in the direction of conventional current, from + to −.'
 };
 
 // Steppers for each mode. Values are in the units in the label.
@@ -88,7 +88,7 @@ export const STEPPERS = {
 
 export const CONTROLS = {
   force: { steppers: ['current', 'field', 'angle'], toggles: [['reverse', 'Reverse current'], ['flip', 'Flip the magnet']] },
-  dc: { steppers: ['current', 'turns', 'field'], toggles: [['commutator', 'Split-ring commutator'], ['reverse', 'Reverse current']] },
+  dc: { steppers: ['current', 'turns', 'field'], toggles: [['commutator', 'Split-ring commutator'], ['pauseSwap', 'Pause at each swap'], ['endView', 'End view'], ['reverse', 'Reverse current']] },
   ac: { steppers: ['peak', 'frequency'], toggles: [] },
   induction: { steppers: ['supply', 'load'], toggles: [['swap', 'Swap two phases']] }
 };
@@ -100,8 +100,8 @@ export const QUESTIONS = {
     { q: 'The wire is turned until it is parallel to the magnetic field. What is the force now?', choices: ['Zero', 'Half as big', 'The biggest possible'], correct: 0, why: 'F = BIL sin θ, and sin 0° = 0. A current along the field lines feels no force.', hint: 'Step the angle down to 0° and watch the graph.' }
   ],
   dc: [
-    { q: 'Why do the two sides of the coil move in opposite directions?', choices: ['The current flows in opposite directions along the two sides', 'One side is nearer the north pole', 'The commutator pushes one side'], correct: 0, why: 'Same field, opposite current, so opposite forces. Together they make a turning effect.', hint: 'Follow the current arrows along each long side of the coil.' },
-    { q: 'What does the split-ring commutator do?', choices: ['Reverses the current in the coil every half turn', 'Makes the magnetic field stronger', 'Changes direct current into alternating current in the supply'], correct: 0, why: 'Reversing the current each half turn keeps the turning effect in the same direction.', hint: 'Switch to plain rings and see what goes wrong.' },
+    { q: 'Why do the two sides of the coil move in opposite directions?', choices: ['The current flows in opposite directions along the two sides', 'One side is nearer the north pole', 'The commutator pushes one side'], correct: 0, why: 'Same field, opposite current, so opposite forces. Together they make a turning effect.', hint: 'Follow the glowing beads along each long side of the coil.' },
+    { q: 'What does the split-ring commutator do?', choices: ['Reverses the current in the coil every half turn', 'Makes the magnetic field stronger', 'Changes direct current into alternating current in the supply'], correct: 0, why: 'Reversing the current each half turn keeps the turning effect in the same direction.', hint: 'Turn on “Pause at each swap” and compare the side on the right before and after each swap.' },
     { q: 'Which change would NOT make the motor spin faster?', choices: ['Reversing the current', 'Using more turns of wire', 'Using a stronger magnet'], correct: 0, why: 'Reversing the current only reverses the direction of rotation.', hint: 'Try each change and watch the speed in the readout.' }
   ],
   ac: [
