@@ -51,10 +51,11 @@
     <section class="workspace" aria-label="Electric motor explorer">
       <div class="viewer-panel" id="viewer-panel">
         <div class="viewer-heading"><span id="scene-title">THE MOTOR EFFECT</span><span class="scale" id="scale-note">MOTION SLOWED · NOT TO SCALE</span><button id="fullscreen" class="panphy-fullscreen-button" type="button" aria-controls="viewer-panel" aria-pressed="false" aria-label="Enter fullscreen" title="Enter fullscreen"><svg class="panphy-fs-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M4 9V4h5M15 4h5v5M20 15v5h-5M9 20H4v-5"/></svg></button></div>
-        <div id="viewer" tabindex="0" role="img" aria-label="Interactive 3D motor. Drag or use arrow keys to rotate; scroll, pinch or plus and minus keys to zoom.">
-          <p id="load-status" role="status">Loading the 3D model…</p>
-          <p class="gesture overlay" aria-hidden="true">Drag to rotate · Pinch or scroll to zoom</p>
-        </div>
+        <div class="stage">
+          <div id="viewer" tabindex="0" role="img" aria-label="Interactive 3D motor. Drag or use arrow keys to rotate; scroll, pinch or plus and minus keys to zoom.">
+            <p id="load-status" role="status">Loading the 3D model…</p>
+            <p class="gesture overlay" aria-hidden="true">Drag to rotate · Pinch or scroll to zoom</p>
+          </div>
           <div class="legend" aria-label="Legend">
             <span data-legend="north"><i style="background:var(--north)">N</i> North pole</span>
             <span data-legend="south"><i style="background:var(--south)">S</i> South pole</span>
@@ -62,43 +63,50 @@
             <span data-legend="current"><i style="background:var(--current)">I</i> Conventional current</span>
             <span data-legend="force"><i style="background:var(--force)">F</i> Force</span>
           </div>
-        <div class="observation" aria-live="off"><strong id="observation-title">Follow the force</strong><p id="observation-text"></p></div>
-        <div id="turning-display" class="turning-display" hidden>
-          <svg viewBox="0 0 80 80" aria-hidden="true"><circle cx="40" cy="40" r="26"/><path id="turning-arc"/><path id="turning-head"/></svg>
-          <div><strong id="turning-value"></strong><p id="turning-explanation"></p></div>
         </div>
-        <p class="particle-readout mono" id="particle-readout" role="status">Tap a part to discover its job.</p>
-        <div class="toolbar" aria-label="View controls">
-          <button type="button" id="motion" class="primary" aria-pressed="true"><svg viewBox="0 0 24 24" aria-hidden="true"><path id="motion-icon" d="M7 5h3v14H7zM14 5h3v14h-3z"/></svg><span id="motion-label" data-reserve="Pause motion">Pause motion</span></button>
-          <button type="button" id="step">Step forward</button>
-          <button type="button" id="reset" data-reserve="Reset">Reset</button>
-          <button type="button" id="power" class="experiment" aria-pressed="false" data-reserve="Switch off current">Switch on current</button>
-          <button type="button" id="spin" class="experiment" data-reserve="Give it a spin" hidden>Give it a spin</button>
-        </div>
-        <div class="study-controls" aria-label="Animation and display">
-          <label for="playback">Playback <select id="playback"><option value="0.15">Very slow</option><option value="0.35" selected>Slow</option><option value="1">Standard</option></select></label>
-          <button type="button" id="home-view">Reset view</button>
-          <button type="button" id="vertical-view" hidden>Inspect vertical coil</button>
-          <label><input type="checkbox" id="show-flow"> Moving current markers</label>
-        </div>
-        <p class="playback-note">Playback changes viewing speed only. Step forward advances up to 0.10 model seconds and pauses.</p>
-        <div class="study-panels">
-          <div class="endview" id="endview" hidden>
-            <p class="endview-title">END VIEW · FROM THE RINGS</p>
-            <canvas id="endview-canvas" role="img" aria-label="End view of the coil and commutator"></canvas>
-            <p id="endview-contact"></p>
-            <p id="endview-rule"></p>
-            <p class="connection-key">Purple A and green B keep their identity. The + / − badges show supply connections, not charge stored on the wire. With the split ring, these connections swap every half-turn.</p>
+        <div class="console">
+          <div class="deck" aria-label="Experiment controls" role="group">
+            <p id="action-hint"></p>
+            <div class="toolbar" aria-label="Run controls">
+              <button type="button" id="power" class="experiment" aria-pressed="false" data-reserve="Switch off current">Switch on current</button>
+              <button type="button" id="spin" class="experiment" data-reserve="Give it a spin" hidden>Give it a spin</button>
+              <button type="button" id="motion" class="primary" aria-pressed="true"><svg viewBox="0 0 24 24" aria-hidden="true"><path id="motion-icon" d="M7 5h3v14H7zM14 5h3v14h-3z"/></svg><span id="motion-label" data-reserve="Pause motion">Pause motion</span></button>
+              <button type="button" id="step">Step forward</button>
+              <button type="button" id="reset" data-reserve="Reset">Reset</button>
+            </div>
+            <div class="sample-controls" id="controls"></div>
+            <div class="study-controls" aria-label="Animation and display">
+              <label for="playback">Playback <select id="playback"><option value="0.15">Very slow</option><option value="0.35" selected>Slow</option><option value="1">Standard</option></select></label>
+              <button type="button" id="home-view">Reset view</button>
+              <button type="button" id="vertical-view" hidden>Inspect vertical coil</button>
+              <label><input type="checkbox" id="show-flow"> Moving current markers</label>
+            </div>
+            <p class="playback-note">Playback changes viewing speed only. Step forward advances up to 0.10 model seconds and pauses.</p>
           </div>
-          <details id="measurements"><summary>Measurements &amp; graphs</summary>
-          <div class="stack">
-            <div class="equation" id="equation" aria-live="off"></div>
-            <div class="graph" id="graph"><canvas id="graph-canvas" role="img" aria-label="Graph"></canvas></div>
+          <div class="readouts">
+            <div class="observation" aria-live="off"><strong id="observation-title">Follow the force</strong><p id="observation-text"></p></div>
+            <div id="turning-display" class="turning-display" hidden>
+              <svg viewBox="0 0 80 80" aria-hidden="true"><circle cx="40" cy="40" r="26"/><path id="turning-arc"/><path id="turning-head"/></svg>
+              <div><strong id="turning-value"></strong><p id="turning-explanation"></p></div>
+            </div>
+            <p class="particle-readout mono" id="particle-readout" role="status">Tap a part to discover its job.</p>
           </div>
-          </details>
+          <div class="study-panels">
+            <div class="endview" id="endview" hidden>
+              <p class="endview-title">END VIEW · FROM THE RINGS</p>
+              <canvas id="endview-canvas" role="img" aria-label="End view of the coil and commutator"></canvas>
+              <p id="endview-contact"></p>
+              <p id="endview-rule"></p>
+              <p class="connection-key">Purple A and green B keep their identity. The + / − badges show supply connections, not charge stored on the wire. With the split ring, these connections swap every half-turn.</p>
+            </div>
+            <details id="measurements"><summary>Measurements &amp; graphs</summary>
+              <div class="stack">
+                <div class="equation" id="equation" aria-live="off"></div>
+                <div class="graph" id="graph"><canvas id="graph-canvas" role="img" aria-label="Graph"></canvas></div>
+              </div>
+            </details>
+          </div>
         </div>
-        <div class="sample-controls" id="controls"></div>
-        <p id="action-hint"></p>
       </div>
       <aside aria-live="polite">
         <p class="eyebrow" id="mode-date">F = BIL · A WIRE IN A MAGNETIC FIELD</p><h2 id="mode-heading">A current in a magnetic field feels a force.</h2>

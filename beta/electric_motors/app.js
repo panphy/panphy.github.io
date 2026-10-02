@@ -40,6 +40,13 @@ const RING_Z = 1.75;
 const SUPPLY_Y = -2.4;
 const SUPPLY_Z = 3.0;
 const BASE_Y = -2.7;
+// Magnets: half the depth of the motor-effect plates, half the height and depth of the motor pole faces,
+// and the even spacing of the field lines that fill them.
+const MAGNET_HALF_DEPTH = 0.7;
+const POLE_HALF = 1.3;
+const FIELD_SPACING = 0.5;
+// The AC supply box, whose front panel is an oscilloscope screen.
+const AC_BOX = { w: 2.0, h: 1.18 };
 
 // Motion models. Times are on-screen seconds; torques are in N m.
 const ROD = { gain: 90, damping: 1.6, maxSpeed: 4.5 };
@@ -131,7 +138,7 @@ let selected = null;
 function readPalette() {
   const styles = getComputedStyle(document.documentElement);
   const css = name => styles.getPropertyValue(name).trim();
-  const names = ['north', 'south', 'field', 'current', 'force', 'copper', 'steel', 'carbon', 'positive', 'negative', 'half-a', 'half-b'];
+  const names = ['north', 'south', 'field', 'current', 'force', 'copper', 'steel', 'carbon', 'neutral', 'positive', 'negative', 'half-a', 'half-b'];
   const result = { dark: document.documentElement.getAttribute('data-theme') === 'dark', css: {} };
   for (const name of names) {
     result[name] = new THREE.Color(css(`--${name}`));
@@ -360,11 +367,39 @@ function clearStage() {
 }
 
 // ---------- Shared apparatus ----------
-function poleBlock(kind, size, position) {
-  const color = palette[kind];
-  const mesh = part(new THREE.Mesh(new THREE.BoxGeometry(...size), material(color, { roughness: 0.55, metalness: 0.1 })), kind);
+// Each magnet is one piece. Its colour fades from the pole colour at each end to neutral in the middle,
+// so the N and S faces read as the two ends of one magnet, never as a magnet with a single pole.
+// `locate` maps a point in the magnet's frame to { end: 0 or 1, dist: distance along the magnet from its middle }.
+function magnetPiece(size, segments, position, locate, key) {
+  const geometry = new THREE.BoxGeometry(...size, ...segments);
+  geometry.setAttribute('color', new THREE.BufferAttribute(new Float32Array(geometry.attributes.position.count * 3), 3));
+  const mesh = part(new THREE.Mesh(geometry, material(0xffffff, { vertexColors: true, roughness: 0.55, metalness: 0.12 })), key);
   mesh.position.copy(position);
+  mesh.userData.locate = locate;
   return mesh;
+}
+// Paint the pieces with `ends[0]` at end 0 and `ends[1]` at end 1, fully coloured beyond `reach` from the middle.
+function paintMagnet(pieces, ends, reach) {
+  const point = new THREE.Vector3();
+  const colour = new THREE.Color();
+  for (const mesh of pieces) {
+    const positions = mesh.geometry.attributes.position;
+    const colours = mesh.geometry.attributes.color;
+    for (let i = 0; i < positions.count; i++) {
+      point.fromBufferAttribute(positions, i).add(mesh.position);
+      const { end, dist } = mesh.userData.locate(point);
+      colour.copy(ends[end]).lerp(palette.neutral, 1 - THREE.MathUtils.smoothstep(dist, 0, reach));
+      colours.setXYZ(i, colour.r, colour.g, colour.b);
+    }
+    colours.needsUpdate = true;
+  }
+}
+// Evenly spaced, parallel field lines: equal spacing shows a uniform field.
+function fieldLineGrid(count, spacing, makeLine) {
+  const group = new THREE.Group();
+  const offsets = n => Array.from({ length: n }, (_, i) => (i - (n - 1) / 2) * spacing);
+  for (const a of offsets(count[0])) for (const b of offsets(count[1])) group.add(makeLine(a, b));
+  return group;
 }
 function battery(position, kind = 'dc') {
   const group = new THREE.Group();
@@ -385,12 +420,110 @@ function battery(position, kind = 'dc') {
     minus.position.set(-0.95, 0.35, 0);
     group.add(body, band, nub, plus, minus);
   } else {
-    const body = part(new THREE.Mesh(new THREE.BoxGeometry(1.4, 0.7, 0.6), material(palette.carbon, { roughness: 0.5 })), 'ac');
-    const face = faceLabel('~', '#ffffff', 0.6);
-    face.position.set(0, 0.02, 0.31);
+    const body = part(new THREE.Mesh(new THREE.BoxGeometry(AC_BOX.w, AC_BOX.h, 0.6), material(palette.carbon, { roughness: 0.5 })), 'ac');
+    const face = scopeFace();
+    face.position.set(0, 0, 0.301);
     group.add(body, face);
+    group.userData.scope = face.userData.scope;
   }
   return group;
+}
+
+// ---------- AC supply oscilloscope ----------
+// The AC supply's front panel works like a CRO: a beam sweeps across the screen at a fixed time base,
+// plotting the supply emf against time. The fixed time base means a higher frequency shows more cycles,
+// and the fixed vertical scale means a bigger peak shows a taller wave. The previous sweep fades out ahead of the beam.
+const SCOPE = { width: 512, height: 288, columns: 240, sweep: 2.5, screen: { x: 22, y: 18, w: 468, h: 206 } };
+function scopeFace() {
+  const canvas = document.createElement('canvas');
+  canvas.width = SCOPE.width;
+  canvas.height = SCOPE.height;
+  const texture = new THREE.CanvasTexture(canvas);
+  texture.colorSpace = THREE.SRGBColorSpace;
+  texture.anisotropy = 4;
+  buildTextures.push(texture);
+  const mesh = new THREE.Mesh(new THREE.PlaneGeometry(AC_BOX.w - 0.06, (AC_BOX.w - 0.06) * SCOPE.height / SCOPE.width), new THREE.MeshBasicMaterial({ map: texture }));
+  mesh.raycast = () => {};
+  mesh.userData.scope = { ctx: canvas.getContext('2d'), texture, samples: new Float32Array(SCOPE.columns), clock: 0, column: 0, value: 0 };
+  drawScope(mesh.userData.scope);
+  return mesh;
+}
+// Advance the beam by `elapsed` model seconds, writing `value` (−1 to 1) into the columns it passes.
+function advanceScope(scope, elapsed, value) {
+  if (!(elapsed > 0)) return;
+  scope.clock += elapsed;
+  const column = Math.floor(scope.clock / SCOPE.sweep * SCOPE.columns);
+  const count = Math.min(column - scope.column, SCOPE.columns);
+  for (let k = 1; k <= count; k++) {
+    scope.samples[(column - count + k) % SCOPE.columns] = scope.value + (value - scope.value) * k / count;
+  }
+  scope.column = column;
+  scope.value = value;
+  if (count > 0) drawScope(scope);
+}
+function drawScope(scope) {
+  const { ctx, samples } = scope;
+  const { width, height, columns } = SCOPE;
+  const { x, y, w, h } = SCOPE.screen;
+  const phosphor = '124, 255, 178';
+  ctx.fillStyle = '#1C2025';
+  ctx.fillRect(0, 0, width, height);
+  ctx.fillStyle = '#06140D';
+  ctx.beginPath();
+  ctx.roundRect(x, y, w, h, 14);
+  ctx.fill();
+  // Graticule: 10 by 6 divisions, with brighter axes.
+  ctx.lineWidth = 1;
+  for (let i = 1; i < 10; i++) {
+    ctx.strokeStyle = `rgba(${phosphor}, ${i === 5 ? 0.22 : 0.1})`;
+    ctx.beginPath();
+    ctx.moveTo(x + w * i / 10, y + 4);
+    ctx.lineTo(x + w * i / 10, y + h - 4);
+    ctx.stroke();
+  }
+  for (let i = 1; i < 6; i++) {
+    ctx.strokeStyle = `rgba(${phosphor}, ${i === 3 ? 0.3 : 0.1})`;
+    ctx.beginPath();
+    ctx.moveTo(x + 4, y + h * i / 6);
+    ctx.lineTo(x + w - 4, y + h * i / 6);
+    ctx.stroke();
+  }
+  const beam = scope.column % columns;
+  const px = c => x + 8 + (w - 16) * c / (columns - 1);
+  const py = v => y + h / 2 - v * h * 0.42;
+  const trace = (from, to, alpha, glow) => {
+    if (to - from < 1) return;
+    ctx.strokeStyle = `rgba(${phosphor}, ${alpha})`;
+    ctx.shadowColor = `rgba(${phosphor}, ${alpha})`;
+    ctx.shadowBlur = glow;
+    ctx.lineWidth = 4;
+    ctx.lineJoin = 'round';
+    ctx.beginPath();
+    for (let c = from; c <= to; c++) c === from ? ctx.moveTo(px(c), py(samples[c])) : ctx.lineTo(px(c), py(samples[c]));
+    ctx.stroke();
+    ctx.shadowBlur = 0;
+  };
+  // The previous sweep, fading, ahead of the beam; then the current sweep up to the beam.
+  trace(Math.min(beam + 6, columns - 1), columns - 1, 0.4, 0);
+  trace(0, beam, 0.95, 10);
+  ctx.fillStyle = `rgb(${phosphor})`;
+  ctx.shadowColor = `rgb(${phosphor})`;
+  ctx.shadowBlur = 14;
+  ctx.beginPath();
+  ctx.arc(px(beam), py(samples[beam]), 5, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.shadowBlur = 0;
+  // Panel lettering.
+  ctx.fillStyle = '#D7DCE1';
+  ctx.font = '700 30px Manrope, system-ui, sans-serif';
+  ctx.textBaseline = 'middle';
+  ctx.textAlign = 'left';
+  ctx.fillText('~ AC SUPPLY', x + 4, height - 32);
+  ctx.fillStyle = '#9AA3AD';
+  ctx.font = '600 22px "IBM Plex Mono", ui-monospace, monospace';
+  ctx.textAlign = 'right';
+  ctx.fillText('emf against time', x + w - 4, height - 32);
+  scope.texture.needsUpdate = true;
 }
 
 // ---------- Mode 1: the motor effect ----------
@@ -423,22 +556,22 @@ function buildForce() {
   rodHolder.position.y = ROD_Y;
   group.add(rodHolder);
 
-  // Magnet: two pole pieces joined by a yoke, all turned together to set the angle.
+  // Magnet: one C-shaped magnet, turned as a whole to set the angle. Its two plates are the poles.
+  // The plates sit between the rails, so the rails stay outside the field.
   const magnet = new THREE.Group();
-  const top = poleBlock('north', [4.4, 0.5, 2.4], new THREE.Vector3(0, 1.4, 0));
-  const bottom = poleBlock('south', [4.4, 0.5, 2.4], new THREE.Vector3(0, -1.4, 0));
-  const yoke = new THREE.Mesh(new THREE.BoxGeometry(0.45, 3.3, 2.4), material(palette.steel, { metalness: 0.5, roughness: 0.45 }));
-  yoke.position.set(2.42, 0, 0);
+  const depth = 2 * MAGNET_HALF_DEPTH;
+  // Distance along the C from its middle: up the back, then along a plate.
+  const alongC = ({ x, y }) => ({ end: y > 0 ? 0 : 1, dist: (x > 2.19 ? Math.min(Math.abs(y), 1.4) : 1.4) + Math.max(0, 2.42 - x) });
+  const top = magnetPiece([4.4, 0.5, depth], [24, 1, 1], new THREE.Vector3(0, 1.4, 0), alongC, 'north');
+  const bottom = magnetPiece([4.4, 0.5, depth], [24, 1, 1], new THREE.Vector3(0, -1.4, 0), alongC, 'south');
+  const yoke = magnetPiece([0.45, 3.3, depth], [1, 24, 1], new THREE.Vector3(2.42, 0, 0), alongC, 'magnet');
   const topLabel = faceLabel('N', '#ffffff', 0.5);
-  topLabel.position.set(-1.6, 1.4, 1.21);
+  topLabel.position.set(-1.6, 1.4, MAGNET_HALF_DEPTH + 0.01);
   const bottomLabel = faceLabel('S', '#ffffff', 0.5);
-  bottomLabel.position.set(-1.6, -1.4, 1.21);
+  bottomLabel.position.set(-1.6, -1.4, MAGNET_HALF_DEPTH + 0.01);
   magnet.add(top, bottom, yoke, topLabel, bottomLabel);
-  const fieldMaterial = new THREE.MeshBasicMaterial({ color: palette.field, transparent: true, opacity: 0.32 });
-  const lines = new THREE.Group();
-  for (const x of [-1.6, 0, 1.6]) {
-    for (const z of [-0.55]) lines.add(fieldLine(new THREE.Vector3(x, 1.15, z), new THREE.Vector3(x, -1.15, z), fieldMaterial, 0.28));
-  }
+  const fieldMaterial = new THREE.MeshBasicMaterial({ color: palette.field, transparent: true, opacity: 0.26 });
+  const lines = fieldLineGrid([8, 3], FIELD_SPACING, (x, z) => fieldLine(new THREE.Vector3(x, 1.15, z), new THREE.Vector3(x, -1.15, z), fieldMaterial, 0.28));
   magnet.add(lines);
   group.add(magnet);
 
@@ -460,7 +593,7 @@ function buildForce() {
     group.add(arrow);
   }
   pickables.push(...triad.force.children);
-  sim = { kind: 'force', group, rod, rodHolder, magnet, poles: { top, bottom, topLabel, bottomLabel, lines }, supply, markers, triad, x: 0, v: 0, phase: 0 };
+  sim = { kind: 'force', group, rod, rodHolder, magnet, poles: { top, bottom, yoke, topLabel, bottomLabel, lines }, supply, markers, triad, x: 0, v: 0, phase: 0 };
   updateForceGeometry();
 }
 function forceVectors() {
@@ -481,9 +614,8 @@ function updateForceGeometry() {
   const { tilt } = forceVectors();
   sim.magnet.rotation.x = tilt;
   // Flipping the magnet swaps which pole is on top and reverses the field lines.
-  const { top, bottom, topLabel, bottomLabel, lines } = sim.poles;
-  top.material.color.copy(state.flip ? palette.south : palette.north);
-  bottom.material.color.copy(state.flip ? palette.north : palette.south);
+  const { top, bottom, yoke, topLabel, bottomLabel, lines } = sim.poles;
+  paintMagnet([top, bottom, yoke], state.flip ? [palette.south, palette.north] : [palette.north, palette.south], 2.4);
   top.userData.part = state.flip ? 'south' : 'north';
   bottom.userData.part = state.flip ? 'north' : 'south';
   topLabel.position.y = state.flip ? -1.4 : 1.4;
@@ -532,19 +664,23 @@ function stepForce(delta) {
 function buildCoil(kind) {
   const group = new THREE.Group();
   stage.add(group);
-  group.add(poleBlock('north', [0.8, 2.6, 0.8], new THREE.Vector3(-2.2, 0, 0)));
-  group.add(poleBlock('south', [0.8, 2.6, 0.8], new THREE.Vector3(2.2, 0, 0)));
-  const north = faceLabel('N', '#ffffff', 0.6);
-  north.position.set(-2.2, 0.75, 0.41);
-  const south = faceLabel('S', '#ffffff', 0.6);
-  south.position.set(2.2, 0.75, 0.41);
+  // One U-shaped magnet standing on the base: its two arms end in pole faces as deep as the coil sides.
+  const armBottom = BASE_Y + 0.5;
+  const armHeight = POLE_HALF - armBottom;
+  const yokeY = (BASE_Y + armBottom) / 2;
+  // Distance along the U from its middle: out along the bar, then up an arm.
+  const alongU = ({ x, y }) => ({ end: x < 0 ? 0 : 1, dist: y <= armBottom + 1e-6 ? Math.abs(x) : 2.05 + (y - yokeY) });
+  const arms = [-1, 1].map(side => magnetPiece([0.5, armHeight, 2 * POLE_HALF], [1, 24, 1], new THREE.Vector3(side * 2.05, POLE_HALF - armHeight / 2, 0), alongU, side < 0 ? 'north' : 'south'));
+  const bar = magnetPiece([4.6, 0.5, 2 * POLE_HALF], [32, 1, 1], new THREE.Vector3(0, yokeY, 0), alongU, 'magnet');
+  paintMagnet([...arms, bar], [palette.north, palette.south], 3.3);
+  group.add(...arms, bar);
+  const north = faceLabel('N', '#ffffff', 0.45);
+  north.position.set(-2.05, 0.75, POLE_HALF + 0.01);
+  const south = faceLabel('S', '#ffffff', 0.45);
+  south.position.set(2.05, 0.75, POLE_HALF + 0.01);
   group.add(north, south);
-  const fieldMaterial = new THREE.MeshBasicMaterial({ color: palette.field, transparent: true, opacity: 0.3 });
-  for (const y of [-1, -0.5, 0, 0.5, 1]) {
-    for (const z of [-0.9, 0.5]) {
-      group.add(fieldLine(new THREE.Vector3(-1.8, y, z), new THREE.Vector3(1.8, y, z), fieldMaterial, 0.88));
-    }
-  }
+  const fieldMaterial = new THREE.MeshBasicMaterial({ color: palette.field, transparent: true, opacity: 0.24 });
+  group.add(fieldLineGrid([5, 5], FIELD_SPACING, (y, z) => fieldLine(new THREE.Vector3(-1.8, y, z), new THREE.Vector3(1.8, y, z), fieldMaterial, 0.88)));
 
   const axle = part(new THREE.Mesh(new THREE.CylinderGeometry(0.07, 0.07, 4.2, 16), material(palette.steel, { metalness: 0.75, roughness: 0.25 })), 'axle');
   axle.rotation.x = Math.PI / 2;
@@ -570,7 +706,8 @@ function buildCoil(kind) {
   const wires = new THREE.Group();
   group.add(wires);
 
-  const supply = battery(new THREE.Vector3(0, SUPPLY_Y + (kind === 'ac' ? 0.05 : 0), SUPPLY_Z), kind === 'ac' ? 'ac' : 'dc');
+  // The AC supply stands on the base, so its larger box rises above the wires.
+  const supply = battery(new THREE.Vector3(0, kind === 'ac' ? BASE_Y + AC_BOX.h / 2 : SUPPLY_Y, SUPPLY_Z), kind === 'ac' ? 'ac' : 'dc');
   group.add(supply);
 
   // Optional sparse flow cues supplement the stationary direction arrows.
@@ -597,7 +734,7 @@ function buildCoil(kind) {
     rotor.add(label);
     return label;
   });
-  sim = { kind, currentArrows, sideLabels, group, rotor, coilGroup, ringParts, brushes, wires, markers, forces, supply, theta: 0.5, omega: 0, phase: 0, time: 0, supplyTime: 0, trace: [], history: [], current: 0, torque: 0 };
+  sim = { kind, currentArrows, sideLabels, group, rotor, coilGroup, ringParts, brushes, wires, markers, forces, supply, scope: supply.userData.scope, theta: 0.5, omega: 0, phase: 0, time: 0, supplyTime: 0, trace: [], history: [], current: 0, torque: 0 };
   buildCoilWinding();
   buildRings();
 }
@@ -709,7 +846,7 @@ function buildRings() {
       new THREE.Vector3(side * 1.35, 0, z),
       new THREE.Vector3(side * 1.35, SUPPLY_Y, z),
       new THREE.Vector3(side * 1.35, SUPPLY_Y, SUPPLY_Z),
-      new THREE.Vector3(side * 0.72, SUPPLY_Y, SUPPLY_Z)
+      new THREE.Vector3(side * (sim.kind === 'ac' ? AC_BOX.w / 2 + 0.02 : 0.72), SUPPLY_Y, SUPPLY_Z)
     ], 0.03, wireMat, 60));
   }
   if (sim.kind === 'dc') sim.supply.rotation.y = state.reverse ? Math.PI : 0;
@@ -768,6 +905,8 @@ function stepCoil(delta) {
   sim.current = coilCurrent();
   sim.torque = -coilConstant() * sim.current * Math.cos(sim.theta);
   sim.time += elapsed;
+  // The supply emf is in phase with the current here, so the scope plots it on the same fixed scale.
+  if (sim.scope) advanceScope(sim.scope, elapsed, sim.current / STEPPERS.peak.max);
   sim.rotor.rotation.z = sim.theta;
   if (sim.kind === 'dc') {
     sim.sideLabels.forEach((badge, i) => {
@@ -952,9 +1091,10 @@ function drawEndView() {
   ctx.fillText('S', w * 0.96, cy);
   ctx.strokeStyle = c.field;
   ctx.fillStyle = c.field;
-  ctx.globalAlpha = 0.4;
+  ctx.globalAlpha = 0.3;
   ctx.lineWidth = 1;
-  for (const y of [h * 0.18, h * 0.82]) {
+  // Evenly spaced across the pole faces: a uniform field.
+  for (const y of [0.18, 0.34, 0.5, 0.66, 0.82].map(f => h * f)) {
     ctx.beginPath();
     ctx.moveTo(w * 0.11, y);
     ctx.lineTo(w * 0.89, y);
