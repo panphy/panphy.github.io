@@ -341,12 +341,13 @@ function battery(position, kind = 'dc') {
   if (kind === 'dc') {
     const body = part(new THREE.Mesh(new THREE.CylinderGeometry(0.3, 0.3, 1.3, 32), material(palette.carbon, { roughness: 0.4 })), 'supply');
     body.rotation.z = Math.PI / 2;
-    const band = part(new THREE.Mesh(new THREE.CylinderGeometry(0.305, 0.305, 0.42, 32), material(palette.current, { roughness: 0.4 })), 'supply');
+    // Band and nub ends are offset from the body's end cap (x = 0.65) so no faces are coplanar and z-fight.
+    const band = part(new THREE.Mesh(new THREE.CylinderGeometry(0.305, 0.305, 0.43, 32), material(palette.current, { roughness: 0.4 })), 'supply');
     band.rotation.z = Math.PI / 2;
-    band.position.x = 0.44;
-    const nub = new THREE.Mesh(new THREE.CylinderGeometry(0.1, 0.1, 0.1, 16), material(palette.steel, { metalness: 0.6 }));
+    band.position.x = 0.445;
+    const nub = new THREE.Mesh(new THREE.CylinderGeometry(0.1, 0.1, 0.14, 16), material(palette.steel, { metalness: 0.6 }));
     nub.rotation.z = Math.PI / 2;
-    nub.position.x = 0.7;
+    nub.position.x = 0.71;
     const plus = labelSprite('+', palette.css['text-main'], 0.45);
     plus.position.set(0.95, 0.35, 0);
     const minus = labelSprite('−', palette.css['text-main'], 0.45);
