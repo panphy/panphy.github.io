@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="description" content="Fire electrons, protons and alpha particles through electric and magnetic fields in interactive 3D: parabolas between plates, circles and helices, a velocity selector and a cyclotron.">
+  <meta name="theme-color" content="#F8F6F1">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <link rel="stylesheet" href="/assets/standalone-top.css">
+  <script>
+  (function() {
+    var dark = false;
+    try { dark = !!localStorage.getItem('charges-in-fields-dark'); } catch (error) {}
+    if (dark) {
+      document.documentElement.setAttribute('data-theme', 'dark');
+      var tc = document.querySelector('meta[name="theme-color"]');
+      if (tc) tc.setAttribute('content', '#111110');
+    }
+  })();
+  </script>
+  <title>Charges in Fields — PanPhy Labs</title>
+  <link rel="icon" type="image/png" href="/assets/favicon.png">
+  <link rel="apple-touch-icon" href="/assets/apple-touch-icon.png">
+  <link rel="stylesheet" href="charges_in_fields/style.css">
+  <link rel="stylesheet" href="/assets/theme-toggle.css">
+  <link rel="stylesheet" href="/assets/fullscreen-button.css">
+  <script src="/assets/theme-toggle.js"></script>
+  <script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/"}}</script>
+</head>
+<body data-mode="efield">
+  <header class="banner">
+    <a class="banner-logo" href="/" aria-label="PanPhy Labs home"><img src="/assets/panphy.png" alt="PanPhy Labs" width="38" height="38"></a>
+    <div class="banner-title">Charges in Fields</div>
+    <div class="banner-actions">
+      <button id="theme-button" type="button" data-panphy-theme-toggle aria-label="Toggle light/dark theme" title="Toggle between light and dark themes"></button>
+    </div>
+  </header>
+  <script>window.PanPhyThemeToggle.mount(document.getElementById('theme-button'), { darkStorageKey: 'charges-in-fields-dark' });</script>
+  <main>
+    <div class="intro"><div><p class="eyebrow">THE FIELD LAB / STEER A CHARGE</p><h1>Push it. Bend it.<br>Spin it up<span>!</span></h1></div><p>Fire electrons, protons and alpha particles through electric and magnetic fields.<br>Then build a velocity selector and a cyclotron.</p></div>
+    <nav class="models" aria-label="Choose an experiment">
+      <button type="button" data-mode="efield" aria-pressed="true"><span>01 / E-FIELD</span><strong>Electric field</strong><small>Parabola between plates</small></button>
+      <button type="button" data-mode="bfield" aria-pressed="false"><span>02 / B-FIELD</span><strong>Magnetic field</strong><small>Circles and helices</small></button>
+      <button type="button" data-mode="selector" aria-pressed="false"><span>03 / E × B</span><strong>Velocity selector</strong><small>Crossed fields</small></button>
+      <button type="button" data-mode="cyclotron" aria-pressed="false"><span>04 / ACCELERATE</span><strong>Cyclotron</strong><small>A particle accelerator</small></button>
+    </nav>
+    <div class="lab-strip">
+      <span>YOUR MISSION <b>Learn to steer a charged particle.</b></span>
+      <span class="progress-group"><span id="progress" class="mono">0 / 4 discoveries unlocked</span><button type="button" id="reset-progress" class="link-button">Reset progress</button></span>
+    </div>
+    <section class="workspace" aria-label="Charges in fields explorer">
+      <div class="viewer-panel" id="viewer-panel">
+        <div class="viewer-heading"><span id="scene-title">CHARGE IN AN ELECTRIC FIELD</span><span class="scale">MOTION SLOWED · PARTICLES ENLARGED</span><button id="fullscreen" class="panphy-fullscreen-button" type="button" aria-controls="viewer-panel" aria-pressed="false" aria-label="Enter fullscreen" title="Enter fullscreen"><svg class="panphy-fs-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M4 9V4h5M15 4h5v5M20 15v5h-5M9 20H4v-5"/></svg></button></div>
+        <div id="viewer" tabindex="0" role="img" aria-label="Interactive 3D view. Drag or use arrow keys to rotate; scroll, pinch or plus and minus keys to zoom.">
+          <p id="load-status" role="status">Loading the 3D model…</p>
+          <div class="legend overlay" aria-label="Legend">
+            <span data-legend="efield"><i style="background:var(--e-field)">E</i> Electric field</span>
+            <span data-legend="bfield"><i style="background:var(--field)">B</i> Magnetic field</span>
+            <span data-legend="velocity"><i style="background:var(--velocity)">v</i> Velocity</span>
+            <span data-legend="force"><i style="background:var(--force)">F</i> Force</span>
+            <span data-legend="speed"><i style="background:linear-gradient(90deg,var(--south),var(--current))"></i> Slow → fast</span>
+          </div>
+          <p class="gesture overlay" aria-hidden="true">Drag to rotate · Pinch or scroll to zoom</p>
+          <div class="stack overlay">
+            <div class="equation" id="equation" aria-live="off"></div>
+            <div class="graph" id="graph"><canvas id="graph-canvas" role="img" aria-label="Graph"></canvas></div>
+          </div>
+        </div>
+        <p class="particle-readout mono" id="particle-readout" role="status">Tap a part to discover its job.</p>
+        <div class="toolbar" aria-label="View controls">
+          <button type="button" id="motion" class="primary" aria-pressed="true"><svg viewBox="0 0 24 24" aria-hidden="true"><path id="motion-icon" d="M7 5h3v14H7zM14 5h3v14h-3z"/></svg><span id="motion-label" data-reserve="Pause motion">Pause motion</span></button>
+          <button type="button" id="reset" data-reserve="Reset view">Reset view</button>
+          <button type="button" id="clear" data-reserve="Clear tracks">Clear tracks</button>
+          <button type="button" id="fire" class="experiment" aria-pressed="false" data-reserve="Inject an alpha particle">Fire</button>
+        </div>
+        <div class="sample-controls" id="controls"></div>
+        <p id="action-hint"></p>
+      </div>
+      <aside aria-live="polite">
+        <p class="eyebrow" id="mode-date"></p><h2 id="mode-heading"></h2>
+        <p class="level" id="mode-level"></p>
+        <p id="description"></p>
+        <div class="idea"><h3><svg class="icon" viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" focusable="false"><circle cx="10.5" cy="10.5" r="6.5"/><path d="M15.3 15.3 21 21"/></svg> Your observation mission</h3><p id="look"></p></div>
+        <h3>What does it mean?</h3><p id="evidence"></p>
+        <div class="deeper"><h3>Going further · A level and IB</h3><p id="deeper"></p></div>
+        <div class="question" id="mode-quiz"></div>
+      </aside>
+    </section>
+    <section class="final-challenge" aria-labelledby="final-title">
+      <div class="final-intro"><p class="eyebrow">FINAL CHALLENGE</p><h2 id="final-title">Put it all together.</h2><p id="final-status">Unlock all four discoveries to open the final challenge.</p></div>
+      <div class="question" id="final-quiz" hidden></div>
+    </section>
+    <section class="reality"><span aria-hidden="true">↗</span><div><h2>A model is an explanation, not a photograph.</h2><p>Every track is calculated step by step from the force qE + qv × B using real charges, masses, voltages and fields, so the shapes and sizes are right. The plates, fields and tracks are drawn to scale in centimetres (the cyclotron in tens of centimetres), but the particles are drawn enormously larger than they really are.</p><p>The motion is slowed down billions of times: an electron crosses these plates in a few nanoseconds. Each track is replayed at a speed that makes it easy to follow, so different particles are not shown at their true relative speeds. Gravity is ignored because it is far too weak to matter, and so are the forces between particles in the beam.</p><p>The fields are perfectly uniform inside the plates or the shaded region and zero outside; real fields spread out at the edges. The cyclotron is non-relativistic, its dees have no deflector to steer the beam out, and the particle starts from rest at the centre.</p></div></section>
+  </main>
+  <footer><span>PanPhy Labs · Charges in fields (beta)</span><a href="/beta/">More beta apps</a></footer>
+  <noscript><p class="no-script">Enable JavaScript to explore the 3D models. The descriptions remain available above.</p></noscript>
+  <script type="module">import('./charges_in_fields/app.js').catch(error => { console.error(error); document.getElementById('load-status').hidden = false; document.getElementById('load-status').textContent = 'The 3D viewer could not load. Check your internet connection and reload. You can still read the explanation on this page.'; });</script>
+</body>
+</html>

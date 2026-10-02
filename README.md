@@ -12,6 +12,7 @@ Browser-based physics tools, simulations, classroom utilities and games. Student
 - **Games and demos:** [Spellwave](fun/spellwave.html) and [ASCII Camera](fun/ascii_cam.html).
 - **GCSE Physics:** school-specific unit companions, available by direct link.
 - **Physics flashcards:** [Combined and Separate Science retrieval practice](beta/phy_flashcard/phy_flashcard.html) in beta.
+- **In beta:** 3D simulations of [Electric Motors](beta/electric_motors.html) and [Charges in Fields](beta/charges_in_fields.html), awaiting review.
 
 ### GCSE Physics
 
