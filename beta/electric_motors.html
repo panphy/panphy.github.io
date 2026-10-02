@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <meta name="description" content="Explore electric motors in interactive 3D: the motor effect and F = BIL, a DC motor with a split-ring commutator, a synchronous AC motor and a three-phase induction motor.">
+  <meta name="description" content="Explore electric motors in interactive 3D: the motor effect and F = BIL, a DC motor with a split-ring commutator, and a synchronous AC motor.">
   <meta name="theme-color" content="#F8F6F1">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
@@ -38,50 +38,64 @@
   </header>
   <script>window.PanPhyThemeToggle.mount(document.getElementById('theme-button'), { darkStorageKey: 'electric-motors-dark' });</script>
   <main>
-    <div class="intro"><div><p class="eyebrow">THE MOTOR LAB / ELECTRICITY INTO MOTION</p><h1>Current in.<br>Motion out<span>!</span></h1></div><p>Push a wire with a magnet. Spin a coil. Chase a rotating field.<br>Find out what keeps every electric motor turning.</p></div>
+    <div class="intro"><div><p class="eyebrow">THE MOTOR LAB / ELECTRICITY INTO MOTION</p><h1>Current in.<br>Motion out<span>!</span></h1></div><p>Push a wire with a magnet. Spin a coil. Follow the current.<br>Find out what keeps every electric motor turning.</p></div>
     <nav class="models" aria-label="Choose a motor">
       <button type="button" data-mode="force" aria-pressed="true"><span>01 / FORCE</span><strong>Motor effect</strong><small>F = BIL</small></button>
       <button type="button" data-mode="dc" aria-pressed="false"><span>02 / DC</span><strong>DC motor</strong><small>Split-ring commutator</small></button>
       <button type="button" data-mode="ac" aria-pressed="false"><span>03 / AC</span><strong>AC motor</strong><small>Slip rings, in step</small></button>
-      <button type="button" data-mode="induction" aria-pressed="false"><span>04 / 3-PHASE</span><strong>Induction motor</strong><small>Rotating magnetic field</small></button>
     </nav>
     <div class="lab-strip">
       <span>YOUR MISSION <b>Find out what keeps a motor turning.</b></span>
-      <span class="progress-group"><span id="progress" class="mono">0 / 4 discoveries unlocked</span><button type="button" id="reset-progress" class="link-button">Reset progress</button></span>
+      <span class="progress-group"><span id="progress" class="mono">0 / 3 discoveries unlocked</span><button type="button" id="reset-progress" class="link-button">Reset progress</button></span>
     </div>
     <section class="workspace" aria-label="Electric motor explorer">
       <div class="viewer-panel" id="viewer-panel">
         <div class="viewer-heading"><span id="scene-title">THE MOTOR EFFECT</span><span class="scale" id="scale-note">MOTION SLOWED · NOT TO SCALE</span><button id="fullscreen" class="panphy-fullscreen-button" type="button" aria-controls="viewer-panel" aria-pressed="false" aria-label="Enter fullscreen" title="Enter fullscreen"><svg class="panphy-fs-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M4 9V4h5M15 4h5v5M20 15v5h-5M9 20H4v-5"/></svg></button></div>
         <div id="viewer" tabindex="0" role="img" aria-label="Interactive 3D motor. Drag or use arrow keys to rotate; scroll, pinch or plus and minus keys to zoom.">
           <p id="load-status" role="status">Loading the 3D model…</p>
-          <div class="legend overlay" aria-label="Legend">
+          <p class="gesture overlay" aria-hidden="true">Drag to rotate · Pinch or scroll to zoom</p>
+        </div>
+          <div class="legend" aria-label="Legend">
             <span data-legend="north"><i style="background:var(--north)">N</i> North pole</span>
             <span data-legend="south"><i style="background:var(--south)">S</i> South pole</span>
             <span data-legend="field"><i style="background:var(--field)">B</i> Magnetic field</span>
-            <span data-legend="current"><i style="background:var(--current)">I</i> Current</span>
+            <span data-legend="current"><i style="background:var(--current)">I</i> Conventional current</span>
             <span data-legend="force"><i style="background:var(--force)">F</i> Force</span>
-            <span data-legend="phase1"><i style="background:var(--phase1)">1</i> Phase 1</span>
-            <span data-legend="phase2"><i style="background:var(--phase2)">2</i> Phase 2</span>
-            <span data-legend="phase3"><i style="background:var(--phase3)">3</i> Phase 3</span>
           </div>
-          <p class="gesture overlay" aria-hidden="true">Drag to rotate · Pinch or scroll to zoom</p>
-          <div class="endview overlay" id="endview" hidden>
-            <p class="endview-title">END VIEW · FROM THE RINGS</p>
-            <canvas id="endview-canvas" role="img" aria-label="End view of the coil and commutator"></canvas>
-            <p id="endview-contact"></p>
-            <p id="endview-rule"></p>
-          </div>
-          <div class="stack overlay">
-            <div class="equation" id="equation" aria-live="off"></div>
-            <div class="graph" id="graph"><canvas id="graph-canvas" role="img" aria-label="Graph"></canvas></div>
-          </div>
+        <div class="observation" aria-live="off"><strong id="observation-title">Follow the force</strong><p id="observation-text"></p></div>
+        <div id="turning-display" class="turning-display" hidden>
+          <svg viewBox="0 0 80 80" aria-hidden="true"><circle cx="40" cy="40" r="26"/><path id="turning-arc"/><path id="turning-head"/></svg>
+          <div><strong id="turning-value"></strong><p id="turning-explanation"></p></div>
         </div>
         <p class="particle-readout mono" id="particle-readout" role="status">Tap a part to discover its job.</p>
         <div class="toolbar" aria-label="View controls">
           <button type="button" id="motion" class="primary" aria-pressed="true"><svg viewBox="0 0 24 24" aria-hidden="true"><path id="motion-icon" d="M7 5h3v14H7zM14 5h3v14h-3z"/></svg><span id="motion-label" data-reserve="Pause motion">Pause motion</span></button>
+          <button type="button" id="step">Step forward</button>
           <button type="button" id="reset" data-reserve="Reset">Reset</button>
           <button type="button" id="power" class="experiment" aria-pressed="false" data-reserve="Switch off current">Switch on current</button>
           <button type="button" id="spin" class="experiment" data-reserve="Give it a spin" hidden>Give it a spin</button>
+        </div>
+        <div class="study-controls" aria-label="Animation and display">
+          <label for="playback">Playback <select id="playback"><option value="0.15">Very slow</option><option value="0.35" selected>Slow</option><option value="1">Standard</option></select></label>
+          <button type="button" id="home-view">Reset view</button>
+          <button type="button" id="vertical-view" hidden>Inspect vertical coil</button>
+          <label><input type="checkbox" id="show-flow"> Moving current markers</label>
+        </div>
+        <p class="playback-note">Playback changes viewing speed only. Step forward advances up to 0.10 model seconds and pauses.</p>
+        <div class="study-panels">
+          <div class="endview" id="endview" hidden>
+            <p class="endview-title">END VIEW · FROM THE RINGS</p>
+            <canvas id="endview-canvas" role="img" aria-label="End view of the coil and commutator"></canvas>
+            <p id="endview-contact"></p>
+            <p id="endview-rule"></p>
+            <p class="connection-key">Purple A and green B keep their identity. The + / − badges show supply connections, not charge stored on the wire. With the split ring, these connections swap every half-turn.</p>
+          </div>
+          <details id="measurements"><summary>Measurements &amp; graphs</summary>
+          <div class="stack">
+            <div class="equation" id="equation" aria-live="off"></div>
+            <div class="graph" id="graph"><canvas id="graph-canvas" role="img" aria-label="Graph"></canvas></div>
+          </div>
+          </details>
         </div>
         <div class="sample-controls" id="controls"></div>
         <p id="action-hint"></p>
@@ -97,10 +111,10 @@
       </aside>
     </section>
     <section class="final-challenge" aria-labelledby="final-title">
-      <div class="final-intro"><p class="eyebrow">FINAL CHALLENGE</p><h2 id="final-title">Put it all together.</h2><p id="final-status">Unlock all four discoveries to open the final challenge.</p></div>
+      <div class="final-intro"><p class="eyebrow">FINAL CHALLENGE</p><h2 id="final-title">Put it all together.</h2><p id="final-status">Unlock all three discoveries to open the final challenge.</p></div>
       <div class="question" id="final-quiz" hidden></div>
     </section>
-    <section class="reality"><span aria-hidden="true">↗</span><div><h2>A model is an explanation, not a photograph.</h2><p>Real motors turn tens of times every second, so all the motion here is slowed down a great deal; the supply frequencies are shown slowed down too. Sizes, colours and arrow lengths are chosen to make the ideas visible. Force arrows grow with the size of the force but are not drawn to an exact scale.</p><p>The forces and torques in the readouts use real formulas and values: a 5.0 cm rod in the motor-effect view, and a coil with 4.0 cm long sides and an area of 20 cm² in the DC and AC views. The coil is drawn with one loop for every 10 turns. The motion uses a simple model of friction and air resistance, and the DC supply keeps the current steady; in a real motor the back emf makes the current fall as the motor speeds up. The AC motor’s coil includes a damper winding, as real synchronous motors do, which stops it swinging back and forth about the synchronous speed.</p><p>The induction motor uses a standard torque–slip curve with an exaggerated slip so you can see it; real motors usually slip by only a few per cent at full load. The field arrows show the direction of the combined field inside the motor, and the rotor bar colours show the induced currents in a simplified way.</p></div></section>
+    <section class="reality"><span aria-hidden="true">↗</span><div><h2>A model is an explanation, not a photograph.</h2><p>Real motors turn tens of times every second, so all the motion here is slowed down a great deal; the supply frequencies are shown slowed down too. Sizes, colours and arrow lengths are chosen to make the ideas visible. The coil’s pink force arrows grow in proportion to force up to a display limit. Their scale is fixed within each view; the end view uses the same force dependence as the 3D coil. The curved turning-effect arrow shows torque relative to the maximum at the selected settings. It vanishes at vertical, where the forces act through the axle. Orange arrows show conventional current direction; optional moving markers are direction cues, not individual charges or their actual speed. Playback speed slows the whole model together, including the supply and graphs; the readouts use model time.</p><p>The forces and torques in the readouts use real formulas and values: a 5.0 cm rod in the motor-effect view, and a coil with 4.0 cm long sides and an area of 20 cm² in the DC and AC views. The coil is drawn with one loop for every 10 turns. The motion uses a simple model of friction and air resistance, and the DC supply keeps the current steady; in a real motor the back emf makes the current fall as the motor speeds up. The AC motor’s coil includes a damper winding, as real synchronous motors do, which stops it swinging back and forth about the synchronous speed.</p></div></section>
   </main>
   <footer><span>PanPhy Labs · Electric motors (beta)</span><a href="/beta/">More beta apps</a></footer>
   <noscript><p class="no-script">Enable JavaScript to explore the 3D models. The descriptions remain available above.</p></noscript>

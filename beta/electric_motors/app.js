@@ -8,6 +8,8 @@ const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matc
 const state = {
   mode: 'force',
   playing: !reducedMotion,
+  playback: 0.35,
+  showFlow: false,
   visible: true,
   powered: false,
   reverse: false,
@@ -16,7 +18,6 @@ const state = {
   pauseSwap: false,
   swapPaused: false,
   endView: true,
-  swap: false,
   values: Object.fromEntries(Object.entries(STEPPERS).map(([key, spec]) => [key, spec.value]))
 };
 
@@ -45,13 +46,11 @@ const ROD = { gain: 90, damping: 1.6, maxSpeed: 4.5 };
 const DC = { inertia: 0.012, linear: 0.002, drag: 6e-4, friction: 0.002 };
 // The AC coil also has a damper winding, which pulls it towards the synchronous speed once it is close.
 const AC = { inertia: 0.03, linear: 0.003, drag: 1e-4, friction: 0.002, damper: 0.05 };
-const INDUCTION = { inertia: 0.25, peakSlip: 0.2, friction: 0.01 };
 
 const HOME = {
   force: { extent: { w: 4.4, h: 2.9 }, target: [-0.4, 0, 0], direction: [0.55, 0.24, 1.2] },
-  dc: { extent: { w: 3.6, h: 3.4 }, target: [0, -0.7, 0.3], direction: [0.75, 0.42, 1.25] },
-  ac: { extent: { w: 3.6, h: 3.4 }, target: [0, -0.7, 0.3], direction: [0.75, 0.42, 1.25] },
-  induction: { extent: { w: 3.3, h: 3.3 }, target: [0, 0, 0.4], direction: [0.55, 0.45, 1.3] }
+  dc: { extent: { w: 3.6, h: 3.4 }, target: [0, -0.7, 0.3], direction: [0.45, 1.25, 1.7] },
+  ac: { extent: { w: 3.6, h: 3.4 }, target: [0, -0.7, 0.3], direction: [0.45, 1.25, 1.7] },
 };
 
 const viewer = $('viewer');
@@ -132,7 +131,7 @@ let selected = null;
 function readPalette() {
   const styles = getComputedStyle(document.documentElement);
   const css = name => styles.getPropertyValue(name).trim();
-  const names = ['north', 'south', 'field', 'current', 'force', 'copper', 'steel', 'carbon', 'phase1', 'phase2', 'phase3', 'positive', 'negative', 'half-a', 'half-b'];
+  const names = ['north', 'south', 'field', 'current', 'force', 'copper', 'steel', 'carbon', 'positive', 'negative', 'half-a', 'half-b'];
   const result = { dark: document.documentElement.getAttribute('data-theme') === 'dark', css: {} };
   for (const name of names) {
     result[name] = new THREE.Color(css(`--${name}`));
@@ -174,6 +173,30 @@ function labelSprite(text, color, size = 0.5) {
   sprite.raycast = () => {};
   return sprite;
 }
+// The letter identifies the same coil end; the sign identifies its supply connection.
+// Reuse three textures so a half-turn never allocates a new canvas or GPU texture.
+function connectionBadge(letter, color) {
+  const maps = ['+', '−', ''].map(sign => canvasTexture(256, 128, (ctx, w, h) => {
+    ctx.fillStyle = palette.css['bg-color'];
+    ctx.strokeStyle = color;
+    ctx.lineWidth = 8;
+    ctx.beginPath();
+    ctx.roundRect(5, 5, w - 10, h - 10, 28);
+    ctx.fill();
+    ctx.stroke();
+    ctx.fillStyle = palette.css['text-main'];
+    ctx.font = '700 80px Manrope, system-ui, sans-serif';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(sign ? `${letter} ${sign}` : letter, w / 2, h / 2 + 3);
+  }));
+  const badge = new THREE.Sprite(new THREE.SpriteMaterial({ map: maps[2], depthWrite: false, depthTest: false }));
+  badge.scale.set(0.66, 0.33, 1);
+  badge.renderOrder = 10;
+  badge.userData.connectionMaps = maps;
+  badge.raycast = () => {};
+  return badge;
+}
 // A flat letter stuck to a face of the apparatus, so it never clips into it.
 function faceLabel(text, color, size = 0.6) {
   const texture = canvasTexture(128, 128, (ctx, w, h) => {
@@ -187,18 +210,6 @@ function faceLabel(text, color, size = 0.6) {
   mesh.raycast = () => {};
   return mesh;
 }
-// Fine stripes suggest the many turns of wire in a winding.
-function windingTexture(color) {
-  const texture = canvasTexture(64, 256, (ctx, w, h) => {
-    ctx.fillStyle = `#${color.getHexString()}`;
-    ctx.fillRect(0, 0, w, h);
-    ctx.fillStyle = 'rgba(0,0,0,0.22)';
-    for (let y = 0; y < h; y += 8) ctx.fillRect(0, y, w, 2);
-  });
-  texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
-  return texture;
-}
-
 // ---------- Object helpers ----------
 const UP = new THREE.Vector3(0, 1, 0);
 function material(color, options = {}) {
@@ -423,10 +434,10 @@ function buildForce() {
   const bottomLabel = faceLabel('S', '#ffffff', 0.5);
   bottomLabel.position.set(-1.6, -1.4, 1.21);
   magnet.add(top, bottom, yoke, topLabel, bottomLabel);
-  const fieldMaterial = new THREE.MeshBasicMaterial({ color: palette.field, transparent: true, opacity: 0.75 });
+  const fieldMaterial = new THREE.MeshBasicMaterial({ color: palette.field, transparent: true, opacity: 0.32 });
   const lines = new THREE.Group();
-  for (const x of [-1.8, -0.9, 0, 0.9, 1.8]) {
-    for (const z of [-0.55, 0.55]) lines.add(fieldLine(new THREE.Vector3(x, 1.15, z), new THREE.Vector3(x, -1.15, z), fieldMaterial, 0.28));
+  for (const x of [-1.6, 0, 1.6]) {
+    for (const z of [-0.55]) lines.add(fieldLine(new THREE.Vector3(x, 1.15, z), new THREE.Vector3(x, -1.15, z), fieldMaterial, 0.28));
   }
   magnet.add(lines);
   group.add(magnet);
@@ -509,10 +520,10 @@ function stepForce(delta) {
   sim.rodHolder.position.x = sim.x;
   sim.rod.rotation.y -= sim.v * delta / 0.08;
   if (on) sim.phase += delta * (0.3 + state.values.current * 0.17);
-  placeMarkers(sim.markers, [forcePath()], sim.phase, on);
+  placeMarkers(sim.markers, [forcePath()], sim.phase, on && state.showFlow, 0.7);
   setMarkerGlow(sim.markers, Math.min(1, state.values.current / 3));
   const origin = new THREE.Vector3(sim.x, 0.24, 0);
-  setArrow(sim.triad.field, origin, field, on ? 0.75 : 0);
+  setArrow(sim.triad.field, origin, field, 0.75);
   setArrow(sim.triad.current, origin, current, on ? 0.75 : 0);
   setArrow(sim.triad.force, origin, force.lengthSq() ? new THREE.Vector3(Math.sign(force.x), 0, 0) : force, on && size > 0 ? 0.35 + Math.min(1.9, size / 0.02 * 0.55) : 0);
 }
@@ -521,17 +532,16 @@ function stepForce(delta) {
 function buildCoil(kind) {
   const group = new THREE.Group();
   stage.add(group);
-  group.add(poleBlock('north', [0.8, 2.6, 2.9], new THREE.Vector3(-2.2, 0, 0)));
-  group.add(poleBlock('south', [0.8, 2.6, 2.9], new THREE.Vector3(2.2, 0, 0)));
+  group.add(poleBlock('north', [0.8, 2.6, 0.8], new THREE.Vector3(-2.2, 0, 0)));
+  group.add(poleBlock('south', [0.8, 2.6, 0.8], new THREE.Vector3(2.2, 0, 0)));
   const north = faceLabel('N', '#ffffff', 0.6);
-  north.position.set(-2.2, 0.75, 1.46);
+  north.position.set(-2.2, 0.75, 0.41);
   const south = faceLabel('S', '#ffffff', 0.6);
-  south.position.set(2.2, 0.75, 1.46);
+  south.position.set(2.2, 0.75, 0.41);
   group.add(north, south);
-  const fieldMaterial = new THREE.MeshBasicMaterial({ color: palette.field, transparent: true, opacity: 0.6 });
-  for (const y of [-0.85, 0, 0.85]) {
-    for (const z of [-0.9, 0, 0.9]) {
-      if (y === 0 && z === 0) continue;
+  const fieldMaterial = new THREE.MeshBasicMaterial({ color: palette.field, transparent: true, opacity: 0.3 });
+  for (const y of [-1, -0.5, 0, 0.5, 1]) {
+    for (const z of [-0.9, 0.5]) {
       group.add(fieldLine(new THREE.Vector3(-1.8, y, z), new THREE.Vector3(1.8, y, z), fieldMaterial, 0.88));
     }
   }
@@ -563,7 +573,7 @@ function buildCoil(kind) {
   const supply = battery(new THREE.Vector3(0, SUPPLY_Y + (kind === 'ac' ? 0.05 : 0), SUPPLY_Z), kind === 'ac' ? 'ac' : 'dc');
   group.add(supply);
 
-  // Up to 10 drawn turns with about 21 beads each.
+  // Optional sparse flow cues supplement the stationary direction arrows.
   const markers = currentMarkers(240, palette.current);
   rotor.add(markers);
   const forces = [makeArrow(palette.force, 0.05), makeArrow(palette.force, 0.05)];
@@ -572,7 +582,22 @@ function buildCoil(kind) {
     pickables.push(...arrow.children);
     group.add(arrow);
   }
-  sim = { kind, group, rotor, coilGroup, ringParts, brushes, wires, markers, forces, supply, theta: 0.5, omega: 0, phase: 0, time: 0, supplyTime: 0, trace: [], history: [], current: 0, torque: 0 };
+  const currentArrows = [1, -1].map(() => {
+    const arrow = makeArrow(palette.current, 0.035);
+    arrow.traverse(child => { child.userData.part = 'current'; });
+    pickables.push(...arrow.children);
+    rotor.add(arrow);
+    return arrow;
+  });
+  const sideLabels = ['A', 'B'].map((letter, i) => {
+    const label = kind === 'dc'
+      ? connectionBadge(letter, palette.css[i ? 'half-b' : 'half-a'])
+      : labelSprite(letter, palette.css['text-main'], 0.32);
+    label.position.set((i ? -1 : 1) * 1.42, 0, 1.25);
+    rotor.add(label);
+    return label;
+  });
+  sim = { kind, currentArrows, sideLabels, group, rotor, coilGroup, ringParts, brushes, wires, markers, forces, supply, theta: 0.5, omega: 0, phase: 0, time: 0, supplyTime: 0, trace: [], history: [], current: 0, torque: 0 };
   buildCoilWinding();
   buildRings();
 }
@@ -587,21 +612,34 @@ function buildCoilWinding() {
   const loops = Math.max(1, Math.round(turns / 10));
   const mat = material(palette.copper, { metalness: 0.6, roughness: 0.3 });
   // In the DC motor the leads take the colour of the half-ring (or slip ring) they are joined to: A purple, B green.
+  const split = sim.kind === 'dc' && state.commutator;
+  const ringZ = split ? [RING_Z, RING_Z] : [RING_Z - 0.2, RING_Z + 0.2];
   const leadMats = sim.kind === 'dc' ? [material(palette['half-a'], { metalness: 0.4, roughness: 0.35 }), material(palette['half-b'], { metalness: 0.4, roughness: 0.35 })] : [mat, mat];
   for (let i = 0; i < loops; i++) {
     const offset = (i - (loops - 1) / 2) * 0.05;
     const r = COIL_R + Math.abs(offset) * 0.3;
     const points = [
-      new THREE.Vector3(RING_R, offset * 0.4, RING_Z - 0.25),
+      new THREE.Vector3(RING_R - 0.01, offset * 0.4, ringZ[0]),
       new THREE.Vector3(r, offset, COIL_HALF + 0.2),
       new THREE.Vector3(r, offset, -COIL_HALF),
       new THREE.Vector3(-r, offset, -COIL_HALF),
       new THREE.Vector3(-r, offset, COIL_HALF + 0.2),
-      new THREE.Vector3(-RING_R, offset * 0.4, RING_Z - 0.25 + (sim.kind === 'dc' && state.commutator ? 0 : 0.4))
+      new THREE.Vector3(-RING_R + 0.01, offset * 0.4, ringZ[1])
     ];
-    coilGroup.add(part(tube(points.slice(1, 5), 0.035, mat, 120), 'coil'));
-    coilGroup.add(part(tube(points.slice(0, 2), 0.035, leadMats[0], 20), 'coil'));
-    coilGroup.add(part(tube(points.slice(4), 0.035, leadMats[1], 20), 'coil'));
+    // One uninterrupted tube avoids open, mismatched end faces at the bends.
+    // Material boundaries sit on the straight coil sides, beyond each bend.
+    const segments = 200;
+    const winding = tube(points, 0.035, [mat, ...leadMats], segments);
+    const lengths = points.slice(1).map((point, j) => point.distanceTo(points[j]));
+    const total = lengths.reduce((sum, length) => sum + length, 0);
+    const leadEnd = Math.round((lengths[0] + 0.25) / total * segments);
+    const leadStart = Math.round((total - lengths[lengths.length - 1] - 0.25) / total * segments);
+    const indicesPerSegment = winding.geometry.parameters.radialSegments * 6;
+    winding.geometry.clearGroups();
+    winding.geometry.addGroup(0, leadEnd * indicesPerSegment, 1);
+    winding.geometry.addGroup(leadEnd * indicesPerSegment, (leadStart - leadEnd) * indicesPerSegment, 0);
+    winding.geometry.addGroup(leadStart * indicesPerSegment, (segments - leadStart) * indicesPerSegment, 2);
+    coilGroup.add(part(winding, 'coil'));
   }
 }
 // One path along each turn drawn in buildCoilWinding, so every bead is a round ball centred on its own wire.
@@ -695,7 +733,9 @@ function stepCoil(delta) {
   const dt = delta / steps;
   const watchSwap = sim.kind === 'dc' && state.pauseSwap && state.commutator && state.powered;
   let swapped = false;
+  let elapsed = 0;
   for (let i = 0; i < steps; i++) {
+    elapsed += dt;
     const before = Math.cos(sim.theta);
     if (sim.kind === 'ac' && state.powered) sim.supplyTime += dt;
     const current = coilCurrent();
@@ -724,28 +764,78 @@ function stepCoil(delta) {
       break;
     }
   }
-  sim.time += delta;
+  // Keep arrows and readouts in the same instant, including while paused.
+  sim.current = coilCurrent();
+  sim.torque = -coilConstant() * sim.current * Math.cos(sim.theta);
+  sim.time += elapsed;
   sim.rotor.rotation.z = sim.theta;
-  sim.history.push([sim.time, sim.theta]);
+  if (sim.kind === 'dc') {
+    sim.sideLabels.forEach((badge, i) => {
+      const positive = halfOnPlus() === (i ? 'B' : 'A');
+      badge.material.map = badge.userData.connectionMaps[state.powered ? (positive ? 0 : 1) : 2];
+    });
+  }
+  if (delta > 0) sim.history.push([sim.time, sim.theta]);
   while (sim.history.length && sim.time - sim.history[0][0] > 3) sim.history.shift();
-  sim.trace.push([sim.time, sim.current, sim.torque]);
+  if (delta > 0) sim.trace.push([sim.time, sim.current, sim.torque]);
   while (sim.trace.length && sim.time - sim.trace[0][0] > 8) sim.trace.shift();
 
-  sim.phase += delta * (0.25 + Math.abs(sim.current) * 0.2) * Math.sign(sim.current);
-  placeMarkers(sim.markers, coilPaths(), sim.phase, Math.abs(sim.current) > 0.05);
+  sim.phase += elapsed * (0.25 + Math.abs(sim.current) * 0.2) * Math.sign(sim.current);
+  placeMarkers(sim.markers, coilPaths().slice(0, 1), sim.phase, state.showFlow && Math.abs(sim.current) > 0.05, 0.85);
+  sim.currentArrows.forEach((arrow, i) => {
+    const side = i ? -1 : 1;
+    const direction = -side * Math.sign(sim.current);
+    setArrow(arrow, new THREE.Vector3(side * (COIL_R + 0.23), 0, -direction * 0.675), new THREE.Vector3(0, 0, direction), Math.abs(sim.current) > 0.05 ? 1.35 : 0);
+  });
   setMarkerGlow(sim.markers, Math.min(1, Math.abs(sim.current) / 3));
 
   // Force on each long side: F = NBIL, vertical, opposite on the two sides.
   const turns = sim.kind === 'ac' ? AC_TURNS : state.values.turns;
   const field = sim.kind === 'ac' ? AC_FIELD : state.values.field;
   const sideForce = turns * field * sim.current * COIL_SIDE;
-  const length = Math.min(2.0, Math.abs(sideForce) * 0.9 + (Math.abs(sideForce) > 0.01 ? 0.3 : 0));
+  const length = coilForceArrowLength(sideForce);
   const c = Math.cos(sim.theta);
   const s = Math.sin(sim.theta);
   const down = new THREE.Vector3(0, -Math.sign(sideForce), 0);
   setArrow(sim.forces[0], new THREE.Vector3(COIL_R * c, COIL_R * s, 0), down, length);
   setArrow(sim.forces[1], new THREE.Vector3(-COIL_R * c, -COIL_R * s, 0), down.clone().negate(), length);
   if (swapped) pauseAtSwap();
+}
+// Fixed force scale: doubling NBIL doubles arrow length until the display limit.
+function coilSideForce() {
+  const turns = sim.kind === 'ac' ? AC_TURNS : state.values.turns;
+  const field = sim.kind === 'ac' ? AC_FIELD : state.values.field;
+  return turns * field * sim.current * COIL_SIDE;
+}
+function coilForceArrowLength(force) {
+  return Math.min(2.4, Math.abs(force) * 1.5);
+}
+function updateTurningDisplay() {
+  const show = sim && (sim.kind === 'dc' || sim.kind === 'ac');
+  $('turning-display').hidden = !show;
+  $('vertical-view').hidden = !show;
+  if (!show) return;
+  const peakCurrent = sim.kind === 'ac' ? state.values.peak : state.values.current;
+  const peakTorque = coilConstant() * peakCurrent;
+  const fraction = peakTorque > 0 ? Math.min(1, Math.abs(sim.torque) / peakTorque) : 0;
+  const arc = $('turning-arc');
+  const head = $('turning-head');
+  // Treat round-off at the exact vertical position as zero.
+  arc.hidden = head.hidden = fraction < 1e-6;
+  arc.style.display = head.style.display = fraction < 1e-6 ? 'none' : '';
+  const direction = sim.torque < 0 ? -1 : 1;
+  const start = -Math.PI / 2;
+  const sweep = fraction * Math.PI * 1.5;
+  const end = start + direction * sweep;
+  const x = 40 + 26 * Math.cos(end), y = 40 - 26 * Math.sin(end);
+  arc.setAttribute('d', `M40 66 A26 26 0 ${sweep > Math.PI ? 1 : 0} ${direction < 0 ? 1 : 0} ${x} ${y}`);
+  const tx = -direction * Math.sin(end), ty = -direction * Math.cos(end);
+  head.setAttribute('d', `M${x + tx * 4} ${y + ty * 4} L${x - tx * 5 - ty * 4} ${y - ty * 5 + tx * 4} L${x - tx * 5 + ty * 4} ${y - ty * 5 - tx * 4} Z`);
+  const vertical = Math.abs(Math.cos(sim.theta)) < 1e-6;
+  setText('turning-value', `Turning effect: ${fmt(Math.abs(sim.torque), 3)} N m · ${Math.round(fraction * 100)}% of peak`);
+  setText('turning-explanation', vertical && Math.abs(sim.current) > 0.05
+    ? 'Vertical: the forces act through the axle. Force remains, but the turning effect is zero.'
+    : `Force on each side: ${fmt(Math.abs(coilSideForce()), 2)} N. The turning arrow shrinks as the force lines approach the axle; pink arrows show the forces themselves.`);
 }
 // Which half-ring touches the + brush. Half A sits on the right-hand brush while cos θ ≥ 0; the + brush is on the right unless the current is reversed.
 function halfOnPlus() {
@@ -775,172 +865,6 @@ function coilSpeed() {
   const [t0, a0] = history[0];
   const [t1, a1] = history[history.length - 1];
   return t1 > t0 ? (a1 - a0) / (t1 - t0) / (2 * Math.PI) : 0;
-}
-
-// ---------- Mode 4: induction motor ----------
-const POLE_ANGLES = [0, 1, 2, 3, 4, 5].map(k => k * Math.PI / 3);
-// Pole k belongs to coil pair k mod 3; the pair's axis is at 0°, 120° or 240°.
-const PAIR_OF_POLE = [0, 2, 1, 0, 2, 1];
-const BAR_COUNT = 14;
-function buildInduction() {
-  const group = new THREE.Group();
-  stage.add(group);
-  const steel = material(palette.steel, { metalness: 0.45, roughness: 0.5 });
-  const shape = new THREE.Shape();
-  shape.absarc(0, 0, 3.0, 0, Math.PI * 2, false);
-  const hole = new THREE.Path();
-  hole.absarc(0, 0, 2.55, 0, Math.PI * 2, true);
-  shape.holes.push(hole);
-  const ringGeometry = new THREE.ExtrudeGeometry(shape, { depth: 2.4, bevelEnabled: false, curveSegments: 64 });
-  ringGeometry.translate(0, 0, -1.2);
-  const stator = part(new THREE.Mesh(ringGeometry, steel), 'stator');
-  group.add(stator);
-  const coils = [];
-  POLE_ANGLES.forEach((angle, k) => {
-    const pole = new THREE.Group();
-    pole.rotation.z = angle;
-    const tooth = part(new THREE.Mesh(new THREE.BoxGeometry(1.15, 0.5, 2.3), steel), 'stator');
-    tooth.position.x = 2.0;
-    const shoe = part(new THREE.Mesh(new THREE.BoxGeometry(0.14, 0.9, 2.3), steel), 'stator');
-    shoe.position.x = 1.5;
-    const winding = new THREE.Mesh(new THREE.BoxGeometry(0.62, 0.74, 2.5), material(0xffffff, { roughness: 0.5, metalness: 0.3 }));
-    winding.position.x = 2.1;
-    pole.add(tooth, shoe, winding);
-    group.add(pole);
-    coils.push(winding);
-    pickables.push(winding);
-  });
-  const rotor = new THREE.Group();
-  group.add(rotor);
-  const core = part(new THREE.Mesh(new THREE.CylinderGeometry(1.08, 1.08, 2.3, 48), material(palette.steel, { transparent: true, opacity: 0.35, roughness: 0.6, depthWrite: false })), 'cage');
-  core.rotation.x = Math.PI / 2;
-  rotor.add(core);
-  const copper = material(palette.copper, { metalness: 0.65, roughness: 0.3 });
-  for (const z of [-1.25, 1.25]) {
-    const endRing = part(new THREE.Mesh(new THREE.TorusGeometry(1.15, 0.09, 12, 64), copper), 'cage');
-    endRing.position.z = z;
-    rotor.add(endRing);
-  }
-  const bars = [];
-  for (let j = 0; j < BAR_COUNT; j++) {
-    const angle = j / BAR_COUNT * Math.PI * 2;
-    const bar = part(new THREE.Mesh(new THREE.CylinderGeometry(0.075, 0.075, 2.5, 12), material(palette.copper, { metalness: 0.5, roughness: 0.3, emissive: 0x000000 })), 'cage');
-    bar.rotation.x = Math.PI / 2;
-    bar.position.set(1.15 * Math.cos(angle), 1.15 * Math.sin(angle), 0);
-    bar.userData.angle = angle;
-    rotor.add(bar);
-    bars.push(bar);
-  }
-  const shaft = part(new THREE.Mesh(new THREE.CylinderGeometry(0.13, 0.13, 4.4, 20), material(palette.steel, { metalness: 0.8, roughness: 0.2 })), 'axle');
-  shaft.rotation.x = Math.PI / 2;
-  shaft.position.z = 0.4;
-  rotor.add(shaft);
-  // A marker flag on the shaft makes the rotor's speed easy to see.
-  const flag = new THREE.Mesh(new THREE.BoxGeometry(0.7, 0.16, 0.08), material(palette.current, { emissive: palette.current, emissiveIntensity: 0.25 }));
-  flag.position.set(0.35, 0, 2.55);
-  rotor.add(flag);
-
-  // The combined field inside the motor: a fan of parallel arrows that rotates.
-  const fieldGroup = new THREE.Group();
-  group.add(fieldGroup);
-  for (const offset of [-0.7, 0, 0.7]) {
-    const arrow = makeArrow(palette.field, offset === 0 ? 0.06 : 0.03, offset === 0 ? 0.95 : 0.6);
-    setArrow(arrow, new THREE.Vector3(-1.35, offset, 0), new THREE.Vector3(1, 0, 0), 2.7);
-    arrow.traverse(child => { child.userData.part = 'resultant'; });
-    pickables.push(...arrow.children);
-    fieldGroup.add(arrow);
-  }
-  // Phasor-style diagram in front of the rotor: one arrow per coil pair and their sum.
-  const phasors = new THREE.Group();
-  phasors.position.z = 2.2;
-  group.add(phasors);
-  const phaseArrows = [0, 1, 2].map(k => makeArrow(palette[`phase${k + 1}`], 0.03));
-  phaseArrows.forEach(arrow => phasors.add(arrow));
-  const sum = makeArrow(palette.field, 0.05);
-  phasors.add(sum);
-  const disc = new THREE.Mesh(new THREE.CircleGeometry(1.6, 64), new THREE.MeshBasicMaterial({ color: palette.field, transparent: true, opacity: palette.dark ? 0.08 : 0.06, depthWrite: false, side: THREE.DoubleSide }));
-  disc.position.z = -0.02;
-  phasors.add(disc);
-
-  sim = { kind: 'induction', group, rotor, coils, bars, fieldGroup, phaseArrows, sum, fieldAngle: 0, rotorAngle: 0, omega: 0, time: 0, torque: 0 };
-  colourCoils();
-}
-// Which phase feeds the coil pair at 0°, 120° and 240°. Swapping two supply wires swaps two of them.
-function phaseOfPair(pair) {
-  return state.swap ? [0, 2, 1][pair] : pair;
-}
-function colourCoils() {
-  sim.coils.forEach((coil, k) => {
-    const phase = phaseOfPair(PAIR_OF_POLE[k]);
-    coil.material.map?.dispose();
-    coil.material.map = windingTexture(palette[`phase${phase + 1}`]);
-    coil.material.needsUpdate = true;
-    coil.userData.part = `phase${phase + 1}`;
-  });
-}
-function inductionTorque(omega) {
-  // Kloss torque–slip curve: peak torque 1 at the peak slip, zero at synchronous speed.
-  const direction = state.swap ? -1 : 1;
-  const synchronous = 2 * Math.PI * state.values.supply;
-  const slip = (direction * synchronous - omega) / synchronous * direction;
-  const sm = INDUCTION.peakSlip;
-  return { torque: direction * 2 * sm * slip / (slip * slip + sm * sm), slip, synchronous, direction };
-}
-function stepInduction(delta) {
-  const steps = 6;
-  const dt = delta / steps;
-  const load = state.values.load / 100;
-  for (let i = 0; i < steps; i++) {
-    let torque = 0;
-    if (state.powered) {
-      sim.time += dt;
-      torque = inductionTorque(sim.omega).torque;
-    }
-    const resist = load + INDUCTION.friction;
-    let net;
-    if (Math.abs(sim.omega) < 0.02 && Math.abs(torque) <= resist) {
-      sim.omega = 0;
-      net = 0;
-    } else {
-      net = torque - resist * Math.sign(sim.omega || torque);
-    }
-    sim.omega += net / INDUCTION.inertia * dt;
-    sim.rotorAngle += sim.omega * dt;
-    sim.torque = torque;
-  }
-  const { direction, slip } = inductionTorque(sim.omega);
-  const phaseAngle = 2 * Math.PI * state.values.supply * sim.time;
-  // i_k = I cos(ωt − 120° k); with coil axes at 0°, 120°, 240° the sum is 1.5 I along angle ωt.
-  const pairCurrents = [0, 1, 2].map(pair => state.powered ? Math.cos(phaseAngle - phaseOfPair(pair) * 2 * Math.PI / 3) : 0);
-  const fieldAngle = direction * phaseAngle;
-  sim.fieldAngle = fieldAngle;
-  sim.pairCurrents = pairCurrents;
-  sim.rotor.rotation.z = sim.rotorAngle;
-  sim.fieldGroup.visible = state.powered;
-  sim.fieldGroup.rotation.z = fieldAngle;
-  const total = new THREE.Vector3();
-  sim.phaseArrows.forEach((arrow, pair) => {
-    const axis = new THREE.Vector3(Math.cos(pair * 2 * Math.PI / 3), Math.sin(pair * 2 * Math.PI / 3), 0);
-    const value = pairCurrents[pair];
-    total.addScaledVector(axis, value);
-    arrow.children.forEach(child => child.material.color.copy(palette[`phase${phaseOfPair(pair) + 1}`]));
-    setArrow(arrow, new THREE.Vector3(0, 0, 0.01 * pair), axis.clone().multiplyScalar(Math.sign(value) || 1), Math.abs(value) * 1.0);
-  });
-  setArrow(sim.sum, new THREE.Vector3(0, 0, 0.04), total, total.length());
-  sim.coils.forEach((coil, k) => {
-    const value = pairCurrents[PAIR_OF_POLE[k]];
-    coil.material.emissive.copy(palette[`phase${phaseOfPair(PAIR_OF_POLE[k]) + 1}`]);
-    coil.material.emissiveIntensity = 0.45 * Math.abs(value);
-  });
-  // Induced bar currents follow the field, scaled by the slip (no slip, no current).
-  const strength = state.powered ? THREE.MathUtils.clamp(Math.sqrt(Math.abs(slip) / 0.3), 0, 1) : 0;
-  for (const bar of sim.bars) {
-    const angle = sim.rotorAngle + bar.userData.angle;
-    const value = strength * Math.sin(angle - fieldAngle) * Math.sign(slip || 1) * direction;
-    const colour = value >= 0 ? palette.current : palette.negative;
-    bar.material.emissive.copy(colour);
-    bar.material.emissiveIntensity = Math.abs(value) * 0.9;
-  }
 }
 
 // ---------- Readouts ----------
@@ -973,6 +897,7 @@ function updateEquation() {
     let html = sim.kind === 'ac' ? `<div class="formula">I = I₀ sin(2πft)</div>` : `<div class="formula">T = B A N I cos θ</div>`;
     html += `<div class="sub">B = ${fmt(field)} T · A = 20 cm² · N = ${turns}</div>`;
     html += row('Current I', `${fmt(sim.current, 1)} A`);
+    html += row('Force on each side', `${fmt(Math.abs(coilSideForce()), 2)} N`);
     html += row('Coil to field θ', `${planeAngle}°`);
     html += row('Torque T', `<b>${fmt(Math.abs(sim.torque), 3)} N m</b>`);
     html += row('Speed (slowed)', `${fmt(speed, 2)} rev/s`);
@@ -987,21 +912,6 @@ function updateEquation() {
     }
     box.innerHTML = html;
     return;
-  }
-  if (sim.kind === 'induction') {
-    const fieldSpeed = state.powered ? state.values.supply : 0;
-    const speed = state.powered || Math.abs(sim.omega) > 0 ? Math.abs(sim.omega) / (2 * Math.PI) : 0;
-    const slip = fieldSpeed ? (fieldSpeed - speed) / fieldSpeed : 0;
-    const startTorque = 2 * INDUCTION.peakSlip / (1 + INDUCTION.peakSlip ** 2);
-    let html = `<div class="formula">s = (nₛ − n) / nₛ</div>`;
-    html += row('Field speed nₛ', `${fmt(fieldSpeed, 2)} rev/s`);
-    html += row('Rotor speed n', `${fmt(speed, 2)} rev/s`);
-    html += row('Slip s', `<b>${state.powered ? Math.round(slip * 100) : 0}%</b>`);
-    html += row('Load torque', `${state.values.load}% of peak`);
-    if (state.powered && speed < 0.01 && state.values.load / 100 + INDUCTION.friction > startTorque) html += `<div class="status warn">Stalled: the load is bigger than the starting torque.</div>`;
-    else if (state.powered && slip > INDUCTION.peakSlip * 1.6 && speed > 0.01) html += `<div class="status warn">Overloaded: slowing down.</div>`;
-    else if (state.powered) html += `<div class="status good">Field ${state.swap ? 'clockwise' : 'anticlockwise'} (seen from the front).</div>`;
-    box.innerHTML = html;
   }
 }
 
@@ -1112,6 +1022,23 @@ function drawEndView() {
     ctx.fillText(side * (state.reverse ? -1 : 1) > 0 ? '+' : '−', x, cy - brushH / 2 - 8);
   }
 
+  // Horizontal moment arms collapse to zero when the force lines pass through the axle.
+  if (Math.abs(sim.current) > 0.05) {
+    ctx.strokeStyle = c.force;
+    ctx.globalAlpha = 0.55;
+    ctx.lineWidth = 1.5;
+    ctx.setLineDash([3, 3]);
+    for (const side of sides) {
+      ctx.beginPath();
+      ctx.moveTo(cx, cy);
+      ctx.lineTo(side.x, cy);
+      ctx.moveTo(side.x, side.y);
+      ctx.lineTo(side.x, cy);
+      ctx.stroke();
+    }
+    ctx.setLineDash([]);
+    ctx.globalAlpha = 1;
+  }
   // Coil sides with current symbols and force arrows.
   const flowing = Math.abs(sim.current) > 0.05;
   const sideR = w * 0.055;
@@ -1144,12 +1071,13 @@ function drawEndView() {
     ctx.font = `700 11px ${font}`;
     const lx = side.sign * ux;
     const ly = side.sign * uy;
-    ctx.fillText(side.half, side.x + lx * sideR * 1.8, side.y - ly * sideR * 1.8);
+    const connection = state.powered ? ` ${halfOnPlus() === side.half ? '+' : '−'}` : '';
+    ctx.fillText(side.half + connection, side.x + lx * sideR * 2.1, side.y - ly * sideR * 2.1);
     if (flowing) {
       // Current into the page with the field to the right gives a downward force (F = IL × B).
       const dir = into ? 1 : -1;
       const y0 = side.y + dir * (sideR + 3);
-      const y1 = y0 + dir * h * 0.13;
+      const y1 = y0 + dir * h * 0.1 * coilForceArrowLength(coilSideForce());
       ctx.strokeStyle = c.force;
       ctx.fillStyle = c.force;
       ctx.lineWidth = 2.5;
@@ -1166,12 +1094,12 @@ function drawEndView() {
   }
   ctx.textBaseline = 'alphabetic';
 
-  setText('endview-contact', `+ brush touches half-ring ${halfLabel(halfOnPlus())}`);
+  setText('endview-contact', state.commutator ? `+ brush touches half-ring ${halfLabel(halfOnPlus())}` : `+ brush stays connected to side ${halfLabel(state.reverse ? 'B' : 'A')}`);
   let rule;
-  if (!flowing) rule = 'Switch the motor on to see the current (⊗ in, ⊙ out).';
+  if (!flowing) rule = 'No current. Symbols when flowing: ⊗ into the page, ⊙ out of the page.';
   else if (state.commutator) {
     const { into } = rightSide();
-    rule = `Right-hand side: current <b>${into ? 'in ⊗' : 'out ⊙'}</b>, pushed <b>${into ? 'down' : 'up'}</b>. Every time.`;
+    rule = `Right-hand side: current <b>${into ? 'in ⊗' : 'out ⊙'}</b>, pushed <b>${into ? 'down' : 'up'}</b>. Every time. ⊗ into the page · ⊙ out of the page.`;
   } else rule = 'Plain rings: no swap, so after half a turn the forces pull the coil back.';
   setText('endview-rule', rule);
 }
@@ -1288,58 +1216,6 @@ function drawGraph() {
     ctx.fillText('−', box.x0 - 4, box.y1 - 2);
     return;
   }
-  if (sim.kind === 'induction') {
-    // Torque–speed curve with the load line and the operating point.
-    const maxSpeed = 1.1;
-    axes(ctx, box, { xLabel: 'n / nₛ', yLabel: 'T / T peak' });
-    ctx.fillStyle = c['text-secondary'];
-    ctx.textAlign = 'center';
-    for (const value of [0, 0.5, 1]) ctx.fillText(String(value), X(value, 0, maxSpeed), box.y1 + 14);
-    ctx.textAlign = 'right';
-    ctx.fillText('1', box.x0 - 3, Y(1, 0, 1.15) + 3);
-    ctx.fillText('0', box.x0 - 3, box.y1);
-    ctx.strokeStyle = c.field;
-    ctx.lineWidth = 2;
-    ctx.beginPath();
-    const sm = INDUCTION.peakSlip;
-    for (let k = 0; k <= 100; k++) {
-      const ratio = k / 100;
-      const slip = 1 - ratio;
-      const torque = 2 * sm * slip / (slip * slip + sm * sm);
-      if (k === 0) ctx.moveTo(X(ratio, 0, maxSpeed), Y(torque, 0, 1.15));
-      else ctx.lineTo(X(ratio, 0, maxSpeed), Y(torque, 0, 1.15));
-    }
-    ctx.stroke();
-    const load = state.values.load / 100 + INDUCTION.friction;
-    ctx.strokeStyle = c.force;
-    ctx.setLineDash([5, 4]);
-    ctx.beginPath();
-    ctx.moveTo(box.x0, Y(load, 0, 1.15));
-    ctx.lineTo(box.x1, Y(load, 0, 1.15));
-    ctx.stroke();
-    ctx.setLineDash([]);
-    ctx.fillStyle = c.force;
-    ctx.textAlign = 'left';
-    ctx.fillText('load', box.x0 + 4, Y(load, 0, 1.15) - 4);
-    if (state.powered) {
-      const synchronous = 2 * Math.PI * state.values.supply;
-      const ratio = THREE.MathUtils.clamp(Math.abs(sim.omega) / synchronous, 0, maxSpeed);
-      const slip = 1 - ratio;
-      const torque = Math.max(0, 2 * sm * slip / (slip * slip + sm * sm));
-      ctx.fillStyle = c['brand-primary'];
-      ctx.beginPath();
-      ctx.arc(X(ratio, 0, maxSpeed), Y(torque, 0, 1.15), 5, 0, Math.PI * 2);
-      ctx.fill();
-    }
-    ctx.fillStyle = c['text-secondary'];
-    ctx.textAlign = 'right';
-    ctx.fillText('synchronous', X(1, 0, maxSpeed) + 2, box.y0 + 20);
-    ctx.strokeStyle = c['card-border'];
-    ctx.beginPath();
-    ctx.moveTo(X(1, 0, maxSpeed), box.y0 + 24);
-    ctx.lineTo(X(1, 0, maxSpeed), box.y1);
-    ctx.stroke();
-  }
 }
 
 // ---------- Camera ----------
@@ -1426,7 +1302,7 @@ function select(mesh) {
   const key = mesh.userData.part;
   readout.textContent = describe(key);
   // Arrows and coil windings already glow, so only plain parts get a highlight.
-  if (mesh.material?.emissive && !['force', 'current', 'resultant', 'cage'].includes(key) && !key.startsWith('phase')) {
+  if (mesh.material?.emissive && !['force', 'current'].includes(key)) {
     mesh.userData.savedEmissive = mesh.material.emissive.clone();
     mesh.userData.savedIntensity = mesh.material.emissiveIntensity;
     selected = mesh;
@@ -1463,11 +1339,57 @@ function setPlaying(playing) {
   $('motion-icon').setAttribute('d', state.playing ? 'M7 5h3v14H7zM14 5h3v14h-3z' : 'M8 5v14l11-7z');
 }
 $('motion').addEventListener('click', () => setPlaying(!state.playing));
+$('playback').addEventListener('change', event => { state.playback = Number(event.target.value); });
+$('show-flow').addEventListener('change', event => { state.showFlow = event.target.checked; stepSim(0); });
+$('home-view').addEventListener('click', () => resetView(true));
+$('vertical-view').addEventListener('click', () => {
+  if (!sim || !['dc', 'ac'].includes(sim.kind)) return;
+  setPlaying(false);
+  sim.theta = Math.PI / 2 + Math.round((sim.theta - Math.PI / 2) / Math.PI) * Math.PI;
+  sim.history = [];
+  sim.trace = [];
+  stepSim(0);
+  updateEquation();
+  drawEndView();
+  drawGraph();
+  updateObservation();
+  readout.textContent = 'VERTICAL COIL · The force lines pass through the axle, so their perpendicular distance from it is zero. The forces can still act, but they produce no turning effect.';
+});
+$('step').addEventListener('click', () => {
+  setPlaying(false);
+  state.swapPaused = false;
+  // Small increments retain the same integration accuracy as playback.
+  for (let i = 0; i < 10; i++) {
+    stepSim(0.01);
+    if (state.swapPaused) break;
+  }
+  updateEquation();
+  drawGraph();
+  drawEndView();
+  updateObservation();
+});
+$('measurements').addEventListener('toggle', () => { updateEquation(); drawGraph(); });
+
+function updateObservation() {
+  if (!sim) return;
+  let title, text;
+  if (sim.kind === 'force') {
+    const { size, force, on } = forceVectors();
+    title = !on ? 'No current → no force' : size < 1e-8 ? 'Parallel to the field → no force' : 'Current + magnetic field → force';
+    text = !on ? 'The magnetic field is still present. Switch on the current to see the orange current arrow and pink force arrow.' : size < 1e-8 ? 'Current flows along the field. Turn the wire across the field to produce a force.' : `The pink arrow points ${force.x > 0 ? 'along' : 'back along'} the rails. Reverse either current or field and the force reverses too.`;
+  } else {
+    const flowing = Math.abs(sim.current) > 0.05;
+    title = !state.powered ? 'Trace the two sides of the coil' : !flowing ? 'No current → no magnetic force' : sim.kind === 'dc' && state.commutator ? 'Opposite currents → opposite forces' : 'Follow the current, then the forces';
+    text = !state.powered && sim.kind === 'ac' ? 'A and B identify the coil sides. Orange arrows show current; pink arrows show force. Switch on the AC supply to explore current reversal.' : state.powered && !flowing ? 'At zero current there is no magnetic force on the coil. A moving coil can coast through this position.' : !state.powered ? 'Purple A and green B identify the same coil ends throughout. Switch on to see + / − badges for their supply connections. Orange arrows show current; pink arrows show force.' : sim.kind === 'dc' && state.commutator ? `Side A: current ${sim.current > 0 ? 'away from' : 'towards'} the rings; force ${sim.current > 0 ? 'down' : 'up'}. At each half turn the current reverses. Use “Pause at each swap” to catch it.` : sim.kind === 'ac' ? 'The supply reverses the current and forces. Slip rings keep each coil end connected to the same brush. Give it a spin to explore synchronisation.' : 'Without the split ring, current stays the same way round the coil. After vertical, the turning effect reverses and pulls the coil back.';
+  }
+  updateTurningDisplay();
+  setText('observation-title', title);
+  setText('observation-text', text);
+}
 const POWER_LABELS = {
   force: ['Switch on current', 'Switch off current'],
   dc: ['Switch on motor', 'Switch off motor'],
   ac: ['Switch on supply', 'Switch off supply'],
-  induction: ['Switch on supply', 'Switch off supply']
 };
 function updatePowerButton() {
   const button = $('power');
@@ -1480,14 +1402,13 @@ $('power').addEventListener('click', () => {
   state.powered = !state.powered;
   if (!state.powered && sim?.kind === 'ac') sim.supplyTime = 0;
   updatePowerButton();
-  if (!state.playing && state.powered) setPlaying(true);
+  if (!state.playing && state.powered && !reducedMotion) setPlaying(true);
   readout.textContent = POWER_MESSAGES[state.mode](state.powered);
 });
 const POWER_MESSAGES = {
   force: on => on ? 'CURRENT ON · The rod is pushed along the rails. Use Fleming’s left-hand rule on the three arrows: Field, Current, Motion.' : 'CURRENT OFF · No current, so no force. The rod rolls to a stop.',
   dc: on => on ? (state.commutator ? 'MOTOR ON · Watch the force arrows: up on one side, down on the other. The split ring reverses the current every half turn.' : 'MOTOR ON, NO COMMUTATOR · The current never reverses, so the coil turns until it is vertical and then gets pulled back.') : 'MOTOR OFF · No current, so no forces. The coil coasts to a stop.',
   ac: on => on ? 'SUPPLY ON · The current reverses every half cycle. On a coil at rest the forces keep reversing, so it only shakes. Try “Give it a spin”.' : 'SUPPLY OFF · The coil coasts to a stop.',
-  induction: on => on ? 'SUPPLY ON · The three coil currents rise and fall in turn, so the field arrow rotates. The rotor bars glow where currents are induced.' : 'SUPPLY OFF · No rotating field, so no induced currents. The rotor slows down.'
 };
 $('spin').addEventListener('click', () => {
   if (!sim || sim.kind !== 'ac') return;
@@ -1548,11 +1469,6 @@ function onValueChange(key) {
     sim.supplyTime = phase / (2 * Math.PI * state.values.frequency);
   }
   if (sim.kind === 'ac') sim.lastFrequency = state.values.frequency;
-  if (key === 'supply' && sim.kind === 'induction') {
-    const phase = 2 * Math.PI * (sim.lastSupply ?? STEPPERS.supply.value) * sim.time;
-    sim.time = phase / (2 * Math.PI * state.values.supply);
-  }
-  if (sim.kind === 'induction') sim.lastSupply = state.values.supply;
   drawGraph();
   updateEquation();
 }
@@ -1604,7 +1520,6 @@ const TOGGLE_MESSAGES = {
   endView: () => state.endView
     ? 'END VIEW · The coil seen from the rings end. ⊗ = current into the page, ⊙ = out of the page. Watch which half-ring touches the + brush.'
     : 'END VIEW HIDDEN · Turn it back on to see the coil and commutator end-on.',
-  swap: () => 'PHASES SWAPPED · Swapping two of the three supply wires reverses the direction in which the field rotates, so the motor runs backwards.'
 };
 function toggle(key, button) {
   state[key] = !state[key];
@@ -1617,7 +1532,6 @@ function toggle(key, button) {
     sim.current = coilCurrent();
     sim.torque = -coilConstant() * sim.current * Math.cos(sim.theta);
   }
-  if (key === 'swap' && sim) colourCoils();
   if (key === 'endView') updateEndViewVisibility();
   readout.textContent = TOGGLE_MESSAGES[key]();
   drawGraph();
@@ -1648,22 +1562,19 @@ const DEFAULT_READOUT = {
   force: 'A COPPER ROD ON RAILS · The rod sits in the field between a north pole (top) and a south pole (bottom). Press “Switch on current”, or tap a part.',
   dc: 'DC MOTOR · A coil on an axle between two poles, fed through a split-ring commutator and two carbon brushes. Press “Switch on motor”, or tap a part.',
   ac: 'AC MOTOR · The same coil, but with two slip rings and an alternating supply. Switch on the supply, then try “Give it a spin”.',
-  induction: 'INDUCTION MOTOR · Six coils on an iron stator around a squirrel-cage rotor. Press “Switch on supply”, or tap a part.'
 };
 const LEGEND = {
   force: ['north', 'south', 'field', 'current', 'force'],
   dc: ['north', 'south', 'field', 'current', 'force'],
   ac: ['north', 'south', 'field', 'current', 'force'],
-  induction: ['field', 'phase1', 'phase2', 'phase3', 'current']
 };
 function buildMode(animate) {
   clearStage();
   const mode = state.mode;
   if (mode === 'force') buildForce();
   else if (mode === 'dc' || mode === 'ac') buildCoil(mode);
-  else buildInduction();
-  floorShadow.position.y = mode === 'force' ? -1.75 : mode === 'induction' ? -3.1 : BASE_Y - 0.17;
-  floorShadow.scale.setScalar(mode === 'induction' ? 1.1 : 1);
+  floorShadow.position.y = mode === 'force' ? -1.75 : BASE_Y - 0.17;
+  floorShadow.scale.setScalar(1);
   updatePowerButton();
   if (animate) fadeIn = { t: 0 };
   stepSim(0);
@@ -1690,13 +1601,13 @@ function selectMode(mode, animate = true) {
   viewer.setAttribute('aria-label', `${data.title}. ${data.description} Drag or use arrow keys to rotate; scroll, pinch or plus and minus keys to zoom.`);
   $('graph-canvas').setAttribute('aria-label', GRAPH_LABELS[mode]);
   quiz.show(mode);
+  updateObservation();
   resetView();
 }
 const GRAPH_LABELS = {
   force: 'Graph of force against the angle between the wire and the field',
   dc: 'Graph of the current in the coil and the torque against time',
   ac: 'Graph of the supply current and the torque against time',
-  induction: 'Graph of torque against rotor speed, with the load line and the operating point'
 };
 document.querySelectorAll('.models [data-mode]').forEach(button => button.addEventListener('click', () => {
   if (button.dataset.mode !== state.mode) selectMode(button.dataset.mode);
@@ -1713,7 +1624,7 @@ function updateProgress() {
   const stars = sets.reduce((sum, key) => sum + setSummary(progress, key, QUESTIONS[key]).stars, 0);
   const total = sets.reduce((sum, key) => sum + QUESTIONS[key].length, 0);
   const finalDone = setSummary(progress, 'final', QUESTIONS.final).complete;
-  $('progress').textContent = `${unlocked.length} / 4 discoveries unlocked · ★ ${stars} / ${total}${finalDone ? ' · Motor expert!' : ''}`;
+  $('progress').textContent = `${unlocked.length} / ${MODE_ORDER.length} discoveries unlocked · ★ ${stars} / ${total}${finalDone ? ' · Motor expert!' : ''}`;
   document.querySelectorAll('.models [data-mode]').forEach(button => {
     const done = unlocked.includes(button.dataset.mode);
     const label = button.querySelector('span');
@@ -1725,8 +1636,8 @@ function updateProgress() {
   finalQuizElement.hidden = !open;
   document.querySelector('.final-challenge').classList.toggle('is-locked', !open);
   $('final-status').textContent = open
-    ? 'You have explored the motor effect, DC motors, AC motors and induction motors. Use them together.'
-    : `Unlock all four discoveries to open the final challenge (${unlocked.length} of 4 so far).`;
+    ? 'You have explored the motor effect, DC motors and AC motors. Use them together.'
+    : `Unlock all ${MODE_ORDER.length} discoveries to open the final challenge (${unlocked.length} of ${MODE_ORDER.length} so far).`;
 }
 $('reset-progress').addEventListener('click', () => {
   if (!window.confirm('Reset all discoveries and stars saved on this device?')) return;
@@ -1765,7 +1676,7 @@ function resize() {
 const resizeObserver = new ResizeObserver(resize);
 resizeObserver.observe(viewer);
 resizeObserver.observe(renderer.domElement);
-new IntersectionObserver(entries => { state.visible = entries[entries.length - 1].isIntersecting; }).observe(viewer);
+new IntersectionObserver(entries => { state.visible = entries[entries.length - 1].isIntersecting; }).observe(viewerPanel);
 renderer.domElement.addEventListener('webglcontextlost', event => {
   event.preventDefault();
   $('load-status').hidden = false;
@@ -1775,7 +1686,6 @@ renderer.domElement.addEventListener('webglcontextlost', event => {
 function stepSim(delta) {
   if (!sim) return;
   if (sim.kind === 'force') stepForce(delta);
-  else if (sim.kind === 'induction') stepInduction(delta);
   else stepCoil(delta);
 }
 
@@ -1791,7 +1701,8 @@ function frame(time) {
   const delta = Math.min((time - previousTime) / 1000, 0.05);
   previousTime = time;
   if (!state.visible || document.hidden) return;
-  if (state.playing) stepSim(delta);
+  stepSim(state.playing ? delta * state.playback : 0);
+  updateObservation();
   if (fadeIn) {
     fadeIn.t += delta;
     const k = Math.min(1, fadeIn.t / TRANSITION_TIME);
@@ -1808,7 +1719,7 @@ function frame(time) {
   drawEndView();
   if (selected) {
     selected.material.emissive.copy(palette.accent);
-    selected.material.emissiveIntensity = 0.25 + 0.2 * Math.sin(time / 220);
+    selected.material.emissiveIntensity = 0.3;
   }
   stepCamera(delta);
   controls.update();

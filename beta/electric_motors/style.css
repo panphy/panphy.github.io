@@ -37,9 +37,6 @@
   --positive: #D45132;
   --negative: #1675BB;
   --neutral: #657481;
-  --phase1: #E07A10;
-  --phase2: #0D9488;
-  --phase3: #7C3AED;
   --half-a: #7C3AED;
   --half-b: #65A30D;
   --correct-bg: #E5F2EA;
@@ -83,9 +80,6 @@
   --positive: #EF6A48;
   --negative: #4BA3E3;
   --neutral: #8C9AA6;
-  --phase1: #FBA43C;
-  --phase2: #2DD4BF;
-  --phase3: #A78BFA;
   --half-a: #A78BFA;
   --half-b: #A3E635;
   --correct-bg: #183324;
@@ -153,7 +147,7 @@ h1 { font-size: clamp(2.6rem, 4.6vw, 4.4rem); letter-spacing: -.02em; line-heigh
 h1 span { color: var(--brand-primary); }
 
 /* Mode chooser */
-.models { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 20px; }
+.models { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 20px; }
 .models button {
   display: grid;
   grid-template-rows: auto auto 1fr;
@@ -202,24 +196,38 @@ h1 span { color: var(--brand-primary); }
 body.viewer-expanded { overflow: hidden; }
 .viewer-panel.is-fullscreen { position: fixed; inset: 0; z-index: 1000; width: 100%; height: 100%; height: 100dvh; overflow: auto; padding: max(16px, env(safe-area-inset-top)) max(16px, env(safe-area-inset-right)) max(16px, env(safe-area-inset-bottom)) max(16px, env(safe-area-inset-left)); }
 .viewer-panel.is-fullscreen > :not(#viewer) { flex-shrink: 0; }
-.viewer-panel.is-fullscreen .viewer-heading { position: sticky; top: 0; z-index: 3; background: var(--viewer-bg); padding-bottom: 8px; }
+.viewer-panel.is-fullscreen .viewer-heading { position: sticky; top: var(--standalone-top); z-index: 3; background: var(--viewer-bg); padding-bottom: 8px; }
 .viewer-panel.is-fullscreen #viewer { flex: 1 0 260px; height: 0; min-height: 260px; }
 
 /* contain: size keeps the canvas pixel size from feeding back into the viewer height. */
-#viewer { position: relative; display: flex; flex-direction: column; flex: 1; min-height: 500px; contain: size; margin: 8px 0 12px; border-radius: 14px; touch-action: none; overflow: hidden; }
+#viewer { position: relative; display: flex; flex-direction: column; flex: none; height: 480px; min-height: 360px; contain: size; margin: 8px 0 12px; border-radius: 14px; touch-action: none; overflow: hidden; }
 #viewer.is-hovering { cursor: pointer; }
 #viewer > canvas { display: block; width: 100%; height: 0; flex: 1; min-height: 0; align-self: stretch; }
 #load-status { position: absolute; inset: 30% 10%; margin: 0; text-align: center; color: var(--text-secondary); }
 
 .overlay { position: absolute; z-index: 2; pointer-events: none; font-size: .74rem; }
-.legend { left: 10px; bottom: 10px; right: 10px; display: flex; flex-wrap: wrap; gap: 6px; }
+.legend { display: flex; flex-wrap: wrap; justify-content: center; gap: 6px; margin: 0 0 14px; font-size: .74rem; }
 .legend > span { display: inline-flex; align-items: center; gap: 6px; padding: 3px 10px 3px 4px; border-radius: 999px; background: var(--overlay-bg); border: 1px solid var(--card-border); }
 .legend i { font-style: normal; display: inline-grid; place-items: center; border-radius: 50%; width: 18px; height: 18px; font-size: .72rem; font-weight: 800; color: #fff; }
 .legend i.bar { border-radius: 3px; height: 8px; width: 18px; }
 .gesture { top: 8px; left: 10px; margin: 0; color: var(--text-secondary); }
 
-/* Live readouts: an equation card and a graph stacked in the top-right corner. */
-.stack { top: 8px; right: 8px; width: 300px; max-width: calc(100% - 16px); display: flex; flex-direction: column; gap: 6px; }
+/* Explanations stay outside the model, so no overlay obscures the apparatus. */
+.stack { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; padding-top: 12px; }
+.observation { border-left: 3px solid var(--brand-accent-strong); padding: 10px 14px; margin-bottom: 12px; background: var(--card-bg); border-radius: 0 12px 12px 0; min-height: 108px; }
+.observation strong { font-size: .95rem; }
+.observation p { font-size: .84rem; line-height: 1.55; color: var(--text-secondary); margin: 4px 0 0; }
+.study-controls { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 8px 16px; margin-top: 12px; font-size: .8rem; }
+.study-controls label { display: inline-flex; align-items: center; gap: 8px; min-height: 48px; cursor: pointer; }
+.study-controls select, .study-controls button { min-height: 48px; padding: 8px 12px; border: 1px solid var(--input-border); border-radius: 10px; color: var(--text-main); background: var(--card-bg); font: inherit; }
+.study-controls input { width: 18px; height: 18px; accent-color: var(--brand-accent-strong); }
+.playback-note { margin: 6px 0 12px; font-size: .72rem; text-align: center; color: var(--text-secondary); }
+.study-panels { display: grid; gap: 12px; margin-bottom: 8px; }
+#measurements { padding: 0 14px 12px; border: 1px solid var(--card-border); border-radius: 12px; background: var(--card-bg); }
+#measurements:not([open]) { padding-bottom: 0; }
+#measurements summary { min-height: 48px; padding: 12px 0; cursor: pointer; font-size: .85rem; font-weight: 700; }
+#measurements summary:focus-visible, .study-controls input:focus-visible { outline: 3px solid var(--focus); outline-offset: 3px; }
+
 .equation { padding: 8px 12px; border-radius: 12px; background: var(--overlay-bg); border: 1px solid var(--card-border); font-family: var(--font-mono); font-size: .78rem; line-height: 1.5; }
 .equation .row { display: flex; justify-content: space-between; gap: 10px; }
 .equation .row span:first-child { color: var(--text-secondary); }
@@ -232,12 +240,15 @@ body.viewer-expanded { overflow: hidden; }
 .graph { padding: 6px; border-radius: 12px; background: var(--overlay-bg); border: 1px solid var(--card-border); }
 .graph canvas { display: block; width: 100%; height: auto; aspect-ratio: 300 / 170; flex: none; min-height: 0; }
 
-/* DC motor: the coil and commutator seen end-on, in the top-left corner. */
-.endview { top: 30px; left: 10px; width: 190px; padding: 6px 8px 8px; border-radius: 12px; background: var(--overlay-bg); border: 1px solid var(--card-border); }
+/* A larger synchronised end view connects the brushes to the labelled coil sides. */
+.endview { display: grid; grid-template-columns: minmax(180px, 260px) minmax(0, 1fr); column-gap: 20px; align-items: center; padding: 14px; border-radius: 12px; background: var(--card-bg); border: 1px solid var(--card-border); }
+.endview canvas { grid-column: 1; grid-row: 1 / span 3; }
+.endview p { grid-column: 2; }
 .endview canvas { display: block; width: 100%; height: auto; aspect-ratio: 1; }
 .endview[hidden] { display: none; }
-.endview p { margin: 2px 0 0; font-family: var(--font-mono); font-size: .68rem; line-height: 1.4; color: var(--text-secondary); }
+.endview p { margin: 2px 0 0; font-family: var(--font-mono); font-size: .8rem; line-height: 1.5; color: var(--text-secondary); }
 .endview p.endview-title { margin: 0 0 2px; font-weight: 600; letter-spacing: .06em; color: var(--text-main); }
+.endview .connection-key { grid-column: 1 / -1; font-family: var(--font-body); font-size: .78rem; margin-top: 12px; }
 .endview b { color: var(--text-main); font-weight: 600; }
 
 /* Room for three lines, so a longer message does not shrink the 3D view. */
@@ -337,8 +348,7 @@ footer { display: flex; justify-content: space-between; gap: 20px; border-top: 1
 @media (max-width: 1100px) {
   .workspace { grid-template-columns: minmax(0, 1.35fr) minmax(290px, 1fr); }
   .models strong { font-size: 1.05rem; }
-  .stack { width: 260px; }
-  .endview { width: 160px; }
+  .endview { grid-template-columns: minmax(150px, 210px) minmax(0, 1fr); gap: 12px; }
 }
 @media (max-width: 860px) {
   .workspace { grid-template-columns: 1fr; }
@@ -358,19 +368,16 @@ footer { display: flex; justify-content: space-between; gap: 20px; border-top: 1
   .models small { font-size: .76rem; }
   .lab-strip { flex-direction: column; align-items: flex-start; gap: 0; }
   .viewer-panel { padding: 12px; }
-  /* On phones the readouts sit above the 3D view instead of covering it. */
-  #viewer { flex: none; height: 720px; min-height: 720px; }
+  #viewer, body.has-endview #viewer { flex: none; height: 360px; min-height: 360px; }
   .viewer-heading { font-size: .68rem; }
   .gesture { display: none; }
-  .stack { position: relative; order: -1; top: auto; right: auto; width: auto; max-width: none; margin: 0 0 8px; }
-  .graph canvas { aspect-ratio: auto; height: 150px; }
-  .endview { position: relative; order: -1; top: auto; left: auto; width: auto; margin: 0 0 8px; display: grid; grid-template-columns: 170px 1fr; column-gap: 12px; align-items: center; }
-  .endview canvas { grid-column: 1; grid-row: 1 / span 3; }
-  .endview p { grid-column: 2; }
-  body.has-endview #viewer { height: 900px; min-height: 900px; }
-  /* Fullscreen keeps the same viewer height; the panel scrolls, so the readouts above never squeeze the 3D view away. */
-  .viewer-panel.is-fullscreen #viewer { flex: none; height: 720px; min-height: 720px; }
-  body.has-endview .viewer-panel.is-fullscreen #viewer { height: 900px; min-height: 900px; }
+  .stack { grid-template-columns: 1fr; }
+  .graph canvas { aspect-ratio: 300 / 170; height: auto; }
+  .endview { grid-template-columns: minmax(0, 1fr); }
+  .endview canvas { grid-column: 1; grid-row: 2; width: min(100%, 280px); justify-self: center; }
+  .endview p { grid-column: 1; }
+  .endview .endview-title { grid-row: 1; }
+  .viewer-panel.is-fullscreen #viewer, body.has-endview .viewer-panel.is-fullscreen #viewer { flex: none; height: 400px; min-height: 400px; }
   .sample-controls .field { flex: 1 1 calc(50% - 12px); }
   .stepper { width: 100%; }
   .stepper input { flex: 1; width: 0; min-width: 0; }
@@ -386,3 +393,11 @@ footer { display: flex; justify-content: space-between; gap: 20px; border-top: 1
   .models button, .toolbar button { transition: none; }
   .models button:hover { transform: none; }
 }
+
+.turning-display { display: flex; align-items: center; gap: 12px; padding: 10px 14px; margin-bottom: 12px; border: 1px solid var(--card-border); border-radius: 12px; background: var(--card-bg); }
+.turning-display svg { flex: 0 0 64px; width: 64px; height: 64px; }
+.turning-display circle { fill: none; stroke: var(--card-border); stroke-width: 2; stroke-dasharray: 3 4; }
+#turning-arc { fill: none; stroke: var(--brand-accent-strong); stroke-width: 4; }
+#turning-head { fill: var(--brand-accent-strong); }
+.turning-display strong { font-size: .85rem; }
+.turning-display p { margin: 4px 0 0; font-size: .78rem; color: var(--text-secondary); line-height: 1.5; }

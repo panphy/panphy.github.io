@@ -1,7 +1,7 @@
 // Text content for the electric motors explorer: mode descriptions, part readouts,
 // control settings and quiz questions. Kept separate from the 3D scene code.
 
-export const MODE_ORDER = ['force', 'dc', 'ac', 'induction'];
+export const MODE_ORDER = ['force', 'dc', 'ac'];
 
 export const MODES = {
   force: {
@@ -33,21 +33,10 @@ export const MODES = {
     heading: 'Alternating current reverses by itself.',
     description: 'An alternating current changes direction many times a second. If it reverses at just the right moments, the coil keeps turning without a commutator. The coil is connected through two complete slip rings, so each end of the coil always touches the same brush. This kind of AC motor turns exactly once for every cycle of the supply: it runs in step (synchronous) with the supply.',
     look: 'Switch on the supply with the coil at rest: it just shakes, because the force keeps reversing. Press “Give it a spin” to start it near the right speed. Watch it lock in step with the supply. Then change the frequency and see whether it can keep up.',
-    evidence: 'Once in step, the current reverses each time the coil passes the vertical position, which is exactly the job the split ring did in the DC motor. This simple motor cannot start itself, and it stalls if the frequency changes too quickly. Many AC motors use a rotating magnetic field instead (next tab).',
+    evidence: 'Once in step, the current reverses each time the coil passes the vertical position, which is exactly the job the split ring did in the DC motor. This simple motor cannot start itself, and it stalls if the frequency changes too quickly.',
     deeper: 'With I = I₀ sin(2πft), the torque is T = BANI₀ sin(2πft) cos θ. It only averages to a steady turning effect when the coil turns at the supply frequency f, so the motor’s speed is fixed by the supply, not by the load. Mains at 50 Hz would turn a two-pole synchronous motor at 3000 revolutions per minute.',
     hint: 'Switch the supply on, give the coil a spin, then step the frequency up or down.'
   },
-  induction: {
-    title: 'INDUCTION MOTOR',
-    date: 'THREE-PHASE · ROTATING MAGNETIC FIELD',
-    level: 'A LEVEL · IB DP · BEYOND',
-    heading: 'A rotating field drags the rotor round.',
-    description: 'Three pairs of coils around the outside (the stator) carry three alternating currents, each a third of a cycle behind the last. Together they make a magnetic field that rotates. The rotor is a “squirrel cage” of copper bars with no electrical connections at all. The moving field induces currents in the bars, and those currents feel a force in the field, so the rotor is dragged round after the field.',
-    look: 'Switch on the supply and watch the big field arrow rotate as the three coil currents rise and fall. The rotor follows, but always a little slower. Add load and watch the slip grow on the graph. Swap two phases to reverse the motor.',
-    evidence: 'If the rotor ever caught up with the field, there would be no relative motion, no induced current and no force. So an induction motor always runs slightly slower than the field: this difference is called slip. Induction motors are rugged and cheap, and power most fans, pumps and factory machines.',
-    deeper: 'Faraday’s and Lenz’s laws at work: the emf in each bar is proportional to the rate at which it cuts the field, which depends on the slip, s = (nₛ − n)/nₛ. Lenz’s law says the induced currents oppose the relative motion, so they pull the rotor along with the field. With more load the rotor slows, the slip increases and the torque rises to match, until the load passes the peak (pull-out) torque and the motor stalls.',
-    hint: 'Switch on the supply, then add load in steps and watch the operating point on the torque–speed graph.'
-  }
 };
 
 // Tap a part of the apparatus to read its job.
@@ -56,22 +45,16 @@ export const PARTS = {
   south: 'SOUTH POLE · Field lines enter a south pole. Between flat, close poles the field is nearly uniform.',
   field: 'MAGNETIC FIELD · The arrows point from north to south. The closer the lines, the stronger the field (the bigger the flux density B).',
   rod: 'COPPER ROD · A conductor carrying a current across a magnetic field feels a force, F = BIL sin θ. Copper is used because it is a good conductor and is not magnetic.',
-  rails: 'RAILS · Carry current to the rod, which can roll along them. The rails are outside the strong field region, so the force on them is tiny.',
   supply: 'DC SUPPLY · Drives a current one way round the circuit. Conventional current flows from + to −.',
+  rails: 'RAILS · Carry current to the rod, which can roll along them. The rails are outside the strong field region, so the force on them is tiny.',
   coil: 'COIL · Many turns of insulated copper wire. Each turn feels the same pair of forces, so more turns give a bigger turning effect.',
   axle: 'AXLE · The coil turns about this axis. A force that points straight through the axle has no turning effect.',
   commutator: 'SPLIT-RING COMMUTATOR · Two half-rings, each joined to one end of the coil: A (purple) to side A, B (green) to side B. Every half turn they swap brushes, reversing the current in the coil.',
   sliprings: 'SLIP RINGS · Two complete rings. Each end of the coil always touches the same brush, so the coil gets whatever current the supply gives it.',
   brush: 'BRUSH · A carbon block that presses on the rotating ring to carry current in and out. Carbon conducts and slides smoothly.',
   ac: 'AC SUPPLY · The current changes direction twice every cycle. In the UK, mains electricity has a frequency of 50 Hz.',
-  stator: 'STATOR · The fixed outer part of the motor: an iron ring with coils on its poles.',
-  phase1: 'PHASE 1 COIL PAIR · Fed by one of the three alternating currents. The coils on opposite sides make a north pole and a south pole.',
-  phase2: 'PHASE 2 COIL PAIR · Its current is a third of a cycle (120°) behind phase 1.',
-  phase3: 'PHASE 3 COIL PAIR · Its current is a third of a cycle behind phase 2. Swapping any two phases reverses the field’s rotation.',
-  cage: 'SQUIRREL-CAGE ROTOR · Copper bars joined by end rings. The rotating field induces currents in the bars (bright = current out of the front, blue = into it).',
-  resultant: 'RESULTANT FIELD · The fields of the three coil pairs add up to one field of constant strength that rotates once per supply cycle.',
   force: 'FORCE · At right angles to both the current and the field (Fleming’s left-hand rule).',
-  current: 'CURRENT · The glowing beads flow in the direction of conventional current, from + to −.'
+  current: 'CURRENT · Orange arrows show conventional current direction, from + to − through the external circuit. Optional moving markers show direction, not the speed of individual charges.'
 };
 
 // Steppers for each mode. Values are in the units in the label.
@@ -82,15 +65,12 @@ export const STEPPERS = {
   turns: { label: 'Turns N', min: 10, max: 100, step: 10, value: 50, decimals: 0, aria: 'Number of turns on the coil' },
   peak: { label: 'Peak current I₀ (A)', min: 0.5, max: 5, step: 0.5, value: 3, decimals: 1, aria: 'Peak current in amps' },
   frequency: { label: 'Frequency f (Hz, slowed)', min: 0.5, max: 1.5, step: 0.1, value: 0.6, decimals: 1, aria: 'Supply frequency in hertz, slowed down' },
-  supply: { label: 'Frequency f (Hz, slowed)', min: 0.2, max: 1, step: 0.1, value: 0.5, decimals: 1, aria: 'Supply frequency in hertz, slowed down' },
-  load: { label: 'Load (% of peak torque)', min: 0, max: 100, step: 10, value: 20, decimals: 0, aria: 'Load torque as a percentage of the peak torque' }
 };
 
 export const CONTROLS = {
   force: { steppers: ['current', 'field', 'angle'], toggles: [['reverse', 'Reverse current'], ['flip', 'Flip the magnet']] },
   dc: { steppers: ['current', 'turns', 'field'], toggles: [['commutator', 'Split-ring commutator'], ['pauseSwap', 'Pause at each swap'], ['endView', 'End view'], ['reverse', 'Reverse current']] },
   ac: { steppers: ['peak', 'frequency'], toggles: [] },
-  induction: { steppers: ['supply', 'load'], toggles: [['swap', 'Swap two phases']] }
 };
 
 export const QUESTIONS = {
@@ -100,7 +80,7 @@ export const QUESTIONS = {
     { q: 'The wire is turned until it is parallel to the magnetic field. What is the force now?', choices: ['Zero', 'Half as big', 'The biggest possible'], correct: 0, why: 'F = BIL sin θ, and sin 0° = 0. A current along the field lines feels no force.', hint: 'Step the angle down to 0° and watch the graph.' }
   ],
   dc: [
-    { q: 'Why do the two sides of the coil move in opposite directions?', choices: ['The current flows in opposite directions along the two sides', 'One side is nearer the north pole', 'The commutator pushes one side'], correct: 0, why: 'Same field, opposite current, so opposite forces. Together they make a turning effect.', hint: 'Follow the glowing beads along each long side of the coil.' },
+    { q: 'Why do the two sides of the coil move in opposite directions?', choices: ['The current flows in opposite directions along the two sides', 'One side is nearer the north pole', 'The commutator pushes one side'], correct: 0, why: 'Same field, opposite current, so opposite forces. Together they make a turning effect.', hint: 'Compare the orange current arrows on sides A and B.' },
     { q: 'What does the split-ring commutator do?', choices: ['Reverses the current in the coil every half turn', 'Makes the magnetic field stronger', 'Changes direct current into alternating current in the supply'], correct: 0, why: 'Reversing the current each half turn keeps the turning effect in the same direction.', hint: 'Turn on “Pause at each swap” and compare the side on the right before and after each swap.' },
     { q: 'Which change would NOT make the motor spin faster?', choices: ['Reversing the current', 'Using more turns of wire', 'Using a stronger magnet'], correct: 0, why: 'Reversing the current only reverses the direction of rotation.', hint: 'Try each change and watch the speed in the readout.' }
   ],
@@ -109,15 +89,10 @@ export const QUESTIONS = {
     { q: 'A synchronous motor is in step with a 0.6 Hz supply. How many turns does it make each second?', choices: ['0.6', '1.2', '6'], correct: 0, why: 'A two-pole synchronous motor turns once per cycle of the supply.', hint: 'Compare the speed readout with the frequency once it is in step.' },
     { q: 'The coil is at rest when the AC supply is switched on. What happens?', choices: ['It shakes but does not start turning', 'It starts turning at full speed', 'It turns slowly and speeds up'], correct: 0, why: 'The force reverses many times a second, so it averages to zero on a stationary coil. This motor must be started by something else.', hint: 'Reset, then switch on the supply without giving it a spin.' }
   ],
-  induction: [
-    { q: 'How does current get into the rotor bars of an induction motor?', choices: ['It is induced by the rotating magnetic field', 'Through brushes and slip rings', 'Through a split-ring commutator'], correct: 0, why: 'The bars cut through the moving field, so currents are induced in them. There are no electrical connections to the rotor.', hint: 'Look for any wires going to the rotor.' },
-    { q: 'Why can the rotor never quite catch up with the rotating field?', choices: ['At the same speed there would be no induced current and so no force', 'Friction always stops it', 'The field gets weaker as the rotor speeds up'], correct: 0, why: 'Induction needs relative motion. The difference in speed is the slip.', hint: 'Set the load to 0% and watch the slip.' },
-    { q: 'The load on an induction motor increases. What happens?', choices: ['It slows a little, the slip rises and the torque increases', 'It speeds up', 'Its speed stays exactly fixed by the supply'], correct: 0, why: 'More slip means bigger induced currents and more torque, until the load is balanced again.', hint: 'Add load in steps and follow the operating point on the graph.' }
-  ],
   final: [
     { q: 'In Fleming’s left-hand rule, what does the first finger point along?', choices: ['The magnetic field, from N to S', 'The current', 'The force'], correct: 0, why: 'First finger = Field, seCond finger = Current, thuMb = Motion.', hint: 'F for First, F for Field.' },
     { q: 'A 50-turn coil has sides 4.0 cm long in a 0.20 T field. The current is 2.0 A. What is the force on one side of the coil?', choices: ['0.80 N', '0.016 N', '8.0 N'], correct: 0, why: 'F = BILN = 0.20 × 2.0 × 0.040 × 50 = 0.80 N. Each turn adds its own force.', hint: 'Find F = BIL for one turn, then multiply by the number of turns.' },
     { q: 'Where is the turning effect on a DC motor coil zero?', choices: ['When the plane of the coil is at right angles to the field', 'When the plane of the coil is parallel to the field', 'It is never zero'], correct: 0, why: 'In that position the forces on the two sides point straight through the axle, so they have no moment.', hint: 'Recall where the coil passes the commutator gaps.' },
-    { q: 'Which motor’s speed is fixed by the supply frequency, whatever the load (until it stalls)?', choices: ['The synchronous AC motor', 'The induction motor', 'The DC motor'], correct: 0, why: 'A synchronous motor turns exactly once per cycle. An induction motor always slips a little, more under heavier load.', hint: 'Compare the AC motor and induction motor tabs.' }
+    { q: 'Which motor’s speed is fixed by the supply frequency, whatever the load (until it stalls)?', choices: ['The synchronous AC motor', 'The DC motor', 'Both the AC and DC motor'], correct: 0, why: 'A synchronous motor turns exactly once per supply cycle. The DC motor’s speed depends on current, field strength, turns and load.', hint: 'Compare the AC supply frequency with the motor speed once it is in step.' }
   ]
 };
