@@ -65,6 +65,12 @@
             <span data-legend="phase3"><i style="background:var(--phase3)">3</i> Phase 3</span>
           </div>
           <p class="gesture overlay" aria-hidden="true">Drag to rotate · Pinch or scroll to zoom</p>
+          <div class="endview overlay" id="endview" hidden>
+            <p class="endview-title">END VIEW · FROM THE RINGS</p>
+            <canvas id="endview-canvas" role="img" aria-label="End view of the coil and commutator"></canvas>
+            <p id="endview-contact"></p>
+            <p id="endview-rule"></p>
+          </div>
           <div class="stack overlay">
             <div class="equation" id="equation" aria-live="off"></div>
             <div class="graph" id="graph"><canvas id="graph-canvas" role="img" aria-label="Graph"></canvas></div>

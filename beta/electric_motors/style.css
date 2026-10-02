@@ -40,6 +40,8 @@
   --phase1: #E07A10;
   --phase2: #0D9488;
   --phase3: #7C3AED;
+  --half-a: #7C3AED;
+  --half-b: #65A30D;
   --correct-bg: #E5F2EA;
   --correct-border: #3F7A55;
   --correct-text: #2B5A3A;
@@ -84,6 +86,8 @@
   --phase1: #FBA43C;
   --phase2: #2DD4BF;
   --phase3: #A78BFA;
+  --half-a: #A78BFA;
+  --half-b: #A3E635;
   --correct-bg: #183324;
   --correct-border: #4ADE80;
   --correct-text: #BBF7D0;
@@ -228,6 +232,14 @@ body.viewer-expanded { overflow: hidden; }
 .graph { padding: 6px; border-radius: 12px; background: var(--overlay-bg); border: 1px solid var(--card-border); }
 .graph canvas { display: block; width: 100%; height: auto; aspect-ratio: 300 / 170; flex: none; min-height: 0; }
 
+/* DC motor: the coil and commutator seen end-on, in the top-left corner. */
+.endview { top: 30px; left: 10px; width: 190px; padding: 6px 8px 8px; border-radius: 12px; background: var(--overlay-bg); border: 1px solid var(--card-border); }
+.endview canvas { display: block; width: 100%; height: auto; aspect-ratio: 1; }
+.endview[hidden] { display: none; }
+.endview p { margin: 2px 0 0; font-family: var(--font-mono); font-size: .68rem; line-height: 1.4; color: var(--text-secondary); }
+.endview p.endview-title { margin: 0 0 2px; font-weight: 600; letter-spacing: .06em; color: var(--text-main); }
+.endview b { color: var(--text-main); font-weight: 600; }
+
 /* Room for three lines, so a longer message does not shrink the 3D view. */
 .particle-readout { margin: 0 0 12px; min-height: calc(4.65em + 20px); padding: 10px 14px; border-radius: 12px; border-left: 3px solid var(--brand-accent); background: var(--card-bg); color: var(--text-main); font-size: .8rem; line-height: 1.55; }
 .toolbar { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; }
@@ -326,6 +338,7 @@ footer { display: flex; justify-content: space-between; gap: 20px; border-top: 1
   .workspace { grid-template-columns: minmax(0, 1.35fr) minmax(290px, 1fr); }
   .models strong { font-size: 1.05rem; }
   .stack { width: 260px; }
+  .endview { width: 160px; }
 }
 @media (max-width: 860px) {
   .workspace { grid-template-columns: 1fr; }
@@ -351,6 +364,13 @@ footer { display: flex; justify-content: space-between; gap: 20px; border-top: 1
   .gesture { display: none; }
   .stack { position: relative; order: -1; top: auto; right: auto; width: auto; max-width: none; margin: 0 0 8px; }
   .graph canvas { aspect-ratio: auto; height: 150px; }
+  .endview { position: relative; order: -1; top: auto; left: auto; width: auto; margin: 0 0 8px; display: grid; grid-template-columns: 170px 1fr; column-gap: 12px; align-items: center; }
+  .endview canvas { grid-column: 1; grid-row: 1 / span 3; }
+  .endview p { grid-column: 2; }
+  body.has-endview #viewer { height: 900px; min-height: 900px; }
+  /* Fullscreen keeps the same viewer height; the panel scrolls, so the readouts above never squeeze the 3D view away. */
+  .viewer-panel.is-fullscreen #viewer { flex: none; height: 720px; min-height: 720px; }
+  body.has-endview .viewer-panel.is-fullscreen #viewer { height: 900px; min-height: 900px; }
   .sample-controls .field { flex: 1 1 calc(50% - 12px); }
   .stepper { width: 100%; }
   .stepper input { flex: 1; width: 0; min-width: 0; }
