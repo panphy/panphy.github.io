@@ -188,45 +188,114 @@ h1 span { color: var(--brand-primary); }
   background: var(--card-bg);
   box-shadow: var(--card-shadow);
 }
-.viewer-panel { display: flex; flex-direction: column; min-width: 0; padding: 20px; background: var(--viewer-bg); }
-.viewer-heading { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; font-family: var(--font-mono); font-size: .76rem; font-weight: 600; letter-spacing: .08em; }
+.viewer-panel { display: flex; flex-direction: column; gap: 14px; min-width: 0; padding: 20px; background: var(--viewer-bg); }
+.viewer-heading { display: flex; align-items: center; gap: 8px 12px; font-family: var(--font-mono); font-size: .76rem; font-weight: 600; letter-spacing: .08em; }
 #scene-title { margin-right: auto; }
-.scale { color: var(--text-secondary); font-size: .68rem; border: 1px solid var(--input-border); border-radius: 999px; padding: 4px 10px; }
-#fullscreen { --panphy-fs-size: 48px; }
-body.viewer-expanded { overflow: hidden; }
-.viewer-panel.is-fullscreen { position: fixed; inset: 0; z-index: 1000; width: 100%; height: 100%; height: 100dvh; overflow: auto; padding: max(16px, env(safe-area-inset-top)) max(16px, env(safe-area-inset-right)) max(16px, env(safe-area-inset-bottom)) max(16px, env(safe-area-inset-left)); }
-.viewer-panel.is-fullscreen > :not(#viewer) { flex-shrink: 0; }
-.viewer-panel.is-fullscreen .viewer-heading { position: sticky; top: var(--standalone-top); z-index: 3; background: var(--viewer-bg); padding-bottom: 8px; }
-.viewer-panel.is-fullscreen #viewer { flex: 1 0 260px; height: 0; min-height: 260px; }
+.scale { color: var(--text-secondary); font-size: .68rem; line-height: 1.3; text-align: center; border: 1px solid var(--input-border); border-radius: 999px; padding: 4px 10px; }
+#fullscreen { --panphy-fs-size: 48px; margin: -6px 0; }
 
+/* The stage holds the 3D view and its legend; the console holds everything you operate or read. */
+.stage { display: flex; flex-direction: column; gap: 10px; min-width: 0; }
 /* contain: size keeps the canvas pixel size from feeding back into the viewer height. */
-#viewer { position: relative; display: flex; flex-direction: column; flex: none; height: 480px; min-height: 360px; contain: size; margin: 8px 0 12px; border-radius: 14px; touch-action: none; overflow: hidden; }
+#viewer { position: relative; display: flex; flex-direction: column; flex: none; height: 480px; min-height: 0; contain: size; border-radius: 14px; touch-action: none; overflow: hidden; }
 #viewer.is-hovering { cursor: pointer; }
 #viewer > canvas { display: block; width: 100%; height: 0; flex: 1; min-height: 0; align-self: stretch; }
 #load-status { position: absolute; inset: 30% 10%; margin: 0; text-align: center; color: var(--text-secondary); }
 
 .overlay { position: absolute; z-index: 2; pointer-events: none; font-size: .74rem; }
-.legend { display: flex; flex-wrap: wrap; justify-content: center; gap: 6px; margin: 0 0 14px; font-size: .74rem; }
+.legend { display: flex; flex-wrap: wrap; justify-content: center; gap: 6px; font-size: .74rem; }
 .legend > span { display: inline-flex; align-items: center; gap: 6px; padding: 3px 10px 3px 4px; border-radius: 999px; background: var(--overlay-bg); border: 1px solid var(--card-border); }
 .legend i { font-style: normal; display: inline-grid; place-items: center; border-radius: 50%; width: 18px; height: 18px; font-size: .72rem; font-weight: 800; color: #fff; }
 .legend i.bar { border-radius: 3px; height: 8px; width: 18px; }
 .gesture { top: 8px; left: 10px; margin: 0; color: var(--text-secondary); }
 
-/* Explanations stay outside the model, so no overlay obscures the apparatus. */
-.stack { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; padding-top: 12px; }
-.observation { border-left: 3px solid var(--brand-accent-strong); padding: 10px 14px; margin-bottom: 12px; background: var(--card-bg); border-radius: 0 12px 12px 0; min-height: 108px; }
-.observation strong { font-size: .95rem; }
-.observation p { font-size: .84rem; line-height: 1.55; color: var(--text-secondary); margin: 4px 0 0; }
-.study-controls { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 8px 16px; margin-top: 12px; font-size: .8rem; }
+/* Console: controls first, then what the model shows, then the study panels.
+   Container queries let the same rules serve the page column, a phone and the fullscreen side column. */
+.console { container-type: inline-size; display: flex; flex-direction: column; gap: 12px; min-width: 0; }
+.console > * { flex-shrink: 0; }
+.deck, .readouts { background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 16px; }
+.deck { display: flex; flex-direction: column; gap: 14px; padding: 14px; }
+.deck > .sample-controls, .deck > .study-controls { border-top: 1px solid var(--card-border); padding-top: 14px; }
+#action-hint { margin: 0; color: var(--text-secondary); font-size: .82rem; line-height: 1.5; }
+
+.toolbar { display: flex; flex-wrap: wrap; gap: 8px; }
+.toolbar button, .question button:not(.link-button) {
+  min-height: 48px;
+  padding: 8px 14px;
+  border: 1px solid var(--input-border);
+  border-radius: 12px;
+  background: var(--card-bg);
+  font-size: .85rem;
+  font-weight: 700;
+  transition: border-color .15s, background .15s;
+}
+.toolbar button { flex: 1 1 auto; }
+.toolbar button:hover { border-color: var(--brand-accent); background: var(--muted-bg); }
+/* Buttons whose label changes keep the width of their widest label, so the toolbar does not jump. */
+.toolbar [data-reserve] { display: inline-grid; justify-items: center; align-content: center; }
+.toolbar [data-reserve]::after { content: attr(data-reserve); height: 0; overflow: hidden; visibility: hidden; }
+.toolbar [data-reserve][hidden] { display: none; }
+.toolbar button.primary { display: inline-flex; align-items: center; gap: 8px; min-width: 150px; justify-content: center; background: var(--text-main); color: var(--bg-color); border-color: var(--text-main); }
+.toolbar button.primary:hover { background: var(--text-main); border-color: var(--text-main); opacity: .9; }
+.toolbar button.primary svg { width: 16px; height: 16px; fill: currentColor; }
+.toolbar button.experiment { border-color: color-mix(in srgb, var(--brand-primary), transparent 50%); color: var(--brand-primary); }
+.toolbar button.experiment[aria-pressed=true] { background: var(--brand-primary); color: var(--bg-color); border-color: var(--brand-primary); }
+/* Pressed (filled) buttons keep their fill on hover, so the light label stays readable. */
+.toolbar button.experiment[aria-pressed=true]:hover, .choice-row button[aria-pressed=true]:hover:not(:disabled) { background: color-mix(in srgb, var(--brand-primary), #000 14%); border-color: color-mix(in srgb, var(--brand-primary), #000 14%); color: var(--bg-color); }
+button:disabled { cursor: default; opacity: .55; }
+
+/* Steppers and toggles */
+.sample-controls { display: flex; flex-wrap: wrap; align-items: flex-end; gap: 12px; }
+.sample-controls .field { display: flex; flex-direction: column; gap: 4px; flex: 1 1 150px; max-width: 250px; font-family: var(--font-mono); font-size: .72rem; font-weight: 600; letter-spacing: .06em; color: var(--text-secondary); }
+.sample-controls .field:has(.choice-row) { flex-basis: 100%; max-width: none; }
+.stepper { display: flex; align-items: center; gap: 6px; width: 100%; }
+.stepper button, .choice-row button {
+  min-width: 48px; min-height: 48px; padding: 8px 14px;
+  border: 1px solid var(--input-border); border-radius: 12px; background: var(--card-bg);
+  font: 700 1.1rem var(--font-body); color: var(--text-main); touch-action: manipulation;
+}
+.stepper button { flex: none; padding: 8px 0; }
+.stepper button:hover:not(:disabled), .choice-row button:hover:not(:disabled) { border-color: var(--brand-accent); background: var(--muted-bg); }
+.stepper input {
+  flex: 1; width: 0; min-width: 44px; min-height: 48px; padding: 0 4px;
+  border: 1px solid var(--input-border); border-radius: 12px; background: var(--card-bg);
+  color: var(--text-main); text-align: center; font: 600 1rem var(--font-mono); letter-spacing: 0;
+  -moz-appearance: textfield; appearance: textfield;
+}
+.stepper input::-webkit-outer-spin-button, .stepper input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+.stepper input:focus-visible { outline: 3px solid var(--focus); outline-offset: 3px; }
+.choice-row { display: flex; flex-wrap: wrap; gap: 8px; }
+.choice-row button { font-size: .85rem; letter-spacing: 0; }
+.choice-row button[aria-pressed=true] { background: var(--brand-primary); border-color: var(--brand-primary); color: var(--bg-color); }
+
+.study-controls { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 14px; font-size: .8rem; }
 .study-controls label { display: inline-flex; align-items: center; gap: 8px; min-height: 48px; cursor: pointer; }
 .study-controls select, .study-controls button { min-height: 48px; padding: 8px 12px; border: 1px solid var(--input-border); border-radius: 10px; color: var(--text-main); background: var(--card-bg); font: inherit; }
+.study-controls button:hover { border-color: var(--brand-accent); background: var(--muted-bg); }
 .study-controls input { width: 18px; height: 18px; accent-color: var(--brand-accent-strong); }
-.playback-note { margin: 6px 0 12px; font-size: .72rem; text-align: center; color: var(--text-secondary); }
-.study-panels { display: grid; gap: 12px; margin-bottom: 8px; }
+.playback-note { margin: -8px 0 0; font-size: .72rem; line-height: 1.45; color: var(--text-secondary); }
+
+/* What the model is showing: one card, so the readouts read together. */
+.readouts { display: grid; grid-template-columns: minmax(0, 1fr); overflow: hidden; border-left: 3px solid var(--brand-accent-strong); }
+.observation { padding: 12px 16px; min-height: 108px; }
+.observation strong { font-size: .95rem; }
+.observation p { font-size: .84rem; line-height: 1.55; color: var(--text-secondary); margin: 4px 0 0; }
+.turning-display { display: flex; align-items: center; gap: 12px; padding: 10px 16px; border-top: 1px solid var(--card-border); }
+.turning-display svg { flex: 0 0 64px; width: 64px; height: 64px; }
+.turning-display circle { fill: none; stroke: var(--card-border); stroke-width: 2; stroke-dasharray: 3 4; }
+#turning-arc { fill: none; stroke: var(--brand-accent-strong); stroke-width: 4; }
+#turning-head { fill: var(--brand-accent-strong); }
+.turning-display strong { font-size: .85rem; }
+.turning-display p { margin: 4px 0 0; font-size: .78rem; color: var(--text-secondary); line-height: 1.5; }
+/* Room for three lines, so a longer message does not move the cards below. */
+.particle-readout { margin: 0; min-height: calc(4.65em + 20px); padding: 10px 16px; border-top: 1px solid var(--card-border); background: var(--muted-bg); color: var(--text-main); font-size: .8rem; line-height: 1.55; }
+
+.study-panels { display: grid; gap: 12px; }
 #measurements { padding: 0 14px 12px; border: 1px solid var(--card-border); border-radius: 12px; background: var(--card-bg); }
 #measurements:not([open]) { padding-bottom: 0; }
 #measurements summary { min-height: 48px; padding: 12px 0; cursor: pointer; font-size: .85rem; font-weight: 700; }
 #measurements summary:focus-visible, .study-controls input:focus-visible { outline: 3px solid var(--focus); outline-offset: 3px; }
+.stack { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; padding-top: 4px; }
 
 .equation { padding: 8px 12px; border-radius: 12px; background: var(--overlay-bg); border: 1px solid var(--card-border); font-family: var(--font-mono); font-size: .78rem; line-height: 1.5; }
 .equation .row { display: flex; justify-content: space-between; gap: 10px; }
@@ -242,61 +311,57 @@ body.viewer-expanded { overflow: hidden; }
 
 /* A larger synchronised end view connects the brushes to the labelled coil sides. */
 .endview { display: grid; grid-template-columns: minmax(180px, 260px) minmax(0, 1fr); column-gap: 20px; align-items: center; padding: 14px; border-radius: 12px; background: var(--card-bg); border: 1px solid var(--card-border); }
-.endview canvas { grid-column: 1; grid-row: 1 / span 3; }
-.endview p { grid-column: 2; }
-.endview canvas { display: block; width: 100%; height: auto; aspect-ratio: 1; }
+.endview canvas { grid-column: 1; grid-row: 1 / span 3; display: block; width: 100%; height: auto; aspect-ratio: 1; }
+.endview p { grid-column: 2; margin: 2px 0 0; font-family: var(--font-mono); font-size: .8rem; line-height: 1.5; color: var(--text-secondary); }
 .endview[hidden] { display: none; }
-.endview p { margin: 2px 0 0; font-family: var(--font-mono); font-size: .8rem; line-height: 1.5; color: var(--text-secondary); }
 .endview p.endview-title { margin: 0 0 2px; font-weight: 600; letter-spacing: .06em; color: var(--text-main); }
 .endview .connection-key { grid-column: 1 / -1; font-family: var(--font-body); font-size: .78rem; margin-top: 12px; }
 .endview b { color: var(--text-main); font-weight: 600; }
 
-/* Room for three lines, so a longer message does not shrink the 3D view. */
-.particle-readout { margin: 0 0 12px; min-height: calc(4.65em + 20px); padding: 10px 14px; border-radius: 12px; border-left: 3px solid var(--brand-accent); background: var(--card-bg); color: var(--text-main); font-size: .8rem; line-height: 1.55; }
-.toolbar { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; }
-.toolbar button, .question button:not(.link-button) {
-  min-height: 48px;
-  padding: 8px 14px;
-  border: 1px solid var(--input-border);
-  border-radius: 12px;
-  background: var(--card-bg);
-  font-size: .85rem;
-  font-weight: 700;
-  transition: border-color .15s, background .15s;
+@container (min-width: 640px) {
+  .readouts { grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr); }
+  .turning-display { border-top: 0; border-left: 1px solid var(--card-border); }
+  .readouts:has(.turning-display[hidden]) .observation { grid-column: 1 / -1; }
+  .particle-readout { grid-column: 1 / -1; }
 }
-.toolbar button:hover { border-color: var(--brand-accent); background: var(--muted-bg); }
-/* Buttons whose label changes keep the width of their widest label, so the toolbar does not jump. */
-.toolbar [data-reserve] { display: inline-grid; justify-items: center; align-content: center; }
-.toolbar [data-reserve]::after { content: attr(data-reserve); height: 0; overflow: hidden; visibility: hidden; }
-.toolbar [data-reserve][hidden] { display: none; }
-.toolbar button.primary { display: inline-flex; align-items: center; gap: 8px; min-width: 160px; justify-content: center; background: var(--text-main); color: var(--bg-color); border-color: var(--text-main); }
-.toolbar button.primary svg { width: 16px; height: 16px; fill: currentColor; }
-.toolbar button.experiment { border-color: color-mix(in srgb, var(--brand-primary), transparent 50%); color: var(--brand-primary); }
-.toolbar button.experiment[aria-pressed=true] { background: var(--brand-primary); color: var(--bg-color); border-color: var(--brand-primary); }
-button:disabled { cursor: default; opacity: .55; }
-#action-hint { text-align: center; color: var(--text-secondary); font-size: .78rem; margin: 10px 0 0; }
+@container (max-width: 560px) {
+  .toolbar button { flex: 1 1 calc(50% - 4px); padding: 8px 10px; }
+  .toolbar button.primary { min-width: 0; }
+  .sample-controls .field { flex: 1 1 calc(50% - 6px); max-width: calc(50% - 6px); }
+  .stack { grid-template-columns: minmax(0, 1fr); }
+  .endview { grid-template-columns: minmax(0, 1fr); }
+  .endview canvas { grid-column: 1; grid-row: 2; width: min(100%, 280px); justify-self: center; margin: 6px 0; }
+  .endview p { grid-column: 1; }
+  .endview .endview-title { grid-row: 1; }
+}
 
-/* Steppers and toggles */
-.sample-controls { display: flex; flex-wrap: wrap; justify-content: center; align-items: flex-end; gap: 12px; margin-top: 12px; }
-.sample-controls .field { display: flex; flex-direction: column; gap: 4px; font-family: var(--font-mono); font-size: .72rem; font-weight: 600; letter-spacing: .06em; color: var(--text-secondary); }
-.stepper { display: inline-flex; align-items: center; gap: 6px; }
-.stepper button, .choice-row button {
-  min-width: 48px; min-height: 48px; padding: 8px 14px;
-  border: 1px solid var(--input-border); border-radius: 12px; background: var(--card-bg);
-  font: 700 1.1rem var(--font-body); color: var(--text-main); touch-action: manipulation;
+@container (max-width: 340px) {
+  .sample-controls .field { flex-basis: 100%; max-width: none; }
 }
-.stepper button:hover:not(:disabled), .choice-row button:hover:not(:disabled) { border-color: var(--brand-accent); background: var(--muted-bg); }
-.stepper input {
-  width: 92px; min-height: 48px; padding: 0 8px;
-  border: 1px solid var(--input-border); border-radius: 12px; background: var(--card-bg);
-  color: var(--text-main); text-align: center; font: 600 1rem var(--font-mono); letter-spacing: 0;
-  -moz-appearance: textfield; appearance: textfield;
+
+/* Fullscreen: the 3D view fills the screen and the console scrolls on its own beside it (or below it in portrait). */
+body.viewer-expanded { overflow: hidden; }
+.viewer-panel.is-fullscreen {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  width: 100%;
+  height: 100%;
+  height: 100dvh;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) clamp(320px, 30vw, 420px);
+  grid-template-rows: auto minmax(0, 1fr);
+  gap: 10px 16px;
+  overflow: hidden;
+  padding: max(10px, env(safe-area-inset-top), var(--standalone-top)) max(16px, env(safe-area-inset-right)) max(12px, env(safe-area-inset-bottom)) max(16px, env(safe-area-inset-left));
 }
-.stepper input::-webkit-outer-spin-button, .stepper input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
-.stepper input:focus-visible { outline: 3px solid var(--focus); outline-offset: 3px; }
-.choice-row { display: flex; flex-wrap: wrap; gap: 8px; }
-.choice-row button { font-size: .85rem; letter-spacing: 0; }
-.choice-row button[aria-pressed=true] { background: var(--brand-primary); border-color: var(--brand-primary); color: var(--bg-color); }
+.viewer-panel.is-fullscreen .viewer-heading { grid-column: 1 / -1; }
+.viewer-panel.is-fullscreen .stage { min-height: 0; }
+.viewer-panel.is-fullscreen #viewer { flex: 1 1 0; height: auto; min-height: 0; }
+.viewer-panel.is-fullscreen .console { min-height: 0; overflow-y: auto; overscroll-behavior: contain; padding: 0 4px 4px; margin: 0 -4px; scrollbar-width: thin; }
+@media (orientation: portrait) {
+  .viewer-panel.is-fullscreen { grid-template-columns: minmax(0, 1fr); grid-template-rows: auto minmax(0, 1.4fr) minmax(0, 1fr); }
+}
 
 aside { border-left: 1px solid var(--card-border); padding: 26px; background: var(--card-bg); }
 aside h2 { font-size: 1.9rem; line-height: 1.15; margin: 10px 0 14px; }
@@ -348,7 +413,6 @@ footer { display: flex; justify-content: space-between; gap: 20px; border-top: 1
 @media (max-width: 1100px) {
   .workspace { grid-template-columns: minmax(0, 1.35fr) minmax(290px, 1fr); }
   .models strong { font-size: 1.05rem; }
-  .endview { grid-template-columns: minmax(150px, 210px) minmax(0, 1fr); gap: 12px; }
 }
 @media (max-width: 860px) {
   .workspace { grid-template-columns: 1fr; }
@@ -367,23 +431,14 @@ footer { display: flex; justify-content: space-between; gap: 20px; border-top: 1
   .models strong { font-size: .98rem; }
   .models small { font-size: .76rem; }
   .lab-strip { flex-direction: column; align-items: flex-start; gap: 0; }
-  .viewer-panel { padding: 12px; }
-  #viewer, body.has-endview #viewer { flex: none; height: 360px; min-height: 360px; }
-  .viewer-heading { font-size: .68rem; }
+  .viewer-panel { padding: 12px; gap: 12px; }
+  #viewer { height: 360px; }
+  .viewer-heading { font-size: .68rem; gap: 8px; }
+  .scale { font-size: .6rem; padding: 3px 8px; }
+  .legend { gap: 4px; font-size: .7rem; }
   .gesture { display: none; }
-  .stack { grid-template-columns: 1fr; }
-  .graph canvas { aspect-ratio: 300 / 170; height: auto; }
-  .endview { grid-template-columns: minmax(0, 1fr); }
-  .endview canvas { grid-column: 1; grid-row: 2; width: min(100%, 280px); justify-self: center; }
-  .endview p { grid-column: 1; }
-  .endview .endview-title { grid-row: 1; }
-  .viewer-panel.is-fullscreen #viewer, body.has-endview .viewer-panel.is-fullscreen #viewer { flex: none; height: 400px; min-height: 400px; }
-  .sample-controls .field { flex: 1 1 calc(50% - 12px); }
-  .stepper { width: 100%; }
-  .stepper input { flex: 1; width: 0; min-width: 0; }
+  .deck { padding: 12px; }
   .particle-readout { min-height: 72px; }
-  .toolbar button { flex: 1 1 calc(50% - 8px); padding: 8px 10px; }
-  .toolbar button.primary { min-width: 0; }
   aside { padding: 20px; }
   .final-challenge { padding: 20px; }
   .reality { gap: 12px; }
@@ -394,10 +449,3 @@ footer { display: flex; justify-content: space-between; gap: 20px; border-top: 1
   .models button:hover { transform: none; }
 }
 
-.turning-display { display: flex; align-items: center; gap: 12px; padding: 10px 14px; margin-bottom: 12px; border: 1px solid var(--card-border); border-radius: 12px; background: var(--card-bg); }
-.turning-display svg { flex: 0 0 64px; width: 64px; height: 64px; }
-.turning-display circle { fill: none; stroke: var(--card-border); stroke-width: 2; stroke-dasharray: 3 4; }
-#turning-arc { fill: none; stroke: var(--brand-accent-strong); stroke-width: 4; }
-#turning-head { fill: var(--brand-accent-strong); }
-.turning-display strong { font-size: .85rem; }
-.turning-display p { margin: 4px 0 0; font-size: .78rem; color: var(--text-secondary); line-height: 1.5; }

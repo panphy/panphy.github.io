@@ -41,8 +41,9 @@ export const MODES = {
 
 // Tap a part of the apparatus to read its job.
 export const PARTS = {
-  north: 'NORTH POLE · Magnetic field lines leave a north pole and go towards a south pole.',
-  south: 'SOUTH POLE · Field lines enter a south pole. Between flat, close poles the field is nearly uniform.',
+  north: 'NORTH POLE · One end of the magnet. Field lines leave a north pole and go towards a south pole. Every magnet has a north and a south pole: cut one in half and each piece still has both.',
+  south: 'SOUTH POLE · The other end of the same magnet. Field lines enter a south pole. Between flat, close poles the field is nearly uniform, so the lines are parallel and evenly spaced.',
+  magnet: 'MAGNET · One magnet, bent so its two ends face each other across the gap. The colours mark its ends: north (red) and south (blue). The middle is not a pole. There is no such thing as a magnet with only one pole.',
   field: 'MAGNETIC FIELD · The arrows point from north to south. The closer the lines, the stronger the field (the bigger the flux density B).',
   rod: 'COPPER ROD · A conductor carrying a current across a magnetic field feels a force, F = BIL sin θ. Copper is used because it is a good conductor and is not magnetic.',
   supply: 'DC SUPPLY · Drives a current one way round the circuit. Conventional current flows from + to −.',
@@ -52,7 +53,7 @@ export const PARTS = {
   commutator: 'SPLIT-RING COMMUTATOR · Two half-rings, each joined to one end of the coil: A (purple) to side A, B (green) to side B. Every half turn they swap brushes, reversing the current in the coil.',
   sliprings: 'SLIP RINGS · Two complete rings. Each end of the coil always touches the same brush, so the coil gets whatever current the supply gives it.',
   brush: 'BRUSH · A carbon block that presses on the rotating ring to carry current in and out. Carbon conducts and slides smoothly.',
-  ac: 'AC SUPPLY · The current changes direction twice every cycle. In the UK, mains electricity has a frequency of 50 Hz.',
+  ac: 'AC SUPPLY · The current changes direction twice every cycle. Its screen works like an oscilloscope (CRO), plotting the supply emf against time: a higher frequency fits more cycles on the screen, and a bigger peak makes a taller wave. In the UK, mains electricity has a frequency of 50 Hz.',
   force: 'FORCE · At right angles to both the current and the field (Fleming’s left-hand rule).',
   current: 'CURRENT · Orange arrows show conventional current direction, from + to − through the external circuit. Optional moving markers show direction, not the speed of individual charges.'
 };
