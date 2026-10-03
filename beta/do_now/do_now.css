@@ -200,10 +200,24 @@ button:focus-visible, a:focus-visible, input:focus-visible, .topic input:focus-v
 #cards { position: fixed; inset: var(--standalone-top) 0 0 0; z-index: 10; display: flex; flex-direction: column; background-color: var(--board); background-image: var(--grid); background-size: 58px 58px; }
 .cards-area { flex: 1; min-height: 0; overflow: auto; display: grid; place-items: center; padding: 3vh max(16px, 3vw); }
 .flashcard { width: min(100%, 900px); padding: clamp(18px, 3.5vmin, 40px); border: 2px solid var(--ink); border-radius: 14px; background: var(--card); color: var(--ink); box-shadow: 8px 8px 0 var(--hi); font-size: clamp(21px, 4.2vmin, 40px); line-height: 1.25; }
+/* The card turns over to show its answer: both faces share one grid cell, so
+   the card is as tall as the taller face. */
+.flip { width: min(100%, 900px); perspective: 1800px; }
+.flip-inner { display: grid; transform-style: preserve-3d; transition: transform .6s cubic-bezier(.3, .7, .2, 1); }
+.flip.flipped .flip-inner { transform: rotateY(180deg); }
+.flip.no-anim .flip-inner { transition: none; }
+.face { grid-area: 1 / 1; width: auto; display: flex; flex-direction: column; -webkit-backface-visibility: hidden; backface-visibility: hidden; }
+.face.back { transform: rotateY(180deg); box-shadow: 8px 8px 0 var(--pop); }
+.face .card-actions { margin-top: auto; padding-top: 1em; }
+.card-recap { margin: 0; font-size: .62em; font-weight: 700; color: var(--muted); }
+.card-unflip { align-self: center; min-height: 44px; margin-top: 10px; padding: 0 12px; border: 0; background: none; font-size: 15px; font-weight: 800; text-decoration: underline; color: var(--muted); }
+.card-unflip:hover { color: var(--ink); }
+@media (prefers-reduced-motion: reduce) { .flip-inner { transition: none; } }
 .card-topic { margin: 0 0 .9em; font-size: max(12px, .38em); font-weight: 900; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); }
 .card-question { margin: 0; font-weight: 700; text-wrap: pretty; }
 .flashcard .q-answer { margin-top: .7em; }
 .card-actions { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 1em; }
+.flashcard.done .card-actions { margin-top: 1em; }
 .card-actions button { flex: 1 1 180px; min-height: 60px; font-size: 18px; }
 .card-actions .ghost { font-size: 17px; }
 .flashcard.done .card-topic { margin: .6em 0 0; }

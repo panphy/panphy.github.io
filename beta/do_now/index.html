@@ -136,18 +136,29 @@
       </div>
     </header>
     <div class="cards-area">
-      <article id="card" class="flashcard">
-        <p id="card-topic" class="card-topic"></p>
-        <p id="card-question" class="card-question"></p>
-        <ol id="card-steps" class="q-steps" hidden></ol>
-        <figure id="card-figure" class="q-figure" hidden><img alt="Diagram for this question"></figure>
-        <div id="card-answer" class="q-answer" hidden></div>
-        <div class="card-actions">
-          <button id="card-reveal" class="primary" type="button">Show answer</button>
-          <button id="card-again" class="ghost" type="button" hidden>Still learning</button>
-          <button id="card-got" class="primary" type="button" hidden>Got it</button>
+      <div id="card" class="flip">
+        <div class="flip-inner">
+          <article id="card-front" class="flashcard face">
+            <p id="card-topic" class="card-topic"></p>
+            <p id="card-question" class="card-question"></p>
+            <ol id="card-steps" class="q-steps" hidden></ol>
+            <figure id="card-figure" class="q-figure" hidden><img alt="Diagram for this question"></figure>
+            <div class="card-actions">
+              <button id="card-reveal" class="primary" type="button">Show answer</button>
+            </div>
+          </article>
+          <article id="card-back" class="flashcard face back">
+            <p class="card-topic">Answer</p>
+            <p id="card-recap" class="card-recap"></p>
+            <div id="card-answer" class="q-answer"></div>
+            <div class="card-actions">
+              <button id="card-again" class="ghost" type="button">Still learning</button>
+              <button id="card-got" class="primary" type="button">Got it</button>
+            </div>
+            <button id="card-unflip" class="card-unflip" type="button">See the question again</button>
+          </article>
         </div>
-      </article>
+      </div>
       <article id="cards-done" class="flashcard done" hidden>
         <p class="card-question">All done.</p>
         <p id="cards-done-text" class="card-topic"></p>

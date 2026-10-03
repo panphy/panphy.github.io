@@ -724,7 +724,19 @@
     renderCard();
   }
 
-  function renderCard(revealed = false) {
+  // Turn the card over. Only the face that is showing can be focused or clicked.
+  function flipCard(showAnswer, animate = true) {
+    const card = $("card");
+    card.classList.toggle("no-anim", !animate);
+    card.classList.toggle("flipped", showAnswer);
+    if (!animate) void card.offsetWidth; // apply the unanimated state before transitions are allowed again
+    card.classList.remove("no-anim");
+    $("card-front").inert = showAnswer;
+    $("card-back").inert = !showAnswer;
+    (showAnswer ? $("card-got") : $("card-reveal")).focus({ preventScroll: true });
+  }
+
+  function renderCard() {
     const card = state.deck[0];
     const learned = state.deckSize - state.deck.length;
     $("cards-progress").textContent = `Flashcards · ${learned} of ${state.deckSize} learned`;
@@ -735,8 +747,11 @@
       $("cards-again").focus();
       return;
     }
+    // A new card always starts question side up, without flipping back in view.
+    flipCard(false, false);
     $("card-topic").textContent = card.Topic.replace(/^\(S\)\s*/, "");
     $("card-question").textContent = card.Question;
+    $("card-recap").textContent = card.Question;
     const steps = $("card-steps");
     steps.textContent = "";
     steps.hidden = !card.steps;
@@ -749,13 +764,12 @@
     }
     const figure = $("card-figure");
     figure.hidden = !card.Image;
-    if (card.Image) figure.querySelector("img").src = IMAGE_DIR + card.Image;
-    const answer = $("card-answer");
-    answer.textContent = card.Answer;
-    answer.hidden = !revealed;
-    $("card-reveal").hidden = revealed;
-    $("card-again").hidden = $("card-got").hidden = !revealed;
-    (revealed ? $("card-got") : $("card-reveal")).focus();
+    // A fresh element each time, so the previous card's diagram never shows while the new one loads.
+    const image = document.createElement("img");
+    image.alt = "Diagram for this question";
+    if (card.Image) image.src = IMAGE_DIR + card.Image;
+    figure.replaceChildren(image);
+    $("card-answer").textContent = card.Answer;
   }
 
   function answerCard(learned) {
@@ -907,7 +921,8 @@
     els.cardsOpen.addEventListener("click", startCards);
     $("cards-restart").addEventListener("click", startCards);
     $("cards-again").addEventListener("click", startCards);
-    $("card-reveal").addEventListener("click", () => renderCard(true));
+    $("card-reveal").addEventListener("click", () => flipCard(true));
+    $("card-unflip").addEventListener("click", () => flipCard(false));
     $("card-again").addEventListener("click", () => answerCard(false));
     $("card-got").addEventListener("click", () => answerCard(true));
     document.querySelectorAll("[data-home]").forEach((button) => button.addEventListener("click", hideBoard));
@@ -959,12 +974,13 @@
         return;
       }
       if (!els.cards.hidden) {
-        const revealed = !$("card-answer").hidden;
+        const revealed = $("card").classList.contains("flipped");
         if (event.key === "Escape") hideBoard();
         else if (!state.deck.length) return;
         else if (event.key === "ArrowRight" && revealed) answerCard(true);
         else if (event.key === "ArrowLeft" && revealed) answerCard(false);
-        else if (event.key === "ArrowDown" && !revealed) renderCard(true);
+        else if (event.key === "ArrowDown" && !revealed) flipCard(true);
+        else if (event.key === "ArrowUp" && revealed) flipCard(false);
         return;
       }
       if (els.board.hidden) {
