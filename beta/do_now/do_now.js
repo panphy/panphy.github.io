@@ -215,6 +215,23 @@
     return state.topics.filter((topic) => state.selected.has(topic.name)).flatMap((topic) => topic.questions.filter(allowed));
   }
 
+  // A word in [square brackets] in a question is shown in bold red (e.g. "must [not] be done").
+  function plainText(text) {
+    return text.replace(/\[([^\]]+)\]/g, "$1");
+  }
+
+  function setQuestionText(node, text) {
+    node.textContent = "";
+    text.split(/\[([^\]]+)\]/).forEach((part, index) => {
+      if (index % 2) {
+        const mark = document.createElement("b");
+        mark.className = "neg";
+        mark.textContent = part;
+        node.append(mark);
+      } else if (part) node.append(part);
+    });
+  }
+
   // Questions that share wording and diagram count as one (units are asked in several topics).
   function questionKey(question) {
     return `${question.Question}|${question.Image}`;
@@ -359,7 +376,7 @@
     for (const topic of state.topics) {
       if (!state.selected.has(topic.name)) continue;
       const questions = topic.questions.filter((question) => allowed(question)
-        && terms.every((term) => question.Question.toLowerCase().includes(term)));
+        && terms.every((term) => plainText(question.Question).toLowerCase().includes(term)));
       if (!questions.length) continue;
       const heading = document.createElement("h3");
       heading.textContent = topic.name.replace(/^\(S\)\s*/, "");
@@ -379,7 +396,7 @@
         });
         const text = document.createElement("span");
         text.className = "pick-text";
-        text.textContent = question.Question;
+        setQuestionText(text, question.Question);
         row.append(input);
         if (order >= 0) {
           const badge = document.createElement("span");
@@ -542,7 +559,7 @@
     const body = document.createElement("div");
     const text = document.createElement("p");
     text.className = "q-text";
-    text.textContent = question.Question;
+    setQuestionText(text, question.Question);
     body.append(text);
 
     if (question.Image) {
@@ -744,8 +761,8 @@
     // A new card always starts question side up, without flipping back in view.
     flipCard(false, false);
     $("card-topic").textContent = card.Topic.replace(/^\(S\)\s*/, "");
-    $("card-question").textContent = card.Question;
-    $("card-recap").textContent = card.Question;
+    setQuestionText($("card-question"), card.Question);
+    setQuestionText($("card-recap"), card.Question);
     const steps = $("card-steps");
     steps.textContent = "";
     steps.hidden = !card.steps;
@@ -817,7 +834,8 @@
       const row = element("tr");
       const questionCell = element("td");
       const wrap = element("div", "sheet-q");
-      const text = element("div", "", question.Question);
+      const text = element("div");
+      setQuestionText(text, question.Question);
       if (question.Image) {
         const image = element("img");
         image.src = IMAGE_DIR + question.Image;

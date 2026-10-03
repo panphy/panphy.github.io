@@ -27,6 +27,7 @@ col.q { width: 46%; }
 col.t { width: 9mm; }
 td.n { text-align: center; font-weight: 700; color: var(--muted); }
 td.q { font-weight: 700; }
+td.q .neg { color: #d0182b; font-weight: 900; }
 td.a { white-space: pre-line; background: var(--tint); }
 td.t::after { content: ""; display: block; width: 4.2mm; height: 4.2mm; margin: .6mm auto 0; border: .3mm solid var(--ink); border-radius: .8mm; }
 td.q img { display: block; margin-top: 2mm; max-width: 100%; max-height: 38mm; }
