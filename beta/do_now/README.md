@@ -19,7 +19,7 @@ Between visits the browser remembers only the course switch, the number of quest
 | Column | Notes |
 |---|---|
 | `Number` | Stable ID. 1–635 are the original numbers; 636 onwards are new. Gaps are removed questions. |
-| `Unit` | AQA unit, used to group topics on the landing page (and to show Paper 1 or 2). |
+| `Unit` | AQA unit, used to group topics on the landing page (and to show Paper 1 or 2). "Working scientifically" is shown first, in its own bordered block; it is based on the Year 9 unit *Work Like a Physicist* and is labelled "Both papers". |
 | `Topic` | Separate Physics only topics start with `(S) `. Row order sets the order on the page. |
 | `Course` | `Combined` or `Separate`, following the "(physics only)" markers in the AQA 8463 specification (version 1.1). Every topic is wholly one or the other, so keep all rows of a topic the same. "Combined only" hides the `Separate` topics. |
 | `Question`, `Answer` | Plain text. A line break inside the cell is shown as a line break. |

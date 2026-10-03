@@ -11,6 +11,7 @@
   const STORAGE_KEY = "panphy-do-now";
   const MAX_COUNT = 20;
   const PAPER_ONE_UNITS = ["Energy", "Electricity", "Particle model of matter", "Atomic structure"];
+  const BOTH_PAPER_UNITS = ["Working scientifically"]; // skills assessed in every paper
   const CHEVRON_ICON = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>';
   const CLOSE_ICON = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>';
   const SWAP_ICON = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 11a8 8 0 0 0-14.3-4.5L4 8.5M4 4v4.5h4.5M4 13a8 8 0 0 0 14.3 4.5l1.7-2M20 20v-4.5h-4.5"/></svg>';
@@ -110,7 +111,9 @@
     const query = els.search.value.trim().toLowerCase();
     const terms = query.split(/\s+/).filter(Boolean);
     els.units.textContent = "";
-    const units = [...new Set(state.topics.map((topic) => topic.unit))];
+    // Skills units (working scientifically) come first, set apart from the content units.
+    const units = [...new Set(state.topics.map((topic) => topic.unit))]
+      .sort((a, b) => BOTH_PAPER_UNITS.includes(b) - BOTH_PAPER_UNITS.includes(a));
     let shownTopics = 0;
 
     for (const unit of units) {
@@ -124,7 +127,7 @@
       shownTopics += topics.length;
 
       const section = document.createElement("section");
-      section.className = "unit";
+      section.className = BOTH_PAPER_UNITS.includes(unit) ? "unit skills-block" : "unit";
       const head = document.createElement("div");
       head.className = "unit-head";
       // A search always shows its matches, whatever is folded away.
@@ -144,7 +147,8 @@
       const paper = document.createElement("span");
       paper.className = "unit-paper";
       const chosen = topics.filter((topic) => state.selected.has(topic.name)).length;
-      paper.textContent = `${PAPER_ONE_UNITS.includes(unit) ? "Paper 1" : "Paper 2"} · ${chosen ? `${chosen} of ${topics.length} selected` : `${topics.length} topics`}`;
+      const paperLabel = BOTH_PAPER_UNITS.includes(unit) ? "Both papers" : PAPER_ONE_UNITS.includes(unit) ? "Paper 1" : "Paper 2";
+      paper.textContent = `${paperLabel} · ${chosen ? `${chosen} of ${topics.length} selected` : `${topics.length} topics`}`;
       paper.dataset.unit = unit;
       if (chosen) paper.classList.add("has-selection");
       const all = document.createElement("button");
