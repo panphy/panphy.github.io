@@ -1,6 +1,6 @@
 # Do Now starters
 
-Lesson starters for AQA GCSE Physics (Higher). The teacher picks topics, then either sets a number of questions to be drawn at random (spread across the chosen topics) or ticks the exact questions to show ("Pick my own"). The board shows them large enough to read from the back of the room. Optional "order the method" tasks show the steps of a practical jumbled, for students to put in order. Each question has its own answer button, and there is a Show ALL answers button.
+Lesson starters for AQA GCSE Physics (Higher). The teacher picks topics, then either sets a number of questions to be drawn at random (spread across the chosen topics) or ticks the exact questions to show ("Pick my own"). The board shows them large enough to read from the back of the room. Optional required practical methods, listed below the topic units, show the steps of a practical jumbled for students to put in order. Each question has its own answer button, and there is a Show ALL answers button.
 
 ## Files
 
@@ -9,7 +9,7 @@ Lesson starters for AQA GCSE Physics (Higher). The teacher picks topics, then ei
 | `index.html`, `do_now.css`, `do_now.js` | The page. No build step. |
 | `questions.csv` | The question bank. The page reads it on every load, so editing this file is all that is needed to change a question. |
 | `images/*.svg` | Diagrams, named in the `Image` column. |
-| `methods.csv` | "Order the method" tasks: one row per practical, with the steps in the correct order, one per line in the `Steps` cell. The page jumbles and letters them. `Note` is added to the answer (e.g. two steps that may be swapped). |
+| `methods.csv` | The "Required practicals" tasks: one row per method, with the steps in the correct order, one per line in the `Steps` cell. The page jumbles and letters them. `Note` is added to the answer (e.g. two steps that may be swapped). |
 | `review-changes.csv` | Every change made to the original bank (old and new wording, with a reason). For review only; the page does not use it and it can be deleted. |
 
 ## Question bank columns

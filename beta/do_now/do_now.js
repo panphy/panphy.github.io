@@ -6,6 +6,7 @@
   const BANK_URL = "questions.csv";
   const METHODS_URL = "methods.csv";
   const LETTERS = "ABCDEFGHIJ";
+  const METHODS_KEY = "practical-methods"; // its entry in the remembered collapsed set
   const IMAGE_DIR = "images/";
   const STORAGE_KEY = "panphy-do-now";
   const MAX_COUNT = 20;
@@ -31,7 +32,7 @@
     count: 5,
     mode: "random",      // "random" | "manual"
     picks: [],           // question Numbers ticked by the teacher, in the order ticked
-    methods: [],         // "order the method" tasks from methods.csv
+    methods: [],         // practical methods from methods.csv
     methodPicks: [],     // their Numbers, in the order ticked
     collapsed: new Set(), // unit names whose topic lists are folded away
     scale: 1,
@@ -252,9 +253,50 @@
     return state.methodPicks.filter((number) => available.has(number)).map((number) => available.get(number));
   }
 
+  // Required practical methods sit below the topic units in their own block: each one
+  // becomes a "put the steps in order" task on the board.
   function renderMethods() {
+    const terms = els.search.value.trim().toLowerCase().split(/\s+/).filter(Boolean);
+    const methods = state.methods.filter((method) => allowed(method)
+      && terms.every((term) => `${method.Practical} required practical methods rp`.toLowerCase().includes(term)));
     els.methods.textContent = "";
-    for (const method of state.methods.filter(allowed)) {
+    els.methods.hidden = methods.length === 0;
+    if (!methods.length) return;
+
+    const open = terms.length > 0 || !state.collapsed.has(METHODS_KEY);
+    const head = document.createElement("div");
+    head.className = "unit-head";
+    const title = document.createElement("h3");
+    const toggle = document.createElement("button");
+    toggle.type = "button";
+    toggle.className = "unit-toggle";
+    toggle.setAttribute("aria-expanded", String(open));
+    toggle.innerHTML = CHEVRON_ICON;
+    toggle.append("Required practicals");
+    toggle.addEventListener("click", () => {
+      state.collapsed.has(METHODS_KEY) ? state.collapsed.delete(METHODS_KEY) : state.collapsed.add(METHODS_KEY);
+      refresh();
+    });
+    title.append(toggle);
+    const status = document.createElement("span");
+    status.className = "unit-paper";
+    const describe = () => {
+      const chosen = methods.filter((method) => state.methodPicks.includes(method.Number)).length;
+      status.textContent = `Optional · ${chosen ? `${chosen} of ${methods.length} selected` : `${methods.length} methods`}`;
+      status.classList.toggle("has-selection", chosen > 0);
+    };
+    describe();
+    head.append(title, status);
+
+    const hint = document.createElement("p");
+    hint.className = "hint first";
+    hint.textContent = "Not recall questions: students see the steps of a required practical method in a jumbled order and put them in the right order. Ticked practicals are added to the board after the questions.";
+    hint.hidden = !open;
+
+    const grid = document.createElement("div");
+    grid.className = "topics";
+    grid.hidden = !open;
+    for (const method of methods) {
       const label = document.createElement("label");
       label.className = "topic";
       const input = document.createElement("input");
@@ -263,6 +305,7 @@
       input.addEventListener("change", () => {
         if (input.checked) state.methodPicks.push(method.Number);
         else state.methodPicks = state.methodPicks.filter((number) => number !== method.Number);
+        describe();
         refresh(false);
       });
       const body = document.createElement("span");
@@ -282,8 +325,9 @@
       count.textContent = `${method.Steps.split("\n").length} steps`;
       body.append(count);
       label.append(input, body);
-      els.methods.append(label);
+      grid.append(label);
     }
+    els.methods.append(head, hint, grid);
   }
 
   // Turn a method into a board item: its steps jumbled and lettered, and the
@@ -366,7 +410,7 @@
     const methodCount = pickedMethods().length;
     const bold = (value) => { const b = document.createElement("b"); b.textContent = value; return b; };
     const addMethods = (alone) => {
-      if (methodCount) els.summary.append(alone ? "" : " · ", bold(methodCount), ` method task${methodCount === 1 ? "" : "s"}`);
+      if (methodCount) els.summary.append(alone ? "" : " · ", bold(methodCount), ` required practical${methodCount === 1 ? "" : "s"}`);
     };
     if (state.mode === "manual") {
       const picked = pickedQuestions().length;
@@ -396,9 +440,14 @@
     addMethods(false);
   }
 
+  // Everything on the landing page that can be folded away: the units and the practical methods.
+  function foldableSections() {
+    return [...new Set(state.topics.map((topic) => topic.unit)), METHODS_KEY];
+  }
+
   function renderControls() {
-    const unitCount = new Set(state.topics.map((topic) => topic.unit)).size;
-    $("fold-all").textContent = unitCount && state.collapsed.size >= unitCount ? "Expand all" : "Collapse all";
+    const sections = foldableSections();
+    $("fold-all").textContent = sections.length && sections.every((name) => state.collapsed.has(name)) ? "Expand all" : "Collapse all";
     els.count.value = state.count;
     document.querySelectorAll("[data-count]").forEach((button) => button.setAttribute("aria-pressed", String(Number(button.dataset.count) === state.count)));
     document.querySelectorAll("[data-course]").forEach((button) => button.setAttribute("aria-pressed", String(button.dataset.course === state.course)));
@@ -733,11 +782,11 @@
   }
 
   function bindEvents() {
-    els.search.addEventListener("input", () => renderTopics());
+    els.search.addEventListener("input", () => { renderTopics(); renderMethods(); });
     $("clear").addEventListener("click", () => { state.selected.clear(); refresh(); });
     $("fold-all").addEventListener("click", () => {
-      const units = [...new Set(state.topics.map((topic) => topic.unit))];
-      state.collapsed = state.collapsed.size >= units.length ? new Set() : new Set(units);
+      const sections = foldableSections();
+      state.collapsed = sections.every((name) => state.collapsed.has(name)) ? new Set() : new Set(sections);
       refresh();
     });
     $("select-shown").addEventListener("click", () => {
