@@ -8,6 +8,11 @@
   @bottom-left { content: "panphy.app · Do Now AO1 revision"; font: 8pt Arial, Helvetica, sans-serif; color: #4f6163; }
   @bottom-right { content: "Page " counter(page) " of " counter(pages); font: 8pt Arial, Helvetica, sans-serif; color: #4f6163; }
 }
+@page practical {
+  @bottom-left { content: "panphy.app · Do Now required practical"; font: 8pt Arial, Helvetica, sans-serif; color: #4f6163; }
+  @bottom-right { content: "Page " counter(page) " of " counter(pages); font: 8pt Arial, Helvetica, sans-serif; color: #4f6163; }
+}
+.practical { page: practical; }
 html { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
 body { margin: 0; background: #47595b; color: var(--ink); font: 11pt/1.4 Arial, Helvetica, sans-serif; }
 .sheet { width: 210mm; min-height: 297mm; margin: 8mm auto; padding: 13mm; background: #fff; box-shadow: 0 2mm 8mm rgba(0, 0, 0, .3); }
@@ -31,6 +36,14 @@ td.q .neg { color: #d0182b; font-weight: 900; }
 td.a { white-space: pre-line; background: var(--tint); }
 td.t::after { content: ""; display: block; width: 4.2mm; height: 4.2mm; margin: .6mm auto 0; border: .3mm solid var(--ink); border-radius: .8mm; }
 td.q img { display: block; margin-top: 2mm; max-width: 100%; max-height: 38mm; }
+.steps { display: grid; grid-template-columns: 1fr 1fr; gap: 4mm; margin: 4mm 0 0; padding: 0; list-style: none; }
+.step { break-inside: avoid; padding: 2.4mm; border: .3mm solid var(--line); border-radius: 1.6mm; }
+.step-head { display: flex; align-items: flex-start; gap: 2.4mm; min-height: 11mm; }
+.step-num { flex: none; display: grid; place-items: center; width: 7mm; height: 7mm; border: .35mm solid var(--ink); border-radius: 50%; background: var(--hi); font: 900 10pt/1 Arial, Helvetica, sans-serif; }
+.step-text { margin: .3mm 0 0; font-size: 10pt; font-weight: 700; line-height: 1.3; }
+.step .diagram svg { display: block; width: auto; max-width: 100%; height: 45mm; margin: 1.6mm auto 0; }
+.steps.few .diagram svg { height: 66mm; }
+.note { margin-top: 4mm; }
 .missing { padding: 20mm 0; text-align: center; font-weight: 700; }
 @media print {
   body { background: #fff; }

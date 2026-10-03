@@ -11,8 +11,8 @@ Between visits the browser remembers only the course switch, the number of quest
 | `index.html`, `do_now.css`, `do_now.js` | The page. No build step. |
 | `questions.csv` | The question bank. The page reads it on every load, so editing this file is all that is needed to change a question. |
 | `images/*.svg` | Diagrams, named in the `Image` column. |
-| `methods.csv` | The "Required practicals" tasks: one row per method, with the steps in the correct order, one per line in the `Steps` cell. The page jumbles and letters them. `Note` is added to the answer (e.g. two steps that may be swapped). |
-| `revision/` | Student revision sheets: an index page and one question-and-answer PDF per topic. See [`revision/README.md`](revision/README.md) |
+| `methods.csv` | The "Required practicals" tasks: one row per method, with the steps in the correct order, one per line in the `Steps` cell. The page jumbles and letters them. `Note` is added to the answer (e.g. two steps that may be swapped). The same steps drive the method sheets in `revision/`, whose diagrams are matched to steps by position, so redraw them if steps change. |
+| `revision/` | Student revision sheets: an index page, one question-and-answer PDF per topic and one method sheet with diagrams per required practical. See [`revision/README.md`](revision/README.md) |
 | `review-changes.csv` | Every change made to the original bank (old and new wording, with a reason). For review only; the page does not use it and it can be deleted. |
 
 ## Question bank columns
