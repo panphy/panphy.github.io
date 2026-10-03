@@ -68,6 +68,13 @@ button:focus-visible, a:focus-visible, input:focus-visible, .topic input:focus-v
 .hint.first { margin: 0 0 14px; font-size: 15px; }
 .badge-s { display: inline-block; padding: 1px 7px; border: 1.5px solid var(--ink); border-radius: 999px; background: var(--violet); color: var(--ink); font-size: 11px; font-weight: 900; letter-spacing: .04em; white-space: nowrap; }
 
+/* Everything currently ticked, shown even when its unit is folded away. */
+.chosen { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-top: 14px; padding: 10px 12px; border: 2px solid var(--ink); border-radius: 10px; background: #fff6de; }
+.chosen-label { font-size: 12px; font-weight: 900; letter-spacing: .12em; text-transform: uppercase; }
+.chip { display: inline-flex; align-items: center; gap: 8px; min-height: 40px; padding: 0 8px 0 14px; border: 2px solid var(--ink); border-radius: 999px; background: var(--hi); font-size: 14px; font-weight: 800; text-align: left; }
+.chip.practical { background: var(--pop); }
+.chip:hover { background: var(--ink); color: #fff; }
+.chip svg { flex: none; width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 3; stroke-linecap: round; }
 .units { margin-top: 8px; }
 .loading, .empty { padding: 22px 0 6px; color: var(--muted); font-weight: 700; }
 .unit { padding-top: 20px; }
