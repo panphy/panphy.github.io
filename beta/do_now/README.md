@@ -12,6 +12,7 @@ Between visits the browser remembers only the course switch, the number of quest
 | `questions.csv` | The question bank. The page reads it on every load, so editing this file is all that is needed to change a question. |
 | `images/*.svg` | Diagrams, named in the `Image` column. |
 | `methods.csv` | The "Required practicals" tasks: one row per method, with the steps in the correct order, one per line in the `Steps` cell. The page jumbles and letters them. `Note` is added to the answer (e.g. two steps that may be swapped). |
+| `revision/` | Student revision sheets: an index page and one question-and-answer PDF per topic. See [`revision/README.md`](revision/README.md) |
 | `review-changes.csv` | Every change made to the original bank (old and new wording, with a reason). For review only; the page does not use it and it can be deleted. |
 
 ## Question bank columns
@@ -43,7 +44,7 @@ Save the CSV as UTF-8 (in Excel: "CSV UTF-8 (Comma delimited)"), or symbols such
 
 All paths inside the folder are relative, and shared assets use site-root paths that already exist, so the folder can be moved as it is.
 
-1. `git mv beta/do_now gcsephy/do-now` (or another name).
-2. Add `<script src="/gcsephy/sw-register.js" defer></script>` to the `<head>` of `index.html`.
+1. `git mv beta/do_now gcsephy/do-now` (or another name). `revision/` moves with it.
+2. Add `<script src="/gcsephy/sw-register.js" defer></script>` to the `<head>` of `index.html` and of `revision/index.html`.
 3. Add an entry to `gcsephy/index.html` and remove the one in `beta/index.html`.
 4. Update the link in the root `README.md`, and delete `review-changes.csv` if it is no longer wanted.

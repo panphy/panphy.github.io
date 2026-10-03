@@ -11,7 +11,7 @@ Browser-based physics tools, simulations, classroom utilities and games. Student
 - **Teacher utilities:** [Exam Timer](for_teachers/timer.html) and [Camera Visualizer](for_teachers/visualizer.html).
 - **Games and demos:** [Spellwave](fun/spellwave.html) and [ASCII Camera](fun/ascii_cam.html).
 - **GCSE Physics:** school-specific unit companions, available by direct link.
-- **Do Now starters:** [AO1 lesson starters by topic](beta/do_now/) for GCSE Physics, with worksheets and revision flashcards, in beta before moving to `gcsephy/`.
+- **Do Now starters:** [AO1 lesson starters by topic](beta/do_now/) for GCSE Physics, with worksheets, flashcards and [printable revision sheets](beta/do_now/revision/), in beta before moving to `gcsephy/`.
 - **In beta:** 3D simulations of [Electric Motors](beta/electric_motors.html) (motor effect, DC and synchronous AC) and [Charges in Fields](beta/charges_in_fields.html), awaiting review.
 
 ### GCSE Physics
