@@ -35,6 +35,7 @@
     methods: [],         // practical methods from methods.csv
     methodPicks: [],     // their Numbers, in the order ticked
     collapsed: new Set(), // unit names whose topic lists are folded away
+    foldsSaved: false,   // false until this browser has stored its own folds: everything then starts folded
     scale: 1,
     sheetKind: "worksheet", // which page the worksheet preview shows: "worksheet" | "key"
     shown: [],           // questions on the board
@@ -74,7 +75,10 @@
       if (saved.mode === "manual") state.mode = "manual";
       if (Array.isArray(saved.picks)) state.picks = saved.picks.map(String);
       if (Array.isArray(saved.methodPicks)) state.methodPicks = saved.methodPicks.map(String);
-      if (Array.isArray(saved.collapsed)) state.collapsed = new Set(saved.collapsed);
+      if (saved.foldsSaved === true && Array.isArray(saved.collapsed)) {
+        state.collapsed = new Set(saved.collapsed);
+        state.foldsSaved = true;
+      }
       if (Number.isFinite(saved.scale)) state.scale = Math.min(1.6, Math.max(0.6, saved.scale));
     } catch (error) { /* storage unavailable: start fresh */ }
   }
@@ -83,7 +87,7 @@
     try {
       localStorage.setItem(STORAGE_KEY, JSON.stringify({
         topics: [...state.selected], course: state.course, count: state.count, scale: state.scale,
-        mode: state.mode, picks: state.picks, methodPicks: state.methodPicks, collapsed: [...state.collapsed],
+        mode: state.mode, picks: state.picks, methodPicks: state.methodPicks, collapsed: [...state.collapsed], foldsSaved: state.foldsSaved,
       }));
     } catch (error) { /* ignore */ }
   }
@@ -883,6 +887,11 @@
         .then((text) => (text ? parseCsv(text).filter((method) => method.Task && method.Steps) : []))
         .catch(() => []);
       buildTopics();
+      // First visit: start with every unit folded, so the page opens as a short list of units.
+      if (!state.foldsSaved) {
+        state.collapsed = new Set(foldableSections());
+        state.foldsSaved = true;
+      }
       refresh();
     } catch (error) {
       els.units.textContent = "";
