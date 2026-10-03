@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="robots" content="noindex, nofollow">
-  <meta name="description" content="AO1 revision sheets for AQA GCSE Physics: every Do Now question and answer, one PDF for each topic.">
+  <meta name="description" content="AO1 revision sheets for AQA GCSE Physics: every Do Now question and answer, one PDF for each topic, and a method sheet with diagrams for each required practical.">
   <meta name="theme-color" content="#0c3a3f">
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
   <title>AO1 revision sheets | Do Now</title>
@@ -24,8 +24,18 @@
     header p { max-width: 46rem; color: #dcebe9; line-height: 1.5; }
     main { max-width: 960px; margin: auto; padding: 2rem 1.25rem 4rem; }
     main > p { max-width: 46rem; line-height: 1.55; }
-    h2 { display: flex; flex-wrap: wrap; align-items: baseline; gap: .3rem 1rem; margin: 2.4rem 0 1rem; font: 900 1.3rem "Arial Black", "Archivo Black", Arial, sans-serif; text-transform: uppercase; }
+    .tools { display: flex; flex-wrap: wrap; align-items: center; gap: .8rem 1rem; margin-top: 1.2rem; }
+    .tools .segmented { margin-top: 0; }
+    .tools .toggle { min-height: 48px; padding: 0 18px; border: 2px solid var(--ink); border-radius: 999px; background: #fff; font: 800 .9rem Arial, Helvetica, sans-serif; color: var(--ink); cursor: pointer; }
+    details.unit { margin-top: 1rem; border-bottom: 2px solid var(--ink); }
+    details.unit > summary { display: flex; align-items: center; gap: .8rem; min-height: 56px; padding: .4rem 0; list-style: none; cursor: pointer; }
+    details.unit > summary::-webkit-details-marker { display: none; }
+    details.unit > summary .icon { flex: none; width: 1.3rem; height: 1.3rem; transition: transform .15s; }
+    details.unit[open] > summary .icon { transform: rotate(90deg); }
+    h2 { display: flex; flex: 1; flex-wrap: wrap; align-items: baseline; gap: .3rem 1rem; margin: 0; font: 900 1.3rem "Arial Black", "Archivo Black", Arial, sans-serif; text-transform: uppercase; }
     h2 span { font: 700 .72rem Arial, Helvetica, sans-serif; letter-spacing: .12em; color: #4f6163; }
+    details.unit > .cards { padding: .4rem 0 1.4rem; }
+    .card .tag { margin-right: .4rem; }
     .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1rem; }
     .card { min-height: 150px; padding: 1.2rem; border: 2px solid var(--ink); background: #fffdf7; }
     .card:focus-within, .card:hover { box-shadow: 6px 6px 0 var(--pop); }
@@ -50,10 +60,13 @@
     <p>Every Do Now question with its answer, one sheet for each topic. Print the topics you are revising, or open them on screen.</p>
   </header>
   <main>
-    <p>Each sheet has the questions on the left and the answers on the right, with a box to tick when you know one. Diagrams are included where a question needs one.</p>
-    <div class="segmented" role="group" aria-label="Course">
-      <button type="button" data-course="all" aria-pressed="true">Separate Physics</button>
-      <button type="button" data-course="combined" aria-pressed="false">Combined only</button>
+    <p>Each sheet has the questions on the left and the answers on the right, with a box to tick when you know one. Diagrams are included where a question needs one. The required practicals have a method sheet with a diagram for every step, which you can also use as the lab procedure.</p>
+    <div class="tools">
+      <div class="segmented" role="group" aria-label="Course">
+        <button type="button" data-course="all" aria-pressed="true">Separate Physics</button>
+        <button type="button" data-course="combined" aria-pressed="false">Combined only</button>
+      </div>
+      <button type="button" class="toggle" id="fold-all">Expand all</button>
     </div>
     <div id="topics" aria-live="polite"><p>Loading the topics…</p></div>
     <p class="note" style="margin-top:2rem"><strong>How to revise with a sheet:</strong> cover the answer column, answer each question out loud or on paper, then uncover and check. Tick the ones you got right and come back to the rest tomorrow. For a quick test on screen, use the flashcards on the <a href="../">Do Now page</a>.</p>

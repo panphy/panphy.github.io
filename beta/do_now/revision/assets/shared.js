@@ -59,5 +59,18 @@
     return [...byName.values()].sort((a, b) => SKILLS_UNITS.includes(b.unit) - SKILLS_UNITS.includes(a.unit));
   }
 
-  root.DoNowRevision = { parseCsv, topicsFrom, fileName, paperLabel };
+  // Required practicals from ../methods.csv. Step n of practical M3 is drawn in practicals/M3-n.svg.
+  function practicalFileName(title) {
+    return fileName(title).replace("AO1 revision", "Required practical");
+  }
+
+  function practicalsFrom(methods) {
+    return methods.filter((method) => method.Number && method.Practical).map((method) => ({
+      number: method.Number, title: method.Practical, unit: method.Unit, separate: method.Course === "Separate",
+      paper: paperLabel(method.Unit), task: method.Task, note: method.Note, file: practicalFileName(method.Practical),
+      steps: method.Steps.split("\n").map((step) => step.trim()).filter(Boolean),
+    })).map((practical) => ({ ...practical, images: practical.steps.map((step, index) => `practicals/${practical.number}-${index + 1}.svg`) }));
+  }
+
+  root.DoNowRevision = { parseCsv, topicsFrom, fileName, paperLabel, practicalsFrom, practicalFileName };
 })(typeof globalThis !== "undefined" ? globalThis : this);
