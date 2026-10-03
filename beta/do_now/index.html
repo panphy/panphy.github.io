@@ -26,7 +26,7 @@
       <div class="hero-inner">
         <p class="eyebrow"><span>Lesson starters</span> · AO1 recall</p>
         <h1>Do <em>Now.</em></h1>
-        <p class="lead">Pick the topics, pick how many questions, and put them on the board.</p>
+        <p class="lead">Pick the topics, pick how many questions, and put them on the board. Or revise them as flashcards.</p>
       </div>
     </section>
 
@@ -96,6 +96,7 @@
     <div class="launch">
       <p id="summary" class="summary" aria-live="polite">Choose at least one topic.</p>
       <div class="launch-actions">
+        <button id="cards-open" class="secondary" type="button" disabled>Flashcards</button>
         <button id="sheet-from-setup" class="secondary" type="button" disabled>Worksheet PDF</button>
         <button id="show" class="primary" type="button" disabled>Show Questions</button>
       </div>
@@ -105,7 +106,7 @@
   <div id="board" hidden>
     <header class="board-bar">
       <div class="board-title">
-        <strong>Do Now</strong>
+        <button class="home-link" type="button" data-home title="Back to topic selection">Do Now</button>
         <span id="board-date"></span>
       </div>
       <div class="board-actions">
@@ -120,6 +121,41 @@
     </header>
     <div id="board-area" class="board-area">
       <ol id="questions" class="questions"></ol>
+    </div>
+  </div>
+
+  <div id="cards" hidden>
+    <header class="board-bar">
+      <div class="board-title">
+        <button class="home-link" type="button" data-home title="Back to topic selection">Do Now</button>
+        <span id="cards-progress"></span>
+      </div>
+      <div class="board-actions">
+        <button id="cards-restart" class="pill" type="button">Start again</button>
+        <button class="pill" type="button" data-home>Change topics</button>
+      </div>
+    </header>
+    <div class="cards-area">
+      <article id="card" class="flashcard">
+        <p id="card-topic" class="card-topic"></p>
+        <p id="card-question" class="card-question"></p>
+        <ol id="card-steps" class="q-steps" hidden></ol>
+        <figure id="card-figure" class="q-figure" hidden><img alt="Diagram for this question"></figure>
+        <div id="card-answer" class="q-answer" hidden></div>
+        <div class="card-actions">
+          <button id="card-reveal" class="primary" type="button">Show answer</button>
+          <button id="card-again" class="ghost" type="button" hidden>Still learning</button>
+          <button id="card-got" class="primary" type="button" hidden>Got it</button>
+        </div>
+      </article>
+      <article id="cards-done" class="flashcard done" hidden>
+        <p class="card-question">All done.</p>
+        <p id="cards-done-text" class="card-topic"></p>
+        <div class="card-actions">
+          <button id="cards-again" class="primary" type="button">Go again</button>
+          <button class="ghost" type="button" data-home>Change topics</button>
+        </div>
+      </article>
     </div>
   </div>
 

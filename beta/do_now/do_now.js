@@ -21,7 +21,7 @@
     summary: $("summary"), show: $("show"), list: $("questions"), area: $("board-area"),
     showAll: $("show-all"), lightbox: $("lightbox"), date: $("board-date"),
     sheetView: $("sheet-view"), sheet: $("sheet"), sheetFromSetup: $("sheet-from-setup"),
-    methods: $("methods"), chosen: $("chosen"),
+    methods: $("methods"), chosen: $("chosen"), cards: $("cards"), cardsOpen: $("cards-open"),
     picker: $("picker"), pickSearch: $("pick-search"), randomOptions: $("random-options"), manualOptions: $("manual-options"),
   };
 
@@ -39,6 +39,8 @@
     foldsSaved: false,   // false until this browser has stored its own folds: everything then starts folded
     scale: 1,
     sheetKind: "worksheet", // which page the worksheet preview shows: "worksheet" | "key"
+    deck: [],            // flashcards still to learn; the first is the one on screen
+    deckSize: 0,
     shown: [],           // questions on the board
   };
 
@@ -419,7 +421,7 @@
     };
     if (state.mode === "manual") {
       const picked = pickedQuestions().length;
-      els.show.disabled = els.sheetFromSetup.disabled = picked + methodCount === 0;
+      els.show.disabled = els.sheetFromSetup.disabled = els.cardsOpen.disabled = picked + methodCount === 0;
       els.summary.textContent = "";
       if (!picked) {
         if (methodCount) addMethods(true);
@@ -433,7 +435,7 @@
     const questions = pool();
     const topicCount = state.topics.filter((topic) => state.selected.has(topic.name) && topic.questions.some(allowed)).length;
     const available = uniqueCount(questions);
-    els.show.disabled = els.sheetFromSetup.disabled = available + methodCount === 0;
+    els.show.disabled = els.sheetFromSetup.disabled = els.cardsOpen.disabled = available + methodCount === 0;
     els.summary.textContent = "";
     if (!available) {
       if (methodCount) addMethods(true);
@@ -702,7 +704,65 @@
   function hideBoard() {
     if (document.fullscreenElement) document.exitFullscreen();
     els.board.hidden = true;
+    els.cards.hidden = true;
     els.setup.hidden = false;
+  }
+
+  // Flashcards, for students revising alone: every question in the chosen
+  // topics (or the hand-picked ones), one at a time. "Got it" retires a card;
+  // "Still learning" sends it to the back of the deck.
+  function startCards() {
+    const questions = state.mode === "manual" ? pickedQuestions() : pool();
+    const seen = new Set();
+    const unique = questions.filter((question) => !seen.has(questionKey(question)) && seen.add(questionKey(question)));
+    state.deck = shuffle([...unique, ...pickedMethods().map(methodItem)]);
+    state.deckSize = state.deck.length;
+    if (!state.deckSize) return;
+    els.setup.hidden = true;
+    els.board.hidden = true;
+    els.cards.hidden = false;
+    renderCard();
+  }
+
+  function renderCard(revealed = false) {
+    const card = state.deck[0];
+    const learned = state.deckSize - state.deck.length;
+    $("cards-progress").textContent = `Flashcards · ${learned} of ${state.deckSize} learned`;
+    $("card").hidden = !card;
+    $("cards-done").hidden = Boolean(card);
+    if (!card) {
+      $("cards-done-text").textContent = `You went through all ${state.deckSize} card${state.deckSize === 1 ? "" : "s"}.`;
+      $("cards-again").focus();
+      return;
+    }
+    $("card-topic").textContent = card.Topic.replace(/^\(S\)\s*/, "");
+    $("card-question").textContent = card.Question;
+    const steps = $("card-steps");
+    steps.textContent = "";
+    steps.hidden = !card.steps;
+    for (const step of card.steps || []) {
+      const row = document.createElement("li");
+      const letter = document.createElement("b");
+      letter.textContent = step.letter;
+      row.append(letter, document.createTextNode(step.text));
+      steps.append(row);
+    }
+    const figure = $("card-figure");
+    figure.hidden = !card.Image;
+    if (card.Image) figure.querySelector("img").src = IMAGE_DIR + card.Image;
+    const answer = $("card-answer");
+    answer.textContent = card.Answer;
+    answer.hidden = !revealed;
+    $("card-reveal").hidden = revealed;
+    $("card-again").hidden = $("card-got").hidden = !revealed;
+    (revealed ? $("card-got") : $("card-reveal")).focus();
+  }
+
+  function answerCard(learned) {
+    const card = state.deck.shift();
+    if (!learned) state.deck.push(card);
+    renderCard();
+    document.querySelector(".cards-area").scrollTop = 0;
   }
 
   function toggleFullscreen() {
@@ -844,6 +904,13 @@
     $("count-up").addEventListener("click", () => { state.count = clampCount(state.count + 1); refresh(false); });
     els.count.addEventListener("change", () => { state.count = clampCount(els.count.value); refresh(false); });
     els.show.addEventListener("click", showBoard);
+    els.cardsOpen.addEventListener("click", startCards);
+    $("cards-restart").addEventListener("click", startCards);
+    $("cards-again").addEventListener("click", startCards);
+    $("card-reveal").addEventListener("click", () => renderCard(true));
+    $("card-again").addEventListener("click", () => answerCard(false));
+    $("card-got").addEventListener("click", () => answerCard(true));
+    document.querySelectorAll("[data-home]").forEach((button) => button.addEventListener("click", hideBoard));
     els.sheetFromSetup.addEventListener("click", () => { showBoard(); openSheet(); });
     $("sheet-open").addEventListener("click", openSheet);
     $("sheet-close").addEventListener("click", () => { els.sheetView.hidden = true; });
@@ -889,6 +956,15 @@
       }
       if (!els.lightbox.hidden) {
         if (event.key === "Escape") els.lightbox.hidden = true;
+        return;
+      }
+      if (!els.cards.hidden) {
+        const revealed = !$("card-answer").hidden;
+        if (event.key === "Escape") hideBoard();
+        else if (!state.deck.length) return;
+        else if (event.key === "ArrowRight" && revealed) answerCard(true);
+        else if (event.key === "ArrowLeft" && revealed) answerCard(false);
+        else if (event.key === "ArrowDown" && !revealed) renderCard(true);
         return;
       }
       if (els.board.hidden) {

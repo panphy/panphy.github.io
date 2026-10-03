@@ -25,13 +25,17 @@ Lesson starters for AQA GCSE Physics (Higher). The teacher picks topics, then ei
 
 Save the CSV as UTF-8 (in Excel: "CSV UTF-8 (Comma delimited)"), or symbols such as Ω and Δθ will be garbled. Questions with the same wording and image are treated as one, so a repeated question (such as the unit of force) never appears twice on the board.
 
+## Flashcards
+
+"Flashcards" on the landing page is for students revising on their own. It makes a shuffled deck of every question in the chosen topics (or the hand-picked questions), shown one at a time: "Show answer", then "Got it" retires the card and "Still learning" sends it to the back of the deck. Keys: `↓` show answer, `→` got it, `←` still learning, `Esc` back.
+
 ## Worksheet
 
 "Worksheet PDF" builds an A4 sheet from the questions on the board: name, class and date lines, then a two-column table of questions and answer spaces. "Save both PDFs" opens the browser's print dialog twice, first for the worksheet and then for a separate answer key; choose "Save as PDF" each time (cancel either dialog to skip that file). The preview can be switched between the two.
 
 ## Board shortcuts
 
-`1`–`9`, `0`: show or hide that answer. `A`: all answers. `N`: new questions. `W`: worksheet. `F`: fullscreen. `Esc`: back to topics.
+`1`–`9`, `0`: show or hide that answer. `A`: all answers. `N`: new questions. `W`: worksheet. `F`: fullscreen. `Esc`: back to topics. Clicking "Do Now" in the top bar also goes back.
 
 ## Moving to `gcsephy/`
 
