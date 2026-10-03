@@ -23,7 +23,7 @@ Between visits the browser remembers only the course switch, the number of quest
 | `Unit` | AQA unit, used to group topics on the landing page (and to show Paper 1 or 2). "Working scientifically" is shown first, in its own bordered block; it is based on the Year 9 unit *Work Like a Physicist* and is labelled "Both papers". |
 | `Topic` | Separate Physics only topics start with `(S) `. Row order sets the order on the page. |
 | `Course` | `Combined` or `Separate`, following the "(physics only)" markers in the AQA 8463 specification (version 1.1). Every topic is wholly one or the other, so keep all rows of a topic the same. "Combined only" hides the `Separate` topics. |
-| `Question`, `Answer` | Plain text. A line break inside the cell is shown as a line break. |
+| `Question`, `Answer` | Plain text. A line break inside the cell is shown as a line break. In a question, a word in square brackets, such as `must [not] be done`, is shown in bold red (board, picker, flashcards and both PDFs); use it only where the negative is the point. |
 | `Image` | A file name in `images/`, or empty. Several questions can share one image. |
 
 Save the CSV as UTF-8 (in Excel: "CSV UTF-8 (Comma delimited)"), or symbols such as Ω and Δθ will be garbled. Questions with the same wording and image are treated as one, so a repeated question (such as the unit of force) never appears twice on the board.

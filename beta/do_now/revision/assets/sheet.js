@@ -35,7 +35,11 @@
     const body = element("tbody");
     topic.questions.forEach((question, index) => {
       const row = element("tr");
-      const questionCell = element("td", "q", question.Question);
+      const questionCell = element("td", "q");
+      question.Question.split(/\[([^\]]+)\]/).forEach((part, at) => {
+        if (at % 2) questionCell.append(element("b", "neg", part));
+        else if (part) questionCell.append(part);
+      });
       if (question.Image) {
         const image = element("img");
         image.src = `../images/${question.Image}`;
