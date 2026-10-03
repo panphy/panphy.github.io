@@ -616,7 +616,7 @@ window.LESSONS = [
             "Use the correct title, units, scale and small crosses.",
             "Identify possible outliers or state that there are none.",
             "Describe the relationship and quote two values with units.",
-            "A prediction inside the measured range is interpolation and is more trustworthy than extending far beyond it.",
+            "A prediction inside the measured range is more trustworthy than one far beyond it.",
           ],
         },
         {
@@ -635,7 +635,7 @@ window.LESSONS = [
       ],
       vocabulary: [
         ["Method", "Numbered instructions another scientist can repeat."],
-        ["Interpolation", "Reading a prediction within the measured data range."],
+        ["Prediction", "A value read from the best-fit line, most trustworthy inside the measured range."],
         ["Evaluation", "A judgement of method quality, errors and improvements."],
         ["Safety risk", "A hazard considered together with how its risk is reduced."],
       ],

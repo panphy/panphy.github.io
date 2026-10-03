@@ -756,7 +756,8 @@ Moons and artificial satellites orbit planets.","New: fills a gap against the sp
 "853","New","","","Define uncertainty.","An estimate of the doubt attached to a measurement.","New: Working scientifically, based on the Year 9 unit Work Like a Physicist"
 "854","New","","","State how the mean of a set of repeated readings is calculated.","Add up the readings, then divide by the number of readings.","New: Working scientifically, based on the Year 9 unit Work Like a Physicist"
 "855","New","","","State how the range of a set of readings is calculated.","Largest reading − smallest reading","New: Working scientifically, based on the Year 9 unit Work Like a Physicist"
-"856","New","","","State how the uncertainty in a set of repeated readings is estimated.","Uncertainty = range ÷ 2","New: Working scientifically, based on the Year 9 unit Work Like a Physicist; made more concise"
+"856","New","","","State how uncertainty is calculated from a set of repeated readings.","Uncertainty = range ÷ 2
+(range = largest reading − smallest reading)","New: Working scientifically, based on the Year 9 unit Work Like a Physicist; made more concise; reworded to ask how uncertainty is calculated"
 "857","New","","","Describe how a final result should be written when its uncertainty is known.","As mean ± uncertainty, with a unit, e.g. 1.22 ± 0.03 s.","New: Working scientifically, based on the Year 9 unit Work Like a Physicist"
 "858","New","","","Three readings are close together but far from the true value. Describe them using the words precise and accurate.","They are precise but not accurate.","New: Working scientifically, based on the Year 9 unit Work Like a Physicist; made more concise"
 "859","New","","","State what repeated measurements help you to judge: precision or accuracy.","Precision","New: Working scientifically, based on the Year 9 unit Work Like a Physicist; made more concise"
@@ -801,7 +802,7 @@ Moons and artificial satellites orbit planets.","New: fills a gap against the sp
 "897","New","","","Define a trend.","The overall relationship shown by the data.","New: Working scientifically, based on the Year 9 unit Work Like a Physicist"
 "898","New","","","State what a good conclusion must include.","The relationship between the variables, supported by values with units.","New: Working scientifically, based on the Year 9 unit Work Like a Physicist; made more concise"
 "899","New","","","Describe the graph of two quantities that are directly proportional.","A straight line through the origin.","New: Working scientifically, based on the Year 9 unit Work Like a Physicist; made more concise"
-"900","New","","","Define interpolation.","Reading a value from a graph within the range of the measured data.","New: Working scientifically, based on the Year 9 unit Work Like a Physicist; made more concise"
+"900","Removed","","","Define interpolation.","Reading a value from a graph within the range of the measured data.","Removed: 'interpolation' is too technical for GCSE"
 "901","New","","","State the three parts of a good evaluation point.","The problem, its effect on the data, and an improvement that fixes it.","New: Working scientifically, based on the Year 9 unit Work Like a Physicist; made more concise"
 "902","New","","","Define peer review.","When other scientists check the method, the evidence and the claims.","New: Working scientifically, based on the Year 9 unit Work Like a Physicist"
 "9","Edited","Describe the change in the kinetic energy store as the speed of an object decreases.","It decreases.","Describe the change in the kinetic energy store as an object slows down.","It decreases.","Made more concise"

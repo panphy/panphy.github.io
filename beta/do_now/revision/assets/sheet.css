@@ -1,0 +1,37 @@
+/* Printable revision sheet: one topic, questions on the left, answers on the
+   right. Colours follow the Do Now page (teal board, marigold accent). */
+:root { --board: #0c3a3f; --ink: #0b2a2e; --hi: #ffc145; --muted: #4f6163; --line: #b8c6c5; --tint: #eef6f4; }
+* { box-sizing: border-box; }
+@page {
+  size: A4;
+  margin: 13mm 13mm 16mm;
+  @bottom-left { content: "panphy.app · Do Now AO1 revision"; font: 8pt Arial, Helvetica, sans-serif; color: #4f6163; }
+  @bottom-right { content: "Page " counter(page) " of " counter(pages); font: 8pt Arial, Helvetica, sans-serif; color: #4f6163; }
+}
+html { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+body { margin: 0; background: #47595b; color: var(--ink); font: 11pt/1.4 Arial, Helvetica, sans-serif; }
+.sheet { width: 210mm; min-height: 297mm; margin: 8mm auto; padding: 13mm; background: #fff; box-shadow: 0 2mm 8mm rgba(0, 0, 0, .3); }
+.top { display: flex; align-items: flex-end; justify-content: space-between; gap: 6mm; padding: 5mm 5mm 4.5mm; border-bottom: 1.6mm solid var(--hi); background: var(--board); color: #fff; }
+.brand { margin: 0 0 1.5mm; font-size: 8pt; font-weight: 700; letter-spacing: .16em; text-transform: uppercase; color: var(--hi); }
+h1 { margin: 0; font: 900 19pt/1.1 "Arial Black", "Archivo Black", Arial, sans-serif; letter-spacing: -.02em; }
+.meta { flex: none; margin: 0; font-size: 8.5pt; line-height: 1.5; text-align: right; color: #dcebe9; }
+.meta b { color: #fff; }
+.how { margin: 4mm 0; padding: 2.4mm 3.5mm; border-left: 1.4mm solid var(--hi); background: var(--tint); font-size: 9.5pt; }
+table { width: 100%; border-collapse: collapse; table-layout: fixed; }
+thead { display: table-header-group; }
+th { padding: 2mm 3mm; border: .3mm solid var(--ink); background: var(--ink); color: #fff; text-align: left; font-size: 8.5pt; letter-spacing: .08em; text-transform: uppercase; }
+td { padding: 2.6mm 3mm; border: .3mm solid var(--line); vertical-align: top; }
+tr { break-inside: avoid; }
+col.n { width: 9mm; }
+col.q { width: 46%; }
+col.t { width: 9mm; }
+td.n { text-align: center; font-weight: 700; color: var(--muted); }
+td.q { font-weight: 700; }
+td.a { white-space: pre-line; background: var(--tint); }
+td.t::after { content: ""; display: block; width: 4.2mm; height: 4.2mm; margin: .6mm auto 0; border: .3mm solid var(--ink); border-radius: .8mm; }
+td.q img { display: block; margin-top: 2mm; max-width: 100%; max-height: 38mm; }
+.missing { padding: 20mm 0; text-align: center; font-weight: 700; }
+@media print {
+  body { background: #fff; }
+  .sheet { width: auto; min-height: 0; margin: 0; padding: 0; box-shadow: none; }
+}
