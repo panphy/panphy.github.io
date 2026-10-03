@@ -46,8 +46,9 @@
           </label>
           <button id="select-shown" class="ghost" type="button">Select all shown</button>
           <button id="clear" class="ghost" type="button">Clear</button>
+          <button id="fold-all" class="ghost" type="button">Collapse all</button>
         </div>
-        <p class="hint"><span class="badge-s">S</span> marks Separate Physics only content. Topics marked <span class="badge-s part">part S</span> contain a few such questions.</p>
+        <p class="hint"><span class="badge-s">S</span> marks topics for Separate Physics only. Choose “Combined only” to hide them.</p>
         <div id="units" class="units" aria-live="polite"><p class="loading">Loading the question bank…</p></div>
       </section>
 
@@ -75,10 +76,6 @@
             <button type="button" data-count="10">10</button>
           </div>
         </div>
-        <label class="check">
-          <input id="extended" type="checkbox">
-          <span>Include long “outline a method” questions</span>
-        </label>
         </div>
         <div id="manual-options" hidden>
           <p class="hint first">Tick the questions to show. They appear on the board in the order you tick them.</p>
@@ -91,6 +88,13 @@
           </div>
           <div id="picker" class="picker" aria-live="polite"></div>
         </div>
+      </section>
+      <section class="panel" aria-labelledby="step-methods">
+        <div class="panel-head">
+          <h2 id="step-methods"><b>3</b> Order a method <small>optional</small></h2>
+        </div>
+        <p class="hint first">Students see the steps of a practical method in a jumbled order and put them in the right order. Tick any to add them to the board after the questions.</p>
+        <div id="methods" class="topics"></div>
       </section>
     </main>
 
@@ -115,7 +119,7 @@
         <button id="sheet-open" class="pill" type="button" title="Worksheet of these questions (W)">Worksheet PDF</button>
         <button id="smaller" class="pill icon" type="button" aria-label="Smaller text" title="Smaller text">A−</button>
         <button id="larger" class="pill icon" type="button" aria-label="Larger text" title="Larger text">A+</button>
-        <button id="fullscreen" class="pill" type="button" title="Fullscreen (F)">Fullscreen</button>
+        <button id="fullscreen" class="pill icon" type="button" aria-pressed="false" aria-label="Fullscreen" title="Fullscreen (F)"><svg viewBox="0 0 24 24" aria-hidden="true"><path class="enter" d="M4 9V4h5M15 4h5v5M20 15v5h-5M9 20H4v-5"/><path class="exit" d="M9 4v5H4M20 9h-5V4M15 20v-5h5M4 15h5v5"/></svg></button>
         <button id="back" class="pill" type="button">Change topics</button>
       </div>
     </header>
@@ -127,9 +131,13 @@
   <div id="sheet-view" hidden role="dialog" aria-modal="true" aria-label="Worksheet preview">
     <div class="sheet-bar">
       <strong>Worksheet</strong>
-      <label class="check"><input id="sheet-answers" type="checkbox"><span>Fill in the answers (teacher copy)</span></label>
+      <div class="segmented" role="group" aria-label="Preview">
+        <button type="button" data-sheet="worksheet" aria-pressed="true">Worksheet</button>
+        <button type="button" data-sheet="key" aria-pressed="false">Answer key</button>
+      </div>
+      <p class="sheet-note">Saves two PDFs: the print dialog opens for the worksheet, then again for the answer key. Choose “Save as PDF” each time.</p>
       <div class="board-actions">
-        <button id="sheet-print" class="pill solid" type="button">Save as PDF / Print</button>
+        <button id="sheet-print" class="pill solid" type="button">Save both PDFs</button>
         <button id="sheet-close" class="pill" type="button">Close</button>
       </div>
     </div>

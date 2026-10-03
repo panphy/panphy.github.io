@@ -1,0 +1,87 @@
+﻿"Number","Unit","Course","Practical","Task","Steps","Note"
+"M1","Energy","Combined","Specific heat capacity","A student measures the specific heat capacity of a metal block.","Measure the mass of the block with a balance.
+Put a heater and a thermometer into the block and wrap it in insulation.
+Record the starting temperature, then switch on the heater and start a timer.
+After 10 minutes, switch off and record the highest temperature reached.
+Calculate the energy supplied from the power of the heater and the time.
+Calculate the specific heat capacity: energy ÷ (mass × temperature rise).",""
+"M2","Energy","Separate","Thermal insulation","A student compares how well different materials insulate a beaker of hot water.","Wrap a beaker in one of the insulating materials.
+Pour in a measured volume of hot water and fit a lid with a thermometer.
+Record the starting temperature and start a stopwatch.
+Record the temperature again after 10 minutes.
+Repeat with each material, using the same volume and starting temperature of water.
+Compare the temperature falls: the smallest fall shows the best insulator.",""
+"M3","Electricity","Combined","Resistance and the length of a wire","A student investigates how the length of a wire affects its resistance.","Connect the wire in a circuit, with an ammeter in series and a voltmeter across the wire.
+Attach the crocodile clips 10 cm apart on the wire.
+Switch on and record the current and the potential difference.
+Switch off to let the wire cool, then move the clips to 20 cm apart.
+Repeat the readings for a range of lengths.
+Calculate the resistance for each length and plot resistance against length.",""
+"M4","Electricity","Combined","Resistors in series and in parallel","A student compares the total resistance of two resistors in series and in parallel.","Connect the two resistors in series with a power supply and an ammeter.
+Connect a voltmeter across both resistors.
+Switch on, record the current and the potential difference, then switch off.
+Calculate the total resistance using R = V ÷ I.
+Reconnect the two resistors in parallel and take the readings again.
+Compare the two values of total resistance.",""
+"M5","Electricity","Combined","I–V characteristic of a filament lamp","A student finds the I–V characteristic of a filament lamp.","Connect the lamp in series with a power supply, a variable resistor and an ammeter.
+Connect a voltmeter in parallel with the lamp.
+Record the current and the potential difference.
+Adjust the variable resistor and record a new pair of readings; do this several times.
+Reverse the connections to the power supply and take the readings again.
+Plot a graph of current against potential difference.",""
+"M6","Particle model of matter","Combined","Density of a regular solid","A student measures the density of a rectangular metal block.","Measure the mass of the block with a balance.
+Measure the length, width and height of the block with a ruler.
+Calculate the volume: length × width × height.
+Calculate the density: mass ÷ volume.","The two measuring steps can be done in either order."
+"M7","Particle model of matter","Combined","Density of an irregular solid","A student measures the density of a small stone.","Measure the mass of the dry stone with a balance.
+Part-fill a measuring cylinder with water and record the volume.
+Lower the stone into the water until it is fully covered.
+Record the new volume shown on the measuring cylinder.
+Subtract the two volumes to find the volume of the stone.
+Calculate the density: mass ÷ volume.",""
+"M8","Particle model of matter","Combined","Density of a liquid","A student measures the density of a liquid.","Put an empty measuring cylinder on a balance and record its mass.
+Pour some of the liquid into the measuring cylinder.
+Record the volume of the liquid and the new mass on the balance.
+Subtract the two masses to find the mass of the liquid.
+Calculate the density: mass ÷ volume.",""
+"M9","Forces","Combined","Force and extension of a spring","A student investigates how the force on a spring affects its extension.","Hang the spring from a clamp stand next to a ruler.
+Measure the original length of the spring.
+Hang a 1 N weight on the spring and measure its new length.
+Calculate the extension: new length − original length.
+Add more weights one at a time, finding the extension each time.
+Plot a graph of force against extension.",""
+"M10","Forces","Combined","Acceleration and force","A student investigates how the force on a trolley affects its acceleration.","Attach a string to a trolley and pass it over a pulley at the end of the bench.
+Hang a mass on the end of the string and hold the trolley still.
+Release the trolley so that it passes through two light gates.
+Record the acceleration calculated by the data logger.
+Move a mass from the trolley to the hanger to increase the force, then repeat.
+Plot a graph of acceleration against force.",""
+"M11","Forces","Combined","Acceleration and mass","A student investigates how the mass of a trolley affects its acceleration.","Attach a string to a trolley and pass it over a pulley at the end of the bench.
+Hang a mass on the end of the string and hold the trolley still.
+Release the trolley and record its acceleration using light gates.
+Add a mass to the trolley, keeping the hanging mass the same.
+Release the trolley again and record the new acceleration.
+Repeat for several masses and plot a graph of acceleration against mass.",""
+"M12","Waves","Combined","Waves in a ripple tank","A student measures the speed of the waves in a ripple tank.","Set up the ripple tank with a lamp above it and a white screen below.
+Switch on the motor so that the dipper makes steady waves.
+Place a ruler on the screen and photograph the wave pattern.
+Measure the length of 10 waves on the photograph and divide by 10 to find the wavelength.
+Count the waves passing a point in 10 seconds and divide by 10 to find the frequency.
+Calculate the wave speed: frequency × wavelength.","The frequency can be found before or after the wavelength."
+"M13","Waves","Combined","Waves on a string","A student measures the speed of a wave on a stretched string.","Attach one end of a string to a vibration generator and pass the other end over a pulley.
+Hang masses on the end of the string to keep it taut.
+Switch on the signal generator and adjust the frequency until clear loops appear.
+Measure the length of several loops and work out the wavelength.
+Read the frequency from the signal generator.
+Calculate the wave speed: frequency × wavelength.","The frequency can be read before or after the wavelength is measured."
+"M14","Waves","Combined","Infrared radiation and surfaces","A student compares how much infrared radiation different surfaces emit.","Fill a Leslie cube with hot water and put the lid on.
+Leave it for a minute so that every face reaches the same temperature.
+Hold an infrared detector 10 cm from one face and record the reading.
+Repeat for each of the other faces, keeping the detector the same distance away.
+Compare the readings: the highest reading shows the best emitter.",""
+"M15","Waves","Separate","Refraction of light","A student investigates the refraction of light by a glass block.","Place a glass block on a sheet of paper and draw around it.
+Shine a narrow ray of light from a ray box at the side of the block.
+Mark the path of the ray going in and the ray coming out with crosses.
+Remove the block and join the crosses to show the path of the ray through the glass.
+Draw the normal at the point where the ray enters the block.
+Measure the angle of incidence and the angle of refraction with a protractor.",""

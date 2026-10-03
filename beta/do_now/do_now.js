@@ -4,18 +4,22 @@
   "use strict";
 
   const BANK_URL = "questions.csv";
+  const METHODS_URL = "methods.csv";
+  const LETTERS = "ABCDEFGHIJ";
   const IMAGE_DIR = "images/";
   const STORAGE_KEY = "panphy-do-now";
   const MAX_COUNT = 20;
   const PAPER_ONE_UNITS = ["Energy", "Electricity", "Particle model of matter", "Atomic structure"];
+  const CHEVRON_ICON = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>';
   const SWAP_ICON = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 11a8 8 0 0 0-14.3-4.5L4 8.5M4 4v4.5h4.5M4 13a8 8 0 0 0 14.3 4.5l1.7-2M20 20v-4.5h-4.5"/></svg>';
 
   const $ = (id) => document.getElementById(id);
   const els = {
     setup: $("setup"), board: $("board"), units: $("units"), search: $("search"), count: $("count"),
-    extended: $("extended"), summary: $("summary"), show: $("show"), list: $("questions"), area: $("board-area"),
+    summary: $("summary"), show: $("show"), list: $("questions"), area: $("board-area"),
     showAll: $("show-all"), lightbox: $("lightbox"), date: $("board-date"),
-    sheetView: $("sheet-view"), sheet: $("sheet"), sheetAnswers: $("sheet-answers"), sheetFromSetup: $("sheet-from-setup"),
+    sheetView: $("sheet-view"), sheet: $("sheet"), sheetFromSetup: $("sheet-from-setup"),
+    methods: $("methods"),
     picker: $("picker"), pickSearch: $("pick-search"), randomOptions: $("random-options"), manualOptions: $("manual-options"),
   };
 
@@ -27,8 +31,11 @@
     count: 5,
     mode: "random",      // "random" | "manual"
     picks: [],           // question Numbers ticked by the teacher, in the order ticked
-    extended: false,
+    methods: [],         // "order the method" tasks from methods.csv
+    methodPicks: [],     // their Numbers, in the order ticked
+    collapsed: new Set(), // unit names whose topic lists are folded away
     scale: 1,
+    sheetKind: "worksheet", // which page the worksheet preview shows: "worksheet" | "key"
     shown: [],           // questions on the board
   };
 
@@ -63,9 +70,10 @@
       if (Array.isArray(saved.topics)) state.selected = new Set(saved.topics);
       if (saved.course === "combined") state.course = "combined";
       if (Number.isFinite(saved.count)) state.count = clampCount(saved.count);
-      state.extended = saved.extended === true;
       if (saved.mode === "manual") state.mode = "manual";
       if (Array.isArray(saved.picks)) state.picks = saved.picks.map(String);
+      if (Array.isArray(saved.methodPicks)) state.methodPicks = saved.methodPicks.map(String);
+      if (Array.isArray(saved.collapsed)) state.collapsed = new Set(saved.collapsed);
       if (Number.isFinite(saved.scale)) state.scale = Math.min(1.6, Math.max(0.6, saved.scale));
     } catch (error) { /* storage unavailable: start fresh */ }
   }
@@ -73,8 +81,8 @@
   function savePrefs() {
     try {
       localStorage.setItem(STORAGE_KEY, JSON.stringify({
-        topics: [...state.selected], course: state.course, count: state.count, extended: state.extended, scale: state.scale,
-        mode: state.mode, picks: state.picks,
+        topics: [...state.selected], course: state.course, count: state.count, scale: state.scale,
+        mode: state.mode, picks: state.picks, methodPicks: state.methodPicks, collapsed: [...state.collapsed],
       }));
     } catch (error) { /* ignore */ }
   }
@@ -85,8 +93,6 @@
 
   function allowed(question) {
     if (state.course === "combined" && question.Course === "Separate") return false;
-    // When picking by hand the teacher sees every question, long ones included.
-    if (state.mode === "random" && !state.extended && question.Type === "Extended") return false;
     return true;
   }
 
@@ -122,11 +128,26 @@
       section.className = "unit";
       const head = document.createElement("div");
       head.className = "unit-head";
+      // A search always shows its matches, whatever is folded away.
+      const open = terms.length > 0 || !state.collapsed.has(unit);
       const title = document.createElement("h3");
-      title.textContent = unit;
+      const toggle = document.createElement("button");
+      toggle.type = "button";
+      toggle.className = "unit-toggle";
+      toggle.setAttribute("aria-expanded", String(open));
+      toggle.innerHTML = CHEVRON_ICON;
+      toggle.append(unit);
+      toggle.addEventListener("click", () => {
+        state.collapsed.has(unit) ? state.collapsed.delete(unit) : state.collapsed.add(unit);
+        refresh();
+      });
+      title.append(toggle);
       const paper = document.createElement("span");
       paper.className = "unit-paper";
-      paper.textContent = PAPER_ONE_UNITS.includes(unit) ? "Paper 1" : "Paper 2";
+      const chosen = topics.filter((topic) => state.selected.has(topic.name)).length;
+      paper.textContent = `${PAPER_ONE_UNITS.includes(unit) ? "Paper 1" : "Paper 2"} · ${chosen ? `${chosen} of ${topics.length} selected` : `${topics.length} topics`}`;
+      paper.dataset.unit = unit;
+      if (chosen) paper.classList.add("has-selection");
       const all = document.createElement("button");
       all.type = "button";
       all.className = "unit-all";
@@ -140,6 +161,7 @@
 
       const grid = document.createElement("div");
       grid.className = "topics";
+      grid.hidden = !open;
       for (const topic of topics) {
         const label = document.createElement("label");
         label.className = "topic";
@@ -149,6 +171,9 @@
         input.dataset.topic = topic.name;
         input.addEventListener("change", () => {
           input.checked ? state.selected.add(topic.name) : state.selected.delete(topic.name);
+          const picked = topics.filter((item) => state.selected.has(item.name)).length;
+          paper.textContent = paper.textContent.replace(/· .*$/, `· ${picked ? `${picked} of ${topics.length} selected` : `${topics.length} topics`}`);
+          paper.classList.toggle("has-selection", picked > 0);
           refresh(false);
         });
         const body = document.createElement("span");
@@ -156,12 +181,12 @@
         name.className = "topic-name";
         name.textContent = topic.name.replace(/^\(S\)\s*/, "");
         body.append(name);
-        const separate = topic.questions.filter((question) => question.Course === "Separate").length;
-        if (separate && state.course === "all") {
+        // A topic is wholly Combined or wholly Separate Physics only.
+        if (topic.questions[0].Course === "Separate") {
           const badge = document.createElement("span");
-          badge.className = separate === topic.questions.length ? "badge-s" : "badge-s part";
-          badge.textContent = separate === topic.questions.length ? "S" : "part S";
-          badge.title = separate === topic.questions.length ? "Separate Physics only" : `${separate} Separate Physics only questions`;
+          badge.className = "badge-s";
+          badge.textContent = "S";
+          badge.title = "Separate Physics only";
           body.append(badge);
         }
         const count = document.createElement("span");
@@ -221,6 +246,63 @@
     return state.picks.filter((number) => available.has(number)).map((number) => available.get(number));
   }
 
+  // The ticked method tasks that the chosen course allows, in tick order.
+  function pickedMethods() {
+    const available = new Map(state.methods.filter(allowed).map((method) => [method.Number, method]));
+    return state.methodPicks.filter((number) => available.has(number)).map((number) => available.get(number));
+  }
+
+  function renderMethods() {
+    els.methods.textContent = "";
+    for (const method of state.methods.filter(allowed)) {
+      const label = document.createElement("label");
+      label.className = "topic";
+      const input = document.createElement("input");
+      input.type = "checkbox";
+      input.checked = state.methodPicks.includes(method.Number);
+      input.addEventListener("change", () => {
+        if (input.checked) state.methodPicks.push(method.Number);
+        else state.methodPicks = state.methodPicks.filter((number) => number !== method.Number);
+        refresh(false);
+      });
+      const body = document.createElement("span");
+      const name = document.createElement("span");
+      name.className = "topic-name";
+      name.textContent = method.Practical;
+      body.append(name);
+      if (method.Course === "Separate") {
+        const badge = document.createElement("span");
+        badge.className = "badge-s";
+        badge.textContent = "S";
+        badge.title = "Separate Physics only";
+        body.append(badge);
+      }
+      const count = document.createElement("span");
+      count.className = "topic-count";
+      count.textContent = `${method.Steps.split("\n").length} steps`;
+      body.append(count);
+      label.append(input, body);
+      els.methods.append(label);
+    }
+  }
+
+  // Turn a method into a board item: its steps jumbled and lettered, and the
+  // answer given as the letters in the correct order.
+  function methodItem(method) {
+    const steps = method.Steps.split("\n").map((step) => step.trim()).filter(Boolean);
+    let order;
+    do order = shuffle(steps.map((step, index) => index));
+    // Jumble thoroughly: at most one step may stay in its correct place.
+    while (steps.length > 2 && order.filter((value, index) => value === index).length > 1);
+    const correct = steps.map((step, index) => LETTERS[order.indexOf(index)]).join(", ");
+    return {
+      Number: method.Number, Topic: method.Practical, Course: method.Course, Image: "",
+      Question: `${method.Task} Put the steps in the correct order.`,
+      Answer: `Correct order: ${correct}${method.Note ? `\n${method.Note}` : ""}`,
+      steps: order.map((stepIndex, position) => ({ letter: LETTERS[position], text: steps[stepIndex] })),
+    };
+  }
+
   function renderPicker() {
     if (state.mode !== "manual") return;
     const terms = els.pickSearch.value.trim().toLowerCase().split(/\s+/).filter(Boolean);
@@ -261,7 +343,7 @@
           row.append(badge);
         }
         row.append(text);
-        const tags = [question.Image && "diagram", question.Type === "Extended" && "long", question.Course === "Separate" && state.course === "all" && "S"];
+        const tags = [question.Image && "diagram"];
         for (const label of tags.filter(Boolean)) {
           const tag = document.createElement("span");
           tag.className = "pick-tag";
@@ -281,36 +363,43 @@
   }
 
   function renderSummary() {
+    const methodCount = pickedMethods().length;
+    const bold = (value) => { const b = document.createElement("b"); b.textContent = value; return b; };
+    const addMethods = (alone) => {
+      if (methodCount) els.summary.append(alone ? "" : " · ", bold(methodCount), ` method task${methodCount === 1 ? "" : "s"}`);
+    };
     if (state.mode === "manual") {
       const picked = pickedQuestions().length;
-      els.show.disabled = els.sheetFromSetup.disabled = picked === 0;
+      els.show.disabled = els.sheetFromSetup.disabled = picked + methodCount === 0;
       els.summary.textContent = "";
       if (!picked) {
-        els.summary.textContent = state.selected.size ? "Tick the questions you want to show." : "Choose at least one topic.";
+        if (methodCount) addMethods(true);
+        else els.summary.textContent = state.selected.size ? "Tick the questions you want to show." : "Choose at least one topic.";
         return;
       }
-      const b = document.createElement("b");
-      b.textContent = picked;
-      els.summary.append(b, ` question${picked === 1 ? "" : "s"} picked`);
+      els.summary.append(bold(picked), ` question${picked === 1 ? "" : "s"} picked`);
+      addMethods(false);
       return;
     }
     const questions = pool();
     const topicCount = state.topics.filter((topic) => state.selected.has(topic.name) && topic.questions.some(allowed)).length;
     const available = uniqueCount(questions);
-    els.show.disabled = els.sheetFromSetup.disabled = available === 0;
+    els.show.disabled = els.sheetFromSetup.disabled = available + methodCount === 0;
     els.summary.textContent = "";
     if (!available) {
-      els.summary.textContent = "Choose at least one topic.";
+      if (methodCount) addMethods(true);
+      else els.summary.textContent = "Choose at least one topic.";
       return;
     }
     const showing = Math.min(state.count, available);
-    const bold = (value) => { const b = document.createElement("b"); b.textContent = value; return b; };
     els.summary.append(bold(topicCount), ` topic${topicCount === 1 ? "" : "s"} · `, bold(available), " questions to draw from · showing ", bold(showing));
+    addMethods(false);
   }
 
   function renderControls() {
+    const unitCount = new Set(state.topics.map((topic) => topic.unit)).size;
+    $("fold-all").textContent = unitCount && state.collapsed.size >= unitCount ? "Expand all" : "Collapse all";
     els.count.value = state.count;
-    els.extended.checked = state.extended;
     document.querySelectorAll("[data-count]").forEach((button) => button.setAttribute("aria-pressed", String(Number(button.dataset.count) === state.count)));
     document.querySelectorAll("[data-course]").forEach((button) => button.setAttribute("aria-pressed", String(button.dataset.course === state.course)));
     document.querySelectorAll("[data-mode]").forEach((button) => button.setAttribute("aria-pressed", String(button.dataset.mode === state.mode)));
@@ -319,7 +408,7 @@
   }
 
   function refresh(redrawTopics = true) {
-    if (redrawTopics) renderTopics();
+    if (redrawTopics) { renderTopics(); renderMethods(); }
     renderControls();
     renderPicker();
     renderSummary();
@@ -360,7 +449,7 @@
 
   function buildCard(question, index) {
     const item = document.createElement("li");
-    item.className = "q";
+    item.className = question.steps ? "q method" : "q";
 
     const number = document.createElement("div");
     number.className = "q-num";
@@ -391,8 +480,21 @@
       body.append(figure);
     }
 
+    if (question.steps) {
+      const list = document.createElement("ol");
+      list.className = "q-steps";
+      for (const step of question.steps) {
+        const row = document.createElement("li");
+        const letter = document.createElement("b");
+        letter.textContent = step.letter;
+        row.append(letter, document.createTextNode(step.text));
+        list.append(row);
+      }
+      body.append(list);
+    }
+
     const answer = document.createElement("div");
-    answer.className = question.Type === "Extended" ? "q-answer long" : "q-answer";
+    answer.className = "q-answer";
     answer.textContent = question.Answer;
     answer.hidden = true;
     body.append(answer);
@@ -445,6 +547,7 @@
   }
 
   function swapQuestion(index) {
+    if (state.shown[index].steps) return;
     const taken = takenBy(state.shown.filter((question, i) => i !== index));
     taken.keys.add(questionKey(state.shown[index]));
     const candidates = pool().filter((question) => !clashes(question, taken));
@@ -497,7 +600,7 @@
 
   function showBoard() {
     const manual = state.mode === "manual";
-    const questions = manual ? pickedQuestions() : drawQuestions(state.count);
+    const questions = [...(manual ? pickedQuestions() : drawQuestions(state.count)), ...pickedMethods().map(methodItem)];
     if (!questions.length) return;
     els.board.classList.toggle("manual", manual);
     state.shown = questions;
@@ -527,7 +630,9 @@
   // The worksheet is an A4 page built from the questions on the board. The
   // browser's print dialog saves it as a PDF, so no PDF library is needed.
   function renderSheet() {
-    const withAnswers = els.sheetAnswers.checked;
+    const withAnswers = state.sheetKind === "key";
+    els.sheet.classList.toggle("key", withAnswers);
+    document.querySelectorAll("[data-sheet]").forEach((button) => button.setAttribute("aria-pressed", String(button.dataset.sheet === state.sheetKind)));
     const element = (tag, className, text) => {
       const node = document.createElement(tag);
       if (className) node.className = className;
@@ -538,7 +643,7 @@
 
     const head = element("header", "sheet-head");
     const topics = [...new Set(state.shown.map((question) => question.Topic.replace(/^\(S\)\s*/, "")))];
-    head.append(element("h1", "", withAnswers ? "Do Now: answers" : "Do Now"),
+    head.append(element("h1", "", withAnswers ? "Do Now: answer key" : "Do Now"),
       element("p", "", `GCSE Physics \u00b7 ${topics.length > 3 ? `${topics.slice(0, 3).join(", ")} and more` : topics.join(", ")}`));
 
     const info = element("div", "sheet-info");
@@ -553,7 +658,7 @@
     thead.append(headRow);
     const body = element("tbody");
     state.shown.forEach((question, index) => {
-      const row = element("tr", question.Type === "Extended" ? "long" : "");
+      const row = element("tr");
       const questionCell = element("td");
       const wrap = element("div", "sheet-q");
       const text = element("div", "", question.Question);
@@ -563,30 +668,56 @@
         image.alt = "Diagram for this question";
         text.append(image);
       }
+      if (question.steps) {
+        const list = element("ol", "sheet-steps");
+        for (const step of question.steps) {
+          const item = element("li");
+          item.append(element("b", "", step.letter), document.createTextNode(step.text));
+          list.append(item);
+        }
+        text.append(list);
+      }
       wrap.append(element("b", "", index + 1), text);
       questionCell.append(wrap);
       row.append(questionCell, element("td", "sheet-a", withAnswers ? question.Answer : ""));
       body.append(row);
     });
     table.append(columns, thead, body);
-    els.sheet.append(head, info, table);
+    els.sheet.append(head, ...(withAnswers ? [] : [info]), table);
   }
 
   function openSheet() {
     if (!state.shown.length) return;
+    state.sheetKind = "worksheet";
     renderSheet();
     els.sheetView.hidden = false;
     $("sheet-print").focus();
   }
 
-  async function printSheet() {
-    // Wait for the diagrams, then let the PDF take its file name from the title.
+  // Print one page of the worksheet preview and resolve when its dialog closes.
+  // (print() blocks in some browsers and returns at once in others.)
+  async function printKind(kind, day) {
+    state.sheetKind = kind;
+    renderSheet();
     await Promise.all([...els.sheet.querySelectorAll("img")].map((image) => image.decode().catch(() => {})));
+    // The PDF takes its file name from the page title.
+    document.title = `Do Now ${kind === "key" ? "answer key" : "worksheet"} ${day}`;
+    await new Promise((resolve) => {
+      window.addEventListener("afterprint", resolve, { once: true });
+      window.print();
+    });
+  }
+
+  // One click saves two PDFs: the worksheet, then its answer key.
+  async function printSheet() {
     const title = document.title;
+    const shownKind = state.sheetKind;
     const day = new Date().toISOString().slice(0, 10);
-    document.title = `Do Now worksheet ${day}${els.sheetAnswers.checked ? " answers" : ""}`;
-    window.print();
+    await printKind("worksheet", day);
+    await printKind("key", day);
     document.title = title;
+    state.sheetKind = shownKind;
+    renderSheet();
   }
 
   function openLightbox(src) {
@@ -604,6 +735,11 @@
   function bindEvents() {
     els.search.addEventListener("input", () => renderTopics());
     $("clear").addEventListener("click", () => { state.selected.clear(); refresh(); });
+    $("fold-all").addEventListener("click", () => {
+      const units = [...new Set(state.topics.map((topic) => topic.unit))];
+      state.collapsed = state.collapsed.size >= units.length ? new Set() : new Set(units);
+      refresh();
+    });
     $("select-shown").addEventListener("click", () => {
       els.units.querySelectorAll("input[data-topic]").forEach((input) => state.selected.add(input.dataset.topic));
       refresh();
@@ -619,13 +755,15 @@
     $("count-down").addEventListener("click", () => { state.count = clampCount(state.count - 1); refresh(false); });
     $("count-up").addEventListener("click", () => { state.count = clampCount(state.count + 1); refresh(false); });
     els.count.addEventListener("change", () => { state.count = clampCount(els.count.value); refresh(false); });
-    els.extended.addEventListener("change", () => { state.extended = els.extended.checked; refresh(); });
     els.show.addEventListener("click", showBoard);
     els.sheetFromSetup.addEventListener("click", () => { showBoard(); openSheet(); });
     $("sheet-open").addEventListener("click", openSheet);
     $("sheet-close").addEventListener("click", () => { els.sheetView.hidden = true; });
     $("sheet-print").addEventListener("click", printSheet);
-    els.sheetAnswers.addEventListener("change", renderSheet);
+    document.querySelectorAll("[data-sheet]").forEach((button) => button.addEventListener("click", () => {
+      state.sheetKind = button.dataset.sheet;
+      renderSheet();
+    }));
     document.querySelectorAll("[data-mode]").forEach((button) => button.addEventListener("click", () => {
       state.mode = button.dataset.mode;
       refresh();
@@ -646,7 +784,15 @@
     els.lightbox.addEventListener("click", () => { els.lightbox.hidden = true; });
 
     window.addEventListener("resize", fitBoard);
-    document.addEventListener("fullscreenchange", fitBoard);
+    const onFullscreenChange = () => {
+      const active = Boolean(document.fullscreenElement || document.webkitFullscreenElement);
+      const button = $("fullscreen");
+      button.setAttribute("aria-pressed", String(active));
+      button.setAttribute("aria-label", active ? "Exit fullscreen" : "Fullscreen");
+      fitBoard();
+    };
+    document.addEventListener("fullscreenchange", onFullscreenChange);
+    document.addEventListener("webkitfullscreenchange", onFullscreenChange);
     document.addEventListener("keydown", (event) => {
       if (event.metaKey || event.ctrlKey || event.altKey) return;
       if (!els.sheetView.hidden) {
@@ -682,6 +828,11 @@
       const response = await fetch(BANK_URL, { cache: "no-cache" });
       if (!response.ok) throw new Error(`HTTP ${response.status}`);
       state.bank = parseCsv(await response.text()).filter((question) => question.Question && question.Topic);
+      // The method tasks are an extra: the page still works if they fail to load.
+      state.methods = await fetch(METHODS_URL, { cache: "no-cache" })
+        .then((reply) => (reply.ok ? reply.text() : ""))
+        .then((text) => (text ? parseCsv(text).filter((method) => method.Task && method.Steps) : []))
+        .catch(() => []);
       buildTopics();
       refresh();
     } catch (error) {
