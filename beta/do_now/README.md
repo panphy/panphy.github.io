@@ -27,7 +27,7 @@ Save the CSV as UTF-8 (in Excel: "CSV UTF-8 (Comma delimited)"), or symbols such
 
 ## Flashcards
 
-"Flashcards" on the landing page is for students revising on their own. It makes a shuffled deck of every question in the chosen topics (or the hand-picked questions), shown one at a time: "Show answer", then "Got it" retires the card and "Still learning" sends it to the back of the deck. Keys: `↓` show answer, `→` got it, `←` still learning, `Esc` back.
+"Flashcards" on the landing page is for students revising on their own. It makes a shuffled deck of every question in the chosen topics (or the hand-picked questions), shown one at a time: "Show answer" flips the card over, then "Got it" retires it and "Still learning" sends it to the back of the deck. Progress is not saved. Keys: `↓` flip to the answer, `↑` flip back, `→` got it, `←` still learning, `Esc` back.
 
 ## Worksheet
 
