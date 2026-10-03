@@ -1,6 +1,6 @@
 # Do Now starters
 
-Lesson starters for AQA GCSE Physics (Higher). The teacher picks topics, then either sets a number of questions to be drawn at random (spread across the chosen topics) or ticks the exact questions to show ("Pick my own"). The board shows them large enough to read from the back of the room. Each question has its own answer button, and there is a Show ALL answers button.
+Lesson starters for AQA GCSE Physics (Higher). The teacher picks topics, then either sets a number of questions to be drawn at random (spread across the chosen topics) or ticks the exact questions to show ("Pick my own"). The board shows them large enough to read from the back of the room. Optional "order the method" tasks show the steps of a practical jumbled, for students to put in order. Each question has its own answer button, and there is a Show ALL answers button.
 
 ## Files
 
@@ -9,6 +9,7 @@ Lesson starters for AQA GCSE Physics (Higher). The teacher picks topics, then ei
 | `index.html`, `do_now.css`, `do_now.js` | The page. No build step. |
 | `questions.csv` | The question bank. The page reads it on every load, so editing this file is all that is needed to change a question. |
 | `images/*.svg` | Diagrams, named in the `Image` column. |
+| `methods.csv` | "Order the method" tasks: one row per practical, with the steps in the correct order, one per line in the `Steps` cell. The page jumbles and letters them. `Note` is added to the answer (e.g. two steps that may be swapped). |
 | `review-changes.csv` | Every change made to the original bank (old and new wording, with a reason). For review only; the page does not use it and it can be deleted. |
 
 ## Question bank columns
@@ -17,9 +18,8 @@ Lesson starters for AQA GCSE Physics (Higher). The teacher picks topics, then ei
 |---|---|
 | `Number` | Stable ID. 1–635 are the original numbers; 636 onwards are new. Gaps are removed questions. |
 | `Unit` | AQA unit, used to group topics on the landing page (and to show Paper 1 or 2). |
-| `Topic` | Topics that are entirely Separate Physics start with `(S) `. Row order sets the order on the page. |
-| `Course` | `Combined` or `Separate`, following the "(physics only)" markers in the AQA 8463 specification (version 1.1). "Combined only" hides every `Separate` row, including the few inside otherwise Combined topics. |
-| `Type` | `Recall` or `Extended`. `Extended` (long "outline a method" answers) is left out of random draws unless the teacher ticks the box; it is always listed in "Pick my own". |
+| `Topic` | Separate Physics only topics start with `(S) `. Row order sets the order on the page. |
+| `Course` | `Combined` or `Separate`, following the "(physics only)" markers in the AQA 8463 specification (version 1.1). Every topic is wholly one or the other, so keep all rows of a topic the same. "Combined only" hides the `Separate` topics. |
 | `Question`, `Answer` | Plain text. A line break inside the cell is shown as a line break. |
 | `Image` | A file name in `images/`, or empty. Several questions can share one image. |
 
@@ -27,7 +27,7 @@ Save the CSV as UTF-8 (in Excel: "CSV UTF-8 (Comma delimited)"), or symbols such
 
 ## Worksheet
 
-"Worksheet PDF" builds an A4 sheet from the questions on the board: name, class and date lines, then a two-column table of questions and answer spaces. "Save as PDF / Print" opens the browser's print dialog; choose "Save as PDF" there. Ticking "Fill in the answers" gives a teacher copy.
+"Worksheet PDF" builds an A4 sheet from the questions on the board: name, class and date lines, then a two-column table of questions and answer spaces. "Save both PDFs" opens the browser's print dialog twice, first for the worksheet and then for a separate answer key; choose "Save as PDF" each time (cancel either dialog to skip that file). The preview can be switched between the two.
 
 ## Board shortcuts
 
