@@ -6,7 +6,7 @@
   const BANK_URL = "questions.csv";
   const METHODS_URL = "methods.csv";
   const LETTERS = "ABCDEFGHIJ";
-  const METHODS_KEY = "practical-methods"; // its entry in the remembered collapsed set
+  const METHODS_KEY = "practical-methods"; // its entry in the collapsed set
   const IMAGE_DIR = "images/";
   const STORAGE_KEY = "panphy-do-now";
   const MAX_COUNT = 20;
@@ -36,7 +36,6 @@
     methods: [],         // practical methods from methods.csv
     methodPicks: [],     // their Numbers, in the order ticked
     collapsed: new Set(), // unit names whose topic lists are folded away
-    foldsSaved: false,   // false until this browser has stored its own folds: everything then starts folded
     scale: 1,
     sheetKind: "worksheet", // which page the worksheet preview shows: "worksheet" | "key"
     deck: [],            // flashcards still to learn; the first is the one on screen
@@ -69,29 +68,21 @@
     return rows.map((r) => Object.fromEntries(header.map((h, i) => [h, (r[i] || "").trim()])));
   }
 
+  // Only general settings are remembered between visits. Ticked topics, picked
+  // questions and open units are not: every visit starts with nothing selected
+  // and every unit folded.
   function loadPrefs() {
     try {
       const saved = JSON.parse(localStorage.getItem(STORAGE_KEY) || "{}");
-      if (Array.isArray(saved.topics)) state.selected = new Set(saved.topics);
       if (saved.course === "combined") state.course = "combined";
       if (Number.isFinite(saved.count)) state.count = clampCount(saved.count);
-      if (saved.mode === "manual") state.mode = "manual";
-      if (Array.isArray(saved.picks)) state.picks = saved.picks.map(String);
-      if (Array.isArray(saved.methodPicks)) state.methodPicks = saved.methodPicks.map(String);
-      if (saved.foldsSaved === true && Array.isArray(saved.collapsed)) {
-        state.collapsed = new Set(saved.collapsed);
-        state.foldsSaved = true;
-      }
       if (Number.isFinite(saved.scale)) state.scale = Math.min(1.6, Math.max(0.6, saved.scale));
     } catch (error) { /* storage unavailable: start fresh */ }
   }
 
   function savePrefs() {
     try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify({
-        topics: [...state.selected], course: state.course, count: state.count, scale: state.scale,
-        mode: state.mode, picks: state.picks, methodPicks: state.methodPicks, collapsed: [...state.collapsed], foldsSaved: state.foldsSaved,
-      }));
+      localStorage.setItem(STORAGE_KEY, JSON.stringify({ course: state.course, count: state.count, scale: state.scale }));
     } catch (error) { /* ignore */ }
   }
 
@@ -463,9 +454,8 @@
     els.manualOptions.hidden = state.mode !== "manual";
   }
 
-  // List every ticked topic and practical as a removable chip. Selections are
-  // remembered between visits and may sit inside folded units, so without this
-  // the board could draw from topics the teacher cannot see are still ticked.
+  // List every ticked topic and practical as a removable chip, so selections
+  // inside folded units stay visible.
   function renderChosen() {
     const topics = state.topics.filter((topic) => state.selected.has(topic.name) && topic.questions.some(allowed));
     const practicals = pickedMethods();
@@ -1014,11 +1004,7 @@
         .then((text) => (text ? parseCsv(text).filter((method) => method.Task && method.Steps) : []))
         .catch(() => []);
       buildTopics();
-      // First visit: start with every unit folded, so the page opens as a short list of units.
-      if (!state.foldsSaved) {
-        state.collapsed = new Set(foldableSections());
-        state.foldsSaved = true;
-      }
+      state.collapsed = new Set(foldableSections()); // every visit starts with all units folded
       refresh();
     } catch (error) {
       els.units.textContent = "";
