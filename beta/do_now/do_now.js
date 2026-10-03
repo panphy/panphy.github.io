@@ -12,6 +12,7 @@
   const MAX_COUNT = 20;
   const PAPER_ONE_UNITS = ["Energy", "Electricity", "Particle model of matter", "Atomic structure"];
   const CHEVRON_ICON = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>';
+  const CLOSE_ICON = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>';
   const SWAP_ICON = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 11a8 8 0 0 0-14.3-4.5L4 8.5M4 4v4.5h4.5M4 13a8 8 0 0 0 14.3 4.5l1.7-2M20 20v-4.5h-4.5"/></svg>';
 
   const $ = (id) => document.getElementById(id);
@@ -20,7 +21,7 @@
     summary: $("summary"), show: $("show"), list: $("questions"), area: $("board-area"),
     showAll: $("show-all"), lightbox: $("lightbox"), date: $("board-date"),
     sheetView: $("sheet-view"), sheet: $("sheet"), sheetFromSetup: $("sheet-from-setup"),
-    methods: $("methods"),
+    methods: $("methods"), chosen: $("chosen"),
     picker: $("picker"), pickSearch: $("pick-search"), randomOptions: $("random-options"), manualOptions: $("manual-options"),
   };
 
@@ -460,8 +461,42 @@
     els.manualOptions.hidden = state.mode !== "manual";
   }
 
+  // List every ticked topic and practical as a removable chip. Selections are
+  // remembered between visits and may sit inside folded units, so without this
+  // the board could draw from topics the teacher cannot see are still ticked.
+  function renderChosen() {
+    const topics = state.topics.filter((topic) => state.selected.has(topic.name) && topic.questions.some(allowed));
+    const practicals = pickedMethods();
+    els.chosen.textContent = "";
+    els.chosen.hidden = topics.length + practicals.length === 0;
+    if (els.chosen.hidden) return;
+    const label = document.createElement("span");
+    label.className = "chosen-label";
+    label.textContent = "Selected";
+    els.chosen.append(label);
+    const addChip = (text, className, remove) => {
+      const chip = document.createElement("button");
+      chip.type = "button";
+      chip.className = className;
+      chip.append(text);
+      chip.insertAdjacentHTML("beforeend", CLOSE_ICON);
+      chip.setAttribute("aria-label", `Remove ${text}`);
+      chip.addEventListener("click", () => { remove(); refresh(); });
+      els.chosen.append(chip);
+    };
+    for (const topic of topics) {
+      addChip(topic.name.replace(/^\(S\)\s*/, ""), "chip", () => state.selected.delete(topic.name));
+    }
+    for (const method of practicals) {
+      addChip(`Practical: ${method.Practical}`, "chip practical", () => {
+        state.methodPicks = state.methodPicks.filter((number) => number !== method.Number);
+      });
+    }
+  }
+
   function refresh(redrawTopics = true) {
     if (redrawTopics) { renderTopics(); renderMethods(); }
+    renderChosen();
     renderControls();
     renderPicker();
     renderSummary();
@@ -787,7 +822,7 @@
 
   function bindEvents() {
     els.search.addEventListener("input", () => { renderTopics(); renderMethods(); });
-    $("clear").addEventListener("click", () => { state.selected.clear(); refresh(); });
+    $("clear").addEventListener("click", () => { state.selected.clear(); state.methodPicks = []; refresh(); });
     $("fold-all").addEventListener("click", () => {
       const sections = foldableSections();
       state.collapsed = sections.every((name) => state.collapsed.has(name)) ? new Set() : new Set(sections);
