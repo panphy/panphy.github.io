@@ -23,10 +23,13 @@ const HOME_TARGET = { fission: [0, 0.6, 0], chain: [0, 0, 0], fusion: [0, 0, 0] 
 const HOME_DIRECTION = { fission: [0, 0.3, 1], chain: [0.6, 0.5, 1], fusion: [0, 0.2, 1] };
 
 // Fission: one exact 236-nucleon nucleus. Times are in seconds.
+const WOBBLE_RATE = 5.5; // radians per second
 const FISSION = {
   approachSpeed: 2.4,
   startGap: 2.8,
-  wobbleTime: 2.2,
+  // Two and a quarter swings: the wobble ends at full stretch, where it is momentarily still,
+  // so the stretch carries straight on instead of the nucleus stopping mid-swing.
+  wobbleTime: 4.5 * Math.PI / WOBBLE_RATE,
   stretchTime: 1.1,
   separateTime: 2.6,
   packTime: 1.2,
@@ -644,12 +647,13 @@ function stepApproach(delta) {
   readout.textContent = 'URANIUM-236 · The extra neutron makes the nucleus unstable. It wobbles like a drop of liquid. (* means excited.)';
 }
 function stepWobble() {
-  const s = Math.min(1, decay.t / FISSION.wobbleTime);
-  nucleus.deform.stretch = 1 + (0.05 + 0.22 * s) * Math.sin(decay.t * 5.5);
+  const t = Math.min(decay.t, FISSION.wobbleTime);
+  const s = t / FISSION.wobbleTime;
+  nucleus.deform.stretch = 1 + (0.05 + 0.22 * s) * Math.sin(t * WOBBLE_RATE);
   nucleus.jiggle = 0.012 + 0.03 * s;
   if (s >= 1) {
     decay.phase = 'stretch';
-    decay.t = 0;
+    decay.t -= FISSION.wobbleTime;
     decay.startStretch = nucleus.deform.stretch;
     readout.textContent = 'STRETCHING · The nucleus elongates and a waist forms. The repulsion between its protons now beats the strong force holding it together.';
   }
