@@ -1,7 +1,9 @@
 // App bootstrap
 
 document.addEventListener("DOMContentLoaded", function() {
-	const savedState = loadState();
+	// During a guided tour the page runs on practice data and leaves the saved workspace unread.
+	const tourState = typeof getTourInitialState === 'function' ? getTourInitialState() : null;
+	const savedState = tourState ? migratePersistedState(tourState) : loadState();
 	const themeButton = document.getElementById('theme-button');
 
 	const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;

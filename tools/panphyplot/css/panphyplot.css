@@ -1636,6 +1636,54 @@ select {
 	}
 }
 
+/* Keep the banner controls on one row on phones. */
+@media (max-width: 480px) {
+	.banner {
+		padding: 6px 10px;
+	}
+
+	.banner-logo img {
+		max-height: 32px;
+		margin-right: 4px;
+	}
+
+	.banner-title {
+		font-size: 1.15rem;
+	}
+
+	.banner-buttons {
+		gap: 6px;
+		margin-right: 0;
+	}
+
+	.banner-button {
+		padding: 6px 10px;
+		font-size: 0.85rem;
+	}
+}
+
+@media (max-width: 400px) {
+	.banner {
+		padding: 6px;
+	}
+
+	.banner-logo img {
+		max-height: 28px;
+	}
+
+	.banner-title {
+		font-size: 1rem;
+	}
+
+	.banner-buttons {
+		gap: 4px;
+	}
+
+	.banner-button {
+		padding: 6px 8px;
+	}
+}
+
 /* Graph Title */
 .graph-title-container {
 	display: flex;

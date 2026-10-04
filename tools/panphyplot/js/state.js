@@ -92,6 +92,8 @@ function debounce(func, wait) {
 
 let saveTimeout;
 let lastSavedSerialized = null;
+// Set by the guided tour (tour.js), which runs on practice data and must never overwrite the saved workspace.
+let persistenceDisabled = false;
 
 function getUiStateSnapshotFromDom() {
 	const graphTitleInput = document.getElementById('graph-title');
@@ -190,6 +192,7 @@ function migratePersistedState(savedState, sourceKey = STORAGE_KEY) {
 }
 
 function saveState() {
+	if (persistenceDisabled) return;
 	try {
 		const serialized = JSON.stringify(buildPersistedState());
 		// Skip the write (and its localStorage I/O) when nothing changed.

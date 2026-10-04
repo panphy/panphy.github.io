@@ -1,4 +1,4 @@
-const BUILD_ID = '2026-10-04T09:50:52Z';
+const BUILD_ID = '2026-10-04T13:45:48Z';
 const APP_VERSIONS = {
   core: BUILD_ID,
   panphymd: BUILD_ID,
@@ -84,6 +84,7 @@ const ASSETS_TO_CACHE = [
   '/tools/panphymd/templates/math-table.md',
   '/tools/panphyplot.html',
   '/tools/panphyplot/css/panphyplot.css',
+  '/tools/panphyplot/css/tour.css',
   '/tools/panphyplot/js/curve-fitting.js',
   '/tools/panphyplot/js/data-processing.js',
   '/tools/panphyplot/js/fit-core.js',
@@ -92,6 +93,7 @@ const ASSETS_TO_CACHE = [
   '/tools/panphyplot/js/main.js',
   '/tools/panphyplot/js/plotting.js',
   '/tools/panphyplot/js/state.js',
+  '/tools/panphyplot/js/tour.js',
   '/tools/panphyplot/js/ui.js',
   'https://cdn.plot.ly/plotly-basic-2.29.1.min.js',
   '/tools/panphyplot/js/vendor/math.min.js',
