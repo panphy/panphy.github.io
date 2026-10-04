@@ -652,7 +652,8 @@ function stepWobble() {
   }
 }
 function stepStretch() {
-  const k = ease(Math.min(1, decay.t / FISSION.stretchTime));
+  // Speed up into the split, so the fragments never look as if they stop before flying apart.
+  const k = Math.min(1, decay.t / FISSION.stretchTime) ** 2;
   const d = nucleus.deform;
   d.stretch = decay.startStretch + (1.5 - decay.startStretch) * k;
   d.pinch = 0.55 * k;
