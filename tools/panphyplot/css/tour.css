@@ -1,0 +1,229 @@
+/* Guided tour (tour.js) */
+
+/* Highlights the current target; purely visual, so the app stays fully usable. */
+.tour-spotlight {
+	position: fixed;
+	z-index: 2400;
+	border-radius: 12px;
+	outline: 3px solid var(--brand-secondary);
+	box-shadow: 0 0 0 200vmax rgba(0, 0, 0, 0.42);
+	pointer-events: none;
+}
+
+[data-theme="dark"] .tour-spotlight {
+	box-shadow: 0 0 0 200vmax rgba(0, 0, 0, 0.6);
+}
+
+.tour-spotlight-empty {
+	outline: none;
+}
+
+.tour-target {
+	scroll-margin-top: calc(var(--standalone-top) + 76px);
+}
+
+.tour-card {
+	position: fixed;
+	z-index: 2500;
+	box-sizing: border-box;
+	width: 340px;
+	max-width: calc(100vw - 24px);
+	max-height: calc(100vh - 24px);
+	overflow-y: auto;
+	padding: 18px 20px 16px;
+	background: var(--card-bg);
+	color: var(--text-main);
+	border: 1px solid var(--card-border);
+	border-radius: 16px;
+	box-shadow: 0 12px 36px rgba(0, 0, 0, 0.28);
+	font-family: var(--font-body);
+	font-size: 0.95rem;
+	line-height: 1.5;
+}
+
+.tour-card:focus {
+	outline: none;
+}
+
+.tour-card-docked {
+	left: 0;
+	right: 0;
+	bottom: 0;
+	width: auto;
+	max-width: none;
+	max-height: 46vh;
+	padding-bottom: calc(16px + env(safe-area-inset-bottom, 0px));
+	border-radius: 16px 16px 0 0;
+}
+
+.tour-invite {
+	right: 16px;
+	bottom: 16px;
+	z-index: 900;
+}
+
+.tour-card-head {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 8px;
+	min-height: 32px;
+}
+
+.tour-eyebrow {
+	font-size: 0.75rem;
+	font-weight: 700;
+	letter-spacing: 0.06em;
+	text-transform: uppercase;
+	color: var(--text-secondary);
+}
+
+.tour-title {
+	margin: 4px 0 8px;
+	font-family: var(--font-display);
+	font-size: 1.35rem;
+	font-weight: 400;
+	line-height: 1.25;
+	color: var(--text-main);
+}
+
+.tour-body,
+.tour-instruction,
+.tour-status {
+	margin: 0 0 10px;
+}
+
+.tour-instruction {
+	padding: 8px 12px;
+	background: var(--muted-bg);
+	border-left: 3px solid var(--brand-secondary);
+	border-radius: 8px;
+	font-weight: 600;
+}
+
+.tour-status {
+	color: var(--btn-create);
+	font-weight: 600;
+}
+
+.tour-nav {
+	display: flex;
+	flex-wrap: wrap;
+	justify-content: flex-end;
+	gap: 8px;
+	margin-top: 14px;
+}
+
+.tour-nav .tour-button:first-child {
+	margin-right: auto;
+}
+
+.tour-button {
+	flex: 0 0 auto;
+	min-height: 44px;
+	white-space: nowrap;
+	padding: 8px 16px;
+	border: 1px solid var(--border-color);
+	border-radius: 999px;
+	font-family: var(--font-body);
+	font-size: 0.9rem;
+	font-weight: 600;
+	cursor: pointer;
+	touch-action: manipulation;
+	transition: background-color 0.2s ease, border-color 0.2s ease;
+}
+
+.tour-button-plain {
+	background: var(--muted-bg);
+	color: var(--text-main);
+}
+
+.tour-button-plain:hover:not(:disabled) {
+	border-color: var(--btn-analyze);
+	color: var(--btn-analyze);
+}
+
+.tour-button-primary {
+	background: var(--btn-analyze);
+	border-color: var(--btn-analyze);
+	color: #ffffff;
+}
+
+.tour-button-primary:hover:not(:disabled) {
+	background: var(--btn-analyze-hover);
+	border-color: var(--btn-analyze-hover);
+}
+
+[data-theme="dark"] .tour-button-primary {
+	color: #1a1a1a;
+}
+
+.tour-button:disabled {
+	opacity: 0.45;
+	cursor: not-allowed;
+}
+
+.tour-button:focus-visible {
+	outline: 3px solid var(--input-focus);
+	outline-offset: 2px;
+}
+
+.tour-button[hidden] {
+	display: none;
+}
+
+.tour-close {
+	min-width: 44px;
+	padding: 0;
+	background: transparent;
+	border-color: transparent;
+	color: var(--text-secondary);
+	font-size: 1.5rem;
+	line-height: 1;
+	box-shadow: none;
+}
+
+.tour-close:hover {
+	color: var(--text-main);
+	background: var(--muted-bg);
+}
+
+.tour-practice-bar {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	justify-content: center;
+	gap: 6px 14px;
+	padding: 8px 20px;
+	background: var(--muted-bg);
+	border-bottom: 1px solid var(--border-color);
+	color: var(--text-main);
+	font-size: 0.9rem;
+	text-align: center;
+}
+
+@media (max-width: 899px) {
+	/* Room to scroll any target clear of the docked card. */
+	body.tour-active {
+		padding-bottom: 46vh;
+	}
+}
+
+@media (max-width: 480px) {
+	.tour-invite {
+		left: 12px;
+		right: 12px;
+		bottom: 12px;
+		width: auto;
+	}
+}
+
+@media (pointer: coarse) {
+	.tour-button {
+		min-height: 48px;
+	}
+
+	.tour-close {
+		min-width: 48px;
+	}
+}
