@@ -3322,12 +3322,15 @@ function initializeDialogFocus() {
 			event.stopImmediatePropagation();
 			entry.close();
 		} else if (event.key === 'Tab') {
-			const elements = focusable(entry.container);
+			// The guided tour's card sits outside the dialog and must stay reachable beside it.
+			const tourCard = document.querySelector('.tour-card:not(.tour-invite)');
+			const elements = [...(tourCard ? focusable(tourCard) : []), ...focusable(entry.container)];
 			const current = elements.indexOf(document.activeElement);
 			const next = event.shiftKey ? current - 1 : current + 1;
-			if (current < 0 || next < 0 || next >= elements.length) {
+			const wraps = current < 0 || next < 0 || next >= elements.length;
+			if (tourCard || wraps) {
 				event.preventDefault();
-				(event.shiftKey ? elements[elements.length - 1] : elements[0])?.focus();
+				(wraps ? elements[event.shiftKey ? elements.length - 1 : 0] : elements[next])?.focus();
 			}
 		}
 	}, true);

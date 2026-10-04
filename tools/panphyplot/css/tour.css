@@ -26,7 +26,7 @@
 	position: fixed;
 	z-index: 2500;
 	box-sizing: border-box;
-	width: 340px;
+	width: 360px;
 	max-width: calc(100vw - 24px);
 	max-height: calc(100vh - 24px);
 	overflow-y: auto;
@@ -122,7 +122,7 @@
 	flex: 0 0 auto;
 	min-height: 44px;
 	white-space: nowrap;
-	padding: 8px 16px;
+	padding: 8px 13px;
 	border: 1px solid var(--border-color);
 	border-radius: 999px;
 	font-family: var(--font-body);
@@ -202,19 +202,30 @@
 	text-align: center;
 }
 
+.tour-chapter-select {
+	width: auto;
+	min-height: 44px;
+	padding: 6px 12px;
+	border: 1px solid var(--input-border);
+	border-radius: 999px;
+	background-color: var(--card-bg);
+	color: var(--text-main);
+	font-family: var(--font-body);
+	font-size: 0.9rem;
+}
+
 @media (max-width: 899px) {
 	/* Room to scroll any target clear of the docked card. */
-	body.tour-active {
+	body.tour-active,
+	body.tour-active #data-processing-content {
 		padding-bottom: 46vh;
 	}
 }
 
-@media (max-width: 480px) {
-	.tour-invite {
-		left: 12px;
-		right: 12px;
-		bottom: 12px;
-		width: auto;
+/* The tour is not offered on phones; keep in step with TOUR_PHONE_QUERY in tour.js. */
+@media (max-width: 699px), (max-height: 499px) {
+	.banner-button.tour-launch {
+		display: none;
 	}
 }
 
