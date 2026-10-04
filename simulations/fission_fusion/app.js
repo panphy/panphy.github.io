@@ -567,7 +567,10 @@ function buildFission() {
   const label = labelSprite('U-235', palette.line, 1.5);
   label.position.set(0, radius + 0.45, 0);
   stage.add(label);
-  nucleus = { group: holder, nucleons, incoming: waiting, radius, materials, geometry, glow: glowSprite, label, y0, deform: { stretch: 1, pinch: 0, gap: 0 }, jiggle: 0.012, excited: false, split: false, fragments: [] };
+  // Pack the fragment shapes now: doing it at the split would hold up that frame.
+  const byDistance = (a, b) => a.length() - b.length();
+  const packed = { ba: packNucleus(141, 141, R).sort(byDistance), kr: packNucleus(92, 92, R).sort(byDistance) };
+  nucleus = { group: holder, nucleons, incoming: waiting, radius, materials, geometry, glow: glowSprite, label, y0, packed, deform: { stretch: 1, pinch: 0, gap: 0 }, jiggle: 0.012, excited: false, split: false, fragments: [] };
   floorShadow.position.y = FLOOR.fission[0];
   floorShadow.scale.setScalar(FLOOR.fission[1] / 1.4);
 }
@@ -682,7 +685,7 @@ function splitNucleus() {
       n.mesh.position.copy(n.local0);
     }
     // Every fragment nucleon moves to a place in a compact, closely packed nucleus.
-    const packed = packNucleus(list.length, key === 'ba' ? 141 : 92, NUCLEON_RADIUS).sort((a, b) => a.length() - b.length());
+    const packed = nucleus.packed[key];
     [...list].sort((a, b) => a.local0.length() - b.local0.length()).forEach((n, i) => { n.pack = packed[i]; });
     const radius = packed[packed.length - 1].length() + NUCLEON_RADIUS;
     const side = key === 'kr' ? 1 : -1;
@@ -1960,6 +1963,13 @@ updateProgress();
 setTemperature(50);
 selectMode('fission', false);
 $('load-status').hidden = true;
+// Draw a gamma-ray wave once now, so its shader is ready. The first waves appear at the moment
+// of fission, and building the shader then froze that frame: the fragments seemed to pause.
+// A new ribbon has zero size, so nothing shows; its material is kept so the shader stays cached.
+const warmWave = makeWave(palette.photon);
+scene.add(warmWave);
+renderer.render(scene, camera);
+scene.remove(warmWave);
 let previousTime = performance.now();
 renderer.setAnimationLoop(frame);
 function frame(time) {
