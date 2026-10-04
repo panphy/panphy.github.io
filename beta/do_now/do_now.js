@@ -419,7 +419,7 @@
     for (const topic of state.topics) {
       if (!state.selected.has(topic.name)) continue;
       const questions = topic.questions.filter((question) => allowed(question)
-        && terms.every((term) => plainText(question.Question).toLowerCase().includes(term)));
+        && terms.every((term) => wordStarts(searchText(question, ["Question", "Answer"]), term)));
       if (!questions.length) continue;
       const heading = document.createElement("h3");
       heading.textContent = topic.name.replace(/^\(S\)\s*/, "");
