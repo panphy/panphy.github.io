@@ -2,6 +2,8 @@
 
 Lesson starters for AQA GCSE Physics (Higher). The teacher picks topics, then either sets a number of questions to be drawn at random (spread across the chosen topics) or ticks the exact questions to show ("Pick my own"). The board shows them large enough to read from the back of the room. Optional required practical methods, listed below the topic units, show the steps of a practical jumbled for students to put in order. Each question has its own answer button, and there is a Show ALL answers button.
 
+The topic search matches topic and unit names, and also the wording of questions and answers (at the start of words, so `electron` finds "electrons" and `rp` does not find "absorption"). Topics found through their questions say how many matched; hover to list them. Required practicals are also matched on their task and steps. The "Pick my own" filter matches question and answer wording the same way.
+
 Between visits the browser remembers only the course switch, the number of questions and the board text size. Ticked topics, picked questions and open units are not remembered: every visit starts with nothing selected and every unit folded.
 
 ## Files

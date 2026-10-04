@@ -107,9 +107,40 @@
     state.selected = new Set([...state.selected].filter((name) => names.has(name)));
   }
 
+  function searchTerms() {
+    return els.search.value.trim().toLowerCase().split(/\s+/).filter(Boolean);
+  }
+
+  // Question and answer text is matched at the start of words, so "electron"
+  // finds "electrons" but a short term such as "rp" does not hit "absorption".
+  function wordStarts(text, term) {
+    let index = text.indexOf(term);
+    while (index >= 0) {
+      if (index === 0 || !/[\p{L}\p{N}]/u.test(text[index - 1])) return true;
+      index = text.indexOf(term, index + 1);
+    }
+    return false;
+  }
+
+  function searchText(item, fields) {
+    if (!item.searchText) item.searchText = plainText(fields.map((field) => item[field]).join(" ")).toLowerCase();
+    return item.searchText;
+  }
+
+  // A topic matches when every term is in its name or unit, or when the terms
+  // left over all appear in one of its questions or answers. Returns null for
+  // no match, or the questions that matched on their wording ([] for a name match).
+  function topicMatch(topic, terms) {
+    const label = `${topic.name} ${topic.unit}`.toLowerCase();
+    const rest = terms.filter((term) => !label.includes(term));
+    if (!rest.length) return [];
+    const hits = topic.questions.filter((question) => allowed(question)
+      && rest.every((term) => wordStarts(searchText(question, ["Question", "Answer"]), term)));
+    return hits.length ? hits : null;
+  }
+
   function renderTopics() {
-    const query = els.search.value.trim().toLowerCase();
-    const terms = query.split(/\s+/).filter(Boolean);
+    const terms = searchTerms();
     els.units.textContent = "";
     // Skills units (working scientifically) come first, set apart from the content units.
     const units = [...new Set(state.topics.map((topic) => topic.unit))]
@@ -117,11 +148,13 @@
     let shownTopics = 0;
 
     for (const unit of units) {
+      const matches = new Map();
       const topics = state.topics.filter((topic) => {
         if (topic.unit !== unit) return false;
         if (!topic.questions.some(allowed)) return false;
-        const haystack = `${topic.name} ${unit}`.toLowerCase();
-        return terms.every((term) => haystack.includes(term));
+        const hits = topicMatch(topic, terms);
+        if (hits) matches.set(topic.name, hits);
+        return hits !== null;
       });
       if (!topics.length) continue;
       shownTopics += topics.length;
@@ -183,6 +216,15 @@
         const name = document.createElement("span");
         name.className = "topic-name";
         name.textContent = topic.name.replace(/^\(S\)\s*/, "");
+        const hits = matches.get(topic.name);
+        if (hits.length) {
+          // Found through its questions: say how many, and list them on hover.
+          const match = document.createElement("small");
+          match.className = "topic-match";
+          match.textContent = `${hits.length} matching question${hits.length === 1 ? "" : "s"}`;
+          label.title = hits.map((question) => plainText(question.Question)).join("\n");
+          name.append(match);
+        }
         body.append(name);
         // A topic is wholly Combined or wholly Separate Physics only.
         if (topic.questions[0].Course === "Separate") {
@@ -206,7 +248,7 @@
     if (!shownTopics) {
       const empty = document.createElement("p");
       empty.className = "empty";
-      empty.textContent = "No topics match that search.";
+      empty.textContent = "No topics, questions or answers match that search.";
       els.units.append(empty);
     }
   }
@@ -275,9 +317,10 @@
   // Required practical methods sit below the topic units in their own block: each one
   // becomes a "put the steps in order" task on the board.
   function renderMethods() {
-    const terms = els.search.value.trim().toLowerCase().split(/\s+/).filter(Boolean);
+    const terms = searchTerms();
     const methods = state.methods.filter((method) => allowed(method)
-      && terms.every((term) => `${method.Practical} required practical methods rp`.toLowerCase().includes(term)));
+      && terms.every((term) => `${method.Practical} required practical methods rp`.toLowerCase().includes(term)
+        || wordStarts(searchText(method, ["Task", "Steps", "Note"]), term)));
     els.methods.textContent = "";
     els.methods.hidden = methods.length === 0;
     if (!methods.length) return;
@@ -376,7 +419,7 @@
     for (const topic of state.topics) {
       if (!state.selected.has(topic.name)) continue;
       const questions = topic.questions.filter((question) => allowed(question)
-        && terms.every((term) => plainText(question.Question).toLowerCase().includes(term)));
+        && terms.every((term) => wordStarts(searchText(question, ["Question", "Answer"]), term)));
       if (!questions.length) continue;
       const heading = document.createElement("h3");
       heading.textContent = topic.name.replace(/^\(S\)\s*/, "");
