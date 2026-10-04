@@ -217,6 +217,7 @@
 @media (max-width: 899px) {
 	/* Room to scroll any target clear of the docked card. */
 	body.tour-active,
+	body.tour-active #popup-content,
 	body.tour-active #data-processing-content {
 		padding-bottom: 46vh;
 	}

@@ -12,9 +12,11 @@ const TOUR_PHONE_QUERY = '(max-width: 699px), (max-height: 499px)';
 const TOUR_NARROW_WIDTH = 900;
 
 // Pendulum practical, T = 2π√(L/g). The linearised sample gives g from the gradient of
-// T² against L; the raw sample is the same experiment before any processing.
+// T² against L; the raw sample is the same experiment before any processing. The spring
+// sample is the first of two Hooke's law datasets; the student adds spring B.
 const TOUR_SAMPLES = {
 	linearised: {
+		name: 'Pendulum',
 		headers: { x: 'L / m', y: 'T² / s²' },
 		rows: [
 			['0.20', '0.82'], ['0.30', '1.19'], ['0.40', '1.63'], ['0.50', '2.00'],
@@ -22,13 +24,24 @@ const TOUR_SAMPLES = {
 		]
 	},
 	raw: {
+		name: 'Pendulum',
 		headers: { x: 'L / m', y: 'T / s' },
 		rows: [
 			['0.20', '0.906'], ['0.30', '1.091'], ['0.40', '1.277'], ['0.50', '1.414'],
 			['0.60', '1.562'], ['0.70', '1.673'], ['0.80', '1.803'], ['0.90', '1.900']
 		]
+	},
+	springs: {
+		name: 'Spring A',
+		headers: { x: 'F / N', y: 'e (A) / cm' },
+		rows: [['1.0', '1.0'], ['2.0', '2.1'], ['3.0', '2.9'], ['4.0', '4.1'], ['5.0', '5.0']]
 	}
 };
+const TOUR_SPRING_B = {
+	headers: { x: 'F / N', y: 'e (B) / cm' },
+	extensions: ['2.1', '3.9', '6.2', '8.0', '9.9']
+};
+const TOUR_COMBINED_Y_LABEL = 'Extension / cm';
 const TOUR_CUSTOM_FORMULA = '2*pi*sqrt(x/g)';
 const TOUR_PROCESSING_FORMULA = 'y^2';
 
@@ -208,6 +221,74 @@ function copyTourProcessedData() {
 	if (hasTourProcessedDataset()) return;
 	mapTourProcessedColumn();
 	document.getElementById('data-processing-copy').click();
+}
+
+// The chapter's second dataset, spring B, is always the one after the sample.
+function hasTourSecondDataset() {
+	return rawData.length > 1;
+}
+
+function showTourSecondDataset() {
+	if (!hasTourSecondDataset()) copyXToNewDataset();
+	else if (activeSet !== 1) switchDataset(1);
+}
+
+function hasTourSecondData() {
+	return hasTourSecondDataset() && getFiniteDatasetPoints(1).length >= TOUR_SPRING_B.extensions.length;
+}
+
+function fillTourSecondData() {
+	showTourSecondDataset();
+	if (hasTourSecondData()) return;
+	const rows = Array.from(document.querySelectorAll('#data-table tbody tr'))
+		.filter(row => row.querySelector('.x-input').value.trim() !== '');
+	TOUR_SPRING_B.extensions.forEach((value, index) => {
+		if (rows[index]) rows[index].querySelector('.y-input').value = value;
+	});
+	updateData();
+}
+
+function hasTourSecondHeaders() {
+	const headers = datasetHeaders[1];
+	return hasTourSecondDataset() && !!headers && ['x', 'y'].every(axis => {
+		const label = String(headers[axis] || '').trim();
+		return label !== '' && label !== axis;
+	});
+}
+
+function nameTourSecondColumns() {
+	fillTourSecondData();
+	if (hasTourSecondHeaders()) return;
+	['x', 'y'].forEach(axis => {
+		document.getElementById(`${axis}-column-name`).value = TOUR_SPRING_B.headers[axis];
+		updateLabels(axis);
+	});
+}
+
+function hasTourSecondFit() {
+	return hasTourSecondDataset() && !!datasetFitResults[1] && !datasetFitResults[1].stale;
+}
+
+function fitTourSecondDataset() {
+	nameTourSecondColumns();
+	if (!hasTourSecondFit()) runTourLinearFit();
+}
+
+function openTourCombinedPlot() {
+	fitTourSecondDataset();
+	if (!isTourElementShown('popup-container')) plotAllDatasets();
+}
+
+function hasTourCombinedLabel() {
+	const label = document.getElementById('combined-y-label').value.trim();
+	return label !== '' && label !== String(datasetHeaders[activeSet]?.y || '').trim();
+}
+
+function setTourCombinedLabel() {
+	openTourCombinedPlot();
+	const labelInput = document.getElementById('combined-y-label');
+	labelInput.value = TOUR_COMBINED_Y_LABEL;
+	labelInput.dispatchEvent(new Event('input', { bubbles: true }));
 }
 
 const TOUR_CHAPTERS = {
@@ -405,6 +486,7 @@ const TOUR_CHAPTERS = {
 	},
 	'data-processing': {
 		title: 'Data processing',
+		next: 'datasets',
 		sample: 'raw',
 		steps: [
 			{
@@ -480,8 +562,108 @@ const TOUR_CHAPTERS = {
 				body: 'PanPhyPlot has switched to the new dataset: T² against L is a straight line, ready for a linear fit. Click the y column heading to give it a tidier name, such as T² / s².'
 			},
 			{
+				title: 'Chapter complete',
+				body: 'You can now fit your own equations and process data before plotting it. The last chapter compares two datasets on one graph.'
+			}
+		]
+	},
+	datasets: {
+		title: 'Multiple datasets',
+		sample: 'springs',
+		start: () => {
+			runTourLinearFit();
+			toggleSection('best-fit-content', document.querySelector('[aria-controls="best-fit-content"]'));
+		},
+		steps: [
+			{
+				title: 'Comparing two experiments',
+				body: 'Spring A has been stretched by five loads and fitted with a line. This chapter adds a second spring and compares the two on one graph.'
+			},
+			{
+				title: 'Dataset tabs',
+				target: '.dataset-tabs-bar',
+				body: 'Each tab is a separate dataset with its own table, graph and fit. The + button adds an empty one, and double-clicking a tab renames it.'
+			},
+			{
+				title: 'Reuse the x values',
+				target: '.btn-copy-x',
+				body: 'Spring B was tested with the same loads. Clone x starts a new dataset with the x column already filled in.',
+				action: {
+					instruction: 'Click Clone x.',
+					isDone: hasTourSecondDataset,
+					perform: showTourSecondDataset
+				}
+			},
+			{
+				title: 'Enter the second set',
+				target: '.table-container',
+				prepare: showTourSecondDataset,
+				body: 'The new dataset has the loads but no extensions yet.',
+				action: {
+					instruction: `Type the extensions in the y column: ${TOUR_SPRING_B.extensions.join(', ')}.`,
+					isDone: hasTourSecondData,
+					perform: fillTourSecondData
+				}
+			},
+			{
+				title: 'Name the columns',
+				target: '#data-table thead',
+				prepare: fillTourSecondData,
+				body: 'A combined graph labels each dataset by its y heading, so give every dataset a different one.',
+				action: {
+					instruction: `Change the headings to ${TOUR_SPRING_B.headers.x} and ${TOUR_SPRING_B.headers.y}.`,
+					isDone: hasTourSecondHeaders,
+					perform: nameTourSecondColumns
+				}
+			},
+			{
+				title: 'Fit this dataset too',
+				target: '#BasicFit .fit-button',
+				prepare: () => {
+					nameTourSecondColumns();
+					showTourBasicFitTab();
+				},
+				body: 'Each dataset keeps its own best-fit line. Fitting here leaves the line for spring A untouched.',
+				action: {
+					instruction: 'Click Fit Curve.',
+					isDone: hasTourSecondFit,
+					perform: fitTourSecondDataset
+				}
+			},
+			{
+				title: 'Plot everything together',
+				target: '.plot-all-btn',
+				prepare: fitTourSecondDataset,
+				body: 'So far each graph shows one dataset. A combined plot shows them all.',
+				action: {
+					instruction: 'Click Plot ALL Datasets.',
+					isDone: () => isTourElementShown('popup-container'),
+					perform: openTourCombinedPlot
+				}
+			},
+			{
+				title: 'Compare the springs',
+				target: '#popup-plot',
+				prepare: openTourCombinedPlot,
+				body: 'Both datasets and their lines share one pair of axes, each in its own colour. Spring B has the steeper line: it stretches more for the same load, so it is the softer spring.'
+			},
+			{
+				title: 'Label the combined graph',
+				target: '#combined-plot-controls',
+				prepare: openTourCombinedPlot,
+				body: 'The title and axis labels start from the current dataset. Here the y-axis should describe both springs.',
+				action: {
+					instruction: `Change the y-axis label to ${TOUR_COMBINED_Y_LABEL}.`,
+					isDone: hasTourCombinedLabel,
+					perform: setTourCombinedLabel
+				}
+			},
+			{
 				title: 'Tour complete',
-				body: 'You can now fit your own equations and process data before plotting it. The Manual covers the remaining features, such as combined plots.'
+				prepare: () => {
+					if (isTourElementShown('popup-container')) closePopup();
+				},
+				body: 'That is the whole of PanPhyPlot: data, uncertainties, fits, processing and combined plots. The Manual has the details when you need them.'
 			}
 		]
 	}
@@ -509,7 +691,7 @@ function getTourInitialState() {
 		rawData: [sample.rows.map(([x, y]) => ({ x: Number(x), y: Number(y), xErrorRaw: 0, yErrorRaw: 0 }))],
 		activeSet: 0,
 		datasetHeaders: { 0: { ...sample.headers } },
-		datasetNames: { 0: 'Pendulum' },
+		datasetNames: { 0: sample.name },
 		datasetToggles: { 0: { x: false, y: false } },
 		datasetErrorTypes: { 0: { x: 'absolute', y: 'absolute' } },
 		datasetDraftRows: {
