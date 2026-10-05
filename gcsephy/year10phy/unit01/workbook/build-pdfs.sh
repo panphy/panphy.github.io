@@ -2,7 +2,8 @@
 # Rebuild the workbook PDFs from the HTML sources with headless Chrome.
 # Serve the repository root first:  python3 -m http.server 8000
 # Then run from this folder:        sh build-pdfs.sh
-# To rebuild only some booklets, name them: sh build-pdfs.sh 3 7 review guide
+# To rebuild only some booklets, name them: sh build-pdfs.sh 3 7 review labs guide
+# "labs" is the virtual labs booklet, written to the unit folder above this one.
 # Headless Chrome may not exit after printing, so each job is stopped once its PDF is written.
 BASE="${BASE:-http://localhost:8000/gcsephy/year10phy/unit01/workbook}"
 CHROME="${CHROME:-/Applications/Google Chrome.app/Contents/MacOS/Google Chrome}"
@@ -50,4 +51,5 @@ lesson 10 "Thermistors, LDRs and sensors"
 lesson 11 "Power and energy transfer"
 lesson 12 "Mains, safety and the National Grid"
 booklet review "Electric Circuits - Year 10 Workbook - Unit review" "review"
+wanted labs && pdf "../Y10 Electricity Virtual Labs.pdf" "$BASE/workbook.html?labs"
 wanted guide && pdf "$OUT/Electric Circuits - Year 10 Teacher Guide.pdf" "$BASE/teacher-guide.html"

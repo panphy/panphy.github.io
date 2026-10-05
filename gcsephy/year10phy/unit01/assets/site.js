@@ -34,6 +34,7 @@
   const revision = lesson.revision;
   const skills = lesson.unlocks.map((skill) => `<span>${icon("check")} ${sub(skill)}</span>`).join("");
   const labHref = lesson.lab ? `${LAB_PDF}#page=${lesson.lab.page}` : "";
+  const labPages = lesson.lab ? `${lesson.lab.range.includes("–") ? "pp." : "p."} ${lesson.lab.range}` : "";
 
   const equationBlock = (eq) => eq ? `
     <div class="equation-block">
@@ -140,12 +141,12 @@
 
   const phetTool = `<a href="${PHET}" target="_blank" rel="noopener"><span>Sim</span><strong>PhET circuit lab</strong></a>`;
   const fourthTool = lesson.lab
-    ? `<a href="${labHref}" target="_blank" rel="noopener"><span>PDF</span><strong>${lesson.lab.label}, pp. ${lesson.lab.range}</strong></a>`
+    ? `<a href="${labHref}" target="_blank" rel="noopener"><span>PDF</span><strong>${lesson.lab.label}, ${labPages}</strong></a>`
     : lesson.phet ? phetTool : "";
   const workbookHref = ([n, title]) => `../../workbook/pdf/${encodeURI(`Electric Circuits - Year 10 Workbook - Lesson ${String(n).padStart(2, "0")} - ${title}.pdf`)}`;
   const labLink = [
     ...(lesson.workbook || []).map((entry) => `<a class="workbook-link" href="${workbookHref(entry)}" target="_blank" rel="noopener">Workbook lesson ${entry[0]} <span aria-hidden="true">${icon("up-right")}</span></a>`),
-    lesson.lab ? `<a class="workbook-link" href="${labHref}" target="_blank" rel="noopener">Virtual labs pp. ${lesson.lab.range} <span aria-hidden="true">${icon("up-right")}</span></a>` : "",
+    lesson.lab ? `<a class="workbook-link" href="${labHref}" target="_blank" rel="noopener">Virtual labs ${labPages} <span aria-hidden="true">${icon("up-right")}</span></a>` : "",
     lesson.phet ? `<a class="workbook-link" href="${PHET}" target="_blank" rel="noopener">Try it in PhET <span aria-hidden="true">${icon("up-right")}</span></a>` : ""
   ].join("");
 
