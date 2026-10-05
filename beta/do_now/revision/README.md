@@ -20,10 +20,10 @@ Each question sheet has the questions on the left, the answers on the right and 
 
 ## Practical diagrams
 
-The `practicals/` diagrams are plain SVG files, one per step, matched to a step by its position in the `Steps` cell of `../methods.csv`. If a practical's steps are edited, added or reordered, redraw the diagrams to match and rebuild its PDF. Keep the style of the existing diagrams (400 × 270 canvas, circuit symbols as in `../images/symbols-*.svg`, red for annotations, blue for what is new in a step).
+The `practicals/` diagrams are plain SVG files, one per step, matched to a step by its position in the `Steps` cell of `../methods.csv`. If a practical's steps are edited, added or reordered, redraw the diagrams to match and rebuild its PDF. Keep the style of the existing diagrams (400 × 270 canvas, circuit symbols as in `../images/symbols-*.svg`, red for annotations, blue for what is new in a step). Label any apparatus a student may not recognise, and tag a diagram "view from above" where it could be read as a side view.
 
 ## Rebuild
 
-The PDFs do not update by themselves. After editing `../questions.csv` or `../methods.csv`, serve the repository root (`python3 -m http.server 8000`) and run `sh build-pdfs.sh` here (needs Node and Chrome). It rebuilds every sheet one at a time; to rebuild a few, give words from their names or a practical's number: `sh build-pdfs.sh density "half-lives" m3`. A full rebuild clears `pdf/` first, so sheets of renamed topics and practicals do not linger.
+The PDFs do not update by themselves. After editing `../questions.csv` or `../methods.csv`, serve the repository root (`python3 -m http.server 8000`) and run `sh build-pdfs.sh` here (needs Node and Chrome). It rebuilds every sheet one at a time; to rebuild a few, give words from their names or a practical's number: `sh build-pdfs.sh density "half-lives" m3`. A full rebuild clears `pdf/` first, so sheets of renamed topics and practicals do not linger. Look over each rebuilt method sheet: a diagram that fails to load prints as "Diagram for step … is missing", and rebuilding that sheet fixes it.
 
 A PDF's name comes from its topic or practical name (`fileName` and `practicalFileName` in `assets/shared.js`), so renaming one renames its PDF.
