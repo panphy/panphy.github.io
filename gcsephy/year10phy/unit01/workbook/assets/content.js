@@ -308,7 +308,7 @@
         { t: "q", fig: D.circuit({ w: 360, h: 210, wires: ["M40 40 H320 V130 H40 Z", "M75 130 V180 H145 V130", "M215 130 V180 H285 V130"], parts: [["battery", 180, 40, "h", "12 V"], ["lamp", 110, 130, "h"], ["lamp", 250, 130, "h"], ["voltmeter", 110, 180, "h", "V₁ = 7.5 V", "b"], ["voltmeter", 250, 180, "h", "V₂ = ?", "b"]], dots: [[75, 130], [145, 130], [215, 130], [285, 130]] }), figCls: "fig-small", p: "(a) What does voltmeter V₂ read? (b) How much energy does each coulomb transfer in the second lamp?", lines: 2, a: "(a) 12 − 7.5 = 4.5 V. (b) 4.5 J per coulomb." },
         { t: "q", say: ["Leo", "A 9 V battery pushes the charges faster than a 1.5 V battery. That's what volts measure."], p: "Explain what is wrong with Leo's idea.", lines: 3, a: "Volts measure energy transferred per coulomb, not speed. A 9 V battery gives each coulomb 9 J of energy; a 1.5 V battery gives each coulomb only 1.5 J." },
       ],
-      lab: { title: "Virtual Lab 2: What does a volt mean?", aside: "Full steps: Virtual Labs worksheet pp. 7–11.", blocks: [
+      lab: { title: "Virtual Lab 2: What does a volt mean?", aside: "Full steps: Virtual Labs worksheet pp. 7–10.", blocks: [
         { t: "lab", blocks: [
           { t: "p", h: "Use one <strong>10 Ω</strong> resistor. At each battery setting, measure the p.d. across the resistor. Then calculate the energy transferred when 2 C passes." },
           { t: "q", p: "Record and calculate.", table: { head: ["Battery setting / V", "p.d. across resistor / V", "Energy for 2 C / J"], rows: [["3", null, null], ["6", null, null], ["9", null, null]], ans: [[null, "3.0", "6.0"], [null, "6.0", "12"], [null, "9.0", "18"]] } },
@@ -365,7 +365,7 @@
           after: [{ t: "p", h: "Is the component an ohmic conductor? Use the table and the graph." }], lines: 2, a: "Yes: V ÷ I is constant (20 Ω) and the graph is a straight line through the origin, so current is directly proportional to p.d." },
         { t: "q", p: "Explain why a resistor only has a constant resistance if its temperature stays the same.", lines: 3, starter: "If the resistor gets hotter, the ions …", a: "If it heats up, the ions vibrate more, so the electrons collide with them more often and the resistance increases. So R is only constant at constant temperature." },
       ],
-      lab: { title: "Virtual Lab 3: Discover the resistance rule", aside: "Full steps: Virtual Labs worksheet pp. 12–16.", blocks: [
+      lab: { title: "Virtual Lab 3: Discover the resistance rule", aside: "Full steps: Virtual Labs worksheet pp. 11–14.", blocks: [
         { t: "lab", blocks: [
           { t: "p", h: "Set the resistor to <strong>10 Ω</strong>. Change only the battery setting. Measure the p.d. across the resistor and the current." },
           { t: "q", p: "Record and calculate.", table: { head: ["Battery setting / V", "p.d. / V", "current / A", "V ÷ I / Ω"], rows: [["2", null, null, null], ["4", null, null, null], ["6", null, null, null], ["8", null, null, null], ["10", null, null, null], ["12", null, null, null]], ans: [[null, "2.0", "0.20", "10"], [null, "4.0", "0.40", "10"], [null, "6.0", "0.60", "10"], [null, "8.0", "0.80", "10"], [null, "10", "1.0", "10"], [null, "12", "1.2", "10"]] } },

@@ -383,3 +383,13 @@ body:not(.answers) .circle-choice span.correct { border-color: transparent !impo
 /* The grid band's negative side margins would poke past the page edge and make Chrome
    shrink the whole print, so the route is inset by the same amount. */
 .circuit-figure.grid-route > ol { margin: 0 8px; }
+
+/* virtual labs booklet (workbook.html?labs) */
+.lab-page { break-before: page; }
+.labs .opener { margin-bottom: 4mm; }
+.key a { color: #0f5f85; }
+.lab-key { margin-bottom: 3mm; font-size: 9pt; line-height: 1.35; }
+.lab-key ol { columns: 2; column-gap: 7mm; margin: 0; padding-left: 6mm; }
+.lab-key li { break-inside: avoid; margin-bottom: 1.2mm; }
+.lab-key li::marker { font-weight: 900; }
+

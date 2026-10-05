@@ -12,10 +12,10 @@ Written for AQA GCSE Combined Science: Trilogy (Higher) 6.2.1–6.2.4, which mat
 
 | Mission | Title | Spec | Worksheet |
 |---|---|---|---|
-| 1 | Build & measure | 6.2.1.1: circuits, symbols, drawing rules, ammeter in series | Meters, pp. 1–2 |
+| 1 | Build & measure | 6.2.1.1: circuits, symbols, drawing rules, ammeter in series | Meters, p. 2 |
 | 2 | Charge on the move | 6.2.1.2: current, Q = I t, conventional current | Lab 1, pp. 3–6 |
-| 3 | Energy per coulomb | 6.2.1.3, 6.2.4.2: p.d., E = Q V, voltmeter in parallel | Lab 2, pp. 7–11 |
-| 4 | Resistance & V = IR | 6.2.1.3–6.2.1.4, RP 15: V = I R, ohmic conductors, wire length | Lab 3, pp. 12–16 |
+| 3 | Energy per coulomb | 6.2.1.3, 6.2.4.2: p.d., E = Q V, voltmeter in parallel | Lab 2, pp. 7–10 |
+| 4 | Resistance & V = IR | 6.2.1.3–6.2.1.4, RP 15: V = I R, ohmic conductors, wire length | Lab 3, pp. 11–14 |
 | 5 | Series & parallel | 6.2.2, RP 15: rules, R_total = R₁ + R₂ | Lab 2, pp. 9–10 |
 | 6 | I–V characteristics | 6.2.1.4, RP 16: resistor, lamp, diode, thermistor, LDR | — |
 | 7 | Power & the National Grid | 6.2.4: P = V I, P = I² R, E = P t, transformers | — |
@@ -42,7 +42,8 @@ Missions follow the workbook's order (each meter is introduced with its quantity
 | `practical/<slug>/index.html` | Shells; `assets/practical.js` renders `assets/practicals.js` |
 | `assets/practical-diagrams.js`, `assets/diagrams.js` | Pictorial practical diagrams; circuit, graph and symbol helpers |
 | `assets/styles.css` | Adapted from the Year 9 companion stylesheet |
-| `Y10 Electricity Virtual Labs*.pdf` | Class worksheet (missions deep-link to its pages), its answers, and a teacher guide hosted but not linked |
+| `Y10 Electricity Virtual Labs.pdf` | Class worksheet with its answers at the back, built from `workbook/workbook.html?labs`. Missions deep-link to its pages, so if they move, update `lab` in `assets/lessons.js`, the table above, and the page references in `workbook/assets/content.js` and `plans-data.js` |
+| `Y10 Electricity Virtual Labs Teacher Guide.pdf` | Hosted but not linked; no source in this repository |
 | `workbook/` | Twelve-lesson workbook, unit review, answer editions and teacher guide. See [`workbook/README.md`](workbook/README.md) |
 
 To edit content, change `assets/lessons.js`, `exam-questions.js` or `practicals.js`; there is no build step. The workbook uses `assets/diagrams.js`, so rebuild its PDFs after changing a circuit symbol.

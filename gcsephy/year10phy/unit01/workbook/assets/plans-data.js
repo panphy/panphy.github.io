@@ -36,11 +36,11 @@
       misconceptions: [["Current is used up.", "Virtual Lab 1 plus Q7. Language: charge goes round; energy is transferred."], ["Minutes go straight into Q = I t.", "Every supported frame has a ‘Convert’ row first."], ["Electrons flow from + to −.", "Show both arrows on one diagram; exam diagrams use conventional current."]],
       support: "Keep the frames; give a units card (C, A, s).",
       stretch: "How many electrons pass in 1 s at 1 A? (≈ 6 × 10¹⁸.) Explain why a bigger current does not need faster-moving electrons in a thicker wire.",
-      homework: "Mission 2 practice questions (with worked answers). Finish Virtual Lab 1 pp. 5–6 if not done.",
+      homework: "Mission 2 practice questions (with worked answers). Finish Virtual Lab 1 pp. 4–6 if not done.",
     },
     3: {
       why: "p.d. is the hardest idea in the unit. It is taught as energy per coulomb, with a model (delivery vans) and an explicit contrast with current, before it is used in V = I R. The voltmeter is introduced here, when students know what it measures.",
-      prep: "PhET (Lab) and Virtual Labs worksheet pp. 7–11. Real demo: 6 V supply, two lamps in series, two voltmeters.",
+      prep: "PhET (Lab) and Virtual Labs worksheet pp. 7–10. Real demo: 6 V supply, two lamps in series, two voltmeters.",
       timing: [
         [0, 6, "Do now", "Retrieval: current, Q = I t, current not used up."],
         [6, 18, "Learn", "Delivery-van model; 1 V = 1 J/C. Worked example and Your turn. Voltmeter in parallel: say ‘across’."],
@@ -56,7 +56,7 @@
     },
     4: {
       why: "V = I R now joins current and p.d., which students understand separately. The particle picture of resistance (collisions with ions) is taught here so that the lamp curve in Lesson 8 is a consequence, not a new fact.",
-      prep: "PhET (Lab), Virtual Labs pp. 12–16. Demo: dimmer (variable resistor) with a lamp.",
+      prep: "PhET (Lab), Virtual Labs pp. 11–14. Demo: dimmer (variable resistor) with a lamp.",
       timing: [
         [0, 6, "Do now", "Retrieval: p.d. meaning, voltmeter, p.d.s add up."],
         [6, 18, "Learn", "Resistance as opposition; two circuits at 6 V. V = I R with both worked examples (the second includes mA)."],

@@ -21,7 +21,7 @@
       keyRule: "No complete loop, no current. Draw with a ruler, and connect the ammeter in series.",
       workbook: [[1, "Complete circuits and symbols"]],
       phet: true,
-      lab: { label: "Meters", page: 1, range: "1–2" },
+      lab: { label: "Meters", page: 2, range: "2" },
       revision: {
         summary:
           "A circuit needs a source of energy and a complete loop. Circuit diagrams use standard symbols so anyone can build your circuit, and an ammeter measures the current when it is connected in series.",
@@ -290,7 +290,7 @@
       keyRule: "V = E ÷ Q. One volt is one joule of energy transferred per coulomb of charge.",
       workbook: [[3, "Potential difference"]],
       phet: true,
-      lab: { label: "Lab 2", page: 7, range: "7–11" },
+      lab: { label: "Lab 2", page: 7, range: "7–10" },
       revision: {
         summary:
           "Potential difference is measured between two points. It tells you how much energy is transferred for every coulomb of charge that passes between them.",
@@ -439,7 +439,7 @@
       keyRule: "V = I R. The greater the resistance, the smaller the current for the same p.d.",
       workbook: [[4, "Resistance and V = IR"]],
       phet: true,
-      lab: { label: "Lab 3", page: 12, range: "12–16" },
+      lab: { label: "Lab 3", page: 11, range: "11–14" },
       revision: {
         summary:
           "The current through a component depends on the p.d. across it and on its resistance. For an ohmic conductor at constant temperature, the resistance does not change.",

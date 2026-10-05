@@ -405,9 +405,6 @@ h1, h2, h3 { overflow-wrap: break-word; hyphens: auto; }
 .resource-card.phet { background: var(--cyan); }
 .resource-card.workbook { background: var(--leaf); }
 .resource-card p em { font-style: normal; font-weight: 700; color: var(--ink); }
-.resource-card.answers { grid-column: span 2; min-height: 0; background: #f1edff; }
-.resource-card.answers h3 { margin-top: 22px; }
-@media (max-width: 680px) { .resource-card.answers { grid-column: auto; } }
 
 @media (max-width: 1000px) {
   .toolkit-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }

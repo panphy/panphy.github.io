@@ -1,5 +1,7 @@
 /* Renders the Electric Circuits student workbook from window.UNIT (assets/content.js).
    workbook.html is the student booklet; workbook.html?answers is the answer edition.
+   workbook.html?labs is the virtual labs booklet (assets/labs-content.js), which has
+   one edition with its answer key at the back.
    Print either one to PDF from Chrome (A4, default margins, no headers/footers). */
 (function () {
   "use strict";
@@ -9,26 +11,28 @@
   const params = new URLSearchParams(location.search);
   const answers = params.has("answers");
   // ?lesson=1..12 prints one lesson booklet; ?review prints the unit review booklet;
-  // neither prints the whole unit.
+  // ?labs prints the virtual labs booklet; none of these prints the whole unit.
   const ONE = U.lessons.find((l) => l.n === Number(params.get("lesson"))) || null;
   const REVIEW = !ONE && params.has("review");
-  const WHOLE = !ONE && !REVIEW;
+  const LABS = !ONE && !REVIEW && params.has("labs") && U.labs ? U.labs : null;
+  const WHOLE = !ONE && !REVIEW && !LABS;
   const LESSONS = ONE ? [ONE] : REVIEW ? [] : U.lessons;
   const LAST = ONE ? ONE.n : U.lessons[U.lessons.length - 1].n;
   const pad = (n) => String(n).padStart(2, "0");
   const SITE = "https://panphy.app/gcsephy/year10phy/unit01/";
-  if (answers) document.body.classList.add("answers");
+  if (answers && !LABS) document.body.classList.add("answers");
 
   const which = ONE ? `Lesson ${ONE.n}` : REVIEW ? "Unit review" : "";
-  const footer = `Electric Circuits, Year 10 workbook${which ? `: ${which}` : ""}${answers ? " (ANSWERS)" : ""}`;
+  const footer = LABS ? "Electric Circuits, Year 10 virtual labs" : `Electric Circuits, Year 10 workbook${which ? `: ${which}` : ""}${answers ? " (ANSWERS)" : ""}`;
   const pageStyle = document.createElement("style");
   pageStyle.textContent = `@page { @bottom-left { content: "${footer}"; } } @page cover { @bottom-left { content: none; } }`;
   document.head.appendChild(pageStyle);
-  document.title = `Electric Circuits - Year 10 Workbook${ONE ? ` Lesson ${pad(ONE.n)} - ${ONE.title}` : REVIEW ? " - Unit review" : ""}${answers ? " (Answers)" : ""}`;
+  document.title = LABS ? "Electric Circuits - Year 10 Virtual Labs" : `Electric Circuits - Year 10 Workbook${ONE ? ` Lesson ${pad(ONE.n)} - ${ONE.title}` : REVIEW ? " - Unit review" : ""}${answers ? " (Answers)" : ""}`;
 
   // ---------- small helpers ----------
   const esc = (s) => String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;");
-  const ans = (html) => (html ? `<span class="ans">${html}</span>` : "");
+  // The labs booklet never shows answers in place: they are listed in its answer key.
+  const ans = (html) => (html && !LABS ? `<span class="ans">${html}</span>` : "");
   const ansNote = (html) => (html ? `<div class="ans-note">${html}</div>` : "");
   const lines = (n, a) => `<div class="lines" style="--n:${n}">${ans(a)}</div>`;
   const box = (h, a, grid) => `<div class="box${grid ? " grid-bg" : ""}" style="--h:${h}mm">${ans(a)}</div>`;
@@ -301,7 +305,11 @@
       dots: [[455, 70], [585, 70], [300, 185], [460, 185]],
     }).replace(/<figure[^>]*>/, "").replace("</figure>", "");
     let middle;
-    if (ONE) {
+    if (LABS) {
+      middle = `<div class="cover-part"><b>Virtual labs</b>Predict. Test. Explain.</div>
+      <p class="lede">Three investigations of charge, energy and resistance, using the PhET Circuit Construction Kit. Work in pairs and swap roles on each new page.</p>
+      <h2 class="cover-sub">The three labs</h2><ul class="cover-lessons">${LABS.labs.map((l) => `<li>Lab ${l.n}: ${l.title}</li>`).join("")}</ul>`;
+    } else if (ONE) {
       middle = `<div class="cover-part"><b>Lesson ${pad(ONE.n)}</b>${ONE.title}${ONE.rp ? `<span>${ONE.rp}</span>` : ""}</div>
       <p class="lede">${ONE.big}</p>
       <h2 class="cover-sub">In this lesson you will</h2><ul class="cover-lessons">${ONE.goals.map((g) => `<li>${D.sub(g)}</li>`).join("")}</ul>`;
@@ -312,13 +320,13 @@
       middle = `<p class="lede">Charge, energy and resistance: twelve lessons, from your first circuit to confident exam answers. Learn with it in class and revise from it at home.</p>
       <div class="cover-stats"><div><b>12</b>lessons</div><div><b>3</b>required practicals</div><div><b>3</b>virtual labs</div><div><b>1</b>companion website</div></div>`;
     }
-    return `<section class="cover"><div class="eyebrow">Year 10 Physics, AQA GCSE, ${ONE ? `Lesson ${ONE.n} of ${U.lessons.length}` : REVIEW ? "Unit review" : "Unit booklet"}</div>
+    return `<section class="cover"><div class="eyebrow">Year 10 Physics, AQA GCSE, ${LABS ? "Virtual labs" : ONE ? `Lesson ${ONE.n} of ${U.lessons.length}` : REVIEW ? "Unit review" : "Unit booklet"}</div>
       <h1>Electric<br><em>Circuits</em></h1>
       ${middle}
       ${answers ? '<div class="edition">Answer edition for teachers and self-marking</div>' : ""}
       <div class="cover-foot">
         <div class="cover-circuit" style="--ink:#fff;--diagram-bg:#0a1326">${art.replace('class="cd"', 'class="cd" style="stroke:#fff"')}</div>
-        <div class="cover-fields"><div>Name<span></span></div><div>Class<span></span></div><div>Teacher<span></span></div><div>Target grade<span></span></div></div>
+        <div class="cover-fields"><div>Name<span></span></div><div>${LABS ? "Partner" : "Class"}<span></span></div><div>${LABS ? "Class" : "Teacher"}<span></span></div><div>${LABS ? "Teacher" : "Target grade"}<span></span></div></div>
       </div></section>`;
   }
 
@@ -409,14 +417,57 @@
         <h4>Do now</h4>${list(l.doNow)}<h4>Cover the page</h4>${list(l.recall)}</div>`).join("")}</div></section>`;
   }
 
+  // ---------- virtual labs booklet ----------
+  const labSec = (s) => `<div class="sec ${SEC[s.icon][0]}">${icon(s.icon)}<div><span class="kind">${s.kind}</span><h3>${s.title}</h3></div>${s.aside ? `<div class="aside">${s.aside}</div>` : ""}</div>`;
+  const labQuestions = (l) => l.sections.flatMap((s) => s.blocks).filter((b) => b.t === "q");
+
+  // A sub-heading stays with everything up to and including its first question.
+  function labGroups(blocks) {
+    const out = [];
+    for (let i = 0; i < blocks.length; i += 1) {
+      if (blocks[i].t !== "sub") { out.push(renderBlock(blocks[i])); continue; }
+      let html = "";
+      for (; i < blocks.length; i += 1) { html += renderBlock(blocks[i]); if (blocks[i].t === "q") break; }
+      out.push(keep(html));
+    }
+    return out;
+  }
+
+  function labSetup() {
+    const S = LABS.setup;
+    return `<section class="new-page" style="break-before:auto"><div class="eyebrow">Start here</div><h2 class="page-title">Set up and meters</h2>
+      <p class="page-intro">${S.intro}</p>${renderBlocks(S.blocks)}</section>`;
+  }
+
+  function lab(l) {
+    qNum = 0;
+    const opener = `<header class="opener"><div class="num"><small>Lab</small>${pad(l.n)}</div>
+      <div><h2>${l.title}</h2><div class="spec">${l.spec}</div></div><div class="big-q">${l.big}</div></header>`;
+    const sections = l.sections.map((s) => {
+      const groups = labGroups(s.blocks);
+      const html = keep(labSec(s) + groups[0]) + groups.slice(1).join("");
+      return s.page ? `<div class="lab-page">${html}</div>` : html;
+    }).join("");
+    return `<section class="lesson labs" style="--accent:var(--${l.accent});--accent-t:var(--${l.accent}-t)">${opener}${sections}</section>`;
+  }
+
+  function labKey() {
+    const fillKey = (b) => Array.from(b.fill.matchAll(/\[\[(.+?)(?:\|\d+)?\]\]/g), (m) => m[1]).join("; ") + ".";
+    return `<section class="new-page"><div class="eyebrow">Check yourself</div><h2 class="page-title">Answers</h2>
+      <p class="page-intro">Finish each lab first. Then compare your measurements, calculations and explanations with these answers. Meter readings are approximate: small differences are fine if you used your own readings consistently and gave the correct units.</p>
+      ${LABS.labs.map((l) => `<div class="lab-key" style="--accent:var(--${l.accent})"><h4 class="sub">Lab ${l.n}: ${l.title}</h4>
+        <ol>${labQuestions(l).map((b) => `<li>${b.key || fillKey(b)}</li>`).join("")}</ol></div>`).join("")}</section>`;
+  }
+
   const book = document.createElement("main");
   book.className = "book";
   const link = (key, ans) => `?${[key, ans ? "answers" : ""].filter(Boolean).join("&")}`;
-  const here = ONE ? `lesson=${ONE.n}` : REVIEW ? "review" : "";
-  const nav = [["", "all"], ...U.lessons.map((l) => [`lesson=${l.n}`, String(l.n)]), ["review", "review"]]
+  const here = ONE ? `lesson=${ONE.n}` : REVIEW ? "review" : LABS ? "labs" : "";
+  const nav = [["", "all"], ...U.lessons.map((l) => [`lesson=${l.n}`, String(l.n)]), ["review", "review"], ...(U.labs ? [["labs", "labs"]] : [])]
     .map(([key, name]) => (key === here ? `<b>${name}</b>` : `<a href="${link(key, answers)}">${name}</a>`)).join(" ");
-  const bar = `<div class="screen-bar">Print preview. Booklet: ${nav}. <a href="${link(here, !answers)}">${answers ? "Student edition" : "Answer edition"}</a>. Print with Chrome, A4, headers and footers off</div>`;
-  const body = ONE ? cover() + howTo() + lesson(ONE) + (U.equations.some((e) => e.lesson <= LAST) ? toolkit() : "") + glossary() + quickAnswers()
+  const bar = `<div class="screen-bar">Print preview. Booklet: ${nav}. ${LABS ? "Answers are at the back" : `<a href="${link(here, !answers)}">${answers ? "Student edition" : "Answer edition"}</a>`}. Print with Chrome, A4, headers and footers off</div>`;
+  const body = LABS ? cover() + labSetup() + LABS.labs.map(lab).join("") + labKey()
+    : ONE ? cover() + howTo() + lesson(ONE) + (U.equations.some((e) => e.lesson <= LAST) ? toolkit() : "") + glossary() + quickAnswers()
     : REVIEW ? cover() + toolkit() + review() + staticExtension() + glossary() + tracker()
     : cover() + howTo() + toolkit() + LESSONS.map(lesson).join("") + review() + staticExtension() + glossary() + tracker() + quickAnswers();
   book.innerHTML = bar + body;
