@@ -25,7 +25,7 @@ By the end of the lesson, students should be able to:
 |---|---|
 | Reliability | How trustworthy or repeatable a set of results is |
 | Uncertainty | The interval within which the true value can be expected to lie |
-| Range | The smallest and largest values, quoted as "from ... to ..." |
+| Range | The maximum and minimum values of the independent or dependent variables |
 | Precision | How close repeated measurements are to each other |
 | Accuracy | How close a measurement is to the true value |
 | Resolution | The smallest change a measuring instrument can detect |
@@ -39,7 +39,7 @@ By the end of the lesson, students should be able to:
 |---|---|
 | Uncertainty | Whenever a measurement is made, there is always some uncertainty about the result obtained |
 | Estimating uncertainty from repeats | Use the range of repeated measurements about the mean as a measure of uncertainty |
-| Range | The maximum and minimum values, for example "from 1.20 s to 1.25 s"; it is not a single number |
+| Range | The maximum and minimum values of the independent or dependent variables, for example "from 10 cm to 50 cm"; it is not a single number |
 | Simple uncertainty calculation | Uncertainty = (maximum value - minimum value) / 2 |
 | Precision | Precise measurements are close together |
 | Accuracy | Accurate measurements are close to the true value |
@@ -164,7 +164,7 @@ For Year 9, students can also round this sensibly:
 
 ## Activity 2: Practice questions
 
-Students calculate the mean, state the range (smallest to largest) and calculate the uncertainty for each data set.
+Students calculate the mean, state the range (the maximum and minimum values) and calculate the uncertainty for each data set.
 
 | Data set | Trial 1 | Trial 2 | Trial 3 | Mean | Range | Uncertainty |
 |---|---:|---:|---:|---:|---:|---:|
@@ -234,7 +234,7 @@ Students complete:
 Students are given three small data sets and must:
 
 1. Calculate the mean.
-2. State the range, from the smallest reading to the largest.
+2. State the range (the maximum and minimum values).
 3. Calculate the uncertainty using (largest - smallest) / 2.
 4. Identify which data set is most precise.
 5. Suggest one possible random error and one possible systematic error.

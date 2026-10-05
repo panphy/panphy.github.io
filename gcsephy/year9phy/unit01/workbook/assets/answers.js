@@ -27,7 +27,7 @@
           ["B", "8.7 (8.73)", "8.4 to 9.1", "0.35 (≈ 0.4)"],
           ["C", "25.0 (25.03)", "25.0 to 25.1", "0.05"],
           ["D", "3.37 (3.4)", "3.20 to 3.65", "0.225 (≈ 0.23)"],
-        ], "num") + "<p class=\"s\">Range = smallest to largest. Uncertainty = (largest − smallest) ÷ 2. Accept one decimal place more or less than shown, if used sensibly.</p>"],
+        ], "num") + "<p class=\"s\">Range = the maximum and minimum values. Uncertainty = (largest − smallest) ÷ 2. Accept one decimal place more or less than shown, if used sensibly.</p>"],
         ["Task 4a · p. 6", "Set A: (12.0 + 12.2 + 12.1) ÷ 3 = 36.3 ÷ 3 = 12.1. (Set B: 26.2 ÷ 3 = 8.73. Set C: 75.1 ÷ 3 = 25.03. Set D: 10.10 ÷ 3 = 3.37.)"],
         ["Task 4b · p. 6", "Most precise: <b>C</b> (smallest spread: its readings differ by only 0.1). Largest uncertainty: <b>B</b> (0.35)."],
         ["Task 4c · p. 6", "<b>D</b>: 3.65 is far from 3.20 and 3.25, so it may be a mistake (a possible outlier). It should be repeated before the mean is trusted. Accept B (largest spread) if justified."],
