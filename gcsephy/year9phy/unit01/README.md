@@ -114,7 +114,7 @@ Lesson 3. Several groups every year draw a perfect bar chart and then invert the
 
 ## Where this sits in the curriculum
 
-A working-scientifically unit with no new physics; the practicals are vehicles for skills GCSE assesses in every required practical: variables, fair tests, repeats and means, **uncertainty as half the range**, precision/accuracy/resolution, random versus systematic error, graph choice with scales and units, best-fit lines, anomalies, conclusions and evaluations. When students write "human error" in Year 10, send them back to this workbook.
+A working-scientifically unit with no new physics; the practicals are vehicles for skills GCSE assesses in every required practical: variables, fair tests, repeats and means, **uncertainty from the range of repeats, (largest − smallest) ÷ 2**, precision/accuracy/resolution, random versus systematic error, graph choice with scales and units, best-fit lines, anomalies, conclusions and evaluations. When students write "human error" in Year 10, send them back to this workbook.
 
 **Assessment points.** Lesson 6 and Lessons 7–8 carry success-criteria checklists in the workbook, worded as a marker would. Lesson 6 is the natural point to collect books.
 

@@ -9,7 +9,7 @@ window.EXAM_QUESTIONS = [
         <thead><tr><th>Trial</th><th>Time / s</th></tr></thead>
         <tbody><tr><td>1</td><td>8.72</td></tr><tr><td>2</td><td>8.64</td></tr><tr><td>3</td><td>8.68</td></tr></tbody>
       </table>`,
-    prompt: "Calculate the mean time and estimate its uncertainty using half the range. Write the final result in the form mean ± uncertainty.",
+    prompt: "Calculate the mean time and estimate its uncertainty from the range of the readings. Write the final result in the form mean ± uncertainty.",
     hint: "Find the total and divide by three. Then subtract the minimum from the maximum and halve the result.",
     answer: "<strong>Mean:</strong> (8.72 + 8.64 + 8.68) ÷ 3 = 8.68 s (2 marks).<br><strong>Uncertainty:</strong> (8.72 − 8.64) ÷ 2 = 0.04 s (1 mark).<br><strong>Reported result:</strong> 8.68 ± 0.04 s (1 mark).",
   },
@@ -113,7 +113,7 @@ window.EXAM_QUESTIONS = [
         <thead><tr><th>Group</th><th>Trial 1 / cm</th><th>Trial 2 / cm</th><th>Trial 3 / cm</th></tr></thead>
         <tbody><tr><td>A</td><td>48.2</td><td>48.4</td><td>48.3</td></tr><tr><td>B</td><td>47.8</td><td>48.8</td><td>48.3</td></tr></tbody>
       </table>`,
-    prompt: "Calculate the half-range uncertainty for each group and decide which group produced the more precise measurements.",
+    prompt: "Use the range of each group’s readings to calculate its uncertainty and decide which group produced the more precise measurements.",
     hint: "For each row, subtract the minimum from the maximum and divide by two. Smaller spread means greater precision.",
     answer: "Group A: (48.4 − 48.2) ÷ 2 = ±0.1 cm (1 mark). Group B: (48.8 − 47.8) ÷ 2 = ±0.5 cm (1 mark). Group A is more precise (1 mark) because its uncertainty/spread is smaller (1 mark).",
   },

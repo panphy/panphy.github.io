@@ -31,16 +31,16 @@ export const lessons: Lesson[] = [
       "Every measurement has doubt hiding inside it. Learn to spot random and systematic errors, calculate uncertainty and explain why precise does not always mean accurate.",
     colour: "lime",
     icon: "±",
-    unlocks: ["precision vs accuracy", "half-range uncertainty", "random & systematic error"],
+    unlocks: ["precision vs accuracy", "uncertainty from repeats", "random & systematic error"],
     keyRule: "Uncertainty = (maximum − minimum) ÷ 2",
     questions: [
       {
         type: "Practice",
         prompt:
           "A student records 2.31 s, 2.47 s and 2.38 s. Calculate the mean and the uncertainty.",
-        hint: "Add the three values and divide by 3. For uncertainty, find half the range.",
+        hint: "Add the three values and divide by 3. For uncertainty, halve the difference between the largest and smallest readings.",
         answer:
-          "Mean = (2.31 + 2.47 + 2.38) ÷ 3 = 2.39 s (to 2 d.p.). Range = 2.47 − 2.31 = 0.16 s, so uncertainty = 0.08 s. Report: 2.39 ± 0.08 s.",
+          "Mean = (2.31 + 2.47 + 2.38) ÷ 3 = 2.39 s (to 2 d.p.). Range: from 2.31 s to 2.47 s. Uncertainty = (2.47 − 2.31) ÷ 2 = 0.08 s. Report: 2.39 ± 0.08 s.",
       },
       {
         type: "Practice",
@@ -54,7 +54,7 @@ export const lessons: Lesson[] = [
         type: "AQA-style",
         marks: 4,
         prompt:
-          "A stopwatch gives 1.84 s, 1.91 s and 1.87 s. Calculate the mean time and estimate the uncertainty using half the range. Give both answers to 2 decimal places.",
+          "A stopwatch gives 1.84 s, 1.91 s and 1.87 s. Calculate the mean time and estimate the uncertainty from the range of the readings. Give both answers to 2 decimal places.",
         hint: "Mean = total ÷ number of readings. Uncertainty = (largest − smallest) ÷ 2.",
         answer:
           "Mean = 5.62 ÷ 3 = 1.87 s (2 marks). Uncertainty = (1.91 − 1.84) ÷ 2 = 0.035 s, which rounds to 0.04 s (2 marks). Final result: 1.87 ± 0.04 s.",

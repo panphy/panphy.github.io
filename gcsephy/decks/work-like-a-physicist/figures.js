@@ -85,12 +85,12 @@
       return svg(700, 566, s, 'Dot plot of three data sets on the horizontal axis and repeated times on the vertical axis: set A close together near 1.21 s, set B spread from 1.05 to 1.47 s, set C close together near 0.91 s');
     },
 
-    // Mean ± half the range on a number line.
+    // Range of the readings and mean ± uncertainty on a number line.
     uncertainty: () => {
       const X = v => 60 + (v - 1.18) / 0.09 * 680;
       const mean = 1.2233;
       let s = `<rect x="${f(X(mean - 0.025))}" y="120" width="${f(X(mean + 0.025) - X(mean - 0.025))}" height="140" class="band"/>`;
-      s += `<path class="bracket" d="M${f(X(1.2))} 102V80H${f(X(1.25))}V102"/>` + t((X(1.2) + X(1.25)) / 2, 62, 'RANGE = 1.25 − 1.20 = 0.05 s', 'lab');
+      s += `<path class="bracket" d="M${f(X(1.2))} 102V80H${f(X(1.25))}V102"/>` + t((X(1.2) + X(1.25)) / 2, 62, 'RANGE: FROM 1.20 s TO 1.25 s', 'lab');
       [1.20, 1.22, 1.25].forEach(v => { s += cross(X(v), 190, 14); });
       s += line(X(mean), 128, X(mean), 252, 'mean-line');
       s += arrow(X(mean), 290, X(mean - 0.025), 290, 'arrow cyan') + arrow(X(mean), 290, X(mean + 0.025), 290, 'arrow cyan');
@@ -98,7 +98,7 @@
       s += `<path class="axis" d="M50 340H750"/>`;
       for (let v = 1.18; v <= 1.2701; v += 0.01) s += line(X(v), 340, X(v), 354, 'ink') + t(X(v), 386, v.toFixed(2), 'tick-t');
       s += t(400, 436, 'Time / s', 'axis-t');
-      return svg(800, 452, s, 'Three readings, 1.20, 1.22 and 1.25 seconds, on a number line; range 0.05 s; mean 1.22 s with an uncertainty band of plus or minus 0.025 s');
+      return svg(800, 452, s, 'Three readings, 1.20, 1.22 and 1.25 seconds, on a number line; range from 1.20 s to 1.25 s; mean 1.22 s with an uncertainty band of plus or minus 0.025 s');
     },
 
     // Random error: spread both ways around the true value.
