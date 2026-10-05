@@ -1065,3 +1065,19 @@ Moons and artificial satellites orbit planets.","Direct question rather than ‘
 "633","Edited","Explain why red-shift is evidence for the Big Bang theory.","It shows that distant galaxies are all moving away, so the Universe is expanding from a small region.","Explain why red-shift is evidence for the Big Bang theory.","The galaxies are all moving apart, so they must once have been close together.","Made less wordy"
 "859","Edited","State what repeated measurements help you to judge: precision or accuracy.","Precision","Do repeated measurements help you judge precision or accuracy?","Precision","Direct question rather than ‘State…’"
 "891","Edited","State what is plotted on a graph: individual trials or means.","The means","Which are plotted on a graph: individual trials or means?","The means","Direct question rather than ‘State…’"
+"640","Edited","State the equation linking kinetic energy, mass and speed.","kinetic energy = 0.5 × mass × speed²
+(Ek = ½ m v²)","State the equation linking kinetic energy, mass and speed.","kinetic energy = 0.5 × mass × speed²
+(E_k = ½ m v²)","Subscripts: written with ""_"" so they are drawn as real subscripts"
+"641","Edited","State the equation linking gravitational potential energy, mass, gravitational field strength and height.","gravitational potential energy = mass × gravitational field strength × height
+(Ep = m g h)","State the equation linking gravitational potential energy, mass, gravitational field strength and height.","gravitational potential energy = mass × gravitational field strength × height
+(E_p = m g h)","Subscripts: written with ""_"" so they are drawn as real subscripts"
+"642","Edited","State the equation linking elastic potential energy, spring constant and extension.","elastic potential energy = 0.5 × spring constant × extension²
+(Ee = ½ k e²)","State the equation linking elastic potential energy, spring constant and extension.","elastic potential energy = 0.5 × spring constant × extension²
+(E_e = ½ k e²)","Subscripts: written with ""_"" so they are drawn as real subscripts"
+"118","Edited","Describe how to calculate the total resistance of two resistors in series.","Add the two resistances: R total = R₁ + R₂.","Describe how to calculate the total resistance of two resistors in series.","Add the two resistances: R_total = R₁ + R₂.","Subscripts: written with ""_"" so they are drawn as real subscripts"
+"838","Edited","State the equation linking the potential differences and numbers of turns of a transformer.","p.d. across primary ÷ p.d. across secondary = turns on primary ÷ turns on secondary
+(Vp ÷ Vs = np ÷ ns)","State the equation linking the potential differences and numbers of turns of a transformer.","p.d. across primary ÷ p.d. across secondary = turns on primary ÷ turns on secondary
+(V_p ÷ V_s = n_p ÷ n_s)","Subscripts: written with ""_"" so they are drawn as real subscripts"
+"839","Edited","State the equation for a transformer that is 100% efficient.","p.d. × current in the secondary = p.d. × current in the primary
+(Vs Is = Vp Ip)","State the equation for a transformer that is 100% efficient.","p.d. × current in the secondary = p.d. × current in the primary
+(V_s × I_s = V_p × I_p)","Subscripts: written with ""_"" so they are drawn as real subscripts; × restored between the symbols"

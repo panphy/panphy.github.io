@@ -34,6 +34,7 @@ td.n { text-align: center; font-weight: 700; color: var(--muted); }
 td.q { font-weight: 700; }
 td.q .neg { color: #d0182b; font-weight: 900; }
 /* Mass number over atomic number, right-aligned against the symbol. The stack has no height of its own, so the line keeps its spacing. */
+sub, sup { font-size: .68em; line-height: 0; }
 .nuclide { white-space: nowrap; }
 .nuclide-numbers { display: inline-flex; flex-direction: column; align-items: flex-end; height: 0; margin-right: .04em; font-size: .6em; line-height: 1; vertical-align: .5em; }
 td.a { white-space: pre-line; background: var(--tint); }

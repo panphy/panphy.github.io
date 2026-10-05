@@ -258,13 +258,17 @@
   }
 
   // A word in [square brackets] in a question is shown in bold red (e.g. "must [not] be done").
+  // The text without that markup, or the "_" of a subscript, for searching and tooltips.
   function plainText(text) {
-    return text.replace(/\[([^\]]+)\]/g, "$1");
+    return text.replace(/\[([^\]]+)\]/g, "$1").replace(/_(?=[A-Za-z0-9])/g, "");
   }
 
-  // Nuclide notation: superscripts directly followed by subscripts ("⁴₂He") are
-  // drawn stacked, mass number over atomic number, and kept on one line with the symbol.
-  const NUCLIDE = /([⁰¹²³⁴⁵⁶⁷⁸⁹⁺⁻]+)([₀₁₂₃₄₅₆₇₈₉₊₋]+)([A-Za-z]*)/;
+  // Superscripts and subscripts. Unicode ones ("m/s²", "R₁") are redrawn as real
+  // <sup> and <sub> so they look the same in every font; "_" starts a subscript of
+  // letters or digits ("V_p", "R_total"). Superscripts directly followed by subscripts
+  // ("⁴₂He") are nuclide notation: drawn stacked, mass number over atomic number, and
+  // kept on one line with the symbol.
+  const SCRIPTS = /([⁰¹²³⁴⁵⁶⁷⁸⁹⁺⁻]+)([₀₁₂₃₄₅₆₇₈₉₊₋]+)([A-Za-z]*)|([⁰¹²³⁴⁵⁶⁷⁸⁹⁺⁻]+)|([₀₁₂₃₄₅₆₇₈₉₊₋]+)|_([A-Za-z0-9]+)/g;
   const SUPERSCRIPTS = "⁰¹²³⁴⁵⁶⁷⁸⁹⁺⁻";
   const SUBSCRIPTS = "₀₁₂₃₄₅₆₇₈₉₊₋";
   const SCRIPT_DIGITS = "0123456789+−";
@@ -274,22 +278,24 @@
   }
 
   function appendText(node, text) {
-    const parts = text.split(NUCLIDE);
-    for (let index = 0; index < parts.length; index += 4) {
-      if (parts[index]) node.append(parts[index]);
-      if (index + 1 >= parts.length) break;
-      const numbers = document.createElement("span");
-      numbers.className = "nuclide-numbers";
-      for (const value of [fromScript(parts[index + 1], SUPERSCRIPTS), fromScript(parts[index + 2], SUBSCRIPTS)]) {
-        const line = document.createElement("span");
-        line.textContent = value;
-        numbers.append(line);
-      }
-      const nuclide = document.createElement("span");
-      nuclide.className = "nuclide";
-      nuclide.append(numbers, parts[index + 3]);
-      node.append(nuclide);
+    const script = (tag, value) => { const part = document.createElement(tag); part.textContent = value; return part; };
+    let done = 0;
+    for (const match of text.matchAll(SCRIPTS)) {
+      if (match.index > done) node.append(text.slice(done, match.index));
+      done = match.index + match[0].length;
+      if (match[1]) {
+        const numbers = document.createElement("span");
+        numbers.className = "nuclide-numbers";
+        numbers.append(script("span", fromScript(match[1], SUPERSCRIPTS)), script("span", fromScript(match[2], SUBSCRIPTS)));
+        const nuclide = document.createElement("span");
+        nuclide.className = "nuclide";
+        nuclide.append(numbers, match[3]);
+        node.append(nuclide);
+      } else if (match[4]) node.append(script("sup", fromScript(match[4], SUPERSCRIPTS)));
+      else if (match[5]) node.append(script("sub", fromScript(match[5], SUBSCRIPTS)));
+      else node.append(script("sub", match[6]));
     }
+    if (done < text.length) node.append(text.slice(done));
   }
 
   function setAnswerText(node, text) {
