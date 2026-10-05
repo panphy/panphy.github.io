@@ -33,6 +33,9 @@ col.t { width: 9mm; }
 td.n { text-align: center; font-weight: 700; color: var(--muted); }
 td.q { font-weight: 700; }
 td.q .neg { color: #d0182b; font-weight: 900; }
+/* Mass number over atomic number, right-aligned against the symbol. The stack has no height of its own, so the line keeps its spacing. */
+.nuclide { white-space: nowrap; }
+.nuclide-numbers { display: inline-flex; flex-direction: column; align-items: flex-end; height: 0; margin-right: .04em; font-size: .6em; line-height: 1; vertical-align: .5em; }
 td.a { white-space: pre-line; background: var(--tint); }
 td.t::after { content: ""; display: block; width: 4.2mm; height: 4.2mm; margin: .6mm auto 0; border: .3mm solid var(--ink); border-radius: .8mm; }
 td.q img { display: block; margin-top: 2mm; max-width: 100%; max-height: 38mm; }

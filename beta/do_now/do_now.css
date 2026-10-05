@@ -170,6 +170,9 @@ button:focus-visible, a:focus-visible, input:focus-visible, .topic input:focus-v
 .q { break-inside: avoid; display: grid; grid-template-columns: auto 1fr auto; gap: .5em; align-items: start; margin: 0 0 .36em; padding: .3em .4em .3em .34em; border: 2px solid var(--ink); border-radius: .22em; background: var(--card); color: var(--ink); }
 .q-num { display: grid; place-items: center; width: 1.5em; height: 1.5em; border: 2px solid var(--ink); border-radius: 50%; background: var(--hi); font: 900 .78em/1 var(--display); margin-top: .03em; }
 .neg { color: #d0182b; font-weight: 900; }
+/* Mass number over atomic number, right-aligned against the symbol. The stack has no height of its own, so the line keeps its spacing. */
+.nuclide { white-space: nowrap; }
+.nuclide-numbers { display: inline-flex; flex-direction: column; align-items: flex-end; height: 0; margin-right: .04em; font-size: .6em; line-height: 1; vertical-align: .5em; }
 .q-text { margin: 0; padding-top: .04em; font-weight: 700; text-wrap: pretty; }
 .q-figure { margin: .3em 0 .1em; }
 .q-figure button { display: block; width: 100%; padding: 0; border: 0; background: none; cursor: zoom-in; }

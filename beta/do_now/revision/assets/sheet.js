@@ -12,6 +12,27 @@
     return node;
   };
 
+  // Nuclide notation: superscripts directly followed by subscripts ("⁴₂He") are
+  // drawn stacked, mass number over atomic number, and kept on one line with the symbol.
+  const NUCLIDE = /([⁰¹²³⁴⁵⁶⁷⁸⁹⁺⁻]+)([₀₁₂₃₄₅₆₇₈₉₊₋]+)([A-Za-z]*)/;
+  const SUPERSCRIPTS = "⁰¹²³⁴⁵⁶⁷⁸⁹⁺⁻";
+  const SUBSCRIPTS = "₀₁₂₃₄₅₆₇₈₉₊₋";
+  const SCRIPT_DIGITS = "0123456789+−";
+  const fromScript = (run, alphabet) => Array.from(run, (char) => SCRIPT_DIGITS[alphabet.indexOf(char)]).join("");
+
+  function appendText(node, text) {
+    const parts = text.split(NUCLIDE);
+    for (let at = 0; at < parts.length; at += 4) {
+      if (parts[at]) node.append(parts[at]);
+      if (at + 1 >= parts.length) break;
+      const numbers = element("span", "nuclide-numbers");
+      numbers.append(element("span", "", fromScript(parts[at + 1], SUPERSCRIPTS)), element("span", "", fromScript(parts[at + 2], SUBSCRIPTS)));
+      const nuclide = element("span", "nuclide");
+      nuclide.append(numbers, parts[at + 3]);
+      node.append(nuclide);
+    }
+  }
+
   function render(topic) {
     document.title = `AO1 revision - ${topic.title}`;
     const top = element("header", "top");
@@ -37,8 +58,11 @@
       const row = element("tr");
       const questionCell = element("td", "q");
       question.Question.split(/\[([^\]]+)\]/).forEach((part, at) => {
-        if (at % 2) questionCell.append(element("b", "neg", part));
-        else if (part) questionCell.append(part);
+        if (at % 2) {
+          const mark = element("b", "neg");
+          appendText(mark, part);
+          questionCell.append(mark);
+        } else if (part) appendText(questionCell, part);
       });
       if (question.Image) {
         const image = element("img");
@@ -46,7 +70,9 @@
         image.alt = "Diagram for this question";
         questionCell.append(image);
       }
-      row.append(element("td", "n", index + 1), questionCell, element("td", "a", question.Answer), element("td", "t"));
+      const answerCell = element("td", "a");
+      appendText(answerCell, question.Answer);
+      row.append(element("td", "n", index + 1), questionCell, answerCell, element("td", "t"));
       body.append(row);
     });
     table.append(columns, head, body);

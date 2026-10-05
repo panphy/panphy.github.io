@@ -262,15 +262,50 @@
     return text.replace(/\[([^\]]+)\]/g, "$1");
   }
 
+  // Nuclide notation: superscripts directly followed by subscripts ("⁴₂He") are
+  // drawn stacked, mass number over atomic number, and kept on one line with the symbol.
+  const NUCLIDE = /([⁰¹²³⁴⁵⁶⁷⁸⁹⁺⁻]+)([₀₁₂₃₄₅₆₇₈₉₊₋]+)([A-Za-z]*)/;
+  const SUPERSCRIPTS = "⁰¹²³⁴⁵⁶⁷⁸⁹⁺⁻";
+  const SUBSCRIPTS = "₀₁₂₃₄₅₆₇₈₉₊₋";
+  const SCRIPT_DIGITS = "0123456789+−";
+
+  function fromScript(run, alphabet) {
+    return Array.from(run, (char) => SCRIPT_DIGITS[alphabet.indexOf(char)]).join("");
+  }
+
+  function appendText(node, text) {
+    const parts = text.split(NUCLIDE);
+    for (let index = 0; index < parts.length; index += 4) {
+      if (parts[index]) node.append(parts[index]);
+      if (index + 1 >= parts.length) break;
+      const numbers = document.createElement("span");
+      numbers.className = "nuclide-numbers";
+      for (const value of [fromScript(parts[index + 1], SUPERSCRIPTS), fromScript(parts[index + 2], SUBSCRIPTS)]) {
+        const line = document.createElement("span");
+        line.textContent = value;
+        numbers.append(line);
+      }
+      const nuclide = document.createElement("span");
+      nuclide.className = "nuclide";
+      nuclide.append(numbers, parts[index + 3]);
+      node.append(nuclide);
+    }
+  }
+
+  function setAnswerText(node, text) {
+    node.textContent = "";
+    appendText(node, text);
+  }
+
   function setQuestionText(node, text) {
     node.textContent = "";
     text.split(/\[([^\]]+)\]/).forEach((part, index) => {
       if (index % 2) {
         const mark = document.createElement("b");
         mark.className = "neg";
-        mark.textContent = part;
+        appendText(mark, part);
         node.append(mark);
-      } else if (part) node.append(part);
+      } else if (part) appendText(node, part);
     });
   }
 
@@ -639,7 +674,7 @@
 
     const answer = document.createElement("div");
     answer.className = "q-answer";
-    answer.textContent = question.Answer;
+    setAnswerText(answer, question.Answer);
     answer.hidden = true;
     body.append(answer);
 
@@ -823,7 +858,7 @@
     image.alt = "Diagram for this question";
     if (card.Image) image.src = IMAGE_DIR + card.Image;
     figure.replaceChildren(image);
-    $("card-answer").textContent = card.Answer;
+    setAnswerText($("card-answer"), card.Answer);
   }
 
   function answerCard(learned) {
@@ -896,7 +931,9 @@
       }
       wrap.append(element("b", "", index + 1), text);
       questionCell.append(wrap);
-      row.append(questionCell, element("td", "sheet-a", withAnswers ? question.Answer : ""));
+      const answerCell = element("td", "sheet-a");
+      if (withAnswers) appendText(answerCell, question.Answer);
+      row.append(questionCell, answerCell);
       body.append(row);
     });
     table.append(columns, thead, body);
