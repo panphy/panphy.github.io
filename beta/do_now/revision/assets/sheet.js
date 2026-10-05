@@ -12,25 +12,36 @@
     return node;
   };
 
-  // Nuclide notation: superscripts directly followed by subscripts ("⁴₂He") are
-  // drawn stacked, mass number over atomic number, and kept on one line with the symbol.
-  const NUCLIDE = /([⁰¹²³⁴⁵⁶⁷⁸⁹⁺⁻]+)([₀₁₂₃₄₅₆₇₈₉₊₋]+)([A-Za-z]*)/;
+  // Superscripts and subscripts. Unicode ones ("m/s²", "R₁") are redrawn as real
+  // <sup> and <sub> so they look the same in every font; "_" starts a subscript of
+  // letters or digits ("V_p", "R_total"). Superscripts directly followed by subscripts
+  // ("⁴₂He") are nuclide notation: drawn stacked, mass number over atomic number, and
+  // kept on one line with the symbol.
+  const SCRIPTS = /([⁰¹²³⁴⁵⁶⁷⁸⁹⁺⁻]+)([₀₁₂₃₄₅₆₇₈₉₊₋]+)([A-Za-z]*)|([⁰¹²³⁴⁵⁶⁷⁸⁹⁺⁻]+)|([₀₁₂₃₄₅₆₇₈₉₊₋]+)|_([A-Za-z0-9]+)/g;
   const SUPERSCRIPTS = "⁰¹²³⁴⁵⁶⁷⁸⁹⁺⁻";
   const SUBSCRIPTS = "₀₁₂₃₄₅₆₇₈₉₊₋";
   const SCRIPT_DIGITS = "0123456789+−";
   const fromScript = (run, alphabet) => Array.from(run, (char) => SCRIPT_DIGITS[alphabet.indexOf(char)]).join("");
 
   function appendText(node, text) {
-    const parts = text.split(NUCLIDE);
-    for (let at = 0; at < parts.length; at += 4) {
-      if (parts[at]) node.append(parts[at]);
-      if (at + 1 >= parts.length) break;
-      const numbers = element("span", "nuclide-numbers");
-      numbers.append(element("span", "", fromScript(parts[at + 1], SUPERSCRIPTS)), element("span", "", fromScript(parts[at + 2], SUBSCRIPTS)));
-      const nuclide = element("span", "nuclide");
-      nuclide.append(numbers, parts[at + 3]);
-      node.append(nuclide);
+    const script = (tag, value) => { const part = document.createElement(tag); part.textContent = value; return part; };
+    let done = 0;
+    for (const match of text.matchAll(SCRIPTS)) {
+      if (match.index > done) node.append(text.slice(done, match.index));
+      done = match.index + match[0].length;
+      if (match[1]) {
+        const numbers = document.createElement("span");
+        numbers.className = "nuclide-numbers";
+        numbers.append(script("span", fromScript(match[1], SUPERSCRIPTS)), script("span", fromScript(match[2], SUBSCRIPTS)));
+        const nuclide = document.createElement("span");
+        nuclide.className = "nuclide";
+        nuclide.append(numbers, match[3]);
+        node.append(nuclide);
+      } else if (match[4]) node.append(script("sup", fromScript(match[4], SUPERSCRIPTS)));
+      else if (match[5]) node.append(script("sub", fromScript(match[5], SUBSCRIPTS)));
+      else node.append(script("sub", match[6]));
     }
+    if (done < text.length) node.append(text.slice(done));
   }
 
   function render(topic) {

@@ -21,11 +21,11 @@
 "638","Energy","Energy stores and systems","Combined","What is a system?","An object or a group of objects.",""
 "639","Energy","Energy stores and systems","Combined","State what happens to energy when a system changes.","It is transferred from one store to another.",""
 "640","Energy","Energy stores and systems","Combined","State the equation linking kinetic energy, mass and speed.","kinetic energy = 0.5 × mass × speed²
-(Ek = ½ m v²)",""
+(E_k = ½ m v²)",""
 "641","Energy","Energy stores and systems","Combined","State the equation linking gravitational potential energy, mass, gravitational field strength and height.","gravitational potential energy = mass × gravitational field strength × height
-(Ep = m g h)",""
+(E_p = m g h)",""
 "642","Energy","Energy stores and systems","Combined","State the equation linking elastic potential energy, spring constant and extension.","elastic potential energy = 0.5 × spring constant × extension²
-(Ee = ½ k e²)",""
+(E_e = ½ k e²)",""
 "643","Energy","Energy stores and systems","Combined","Name the two quantities that kinetic energy depends on.","Mass and speed",""
 "644","Energy","Energy stores and systems","Combined","Name the three quantities that gravitational potential energy depends on.","Mass, gravitational field strength and height",""
 "645","Energy","Energy stores and systems","Combined","A ball is thrown straight up. Describe the changes in its energy stores as it rises.","Kinetic energy store decreases; gravitational potential energy store increases.",""
@@ -177,7 +177,7 @@ LDR: lights that switch on when it gets dark",""
 "114","Electricity","Resistance and I–V characteristics (RP)","Combined","Explain why the potential difference is kept small when measuring the resistance of a wire.","So the current is small and the wire does not heat up.",""
 "116","Electricity","Resistance and I–V characteristics (RP)","Combined","What does it mean for two resistors to be in series?","They are connected one after the other, on a single path.",""
 "117","Electricity","Resistance and I–V characteristics (RP)","Combined","What does it mean for two resistors to be in parallel?","They are on separate branches.",""
-"118","Electricity","Resistance and I–V characteristics (RP)","Combined","Describe how to calculate the total resistance of two resistors in series.","Add the two resistances: R total = R₁ + R₂.",""
+"118","Electricity","Resistance and I–V characteristics (RP)","Combined","Describe how to calculate the total resistance of two resistors in series.","Add the two resistances: R_total = R₁ + R₂.",""
 "120","Electricity","Resistance and I–V characteristics (RP)","Combined","A lamp, a power supply and a variable resistor are in series. State two ways to increase the potential difference across the lamp.","Increase the supply potential difference.
 Decrease the resistance of the variable resistor.",""
 "121","Electricity","Resistance and I–V characteristics (RP)","Combined","Finding the I–V characteristic of a component: name the independent and dependent variables.","Independent: potential difference across the component
@@ -878,9 +878,9 @@ How much radiation it reflects into space",""
 "836","Magnetism and electromagnetism","(S) Induced potential, transformers and the National Grid","Separate","State what the magnetic field of an induced current does.","It opposes the change that caused it.",""
 "837","Magnetism and electromagnetism","(S) Induced potential, transformers and the National Grid","Separate","Explain why a transformer does not work with a direct current.","Direct current gives a constant magnetic field; induction needs a changing field.",""
 "838","Magnetism and electromagnetism","(S) Induced potential, transformers and the National Grid","Separate","State the equation linking the potential differences and numbers of turns of a transformer.","p.d. across primary ÷ p.d. across secondary = turns on primary ÷ turns on secondary
-(Vp ÷ Vs = np ÷ ns)",""
+(V_p ÷ V_s = n_p ÷ n_s)",""
 "839","Magnetism and electromagnetism","(S) Induced potential, transformers and the National Grid","Separate","State the equation for a transformer that is 100% efficient.","p.d. × current in the secondary = p.d. × current in the primary
-(Vs Is = Vp Ip)",""
+(V_s × I_s = V_p × I_p)",""
 "840","Magnetism and electromagnetism","(S) Induced potential, transformers and the National Grid","Separate","Describe the potential difference–time graph for an alternator.","It alternates: a wave going equally above and below zero.",""
 "841","Magnetism and electromagnetism","(S) Induced potential, transformers and the National Grid","Separate","Describe the potential difference–time graph for a dynamo.","It rises and falls but never goes below zero.",""
 "608","Space physics","(S) Solar System, stars, orbits and satellites","Separate","Name the main objects in our Solar System.","The Sun, eight planets, dwarf planets, moons, asteroids and comets",""
