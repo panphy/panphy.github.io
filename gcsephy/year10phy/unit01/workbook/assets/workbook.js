@@ -61,7 +61,8 @@
 
   /* Graph paper drawn in millimetres: 2 mm minor and 1 cm major squares.
      spec: { w, h, origin: "corner" | "centre", xLabel, yLabel, x: [perCm, labelEvery], y: [...],
-             points, fit: [[x1,y1],[x2,y2]] or fn }  (points/fit only appear in the answer edition) */
+             points, fit: [[x1,y1],[x2,y2]] or fn }  (points/fit only appear in the answer edition)
+     yTicks: false leaves the y scale for the student to choose; the answer edition still numbers it. */
   function graphPaper(spec) {
     const W = spec.w || 150, H = spec.h || 90, L = 12, T = 6;
     const ox = spec.origin === "centre" ? W / 2 : 0;
@@ -79,7 +80,7 @@
         out += `<text class="tick" x="${L + ox + cm * 10}" y="${T + oy + 3.8}" text-anchor="middle">${fmt(cm * spec.x[0])}</text>`;
       }
       for (let cm = -Math.floor((H - oy) / 10); cm <= oy / 10; cm += spec.y[1] || 1) {
-        if (cm === 0) continue;
+        if (cm === 0 || (spec.yTicks === false && !answers)) continue;
         out += `<text class="tick" x="${L + ox - 1.2}" y="${T + oy - cm * 10 + 1}" text-anchor="end">${fmt(cm * spec.y[0])}</text>`;
       }
       out += `<text class="tick" x="${L + ox - 1.2}" y="${T + oy + 3.8}" text-anchor="end">0</text>`;

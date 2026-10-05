@@ -23,7 +23,7 @@ Written for AQA GCSE Combined Science: Trilogy (Higher) 6.2.1–6.2.4, which mat
 
 Missions follow the workbook's order (each meter is introduced with its quantity). Lesson URLs use slugs, so reordering does not break links. Missions 1–6 link to the PhET Circuit Construction Kit; 7–8 have no simulation. Required-practical numbers differ by course: resistance is RP 15 (Trilogy) / RP 3 (Physics); I–V characteristics is RP 16 / RP 4.
 
-**Required practicals.** `practical/resistance/` (Part A wire length, Part B series and parallel) and `practical/iv-characteristics/` each have aim, apparatus, safety, method with diagrams, fillable tables, graph instructions, analysis and a six-mark question, with hints and answers hidden until clicked. Readings are saved in the student's browser only. Each also has a 12-page A4 worksheet PDF and answer PDF, linked from the practical page and the unit home.
+**Required practicals.** `practical/resistance/` (Part A wire length, Part B series and parallel) and `practical/iv-characteristics/` each have aim, apparatus, safety, method with diagrams, fillable tables, graph instructions, analysis and a six-mark question, with hints and answers hidden until clicked. Readings are saved in the student's browser only. The paper version is workbook lessons 5, 7 and 9.
 
 **Go further.** Mission 5 has an optional, clearly labelled beyond-spec panel on 1/R_total = 1/R₁ + 1/R₂.
 
@@ -40,22 +40,12 @@ Missions follow the workbook's order (each meter is introduced with its quantity
 | `equation-triangles/index.html` | Interactive rearranging help (`assets/triangles.js`) |
 | `exam-zone/index.html` | Shell; `assets/exam-zone.js` renders `assets/exam-questions.js` |
 | `practical/<slug>/index.html` | Shells; `assets/practical.js` renders `assets/practicals.js` |
-| `practical/worksheet.html` | Printable A4 worksheet: `?rp=<slug>`, add `&answers` (`assets/practical-print.js`, `.css`) |
 | `assets/practical-diagrams.js`, `assets/diagrams.js` | Pictorial practical diagrams; circuit, graph and symbol helpers |
 | `assets/styles.css` | Adapted from the Year 9 companion stylesheet |
-| `Y10 Required Practical - *.pdf` | Worksheet and answer PDFs printed from `practical/worksheet.html` |
 | `Y10 Electricity Virtual Labs*.pdf` | Class worksheet (missions deep-link to its pages), its answers, and a teacher guide hosted but not linked |
 | `workbook/` | Twelve-lesson workbook, unit review, answer editions and teacher guide. See [`workbook/README.md`](workbook/README.md) |
 
 To edit content, change `assets/lessons.js`, `exam-questions.js` or `practicals.js`; there is no build step. The workbook uses `assets/diagrams.js`, so rebuild its PDFs after changing a circuit symbol.
-
-After editing a practical, regenerate its PDFs: serve the site locally and print `practical/worksheet.html?rp=<slug>` (and with `&answers`) to A4 PDF from Chrome with default margins and no headers or footers, or use headless Chrome:
-
-```bash
-"/Applications/Google Chrome.app/Contents/MacOS/Google Chrome" --headless --no-pdf-header-footer --virtual-time-budget=4000 --print-to-pdf="Y10 Required Practical - Resistance.pdf" "http://localhost:8000/gcsephy/year10phy/unit01/practical/worksheet.html?rp=resistance"
-```
-
-Headless Chrome may not exit once the PDF is written; stop it when the file appears. Student and answer versions must have the same page count; a longer answer version means an answer has overflowed its page.
 
 ## Hosting
 

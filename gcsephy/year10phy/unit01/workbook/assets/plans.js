@@ -26,7 +26,7 @@
         <tr><th>Student workbook</th><td>One booklet per lesson (12 pt text, wide writing lines), each with its toolkit, key words and quick answers, plus a Unit review booklet with the static electricity page (Physics only) and progress tracker. Every lesson: explanations, worked examples, graded practice, lab records, an exam question and a revision box. It is the students' classwork book and their revision guide.</td></tr>
         <tr><th>Answer edition</th><td>Same pages and page numbers as each booklet, with answers in blue. For marking, and for release to students for self-marking if you choose.</td></tr>
         <tr><th>Companion website</th><td>${SITE}: homework and revision. Missions carry more questions with hints and worked answers; the Exam Zone is for the end of the unit.</td></tr>
-        <tr><th>Virtual labs, RP sheets</th><td>Lessons 2–4 use the Virtual Labs worksheet (PhET) for the full investigation; the workbook holds a short record. Lab 3 plots current against p.d., as AQA does. Lessons 5, 7 and 9 have full required-practical pages on the website.</td></tr>
+        <tr><th>Virtual labs, practicals</th><td>Lessons 2–4 use the Virtual Labs worksheet (PhET) for the full investigation; the workbook holds a short record. Lab 3 plots current against p.d., as AQA does. Lessons 5, 7 and 9 are the required practicals: the workbook is the lab sheet, and the website has a matching page for each.</td></tr>
       </tbody></table>
       <h4 class="sub">Design principles</h4>
       ${list([
