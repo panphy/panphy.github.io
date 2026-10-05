@@ -118,7 +118,7 @@
         { type: "box", eyebrow: "Follow every step", paras: [
           "Three readings: 1.20 s, 1.25 s, 1.22 s",
           "Step 1 — Mean. (1.20 + 1.25 + 1.22) ÷ 3 = 3.67 ÷ 3 = 1.22 s (to 2 d.p.)",
-          "Step 2 — Range. smallest to largest = from 1.20 s to 1.25 s",
+          "Step 2 — Range. maximum and minimum values = from 1.20 s to 1.25 s",
           "Step 3 — Uncertainty. (largest − smallest) ÷ 2 = 0.05 ÷ 2 = 0.025 s, rounded sensibly to 0.03 s",
           "Step 4 — Write it properly. mean time = 1.22 s ± 0.03 s",
           "Read that last line out loud as: <i>“somewhere around 1.22 seconds, give or take 0.03 — and I am being honest about it.”</i>",
@@ -619,12 +619,12 @@
           ["Mean", "The average: the total of the trials divided by the number of trials"],
           ["Precision", "How close repeated measurements are to each other"],
           ["Random error", "Unpredictable variation between repeats. Repeats and a mean reduce it"],
-          ["Range", "The smallest and largest values, written as ‘from … to …’"],
+          ["Range", "The maximum and minimum values of the independent or dependent variables"],
           ["Reliability", "How far a set of results can be trusted and repeated"],
           ["Resolution", "The smallest change a measuring instrument can detect"],
           ["Systematic error", "An error that shifts every reading the same way. Repeats do not fix it"],
           ["Trial", "One repeat of a measurement"],
-          ["Uncertainty", "The interval the true value should lie in. From repeats: (largest − smallest) ÷ 2"],
+          ["Uncertainty", "The interval within which the true value can be expected to lie"],
         ] },
       ] },
 

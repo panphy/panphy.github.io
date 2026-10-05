@@ -37,7 +37,7 @@ window.LESSONS = [
           ],
           points: [
             "Mean = total of the readings ÷ number of readings.",
-            "Range: from the smallest reading to the largest reading.",
+            "Range: the maximum and minimum values, quoted as ‘from … to …’.",
             "Uncertainty = (largest − smallest) ÷ 2.",
             "Write the final result as mean ± uncertainty, with a unit.",
           ],
@@ -72,8 +72,8 @@ window.LESSONS = [
       vocabulary: [
         ["Precision", "How close repeated measurements are to each other."],
         ["Accuracy", "How close a measurement is to the true value."],
-        ["Range", "The smallest and largest values, quoted as ‘from … to …’."],
-        ["Uncertainty", "The interval within which the true value can be expected to lie, written as mean ± uncertainty."],
+        ["Range", "The maximum and minimum values of the independent or dependent variables."],
+        ["Uncertainty", "The interval within which the true value can be expected to lie."],
         ["Resolution", "The smallest change an instrument can detect."],
       ],
     },
@@ -636,7 +636,7 @@ window.LESSONS = [
       ],
       vocabulary: [
         ["Method", "Numbered instructions another scientist can repeat."],
-        ["Prediction", "A value read from the best-fit line, most trustworthy inside the measured range."],
+        ["Prediction", "A statement suggesting what will happen in the future, based on observation, experience or a hypothesis."],
         ["Evaluation", "A judgement of method quality, errors and improvements."],
         ["Safety risk", "A hazard considered together with how its risk is reduced."],
       ],
