@@ -13,7 +13,7 @@ This lesson prepares students for the practical and data-handling skills used th
 By the end of the lesson, students should be able to:
 
 1. Explain why measurements always have some uncertainty.
-2. Calculate uncertainty from repeated readings using half the range.
+2. Calculate uncertainty from the range of repeated readings.
 3. Distinguish between precision and accuracy.
 4. Explain what is meant by the resolution of a measuring instrument.
 5. Describe random errors and systematic errors.
@@ -24,8 +24,8 @@ By the end of the lesson, students should be able to:
 | Keyword | Student-friendly definition |
 |---|---|
 | Reliability | How trustworthy or repeatable a set of results is |
-| Uncertainty | The doubt about a measurement or result |
-| Range | The difference between the largest and smallest value |
+| Uncertainty | The interval within which the true value can be expected to lie |
+| Range | The smallest and largest values, quoted as "from ... to ..." |
 | Precision | How close repeated measurements are to each other |
 | Accuracy | How close a measurement is to the true value |
 | Resolution | The smallest change a measuring instrument can detect |
@@ -39,6 +39,7 @@ By the end of the lesson, students should be able to:
 |---|---|
 | Uncertainty | Whenever a measurement is made, there is always some uncertainty about the result obtained |
 | Estimating uncertainty from repeats | Use the range of repeated measurements about the mean as a measure of uncertainty |
+| Range | The maximum and minimum values, for example "from 1.20 s to 1.25 s"; it is not a single number |
 | Simple uncertainty calculation | Uncertainty = (maximum value - minimum value) / 2 |
 | Precision | Precise measurements are close together |
 | Accuracy | Accurate measurements are close to the true value |
@@ -150,8 +151,8 @@ Step-by-step:
 
 1. Maximum value = 1.25 s
 2. Minimum value = 1.20 s
-3. Range = 1.25 - 1.20 = 0.05 s
-4. Uncertainty = 0.05 / 2 = 0.025 s
+3. Range: from 1.20 s to 1.25 s
+4. Uncertainty = (1.25 - 1.20) / 2 = 0.025 s
 
 The result can be written as:
 
@@ -163,7 +164,7 @@ For Year 9, students can also round this sensibly:
 
 ## Activity 2: Practice questions
 
-Students calculate the mean, range, and uncertainty for each data set.
+Students calculate the mean, state the range (smallest to largest) and calculate the uncertainty for each data set.
 
 | Data set | Trial 1 | Trial 2 | Trial 3 | Mean | Range | Uncertainty |
 |---|---:|---:|---:|---:|---:|---:|
@@ -233,8 +234,8 @@ Students complete:
 Students are given three small data sets and must:
 
 1. Calculate the mean.
-2. Calculate the range.
-3. Calculate the uncertainty using half the range.
+2. State the range, from the smallest reading to the largest.
+3. Calculate the uncertainty using (largest - smallest) / 2.
 4. Identify which data set is most precise.
 5. Suggest one possible random error and one possible systematic error.
 
