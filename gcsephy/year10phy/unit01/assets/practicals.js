@@ -1,10 +1,8 @@
 /* Required practical content. assets/practical.js renders each practical as a web
-   page; assets/practical-print.js renders the same content as the A4 worksheet that
-   is saved as the downloadable PDF. Block types: variables, steps, figures, note,
-   table, graph, question, keywords, sketch, checklist and page (a page break in the
-   printed worksheet only). `before` blocks follow the safety list; a question with
-   `frame: true` gets Equation / Substitute / Answer lines in the printed worksheet.
-   In tables a string is printed in the cell and null is a cell for the student;
+   page. Block types: variables, steps, figures, note, table, graph, question,
+   keywords, sketch and checklist. `before` blocks follow the safety list; a question
+   with `frame: true` prompts for Equation / Substitute / Answer.
+   In tables a string is shown in the cell and null is a cell for the student;
    `answers` holds example results in the same shape. */
 (function () {
   "use strict";
@@ -87,8 +85,6 @@
       workbook: [[5, "Resistance of a wire (RP)"], [7, "Resistors in series and parallel (RP)"]],
       equation: { eq: "R = V ÷ I", words: "resistance = potential difference ÷ current", units: "R in ohms (Ω), V in volts (V), I in amperes (A)" },
       missions: [["resistance", "Mission 4: Resistance & V = IR"], ["series-and-parallel", "Mission 5: Series & parallel"]],
-      pdf: "Y10 Required Practical - Resistance.pdf",
-      answersPdf: "Y10 Required Practical - Resistance (Ans).pdf",
       apparatus: [
         "Low-voltage d.c. power supply or battery (about 2 V)",
         "Ammeter (0–2 A)",
@@ -157,7 +153,6 @@
               ],
             },
             { type: "figures", items: [wireCircuit] },
-            { type: "page" },
             { type: "figures", items: [P.wireBench()] },
             {
               type: "note",
@@ -175,7 +170,6 @@
                 [null, "1.48", "0.43", "3.44"], [null, "1.54", "0.39", "3.95"], [null, "1.58", "0.35", "4.51"], [null, "1.62", "0.32", "5.06"], [null, "1.65", "0.29", "5.69"],
               ],
             },
-            { type: "page" },
             {
               type: "question",
               id: "a1",
@@ -185,7 +179,6 @@
               answer: "As the length increases, the resistance increases. Doubling the length roughly doubles the resistance (for example, 1.22 Ω at 20 cm and 2.32 Ω at 40 cm).",
             },
             { type: "figures", items: [P.graphSkills()] },
-            { type: "page" },
             {
               type: "graph",
               id: "graph-a",
@@ -194,7 +187,6 @@
               xLabel: "length / cm",
               yLabel: "resistance / Ω",
               origin: "corner",
-              print: { xPerCm: 10, yPerCm: 0.5 },
               example: {
                 x: [0, 100, 20], y: [0, 6, 1],
                 points: [[10, 0.67], [20, 1.22], [30, 1.78], [40, 2.32], [50, 2.88], [60, 3.44], [70, 3.95], [80, 4.51], [90, 5.06], [100, 5.69]],
@@ -210,7 +202,6 @@
               hint: "Is the line straight or curved? Does it pass through, or close to, the origin?",
               answer: "The graph is a straight line that passes through (or very close to) the origin. This shows that the resistance of the wire is directly proportional to its length.",
             },
-            { type: "page" },
             {
               type: "question",
               id: "a3",
@@ -243,7 +234,6 @@
               hint: "Think about what electrons collide with as they move through a metal.",
               answer: "Electrons collide with the ions in the metal as they move through the wire. In a longer wire there are more ions along the path, so there are more collisions and the electrons are opposed more. The resistance is greater.",
             },
-            { type: "page" },
             {
               type: "question",
               id: "a7",
@@ -315,7 +305,6 @@
               ],
             },
             { type: "figures", items: [seriesCircuit, parallelCircuit] },
-            { type: "page" },
             {
               type: "table",
               id: "combinations",
@@ -341,7 +330,6 @@
               hint: "Is the parallel value bigger or smaller than each resistor on its own?",
               answer: "The parallel resistance (5.0 Ω in the example) is less than the resistance of either resistor on its own. For two identical resistors it is about half the resistance of one.",
             },
-            { type: "page" },
             { type: "figures", items: [P.currentPaths()] },
             {
               type: "question",
@@ -417,8 +405,6 @@
       workbook: [[9, "Investigating I-V characteristics (RP)"]],
       equation: { eq: "R = V ÷ I", words: "resistance = potential difference ÷ current", units: "R in ohms (Ω), V in volts (V), I in amperes (A)" },
       missions: [["iv-characteristics", "Mission 6: I–V characteristics"]],
-      pdf: "Y10 Required Practical - IV Characteristics.pdf",
-      answersPdf: "Y10 Required Practical - IV Characteristics (Ans).pdf",
       apparatus: [
         "Variable d.c. power supply (0–6 V) or battery pack",
         "Variable resistor (rheostat)",
@@ -482,7 +468,6 @@
               ],
             },
             { type: "figures", items: [ivCircuit, diodeCircuit] },
-            { type: "page" },
             { type: "figures", items: [P.reverseSupply(), P.diodeWay()] },
             {
               type: "note",
@@ -519,7 +504,6 @@
               rows: Array.from({ length: 6 }, () => [null, null, null, null, null]),
               answers: [["0.5", "0.08", "6.3", "−0.5", "−0.08"], ["1.0", "0.11", "9.1", "−1.0", "−0.11"], ["2.0", "0.16", "12.5", "−2.0", "−0.17"], ["3.0", "0.21", "14.3", "−3.0", "−0.20"], ["4.5", "0.26", "17.3", "−4.5", "−0.26"], ["6.0", "0.30", "20.0", "−6.0", "−0.30"]],
             },
-            { type: "page" },
             {
               type: "table",
               id: "diode",
@@ -550,7 +534,6 @@
               xLabel: "p.d. / V",
               yLabel: "current / A",
               origin: "centre",
-              print: { xPerCm: 1, yPerCm: 0.1 },
               example: {
                 x: [-6, 6, 2], y: [-0.6, 0.6, 0.2],
                 points: [[1, 0.1], [2, 0.2], [3.1, 0.31], [3.9, 0.39], [5, 0.5], [6, 0.6], [-1, -0.1], [-2, -0.2], [-3, -0.3], [-4, -0.4], [-5.1, -0.51], [-6, -0.6]],
@@ -575,7 +558,6 @@
               hint: "Use R = V ÷ I with a p.d. and the current measured at that p.d.",
               answer: "For example, R = V ÷ I = 6.0 ÷ 0.60 = 10 Ω.",
             },
-            { type: "page" },
             {
               type: "graph",
               id: "graph-lamp",
@@ -584,7 +566,6 @@
               xLabel: "p.d. / V",
               yLabel: "current / A",
               origin: "centre",
-              print: { xPerCm: 1, yPerCm: 0.05 },
               example: {
                 x: [-6, 6, 2], y: [-0.3, 0.3, 0.1],
                 points: [[0.5, 0.08], [1, 0.11], [2, 0.16], [3, 0.21], [4.5, 0.26], [6, 0.3], [-0.5, -0.08], [-1, -0.11], [-2, -0.17], [-3, -0.2], [-4.5, -0.26], [-6, -0.3]],
@@ -600,7 +581,6 @@
               hint: "Use R = V ÷ I twice: once for your first reading and once for your last.",
               answer: "Example: at 0.5 V, R = 0.5 ÷ 0.08 ≈ 6 Ω. At 6.0 V, R = 6.0 ÷ 0.30 = 20 Ω. The resistance of the lamp increases as the p.d. (and current) increases.",
             },
-            { type: "page" },
             { type: "figures", items: [P.filament()] },
             {
               type: "question",
@@ -611,7 +591,6 @@
               hint: "What does a bigger current do to the filament? Think about ions and electrons.",
               answer: "A bigger current heats the filament to a higher temperature (1). The metal ions vibrate more (1). Electrons collide with the ions more often, so the resistance increases (1).",
             },
-            { type: "page" },
             {
               type: "graph",
               id: "graph-diode",
@@ -620,7 +599,6 @@
               xLabel: "p.d. / V",
               yLabel: "current / mA",
               origin: "low",
-              print: { xPerCm: 0.1, yPerCm: 5, height: 100 },
               example: {
                 x: [-0.8, 0.8, 0.4], y: [0, 45, 15],
                 points: [[0.2, 0], [0.4, 0.1], [0.5, 0.5], [0.55, 1.4], [0.6, 4.3], [0.65, 13], [0.68, 25], [0.7, 40], [-0.2, 0], [-0.4, 0], [-0.6, 0], [-0.8, 0]],
@@ -652,7 +630,6 @@
               hint: "Look at how quickly the diode's current changes between 0.5 V and 0.7 V.",
               answer: "The current changes very quickly over a small range of p.d. near 0.6 V. Small steps give more points there, so the shape of the curve can be drawn accurately.",
             },
-            { type: "page" },
             {
               type: "table",
               id: "summary",

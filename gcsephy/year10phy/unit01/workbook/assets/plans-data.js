@@ -72,7 +72,7 @@
     },
     5: {
       why: "The first required practical. Students can now draw the circuit, place both meters and calculate R, so the practical is about method, variables and evidence rather than new content.",
-      prep: "Per group: low-voltage dc supply (≈ 2 V), switch, ammeter, voltmeter, 1.1 m of constantan/nichrome wire (e.g. 0.3 mm) taped to a metre ruler, two crocodile clips, leads. Required practical worksheet (Resistance, Part A) as extension/reference.",
+      prep: "Per group: low-voltage dc supply (≈ 2 V), switch, ammeter, voltmeter, 1.1 m of constantan/nichrome wire (e.g. 0.3 mm) taped to a metre ruler, two crocodile clips, leads. Website practical page (Resistance, Part A) for reference.",
       timing: [
         [0, 6, "Do now", "Retrieval: R = V ÷ I, heating, meter symbols."],
         [6, 14, "Plan", "Complete the variables table (Q1). Walk through the circuit and safety. Stress switch-off between readings."],
@@ -82,7 +82,7 @@
       ],
       hinge: "Why switch off between readings? (Q7.) If students answer ‘to save the battery’, reteach heating → resistance.",
       misconceptions: [["‘Measure resistance with the voltmeter.’", "Resistance is calculated from V and I."], ["Line of best fit = dot-to-dot.", "Model a single straight line through the origin region, ignoring the anomaly."], ["Increasing length reduces current, so ‘current is the DV’.", "The DV is R (calculated)."]],
-      support: "Pre-scaled axes are provided; give a partially completed example table.",
+      support: "The length axis is pre-scaled; give a resistance scale (e.g. 2 cm for 1 Ω) and a partially completed example table.",
       stretch: "Q8: explain a non-zero intercept (zero error at the clip).",
       homework: "Finish graph. Exam corner six-mark method. Mission 4 questions 6–9 (measuring resistance and the wire practical).",
     },
@@ -104,7 +104,7 @@
     },
     7: {
       why: "The second part of the resistance practical tests the Lesson 6 rules with measurements, and gives evaluation practice (specific error and improvement).",
-      prep: "Per group: low-voltage supply, switch, ammeter, voltmeter, two identical resistors (e.g. 10 Ω), leads. Resistance worksheet Part B for reference.",
+      prep: "Per group: low-voltage supply, switch, ammeter, voltmeter, two identical resistors (e.g. 10 Ω), leads. Website practical page (Resistance, Part B) for reference.",
       timing: [
         [0, 6, "Do now", "Retrieval: series total, parallel rules."],
         [6, 12, "Predict", "Q1: rank the three arrangements. Record predictions on the board."],
@@ -136,7 +136,7 @@
     },
     9: {
       why: "Students now know what each graph should look like, so the practical tests predictions and focuses on method: varying p.d., reversing, safety and the diode's extra steps.",
-      prep: "Per group: variable low-voltage supply or supply + variable resistor, ammeter (and milliammeter), voltmeter, fixed resistor, 6 V filament lamp, diode + protective resistor (e.g. 100 Ω), leads. I–V worksheet for reference.",
+      prep: "Per group: variable low-voltage supply or supply + variable resistor, ammeter (and milliammeter), voltmeter, fixed resistor, 6 V filament lamp, diode + protective resistor (e.g. 100 Ω), leads. Website practical page (I–V characteristics) for reference.",
       timing: [
         [0, 6, "Do now + safety", "Retrieval. Lamp rating, hot lamp, protective resistor."],
         [6, 12, "Set up", "Check ammeter in series and voltmeter across the component only."],

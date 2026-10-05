@@ -1,7 +1,6 @@
 /* Teaching diagrams for the required practicals: bench layouts, graph skills and
-   particle pictures. Each returns a <figure> (via Diagrams.circuit) so it renders
-   the same on the practical pages and in the printed worksheets. Colours and text
-   sizes are set inline so both stylesheets draw them identically. */
+   particle pictures. Each returns a <figure> (via Diagrams.circuit) for the
+   practical pages. Colours and text sizes are set inline. */
 (function () {
   "use strict";
 

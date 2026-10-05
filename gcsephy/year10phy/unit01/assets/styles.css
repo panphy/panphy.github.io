@@ -32,7 +32,7 @@ button, summary { font: inherit; }
 /* Stroke icons (see Diagrams.icon) that replace arrow and tick glyphs. */
 .icon { width: 1em; height: 1em; flex: none; display: inline-block; vertical-align: -.14em; fill: none; stroke: currentColor; stroke-width: 2.6; stroke-linecap: round; stroke-linejoin: round; }
 .arrow .icon, .workbook-link span .icon, .practical-cta .icon, .reveal summary b .icon { width: .9em; height: .9em; stroke-width: 2.4; }
-.button span, .toolkit-link span, .workbook-link span, .practical-downloads a span { display: inline-flex; }
+.button span, .toolkit-link span, .workbook-link span { display: inline-flex; }
 .button .icon, .toolkit-link .icon { width: 1.15em; height: 1.15em; }
 .lesson-pagination span .icon, .unlock-strip span .icon { width: 1.3em; height: 1.3em; stroke-width: 2.8; }
 .lesson-icon .icon { width: 36px; height: 36px; stroke-width: 1.8; }
@@ -404,7 +404,6 @@ h1, h2, h3 { overflow-wrap: break-word; hyphens: auto; }
 .toolkit-note { margin: 22px 0 0; color: var(--muted); font-size: 14px; line-height: 1.55; max-width: 880px; }
 .resource-card.phet { background: var(--cyan); }
 .resource-card.workbook { background: var(--leaf); }
-.resource-card.practical { background: #fffdf7; }
 .resource-card p em { font-style: normal; font-weight: 700; color: var(--ink); }
 .resource-card.answers { grid-column: span 2; min-height: 0; background: #f1edff; }
 .resource-card.answers h3 { margin-top: 22px; }
@@ -479,10 +478,6 @@ h1, h2, h3 { overflow-wrap: break-word; hyphens: auto; }
 /* required practical pages */
 .practical-tools { grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); }
 .practical-tools a { border-bottom: 1px solid var(--line); }
-.practical-downloads { gap: 12px 18px; }
-.practical-downloads a { display: inline-flex; align-items: center; gap: 12px; min-height: 48px; padding: 10px 16px; border: 2px solid var(--ink); background: #fffdf8; font-size: 13px; font-weight: 900; letter-spacing: .06em; text-transform: uppercase; box-shadow: 4px 4px 0 var(--ink); }
-.practical-downloads a:hover { transform: translate(-2px, -2px); box-shadow: 6px 6px 0 var(--ink); }
-.practical-downloads a span { font-size: 18px; }
 .practical-section { padding: 90px clamp(22px, 6vw, 90px); display: grid; grid-template-columns: minmax(250px, .62fr) minmax(0, 1.38fr); gap: 6vw; align-items: start; background: #e9eef1; border-bottom: 2px solid var(--ink); scroll-margin-top: 0; }
 .practical-section.alt { background: var(--paper); }
 .practical-section .revision-intro .workbook-link { margin-top: 12px; }

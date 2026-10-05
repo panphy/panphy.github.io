@@ -389,7 +389,7 @@
       big: "If you double the length of a wire, what happens to its resistance?",
       goals: ["set up a circuit to find resistance from V and I", "identify and control the variables", "record, process and graph results", "write a conclusion using evidence"],
       keywords: ["independent variable", "dependent variable", "control variable", "anomaly", "line of best fit"],
-      online: { label: "Required practical: Resistance", path: "practical/resistance/", text: "Method, example results and a printable worksheet (Part A)." },
+      online: { label: "Required practical: Resistance", path: "practical/resistance/", text: "Method, diagrams and example results (Part A)." },
       order: ["doNow", "learn", "lab", "try", "exam", "revise"],
       doNow: [
         ["Calculate R for 1.2 V and 0.40 A.", "R = 1.2 ÷ 0.40 = 3.0 Ω"],
@@ -408,7 +408,7 @@
       lab: { title: "Results", aside: "Answer edition: example results. Yours will differ.", blocks: [
         { t: "lab", blocks: [
           { t: "q", p: "Record your readings and calculate the resistance.", table: { head: ["Length / cm", "p.d. / V", "current / A", "R = V ÷ I / Ω"], rows: [10, 20, 30, 40, 50, 60, 70, 80, 90, 100].map((l) => [String(l), null, null, null]), ans: [[null, "0.20", "0.40", "0.50"], [null, "0.40", "0.40", "1.0"], [null, "0.60", "0.40", "1.5"], [null, "0.80", "0.40", "2.0"], [null, "1.00", "0.40", "2.5"], [null, "1.44", "0.40", "3.6 (anomaly)"], [null, "1.40", "0.40", "3.5"], [null, "1.60", "0.40", "4.0"], [null, "1.80", "0.40", "4.5"], [null, "2.00", "0.40", "5.0"]] } },
-          { t: "q", p: "Plot resistance (up the side) against length (along the bottom). Draw a line of best fit.", graph: { w: 110, h: 60, x: [10, 1], y: [1, 1], xLabel: "length / cm", yLabel: "resistance / Ω", points: [[10, 0.5], [20, 1], [30, 1.5], [40, 2], [50, 2.5], [60, 3.6], [70, 3.5], [80, 4], [90, 4.5], [100, 5]], fit: [[0, 0], [105, 5.25]] } },
+          { t: "q", p: "Plot resistance (up the side) against length (along the bottom). Draw a line of best fit.", graph: { w: 110, h: 100, x: [10, 1], y: [0.5, 2], yTicks: false, xLabel: "length / cm", yLabel: "resistance / Ω", points: [[10, 0.5], [20, 1], [30, 1.5], [40, 2], [50, 2.5], [60, 3.6], [70, 3.5], [80, 4], [90, 4.5], [100, 5]], fit: [[0, 0], [100, 5]] } },
         ] },
       ] },
       tryTitle: "Analyse and evaluate",
@@ -481,7 +481,7 @@
       big: "Two identical resistors, three ways to connect them. Which arrangement lets the most current flow?",
       goals: ["measure the total resistance of resistors in series and in parallel", "compare results with R_total = R₁ + R₂", "explain the results using paths and current", "evaluate the measurements"],
       keywords: ["total resistance", "prediction", "uncertainty", "resolution", "evaluate"],
-      online: { label: "Required practical: Resistance (Part B)", path: "practical/resistance/", text: "Method, example results and a printable worksheet (Part B)." },
+      online: { label: "Required practical: Resistance (Part B)", path: "practical/resistance/", text: "Method, diagrams and example results (Part B)." },
       order: ["doNow", "learn", "lab", "try", "exam", "revise"],
       doNow: [
         ["Total resistance of 10 Ω and 15 Ω in series?", "25 Ω"],
@@ -568,7 +568,7 @@
       big: "Can you produce the fingerprint graphs of a resistor, a lamp and a diode yourself?",
       goals: ["set up a circuit to vary the p.d. and measure the current", "take readings in both directions, safely", "plot an I–V graph with positive and negative values", "describe how the method changes for a diode"],
       keywords: ["variable resistor", "protective resistor", "reverse", "range", "interval"],
-      online: { label: "Required practical: I–V characteristics", path: "practical/iv-characteristics/", text: "Method, example results, graphs and a printable worksheet." },
+      online: { label: "Required practical: I–V characteristics", path: "practical/iv-characteristics/", text: "Method, diagrams, example results and graphs." },
       order: ["doNow", "learn", "lab", "try", "exam", "revise"],
       doNow: [
         ["Sketch the I–V graph shape for a diode.", "Zero current for negative p.d.; almost none until a small positive p.d., then rises steeply."],

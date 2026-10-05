@@ -24,7 +24,6 @@
   }
 
   const STORE_KEY = `y10u1-practical-${practical.slug}`;
-  const pdfHref = (file) => `../../${encodeURI(file)}`;
   const description = document.querySelector('meta[name="description"]');
   document.title = `Required practical: ${practical.title} | Electric Circuits`;
   if (description) description.content = practical.intro;
@@ -100,7 +99,7 @@
         return `
           <article class="revision-card practical-card">${cardHeading(number, block.title)}
             <p class="practical-text">${sub(block.text)}</p>
-            <p class="practical-text muted">Sketch on paper or in the worksheet PDF, then compare.</p>
+            <p class="practical-text muted">Sketch on paper, then compare.</p>
             ${sketches(block, false)}
             <details class="reveal answer-reveal example-reveal"><summary><span>Expected shapes</span><b>${icon("check")}</b></summary><div>${sketches(block, true)}<p>${sub(block.caption)}</p></div></details>
           </article>`;
@@ -142,7 +141,7 @@
         return `
           <article class="revision-card practical-card">${cardHeading(number, block.title)}
             <p class="practical-text">${sub(block.text)}</p>
-            <p class="practical-text muted">Draw it on graph paper or on the grid in the worksheet PDF. Put <strong>${block.yLabel}</strong> on the vertical axis and <strong>${block.xLabel}</strong> on the horizontal axis.</p>
+            <p class="practical-text muted">Draw it on graph paper or on the grid in your workbook. Put <strong>${block.yLabel}</strong> on the vertical axis and <strong>${block.xLabel}</strong> on the horizontal axis.</p>
             <details class="reveal answer-reveal example-reveal"><summary><span>Example graph</span><b>${icon("check")}</b></summary><div>${figure}</div></details>
           </article>`;
       }
@@ -179,7 +178,6 @@
   const tools = [
     '<a href="#before"><span>01</span><strong>Before you start</strong></a>',
     ...practical.parts.map((part, i) => `<a href="#${part.id}"><span>${String(i + 2).padStart(2, "0")}</span><strong>${part.label}${part.id === "exam" ? "" : `: ${sub(part.title)}`}</strong></a>`),
-    `<a href="${pdfHref(practical.pdf)}" target="_blank" rel="noopener"><span>PDF</span><strong>Worksheet</strong></a>`,
   ].join("");
   const workbookHref = ([n, title]) => `../../workbook/pdf/${encodeURI(`Electric Circuits - Year 10 Workbook - Lesson ${String(n).padStart(2, "0")} - ${title}.pdf`)}`;
   const workbookLinks = (practical.workbook || []).map((entry) => `<a class="workbook-link" href="${workbookHref(entry)}" target="_blank" rel="noopener">Workbook lesson ${entry[0]} <span aria-hidden="true">${icon("up-right")}</span></a>`).join("");
@@ -206,17 +204,12 @@
           <div class="dossier-rule">${sub(practical.keyRule)}</div>
         </div>
       </header>
-      <section class="unlock-strip practical-downloads" aria-label="Download the worksheet">
-        <strong>Worksheet PDF</strong>
-        <a href="${pdfHref(practical.pdf)}" target="_blank" rel="noopener">Student worksheet <span aria-hidden="true">${icon("down")}</span></a>
-        <a href="${pdfHref(practical.answersPdf)}" target="_blank" rel="noopener">Answers <span aria-hidden="true">${icon("down")}</span></a>
-      </section>
       <nav class="lesson-tools practical-tools" aria-label="Sections of this practical">${tools}</nav>
       <section class="practical-section" id="before">
         <div class="revision-intro">
           <p class="eyebrow dark">Before you start</p>
           <h2>Know the aim.<br>Stay safe.</h2>
-          <p>Read the whole method before you build anything. Fill in the tables and questions on this page or in the printed worksheet.</p>
+          <p>Read the whole method before you build anything. Fill in the tables and questions on this page or in your workbook.</p>
           ${workbookLinks}${missionLinks}
         </div>
         <div class="practical-content">
@@ -237,7 +230,7 @@
       </section>
       ${practical.parts.map(renderPart).join("")}
       <section class="practical-save" aria-label="Saved answers">
-        <p><strong>Your answers stay on this device.</strong> They are saved in this browser as you type and are not sent anywhere. Download the PDF to hand in a paper copy.</p>
+        <p><strong>Your answers stay on this device.</strong> They are saved in this browser as you type and are not sent anywhere.</p>
         <button type="button" class="clear-answers">Clear my answers</button>
       </section>
       <nav class="lesson-pagination" aria-label="Related missions">${pagination}</nav>
