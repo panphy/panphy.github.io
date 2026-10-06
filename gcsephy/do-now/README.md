@@ -50,11 +50,6 @@ Each topic's share follows how often it earned recall (AO1) marks in the AQA Hig
 
 `1`–`9`, `0`: show or hide that answer. `A`: all answers. `N`: new questions. `W`: worksheet. `F`: fullscreen. `Esc`: back to topics. Clicking "Do Now" in the top bar also goes back.
 
-## Moving to `gcsephy/`
+## Old address
 
-All paths inside the folder are relative, and shared assets use site-root paths that already exist, so the folder can be moved as it is.
-
-1. `git mv beta/do_now gcsephy/do-now` (or another name). `revision/` moves with it.
-2. Add `<script src="/gcsephy/sw-register.js" defer></script>` to the `<head>` of `index.html` and of `revision/index.html`.
-3. Add an entry to `gcsephy/index.html` and remove the one in `beta/index.html`.
-4. Update the link in the root `README.md`, and delete `review-changes.csv` if it is no longer wanted.
+The page used to live at `beta/do_now/`. The four HTML files left there (`index.html`, `revision/index.html`, `revision/sheet.html`, `revision/practical.html`) only forward old links here, keeping any query and hash. Old direct links to a PDF, CSV or image are not forwarded.
