@@ -187,6 +187,9 @@ strong, b { font-weight: 800; }
 .step:last-child { border-bottom: 0; }
 .step.final > span:last-child { font-weight: 800; }
 .worked .yt .step > span:last-child { color: var(--ans); font-weight: 700; }
+.worked .data { margin: 0 0 1.5mm; }
+.worked .data th, .worked .data td { height: 6.2mm; padding: .8mm 2mm; }
+.worked .data td { white-space: nowrap; }
 
 /* questions */
 .question { position: relative; margin: 0 0 3mm; padding-left: 9mm; break-inside: avoid; }

@@ -143,8 +143,9 @@
 
   function worked(b) {
     const steps = (arr, blank) => arr.map(([k, v], i) => `<div class="step${i === arr.length - 1 ? " final" : ""}"><span>${k}</span><span>${blank ? ans(v) : v}</span></div>`).join("");
-    return `<div class="worked"><div><h4>Worked example</h4><div class="q">${b.q}</div>${steps(b.steps)}</div>` +
-      `<div class="yt"><h4>Your turn</h4><div class="q">${b.yt.q}</div>${steps(b.yt.steps, true)}</div></div>`;
+    const given = (t) => (t ? dataTable(t) : "");
+    return `<div class="worked"><div><h4>Worked example</h4><div class="q">${b.q}</div>${given(b.table)}${steps(b.steps)}</div>` +
+      `<div class="yt"><h4>Your turn</h4><div class="q">${b.yt.q}</div>${given(b.yt.table)}${steps(b.yt.steps, true)}</div></div>`;
   }
 
   function question(b) {
