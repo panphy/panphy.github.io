@@ -12,6 +12,11 @@
     return node;
   };
 
+  // A sheet asks for all its diagrams at once and now and then one request fails, so try again before giving up.
+  const fetchSvg = (url, attempts = 3) => fetch(url)
+    .then((response) => { if (!response.ok) throw new Error(response.status); return response.text(); })
+    .catch((error) => { if (attempts > 1) return fetchSvg(url, attempts - 1); throw error; });
+
   function render(practical) {
     const loading = [];
     document.title = `Required practical - ${practical.title}`;
@@ -34,8 +39,7 @@
       item.append(label, diagram);
       steps.append(item);
       // Inline SVG, so the page is complete (and prints in full) once the last diagram has arrived.
-      loading.push(fetch(practical.images[index])
-        .then((response) => { if (!response.ok) throw new Error(response.status); return response.text(); })
+      loading.push(fetchSvg(practical.images[index])
         .then((svg) => { diagram.innerHTML = svg; })
         .catch(() => { diagram.textContent = `Diagram for step ${index + 1} is missing.`; }));
     });
