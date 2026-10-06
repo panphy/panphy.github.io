@@ -3,199 +3,315 @@
 
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="robots" content="noindex, nofollow">
+  <meta name="description" content="AQA GCSE Physics resources from PanPhy Labs: unit companion sites, workbooks, Do Now lesson starters, revision sheets and teaching decks.">
+  <meta name="theme-color" content="#f5f1e6">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
   <title>GCSE Physics - PanPhy Labs</title>
+  <link rel="icon" type="image/png" href="/assets/favicon.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="/assets/apple-touch-icon.png">
+  <link rel="stylesheet" href="/assets/standalone-top.css">
+  <link rel="stylesheet" href="/assets/fonts/fonts.css">
+  <link rel="stylesheet" href="/gcsephy/assets/fonts/archivo-black.css">
   <style>
-    *, *::before, *::after {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
+    /* The hub for everything under gcsephy/. The page itself is ink on gridded
+       paper; each card wears the colours, corner radius and heading face of the
+       resource it opens, so the index doubles as a map of the folder. */
+    :root {
+      color-scheme: light;
+      --paper: #f5f1e6;
+      --ink: #0b1730;
+      --muted: #56606e;
+      --rule: rgba(11, 23, 48, .14);
+      --display: "Arial Black", "Archivo Black", Arial, sans-serif;
+      --serif: 'DM Serif Display', Georgia, serif;
+      --body: 'Manrope', system-ui, Arial, sans-serif;
+      --mono: 'IBM Plex Mono', ui-monospace, Menlo, monospace;
+      --gutter: clamp(16px, 5vw, 72px);
+      --standalone-top-bg: #f5f1e6;
     }
 
+    *, *::before, *::after { box-sizing: border-box; }
+    html { scroll-behavior: smooth; -webkit-text-size-adjust: 100%; }
     body {
-      min-height: 100vh;
-      background: #0f0f12;
-      color: #e8e4dc;
-      font-family: ui-monospace, 'Cascadia Code', 'Source Code Pro', Menlo, Consolas, monospace;
-      padding: 48px 24px;
-      max-width: 760px;
+      margin: 0;
+      background-color: var(--paper);
+      background-image: linear-gradient(var(--rule) 1px, transparent 1px), linear-gradient(90deg, var(--rule) 1px, transparent 1px);
+      background-size: 58px 58px;
+      color: var(--ink);
+      font: 16px/1.5 var(--body);
+    }
+    a { color: inherit; text-decoration: none; -webkit-tap-highlight-color: transparent; }
+    a:focus-visible { outline: 3px solid #ff795e; outline-offset: 4px; }
+    .icon { width: 1em; height: 1em; flex: none; fill: none; stroke: currentColor; stroke-width: 2.6; stroke-linecap: round; stroke-linejoin: round; }
+
+    /* ---------- Top bar ---------- */
+    .topbar {
+      display: flex; align-items: center; justify-content: space-between; gap: 16px;
+      min-height: 76px; padding: 0 var(--gutter);
+      background: var(--paper); border-bottom: 2px solid var(--ink);
+    }
+    .brand { display: inline-flex; align-items: center; gap: 12px; min-height: 48px; font-weight: 800; letter-spacing: -.02em; }
+    .brand img { display: block; border: 2px solid var(--ink); border-radius: 8px; }
+    .spec { font: 600 .72rem/1.3 var(--mono); letter-spacing: .14em; text-transform: uppercase; color: var(--muted); text-align: right; }
+
+    /* ---------- Hero ---------- */
+    .hero {
+      display: grid; grid-template-columns: minmax(0, 1.15fr) minmax(260px, .85fr); gap: clamp(28px, 6vw, 90px); align-items: end;
+      padding: clamp(40px, 7vw, 96px) var(--gutter) clamp(44px, 6vw, 84px);
+      border-bottom: 2px solid var(--ink);
+    }
+    .eyebrow { margin: 0 0 20px; font: 600 .76rem/1.4 var(--mono); letter-spacing: .18em; text-transform: uppercase; }
+    .eyebrow span { background: var(--ink); color: var(--paper); padding: 3px 8px; margin-right: 6px; }
+    h1 { margin: 0; font: 900 clamp(52px, 8.8vw, 136px)/.8 var(--display); letter-spacing: -.085em; text-transform: uppercase; }
+    h1 i { font-style: normal; color: var(--paper); -webkit-text-stroke: 5px var(--ink); paint-order: stroke fill; }
+    h1 b { color: #ff795e; }
+    .lead { max-width: 34rem; margin: clamp(22px, 3vw, 36px) 0 0; font-size: clamp(17px, 1.7vw, 21px); line-height: 1.5; color: #2c3850; }
+
+    /* Jump tiles: a contents list in the colours of each section. */
+    .jump { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; }
+    .jump a {
+      display: flex; align-items: center; justify-content: space-between; gap: 14px;
+      min-height: 52px; padding: 0 16px; border: 2px solid var(--ink);
+      background: var(--j-bg); color: var(--j-fg); box-shadow: 5px 5px 0 var(--j-shadow);
+      font: 900 1rem/1 var(--display); letter-spacing: -.03em; text-transform: uppercase;
+      transition: transform .12s ease, box-shadow .12s ease;
+    }
+    .jump a small { font: 500 .7rem/1 var(--mono); letter-spacing: .1em; opacity: .85; }
+    .jump a:hover { transform: translate(-2px, -2px); box-shadow: 7px 7px 0 var(--j-shadow); }
+    .jump li:nth-child(1) { --j-bg: #07162f; --j-fg: #c9ee49; --j-shadow: #42cbe8; margin-right: 18%; }
+    .jump li:nth-child(2) { --j-bg: #0a1326; --j-fg: #ffd23f; --j-shadow: #3fd0e8; margin: 0 9%; }
+    .jump li:nth-child(3) { --j-bg: #fff; --j-fg: #c2410c; --j-shadow: #0d9488; margin-left: 18%; }
+    .jump li:nth-child(3) a { border-radius: 14px; font: 400 1.25rem/1 var(--serif); letter-spacing: 0; text-transform: none; }
+    .jump li:nth-child(4) { --j-bg: #0c3a3f; --j-fg: #ffc145; --j-shadow: #ff8fa3; margin: 0 9%; }
+    .jump li:nth-child(4) a { border-radius: 10px; }
+    .jump li:nth-child(5) { --j-bg: #a895ff; --j-fg: #0b1730; --j-shadow: #0b1730; margin-right: 18%; }
+
+    /* ---------- Sections ---------- */
+    .band {
+      display: grid; grid-template-columns: clamp(150px, 19vw, 260px) minmax(0, 1fr); gap: clamp(20px, 4vw, 56px);
+      padding: clamp(36px, 5vw, 68px) var(--gutter);
+      border-bottom: 2px solid var(--ink);
+      scroll-margin-top: 12px;
+    }
+    .band:nth-of-type(even) { background: rgba(255, 253, 247, .72); }
+    .rail { position: sticky; top: calc(var(--standalone-top, 0px) + 20px); align-self: start; }
+    .rail p { margin: 0 0 6px; font: 600 .72rem/1.4 var(--mono); letter-spacing: .16em; text-transform: uppercase; color: var(--muted); }
+    .rail h2 {
+      margin: 0; font: 900 clamp(84px, 11vw, 168px)/.8 var(--display); letter-spacing: -.09em;
+      color: transparent; -webkit-text-stroke: 2px var(--ink);
+    }
+    .rail h2.word { font-size: clamp(54px, 6.4vw, 96px); letter-spacing: -.07em; text-transform: uppercase; }
+    @supports not (-webkit-text-stroke: 2px black) { .rail h2 { color: var(--ink); } }
+    .cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 290px), 1fr)); gap: 22px 24px; align-content: start; }
+
+    /* ---------- Cards ---------- */
+    .card {
+      position: relative; isolation: isolate; overflow: hidden;
+      display: flex; flex-direction: column; min-height: 228px; padding: 20px 20px 16px;
+      border: 2px solid var(--ink); border-radius: var(--c-radius, 4px);
+      background-color: var(--c-bg); color: var(--c-fg); box-shadow: 7px 7px 0 var(--c-shadow);
+      transition: transform .14s ease, box-shadow .14s ease;
+    }
+    .card:hover, .card:focus-visible { transform: translate(-3px, -3px); box-shadow: 10px 10px 0 var(--c-shadow); }
+    .card::before { content: ""; position: absolute; inset: 0; z-index: -1; background-image: var(--c-texture, none); background-size: var(--c-texture-size, 58px 58px); }
+    .kind {
+      align-self: flex-start; padding: 4px 9px; border-radius: 999px;
+      background: var(--c-accent); color: var(--c-on-accent, var(--ink));
+      font: 600 .68rem/1.2 var(--mono); letter-spacing: .12em; text-transform: uppercase;
+    }
+    .title { margin: 16px 0 10px; font: var(--c-title, 900 clamp(1.5rem, 2.3vw, 1.95rem)/.95 var(--display)); letter-spacing: var(--c-tracking, -.055em); text-transform: var(--c-case, uppercase); }
+    .desc { color: var(--c-sub); font-size: .95rem; line-height: 1.45; }
+    .foot { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-top: auto; padding-top: 18px; }
+    .meta { font: 500 .72rem/1.3 var(--mono); letter-spacing: .08em; text-transform: uppercase; color: var(--c-sub); }
+    .go { display: grid; place-items: center; width: 44px; height: 44px; flex: none; border: 2px solid currentColor; border-radius: 50%; font-size: 20px; color: var(--c-arrow, var(--c-accent)); transition: transform .14s ease; }
+    .card:hover .go { transform: rotate(-45deg); }
+
+    /* Year 9, Work Like a Physicist: navy, lime and cyan. */
+    .t-y9 { --c-bg: #07162f; --c-fg: #fff; --c-sub: #c5d0e2; --c-accent: #c9ee49; --c-shadow: #42cbe8; --c-texture: linear-gradient(rgba(68, 168, 200, .16) 1px, transparent 1px), linear-gradient(90deg, rgba(68, 168, 200, .16) 1px, transparent 1px); }
+    /* Year 10, Electric Circuits: deeper navy, spark yellow and copper. */
+    .t-y10 { --c-bg: #0a1326; --c-fg: #fff; --c-sub: #d5deeb; --c-accent: #ffd23f; --c-shadow: #ff8a4c; --c-texture: linear-gradient(rgba(68, 168, 200, .16) 1px, transparent 1px), linear-gradient(90deg, rgba(68, 168, 200, .16) 1px, transparent 1px); }
+    /* Year 10 workbook page: paper card, navy ink, cyan shadow. */
+    .t-y10-book { --c-bg: #fffdf7; --c-fg: #0a1326; --c-sub: #4a5360; --c-accent: #ffd23f; --c-shadow: #3fd0e8; --c-arrow: #0a1326; }
+    /* Year 11 and the atoms deck: dotted paper, serif headings, orange and teal. */
+    .t-y11 { --c-bg: #fff; --c-fg: #1b1b1b; --c-sub: #5f5954; --c-accent: #c2410c; --c-on-accent: #fff; --c-shadow: #0d9488; --c-arrow: #0f766e; --c-radius: 18px; --c-title: 400 clamp(1.7rem, 2.5vw, 2.1rem)/1.05 var(--serif); --c-tracking: 0; --c-case: none; --c-texture: radial-gradient(#e4dfd4 1px, transparent 1px); --c-texture-size: 22px 22px; }
+    /* Do Now: teal board, marigold and pink. */
+    .t-dn { --c-bg: #0c3a3f; --c-fg: #fff; --c-sub: #dcebe9; --c-accent: #ffc145; --c-shadow: #ff8fa3; --c-radius: 12px; --c-texture: linear-gradient(rgba(140, 214, 204, .13) 1px, transparent 1px), linear-gradient(90deg, rgba(140, 214, 204, .13) 1px, transparent 1px); }
+    .t-dn-sheet { --c-bg: #fffdf7; --c-fg: #0b2a2e; --c-sub: #4f6163; --c-accent: #ff8fa3; --c-shadow: #ffc145; --c-arrow: #0b2a2e; --c-radius: 12px; }
+
+    /* ---------- Footer ---------- */
+    footer { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px 24px; padding: 22px var(--gutter) calc(28px + env(safe-area-inset-bottom, 0px)); font: 500 .74rem/1.4 var(--mono); letter-spacing: .1em; text-transform: uppercase; color: var(--muted); }
+    footer a { display: inline-flex; align-items: center; gap: 8px; min-height: 48px; color: var(--ink); font-weight: 600; }
+    footer a:hover { text-decoration: underline; text-underline-offset: 4px; }
+
+    /* ---------- Load-in ---------- */
+    @media (prefers-reduced-motion: no-preference) {
+      .hero > *, .jump li { animation: rise .5s cubic-bezier(.2, .8, .2, 1) both; }
+      .jump li:nth-child(1) { animation-delay: .10s; }
+      .jump li:nth-child(2) { animation-delay: .16s; }
+      .jump li:nth-child(3) { animation-delay: .22s; }
+      .jump li:nth-child(4) { animation-delay: .28s; }
+      .jump li:nth-child(5) { animation-delay: .34s; }
+      @keyframes rise { from { opacity: 0; transform: translateY(14px); } }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      html { scroll-behavior: auto; }
+      .card, .jump a, .go { transition: none; }
     }
 
-    a.back {
-      display: inline-block;
-      color: rgba(232, 228, 220, 0.42);
-      text-decoration: none;
-      font-size: 0.82rem;
-      letter-spacing: 0.04em;
-      margin-bottom: 40px;
+    /* ---------- Narrow screens ---------- */
+    @media (max-width: 860px) {
+      .hero { grid-template-columns: 1fr; align-items: start; }
+      .jump { grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 14px; }
+      .jump li:nth-child(n) { margin: 0; }
+      .band { grid-template-columns: 1fr; gap: 22px; }
+      .rail { position: static; display: flex; align-items: flex-end; gap: 14px; }
+      .rail p { margin: 0 0 4px; max-width: 9rem; }
+      .rail h2 { font-size: 84px; }
+      .rail h2.word { font-size: 56px; }
     }
-
-    a.back:hover {
-      color: #e8e4dc;
-    }
-
-    h1 {
-      font-size: 1rem;
-      letter-spacing: 0.14em;
-      text-transform: uppercase;
-      color: rgba(232, 228, 220, 0.38);
-      margin-bottom: 4px;
-    }
-
-    .subtitle {
-      font-size: 0.76rem;
-      color: rgba(232, 228, 220, 0.28);
-      letter-spacing: 0.06em;
-      margin-bottom: 34px;
-    }
-
-    h2 {
-      font-size: 0.72rem;
-      letter-spacing: 0.12em;
-      text-transform: uppercase;
-      color: rgba(232, 228, 220, 0.3);
-      margin: 28px 0 10px;
-    }
-
-    ul {
-      list-style: none;
-      display: flex;
-      flex-direction: column;
-      gap: 4px;
-    }
-
-    a.entry {
-      display: flex;
-      align-items: baseline;
-      gap: 18px;
-      padding: 13px 16px;
-      border: 1px solid rgba(255, 255, 255, 0.07);
-      border-radius: 10px;
-      background: rgba(255, 255, 255, 0.03);
-      text-decoration: none;
-      color: inherit;
-      transition: background 0.12s ease, border-color 0.12s ease;
-    }
-
-    a.entry:hover {
-      background: rgba(255, 255, 255, 0.07);
-      border-color: rgba(255, 255, 255, 0.15);
-    }
-
-    .entry-name {
-      font-size: 0.92rem;
-      color: #e8e4dc;
-      flex-shrink: 0;
-    }
-
-    .entry-desc {
-      font-size: 0.78rem;
-      color: rgba(232, 228, 220, 0.42);
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-
-    @media (max-width: 620px) {
-      body {
-        padding: 36px 18px;
-      }
-
-      a.entry {
-        flex-direction: column;
-        gap: 5px;
-      }
-
-      .entry-desc {
-        white-space: normal;
-      }
+    @media (max-width: 480px) {
+      .spec { display: none; }
+      .card { min-height: 0; box-shadow: 5px 5px 0 var(--c-shadow); }
+      h1 { font-size: 17vw; }
+      h1 i { -webkit-text-stroke-width: 4px; }
     }
   </style>
   <script src="/gcsephy/sw-register.js" defer></script>
 </head>
 
-<body>
-  <a class="back" href="/">&larr; PanPhy Labs</a>
-  <h1>GCSE Physics</h1>
-  <p class="subtitle">Unit companions for AQA GCSE physics</p>
+<body id="top">
+  <header class="topbar">
+    <a class="brand" href="/" aria-label="PanPhy Labs home"><img src="/assets/panphy.png" alt="PanPhy Labs" width="48" height="48"><span>PanPhy Labs</span></a>
+    <span class="spec">AQA GCSE<br>Physics 8463</span>
+  </header>
 
-  <h2>Year 9</h2>
-  <ul>
-    <li>
-      <a class="entry" href="year9phy/unit01/">
-        <span class="entry-name">Work Like a Physicist</span>
-        <span class="entry-desc">Unit 1 companion: working scientifically, missions and Exam Zone</span>
-      </a>
-    </li>
-  </ul>
+  <main>
+    <section class="hero">
+      <div>
+        <p class="eyebrow"><span>Years 9 to 11</span> Unit by unit</p>
+        <h1>GCSE<br><i>Physics</i><b>.</b></h1>
+        <p class="lead">Unit companions, workbooks, lesson starters and teaching decks for AQA GCSE Physics. Each one keeps its own colours here, so you will know it when you get there.</p>
+      </div>
+      <nav aria-label="Sections on this page">
+        <ul class="jump">
+          <li><a href="#year9">Year 9 <small>01</small></a></li>
+          <li><a href="#year10">Year 10 <small>02</small></a></li>
+          <li><a href="#year11">Year 11 <small>03</small></a></li>
+          <li><a href="#starters">Do Now <small>04</small></a></li>
+          <li><a href="#decks">Decks <small>05</small></a></li>
+        </ul>
+      </nav>
+    </section>
 
-  <h2>Year 10</h2>
-  <ul>
-    <li>
-      <a class="entry" href="year10phy/unit01/">
-        <span class="entry-name">Electric Circuits</span>
-        <span class="entry-desc">Electricity companion: revision notes, practice and Exam Zone</span>
-      </a>
-    </li>
-    <li>
-      <a class="entry" href="year10phy/unit01/workbook/">
-        <span class="entry-name">Electric Circuits workbook</span>
-        <span class="entry-desc">Twelve-lesson workbook, one printable booklet per lesson, with answer editions</span>
-      </a>
-    </li>
-  </ul>
+    <section class="band" id="year9" aria-labelledby="year9-title">
+      <div class="rail">
+        <p>Year</p>
+        <h2 id="year9-title" aria-label="Year 9">9</h2>
+      </div>
+      <div class="cards">
+        <a class="card t-y9" href="year9phy/unit01/">
+          <span class="kind">Unit 1 companion</span>
+          <strong class="title">Work Like a Physicist</strong>
+          <span class="desc">Working scientifically: revision notes for each mission, fresh practice and the Exam Zone.</span>
+          <span class="foot"><span class="meta">8 lessons · 40 questions</span><span class="go" aria-hidden="true"><svg class="icon" viewBox="0 0 24 24" focusable="false"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span></span>
+        </a>
+      </div>
+    </section>
 
-  <h2>Year 11</h2>
-  <ul>
-    <li>
-      <a class="entry" href="year11phy/unit01/">
-        <span class="entry-name">Atoms and Nuclear Radiation workbook</span>
-        <span class="entry-desc">Ten-lesson workbook, one printable booklet per lesson, with answer editions and a unit review</span>
-      </a>
-    </li>
-  </ul>
+    <section class="band" id="year10" aria-labelledby="year10-title">
+      <div class="rail">
+        <p>Year</p>
+        <h2 id="year10-title" aria-label="Year 10">10</h2>
+      </div>
+      <div class="cards">
+        <a class="card t-y10" href="year10phy/unit01/">
+          <span class="kind">Unit companion</span>
+          <strong class="title">Electric Circuits</strong>
+          <span class="desc">Electricity companion: revision notes, practice and the Exam Zone.</span>
+          <span class="foot"><span class="meta">59 questions · 8 guides</span><span class="go" aria-hidden="true"><svg class="icon" viewBox="0 0 24 24" focusable="false"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span></span>
+        </a>
+        <a class="card t-y10-book" href="year10phy/unit01/workbook/">
+          <span class="kind">Workbook</span>
+          <strong class="title">Electric Circuits workbook</strong>
+          <span class="desc">Twelve-lesson workbook, one printable booklet per lesson, with answer editions.</span>
+          <span class="foot"><span class="meta">12 lesson booklets</span><span class="go" aria-hidden="true"><svg class="icon" viewBox="0 0 24 24" focusable="false"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span></span>
+        </a>
+      </div>
+    </section>
 
-  <h2>Lesson starters and revision</h2>
-  <ul>
-    <li>
-      <a class="entry" href="do-now/">
-        <span class="entry-name">Do Now starters</span>
-        <span class="entry-desc">AO1 lesson starters, worksheets and revision flashcards by topic</span>
-      </a>
-    </li>
-    <li>
-      <a class="entry" href="do-now/revision/">
-        <span class="entry-name">AO1 revision sheets</span>
-        <span class="entry-desc">Printable question-and-answer sheet per topic, and a method sheet per required practical</span>
-      </a>
-    </li>
-  </ul>
+    <section class="band" id="year11" aria-labelledby="year11-title">
+      <div class="rail">
+        <p>Year</p>
+        <h2 id="year11-title" aria-label="Year 11">11</h2>
+      </div>
+      <div class="cards">
+        <a class="card t-y11" href="year11phy/unit01/">
+          <span class="kind">Workbook</span>
+          <strong class="title">Atoms and Nuclear Radiation workbook</strong>
+          <span class="desc">Ten-lesson workbook, one printable booklet per lesson, with answer editions and a unit review.</span>
+          <span class="foot"><span class="meta">10 lesson booklets</span><span class="go" aria-hidden="true"><svg class="icon" viewBox="0 0 24 24" focusable="false"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span></span>
+        </a>
+      </div>
+    </section>
 
-  <h2>Teaching decks</h2>
-  <ul>
-    <li>
-      <a class="entry" href="decks/atoms-and-radiation/">
-        <span class="entry-name">Atoms and Nuclear Radiation</span>
-        <span class="entry-desc">Slide deck: atomic models, alpha, beta, gamma and half-life</span>
-      </a>
-    </li>
-    <li>
-      <a class="entry" href="decks/work-like-a-physicist/">
-        <span class="entry-name">Work Like a Physicist</span>
-        <span class="entry-desc">Year 9 slide deck: uncertainty, errors, variables, graphs and investigations</span>
-      </a>
-    </li>
-    <li>
-      <a class="entry" href="decks/electric-circuits/">
-        <span class="entry-name">Electric Circuits</span>
-        <span class="entry-desc">Year 10 slide deck: current, p.d., resistance, I–V, power and mains safety</span>
-      </a>
-    </li>
-  </ul>
+    <section class="band" id="starters" aria-labelledby="starters-title">
+      <div class="rail">
+        <p>Lesson starters and revision</p>
+        <h2 class="word" id="starters-title" aria-label="Lesson starters and revision">AO1</h2>
+      </div>
+      <div class="cards">
+        <a class="card t-dn" href="do-now/">
+          <span class="kind">Lesson starters</span>
+          <strong class="title">Do Now starters</strong>
+          <span class="desc">AO1 lesson starters, worksheets and revision flashcards by topic.</span>
+          <span class="foot"><span class="meta">Board · worksheet · flashcards</span><span class="go" aria-hidden="true"><svg class="icon" viewBox="0 0 24 24" focusable="false"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span></span>
+        </a>
+        <a class="card t-dn-sheet" href="do-now/revision/">
+          <span class="kind">Printable PDFs</span>
+          <strong class="title">AO1 revision sheets</strong>
+          <span class="desc">Printable question-and-answer sheet per topic, and a method sheet per required practical.</span>
+          <span class="foot"><span class="meta">By topic · by practical</span><span class="go" aria-hidden="true"><svg class="icon" viewBox="0 0 24 24" focusable="false"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span></span>
+        </a>
+      </div>
+    </section>
 
-  <!-- Add an entry whenever a page, unit or standalone resource is added under gcsephy/. -->
-  <!-- Remove or update the entry when a page is renamed or deleted. -->
+    <section class="band" id="decks" aria-labelledby="decks-title">
+      <div class="rail">
+        <p>Teaching decks</p>
+        <h2 class="word" id="decks-title" aria-label="Teaching decks">Deck</h2>
+      </div>
+      <div class="cards">
+        <a class="card t-y9" href="decks/work-like-a-physicist/">
+          <span class="kind">Year 9 slide deck</span>
+          <strong class="title">Work Like a Physicist</strong>
+          <span class="desc">Uncertainty, errors, variables, graphs and investigations.</span>
+          <span class="foot"><span class="meta">Present fullscreen</span><span class="go" aria-hidden="true"><svg class="icon" viewBox="0 0 24 24" focusable="false"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span></span>
+        </a>
+        <a class="card t-y10" href="decks/electric-circuits/">
+          <span class="kind">Year 10 slide deck</span>
+          <strong class="title">Electric Circuits</strong>
+          <span class="desc">Current, p.d., resistance, I–V, power and mains safety.</span>
+          <span class="foot"><span class="meta">Present fullscreen</span><span class="go" aria-hidden="true"><svg class="icon" viewBox="0 0 24 24" focusable="false"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span></span>
+        </a>
+        <a class="card t-y11" href="decks/atoms-and-radiation/">
+          <span class="kind">Slide deck</span>
+          <strong class="title">Atoms and Nuclear Radiation</strong>
+          <span class="desc">Atomic models, alpha, beta, gamma and half-life.</span>
+          <span class="foot"><span class="meta">Present fullscreen</span><span class="go" aria-hidden="true"><svg class="icon" viewBox="0 0 24 24" focusable="false"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span></span>
+        </a>
+      </div>
+    </section>
+
+    <!-- Add an entry whenever a page, unit or standalone resource is added under gcsephy/. -->
+    <!-- Remove or update the entry when a page is renamed or deleted. -->
+  </main>
+
+  <footer>
+    <span>GCSE Physics · PanPhy Labs</span>
+    <a href="/"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M19 12H5M11 6l-6 6 6 6"/></svg> All PanPhy Labs apps</a>
+  </footer>
 </body>
 
 </html>
