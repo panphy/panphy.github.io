@@ -54,6 +54,7 @@ button:focus-visible, a:focus-visible, input:focus-visible, .topic input:focus-v
 .panel h2 { margin: 0; display: flex; align-items: center; gap: 12px; font: 900 clamp(22px, 3vw, 30px)/1 var(--display); letter-spacing: -.04em; text-transform: uppercase; }
 .panel h2 b { display: grid; place-items: center; width: 40px; height: 40px; border: 2px solid var(--ink); border-radius: 50%; background: var(--hi); font-size: 20px; letter-spacing: 0; }
 
+.switches { display: flex; flex-wrap: wrap; gap: 10px; }
 .segmented { display: inline-flex; border: 2px solid var(--ink); border-radius: 999px; overflow: hidden; background: #fff; }
 .segmented button { min-height: 44px; padding: 0 16px; border: 0; background: none; font-size: 14px; font-weight: 800; }
 .segmented button[aria-pressed="true"] { background: var(--ink); color: #fff; }

@@ -1,0 +1,988 @@
+﻿Number,Unit,Topic,Course,Target,Reason,Question,Answer
+1,Energy,Energy stores and systems,Combined,7,Core fact,Name the eight stores of energy.,"Chemical, electrostatic, magnetic, elastic potential, nuclear, thermal, kinetic and gravitational potential"
+2,Energy,Energy stores and systems,Combined,7,Definition that mark schemes ask for,State the law of conservation of energy.,"Energy can be transferred usefully, stored or dissipated, but it cannot be created or destroyed."
+3,Energy,Energy stores and systems,Combined,7,Asked in the 2020–23 papers,What is a closed system?,A system where no energy enters or leaves.
+4,Energy,Energy stores and systems,Combined,7,Definition that mark schemes ask for,Define work done.,The energy transferred when a force moves an object through a distance.
+5,Energy,Energy stores and systems,Combined,7,Standard unit,State the standard unit of energy.,Joule (J)
+6,Energy,Energy stores and systems,Combined,7,One representative of a group of similar questions,Name the store of energy associated with fuels and batteries.,The chemical energy store
+7,Energy,Energy stores and systems,Combined,9,,Describe the change in the chemical energy store as fuel is burned.,It decreases.
+8,Energy,Energy stores and systems,Combined,9,,Name the store of energy associated with changes in speed.,The kinetic energy store
+9,Energy,Energy stores and systems,Combined,9,,Describe the change in the kinetic energy store as an object slows down.,It decreases.
+10,Energy,Energy stores and systems,Combined,9,,Name the store of energy associated with changes in height.,The gravitational potential energy store
+11,Energy,Energy stores and systems,Combined,9,,Describe the change in the gravitational potential energy store as an object rises.,It increases.
+12,Energy,Energy stores and systems,Combined,7,One representative of a group of similar questions,Name the store of energy associated with extending and compressing objects.,The elastic potential energy store
+13,Energy,Energy stores and systems,Combined,9,,Describe the change in the elastic potential energy store as a spring is compressed further.,It increases.
+14,Energy,Energy stores and systems,Combined,9,,Name the store of energy associated with changes in temperature.,The thermal energy store
+15,Energy,Energy stores and systems,Combined,9,,Describe the change in the thermal energy store as an object gets hotter.,It increases.
+16,Energy,Energy stores and systems,Combined,7,Core fact,Name the four ways energy is transferred between stores.,"Mechanically, electrically, by heating and by radiation"
+17,Energy,Energy stores and systems,Combined,9,,Name the energy transfer when a force moves an object.,Mechanical transfer
+18,Energy,Energy stores and systems,Combined,7,One representative of a group of similar questions,Name the energy transfer when an object emits light or sound.,Transfer by radiation
+19,Energy,Energy stores and systems,Combined,9,,Name the energy transfer when a hot object warms a cooler one.,Transfer by heating
+638,Energy,Energy stores and systems,Combined,9,,What is a system?,An object or a group of objects.
+639,Energy,Energy stores and systems,Combined,9,,State what happens to energy when a system changes.,It is transferred from one store to another.
+640,Energy,Energy stores and systems,Combined,9,On the equations sheet,"State the equation linking kinetic energy, mass and speed.","kinetic energy = 0.5 × mass × speed²
+(E_k = ½ m v²)"
+641,Energy,Energy stores and systems,Combined,9,On the equations sheet,"State the equation linking gravitational potential energy, mass, gravitational field strength and height.","gravitational potential energy = mass × gravitational field strength × height
+(E_p = m g h)"
+642,Energy,Energy stores and systems,Combined,9,On the equations sheet,"State the equation linking elastic potential energy, spring constant and extension.","elastic potential energy = 0.5 × spring constant × extension²
+(E_e = ½ k e²)"
+643,Energy,Energy stores and systems,Combined,7,Asked in the 2020–23 papers,Name the two quantities that kinetic energy depends on.,Mass and speed
+644,Energy,Energy stores and systems,Combined,7,What a quantity depends on,Name the three quantities that gravitational potential energy depends on.,"Mass, gravitational field strength and height"
+645,Energy,Energy stores and systems,Combined,7,Asked in the 2020–23 papers,A ball is thrown straight up. Describe the changes in its energy stores as it rises.,Kinetic energy store decreases; gravitational potential energy store increases.
+646,Energy,Energy stores and systems,Combined,7,Asked in the 2020–23 papers,An electric kettle is switched on. Describe the useful energy transfer.,Energy is transferred electrically to the thermal energy store of the water.
+915,Energy,Energy stores and systems,Combined,7,Asked in the 2020–23 papers,A falling apple hits the ground. Describe the energy transfer.,Energy is transferred from the kinetic store of the apple to the thermal store of the surroundings.
+20,Energy,Specific heat capacity (RP),Combined,9,,State the three variables that a change in thermal energy depends on.,"Mass, specific heat capacity and change in temperature"
+21,Energy,Specific heat capacity (RP),Combined,9,,What does Δθ represent?,Change in temperature
+22,Energy,Specific heat capacity (RP),Combined,7,Standard unit,State the standard unit of specific heat capacity.,Joule per kilogram per degree Celsius (J/kg °C)
+23,Energy,Specific heat capacity (RP),Combined,7,Definition that mark schemes ask for,Define specific heat capacity.,The energy required to raise the temperature of 1 kg of a substance by 1 °C.
+24,Energy,Specific heat capacity (RP),Combined,9,,"A material has a high specific heat capacity. Is it hard or easy to heat up, and why?","Hard.
+It takes a lot of energy to raise the temperature of 1 kg by 1 °C."
+25,Energy,Specific heat capacity (RP),Combined,7,Core practical fact,State the three measurements needed to find the specific heat capacity of a substance.,"Energy supplied, mass and temperature rise"
+26,Energy,Specific heat capacity (RP),Combined,9,,Name the piece of equipment used to measure temperature.,A thermometer
+27,Energy,Specific heat capacity (RP),Combined,9,,Name the piece of equipment used to measure mass.,A balance
+28,Energy,Specific heat capacity (RP),Combined,9,,Explain why a Bunsen burner is not used when measuring specific heat capacity.,The energy it supplies cannot be measured easily.
+29,Energy,Specific heat capacity (RP),Combined,7,Core practical fact,Explain why an electrical heater is used when measuring specific heat capacity.,"The energy supplied can be calculated from potential difference, current and time."
+647,Energy,Specific heat capacity (RP),Combined,9,On the equations sheet,"State the equation linking change in thermal energy, mass, specific heat capacity and temperature change.","change in thermal energy = mass × specific heat capacity × temperature change
+(ΔE = m c Δθ)"
+648,Energy,Specific heat capacity (RP),Combined,9,,"When measuring specific heat capacity, explain why the block is wrapped in insulation.",To reduce energy transfer to the surroundings.
+649,Energy,Specific heat capacity (RP),Combined,9,,Explain why a measured specific heat capacity is usually higher than the true value.,"Some of the energy supplied is transferred to the surroundings, not the block."
+31,Energy,"Conservation of energy, power and efficiency",Combined,7,Definition that mark schemes ask for,Define power.,The rate at which energy is transferred (or work is done).
+32,Energy,"Conservation of energy, power and efficiency",Combined,7,Standard unit,State the standard unit of power.,Watt (W)
+33,Energy,"Conservation of energy, power and efficiency",Combined,9,,State the standard unit of time.,Second (s)
+34,Energy,"Conservation of energy, power and efficiency",Combined,9,,State a unit that is equivalent to 1 W.,1 J/s
+35,Energy,"Conservation of energy, power and efficiency",Combined,9,,State the term for energy transferred to stores that are not useful.,Wasted energy
+36,Energy,"Conservation of energy, power and efficiency",Combined,7,Asked in the 2020–23 papers,State how unwanted energy transfers can be reduced.,By lubrication and by thermal insulation.
+37,Energy,"Conservation of energy, power and efficiency",Combined,9,,Lubricating moving parts reduces unwanted energy transfers to which energy store?,The thermal energy store
+38,Energy,"Conservation of energy, power and efficiency",Combined,7,Definition that mark schemes ask for,Describe what it means for a device to be efficient.,Most of the input energy is transferred usefully; little is wasted.
+39,Energy,"Conservation of energy, power and efficiency",Combined,9,,State the unit of efficiency.,It has no unit (it is a ratio).
+40,Energy,"Conservation of energy, power and efficiency",Combined,9,,State how the efficiency of a mechanical energy transfer can be increased.,By lubricating the moving parts.
+41,Energy,"Conservation of energy, power and efficiency",Combined,9,,State how the efficiency of a heating energy transfer can be increased.,By adding thermal insulation.
+42,Energy,"Conservation of energy, power and efficiency",Combined,9,,"Torches A and B each have an input power of 50 W. A has a useful output of 40 W and B of 45 W. Which is more efficient, and why?","Torch B.
+Its efficiency is higher: 90%, against 80% for A."
+43,Energy,"Conservation of energy, power and efficiency",Combined,9,,"Heaters A and B each have a useful output of 2000 W. A has an input power of 2500 W and B of 2600 W. Which is more efficient, and why?","Heater A.
+Its efficiency is higher: 80%, against 77% for B."
+650,Energy,"Conservation of energy, power and efficiency",Combined,9,On the equations sheet,"State the equation linking power, energy transferred and time.","power = energy transferred ÷ time
+(P = E ÷ t)"
+651,Energy,"Conservation of energy, power and efficiency",Combined,9,On the equations sheet,"State the equation linking power, work done and time.","power = work done ÷ time
+(P = W ÷ t)"
+652,Energy,"Conservation of energy, power and efficiency",Combined,9,On the equations sheet,"In words, state the equation for efficiency in terms of energy.",efficiency = useful output energy transfer ÷ total input energy transfer
+653,Energy,"Conservation of energy, power and efficiency",Combined,9,On the equations sheet,"In words, state the equation for efficiency in terms of power.",efficiency = useful power output ÷ total power input
+654,Energy,"Conservation of energy, power and efficiency",Combined,7,Definition that mark schemes ask for,State what is meant by dissipated energy.,Energy transferred to the surroundings and stored in less useful ways.
+655,Energy,"Conservation of energy, power and efficiency",Combined,9,,State what eventually happens to wasted energy.,"It is transferred to the surroundings, which warm up slightly."
+656,Energy,"Conservation of energy, power and efficiency",Combined,7,Standard explanation,"Two motors lift the same load through the same height. Motor A is quicker. Which is more powerful, and why?","Motor A.
+It transfers the same energy in less time."
+657,Energy,"Conservation of energy, power and efficiency",Combined,7,Standard explanation,Explain why efficiency can never be greater than 1 (100%).,"Energy cannot be created, so useful output cannot exceed total input."
+905,Energy,"Conservation of energy, power and efficiency",Combined,9,,A motor is 30% efficient. What does this mean?,30% of the input energy is transferred usefully; 70% is wasted.
+44,Energy,Thermal conductivity and insulation,Combined,7,Asked in the 2020–23 papers,Describe how thermal conductivity affects the rate of energy transfer through a material.,"The higher the thermal conductivity, the higher the rate of energy transfer by conduction."
+45,Energy,Thermal conductivity and insulation,Combined,9,,Name two things that affect how fast a building cools through its walls.,The thickness and the thermal conductivity of the walls
+46,Energy,Thermal conductivity and insulation,Combined,9,,Describe how the thickness of a building's walls affects its rate of energy loss.,"The thicker the walls, the lower the rate of energy loss."
+47,Energy,Thermal conductivity and insulation,Combined,9,,Describe how the thermal conductivity of a building's walls affects its rate of energy loss.,"The higher the thermal conductivity, the higher the rate of energy loss."
+48,Energy,Thermal conductivity and insulation,Combined,9,,Explain the purpose of using a good thermal insulator.,To reduce unwanted energy transfers by heating.
+49,Energy,(S) Thermal insulation (RP),Separate,9,,Name the equipment needed to compare thermal insulators.,"A beaker of hot water, insulating materials, a thermometer and a stopwatch"
+50,Energy,(S) Thermal insulation (RP),Separate,7,Asked in the 2020–23 papers,Comparing thermal insulators: name the independent variable.,The type of insulating material
+51,Energy,(S) Thermal insulation (RP),Separate,7,Asked in the 2020–23 papers,Comparing thermal insulators: name the dependent variable.,The temperature fall of the water in a set time
+52,Energy,(S) Thermal insulation (RP),Separate,7,Core practical fact,Comparing thermal insulators: name three control variables.,"Any three from: volume of water, starting temperature, thickness of insulation, cooling time"
+53,Energy,(S) Thermal insulation (RP),Separate,9,,Name the piece of equipment used to measure time.,A stopwatch
+658,Energy,Thermal conductivity and insulation,Combined,7,Standard explanation,Explain why loft insulation reduces the heating bills of a house.,Its low thermal conductivity reduces the rate of energy transfer out of the house.
+916,Energy,Thermal conductivity and insulation,Combined,7,What a quantity depends on,Give three things that affect the rate of energy transfer through a wall.,"Its thickness, its thermal conductivity and the temperature difference across it."
+659,Energy,(S) Thermal insulation (RP),Separate,9,,Comparing thermal insulators: explain why each beaker must start at the same temperature.,"Hotter water cools faster, so the comparison would be unfair."
+55,Energy,Energy resources,Combined,9,,Name the three main uses for energy resources.,"Transport, electricity generation and heating"
+56,Energy,Energy resources,Combined,7,Definition that mark schemes ask for,What is a renewable energy resource?,One that is being (or can be) replenished as it is used.
+57,Energy,Energy resources,Combined,9,,Name the nine main energy resources.,"Fossil fuels, nuclear fuel, biofuel, wind, hydroelectricity, geothermal, tides, the Sun and water waves"
+58,Energy,Energy resources,Combined,7,Core fact,Name the three types of fossil fuels.,"Coal, oil and natural gas"
+59,Energy,Energy resources,Combined,7,Core fact,Identify the two main non-renewable energy resources.,Fossil fuels and nuclear fuel
+60,Energy,Energy resources,Combined,9,,Name two energy resources which involve burning or combustion.,Fossil fuels and biofuel
+61,Energy,Energy resources,Combined,7,Definition that mark schemes ask for,State what reliable means for an energy resource.,It can supply energy whenever it is needed.
+62,Energy,Energy resources,Combined,7,Standard explanation,Explain why solar power is not reliable in every country.,The amount of sunlight varies with the weather and the time of day.
+63,Energy,Energy resources,Combined,9,,Explain why wind power is not reliable in every country.,"The wind speed varies, and sometimes there is no wind."
+64,Energy,Energy resources,Combined,7,Standard explanation,Explain why fossil fuels are considered reliable.,"They can be burned at any time, in varying amounts, to match demand."
+65,Energy,Energy resources,Combined,9,,Explain why hydroelectricity is considered reliable.,The flow of water through a dam can be adjusted depending on demand.
+66,Energy,Energy resources,Combined,9,,Identify the energy resource that contributes most to climate change.,Fossil fuels
+67,Energy,Energy resources,Combined,9,,"Other than climate change, name two environmental problems that energy resources can cause.","Any two from: habitat destruction, air pollution, radioactive waste, visual or noise pollution"
+68,Energy,Energy resources,Combined,9,,Name two energy resources that can fuel internal combustion engines.,Fossil fuels and biofuel
+69,Energy,Energy resources,Combined,9,,Name the energy resources that can be used for electricity generation.,"Fossil fuels, nuclear fuel, biofuel, wind, hydroelectricity, solar, geothermal, tidal and wave"
+70,Energy,Energy resources,Combined,9,,Name the energy resources that can be used for heating.,"Fossil fuels, biofuel, geothermal and solar"
+71,Energy,Energy resources,Combined,9,,State four types of consideration that affect the choice of energy resource.,"Environmental, political, social and economic"
+660,Energy,Energy resources,Combined,7,Definition that mark schemes ask for,What is a non-renewable energy resource?,"One that is not replenished as it is used, so it will run out."
+661,Energy,Energy resources,Combined,9,,Explain why nuclear fuel is a non-renewable energy resource.,The supply of uranium and plutonium is finite and is not replenished.
+662,Energy,Energy resources,Combined,7,Core fact,Give one advantage of nuclear power over burning fossil fuels.,It produces no carbon dioxide when generating electricity.
+663,Energy,Energy resources,Combined,7,Core fact,Give one disadvantage of nuclear power.,It produces radioactive waste that stays hazardous for a very long time.
+664,Energy,Energy resources,Combined,7,Asked in the 2020–23 papers,Name the gas from burning fossil fuels that contributes most to climate change.,Carbon dioxide
+665,Energy,Energy resources,Combined,7,Asked in the 2020–23 papers,"Other than climate change, state one environmental problem caused by burning fossil fuels.",Acid rain (caused by sulfur dioxide)
+666,Energy,Energy resources,Combined,9,,State one environmental impact of a hydroelectric dam or tidal barrage.,"It floods land or changes habitats, harming wildlife."
+667,Energy,Energy resources,Combined,7,Standard explanation,Explain why tidal power is more reliable than wind power.,The tides are predictable; the wind is not.
+668,Energy,Energy resources,Combined,9,,Explain why scientists cannot always deal with the environmental issues they identify.,"Because of political, social, ethical or economic considerations."
+912,Energy,Energy resources,Combined,7,Standard explanation,Explain why biofuel can be described as carbon neutral.,The plants absorb as much carbon dioxide growing as is released when the fuel burns.
+913,Energy,Energy resources,Combined,9,,Give one disadvantage of geothermal power.,It is only possible in a few places.
+914,Energy,Energy resources,Combined,9,,Compare the costs of renewable energy resources with fossil fuels.,"Expensive to set up, but no fuel cost and cheap to run."
+72,Electricity,Standard circuit diagram symbols,Combined,7,Asked in the 2020–23 papers,Name the components labelled A to E in the diagram.,"A: open switch
+B: closed switch
+C: cell
+D: battery
+E: diode"
+73,Electricity,Standard circuit diagram symbols,Combined,7,Asked in the 2020–23 papers,Name the components labelled F to J in the diagram.,"F: resistor
+G: variable resistor
+H: light-emitting diode (LED)
+I: lamp
+J: fuse"
+74,Electricity,Standard circuit diagram symbols,Combined,7,Asked in the 2020–23 papers,Name the components labelled K to N in the diagram.,"K: voltmeter
+L: ammeter
+M: thermistor
+N: light-dependent resistor (LDR)"
+75,Electricity,Standard circuit diagram symbols,Combined,9,,State the function of a cell or battery.,To provide the potential difference that makes charge flow.
+76,Electricity,Standard circuit diagram symbols,Combined,9,,State the difference between a cell and a battery.,A battery is two or more cells connected together.
+77,Electricity,Standard circuit diagram symbols,Combined,7,Asked in the 2020–23 papers,State the function of a diode.,To allow current in one direction only.
+78,Electricity,Standard circuit diagram symbols,Combined,9,,State the function of a resistor.,To limit (reduce) the current in a circuit.
+79,Electricity,Standard circuit diagram symbols,Combined,9,,State the function of a variable resistor.,To control the current by changing its resistance.
+80,Electricity,Standard circuit diagram symbols,Combined,9,,State the function of an LED.,To emit light when current passes through it in the forward direction.
+81,Electricity,Standard circuit diagram symbols,Combined,7,Core fact,State the function of a fuse.,To melt and break the circuit if the current becomes too large.
+82,Electricity,Standard circuit diagram symbols,Combined,9,,State the function of a voltmeter.,To measure potential difference.
+83,Electricity,Standard circuit diagram symbols,Combined,7,Asked in the 2020–23 papers,"Which diagram, A or B, shows a voltmeter connected correctly across the lamp? Explain.","B.
+The voltmeter is in parallel with the lamp."
+84,Electricity,Standard circuit diagram symbols,Combined,9,,State the function of an ammeter.,To measure current.
+85,Electricity,Standard circuit diagram symbols,Combined,9,,"Which diagram, A or B, shows an ammeter connected correctly to measure the current in the lamp? Explain.","A.
+The ammeter is in series with the lamp."
+86,Electricity,Standard circuit diagram symbols,Combined,9,,State the function of a thermistor.,To sense temperature: its resistance changes with temperature.
+87,Electricity,Standard circuit diagram symbols,Combined,9,,State the function of an LDR.,To sense light: its resistance changes with light intensity.
+88,Electricity,"Current, resistance and potential difference",Combined,9,,What is an electrical conductor?,A material that allows charge to flow through it.
+89,Electricity,"Current, resistance and potential difference",Combined,9,,Name the charged subatomic particles that can flow in metals.,Electrons
+90,Electricity,"Current, resistance and potential difference",Combined,7,Definition that mark schemes ask for,Define electric current.,The rate of flow of electrical charge.
+91,Electricity,"Current, resistance and potential difference",Combined,7,Standard unit,"State the standard units of charge, current and time.","Charge: coulomb (C)
+Current: ampere (A)
+Time: second (s)"
+92,Electricity,"Current, resistance and potential difference",Combined,7,Core fact,Describe the current at different points in a single closed loop.,It is the same at every point.
+93,Electricity,"Current, resistance and potential difference",Combined,9,,Name the two variables that the current through a component depends on.,The potential difference across it and its resistance
+94,Electricity,"Current, resistance and potential difference",Combined,9,,The potential difference across a fixed resistor is increased. Describe the effect on the current.,The current increases.
+95,Electricity,"Current, resistance and potential difference",Combined,9,,The resistance of a component is increased at a constant potential difference. Describe the effect on the current.,The current decreases.
+96,Electricity,"Current, resistance and potential difference",Combined,7,Standard unit,State the standard units of potential difference and resistance.,"Potential difference: volt (V)
+Resistance: ohm (Ω)"
+97,Electricity,"Current, resistance and potential difference",Combined,9,,Name the type of component whose resistance stays constant as the current changes.,An ohmic conductor (at constant temperature)
+98,Electricity,"Current, resistance and potential difference",Combined,7,Core fact,Describe how current depends on potential difference for an ohmic conductor.,Current is directly proportional to potential difference.
+99,Electricity,"Current, resistance and potential difference",Combined,9,,Name the type of component that gives this I–V graph.,An ohmic conductor (e.g. a fixed resistor)
+100,Electricity,"Current, resistance and potential difference",Combined,7,Core fact,Name the component that gives this I–V graph.,A filament lamp
+101,Electricity,"Current, resistance and potential difference",Combined,9,,This is the I–V graph for a filament lamp. Describe how its resistance changes as the potential difference increases.,The resistance increases.
+102,Electricity,"Current, resistance and potential difference",Combined,7,Standard explanation,Explain why the resistance of a filament lamp increases with current.,"A greater current makes the filament hotter, and its resistance increases with temperature."
+103,Electricity,"Current, resistance and potential difference",Combined,9,,Name the component that gives this I–V graph.,A diode
+104,Electricity,"Current, resistance and potential difference",Combined,7,Asked in the 2020–23 papers,This is the I–V graph for a diode. Describe its resistance when the potential difference is reversed.,Very high (almost no current flows).
+105,Electricity,"Current, resistance and potential difference",Combined,7,Asked in the 2020–23 papers,Describe how the resistance of a thermistor varies with temperature.,"As the temperature increases, the resistance decreases."
+106,Electricity,"Current, resistance and potential difference",Combined,7,Asked in the 2020–23 papers,Describe how the resistance of an LDR varies with light intensity.,"As the light intensity increases, the resistance decreases."
+107,Electricity,"Current, resistance and potential difference",Combined,9,,Give one use of a thermistor and one use of an LDR.,"Thermistor: thermostat
+LDR: lights that switch on when it gets dark"
+669,Electricity,"Current, resistance and potential difference",Combined,9,,State the two things needed for electrical charge to flow in a circuit.,A complete circuit and a source of potential difference.
+670,Electricity,"Current, resistance and potential difference",Combined,9,On the equations sheet,"State the equation linking charge flow, current and time.","charge flow = current × time
+(Q = I t)"
+671,Electricity,"Current, resistance and potential difference",Combined,9,On the equations sheet,"State the equation linking potential difference, current and resistance.","potential difference = current × resistance
+(V = I R)"
+672,Electricity,"Current, resistance and potential difference",Combined,9,,State the condition for the current through a resistor to be directly proportional to the potential difference.,Its temperature must stay constant.
+108,Electricity,Resistance and I–V characteristics (RP),Combined,7,Core practical fact,State the two measurements needed to find the resistance of a component.,The potential difference across it and the current through it
+109,Electricity,Resistance and I–V characteristics (RP),Combined,9,,Wire length and resistance: name the independent variable.,Length of the wire
+110,Electricity,Resistance and I–V characteristics (RP),Combined,9,,Wire length and resistance: name the dependent variable.,Resistance of the wire
+111,Electricity,Resistance and I–V characteristics (RP),Combined,7,Core practical fact,Wire length and resistance: name three control variables.,"The temperature, thickness and material of the wire"
+112,Electricity,Resistance and I–V characteristics (RP),Combined,7,Asked in the 2020–23 papers,Describe how the length of a wire affects its resistance.,The resistance increases (it is directly proportional to length).
+113,Electricity,Resistance and I–V characteristics (RP),Combined,7,Asked in the 2020–23 papers,The crocodile clip on a wire cannot be placed at exactly 0 cm. Name the type of error this causes.,A zero error (a systematic error)
+114,Electricity,Resistance and I–V characteristics (RP),Combined,7,Standard explanation,Explain why the potential difference is kept small when measuring the resistance of a wire.,So the current is small and the wire does not heat up.
+116,Electricity,Resistance and I–V characteristics (RP),Combined,9,,What does it mean for two resistors to be in series?,"They are connected one after the other, on a single path."
+117,Electricity,Resistance and I–V characteristics (RP),Combined,9,,What does it mean for two resistors to be in parallel?,They are on separate branches.
+118,Electricity,Resistance and I–V characteristics (RP),Combined,7,Core fact,Describe how to calculate the total resistance of two resistors in series.,Add the two resistances: R_total = R₁ + R₂.
+120,Electricity,Resistance and I–V characteristics (RP),Combined,9,,"A lamp, a power supply and a variable resistor are in series. State two ways to increase the potential difference across the lamp.","Increase the supply potential difference.
+Decrease the resistance of the variable resistor."
+121,Electricity,Resistance and I–V characteristics (RP),Combined,7,Core practical fact,Finding the I–V characteristic of a component: name the independent and dependent variables.,"Independent: potential difference across the component
+Dependent: current through it"
+673,Electricity,Resistance and I–V characteristics (RP),Combined,9,,Describe the graph of resistance against length for a wire.,A straight line through the origin.
+123,Electricity,Series and parallel circuits,Combined,9,,Name the two ways components can be joined in a circuit.,In series and in parallel
+124,Electricity,Series and parallel circuits,Combined,7,Core fact,Describe the current through components in series.,It is the same through each component.
+125,Electricity,Series and parallel circuits,Combined,9,,Describe the potential difference across components in series.,The total potential difference is shared between them.
+126,Electricity,Series and parallel circuits,Combined,9,,Describe the total resistance of components connected in series.,It is the sum of the individual resistances.
+127,Electricity,Series and parallel circuits,Combined,9,,Describe the current through components in parallel.,The total current is the sum of the currents in the branches.
+128,Electricity,Series and parallel circuits,Combined,9,,The lamp in this circuit is lit. Describe what happens to the ammeter reading when the switch is closed.,"It does not change.
+The lamp is on a separate branch, so the potential difference across it stays the same."
+129,Electricity,Series and parallel circuits,Combined,7,Core fact,Describe the potential difference across components in parallel.,It is the same across each component.
+636,Electricity,Series and parallel circuits,Combined,7,Asked in the 2020–23 papers,Describe the total resistance of two resistors connected in parallel.,It is less than the resistance of the smaller resistor.
+674,Electricity,Series and parallel circuits,Combined,9,,Explain why adding resistors in series increases the total resistance.,"The potential difference is shared between more resistors, so the current is smaller."
+675,Electricity,Series and parallel circuits,Combined,7,Asked in the 2020–23 papers,Explain why adding resistors in parallel decreases the total resistance.,"Each new branch gives the charge another path, so the total current increases."
+676,Electricity,Series and parallel circuits,Combined,9,,Lamps are connected in series and one breaks. State what happens to the others.,"They all go out, because the circuit is broken."
+677,Electricity,Series and parallel circuits,Combined,9,,Give two advantages of connecting lamps in parallel rather than in series.,"Each lamp can be switched separately, and if one breaks the others stay lit."
+130,Electricity,Mains electricity and the National Grid,Combined,9,,What do a.c. and d.c. stand for?,Alternating current and direct current
+131,Electricity,Mains electricity and the National Grid,Combined,7,Definition that mark schemes ask for,What is an alternating current (a.c.)?,A current that repeatedly reverses direction.
+132,Electricity,Mains electricity and the National Grid,Combined,7,Asked in the 2020–23 papers,State the frequency and potential difference of the UK mains electricity supply.,50 Hz and about 230 V
+133,Electricity,Mains electricity and the National Grid,Combined,7,Core fact,"State the colour of the insulation on the live, neutral and earth wires.","Live: brown
+Neutral: blue
+Earth: green and yellow stripes"
+134,Electricity,Mains electricity and the National Grid,Combined,7,Core fact,State the function of the live wire in a three-core cable.,It carries the alternating potential difference from the supply.
+135,Electricity,Mains electricity and the National Grid,Combined,7,Core fact,State the function of the neutral wire in a three-core cable.,It completes the circuit.
+136,Electricity,Mains electricity and the National Grid,Combined,7,Core fact,State the function of the earth wire in a three-core cable.,It is a safety wire that stops the appliance becoming live.
+137,Electricity,Mains electricity and the National Grid,Combined,9,,State the potential difference between the live wire and the earth wire.,About 230 V
+138,Electricity,Mains electricity and the National Grid,Combined,7,Asked in the 2020–23 papers,"Name the wires in a three-core cable that are at, or close to, 0 V.",The earth wire and the neutral wire
+139,Electricity,Mains electricity and the National Grid,Combined,9,,State when the earth wire will carry a current.,Only when there is a fault.
+140,Electricity,Mains electricity and the National Grid,Combined,7,Core fact,"In a plug, name the wire that is connected to the fuse.",The live wire
+141,Electricity,Mains electricity and the National Grid,Combined,7,Asked in the 2020–23 papers,Explain why touching the live wire is dangerous even when the appliance is switched off.,"The live wire is still at about 230 V, so a current would flow through the person to earth."
+142,Electricity,Mains electricity and the National Grid,Combined,9,,Define power in terms of energy.,The rate at which energy is transferred.
+143,Electricity,Mains electricity and the National Grid,Combined,7,Same question as one tagged in another topic,State the standard unit of power.,Watt (W)
+144,Electricity,Mains electricity and the National Grid,Combined,9,,Give two things that affect the energy transferred by an appliance.,Its power and the time it is switched on
+145,Electricity,Mains electricity and the National Grid,Combined,9,,What does a higher power rating tell you about an appliance?,It transfers more energy each second.
+146,Electricity,Mains electricity and the National Grid,Combined,7,Definition that mark schemes ask for,Describe the National Grid and its purpose.,A system of cables and transformers linking power stations to consumers.
+147,Electricity,Mains electricity and the National Grid,Combined,9,,State what is transferred across the National Grid.,Electrical power
+148,Electricity,Mains electricity and the National Grid,Combined,9,,State the function of transformers.,To increase or decrease the potential difference.
+149,Electricity,Mains electricity and the National Grid,Combined,9,,What does a step-up transformer do to the potential difference?,It increases it.
+150,Electricity,Mains electricity and the National Grid,Combined,7,Asked in the 2020–23 papers,What does a step-up transformer do to the current?,It decreases it.
+151,Electricity,Mains electricity and the National Grid,Combined,7,Asked in the 2020–23 papers,Explain why step-up transformers are used before electricity is transmitted.,"A higher potential difference means a smaller current, so less energy is wasted heating the cables."
+678,Electricity,Mains electricity and the National Grid,Combined,7,Asked in the 2020–23 papers,What is direct current (d.c.)?,A current that flows in one direction only.
+679,Electricity,Mains electricity and the National Grid,Combined,9,,Name a source of direct current.,A cell or battery
+680,Electricity,Mains electricity and the National Grid,Combined,9,On the equations sheet,"State the equation linking power, potential difference and current.","power = potential difference × current
+(P = V I)"
+681,Electricity,Mains electricity and the National Grid,Combined,9,On the equations sheet,"State the equation linking power, current and resistance.","power = current² × resistance
+(P = I² R)"
+682,Electricity,Mains electricity and the National Grid,Combined,9,On the equations sheet,"State the equation linking energy transferred, power and time.","energy transferred = power × time
+(E = P t)"
+683,Electricity,Mains electricity and the National Grid,Combined,9,On the equations sheet,"State the equation linking energy transferred, charge flow and potential difference.","energy transferred = charge flow × potential difference
+(E = Q V)"
+684,Electricity,Mains electricity and the National Grid,Combined,9,,A battery-powered fan is switched on. Describe the useful energy transfer.,Energy is transferred electrically from the chemical store of the battery to the kinetic store of the fan.
+685,Electricity,Mains electricity and the National Grid,Combined,7,Asked in the 2020–23 papers,Explain why step-down transformers are used before electricity reaches homes.,To reduce the potential difference to a safer value (230 V).
+686,Electricity,Mains electricity and the National Grid,Combined,9,,Explain why any connection between the live wire and earth is dangerous.,"A very large current would flow, which could cause a fire or a fatal shock."
+152,Electricity,(S) Static charge and electric fields,Separate,7,Asked in the 2020–23 papers,Describe how insulating materials can become electrically charged.,By rubbing them together: friction transfers electrons between them.
+153,Electricity,(S) Static charge and electric fields,Separate,7,One representative of a group of similar questions,Describe how a material can become negatively charged.,By gaining electrons.
+154,Electricity,(S) Static charge and electric fields,Separate,9,,Describe how a material can become positively charged.,By losing electrons.
+155,Electricity,(S) Static charge and electric fields,Separate,7,Core fact,Describe what happens when two charged objects are brought close together.,"They exert a force on each other: like charges repel, opposite charges attract."
+156,Electricity,(S) Static charge and electric fields,Separate,9,,State whether electrostatic force is a contact force or non-contact force.,Non-contact force
+157,Electricity,(S) Static charge and electric fields,Separate,9,,Explain why there is no potential difference between two insulators before they are rubbed together.,"Both are neutral, so there is no difference in charge."
+158,Electricity,(S) Static charge and electric fields,Separate,9,,Name the type of field that surrounds every charged object.,An electric field
+159,Electricity,(S) Static charge and electric fields,Separate,9,,State where the electric field around a charged object is strongest.,Closest to the object.
+160,Electricity,(S) Static charge and electric fields,Separate,9,,Describe how the strength of an electric field changes with distance from the charge.,The field gets stronger closer to the charge.
+161,Electricity,(S) Static charge and electric fields,Separate,7,Core fact,State the direction in which electric field lines point.,Away from positive charges and towards negative charges.
+162,Electricity,(S) Static charge and electric fields,Separate,9,,"Which diagram, A or B, shows the electric field around a negative charge? Explain.","A.
+The field lines point towards the negative charge."
+163,Electricity,(S) Static charge and electric fields,Separate,9,,Explain why a charged object experiences a force when close to another charged object.,The electric field of each object exerts a force on the other object.
+164,Electricity,(S) Static charge and electric fields,Separate,9,,State how the size of the force between two charged objects can be increased.,By moving them closer together.
+687,Electricity,(S) Static charge and electric fields,Separate,9,,State what happens when two objects with the same type of charge are brought together.,They repel each other.
+688,Electricity,(S) Static charge and electric fields,Separate,9,,State what happens when two objects with opposite charges are brought together.,They attract each other.
+689,Electricity,(S) Static charge and electric fields,Separate,7,Asked in the 2020–23 papers,A plastic rod becomes negatively charged when it is rubbed with a cloth. State and explain the charge on the cloth.,Positive (equal in size): the cloth lost the electrons that the rod gained.
+690,Electricity,(S) Static charge and electric fields,Separate,7,Definition that mark schemes ask for,What is an electric field?,The region around a charged object where another charged object experiences a force.
+691,Electricity,(S) Static charge and electric fields,Separate,7,Core fact,Describe the electric field around an isolated positively charged sphere.,"Straight lines pointing radially outwards, away from the sphere."
+692,Electricity,(S) Static charge and electric fields,Separate,7,Asked in the 2020–23 papers,Explain how a spark is produced between a charged object and an earthed conductor.,"The strong electric field ionises the air, so charge can flow across the gap."
+165,Particle model of matter,Density of materials,Combined,7,Definition that mark schemes ask for,Define density.,The mass per unit volume of a substance.
+166,Particle model of matter,Density of materials,Combined,9,,State the standard unit of volume.,Cubic metre (m³)
+167,Particle model of matter,Density of materials,Combined,7,Standard unit,State the standard unit of density.,Kilogram per cubic metre (kg/m³)
+168,Particle model of matter,Density of materials,Combined,9,,Which state of matter can be compressed easily?,Gas
+169,Particle model of matter,Density of materials,Combined,9,,Explain why solids and liquids cannot be compressed easily.,Their particles are already touching.
+170,Particle model of matter,Density of materials,Combined,7,Asked in the 2020–23 papers,Describe the motion of particles in a solid.,They vibrate around a fixed position.
+171,Particle model of matter,Density of materials,Combined,9,,Describe the motion of particles in a liquid.,"They move randomly, sliding past one another."
+172,Particle model of matter,Density of materials,Combined,7,Asked in the 2020–23 papers,Describe the motion of particles in a gas.,They move quickly in random directions.
+693,Particle model of matter,Density of materials,Combined,9,On the equations sheet,"State the equation linking density, mass and volume.","density = mass ÷ volume
+(ρ = m ÷ V)"
+694,Particle model of matter,Density of materials,Combined,9,,Describe the arrangement of the particles in a solid.,Very close together in a regular pattern.
+695,Particle model of matter,Density of materials,Combined,9,,Describe the arrangement of the particles in a liquid.,"Close together, in a random arrangement."
+696,Particle model of matter,Density of materials,Combined,7,Core fact,Describe the arrangement of the particles in a gas.,"Far apart, in a random arrangement."
+697,Particle model of matter,Density of materials,Combined,7,Asked in the 2020–23 papers,Explain why gases have a much lower density than solids and liquids.,"The particles are far apart, so there is less mass in a given volume."
+173,Particle model of matter,Measuring density (RP),Combined,7,Core practical fact,State the two measurements needed to find the density of an object.,Mass and volume
+174,Particle model of matter,Measuring density (RP),Combined,9,,Describe how the volume of a cube can be found.,Measure one side with a ruler and cube it.
+175,Particle model of matter,Measuring density (RP),Combined,9,,Describe how the volume of a sphere can be found.,"Measure the diameter, halve it to find the radius, then use volume = 4/3 × π × r³."
+176,Particle model of matter,Measuring density (RP),Combined,9,,Describe how the volume of a liquid can be measured.,With a measuring cylinder.
+177,Particle model of matter,Measuring density (RP),Combined,9,,Convert 1 ml into cm³.,1 ml = 1 cm³
+178,Particle model of matter,Measuring density (RP),Combined,7,Core practical fact,Describe how the mass of a liquid can be found.,"Weigh the measuring cylinder empty, then with the liquid in it, and subtract."
+179,Particle model of matter,Measuring density (RP),Combined,7,Asked in the 2020–23 papers,Name the method used to measure the volume of an irregularly shaped object.,The displacement method
+698,Particle model of matter,Measuring density (RP),Combined,7,Asked in the 2020–23 papers,Describe how to read a measuring cylinder accurately.,Read the bottom of the meniscus at eye level.
+699,Particle model of matter,Measuring density (RP),Combined,9,,Name a measuring instrument that gives a more precise length than a ruler.,Vernier calipers
+182,Particle model of matter,Changes of state,Combined,9,,Name the change of state from solid to gas.,Sublimation
+183,Particle model of matter,Changes of state,Combined,9,,Name the change of state from gas to liquid.,Condensation
+184,Particle model of matter,Changes of state,Combined,7,Standard explanation,Explain the difference between boiling and evaporation.,"Boiling: only at the boiling point, throughout the liquid.
+Evaporation: at any temperature, from the surface only."
+185,Particle model of matter,Changes of state,Combined,7,Asked in the 2020–23 papers,Explain why mass is conserved during a change of state.,The number of particles stays the same.
+186,Particle model of matter,Changes of state,Combined,7,Asked in the 2020–23 papers,What is a physical change?,A change in which no new substance is made and that can be reversed.
+187,Particle model of matter,Changes of state,Combined,9,,Are physical changes reversible?,Yes
+188,Particle model of matter,Changes of state,Combined,9,,What is a chemical change?,A change in which new substances are made.
+189,Particle model of matter,Changes of state,Combined,9,,Are chemical changes reversible?,Usually not
+700,Particle model of matter,Changes of state,Combined,9,,Name the change of state from solid to liquid.,Melting
+701,Particle model of matter,Changes of state,Combined,9,,Name the change of state from liquid to solid.,Freezing
+702,Particle model of matter,Changes of state,Combined,9,,Name the two ways a liquid can change into a gas.,Boiling and evaporating
+703,Particle model of matter,Changes of state,Combined,9,,A 50 g ice cube melts. State the mass of water formed.,50 g
+190,Particle model of matter,Internal energy,Combined,7,Definition that mark schemes ask for,Define internal energy.,The total energy stored by the particles that make up a system.
+191,Particle model of matter,Internal energy,Combined,7,Core fact,State how internal energy is related to the energies of the particles.,Internal energy = total kinetic energy + total potential energy of the particles
+192,Particle model of matter,Internal energy,Combined,7,Asked in the 2020–23 papers,State which part of the internal energy changes when the temperature changes.,The kinetic energy of the particles
+193,Particle model of matter,Internal energy,Combined,9,,Describe how the average kinetic energy of the particles is related to temperature.,"The greater the average kinetic energy, the higher the temperature."
+194,Particle model of matter,Internal energy,Combined,9,,State which part of the internal energy changes when a substance changes state.,The potential energy of the particles
+195,Particle model of matter,Internal energy,Combined,9,,The potential energy of the particles changes at a constant temperature. State what happens to the substance.,It changes state.
+196,Particle model of matter,Internal energy,Combined,9,,State the two things that can happen when a substance is heated.,"Its temperature can increase, or it can change state."
+197,Particle model of matter,Internal energy,Combined,7,Core fact,Describe the change in temperature of a substance during a change of state.,The temperature remains constant.
+198,Particle model of matter,Internal energy,Combined,9,,State the two things that can happen when a substance is cooled.,"Its temperature can decrease, or it can change state."
+199,Particle model of matter,Internal energy,Combined,9,,In which state of matter is the internal energy of a substance highest?,Gas
+704,Particle model of matter,Internal energy,Combined,9,,State what heating does to the internal energy of a system.,It increases it (the particles gain energy).
+705,Particle model of matter,Internal energy,Combined,9,,State three things that the temperature rise of a heated substance depends on.,"Its mass, its specific heat capacity and the energy transferred to it"
+200,Particle model of matter,Changes of state and specific latent heat,Combined,7,Standard unit,State the standard unit of specific latent heat.,Joule per kilogram (J/kg)
+201,Particle model of matter,Changes of state and specific latent heat,Combined,7,Asked in the 2020–23 papers,Define latent heat.,The energy needed to change the state of a substance with no change in temperature.
+202,Particle model of matter,Changes of state and specific latent heat,Combined,7,Definition that mark schemes ask for,Define specific latent heat.,The energy needed to change the state of 1 kg of a substance with no change in temperature.
+203,Particle model of matter,Changes of state and specific latent heat,Combined,9,,Define specific latent heat of fusion.,The energy needed to change 1 kg of a substance from solid to liquid with no change in temperature.
+204,Particle model of matter,Changes of state and specific latent heat,Combined,9,,Define specific latent heat of vaporisation.,The energy needed to change 1 kg of a substance from liquid to vapour (gas) with no change in temperature.
+205,Particle model of matter,Changes of state and specific latent heat,Combined,9,,Which letter on the heating curve shows the substance melting?,B
+206,Particle model of matter,Changes of state and specific latent heat,Combined,9,,Which letter on the heating curve shows the substance boiling?,D
+207,Particle model of matter,Changes of state and specific latent heat,Combined,9,,Which letter on the heating curve shows a solid getting hotter?,A
+208,Particle model of matter,Changes of state and specific latent heat,Combined,9,,Which letter on the heating curve shows a liquid getting hotter?,C
+209,Particle model of matter,Changes of state and specific latent heat,Combined,9,,Which letter on the cooling curve shows the substance freezing?,D
+210,Particle model of matter,Changes of state and specific latent heat,Combined,9,,Which letter on the cooling curve shows a liquid cooling?,C
+706,Particle model of matter,Changes of state and specific latent heat,Combined,9,On the equations sheet,"State the equation linking energy for a change of state, mass and specific latent heat.","energy for a change of state = mass × specific latent heat
+(E = m L)"
+707,Particle model of matter,Changes of state and specific latent heat,Combined,7,Standard explanation,Explain why the temperature stays constant while a substance melts.,"The energy supplied increases the potential energy of the particles, not their kinetic energy."
+708,Particle model of matter,Changes of state and specific latent heat,Combined,9,,State the difference between specific heat capacity and specific latent heat.,"Specific heat capacity: energy to change the temperature of 1 kg by 1 °C.
+Specific latent heat: energy to change the state of 1 kg."
+211,Particle model of matter,Particle motion in gases,Combined,9,,The average kinetic energy of the particles of a gas increases. State what happens to its temperature.,The temperature increases.
+212,Particle model of matter,Particle motion in gases,Combined,7,Asked in the 2020–23 papers,Describe the cause of gas pressure.,Gas particles colliding with the walls of the container.
+213,Particle model of matter,Particle motion in gases,Combined,9,,A gas is heated at constant volume. State what happens to its pressure.,The pressure increases.
+709,Particle model of matter,Particle motion in gases,Combined,7,Asked in the 2020–23 papers,Describe the motion of the molecules in a gas.,They are in constant random motion.
+710,Particle model of matter,Particle motion in gases,Combined,7,Asked in the 2020–23 papers,"Explain, using particles, why heating a gas at constant volume increases its pressure.","The particles move faster, so they hit the walls more often and with more force."
+214,Particle model of matter,(S) Pressure in gases,Separate,9,,The pressure on a gas is increased at constant temperature. State what happens to its volume.,The volume decreases.
+215,Particle model of matter,(S) Pressure in gases,Separate,7,Core fact,A gas is compressed at constant temperature. State what happens to its pressure.,The pressure increases.
+216,Particle model of matter,(S) Pressure in gases,Separate,7,Asked in the 2020–23 papers,Explain why increasing the volume of a gas decreases its pressure.,"The particles are more spread out, so they hit the walls less often."
+217,Particle model of matter,(S) Pressure in gases,Separate,7,Standard unit,State the standard unit of pressure.,Pascal (Pa)
+218,Particle model of matter,(S) Pressure in gases,Separate,9,,State the standard unit of volume.,Cubic metre (m³)
+711,Particle model of matter,(S) Pressure in gases,Separate,9,On the equations sheet,State the equation for a fixed mass of gas at constant temperature.,"pressure × volume = constant
+(p V = constant)"
+712,Particle model of matter,(S) Pressure in gases,Separate,9,,State the direction of the net force that gas pressure exerts on a container wall.,At right angles to the wall.
+713,Particle model of matter,(S) Pressure in gases,Separate,9,,The volume of a gas is doubled at constant temperature. State what happens to its pressure.,It halves.
+219,Particle model of matter,(S) Increasing the pressure of a gas,Separate,7,Definition that mark schemes ask for,Describe what is meant by doing work on a gas.,Transferring energy to the gas by applying a force to it.
+220,Particle model of matter,(S) Increasing the pressure of a gas,Separate,9,,State the effect on the internal energy of a gas if work is done on it.,The internal energy increases.
+221,Particle model of matter,(S) Increasing the pressure of a gas,Separate,7,Core fact,State the effect on the temperature of a gas if work is done on it.,The temperature increases.
+222,Particle model of matter,(S) Increasing the pressure of a gas,Separate,9,,Describe how work can be done on a gas.,"By compressing it, e.g. pushing the piston of a bicycle pump."
+223,Atomic structure,Atoms and isotopes,Combined,9,,State the approximate radius of an atom.,About 0.1 nm (1 × 10⁻¹⁰ m)
+224,Atomic structure,Atoms and isotopes,Combined,7,Core fact,Describe the structure of an atom.,"A positive nucleus of protons and neutrons, surrounded by negative electrons."
+225,Atomic structure,Atoms and isotopes,Combined,7,Asked in the 2020–23 papers,State how the radius of a nucleus compares with the radius of an atom.,Less than 1/10 000 of the radius of the atom.
+226,Atomic structure,Atoms and isotopes,Combined,7,Core fact,State where most of the mass of an atom is concentrated.,In the nucleus.
+227,Atomic structure,Atoms and isotopes,Combined,9,,State the sign of the overall charge of the nucleus.,Positive
+228,Atomic structure,Atoms and isotopes,Combined,9,,State the relative charge of a proton.,+1 (positive)
+229,Atomic structure,Atoms and isotopes,Combined,9,,State the relative charge of a neutron.,0
+230,Atomic structure,Atoms and isotopes,Combined,9,,State the relative charge of an electron.,−1 (negative)
+231,Atomic structure,Atoms and isotopes,Combined,9,,State the relative mass of a proton.,1
+232,Atomic structure,Atoms and isotopes,Combined,9,,State the relative mass of a neutron.,1
+233,Atomic structure,Atoms and isotopes,Combined,9,,State the relative mass of an electron.,Very small (about 1/2000)
+234,Atomic structure,Atoms and isotopes,Combined,9,,Describe the arrangement of electrons in an atom.,In energy levels at different distances from the nucleus.
+235,Atomic structure,Atoms and isotopes,Combined,7,Asked in the 2020–23 papers,State how an electron can move to a higher energy level.,By absorbing electromagnetic radiation.
+236,Atomic structure,Atoms and isotopes,Combined,7,Asked in the 2020–23 papers,State how an electron can move to a lower energy level.,By emitting electromagnetic radiation.
+714,Atomic structure,Atoms and isotopes,Combined,9,,Name the two types of particle found in the nucleus of an atom.,Protons and neutrons
+237,Atomic structure,"Mass number, atomic number and isotopes",Combined,9,,State the overall charge of an atom.,Zero
+238,Atomic structure,"Mass number, atomic number and isotopes",Combined,9,,Explain why atoms have an overall neutral charge.,The number of protons equals the number of electrons.
+239,Atomic structure,"Mass number, atomic number and isotopes",Combined,9,,State what is the same about all atoms of the same element.,The number of protons
+240,Atomic structure,"Mass number, atomic number and isotopes",Combined,9,,State what the atomic number of an atom tells you.,The number of protons
+241,Atomic structure,"Mass number, atomic number and isotopes",Combined,7,Definition that mark schemes ask for,State what the mass number of an atom tells you.,The total number of protons and neutrons
+242,Atomic structure,"Mass number, atomic number and isotopes",Combined,7,Asked in the 2020–23 papers,Define isotopes.,Atoms of the same element with different numbers of neutrons.
+243,Atomic structure,"Mass number, atomic number and isotopes",Combined,9,,Which differs between two isotopes of an element: mass number or atomic number?,The mass number
+244,Atomic structure,"Mass number, atomic number and isotopes",Combined,9,,Describe how ions form from atoms.,Atoms lose or gain electrons.
+715,Atomic structure,"Mass number, atomic number and isotopes",Combined,9,,An atom of carbon is written ¹⁴₆C. State what the numbers 14 and 6 represent.,"14: the mass number (protons + neutrons).
+6: the atomic number (protons)."
+716,Atomic structure,"Mass number, atomic number and isotopes",Combined,7,Asked in the 2020–23 papers,State how to calculate the number of neutrons in an atom.,Number of neutrons = mass number − atomic number
+717,Atomic structure,"Mass number, atomic number and isotopes",Combined,7,Asked in the 2020–23 papers,State the type of ion formed when an atom loses one or more electrons.,A positive ion
+245,Atomic structure,The development of the model of the atom,Combined,9,,Name the first subatomic particle to be discovered.,The electron
+246,Atomic structure,The development of the model of the atom,Combined,7,Core fact,Name the model of the atom with electrons embedded in a positively charged sphere.,The plum pudding model
+247,Atomic structure,The development of the model of the atom,Combined,9,,Name the model of the atom proposed after the nucleus was discovered.,The nuclear model
+248,Atomic structure,The development of the model of the atom,Combined,9,,Name the experiment that discovered the nucleus of an atom.,The alpha particle scattering experiment
+249,Atomic structure,The development of the model of the atom,Combined,9,,State what the alpha particle scattering experiment showed about the nucleus.,"The mass of the atom is concentrated in a very small, positively charged nucleus."
+250,Atomic structure,The development of the model of the atom,Combined,7,Standard explanation,Explain how the alpha particle scattering experiment showed that the nucleus is very small.,Most alpha particles passed straight through; only a very few were scattered backwards.
+251,Atomic structure,The development of the model of the atom,Combined,7,Standard explanation,Explain how the alpha particle scattering experiment showed that the nucleus is positively charged.,"Some positive alpha particles were deflected or scattered backwards, repelled by the nucleus."
+252,Atomic structure,The development of the model of the atom,Combined,9,,Name the model of the atom that replaced the plum pudding model.,The nuclear model
+253,Atomic structure,The development of the model of the atom,Combined,9,,Name the model of the atom that replaced the nuclear model.,The Bohr model
+254,Atomic structure,The development of the model of the atom,Combined,7,Asked in the 2020–23 papers,Describe the Bohr model of the atom.,A small positive nucleus with electrons orbiting at specific distances.
+255,Atomic structure,The development of the model of the atom,Combined,9,,Name the second subatomic particle to be discovered.,The proton
+256,Atomic structure,The development of the model of the atom,Combined,9,,Name the third subatomic particle to be discovered.,The neutron
+718,Atomic structure,The development of the model of the atom,Combined,9,,What were atoms thought to be before the electron was discovered?,Tiny spheres that could not be divided.
+719,Atomic structure,The development of the model of the atom,Combined,9,,Most alpha particles passed straight through the gold foil. State what this showed.,Most of the atom is empty space.
+720,Atomic structure,The development of the model of the atom,Combined,9,,Explain why the alpha particle scattering experiment led to the plum pudding model being replaced.,It could not explain why some alpha particles were deflected through large angles.
+721,Atomic structure,The development of the model of the atom,Combined,9,,Name the scientist who provided the evidence for the neutron.,James Chadwick
+722,Atomic structure,The development of the model of the atom,Combined,9,,Name the scientist who suggested that electrons orbit at specific distances.,Niels Bohr
+257,Atomic structure,Radioactive decay and nuclear radiation,Combined,9,,State which part of an atom nuclear radiation is emitted from.,The nucleus
+258,Atomic structure,Radioactive decay and nuclear radiation,Combined,9,,Explain why unstable nuclei emit radiation.,To become more stable.
+259,Atomic structure,Radioactive decay and nuclear radiation,Combined,9,,What is radioactive decay?,The random process in which an unstable nucleus emits radiation.
+260,Atomic structure,Radioactive decay and nuclear radiation,Combined,7,Asked in the 2020–23 papers,Explain why radioactive decay is described as random.,"It is impossible to predict which nucleus will decay next, or when."
+261,Atomic structure,Radioactive decay and nuclear radiation,Combined,7,Definition that mark schemes ask for,Define the activity of a radioactive source.,The rate at which its unstable nuclei decay.
+262,Atomic structure,Radioactive decay and nuclear radiation,Combined,7,Asked in the 2020–23 papers,State the standard unit of activity.,Becquerel (Bq)
+263,Atomic structure,Radioactive decay and nuclear radiation,Combined,9,,What is count-rate?,The number of decays recorded each second by a detector.
+264,Atomic structure,Radioactive decay and nuclear radiation,Combined,7,Asked in the 2020–23 papers,Explain why the count-rate is always less than the activity.,The detector picks up only some of the radiation emitted.
+265,Atomic structure,Radioactive decay and nuclear radiation,Combined,9,,Name the four types of nuclear radiation.,"Alpha particles, beta particles, gamma rays and neutrons"
+266,Atomic structure,Radioactive decay and nuclear radiation,Combined,9,,Name the three types of nuclear radiation that are ionising.,"Alpha, beta and gamma"
+267,Atomic structure,Radioactive decay and nuclear radiation,Combined,7,Asked in the 2020–23 papers,State what an alpha particle is made of.,Two protons and two neutrons (a helium nucleus)
+268,Atomic structure,Radioactive decay and nuclear radiation,Combined,7,Core fact,State what a beta particle is.,A high-speed electron from the nucleus
+269,Atomic structure,Radioactive decay and nuclear radiation,Combined,7,Asked in the 2020–23 papers,State what a gamma ray is.,Electromagnetic radiation from the nucleus
+270,Atomic structure,Radioactive decay and nuclear radiation,Combined,9,,A nucleus contains no electrons. Describe how it can emit a beta particle.,A neutron turns into a proton and an electron; the electron is emitted.
+271,Atomic structure,Radioactive decay and nuclear radiation,Combined,7,Core fact,"List alpha, beta and gamma radiation from most to least ionising.","Alpha, beta, gamma"
+272,Atomic structure,Radioactive decay and nuclear radiation,Combined,7,Core fact,"List alpha, beta and gamma radiation from most to least penetrating.","Gamma, beta, alpha"
+273,Atomic structure,Radioactive decay and nuclear radiation,Combined,7,Asked in the 2020–23 papers,State the range of alpha radiation in air.,A few centimetres
+274,Atomic structure,Radioactive decay and nuclear radiation,Combined,9,,State the range of beta radiation in air.,About a metre
+275,Atomic structure,Radioactive decay and nuclear radiation,Combined,9,,State the range of gamma radiation in air.,A very long distance (it is hardly absorbed by air)
+276,Atomic structure,Radioactive decay and nuclear radiation,Combined,9,,Name the type of radiation stopped by a sheet of paper.,Alpha
+277,Atomic structure,Radioactive decay and nuclear radiation,Combined,9,,Name the two types of radiation stopped by a few millimetres of aluminium.,Alpha and beta
+278,Atomic structure,Radioactive decay and nuclear radiation,Combined,7,Core fact,State what is needed to absorb most gamma radiation.,Several centimetres of lead
+279,Atomic structure,Radioactive decay and nuclear radiation,Combined,9,,Name the type of radiation stopped by skin.,Alpha
+723,Atomic structure,Radioactive decay and nuclear radiation,Combined,9,,Name a detector of nuclear radiation.,A Geiger–Müller tube
+724,Atomic structure,Radioactive decay and nuclear radiation,Combined,9,,"State the relative charges of alpha, beta and gamma radiation.","Alpha: +2
+Beta: −1
+Gamma: 0"
+906,Atomic structure,Radioactive decay and nuclear radiation,Combined,9,,What is ionisation?,An atom gaining or losing electrons to become an ion.
+280,Atomic structure,Nuclear equations,Combined,7,Asked in the 2020–23 papers,Describe how the mass number and atomic number change when an alpha particle is emitted.,Mass number decreases by 4. Atomic number decreases by 2.
+281,Atomic structure,Nuclear equations,Combined,7,Asked in the 2020–23 papers,Describe how the mass number and atomic number change when a beta particle is emitted.,Mass number stays the same. Atomic number increases by 1.
+282,Atomic structure,Nuclear equations,Combined,9,,Explain why gamma emission does not change the mass number or atomic number.,A gamma ray has no mass and no charge.
+725,Atomic structure,Nuclear equations,Combined,9,,State the symbol for an alpha particle in a nuclear equation.,⁴₂He
+726,Atomic structure,Nuclear equations,Combined,9,,State the symbol for a beta particle in a nuclear equation.,⁰₋₁e
+727,Atomic structure,Nuclear equations,Combined,7,Core fact,State the two quantities that must balance in a nuclear equation.,The total mass number and the total atomic number
+728,Atomic structure,Nuclear equations,Combined,9,,State what happens to the element when a nucleus emits an alpha or beta particle.,"It becomes a different element, because the number of protons changes."
+283,Atomic structure,Half-lives and the random nature of radioactive decay,Combined,7,Definition that mark schemes ask for,Define half-life in terms of activity.,The time taken for the activity (or count rate) of a sample to halve.
+637,Atomic structure,Half-lives and the random nature of radioactive decay,Combined,7,Asked in the 2020–23 papers,Define half-life in terms of the number of nuclei.,The time taken for the number of nuclei of the isotope in a sample to halve.
+284,Atomic structure,Half-lives and the random nature of radioactive decay,Combined,9,,Describe what happens to the half-life of an isotope as time passes.,Nothing: it is constant.
+285,Atomic structure,Half-lives and the random nature of radioactive decay,Combined,9,,Describe what happens to the activity of a radioactive sample over time.,It decreases.
+286,Atomic structure,Half-lives and the random nature of radioactive decay,Combined,9,,Describe what happens to the number of unstable nuclei in a radioactive sample over time.,It decreases.
+729,Atomic structure,Half-lives and the random nature of radioactive decay,Combined,9,,State the fraction of radioactive nuclei remaining after two half-lives.,One quarter (¼)
+730,Atomic structure,Half-lives and the random nature of radioactive decay,Combined,9,,State the fraction of radioactive nuclei remaining after three half-lives.,One eighth (⅛)
+731,Atomic structure,Half-lives and the random nature of radioactive decay,Combined,7,Core practical fact,Describe how to find the half-life from a graph of activity against time.,Find the time taken for the activity to fall to half its starting value.
+287,Atomic structure,Radioactive contamination,Combined,7,Asked in the 2020–23 papers,What is radioactive contamination?,The unwanted presence of radioactive atoms on or in other materials.
+288,Atomic structure,Radioactive contamination,Combined,9,,Explain why radioactive contamination is dangerous.,The contaminating atoms keep emitting radiation for as long as they remain.
+289,Atomic structure,Radioactive contamination,Combined,7,Asked in the 2020–23 papers,What is irradiation?,Exposing an object to nuclear radiation.
+290,Atomic structure,Radioactive contamination,Combined,9,,Explain why irradiation is dangerous.,"The radiation can ionise atoms in living cells, damaging or killing them."
+291,Atomic structure,Radioactive contamination,Combined,9,,State whether irradiated objects become radioactive.,No: their nuclei do not become unstable.
+732,Atomic structure,Radioactive contamination,Combined,9,,Give three precautions that protect people against irradiation.,"Use shielding, keep your distance from the source, and limit the exposure time."
+733,Atomic structure,Radioactive contamination,Combined,7,Asked in the 2020–23 papers,Explain why contamination by an alpha source inside the body is especially dangerous.,Alpha radiation is strongly ionising and is absorbed by nearby cells.
+734,Atomic structure,Radioactive contamination,Combined,9,,State what the hazard from radioactive contamination depends on.,The type of radiation emitted.
+735,Atomic structure,Radioactive contamination,Combined,7,Asked in the 2020–23 papers,Explain why studies of the effects of radiation on humans should be published.,So that other scientists can check the findings (peer review).
+292,Atomic structure,"(S) Background radiation, different half-lives and uses of nuclear radiation",Separate,7,Definition that mark schemes ask for,What is background radiation?,"Radiation that is around us all the time, from natural and human-made sources."
+293,Atomic structure,"(S) Background radiation, different half-lives and uses of nuclear radiation",Separate,9,,Name two natural sources of background radiation.,Rocks and cosmic rays
+294,Atomic structure,"(S) Background radiation, different half-lives and uses of nuclear radiation",Separate,7,Asked in the 2020–23 papers,Name two human-made sources of background radiation.,Fallout from nuclear weapons testing and nuclear accidents
+295,Atomic structure,"(S) Background radiation, different half-lives and uses of nuclear radiation",Separate,9,,What is radiation dose?,A measure of the risk of harm from exposure to radiation.
+296,Atomic structure,"(S) Background radiation, different half-lives and uses of nuclear radiation",Separate,9,,Explain why an isotope with a short half-life can be very hazardous at first.,"Its nuclei decay quickly, so its activity is very high."
+297,Atomic structure,"(S) Background radiation, different half-lives and uses of nuclear radiation",Separate,9,,Give two uses of nuclear radiation in medicine.,"Exploring internal organs, and controlling or destroying unwanted tissue"
+298,Atomic structure,"(S) Background radiation, different half-lives and uses of nuclear radiation",Separate,9,,Explain why alpha radiation is not suitable for exploring internal organs.,"It cannot pass out of the body to be detected, and it is strongly ionising."
+736,Atomic structure,"(S) Background radiation, different half-lives and uses of nuclear radiation",Separate,9,,State the unit of radiation dose.,Sievert (Sv)
+737,Atomic structure,"(S) Background radiation, different half-lives and uses of nuclear radiation",Separate,9,,State how many millisieverts (mSv) equal 1 sievert (Sv).,1000 mSv
+738,Atomic structure,"(S) Background radiation, different half-lives and uses of nuclear radiation",Separate,9,,Give two things that affect a person's background radiation dose.,Their occupation and their location
+739,Atomic structure,"(S) Background radiation, different half-lives and uses of nuclear radiation",Separate,7,Standard explanation,Explain why a medical tracer should have a short half-life.,"Its activity falls quickly, limiting the dose to the patient."
+740,Atomic structure,"(S) Background radiation, different half-lives and uses of nuclear radiation",Separate,9,,Explain why a medical tracer should emit gamma radiation.,It passes out of the body to be detected and is only weakly ionising.
+299,Atomic structure,(S) Nuclear fission and fusion,Separate,7,Definition that mark schemes ask for,Define nuclear fission.,"The splitting of a large, unstable nucleus into two smaller nuclei."
+300,Atomic structure,(S) Nuclear fission and fusion,Separate,9,,Give two examples of elements that can undergo nuclear fission.,Uranium and plutonium
+301,Atomic structure,(S) Nuclear fission and fusion,Separate,9,,What is spontaneous fission?,Fission that happens without the nucleus absorbing a neutron.
+302,Atomic structure,(S) Nuclear fission and fusion,Separate,7,Asked in the 2020–23 papers,State what usually has to happen before a nucleus undergoes fission.,The unstable nucleus must absorb a neutron.
+303,Atomic structure,(S) Nuclear fission and fusion,Separate,7,Asked in the 2020–23 papers,State what a nucleus splits into during fission.,"Two smaller nuclei, two or three neutrons and gamma rays"
+304,Atomic structure,(S) Nuclear fission and fusion,Separate,7,Definition that mark schemes ask for,What is a chain reaction?,"Neutrons released by one fission cause further fissions, which release more neutrons, and so on."
+305,Atomic structure,(S) Nuclear fission and fusion,Separate,7,Definition that mark schemes ask for,Define nuclear fusion.,The joining of two light nuclei to form a heavier nucleus.
+306,Atomic structure,(S) Nuclear fission and fusion,Separate,9,,"In nuclear fusion, which has more mass: the two light nuclei or the nucleus they form?",The two light nuclei
+307,Atomic structure,(S) Nuclear fission and fusion,Separate,7,Asked in the 2020–23 papers,Some mass is lost during nuclear fusion. State what it is converted into.,Energy (of radiation)
+741,Atomic structure,(S) Nuclear fission and fusion,Separate,9,,Name the energy store that all fission products have.,The kinetic energy store
+742,Atomic structure,(S) Nuclear fission and fusion,Separate,9,,State how the chain reaction in a reactor differs from that in a nuclear weapon.,"Reactor: controlled.
+Weapon: uncontrolled, causing an explosion."
+743,Atomic structure,(S) Nuclear fission and fusion,Separate,9,,Name the process that releases energy in stars.,Nuclear fusion
+308,Forces,"Scalars, vectors, contact and non-contact forces",Combined,7,Asked in the 2020–23 papers,Define a scalar quantity.,A quantity that has magnitude only.
+309,Forces,"Scalars, vectors, contact and non-contact forces",Combined,9,,Give three examples of scalar quantities.,"Any three from: energy, time, mass, distance, speed, temperature"
+310,Forces,"Scalars, vectors, contact and non-contact forces",Combined,7,Asked in the 2020–23 papers,Define a vector quantity.,A quantity that has both magnitude and direction.
+311,Forces,"Scalars, vectors, contact and non-contact forces",Combined,9,,Give three examples of vector quantities.,"Any three from: force, displacement, velocity, acceleration, momentum"
+312,Forces,"Scalars, vectors, contact and non-contact forces",Combined,9,,State how a vector is represented on a diagram.,By an arrow.
+313,Forces,"Scalars, vectors, contact and non-contact forces",Combined,9,,Explain why an arrow is a suitable way to represent a vector.,Its length shows the magnitude and its direction shows the direction.
+314,Forces,"Scalars, vectors, contact and non-contact forces",Combined,9,,State what a force is.,A push or pull on an object due to an interaction with another object.
+315,Forces,"Scalars, vectors, contact and non-contact forces",Combined,9,,What is a contact force?,A force between objects that are physically touching.
+316,Forces,"Scalars, vectors, contact and non-contact forces",Combined,7,Asked in the 2020–23 papers,Give three examples of contact forces.,"Any three from: friction, air resistance, tension, normal contact force"
+317,Forces,"Scalars, vectors, contact and non-contact forces",Combined,9,,What is a non-contact force?,A force between objects that are physically separated.
+318,Forces,"Scalars, vectors, contact and non-contact forces",Combined,9,,Give three examples of non-contact forces.,"Gravitational force (weight), electrostatic force, magnetic force"
+319,Forces,"Scalars, vectors, contact and non-contact forces",Combined,9,,"When two objects interact, state which of them experiences a force.",Both: the forces are equal in size and opposite in direction.
+320,Forces,Gravity,Combined,7,Definition that mark schemes ask for,Define weight.,The force acting on an object due to gravity.
+321,Forces,Gravity,Combined,9,,State why objects experience weight on Earth.,The Earth's gravitational field attracts them.
+322,Forces,Gravity,Combined,7,Standard explanation,Explain why objects experience different weights on different planets.,Each planet has a different gravitational field strength.
+323,Forces,Gravity,Combined,9,,Does the mass of an object change if it is moved to another planet?,No
+324,Forces,Gravity,Combined,9,,Does the weight of an object change if it is moved to another planet?,Yes: the gravitational field strength is different.
+325,Forces,Gravity,Combined,9,,State the standard unit of weight.,Newton (N)
+326,Forces,Gravity,Combined,9,,State the standard unit of mass.,Kilogram (kg)
+327,Forces,Gravity,Combined,7,Standard unit,State the standard unit of gravitational field strength.,Newton per kilogram (N/kg)
+328,Forces,Gravity,Combined,9,,State the mathematical relationship between weight and mass.,Weight is directly proportional to mass (W ∝ m).
+329,Forces,Gravity,Combined,9,,What does the symbol ∝ mean?,Is directly proportional to
+330,Forces,Gravity,Combined,9,,Describe how the weight of an object depends on its mass.,Doubling the mass doubles the weight (direct proportion).
+331,Forces,Gravity,Combined,7,Asked in the 2020–23 papers,What is the centre of mass of an object?,The single point where the weight of the object can be considered to act.
+744,Forces,Gravity,Combined,9,On the equations sheet,"State the equation linking weight, mass and gravitational field strength.","weight = mass × gravitational field strength
+(W = m g)"
+745,Forces,Gravity,Combined,9,,Name the instrument used to measure weight.,A newtonmeter (calibrated spring balance)
+746,Forces,Gravity,Combined,9,,State the gravitational field strength at the surface of the Earth.,About 9.8 N/kg
+332,Forces,"Resultant forces, work done and energy transfer",Combined,7,Definition that mark schemes ask for,Define resultant force.,The single force that has the same effect as all the forces acting on an object.
+333,Forces,"Resultant forces, work done and energy transfer",Combined,9,,Describe how a resultant force is calculated.,By adding all the forces on the object as vectors.
+334,Forces,"Resultant forces, work done and energy transfer",Combined,9,,Two forces act in the same direction. Describe how to find the size of the resultant force.,Add the two forces together.
+335,Forces,"Resultant forces, work done and energy transfer",Combined,9,,Two unequal forces act in opposite directions. State the direction of the resultant force.,The direction of the larger force
+336,Forces,"Resultant forces, work done and energy transfer",Combined,9,,Two forces act in opposite directions. Describe how to find the size of the resultant force.,Subtract the smaller force from the larger force.
+337,Forces,"Resultant forces, work done and energy transfer",Combined,7,Core fact,State the resultant force when the forces on an object are balanced.,Zero (0 N)
+338,Forces,"Resultant forces, work done and energy transfer",Combined,7,Standard unit,State the standard unit of work done.,Joule (J)
+339,Forces,"Resultant forces, work done and energy transfer",Combined,9,,State the standard unit of force.,Newton (N)
+340,Forces,"Resultant forces, work done and energy transfer",Combined,9,,State the standard unit of distance.,Metre (m)
+341,Forces,"Resultant forces, work done and energy transfer",Combined,9,,State a unit that is equivalent to 1 J of work done.,1 N m
+342,Forces,"Resultant forces, work done and energy transfer",Combined,7,Asked in the 2020–23 papers,Work is done against friction. Name the energy store that increases.,The thermal energy store
+343,Forces,"Resultant forces, work done and energy transfer",Combined,9,,Work is done on an object against friction. State what happens to its temperature.,Its temperature rises.
+747,Forces,"Resultant forces, work done and energy transfer",Combined,9,On the equations sheet,"State the equation linking work done, force and distance.","work done = force × distance moved in the direction of the force
+(W = F s)"
+748,Forces,"Resultant forces, work done and energy transfer",Combined,9,,State how much work is done when a force of 1 N moves an object through 1 m.,1 J
+749,Forces,"Resultant forces, work done and energy transfer",Combined,9,,Describe what a free body diagram shows.,"All the forces acting on one object, drawn as arrows."
+750,Forces,"Resultant forces, work done and energy transfer",Combined,9,,State what is meant by resolving a force.,Splitting it into two components at right angles that together have the same effect.
+344,Forces,Forces and elasticity,Combined,9,,Give three ways in which the shape of an object can be changed.,"Stretching, compressing or bending"
+345,Forces,Forces and elasticity,Combined,7,Asked in the 2020–23 papers,What is elastic deformation?,The object returns to its original shape when the forces are removed.
+346,Forces,Forces and elasticity,Combined,7,Asked in the 2020–23 papers,What is inelastic deformation?,The object does not return to its original shape when the forces are removed.
+347,Forces,Forces and elasticity,Combined,7,Asked in the 2020–23 papers,"State how the extension of a spring depends on the force applied, below the limit of proportionality.",The extension is directly proportional to the force.
+348,Forces,Forces and elasticity,Combined,9,,Describe the relationship between the force on an elastic object and its extension.,"As the force increases, the extension increases."
+349,Forces,Forces and elasticity,Combined,7,Definition that mark schemes ask for,What is the limit of proportionality of an elastic object?,The point beyond which extension is no longer directly proportional to force.
+350,Forces,Forces and elasticity,Combined,9,,Which letter shows the limit of proportionality on this force–extension graph?,C
+351,Forces,Forces and elasticity,Combined,9,,State the standard unit of force.,Newton (N)
+352,Forces,Forces and elasticity,Combined,7,Standard unit,State the standard unit of spring constant.,Newton per metre (N/m)
+353,Forces,Forces and elasticity,Combined,7,Definition that mark schemes ask for,Define spring constant.,The force needed to stretch (or compress) a spring by 1 m.
+354,Forces,Forces and elasticity,Combined,9,,State the standard unit of extension.,Metre (m)
+355,Forces,Forces and elasticity,Combined,7,Asked in the 2020–23 papers,State how the extension of an elastic object is calculated.,Extension = stretched length − original length
+356,Forces,Forces and elasticity,Combined,7,Core fact,Name the energy store that increases when an elastic object is stretched or compressed.,The elastic potential energy store
+357,Forces,Forces and elasticity,Combined,7,Core practical fact,Describe how to find the spring constant from a graph of force (y-axis) against extension (x-axis).,It is the gradient of the straight section.
+358,Forces,Forces and elasticity,Combined,9,,Describe how to find the spring constant from a graph of extension (y-axis) against force (x-axis).,It is 1 ÷ gradient of the straight section.
+359,Forces,Forces and elasticity,Combined,9,,State the standard unit of elastic potential energy.,Joule (J)
+751,Forces,Forces and elasticity,Combined,9,On the equations sheet,"State the equation linking force, spring constant and extension.","force = spring constant × extension
+(F = k e)"
+752,Forces,Forces and elasticity,Combined,9,,Explain why more than one force is needed to stretch or compress a stationary object.,A single force would just make the object move.
+753,Forces,Forces and elasticity,Combined,9,,State how the work done stretching a spring compares with the elastic potential energy stored.,They are equal (if the spring is not inelastically deformed).
+754,Forces,Forces and elasticity,Combined,9,,State how linear and non-linear relationships look on a force–extension graph.,"Linear: a straight line.
+Non-linear: a curve."
+361,Forces,Force and extension (RP),Combined,7,Core practical fact,Investigating how force affects the extension of a spring: name the independent variable.,Force applied to the spring
+362,Forces,Force and extension (RP),Combined,7,Core practical fact,Investigating how force affects the extension of a spring: name the dependent variable.,Extension of the spring
+363,Forces,Force and extension (RP),Combined,9,,State the extension of a spring when no force is applied.,Zero
+364,Forces,Force and extension (RP),Combined,7,Core practical fact,Describe how to convert the mass hung on a spring into a weight.,Multiply the mass in kg by the gravitational field strength (9.8 N/kg).
+366,Forces,Force and extension (RP),Combined,9,,"A student records the whole length of a spring, not its extension. Name the type of error this causes.",A systematic error (every value is too large).
+367,Forces,Force and extension (RP),Combined,9,,The force on a spring is doubled. State the effect on its extension.,It doubles (below the limit of proportionality).
+368,Forces,"(S) Moments, levers and gears",Separate,9,,State what is required to cause an object to rotate.,A force that does not act through the pivot or centre of mass.
+369,Forces,"(S) Moments, levers and gears",Separate,9,,Name the turning effect of a force.,A moment
+370,Forces,"(S) Moments, levers and gears",Separate,7,Core fact,State which distance is used when calculating the moment of a force.,The perpendicular distance from the pivot to the line of action of the force
+371,Forces,"(S) Moments, levers and gears",Separate,9,,The clockwise and anticlockwise moments about a pivot are equal. State what this tells you about the object.,It is balanced.
+372,Forces,"(S) Moments, levers and gears",Separate,7,Standard explanation,Explain how a lever can reduce the force needed to turn something.,Pushing further from the pivot gives the same moment with a smaller force.
+373,Forces,"(S) Moments, levers and gears",Separate,9,,State the function of a lever.,To transmit the rotational effect of a force.
+374,Forces,"(S) Moments, levers and gears",Separate,9,,State the function of a simple gear system.,To transmit the rotational effect of a force.
+755,Forces,"(S) Moments, levers and gears",Separate,9,On the equations sheet,"State the equation linking moment, force and distance.","moment = force × perpendicular distance from the pivot
+(M = F d)"
+756,Forces,"(S) Moments, levers and gears",Separate,9,,State the standard unit of the moment of a force.,Newton-metre (N m)
+757,Forces,"(S) Moments, levers and gears",Separate,7,Definition that mark schemes ask for,State the principle of moments for a balanced object.,Total clockwise moment about the pivot = total anticlockwise moment.
+758,Forces,"(S) Moments, levers and gears",Separate,9,,A small gear drives a larger gear. State the effect on the speed of rotation and on the moment.,The larger gear turns more slowly but with a bigger moment.
+375,Forces,(S) Pressure in fluids and in the atmosphere,Separate,9,,Name the two states of matter that are considered fluids.,Liquid and gas
+376,Forces,(S) Pressure in fluids and in the atmosphere,Separate,9,,Describe what causes pressure in a fluid.,The particles of the fluid colliding with surfaces.
+377,Forces,(S) Pressure in fluids and in the atmosphere,Separate,9,,A fluid exerts a force on its container. State the direction of the force.,At right angles to the surface.
+378,Forces,(S) Pressure in fluids and in the atmosphere,Separate,9,On the equations sheet,"State the equation linking pressure, area and force.","pressure = force ÷ area
+(p = F ÷ A)"
+379,Forces,(S) Pressure in fluids and in the atmosphere,Separate,7,Standard unit,State the standard unit of pressure.,Pascal (Pa)
+380,Forces,(S) Pressure in fluids and in the atmosphere,Separate,7,What a quantity depends on,Describe how the pressure in a liquid depends on the height of the liquid column.,"The taller the column, the greater the pressure."
+381,Forces,(S) Pressure in fluids and in the atmosphere,Separate,7,What a quantity depends on,Describe how the pressure in a liquid depends on its density.,"The denser the liquid, the greater the pressure."
+382,Forces,(S) Pressure in fluids and in the atmosphere,Separate,7,Asked in the 2020–23 papers,Explain what causes upthrust.,"Pressure increases with depth, so the pressure on the bottom of a submerged object is greater than on the top."
+383,Forces,(S) Pressure in fluids and in the atmosphere,Separate,9,,Describe the Earth's atmosphere.,A thin layer of air around the Earth.
+384,Forces,(S) Pressure in fluids and in the atmosphere,Separate,9,,Describe how the density of the atmosphere changes with height.,It decreases as height increases.
+385,Forces,(S) Pressure in fluids and in the atmosphere,Separate,9,,Give the cause of atmospheric pressure.,Air molecules colliding with a surface.
+386,Forces,(S) Pressure in fluids and in the atmosphere,Separate,7,Core fact,Describe how atmospheric pressure changes with height.,It decreases as height increases.
+759,Forces,(S) Pressure in fluids and in the atmosphere,Separate,9,On the equations sheet,State the equation for the pressure due to a column of liquid.,"pressure = height × density × gravitational field strength
+(p = h ρ g)"
+760,Forces,(S) Pressure in fluids and in the atmosphere,Separate,7,Standard explanation,Explain why the pressure in a liquid increases with depth.,"The deeper you go, the greater the weight of liquid above."
+761,Forces,(S) Pressure in fluids and in the atmosphere,Separate,9,,State the condition for an object to float.,Upthrust equals its weight.
+762,Forces,(S) Pressure in fluids and in the atmosphere,Separate,9,,State when an object in a liquid sinks.,When its weight is greater than the upthrust.
+763,Forces,(S) Pressure in fluids and in the atmosphere,Separate,9,,Explain why atmospheric pressure decreases as height increases.,"There is less air above, so fewer air molecules collide with each unit of area."
+387,Forces,"Distance, displacement, speed and velocity",Combined,9,,Define distance.,How far an object moves.
+388,Forces,"Distance, displacement, speed and velocity",Combined,9,,Define displacement.,"The straight-line distance from start to finish, with its direction."
+389,Forces,"Distance, displacement, speed and velocity",Combined,7,Standard explanation,Explain the difference between distance and displacement.,Displacement has a direction (vector); distance does not (scalar).
+390,Forces,"Distance, displacement, speed and velocity",Combined,7,Standard explanation,Explain the difference between speed and velocity.,Velocity has a direction (vector); speed does not (scalar).
+391,Forces,"Distance, displacement, speed and velocity",Combined,9,,"State typical values for walking speed, running speed and cycling speed.","Walking: 1.5 m/s
+Running: 3 m/s
+Cycling: 6 m/s"
+392,Forces,"Distance, displacement, speed and velocity",Combined,9,,State a typical value for the speed of sound in air.,330 m/s
+393,Forces,"Distance, displacement, speed and velocity",Combined,7,Definition that mark schemes ask for,Define velocity.,The speed of an object in a given direction.
+394,Forces,"Distance, displacement, speed and velocity",Combined,9,,An object moves along a curved path. Describe its speed and its velocity.,"Speed: can be constant.
+Velocity: changing, because the direction changes."
+395,Forces,"Distance, displacement, speed and velocity",Combined,7,Core fact,State what the gradient of a distance–time graph represents.,Speed
+396,Forces,"Distance, displacement, speed and velocity",Combined,9,,Describe how acceleration appears on a distance–time graph.,As a curve (the gradient changes).
+764,Forces,"Distance, displacement, speed and velocity",Combined,9,On the equations sheet,"State the equation linking distance travelled, speed and time.","distance travelled = speed × time
+(s = v t)"
+765,Forces,"Distance, displacement, speed and velocity",Combined,9,,"Give three factors that affect how fast a person walks, runs or cycles.","Any three from: age, fitness, terrain, distance travelled"
+766,Forces,"Distance, displacement, speed and velocity",Combined,9,,"State typical speeds for a car on a main road, a train and an aeroplane.","Car: about 25 m/s
+Train: about 50 m/s
+Aeroplane: about 250 m/s"
+767,Forces,"Distance, displacement, speed and velocity",Combined,9,,State what a horizontal line on a distance–time graph shows.,The object is stationary.
+768,Forces,"Distance, displacement, speed and velocity",Combined,7,Core practical fact,Describe how to find the speed at one instant from a curved distance–time graph.,Draw a tangent to the curve at that time and find its gradient.
+397,Forces,Acceleration,Combined,7,Standard unit,State the standard unit of acceleration.,Metre per second squared (m/s²)
+398,Forces,Acceleration,Combined,7,Core fact,State what the gradient of a velocity–time graph represents.,Acceleration
+399,Forces,Acceleration,Combined,7,Core fact,State what the area under a velocity–time graph represents.,The distance travelled
+400,Forces,Acceleration,Combined,9,,State the acceleration of an object in free fall near the Earth's surface.,About 9.8 m/s²
+401,Forces,Acceleration,Combined,7,Asked in the 2020–23 papers,Define terminal velocity.,The constant velocity of a falling object when the resistive forces equal its weight.
+769,Forces,Acceleration,Combined,9,On the equations sheet,"State the equation linking acceleration, change in velocity and time taken.","acceleration = change in velocity ÷ time taken
+(a = Δv ÷ t)"
+770,Forces,Acceleration,Combined,9,On the equations sheet,State the equation for uniform acceleration.,"(final velocity)² − (initial velocity)² = 2 × acceleration × distance
+(v² − u² = 2 a s)"
+771,Forces,Acceleration,Combined,9,,State what a negative acceleration means.,The object is slowing down.
+772,Forces,Acceleration,Combined,9,,State what a horizontal line on a velocity–time graph shows.,Constant velocity.
+773,Forces,Acceleration,Combined,9,,"State what a straight, sloping line on a velocity–time graph shows.",Constant acceleration.
+904,Forces,Acceleration,Combined,7,Definition that mark schemes ask for,What is acceleration?,The rate of change of velocity.
+402,Forces,Newton's laws,Combined,7,Definition that mark schemes ask for,State Newton's first law.,"If the resultant force is zero, a stationary object stays still and a moving object keeps the same velocity."
+403,Forces,Newton's laws,Combined,7,Asked in the 2020–23 papers,An object travels at constant velocity. Is there a resultant force on it?,No
+404,Forces,Newton's laws,Combined,7,Asked in the 2020–23 papers,Define inertia.,The tendency of an object to continue in its state of rest or of uniform motion.
+405,Forces,Newton's laws,Combined,7,Definition that mark schemes ask for,State Newton's second law.,Acceleration is proportional to the resultant force and inversely proportional to the mass (F = m a).
+406,Forces,Newton's laws,Combined,9,,Describe how the acceleration of an object depends on the resultant force.,Acceleration is directly proportional to the resultant force.
+407,Forces,Newton's laws,Combined,9,,What is inertial mass?,A measure of how difficult it is to change the velocity of an object.
+408,Forces,Newton's laws,Combined,9,,An object is changing velocity. Is there a resultant force on it?,Yes
+409,Forces,Newton's laws,Combined,7,Asked in the 2020–23 papers,State Newton's third law.,"When two objects interact, the forces they exert on each other are equal and opposite."
+775,Forces,Newton's laws,Combined,9,On the equations sheet,"State the equation linking resultant force, mass and acceleration.","resultant force = mass × acceleration
+(F = m a)"
+776,Forces,Newton's laws,Combined,7,What a quantity depends on,"For a constant force, state how acceleration depends on mass.",Acceleration is inversely proportional to mass.
+777,Forces,Newton's laws,Combined,9,,A car travels at a steady speed along a straight road. Compare the driving force and the resistive forces.,They are balanced (equal and opposite).
+778,Forces,Newton's laws,Combined,9,,What does the symbol ~ mean?,Approximately
+779,Forces,Newton's laws,Combined,9,,Give an example of Newton's third law.,You push on a wall; the wall pushes back on you with an equal and opposite force.
+410,Forces,"Force, mass and acceleration (RP)",Combined,7,Core practical fact,Force and acceleration of a trolley: name the independent variable.,Force applied to the trolley
+411,Forces,"Force, mass and acceleration (RP)",Combined,7,Core practical fact,Force and acceleration of a trolley: name the dependent variable.,Acceleration of the trolley
+412,Forces,"Force, mass and acceleration (RP)",Combined,7,Core practical fact,Force and acceleration of a trolley: name the control variables.,The total mass (trolley and hanging masses) and the surface the trolley travels on
+903,Forces,"Force, mass and acceleration (RP)",Combined,7,Standard explanation,Force and acceleration of a trolley: explain why each mass taken off the hanging stack is put on the trolley.,To change the force while keeping the total mass the same.
+414,Forces,"Force, mass and acceleration (RP)",Combined,9,,The force on a trolley is doubled. State the effect on its acceleration.,It doubles.
+415,Forces,"Force, mass and acceleration (RP)",Combined,9,,Mass and acceleration of a trolley: name the independent variable.,Mass of the trolley
+416,Forces,"Force, mass and acceleration (RP)",Combined,9,,Mass and acceleration of a trolley: name the dependent variable.,Acceleration of the trolley
+417,Forces,"Force, mass and acceleration (RP)",Combined,9,,Mass and acceleration of a trolley: name the control variables.,The force applied and the surface the trolley travels on
+419,Forces,Stopping distance,Combined,7,Definition that mark schemes ask for,What is the stopping distance of a vehicle?,Thinking distance + braking distance
+420,Forces,Stopping distance,Combined,7,Asked in the 2020–23 papers,What is the thinking distance of a vehicle?,The distance travelled during the driver's reaction time.
+421,Forces,Stopping distance,Combined,9,,What is the braking distance of a vehicle?,The distance travelled under the braking force.
+422,Forces,Stopping distance,Combined,9,,Name the factor that increases both thinking distance and braking distance.,Speed
+423,Forces,Stopping distance,Combined,9,,State the typical range of human reaction times.,0.2 s to 0.9 s
+424,Forces,Stopping distance,Combined,7,Core fact,Give four factors that affect reaction time.,"Tiredness, drugs, alcohol and distractions"
+425,Forces,Stopping distance,Combined,7,Asked in the 2020–23 papers,Give four factors that affect braking distance.,"Speed, wet or icy roads, worn tyres and worn brakes"
+426,Forces,Stopping distance,Combined,7,Asked in the 2020–23 papers,Describe the energy transfer when a vehicle brakes.,Energy is transferred from the kinetic store of the vehicle to the thermal store of the brakes.
+427,Forces,Stopping distance,Combined,9,,Describe how the braking force needed to stop in a given distance depends on speed.,"The greater the speed, the greater the braking force needed."
+428,Forces,Stopping distance,Combined,7,Asked in the 2020–23 papers,Give two dangers of a very large deceleration.,The brakes may overheat and the driver may lose control.
+780,Forces,Stopping distance,Combined,9,,Describe a simple method to measure a person's reaction time.,"Drop a ruler between their fingers. The further it falls before they catch it, the longer the reaction time."
+781,Forces,Stopping distance,Combined,9,,Explain why braking distance increases with speed.,"The vehicle has more kinetic energy, so the brakes must do more work to stop it."
+907,Forces,Stopping distance,Combined,9,,The speed of a vehicle doubles. State what happens to the thinking distance.,It doubles (it is directly proportional to speed).
+908,Forces,Stopping distance,Combined,9,,Which does speed affect more: thinking distance or braking distance?,Braking distance
+429,Forces,Momentum,Combined,7,Standard unit,State the standard unit of momentum.,Kilogram metre per second (kg m/s)
+430,Forces,Momentum,Combined,7,Asked in the 2020–23 papers,State the law of conservation of momentum.,"In a closed system, total momentum before an event = total momentum after."
+431,Forces,(S) Changes in momentum,Separate,9,,State how the momentum of an object can be changed.,By a resultant force acting on it.
+432,Forces,(S) Changes in momentum,Separate,7,Definition that mark schemes ask for,How is force related to momentum?,Force is the rate of change of momentum.
+433,Forces,(S) Changes in momentum,Separate,7,Asked in the 2020–23 papers,"Explain how air bags, seat belts and crash mats reduce the force in a collision.","They increase the time taken for the momentum to change, which reduces the force."
+782,Forces,Momentum,Combined,9,On the equations sheet,"State the equation linking momentum, mass and velocity.","momentum = mass × velocity
+(p = m v)"
+783,Forces,Momentum,Combined,7,Core fact,State whether momentum is a scalar or a vector quantity.,A vector
+784,Forces,Momentum,Combined,9,,State the momentum of a stationary object.,Zero
+785,Forces,(S) Changes in momentum,Separate,9,On the equations sheet,"State the equation linking force, change in momentum and time.","force = change in momentum ÷ time taken
+(F = m Δv ÷ Δt)"
+434,Waves,Transverse and longitudinal waves,Combined,7,Core fact,State what waves transfer.,Energy
+435,Waves,Transverse and longitudinal waves,Combined,7,Core fact,State what waves do [not] transfer.,Matter
+436,Waves,Transverse and longitudinal waves,Combined,9,,Name the material that a wave travels through.,A medium
+437,Waves,Transverse and longitudinal waves,Combined,9,,Name a repeated back-and-forth motion.,An oscillation
+438,Waves,Transverse and longitudinal waves,Combined,9,,State what oscillates in a water wave.,The water particles (up and down)
+439,Waves,Transverse and longitudinal waves,Combined,9,,State what oscillates in a sound wave in air.,The air particles
+440,Waves,Transverse and longitudinal waves,Combined,9,,State what oscillates in a light wave.,Electric and magnetic fields
+441,Waves,Transverse and longitudinal waves,Combined,9,,Name the two types of wave.,Transverse waves and longitudinal waves
+442,Waves,Transverse and longitudinal waves,Combined,7,Asked in the 2020–23 papers,What is a transverse wave?,A wave in which the oscillations are perpendicular to the direction of energy transfer.
+443,Waves,Transverse and longitudinal waves,Combined,7,Asked in the 2020–23 papers,What is a longitudinal wave?,A wave in which the oscillations are parallel to the direction of energy transfer.
+444,Waves,Transverse and longitudinal waves,Combined,7,Core fact,What type of wave is sound?,Longitudinal
+445,Waves,Transverse and longitudinal waves,Combined,9,,What type of wave is light?,Transverse
+446,Waves,Transverse and longitudinal waves,Combined,7,Asked in the 2020–23 papers,State what labels A and B show on this longitudinal wave.,"A: a compression
+B: a rarefaction"
+786,Waves,Transverse and longitudinal waves,Combined,9,,Give an example of a transverse wave.,Ripples on water (or light)
+787,Waves,Transverse and longitudinal waves,Combined,9,,Give an example of a longitudinal wave.,Sound waves in air
+788,Waves,Transverse and longitudinal waves,Combined,9,,Describe evidence that water waves transfer energy without moving the water along.,A floating object bobs up and down but is not carried along.
+909,Waves,Transverse and longitudinal waves,Combined,9,,What is a compression in a longitudinal wave?,A region where the particles are closer together.
+910,Waves,Transverse and longitudinal waves,Combined,9,,What is a rarefaction in a longitudinal wave?,A region where the particles are further apart.
+447,Waves,Properties of waves,Combined,7,Core fact,"This transverse wave is drawn against distance, at one instant. State what labels A to E show.","A: amplitude
+B: wavelength
+C: peak
+D: trough
+E: rest position"
+448,Waves,Properties of waves,Combined,7,Definition that mark schemes ask for,Define wavelength.,The distance from a point on one wave to the same point on the next.
+449,Waves,Properties of waves,Combined,7,Definition that mark schemes ask for,Define frequency.,The number of waves passing a point each second.
+450,Waves,Properties of waves,Combined,7,Standard unit,State the standard unit of frequency.,Hertz (Hz)
+451,Waves,Properties of waves,Combined,7,Definition that mark schemes ask for,Define the period of a wave.,The time for one complete wave to pass a point.
+452,Waves,Properties of waves,Combined,9,,State the standard unit of period.,Second (s)
+453,Waves,Properties of waves,Combined,9,On the equations sheet,"In words, state the equation linking period and frequency.",period = 1 ÷ frequency
+454,Waves,Properties of waves,Combined,9,On the equations sheet,"In symbols, state the equation linking period and frequency.",T = 1 ÷ f
+789,Waves,Properties of waves,Combined,9,On the equations sheet,"State the equation linking wave speed, frequency and wavelength.","wave speed = frequency × wavelength
+(v = f λ)"
+790,Waves,Properties of waves,Combined,7,Definition that mark schemes ask for,What is the amplitude of a wave?,The maximum displacement of a point on the wave from its rest position.
+791,Waves,Properties of waves,Combined,9,,What is wave speed?,The speed at which the wave transfers energy through the medium.
+792,Waves,Properties of waves,Combined,9,,Describe a method to measure the speed of sound in air.,"Time a sound over a measured distance, e.g. from a clap to an observer. Speed = distance ÷ time."
+793,Waves,(S) Sound waves and waves for detection and exploration,Separate,9,,"A sound wave passes into a different medium. Which stays the same: speed, frequency or wavelength?",Frequency
+455,Waves,Waves in a ripple tank and on a string (RP),Combined,9,,Name three properties of a wave that can be measured in a ripple tank.,"Frequency, wavelength and speed"
+456,Waves,Waves in a ripple tank and on a string (RP),Combined,9,,A ripple tank casts bright and dark lines on the screen. State what they show.,"Bright lines: peaks.
+Dark lines: troughs."
+457,Waves,Waves in a ripple tank and on a string (RP),Combined,7,Core practical fact,Describe how waves are produced in a ripple tank.,A motor makes a dipper vibrate up and down on the water surface.
+459,Waves,Waves in a ripple tank and on a string (RP),Combined,7,Asked in the 2020–23 papers,Describe how to measure the frequency of waves in a ripple tank.,Count the waves passing a point in 10 s and divide by 10.
+460,Waves,Waves in a ripple tank and on a string (RP),Combined,7,Asked in the 2020–23 papers,Describe two ways to find the speed of the waves in a ripple tank.,"Frequency × wavelength
+Or: time a wave over a measured distance, then distance ÷ time"
+462,Waves,Waves in a ripple tank and on a string (RP),Combined,9,,Describe how to find the frequency of a wave on a string.,Read it from the signal generator.
+463,Waves,Waves in a ripple tank and on a string (RP),Combined,7,Core practical fact,Describe how to measure the wavelength of a wave on a string.,"Measure the length of several loops and divide by the number of loops.
+Wavelength = 2 × the length of one loop."
+464,Waves,Waves in a ripple tank and on a string (RP),Combined,9,,Describe how to find the speed of a wave on a string.,Multiply the frequency by the wavelength.
+465,Waves,"(S) Reflection, absorption and transmission",Separate,9,,Describe how light travels.,In straight lines.
+466,Waves,"(S) Reflection, absorption and transmission",Separate,7,Core fact,Name the line drawn at 90° to a boundary where a wave meets it.,The normal
+467,Waves,"(S) Reflection, absorption and transmission",Separate,9,,State what happens to a wave that is transmitted at a boundary.,It passes through the new material.
+468,Waves,"(S) Reflection, absorption and transmission",Separate,7,Core fact,State what happens to a wave that is absorbed at a boundary.,Its energy is transferred to the material.
+469,Waves,"(S) Reflection, absorption and transmission",Separate,9,,State what happens to a wave that is reflected at a boundary.,It bounces back off the boundary.
+470,Waves,"(S) Reflection, absorption and transmission",Separate,9,,Name a reflection of a sound wave.,An echo
+794,Waves,"(S) Reflection, absorption and transmission",Separate,7,Core fact,State the law of reflection.,The angle of incidence is equal to the angle of reflection.
+795,Waves,"(S) Reflection, absorption and transmission",Separate,7,Core fact,Name three things that can happen to a wave at a boundary.,"It can be reflected, absorbed or transmitted."
+471,Waves,(S) Reflection and refraction of light (RP),Separate,9,,Describe how the normal is drawn in a ray diagram.,"At 90° to the boundary, where the ray meets it."
+472,Waves,(S) Reflection and refraction of light (RP),Separate,7,Core practical fact,State how the angle of incidence is measured.,Between the incident ray and the normal.
+473,Waves,(S) Reflection and refraction of light (RP),Separate,9,,State how the angle of reflection is measured.,Between the reflected ray and the normal.
+474,Waves,(S) Reflection and refraction of light (RP),Separate,7,Core practical fact,State how the angle of refraction is measured.,Between the refracted ray and the normal.
+475,Waves,(S) Reflection and refraction of light (RP),Separate,7,Core fact,State how the angle of reflection compares with the angle of incidence.,They are equal.
+476,Waves,Electromagnetic waves,Combined,9,,Light passes from air into glass. Compare the angle of refraction with the angle of incidence.,It is smaller (the ray bends towards the normal).
+477,Waves,Electromagnetic waves,Combined,9,,Light passes from glass into air. Compare the angle of refraction with the angle of incidence.,It is larger (the ray bends away from the normal).
+796,Waves,(S) Reflection and refraction of light (RP),Separate,9,,Name the equipment used to produce a narrow ray of light.,A ray box
+797,Waves,(S) Reflection and refraction of light (RP),Separate,7,Standard explanation,Explain why a narrow ray is used when investigating reflection and refraction.,Its position can be marked more accurately.
+798,Waves,(S) Reflection and refraction of light (RP),Separate,9,,Name the instrument used to measure the angles in a ray diagram.,A protractor
+478,Waves,(S) Sound waves and waves for detection and exploration,Separate,9,,State what happens to the speed of sound when it passes from air into a solid.,It increases.
+479,Waves,(S) Sound waves and waves for detection and exploration,Separate,9,,"State what happens to the loudness of a sound passing from air into a solid, and why.",It decreases: some sound is reflected or absorbed at the boundary.
+480,Waves,(S) Sound waves and waves for detection and exploration,Separate,9,,Name the part of the human ear that detects sound waves.,The eardrum
+481,Waves,(S) Sound waves and waves for detection and exploration,Separate,9,,Name the part of the ear that sends electrical signals to the brain.,The cochlea
+482,Waves,(S) Sound waves and waves for detection and exploration,Separate,7,Core fact,State the range of human hearing.,20 Hz to 20 kHz
+483,Waves,(S) Sound waves and waves for detection and exploration,Separate,7,Definition that mark schemes ask for,Name sound with a frequency above the range of human hearing.,Ultrasound
+484,Waves,(S) Sound waves and waves for detection and exploration,Separate,9,,What is echolocation?,Using reflected sound (echoes) to locate an object.
+485,Waves,(S) Sound waves and waves for detection and exploration,Separate,9,,Give two uses of ultrasound imaging.,Medical scans (e.g. of an unborn baby) and finding flaws in materials
+486,Waves,(S) Sound waves and waves for detection and exploration,Separate,9,,What are seismic waves?,Waves produced by earthquakes.
+487,Waves,(S) Sound waves and waves for detection and exploration,Separate,9,,Name the two types of seismic waves.,P-waves and S-waves
+488,Waves,(S) Sound waves and waves for detection and exploration,Separate,7,Core fact,What type of wave are P-waves?,Longitudinal
+489,Waves,(S) Sound waves and waves for detection and exploration,Separate,9,,Name the states of matter that P-waves travel through.,Solids and liquids
+490,Waves,(S) Sound waves and waves for detection and exploration,Separate,7,Core fact,What type of wave are S-waves?,Transverse
+491,Waves,(S) Sound waves and waves for detection and exploration,Separate,9,,Name the state of matter that S-waves travel through.,Solids only
+799,Waves,(S) Sound waves and waves for detection and exploration,Separate,9,,Describe how a sound wave travels through a solid.,The particles of the solid vibrate and pass the vibrations on.
+800,Waves,(S) Sound waves and waves for detection and exploration,Separate,9,,Explain why human hearing is limited to a range of frequencies.,Sound makes the eardrum vibrate only over a limited range of frequencies.
+801,Waves,(S) Sound waves and waves for detection and exploration,Separate,9,,State what happens to ultrasound at a boundary between two media.,It is partially reflected.
+802,Waves,(S) Sound waves and waves for detection and exploration,Separate,7,Core practical fact,Describe how ultrasound is used to find the distance to a boundary.,Time the reflection: distance = speed × time ÷ 2.
+803,Waves,(S) Sound waves and waves for detection and exploration,Separate,9,,State what echo sounding is used for.,Detecting objects in deep water and measuring water depth.
+804,Waves,(S) Sound waves and waves for detection and exploration,Separate,9,,State what seismic waves have provided evidence for.,The structure and size of the Earth's core.
+805,Waves,(S) Sound waves and waves for detection and exploration,Separate,7,Standard explanation,Explain how S-waves provide evidence that part of the Earth's core is liquid.,S-waves cannot travel through liquid and are not detected on the far side of the Earth.
+492,Waves,Electromagnetic waves,Combined,7,Core fact,What type of wave are electromagnetic waves?,Transverse
+493,Waves,Electromagnetic waves,Combined,9,,State what oscillates in electromagnetic waves.,Electric and magnetic fields
+494,Waves,Electromagnetic waves,Combined,9,,Explain why electromagnetic waves can travel in a vacuum.,"They are oscillations of fields, not particles, so they need no medium."
+495,Waves,Electromagnetic waves,Combined,7,Asked in the 2020–23 papers,"Name the seven groups of the electromagnetic spectrum, from longest to shortest wavelength.","Radio waves, microwaves, infrared, visible light, ultraviolet, X-rays and gamma rays"
+496,Waves,Electromagnetic waves,Combined,9,,Name the electromagnetic waves with the longest wavelength.,Radio waves
+497,Waves,Electromagnetic waves,Combined,9,,Name the electromagnetic waves with the shortest wavelength.,Gamma rays
+498,Waves,Electromagnetic waves,Combined,9,,Name the electromagnetic waves that human eyes can detect.,Visible light
+499,Waves,Electromagnetic waves,Combined,7,Asked in the 2020–23 papers,Define refraction.,The change in direction of a wave at a boundary between two media.
+500,Waves,Electromagnetic waves,Combined,7,Asked in the 2020–23 papers,Give two situations in which a wave crossing a boundary is not refracted.,"When it travels along the normal.
+When its speed is the same in both media."
+501,Waves,Electromagnetic waves,Combined,7,Asked in the 2020–23 papers,Explain why refraction happens.,The wave changes speed in the new medium.
+502,Waves,Electromagnetic waves,Combined,9,,Name the process shown in this wavefront diagram.,Refraction
+503,Waves,Electromagnetic waves,Combined,9,,State what labels A to D show in this diagram.,"A: incident ray
+B: angle of incidence
+C: refracted ray
+D: angle of refraction"
+504,Waves,Electromagnetic waves,Combined,7,Asked in the 2020–23 papers,Describe how radio waves can be produced.,By oscillations in an electrical circuit.
+505,Waves,Electromagnetic waves,Combined,7,Asked in the 2020–23 papers,Describe how radio waves can be detected.,"They are absorbed by an aerial, creating an alternating current of the same frequency."
+506,Waves,Electromagnetic waves,Combined,7,Core fact,State two hazards of ultraviolet radiation.,Premature skin ageing and a higher risk of skin cancer
+507,Waves,Electromagnetic waves,Combined,7,Asked in the 2020–23 papers,State the hazards of X-rays and gamma rays.,They are ionising: they can cause gene mutations and cancer.
+508,Waves,Electromagnetic waves,Combined,9,,State what radio waves are used for.,Television and radio signals
+509,Waves,Electromagnetic waves,Combined,9,,State what microwaves are used for.,Satellite communications and cooking food
+510,Waves,Electromagnetic waves,Combined,7,Asked in the 2020–23 papers,State what infrared radiation is used for.,"Electrical heaters, cooking food and infrared cameras"
+511,Waves,Electromagnetic waves,Combined,9,,State what visible light is used for.,Fibre optic communications
+512,Waves,Electromagnetic waves,Combined,7,Asked in the 2020–23 papers,State what ultraviolet radiation is used for.,Energy-efficient lamps and sun tanning
+513,Waves,Electromagnetic waves,Combined,9,,State what X-rays and gamma rays are used for.,Medical imaging and treatments
+806,Waves,Electromagnetic waves,Combined,7,Asked in the 2020–23 papers,State what all electromagnetic waves have in common in a vacuum.,They travel at the same speed.
+807,Waves,Electromagnetic waves,Combined,9,,Name the electromagnetic waves with the highest frequency.,Gamma rays
+808,Waves,Electromagnetic waves,Combined,9,,State what electromagnetic waves transfer.,"Energy, from a source to an absorber."
+809,Waves,Electromagnetic waves,Combined,9,,State the kind of spectrum that electromagnetic waves form.,A continuous spectrum
+810,Waves,Electromagnetic waves,Combined,9,,State where gamma rays originate.,From changes in the nucleus of an atom.
+811,Waves,Electromagnetic waves,Combined,7,Standard explanation,Explain why microwaves are suitable for satellite communications.,They pass through the atmosphere without being absorbed or reflected.
+812,Waves,Electromagnetic waves,Combined,7,Asked in the 2020–23 papers,Explain why X-rays are suitable for producing images of bones.,They pass through soft tissue but are absorbed by bone.
+813,Waves,Electromagnetic waves,Combined,9,,"State two things that the hazard from UV, X-rays and gamma rays depends on.",The type of radiation and the size of the dose
+514,Waves,Infrared radiation (RP),Combined,9,,Describe a Leslie cube.,"A hollow metal cube with faces of different colours and textures, filled with hot water."
+515,Waves,Infrared radiation (RP),Combined,9,,Infrared emission from surfaces: name the independent variable.,The type of surface
+516,Waves,Infrared radiation (RP),Combined,7,Asked in the 2020–23 papers,Infrared emission from surfaces: name the dependent variable.,The amount of infrared radiation emitted
+517,Waves,Infrared radiation (RP),Combined,7,Core practical fact,Infrared emission from surfaces: name the control variables.,"Temperature, area and material of the surface, and its distance from the detector"
+518,Waves,Infrared radiation (RP),Combined,7,Core practical fact,Describe how the infrared radiation emitted by a surface is measured.,With an infrared detector at a fixed distance.
+519,Waves,Infrared radiation (RP),Combined,9,,State how the reading on an infrared thermometer depends on the radiation it detects.,"The more radiation detected, the higher the reading."
+521,Waves,Infrared radiation (RP),Combined,9,,All faces of a Leslie cube are at the same temperature. Explain why the infrared readings differ.,"Different surfaces emit at different rates: matt black emits most, shiny silver least."
+814,Waves,Infrared radiation (RP),Combined,7,Core fact,State the type of surface that is the best emitter of infrared radiation.,Matt black
+815,Waves,Infrared radiation (RP),Combined,9,,State the type of surface that is the worst emitter of infrared radiation.,Shiny silver
+816,Waves,Infrared radiation (RP),Combined,7,Core fact,State the type of surface that is the best absorber of infrared radiation.,Matt black
+522,Waves,(S) Lenses and visible light,Separate,9,,Name the process that happens to light in a lens.,Refraction
+523,Waves,(S) Lenses and visible light,Separate,7,Core fact,Describe what a convex lens does to parallel rays of light.,It brings them together at the principal focus.
+524,Waves,(S) Lenses and visible light,Separate,7,Definition that mark schemes ask for,What is the focal length of a lens?,The distance from the lens to the principal focus.
+525,Waves,(S) Lenses and visible light,Separate,9,,Describe what a concave lens does to parallel rays of light.,"It spreads them out, as if from the principal focus."
+526,Waves,(S) Lenses and visible light,Separate,7,Definition that mark schemes ask for,What is a real image?,An image formed where rays of light actually meet.
+527,Waves,(S) Lenses and visible light,Separate,7,Definition that mark schemes ask for,What is a virtual image?,An image that rays of light only appear to come from.
+528,Waves,(S) Lenses and visible light,Separate,9,,Name the type of image that can be shown on a screen.,A real image
+529,Waves,(S) Lenses and visible light,Separate,9,,Name the type of lens that produces only virtual images.,A concave lens
+530,Waves,(S) Lenses and visible light,Separate,9,,Name the type of lens that this symbol represents.,A convex lens
+531,Waves,(S) Lenses and visible light,Separate,9,,Name the type of lens that this symbol represents.,A concave lens
+532,Waves,(S) Lenses and visible light,Separate,9,,Name the type of lens shown in this ray diagram.,A convex lens
+533,Waves,(S) Lenses and visible light,Separate,9,,Name the type of lens shown in this ray diagram.,A concave lens
+534,Waves,(S) Lenses and visible light,Separate,9,,State how different colours of light differ.,They have different wavelengths.
+535,Waves,(S) Lenses and visible light,Separate,7,Asked in the 2020–23 papers,What is specular reflection?,Reflection from a smooth surface in a single direction.
+536,Waves,(S) Lenses and visible light,Separate,9,,What is diffuse reflection?,"Reflection from a rough surface, scattering light in many directions."
+537,Waves,(S) Lenses and visible light,Separate,7,Asked in the 2020–23 papers,Explain how colour filters work.,They transmit some wavelengths and absorb the rest.
+538,Waves,(S) Lenses and visible light,Separate,7,Standard explanation,Explain why blue objects appear blue.,They reflect blue light and absorb the other colours.
+539,Waves,(S) Lenses and visible light,Separate,9,,Explain why white objects appear white.,They reflect all colours of light equally.
+540,Waves,(S) Lenses and visible light,Separate,9,,Explain why black objects appear black.,They absorb all colours of light.
+817,Waves,(S) Lenses and visible light,Separate,9,On the equations sheet,"In words, state the equation for magnification.",magnification = image height ÷ object height
+818,Waves,(S) Lenses and visible light,Separate,9,,State the unit of magnification.,It has no unit (it is a ratio).
+819,Waves,(S) Lenses and visible light,Separate,9,,State the types of image that a convex lens can produce.,Real or virtual
+820,Waves,(S) Lenses and visible light,Separate,9,,State what determines the colour of an opaque object.,The wavelengths of light it reflects most strongly.
+821,Waves,(S) Lenses and visible light,Separate,9,,State what an opaque object does to light.,It absorbs or reflects it; none is transmitted.
+822,Waves,(S) Lenses and visible light,Separate,7,Asked in the 2020–23 papers,A blue object is viewed in red light. State and explain the colour it appears.,"Black.
+It absorbs the red light and has no blue light to reflect."
+541,Waves,(S) Black body radiation,Separate,9,,Name the type of radiation that all objects emit.,Infrared radiation
+542,Waves,(S) Black body radiation,Separate,9,,Describe how the infrared radiation emitted by an object depends on its temperature.,"The hotter the object, the more it emits."
+543,Waves,(S) Black body radiation,Separate,7,Definition that mark schemes ask for,What is a perfect black body?,An object that absorbs all the radiation that falls on it.
+544,Waves,(S) Black body radiation,Separate,9,,State the link between how well an object absorbs radiation and how well it emits it.,A good absorber is also a good emitter.
+545,Waves,(S) Black body radiation,Separate,7,Asked in the 2020–23 papers,Describe how the radiation emitted by an object changes as its temperature increases.,The intensity increases and the peak moves to a shorter wavelength.
+546,Waves,(S) Black body radiation,Separate,9,,An object is at a constant temperature. Compare the radiation it emits and absorbs.,It absorbs and emits radiation at the same rate.
+547,Waves,(S) Black body radiation,Separate,7,Core fact,"In terms of radiation, when does the temperature of an object increase?",When it absorbs radiation faster than it emits it.
+823,Waves,(S) Black body radiation,Separate,9,,"State what all objects do, whatever their temperature.",They emit and absorb infrared radiation.
+824,Waves,(S) Black body radiation,Separate,9,,"In terms of radiation, when does the temperature of an object decrease?",When it emits radiation faster than it absorbs it.
+825,Waves,(S) Black body radiation,Separate,9,,Give three factors that the temperature of the Earth depends on.,"How fast it absorbs radiation
+How fast it emits radiation
+How much radiation it reflects into space"
+548,Magnetism and electromagnetism,Permanent and induced magnetism,Combined,9,,What does ‘attract’ mean?,A force pulls the two objects towards each other.
+549,Magnetism and electromagnetism,Permanent and induced magnetism,Combined,9,,What does ‘repel’ mean?,A force pushes the two objects away from each other.
+550,Magnetism and electromagnetism,Permanent and induced magnetism,Combined,9,,Name the two ends of a magnet.,The north pole and the south pole
+551,Magnetism and electromagnetism,Permanent and induced magnetism,Combined,9,,State what a north pole does to another north pole.,It repels it.
+552,Magnetism and electromagnetism,Permanent and induced magnetism,Combined,9,,State what a north pole does to a south pole.,It attracts it.
+553,Magnetism and electromagnetism,Permanent and induced magnetism,Combined,7,Asked in the 2020–23 papers,Name three magnetic chemical elements.,"Iron, nickel and cobalt"
+554,Magnetism and electromagnetism,Permanent and induced magnetism,Combined,7,Asked in the 2020–23 papers,Name an alloy that is magnetic.,Steel
+555,Magnetism and electromagnetism,Permanent and induced magnetism,Combined,7,Definition that mark schemes ask for,What is a permanent magnet?,A magnet that produces its own magnetic field.
+556,Magnetism and electromagnetism,Permanent and induced magnetism,Combined,7,Asked in the 2020–23 papers,What is an induced magnet?,A material that becomes a magnet when placed in a magnetic field.
+557,Magnetism and electromagnetism,Permanent and induced magnetism,Combined,7,Asked in the 2020–23 papers,Is the force between an induced magnet and a permanent magnet attractive or repulsive?,Always attractive
+558,Magnetism and electromagnetism,Permanent and induced magnetism,Combined,9,,State what surrounds a permanent magnet.,A magnetic field
+559,Magnetism and electromagnetism,Permanent and induced magnetism,Combined,9,,Describe how the strength of a magnetic field changes with distance from the magnet.,It gets weaker as the distance increases.
+560,Magnetism and electromagnetism,Permanent and induced magnetism,Combined,7,Asked in the 2020–23 papers,State where the field of a permanent magnet is strongest.,At the poles.
+561,Magnetism and electromagnetism,Permanent and induced magnetism,Combined,7,Asked in the 2020–23 papers,State how field lines show where a magnetic field is strongest.,The lines are closest together.
+562,Magnetism and electromagnetism,Permanent and induced magnetism,Combined,7,Core fact,State the direction in which magnetic field lines point.,From the north pole to the south pole.
+563,Magnetism and electromagnetism,Permanent and induced magnetism,Combined,9,,Describe what a compass contains.,A small bar magnet that is free to rotate.
+564,Magnetism and electromagnetism,Permanent and induced magnetism,Combined,9,,Give two ways to show the shape of the magnetic field around a magnet.,Plotting compasses or iron filings
+565,Magnetism and electromagnetism,Permanent and induced magnetism,Combined,7,Core practical fact,Describe how to find the direction of the magnetic field around a magnet.,"Use a plotting compass: its needle points along the field, from north to south."
+566,Magnetism and electromagnetism,Permanent and induced magnetism,Combined,9,,Name the pole at the end of a compass needle that points north.,A north pole
+567,Magnetism and electromagnetism,Permanent and induced magnetism,Combined,9,,State the type of magnetic pole near the Earth's geographic North Pole.,A magnetic south pole
+568,Magnetism and electromagnetism,Permanent and induced magnetism,Combined,7,Asked in the 2020–23 papers,State the evidence that the Earth's core is magnetic.,A compass needle points in the same direction wherever it is on Earth.
+826,Magnetism and electromagnetism,Permanent and induced magnetism,Combined,7,Definition that mark schemes ask for,What is a magnetic field?,The region around a magnet where a force acts on another magnet or magnetic material.
+827,Magnetism and electromagnetism,Permanent and induced magnetism,Combined,9,,Is the force between two magnets a contact or a non-contact force?,Non-contact
+828,Magnetism and electromagnetism,Permanent and induced magnetism,Combined,9,,State what happens to an induced magnet when it is removed from the field.,It quickly loses its magnetism.
+829,Magnetism and electromagnetism,Permanent and induced magnetism,Combined,7,Definition that mark schemes ask for,State how the direction of a magnetic field is defined.,The direction of the force on a north pole placed at that point.
+569,Magnetism and electromagnetism,Electromagnetism,Combined,9,,State when a wire has a magnetic field around it.,When it carries a current.
+570,Magnetism and electromagnetism,Electromagnetism,Combined,7,Core fact,Describe the magnetic field around a straight current-carrying wire.,Concentric circles around the wire.
+571,Magnetism and electromagnetism,Electromagnetism,Combined,9,,State what the strength of the magnetic field around a wire depends on.,The size of the current and the distance from the wire
+572,Magnetism and electromagnetism,Electromagnetism,Combined,9,,What is a solenoid?,A long coil of wire.
+573,Magnetism and electromagnetism,Electromagnetism,Combined,7,Core fact,Describe the magnetic field around a solenoid.,Similar to that of a bar magnet.
+574,Magnetism and electromagnetism,Electromagnetism,Combined,9,,State where the magnetic field of a solenoid is strong and uniform.,Inside the solenoid.
+575,Magnetism and electromagnetism,Electromagnetism,Combined,9,,Describe how to make an electromagnet.,Wrap a coil of wire around an iron core and pass a current through it.
+576,Magnetism and electromagnetism,Electromagnetism,Combined,7,Asked in the 2020–23 papers,Give two advantages of an electromagnet over a permanent magnet.,"It can be switched on and off, and its strength can be varied."
+577,Magnetism and electromagnetism,Electromagnetism,Combined,7,Asked in the 2020–23 papers,Give two ways to make an electromagnet stronger.,Increase the current or add more turns.
+830,Magnetism and electromagnetism,Electromagnetism,Combined,9,,State the effect of adding an iron core to a solenoid.,It makes the magnetic field stronger.
+831,Magnetism and electromagnetism,Electromagnetism,Combined,9,,State how to reverse the magnetic field around a wire.,Reverse the current.
+832,Magnetism and electromagnetism,Electromagnetism,Combined,9,,A wire is coiled into a solenoid. State the effect on its magnetic field.,It makes the magnetic field stronger.
+578,Magnetism and electromagnetism,Fleming's left-hand rule and motors,Combined,7,Asked in the 2020–23 papers,Describe the motor effect.,A current-carrying conductor in a magnetic field experiences a force.
+579,Magnetism and electromagnetism,Fleming's left-hand rule and motors,Combined,7,Asked in the 2020–23 papers,"In Fleming's left-hand rule, state what the thumb represents.",The direction of the force
+580,Magnetism and electromagnetism,Fleming's left-hand rule and motors,Combined,7,Asked in the 2020–23 papers,"In Fleming's left-hand rule, state what the first finger represents.",The direction of the magnetic field
+581,Magnetism and electromagnetism,Fleming's left-hand rule and motors,Combined,7,Asked in the 2020–23 papers,"In Fleming's left-hand rule, state what the second finger represents.",The direction of the current
+582,Magnetism and electromagnetism,Fleming's left-hand rule and motors,Combined,7,Asked in the 2020–23 papers,Give three ways to increase the force on a current-carrying wire in a magnetic field.,"Increase the magnetic flux density, the current, or the length of wire in the field."
+583,Magnetism and electromagnetism,Fleming's left-hand rule and motors,Combined,9,,Define magnetic flux density.,A measure of the strength of a magnetic field.
+584,Magnetism and electromagnetism,Fleming's left-hand rule and motors,Combined,9,,State the standard unit of magnetic flux density.,Tesla (T)
+585,Magnetism and electromagnetism,Fleming's left-hand rule and motors,Combined,9,,Describe what happens to a current-carrying coil in a magnetic field.,"It rotates, because the forces on its two sides act in opposite directions."
+586,Magnetism and electromagnetism,Fleming's left-hand rule and motors,Combined,9,,Name the effect used in electric motors.,The motor effect
+587,Magnetism and electromagnetism,(S) Loudspeakers,Separate,7,Asked in the 2020–23 papers,Name the effect used in loudspeakers.,The motor effect
+588,Magnetism and electromagnetism,(S) Loudspeakers,Separate,7,Asked in the 2020–23 papers,Describe how a loudspeaker produces sound.,"An alternating current in the coil makes the cone vibrate, which makes the air vibrate."
+589,Magnetism and electromagnetism,(S) Loudspeakers,Separate,9,,State how to increase the amplitude of the sound from a loudspeaker.,Increase the current in the coil.
+590,Magnetism and electromagnetism,(S) Loudspeakers,Separate,9,,State how to increase the frequency of the sound from a loudspeaker.,Increase the frequency of the alternating current.
+833,Magnetism and electromagnetism,Fleming's left-hand rule and motors,Combined,9,On the equations sheet,State the equation for the force on a current-carrying conductor at right angles to a magnetic field.,"force = magnetic flux density × current × length
+(F = B I l)"
+834,Magnetism and electromagnetism,Fleming's left-hand rule and motors,Combined,9,,Give two ways to reverse the force on a current-carrying wire in a magnetic field.,Reverse the current or reverse the magnetic field.
+835,Magnetism and electromagnetism,Fleming's left-hand rule and motors,Combined,9,,Give two ways to make an electric motor spin faster.,"Increase the current, or use a stronger magnetic field."
+911,Magnetism and electromagnetism,Fleming's left-hand rule and motors,Combined,7,Asked in the 2020–23 papers,Explain why a current-carrying wire in a magnetic field experiences a force.,The magnetic field around the wire interacts with the field it is placed in.
+591,Magnetism and electromagnetism,"(S) Induced potential, transformers and the National Grid",Separate,7,Core fact,State what is induced by the generator effect.,"A potential difference (and a current, in a complete circuit)."
+592,Magnetism and electromagnetism,"(S) Induced potential, transformers and the National Grid",Separate,7,Asked in the 2020–23 papers,State what is needed for the generator effect to occur.,"A conductor moving relative to a magnetic field, or a changing magnetic field around a conductor."
+593,Magnetism and electromagnetism,"(S) Induced potential, transformers and the National Grid",Separate,7,Core fact,Give three ways to increase the size of the induced potential difference.,"Use a stronger magnetic field, move faster, or use more turns on the coil."
+594,Magnetism and electromagnetism,"(S) Induced potential, transformers and the National Grid",Separate,9,,Describe how to reverse the direction of the induced potential difference.,Reverse the direction of movement or of the magnetic field.
+595,Magnetism and electromagnetism,"(S) Induced potential, transformers and the National Grid",Separate,7,Core fact,State the difference between an alternator and a dynamo.,An alternator generates alternating current; a dynamo generates direct current.
+596,Magnetism and electromagnetism,"(S) Induced potential, transformers and the National Grid",Separate,9,,Name the effect used in microphones.,The generator effect
+597,Magnetism and electromagnetism,"(S) Induced potential, transformers and the National Grid",Separate,9,,Describe how a microphone works.,"Sound makes a diaphragm and coil vibrate in a magnetic field, inducing a changing potential difference."
+598,Magnetism and electromagnetism,"(S) Induced potential, transformers and the National Grid",Separate,9,,Name the effect used in transformers.,The generator effect
+599,Magnetism and electromagnetism,"(S) Induced potential, transformers and the National Grid",Separate,7,Asked in the 2020–23 papers,Describe the structure of a transformer.,A primary coil and a secondary coil wound on an iron core.
+600,Magnetism and electromagnetism,"(S) Induced potential, transformers and the National Grid",Separate,9,,Describe what a step-up transformer does.,It increases the potential difference.
+601,Magnetism and electromagnetism,"(S) Induced potential, transformers and the National Grid",Separate,9,,Describe what a step-down transformer does.,It decreases the potential difference.
+602,Magnetism and electromagnetism,"(S) Induced potential, transformers and the National Grid",Separate,7,Core fact,Compare the numbers of turns on the coils of a step-up transformer.,More turns on the secondary coil than on the primary.
+603,Magnetism and electromagnetism,"(S) Induced potential, transformers and the National Grid",Separate,9,,Compare the numbers of turns on the coils of a step-down transformer.,Fewer turns on the secondary coil than on the primary.
+604,Magnetism and electromagnetism,"(S) Induced potential, transformers and the National Grid",Separate,7,Core fact,State how power input and power output are related in an ideal transformer.,They are equal.
+605,Magnetism and electromagnetism,"(S) Induced potential, transformers and the National Grid",Separate,9,,Name the type of current supplied to the primary coil of a transformer.,Alternating current
+606,Magnetism and electromagnetism,"(S) Induced potential, transformers and the National Grid",Separate,9,,Name the type of current induced in the secondary coil of a transformer.,Alternating current
+607,Magnetism and electromagnetism,"(S) Induced potential, transformers and the National Grid",Separate,7,Asked in the 2020–23 papers,Explain why a transformer needs an iron core.,"Iron is easily magnetised, so it carries the changing magnetic field from the primary coil to the secondary coil."
+836,Magnetism and electromagnetism,"(S) Induced potential, transformers and the National Grid",Separate,7,Asked in the 2020–23 papers,State what the magnetic field of an induced current does.,It opposes the change that caused it.
+837,Magnetism and electromagnetism,"(S) Induced potential, transformers and the National Grid",Separate,7,Standard explanation,Explain why a transformer does not work with a direct current.,Direct current gives a constant magnetic field; induction needs a changing field.
+838,Magnetism and electromagnetism,"(S) Induced potential, transformers and the National Grid",Separate,9,On the equations sheet,State the equation linking the potential differences and numbers of turns of a transformer.,"p.d. across primary ÷ p.d. across secondary = turns on primary ÷ turns on secondary
+(V_p ÷ V_s = n_p ÷ n_s)"
+839,Magnetism and electromagnetism,"(S) Induced potential, transformers and the National Grid",Separate,9,On the equations sheet,State the equation for a transformer that is 100% efficient.,"p.d. × current in the secondary = p.d. × current in the primary
+(V_s × I_s = V_p × I_p)"
+840,Magnetism and electromagnetism,"(S) Induced potential, transformers and the National Grid",Separate,7,Asked in the 2020–23 papers,Describe the potential difference–time graph for an alternator.,It alternates: a wave going equally above and below zero.
+841,Magnetism and electromagnetism,"(S) Induced potential, transformers and the National Grid",Separate,7,Asked in the 2020–23 papers,Describe the potential difference–time graph for a dynamo.,It rises and falls but never goes below zero.
+608,Space physics,"(S) Solar System, stars, orbits and satellites",Separate,9,,Name the main objects in our Solar System.,"The Sun, eight planets, dwarf planets, moons, asteroids and comets"
+609,Space physics,"(S) Solar System, stars, orbits and satellites",Separate,9,,Name the eight planets in order from the Sun.,"Mercury, Venus, Earth, Mars, Jupiter, Saturn, Uranus and Neptune"
+610,Space physics,"(S) Solar System, stars, orbits and satellites",Separate,9,,What is a galaxy?,A huge collection of stars held together by gravity.
+611,Space physics,"(S) Solar System, stars, orbits and satellites",Separate,9,,Give the name of our galaxy.,The Milky Way
+612,Space physics,"(S) Solar System, stars, orbits and satellites",Separate,9,,Name a cloud of dust and gas where stars form.,A nebula
+613,Space physics,"(S) Solar System, stars, orbits and satellites",Separate,7,Asked in the 2020–23 papers,Name the force that pulls a nebula together to form a star.,Gravity
+614,Space physics,"(S) Solar System, stars, orbits and satellites",Separate,9,,What is a protostar?,"A hot ball of gas formed as gravity pulls a nebula together, before fusion starts."
+615,Space physics,"(S) Solar System, stars, orbits and satellites",Separate,7,Asked in the 2020–23 papers,Name the process that begins when a protostar becomes hot enough.,Nuclear fusion
+616,Space physics,"(S) Solar System, stars, orbits and satellites",Separate,7,Asked in the 2020–23 papers,Explain why a main sequence star is stable.,The inward pull of gravity is balanced by the outward push from fusion energy.
+617,Space physics,"(S) Solar System, stars, orbits and satellites",Separate,9,,State what a Sun-sized star becomes after its main sequence stage.,"A red giant, then a white dwarf, then a black dwarf"
+618,Space physics,"(S) Solar System, stars, orbits and satellites",Separate,9,,State what a star much bigger than the Sun becomes after its main sequence stage.,"A red super giant, then a supernova, then a neutron star or a black hole"
+619,Space physics,"(S) Solar System, stars, orbits and satellites",Separate,7,Asked in the 2020–23 papers,State how elements up to iron are formed.,By nuclear fusion in stars.
+620,Space physics,"(S) Solar System, stars, orbits and satellites",Separate,7,Asked in the 2020–23 papers,State how elements heavier than iron are formed.,In supernovae
+621,Space physics,"(S) Solar System, stars, orbits and satellites",Separate,7,Core fact,State what keeps one object in orbit around another.,Gravity
+622,Space physics,"(S) Solar System, stars, orbits and satellites",Separate,9,,What is an orbit?,The curved path of one object around another in space.
+623,Space physics,"(S) Solar System, stars, orbits and satellites",Separate,9,,Name a natural satellite of Earth.,The Moon
+624,Space physics,"(S) Solar System, stars, orbits and satellites",Separate,9,,What is an artificial satellite?,A human-made object in orbit around a planet.
+625,Space physics,"(S) Solar System, stars, orbits and satellites",Separate,7,Asked in the 2020–23 papers,Explain why an object in orbit is accelerating.,"Its direction, and so its velocity, is always changing."
+626,Space physics,"(S) Solar System, stars, orbits and satellites",Separate,7,Asked in the 2020–23 papers,Explain why the velocity of an object in a circular orbit changes but its speed does not.,"Gravity acts at right angles to its motion, changing its direction but not its speed."
+627,Space physics,"(S) Solar System, stars, orbits and satellites",Separate,7,Core fact,State how the speed of a stable orbit depends on its radius.,"The smaller the radius, the greater the speed."
+842,Space physics,"(S) Solar System, stars, orbits and satellites",Separate,9,,State what the Sun was formed from.,A nebula (a cloud of dust and gas) pulled together by gravity.
+843,Space physics,"(S) Solar System, stars, orbits and satellites",Separate,9,,Name the natural satellites of planets.,Moons
+844,Space physics,"(S) Solar System, stars, orbits and satellites",Separate,7,Asked in the 2020–23 papers,List the stages in the life cycle of a Sun-sized star.,"Nebula, protostar, main sequence star, red giant, white dwarf, black dwarf"
+845,Space physics,"(S) Solar System, stars, orbits and satellites",Separate,7,Asked in the 2020–23 papers,List the stages in the life cycle of a star much bigger than the Sun.,"Nebula, protostar, main sequence star, red super giant, supernova, then a neutron star or a black hole"
+846,Space physics,"(S) Solar System, stars, orbits and satellites",Separate,7,Core fact,State how elements made in stars are spread through the Universe.,By supernova explosions.
+847,Space physics,"(S) Solar System, stars, orbits and satellites",Separate,9,,What do planets orbit? What do moons and artificial satellites orbit?,"Planets orbit the Sun.
+Moons and artificial satellites orbit planets."
+628,Space physics,(S) Red-shift,Separate,7,Asked in the 2020–23 papers,What is red-shift?,The increase in the observed wavelength of light from galaxies that are moving away.
+629,Space physics,(S) Red-shift,Separate,7,Standard explanation,Explain why light from distant galaxies is red-shifted.,The galaxies are moving away from us.
+630,Space physics,(S) Red-shift,Separate,9,,Describe how the red-shift of a galaxy depends on its speed.,"The faster it is moving away, the greater the red-shift."
+631,Space physics,(S) Red-shift,Separate,9,,Describe how the speed of a galaxy depends on its distance from us.,"The further away it is, the faster it is moving away."
+632,Space physics,(S) Red-shift,Separate,9,,Describe the Big Bang theory.,"The Universe began from a very small, hot, dense region and has been expanding ever since."
+633,Space physics,(S) Red-shift,Separate,7,Standard explanation,Explain why red-shift is evidence for the Big Bang theory.,"The galaxies are all moving apart, so they must once have been close together."
+634,Space physics,(S) Red-shift,Separate,9,,Name two things about the Universe that scientists still do not understand.,Dark energy and dark matter
+635,Space physics,(S) Red-shift,Separate,9,,State what observations of supernovae since 1998 suggest about the Universe.,Its expansion is accelerating.
+848,Space physics,(S) Red-shift,Separate,9,,State what happens to the observed wavelength of light from a galaxy moving away from us.,It increases.
+849,Space physics,(S) Red-shift,Separate,9,,State what the red-shift of distant galaxies provides evidence for.,That the Universe is expanding (the Big Bang theory).
+850,Working scientifically,"Precision, accuracy and uncertainty",Combined,7,Definition that mark schemes ask for,Define precision.,How close repeated measurements are to each other.
+851,Working scientifically,"Precision, accuracy and uncertainty",Combined,7,Definition that mark schemes ask for,Define accuracy.,How close a measurement is to the true value.
+852,Working scientifically,"Precision, accuracy and uncertainty",Combined,7,Asked in the 2020–23 papers,Define the resolution of a measuring instrument.,The smallest change the instrument can detect.
+853,Working scientifically,"Precision, accuracy and uncertainty",Combined,9,,Define uncertainty.,The interval within which the true value can be expected to lie.
+854,Working scientifically,"Precision, accuracy and uncertainty",Combined,9,,State how the mean of a set of repeated readings is calculated.,"Add up the readings, then divide by the number of readings."
+855,Working scientifically,"Precision, accuracy and uncertainty",Combined,9,,Define range.,The maximum and minimum values of the independent or dependent variables.
+856,Working scientifically,"Precision, accuracy and uncertainty",Combined,7,Asked in the 2020–23 papers,State how uncertainty is calculated from a set of repeated readings.,Uncertainty = (largest reading − smallest reading) ÷ 2
+857,Working scientifically,"Precision, accuracy and uncertainty",Combined,9,,Describe how a final result should be written when its uncertainty is known.,"As mean ± uncertainty, with a unit, e.g. 1.22 ± 0.03 s."
+858,Working scientifically,"Precision, accuracy and uncertainty",Combined,9,,Three readings are close together but far from the true value. Describe them using the words precise and accurate.,They are precise but not accurate.
+859,Working scientifically,"Precision, accuracy and uncertainty",Combined,9,,Do repeated measurements help you judge precision or accuracy?,Precision
+860,Working scientifically,Random and systematic errors,Combined,7,Core fact,Describe the effect of a random error on a set of readings.,It scatters the readings unpredictably.
+861,Working scientifically,Random and systematic errors,Combined,7,Core fact,Describe the effect of a systematic error on a set of readings.,It shifts every reading in the same direction by the same amount.
+862,Working scientifically,Random and systematic errors,Combined,9,,Give an example of a random error.,Reaction time when using a stopwatch.
+863,Working scientifically,Random and systematic errors,Combined,7,Asked in the 2020–23 papers,Give an example of a systematic error.,A balance that does not read zero when empty.
+864,Working scientifically,Random and systematic errors,Combined,7,Asked in the 2020–23 papers,State how the effect of random error can be reduced.,Take more repeats and calculate a mean.
+865,Working scientifically,Random and systematic errors,Combined,9,,Explain why repeating readings does not remove a systematic error.,"Every reading is shifted in the same direction, so the mean is shifted too."
+866,Working scientifically,Random and systematic errors,Combined,9,,State how a systematic error can be found and corrected.,"Check the zero and calibration of the instrument, then correct the method."
+867,Working scientifically,Random and systematic errors,Combined,9,,"Explain why ""human error"" is not a good answer when evaluating an experiment.",It is too vague: you must name what actually went wrong.
+868,Working scientifically,Random and systematic errors,Combined,9,,A ruler is read from the wrong zero mark every time. State the type of error this causes.,A systematic error
+869,Working scientifically,Random and systematic errors,Combined,9,,Does better resolution remove a systematic error?,No: the readings are finer but still shifted.
+870,Working scientifically,Variables and planning,Combined,7,Definition that mark schemes ask for,What is the independent variable?,The one variable that is deliberately changed.
+871,Working scientifically,Variables and planning,Combined,7,Definition that mark schemes ask for,What is the dependent variable?,The variable that is measured.
+872,Working scientifically,Variables and planning,Combined,7,Definition that mark schemes ask for,What is a control variable?,A variable kept the same to make the test fair.
+873,Working scientifically,Variables and planning,Combined,7,Standard explanation,Explain why control variables must be kept the same.,"If two variables change together, you cannot tell which one caused the result."
+874,Working scientifically,Variables and planning,Combined,9,,What is continuous data?,Number data that can take any value on a scale.
+875,Working scientifically,Variables and planning,Combined,9,,What is categoric data?,Data sorted into named groups or types.
+876,Working scientifically,Variables and planning,Combined,9,,Give two examples of continuous variables.,"Any two from: length, time, temperature, mass"
+877,Working scientifically,Variables and planning,Combined,9,,Give two examples of categoric variables.,"Any two from: material, colour, brand, type of surface"
+878,Working scientifically,Variables and planning,Combined,9,,State the form of a good research question.,"""How does X affect Y?""
+(X: independent variable, Y: dependent variable)"
+879,Working scientifically,Variables and planning,Combined,9,,State the minimum number of trials for each value of the independent variable.,Three
+880,Working scientifically,Variables and planning,Combined,9,,Describe what a good method allows another scientist to do.,Repeat the investigation by following its steps.
+881,Working scientifically,Tables and graphs,Combined,9,,State where the units should be written in a results table.,In the column headings.
+882,Working scientifically,Tables and graphs,Combined,7,Core fact,Name the type of graph used when the independent variable is continuous.,A line graph
+883,Working scientifically,Tables and graphs,Combined,9,,Name the type of graph used when the independent variable is categoric.,A bar chart
+884,Working scientifically,Tables and graphs,Combined,9,,State which variable decides the type of graph to draw.,The independent variable
+885,Working scientifically,Tables and graphs,Combined,7,Core fact,State which variable is plotted on the x-axis of a graph.,The independent variable
+886,Working scientifically,Tables and graphs,Combined,7,Core fact,State which variable is plotted on the y-axis of a graph.,The dependent variable
+887,Working scientifically,Tables and graphs,Combined,7,Core fact,State two things every axis of a graph must have.,A label (the quantity) and a unit
+888,Working scientifically,Tables and graphs,Combined,9,,Describe a good scale for the axis of a graph.,"It uses most of the grid and goes up in equal, easy-to-read steps."
+889,Working scientifically,Tables and graphs,Combined,9,,State how the points on a line graph should be plotted.,As small crosses.
+890,Working scientifically,Tables and graphs,Combined,9,,Explain why the bars on a bar chart have gaps between them.,"The categories are separate, with no values in between."
+891,Working scientifically,Tables and graphs,Combined,9,,Which are plotted on a graph: individual trials or means?,The means
+892,Working scientifically,"Best-fit lines, outliers and conclusions",Combined,9,,What is a line of best fit?,One smooth line showing the overall trend of the data.
+893,Working scientifically,"Best-fit lines, outliers and conclusions",Combined,7,Core practical fact,Describe how a line of best fit should be drawn.,As one thin line with points balanced above and below it.
+894,Working scientifically,"Best-fit lines, outliers and conclusions",Combined,9,,State what must [not] be done when drawing a line of best fit.,Joining the points dot-to-dot.
+895,Working scientifically,"Best-fit lines, outliers and conclusions",Combined,7,Definition that mark schemes ask for,What is an outlier?,A result that does not fit the pattern of the others.
+896,Working scientifically,"Best-fit lines, outliers and conclusions",Combined,7,Core practical fact,Describe what you should do when you find an outlier.,"Check the recording and plotting, then repeat the measurement. Never just delete it."
+897,Working scientifically,"Best-fit lines, outliers and conclusions",Combined,9,,What is a trend?,The overall relationship shown by the data.
+898,Working scientifically,"Best-fit lines, outliers and conclusions",Combined,9,,State what a good conclusion must include.,"The relationship between the variables, supported by values with units."
+899,Working scientifically,"Best-fit lines, outliers and conclusions",Combined,7,Core fact,Describe the graph of two quantities that are directly proportional.,A straight line through the origin.
+901,Working scientifically,"Best-fit lines, outliers and conclusions",Combined,9,,State the three parts of a good evaluation point.,"The problem, its effect on the data, and an improvement that fixes it."
+902,Working scientifically,"Best-fit lines, outliers and conclusions",Combined,9,,What is peer review?,"When other scientists check the method, the evidence and the claims."

@@ -53,9 +53,12 @@
     meta.append(element("b", "", topic.unit), document.createElement("br"),
       `${topic.paper} · ${topic.separate ? "Separate Physics only" : "Combined and Separate"}`, document.createElement("br"),
       `${topic.questions.length} questions`);
+    // Priority questions (Target column "7") get a star, so one sheet serves both targets.
+    const priority = topic.questions.filter((question) => question.Target === "7").length;
     top.append(heading, meta);
 
-    const how = element("p", "how", "Cover the answers. Answer each question out loud or on paper, then check. Tick the ones you know.");
+    const how = element("p", "how", "Cover the answers. Answer each question out loud or on paper, then check. Tick the ones you know."
+      + (priority ? ` Learn the ${priority} starred (★) questions first.` : ""));
 
     const table = element("table");
     const columns = element("colgroup");
@@ -83,7 +86,9 @@
       }
       const answerCell = element("td", "a");
       appendText(answerCell, question.Answer);
-      row.append(element("td", "n", index + 1), questionCell, answerCell, element("td", "t"));
+      const numberCell = element("td", "n", index + 1);
+      if (question.Target === "7") numberCell.append(element("span", "star", "★"));
+      row.append(numberCell, questionCell, answerCell, element("td", "t"));
       body.append(row);
     });
     table.append(columns, head, body);

@@ -16,7 +16,7 @@ Printable PDFs for students to revise from, and the page that lists them. `index
 | `practicals/` | One SVG per practical step, named `<number>-<step>.svg` (`M3-2.svg` is step 2 of practical M3) |
 | `build-pdfs.sh` | Rebuilds the PDFs with headless Chrome |
 
-Each question sheet has the questions on the left, the answers on the right and a tick box per question; diagrams come from `../images/`.
+Each question sheet has the questions on the left, the answers on the right and a tick box per question; diagrams come from `../images/`. Questions with `7` in the `Target` column of `../questions.csv` get a star under their number, and the instruction line says how many to learn first.
 
 ## Practical diagrams
 
