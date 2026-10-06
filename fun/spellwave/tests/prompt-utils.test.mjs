@@ -4,7 +4,7 @@ import {
   pickTarget, buildSearchPrompt, buildAltSearchPrompts, buildTwoWordLimit,
   getInputCharacters, promptIndexForProgress,
 } from '../src/prompt-utils.js';
-import { ALL_WORDS, EQUATION_WORDS } from '../src/question-bank.js';
+import { ALL_WORDS, EQUATION_WORDS, MEDIUM_WORDS, HARD_WORDS } from '../src/question-bank.js';
 
 const enemy = (searchPrompt, z, matched = searchPrompt) => ({
   searchPrompt, _matchedSearchPrompt: matched, group: { position: { z } },
@@ -37,6 +37,7 @@ test('British/American spelling alternatives', () => {
   assert.deepEqual(buildAltSearchPrompts('centre of mass'), ['centerofmass']);
   assert.deepEqual(buildAltSearchPrompts('ionising radiation'), ['ionizingradiation']);
   assert.deepEqual(buildAltSearchPrompts('aluminium'), ['aluminum']);
+  assert.deepEqual(buildAltSearchPrompts('distance travelled'), ['distancetraveled']);
 });
 
 test('promptIndexForProgress maps typed count onto the displayed text', () => {
@@ -58,5 +59,14 @@ test('equation bosses always produce a hidden-word limit', () => {
   for (const { term } of EQUATION_WORDS) {
     const limit = buildTwoWordLimit(term, { alwaysLimit: true, multiplicationAlias: true, maxHiddenWords: 2 });
     assert.ok(limit && limit.searchPrompt.length > 0, term);
+  }
+});
+
+test('boss definitions do not repeat a word of the hidden term', () => {
+  const lowValue = new Set(['a', 'an', 'and', 'as', 'by', 'for', 'from', 'in', 'of', 'on', 'or', 'per', 'the', 'to', 'with']);
+  for (const { term, definition } of [...MEDIUM_WORDS, ...HARD_WORDS]) {
+    const clueWords = new Set(definition.toLowerCase().split(/[^a-z]+/));
+    const repeated = term.toLowerCase().split(/\s+/).filter(word => word.length > 3 && !lowValue.has(word) && clueWords.has(word));
+    assert.deepEqual(repeated, [], `"${term}" is given away by its definition`);
   }
 });

@@ -16,6 +16,8 @@ const SPELLING_ALTS = [
   ['magnetisation', 'magnetization'],
   ['neutralise', 'neutralize'],
   ['vapourise', 'vaporize'],
+  ['vaporisation', 'vaporization'],
+  ['travelled', 'traveled'],
   ['aluminium', 'aluminum'],
   ['sulphur', 'sulfur'],
   ['grey', 'gray'],
