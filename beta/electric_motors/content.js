@@ -1,5 +1,5 @@
 // Text content for the electric motors explorer: mode descriptions, part readouts,
-// control settings and quiz questions. Kept separate from the 3D scene code.
+// control settings and quiz questions (each question's first choice is the correct one; the quiz shuffles them). Kept separate from the 3D scene code.
 
 export const MODE_ORDER = ['force', 'dc', 'ac'];
 
@@ -10,7 +10,7 @@ export const MODES = {
     level: 'GCSE · A LEVEL · IB DP',
     heading: 'A current in a magnetic field feels a force.',
     description: 'A copper rod rests on two metal rails between the poles of a strong magnet. When a current flows through the rod, the magnetic field of the current and the field of the magnet push on each other, so the rod is pushed along the rails. This is the motor effect. The force is biggest when the wire is at 90° to the field, and zero when the wire is parallel to it.',
-    look: 'Press “Switch on current” and watch which way the rod rolls. Reverse the current, then flip the magnet: each one reverses the force. Now step the angle down to 0° and watch the force in the graph shrink to nothing.',
+    look: 'Press “Switch on current” and watch which way the rod rolls. Reverse the current, then flip the magnet: each one reverses the force. Now step the angle down to 0° and watch the force in the graph shrink to nothing. Make the field stronger and the field lines crowd closer together.',
     evidence: 'Use Fleming’s left-hand rule: First finger = Field (N to S), seCond finger = Current (+ to −), thuMb = Motion (force). The three arrows on the rod show the same thing. The size of the force is F = BIL when the wire is at 90° to the field, where B is the magnetic flux density in tesla.',
     deeper: 'For any angle θ between the wire and the field, F = BIL sin θ. Only the component of B at right angles to the wire matters. In vector form F = IL × B, which is why the force is always at right angles to both the current and the field.',
     hint: 'Switch the current on, then change one thing at a time: current, field, angle or direction.'
@@ -21,7 +21,7 @@ export const MODES = {
     level: 'GCSE · A LEVEL · IB DP',
     heading: 'Two forces turn a coil. A split ring keeps it turning.',
     description: 'A coil of wire sits between two magnetic poles. Current flows one way along one side of the coil and the opposite way along the other side, so the two sides are pushed in opposite directions: up on one side, down on the other. This pair of forces makes a turning effect (a moment) that spins the coil. Every half turn, the split-ring commutator swaps the connections, so the current in the coil reverses and the coil keeps turning the same way.',
-    look: 'Switch the motor on and watch the end view. Half-ring A (purple) is joined to coil side A, and half-ring B (green) to side B. Turn on “Pause at each swap” to stop the motor just as the halves change brushes. Compare the side on the right before and after each swap. Then switch to plain rings (no commutator): the coil rocks to a stop instead of spinning.',
+    look: 'Switch the motor on and watch the end view. Half-ring A (purple) is joined to coil side A, and half-ring B (green) to side B. Turn on “Pause at each swap” to stop the motor just as the halves change brushes. Compare the side on the right before and after each swap. Then switch to plain rings (no commutator): the coil rocks to a stop instead of spinning. Finally, try “Turn coil to vertical” before switching on: the motor cannot start from that dead spot until you nudge it.',
     evidence: 'Each half-ring touches the + brush for half a turn, then the − brush for the next half. So whichever side of the coil is on the right always gets current in the same direction and is always pushed the same way. That keeps the turning effect in one direction. The swap happens when the coil is vertical: there the forces point straight through the axle and have no turning effect, and the coil’s momentum carries it past. The turning effect is greatest when the plane of the coil is parallel to the field. More current, more turns or a stronger magnet make the motor turn faster.',
     deeper: 'The torque on a coil of N turns and area A is T = BANI cos θ, where θ is the angle between the plane of the coil and the field. The spinning coil also acts as a generator: it produces a back emf that opposes the supply. A motor draws a large current when it starts and a smaller one at full speed.',
     hint: 'Switch the motor on, then change the turns, current or field and compare the speed.'
@@ -32,10 +32,10 @@ export const MODES = {
     level: 'GCSE EXTENSION · A LEVEL · IB DP',
     heading: 'Alternating current reverses by itself.',
     description: 'An alternating current changes direction many times a second. If it reverses at just the right moments, the coil keeps turning without a commutator. The coil is connected through two complete slip rings, so each end of the coil always touches the same brush. This kind of AC motor turns exactly once for every cycle of the supply: it runs in step (synchronous) with the supply.',
-    look: 'Switch on the supply with the coil at rest: it just shakes, because the force keeps reversing. Press “Give it a spin” to start it near the right speed. Watch it lock in step with the supply. Then change the frequency and see whether it can keep up.',
-    evidence: 'Once in step, the current reverses each time the coil passes the vertical position, which is exactly the job the split ring did in the DC motor. This simple motor cannot start itself, and it stalls if the frequency changes too quickly.',
-    deeper: 'With I = I₀ sin(2πft), the torque is T = BANI₀ sin(2πft) cos θ. It only averages to a steady turning effect when the coil turns at the supply frequency f, so the motor’s speed is fixed by the supply, not by the load. Mains at 50 Hz would turn a two-pole synchronous motor at 3000 revolutions per minute.',
-    hint: 'Switch the supply on, give the coil a spin, then step the frequency up or down.'
+    look: 'Switch on the supply with the coil at rest: it shakes, and a big current may even swing it over, but it never keeps turning, because the force keeps reversing. Press “Give it a spin”: the coil is spun up to the supply’s speed and let go at the right moment in the cycle, so it locks in step. Then raise the frequency one step at a time and see how far it can keep up. Turn the peak current down, or hold the frequency button, and watch it drop out of step.',
+    evidence: 'Once in step, the current reverses once every half turn, at the same point in each turn. So the turning effect acts one way on average, which is the job the split ring did in the DC motor. With little friction to beat, the reversals come soon after the coil lies along the field, and the coil is pushed forwards and backwards almost equally. The harder the motor has to work, the further the coil lags behind the supply and the nearer the reversals move to vertical, where the split ring made them. That is the most turning effect it can give. This simple motor cannot start itself. It stays in step only while the current gives enough turning effect to beat friction and air resistance, which grow with speed. If the frequency rises too far or too quickly, or the current is too small, it drops out of step and slows to a stop.',
+    deeper: 'With I = I₀ sin(2πft), the torque is T = BANI₀ sin(2πft) cos θ. It only averages to a steady turning effect when the coil turns at the supply frequency f, so the motor’s speed is fixed by the supply, not by the load. A bigger load makes the coil lag further behind the supply; beyond the greatest turning effect, ½BANI₀, it drops out of step. Mains at 50 Hz would turn a two-pole synchronous motor at 3000 revolutions per minute.',
+    hint: 'Switch the supply on, give the coil a spin, then step the frequency or peak current up or down.'
   },
 };
 
@@ -44,7 +44,7 @@ export const PARTS = {
   north: 'NORTH POLE · One end of the magnet. Field lines leave a north pole and go towards a south pole. Every magnet has a north and a south pole: cut one in half and each piece still has both.',
   south: 'SOUTH POLE · The other end of the same magnet. Field lines enter a south pole. Between flat, close poles the field is nearly uniform, so the lines are parallel and evenly spaced.',
   magnet: 'MAGNET · One magnet, bent so its two ends face each other across the gap. The colours mark its ends: north (red) and south (blue). The middle is not a pole. There is no such thing as a magnet with only one pole.',
-  field: 'MAGNETIC FIELD · The arrows point from north to south. The closer the lines, the stronger the field (the bigger the flux density B).',
+  field: 'MAGNETIC FIELD · The arrows point from north to south. The closer the lines, the stronger the field (the bigger the flux density B). Change B and count the lines.',
   rod: 'COPPER ROD · A conductor carrying a current across a magnetic field feels a force, F = BIL sin θ. Copper is used because it is a good conductor and is not magnetic.',
   supply: 'DC SUPPLY · Drives a current one way round the circuit. Conventional current flows from + to −.',
   rails: 'RAILS · Carry current to the rod, which can roll along them. The rails are outside the strong field region, so the force on them is tiny.',
@@ -58,42 +58,43 @@ export const PARTS = {
   current: 'CURRENT · Orange arrows show conventional current direction, from + to − through the external circuit. Optional moving markers show direction, not the speed of individual charges.'
 };
 
-// Steppers for each mode. Values are in the units in the label.
+// Steppers for each mode. Values are in the units in the label. The buttons move in whole steps;
+// a typed value is kept to `precision` decimal places.
 export const STEPPERS = {
-  current: { label: 'Current I (A)', min: 0, max: 5, step: 0.5, value: 2, decimals: 1, aria: 'Current in amps' },
-  field: { label: 'Field B (T)', min: 0.05, max: 0.5, step: 0.05, value: 0.2, decimals: 2, aria: 'Magnetic flux density in tesla' },
-  angle: { label: 'Angle θ to field (°)', min: 0, max: 90, step: 15, value: 90, decimals: 0, aria: 'Angle between the wire and the field in degrees' },
-  turns: { label: 'Turns N', min: 10, max: 100, step: 10, value: 50, decimals: 0, aria: 'Number of turns on the coil' },
-  peak: { label: 'Peak current I₀ (A)', min: 0.5, max: 5, step: 0.5, value: 3, decimals: 1, aria: 'Peak current in amps' },
-  frequency: { label: 'Frequency f (Hz, slowed)', min: 0.5, max: 1.5, step: 0.1, value: 0.6, decimals: 1, aria: 'Supply frequency in hertz, slowed down' },
+  current: { label: 'Current I (A)', min: 0, max: 5, step: 0.5, value: 2, decimals: 1, precision: 2, aria: 'Current in amps' },
+  field: { label: 'Field B (T)', min: 0.05, max: 0.5, step: 0.05, value: 0.2, decimals: 2, precision: 3, aria: 'Magnetic flux density in tesla' },
+  angle: { label: 'Angle θ to field (°)', min: 0, max: 90, step: 15, value: 90, decimals: 0, precision: 1, aria: 'Angle between the wire and the field in degrees' },
+  turns: { label: 'Turns N', min: 10, max: 100, step: 10, value: 50, decimals: 0, precision: 0, aria: 'Number of turns on the coil' },
+  peak: { label: 'Peak current I₀ (A)', min: 0.5, max: 5, step: 0.5, value: 3, decimals: 1, precision: 2, aria: 'Peak current in amps' },
+  frequency: { label: 'Frequency f (Hz, slowed)', min: 0.5, max: 1.5, step: 0.1, value: 0.6, decimals: 1, precision: 2, aria: 'Supply frequency in hertz, slowed down' },
 };
 
 export const CONTROLS = {
-  force: { steppers: ['current', 'field', 'angle'], toggles: [['reverse', 'Reverse current'], ['flip', 'Flip the magnet']] },
-  dc: { steppers: ['current', 'turns', 'field'], toggles: [['commutator', 'Split-ring commutator'], ['pauseSwap', 'Pause at each swap'], ['endView', 'End view'], ['reverse', 'Reverse current']] },
-  ac: { steppers: ['peak', 'frequency'], toggles: [] },
+  force: { steppers: ['current', 'field', 'angle'], toggles: [['reverse', 'Reverse current'], ['flip', 'Flip the magnet']], actions: [] },
+  dc: { steppers: ['current', 'turns', 'field'], toggles: [['commutator', 'Split-ring commutator'], ['pauseSwap', 'Pause at each swap'], ['endView', 'End view'], ['reverse', 'Reverse current']], actions: [['vertical', 'Turn coil to vertical']] },
+  ac: { steppers: ['peak', 'frequency'], toggles: [], actions: [['vertical', 'Turn coil to vertical']] },
 };
 
 export const QUESTIONS = {
   force: [
     { q: 'A wire carries a current at right angles to a magnetic field. What happens?', choices: ['It feels a force at right angles to both the current and the field', 'It feels a force along the direction of the current', 'Nothing, unless the wire is made of iron'], correct: 0, why: 'This is the motor effect. Fleming’s left-hand rule gives the direction of the force.', hint: 'Switch on the current and compare the three arrows on the rod.' },
     { q: 'B = 0.20 T, I = 2.0 A and 5.0 cm of wire is in the field, at 90° to it. What is the force?', choices: ['0.020 N', '0.20 N', '2.0 N'], correct: 0, why: 'F = BIL = 0.20 × 2.0 × 0.050 = 0.020 N. Remember to convert 5.0 cm to 0.050 m.', hint: 'Use F = BIL with the length in metres.' },
-    { q: 'The wire is turned until it is parallel to the magnetic field. What is the force now?', choices: ['Zero', 'Half as big', 'The biggest possible'], correct: 0, why: 'F = BIL sin θ, and sin 0° = 0. A current along the field lines feels no force.', hint: 'Step the angle down to 0° and watch the graph.' }
+    { q: 'The wire is turned until it is parallel to the magnetic field. What is the force now?', choices: ['Zero', 'Half as big', 'The biggest possible'], correct: 0, why: 'F = BIL sin θ, and sin 0° = 0. A current along the field lines feels no force.', hint: 'Step the angle down to 0° and watch the force graph.' }
   ],
   dc: [
     { q: 'Why do the two sides of the coil move in opposite directions?', choices: ['The current flows in opposite directions along the two sides', 'One side is nearer the north pole', 'The commutator pushes one side'], correct: 0, why: 'Same field, opposite current, so opposite forces. Together they make a turning effect.', hint: 'Compare the orange current arrows on sides A and B.' },
     { q: 'What does the split-ring commutator do?', choices: ['Reverses the current in the coil every half turn', 'Makes the magnetic field stronger', 'Changes direct current into alternating current in the supply'], correct: 0, why: 'Reversing the current each half turn keeps the turning effect in the same direction.', hint: 'Turn on “Pause at each swap” and compare the side on the right before and after each swap.' },
-    { q: 'Which change would NOT make the motor spin faster?', choices: ['Reversing the current', 'Using more turns of wire', 'Using a stronger magnet'], correct: 0, why: 'Reversing the current only reverses the direction of rotation.', hint: 'Try each change and watch the speed in the readout.' }
+    { q: 'Which change would NOT make the motor spin faster?', choices: ['Reversing the current', 'Using more turns of wire', 'Using a stronger magnet'], correct: 0, why: 'Reversing the current only reverses the direction of rotation.', hint: 'Try each change and watch the speed under “Measurements & graphs”.' }
   ],
   ac: [
     { q: 'Why does a simple AC motor not need a split-ring commutator?', choices: ['The supply current reverses by itself', 'AC produces no force on a coil', 'Slip rings reverse the current'], correct: 0, why: 'Alternating current changes direction on its own. If the coil turns in step, it reverses at the right moments.', hint: 'Watch the current graph while the coil is running in step.' },
     { q: 'A synchronous motor is in step with a 0.6 Hz supply. How many turns does it make each second?', choices: ['0.6', '1.2', '6'], correct: 0, why: 'A two-pole synchronous motor turns once per cycle of the supply.', hint: 'Compare the speed readout with the frequency once it is in step.' },
-    { q: 'The coil is at rest when the AC supply is switched on. What happens?', choices: ['It shakes but does not start turning', 'It starts turning at full speed', 'It turns slowly and speeds up'], correct: 0, why: 'The force reverses many times a second, so it averages to zero on a stationary coil. This motor must be started by something else.', hint: 'Reset, then switch on the supply without giving it a spin.' }
+    { q: 'The coil is at rest when the AC supply is switched on. What happens?', choices: ['It shakes but does not keep turning', 'It starts turning at full speed', 'It turns slowly and speeds up'], correct: 0, why: 'The force keeps reversing, so it averages to zero on a stationary coil. This motor must be started by something else.', hint: 'Reset, then switch on the supply without giving it a spin.' }
   ],
   final: [
     { q: 'In Fleming’s left-hand rule, what does the first finger point along?', choices: ['The magnetic field, from N to S', 'The current', 'The force'], correct: 0, why: 'First finger = Field, seCond finger = Current, thuMb = Motion.', hint: 'F for First, F for Field.' },
     { q: 'A 50-turn coil has sides 4.0 cm long in a 0.20 T field. The current is 2.0 A. What is the force on one side of the coil?', choices: ['0.80 N', '0.016 N', '8.0 N'], correct: 0, why: 'F = BILN = 0.20 × 2.0 × 0.040 × 50 = 0.80 N. Each turn adds its own force.', hint: 'Find F = BIL for one turn, then multiply by the number of turns.' },
     { q: 'Where is the turning effect on a DC motor coil zero?', choices: ['When the plane of the coil is at right angles to the field', 'When the plane of the coil is parallel to the field', 'It is never zero'], correct: 0, why: 'In that position the forces on the two sides point straight through the axle, so they have no moment.', hint: 'Recall where the coil passes the commutator gaps.' },
-    { q: 'Which motor’s speed is fixed by the supply frequency, whatever the load (until it stalls)?', choices: ['The synchronous AC motor', 'The DC motor', 'Both the AC and DC motor'], correct: 0, why: 'A synchronous motor turns exactly once per supply cycle. The DC motor’s speed depends on current, field strength, turns and load.', hint: 'Compare the AC supply frequency with the motor speed once it is in step.' }
+    { q: 'Which motor’s speed is fixed by the supply frequency, whatever the load (until it drops out of step)?', choices: ['The synchronous AC motor', 'The DC motor', 'Both the AC and DC motor'], correct: 0, why: 'A synchronous motor turns exactly once per supply cycle. The DC motor’s speed depends on current, field strength, turns and load.', hint: 'Compare the AC supply frequency with the motor speed once it is in step.' }
   ]
 };

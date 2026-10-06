@@ -38,7 +38,7 @@
   </header>
   <script>window.PanPhyThemeToggle.mount(document.getElementById('theme-button'), { darkStorageKey: 'electric-motors-dark' });</script>
   <main>
-    <div class="intro"><div><p class="eyebrow">THE MOTOR LAB / ELECTRICITY INTO MOTION</p><h1>Current in.<br>Motion out<span>!</span></h1></div><p>Push a wire with a magnet. Spin a coil. Follow the current.<br>Find out what keeps every electric motor turning.</p></div>
+    <div class="intro"><div><p class="eyebrow">THE MOTOR LAB / ELECTRICITY INTO MOTION</p><h1>Current in. Motion out<span>!</span></h1></div><p>Push a wire with a magnet. Spin a coil. Follow the current.<br>Find out what keeps every electric motor turning.</p></div>
     <nav class="models" aria-label="Choose a motor">
       <button type="button" data-mode="force" aria-pressed="true"><span>01 / FORCE</span><strong>Motor effect</strong><small>F = BIL</small></button>
       <button type="button" data-mode="dc" aria-pressed="false"><span>02 / DC</span><strong>DC motor</strong><small>Split-ring commutator</small></button>
@@ -50,19 +50,36 @@
     </div>
     <section class="workspace" aria-label="Electric motor explorer">
       <div class="viewer-panel" id="viewer-panel">
-        <div class="viewer-heading"><span id="scene-title">THE MOTOR EFFECT</span><span class="scale" id="scale-note">MOTION SLOWED · NOT TO SCALE</span><button id="fullscreen" class="panphy-fullscreen-button" type="button" aria-controls="viewer-panel" aria-pressed="false" aria-label="Enter fullscreen" title="Enter fullscreen"><svg class="panphy-fs-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M4 9V4h5M15 4h5v5M20 15v5h-5M9 20H4v-5"/></svg></button></div>
-        <div class="stage">
-          <div id="viewer" tabindex="0" role="img" aria-label="Interactive 3D motor. Drag or use arrow keys to rotate; scroll, pinch or plus and minus keys to zoom.">
-            <p id="load-status" role="status">Loading the 3D model…</p>
-            <p class="gesture overlay" aria-hidden="true">Drag to rotate · Pinch or scroll to zoom</p>
+        <script>if (window.innerWidth < 1000) document.getElementById('viewer-panel').classList.add('is-stacked');</script>
+        <div class="viewer-heading"><span id="scene-title">THE MOTOR EFFECT</span><button id="fullscreen" class="panphy-fullscreen-button" type="button" aria-controls="viewer-panel" aria-pressed="false" aria-label="Enter fullscreen" title="Enter fullscreen"><svg class="panphy-fs-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M4 9V4h5M15 4h5v5M20 15v5h-5M9 20H4v-5"/></svg></button></div>
+        <div class="bench">
+          <div class="stage">
+            <div id="viewer" tabindex="0" role="img" aria-label="Interactive 3D motor. Drag or use arrow keys to rotate; pinch or plus and minus keys to zoom.">
+              <p id="load-status" role="status">Loading the 3D model…</p>
+              <p class="gesture overlay" aria-hidden="true">Drag to rotate · Click the model, then scroll to zoom</p>
+              <p class="scale overlay" id="scale-note">MOTION SLOWED · NOT TO SCALE</p>
+            </div>
+            <div class="legend" aria-label="Legend">
+              <span data-legend="north"><i style="background:var(--north)">N</i> North pole</span>
+              <span data-legend="south"><i style="background:var(--south)">S</i> South pole</span>
+              <span data-legend="field"><i style="background:var(--field)">B</i> Magnetic field</span>
+              <span data-legend="current"><i style="background:var(--current)">I</i> Conventional current</span>
+              <span data-legend="force"><i style="background:var(--force)">F</i> Force</span>
+            </div>
           </div>
-          <div class="legend" aria-label="Legend">
-            <span data-legend="north"><i style="background:var(--north)">N</i> North pole</span>
-            <span data-legend="south"><i style="background:var(--south)">S</i> South pole</span>
-            <span data-legend="field"><i style="background:var(--field)">B</i> Magnetic field</span>
-            <span data-legend="current"><i style="background:var(--current)">I</i> Conventional current</span>
-            <span data-legend="force"><i style="background:var(--force)">F</i> Force</span>
+          <div class="endview" id="endview" hidden>
+            <p class="endview-title">END VIEW · FROM THE RINGS</p>
+            <canvas id="endview-canvas" role="img" aria-label="End view of the coil and commutator"></canvas>
+            <p id="endview-contact"></p>
+            <p id="endview-rule"></p>
+            <p class="connection-key">Purple A and green B keep their identity. The + / − badges show supply connections, not charge stored on the wire. With the split ring, these connections swap every half-turn.</p>
           </div>
+          <details id="measurements" open><summary>Measurements &amp; graphs</summary>
+            <div class="stack">
+              <div class="equation" id="equation" aria-live="off"></div>
+              <div class="graph" id="graph"><canvas id="graph-canvas" role="img" aria-label="Graph"></canvas></div>
+            </div>
+          </details>
         </div>
         <div class="console">
           <div class="deck" aria-label="Experiment controls" role="group">
@@ -71,17 +88,18 @@
               <button type="button" id="power" class="experiment" aria-pressed="false" data-reserve="Switch off current">Switch on current</button>
               <button type="button" id="spin" class="experiment" data-reserve="Give it a spin" hidden>Give it a spin</button>
               <button type="button" id="motion" class="primary" aria-pressed="true"><svg viewBox="0 0 24 24" aria-hidden="true"><path id="motion-icon" d="M7 5h3v14H7zM14 5h3v14h-3z"/></svg><span id="motion-label" data-reserve="Pause motion">Pause motion</span></button>
-              <button type="button" id="step">Step forward</button>
-              <button type="button" id="reset" data-reserve="Reset">Reset</button>
+              <button type="button" id="step" title="Advance 0.10 model seconds, then pause">Step forward</button>
             </div>
-            <div class="sample-controls" id="controls"></div>
+            <div class="experiment-controls" id="controls"></div>
             <div class="study-controls" aria-label="Animation and display">
-              <label for="playback">Playback <select id="playback"><option value="0.15">Very slow</option><option value="0.35" selected>Slow</option><option value="1">Standard</option></select></label>
-              <button type="button" id="home-view">Reset view</button>
-              <button type="button" id="vertical-view" hidden>Inspect vertical coil</button>
+              <label for="playback" title="Playback changes viewing speed only; the readouts use model time.">Playback <select id="playback"><option value="0.15">Very slow</option><option value="0.35" selected>Slow</option><option value="1">Standard</option></select></label>
               <label><input type="checkbox" id="show-flow"> Moving current markers</label>
             </div>
             <p class="playback-note">Playback changes viewing speed only. Step forward advances up to 0.10 model seconds and pauses.</p>
+            <div class="reset-row" aria-label="Reset">
+              <button type="button" id="home-view" title="Stop the model and return to the starting view. Your settings are kept.">Reset view</button>
+              <button type="button" id="reset" title="Stop the model and restore every setting to its starting value.">Reset all</button>
+            </div>
           </div>
           <div class="readouts">
             <div class="observation" aria-live="off"><strong id="observation-title">Follow the force</strong><p id="observation-text"></p></div>
@@ -89,40 +107,29 @@
               <svg viewBox="0 0 80 80" aria-hidden="true"><circle cx="40" cy="40" r="26"/><path id="turning-arc"/><path id="turning-head"/></svg>
               <div><strong id="turning-value"></strong><p id="turning-explanation"></p></div>
             </div>
-            <p class="particle-readout mono" id="particle-readout" role="status">Tap a part to discover its job.</p>
-          </div>
-          <div class="study-panels">
-            <div class="endview" id="endview" hidden>
-              <p class="endview-title">END VIEW · FROM THE RINGS</p>
-              <canvas id="endview-canvas" role="img" aria-label="End view of the coil and commutator"></canvas>
-              <p id="endview-contact"></p>
-              <p id="endview-rule"></p>
-              <p class="connection-key">Purple A and green B keep their identity. The + / − badges show supply connections, not charge stored on the wire. With the split ring, these connections swap every half-turn.</p>
-            </div>
-            <details id="measurements"><summary>Measurements &amp; graphs</summary>
-              <div class="stack">
-                <div class="equation" id="equation" aria-live="off"></div>
-                <div class="graph" id="graph"><canvas id="graph-canvas" role="img" aria-label="Graph"></canvas></div>
-              </div>
-            </details>
+            <p class="part-readout mono" id="part-readout" role="status">Tap a part to discover its job.</p>
           </div>
         </div>
       </div>
-      <aside aria-live="polite">
+    </section>
+    <aside class="guide">
+      <div class="guide-text">
         <p class="eyebrow" id="mode-date">F = BIL · A WIRE IN A MAGNETIC FIELD</p><h2 id="mode-heading">A current in a magnetic field feels a force.</h2>
         <p class="level" id="mode-level">GCSE · A LEVEL · IB DP</p>
         <p id="description"></p>
         <div class="idea"><h3><svg class="icon" viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" focusable="false"><circle cx="10.5" cy="10.5" r="6.5"/><path d="M15.3 15.3 21 21"/></svg> Your observation mission</h3><p id="look"></p></div>
+      </div>
+      <div class="guide-study">
         <h3>What does it mean?</h3><p id="evidence"></p>
         <div class="deeper"><h3>Going further · A level and IB</h3><p id="deeper"></p></div>
         <div class="question" id="mode-quiz"></div>
-      </aside>
-    </section>
+      </div>
+    </aside>
     <section class="final-challenge" aria-labelledby="final-title">
       <div class="final-intro"><p class="eyebrow">FINAL CHALLENGE</p><h2 id="final-title">Put it all together.</h2><p id="final-status">Unlock all three discoveries to open the final challenge.</p></div>
       <div class="question" id="final-quiz" hidden></div>
     </section>
-    <section class="reality"><span aria-hidden="true">↗</span><div><h2>A model is an explanation, not a photograph.</h2><p>Real motors turn tens of times every second, so all the motion here is slowed down a great deal; the supply frequencies are shown slowed down too. Sizes, colours and arrow lengths are chosen to make the ideas visible. The coil’s pink force arrows grow in proportion to force up to a display limit. Their scale is fixed within each view; the end view uses the same force dependence as the 3D coil. The curved turning-effect arrow shows torque relative to the maximum at the selected settings. It vanishes at vertical, where the forces act through the axle. Orange arrows show conventional current direction; optional moving markers are direction cues, not individual charges or their actual speed. Playback speed slows the whole model together, including the supply and graphs; the readouts use model time.</p><p>The forces and torques in the readouts use real formulas and values: a 5.0 cm rod in the motor-effect view, and a coil with 4.0 cm long sides and an area of 20 cm² in the DC and AC views. The coil is drawn with one loop for every 10 turns. The motion uses a simple model of friction and air resistance, and the DC supply keeps the current steady; in a real motor the back emf makes the current fall as the motor speeds up. The AC motor’s coil includes a damper winding, as real synchronous motors do, which stops it swinging back and forth about the synchronous speed.</p></div></section>
+    <section class="reality"><span aria-hidden="true">↗</span><div><h2>A model is an explanation, not a photograph.</h2><p>Real motors turn tens of times every second, so all the motion here is slowed down a great deal; the supply frequencies are shown slowed down too. Sizes, colours and arrow lengths are chosen to make the ideas visible. The pink force arrows grow in proportion to the force up to a display limit: 0.075 N on the rod and 4 N on each side of the coil. Their scale is fixed within each view; the end view uses the same force dependence as the 3D coil. More field lines are drawn for a stronger field. The curved turning-effect arrow shows torque relative to the maximum at the selected settings. It vanishes at vertical, where the forces act through the axle. Orange arrows show conventional current direction; optional moving markers are direction cues, not individual charges or their actual speed. Playback speed slows the whole model together, including the supply and graphs; the readouts use model time.</p><p>The forces and torques in the readouts use real formulas and values: a 5.0 cm rod in the motor-effect view, and a coil with 4.0 cm long sides and an area of 20 cm² in the DC and AC views. The coil is drawn with one loop for about every 10 turns. The motion uses a simple model of friction and air resistance, and the supplies keep the current at its set value; in a real motor the back emf makes the current fall as the motor speeds up. The AC motor is driven only by the force on its coil. That force averages to a steady turning effect only when the coil turns in step with the supply, so the coil has to be spun up to speed and let go at the right moment in the cycle, which “Give it a spin” does for you. If friction needs more turning effect than the current can give, or the frequency changes faster than the coil can follow, it drops out of step and slows to a stop. Just after a change it may surge a little faster and slower before it settles.</p></div></section>
   </main>
   <footer><span>PanPhy Labs · Electric motors (beta)</span><a href="/beta/">More beta apps</a></footer>
   <noscript><p class="no-script">Enable JavaScript to explore the 3D models. The descriptions remain available above.</p></noscript>

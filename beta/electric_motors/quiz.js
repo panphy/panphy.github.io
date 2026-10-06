@@ -125,12 +125,19 @@ export class Quiz {
     this.count.removeAttribute('aria-label');
     this.text.textContent = question.q;
     this.nextButton.hidden = true;
-    question.choices.forEach((label, choiceIndex) => {
-      const button = el('button', '', label);
+    // Shuffle the choices each time a question is shown, so position never gives the answer away.
+    const order = question.choices.map((_, choiceIndex) => choiceIndex);
+    for (let i = order.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [order[i], order[j]] = [order[j], order[i]];
+    }
+    for (const choiceIndex of order) {
+      const button = el('button', '', question.choices[choiceIndex]);
       button.type = 'button';
+      if (choiceIndex === question.correct) this.correctButton = button;
       button.addEventListener('click', () => this.answer(button, choiceIndex));
       this.choices.appendChild(button);
-    });
+    }
   }
 
   answer(button, choiceIndex) {
@@ -161,9 +168,8 @@ export class Quiz {
   }
 
   reveal() {
-    const question = this.questionSets[this.key][this.viewIndex[this.key]];
     this.revealed = true;
-    this.choices.children[question.correct].dataset.result = 'reveal';
+    this.correctButton.dataset.result = 'reveal';
     this.feedback.textContent = 'The answer is highlighted. Choose it to continue (no star this time).';
     this.revealButton.hidden = true;
   }

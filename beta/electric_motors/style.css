@@ -27,15 +27,11 @@
   --north: #D45132;
   --south: #1675BB;
   --field: #0D9488;
-  --e-field: #B7791F;
   --current: #E07A10;
   --force: #B5179E;
-  --velocity: #2F6FDB;
   --copper: #B8733D;
   --steel: #8E99A4;
   --carbon: #4A5360;
-  --positive: #D45132;
-  --negative: #1675BB;
   --neutral: #657481;
   --half-a: #7C3AED;
   --half-b: #65A30D;
@@ -70,15 +66,11 @@
   --north: #EF6A48;
   --south: #4BA3E3;
   --field: #2DD4BF;
-  --e-field: #E0A445;
   --current: #FBA43C;
   --force: #E879F9;
-  --velocity: #6EA8FF;
   --copper: #D08A50;
   --steel: #9AA5B0;
   --carbon: #5B6573;
-  --positive: #EF6A48;
-  --negative: #4BA3E3;
   --neutral: #8C9AA6;
   --half-a: #A78BFA;
   --half-b: #A3E635;
@@ -139,22 +131,22 @@ button:focus-visible, a:focus-visible, #viewer:focus-visible, select:focus-visib
 
 main, footer { width: calc(100% - 48px); max-width: 1320px; margin: auto; }
 .eyebrow { margin: 0; font-family: var(--font-mono); font-size: .76rem; letter-spacing: .12em; font-weight: 600; color: var(--brand-primary); }
-.intro { display: flex; align-items: center; justify-content: space-between; gap: 24px; padding: 30px 0 24px; }
+.intro { display: flex; align-items: center; justify-content: space-between; gap: 24px; padding: 20px 0 16px; }
 .intro p { margin: 0; }
-.intro > p { color: var(--text-secondary); border-left: 3px solid var(--card-border); padding-left: 22px; }
+.intro > p { color: var(--text-secondary); font-size: .92rem; border-left: 3px solid var(--card-border); padding-left: 18px; }
 h1, h2 { font-family: var(--font-display); font-weight: 400; }
-h1 { font-size: clamp(2.6rem, 4.6vw, 4.4rem); letter-spacing: -.02em; line-height: 1.02; margin: 10px 0 0; }
+h1 { font-size: clamp(1.9rem, 3.2vw, 2.8rem); letter-spacing: -.02em; line-height: 1.05; margin: 6px 0 0; }
 h1 span { color: var(--brand-primary); }
 
 /* Mode chooser */
-.models { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 20px; }
+.models { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 12px; }
 .models button {
   display: grid;
   grid-template-rows: auto auto 1fr;
   align-content: start;
   gap: 2px;
-  min-height: 100px;
-  padding: 14px 18px;
+  min-height: 76px;
+  padding: 10px 16px;
   background: var(--card-bg);
   border: 1px solid var(--card-border);
   border-radius: 16px;
@@ -170,34 +162,42 @@ h1 span { color: var(--brand-primary); }
 [data-theme="dark"] .models button[aria-pressed=true] { background: var(--brand-accent); border-color: var(--brand-accent); color: #0B1F1D; }
 .models button[aria-pressed=true] > span, .models button[aria-pressed=true] small { color: inherit; opacity: .85; }
 
-.lab-strip { display: flex; justify-content: space-between; align-items: center; gap: 16px; margin-bottom: 12px; color: var(--text-secondary); font-size: .8rem; }
+.lab-strip { display: flex; justify-content: space-between; align-items: center; gap: 16px; margin-bottom: 8px; color: var(--text-secondary); font-size: .8rem; }
 .lab-strip b { margin-left: 12px; color: var(--text-main); }
 .progress-group { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
 #progress { font-weight: 600; color: var(--brand-primary); }
 .link-button { min-height: 48px; padding: 0 4px; background: transparent; border: 0; color: var(--text-secondary); text-decoration: underline; text-underline-offset: 3px; font-size: .8rem; }
 .link-button:hover { color: var(--text-main); }
 
-/* Workspace */
+/* Workspace: the 3D view with its study panels on the left, and everything you operate on the right. */
 .workspace {
   scroll-margin-top: 72px;
-  display: grid;
-  grid-template-columns: minmax(0, 1.8fr) minmax(310px, 1fr);
   border: 1px solid var(--card-border);
   border-radius: 20px;
-  overflow: hidden;
+  overflow: clip;
   background: var(--card-bg);
   box-shadow: var(--card-shadow);
 }
-.viewer-panel { display: flex; flex-direction: column; gap: 14px; min-width: 0; padding: 20px; background: var(--viewer-bg); }
-.viewer-heading { display: flex; align-items: center; gap: 8px 12px; font-family: var(--font-mono); font-size: .76rem; font-weight: 600; letter-spacing: .08em; }
+.viewer-panel {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(330px, 400px);
+  align-items: start;
+  gap: 12px 16px;
+  min-width: 0;
+  padding: 16px 20px 20px;
+  border-radius: inherit;
+  background: var(--viewer-bg);
+}
+.viewer-heading { grid-column: 1 / -1; display: flex; align-items: center; gap: 8px 12px; min-height: 36px; font-family: var(--font-mono); font-size: .76rem; font-weight: 600; letter-spacing: .08em; }
 #scene-title { margin-right: auto; }
-.scale { color: var(--text-secondary); font-size: .68rem; line-height: 1.3; text-align: center; border: 1px solid var(--input-border); border-radius: 999px; padding: 4px 10px; }
 #fullscreen { --panphy-fs-size: 48px; margin: -6px 0; }
 
-/* The stage holds the 3D view and its legend; the console holds everything you operate or read. */
+.bench { display: flex; flex-direction: column; gap: 12px; min-width: 0; }
 .stage { display: flex; flex-direction: column; gap: 10px; min-width: 0; }
 /* contain: size keeps the canvas pixel size from feeding back into the viewer height. */
-#viewer { position: relative; display: flex; flex-direction: column; flex: none; height: 480px; min-height: 0; contain: size; border-radius: 14px; touch-action: none; overflow: hidden; }
+#viewer { position: relative; display: flex; flex-direction: column; flex: none; height: clamp(360px, calc(100vh - 300px), 620px); min-height: 0; contain: size; border-radius: 14px; background: var(--viewer-bg); touch-action: pan-y; overflow: hidden; }
+/* With the end view open, both it and the 3D view fit on one screen. */
+body.has-endview #viewer { height: clamp(320px, calc(100vh - 450px), 520px); }
 #viewer.is-hovering { cursor: pointer; }
 #viewer > canvas { display: block; width: 100%; height: 0; flex: 1; min-height: 0; align-self: stretch; }
 #load-status { position: absolute; inset: 30% 10%; margin: 0; text-align: center; color: var(--text-secondary); }
@@ -206,16 +206,16 @@ h1 span { color: var(--brand-primary); }
 .legend { display: flex; flex-wrap: wrap; justify-content: center; gap: 6px; font-size: .74rem; }
 .legend > span { display: inline-flex; align-items: center; gap: 6px; padding: 3px 10px 3px 4px; border-radius: 999px; background: var(--overlay-bg); border: 1px solid var(--card-border); }
 .legend i { font-style: normal; display: inline-grid; place-items: center; border-radius: 50%; width: 18px; height: 18px; font-size: .72rem; font-weight: 800; color: #fff; }
-.legend i.bar { border-radius: 3px; height: 8px; width: 18px; }
 .gesture { top: 8px; left: 10px; margin: 0; color: var(--text-secondary); }
+.scale { top: 8px; right: 10px; margin: 0; padding: 3px 10px; border: 1px solid var(--input-border); border-radius: 999px; background: var(--overlay-bg); color: var(--text-secondary); font-family: var(--font-mono); font-size: .64rem; font-weight: 600; letter-spacing: .08em; white-space: nowrap; }
 
-/* Console: controls first, then what the model shows, then the study panels.
+/* Console: controls first, then what the model shows.
    Container queries let the same rules serve the page column, a phone and the fullscreen side column. */
 .console { container-type: inline-size; display: flex; flex-direction: column; gap: 12px; min-width: 0; }
 .console > * { flex-shrink: 0; }
 .deck, .readouts { background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 16px; }
 .deck { display: flex; flex-direction: column; gap: 14px; padding: 14px; }
-.deck > .sample-controls, .deck > .study-controls { border-top: 1px solid var(--card-border); padding-top: 14px; }
+.deck > .experiment-controls, .deck > .study-controls, .deck > .reset-row { border-top: 1px solid var(--card-border); padding-top: 14px; }
 #action-hint { margin: 0; color: var(--text-secondary); font-size: .82rem; line-height: 1.5; }
 
 .toolbar { display: flex; flex-wrap: wrap; gap: 8px; }
@@ -245,14 +245,15 @@ h1 span { color: var(--brand-primary); }
 button:disabled { cursor: default; opacity: .55; }
 
 /* Steppers and toggles */
-.sample-controls { display: flex; flex-wrap: wrap; align-items: flex-end; gap: 12px; }
-.sample-controls .field { display: flex; flex-direction: column; gap: 4px; flex: 1 1 150px; max-width: 250px; font-family: var(--font-mono); font-size: .72rem; font-weight: 600; letter-spacing: .06em; color: var(--text-secondary); }
-.sample-controls .field:has(.choice-row) { flex-basis: 100%; max-width: none; }
+.experiment-controls { display: flex; flex-wrap: wrap; align-items: flex-end; gap: 12px; }
+.experiment-controls .field { display: flex; flex-direction: column; gap: 4px; flex: 1 1 150px; max-width: 250px; font-family: var(--font-mono); font-size: .72rem; font-weight: 600; letter-spacing: .06em; color: var(--text-secondary); }
+.experiment-controls .field:has(.choice-row) { flex-basis: 100%; max-width: none; }
 .stepper { display: flex; align-items: center; gap: 6px; width: 100%; }
 .stepper button, .choice-row button {
   min-width: 48px; min-height: 48px; padding: 8px 14px;
   border: 1px solid var(--input-border); border-radius: 12px; background: var(--card-bg);
   font: 700 1.1rem var(--font-body); color: var(--text-main); touch-action: manipulation;
+  user-select: none; -webkit-user-select: none; -webkit-touch-callout: none;
 }
 .stepper button { flex: none; padding: 8px 0; }
 .stepper button:hover:not(:disabled), .choice-row button:hover:not(:disabled) { border-color: var(--brand-accent); background: var(--muted-bg); }
@@ -267,17 +268,20 @@ button:disabled { cursor: default; opacity: .55; }
 .choice-row { display: flex; flex-wrap: wrap; gap: 8px; }
 .choice-row button { font-size: .85rem; letter-spacing: 0; }
 .choice-row button[aria-pressed=true] { background: var(--brand-primary); border-color: var(--brand-primary); color: var(--bg-color); }
+.choice-row button.action { border-style: dashed; }
 
 .study-controls { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 14px; font-size: .8rem; }
 .study-controls label { display: inline-flex; align-items: center; gap: 8px; min-height: 48px; cursor: pointer; }
-.study-controls select, .study-controls button { min-height: 48px; padding: 8px 12px; border: 1px solid var(--input-border); border-radius: 10px; color: var(--text-main); background: var(--card-bg); font: inherit; }
-.study-controls button:hover { border-color: var(--brand-accent); background: var(--muted-bg); }
+.study-controls select { min-height: 48px; padding: 8px 12px; border: 1px solid var(--input-border); border-radius: 10px; color: var(--text-main); background: var(--card-bg); font: inherit; }
 .study-controls input { width: 18px; height: 18px; accent-color: var(--brand-accent-strong); }
 .playback-note { margin: -8px 0 0; font-size: .72rem; line-height: 1.45; color: var(--text-secondary); }
+.reset-row { display: flex; flex-wrap: wrap; gap: 8px; }
+.reset-row button { flex: 1 1 0; min-height: 48px; padding: 8px 12px; border: 1px solid var(--input-border); border-radius: 12px; background: var(--card-bg); font-size: .85rem; font-weight: 700; }
+.reset-row button:hover { border-color: var(--brand-accent); background: var(--muted-bg); }
 
 /* What the model is showing: one card, so the readouts read together. */
 .readouts { display: grid; grid-template-columns: minmax(0, 1fr); overflow: hidden; border-left: 3px solid var(--brand-accent-strong); }
-.observation { padding: 12px 16px; min-height: 108px; }
+.observation { padding: 12px 16px; min-height: 96px; }
 .observation strong { font-size: .95rem; }
 .observation p { font-size: .84rem; line-height: 1.55; color: var(--text-secondary); margin: 4px 0 0; }
 .turning-display { display: flex; align-items: center; gap: 12px; padding: 10px 16px; border-top: 1px solid var(--card-border); }
@@ -288,14 +292,13 @@ button:disabled { cursor: default; opacity: .55; }
 .turning-display strong { font-size: .85rem; }
 .turning-display p { margin: 4px 0 0; font-size: .78rem; color: var(--text-secondary); line-height: 1.5; }
 /* Room for three lines, so a longer message does not move the cards below. */
-.particle-readout { margin: 0; min-height: calc(4.65em + 20px); padding: 10px 16px; border-top: 1px solid var(--card-border); background: var(--muted-bg); color: var(--text-main); font-size: .8rem; line-height: 1.55; }
+.part-readout { margin: 0; min-height: calc(4.65em + 20px); padding: 10px 16px; border-top: 1px solid var(--card-border); background: var(--muted-bg); color: var(--text-main); font-size: .8rem; line-height: 1.55; }
 
-.study-panels { display: grid; gap: 12px; }
 #measurements { padding: 0 14px 12px; border: 1px solid var(--card-border); border-radius: 12px; background: var(--card-bg); }
 #measurements:not([open]) { padding-bottom: 0; }
 #measurements summary { min-height: 48px; padding: 12px 0; cursor: pointer; font-size: .85rem; font-weight: 700; }
 #measurements summary:focus-visible, .study-controls input:focus-visible { outline: 3px solid var(--focus); outline-offset: 3px; }
-.stack { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; padding-top: 4px; }
+.stack { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr); gap: 12px; padding-top: 4px; }
 
 .equation { padding: 8px 12px; border-radius: 12px; background: var(--overlay-bg); border: 1px solid var(--card-border); font-family: var(--font-mono); font-size: .78rem; line-height: 1.5; }
 .equation .row { display: flex; justify-content: space-between; gap: 10px; }
@@ -310,36 +313,40 @@ button:disabled { cursor: default; opacity: .55; }
 .graph canvas { display: block; width: 100%; height: auto; aspect-ratio: 300 / 170; flex: none; min-height: 0; }
 
 /* A larger synchronised end view connects the brushes to the labelled coil sides. */
-.endview { display: grid; grid-template-columns: minmax(180px, 260px) minmax(0, 1fr); column-gap: 20px; align-items: center; padding: 14px; border-radius: 12px; background: var(--card-bg); border: 1px solid var(--card-border); }
+.endview { display: grid; grid-template-columns: minmax(160px, 220px) minmax(0, 1fr); column-gap: 20px; align-items: center; padding: 12px 14px; border-radius: 12px; background: var(--card-bg); border: 1px solid var(--card-border); }
 .endview canvas { grid-column: 1; grid-row: 1 / span 3; display: block; width: 100%; height: auto; aspect-ratio: 1; }
 .endview p { grid-column: 2; margin: 2px 0 0; font-family: var(--font-mono); font-size: .8rem; line-height: 1.5; color: var(--text-secondary); }
 .endview[hidden] { display: none; }
 .endview p.endview-title { margin: 0 0 2px; font-weight: 600; letter-spacing: .06em; color: var(--text-main); }
-.endview .connection-key { grid-column: 1 / -1; font-family: var(--font-body); font-size: .78rem; margin-top: 12px; }
+.endview .connection-key { grid-column: 2; font-family: var(--font-body); font-size: .76rem; margin-top: 8px; }
+.endview canvas { grid-row: 1 / span 4; }
 .endview b { color: var(--text-main); font-weight: 600; }
 
 @container (min-width: 640px) {
   .readouts { grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr); }
   .turning-display { border-top: 0; border-left: 1px solid var(--card-border); }
   .readouts:has(.turning-display[hidden]) .observation { grid-column: 1 / -1; }
-  .particle-readout { grid-column: 1 / -1; }
+  .part-readout { grid-column: 1 / -1; }
 }
 @container (max-width: 560px) {
   .toolbar button { flex: 1 1 calc(50% - 4px); padding: 8px 10px; }
   .toolbar button.primary { min-width: 0; }
-  .sample-controls .field { flex: 1 1 calc(50% - 6px); max-width: calc(50% - 6px); }
-  .stack { grid-template-columns: minmax(0, 1fr); }
-  .endview { grid-template-columns: minmax(0, 1fr); }
-  .endview canvas { grid-column: 1; grid-row: 2; width: min(100%, 280px); justify-self: center; margin: 6px 0; }
-  .endview p { grid-column: 1; }
-  .endview .endview-title { grid-row: 1; }
+  .experiment-controls .field { flex: 1 1 calc(50% - 6px); max-width: calc(50% - 6px); }
 }
 
-@container (max-width: 340px) {
-  .sample-controls .field { flex-basis: 100%; max-width: none; }
+@container (max-width: 380px) {
+  .experiment-controls .field { flex-basis: 100%; max-width: none; }
 }
 
-/* Fullscreen: the 3D view fills the screen and the console scrolls on its own beside it (or below it in portrait). */
+/* Stacked (narrow page or portrait fullscreen): one column. The 3D view stays pinned under the banner
+   while the end view, controls and readouts scroll beneath it, so the model is always in sight. */
+.viewer-panel.is-stacked { display: flex; flex-direction: column; align-items: stretch; --pin-top: calc(var(--standalone-top, 0px) + 61px); }
+.is-stacked .bench, .is-stacked .stage { display: contents; }
+.is-stacked #viewer { position: sticky; top: var(--pin-top); z-index: 5; height: clamp(230px, 40vh, 420px); border-radius: 0 0 14px 14px; box-shadow: 0 6px 10px -8px rgba(0, 0, 0, .35); }
+body.has-endview .is-stacked #viewer { height: clamp(230px, 40vh, 420px); }
+.is-stacked #measurements { order: 5; }
+
+/* Fullscreen: the 3D view fills the screen. Beside it the console scrolls on its own; the end view and graphs sit under the view. */
 body.viewer-expanded { overflow: hidden; }
 .viewer-panel.is-fullscreen {
   position: fixed;
@@ -348,31 +355,31 @@ body.viewer-expanded { overflow: hidden; }
   width: 100%;
   height: 100%;
   height: 100dvh;
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) clamp(320px, 30vw, 420px);
-  grid-template-rows: auto minmax(0, 1fr);
-  gap: 10px 16px;
-  overflow: hidden;
-  padding: max(10px, env(safe-area-inset-top), var(--standalone-top)) max(16px, env(safe-area-inset-right)) max(12px, env(safe-area-inset-bottom)) max(16px, env(safe-area-inset-left));
+  border-radius: 0;
+  --fs-top: max(10px, env(safe-area-inset-top), var(--standalone-top, 0px));
+  padding: var(--fs-top) max(16px, env(safe-area-inset-right)) max(12px, env(safe-area-inset-bottom)) max(16px, env(safe-area-inset-left));
 }
-.viewer-panel.is-fullscreen .viewer-heading { grid-column: 1 / -1; }
-.viewer-panel.is-fullscreen .stage { min-height: 0; }
-.viewer-panel.is-fullscreen #viewer { flex: 1 1 0; height: auto; min-height: 0; }
-.viewer-panel.is-fullscreen .console { min-height: 0; overflow-y: auto; overscroll-behavior: contain; padding: 0 4px 4px; margin: 0 -4px; scrollbar-width: thin; }
-@media (orientation: portrait) {
-  .viewer-panel.is-fullscreen { grid-template-columns: minmax(0, 1fr); grid-template-rows: auto minmax(0, 1.4fr) minmax(0, 1fr); }
-}
+.viewer-panel.is-fullscreen:not(.is-stacked) { grid-template-columns: minmax(0, 1fr) clamp(320px, 30vw, 420px); grid-template-rows: auto minmax(0, 1fr); align-items: stretch; overflow: hidden; }
+.is-fullscreen:not(.is-stacked) .bench { min-height: 0; overflow-y: auto; overscroll-behavior: contain; scrollbar-width: thin; }
+.is-fullscreen:not(.is-stacked) .stage { flex: 1 0 max(300px, 64%); }
+.is-fullscreen:not(.is-stacked) #viewer { flex: 1 1 0; height: auto; }
+.is-fullscreen:not(.is-stacked) .console { min-height: 0; overflow-y: auto; overscroll-behavior: contain; padding: 0 4px 4px; margin: 0 -4px; scrollbar-width: thin; }
+.viewer-panel.is-fullscreen.is-stacked { overflow-y: auto; overscroll-behavior: contain; padding-top: 0; --pin-top: calc(var(--fs-top) + 48px); }
+.is-fullscreen.is-stacked .viewer-heading { position: sticky; top: 0; z-index: 6; flex: none; min-height: calc(var(--fs-top) + 48px); margin-bottom: -12px; padding-top: var(--fs-top); background: var(--viewer-bg); }
+.is-fullscreen.is-stacked #fullscreen { margin: 0; }
+.is-fullscreen.is-stacked > *, .is-fullscreen.is-stacked .bench > *, .is-fullscreen.is-stacked .stage > * { flex-shrink: 0; }
 
-aside { border-left: 1px solid var(--card-border); padding: 26px; background: var(--card-bg); }
-aside h2 { font-size: 1.9rem; line-height: 1.15; margin: 10px 0 14px; }
-aside p { color: var(--text-secondary); font-size: .92rem; margin: 8px 0 20px; }
+/* Guide: what the model shows, then questions. */
+.guide { display: grid; grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr); gap: 8px 40px; margin-top: 20px; padding: 26px; border: 1px solid var(--card-border); border-radius: 20px; background: var(--card-bg); box-shadow: var(--card-shadow); }
+.guide h2 { font-size: 1.9rem; line-height: 1.15; margin: 10px 0 14px; }
+.guide p { color: var(--text-secondary); font-size: .92rem; margin: 8px 0 20px; }
 h3 { font-size: .88rem; margin: 0; }
 .icon { width: 1.15em; height: 1.15em; vertical-align: -0.2em; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
 .idea h3 .icon { color: var(--brand-accent-strong); }
-.idea { border-left: 3px solid var(--brand-accent); border-radius: 0 12px 12px 0; padding: 13px 16px; margin: 20px 0; background: var(--muted-bg); }
+.idea { border-left: 3px solid var(--brand-accent); border-radius: 0 12px 12px 0; padding: 13px 16px; margin: 20px 0 0; background: var(--muted-bg); }
 .idea p { margin: 6px 0 0; }
 .level { display: inline-block; margin: 0 0 12px; padding: 2px 10px; border-radius: 999px; border: 1px solid var(--input-border); font-family: var(--font-mono); font-size: .7rem; letter-spacing: .06em; color: var(--text-secondary); }
-.deeper { border: 1px dashed var(--input-border); border-radius: 12px; padding: 12px 16px; margin: 0 0 20px; }
+.deeper { border: 1px dashed var(--input-border); border-radius: 12px; padding: 12px 16px; margin: 0; }
 .deeper p { margin: 6px 0 0; font-size: .88rem; }
 .deeper h3 { color: var(--brand-primary); }
 
@@ -411,35 +418,37 @@ footer { display: flex; justify-content: space-between; gap: 20px; border-top: 1
 .no-script { padding: 24px; }
 
 @media (max-width: 1100px) {
-  .workspace { grid-template-columns: minmax(0, 1.35fr) minmax(290px, 1fr); }
   .models strong { font-size: 1.05rem; }
 }
 @media (max-width: 860px) {
-  .workspace { grid-template-columns: 1fr; }
-  aside { border-left: 0; border-top: 1px solid var(--card-border); }
+  .guide { grid-template-columns: 1fr; }
   .final-challenge { grid-template-columns: 1fr; gap: 12px; }
 }
 @media (max-width: 760px) {
   main, footer { width: calc(100% - 28px); }
   .banner { padding-left: max(12px, env(safe-area-inset-left)); padding-right: max(12px, env(safe-area-inset-right)); }
   .banner-title { font-size: 1.25rem; }
-  .intro { display: block; padding: 22px 0 18px; }
-  .intro > p { margin-top: 16px; font-size: .9rem; }
-  .intro h1 { font-size: 2.8rem; }
-  .models { grid-template-columns: repeat(2, 1fr); gap: 8px; }
-  .models button { min-height: 84px; padding: 12px; border-radius: 14px; }
-  .models strong { font-size: .98rem; }
-  .models small { font-size: .76rem; }
+  .intro { display: block; padding: 16px 0 14px; }
+  .intro > p { margin-top: 12px; font-size: .88rem; }
+  .models { gap: 6px; }
+  .models button { min-height: 60px; padding: 8px 10px; border-radius: 12px; }
+  .models button > span { font-size: .62rem; letter-spacing: .04em; }
+  .models strong { font-size: .9rem; }
+  .models small { font-size: .68rem; line-height: 1.25; }
   .lab-strip { flex-direction: column; align-items: flex-start; gap: 0; }
-  .viewer-panel { padding: 12px; gap: 12px; }
-  #viewer { height: 360px; }
-  .viewer-heading { font-size: .68rem; gap: 8px; }
-  .scale { font-size: .6rem; padding: 3px 8px; }
+  .viewer-panel { padding: 8px 12px 12px; gap: 12px; }
+  .viewer-heading { font-size: .7rem; }
+  .scale { font-size: .56rem; padding: 2px 8px; }
   .legend { gap: 4px; font-size: .7rem; }
   .gesture { display: none; }
   .deck { padding: 12px; }
-  .particle-readout { min-height: 72px; }
-  aside { padding: 20px; }
+  .stack { grid-template-columns: minmax(0, 1fr); }
+  .endview { grid-template-columns: minmax(0, 1fr); }
+  .endview canvas { grid-column: 1; grid-row: 2; width: min(100%, 230px); justify-self: center; margin: 6px 0; }
+  .endview p, .endview .connection-key { grid-column: 1; }
+  .endview .endview-title { grid-row: 1; }
+  .part-readout { min-height: 72px; }
+  .guide { padding: 20px; }
   .final-challenge { padding: 20px; }
   .reality { gap: 12px; }
   footer { flex-direction: column; gap: 8px; }
