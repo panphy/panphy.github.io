@@ -11,7 +11,7 @@ Browser-based physics tools, simulations, classroom utilities and games. Student
 - **Teacher utilities:** [Exam Timer](for_teachers/timer.html) and [Camera Visualizer](for_teachers/visualizer.html).
 - **Games and demos:** [Spellwave](fun/spellwave.html) and [ASCII Camera](fun/ascii_cam.html).
 - **GCSE Physics:** school-specific unit companions, available by direct link.
-- **Do Now starters:** [AO1 lesson starters by topic](beta/do_now/) for GCSE Physics, with worksheets, flashcards and [printable revision sheets and required-practical method sheets](beta/do_now/revision/), in beta before moving to `gcsephy/`.
+- **Do Now starters:** [AO1 lesson starters by topic](gcsephy/do-now/) for GCSE Physics, with worksheets, flashcards and [printable revision sheets and required-practical method sheets](gcsephy/do-now/revision/).
 - **In beta:** 3D simulations of [Electric Motors](beta/electric_motors.html) (motor effect, DC and synchronous AC) and [Charges in Fields](beta/charges_in_fields.html), awaiting review.
 
 ### GCSE Physics
@@ -39,9 +39,9 @@ Pages under `fun/`, `beta/`, `misc/` and `gcsephy/` need internet access, as do 
 | `assets/` | Shared controls, icons, locally hosted fonts, and service-worker registration |
 | `tools/`, `simulations/`, `for_teachers/` | Published educational apps |
 | `fun/` | Network-only games and demos; Spellwave's text-logic tests run with `node --test fun/spellwave/tests/` |
-| `beta/` | Trial apps, including the Do Now starters, listed in `beta/index.html` |
+| `beta/` | Trial apps, listed in `beta/index.html`; `beta/do_now/` only forwards old links to `gcsephy/do-now/` |
 | `misc/` | Unlisted resources, inventoried in `misc/index.html` |
-| `gcsephy/` | GCSE Physics curriculum resources, inventoried in `gcsephy/index.html` |
+| `gcsephy/` | GCSE Physics curriculum resources and the Do Now starters, inventoried in `gcsephy/index.html` |
 | `.github/workflows/` | Repository automation |
 
 ## Contact

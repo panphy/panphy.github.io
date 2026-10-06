@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="robots" content="noindex, nofollow">
+  <meta name="description" content="Do Now lesson starters for AQA GCSE Physics: choose topics, choose how many questions, and show them on the board.">
+  <meta name="theme-color" content="#072a2e">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <title>Do Now · GCSE Physics starters</title>
+  <link rel="icon" type="image/png" href="/assets/favicon.png">
+  <link rel="apple-touch-icon" href="/assets/apple-touch-icon.png">
+  <link rel="stylesheet" href="/assets/standalone-top.css">
+  <link rel="stylesheet" href="do_now.css">
+  <script src="do_now.js" defer></script>
+  <script src="/gcsephy/sw-register.js" defer></script>
+</head>
+<body>
+  <div id="setup">
+    <header class="topbar">
+      <a class="brand" href="https://panphy.app/" aria-label="PanPhy Labs main website"><img src="/assets/favicon.png" alt="" width="32" height="32"><span>Do Now</span></a>
+      <a class="topbar-link" href="revision/">Revision sheets</a>
+    </header>
+
+    <section class="hero">
+      <div class="hero-inner">
+        <p class="eyebrow"><span>Lesson starters</span> · AO1 recall</p>
+        <h1>Do <em>Now.</em></h1>
+        <p class="lead">Pick the topics, pick how many questions, and put them on the board. Or revise them as flashcards.</p>
+      </div>
+    </section>
+
+    <main class="setup-main">
+      <section class="panel" aria-labelledby="step-topics">
+        <div class="panel-head">
+          <h2 id="step-topics"><b>1</b> Choose topics</h2>
+          <div class="switches">
+            <div class="segmented" role="group" aria-label="Course">
+              <button type="button" data-course="all" aria-pressed="true">Separate Physics</button>
+              <button type="button" data-course="combined" aria-pressed="false">Combined only</button>
+            </div>
+            <div class="segmented" role="group" aria-label="Target grade">
+              <button type="button" data-target="9" aria-pressed="true" title="Every question in the bank">Target 9</button>
+              <button type="button" data-target="7" aria-pressed="false" title="Only the priority questions">Target 7</button>
+            </div>
+          </div>
+        </div>
+        <div class="search-row">
+          <label class="search">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></svg>
+            <input id="search" type="search" placeholder="Search topics, questions and answers, e.g. waves, Bohr, RP" autocomplete="off" aria-label="Search topics, questions and answers">
+          </label>
+          <button id="select-shown" class="ghost" type="button">Select all shown</button>
+          <button id="clear" class="ghost" type="button">Clear</button>
+          <button id="fold-all" class="ghost" type="button">Collapse all</button>
+        </div>
+        <p class="hint"><span class="badge-s">S</span> marks topics for Separate Physics only. Choose “Combined only” to hide them.</p>
+        <div id="chosen" class="chosen" hidden aria-live="polite"></div>
+        <div id="units" class="units" aria-live="polite"><p class="loading">Loading the question bank…</p></div>
+        <div id="methods" class="methods-block" hidden></div>
+      </section>
+
+      <section class="panel" aria-labelledby="step-count">
+        <div class="panel-head">
+          <h2 id="step-count"><b>2</b> Choose questions</h2>
+          <div class="segmented" role="group" aria-label="How questions are chosen">
+            <button type="button" data-mode="random" aria-pressed="true">Random</button>
+            <button type="button" data-mode="manual" aria-pressed="false">Pick my own</button>
+          </div>
+        </div>
+        <div id="random-options">
+        <p class="hint first">Questions are drawn at random, spread across the topics you chose. How many?</p>
+        <div class="count-row">
+          <div class="stepper">
+            <button id="count-down" type="button" aria-label="One fewer question">−</button>
+            <input id="count" type="number" inputmode="numeric" min="1" max="20" value="5" aria-label="Number of questions">
+            <button id="count-up" type="button" aria-label="One more question">+</button>
+          </div>
+          <div class="presets" role="group" aria-label="Quick choices">
+            <button type="button" data-count="3">3</button>
+            <button type="button" data-count="5">5</button>
+            <button type="button" data-count="6">6</button>
+            <button type="button" data-count="8">8</button>
+            <button type="button" data-count="10">10</button>
+          </div>
+        </div>
+        </div>
+        <div id="manual-options" hidden>
+          <p class="hint first">Tick the questions to show. They appear on the board in the order you tick them.</p>
+          <div class="search-row">
+            <label class="search">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></svg>
+              <input id="pick-search" type="search" placeholder="Filter questions and answers, e.g. define, unit, Bohr" autocomplete="off" aria-label="Filter questions and answers">
+            </label>
+            <button id="clear-picks" class="ghost" type="button">Clear picks</button>
+          </div>
+          <div id="picker" class="picker" aria-live="polite"></div>
+        </div>
+      </section>
+    </main>
+
+    <div class="launch">
+      <p id="summary" class="summary" aria-live="polite">Choose at least one topic.</p>
+      <div class="launch-actions">
+        <button id="cards-open" class="secondary" type="button" disabled>Flashcards</button>
+        <button id="sheet-from-setup" class="secondary" type="button" disabled>Worksheet PDF</button>
+        <button id="show" class="primary" type="button" disabled>Show Questions</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="board" hidden>
+    <header class="board-bar">
+      <div class="board-title">
+        <button class="home-link" type="button" data-home title="Back to topic selection">Do Now</button>
+        <span id="board-date"></span>
+      </div>
+      <div class="board-actions">
+        <button id="show-all" class="pill solid" type="button" aria-pressed="false">Show ALL answers</button>
+        <button id="reshuffle" class="pill" type="button" title="New set of questions (N)">New questions</button>
+        <button id="sheet-open" class="pill" type="button" title="Worksheet of these questions (W)">Worksheet PDF</button>
+        <button id="smaller" class="pill icon" type="button" aria-label="Smaller text" title="Smaller text">A−</button>
+        <button id="larger" class="pill icon" type="button" aria-label="Larger text" title="Larger text">A+</button>
+        <button id="fullscreen" class="pill icon" type="button" aria-pressed="false" aria-label="Fullscreen" title="Fullscreen (F)"><svg viewBox="0 0 24 24" aria-hidden="true"><path class="enter" d="M4 9V4h5M15 4h5v5M20 15v5h-5M9 20H4v-5"/><path class="exit" d="M9 4v5H4M20 9h-5V4M15 20v-5h5M4 15h5v5"/></svg></button>
+        <button id="back" class="pill" type="button">Change topics</button>
+      </div>
+    </header>
+    <div id="board-area" class="board-area">
+      <ol id="questions" class="questions"></ol>
+    </div>
+  </div>
+
+  <div id="cards" hidden>
+    <header class="board-bar">
+      <div class="board-title">
+        <button class="home-link" type="button" data-home title="Back to topic selection">Do Now</button>
+        <span id="cards-progress"></span>
+      </div>
+      <div class="board-actions">
+        <button id="cards-restart" class="pill" type="button">Start again</button>
+        <button class="pill" type="button" data-home>Change topics</button>
+      </div>
+    </header>
+    <div class="cards-area">
+      <div id="card" class="flip">
+        <div class="flip-inner">
+          <article id="card-front" class="flashcard face">
+            <p id="card-topic" class="card-topic"></p>
+            <p id="card-question" class="card-question"></p>
+            <ol id="card-steps" class="q-steps" hidden></ol>
+            <figure id="card-figure" class="q-figure" hidden><img alt="Diagram for this question"></figure>
+            <div class="card-actions">
+              <button id="card-reveal" class="primary" type="button">Show answer</button>
+            </div>
+          </article>
+          <article id="card-back" class="flashcard face back">
+            <p class="card-topic">Answer</p>
+            <p id="card-recap" class="card-recap"></p>
+            <div id="card-answer" class="q-answer"></div>
+            <div class="card-actions">
+              <button id="card-again" class="ghost" type="button">Still learning</button>
+              <button id="card-got" class="primary" type="button">Got it</button>
+            </div>
+            <button id="card-unflip" class="card-unflip" type="button">See the question again</button>
+          </article>
+        </div>
+      </div>
+      <article id="cards-done" class="flashcard done" hidden>
+        <p class="card-question">All done.</p>
+        <p id="cards-done-text" class="card-topic"></p>
+        <div class="card-actions">
+          <button id="cards-again" class="primary" type="button">Go again</button>
+          <button class="ghost" type="button" data-home>Change topics</button>
+        </div>
+      </article>
+    </div>
+  </div>
+
+  <div id="sheet-view" hidden role="dialog" aria-modal="true" aria-label="Worksheet preview">
+    <div class="sheet-bar">
+      <strong>Worksheet</strong>
+      <div class="segmented" role="group" aria-label="Preview">
+        <button type="button" data-sheet="worksheet" aria-pressed="true">Worksheet</button>
+        <button type="button" data-sheet="key" aria-pressed="false">Answer key</button>
+      </div>
+      <p class="sheet-note">Saves two PDFs: the print dialog opens for the worksheet, then again for the answer key. Choose “Save as PDF” each time.</p>
+      <div class="board-actions">
+        <button id="sheet-print" class="pill solid" type="button">Save both PDFs</button>
+        <button id="sheet-close" class="pill" type="button">Close</button>
+      </div>
+    </div>
+    <div class="sheet-scroll"><article id="sheet" class="sheet"></article></div>
+  </div>
+
+  <div id="lightbox" class="lightbox" hidden role="dialog" aria-modal="true" aria-label="Enlarged diagram">
+    <img alt="">
+    <button type="button" class="pill solid">Close</button>
+  </div>
+</body>
+</html>

@@ -5,7 +5,7 @@
 # To rebuild only some sheets, give words from the topic or practical names, or a practical's number:  sh build-pdfs.sh density "half-lives" m3
 # Needs Node (to list the sheets from ../questions.csv and ../methods.csv) and Chrome.
 # Headless Chrome may not exit after printing, so each job is stopped once its PDF is written.
-BASE="${BASE:-http://localhost:8000/beta/do_now/revision}"
+BASE="${BASE:-http://localhost:8000/gcsephy/do-now/revision}"
 CHROME="${CHROME:-/Applications/Google Chrome.app/Contents/MacOS/Google Chrome}"
 OUT="pdf"
 mkdir -p "$OUT"
