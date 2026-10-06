@@ -34,9 +34,15 @@
       <section class="panel" aria-labelledby="step-topics">
         <div class="panel-head">
           <h2 id="step-topics"><b>1</b> Choose topics</h2>
-          <div class="segmented" role="group" aria-label="Course">
-            <button type="button" data-course="all" aria-pressed="true">Separate Physics</button>
-            <button type="button" data-course="combined" aria-pressed="false">Combined only</button>
+          <div class="switches">
+            <div class="segmented" role="group" aria-label="Course">
+              <button type="button" data-course="all" aria-pressed="true">Separate Physics</button>
+              <button type="button" data-course="combined" aria-pressed="false">Combined only</button>
+            </div>
+            <div class="segmented" role="group" aria-label="Target grade">
+              <button type="button" data-target="9" aria-pressed="true" title="Every question in the bank">Target 9</button>
+              <button type="button" data-target="7" aria-pressed="false" title="Only the priority questions">Target 7</button>
+            </div>
           </div>
         </div>
         <div class="search-row">

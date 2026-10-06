@@ -31,6 +31,7 @@
     topics: [],          // [{ name, unit, questions }] in bank order
     selected: new Set(), // topic names
     course: "all",       // "all" | "combined"
+    target: "9",         // "9": the whole bank | "7": only the priority questions (Target column)
     count: 5,
     mode: "random",      // "random" | "manual"
     picks: [],           // question Numbers ticked by the teacher, in the order ticked
@@ -76,6 +77,7 @@
     try {
       const saved = JSON.parse(localStorage.getItem(STORAGE_KEY) || "{}");
       if (saved.course === "combined") state.course = "combined";
+      if (saved.target === "7") state.target = "7";
       if (Number.isFinite(saved.count)) state.count = clampCount(saved.count);
       if (Number.isFinite(saved.scale)) state.scale = Math.min(1.6, Math.max(0.6, saved.scale));
     } catch (error) { /* storage unavailable: start fresh */ }
@@ -83,7 +85,7 @@
 
   function savePrefs() {
     try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify({ course: state.course, count: state.count, scale: state.scale }));
+      localStorage.setItem(STORAGE_KEY, JSON.stringify({ course: state.course, target: state.target, count: state.count, scale: state.scale }));
     } catch (error) { /* ignore */ }
   }
 
@@ -93,6 +95,8 @@
 
   function allowed(question) {
     if (state.course === "combined" && question.Course === "Separate") return false;
+    // Practical methods have no Target column, so the target never hides them.
+    if (state.target === "7" && "Target" in question && question.Target !== "7") return false;
     return true;
   }
 
@@ -554,6 +558,7 @@
     els.count.value = state.count;
     document.querySelectorAll("[data-count]").forEach((button) => button.setAttribute("aria-pressed", String(Number(button.dataset.count) === state.count)));
     document.querySelectorAll("[data-course]").forEach((button) => button.setAttribute("aria-pressed", String(button.dataset.course === state.course)));
+    document.querySelectorAll("[data-target]").forEach((button) => button.setAttribute("aria-pressed", String(button.dataset.target === state.target)));
     document.querySelectorAll("[data-mode]").forEach((button) => button.setAttribute("aria-pressed", String(button.dataset.mode === state.mode)));
     els.randomOptions.hidden = state.mode !== "random";
     els.manualOptions.hidden = state.mode !== "manual";
@@ -1006,6 +1011,10 @@
     });
     document.querySelectorAll("[data-course]").forEach((button) => button.addEventListener("click", () => {
       state.course = button.dataset.course;
+      refresh();
+    }));
+    document.querySelectorAll("[data-target]").forEach((button) => button.addEventListener("click", () => {
+      state.target = button.dataset.target;
       refresh();
     }));
     document.querySelectorAll("[data-count]").forEach((button) => button.addEventListener("click", () => {

@@ -31,6 +31,7 @@ col.n { width: 9mm; }
 col.q { width: 46%; }
 col.t { width: 9mm; }
 td.n { text-align: center; font-weight: 700; color: var(--muted); }
+td.n .star { display: block; font-size: 10pt; line-height: 1.1; color: var(--ink); }
 th:last-child, td.t { padding-left: 0; padding-right: 0; text-align: center; }
 td.q { font-weight: 700; }
 td.q .neg { color: #d0182b; font-weight: 900; }

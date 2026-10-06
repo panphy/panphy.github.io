@@ -4,7 +4,9 @@ Lesson starters for AQA GCSE Physics (Higher). The teacher picks topics, then ei
 
 The topic search matches topic and unit names, and also the wording of questions and answers (at the start of words, so `electron` finds "electrons" and `rp` does not find "absorption"). Topics found through their questions say how many matched; hover to list them. Required practicals are also matched on their task and steps. The "Pick my own" filter matches question and answer wording the same way.
 
-Between visits the browser remembers only the course switch, the number of questions and the board text size. Ticked topics, picked questions and open units are not remembered: every visit starts with nothing selected and every unit folded.
+The "Target 9 / Target 7" switch beside the course switch sets how much of the bank is used. Target 9 is every question; Target 7 keeps only the priority questions (about 40% of each topic), for students who would be overwhelmed by the whole bank. It applies to the random draw, "Pick my own", flashcards, search and the topic counts, and works together with "Combined only". Required practical methods are never hidden by it.
+
+Between visits the browser remembers only the course switch, the target switch, the number of questions and the board text size. Ticked topics, picked questions and open units are not remembered: every visit starts with nothing selected and every unit folded.
 
 ## Files
 
@@ -16,6 +18,7 @@ Between visits the browser remembers only the course switch, the number of quest
 | `methods.csv` | The "Required practicals" tasks: one row per method, with the steps in the correct order, one per line in the `Steps` cell. The page jumbles and letters them. `Note` is added to the answer (e.g. two steps that may be swapped). The same steps drive the method sheets in `revision/`, whose diagrams are matched to steps by position, so redraw them if steps change. |
 | `revision/` | Student revision sheets: an index page, one question-and-answer PDF per topic and one method sheet with diagrams per required practical. See [`revision/README.md`](revision/README.md) |
 | `review-changes.csv` | Every change made to the original bank (old and new wording, with a reason). For review only; the page does not use it and it can be deleted. |
+| `review-target7.csv` | Why each `Target` 7 question was chosen. For review only, as above. |
 
 ## Question bank columns
 
@@ -27,8 +30,13 @@ Between visits the browser remembers only the course switch, the number of quest
 | `Course` | `Combined` or `Separate`, following the "(physics only)" markers in the AQA 8463 specification (version 1.1). Every topic is wholly one or the other, so keep all rows of a topic the same. "Combined only" hides the `Separate` topics. |
 | `Question`, `Answer` | Plain text. A line break inside the cell is shown as a line break. In a question, a word in square brackets, such as `must [not] be done`, is shown in bold red (board, picker, flashcards and both PDFs); use it only where the negative is the point. Superscript and subscript numbers are typed as Unicode characters (`m/s²`, `R₁`); a subscript of letters is typed after an underscore (`V_p`, `R_total`). Both are drawn as real superscripts and subscripts on the board, flashcards, worksheet and revision PDFs. Nuclide notation is typed with Unicode superscripts then subscripts (`⁴₂He`, `⁰₋₁e`) and is drawn with the mass number stacked over the atomic number. |
 | `Image` | A file name in `images/`, or empty. Several questions can share one image. |
+| `Target` | `7` for a priority question, shown under both targets; empty for a question shown only under Target 9. Give a repeated question the same value in every topic. The revision sheets star the `7` rows, so rebuild a topic's PDF after changing them. |
 
 Save the CSV as UTF-8 (in Excel: "CSV UTF-8 (Comma delimited)"), or symbols such as Ω and Δθ will be garbled. Questions with the same wording and image are treated as one, so a repeated question (such as the unit of force) never appears twice on the board.
+
+## How the Target 7 questions were chosen
+
+Each topic's share follows how often it earned recall (AO1) marks in the AQA Higher papers for Physics 8463 and Combined Science: Trilogy 8464, November 2020 to June 2023 (16 papers, counted from the specification references in the mark schemes): about half of an often-tested topic, a third of a middling one and a quarter of a rarely tested one, never fewer than two. Within a topic the choice favours facts those papers asked for directly, then units, definitions that mark schemes expect and standard explanations. "State the equation" questions are all left to Target 9, because the equations sheet is provided in the exam. Re-check the shares when newer papers are available.
 
 ## Flashcards
 
