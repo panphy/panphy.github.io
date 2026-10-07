@@ -339,11 +339,14 @@
       const paths = [
         ['M20,410 L600,410', 'far away: straight on', 600, 396, 'end'],
         ['M20,168 L220,168 C300,168 330,146 380,104 L470,32', 'close: repelled, deflected', 462, 22, 'end'],
-        ['M20,236 L278,236 Q306,229 278,222 L40,190', 'head-on: bounces back', 20, 272, 'start']
+        // A still picture needs the return leg drawn to one side; on the live slide the
+        // alpha particle slows, stops and goes straight back along the line it came in on.
+        [on ? 'M20,230 L292,230 L40,230' : 'M20,236 L278,236 Q306,229 278,222 L40,190', 'head-on: bounces back', 20, 272, 'start']
       ];
+      const slowTurn = 'calcMode="spline" keyPoints="0;0.52;1" keyTimes="0;0.5;1" keySplines="0 0 .4 1;.6 0 1 1"';
       paths.forEach(([d, label, x, y, anchor], i) => {
         let track = `<path d="${d}" class="alpha-path" marker-end="url(#m-alpha)"/>`;
-        track += `<g class="mover"><circle r="10" fill="url(#g-alpha)"/><animateMotion dur="3s" begin="-${i * 0.9}s" repeatCount="indefinite" path="${d}"/></g>`;
+        track += `<g class="mover"><circle r="10" fill="url(#g-alpha)"/><animateMotion dur="3s" begin="-${i * 0.9}s" repeatCount="indefinite" path="${d}"${on && i === 2 ? ' ' + slowTurn : ''}/></g>`;
         track += text(x, y, label, 'lbl', anchor, 'style="fill:var(--alpha)"');
         // In the deck each track appears with its row of the observation table.
         s += on ? `<g class="with-row with-row-${i}">${track}</g>` : track;
@@ -478,16 +481,28 @@
       s += `<rect x="520" y="52" width="18" height="326" rx="3" style="fill:var(--aluminium)"/>`;
       s += `<rect x="730" y="52" width="52" height="326" rx="4" style="fill:var(--lead)"/>`;
       s += text(303, 30, 'paper', 'lbl mono strong') + text(529, 22, 'aluminium', 'lbl mono strong') + text(529, 46, 'few mm', 'lbl mono') + text(756, 22, 'lead', 'lbl mono strong') + text(756, 46, 'several cm', 'lbl mono');
-      // Each particle starts at the source (x = 104) and travels to where it is drawn.
-      const fired = (xs, y, r, kind) => xs.map(x => fly(on, 104 - x, 0, ball(x, y, r, kind))).join('');
+      // Deck build: each radiation streams from the source for as long as its step is shown.
+      // The drawn particles and waves ("still") stand in on thumbnails, in print and with reduced motion.
+      const still = body => on ? `<g class="still">${body}</g>` : body;
+      const stream = (y, endX, r, kind, seconds, count) => !on ? '' : Array.from({ length: count }, (_, i) => {
+        const begin = f(i * seconds / count);
+        return `<g class="mover">${ball(0, 0, r, kind)}<animateMotion dur="${seconds}s" begin="-${begin}s" repeatCount="indefinite" path="M104,${y} H${endX - r}"/>`
+          + `<animate attributeName="opacity" dur="${seconds}s" begin="-${begin}s" repeatCount="indefinite" values="1;1;0" keyTimes="0;0.93;1"/></g>`;
+      }).join('');
+      // A wave one wavelength longer than its window, sliding along by that wavelength.
+      const running = (id, x1, x2, amp, opacity, seconds) => {
+        const lambda = 58, cycles = Math.ceil((x2 - x1) / lambda) + 1;
+        return `<clipPath id="${id}"><rect x="${x1}" y="270" width="${x2 - x1}" height="70"/></clipPath>`
+          + `<g clip-path="url(#${id})"><g class="wave-run" style="--shift:${lambda}px;--time:${seconds}s">${wave(x2 - cycles * lambda, 305, x2, 305, { cycles, amp, head: false, opacity })}</g></g>`;
+      };
       const greek = (y, sym, color) => text(112, y, sym, 'lbl greek', 'start', `style="fill:var(--${color})"`);
-      const alpha = `<line x1="90" y1="125" x2="294" y2="125" class="lane" style="stroke:var(--alpha)"/>` + fired([150, 232], 125, 14, 'alpha')
+      const alpha = `<line x1="90" y1="125" x2="294" y2="125" class="lane" style="stroke:var(--alpha)"/>` + still(ball(150, 125, 14, 'alpha') + ball(232, 125, 14, 'alpha')) + stream(125, 300, 14, 'alpha', 3, 3)
         + text(318, 110, 'stopped', 'lbl small', 'start', 'style="fill:var(--alpha)"');
-      const beta = `<line x1="90" y1="215" x2="514" y2="215" class="lane" style="stroke:var(--electron)"/>` + fired([160, 290, 420], 215, 10, 'electron')
+      const beta = `<line x1="90" y1="215" x2="514" y2="215" class="lane" style="stroke:var(--electron)"/>` + still([160, 290, 420].map(x => ball(x, 215, 10, 'electron')).join('')) + stream(215, 520, 10, 'electron', 2.4, 4)
         + text(550, 200, 'stopped', 'lbl small', 'start', 'style="fill:var(--electron)"');
-      const rays = [wave(90, 305, 728, 305, { cycles: 11, amp: 10, head: false }), wave(786, 305, 940, 305, { cycles: 3, amp: 6, opacity: .45 })];
-      const gamma = (on ? `<g class="wipe">${rays[0]}</g><g class="wipe later">${rays[1]}</g>` : rays.join(''))
-        + text(860, 340, 'reduced', 'lbl small', 'middle', 'style="fill:var(--photon)"');
+      let gamma = still(wave(90, 305, 728, 305, { cycles: 11, amp: 10, head: false }) + wave(786, 305, 940, 305, { cycles: 3, amp: 6, opacity: .45 }));
+      if (on) gamma += `<g class="mover">${running('gamma-in', 90, 728, 10, 1, .3)}${running('gamma-out', 786, 926, 6, .45, .3)}<line x1="924" y1="305" x2="940" y2="305" style="stroke:var(--photon);opacity:.45" stroke-width="3" marker-end="url(#m-photon)"/></g>`;
+      gamma += text(860, 340, 'reduced', 'lbl small', 'middle', 'style="fill:var(--photon)"');
       const labels = [greek(100, 'α', 'alpha'), greek(196, 'β', 'electron'), greek(282, 'γ', 'photon')];
       s += on ? [alpha, beta, gamma].map((lane, i) => stepG(on, i + 1, lane + labels[i])).join('') : alpha + beta + gamma + labels.join('');
       return svg('0 0 960 410', s, 'Penetration: paper stops alpha, a few millimetres of aluminium stops beta, several centimetres of lead reduce gamma');
