@@ -486,22 +486,23 @@
       // Deck build: each radiation streams from the source for as long as its step is shown.
       // The drawn particles and waves ("still") stand in on thumbnails, in print and with reduced motion.
       const still = body => on ? `<g class="still">${body}</g>` : body;
-      // Particles wait out of sight inside the source and come out through its face (x = 84)
+      // Particles wait out of sight behind the source (redrawn on top below) and come out through its face (x = 84)
       // one at a time once their step is shown (deck.css runs them), so the stream starts at
       // the source on the click.
       const stream = (y, endX, r, kind, seconds, count) => {
         if (!on) return '';
         const balls = Array.from({ length: count }, (_, i) =>
           `<g class="stream-ball" style="--time:${seconds}s;--delay:${(i * seconds / count).toFixed(3)}s;--travel:${endX - 84}px">${ball(84 - r, y, r, kind)}</g>`).join('');
-        return `<g class="mover"><clipPath id="lane-${kind}"><rect x="84" y="${y - r - 2}" width="${endX - 84}" height="${2 * r + 4}"/></clipPath><g clip-path="url(#lane-${kind})">${balls}</g></g>`;
+        return `<g class="mover">${balls}</g>`;
       };
       // A wave one wavelength longer than its window, sliding along by that wavelength. The
       // window opens from its left edge when the step is shown, so the wave front sets off
       // from the source (and from the far side of the lead once it has got there).
-      // Both windows start a whole number of wavelengths from x = 32, so the wave beyond the
+      // The two windows start a whole number of wavelengths apart, so the wave beyond the
       // lead keeps the wavelength, frequency and phase of the wave before it: only the
-      // amplitude is smaller.
-      const LAMBDA = 58, PERIOD = 0.14;
+      // amplitude is smaller. The wavelength is longer than in the still picture: at this
+      // speed a short wave moves too large a part of itself each frame and looks jerky.
+      const LAMBDA = 87, PERIOD = 0.21;
       const running = (id, x1, x2, amp, opacity, wait) => {
         const cycles = Math.ceil((x2 - x1) / LAMBDA) + 1, cross = (x2 - x1) / LAMBDA * PERIOD;
         return `<clipPath id="${id}"><rect x="${x1}" y="270" width="${x2 - x1}" height="70" class="wave-window" style="--cross:${cross.toFixed(2)}s;--wait:${wait}s"/></clipPath>`
@@ -522,7 +523,7 @@
       if (on) gamma += `<g class="mover">${running('gamma-in', 90, 728, 10, 1, 0)}${running('gamma-out', 786, 940, 6, .45, 1.65)}</g>`;
       gamma += onArrival(1.8, text(860, 340, 'reduced', 'lbl small', 'middle', 'style="fill:var(--photon)"'));
       const labels = [greek(100, 'α', 'alpha'), greek(196, 'β', 'electron'), greek(282, 'γ', 'photon')];
-      s += on ? [alpha, beta, gamma].map((lane, i) => stepG(on, i + 1, lane + labels[i])).join('') : alpha + beta + gamma + labels.join('');
+      s += on ? [alpha, beta, gamma].map((lane, i) => stepG(on, i + 1, lane + labels[i])).join('') + `<rect x="20" y="70" width="64" height="290" rx="12" style="fill:var(--lead)"/>` : alpha + beta + gamma + labels.join('');
       return svg('0 0 960 410', s, 'Penetration: paper stops alpha, a few millimetres of aluminium stops beta, several centimetres of lead reduce gamma');
     },
 

@@ -514,6 +514,8 @@ h2:has(+ .terms) { margin-bottom: 24px; }
      leave one at a time; the gamma wave front runs out to the lead, then on beyond it. */
   #deck .slide.active .step.shown .stream-ball { animation: stream var(--time) linear var(--delay) infinite backwards; }
   #deck .slide.active .wave-run { animation: wave-run var(--time) linear infinite; }
+  /* Let the browser move these on their own layers rather than repaint the figure each frame. */
+  #deck .slide.active .wave-run, #deck .slide.active .step.shown .stream-ball { will-change: transform; }
   #deck .wave-window { transform-box: fill-box; transform-origin: left center; transition: transform var(--cross) linear var(--wait); }
   #deck .step:not(.shown) .wave-window { transform: scaleX(0); transition: none; }
   #deck .on-arrival { transition: opacity .3s ease var(--wait); }
