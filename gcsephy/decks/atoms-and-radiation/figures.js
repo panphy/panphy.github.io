@@ -484,11 +484,17 @@
       // Deck build: each radiation streams from the source for as long as its step is shown.
       // The drawn particles and waves ("still") stand in on thumbnails, in print and with reduced motion.
       const still = body => on ? `<g class="still">${body}</g>` : body;
-      const stream = (y, endX, r, kind, seconds, count) => !on ? '' : Array.from({ length: count }, (_, i) => {
-        const begin = f(i * seconds / count);
-        return `<g class="mover">${ball(0, 0, r, kind)}<animateMotion dur="${seconds}s" begin="-${begin}s" repeatCount="indefinite" path="M104,${y} H${endX - r}"/>`
-          + `<animate attributeName="opacity" dur="${seconds}s" begin="-${begin}s" repeatCount="indefinite" values="1;1;0" keyTimes="0;0.93;1"/></g>`;
-      }).join('');
+      // Evenly timed particles start out of sight inside the source and come out through its
+      // face (x = 84), so one leaving the source never coincides with one vanishing at the barrier.
+      const stream = (y, endX, r, kind, seconds, count) => {
+        if (!on) return '';
+        const balls = Array.from({ length: count }, (_, i) => {
+          const begin = (i * seconds / count).toFixed(3);
+          return `<g>${ball(0, 0, r, kind)}<animateMotion dur="${seconds}s" begin="-${begin}s" repeatCount="indefinite" path="M${84 - r},${y} H${endX - r}"/>`
+            + `<animate attributeName="opacity" dur="${seconds}s" begin="-${begin}s" repeatCount="indefinite" values="1;1;0" keyTimes="0;0.95;1"/></g>`;
+        }).join('');
+        return `<g class="mover"><clipPath id="lane-${kind}"><rect x="84" y="${y - r - 2}" width="${endX - 84}" height="${2 * r + 4}"/></clipPath><g clip-path="url(#lane-${kind})">${balls}</g></g>`;
+      };
       // A wave one wavelength longer than its window, sliding along by that wavelength.
       const running = (id, x1, x2, amp, opacity, seconds) => {
         const lambda = 58, cycles = Math.ceil((x2 - x1) / lambda) + 1;
@@ -496,9 +502,11 @@
           + `<g clip-path="url(#${id})"><g class="wave-run" style="--shift:${lambda}px;--time:${seconds}s">${wave(x2 - cycles * lambda, 305, x2, 305, { cycles, amp, head: false, opacity })}</g></g>`;
       };
       const greek = (y, sym, color) => text(112, y, sym, 'lbl greek', 'start', `style="fill:var(--${color})"`);
-      const alpha = `<line x1="90" y1="125" x2="294" y2="125" class="lane" style="stroke:var(--alpha)"/>` + still(ball(150, 125, 14, 'alpha') + ball(232, 125, 14, 'alpha')) + stream(125, 300, 14, 'alpha', 3, 3)
+      // The lane lines belong to the printed figure only.
+      const lane = (x2, y, color) => on ? '' : `<line x1="90" y1="${y}" x2="${x2}" y2="${y}" class="lane" style="stroke:var(--${color})"/>`;
+      const alpha = lane(294, 125, 'alpha') + still(ball(150, 125, 14, 'alpha') + ball(232, 125, 14, 'alpha')) + stream(125, 300, 14, 'alpha', 3.6, 4)
         + text(318, 110, 'stopped', 'lbl small', 'start', 'style="fill:var(--alpha)"');
-      const beta = `<line x1="90" y1="215" x2="514" y2="215" class="lane" style="stroke:var(--electron)"/>` + still([160, 290, 420].map(x => ball(x, 215, 10, 'electron')).join('')) + stream(215, 520, 10, 'electron', 2.4, 4)
+      const beta = lane(514, 215, 'electron') + still([160, 290, 420].map(x => ball(x, 215, 10, 'electron')).join('')) + stream(215, 520, 10, 'electron', 2.6, 4)
         + text(550, 200, 'stopped', 'lbl small', 'start', 'style="fill:var(--electron)"');
       let gamma = still(wave(90, 305, 728, 305, { cycles: 11, amp: 10, head: false }) + wave(786, 305, 940, 305, { cycles: 3, amp: 6, opacity: .45 }));
       if (on) gamma += `<g class="mover">${running('gamma-in', 90, 728, 10, 1, .3)}${running('gamma-out', 786, 926, 6, .45, .3)}<line x1="924" y1="305" x2="940" y2="305" style="stroke:var(--photon);opacity:.45" stroke-width="3" marker-end="url(#m-photon)"/></g>`;
