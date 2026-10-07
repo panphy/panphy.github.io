@@ -10,17 +10,16 @@ Browser-based physics tools, simulations, classroom utilities and games. Student
 - **Simulations:** [Virtual Ripple Tank](simulations/ripple_tank.html), [Wave Superposition](simulations/superposition.html), [Standing Wave](simulations/standing_wave.html), [Collision Lab](simulations/collision.html), [States of Matter](simulations/states.html), [Atomic Models](simulations/atomic_models.html), [Nuclear Decay](simulations/nuclear_decay.html), [Fission and Fusion](simulations/fission_fusion.html), and [Lorentz Transform](simulations/lorentz.html).
 - **Teacher utilities:** [Exam Timer](for_teachers/timer.html) and [Camera Visualizer](for_teachers/visualizer.html).
 - **Games and demos:** [Spellwave](fun/spellwave.html) and [ASCII Camera](fun/ascii_cam.html).
-- **GCSE Physics:** school-specific unit companions, available by direct link.
-- **Do Now starters:** [AO1 lesson starters by topic](gcsephy/do-now/) for GCSE Physics, with worksheets, flashcards and [printable revision sheets and required-practical method sheets](gcsephy/do-now/revision/).
 - **In beta:** 3D simulations of [Electric Motors](beta/electric_motors.html) (motor effect, DC and synchronous AC) and [Charges in Fields](beta/charges_in_fields.html), awaiting review.
 
-### GCSE Physics
+## GCSE Physics
 
-The [GCSE Physics hub](https://panphy.app/gcsephy/) collects the author's school curriculum resources:
+The [GCSE Physics hub](https://panphy.app/gcsephy/) collects the author's school curriculum resources for AQA GCSE Physics, available by direct link:
 
 - **Year 9 · [Work Like a Physicist](https://panphy.app/gcsephy/year9phy/unit01/):** a student companion site, revision guides, Exam Zone, 40-page workbook, lesson plans, and a [50-slide HTML teaching deck](https://panphy.app/gcsephy/decks/work-like-a-physicist/). See the [unit overview](gcsephy/year9phy/unit01/README.md) for materials and editable sources.
 - **Year 10 · [Electric Circuits](https://panphy.app/gcsephy/year10phy/unit01/):** revision notes, practice questions, an Exam Zone, required-practical resources, a twelve-lesson workbook with answer editions and a teacher guide, and an [HTML teaching deck](https://panphy.app/gcsephy/decks/electric-circuits/). See the [unit overview](gcsephy/year10phy/unit01/README.md).
 - **Year 11 · [Atoms and Nuclear Radiation](https://panphy.app/gcsephy/year11phy/unit01/):** a ten-lesson workbook with answer editions and a unit review, alongside an [HTML teaching deck](https://panphy.app/gcsephy/decks/atoms-and-radiation/). See the [workbook overview](gcsephy/year11phy/unit01/README.md).
+- **[Do Now starters](https://panphy.app/gcsephy/do-now/):** AO1 lesson starters by topic, with worksheets, flashcards, and [printable revision sheets and required-practical method sheets](https://panphy.app/gcsephy/do-now/revision/). See the [Do Now overview](gcsephy/do-now/README.md) for the question bank and how to edit it.
 
 These public, open-source resources are intentionally outside the general homepage catalogue, but teachers and students are welcome to use and adapt them.
 
@@ -28,7 +27,7 @@ These public, open-source resources are intentionally outside the general homepa
 
 Most published tools and simulations work offline once cached: visit online first and check the homepage's **Offline Ready** indicator. Updates appear through an update prompt. Shared fonts in `assets/fonts/` are precached (about 336 KB).
 
-Pages under `fun/`, `beta/`, `misc/` and `gcsephy/` need internet access, as do Supabase features such as leaderboards. `gcsephy/` registers its own small worker (`gcsephy/sw.js`), which stores nothing and only revalidates requests so edits appear on the next load.
+Pages under `fun/`, `beta/`, `misc/` and `gcsephy/` need internet access, as do Supabase features such as leaderboards. `gcsephy/` registers its own small worker (`gcsephy/sw.js`), which stores nothing and only revalidates requests so edits appear on the next load; a page that is already open offers a Reload banner when its files or its question bank change.
 
 ## Repository map
 
