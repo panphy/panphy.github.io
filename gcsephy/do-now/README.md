@@ -13,7 +13,7 @@ Between visits the browser remembers only the course switch, the target switch, 
 | Path | Purpose |
 |---|---|
 | `index.html`, `do_now.css`, `do_now.js` | The page. No build step. |
-| `questions.csv` | The question bank. The page reads it on every load, so editing this file is all that is needed to change a question. |
+| `questions.csv` | The question bank. The page reads it on every load, so editing this file is all that is needed to change a question. A page that is already open offers a Reload banner within about five minutes of the change (`data-watch` on the `sw-register.js` script tag; the same for `methods.csv`). |
 | `images/*.svg` | Diagrams, named in the `Image` column. |
 | `methods.csv` | The "Required practicals" tasks: one row per method, with the steps in the correct order, one per line in the `Steps` cell. The page jumbles and letters them. `Note` is added to the answer (e.g. two steps that may be swapped). The same steps drive the method sheets in `revision/`, whose diagrams are matched to steps by position, so redraw them if steps change. |
 | `revision/` | Student revision sheets: an index page, one question-and-answer PDF per topic and one method sheet with diagrams per required practical. See [`revision/README.md`](revision/README.md) |

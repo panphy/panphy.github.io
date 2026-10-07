@@ -1,14 +1,18 @@
 // Registers the /gcsephy/ freshness worker (no offline caching; see sw.js) and
 // offers a reload when a page that is already open changes on the server.
 (() => {
+  // A page can list data files it loads with fetch (space-separated, relative to
+  // the page) in data-watch on this script tag, so edits to them offer a reload too.
+  const extraWatch = ((document.currentScript && document.currentScript.dataset.watch) || '').split(/\s+/).filter(Boolean);
+
   if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
       navigator.serviceWorker.register('/gcsephy/sw.js', { scope: '/gcsephy/' }).catch(() => {});
     });
   }
 
-  // Update check: compare the content of the page and its own /gcsephy/ scripts
-  // and stylesheets with what they were when the page opened.
+  // Update check: compare the content of the page, its own /gcsephy/ scripts and
+  // stylesheets and any data-watch files with what they were when the page opened.
   // It never reloads by itself, so a lesson in progress is not interrupted.
   const CHECK_INTERVAL_MS = 5 * 60 * 1000;
   const MIN_GAP_MS = 60 * 1000;
@@ -25,6 +29,7 @@
     };
     document.querySelectorAll('script[src]').forEach((el) => add(el.getAttribute('src')));
     document.querySelectorAll('link[rel~="stylesheet"][href]').forEach((el) => add(el.getAttribute('href')));
+    extraWatch.forEach(add);
     return [...urls];
   }
 
