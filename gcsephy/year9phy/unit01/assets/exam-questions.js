@@ -39,7 +39,7 @@ window.EXAM_QUESTIONS = [
   },
   {
     section: "Round 2: Patterns and evidence",
-    skill: "Means and outliers",
+    skill: "Means and anomalous results",
     marks: 4,
     stimulus: `
       <table class="data-table">
@@ -47,9 +47,9 @@ window.EXAM_QUESTIONS = [
         <thead><tr><th>Material</th><th>Trial 1 / cm</th><th>Trial 2 / cm</th><th>Trial 3 / cm</th></tr></thead>
         <tbody><tr><td>Foam</td><td>9</td><td>11</td><td>10</td></tr><tr><td>Felt</td><td>18</td><td>17</td><td>19</td></tr><tr><td>Cardboard</td><td>26</td><td>44</td><td>25</td></tr></tbody>
       </table>`,
-    prompt: "Calculate the mean bounce height for the foam. Identify the likely outlier in the full table and state what the student should do before deciding whether to exclude it.",
+    prompt: "Calculate the mean bounce height for the foam. Identify the likely anomalous result in the full table and state what the student should do before deciding whether to exclude it.",
     hint: "Calculate using only the foam row. Then look for one reading that disagrees strongly with its repeats.",
-    answer: "Foam total = 9 + 11 + 10 = 30 cm (1 mark), so mean = 30 ÷ 3 = 10 cm (1 mark). The likely outlier is 44 cm for cardboard (1 mark). Check the recording and method, then repeat that reading before deciding; exclude it only if there is evidence of a problem (1 mark).",
+    answer: "Foam total = 9 + 11 + 10 = 30 cm (1 mark), so mean = 30 ÷ 3 = 10 cm (1 mark). The likely anomalous result is 44 cm for cardboard (1 mark). Check the recording and method, then repeat that reading before deciding; exclude it only if there is evidence of a problem (1 mark).",
   },
   {
     section: "Round 2: Patterns and evidence",
@@ -75,9 +75,9 @@ window.EXAM_QUESTIONS = [
         <thead><tr><th>Pendulum length / cm</th><th>Time period / s</th></tr></thead>
         <tbody><tr><td>20</td><td>0.9</td></tr><tr><td>40</td><td>1.3</td></tr><tr><td>60</td><td>2.7</td></tr><tr><td>80</td><td>1.8</td></tr><tr><td>100</td><td>2.1</td></tr></tbody>
       </table>`,
-    prompt: "State what should be plotted on each graph axis, identify the likely outlier, and describe how the student should draw a suitable line of best fit.",
+    prompt: "State what should be plotted on each graph axis, identify the likely anomalous result, and describe how the student should draw a suitable line of best fit.",
     hint: "The independent variable belongs on x. Look for the point that breaks the overall pattern. A best-fit line is not dot-to-dot.",
-    answer: "x-axis: pendulum length / cm (1 mark). y-axis: time period / s (1 mark). The likely outlier is (60 cm, 2.7 s) (1 mark). Draw one smooth curve or straight trend appropriate to the other points, with points reasonably balanced around it (1 mark), rather than joining points dot-to-dot or forcing the line through the outlier (1 mark).",
+    answer: "x-axis: pendulum length / cm (1 mark). y-axis: time period / s (1 mark). The likely anomalous result is (60 cm, 2.7 s) (1 mark). Draw one smooth curve or straight trend appropriate to the other points, with points reasonably balanced around it (1 mark), rather than joining points dot-to-dot or forcing the line through the anomalous result (1 mark).",
   },
   {
     section: "Round 2: Patterns and evidence",
@@ -91,7 +91,7 @@ window.EXAM_QUESTIONS = [
     section: "Round 3: Planning and evaluation",
     skill: "Method",
     marks: 6,
-    prompt: "Plan an investigation to determine how the release height of a trolley on a fixed ramp affects the time it takes to travel a marked 1.0 m section after leaving the ramp. Your method should produce valid, reliable and safe results.",
+    prompt: "Plan an investigation to determine how the release height of a trolley on a fixed ramp affects the time it takes to travel a marked 1.0 m section after leaving the ramp. Your method should produce valid, repeatable and safe results.",
     hint: "Include a range of heights, a fixed distance, a fair release, controls, repeats, processing and a relevant safety step.",
     answer: "Indicative marking points: use at least five measured release heights over a sensible range; mark a fixed 1.0 m timing section after the ramp; release the trolley without pushing, ideally with a gate; time the section using light gates or a consistent stopwatch method; keep the trolley, fixed ramp, surface and timing distance controlled; repeat at least three times at each height and calculate a mean; keep the run area clear and stop the trolley safely. Award up to 6 marks for a coherent, repeatable method.",
   },
@@ -99,7 +99,7 @@ window.EXAM_QUESTIONS = [
     section: "Round 3: Planning and evaluation",
     skill: "Evaluation",
     marks: 4,
-    prompt: "A student launches a paper aeroplane by hand and measures its flight distance. The evaluation says only, ‘There was human error.’ Explain the specific problem, its likely effect, a matching improvement and one way to improve reliability.",
+    prompt: "A student launches a paper aeroplane by hand and measures its flight distance. The evaluation says only, ‘There was human error.’ Explain the specific problem, its likely effect, a matching improvement and one way to make the results more repeatable.",
     hint: "Would every hand launch give exactly the same speed and angle? Replace the variable action with something repeatable.",
     answer: "Hand launches vary in force, speed and angle (1 mark), causing random variation in flight distance and making comparisons less fair (1 mark). Use a mechanical or elastic launcher set to the same extension and angle each time (1 mark). Repeat each condition at least three times and calculate a mean (1 mark).",
   },
@@ -119,7 +119,7 @@ window.EXAM_QUESTIONS = [
   },
   {
     section: "Round 3: Planning and evaluation",
-    skill: "Evidence and reliability",
+    skill: "Evidence and repeatability",
     marks: 5,
     stimulus: `
       <table class="data-table">
@@ -127,7 +127,7 @@ window.EXAM_QUESTIONS = [
         <thead><tr><th>Inside surface</th><th>Temperature rise / °C</th></tr></thead>
         <tbody><tr><td>Black card</td><td>24</td></tr><tr><td>White card</td><td>9</td></tr><tr><td>Foil</td><td>14</td></tr></tbody>
       </table>`,
-    prompt: "The student concludes that black card is the best surface for the solar oven. Evaluate this conclusion and describe how the evidence could be made more reliable.",
+    prompt: "The student concludes that black card is the best surface for the solar oven. Evaluate this conclusion and describe how the evidence could be improved.",
     hint: "Use the values to judge the claim, then notice how many readings were collected for each surface.",
     answer: "The conclusion is supported because black card produced the greatest temperature rise, 24 °C (1 mark), compared with 14 °C for foil and 9 °C for white card (1 mark). However, only one reading appears to have been collected for each surface, so random variation cannot be judged (1 mark). Repeat each surface at least three times under the same conditions (1 mark) and compare calculated mean temperature rises (1 mark).",
   },

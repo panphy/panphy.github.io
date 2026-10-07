@@ -23,10 +23,10 @@ build() { # lesson-number pdf-name
   rm -rf "$profile"
 }
 
-build 1 "Lesson 1 - reliability of data.pdf"
+build 1 "Lesson 1 - can this data be trusted.pdf"
 build 2 "Lesson 2 - variables, data types, graph choice.pdf"
 build 3 "Lesson 3 - bar chart - shock absorber.pdf"
 build 4 "Lesson 4 - line graph - ramp.pdf"
-build 5 "Lesson 5 - best fit lines, outliers.pdf"
+build 5 "Lesson 5 - best fit lines, anomalous results.pdf"
 build 6 "Lesson 6 - independent challenge - paper helicopter.pdf"
 build 7 "Lessons 7-8 - student research project.pdf"

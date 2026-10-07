@@ -8,7 +8,7 @@ A complete unit on how to produce evidence other people will accept. Lesson plan
 
 ## What the unit is for
 
-Producing evidence that convinces people who were not there. Over eight lessons students learn to take a measurement they can defend, spot errors in their own results, and turn messy numbers into a graph that shows the pattern, then design, run and defend their own investigation. The skills (variables, repeats, means, uncertainty, precision versus accuracy, random versus systematic error, graph choice, best-fit lines, outliers, conclusions, evaluations) underpin every required practical to Year 13, so it pays to teach them once, properly.
+Producing evidence that convinces people who were not there. Over eight lessons students learn to take a measurement they can defend, spot errors in their own results, and turn messy numbers into a graph that shows the pattern, then design, run and defend their own investigation. The skills (variables, repeats, means, uncertainty, precision versus accuracy, random versus systematic error, graph choice, best-fit lines, anomalous results, conclusions, evaluations) underpin every required practical to Year 13, so it pays to teach them once, properly.
 
 ---
 
@@ -20,7 +20,7 @@ Producing evidence that convinces people who were not there. Over eight lessons 
 | `Work Like a Physicist - Year 9 Student Workbook.pdf` | 40-page A4 student workbook, one per student for the whole unit | Print double-sided. Students keep the same workbook for all eight lessons |
 | `Work Like a Physicist - Year 9 Student Workbook (Answers).pdf` | Answer key for the workbook, by lesson, task and workbook page; linked from the companion site's Resources section | Mark with it, or let students self-check. Practical tasks give sample data |
 | `workbook/` | Editable source of the student workbook and its answers (HTML, CSS, JavaScript) | Edit `workbook/assets/content.js` (or `answers.js` for the answers), then run `sh build-pdf.sh` (or `sh build-answers-pdf.sh`). See `workbook/README.md` |
-| `worksheet/` | 2-page Lesson 5 practice sheet (best-fit line and curve, outliers, directly proportional) with a 1-page answer key, as editable source and PDFs | Print for Lesson 5 or revision. Edit `worksheet/assets/content.js`, then run `sh build-pdf.sh`. See `worksheet/README.md` |
+| `worksheet/` | 2-page Lesson 5 practice sheet (best-fit line and curve, anomalous results, directly proportional) with a 1-page answer key, as editable source and PDFs | Print for Lesson 5 or revision. Edit `worksheet/assets/content.js`, then run `sh build-pdf.sh`. See `worksheet/README.md` |
 | `teaching-guides/` | The seven lesson-plan PDFs (`Lesson 1 …` to `Lessons 7-8 …`) and their editable source | Read the PDFs before teaching; they are the detail behind each lesson. Edit `teaching-guides/source/*.md`, then run `sh build-pdf.sh`. See `teaching-guides/README.md` |
 | `index.html`, `lesson/` and `assets/` | Static online student companion | Open `index.html`, or visit this folder's published web address |
 | `source/` | Original Sites/React companion-site source and its Git history | Keep this when moving or backing up the project |
@@ -44,7 +44,7 @@ Lesson plans give objectives, vocabulary, activities, answers and teacher notes.
 | 2 | What are you actually changing? | Independent, dependent and control variables; continuous vs categoric; graph choice | Optional demo |
 | 3 | The drop test | Categoric data, repeats, means, bar charts | Shock absorber — ball dropped onto different materials |
 | 4 | Higher ramp, further flight? | Continuous data, scales, plotting a line graph | Ramp — trolley distance against ramp height |
-| 5 | The point that does not fit | Best-fit lines, outliers, graph quality, conclusions | None — analysis of Lesson 4 data |
+| 5 | The point that does not fit | Best-fit lines, anomalous results, graph quality, conclusions | None — analysis of Lesson 4 data |
 | 6 | Solo flight | The whole process, unaided. Light-touch assessment | Paper helicopter |
 | 7–8 | Your investigation | Student-designed investigation, in pairs or threes | Their choice, from a pooled equipment set |
 
@@ -96,10 +96,10 @@ The single most persistent misconception in the unit. Students see tightly clust
 Graph choice follows the **independent** variable, never the dependent one. The dependent variable is almost always a number, so it cannot distinguish the two cases. "Which surface gives the most friction?" measures centimetres but needs a bar chart, because surfaces are categories. Attack this head-on in Lesson 2 or it will cost marks in every lesson that follows.
 
 **"Human error."**
-Worth nothing, every time. Push for the mechanism: *"we judged the bounce height by eye and the ball moved too fast to read the ruler reliably."* The random/systematic distinction from Lesson 1 is what makes a specific answer possible.
+Worth nothing, every time. Push for the mechanism: *"we judged the bounce height by eye and the ball moved too fast to read the ruler consistently."* The random/systematic distinction from Lesson 1 is what makes a specific answer possible.
 
 **"Just ignore the weird result."**
-Students want a rule for discarding data. The rule is: find out why first. Check the recording, check the method, repeat it if you can. An outlier you cannot explain gets reported and circled, not deleted. This is the closest the unit gets to teaching scientific honesty and it deserves the time.
+Students want a rule for discarding data. The rule is: find out why first. Check the recording, check the method, repeat it if you can. An anomalous result you cannot explain gets reported and circled, not deleted. This is the closest the unit gets to teaching scientific honesty and it deserves the time.
 
 **Dot-to-dot lines.**
 They reappear under time pressure even after being taught against. A zig-zag line claims every reading is perfect — which students have already disproved themselves in Lesson 1.

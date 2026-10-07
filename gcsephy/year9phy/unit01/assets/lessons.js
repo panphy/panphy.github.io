@@ -218,7 +218,7 @@ window.LESSONS = [
         type: "AQA-style",
         marks: 4,
         prompt:
-          "Explain why ‘the results are numbers, so use a line graph’ is not a reliable rule for choosing a graph. Use an example in your answer.",
+          "Explain why ‘the results are numbers, so use a line graph’ is not a safe rule for choosing a graph. Use an example in your answer.",
         hint: "The dependent variable is often numerical in both types of investigation.",
         answer:
           "Graph choice depends on the independent variable, not simply whether any result is numerical (2). For example, bounce height is numerical, but if material type is changed then the independent variable is categoric, so a bar chart is needed (2).",
@@ -298,7 +298,7 @@ window.LESSONS = [
         ["Trial", "One repeat of a measurement."],
         ["Mean", "The total of the trials divided by their number."],
         ["Bar chart", "The graph used for a categoric independent variable."],
-        ["Reliability", "How far results can be trusted and repeated."],
+        ["Repeatable", "The same person, method and equipment give similar results again."],
       ],
     },
     questions: [
@@ -321,7 +321,7 @@ window.LESSONS = [
         type: "AQA-style",
         marks: 4,
         prompt:
-          "Describe how a student should collect reliable bounce-height data for four different materials. Include repeats and control variables.",
+          "Describe how a student should collect repeatable bounce-height data for four different materials. Include repeats and control variables.",
         hint: "Give a repeatable method and name at least two things that must stay the same.",
         answer:
           "Drop the same ball from the same measured height onto each material without pushing it (1). Measure the maximum bounce height using the ruler in the same position (1). Repeat at least three times for each material and calculate a mean (1). Keep controls such as ball type, release method, drop height and ruler position the same (1).",
@@ -451,17 +451,17 @@ window.LESSONS = [
     ],
   },
   {
-    slug: "best-fit-outliers",
+    slug: "best-fit-anomalies",
     number: "05",
-    shortTitle: "Best fit & outliers",
+    shortTitle: "Best fit & anomalies",
     title: "The point that does not fit",
     mission: "Find the signal in messy data",
     intro:
       "Experimental points rarely behave perfectly. Draw a best-fit line, challenge suspicious results and write a conclusion that follows the evidence.",
     colour: "yellow",
     icon: "best-fit",
-    unlocks: ["best-fit lines", "outlier decisions", "evidence-led conclusions"],
-    keyRule: "Check or repeat an outlier before deciding what to do with it.",
+    unlocks: ["best-fit lines", "anomalous result decisions", "evidence-led conclusions"],
+    keyRule: "Check or repeat an anomalous result before deciding what to do with it.",
     revision: {
       pageStart: 20,
       pageRange: "20–24",
@@ -482,15 +482,15 @@ window.LESSONS = [
           remember: "Best fit means overall trend, not every measurement.",
         },
         {
-          title: "Treat an outlier as a question",
+          title: "Treat an anomalous result as a question",
           paragraphs: [
-            "An outlier is a result that does not fit the pattern of the others. It may be a mistake, a method problem or a genuine effect.",
+            "An anomalous result is a result that does not fit the pattern of the others. It may be a mistake, a method problem or a genuine effect.",
           ],
           points: [
             "Check the recording, calculation and plotting.",
             "Check whether the equipment or method changed.",
             "Repeat the measurement if possible.",
-            "Correct a known mistake; otherwise report and annotate the unexplained outlier.",
+            "Correct a known mistake; otherwise report and annotate the unexplained anomalous result.",
           ],
           remember: "Never silently delete inconvenient evidence.",
         },
@@ -503,7 +503,7 @@ window.LESSONS = [
             "Name both variables and the direction of the change.",
             "Quote at least two relevant values with units.",
             "Say whether the pattern is strong, weak, straight or curved when the graph supports that claim.",
-            "Mention a possible outlier only with a reason.",
+            "Mention a possible anomalous result only with a reason.",
           ],
           formula: "As ramp height increased, mean distance increased from ___ cm at ___ cm to ___ cm at ___ cm.",
         },
@@ -516,14 +516,14 @@ window.LESSONS = [
             "Title, axes, units and sensible scale are present.",
             "Points are accurate small crosses.",
             "The best-fit line is clear and not dot-to-dot.",
-            "Outliers are identified and explained, or their absence is stated.",
+            "Anomalous results are identified and explained, or their absence is stated.",
           ],
           remember: "Peer review should give one specific improvement, not ‘make it neater’.",
         },
       ],
       vocabulary: [
         ["Best-fit line", "One line showing the overall trend of the data."],
-        ["Outlier", "A result that does not fit the pattern of the others. AQA calls it an anomalous result (an anomaly)."],
+        ["Anomalous result", "A result that does not fit the pattern of the others. Also called an anomaly."],
         ["Trend", "The overall relationship shown by the data."],
         ["Conclusion", "A statement supported by processed evidence."],
       ],
@@ -532,10 +532,10 @@ window.LESSONS = [
       {
         type: "Practice",
         prompt:
-          "Ramp height / cm: 5, 10, 15, 20, 25. Mean distance / cm: 20, 37, 52, 96, 80. Which point is the likely outlier?",
+          "Ramp height / cm: 5, 10, 15, 20, 25. Mean distance / cm: 20, 37, 52, 96, 80. Which point is the likely anomalous result?",
         hint: "Look for the point that breaks the otherwise steady increasing trend.",
         answer:
-          "The point (20 cm, 96 cm) is the likely outlier. It is much higher than expected between 52 cm at 15 cm and 80 cm at 25 cm.",
+          "The point (20 cm, 96 cm) is the likely anomalous result. It is much higher than expected between 52 cm at 15 cm and 80 cm at 25 cm.",
       },
       {
         type: "Practice",
@@ -552,7 +552,7 @@ window.LESSONS = [
           "A student finds one result far from the best-fit line. Describe what the student should do before excluding it and explain why automatic deletion is poor scientific practice.",
         hint: "Check records, equipment and method; repeat if possible.",
         answer:
-          "Check for a recording, plotting or calculation mistake and inspect the equipment and method (2). Repeat the measurement if possible (1). Automatic deletion could hide a real effect or remove valid evidence without a reason, so an unexplained outlier should be reported rather than silently erased (1).",
+          "Check for a recording, plotting or calculation mistake and inspect the equipment and method (2). Repeat the measurement if possible (1). Automatic deletion could hide a real effect or remove valid evidence without a reason, so an unexplained anomalous result should be reported rather than silently erased (1).",
       },
       {
         type: "AQA-style",
@@ -615,7 +615,7 @@ window.LESSONS = [
           ],
           points: [
             "Use the correct title, units, scale and small crosses.",
-            "Identify possible outliers or state that there are none.",
+            "Identify possible anomalous results or state that there are none.",
             "Describe the relationship and quote two values with units.",
             "A prediction inside the measured range is more trustworthy than one far beyond it.",
           ],
@@ -629,7 +629,7 @@ window.LESSONS = [
             "Weak: ‘There was human error.’",
             "Better: ‘Reaction time varied when starting and stopping the stopwatch, increasing scatter.’",
             "Matching improvement: use slow-motion video or electronic timing.",
-            "Self-assess the variables, table, repeats, means, graph, outliers and evidence-led conclusion.",
+            "Self-assess the variables, table, repeats, means, graph, anomalous results and evidence-led conclusion.",
           ],
           remember: "Problem → effect on data → realistic improvement.",
         },
@@ -663,7 +663,7 @@ window.LESSONS = [
         marks: 6,
         prompt:
           "Plan an investigation to determine how wing length affects the fall time of a paper helicopter. Include a range, repeats, controls and safety.",
-        hint: "Write a sequence another student could follow. Include how the time is measured and how reliability is improved.",
+        hint: "Write a sequence another student could follow. Include how the time is measured and how the results are made repeatable.",
         answer:
           "Make otherwise identical helicopters with at least five measured wing lengths, for example 4–8 cm (1). Drop each from the same measured height using the same release method (1). Time the fall to the floor (1). Repeat at least three times at each length and calculate a mean (1). Keep paper, helicopter design, paperclip mass and drop height constant (1). Keep the drop zone clear and do not stand on furniture (1).",
       },
@@ -737,7 +737,7 @@ window.LESSONS = [
         {
           title: "Defend the conclusion and evaluation",
           paragraphs: [
-            "Interrogate the graph before writing: identify the pattern, judge its strength, consider outliers and choose the strongest numerical evidence.",
+            "Interrogate the graph before writing: identify the pattern, judge its strength, consider anomalous results and choose the strongest numerical evidence.",
           ],
           points: [
             "A conclusion states the relationship and quotes processed values with units.",

@@ -52,7 +52,7 @@
           <tr><td>Lesson 2</td><td>What are you actually changing?</td><td>Variables, data types, choosing the right graph</td></tr>
           <tr><td>Lesson 3</td><td>The drop test</td><td>Shock absorber practical · bar charts</td></tr>
           <tr><td>Lesson 4</td><td>Higher ramp, further flight?</td><td>Ramp practical · line graphs</td></tr>
-          <tr><td>Lesson 5</td><td>The point that does not fit</td><td>Best-fit lines, outliers, graph quality</td></tr>
+          <tr><td>Lesson 5</td><td>The point that does not fit</td><td>Best-fit lines, anomalous results, graph quality</td></tr>
           <tr><td>Lesson 6</td><td>Solo flight</td><td>Paper helicopter · independent challenge</td></tr>
           <tr><td>Lessons 7–8</td><td>Your investigation</td><td>Design, run, graph and defend your own experiment</td></tr>
           <tr><td>Reference</td><td>The Physicist's Toolkit</td><td>Every rule, formula and checklist in one place — page 3</td></tr>
@@ -74,7 +74,7 @@
             { type: "eq", html: "mean = total of trials ÷ number of trials" },
             { type: "eq", html: "uncertainty = (largest − smallest) ÷ 2" },
             { type: "h4", html: "Words that earn marks" },
-            { type: "p", html: "Instead of “it went up”, write “<i>as the ramp height increased, the distance travelled increased</i>”. Instead of “it was wrong”, name the error: <i>random</i> or <i>systematic</i>. Instead of “weird result”, write “<i>possible outlier at 20 cm</i>”." },
+            { type: "p", html: "Instead of “it went up”, write “<i>as the ramp height increased, the distance travelled increased</i>”. Instead of “it was wrong”, name the error: <i>random</i> or <i>systematic</i>. Instead of “weird result”, write “<i>possible anomalous result at 20 cm</i>”." },
           ],
           right: [
             { type: "h4", html: "Precision vs accuracy" },
@@ -158,7 +158,7 @@
 
       /* 8 */
       { run: L1, blocks: [
-        task(8, "Reliability detective", "Stretch"),
+        task(8, "Data detective", "Stretch"),
         p("Three claims. For each, decide what you would need to know before believing it, and name the error you are most suspicious of."),
         { type: "table", widths: ["38%", "40%", "22%"], head: ["The claim", "What I would need to know first", "Suspected error"], rh: 18.4, rows: [["“Our reaction times improved after training.” The two tests were timed by different people.", "", ""], ["“This spring stretches 4.0 cm per 100 g.” One reading was taken for each mass.", "", ""], ["“The classroom is exactly 6.000 m long.” Measured once, with a tape held slightly slack.", "", ""]] },
         { type: "checkpoint", title: "Checkpoint — Lesson 1", items: [
@@ -166,7 +166,7 @@
           "2. A result that is close to the true value is [[48]].",
           "3. Uncertainty is calculated using [[48]].",
           { html: "4. Repeats fix [[24]] errors but not [[24]] errors, because", lines: 1 },
-          { html: "5. One thing I would do differently to make my data more reliable:", lines: 2 },
+          { html: "5. One thing I would do differently to make my data more repeatable:", lines: 2 },
         ] },
         { type: "home", paras: ["Find a claim with a number in it — an advert, a headline, a sports statistic. Write down one question you would have to ask before you believed it, and bring it to Lesson 2."], lines: 2 },
       ] },
@@ -339,13 +339,13 @@
 
       /* ---------------- Lesson 5 ---------------- */
       /* 20 */
-      opener(L5, { badge: "LESSON 5", title: "The point that does not fit", subtitle: "Best-fit lines · outliers · graph quality · writing a conclusion" },
+      opener(L5, { badge: "LESSON 5", title: "The point that does not fit", subtitle: "Best-fit lines · anomalous results · graph quality · writing a conclusion" },
         { title: "The readings that were too strange to believe", paras: [
           "In 1985 three scientists from the British Antarctic Survey published something alarming: every spring, the ozone layer above Antarctica was collapsing. They had spotted it from readings taken on the ground, year after year.",
           "Satellites had been watching the same sky. The values they recorded were so far below anything expected that the processing software had been set up to flag such extreme readings as probable instrument faults — so they were not treated as real. The satellite had, in a sense, been seeing the ozone hole and setting the evidence aside.",
           "Once the ground-based results were published, the satellite data was re-examined, and the hole was there in the record.",
         ], punch: "An odd result is a question, not rubbish. Ask it before you bin it." },
-        ["Draw a best-fit line — straight or curved — that shows the trend", "Explain why dot-to-dot is wrong for experimental data", "Identify a possible outlier and say what you would do about it", "Improve a graph against a checklist", "Write a conclusion that quotes evidence instead of vibes"],
+        ["Draw a best-fit line — straight or curved — that shows the trend", "Explain why dot-to-dot is wrong for experimental data", "Identify a possible anomalous result and say what you would do about it", "Improve a graph against a checklist", "Write a conclusion that quotes evidence instead of vibes"],
         [
           task(1, "Which graph is better?", "5 min"),
           p("Your teacher will show you three versions of the same data: dot-to-dot, a best-fit straight line, and a best-fit curve."),
@@ -361,7 +361,7 @@
           left: { eyebrow: "Do", paras: ["Draw one smooth line — straight or gently curved — in pencil, with a ruler if it is straight.", "Aim for a balance of points either side.", "Extend it across the range of your data."] },
           right: { kind: "orange", eyebrow: "Do not", paras: ["Zig-zag from point to point.", "Force the line through the first and last points and ignore the middle.", "Draw a thick, wobbly, double-stroke line — precision matters here too."] } },
         q("a", "Your results are “rarely perfect”. Explain what a best-fit line is admitting about experimental data.", 2),
-        task(3, "Spot the outlier", "10 min"),
+        task(3, "Spot the anomalous result", "10 min"),
         p("Another class ran the ramp experiment and got these means."),
         { type: "split", cols: "1fr 1fr", gap: 6,
           left: [
@@ -376,10 +376,10 @@
       { run: L5, blocks: [
         q("b", "Should the class delete it? Write what they should do <i>first</i>, and why.", 2),
         q("c", "Give two things that could have caused a reading like this in the ramp practical:", 2),
-        { type: "box", kind: "orange", eyebrow: "The honest answer", paras: ["An outlier that turns out to be a measuring mistake gets corrected or repeated. An outlier you cannot explain gets reported, not hidden — circled on the graph with a note. Deleting data because it is inconvenient is the one thing a scientist must never do."], mb: 5 },
+        { type: "box", kind: "orange", eyebrow: "The honest answer", paras: ["An anomalous result that turns out to be a measuring mistake gets corrected or repeated. An anomalous result you cannot explain gets reported, not hidden — circled on the graph with a note. Deleting data because it is inconvenient is the one thing a scientist must never do."], mb: 5 },
         task(4, "Finish your own graph", "20 min"),
-        p("Go back to your ramp graph from Lesson 4. Add the best-fit line. Circle anything that does not sit near it and write a short note beside it. If there are no outliers, write “no outliers — all points lie close to the line”. Saying so is worth marks."),
-        { type: "checks", head: "Before you call it finished", items: ["Title included", "x-axis labelled with unit", "y-axis labelled with unit", "Sensible scale, using most of the grid", "Points plotted accurately as small crosses", "Best-fit line drawn — not dot-to-dot", "Outliers circled and commented on, or their absence stated"] },
+        p("Go back to your ramp graph from Lesson 4. Add the best-fit line. Circle anything that does not sit near it and write a short note beside it. If there are no anomalous results, write “no anomalous results — all points lie close to the line”. Saying so is worth marks."),
+        { type: "checks", head: "Before you call it finished", items: ["Title included", "x-axis labelled with unit", "y-axis labelled with unit", "Sensible scale, using most of the grid", "Points plotted accurately as small crosses", "Best-fit line drawn — not dot-to-dot", "Anomalous results circled and commented on, or their absence stated"] },
         task(5, "Peer review", "10 min"),
         p("Swap booklets. Mark your partner's graph against the list above, then write them one specific improvement — not “make it neater”."),
         { type: "kv", rh: 8.8, rows: ["Reviewed by", "Strongest thing about this graph", "One specific improvement"] },
@@ -394,7 +394,7 @@
           { html: "I know this because the graph shows [[100]]", lines: 1 },
           "For example, at [[24]] cm the mean distance was [[24]] cm, while at [[24]] cm it was [[24]] cm.",
           "One possible source of random error was [[84]]",
-          "One result that may be an outlier is [[45]] because [[55]]",
+          "One result that may be an anomalous result is [[45]] because [[55]]",
         ] },
         task(7, "Mark someone else's graph", "Stretch"),
         p("A student hands in the graph below for the spring experiment. It has four separate problems. Find them, mark them on the graph, and list them."),
@@ -413,8 +413,8 @@
         { type: "checkpoint", title: "Checkpoint — Lesson 5", items: [
           "1. A best-fit line is [[80]].",
           "2. We avoid dot-to-dot lines because [[70]].",
-          "3. An outlier is [[80]].",
-          "4. Before ignoring an outlier you should [[70]].",
+          "3. An anomalous result is [[80]].",
+          "4. Before ignoring an anomalous result you should [[70]].",
           { html: "5. Why would deleting an inconvenient result be dishonest rather than just untidy?", lines: 2 },
         ] },
         { type: "home", paras: ["Find a graph somewhere outside school — a news site, a textbook, a sports app, a product advert. Run it through the graph quality checklist on page 3."], qs: [["a", "Where the graph came from, and what it shows:", 2], ["b", "Two things it does well:", 2], ["c", "One thing that would lose marks if a Year 9 student handed it in:", 2]] },
@@ -428,7 +428,7 @@
           "The engineers could not just try it and see. They tested rotor designs in a chamber pumped down to Martian pressure, changing blade size and spin rate, measuring lift, plotting the results, and reading the pattern off the graph. Ingenuity's rotors ended up over a metre across for a craft with a mass under 2 kg.",
           "Today you do a much smaller version of the same job — with paper. But the process is identical, and this time nobody is going to walk you through it.",
         ], punch: "This one is on you. Booklet, ruler, brain." },
-        { title: "Your mission — independently, from start to finish", items: ["Identify all three types of variable", "Design your own results table with units", "Collect three trials for each of five values and calculate means", "Choose the correct graph and justify it", "Plot accurately, add a best-fit line, deal with outliers", "Write a conclusion supported by your own numbers"] },
+        { title: "Your mission — independently, from start to finish", items: ["Identify all three types of variable", "Design your own results table with units", "Collect three trials for each of five values and calculate means", "Choose the correct graph and justify it", "Plot accurately, add a best-fit line, deal with anomalous results", "Write a conclusion supported by your own numbers"] },
         []),
 
       /* 26 */
@@ -457,7 +457,7 @@
       /* 28 */
       { run: L6, blocks: [
         task(4, "Graph your results", "Assessed"),
-        p("Everything you have learned so far, in one graph. Title, axes, units, scale, accurate points, best-fit line, outliers noted."),
+        p("Everything you have learned so far, in one graph. Title, axes, units, scale, accurate points, best-fit line, anomalous results noted."),
         { type: "draw", h: 137, foot: `<div class="tl">Title:</div><div class="r left">Check both axes have units before you hand this in</div>` },
         { type: "spacer", mm: 2 },
         task(5, "Conclusion", "Assessed"),
@@ -465,7 +465,7 @@
           "As [[45]] increased, the fall time [[55]]",
           { html: "The evidence for this is [[100]]", lines: 1 },
           "A specific pair of numbers from my results: at [[24]] the mean was [[24]], at [[24]] it was [[24]].",
-          "My graph [[24]] contain a possible outlier. Details: [[60]]",
+          "My graph [[24]] contain a possible anomalous result. Details: [[60]]",
         ] },
         q("a", "Try a prediction. Using your best-fit line only, what fall time would you expect for a wing length you did <i>not</i> test? State the value and where you read it from.", 2),
       ] },
@@ -474,7 +474,7 @@
       { run: L6, blocks: [
         task(6, "Mark yourself", "Self-assessment"),
         p("Be strict. This is the same list your teacher will use."),
-        { type: "checks", head: "Success criteria", ticks: ["Not yet", "Done"], tickW: "20mm", cls: "wide", items: ["Independent, dependent and control variables all identified", "Table designed by me, with units in every heading", "Three trials for every value of the independent variable", "Means calculated correctly", "Correct graph type, with a reason given", "Axes labelled, units shown, sensible scale", "Best-fit line rather than dot-to-dot", "Outliers identified, or their absence stated", "Conclusion quotes evidence from my own results"] },
+        { type: "checks", head: "Success criteria", ticks: ["Not yet", "Done"], tickW: "20mm", cls: "wide", items: ["Independent, dependent and control variables all identified", "Table designed by me, with units in every heading", "Three trials for every value of the independent variable", "Means calculated correctly", "Correct graph type, with a reason given", "Axes labelled, units shown, sensible scale", "Best-fit line rather than dot-to-dot", "Anomalous results identified, or their absence stated", "Conclusion quotes evidence from my own results"] },
         { type: "spacer", mm: 4 },
         { type: "checkpoint", title: "Checkpoint — Lesson 6", items: [
           { html: "1. The most important thing I have learned about drawing graphs is", lines: 1 },
@@ -562,7 +562,7 @@
         task(9, "Interrogate your own results", "Lesson 8"),
         q("a", "What pattern does the graph show? Does the dependent variable increase, decrease, or stay about the same?", 2),
         q("b", "Is the pattern strong and clear, or weak and scattered? What in the graph tells you that?", 2),
-        q("c", "Any possible outliers? Say which, or state clearly that there are none.", 1),
+        q("c", "Any possible anomalous results? Say which, or state clearly that there are none.", 1),
         q("d", "What is the single strongest piece of evidence in your results — the one number a doubter would find hardest to argue with?", 2),
         task(10, "Conclusion", "Assessed"),
         p("Use the version that matches your investigation."),
@@ -582,7 +582,7 @@
         q("a", "How confident are you in your conclusion — and what would it take to make you more confident?", 2),
         task(12, "Peer review", "Lesson 8"),
         p("Swap with another group. Their job is to find the weakness you missed. Yours is to be grateful for it."),
-        { type: "checks", twinW: ["48%", "13mm", "36%", "16mm"], twin: [["Question uses “How does X affect Y?”", "Independent variable identified", "Dependent variable identified", "Three or more control variables", "Results table includes units", "At least three trials", "Means calculated", "Conclusion uses evidence"], ["Correct graph type chosen", "Axes labelled correctly", "Units shown on the graph", "Sensible scale used", "Points or bars accurate", "Best-fit line where appropriate", "Outliers considered", "Evaluation names an improvement"]], head: "Feature", tickW: "14.5mm" },
+        { type: "checks", twinW: ["48%", "13mm", "36%", "16mm"], twin: [["Question uses “How does X affect Y?”", "Independent variable identified", "Dependent variable identified", "Three or more control variables", "Results table includes units", "At least three trials", "Means calculated", "Conclusion uses evidence"], ["Correct graph type chosen", "Axes labelled correctly", "Units shown on the graph", "Sensible scale used", "Points or bars accurate", "Best-fit line where appropriate", "Anomalous results considered", "Evaluation names an improvement"]], head: "Feature", tickW: "14.5mm" },
         { type: "kv", rh: 9, rows: ["Reviewed by", "The strongest part of this investigation", "The question I would ask this group"] },
         task(13, "Going further", "Stretch"),
         q("a", "Compare your results with another group who investigated something similar. Do you agree? If not, what could explain the difference?", 2),
@@ -607,7 +607,7 @@
       { run: GL, lead: { badge: "GLOSSARY", title: "Every word you need", subtitle: "If you use these words correctly, you sound like a physicist. If you avoid them, you lose marks." }, blocks: [
         { type: "table", cls: "gloss bf", widths: ["34%", "66%"], head: ["Word", "What it means"], rows: [
           ["Accuracy", "How close a measurement is to the true value"],
-          ["Anomaly / outlier", "A result that does not fit the pattern of the others"],
+          ["Anomalous result (anomaly)", "A result that does not fit the pattern of the others"],
           ["Bar chart", "The graph you use when the independent variable is categoric"],
           ["Best-fit line", "A single straight or curved line showing the overall trend, with points balanced either side"],
           ["Categoric data", "Data sorted into named groups or types — material, colour, brand"],
@@ -620,7 +620,7 @@
           ["Precision", "How close repeated measurements are to each other"],
           ["Random error", "Unpredictable variation between repeats. Repeats and a mean reduce it"],
           ["Range", "The maximum and minimum values of the independent or dependent variables"],
-          ["Reliability", "How far a set of results can be trusted and repeated"],
+          ["Repeatable", "The same person, method and equipment give similar results again"],
           ["Resolution", "The smallest change a measuring instrument can detect"],
           ["Systematic error", "An error that shifts every reading the same way. Repeats do not fix it"],
           ["Trial", "One repeat of a measurement"],
@@ -634,7 +634,7 @@
         { type: "table", cls: "phrases", widths: ["44%", "56%"], head: ["Instead of writing…", "Write…"], rows: [
           ["“It went up.”", "“As the ramp height increased, the distance travelled increased.”"],
           ["“It was human error.”", "“Reaction time when starting the stopwatch caused random error.”"],
-          ["“One result was weird.”", "“The value at 20 cm is a possible outlier — it does not fit the trend.”"],
+          ["“One result was weird.”", "“The value at 20 cm is a possible anomalous result — it does not fit the trend.”"],
           ["“The results were good.”", "“The repeats were close together, so the data is precise.”"],
           ["“We did it three times.”", "“Three trials were taken at each value so that a mean could be calculated.”"],
           ["“It's a bar chart.”", "“A bar chart was used because material type is categoric.”"],
@@ -646,7 +646,7 @@
           ["2", "Identify all three variables and choose the right graph", "○ ○ ○"],
           ["3", "Take repeat readings, find a mean, draw a bar chart", "○ ○ ○"],
           ["4", "Plot an accurate line graph with labelled axes and units", "○ ○ ○"],
-          ["5", "Draw a best-fit line and deal with an outlier properly", "○ ○ ○"],
+          ["5", "Draw a best-fit line and deal with an anomalous result properly", "○ ○ ○"],
           ["6", "Run a whole investigation on my own", "○ ○ ○"],
           ["7–8", "Design my own experiment and defend the conclusion", "○ ○ ○"],
         ] },

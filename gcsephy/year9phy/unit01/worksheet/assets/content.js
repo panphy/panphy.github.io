@@ -9,7 +9,7 @@
   const g = (o) => ({ type: "html", html: graph(o) });
 
   const RUN1 = ["LESSON 5 WORKSHEET", "BEST-FIT LINES AND CURVES"];
-  const RUN2 = ["LESSON 5 WORKSHEET", "OUTLIERS AND PROPORTIONALITY"];
+  const RUN2 = ["LESSON 5 WORKSHEET", "ANOMALOUS RESULTS AND PROPORTIONALITY"];
 
   const mini = (cap, o) => `<div class="mini"><div class="cap">${cap}</div>${graph({ ...o, mini: true, h: 86, xmax: 8, ymax: 16, xstep: 2, ystep: 4, pts: DATA.trend })}<div class="opts"><span><i></i>Good</span><span><i></i>Not good</span></div><div class="why">Why:</div></div>`;
   const trend = DATA.trend;
@@ -52,10 +52,10 @@
       { run: RUN2, blocks: [
         { type: "split", cols: "1fr 1fr", gap: 6,
           left: [
-            task(4, "The point that does not fit", "Outlier"),
+            task(4, "The point that does not fit", "Anomalous result"),
             p("A class repeats the ramp practical and plots the mean distance for each height."),
             g({ xmax: 32, ymax: 140, xstep: 4, ystep: 20, xlabel: "Ramp height / cm", ylabel: "Mean distance / cm", pts: DATA.ramp, h: 96, alt: "Distance travelled against ramp height with one point far below the trend" }),
-            q("a", "<b>Circle</b> the possible outlier, then draw the best-fit line for the trend.", 0),
+            q("a", "<b>Circle</b> the possible anomalous result, then draw the best-fit line for the trend.", 0),
             q("b", "Priya says “rub it out, it spoils the graph”. Marcus says “draw the line through it”. Who is right? What should happen <i>first</i>?", 3),
             q("c", "Repeating 20 cm gives about 76 cm. What does that suggest, and what do you do with the 52 cm reading?", 2),
             q("d", "If it was still 52 cm after repeating, what might that tell you?", 2),
@@ -71,7 +71,7 @@
             q("d", "What does the y-intercept represent? How could the student change the method?", 3),
           ] },
         { type: "spacer", mm: 2 },
-        { type: "box", kind: "orange", eyebrow: "Talk about it", paras: ["When, if ever, is it honest to leave an outlier out when you draw a best-fit line?", "A straight line with a y-intercept is not directly proportional. Is it still a useful pattern? What can you still predict from it?"], mb: 0 },
+        { type: "box", kind: "orange", eyebrow: "Talk about it", paras: ["When, if ever, is it honest to leave an anomalous result out when you draw a best-fit line?", "A straight line with a y-intercept is not directly proportional. Is it still a useful pattern? What can you still predict from it?"], mb: 0 },
       ] },
     ],
   };

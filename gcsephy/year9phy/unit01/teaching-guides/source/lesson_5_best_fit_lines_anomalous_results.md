@@ -1,10 +1,10 @@
-# Lesson 5: Best-Fit Lines, Outliers, and Graph Quality
+# Lesson 5: Best-Fit Lines, Anomalous results, and Graph Quality
 
 ## Unit
 Working Like a Physicist: Collecting, Processing, and Presenting Data
 
 ## Lesson focus
-Students complete and improve their line graphs, learn how to draw a best-fit line, and identify possible outliers.
+Students complete and improve their line graphs, learn how to draw a best-fit line, and identify possible anomalous results.
 
 ## Assumptions
 Students collected ramp practical data in Lesson 4.
@@ -16,8 +16,8 @@ By the end of the lesson, students should be able to:
 
 1. Draw a suitable best-fit line.
 2. Explain why dot-to-dot lines are usually not appropriate for experimental data.
-3. Identify possible outliers.
-4. Explain what should be done when an outlier is found.
+3. Identify possible anomalous results.
+4. Explain what should be done when an anomalous result is found.
 5. Improve the quality of a line graph using a checklist.
 6. Write a short conclusion from a graph.
 
@@ -27,7 +27,7 @@ By the end of the lesson, students should be able to:
 |---|---|
 | Best-fit line | A line that shows the overall pattern of the results |
 | Dot-to-dot line | A line drawn by joining every point directly to the next point |
-| Outlier | A result that does not fit the pattern (AQA: an anomalous result) |
+| Anomalous result | A result that does not fit the pattern |
 | Random error | Unpredictable variation between repeats |
 | Systematic error | A repeated error that shifts all results in the same way |
 
@@ -66,17 +66,17 @@ Important message:
 
 > Experimental results are rarely perfect. The best-fit line shows the trend, not every single measurement.
 
-## Main teaching: Outliers
+## Main teaching: Anomalous results
 
 Introduce:
 
-An outlier is a result that does not fit the pattern of the other results.
+An anomalous result is a result that does not fit the pattern of the other results.
 
 Important message:
 
-> We should not automatically ignore an outlier. First, we should check whether there was a mistake or repeat the measurement if possible.
+> We should not automatically ignore an anomalous result. First, we should check whether there was a mistake or repeat the measurement if possible.
 
-Possible causes of outliers:
+Possible causes of anomalous results:
 
 - incorrect measurement
 - recording error
@@ -84,7 +84,7 @@ Possible causes of outliers:
 - inconsistent release method
 - misreading the scale
 
-## Activity 1: Spot the outlier
+## Activity 1: Spot the anomalous result
 
 Give students this example dataset:
 
@@ -96,7 +96,7 @@ Give students this example dataset:
 | 20 | 96 |
 | 25 | 80 |
 
-Students should notice that the value at 20 cm may be an outlier because it does not fit the general trend.
+Students should notice that the value at 20 cm may be an anomalous result because it does not fit the general trend.
 
 Discussion prompts:
 
@@ -121,7 +121,7 @@ They must include:
 - sensible scale
 - accurately plotted points
 - best-fit line
-- possible outlier circled or commented on
+- possible anomalous result circled or commented on
 
 ## Activity 3: Peer review checklist
 
@@ -136,7 +136,7 @@ Students swap books and check each other's graphs.
 | Points plotted accurately |
 | Best-fit line drawn |
 | Dot-to-dot line avoided |
-| Outlier considered |
+| Anomalous result considered |
 
 ## Written conclusion
 
@@ -145,7 +145,7 @@ Students write a short conclusion using this structure:
 > As ramp height increased, the distance travelled by the trolley __________.  
 > I know this because the graph shows __________.  
 > One possible source of random error was __________.  
-> One result that may be an outlier is __________ because __________.
+> One result that may be an anomalous result is __________ because __________.
 
 ## Plenary
 
@@ -153,12 +153,12 @@ Ask students to answer:
 
 1. What is a best-fit line?
 2. Why should we avoid dot-to-dot lines?
-3. What is an outlier?
-4. What should we do before ignoring an outlier?
+3. What is an anomalous result?
+4. What should we do before ignoring an anomalous result?
 
 ## Possible prep
 
-Students are given a printed line graph with mistakes. They must identify and correct the errors, for example missing units, poor scale, dot-to-dot line, and unrecognized outlier.
+Students are given a printed line graph with mistakes. They must identify and correct the errors, for example missing units, poor scale, dot-to-dot line, and unrecognized anomalous result.
 
 ## Teacher notes
 

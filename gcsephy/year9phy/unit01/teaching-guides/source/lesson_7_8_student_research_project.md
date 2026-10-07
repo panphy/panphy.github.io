@@ -20,11 +20,11 @@ Students independently apply the full investigation process:
 6. Calculate mean values.
 7. Choose and draw the correct graph.
 8. Draw a best-fit line where appropriate.
-9. Identify possible outliers.
+9. Identify possible anomalous results.
 10. Write a conclusion and evaluation based on evidence.
 
 ## Assumptions
-Students have completed Lessons 1-6 and have practiced reliability of data, variables, data types, graph choice, repeated measurements, means, bar charts, line graphs, best-fit lines, outliers, conclusions, and evaluations.
+Students have completed Lessons 1-6 and have practiced judging whether data can be trusted, variables, data types, graph choice, repeated measurements, means, bar charts, line graphs, best-fit lines, anomalous results, conclusions, and evaluations.
 
 Students can work in pairs or groups of 3. Groups of 3 are useful where equipment is limited or where one student can act as a timer or recorder.
 
@@ -39,7 +39,7 @@ By the end of Lessons 7-8, students should be able to:
 6. Choose a bar chart or line graph using the type of independent variable.
 7. Draw a high-quality graph with labels, units, sensible scale, and accurate plotting.
 8. Use a best-fit line where appropriate.
-9. Comment on outliers, errors, and improvements.
+9. Comment on anomalous results, errors, and improvements.
 10. Present a conclusion supported by data.
 
 ## Key vocabulary
@@ -57,7 +57,7 @@ By the end of Lessons 7-8, students should be able to:
 | Bar chart | A graph used when the independent variable is categoric |
 | Line graph | A graph used when the independent variable is continuous |
 | Best-fit line | A line that shows the overall pattern of the results |
-| Outlier | A result that does not fit the pattern (AQA: an anomalous result) |
+| Anomalous result | A result that does not fit the pattern |
 | Random error | Unpredictable variation between repeats |
 | Systematic error | A repeated error that shifts all results in the same way |
 
@@ -277,7 +277,7 @@ Graph requirements:
 7. Bars with gaps if drawing a bar chart.
 8. Small crosses if drawing a line graph.
 9. Best-fit line if drawing a line graph.
-10. Possible outliers circled or commented on.
+10. Possible anomalous results circled or commented on.
 
 ## Activity 3: Analyse the results
 
@@ -286,7 +286,7 @@ Students answer:
 1. What pattern does the graph show?
 2. Does the dependent variable increase, decrease, or stay about the same?
 3. Is the relationship strong or weak?
-4. Are there any possible outliers?
+4. Are there any possible anomalous results?
 5. What could have caused random error?
 6. What could have caused systematic error?
 
@@ -300,7 +300,7 @@ Each group produces one final project page containing:
 4. Results table.
 5. Mean values.
 6. Correct graph.
-7. Comment on outliers or errors.
+7. Comment on anomalous results or errors.
 8. Conclusion.
 9. Evaluation.
 
@@ -311,7 +311,7 @@ Students write a conclusion using this structure:
 > As __________ increased/changed, __________ increased/decreased/stayed about the same.  
 > I know this because __________.  
 > The graph shows __________.  
-> One result that may be an outlier is __________ because __________.
+> One result that may be an anomalous result is __________ because __________.
 
 For a categoric investigation, students can use:
 
@@ -348,7 +348,7 @@ Students swap work with another group and check:
 | Sensible scale used |  |
 | Points or bars plotted accurately |  |
 | Best-fit line drawn where appropriate |  |
-| Outliers considered |  |
+| Anomalous results considered |  |
 | Conclusion uses evidence |  |
 | Evaluation includes an improvement |  |
 
@@ -364,7 +364,7 @@ Students swap work with another group and check:
 | Graph choice | Correct graph chosen using the independent variable |
 | Graph quality | Title, axes, units, sensible scale, and accurate plotting included |
 | Best-fit line | Used for line graphs where appropriate |
-| Outliers | Possible outliers identified or absence of outliers stated |
+| Anomalous results | Possible anomalous results identified or absence of anomalous results stated |
 | Conclusion | Describes the pattern and uses evidence from results |
 | Evaluation | Identifies errors, weaknesses, and a realistic improvement |
 
@@ -373,7 +373,7 @@ Students swap work with another group and check:
 More confident students can:
 
 1. Compare their results with another group.
-2. Explain whether their data is reliable.
+2. Explain whether their data is repeatable.
 3. Suggest a wider range of values for the independent variable.
 4. Explain whether the pattern is linear or non-linear.
 5. Add error bars if appropriate.

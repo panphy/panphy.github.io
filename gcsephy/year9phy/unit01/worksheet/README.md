@@ -1,6 +1,6 @@
 # Lesson 5 worksheet: best-fit lines (source)
 
-A 2-page A4 practice sheet for Lesson 5, styled like the workbook, plus a 1-page teacher answer key. Page 1: best-fit straight line, best-fit curve, judging four lines. Page 2: an outlier to discuss, and a "directly proportional?" question where the best-fit line has a y-intercept.
+A 2-page A4 practice sheet for Lesson 5, styled like the workbook, plus a 1-page teacher answer key. Page 1: best-fit straight line, best-fit curve, judging four lines. Page 2: an anomalous result to discuss, and a "directly proportional?" question where the best-fit line has a y-intercept.
 
 | File | Use |
 |---|---|

@@ -88,7 +88,7 @@
 .machine .sticky.two { right: -20px; bottom: 110px; transform: rotate(7deg); }
 .machine .stamp { right: -10px; top: 20px; }
 
-/* Outlier decision route */
+/* Anomalous result decision route */
 .route { display: grid; grid-template-columns: repeat(4, 1fr); gap: 34px; }
 .route > div { position: relative; padding: 18px 20px; border: 2px solid var(--ink); background: var(--card); font-size: 28px; font-weight: 700; line-height: 1.25; box-shadow: 6px 6px 0 rgba(7, 22, 47, .12); }
 .route > div b { display: block; margin-bottom: 6px; font: 900 18px Arial, sans-serif; letter-spacing: .16em; text-transform: uppercase; color: var(--muted); }

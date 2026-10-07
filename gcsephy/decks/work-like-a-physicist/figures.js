@@ -1,6 +1,6 @@
 // SVG diagrams for the Work Like a Physicist deck, drawn in the style of the
 // Year 9 companion site (gcsephy/year9phy/unit01): navy ink, lime points,
-// coral outliers, cyan trend lines and bold Arial labels. Each
+// coral anomalous results, cyan trend lines and bold Arial labels. Each
 // <div data-fig="name"> is filled from FIGURES; colours come from deck CSS.
 (() => {
   const f = n => Math.round(n * 10) / 10;
@@ -296,8 +296,8 @@
       let out = s + line(X(1), Y(8.5), X(28), Y(89.5), 'trend');
       out += pts.map(([a, b]) => cross(X(a), Y(b), 9)).join('');
       out += `<circle cx="${f(X(20))}" cy="${f(Y(96))}" r="26" class="out-ring"/>`;
-      out += t(X(20) - 40, Y(96) - 4, 'outlier?', 'lab hot-t', 'end');
-      return svg(880, 540, out, 'Ramp data with a best-fit line through four points; the point at 20 cm, 96 cm lies far above the line and is circled as a possible outlier');
+      out += t(X(20) - 40, Y(96) - 4, 'anomaly?', 'lab hot-t', 'end');
+      return svg(880, 540, out, 'Ramp data with a best-fit line through four points; the point at 20 cm, 96 cm lies far above the line and is circled as a possible anomalous result');
     },
 
     // The six things that earn graph marks.
@@ -310,7 +310,7 @@
       out += `<circle cx="${f(X(20))}" cy="${f(Y(96))}" r="26" class="out-ring"/>`;
       out += t(480, 38, 'Mean distance travelled against ramp height', 'lab');
       out += tag(1, 110, 32) + tag(2, 330, 505) + tag(3, X(30) + 46, Y(0) + 22) + tag(4, X(15) - 34, Y(52) - 30) + tag(5, X(27) + 22, Y(95) + 12) + tag(6, X(20) + 44, Y(96) - 14);
-      return svg(880, 600, out, 'Annotated line graph: 1 title, 2 axis labels with units, 3 even scale, 4 small crosses, 5 one best-fit line, 6 outlier circled');
+      return svg(880, 600, out, 'Annotated line graph: 1 title, 2 axis labels with units, 3 even scale, 4 small crosses, 5 one best-fit line, 6 anomalous result circled');
     },
 
     // Folded paper helicopter: illustrated model and experiment cues.

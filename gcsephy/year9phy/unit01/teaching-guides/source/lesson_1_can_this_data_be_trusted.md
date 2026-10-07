@@ -1,4 +1,4 @@
-# Lesson 1: Reliability of Data
+# Lesson 1: Can This Data Be Trusted?
 
 ## Unit
 Working Like a Physicist: Collecting, Processing, and Presenting Data
@@ -7,7 +7,7 @@ Working Like a Physicist: Collecting, Processing, and Presenting Data
 Students learn how scientists judge whether data can be trusted. They are introduced to uncertainty, precision, accuracy, resolution of measurement, random error, and systematic error before they begin planning and presenting investigations in the rest of the unit.
 
 ## Why this lesson comes first
-This lesson prepares students for the practical and data-handling skills used throughout Lessons 2-8. Before students choose graph types, calculate means, draw best-fit lines, or evaluate outliers, they need to understand why measurements are never perfect and why repeated readings help us judge reliability.
+This lesson prepares students for the practical and data-handling skills used throughout Lessons 2-8. Before students choose graph types, calculate means, draw best-fit lines, or evaluate anomalous results, they need to understand why measurements are never perfect and why repeated readings help us judge whether results are repeatable.
 
 ## Learning objectives
 By the end of the lesson, students should be able to:
@@ -17,13 +17,14 @@ By the end of the lesson, students should be able to:
 3. Distinguish between precision and accuracy.
 4. Explain what is meant by the resolution of a measuring instrument.
 5. Describe random errors and systematic errors.
-6. Suggest ways to improve the reliability of data.
+6. Suggest ways to make data more repeatable.
 
 ## Key vocabulary
 
 | Keyword | Student-friendly definition |
 |---|---|
-| Reliability | How trustworthy a set of results is. AQA uses the more exact words: repeatable (same person, method and equipment give the same results) and reproducible (another person or method does) |
+| Repeatable | The same person, method and equipment give similar results again |
+| Reproducible | Another person, or a different method or equipment, gives similar results |
 | Uncertainty | The interval within which the true value can be expected to lie |
 | Range | The maximum and minimum values of the independent or dependent variables |
 | Precision | How close repeated measurements are to each other |
@@ -57,7 +58,7 @@ By the end of the lesson, students should be able to:
 - Optional: different measuring instruments, for example a ruler marked in cm and a ruler marked in mm
 - Optional: printed worksheet with data sets
 
-## Starter: Which data set is most reliable?
+## Starter: Which data set would you trust most?
 
 Show students three sets of repeated measurements for the same experiment.
 
@@ -83,7 +84,7 @@ Expected discussion:
 - Data set A is precise because the readings are close together.
 - Data set B is less precise because the readings are spread out.
 - Data set C is precise, but could be inaccurate if the true fall time is closer to 1.21 s.
-- Repeats help us spot variation and calculate a more reliable mean.
+- Repeats help us spot variation and calculate a mean that is closer to the true value.
 
 ## Main teaching: Precision and accuracy
 
@@ -203,7 +204,7 @@ Students then answer:
 2. What was your uncertainty?
 3. What random errors may have affected your results?
 4. What systematic errors may have affected your results?
-5. How could you improve the reliability of your data?
+5. How could you make your data more repeatable?
 
 ## Check for understanding
 
@@ -218,7 +219,7 @@ Ask students:
 7. Why does taking repeats help with random error?
 8. Why does taking repeats not fix systematic error?
 
-## Plenary: Reliability exit ticket
+## Plenary: Exit ticket
 
 Students complete:
 
@@ -227,7 +228,7 @@ Students complete:
 3. The uncertainty is calculated using __________.
 4. One possible random error was __________.
 5. One possible systematic error was __________.
-6. To make my data more reliable, I could __________.
+6. To make my data more repeatable, I could __________.
 
 ## Possible prep
 
@@ -245,9 +246,9 @@ This lesson should stay practical and concrete. The aim is not to teach advanced
 
 The most important links to later lessons are:
 
-1. Repeats help students judge reliability.
+1. Repeats help students judge whether results are repeatable.
 2. Means are useful because repeated measurements vary.
-3. Unusual results may be outliers, but should be checked before being ignored.
+3. Unusual results may be anomalous results, but should be checked before being ignored.
 4. Graphs and conclusions are only as good as the quality of the data behind them.
 5. Evaluations should mention specific random errors, systematic errors, and realistic improvements.
 
