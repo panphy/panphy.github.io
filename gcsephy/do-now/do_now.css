@@ -36,7 +36,7 @@ button:focus-visible, a:focus-visible, input:focus-visible, .topic input:focus-v
 }
 .brand { display: inline-flex; align-items: center; gap: 12px; min-height: 48px; font-weight: 800; letter-spacing: -.02em; color: inherit; text-decoration: none; }
 .brand img { border-radius: 6px; }
-.topbar-link { display: inline-flex; align-items: center; min-height: 44px; padding: 0 16px; border: 1px solid rgba(255, 255, 255, .4); border-radius: 999px; color: #fff; font-size: 14px; font-weight: 800; text-decoration: none; white-space: nowrap; }
+.topbar-link { display: inline-flex; align-items: center; min-height: 48px; padding: 0 16px; border: 1px solid rgba(255, 255, 255, .4); border-radius: 999px; color: #fff; font-size: 14px; font-weight: 800; text-decoration: none; white-space: nowrap; }
 .topbar-link:hover { background: #fff; color: var(--board); }
 
 .hero { background-color: var(--board); background-image: var(--grid); background-size: 58px 58px; color: #fff; padding: clamp(28px, 5vw, 56px) clamp(16px, 5vw, 64px) clamp(44px, 6vw, 72px); }
@@ -56,7 +56,7 @@ button:focus-visible, a:focus-visible, input:focus-visible, .topic input:focus-v
 
 .switches { display: flex; flex-wrap: wrap; gap: 10px; }
 .segmented { display: inline-flex; border: 2px solid var(--ink); border-radius: 999px; overflow: hidden; background: #fff; }
-.segmented button { min-height: 44px; padding: 0 16px; border: 0; background: none; font-size: 14px; font-weight: 800; }
+.segmented button { min-height: 48px; padding: 0 16px; border: 0; background: none; font-size: 14px; font-weight: 800; }
 .segmented button[aria-pressed="true"] { background: var(--ink); color: #fff; }
 
 .search-row { display: flex; gap: 10px; flex-wrap: wrap; }
@@ -73,7 +73,7 @@ button:focus-visible, a:focus-visible, input:focus-visible, .topic input:focus-v
 /* Everything currently ticked, shown even when its unit is folded away. */
 .chosen { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-top: 14px; padding: 10px 12px; border: 2px solid var(--ink); border-radius: 10px; background: #fff6de; }
 .chosen-label { font-size: 12px; font-weight: 900; letter-spacing: .12em; text-transform: uppercase; }
-.chip { display: inline-flex; align-items: center; gap: 8px; min-height: 40px; padding: 0 8px 0 14px; border: 2px solid var(--ink); border-radius: 999px; background: var(--hi); font-size: 14px; font-weight: 800; text-align: left; }
+.chip { display: inline-flex; align-items: center; gap: 8px; min-height: 48px; padding: 0 8px 0 14px; border: 2px solid var(--ink); border-radius: 999px; background: var(--hi); font-size: 14px; font-weight: 800; text-align: left; }
 .chip.practical { background: var(--pop); }
 .chip:hover { background: var(--ink); color: #fff; }
 .chip svg { flex: none; width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 3; stroke-linecap: round; }
@@ -82,14 +82,14 @@ button:focus-visible, a:focus-visible, input:focus-visible, .topic input:focus-v
 .unit { padding-top: 20px; }
 .unit-head { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; margin-bottom: 10px; padding-bottom: 8px; border-bottom: 2px solid var(--ink); }
 .unit-head h3 { margin: 0; }
-.unit-toggle { display: inline-flex; align-items: center; gap: 8px; min-height: 44px; padding: 0 8px 0 0; border: 0; background: none; font: 900 18px/1.1 var(--display); letter-spacing: -.03em; text-transform: uppercase; text-align: left; }
+.unit-toggle { display: inline-flex; align-items: center; gap: 8px; min-height: 48px; padding: 0 8px 0 0; border: 0; background: none; font: 900 18px/1.1 var(--display); letter-spacing: -.03em; text-transform: uppercase; text-align: left; }
 .unit-toggle svg { flex: none; width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width: 3; stroke-linecap: round; stroke-linejoin: round; transition: transform .15s ease; }
 .unit-toggle[aria-expanded="false"] svg { transform: rotate(-90deg); }
 .unit-paper.has-selection { color: var(--ink); }
 .unit:has(.unit-toggle[aria-expanded="false"]) { padding-top: 8px; }
 .unit:has(.unit-toggle[aria-expanded="false"]) .unit-head { margin-bottom: 0; }
 .unit-paper { font-size: 11px; font-weight: 900; letter-spacing: .14em; text-transform: uppercase; color: var(--muted); }
-.unit-all { margin-left: auto; min-height: 44px; padding: 0 14px; border: 2px solid var(--ink); border-radius: 999px; background: #fff; font-size: 13px; font-weight: 800; }
+.unit-all { margin-left: auto; min-height: 48px; padding: 0 14px; border: 2px solid var(--ink); border-radius: 999px; background: #fff; font-size: 13px; font-weight: 800; }
 /* Working scientifically (above the content units) and Required practicals
    (below them) are set apart in their own bordered blocks. */
 .methods-block, .unit.skills-block { padding: 6px 16px 16px; border: 2px dashed var(--ink); border-radius: 12px; background: #e6f4f1; }
@@ -121,6 +121,14 @@ button:focus-visible, a:focus-visible, input:focus-visible, .topic input:focus-v
 .pick-text { flex: 1; }
 .pick-order { flex: none; display: grid; place-items: center; min-width: 26px; height: 26px; padding: 0 6px; border: 2px solid var(--ink); border-radius: 999px; background: var(--hi); font: 900 13px/1 Arial, sans-serif; }
 .pick-tag { flex: none; padding: 2px 8px; border: 1.5px solid var(--line); border-radius: 999px; font-size: 11px; font-weight: 800; color: var(--muted); white-space: nowrap; }
+/* The ticked questions in board order, to review, reorder or remove. */
+.picked { margin: 0 0 14px; padding: 10px 12px; border: 2px solid var(--ink); border-radius: 10px; background: #fff6de; }
+.picked ol { list-style: none; margin: 8px 0 0; padding: 0; }
+.picked li { display: flex; align-items: center; gap: 10px; padding: 5px 0; border-top: 1px solid var(--line); font-size: 15px; font-weight: 700; line-height: 1.3; }
+.picked button { flex: none; display: grid; place-items: center; width: 48px; height: 48px; padding: 0; border: 2px solid var(--ink); border-radius: 50%; background: #fff; }
+.picked button:hover:not(:disabled) { background: var(--ink); color: #fff; }
+.picked button:disabled { opacity: .3; cursor: default; }
+.picked button svg { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 3; stroke-linecap: round; stroke-linejoin: round; }
 #board.manual #reshuffle, #board.manual .swap-btn { display: none; }
 .count-row { display: flex; align-items: center; gap: 18px; flex-wrap: wrap; }
 .stepper { display: inline-flex; align-items: stretch; border: 2px solid var(--ink); border-radius: 12px; overflow: hidden; background: #fff; }
@@ -165,6 +173,23 @@ button:focus-visible, a:focus-visible, input:focus-visible, .topic input:focus-v
 #fullscreen[aria-pressed="true"] .exit { display: inline; }
 .pill.solid { border: 2px solid var(--ink); background: var(--hi); color: var(--ink); }
 .pill.solid:hover { background: #fff; }
+.pill:disabled { opacity: .4; cursor: not-allowed; }
+.pill:disabled:hover { background: none; color: #fff; }
+.more-toggle { display: none; }
+/* On one line the date gives way first, so the buttons never wrap under the title. */
+@media (min-width: 1000px) {
+  .board-bar, .board-actions { flex-wrap: nowrap; }
+  .board-title { flex: 1 1 0; }
+  .home-link, .board-actions { flex: none; }
+}
+@media (min-width: 1000px) and (max-width: 1199px) {
+  .board-actions { gap: 6px; }
+  .board-actions .pill:not(.icon) { padding: 0 12px; font-size: 13px; }
+}
+/* A strip under the board while part of it is below the bottom edge. */
+.more-below { flex: none; display: flex; align-items: center; justify-content: center; gap: 6px; width: 100%; min-height: 48px; padding: 0 16px env(safe-area-inset-bottom); border: 0; border-top: 1px solid rgba(255, 255, 255, .15); background: var(--board-deep); color: var(--hi); font-size: 15px; font-weight: 900; }
+.more-below:hover { color: #fff; }
+.more-below svg { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 3; stroke-linecap: round; stroke-linejoin: round; }
 
 .board-area { flex: 1; min-height: 0; overflow: auto; padding: 2vh max(2vw, env(safe-area-inset-right)) 2vh max(2vw, env(safe-area-inset-left)); }
 .questions { --q: 40px; list-style: none; margin: 0; padding: 0; column-gap: 1.6vw; font-size: var(--q); line-height: 1.22; }
@@ -194,15 +219,46 @@ sub, sup { font-size: .68em; line-height: 0; }
 .q-actions .swap-btn { display: grid; place-items: center; padding: 0; }
 .q-actions .swap-btn svg { width: 1.3em; height: 1.3em; fill: none; stroke: currentColor; stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round; }
 
+.keys { position: fixed; inset: 0; z-index: 30; display: grid; place-items: center; padding: 16px; overflow: auto; background: rgba(3, 12, 30, .8); }
+.keys-card { width: min(100%, 460px); padding: 20px 22px; border: 2px solid var(--ink); border-radius: 12px; background: var(--card); color: var(--ink); box-shadow: 6px 6px 0 var(--hi); }
+.keys-card h2 { margin: 0; font: 900 24px/1 var(--display); letter-spacing: -.04em; text-transform: uppercase; }
+.keys-card h3 { margin: 16px 0 4px; font-size: 12px; font-weight: 900; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); }
+.keys-card dl { margin: 0; }
+.keys-card dl div { display: grid; grid-template-columns: 112px 1fr; align-items: center; gap: 10px; padding: 5px 0; border-top: 1px solid var(--line); }
+.keys-card dd { margin: 0; font-weight: 700; }
+.keys-card kbd { display: inline-block; min-width: 28px; padding: 3px 7px; border: 2px solid var(--ink); border-radius: 6px; background: #fff; font: 700 13px/1.2 ui-monospace, Menlo, Consolas, monospace; text-align: center; }
+.keys-card .pill { margin-top: 16px; }
+
 .lightbox { position: fixed; inset: 0; z-index: 30; display: grid; grid-template-rows: 1fr auto; justify-items: center; align-items: center; gap: 2vh; padding: 3vh 3vw; background: rgba(3, 12, 30, .92); }
 .lightbox img { max-width: 94vw; max-height: 82vh; width: auto; height: 100%; min-height: 0; object-fit: contain; border: 2px solid var(--ink); border-radius: 12px; background: #fff; }
 
+/* Buttons under the text: on a phone, and in two columns on a narrow board. */
+.questions.stacked .q { grid-template-columns: auto 1fr; }
+.questions.stacked .q-actions { grid-column: 1 / -1; justify-content: flex-end; }
 @media (max-width: 700px) {
-  .launch { justify-content: stretch; }
-  .primary { flex: 1; }
+  .hero { padding-top: 18px; padding-bottom: 42px; }
+  .lead { margin-top: 14px; }
+  .launch { display: grid; grid-template-columns: 1fr; gap: 8px; margin-top: 16px; padding-top: 8px; }
+  .summary { font-size: 14px; }
+  .launch-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 8px 10px; }
+  .launch .secondary, .launch .primary { min-height: 48px; padding: 0 10px; }
+  .launch .secondary { font-size: 15px; }
+  .launch .primary { grid-column: 1 / -1; font-size: 18px; }
+  .picked li { flex-wrap: wrap; }
+  .picked .pick-text { flex: 1 1 calc(100% - 46px); }
+  .picked li button:first-of-type { margin-left: auto; }
   .board-title span { display: none; }
   #cards .board-title { flex-wrap: wrap; gap: 4px 12px; }
   #cards .board-title span { display: inline; font-size: 14px; }
+  /* The less-used board buttons fold into the "More options" button. */
+  .more-toggle { display: block; }
+  #board .board-actions:not(.open) .extra { display: none; }
+  .board-actions .pill:not(.icon) { padding: 0 11px; font-size: 13px; }
+  #cards [data-keys] { display: none; } /* no keyboard on a phone */
+  #sheet-view .sheet-bar { gap: 8px 10px; }
+  #sheet-view .sheet-bar strong { font-size: 16px; }
+  #sheet-view .segmented button { padding: 0 10px; font-size: 13px; }
+  #sheet-view .sheet-note { order: 3; flex-basis: 100%; font-size: 12px; }
   .q { grid-template-columns: auto 1fr; }
   .q-actions { grid-column: 1 / -1; justify-content: flex-end; }
 }
@@ -220,7 +276,7 @@ sub, sup { font-size: .68em; line-height: 0; }
 .face.back { transform: rotateY(180deg); box-shadow: 8px 8px 0 var(--pop); }
 .face .card-actions { margin-top: auto; padding-top: 1em; }
 .card-recap { margin: 0; font-size: .62em; font-weight: 700; color: var(--muted); }
-.card-unflip { align-self: center; min-height: 44px; margin-top: 10px; padding: 0 12px; border: 0; background: none; font-size: 15px; font-weight: 800; text-decoration: underline; color: var(--muted); }
+.card-unflip { align-self: center; min-height: 48px; margin-top: 10px; padding: 0 12px; border: 0; background: none; font-size: 15px; font-weight: 800; text-decoration: underline; color: var(--muted); }
 .card-unflip:hover { color: var(--ink); }
 @media (prefers-reduced-motion: reduce) { .flip-inner { transition: none; } }
 .card-topic { margin: 0 0 .9em; font-size: max(12px, .38em); font-weight: 900; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); }
@@ -236,7 +292,9 @@ sub, sup { font-size: .68em; line-height: 0; }
 #sheet-view { position: fixed; inset: var(--standalone-top) 0 0 0; z-index: 20; display: flex; flex-direction: column; background: #47595b; }
 .sheet-bar { flex: none; display: flex; align-items: center; justify-content: space-between; gap: 12px 20px; flex-wrap: wrap; padding: 8px 16px; background: var(--board-deep); color: #fff; }
 .sheet-bar strong { font: 900 22px/1 var(--display); letter-spacing: -.04em; text-transform: uppercase; color: var(--hi); }
-.sheet-bar .segmented { color: var(--ink); }
+/* On the dark bar the chosen page is the bright one. */
+.sheet-bar .segmented { border-color: rgba(255, 255, 255, .6); background: none; }
+.sheet-bar .segmented button[aria-pressed="true"] { background: var(--hi); color: var(--ink); }
 .sheet-note { flex: 1 1 260px; margin: 0; font-size: 13px; color: var(--soft); }
 .sheet.key .sheet-table td { height: auto; }
 .sheet.key .sheet-q img { max-height: 30mm; }
@@ -261,7 +319,7 @@ sub, sup { font-size: .68em; line-height: 0; }
 @media print {
   @page { size: A4; margin: 13mm; }
   html, body { background: #fff; }
-  #setup, #board, #cards, #lightbox, .sheet-bar { display: none !important; }
+  #setup, #board, #cards, #lightbox, #keys, .sheet-bar { display: none !important; }
   #sheet-view { position: static; display: block; background: none; }
   .sheet-scroll { overflow: visible; padding: 0; }
   .sheet { width: auto; min-height: 0; padding: 0; box-shadow: none; }
