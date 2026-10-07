@@ -132,6 +132,12 @@
 .cd text.lattice-title { font: 900 15px/1 Arial, Helvetica, sans-serif; letter-spacing: .06em; }
 .cd text.lattice-count { font: 800 14px/1 Arial, Helvetica, sans-serif; }
 
+/* The finished earth-fault picture has a melted fuse: no wire through it, a hot tint and a gap. */
+.cd .fuse-wire { opacity: 0; }
+.cd .fuse-blown { fill: #ffd2c2; stroke: #d9480f; stroke-width: 2.5; }
+.cd .fuse-ends { stroke-width: 3; }
+.cd .fuse-flash { opacity: 0; transform-box: fill-box; transform-origin: center; }
+@keyframes fuse-flash { 0% { opacity: 0; transform: scale(.3); } 25% { opacity: 1; transform: scale(1.6); } 60% { opacity: 1; transform: scale(1.2); } 100% { opacity: 0; transform: scale(1.8); } }
 /* The finished earth-fault picture has the live wire broken away from the heater. */
 .cd .live-to-heater { opacity: 0; transition: opacity .3s ease; }
 /* Mission 8: the earth-fault diagram builds in three clicks. Scoped to the live
@@ -142,7 +148,8 @@
   #deck .cd .k2.shown .flow-line { animation: fault-flow .5s linear infinite; }
   #deck .cd .fault-current, #deck .cd .fuse-wire { transition: opacity .5s ease; }
   /* Once the fuse has melted its wire is gone and the fault current stops. */
-  #deck .cd:has(.k3.shown) .fuse-wire { opacity: 0; }
+  #deck .cd:not(:has(.k3.shown)) .fuse-wire { opacity: 1; }
+  #deck .cd .k3.shown .fuse-flash { animation: fuse-flash 1s ease-out both; }
   #deck .cd:has(.k3.shown) .fault-current { opacity: .25; }
   #deck .cd:has(.k3.shown) .flow-line { animation: none; }
 }
@@ -152,7 +159,7 @@
 @media print { .cd .charge-dot { display: none; } }
 
 .thumb-slide .cd .e-drift, .thumb-slide .cd .e-jig { animation: none; }
-@media (prefers-reduced-motion: reduce) { .cd .e-drift, .cd .e-jig, #deck .cd .k2.shown .flow-line { animation: none; } }
+@media (prefers-reduced-motion: reduce) { .cd .e-drift, .cd .e-jig, #deck .cd .k2.shown .flow-line, #deck .cd .k3.shown .fuse-flash { animation: none; } }
 
 /* Proportionality sign, drawn because the display fonts have no ∝ glyph */
 .prop { display: inline-block; width: .9em; height: .56em; vertical-align: .02em; fill: none; stroke: currentColor; stroke-width: 2.4; stroke-linecap: round; }

@@ -345,7 +345,9 @@
       ];
       const slowTurn = 'calcMode="spline" keyPoints="0;0.52;1" keyTimes="0;0.5;1" keySplines="0 0 .4 1;.6 0 1 1"';
       paths.forEach(([d, label, x, y, anchor], i) => {
-        let track = `<path d="${d}" class="alpha-path" marker-end="url(#m-alpha)"/>`;
+        // Head-on, live: the particle runs straight in and back, inside a thin U-shaped arrow.
+        const drawn = on && i === 2 ? 'M20,236 H286 A6,6 0 0 0 286,224 H40' : d;
+        let track = `<path d="${drawn}" class="alpha-path" marker-end="url(#m-alpha)"/>`;
         track += `<g class="mover"><circle r="10" fill="url(#g-alpha)"/><animateMotion dur="3s" begin="-${i * 0.9}s" repeatCount="indefinite" path="${d}"${on && i === 2 ? ' ' + slowTurn : ''}/></g>`;
         track += text(x, y, label, 'lbl', anchor, 'style="fill:var(--alpha)"');
         // In the deck each track appears with its row of the observation table.
@@ -484,33 +486,41 @@
       // Deck build: each radiation streams from the source for as long as its step is shown.
       // The drawn particles and waves ("still") stand in on thumbnails, in print and with reduced motion.
       const still = body => on ? `<g class="still">${body}</g>` : body;
-      // Evenly timed particles start out of sight inside the source and come out through its
-      // face (x = 84), so one leaving the source never coincides with one vanishing at the barrier.
+      // Particles wait out of sight inside the source and come out through its face (x = 84)
+      // one at a time once their step is shown (deck.css runs them), so the stream starts at
+      // the source on the click.
       const stream = (y, endX, r, kind, seconds, count) => {
         if (!on) return '';
-        const balls = Array.from({ length: count }, (_, i) => {
-          const begin = (i * seconds / count).toFixed(3);
-          return `<g>${ball(0, 0, r, kind)}<animateMotion dur="${seconds}s" begin="-${begin}s" repeatCount="indefinite" path="M${84 - r},${y} H${endX - r}"/>`
-            + `<animate attributeName="opacity" dur="${seconds}s" begin="-${begin}s" repeatCount="indefinite" values="1;1;0" keyTimes="0;0.95;1"/></g>`;
-        }).join('');
+        const balls = Array.from({ length: count }, (_, i) =>
+          `<g class="stream-ball" style="--time:${seconds}s;--delay:${(i * seconds / count).toFixed(3)}s;--travel:${endX - 84}px">${ball(84 - r, y, r, kind)}</g>`).join('');
         return `<g class="mover"><clipPath id="lane-${kind}"><rect x="84" y="${y - r - 2}" width="${endX - 84}" height="${2 * r + 4}"/></clipPath><g clip-path="url(#lane-${kind})">${balls}</g></g>`;
       };
-      // A wave one wavelength longer than its window, sliding along by that wavelength.
-      const running = (id, x1, x2, amp, opacity, seconds) => {
-        const lambda = 58, cycles = Math.ceil((x2 - x1) / lambda) + 1;
-        return `<clipPath id="${id}"><rect x="${x1}" y="270" width="${x2 - x1}" height="70"/></clipPath>`
-          + `<g clip-path="url(#${id})"><g class="wave-run" style="--shift:${lambda}px;--time:${seconds}s">${wave(x2 - cycles * lambda, 305, x2, 305, { cycles, amp, head: false, opacity })}</g></g>`;
+      // A wave one wavelength longer than its window, sliding along by that wavelength. The
+      // window opens from its left edge when the step is shown, so the wave front sets off
+      // from the source (and from the far side of the lead once it has got there).
+      // Both windows start a whole number of wavelengths from x = 32, so the wave beyond the
+      // lead keeps the wavelength, frequency and phase of the wave before it: only the
+      // amplitude is smaller.
+      const LAMBDA = 58, PERIOD = 0.14;
+      const running = (id, x1, x2, amp, opacity, wait) => {
+        const cycles = Math.ceil((x2 - x1) / LAMBDA) + 1, cross = (x2 - x1) / LAMBDA * PERIOD;
+        return `<clipPath id="${id}"><rect x="${x1}" y="270" width="${x2 - x1}" height="70" class="wave-window" style="--cross:${cross.toFixed(2)}s;--wait:${wait}s"/></clipPath>`
+          + `<g clip-path="url(#${id})"><g class="wave-run" style="--shift:${LAMBDA}px;--time:${PERIOD}s">${wave(x1 - LAMBDA, 305, x1 + (cycles - 1) * LAMBDA, 305, { cycles, amp, head: false, opacity })}</g></g>`;
       };
+      // "stopped" and "reduced" appear when the first of the stream gets that far.
+      const onArrival = (seconds, body) => on ? `<g class="on-arrival" style="--wait:${seconds}s">${body}</g>` : body;
       const greek = (y, sym, color) => text(112, y, sym, 'lbl greek', 'start', `style="fill:var(--${color})"`);
       // The lane lines belong to the printed figure only.
       const lane = (x2, y, color) => on ? '' : `<line x1="90" y1="${y}" x2="${x2}" y2="${y}" class="lane" style="stroke:var(--${color})"/>`;
-      const alpha = lane(294, 125, 'alpha') + still(ball(150, 125, 14, 'alpha') + ball(232, 125, 14, 'alpha')) + stream(125, 300, 14, 'alpha', 3.6, 4)
-        + text(318, 110, 'stopped', 'lbl small', 'start', 'style="fill:var(--alpha)"');
-      const beta = lane(514, 215, 'electron') + still([160, 290, 420].map(x => ball(x, 215, 10, 'electron')).join('')) + stream(215, 520, 10, 'electron', 2.6, 4)
-        + text(550, 200, 'stopped', 'lbl small', 'start', 'style="fill:var(--electron)"');
-      let gamma = still(wave(90, 305, 728, 305, { cycles: 11, amp: 10, head: false }) + wave(786, 305, 940, 305, { cycles: 3, amp: 6, opacity: .45 }));
-      if (on) gamma += `<g class="mover">${running('gamma-in', 90, 728, 10, 1, .3)}${running('gamma-out', 786, 926, 6, .45, .3)}<line x1="924" y1="305" x2="940" y2="305" style="stroke:var(--photon);opacity:.45" stroke-width="3" marker-end="url(#m-photon)"/></g>`;
-      gamma += text(860, 340, 'reduced', 'lbl small', 'middle', 'style="fill:var(--photon)"');
+      const alpha = lane(294, 125, 'alpha') + still(ball(150, 125, 14, 'alpha') + ball(232, 125, 14, 'alpha')) + stream(125, 300, 14, 'alpha', 1.6, 4)
+        + onArrival(1.4, text(318, 110, 'stopped', 'lbl small', 'start', 'style="fill:var(--alpha)"'));
+      const beta = lane(514, 215, 'electron') + still([160, 290, 420].map(x => ball(x, 215, 10, 'electron')).join('')) + stream(215, 520, 10, 'electron', 1.2, 4)
+        + onArrival(1.0, text(550, 200, 'stopped', 'lbl small', 'start', 'style="fill:var(--electron)"'));
+      // On the slide the wave beyond the lead has no arrowhead and the same wavelength as before it.
+      const beyond = on ? wave(786, 305, 931, 305, { cycles: 2.5, amp: 6, head: false, opacity: .45 }) : wave(786, 305, 940, 305, { cycles: 3, amp: 6, opacity: .45 });
+      let gamma = still(wave(90, 305, 728, 305, { cycles: 11, amp: 10, head: false }) + beyond);
+      if (on) gamma += `<g class="mover">${running('gamma-in', 90, 728, 10, 1, 0)}${running('gamma-out', 786, 940, 6, .45, 1.65)}</g>`;
+      gamma += onArrival(1.8, text(860, 340, 'reduced', 'lbl small', 'middle', 'style="fill:var(--photon)"'));
       const labels = [greek(100, 'α', 'alpha'), greek(196, 'β', 'electron'), greek(282, 'γ', 'photon')];
       s += on ? [alpha, beta, gamma].map((lane, i) => stepG(on, i + 1, lane + labels[i])).join('') : alpha + beta + gamma + labels.join('');
       return svg('0 0 960 410', s, 'Penetration: paper stops alpha, a few millimetres of aluminium stops beta, several centimetres of lead reduce gamma');

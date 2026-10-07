@@ -157,7 +157,10 @@
       [[230, 76, 0], [90, 76, 0], [470, 150, 90], [230, 196, 180], [100, 196, 180]].forEach(([x, y, a]) => { s += head(x, y, a); });
       s += `<path d="M372 56 H470 V196 H310" class="flow-line" style="stroke-dasharray:6 5"/></g>`;
       s += txt(250, 268, 'Live touches the case → big current to earth', 'note hot') + '</g>';
-      s += `<g class="step k3">${txt(250, 288, '→ fuse melts → supply cut off', 'note hot')}</g>`;
+      // The melted fuse: a gap in its wire, a hot tint, a flash as it goes and a label.
+      s += `<g class="step k3"><rect x="130" y="69" width="40" height="14" class="fuse-blown"/><path d="M130 76 H142 M158 76 H170" class="fuse-ends"/>`;
+      s += `<path class="spark fuse-flash" d="M150 62 l5 -10 l2 8 l8 -5 l-4 9 l9 3 l-10 3 l4 8 l-9 -4 l-3 9 l-3 -10 l-9 3 l6 -8 l-8 -5 z"/>`;
+      s += txt(150, 102, 'melted', 'note hot') + txt(250, 288, '→ fuse melts → supply cut off', 'note hot') + '</g>';
       return svg(500, 300, s, 'Fault in a metal-cased heater: the live wire touches the case, a large current flows through the earth wire and the fuse in the live wire melts');
     }
   };
