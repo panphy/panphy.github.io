@@ -11,11 +11,13 @@
   const head = (x, y, a, cls = 'flow') => `<g transform="translate(${x} ${y}) rotate(${a})"><path class="${cls}" d="M7 0 L-5 -6 L-5 6 Z"/></g>`;
   // Current going round a circuit: orange arrowheads in the conventional direction
   // (+ to −), as every slide after "Conventional current" shows it. They sit just above
-  // the wires, so they pass behind each component symbol. runs: [path, seconds, start times].
-  function currentFlow(markup, lastWire, runs) {
+  // the wires, so they pass behind each component symbol.
+  // runs: [path, seconds, start times, arrowhead size (1 = the fixed arrowheads)].
+  // cover: markup drawn over the arrowheads but under the symbols, to hide them inside a battery.
+  function currentFlow(markup, lastWire, runs, cover = '') {
     if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return markup;
-    const marks = runs.map(([path, dur, starts]) => starts.map(t => `<path class="flow charge-dot" d="M7 0 L-5 -6 L-5 6 Z"><animateMotion dur="${dur}s" repeatCount="indefinite" begin="-${t}s" rotate="auto" path="${path}"/></path>`).join('')).join('');
-    return markup.replace(`<path d="${lastWire}"/>`, match => match + marks);
+    const marks = runs.map(([path, dur, starts, k = 1]) => starts.map(t => `<path class="flow charge-dot" d="M${7 * k} 0 L${-5 * k} ${-6 * k} L${-5 * k} ${6 * k} Z"><animateMotion dur="${dur}s" repeatCount="indefinite" begin="-${t}s" rotate="auto" path="${path}"/></path>`).join('')).join('');
+    return markup.replace(`<path d="${lastWire}"/>`, match => match + marks + cover);
   }
   const fall = x => 0.9 * Math.exp(-2.6 * x) + 0.05;
   // The practical diagrams set label sizes inline for the companion pages;
@@ -103,12 +105,16 @@
 
     // Mission 5
     series: () => D.circuit({ w: 360, h: 205, wires: [LOOP], parts: [['battery', 180, 40, 'h', '12 V'], ['ammeter', 40, 95, 'v', '1.0 A', 'r'], ['resistor', 120, 150, 'h', '4 Ω, 4 V', 'b'], ['resistor', 240, 150, 'h', '8 Ω, 8 V', 'b']], caption: 'R_total = 4 + 8 = 12 Ω, I = 12 ÷ 12 = 1.0 A' }),
-    // With data-animate, the current splits at the junction: two arrowheads take the 3 Ω
-    // branch for every one through the 6 Ω branch, and all three pass the ammeter.
+    // With data-animate, arrowhead size shows the size of the current: large (3 A) through
+    // the battery and ammeter, medium (2 A) in the 3 Ω branch, small (1 A) in the 6 Ω branch.
+    // Each stretch takes a whole number of 1.25 s intervals, so a large arrowhead reaching
+    // the left junction is replaced by a medium and a small one at the same moment.
     parallel: el => {
       const figure = D.circuit({ w: 360, h: 225, wires: ['M40 40 H320 V185 H40 Z', 'M40 115 H320'], parts: [['battery', 180, 40, 'h', '6 V'], ['ammeter', 40, 77, 'v', '3 A', 'r'], ['resistor', 180, 115, 'h', '3 Ω, 2 A'], ['resistor', 180, 185, 'h', '6 Ω, 1 A', 'b']], dots: [[40, 115], [320, 115]], caption: 'Each branch has 6 V across it; 2 A + 1 A = 3 A' });
       if (!('animate' in el.dataset)) return figure;
-      return currentFlow(figure, 'M40 115 H320', [['M320 40 H40 V115 H320 Z', 12, [0, 1, 3, 4, 6, 7, 9, 10]], ['M320 40 H40 V185 H320 Z', 15, [2, 5, 8, 11, 14]]]);
+      const every = (n, gap = 1.25) => Array.from({ length: n }, (_, i) => i * gap);
+      return currentFlow(figure, 'M40 115 H320', [['M320 115 V40 H40 V115', 7.5, every(6), 1.5], ['M40 115 H320', 5, every(4), 1.1], ['M40 115 V185 H320 V115', 7.5, every(6), 0.7]],
+        '<rect class="mask" x="158" y="24" width="44" height="32"/>');
     },
     paths: () => P.currentPaths(),
     seriesProblem: () => D.circuit({ w: 360, h: 245, wires: [LOOP, 'M210 150 V205 H270 V150'], parts: [['battery', 180, 40, 'h', '9.0 V'], ['lamp', 110, 150, 'h', 'lamp', 'b'], ['resistor', 240, 150, 'h', '10 Ω'], ['voltmeter', 240, 205, 'h', '6.0 V', 'b']], dots: [[210, 150], [270, 150]], caption: 'Find the resistance of the lamp.' }),
@@ -140,7 +146,9 @@
       s += `<g transform="translate(150 76)"><rect class="mask" x="-21" y="-5" width="42" height="10"/><g class="body"><rect x="-20" y="-7" width="40" height="14"/><line x1="-20" y1="0" x2="20" y2="0" class="fuse-wire"/></g></g>` + txt(150, 58, 'fuse', 'note');
       s += txt(24, 64, 'LIVE', 'note', 'start') + txt(24, 124, 'NEUTRAL', 'note', 'start') + txt(60, 184, 'EARTH', 'note', 'start');
       // Inside the case the heater sits between live and neutral, as in normal use.
-      s += `<path d="M300 76 H380 V100" class="w-live"/><path d="M300 136 H380 V124" class="w-neutral"/><rect x="350" y="100" width="60" height="24" class="heater"/>` + txt(380, 158, 'heater', 'note');
+      // The stretch of live wire into the heater is there until the fault: it is the part that
+      // breaks off and touches the case, leaving a stub on the heater (deck.css).
+      s += `<path d="M300 76 H340 M380 100 V88" class="w-live"/><path d="M340 76 H380 V100" class="w-live live-to-heater"/><path d="M300 136 H380 V124" class="w-neutral"/><rect x="350" y="100" width="60" height="24" class="heater"/>` + txt(380, 158, 'heater', 'note');
       s += `<circle cx="300" cy="196" r="5" class="dot"/><path d="M60 196 V226 M44 226 H76 M50 234 H70 M56 242 H64"/>`;
       // Three clicks: the fault, the current it drives to earth, then the fuse melting.
       s += `<g class="step k1"><path d="M340 76 Q352 76 352 64 V44" class="w-live"/>`;

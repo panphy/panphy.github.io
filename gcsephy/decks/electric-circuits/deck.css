@@ -132,10 +132,13 @@
 .cd text.lattice-title { font: 900 15px/1 Arial, Helvetica, sans-serif; letter-spacing: .06em; }
 .cd text.lattice-count { font: 800 14px/1 Arial, Helvetica, sans-serif; }
 
+/* The finished earth-fault picture has the live wire broken away from the heater. */
+.cd .live-to-heater { opacity: 0; transition: opacity .3s ease; }
 /* Mission 8: the earth-fault diagram builds in three clicks. Scoped to the live
    deck on screen, so thumbnails and print keep the finished diagram. */
 @media screen {
   #deck .cd .step:not(.shown) { transform: none; }
+  #deck .cd:not(:has(.k1.shown)) .live-to-heater { opacity: 1; }
   #deck .cd .k2.shown .flow-line { animation: fault-flow .5s linear infinite; }
   #deck .cd .fault-current, #deck .cd .fuse-wire { transition: opacity .5s ease; }
   /* Once the fuse has melted its wire is gone and the fault current stops. */
