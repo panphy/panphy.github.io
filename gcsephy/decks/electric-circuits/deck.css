@@ -130,8 +130,24 @@
 .cd text.lattice-title { font: 900 15px/1 Arial, Helvetica, sans-serif; letter-spacing: .06em; }
 .cd text.lattice-count { font: 800 14px/1 Arial, Helvetica, sans-serif; }
 
+/* Mission 8: the earth-fault diagram builds in three clicks. Scoped to the live
+   deck on screen, so thumbnails and print keep the finished diagram. */
+@media screen {
+  #deck .cd .step:not(.shown) { transform: none; }
+  #deck .cd .k2.shown .flow-line { animation: fault-flow .5s linear infinite; }
+  #deck .cd .fault-current, #deck .cd .fuse-wire { transition: opacity .5s ease; }
+  /* Once the fuse has melted its wire is gone and the fault current stops. */
+  #deck .cd:has(.k3.shown) .fuse-wire { opacity: 0; }
+  #deck .cd:has(.k3.shown) .fault-current { opacity: .25; }
+  #deck .cd:has(.k3.shown) .flow-line { animation: none; }
+}
+/* Thumbnails show the built diagram complete. */
+.thumb-slide .cd .step:not(.shown) { opacity: 1; transform: none; }
+@keyframes fault-flow { to { stroke-dashoffset: -11; } }
+@media print { .cd .charge-dot { display: none; } }
+
 .thumb-slide .cd .e-drift, .thumb-slide .cd .e-jig { animation: none; }
-@media (prefers-reduced-motion: reduce) { .cd .e-drift, .cd .e-jig { animation: none; } }
+@media (prefers-reduced-motion: reduce) { .cd .e-drift, .cd .e-jig, #deck .cd .k2.shown .flow-line { animation: none; } }
 
 /* Proportionality sign, drawn because the display fonts have no ∝ glyph */
 .prop { display: inline-block; width: .9em; height: .56em; vertical-align: .02em; fill: none; stroke: currentColor; stroke-width: 2.4; stroke-linecap: round; }

@@ -20,6 +20,11 @@
     return `<line x1="${f(x1)}" y1="${f(y1)}" x2="${f(bx)}" y2="${f(by)}" class="${cls}"/><path class="head ${cls.replace('arrow', '').trim()}" d="M${f(x2)} ${f(y2)}L${p(Math.PI / 2)}L${p(-Math.PI / 2)}Z"/>`;
   }
 
+  // Deck builds. step(): shown on its own click. sync(): shown with a text step
+  // the slide already has (deck.css names which one).
+  const step = (k, body) => `<g class="step k${k}">${body}</g>`;
+  const sync = (name, body) => `<g class="sync sync-${name}">${body}</g>`;
+
   // Gridded axes. Returns the drawing plus value → pixel converters.
   function axes({ x0, y0, w, h, xr, yr, xLabel, yLabel, xEvery = 1, yEvery = 1, fmtX = String, fmtY = String, grid = true, showX = true }) {
     const [xmin, xmax, xs] = xr, [ymin, ymax, ys] = yr;
@@ -89,12 +94,13 @@
     uncertainty: () => {
       const X = v => 60 + (v - 1.18) / 0.09 * 680;
       const mean = 1.2233;
-      let s = `<rect x="${f(X(mean - 0.025))}" y="120" width="${f(X(mean + 0.025) - X(mean - 0.025))}" height="140" class="band"/>`;
-      s += `<path class="bracket" d="M${f(X(1.2))} 102V80H${f(X(1.25))}V102"/>` + t((X(1.2) + X(1.25)) / 2, 62, 'RANGE: FROM 1.20 s TO 1.25 s', 'lab');
+      // Each part appears with its line of the worked example: mean, range, uncertainty.
+      let s = sync('w3', `<rect x="${f(X(mean - 0.025))}" y="120" width="${f(X(mean + 0.025) - X(mean - 0.025))}" height="140" class="band"/>`);
+      s += sync('w2', `<path class="bracket" d="M${f(X(1.2))} 102V80H${f(X(1.25))}V102"/>` + t((X(1.2) + X(1.25)) / 2, 62, 'RANGE: FROM 1.20 s TO 1.25 s', 'lab'));
       [1.20, 1.22, 1.25].forEach(v => { s += cross(X(v), 190, 14); });
-      s += line(X(mean), 128, X(mean), 252, 'mean-line');
-      s += arrow(X(mean), 290, X(mean - 0.025), 290, 'arrow cyan') + arrow(X(mean), 290, X(mean + 0.025), 290, 'arrow cyan');
-      s += t(X(mean + 0.025) + 14, 299, '± 0.025 s', 'lab small', 'start');
+      s += sync('w1', line(X(mean), 128, X(mean), 252, 'mean-line'));
+      s += sync('w3', arrow(X(mean), 290, X(mean - 0.025), 290, 'arrow cyan') + arrow(X(mean), 290, X(mean + 0.025), 290, 'arrow cyan')
+        + t(X(mean + 0.025) + 14, 299, '± 0.025 s', 'lab small', 'start'));
       s += `<path class="axis" d="M50 340H750"/>`;
       for (let v = 1.18; v <= 1.2701; v += 0.01) s += line(X(v), 340, X(v), 354, 'ink') + t(X(v), 386, v.toFixed(2), 'tick-t');
       s += t(400, 436, 'Time / s', 'axis-t');
@@ -199,12 +205,17 @@
       s += `<rect x="330" y="520" width="240" height="40" class="f-alt box"/>`;
       for (let i = 0; i < 12; i++) s += dot(346 + i * 19, 533 + (i % 2) * 13, 3, 'foam');
       s += t(450, 598, 'material under test', 'body-t');
-      s += dot(430, Y(50) - 22, 22, 'ball') + t(470, Y(50) - 30, 'release from 50 cm', 'body-t', 'start') + t(470, Y(50) - 2, 'no push', 'body-t muted-t', 'start');
-      s += arrow(430, Y(50) + 8, 430, 508, 'arrow dash-arrow');
-      s += `<circle cx="490" cy="${f(Y(24) - 22)}" r="22" class="ghost"/>`;
-      s += arrow(490, 508, 490, Y(24) + 6, 'arrow hot');
-      s += line(310, Y(24), 470, Y(24), 'trend dash');
-      s += t(530, Y(24) - 50, 'bounce height', 'lab', 'start') + t(530, Y(24) - 22, 'read at the ball', 'body-t muted-t', 'start') + t(530, Y(24) + 4, 'bottom, eye level', 'body-t muted-t', 'start');
+      s += dot(430, Y(50) - 22, 22, 'ball release') + t(470, Y(50) - 30, 'release from 50 cm', 'body-t', 'start') + t(470, Y(50) - 2, 'no push', 'body-t muted-t', 'start');
+      // Two clicks: the ball falls and bounces straight back up, then the bounce height is marked.
+      // The still picture draws the bounce to one side; the live slide puts it on the drop line (deck.css).
+      s += step(1, arrow(430, Y(50) + 8, 430, 508, 'arrow dash-arrow'));
+      let bounce = `<g class="bounce-path"><circle cx="490" cy="${f(Y(24) - 22)}" r="22" class="ghost"/>`;
+      bounce += arrow(490, 508, 490, Y(24) + 6, 'arrow hot') + '</g>';
+      bounce += line(310, Y(24), 470, Y(24), 'trend dash');
+      bounce += t(530, Y(24) - 50, 'bounce height', 'lab', 'start') + t(530, Y(24) - 22, 'read at the ball', 'body-t muted-t', 'start') + t(530, Y(24) + 4, 'bottom, eye level', 'body-t muted-t', 'start');
+      s += step(2, bounce);
+      // The ball that moves: shown on the live slide only (deck.css), where the drawn ball becomes an outline.
+      s += `<circle cx="430" cy="${f(Y(50) - 22)}" r="22" class="ball live-only drop-ball" style="--land:${f(498 - (Y(50) - 22))}px;--rise:${f(Y(24) - Y(50))}px"/>`;
       s += t(60, 40, 'metre ruler: 0 at the material surface', 'body-t', 'start');
       return svg(800, 620, s, 'Drop test: a ball released from 50 cm beside a clamped metre ruler onto a material; the bounce height is read at eye level');
     },
@@ -234,16 +245,21 @@
       [0, 1, 2].forEach(i => { s += rect(40, 356 - i * 64, 110, 64, 'f-alt box'); });
       s += `<path class="board" d="M${A[0]} ${A[1]}L${B[0]} ${B[1]}L${B[0] - 26} ${B[1]}L${A[0]} ${A[1] + 12}Z"/>`;
       const [tx, ty] = at(0.24);
-      s += `<g transform="translate(${f(tx)} ${f(ty)}) rotate(${f(ang * 180 / Math.PI)})"><rect x="-42" y="-40" width="86" height="30" class="f-accent box" rx="4"/>${dot(-24, -8, 9, 'wheel')}${dot(26, -8, 9, 'wheel')}</g>`;
+      // First click on the live slide: the trolley runs down the ramp, levels out where the
+      // ramp meets the floor and rolls to a stop. The second click marks the distance.
+      const deg = f(ang * 180 / Math.PI), [ex, ey] = at(0.93);
+      const places = `--at-start:translate(${f(tx)}px, ${f(ty)}px) rotate(${deg}deg);--at-foot:translate(${f(ex)}px, ${f(ey)}px) rotate(${deg}deg);--on-floor:translate(${B[0] + 30}px, 420px) rotate(0deg);--at-rest:translate(720px, 420px) rotate(0deg)`;
+      s += `<g class="trolley" style="${places}" transform="translate(${f(tx)} ${f(ty)}) rotate(${deg})"><rect x="-42" y="-40" width="86" height="30" class="f-accent box" rx="4"/>${dot(-24, -8, 9, 'wheel')}${dot(26, -8, 9, 'wheel')}</g>`;
       const [s1x, s1y] = at(0.1), [s2x, s2y] = at(0.1, 34);
       s += line(s1x, s1y, s2x, s2y, 'tape') + t(s2x - 8, s2y - 14, 'start line', 'body-t small', 'end');
       s += t(230, 236, 'release, no push', 'body-t', 'start');
-      s += `<g transform="translate(720 420)"><rect x="-42" y="-40" width="86" height="30" class="ghost-box" rx="4"/><circle cx="-24" cy="-8" r="9" class="ghost"/><circle cx="26" cy="-8" r="9" class="ghost"/></g>`;
+      s += step(1, '');
       s += rect(440, 424, 400, 14, 'f-alt box');
       for (let i = 0; i <= 40; i++) s += line(440 + i * 10, 424, 440 + i * 10, i % 5 ? 430 : 434, 'ink thin');
-      s += arrow(580, 466, 440, 466, 'arrow') + arrow(620, 466, 762, 466, 'arrow') + t(600, 474, 'd', 'big small-big');
+      // The ghost has no transform of its own, because a step's reveal styles would replace it.
+      const ghost = `<rect x="678" y="380" width="86" height="30" class="ghost-box" rx="4"/><circle cx="696" cy="412" r="9" class="ghost"/><circle cx="746" cy="412" r="9" class="ghost"/>`;
+      s += step(2, ghost + arrow(580, 466, 440, 466, 'arrow') + arrow(620, 466, 762, 466, 'arrow') + t(600, 474, 'd', 'big small-big') + t(600, 506, 'distance travelled after the ramp', 'body-t'));
       s += arrow(16, 310, 16, 230, 'arrow') + arrow(16, 336, 16, 418, 'arrow') + t(16, 334, 'h', 'big small-big');
-      s += t(600, 506, 'distance travelled after the ramp', 'body-t');
       return svg(900, 520, s, 'A trolley released from a start line on a ramp of height h, propped on blocks, travels a distance d along the floor, measured with a tape');
     },
 
@@ -263,7 +279,8 @@
     lineGraph: () => {
       const { s, X, Y } = axes({ x0: 130, y0: 60, w: 720, h: 400, xr: [0, 30, 2.5], yr: [0, 90, 5], xEvery: 2, yEvery: 2, xLabel: 'Ramp height / cm', yLabel: 'Mean distance / cm' });
       const pts = [[5, 20], [10, 37], [15, 52], [20, 66], [25, 80]];
-      return svg(900, 560, s + pts.map(([a, b]) => cross(X(a), Y(b), 9)).join('') + t(490, 32, 'Mean distance travelled against ramp height', 'lab'), 'Line graph axes with five plotted crosses: ramp height 5, 10, 15, 20 and 25 cm against mean distance 20, 37, 52, 66 and 80 cm');
+      // One mean plotted per click.
+      return svg(900, 560, s + pts.map(([a, b], i) => step(i + 1, cross(X(a), Y(b), 9))).join('') + t(490, 32, 'Mean distance travelled against ramp height', 'lab'), 'Line graph axes with five plotted crosses: ramp height 5, 10, 15, 20 and 25 cm against mean distance 20, 37, 52, 66 and 80 cm');
     },
 
     // Dot-to-dot, straight best fit and curved best fit.
@@ -295,8 +312,8 @@
       const pts = [[5, 20], [10, 37], [15, 52], [20, 96], [25, 80]];
       let out = s + line(X(1), Y(8.5), X(28), Y(89.5), 'trend');
       out += pts.map(([a, b]) => cross(X(a), Y(b), 9)).join('');
-      out += `<circle cx="${f(X(20))}" cy="${f(Y(96))}" r="26" class="out-ring"/>`;
-      out += t(X(20) - 40, Y(96) - 4, 'anomaly?', 'lab hot-t', 'end');
+      // Circled when the first point beside the table is revealed.
+      out += sync('l1', `<circle cx="${f(X(20))}" cy="${f(Y(96))}" r="26" class="out-ring"/>` + t(X(20) - 40, Y(96) - 4, 'anomaly?', 'lab hot-t', 'end'));
       return svg(880, 540, out, 'Ramp data with a best-fit line through four points; the point at 20 cm, 96 cm lies far above the line and is circled as a possible anomalous result');
     },
 
@@ -330,9 +347,12 @@
       const { s, X, Y } = axes({ x0: 130, y0: 50, w: 700, h: 400, xr: [3, 9, 0.5], yr: [1, 2, 0.05], xEvery: 2, yEvery: 4, fmtY: v => v.toFixed(1), xLabel: 'Wing length / cm', yLabel: 'Mean fall time / s' });
       const pts = [[4, 1.10], [5, 1.32], [6, 1.50], [7, 1.71], [8, 1.88]];
       let out = s + line(X(3.4), Y(0.196 * 3.4 + 0.33), X(8.6), Y(0.196 * 8.6 + 0.33), 'trend');
-      out += `<path class="guide" d="M${f(X(6.5))} ${f(Y(1))}V${f(Y(1.604))}H${f(X(3))}"/>`;
+      // With the "6.5 cm" text step the guide is drawn up to the line and across to the axis.
+      // Its dash pattern ends in a gap as long as the path, so sliding the pattern draws it.
+      const length = Y(1) - Y(1.604) + X(6.5) - X(3), dashes = Math.ceil(length / 15);
+      out += `<path class="guide draw-guide" style="--dashes:${'8 7 '.repeat(dashes)}0 ${f(length)};--hidden:${dashes * 15}" d="M${f(X(6.5))} ${f(Y(1))}V${f(Y(1.604))}H${f(X(3))}"/>`;
       out += pts.map(([a, b]) => cross(X(a), Y(b), 9)).join('');
-      out += dot(X(6.5), Y(1.604), 9, 'pt') + t(X(6.5) + 16, Y(1.604) + 34, '6.5 cm → about 1.6 s', 'lab small', 'start');
+      out += sync('l4', dot(X(6.5), Y(1.604), 9, 'pt') + t(X(6.5) + 16, Y(1.604) + 34, '6.5 cm → about 1.6 s', 'lab small', 'start'));
       return svg(880, 540, out, 'Wing length against mean fall time: points from 4 cm, 1.10 s to 8 cm, 1.88 s with a straight best-fit line; reading at 6.5 cm gives about 1.6 s');
     }
   };

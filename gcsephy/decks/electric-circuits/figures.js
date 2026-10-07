@@ -9,6 +9,13 @@
   const svg = (w, h, body, label) => `<svg class="cd" viewBox="0 0 ${w} ${h}" role="img" aria-label="${label}" xmlns="http://www.w3.org/2000/svg">${body}</svg>`;
   const txt = (x, y, s, cls = '', anchor = 'middle') => `<text x="${x}" y="${y}" class="${cls}" text-anchor="${anchor}">${s}</text>`;
   const head = (x, y, a, cls = 'flow') => `<g transform="translate(${x} ${y}) rotate(${a})"><path class="${cls}" d="M7 0 L-5 -6 L-5 6 Z"/></g>`;
+  // Charges going round a circuit, electron-flow direction. They sit just above
+  // the wires, so they pass behind each component symbol. runs: [path, seconds, start times].
+  function charges(markup, lastWire, runs) {
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return markup;
+    const dots = runs.map(([path, dur, starts]) => starts.map(t => `<circle class="charge-dot" r="4.5"><animateMotion dur="${dur}s" repeatCount="indefinite" begin="-${t}s" path="${path}"/></circle>`).join('')).join('');
+    return markup.replace(`<path d="${lastWire}"/>`, match => match + dots);
+  }
   const fall = x => 0.9 * Math.exp(-2.6 * x) + 0.05;
   // The practical diagrams set label sizes inline for the companion pages;
   // enlarge them so they read from the back of a room.
@@ -55,7 +62,10 @@
       notes: [[170, 20, '+'], [192, 20, '−'], [58, 80, 'conventional', 'start', 'hot'], [58, 96, 'current: + → −', 'start', 'hot'], [302, 80, 'electrons:', 'end', 'cool'], [302, 96, '− → +', 'end', 'cool']],
       caption: 'Orange: conventional current (+ to −). Blue: electron flow (− to +).'
     }),
-    threeAmmeters: () => D.circuit({ w: 360, h: 200, wires: [LOOP], parts: [['cell', 180, 40, 'h', '6 V'], ['ammeter', 40, 95, 'v', '0.60 A', 'r'], ['ammeter', 320, 95, 'v', '0.60 A', 'l'], ['ammeter', 110, 150, 'h', '0.60 A', 'b'], ['resistor', 230, 150, 'h', '10 Ω', 'b']], caption: 'Three ammeters in one loop give the same reading.' }),
+    // Evenly spaced charges at one speed: the same number pass every ammeter each second.
+    threeAmmeters: () => charges(
+      D.circuit({ w: 360, h: 200, wires: [LOOP], parts: [['cell', 180, 40, 'h', '6 V'], ['ammeter', 40, 95, 'v', '0.60 A', 'r'], ['ammeter', 320, 95, 'v', '0.60 A', 'l'], ['ammeter', 110, 150, 'h', '0.60 A', 'b'], ['resistor', 230, 150, 'h', '10 Ω', 'b']], caption: 'Three ammeters in one loop give the same reading.' }),
+      LOOP, [[LOOP, 13, [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]]]),
 
     // Mission 3
     voltmeter: () => D.circuit({ w: 360, h: 240, wires: [LOOP, 'M130 150 V205 H230 V150'], parts: [['battery', 180, 40, 'h', '6 V'], ['ammeter', 40, 95, 'v'], ['resistor', 180, 150, 'h', '10 Ω'], ['voltmeter', 180, 205, 'h', 'reads 6 V', 'b']], dots: [[130, 150], [230, 150]], caption: 'Ammeter in series. Voltmeter across the resistor, in parallel.' }),
@@ -92,7 +102,13 @@
 
     // Mission 5
     series: () => D.circuit({ w: 360, h: 205, wires: [LOOP], parts: [['battery', 180, 40, 'h', '12 V'], ['ammeter', 40, 95, 'v', '1.0 A', 'r'], ['resistor', 120, 150, 'h', '4 Ω, 4 V', 'b'], ['resistor', 240, 150, 'h', '8 Ω, 8 V', 'b']], caption: 'R_total = 4 + 8 = 12 Ω, I = 12 ÷ 12 = 1.0 A' }),
-    parallel: () => D.circuit({ w: 360, h: 225, wires: ['M40 40 H320 V185 H40 Z', 'M40 115 H320'], parts: [['battery', 180, 40, 'h', '6 V'], ['ammeter', 40, 77, 'v', '3 A', 'r'], ['resistor', 180, 115, 'h', '3 Ω, 2 A'], ['resistor', 180, 185, 'h', '6 Ω, 1 A', 'b']], dots: [[40, 115], [320, 115]], caption: 'Each branch has 6 V across it; 2 A + 1 A = 3 A' }),
+    // With data-animate, charges split at the junction: two take the 3 Ω branch
+    // for every one through the 6 Ω branch, and all three pass the ammeter.
+    parallel: el => {
+      const figure = D.circuit({ w: 360, h: 225, wires: ['M40 40 H320 V185 H40 Z', 'M40 115 H320'], parts: [['battery', 180, 40, 'h', '6 V'], ['ammeter', 40, 77, 'v', '3 A', 'r'], ['resistor', 180, 115, 'h', '3 Ω, 2 A'], ['resistor', 180, 185, 'h', '6 Ω, 1 A', 'b']], dots: [[40, 115], [320, 115]], caption: 'Each branch has 6 V across it; 2 A + 1 A = 3 A' });
+      if (!('animate' in el.dataset)) return figure;
+      return charges(figure, 'M40 115 H320', [['M40 40 H320 V115 H40 Z', 12, [0, 1, 3, 4, 6, 7, 9, 10]], ['M40 40 H320 V185 H40 Z', 15, [2, 5, 8, 11, 14]]]);
+    },
     paths: () => P.currentPaths(),
     seriesProblem: () => D.circuit({ w: 360, h: 245, wires: [LOOP, 'M210 150 V205 H270 V150'], parts: [['battery', 180, 40, 'h', '9.0 V'], ['lamp', 110, 150, 'h', 'lamp', 'b'], ['resistor', 240, 150, 'h', '10 Ω'], ['voltmeter', 240, 205, 'h', '6.0 V', 'b']], dots: [[210, 150], [270, 150]], caption: 'Find the resistance of the lamp.' }),
 
@@ -120,16 +136,18 @@
       let s = `<defs><pattern id="deck-earth" width="14" height="14" patternUnits="userSpaceOnUse" patternTransform="rotate(40)"><rect width="14" height="14" fill="#258044" stroke="none"/><rect width="7" height="14" fill="#f7d83b" stroke="none"/></pattern></defs>`;
       s += `<rect x="300" y="36" width="190" height="200" rx="10" class="case"/>` + txt(395, 18, 'metal case', 'note');
       s += `<path d="M24 76 H300" class="w-live"/><path d="M24 136 H300" class="w-neutral"/><path d="M60 196 H300" style="${earthStripe}" class="w-earth"/>`;
-      s += `<g transform="translate(150 76)"><rect class="mask" x="-21" y="-5" width="42" height="10"/><g class="body"><rect x="-20" y="-7" width="40" height="14"/><line x1="-20" y1="0" x2="20" y2="0"/></g></g>` + txt(150, 58, 'fuse', 'note');
+      s += `<g transform="translate(150 76)"><rect class="mask" x="-21" y="-5" width="42" height="10"/><g class="body"><rect x="-20" y="-7" width="40" height="14"/><line x1="-20" y1="0" x2="20" y2="0" class="fuse-wire"/></g></g>` + txt(150, 58, 'fuse', 'note');
       s += txt(24, 64, 'LIVE', 'note', 'start') + txt(24, 124, 'NEUTRAL', 'note', 'start') + txt(60, 184, 'EARTH', 'note', 'start');
       s += `<path d="M300 136 H350 V112 M410 112 V136 H300" class="inner"/><rect x="350" y="100" width="60" height="24" class="heater"/>` + txt(380, 150, 'heater', 'note');
-      s += `<path d="M300 76 H340 Q352 76 352 64 V44" class="w-live"/>`;
-      s += `<path class="spark" d="M352 40 l6 -12 l2 10 l10 -6 l-5 11 l11 3 l-12 4 l5 10 l-11 -5 l-4 11 l-3 -12 l-11 3 l7 -9 l-9 -7 z"/>`;
       s += `<circle cx="300" cy="196" r="5" class="dot"/><path d="M60 196 V226 M44 226 H76 M50 234 H70 M56 242 H64"/>`;
+      // Three clicks: the fault, the current it drives to earth, then the fuse melting.
+      s += `<g class="step k1"><path d="M300 76 H340 Q352 76 352 64 V44" class="w-live"/>`;
+      s += `<path class="spark" d="M352 40 l6 -12 l2 10 l10 -6 l-5 11 l11 3 l-12 4 l5 10 l-11 -5 l-4 11 l-3 -12 l-11 3 l7 -9 l-9 -7 z"/></g>`;
+      s += `<g class="step k2"><g class="fault-current">`;
       [[230, 76, 0], [90, 76, 0], [470, 150, 90], [230, 196, 180], [100, 196, 180]].forEach(([x, y, a]) => { s += head(x, y, a); });
-      s += `<path d="M372 56 H470 V196 H310" class="flow-line" style="stroke-dasharray:6 5"/>`;
-      s += txt(250, 268, 'Live touches the case → big current to earth', 'note hot');
-      s += txt(250, 288, '→ fuse melts → supply cut off', 'note hot');
+      s += `<path d="M372 56 H470 V196 H310" class="flow-line" style="stroke-dasharray:6 5"/></g>`;
+      s += txt(250, 268, 'Live touches the case → big current to earth', 'note hot') + '</g>';
+      s += `<g class="step k3">${txt(250, 288, '→ fuse melts → supply cut off', 'note hot')}</g>`;
       return svg(500, 300, s, 'Fault in a metal-cased heater: the live wire touches the case, a large current flows through the earth wire and the fuse in the live wire melts');
     }
   };

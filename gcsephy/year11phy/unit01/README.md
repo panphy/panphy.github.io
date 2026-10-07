@@ -17,7 +17,7 @@ Ten 50-minute lessons for AQA GCSE Physics 4.4.1–4.4.2 and Combined Science: T
 | `assets/figures-print.css` | Deck figure styles for print; keep in step with `../../decks/atoms-and-radiation/deck.css` |
 | `build-pdfs.sh` | Rebuilds the PDFs with headless Chrome; name booklets (`3 7 review`) to rebuild only those |
 
-Diagrams come from `/gcsephy/decks/atoms-and-radiation/figures.js` (`window.DeckFigures`); rebuild the PDFs after changing a deck figure the workbook uses. As in Year 10, every page after the cover prints 1.2× larger (12 pt text, ~9.6 mm writing lines), and grid columns use `minmax(0, 1fr)` because Chrome shrinks the whole print if anything overflows.
+Diagrams come from `/gcsephy/decks/atoms-and-radiation/figures.js` (`window.DeckFigures`); rebuild the PDFs after changing a deck figure the workbook uses. The deck's click-through builds are opt-in (`data-animate` on a slide's figure), so figures drawn here are always complete. As in Year 10, every page after the cover prints 1.2× larger (12 pt text, ~9.6 mm writing lines), and grid columns use `minmax(0, 1fr)` because Chrome shrinks the whole print if anything overflows.
 
 ## Sequence
 
