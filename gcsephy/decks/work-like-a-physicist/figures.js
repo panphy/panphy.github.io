@@ -256,8 +256,9 @@
       s += step(1, '');
       s += rect(440, 424, 400, 14, 'f-alt box');
       for (let i = 0; i <= 40; i++) s += line(440 + i * 10, 424, 440 + i * 10, i % 5 ? 430 : 434, 'ink thin');
-      // The ghost has no transform of its own, because a step's reveal styles would replace it.
-      const ghost = `<rect x="678" y="380" width="86" height="30" class="ghost-box" rx="4"/><circle cx="696" cy="412" r="9" class="ghost"/><circle cx="746" cy="412" r="9" class="ghost"/>`;
+      // The dotted trolley marks the stopping place in the still picture only: on the live
+      // slide the trolley itself ends up there (deck.css hides the outline).
+      const ghost = `<g class="still-only"><rect x="678" y="380" width="86" height="30" class="ghost-box" rx="4"/><circle cx="696" cy="412" r="9" class="ghost"/><circle cx="746" cy="412" r="9" class="ghost"/></g>`;
       s += step(2, ghost + arrow(580, 466, 440, 466, 'arrow') + arrow(620, 466, 762, 466, 'arrow') + t(600, 474, 'd', 'big small-big') + t(600, 506, 'distance travelled after the ramp', 'body-t'));
       s += arrow(16, 310, 16, 230, 'arrow') + arrow(16, 336, 16, 418, 'arrow') + t(16, 334, 'h', 'big small-big');
       return svg(900, 520, s, 'A trolley released from a start line on a ramp of height h, propped on blocks, travels a distance d along the floor, measured with a tape');

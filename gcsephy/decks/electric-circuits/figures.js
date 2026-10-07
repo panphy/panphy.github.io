@@ -9,12 +9,13 @@
   const svg = (w, h, body, label) => `<svg class="cd" viewBox="0 0 ${w} ${h}" role="img" aria-label="${label}" xmlns="http://www.w3.org/2000/svg">${body}</svg>`;
   const txt = (x, y, s, cls = '', anchor = 'middle') => `<text x="${x}" y="${y}" class="${cls}" text-anchor="${anchor}">${s}</text>`;
   const head = (x, y, a, cls = 'flow') => `<g transform="translate(${x} ${y}) rotate(${a})"><path class="${cls}" d="M7 0 L-5 -6 L-5 6 Z"/></g>`;
-  // Charges going round a circuit, electron-flow direction. They sit just above
+  // Current going round a circuit: orange arrowheads in the conventional direction
+  // (+ to −), as every slide after "Conventional current" shows it. They sit just above
   // the wires, so they pass behind each component symbol. runs: [path, seconds, start times].
-  function charges(markup, lastWire, runs) {
+  function currentFlow(markup, lastWire, runs) {
     if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return markup;
-    const dots = runs.map(([path, dur, starts]) => starts.map(t => `<circle class="charge-dot" r="4.5"><animateMotion dur="${dur}s" repeatCount="indefinite" begin="-${t}s" path="${path}"/></circle>`).join('')).join('');
-    return markup.replace(`<path d="${lastWire}"/>`, match => match + dots);
+    const marks = runs.map(([path, dur, starts]) => starts.map(t => `<path class="flow charge-dot" d="M7 0 L-5 -6 L-5 6 Z"><animateMotion dur="${dur}s" repeatCount="indefinite" begin="-${t}s" rotate="auto" path="${path}"/></path>`).join('')).join('');
+    return markup.replace(`<path d="${lastWire}"/>`, match => match + marks);
   }
   const fall = x => 0.9 * Math.exp(-2.6 * x) + 0.05;
   // The practical diagrams set label sizes inline for the companion pages;
@@ -62,10 +63,10 @@
       notes: [[170, 20, '+'], [192, 20, '−'], [58, 80, 'conventional', 'start', 'hot'], [58, 96, 'current: + → −', 'start', 'hot'], [302, 80, 'electrons:', 'end', 'cool'], [302, 96, '− → +', 'end', 'cool']],
       caption: 'Orange: conventional current (+ to −). Blue: electron flow (− to +).'
     }),
-    // Evenly spaced charges at one speed: the same number pass every ammeter each second.
-    threeAmmeters: () => charges(
+    // Evenly spaced arrowheads at one speed: the same current passes every ammeter.
+    threeAmmeters: () => currentFlow(
       D.circuit({ w: 360, h: 200, wires: [LOOP], parts: [['cell', 180, 40, 'h', '6 V'], ['ammeter', 40, 95, 'v', '0.60 A', 'r'], ['ammeter', 320, 95, 'v', '0.60 A', 'l'], ['ammeter', 110, 150, 'h', '0.60 A', 'b'], ['resistor', 230, 150, 'h', '10 Ω', 'b']], caption: 'Three ammeters in one loop give the same reading.' }),
-      LOOP, [[LOOP, 13, [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]]]),
+      LOOP, [['M320 40 H40 V150 H320 Z', 13, [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]]]),
 
     // Mission 3
     voltmeter: () => D.circuit({ w: 360, h: 240, wires: [LOOP, 'M130 150 V205 H230 V150'], parts: [['battery', 180, 40, 'h', '6 V'], ['ammeter', 40, 95, 'v'], ['resistor', 180, 150, 'h', '10 Ω'], ['voltmeter', 180, 205, 'h', 'reads 6 V', 'b']], dots: [[130, 150], [230, 150]], caption: 'Ammeter in series. Voltmeter across the resistor, in parallel.' }),
@@ -102,12 +103,12 @@
 
     // Mission 5
     series: () => D.circuit({ w: 360, h: 205, wires: [LOOP], parts: [['battery', 180, 40, 'h', '12 V'], ['ammeter', 40, 95, 'v', '1.0 A', 'r'], ['resistor', 120, 150, 'h', '4 Ω, 4 V', 'b'], ['resistor', 240, 150, 'h', '8 Ω, 8 V', 'b']], caption: 'R_total = 4 + 8 = 12 Ω, I = 12 ÷ 12 = 1.0 A' }),
-    // With data-animate, charges split at the junction: two take the 3 Ω branch
-    // for every one through the 6 Ω branch, and all three pass the ammeter.
+    // With data-animate, the current splits at the junction: two arrowheads take the 3 Ω
+    // branch for every one through the 6 Ω branch, and all three pass the ammeter.
     parallel: el => {
       const figure = D.circuit({ w: 360, h: 225, wires: ['M40 40 H320 V185 H40 Z', 'M40 115 H320'], parts: [['battery', 180, 40, 'h', '6 V'], ['ammeter', 40, 77, 'v', '3 A', 'r'], ['resistor', 180, 115, 'h', '3 Ω, 2 A'], ['resistor', 180, 185, 'h', '6 Ω, 1 A', 'b']], dots: [[40, 115], [320, 115]], caption: 'Each branch has 6 V across it; 2 A + 1 A = 3 A' });
       if (!('animate' in el.dataset)) return figure;
-      return charges(figure, 'M40 115 H320', [['M40 40 H320 V115 H40 Z', 12, [0, 1, 3, 4, 6, 7, 9, 10]], ['M40 40 H320 V185 H40 Z', 15, [2, 5, 8, 11, 14]]]);
+      return currentFlow(figure, 'M40 115 H320', [['M320 40 H40 V115 H320 Z', 12, [0, 1, 3, 4, 6, 7, 9, 10]], ['M320 40 H40 V185 H320 Z', 15, [2, 5, 8, 11, 14]]]);
     },
     paths: () => P.currentPaths(),
     seriesProblem: () => D.circuit({ w: 360, h: 245, wires: [LOOP, 'M210 150 V205 H270 V150'], parts: [['battery', 180, 40, 'h', '9.0 V'], ['lamp', 110, 150, 'h', 'lamp', 'b'], ['resistor', 240, 150, 'h', '10 Ω'], ['voltmeter', 240, 205, 'h', '6.0 V', 'b']], dots: [[210, 150], [270, 150]], caption: 'Find the resistance of the lamp.' }),
