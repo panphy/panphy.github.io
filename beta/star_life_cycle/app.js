@@ -1067,12 +1067,22 @@ $('reset').addEventListener('click', () => {
   refresh(true);
 });
 // Fullscreen, with an expanded-panel fallback for browsers without element fullscreen (iPhone).
+// On wide screens the controls move into the right-hand column, beside the 3D view.
+const workspace = $('workspace');
 const viewerPanel = $('viewer-panel');
+const sideControls = $('side-controls');
+const notes = $('notes');
 const fullscreenButton = $('fullscreen');
+const wideQuery = window.matchMedia('(min-width: 900px)');
 let fallbackFullscreen = false;
+function placeControls() {
+  const inSide = workspace.classList.contains('is-fullscreen') && wideQuery.matches;
+  if (inSide && sideControls.parentElement !== notes) notes.prepend(sideControls);
+  else if (!inSide && sideControls.parentElement !== viewerPanel) viewerPanel.append(sideControls);
+}
 function updateFullscreen() {
-  const expanded = document.fullscreenElement === viewerPanel || fallbackFullscreen;
-  viewerPanel.classList.toggle('is-fullscreen', expanded);
+  const expanded = document.fullscreenElement === workspace || fallbackFullscreen;
+  workspace.classList.toggle('is-fullscreen', expanded);
   document.body.classList.toggle('viewer-expanded', expanded);
   fullscreenButton.classList.toggle('is-fullscreen', expanded);
   fullscreenButton.setAttribute('aria-label', expanded ? 'Exit fullscreen' : 'Enter fullscreen');
@@ -1081,16 +1091,18 @@ function updateFullscreen() {
     ? 'M9 4v5H4M20 9h-5V4M15 20v-5h5M4 15h5v5'
     : 'M4 9V4h5M15 4h5v5M20 15v5h-5M9 20H4v-5');
   fullscreenButton.setAttribute('aria-pressed', String(expanded));
+  placeControls();
 }
+wideQuery.addEventListener('change', placeControls);
 fullscreenButton.addEventListener('click', async () => {
-  if (document.fullscreenElement === viewerPanel) {
+  if (document.fullscreenElement === workspace) {
     await document.exitFullscreen();
   } else if (fallbackFullscreen) {
     fallbackFullscreen = false;
     updateFullscreen();
   } else {
     try {
-      await viewerPanel.requestFullscreen();
+      await workspace.requestFullscreen();
     } catch {
       fallbackFullscreen = true;
       updateFullscreen();

@@ -196,9 +196,23 @@ input[type=range]::-moz-range-thumb { width: 20px; height: 20px; border-radius: 
 .scale { color: var(--text-secondary); font-size: .68rem; border: 1px solid var(--input-border); border-radius: 999px; padding: 4px 10px; }
 #fullscreen { --panphy-fs-size: 48px; }
 body.viewer-expanded { overflow: hidden; }
-.viewer-panel.is-fullscreen { position: fixed; inset: 0; z-index: 1000; width: 100%; height: 100%; height: 100dvh; overflow: auto; padding: max(16px, env(safe-area-inset-top)) max(16px, env(safe-area-inset-right)) max(16px, env(safe-area-inset-bottom)) max(16px, env(safe-area-inset-left)); }
-.viewer-panel.is-fullscreen > :not(#viewer) { flex-shrink: 0; }
-.viewer-panel.is-fullscreen #viewer { flex: 1 0 260px; height: 0; min-height: 260px; }
+.side-controls { display: contents; }
+.workspace.is-fullscreen { position: fixed; inset: 0; z-index: 1000; width: 100%; height: 100%; height: 100dvh; display: block; border: 0; border-radius: 0; box-shadow: none; background: var(--viewer-bg); }
+.workspace.is-fullscreen aside { display: none; }
+.workspace.is-fullscreen .viewer-panel { height: 100%; overflow: auto; padding: max(16px, env(safe-area-inset-top)) max(16px, env(safe-area-inset-right)) max(16px, env(safe-area-inset-bottom)) max(16px, env(safe-area-inset-left)); }
+.workspace.is-fullscreen .viewer-panel > :not(#viewer), .workspace.is-fullscreen .side-controls > * { flex-shrink: 0; }
+.workspace.is-fullscreen #viewer { flex: 1 0 260px; height: 0; min-height: 260px; }
+/* Wide screens: the controls and the stage notes share a right-hand column beside the 3D view. */
+@media (min-width: 900px) {
+  .workspace.is-fullscreen { display: grid; grid-template-columns: minmax(0, 1fr) clamp(340px, 30vw, 460px); }
+  .workspace.is-fullscreen #viewer { margin-bottom: 0; }
+  .workspace.is-fullscreen aside { display: block; min-height: 0; overflow: auto; overscroll-behavior: contain; border-top: 0; border-left: 1px solid var(--card-border); padding: max(20px, env(safe-area-inset-top)) max(20px, env(safe-area-inset-right)) max(20px, env(safe-area-inset-bottom)) 20px; }
+  .workspace.is-fullscreen aside .side-controls { display: block; margin-bottom: 20px; padding-bottom: 20px; border-bottom: 1px solid var(--card-border); }
+  .workspace.is-fullscreen aside .live { background: var(--muted-bg); }
+  .workspace.is-fullscreen aside .stages { grid-auto-flow: row; grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .workspace.is-fullscreen aside .toolbar { justify-content: flex-start; }
+  .workspace.is-fullscreen aside .side-controls p { color: var(--text-main); margin-bottom: 12px; }
+}
 
 /* contain: size keeps the canvas pixel size from feeding back into the viewer height. */
 #viewer { position: relative; display: flex; flex-direction: column; flex: 1; min-height: 540px; contain: size; margin: 8px 0 12px; border-radius: 14px; touch-action: none; overflow: hidden; background: var(--space); color: var(--space-text); cursor: grab; }
@@ -269,7 +283,7 @@ aside p { color: var(--text-secondary); font-size: .92rem; margin: 0 0 12px; }
 aside p b { color: var(--text-main); }
 aside .tagline { color: var(--text-main); font-weight: 600; font-size: 1rem; margin-bottom: 16px; }
 aside .note { font-size: .82rem; padding-left: 12px; border-left: 2px solid var(--input-border); }
-aside.swap > * { animation: notes-in .45s ease both; }
+aside.swap > :not(.side-controls) { animation: notes-in .45s ease both; }
 @keyframes notes-in { from { opacity: 0; transform: translateY(6px); } }
 .icon { width: 1.15em; height: 1.15em; vertical-align: -0.2em; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
 .idea { border-left: 3px solid var(--brand-accent); border-radius: 0 12px 12px 0; padding: 13px 16px; margin: 18px 0; background: var(--muted-bg); }
@@ -348,6 +362,6 @@ footer a { min-height: 48px; display: inline-flex; align-items: center; }
 }
 @media (prefers-reduced-motion: reduce) {
   .toolbar button.experiment.nudge { animation: none; }
-  aside.swap > * { animation: none; }
+  aside.swap > :not(.side-controls) { animation: none; }
   #balance-fill, #balance-marker { transition: none; }
 }
