@@ -6,11 +6,11 @@
   'use strict';
 
   const FILES = [
-    'lesson_1_reliability_of_data.md',
+    'lesson_1_can_this_data_be_trusted.md',
     'lesson_2_variables_data_types_graph_choice.md',
     'lesson_3_shock_absorber_bar_chart.md',
     'lesson_4_ramp_line_graph.md',
-    'lesson_5_best_fit_lines_outliers.md',
+    'lesson_5_best_fit_lines_anomalous_results.md',
     'lesson_6_paper_helicopter_independent_challenge.md',
     'lesson_7_8_student_research_project.md'
   ];

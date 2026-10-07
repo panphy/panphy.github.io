@@ -32,16 +32,16 @@
         note("<b>C only</b> is good: a straight line with the points balanced either side. <b>A</b> is dot-to-dot, so it treats every measurement as exact; <b>B</b> is too shallow, so the points drift above the line and miss the trend; <b>D</b> is a wobbly curve through every point, which follows the scatter instead of the trend."),
         { type: "split", cols: "1fr 1fr", gap: 6,
           left: [
-            task(4, "The point that does not fit", "Outlier"),
+            task(4, "The point that does not fit", "Anomalous result"),
             g({ xmax: 32, ymax: 140, xstep: 4, ystep: 20, xlabel: "Ramp height / cm", ylabel: "Mean distance / cm", pts: DATA.ramp, line: line(rampTrend, 0, 32), marks: [{ circle: [20, 52] }] }),
-            note("<b>a</b> Outlier at (20, 52); the line follows the other seven points, so it passes well above it. <b>b</b> Neither: do not delete it or bend the line to it. First check the record, then repeat the 20 cm run. <b>c</b> A repeat near 76 cm suggests a measuring or release mistake: note it on the graph and use the repeat. <b>d</b> If it stays near 52 cm, it may be real physics (a bump or a sticking wheel). Report it, investigate, and do not hide it."),
+            note("<b>a</b> Anomalous result at (20, 52); the line follows the other seven points, so it passes well above it. <b>b</b> Neither: do not delete it or bend the line to it. First check the record, then repeat the 20 cm run. <b>c</b> A repeat near 76 cm suggests a measuring or release mistake: note it on the graph and use the repeat. <b>d</b> If it stays near 52 cm, it may be real physics (a bump or a sticking wheel). Report it, investigate, and do not hide it."),
           ],
           right: [
             task(5, "Directly proportional?", "Think"),
             g({ xmax: 140, ymax: 200, xstep: 20, ystep: 20, xlabel: "Volume of water / cm³", ylabel: "Mass of beaker + water / g", pts: DATA.water, line: line(DATA.water, 0, 140), marks: [{ dot: [0, 51] }] }),
             note("<b>a</b> About 50 g (accept 45–55). <b>b</b> About 90 g and 130 g: 130 is not double 90, so no. <b>c</b> No. The line is straight but does not pass through the origin. <b>d</b> The intercept is the mass of the empty beaker. Zero the balance with the beaker on (tare it), or subtract 50 g from every reading; then the line passes through (0, 0)."),
           ] },
-        note("<b>Talk about it:</b> an outlier is left out of the <i>line</i> only when there is a reason, such as a recorded mistake, and it stays circled on the graph. A straight line with an intercept still shows a linear pattern and supports predictions; it just is not proportional, and the intercept often points to a systematic error or an extra fixed quantity."),
+        note("<b>Talk about it:</b> an anomalous result is left out of the <i>line</i> only when there is a reason, such as a recorded mistake, and it stays circled on the graph. A straight line with an intercept still shows a linear pattern and supports predictions; it just is not proportional, and the intercept often points to a systematic error or an extra fixed quantity."),
       ],
     }],
   };

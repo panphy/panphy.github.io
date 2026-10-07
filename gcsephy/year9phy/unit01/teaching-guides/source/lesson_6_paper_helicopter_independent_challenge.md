@@ -4,7 +4,7 @@
 Working Like a Physicist: Collecting, Processing, and Presenting Data
 
 ## Lesson focus
-Students independently apply the data handling skills developed across the unit: variables, tables, repeated measurements, averages, graph choice, plotting, best-fit lines, and outliers.
+Students independently apply the data handling skills developed across the unit: variables, tables, repeated measurements, averages, graph choice, plotting, best-fit lines, and anomalous results.
 
 ## Assumptions
 Students have already practiced categoric data, continuous data, bar charts, line graphs, and best-fit lines.
@@ -28,7 +28,7 @@ By the end of the lesson, students should be able to independently:
 5. Choose the correct graph type.
 6. Plot a line graph accurately.
 7. Draw a best-fit line.
-8. Identify possible outliers.
+8. Identify possible anomalous results.
 9. Write a conclusion based on the data.
 
 ## Key vocabulary
@@ -41,7 +41,7 @@ By the end of the lesson, students should be able to independently:
 | Continuous data | Number data that can have many possible values |
 | Mean | The average value |
 | Best-fit line | A line that shows the overall pattern of the results |
-| Outlier | A result that does not fit the pattern (AQA: an anomalous result) |
+| Anomalous result | A result that does not fit the pattern |
 
 ## Equipment
 Per group:
@@ -131,7 +131,7 @@ Students produce one page containing:
 4. Mean values.
 5. Correct graph.
 6. Best-fit line.
-7. Comment on outliers or errors.
+7. Comment on anomalous results or errors.
 8. Conclusion.
 
 ## Success criteria
@@ -144,7 +144,7 @@ Students produce one page containing:
 | Graph choice | Line graph chosen because wing length is continuous |
 | Graph quality | Axes labeled, units included, sensible scale used |
 | Best-fit line | Best-fit line drawn instead of dot-to-dot line |
-| Outliers | Possible outlier identified or absence of outliers stated |
+| Anomalous results | Possible anomalous result identified or absence of anomalous results stated |
 | Conclusion | Conclusion uses evidence from the results |
 
 ## Plenary
