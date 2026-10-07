@@ -138,10 +138,11 @@
       s += `<path d="M24 76 H300" class="w-live"/><path d="M24 136 H300" class="w-neutral"/><path d="M60 196 H300" style="${earthStripe}" class="w-earth"/>`;
       s += `<g transform="translate(150 76)"><rect class="mask" x="-21" y="-5" width="42" height="10"/><g class="body"><rect x="-20" y="-7" width="40" height="14"/><line x1="-20" y1="0" x2="20" y2="0" class="fuse-wire"/></g></g>` + txt(150, 58, 'fuse', 'note');
       s += txt(24, 64, 'LIVE', 'note', 'start') + txt(24, 124, 'NEUTRAL', 'note', 'start') + txt(60, 184, 'EARTH', 'note', 'start');
-      s += `<path d="M300 136 H350 V112 M410 112 V136 H300" class="inner"/><rect x="350" y="100" width="60" height="24" class="heater"/>` + txt(380, 150, 'heater', 'note');
+      // Inside the case the heater sits between live and neutral, as in normal use.
+      s += `<path d="M300 76 H380 V100" class="w-live"/><path d="M300 136 H380 V124" class="w-neutral"/><rect x="350" y="100" width="60" height="24" class="heater"/>` + txt(380, 158, 'heater', 'note');
       s += `<circle cx="300" cy="196" r="5" class="dot"/><path d="M60 196 V226 M44 226 H76 M50 234 H70 M56 242 H64"/>`;
       // Three clicks: the fault, the current it drives to earth, then the fuse melting.
-      s += `<g class="step k1"><path d="M300 76 H340 Q352 76 352 64 V44" class="w-live"/>`;
+      s += `<g class="step k1"><path d="M340 76 Q352 76 352 64 V44" class="w-live"/>`;
       s += `<path class="spark" d="M352 40 l6 -12 l2 10 l10 -6 l-5 11 l11 3 l-12 4 l5 10 l-11 -5 l-4 11 l-3 -12 l-11 3 l7 -9 l-9 -7 z"/></g>`;
       s += `<g class="step k2"><g class="fault-current">`;
       [[230, 76, 0], [90, 76, 0], [470, 150, 90], [230, 196, 180], [100, 196, 180]].forEach(([x, y, a]) => { s += head(x, y, a); });
