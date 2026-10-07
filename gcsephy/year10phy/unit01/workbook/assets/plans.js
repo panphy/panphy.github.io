@@ -34,7 +34,7 @@
         "<strong>One new idea at a time.</strong> Current, p.d. and resistance get a lesson each, each with a model (bike chain, delivery vans, collisions) and its limitation. Common misconceptions appear as student claims (Mia, Leo, Ava) to correct.",
         "<strong>Worked example → your turn → faded practice.</strong> Calculation questions go from a full frame (Equation, Substitute, Answer) to no frame to a challenge.",
         "<strong>Retrieval every lesson.</strong> ‘Do now’ questions revisit earlier lessons; ‘Revise it’ gives cover-and-answer questions with quick answers at the back.",
-        "<strong>Equations are learned.</strong> This cohort sits GCSE in 2028; AQA has confirmed equation sheets only up to 2027, so the booklet teaches recall.",
+        "<strong>Equations are still learned.</strong> AQA provides the full Physics Equations Sheet in every paper, confirmed for 2027 and from 2028 onwards. It does not include R<sub>total</sub> = R₁ + R₂, and students who know the equations work faster, so the booklet still teaches recall.",
       ])}
       <h4 class="sub">Sequence</h4>
       <table class="route"><thead><tr><th>#</th><th>Lesson</th><th>Companion website</th></tr></thead><tbody>${rows}</tbody></table>

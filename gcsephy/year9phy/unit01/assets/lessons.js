@@ -523,7 +523,7 @@ window.LESSONS = [
       ],
       vocabulary: [
         ["Best-fit line", "One line showing the overall trend of the data."],
-        ["Outlier", "A result that does not fit the pattern of the others."],
+        ["Outlier", "A result that does not fit the pattern of the others. AQA calls it an anomalous result (an anomaly)."],
         ["Trend", "The overall relationship shown by the data."],
         ["Conclusion", "A statement supported by processed evidence."],
       ],

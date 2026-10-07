@@ -356,7 +356,7 @@
     const met = U.equations.filter((e) => e.lesson <= LAST);
     const tools = met.map((e) => `<div class="tool"><div class="eq">${e.eq}</div><span class="lesson-tag">Lesson ${e.lesson}</span><div class="words">${e.words}</div><div class="units">${e.units}</div><div class="recall-cover">Rearranged: ${e.re}</div></div>`).join("");
     return `<section class="new-page"><div class="eyebrow">Reference</div><h2 class="page-title">Equation toolkit</h2>
-      <p class="page-intro">${ONE && LAST < 12 ? "The equations you have met so far. " : ""}You will meet these one at a time. Learn each equation <strong>in words</strong> as well as symbols: your exams may or may not give you an equation sheet, and knowing them by heart makes every question faster.</p>
+      <p class="page-intro">${ONE && LAST < 12 ? "The equations you have met so far. " : ""}You will meet these one at a time. Learn each equation <strong>in words</strong> as well as symbols: AQA gives you an equation sheet in the exam (it does not include R<sub>total</sub> = R₁ + R₂), but knowing the equations by heart makes every question faster.</p>
       <div class="toolkit">${tools}</div>
       <h4 class="sub">Four steps for every calculation</h4>
       <div class="method-steps"><div><b>1</b>Write down what you know, with units. Convert units first (minutes → seconds, kW → W, mA → A).</div><div><b>2</b>Write the equation you will use, in symbols.</div><div><b>3</b>Substitute the numbers, then rearrange if needed.</div><div><b>4</b>Give the answer with a unit. Ask: is it sensible?</div></div>

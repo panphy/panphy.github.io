@@ -36,7 +36,7 @@ Save the CSV as UTF-8 (in Excel: "CSV UTF-8 (Comma delimited)"), or symbols such
 
 ## How the Target 7 questions were chosen
 
-Each topic's share follows how often it earned recall (AO1) marks in the AQA Higher papers for Physics 8463 and Combined Science: Trilogy 8464, November 2020 to June 2023 (16 papers, counted from the specification references in the mark schemes): about half of an often-tested topic, a third of a middling one and a quarter of a rarely tested one, never fewer than two. Within a topic the choice favours facts those papers asked for directly, then units, definitions that mark schemes expect and standard explanations. "State the equation" questions are all left to Target 9, because the equations sheet is provided in the exam. Re-check the shares when newer papers are available.
+Each topic's share follows how often it earned recall (AO1) marks in the AQA Higher papers for Physics 8463 and Combined Science: Trilogy 8464, November 2020 to June 2023 (16 papers, counted from the specification references in the mark schemes): about half of an often-tested topic, a third of a middling one and a quarter of a rarely tested one, never fewer than two. Within a topic the choice favours facts those papers asked for directly, then units, definitions that mark schemes expect and standard explanations. "State the equation" questions are all left to Target 9, because AQA provides the full Physics Equations Sheet in the exam, for 2027 and from 2028 onwards ([AQA notice, 1 September 2026](https://www.aqa.org.uk/news/gcse-maths-sciences-formulae-equation-sheets-2027-28); more in [the Year 10 README](../year10phy/unit01/README.md#equation-sheet)). Re-check the shares when newer papers are available.
 
 ## Flashcards
 

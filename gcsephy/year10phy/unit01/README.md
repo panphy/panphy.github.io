@@ -27,6 +27,14 @@ Missions follow the workbook's order (each meter is introduced with its quantity
 
 **Go further.** Mission 5 has an optional, clearly labelled beyond-spec panel on 1/R_total = 1/R₁ + 1/R₂.
 
+## Equation sheet
+
+AQA gives every student the full Physics Equations Sheet as an insert with each physics paper (Physics 8463 and Combined Science 8464/8465), so equations do not have to be memorised for the exam. Ofqual first required this for 2025–2027 and has since made it permanent for exams from 2028 onwards.
+
+- Evidence: [AQA notice, 1 September 2026: formulae and equation sheets for 2027 and 2028 onwards](https://www.aqa.org.uk/news/gcse-maths-sciences-formulae-equation-sheets-2027-28), which links the [Ofqual decision](https://www.gov.uk/government/consultations/proposed-changes-to-the-assessment-of-mathematics-physics-and-combined-science-gcses/outcome/decisions-proposed-changes-to-the-assessment-of-mathematics-physics-and-combined-science-gcses) and the [sheet itself](https://www.aqa.org.uk/filestore/physics/AQA-GCSE-Science-8463-INS-AI-V2.3.pdf).
+- The sheet has Q = I t, V = I R, P = V I, P = I² R, E = P t, E = Q V and (HT) V_p I_p = V_s I_s. It does **not** have R_total = R₁ + R₂, which students must learn.
+- So the site, deck and workbook label equations "on the equation sheet" (and R_total "learn it"), while still teaching each one. If AQA changes this, update those labels, the equation toolkit text in `index.html`, `workbook/assets/workbook.js` and `plans.js`, and this section.
+
 ## Questions
 
 47 practice questions (5–9 per mission), plus 17 Exam Zone questions worth 56 marks in four rounds, none repeated. Every question has a hint and a worked answer, hidden until clicked; answers are visible by design, as this is a revision tool. All questions are original, and diagrams are inline SVG from `assets/diagrams.js`.

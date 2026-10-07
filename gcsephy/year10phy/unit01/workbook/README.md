@@ -42,7 +42,7 @@ Each lesson runs: opener → Do now → Learn it (models, diagrams, worked examp
 ## Design notes
 
 - Lesson 1 teaches circuits and symbols before testing; Q = I t comes in Lesson 2 and the voltmeter in Lesson 3. The website's missions follow the same order.
-- [AQA confirms equation sheets will continue from 2028](https://www.aqa.org.uk/news/gcse-maths-sciences-formulae-equation-sheets-2027-28), but the toolkit still teaches each equation, with triangles as rearranging help.
+- AQA provides the full equation sheet in every paper, including from 2028 (evidence and links: [`../README.md`](../README.md#equation-sheet)). The toolkit still teaches each equation, with triangles as rearranging help; R_total = R₁ + R₂ is not on the sheet.
 - No QR codes; students rarely have phones in lessons, so openers give the mission name and address as text.
 - The student edition reserves the space answers take up, with answers hidden, so both editions have identical page numbers. Each lesson starts on a new page, so some end with white space.
 

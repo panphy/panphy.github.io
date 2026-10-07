@@ -57,7 +57,7 @@ By the end of Lessons 7-8, students should be able to:
 | Bar chart | A graph used when the independent variable is categoric |
 | Line graph | A graph used when the independent variable is continuous |
 | Best-fit line | A line that shows the overall pattern of the results |
-| Outlier | A result that does not fit the pattern |
+| Outlier | A result that does not fit the pattern (AQA: an anomalous result) |
 | Random error | Unpredictable variation between repeats |
 | Systematic error | A repeated error that shifts all results in the same way |
 

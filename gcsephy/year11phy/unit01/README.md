@@ -26,7 +26,7 @@ Diagrams come from `/gcsephy/decks/atoms-and-radiation/figures.js` (`window.Deck
 | 1 | Inside the atom | 3–6 | 4.4.1.1–2 · 6.4.1.1–2 |
 | 2 | Isotopes and ions | 7–8 | 4.4.1.2 · 6.4.1.2 |
 | 3 | From plum pudding to the nucleus | 9–15 | 4.4.1.3 · 6.4.1.3 |
-| 4 | Energy levels and the nucleus | 16–21 | 4.4.1.2–3 · 6.4.1.2–3 |
+| 4 | Energy levels and the nucleus | 16–21 | 4.4.1.1–3 · 6.4.1.1–3 |
 | 5 | Radioactive decay (Nuclear Decay sim) | 22–26 | 4.4.2.1 · 6.4.2.1 |
 | 6 | Nuclear equations | 24–27 | 4.4.2.2 · 6.4.2.2 |
 | 7 | Properties and uses of radiation | 28–30 | 4.4.2.1 · 6.4.2.1 |
