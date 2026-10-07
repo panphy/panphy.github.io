@@ -179,7 +179,7 @@ LDR: lights that switch on when it gets dark"
 110,Electricity,Resistance and I–V characteristics (RP),Combined,9,,Wire length and resistance: name the dependent variable.,Resistance of the wire
 111,Electricity,Resistance and I–V characteristics (RP),Combined,7,Core practical fact,Wire length and resistance: name three control variables.,"The temperature, thickness and material of the wire"
 112,Electricity,Resistance and I–V characteristics (RP),Combined,7,Asked in the 2020–23 papers,Describe how the length of a wire affects its resistance.,The resistance increases (it is directly proportional to length).
-113,Electricity,Resistance and I–V characteristics (RP),Combined,7,Asked in the 2020–23 papers,The crocodile clip on a wire cannot be placed at exactly 0 cm. Name the type of error this causes.,A zero error (a systematic error)
+113,Electricity,Resistance and I–V characteristics (RP),Combined,7,Asked in the 2020–23 papers,"In the wire-length practical, the fixed crocodile clip is at the 1 cm mark, but every length is read from 0 cm. Name the type of error this causes.",A zero error (a systematic error): every length is 1 cm too long.
 114,Electricity,Resistance and I–V characteristics (RP),Combined,7,Standard explanation,Explain why the potential difference is kept small when measuring the resistance of a wire.,So the current is small and the wire does not heat up.
 116,Electricity,Resistance and I–V characteristics (RP),Combined,9,,What does it mean for two resistors to be in series?,"They are connected one after the other, on a single path."
 117,Electricity,Resistance and I–V characteristics (RP),Combined,9,,What does it mean for two resistors to be in parallel?,They are on separate branches.
@@ -950,6 +950,7 @@ Moons and artificial satellites orbit planets."
 867,Working scientifically,Random and systematic errors,Combined,9,,"Explain why ""human error"" is not a good answer when evaluating an experiment.",It is too vague: you must name what actually went wrong.
 868,Working scientifically,Random and systematic errors,Combined,9,,A ruler is read from the wrong zero mark every time. State the type of error this causes.,A systematic error
 869,Working scientifically,Random and systematic errors,Combined,9,,Does better resolution remove a systematic error?,No: the readings are finer but still shifted.
+917,Working scientifically,Random and systematic errors,Combined,9,,"A graph should be a straight line through the origin, but the line of best fit misses the origin. Name the type of error this suggests.",A systematic error (such as a zero error): every reading is shifted by the same amount.
 870,Working scientifically,Variables and planning,Combined,7,Definition that mark schemes ask for,What is the independent variable?,The one variable that is deliberately changed.
 871,Working scientifically,Variables and planning,Combined,7,Definition that mark schemes ask for,What is the dependent variable?,The variable that is measured.
 872,Working scientifically,Variables and planning,Combined,7,Definition that mark schemes ask for,What is a control variable?,A variable kept the same to make the test fair.
