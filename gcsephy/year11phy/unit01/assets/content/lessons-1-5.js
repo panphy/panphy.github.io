@@ -178,7 +178,7 @@
     // ============================================================ 4
     {
       n: 4, accent: "photon", title: "Energy levels and the nucleus",
-      spec: "AQA Physics 4.4.1.2–4.4.1.3; Combined Science 6.4.1.2–6.4.1.3",
+      spec: "AQA Physics 4.4.1.1–4.4.1.3; Combined Science 6.4.1.1–6.4.1.3",
       mapLine: "The Bohr model, absorbing and emitting EM radiation, protons and neutrons, why models change",
       big: "Neon signs glow red and sodium street lamps glow orange. Each element gives out its own colours of light. What are its electrons doing?",
       goals: ["describe Bohr's model of electrons in energy levels", "explain how electrons change level when they absorb or emit electromagnetic radiation", "describe how protons and then neutrons were discovered", "explain why scientific models change"],

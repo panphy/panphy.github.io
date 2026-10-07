@@ -41,7 +41,7 @@ By the end of the lesson, students should be able to independently:
 | Continuous data | Number data that can have many possible values |
 | Mean | The average value |
 | Best-fit line | A line that shows the overall pattern of the results |
-| Outlier | A result that does not fit the pattern |
+| Outlier | A result that does not fit the pattern (AQA: an anomalous result) |
 
 ## Equipment
 Per group:

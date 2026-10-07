@@ -425,7 +425,7 @@
       opener(L6, { badge: "LESSON 6", title: "Solo flight", subtitle: "Paper helicopter challenge · the whole process, on your own" },
         { title: "The helicopter that flew on Mars", paras: [
           "In April 2021 a small helicopter called Ingenuity lifted off the surface of Mars. Getting it to fly was brutally hard: the Martian atmosphere is around one per cent as dense as Earth's, so the rotors have almost nothing to push against.",
-          "The engineers could not just try it and see. They tested rotor designs in a chamber pumped down to Martian pressure, changing blade size and spin rate, measuring lift, plotting the results, and reading the pattern off the graph. Ingenuity's rotors ended up over a metre across for a craft weighing under 2 kg.",
+          "The engineers could not just try it and see. They tested rotor designs in a chamber pumped down to Martian pressure, changing blade size and spin rate, measuring lift, plotting the results, and reading the pattern off the graph. Ingenuity's rotors ended up over a metre across for a craft with a mass under 2 kg.",
           "Today you do a much smaller version of the same job — with paper. But the process is identical, and this time nobody is going to walk you through it.",
         ], punch: "This one is on you. Booklet, ruler, brain." },
         { title: "Your mission — independently, from start to finish", items: ["Identify all three types of variable", "Design your own results table with units", "Collect three trials for each of five values and calculate means", "Choose the correct graph and justify it", "Plot accurately, add a best-fit line, deal with outliers", "Write a conclusion supported by your own numbers"] },

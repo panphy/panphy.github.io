@@ -23,7 +23,7 @@ By the end of the lesson, students should be able to:
 
 | Keyword | Student-friendly definition |
 |---|---|
-| Reliability | How trustworthy or repeatable a set of results is |
+| Reliability | How trustworthy a set of results is. AQA uses the more exact words: repeatable (same person, method and equipment give the same results) and reproducible (another person or method does) |
 | Uncertainty | The interval within which the true value can be expected to lie |
 | Range | The maximum and minimum values of the independent or dependent variables |
 | Precision | How close repeated measurements are to each other |

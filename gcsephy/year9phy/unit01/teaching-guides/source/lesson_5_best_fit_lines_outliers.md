@@ -27,7 +27,7 @@ By the end of the lesson, students should be able to:
 |---|---|
 | Best-fit line | A line that shows the overall pattern of the results |
 | Dot-to-dot line | A line drawn by joining every point directly to the next point |
-| Outlier | A result that does not fit the pattern |
+| Outlier | A result that does not fit the pattern (AQA: an anomalous result) |
 | Random error | Unpredictable variation between repeats |
 | Systematic error | A repeated error that shifts all results in the same way |
 
