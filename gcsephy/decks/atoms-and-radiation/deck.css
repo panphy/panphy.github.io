@@ -489,6 +489,7 @@ h2:has(+ .terms) { margin-bottom: 24px; }
 .slide.active .pulse { animation: pulse 1.6s ease-in-out infinite; transform-box: fill-box; transform-origin: center; }
 @keyframes draw { to { stroke-dashoffset: 0; } }
 @keyframes wave-run { to { transform: translateX(var(--shift)); } }
+@keyframes stream { 0% { transform: translateX(0); opacity: 1; } 95% { opacity: 1; } 100% { transform: translateX(var(--travel)); opacity: 0; } }
 /* Where the moving streams play, the particles and waves drawn in place step aside. */
 @media screen and (prefers-reduced-motion: no-preference) { #deck .still { display: none; } }
 @keyframes pulse { 50% { transform: scale(1.08); opacity: .75; } }
@@ -509,8 +510,14 @@ h2:has(+ .terms) { margin-bottom: 24px; }
   #deck .hop { transition: transform .9s ease-in-out; }
   #deck .fig:not(:has(.k2.shown)) .until-k2, #deck .fig:not(:has(.k3.shown)) .until-k3 { transform: translate(var(--fx), var(--fy)); }
   #deck .fig:has(.k2.shown) .spent-k2 { opacity: .3; }
-  /* Penetration: gamma waves run steadily to the right. */
+  /* Penetration: each stream sets off from the source when its step is shown. Particles
+     leave one at a time; the gamma wave front runs out to the lead, then on beyond it. */
+  #deck .slide.active .step.shown .stream-ball { animation: stream var(--time) linear var(--delay) infinite backwards; }
   #deck .slide.active .wave-run { animation: wave-run var(--time) linear infinite; }
+  #deck .wave-window { transform-box: fill-box; transform-origin: left center; transition: transform var(--cross) linear var(--wait); }
+  #deck .step:not(.shown) .wave-window { transform: scaleX(0); transition: none; }
+  #deck .on-arrival { transition: opacity .3s ease var(--wait); }
+  #deck .step:not(.shown) .on-arrival { opacity: 0; transition: none; }
   /* Random decay: each nucleus changes at its own moment. */
   #deck .pop { transition: opacity .25s ease var(--d); }
   #deck .step:not(.shown) .pop { opacity: 0; transition-delay: 0s; }
@@ -530,7 +537,7 @@ h2:has(+ .terms) { margin-bottom: 24px; }
   .slide, .step, .progress span { transition: none; }
   .slide.active .draw { animation: none; stroke-dasharray: none; stroke-dashoffset: 0; }
   .slide.active .pulse { animation: none; }
-  #deck svg .step, #deck .fly, #deck svg .wipe, #deck .hop, #deck .pop, #deck .with-row { transition: none; }
+  #deck svg .step, #deck .fly, #deck svg .wipe, #deck .hop, #deck .pop, #deck .with-row, #deck .on-arrival { transition: none; }
 }
 
 @media (max-width: 640px) {
