@@ -122,6 +122,7 @@
 @media screen {
   #deck .wf .step:not(.shown) { transform: none; }
   #deck .wf .live-only { display: inline; }
+  #deck .wf .still-only { display: none; }
   /* Parts that appear with a text step already on the slide. */
   #deck .wf .sync { transition: opacity .4s ease; }
   #deck .slide:not(:has(.worked .step:nth-child(1).shown)) .sync-w1,

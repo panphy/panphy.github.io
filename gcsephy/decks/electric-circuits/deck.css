@@ -26,6 +26,8 @@
 .cd text.tick { font: 600 13px/1 Arial, Helvetica, sans-serif; fill: #4b5563; }
 .cd text.axis-label { font: 800 14px/1 Arial, Helvetica, sans-serif; }
 .cd .charge-dot { fill: var(--cyan); stroke: var(--ink); stroke-width: 2; }
+/* Moving current arrowheads keep the orange of the fixed ones. */
+.cd .charge-dot.flow { fill: #d9480f; stroke: none; }
 
 /* Extra pictures drawn for the deck in the same style */
 .cd .e-dot { fill: #4aa3d8; stroke: var(--ink); stroke-width: 1.6; }
