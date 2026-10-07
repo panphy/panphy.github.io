@@ -14,6 +14,8 @@
   const BOTH_PAPER_UNITS = ["Working scientifically"]; // skills assessed in every paper
   const CHEVRON_ICON = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>';
   const CLOSE_ICON = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>';
+  const UP_ICON = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 19V5M5 12l7-7 7 7"/></svg>';
+  const DOWN_ICON = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12l7 7 7-7"/></svg>';
   const SWAP_ICON = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 11a8 8 0 0 0-14.3-4.5L4 8.5M4 4v4.5h4.5M4 13a8 8 0 0 0 14.3 4.5l1.7-2M20 20v-4.5h-4.5"/></svg>';
 
   const $ = (id) => document.getElementById(id);
@@ -23,7 +25,8 @@
     showAll: $("show-all"), lightbox: $("lightbox"), date: $("board-date"),
     sheetView: $("sheet-view"), sheet: $("sheet"), sheetFromSetup: $("sheet-from-setup"),
     methods: $("methods"), chosen: $("chosen"), cards: $("cards"), cardsOpen: $("cards-open"),
-    picker: $("picker"), pickSearch: $("pick-search"), randomOptions: $("random-options"), manualOptions: $("manual-options"),
+    picker: $("picker"), picked: $("picked"), pickSearch: $("pick-search"), more: $("more-below"), keys: $("keys"),
+    randomOptions: $("random-options"), manualOptions: $("manual-options"),
   };
 
   const state = {
@@ -42,6 +45,9 @@
     sheetKind: "worksheet", // which page the worksheet preview shows: "worksheet" | "key"
     deck: [],            // flashcards still to learn; the first is the one on screen
     deckSize: 0,
+    cardLog: [],         // flashcards answered so far, newest last, for Undo
+    fitAnswers: false,   // "Show ALL answers" was pressed: size the board to fit the answers too
+    opener: null,        // the control that left the landing page, to give focus back to
     shown: [],           // questions on the board
   };
 
@@ -454,8 +460,56 @@
     };
   }
 
+  // The ticked questions in board order, each with move and remove buttons.
+  function renderPicked() {
+    const picked = pickedQuestions();
+    els.picked.textContent = "";
+    els.picked.hidden = picked.length === 0;
+    if (!picked.length) return;
+    const label = document.createElement("span");
+    label.className = "chosen-label";
+    label.textContent = "On the board, in this order";
+    const list = document.createElement("ol");
+    const act = (question, name, icon, text, disabled, change) => {
+      const button = document.createElement("button");
+      button.type = "button";
+      button.innerHTML = icon;
+      button.disabled = disabled;
+      button.dataset.act = `${name}-${question.Number}`;
+      button.setAttribute("aria-label", `${text}: ${plainText(question.Question)}`);
+      button.addEventListener("click", () => {
+        change();
+        refresh(false);
+        // The list was rebuilt: keep the keyboard on the question that moved.
+        const same = els.picked.querySelector(`[data-act="${name}-${question.Number}"]:not(:disabled)`);
+        (same || els.picked.querySelector(`[data-act$="-${question.Number}"]:not(:disabled)`) || els.pickSearch).focus();
+      });
+      return button;
+    };
+    const swap = (a, b) => {
+      const i = state.picks.indexOf(a.Number), j = state.picks.indexOf(b.Number);
+      [state.picks[i], state.picks[j]] = [state.picks[j], state.picks[i]];
+    };
+    picked.forEach((question, index) => {
+      const row = document.createElement("li");
+      const order = document.createElement("span");
+      order.className = "pick-order";
+      order.textContent = index + 1;
+      const text = document.createElement("span");
+      text.className = "pick-text";
+      setQuestionText(text, question.Question);
+      row.append(order, text,
+        act(question, "up", UP_ICON, "Move up", index === 0, () => swap(question, picked[index - 1])),
+        act(question, "down", DOWN_ICON, "Move down", index === picked.length - 1, () => swap(question, picked[index + 1])),
+        act(question, "remove", CLOSE_ICON, "Remove", false, () => { state.picks = state.picks.filter((number) => number !== question.Number); }));
+      list.append(row);
+    });
+    els.picked.append(label, list);
+  }
+
   function renderPicker() {
     if (state.mode !== "manual") return;
+    renderPicked();
     const terms = els.pickSearch.value.trim().toLowerCase().split(/\s+/).filter(Boolean);
     const scroll = els.picker.scrollTop;
     const boardOrder = pickedQuestions().map((question) => question.Number);
@@ -700,6 +754,11 @@
     reveal.addEventListener("click", () => {
       setAnswer(item, answer.hidden);
       syncShowAll();
+      // Once the last answer is hidden again the text can go back to full size.
+      if (state.fitAnswers && !els.list.querySelector(".q-answer:not([hidden])")) {
+        state.fitAnswers = false;
+        fitBoard();
+      }
       if (!answer.hidden) answer.scrollIntoView({ block: "nearest", behavior: "smooth" });
     });
     const swap = document.createElement("button");
@@ -730,6 +789,7 @@
   }
 
   function renderBoard() {
+    state.fitAnswers = false;
     els.list.textContent = "";
     state.shown.forEach((question, index) => els.list.append(buildCard(question, index)));
     syncShowAll();
@@ -753,16 +813,31 @@
   // Choose the largest text size (and one or two columns) at which every
   // question fits on screen; below the minimum readable size the board scrolls.
   // Answers are left out of the measurement so the text never shrinks when
-  // one is revealed: the board scrolls instead.
+  // one is revealed: the board scrolls instead. "Show ALL answers" is the
+  // exception, and refits the board with the answers included.
   function fitBoard() {
     if (els.board.hidden || !state.shown.length) return;
     const list = els.list;
+    // Measure without the "More below" strip and without a clipped date; both are put back if needed.
+    els.more.hidden = true;
+    els.date.style.visibility = "";
+    if (els.date.scrollWidth > els.date.clientWidth) els.date.style.visibility = "hidden";
     const style = getComputedStyle(els.area);
     const available = els.area.clientHeight - parseFloat(style.paddingTop) - parseFloat(style.paddingBottom);
     const viewport = window.innerHeight;
-    const min = Math.max(22, Math.min(viewport * 0.045, window.innerWidth * 0.05));
+    const readable = Math.max(22, Math.min(viewport * 0.045, window.innerWidth * 0.05));
+    // Going through every answer at once, a little smaller beats scrolling.
+    const min = state.fitAnswers ? Math.max(22, readable * 0.75) : readable;
     const max = Math.max(min, viewport * 0.085);
-    const layouts = window.innerWidth >= 900 && state.shown.length > 1 ? [1, 2] : [1];
+    const two = window.innerWidth >= 900 && state.shown.length > 1;
+    // In two columns on a narrow board the buttons may also go under the text, which leaves more words per line.
+    const layouts = [{ columns: 1, stacked: false }];
+    if (two) layouts.push({ columns: 2, stacked: false });
+    if (two && window.innerWidth < 1280) layouts.push({ columns: 2, stacked: true });
+    const apply = (layout) => {
+      list.style.columnCount = layout.columns;
+      list.classList.toggle("stacked", layout.stacked);
+    };
     // Whole half-pixels only, so the size applied is exactly a size that was measured.
     const snap = (size) => Math.floor(size * 2) / 2;
     const fits = (size) => {
@@ -770,9 +845,9 @@
       return list.offsetHeight <= available;
     };
     let best = null;
-    list.classList.add("measuring");
-    for (const columns of layouts) {
-      list.style.columnCount = columns;
+    list.classList.toggle("measuring", !state.fitAnswers);
+    for (const layout of layouts) {
+      apply(layout);
       if (!fits(min)) continue;
       let low = min, high = max;
       if (fits(max)) low = max;
@@ -780,12 +855,56 @@
         const mid = (low + high) / 2;
         if (fits(mid)) low = mid; else high = mid;
       }
-      if (!best || low > best.size * 1.06) best = { size: low, columns };
+      if (!best || low > best.size * 1.06) best = { size: low, layout };
     }
-    if (!best) best = { size: min, columns: layouts.length > 1 && state.shown.length > 3 ? 2 : 1 };
+    if (!best) best = { size: min, layout: two && state.shown.length > 3 ? layouts[layouts.length - 1] : layouts[0] };
     list.classList.remove("measuring");
-    list.style.columnCount = best.columns;
+    apply(best.layout);
     list.style.setProperty("--q", `${snap(snap(best.size) * state.scale)}px`);
+    updateMore();
+  }
+
+  // Say so when part of the board is below the bottom edge.
+  function updateMore() {
+    els.more.hidden = els.board.hidden || els.area.scrollHeight - els.area.scrollTop - els.area.clientHeight < 24;
+  }
+
+  // The board, flashcards and worksheet are history entries, so the browser's
+  // Back button (or a phone's back swipe) returns to the topics instead of
+  // leaving the page.
+  function currentView() {
+    return (history.state && history.state.view) || "setup";
+  }
+
+  function pushView(view) {
+    if (currentView() !== view) history.pushState({ view }, "");
+  }
+
+  function goBack() {
+    if (currentView() === "setup") applyView("setup");
+    else history.back();
+  }
+
+  function applyView(view) {
+    const possible = { setup: true, board: state.shown.length > 0, sheet: state.shown.length > 0, cards: state.deckSize > 0 };
+    if (!possible[view]) {
+      history.replaceState(null, "");
+      view = "setup";
+    }
+    if (view === "setup" && document.fullscreenElement) document.exitFullscreen();
+    els.keys.hidden = true;
+    els.lightbox.hidden = true;
+    els.setup.hidden = view !== "setup";
+    els.board.hidden = view !== "board" && view !== "sheet";
+    els.cards.hidden = view !== "cards";
+    els.sheetView.hidden = view !== "sheet";
+    if (view === "setup") (state.opener && state.opener.isConnected && state.opener !== document.body ? state.opener : els.show).focus();
+    else if (view === "sheet") $("sheet-print").focus();
+    else if (view === "cards") (state.deck.length ? ($("card").classList.contains("flipped") ? $("card-got") : $("card-reveal")) : $("cards-again")).focus();
+    else {
+      fitBoard();
+      els.showAll.focus();
+    }
   }
 
   function showBoard() {
@@ -794,18 +913,27 @@
     if (!questions.length) return;
     els.board.classList.toggle("manual", manual);
     state.shown = questions;
-    els.date.textContent = new Date().toLocaleDateString("en-GB", { weekday: "long", day: "numeric", month: "long" });
+    // A narrow board has room beside the buttons only for the short form ("Wed 7 Oct").
+    const dateStyle = window.innerWidth < 1200 ? "short" : "long";
+    els.date.textContent = new Date().toLocaleDateString("en-GB", { weekday: dateStyle, day: "numeric", month: dateStyle });
+    const arriving = els.board.hidden;
+    if (arriving) state.opener = document.activeElement;
     els.setup.hidden = true;
     els.board.hidden = false;
     els.area.scrollTop = 0;
+    $("board-more").setAttribute("aria-expanded", "false");
+    $("board-more").parentNode.classList.remove("open");
     renderBoard();
+    pushView("board");
+    if (arriving) els.showAll.focus();
   }
 
-  function hideBoard() {
-    if (document.fullscreenElement) document.exitFullscreen();
-    els.board.hidden = true;
-    els.cards.hidden = true;
-    els.setup.hidden = false;
+  // A stray press of "New questions" part-way through the answers would lose the set.
+  function redrawBoard() {
+    const answers = [...els.list.querySelectorAll(".q-answer")];
+    const revealed = answers.filter((answer) => !answer.hidden).length;
+    if (revealed && revealed < answers.length && !window.confirm("Replace all of these questions with a new set?")) return;
+    showBoard();
   }
 
   // Flashcards, for students revising alone: every question in the chosen
@@ -817,10 +945,13 @@
     const unique = questions.filter((question) => !seen.has(questionKey(question)) && seen.add(questionKey(question)));
     state.deck = shuffle([...unique, ...pickedMethods().map(methodItem)]);
     state.deckSize = state.deck.length;
+    state.cardLog = [];
     if (!state.deckSize) return;
+    if (els.cards.hidden) state.opener = document.activeElement;
     els.setup.hidden = true;
     els.board.hidden = true;
     els.cards.hidden = false;
+    pushView("cards");
     renderCard();
   }
 
@@ -842,6 +973,7 @@
     $("cards-progress").textContent = `Flashcards · ${learned} of ${state.deckSize} learned`;
     $("card").hidden = !card;
     $("cards-done").hidden = Boolean(card);
+    $("cards-undo").disabled = state.cardLog.length === 0;
     if (!card) {
       $("cards-done-text").textContent = `You went through all ${state.deckSize} card${state.deckSize === 1 ? "" : "s"}.`;
       $("cards-again").focus();
@@ -875,8 +1007,29 @@
   function answerCard(learned) {
     const card = state.deck.shift();
     if (!learned) state.deck.push(card);
+    state.cardLog.push({ card, learned });
     renderCard();
     document.querySelector(".cards-area").scrollTop = 0;
+  }
+
+  // Take back the last "Got it" or "Still learning": that card returns to the front.
+  function undoCard() {
+    const last = state.cardLog.pop();
+    if (!last) return;
+    if (!last.learned) state.deck.splice(state.deck.lastIndexOf(last.card), 1);
+    state.deck.unshift(last.card);
+    renderCard();
+  }
+
+  function restartCards() {
+    const learned = state.deckSize - state.deck.length;
+    if (learned && state.deck.length && !window.confirm("Start again? Your progress through this deck will be lost.")) return;
+    startCards();
+  }
+
+  function openKeys() {
+    els.keys.hidden = false;
+    $("keys-close").focus();
   }
 
   function toggleFullscreen() {
@@ -956,6 +1109,7 @@
     state.sheetKind = "worksheet";
     renderSheet();
     els.sheetView.hidden = false;
+    pushView("sheet");
     $("sheet-print").focus();
   }
 
@@ -1026,16 +1180,28 @@
     els.count.addEventListener("change", () => { state.count = clampCount(els.count.value); refresh(false); });
     els.show.addEventListener("click", showBoard);
     els.cardsOpen.addEventListener("click", startCards);
-    $("cards-restart").addEventListener("click", startCards);
+    $("cards-restart").addEventListener("click", restartCards);
+    $("cards-undo").addEventListener("click", undoCard);
+    document.querySelectorAll("[data-keys]").forEach((button) => button.addEventListener("click", openKeys));
+    els.keys.addEventListener("click", (event) => { if (event.target === els.keys || event.target.id === "keys-close") els.keys.hidden = true; });
+    $("board-more").addEventListener("click", (event) => {
+      const open = event.currentTarget.parentNode.classList.toggle("open");
+      event.currentTarget.setAttribute("aria-expanded", String(open));
+      fitBoard();
+    });
+    els.more.addEventListener("click", () => els.area.scrollBy({ top: els.area.clientHeight * 0.8, behavior: "smooth" }));
+    els.area.addEventListener("scroll", updateMore, { passive: true });
+    if (window.ResizeObserver) new ResizeObserver(updateMore).observe(els.list);
+    window.addEventListener("popstate", (event) => applyView((event.state && event.state.view) || "setup"));
     $("cards-again").addEventListener("click", startCards);
     $("card-reveal").addEventListener("click", () => flipCard(true));
     $("card-unflip").addEventListener("click", () => flipCard(false));
     $("card-again").addEventListener("click", () => answerCard(false));
     $("card-got").addEventListener("click", () => answerCard(true));
-    document.querySelectorAll("[data-home]").forEach((button) => button.addEventListener("click", hideBoard));
+    document.querySelectorAll("[data-home]").forEach((button) => button.addEventListener("click", goBack));
     els.sheetFromSetup.addEventListener("click", () => { showBoard(); openSheet(); });
     $("sheet-open").addEventListener("click", openSheet);
-    $("sheet-close").addEventListener("click", () => { els.sheetView.hidden = true; });
+    $("sheet-close").addEventListener("click", goBack);
     $("sheet-print").addEventListener("click", printSheet);
     document.querySelectorAll("[data-sheet]").forEach((button) => button.addEventListener("click", () => {
       state.sheetKind = button.dataset.sheet;
@@ -1052,12 +1218,15 @@
       const visible = els.showAll.getAttribute("aria-pressed") !== "true";
       els.list.querySelectorAll(".q").forEach((item) => setAnswer(item, visible));
       syncShowAll();
+      // With every answer showing, shrink the text if that brings them all on screen.
+      state.fitAnswers = visible;
+      fitBoard();
     });
-    $("reshuffle").addEventListener("click", showBoard);
+    $("reshuffle").addEventListener("click", redrawBoard);
     $("smaller").addEventListener("click", () => setScale(1 / 1.1));
     $("larger").addEventListener("click", () => setScale(1.1));
     $("fullscreen").addEventListener("click", toggleFullscreen);
-    $("back").addEventListener("click", hideBoard);
+    $("back").addEventListener("click", goBack);
     els.lightbox.addEventListener("click", () => { els.lightbox.hidden = true; });
 
     window.addEventListener("resize", fitBoard);
@@ -1072,8 +1241,12 @@
     document.addEventListener("webkitfullscreenchange", onFullscreenChange);
     document.addEventListener("keydown", (event) => {
       if (event.metaKey || event.ctrlKey || event.altKey) return;
+      if (!els.keys.hidden) {
+        if (event.key === "Escape" || event.key === "?") els.keys.hidden = true;
+        return;
+      }
       if (!els.sheetView.hidden) {
-        if (event.key === "Escape") els.sheetView.hidden = true;
+        if (event.key === "Escape") goBack();
         return;
       }
       if (!els.lightbox.hidden) {
@@ -1082,7 +1255,9 @@
       }
       if (!els.cards.hidden) {
         const revealed = $("card").classList.contains("flipped");
-        if (event.key === "Escape") hideBoard();
+        if (event.key === "Escape") goBack();
+        else if (event.key === "?") openKeys();
+        else if (event.key.toLowerCase() === "u") undoCard();
         else if (!state.deck.length) return;
         else if (event.key === "ArrowRight" && revealed) answerCard(true);
         else if (event.key === "ArrowLeft" && revealed) answerCard(false);
@@ -1096,10 +1271,11 @@
       }
       const key = event.key.toLowerCase();
       if (key === "a") els.showAll.click();
-      else if (key === "n" && state.mode === "random") showBoard();
+      else if (key === "n" && state.mode === "random") redrawBoard();
+      else if (key === "?") openKeys();
       else if (key === "f") toggleFullscreen();
       else if (key === "w") openSheet();
-      else if (key === "escape" && !document.fullscreenElement) hideBoard();
+      else if (key === "escape" && !document.fullscreenElement) goBack();
       else if (/^[0-9]$/.test(key)) {
         const item = els.list.children[key === "0" ? 9 : Number(key) - 1];
         if (item) item.querySelector(".ans-btn").click();
@@ -1109,6 +1285,8 @@
 
   async function start() {
     loadPrefs();
+    // A reload keeps the history entry but not the board it stood for.
+    if (history.state && history.state.view) history.replaceState(null, "");
     bindEvents();
     renderControls();
     try {

@@ -49,13 +49,13 @@
         <div class="search-row">
           <label class="search">
             <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></svg>
-            <input id="search" type="search" placeholder="Search topics, questions and answers, e.g. waves, Bohr, RP" autocomplete="off" aria-label="Search topics, questions and answers">
+            <input id="search" type="search" placeholder="Search, e.g. waves, RP" autocomplete="off" aria-label="Search topics, questions and answers">
           </label>
           <button id="select-shown" class="ghost" type="button">Select all shown</button>
           <button id="clear" class="ghost" type="button">Clear</button>
           <button id="fold-all" class="ghost" type="button">Collapse all</button>
         </div>
-        <p class="hint"><span class="badge-s">S</span> marks topics for Separate Physics only. Choose “Combined only” to hide them.</p>
+        <p class="hint"><span class="badge-s">S</span> marks topics for Separate Physics only. Choose “Combined only” to hide them. “Target 7” keeps only the priority questions, about 40% of each topic; “Target 9” uses the whole bank.</p>
         <div id="chosen" class="chosen" hidden aria-live="polite"></div>
         <div id="units" class="units" aria-live="polite"><p class="loading">Loading the question bank…</p></div>
         <div id="methods" class="methods-block" hidden></div>
@@ -88,10 +88,11 @@
         </div>
         <div id="manual-options" hidden>
           <p class="hint first">Tick the questions to show. They appear on the board in the order you tick them.</p>
+          <div id="picked" class="picked" hidden></div>
           <div class="search-row">
             <label class="search">
               <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></svg>
-              <input id="pick-search" type="search" placeholder="Filter questions and answers, e.g. define, unit, Bohr" autocomplete="off" aria-label="Filter questions and answers">
+              <input id="pick-search" type="search" placeholder="Filter, e.g. define, unit" autocomplete="off" aria-label="Filter questions and answers">
             </label>
             <button id="clear-picks" class="ghost" type="button">Clear picks</button>
           </div>
@@ -118,17 +119,20 @@
       </div>
       <div class="board-actions">
         <button id="show-all" class="pill solid" type="button" aria-pressed="false">Show ALL answers</button>
-        <button id="reshuffle" class="pill" type="button" title="New set of questions (N)">New questions</button>
-        <button id="sheet-open" class="pill" type="button" title="Worksheet of these questions (W)">Worksheet PDF</button>
-        <button id="smaller" class="pill icon" type="button" aria-label="Smaller text" title="Smaller text">A−</button>
-        <button id="larger" class="pill icon" type="button" aria-label="Larger text" title="Larger text">A+</button>
-        <button id="fullscreen" class="pill icon" type="button" aria-pressed="false" aria-label="Fullscreen" title="Fullscreen (F)"><svg viewBox="0 0 24 24" aria-hidden="true"><path class="enter" d="M4 9V4h5M15 4h5v5M20 15v5h-5M9 20H4v-5"/><path class="exit" d="M9 4v5H4M20 9h-5V4M15 20v-5h5M4 15h5v5"/></svg></button>
+        <button id="reshuffle" class="pill" type="button" title="Replace every question with a new set (N)">New questions</button>
+        <button id="board-more" class="pill icon more-toggle" type="button" aria-expanded="false" aria-label="More options"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h.01M12 12h.01M19 12h.01" stroke-width="3.6"/></svg></button>
+        <button id="sheet-open" class="pill extra" type="button" title="Worksheet of these questions (W)">Worksheet PDF</button>
+        <button id="smaller" class="pill icon extra" type="button" aria-label="Smaller text" title="Smaller text">A−</button>
+        <button id="larger" class="pill icon extra" type="button" aria-label="Larger text" title="Larger text">A+</button>
+        <button id="fullscreen" class="pill icon extra" type="button" aria-pressed="false" aria-label="Fullscreen" title="Fullscreen (F)"><svg viewBox="0 0 24 24" aria-hidden="true"><path class="enter" d="M4 9V4h5M15 4h5v5M20 15v5h-5M9 20H4v-5"/><path class="exit" d="M9 4v5H4M20 9h-5V4M15 20v-5h5M4 15h5v5"/></svg></button>
+        <button class="pill icon extra" type="button" data-keys aria-label="Keyboard shortcuts" title="Keyboard shortcuts (?)">?</button>
         <button id="back" class="pill" type="button">Change topics</button>
       </div>
     </header>
     <div id="board-area" class="board-area">
       <ol id="questions" class="questions"></ol>
     </div>
+    <button id="more-below" class="more-below" type="button" hidden>More below<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button>
   </div>
 
   <div id="cards" hidden>
@@ -138,7 +142,9 @@
         <span id="cards-progress"></span>
       </div>
       <div class="board-actions">
+        <button id="cards-undo" class="pill" type="button" title="Take back the last card (U)" disabled>Undo</button>
         <button id="cards-restart" class="pill" type="button">Start again</button>
+        <button class="pill icon" type="button" data-keys aria-label="Keyboard shortcuts" title="Keyboard shortcuts (?)">?</button>
         <button class="pill" type="button" data-home>Change topics</button>
       </div>
     </header>
@@ -191,6 +197,30 @@
       </div>
     </div>
     <div class="sheet-scroll"><article id="sheet" class="sheet"></article></div>
+  </div>
+
+  <div id="keys" class="keys" hidden role="dialog" aria-modal="true" aria-labelledby="keys-title">
+    <div class="keys-card">
+      <h2 id="keys-title">Keyboard shortcuts</h2>
+      <h3>Board</h3>
+      <dl>
+        <div><dt><kbd>1</kbd>–<kbd>9</kbd> <kbd>0</kbd></dt><dd>Show or hide that answer</dd></div>
+        <div><dt><kbd>A</kbd></dt><dd>Show or hide all answers</dd></div>
+        <div><dt><kbd>N</kbd></dt><dd>New set of questions</dd></div>
+        <div><dt><kbd>W</kbd></dt><dd>Worksheet PDF</dd></div>
+        <div><dt><kbd>F</kbd></dt><dd>Fullscreen</dd></div>
+        <div><dt><kbd>Esc</kbd></dt><dd>Back to topics</dd></div>
+      </dl>
+      <h3>Flashcards</h3>
+      <dl>
+        <div><dt><kbd>↓</kbd> <kbd>↑</kbd></dt><dd>Flip to the answer, and back</dd></div>
+        <div><dt><kbd>→</kbd></dt><dd>Got it</dd></div>
+        <div><dt><kbd>←</kbd></dt><dd>Still learning</dd></div>
+        <div><dt><kbd>U</kbd></dt><dd>Undo the last card</dd></div>
+        <div><dt><kbd>Esc</kbd></dt><dd>Back to topics</dd></div>
+      </dl>
+      <button id="keys-close" class="pill solid" type="button">Close</button>
+    </div>
   </div>
 
   <div id="lightbox" class="lightbox" hidden role="dialog" aria-modal="true" aria-label="Enlarged diagram">

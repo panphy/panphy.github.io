@@ -1,12 +1,12 @@
 # Do Now starters
 
-Lesson starters for AQA GCSE Physics (Higher). The teacher picks topics, then either sets a number of questions to be drawn at random (spread across the chosen topics) or ticks the exact questions to show ("Pick my own"). The board shows them large enough to read from the back of the room. Optional required practical methods, listed below the topic units, show the steps of a practical jumbled for students to put in order. Each question has its own answer button, and there is a Show ALL answers button.
+Lesson starters for AQA GCSE Physics (Higher). The teacher picks topics, then either sets a number of questions to be drawn at random (spread across the chosen topics) or ticks the exact questions to show ("Pick my own"). The board shows them large enough to read from the back of the room. Optional required practical methods, listed below the topic units, show the steps of a practical jumbled for students to put in order. Each question has its own answer button, and there is a Show ALL answers button. The text is sized so that the questions fill the screen; revealing one answer never shrinks it (the board scrolls, and a "More below" strip says so), but Show ALL answers refits the board, slightly smaller if need be, so that every answer is on screen together. "New questions" asks first when only some of the answers are showing.
 
-The topic search matches topic and unit names, and also the wording of questions and answers (at the start of words, so `electron` finds "electrons" and `rp` does not find "absorption"). Topics found through their questions say how many matched; hover to list them. Required practicals are also matched on their task and steps. The "Pick my own" filter matches question and answer wording the same way.
+The topic search matches topic and unit names, and also the wording of questions and answers (at the start of words, so `electron` finds "electrons" and `rp` does not find "absorption"). Topics found through their questions say how many matched; hover to list them. Required practicals are also matched on their task and steps. The "Pick my own" filter matches question and answer wording the same way; the ticked questions are listed above it in board order, where they can be moved up or down or removed.
 
 The "Target 9 / Target 7" switch beside the course switch sets how much of the bank is used. Target 9 is every question; Target 7 keeps only the priority questions (about 40% of each topic), for students who would be overwhelmed by the whole bank. It applies to the random draw, "Pick my own", flashcards, search and the topic counts, and works together with "Combined only". Required practical methods are never hidden by it.
 
-Between visits the browser remembers only the course switch, the target switch, the number of questions and the board text size. Ticked topics, picked questions and open units are not remembered: every visit starts with nothing selected and every unit folded.
+Between visits the browser remembers only the course switch, the target switch, the number of questions and the board text size. Ticked topics, picked questions and open units are not remembered: every visit starts with nothing selected and every unit folded. The board, flashcards and worksheet are browser history entries, so the Back button returns to the topics (with the selection intact) instead of leaving the page.
 
 ## Files
 
@@ -40,7 +40,7 @@ Each topic's share follows how often it earned recall (AO1) marks in the AQA Hig
 
 ## Flashcards
 
-"Flashcards" on the landing page is for students revising on their own. It makes a shuffled deck of every question in the chosen topics (or the hand-picked questions), shown one at a time: "Show answer" flips the card over, then "Got it" retires it and "Still learning" sends it to the back of the deck. Progress is not saved. Keys: `↓` flip to the answer, `↑` flip back, `→` got it, `←` still learning, `Esc` back.
+"Flashcards" on the landing page is for students revising on their own. It makes a shuffled deck of every question in the chosen topics (or the hand-picked questions), shown one at a time: "Show answer" flips the card over, then "Got it" retires it and "Still learning" sends it to the back of the deck. "Undo" takes back the last card. Progress is not saved. Keys: `↓` flip to the answer, `↑` flip back, `→` got it, `←` still learning, `U` undo, `Esc` back.
 
 ## Worksheet
 
@@ -48,7 +48,7 @@ Each topic's share follows how often it earned recall (AO1) marks in the AQA Hig
 
 ## Board shortcuts
 
-`1`–`9`, `0`: show or hide that answer. `A`: all answers. `N`: new questions. `W`: worksheet. `F`: fullscreen. `Esc`: back to topics. Clicking "Do Now" in the top bar also goes back.
+`1`–`9`, `0`: show or hide that answer. `A`: all answers. `N`: new questions. `W`: worksheet. `F`: fullscreen. `Esc`: back to topics. `?` (or the "?" button): list of shortcuts. Clicking "Do Now" in the top bar also goes back. On a phone the less-used board buttons are behind the "⋯" button.
 
 ## Old address
 
