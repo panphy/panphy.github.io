@@ -180,6 +180,13 @@
     };
   }
 
+  // Click-through builds for the deck: a figure's div opts in with data-animate.
+  // Without it the markup is the finished diagram, which the workbooks print.
+  const animated = el => 'animate' in el.dataset;
+  const stepG = (on, k, body, cls = '') => on ? `<g class="step k${k}${cls && ' ' + cls}">${body}</g>` : body;
+  // Starts (dx, dy) away from where it is drawn, then travels there when its step shows.
+  const fly = (on, dx, dy, body) => on ? `<g class="fly" style="--fx:${f(dx)}px;--fy:${f(dy)}px">${body}</g>` : body;
+
   function bohrAtom(cx, cy, labels) {
     let s = shadow(cx, cy + 250, 170);
     s += ring(cx, cy, 120) + ring(cx, cy, 225);
@@ -261,19 +268,22 @@
       return svg('0 0 960 390', s, 'Nuclei of carbon-12, carbon-13 and carbon-14: all have 6 protons but 6, 7 and 8 neutrons');
     },
 
-    ion: () => {
-      let s = '';
-      [[230, false], [730, true]].forEach(([cx, ion]) => {
-        s += ring(cx, 200, 85) + ring(cx, 200, 150, ion ? 'stroke-dasharray="6 7" opacity=".45"' : '');
-        s += cluster(cx, 200, 3, 4, 20);
-        s += orbiter(cx, 200, 85, 85, 0.2, 8) + orbiter(cx, 200, 85, 85, 0.2 + Math.PI, 8);
-        if (!ion) s += orbiter(cx, 200, 150, 150, 3.9, 14);
-      });
-      s += ball(905, 60, 12, 'electron') + arrow(845, 118, 890, 74, 'electron', 2.5);
-      s += text(905, 32, 'outer e⁻ lost', 'lbl', 'end');
-      s += arrow(410, 200, 540, 200, 'text-secondary', 3) + text(475, 182, 'loses 1 e⁻', 'lbl mono');
-      s += text(230, 400, 'lithium atom', 'lbl display') + text(230, 432, '3 p, 3 e → charge 0', 'lbl mono');
-      s += text(730, 400, 'lithium ion, Li⁺', 'lbl display') + text(730, 432, '3 p, 2 e → charge +1', 'lbl mono');
+    ion: el => {
+      const on = animated(el);
+      const atom = (cx, ion) => {
+        let a = ring(cx, 200, 85) + ring(cx, 200, 150, ion ? 'stroke-dasharray="6 7" opacity=".45"' : '');
+        a += cluster(cx, 200, 3, 4, 20);
+        a += orbiter(cx, 200, 85, 85, 0.2, 8) + orbiter(cx, 200, 85, 85, 0.2 + Math.PI, 8);
+        if (!ion) a += orbiter(cx, 200, 150, 150, 3.9, 14);
+        return a;
+      };
+      // The lost electron starts on the outer energy level and leaves along the arrow.
+      let after = atom(730, true) + fly(on, -53, 53, ball(905, 60, 12, 'electron')) + arrow(845, 118, 890, 74, 'electron', 2.5);
+      after += text(905, 32, 'outer e⁻ lost', 'lbl', 'end');
+      after += arrow(410, 200, 540, 200, 'text-secondary', 3) + text(475, 182, 'loses 1 e⁻', 'lbl mono');
+      const before = text(230, 400, 'lithium atom', 'lbl display') + text(230, 432, '3 p, 3 e → charge 0', 'lbl mono');
+      const afterLabels = text(730, 400, 'lithium ion, Li⁺', 'lbl display') + text(730, 432, '3 p, 2 e → charge +1', 'lbl mono');
+      const s = on ? atom(230, false) + before + stepG(on, 1, after + afterLabels) : atom(230, false) + after + before + afterLabels;
       return svg('0 0 960 450', s, 'A lithium atom loses its outer electron to become a positive ion');
     },
 
@@ -323,7 +333,8 @@
       return svg('0 0 900 460', s, 'Alpha scattering: alpha particles fired at thin gold foil. Most pass straight through, some are deflected, a very few bounce back');
     },
 
-    'scatter-zoom': () => {
+    'scatter-zoom': el => {
+      const on = animated(el);
       let s = ball(350, 230, 42, 'positive') + text(350, 318, 'gold nucleus (+)', 'lbl strong');
       const paths = [
         ['M20,410 L600,410', 'far away: straight on', 600, 396, 'end'],
@@ -331,9 +342,11 @@
         ['M20,236 L278,236 Q306,229 278,222 L40,190', 'head-on: bounces back', 20, 272, 'start']
       ];
       paths.forEach(([d, label, x, y, anchor], i) => {
-        s += `<path d="${d}" class="alpha-path" marker-end="url(#m-alpha)"/>`;
-        s += `<g class="mover"><circle r="10" fill="url(#g-alpha)"/><animateMotion dur="3s" begin="-${i * 0.9}s" repeatCount="indefinite" path="${d}"/></g>`;
-        s += text(x, y, label, 'lbl', anchor, 'style="fill:var(--alpha)"');
+        let track = `<path d="${d}" class="alpha-path" marker-end="url(#m-alpha)"/>`;
+        track += `<g class="mover"><circle r="10" fill="url(#g-alpha)"/><animateMotion dur="3s" begin="-${i * 0.9}s" repeatCount="indefinite" path="${d}"/></g>`;
+        track += text(x, y, label, 'lbl', anchor, 'style="fill:var(--alpha)"');
+        // In the deck each track appears with its row of the observation table.
+        s += on ? `<g class="with-row with-row-${i}">${track}</g>` : track;
       });
       return svg('0 0 640 460', s, 'Close-up: alpha particles far from a nucleus pass straight through; close ones are repelled; a head-on one bounces back');
     },
@@ -357,7 +370,8 @@
       return svg('0 0 840 440', s, 'Carbon atom as Bohr pictured it in 1913, with one positive nucleus, and today, with 6 protons and 6 neutrons');
     },
 
-    levels: () => {
+    levels: el => {
+      const on = animated(el);
       let s = '';
       [[240, true], [720, false]].forEach(([cx, absorb]) => {
         const cy = 215, a = -0.75;
@@ -365,16 +379,20 @@
         s += ring(cx, cy, 75) + ring(cx, cy, 150) + ball(cx, cy, 16, 'proton');
         s += text(cx - 75, cy + 5, 'n=1', 'lbl mono small', 'middle') + text(cx - 150, cy + 5, 'n=2', 'lbl mono small', 'middle');
         const [from, to] = absorb ? [p1, p2] : [p2, p1];
-        s += `<circle cx="${f(from[0])}" cy="${f(from[1])}" r="12" class="ghost"/>`;
-        s += ball(to[0], to[1], 12, 'electron');
+        const ghost = `<circle cx="${f(from[0])}" cy="${f(from[1])}" r="12" class="ghost"/>`;
+        const electron = ball(to[0], to[1], 12, 'electron');
         const k = absorb ? 1 : -1;
-        s += arrow(from[0] + 13 * k * Math.cos(a), from[1] + 13 * k * Math.sin(a), to[0] - 16 * k * Math.cos(a), to[1] - 16 * k * Math.sin(a), 'brand-accent', 3);
-        if (absorb) s += wave(cx - 200, cy - 170, p1[0] - 16, p1[1] - 10, { cycles: 5 });
+        const jump = arrow(from[0] + 13 * k * Math.cos(a), from[1] + 13 * k * Math.sin(a), to[0] - 16 * k * Math.cos(a), to[1] - 16 * k * Math.sin(a), 'brand-accent', 3);
         // Leave to the lower right so the wave stays clear of the electron's path inward.
-        else s += wave(p1[0] + 15, p1[1] + 7, cx + 225, cy + 30, { cycles: 5 });
-        s += text(cx, 38, absorb ? 'ABSORBS EM RADIATION' : 'EMITS EM RADIATION', 'lbl mono strong a');
-        s += text(cx, 402, absorb ? 'moves further out' : 'moves closer in', 'lbl display');
-        s += text(cx, 432, absorb ? 'higher energy level' : 'lower energy level', 'lbl mono');
+        const radiation = absorb ? wave(cx - 200, cy - 170, p1[0] - 16, p1[1] - 10, { cycles: 5 }) : wave(p1[0] + 15, p1[1] + 7, cx + 225, cy + 30, { cycles: 5 });
+        const title = text(cx, 38, absorb ? 'ABSORBS EM RADIATION' : 'EMITS EM RADIATION', 'lbl mono strong a');
+        const result = text(cx, 402, absorb ? 'moves further out' : 'moves closer in', 'lbl display') + text(cx, 432, absorb ? 'higher energy level' : 'lower energy level', 'lbl mono');
+        if (!on) { s += ghost + electron + jump + radiation + title + result; return; }
+        // Deck build: radiation arrives, the electron jumps out; then an electron drops back and emits.
+        const hop = `<g class="hop until-k${absorb ? 2 : 3}" style="--fx:${f(from[0] - to[0])}px;--fy:${f(from[1] - to[1])}px">${electron}</g>`;
+        s += title;
+        if (absorb) s += stepG(on, 1, radiation, 'wipe spent-k2') + stepG(on, 2, ghost + jump + result) + hop;
+        else s += stepG(on, 3, ghost + jump + result + `<g class="wipe late">${radiation}</g>`) + hop;
       });
       return svg('0 0 960 450', s, 'Hydrogen atom: an electron absorbs electromagnetic radiation and moves to a higher energy level; it emits radiation when it moves to a lower level');
     },
@@ -412,53 +430,66 @@
       return svg('0 0 960 420', s, 'An unstable nucleus emits alpha, beta, gamma or a neutron; a Geiger-Müller tube and counter record the count rate');
     },
 
-    alpha: () => {
+    alpha: el => {
+      const on = animated(el);
       let s = shadow(150, 300, 100) + cluster(150, 190, 95, 146, 10);
-      s += arrow(260, 190, 330, 190, 'text-secondary', 3);
-      s += shadow(440, 300, 95) + cluster(440, 200, 93, 144, 10);
-      s += `<line x1="530" y1="160" x2="598" y2="112" class="trail" style="stroke:var(--alpha)"/>` + cluster(636, 86, 2, 2, 10);
-      s += text(150, 344, 'americium-241', 'lbl display') + text(150, 372, '95 p, 146 n', 'lbl mono');
-      s += text(440, 344, 'neptunium-237', 'lbl display') + text(440, 372, '93 p, 144 n', 'lbl mono');
-      s += text(636, 162, 'alpha particle', 'lbl display') + text(636, 190, '2 p, 2 n', 'lbl mono');
+      const parentLabels = text(150, 344, 'americium-241', 'lbl display') + text(150, 372, '95 p, 146 n', 'lbl mono');
+      let after = arrow(260, 190, 330, 190, 'text-secondary', 3);
+      after += shadow(440, 300, 95) + cluster(440, 200, 93, 144, 10);
+      after += `<line x1="530" y1="160" x2="598" y2="112" class="trail" style="stroke:var(--alpha)"/>` + fly(on, -106, 74, cluster(636, 86, 2, 2, 10));
+      const afterLabels = text(440, 344, 'neptunium-237', 'lbl display') + text(440, 372, '93 p, 144 n', 'lbl mono')
+        + text(636, 162, 'alpha particle', 'lbl display') + text(636, 190, '2 p, 2 n', 'lbl mono');
+      s += on ? parentLabels + stepG(on, 1, after + afterLabels) : after + parentLabels + afterLabels;
       return svg('0 0 720 400', s, 'Alpha decay: americium-241 emits an alpha particle of 2 protons and 2 neutrons and becomes neptunium-237');
     },
 
-    beta: () => {
+    beta: el => {
+      const on = animated(el);
       let s = shadow(140, 262, 100) + cluster(140, 150, 6, 8, 26);
-      s += arrow(250, 150, 320, 150, 'text-secondary', 3);
-      s += shadow(430, 262, 100) + cluster(430, 150, 7, 7, 26, { base: [6, 8], highlight: true });
-      s += `<line x1="528" y1="120" x2="616" y2="78" class="trail" style="stroke:var(--electron)"/>` + ball(640, 68, 14, 'electron') + text(640, 30, 'beta particle', 'lbl strong');
-      s += text(140, 300, 'carbon-14', 'lbl display') + text(140, 328, '6 p, 8 n', 'lbl mono');
-      s += text(430, 300, 'nitrogen-14', 'lbl display') + text(430, 328, '7 p, 7 n', 'lbl mono');
-      s += `<rect x="120" y="356" width="480" height="96" rx="18" class="inset"/>` + text(150, 410, 'IN THE NUCLEUS', 'lbl mono small', 'start');
-      s += ball(342, 404, 20, 'neutron') + arrow(368, 404, 404, 404, 'text-secondary', 2.5) + ball(432, 404, 20, 'proton') + text(480, 414, '+', 'lbl display') + ball(528, 404, 14, 'electron');
+      const parentLabels = text(140, 300, 'carbon-14', 'lbl display') + text(140, 328, '6 p, 8 n', 'lbl mono');
+      let after = arrow(250, 150, 320, 150, 'text-secondary', 3);
+      after += shadow(430, 262, 100) + cluster(430, 150, 7, 7, 26, { base: [6, 8], highlight: true });
+      after += `<line x1="528" y1="120" x2="616" y2="78" class="trail" style="stroke:var(--electron)"/>` + fly(on, -112, 52, ball(640, 68, 14, 'electron')) + text(640, 30, 'beta particle', 'lbl strong');
+      const afterLabels = text(430, 300, 'nitrogen-14', 'lbl display') + text(430, 328, '7 p, 7 n', 'lbl mono');
+      let inside = `<rect x="120" y="356" width="480" height="96" rx="18" class="inset"/>` + text(150, 410, 'IN THE NUCLEUS', 'lbl mono small', 'start');
+      inside += ball(342, 404, 20, 'neutron') + arrow(368, 404, 404, 404, 'text-secondary', 2.5) + ball(432, 404, 20, 'proton') + text(480, 414, '+', 'lbl display') + ball(528, 404, 14, 'electron');
+      // Deck build: what happens inside the nucleus first, then the new nucleus and the beta particle.
+      s += on ? parentLabels + stepG(on, 1, inside) + stepG(on, 2, after + afterLabels) : after + parentLabels + afterLabels + inside;
       return svg('0 0 720 460', s, 'Beta decay: a neutron turns into a proton and a fast electron; carbon-14 becomes nitrogen-14');
     },
 
-    gamma: () => {
+    gamma: el => {
+      const on = animated(el);
       let s = `<circle cx="150" cy="180" r="140" fill="url(#g-glow)" class="pulse"/>` + cluster(150, 180, 43, 56, 14);
-      s += arrow(262, 180, 330, 180, 'text-secondary', 3);
-      s += shadow(440, 290, 90) + cluster(440, 180, 43, 56, 14);
-      s += wave(540, 150, 700, 56, { cycles: 5, amp: 10 }) + text(640, 66, 'gamma ray', 'lbl strong', 'end', 'style="fill:var(--photon)"');
-      s += text(150, 334, 'technetium-99m', 'lbl display') + text(150, 362, 'extra energy', 'lbl mono');
-      s += text(440, 334, 'technetium-99', 'lbl display') + text(440, 362, 'same p and n', 'lbl mono');
+      const parentLabels = text(150, 334, 'technetium-99m', 'lbl display') + text(150, 362, 'extra energy', 'lbl mono');
+      const ray = wave(540, 150, 700, 56, { cycles: 5, amp: 10 });
+      let after = arrow(262, 180, 330, 180, 'text-secondary', 3);
+      after += shadow(440, 290, 90) + cluster(440, 180, 43, 56, 14);
+      after += (on ? `<g class="wipe late">${ray}</g>` : ray) + text(640, 66, 'gamma ray', 'lbl strong', 'end', 'style="fill:var(--photon)"');
+      const afterLabels = text(440, 334, 'technetium-99', 'lbl display') + text(440, 362, 'same p and n', 'lbl mono');
+      s += on ? parentLabels + stepG(on, 1, after + afterLabels) : after + parentLabels + afterLabels;
       return svg('0 0 720 400', s, 'Gamma emission: an excited technetium-99m nucleus gives out a gamma ray; its protons and neutrons do not change');
     },
 
-    penetration: () => {
+    penetration: el => {
+      const on = animated(el);
       let s = `<rect x="20" y="70" width="64" height="290" rx="12" style="fill:var(--lead)"/>` + text(52, 392, 'SOURCE', 'lbl mono small');
       s += `<rect x="300" y="52" width="7" height="326" rx="2" style="fill:var(--paper);stroke:var(--input-border)"/>`;
       s += `<rect x="520" y="52" width="18" height="326" rx="3" style="fill:var(--aluminium)"/>`;
       s += `<rect x="730" y="52" width="52" height="326" rx="4" style="fill:var(--lead)"/>`;
       s += text(303, 30, 'paper', 'lbl mono strong') + text(529, 22, 'aluminium', 'lbl mono strong') + text(529, 46, 'few mm', 'lbl mono') + text(756, 22, 'lead', 'lbl mono strong') + text(756, 46, 'several cm', 'lbl mono');
-      s += `<line x1="90" y1="125" x2="294" y2="125" class="lane" style="stroke:var(--alpha)"/>` + ball(150, 125, 14, 'alpha') + ball(232, 125, 14, 'alpha');
-      s += text(318, 110, 'stopped', 'lbl small', 'start', 'style="fill:var(--alpha)"');
-      s += `<line x1="90" y1="215" x2="514" y2="215" class="lane" style="stroke:var(--electron)"/>` + [160, 290, 420].map(x => ball(x, 215, 10, 'electron')).join('');
-      s += text(550, 200, 'stopped', 'lbl small', 'start', 'style="fill:var(--electron)"');
-      s += wave(90, 305, 728, 305, { cycles: 11, amp: 10, head: false });
-      s += wave(786, 305, 940, 305, { cycles: 3, amp: 6, opacity: .45 });
-      s += text(860, 340, 'reduced', 'lbl small', 'middle', 'style="fill:var(--photon)"');
-      s += text(112, 100, 'α', 'lbl greek', 'start', 'style="fill:var(--alpha)"') + text(112, 196, 'β', 'lbl greek', 'start', 'style="fill:var(--electron)"') + text(112, 282, 'γ', 'lbl greek', 'start', 'style="fill:var(--photon)"');
+      // Each particle starts at the source (x = 104) and travels to where it is drawn.
+      const fired = (xs, y, r, kind) => xs.map(x => fly(on, 104 - x, 0, ball(x, y, r, kind))).join('');
+      const greek = (y, sym, color) => text(112, y, sym, 'lbl greek', 'start', `style="fill:var(--${color})"`);
+      const alpha = `<line x1="90" y1="125" x2="294" y2="125" class="lane" style="stroke:var(--alpha)"/>` + fired([150, 232], 125, 14, 'alpha')
+        + text(318, 110, 'stopped', 'lbl small', 'start', 'style="fill:var(--alpha)"');
+      const beta = `<line x1="90" y1="215" x2="514" y2="215" class="lane" style="stroke:var(--electron)"/>` + fired([160, 290, 420], 215, 10, 'electron')
+        + text(550, 200, 'stopped', 'lbl small', 'start', 'style="fill:var(--electron)"');
+      const rays = [wave(90, 305, 728, 305, { cycles: 11, amp: 10, head: false }), wave(786, 305, 940, 305, { cycles: 3, amp: 6, opacity: .45 })];
+      const gamma = (on ? `<g class="wipe">${rays[0]}</g><g class="wipe later">${rays[1]}</g>` : rays.join(''))
+        + text(860, 340, 'reduced', 'lbl small', 'middle', 'style="fill:var(--photon)"');
+      const labels = [greek(100, 'α', 'alpha'), greek(196, 'β', 'electron'), greek(282, 'γ', 'photon')];
+      s += on ? [alpha, beta, gamma].map((lane, i) => stepG(on, i + 1, lane + labels[i])).join('') : alpha + beta + gamma + labels.join('');
       return svg('0 0 960 410', s, 'Penetration: paper stops alpha, a few millimetres of aluminium stops beta, several centimetres of lead reduce gamma');
     },
 
@@ -480,16 +511,19 @@
       return svg('0 0 240 180', s, 'Medical tracer: gamma rays pass out of the body to a detector');
     },
 
-    'half-life': () => {
+    'half-life': el => {
+      const on = animated(el);
       const X = t => 90 + t * 18.75, Y = n => 400 - n * 0.85;
       let s = `<line x1="90" y1="400" x2="700" y2="400" class="axis"/><line x1="90" y1="400" x2="90" y2="44" class="axis"/>`;
       [0, 8, 16, 24, 32].forEach(t => { s += `<line x1="${X(t)}" y1="400" x2="${X(t)}" y2="408" class="axis"/>` + text(X(t), 432, t, 'lbl mono small'); });
       [0, 100, 200, 300, 400].forEach(n => { s += `<line x1="82" y1="${Y(n)}" x2="90" y2="${Y(n)}" class="axis"/>` + text(74, Y(n) + 6, n, 'lbl mono small', 'end'); });
       s += text(395, 462, 'time (days)', 'lbl');
       s += text(22, 222, 'undecayed nuclei', 'lbl', 'middle', 'transform="rotate(-90 22 222)"');
-      [[8, 200, '½'], [16, 100, '¼'], [24, 50, '⅛']].forEach(([t, n, frac]) => {
-        s += `<path d="M90,${Y(n)} H${X(t)} V400" class="guide accent"/>` + `<circle cx="${X(t)}" cy="${Y(n)}" r="6" style="fill:var(--brand-accent)"/>`;
-        s += text(X(t) + 14, Y(n) - 12, frac, 'lbl strong', 'start', 'style="fill:var(--brand-accent-strong)"');
+      // Deck build: one halving per click, read across from the axis and then down.
+      [[8, 200, '½'], [16, 100, '¼'], [24, 50, '⅛']].forEach(([t, n, frac], i) => {
+        let mark = `<path d="M90,${Y(n)} H${X(t)} V400" class="guide accent"/>` + `<circle cx="${X(t)}" cy="${Y(n)}" r="6" style="fill:var(--brand-accent)"/>`;
+        mark += text(X(t) + 14, Y(n) - 12, frac, 'lbl strong', 'start', 'style="fill:var(--brand-accent-strong)"');
+        s += stepG(on, i + 1, mark, 'wipe');
       });
       let d = '';
       for (let t = 0; t <= 32; t += 0.5) d += `${t ? 'L' : 'M'}${f(X(t))},${f(Y(400 * Math.pow(2, -t / 8)))}`;
@@ -497,18 +531,25 @@
       return svg('0 0 720 480', s, 'Decay curve: 400 undecayed nuclei fall to 200 after 8 days, 100 after 16 days and 50 after 24 days');
     },
 
-    random: () => {
+    random: el => {
+      const on = animated(el);
+      const delay = seeded(11);
       const rand = seeded(7);
       const order = Array.from({ length: 64 }, (_, i) => i).sort(() => rand() - 0.5);
       const decayed = [new Set(), new Set(order.slice(0, 31)), new Set(order.slice(0, 49))];
       const labels = [['start', '64 undecayed'], ['after 1 half-life', '33 undecayed (≈ 32)'], ['after 2 half-lives', '15 undecayed (≈ 16)']];
       let s = '';
       [40, 368, 696].forEach((x0, g) => {
+        let grid = '';
         for (let i = 0; i < 64; i++) {
           const x = x0 + (i % 8) * 28 + 14, y = 40 + Math.floor(i / 8) * 28 + 14;
-          s += ball(x, y, 11, decayed[g].has(i) ? 'decayed' : 'undecayed');
+          // Deck build: nuclei that decay during this half-life change one by one, at random moments.
+          if (on && g && decayed[g].has(i) && !decayed[g - 1].has(i)) {
+            grid += ball(x, y, 11, 'undecayed') + `<g class="pop" style="--d:${f(0.5 + delay() * 2.5)}s">${ball(x, y, 11, 'decayed')}</g>`;
+          } else grid += ball(x, y, 11, decayed[g].has(i) ? 'decayed' : 'undecayed');
         }
-        s += text(x0 + 112, 310, labels[g][0], 'lbl mono strong') + text(x0 + 112, 340, labels[g][1], 'lbl');
+        grid += text(x0 + 112, 310, labels[g][0], 'lbl mono strong') + text(x0 + 112, 340, labels[g][1], 'lbl');
+        s += g ? stepG(on, g, grid) : grid;
       });
       return svg('0 0 960 360', s, 'Random decay of 64 nuclei: 33 remain after one half-life and 15 after two, close to but not exactly half each time');
     },

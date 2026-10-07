@@ -113,3 +113,51 @@
 .frame .blank { display: inline-block; min-width: 120px; border-bottom: 3px solid var(--ink); }
 .frame .blank.s { min-width: 70px; }
 .frame b { font-weight: 900; }
+
+/* Diagram builds. Scoped to the live deck on screen, so thumbnails and print keep
+   the finished diagram. */
+.wf .live-only { display: none; }
+/* Thumbnails show a built diagram complete. */
+.thumb-slide .wf .step[class*="step k"]:not(.shown) { opacity: 1; transform: none; }
+@media screen {
+  #deck .wf .step:not(.shown) { transform: none; }
+  #deck .wf .live-only { display: inline; }
+  /* Parts that appear with a text step already on the slide. */
+  #deck .wf .sync { transition: opacity .4s ease; }
+  #deck .slide:not(:has(.worked .step:nth-child(1).shown)) .sync-w1,
+  #deck .slide:not(:has(.worked .step:nth-child(2).shown)) .sync-w2,
+  #deck .slide:not(:has(.worked .step:nth-child(3).shown)) .sync-w3,
+  #deck .slide:not(:has(li.step:nth-child(1).shown)) .sync-l1,
+  #deck .slide:not(:has(li.step:nth-child(4).shown)) .sync-l4 { opacity: 0; }
+  /* Reading between the points: up to the line, then across to the axis. */
+  #deck .wf .draw-guide { stroke-dasharray: var(--dashes); transition: stroke-dashoffset 1.6s ease-in-out; }
+  #deck .slide:not(:has(li.step:nth-child(4).shown)) .draw-guide { stroke-dashoffset: var(--hidden); }
+  #deck .wf .sync-l4 { transition-delay: 1.5s; }
+  #deck .slide:not(:has(li.step:nth-child(4).shown)) .sync-l4 { transition-delay: 0s; }
+  /* Drop test: one run on the first click. The ball speeds up as it falls, then slows
+     as it rises straight back up, and stays at the bounce height to be read. */
+  #deck .wf .drop-ball { transition: transform .5s ease-in-out; }
+  #deck .wf:has(.k1.shown) .drop-ball { transform: translateY(var(--rise)); animation: drop-bounce 1.4s both; }
+  #deck .wf .release { transition: fill .3s ease; }
+  #deck .wf:has(.k1.shown) .release { fill: transparent; stroke-dasharray: 6 6; }
+  #deck .wf .bounce-path { transform: translateX(-60px); }
+  #deck .wf:has(.bounce-path):has(.k2.shown) .k1 { opacity: 0; }
+  /* Ramp: one run on the first click. The trolley speeds up down the slope, levels out
+     at the foot and slows to a stop along the floor. */
+  #deck .wf .trolley { transform: var(--at-start); transition: transform .6s ease-in-out; }
+  #deck .wf:has(.k1.shown) .trolley { transform: var(--at-rest); animation: ramp-run 2.4s both; }
+}
+@media (prefers-reduced-motion: reduce) {
+  #deck .wf .sync, #deck .wf .draw-guide, #deck .wf .drop-ball, #deck .wf .release, #deck .wf .trolley { transition: none !important; animation: none !important; }
+}
+@keyframes drop-bounce {
+  0% { transform: translateY(0); animation-timing-function: cubic-bezier(.11, 0, .5, 0); }
+  58% { transform: translateY(var(--land)); animation-timing-function: cubic-bezier(.5, 1, .89, 1); }
+  100% { transform: translateY(var(--rise)); }
+}
+@keyframes ramp-run {
+  0% { transform: var(--at-start); animation-timing-function: cubic-bezier(.11, 0, .5, 0); }
+  52% { transform: var(--at-foot); animation-timing-function: linear; }
+  57% { transform: var(--on-floor); animation-timing-function: cubic-bezier(.5, 1, .89, 1); }
+  100% { transform: var(--at-rest); }
+}
