@@ -16,7 +16,7 @@
 15,Energy,Energy stores and systems,Combined,9,,Describe the change in the thermal energy store as an object gets hotter.,It increases.
 16,Energy,Energy stores and systems,Combined,7,Core fact,Name the four ways energy is transferred between stores.,"Mechanically, electrically, by heating and by radiation"
 17,Energy,Energy stores and systems,Combined,9,,Name the energy transfer when a force moves an object.,Mechanical transfer
-18,Energy,Energy stores and systems,Combined,7,One representative of a group of similar questions,Name the energy transfer when an object emits light or sound.,Transfer by radiation
+18,Energy,Energy stores and systems,Combined,7,One representative of a group of similar questions,Name the energy transfer when an object emits light or infrared.,Transfer by radiation
 19,Energy,Energy stores and systems,Combined,9,,Name the energy transfer when a hot object warms a cooler one.,Transfer by heating
 638,Energy,Energy stores and systems,Combined,9,,What is a system?,An object or a group of objects.
 639,Energy,Energy stores and systems,Combined,9,,State what happens to energy when a system changes.,It is transferred from one store to another.
@@ -244,7 +244,7 @@ Earth: green and yellow stripes"
 154,Electricity,(S) Static charge and electric fields,Separate,9,,Describe how a material can become positively charged.,By losing electrons.
 155,Electricity,(S) Static charge and electric fields,Separate,7,Core fact,Describe what happens when two charged objects are brought close together.,"They exert a force on each other: like charges repel, opposite charges attract."
 156,Electricity,(S) Static charge and electric fields,Separate,9,,State whether electrostatic force is a contact force or non-contact force.,Non-contact force
-157,Electricity,(S) Static charge and electric fields,Separate,9,,Explain why there is no potential difference between two insulators before they are rubbed together.,"Both are neutral, so there is no difference in charge."
+157,Electricity,(S) Static charge and electric fields,Separate,9,,Explain why an insulator has no overall charge before it is rubbed.,It has equal amounts of positive and negative charge.
 158,Electricity,(S) Static charge and electric fields,Separate,9,,Name the type of field that surrounds every charged object.,An electric field
 159,Electricity,(S) Static charge and electric fields,Separate,9,,State where the electric field around a charged object is strongest.,Closest to the object.
 160,Electricity,(S) Static charge and electric fields,Separate,9,,Describe how the strength of an electric field changes with distance from the charge.,The field gets stronger closer to the charge.
@@ -275,13 +275,12 @@ The field lines point towards the negative charge."
 697,Particle model of matter,Density of materials,Combined,7,Asked in the 2020–23 papers,Explain why gases have a much lower density than solids and liquids.,"The particles are far apart, so there is less mass in a given volume."
 173,Particle model of matter,Measuring density (RP),Combined,7,Core practical fact,State the two measurements needed to find the density of an object.,Mass and volume
 174,Particle model of matter,Measuring density (RP),Combined,9,,Describe how the volume of a cube can be found.,Measure one side with a ruler and cube it.
-175,Particle model of matter,Measuring density (RP),Combined,9,,Describe how the volume of a sphere can be found.,"Measure the diameter, halve it to find the radius, then use volume = 4/3 × π × r³."
 176,Particle model of matter,Measuring density (RP),Combined,9,,Describe how the volume of a liquid can be measured.,With a measuring cylinder.
 177,Particle model of matter,Measuring density (RP),Combined,9,,Convert 1 ml into cm³.,1 ml = 1 cm³
 178,Particle model of matter,Measuring density (RP),Combined,7,Core practical fact,Describe how the mass of a liquid can be found.,"Weigh the measuring cylinder empty, then with the liquid in it, and subtract."
 179,Particle model of matter,Measuring density (RP),Combined,7,Asked in the 2020–23 papers,Name the method used to measure the volume of an irregularly shaped object.,The displacement method
 698,Particle model of matter,Measuring density (RP),Combined,7,Asked in the 2020–23 papers,Describe how to read a measuring cylinder accurately.,Read the bottom of the meniscus at eye level.
-699,Particle model of matter,Measuring density (RP),Combined,9,,Name a measuring instrument that gives a more precise length than a ruler.,Vernier calipers
+699,Particle model of matter,Measuring density (RP),Combined,9,,Name an instrument for measuring length that has a better resolution than a ruler.,Vernier calipers
 182,Particle model of matter,Changes of state,Combined,9,,Name the change of state from solid to gas.,Sublimation
 183,Particle model of matter,Changes of state,Combined,9,,Name the change of state from gas to liquid.,Condensation
 184,Particle model of matter,Changes of state,Combined,7,Standard explanation,Explain the difference between boiling and evaporation.,"Boiling: only at the boiling point, throughout the liquid.
@@ -376,7 +375,7 @@ Specific latent heat: energy to change the state of 1 kg."
 250,Atomic structure,The development of the model of the atom,Combined,7,Standard explanation,Explain how the alpha particle scattering experiment showed that the nucleus is very small.,Most alpha particles passed straight through; only a very few were scattered backwards.
 251,Atomic structure,The development of the model of the atom,Combined,7,Standard explanation,Explain how the alpha particle scattering experiment showed that the nucleus is positively charged.,"Some positive alpha particles were deflected or scattered backwards, repelled by the nucleus."
 252,Atomic structure,The development of the model of the atom,Combined,9,,Name the model of the atom that replaced the plum pudding model.,The nuclear model
-253,Atomic structure,The development of the model of the atom,Combined,9,,Name the model of the atom that replaced the nuclear model.,The Bohr model
+253,Atomic structure,The development of the model of the atom,Combined,9,,Name the model of the atom that came after the nuclear model.,The Bohr model (Bohr adapted the nuclear model)
 254,Atomic structure,The development of the model of the atom,Combined,7,Asked in the 2020–23 papers,Describe the Bohr model of the atom.,A small positive nucleus with electrons orbiting at specific distances.
 255,Atomic structure,The development of the model of the atom,Combined,9,,Name the second subatomic particle to be discovered.,The proton
 256,Atomic structure,The development of the model of the atom,Combined,9,,Name the third subatomic particle to be discovered.,The neutron
@@ -394,7 +393,7 @@ Specific latent heat: energy to change the state of 1 kg."
 263,Atomic structure,Radioactive decay and nuclear radiation,Combined,9,,What is count-rate?,The number of decays recorded each second by a detector.
 264,Atomic structure,Radioactive decay and nuclear radiation,Combined,7,Asked in the 2020–23 papers,Explain why the count-rate is always less than the activity.,The detector picks up only some of the radiation emitted.
 265,Atomic structure,Radioactive decay and nuclear radiation,Combined,9,,Name the four types of nuclear radiation.,"Alpha particles, beta particles, gamma rays and neutrons"
-266,Atomic structure,Radioactive decay and nuclear radiation,Combined,9,,Name the three types of nuclear radiation that are ionising.,"Alpha, beta and gamma"
+266,Atomic structure,Radioactive decay and nuclear radiation,Combined,9,,Name three types of ionising nuclear radiation.,"Alpha, beta and gamma"
 267,Atomic structure,Radioactive decay and nuclear radiation,Combined,7,Asked in the 2020–23 papers,State what an alpha particle is made of.,Two protons and two neutrons (a helium nucleus)
 268,Atomic structure,Radioactive decay and nuclear radiation,Combined,7,Core fact,State what a beta particle is.,A high-speed electron from the nucleus
 269,Atomic structure,Radioactive decay and nuclear radiation,Combined,7,Asked in the 2020–23 papers,State what a gamma ray is.,Electromagnetic radiation from the nucleus
@@ -596,7 +595,7 @@ Aeroplane: about 250 m/s"
 (a = Δv ÷ t)"
 770,Forces,Acceleration,Combined,9,On the equations sheet,State the equation for uniform acceleration.,"(final velocity)² − (initial velocity)² = 2 × acceleration × distance
 (v² − u² = 2 a s)"
-771,Forces,Acceleration,Combined,9,,State what a negative acceleration means.,The object is slowing down.
+771,Forces,Acceleration,Combined,9,,What is a deceleration?,A negative acceleration: the object is slowing down.
 772,Forces,Acceleration,Combined,9,,State what a horizontal line on a velocity–time graph shows.,Constant velocity.
 773,Forces,Acceleration,Combined,9,,"State what a straight, sloping line on a velocity–time graph shows.",Constant acceleration.
 904,Forces,Acceleration,Combined,7,Definition that mark schemes ask for,What is acceleration?,The rate of change of velocity.
@@ -716,7 +715,6 @@ Wavelength = 2 × the length of one loop."
 478,Waves,(S) Sound waves and waves for detection and exploration,Separate,9,,State what happens to the speed of sound when it passes from air into a solid.,It increases.
 479,Waves,(S) Sound waves and waves for detection and exploration,Separate,9,,"State what happens to the loudness of a sound passing from air into a solid, and why.",It decreases: some sound is reflected or absorbed at the boundary.
 480,Waves,(S) Sound waves and waves for detection and exploration,Separate,9,,Name the part of the human ear that detects sound waves.,The eardrum
-481,Waves,(S) Sound waves and waves for detection and exploration,Separate,9,,Name the part of the ear that sends electrical signals to the brain.,The cochlea
 482,Waves,(S) Sound waves and waves for detection and exploration,Separate,7,Core fact,State the range of human hearing.,20 Hz to 20 kHz
 483,Waves,(S) Sound waves and waves for detection and exploration,Separate,7,Definition that mark schemes ask for,Name sound with a frequency above the range of human hearing.,Ultrasound
 484,Waves,(S) Sound waves and waves for detection and exploration,Separate,9,,What is echolocation?,Using reflected sound (echoes) to locate an object.
@@ -742,7 +740,7 @@ Wavelength = 2 × the length of one loop."
 497,Waves,Electromagnetic waves,Combined,9,,Name the electromagnetic waves with the shortest wavelength.,Gamma rays
 498,Waves,Electromagnetic waves,Combined,9,,Name the electromagnetic waves that human eyes can detect.,Visible light
 499,Waves,Electromagnetic waves,Combined,7,Asked in the 2020–23 papers,Define refraction.,The change in direction of a wave at a boundary between two media.
-500,Waves,Electromagnetic waves,Combined,7,Asked in the 2020–23 papers,Give two situations in which a wave crossing a boundary is not refracted.,"When it travels along the normal.
+500,Waves,Electromagnetic waves,Combined,7,Asked in the 2020–23 papers,Give two situations in which a wave crossing a boundary does not change direction.,"When it travels along the normal.
 When its speed is the same in both media."
 501,Waves,Electromagnetic waves,Combined,7,Asked in the 2020–23 papers,Explain why refraction happens.,The wave changes speed in the new medium.
 502,Waves,Electromagnetic waves,Combined,9,,Name the process shown in this wavefront diagram.,Refraction
@@ -835,8 +833,7 @@ How much radiation it reflects into space"
 564,Magnetism and electromagnetism,Permanent and induced magnetism,Combined,9,,Give two ways to show the shape of the magnetic field around a magnet.,Plotting compasses or iron filings
 565,Magnetism and electromagnetism,Permanent and induced magnetism,Combined,7,Core practical fact,Describe how to find the direction of the magnetic field around a magnet.,"Use a plotting compass: its needle points along the field, from north to south."
 566,Magnetism and electromagnetism,Permanent and induced magnetism,Combined,9,,Name the pole at the end of a compass needle that points north.,A north pole
-567,Magnetism and electromagnetism,Permanent and induced magnetism,Combined,9,,State the type of magnetic pole near the Earth's geographic North Pole.,A magnetic south pole
-568,Magnetism and electromagnetism,Permanent and induced magnetism,Combined,7,Asked in the 2020–23 papers,State the evidence that the Earth's core is magnetic.,A compass needle points in the same direction wherever it is on Earth.
+568,Magnetism and electromagnetism,Permanent and induced magnetism,Combined,7,Asked in the 2020–23 papers,State the evidence that the Earth's core is magnetic.,"A compass needle lines up north–south when no other magnet is near, so the Earth has its own magnetic field."
 826,Magnetism and electromagnetism,Permanent and induced magnetism,Combined,7,Definition that mark schemes ask for,What is a magnetic field?,The region around a magnet where a force acts on another magnet or magnetic material.
 827,Magnetism and electromagnetism,Permanent and induced magnetism,Combined,9,,Is the force between two magnets a contact or a non-contact force?,Non-contact
 828,Magnetism and electromagnetism,Permanent and induced magnetism,Combined,9,,State what happens to an induced magnet when it is removed from the field.,It quickly loses its magnetism.
@@ -963,7 +960,6 @@ Moons and artificial satellites orbit planets."
 877,Working scientifically,Variables and planning,Combined,9,,Give two examples of categoric variables.,"Any two from: material, colour, brand, type of surface"
 878,Working scientifically,Variables and planning,Combined,9,,State the form of a good research question.,"""How does X affect Y?""
 (X: independent variable, Y: dependent variable)"
-879,Working scientifically,Variables and planning,Combined,9,,State the minimum number of trials for each value of the independent variable.,Three
 880,Working scientifically,Variables and planning,Combined,9,,Describe what a good method allows another scientist to do.,Repeat the investigation by following its steps.
 881,Working scientifically,Tables and graphs,Combined,9,,State where the units should be written in a results table.,In the column headings.
 882,Working scientifically,Tables and graphs,Combined,7,Core fact,Name the type of graph used when the independent variable is continuous.,A line graph
@@ -976,13 +972,13 @@ Moons and artificial satellites orbit planets."
 889,Working scientifically,Tables and graphs,Combined,9,,State how the points on a line graph should be plotted.,As small crosses.
 890,Working scientifically,Tables and graphs,Combined,9,,Explain why the bars on a bar chart have gaps between them.,"The categories are separate, with no values in between."
 891,Working scientifically,Tables and graphs,Combined,9,,Which are plotted on a graph: individual trials or means?,The means
-892,Working scientifically,"Best-fit lines, outliers and conclusions",Combined,9,,What is a line of best fit?,One smooth line showing the overall trend of the data.
-893,Working scientifically,"Best-fit lines, outliers and conclusions",Combined,7,Core practical fact,Describe how a line of best fit should be drawn.,As one thin line with points balanced above and below it.
-894,Working scientifically,"Best-fit lines, outliers and conclusions",Combined,9,,State what must [not] be done when drawing a line of best fit.,Joining the points dot-to-dot.
-895,Working scientifically,"Best-fit lines, outliers and conclusions",Combined,7,Definition that mark schemes ask for,What is an outlier?,A result that does not fit the pattern of the others.
-896,Working scientifically,"Best-fit lines, outliers and conclusions",Combined,7,Core practical fact,Describe what you should do when you find an outlier.,"Check the recording and plotting, then repeat the measurement. Never just delete it."
-897,Working scientifically,"Best-fit lines, outliers and conclusions",Combined,9,,What is a trend?,The overall relationship shown by the data.
-898,Working scientifically,"Best-fit lines, outliers and conclusions",Combined,9,,State what a good conclusion must include.,"The relationship between the variables, supported by values with units."
-899,Working scientifically,"Best-fit lines, outliers and conclusions",Combined,7,Core fact,Describe the graph of two quantities that are directly proportional.,A straight line through the origin.
-901,Working scientifically,"Best-fit lines, outliers and conclusions",Combined,9,,State the three parts of a good evaluation point.,"The problem, its effect on the data, and an improvement that fixes it."
-902,Working scientifically,"Best-fit lines, outliers and conclusions",Combined,9,,What is peer review?,"When other scientists check the method, the evidence and the claims."
+892,Working scientifically,"Best-fit lines, anomalous results and conclusions",Combined,9,,What is a line of best fit?,One smooth line showing the overall trend of the data.
+893,Working scientifically,"Best-fit lines, anomalous results and conclusions",Combined,7,Core practical fact,Describe how a line of best fit should be drawn.,As one thin line with points balanced above and below it.
+894,Working scientifically,"Best-fit lines, anomalous results and conclusions",Combined,9,,State what must [not] be done when drawing a line of best fit.,Joining the points dot-to-dot.
+895,Working scientifically,"Best-fit lines, anomalous results and conclusions",Combined,7,Definition that mark schemes ask for,What is an anomalous result (an outlier)?,A result that does not fit the pattern of the others.
+896,Working scientifically,"Best-fit lines, anomalous results and conclusions",Combined,7,Core practical fact,Describe what you should do when you find an anomalous result.,"Check the recording and plotting, then repeat the measurement. If it is still anomalous, leave it out of the mean and the line of best fit."
+897,Working scientifically,"Best-fit lines, anomalous results and conclusions",Combined,9,,What is a trend?,The overall relationship shown by the data.
+898,Working scientifically,"Best-fit lines, anomalous results and conclusions",Combined,9,,State what a good conclusion must include.,"The relationship between the variables, supported by values with units."
+899,Working scientifically,"Best-fit lines, anomalous results and conclusions",Combined,7,Core fact,Describe the graph of two quantities that are directly proportional.,A straight line through the origin.
+901,Working scientifically,"Best-fit lines, anomalous results and conclusions",Combined,9,,State the three parts of a good evaluation point.,"The problem, its effect on the data, and an improvement that fixes it."
+902,Working scientifically,"Best-fit lines, anomalous results and conclusions",Combined,9,,What is peer review?,"When other scientists check the method, the evidence and the claims."
