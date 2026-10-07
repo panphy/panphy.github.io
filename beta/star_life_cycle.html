@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="description" content="Choose a star's mass and follow its whole life in interactive 3D: nebula, protostar, main sequence, giant, then white dwarf, neutron star or black hole.">
+  <meta name="theme-color" content="#F8F6F1">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <link rel="stylesheet" href="/assets/standalone-top.css">
+  <script>
+  (function() {
+    var dark = false;
+    try { dark = !!localStorage.getItem('star-life-cycle-dark'); } catch (error) {}
+    if (dark) {
+      document.documentElement.setAttribute('data-theme', 'dark');
+      var tc = document.querySelector('meta[name="theme-color"]');
+      if (tc) tc.setAttribute('content', '#111110');
+    }
+  })();
+  </script>
+  <title>Life Cycle of a Star — PanPhy Labs</title>
+  <link rel="icon" type="image/png" href="/assets/favicon.png">
+  <link rel="apple-touch-icon" href="/assets/apple-touch-icon.png">
+  <link rel="stylesheet" href="star_life_cycle/style.css">
+  <link rel="stylesheet" href="/assets/theme-toggle.css">
+  <link rel="stylesheet" href="/assets/fullscreen-button.css">
+  <script src="/assets/theme-toggle.js"></script>
+  <script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/"}}</script>
+</head>
+<body>
+  <header class="banner">
+    <a class="banner-logo" href="/" aria-label="PanPhy Labs home"><img src="/assets/panphy.png" alt="PanPhy Labs" width="38" height="38"></a>
+    <div class="banner-title">Life Cycle of a Star</div>
+    <div class="banner-actions">
+      <button id="theme-button" type="button" data-panphy-theme-toggle aria-label="Toggle light/dark theme" title="Toggle between light and dark themes"></button>
+    </div>
+  </header>
+  <script>window.PanPhyThemeToggle.mount(document.getElementById('theme-button'), { darkStorageKey: 'star-life-cycle-dark' });</script>
+  <main>
+    <section class="mass-panel" aria-labelledby="mass-title">
+      <div class="mass-head">
+        <div>
+          <p class="eyebrow">STEP 1 / CHOOSE A STAR</p>
+          <h1 id="mass-title">Mass decides everything<span>.</span></h1>
+        </div>
+        <p class="fate" id="fate" role="status"></p>
+      </div>
+      <div class="mass-row">
+        <div class="mass-entry">
+          <label for="mass-input">Starting mass</label>
+          <div class="stepper">
+            <button type="button" id="mass-down" aria-label="Lower mass">−</button>
+            <input id="mass-input" class="mono" type="number" inputmode="decimal" min="0.1" max="100" step="any" value="1">
+            <span class="unit mono">M☉</span>
+            <button type="button" id="mass-up" aria-label="Higher mass">+</button>
+          </div>
+          <small>1 M☉ = the mass of the Sun. Range 0.1 to 100.</small>
+        </div>
+        <div class="mass-scale">
+          <input id="mass-slider" type="range" min="-1" max="2" step="0.005" value="0" aria-label="Starting mass on a logarithmic scale">
+          <div class="fate-band" aria-hidden="true">
+            <span class="band-wd" style="flex:1.903"><b>White dwarf</b><i>below 8 M☉</i></span>
+            <span class="band-ns" style="flex:0.398"><b>Neutron star</b><i>8 to 20</i></span>
+            <span class="band-bh" style="flex:0.699"><b>Black hole</b><i>above 20 M☉</i></span>
+          </div>
+          <div class="ticks mono" aria-hidden="true"><span style="left:0">0.1</span><span style="left:33.33%">1</span><span style="left:66.67%">10</span><span style="left:100%">100</span></div>
+          <p class="fate-key"><span><i class="band-wd"></i>White dwarf: below 8</span><span><i class="band-ns"></i>Neutron star: 8 to 20</span><span><i class="band-bh"></i>Black hole: above 20</span></p>
+        </div>
+      </div>
+      <div class="presets" id="presets" aria-label="Example stars">
+        <button type="button" data-mass="0.12"><b>0.12</b> Proxima Centauri</button>
+        <button type="button" data-mass="1"><b>1</b> The Sun</button>
+        <button type="button" data-mass="2.1"><b>2.1</b> Sirius A</button>
+        <button type="button" data-mass="5"><b>5</b> Blue-white star</button>
+        <button type="button" data-mass="18"><b>18</b> Betelgeuse</button>
+        <button type="button" data-mass="40"><b>40</b> Blue giant</button>
+      </div>
+    </section>
+
+    <section class="workspace" aria-label="Star life cycle explorer">
+      <div class="viewer-panel" id="viewer-panel">
+        <div class="viewer-heading">
+          <span id="scene-title" class="mono">NEBULA</span>
+          <span class="scale mono">SIZES AND TIMES COMPRESSED</span>
+          <button id="fullscreen" class="panphy-fullscreen-button" type="button" aria-controls="viewer-panel" aria-pressed="false" aria-label="Enter fullscreen" title="Enter fullscreen"><svg class="panphy-fs-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M4 9V4h5M15 4h5v5M20 15v5h-5M9 20H4v-5"/></svg></button>
+        </div>
+        <div id="viewer" tabindex="0" role="img" aria-label="Interactive 3D view of the star. Drag to rotate; scroll or pinch to zoom.">
+          <p id="load-status" role="status">Loading the 3D model…</p>
+          <dl class="readout overlay mono" id="readout" aria-label="Current values">
+            <div><dt>Age</dt><dd id="r-age">—</dd></div>
+            <div><dt>Mass</dt><dd id="r-mass">—</dd></div>
+            <div><dt>Radius</dt><dd id="r-radius">—</dd></div>
+            <div><dt>Surface</dt><dd id="r-temp">—</dd></div>
+            <div><dt>Brightness</dt><dd id="r-lum">—</dd></div>
+            <div><dt>Core</dt><dd id="r-core">—</dd></div>
+          </dl>
+          <div class="balance overlay" id="balance" aria-live="off">
+            <div class="balance-labels mono"><span>GRAVITY</span><span>PRESSURE</span></div>
+            <div class="balance-track"><i id="balance-fill"></i><b id="balance-marker"></b></div>
+            <p id="balance-text"></p>
+          </div>
+          <figure class="true-scale overlay">
+            <canvas id="scale-canvas" width="300" height="220" role="img" aria-label="True-scale size comparison"></canvas>
+            <figcaption id="scale-caption" class="mono"></figcaption>
+          </figure>
+          <p class="gesture overlay" aria-hidden="true">Drag to rotate · Pinch or scroll to zoom</p>
+        </div>
+        <p class="live" id="live" role="status"></p>
+        <ol class="stages" id="stages" aria-label="Stages of this star's life"></ol>
+        <div class="scrub">
+          <input id="scrub" type="range" min="0" max="1" step="0.001" value="0" aria-label="Move through the star's life">
+        </div>
+        <div class="toolbar" aria-label="Playback and view controls">
+          <button type="button" id="play" class="primary" aria-pressed="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path id="play-icon" d="M8 5v14l11-7z"/></svg><span id="play-label">Play</span></button>
+          <button type="button" id="prev" aria-label="Previous stage">◀ Stage</button>
+          <button type="button" id="next" aria-label="Next stage">Stage ▶</button>
+          <div class="speed" role="group" aria-label="Playback speed">
+            <button type="button" data-speed="0.5" aria-pressed="false">½×</button>
+            <button type="button" data-speed="1" aria-pressed="true">1×</button>
+            <button type="button" data-speed="2" aria-pressed="false">2×</button>
+          </div>
+          <button type="button" id="cutaway" class="experiment" aria-pressed="false">Cutaway</button>
+          <button type="button" id="reset">Reset view</button>
+        </div>
+      </div>
+
+      <aside aria-live="polite">
+        <p class="eyebrow" id="stage-eyebrow"></p>
+        <h2 id="stage-name"></h2>
+        <p class="tagline" id="stage-tagline"></p>
+        <div id="stage-body"></div>
+        <div class="idea"><h3><svg class="icon" viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" focusable="false"><circle cx="10.5" cy="10.5" r="6.5"/><path d="M15.3 15.3 21 21"/></svg> Look for</h3><p id="stage-look"></p></div>
+        <div class="layers" id="layers-box" hidden>
+          <h3>Inside the star</h3>
+          <p class="layers-hint" id="layers-hint"></p>
+          <ul id="layers"></ul>
+          <p class="layer-info" id="layer-info"></p>
+        </div>
+        <details class="deeper"><summary>Going further · A level and IB</summary><div id="stage-deeper"></div></details>
+      </aside>
+    </section>
+
+    <section class="charts">
+      <div class="card">
+        <p class="eyebrow">THE HERTZSPRUNG–RUSSELL DIAGRAM</p>
+        <h2>Brightness against temperature</h2>
+        <div class="hr-wrap"><canvas id="hr-canvas" role="img" aria-label="Hertzsprung–Russell diagram showing this star's track"></canvas></div>
+        <p class="caption" id="hr-caption"></p>
+        <p class="caption">Hot stars are on the <b>left</b>. The dashed lines join stars of the same radius: a star that moves along one keeps its size, and one that crosses them is growing or shrinking.</p>
+      </div>
+      <div class="card">
+        <p class="eyebrow">THE WHOLE LIFE, TO SCALE</p>
+        <h2>Where the time goes</h2>
+        <div class="life-bar" id="life-bar" role="img" aria-label="Stage durations to scale"></div>
+        <table class="durations mono" id="durations"><caption class="sr-only">Duration of each stage</caption><tbody></tbody></table>
+        <p class="caption" id="life-caption"></p>
+      </div>
+    </section>
+
+    <section class="reality"><span aria-hidden="true">↗</span><div>
+      <h2>A model is an explanation, not a photograph.</h2>
+      <p>The numbers come from standard physics: mass–luminosity and mass–radius relations for the main sequence, the Stefan–Boltzmann law linking brightness, radius and temperature, free-fall and Kelvin–Helmholtz timescales, and measured relations for the mass of the remnant. The star's colour is the colour of a hot body at its surface temperature, with the colour strengthened so that cool and hot stars are easy to tell apart.</p>
+      <p>Sizes are compressed. Real stars range from 20 km to over 1000 times the width of the Sun, so the 3D view squeezes that range enormously; the small inset always shows the true scale. Cutaway layers are widened so you can see them: the core of a giant is really less than a thousandth of its radius. Time is compressed too: every stage plays for the same few seconds, whether it really lasts a day or ten billion years.</p>
+      <p>The boundaries at 8 and 20 solar masses are approximate. They depend on what the star is made of, how fast it spins and whether it has a companion. The tracks after the main sequence are simplified, and stars lighter than about 0.5 solar masses live so long that their final stages are predictions that nobody has observed.</p>
+    </div></section>
+  </main>
+  <footer><span>PanPhy Labs · Life cycle of a star (beta)</span><a href="/beta/">More beta apps</a></footer>
+  <noscript><p class="no-script">Enable JavaScript to explore the 3D model.</p></noscript>
+  <script type="module">import('./star_life_cycle/app.js').catch(error => { console.error(error); const status = document.getElementById('load-status'); status.hidden = false; status.textContent = 'The 3D viewer could not load. Check your internet connection and reload.'; });</script>
+</body>
+</html>
