@@ -1,0 +1,77 @@
+/* Exam statistics deck: the shared teaching-deck layout in the Do Now colours
+   (board green, paper, amber and pink, from ../do_now.css). */
+.deck-donow {
+  --navy: #0c3a3f;
+  --navy-deep: #072a2e;
+  --paper: #f8f5ec;
+  --ink: #0b2a2e;
+  --muted: #4f6163;
+  --hi: #ffc145;
+  --cyan: #7fd6cc;
+  --hot: #ff8fa3;
+  --violet: #a895ff;
+  --alt: #c4d8d6;
+  --line: rgba(11, 42, 46, .17);
+  --card: #fffdf7;
+  --note: #d9f2ee;
+  --formula: #fff0cc;
+}
+.deck-donow body,
+.deck-donow .slide.dark {
+  background-image: linear-gradient(rgba(196, 216, 214, .13) 1px, transparent 1px), linear-gradient(90deg, rgba(196, 216, 214, .13) 1px, transparent 1px);
+}
+.slide.dark .lead { color: #d3e3e1; }
+.card.navy p { color: #d3e3e1; }
+.status { margin: auto; font: 900 30px Arial, sans-serif; color: var(--muted); }
+
+/* Title slide */
+.figures { display: grid; grid-template-columns: 1fr 1fr; gap: 22px; }
+.figure { padding: 22px 24px; border: 2px solid #fff; background: rgba(255, 255, 255, .06); }
+.figure b { display: block; font: 900 78px/1 var(--display); letter-spacing: -.04em; color: var(--hi); }
+.figure span { display: block; margin-top: 8px; font-size: 24px; font-weight: 800; color: #d3e3e1; }
+.figure.big { grid-column: 1 / -1; background: var(--hi); border-color: var(--hi); box-shadow: 9px 9px 0 var(--hot); }
+.figure.big b { font-size: 132px; color: var(--ink); }
+.figure.big span { color: var(--ink); font-size: 28px; }
+
+.bars + *, .grid + * { margin-top: 16px; }
+.note { margin: 0; font-size: 22px; font-weight: 700; line-height: 1.3; color: var(--muted); }
+.sep { display: inline-block; margin-left: 10px; padding: 1px 8px; border: 2px solid var(--ink); border-radius: 999px; background: var(--violet); font: 900 14px/1.3 Arial, sans-serif; letter-spacing: .06em; vertical-align: middle; }
+
+/* Horizontal bars */
+.bars { flex: 1; min-height: 0; display: grid; align-content: space-between; }
+.bar-row { display: grid; grid-template-columns: var(--label, 560px) 1fr; align-items: center; gap: 20px; }
+.bar-row .name { font-size: 27px; font-weight: 800; line-height: 1.1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.bar-row .name small { display: block; margin-top: 3px; font-size: 17px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); }
+.track { display: flex; align-items: center; gap: 12px; height: 38px; }
+.track i { display: block; height: 100%; min-width: 3px; border: 2px solid var(--ink); background: var(--accent); }
+.track i.second { background: var(--navy); }
+.track b { font: 900 24px Arial, sans-serif; white-space: nowrap; }
+.bars.pair .track { height: 24px; }
+.bars.pair .bar-row > div { display: grid; gap: 4px; }
+.key { display: flex; gap: 28px; margin: 0 0 14px; font-size: 21px; font-weight: 800; }
+.key span { display: inline-flex; align-items: center; gap: 9px; }
+.key i { width: 22px; height: 22px; border: 2px solid var(--ink); background: var(--accent); }
+.key i.second { background: var(--navy); }
+.key i.third { background: var(--hot); }
+.key i.rest { background: var(--card); }
+
+/* One stacked bar per series */
+.stacked { display: flex; width: 100%; height: 54px; border: 2px solid var(--ink); background: var(--card); }
+.stacked i { display: grid; place-items: center; height: 100%; border-right: 2px solid var(--ink); background: var(--accent); font: 900 24px Arial, sans-serif; font-style: normal; overflow: hidden; }
+.stacked i.third { background: var(--hot); }
+.stacked i.rest { border-right: 0; background: none; color: var(--muted); font-size: 20px; }
+
+/* Topic or fact against exam series */
+.grid { flex: 1; min-height: 0; display: grid; align-content: space-between; }
+.grid-row { display: grid; grid-template-columns: var(--label, 560px) repeat(var(--series), 96px) 1fr; align-items: center; gap: 8px; }
+.grid-row .name { font-size: 24px; font-weight: 800; line-height: 1.1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.grid-row.head { font: 900 17px/1.15 Arial, sans-serif; letter-spacing: .08em; text-transform: uppercase; text-align: center; color: var(--muted); }
+.grid-row.head .name { font: inherit; text-align: left; }
+.grid-row.unit .name { padding-top: 4px; font: 900 18px Arial, sans-serif; letter-spacing: .14em; text-transform: uppercase; color: var(--muted); }
+.cell { display: grid; place-items: center; height: var(--cell, 34px); border: 2px solid var(--ink); background: var(--card); font: 900 21px Arial, sans-serif; }
+.cell.none { border-color: var(--line); color: transparent; }
+.dot { justify-self: center; width: 28px; height: 28px; border: 2px solid var(--line); border-radius: 50%; }
+.dot.on { border-color: var(--ink); background: var(--accent); }
+.grid-row .total { padding-left: 12px; font: 900 22px Arial, sans-serif; white-space: nowrap; }
+.grid-row .track { height: 26px; padding-left: 12px; }
+.grid-row .track b { font-size: 20px; }

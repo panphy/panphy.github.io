@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en" class="deck-donow">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="robots" content="noindex, nofollow">
+  <meta name="description" content="Which topics and facts earn recall marks in AQA GCSE Physics and Combined Science: Trilogy Higher papers, counted from the mark schemes.">
+  <meta name="theme-color" content="#072a2e">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <title>Exam statistics · Do Now</title>
+  <link rel="icon" type="image/png" href="/assets/favicon.png">
+  <link rel="apple-touch-icon" href="/assets/apple-touch-icon.png">
+  <link rel="stylesheet" href="/assets/standalone-top.css">
+  <link rel="stylesheet" href="/gcsephy/decks/assets/companion-deck.css">
+  <link rel="stylesheet" href="deck.css">
+  <script src="/gcsephy/sw-register.js" data-watch="marks.csv sections.csv facts.csv practicals.csv" defer></script>
+</head>
+<body data-deck-key="do-now-exam-stats" data-deck-title="Exam statistics">
+  <header class="topbar">
+    <a class="brand" href="https://panphy.app/" aria-label="PanPhy Labs main website"><img src="/assets/favicon.png" alt="" width="32" height="32"><span>Exam statistics</span></a>
+    <div class="top-actions">
+      <button id="thumbs-toggle" class="nav-pill icon-only" type="button" aria-controls="thumbs" aria-pressed="true" aria-label="Hide slide thumbnails" title="Show or hide slide thumbnails (T)"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path class="pane" d="M9.5 4.5H6A2.5 2.5 0 0 0 3.5 7v10A2.5 2.5 0 0 0 6 19.5h3.5z"/><rect x="3.5" y="4.5" width="17" height="15" rx="2.5"/><path d="M9.5 4.5v15"/></svg></button>
+      <a class="nav-pill" href="../"><span class="wide">Do Now</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 17L17 7M9 7h8v8"/></svg></a>
+      <button id="fullscreen" class="nav-pill" type="button" aria-pressed="false" aria-label="Present fullscreen" title="Present fullscreen (F)"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9V4h5M15 4h5v5M20 15v5h-5M9 20H4v-5"/></svg><span class="wide">Present</span></button>
+    </div>
+  </header>
+
+  <nav class="thumbs" id="thumbs" aria-label="Slides"></nav>
+
+  <main class="stage" id="stage">
+    <!-- deck.js draws every slide from the CSV files in this folder. -->
+    <div class="deck" id="deck"></div>
+  </main>
+
+  <nav class="controls" aria-label="Slide controls">
+    <button type="button" id="prev" aria-label="Previous slide"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg></button>
+    <span class="counter" id="counter" aria-live="polite"></span>
+    <button type="button" id="next" aria-label="Next slide"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 5l7 7-7 7"/></svg></button>
+  </nav>
+  <div class="progress" aria-hidden="true"><span id="progress-bar"></span></div>
+
+  <script src="deck.js"></script>
+</body>
+</html>

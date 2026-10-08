@@ -19,6 +19,7 @@ Between visits the browser remembers only the course switch, the target switch, 
 | `revision/` | Student revision sheets: an index page, one question-and-answer PDF per topic and one method sheet with diagrams per required practical. See [`revision/README.md`](revision/README.md) |
 | `review-changes.csv` | Every change made to the original bank (old and new wording, with a reason). For review only; the page does not use it and it can be deleted. |
 | `review-target7.csv` | Why each `Target` 7 question was chosen. For review only, as above. |
+| `exam-stats/` | A slide deck of where the recall marks were in past papers, linked from the top bar, with the CSV record behind it. See [`exam-stats/README.md`](exam-stats/README.md) |
 
 ## Question bank columns
 
@@ -36,7 +37,7 @@ Save the CSV as UTF-8 (in Excel: "CSV UTF-8 (Comma delimited)"), or symbols such
 
 ## How the Target 7 questions were chosen
 
-Each topic's share follows how often it earned recall (AO1) marks in the AQA Higher papers for Physics 8463 and Combined Science: Trilogy 8464, November 2020 to June 2023 (16 papers, counted from the specification references in the mark schemes): about half of an often-tested topic, a third of a middling one and a quarter of a rarely tested one, never fewer than two. Within a topic the choice favours facts those papers asked for directly, then units, definitions that mark schemes expect and standard explanations. "State the equation" questions are all left to Target 9, because AQA provides the full Physics Equations Sheet in the exam, for 2027 and from 2028 onwards ([AQA notice, 1 September 2026](https://www.aqa.org.uk/news/gcse-maths-sciences-formulae-equation-sheets-2027-28); more in [the Year 10 README](../year10phy/unit01/README.md#equation-sheet)). Re-check the shares when newer papers are available.
+Each topic's share follows how often it earned recall (AO1) marks in the AQA Higher papers for Physics 8463 and Combined Science: Trilogy 8464, November 2020 to June 2025 (24 papers, counted from the specification references in the mark schemes; the record is `exam-stats/marks.csv`): about half of an often-tested topic, a third of a middling one and a quarter of a rarely tested one, never fewer than two. Within a topic the choice favours facts those papers asked for directly, then units, definitions that mark schemes expect and standard explanations. "State the equation" questions are all left to Target 9, because AQA provides the full Physics Equations Sheet in the exam, for 2027 and from 2028 onwards ([AQA notice, 1 September 2026](https://www.aqa.org.uk/news/gcse-maths-sciences-formulae-equation-sheets-2027-28); more in [the Year 10 README](../year10phy/unit01/README.md#equation-sheet)). Re-check the shares when newer papers are available: June 2025 is the latest series counted.
 
 ## Flashcards
 
