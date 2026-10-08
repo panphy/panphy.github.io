@@ -79,7 +79,10 @@ sub, sup { line-height: 0; }
   border-bottom: 1px solid rgba(255, 255, 255, .15);
   color: #fff;
 }
-.brand { display: inline-flex; align-items: center; gap: 12px; min-height: 48px; min-width: 0; font-weight: 800; letter-spacing: -.02em; text-decoration: none; }
+.brand { display: inline-flex; align-items: center; gap: 4px; min-height: 48px; min-width: 0; font-weight: 800; letter-spacing: -.02em; }
+.brand a { display: inline-flex; align-items: center; min-height: 48px; color: inherit; text-decoration: none; }
+.brand-logo { flex: none; justify-content: center; min-width: 48px; margin-left: -8px; }
+.brand-name { min-width: 0; padding-right: 8px; }
 .brand img { width: 32px; height: 32px; border-radius: 6px; flex: none; }
 .brand span { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .top-actions { display: flex; align-items: center; gap: 8px; flex: none; }
