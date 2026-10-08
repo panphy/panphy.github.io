@@ -20,7 +20,7 @@ const BASE_FOV = 40;
 const KIND_CODE = { inert: 0, fusion: 1, radiative: 2, convective: 3, degenerate: 4, shell: 5 };
 const KIND_LABEL = { inert: 'no fusion', fusion: 'fusion', radiative: 'radiation', convective: 'convection', degenerate: 'degenerate', shell: 'burns at its base' };
 const STAGE_COLOUR = {
-  cloud: '#8E99A4', proto: '#E07A10', ms: '#0D9488', blue: '#2F6FDB', rgb: '#D45132', he: '#B7791F', agb: '#B5179E',
+  cloud: '#8E99A4', proto: '#E07A10', ms: '#0D9488', blue: '#2F6FDB', rgb: '#D45132',
   pn: '#3F8A55', wd: '#657481', sg: '#D45132', late: '#7C3AED', sn: '#E11D48', ns: '#B7791F', bh: '#1B1B1B'
 };
 const FATE = {
@@ -414,8 +414,10 @@ function currentLayers(st) {
 // What the scene should look like at this point in the life. Each stage starts from the look that the
 // previous stage ended with and changes gradually, so neighbouring stages join up.
 function stageTargets(st) {
-  const { stage, p } = st;
-  const id = stage.id;
+  const { stage } = st;
+  // A stage made of phases looks like whichever phase it is in.
+  const id = st.phase.id || stage.id;
+  const p = st.q;
   const M = state.mass;
   const main = mainSequenceSurface(M);
   const mainWind = M > 15 ? 0.3 : 0;
@@ -1180,7 +1182,10 @@ function frame() {
   const time = clock.elapsedTime;
   if (state.playing) {
     const end = state.life.stages.length;
-    state.position = Math.min(end, state.position + dt * state.speed / STAGE_SECONDS);
+    // A stage made of several phases plays for twice as long, so that each phase can be seen.
+    const stage = state.life.stages[Math.min(Math.floor(state.position), state.life.stages.length - 1)];
+    const seconds = STAGE_SECONDS * (stage.phases && stage.phases.length > 1 ? 2 : 1);
+    state.position = Math.min(end, state.position + dt * state.speed / seconds);
     if (state.position >= end) setPlaying(false);
     refresh();
   }
