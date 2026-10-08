@@ -8,15 +8,15 @@
 7,Energy,Energy stores and systems,Combined,9,,Describe the change in the chemical energy store as fuel is burned.,It decreases.
 8,Energy,Energy stores and systems,Combined,9,,Name the store of energy associated with changes in speed.,The kinetic energy store
 9,Energy,Energy stores and systems,Combined,9,,Describe the change in the kinetic energy store as an object slows down.,It decreases.
-10,Energy,Energy stores and systems,Combined,9,,Name the store of energy associated with changes in height.,The gravitational potential energy store
+10,Energy,Energy stores and systems,Combined,7,Asked in the 2024–25 papers,Name the store of energy associated with changes in height.,The gravitational potential energy store
 11,Energy,Energy stores and systems,Combined,9,,Describe the change in the gravitational potential energy store as an object rises.,It increases.
 12,Energy,Energy stores and systems,Combined,7,One representative of a group of similar questions,Name the store of energy associated with extending and compressing objects.,The elastic potential energy store
 13,Energy,Energy stores and systems,Combined,9,,Describe the change in the elastic potential energy store as a spring is compressed further.,It increases.
-14,Energy,Energy stores and systems,Combined,9,,Name the store of energy associated with changes in temperature.,The thermal energy store
+14,Energy,Energy stores and systems,Combined,7,Asked in the 2024–25 papers,Name the store of energy associated with changes in temperature.,The thermal energy store
 15,Energy,Energy stores and systems,Combined,9,,Describe the change in the thermal energy store as an object gets hotter.,It increases.
 16,Energy,Energy stores and systems,Combined,7,Core fact,Name the four ways energy is transferred between stores.,"Mechanically, electrically, by heating and by radiation"
 17,Energy,Energy stores and systems,Combined,9,,Name the energy transfer when a force moves an object.,Mechanical transfer
-18,Energy,Energy stores and systems,Combined,7,One representative of a group of similar questions,Name the energy transfer when an object emits light or infrared.,Transfer by radiation
+18,Energy,Energy stores and systems,Combined,9,,Name the energy transfer when an object emits light or infrared.,Transfer by radiation
 19,Energy,Energy stores and systems,Combined,9,,Name the energy transfer when a hot object warms a cooler one.,Transfer by heating
 638,Energy,Energy stores and systems,Combined,9,,What is a system?,An object or a group of objects.
 639,Energy,Energy stores and systems,Combined,9,,State what happens to energy when a system changes.,It is transferred from one store to another.
@@ -27,7 +27,7 @@
 642,Energy,Energy stores and systems,Combined,9,On the equations sheet,"State the equation linking elastic potential energy, spring constant and extension.","elastic potential energy = 0.5 × spring constant × extension²
 (E_e = ½ k e²)"
 643,Energy,Energy stores and systems,Combined,7,Asked in the 2020–23 papers,Name the two quantities that kinetic energy depends on.,Mass and speed
-644,Energy,Energy stores and systems,Combined,7,What a quantity depends on,Name the three quantities that gravitational potential energy depends on.,"Mass, gravitational field strength and height"
+644,Energy,Energy stores and systems,Combined,9,,Name the three quantities that gravitational potential energy depends on.,"Mass, gravitational field strength and height"
 645,Energy,Energy stores and systems,Combined,7,Asked in the 2020–23 papers,A ball is thrown straight up. Describe the changes in its energy stores as it rises.,Kinetic energy store decreases; gravitational potential energy store increases.
 646,Energy,Energy stores and systems,Combined,7,Asked in the 2020–23 papers,An electric kettle is switched on. Describe the useful energy transfer.,Energy is transferred electrically to the thermal energy store of the water.
 915,Energy,Energy stores and systems,Combined,7,Asked in the 2020–23 papers,A falling apple hits the ground. Describe the energy transfer.,Energy is transferred from the kinetic store of the apple to the thermal store of the surroundings.
@@ -44,7 +44,7 @@ It takes a lot of energy to raise the temperature of 1 kg by 1 °C."
 29,Energy,Specific heat capacity (RP),Combined,7,Core practical fact,Explain why an electrical heater is used when measuring specific heat capacity.,"The energy supplied can be calculated from potential difference, current and time."
 647,Energy,Specific heat capacity (RP),Combined,9,On the equations sheet,"State the equation linking change in thermal energy, mass, specific heat capacity and temperature change.","change in thermal energy = mass × specific heat capacity × temperature change
 (ΔE = m c Δθ)"
-648,Energy,Specific heat capacity (RP),Combined,9,,"When measuring specific heat capacity, explain why the block is wrapped in insulation.",To reduce energy transfer to the surroundings.
+648,Energy,Specific heat capacity (RP),Combined,7,Asked in the 2024–25 papers,"When measuring specific heat capacity, explain why the block is wrapped in insulation.",To reduce energy transfer to the surroundings.
 649,Energy,Specific heat capacity (RP),Combined,9,,Explain why a measured specific heat capacity is usually higher than the true value.,"Some of the energy supplied is transferred to the surroundings, not the block."
 31,Energy,"Conservation of energy, power and efficiency",Combined,7,Definition that mark schemes ask for,Define power.,The rate at which energy is transferred (or work is done).
 32,Energy,"Conservation of energy, power and efficiency",Combined,7,Standard unit,State the standard unit of power.,Watt (W)
@@ -109,7 +109,7 @@ It transfers the same energy in less time."
 663,Energy,Energy resources,Combined,7,Core fact,Give one disadvantage of nuclear power.,It produces radioactive waste that stays hazardous for a very long time.
 664,Energy,Energy resources,Combined,7,Asked in the 2020–23 papers,Name the gas from burning fossil fuels that contributes most to climate change.,Carbon dioxide
 665,Energy,Energy resources,Combined,7,Asked in the 2020–23 papers,"Other than climate change, state one environmental problem caused by burning fossil fuels.",Acid rain (caused by sulfur dioxide)
-666,Energy,Energy resources,Combined,9,,State one environmental impact of a hydroelectric dam or tidal barrage.,"It floods land or changes habitats, harming wildlife."
+666,Energy,Energy resources,Combined,7,Asked in the 2024–25 papers,State one environmental impact of a hydroelectric dam or tidal barrage.,"It floods land or changes habitats, harming wildlife."
 667,Energy,Energy resources,Combined,7,Standard explanation,Explain why tidal power is more reliable than wind power.,The tides are predictable; the wind is not.
 668,Energy,Energy resources,Combined,9,,Explain why scientists cannot always deal with the environmental issues they identify.,"Because of political, social, ethical or economic considerations."
 912,Energy,Energy resources,Combined,7,Standard explanation,Explain why biofuel can be described as carbon neutral.,The plants absorb as much carbon dioxide growing as is released when the fuel burns.
@@ -188,7 +188,7 @@ LDR: lights that switch on when it gets dark"
 Decrease the resistance of the variable resistor."
 121,Electricity,Resistance and I–V characteristics (RP),Combined,7,Core practical fact,Finding the I–V characteristic of a component: name the independent and dependent variables.,"Independent: potential difference across the component
 Dependent: current through it"
-673,Electricity,Resistance and I–V characteristics (RP),Combined,9,,Describe the graph of resistance against length for a wire.,A straight line through the origin.
+673,Electricity,Resistance and I–V characteristics (RP),Combined,7,Asked in the 2024–25 papers,Describe the graph of resistance against length for a wire.,A straight line through the origin.
 123,Electricity,Series and parallel circuits,Combined,9,,Name the two ways components can be joined in a circuit.,In series and in parallel
 124,Electricity,Series and parallel circuits,Combined,7,Core fact,Describe the current through components in series.,It is the same through each component.
 125,Electricity,Series and parallel circuits,Combined,9,,Describe the potential difference across components in series.,The total potential difference is shared between them.
@@ -247,7 +247,7 @@ Earth: green and yellow stripes"
 157,Electricity,(S) Static charge and electric fields,Separate,9,,Explain why an insulator has no overall charge before it is rubbed.,It has equal amounts of positive and negative charge.
 158,Electricity,(S) Static charge and electric fields,Separate,9,,Name the type of field that surrounds every charged object.,An electric field
 159,Electricity,(S) Static charge and electric fields,Separate,9,,State where the electric field around a charged object is strongest.,Closest to the object.
-160,Electricity,(S) Static charge and electric fields,Separate,9,,Describe how the strength of an electric field changes with distance from the charge.,The field gets stronger closer to the charge.
+160,Electricity,(S) Static charge and electric fields,Separate,7,Asked in the 2024–25 papers,Describe how the strength of an electric field changes with distance from the charge.,The field gets stronger closer to the charge.
 161,Electricity,(S) Static charge and electric fields,Separate,7,Core fact,State the direction in which electric field lines point.,Away from positive charges and towards negative charges.
 162,Electricity,(S) Static charge and electric fields,Separate,9,,"Which diagram, A or B, shows the electric field around a negative charge? Explain.","A.
 The field lines point towards the negative charge."
@@ -266,18 +266,18 @@ The field lines point towards the negative charge."
 169,Particle model of matter,Density of materials,Combined,9,,Explain why solids and liquids cannot be compressed easily.,Their particles are already touching.
 170,Particle model of matter,Density of materials,Combined,7,Asked in the 2020–23 papers,Describe the motion of particles in a solid.,They vibrate around a fixed position.
 171,Particle model of matter,Density of materials,Combined,9,,Describe the motion of particles in a liquid.,"They move randomly, sliding past one another."
-172,Particle model of matter,Density of materials,Combined,7,Asked in the 2020–23 papers,Describe the motion of particles in a gas.,They move quickly in random directions.
+172,Particle model of matter,Density of materials,Combined,9,,Describe the motion of particles in a gas.,They move quickly in random directions.
 693,Particle model of matter,Density of materials,Combined,9,On the equations sheet,"State the equation linking density, mass and volume.","density = mass ÷ volume
 (ρ = m ÷ V)"
 694,Particle model of matter,Density of materials,Combined,9,,Describe the arrangement of the particles in a solid.,Very close together in a regular pattern.
 695,Particle model of matter,Density of materials,Combined,9,,Describe the arrangement of the particles in a liquid.,"Close together, in a random arrangement."
-696,Particle model of matter,Density of materials,Combined,7,Core fact,Describe the arrangement of the particles in a gas.,"Far apart, in a random arrangement."
+696,Particle model of matter,Density of materials,Combined,9,,Describe the arrangement of the particles in a gas.,"Far apart, in a random arrangement."
 697,Particle model of matter,Density of materials,Combined,7,Asked in the 2020–23 papers,Explain why gases have a much lower density than solids and liquids.,"The particles are far apart, so there is less mass in a given volume."
 173,Particle model of matter,Measuring density (RP),Combined,7,Core practical fact,State the two measurements needed to find the density of an object.,Mass and volume
 174,Particle model of matter,Measuring density (RP),Combined,9,,Describe how the volume of a cube can be found.,Measure one side with a ruler and cube it.
 176,Particle model of matter,Measuring density (RP),Combined,9,,Describe how the volume of a liquid can be measured.,With a measuring cylinder.
 177,Particle model of matter,Measuring density (RP),Combined,9,,Convert 1 ml into cm³.,1 ml = 1 cm³
-178,Particle model of matter,Measuring density (RP),Combined,7,Core practical fact,Describe how the mass of a liquid can be found.,"Weigh the measuring cylinder empty, then with the liquid in it, and subtract."
+178,Particle model of matter,Measuring density (RP),Combined,9,,Describe how the mass of a liquid can be found.,"Weigh the measuring cylinder empty, then with the liquid in it, and subtract."
 179,Particle model of matter,Measuring density (RP),Combined,7,Asked in the 2020–23 papers,Name the method used to measure the volume of an irregularly shaped object.,The displacement method
 698,Particle model of matter,Measuring density (RP),Combined,7,Asked in the 2020–23 papers,Describe how to read a measuring cylinder accurately.,Read the bottom of the meniscus at eye level.
 699,Particle model of matter,Measuring density (RP),Combined,9,,Name an instrument for measuring length that has a better resolution than a ruler.,Vernier calipers
@@ -296,7 +296,7 @@ Evaporation: at any temperature, from the surface only."
 191,Particle model of matter,Internal energy,Combined,7,Core fact,State how internal energy is related to the energies of the particles.,Internal energy = total kinetic energy + total potential energy of the particles
 192,Particle model of matter,Internal energy,Combined,7,Asked in the 2020–23 papers,State which part of the internal energy changes when the temperature changes.,The kinetic energy of the particles
 193,Particle model of matter,Internal energy,Combined,9,,Describe how the average kinetic energy of the particles is related to temperature.,"The greater the average kinetic energy, the higher the temperature."
-194,Particle model of matter,Internal energy,Combined,9,,State which part of the internal energy changes when a substance changes state.,The potential energy of the particles
+194,Particle model of matter,Internal energy,Combined,7,Asked in the 2024–25 papers,State which part of the internal energy changes when a substance changes state.,The potential energy of the particles
 195,Particle model of matter,Internal energy,Combined,9,,The potential energy of the particles changes at a constant temperature. State what happens to the substance.,It changes state.
 196,Particle model of matter,Internal energy,Combined,9,,State the two things that can happen when a substance is heated.,"Its temperature can increase, or it can change state."
 197,Particle model of matter,Internal energy,Combined,7,Core fact,Describe the change in temperature of a substance during a change of state.,The temperature remains constant.
@@ -341,7 +341,7 @@ Specific latent heat: energy to change the state of 1 kg."
 223,Atomic structure,Atoms and isotopes,Combined,9,,State the approximate radius of an atom.,About 0.1 nm (1 × 10⁻¹⁰ m)
 224,Atomic structure,Atoms and isotopes,Combined,7,Core fact,Describe the structure of an atom.,"A positive nucleus of protons and neutrons, surrounded by negative electrons."
 225,Atomic structure,Atoms and isotopes,Combined,7,Asked in the 2020–23 papers,State how the radius of a nucleus compares with the radius of an atom.,Less than 1/10 000 of the radius of the atom.
-226,Atomic structure,Atoms and isotopes,Combined,7,Core fact,State where most of the mass of an atom is concentrated.,In the nucleus.
+226,Atomic structure,Atoms and isotopes,Combined,9,,State where most of the mass of an atom is concentrated.,In the nucleus.
 227,Atomic structure,Atoms and isotopes,Combined,9,,State the sign of the overall charge of the nucleus.,Positive
 228,Atomic structure,Atoms and isotopes,Combined,9,,State the relative charge of a proton.,+1 (positive)
 229,Atomic structure,Atoms and isotopes,Combined,9,,State the relative charge of a neutron.,0
@@ -377,7 +377,7 @@ Specific latent heat: energy to change the state of 1 kg."
 718,Atomic structure,The development of the model of the atom,Combined,9,,What were atoms thought to be before the electron was discovered?,Tiny spheres that could not be divided.
 719,Atomic structure,The development of the model of the atom,Combined,9,,Most alpha particles passed straight through the gold foil. State what this showed.,Most of the atom is empty space.
 720,Atomic structure,The development of the model of the atom,Combined,9,,Explain why the alpha particle scattering experiment led to the plum pudding model being replaced.,It could not explain why some alpha particles were deflected through large angles.
-721,Atomic structure,The development of the model of the atom,Combined,9,,Name the scientist who provided the evidence for the neutron.,James Chadwick
+721,Atomic structure,The development of the model of the atom,Combined,7,Asked in the 2024–25 papers,Name the scientist who provided the evidence for the neutron.,James Chadwick
 722,Atomic structure,The development of the model of the atom,Combined,9,,Name the scientist who suggested that electrons orbit at specific distances.,Niels Bohr
 257,Atomic structure,Radioactive decay and nuclear radiation,Combined,9,,State which part of an atom nuclear radiation is emitted from.,The nucleus
 258,Atomic structure,Radioactive decay and nuclear radiation,Combined,9,,Explain why unstable nuclei emit radiation.,To become more stable.
@@ -399,7 +399,7 @@ Specific latent heat: energy to change the state of 1 kg."
 274,Atomic structure,Radioactive decay and nuclear radiation,Combined,9,,State the range of beta radiation in air.,About a metre
 275,Atomic structure,Radioactive decay and nuclear radiation,Combined,9,,State the range of gamma radiation in air.,A very long distance (it is hardly absorbed by air)
 276,Atomic structure,Radioactive decay and nuclear radiation,Combined,9,,Name the type of radiation stopped by a sheet of paper.,Alpha
-277,Atomic structure,Radioactive decay and nuclear radiation,Combined,9,,Name the two types of radiation stopped by a few millimetres of aluminium.,Alpha and beta
+277,Atomic structure,Radioactive decay and nuclear radiation,Combined,7,Asked in the 2024–25 papers,Name the two types of radiation stopped by a few millimetres of aluminium.,Alpha and beta
 278,Atomic structure,Radioactive decay and nuclear radiation,Combined,7,Core fact,State what is needed to absorb most gamma radiation.,Several centimetres of lead
 279,Atomic structure,Radioactive decay and nuclear radiation,Combined,9,,Name the type of radiation stopped by skin.,Alpha
 723,Atomic structure,Radioactive decay and nuclear radiation,Combined,9,,Name a detector of nuclear radiation.,A Geiger–Müller tube
@@ -414,7 +414,7 @@ Gamma: 0"
 726,Atomic structure,Nuclear equations,Combined,9,,State the symbol for a beta particle in a nuclear equation.,⁰₋₁e
 727,Atomic structure,Nuclear equations,Combined,7,Core fact,State the two quantities that must balance in a nuclear equation.,The total mass number and the total atomic number
 728,Atomic structure,Nuclear equations,Combined,9,,State what happens to the element when a nucleus emits an alpha or beta particle.,"It becomes a different element, because the number of protons changes."
-283,Atomic structure,Half-lives and the random nature of radioactive decay,Combined,7,Definition that mark schemes ask for,Define half-life in terms of activity.,The time taken for the activity (or count rate) of a sample to halve.
+283,Atomic structure,Half-lives and the random nature of radioactive decay,Combined,9,,Define half-life in terms of activity.,The time taken for the activity (or count rate) of a sample to halve.
 637,Atomic structure,Half-lives and the random nature of radioactive decay,Combined,7,Asked in the 2020–23 papers,Define half-life in terms of the number of nuclei.,The time taken for the number of nuclei of the isotope in a sample to halve.
 284,Atomic structure,Half-lives and the random nature of radioactive decay,Combined,9,,Describe what happens to the half-life of an isotope as time passes.,Nothing: it is constant.
 285,Atomic structure,Half-lives and the random nature of radioactive decay,Combined,9,,Describe what happens to the activity of a radioactive sample over time.,It decreases.
@@ -427,7 +427,7 @@ Gamma: 0"
 289,Atomic structure,Radioactive contamination,Combined,7,Asked in the 2020–23 papers,What is irradiation?,Exposing an object to nuclear radiation.
 290,Atomic structure,Radioactive contamination,Combined,9,,Explain why irradiation is dangerous.,"The radiation can ionise atoms in living cells, damaging or killing them."
 291,Atomic structure,Radioactive contamination,Combined,9,,State whether irradiated objects become radioactive.,No: their nuclei do not become unstable.
-732,Atomic structure,Radioactive contamination,Combined,9,,Give three precautions that protect people against irradiation.,"Use shielding, keep your distance from the source, and limit the exposure time."
+732,Atomic structure,Radioactive contamination,Combined,7,Asked in the 2024–25 papers,Give three precautions that protect people against irradiation.,"Use shielding, keep your distance from the source, and limit the exposure time."
 733,Atomic structure,Radioactive contamination,Combined,7,Asked in the 2020–23 papers,Explain why contamination by an alpha source inside the body is especially dangerous.,Alpha radiation is strongly ionising and is absorbed by nearby cells.
 734,Atomic structure,Radioactive contamination,Combined,9,,State what the hazard from radioactive contamination depends on.,The type of radiation emitted.
 735,Atomic structure,Radioactive contamination,Combined,7,Asked in the 2020–23 papers,Explain why studies of the effects of radiation on humans should be published.,So that other scientists can check the findings (peer review).
@@ -453,7 +453,7 @@ Gamma: 0"
 306,Atomic structure,(S) Nuclear fission and fusion,Separate,9,,"In nuclear fusion, which has more mass: the two light nuclei or the nucleus they form?",The two light nuclei
 307,Atomic structure,(S) Nuclear fission and fusion,Separate,7,Asked in the 2020–23 papers,Some mass is lost during nuclear fusion. State what it is converted into.,Energy (of radiation)
 741,Atomic structure,(S) Nuclear fission and fusion,Separate,9,,Name the energy store that all fission products have.,The kinetic energy store
-742,Atomic structure,(S) Nuclear fission and fusion,Separate,9,,State how the chain reaction in a reactor differs from that in a nuclear weapon.,"Reactor: controlled.
+742,Atomic structure,(S) Nuclear fission and fusion,Separate,7,Asked in the 2024–25 papers,State how the chain reaction in a reactor differs from that in a nuclear weapon.,"Reactor: controlled.
 Weapon: uncontrolled, causing an explosion."
 743,Atomic structure,(S) Nuclear fission and fusion,Separate,9,,Name the process that releases energy in stars.,Nuclear fusion
 308,Forces,"Scalars, vectors, contact and non-contact forces",Combined,7,Asked in the 2020–23 papers,Define a scalar quantity.,A quantity that has magnitude only.
@@ -541,28 +541,28 @@ Non-linear: a curve."
 758,Forces,"(S) Moments, levers and gears",Separate,9,,A small gear drives a larger gear. State the effect on the speed of rotation and on the moment.,The larger gear turns more slowly but with a bigger moment.
 375,Forces,(S) Pressure in fluids and in the atmosphere,Separate,9,,Name the two states of matter that are considered fluids.,Liquid and gas
 376,Forces,(S) Pressure in fluids and in the atmosphere,Separate,9,,Describe what causes pressure in a fluid.,The particles of the fluid colliding with surfaces.
-377,Forces,(S) Pressure in fluids and in the atmosphere,Separate,9,,A fluid exerts a force on its container. State the direction of the force.,At right angles to the surface.
+377,Forces,(S) Pressure in fluids and in the atmosphere,Separate,7,Asked in the 2024–25 papers,A fluid exerts a force on its container. State the direction of the force.,At right angles to the surface.
 378,Forces,(S) Pressure in fluids and in the atmosphere,Separate,9,On the equations sheet,"State the equation linking pressure, area and force.","pressure = force ÷ area
 (p = F ÷ A)"
 379,Forces,(S) Pressure in fluids and in the atmosphere,Separate,7,Standard unit,State the standard unit of pressure.,Pascal (Pa)
 380,Forces,(S) Pressure in fluids and in the atmosphere,Separate,7,What a quantity depends on,Describe how the pressure in a liquid depends on the height of the liquid column.,"The taller the column, the greater the pressure."
-381,Forces,(S) Pressure in fluids and in the atmosphere,Separate,7,What a quantity depends on,Describe how the pressure in a liquid depends on its density.,"The denser the liquid, the greater the pressure."
+381,Forces,(S) Pressure in fluids and in the atmosphere,Separate,9,,Describe how the pressure in a liquid depends on its density.,"The denser the liquid, the greater the pressure."
 382,Forces,(S) Pressure in fluids and in the atmosphere,Separate,7,Asked in the 2020–23 papers,Explain what causes upthrust.,"Pressure increases with depth, so the pressure on the bottom of a submerged object is greater than on the top."
 383,Forces,(S) Pressure in fluids and in the atmosphere,Separate,9,,Describe the Earth's atmosphere.,A thin layer of air around the Earth.
 384,Forces,(S) Pressure in fluids and in the atmosphere,Separate,9,,Describe how the density of the atmosphere changes with height.,It decreases as height increases.
 385,Forces,(S) Pressure in fluids and in the atmosphere,Separate,9,,Give the cause of atmospheric pressure.,Air molecules colliding with a surface.
-386,Forces,(S) Pressure in fluids and in the atmosphere,Separate,7,Core fact,Describe how atmospheric pressure changes with height.,It decreases as height increases.
+386,Forces,(S) Pressure in fluids and in the atmosphere,Separate,9,,Describe how atmospheric pressure changes with height.,It decreases as height increases.
 759,Forces,(S) Pressure in fluids and in the atmosphere,Separate,9,On the equations sheet,State the equation for the pressure due to a column of liquid.,"pressure = height × density × gravitational field strength
 (p = h ρ g)"
 760,Forces,(S) Pressure in fluids and in the atmosphere,Separate,7,Standard explanation,Explain why the pressure in a liquid increases with depth.,"The deeper you go, the greater the weight of liquid above."
 761,Forces,(S) Pressure in fluids and in the atmosphere,Separate,9,,State the condition for an object to float.,Upthrust equals its weight.
 762,Forces,(S) Pressure in fluids and in the atmosphere,Separate,9,,State when an object in a liquid sinks.,When its weight is greater than the upthrust.
-763,Forces,(S) Pressure in fluids and in the atmosphere,Separate,9,,Explain why atmospheric pressure decreases as height increases.,"There is less air above, so fewer air molecules collide with each unit of area."
+763,Forces,(S) Pressure in fluids and in the atmosphere,Separate,7,Asked in the 2024–25 papers,Explain why atmospheric pressure decreases as height increases.,"There is less air above, so fewer air molecules collide with each unit of area."
 387,Forces,"Distance, displacement, speed and velocity",Combined,9,,Define distance.,How far an object moves.
 388,Forces,"Distance, displacement, speed and velocity",Combined,9,,Define displacement.,"The straight-line distance from start to finish, with its direction."
 389,Forces,"Distance, displacement, speed and velocity",Combined,7,Standard explanation,Explain the difference between distance and displacement.,Displacement has a direction (vector); distance does not (scalar).
 390,Forces,"Distance, displacement, speed and velocity",Combined,7,Standard explanation,Explain the difference between speed and velocity.,Velocity has a direction (vector); speed does not (scalar).
-391,Forces,"Distance, displacement, speed and velocity",Combined,9,,"State typical values for walking speed, running speed and cycling speed.","Walking: 1.5 m/s
+391,Forces,"Distance, displacement, speed and velocity",Combined,7,Asked in the 2024–25 papers,"State typical values for walking speed, running speed and cycling speed.","Walking: 1.5 m/s
 Running: 3 m/s
 Cycling: 6 m/s"
 392,Forces,"Distance, displacement, speed and velocity",Combined,9,,State a typical value for the speed of sound in air.,330 m/s
@@ -615,7 +615,7 @@ Aeroplane: about 250 m/s"
 417,Forces,"Force, mass and acceleration (RP)",Combined,9,,Mass and acceleration of a trolley: name the control variables.,The force applied and the surface the trolley travels on
 419,Forces,Stopping distance,Combined,7,Definition that mark schemes ask for,What is the stopping distance of a vehicle?,Thinking distance + braking distance
 420,Forces,Stopping distance,Combined,7,Asked in the 2020–23 papers,What is the thinking distance of a vehicle?,The distance travelled during the driver's reaction time.
-421,Forces,Stopping distance,Combined,9,,What is the braking distance of a vehicle?,The distance travelled under the braking force.
+421,Forces,Stopping distance,Combined,7,Asked in the 2024–25 papers,What is the braking distance of a vehicle?,The distance travelled under the braking force.
 422,Forces,Stopping distance,Combined,9,,Name the factor that increases both thinking distance and braking distance.,Speed
 423,Forces,Stopping distance,Combined,9,,State the typical range of human reaction times.,0.2 s to 0.9 s
 424,Forces,Stopping distance,Combined,7,Core fact,Give four factors that affect reaction time.,"Tiredness, drugs, alcohol and distractions"
@@ -634,7 +634,7 @@ Aeroplane: about 250 m/s"
 433,Forces,(S) Changes in momentum,Separate,7,Asked in the 2020–23 papers,"Explain how air bags, seat belts and crash mats reduce the force in a collision.","They increase the time taken for the momentum to change, which reduces the force."
 782,Forces,Momentum,Combined,9,On the equations sheet,"State the equation linking momentum, mass and velocity.","momentum = mass × velocity
 (p = m v)"
-783,Forces,Momentum,Combined,7,Core fact,State whether momentum is a scalar or a vector quantity.,A vector
+783,Forces,Momentum,Combined,9,,State whether momentum is a scalar or a vector quantity.,A vector
 784,Forces,Momentum,Combined,9,,State the momentum of a stationary object.,Zero
 785,Forces,(S) Changes in momentum,Separate,9,On the equations sheet,"State the equation linking force, change in momentum and time.","force = change in momentum ÷ time taken
 (F = m Δv ÷ Δt)"
@@ -671,14 +671,14 @@ E: rest position"
 454,Waves,Properties of waves,Combined,9,On the equations sheet,"In symbols, state the equation linking period and frequency.",T = 1 ÷ f
 789,Waves,Properties of waves,Combined,9,On the equations sheet,"State the equation linking wave speed, frequency and wavelength.","wave speed = frequency × wavelength
 (v = f λ)"
-790,Waves,Properties of waves,Combined,7,Definition that mark schemes ask for,What is the amplitude of a wave?,The maximum displacement of a point on the wave from its rest position.
+790,Waves,Properties of waves,Combined,9,,What is the amplitude of a wave?,The maximum displacement of a point on the wave from its rest position.
 791,Waves,Properties of waves,Combined,9,,What is wave speed?,The speed at which the wave transfers energy through the medium.
 792,Waves,Properties of waves,Combined,9,,Describe a method to measure the speed of sound in air.,"Time a sound over a measured distance, e.g. from a clap to an observer. Speed = distance ÷ time."
 793,Waves,(S) Sound waves and waves for detection and exploration,Separate,9,,"A sound wave passes into a different medium. Which stays the same: speed, frequency or wavelength?",Frequency
 455,Waves,Waves in a ripple tank and on a string (RP),Combined,9,,Name three properties of a wave that can be measured in a ripple tank.,"Frequency, wavelength and speed"
 456,Waves,Waves in a ripple tank and on a string (RP),Combined,9,,A ripple tank casts bright and dark lines on the screen. State what they show.,"Bright lines: peaks.
 Dark lines: troughs."
-457,Waves,Waves in a ripple tank and on a string (RP),Combined,7,Core practical fact,Describe how waves are produced in a ripple tank.,A motor makes a dipper vibrate up and down on the water surface.
+457,Waves,Waves in a ripple tank and on a string (RP),Combined,9,,Describe how waves are produced in a ripple tank.,A motor makes a dipper vibrate up and down on the water surface.
 459,Waves,Waves in a ripple tank and on a string (RP),Combined,7,Asked in the 2020–23 papers,Describe how to measure the frequency of waves in a ripple tank.,Count the waves passing a point in 10 s and divide by 10.
 460,Waves,Waves in a ripple tank and on a string (RP),Combined,7,Asked in the 2020–23 papers,Describe two ways to find the speed of the waves in a ripple tank.,"Frequency × wavelength
 Or: time a wave over a measured distance, then distance ÷ time"
@@ -745,11 +745,11 @@ D: angle of refraction"
 506,Waves,Electromagnetic waves,Combined,7,Core fact,State two hazards of ultraviolet radiation.,Premature skin ageing and a higher risk of skin cancer
 507,Waves,Electromagnetic waves,Combined,7,Asked in the 2020–23 papers,State the hazards of X-rays and gamma rays.,They are ionising: they can cause gene mutations and cancer.
 508,Waves,Electromagnetic waves,Combined,9,,State what radio waves are used for.,Television and radio signals
-509,Waves,Electromagnetic waves,Combined,9,,State what microwaves are used for.,Satellite communications and cooking food
+509,Waves,Electromagnetic waves,Combined,7,Asked in the 2024–25 papers,State what microwaves are used for.,Satellite communications and cooking food
 510,Waves,Electromagnetic waves,Combined,7,Asked in the 2020–23 papers,State what infrared radiation is used for.,"Electrical heaters, cooking food and infrared cameras"
 511,Waves,Electromagnetic waves,Combined,9,,State what visible light is used for.,Fibre optic communications
 512,Waves,Electromagnetic waves,Combined,7,Asked in the 2020–23 papers,State what ultraviolet radiation is used for.,Energy-efficient lamps and sun tanning
-513,Waves,Electromagnetic waves,Combined,9,,State what X-rays and gamma rays are used for.,Medical imaging and treatments
+513,Waves,Electromagnetic waves,Combined,7,Asked in the 2024–25 papers,State what X-rays and gamma rays are used for.,Medical imaging and treatments
 806,Waves,Electromagnetic waves,Combined,7,Asked in the 2020–23 papers,State what all electromagnetic waves have in common in a vacuum.,They travel at the same speed.
 807,Waves,Electromagnetic waves,Combined,9,,Name the electromagnetic waves with the highest frequency.,Gamma rays
 808,Waves,Electromagnetic waves,Combined,9,,State what electromagnetic waves transfer.,"Energy, from a source to an absorber."
@@ -770,7 +770,7 @@ D: angle of refraction"
 816,Waves,Infrared radiation (RP),Combined,7,Core fact,State the type of surface that is the best absorber of infrared radiation.,Matt black
 522,Waves,(S) Lenses and visible light,Separate,9,,Name the process that happens to light in a lens.,Refraction
 523,Waves,(S) Lenses and visible light,Separate,7,Core fact,Describe what a convex lens does to parallel rays of light.,It brings them together at the principal focus.
-524,Waves,(S) Lenses and visible light,Separate,7,Definition that mark schemes ask for,What is the focal length of a lens?,The distance from the lens to the principal focus.
+524,Waves,(S) Lenses and visible light,Separate,9,,What is the focal length of a lens?,The distance from the lens to the principal focus.
 525,Waves,(S) Lenses and visible light,Separate,9,,Describe what a concave lens does to parallel rays of light.,"It spreads them out, as if from the principal focus."
 526,Waves,(S) Lenses and visible light,Separate,7,Definition that mark schemes ask for,What is a real image?,An image formed where rays of light actually meet.
 527,Waves,(S) Lenses and visible light,Separate,7,Definition that mark schemes ask for,What is a virtual image?,An image that rays of light only appear to come from.
@@ -778,13 +778,13 @@ D: angle of refraction"
 529,Waves,(S) Lenses and visible light,Separate,9,,Name the type of lens that produces only virtual images.,A concave lens
 530,Waves,(S) Lenses and visible light,Separate,9,,Name the type of lens that this symbol represents.,A convex lens
 531,Waves,(S) Lenses and visible light,Separate,9,,Name the type of lens that this symbol represents.,A concave lens
-532,Waves,(S) Lenses and visible light,Separate,9,,Name the type of lens shown in this ray diagram.,A convex lens
+532,Waves,(S) Lenses and visible light,Separate,7,Asked in the 2024–25 papers,Name the type of lens shown in this ray diagram.,A convex lens
 533,Waves,(S) Lenses and visible light,Separate,9,,Name the type of lens shown in this ray diagram.,A concave lens
 534,Waves,(S) Lenses and visible light,Separate,9,,State how different colours of light differ.,They have different wavelengths.
 535,Waves,(S) Lenses and visible light,Separate,7,Asked in the 2020–23 papers,What is specular reflection?,Reflection from a smooth surface in a single direction.
 536,Waves,(S) Lenses and visible light,Separate,9,,What is diffuse reflection?,"Reflection from a rough surface, scattering light in many directions."
-537,Waves,(S) Lenses and visible light,Separate,7,Asked in the 2020–23 papers,Explain how colour filters work.,They transmit some wavelengths and absorb the rest.
-538,Waves,(S) Lenses and visible light,Separate,7,Standard explanation,Explain why blue objects appear blue.,They reflect blue light and absorb the other colours.
+537,Waves,(S) Lenses and visible light,Separate,9,,Explain how colour filters work.,They transmit some wavelengths and absorb the rest.
+538,Waves,(S) Lenses and visible light,Separate,9,,Explain why blue objects appear blue.,They reflect blue light and absorb the other colours.
 539,Waves,(S) Lenses and visible light,Separate,9,,Explain why white objects appear white.,They reflect all colours of light equally.
 540,Waves,(S) Lenses and visible light,Separate,9,,Explain why black objects appear black.,They absorb all colours of light.
 817,Waves,(S) Lenses and visible light,Separate,9,On the equations sheet,"In words, state the equation for magnification.",magnification = image height ÷ object height
@@ -810,8 +810,8 @@ How much radiation it reflects into space"
 551,Magnetism and electromagnetism,Permanent and induced magnetism,Combined,9,,State what a north pole does to another north pole.,It repels it.
 552,Magnetism and electromagnetism,Permanent and induced magnetism,Combined,9,,State what a north pole does to a south pole.,It attracts it.
 553,Magnetism and electromagnetism,Permanent and induced magnetism,Combined,7,Asked in the 2020–23 papers,Name three magnetic chemical elements.,"Iron, nickel and cobalt"
-554,Magnetism and electromagnetism,Permanent and induced magnetism,Combined,7,Asked in the 2020–23 papers,Name an alloy that is magnetic.,Steel
-555,Magnetism and electromagnetism,Permanent and induced magnetism,Combined,7,Definition that mark schemes ask for,What is a permanent magnet?,A magnet that produces its own magnetic field.
+554,Magnetism and electromagnetism,Permanent and induced magnetism,Combined,9,,Name an alloy that is magnetic.,Steel
+555,Magnetism and electromagnetism,Permanent and induced magnetism,Combined,9,,What is a permanent magnet?,A magnet that produces its own magnetic field.
 556,Magnetism and electromagnetism,Permanent and induced magnetism,Combined,7,Asked in the 2020–23 papers,What is an induced magnet?,A material that becomes a magnet when placed in a magnetic field.
 557,Magnetism and electromagnetism,Permanent and induced magnetism,Combined,7,Asked in the 2020–23 papers,Is the force between an induced magnet and a permanent magnet attractive or repulsive?,Always attractive
 558,Magnetism and electromagnetism,Permanent and induced magnetism,Combined,9,,State what surrounds a permanent magnet.,A magnetic field
@@ -821,13 +821,13 @@ How much radiation it reflects into space"
 562,Magnetism and electromagnetism,Permanent and induced magnetism,Combined,7,Core fact,State the direction in which magnetic field lines point.,From the north pole to the south pole.
 563,Magnetism and electromagnetism,Permanent and induced magnetism,Combined,9,,Describe what a compass contains.,A small bar magnet that is free to rotate.
 564,Magnetism and electromagnetism,Permanent and induced magnetism,Combined,9,,Give two ways to show the shape of the magnetic field around a magnet.,Plotting compasses or iron filings
-565,Magnetism and electromagnetism,Permanent and induced magnetism,Combined,7,Core practical fact,Describe how to find the direction of the magnetic field around a magnet.,"Use a plotting compass: its needle points along the field, from north to south."
+565,Magnetism and electromagnetism,Permanent and induced magnetism,Combined,9,,Describe how to find the direction of the magnetic field around a magnet.,"Use a plotting compass: its needle points along the field, from north to south."
 566,Magnetism and electromagnetism,Permanent and induced magnetism,Combined,9,,Name the pole at the end of a compass needle that points north.,A north pole
 568,Magnetism and electromagnetism,Permanent and induced magnetism,Combined,7,Asked in the 2020–23 papers,State the evidence that the Earth's core is magnetic.,"A compass needle lines up north–south when no other magnet is near, so the Earth has its own magnetic field."
 826,Magnetism and electromagnetism,Permanent and induced magnetism,Combined,7,Definition that mark schemes ask for,What is a magnetic field?,The region around a magnet where a force acts on another magnet or magnetic material.
 827,Magnetism and electromagnetism,Permanent and induced magnetism,Combined,9,,Is the force between two magnets a contact or a non-contact force?,Non-contact
 828,Magnetism and electromagnetism,Permanent and induced magnetism,Combined,9,,State what happens to an induced magnet when it is removed from the field.,It quickly loses its magnetism.
-829,Magnetism and electromagnetism,Permanent and induced magnetism,Combined,7,Definition that mark schemes ask for,State how the direction of a magnetic field is defined.,The direction of the force on a north pole placed at that point.
+829,Magnetism and electromagnetism,Permanent and induced magnetism,Combined,9,,State how the direction of a magnetic field is defined.,The direction of the force on a north pole placed at that point.
 569,Magnetism and electromagnetism,Electromagnetism,Combined,9,,State when a wire has a magnetic field around it.,When it carries a current.
 570,Magnetism and electromagnetism,Electromagnetism,Combined,7,Core fact,Describe the magnetic field around a straight current-carrying wire.,Concentric circles around the wire.
 571,Magnetism and electromagnetism,Electromagnetism,Combined,9,,State what the strength of the magnetic field around a wire depends on.,The size of the current and the distance from the wire
@@ -838,7 +838,7 @@ How much radiation it reflects into space"
 576,Magnetism and electromagnetism,Electromagnetism,Combined,7,Asked in the 2020–23 papers,Give two advantages of an electromagnet over a permanent magnet.,"It can be switched on and off, and its strength can be varied."
 577,Magnetism and electromagnetism,Electromagnetism,Combined,7,Asked in the 2020–23 papers,Give two ways to make an electromagnet stronger.,Increase the current or add more turns.
 830,Magnetism and electromagnetism,Electromagnetism,Combined,9,,State the effect of adding an iron core to a solenoid.,It makes the magnetic field stronger.
-831,Magnetism and electromagnetism,Electromagnetism,Combined,9,,State how to reverse the magnetic field around a wire.,Reverse the current.
+831,Magnetism and electromagnetism,Electromagnetism,Combined,7,Asked in the 2024–25 papers,State how to reverse the magnetic field around a wire.,Reverse the current.
 832,Magnetism and electromagnetism,Electromagnetism,Combined,9,,A wire is coiled into a solenoid. State the effect on its magnetic field.,It makes the magnetic field stronger.
 578,Magnetism and electromagnetism,Fleming's left-hand rule and motors,Combined,7,Asked in the 2020–23 papers,Describe the motor effect.,A current-carrying conductor in a magnetic field experiences a force.
 579,Magnetism and electromagnetism,Fleming's left-hand rule and motors,Combined,7,Asked in the 2020–23 papers,"In Fleming's left-hand rule, state what the thumb represents.",The direction of the force
@@ -847,7 +847,7 @@ How much radiation it reflects into space"
 582,Magnetism and electromagnetism,Fleming's left-hand rule and motors,Combined,7,Asked in the 2020–23 papers,Give three ways to increase the force on a current-carrying wire in a magnetic field.,"Increase the magnetic flux density, the current, or the length of wire in the field."
 583,Magnetism and electromagnetism,Fleming's left-hand rule and motors,Combined,9,,Define magnetic flux density.,A measure of the strength of a magnetic field.
 584,Magnetism and electromagnetism,Fleming's left-hand rule and motors,Combined,9,,State the standard unit of magnetic flux density.,Tesla (T)
-585,Magnetism and electromagnetism,Fleming's left-hand rule and motors,Combined,9,,Describe what happens to a current-carrying coil in a magnetic field.,"It rotates, because the forces on its two sides act in opposite directions."
+585,Magnetism and electromagnetism,Fleming's left-hand rule and motors,Combined,7,Asked in the 2024–25 papers,Describe what happens to a current-carrying coil in a magnetic field.,"It rotates, because the forces on its two sides act in opposite directions."
 586,Magnetism and electromagnetism,Fleming's left-hand rule and motors,Combined,9,,Name the effect used in electric motors.,The motor effect
 587,Magnetism and electromagnetism,(S) Loudspeakers,Separate,7,Asked in the 2020–23 papers,Name the effect used in loudspeakers.,The motor effect
 588,Magnetism and electromagnetism,(S) Loudspeakers,Separate,7,Asked in the 2020–23 papers,Describe how a loudspeaker produces sound.,"An alternating current in the coil makes the cone vibrate, which makes the air vibrate."
@@ -864,7 +864,7 @@ How much radiation it reflects into space"
 594,Magnetism and electromagnetism,"(S) Induced potential, transformers and the National Grid",Separate,9,,Describe how to reverse the direction of the induced potential difference.,Reverse the direction of movement or of the magnetic field.
 595,Magnetism and electromagnetism,"(S) Induced potential, transformers and the National Grid",Separate,7,Core fact,State the difference between an alternator and a dynamo.,An alternator generates alternating current; a dynamo generates direct current.
 596,Magnetism and electromagnetism,"(S) Induced potential, transformers and the National Grid",Separate,9,,Name the effect used in microphones.,The generator effect
-597,Magnetism and electromagnetism,"(S) Induced potential, transformers and the National Grid",Separate,9,,Describe how a microphone works.,"Sound makes a diaphragm and coil vibrate in a magnetic field, inducing a changing potential difference."
+597,Magnetism and electromagnetism,"(S) Induced potential, transformers and the National Grid",Separate,7,Asked in the 2024–25 papers,Describe how a microphone works.,"Sound makes a diaphragm and coil vibrate in a magnetic field, inducing a changing potential difference."
 598,Magnetism and electromagnetism,"(S) Induced potential, transformers and the National Grid",Separate,9,,Name the effect used in transformers.,The generator effect
 599,Magnetism and electromagnetism,"(S) Induced potential, transformers and the National Grid",Separate,7,Asked in the 2020–23 papers,Describe the structure of a transformer.,A primary coil and a secondary coil wound on an iron core.
 600,Magnetism and electromagnetism,"(S) Induced potential, transformers and the National Grid",Separate,9,,Describe what a step-up transformer does.,It increases the potential difference.
@@ -883,7 +883,7 @@ How much radiation it reflects into space"
 (V_s × I_s = V_p × I_p)"
 840,Magnetism and electromagnetism,"(S) Induced potential, transformers and the National Grid",Separate,7,Asked in the 2020–23 papers,Describe the potential difference–time graph for an alternator.,It alternates: a wave going equally above and below zero.
 841,Magnetism and electromagnetism,"(S) Induced potential, transformers and the National Grid",Separate,7,Asked in the 2020–23 papers,Describe the potential difference–time graph for a dynamo.,It rises and falls but never goes below zero.
-608,Space physics,"(S) Solar System, stars, orbits and satellites",Separate,9,,Name the main objects in our Solar System.,"The Sun, eight planets, dwarf planets, moons, asteroids and comets"
+608,Space physics,"(S) Solar System, stars, orbits and satellites",Separate,7,Asked in the 2024–25 papers,Name the main objects in our Solar System.,"The Sun, eight planets, dwarf planets, moons, asteroids and comets"
 610,Space physics,"(S) Solar System, stars, orbits and satellites",Separate,9,,What is a galaxy?,A huge collection of stars held together by gravity.
 611,Space physics,"(S) Solar System, stars, orbits and satellites",Separate,9,,Give the name of our galaxy.,The Milky Way
 612,Space physics,"(S) Solar System, stars, orbits and satellites",Separate,9,,Name a cloud of dust and gas where stars form.,A nebula
@@ -955,7 +955,7 @@ Moons and artificial satellites orbit planets."
 887,Working scientifically,Tables and graphs,Combined,7,Core fact,State two things every axis of a graph must have.,A label (the quantity) and a unit
 888,Working scientifically,Tables and graphs,Combined,9,,Describe a good scale for the axis of a graph.,"It uses most of the grid and goes up in equal, easy-to-read steps."
 892,Working scientifically,"Best-fit lines, anomalous results and conclusions",Combined,9,,What is a line of best fit?,One smooth line showing the overall trend of the data.
-893,Working scientifically,"Best-fit lines, anomalous results and conclusions",Combined,7,Core practical fact,Describe how a line of best fit should be drawn.,As one thin line with points balanced above and below it.
+893,Working scientifically,"Best-fit lines, anomalous results and conclusions",Combined,7,Core practical fact,Describe how a line of best fit should be drawn.,"One thin straight line or smooth curve, close to the points, with about as many above it as below."
 894,Working scientifically,"Best-fit lines, anomalous results and conclusions",Combined,9,,State what must [not] be done when drawing a line of best fit.,Joining the points dot-to-dot.
 895,Working scientifically,"Best-fit lines, anomalous results and conclusions",Combined,7,Definition that mark schemes ask for,What is an anomalous result?,A result that does not fit the pattern of the others.
 896,Working scientifically,"Best-fit lines, anomalous results and conclusions",Combined,7,Core practical fact,Describe what you should do when you find an anomalous result.,"Check the recording and plotting, then repeat the measurement. If it is still anomalous, leave it out of the mean and the line of best fit."
