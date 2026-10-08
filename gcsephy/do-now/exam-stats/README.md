@@ -15,6 +15,8 @@ Every slide is drawn from the CSV files below when the page loads, so updating t
 | `facts.csv` | Facts asked as recall in more than one series: one row for each time, with the series, paper and part. Written by hand; the deck shows a fact once it has rows in two series |
 | `practicals.csv` | Required practical numbers and names, with the qualification each number belongs to (1–10 in Physics 8463, 14–21 in Trilogy 8464) |
 | `add-paper.py` | Adds one paper to `marks.csv` from its question paper and mark scheme PDFs |
+| `audit-prompt.py` | Prints a prompt, with the current figures filled in, that asks another AI model to check the statistics independently |
+| `audits/` | A short record of each audit: what was checked, what it found and what was done |
 
 ## `marks.csv` columns
 
@@ -38,4 +40,14 @@ AQA releases papers and mark schemes to the public about a year after the exam; 
 2. Act on each `CHECK` line it prints: the marks must add up to 100 (Physics) or 70 (Trilogy), and a part it could not read is typed into `marks.csv` by hand from the mark scheme.
 3. Read the new recall questions. For each one that asks a fact already in `facts.csv`, add a row with its series, paper and part; start a new fact when one has been asked in two series. Every row must point at a part with recall marks.
 4. If a mark scheme's reference is plainly wrong for the question, or the examiner report says a question was discounted, add a row to `corrections.csv` rather than changing `marks.csv`.
-5. Open both views of the deck and look through them. Then review the `Target` column of `../questions.csv` against the new figures, as described in [the Do Now README](../README.md#how-the-target-7-questions-were-chosen).
+5. Open both views of the deck and look through them.
+6. Commit and push, then have the figures audited independently (below). Then review the `Target` column of `../questions.csv` against the new figures, as described in [the Do Now README](../README.md#how-the-target-7-questions-were-chosen).
+
+## Independent audit
+
+The figures are counted by one AI model, so they are checked by a different one before being relied on. After a year's papers are added and pushed:
+
+1. Run `python3 audit-prompt.py > prompt.txt` and paste the result into a model that can browse the web and run code (not the one that added the data). The prompt gives it the public CSV files, the papers and the claimed figures, and asks it to recompute everything, sample parts against the mark schemes, question references that do not fit the question, read the examiner reports and check every row of `facts.csv`.
+2. Check that its report says which files and papers it actually read, and that its row counts match.
+3. Test each finding against the data and the papers before acting on it: an auditor can be wrong too. Put source corrections in `corrections.csv`, not `marks.csv`.
+4. Re-check the Target 7 bands if a topic's figures moved, and add a record to `audits/` like the existing one.
