@@ -27,9 +27,10 @@
   --north: #D45132;
   --south: #1675BB;
   --field: #0D9488;
-  --e-field: #B7791F;
+  --e-field: #7C3AED;
   --current: #E07A10;
   --force: #B5179E;
+  --force-b: #EC4899;
   --velocity: #2F6FDB;
   --copper: #B8733D;
   --steel: #8E99A4;
@@ -72,9 +73,10 @@
   --north: #EF6A48;
   --south: #4BA3E3;
   --field: #2DD4BF;
-  --e-field: #E0A445;
+  --e-field: #A78BFA;
   --current: #FBA43C;
   --force: #E879F9;
+  --force-b: #FB7185;
   --velocity: #6EA8FF;
   --copper: #D08A50;
   --steel: #9AA5B0;
@@ -213,6 +215,7 @@ body.viewer-expanded { overflow: hidden; }
 .legend { left: 10px; bottom: 10px; right: 10px; display: flex; flex-wrap: wrap; gap: 6px; }
 .legend > span { display: inline-flex; align-items: center; gap: 6px; padding: 3px 10px 3px 4px; border-radius: 999px; background: var(--overlay-bg); border: 1px solid var(--card-border); }
 .legend i { font-style: normal; display: inline-grid; place-items: center; border-radius: 50%; width: 18px; height: 18px; font-size: .72rem; font-weight: 800; color: #fff; }
+.legend > span.is-off { opacity: .5; text-decoration: line-through; }
 .legend i.bar { border-radius: 3px; height: 8px; width: 18px; }
 .gesture { top: 8px; left: 10px; margin: 0; color: var(--text-secondary); }
 
