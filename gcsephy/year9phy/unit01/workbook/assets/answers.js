@@ -58,7 +58,7 @@
         ["Checkpoint · p. 8", ul([
           "<b>1.</b> precise.",
           "<b>2.</b> accurate.",
-          "<b>3.</b> the range of the repeats: (largest − smallest) ÷ 2.",
+          "<b>3.</b> the largest and smallest repeat readings: (largest − smallest) ÷ 2.",
           "<b>4.</b> random … systematic, because a systematic error shifts every reading the same way, so averaging repeats leaves the mean just as wrong.",
           "<b>5.</b> Open. e.g. take more repeats, use an instrument with finer resolution, use the same timer each time, or check the instrument’s zero.",
         ])],

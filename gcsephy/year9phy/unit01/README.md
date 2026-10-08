@@ -16,7 +16,7 @@ Producing evidence that convinces people who were not there. Over eight lessons 
 
 | File | What it is | What to do with it |
 |---|---|---|
-| [`../../decks/work-like-a-physicist/index.html`](../../decks/work-like-a-physicist/index.html) | 50-slide HTML teaching deck covering all eight lessons | Present in a browser; advance to reveal answers and teaching points |
+| [`../../decks/work-like-a-physicist/index.html`](../../decks/work-like-a-physicist/index.html) | 50-slide HTML teaching deck covering all eight lessons | Present in a browser; advance to reveal answers and teaching points. A collapsible revision note for students sits beneath each slide (N) |
 | `Work Like a Physicist - Year 9 Student Workbook.pdf` | 40-page A4 student workbook, one per student for the whole unit | Print double-sided. Students keep the same workbook for all eight lessons |
 | `Work Like a Physicist - Year 9 Student Workbook (Answers).pdf` | Answer key for the workbook, by lesson, task and workbook page; linked from the companion site's Resources section | Mark with it, or let students self-check. Practical tasks give sample data |
 | `workbook/` | Editable source of the student workbook and its answers (HTML, CSS, JavaScript) | Edit `workbook/assets/content.js` (or `answers.js` for the answers), then run `sh build-pdf.sh` (or `sh build-answers-pdf.sh`). See `workbook/README.md` |
@@ -114,7 +114,7 @@ Lesson 3. Several groups every year draw a perfect bar chart and then invert the
 
 ## Where this sits in the curriculum
 
-A working-scientifically unit with no new physics; the practicals are vehicles for skills GCSE assesses in every required practical: variables, fair tests, repeats and means, **uncertainty from the range of repeats, (largest − smallest) ÷ 2**, precision/accuracy/resolution, random versus systematic error, graph choice with scales and units, best-fit lines, anomalies, conclusions and evaluations. When students write "human error" in Year 10, send them back to this workbook.
+A working-scientifically unit with no new physics; the practicals are vehicles for skills GCSE assesses in every required practical: variables, fair tests, repeats and means, **uncertainty from repeat readings, (largest − smallest) ÷ 2**, precision/accuracy/resolution, random versus systematic error, graph choice with scales and units, best-fit lines, anomalies, conclusions and evaluations. When students write "human error" in Year 10, send them back to this workbook.
 
 **Assessment points.** Lesson 6 and Lessons 7–8 carry success-criteria checklists in the workbook, worded as a marker would. Lesson 6 is the natural point to collect books.
 

@@ -1,5 +1,6 @@
 // Slide navigation shared by the unit companion decks: scaling, keyboard /
-// touch / button controls, step reveals, URL hash and fullscreen.
+// touch / button controls, step reveals, URL hash and fullscreen. Student
+// revision notes beneath the slide come from deck-notes.js.
 // Each deck fills its diagrams first through window.DeckFigures.render().
 (() => {
   const SLIDE_W = 1600;
@@ -58,6 +59,7 @@
       if (current && thumbFocused && document.activeElement !== thumb) thumb.focus({ preventScroll: true });
       if (current && document.body.classList.contains('show-thumbs')) thumb.scrollIntoView({ block: 'nearest' });
     });
+    if (window.DeckNotes) window.DeckNotes.show(slide);
     if (location.hash !== `#${n}`) history.replaceState(null, '', `#${n}`);
     const name = slide.dataset.title;
     document.title = name && name !== deckTitle ? `${name} · ${deckTitle}` : deckTitle;
@@ -204,6 +206,7 @@
   function init() {
     if (window.DeckFigures) window.DeckFigures.render();
     state.slides = [...deck.querySelectorAll('.slide')];
+    if (window.DeckNotes) window.DeckNotes.collect(state.slides);
     state.slides.forEach((slide, i) => {
       const foot = slide.querySelector('.slide-foot [data-page]');
       if (foot) foot.textContent = String(i + 1).padStart(2, '0');
