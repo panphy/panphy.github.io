@@ -14,13 +14,32 @@
   const deck = document.getElementById("deck");
   const MONTHS = { "06": "June", "11": "Nov" };
   const UNIT_ORDER = ["Energy", "Electricity", "Particle model of matter", "Atomic structure", "Forces", "Waves", "Magnetism and electromagnetism", "Space physics"];
-  // One topic-by-topic slide for each group of units: [slide title, heading, units].
+  // One topic-by-topic slide for each group of units: [units, slide title, heading]. A course
+  // without Space physics uses the second title and heading.
   const GROUPS = [
-    ["Energy and electricity", "Energy and <em>electricity.</em>", ["Energy", "Electricity"]],
-    ["Particles and atoms", "Particles and <em>atoms.</em>", ["Particle model of matter", "Atomic structure"]],
-    ["Forces", "<em>Forces.</em>", ["Forces"]],
-    ["Waves, magnetism and space", "Waves, magnetism, <em>space.</em>", ["Waves", "Magnetism and electromagnetism", "Space physics"]],
+    [["Energy", "Electricity"], "Energy and electricity", "Energy and <em>electricity.</em>"],
+    [["Particle model of matter", "Atomic structure"], "Particles and atoms", "Particles and <em>atoms.</em>"],
+    [["Forces"], "Forces", "<em>Forces.</em>"],
+    [["Waves", "Magnetism and electromagnetism", "Space physics"], "Waves, magnetism and space", "Waves, magnetism, <em>space.</em>", "Waves and magnetism", "Waves and <em>magnetism.</em>"],
   ];
+  // The deck shows one course at a time: ?course=physics or ?course=trilogy.
+  const COURSES = {
+    physics: { code: "8463", name: "Physics", full: "GCSE Physics (8463)", papers: "Physics (8463) Higher papers", other: "trilogy" },
+    trilogy: { code: "8464", name: "Trilogy", full: "Combined Science: Trilogy (8464)", papers: "Trilogy (8464) Physics Higher papers", other: "physics" },
+  };
+  const COURSE_KEY = "do-now-exam-stats-course";
+
+  function chosenCourse() {
+    const asked = new URLSearchParams(location.search).get("course");
+    let saved = null;
+    try { saved = localStorage.getItem(COURSE_KEY); } catch (error) { /* storage unavailable */ }
+    const key = COURSES[asked] ? asked : COURSES[saved] ? saved : "physics";
+    try { localStorage.setItem(COURSE_KEY, key); } catch (error) { /* ignore */ }
+    document.querySelectorAll("[data-course]").forEach((link) => {
+      if (link.dataset.course === key) link.setAttribute("aria-current", "true"); else link.removeAttribute("aria-current");
+    });
+    return key;
+  }
   const ACCENTS = ["a-hi", "a-hot", "a-cyan", "a-violet"];
 
   // RFC 4180 parser: quoted fields may hold commas, doubled quotes and newlines.
@@ -83,12 +102,12 @@
   }
   const finish = (section) => { section.append(section.foot); deck.append(section); };
 
-  function build(marks, sections, facts, practicals, corrections) {
-    const series = [...new Set(marks.map((part) => part.Series))].sort();
-    const papers = new Set(marks.map((part) => `${part.Series} ${part.Paper}`));
-    const isPhysics = (part) => part.Paper.startsWith("8463");
+  function build(allMarks, sections, facts, practicals, corrections, courseKey) {
+    const course = COURSES[courseKey];
+    const other = COURSES[course.other];
+    const isTrilogy = courseKey === "trilogy";
     const corrected = new Map(corrections.map((row) => [`${row.Series} ${row.Paper} ${row.Part}`, row]));
-    for (const part of marks) {
+    for (const part of allMarks) {
       part.marks = Number(part.Marks) || 0;
       part.recall = Number(part.Recall) || 0;
       // marks.csv keeps what the mark scheme prints; corrections.csv says where that is not used as it stands.
@@ -96,14 +115,14 @@
       if (correction && correction.Sections) part.Sections = correction.Sections;
       part.discounted = Boolean(correction && correction.Status === "Discounted");
     }
-
-    // Marks available in each series: Separate-only topics can appear only in the Physics papers.
-    const available = { Combined: {}, Separate: {} };
-    for (const name of series) {
-      const sat = marks.filter((part) => part.Series === name);
-      available.Combined[name] = sum(sat, (part) => part.marks);
-      available.Separate[name] = sum(sat.filter(isPhysics), (part) => part.marks);
-    }
+    const series = [...new Set(allMarks.map((part) => part.Series))].sort();
+    // Everything except the repeated facts is counted from this course's own papers.
+    const marks = allMarks.filter((part) => part.Paper.startsWith(course.code));
+    const papers = new Set(marks.map((part) => `${part.Series} ${part.Paper}`));
+    const totalMarks = sum(marks, (part) => part.marks);
+    const recallMarks = sum(marks, (part) => part.recall);
+    const equationMarks = sum(marks.filter((part) => part.Equation === "1"), (part) => part.marks);
+    const span = `${seriesName(series[0])} to ${seriesName(series[series.length - 1])}`;
 
     // A section belongs to the topic with the longest matching reference.
     function topicOf(reference) {
@@ -113,62 +132,59 @@
       }
       return best;
     }
+    // Separate Physics topics are not examined in the Trilogy papers, so that view leaves them out.
     const topics = new Map();
     for (const section of sections) {
-      if (!topics.has(section.Topic)) {
-        topics.set(section.Topic, { name: section.Topic, unit: section.Unit, separate: section.Course === "Separate", recall: {}, all: {}, physics: 0, trilogy: 0 });
-      }
+      const separate = section.Course === "Separate";
+      if ((isTrilogy && separate) || topics.has(section.Topic)) continue;
+      topics.set(section.Topic, { name: section.Topic, unit: section.Unit, separate, recall: {}, recallMarks: 0 });
     }
+    const units = UNIT_ORDER.filter((unit) => [...topics.values()].some((topic) => topic.unit === unit));
     for (const part of marks) {
       const references = list(part.Sections);
       for (const reference of references) {
         const match = topicOf(reference);
-        if (!match) continue;
-        const topic = topics.get(match.Topic);
+        const topic = match && topics.get(match.Topic);
+        if (!topic) continue;
         // A part that covers several sections shares its marks equally between them.
         topic.recall[part.Series] = (topic.recall[part.Series] || 0) + part.recall / references.length;
-        topic.all[part.Series] = (topic.all[part.Series] || 0) + part.marks / references.length;
-        topic[isPhysics(part) ? "physics" : "trilogy"] += part.recall / references.length;
+        topic.recallMarks += part.recall / references.length;
       }
     }
-    // Each course gets its own rate: recall marks in every 100 marks of that course's papers.
-    // Separate-only topics cannot appear in the Trilogy papers, so they have no Trilogy rate.
-    const physicsMarks = sum(series, (name) => available.Separate[name]);
-    const trilogyMarks = sum(series, (name) => available.Combined[name]) - physicsMarks;
-    for (const topic of topics.values()) {
-      topic.physicsRate = physicsMarks ? topic.physics / physicsMarks * 100 : 0;
-      topic.trilogyRate = topic.separate || !trilogyMarks ? null : topic.trilogy / trilogyMarks * 100;
-    }
-    const rankedFor = (key) => [...topics.values()].filter((topic) => topic[key] !== null).sort((a, b) => b[key] - a[key]);
-    const topRate = Math.max(0.1, ...[...topics.values()].map((topic) => Math.max(topic.physicsRate, topic.trilogyRate || 0)));
+    // A topic's rate is its recall marks in every 100 marks of the course's papers.
+    for (const topic of topics.values()) topic.rate = totalMarks ? topic.recallMarks / totalMarks * 100 : 0;
+    const ranked = [...topics.values()].sort((a, b) => b.rate - a.rate);
+    const topRate = Math.max(0.1, ranked.length ? ranked[0].rate : 0);
 
-    const totalMarks = sum(marks, (part) => part.marks);
-    const recallMarks = sum(marks, (part) => part.recall);
-    const equationMarks = sum(marks.filter((part) => part.Equation === "1"), (part) => part.marks);
-    const span = `${seriesName(series[0])} to ${seriesName(series[series.length - 1])}`;
     const topicName = (topic) => {
       const name = el("span", "name", topic.name);
       if (topic.separate) name.append(el("span", "sep", "S"));
       return name;
     };
+    const perHundred = `Recall marks in every 100 marks of the ${course.papers}.`;
     const separateNote = () => {
       const note = el("p", "note");
       note.append(el("span", "sep", "S"), " Separate Physics only: not examined in the Trilogy papers.");
       note.firstChild.style.marginLeft = "0";
       return note;
     };
+    const notes = (text) => el("div", "", isTrilogy ? [el("p", "note", text)] : [el("p", "note", text), separateNote()]);
+    const courseLink = (key, text) => { const a = el("a", "", text); a.href = `?course=${key}`; return a; };
 
+    document.title = `Exam statistics: ${course.name} · Do Now`;
+    document.body.dataset.deckTitle = `Exam statistics: ${course.name}`;
     deck.textContent = "";
 
-    // 1 Title
+    // Title
     {
-      const section = slide("dark a-hi", "Exam statistics", "", "", "Do Now · exam statistics");
+      const section = slide("dark a-hi", "Exam statistics", "", "", `Exam statistics · ${course.name}`);
       const eyebrow = el("p", "eyebrow");
-      eyebrow.append(el("span", "on", "Do Now"), " · exam statistics");
+      eyebrow.append(el("span", "on", "Do Now"), ` · exam statistics · ${course.name}`);
       const heading = el("h1");
       heading.innerHTML = "What the<br>papers <em>ask.</em>";
+      const switcher = el("div", "unlocks", [courseLink(course.other, `See the ${other.name} version`)]);
       const left = el("div", "", [eyebrow, heading,
-        el("p", "lead", `Where the recall marks were in AQA GCSE Physics and Combined Science: Trilogy Higher papers, ${span}.`)]);
+        el("p", "lead", `Where the recall marks were in AQA ${course.full} Higher papers, ${span}.`), switcher]);
       const figure = (value, label, big) => el("div", `figure${big ? " big" : ""}`, [el("b", "", value), el("span", "", label)]);
       const right = el("div", "figures", [
         figure(`${Math.round(recallMarks / totalMarks * 100)}%`, "of all marks are for recall (AO1)", true),
@@ -179,24 +195,24 @@
       finish(section);
     }
 
-    // 2 How the marks were counted
+    // How the marks were counted
     {
       const section = slide("a-hi", "How we counted", "The method", "Counted from the <em>mark schemes.</em>");
-      const points = el("ul", "points small");
+      const points = el("ul", "points small tight");
       const point = (html) => { const item = el("li"); item.innerHTML = html; points.append(item); };
-      point(`<b>${papers.size} Higher papers</b> in ${series.length} exam series: Physics (8463) and Combined Science: Trilogy (8464), Papers 1 and 2.`);
+      point(`<b>${papers.size} Higher papers</b> in ${series.length} exam series: ${course.full}, ${isTrilogy ? "Physics Papers" : "Papers"} 1 and 2. ${other.name} has its own version of this deck.`);
       point("AQA's mark schemes label the marks with an <b>assessment objective</b> and a <b>specification section</b>. We used those labels, and corrected one that was plainly wrong.");
       point("<b>Recall marks</b> are the marks labelled AO1: knowledge and understanding of ideas and practical methods. That includes describing a method, so it is more than one-line facts.");
       point(`We left out the ${Math.round(equationMarks)} marks for writing down or choosing an equation, because <b>the full equations sheet is now provided</b>. It was not in 2020 and 2021.`);
       point("Marks are split by AQA's mark-by-mark labels. For long answers marked in levels, and for parts covering several sections, the split is an estimate.");
-      points.classList.add("tight");
       section.append(el("div", "stack", [points, el("div", "remember", "Higher tier only. Six series is a small sample, and AQA covers the specification over several years: a quiet topic is not a safe topic to skip.")]));
       finish(section);
     }
 
-    // 3 Recall share in each series
+    // Recall share in each series
     {
-      const section = slide("a-hi", "Recall each year", "Every series", "About a third, <em>every year.</em>");
+      const share = Math.round(recallMarks / totalMarks * 100);
+      const section = slide("a-hi", "Recall each year", "Every series", share >= 30 && share <= 37 ? "About a third, <em>every year.</em>" : `About ${share}%, <em>every year.</em>`);
       const key = el("div", "key", [
         el("span", "", [el("i"), "Recall"]),
         el("span", "", [el("i", "third"), "Writing down or choosing an equation"]),
@@ -207,6 +223,7 @@
       for (const name of series) {
         const sat = marks.filter((part) => part.Series === name);
         const total = sum(sat, (part) => part.marks);
+        if (!total) continue;
         const recall = sum(sat, (part) => part.recall) / total * 100;
         const equation = sum(sat.filter((part) => part.Equation === "1"), (part) => part.marks) / total * 100;
         const stacked = el("div", "stacked", [el("i", "", `${Math.round(recall)}%`), el("i", "third", ""), el("i", "rest", `${Math.round(100 - recall - equation)}%`)]);
@@ -219,81 +236,57 @@
       const footnote = discounted.length
         ? ` Counted as printed: AQA discounted one question (${sum(discounted, (part) => part.marks)} marks, ${seriesName(discounted[0].Series)}) and gave every student its marks.`
         : "";
-      section.append(key, bars, el("p", "note", `Share of all the marks in the four Higher papers of each series.${footnote}`));
+      section.append(key, bars, el("p", "note", `Share of all the marks in the two ${course.name} Higher papers of each series.${footnote}`));
       finish(section);
     }
 
-    // 4 Units, in the Physics and the Trilogy papers
+    // Units
     {
       const section = slide("a-hi", "Recall by unit", "By unit", "Where the recall <em>marks are.</em>");
-      const key = el("div", "key", [el("span", "", [el("i"), "Physics papers"]), el("span", "", [el("i", "second"), "Trilogy papers"])]);
-      const unitRate = (unit, physics) => {
-        const sat = marks.filter((part) => isPhysics(part) === physics);
-        let recall = 0;
-        for (const part of sat) {
-          const references = list(part.Sections);
-          for (const reference of references) {
-            const match = topicOf(reference);
-            if (match && match.Unit === unit) recall += part.recall / references.length;
-          }
-        }
-        return recall / sum(sat, (part) => part.marks) * 100;
-      };
-      const rows = UNIT_ORDER.map((unit) => ({ unit, physics: unitRate(unit, true), trilogy: unitRate(unit, false) }));
-      const most = Math.max(...rows.map((row) => Math.max(row.physics, row.trilogy)));
-      const bars = el("div", "bars pair");
+      const rows = units.map((unit) => ({ unit, rate: sum([...topics.values()].filter((topic) => topic.unit === unit), (topic) => topic.rate) }));
+      const most = Math.max(0.1, ...rows.map((row) => row.rate));
+      const bars = el("div", "bars");
       bars.style.setProperty("--label", "470px");
       for (const row of rows) {
-        const track = (value, second) => {
-          const bar = el("i", second ? "second" : "");
-          bar.style.width = `${value / most * 82}%`;
-          return el("div", "track", [bar, el("b", "", value ? rate(value) : "not examined")]);
-        };
-        bars.append(el("div", "bar-row", [el("span", "name", row.unit), el("div", "", [track(row.physics, false), track(row.trilogy, true)])]));
+        const bar = el("i");
+        bar.style.width = `${row.rate / most * 86}%`;
+        bars.append(el("div", "bar-row", [el("span", "name", row.unit), el("div", "track", [bar, el("b", "", rate(row.rate))])]));
       }
-      section.append(key, bars, el("p", "note", "Recall marks in every 100 marks of the papers. Space physics is examined in the Physics papers only."));
+      section.append(bars, el("p", "note", `${perHundred}${isTrilogy ? " Space physics is not part of Trilogy." : ""}`));
       finish(section);
     }
 
-    // The topics with the most and the fewest recall marks, for each course on its own papers
-    const rankSlide = (accent, title, eyebrow, heading, key, chosen, note, showSeparate) => {
+    // The topics with the most and the fewest recall marks
+    const rankSlide = (accent, title, eyebrow, heading, chosen, note) => {
       const section = slide(accent, title, eyebrow, heading);
       const bars = el("div", "bars");
       for (const topic of chosen) {
         const bar = el("i");
-        bar.style.width = `${topic[key] / topRate * 86}%`;
-        const name = topicName(topic);
-        bars.append(el("div", "bar-row", [name, el("div", "track", [bar, el("b", "", rate(topic[key]))])]));
+        bar.style.width = `${topic.rate / topRate * 86}%`;
+        bars.append(el("div", "bar-row", [topicName(topic), el("div", "track", [bar, el("b", "", rate(topic.rate))])]));
       }
-      const notes = [el("p", "note", note)];
-      if (showSeparate) notes.push(separateNote());
-      section.append(bars, el("div", "", notes));
+      section.append(bars, notes(note));
       finish(section);
     };
-    const physicsRanked = rankedFor("physicsRate");
-    const trilogyRanked = rankedFor("trilogyRate");
-    rankSlide("a-hi", "Physics: most recall marks", "Separate Physics · top twelve topics", "Physics: <em>most.</em>", "physicsRate", physicsRanked.slice(0, 12),
-      "Recall marks in every 100 marks of the Physics (8463) Higher papers.", true);
-    rankSlide("a-hi", "Physics: fewest recall marks", "Separate Physics · bottom twelve topics", "Physics: <em>fewest.</em>", "physicsRate", physicsRanked.slice(-12),
-      "Same scale as the top twelve. Several of these topics are examined mainly through calculations.", true);
-    rankSlide("a-hot", "Trilogy: most recall marks", "Combined Science: Trilogy · top twelve topics", "Trilogy: <em>most.</em>", "trilogyRate", trilogyRanked.slice(0, 12),
-      "Recall marks in every 100 marks of the Trilogy (8464) Physics Higher papers.", false);
-    rankSlide("a-hot", "Trilogy: fewest recall marks", "Combined Science: Trilogy · bottom twelve topics", "Trilogy: <em>fewest.</em>", "trilogyRate", trilogyRanked.slice(-12),
-      "Same scale as the top twelve. Several of these topics are examined mainly through calculations.", false);
+    rankSlide("a-hi", "Most recall marks", `${course.name} · top twelve topics`, "Most recall <em>marks.</em>", ranked.slice(0, 12), perHundred);
+    rankSlide("a-hot", "Fewest recall marks", `${course.name} · bottom twelve topics`, "Fewest recall <em>marks.</em>", ranked.slice(-12),
+      "Same scale as the top twelve. Several of these topics are examined mainly through calculations.");
 
-    // 7 to 10 Each topic, series by series
+    // Each topic, series by series
     const peak = Math.max(1, ...[...topics.values()].flatMap((topic) => series.map((name) => topic.recall[name] || 0)));
-    GROUPS.forEach(([title, heading, units], at) => {
-      const section = slide(ACCENTS[at % ACCENTS.length], title, "Topic by topic", heading);
+    GROUPS.forEach(([groupUnits, fullTitle, fullHeading, shortTitle, shortHeading], at) => {
+      const shown = groupUnits.filter((unit) => units.includes(unit));
+      if (!shown.length) return;
+      const trimmed = shown.length < groupUnits.length && shortTitle;
+      const section = slide(ACCENTS[at % ACCENTS.length], trimmed ? shortTitle : fullTitle, `${course.name} · topic by topic`, trimmed ? shortHeading : fullHeading);
       const grid = el("div", "grid");
       grid.style.setProperty("--series", series.length);
-      grid.style.setProperty("--tail", 2);
       const head = el("div", "grid-row head", [el("span", "name", "Recall marks in each series")]);
       for (const name of series) head.append(el("span", "", seriesName(name)));
-      head.append(el("span", "", "Physics"), el("span", "", "Trilogy"));
+      head.append(el("span", "", "In every 100 marks"));
       grid.append(head);
-      for (const unit of units) {
-        if (units.length > 1) grid.append(el("div", "grid-row unit", [el("span", "name", unit)]));
+      for (const unit of shown) {
+        if (shown.length > 1) grid.append(el("div", "grid-row unit", [el("span", "name", unit)]));
         for (const topic of [...topics.values()].filter((item) => item.unit === unit)) {
           const row = el("div", "grid-row", [topicName(topic)]);
           for (const name of series) {
@@ -302,36 +295,42 @@
             if (value >= 0.5) cell.style.background = `color-mix(in srgb, var(--accent) ${Math.round(18 + 82 * Math.min(1, value / peak))}%, var(--card))`;
             row.append(cell);
           }
-          row.append(el("span", "per", rate(topic.physicsRate)), el("span", "per", topic.trilogyRate === null ? "–" : rate(topic.trilogyRate)));
+          const bar = el("i");
+          bar.style.width = `${topic.rate / topRate * 70}%`;
+          row.append(el("div", "track", [bar, el("b", "", rate(topic.rate))]));
           grid.append(row);
         }
       }
       grid.style.setProperty("--cell", grid.children.length > 15 ? "28px" : "34px");
-      section.append(grid, el("div", "", [
-        el("p", "note", "Cells: recall marks across all four papers. Right-hand columns: recall marks in every 100 marks of each course's papers."),
-        separateNote(),
-      ]));
+      section.append(grid, notes(`Cells: recall marks in the two ${course.name} papers of that series.`));
       finish(section);
     });
 
-    // Facts asked in more than one series
-    const discountedParts = new Set(marks.filter((part) => part.discounted).map((part) => `${part.Series} ${part.Paper} ${part.Part}`));
+    // Facts asked in more than one series. These use both courses' papers, because the shared
+    // content is the same; a ring shows a series where only the other course's paper asked it.
+    const discountedParts = new Set(allMarks.filter((part) => part.discounted).map((part) => `${part.Series} ${part.Paper} ${part.Part}`));
     const discountedFacts = facts.filter((row) => discountedParts.has(`${row.Series} ${row.Paper} ${row.Part}`))
       .map((row) => `The ${seriesName(row.Series)} question on "${row.Fact.toLowerCase()}" was in a question AQA discounted.`);
     const byFact = new Map();
     for (const row of facts) {
-      if (!byFact.has(row.Fact)) byFact.set(row.Fact, { Fact: row.Fact, Course: row.Course, asked: [] });
+      if (!series.includes(row.Series) || (isTrilogy && row.Course === "Separate")) continue;
+      if (!byFact.has(row.Fact)) byFact.set(row.Fact, { Fact: row.Fact, Course: row.Course, here: new Set(), anywhere: new Set() });
       const fact = byFact.get(row.Fact);
-      if (series.includes(row.Series) && !fact.asked.includes(row.Series)) fact.asked.push(row.Series);
+      fact.anywhere.add(row.Series);
+      if (row.Paper.startsWith(course.code)) fact.here.add(row.Series);
     }
     const known = [...byFact.values()]
-      .filter((fact) => fact.asked.length > 1)
-      .sort((a, b) => b.asked.length - a.asked.length);
+      .filter((fact) => fact.anywhere.size > 1)
+      .sort((a, b) => b.anywhere.size - a.anywhere.size || b.here.size - a.here.size);
     const perSlide = Math.ceil(known.length / Math.max(1, Math.ceil(known.length / 16)));
     for (let from = 0; from < known.length; from += perSlide) {
       const first = from === 0;
       const section = slide(first ? "a-hi" : "a-hot", first ? "Asked again and again" : "Asked more than once",
         "The same facts come back", first ? "Asked again <em>and again.</em>" : "Asked more <em>than once.</em>");
+      const key = el("div", "key", [
+        el("span", "", [el("i", "round"), `Asked in a ${course.name} paper`]),
+        el("span", "", [el("i", "round ring"), `Asked only in a ${other.name} paper`]),
+      ]);
       const grid = el("div", "grid");
       grid.style.setProperty("--series", series.length);
       grid.style.setProperty("--label", "680px");
@@ -343,19 +342,19 @@
         const name = el("span", "name", fact.Fact);
         if (fact.Course === "Separate") name.append(el("span", "sep", "S"));
         const row = el("div", "grid-row", [name]);
-        for (const item of series) row.append(el("span", fact.asked.includes(item) ? "dot on" : "dot"));
-        row.append(el("span", "total", `${fact.asked.length} of ${series.length}`));
+        for (const item of series) row.append(el("span", fact.here.has(item) ? "dot on" : fact.anywhere.has(item) ? "dot ring" : "dot"));
+        row.append(el("span", "total", `${fact.anywhere.size} of ${series.length}`));
         grid.append(row);
       }
-      section.append(grid, el("p", "note", ["Chosen by reading the recall questions in every paper. The wording changes; the fact does not.", ...(first ? discountedFacts : [])].join(" ")));
+      section.append(key, grid, el("p", "note", ["Chosen by reading the recall questions in every paper. Both courses share this content, so a fact asked in either is worth knowing.", ...(first ? discountedFacts : [])].join(" ")));
       finish(section);
     }
 
     // Required practicals
     {
-      const names = new Map(practicals.map((practical) => [practical.Number, practical.Practical]));
-      const order = [...new Set(practicals.map((practical) => practical.Practical))];
-      const tagged = new Map(order.map((name) => [name, {}]));
+      const mine = practicals.filter((practical) => practical.Qualification === course.code);
+      const names = new Map(mine.map((practical) => [practical.Number, practical.Practical]));
+      const tagged = new Map(mine.map((practical) => [practical.Practical, {}]));
       for (const part of marks) {
         for (const number of list(part.Practicals)) {
           const record = tagged.get(names.get(number));
@@ -364,7 +363,7 @@
       }
       const most = Math.max(1, ...[...tagged.values()].flatMap((record) => Object.values(record)));
       const methods = marks.filter((part) => part.Levels === "1" && list(part.Practicals).length).length;
-      const section = slide("a-cyan", "Required practicals", "Required practicals", "Practicals earn <em>marks too.</em>");
+      const section = slide("a-cyan", "Required practicals", `${course.name} · required practicals`, "Practicals earn <em>marks too.</em>");
       const grid = el("div", "grid");
       grid.style.setProperty("--series", series.length);
       const head = el("div", "grid-row head", [el("span", "name", "Marks on each practical")]);
@@ -382,7 +381,7 @@
         row.append(el("span", "total", `${whole(sum(series, (item) => record[item] || 0))} marks`));
         grid.append(row);
       }
-      section.append(grid, el("p", "note", `All marks, not only recall, on questions AQA labelled with a required practical, across the Physics and Trilogy papers. ${methods} of them were extended "describe a method" questions, worth 4 to 6 marks each. Some practical questions carry no label, so these are minimum figures.`));
+      section.append(grid, el("p", "note", `All marks, not only recall, on questions AQA labelled with a required practical in the ${course.name} papers. ${methods} of them were extended "describe a method" questions, worth 4 to 6 marks each. Some practical questions carry no label, so these are minimum figures.`));
       finish(section);
     }
 
@@ -409,7 +408,7 @@
       cards.querySelectorAll("h3").forEach((heading) => { heading.style.marginBottom = "18px"; });
       const links = el("div", "unlocks");
       const link = (href, text) => { const a = el("a", "", text); a.href = href; return a; };
-      links.append(link("../", "Open Do Now"), link("../revision/", "Revision sheets"));
+      links.append(link("../", "Open Do Now"), link("../revision/", "Revision sheets"), courseLink(course.other, `${other.name} version`));
       links.style.marginTop = "0";
       section.append(el("div", "stack", [cards, links]));
       finish(section);
@@ -419,7 +418,7 @@
   try {
     deck.append(el("p", "status", "Loading the figures…"));
     const [marks, sections, facts, practicals, corrections] = await Promise.all(["marks.csv", "sections.csv", "facts.csv", "practicals.csv", "corrections.csv"].map(load));
-    build(marks, sections, facts, practicals, corrections);
+    build(marks, sections, facts, practicals, corrections, chosenCourse());
   } catch (error) {
     deck.textContent = "";
     const section = el("section", "slide a-hi", [el("p", "status", "The figures could not be loaded. Check your connection and reload.")]);

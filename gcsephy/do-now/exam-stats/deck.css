@@ -76,3 +76,15 @@
 .grid-row .track { height: 26px; padding-left: 12px; }
 .grid-row .track b { font-size: 20px; }
 .grid-row .per { text-align: center; font: 900 22px Arial, sans-serif; }
+.key i.round { border-radius: 50%; }
+.key i.ring, .dot.ring { border: 5px solid var(--accent); background: none; }
+.unlocks a[href^="?course"] { box-shadow: 5px 5px 0 var(--hot); }
+
+/* Course switch in the top bar */
+.course-switch { display: inline-flex; border: 1px solid rgba(255, 255, 255, .35); border-radius: 999px; overflow: hidden; }
+.course-switch a { display: inline-flex; align-items: center; min-height: 44px; padding: 0 14px; color: #fff; font-size: 13px; font-weight: 800; text-decoration: none; }
+.course-switch a[aria-current] { background: #fff; color: var(--navy); }
+@media (max-width: 480px) {
+  .brand span { display: none; }
+  .course-switch a { padding: 0 11px; }
+}

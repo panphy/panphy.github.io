@@ -2,6 +2,8 @@
 
 A slide deck showing where the recall (AO1) marks were in AQA GCSE Physics (8463) and Combined Science: Trilogy (8464) Higher papers, from November 2020 onwards. It is linked from the Do Now top bar and uses the shared teaching-deck layout (`/gcsephy/decks/assets/`) in the Do Now colours.
 
+The deck shows one course at a time, each counted from its own papers: `?course=physics` (the default) or `?course=trilogy`. The switch is in the top bar, the last choice is remembered, and the Do Now link opens the Trilogy view when "Combined only" is selected there. The Trilogy view leaves out the Separate Physics topics. The repeated-facts slides use both courses' papers, because the shared content is the same; a ring marks a series in which only the other course's paper asked the fact.
+
 Every slide is drawn from the CSV files below when the page loads, so updating the files updates the deck. Nothing of a paper's wording is stored.
 
 | File | Purpose |
@@ -11,7 +13,7 @@ Every slide is drawn from the CSV files below when the page loads, so updating t
 | `sections.csv` | Which unit and topic each specification section belongs to. A reference uses the longest `Section` it starts with |
 | `corrections.csv` | Parts where the mark scheme's reference is not used as printed. `Sections` replaces the part's sections for the deck; `Status` `Discounted` marks a question AQA discounted (it is still counted as printed, and the deck says so); `Reason` says why. `marks.csv` keeps what the mark scheme prints |
 | `facts.csv` | Facts asked as recall in more than one series: one row for each time, with the series, paper and part. Written by hand; the deck shows a fact once it has rows in two series |
-| `practicals.csv` | Required practical numbers and names (1–10 in Physics, 14–21 in Trilogy) |
+| `practicals.csv` | Required practical numbers and names, with the qualification each number belongs to (1–10 in Physics 8463, 14–21 in Trilogy 8464) |
 | `add-paper.py` | Adds one paper to `marks.csv` from its question paper and mark scheme PDFs |
 
 ## `marks.csv` columns
@@ -36,4 +38,4 @@ AQA releases papers and mark schemes to the public about a year after the exam; 
 2. Act on each `CHECK` line it prints: the marks must add up to 100 (Physics) or 70 (Trilogy), and a part it could not read is typed into `marks.csv` by hand from the mark scheme.
 3. Read the new recall questions. For each one that asks a fact already in `facts.csv`, add a row with its series, paper and part; start a new fact when one has been asked in two series. Every row must point at a part with recall marks.
 4. If a mark scheme's reference is plainly wrong for the question, or the examiner report says a question was discounted, add a row to `corrections.csv` rather than changing `marks.csv`.
-5. Open the deck and look through it. Then review the `Target` column of `../questions.csv` against the new figures, as described in [the Do Now README](../README.md#how-the-target-7-questions-were-chosen).
+5. Open both views of the deck and look through them. Then review the `Target` column of `../questions.csv` against the new figures, as described in [the Do Now README](../README.md#how-the-target-7-questions-were-chosen).
