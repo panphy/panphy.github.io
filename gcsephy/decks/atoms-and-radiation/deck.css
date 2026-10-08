@@ -372,6 +372,31 @@ h3 { font-size: 34px; line-height: 1.15; }
 .try { display: inline-flex; align-items: center; gap: 10px; margin-top: 8px; font: 700 25px var(--font-body); color: var(--brand-primary); text-decoration: none; border-bottom: 2px solid color-mix(in srgb, var(--brand-primary), transparent 60%); padding-bottom: 2px; }
 .try:hover { border-bottom-color: var(--brand-primary); }
 
+/* History slides are background stories, not exam content: a warm tint of the deck's
+   orange sets them apart, and a small label says so. */
+.slide.history { background-color: color-mix(in srgb, var(--brand-primary) 9%, var(--bg-color)); background-image: radial-gradient(color-mix(in srgb, var(--brand-primary) 16%, var(--bg-pattern)) 1.5px, transparent 1.5px); background-size: 36px 36px; }
+.not-examined { position: absolute; top: 62px; right: 88px; margin: 0; padding: 5px 14px; border: 1px solid color-mix(in srgb, var(--brand-primary) 35%, transparent); border-radius: 999px; font: 600 15px var(--font-mono); letter-spacing: .1em; text-transform: uppercase; color: var(--text-secondary); }
+
+/* Story slides: photographs of the scientists and their apparatus (images/) beside a short
+   account. Photos sit to the left of the text, or in a row above it with .band. The
+   credits line under the story links each photo to its source. */
+.story { flex: 1; min-height: 0; display: grid; grid-template-columns: auto 1fr; gap: 50px; align-items: center; }
+.story.band { grid-template-columns: 1fr; gap: 30px; align-content: center; }
+.story-photos { display: flex; align-items: flex-start; gap: 20px; }
+.story.band .story-photos { justify-content: center; gap: 30px; }
+.story-photos figure { margin: 0; }
+.story-photos img { display: block; width: auto; height: var(--photo-h, 360px); border-radius: 16px; border: 1px solid var(--card-border); box-shadow: var(--card-shadow); background: #fff; }
+/* A caption wraps to its photo's width. */
+.story-photos figcaption { width: 0; min-width: 100%; margin-top: 12px; font-size: 21px; line-height: 1.3; color: var(--text-secondary); }
+.story-photos figcaption b { color: var(--text-main); }
+.story .points { gap: 18px; }
+.story .points li { font-size: 30px; }
+.story.band .points { grid-template-columns: repeat(3, 1fr); gap: 16px 36px; }
+.story.band .points li { font-size: 28px; }
+.story .stack { flex: none; }
+.credits { margin: 12px 0 0; font-size: 14px; color: var(--text-secondary); }
+.credits a { color: inherit; }
+
 /* Cards and tables */
 .cards { display: grid; gap: 22px; }
 .cards.calc { align-content: center; }

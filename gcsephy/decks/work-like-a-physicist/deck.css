@@ -162,3 +162,25 @@
   57% { transform: var(--on-floor); animation-timing-function: cubic-bezier(.5, 1, .89, 1); }
   100% { transform: var(--at-rest); }
 }
+
+/* News slides: each mission's case as the front page of an invented paper, with a real
+   photograph (images/case-*.jpg). The credit under each photo links to its source. */
+.masthead { display: flex; align-items: center; gap: 22px; padding-bottom: 14px; border-bottom: 6px double var(--ink); }
+.masthead .paper-name { font: 900 44px/1 var(--display); letter-spacing: -.05em; text-transform: uppercase; }
+.masthead .dateline { margin-left: auto; font: 900 18px Arial, sans-serif; letter-spacing: .16em; text-transform: uppercase; color: var(--muted); }
+.masthead .edition { padding: 6px 14px; border: 2px solid var(--ink); border-radius: 999px; background: var(--accent); font: 900 17px Arial, sans-serif; letter-spacing: .1em; text-transform: uppercase; white-space: nowrap; }
+.front { display: grid; grid-template-columns: 690px 1fr; gap: 50px; margin-top: 28px; }
+.news-photo { margin: 0; min-height: 0; }
+.news-photo img { display: block; width: 100%; height: auto; max-height: 520px; object-fit: cover; border: 2px solid var(--ink); box-shadow: 10px 10px 0 var(--accent); background: #05060c; }
+.news-photo.whole img { height: 520px; object-fit: contain; }
+.news-photo figcaption { margin-top: 24px; font-size: 22px; font-weight: 700; line-height: 1.3; }
+.news-photo .credit { display: block; margin-top: 5px; font-size: 15px; font-weight: 600; color: var(--muted); text-decoration: none; }
+.news-photo .credit a { color: inherit; }
+.story { display: flex; flex-direction: column; min-height: 0; }
+.story .kicker { align-self: flex-start; margin: 0; padding: 6px 13px; background: var(--ink); color: var(--paper); font: 900 17px Arial, sans-serif; letter-spacing: .2em; text-transform: uppercase; }
+.story h2 { margin: 18px 0 20px; font-size: 68px; }
+.story .standfirst { margin: 0; font-size: 30px; font-weight: 700; line-height: 1.3; }
+.story .follow-up { margin: 22px 0 0; padding: 12px 18px 14px; border-left: 8px solid var(--accent); background: var(--card); font-size: 26px; line-height: 1.3; }
+.story .ask { margin: auto 0 0; padding: 14px 20px 16px; border: 2px solid var(--ink); background: var(--accent); font-size: 29px; font-weight: 800; line-height: 1.2; box-shadow: 6px 6px 0 rgba(7, 22, 47, .12); }
+.story .follow-up b, .story .ask b { display: block; margin-bottom: 5px; font: 900 16px Arial, sans-serif; letter-spacing: .18em; text-transform: uppercase; }
+.story .follow-up b { color: var(--muted); }

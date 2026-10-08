@@ -19,20 +19,24 @@ Ten 50-minute lessons for AQA GCSE Physics 4.4.1–4.4.2 and Combined Science: T
 
 Diagrams come from `/gcsephy/decks/atoms-and-radiation/figures.js` (`window.DeckFigures`); rebuild the PDFs after changing a deck figure the workbook uses. The deck's click-through builds are opt-in (`data-animate` on a slide's figure), so figures drawn here are always complete. As in Year 10, every page after the cover prints 1.2× larger (12 pt text, ~9.6 mm writing lines), and grid columns use `minmax(0, 1fr)` because Chrome shrinks the whole print if anything overflows.
 
+The deck has five story slides (11, 13, 18, 22 and 39) with photographs of the scientists, Thomson's tube and Marie Curie's notebook, kept in `../../decks/atoms-and-radiation/images/` and not used in the booklets. Each photo has a caption and a credit linking to its source; change a photo and its credit together, and use only public domain or Creative Commons images that allow reuse. Adding or removing a deck slide shifts the numbers below: update `deck.slides` in the lesson files and this table, then rebuild the PDFs.
+
+The Chadwick photo is from Los Alamos National Laboratory, which asks for this notice to accompany copies: "Unless otherwise indicated, this information has been authored by an employee or employees of the Los Alamos National Security, LLC (LANS), operator of the Los Alamos National Laboratory under Contract No. DE-AC52-06NA25396 with the U.S. Department of Energy. The U.S. Government has rights to use, reproduce, and distribute this information. The public may copy and use this information without charge, provided that this Notice and any statement of authorship are reproduced on all copies. Neither the Government nor LANS makes any warranty, express or implied, or assumes any liability or responsibility for the use of this information."
+
 ## Sequence
 
 | # | Lesson | Deck slides | Spec (Physics · Combined) |
 |---:|---|---|---|
 | 1 | Inside the atom | 3–6 | 4.4.1.1–2 · 6.4.1.1–2 |
 | 2 | Isotopes and ions | 7–8 | 4.4.1.2 · 6.4.1.2 |
-| 3 | From plum pudding to the nucleus | 9–15 | 4.4.1.3 · 6.4.1.3 |
-| 4 | Energy levels and the nucleus | 16–21 | 4.4.1.1–3 · 6.4.1.1–3 |
-| 5 | Radioactive decay (Nuclear Decay sim) | 22–26 | 4.4.2.1 · 6.4.2.1 |
-| 6 | Nuclear equations | 24–27 | 4.4.2.2 · 6.4.2.2 |
-| 7 | Properties and uses of radiation | 28–30 | 4.4.2.1 · 6.4.2.1 |
-| 8 | Half-life and random decay (half-life lab) | 31–33 | 4.4.2.3 · 6.4.2.3 |
-| 9 | Half-life calculations (HT: net decline) | 32 | 4.4.2.3 · 6.4.2.3 |
-| 10 | Contamination and irradiation | 34–36 | 4.4.2.4 · 6.4.2.4 |
+| 3 | From plum pudding to the nucleus | 9–17 | 4.4.1.3 · 6.4.1.3 |
+| 4 | Energy levels and the nucleus | 18–25 | 4.4.1.1–3 · 6.4.1.1–3 |
+| 5 | Radioactive decay (Nuclear Decay sim) | 26–30 | 4.4.2.1 · 6.4.2.1 |
+| 6 | Nuclear equations | 28–31 | 4.4.2.2 · 6.4.2.2 |
+| 7 | Properties and uses of radiation | 32–34 | 4.4.2.1 · 6.4.2.1 |
+| 8 | Half-life and random decay (half-life lab) | 35–37 | 4.4.2.3 · 6.4.2.3 |
+| 9 | Half-life calculations (HT: net decline) | 36 | 4.4.2.3 · 6.4.2.3 |
+| 10 | Contamination and irradiation | 38–41 | 4.4.2.4 · 6.4.2.4 |
 
 The Unit review follows Lesson 10 and adds two GCSE Physics-only extension pages the deck omits: background radiation, half-life hazards and medical uses (4.4.3), and fission and fusion (4.4.4).
 

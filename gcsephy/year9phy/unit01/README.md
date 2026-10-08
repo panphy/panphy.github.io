@@ -16,7 +16,7 @@ Producing evidence that convinces people who were not there. Over eight lessons 
 
 | File | What it is | What to do with it |
 |---|---|---|
-| [`../../decks/work-like-a-physicist/index.html`](../../decks/work-like-a-physicist/index.html) | 50-slide HTML teaching deck covering all eight lessons | Present in a browser; advance to reveal answers and teaching points. A collapsible revision note for students sits beneath most slides (N) |
+| [`../../decks/work-like-a-physicist/index.html`](../../decks/work-like-a-physicist/index.html) | 57-slide HTML teaching deck covering all eight lessons | Present in a browser; advance to reveal answers and teaching points. A collapsible revision note for students sits beneath most slides (N) |
 | `Work Like a Physicist - Year 9 Student Workbook.pdf` | 40-page A4 student workbook, one per student for the whole unit | Print double-sided. Students keep the same workbook for all eight lessons |
 | `Work Like a Physicist - Year 9 Student Workbook (Answers).pdf` | Answer key for the workbook, by lesson, task and workbook page; linked from the companion site's Resources section | Mark with it, or let students self-check. Practical tasks give sample data |
 | `workbook/` | Editable source of the student workbook and its answers (HTML, CSS, JavaScript) | Edit `workbook/assets/content.js` (or `answers.js` for the answers), then run `sh build-pdf.sh` (or `sh build-answers-pdf.sh`). See `workbook/README.md` |
@@ -134,7 +134,7 @@ A working-scientifically unit with no new physics; the practicals are vehicles f
 **Freely swappable**
 
 - **The practicals.** Any categoric investigation works for Lesson 3; any continuous one works for Lesson 4. Use what your prep room actually has.
-- **The case studies** opening each lesson. They are there to buy two minutes of attention. If you have a better story, tell yours, and update any associated image and credit.
+- **The case studies** opening each lesson. They are there to buy two minutes of attention. If you have a better story, tell yours, and update any associated image and credit. In the deck each case has a news slide with a photograph (`images/case-*.jpg` in the deck folder); the credit under the photo links to its source and licence, so change both together. Use only public domain or Creative Commons images that allow reuse.
 - **The timings.** There are none printed on the slides, deliberately — pacing is your call and a visible clock only adds pressure.
 - **Individual tasks.** Most lessons have more material than fifty minutes allows. Cutting a task is expected, not a failure.
 
