@@ -375,6 +375,10 @@ h3 { font-size: 34px; line-height: 1.15; }
 /* History slides are background stories, not exam content: a warm tint of the deck's
    orange sets them apart, and a small label says so. */
 .slide.history { background-color: color-mix(in srgb, var(--brand-primary) 9%, var(--bg-color)); background-image: radial-gradient(color-mix(in srgb, var(--brand-primary) 16%, var(--bg-pattern)) 1.5px, transparent 1.5px); background-size: 36px 36px; }
+/* Presenting fullscreen, the page around the slide takes the same tint, so the colour
+   reaches the screen edges when the screen is not 16:9. */
+body.is-fullscreen { transition: background-color .35s ease; }
+body.is-fullscreen:has(#deck .slide.history.active) { background-color: color-mix(in srgb, var(--brand-primary) 9%, var(--bg-color)); background-image: radial-gradient(color-mix(in srgb, var(--brand-primary) 16%, var(--bg-pattern)) 1px, transparent 1px); }
 .not-examined { position: absolute; top: 62px; right: 88px; margin: 0; padding: 5px 14px; border: 1px solid color-mix(in srgb, var(--brand-primary) 35%, transparent); border-radius: 999px; font: 600 15px var(--font-mono); letter-spacing: .1em; text-transform: uppercase; color: var(--text-secondary); }
 
 /* Story slides: photographs of the scientists and their apparatus (images/) beside a short
