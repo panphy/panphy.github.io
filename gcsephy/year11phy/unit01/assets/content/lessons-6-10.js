@@ -18,7 +18,7 @@
       big: "Radium-226 decays and becomes radon, a completely different element. How can we predict exactly which nucleus it turns into?",
       goals: ["use the symbols for alpha, beta, gamma and neutron radiation", "balance a nuclear equation using mass numbers and atomic numbers", "work out the new nucleus after alpha or beta decay", "explain the effect of each decay on the mass and charge of the nucleus"],
       keywords: ["nuclear equation", "parent nucleus", "daughter nucleus", "mass number", "atomic number", "balance"],
-      deck: { slides: "24–27", text: "Alpha, beta and gamma equations, and the ‘What changes?’ table.", sim: SIM_DECAY },
+      deck: { slides: "28–31", text: "Alpha, beta and gamma equations, and the ‘What changes?’ table.", sim: SIM_DECAY },
       doNow: [
         ["What is an alpha particle made of?", "2 protons and 2 neutrons (a helium nucleus)."],
         ["What happens in the nucleus in beta decay?", "A neutron turns into a proton, and a fast electron is emitted."],
@@ -71,7 +71,7 @@
       big: "A smoke alarm uses alpha radiation, a paper mill uses beta and a hospital uses gamma. Why not use the same radiation for all three?",
       goals: ["compare the ionising power, range in air and penetration of alpha, beta and gamma", "explain why more ionising radiation is less penetrating", "identify radiation from absorber data", "choose a suitable source for a use and justify the choice"],
       keywords: ["ionising", "ion", "penetration", "range", "absorbed", "smoke alarm", "thickness gauge", "tracer"],
-      deck: { slides: "28–30", text: "Comparing alpha, beta and gamma, penetration, and choosing a source.", sim: SIM_DECAY },
+      deck: { slides: "32–34", text: "Comparing alpha, beta and gamma, penetration, and choosing a source.", sim: SIM_DECAY },
       doNow: [
         [`Complete: ${N(210, 84, "Po")} → ${N(206, 82, "Pb")} + ?`, `${ALPHA} (an alpha particle)`],
         ["What happens to the atomic number in beta decay?", "It increases by 1."],
@@ -118,7 +118,7 @@
       big: "You cannot predict when one nucleus will decay. So how can we say that half of a sample of iodine-131 will be left after 8 days?",
       goals: ["explain why decay is random but a large sample is predictable", "define half-life in two ways", "find the half-life from a decay curve", "plot a decay curve from data"],
       keywords: ["half-life", "random", "decay curve", "sample", "count rate", "activity"],
-      deck: { slides: "31–33", text: "Half-life, using half-life and random decay.", sim: SIM_DECAY },
+      deck: { slides: "35–37", text: "Half-life, using half-life and random decay.", sim: SIM_DECAY },
       doNow: [
         ["Which radiation is stopped by paper?", "Alpha."],
         ["What does a count rate measure?", "The number of decays a detector records each second."],
@@ -179,7 +179,7 @@
       big: "A hospital uses iodine-131, with a half-life of 8 days. How long before less than 1% of it is left, and why does that matter?",
       goals: ["count half-lives to find how much is left", "find a half-life from data", "find how long it takes to fall to a given value", "(Higher) work out the net decline as a ratio"],
       keywords: ["half-life", "number of half-lives", "initial activity", "fraction remaining", "net decline", "ratio"],
-      deck: { slides: "32", text: "Using half-life: from a graph, counting halvings, and as a ratio." },
+      deck: { slides: "36", text: "Using half-life: from a graph, counting halvings, and as a ratio." },
       doNow: [
         ["Define half-life.", "The time for the number of unstable nuclei (or the count rate) to halve."],
         ["A count rate falls from 400 to 200 in 8 days. What is the half-life?", "8 days."],
@@ -226,7 +226,7 @@
       big: "Supermarkets can sell food treated with gamma rays to kill bacteria. Does eating it make you radioactive?",
       goals: ["explain the difference between irradiation and contamination", "compare the hazards of alpha, beta and gamma inside and outside the body", "describe precautions for working with radioactive sources", "explain why studies of radiation effects are published and peer reviewed"],
       keywords: ["irradiation", "contamination", "hazard", "precaution", "dosimeter", "peer review"],
-      deck: { slides: "34–36", text: "Contamination and irradiation, the quick check and the key words." },
+      deck: { slides: "38–41", text: "Contamination and irradiation, the quick check and the key words." },
       doNow: [
         ["A source has a half-life of 3 hours. What fraction is left after 9 hours?", "⅛ (3 half-lives)."],
         ["Which radiation is the most penetrating?", "Gamma."],
