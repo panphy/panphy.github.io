@@ -2823,7 +2823,7 @@
         startOfflineReadinessMonitor();
     </script>
     <script>
-        // Hero trace: y(t) for f1 = 2.0 Hz and f2 = 2.3 Hz over a 2 s window, replayed at 0.1x speed
+        // Hero trace: waves of f1 = 2.0 Hz and f2 = 2.3 Hz over a 2 s window, drifting to the right at 0.1x speed
         (function () {
             var svg = document.getElementById('scope-trace');
             var wave1 = document.getElementById('scope-wave-1');
@@ -2845,7 +2845,7 @@
                 var d2 = '';
                 var dSum = '';
                 for (var x = 0; x <= WIDTH; x += 4) {
-                    var t = start + (x / WIDTH) * WINDOW_S;
+                    var t = (x / WIDTH) * WINDOW_S - start;
                     var y1 = AMPLITUDE * Math.sin(2 * Math.PI * F1 * t);
                     var y2 = AMPLITUDE * Math.sin(2 * Math.PI * F2 * t);
                     var cmd = x === 0 ? 'M' : 'L';
