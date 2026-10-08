@@ -612,6 +612,8 @@
     els.count.value = state.count;
     document.querySelectorAll("[data-count]").forEach((button) => button.setAttribute("aria-pressed", String(Number(button.dataset.count) === state.count)));
     document.querySelectorAll("[data-course]").forEach((button) => button.setAttribute("aria-pressed", String(button.dataset.course === state.course)));
+    // The exam statistics deck has a view for each course; open the one that matches the switch.
+    $("stats-link").href = `exam-stats/?course=${state.course === "combined" ? "trilogy" : "physics"}`;
     document.querySelectorAll("[data-target]").forEach((button) => button.setAttribute("aria-pressed", String(button.dataset.target === state.target)));
     document.querySelectorAll("[data-mode]").forEach((button) => button.setAttribute("aria-pressed", String(button.dataset.mode === state.mode)));
     els.randomOptions.hidden = state.mode !== "random";
