@@ -288,8 +288,6 @@ Evaporation: at any temperature, from the surface only."
 185,Particle model of matter,Changes of state,Combined,7,Asked in the 2020–23 papers,Explain why mass is conserved during a change of state.,The number of particles stays the same.
 186,Particle model of matter,Changes of state,Combined,7,Asked in the 2020–23 papers,What is a physical change?,A change in which no new substance is made and that can be reversed.
 187,Particle model of matter,Changes of state,Combined,9,,Are physical changes reversible?,Yes
-188,Particle model of matter,Changes of state,Combined,9,,What is a chemical change?,A change in which new substances are made.
-189,Particle model of matter,Changes of state,Combined,9,,Are chemical changes reversible?,Usually not
 700,Particle model of matter,Changes of state,Combined,9,,Name the change of state from solid to liquid.,Melting
 701,Particle model of matter,Changes of state,Combined,9,,Name the change of state from liquid to solid.,Freezing
 702,Particle model of matter,Changes of state,Combined,9,,Name the two ways a liquid can change into a gas.,Boiling and evaporating
@@ -374,11 +372,8 @@ Specific latent heat: energy to change the state of 1 kg."
 249,Atomic structure,The development of the model of the atom,Combined,9,,State what the alpha particle scattering experiment showed about the nucleus.,"The mass of the atom is concentrated in a very small, positively charged nucleus."
 250,Atomic structure,The development of the model of the atom,Combined,7,Standard explanation,Explain how the alpha particle scattering experiment showed that the nucleus is very small.,Most alpha particles passed straight through; only a very few were scattered backwards.
 251,Atomic structure,The development of the model of the atom,Combined,7,Standard explanation,Explain how the alpha particle scattering experiment showed that the nucleus is positively charged.,"Some positive alpha particles were deflected or scattered backwards, repelled by the nucleus."
-252,Atomic structure,The development of the model of the atom,Combined,9,,Name the model of the atom that replaced the plum pudding model.,The nuclear model
 253,Atomic structure,The development of the model of the atom,Combined,9,,Name the model of the atom that came after the nuclear model.,The Bohr model (Bohr adapted the nuclear model)
 254,Atomic structure,The development of the model of the atom,Combined,7,Asked in the 2020–23 papers,Describe the Bohr model of the atom.,A small positive nucleus with electrons orbiting at specific distances.
-255,Atomic structure,The development of the model of the atom,Combined,9,,Name the second subatomic particle to be discovered.,The proton
-256,Atomic structure,The development of the model of the atom,Combined,9,,Name the third subatomic particle to be discovered.,The neutron
 718,Atomic structure,The development of the model of the atom,Combined,9,,What were atoms thought to be before the electron was discovered?,Tiny spheres that could not be divided.
 719,Atomic structure,The development of the model of the atom,Combined,9,,Most alpha particles passed straight through the gold foil. State what this showed.,Most of the atom is empty space.
 720,Atomic structure,The development of the model of the atom,Combined,9,,Explain why the alpha particle scattering experiment led to the plum pudding model being replaced.,It could not explain why some alpha particles were deflected through large angles.
@@ -482,7 +477,6 @@ Weapon: uncontrolled, causing an explosion."
 326,Forces,Gravity,Combined,9,,State the standard unit of mass.,Kilogram (kg)
 327,Forces,Gravity,Combined,7,Standard unit,State the standard unit of gravitational field strength.,Newton per kilogram (N/kg)
 328,Forces,Gravity,Combined,9,,State the mathematical relationship between weight and mass.,Weight is directly proportional to mass (W ∝ m).
-329,Forces,Gravity,Combined,9,,What does the symbol ∝ mean?,Is directly proportional to
 330,Forces,Gravity,Combined,9,,Describe how the weight of an object depends on its mass.,Doubling the mass doubles the weight (direct proportion).
 331,Forces,Gravity,Combined,7,Asked in the 2020–23 papers,What is the centre of mass of an object?,The single point where the weight of the object can be considered to act.
 744,Forces,Gravity,Combined,9,On the equations sheet,"State the equation linking weight, mass and gravitational field strength.","weight = mass × gravitational field strength
@@ -530,7 +524,6 @@ Weapon: uncontrolled, causing an explosion."
 Non-linear: a curve."
 361,Forces,Force and extension (RP),Combined,7,Core practical fact,Investigating how force affects the extension of a spring: name the independent variable.,Force applied to the spring
 362,Forces,Force and extension (RP),Combined,7,Core practical fact,Investigating how force affects the extension of a spring: name the dependent variable.,Extension of the spring
-363,Forces,Force and extension (RP),Combined,9,,State the extension of a spring when no force is applied.,Zero
 364,Forces,Force and extension (RP),Combined,7,Core practical fact,Describe how to convert the mass hung on a spring into a weight.,Multiply the mass in kg by the gravitational field strength (9.8 N/kg).
 366,Forces,Force and extension (RP),Combined,9,,"A student records the whole length of a spring, not its extension. Name the type of error this causes.",A systematic error (every value is too large).
 367,Forces,Force and extension (RP),Combined,9,,The force on a spring is doubled. State the effect on its extension.,It doubles (below the limit of proportionality).
@@ -611,7 +604,6 @@ Aeroplane: about 250 m/s"
 (F = m a)"
 776,Forces,Newton's laws,Combined,7,What a quantity depends on,"For a constant force, state how acceleration depends on mass.",Acceleration is inversely proportional to mass.
 777,Forces,Newton's laws,Combined,9,,A car travels at a steady speed along a straight road. Compare the driving force and the resistive forces.,They are balanced (equal and opposite).
-778,Forces,Newton's laws,Combined,9,,What does the symbol ~ mean?,Approximately
 779,Forces,Newton's laws,Combined,9,,Give an example of Newton's third law.,You push on a wall; the wall pushes back on you with an equal and opposite force.
 410,Forces,"Force, mass and acceleration (RP)",Combined,7,Core practical fact,Force and acceleration of a trolley: name the independent variable.,Force applied to the trolley
 411,Forces,"Force, mass and acceleration (RP)",Combined,7,Core practical fact,Force and acceleration of a trolley: name the dependent variable.,Acceleration of the trolley
@@ -814,8 +806,6 @@ It absorbs the red light and has no blue light to reflect."
 825,Waves,(S) Black body radiation,Separate,9,,Give three factors that the temperature of the Earth depends on.,"How fast it absorbs radiation
 How fast it emits radiation
 How much radiation it reflects into space"
-548,Magnetism and electromagnetism,Permanent and induced magnetism,Combined,9,,What does ‘attract’ mean?,A force pulls the two objects towards each other.
-549,Magnetism and electromagnetism,Permanent and induced magnetism,Combined,9,,What does ‘repel’ mean?,A force pushes the two objects away from each other.
 550,Magnetism and electromagnetism,Permanent and induced magnetism,Combined,9,,Name the two ends of a magnet.,The north pole and the south pole
 551,Magnetism and electromagnetism,Permanent and induced magnetism,Combined,9,,State what a north pole does to another north pole.,It repels it.
 552,Magnetism and electromagnetism,Permanent and induced magnetism,Combined,9,,State what a north pole does to a south pole.,It attracts it.
@@ -894,7 +884,6 @@ How much radiation it reflects into space"
 840,Magnetism and electromagnetism,"(S) Induced potential, transformers and the National Grid",Separate,7,Asked in the 2020–23 papers,Describe the potential difference–time graph for an alternator.,It alternates: a wave going equally above and below zero.
 841,Magnetism and electromagnetism,"(S) Induced potential, transformers and the National Grid",Separate,7,Asked in the 2020–23 papers,Describe the potential difference–time graph for a dynamo.,It rises and falls but never goes below zero.
 608,Space physics,"(S) Solar System, stars, orbits and satellites",Separate,9,,Name the main objects in our Solar System.,"The Sun, eight planets, dwarf planets, moons, asteroids and comets"
-609,Space physics,"(S) Solar System, stars, orbits and satellites",Separate,9,,Name the eight planets in order from the Sun.,"Mercury, Venus, Earth, Mars, Jupiter, Saturn, Uranus and Neptune"
 610,Space physics,"(S) Solar System, stars, orbits and satellites",Separate,9,,What is a galaxy?,A huge collection of stars held together by gravity.
 611,Space physics,"(S) Solar System, stars, orbits and satellites",Separate,9,,Give the name of our galaxy.,The Milky Way
 612,Space physics,"(S) Solar System, stars, orbits and satellites",Separate,9,,Name a cloud of dust and gas where stars form.,A nebula
@@ -937,7 +926,6 @@ Moons and artificial satellites orbit planets."
 854,Working scientifically,"Precision, accuracy and uncertainty",Combined,9,,State how the mean of a set of repeated readings is calculated.,"Add up the readings, then divide by the number of readings."
 855,Working scientifically,"Precision, accuracy and uncertainty",Combined,9,,Define range.,The maximum and minimum values of the independent or dependent variables.
 856,Working scientifically,"Precision, accuracy and uncertainty",Combined,7,Asked in the 2020–23 papers,State how uncertainty is calculated from a set of repeated readings.,Uncertainty = (largest reading − smallest reading) ÷ 2
-857,Working scientifically,"Precision, accuracy and uncertainty",Combined,9,,Describe how a final result should be written when its uncertainty is known.,"As mean ± uncertainty, with a unit, e.g. 1.22 ± 0.03 s."
 858,Working scientifically,"Precision, accuracy and uncertainty",Combined,9,,Three readings are close together but far from the true value. Describe them using the words precise and accurate.,They are precise but not accurate.
 859,Working scientifically,"Precision, accuracy and uncertainty",Combined,9,,Do repeated measurements help you judge precision or accuracy?,Precision
 860,Working scientifically,Random and systematic errors,Combined,7,Core fact,Describe the effect of a random error on a set of readings.,It scatters the readings unpredictably.
@@ -959,27 +947,18 @@ Moons and artificial satellites orbit planets."
 875,Working scientifically,Variables and planning,Combined,9,,What is categoric data?,Data sorted into named groups or types.
 876,Working scientifically,Variables and planning,Combined,9,,Give two examples of continuous variables.,"Any two from: length, time, temperature, mass"
 877,Working scientifically,Variables and planning,Combined,9,,Give two examples of categoric variables.,"Any two from: material, colour, brand, type of surface"
-878,Working scientifically,Variables and planning,Combined,9,,State the form of a good research question.,"""How does X affect Y?""
-(X: independent variable, Y: dependent variable)"
-880,Working scientifically,Variables and planning,Combined,9,,Describe what a good method allows another scientist to do.,Repeat the investigation by following its steps.
 881,Working scientifically,Tables and graphs,Combined,9,,State where the units should be written in a results table.,In the column headings.
 882,Working scientifically,Tables and graphs,Combined,7,Core fact,Name the type of graph used when the independent variable is continuous.,A line graph
 883,Working scientifically,Tables and graphs,Combined,9,,Name the type of graph used when the independent variable is categoric.,A bar chart
-884,Working scientifically,Tables and graphs,Combined,9,,State which variable decides the type of graph to draw.,The independent variable
 885,Working scientifically,Tables and graphs,Combined,7,Core fact,State which variable is plotted on the x-axis of a graph.,The independent variable
 886,Working scientifically,Tables and graphs,Combined,7,Core fact,State which variable is plotted on the y-axis of a graph.,The dependent variable
 887,Working scientifically,Tables and graphs,Combined,7,Core fact,State two things every axis of a graph must have.,A label (the quantity) and a unit
 888,Working scientifically,Tables and graphs,Combined,9,,Describe a good scale for the axis of a graph.,"It uses most of the grid and goes up in equal, easy-to-read steps."
-889,Working scientifically,Tables and graphs,Combined,9,,State how the points on a line graph should be plotted.,As small crosses.
-890,Working scientifically,Tables and graphs,Combined,9,,Explain why the bars on a bar chart have gaps between them.,"The categories are separate, with no values in between."
-891,Working scientifically,Tables and graphs,Combined,9,,Which are plotted on a graph: individual trials or means?,The means
 892,Working scientifically,"Best-fit lines, anomalous results and conclusions",Combined,9,,What is a line of best fit?,One smooth line showing the overall trend of the data.
 893,Working scientifically,"Best-fit lines, anomalous results and conclusions",Combined,7,Core practical fact,Describe how a line of best fit should be drawn.,As one thin line with points balanced above and below it.
 894,Working scientifically,"Best-fit lines, anomalous results and conclusions",Combined,9,,State what must [not] be done when drawing a line of best fit.,Joining the points dot-to-dot.
 895,Working scientifically,"Best-fit lines, anomalous results and conclusions",Combined,7,Definition that mark schemes ask for,What is an anomalous result?,A result that does not fit the pattern of the others.
 896,Working scientifically,"Best-fit lines, anomalous results and conclusions",Combined,7,Core practical fact,Describe what you should do when you find an anomalous result.,"Check the recording and plotting, then repeat the measurement. If it is still anomalous, leave it out of the mean and the line of best fit."
-897,Working scientifically,"Best-fit lines, anomalous results and conclusions",Combined,9,,What is a trend?,The overall relationship shown by the data.
 898,Working scientifically,"Best-fit lines, anomalous results and conclusions",Combined,9,,State what a good conclusion must include.,"The relationship between the variables, supported by values with units."
 899,Working scientifically,"Best-fit lines, anomalous results and conclusions",Combined,7,Core fact,Describe the graph of two quantities that are directly proportional.,A straight line through the origin.
-901,Working scientifically,"Best-fit lines, anomalous results and conclusions",Combined,9,,State the three parts of a good evaluation point.,"The problem, its effect on the data, and an improvement that fixes it."
 902,Working scientifically,"Best-fit lines, anomalous results and conclusions",Combined,9,,What is peer review?,"When other scientists check the method, the evidence and the claims."
