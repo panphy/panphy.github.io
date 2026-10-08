@@ -166,7 +166,6 @@ body.is-fullscreen .controls { left: 50%; }
   --rn-border: 2px solid var(--ink);
   --rn-radius: 0px;
   --rn-accent: var(--cyan);
-  --rn-mark: var(--hi);
   --rn-callout: var(--note);
   --rn-trap: var(--wrong);
   --rn-tip: var(--right);

@@ -223,7 +223,6 @@ body.is-fullscreen .stage { left: 0; }
   --rn-border: 1px solid var(--input-border);
   --rn-radius: 14px;
   --rn-accent: var(--brand-accent);
-  --rn-mark: color-mix(in srgb, var(--brand-accent), transparent 72%);
   --rn-callout: var(--muted-bg);
   --rn-trap: var(--brand-primary);
   --rn-tip: var(--brand-accent-strong);
