@@ -64,7 +64,7 @@
             --bg-color: #F8F6F1;
             --bg-pattern: #EDE9E0;
             --text-main: #1B1B1B;
-            --text-secondary: #6B6560;
+            --text-secondary: #57524D;
 
             --brand-primary: #C2410C;
             --brand-secondary: #EA580C;
@@ -88,7 +88,13 @@
             --status-error: #dc2626;
 
             --section-num-color: rgba(194, 65, 12, 0.06);
+            --section-num-strong: rgba(194, 65, 12, 0.24);
             --divider-color: #E8E4DD;
+
+            --tint-neutral: #EFEBE2;
+            --tint-primary: #FBE9DF;
+            --tint-accent: #DDF0EC;
+            --scope-grid: rgba(27, 27, 27, 0.08);
         }
 
         [data-theme="dark"] {
@@ -98,7 +104,7 @@
             --bg-color: #111110;
             --bg-pattern: #1A1A18;
             --text-main: #EDEBE8;
-            --text-secondary: #9C9890;
+            --text-secondary: #B9B4AA;
 
             --brand-primary: #FB923C;
             --brand-secondary: #F97316;
@@ -122,7 +128,13 @@
             --status-error: #ff7d7d;
 
             --section-num-color: rgba(251, 146, 60, 0.05);
+            --section-num-strong: rgba(251, 146, 60, 0.3);
             --divider-color: #2A2A28;
+
+            --tint-neutral: #222220;
+            --tint-primary: #2B1D12;
+            --tint-accent: #12292A;
+            --scope-grid: rgba(242, 240, 236, 0.08);
         }
 
         /* ========================================
@@ -326,59 +338,244 @@
         /* ========================================
            Hero Header
            ======================================== */
-        header {
-            display: flex;
-            flex-direction: column;
+        .hero {
+            display: grid;
+            grid-template-columns: minmax(0, 1.05fr) minmax(0, 0.95fr);
+            gap: clamp(2rem, 5vw, 4.5rem);
             align-items: center;
-            justify-content: center;
-            padding: 6.5rem 1.5rem 2.5rem;
-            text-align: center;
-            position: relative;
+            max-width: 1180px;
+            margin: 0 auto;
+            padding: 7.5rem 1.5rem 3.5rem;
         }
 
-        .logo {
-            height: 60px;
-            width: auto;
-            margin-bottom: 1.1rem;
-            filter: drop-shadow(0 2px 8px rgba(0, 0, 0, 0.08));
+        .hero-copy > * {
             animation: heroFadeUp 0.8s ease-out both;
         }
 
-        header h1 {
-            font-family: var(--font-display);
-            font-size: 3.8rem;
-            font-weight: 400;
-            margin: 0;
-            letter-spacing: -0.02em;
+        .hero-copy > :nth-child(2) { animation-delay: 0.1s; }
+        .hero-copy > :nth-child(3) { animation-delay: 0.2s; }
+        .hero-copy > :nth-child(4) { animation-delay: 0.3s; }
+
+        .hero-brand {
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+            margin-bottom: 1.4rem;
+        }
+
+        .logo {
+            width: auto;
+            height: 52px;
+            filter: drop-shadow(0 2px 8px rgba(0, 0, 0, 0.08));
+        }
+
+        .hero-eyebrow {
             color: var(--brand-primary);
-            line-height: 1.1;
-            animation: heroFadeUp 0.8s ease-out 0.12s both;
+            font-family: var(--font-mono);
+            font-size: 0.78rem;
+            font-weight: 600;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
         }
 
-        header h1.gradient-text {
-            background: linear-gradient(135deg, var(--brand-primary), var(--brand-accent));
-            -webkit-background-clip: text;
-            background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-
-        .hero-rule {
-            width: 48px;
-            height: 2px;
-            background: var(--brand-primary);
-            margin: 1.1rem auto;
-            border-radius: 1px;
-            animation: heroFadeUp 0.8s ease-out 0.24s both;
-            transition: background-color 0.4s ease;
-        }
-
-        header p {
-            font-size: 1.15rem;
-            color: var(--text-secondary);
-            max-width: 560px;
+        .hero h1 {
             margin: 0;
+            color: var(--text-main);
+            font-family: var(--font-display);
+            font-size: clamp(4rem, 10.5vw, 8.6rem);
+            font-weight: 400;
+            line-height: 0.9;
+            letter-spacing: -0.03em;
+        }
+
+        .hero h1 em {
+            display: block;
+            color: var(--brand-primary);
+        }
+
+        .hero-tagline {
+            max-width: 26ch;
+            margin: 1.6rem 0 0;
+            font-size: clamp(1.15rem, 1.9vw, 1.45rem);
+            font-weight: 600;
+            line-height: 1.35;
+        }
+
+        .hero-facts {
+            display: flex;
+            flex-wrap: wrap;
+            margin: 2.2rem 0 0;
+            padding: 0;
+            list-style: none;
+            border-top: 2px solid var(--text-main);
+            transition: border-color 0.4s ease;
+        }
+
+        .hero-facts li {
+            margin-right: 1.8rem;
+            padding: 0.9rem 1.8rem 0 0;
+            border-right: 1px solid var(--card-border);
+        }
+
+        .hero-facts li:last-child {
+            margin-right: 0;
+            border-right: 0;
+        }
+
+        .hero-facts strong {
+            display: block;
+            font-family: var(--font-display);
+            font-size: 2.4rem;
+            font-weight: 400;
+            line-height: 1;
+        }
+
+        .hero-facts span {
+            color: var(--text-secondary);
+            font-family: var(--font-mono);
+            font-size: 0.72rem;
             font-weight: 500;
-            animation: heroFadeUp 0.8s ease-out 0.32s both;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+        }
+
+        /* Hero trace: a 2 s window of two waves and their sum, replayed at one tenth speed. */
+        .scope {
+            position: relative;
+            display: block;
+            color: var(--text-main);
+            text-decoration: none;
+            background: var(--card-bg);
+            border: 2px solid var(--text-main);
+            border-radius: 22px;
+            box-shadow: 0 24px 60px rgba(0, 0, 0, 0.12);
+            animation: heroFadeUp 0.8s ease-out 0.25s both;
+            transition: background-color 0.4s ease, border-color 0.4s ease, transform 0.25s ease;
+            touch-action: manipulation;
+        }
+
+        .scope:hover {
+            transform: translateY(-4px);
+        }
+
+        .scope:focus-visible {
+            outline: 3px solid color-mix(in srgb, var(--brand-primary) 55%, transparent);
+            outline-offset: 4px;
+        }
+
+        .scope-head,
+        .scope-foot {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 0.5rem 1rem;
+            padding: 0.85rem 1.2rem;
+            font-family: var(--font-mono);
+            font-size: 0.72rem;
+            font-weight: 600;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+        }
+
+        .scope-head {
+            border-bottom: 1px solid var(--card-border);
+        }
+
+        .scope-foot {
+            border-top: 1px solid var(--card-border);
+        }
+
+        .scope-scale {
+            color: var(--text-secondary);
+            font-weight: 500;
+            letter-spacing: 0.04em;
+            text-transform: none;
+            white-space: nowrap;
+        }
+
+        .scope svg {
+            display: block;
+            width: 100%;
+            height: auto;
+            fill: none;
+        }
+
+        .scope-grid {
+            stroke: var(--scope-grid);
+        }
+
+        .scope-axis {
+            stroke: var(--text-secondary);
+            stroke-dasharray: 4 5;
+        }
+
+        .scope-wave {
+            stroke-linecap: round;
+            stroke-linejoin: round;
+        }
+
+        .scope-wave-1 {
+            stroke: var(--brand-primary);
+            stroke-width: 2;
+            opacity: 0.75;
+        }
+
+        .scope-wave-2 {
+            stroke: var(--brand-accent);
+            stroke-width: 2;
+            opacity: 0.75;
+        }
+
+        .scope-wave-sum {
+            stroke: var(--text-main);
+            stroke-width: 4;
+        }
+
+        .scope-readouts {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.4rem 1.3rem;
+            font-size: 0.82rem;
+            letter-spacing: 0.02em;
+            text-transform: none;
+        }
+
+        .scope-readouts i {
+            display: inline-block;
+            width: 14px;
+            height: 3px;
+            margin-right: 0.4rem;
+            vertical-align: middle;
+            border-radius: 2px;
+        }
+
+        .scope-key-1 { background: var(--brand-primary); }
+        .scope-key-2 { background: var(--brand-accent); }
+        .scope-key-sum { background: var(--text-main); }
+
+        .scope-cta {
+            color: var(--brand-primary);
+            white-space: nowrap;
+        }
+
+        .scope-cta::after {
+            content: '\2192';
+            margin-left: 0.5em;
+        }
+
+        .scope-note {
+            position: absolute;
+            top: -18px;
+            right: 26px;
+            padding: 0.4rem 0.75rem;
+            color: var(--bg-color);
+            background: var(--text-main);
+            border-radius: 9px;
+            font-family: var(--font-mono);
+            font-size: 0.85rem;
+            font-weight: 600;
+            transform: rotate(3deg);
+            transition: background-color 0.4s ease, color 0.4s ease;
         }
 
         /* ========================================
@@ -538,17 +735,37 @@
             transition: color 0.4s ease;
         }
 
+        .app-section[data-section]::before {
+            content: none;
+        }
+
         .section-heading {
             display: grid;
             grid-template-columns: minmax(0, 1fr) minmax(260px, 410px);
             gap: 2rem;
             align-items: end;
             margin-bottom: 2rem;
+            padding-bottom: 1.1rem;
+            border-bottom: 2px solid var(--text-main);
             position: relative;
+            transition: border-color 0.4s ease;
         }
 
         .section-title-block {
+            display: grid;
+            grid-template-columns: auto minmax(0, 1fr);
+            column-gap: 1.1rem;
+            align-items: end;
             min-width: 0;
+        }
+
+        .section-num {
+            grid-row: 1 / span 2;
+            color: var(--section-num-strong);
+            font-family: var(--font-display);
+            font-size: clamp(3.2rem, 7vw, 5rem);
+            line-height: 0.82;
+            user-select: none;
         }
 
         .section-eyebrow {
@@ -556,7 +773,7 @@
             margin: 0 0 0.35rem 0.1rem;
             color: var(--brand-primary);
             font-family: var(--font-mono);
-            font-size: 0.67rem;
+            font-size: 0.74rem;
             font-weight: 600;
             letter-spacing: 0.12em;
             text-transform: uppercase;
@@ -564,14 +781,16 @@
 
         .section h2 {
             font-family: var(--font-display);
-            font-size: 2.35rem;
+            font-size: clamp(2.1rem, 5vw, 3.6rem);
             font-weight: 400;
+            line-height: 1;
             margin: 0;
             color: var(--text-main);
             position: relative;
             display: flex;
+            flex-wrap: wrap;
             align-items: center;
-            gap: 12px;
+            gap: 4px 12px;
         }
 
         .section h2 .section-label {
@@ -596,7 +815,7 @@
             margin: 0;
             max-width: 330px;
             color: var(--text-secondary);
-            font-size: 0.88rem;
+            font-size: 0.95rem;
             line-height: 1.6;
         }
 
@@ -625,19 +844,15 @@
         }
 
         .card {
-            --card-icon-bg: rgba(194, 65, 12, 0.1);
-            --card-icon-bg: color-mix(in srgb, var(--brand-primary) 10%, var(--card-bg));
-            --card-icon-color: var(--brand-primary);
+            --card-tint: var(--tint-neutral);
             background: var(--card-bg);
             border: 1px solid var(--card-border);
-            border-radius: 16px;
-            padding: 1.35rem;
+            border-radius: 20px;
             display: flex;
             flex-direction: column;
             box-shadow: var(--card-shadow);
             position: relative;
             overflow: hidden;
-            min-height: 248px;
             color: var(--text-main);
             text-decoration: none;
             transition: opacity 0.4s ease-out,
@@ -646,6 +861,9 @@
                         box-shadow 0.3s ease,
                         background-color 0.4s ease;
         }
+
+        .grid > .card:nth-child(3n + 2) { --card-tint: var(--tint-primary); }
+        .grid > .card:nth-child(3n) { --card-tint: var(--tint-accent); }
 
         .card[hidden] {
             display: none;
@@ -671,7 +889,7 @@
         .card:hover {
             transform: translateY(-5px);
             box-shadow: var(--card-hover-shadow);
-            border-color: color-mix(in srgb, var(--card-icon-color) 55%, var(--card-border));
+            border-color: var(--text-main);
         }
 
         .js .card.revealed:hover {
@@ -683,44 +901,73 @@
             outline-offset: 3px;
         }
 
-        .card-top {
+        /* Card artwork: one small drawing of what the app does. */
+        .card-art {
+            background: var(--card-tint);
+            border-bottom: 1px solid var(--card-border);
+            transition: background-color 0.4s ease, border-color 0.4s ease;
+        }
+
+        .card-art svg {
+            display: block;
+            width: 100%;
+            height: auto;
+            fill: none;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+        }
+
+        .a-ink { stroke: var(--text-main); }
+        .a-pri { stroke: var(--brand-primary); }
+        .a-acc { stroke: var(--brand-accent); }
+        .a-mut { stroke: var(--text-secondary); }
+        .a-ink-f { fill: var(--text-main); }
+        .a-pri-f { fill: var(--brand-primary); }
+        .a-acc-f { fill: var(--brand-accent); }
+        .a-mut-f { fill: var(--text-secondary); }
+        .a-pri-soft { fill: color-mix(in srgb, var(--brand-primary) 22%, var(--card-bg)); }
+        .a-acc-soft { fill: color-mix(in srgb, var(--brand-accent) 28%, var(--card-bg)); }
+        .a-paper { fill: var(--card-bg); }
+
+        .card-art text {
+            stroke: none;
+            font-family: var(--font-mono);
+            font-weight: 600;
+        }
+
+        .a-t { fill: var(--text-secondary); font-size: 11px; }
+        .a-ts { fill: var(--text-main); font-size: 12px; }
+        .a-clock { fill: var(--text-main); font-size: 40px; }
+        .a-word { font-size: 30px; }
+        .a-ascii { font-size: 13px; }
+
+        .card-art .a-serif,
+        .card-art .a-math {
+            fill: var(--text-main);
+            font-family: var(--font-display);
+            font-weight: 400;
+        }
+
+        .a-serif { font-size: 21px; }
+        .a-math { font-size: 19px; font-style: italic; }
+
+        .card-meta {
             display: flex;
             align-items: center;
-            gap: 0.7rem;
-            min-height: 48px;
-            margin-bottom: 1.35rem;
-            padding-right: 6rem;
-        }
-
-        .card-icon {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            width: 46px;
-            height: 46px;
-            flex: 0 0 46px;
-            color: var(--card-icon-color);
-            background: var(--card-icon-bg);
-            border: 1px solid color-mix(in srgb, var(--card-icon-color) 15%, transparent);
-            border-radius: 13px;
-            font-family: var(--font-mono);
-            font-size: 0.78rem;
-            font-weight: 600;
-            letter-spacing: -0.02em;
-        }
-
-        .card-icon svg {
-            display: block;
-            width: 30px;
-            height: 30px;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 0.4rem 0.6rem;
+            min-height: 1.6rem;
+            margin: 1.2rem 1.4rem 0;
         }
 
         .card-type {
+            white-space: nowrap;
             color: var(--text-secondary);
             font-family: var(--font-mono);
-            font-size: 0.65rem;
+            font-size: 0.7rem;
             font-weight: 600;
-            letter-spacing: 0.08em;
+            letter-spacing: 0.1em;
             text-transform: uppercase;
         }
 
@@ -729,26 +976,28 @@
             margin-top: 0.6rem;
             color: var(--text-secondary);
             font-family: var(--font-mono);
-            font-size: 0.68rem;
+            font-size: 0.72rem;
             letter-spacing: 0.02em;
         }
 
         .card-body {
             position: relative;
             z-index: 1;
+            margin: 0.5rem 1.4rem 0;
         }
 
         .card h3 {
             font-family: var(--font-display);
-            font-size: 1.45rem;
+            font-size: 1.8rem;
             font-weight: 400;
-            margin: 0 0 0.6rem 0;
+            margin: 0 0 0.5rem 0;
             color: var(--text-main);
-            line-height: 1.3;
+            line-height: 1.15;
+            letter-spacing: -0.01em;
         }
 
         .card p {
-            font-size: 0.9rem;
+            font-size: 0.97rem;
             margin: 0;
             color: var(--text-secondary);
             line-height: 1.6;
@@ -757,23 +1006,16 @@
         .card-offline-pill {
             display: inline-flex;
             align-items: center;
-            gap: 0.3rem;
-            position: absolute;
-            top: 0.8rem;
-            right: 0.8rem;
-            z-index: 2;
-            padding: 0.22rem 0.45rem;
-            border-radius: 6px;
-            border: 1px solid var(--nav-border);
-            background: var(--nav-bg);
-            backdrop-filter: blur(8px);
-            -webkit-backdrop-filter: blur(8px);
+            gap: 0.35rem;
+            padding: 0.25rem 0.55rem;
+            border-radius: 999px;
+            border: 1px solid color-mix(in srgb, currentColor 40%, transparent);
             color: var(--text-secondary);
             font-family: var(--font-mono);
             font-size: 11px;
             line-height: 1.1;
-            font-weight: 500;
-            letter-spacing: 0.04em;
+            font-weight: 600;
+            letter-spacing: 0.06em;
             white-space: nowrap;
             text-transform: uppercase;
         }
@@ -784,8 +1026,8 @@
 
         .card-offline-pill::before {
             content: '';
-            width: 0.34rem;
-            height: 0.34rem;
+            width: 0.38rem;
+            height: 0.38rem;
             border-radius: 50%;
             background: var(--status-check);
             box-shadow: 0 0 0 0 rgba(37, 99, 235, 0.45);
@@ -814,38 +1056,24 @@
         .card-cta {
             display: inline-flex;
             align-items: center;
-            width: 100%;
-            margin-top: auto;
-            padding-top: 1.35rem;
+            margin: auto 1.4rem 0;
+            padding: 1.3rem 0 1.4rem;
             color: var(--brand-primary);
             font-family: var(--font-mono);
-            font-size: 0.75rem;
+            font-size: 0.8rem;
             font-weight: 600;
-            letter-spacing: 0.04em;
+            letter-spacing: 0.08em;
             text-transform: uppercase;
         }
 
         .card-cta::after {
             content: '\2192';
-            margin-left: 0.45rem;
+            margin-left: 0.5rem;
             transition: transform 0.25s ease;
         }
 
         .card:hover .card-cta::after {
             transform: translateX(4px);
-        }
-
-        #simulations .card,
-        #fun .card {
-            --card-icon-bg: rgba(13, 148, 136, 0.11);
-            --card-icon-bg: color-mix(in srgb, var(--brand-accent) 11%, var(--card-bg));
-            --card-icon-color: var(--brand-accent);
-        }
-
-        #for_teachers .card {
-            --card-icon-bg: rgba(234, 88, 12, 0.11);
-            --card-icon-bg: color-mix(in srgb, var(--brand-secondary) 11%, var(--card-bg));
-            --card-icon-color: var(--brand-secondary);
         }
 
         .back-to-top {
@@ -1034,26 +1262,21 @@
             }
         }
 
+        @media (max-width: 900px) {
+            .hero {
+                grid-template-columns: 1fr;
+                gap: 3rem;
+                padding: 6rem 1.5rem 3rem;
+            }
+
+            .scope {
+                max-width: 600px;
+            }
+        }
+
         @media (max-width: 768px) {
-            header {
-                padding: 5.25rem 1.5rem 1.5rem;
-            }
-
-            header h1 {
-                font-size: 2.6rem;
-            }
-
             .logo {
-                height: 48px;
-                margin-bottom: 0.8rem;
-            }
-
-            header p {
-                font-size: 1rem;
-            }
-
-            .hero-rule {
-                margin: 0.8rem auto;
+                height: 46px;
             }
 
             .section {
@@ -1074,10 +1297,6 @@
             .section[data-section]::before {
                 font-size: 4rem;
                 top: -1.2rem;
-            }
-
-            .section h2 {
-                font-size: 1.8rem;
             }
 
             .catalogue-intro {
@@ -1165,10 +1384,26 @@
                 letter-spacing: 0;
             }
 
+            .hero,
             .catalogue-intro,
             .section {
                 padding-right: 1rem;
                 padding-left: 1rem;
+            }
+
+            .hero-facts li {
+                margin-right: 1rem;
+                padding-right: 1rem;
+            }
+
+            .hero-facts strong {
+                font-size: 2rem;
+            }
+
+            .scope-head,
+            .scope-foot {
+                flex-wrap: wrap;
+                padding: 0.75rem 1rem;
             }
 
             .section[data-section]::before {
@@ -1184,12 +1419,7 @@
             }
 
             .section-summary p {
-                font-size: 0.82rem;
-            }
-
-            .card {
-                min-height: 228px;
-                padding: 1.2rem;
+                font-size: 0.88rem;
             }
         }
 
@@ -1253,11 +1483,42 @@
         </button>
     </nav>
 
-    <header>
-        <img src="/assets/panphy.png" alt="" class="logo" onerror="this.style.display='none'">
-        <h1>PanPhy Labs</h1>
-        <div class="hero-rule"></div>
-        <p>Physics apps, tools, sims, and some random stuff.</p>
+    <header class="hero">
+        <div class="hero-copy">
+            <div class="hero-brand">
+                <img src="/assets/panphy.png" alt="" class="logo" onerror="this.style.display='none'">
+                <span class="hero-eyebrow">Physics in the browser</span>
+            </div>
+            <h1>PanPhy <em>Labs</em></h1>
+            <p class="hero-tagline">Physics apps, tools, sims, and some random stuff.</p>
+            <ul class="hero-facts">
+                <li><strong id="fact-apps">18</strong><span>apps</span></li>
+                <li><strong id="fact-offline">16</strong><span>work offline</span></li>
+                <li><strong>0</strong><span>installs</span></li>
+            </ul>
+        </div>
+        <a class="scope" href="/simulations/superposition.html" aria-label="Open the Wave Superposition simulation">
+            <span class="scope-note" aria-hidden="true">y = y₁ + y₂</span>
+            <span class="scope-head">
+                <span>Wave Superposition</span>
+                <span class="scope-scale">0.2 s/div · ×0.1 speed</span>
+            </span>
+            <svg id="scope-trace" viewBox="0 0 520 300" aria-hidden="true" focusable="false">
+                <g class="scope-grid"><path d="M52 0v300"/><path d="M104 0v300"/><path d="M156 0v300"/><path d="M208 0v300"/><path d="M260 0v300"/><path d="M312 0v300"/><path d="M364 0v300"/><path d="M416 0v300"/><path d="M468 0v300"/><path d="M0 50h520"/><path d="M0 100h520"/><path d="M0 150h520"/><path d="M0 200h520"/><path d="M0 250h520"/></g>
+                <path class="scope-axis" d="M0 150h520"/>
+                <path class="scope-wave scope-wave-1" id="scope-wave-1"/>
+                <path class="scope-wave scope-wave-2" id="scope-wave-2"/>
+                <path class="scope-wave scope-wave-sum" id="scope-wave-sum"/>
+            </svg>
+            <span class="scope-foot">
+                <span class="scope-readouts">
+                    <span><i class="scope-key-1"></i>f₁ = 2.0 Hz</span>
+                    <span><i class="scope-key-2"></i>f₂ = 2.3 Hz</span>
+                    <span><i class="scope-key-sum"></i>beat = 0.3 Hz</span>
+                </span>
+                <span class="scope-cta">Open sim</span>
+            </span>
+        </a>
     </header>
 
     <main id="main" tabindex="-1">
@@ -1288,6 +1549,7 @@
     <section class="section app-section" id="tools" data-section="01" data-category="tools">
         <div class="section-heading">
             <div class="section-title-block">
+                <span class="section-num" aria-hidden="true">01</span>
                 <span class="section-eyebrow">Build &amp; analyse</span>
                 <h2>Tools <span class="section-label">Explore</span></h2>
             </div>
@@ -1298,8 +1560,24 @@
         </div>
         <div class="grid">
             <a class="card" href="/tools/panphymd.html">
-                <div class="card-top">
-                    <span class="card-icon" aria-hidden="true">MD</span>
+                <div class="card-art" aria-hidden="true">
+                    <svg viewBox="0 0 360 168" focusable="false">
+                        <text class="a-t" x="28" y="52">## Energy</text>
+                        <text class="a-t" x="28" y="80">$E_k = \frac{1}{2}mv^2$</text>
+                        <text class="a-t" x="28" y="108">- mass in kg</text>
+                        <text class="a-t" x="28" y="128">- speed in m/s</text>
+                        <path class="a-pri" d="M178 84h22m-7-7 7 7-7 7" stroke-width="2.5"/>
+                        <text class="a-serif" x="218" y="58">Energy</text>
+                        <text class="a-math" x="218" y="98">E</text>
+                        <text class="a-ts" x="231" y="103">k</text>
+                        <text class="a-math" x="243" y="98">= ½ mv²</text>
+                        <circle class="a-ink-f" cx="222" cy="120" r="2.5"/>
+                        <path class="a-mut" d="M232 120h68" stroke-width="3"/>
+                        <circle class="a-ink-f" cx="222" cy="138" r="2.5"/>
+                        <path class="a-mut" d="M232 138h84" stroke-width="3"/>
+                    </svg>
+                </div>
+                <div class="card-meta">
                     <span class="card-type">Editor</span>
                 </div>
                 <div class="card-body">
@@ -1309,8 +1587,16 @@
                 <span class="card-cta">Open editor</span>
             </a>
             <a class="card" href="/tools/panphyplot.html" data-topic="data">
-                <div class="card-top">
-                    <span class="card-icon" aria-hidden="true">x,y</span>
+                <div class="card-art" aria-hidden="true">
+                    <svg viewBox="0 0 360 168" focusable="false">
+                        <path class="a-ink" d="M52 24v116h270" stroke-width="2"/>
+                        <path class="a-pri" d="M60 132 312 38" stroke-width="3"/>
+                        <path class="a-ink" stroke-width="1.5" d="M90 108v22m-5-22h10m-10 22h10M132 96v20m-5-20h10m-10 20h10M174 72v24m-5-24h10m-10 24h10M216 64v20m-5-20h10m-10 20h10M258 42v24m-5-24h10m-10 24h10M298 34v18m-5-18h10m-10 18h10"/>
+                        <g class="a-ink-f"><circle cx="90" cy="119" r="4.5"/><circle cx="132" cy="106" r="4.5"/><circle cx="174" cy="84" r="4.5"/><circle cx="216" cy="74" r="4.5"/><circle cx="258" cy="54" r="4.5"/><circle cx="298" cy="43" r="4.5"/></g>
+                        <text class="a-ts" x="186" y="128">y = 2.04x + 0.31</text>
+                    </svg>
+                </div>
+                <div class="card-meta">
                     <span class="card-type">Data analysis</span>
                 </div>
                 <div class="card-body">
@@ -1320,8 +1606,18 @@
                 <span class="card-cta">Plot data</span>
             </a>
             <a class="card" href="/tools/motion_tracker.html" data-topic="data mechanics">
-                <div class="card-top">
-                    <span class="card-icon" aria-hidden="true">Δx</span>
+                <div class="card-art" aria-hidden="true">
+                    <svg viewBox="0 0 360 168" focusable="false">
+                        <path class="a-ink" d="M28 142h304" stroke-width="2"/>
+                        <path class="a-acc" d="M48 136Q170 -62 292 136" stroke-width="2" stroke-dasharray="3 6"/>
+                        <g class="a-ink-f"><circle cx="48" cy="136" r="5" opacity="0.25"/><circle cx="82" cy="87" r="5" opacity="0.4"/><circle cx="117" cy="54" r="5" opacity="0.55"/><circle cx="152" cy="38" r="5" opacity="0.7"/><circle cx="187" cy="38" r="5" opacity="0.85"/></g>
+                        <circle class="a-acc-f" cx="222" cy="54" r="7"/>
+                        <g class="a-ink" stroke-width="2"><rect x="206" y="38" width="32" height="32" rx="4"/><path d="M222 28v8M222 72v8M196 54h8M240 54h8"/></g>
+                        <text class="a-ts" x="250" y="46">frame 6</text>
+                        <text class="a-t" x="250" y="62">v = 3.2 m/s</text>
+                    </svg>
+                </div>
+                <div class="card-meta">
                     <span class="card-type">Video analysis</span>
                 </div>
                 <div class="card-body">
@@ -1331,8 +1627,14 @@
                 <span class="card-cta">Track motion</span>
             </a>
             <a class="card" href="/tools/sound_analyzer.html" data-topic="sound waves">
-                <div class="card-top">
-                    <span class="card-icon" aria-hidden="true">Hz</span>
+                <div class="card-art" aria-hidden="true">
+                    <svg viewBox="0 0 360 168" focusable="false">
+                        <path class="a-ink" d="M28 140h304" stroke-width="2"/>
+                        <rect class="a-ink-f" x="36" y="128" width="9" height="10" rx="2"/><rect class="a-ink-f" x="51" y="122" width="9" height="16" rx="2"/><rect class="a-ink-f" x="66" y="114" width="9" height="24" rx="2"/><rect class="a-ink-f" x="81" y="104" width="9" height="34" rx="2"/><rect class="a-ink-f" x="96" y="86" width="9" height="52" rx="2"/><rect class="a-pri-f" x="111" y="42" width="9" height="96" rx="2"/><rect class="a-ink-f" x="126" y="80" width="9" height="58" rx="2"/><rect class="a-ink-f" x="141" y="102" width="9" height="36" rx="2"/><rect class="a-ink-f" x="156" y="112" width="9" height="26" rx="2"/><rect class="a-ink-f" x="171" y="116" width="9" height="22" rx="2"/><rect class="a-ink-f" x="186" y="98" width="9" height="40" rx="2"/><rect class="a-ink-f" x="201" y="108" width="9" height="30" rx="2"/><rect class="a-ink-f" x="216" y="120" width="9" height="18" rx="2"/><rect class="a-ink-f" x="231" y="124" width="9" height="14" rx="2"/><rect class="a-ink-f" x="246" y="116" width="9" height="22" rx="2"/><rect class="a-ink-f" x="261" y="122" width="9" height="16" rx="2"/><rect class="a-ink-f" x="276" y="128" width="9" height="10" rx="2"/><rect class="a-ink-f" x="291" y="130" width="9" height="8" rx="2"/><rect class="a-ink-f" x="306" y="132" width="9" height="6" rx="2"/><rect class="a-ink-f" x="321" y="133" width="9" height="5" rx="2"/>
+                        <text class="a-ts" x="130" y="48">440 Hz</text>
+                    </svg>
+                </div>
+                <div class="card-meta">
                     <span class="card-type">Audio analysis</span>
                 </div>
                 <div class="card-body">
@@ -1343,8 +1645,17 @@
                 <span class="card-cta">Analyze sound</span>
             </a>
             <a class="card" href="/tools/tone_generator.html" data-topic="sound waves">
-                <div class="card-top">
-                    <span class="card-icon" aria-hidden="true">~</span>
+                <div class="card-art" aria-hidden="true">
+                    <svg viewBox="0 0 360 168" focusable="false">
+                        <text class="a-ts" x="24" y="52">CH 1</text>
+                        <text class="a-t" x="24" y="68">440 Hz</text>
+                        <text class="a-ts" x="24" y="112">CH 2</text>
+                        <text class="a-t" x="24" y="128">660 Hz</text>
+                        <path class="a-pri" stroke-width="2.5" d="M96 56.0L100 45.0L104 36.9L108 34.0L112 36.9L116 45.0L120 56.0L124 67.0L128 75.1L132 78.0L136 75.1L140 67.0L144 56.0L148 45.0L152 36.9L156 34.0L160 36.9L164 45.0L168 56.0L172 67.0L176 75.1L180 78.0L184 75.1L188 67.0L192 56.0L196 45.0L200 36.9L204 34.0L208 36.9L212 45.0L216 56.0L220 67.0L224 75.1L228 78.0L232 75.1L236 67.0L240 56.0L244 45.0L248 36.9L252 34.0L256 36.9L260 45.0L264 56.0L268 67.0L272 75.1L276 78.0L280 75.1L284 67.0L288 56.0L292 45.0L296 36.9L300 34.0L304 36.9L308 45.0L312 56.0L316 67.0L320 75.1L324 78.0L328 75.1L332 67.0L336 56.0"/>
+                        <path class="a-acc" stroke-width="2.5" d="M96 116.0L100 106.1L104 102.0L108 106.1L112 116.0L116 125.9L120 130.0L124 125.9L128 116.0L132 106.1L136 102.0L140 106.1L144 116.0L148 125.9L152 130.0L156 125.9L160 116.0L164 106.1L168 102.0L172 106.1L176 116.0L180 125.9L184 130.0L188 125.9L192 116.0L196 106.1L200 102.0L204 106.1L208 116.0L212 125.9L216 130.0L220 125.9L224 116.0L228 106.1L232 102.0L236 106.1L240 116.0L244 125.9L248 130.0L252 125.9L256 116.0L260 106.1L264 102.0L268 106.1L272 116.0L276 125.9L280 130.0L284 125.9L288 116.0L292 106.1L296 102.0L300 106.1L304 116.0L308 125.9L312 130.0L316 125.9L320 116.0L324 106.1L328 102.0L332 106.1L336 116.0"/>
+                    </svg>
+                </div>
+                <div class="card-meta">
                     <span class="card-type">Audio tool</span>
                 </div>
                 <div class="card-body">
@@ -1359,6 +1670,7 @@
     <section class="section app-section" id="simulations" data-section="02" data-category="simulations">
         <div class="section-heading">
             <div class="section-title-block">
+                <span class="section-num" aria-hidden="true">02</span>
                 <span class="section-eyebrow">See physics move</span>
                 <h2>Simulations <span class="section-label">Interact</span></h2>
             </div>
@@ -1369,8 +1681,14 @@
         </div>
         <div class="grid">
             <a class="card" href="/simulations/ripple_tank.html" data-topic="waves">
-                <div class="card-top">
-                    <span class="card-icon" aria-hidden="true">λ</span>
+                <div class="card-art" aria-hidden="true">
+                    <svg viewBox="0 0 360 168" focusable="false">
+                        <g class="a-acc" stroke-width="1.6" opacity="0.85"><circle cx="140" cy="150" r="22"/><circle cx="140" cy="150" r="44"/><circle cx="140" cy="150" r="66"/><circle cx="140" cy="150" r="88"/><circle cx="140" cy="150" r="110"/><circle cx="140" cy="150" r="132"/><circle cx="140" cy="150" r="154"/><circle cx="140" cy="150" r="176"/><circle cx="140" cy="150" r="198"/><circle cx="220" cy="150" r="22"/><circle cx="220" cy="150" r="44"/><circle cx="220" cy="150" r="66"/><circle cx="220" cy="150" r="88"/><circle cx="220" cy="150" r="110"/><circle cx="220" cy="150" r="132"/><circle cx="220" cy="150" r="154"/><circle cx="220" cy="150" r="176"/><circle cx="220" cy="150" r="198"/></g>
+                        <circle class="a-pri-f" cx="140" cy="150" r="6"/>
+                        <circle class="a-pri-f" cx="220" cy="150" r="6"/>
+                    </svg>
+                </div>
+                <div class="card-meta">
                     <span class="card-type">Wave lab</span>
                 </div>
                 <div class="card-body">
@@ -1380,8 +1698,15 @@
                 <span class="card-cta">Launch sim</span>
             </a>
             <a class="card" href="/simulations/superposition.html" data-topic="waves">
-                <div class="card-top">
-                    <span class="card-icon" aria-hidden="true">Σ</span>
+                <div class="card-art" aria-hidden="true">
+                    <svg viewBox="0 0 360 168" focusable="false">
+                        <path class="a-mut" d="M24 84h312" stroke-dasharray="4 5"/>
+                        <path class="a-pri" stroke-width="1.8" opacity="0.8" d="M24 84.0L28 78.6L32 73.8L36 70.0L40 67.7L44 67.0L48 68.1L52 70.8L56 74.9L60 79.9L64 85.4L68 90.7L72 95.3L76 98.7L80 100.7L84 100.9L88 99.4L92 96.3L96 91.9L100 86.7L104 81.3L108 76.1L112 71.7L116 68.6L120 67.1L124 67.3L128 69.3L132 72.7L136 77.3L140 82.6L144 88.1L148 93.1L152 97.2L156 99.9L160 101.0L164 100.3L168 98.0L172 94.2L176 89.4L180 84.0L184 78.6L188 73.8L192 70.0L196 67.7L200 67.0L204 68.1L208 70.8L212 74.9L216 79.9L220 85.4L224 90.7L228 95.3L232 98.7L236 100.7L240 100.9L244 99.4L248 96.3L252 91.9L256 86.7L260 81.3L264 76.1L268 71.7L272 68.6L276 67.1L280 67.3L284 69.3L288 72.7L292 77.3L296 82.6L300 88.1L304 93.1L308 97.2L312 99.9L316 101.0L320 100.3L324 98.0L328 94.2L332 89.4L336 84.0"/>
+                        <path class="a-acc" stroke-width="1.8" opacity="0.8" d="M24 84.0L28 77.8L32 72.5L36 68.8L40 67.1L44 67.7L48 70.5L52 75.1L56 81.0L60 87.3L64 93.1L68 97.7L72 100.4L76 100.9L80 99.1L84 95.3L88 89.9L92 83.7L96 77.6L100 72.3L104 68.6L108 67.0L112 67.7L116 70.7L120 75.4L124 81.3L128 87.5L132 93.3L136 97.8L140 100.5L144 100.9L148 99.0L152 95.1L156 89.6L160 83.5L164 77.3L168 72.1L172 68.5L176 67.0L180 67.8L184 70.8L188 75.6L192 81.5L196 87.8L200 93.5L204 98.0L208 100.5L212 100.8L216 98.9L220 94.9L224 89.4L228 83.2L232 77.1L236 71.9L240 68.4L244 67.0L248 67.9L252 71.0L256 75.9L260 81.8L264 88.1L268 93.8L272 98.1L276 100.6L280 100.8L284 98.7L288 94.6L292 89.1L296 82.9L300 76.8L304 71.7L308 68.3L312 67.0L316 68.0L320 71.2L324 76.1L328 82.1L332 88.3L336 94.0"/>
+                        <path class="a-ink" stroke-width="3.5" d="M24 84.0L28 72.5L32 62.3L36 54.8L40 50.7L44 50.7L48 54.6L52 62.0L56 71.9L60 83.2L64 94.5L68 104.3L72 111.7L76 115.6L80 115.8L84 112.1L88 105.3L92 96.0L96 85.5L100 75.0L104 65.9L108 59.1L112 55.5L116 55.3L120 58.5L124 64.6L128 72.8L132 82.0L136 91.2L140 99.1L144 104.9L148 108.1L152 108.2L156 105.5L160 100.4L164 93.7L168 86.1L172 78.7L176 72.4L180 67.8L184 65.4L188 65.4L192 67.6L196 71.5L200 76.6L204 82.1L208 87.4L212 91.8L216 94.8L220 96.2L224 96.0L228 94.5L232 91.8L236 88.6L240 85.3L244 82.4L248 80.2L252 78.9L256 78.6L260 79.1L264 80.2L268 81.5L272 82.8L276 83.7L280 84.1L284 84.0L288 83.4L292 82.5L296 81.5L300 80.9L304 80.8L308 81.5L312 82.9L316 85.0L320 87.5L324 90.1L328 92.3L332 93.7L336 94.0"/>
+                    </svg>
+                </div>
+                <div class="card-meta">
                     <span class="card-type">Wave lab</span>
                 </div>
                 <div class="card-body">
@@ -1391,8 +1716,16 @@
                 <span class="card-cta">Launch sim</span>
             </a>
             <a class="card" href="/simulations/standing_wave.html" data-topic="waves">
-                <div class="card-top">
-                    <span class="card-icon" aria-hidden="true">nλ</span>
+                <div class="card-art" aria-hidden="true">
+                    <svg viewBox="0 0 360 168" focusable="false">
+                        <path class="a-ink" d="M40 44v80M320 44v80" stroke-width="3"/>
+                        <path class="a-mut" stroke-width="2" stroke-dasharray="4 5" d="M40 84.0L44 88.8L48 93.6L52 98.1L56 102.5L60 106.4L64 110.0L68 113.1L72 115.7L76 117.7L80 119.1L84 119.9L88 120.0L92 119.4L96 118.2L100 116.4L104 114.0L108 111.1L112 107.7L116 103.8L120 99.6L124 95.1L128 90.4L132 85.6L136 80.8L140 76.0L144 71.4L148 66.9L152 62.8L156 59.1L160 55.9L164 53.1L168 50.9L172 49.3L176 48.3L180 48.0L184 48.3L188 49.3L192 50.9L196 53.1L200 55.9L204 59.1L208 62.8L212 66.9L216 71.4L220 76.0L224 80.8L228 85.6L232 90.4L236 95.1L240 99.6L244 103.8L248 107.7L252 111.1L256 114.0L260 116.4L264 118.2L268 119.4L272 120.0L276 119.9L280 119.1L284 117.7L288 115.7L292 113.1L296 110.0L300 106.4L304 102.5L308 98.1L312 93.6L316 88.8L320 84.0"/>
+                        <path class="a-ink" stroke-width="3.5" d="M40 84.0L44 79.2L48 74.4L52 69.9L56 65.5L60 61.6L64 58.0L68 54.9L72 52.3L76 50.3L80 48.9L84 48.1L88 48.0L92 48.6L96 49.8L100 51.6L104 54.0L108 56.9L112 60.3L116 64.2L120 68.4L124 72.9L128 77.6L132 82.4L136 87.2L140 92.0L144 96.6L148 101.1L152 105.2L156 108.9L160 112.1L164 114.9L168 117.1L172 118.7L176 119.7L180 120.0L184 119.7L188 118.7L192 117.1L196 114.9L200 112.1L204 108.9L208 105.2L212 101.1L216 96.6L220 92.0L224 87.2L228 82.4L232 77.6L236 72.9L240 68.4L244 64.2L248 60.3L252 56.9L256 54.0L260 51.6L264 49.8L268 48.6L272 48.0L276 48.1L280 48.9L284 50.3L288 52.3L292 54.9L296 58.0L300 61.6L304 65.5L308 69.9L312 74.4L316 79.2L320 84.0"/>
+                        <g class="a-pri-f"><circle cx="40" cy="84" r="5"/><circle cx="133.3" cy="84" r="5"/><circle cx="226.7" cy="84" r="5"/><circle cx="320" cy="84" r="5"/></g>
+                        <text class="a-ts" x="180" y="152" text-anchor="middle">n = 3</text>
+                    </svg>
+                </div>
+                <div class="card-meta">
                     <span class="card-type">Wave lab</span>
                 </div>
                 <div class="card-body">
@@ -1402,8 +1735,17 @@
                 <span class="card-cta">Launch sim</span>
             </a>
             <a class="card" href="/simulations/collision.html" data-topic="mechanics">
-                <div class="card-top">
-                    <span class="card-icon" aria-hidden="true">mv</span>
+                <div class="card-art" aria-hidden="true">
+                    <svg viewBox="0 0 360 168" focusable="false">
+                        <path class="a-ink" d="M30 130h300" stroke-width="2"/>
+                        <circle class="a-pri-f" cx="110" cy="100" r="28"/>
+                        <circle class="a-acc-f" cx="250" cy="108" r="20"/>
+                        <path class="a-ink" stroke-width="2.5" d="M148 100h42m-9-8 9 8-9 8M222 108h-22m8-7-8 7 8 7"/>
+                        <text class="a-ts" x="110" y="58" text-anchor="middle">2.0 kg</text>
+                        <text class="a-ts" x="250" y="74" text-anchor="middle">1.0 kg</text>
+                    </svg>
+                </div>
+                <div class="card-meta">
                     <span class="card-type">Mechanics</span>
                 </div>
                 <div class="card-body">
@@ -1414,8 +1756,16 @@
                 <span class="card-cta">Launch sim</span>
             </a>
             <a class="card" href="/simulations/states.html" data-topic="matter">
-                <div class="card-top">
-                    <span class="card-icon" aria-hidden="true">S/L/G</span>
+                <div class="card-art" aria-hidden="true">
+                    <svg viewBox="0 0 360 168" focusable="false">
+                        <g class="a-ink" stroke-width="2"><rect x="28" y="28" width="88" height="98" rx="4"/><rect x="136" y="28" width="88" height="98" rx="4"/><rect x="244" y="28" width="88" height="98" rx="4"/></g>
+                        <g class="a-acc-f"><circle cx="45" cy="117" r="9"/><circle cx="63" cy="117" r="9"/><circle cx="81" cy="117" r="9"/><circle cx="99" cy="117" r="9"/><circle cx="45" cy="99" r="9"/><circle cx="63" cy="99" r="9"/><circle cx="81" cy="99" r="9"/><circle cx="99" cy="99" r="9"/><circle cx="45" cy="81" r="9"/><circle cx="63" cy="81" r="9"/><circle cx="81" cy="81" r="9"/><circle cx="99" cy="81" r="9"/><circle cx="147" cy="117" r="9"/><circle cx="166" cy="116" r="9"/><circle cx="185" cy="117" r="9"/><circle cx="204" cy="116" r="9"/><circle cx="156" cy="100" r="9"/><circle cx="176" cy="99" r="9"/><circle cx="195" cy="100" r="9"/><circle cx="214" cy="100" r="9"/><circle cx="166" cy="83" r="9"/><circle cx="188" cy="82" r="9"/><circle cx="206" cy="83" r="9"/><circle cx="262" cy="48" r="9"/><circle cx="310" cy="60" r="9"/><circle cx="280" cy="96" r="9"/><circle cx="316" cy="112" r="9"/></g>
+                        <text class="a-t" x="72" y="150" text-anchor="middle">solid</text>
+                        <text class="a-t" x="180" y="150" text-anchor="middle">liquid</text>
+                        <text class="a-t" x="288" y="150" text-anchor="middle">gas</text>
+                    </svg>
+                </div>
+                <div class="card-meta">
                     <span class="card-type">Particle model</span>
                 </div>
                 <div class="card-body">
@@ -1425,15 +1775,18 @@
                 <span class="card-cta">Launch sim</span>
             </a>
             <a class="card" href="/simulations/atomic_models.html" data-topic="atomic">
-                <div class="card-top">
-                    <span class="card-icon" aria-hidden="true">
-                        <svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.7" focusable="false">
-                            <ellipse cx="16" cy="16" rx="12" ry="5.5"/>
-                            <ellipse cx="16" cy="16" rx="12" ry="5.5" transform="rotate(60 16 16)"/>
-                            <ellipse cx="16" cy="16" rx="12" ry="5.5" transform="rotate(120 16 16)"/>
-                            <circle cx="16" cy="16" r="2.3" fill="currentColor" stroke="none"/>
-                        </svg>
-                    </span>
+                <div class="card-art" aria-hidden="true">
+                    <svg viewBox="0 0 360 168" focusable="false">
+                        <circle class="a-pri a-pri-soft" cx="96" cy="84" r="44" stroke-width="2"/>
+                        <g class="a-acc-f"><circle cx="80" cy="68" r="5"/><circle cx="114" cy="80" r="5"/><circle cx="90" cy="106" r="5"/></g>
+                        <path class="a-ink" stroke-width="2.5" d="M156 84h30m-8-8 8 8-8 8"/>
+                        <g class="a-mut" stroke-width="1.6"><circle cx="262" cy="84" r="26"/><circle cx="262" cy="84" r="48"/></g>
+                        <g class="a-mut-f"><circle cx="262" cy="84" r="4.5"/><circle cx="266.5" cy="91.8" r="4.5"/><circle cx="253" cy="84" r="4.5"/><circle cx="266.5" cy="76.2" r="4.5"/></g>
+                        <g class="a-pri-f"><circle cx="271" cy="84" r="4.5"/><circle cx="257.5" cy="91.8" r="4.5"/><circle cx="257.5" cy="76.2" r="4.5"/></g>
+                        <g class="a-acc-f"><circle cx="236" cy="84" r="5"/><circle cx="288" cy="84" r="5"/><circle cx="295.9" cy="50.1" r="5"/></g>
+                    </svg>
+                </div>
+                <div class="card-meta">
                     <span class="card-type">Atomic physics</span>
                 </div>
                 <div class="card-body">
@@ -1443,8 +1796,20 @@
                 <span class="card-cta">Launch sim</span>
             </a>
             <a class="card" href="/simulations/nuclear_decay.html" data-topic="atomic">
-                <div class="card-top">
-                    <span class="card-icon" aria-hidden="true">α β γ</span>
+                <div class="card-art" aria-hidden="true">
+                    <svg viewBox="0 0 360 168" focusable="false">
+                        <circle class="a-ink a-pri-soft" cx="84" cy="84" r="34" stroke-width="2"/>
+                        <path class="a-mut" stroke-width="1.6" stroke-dasharray="3 6" d="M124 68 228 44M126 84h122"/>
+                        <g class="a-pri-f"><circle cx="243" cy="33" r="7"/><circle cx="257" cy="47" r="7"/></g>
+                        <g class="a-mut-f"><circle cx="257" cy="33" r="7"/><circle cx="243" cy="47" r="7"/></g>
+                        <circle class="a-acc-f" cx="256" cy="84" r="4.5"/>
+                        <g transform="translate(124 102) rotate(13)"><path class="a-ink" stroke-width="2" d="M0 0.0L2 -4.2L4 -6.0L6 -4.2L8 -0.0L10 4.2L12 6.0L14 4.2L16 0.0L18 -4.2L20 -6.0L22 -4.2L24 -0.0L26 4.2L28 6.0L30 4.2L32 0.0L34 -4.2L36 -6.0L38 -4.2L40 -0.0L42 4.2L44 6.0L46 4.2L48 0.0L50 -4.2L52 -6.0L54 -4.2L56 -0.0L58 4.2L60 6.0L62 4.2L64 0.0L66 -4.2L68 -6.0L70 -4.2L72 -0.0L74 4.2L76 6.0L78 4.2L80 0.0L82 -4.2L84 -6.0L86 -4.2L88 -0.0L90 4.2L92 6.0L94 4.2L96 0.0L98 -4.2L100 -6.0L102 -4.2L104 0.0L106 4.2L108 6.0L110 4.2L112 0.0L114 -4.2L116 -6.0L118 -4.2L120 -0.0L122 4.2L124 6.0L126 4.2L128 0.0"/></g>
+                        <text class="a-math" x="282" y="46">α</text>
+                        <text class="a-math" x="282" y="90">β</text>
+                        <text class="a-math" x="282" y="138">γ</text>
+                    </svg>
+                </div>
+                <div class="card-meta">
                     <span class="card-type">Nuclear physics</span>
                 </div>
                 <div class="card-body">
@@ -1454,19 +1819,25 @@
                 <span class="card-cta">Launch sim</span>
             </a>
             <a class="card" href="/simulations/fission_fusion.html" data-topic="atomic">
-                <div class="card-top">
-                    <span class="card-icon" aria-hidden="true">
-                        <svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" focusable="false">
-                            <circle cx="6" cy="8" r="3"/>
-                            <path d="M11 8h5m-2-2 2 2-2 2"/>
-                            <circle cx="23" cy="5" r="2.5"/>
-                            <circle cx="23" cy="11" r="2.5"/>
-                            <circle cx="6" cy="21" r="2.5"/>
-                            <circle cx="6" cy="27" r="2.5"/>
-                            <path d="M11 24h5m-2-2 2 2-2 2"/>
-                            <circle cx="23" cy="24" r="3"/>
-                        </svg>
-                    </span>
+                <div class="card-art" aria-hidden="true">
+                    <svg viewBox="0 0 360 168" focusable="false">
+                        <path class="a-mut" d="M184 22v112" stroke-dasharray="3 6"/>
+                        <circle class="a-mut-f" cx="18" cy="84" r="6"/>
+                        <path class="a-ink" stroke-width="2" d="M28 84h12m-5-5 5 5-5 5M100 84h12m-5-5 5 5-5 5"/>
+                        <circle class="a-ink a-pri-soft" cx="70" cy="84" r="26" stroke-width="2"/>
+                        <circle class="a-ink a-pri-soft" cx="134" cy="64" r="16" stroke-width="2"/>
+                        <circle class="a-ink a-pri-soft" cx="136" cy="108" r="14" stroke-width="2"/>
+                        <path class="a-mut" stroke-width="1.6" d="M150 50l8-5M156 86h8M150 122l7 5"/>
+                        <g class="a-mut-f"><circle cx="166" cy="40" r="6"/><circle cx="172" cy="86" r="6"/><circle cx="164" cy="132" r="6"/></g>
+                        <g class="a-pri-f"><circle cx="206" cy="56" r="6"/><circle cx="212" cy="105.6" r="6"/><circle cx="286" cy="80" r="6"/><circle cx="298" cy="92" r="6"/></g>
+                        <g class="a-mut-f"><circle cx="218" cy="56" r="6"/><circle cx="206" cy="116" r="6"/><circle cx="218" cy="116" r="6"/><circle cx="298" cy="80" r="6"/><circle cx="286" cy="92" r="6"/><circle cx="334" cy="54" r="6"/></g>
+                        <path class="a-ink" stroke-width="2" d="M236 86h26m-7-7 7 7-7 7"/>
+                        <path class="a-mut" stroke-width="1.6" d="M312 72l12-10"/>
+                        <text class="a-t" x="92" y="158" text-anchor="middle">fission</text>
+                        <text class="a-t" x="272" y="158" text-anchor="middle">fusion</text>
+                    </svg>
+                </div>
+                <div class="card-meta">
                     <span class="card-type">Nuclear physics</span>
                 </div>
                 <div class="card-body">
@@ -1476,8 +1847,20 @@
                 <span class="card-cta">Launch sim</span>
             </a>
             <a class="card" href="/simulations/lorentz.html" data-topic="relativity">
-                <div class="card-top">
-                    <span class="card-icon" aria-hidden="true">γ</span>
+                <div class="card-art" aria-hidden="true">
+                    <svg viewBox="0 0 360 168" focusable="false">
+                        <path class="a-pri" stroke-width="1.8" stroke-dasharray="4 6" d="M110 142 230 22"/>
+                        <path class="a-ink" stroke-width="2" d="M110 22v120h200"/>
+                        <path class="a-acc" stroke-width="2.5" d="M182 22 110 142 290 34"/>
+                        <text class="a-t" x="88" y="32">ct</text>
+                        <text class="a-t" x="318" y="146">x</text>
+                        <text class="a-ts" x="190" y="32">ct′</text>
+                        <text class="a-ts" x="298" y="38">x′</text>
+                        <text class="a-t" x="232" y="108">v = 0.6c</text>
+                        <text class="a-ts" x="232" y="126">γ = 1.25</text>
+                    </svg>
+                </div>
+                <div class="card-meta">
                     <span class="card-type">Relativity</span>
                 </div>
                 <div class="card-body">
@@ -1492,6 +1875,7 @@
     <section class="section app-section" id="for_teachers" data-section="03" data-category="for_teachers">
         <div class="section-heading">
             <div class="section-title-block">
+                <span class="section-num" aria-hidden="true">03</span>
                 <span class="section-eyebrow">Made for the classroom</span>
                 <h2>For Teachers <span class="section-label">Utility</span></h2>
             </div>
@@ -1502,8 +1886,17 @@
         </div>
         <div class="grid">
             <a class="card" href="/for_teachers/timer.html">
-                <div class="card-top">
-                    <span class="card-icon" aria-hidden="true">T</span>
+                <div class="card-art" aria-hidden="true">
+                    <svg viewBox="0 0 360 168" focusable="false">
+                        <text class="a-clock" x="180" y="80" text-anchor="middle">0:45:00</text>
+                        <rect class="a-mut-f" x="60" y="100" width="192" height="10" rx="5" opacity="0.3"/>
+                        <rect class="a-ink-f" x="60" y="100" width="96" height="10" rx="5"/>
+                        <rect class="a-pri-f" x="254" y="100" width="46" height="10" rx="5"/>
+                        <text class="a-t" x="60" y="134">1 h 30 min</text>
+                        <text class="a-ts" x="300" y="134" text-anchor="end">+25% extra time</text>
+                    </svg>
+                </div>
+                <div class="card-meta">
                     <span class="card-type">Assessment</span>
                 </div>
                 <div class="card-body">
@@ -1513,8 +1906,18 @@
                 <span class="card-cta">Open timer</span>
             </a>
             <a class="card" href="/for_teachers/visualizer.html">
-                <div class="card-top">
-                    <span class="card-icon" aria-hidden="true">Cam</span>
+                <div class="card-art" aria-hidden="true">
+                    <svg viewBox="0 0 360 168" focusable="false">
+                        <path class="a-ink" stroke-width="2.5" d="M60 46V26h20M280 26h20v20M300 122v20h-20M80 142H60v-20"/>
+                        <g transform="rotate(-4 180 84)">
+                        <rect class="a-ink a-paper" x="112" y="38" width="136" height="92" rx="3" stroke-width="2"/>
+                        <path class="a-mut" stroke-width="3" d="M128 60h72M128 78h100M128 96h58M128 114h86"/>
+                        <path class="a-pri" stroke-width="2.5" d="M120 79c4-14 110-16 116-2s-112 18-116 2z"/>
+                        </g>
+                        <circle class="a-pri-f" cx="286" cy="40" r="4"/>
+                    </svg>
+                </div>
+                <div class="card-meta">
                     <span class="card-type">Classroom</span>
                 </div>
                 <div class="card-body">
@@ -1530,6 +1933,7 @@
     <section class="section app-section" id="fun" data-section="04" data-category="fun">
         <div class="section-heading">
             <div class="section-title-block">
+                <span class="section-num" aria-hidden="true">04</span>
                 <span class="section-eyebrow">Experiments &amp; play</span>
                 <h2>For Fun <span class="section-label">Play</span></h2>
             </div>
@@ -1540,8 +1944,20 @@
         </div>
         <div class="grid">
             <a class="card" href="/fun/spellwave.html">
-                <div class="card-top">
-                    <span class="card-icon" aria-hidden="true">ABC</span>
+                <div class="card-art" aria-hidden="true">
+                    <svg viewBox="0 0 360 168" focusable="false">
+                        <text class="a-word a-pri-f" x="30" y="96">QUA</text>
+                        <path class="a-ink" stroke-width="2.5" d="M92 66v38"/>
+                        <text class="a-word a-mut-f" x="100" y="96">RK</text>
+                        <path class="a-pri" stroke-width="3" d="M162 92l26-16-8 16 28-14-9 16 30-12"/>
+                        <path class="a-ink" stroke-width="2.5" d="M276 62l-8-16M316 62l8-16"/>
+                        <circle class="a-ink a-acc-soft" cx="296" cy="90" r="32" stroke-width="2.5"/>
+                        <circle class="a-ink-f" cx="285" cy="82" r="4.5"/>
+                        <circle class="a-ink-f" cx="307" cy="82" r="4.5"/>
+                        <path class="a-ink" stroke-width="2.5" d="M280 102l5.5-6 5.5 6 5.5-6 5.5 6 5.5-6 5.5 6"/>
+                    </svg>
+                </div>
+                <div class="card-meta">
                     <span class="card-type">Typing game</span>
                 </div>
                 <div class="card-body">
@@ -1551,8 +1967,17 @@
                 <span class="card-cta">Play now</span>
             </a>
             <a class="card" href="/fun/ascii_cam.html">
-                <div class="card-top">
-                    <span class="card-icon" aria-hidden="true">TXT</span>
+                <div class="card-art" aria-hidden="true">
+                    <svg viewBox="0 0 360 168" focusable="false">
+                        <text class="a-ascii a-acc-f" x="180" y="40" text-anchor="middle">.:=+*##*+=:.</text>
+                        <text class="a-ascii a-acc-f" x="180" y="59" text-anchor="middle">.-+*#%@@@@%#*+-.</text>
+                        <text class="a-ascii a-pri-f" x="180" y="78" text-anchor="middle">:=*#%@@@@@@@@%#*=:</text>
+                        <text class="a-ascii a-pri-f" x="180" y="97" text-anchor="middle">:=*#%@@@@@@@@%#*=:</text>
+                        <text class="a-ascii a-acc-f" x="180" y="116" text-anchor="middle">.-+*#%@@@@%#*+-.</text>
+                        <text class="a-ascii a-acc-f" x="180" y="135" text-anchor="middle">.:=+*##*+=:.</text>
+                    </svg>
+                </div>
+                <div class="card-meta">
                     <span class="card-type">Creative camera</span>
                 </div>
                 <div class="card-body">
@@ -1610,6 +2035,9 @@
             var activeTopic = 'all';
 
             if (!appSections.length) return;
+
+            var appsFact = document.getElementById('fact-apps');
+            if (appsFact) appsFact.textContent = document.querySelectorAll('.app-section .card').length;
 
             // Give each card a concise accessible name and description.
             document.querySelectorAll('.card').forEach(function (card, index) {
@@ -2187,6 +2615,8 @@
         const OFFLINE_POLL_MS = 3000;
         const OFFLINE_POLL_MAX = 40;
         const offlineStatus = document.getElementById('offline-status');
+        const offlineFact = document.getElementById('fact-offline');
+        if (offlineFact) offlineFact.textContent = OFFLINE_APP_PATHS.length;
         let offlinePollCount = 0;
         let offlineReadyPollId = 0;
         let offlineReadinessUpdateInFlight = false;
@@ -2221,7 +2651,12 @@
                 const pill = document.createElement('span');
                 pill.className = 'card-offline-pill';
                 setCardOfflineState(pill, 'checking', '');
-                card.prepend(pill);
+                const meta = card.querySelector('.card-meta');
+                if (meta) {
+                    meta.append(pill);
+                } else {
+                    card.prepend(pill);
+                }
                 offlineCardPills.set(cardPath, pill);
             });
         }
@@ -2388,15 +2823,68 @@
         startOfflineReadinessMonitor();
     </script>
     <script>
-        // Apply gradient text effect, skip on Brave iOS where background-clip:text is broken
+        // Hero trace: y(t) for f1 = 2.0 Hz and f2 = 2.3 Hz over a 2 s window, replayed at 0.1x speed
         (function () {
-            var h1 = document.querySelector('header h1');
-            if (!h1) return;
-            var isIOS = /iP(hone|ad|od)/.test(navigator.userAgent);
-            var isBrave = !!navigator.brave;
-            if (!(isIOS && isBrave)) {
-                h1.classList.add('gradient-text');
+            var svg = document.getElementById('scope-trace');
+            var wave1 = document.getElementById('scope-wave-1');
+            var wave2 = document.getElementById('scope-wave-2');
+            var waveSum = document.getElementById('scope-wave-sum');
+            if (!svg || !wave1 || !wave2 || !waveSum) return;
+
+            var WIDTH = 520;
+            var MID = 150;
+            var AMPLITUDE = 44;
+            var WINDOW_S = 2;
+            var PLAYBACK = 0.1;
+            var F1 = 2.0;
+            var F2 = 2.3;
+
+            function draw(seconds) {
+                var start = seconds * PLAYBACK;
+                var d1 = '';
+                var d2 = '';
+                var dSum = '';
+                for (var x = 0; x <= WIDTH; x += 4) {
+                    var t = start + (x / WIDTH) * WINDOW_S;
+                    var y1 = AMPLITUDE * Math.sin(2 * Math.PI * F1 * t);
+                    var y2 = AMPLITUDE * Math.sin(2 * Math.PI * F2 * t);
+                    var cmd = x === 0 ? 'M' : 'L';
+                    d1 += cmd + x + ' ' + (MID - y1).toFixed(1);
+                    d2 += cmd + x + ' ' + (MID - y2).toFixed(1);
+                    dSum += cmd + x + ' ' + (MID - y1 - y2).toFixed(1);
+                }
+                wave1.setAttribute('d', d1);
+                wave2.setAttribute('d', d2);
+                waveSum.setAttribute('d', dSum);
             }
+
+            draw(14);
+            if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+
+            var inView = true;
+            var frameId = 0;
+
+            function frame(now) {
+                frameId = 0;
+                if (!inView || document.hidden) return;
+                draw(now / 1000);
+                frameId = requestAnimationFrame(frame);
+            }
+
+            function resume() {
+                if (!frameId && inView && !document.hidden) {
+                    frameId = requestAnimationFrame(frame);
+                }
+            }
+
+            if ('IntersectionObserver' in window) {
+                new IntersectionObserver(function (entries) {
+                    inView = entries[entries.length - 1].isIntersecting;
+                    resume();
+                }).observe(svg);
+            }
+            document.addEventListener('visibilitychange', resume);
+            resume();
         })();
     </script>
     <script>
