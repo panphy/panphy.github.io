@@ -214,8 +214,8 @@ body.viewer-expanded { overflow: hidden; }
   .workspace.is-fullscreen aside .side-controls p { color: var(--text-main); margin-bottom: 12px; }
 }
 
-/* contain: size keeps the canvas pixel size from feeding back into the viewer height. */
-#viewer { position: relative; display: flex; flex-direction: column; flex: 1; min-height: 540px; contain: size; margin: 8px 0 12px; border-radius: 14px; touch-action: none; overflow: hidden; background: var(--space); color: var(--space-text); cursor: grab; }
+/* Size containment keeps the canvas pixel size from feeding back into the viewer height. */
+#viewer { position: relative; display: flex; flex-direction: column; flex: 1; min-height: 540px; container-type: size; margin: 8px 0 12px; border-radius: 14px; touch-action: none; overflow: hidden; background: var(--space); color: var(--space-text); cursor: grab; }
 #viewer:active { cursor: grabbing; }
 #viewer.is-hovering { cursor: pointer; }
 #viewer > canvas { display: block; width: 100%; height: 0; flex: 1; min-height: 0; align-self: stretch; }
@@ -236,10 +236,19 @@ body.viewer-expanded { overflow: hidden; }
 #balance-fill { position: absolute; top: 0; bottom: 0; border-radius: 4px; transition: left .4s, right .4s, background .4s; }
 #balance-marker { position: absolute; top: -4px; width: 4px; height: 16px; margin-left: -2px; border-radius: 2px; background: #fff; transition: left .4s; }
 .balance p { margin: 0; font-size: .74rem; line-height: 1.35; color: var(--space-text); }
-.true-scale { right: 10px; bottom: 10px; width: 170px; margin: 0; padding: 6px; border-radius: 12px; background: var(--space-panel); border: 1px solid var(--space-border); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); }
+.true-scale, .mini-hr { right: 10px; width: 170px; margin: 0; padding: 6px; border-radius: 12px; background: var(--space-panel); border: 1px solid var(--space-border); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); }
+.true-scale { bottom: 10px; }
+.mini-hr { top: 10px; }
 .true-scale canvas { display: block; width: 100%; height: auto; aspect-ratio: 300 / 220; flex: none; }
-.true-scale figcaption { margin-top: 2px; font-size: .64rem; line-height: 1.35; text-align: center; color: var(--space-muted); }
-.gesture { top: 10px; right: 12px; margin: 0; color: var(--space-muted); }
+.mini-hr canvas { display: block; width: 100%; height: auto; aspect-ratio: 300 / 230; flex: none; }
+.true-scale figcaption, .mini-hr figcaption { margin-top: 2px; font-size: .64rem; line-height: 1.35; text-align: center; color: var(--space-muted); }
+.gesture { bottom: 10px; left: 50%; transform: translateX(-50%); margin: 0; white-space: nowrap; color: var(--space-muted); }
+/* A short viewer (fullscreen on a phone held sideways) has no room for full-size insets. */
+@container (max-height: 430px) {
+  .true-scale, .mini-hr { width: 104px; }
+  .true-scale figcaption, .mini-hr figcaption { display: none; }
+}
+@container (max-width: 700px) { .gesture { display: none; } }
 
 .live { margin: 0 0 12px; min-height: calc(3.1em + 20px); padding: 10px 14px; border-radius: 12px; border-left: 3px solid var(--brand-accent); background: var(--card-bg); font-size: .84rem; line-height: 1.55; }
 
@@ -284,6 +293,11 @@ aside p b { color: var(--text-main); }
 aside .tagline { color: var(--text-main); font-weight: 600; font-size: 1rem; margin-bottom: 16px; }
 aside .note { font-size: .82rem; padding-left: 12px; border-left: 2px solid var(--input-border); }
 aside.swap > :not(.side-controls) { animation: notes-in .45s ease both; }
+/* Side by side, the 3D view sets the height and the notes scroll inside it, so the page does not jump when the notes change length. */
+@media (min-width: 1081px) {
+  .workspace:not(.is-fullscreen) aside { contain: size; overflow-y: auto; }
+  .workspace:not(.is-fullscreen) aside::after { content: ''; display: block; position: sticky; bottom: -26px; height: 40px; margin-top: -40px; background: linear-gradient(transparent, var(--card-bg)); pointer-events: none; }
+}
 @keyframes notes-in { from { opacity: 0; transform: translateY(6px); } }
 .icon { width: 1.15em; height: 1.15em; vertical-align: -0.2em; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
 .idea { border-left: 3px solid var(--brand-accent); border-radius: 0 12px 12px 0; padding: 13px 16px; margin: 18px 0; background: var(--muted-bg); }
@@ -348,7 +362,7 @@ footer a { min-height: 48px; display: inline-flex; align-items: center; }
   .scale, .gesture { display: none; }
   .readout { min-width: 0; width: 190px; font-size: .68rem; padding: 8px 10px; }
   .balance { width: 190px; }
-  .true-scale { width: 124px; }
+  .true-scale, .mini-hr { width: 124px; }
   .stages { grid-auto-flow: row; grid-template-columns: repeat(4, minmax(0, 1fr)); }
   aside, .card, .reality { padding: 18px; }
   .reality > span { display: none; }
@@ -357,6 +371,7 @@ footer a { min-height: 48px; display: inline-flex; align-items: center; }
 @media (max-width: 480px) {
   .stages { grid-template-columns: repeat(3, minmax(0, 1fr)); }
   .balance { width: auto; right: 142px; }
+  .mini-hr { width: 108px; }
   .fate-band span { min-height: 18px; padding: 0; font-size: 0; }
   .fate-key { display: flex; }
 }

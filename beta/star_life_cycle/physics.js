@@ -200,8 +200,9 @@ export function buildLife(M) {
         phases[0].share = 0.45;
         phases.push({
           id: 'he', share: 0.3, years: heYears, mass: [M - 0.2 * lost, M - 0.25 * lost], coreT: [1e8, 2e8],
-          // The star shrinks back from the tip of the red giant branch, then settles.
-          keys: [tip, { L: heL, T: heT }, { L: 1.25 * heL, T: 0.98 * heT }, heEnd]
+          // The star drops back from the tip of the red giant branch in the first tenth of the phase
+          // (really about a million years), then stays steady and brightens only slightly.
+          keys: [tip, ...Array.from({ length: 10 }, (_, i) => ({ L: heL * 1.5 ** (i / 9), T: heT * 0.96 ** (i / 9) }))]
         }, {
           id: 'agb', share: 0.25, years: 0.15 * heYears, mass: [M - 0.25 * lost, remnant + 0.15 * lost], coreT: [2e8, 3e8],
           keys: [heEnd, { L: 0.3 * agbL, T: 3600 }, { L: agbL, T: 3000 }]

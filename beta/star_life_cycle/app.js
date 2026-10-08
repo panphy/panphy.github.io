@@ -692,6 +692,7 @@ let layerSignature = '';
 let layerNames = '';
 let lastLayers = null;
 let notesKey = '';
+let liveDirty = true;
 
 function setMass(mass, keepInput = false) {
   const M = clamp(Number(mass.toPrecision(3)), MASS_MIN, MASS_MAX);
@@ -728,6 +729,7 @@ function setMass(mass, keepInput = false) {
     const duration = stage.id === 'sn' ? 'under a second, then months' : last ? 'no end' : fmt.years(stage.years);
     return `<tr data-index="${i}"><td><i style="background:${STAGE_COLOUR[stage.id]}"></i></td><td>${stageName(stage)}</td><td>${duration}${percent}</td></tr>`;
   }).join('');
+  liveDirty = true;
   $('life-caption').textContent = `This star spends ${fmt.sig(life.ms.years / life.yearsToRemnant * 100, 2)}% of its life on the main sequence. That is why most of the stars in the sky are main sequence stars.`;
 
   shownStage = -1;
@@ -778,6 +780,7 @@ function renderStageNotes(st) {
   if (key !== notesKey) {
     notesKey = key;
     const aside = document.querySelector('aside');
+    aside.scrollTop = 0;
     aside.classList.remove('swap');
     void aside.offsetWidth;
     aside.classList.add('swap');
@@ -788,6 +791,30 @@ function renderStageNotes(st) {
     if (i !== stage.index) button.lastElementChild.style.width = '';
   });
   document.querySelectorAll('#durations tr').forEach((row, i) => row.classList.toggle('current', i === stage.index));
+}
+
+const liveText = st => {
+  const notes = STAGES[st.stage.id];
+  return notes.live ? notes.live(context(st)) : `<b>${stageName(st.stage)}.</b> ${notes.tagline}`;
+};
+// Keep the line under the 3D view as tall as its longest message in this life, so the controls below it never move.
+const liveProbe = $('live').cloneNode();
+liveProbe.removeAttribute('id');
+liveProbe.removeAttribute('role');
+liveProbe.setAttribute('aria-hidden', 'true');
+liveProbe.style.cssText = 'position:absolute;visibility:hidden;pointer-events:none;min-height:0;margin:0';
+function reserveLive() {
+  const live = $('live');
+  const width = live.getBoundingClientRect().width;
+  if (!width) return;
+  const texts = new Set();
+  for (let s = 0; s < state.life.stages.length; s += 0.05) texts.add(liveText(lifeState(state.life, s)));
+  live.after(liveProbe);
+  liveProbe.style.width = `${width}px`;
+  let height = 0;
+  texts.forEach(text => { liveProbe.innerHTML = text; height = Math.max(height, liveProbe.offsetHeight); });
+  liveProbe.remove();
+  live.style.minHeight = `max(calc(3.1em + 20px), ${height}px)`;
 }
 
 function renderLayers(st) {
@@ -827,7 +854,8 @@ function renderReadout(st) {
 
   const c = context(st);
   const notes = STAGES[id];
-  $('live').innerHTML = notes.live ? notes.live(c) : `<b>${stageName(stage)}.</b> ${notes.tagline}`;
+  const live = liveText(st);
+  if ($('live').innerHTML !== live) $('live').innerHTML = live;
   const balance = notes.balance(c);
   const half = balance.v * 50;
   const fill = $('balance-fill');
@@ -1081,6 +1109,7 @@ function placeControls() {
   const inSide = workspace.classList.contains('is-fullscreen') && wideQuery.matches;
   if (inSide && sideControls.parentElement !== notes) notes.prepend(sideControls);
   else if (!inSide && sideControls.parentElement !== viewerPanel) viewerPanel.append(sideControls);
+  liveDirty = true;
 }
 function updateFullscreen() {
   const expanded = document.fullscreenElement === workspace || fallbackFullscreen;
@@ -1149,6 +1178,63 @@ function pickLayer(event) {
   const index = lastLayers.findIndex((layer, i) => r <= view.layerRad[i]);
   return index < 0 ? lastLayers.length - 1 : index;
 }
+// The same diagram as a small inset on the 3D view: the main sequence, this star's track and where it is now.
+function drawMiniHR(st) {
+  const track = hrTrack(state.life, 28);
+  const canvas = $('mini-hr-canvas');
+  const g = canvas.getContext('2d');
+  const W = canvas.width, H = canvas.height;
+  const pad = { l: 10, r: 10, t: 10, b: 30 };
+  const x = T => pad.l + (HR.tMax - Math.log10(T)) / (HR.tMax - HR.tMin) * (W - pad.l - pad.r);
+  const y = L => pad.t + (HR.lMax - Math.log10(L)) / (HR.lMax - HR.lMin) * (H - pad.t - pad.b);
+  g.clearRect(0, 0, W, H);
+  g.lineCap = 'round'; g.lineJoin = 'round';
+  // The colour of a hot body at each temperature, with the hot end on the left.
+  for (let px = pad.l; px < W - pad.r; px += 2) {
+    const [r, gg, b] = starRGB(10 ** (HR.tMax - (px - pad.l) / (W - pad.l - pad.r) * (HR.tMax - HR.tMin)));
+    g.fillStyle = `rgb(${r * 255 | 0},${gg * 255 | 0},${b * 255 | 0})`;
+    g.fillRect(px, H - pad.b + 4, 2, 6);
+  }
+  g.fillStyle = '#A8A49C'; g.font = `600 17px ${css('--font-mono')}`; g.textBaseline = 'alphabetic';
+  g.textAlign = 'left'; g.fillText('HOT', pad.l, H - 1);
+  g.textAlign = 'right'; g.fillText('COOL', W - pad.r, H - 1);
+  g.strokeStyle = 'rgba(255,255,255,.22)'; g.lineWidth = 1.5;
+  g.strokeRect(pad.l, pad.t, W - pad.l - pad.r, H - pad.t - pad.b);
+
+  g.save();
+  g.beginPath(); g.rect(pad.l, pad.t, W - pad.l - pad.r, H - pad.t - pad.b); g.clip();
+  g.strokeStyle = 'rgba(94,234,212,.3)'; g.lineWidth = 16;
+  g.beginPath();
+  for (let i = 0; i <= 30; i += 1) {
+    const ms = mainSequence(10 ** (-1 + 3 * i / 30));
+    if (i) g.lineTo(x(ms.T), y(ms.L)); else g.moveTo(x(ms.T), y(ms.L));
+  }
+  g.stroke();
+  g.strokeStyle = '#FB923C'; g.lineWidth = 3.5;
+  track.forEach(segment => {
+    const stage = state.life.stages.find(s => s.id === segment.id);
+    const passed = stage.index < st.index ? 1 : stage.index === st.index ? st.p : 0;
+    const split = Math.round(passed * (segment.points.length - 1));
+    [[0, split, 1], [split, segment.points.length - 1, 0.3]].forEach(([from, to, alpha]) => {
+      if (to <= from) return;
+      g.globalAlpha = alpha; g.beginPath();
+      for (let i = from; i <= to; i += 1) { const pt = segment.points[i]; if (i === from) g.moveTo(x(pt.T), y(pt.L)); else g.lineTo(x(pt.T), y(pt.L)); }
+      g.stroke();
+    });
+  });
+  g.globalAlpha = 1;
+  if (st.onChart) {
+    const [r, gg, b] = starRGB(st.T);
+    g.beginPath(); g.arc(x(st.T), y(st.L), 11, 0, Math.PI * 2);
+    g.fillStyle = `rgb(${r * 255 | 0},${gg * 255 | 0},${b * 255 | 0})`; g.fill();
+    g.lineWidth = 3.5; g.strokeStyle = '#fff'; g.stroke();
+  }
+  g.restore();
+  const id = st.stage.id;
+  $('mini-hr-caption').innerHTML = `HR DIAGRAM<br>${st.onChart ? 'brighter ↑ · hotter ←'
+    : id === 'cloud' ? 'too cold to plot yet' : id === 'sn' ? 'off the top' : id === 'ns' ? 'off the left edge' : 'nothing to plot'}`;
+}
+
 let downAt = null;
 viewer.addEventListener('pointerdown', event => { downAt = [event.clientX, event.clientY]; });
 viewer.addEventListener('pointerup', event => {
@@ -1171,6 +1257,7 @@ function resize() {
   const px = renderer.domElement.height / (2 * Math.tan(THREE.MathUtils.degToRad(camera.fov / 2)));
   [cloud, wind, shell, jets].forEach(points => { points.material.uniforms.uPx.value = px; });
   hrDirty = true;
+  liveDirty = true;
 }
 new ResizeObserver(resize).observe(viewer);
 new ResizeObserver(() => { hrDirty = true; }).observe($('hr-canvas').parentElement);
@@ -1198,7 +1285,8 @@ function frame() {
     renderReadout(st);
   }
   // While playing, the diagram only needs to keep up roughly ten times a second.
-  if (hrDirty && time - lastHR > (state.playing ? 0.1 : 0)) { hrDirty = false; lastHR = time; drawHR(st); }
+  if (hrDirty && time - lastHR > (state.playing ? 0.1 : 0)) { hrDirty = false; lastHR = time; drawHR(st); drawMiniHR(st); }
+  if (liveDirty) { liveDirty = false; reserveLive(); }
   renderer.render(scene, camera);
   requestAnimationFrame(frame);
 }
