@@ -1135,3 +1135,6 @@ When its speed is the same in both media.","Consistent with the definition of re
 "255","Removed","Name the second subatomic particle to be discovered.","The proton","","","Removed: never asked in this form in an exam; the sequence is covered by 245 and the model questions"
 "256","Removed","Name the third subatomic particle to be discovered.","The neutron","","","Removed: never asked in this form in an exam; the sequence is covered by 245 and 721"
 "893","Edited","Describe how a line of best fit should be drawn.","As one thin line with points balanced above and below it.","Describe how a line of best fit should be drawn.","One thin straight line or smooth curve, close to the points, with about as many above it as below.","Fuller answer: straight or curved, and close to the points as well as balanced"
+"839","Edited","State the equation for a transformer that is 100% efficient.","p.d. × current in the secondary = p.d. × current in the primary
+(V_s × I_s = V_p × I_p)","State the equation for a transformer that is 100% efficient.","p.d. × current in the secondary = p.d. × current in the primary
+(V_s × I_s = V_p × I_p)","Moved from (S) Induced potential, transformers and the National Grid (Separate) to Mains electricity and the National Grid (Combined): Trilogy 6.2.4.3 requires this equation at Higher tier and it is on the Combined Science equations sheet"

@@ -342,8 +342,8 @@
       opener(L5, { badge: "LESSON 5", title: "The point that does not fit", subtitle: "Best-fit lines · anomalous results · graph quality · writing a conclusion" },
         { title: "The readings that were too strange to believe", paras: [
           "In 1985 three scientists from the British Antarctic Survey published something alarming: every spring, the ozone layer above Antarctica was collapsing. They had spotted it from readings taken on the ground, year after year.",
-          "Satellites had been watching the same sky. The values they recorded were so far below anything expected that the processing software had been set up to flag such extreme readings as probable instrument faults — so they were not treated as real. The satellite had, in a sense, been seeing the ozone hole and setting the evidence aside.",
-          "Once the ground-based results were published, the satellite data was re-examined, and the hole was there in the record.",
+          "Satellites had been watching the same sky. The values they recorded were so far below anything expected that the processing software flagged them as readings it could not trust. The scientists did not bin them, and did not believe them straight away either: they checked them against measurements taken from the ground.",
+          "The ground-based results were published first. A few months later the satellite team showed their maps, and the hole was there in the record.",
         ], punch: "An odd result is a question, not rubbish. Ask it before you bin it." },
         ["Draw a best-fit line — straight or curved — that shows the trend", "Explain why dot-to-dot is wrong for experimental data", "Identify a possible anomalous result and say what you would do about it", "Improve a graph against a checklist", "Write a conclusion that quotes evidence instead of vibes"],
         [

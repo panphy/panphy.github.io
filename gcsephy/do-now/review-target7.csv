@@ -236,6 +236,8 @@ Earth: green and yellow stripes"
 (E = P t)"
 683,Electricity,Mains electricity and the National Grid,Combined,9,On the equations sheet,"State the equation linking energy transferred, charge flow and potential difference.","energy transferred = charge flow × potential difference
 (E = Q V)"
+839,Electricity,Mains electricity and the National Grid,Combined,9,On the equations sheet,State the equation for a transformer that is 100% efficient.,"p.d. × current in the secondary = p.d. × current in the primary
+(V_s × I_s = V_p × I_p)"
 684,Electricity,Mains electricity and the National Grid,Combined,9,,A battery-powered fan is switched on. Describe the useful energy transfer.,Energy is transferred electrically from the chemical store of the battery to the kinetic store of the fan.
 685,Electricity,Mains electricity and the National Grid,Combined,7,Asked in the 2020–23 papers,Explain why step-down transformers are used before electricity reaches homes.,To reduce the potential difference to a safer value (230 V).
 686,Electricity,Mains electricity and the National Grid,Combined,9,,Explain why any connection between the live wire and earth is dangerous.,"A very large current would flow, which could cause a fire or a fatal shock."
@@ -879,8 +881,6 @@ How much radiation it reflects into space"
 837,Magnetism and electromagnetism,"(S) Induced potential, transformers and the National Grid",Separate,7,Standard explanation,Explain why a transformer does not work with a direct current.,Direct current gives a constant magnetic field; induction needs a changing field.
 838,Magnetism and electromagnetism,"(S) Induced potential, transformers and the National Grid",Separate,9,On the equations sheet,State the equation linking the potential differences and numbers of turns of a transformer.,"p.d. across primary ÷ p.d. across secondary = turns on primary ÷ turns on secondary
 (V_p ÷ V_s = n_p ÷ n_s)"
-839,Magnetism and electromagnetism,"(S) Induced potential, transformers and the National Grid",Separate,9,On the equations sheet,State the equation for a transformer that is 100% efficient.,"p.d. × current in the secondary = p.d. × current in the primary
-(V_s × I_s = V_p × I_p)"
 840,Magnetism and electromagnetism,"(S) Induced potential, transformers and the National Grid",Separate,7,Asked in the 2020–23 papers,Describe the potential difference–time graph for an alternator.,It alternates: a wave going equally above and below zero.
 841,Magnetism and electromagnetism,"(S) Induced potential, transformers and the National Grid",Separate,7,Asked in the 2020–23 papers,Describe the potential difference–time graph for a dynamo.,It rises and falls but never goes below zero.
 608,Space physics,"(S) Solar System, stars, orbits and satellites",Separate,7,Asked in the 2024–25 papers,Name the main objects in our Solar System.,"The Sun, eight planets, dwarf planets, moons, asteroids and comets"
