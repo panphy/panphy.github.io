@@ -343,12 +343,17 @@
         // alpha particle slows, stops and goes straight back along the line it came in on.
         [on ? 'M20,230 L292,230 L40,230' : 'M20,236 L278,236 Q306,229 278,222 L40,190', 'head-on: bounces back', 20, 272, 'start']
       ];
-      const slowTurn = 'calcMode="spline" keyPoints="0;0.52;1" keyTimes="0;0.5;1" keySplines="0 0 .4 1;.6 0 1 1"';
+      // The head-on particle fades out on its way back and the track stays empty for a moment,
+      // so the next one coming in does not look like the same particle bouncing off the left edge.
+      const slowTurn = 'calcMode="spline" keyPoints="0;0.52;1;1" keyTimes="0;0.375;0.75;1" keySplines="0 0 .4 1;.6 0 1 1;0 0 1 1"';
+      const fadeOut = begin => `<animate attributeName="opacity" dur="4s" begin="${begin}" repeatCount="indefinite" values="0;1;1;0;0" keyTimes="0;0.05;0.7;0.75;1"/>`;
       paths.forEach(([d, label, x, y, anchor], i) => {
         // Head-on, live: the particle runs straight in and back, inside a thin U-shaped arrow.
         const drawn = on && i === 2 ? 'M20,236 H286 A6,6 0 0 0 286,224 H40' : d;
         let track = `<path d="${drawn}" class="alpha-path" marker-end="url(#m-alpha)"/>`;
-        track += `<g class="mover"><circle r="10" fill="url(#g-alpha)"/><animateMotion dur="3s" begin="-${i * 0.9}s" repeatCount="indefinite" path="${d}"${on && i === 2 ? ' ' + slowTurn : ''}/></g>`;
+        const headOn = on && i === 2;
+        const begin = `-${i * 0.9}s`;
+        track += `<g class="mover"><circle r="10" fill="url(#g-alpha)"/><animateMotion dur="${headOn ? 4 : 3}s" begin="${begin}" repeatCount="indefinite" path="${d}"${headOn ? ' ' + slowTurn : ''}/>${headOn ? fadeOut(begin) : ''}</g>`;
         track += text(x, y, label, 'lbl', anchor, 'style="fill:var(--alpha)"');
         // In the deck each track appears with its row of the observation table.
         s += on ? `<g class="with-row with-row-${i}">${track}</g>` : track;
