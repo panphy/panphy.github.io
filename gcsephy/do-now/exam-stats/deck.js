@@ -2,8 +2,9 @@
    so adding a year's papers to marks.csv (and facts.csv) updates the deck:
 
      marks.csv      one row per question part: marks, recall (AO1) marks, sections
+     corrections.csv parts whose section is corrected, or that AQA discounted
      sections.csv   specification section -> unit and topic
-     facts.csv      facts asked in more than one series, with the series
+     facts.csv      one row for each time a repeated fact was asked
      practicals.csv required practical number -> name
 
    Once the slides exist, the shared deck script takes over the navigation. */
@@ -82,13 +83,18 @@
   }
   const finish = (section) => { section.append(section.foot); deck.append(section); };
 
-  function build(marks, sections, facts, practicals) {
+  function build(marks, sections, facts, practicals, corrections) {
     const series = [...new Set(marks.map((part) => part.Series))].sort();
     const papers = new Set(marks.map((part) => `${part.Series} ${part.Paper}`));
     const isPhysics = (part) => part.Paper.startsWith("8463");
+    const corrected = new Map(corrections.map((row) => [`${row.Series} ${row.Paper} ${row.Part}`, row]));
     for (const part of marks) {
       part.marks = Number(part.Marks) || 0;
       part.recall = Number(part.Recall) || 0;
+      // marks.csv keeps what the mark scheme prints; corrections.csv says where that is not used as it stands.
+      const correction = corrected.get(`${part.Series} ${part.Paper} ${part.Part}`);
+      if (correction && correction.Sections) part.Sections = correction.Sections;
+      part.discounted = Boolean(correction && correction.Status === "Discounted");
     }
 
     // Marks available in each series: Separate-only topics can appear only in the Physics papers.
@@ -110,7 +116,7 @@
     const topics = new Map();
     for (const section of sections) {
       if (!topics.has(section.Topic)) {
-        topics.set(section.Topic, { name: section.Topic, unit: section.Unit, separate: section.Course === "Separate", recall: {}, all: {} });
+        topics.set(section.Topic, { name: section.Topic, unit: section.Unit, separate: section.Course === "Separate", recall: {}, all: {}, physics: 0, trilogy: 0 });
       }
     }
     for (const part of marks) {
@@ -122,17 +128,19 @@
         // A part that covers several sections shares its marks equally between them.
         topic.recall[part.Series] = (topic.recall[part.Series] || 0) + part.recall / references.length;
         topic.all[part.Series] = (topic.all[part.Series] || 0) + part.marks / references.length;
+        topic[isPhysics(part) ? "physics" : "trilogy"] += part.recall / references.length;
       }
     }
+    // Each course gets its own rate: recall marks in every 100 marks of that course's papers.
+    // Separate-only topics cannot appear in the Trilogy papers, so they have no Trilogy rate.
+    const physicsMarks = sum(series, (name) => available.Separate[name]);
+    const trilogyMarks = sum(series, (name) => available.Combined[name]) - physicsMarks;
     for (const topic of topics.values()) {
-      const pool = available[topic.separate ? "Separate" : "Combined"];
-      const offered = sum(series, (name) => pool[name]);
-      topic.recallMarks = sum(series, (name) => topic.recall[name] || 0);
-      topic.rate = offered ? topic.recallMarks / offered * 100 : 0;
-      topic.seriesAsked = series.filter((name) => (topic.recall[name] || 0) >= 0.5).length;
+      topic.physicsRate = physicsMarks ? topic.physics / physicsMarks * 100 : 0;
+      topic.trilogyRate = topic.separate || !trilogyMarks ? null : topic.trilogy / trilogyMarks * 100;
     }
-    const ranked = [...topics.values()].sort((a, b) => b.rate - a.rate);
-    const topRate = ranked.length ? ranked[0].rate : 1;
+    const rankedFor = (key) => [...topics.values()].filter((topic) => topic[key] !== null).sort((a, b) => b[key] - a[key]);
+    const topRate = Math.max(0.1, ...[...topics.values()].map((topic) => Math.max(topic.physicsRate, topic.trilogyRate || 0)));
 
     const totalMarks = sum(marks, (part) => part.marks);
     const recallMarks = sum(marks, (part) => part.recall);
@@ -145,7 +153,7 @@
     };
     const separateNote = () => {
       const note = el("p", "note");
-      note.append(el("span", "sep", "S"), " Separate Physics only: measured against the Physics papers alone.");
+      note.append(el("span", "sep", "S"), " Separate Physics only: not examined in the Trilogy papers.");
       note.firstChild.style.marginLeft = "0";
       return note;
     };
@@ -163,7 +171,7 @@
         el("p", "lead", `Where the recall marks were in AQA GCSE Physics and Combined Science: Trilogy Higher papers, ${span}.`)]);
       const figure = (value, label, big) => el("div", `figure${big ? " big" : ""}`, [el("b", "", value), el("span", "", label)]);
       const right = el("div", "figures", [
-        figure(`${Math.round(recallMarks / totalMarks * 100)}%`, "of all marks are for recall", true),
+        figure(`${Math.round(recallMarks / totalMarks * 100)}%`, "of all marks are for recall (AO1)", true),
         figure(String(papers.size), "papers counted"),
         figure(totalMarks.toLocaleString("en-GB"), "marks counted"),
       ]);
@@ -177,11 +185,12 @@
       const points = el("ul", "points small");
       const point = (html) => { const item = el("li"); item.innerHTML = html; points.append(item); };
       point(`<b>${papers.size} Higher papers</b> in ${series.length} exam series: Physics (8463) and Combined Science: Trilogy (8464), Papers 1 and 2.`);
-      point("AQA's mark schemes label every question part with its <b>assessment objective</b> and its <b>specification section</b>. We used those labels, not our own judgement.");
-      point("<b>Recall marks</b> are the marks labelled AO1: stating, naming, defining and describing what you have learnt.");
-      point(`We left out the ${Math.round(equationMarks)} marks for writing down an equation, because <b>the equations sheet is provided</b> in the exam.`);
-      point("A part that covers several sections shares its marks equally between them.");
-      section.append(el("div", "stack", [points, el("div", "remember", "Six series is a small sample, and AQA covers the specification over several years. A quiet topic is not a safe topic to skip.")]));
+      point("AQA's mark schemes label the marks with an <b>assessment objective</b> and a <b>specification section</b>. We used those labels, and corrected one that was plainly wrong.");
+      point("<b>Recall marks</b> are the marks labelled AO1: knowledge and understanding of ideas and practical methods. That includes describing a method, so it is more than one-line facts.");
+      point(`We left out the ${Math.round(equationMarks)} marks for writing down or choosing an equation, because <b>the full equations sheet is now provided</b>. It was not in 2020 and 2021.`);
+      point("Marks are split by AQA's mark-by-mark labels. For long answers marked in levels, and for parts covering several sections, the split is an estimate.");
+      points.classList.add("tight");
+      section.append(el("div", "stack", [points, el("div", "remember", "Higher tier only. Six series is a small sample, and AQA covers the specification over several years: a quiet topic is not a safe topic to skip.")]));
       finish(section);
     }
 
@@ -190,7 +199,7 @@
       const section = slide("a-hi", "Recall each year", "Every series", "About a third, <em>every year.</em>");
       const key = el("div", "key", [
         el("span", "", [el("i"), "Recall"]),
-        el("span", "", [el("i", "third"), "Writing down an equation"]),
+        el("span", "", [el("i", "third"), "Writing down or choosing an equation"]),
         el("span", "", [el("i", "rest"), "Calculating, applying and analysing"]),
       ]);
       const bars = el("div", "bars");
@@ -206,7 +215,11 @@
         stacked.children[2].style.flex = "1";
         bars.append(el("div", "bar-row", [el("span", "name", seriesName(name)), stacked]));
       }
-      section.append(key, bars, el("p", "note", "Share of all the marks in the four Higher papers of each series. Recall questions are the ones Do Now practises."));
+      const discounted = marks.filter((part) => part.discounted);
+      const footnote = discounted.length
+        ? ` Counted as printed: AQA discounted one question (${sum(discounted, (part) => part.marks)} marks, ${seriesName(discounted[0].Series)}) and gave every student its marks.`
+        : "";
+      section.append(key, bars, el("p", "note", `Share of all the marks in the four Higher papers of each series.${footnote}`));
       finish(section);
     }
 
@@ -242,23 +255,31 @@
       finish(section);
     }
 
-    // 5 and 6 The topics with the most and the fewest recall marks
-    const rankSlide = (accent, title, eyebrow, heading, chosen, note) => {
+    // The topics with the most and the fewest recall marks, for each course on its own papers
+    const rankSlide = (accent, title, eyebrow, heading, key, chosen, note, showSeparate) => {
       const section = slide(accent, title, eyebrow, heading);
       const bars = el("div", "bars");
       for (const topic of chosen) {
         const bar = el("i");
-        bar.style.width = `${topic.rate / topRate * 86}%`;
+        bar.style.width = `${topic[key] / topRate * 86}%`;
         const name = topicName(topic);
-        bars.append(el("div", "bar-row", [name, el("div", "track", [bar, el("b", "", rate(topic.rate))])]));
+        bars.append(el("div", "bar-row", [name, el("div", "track", [bar, el("b", "", rate(topic[key]))])]));
       }
-      section.append(bars, el("div", "", [el("p", "note", note), separateNote()]));
+      const notes = [el("p", "note", note)];
+      if (showSeparate) notes.push(separateNote());
+      section.append(bars, el("div", "", notes));
       finish(section);
     };
-    rankSlide("a-hi", "Most recall marks", "Top twelve topics", "Most recall <em>marks.</em>", ranked.slice(0, 12),
-      "Recall marks in every 100 marks of the papers the topic can appear in.");
-    rankSlide("a-hot", "Fewest recall marks", "Bottom twelve topics", "Fewest recall <em>marks.</em>", ranked.slice(-12),
-      "Bars use the same scale as the top twelve. Several of these topics are examined mainly through calculations.");
+    const physicsRanked = rankedFor("physicsRate");
+    const trilogyRanked = rankedFor("trilogyRate");
+    rankSlide("a-hi", "Physics: most recall marks", "Separate Physics · top twelve topics", "Physics: <em>most.</em>", "physicsRate", physicsRanked.slice(0, 12),
+      "Recall marks in every 100 marks of the Physics (8463) Higher papers.", true);
+    rankSlide("a-hi", "Physics: fewest recall marks", "Separate Physics · bottom twelve topics", "Physics: <em>fewest.</em>", "physicsRate", physicsRanked.slice(-12),
+      "Same scale as the top twelve. Several of these topics are examined mainly through calculations.", true);
+    rankSlide("a-hot", "Trilogy: most recall marks", "Combined Science: Trilogy · top twelve topics", "Trilogy: <em>most.</em>", "trilogyRate", trilogyRanked.slice(0, 12),
+      "Recall marks in every 100 marks of the Trilogy (8464) Physics Higher papers.", false);
+    rankSlide("a-hot", "Trilogy: fewest recall marks", "Combined Science: Trilogy · bottom twelve topics", "Trilogy: <em>fewest.</em>", "trilogyRate", trilogyRanked.slice(-12),
+      "Same scale as the top twelve. Several of these topics are examined mainly through calculations.", false);
 
     // 7 to 10 Each topic, series by series
     const peak = Math.max(1, ...[...topics.values()].flatMap((topic) => series.map((name) => topic.recall[name] || 0)));
@@ -266,9 +287,10 @@
       const section = slide(ACCENTS[at % ACCENTS.length], title, "Topic by topic", heading);
       const grid = el("div", "grid");
       grid.style.setProperty("--series", series.length);
+      grid.style.setProperty("--tail", 2);
       const head = el("div", "grid-row head", [el("span", "name", "Recall marks in each series")]);
       for (const name of series) head.append(el("span", "", seriesName(name)));
-      head.append(el("span", "", "In every 100 marks"));
+      head.append(el("span", "", "Physics"), el("span", "", "Trilogy"));
       grid.append(head);
       for (const unit of units) {
         if (units.length > 1) grid.append(el("div", "grid-row unit", [el("span", "name", unit)]));
@@ -280,19 +302,29 @@
             if (value >= 0.5) cell.style.background = `color-mix(in srgb, var(--accent) ${Math.round(18 + 82 * Math.min(1, value / peak))}%, var(--card))`;
             row.append(cell);
           }
-          const bar = el("i");
-          bar.style.width = `${topic.rate / topRate * 70}%`;
-          row.append(el("div", "track", [bar, el("b", "", rate(topic.rate))]));
+          row.append(el("span", "per", rate(topic.physicsRate)), el("span", "per", topic.trilogyRate === null ? "–" : rate(topic.trilogyRate)));
           grid.append(row);
         }
       }
       grid.style.setProperty("--cell", grid.children.length > 15 ? "28px" : "34px");
-      section.append(grid, separateNote());
+      section.append(grid, el("div", "", [
+        el("p", "note", "Cells: recall marks across all four papers. Right-hand columns: recall marks in every 100 marks of each course's papers."),
+        separateNote(),
+      ]));
       finish(section);
     });
 
     // Facts asked in more than one series
-    const known = facts.map((fact) => ({ ...fact, asked: list(fact.Series).filter((name) => series.includes(name)) }))
+    const discountedParts = new Set(marks.filter((part) => part.discounted).map((part) => `${part.Series} ${part.Paper} ${part.Part}`));
+    const discountedFacts = facts.filter((row) => discountedParts.has(`${row.Series} ${row.Paper} ${row.Part}`))
+      .map((row) => `The ${seriesName(row.Series)} question on "${row.Fact.toLowerCase()}" was in a question AQA discounted.`);
+    const byFact = new Map();
+    for (const row of facts) {
+      if (!byFact.has(row.Fact)) byFact.set(row.Fact, { Fact: row.Fact, Course: row.Course, asked: [] });
+      const fact = byFact.get(row.Fact);
+      if (series.includes(row.Series) && !fact.asked.includes(row.Series)) fact.asked.push(row.Series);
+    }
+    const known = [...byFact.values()]
       .filter((fact) => fact.asked.length > 1)
       .sort((a, b) => b.asked.length - a.asked.length);
     const perSlide = Math.ceil(known.length / Math.max(1, Math.ceil(known.length / 16)));
@@ -315,7 +347,7 @@
         row.append(el("span", "total", `${fact.asked.length} of ${series.length}`));
         grid.append(row);
       }
-      section.append(grid, el("p", "note", "Chosen by reading the recall questions in every paper. The wording changes; the fact does not."));
+      section.append(grid, el("p", "note", ["Chosen by reading the recall questions in every paper. The wording changes; the fact does not.", ...(first ? discountedFacts : [])].join(" ")));
       finish(section);
     }
 
@@ -386,8 +418,8 @@
 
   try {
     deck.append(el("p", "status", "Loading the figures…"));
-    const [marks, sections, facts, practicals] = await Promise.all(["marks.csv", "sections.csv", "facts.csv", "practicals.csv"].map(load));
-    build(marks, sections, facts, practicals);
+    const [marks, sections, facts, practicals, corrections] = await Promise.all(["marks.csv", "sections.csv", "facts.csv", "practicals.csv", "corrections.csv"].map(load));
+    build(marks, sections, facts, practicals, corrections);
   } catch (error) {
     deck.textContent = "";
     const section = el("section", "slide a-hi", [el("p", "status", "The figures could not be loaded. Check your connection and reload.")]);

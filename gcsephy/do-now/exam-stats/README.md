@@ -9,7 +9,8 @@ Every slide is drawn from the CSV files below when the page loads, so updating t
 | `index.html`, `deck.css`, `deck.js` | The deck. `deck.js` builds the slides, then loads the shared deck script |
 | `marks.csv` | One row per question part of every paper counted |
 | `sections.csv` | Which unit and topic each specification section belongs to. A reference uses the longest `Section` it starts with |
-| `facts.csv` | Facts asked in more than one series, with the series, separated by `;`. Written by hand |
+| `corrections.csv` | Parts where the mark scheme's reference is not used as printed. `Sections` replaces the part's sections for the deck; `Status` `Discounted` marks a question AQA discounted (it is still counted as printed, and the deck says so); `Reason` says why. `marks.csv` keeps what the mark scheme prints |
+| `facts.csv` | Facts asked as recall in more than one series: one row for each time, with the series, paper and part. Written by hand; the deck shows a fact once it has rows in two series |
 | `practicals.csv` | Required practical numbers and names (1–10 in Physics, 14–21 in Trilogy) |
 | `add-paper.py` | Adds one paper to `marks.csv` from its question paper and mark scheme PDFs |
 
@@ -21,17 +22,18 @@ Every slide is drawn from the CSV files below when the page loads, so updating t
 | `Paper` | `8463/1H`, `8463/2H`, `8464/P/1H` or `8464/P/2H` |
 | `Part` | Question part, e.g. `03.2` |
 | `Marks` | From the question paper |
-| `Recall` | The AO1 marks. Where a part has several assessment objectives, its marks are shared equally between them. `0` for a write-down-the-equation part, because the equations sheet is provided |
-| `Equation` | `1` for a write-down-the-equation part |
+| `Recall` | The AO1 marks (knowledge and understanding, which includes describing a practical method). Mark schemes usually print one objective per mark, so this is the share of the part's printed labels that are AO1: a 5-mark part labelled AO2 four times and AO1 once has `1`. For an answer marked in levels this is an estimate. `0` for an equation part, because the full equations sheet is now provided (it was not in 2020 and 2021) |
+| `Equation` | `1` for a part that asks the student to write down or choose an equation |
 | `Levels` | `1` for an extended answer marked in levels |
 | `Sections` | Specification references from the mark scheme, separated by `;`. Trilogy references (6.x) are renumbered to the Physics specification (4.x) |
 | `Practicals` | Required practical numbers from the mark scheme, separated by `;` |
 
 ## Adding a year
 
-AQA releases papers and mark schemes to the public about a year after the exam; teachers can get them earlier from Centre Services. Do not add the PDFs to the repository.
+AQA releases papers and mark schemes to the public about a year after the exam; teachers can get them earlier from Centre Services. Do not add the PDFs to the repository. Only Higher tier papers are counted. The November 2020 and 2021 papers are printed with June dates; they are recorded as `2020-11` and `2021-11`.
 
 1. For each of the four Higher papers run, for example, `python3 add-paper.py 2026-06 8463/1H question-paper.pdf mark-scheme.pdf`. It needs macOS (it reads PDFs through `swift`) or `pdftotext`.
 2. Act on each `CHECK` line it prints: the marks must add up to 100 (Physics) or 70 (Trilogy), and a part it could not read is typed into `marks.csv` by hand from the mark scheme.
-3. Read the new recall questions and add the series to any fact in `facts.csv` that was asked again, or add a new row once a fact has been asked twice.
-4. Open the deck and look through it. Then review the `Target` column of `../questions.csv` against the new figures, as described in [the Do Now README](../README.md#how-the-target-7-questions-were-chosen).
+3. Read the new recall questions. For each one that asks a fact already in `facts.csv`, add a row with its series, paper and part; start a new fact when one has been asked in two series. Every row must point at a part with recall marks.
+4. If a mark scheme's reference is plainly wrong for the question, or the examiner report says a question was discounted, add a row to `corrections.csv` rather than changing `marks.csv`.
+5. Open the deck and look through it. Then review the `Target` column of `../questions.csv` against the new figures, as described in [the Do Now README](../README.md#how-the-target-7-questions-were-chosen).
