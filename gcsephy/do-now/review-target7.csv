@@ -162,7 +162,7 @@ Resistance: ohm (Ω)"
 100,Electricity,"Current, resistance and potential difference",Combined,7,Core fact,Name the component that gives this I–V graph.,A filament lamp
 101,Electricity,"Current, resistance and potential difference",Combined,9,,This is the I–V graph for a filament lamp. Describe how its resistance changes as the potential difference increases.,The resistance increases.
 102,Electricity,"Current, resistance and potential difference",Combined,7,Standard explanation,Explain why the resistance of a filament lamp increases with current.,"A greater current makes the filament hotter, and its resistance increases with temperature."
-103,Electricity,"Current, resistance and potential difference",Combined,9,,Name the component that gives this I–V graph.,A diode
+103,Electricity,"Current, resistance and potential difference",Combined,7,Core fact,Name the component that gives this I–V graph.,A diode
 104,Electricity,"Current, resistance and potential difference",Combined,7,Asked in the 2020–23 papers,This is the I–V graph for a diode. Describe its resistance when the potential difference is reversed.,Very high (almost no current flows).
 105,Electricity,"Current, resistance and potential difference",Combined,7,Asked in the 2020–23 papers,Describe how the resistance of a thermistor varies with temperature.,"As the temperature increases, the resistance decreases."
 106,Electricity,"Current, resistance and potential difference",Combined,7,Asked in the 2020–23 papers,Describe how the resistance of an LDR varies with light intensity.,"As the light intensity increases, the resistance decreases."
@@ -173,7 +173,7 @@ LDR: lights that switch on when it gets dark"
 (Q = I t)"
 671,Electricity,"Current, resistance and potential difference",Combined,9,On the equations sheet,"State the equation linking potential difference, current and resistance.","potential difference = current × resistance
 (V = I R)"
-672,Electricity,"Current, resistance and potential difference",Combined,9,,State the condition for the current through a resistor to be directly proportional to the potential difference.,Its temperature must stay constant.
+672,Electricity,"Current, resistance and potential difference",Combined,7,Core fact,State the condition for the current through a resistor to be directly proportional to the potential difference.,Its temperature must stay constant.
 108,Electricity,Resistance and I–V characteristics (RP),Combined,7,Core practical fact,State the two measurements needed to find the resistance of a component.,The potential difference across it and the current through it
 109,Electricity,Resistance and I–V characteristics (RP),Combined,9,,Wire length and resistance: name the independent variable.,Length of the wire
 110,Electricity,Resistance and I–V characteristics (RP),Combined,9,,Wire length and resistance: name the dependent variable.,Resistance of the wire
