@@ -81,7 +81,7 @@
     for (let y = B; y >= T; y -= 21) grid += `<line x1="${L}" y1="${y}" x2="${R}" y2="${y}" stroke="#e5e7eb" stroke-width="1"/>`;
     const X = (v) => L + v * 2.5; // 0–100 cm
     const Y = (v) => B - v * 35; // 0–6 Ω
-    const pts = [[10, 0.67], [20, 1.22], [30, 1.78], [40, 2.32], [50, 3.4], [60, 3.44], [70, 3.95], [80, 4.51], [90, 5.06]];
+    const pts = [[10, 0.55], [20, 1.1], [30, 1.66], [40, 2.2], [50, 3.4], [60, 3.32], [70, 3.83], [80, 4.39], [90, 4.94]];
     const cross = ([a, b]) => `<path d="M${X(a) - 4} ${Y(b) - 4} L${X(a) + 4} ${Y(b) + 4} M${X(a) - 4} ${Y(b) + 4} L${X(a) + 4} ${Y(b) - 4}" stroke="${INK}" stroke-width="2"/>`;
     let ticks = "";
     for (let v = 0; v <= 100; v += 20) ticks += t(X(v), B + 15, String(v), { size: 10, weight: 600 });
@@ -93,10 +93,10 @@
       <line x1="${L}" y1="${B}" x2="${R}" y2="${B}" stroke="${INK}" stroke-width="2.2"/><line x1="${L}" y1="${B}" x2="${L}" y2="${T}" stroke="${INK}" stroke-width="2.2"/>
       ${ticks}
       ${t(L, T - 12, "resistance / Ω", { size: 11, anchor: "start" })}${t((L + R) / 2, B + 32, "length / cm", { size: 11 })}
-      <line x1="${X(0)}" y1="${Y(0.12)}" x2="${X(100)}" y2="${Y(5.62)}" stroke="${RED}" stroke-width="2.4"/>
+      <line x1="${X(0)}" y1="${Y(0)}" x2="${X(100)}" y2="${Y(5.5)}" stroke="${RED}" stroke-width="2.4"/>
       ${pts.map(cross).join("")}
       <circle cx="${X(50)}" cy="${Y(3.4)}" r="11" fill="none" stroke="${BLUE}" stroke-width="2"/>
-      ${tag(1, L - 38, T - 16)}${tag(2, L - 44, Y(3) - 12)}${tag(3, X(30) - 16, Y(1.78) - 10)}${tag(4, X(50) - 22, Y(3.4) - 12)}${tag(5, X(90) + 12, Y(5.06) + 22)}${tag(6, R - 44, T + 6)}
+      ${tag(1, L - 38, T - 16)}${tag(2, L - 44, Y(3) - 12)}${tag(3, X(30) - 16, Y(1.66) - 10)}${tag(4, X(50) - 22, Y(3.4) - 12)}${tag(5, X(90) + 12, Y(4.94) + 22)}${tag(6, R - 44, T + 6)}
       ${note(1, 350, 40, ["Label both axes with", "quantity / unit"])}
       ${note(2, 350, 82, ["Even scales: equal", "steps, easy numbers"])}
       ${note(3, 350, 124, ["Plot small, neat", "crosses (×)"])}

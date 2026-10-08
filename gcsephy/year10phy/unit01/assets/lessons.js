@@ -822,7 +822,7 @@
             title: "Diode (and LED)",
             paragraphs: [
               "A diode lets current flow in one direction only. In the reverse direction it has a very high resistance, so the current is practically zero.",
-              "In the forward direction almost no current flows until the p.d. reaches about 0.6 V; after that, the current rises steeply. An LED (light-emitting diode) behaves the same way and emits light when current flows.",
+              "In the forward direction almost no current flows until the p.d. reaches about 0.6 V; after that, the current rises steeply. An LED (light-emitting diode) behaves in the same way, but needs a larger p.d. before it conducts, and it emits light when current flows.",
             ],
             figure: D.ivSketch("diode", "Diode: current flows one way only; very high resistance in reverse."),
             componentImages: [
