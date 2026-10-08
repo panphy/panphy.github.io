@@ -120,6 +120,10 @@ button:focus-visible, a:focus-visible { outline: 3px solid var(--focus); outline
 .banner-logo img { display: block; width: 38px; height: 38px; object-fit: contain; }
 .banner-title {
   justify-self: center;
+  display: inline-flex;
+  align-items: center;
+  min-height: 48px;
+  text-decoration: none;
   font-family: var(--font-display);
   font-size: 1.4rem;
   letter-spacing: -0.5px;

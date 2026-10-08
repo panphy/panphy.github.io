@@ -85,6 +85,6 @@
 .course-switch a { display: inline-flex; align-items: center; min-height: 44px; padding: 0 14px; color: #fff; font-size: 13px; font-weight: 800; text-decoration: none; }
 .course-switch a[aria-current] { background: #fff; color: var(--navy); }
 @media (max-width: 480px) {
-  .brand span { display: none; }
+  .brand .brand-name { display: none; }
   .course-switch a { padding: 0 11px; }
 }
