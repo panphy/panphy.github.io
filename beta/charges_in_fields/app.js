@@ -13,6 +13,8 @@ const state = {
   swap: false,
   reverseB: false,
   autotune: true,
+  showE: true,
+  showB: true,
   beam: false,
   values: {}
 };
@@ -117,7 +119,7 @@ let selected = null;
 function readPalette() {
   const styles = getComputedStyle(document.documentElement);
   const css = name => styles.getPropertyValue(name).trim();
-  const names = ['positive', 'negative', 'alpha', 'field', 'e-field', 'force', 'velocity', 'copper', 'steel', 'carbon', 'north', 'south', 'current', 'text-secondary'];
+  const names = ['positive', 'negative', 'alpha', 'field', 'e-field', 'force', 'force-b', 'velocity', 'copper', 'steel', 'carbon', 'north', 'south', 'current', 'text-secondary'];
   const result = { dark: document.documentElement.getAttribute('data-theme') === 'dark', css: {} };
   for (const name of names) {
     const key = name.replace(/-(\w)/g, (_, c) => c.toUpperCase());
@@ -423,13 +425,19 @@ function newLab(kind) {
   stage.add(group);
   const velocity = makeArrow(palette.velocity, 0.045);
   const force = makeArrow(palette.force, 0.045);
-  const electric = makeArrow(palette.eField, 0.045);
-  const magnetic = makeArrow(palette.field, 0.045);
+  // The selector shows the electric and magnetic forces separately, in two force colours.
+  const electric = makeArrow(palette.force, 0.045);
+  const magnetic = makeArrow(palette.forceB, 0.045);
   for (const arrow of [velocity, force, electric, magnetic]) {
     arrow.visible = false;
     group.add(arrow);
   }
-  lab = { kind, group, tracks, tracers: [], arrows: { velocity, force, electric, magnetic }, spots: [], time: 0, spawnClock: 0, emitted: new Array(HISTOGRAM_BINS).fill(0), passed: new Array(HISTOGRAM_BINS).fill(0) };
+  // Everything drawn for a field (lines and region tint) sits in its group, so it can be hidden as one.
+  const fieldGroups = { E: new THREE.Group(), B: new THREE.Group() };
+  fieldGroups.E.visible = state.showE;
+  fieldGroups.B.visible = state.showB;
+  group.add(fieldGroups.E, fieldGroups.B);
+  lab = { kind, group, tracks, fieldGroups, tracers: [], arrows: { velocity, force, electric, magnetic }, spots: [], time: 0, spawnClock: 0, emitted: new Array(HISTOGRAM_BINS).fill(0), passed: new Array(HISTOGRAM_BINS).fill(0) };
   return group;
 }
 function plates(group, halfGap, length, { swap = false } = {}) {
@@ -448,34 +456,48 @@ function plates(group, halfGap, length, { swap = false } = {}) {
   const bottom = make(swap ? 1 : -1, -halfGap - 0.08);
   return { top, bottom };
 }
-function eFieldArrows(group, halfGap, length, down = true, opacity = 0.55) {
-  const arrows = new THREE.Group();
-  for (let x = -length / 2 + 0.6; x <= length / 2 - 0.5; x += 1.2) {
-    for (const z of [-1, 0, 1]) {
-      const arrow = makeArrow(palette.eField, 0.018, opacity);
-      setArrow(arrow, new THREE.Vector3(x, down ? halfGap : -halfGap, z), new THREE.Vector3(0, down ? -1 : 1, 0), halfGap * 2);
-      arrow.traverse(child => { child.userData.part = 'efield'; });
-      pickables.push(...arrow.children);
-      arrows.add(arrow);
+// A field line: a solid line across the whole field region with arrowheads along it for the direction.
+// Unlit, so each field is exactly its legend colour in every experiment.
+function fieldLine(kind, from, to, partKey, { radius = 0.025, heads = 1, headScale = 1 } = {}) {
+  const mat = new THREE.MeshBasicMaterial({ color: kind === 'E' ? palette.eField : palette.field });
+  const span = to.clone().sub(from);
+  const length = span.length();
+  const line = new THREE.Group();
+  line.position.copy(from);
+  line.quaternion.setFromUnitVectors(UP, span.normalize());
+  const shaft = new THREE.Mesh(new THREE.CylinderGeometry(radius, radius, length, 10), mat);
+  shaft.position.y = length / 2;
+  line.add(shaft);
+  line.userData.heads = [];
+  for (let i = 0; i < heads; i++) {
+    const head = new THREE.Mesh(new THREE.ConeGeometry(radius * 3.6 * headScale, radius * 10 * headScale, 16), mat);
+    head.position.y = length * (i + 0.5) / heads;
+    line.add(head);
+    line.userData.heads.push(head);
+  }
+  for (const mesh of line.children) part(mesh, partKey);
+  lab.fieldGroups[kind].add(line);
+  return line;
+}
+// Electric field lines from the positive plate to the negative plate, either side of the beam.
+function eFieldLines(halfGap, length, down = true) {
+  for (let x = -length / 2 + 0.5; x < length / 2; x += 1) {
+    for (const z of [-1, 1]) {
+      const top = new THREE.Vector3(x, halfGap, z);
+      const bottom = new THREE.Vector3(x, -halfGap, z);
+      fieldLine('E', down ? top : bottom, down ? bottom : top, 'efield');
     }
   }
-  group.add(arrows);
-  return arrows;
 }
-// Magnetic field into the screen: short arrows pointing away from the viewer.
-function bFieldArrows(group, xs, ys, z0, length, sign = 1, opacity = 0.5) {
-  const arrows = new THREE.Group();
+// Magnetic field lines into the screen (sign > 0) or out of it, from one face of the region to the other.
+function bFieldLines(xs, ys, zFront, zBack, sign = 1, options = {}) {
   for (const x of xs) {
     for (const y of ys) {
-      const arrow = makeArrow(palette.field, 0.02, opacity);
-      setArrow(arrow, new THREE.Vector3(x, y, sign > 0 ? z0 : z0 - length), new THREE.Vector3(0, 0, -sign), length);
-      arrow.traverse(child => { child.userData.part = 'bfield'; });
-      pickables.push(...arrow.children);
-      arrows.add(arrow);
+      const front = new THREE.Vector3(x, y, zFront);
+      const back = new THREE.Vector3(x, y, zBack);
+      fieldLine('B', sign > 0 ? front : back, sign > 0 ? back : front, 'bfield', options);
     }
   }
-  group.add(arrows);
-  return arrows;
 }
 function source(group, position) {
   const gun = part(new THREE.Mesh(new THREE.CylinderGeometry(0.3, 0.38, 1.2, 24), material(palette.carbon, { metalness: 0.4 })), 'gun');
@@ -492,7 +514,7 @@ function buildEField() {
   const halfGap = state.values.separation / 2;
   const length = PLATE_LENGTH * 100;
   lab.plates = plates(group, halfGap, length, { swap: state.swap });
-  lab.fieldArrows = eFieldArrows(group, halfGap, length, !state.swap);
+  eFieldLines(halfGap, length, !state.swap);
   source(group, new THREE.Vector3(-8, 0, 0));
   const screen = part(new THREE.Mesh(new THREE.BoxGeometry(0.12, 12, 4), material(palette.alpha, { transparent: true, opacity: palette.dark ? 0.25 : 0.2, roughness: 0.9, depthWrite: false })), 'screen');
   screen.position.x = SCREEN_X * 100 + 0.06;
@@ -513,9 +535,10 @@ function buildBField() {
   box.raycast = () => {};
   const edges = new THREE.LineSegments(new THREE.EdgesGeometry(box.geometry), new THREE.LineBasicMaterial({ color: palette.field, transparent: true, opacity: 0.4 }));
   edges.position.copy(box.position);
-  group.add(box, edges);
-  const ticks = [-7.5, -4.5, -1.5, 1.5, 4.5, 7.5];
-  lab.fieldArrows = bFieldArrows(group, ticks, ticks, zMax - 0.2, 1.4, state.reverseB ? -1 : 1);
+  lab.fieldGroups.B.add(box, edges);
+  const ticks = [-6.75, -2.25, 2.25, 6.75];
+  // Long lines seen almost end-on need bigger arrowheads to show which way the field points.
+  bFieldLines(ticks, ticks, zMax, zMin, state.reverseB ? -1 : 1, { heads: 3, headScale: 1.5 });
   const gun = part(new THREE.Mesh(new THREE.CylinderGeometry(0.16, 0.2, 0.7, 20), material(palette.carbon, { metalness: 0.4 })), 'gun');
   gun.rotation.z = -Math.PI / 2;
   gun.position.set(-0.45, 0, 0);
@@ -526,14 +549,13 @@ function buildSelector() {
   const halfGap = SELECTOR_GAP * 100 / 2;
   const length = PLATE_LENGTH * 100;
   plates(group, halfGap, length);
-  eFieldArrows(group, halfGap, length, true, 0.4);
+  eFieldLines(halfGap, length);
   // Shaded region where the magnetic field acts (into the screen).
   const region = new THREE.Mesh(new THREE.BoxGeometry(length, halfGap * 2, 3.2), new THREE.MeshBasicMaterial({ color: palette.field, transparent: true, opacity: palette.dark ? 0.08 : 0.06, depthWrite: false }));
   region.raycast = () => {};
-  group.add(region);
-  const xs = [];
-  for (let x = -length / 2 + 0.9; x < length / 2; x += 1.8) xs.push(x);
-  bFieldArrows(group, xs, [-0.5, 0.5], 1.9, 0.9, 1, 0.65);
+  lab.fieldGroups.B.add(region);
+  // Between the electric field lines, so the two sets never touch.
+  bFieldLines([-4, -2, 0, 2, 4], [-0.5, 0.5], 1.6, -1.6);
   source(group, new THREE.Vector3(-8, 0, 0));
   const wall = new THREE.Group();
   const wallMaterial = material(palette.carbon, { roughness: 0.7 });
@@ -571,7 +593,16 @@ function buildCyclotron() {
   });
   deeGeometry.dispose();
   const gap = part(new THREE.Mesh(new THREE.BoxGeometry(halfGap * 2, 0.7, R * 2), new THREE.MeshBasicMaterial({ color: palette.eField, transparent: true, opacity: 0.12, depthWrite: false })), 'gapRegion');
-  group.add(gap);
+  lab.fieldGroups.E.add(gap);
+  // Electric field lines across the gap, above and below the plane of the orbit. Their arrowheads follow the alternating voltage.
+  lab.gapHeads = [];
+  for (let z = -4.5; z <= 4.5; z += 1) {
+    for (const y of [-0.22, 0.22]) {
+      const line = fieldLine('E', new THREE.Vector3(-halfGap, y, z), new THREE.Vector3(halfGap, y, z), 'gapRegion', { radius: 0.018 });
+      lab.gapHeads.push(...line.userData.heads);
+    }
+  }
+  for (const head of lab.gapHeads) head.visible = false;
   // Magnet poles above and below: the field points up, from the N pole to the S pole.
   for (const [y, kind] of [[1.25, 'south'], [-1.25, 'north']]) {
     const pole = part(new THREE.Mesh(new THREE.CylinderGeometry(R + 0.6, R + 0.6, 0.5, 64), material(palette[kind], { transparent: true, opacity: y > 0 ? 0.07 : 0.35, depthWrite: false })), 'pole');
@@ -582,14 +613,9 @@ function buildCyclotron() {
   label.rotation.x = -Math.PI / 2;
   label.position.set(-(R - 0.4), -0.99, R * 0.55);
   group.add(label);
-  const arrows = new THREE.Group();
-  for (const [x, z] of [[-3.6, -2.2], [3.6, -2.2], [-3.6, 2.2], [3.6, 2.2], [0, -4.3], [-2, 3.9], [2, 3.9]]) {
-    const arrow = makeArrow(palette.field, 0.025, 0.7);
-    setArrow(arrow, new THREE.Vector3(x, -0.95, z), UP, 1.9);
-    arrow.traverse(child => { child.userData.part = 'pole'; });
-    arrows.add(arrow);
+  for (const [x, z] of [[-3.6, -2.2], [3.6, -2.2], [-3.6, 2.2], [3.6, 2.2], [-1.6, -4], [1.6, -4], [-1.6, 4], [1.6, 4], [-1.8, 0], [1.8, 0]]) {
+    fieldLine('B', new THREE.Vector3(x, -1, z), new THREE.Vector3(x, 1, z), 'bfieldUp');
   }
-  group.add(arrows);
   const oscillator = part(new THREE.Mesh(new THREE.BoxGeometry(1.4, 0.7, 0.8), material(palette.carbon)), 'oscillator');
   oscillator.position.set(0, -0.6, R + 1.8);
   group.add(oscillator);
@@ -1006,11 +1032,18 @@ function resetView(animate = false) {
 const raycaster = new THREE.Raycaster();
 raycaster.params.Line.threshold = 0.1;
 const pointer = new THREE.Vector2();
+// A mesh inside a hidden group keeps its own visible flag, so check its ancestors too.
+function isShown(object) {
+  for (let current = object; current; current = current.parent) {
+    if (!current.visible) return false;
+  }
+  return true;
+}
 function pick(clientX, clientY) {
   const rect = renderer.domElement.getBoundingClientRect();
   pointer.set((clientX - rect.left) / rect.width * 2 - 1, -(clientY - rect.top) / rect.height * 2 + 1);
   raycaster.setFromCamera(pointer, camera);
-  const hits = raycaster.intersectObjects(pickables.filter(mesh => mesh.visible), false);
+  const hits = raycaster.intersectObjects(pickables.filter(isShown), false);
   return hits.find(hit => PARTS[hit.object.userData.part])?.object || null;
 }
 function select(mesh) {
@@ -1032,8 +1065,9 @@ function select(mesh) {
 function describe(key) {
   if (key === 'particle') {
     const data = particleData();
-    return `${data.name.toUpperCase()} · Charge ${data.q > 0 ? '+' : '−'}${sci(Math.abs(data.q))} C · Mass ${sci(data.m)} kg. ${PARTS.particle.split('· ')[1]}`;
+    return `${data.name.toUpperCase()} · Charge ${data.q > 0 ? '+' : '−'}${sci(Math.abs(data.q))} C · Mass ${sci(data.m)} kg. ${PARTS[state.mode === 'selector' ? 'particleSelector' : 'particle'].split('· ')[1]}`;
   }
+  if (key === 'bfield' && state.mode === 'bfield' && state.reverseB) return PARTS.bfieldOut;
   return PARTS[key];
 }
 let pointerStart = null;
@@ -1209,7 +1243,45 @@ function buildControls() {
     field.appendChild(rowElement);
     container.appendChild(field);
   }
+  const show = document.createElement('div');
+  show.className = 'field';
+  show.setAttribute('role', 'group');
+  show.setAttribute('aria-labelledby', 'label-show');
+  show.innerHTML = '<span id="label-show">Show field lines</span>';
+  const showRow = document.createElement('div');
+  showRow.className = 'choice-row';
+  for (const kind of MODE_FIELDS[state.mode]) {
+    const { name, colour } = FIELD_KINDS[kind];
+    const button = document.createElement('button');
+    button.type = 'button';
+    button.dataset.show = kind;
+    button.innerHTML = `<i class="chip" style="background:var(--${colour})">${kind}</i>${name} field`;
+    button.addEventListener('click', () => showField(kind, !state[`show${kind}`]));
+    showRow.appendChild(button);
+  }
+  show.appendChild(showRow);
+  container.appendChild(show);
+  updateFieldToggles();
   if (state.mode === 'cyclotron' && state.autotune) tune();
+}
+// Hiding a field only hides its drawing: it still acts on the particles.
+const FIELD_KINDS = { E: { name: 'Electric', colour: 'e-field', legend: 'efield' }, B: { name: 'Magnetic', colour: 'field', legend: 'bfield' } };
+const MODE_FIELDS = { efield: ['E'], bfield: ['B'], selector: ['E', 'B'], cyclotron: ['E', 'B'] };
+function updateFieldToggles() {
+  for (const [kind, { legend }] of Object.entries(FIELD_KINDS)) {
+    const shown = state[`show${kind}`];
+    document.querySelector(`[data-show=${kind}]`)?.setAttribute('aria-pressed', String(shown));
+    document.querySelector(`[data-legend=${legend}]`).classList.toggle('is-off', !shown);
+  }
+}
+function showField(kind, shown) {
+  state[`show${kind}`] = shown;
+  if (lab) lab.fieldGroups[kind].visible = shown;
+  updateFieldToggles();
+  const name = FIELD_KINDS[kind].name.toUpperCase();
+  readout.textContent = shown
+    ? `${name} FIELD SHOWN · The lines show the direction of the field.`
+    : `${name} FIELD HIDDEN · Only the drawing is hidden: the field still acts on the particles.`;
 }
 // Each particle needs its own ranges, so choosing one resets its settings to sensible values.
 function chooseParticle(key) {
@@ -1277,7 +1349,7 @@ const DEFAULT_READOUT = {
 const LEGEND = {
   efield: ['efield', 'velocity', 'force'],
   bfield: ['bfield', 'velocity', 'force'],
-  selector: ['efield', 'bfield', 'velocity', 'speed'],
+  selector: ['efield', 'bfield', 'velocity', 'forceE', 'forceB', 'speed'],
   cyclotron: ['efield', 'bfield', 'velocity', 'force']
 };
 const GRAPH_LABELS = {
@@ -1418,6 +1490,11 @@ function stepLab(delta) {
       dee.material.emissive.copy(value >= 0 ? palette.positive : palette.negative);
       dee.material.emissiveIntensity = Math.abs(value) * 0.8;
     });
+    // A positive voltage makes the left dee positive, so the field in the gap points to the right.
+    for (const head of lab.gapHeads) {
+      head.visible = Math.abs(voltage) > 0.05;
+      head.rotation.x = voltage < 0 ? Math.PI : 0;
+    }
   }
   if (state.mode === 'selector' && lab.detector) {
     lab.flash = Math.max(0, (lab.flash || 0) - delta * 2);
