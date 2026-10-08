@@ -90,6 +90,7 @@
       case 'Home': event.preventDefault(); show(0); break;
       case 'End': event.preventDefault(); show(state.slides.length - 1); break;
       case 'f': case 'F': toggleFullscreen(); break;
+      case 'Escape': if (document.body.classList.contains('is-window-fullscreen')) setPresenting(false); break;
       case 't': case 'T': setThumbs(!document.body.classList.contains('show-thumbs')); break;
       default: break;
     }
@@ -148,22 +149,50 @@
     }
   }
 
+  // iPhone has no Fullscreen API, so presenting there fills the browser window
+  // instead and shows a button to leave.
   const fullscreenElement = () => document.fullscreenElement || document.webkitFullscreenElement;
-  function toggleFullscreen() {
-    const root = document.documentElement;
-    if (fullscreenElement()) {
-      (document.exitFullscreen || document.webkitExitFullscreen).call(document);
-    } else {
-      const request = root.requestFullscreen || root.webkitRequestFullscreen;
-      if (request) request.call(root);
-    }
-  }
-  function onFullscreenChange() {
-    const on = !!fullscreenElement();
+  const requestFullscreen = document.documentElement.requestFullscreen || document.documentElement.webkitRequestFullscreen;
+  const exitButton = document.createElement('button');
+  function setPresenting(on, inWindow = false) {
     document.body.classList.toggle('is-fullscreen', on);
+    document.body.classList.toggle('is-window-fullscreen', on && inWindow);
     fullscreenButton.setAttribute('aria-pressed', String(on));
     fullscreenButton.setAttribute('aria-label', on ? 'Exit fullscreen' : 'Present fullscreen');
     requestAnimationFrame(fit);
+  }
+  function toggleFullscreen() {
+    if (fullscreenElement()) {
+      (document.exitFullscreen || document.webkitExitFullscreen).call(document);
+    } else if (requestFullscreen) {
+      requestFullscreen.call(document.documentElement);
+    } else {
+      setPresenting(!document.body.classList.contains('is-fullscreen'), true);
+    }
+  }
+  function onFullscreenChange() {
+    setPresenting(!!fullscreenElement());
+  }
+  function buildExitButton() {
+    exitButton.type = 'button';
+    exitButton.className = 'exit-present';
+    exitButton.setAttribute('aria-label', 'Exit fullscreen');
+    exitButton.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M6 6l12 12M18 6L6 18"/></svg>';
+    exitButton.addEventListener('click', () => setPresenting(false));
+    document.body.appendChild(exitButton);
+  }
+
+  // iOS can keep a stale or over-tall layout viewport after the phone is
+  // turned, which cuts the slide off with no way to scroll. Pin the layout to
+  // the visible viewport and refit whenever the stage really changes size.
+  function syncViewport() {
+    const viewport = window.visualViewport;
+    if (viewport && viewport.scale < 1.01) {
+      const gap = Math.round(document.documentElement.clientHeight - viewport.offsetTop - viewport.height);
+      document.documentElement.style.setProperty('--vv-bottom', `${gap > 1 ? gap : 0}px`);
+      if (window.scrollX || window.scrollY) window.scrollTo(0, 0);
+    }
+    fit();
   }
 
   const SVG_NS = 'http://www.w3.org/2000/svg';
@@ -293,19 +322,22 @@
     setThumbs(!thumbsHidden, false);
     const fromHash = parseInt(location.hash.slice(1), 10);
     show(Number.isFinite(fromHash) ? fromHash - 1 : 0);
-    fit();
+    syncViewport();
 
     prevButton.addEventListener('click', prev);
     nextButton.addEventListener('click', next);
     fullscreenButton.addEventListener('click', toggleFullscreen);
     thumbsToggle.addEventListener('click', () => setThumbs(!document.body.classList.contains('show-thumbs')));
-    if (!(document.documentElement.requestFullscreen || document.documentElement.webkitRequestFullscreen)) fullscreenButton.hidden = true;
+    buildExitButton();
     document.addEventListener('keydown', onKey);
     document.addEventListener('fullscreenchange', onFullscreenChange);
     document.addEventListener('webkitfullscreenchange', onFullscreenChange);
     stage.addEventListener('touchstart', onTouchStart, { passive: true });
     stage.addEventListener('touchend', onTouchEnd, { passive: true });
-    window.addEventListener('resize', fit);
+    window.addEventListener('resize', syncViewport);
+    window.addEventListener('orientationchange', () => [0, 300, 800].forEach(delay => setTimeout(syncViewport, delay)));
+    if (window.visualViewport) window.visualViewport.addEventListener('resize', syncViewport);
+    if (window.ResizeObserver) new ResizeObserver(fit).observe(stage);
     reduceMotion.addEventListener('change', setScatterActive);
     window.addEventListener('hashchange', () => {
       const n = parseInt(location.hash.slice(1), 10);
