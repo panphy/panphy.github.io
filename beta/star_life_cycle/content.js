@@ -218,78 +218,74 @@ export const STAGES = {
   rgb: {
     name: 'Red giant',
     tagline: 'The core has run out of hydrogen. The core shrinks and the outside swells.',
-    balance: () => ({ v: 0.3, text: 'Core shrinks, outer layers expand' }),
+    balance: c => ({
+      rgb: { v: 0.3, text: 'Core shrinks, outer layers expand' },
+      he: { v: 0, text: 'Balanced again' },
+      agb: { v: 0.6, text: 'Outer layers pushed away' }
+    })[c.st.phase.id],
+    live: c => ({
+      rgb: '<b>In the core now:</b> no fusion. Hydrogen fuses in a shell around the core, and the star swells.',
+      he: `<b>In the core now:</b> helium → carbon and oxygen, at ${temp(c.st.coreT)}. The star shrinks back and steadies${c.M >= 2 ? ': for a while it is hotter and yellower, but still a giant' : ''}.`,
+      agb: '<b>In the core now:</b> no fusion. Helium and hydrogen fuse in two shells, and the star swells again.'
+    })[c.st.phase.id],
     body: c => {
-      const tip = c.stage.keys[c.stage.keys.length - 1];
-      const end = c.M < HELIUM_IGNITION_MASS
-        ? 'This star is too light: its core never reaches the 100 million K needed to fuse helium. It will lose its outer layers and leave a white dwarf made of helium.'
-        : c.M < 2
-          ? 'When the core reaches about 100 million K, helium ignites everywhere in the core within minutes: the <b>helium flash</b>.'
-          : 'When the core reaches about 100 million K, helium fusion begins.';
-      return `
+      const [first, , last] = c.stage.phases;
+      const tip = first.keys[first.keys.length - 1];
+      const start = `
       <p>With no fusion in the core, nothing holds it up. Gravity squeezes the helium core, and it gets hotter.</p>
       <p>Hydrogen now fuses in a <b>shell</b> around the core, faster than before. The extra energy pushes the outer layers outward until the star is about ${sig(tip.R, 2)} times the width of the Sun (${orbitComparison(tip.R)}).</p>
-      <p>The energy is spread over a huge surface, so the surface cools to about ${temp(tip.T)} and glows red, even though the star is now ${sig(tip.L / c.ms.L, 2)} times brighter.</p>
-      <p>${end}</p>`;
+      <p>The energy is spread over a huge surface, so the surface cools to about ${temp(tip.T)} and glows red, even though the star is now ${sig(tip.L / c.ms.L, 2)} times brighter.</p>`;
+      if (!last) return `${start}
+      <p>This star is too light: its core never reaches the 100 million K needed to fuse helium. It will lose its outer layers and leave a white dwarf made of helium.</p>`;
+      const end = last.keys[last.keys.length - 1];
+      return `${start}
+      <p>When the core reaches about 100 million K, <b>helium</b> begins to fuse into <b>carbon</b> and <b>oxygen</b>. When the helium in the core runs out too, this star is not massive enough to fuse carbon, so fusion in the core stops for good.</p>
+      <p>The star swells again, to about ${sig(end.R, 2)} R☉ (${orbitComparison(end.R)}), and blows its outer layers into space. It goes from ${mass(c.stage.mass[0])} to ${mass(c.stage.mass[1])} in this stage.</p>
+      <p class="note">While helium fuses in the core, the star shrinks and steadies for a while before it swells again. Astronomers count that as a separate phase: see Going further.</p>`;
     },
-    look: () => 'Giants have a few enormous convection cells instead of fine speckles. Gas drifts away from the weakly held surface. The cutaway shows a dead helium core with a thin burning shell around it (the real core is only about the size of the Earth).',
-    deeper: c => `
+    look: c => (c.stage.phases.length > 1
+      ? 'Giants have a few enormous convection cells instead of fine speckles, and gas drifts away from the weakly held surface. Scrub slowly: partway through, the star shrinks and drops down the HR diagram, then swells again. Open the cutaway to see what the core is doing each time.'
+      : 'Giants have a few enormous convection cells instead of fine speckles. Gas drifts away from the weakly held surface. The cutaway shows a dead helium core with a thin burning shell around it (the real core is only about the size of the Earth).'),
+    deeper: c => {
+      const [first, he, agb] = c.stage.phases;
+      const start = `
       <p><b>Stefan–Boltzmann law.</b> L = 4πR²σT⁴. A star that is cool yet very luminous must be enormous.</p>
-      <p>The core is so dense that it is held up by <b>electron degeneracy pressure</b>, which does not depend on temperature. ${c.M < 2 && c.M >= HELIUM_IGNITION_MASS ? 'So when helium ignites, the core cannot expand and cool to steady itself. Fusion runs away, briefly releasing 10¹¹ L☉. All of it goes into expanding the core, so nothing is seen from outside.' : ''}</p>
-      <p>The convective envelope reaches deep enough to carry fusion products up to the surface (the first dredge-up).</p>`,
-    layers: c => [
-      { name: 'Helium core (no fusion)', el: 'He', kind: 'inert', r: 0.11, info: 'Helium "ash" from the main sequence. It is contracting and heating up, held up by electron degeneracy pressure. In reality it is about the size of the Earth.' },
-      { name: 'Hydrogen-fusing shell', el: 'H', kind: 'fusion', r: 0.17, info: `Hydrogen fuses to helium in a thin shell at ${temp(Math.max(3e7, c.st.coreT * 0.5))}, adding more helium to the core below.` },
-      { name: 'Convective envelope', el: 'H', kind: 'convective', r: 1, info: 'A vast, thin, churning envelope. Its average density is less than a thousandth of the density of air.' }
-    ]
-  },
-
-  he: {
-    name: 'Helium burning',
-    tagline: 'The core is hot enough to fuse helium into carbon and oxygen.',
-    balance: () => ({ v: 0, text: 'Balanced again' }),
-    body: c => `
-      <p>At 100 million K, three helium nuclei can fuse to make <b>carbon</b>. Add one more and you get <b>oxygen</b>.</p>
-      <p>With energy released in the core again, the star settles down: it shrinks to about ${sig(c.stage.keys[0].R, 2)} R☉ and its surface warms up a little.</p>
-      <p>This lasts ${years(c.stage.years)}, far shorter than the main sequence. Helium fusion releases only about a tenth as much energy per kilogram as hydrogen fusion, and the star is now much brighter.</p>
-      ${c.M >= 4 ? '<p>A star of this mass pulses in and out here as a <b>Cepheid variable</b>. The pulse period reveals its true brightness, which astronomers use to measure distances to other galaxies.</p>' : ''}
-      <p class="note">At GCSE this stage is counted as part of the red giant stage.</p>`,
-    look: () => 'The star has shrunk since the red giant stage. On the HR diagram it has dropped back down. Open the cutaway: there are now two regions of fusion.',
-    deeper: () => `
-      <p><b>Triple-alpha process.</b> ⁴He + ⁴He ⇌ ⁸Be, which falls apart in about 10⁻¹⁶ s. Just occasionally a third ⁴He hits it first and makes ¹²C. This only works because carbon has an excited state at exactly the right energy (the Hoyle state). The rate goes as T⁴⁰.</p>
-      <p>Then ¹²C + ⁴He → ¹⁶O + γ. Nearly all the carbon and oxygen in your body was made this way.</p>`,
-    layers: () => [
-      { name: 'Helium-fusing core', el: 'He', kind: 'fusion', r: 0.14, info: 'Helium fuses to carbon and oxygen at 100 to 200 million K.' },
-      { name: 'Helium layer', el: 'He', kind: 'inert', r: 0.22, info: 'Helium that is not hot enough to fuse.' },
-      { name: 'Hydrogen-fusing shell', el: 'H', kind: 'fusion', r: 0.28, info: 'Hydrogen still fuses to helium in a shell.' },
-      { name: 'Convective envelope', el: 'H', kind: 'convective', r: 1, info: 'The outer layers, still mostly hydrogen.' }
-    ]
-  },
-
-  agb: {
-    name: 'Red giant again',
-    tagline: 'The core runs out of helium too. Two burning shells swell the star to its largest size.',
-    balance: () => ({ v: 0.6, text: 'Outer layers pushed away' }),
-    body: c => {
-      const tip = c.stage.keys[c.stage.keys.length - 1];
+      <p>The core is so dense that it is held up by <b>electron degeneracy pressure</b>, which does not depend on temperature. ${c.M < 2 && he ? 'So when helium ignites, the core cannot expand and cool to steady itself. Fusion runs away, briefly releasing 10¹¹ L☉: the <b>helium flash</b>. All of it goes into expanding the core, so nothing is seen from outside.' : ''}</p>
+      <p>The convective envelope reaches deep enough to carry fusion products up to the surface (the first dredge-up).</p>`;
+      if (!he) return start;
       return `
-      <p>The core is now carbon and oxygen. To fuse carbon it would need 600 million K, and this star is not massive enough to squeeze its core that hard. Fusion in the core stops for good.</p>
-      <p>Helium and hydrogen fuse in two thin shells around the dead core. The star swells to about ${sig(tip.R, 2)} R☉ (${orbitComparison(tip.R)}) and shines ${lum(tip.L)}.</p>
-      <p>Gravity at this bloated surface is so weak that the star pulses and blows its outer layers into space. It goes from ${mass(c.stage.mass[0])} to ${mass(c.stage.mass[1])} in this stage.</p>
-      <p class="note">Astronomers call this the asymptotic giant branch (AGB). At GCSE it is counted as part of the red giant stage.</p>`;
-    },
-    look: () => 'The star slowly pulses in and out, and a dense wind streams away. The cutaway shows a dead carbon–oxygen core wrapped in two burning shells.',
-    deeper: () => `
-      <p><b>Thermal pulses.</b> The helium shell switches on in a flash every 10⁴ to 10⁵ years. Each pulse mixes carbon up to the surface.</p>
+      <p><b>Three phases in one stage.</b> Astronomers split the red giant stage into three phases, which is why the track on the HR diagram goes up, drops, then climbs again.</p>
+      <p><b>1. Red giant branch</b> (${years(first.years)}). The helium core does not fuse. Hydrogen fuses in a shell around it and the star swells.</p>
+      <p><b>2. Core helium burning</b> (${years(he.years)}). With energy released in the core again, the star is balanced: it shrinks to about ${sig(he.keys[1].R, 2)} R☉ and its surface warms up a little. Helium fusion releases only about a tenth as much energy per kilogram as hydrogen fusion, so this lasts far less time than the main sequence.</p>
+      <p><b>3. Asymptotic giant branch</b> (${years(agb.years)}). The carbon–oxygen core does not fuse: carbon would need 600 million K. Helium and hydrogen fuse in two thin shells and the star swells again.</p>
+      ${start}
+      <p><b>Triple-alpha process.</b> ⁴He + ⁴He ⇌ ⁸Be, which falls apart in about 10⁻¹⁶ s. Just occasionally a third ⁴He hits it first and makes ¹²C. This only works because carbon has an excited state at exactly the right energy (the Hoyle state). The rate goes as T⁴⁰.</p>
+      <p>Then ¹²C + ⁴He → ¹⁶O + γ. Nearly all the carbon and oxygen in your body was made this way.</p>
+      ${c.M >= 4 ? '<p>A star of this mass pulses in and out while it fuses helium in its core, as a <b>Cepheid variable</b>. The pulse period reveals its true brightness, which astronomers use to measure distances to other galaxies.</p>' : ''}
+      <p><b>Thermal pulses.</b> On the asymptotic giant branch the helium shell switches on in a flash every 10⁴ to 10⁵ years. Each pulse mixes carbon up to the surface.</p>
       <p><b>s-process.</b> Free neutrons are captured slowly by nuclei, building elements heavier than iron such as strontium, barium and lead.</p>
-      <p>The "superwind" removes up to 10⁻⁴ M☉ per year. Carbon and silicate dust forms in the cool outflow: this is where most of the dust in the galaxy comes from.</p>`,
-    layers: () => [
-      { name: 'Carbon–oxygen core (no fusion)', el: 'C', kind: 'inert', r: 0.1, info: 'Dead "ash" from helium fusion, held up by electron degeneracy pressure. This will become the white dwarf.' },
-      { name: 'Helium-fusing shell', el: 'He', kind: 'fusion', r: 0.14, info: 'Helium fuses to carbon in a thin shell. It switches on in violent flashes.' },
-      { name: 'Helium layer', el: 'He', kind: 'inert', r: 0.19, info: 'Helium made by the hydrogen shell above, waiting to fuse.' },
-      { name: 'Hydrogen-fusing shell', el: 'H', kind: 'fusion', r: 0.23, info: 'Hydrogen fuses to helium in a second thin shell.' },
-      { name: 'Convective envelope', el: 'H', kind: 'convective', r: 1, info: 'Enormous and barely held by gravity. It is being blown away as a stellar wind.' }
-    ]
+      <p>The "superwind" removes up to 10⁻⁴ M☉ per year. Carbon and silicate dust forms in the cool outflow: this is where most of the dust in the galaxy comes from.</p>`;
+    },
+    layers: c => ({
+      rgb: [
+        { name: 'Helium core (no fusion)', el: 'He', kind: 'inert', r: 0.11, info: 'Helium "ash" from the main sequence. It is contracting and heating up, held up by electron degeneracy pressure. In reality it is about the size of the Earth.' },
+        { name: 'Hydrogen-fusing shell', el: 'H', kind: 'fusion', r: 0.17, info: `Hydrogen fuses to helium in a thin shell at ${temp(Math.max(3e7, c.st.coreT * 0.5))}, adding more helium to the core below.` },
+        { name: 'Convective envelope', el: 'H', kind: 'convective', r: 1, info: 'A vast, thin, churning envelope. Its average density is less than a thousandth of the density of air.' }
+      ],
+      he: [
+        { name: 'Helium-fusing core', el: 'He', kind: 'fusion', r: 0.14, info: 'Helium fuses to carbon and oxygen at 100 to 200 million K.' },
+        { name: 'Helium layer', el: 'He', kind: 'inert', r: 0.22, info: 'Helium that is not hot enough to fuse.' },
+        { name: 'Hydrogen-fusing shell', el: 'H', kind: 'fusion', r: 0.28, info: 'Hydrogen still fuses to helium in a shell.' },
+        { name: 'Convective envelope', el: 'H', kind: 'convective', r: 1, info: 'The outer layers, still mostly hydrogen.' }
+      ],
+      agb: [
+        { name: 'Carbon–oxygen core (no fusion)', el: 'C', kind: 'inert', r: 0.1, info: 'Dead "ash" from helium fusion, held up by electron degeneracy pressure. This will become the white dwarf.' },
+        { name: 'Helium-fusing shell', el: 'He', kind: 'fusion', r: 0.14, info: 'Helium fuses to carbon in a thin shell. It switches on in violent flashes.' },
+        { name: 'Helium layer', el: 'He', kind: 'inert', r: 0.19, info: 'Helium made by the hydrogen shell above, waiting to fuse.' },
+        { name: 'Hydrogen-fusing shell', el: 'H', kind: 'fusion', r: 0.23, info: 'Hydrogen fuses to helium in a second thin shell.' },
+        { name: 'Convective envelope', el: 'H', kind: 'convective', r: 1, info: 'Enormous and barely held by gravity. It is being blown away as a stellar wind.' }
+      ]
+    })[c.st.phase.id]
   },
 
   pn: {

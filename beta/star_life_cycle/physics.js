@@ -121,11 +121,21 @@ export function buildLife(M) {
   const remnant = remnantMass(M);
   const stages = [];
   const add = stage => {
-    if (stage.keys) stage.keys = stage.keys.map(resolveKey);
+    (stage.phases || [stage]).forEach(part => { if (part.keys) part.keys = part.keys.map(resolveKey); });
+    if (stage.phases) {
+      // The stage's years and mass span its phases. Each phase remembers the years that came before it.
+      stage.years = 0;
+      stage.phases.forEach(phase => { phase.before = stage.years; stage.years += phase.years; });
+      stage.mass = [stage.phases[0].mass[0], stage.phases[stage.phases.length - 1].mass[1]];
+    }
     stages.push(stage);
     return stage;
   };
-  const lastKey = () => { const k = stages[stages.length - 1].keys; return k[k.length - 1]; };
+  const lastKey = () => {
+    const stage = stages[stages.length - 1];
+    const k = (stage.phases ? stage.phases[stage.phases.length - 1] : stage).keys;
+    return k[k.length - 1];
+  };
 
   // A dense molecular cloud core: 10⁴ hydrogen molecules per cm³ at 10 K.
   const cloudDensity = 1e10 * 2.33 * PROTON_MASS_KG;
@@ -170,25 +180,35 @@ export function buildLife(M) {
       const tipL = heliumIgnites ? Math.max(2500, 4 * ms.L) : 800;
       const tipT = clamp(3400 + 100 * M, 3400, 4200);
       const giantFraction = M <= 1.5 ? 0.13 : 0.13 * (1.5 / M) ** 1.2;
-      add({
-        id: 'rgb', type: 'star', years: giantFraction * ms.years, mass: [M, M - 0.2 * lost],
+      // One red giant stage, as at GCSE and A level. Astronomers split it into three phases: the red giant
+      // branch (hydrogen shell only), core helium fusion (the star shrinks for a while) and the asymptotic
+      // giant branch (two shells). Each phase takes a fixed share of the stage so that the short ones can be seen.
+      const tip = { L: tipL, T: tipT };
+      const phases = [{
+        id: 'rgb', share: 1, years: giantFraction * ms.years, mass: [M, M - 0.2 * lost],
         // Below 0.5 M☉ the core never gets hot enough to fuse helium.
         coreT: [1.3 * ms.coreT, heliumIgnites ? 1e8 : 6e7],
-        keys: [lastKey(), { L: 2.6 * ms.L, T: 5000 }, { L: Math.sqrt(2.6 * ms.L * tipL), T: 4400 }, { L: tipL, T: tipT }]
-      });
+        keys: [lastKey(), { L: 2.6 * ms.L, T: 5000 }, { L: Math.sqrt(2.6 * ms.L * tipL), T: 4400 }, tip]
+      }];
+      let agbL;
       if (heliumIgnites) {
         const heL = Math.max(45, 1.6 * ms.L);
         const heT = M < 2 ? 4800 : Math.min(6800, 5000 + 300 * (M - 2));
         const heYears = Math.min(1.2e8, 0.15 * ms.years);
-        add({
-          id: 'he', type: 'star', years: heYears, mass: [M - 0.2 * lost, M - 0.25 * lost], coreT: [1e8, 2e8],
-          keys: [{ L: heL, T: heT }, { L: 1.5 * heL, T: 0.96 * heT }]
+        const heEnd = { L: 1.5 * heL, T: 0.96 * heT };
+        agbL = 3000 * M ** 1.2;
+        phases[0].share = 0.45;
+        phases.push({
+          id: 'he', share: 0.3, years: heYears, mass: [M - 0.2 * lost, M - 0.25 * lost], coreT: [1e8, 2e8],
+          // The star shrinks back from the tip of the red giant branch, then settles.
+          keys: [tip, { L: heL, T: heT }, { L: 1.25 * heL, T: 0.98 * heT }, heEnd]
+        }, {
+          id: 'agb', share: 0.25, years: 0.15 * heYears, mass: [M - 0.25 * lost, remnant + 0.15 * lost], coreT: [2e8, 3e8],
+          keys: [heEnd, { L: 0.3 * agbL, T: 3600 }, { L: agbL, T: 3000 }]
         });
-        const agbL = 3000 * M ** 1.2;
-        add({
-          id: 'agb', type: 'star', years: 0.15 * heYears, mass: [M - 0.25 * lost, remnant + 0.15 * lost], coreT: [2e8, 3e8],
-          keys: [lastKey(), { L: 0.3 * agbL, T: 3600 }, { L: agbL, T: 3000 }]
-        });
+      }
+      add({ id: 'rgb', type: 'star', phases });
+      if (heliumIgnites) {
         add({
           id: 'pn', type: 'star', years: 2e4, mass: [remnant + 0.15 * lost, remnant], coreT: [3e8, 1.5e8],
           keys: [lastKey(), { L: 0.8 * agbL, T: 8000 }, { L: 0.6 * agbL, T: 45000 }, { L: 0.3 * agbL, T: 120000 }, { T: 110000, R: 1.3 * whiteDwarfR }]
@@ -273,37 +293,51 @@ export function buildLife(M) {
   };
 }
 
+// The phase of a stage at progress p, and the progress q through that phase. A stage without phases is its own phase.
+function phaseAt(stage, p) {
+  if (!stage.phases) return { phase: stage, q: p };
+  let from = 0;
+  for (const phase of stage.phases) {
+    if (p < from + phase.share) return { phase, q: (p - from) / phase.share };
+    from += phase.share;
+  }
+  return { phase: stage.phases[stage.phases.length - 1], q: 1 };
+}
+
 // Everything the display needs at timeline position s (stage index + progress through that stage).
 export function lifeState(life, s) {
   const count = life.stages.length;
   const index = clamp(Math.floor(s), 0, count - 1);
   const p = clamp(s - index);
   const stage = life.stages[index];
+  const { phase, q } = phaseAt(stage, p);
   let T = null, L = null, R = null;
-  if (stage.keys) ({ T, L, R } = interpolateKeys(stage.keys, p));
+  if (phase.keys) ({ T, L, R } = interpolateKeys(phase.keys, q));
   if (stage.radius) R = stage.radius(p);
   if (stage.surfaceT) T = stage.surfaceT(p);
   if (stage.luminosity) L = stage.luminosity(p);
-  const coreT = typeof stage.coreT === 'function' ? stage.coreT(p) : logLerp(stage.coreT[0], stage.coreT[1], p);
-  const elapsed = stage.elapsed ? stage.elapsed(p) : stage.years * p;
+  const coreT = typeof phase.coreT === 'function' ? phase.coreT(q) : logLerp(phase.coreT[0], phase.coreT[1], q);
+  const elapsed = stage.elapsed ? stage.elapsed(p) : (phase.before || 0) + phase.years * q;
   return {
-    stage, index, p, T, L, R, coreT,
+    stage, index, p, phase, q, T, L, R, coreT,
     // A supernova keeps its mass until the shock reaches the surface.
-    mass: lerp(stage.mass[0], stage.mass[1], stage.id === 'sn' ? clamp((p - SN_BREAKOUT) / (1 - SN_BREAKOUT)) : p),
+    mass: lerp(phase.mass[0], phase.mass[1], stage.id === 'sn' ? clamp((p - SN_BREAKOUT) / (1 - SN_BREAKOUT)) : q),
     age: stage.start + elapsed,
     elapsed,
     seconds: stage.seconds ? stage.seconds(p) : null,
-    onChart: stage.keys !== undefined && T < 250000
+    onChart: phase.keys !== undefined && T < 250000
   };
 }
 
 // The whole Hertzsprung–Russell track, one polyline per stage that has a surface to plot.
 export function hrTrack(life, samples = 24) {
   // A neutron star's surface is far too hot to fall on the diagram.
-  return life.stages.filter(stage => stage.keys && stage.id !== 'ns').map(stage => {
+  return life.stages.filter(stage => (stage.keys || stage.phases) && stage.id !== 'ns').map(stage => {
     const points = [];
-    for (let i = 0; i <= samples; i += 1) {
-      const { T, L } = interpolateKeys(stage.keys, i / samples);
+    const count = samples * (stage.phases ? stage.phases.length : 1);
+    for (let i = 0; i <= count; i += 1) {
+      const { phase, q } = phaseAt(stage, i / count);
+      const { T, L } = interpolateKeys(phase.keys, q);
       points.push({ T, L });
     }
     return { id: stage.id, points };
