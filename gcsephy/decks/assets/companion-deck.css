@@ -89,7 +89,7 @@ sub, sup { line-height: 0; }
 
 .controls {
   position: fixed;
-  bottom: max(10px, env(safe-area-inset-bottom));
+  bottom: calc(max(10px, env(safe-area-inset-bottom)) + var(--vv-bottom, 0px));
   left: 50%;
   z-index: 20;
   transform: translateX(-50%);
@@ -108,7 +108,7 @@ sub, sup { line-height: 0; }
 .controls svg { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 2.8; stroke-linecap: round; stroke-linejoin: round; }
 .counter { min-width: 92px; text-align: center; font: 900 15px Arial, sans-serif; letter-spacing: .08em; color: var(--muted); }
 .counter b { color: var(--ink); }
-.progress { position: fixed; left: 0; right: 0; bottom: 0; z-index: 21; height: 5px; }
+.progress { position: fixed; left: 0; right: 0; bottom: var(--vv-bottom, 0px); z-index: 21; height: 5px; }
 .progress span { display: block; height: 100%; width: 0; background: var(--hi); transition: width .3s ease; }
 
 /* Slide thumbnails: shown beside the stage unless presenting fullscreen. */
@@ -120,7 +120,7 @@ sub, sup { line-height: 0; }
   position: fixed;
   top: calc(60px + var(--standalone-top));
   left: 0;
-  bottom: 0;
+  bottom: var(--vv-bottom, 0px);
   z-index: 15;
   width: 252px;
   display: none;
@@ -158,7 +158,7 @@ body.is-fullscreen .controls { left: 50%; }
 }
 
 /* Stage: slides are authored at 1600 × 900 and scaled to fit. */
-.stage { position: fixed; top: calc(60px + var(--standalone-top)); left: 0; right: 0; bottom: 74px; }
+.stage { position: fixed; top: calc(60px + var(--standalone-top)); left: 0; right: 0; bottom: calc(74px + var(--vv-bottom, 0px)); }
 .deck {
   position: absolute;
   top: 0;
@@ -172,8 +172,28 @@ body.is-fullscreen .controls { left: 50%; }
   overflow: hidden;
 }
 body.is-fullscreen .topbar, body.is-fullscreen .controls { display: none; }
-body.is-fullscreen .stage { top: 0; bottom: 0; }
+body.is-fullscreen .stage { top: 0; bottom: var(--vv-bottom, 0px); }
 body.is-fullscreen .deck { border: 0; box-shadow: none; }
+
+/* Leaves the in-window presenting mode used where there is no Fullscreen API (iPhone). */
+.exit-present {
+  position: fixed;
+  top: calc(max(8px, env(safe-area-inset-top)) + var(--standalone-top));
+  right: max(8px, env(safe-area-inset-right));
+  z-index: 30;
+  display: none;
+  place-items: center;
+  width: 48px;
+  height: 48px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, .5);
+  color: #fff;
+}
+.exit-present svg { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 2.6; stroke-linecap: round; }
+body.is-window-fullscreen .exit-present { display: grid; }
+body.is-window-fullscreen .stage { top: var(--standalone-top); bottom: calc(env(safe-area-inset-bottom, 0px) + var(--vv-bottom, 0px)); }
 
 .slide {
   position: absolute;

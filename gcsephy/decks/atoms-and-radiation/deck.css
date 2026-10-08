@@ -144,7 +144,7 @@ button:focus-visible, a:focus-visible { outline: 3px solid var(--focus); outline
   position: fixed;
   top: calc(60px + var(--standalone-top));
   left: 0;
-  bottom: 0;
+  bottom: var(--vv-bottom, 0px);
   z-index: 15;
   width: calc(var(--thumb-w) + 68px);
   display: none;
@@ -182,7 +182,7 @@ body.is-fullscreen .stage { left: 0; }
 
 .controls {
   position: fixed;
-  bottom: max(10px, env(safe-area-inset-bottom));
+  bottom: calc(max(10px, env(safe-area-inset-bottom)) + var(--vv-bottom, 0px));
   left: 50%;
   z-index: 20;
   transform: translateX(-50%);
@@ -211,11 +211,11 @@ body.is-fullscreen .stage { left: 0; }
 .controls svg { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round; }
 .counter { min-width: 92px; text-align: center; font: 600 .9rem var(--font-mono); letter-spacing: .06em; color: var(--text-secondary); }
 .counter b { color: var(--text-main); }
-.progress { position: fixed; left: 0; right: 0; bottom: 0; z-index: 21; height: 4px; }
+.progress { position: fixed; left: 0; right: 0; bottom: var(--vv-bottom, 0px); z-index: 21; height: 4px; }
 .progress span { display: block; height: 100%; width: 0; background: linear-gradient(90deg, var(--brand-primary), var(--brand-accent)); transition: width .3s ease; }
 
 /* Stage: slides are authored at 1600 × 900 and scaled to fit. */
-.stage { position: fixed; top: calc(60px + var(--standalone-top)); left: 0; right: 0; bottom: 74px; }
+.stage { position: fixed; top: calc(60px + var(--standalone-top)); left: 0; right: 0; bottom: calc(74px + var(--vv-bottom, 0px)); }
 .deck {
   position: absolute;
   top: 0;
@@ -232,8 +232,28 @@ body.is-fullscreen .stage { left: 0; }
   overflow: hidden;
 }
 body.is-fullscreen .banner, body.is-fullscreen .controls { display: none; }
-body.is-fullscreen .stage { top: 0; bottom: 0; }
+body.is-fullscreen .stage { top: 0; bottom: var(--vv-bottom, 0px); }
 body.is-fullscreen .deck { border: 0; border-radius: 0; box-shadow: none; }
+
+/* Leaves the in-window presenting mode used where there is no Fullscreen API (iPhone). */
+.exit-present {
+  position: fixed;
+  top: calc(max(8px, env(safe-area-inset-top)) + var(--standalone-top));
+  right: max(8px, env(safe-area-inset-right));
+  z-index: 30;
+  display: none;
+  place-items: center;
+  width: 48px;
+  height: 48px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, .5);
+  color: #fff;
+}
+.exit-present svg { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 2.6; stroke-linecap: round; }
+body.is-window-fullscreen .exit-present { display: grid; }
+body.is-window-fullscreen .stage { top: var(--standalone-top); bottom: calc(env(safe-area-inset-bottom, 0px) + var(--vv-bottom, 0px)); }
 
 .slide {
   position: absolute;
