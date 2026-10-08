@@ -2,26 +2,27 @@ Section,Unit,Topic,Course
 4.1.1.1,Energy,Energy stores and systems,Combined
 4.1.1.2,Energy,Energy stores and systems,Combined
 4.1.1.3,Energy,Specific heat capacity and its practical,Combined
-4.1.1.4,Energy,"Conservation of energy, power and efficiency",Combined
-4.1.2.1,Energy,Thermal conductivity and insulation,Combined
-4.1.2.2,Energy,"Conservation of energy, power and efficiency",Combined
+4.1.1.4,Energy,Power and efficiency,Combined
+4.1.2.1,Energy,"Energy transfers, dissipation and insulation",Combined
+4.1.2.2,Energy,Power and efficiency,Combined
 4.1.3,Energy,Energy resources,Combined
 4.2.1.1,Electricity,Circuit symbols,Combined
 4.2.1.2,Electricity,"Current, resistance and potential difference",Combined
 4.2.1.3,Electricity,"Current, resistance and potential difference",Combined
 4.2.1.4,Electricity,Resistors and I–V characteristics,Combined
 4.2.2,Electricity,Series and parallel circuits,Combined
-4.2.3,Electricity,Mains electricity and the National Grid,Combined
-4.2.4,Electricity,Mains electricity and the National Grid,Combined
+4.2.3,Electricity,"Electrical power, mains and the National Grid",Combined
+4.2.4,Electricity,"Electrical power, mains and the National Grid",Combined
 4.2.5,Electricity,Static charge and electric fields,Separate
 4.3.1.1,Particle model of matter,Density and its practical,Combined
 4.3.1.2,Particle model of matter,Changes of state,Combined
 4.3.2.1,Particle model of matter,Internal energy,Combined
-4.3.2.2,Particle model of matter,Internal energy,Combined
+4.3.2.2,Energy,Specific heat capacity and its practical,Combined
 4.3.2.3,Particle model of matter,Specific latent heat,Combined
-4.3.3,Particle model of matter,Pressure in gases,Separate
-4.3.3.1,Particle model of matter,Particle motion in gases,Combined
-4.4.1.1,Atomic structure,Atoms and isotopes,Combined
+4.3.3,Particle model of matter,Particle motion in gases,Combined
+4.3.3.2,Particle model of matter,Pressure in gases,Separate
+4.3.3.3,Particle model of matter,Pressure in gases,Separate
+4.4.1.1,Atomic structure,Structure of the atom,Combined
 4.4.1.2,Atomic structure,"Mass number, atomic number and isotopes",Combined
 4.4.1.3,Atomic structure,Development of the model of the atom,Combined
 4.4.2.1,Atomic structure,Radioactive decay and nuclear radiation,Combined

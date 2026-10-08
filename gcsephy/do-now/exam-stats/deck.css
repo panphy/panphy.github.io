@@ -63,7 +63,7 @@
 
 /* Topic or fact against exam series */
 .grid { flex: 1; min-height: 0; display: grid; align-content: space-between; }
-.grid-row { display: grid; grid-template-columns: var(--label, 560px) repeat(var(--series), 96px) 1fr; align-items: center; gap: 8px; }
+.grid-row { display: grid; grid-template-columns: var(--label, 560px) repeat(var(--series), 96px) repeat(var(--tail, 1), 1fr); align-items: center; gap: 8px; }
 .grid-row .name { font-size: 24px; font-weight: 800; line-height: 1.1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .grid-row.head { font: 900 17px/1.15 Arial, sans-serif; letter-spacing: .08em; text-transform: uppercase; text-align: center; color: var(--muted); }
 .grid-row.head .name { font: inherit; text-align: left; }
@@ -75,3 +75,4 @@
 .grid-row .total { padding-left: 12px; font: 900 22px Arial, sans-serif; white-space: nowrap; }
 .grid-row .track { height: 26px; padding-left: 12px; }
 .grid-row .track b { font-size: 20px; }
+.grid-row .per { text-align: center; font: 900 22px Arial, sans-serif; }

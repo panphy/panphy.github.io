@@ -1,32 +1,124 @@
-Fact,Unit,Course,Series
-Factors that affect stopping distance (thinking and braking),Forces,Combined,2020-11;2021-11;2022-06;2023-06;2024-06;2025-06
-Circuit symbols drawn or named,Electricity,Combined,2020-11;2021-11;2022-06;2023-06;2024-06;2025-06
-How energy stores change in a transfer,Energy,Combined,2020-11;2022-06;2023-06;2024-06;2025-06
-Gas pressure explained by particle collisions,Particle model of matter,Combined,2020-11;2021-11;2023-06;2024-06;2025-06
-Renewable energy resources named or defined,Energy,Combined,2020-11;2021-11;2023-06;2025-06
-What transverse and longitudinal waves are,Waves,Combined,2021-11;2023-06;2024-06;2025-06
-Irradiation and contamination compared,Atomic structure,Combined,2022-06;2023-06;2024-06;2025-06
-Why an object reaches terminal velocity,Forces,Combined,2020-11;2022-06;2024-06;2025-06
-Fleming's left-hand rule and the motor effect,Magnetism and electromagnetism,Combined,2021-11;2022-06;2023-06;2025-06
-The life cycle of stars and how elements form,Space physics,Separate,2020-11;2021-11;2022-06;2024-06
-Why the National Grid uses step-up transformers,Electricity,Combined,2021-11;2022-06;2023-06
-UK mains potential difference and frequency,Electricity,Combined,2020-11;2024-06;2025-06
-Direct and alternating potential difference,Electricity,Combined,2021-11;2023-06;2025-06
-Environmental effects of energy resources,Energy,Combined,2020-11;2021-11;2025-06
-What an alpha particle consists of,Atomic structure,Combined,2022-06;2024-06;2025-06
-Completing a nuclear equation,Atomic structure,Combined,2021-11;2022-06;2025-06
-The random nature of radioactive decay,Atomic structure,Combined,2020-11;2021-11;2023-06
-Elastic and inelastic deformation,Forces,Combined,2020-11;2021-11;2023-06
-Newton's third law,Forces,Combined,2023-06;2024-06;2025-06
-How a longer collision time reduces the force,Forces,Separate,2020-11;2023-06;2025-06
-Why refraction happens (the wave changes speed),Waves,Combined,2020-11;2023-06;2025-06
-"Hazards of ultraviolet, X-rays and gamma rays",Waves,Combined,2021-11;2024-06;2025-06
-Why a potential difference is induced (generator effect),Magnetism and electromagnetism,Separate,2020-11;2023-06;2024-06
-What a closed system is,Energy,Combined,2021-11;2023-06
-What vector and scalar quantities are,Forces,Combined,2020-11;2021-11
-Conservation of momentum,Forces,Combined,2020-11;2022-06
-Why brakes heat up and the risks of a large deceleration,Forces,Combined,2023-06;2025-06
-What isotopes are,Atomic structure,Combined,2023-06;2025-06
-Peer review,Atomic structure,Combined,2023-06;2024-06
-Why a transformer core is made of iron,Magnetism and electromagnetism,Separate,2023-06;2025-06
-What red-shift is and why it happens,Space physics,Separate,2022-06;2025-06
+Fact,Unit,Course,Series,Paper,Part
+"Stopping distance: thinking, braking and what affects them",Forces,Combined,2020-11,8464/P/2H,06.2
+"Stopping distance: thinking, braking and what affects them",Forces,Combined,2021-11,8463/2H,01.1
+"Stopping distance: thinking, braking and what affects them",Forces,Combined,2022-06,8463/2H,03.1
+"Stopping distance: thinking, braking and what affects them",Forces,Combined,2022-06,8463/2H,03.2
+"Stopping distance: thinking, braking and what affects them",Forces,Combined,2023-06,8463/2H,03.4
+"Stopping distance: thinking, braking and what affects them",Forces,Combined,2024-06,8463/2H,07.5
+"Stopping distance: thinking, braking and what affects them",Forces,Combined,2025-06,8464/P/2H,02.2
+Circuit symbols drawn or named,Electricity,Combined,2020-11,8463/1H,01.1
+Circuit symbols drawn or named,Electricity,Combined,2020-11,8464/P/1H,01.4
+Circuit symbols drawn or named,Electricity,Combined,2021-11,8464/P/1H,01.5
+Circuit symbols drawn or named,Electricity,Combined,2022-06,8463/1H,11.1
+Circuit symbols drawn or named,Electricity,Combined,2023-06,8464/P/1H,02.1
+Circuit symbols drawn or named,Electricity,Combined,2024-06,8464/P/1H,03.1
+Circuit symbols drawn or named,Electricity,Combined,2025-06,8464/P/1H,03.1
+How energy stores change in a transfer,Energy,Combined,2020-11,8464/P/1H,04.3
+How energy stores change in a transfer,Energy,Combined,2022-06,8464/P/1H,03.1
+How energy stores change in a transfer,Energy,Combined,2023-06,8463/1H,07.2
+How energy stores change in a transfer,Energy,Combined,2024-06,8464/P/2H,02.1
+How energy stores change in a transfer,Energy,Combined,2025-06,8463/1H,10.2
+Gas pressure explained by particle collisions,Particle model of matter,Combined,2020-11,8463/1H,10.3
+Gas pressure explained by particle collisions,Particle model of matter,Combined,2021-11,8464/P/1H,06.4
+Gas pressure explained by particle collisions,Particle model of matter,Combined,2023-06,8463/1H,09.3
+Gas pressure explained by particle collisions,Particle model of matter,Combined,2024-06,8463/1H,08.1
+Gas pressure explained by particle collisions,Particle model of matter,Combined,2025-06,8463/1H,08.3
+Renewable energy resources named or defined,Energy,Combined,2020-11,8464/P/1H,04.1
+Renewable energy resources named or defined,Energy,Combined,2021-11,8464/P/1H,03.1
+Renewable energy resources named or defined,Energy,Combined,2023-06,8464/P/1H,01.1
+Renewable energy resources named or defined,Energy,Combined,2025-06,8463/1H,01.1
+Renewable energy resources named or defined,Energy,Combined,2025-06,8464/P/1H,01.2
+What transverse and longitudinal waves are,Waves,Combined,2021-11,8463/2H,05.5
+What transverse and longitudinal waves are,Waves,Combined,2023-06,8464/P/2H,03.4
+What transverse and longitudinal waves are,Waves,Combined,2024-06,8464/P/2H,03.2
+What transverse and longitudinal waves are,Waves,Combined,2025-06,8464/P/2H,03.1
+What transverse and longitudinal waves are,Waves,Combined,2025-06,8463/2H,01.1
+Irradiation and contamination compared,Atomic structure,Combined,2022-06,8463/1H,07.3
+Irradiation and contamination compared,Atomic structure,Combined,2023-06,8463/1H,05.5
+Irradiation and contamination compared,Atomic structure,Combined,2024-06,8464/P/1H,05.1
+Irradiation and contamination compared,Atomic structure,Combined,2025-06,8463/1H,07.2
+Why an object reaches terminal velocity,Forces,Combined,2020-11,8463/2H,06.7
+Why an object reaches terminal velocity,Forces,Combined,2022-06,8463/2H,04.2
+Why an object reaches terminal velocity,Forces,Combined,2024-06,8464/P/2H,06.4
+Why an object reaches terminal velocity,Forces,Combined,2025-06,8463/2H,05.3
+Fleming's left-hand rule and the motor effect,Magnetism and electromagnetism,Combined,2021-11,8463/2H,09.1
+Fleming's left-hand rule and the motor effect,Magnetism and electromagnetism,Combined,2021-11,8464/P/2H,04.7
+Fleming's left-hand rule and the motor effect,Magnetism and electromagnetism,Combined,2022-06,8464/P/2H,04.2
+Fleming's left-hand rule and the motor effect,Magnetism and electromagnetism,Combined,2022-06,8464/P/2H,04.3
+Fleming's left-hand rule and the motor effect,Magnetism and electromagnetism,Combined,2023-06,8463/2H,04.4
+Fleming's left-hand rule and the motor effect,Magnetism and electromagnetism,Combined,2023-06,8464/P/2H,04.3
+Fleming's left-hand rule and the motor effect,Magnetism and electromagnetism,Combined,2025-06,8463/2H,07.3
+Fleming's left-hand rule and the motor effect,Magnetism and electromagnetism,Combined,2025-06,8464/P/2H,04.3
+The life cycle of stars and how elements form,Space physics,Separate,2020-11,8463/2H,02.4
+The life cycle of stars and how elements form,Space physics,Separate,2021-11,8463/2H,03.2
+The life cycle of stars and how elements form,Space physics,Separate,2022-06,8463/2H,06.1
+The life cycle of stars and how elements form,Space physics,Separate,2024-06,8463/2H,03.6
+Why the National Grid uses step-up transformers,Electricity,Combined,2021-11,8463/1H,10.1
+Why the National Grid uses step-up transformers,Electricity,Combined,2022-06,8463/1H,06.1
+Why the National Grid uses step-up transformers,Electricity,Combined,2022-06,8464/P/1H,01.4
+Why the National Grid uses step-up transformers,Electricity,Combined,2023-06,8464/P/1H,03.1
+UK mains potential difference and frequency,Electricity,Combined,2020-11,8464/P/1H,01.2
+UK mains potential difference and frequency,Electricity,Combined,2024-06,8463/1H,05.1
+UK mains potential difference and frequency,Electricity,Combined,2025-06,8464/P/1H,05.1
+Direct and alternating potential difference,Electricity,Combined,2021-11,8463/1H,01.1
+Direct and alternating potential difference,Electricity,Combined,2021-11,8464/P/1H,05.2
+Direct and alternating potential difference,Electricity,Combined,2023-06,8463/1H,03.1
+Direct and alternating potential difference,Electricity,Combined,2025-06,8464/P/1H,05.3
+Environmental effects of energy resources,Energy,Combined,2020-11,8463/1H,04.2
+Environmental effects of energy resources,Energy,Combined,2020-11,8464/P/1H,04.2
+Environmental effects of energy resources,Energy,Combined,2021-11,8463/1H,02.4
+Environmental effects of energy resources,Energy,Combined,2021-11,8464/P/1H,03.3
+Environmental effects of energy resources,Energy,Combined,2024-06,8464/P/1H,06.4
+Environmental effects of energy resources,Energy,Combined,2025-06,8463/1H,04.1
+Environmental effects of energy resources,Energy,Combined,2025-06,8464/P/1H,01.6
+What an alpha particle consists of,Atomic structure,Combined,2022-06,8463/1H,07.1
+What an alpha particle consists of,Atomic structure,Combined,2024-06,8464/P/1H,02.1
+What an alpha particle consists of,Atomic structure,Combined,2025-06,8464/P/1H,04.1
+Completing a nuclear equation,Atomic structure,Combined,2022-06,8463/1H,07.2
+Completing a nuclear equation,Atomic structure,Combined,2022-06,8464/P/1H,06.2
+Completing a nuclear equation,Atomic structure,Combined,2025-06,8463/1H,07.3
+Completing a nuclear equation,Atomic structure,Combined,2025-06,8464/P/1H,04.2
+The random nature of radioactive decay,Atomic structure,Combined,2020-11,8464/P/1H,06.1
+The random nature of radioactive decay,Atomic structure,Combined,2021-11,8463/1H,06.4
+The random nature of radioactive decay,Atomic structure,Combined,2023-06,8464/P/1H,04.7
+Elastic and inelastic deformation,Forces,Combined,2020-11,8464/P/2H,03.1
+Elastic and inelastic deformation,Forces,Combined,2021-11,8464/P/2H,01.1
+Elastic and inelastic deformation,Forces,Combined,2023-06,8464/P/2H,05.3
+Newton's third law,Forces,Combined,2023-06,8463/2H,05.2
+Newton's third law,Forces,Combined,2024-06,8464/P/2H,04.3
+Newton's third law,Forces,Combined,2025-06,8464/P/2H,01.6
+How a longer collision time reduces the force,Forces,Separate,2020-11,8463/2H,05.3
+How a longer collision time reduces the force,Forces,Separate,2023-06,8463/2H,05.4
+How a longer collision time reduces the force,Forces,Separate,2025-06,8463/2H,06.2
+Why refraction happens (the wave changes speed),Waves,Combined,2020-11,8463/2H,03.5
+Why refraction happens (the wave changes speed),Waves,Combined,2023-06,8463/2H,07.6
+Why refraction happens (the wave changes speed),Waves,Combined,2025-06,8464/P/2H,03.5
+"Hazards of ultraviolet, X-rays and gamma rays",Waves,Combined,2021-11,8464/P/2H,05.3
+"Hazards of ultraviolet, X-rays and gamma rays",Waves,Combined,2024-06,8463/2H,06.3
+"Hazards of ultraviolet, X-rays and gamma rays",Waves,Combined,2024-06,8464/P/2H,03.5
+"Hazards of ultraviolet, X-rays and gamma rays",Waves,Combined,2025-06,8464/P/2H,03.2
+Why a potential difference is induced,Magnetism and electromagnetism,Separate,2020-11,8463/2H,07.3
+Why a potential difference is induced,Magnetism and electromagnetism,Separate,2023-06,8463/2H,09.1
+Why a potential difference is induced,Magnetism and electromagnetism,Separate,2024-06,8463/2H,08.2
+Why a potential difference is induced,Magnetism and electromagnetism,Separate,2025-06,8463/2H,09.3
+What a closed system is,Energy,Combined,2021-11,8463/1H,08.1
+What a closed system is,Energy,Combined,2023-06,8463/2H,05.1
+What a closed system is,Energy,Combined,2023-06,8464/P/1H,05.3
+What vector and scalar quantities are,Forces,Combined,2020-11,8464/P/2H,04.1
+What vector and scalar quantities are,Forces,Combined,2021-11,8464/P/2H,02.1
+Conservation of momentum,Forces,Combined,2020-11,8463/2H,05.1
+Conservation of momentum,Forces,Combined,2020-11,8464/P/2H,04.5
+Conservation of momentum,Forces,Combined,2022-06,8464/P/2H,03.2
+Why brakes heat up and the risks of a large deceleration,Forces,Combined,2023-06,8463/2H,03.5
+Why brakes heat up and the risks of a large deceleration,Forces,Combined,2023-06,8464/P/2H,07.3
+Why brakes heat up and the risks of a large deceleration,Forces,Combined,2025-06,8463/2H,06.4
+Why brakes heat up and the risks of a large deceleration,Forces,Combined,2025-06,8463/2H,06.5
+What isotopes are,Atomic structure,Combined,2023-06,8463/1H,05.1
+What isotopes are,Atomic structure,Combined,2025-06,8463/1H,05.1
+Peer review,Atomic structure,Combined,2023-06,8464/P/1H,04.1
+Peer review,Atomic structure,Combined,2024-06,8464/P/1H,05.4
+Why a transformer core is made of iron,Magnetism and electromagnetism,Separate,2023-06,8463/2H,08.1
+Why a transformer core is made of iron,Magnetism and electromagnetism,Separate,2025-06,8463/2H,09.1
+What red-shift is and why it happens,Space physics,Separate,2022-06,8463/2H,06.2
+What red-shift is and why it happens,Space physics,Separate,2025-06,8463/2H,04.4
+What red-shift is and why it happens,Space physics,Separate,2025-06,8463/2H,04.5
