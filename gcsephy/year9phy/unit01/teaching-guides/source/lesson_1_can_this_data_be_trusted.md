@@ -13,7 +13,7 @@ This lesson prepares students for the practical and data-handling skills used th
 By the end of the lesson, students should be able to:
 
 1. Explain why measurements always have some uncertainty.
-2. Calculate uncertainty from the range of repeated readings.
+2. Calculate uncertainty from repeated readings.
 3. Distinguish between precision and accuracy.
 4. Explain what is meant by the resolution of a measuring instrument.
 5. Describe random errors and systematic errors.

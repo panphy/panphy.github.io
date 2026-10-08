@@ -33,7 +33,7 @@ AQA gives every student the full Physics Equations Sheet as an insert with each 
 
 - Evidence: [AQA notice, 1 September 2026: formulae and equation sheets for 2027 and 2028 onwards](https://www.aqa.org.uk/news/gcse-maths-sciences-formulae-equation-sheets-2027-28), which links the [Ofqual decision](https://www.gov.uk/government/consultations/proposed-changes-to-the-assessment-of-mathematics-physics-and-combined-science-gcses/outcome/decisions-proposed-changes-to-the-assessment-of-mathematics-physics-and-combined-science-gcses) and the [sheet itself](https://www.aqa.org.uk/filestore/physics/AQA-GCSE-Science-8463-INS-AI-V2.3.pdf).
 - The sheet has Q = I t, V = I R, P = V I, P = I² R, E = P t, E = Q V and (HT) V_p I_p = V_s I_s. It does **not** have R_total = R₁ + R₂, which students must learn.
-- So the site, deck and workbook label equations "on the equation sheet" (and R_total "learn it"), while still teaching each one. If AQA changes this, update those labels, the equation toolkit text in `index.html`, `workbook/assets/workbook.js` and `plans.js`, and this section.
+- So the site, deck and workbook label equations "on the equation sheet" (and R_total "learn it"), while still teaching each one. If AQA changes this, update those labels, the deck's revision note on its Equation toolkit slide, the equation toolkit text in `index.html`, `workbook/assets/workbook.js` and `plans.js`, and this section.
 
 ## Questions
 

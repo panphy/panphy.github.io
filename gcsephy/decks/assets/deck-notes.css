@@ -1,0 +1,118 @@
+/* Revision-note pane beneath the slide (deck-notes.js). Each deck's own
+   stylesheet sets the --rn-* colours and fonts; this file owns the layout.
+   Load it after the deck stylesheet: it moves the bottom of the stage. */
+:root {
+  --notes-bar: 52px;
+  --notes-open: clamp(150px, 27vh, 280px);
+  --thumbs-w: 252px;
+}
+.slide .revision-note { display: none; }
+
+body:not(.is-fullscreen) .stage { bottom: calc(74px + var(--notes-bar) + var(--vv-bottom, 0px)); }
+body.notes-open:not(.is-fullscreen) .stage { bottom: calc(74px + var(--notes-bar) + var(--notes-open) + var(--vv-bottom, 0px)); }
+
+.notes {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: calc(74px + var(--vv-bottom, 0px));
+  z-index: 16;
+  display: flex;
+  flex-direction: column;
+  padding: 0 max(28px, env(safe-area-inset-right)) 0 max(28px, env(safe-area-inset-left));
+  color: var(--rn-ink);
+  font: var(--rn-font);
+}
+body.show-thumbs .notes { left: var(--thumbs-w); }
+body.is-fullscreen .notes { display: none; }
+
+.notes-toggle {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  height: 44px;
+  padding: 0 14px;
+  border: var(--rn-border);
+  border-radius: var(--rn-radius);
+  background: var(--rn-bar);
+  color: var(--rn-ink);
+  font: var(--rn-label-font);
+  letter-spacing: var(--rn-label-spacing, normal);
+  text-transform: var(--rn-label-case, none);
+  text-align: left;
+}
+.notes-toggle svg { flex: none; width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; }
+.notes-chevron { margin-left: auto; transition: transform .2s ease; }
+.notes-toggle[aria-expanded="true"] .notes-chevron { transform: rotate(180deg); }
+.notes-none { display: none; color: var(--rn-muted); font-weight: 600; letter-spacing: normal; text-transform: none; }
+.notes.is-empty .notes-none { display: inline; }
+.notes.is-empty .notes-label, .notes.is-empty .notes-icon { opacity: .55; }
+body.notes-open .notes-toggle { border-bottom-left-radius: 0; border-bottom-right-radius: 0; }
+
+.notes-body {
+  height: var(--notes-open);
+  padding: 14px 20px 16px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  border: var(--rn-border);
+  border-top: 0;
+  border-radius: 0 0 var(--rn-radius) var(--rn-radius);
+  background: var(--rn-bg);
+  scrollbar-width: thin;
+}
+.notes-body:focus-visible { outline: 3px solid var(--rn-accent); outline-offset: -3px; }
+.notes-empty { margin: 0; color: var(--rn-muted); }
+
+/* A note: key points on the left, call-outs (mistake, exam tip, go further) beside them. */
+.revision-note { display: grid; grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr); gap: 10px 28px; align-items: start; max-width: 1280px; margin: 0 auto; font-size: 16.5px; line-height: 1.45; }
+.revision-note > ul { grid-column: 1; grid-row: 1 / span 4; margin: 0; padding: 0; list-style: none; display: grid; gap: 7px; }
+.revision-note > ul:only-child { grid-column: 1 / -1; }
+.revision-note li { position: relative; padding-left: 20px; }
+.revision-note li::before { content: ""; position: absolute; left: 2px; top: .52em; width: 9px; height: 9px; border-radius: 50%; background: var(--rn-accent); }
+.revision-note b { font-weight: 800; }
+.revision-note mark { padding: 0 .15em; background: var(--rn-mark); color: inherit; font-weight: 800; }
+.revision-note > p { grid-column: 2; margin: 0; padding: 8px 12px; border-left: 4px solid var(--rn-accent); background: var(--rn-callout); font-size: 15.5px; }
+.revision-note > p::before { display: block; margin-bottom: 2px; font: var(--rn-tag-font); letter-spacing: .1em; text-transform: uppercase; }
+.revision-note > .trap { border-left-color: var(--rn-trap); }
+.revision-note > .trap::before { content: "Common mistake"; color: var(--rn-trap); }
+.revision-note > .tip::before { content: "Exam tip"; color: var(--rn-tip); }
+.revision-note > .more { border-left-color: var(--rn-more); }
+.revision-note > .more::before { content: "Go further"; color: var(--rn-more); }
+.revision-note sub, .revision-note sup { line-height: 0; }
+
+@media (max-width: 900px) {
+  body.show-thumbs .notes { left: 0; }
+  .notes { padding: 0 max(12px, env(safe-area-inset-right)) 0 max(12px, env(safe-area-inset-left)); }
+}
+@media (max-width: 760px) {
+  .revision-note { grid-template-columns: minmax(0, 1fr); }
+  .revision-note > ul, .revision-note > p { grid-column: 1; grid-row: auto; }
+}
+@media (max-width: 640px) and (orientation: portrait) {
+  :root { --notes-open: clamp(170px, 40vh, 380px); }
+}
+
+/* Short screens (a phone on its side): the toggle sits beside the slide
+   controls and an open note covers the lower part of the slide, so the slide
+   keeps its size. */
+@media (max-height: 520px) {
+  body:not(.is-fullscreen) .stage, body.notes-open:not(.is-fullscreen) .stage { bottom: calc(74px + var(--vv-bottom, 0px)); }
+  .notes { bottom: calc(max(10px, env(safe-area-inset-bottom)) + 7px + var(--vv-bottom, 0px)); right: auto; flex-direction: column-reverse; pointer-events: none; }
+  .notes-toggle { width: auto; pointer-events: auto; border-radius: 999px; }
+  body.notes-open .notes-toggle { border-radius: 999px; }
+  .notes-none { display: none !important; }
+  .notes-chevron { margin-left: 2px; }
+  .notes-body { position: fixed; left: max(12px, env(safe-area-inset-left)); right: max(12px, env(safe-area-inset-right)); bottom: calc(74px + var(--vv-bottom, 0px)); height: auto; max-height: calc(100vh - 150px); border-top: var(--rn-border); border-radius: var(--rn-radius); pointer-events: auto; }
+  body.show-thumbs .notes-body { left: calc(var(--thumbs-w) + 12px); }
+}
+@media (max-height: 520px) and (max-width: 900px) {
+  body.show-thumbs .notes-body { left: max(12px, env(safe-area-inset-left)); }
+}
+
+@media print {
+  .notes { display: none !important; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .notes-chevron { transition: none; }
+}

@@ -157,6 +157,27 @@ body.is-fullscreen .controls { left: 50%; }
   body.show-thumbs .controls { left: 50%; }
 }
 
+/* Revision-note pane colours (layout in deck-notes.css). */
+.notes {
+  --rn-ink: var(--ink);
+  --rn-muted: var(--muted);
+  --rn-bar: var(--paper);
+  --rn-bg: var(--card);
+  --rn-border: 2px solid var(--ink);
+  --rn-radius: 0px;
+  --rn-accent: var(--cyan);
+  --rn-mark: var(--hi);
+  --rn-callout: var(--note);
+  --rn-trap: var(--wrong);
+  --rn-tip: var(--right);
+  --rn-more: #5b45c9;
+  --rn-font: 16px/1.45 Arial, Helvetica, sans-serif;
+  --rn-label-font: 900 13px Arial, sans-serif;
+  --rn-label-spacing: .14em;
+  --rn-label-case: uppercase;
+  --rn-tag-font: 900 12px Arial, sans-serif;
+}
+
 /* Stage: slides are authored at 1600 × 900 and scaled to fit. */
 .stage { position: fixed; top: calc(60px + var(--standalone-top)); left: 0; right: 0; bottom: calc(74px + var(--vv-bottom, 0px)); }
 .deck {

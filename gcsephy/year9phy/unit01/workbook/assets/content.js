@@ -96,7 +96,7 @@
           "The team had repeated the measurement thousands of times and the results were beautifully consistent. Newspapers around the world reported that Einstein had been proved wrong.",
           "A few months later the team traced the problem to their own equipment — including a fibre-optic cable that was not properly connected. Every reading had been shifted by the same tiny amount, in the same direction, so repeating the measurement could never reveal it. The result was withdrawn.",
         ], punch: "Consistent does not mean correct. Today you learn the difference." },
-        ["Explain why every measurement carries some uncertainty", "Calculate uncertainty from the range of repeated readings", "Tell the difference between precision and accuracy — and prove it with an example", "Say what the resolution of an instrument is", "Describe random and systematic errors, and explain why repeats only fix one of them"],
+        ["Explain why every measurement carries some uncertainty", "Calculate uncertainty from repeated readings", "Tell the difference between precision and accuracy — and prove it with an example", "Say what the resolution of an instrument is", "Describe random and systematic errors, and explain why repeats only fix one of them"],
         [
           task(1, "Which data would you trust?", "5 min"),
           p("Three students timed the same toy car rolling down the same ramp. All three took three readings."),

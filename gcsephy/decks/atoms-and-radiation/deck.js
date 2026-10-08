@@ -52,6 +52,7 @@
       if (current && thumbFocused && document.activeElement !== thumb) thumb.focus({ preventScroll: true });
       if (current && document.body.classList.contains('show-thumbs')) thumb.scrollIntoView({ block: 'center' });
     });
+    if (window.DeckNotes) window.DeckNotes.show(slide);
     if (location.hash !== `#${n}`) history.replaceState(null, '', `#${n}`);
     document.title = `${slide.dataset.title || 'Atoms and Nuclear Radiation'} · GCSE Physics`;
     setScatterActive();
@@ -310,6 +311,7 @@
   function init() {
     window.DeckFigures.render();
     state.slides = [...deck.querySelectorAll('.slide')];
+    if (window.DeckNotes) window.DeckNotes.collect(state.slides);
     const scatterSvg = deck.querySelector('[data-fig="scatter"] svg');
     state.scatter = { svg: scatterSvg, group: scatterSvg.querySelector('.scatter-live'), particles: [], lastSpawn: null, count: 0, active: false };
     state.slides.forEach((slide, i) => {

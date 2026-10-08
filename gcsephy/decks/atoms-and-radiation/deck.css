@@ -214,6 +214,25 @@ body.is-fullscreen .stage { left: 0; }
 .progress { position: fixed; left: 0; right: 0; bottom: var(--vv-bottom, 0px); z-index: 21; height: 4px; }
 .progress span { display: block; height: 100%; width: 0; background: linear-gradient(90deg, var(--brand-primary), var(--brand-accent)); transition: width .3s ease; }
 
+/* Revision-note pane colours (layout in ../assets/deck-notes.css). */
+.notes {
+  --rn-ink: var(--text-main);
+  --rn-muted: var(--text-secondary);
+  --rn-bar: var(--card-bg);
+  --rn-bg: var(--card-bg);
+  --rn-border: 1px solid var(--input-border);
+  --rn-radius: 14px;
+  --rn-accent: var(--brand-accent);
+  --rn-mark: color-mix(in srgb, var(--brand-accent), transparent 72%);
+  --rn-callout: var(--muted-bg);
+  --rn-trap: var(--brand-primary);
+  --rn-tip: var(--brand-accent-strong);
+  --rn-more: var(--photon);
+  --rn-font: 16px/1.45 var(--font-body);
+  --rn-label-font: 700 15px var(--font-body);
+  --rn-tag-font: 600 12px var(--font-mono);
+}
+
 /* Stage: slides are authored at 1600 × 900 and scaled to fit. */
 .stage { position: fixed; top: calc(60px + var(--standalone-top)); left: 0; right: 0; bottom: calc(74px + var(--vv-bottom, 0px)); }
 .deck {
