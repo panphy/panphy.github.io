@@ -11,8 +11,9 @@
     });
   }
 
-  // Update check: compare the content of the page, its own /gcsephy/ scripts and
-  // stylesheets and any data-watch files with what they were when the page opened.
+  // Update check: compare the content of the page, its own /gcsephy/ scripts,
+  // stylesheets and images and any data-watch files with what they were when the
+  // page opened (or, for an image added later, when it was first seen).
   // It never reloads by itself, so a lesson in progress is not interrupted.
   const CHECK_INTERVAL_MS = 5 * 60 * 1000;
   const MIN_GAP_MS = 60 * 1000;
@@ -29,6 +30,8 @@
     };
     document.querySelectorAll('script[src]').forEach((el) => add(el.getAttribute('src')));
     document.querySelectorAll('link[rel~="stylesheet"][href]').forEach((el) => add(el.getAttribute('href')));
+    document.querySelectorAll('img[src]').forEach((el) => add(el.getAttribute('src')));
+    document.querySelectorAll('svg image').forEach((el) => add(el.getAttribute('href') || el.getAttribute('xlink:href')));
     extraWatch.forEach(add);
     return [...urls];
   }
@@ -40,13 +43,13 @@
     try {
       const res = await fetch(url, { cache: 'no-cache' });
       if (!res.ok) return null;
-      const text = await res.text();
+      const bytes = new Uint8Array(await res.arrayBuffer()); // bytes, so images hash too
       let hash = 0x811c9dc5; // FNV-1a
-      for (let i = 0; i < text.length; i++) {
-        hash ^= text.charCodeAt(i);
+      for (let i = 0; i < bytes.length; i++) {
+        hash ^= bytes[i];
         hash = Math.imul(hash, 0x01000193);
       }
-      return (hash >>> 0).toString(16) + ':' + text.length;
+      return (hash >>> 0).toString(16) + ':' + bytes.length;
     } catch {
       return null; // offline or blocked: treat as unknown
     }
@@ -71,6 +74,8 @@
         return;
       }
       const changed = Object.keys(now).filter((url) => state.baseline[url] && state.baseline[url] !== now[url]);
+      // A file first seen now (an image the page added after it opened) is watched from here on.
+      Object.keys(now).forEach((url) => { if (!state.baseline[url]) state.baseline[url] = now[url]; });
       if (!changed.length) return;
       const signature = changed.map((url) => url + '=' + now[url]).join('|');
       if (signature !== state.dismissed) showBanner(signature);
