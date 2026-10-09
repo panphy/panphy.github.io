@@ -1715,8 +1715,16 @@ function updateMotionButton() {
 }
 $('motion').addEventListener('click', () => setPlaying(!state.playing));
 function resetScene() {
-  // Stop any reaction, then return to the default view.
+  // Stop any reaction and put this tab's controls, motion and view back as they were on arrival.
+  if (state.mode === 'chain') {
+    rodCount = 0;
+    for (const option of $('enrichment').options) option.selected = option.defaultSelected;
+  } else if (state.mode === 'fusion') {
+    $('temp-input').value = $('temp-input').defaultValue;
+  }
+  state.playing = !reducedMotion;
   buildMode(false);
+  if (state.mode === 'fusion') setTemperature(currentTemperature());
   resetView();
   readout.textContent = DEFAULT_READOUT[state.mode]();
 }
@@ -1874,7 +1882,6 @@ function selectMode(mode, animate = true) {
   document.querySelector('.scale').hidden = mode === 'energy';
   $('fire').hidden = mode === 'energy';
   $('motion').hidden = mode === 'energy';
-  $('reset').textContent = mode === 'energy' ? 'Reset' : 'Reset view';
   $('reset').hidden = mode === 'energy';
   $('action-hint').textContent = data.hint;
   if (mode !== 'energy') readout.textContent = DEFAULT_READOUT[mode]();
