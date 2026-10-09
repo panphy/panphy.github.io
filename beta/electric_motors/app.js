@@ -1,7 +1,6 @@
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
-import { MODES, MODE_ORDER, PARTS, STEPPERS, CONTROLS, QUESTIONS } from './content.js';
-import { Quiz, loadProgress, saveProgress, setSummary } from './quiz.js';
+import { MODES, MODE_ORDER, PARTS, STEPPERS, CONTROLS } from './content.js';
 
 const $ = id => document.getElementById(id);
 const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -1945,7 +1944,6 @@ function selectMode(mode, animate = true) {
   document.querySelectorAll('.models [data-mode]').forEach(button => button.setAttribute('aria-pressed', String(button.dataset.mode === mode)));
   viewer.setAttribute('aria-label', `${data.title}. ${data.description} Drag or use arrow keys to rotate; pinch or plus and minus keys to zoom.`);
   $('graph-canvas').setAttribute('aria-label', GRAPH_LABELS[mode]);
-  quiz.show(mode);
   updateObservation();
   resetView();
 }
@@ -1957,41 +1955,6 @@ const GRAPH_LABELS = {
 document.querySelectorAll('.models [data-mode]').forEach(button => button.addEventListener('click', () => {
   if (button.dataset.mode !== state.mode) selectMode(button.dataset.mode);
 }));
-
-// ---------- Progress ----------
-const progress = loadProgress();
-const quiz = new Quiz($('mode-quiz'), { questionSets: QUESTIONS, progress, title: '✦ Unlock this discovery', completeText: '✦ Discovery unlocked!', onChange: updateProgress });
-const finalQuiz = new Quiz($('final-quiz'), { questionSets: QUESTIONS, progress, title: '✦ Final challenge', completeText: 'Motor expert!', completeIcon: 'trophy', onChange: updateProgress });
-function updateProgress() {
-  saveProgress(progress);
-  const unlocked = MODE_ORDER.filter(mode => setSummary(progress, mode, QUESTIONS[mode]).complete);
-  const sets = [...MODE_ORDER, 'final'];
-  const stars = sets.reduce((sum, key) => sum + setSummary(progress, key, QUESTIONS[key]).stars, 0);
-  const total = sets.reduce((sum, key) => sum + QUESTIONS[key].length, 0);
-  const finalDone = setSummary(progress, 'final', QUESTIONS.final).complete;
-  $('progress').textContent = `${unlocked.length} / ${MODE_ORDER.length} discoveries unlocked · ★ ${stars} / ${total}${finalDone ? ' · Motor expert!' : ''}`;
-  document.querySelectorAll('.models [data-mode]').forEach(button => {
-    const done = unlocked.includes(button.dataset.mode);
-    const label = button.querySelector('span');
-    label.textContent = `${label.textContent.replace(' ✓', '')}${done ? ' ✓' : ''}`;
-  });
-  const open = unlocked.length === MODE_ORDER.length;
-  const finalQuizElement = $('final-quiz');
-  if (open && finalQuizElement.hidden) finalQuiz.show('final');
-  finalQuizElement.hidden = !open;
-  document.querySelector('.final-challenge').classList.toggle('is-locked', !open);
-  $('final-status').textContent = open
-    ? 'You have explored the motor effect, DC motors and AC motors. Use them together.'
-    : `Unlock all ${MODE_ORDER.length} discoveries to open the final challenge (${unlocked.length} of ${MODE_ORDER.length} so far).`;
-}
-$('reset-progress').addEventListener('click', () => {
-  if (!window.confirm('Reset all discoveries and stars saved on this device?')) return;
-  Object.keys(progress).forEach(key => delete progress[key]);
-  quiz.resetView();
-  finalQuiz.resetView();
-  $('final-quiz').hidden = true;
-  updateProgress();
-});
 
 // ---------- Theme ----------
 // Rebuild the scene (new colours or fonts) without disturbing the running model.
@@ -2051,7 +2014,6 @@ function stepSim(delta) {
 }
 
 setPlaying(state.playing);
-updateProgress();
 resize();
 selectMode('force', false);
 $('load-status').hidden = true;

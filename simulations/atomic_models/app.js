@@ -1,7 +1,6 @@
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
-import { MODELS, MODEL_ORDER, PARTICLES, ORBITALS, QUESTIONS } from './content.js';
-import { Quiz, loadProgress, saveProgress, setSummary } from './quiz.js';
+import { MODELS, MODEL_ORDER, PARTICLES, ORBITALS } from './content.js';
 
 const $ = id => document.getElementById(id);
 const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -1210,48 +1209,12 @@ function selectModel(model, animate = true) {
   for (const [id, key] of Object.entries({ 'scene-title': 'title', 'model-date': 'date', 'model-heading': 'heading', description: 'description', look: 'look', evidence: 'evidence' })) $(id).textContent = data[key];
   document.querySelectorAll('.models [data-model]').forEach(button => button.setAttribute('aria-pressed', String(button.dataset.model === model)));
   viewer.setAttribute('aria-label', `${data.title}. ${data.description} Drag or use arrow keys to rotate; scroll, pinch or plus and minus keys to zoom.`);
-  quiz.show(model);
   if (previous !== model || !animate) resetView();
   buildAtom(animate && previous !== model);
 }
 document.querySelectorAll('.models [data-model]').forEach(button => button.addEventListener('click', () => {
   if (button.dataset.model !== state.model) selectModel(button.dataset.model);
 }));
-
-// ---------- Progress ----------
-const progress = loadProgress();
-const quiz = new Quiz($('model-quiz'), { questionSets: QUESTIONS, progress, title: '✦ Unlock this discovery', completeText: '✦ Discovery unlocked!', onChange: updateProgress });
-const finalQuiz = new Quiz($('final-quiz'), { questionSets: QUESTIONS, progress, title: '✦ Final challenge', completeText: '🏆 Atom explorer!', onChange: updateProgress });
-function updateProgress() {
-  saveProgress(progress);
-  const unlocked = MODEL_ORDER.filter(model => setSummary(progress, model, QUESTIONS[model]).complete);
-  const sets = [...MODEL_ORDER, 'final'];
-  const stars = sets.reduce((sum, key) => sum + setSummary(progress, key, QUESTIONS[key]).stars, 0);
-  const total = sets.reduce((sum, key) => sum + QUESTIONS[key].length, 0);
-  const finalDone = setSummary(progress, 'final', QUESTIONS.final).complete;
-  $('progress').textContent = `${unlocked.length} / 4 discoveries unlocked · ★ ${stars} / ${total}${finalDone ? ' · Atom explorer!' : ''}`;
-  document.querySelectorAll('.models [data-model]').forEach(button => {
-    const done = unlocked.includes(button.dataset.model);
-    button.toggleAttribute('data-unlocked', done);
-    button.querySelector('span').textContent = `${button.querySelector('span').textContent.replace(' ✓', '')}${done ? ' ✓' : ''}`;
-  });
-  const open = unlocked.length === MODEL_ORDER.length;
-  const finalQuizElement = $('final-quiz');
-  if (open && finalQuizElement.hidden) finalQuiz.show('final');
-  finalQuizElement.hidden = !open;
-  document.querySelector('.final-challenge').classList.toggle('is-locked', !open);
-  $('final-status').textContent = open
-    ? 'You have explored every model. Link each change to the evidence that caused it.'
-    : `Unlock all four discoveries to open the final challenge (${unlocked.length} of 4 so far).`;
-}
-$('reset-progress').addEventListener('click', () => {
-  if (!window.confirm('Reset all discoveries and stars saved on this device?')) return;
-  Object.keys(progress).forEach(key => delete progress[key]);
-  quiz.resetView();
-  finalQuiz.resetView();
-  $('final-quiz').hidden = true;
-  updateProgress();
-});
 
 // ---------- Theme ----------
 window.addEventListener('panphy:theme-change', () => {
@@ -1293,7 +1256,6 @@ renderer.domElement.addEventListener('webglcontextlost', event => {
 
 renderEnergyDiagram();
 setPlaying(state.playing);
-updateProgress();
 selectModel('plum', false);
 $('load-status').hidden = true;
 let previousTime = performance.now();

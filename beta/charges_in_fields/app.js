@@ -1,7 +1,6 @@
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
-import { MODES, MODE_ORDER, PARTICLES, MODE_PARTICLES, STEPPERS, CONTROLS, PARTS, QUESTIONS } from './content.js';
-import { Quiz, loadProgress, saveProgress, setSummary } from './quiz.js';
+import { MODES, MODE_ORDER, PARTICLES, MODE_PARTICLES, STEPPERS, CONTROLS, PARTS } from './content.js';
 
 const $ = id => document.getElementById(id);
 const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -1395,47 +1394,11 @@ function selectMode(mode, animate = true) {
   document.querySelectorAll('.models [data-mode]').forEach(button => button.setAttribute('aria-pressed', String(button.dataset.mode === mode)));
   viewer.setAttribute('aria-label', `${data.title}. ${data.description} Drag or use arrow keys to rotate; scroll, pinch or plus and minus keys to zoom.`);
   $('graph-canvas').setAttribute('aria-label', GRAPH_LABELS[mode]);
-  quiz.show(mode);
   resetView();
 }
 document.querySelectorAll('.models [data-mode]').forEach(button => button.addEventListener('click', () => {
   if (button.dataset.mode !== state.mode) selectMode(button.dataset.mode);
 }));
-
-// ---------- Progress ----------
-const progress = loadProgress();
-const quiz = new Quiz($('mode-quiz'), { questionSets: QUESTIONS, progress, title: '✦ Unlock this discovery', completeText: '✦ Discovery unlocked!', onChange: updateProgress });
-const finalQuiz = new Quiz($('final-quiz'), { questionSets: QUESTIONS, progress, title: '✦ Final challenge', completeText: 'Field expert!', completeIcon: 'trophy', onChange: updateProgress });
-function updateProgress() {
-  saveProgress(progress);
-  const unlocked = MODE_ORDER.filter(mode => setSummary(progress, mode, QUESTIONS[mode]).complete);
-  const sets = [...MODE_ORDER, 'final'];
-  const stars = sets.reduce((sum, key) => sum + setSummary(progress, key, QUESTIONS[key]).stars, 0);
-  const total = sets.reduce((sum, key) => sum + QUESTIONS[key].length, 0);
-  const finalDone = setSummary(progress, 'final', QUESTIONS.final).complete;
-  $('progress').textContent = `${unlocked.length} / 4 discoveries unlocked · ★ ${stars} / ${total}${finalDone ? ' · Field expert!' : ''}`;
-  document.querySelectorAll('.models [data-mode]').forEach(button => {
-    const done = unlocked.includes(button.dataset.mode);
-    const label = button.querySelector('span');
-    label.textContent = `${label.textContent.replace(' ✓', '')}${done ? ' ✓' : ''}`;
-  });
-  const open = unlocked.length === MODE_ORDER.length;
-  const finalQuizElement = $('final-quiz');
-  if (open && finalQuizElement.hidden) finalQuiz.show('final');
-  finalQuizElement.hidden = !open;
-  document.querySelector('.final-challenge').classList.toggle('is-locked', !open);
-  $('final-status').textContent = open
-    ? 'You have steered charges with electric fields, magnetic fields, crossed fields and a cyclotron. Use them together.'
-    : `Unlock all four discoveries to open the final challenge (${unlocked.length} of 4 so far).`;
-}
-$('reset-progress').addEventListener('click', () => {
-  if (!window.confirm('Reset all discoveries and stars saved on this device?')) return;
-  Object.keys(progress).forEach(key => delete progress[key]);
-  quiz.resetView();
-  finalQuiz.resetView();
-  $('final-quiz').hidden = true;
-  updateProgress();
-});
 
 // ---------- Theme ----------
 window.addEventListener('panphy:theme-change', () => {
@@ -1504,7 +1467,6 @@ function stepLab(delta) {
 }
 
 setPlaying(state.playing);
-updateProgress();
 resize();
 selectMode('efield', false);
 $('load-status').hidden = true;

@@ -1,5 +1,5 @@
 // Text content for the nuclear decay explorer: mode descriptions, particle
-// readouts, isotopes and quiz questions. Kept separate from the 3D scene code.
+// readouts and isotopes. Kept separate from the 3D scene code.
 
 export const MODE_ORDER = ['alpha', 'beta', 'gamma', 'halflife'];
 
@@ -73,33 +73,4 @@ export const PARTICLES = {
   paper: 'PAPER · One sheet stops alpha particles.',
   aluminium: 'ALUMINIUM · A few millimetres stop beta particles.',
   lead: 'LEAD · Several centimetres reduce gamma rays a lot, but some still get through.'
-};
-
-export const QUESTIONS = {
-  alpha: [
-    { q: 'What is an alpha particle made of?', choices: ['One electron', '2 protons and 2 neutrons', 'A gamma ray'], correct: 1, why: 'It is a helium nucleus: mass number 4, atomic number 2.', hint: 'Decay the nucleus and tap the particle that leaves.' },
-    { q: 'After alpha decay, what happens to the mass number and atomic number?', choices: ['Mass number −4, atomic number −2', 'Both stay the same', 'Mass number stays the same, atomic number +1'], correct: 0, why: '241 − 4 = 237 and 95 − 2 = 93, so americium becomes neptunium.', hint: 'Read the top and bottom numbers in the equation.' },
-    { q: 'Which material stops alpha particles?', choices: ['Only thick lead', 'A few mm of aluminium, but not paper', 'A sheet of paper'], correct: 2, why: 'Alpha particles are strongly ionising, so they lose their energy very quickly.', hint: 'Press “Test penetration”.' }
-  ],
-  beta: [
-    { q: 'Where does the electron in beta decay come from?', choices: ['A neutron in the nucleus changes into a proton and an electron', 'An electron shell around the atom', 'It was hiding inside a proton'], correct: 0, why: 'The electron is created in the nucleus when a neutron changes.', hint: 'Watch which particle glows before the electron leaves.' },
-    { q: 'Carbon-14 (6 protons) beta decays. How many protons does the new nucleus have?', choices: ['5', '6', '7'], correct: 2, why: 'A neutron became a proton: 6 + 1 = 7, which is nitrogen.', hint: 'Count the protons before and after.' },
-    { q: 'Why does the mass number stay at 14?', choices: ['The electron has a mass number of 4', 'One neutron is replaced by one proton, so the nucleon total is unchanged', 'A proton leaves the nucleus'], correct: 1, why: 'Mass number counts protons + neutrons: 8 + 6 = 7 + 7.', hint: 'Add protons and neutrons before and after.' }
-  ],
-  gamma: [
-    { q: 'What is a gamma ray?', choices: ['A fast electron', 'A helium nucleus', 'An electromagnetic wave'], correct: 2, why: 'Gamma rays are high-energy electromagnetic radiation from the nucleus.', hint: 'Tap the wavy packet that leaves the nucleus.' },
-    { q: 'What happens to the nucleus when it emits a gamma ray?', choices: ['It loses energy; its protons and neutrons stay the same', 'It becomes a different element', 'Its mass number falls by 4'], correct: 0, why: 'Gamma emission only carries away energy: A and Z do not change.', hint: 'Compare the equation numbers before and after.' },
-    { q: 'Why can a gamma tracer be detected outside the body?', choices: ['It is strongly ionising', 'It is very penetrating', 'It is stopped by skin'], correct: 1, why: 'Gamma rays are weakly ionising, so most pass through the body.', hint: 'Press “Test penetration” and see what gets through.' }
-  ],
-  halflife: [
-    { q: 'What is the half-life of a radioactive isotope?', choices: ['Half the time it takes for every nucleus to decay', 'The time for the number of unstable nuclei to halve', 'The age of the sample'], correct: 1, why: 'Half-life is the time for the number of undecayed nuclei, or the count rate, to fall to half.', hint: 'Look where the graph reaches half its starting height.' },
-    { q: 'A sample starts with 400 undecayed nuclei. About how many remain after two half-lives?', choices: ['100', '200', '0'], correct: 0, why: '400 → 200 after one half-life → 100 after two.', hint: 'Halve it, then halve it again.' },
-    { q: 'Why does the graph wobble around the dashed curve, especially for small samples?', choices: ['The simulation is broken', 'The half-life keeps changing', 'Radioactive decay is random'], correct: 2, why: 'Each nucleus decays at a random moment. Only large numbers follow the curve closely.', hint: 'Run a sample of 100, then 900.' }
-  ],
-  final: [
-    { q: 'Which decay changes neither the mass number nor the atomic number?', choices: ['Alpha', 'Beta', 'Gamma'], correct: 2, why: 'Gamma rays carry energy only.', hint: 'Compare the three equations.' },
-    { q: 'Which radiation is the most strongly ionising?', choices: ['Alpha', 'Beta', 'Gamma'], correct: 0, why: 'Alpha particles are large and doubly charged, which is also why they are stopped so easily.', hint: 'Which one is stopped by paper?' },
-    { q: 'Complete: ²²⁶₈₈Ra → ²²²₈₆Rn + ?', choices: ['⁰₋₁e (beta)', '⁴₂He (alpha)', 'γ (gamma)'], correct: 1, why: '226 − 222 = 4 and 88 − 86 = 2: a helium nucleus.', hint: 'Subtract the top numbers, then the bottom numbers.' },
-    { q: 'A source has a half-life of 8 days. What fraction of the undecayed nuclei remain after 24 days?', choices: ['1/3', '1/8', '1/16'], correct: 1, why: '24 days is three half-lives: ½ × ½ × ½ = 1/8.', hint: 'How many half-lives fit into 24 days?' }
-  ]
 };

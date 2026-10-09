@@ -35,12 +35,8 @@
   --neutral: #657481;
   --half-a: #7C3AED;
   --half-b: #65A30D;
-  --correct-bg: #E5F2EA;
   --correct-border: #3F7A55;
-  --correct-text: #2B5A3A;
-  --retry-bg: #FFF1DD;
   --retry-border: #9E6B27;
-  --retry-text: #754C17;
 }
 
 [data-theme="dark"] {
@@ -74,12 +70,8 @@
   --neutral: #8C9AA6;
   --half-a: #A78BFA;
   --half-b: #A3E635;
-  --correct-bg: #183324;
   --correct-border: #4ADE80;
-  --correct-text: #BBF7D0;
-  --retry-bg: #3A2A12;
   --retry-border: #F0A64A;
-  --retry-text: #FCD9A8;
 }
 
 * { box-sizing: border-box; }
@@ -164,10 +156,6 @@ h1 span { color: var(--brand-primary); }
 
 .lab-strip { display: flex; justify-content: space-between; align-items: center; gap: 16px; margin-bottom: 8px; color: var(--text-secondary); font-size: .8rem; }
 .lab-strip b { margin-left: 12px; color: var(--text-main); }
-.progress-group { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
-#progress { font-weight: 600; color: var(--brand-primary); }
-.link-button { min-height: 48px; padding: 0 4px; background: transparent; border: 0; color: var(--text-secondary); text-decoration: underline; text-underline-offset: 3px; font-size: .8rem; }
-.link-button:hover { color: var(--text-main); }
 
 /* Workspace: the 3D view with its study panels on the left, and everything you operate on the right. */
 .workspace {
@@ -219,7 +207,7 @@ body.has-endview #viewer { height: clamp(320px, calc(100vh - 450px), 520px); }
 #action-hint { margin: 0; color: var(--text-secondary); font-size: .82rem; line-height: 1.5; }
 
 .toolbar { display: flex; flex-wrap: wrap; gap: 8px; }
-.toolbar button, .question button:not(.link-button) {
+.toolbar button {
   min-height: 48px;
   padding: 8px 14px;
   border: 1px solid var(--input-border);
@@ -369,7 +357,7 @@ body.viewer-expanded { overflow: hidden; }
 .is-fullscreen.is-stacked #fullscreen { margin: 0; }
 .is-fullscreen.is-stacked > *, .is-fullscreen.is-stacked .bench > *, .is-fullscreen.is-stacked .stage > * { flex-shrink: 0; }
 
-/* Guide: what the model shows, then questions. */
+/* Guide: what the model shows. */
 .guide { display: grid; grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr); gap: 8px 40px; margin-top: 20px; padding: 26px; border: 1px solid var(--card-border); border-radius: 20px; background: var(--card-bg); box-shadow: var(--card-shadow); }
 .guide h2 { font-size: 1.9rem; line-height: 1.15; margin: 10px 0 14px; }
 .guide p { color: var(--text-secondary); font-size: .92rem; margin: 8px 0 20px; }
@@ -383,33 +371,6 @@ h3 { font-size: .88rem; margin: 0; }
 .deeper p { margin: 6px 0 0; font-size: .88rem; }
 .deeper h3 { color: var(--brand-primary); }
 
-/* Questions */
-.question { border-top: 1px solid var(--card-border); margin-top: 20px; padding-top: 20px; }
-.q-head { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; }
-.q-head h3 { color: var(--brand-primary); }
-.q-count { font-family: var(--font-mono); font-size: .74rem; color: var(--text-secondary); white-space: nowrap; }
-.question .q-text { margin: 10px 0 12px; color: var(--text-main); font-weight: 600; }
-.choices { display: grid; gap: 8px; }
-.question .choices button { text-align: left; font-weight: 600; }
-.question .choices button:not(:disabled):hover { border-color: var(--brand-accent); background: var(--muted-bg); }
-.question .choices button[data-result=correct] { background: var(--correct-bg); border-color: var(--correct-border); color: var(--correct-text); opacity: 1; }
-.question .choices button[data-result=retry] { background: var(--retry-bg); border-color: var(--retry-border); color: var(--retry-text); }
-.question .choices button[data-result=reveal] { border: 2px dashed var(--correct-border); }
-.question .feedback { min-height: 1.5em; margin: 12px 0 4px; font-weight: 600; color: var(--text-main); font-size: .86rem; }
-.q-actions { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; justify-content: space-between; }
-.question button.next-button { background: var(--brand-accent-strong); border-color: var(--brand-accent-strong); color: #fff; }
-[data-theme="dark"] .question .next-button { background: var(--brand-accent); border-color: var(--brand-accent); color: #0B1F1D; }
-.q-dots { display: flex; gap: 6px; margin-top: 10px; color: var(--text-secondary); font-size: .9rem; }
-.q-dots .star { color: var(--brand-primary); }
-.q-dots .done { color: var(--brand-accent-strong); }
-.q-dots .current { text-decoration: underline; text-underline-offset: 4px; }
-
-.final-challenge { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.4fr); gap: 28px; margin-top: 20px; padding: 26px; border: 1px solid var(--card-border); border-radius: 20px; background: var(--card-bg); box-shadow: var(--card-shadow); }
-.final-challenge h2 { font-size: 1.8rem; margin: 8px 0; }
-.final-challenge p { color: var(--text-secondary); }
-.final-challenge .question { margin: 0; padding: 0; border: 0; }
-.final-challenge.is-locked { opacity: .8; }
-
 .reality { display: flex; gap: 24px; padding: 28px 0; max-width: 1030px; }
 .reality > span { font-size: 2rem; color: var(--brand-primary); }
 .reality h2 { font-size: 1.3rem; margin: 0 0 8px; }
@@ -422,7 +383,6 @@ footer { display: flex; justify-content: space-between; gap: 20px; border-top: 1
 }
 @media (max-width: 860px) {
   .guide { grid-template-columns: 1fr; }
-  .final-challenge { grid-template-columns: 1fr; gap: 12px; }
 }
 @media (max-width: 760px) {
   main, footer { width: calc(100% - 28px); }
@@ -449,7 +409,6 @@ footer { display: flex; justify-content: space-between; gap: 20px; border-top: 1
   .endview .endview-title { grid-row: 1; }
   .part-readout { min-height: 72px; }
   .guide { padding: 20px; }
-  .final-challenge { padding: 20px; }
   .reality { gap: 12px; }
   footer { flex-direction: column; gap: 8px; }
 }

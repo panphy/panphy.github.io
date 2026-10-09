@@ -1,5 +1,5 @@
 // Text content for the charges in fields explorer: mode descriptions, particle data,
-// control settings, part readouts and quiz questions. Kept separate from the scene code.
+// control settings and part readouts. Kept separate from the scene code.
 
 export const MODE_ORDER = ['efield', 'bfield', 'selector', 'cyclotron'];
 
@@ -123,33 +123,4 @@ export const PARTS = {
   pole: 'MAGNET POLE · The large magnet makes a uniform vertical field through both dees.',
   oscillator: 'OSCILLATOR · Applies an alternating voltage to the dees. It must match the cyclotron frequency f = qB/(2πm).',
   track: 'TRACK · The dots are placed at equal time intervals, so wider spacing means a faster particle.'
-};
-
-export const QUESTIONS = {
-  efield: [
-    { q: 'Which way is an electron pushed between charged plates?', choices: ['Towards the positive plate', 'Towards the negative plate', 'Straight on: the field has no effect'], correct: 0, why: 'The electron is negative, so it is attracted to the positive plate: against the field direction.', hint: 'Fire an electron and see which plate it bends towards.' },
-    { q: 'Plates 4.0 cm apart have 200 V across them. What is the field strength?', choices: ['5000 V/m', '50 V/m', '8.0 V/m'], correct: 0, why: 'E = V/d = 200 / 0.040 = 5000 V/m. Remember to convert cm to m.', hint: 'Use E = V/d with d in metres.' },
-    { q: 'The particle is fired twice as fast. What happens to its deflection between the plates?', choices: ['It falls to a quarter', 'It halves', 'It stays the same'], correct: 0, why: 'It spends half as long between the plates, and y = ½at², so the deflection is (½)² = ¼ as big.', hint: 'Double the speed and compare the spots on the screen.' }
-  ],
-  bfield: [
-    { q: 'Why does a charged particle move in a circle in a uniform magnetic field?', choices: ['The force is always at right angles to its velocity', 'The force always points along the field', 'The field slows it down'], correct: 0, why: 'A force at right angles to the motion changes direction but not speed: the condition for circular motion.', hint: 'Watch the force arrow as the particle goes round.' },
-    { q: 'The speed of the particle doubles. What happens to the radius of its circle?', choices: ['It doubles', 'It halves', 'It stays the same'], correct: 0, why: 'r = mv/(qB), so r is proportional to v.', hint: 'Double the speed and compare the circles.' },
-    { q: 'How much work does the magnetic force do on the particle?', choices: ['None', 'qvB × the distance travelled', 'It depends on the speed'], correct: 0, why: 'The force is always perpendicular to the motion, so no work is done and the kinetic energy stays constant.', hint: 'Look at the kinetic energy line on the graph.' }
-  ],
-  selector: [
-    { q: 'Which particles pass straight through a velocity selector?', choices: ['Those with speed v = E/B', 'Those with the largest charge', 'Those with the smallest mass'], correct: 0, why: 'At v = E/B the electric force qE and the magnetic force qvB are equal and opposite.', hint: 'Compare the readout v = E/B with the colour that passes.' },
-    { q: 'E = 5.0 × 10⁴ V/m and B = 0.20 T. Which speed is selected?', choices: ['2.5 × 10⁵ m/s', '1.0 × 10⁴ m/s', '4.0 × 10⁻⁶ m/s'], correct: 0, why: 'v = E/B = 5.0 × 10⁴ / 0.20 = 2.5 × 10⁵ m/s.', hint: 'Divide E by B.' },
-    { q: 'Protons are replaced by alpha particles with the same speeds. What happens?', choices: ['The same speed is selected', 'A higher speed is selected', 'Nothing gets through'], correct: 0, why: 'The charge cancels in qE = qvB, so the selected speed v = E/B does not depend on charge or mass.', hint: 'Switch particles and watch which colour passes.' }
-  ],
-  cyclotron: [
-    { q: 'Where is the particle accelerated in a cyclotron?', choices: ['In the gap between the dees', 'Inside the dees', 'Only at the very edge'], correct: 0, why: 'Inside the hollow dees there is no electric field. Only the electric field in the gap does work on the particle.', hint: 'Watch where the dots spread out.' },
-    { q: 'Why can the oscillator frequency stay fixed while the particle speeds up?', choices: ['The time for each semicircle does not depend on the speed', 'The particle does not really speed up', 'The magnetic field gets stronger'], correct: 0, why: 'Faster particles travel bigger semicircles in the same time, T = 2πm/(qB).', hint: 'Compare the time for the first and the last semicircle.' },
-    { q: 'What sets the maximum kinetic energy of the particles?', choices: ['The magnetic field and the radius of the dees', 'Only the gap voltage', 'Only the oscillator frequency'], correct: 0, why: 'Eₖ = q²B²R²/(2m): a bigger gap voltage just gets there in fewer turns.', hint: 'Change the gap voltage and compare the final energy.' }
-  ],
-  final: [
-    { q: 'An electron and a proton enter the same magnetic field with the same speed. Which statement is true?', choices: ['They curve in opposite directions, and the electron’s circle is much smaller', 'They curve the same way with equal radii', 'Only the proton is deflected'], correct: 0, why: 'Opposite charges feel opposite forces, and r = mv/(qB) is much smaller for the far lighter electron.', hint: 'Compare r = mv/(qB) for the two particles.' },
-    { q: 'Which field can change the kinetic energy of a charged particle?', choices: ['An electric field', 'A magnetic field', 'Both, equally'], correct: 0, why: 'An electric force can act along the motion and do work; a magnetic force is always perpendicular to it.', hint: 'Recall the energy graphs in the first two tabs.' },
-    { q: 'A proton moves at 3.0 × 10⁵ m/s at right angles to a 0.10 T field. What is the force on it?', choices: ['4.8 × 10⁻¹⁵ N', '3.0 × 10⁴ N', '1.6 × 10⁻²⁰ N'], correct: 0, why: 'F = qvB = 1.6 × 10⁻¹⁹ × 3.0 × 10⁵ × 0.10 = 4.8 × 10⁻¹⁵ N.', hint: 'Use F = qvB with q = 1.6 × 10⁻¹⁹ C.' },
-    { q: 'In a cyclotron, the magnetic field is doubled. What must happen to the oscillator frequency?', choices: ['It must double', 'It must halve', 'It must stay the same'], correct: 0, why: 'f = qB/(2πm), so the frequency is proportional to B.', hint: 'Turn auto-tune on, change B and watch f.' }
-  ]
 };
