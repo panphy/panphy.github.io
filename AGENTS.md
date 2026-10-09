@@ -29,7 +29,7 @@ For a new or promoted general published app:
 1. Place it in the appropriate directory and update its previous inventory if moved.
 2. Link it from `index.html` and add it to `sitemap.xml`.
 3. For offline support, include `<script src="/assets/sw-register.js" defer></script>`, add the page and required assets to `ASSETS_TO_CACHE`, and add its homepage requirements to `OFFLINE_CARD_REQUIREMENTS` in `index.html`.
-4. For registered apps, add an `APP_VERSIONS` entry in `sw.js` and ensure `getAppGroup` in `assets/sw-register.js` identifies it.
+4. For registered apps, name the page `<section>/<app>.html` with supporting files in `<section>/<app>/`, so that `getAssetGroup` in `sw.js` and `getAppGroup` in `assets/sw-register.js` give them one app name; otherwise add a matching rule to both.
 5. Bump `BUILD_ID` after cached-file changes, as below.
 
 Network-only apps omit registration and offline requirements. Public support/reference pages may use the service worker without a homepage listing.
@@ -42,7 +42,7 @@ Network-only apps omit registration and offline requirements. Public support/ref
 - Cache URLs must match exactly, including CDN versions, paths, and query strings. Include required local modules and media for offline apps.
 - `/beta`, `/misc`, `/fun`, `/gcsephy`, and Supabase API calls remain network-only. Other resources can also be runtime-cached; do not assume an uncached resource is available offline.
 - `gcsephy/sw.js` is a separate freshness worker, not an offline cache: it uses `cache: 'no-cache'` fetches, no Cache Storage and no `BUILD_ID`. New `gcsephy/` pages include `<script src="/gcsephy/sw-register.js" defer></script>`, which also compares the open page's own HTML, scripts, stylesheets and images with the server (content hash, since GitHub Pages ETags change on every deploy) and offers a Reload banner when they change; it never reloads by itself. A page that loads data with `fetch` lists those files in `data-watch` on the script tag (as Do Now does for its CSVs) so that edits to them offer the reload too.
-- Keep `APP_VERSIONS` and app-group detection aligned. Entries currently use `BUILD_ID`, which is also the fallback version.
+- Update prompts are app-specific: at install the worker hashes each app's precached same-origin files, plus the shared `/assets/` files and `manifest.json`, into a per-app version, and a page prompts only when its own app's version differs. Keep `getAssetGroup` (`sw.js`) and `getAppGroup` (`assets/sw-register.js`) aligned; an app missing from the version map falls back to `BUILD_ID` and prompts on every build.
 - Preserve user-approved activation for normal updates. Keep precache repair limited to missing entries and rate-limited by the landing page.
 
 ## Code and interface conventions
