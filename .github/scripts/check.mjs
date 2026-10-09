@@ -8,9 +8,10 @@
 import { execFileSync } from "node:child_process";
 import { existsSync, readFileSync, statSync } from "node:fs";
 import path from "node:path";
+import { fileURLToPath } from "node:url";
 import vm from "node:vm";
 
-const ROOT = path.resolve(path.dirname(new URL(import.meta.url).pathname), "../..");
+const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../..");
 const SITE = "https://panphy.app";
 const EXAM_STATS = "gcsephy/do-now/exam-stats";
 const PAPER_MARKS = { "8463/1H": 100, "8463/2H": 100, "8464/P/1H": 70, "8464/P/2H": 70 };
