@@ -34,7 +34,8 @@ const FISSION = {
   separateTime: 2.6,
   packTime: 1.2,
   travel: 3.2, // total distance the two fragments move apart
-  krSide: 92 / 233, // the lighter fragment moves further (momentum is conserved)
+  drag: 1, // per second: the fragments lose speed gradually and are never brought to a halt
+  krShare: 141 / 233, // the lighter fragment moves faster and further (momentum is conserved)
   neutronSpeed: 3.2,
   gammaSpeed: 5
 };
@@ -519,7 +520,8 @@ function flash(position, size, duration = 0.7) {
 function buildFission() {
   const R = NUCLEON_RADIUS;
   const points = packNucleus(236, 1663, R);
-  const order = points.map((_, i) => i).sort((a, b) => points[a].y - points[b].y);
+  // Ordered from the top: barium takes the upper part, so the faster krypton heads down, away from the equation panel.
+  const order = points.map((_, i) => i).sort((a, b) => points[b].y - points[a].y);
   // Three nucleons near the waist become the neutrons that are released; the rest split 141 (barium) and 92 (krypton).
   const candidates = order.slice(136, 147);
   const byX = [...candidates].sort((a, b) => points[a].x - points[b].x);
@@ -552,7 +554,7 @@ function buildFission() {
     mesh.rotation.y = slot * 0.9;
     mesh.userData.radius = R;
     holder.add(mesh);
-    const record = { mesh, home: points[slot].clone(), kind: kinds[slot], group: group[slot], side: group[slot] === 'kr' ? 1 : group[slot] === 'ba' ? -1 : 0, phase: rand() * Math.PI * 2, axis: randomDirection(rand), current: new THREE.Vector3() };
+    const record = { mesh, home: points[slot].clone(), kind: kinds[slot], group: group[slot], side: group[slot] === 'ba' ? 1 : group[slot] === 'kr' ? -1 : 0, phase: rand() * Math.PI * 2, axis: randomDirection(rand), current: new THREE.Vector3() };
     record.pick = { object: mesh, kind: kinds[slot], nucleon: record };
     pickables.push(record.pick);
     return record;
@@ -625,12 +627,13 @@ function startFission() {
   updateFireButton();
 }
 function stepDecay(delta) {
-  if (!decay || !nucleus || decay.phase === 'done') return;
+  if (!decay || !nucleus) return;
   decay.t += delta;
   if (decay.phase === 'approach') stepApproach(delta);
   else if (decay.phase === 'wobble') stepWobble();
   else if (decay.phase === 'stretch') stepStretch();
-  else if (decay.phase === 'separate') stepSeparate();
+  // The fragments keep drifting and jiggling after the reaction is over.
+  else if (decay.phase === 'separate' || decay.phase === 'done') stepSeparate(delta);
 }
 function stepApproach(delta) {
   const incoming = nucleus.incoming;
@@ -692,12 +695,13 @@ function splitNucleus() {
     const packed = nucleus.packed[key];
     [...list].sort((a, b) => a.local0.length() - b.local0.length()).forEach((n, i) => { n.pack = packed[i]; });
     const radius = packed[packed.length - 1].length() + NUCLEON_RADIUS;
-    const side = key === 'kr' ? 1 : -1;
-    const share = key === 'kr' ? FISSION.krSide : 1 - FISSION.krSide;
+    const side = key === 'ba' ? 1 : -1;
+    const share = key === 'kr' ? FISSION.krShare : 1 - FISSION.krShare;
     const label = labelSprite(key === 'kr' ? 'Kr-92' : 'Ba-141', palette.line, 1.5);
     label.position.set(0, side * (radius + 0.4), 0);
     g.add(label);
-    nucleus.fragments.push({ key, list, g, centre, side, distance: FISSION.travel * share });
+    // Under this drag a fragment covers speed / drag in total, so the two end up `travel` apart.
+    nucleus.fragments.push({ key, list, g, side, speed: FISSION.travel * share * FISSION.drag });
   }
   // The three neutrons from the waist fly out sideways.
   neck.forEach((n, i) => {
@@ -726,19 +730,20 @@ function splitNucleus() {
   renderEquation(true);
   readout.textContent = 'FISSION · Two smaller nuclei (barium-141 and krypton-92), 3 free neutrons and gamma rays. About 170 MeV of energy is released, mostly as movement of the fragments.';
 }
-function stepSeparate() {
-  const move = easeOut(Math.min(1, decay.t / FISSION.separateTime));
+function stepSeparate(delta) {
   const pack = ease(Math.min(1, decay.t / FISSION.packTime));
+  const slow = Math.exp(-FISSION.drag * delta);
   for (const fragment of nucleus.fragments) {
-    fragment.g.position.y = fragment.centre.y + fragment.side * fragment.distance * move;
+    fragment.g.position.y += fragment.side * fragment.speed * (1 - slow) / FISSION.drag;
+    fragment.speed *= slow;
     for (const n of fragment.list) {
       n.mesh.position.lerpVectors(n.local0, n.pack, pack).addScaledVector(n.axis, 0.012 * Math.sin(state.time * 9 + n.phase));
     }
   }
-  if (decay.t >= FISSION.separateTime) {
+  if (decay.phase === 'separate' && decay.t >= FISSION.separateTime) {
     decay.phase = 'done';
     updateFireButton();
-    readout.textContent = 'DONE · The fragments stop as they crash into nearby atoms and heat them. That heat is what a nuclear power station uses. Tap a nucleon to see which nucleus it is in.';
+    readout.textContent = 'DONE · The fragments slow down as they crash into nearby atoms and heat them. That heat is what a nuclear power station uses. Tap a nucleon to see which nucleus it is in.';
   }
 }
 
