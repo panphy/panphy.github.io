@@ -1015,7 +1015,7 @@ function decayInSample(index) {
 function setSampleRunning(running, stopAt = null) {
   if (!sample) return;
   if (running && sample.t >= MAX_HALF_LIVES - 1e-9) {
-    readout.textContent = `The graph is full after ${MAX_HALF_LIVES} half-lives. Press “Reset sample” to start again.`;
+    readout.textContent = `The graph is full after ${MAX_HALF_LIVES} half-lives. Press “Reset” to start again.`;
     return;
   }
   sample.running = running;
@@ -1269,7 +1269,14 @@ $('motion').addEventListener('click', () => {
   else setPlaying(!state.playing);
 });
 function resetScene() {
-  // Stop any decay, penetration test or sample run, then return to the default view.
+  // Stop any decay, penetration test or sample run and put this tab's controls, motion and view back as they were on arrival.
+  if (state.mode === 'halflife') {
+    for (const id of ['isotope', 'sample-size']) {
+      for (const option of $(id).options) option.selected = option.defaultSelected;
+    }
+    updateEmissionLegend();
+  }
+  state.playing = !reducedMotion;
   buildMode(false);
   resetView();
   readout.textContent = DEFAULT_READOUT[state.mode]();
@@ -1365,8 +1372,6 @@ function selectMode(mode, animate = true) {
   $('decay').hidden = halfLife;
   $('penetration').hidden = halfLife;
   $('step-half').hidden = !halfLife;
-  // Half-life has a single Reset that clears the sample and the view.
-  $('reset').textContent = halfLife ? 'Reset' : 'Reset view';
   $('sample-controls').hidden = !halfLife;
   $('action-hint').textContent = data.hint;
   readout.textContent = DEFAULT_READOUT[mode]();
@@ -1379,11 +1384,12 @@ function selectMode(mode, animate = true) {
 document.querySelectorAll('.models [data-mode]').forEach(button => button.addEventListener('click', () => {
   if (button.dataset.mode !== state.mode) selectMode(button.dataset.mode);
 }));
-$('isotope').addEventListener('change', () => {
+function updateEmissionLegend() {
   const emits = ISOTOPES[$('isotope').value].emits;
   document.querySelector('[data-legend="alpha"]').hidden = emits !== 'alpha';
   document.querySelector('[data-legend="electron"]').hidden = emits === 'alpha';
-});
+}
+$('isotope').addEventListener('change', updateEmissionLegend);
 
 // ---------- Progress ----------
 const progress = loadProgress();
