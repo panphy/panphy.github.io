@@ -14,6 +14,8 @@ from collections import defaultdict
 HERE = os.path.dirname(os.path.abspath(__file__))
 RAW = "https://raw.githubusercontent.com/panphy/panphy.github.io/main/gcsephy/do-now/exam-stats"
 COURSES = {"8463": "Physics (8463)", "8464": "Trilogy (8464)"}
+PAPER_MARKS = {"8463": 100, "8464": 70}
+PAPER_1_UNITS = {"Energy", "Electricity", "Particle model of matter", "Atomic structure"}
 
 
 def rows(name):
@@ -45,20 +47,23 @@ def figures(code):
         sat = [r for r in mine if r["Series"] == name]
         by_series.append(f"{name} {sum(float(r['Recall']) for r in sat) / sum(int(r['Marks']) for r in sat):.0%}")
     topics = defaultdict(float)
+    paper_total = {n: sum(int(r["Marks"]) for r in mine if r["Paper"].endswith(f"{n}H")) for n in (1, 2)}
+    own_paper = {s["Topic"]: 1 if s["Unit"] in PAPER_1_UNITS else 2 for s in sections}
     for r in mine:
         correction = corrected.get((r["Series"], r["Paper"], r["Part"]))
         references = (correction["Sections"] if correction and correction["Sections"] else r["Sections"]).split(";")
         for reference in references:
             topics[topic_of(reference)["Topic"]] += float(r["Recall"]) / len(references)
-    top = sorted(topics.items(), key=lambda item: -item[1])[:4]
+    rates = {name: value / paper_total[own_paper[name]] * PAPER_MARKS[code] for name, value in topics.items()}
+    top = sorted(rates.items(), key=lambda item: -item[1])[:4]
     return "\n".join([
         f"{COURSES[code]}:",
         f"- {len({(r['Series'], r['Paper']) for r in mine})} papers and {total:,} marks in total.",
         f"- {recall:g} recall marks, which is {recall / total:.0%} of all marks.",
         f"- {equation} marks for writing down or choosing an equation.",
         f"- Recall share by series: {', '.join(by_series)}.",
-        "- The four topics with the highest rates (recall marks per 100 marks of this course's papers): "
-        + "; ".join(f'"{name}" ({value / total * 100:.1f})' for name, value in top) + ".",
+        f"- The four topics with the highest rates (average recall marks on the topic's own {PAPER_MARKS[code]}-mark paper): "
+        + "; ".join(f'"{name}" ({value:.1f})' for name, value in top) + ".",
     ])
 
 
@@ -100,7 +105,7 @@ Combined Science: Trilogy 8464: https://revisionscience.com/gcse-revision/scienc
 HOW THE FIGURES ARE CALCULATED
 - Each course is counted from its own papers only.
 - A part that lists several sections shares its Marks and its Recall equally between them, after any replacement from corrections.csv.
-- A topic's rate is its recall marks per 100 marks of that course's papers. Separate topics do not appear in the Trilogy figures.
+- A topic's rate is its average recall marks each time its own paper is set. Paper 1 examines Energy, Electricity, Particle model of matter and Atomic structure; Paper 2 examines the other units. The rate is all the topic's recall marks (including the few it earned on the other paper) divided by the total marks of that course's Paper 1s or Paper 2s, times 100 for Physics or 70 for Trilogy. Separate topics do not appear in the Trilogy figures.
 
 FIGURES I CLAIM (please recompute and confirm or correct each)
 {figures("8463")}
@@ -116,7 +121,7 @@ Part A: check the data files.
 
 Part B: recompute the statistics.
 5. Recompute every figure in "Figures I claim" and show yours beside mine.
-6. For each course, produce a table of all its topics with unit, recall marks, total marks and rate per 100, sorted by rate.
+6. For each course, produce a table of all its topics with unit, own paper, recall marks, the total marks of that paper across the series and rate, sorted by rate.
 
 Part C: check the mapping and the method.
 7. Review sections.csv against the AQA GCSE Physics 8463 specification. Is each section in the right unit and topic, and correctly marked Combined or Separate ("physics only" content)? Does each topic name describe everything it collects?

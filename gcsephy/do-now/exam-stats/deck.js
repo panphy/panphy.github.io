@@ -14,6 +14,8 @@
   const deck = document.getElementById("deck");
   const MONTHS = { "06": "June", "11": "Nov" };
   const UNIT_ORDER = ["Energy", "Electricity", "Particle model of matter", "Atomic structure", "Forces", "Waves", "Magnetism and electromagnetism", "Space physics"];
+  // Paper 1 examines these units and Paper 2 the rest.
+  const PAPER_1_UNITS = ["Energy", "Electricity", "Particle model of matter", "Atomic structure"];
   // One topic-by-topic slide for each group of units: [units, slide title, heading]. A course
   // without Space physics uses the second title and heading.
   const GROUPS = [
@@ -24,8 +26,8 @@
   ];
   // The deck shows one course at a time: ?course=physics or ?course=trilogy.
   const COURSES = {
-    physics: { code: "8463", name: "Physics", full: "GCSE Physics (8463)", papers: "Physics (8463) Higher papers", other: "trilogy" },
-    trilogy: { code: "8464", name: "Trilogy", full: "Combined Science: Trilogy (8464)", papers: "Trilogy (8464) Physics Higher papers", other: "physics" },
+    physics: { code: "8463", name: "Physics", full: "GCSE Physics (8463)", papers: "Physics (8463) Higher papers", paperMarks: 100, other: "trilogy" },
+    trilogy: { code: "8464", name: "Trilogy", full: "Combined Science: Trilogy (8464)", papers: "Trilogy (8464) Physics Higher papers", paperMarks: 70, other: "physics" },
   };
   const COURSE_KEY = "do-now-exam-stats-course";
 
@@ -132,12 +134,13 @@
       }
       return best;
     }
+    const paperOf = (unit) => (PAPER_1_UNITS.includes(unit) ? 1 : 2);
     // Separate Physics topics are not examined in the Trilogy papers, so that view leaves them out.
     const topics = new Map();
     for (const section of sections) {
       const separate = section.Course === "Separate";
       if ((isTrilogy && separate) || topics.has(section.Topic)) continue;
-      topics.set(section.Topic, { name: section.Topic, unit: section.Unit, separate, recall: {}, recallMarks: 0 });
+      topics.set(section.Topic, { name: section.Topic, unit: section.Unit, paper: paperOf(section.Unit), separate, recall: {}, recallMarks: 0 });
     }
     const units = UNIT_ORDER.filter((unit) => [...topics.values()].some((topic) => topic.unit === unit));
     for (const part of marks) {
@@ -151,8 +154,12 @@
         topic.recallMarks += part.recall / references.length;
       }
     }
-    // A topic's rate is its recall marks in every 100 marks of the course's papers.
-    for (const topic of topics.values()) topic.rate = totalMarks ? topic.recallMarks / totalMarks * 100 : 0;
+    // A topic's rate is its average recall marks each time its own paper is set (Paper 1 or
+    // Paper 2: 100 marks in Physics, 70 in Trilogy). The few recall marks a topic earned on the
+    // other paper are included.
+    const paperTotal = (number) => sum(marks.filter((part) => part.Paper.endsWith(`${number}H`)), (part) => part.marks);
+    const paperTotals = { 1: paperTotal(1), 2: paperTotal(2) };
+    for (const topic of topics.values()) topic.rate = paperTotals[topic.paper] ? topic.recallMarks / paperTotals[topic.paper] * course.paperMarks : 0;
     const ranked = [...topics.values()].sort((a, b) => b.rate - a.rate);
     const topRate = Math.max(0.1, ranked.length ? ranked[0].rate : 0);
 
@@ -161,7 +168,7 @@
       if (topic.separate) name.append(el("span", "sep", "S"));
       return name;
     };
-    const perHundred = `Recall marks in every 100 marks of the ${course.papers}.`;
+    const perPaper = (what) => `Average recall marks on the paper that examines the ${what} (Paper 1 or Paper 2, ${course.paperMarks} marks each), over ${series.length} series.`;
     const separateNote = () => {
       const note = el("p", "note");
       note.append(el("span", "sep", "S"), " Separate Physics only: not examined in the Trilogy papers.");
@@ -252,7 +259,7 @@
         bar.style.width = `${row.rate / most * 86}%`;
         bars.append(el("div", "bar-row", [el("span", "name", row.unit), el("div", "track", [bar, el("b", "", rate(row.rate))])]));
       }
-      section.append(bars, el("p", "note", `${perHundred}${isTrilogy ? " Space physics is not part of Trilogy." : ""}`));
+      section.append(bars, el("p", "note", `${perPaper("unit")}${isTrilogy ? " Space physics is not part of Trilogy." : ""}`));
       finish(section);
     }
 
@@ -268,7 +275,7 @@
       section.append(bars, notes(note));
       finish(section);
     };
-    rankSlide("a-hi", "Most recall marks", `${course.name} · top twelve topics`, "Most recall <em>marks.</em>", ranked.slice(0, 12), perHundred);
+    rankSlide("a-hi", "Most recall marks", `${course.name} · top twelve topics`, "Most recall <em>marks.</em>", ranked.slice(0, 12), perPaper("topic"));
     rankSlide("a-hot", "Fewest recall marks", `${course.name} · bottom twelve topics`, "Fewest recall <em>marks.</em>", ranked.slice(-12),
       "Same scale as the top twelve. Several of these topics are examined mainly through calculations.");
 
@@ -283,7 +290,7 @@
       grid.style.setProperty("--series", series.length);
       const head = el("div", "grid-row head", [el("span", "name", "Recall marks in each series")]);
       for (const name of series) head.append(el("span", "", seriesName(name)));
-      head.append(el("span", "", "In every 100 marks"));
+      head.append(el("span", "", `Average per Paper ${paperOf(shown[0])} (${course.paperMarks} marks)`));
       grid.append(head);
       for (const unit of shown) {
         if (shown.length > 1) grid.append(el("div", "grid-row unit", [el("span", "name", unit)]));
