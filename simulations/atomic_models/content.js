@@ -1,5 +1,5 @@
 // Text content for the atomic models explorer: model descriptions, particle
-// readouts and quiz questions. Kept separate from the 3D scene code.
+// readouts. Kept separate from the 3D scene code.
 
 export const MODEL_ORDER = ['plum', 'rutherford', 'bohr', 'cloud'];
 
@@ -64,32 +64,4 @@ export const ORBITALS = {
   '1s': '1s ORBITAL · 2 electrons · A sphere close to the nucleus: the lowest energy level (n = 1).',
   '2s': '2s ORBITAL · 2 electrons · A larger sphere with an empty shell inside it (a node). Energy level n = 2.',
   '2p': '2p ORBITALS · 2 electrons · One in each of two dumbbell-shaped orbitals (teal and violet), at right angles. Also energy level n = 2.'
-};
-
-export const QUESTIONS = {
-  plum: [
-    { q: 'Does this model have a nucleus?', choices: ['Yes, a small one at the centre', 'No, positive charge is spread through the whole atom', 'Yes, made of electrons'], correct: 1, why: 'Its positive charge is spread throughout the sphere.', hint: 'Zoom inside. Is there a separate central particle?' },
-    { q: 'What balances the electrons’ negative charge?', choices: ['Nothing; the atom is negative overall', 'Neutrons around the edge', 'A sphere of spread-out positive charge'], correct: 2, why: 'The positive “pudding” carries the same total charge as the electrons, so the atom is neutral.', hint: 'Look at the + marks.' },
-    { q: 'If this model were right, what would happen to alpha particles fired at gold foil?', choices: ['They would pass through with only tiny deflections', 'Many would bounce straight back', 'They would all be absorbed'], correct: 0, why: 'Spread-out charge only produces weak forces, so every alpha particle is deflected by a tiny angle.', hint: 'Press “Fire alpha particles” and watch the paths.' }
-  ],
-  rutherford: [
-    { q: 'Why did most alpha particles pass straight through the gold foil?', choices: ['The nucleus has no charge', 'The atom is mostly empty space', 'Alpha particles are too small to hit anything'], correct: 1, why: 'Most alpha particles did not pass close enough to a nucleus to be strongly deflected.', hint: 'Compare the tiny centre with the space around it.' },
-    { q: 'Why did a very few alpha particles bounce back?', choices: ['They came very close to a small, dense, positive nucleus', 'They hit an electron', 'The foil was too thick'], correct: 0, why: 'Only a tiny, concentrated positive charge can push a fast alpha particle back the way it came.', hint: 'Fire alpha particles and watch the ones that pass close to the nucleus.' },
-    { q: 'Where is almost all of the atom’s mass?', choices: ['Spread evenly through the atom', 'In the electrons', 'In the tiny nucleus'], correct: 2, why: 'The nucleus contains almost all the mass, in a tiny volume.', hint: 'Electrons are very light.' }
-  ],
-  bohr: [
-    { q: 'Can a Bohr electron stay halfway between allowed energy levels?', choices: ['Yes, anywhere between levels', 'No, only at allowed energy levels', 'Only in large atoms'], correct: 1, why: 'In this model an electron must occupy an allowed energy level.', hint: 'The rings represent the allowed energy levels.' },
-    { q: 'What happens when an electron absorbs exactly the right amount of energy?', choices: ['It moves to a higher energy level', 'It falls into the nucleus', 'It turns into a proton'], correct: 0, why: 'Absorbing a photon with exactly the energy difference moves it up a level.', hint: 'Press “Excite an electron” and watch the energy diagram.' },
-    { q: 'When an electron drops to a lower energy level, what does it emit?', choices: ['A proton', 'Energy as light (a photon)', 'A neutron'], correct: 1, why: 'The energy difference leaves as a photon of one specific colour. This explains line spectra.', hint: 'Watch what leaves the atom after the electron drops back.' }
-  ],
-  cloud: [
-    { q: 'What does a dense region of the cloud show?', choices: ['Where the protons are', 'A solid electron shell', 'Where an electron is most likely to be found'], correct: 2, why: 'The cloud is a map of probability, not a solid object.', hint: 'Each dot is a possible position of an electron.' },
-    { q: 'Does this model give each electron a fixed path?', choices: ['No, only the probability of where it is', 'Yes, circular orbits', 'Yes, figure-of-eight paths'], correct: 0, why: 'Quantum mechanics describes likely positions, not paths.', hint: 'Watch the flicker. Is there a track to follow?' },
-    { q: 'Which idea from Bohr’s model does it keep?', choices: ['Planetary orbits', 'Electrons have definite energy levels', 'Positive charge spread through the atom'], correct: 1, why: 'Energy levels remain: 1s is level n = 1; 2s and 2p are level n = 2.', hint: 'Inspect the orbitals and read their labels.' }
-  ],
-  final: [
-    { q: 'Which evidence ended the plum pudding model?', choices: ['The discovery of the neutron', 'Alpha particles bouncing back from gold foil', 'Hydrogen’s line spectrum'], correct: 1, why: 'Large deflections needed a small, dense, positive nucleus.', hint: 'Compare the alpha beams in the first two models.' },
-    { q: 'Which model first explained hydrogen’s line spectrum?', choices: ['Plum pudding', 'Rutherford', 'Bohr'], correct: 2, why: 'Bohr’s fixed energy levels mean only specific photon energies are emitted.', hint: 'Which model has energy levels and photons?' },
-    { q: 'Which order did the models appear in?', choices: ['Rutherford → plum pudding → Bohr → electron cloud', 'Plum pudding → Rutherford → Bohr → electron cloud', 'Bohr → Rutherford → plum pudding → electron cloud'], correct: 1, why: 'Thomson 1904, Rutherford 1911, Bohr 1913, Schrödinger 1926. Each model was changed by new evidence.', hint: 'Check the dates on the model buttons.' }
-  ]
 };

@@ -1,4 +1,4 @@
-const BUILD_ID = '2026-10-09T14:18:57Z';
+const BUILD_ID = '2026-10-09T14:46:33Z';
 const CACHE_PREFIX = 'panphy-labs';
 const PRECACHE_NAME = `${CACHE_PREFIX}-precache-${BUILD_ID}`;
 const RUNTIME_CACHE = `${CACHE_PREFIX}-runtime-${BUILD_ID}`;
@@ -107,17 +107,14 @@ const ASSETS_TO_CACHE = [
   '/simulations/atomic_models/style.css',
   '/simulations/atomic_models/app.js',
   '/simulations/atomic_models/content.js',
-  '/simulations/atomic_models/quiz.js',
   '/simulations/nuclear_decay.html',
   '/simulations/nuclear_decay/style.css',
   '/simulations/nuclear_decay/app.js',
   '/simulations/nuclear_decay/content.js',
-  '/simulations/nuclear_decay/quiz.js',
   '/simulations/fission_fusion.html',
   '/simulations/fission_fusion/style.css',
   '/simulations/fission_fusion/app.js',
   '/simulations/fission_fusion/content.js',
-  '/simulations/fission_fusion/quiz.js',
   'https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js',
   'https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/controls/OrbitControls.js',
   '/simulations/ripple_tank.html',

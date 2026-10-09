@@ -1,5 +1,5 @@
 // Text content for the fission and fusion explorer: mode descriptions, particle
-// readouts, binding-energy data and quiz questions. Kept separate from the scene code.
+// readouts and binding-energy data. Kept separate from the scene code.
 
 export const MODE_ORDER = ['fission', 'chain', 'fusion', 'energy'];
 
@@ -88,33 +88,4 @@ export const REACTIONS = {
     equation: 'H-2 + H-3 → He-4 + n',
     fuelMass: 5.030
   }
-};
-
-export const QUESTIONS = {
-  fission: [
-    { q: 'What happens to a uranium-235 nucleus when it absorbs a neutron?', choices: ['It becomes unstable uranium-236 and splits into two smaller nuclei', 'It fires out an alpha particle and stays uranium', 'It becomes a larger, stable nucleus'], correct: 0, why: 'Uranium-236 is unstable: it stretches and splits, releasing energy and neutrons.', hint: 'Fire a neutron and watch what happens after it joins the nucleus.' },
-    { q: 'In ²³⁵U + ¹n → ¹⁴¹Ba + ⁹²Kr + ? ¹n, how many neutrons come out?', choices: ['1', '2', '3'], correct: 2, why: '235 + 1 = 236 on the left. 141 + 92 = 233, so 3 more nucleons are needed: 3 neutrons.', hint: 'Make the top numbers add up on both sides.' },
-    { q: 'Where does the energy released in fission come from?', choices: ['A little of the nuclear mass becomes energy, mostly kinetic energy of the fragments', 'Chemical bonds in uranium breaking', 'Electrons falling into the nucleus'], correct: 0, why: 'The products have slightly less mass than the starting nucleus. E = mc² turns that difference into about 170 MeV.', hint: 'Watch how fast the fragments move apart.' }
-  ],
-  chain: [
-    { q: 'What is a chain reaction?', choices: ['Neutrons from one fission cause more fissions, which release more neutrons', 'A series of alpha decays', 'Nuclei stuck together by chemical bonds'], correct: 0, why: 'Each fission releases neutrons that can trigger further fissions.', hint: 'Start the reaction and watch the graph.' },
-    { q: 'What do control rods do in a nuclear reactor?', choices: ['They absorb neutrons so fewer cause fission', 'They release more neutrons', 'They make the fuel hotter'], correct: 0, why: 'Absorbing neutrons keeps the number of fissions steady.', hint: 'Add rods with the + button and watch the fission rate.' },
-    { q: 'On average, exactly 1 neutron from each fission causes another fission. What does the reaction do?', choices: ['It runs at a steady rate', 'It grows explosively', 'It stops within a second'], correct: 0, why: 'One new fission per fission keeps the number of fissions per second constant. This is how a reactor is run.', hint: 'Look for k ≈ 1 in the graph panel.' }
-  ],
-  fusion: [
-    { q: 'Why must the nuclei be very hot to fuse?', choices: ['They repel each other, so they need enough kinetic energy to get close together', 'Heat turns protons into neutrons', 'Fusion only happens in gases'], correct: 0, why: 'Both nuclei are positive. Fast, hot nuclei can overcome the repulsion and get close enough for the strong force to bind them.', hint: 'Compare the energy line with the top of the barrier in the graph.' },
-    { q: 'In ²H + ³H → ⁴He + ?, what is the missing particle?', choices: ['A proton', 'A neutron', 'An electron'], correct: 1, why: '2 + 3 = 5, and helium-4 has 4, so 1 nucleon is left. The charges balance (1 + 1 = 2 + 0), so it is a neutron.', hint: 'Balance the top and bottom numbers.' },
-    { q: 'Where does fusion happen naturally?', choices: ['In the cores of stars such as the Sun', 'In uranium mines', 'In today’s nuclear power stations'], correct: 0, why: 'Stars are hot and dense enough for hydrogen nuclei to fuse.', hint: 'Think about what powers the Sun.' }
-  ],
-  energy: [
-    { q: 'Which nucleus is at the peak of the binding energy per nucleon curve?', choices: ['Hydrogen-2', 'Iron-56', 'Uranium-235'], correct: 1, why: 'Iron-56 (with nickel-62) is the most tightly bound per nucleon.', hint: 'Find the highest point on the curve.' },
-    { q: 'Uranium fission releases energy because…', choices: ['the products have more binding energy per nucleon than uranium', 'the products have less binding energy per nucleon than uranium', 'the products are lighter than iron'], correct: 0, why: 'The fragments are higher up the curve, so more binding energy is released as the nucleons become more tightly bound.', hint: 'Compare the heights of U-236, Ba-141 and Kr-92.' },
-    { q: 'Compared with fission, fusion releases … per kilogram of fuel.', choices: ['about the same energy', 'more energy', 'far less energy'], correct: 1, why: 'D–T fusion releases about 3.5 MeV per nucleon compared with 0.7 MeV per nucleon for fission.', hint: 'Read the “per kilogram” numbers for both reactions.' }
-  ],
-  final: [
-    { q: 'Which process joins two light nuclei?', choices: ['Fission', 'Fusion', 'Alpha decay'], correct: 1, why: 'Fusion means joining.', hint: 'Fission means splitting.' },
-    { q: 'Complete: ²³⁵U + ¹n → ¹⁴⁰Xe + ⁹⁴Sr + ? ¹n', choices: ['1', '2', '3'], correct: 1, why: '236 − (140 + 94) = 2 neutrons. The bottom numbers check: 92 = 54 + 38.', hint: 'Add the top numbers on each side.' },
-    { q: 'A power station reactor runs at steady power. On average, how many neutrons from each fission go on to cause another fission?', choices: ['Fewer than 1', 'Exactly 1', 'More than 2'], correct: 1, why: 'Exactly 1 keeps the fission rate constant. The control rods absorb the rest.', hint: 'Recall the chain reaction tab.' },
-    { q: 'Why is fusion hard to achieve on Earth?', choices: ['It needs a temperature of about 100 million °C and a way to contain the hot plasma', 'Hydrogen is too radioactive to handle', 'Hydrogen absorbs neutrons too strongly'], correct: 0, why: 'The nuclei must overcome their electrostatic repulsion, and no solid container can hold a plasma that hot.', hint: 'Think about the repulsion between nuclei.' }
-  ]
 };
