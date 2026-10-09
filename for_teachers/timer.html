@@ -52,7 +52,7 @@
             flex-direction: column;
             align-items: center;
             min-height: 100vh;
-            padding: 4.75rem 1.5rem 1.5rem; /* clears the fixed logo */
+            padding: 3.5rem 1.5rem 1.5rem; /* clears the fixed logo and fullscreen button */
         }
 
         a {
@@ -67,12 +67,12 @@
 
         .logo-container {
             position: fixed;
-            top: calc(20px + var(--standalone-top));
+            top: calc(12px + var(--standalone-top));
             left: 20px;
         }
 
         .logo-container img {
-            max-height: 46px;
+            max-height: 36px;
             filter: drop-shadow(0 6px 12px rgba(0, 0, 0, 0.5));
         }
 
@@ -537,6 +537,11 @@
             z-index: 1000;
         }
 
+        /* Out of fullscreen the button sits higher, level with the logo, so the cards can start sooner. */
+        body:not(.fullscreen-active) .fullscreen-toggle {
+            top: calc(8px + var(--standalone-top));
+        }
+
         /* Styling for fullscreen button in fullscreen mode */
         .fullscreen-active .fullscreen-toggle {
             display: inline-grid !important;
@@ -702,7 +707,7 @@
         @media (min-width: 1200px) and (min-height: 700px) {
             /* Clear the fixed logo now that the card spans the full width. */
             body:not(.fullscreen-active) {
-                padding: 4.75rem 1.5rem 1rem;
+                padding: 3.5rem 1.5rem 1rem;
             }
 
             body:not(.fullscreen-active) .app-container {
@@ -857,7 +862,7 @@
                     height: 100vh;
                     height: 100dvh;
                     min-height: 0;
-                    padding: 4.75rem 1.5rem 1rem;
+                    padding: 3.5rem 1.5rem 1rem;
                 }
 
                 body:not(.fullscreen-active) .app-container {
