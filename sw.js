@@ -1,26 +1,9 @@
-const BUILD_ID = '2026-10-08T20:27:13Z';
-const APP_VERSIONS = {
-  core: BUILD_ID,
-  panphymd: BUILD_ID,
-  panphyplot: BUILD_ID,
-  motion_tracker: BUILD_ID,
-  sound_analyzer: BUILD_ID,
-  tone_generator: BUILD_ID,
-  ripple_tank: BUILD_ID,
-  superposition: BUILD_ID,
-  standing_wave: BUILD_ID,
-  states: BUILD_ID,
-  lorentz: BUILD_ID,
-  collision: BUILD_ID,
-  atomic_models: BUILD_ID,
-  nuclear_decay: BUILD_ID,
-  fission_fusion: BUILD_ID,
-  timer: BUILD_ID,
-  visualizer: BUILD_ID
-};
+const BUILD_ID = '2026-10-09T08:13:03Z';
 const CACHE_PREFIX = 'panphy-labs';
 const PRECACHE_NAME = `${CACHE_PREFIX}-precache-${BUILD_ID}`;
 const RUNTIME_CACHE = `${CACHE_PREFIX}-runtime-${BUILD_ID}`;
+// Per-app content versions, stored in the precache so they survive worker restarts.
+const APP_VERSIONS_KEY = '/__app-versions__';
 const CORS_REQUIRED_ASSETS = new Set([
   'https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js',
   'https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/controls/OrbitControls.js',
@@ -224,11 +207,80 @@ async function cachePrecacheAssets(onlyMissing = false) {
   };
 }
 
+// Which app a precached same-origin file belongs to. Keep in step with
+// getAppGroup in assets/sw-register.js. 'shared' files count towards every app.
+function getAssetGroup(pathname) {
+  if (pathname === '/' || pathname === '/index.html') return 'core';
+  if (pathname.startsWith('/assets/') || pathname === '/manifest.json') return 'shared';
+  if (pathname.startsWith('/simulations/lorentz')) return 'lorentz';
+  const match = pathname.match(/^\/[^/]+\/([^/.]+)/);
+  return match ? match[1] : 'core';
+}
+
+async function sha256Hex(data) {
+  const digest = await crypto.subtle.digest('SHA-256', data);
+  return [...new Uint8Array(digest)].map((byte) => byte.toString(16).padStart(2, '0')).join('');
+}
+
+// One version per app, hashed from the precached bytes of its own files plus
+// the shared ones, so an update prompt appears only in apps whose files changed.
+// CDN files are left out: their URLs are version-pinned in same-origin files.
+async function computeAppVersions() {
+  const cache = await caches.open(PRECACHE_NAME);
+  const groups = {};
+  await Promise.all(ASSETS_TO_CACHE.map(async (url) => {
+    const resolvedUrl = new URL(url, self.location.origin);
+    if (resolvedUrl.origin !== self.location.origin) return;
+    const cached = await cache.match(resolvedUrl.href);
+    const hash = cached ? await sha256Hex(await cached.arrayBuffer()) : 'missing';
+    const group = getAssetGroup(resolvedUrl.pathname);
+    (groups[group] = groups[group] || []).push(`${resolvedUrl.pathname}${resolvedUrl.search}=${hash}`);
+  }));
+
+  const shared = groups.shared || [];
+  const appVersions = {};
+  await Promise.all(Object.keys(groups).filter((group) => group !== 'shared').map(async (group) => {
+    const lines = [...groups[group], ...shared].sort().join('\n');
+    appVersions[group] = (await sha256Hex(new TextEncoder().encode(lines))).slice(0, 16);
+  }));
+  return appVersions;
+}
+
+async function storeAppVersions() {
+  try {
+    const appVersions = await computeAppVersions();
+    const cache = await caches.open(PRECACHE_NAME);
+    await cache.put(APP_VERSIONS_KEY, new Response(JSON.stringify(appVersions), {
+      headers: { 'Content-Type': 'application/json' }
+    }));
+    return appVersions;
+  } catch (error) {
+    console.warn('App versions unavailable:', error);
+    return {};
+  }
+}
+
+// An app missing from the map falls back to BUILD_ID in sw-register.js.
+async function getAppVersions() {
+  try {
+    const cache = await caches.open(PRECACHE_NAME);
+    const stored = await cache.match(APP_VERSIONS_KEY);
+    if (stored) return await stored.json();
+  } catch (error) {
+    // Recompute below.
+  }
+  return storeAppVersions();
+}
+
 let precacheRepairPromise = null;
 
 function repairPrecache() {
   if (!precacheRepairPromise) {
     precacheRepairPromise = cachePrecacheAssets(true)
+      .then(async (result) => {
+        await storeAppVersions();
+        return result;
+      })
       .finally(() => {
         precacheRepairPromise = null;
       });
@@ -241,6 +293,7 @@ function repairPrecache() {
 self.addEventListener('install', (event) => {
   event.waitUntil((async () => {
     await cachePrecacheAssets();
+    await storeAppVersions();
   })());
 });
 
@@ -265,11 +318,11 @@ self.addEventListener('message', (event) => {
           })
       );
     } else if (event.data.type === 'GET_VERSION_MAP') {
-      if (event.ports && event.ports[0]) {
-        event.ports[0].postMessage({
-          buildId: BUILD_ID,
-          appVersions: APP_VERSIONS
-        });
+      const replyPort = event.ports && event.ports[0];
+      if (replyPort) {
+        event.waitUntil(getAppVersions().then((appVersions) => {
+          replyPort.postMessage({ buildId: BUILD_ID, appVersions });
+        }));
       }
     }
   }
