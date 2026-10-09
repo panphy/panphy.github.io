@@ -41,7 +41,7 @@ Pages under `fun/`, `beta/`, `misc/` and `gcsephy/` need internet access, as do 
 | `beta/` | Trial apps, listed in `beta/index.html`; `beta/do_now/` only forwards old links to `gcsephy/do-now/` |
 | `misc/` | Unlisted resources, inventoried in `misc/index.html` |
 | `gcsephy/` | GCSE Physics curriculum resources and the Do Now starters, inventoried in `gcsephy/index.html` |
-| `.github/workflows/` | Repository automation |
+| `.github/` | Repository automation: `workflows/checks.yml` runs `scripts/check.mjs` and the app tests on every pull request; `workflows/supabase-keepalive.yml` pings Supabase twice a week |
 
 ## Contact
 

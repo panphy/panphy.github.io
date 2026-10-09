@@ -1,0 +1,34 @@
+name: Checks
+
+on:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  checks:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # the BUILD_ID check compares with the base branch
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: Repository checks
+        env:
+          BASE_REF: ${{ github.base_ref }}
+        run: |
+          if [ -n "$BASE_REF" ]; then
+            node .github/scripts/check.mjs --base "origin/$BASE_REF"
+          else
+            node .github/scripts/check.mjs
+          fi
+      - name: App tests
+        run: |
+          node --test \
+            tools/panphyplot/tests/regression.test.cjs \
+            tools/motion_tracker/tests/regression.test.cjs \
+            fun/spellwave/tests/prompt-utils.test.mjs
