@@ -332,6 +332,12 @@ h3 { font-size: 34px; line-height: 1.15; }
 .split { flex: 1; min-height: 0; display: grid; grid-template-columns: 1fr 1.12fr; gap: 56px; align-items: center; }
 .split.wide-fig { grid-template-columns: .82fr 1.3fr; }
 .split.even { grid-template-columns: 1fr 1fr; }
+/* An .idea that sums up the figure comes after the panel in the page, so it is revealed
+   after the figure's steps, but still sits under the points on the left. */
+.split.idea-last { grid-template-rows: 1fr auto auto 1fr; row-gap: 26px; }
+.split.idea-last > .stack { grid-area: 2 / 1; }
+.split.idea-last > .idea { grid-area: 3 / 1; }
+.split.idea-last > .panel { grid-area: 1 / 2 / -1 / 3; }
 .stack { flex: 1; min-height: 0; display: flex; flex-direction: column; gap: 26px; }
 .stack.center { justify-content: center; gap: 44px; }
 .fill { flex: 1; min-height: 0; }
