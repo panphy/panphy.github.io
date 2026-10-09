@@ -697,6 +697,109 @@
             }
         }
 
+        /* 4. Large screens (classroom boards): scale with the viewport so the
+              timer fills the screen instead of sitting in the middle. */
+        @media (min-width: 1200px) and (min-height: 700px) {
+            .app-container {
+                flex-wrap: nowrap;
+                max-width: none;
+            }
+
+            .timer-container {
+                flex: 1 1 auto;
+                max-width: none;
+                min-width: 0;
+            }
+
+            .side-column {
+                flex: 0 0 clamp(180px, 14vw, 480px);
+            }
+
+            .control-container {
+                width: 100%;
+            }
+
+            .time {
+                /* The rem term covers the parts that do not scale: padding, logo strip, footer. */
+                font-size: clamp(7rem, min(15vw, 36vh - 10.5rem), 40rem);
+                line-height: 1.1;
+            }
+
+            #current-clock {
+                font-size: clamp(1.6rem, 3.6vh, 6rem);
+            }
+
+            .label,
+            .info {
+                font-size: clamp(1.1rem, 2.2vh, 3.6rem);
+            }
+
+            #preview-hint {
+                font-size: clamp(0.9rem, 1.7vh, 2.6rem);
+            }
+
+            input,
+            select {
+                font-size: clamp(1.1rem, 2vh, 3rem);
+            }
+
+            input {
+                width: clamp(110px, 8vw, 260px);
+            }
+
+            select {
+                width: clamp(130px, 10vw, 320px);
+            }
+
+            .end-time-label {
+                font-size: clamp(0.78rem, 0.95vw, 2rem);
+            }
+
+            .end-time-value {
+                font-size: clamp(2.4rem, 3.9vw, 9rem);
+            }
+
+            .control-area button {
+                height: clamp(64px, 8vh, 150px);
+                font-size: clamp(1rem, 1.35vw, 2.8rem);
+            }
+
+            /* Fullscreen: no page chrome, so the cards take the whole screen. */
+            .fullscreen-active .app-container {
+                width: calc(100vw - 3rem);
+            }
+
+            .fullscreen-active .side-column {
+                flex: 0 0 clamp(180px, 14vw, 480px);
+            }
+
+            .fullscreen-active .time {
+                font-size: clamp(7rem, min(16vw, 31vh - 1.5rem), 48rem);
+                line-height: 1;
+            }
+
+            .fullscreen-active.is-setting .time {
+                font-size: clamp(7rem, min(16vw, 26vh - 2.5rem), 48rem);
+            }
+
+            .fullscreen-active #current-clock {
+                font-size: clamp(1.6rem, 4.6vh, 7rem);
+            }
+
+            .fullscreen-active .label,
+            .fullscreen-active .info {
+                font-size: clamp(1.2rem, 2.8vh, 4.4rem);
+            }
+
+            .fullscreen-active .end-time-value {
+                font-size: clamp(2.4rem, 3.9vw, 9rem);
+            }
+
+            .fullscreen-active .control-area button {
+                height: clamp(64px, 9vh, 170px);
+            }
+        }
+
         /* Custom Confirmation Dialog */
         .confirm-overlay {
             position: fixed;
