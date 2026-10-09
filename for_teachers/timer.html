@@ -847,6 +847,195 @@
             }
         }
 
+        /* 5. Laptops, tablets and boards: the whole page fits the viewport, so
+              nothing scrolls. The card is a size container and the digits are
+              sized from it. Phones (and browsers without container queries)
+              keep the scrolling layout above. */
+        @supports (container-type: size) {
+            @media (min-width: 700px) and (min-height: 540px) {
+                body:not(.fullscreen-active) {
+                    height: 100vh;
+                    height: 100dvh;
+                    min-height: 0;
+                    padding: 4.75rem 1.5rem 1rem;
+                }
+
+                body:not(.fullscreen-active) .app-container {
+                    flex: 1 1 0;
+                    flex-wrap: nowrap;
+                    align-items: stretch;
+                    gap: clamp(1rem, 2vw, 2rem);
+                    max-width: none;
+                    min-height: 0;
+                }
+
+                body:not(.fullscreen-active) footer {
+                    flex: none;
+                    margin-top: 0.75rem;
+                }
+
+                body:not(.fullscreen-active) footer p {
+                    margin: 0.25rem 0;
+                }
+
+                body:not(.fullscreen-active) .timer-container {
+                    container: timer / size;
+                    flex: 1 1 0;
+                    max-width: none;
+                    min-width: 0;
+                    min-height: 0;
+                    display: flex;
+                    flex-wrap: wrap;
+                    align-items: center;
+                    align-content: center;
+                    justify-content: center;
+                    column-gap: 1rem;
+                    padding: 1.25rem 1.5rem 1rem;
+                }
+
+                body:not(.fullscreen-active) .timer-container > * {
+                    flex: 0 0 100%;
+                }
+
+                body:not(.fullscreen-active) #current-clock {
+                    font-size: clamp(1.25rem, 4.5cqh, 6rem);
+                    line-height: 1.2;
+                }
+
+                body:not(.fullscreen-active) .label,
+                body:not(.fullscreen-active) .info {
+                    font-size: clamp(0.9rem, 2.8cqh, 3.6rem);
+                }
+
+                body:not(.fullscreen-active) #preview-hint {
+                    font-size: clamp(0.8rem, 2.1cqh, 2.6rem);
+                }
+
+                /* Width: eight characters across the card. Height: what the clock,
+                   labels and time entry leave; the rem term is their fixed part. */
+                body:not(.fullscreen-active) .time {
+                    font-size: clamp(3rem, min(21cqw, 37.5cqh - 3.6rem), 48rem);
+                    line-height: 1;
+                    margin: 0;
+                }
+
+                body:not(.fullscreen-active) .inputs {
+                    flex-wrap: nowrap;
+                    gap: 0.5rem;
+                    margin: 0.5rem 0 0;
+                }
+
+                /* Narrow card: time entry keeps its own row and shrinks to fit. */
+                @container timer (max-width: 799.98px) {
+                    body:not(.fullscreen-active) input {
+                        width: clamp(70px, 20cqw, 110px);
+                    }
+
+                    body:not(.fullscreen-active) select {
+                        width: clamp(100px, 24cqw, 130px);
+                    }
+                }
+
+                /* Wide card: clock and time entry share the top row. */
+                @container timer (min-width: 800px) {
+                    body:not(.fullscreen-active) #current-clock {
+                        flex: 1 1 0;
+                        order: -2;
+                    }
+
+                    body:not(.fullscreen-active) .inputs {
+                        flex: 0 0 auto;
+                        order: -1;
+                        gap: 0.75rem;
+                        margin: 0;
+                    }
+
+                    body:not(.fullscreen-active) .time {
+                        font-size: clamp(3rem, min(21cqw, 37.5cqh - 1.9rem), 48rem);
+                    }
+                }
+            }
+
+            /* Below board size the side column is compacted so it fits the height. */
+            @media (min-width: 700px) and (min-height: 540px) and (max-width: 1199.98px),
+                   (min-width: 700px) and (min-height: 540px) and (max-height: 699.98px) {
+                body:not(.fullscreen-active) .side-column {
+                    flex: 0 0 clamp(150px, min(14vw, 25vh), 480px);
+                    gap: 0.75rem;
+                    min-height: 0;
+                }
+
+                body:not(.fullscreen-active) .control-container {
+                    width: 100%;
+                    min-width: 0;
+                    padding: clamp(0.75rem, 2vh, 1.5rem);
+                }
+
+                body:not(.fullscreen-active) .end-times-panel {
+                    padding: clamp(0.75rem, 2vh, 1.4rem) 0.8rem;
+                }
+
+                body:not(.fullscreen-active) .end-time-value {
+                    font-size: clamp(1.6rem, min(3.9vw, 7vh), 9rem);
+                }
+
+                body:not(.fullscreen-active) .end-time-row + .end-time-row {
+                    margin-top: clamp(0.5rem, 1.6vh, 1.2rem);
+                }
+
+                body:not(.fullscreen-active) .control-area {
+                    gap: clamp(0.5rem, 1.3vh, 0.8rem);
+                }
+
+                body:not(.fullscreen-active) .control-area button {
+                    height: clamp(44px, 8vh, 150px);
+                    padding: 0 8px;
+                    font-size: clamp(0.9rem, min(1.35vw, 2.4vh), 2.8rem);
+                }
+            }
+
+            /* Portrait (tablets held upright): end times and controls sit below the timer. */
+            @media (min-width: 700px) and (min-height: 540px) and (orientation: portrait) {
+                body:not(.fullscreen-active) .app-container {
+                    flex-direction: column;
+                    gap: 1rem;
+                }
+
+                body:not(.fullscreen-active) .side-column {
+                    flex: 0 0 auto;
+                    flex-direction: row;
+                    align-items: stretch;
+                    justify-content: center;
+                    gap: 1rem;
+                    width: 100%;
+                }
+
+                body:not(.fullscreen-active) .end-times-panel,
+                body:not(.fullscreen-active) .control-container {
+                    flex: 1;
+                    align-self: stretch;
+                    display: flex;
+                    flex-direction: column;
+                    justify-content: center;
+                    width: auto;
+                    padding: 1rem;
+                }
+
+                body:not(.fullscreen-active) .control-area {
+                    width: 100%;
+                    gap: 0.5rem;
+                }
+
+                body:not(.fullscreen-active) .control-area button {
+                    height: 48px;
+                }
+
+                body:not(.fullscreen-active) .end-time-value {
+                    font-size: clamp(1.8rem, 5vw, 4rem);
+                }
+            }
+        }
+
         /* Custom Confirmation Dialog */
         .confirm-overlay {
             position: fixed;
