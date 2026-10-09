@@ -50,11 +50,14 @@ AQA gives every student the full Physics Equations Sheet as an insert with each 
 | `practical/<slug>/index.html` | Shells; `assets/practical.js` renders `assets/practicals.js` |
 | `assets/practical-diagrams.js`, `assets/diagrams.js` | Pictorial practical diagrams; circuit, graph and symbol helpers |
 | `assets/styles.css` | Adapted from the Year 9 companion stylesheet |
+| `assets/components/` | Component pictures for the I–V mission; the teaching deck's "What they look like" slide uses the same files, so renaming one means updating `../../decks/electric-circuits/index.html` too |
 | `Y10 Electricity Virtual Labs.pdf` | Class worksheet with its answers at the back, built from `workbook/workbook.html?labs`. Missions deep-link to its pages, so if they move, update `lab` in `assets/lessons.js`, the table above, and the page references in `workbook/assets/content.js` and `plans-data.js` |
 | `Y10 Electricity Virtual Labs Teacher Guide.pdf` | Hosted but not linked; no source in this repository |
 | `workbook/` | Twelve-lesson workbook, unit review, answer editions and teacher guide. See [`workbook/README.md`](workbook/README.md) |
 
 To edit content, change `assets/lessons.js`, `exam-questions.js` or `practicals.js`; there is no build step. The workbook uses `assets/diagrams.js`, so rebuild its PDFs after changing a circuit symbol.
+
+The teaching deck (`../../decks/electric-circuits/`) has three photo slides: the components, the National Grid and the inside of a UK plug. The Grid and plug photos are in the deck's `images/` folder, each with a credit on the slide linking to its source; change a photo and its credit together, and use only public domain or Creative Commons images that allow reuse.
 
 ## Hosting
 

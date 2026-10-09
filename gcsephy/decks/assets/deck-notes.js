@@ -19,17 +19,17 @@
 
   function build() {
     pane.className = 'notes';
-    pane.setAttribute('aria-label', 'Revision note');
+    pane.setAttribute('aria-label', 'Note');
     toggle.type = 'button';
     toggle.className = 'notes-toggle';
-    toggle.title = 'Show or hide the revision note (N)';
+    toggle.title = 'Show or hide the note (N)';
     toggle.setAttribute('aria-controls', 'notes-body');
-    toggle.innerHTML = '<svg class="notes-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M6 3.5h9l4 4V20a.5.5 0 0 1-.5.5h-12A.5.5 0 0 1 6 20z"/><path d="M9.5 12h6M9.5 16h4"/></svg><span class="notes-label">Revision note</span><span class="notes-none">None for this slide</span><svg class="notes-chevron" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M6 15l6-6 6 6"/></svg>';
+    toggle.innerHTML = '<svg class="notes-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M6 3.5h9l4 4V20a.5.5 0 0 1-.5.5h-12A.5.5 0 0 1 6 20z"/><path d="M9.5 12h6M9.5 16h4"/></svg><span class="notes-label">Note</span><span class="notes-none">No additional note for this slide</span><svg class="notes-chevron" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M6 15l6-6 6 6"/></svg>';
     body.id = 'notes-body';
     body.className = 'notes-body';
     body.tabIndex = 0;
     empty.className = 'notes-empty';
-    empty.textContent = 'No revision note for this slide.';
+    empty.textContent = 'No additional note for this slide.';
     pane.append(toggle, body);
     const controls = document.querySelector('.controls');
     controls.parentNode.insertBefore(pane, controls);
