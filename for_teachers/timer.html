@@ -52,7 +52,7 @@
             flex-direction: column;
             align-items: center;
             min-height: 100vh;
-            padding: 3.5rem 1.5rem 1.5rem;
+            padding: 4.75rem 1.5rem 1.5rem; /* clears the fixed logo */
         }
 
         a {
@@ -697,9 +697,62 @@
             }
         }
 
-        /* 4. Large screens (classroom boards): scale with the viewport so the
-              timer fills the screen instead of sitting in the middle. */
+        /* 4. Large screens (classroom boards): the page fits the viewport and the
+              digits take the space that is left, instead of stopping at fixed sizes. */
         @media (min-width: 1200px) and (min-height: 700px) {
+            /* Clear the fixed logo now that the card spans the full width. */
+            body:not(.fullscreen-active) {
+                padding: 4.75rem 1.5rem 1rem;
+            }
+
+            body:not(.fullscreen-active) .app-container {
+                flex: 1 0 auto;
+                align-items: stretch;
+            }
+
+            body:not(.fullscreen-active) footer {
+                margin-top: 0.75rem;
+            }
+
+            body:not(.fullscreen-active) footer p {
+                margin: 0.25rem 0;
+            }
+
+            /* Clock and time entry share the top row, leaving the height to the digits. */
+            body:not(.fullscreen-active) .timer-container {
+                display: flex;
+                flex-wrap: wrap;
+                align-items: center;
+                align-content: center;
+                justify-content: center;
+                column-gap: 1rem;
+                padding: 1.25rem 2rem 1rem;
+            }
+
+            body:not(.fullscreen-active) .timer-container > * {
+                flex: 0 0 100%;
+            }
+
+            body:not(.fullscreen-active) #current-clock {
+                flex: 1 1 0;
+                order: -2;
+            }
+
+            body:not(.fullscreen-active) .inputs {
+                flex: 0 0 auto;
+                order: -1;
+                flex-wrap: nowrap;
+                gap: 0.75rem;
+                margin: 0;
+            }
+
+            body:not(.fullscreen-active) .time {
+                /* Width: eight characters in the card. Height: what the rest of the page leaves. */
+                font-size: clamp(7rem, min(18vw - 2rem, 41vh - 7.25rem), 48rem);
+                line-height: 1;
+                margin: 0;
+            }
+
             .app-container {
                 flex-wrap: nowrap;
                 max-width: none;
@@ -712,17 +765,11 @@
             }
 
             .side-column {
-                flex: 0 0 clamp(180px, 14vw, 480px);
+                flex: 0 0 clamp(180px, min(14vw, 25vh), 480px);
             }
 
             .control-container {
                 width: 100%;
-            }
-
-            .time {
-                /* The rem term covers the parts that do not scale: padding, logo strip, footer. */
-                font-size: clamp(7rem, min(15vw, 36vh - 10.5rem), 40rem);
-                line-height: 1.1;
             }
 
             #current-clock {
@@ -752,16 +799,16 @@
             }
 
             .end-time-label {
-                font-size: clamp(0.78rem, 0.95vw, 2rem);
+                font-size: clamp(0.78rem, min(0.95vw, 1.7vh), 2rem);
             }
 
             .end-time-value {
-                font-size: clamp(2.4rem, 3.9vw, 9rem);
+                font-size: clamp(2.4rem, min(3.9vw, 7vh), 9rem);
             }
 
             .control-area button {
                 height: clamp(64px, 8vh, 150px);
-                font-size: clamp(1rem, 1.35vw, 2.8rem);
+                font-size: clamp(1rem, min(1.35vw, 2.4vh), 2.8rem);
             }
 
             /* Fullscreen: no page chrome, so the cards take the whole screen. */
@@ -770,7 +817,7 @@
             }
 
             .fullscreen-active .side-column {
-                flex: 0 0 clamp(180px, 14vw, 480px);
+                flex: 0 0 clamp(180px, min(14vw, 25vh), 480px);
             }
 
             .fullscreen-active .time {
@@ -792,7 +839,7 @@
             }
 
             .fullscreen-active .end-time-value {
-                font-size: clamp(2.4rem, 3.9vw, 9rem);
+                font-size: clamp(2.4rem, min(3.9vw, 7vh), 9rem);
             }
 
             .fullscreen-active .control-area button {
