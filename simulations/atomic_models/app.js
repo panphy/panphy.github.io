@@ -1117,12 +1117,10 @@ function setPlaying(playing) {
 }
 $('motion').addEventListener('click', () => setPlaying(!state.playing));
 function resetScene() {
-  // Stop any running demonstration, then return to the model's default view.
-  stopBeam();
-  endExcite();
-  state.inspectIndex = 0;
-  resetView();
-  readout.textContent = DEFAULT_READOUT[state.model];
+  // Stop any running demonstration and put this model's atom, motion and view back as they were on arrival.
+  state.exciteIndex = 0;
+  setPlaying(!reducedMotion);
+  selectModel(state.model, false);
 }
 $('reset').addEventListener('click', resetScene);
 $('inspect').addEventListener('click', () => {
