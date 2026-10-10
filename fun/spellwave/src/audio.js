@@ -1,8 +1,23 @@
-const MASTER_VOLUME = 0.95;
+// The output limiter adds about 2 dB of make-up gain, so the master sits a little lower than it used to.
+const MASTER_VOLUME = 0.78;
 const MUSIC_GAIN = 0.82;
 const MUSIC_TIMER_INTERVAL = 80;
 const MUSIC_SCHEDULE_AHEAD = 0.34;
 const MUSIC_TRANSITION_DURATION = 1.2;
+// Song form: each season theme plays its melody twice, then its B section, then the melody again.
+const MUSIC_SECTION_STEPS = 32;
+const MUSIC_FORM = ['a', 'a', 'b', 'a'];
+const MUSIC_STEP_WRAP = 256;
+const MUSIC_REVERB_SEND = 0.2;
+const SFX_REVERB_SEND = 0.24;
+const ECHO_TIME = 0.29;
+const ECHO_FEEDBACK = 0.3;
+const ECHO_SEND = 0.26;
+const MUSIC_FILTER_OPEN = 18000;
+const MUSIC_FILTER_LOW_LIFE = 3400;
+const MUSIC_FILTER_FROZEN = 420;
+const FROZEN_TEMPO_STRETCH = 1.4;
+const LANE_PAN_WIDTH = 0.7;
 const MUSIC_SEASONS = [
   {
     name: 'spring',
@@ -20,6 +35,12 @@ const MUSIC_SEASONS = [
       587.33, 659.25, 783.99, 880.0, 783.99, 659.25, 587.33, null,
       659.25, 783.99, 987.77, 880.0, 783.99, 659.25, 587.33, 523.25,
       493.88, null, 587.33, 659.25, 783.99, 659.25, 587.33, 523.25,
+    ],
+    melodyB: [
+      783.99, 659.25, 523.25, 659.25, 880.0, 698.46, 587.33, 698.46,
+      1046.5, 880.0, 698.46, 880.0, 987.77, 783.99, 587.33, null,
+      659.25, 783.99, 1046.5, 783.99, 698.46, 880.0, 1174.66, 880.0,
+      880.0, 1046.5, 880.0, 698.46, 783.99, null, 587.33, null,
     ],
     bass: [
       130.81, null, null, null, 146.83, null, null, null,
@@ -43,6 +64,12 @@ const MUSIC_SEASONS = [
       659.25, 783.99, 987.77, 1174.66, 987.77, 880.0, 783.99, 659.25,
       739.99, null, 880.0, 987.77, 1174.66, 987.77, 880.0, 739.99,
     ],
+    melodyB: [
+      739.99, 880.0, 1174.66, 880.0, 880.0, 659.25, 880.0, 659.25,
+      659.25, 783.99, 1046.5, 783.99, 587.33, 783.99, 987.77, 880.0,
+      1174.66, 880.0, 739.99, 880.0, 880.0, 987.77, 880.0, 659.25,
+      783.99, 1046.5, 1318.51, 1046.5, 987.77, 1174.66, 987.77, 880.0,
+    ],
     bass: [
       146.83, null, 146.83, null, 110.0, null, 110.0, null,
       130.81, null, 130.81, null, 98.0, null, 110.0, null,
@@ -65,6 +92,12 @@ const MUSIC_SEASONS = [
       349.23, 440.0, 523.25, 659.25, 587.33, 523.25, 440.0, 392.0,
       329.63, null, 392.0, 493.88, 587.33, 523.25, 493.88, 392.0,
     ],
+    melodyB: [
+      659.25, 523.25, 440.0, 523.25, 587.33, 493.88, 392.0, 493.88,
+      523.25, 440.0, 349.23, 440.0, 493.88, 587.33, 659.25, null,
+      440.0, 523.25, 659.25, 880.0, 783.99, 587.33, 493.88, 587.33,
+      698.46, 523.25, 440.0, 523.25, 587.33, 493.88, 440.0, null,
+    ],
     bass: [
       110.0, null, null, null, 98.0, null, 98.0, null,
       87.31, null, null, null, 98.0, null, 110.0, null,
@@ -86,6 +119,12 @@ const MUSIC_SEASONS = [
       587.33, null, 739.99, null, 880.0, 783.99, null, 739.99,
       523.25, null, 659.25, null, 783.99, 739.99, null, 659.25,
       493.88, null, 587.33, null, 739.99, 659.25, null, 587.33,
+    ],
+    melodyB: [
+      987.77, null, 783.99, null, 659.25, 783.99, null, 987.77,
+      880.0, null, 739.99, null, 587.33, 739.99, null, 880.0,
+      783.99, null, 659.25, null, 523.25, 659.25, null, 783.99,
+      739.99, null, 587.33, null, 493.88, 587.33, null, 659.25,
     ],
     bass: [
       82.41, null, null, null, 98.0, null, null, null,
@@ -249,12 +288,19 @@ export function createSpellwaveAudio({
   getWaveSet,
   getIsFinalWave = () => false,
   getTypedLength,
+  getHealth = () => Infinity,
+  getIsTimeFrozen = () => false,
+  lowHealth = 0,
   pathLanes,
 }) {
   let audioEnabled = initialEnabled;
   let audioContext = null;
   let masterGain = null;
   let musicGain = null;
+  let musicFilter = null;
+  let musicDuck = null;
+  let melodyBus = null;
+  let sfxBus = null;
   let musicTimer = null;
   let musicStep = 0;
   let nextMusicTime = 0;
@@ -291,11 +337,110 @@ export function createSpellwaveAudio({
       musicGain = audioContext.createGain();
       masterGain.gain.setValueAtTime(MASTER_VOLUME, audioContext.currentTime);
       musicGain.gain.setValueAtTime(0.0001, audioContext.currentTime);
-      musicGain.connect(masterGain);
-      masterGain.connect(audioContext.destination);
+      buildSignalChain(audioContext);
     }
 
     return audioContext;
+  }
+
+  // music: musicGain -> musicFilter -> musicDuck -> master; melody notes also feed an echo.
+  // effects: sfxBus -> master. Both buses send to one shared reverb, and a limiter
+  // sits on the output so stacked sounds cannot clip.
+  function buildSignalChain(context) {
+    const limiter = context.createDynamicsCompressor();
+    limiter.threshold.value = -6;
+    limiter.knee.value = 6;
+    limiter.ratio.value = 12;
+    limiter.attack.value = 0.003;
+    limiter.release.value = 0.22;
+    masterGain.connect(limiter);
+    limiter.connect(context.destination);
+
+    musicFilter = context.createBiquadFilter();
+    musicFilter.type = 'lowpass';
+    musicFilter.frequency.value = MUSIC_FILTER_OPEN;
+    musicFilter.Q.value = 0.4;
+    musicDuck = context.createGain();
+    musicGain.connect(musicFilter);
+    musicFilter.connect(musicDuck);
+    musicDuck.connect(masterGain);
+
+    sfxBus = context.createGain();
+    sfxBus.connect(masterGain);
+
+    const reverb = context.createConvolver();
+    reverb.buffer = createReverbImpulse(context, 1.7);
+    const musicSend = context.createGain();
+    const sfxSend = context.createGain();
+    musicSend.gain.value = MUSIC_REVERB_SEND;
+    sfxSend.gain.value = SFX_REVERB_SEND;
+    musicDuck.connect(musicSend);
+    sfxBus.connect(sfxSend);
+    musicSend.connect(reverb);
+    sfxSend.connect(reverb);
+    reverb.connect(masterGain);
+
+    melodyBus = context.createGain();
+    const echo = context.createDelay(1);
+    const echoFeedback = context.createGain();
+    const echoTone = context.createBiquadFilter();
+    const echoSend = context.createGain();
+    echo.delayTime.value = ECHO_TIME;
+    echoFeedback.gain.value = ECHO_FEEDBACK;
+    echoTone.type = 'lowpass';
+    echoTone.frequency.value = 2400;
+    echoSend.gain.value = ECHO_SEND;
+    melodyBus.connect(musicGain);
+    melodyBus.connect(echoSend);
+    echoSend.connect(echo);
+    echo.connect(echoTone);
+    echoTone.connect(echoFeedback);
+    echoFeedback.connect(echo);
+    echoTone.connect(musicGain);
+  }
+
+  function createReverbImpulse(context, seconds) {
+    const length = Math.floor(context.sampleRate * seconds);
+    const impulse = context.createBuffer(2, length, context.sampleRate);
+    for (let channel = 0; channel < 2; channel += 1) {
+      const data = impulse.getChannelData(channel);
+      for (let index = 0; index < length; index += 1) {
+        data[index] = (Math.random() * 2 - 1) * Math.pow(1 - index / length, 2.6);
+      }
+    }
+    return impulse;
+  }
+
+  // Routes a voice through a stereo panner when one is asked for and supported.
+  function panned(destination, pan) {
+    if (!pan || !audioContext.createStereoPanner) return destination;
+    const panner = audioContext.createStereoPanner();
+    panner.pan.value = Math.max(-1, Math.min(1, pan));
+    panner.connect(destination);
+    return panner;
+  }
+
+  function lanePan(enemy) {
+    const lane = enemy && Number.isFinite(enemy.lane) ? enemy.lane : 0;
+    const widest = Math.max(...pathLanes.map(Math.abs)) || 1;
+    return (lane / widest) * LANE_PAN_WIDTH;
+  }
+
+  // Small random pitch and level changes so repeated sounds are not identical.
+  function varyPitch(frequency, cents = 28) {
+    return frequency * Math.pow(2, ((Math.random() * 2 - 1) * cents) / 1200);
+  }
+
+  function varyGain(gain, amount = 0.12) {
+    return gain * (1 + (Math.random() * 2 - 1) * amount);
+  }
+
+  function duckMusic(depth = 0.4, hold = 0.5) {
+    if (!musicDuck || !audioContext) return;
+    const now = audioContext.currentTime;
+    musicDuck.gain.cancelScheduledValues(now);
+    musicDuck.gain.setTargetAtTime(depth, now, 0.03);
+    musicDuck.gain.setTargetAtTime(1, now + hold, 0.25);
   }
 
   function resumeAudio() {
@@ -324,10 +469,10 @@ export function createSpellwaveAudio({
     if (!context || !masterGain) return;
 
     const start = context.currentTime + (options.delay || 0);
-    scheduleTone(frequency, duration, start, options, masterGain);
+    scheduleTone(frequency, duration, start, options, sfxBus);
   }
 
-  function scheduleTone(frequency, duration, start, options = {}, destination = masterGain) {
+  function scheduleTone(frequency, duration, start, options = {}, destination = sfxBus) {
     const context = audioContext;
     if (!context || !destination) return;
 
@@ -346,9 +491,20 @@ export function createSpellwaveAudio({
     gainNode.gain.exponentialRampToValueAtTime(0.0001, start + duration);
 
     oscillator.connect(gainNode);
-    gainNode.connect(destination);
+    gainNode.connect(panned(destination, options.pan));
     oscillator.start(start);
     oscillator.stop(start + duration + 0.04);
+
+    // A second, slightly detuned voice thickens the note.
+    if (options.chorus) {
+      scheduleTone(frequency, duration, start, {
+        ...options,
+        chorus: 0,
+        gain: (options.gain || 0.05) * 0.5,
+        detune: (options.detune || 0) + options.chorus,
+        pan: -(options.pan || 0),
+      }, destination);
+    }
   }
 
   function playNoise(duration, options = {}) {
@@ -356,10 +512,10 @@ export function createSpellwaveAudio({
     if (!context || !masterGain) return;
 
     const start = context.currentTime + (options.delay || 0);
-    scheduleNoise(duration, start, options, masterGain);
+    scheduleNoise(duration, start, options, sfxBus);
   }
 
-  function scheduleNoise(duration, start, options = {}, destination = masterGain) {
+  function scheduleNoise(duration, start, options = {}, destination = sfxBus) {
     const context = audioContext;
     if (!context || !destination) return;
 
@@ -380,11 +536,24 @@ export function createSpellwaveAudio({
     gainNode.gain.setValueAtTime(options.gain || 0.04, start);
     gainNode.gain.exponentialRampToValueAtTime(0.0001, start + duration);
 
+    if (options.endFilterFrequency) {
+      filter.frequency.exponentialRampToValueAtTime(options.endFilterFrequency, start + duration);
+    }
     source.connect(filter);
     filter.connect(gainNode);
-    gainNode.connect(destination);
+    gainNode.connect(panned(destination, options.pan));
     source.start(start);
     source.stop(start + duration + 0.02);
+  }
+
+  function scheduleKick(start, gain) {
+    scheduleTone(150, 0.16, start, { gain, type: 'sine', endFrequency: 44, attack: 0.002 }, musicGain);
+    scheduleNoise(0.02, start, { gain: gain * 0.35, filterType: 'lowpass', filterFrequency: 1800 }, musicGain);
+  }
+
+  function scheduleSnare(start, gain, tone = 1800) {
+    scheduleNoise(0.13, start, { gain, filterType: 'bandpass', filterFrequency: tone, q: 0.7 }, musicGain);
+    scheduleTone(196, 0.07, start, { gain: gain * 0.55, type: 'triangle', endFrequency: 130, attack: 0.002 }, musicGain);
   }
 
   function startMusicLoop(reset) {
@@ -429,6 +598,9 @@ export function createSpellwaveAudio({
     const wave = getWaveSet();
     const profile = getMusicProfile(wave);
     updateMusicProfile(profile);
+    const frozen = getMode() === 'running' && getIsTimeFrozen();
+    const lowLife = isLowLife();
+    updateMusicTone(frozen, lowLife);
 
     while (nextMusicTime < audioContext.currentTime + MUSIC_SCHEDULE_AHEAD) {
       const transitionProgress = getMusicTransitionProgress(nextMusicTime);
@@ -436,14 +608,32 @@ export function createSpellwaveAudio({
         ? lerp(previousMusicProfile.baseStep, activeMusicProfile.baseStep, transitionProgress)
         : activeMusicProfile.baseStep;
       const intensity = getMusicIntensity(wave, activeMusicProfile);
-      const stepDuration = Math.max(activeMusicProfile.minStep || 0.112, baseStep - intensity * 0.0065);
+      const stepDuration = Math.max(activeMusicProfile.minStep || 0.112, baseStep - intensity * 0.0065)
+        * (frozen ? FROZEN_TEMPO_STRETCH : 1);
       if (previousMusicProfile && transitionProgress < 1) {
         scheduleMusicStep(musicStep, nextMusicTime, stepDuration, previousMusicProfile, intensity, 1 - transitionProgress);
       }
       scheduleMusicStep(musicStep, nextMusicTime, stepDuration, activeMusicProfile, intensity, previousMusicProfile ? transitionProgress : 1);
+      if (lowLife) scheduleHeartbeat(musicStep, nextMusicTime, stepDuration);
       nextMusicTime += stepDuration;
-      musicStep = (musicStep + 1) % activeMusicProfile.melody.length;
+      musicStep = (musicStep + 1) % MUSIC_STEP_WRAP;
     }
+  }
+
+  // The music turns muffled while time is frozen and a little darker at low life.
+  function updateMusicTone(frozen, lowLife) {
+    const target = frozen ? MUSIC_FILTER_FROZEN : lowLife ? MUSIC_FILTER_LOW_LIFE : MUSIC_FILTER_OPEN;
+    musicFilter.frequency.setTargetAtTime(target, audioContext.currentTime, frozen ? 0.12 : 0.3);
+  }
+
+  function isLowLife() {
+    return getMode() === 'running' && getHealth() <= lowHealth;
+  }
+
+  function scheduleHeartbeat(step, start, stepDuration) {
+    if (step % 8 !== 0) return;
+    scheduleTone(58, 0.2, start, { gain: 0.07, type: 'sine', endFrequency: 40, attack: 0.004 }, musicDuck);
+    scheduleTone(52, 0.24, start + stepDuration * 1.3, { gain: 0.05, type: 'sine', endFrequency: 36, attack: 0.004 }, musicDuck);
   }
 
   function getMusicProfile(wave) {
@@ -500,7 +690,10 @@ export function createSpellwaveAudio({
       return;
     }
 
-    const melody = profile.melody[step % profile.melody.length];
+    const section = MUSIC_FORM[Math.floor(step / MUSIC_SECTION_STEPS) % MUSIC_FORM.length];
+    const isLastSection = Math.floor(step / MUSIC_SECTION_STEPS) % MUSIC_FORM.length === MUSIC_FORM.length - 1;
+    const line = section === 'b' && profile.melodyB ? profile.melodyB : profile.melody;
+    const melody = line[step % line.length];
     const bass = profile.bass[step % profile.bass.length];
     const accent = step % 8 === 0;
     const isBoss = profile.isBoss || false;
@@ -527,13 +720,25 @@ export function createSpellwaveAudio({
         gain: (profile.melodyGain + intensity * 0.0008) * profileGain,
         type: profile.melodyType,
         attack: 0.003,
-      }, musicGain);
+        chorus: 7,
+        pan: -0.18,
+      }, melodyBus);
       if (step % 8 === 6 || latePulse) {
         scheduleTone(melody * (profile.name === 'winter' ? 2 : isBoss ? 1.414 : 1.5), stepDuration * 0.5, start + stepDuration * 0.18, {
           gain: (0.009 + intensity * 0.0005) * profileGain,
           type: profile.accentType,
           attack: 0.003,
+          pan: 0.3,
         }, musicGain);
+      }
+      // The last pass of the tune is doubled an octave up, so the return of the melody lifts.
+      if (isLastSection && profile.melodyB && step % 2 === 0) {
+        scheduleTone(melody * 2, stepDuration * 0.6, start + stepDuration * 0.08, {
+          gain: profile.melodyGain * 0.3 * profileGain,
+          type: 'triangle',
+          attack: 0.004,
+          pan: 0.22,
+        }, melodyBus);
       }
     }
 
@@ -543,16 +748,21 @@ export function createSpellwaveAudio({
         filterType: 'highpass',
         filterFrequency: profile.name === 'winter' ? 3200 : isBoss ? 1800 : 2400,
         q: 0.6,
+        pan: step % 8 === 2 ? -0.35 : 0.35,
       }, musicGain);
     }
 
-    if (step % 16 === 8 || (intensity >= 6 && step % 16 === 0) || (isBoss && step % 8 === 4)) {
-      scheduleNoise(stepDuration * 0.55, start, {
-        gain: (profile.drumGain + intensity * 0.0009) * profileGain,
-        filterType: 'bandpass',
-        filterFrequency: profile.drumFilter,
-        q: 0.9,
-      }, musicGain);
+    const drumGain = (profile.drumGain + intensity * 0.0009) * profileGain;
+    if (step % 8 === 0 || ((intensity >= 6 || isBoss) && step % 16 === 10)) {
+      scheduleKick(start, drumGain * 2.1);
+    }
+    if (step % 8 === 4) {
+      scheduleSnare(start, drumGain * 1.15, profile.drumFilter * 2 + 900);
+    }
+    // A short snare roll leads into every fourth bar's turnaround.
+    if (step % 64 >= 60 && profile.name !== 'game-over') {
+      scheduleSnare(start, drumGain * (0.55 + (step % 4) * 0.2), profile.drumFilter * 2 + 1300);
+      scheduleSnare(start + stepDuration * 0.5, drumGain * (0.45 + (step % 4) * 0.2), profile.drumFilter * 2 + 1300);
     }
 
     if (isBoss && step % 16 === 0) {
@@ -755,7 +965,7 @@ export function createSpellwaveAudio({
 
   function playTypeSound() {
     const pitch = 520 + Math.min(getTypedLength(), 12) * 18;
-    playTone(pitch, 0.045, { gain: 0.026, type: 'square' });
+    playTone(varyPitch(pitch, 10), 0.045, { gain: varyGain(0.026), type: 'square' });
   }
 
   function playBackspaceSound() {
@@ -763,26 +973,103 @@ export function createSpellwaveAudio({
   }
 
   function playMistakeSound() {
-    playTone(150, 0.13, { gain: 0.05, type: 'sawtooth', endFrequency: 82 });
+    playTone(varyPitch(150), 0.13, { gain: 0.05, type: 'sawtooth', endFrequency: 82 });
     playNoise(0.08, { gain: 0.025, filterFrequency: 180, filterType: 'lowpass' });
   }
 
   function playRevealSound(enemy) {
     const laneIndex = Math.max(0, pathLanes.findIndex((lane) => lane === enemy.lane));
     const pitch = enemy.isBoss ? 180 : 460 + laneIndex * 18;
-    playTone(pitch, 0.09, { gain: enemy.isBoss ? 0.06 : 0.03, type: enemy.isBoss ? 'sawtooth' : 'triangle' });
-    if (enemy.isBoss) playTone(90, 0.2, { gain: 0.036, delay: 0.02, type: 'sine' });
+    const pan = lanePan(enemy);
+    playTone(pitch, 0.09, { gain: enemy.isBoss ? 0.06 : 0.03, type: enemy.isBoss ? 'sawtooth' : 'triangle', pan });
+    if (enemy.isBoss) playTone(90, 0.2, { gain: 0.036, delay: 0.02, type: 'sine', pan });
   }
 
   function playDefeatSound(enemy) {
-    const base = enemy.isBoss ? 180 : 720;
-    playTone(base, 0.09, { gain: 0.055, type: 'square', endFrequency: enemy.isBoss ? 320 : 420 });
-    playTone(base * 1.5, 0.12, { gain: 0.03, delay: 0.035, type: 'triangle', endFrequency: base * 0.75 });
-    playNoise(enemy.isBoss ? 0.24 : 0.13, {
-      gain: enemy.isBoss ? 0.08 : 0.045,
-      filterFrequency: enemy.isBoss ? 360 : 1200,
-      filterType: enemy.isBoss ? 'lowpass' : 'bandpass',
+    if (enemy.isBoss) {
+      playBossExplosionSound(enemy);
+      return;
+    }
+    const pan = lanePan(enemy);
+    const base = varyPitch(720, 60);
+    playTone(base, 0.09, { gain: varyGain(0.055), type: 'square', endFrequency: base * 0.58, pan });
+    playTone(base * 1.5, 0.12, { gain: 0.03, delay: 0.035, type: 'triangle', endFrequency: base * 0.75, pan });
+    playTone(190, 0.12, { gain: 0.05, type: 'sine', endFrequency: 70, attack: 0.002, pan });
+    playNoise(0.13, { gain: varyGain(0.045), filterFrequency: varyPitch(1200, 200), filterType: 'bandpass', pan });
+  }
+
+  // A long layered blast: low boom, falling growl, a wash of noise, then crackling debris.
+  function playBossExplosionSound(enemy) {
+    const pan = lanePan(enemy) * 0.6;
+    duckMusic(0.35, 0.9);
+    playTone(180, 0.09, { gain: 0.06, type: 'square', endFrequency: 320, pan });
+    playTone(96, 1.2, { gain: 0.12, type: 'sine', endFrequency: 28, attack: 0.004 });
+    playTone(140, 0.75, { gain: 0.07, type: 'sawtooth', endFrequency: 38, attack: 0.004, pan });
+    playNoise(1.1, { gain: 0.1, filterType: 'lowpass', filterFrequency: 1400, endFilterFrequency: 120, pan });
+    playNoise(0.3, { gain: 0.05, filterType: 'highpass', filterFrequency: 3200, pan });
+    for (let index = 0; index < 6; index += 1) {
+      playNoise(0.07, {
+        gain: 0.035,
+        delay: 0.18 + Math.random() * 0.75,
+        filterType: 'bandpass',
+        filterFrequency: 700 + Math.random() * 2600,
+        q: 2.2,
+        pan: Math.random() * 1.4 - 0.7,
+      });
+    }
+    playTone(1318.51, 0.9, { gain: 0.014, delay: 0.25, type: 'sine', endFrequency: 880, attack: 0.05 });
+  }
+
+  // The spell itself: a quick falling zap from the wand toward the target.
+  function playBeamSound(targetX = 0) {
+    const widest = Math.max(...pathLanes.map(Math.abs)) || 1;
+    const pan = Math.max(-1, Math.min(1, targetX / widest)) * LANE_PAN_WIDTH;
+    const pitch = varyPitch(1480, 70);
+    playTone(pitch, 0.11, { gain: varyGain(0.03), type: 'square', endFrequency: pitch * 0.36, attack: 0.002, pan });
+    playTone(pitch * 1.5, 0.07, { gain: 0.014, type: 'triangle', endFrequency: pitch * 0.6, attack: 0.002, pan });
+    playNoise(0.09, { gain: 0.018, filterType: 'highpass', filterFrequency: 4200, pan });
+  }
+
+  function playChainPrimeSound() {
+    playTone(330, 0.3, { gain: 0.04, type: 'sawtooth', endFrequency: 990, attack: 0.02 });
+    playTone(660, 0.28, { gain: 0.026, delay: 0.04, type: 'square', endFrequency: 1980, attack: 0.02 });
+    for (let index = 0; index < 4; index += 1) {
+      playNoise(0.03, { gain: 0.03, delay: 0.05 + index * 0.06, filterType: 'bandpass', filterFrequency: 3600, q: 3 });
+    }
+  }
+
+  // One jump of chain lightning: a sharp crack with a ragged electric tail.
+  function playChainZapSound(targetX = 0) {
+    const widest = Math.max(...pathLanes.map(Math.abs)) || 1;
+    const pan = Math.max(-1, Math.min(1, targetX / widest)) * LANE_PAN_WIDTH;
+    playNoise(0.05, { gain: 0.085, filterType: 'highpass', filterFrequency: 2600, pan });
+    playTone(varyPitch(1900, 120), 0.16, { gain: 0.04, type: 'sawtooth', endFrequency: 180, attack: 0.001, pan });
+    for (let index = 0; index < 5; index += 1) {
+      playNoise(0.025, {
+        gain: 0.05,
+        delay: 0.03 + Math.random() * 0.2,
+        filterType: 'bandpass',
+        filterFrequency: 2200 + Math.random() * 3800,
+        q: 4,
+        pan,
+      });
+    }
+    playTone(70, 0.22, { gain: 0.06, type: 'sine', endFrequency: 38, attack: 0.003 });
+  }
+
+  function playTimeFreezeSound() {
+    playTone(2093, 0.7, { gain: 0.03, type: 'sine', endFrequency: 196, attack: 0.01 });
+    playTone(1046.5, 0.8, { gain: 0.03, delay: 0.03, type: 'triangle', endFrequency: 98, attack: 0.01 });
+    playTone(80, 0.5, { gain: 0.07, delay: 0.25, type: 'sine', endFrequency: 40, attack: 0.02 });
+    playNoise(0.7, { gain: 0.04, filterType: 'bandpass', filterFrequency: 5200, endFilterFrequency: 500, q: 1.2 });
+    [2637, 3136, 3951].forEach((frequency, index) => {
+      playTone(frequency, 0.5, { gain: 0.012, delay: 0.3 + index * 0.09, type: 'sine', pan: index - 1 });
     });
+  }
+
+  function playTimeResumeSound() {
+    playTone(196, 0.3, { gain: 0.035, type: 'triangle', endFrequency: 1046.5, attack: 0.01 });
+    playNoise(0.28, { gain: 0.025, filterType: 'bandpass', filterFrequency: 600, endFilterFrequency: 4800, q: 1.2 });
   }
 
   function playHealSound(healed) {
@@ -794,26 +1081,28 @@ export function createSpellwaveAudio({
   }
 
   function playMedicPassSound() {
-    playTone(420, 0.08, { gain: 0.026, type: 'triangle', endFrequency: 280 });
+    playTone(varyPitch(420), 0.08, { gain: 0.026, type: 'triangle', endFrequency: 280 });
   }
 
   function playDamageSound(enemy) {
     const bossHit = !!enemy?.isBoss;
-    playTone(bossHit ? 62 : 78, bossHit ? 0.28 : 0.22, { gain: bossHit ? 0.086 : 0.07, type: 'sawtooth', endFrequency: bossHit ? 36 : 45 });
+    duckMusic(0.55, 0.3);
+    playTone(varyPitch(bossHit ? 62 : 78), bossHit ? 0.28 : 0.22, { gain: bossHit ? 0.086 : 0.07, type: 'sawtooth', endFrequency: bossHit ? 36 : 45 });
     playNoise(bossHit ? 0.24 : 0.18, { gain: bossHit ? 0.074 : 0.06, filterFrequency: bossHit ? 135 : 170, filterType: 'lowpass' });
   }
 
   function playBossThrowSound() {
-    playTone(176, 0.11, { gain: 0.045, type: 'sawtooth', endFrequency: 132 });
-    playTone(352, 0.07, { gain: 0.022, delay: 0.03, type: 'square', endFrequency: 260 });
+    playTone(varyPitch(176), 0.11, { gain: 0.045, type: 'sawtooth', endFrequency: 132 });
+    playTone(varyPitch(352), 0.07, { gain: 0.022, delay: 0.03, type: 'square', endFrequency: 260 });
   }
 
   function playBossImpactSound() {
-    playTone(92, 0.16, { gain: 0.058, type: 'sawtooth', endFrequency: 52 });
+    playTone(varyPitch(92), 0.16, { gain: varyGain(0.058), type: 'sawtooth', endFrequency: 52 });
     playNoise(0.12, { gain: 0.045, filterFrequency: 260, filterType: 'lowpass' });
   }
 
   function playBossWarningSound() {
+    duckMusic(0.45, 0.6);
     playTone(146.83, 0.18, { gain: 0.072, type: 'sawtooth', endFrequency: 110 });
     playTone(73.42, 0.48, { gain: 0.052, delay: 0.06, type: 'sawtooth', endFrequency: 55 });
     playTone(220, 0.12, { gain: 0.04, delay: 0.2, type: 'square', endFrequency: 155.56 });
@@ -920,9 +1209,15 @@ export function createSpellwaveAudio({
   }
 
   function playShockwaveSound() {
+    duckMusic(0.4, 0.7);
     playTone(120, 0.45, { gain: 0.065, type: 'sawtooth', endFrequency: 60 });
     playTone(60, 0.60, { gain: 0.080, delay: 0.05, type: 'sine', endFrequency: 30 });
+    playTone(44, 1.0, { gain: 0.09, delay: 0.02, type: 'sine', endFrequency: 24, attack: 0.01 });
     playNoise(0.60, { gain: 0.075, filterFrequency: 450, filterType: 'lowpass' });
+    // The three wavefronts sweep outward one after another.
+    [0, 0.15, 0.3].forEach((delay) => {
+      playNoise(0.5, { gain: 0.04, delay, filterType: 'bandpass', filterFrequency: 300, endFilterFrequency: 3200, q: 1.1 });
+    });
   }
 
   function playShieldActivateSound() {
@@ -955,6 +1250,11 @@ export function createSpellwaveAudio({
     playMistakeSound,
     playRevealSound,
     playDefeatSound,
+    playBeamSound,
+    playChainPrimeSound,
+    playChainZapSound,
+    playTimeFreezeSound,
+    playTimeResumeSound,
     playHealSound,
     playMedicPassSound,
     playDamageSound,

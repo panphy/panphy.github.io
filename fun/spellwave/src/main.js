@@ -66,6 +66,8 @@ const SPAWN_SPREAD = 10;
 const FIRST_WAVE_SPAWN_SPREAD = 4;
 const HEART_COUNT = 5;
 const MAX_LIFE = HEART_COUNT * 2;
+// Two hearts or fewer: the music darkens and a heartbeat joins it.
+const LOW_LIFE_MUSIC_THRESHOLD = 4;
 const MINION_DAMAGE = 2;
 const BOSS_CONTACT_DAMAGE = MAX_LIFE;
 const BOSS_SHOTS_PER_DAMAGE = 2;
@@ -527,6 +529,11 @@ const {
   playShockwaveSound,
   playShieldActivateSound,
   playShieldBlockSound,
+  playBeamSound,
+  playChainPrimeSound,
+  playChainZapSound,
+  playTimeFreezeSound,
+  playTimeResumeSound,
 } = createSpellwaveAudio({
   audioButton,
   initialEnabled: loadAudioSetting(),
@@ -536,6 +543,9 @@ const {
   getWaveSet: () => waveSet,
   getIsFinalWave: () => isFinalWave(),
   getTypedLength: () => typedBuffer.length,
+  getHealth: () => health,
+  getIsTimeFrozen: () => Boolean(potionsSystem) && potionsSystem.isTimeFrozen(),
+  lowHealth: LOW_LIFE_MUSIC_THRESHOLD,
   pathLanes: PATH_LANES,
 });
 
@@ -641,6 +651,9 @@ potionsSystem = createPotionSystem({
   playGodModeOffSound,
   playToggleSound,
   playStartSound,
+  playChainPrimeSound,
+  playTimeFreezeSound,
+  playTimeResumeSound,
   THREE,
   SPAWN_Z,
   WALL_Z
@@ -3114,6 +3127,7 @@ function spawnBeam(targetPosition) {
   const start = new THREE.Vector3(staffX, 2.38, WALL_Z - 0.2);
   const end = targetPosition.clone();
   end.y += 1.2;
+  playBeamSound(end.x);
   const distance = start.distanceTo(end);
   const mid = start.clone().lerp(end, 0.5);
 
@@ -4914,6 +4928,7 @@ function spawnLightningVisual(startPos, targetPos, hold = false) {
   const flashMesh = new THREE.Mesh(flashGeo, flashMat);
   flashMesh.position.copy(targetPos);
   effectsGroup.add(flashMesh);
+  playChainZapSound(targetPos.x);
   fx.flash(targetPos, 0xffe58a, 4.2, 0.24);
   fx.lightPulse(targetPos, 0xffdd66, 22, 0.3);
   fx.burst(targetPos, { color: 0xffe58a, color2: 0xffffff, count: 16, speed: 6, life: 0.5, size: 0.3 });
