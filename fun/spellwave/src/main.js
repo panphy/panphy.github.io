@@ -6,10 +6,10 @@ import { ALL_WORDS, EASY_WORDS, HARD_WORDS, MEDIUM_WORDS, EQUATION_WORDS } from 
 import { createEndingFX } from './ending-fx.js';
 import { createLeaderboard } from './leaderboard.js';
 import { createEnemyMesh, createMimicChestMesh } from './enemy-meshes.js';
-import { normalPromptLengthCap, bossAnswerLengthCap, bossWordLengthCap, previewLengthCap, withinLength, hardGuestCount } from './difficulty.js';
+import { normalPromptLengthCap, bossAnswerLengthCap, bossWordLengthCap, previewLengthCap, withinLength, hardGuestCount } from './difficulty.js?v=20261010-startfix';
 import { createLowPolyTerrain, createLowPolyTree, createLowPolyRock, createLowPolyCloud } from './lowpoly.js';
 import { createVisuals, GLOW_GAIN, MOON_GLOW_GAIN } from './visuals.js';
-import { pickTarget, getInputCharacters, isMathOperatorInput, buildSearchPrompt, buildAltSearchPrompts, buildHintMask, getBossQuestionHintRange, escapeHtml, wrapSups, buildHintPart, buildBossPrompt, promptIndexForProgress } from './prompt-utils.js';
+import { pickTarget, getInputCharacters, isMathOperatorInput, buildSearchPrompt, buildAltSearchPrompts, buildHintMask, getBossQuestionHintRange, escapeHtml, wrapSups, buildHintPart, buildBossPrompt, promptIndexForProgress } from './prompt-utils.js?v=20261010-startfix';
 
 const canvas = document.getElementById('gameCanvas');
 const labelsLayer = document.getElementById('labelsLayer');

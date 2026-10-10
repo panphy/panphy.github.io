@@ -1,4 +1,5 @@
 import test from 'node:test';
+import { readFileSync } from 'node:fs';
 import assert from 'node:assert/strict';
 import {
   NORMAL_PROMPT_LENGTH_CAPS, EARLY_BOSS_WAVES, HARD_GUEST_COUNTS,
@@ -67,4 +68,17 @@ test('long phrases stay out of normal pools and previews at every wave', () => {
     assert.equal(withinLength(longTerms, previewLengthCap(wave)).length, 0);
     assert.equal(bossAnswerLengthCap(wave), wave <= 2 ? 14 : 16);
   }
+});
+
+
+test('startup dependencies share the page release version to avoid mixed cached code', () => {
+  const html = readFileSync(new URL('../../spellwave.html', import.meta.url), 'utf8');
+  const main = readFileSync(new URL('../src/main.js', import.meta.url), 'utf8');
+  const difficulty = readFileSync(new URL('../src/difficulty.js', import.meta.url), 'utf8');
+  const version = html.match(/spellwave\/src\/main\.js\?v=([^"&]+)/)?.[1];
+  assert.ok(version, 'entry module must have a cache version');
+  assert.ok(html.includes(`spellwave/src/styles.css?v=${version}"`));
+  assert.ok(main.includes(`from './difficulty.js?v=${version}'`));
+  assert.ok(main.includes(`from './prompt-utils.js?v=${version}'`));
+  assert.ok(difficulty.includes(`from './prompt-utils.js?v=${version}'`));
 });
