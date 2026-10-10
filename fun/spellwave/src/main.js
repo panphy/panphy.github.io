@@ -6,10 +6,10 @@ import { ALL_WORDS, EASY_WORDS, HARD_WORDS, MEDIUM_WORDS, EQUATION_WORDS } from 
 import { createEndingFX } from './ending-fx.js';
 import { createLeaderboard } from './leaderboard.js';
 import { createEnemyMesh, createMimicChestMesh } from './enemy-meshes.js';
-import { normalPromptLengthCap, bossAnswerLengthCap, bossWordLengthCap, previewLengthCap, withinLength, hardGuestCount } from './difficulty.js?v=20261010-startfix';
+import { normalPromptLengthCap, bossAnswerLengthCap, bossWordLengthCap, previewLengthCap, withinLength, hardGuestCount } from './difficulty.js?v=20261010-boss-pressure';
 import { createLowPolyTerrain, createLowPolyTree, createLowPolyRock, createLowPolyCloud } from './lowpoly.js';
 import { createVisuals, GLOW_GAIN, MOON_GLOW_GAIN } from './visuals.js';
-import { pickTarget, getInputCharacters, isMathOperatorInput, buildSearchPrompt, buildAltSearchPrompts, buildHintMask, getBossQuestionHintRange, escapeHtml, wrapSups, buildHintPart, buildBossPrompt, promptIndexForProgress } from './prompt-utils.js?v=20261010-startfix';
+import { pickTarget, getInputCharacters, isMathOperatorInput, buildSearchPrompt, buildAltSearchPrompts, buildHintMask, getBossQuestionHintRange, escapeHtml, wrapSups, buildHintPart, buildBossPrompt, promptIndexForProgress } from './prompt-utils.js?v=20261010-boss-pressure';
 
 const canvas = document.getElementById('gameCanvas');
 const labelsLayer = document.getElementById('labelsLayer');
@@ -99,7 +99,7 @@ const GAME_PROFILE = {
   spawnJitter: 0.5,
   spawnMin: 1.05,
   bossWarningDelay: 1.0,
-  bossSpawnGap: 6.0,
+  bossSpawnGap: 2.8,
   revealZ: -40,
 };
 const NORMAL_ENEMY_TARGETS = [7, 8, 10, 11, 12, 13, 14, 15, 16, 16];
@@ -1480,9 +1480,8 @@ function animate(frameTime) {
         } else if (finalWaveQueueIndex < finalWaveQueue.length) {
           const nextEntry = finalWaveQueue[finalWaveQueueIndex];
           const hasActiveSupportEnemy = nextEntry !== 'boss' && enemies.some(e => (e.isMimic || e.isMedic) && !e.dying);
-          const activeBossCount = enemies.filter(enemy => enemy.isBoss && !enemy.dying).length;
-          if (!hasActiveSupportEnemy && (nextEntry !== 'boss' || activeBossCount < 2)) {
-            bossSpawnTimer -= currentDelta;
+          bossSpawnTimer = Math.max(0, bossSpawnTimer - currentDelta);
+          if (!hasActiveSupportEnemy) {
             if (bossSpawnTimer <= 0) {
               const entry = finalWaveQueue[finalWaveQueueIndex];
               finalWaveQueueIndex += 1;
@@ -1499,8 +1498,9 @@ function animate(frameTime) {
           }
         }
       } else {
-        if (bossesSpawned < BOSSES_PER_WAVE && !enemies.some(enemy => enemy.isBoss && !enemy.dying)) {
-          bossSpawnTimer -= currentDelta;
+        if (bossesSpawned < BOSSES_PER_WAVE) {
+          // Keep spawning on the timer even while earlier bosses are still active.
+          bossSpawnTimer = Math.max(0, bossSpawnTimer - currentDelta);
           if (bossSpawnTimer <= 0) {
             spawnBoss();
             bossesSpawned += 1;
