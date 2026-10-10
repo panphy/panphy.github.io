@@ -98,36 +98,53 @@ test('long vocabulary asks for a substantial word and preserves equation exponen
 });
 
 
-test('a typo preserves the prefix and target, then correct typing completes the kill', () => {
+function createTypingHarness() {
   const source = readFileSync(new URL('../src/main.js', import.meta.url), 'utf8');
   const inputCode = source.slice(source.indexOf('function enterCharacter(character)'), source.indexOf('// Simple FNV-1a'));
-  const target = enemy('force', -20);
-  target.type = { eye: 0 };
-  target.group.scale = { y: 1 };
+  const targets = ['force', 'mass'].map(prompt => {
+    const target = enemy(prompt, -20);
+    target.type = { eye: 0 };
+    target.group.scale = { y: 1 };
+    return target;
+  });
   const context = vm.createContext({
-    typedBuffer: 'for', activeTarget: target, typedAttempts: 0, mistakes: 0, kills: 0,
+    typedBuffer: 'for', activeTarget: targets[0], typedAttempts: 0, mistakes: 0, kills: 0, streak: 3,
     getInputCharacters, pickTarget, isMathOperatorInput,
     checkCheatCode() {}, playTypeSound() {}, updateTypedDisplay() {},
     reusableVector: { y: 0, copy() {} }, fx: { burst() {} },
     hasActiveEquationPrefix: () => false,
   });
-  context.findMatches = prefix => {
-    target._matchedSearchPrompt = 'force';
-    return 'force'.startsWith(prefix) ? [target] : [];
-  };
-  context.registerMistake = () => { context.mistakes += 1; };
-  context.defeatEnemy = () => { context.kills += 1; context.typedBuffer = ''; };
+  context.findMatches = prefix => targets.filter(target => {
+    target._matchedSearchPrompt = target.searchPrompt;
+    return target.searchPrompt.startsWith(prefix);
+  });
+  context.chooseTarget = matches => pickTarget(matches, context.typedBuffer);
+  context.registerMistake = () => { context.mistakes += 1; context.streak = 0; };
+  context.defeatEnemy = () => { context.kills += 1; context.typedBuffer = ''; context.activeTarget = null; };
   vm.runInContext(inputCode, context);
-  context.enterCharacter('x');
-  assert.equal(context.typedBuffer, 'for');
-  assert.equal(context.activeTarget, target);
+  return { context, targets };
+}
+
+test('a typo discards the prefix and target and breaks the chain', () => {
+  const { context } = createTypingHarness();
+  context.enterCharacter('z');
+  assert.equal(context.typedBuffer, '');
+  assert.equal(context.activeTarget, null);
   assert.equal(context.mistakes, 1);
-  context.enterCharacter('f'); // An incorrect letter must not silently restart on another prefix.
-  assert.equal(context.typedBuffer, 'for');
-  context.enterCharacter('c');
-  assert.equal(context.typedBuffer, 'forc');
-  context.enterCharacter('e');
+  assert.equal(context.streak, 0);
+  for (const letter of 'force') context.enterCharacter(letter);
+  assert.equal(context.kills, 1);
+  assert.equal(context.typedAttempts, 6);
+});
+
+test('typing another prompt switches targets immediately and discards old progress', () => {
+  const { context, targets } = createTypingHarness();
+  context.enterCharacter('m');
+  assert.equal(context.typedBuffer, 'm');
+  assert.equal(context.activeTarget, targets[1]);
+  assert.equal(context.mistakes, 1);
+  assert.equal(context.streak, 0);
+  for (const letter of 'ass') context.enterCharacter(letter);
   assert.equal(context.kills, 1);
   assert.equal(context.typedAttempts, 4);
-  assert.equal(context.mistakes, 2);
 });

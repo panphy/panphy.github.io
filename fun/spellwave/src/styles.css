@@ -3429,26 +3429,3 @@ body.is-running:not(.is-paused) .sw-leaderboard {
   background: rgba(251, 245, 228, 0.5);
   box-shadow: 0 4px 12px rgba(74, 52, 28, 0.14);
 }
-
-#clearTargetButton {
-  min-height: 48px;
-  padding: 6px 12px;
-  border: 1px solid currentColor;
-  border-radius: 12px;
-  background: transparent;
-  color: inherit;
-  font: inherit;
-  cursor: pointer;
-  flex-shrink: 0;
-}
-#clearTargetButton:focus-visible { outline: 3px solid #b87a36; outline-offset: 3px; }
-@media (max-width: 640px) {
-  #clearTargetButton { font-size: 11px; padding: 4px 8px; }
-}
-
-.typing-strip { grid-template-columns: auto minmax(0, 1fr) auto auto; }
-@media (max-width: 640px) {
-  .typing-strip { grid-template-columns: auto minmax(0, 1fr) auto; }
-  .typing-strip small { grid-column: 2; grid-row: 2; }
-  #clearTargetButton { grid-column: 3; grid-row: 1 / 3; }
-}
