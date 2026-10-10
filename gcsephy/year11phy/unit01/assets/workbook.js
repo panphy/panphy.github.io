@@ -215,8 +215,14 @@
       learn: section("learn", l.learnTitle, l.learnAside, l.learn),
       try: l.try ? section("try", l.tryTitle, l.tryAside, l.try) : "",
       lab: l.lab ? section("lab", l.lab.title, l.lab.aside, l.lab.blocks) : "",
-      exam: keep(secHead("exam", "Exam corner", "Write in full sentences. Show every step of a calculation.") +
-        `<div class="exam-card">${l.exam.map((e) => (e.tip ? `<div class="tip">${e.tip}</div>` : "") + question(e)).join("")}</div>`),
+      // examSplit gives each question its own card, so the section can break between questions
+      // when it would otherwise jump to a new page whole.
+      exam: (() => {
+        const head = secHead("exam", "Exam corner", "Write in full sentences. Show every step of a calculation.");
+        const cards = l.exam.map((e) => (e.tip ? `<div class="tip">${e.tip}</div>` : "") + question(e));
+        const card = (html) => `<div class="exam-card">${html}</div>`;
+        return l.examSplit ? cards.map((c, i) => keep((i ? "" : head) + card(c))).join("") : keep(head + card(cards.join("")));
+      })(),
       revise: keep(secHead("revise", "Revise it", "Use this box after the lesson and before tests.") +
         `<div class="revise-card"><div><h4>Summary</h4><ul>${l.summary.map((s) => `<li>${s}</li>`).join("")}</ul>
         <div class="recall"><h4>Cover the page and answer</h4>${l.recall.map(([q], i) => `<p><b>${i + 1}</b>${q}</p>`).join("")}</div></div>

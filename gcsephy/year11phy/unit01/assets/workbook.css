@@ -260,6 +260,7 @@ strong, b { font-weight: 800; }
 /* exam corner */
 .exam-card { padding: 3.5mm 4mm 1mm; border: 1.5px solid #c4b3ef; border-radius: 3mm; background: var(--photon-t); break-inside: avoid; }
 .exam-card .question:last-child { margin-bottom: 2mm; }
+.keep + .keep > .exam-card:first-child { margin-top: 3mm; }
 .exam-card .question .lines, .exam-card .question .box { background-color: white; }
 .tip { margin: 2mm 0 2.5mm; padding: 2mm 3mm; border-left: 1.2mm solid var(--photon); border-radius: 0 2mm 2mm 0; background: white; font-size: 9pt; }
 .tip::before { content: "Get the marks: "; font-weight: 800; color: var(--photon); }
