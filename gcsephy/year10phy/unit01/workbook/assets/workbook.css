@@ -134,7 +134,7 @@ strong { font-weight: 700; }
 .model h4 { margin: 0 0 1.5mm; font: 900 8pt/1 Arial, sans-serif; letter-spacing: .14em; text-transform: uppercase; }
 .model .breaks { margin: 1.5mm 0 0; padding-top: 1.5mm; border-top: 1px solid var(--rule); font-size: 9pt; color: #333c48; }
 .model .breaks::before { content: "Where the model breaks: "; font-weight: 700; }
-.eq-card { display: grid; grid-template-columns: auto 1fr; gap: 1mm 5mm; align-items: center; margin: 2mm 0 3mm; padding: 3mm 4mm; border: 2px solid var(--ink); box-shadow: 1.4mm 1.4mm 0 var(--accent); background: white; break-inside: avoid; }
+.eq-card { display: grid; grid-template-columns: auto 1fr; gap: 1mm 5mm; align-items: center; margin: 2mm 1.4mm 3mm 0; padding: 3mm 4mm; border: 2px solid var(--ink); box-shadow: 1.4mm 1.4mm 0 var(--accent); background: white; break-inside: avoid; }
 .eq-card .eq { grid-row: span 3; font: 900 19pt/1 "Arial Black", "Archivo Black", Arial, sans-serif; letter-spacing: -.02em; white-space: nowrap; }
 .eq-card .words { font-weight: 700; }
 .eq-card .units { font-size: 9pt; color: #333c48; }
@@ -190,8 +190,8 @@ strong { font-weight: 700; }
 .options-row { display: grid; grid-template-columns: repeat(var(--cols, 4), minmax(0, 1fr)); gap: 3mm; margin: 1mm 0 2mm; }
 .options-row > div { border: 1.5px solid var(--ink); padding: 1.5mm; text-align: center; font-size: 9pt; }
 .options-row > div b { display: block; text-align: left; font-size: 8.5pt; }
-.options-row .circle-choice { display: flex; justify-content: center; gap: 3mm; margin-top: 1mm; font-weight: 700; }
-.options-row .circle-choice span { padding: .2mm 2.2mm; border-radius: 99px; border: 1px solid transparent; }
+.options-row .circle-choice { display: flex; flex-wrap: wrap; justify-content: center; gap: 1mm 1.5mm; margin-top: 1mm; font-weight: 700; }
+.options-row .circle-choice span { padding: .2mm 1.4mm; border-radius: 99px; border: 1px solid transparent; }
 .options-row .circle-choice span.correct { border-color: var(--ans); color: var(--ans); border-width: 1.6px; }
 .order { list-style: none; padding: 0; margin: 1mm 0 0; display: grid; gap: 1.5mm; }
 .order li { display: grid; grid-template-columns: 9mm 1fr; align-items: center; margin: 0; padding: 1.4mm 2.5mm 1.4mm 0; border: 1.3px solid var(--ink); font-size: 9.4pt; }
