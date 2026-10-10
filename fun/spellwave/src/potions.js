@@ -22,6 +22,9 @@ export function createPotionSystem({
   playGodModeOffSound,
   playToggleSound,
   playStartSound,
+  playChainPrimeSound = playToggleSound,
+  playTimeFreezeSound = playGodModeOnSound,
+  playTimeResumeSound = playGodModeOffSound,
   THREE,
   SPAWN_Z,
   WALL_Z
@@ -167,12 +170,12 @@ export function createPotionSystem({
 
     if (potion === 'time_freeze') {
       timeFreezeTimer = 3.5;
-      playGodModeOnSound();
+      playTimeFreezeSound();
       showBanner('TIME FREEZE!', 'time-freeze');
     } else if (potion === 'chain_lightning') {
       chainLightningPrimed = true;
       document.body.classList.add('chain-lightning-primed');
-      playToggleSound();
+      playChainPrimeSound();
       showBanner('CHAIN PRIMED!', 'chain-lightning');
     } else if (potion === 'shockwave') {
       playShockwaveSound();
@@ -323,7 +326,7 @@ export function createPotionSystem({
       if (timeFreezeTimer > 0) {
         timeFreezeTimer = Math.max(0, timeFreezeTimer - delta);
         if (timeFreezeTimer <= 0) {
-          playGodModeOffSound();
+          playTimeResumeSound();
         }
       }
 
