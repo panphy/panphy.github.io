@@ -395,6 +395,21 @@ const SEASON_PALETTES = [
   },
 ];
 
+// Wave 10 leaves the seasons behind: a violet night among the stars, with dark stone underfoot.
+const FINAL_WAVE_PALETTE = {
+  name: 'final',
+  bgColor: 0x2a1a5e, fogColor: 0x1c1244, fogNear: 40, fogFar: 112, skyTop: 0x070418,
+  hemiSky: 0x9a88e8, hemiGround: 0x2a1e4a, hemiIntensity: 0.85,
+  sunColor: 0xd6c4ff, sunIntensity: 1.35,
+  emberColor: 0xc060ff, emberIntensity: 2.2,
+  pathMarkerColor: 0xe040fb, pathMarkerEmissive: 0x8a1aa8,
+  leafColors: [0x4a3c8c, 0x5c4aa6, 0x362a6c], trunkColor: 0x2c2240,
+  moonColor: 0xf3e8ff, starOpacity: 1,
+  groundPath: { h: 0.72, s: 0.22, lBase: 0.4 },
+  groundAlt1: { h: 0.8, s: 0.4, l: 0.36 },
+  groundGrass: { h: 0.72, s: 0.34, l: 0.27 },
+};
+
 const reusableVector = new THREE.Vector3();
 const reusableVectorTwo = new THREE.Vector3();
 const moonScreenVector = new THREE.Vector3();
@@ -486,6 +501,7 @@ let bossesDefeated = 0;
 let encounteredTerms = [];
 let firstMedicHintShown = false;
 let sceneGround = null;
+let finalWaveScenery = null;
 let sceneLeafMaterials = [];
 let sceneTrunkMaterial = null;
 let sceneCrystalMat = null;
@@ -825,6 +841,7 @@ function startGame() {
   document.body.classList.remove('time-frozen');
   document.body.classList.remove('chain-lightning-primed');
   document.body.classList.remove('final-wave-active');
+  setFinalWaveScenery(false);
   dismissEndingSequence();
   wandsArePrimed = false;
   waveSet = 1;
@@ -1953,6 +1970,7 @@ function updateEnvironment(seconds, delta, isTimeFrozen = false) {
   }
 
   seasonalEffects.update(seconds, envDelta, scrollDelta);
+  updateFinalWaveScenery(seconds, envDelta);
 
   updateClouds(envDelta);
 }
@@ -2881,6 +2899,7 @@ function createSky() {
   scene.add(moon);
 
   starField = visuals.stars;
+  finalWaveScenery = createFinalWaveScenery();
 }
 
 function createMeteors() {
@@ -4098,17 +4117,62 @@ function startFinalWave() {
   showBanner('FINAL WAVE!', 'final-wave');
   playBossWarningSound();
   updatePhaseDisplay();
-  // Space background: cancel season transition, disable weather, apply deep-space look
-  seasonFade = null;
+  // The world fades to the starlit night; weather stops and the moons and drifting rocks appear.
   seasonalEffects.stopWeather();
-  scene.background.setHex(0x000008);
-  scene.fog.color.setHex(0x000008);
-  scene.fog.near = 28;
-  scene.fog.far = 90;
-  skyTopColor.setHex(0x000008);
-  if (starField) {
-    starField.size = 1.7;
-    starField.opacity = 1.0;
+  seasonFade = { from: buildSeasonFromScene(), to: buildSeasonTarget(FINAL_WAVE_PALETTE), palette: FINAL_WAVE_PALETTE, t: 0, duration: 3.5 };
+  if (starField) starField.size = 1.7;
+  setFinalWaveScenery(true);
+}
+
+function setFinalWaveScenery(active) {
+  if (finalWaveScenery) finalWaveScenery.group.visible = active;
+}
+
+// Faceted moons hung in the sky and a scatter of slowly tumbling rocks above the verges.
+function createFinalWaveScenery() {
+  const group = new THREE.Group();
+  group.visible = false;
+  const moonSpecs = [
+    { position: [-24, 22, -68], radius: 6, color: 0x8a6fe0, ring: 0xe0b8ff },
+    { position: [20, 30, -78], radius: 3.4, color: 0x4fc8c0, ring: null },
+    { position: [34, 13, -60], radius: 2.2, color: 0xf2a65a, ring: null },
+  ];
+  for (const spec of moonSpecs) {
+    const material = new THREE.MeshStandardMaterial({ color: spec.color, emissive: spec.color, emissiveIntensity: 0.22, roughness: 1, flatShading: true, fog: false });
+    const body = new THREE.Mesh(new THREE.IcosahedronGeometry(spec.radius, 1), material);
+    body.position.set(...spec.position);
+    group.add(body);
+    if (spec.ring) {
+      const ringMaterial = new THREE.MeshStandardMaterial({ color: spec.ring, emissive: spec.ring, emissiveIntensity: 0.4, roughness: 1, flatShading: true, fog: false });
+      const ring = new THREE.Mesh(new THREE.TorusGeometry(spec.radius * 1.7, spec.radius * 0.09, 4, 14), ringMaterial);
+      ring.position.set(...spec.position);
+      ring.rotation.set(1.25, 0.3, 0);
+      group.add(ring);
+    }
+  }
+  const rockMaterial = new THREE.MeshStandardMaterial({ color: 0x5a4a9a, roughness: 1, flatShading: true });
+  const crystalMaterial = new THREE.MeshStandardMaterial({ color: 0xe040fb, emissive: 0xe040fb, emissiveIntensity: 1.2, roughness: 0.4, flatShading: true });
+  const drifters = [];
+  for (let index = 0; index < 18; index += 1) {
+    const side = index % 2 === 0 ? -1 : 1;
+    const isCrystal = index % 6 === 5;
+    const geometry = isCrystal ? new THREE.OctahedronGeometry(0.35, 0) : new THREE.DodecahedronGeometry(0.5 + Math.random() * 0.9, 0);
+    const rock = new THREE.Mesh(geometry, isCrystal ? crystalMaterial : rockMaterial);
+    rock.position.set(side * (9 + Math.random() * 12), 3 + Math.random() * 9, -62 + Math.random() * 66);
+    if (isCrystal) rock.scale.set(1, 2, 1);
+    group.add(rock);
+    drifters.push({ rock, baseY: rock.position.y, phase: Math.random() * Math.PI * 2, spin: 0.1 + Math.random() * 0.3 });
+  }
+  scene.add(group);
+  return { group, drifters };
+}
+
+function updateFinalWaveScenery(seconds, delta) {
+  if (!finalWaveScenery || !finalWaveScenery.group.visible) return;
+  for (const drifter of finalWaveScenery.drifters) {
+    drifter.rock.position.y = drifter.baseY + Math.sin(seconds * 0.5 + drifter.phase) * 0.6;
+    drifter.rock.rotation.x += drifter.spin * delta;
+    drifter.rock.rotation.y += drifter.spin * 0.7 * delta;
   }
 }
 
@@ -4391,6 +4455,7 @@ function advanceWaveSet() {
     potionsSystem.deactivateShield();
   }
   document.body.classList.remove('final-wave-active');
+  setFinalWaveScenery(false);
   waveSet += 1;
   wavePhase = 'normal';
   waveClearDelayTimer = 0;

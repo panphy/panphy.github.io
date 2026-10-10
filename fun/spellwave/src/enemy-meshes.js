@@ -1,6 +1,6 @@
 import * as THREE from 'three';
-import { shadedBoxGeometry, GLOW_GAIN } from './visuals.js';
-import { LOW_POLY_CREATURES, buildPulseHeart } from './lowpoly-creatures.js';
+import { GLOW_GAIN } from './visuals.js';
+import { LOW_POLY_CREATURES, buildPulseHeart, buildMimicChest } from './lowpoly-creatures.js';
 
 const materialCache = new Map();
 
@@ -28,25 +28,6 @@ function getCachedMaterial(key, options) {
   return materialCache.get(key);
 }
 
-function getMimicBodyMat(type) {
-  return getCachedMaterial(`mimic-body-${type.body}`, { color: type.body, emissive: 0x7a4c10, emissiveIntensity: 0.4, roughness: 0.6, metalness: 0.12 });
-}
-function getMimicTrimMat(type) {
-  return getCachedMaterial(`mimic-trim-${type.trim}`, { color: type.trim, emissive: 0xffe060, emissiveIntensity: 0.55, roughness: 0.18, metalness: 1.0 });
-}
-function getMimicEyeMat(type) {
-  return getCachedMaterial(`mimic-eye-${type.eye}`, { color: type.eye, emissive: type.eye, emissiveIntensity: 2.8, roughness: 0.1 });
-}
-function getMimicInteriorMat() {
-  return getCachedMaterial('mimic-interior', { color: 0x0e0115, roughness: 0.9 });
-}
-function getMimicToothMat() {
-  return getCachedMaterial('mimic-tooth', { color: 0xf5f0dc, emissive: 0xfff4cc, emissiveIntensity: 0.22, roughness: 0.55 });
-}
-function getMimicGemMat(type) {
-  return getCachedMaterial(`mimic-gem-${type.eye}`, { color: type.eye, emissive: type.eye, emissiveIntensity: 3.5, roughness: 0.05, metalness: 0.4 });
-}
-
 // Stands in for a PointLight on an enemy. Adding and removing real lights changes
 // the scene's light count, which makes every shader recompile and stalls a frame;
 // the game instead lends these anchors a light from a fixed pool each frame.
@@ -61,7 +42,7 @@ function createGlowAnchor(color, intensity, distance, decay = 2) {
 }
 
 // What the low-poly creature builders need: faceted materials, glowing ones, and a
-// mesh factory that sets up shadows and stun tinting like blockMesh does.
+// mesh factory that sets up shadows and stun tinting.
 const lowPolyKit = {
   mat(color, options = {}) {
     return getCachedMaterial(`lowpoly-${color}-${options.side ?? 0}`, {
@@ -132,44 +113,7 @@ function finishBossGroup(group, type, beaconY = 2.9) {
 }
 
 export function createMimicChestMesh(type) {
-  const bodyMat = getMimicBodyMat(type);
-  const trimMat = getMimicTrimMat(type);
-  const eyeMat = getMimicEyeMat(type);
-  const darkInteriorMat = getMimicInteriorMat();
-  const toothMat = getMimicToothMat();
-  const gemMat = getMimicGemMat(type);
-
-  const g = new THREE.Group();
-
-  // Wood base (taller for presence)
-  g.add(blockMesh(1.2, 0.56, 0.9, bodyMat, 0, 0.28, 0));
-
-  // Dark interior tray visible when lid opens
-  g.add(blockMesh(0.96, 0.10, 0.72, darkInteriorMat, 0, 0.52, 0));
-
-  // Bottom base trim bar
-  g.add(blockMesh(1.28, 0.09, 0.98, trimMat, 0, 0.045, 0));
-
-  // Four corner pillars running full height
-  g.add(blockMesh(0.12, 0.60, 0.12, trimMat, -0.59, 0.30, 0.42));
-  g.add(blockMesh(0.12, 0.60, 0.12, trimMat,  0.59, 0.30, 0.42));
-  g.add(blockMesh(0.12, 0.60, 0.12, trimMat, -0.59, 0.30, -0.42));
-  g.add(blockMesh(0.12, 0.60, 0.12, trimMat,  0.59, 0.30, -0.42));
-
-  // Mid-band gold strip on front face
-  g.add(blockMesh(1.28, 0.07, 0.1, trimMat, 0, 0.50, 0.42));
-
-  // Glowing eyes (large, bright)
-  g.add(blockMesh(0.20, 0.20, 0.06, eyeMat, -0.24, 0.54, 0.18));
-  g.add(blockMesh(0.20, 0.20, 0.06, eyeMat,  0.24, 0.54, 0.18));
-
-  // Lower teeth (5 teeth, angled forward)
-  for (let i = 0; i < 5; i++) {
-    const x = -0.40 + i * 0.20;
-    const tooth = blockMesh(0.09, 0.15, 0.09, toothMat, x, 0.54, 0.35);
-    tooth.rotation.x = 0.25;
-    g.add(tooth);
-  }
+  const { group: g, lid: lidGroup } = buildMimicChest(type, lowPolyKit);
 
   // Glow inside the chest (intensity driven each frame)
   const light = createGlowAnchor(type.eye, 0.5, 6.0);
@@ -180,40 +124,6 @@ export function createMimicChestMesh(type) {
   const outerGlow = createGlowAnchor(0xffd040, 1.0, 4.5);
   outerGlow.position.set(0, 1.6, 0);
   g.add(outerGlow);
-
-  // Lid Group — pivot at top-back edge of the base
-  const lidGroup = new THREE.Group();
-  lidGroup.position.set(0, 0.58, -0.45);
-  g.add(lidGroup);
-
-  // Lid wood
-  lidGroup.add(blockMesh(1.2, 0.38, 0.9, bodyMat, 0, 0.19, 0.45));
-
-  // Top cap trim strip
-  lidGroup.add(blockMesh(1.28, 0.07, 0.98, trimMat, 0, 0.39, 0.45));
-
-  // Front trim strip on lid
-  lidGroup.add(blockMesh(1.28, 0.07, 0.1, trimMat, 0, 0.04, 0.88));
-
-  // Lid corner posts
-  lidGroup.add(blockMesh(0.12, 0.42, 0.12, trimMat, -0.59, 0.19, 0.02));
-  lidGroup.add(blockMesh(0.12, 0.42, 0.12, trimMat,  0.59, 0.19, 0.02));
-  lidGroup.add(blockMesh(0.12, 0.42, 0.12, trimMat, -0.59, 0.19, 0.88));
-  lidGroup.add(blockMesh(0.12, 0.42, 0.12, trimMat,  0.59, 0.19, 0.88));
-
-  // Lock clasp
-  lidGroup.add(blockMesh(0.18, 0.24, 0.07, trimMat, 0, 0.02, 0.94));
-
-  // Center magenta gem on lid front
-  lidGroup.add(blockMesh(0.14, 0.14, 0.07, gemMat, 0, 0.21, 0.92));
-
-  // Upper teeth (6 teeth, angled down)
-  for (let i = 0; i < 6; i++) {
-    const x = -0.46 + i * 0.185;
-    const tooth = blockMesh(0.08, 0.15, 0.09, toothMat, x, 0.0, 0.81);
-    tooth.rotation.x = -0.25;
-    lidGroup.add(tooth);
-  }
 
   // Incoming beacon & target marker
   const incomingBeacon = createIncomingBeacon(type);
@@ -280,18 +190,4 @@ function createTargetMarker(type) {
   marker.visible = false;
   marker.userData.material = material;
   return marker;
-}
-
-export function blockMesh(width, height, depth, material, x, y, z) {
-  const mesh = new THREE.Mesh(shadedBoxGeometry(width, height, depth), material);
-  mesh.position.set(x, y, z);
-  mesh.castShadow = true;
-  mesh.receiveShadow = true;
-  if (material && material.userData) {
-    if (material.userData.stunMaterial) {
-      mesh.userData.normalMaterial = material;
-      mesh.userData.stunMaterial = material.userData.stunMaterial;
-    }
-  }
-  return mesh;
 }

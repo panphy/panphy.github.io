@@ -24,23 +24,6 @@ const TONEMAPPED_OUTPUT = `
   #include <colorspace_fragment>
 `;
 
-// Box with a baked vertical gradient: the underside is darker than the top, which
-// reads as soft ambient shading. Needs a material with vertexColors enabled.
-export function shadedBoxGeometry(width, height, depth, bottomShade = 0.74) {
-  const geometry = new THREE.BoxGeometry(width, height, depth);
-  const positions = geometry.attributes.position;
-  const colors = new Float32Array(positions.count * 3);
-  for (let index = 0; index < positions.count; index += 1) {
-    const t = positions.getY(index) / height + 0.5;
-    const shade = bottomShade + (1 - bottomShade) * t;
-    colors[index * 3] = shade;
-    colors[index * 3 + 1] = shade;
-    colors[index * 3 + 2] = shade;
-  }
-  geometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));
-  return geometry;
-}
-
 function createGlowTexture() {
   const size = 96;
   const canvas = document.createElement('canvas');
