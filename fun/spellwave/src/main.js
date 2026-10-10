@@ -610,6 +610,16 @@ const emberLight = new THREE.PointLight(0xf26a3d, 2.5, 22, 1.8);
 emberLight.position.set(0, 2.2, 5.7);
 scene.add(emberLight);
 
+// Enemy glows borrow these lights, nearest enemy first, so the light count never changes.
+const ENEMY_GLOW_LIGHTS = 4;
+const enemyGlowLights = [];
+for (let index = 0; index < ENEMY_GLOW_LIGHTS; index += 1) {
+  const light = new THREE.PointLight(0xffffff, 0, 5, 2);
+  scene.add(light);
+  enemyGlowLights.push(light);
+}
+const glowAnchors = [];
+
 // Back light from the far end of the road, so enemies and trees get a bright edge.
 const rimLight = new THREE.DirectionalLight(0xd9f7e5, 0.9);
 rimLight.position.set(0, 9, -46);
@@ -617,6 +627,7 @@ rimLight.target.position.set(0, 1, 6);
 scene.add(rimLight, rimLight.target);
 
 createWorld();
+createShaderKeepers();
 createSky();
 createMeteors();
 createClouds();
@@ -1494,6 +1505,7 @@ function animate(frameTime) {
   }
 
   updateEffects(delta);
+  updateEnemyGlows();
   updateEnvironment(gameTimeSeconds, delta, isTimeFrozen);
   updateSeasonFade(delta);
   updateLabels();
@@ -1540,7 +1552,7 @@ function updateEnemies(delta, seconds) {
         enemy.group.traverse(child => {
           if (child.isMesh && child.userData.stunMaterial) {
             child.material = child.userData.stunMaterial;
-          } else if (child.isLight) {
+          } else if (child.isGlow) {
             if (child.userData.origColor === undefined) {
               child.userData.origColor = child.color.clone();
               child.userData.origIntensity = child.intensity;
@@ -1555,7 +1567,7 @@ function updateEnemies(delta, seconds) {
       enemy.group.traverse(child => {
         if (child.isMesh && child.userData.normalMaterial) {
           child.material = child.userData.normalMaterial;
-        } else if (child.isLight) {
+        } else if (child.isGlow) {
           if (child.userData.origColor !== undefined) {
             child.color.copy(child.userData.origColor);
             child.intensity = child.userData.origIntensity;
@@ -1643,6 +1655,34 @@ function updateEnemies(delta, seconds) {
   }
 
   if (mode === 'running') selectTarget();
+}
+
+function updateEnemyGlows() {
+  glowAnchors.length = 0;
+  for (const enemy of enemies) {
+    if (!enemy.glowAnchors) {
+      enemy.glowAnchors = [];
+      enemy.group.traverse((child) => { if (child.isGlow) enemy.glowAnchors.push(child); });
+    }
+    for (const anchor of enemy.glowAnchors) glowAnchors.push(anchor);
+  }
+  if (glowAnchors.length > ENEMY_GLOW_LIGHTS) {
+    for (const anchor of glowAnchors) anchor.getWorldPosition(reusableVector), anchor.sortZ = reusableVector.z;
+    glowAnchors.sort((a, b) => b.sortZ - a.sortZ);
+  }
+  for (let index = 0; index < ENEMY_GLOW_LIGHTS; index += 1) {
+    const light = enemyGlowLights[index];
+    const anchor = glowAnchors[index];
+    if (!anchor) {
+      light.intensity = 0;
+      continue;
+    }
+    anchor.getWorldPosition(light.position);
+    light.color.copy(anchor.color);
+    light.intensity = anchor.intensity;
+    light.distance = anchor.distance;
+    light.decay = anchor.decay;
+  }
 }
 
 // Bosses shed rising embers, healers and chests a slow sparkle.
@@ -1970,8 +2010,8 @@ function setMoonShadowResolution(size) {
 }
 
 function updateMoonShadowLighting() {
+  // castShadow stays as Battery Saver set it: switching it here would recompile every shader.
   moonLight.intensity = moonLightBaseIntensity * moonShadowStrength;
-  moonLight.castShadow = moonShadowStrength > 0.02;
 }
 
 function updateFlyingShadowOpacity() {
@@ -2642,6 +2682,31 @@ function createWorld() {
 function groundNoise(x, z) {
   const value = Math.sin(x * 127.1 + z * 311.7) * 43758.5453;
   return value - Math.floor(value);
+}
+
+// Three.js deletes a shader once no material uses it, so short-lived effects (debris,
+// beams, shockwaves) would recompile theirs each time they reappear. These specks,
+// hidden under the road, keep one material of each kind alive.
+function createShaderKeepers() {
+  const keepers = new THREE.Group();
+  keepers.position.set(0, -1.2, -10);
+  keepers.scale.setScalar(0.001);
+  const geometry = new THREE.BoxGeometry(1, 1, 1);
+  const materials = [
+    new THREE.MeshStandardMaterial({ transparent: true }),
+    new THREE.MeshBasicMaterial({ transparent: true, blending: THREE.AdditiveBlending, depthWrite: false }),
+    new THREE.MeshBasicMaterial({ transparent: true, blending: THREE.AdditiveBlending, depthWrite: false, side: THREE.DoubleSide }),
+    new THREE.MeshBasicMaterial({ transparent: true }),
+    new THREE.MeshBasicMaterial({ transparent: true, blending: THREE.AdditiveBlending, depthWrite: false, side: THREE.DoubleSide, fog: false }),
+  ];
+  for (const material of materials) {
+    const mesh = new THREE.Mesh(geometry, material);
+    mesh.castShadow = true;
+    mesh.frustumCulled = false;
+    keepers.add(mesh);
+  }
+  keepers.add(new THREE.Sprite(new THREE.SpriteMaterial({ transparent: true, blending: THREE.AdditiveBlending, depthWrite: false, fog: false })));
+  world.add(keepers);
 }
 
 function createGround() {
