@@ -206,6 +206,30 @@ function buildTwoWordLimit(term, options = {}) {
   };
 }
 
+// Keep the full phrase visible, asking for one substantial word. Prefer longer
+// content words over generic words such as "energy", without exceeding the cap.
+function buildBossPrompt(term, options = {}) {
+  const data = buildTwoWordLimit(term, { ...options, alwaysLimit: true, maxHiddenWords: 1 });
+  if (!data) return null;
+  const candidates = data.parts.filter(part => !part.isWhitespace
+    && isWordToken(getAnswerTokenText(part.text))
+    && !isLowValueAnswerToken(getAnswerTokenText(part.text))
+    && buildSearchPrompt(getAnswerTokenText(part.text), options).length <= (options.maxAnswerLength ?? 16));
+  candidates.sort((a, b) => buildSearchPrompt(getAnswerTokenText(b.text), options).length
+    - buildSearchPrompt(getAnswerTokenText(a.text), options).length);
+  const chosen = candidates[0];
+  if (!chosen) return null;
+  for (const part of data.parts) {
+    part.isHidden = part === chosen;
+    part.isGiven = !part.isWhitespace && !part.isHidden;
+    part.answerText = part.isHidden ? getAnswerTokenText(part.text) : part.text;
+    part.exponentText = part.isHidden ? getTokenExponent(part.text) : '';
+  }
+  data.searchPrompt = buildSearchPrompt(chosen.answerText, options);
+  data.altSearchPrompts = buildAltSearchPrompts(chosen.answerText, options);
+  return data;
+}
+
 function shouldUseVocabularyPromptLimit(term) {
   const searchLength = buildSearchPrompt(term).length;
   if (searchLength < LONG_VOCAB_LIMIT_LENGTH) return false;
@@ -253,6 +277,7 @@ export {
   wrapSups,
   buildHintPart,
   buildTwoWordLimit,
+  buildBossPrompt,
   shouldUseVocabularyPromptLimit,
   promptIndexForProgress,
 };

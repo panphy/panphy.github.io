@@ -3,11 +3,11 @@
 import { buildSearchPrompt } from './prompt-utils.js';
 
 // Longest prompt, in typed characters, that a normal monster, healer or chest may
-// ask on waves 1, 2, 3… Later waves have no cap.
-export const NORMAL_PROMPT_LENGTH_CAPS = [11, 14, 19, 19, 26, 26];
+// ask on waves 1, 2, 3… Late waves keep the final cap.
+export const NORMAL_PROMPT_LENGTH_CAPS = [11, 12, 12, 13, 13, 14];
 
-// Boss words are shown as normal monsters earlier in the same wave, so the first
-// waves' boss words are capped too.
+// Early vocabulary bosses use compact terms. Only terms that also fit the
+// minion cap are previewed as normal monsters.
 export const EARLY_BOSS_WORD_LENGTH_CAP = 14;
 export const EARLY_BOSS_WAVES = 2;
 
@@ -23,16 +23,16 @@ export function typedLength(entry) {
 }
 
 export function normalPromptLengthCap(wave) {
-  return NORMAL_PROMPT_LENGTH_CAPS[wave - 1] ?? Infinity;
+  return NORMAL_PROMPT_LENGTH_CAPS[wave - 1] ?? NORMAL_PROMPT_LENGTH_CAPS.at(-1);
 }
 
 export function bossWordLengthCap(wave) {
   return wave <= EARLY_BOSS_WAVES ? EARLY_BOSS_WORD_LENGTH_CAP : Infinity;
 }
 
-// A boss preview may run to the boss cap even when the wave's normal cap is shorter.
+// Previews obey exactly the same limit as other minions.
 export function previewLengthCap(wave) {
-  return Math.max(normalPromptLengthCap(wave), bossWordLengthCap(wave) === Infinity ? 0 : bossWordLengthCap(wave));
+  return normalPromptLengthCap(wave);
 }
 
 export function withinLength(entries, cap) {
@@ -44,4 +44,9 @@ export function hardGuestCount(wave, random = Math.random) {
   const range = HARD_GUEST_COUNTS[wave - 1];
   if (!range) return 0;
   return range[0] + Math.floor(random() * (range[1] - range[0] + 1));
+}
+
+// Limit the actual answer, independently of the full vocabulary or equation.
+export function bossAnswerLengthCap(wave) {
+  return wave <= EARLY_BOSS_WAVES ? 14 : 16;
 }

@@ -6,10 +6,10 @@ import { ALL_WORDS, EASY_WORDS, HARD_WORDS, MEDIUM_WORDS, EQUATION_WORDS } from 
 import { createEndingFX } from './ending-fx.js';
 import { createLeaderboard } from './leaderboard.js';
 import { createEnemyMesh, createMimicChestMesh } from './enemy-meshes.js';
-import { normalPromptLengthCap, bossWordLengthCap, previewLengthCap, withinLength, hardGuestCount } from './difficulty.js';
+import { normalPromptLengthCap, bossAnswerLengthCap, bossWordLengthCap, previewLengthCap, withinLength, hardGuestCount } from './difficulty.js';
 import { createLowPolyTerrain, createLowPolyTree, createLowPolyRock, createLowPolyCloud } from './lowpoly.js';
 import { createVisuals, GLOW_GAIN, MOON_GLOW_GAIN } from './visuals.js';
-import { pickTarget, getInputCharacters, isMathOperatorInput, buildSearchPrompt, buildAltSearchPrompts, buildHintMask, getBossQuestionHintRange, escapeHtml, wrapSups, buildHintPart, buildTwoWordLimit, shouldUseVocabularyPromptLimit, promptIndexForProgress } from './prompt-utils.js';
+import { pickTarget, getInputCharacters, isMathOperatorInput, buildSearchPrompt, buildAltSearchPrompts, buildHintMask, getBossQuestionHintRange, escapeHtml, wrapSups, buildHintPart, buildBossPrompt, promptIndexForProgress } from './prompt-utils.js';
 
 const canvas = document.getElementById('gameCanvas');
 const labelsLayer = document.getElementById('labelsLayer');
@@ -99,17 +99,17 @@ const GAME_PROFILE = {
   spawnJitter: 0.5,
   spawnMin: 1.05,
   bossWarningDelay: 1.0,
-  bossSpawnGap: 2.8,
+  bossSpawnGap: 6.0,
   revealZ: -40,
 };
 const NORMAL_ENEMY_TARGETS = [7, 8, 10, 11, 12, 13, 14, 15, 16, 16];
-const NORMAL_TYPING_BUDGETS = [58, 72, 88, 106, 124, 142, 158, 174, 188, 202];
+const NORMAL_TYPING_BUDGETS = [58, 68, 80, 92, 104, 116, 128, 140, 152, 164];
 const ACTIVE_TYPING_PRESSURE_BASE = 36;
 const ACTIVE_TYPING_PRESSURE_GROWTH = 4;
 const ACTIVE_TYPING_PRESSURE_MAX = 58;
 const LONG_ACTIVE_PROMPT_COST = 13;
 const ACTIVE_LONG_PROMPT_LIMIT = 2;
-const LATE_ACTIVE_LONG_PROMPT_LIMIT = 3;
+const LATE_ACTIVE_LONG_PROMPT_LIMIT = 2;
 const SPAWN_COST_BASELINE = 7;
 const SPAWN_COST_DELAY_MAX = 1.85;
 const SUPPORT_SPAWN_DELAY_MIN = 0.75;
@@ -1067,6 +1067,12 @@ function handleKeyDown(event) {
     }
   }
 
+  if (event.key === 'Delete') {
+    event.preventDefault();
+    clearTypingTarget();
+    return;
+  }
+
   if (event.key === 'Backspace') {
     event.preventDefault();
     typedBuffer = typedBuffer.slice(0, -1);
@@ -1126,6 +1132,15 @@ function handleBeforeInput(event) {
   }
 }
 
+function clearTypingTarget() {
+  typedBuffer = '';
+  activeTarget = null;
+  updateTypedDisplay();
+  focusKeyboard();
+}
+
+document.getElementById('clearTargetButton').addEventListener('click', clearTypingTarget);
+
 function enterCharacter(character) {
   checkCheatCode(character);
 
@@ -1153,24 +1168,12 @@ function enterCharacter(character) {
     }
   }
 
-  for (const inputOption of inputOptions) {
-    const restartMatches = findMatches(inputOption.value, inputOption);
-    if (restartMatches.length > 0) {
-      typedBuffer = inputOption.value;
-      activeTarget = chooseTarget(restartMatches);
-      registerMistake();
-      updateTypedDisplay();
-      return;
-    }
-  }
-
   if (isMathOperatorInput(character) && hasActiveEquationPrefix()) {
     updateTypedDisplay();
     return;
   }
 
-  typedBuffer = '';
-  activeTarget = null;
+  // A typo costs accuracy and the chain, never the correctly typed prefix.
   registerMistake();
   updateTypedDisplay();
 }
@@ -1480,7 +1483,8 @@ function animate(frameTime) {
         } else if (finalWaveQueueIndex < finalWaveQueue.length) {
           const nextEntry = finalWaveQueue[finalWaveQueueIndex];
           const hasActiveSupportEnemy = nextEntry !== 'boss' && enemies.some(e => (e.isMimic || e.isMedic) && !e.dying);
-          if (!hasActiveSupportEnemy) {
+          const activeBossCount = enemies.filter(enemy => enemy.isBoss && !enemy.dying).length;
+          if (!hasActiveSupportEnemy && (nextEntry !== 'boss' || activeBossCount < 2)) {
             bossSpawnTimer -= currentDelta;
             if (bossSpawnTimer <= 0) {
               const entry = finalWaveQueue[finalWaveQueueIndex];
@@ -1498,7 +1502,7 @@ function animate(frameTime) {
           }
         }
       } else {
-        if (bossesSpawned < BOSSES_PER_WAVE) {
+        if (bossesSpawned < BOSSES_PER_WAVE && !enemies.some(enemy => enemy.isBoss && !enemy.dying)) {
           bossSpawnTimer -= currentDelta;
           if (bossSpawnTimer <= 0) {
             spawnBoss();
@@ -2482,6 +2486,10 @@ function getEnemyLimit() {
 
 function getEnemySpeed(enemy) {
   const profile = currentDifficulty();
+  if (enemy.isBoss) {
+    const responseTime = 18 + enemy.searchPrompt.length * 0.8;
+    return (WALL_Z - enemy.revealZ) / responseTime;
+  }
   const wavePressure = Math.max(0, waveSet - 1) * profile.waveSpeedBonus;
   const longPromptPenalty = Math.max(0, enemy.searchPrompt.length - (enemy.isBoss ? 6 : 8));
   const lengthFactor = THREE.MathUtils.clamp(
@@ -2595,18 +2603,10 @@ function spawnEnemy(options = {}) {
   labelsLayer.append(label);
 
   const promptOptions = { multiplicationAlias: isEquationPrompt };
-  const shouldLimitVocabulary = isBoss && !isEquationPrompt && shouldUseVocabularyPromptLimit(wordData.term);
-  const bossHiddenWordCap = waveSet >= 5 ? 3 : 2;
-  const twoWordData = (isBoss && isEquationPrompt)
-    ? buildTwoWordLimit(wordData.term, {
-        alwaysLimit: true,
-        multiplicationAlias: true,
-        maxHiddenWords: bossHiddenWordCap,
-      })
-    : shouldLimitVocabulary
-    ? buildTwoWordLimit(wordData.term, {
-        alwaysLimit: true,
-        maxHiddenWords: waveSet >= 5 ? 3 : 1,
+  const twoWordData = isBoss
+    ? buildBossPrompt(wordData.term, {
+        ...promptOptions,
+        maxAnswerLength: bossAnswerLengthCap(waveSet),
       })
     : null;
   const enemy = {
@@ -3466,17 +3466,18 @@ function prepareWavePlan() {
   mimicsSpawnedThisSet = 0;
   mimicSpawnSlots = chooseMimicSpawnSlots(normalEnemyTarget, getMimicCountForWave(waveSet));
   
-  const previewableWords = [...definitionBossWordsForWave()];
+  const previewableWords = withinLength(definitionBossWordsForWave(), previewLengthCap(waveSet));
   const equationWord = bossWordsThisSet.find(w => w.isEquation);
   if (equationWord) {
     const quantities = getEquationQuantities(equationWord.term);
     const unseenQuantities = quantities.filter(q => !previewableWords.some(pw => pw.term === q.term));
     if (unseenQuantities.length > 0) {
-      // Prefer a quantity short enough for this wave; an equation of long quantities still previews one.
+      // Never turn a long equation quantity into a full-phrase minion.
       const fitting = withinLength(unseenQuantities, previewLengthCap(waveSet));
-      const candidates = fitting.length > 0 ? fitting : unseenQuantities;
-      const chosenQuantity = candidates[Math.floor(Math.random() * candidates.length)];
-      previewableWords.push(chosenQuantity);
+      if (fitting.length > 0) {
+        const chosenQuantity = fitting[Math.floor(Math.random() * fitting.length)];
+        previewableWords.push(chosenQuantity);
+      }
     }
   }
   previewableWordsThisSet = previewableWords;
@@ -3521,7 +3522,7 @@ function shouldSpawnMedic() {
 function chooseMimicPrompt() {
   const reservedBossTerms = new Set(bossWordsThisSet.map((w) => w.term));
   const nearExisting = new Set(enemies.map((e) => e.prompt));
-  const pool = currentKeywordPool().filter((entry) => !reservedBossTerms.has(entry.term));
+  const pool = withinLength(currentKeywordPool(), 12).filter((entry) => !reservedBossTerms.has(entry.term));
   const usablePool = pool.length > 0 ? pool : EASY_WORDS;
   for (let attempt = 0; attempt < 8; attempt += 1) {
     const entry = usablePool[Math.floor(Math.random() * usablePool.length)];
@@ -3711,10 +3712,12 @@ function nextSpawnDelay(enemy = null, options = {}) {
   );
   const supportFactor = options.support ? 0.8 : 1;
   const minimumDelay = options.support ? SUPPORT_SPAWN_DELAY_MIN : profile.spawnMin;
+  // A short breather after each three minions keeps late waves in readable groups.
+  const breather = !options.support && normalEnemiesSpawned % 3 === 0 ? 2 : 0;
   return Math.max(
     minimumDelay,
     wavePace * costFactor * supportFactor + Math.random() * profile.spawnJitter
-  );
+  ) + breather;
 }
 
 function weightedPick(items) {
@@ -4214,18 +4217,14 @@ function spawnBoss() {
   const lanes = [-5.0, 0, 5.0];
   const lane = lanes[bossesSpawned % lanes.length];
 
-  // Calculate actual speed to guarantee consistent 8s travel time to the reveal line
   const profile = currentDifficulty();
-  const wavePressure = Math.max(0, waveSet - 1) * profile.waveSpeedBonus;
-  const longPromptPenalty = Math.max(0, wordData.term.length - 5);
-  const lengthFactor = THREE.MathUtils.clamp(1 - longPromptPenalty * 0.024, 0.7, 1);
-  const speed = (bossType.speed + wavePressure) * profile.speedMultiplier * lengthFactor;
-
-  const targetWait = 8.0;
-  const startZ = profile.revealZ - (speed * targetWait);
-
   const isClimaxBoss = isFinalWave() && (bossesSpawned >= 7);
-  spawnEnemy({ isBoss: true, wordData, bossType, lane, delay: 0, startZ, isClimaxBoss });
+  const enemy = spawnEnemy({ isBoss: true, wordData, bossType, lane, delay: 0, startZ: profile.revealZ, isClimaxBoss });
+  // Use the actual answer and movement speed for a consistent entrance.
+  enemy.spawnZ = profile.revealZ - getEnemySpeed(enemy) * 8;
+  enemy.group.position.z = enemy.spawnZ;
+  enemy.revealed = false;
+  enemy.shotTimer = 4 + enemy.searchPrompt.length * 0.25;
 }
 
 function chooseBossWord() {
