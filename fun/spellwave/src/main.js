@@ -1067,12 +1067,6 @@ function handleKeyDown(event) {
     }
   }
 
-  if (event.key === 'Delete') {
-    event.preventDefault();
-    clearTypingTarget();
-    return;
-  }
-
   if (event.key === 'Backspace') {
     event.preventDefault();
     typedBuffer = typedBuffer.slice(0, -1);
@@ -1132,15 +1126,6 @@ function handleBeforeInput(event) {
   }
 }
 
-function clearTypingTarget() {
-  typedBuffer = '';
-  activeTarget = null;
-  updateTypedDisplay();
-  focusKeyboard();
-}
-
-document.getElementById('clearTargetButton').addEventListener('click', clearTypingTarget);
-
 function enterCharacter(character) {
   checkCheatCode(character);
 
@@ -1168,12 +1153,24 @@ function enterCharacter(character) {
     }
   }
 
+  for (const inputOption of inputOptions) {
+    const restartMatches = findMatches(inputOption.value, inputOption);
+    if (restartMatches.length > 0) {
+      typedBuffer = inputOption.value;
+      activeTarget = chooseTarget(restartMatches);
+      registerMistake();
+      updateTypedDisplay();
+      return;
+    }
+  }
+
   if (isMathOperatorInput(character) && hasActiveEquationPrefix()) {
     updateTypedDisplay();
     return;
   }
 
-  // A typo costs accuracy and the chain, never the correctly typed prefix.
+  typedBuffer = '';
+  activeTarget = null;
   registerMistake();
   updateTypedDisplay();
 }

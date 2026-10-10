@@ -37,7 +37,7 @@ Difficulty has two separate parts, and a keyword must suit both:
 - Each ordinary wave has two vocabulary bosses and one equation boss. Bosses show the full phrase or equation structure with one missing content word, revealing its first three letters. The longest meaningful word that fits the answer cap is selected; spaces, operators and given exponents do not need typing.
 - Ordinary boss rounds present one boss at a time. The finale allows two active bosses, spaced at least six seconds apart. Boss movement gives 18 seconds plus 0.8 seconds per answer letter after reveal; the entrance takes eight seconds. The first rock attack is delayed according to answer length too.
 - Healers and chests use short answers, at most 12 letters. Support prompts obey the wave's minion cap too.
-- Typos cost accuracy and break the chain but preserve all correct typing. Backspace removes a letter; **Clear target** (or Delete) clears the prefix to choose another enemy. Escape pauses.
+- Typing has no mercy: a wrong letter clears the prefix and breaks the chain. If that letter starts another visible prompt, it immediately starts targeting that enemy instead (also costing accuracy and the chain). Targets follow the matching prefix freely; no explicit switch control is needed. Backspace removes a letter; Escape pauses.
 - Normal-wave typing budgets rise from 58 to 152 letters across waves 1–9. Spawning also limits active text, slows longer prompts and leaves a two-second breather after every three normal minions. Later waves retain short prompts while increasing encounter pressure.
 
 These caps and timings are starting points for playtesting, especially waves 5–9. Keep this table aligned with `src/difficulty.js` and pacing in `src/main.js`.
