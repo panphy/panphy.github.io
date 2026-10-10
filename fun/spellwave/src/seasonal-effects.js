@@ -1,4 +1,5 @@
-import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.164.1/build/three.module.js';
+import * as THREE from 'three';
+import { shadedBoxGeometry } from './visuals.js';
 
 export function createSeasonalEffects({
   scene,
@@ -257,13 +258,13 @@ export function createSeasonalEffects({
   }
 
   function createSpringFlowers() {
-    const stemMaterial = new THREE.MeshStandardMaterial({ color: 0x2e7d48, roughness: 0.82 });
-    const centerMaterial = new THREE.MeshStandardMaterial({ color: 0xffd86f, roughness: 0.55, emissive: 0x6b3a00, emissiveIntensity: 0.18 });
+    const stemMaterial = new THREE.MeshStandardMaterial({ vertexColors: true, color: 0x2e7d48, roughness: 0.82 });
+    const centerMaterial = new THREE.MeshStandardMaterial({ vertexColors: true, color: 0xffd86f, roughness: 0.55, emissive: 0x6b3a00, emissiveIntensity: 0.18 });
     const petalMaterials = [
-      new THREE.MeshStandardMaterial({ color: 0xff8fbd, roughness: 0.72 }),
-      new THREE.MeshStandardMaterial({ color: 0xf9c7dc, roughness: 0.72 }),
-      new THREE.MeshStandardMaterial({ color: 0xd9f99d, roughness: 0.75 }),
-      new THREE.MeshStandardMaterial({ color: 0xbde7ff, roughness: 0.7 }),
+      new THREE.MeshStandardMaterial({ vertexColors: true, color: 0xff8fbd, roughness: 0.72 }),
+      new THREE.MeshStandardMaterial({ vertexColors: true, color: 0xf9c7dc, roughness: 0.72 }),
+      new THREE.MeshStandardMaterial({ vertexColors: true, color: 0xd9f99d, roughness: 0.75 }),
+      new THREE.MeshStandardMaterial({ vertexColors: true, color: 0xbde7ff, roughness: 0.7 }),
     ];
 
     for (let patchIndex = 0; patchIndex < 42; patchIndex += 1) {
@@ -300,10 +301,10 @@ export function createSeasonalEffects({
 
   function createAutumnFallenLeaves() {
     const leafMaterials = [
-      new THREE.MeshStandardMaterial({ color: 0xb33b12, roughness: 0.9 }),
-      new THREE.MeshStandardMaterial({ color: 0xd76818, roughness: 0.9 }),
-      new THREE.MeshStandardMaterial({ color: 0xe1a32c, roughness: 0.86 }),
-      new THREE.MeshStandardMaterial({ color: 0x7d2d18, roughness: 0.94 }),
+      new THREE.MeshStandardMaterial({ vertexColors: true, color: 0xb33b12, roughness: 0.9 }),
+      new THREE.MeshStandardMaterial({ vertexColors: true, color: 0xd76818, roughness: 0.9 }),
+      new THREE.MeshStandardMaterial({ vertexColors: true, color: 0xe1a32c, roughness: 0.86 }),
+      new THREE.MeshStandardMaterial({ vertexColors: true, color: 0x7d2d18, roughness: 0.94 }),
     ];
 
     for (let index = 0; index < 92; index += 1) {
@@ -413,7 +414,7 @@ export function createSeasonalEffects({
   }
 
   function blockMesh(width, height, depth, material, x, y, z) {
-    const mesh = new THREE.Mesh(new THREE.BoxGeometry(width, height, depth), material);
+    const mesh = new THREE.Mesh(shadedBoxGeometry(width, height, depth, 0.8), material);
     mesh.position.set(x, y, z);
     mesh.castShadow = true;
     mesh.receiveShadow = true;
