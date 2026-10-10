@@ -1,10 +1,11 @@
-import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.164.1/build/three.module.js';
+import * as THREE from 'three';
+import { shadedBoxGeometry, GLOW_GAIN } from './visuals.js';
 
 const materialCache = new Map();
 
 function getCachedMaterial(key, options) {
   if (!materialCache.has(key)) {
-    const mat = new THREE.MeshStandardMaterial(options);
+    const mat = new THREE.MeshStandardMaterial({ vertexColors: true, ...options });
     mat.userData.isShared = true;
     const origColor = mat.color;
     const gray = 0.299 * origColor.r + 0.587 * origColor.g + 0.114 * origColor.b;
@@ -33,23 +34,23 @@ function getTrimMat(color) {
   return getCachedMaterial(`trim-${color}`, { color: color, roughness: 0.78, metalness: 0.02 });
 }
 function getEyeMat(color) {
-  return getCachedMaterial(`eye-${color}`, { color: color, emissive: color, emissiveIntensity: 0.9, roughness: 0.4 });
+  return getCachedMaterial(`eye-${color}`, { color: color, emissive: color, emissiveIntensity: 2.4, roughness: 0.4 });
 }
 function getBossMat(type) {
   return getCachedMaterial(`boss-${type.name}-${type.body}`, {
-    color: type.body, emissive: type.body, emissiveIntensity: 0.56,
+    color: type.body, emissive: type.body, emissiveIntensity: 0.3,
     roughness: 0.58, metalness: 0.03,
   });
 }
 function getBossTrimMat(type) {
   return getCachedMaterial(`bosstrim-${type.name}-${type.trim}`, {
-    color: type.trim, emissive: type.trim, emissiveIntensity: 0.82,
+    color: type.trim, emissive: type.trim, emissiveIntensity: 0.6,
     roughness: 0.46, metalness: 0.08,
   });
 }
 function getBossEyeMat(type) {
   return getCachedMaterial(`bosseye-${type.name}-${type.eye}`, {
-    color: type.eye, emissive: type.eye, emissiveIntensity: 2.2, roughness: 0.4,
+    color: type.eye, emissive: type.eye, emissiveIntensity: 3.4, roughness: 0.4,
   });
 }
 function getMedicHeartMat(type) {
@@ -926,7 +927,7 @@ function createStellarDreadnoughtMesh(type) {
 
 function createIncomingBeacon(type) {
   const material = new THREE.MeshBasicMaterial({
-    color: type.eye,
+    color: new THREE.Color(type.eye).multiplyScalar(GLOW_GAIN),
     transparent: true,
     opacity: 0.58,
     blending: THREE.AdditiveBlending,
@@ -940,7 +941,7 @@ function createIncomingBeacon(type) {
 function createTargetMarker(type) {
   const marker = new THREE.Group();
   const material = new THREE.MeshBasicMaterial({
-    color: type.eye,
+    color: new THREE.Color(type.eye).multiplyScalar(GLOW_GAIN),
     transparent: true,
     opacity: 0,
     blending: THREE.AdditiveBlending,
@@ -963,7 +964,7 @@ function createTargetMarker(type) {
 }
 
 export function blockMesh(width, height, depth, material, x, y, z) {
-  const mesh = new THREE.Mesh(new THREE.BoxGeometry(width, height, depth), material);
+  const mesh = new THREE.Mesh(shadedBoxGeometry(width, height, depth), material);
   mesh.position.set(x, y, z);
   mesh.castShadow = true;
   mesh.receiveShadow = true;

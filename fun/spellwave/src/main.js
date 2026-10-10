@@ -1,4 +1,4 @@
-import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.164.1/build/three.module.js';
+import * as THREE from 'three';
 import { createSpellwaveAudio } from './audio.js';
 import { createSeasonalEffects } from './seasonal-effects.js';
 import { createPotionSystem } from './potions.js';
@@ -6,6 +6,7 @@ import { ALL_WORDS, EASY_WORDS, HARD_WORDS, MEDIUM_WORDS, EQUATION_WORDS } from 
 import { createEndingFX } from './ending-fx.js';
 import { createLeaderboard } from './leaderboard.js';
 import { createEnemyMesh, createMimicChestMesh, blockMesh } from './enemy-meshes.js';
+import { createVisuals, shadedBoxGeometry, GLOW_GAIN, MOON_GLOW_GAIN } from './visuals.js';
 import { pickTarget, getInputCharacters, isMathOperatorInput, buildSearchPrompt, buildAltSearchPrompts, buildHintMask, getBossQuestionHintRange, escapeHtml, wrapSups, buildHintPart, buildTwoWordLimit, shouldUseVocabularyPromptLimit, promptIndexForProgress } from './prompt-utils.js';
 
 const canvas = document.getElementById('gameCanvas');
@@ -328,11 +329,16 @@ const MOON_SHADOW_FADE_OUT_RATE = 4.8;
 const INITIAL_MOON_ANGLE = Math.random() * Math.PI;
 const CLOUD_WRAP_X = 46;
 const CLOUD_RESET_X = -46;
+// How far clouds take on the sky colour, so they dim at dusk and at night.
+const CLOUD_SKY_TINT = 0.42;
+
+// The palettes' ground colours are scaled down so the road stays moody under the bright sun and sky lights.
+const GROUND_TONE = 0.5;
 
 const SEASON_PALETTES = [
   { // Spring (wave 1): soft twilight blue, cherry blossoms
     name: 'spring',
-    bgColor: 0x6a90b0, fogColor: 0x6a90b0, fogNear: 20, fogFar: 70,
+    bgColor: 0x6a90b0, fogColor: 0x6a90b0, fogNear: 20, fogFar: 70, skyTop: 0x2f5fa6,
     hemiSky: 0xb0d8f0, hemiGround: 0x508050, hemiIntensity: 1.2,
     sunColor: 0xffe0b0, sunIntensity: 1.8,
     emberColor: 0xff90b0, emberIntensity: 2.0,
@@ -345,7 +351,7 @@ const SEASON_PALETTES = [
   },
   { // Summer (wave 2): warm blue evening, lush greens
     name: 'summer',
-    bgColor: 0x243870, fogColor: 0x243870, fogNear: 26, fogFar: 88,
+    bgColor: 0x243870, fogColor: 0x243870, fogNear: 26, fogFar: 88, skyTop: 0x0b1440,
     hemiSky: 0x4878d0, hemiGround: 0x265028, hemiIntensity: 1.5,
     sunColor: 0xfffac8, sunIntensity: 3.0,
     emberColor: 0xffcc30, emberIntensity: 2.8,
@@ -358,7 +364,7 @@ const SEASON_PALETTES = [
   },
   { // Autumn (wave 3): golden harvest dusk, amber sky, red/orange leaves
     name: 'autumn',
-    bgColor: 0xd07840, fogColor: 0xb06030, fogNear: 22, fogFar: 72,
+    bgColor: 0xd07840, fogColor: 0xb06030, fogNear: 22, fogFar: 72, skyTop: 0x5a3a78,
     hemiSky: 0xe0b878, hemiGround: 0x703820, hemiIntensity: 1.4,
     sunColor: 0xff9840, sunIntensity: 2.4,
     emberColor: 0xff4818, emberIntensity: 2.8,
@@ -371,7 +377,7 @@ const SEASON_PALETTES = [
   },
   { // Winter (wave 4): cold steel-blue dusk, icy tones
     name: 'winter',
-    bgColor: 0x1e3050, fogColor: 0x1e3050, fogNear: 18, fogFar: 68,
+    bgColor: 0x1e3050, fogColor: 0x1e3050, fogNear: 18, fogFar: 68, skyTop: 0x060d26,
     hemiSky: 0x5070b0, hemiGround: 0x182840, hemiIntensity: 1.2,
     sunColor: 0xb8d4ff, sunIntensity: 2.0,
     emberColor: 0x6888ff, emberIntensity: 2.0,
@@ -546,7 +552,7 @@ renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
 renderer.setSize(window.innerWidth, window.innerHeight, false);
 renderer.outputColorSpace = THREE.SRGBColorSpace;
 renderer.shadowMap.enabled = true;
-renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+renderer.shadowMap.type = THREE.PCFShadowMap;
 
 const scene = new THREE.Scene();
 scene.background = new THREE.Color(0x07120f);
@@ -555,6 +561,10 @@ scene.fog = new THREE.Fog(0x07120f, 20, 78);
 const camera = new THREE.PerspectiveCamera(58, window.innerWidth / window.innerHeight, 0.1, 120);
 camera.position.set(0, 7.2, 12.8);
 camera.lookAt(cameraTarget);
+
+const visuals = createVisuals({ renderer, scene, camera, available: webGLAvailable });
+const fx = visuals.effects;
+const skyTopColor = new THREE.Color(0x07120f);
 
 const world = new THREE.Group();
 scene.add(world);
@@ -571,7 +581,7 @@ scene.add(hemiLight);
 const moonLight = new THREE.DirectionalLight(0xc9ffec, 2.2);
 moonLight.position.set(18, 14, -28);
 moonLight.castShadow = true;
-moonLight.shadow.mapSize.set(1024, 1024);
+moonLight.shadow.mapSize.set(2048, 2048);
 moonLight.shadow.camera.left = -22;
 moonLight.shadow.camera.right = 22;
 moonLight.shadow.camera.top = 22;
@@ -586,6 +596,12 @@ moonLightBaseIntensity = moonLight.intensity;
 const emberLight = new THREE.PointLight(0xf26a3d, 2.5, 22, 1.8);
 emberLight.position.set(0, 2.2, 5.7);
 scene.add(emberLight);
+
+// Back light from the far end of the road, so enemies and trees get a bright edge.
+const rimLight = new THREE.DirectionalLight(0xd9f7e5, 0.9);
+rimLight.position.set(0, 9, -46);
+rimLight.target.position.set(0, 1, 6);
+scene.add(rimLight, rimLight.target);
 
 createWorld();
 createSky();
@@ -1082,6 +1098,9 @@ function enterCharacter(character) {
         defeatEnemy(activeTarget);
       } else {
         playTypeSound();
+        reusableVector.copy(activeTarget.group.position);
+        reusableVector.y += 0.9 * activeTarget.group.scale.y;
+        fx.burst(reusableVector, { color: activeTarget.type.eye, color2: 0xffffff, count: 5, speed: 2.4, life: 0.35, size: 0.22 });
       }
       updateTypedDisplay();
       return;
@@ -1462,7 +1481,7 @@ function animate(frameTime) {
   updateEnvironment(gameTimeSeconds, delta, isTimeFrozen);
   updateSeasonFade(delta);
   updateLabels();
-  renderer.render(scene, camera);
+  visuals.render(delta, { measure: mode === 'running' });
 
   scheduleFrame();
 }
@@ -1562,7 +1581,10 @@ function updateEnemies(delta, seconds) {
     if (enemy.revealed && !wasRevealed) {
       enemy.revealFlash = 0.28;
       if (!enemy.isMimic) playRevealSound(enemy);
+      reusableVector.set(enemy.group.position.x, 0.14, enemy.group.position.z);
+      fx.ring(reusableVector, enemy.type.eye, { from: 0.3, to: enemy.isBoss ? 4.6 : 2.2, life: 0.55, opacity: 0.7 });
     }
+    updateEnemyAura(enemy, delta);
     if (enemy.revealFlash > 0) enemy.revealFlash -= delta;
 
     if (enemy.isBoss && enemy.revealed && (!enemy.stunTimer || enemy.stunTimer <= 0)) {
@@ -1607,6 +1629,26 @@ function updateEnemies(delta, seconds) {
   if (mode === 'running') selectTarget();
 }
 
+// Bosses shed rising embers, healers and chests a slow sparkle.
+function updateEnemyAura(enemy, delta) {
+  if (!enemy.revealed || !(enemy.isBoss || enemy.isMedic || enemy.isMimic)) return;
+  const interval = enemy.isBoss ? 0.06 : 0.16;
+  enemy.auraTimer = (enemy.auraTimer || 0) + delta;
+  while (enemy.auraTimer > interval) {
+    enemy.auraTimer -= interval;
+    const reach = enemy.isBoss ? 1.1 * enemy.group.scale.x : 0.6;
+    reusableVector.set(
+      enemy.group.position.x + (Math.random() - 0.5) * 2 * reach,
+      enemy.group.position.y + 0.2 + Math.random() * (enemy.isBoss ? 2.2 * enemy.group.scale.y : 1.2),
+      enemy.group.position.z + (Math.random() - 0.5) * 2 * reach
+    );
+    fx.burst(reusableVector, {
+      color: enemy.type.eye, color2: enemy.type.trim, count: 1, speed: 0.3,
+      life: enemy.isBoss ? 1.3 : 0.9, size: enemy.isBoss ? 0.36 : 0.22, gravity: -1.4, drag: 0.6, up: 0.5,
+    });
+  }
+}
+
 function updateEnemyMarkers(enemy, seconds) {
   const incomingBeacon = enemy.group.userData.incomingBeacon;
   if (incomingBeacon) {
@@ -1649,6 +1691,11 @@ function updateEffects(delta) {
       effect.mesh.position.copy(effect.start).lerp(effect.end, eased);
       effect.mesh.position.y += Math.sin(progress * Math.PI) * effect.arcHeight;
       if (!potionsSystem.isTimeFrozen()) {
+        effect.trailTimer = (effect.trailTimer || 0) + delta;
+        while (effect.trailTimer > 0.03) {
+          effect.trailTimer -= 0.03;
+          fx.burst(effect.mesh.position, { color: effect.enemy.type.eye, color2: 0xff7a2a, count: 1, speed: 0.6, life: 0.5, size: 0.34, gravity: 1.2, up: 0 });
+        }
         effect.mesh.rotation.x += effect.spin.x * delta;
         effect.mesh.rotation.y += effect.spin.y * delta;
         effect.mesh.rotation.z += effect.spin.z * delta;
@@ -1693,7 +1740,7 @@ function updateEffects(delta) {
       const progress = 1 - amount;
       const currentScale = effect.initialScale + progress * effect.expandSpeed;
       effect.mesh.scale.setScalar(currentScale);
-      effect.mesh.material.opacity = amount * 0.8;
+      effect.mesh.material.opacity = amount * 0.22;
     } else {
       effect.mesh.material.opacity = amount * 0.82;
       effect.mesh.scale.set(1, 1, Math.max(0.08, amount));
@@ -1771,12 +1818,14 @@ function updateEnvironment(seconds, delta, isTimeFrozen = false) {
     updateMoonHaze();
   }
 
-  if (starField) {
-    starField.rotation.y = seconds * 0.006;
-  }
+  starField.update(seconds, renderer.getPixelRatio ? renderer.getPixelRatio() : 1);
+  rimLight.color.copy(hemiLight.color);
+  visuals.sky.sync(camera, scene.fog.color, scene.background, skyTopColor, moon);
+  visuals.motes.update(seconds, emberLight.color);
+  fx.update(delta, camera);
 
   if (pathMarkerMaterial) {
-    pathMarkerMaterial.emissiveIntensity = 0.24 + Math.sin(seconds * 2.8) * 0.1;
+    pathMarkerMaterial.emissiveIntensity = 1.5 + Math.sin(seconds * 2.8) * 0.5;
   }
 
   const scrollDelta = SCENERY_SCROLL_SPEED * delta * (isTimeFrozen ? 0 : mode === 'running' ? 1 : 0.35);
@@ -1803,7 +1852,7 @@ function updateEnvironment(seconds, delta, isTimeFrozen = false) {
     wandsArePrimed = false;
     sceneCrystalMat.color.setHex(0x58dfcf);
     sceneCrystalMat.emissive.setHex(0x2dd4bf);
-    sceneCrystalMat.emissiveIntensity = 2.0;
+    sceneCrystalMat.emissiveIntensity = 2.6;
     for (const crown of lightningCrowns) crown.visible = false;
     for (const light of torchLights) light.color.setHex(0x2dd4bf);
   }
@@ -1858,7 +1907,7 @@ function updateRoad(scrollDelta) {
     if (block.z > ROAD_MAX_Z) block.z -= ROAD_SPAN;
     reusableVector.set(block.x, block.y, block.z);
     reusableQuaternion.identity();
-    reusableVectorTwo.set(1, 1, 1);
+    reusableVectorTwo.set(1, block.sy, 1);
     reusableMatrix.compose(reusableVector, reusableQuaternion, reusableVectorTwo);
     sceneGroundMesh.setMatrixAt(index, reusableMatrix);
   }
@@ -2565,11 +2614,15 @@ function createWorld() {
   createPathMarkers();
 }
 
+function groundNoise(x, z) {
+  const value = Math.sin(x * 127.1 + z * 311.7) * 43758.5453;
+  return value - Math.floor(value);
+}
+
 function createGround() {
   const geometry = new THREE.BoxGeometry(1, 0.55, 1);
   const material = new THREE.MeshStandardMaterial({
     color: 0xffffff,
-    vertexColors: true,
     roughness: 0.96,
     metalness: 0.0,
   });
@@ -2585,10 +2638,15 @@ function createGround() {
       const pathAmount = Math.max(0, 1 - Math.abs(x) / 3.2);
       const ridge = Math.sin(x * 1.3 + z * 0.27) * 0.12 + Math.cos(z * 0.42) * 0.08;
       const y = -0.38 + ridge * (1 - pathAmount * 0.8);
-      roadBlocks[index] = { x, y, z };
-      reusableVector.set(x, y, z);
+      // A few verge blocks stand proud as boulders; path cobbles sit at slightly uneven heights.
+      const roll = groundNoise(x, z);
+      const isStone = Math.abs(x) > 4 && roll > 0.972;
+      const sy = isStone ? 1.9 + roll * 0.9 : 1;
+      const cobble = Math.abs(x) < 3.1 ? (groundNoise(x + 31, z + 7) - 0.5) * 0.05 : 0;
+      roadBlocks[index] = { x, y: y + cobble, z, sy, isStone };
+      reusableVector.set(x, y + cobble, z);
       reusableQuaternion.identity();
-      reusableVectorTwo.set(1, 1, 1);
+      reusableVectorTwo.set(1, sy, 1);
       reusableMatrix.compose(reusableVector, reusableQuaternion, reusableVectorTwo);
       mesh.setMatrixAt(index, reusableMatrix);
       index += 1;
@@ -2629,10 +2687,10 @@ function createLightningCrown() {
 }
 
 function createTorches() {
-  const shaftMat = new THREE.MeshStandardMaterial({ color: 0x2a1a10, roughness: 0.88 });
-  const bandMat = new THREE.MeshStandardMaterial({ color: 0x7a6040, roughness: 0.48, metalness: 0.5 });
+  const shaftMat = new THREE.MeshStandardMaterial({ color: 0x2a1a10, roughness: 0.88, vertexColors: true });
+  const bandMat = new THREE.MeshStandardMaterial({ color: 0x9a7a48, roughness: 0.36, metalness: 0.8, vertexColors: true });
   sceneCrystalMat = new THREE.MeshStandardMaterial({
-    color: 0x58dfcf, emissive: 0x2dd4bf, emissiveIntensity: 2.0,
+    color: 0x58dfcf, emissive: 0x2dd4bf, emissiveIntensity: 2.6,
     roughness: 0.1, metalness: 0.2, transparent: true, opacity: 0.9,
   });
 
@@ -2691,11 +2749,11 @@ function createTorches() {
 }
 
 function createTrees() {
-  sceneTrunkMaterial = new THREE.MeshStandardMaterial({ color: 0x513820, roughness: 0.9 });
+  sceneTrunkMaterial = new THREE.MeshStandardMaterial({ color: 0x513820, roughness: 0.9, vertexColors: true });
   sceneLeafMaterials = [
-    new THREE.MeshStandardMaterial({ color: 0x1f5b38, roughness: 0.9 }),
-    new THREE.MeshStandardMaterial({ color: 0x2f7247, roughness: 0.9 }),
-    new THREE.MeshStandardMaterial({ color: 0x163d30, roughness: 0.92 }),
+    new THREE.MeshStandardMaterial({ color: 0x1f5b38, roughness: 0.9, vertexColors: true }),
+    new THREE.MeshStandardMaterial({ color: 0x2f7247, roughness: 0.9, vertexColors: true }),
+    new THREE.MeshStandardMaterial({ color: 0x163d30, roughness: 0.92, vertexColors: true }),
   ];
 
   for (let index = 0; index < 34; index += 1) {
@@ -2712,6 +2770,24 @@ function createTrees() {
     const upperLeaves = blockMesh(1.05, 0.86, 1.05, leafMaterial, 0, height + 1.38, 0);
     tree.add(lowerLeaves);
     tree.add(upperLeaves);
+    // Off-centre clumps in the neighbouring leaf shades break up the two stacked cubes.
+    const clumpCount = 2 + (index % 2);
+    for (let clump = 0; clump < clumpCount; clump += 1) {
+      const clumpMaterial = sceneLeafMaterials[(index + clump + 1) % sceneLeafMaterials.length];
+      const angle = Math.random() * Math.PI * 2;
+      const size = 0.5 + Math.random() * 0.34;
+      const clumpLeaves = blockMesh(
+        size, size * 0.86, size, clumpMaterial,
+        Math.cos(angle) * 0.72, height + 0.5 + Math.random() * 0.9, Math.sin(angle) * 0.72
+      );
+      tree.add(clumpLeaves);
+      canopyBlocks.push({
+        mesh: clumpLeaves,
+        baseY: clumpLeaves.position.y,
+        phase: Math.random() * Math.PI * 2,
+        amount: 0.02 + Math.random() * 0.02,
+      });
+    }
     world.add(tree);
     scrollingTrees.push({
       group: tree,
@@ -2736,7 +2812,7 @@ function createPathMarkers() {
   pathMarkerMaterial = new THREE.MeshStandardMaterial({
     color: 0x58dfcf,
     emissive: 0x0e6861,
-    emissiveIntensity: 0.28,
+    emissiveIntensity: 1.5,
     roughness: 0.55,
   });
   for (let z = PATH_MARKER_MIN_Z; z <= PATH_MARKER_MAX_Z; z += PATH_MARKER_SPACING) {
@@ -2758,26 +2834,12 @@ function configurePathMarker(marker) {
 
 function createSky() {
   const moonGeometry = new THREE.SphereGeometry(3.2, 24, 16);
-  const moonMaterial = new THREE.MeshBasicMaterial({ color: 0xfff1b8, transparent: true });
+  const moonMaterial = new THREE.MeshBasicMaterial({ color: 0xfff1b8, transparent: true, fog: false });
   moon = new THREE.Mesh(moonGeometry, moonMaterial);
   positionMoonOnArc();
   scene.add(moon);
 
-  const starGeometry = new THREE.BufferGeometry();
-  const positions = [];
-  for (let index = 0; index < 260; index += 1) {
-    positions.push((Math.random() - 0.5) * 90, Math.random() * 38 + 8, -Math.random() * 90 - 8);
-  }
-  starGeometry.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
-  const starMaterial = new THREE.PointsMaterial({
-    color: 0xf2f0df,
-    size: 0.08,
-    transparent: true,
-    opacity: 0.72,
-    fog: false,
-  });
-  starField = new THREE.Points(starGeometry, starMaterial);
-  scene.add(starField);
+  starField = visuals.stars;
 }
 
 function createMeteors() {
@@ -2910,11 +2972,13 @@ function createClouds() {
     color: 0xf0f2f8,
     transparent: true,
     opacity: 0.82,
+    vertexColors: true,
   });
   weatherCloudMaterial = new THREE.MeshBasicMaterial({
     color: 0xd8e4f2,
     transparent: true,
     opacity: 0,
+    vertexColors: true,
   });
   const configs = [
     { x: -38, y: 17.5, z: -50, scale: 1.05, speed: 0.55, t: 0 },
@@ -2965,10 +3029,12 @@ function updateClouds(delta) {
 
   if (baseCloudMaterial) {
     baseCloudMaterial.color.setHex(isRainySummer ? 0xc9d1df : isSnowyWinter ? 0xf4fbff : 0xf0f2f8);
+    baseCloudMaterial.color.lerp(scene.background, CLOUD_SKY_TINT);
     baseCloudMaterial.opacity = 0.82 + cloudWeatherBlend * 0.08;
   }
   if (weatherCloudMaterial) {
     weatherCloudMaterial.color.setHex(isRainySummer ? 0xb7c2d4 : 0xeaf6ff);
+    weatherCloudMaterial.color.lerp(scene.background, CLOUD_SKY_TINT);
     weatherCloudMaterial.opacity = cloudWeatherBlend * (isSnowyWinter ? 0.92 : 0.86);
   }
 
@@ -2994,6 +3060,10 @@ function updateClouds(delta) {
       cloud.baseScale * depthScale
     );
   }
+}
+
+function glowColor(hex, gain = GLOW_GAIN) {
+  return new THREE.Color(hex).multiplyScalar(gain);
 }
 
 function triggerWandSwing(wandGroup) {
@@ -3027,7 +3097,7 @@ function updateWandSwings(delta) {
 
 function spawnBeam(targetPosition) {
   const side = Math.random() < 0.5 ? 0 : 1;
-  const staffX = side === 0 ? -6.7 : 6.7;
+  const staffX = side === 0 ? -5.35 : 5.35;
   if (wandGroups[side]) triggerWandSwing(wandGroups[side]);
   const start = new THREE.Vector3(staffX, 2.38, WALL_Z - 0.2);
   const end = targetPosition.clone();
@@ -3038,7 +3108,7 @@ function spawnBeam(targetPosition) {
   // White core beam
   const coreGeo = new THREE.BoxGeometry(0.14, 0.14, distance);
   const coreMat = new THREE.MeshBasicMaterial({
-    color: 0xffffff, transparent: true, opacity: 1,
+    color: glowColor(0xffffff), transparent: true, opacity: 1,
     blending: THREE.AdditiveBlending, depthWrite: false,
   });
   const coreMesh = new THREE.Mesh(coreGeo, coreMat);
@@ -3050,7 +3120,7 @@ function spawnBeam(targetPosition) {
   // Wide teal glow beam
   const glowGeo = new THREE.BoxGeometry(0.72, 0.72, distance);
   const glowMat = new THREE.MeshBasicMaterial({
-    color: 0x58dfcf, transparent: true, opacity: 0.48,
+    color: glowColor(0x58dfcf, 1.5), transparent: true, opacity: 0.48,
     blending: THREE.AdditiveBlending, depthWrite: false,
   });
   const glowMesh = new THREE.Mesh(glowGeo, glowMat);
@@ -3080,6 +3150,16 @@ function spawnBeam(targetPosition) {
   muzzleMesh.position.copy(start);
   effectsGroup.add(muzzleMesh);
   beams.push({ mesh: muzzleMesh, life: 0.14, maxLife: 0.14, kind: 'beam_flash' });
+
+  fx.flash(start, 0xd8fff6, 2.2, 0.18);
+  fx.flash(end, 0x9ffff0, 3.6, 0.26);
+  fx.ring(end, 0x58dfcf, { from: 0.3, to: 2.4, life: 0.32, flat: false });
+  fx.lightPulse(end, 0x58dfcf, 16, 0.3);
+  fx.burst(end, { color: 0x9ffff0, color2: 0xffffff, count: 20, speed: 5.2, life: 0.6, size: 0.3 });
+  for (let step = 1; step <= 5; step += 1) {
+    reusableVector.lerpVectors(start, end, step / 6);
+    fx.burst(reusableVector, { color: 0x58dfcf, color2: 0xffffff, count: 3, speed: 0.9, life: 0.45, size: 0.22, gravity: 0.6, up: 0.2 });
+  }
 }
 
 function spawnBossRock(enemy) {
@@ -3089,12 +3169,12 @@ function spawnBossRock(enemy) {
   const rockMaterial = new THREE.MeshStandardMaterial({
     color: 0x5a4636,
     emissive: enemy.type.trim,
-    emissiveIntensity: 0.14,
+    emissiveIntensity: 0.5,
     roughness: 0.92,
     metalness: 0.02,
   });
   const emberMaterial = new THREE.MeshBasicMaterial({
-    color: enemy.type.eye,
+    color: glowColor(enemy.type.eye, 1.8),
     transparent: true,
     opacity: 0.44,
     blending: THREE.AdditiveBlending,
@@ -3144,8 +3224,8 @@ function spawnDebris(position, type, isBoss = false) {
       transparent: true,
       opacity: 1,
       roughness: 0.6,
-      emissive: isBoss && Math.random() < 0.5 ? color : 0x000000,
-      emissiveIntensity: isBoss ? 1.8 : 0
+      emissive: (isBoss ? Math.random() < 0.5 : index % 4 === 0) ? color : 0x000000,
+      emissiveIntensity: isBoss ? 2.4 : 1.6
     });
     const mesh = new THREE.Mesh(new THREE.BoxGeometry(baseScale, baseScale, baseScale), material);
     mesh.position.copy(position);
@@ -3167,6 +3247,23 @@ function spawnDebris(position, type, isBoss = false) {
     });
   }
 
+  reusableVector.copy(position);
+  reusableVector.y += 0.8;
+  fx.burst(reusableVector, {
+    color: type.trim, color2: type.eye || 0xffaa00,
+    count: isBoss ? 90 : 18, speed: isBoss ? 9.5 : 4.6,
+    life: isBoss ? 1.2 : 0.65, size: isBoss ? 0.52 : 0.3, spread: isBoss ? 1.2 : 0.3,
+  });
+  fx.flash(reusableVector, type.eye || 0xffffff, isBoss ? 11 : 2.6, isBoss ? 0.45 : 0.2);
+  reusableVector.y = 0.14;
+  fx.ring(reusableVector, type.eye || 0xffffff, { from: 0.4, to: isBoss ? 9 : 2.8, life: isBoss ? 0.7 : 0.4 });
+  if (isBoss) {
+    reusableVector.y = 1.6;
+    fx.lightPulse(reusableVector, type.eye || 0xffaa00, 60, 0.6);
+    reusableVector.y = 0.14;
+    fx.ring(reusableVector, 0xffffff, { from: 0.4, to: 5.5, life: 0.45, opacity: 0.6 });
+  }
+
   if (isBoss) {
     const shockwaveCount = 3;
     for (let i = 0; i < shockwaveCount; i++) {
@@ -3174,11 +3271,11 @@ function spawnDebris(position, type, isBoss = false) {
       const speed = 6.0 - i * 1.5;
       const color = i === 0 ? 0xffffff : i === 1 ? 0xffaa00 : 0xff3300;
       
-      const waveGeo = new THREE.SphereGeometry(scale, 16, 16);
+      const waveGeo = new THREE.SphereGeometry(scale, 32, 20);
       const waveMat = new THREE.MeshBasicMaterial({
         color: color,
         transparent: true,
-        opacity: 0.8,
+        opacity: 0.22,
         blending: THREE.AdditiveBlending,
         depthWrite: false
       });
@@ -3233,6 +3330,7 @@ function clearEffects() {
     chunk.mesh.material.dispose();
   }
   debris.length = 0;
+  fx.clear();
 }
 
 function disposeObject(object) {
@@ -3605,7 +3703,8 @@ function buildSeasonFromScene() {
     leafColors: sceneLeafMaterials.map(m => m.color.clone()),
     trunkColor: sceneTrunkMaterial ? sceneTrunkMaterial.color.clone() : new THREE.Color(0x513820),
     moonColor: moon ? moon.material.color.clone() : new THREE.Color(0xfff1b8),
-    starOpacity: starField ? starField.material.opacity : 0.72,
+    starOpacity: starField ? starField.opacity : 0.72,
+    skyTop: skyTopColor.clone(),
   };
 }
 
@@ -3626,8 +3725,9 @@ function buildSeasonTarget(palette) {
     pathMarkerEmissive: new THREE.Color(palette.pathMarkerEmissive),
     leafColors: palette.leafColors.map(c => new THREE.Color(c)),
     trunkColor: new THREE.Color(palette.trunkColor),
-    moonColor: new THREE.Color(palette.moonColor),
+    moonColor: new THREE.Color(palette.moonColor).multiplyScalar(MOON_GLOW_GAIN),
     starOpacity: palette.starOpacity,
+    skyTop: new THREE.Color(palette.skyTop),
   };
 }
 
@@ -3653,11 +3753,12 @@ function applySeasonInstant(palette) {
     sceneLeafMaterials[i].color.setHex(palette.leafColors[i]);
   }
   if (sceneTrunkMaterial) sceneTrunkMaterial.color.setHex(palette.trunkColor);
-  if (moon) moon.material.color.setHex(palette.moonColor);
+  if (moon) moon.material.color.setHex(palette.moonColor).multiplyScalar(MOON_GLOW_GAIN);
   if (starField) {
-    starField.material.size = 0.08;
-    starField.material.opacity = palette.starOpacity;
+    starField.size = 1;
+    starField.opacity = palette.starOpacity;
   }
+  skyTopColor.setHex(palette.skyTop);
   recolorGround(palette);
   seasonalEffects.setSeason(palette.name);
 }
@@ -3706,7 +3807,8 @@ function updateSeasonFade(delta) {
   }
   if (sceneTrunkMaterial) sceneTrunkMaterial.color.lerpColors(from.trunkColor, to.trunkColor, t);
   if (moon) moon.material.color.lerpColors(from.moonColor, to.moonColor, t);
-  if (starField) starField.material.opacity = THREE.MathUtils.lerp(from.starOpacity, to.starOpacity, t);
+  if (starField) starField.opacity = THREE.MathUtils.lerp(from.starOpacity, to.starOpacity, t);
+  skyTopColor.lerpColors(from.skyTop, to.skyTop, t);
 
   if (seasonFade.t >= 1) {
     recolorGround(seasonFade.palette);
@@ -3720,14 +3822,17 @@ function recolorGround(palette) {
   let index = 0;
   for (let z = ROAD_MIN_Z; z < ROAD_MAX_Z; z += 1) {
     for (let x = -11; x <= 11; x += 1) {
-      if (Math.abs(x) < 3.1) {
-        color.setHSL(palette.groundPath.h, palette.groundPath.s, palette.groundPath.lBase + Math.sin(z * 0.7) * 0.025);
+      const jitter = (groundNoise(x + 13, z + 5) - 0.5) * 0.07;
+      if (roadBlocks[index].isStone) {
+        color.setHSL(palette.groundPath.h, palette.groundPath.s * 0.5, 0.36 + jitter);
+      } else if (Math.abs(x) < 3.1) {
+        color.setHSL(palette.groundPath.h, palette.groundPath.s, palette.groundPath.lBase + Math.sin(z * 0.7) * 0.025 + jitter * 0.7);
       } else if ((x + z) % 7 === 0) {
-        color.setHSL(palette.groundAlt1.h, palette.groundAlt1.s, palette.groundAlt1.l);
+        color.setHSL(palette.groundAlt1.h, palette.groundAlt1.s, palette.groundAlt1.l + jitter);
       } else {
-        color.setHSL(palette.groundGrass.h, palette.groundGrass.s, palette.groundGrass.l + Math.sin(x * 2.3 + z * 1.7) * 0.03);
+        color.setHSL(palette.groundGrass.h, palette.groundGrass.s, palette.groundGrass.l + Math.sin(x * 2.3 + z * 1.7) * 0.03 + jitter);
       }
-      sceneGroundMesh.setColorAt(index, color);
+      sceneGroundMesh.setColorAt(index, color.multiplyScalar(GROUND_TONE));
       index += 1;
     }
   }
@@ -3793,7 +3898,7 @@ function resizeRenderer() {
   const height = window.innerHeight;
   camera.aspect = width / height;
   camera.updateProjectionMatrix();
-  renderer.setSize(width, height, false);
+  visuals.setSize(width, height);
   // Label dimensions depend on the viewport (vw font sizing + px max-width wrapping),
   // so invalidate cached measurements whenever the viewport changes.
   labelMeasureGen += 1;
@@ -3853,6 +3958,7 @@ function applyBatterySaver() {
     if (renderer) renderer.shadowMap.enabled = true;
     if (moonLight) moonLight.castShadow = true;
   }
+  visuals.setBatterySaver(batterySaver);
   if (scene) {
     scene.traverse(child => {
       if (child.isMesh && child.material) {
@@ -3981,9 +4087,10 @@ function startFinalWave() {
   scene.fog.color.setHex(0x000008);
   scene.fog.near = 28;
   scene.fog.far = 90;
+  skyTopColor.setHex(0x000008);
   if (starField) {
-    starField.material.size = 0.22;
-    starField.material.opacity = 1.0;
+    starField.size = 1.7;
+    starField.opacity = 1.0;
   }
 }
 
@@ -4762,7 +4869,7 @@ function spawnLightningVisual(startPos, targetPos, hold = false) {
   // 1. Solid white core tube
   const coreGeom = new THREE.TubeGeometry(curve, 16, 0.10, 4, false);
   const coreMat = new THREE.MeshBasicMaterial({
-    color: 0xffffff,
+    color: glowColor(0xffffff),
     transparent: true,
     opacity: 1.0,
     blending: THREE.AdditiveBlending,
@@ -4774,7 +4881,7 @@ function spawnLightningVisual(startPos, targetPos, hold = false) {
   // 2. Wide glowing golden sleeve
   const glowGeom = new THREE.TubeGeometry(curve, 16, 0.38, 5, false);
   const glowMat = new THREE.MeshBasicMaterial({
-    color: 0xefc35c,
+    color: glowColor(0xefc35c, 1.8),
     transparent: true,
     opacity: 0.52,
     blending: THREE.AdditiveBlending,
@@ -4795,6 +4902,9 @@ function spawnLightningVisual(startPos, targetPos, hold = false) {
   const flashMesh = new THREE.Mesh(flashGeo, flashMat);
   flashMesh.position.copy(targetPos);
   effectsGroup.add(flashMesh);
+  fx.flash(targetPos, 0xffe58a, 4.2, 0.24);
+  fx.lightPulse(targetPos, 0xffdd66, 22, 0.3);
+  fx.burst(targetPos, { color: 0xffe58a, color2: 0xffffff, count: 16, speed: 6, life: 0.5, size: 0.3 });
 
   // Register them in beams array for decay
   const duration = 0.10;
