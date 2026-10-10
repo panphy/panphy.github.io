@@ -89,6 +89,19 @@ function getMimicGemMat(type) {
   return getCachedMaterial(`mimic-gem-${type.eye}`, { color: type.eye, emissive: type.eye, emissiveIntensity: 3.5, roughness: 0.05, metalness: 0.4 });
 }
 
+// Stands in for a PointLight on an enemy. Adding and removing real lights changes
+// the scene's light count, which makes every shader recompile and stalls a frame;
+// the game instead lends these anchors a light from a fixed pool each frame.
+function createGlowAnchor(color, intensity, distance, decay = 2) {
+  const anchor = new THREE.Object3D();
+  anchor.isGlow = true;
+  anchor.color = new THREE.Color(color);
+  anchor.intensity = intensity;
+  anchor.distance = distance;
+  anchor.decay = decay;
+  return anchor;
+}
+
 export function createEnemyMesh(type) {
   if (!!type.isMedic) return createMedicHeartMesh(type);
   if (!!type.isMimic) return createMimicChestMesh(type);
@@ -249,7 +262,7 @@ function createMedicHeartMesh(type) {
   group.add(blockMesh(0.18, 0.18, 0.5, shineMaterial, -0.42, 2.02, 0.08));
   group.add(blockMesh(0.12, 0.12, 0.5, shineMaterial, -0.2, 1.8, 0.09));
 
-  const medicGlow = new THREE.PointLight(type.body, 1.35, 5.2, 2.0);
+  const medicGlow = createGlowAnchor(type.body, 1.35, 5.2, 2.0);
   medicGlow.position.set(0, 1.5, 0.45);
   group.add(medicGlow);
 
@@ -272,7 +285,7 @@ function bossEyeMat(type) {
   return getBossEyeMat(type);
 }
 function finishBossGroup(group, type, beaconY = 2.9) {
-  const glow = new THREE.PointLight(type.eye, 1.35, 5.5, 2.1);
+  const glow = createGlowAnchor(type.eye, 1.35, 5.5, 2.1);
   glow.position.set(0, 1.45, 0.45);
   group.add(glow);
   const incomingBeacon = createIncomingBeacon(type);
@@ -324,13 +337,13 @@ export function createMimicChestMesh(type) {
     g.add(tooth);
   }
 
-  // PointLight inside the chest (intensity driven each frame)
-  const light = new THREE.PointLight(type.eye, 0.5, 6.0);
+  // Glow inside the chest (intensity driven each frame)
+  const light = createGlowAnchor(type.eye, 0.5, 6.0);
   light.position.set(0, 0.55, 0.1);
   g.add(light);
 
   // Outer golden glow — casts warm light on ground around the chest
-  const outerGlow = new THREE.PointLight(0xffd040, 1.0, 4.5);
+  const outerGlow = createGlowAnchor(0xffd040, 1.0, 4.5);
   outerGlow.position.set(0, 1.6, 0);
   g.add(outerGlow);
 
