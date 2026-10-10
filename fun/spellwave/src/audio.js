@@ -21,6 +21,7 @@ const LANE_PAN_WIDTH = 0.7;
 const MUSIC_SEASONS = [
   {
     name: 'spring',
+    voice: 'marimba',
     baseStep: 0.185,
     melodyType: 'triangle',
     bassType: 'sine',
@@ -49,9 +50,10 @@ const MUSIC_SEASONS = [
   },
   {
     name: 'summer',
+    voice: 'pluck',
     baseStep: 0.168,
     melodyType: 'square',
-    bassType: 'square',
+    bassType: 'triangle',
     accentType: 'triangle',
     melodyGain: 0.026,
     bassGain: 0.03,
@@ -77,6 +79,7 @@ const MUSIC_SEASONS = [
   },
   {
     name: 'autumn',
+    voice: 'marimba',
     baseStep: 0.178,
     melodyType: 'sawtooth',
     bassType: 'triangle',
@@ -105,6 +108,7 @@ const MUSIC_SEASONS = [
   },
   {
     name: 'winter',
+    voice: 'musicbox',
     baseStep: 0.192,
     melodyType: 'sine',
     bassType: 'sine',
@@ -209,6 +213,7 @@ const ENDING_MUSIC = {
 
 const BOSS_MUSIC = {
   name: 'boss',
+  voice: 'edged',
   isBoss: true,
   baseStep: 0.145,
   minStep: 0.096,
@@ -234,6 +239,7 @@ const BOSS_MUSIC = {
 };
 const WAVE_CLEAR_MUSIC = {
   name: 'wave-clear',
+  voice: 'musicbox',
   baseStep: 0.176,
   minStep: 0.118,
   melodyType: 'triangle',
@@ -257,6 +263,7 @@ const WAVE_CLEAR_MUSIC = {
 };
 const GAME_OVER_MUSIC = {
   name: 'game-over',
+  voice: 'pluck',
   baseStep: 0.34,
   minStep: 0.24,
   melodyType: 'sine',
@@ -556,6 +563,39 @@ export function createSpellwaveAudio({
     scheduleTone(196, 0.07, start, { gain: gain * 0.55, type: 'triangle', endFrequency: 130, attack: 0.002 }, musicGain);
   }
 
+  function scheduleThump(start, gain) {
+    scheduleTone(108, 0.2, start, { gain, type: 'sine', endFrequency: 52, attack: 0.004 }, musicGain);
+  }
+
+  function scheduleWoodblock(start, gain, pan = 0, pitch = 1) {
+    scheduleTone(880 * pitch, 0.07, start, { gain, type: 'sine', attack: 0.001, pan }, musicGain);
+    scheduleTone(1320 * pitch, 0.045, start, { gain: gain * 0.5, type: 'sine', attack: 0.001, pan }, musicGain);
+  }
+
+  // The melody instruments. Each is a few sine partials with a struck or plucked envelope;
+  // `ring` is how long a note sounds, independent of how fast the tune is stepping.
+  function scheduleVoice(profile, frequency, start, stepDuration, gain, pan) {
+    const voice = profile.voice || 'lead';
+    if (voice === 'marimba' || voice === 'edged') {
+      scheduleTone(frequency, 0.5, start, { gain: gain * 1.3, type: 'sine', attack: 0.002, pan }, melodyBus);
+      scheduleTone(frequency * 4, 0.1, start, { gain: gain * 0.36, type: 'sine', attack: 0.001, pan }, melodyBus);
+      scheduleTone(frequency * 2, 0.22, start, { gain: gain * 0.2, type: 'triangle', attack: 0.002, pan }, melodyBus);
+      if (voice === 'edged') {
+        scheduleTone(frequency, stepDuration * 0.8, start, { gain: gain * 0.3, type: 'sawtooth', attack: 0.004, chorus: 7, pan: -pan }, melodyBus);
+      }
+    } else if (voice === 'musicbox') {
+      scheduleTone(frequency, 0.9, start, { gain: gain * 1.2, type: 'sine', attack: 0.002, pan }, melodyBus);
+      scheduleTone(frequency * 3, 0.3, start, { gain: gain * 0.2, type: 'sine', attack: 0.001, pan: -pan }, melodyBus);
+      scheduleTone(frequency * 5.4, 0.08, start, { gain: gain * 0.1, type: 'sine', attack: 0.001, pan }, melodyBus);
+    } else if (voice === 'pluck') {
+      scheduleTone(frequency, 0.42, start, { gain: gain * 1.25, type: 'triangle', attack: 0.003, pan }, melodyBus);
+      scheduleTone(frequency, 0.6, start, { gain: gain * 0.7, type: 'sine', attack: 0.004, pan: -pan }, melodyBus);
+      scheduleTone(frequency * 2, 0.12, start, { gain: gain * 0.22, type: 'sine', attack: 0.001, pan }, melodyBus);
+    } else {
+      scheduleTone(frequency, stepDuration * 0.82, start, { gain, type: profile.melodyType, attack: 0.003, chorus: 7, pan }, melodyBus);
+    }
+  }
+
   function startMusicLoop(reset) {
     const context = resumeAudio();
     if (!context || !musicGain || !isMusicActiveMode()) return;
@@ -706,6 +746,15 @@ export function createSpellwaveAudio({
         type: profile.bassType,
         attack: 0.004,
       }, musicGain);
+      // A soft held fifth above the bass fills the space the old buzzy leads used to.
+      if (!isBoss) {
+        scheduleTone(bass * 3, stepDuration * 4.2, start, {
+          gain: profile.bassGain * 0.22 * profileGain,
+          type: 'sine',
+          attack: 0.12,
+          pan: 0.2,
+        }, musicGain);
+      }
       if (densePulse) {
         scheduleTone(bass * 2, stepDuration * 0.52, start + stepDuration * 0.5, {
           gain: (0.009 + intensity * 0.0007) * profileGain,
@@ -716,13 +765,8 @@ export function createSpellwaveAudio({
     }
 
     if (melody && (step % 2 === 0 || intensity >= 2 || profile.name === 'summer' || isBoss)) {
-      scheduleTone(melody, stepDuration * 0.82, start + stepDuration * 0.08, {
-        gain: (profile.melodyGain + intensity * 0.0008) * profileGain,
-        type: profile.melodyType,
-        attack: 0.003,
-        chorus: 7,
-        pan: -0.18,
-      }, melodyBus);
+      scheduleVoice(profile, melody, start + stepDuration * 0.08, stepDuration,
+        (profile.melodyGain + intensity * 0.0008) * profileGain, -0.18);
       if (step % 8 === 6 || latePulse) {
         scheduleTone(melody * (profile.name === 'winter' ? 2 : isBoss ? 1.414 : 1.5), stepDuration * 0.5, start + stepDuration * 0.18, {
           gain: (0.009 + intensity * 0.0005) * profileGain,
@@ -753,16 +797,25 @@ export function createSpellwaveAudio({
     }
 
     const drumGain = (profile.drumGain + intensity * 0.0009) * profileGain;
+    // Boss music keeps a real kick and snare; everything else uses a soft thump and a woodblock.
     if (step % 8 === 0 || ((intensity >= 6 || isBoss) && step % 16 === 10)) {
-      scheduleKick(start, drumGain * 2.1);
+      if (isBoss) scheduleKick(start, drumGain * 2.1);
+      else scheduleThump(start, drumGain * 1.9);
     }
     if (step % 8 === 4) {
-      scheduleSnare(start, drumGain * 1.15, profile.drumFilter * 2 + 900);
+      if (isBoss) scheduleSnare(start, drumGain * 1.15, profile.drumFilter * 2 + 900);
+      else scheduleWoodblock(start, drumGain * 1.5, 0.25);
     }
-    // A short snare roll leads into every fourth bar's turnaround.
+    // A short roll leads into every fourth bar's turnaround.
     if (step % 64 >= 60 && profile.name !== 'game-over') {
-      scheduleSnare(start, drumGain * (0.55 + (step % 4) * 0.2), profile.drumFilter * 2 + 1300);
-      scheduleSnare(start + stepDuration * 0.5, drumGain * (0.45 + (step % 4) * 0.2), profile.drumFilter * 2 + 1300);
+      const rise = step % 4;
+      if (isBoss) {
+        scheduleSnare(start, drumGain * (0.55 + rise * 0.2), profile.drumFilter * 2 + 1300);
+        scheduleSnare(start + stepDuration * 0.5, drumGain * (0.45 + rise * 0.2), profile.drumFilter * 2 + 1300);
+      } else {
+        scheduleWoodblock(start, drumGain * (0.8 + rise * 0.25), -0.25, 1 + rise * 0.12);
+        scheduleWoodblock(start + stepDuration * 0.5, drumGain * (0.6 + rise * 0.25), 0.25, 1.06 + rise * 0.12);
+      }
     }
 
     if (isBoss && step % 16 === 0) {
@@ -949,40 +1002,57 @@ export function createSpellwaveAudio({
     return start + (end - start) * t;
   }
 
+  // A small struck-bar sound: a sine with two quieter overtones.
+  function playChime(frequency, duration, gain, options = {}) {
+    playTone(frequency, duration, { ...options, gain: gain * 0.8, type: 'sine', attack: 0.002 });
+    playTone(frequency * 2, duration * 0.5, { ...options, gain: gain * 0.3, type: 'sine', attack: 0.001 });
+    playTone(frequency * 4, duration * 0.2, { ...options, gain: gain * 0.14, type: 'sine', attack: 0.001 });
+  }
+
   function playToggleSound() {
-    playTone(640, 0.07, { gain: 0.045, type: 'triangle' });
+    playChime(660, 0.16, 0.05);
   }
 
   function playStartSound() {
-    playTone(196, 0.16, { gain: 0.045, type: 'triangle' });
-    playTone(294, 0.14, { gain: 0.04, delay: 0.05, type: 'triangle' });
-    playTone(392, 0.18, { gain: 0.036, delay: 0.1, type: 'sine' });
+    playChime(392, 0.3, 0.05);
+    playChime(587.33, 0.3, 0.045, { delay: 0.07 });
+    playChime(783.99, 0.45, 0.04, { delay: 0.14 });
   }
 
   function playPauseSound() {
-    playTone(330, 0.08, { gain: 0.032, type: 'triangle', endFrequency: 220 });
+    playChime(330, 0.16, 0.04);
+    playChime(247, 0.2, 0.034, { delay: 0.07 });
   }
 
   function playTypeSound() {
     const pitch = 520 + Math.min(getTypedLength(), 12) * 18;
-    playTone(varyPitch(pitch, 10), 0.045, { gain: varyGain(0.026), type: 'square' });
+    // A wooden tick that climbs as the word fills in.
+    const tick = varyPitch(pitch * 1.5, 10);
+    playTone(tick, 0.06, { gain: varyGain(0.038), type: 'sine', attack: 0.001 });
+    playTone(tick * 1.5, 0.035, { gain: 0.02, type: 'sine', attack: 0.001 });
   }
 
   function playBackspaceSound() {
-    playTone(260, 0.05, { gain: 0.02, type: 'triangle', endFrequency: 190 });
+    playTone(300, 0.07, { gain: 0.04, type: 'sine', endFrequency: 190, attack: 0.001 });
   }
 
   function playMistakeSound() {
-    playTone(varyPitch(150), 0.13, { gain: 0.05, type: 'sawtooth', endFrequency: 82 });
-    playNoise(0.08, { gain: 0.025, filterFrequency: 180, filterType: 'lowpass' });
+    // A dull, muted knock.
+    playTone(varyPitch(190), 0.14, { gain: 0.07, type: 'sine', endFrequency: 110, attack: 0.002 });
+    playTone(varyPitch(285), 0.06, { gain: 0.03, type: 'triangle', endFrequency: 180, attack: 0.001 });
+    playNoise(0.07, { gain: 0.02, filterFrequency: 260, filterType: 'lowpass' });
   }
 
   function playRevealSound(enemy) {
     const laneIndex = Math.max(0, pathLanes.findIndex((lane) => lane === enemy.lane));
     const pitch = enemy.isBoss ? 180 : 460 + laneIndex * 18;
     const pan = lanePan(enemy);
-    playTone(pitch, 0.09, { gain: enemy.isBoss ? 0.06 : 0.03, type: enemy.isBoss ? 'sawtooth' : 'triangle', pan });
-    if (enemy.isBoss) playTone(90, 0.2, { gain: 0.036, delay: 0.02, type: 'sine', pan });
+    if (enemy.isBoss) {
+      playTone(pitch, 0.09, { gain: 0.06, type: 'sawtooth', pan });
+      playTone(90, 0.2, { gain: 0.036, delay: 0.02, type: 'sine', pan });
+    } else {
+      playChime(pitch * 1.5, 0.2, 0.04, { pan });
+    }
   }
 
   function playDefeatSound(enemy) {
@@ -991,11 +1061,12 @@ export function createSpellwaveAudio({
       return;
     }
     const pan = lanePan(enemy);
-    const base = varyPitch(720, 60);
-    playTone(base, 0.09, { gain: varyGain(0.055), type: 'square', endFrequency: base * 0.58, pan });
-    playTone(base * 1.5, 0.12, { gain: 0.03, delay: 0.035, type: 'triangle', endFrequency: base * 0.75, pan });
-    playTone(190, 0.12, { gain: 0.05, type: 'sine', endFrequency: 70, attack: 0.002, pan });
-    playNoise(0.13, { gain: varyGain(0.045), filterFrequency: varyPitch(1200, 200), filterType: 'bandpass', pan });
+    // A soft pop: a quick upward blip, a struck note and a puff of air.
+    const base = varyPitch(560, 80);
+    playTone(base, 0.08, { gain: varyGain(0.075), type: 'sine', endFrequency: base * 1.9, attack: 0.002, pan });
+    playChime(base * 1.5, 0.22, 0.04, { delay: 0.03, pan });
+    playTone(170, 0.12, { gain: 0.06, type: 'sine', endFrequency: 70, attack: 0.002, pan });
+    playNoise(0.1, { gain: varyGain(0.03), filterFrequency: varyPitch(900, 200), filterType: 'lowpass', pan });
   }
 
   // A long layered blast: low boom, falling growl, a wash of noise, then crackling debris.
@@ -1025,9 +1096,9 @@ export function createSpellwaveAudio({
     const widest = Math.max(...pathLanes.map(Math.abs)) || 1;
     const pan = Math.max(-1, Math.min(1, targetX / widest)) * LANE_PAN_WIDTH;
     const pitch = varyPitch(1480, 70);
-    playTone(pitch, 0.11, { gain: varyGain(0.03), type: 'square', endFrequency: pitch * 0.36, attack: 0.002, pan });
-    playTone(pitch * 1.5, 0.07, { gain: 0.014, type: 'triangle', endFrequency: pitch * 0.6, attack: 0.002, pan });
-    playNoise(0.09, { gain: 0.018, filterType: 'highpass', filterFrequency: 4200, pan });
+    playTone(pitch, 0.12, { gain: varyGain(0.05), type: 'sine', endFrequency: pitch * 0.36, attack: 0.002, pan });
+    playTone(pitch * 1.5, 0.08, { gain: 0.02, type: 'triangle', endFrequency: pitch * 0.6, attack: 0.002, pan });
+    playNoise(0.09, { gain: 0.014, filterType: 'highpass', filterFrequency: 4200, pan });
   }
 
   function playChainPrimeSound() {
@@ -1110,10 +1181,10 @@ export function createSpellwaveAudio({
   }
 
   function playWaveClearSound() {
-    playTone(262, 0.22, { gain: 0.04, type: 'triangle' });
-    playTone(330, 0.24, { gain: 0.035, delay: 0.04, type: 'triangle' });
-    playTone(392, 0.3, { gain: 0.035, delay: 0.08, type: 'triangle' });
-    playTone(523, 0.22, { gain: 0.026, delay: 0.16, type: 'sine' });
+    playChime(523.25, 0.4, 0.05);
+    playChime(659.25, 0.4, 0.045, { delay: 0.07 });
+    playChime(783.99, 0.45, 0.045, { delay: 0.14 });
+    playChime(1046.5, 0.7, 0.04, { delay: 0.24 });
   }
 
   function playVictoryFinaleSound() {
@@ -1200,9 +1271,9 @@ export function createSpellwaveAudio({
   }
 
   function playChestOpenSound() {
-    playTone(120, 0.04, { gain: 0.035, type: 'sawtooth', endFrequency: 110 });
-    playTone(130, 0.04, { gain: 0.035, delay: 0.035, type: 'sawtooth', endFrequency: 120 });
-    playTone(140, 0.05, { gain: 0.035, delay: 0.07, type: 'sawtooth', endFrequency: 130 });
+    playTone(120, 0.04, { gain: 0.05, type: 'triangle', endFrequency: 110 });
+    playTone(130, 0.04, { gain: 0.05, delay: 0.035, type: 'triangle', endFrequency: 120 });
+    playTone(140, 0.05, { gain: 0.05, delay: 0.07, type: 'triangle', endFrequency: 130 });
     playTone(440, 0.12, { gain: 0.024, delay: 0.12, type: 'sine' });
     playTone(660, 0.14, { gain: 0.024, delay: 0.18, type: 'sine' });
     playTone(880, 0.16, { gain: 0.020, delay: 0.24, type: 'sine' });
