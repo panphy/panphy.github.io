@@ -956,6 +956,47 @@ export function buildStellarDreadnought(type, kit) {
   return group;
 }
 
+// Mimic Chest — a toothy treasure chest. Returns the chest and its lid pivot, which the
+// game swings open; the base and lid meet in two rows of teeth.
+export function buildMimicChest(type, kit) {
+  const b = builder(kit);
+  const wood = kit.mat(mix(type.body, 0x8a5226, 0.5));
+  const woodDark = kit.mat(mix(type.body, 0x5a3418, 0.7));
+  const gold = kit.mat(type.trim);
+  const inside = kit.mat(0x1a0a1c);
+  const bone = kit.mat(BONE);
+  const eyeGlow = kit.glow(type.eye, 1.8);
+  const gem = kit.glow(type.eye, 1.4);
+  const group = new THREE.Group();
+
+  // Four-sided tapered tubs, turned 45 degrees and squashed front to back, make the box.
+  const tub = (top, bottom, height) => b.cylinder(top, bottom, height, 4);
+  b.place(group, tub(0.86, 0.76, 0.56), wood, [0, 0.28, 0], [1, 1, 0.76], [0, Math.PI / 4, 0]);
+  b.place(group, tub(0.9, 0.9, 0.09), gold, [0, 0.045, 0], [1, 1, 0.76], [0, Math.PI / 4, 0]);
+  b.place(group, tub(0.89, 0.87, 0.08), gold, [0, 0.52, 0], [1, 1, 0.76], [0, Math.PI / 4, 0]);
+  b.place(group, b.box(0.98, 0.06, 0.74), inside, [0, 0.55, 0]);
+  for (const x of [-0.24, 0.24]) b.place(group, b.octa(0.11), eyeGlow, [x, 0.34, 0.46], [1.2, 1, 0.5]);
+  for (let index = 0; index < 5; index += 1) {
+    b.place(group, b.cone(0.055, 0.17, 4), bone, [-0.4 + index * 0.2, 0.62, 0.36], null, [0.25, 0, 0]);
+  }
+
+  const lid = pivot(group, 0, 0.58, -0.46);
+  // Half of a seven-sided drum, lying on its side, is the domed lid.
+  const dome = new THREE.CylinderGeometry(0.47, 0.47, 1.22, 7, 1, false, 0, Math.PI);
+  b.place(lid, dome, wood, [0, 0, 0.46], null, [0, 0, Math.PI / 2]);
+  for (const x of [-0.62, 0, 0.62]) {
+    const band = new THREE.CylinderGeometry(0.49, 0.49, 0.09, 7, 1, false, 0, Math.PI);
+    b.place(lid, band, x === 0 ? woodDark : gold, [x, 0, 0.46], null, [0, 0, Math.PI / 2]);
+  }
+  b.place(lid, b.box(1.2, 0.05, 0.9), inside, [0, 0.0, 0.46]);
+  b.place(lid, b.box(0.2, 0.26, 0.08), gold, [0, 0.03, 0.95]);
+  b.place(lid, b.octa(0.09), gem, [0, 0.2, 0.93], [1, 1.2, 0.6]);
+  for (let index = 0; index < 6; index += 1) {
+    b.place(lid, b.cone(0.05, 0.17, 4), bone, [-0.46 + index * 0.185, -0.06, 0.82], null, [Math.PI - 0.25, 0, 0]);
+  }
+  return { group, lid };
+}
+
 export const LOW_POLY_CREATURES = {
   'Mudlug': buildMudlug,
   'Glowmite': buildGlowmite,

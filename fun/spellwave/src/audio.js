@@ -1002,189 +1002,267 @@ export function createSpellwaveAudio({
     return start + (end - start) * t;
   }
 
-  // A small struck-bar sound: a sine with two quieter overtones.
-  function playChime(frequency, duration, gain, options = {}) {
-    playTone(frequency, duration, { ...options, gain: gain * 0.8, type: 'sine', attack: 0.002 });
-    playTone(frequency * 2, duration * 0.5, { ...options, gain: gain * 0.3, type: 'sine', attack: 0.001 });
-    playTone(frequency * 4, duration * 0.2, { ...options, gain: gain * 0.14, type: 'sine', attack: 0.001 });
+  // ── Sound effects ──────────────────────────────────────────────────────
+  // One family, built from a few handmade-sounding pieces: wooden knocks, mallet
+  // notes, small bells, paper rustles and soft drums. Options carry delay and pan.
+
+  // A struck piece of wood: a short pitched thud with a click on the front.
+  function knock(frequency, gain, options = {}) {
+    const pitch = varyPitch(frequency, options.spread ?? 24);
+    playTone(pitch, options.length ?? 0.07, { ...options, gain: varyGain(gain), type: 'sine', attack: 0.001, endFrequency: pitch * 0.82 });
+    playTone(pitch * 2.4, 0.03, { ...options, gain: gain * 0.35, type: 'sine', attack: 0.001 });
   }
 
-  function playToggleSound() {
-    playChime(660, 0.16, 0.05);
+  // A marimba-like bar.
+  function mallet(frequency, duration, gain, options = {}) {
+    playTone(frequency, duration, { ...options, gain, type: 'sine', attack: 0.002 });
+    playTone(frequency * 4, duration * 0.2, { ...options, gain: gain * 0.26, type: 'sine', attack: 0.001 });
+    playTone(frequency * 2, duration * 0.4, { ...options, gain: gain * 0.14, type: 'triangle', attack: 0.002 });
   }
 
-  function playStartSound() {
-    playChime(392, 0.3, 0.05);
-    playChime(587.33, 0.3, 0.045, { delay: 0.07 });
-    playChime(783.99, 0.45, 0.04, { delay: 0.14 });
+  // A small bell: the out-of-tune upper partials are what make it ring like metal.
+  function bell(frequency, duration, gain, options = {}) {
+    playTone(frequency, duration, { ...options, gain, type: 'sine', attack: 0.002 });
+    playTone(frequency * 2.76, duration * 0.55, { ...options, gain: gain * 0.3, type: 'sine', attack: 0.001 });
+    playTone(frequency * 5.4, duration * 0.25, { ...options, gain: gain * 0.14, type: 'sine', attack: 0.001 });
   }
 
-  function playPauseSound() {
-    playChime(330, 0.16, 0.04);
-    playChime(247, 0.2, 0.034, { delay: 0.07 });
+  // Paper or cloth moving: a short band of filtered noise, optionally sweeping.
+  function rustle(duration, gain, options = {}) {
+    playNoise(duration, {
+      filterType: 'bandpass', filterFrequency: 2600, q: 0.9, ...options, gain,
+    });
   }
 
-  function playTypeSound() {
-    const pitch = 520 + Math.min(getTypedLength(), 12) * 18;
-    // A wooden tick that climbs as the word fills in.
-    const tick = varyPitch(pitch * 1.5, 10);
-    playTone(tick, 0.06, { gain: varyGain(0.038), type: 'sine', attack: 0.001 });
-    playTone(tick * 1.5, 0.035, { gain: 0.02, type: 'sine', attack: 0.001 });
+  // A soft-headed drum: a falling low tone with a dull thud of air.
+  function drum(frequency, duration, gain, options = {}) {
+    playTone(frequency, duration, { ...options, gain, type: 'sine', endFrequency: frequency * 0.45, attack: 0.003 });
+    playNoise(Math.min(0.12, duration), { ...options, gain: gain * 0.45, filterType: 'lowpass', filterFrequency: 320 });
   }
 
-  function playBackspaceSound() {
-    playTone(300, 0.07, { gain: 0.04, type: 'sine', endFrequency: 190, attack: 0.001 });
-  }
-
-  function playMistakeSound() {
-    // A dull, muted knock.
-    playTone(varyPitch(190), 0.14, { gain: 0.07, type: 'sine', endFrequency: 110, attack: 0.002 });
-    playTone(varyPitch(285), 0.06, { gain: 0.03, type: 'triangle', endFrequency: 180, attack: 0.001 });
-    playNoise(0.07, { gain: 0.02, filterFrequency: 260, filterType: 'lowpass' });
-  }
-
-  function playRevealSound(enemy) {
-    const laneIndex = Math.max(0, pathLanes.findIndex((lane) => lane === enemy.lane));
-    const pitch = enemy.isBoss ? 180 : 460 + laneIndex * 18;
-    const pan = lanePan(enemy);
-    if (enemy.isBoss) {
-      playTone(pitch, 0.09, { gain: 0.06, type: 'sawtooth', pan });
-      playTone(90, 0.2, { gain: 0.036, delay: 0.02, type: 'sine', pan });
-    } else {
-      playChime(pitch * 1.5, 0.2, 0.04, { pan });
+  // Loose pieces of wood falling: a scatter of knocks over a short time.
+  function clatter(count, span, gain, options = {}) {
+    for (let index = 0; index < count; index += 1) {
+      knock(260 + Math.random() * 700, gain * (0.55 + Math.random() * 0.45), {
+        ...options,
+        delay: (options.delay || 0) + Math.random() * span,
+        pan: options.pan ?? Math.random() * 1.2 - 0.6,
+        spread: 0,
+      });
     }
   }
 
+  function laneOf(targetX) {
+    const widest = Math.max(...pathLanes.map(Math.abs)) || 1;
+    return Math.max(-1, Math.min(1, targetX / widest)) * LANE_PAN_WIDTH;
+  }
+
+  // Menu and typing
+
+  function playToggleSound() {
+    knock(700, 0.05);
+    bell(1400, 0.18, 0.016, { delay: 0.01 });
+  }
+
+  function playStartSound() {
+    mallet(392, 0.32, 0.05);
+    mallet(587.33, 0.32, 0.045, { delay: 0.08 });
+    mallet(783.99, 0.5, 0.045, { delay: 0.16 });
+    rustle(0.12, 0.014, { delay: 0.16, filterFrequency: 5200 });
+  }
+
+  function playPauseSound() {
+    knock(520, 0.045);
+    knock(390, 0.04, { delay: 0.09 });
+  }
+
+  // A wooden tick that climbs as the word fills in.
+  function playTypeSound() {
+    const pitch = (520 + Math.min(getTypedLength(), 12) * 18) * 1.5;
+    knock(pitch, 0.04, { length: 0.055, spread: 10 });
+  }
+
+  function playBackspaceSound() {
+    knock(300, 0.035, { length: 0.06 });
+    rustle(0.05, 0.01, { filterFrequency: 1800 });
+  }
+
+  // Two dull, hollow thumps.
+  function playMistakeSound() {
+    knock(190, 0.07, { length: 0.11 });
+    knock(150, 0.06, { length: 0.12, delay: 0.085 });
+  }
+
+  // Monsters
+
+  function playRevealSound(enemy) {
+    const pan = lanePan(enemy);
+    if (enemy.isBoss) {
+      drum(92, 0.5, 0.085, { pan });
+      bell(138, 1.1, 0.04, { delay: 0.03, pan });
+      return;
+    }
+    const laneIndex = Math.max(0, pathLanes.findIndex((lane) => lane === enemy.lane));
+    bell(690 + laneIndex * 27, 0.24, 0.03, { pan });
+  }
+
+  // A soft pop, a struck note and a flutter of paper.
   function playDefeatSound(enemy) {
     if (enemy.isBoss) {
       playBossExplosionSound(enemy);
       return;
     }
     const pan = lanePan(enemy);
-    // A soft pop: a quick upward blip, a struck note and a puff of air.
     const base = varyPitch(560, 80);
-    playTone(base, 0.08, { gain: varyGain(0.075), type: 'sine', endFrequency: base * 1.9, attack: 0.002, pan });
-    playChime(base * 1.5, 0.22, 0.04, { delay: 0.03, pan });
-    playTone(170, 0.12, { gain: 0.06, type: 'sine', endFrequency: 70, attack: 0.002, pan });
-    playNoise(0.1, { gain: varyGain(0.03), filterFrequency: varyPitch(900, 200), filterType: 'lowpass', pan });
+    playTone(base, 0.08, { gain: varyGain(0.065), type: 'sine', endFrequency: base * 1.9, attack: 0.002, pan });
+    mallet(base * 1.5, 0.24, 0.036, { delay: 0.03, pan });
+    knock(210, 0.05, { length: 0.1, pan });
+    rustle(0.11, 0.02, { delay: 0.02, filterFrequency: varyPitch(2200, 300), pan });
   }
 
-  // A long layered blast: low boom, falling growl, a wash of noise, then crackling debris.
+  // A big drum, a long low rumble, then the pieces clattering down and one low bell.
   function playBossExplosionSound(enemy) {
     const pan = lanePan(enemy) * 0.6;
-    duckMusic(0.35, 0.9);
-    playTone(180, 0.09, { gain: 0.06, type: 'square', endFrequency: 320, pan });
-    playTone(96, 1.2, { gain: 0.12, type: 'sine', endFrequency: 28, attack: 0.004 });
-    playTone(140, 0.75, { gain: 0.07, type: 'sawtooth', endFrequency: 38, attack: 0.004, pan });
-    playNoise(1.1, { gain: 0.1, filterType: 'lowpass', filterFrequency: 1400, endFilterFrequency: 120, pan });
-    playNoise(0.3, { gain: 0.05, filterType: 'highpass', filterFrequency: 3200, pan });
-    for (let index = 0; index < 6; index += 1) {
-      playNoise(0.07, {
-        gain: 0.035,
-        delay: 0.18 + Math.random() * 0.75,
-        filterType: 'bandpass',
-        filterFrequency: 700 + Math.random() * 2600,
-        q: 2.2,
-        pan: Math.random() * 1.4 - 0.7,
-      });
-    }
-    playTone(1318.51, 0.9, { gain: 0.014, delay: 0.25, type: 'sine', endFrequency: 880, attack: 0.05 });
+    duckMusic(0.35, 1.0);
+    drum(96, 1.3, 0.15, { pan });
+    drum(64, 0.9, 0.1, { delay: 0.09 });
+    playNoise(1.3, { gain: 0.085, filterType: 'lowpass', filterFrequency: 900, endFilterFrequency: 90, pan });
+    rustle(0.4, 0.035, { filterFrequency: 3400, endFilterFrequency: 900, pan });
+    clatter(9, 0.9, 0.05, { delay: 0.16 });
+    bell(196, 1.6, 0.035, { delay: 0.3 });
+    bell(293.66, 1.2, 0.02, { delay: 0.42 });
   }
 
-  // The spell itself: a quick falling zap from the wand toward the target.
+  // The spell: a quick swish of air and a falling plucked note.
   function playBeamSound(targetX = 0) {
-    const widest = Math.max(...pathLanes.map(Math.abs)) || 1;
-    const pan = Math.max(-1, Math.min(1, targetX / widest)) * LANE_PAN_WIDTH;
-    const pitch = varyPitch(1480, 70);
-    playTone(pitch, 0.12, { gain: varyGain(0.05), type: 'sine', endFrequency: pitch * 0.36, attack: 0.002, pan });
-    playTone(pitch * 1.5, 0.08, { gain: 0.02, type: 'triangle', endFrequency: pitch * 0.6, attack: 0.002, pan });
-    playNoise(0.09, { gain: 0.014, filterType: 'highpass', filterFrequency: 4200, pan });
-  }
-
-  function playChainPrimeSound() {
-    playTone(330, 0.3, { gain: 0.04, type: 'sawtooth', endFrequency: 990, attack: 0.02 });
-    playTone(660, 0.28, { gain: 0.026, delay: 0.04, type: 'square', endFrequency: 1980, attack: 0.02 });
-    for (let index = 0; index < 4; index += 1) {
-      playNoise(0.03, { gain: 0.03, delay: 0.05 + index * 0.06, filterType: 'bandpass', filterFrequency: 3600, q: 3 });
-    }
-  }
-
-  // One jump of chain lightning: a sharp crack with a ragged electric tail.
-  function playChainZapSound(targetX = 0) {
-    const widest = Math.max(...pathLanes.map(Math.abs)) || 1;
-    const pan = Math.max(-1, Math.min(1, targetX / widest)) * LANE_PAN_WIDTH;
-    playNoise(0.05, { gain: 0.085, filterType: 'highpass', filterFrequency: 2600, pan });
-    playTone(varyPitch(1900, 120), 0.16, { gain: 0.04, type: 'sawtooth', endFrequency: 180, attack: 0.001, pan });
-    for (let index = 0; index < 5; index += 1) {
-      playNoise(0.025, {
-        gain: 0.05,
-        delay: 0.03 + Math.random() * 0.2,
-        filterType: 'bandpass',
-        filterFrequency: 2200 + Math.random() * 3800,
-        q: 4,
-        pan,
-      });
-    }
-    playTone(70, 0.22, { gain: 0.06, type: 'sine', endFrequency: 38, attack: 0.003 });
-  }
-
-  function playTimeFreezeSound() {
-    playTone(2093, 0.7, { gain: 0.03, type: 'sine', endFrequency: 196, attack: 0.01 });
-    playTone(1046.5, 0.8, { gain: 0.03, delay: 0.03, type: 'triangle', endFrequency: 98, attack: 0.01 });
-    playTone(80, 0.5, { gain: 0.07, delay: 0.25, type: 'sine', endFrequency: 40, attack: 0.02 });
-    playNoise(0.7, { gain: 0.04, filterType: 'bandpass', filterFrequency: 5200, endFilterFrequency: 500, q: 1.2 });
-    [2637, 3136, 3951].forEach((frequency, index) => {
-      playTone(frequency, 0.5, { gain: 0.012, delay: 0.3 + index * 0.09, type: 'sine', pan: index - 1 });
-    });
-  }
-
-  function playTimeResumeSound() {
-    playTone(196, 0.3, { gain: 0.035, type: 'triangle', endFrequency: 1046.5, attack: 0.01 });
-    playNoise(0.28, { gain: 0.025, filterType: 'bandpass', filterFrequency: 600, endFilterFrequency: 4800, q: 1.2 });
+    const pan = laneOf(targetX);
+    const pitch = varyPitch(1320, 70);
+    rustle(0.13, 0.03, { filterFrequency: 900, endFilterFrequency: 4200, q: 1.4, pan });
+    playTone(pitch, 0.12, { gain: varyGain(0.04), type: 'sine', endFrequency: pitch * 0.4, attack: 0.002, pan });
   }
 
   function playHealSound(healed) {
-    playTone(660, 0.1, { gain: 0.042, type: 'triangle', endFrequency: 880 });
+    mallet(523.25, 0.3, 0.04);
+    mallet(659.25, 0.3, 0.036, { delay: 0.07 });
     if (healed > 0) {
-      playTone(990, 0.16, { gain: 0.032, delay: 0.04, type: 'sine' });
+      mallet(783.99, 0.4, 0.036, { delay: 0.14 });
+      bell(1567.98, 0.5, 0.016, { delay: 0.2 });
     }
-    playNoise(0.1, { gain: 0.022, delay: 0.02, filterFrequency: 1800, filterType: 'bandpass' });
   }
 
   function playMedicPassSound() {
-    playTone(varyPitch(420), 0.08, { gain: 0.026, type: 'triangle', endFrequency: 280 });
+    knock(420, 0.03, { length: 0.08 });
+    knock(315, 0.026, { length: 0.09, delay: 0.09 });
   }
 
+  // A hit on the wall: a deep drum and a rattle of loose wood.
   function playDamageSound(enemy) {
     const bossHit = !!enemy?.isBoss;
     duckMusic(0.55, 0.3);
-    playTone(varyPitch(bossHit ? 62 : 78), bossHit ? 0.28 : 0.22, { gain: bossHit ? 0.086 : 0.07, type: 'sawtooth', endFrequency: bossHit ? 36 : 45 });
-    playNoise(bossHit ? 0.24 : 0.18, { gain: bossHit ? 0.074 : 0.06, filterFrequency: bossHit ? 135 : 170, filterType: 'lowpass' });
+    drum(bossHit ? 70 : 88, bossHit ? 0.5 : 0.36, bossHit ? 0.11 : 0.085);
+    clatter(bossHit ? 6 : 3, 0.22, 0.045, { delay: 0.03 });
   }
 
   function playBossThrowSound() {
-    playTone(varyPitch(176), 0.11, { gain: 0.045, type: 'sawtooth', endFrequency: 132 });
-    playTone(varyPitch(352), 0.07, { gain: 0.022, delay: 0.03, type: 'square', endFrequency: 260 });
+    rustle(0.22, 0.04, { filterFrequency: 320, endFilterFrequency: 1100, q: 1.2 });
+    knock(180, 0.05, { length: 0.1 });
   }
 
   function playBossImpactSound() {
-    playTone(varyPitch(92), 0.16, { gain: varyGain(0.058), type: 'sawtooth', endFrequency: 52 });
-    playNoise(0.12, { gain: 0.045, filterFrequency: 260, filterType: 'lowpass' });
+    drum(104, 0.26, 0.065);
+    clatter(2, 0.1, 0.04, { delay: 0.02 });
   }
 
+  // Three war-drum beats, closing in, over a low bell.
   function playBossWarningSound() {
-    duckMusic(0.45, 0.6);
-    playTone(146.83, 0.18, { gain: 0.072, type: 'sawtooth', endFrequency: 110 });
-    playTone(73.42, 0.48, { gain: 0.052, delay: 0.06, type: 'sawtooth', endFrequency: 55 });
-    playTone(220, 0.12, { gain: 0.04, delay: 0.2, type: 'square', endFrequency: 155.56 });
-    playNoise(0.42, { gain: 0.038, delay: 0.04, filterFrequency: 340, filterType: 'bandpass', q: 1.4 });
+    duckMusic(0.45, 0.7);
+    drum(82, 0.4, 0.085);
+    drum(82, 0.4, 0.085, { delay: 0.26 });
+    drum(70, 0.7, 0.1, { delay: 0.46 });
+    bell(110, 1.4, 0.04, { delay: 0.46 });
   }
+
+  // Potions
+
+  // A run of small bells climbing, with a crackle of paper.
+  function playChainPrimeSound() {
+    [880, 1108.73, 1318.51, 1760].forEach((frequency, index) => {
+      bell(frequency, 0.3, 0.026, { delay: index * 0.06, pan: index % 2 === 0 ? -0.3 : 0.3 });
+    });
+    rustle(0.3, 0.02, { filterFrequency: 1800, endFilterFrequency: 6000, q: 1.6 });
+  }
+
+  // One jump of chain lightning: a sharp crack of wood, a quick rattle and a low thump.
+  function playChainZapSound(targetX = 0) {
+    const pan = laneOf(targetX);
+    playNoise(0.035, { gain: 0.085, filterType: 'highpass', filterFrequency: 2800, pan });
+    knock(1300, 0.06, { length: 0.05, pan });
+    for (let index = 0; index < 5; index += 1) {
+      knock(900 + Math.random() * 1400, 0.03, { length: 0.03, delay: 0.03 + Math.random() * 0.16, pan, spread: 0 });
+    }
+    drum(84, 0.24, 0.06);
+  }
+
+  // Bells stepping down and slowing, as if the world winds down.
+  function playTimeFreezeSound() {
+    [1567.98, 1174.66, 880, 587.33, 392].forEach((frequency, index) => {
+      bell(frequency, 0.7, 0.03, { delay: index * index * 0.028, pan: index % 2 === 0 ? -0.35 : 0.35 });
+    });
+    drum(72, 0.7, 0.07, { delay: 0.42 });
+    rustle(0.6, 0.02, { filterFrequency: 5000, endFilterFrequency: 500, q: 1.2 });
+  }
+
+  function playTimeResumeSound() {
+    [392, 587.33, 880].forEach((frequency, index) => bell(frequency, 0.35, 0.026, { delay: index * 0.05 }));
+    rustle(0.25, 0.016, { filterFrequency: 600, endFilterFrequency: 4800, q: 1.2 });
+  }
+
+  // A great drum and three waves of air rolling outward.
+  function playShockwaveSound() {
+    duckMusic(0.4, 0.7);
+    drum(88, 0.9, 0.14);
+    drum(52, 1.1, 0.1, { delay: 0.04 });
+    playNoise(0.7, { gain: 0.06, filterType: 'lowpass', filterFrequency: 500 });
+    [0, 0.15, 0.3].forEach((delay) => {
+      rustle(0.5, 0.036, { delay, filterFrequency: 300, endFilterFrequency: 3000, q: 1.1 });
+    });
+  }
+
+  function playShieldActivateSound() {
+    [293.66, 440, 587.33].forEach((frequency, index) => bell(frequency, 0.8, 0.034, { delay: index * 0.09 }));
+    playTone(146.83, 0.8, { gain: 0.04, type: 'sine', attack: 0.2 });
+  }
+
+  // A gong, with the thud of whatever struck it.
+  function playShieldBlockSound() {
+    bell(220, 1.2, 0.07);
+    bell(330, 0.8, 0.03, { delay: 0.01 });
+    drum(110, 0.3, 0.08);
+    knock(900, 0.04, { length: 0.04 });
+  }
+
+  // Chests
+
+  function playChestClackSound() {
+    knock(400, 0.045, { length: 0.07 });
+    knock(290, 0.04, { length: 0.09, delay: 0.035 });
+    drum(140, 0.12, 0.04);
+  }
+
+  // A creak of the lid, then a glint of coins.
+  function playChestOpenSound() {
+    [180, 205, 235].forEach((frequency, index) => knock(frequency, 0.04, { length: 0.05, delay: index * 0.04, spread: 0 }));
+    [1318.51, 1760, 2093].forEach((frequency, index) => bell(frequency, 0.3, 0.018, { delay: 0.14 + index * 0.06 }));
+  }
+
+  // Wave results
 
   function playWaveClearSound() {
-    playChime(523.25, 0.4, 0.05);
-    playChime(659.25, 0.4, 0.045, { delay: 0.07 });
-    playChime(783.99, 0.45, 0.045, { delay: 0.14 });
-    playChime(1046.5, 0.7, 0.04, { delay: 0.24 });
+    [523.25, 659.25, 783.99, 1046.5].forEach((frequency, index) => {
+      mallet(frequency, index === 3 ? 0.7 : 0.4, 0.042, { delay: index * 0.08 });
+    });
+    bell(2093, 0.6, 0.014, { delay: 0.34 });
+    rustle(0.14, 0.014, { delay: 0.3, filterFrequency: 5200 });
   }
 
   function playVictoryFinaleSound() {
@@ -1239,70 +1317,23 @@ export function createSpellwaveAudio({
   }
 
   function playGameOverSound() {
-    playTone(196, 0.18, { gain: 0.055, type: 'sawtooth', endFrequency: 130 });
-    playTone(130, 0.26, { gain: 0.052, delay: 0.12, type: 'sawtooth', endFrequency: 70 });
-    playNoise(0.22, { gain: 0.045, delay: 0.04, filterFrequency: 220, filterType: 'lowpass' });
+    [392, 349.23, 293.66, 196].forEach((frequency, index) => {
+      mallet(frequency, index === 3 ? 0.9 : 0.4, 0.04, { delay: index * 0.16 });
+    });
+    drum(70, 0.8, 0.06, { delay: 0.5 });
   }
 
   function playGodModeOnSound() {
-    playTone(523.25, 0.08, { gain: 0.032, type: 'square' });
-    playTone(659.25, 0.08, { gain: 0.03, delay: 0.045, type: 'triangle' });
-    playTone(783.99, 0.09, { gain: 0.032, delay: 0.09, type: 'square' });
-    playTone(1046.5, 0.11, { gain: 0.034, delay: 0.135, type: 'triangle' });
-    playTone(1567.98, 0.28, { gain: 0.026, delay: 0.19, type: 'sine', endFrequency: 2093.0 });
-    playTone(2349.32, 0.12, { gain: 0.015, delay: 0.24, type: 'sine' });
-    playTone(1174.66, 0.16, { gain: 0.018, delay: 0.26, type: 'triangle', detune: 9 });
-    playNoise(0.24, { gain: 0.022, delay: 0.11, filterFrequency: 3600, filterType: 'highpass', q: 0.55 });
-  }
-
-  function playGodModeOffSound() {
-    playTone(2349.32, 0.08, { gain: 0.015, type: 'sine' });
-    playTone(1567.98, 0.12, { gain: 0.026, delay: 0.045, type: 'sine', endFrequency: 1174.66 });
-    playTone(1046.5, 0.09, { gain: 0.034, delay: 0.105, type: 'triangle' });
-    playTone(783.99, 0.09, { gain: 0.032, delay: 0.15, type: 'square' });
-    playTone(659.25, 0.08, { gain: 0.03, delay: 0.195, type: 'triangle' });
-    playTone(523.25, 0.18, { gain: 0.032, delay: 0.24, type: 'square', endFrequency: 261.63 });
-    playNoise(0.24, { gain: 0.018, delay: 0.08, filterFrequency: 1400, filterType: 'lowpass', q: 0.55 });
-  }
-
-  function playChestClackSound() {
-    playTone(180, 0.12, { gain: 0.05, type: 'triangle', endFrequency: 90 });
-    playNoise(0.06, { gain: 0.045, filterFrequency: 450, filterType: 'bandpass', q: 4.0 });
-  }
-
-  function playChestOpenSound() {
-    playTone(120, 0.04, { gain: 0.05, type: 'triangle', endFrequency: 110 });
-    playTone(130, 0.04, { gain: 0.05, delay: 0.035, type: 'triangle', endFrequency: 120 });
-    playTone(140, 0.05, { gain: 0.05, delay: 0.07, type: 'triangle', endFrequency: 130 });
-    playTone(440, 0.12, { gain: 0.024, delay: 0.12, type: 'sine' });
-    playTone(660, 0.14, { gain: 0.024, delay: 0.18, type: 'sine' });
-    playTone(880, 0.16, { gain: 0.020, delay: 0.24, type: 'sine' });
-  }
-
-  function playShockwaveSound() {
-    duckMusic(0.4, 0.7);
-    playTone(120, 0.45, { gain: 0.065, type: 'sawtooth', endFrequency: 60 });
-    playTone(60, 0.60, { gain: 0.080, delay: 0.05, type: 'sine', endFrequency: 30 });
-    playTone(44, 1.0, { gain: 0.09, delay: 0.02, type: 'sine', endFrequency: 24, attack: 0.01 });
-    playNoise(0.60, { gain: 0.075, filterFrequency: 450, filterType: 'lowpass' });
-    // The three wavefronts sweep outward one after another.
-    [0, 0.15, 0.3].forEach((delay) => {
-      playNoise(0.5, { gain: 0.04, delay, filterType: 'bandpass', filterFrequency: 300, endFilterFrequency: 3200, q: 1.1 });
+    [523.25, 659.25, 783.99, 1046.5, 1567.98].forEach((frequency, index) => {
+      bell(frequency, 0.3, 0.026, { delay: index * 0.045, pan: index % 2 === 0 ? -0.3 : 0.3 });
     });
   }
 
-  function playShieldActivateSound() {
-    playTone(220, 0.4, { gain: 0.05, type: 'sawtooth', endFrequency: 440 });
-    playTone(330, 0.45, { gain: 0.05, delay: 0.05, type: 'sine', endFrequency: 660 });
-    playTone(440, 0.5, { gain: 0.05, delay: 0.1, type: 'sine', endFrequency: 880 });
-  }
-
-  function playShieldBlockSound() {
-    playTone(880, 0.15, { gain: 0.08, type: 'sine', endFrequency: 1760 });
-    playTone(440, 0.20, { gain: 0.08, type: 'triangle', endFrequency: 880 });
-    playNoise(0.25, { gain: 0.06, filterFrequency: 3000, filterType: 'bandpass', q: 1.5 });
-    // Deep bass deflection
-    playTone(100, 0.35, { gain: 0.07, delay: 0.02, type: 'sine', endFrequency: 40 });
+  function playGodModeOffSound() {
+    [1567.98, 1046.5, 783.99, 659.25, 523.25].forEach((frequency, index) => {
+      bell(frequency, 0.3, 0.026, { delay: index * 0.045, pan: index % 2 === 0 ? 0.3 : -0.3 });
+    });
+    knock(260, 0.04, { length: 0.1, delay: 0.24 });
   }
 
   return {
