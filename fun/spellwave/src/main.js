@@ -562,7 +562,10 @@ const camera = new THREE.PerspectiveCamera(58, window.innerWidth / window.innerH
 camera.position.set(0, 7.2, 12.8);
 camera.lookAt(cameraTarget);
 
-const visuals = createVisuals({ renderer, scene, camera, available: webGLAvailable });
+const visuals = createVisuals({
+  renderer, scene, camera, available: webGLAvailable,
+  onQualityChange: (level) => setMoonShadowResolution(level === 'high' ? 2048 : 1024),
+});
 const fx = visuals.effects;
 const skyTopColor = new THREE.Color(0x07120f);
 
@@ -581,7 +584,7 @@ scene.add(hemiLight);
 const moonLight = new THREE.DirectionalLight(0xc9ffec, 2.2);
 moonLight.position.set(18, 14, -28);
 moonLight.castShadow = true;
-moonLight.shadow.mapSize.set(2048, 2048);
+moonLight.shadow.mapSize.set(1024, 1024);
 moonLight.shadow.camera.left = -22;
 moonLight.shadow.camera.right = 22;
 moonLight.shadow.camera.top = 22;
@@ -1942,6 +1945,15 @@ function updateMoonShadowFade(delta, targetStrength) {
   moonShadowStrength = moveTowards(moonShadowStrength, targetStrength, rate * delta);
   updateMoonShadowLighting();
   updateFlyingShadowOpacity();
+}
+
+function setMoonShadowResolution(size) {
+  if (moonLight.shadow.mapSize.x === size) return;
+  moonLight.shadow.mapSize.set(size, size);
+  if (moonLight.shadow.map) {
+    moonLight.shadow.map.dispose();
+    moonLight.shadow.map = null;
+  }
 }
 
 function updateMoonShadowLighting() {

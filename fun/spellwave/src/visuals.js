@@ -13,9 +13,11 @@ export const QUALITY_LEVELS = ['basic', 'medium', 'high'];
 
 const EXPOSURE = 1.12;
 const MAX_PIXEL_RATIO = { basic: 1.5, medium: 1.5, high: 2 };
-const SLOW_FRAME_SECONDS = 1 / 42;
-const QUALITY_SAMPLE_FRAMES = 90;
-const QUALITY_WARMUP_FRAMES = 60;
+const SLOW_FRAME_MS = 1000 / 42;
+const QUALITY_WINDOW_MS = 2500;
+const QUALITY_WARMUP_MS = 3000;
+const SLOW_SHARE = 0.6;
+const SLOW_WINDOWS_TO_STEP_DOWN = 2;
 
 const TONEMAPPED_OUTPUT = `
   #include <tonemapping_fragment>
@@ -506,7 +508,7 @@ function createSpellEffects(scene, glowTexture) {
   };
 }
 
-export function createVisuals({ renderer, scene, camera, available }) {
+export function createVisuals({ renderer, scene, camera, available, onQualityChange = null }) {
   const glowTexture = createGlowTexture();
   const sky = createSky(scene);
   const stars = createStars(scene);
@@ -521,9 +523,12 @@ export function createVisuals({ renderer, scene, camera, available }) {
   let saver = false;
   let width = window.innerWidth;
   let height = window.innerHeight;
-  let sampleFrames = 0;
-  let sampleSeconds = 0;
-  let warmupFrames = QUALITY_WARMUP_FRAMES;
+  let lastFrameStamp = 0;
+  let warmupMs = QUALITY_WARMUP_MS;
+  let windowMs = 0;
+  let windowFrames = 0;
+  let windowSlowFrames = 0;
+  let slowWindows = 0;
 
   if (available) {
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
@@ -593,6 +598,7 @@ export function createVisuals({ renderer, scene, camera, available }) {
     motes.points.visible = !saver;
     effects.setSparkScale(saver ? 0.5 : quality === 'medium' ? 0.8 : 1);
     setSize(width, height);
+    if (onQualityChange) onQualityChange(quality);
   }
 
   function setSize(nextWidth, nextHeight) {
@@ -606,30 +612,39 @@ export function createVisuals({ renderer, scene, camera, available }) {
     effects.material.uniforms.uScale.value = scale;
   }
 
-  // Steps down one tier when a run of frames is slow; it never steps back up,
-  // so the picture cannot flicker between tiers.
-  function trackFrame(delta) {
-    if (!available || saver || quality === 'basic' || delta <= 0 || delta > 0.1) return;
-    if (warmupFrames > 0) {
-      warmupFrames -= 1;
+  // Steps down one tier after two windows in a row where most frames were slow, so
+  // a stutter while shaders compile does not count. It never steps back up, so the
+  // picture cannot flicker between tiers.
+  function trackFrame() {
+    const now = performance.now();
+    const frameMs = now - lastFrameStamp;
+    lastFrameStamp = now;
+    // A long gap is a pause or a hidden tab, not a slow frame.
+    if (!available || saver || quality === 'basic' || frameMs <= 0 || frameMs > 250) return;
+    if (warmupMs > 0) {
+      warmupMs -= frameMs;
       return;
     }
-    sampleFrames += 1;
-    sampleSeconds += delta;
-    if (sampleFrames < QUALITY_SAMPLE_FRAMES) return;
-    const average = sampleSeconds / sampleFrames;
-    sampleFrames = 0;
-    sampleSeconds = 0;
-    if (average > SLOW_FRAME_SECONDS) {
+    windowMs += frameMs;
+    windowFrames += 1;
+    if (frameMs > SLOW_FRAME_MS) windowSlowFrames += 1;
+    if (windowMs < QUALITY_WINDOW_MS) return;
+    slowWindows = windowSlowFrames / windowFrames > SLOW_SHARE ? slowWindows + 1 : 0;
+    windowMs = 0;
+    windowFrames = 0;
+    windowSlowFrames = 0;
+    if (slowWindows >= SLOW_WINDOWS_TO_STEP_DOWN) {
+      slowWindows = 0;
+      warmupMs = QUALITY_WARMUP_MS;
       autoQuality = QUALITY_LEVELS[Math.max(0, QUALITY_LEVELS.indexOf(autoQuality) - 1)];
-      warmupFrames = QUALITY_WARMUP_FRAMES;
       applyQuality();
     }
   }
 
   function render(delta, { measure = false } = {}) {
     if (!available) return;
-    if (measure) trackFrame(delta);
+    if (measure) trackFrame();
+    else lastFrameStamp = 0;
     if (usesComposer()) composer.render(delta);
     else renderer.render(scene, camera);
   }
