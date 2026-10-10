@@ -3824,9 +3824,7 @@ function applySeasonForWave(wave, instant = false) {
     seasonFade = null;
     return;
   }
-  const from = buildSeasonFromScene();
-  const to = buildSeasonTarget(palette);
-  seasonFade = { from, to, palette, t: 0, duration: 3.5 };
+  startSeasonFade(palette);
 }
 
 function updateSeasonFade(delta) {
@@ -3860,20 +3858,30 @@ function updateSeasonFade(delta) {
   if (starField) starField.opacity = THREE.MathUtils.lerp(from.starOpacity, to.starOpacity, t);
   skyTopColor.lerpColors(from.skyTop, to.skyTop, t);
 
+  if (sceneGround) sceneGround.blend(t);
+
   if (seasonFade.t >= 1) {
-    recolorGround(seasonFade.palette);
     seasonFade = null;
   }
 }
 
-function recolorGround(palette) {
-  if (!sceneGround) return;
-  sceneGround.recolor({
+function groundColours(palette) {
+  return {
     path: { h: palette.groundPath.h, s: palette.groundPath.s, l: palette.groundPath.lBase },
     grass: palette.groundGrass,
     patch: palette.groundAlt1,
     tone: GROUND_TONE,
-  });
+  };
+}
+
+function recolorGround(palette) {
+  if (sceneGround) sceneGround.recolor(groundColours(palette));
+}
+
+// Starts a gradual change of season; the ground fades with the sky, lights and leaves.
+function startSeasonFade(palette) {
+  seasonFade = { from: buildSeasonFromScene(), to: buildSeasonTarget(palette), palette, t: 0, duration: 3.5 };
+  if (sceneGround) sceneGround.startBlend(groundColours(palette));
 }
 
 function accuracy() {
@@ -4119,7 +4127,7 @@ function startFinalWave() {
   updatePhaseDisplay();
   // The world fades to the starlit night; weather stops and the moons and drifting rocks appear.
   seasonalEffects.stopWeather();
-  seasonFade = { from: buildSeasonFromScene(), to: buildSeasonTarget(FINAL_WAVE_PALETTE), palette: FINAL_WAVE_PALETTE, t: 0, duration: 3.5 };
+  startSeasonFade(FINAL_WAVE_PALETTE);
   if (starField) starField.size = 1.7;
   setFinalWaveScenery(true);
 }
