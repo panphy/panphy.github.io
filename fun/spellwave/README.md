@@ -4,6 +4,16 @@ A typing defence game for AQA GCSE Physics vocabulary. The page is `fun/spellwav
 
 Run the tests with `node --test fun/spellwave/tests/`.
 
+## Art style
+
+Everything is low-poly: simple solids with flat shading, so every facet shows, in warm paper-like colours.
+
+- `src/lowpoly.js` builds the scenery: the scrolling faceted ground, trees, rocks and clouds.
+- `src/lowpoly-creatures.js` builds every monster and boss from solids on pivots. Each builder also returns an `animate(seconds, enemy)` function that moves those pivots (legs, wings, jaws, tails).
+- Season colours are the `SEASON_PALETTES` in `src/main.js`. Keep light levels modest: anything brighter than 1.0 in the rendered frame blooms, so over-lit ground turns the whole scene hazy.
+- The sound follows the same idea (`src/audio.js`): mallet, plucked and music-box voices built from sine partials, with soft percussion. Boss music and the big moments (boss kills, lightning, shockwave, damage) keep harder sounds on purpose.
+- A monster must not carry its own light. Use a glow anchor (`createGlowAnchor` in `src/enemy-meshes.js`), which borrows from a fixed pool; adding real lights makes every shader recompile and stalls the game.
+
 ## Difficulty design
 
 Difficulty has two separate parts, and a keyword must suit both:
