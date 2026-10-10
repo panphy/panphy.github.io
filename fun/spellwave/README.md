@@ -2,6 +2,8 @@
 
 A typing defence game for AQA GCSE Physics vocabulary. The page is `fun/spellwave.html`; the code is in `src/`. It is network-only (no offline cache), needs no build step, and loads Three.js and two post-processing add-ons from jsDelivr through the import map in the HTML.
 
+The page versions its stylesheet, entry module, difficulty module and prompt utilities with a shared `?v=` value. Bump that value together when changing these files so a new page cannot load incompatible browser-cached code (GitHub Pages caches assets for ten minutes). Filenames remain stable; this is independent of the root service worker.
+
 Run the tests with `node --test fun/spellwave/tests/*.test.mjs`.
 
 ## Art style
