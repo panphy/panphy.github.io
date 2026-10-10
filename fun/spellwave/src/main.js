@@ -7,6 +7,7 @@ import { createEndingFX } from './ending-fx.js';
 import { createLeaderboard } from './leaderboard.js';
 import { createEnemyMesh, createMimicChestMesh, blockMesh } from './enemy-meshes.js';
 import { normalPromptLengthCap, bossWordLengthCap, previewLengthCap, withinLength, hardGuestCount } from './difficulty.js';
+import { createLowPolyTerrain, createLowPolyTree, createLowPolyRock, createLowPolyCloud } from './lowpoly.js';
 import { createVisuals, shadedBoxGeometry, GLOW_GAIN, MOON_GLOW_GAIN } from './visuals.js';
 import { pickTarget, getInputCharacters, isMathOperatorInput, buildSearchPrompt, buildAltSearchPrompts, buildHintMask, getBossQuestionHintRange, escapeHtml, wrapSups, buildHintPart, buildTwoWordLimit, shouldUseVocabularyPromptLimit, promptIndexForProgress } from './prompt-utils.js';
 
@@ -336,21 +337,22 @@ const CLOUD_RESET_X = -46;
 const CLOUD_SKY_TINT = 0.42;
 
 // The palettes' ground colours are scaled down so the road stays moody under the bright sun and sky lights.
-const GROUND_TONE = 0.5;
+const GROUND_TONE = 0.8;
 
 const SEASON_PALETTES = [
-  { // Spring (wave 1): soft twilight blue, cherry blossoms
+  { // Spring (wave 1): paper-warm daylight, olive trees, sand road.
+    // Light levels stay modest so sunlit ground does not cross the bloom threshold.
     name: 'spring',
-    bgColor: 0x6a90b0, fogColor: 0x6a90b0, fogNear: 20, fogFar: 70, skyTop: 0x2f5fa6,
-    hemiSky: 0xb0d8f0, hemiGround: 0x508050, hemiIntensity: 1.2,
-    sunColor: 0xffe0b0, sunIntensity: 1.8,
-    emberColor: 0xff90b0, emberIntensity: 2.0,
-    pathMarkerColor: 0xf098b8, pathMarkerEmissive: 0xd06080,
-    leafColors: [0xeaa8bc, 0xf5c8d8, 0xd890a8], trunkColor: 0x6b4226,
-    moonColor: 0xfff1b8, starOpacity: 0.4,
-    groundPath: { h: 0.08, s: 0.2, lBase: 0.28 },
-    groundAlt1: { h: 0.28, s: 0.28, l: 0.28 },
-    groundGrass: { h: 0.28, s: 0.38, l: 0.22 },
+    bgColor: 0x9fd4c2, fogColor: 0xe6d6a4, fogNear: 34, fogFar: 96, skyTop: 0x3fa596,
+    hemiSky: 0xd8ecd8, hemiGround: 0x9a7a44, hemiIntensity: 0.85,
+    sunColor: 0xffe9bd, sunIntensity: 1.55,
+    emberColor: 0xffc078, emberIntensity: 1.6,
+    pathMarkerColor: 0xe9a45c, pathMarkerEmissive: 0x9a5a20,
+    leafColors: [0x7f9e2e, 0x9bb23a, 0x5f8428], trunkColor: 0xa85a26,
+    moonColor: 0xfff4d6, starOpacity: 0,
+    groundPath: { h: 0.105, s: 0.52, lBase: 0.56 },
+    groundAlt1: { h: 0.16, s: 0.55, l: 0.44 },
+    groundGrass: { h: 0.215, s: 0.6, l: 0.36 },
   },
   { // Summer (wave 2): warm blue evening, lush greens
     name: 'summer',
@@ -409,7 +411,6 @@ const wandGroups = [];
 const wandSwings = [];
 const lightningCrowns = [];
 const pathMarkerBlocks = [];
-const roadBlocks = [];
 const scrollingTrees = [];
 const clouds = [];
 const meteors = [];
@@ -484,7 +485,7 @@ let bossShotHits = 0;
 let bossesDefeated = 0;
 let encounteredTerms = [];
 let firstMedicHintShown = false;
-let sceneGroundMesh = null;
+let sceneGround = null;
 let sceneLeafMaterials = [];
 let sceneTrunkMaterial = null;
 let sceneCrystalMat = null;
@@ -1604,6 +1605,7 @@ function updateEnemies(delta, seconds) {
       enemy.group.position.y = enemy.baseY + Math.abs(Math.sin(seconds * 4.8 + enemy.phase)) * enemy.stepBounce;
     }
     enemy.group.rotation.y = Math.sin(seconds * 2.4 + enemy.phase) * 0.18;
+    if (enemy.group.userData.animate && enemy.stunTimer <= 0) enemy.group.userData.animate(seconds, enemy);
 
     const wasRevealed = enemy.revealed;
     enemy.revealed = enemy.group.position.z >= enemy.revealZ;
@@ -1956,19 +1958,7 @@ function updateEnvironment(seconds, delta, isTimeFrozen = false) {
 }
 
 function updateRoad(scrollDelta) {
-  if (!sceneGroundMesh) return;
-  const zShift = scrollDelta * ROAD_SCROLL_MULTIPLIER;
-  for (let index = 0; index < roadBlocks.length; index += 1) {
-    const block = roadBlocks[index];
-    block.z += zShift;
-    if (block.z > ROAD_MAX_Z) block.z -= ROAD_SPAN;
-    reusableVector.set(block.x, block.y, block.z);
-    reusableQuaternion.identity();
-    reusableVectorTwo.set(1, block.sy, 1);
-    reusableMatrix.compose(reusableVector, reusableQuaternion, reusableVectorTwo);
-    sceneGroundMesh.setMatrixAt(index, reusableMatrix);
-  }
-  sceneGroundMesh.instanceMatrix.needsUpdate = true;
+  if (sceneGround) sceneGround.scroll(scrollDelta * ROAD_SCROLL_MULTIPLIER);
 }
 
 function positionMoonOnArc() {
@@ -2680,11 +2670,6 @@ function createWorld() {
   createPathMarkers();
 }
 
-function groundNoise(x, z) {
-  const value = Math.sin(x * 127.1 + z * 311.7) * 43758.5453;
-  return value - Math.floor(value);
-}
-
 // Three.js deletes a shader once no material uses it, so short-lived effects (debris,
 // beams, shockwaves) would recompile theirs each time they reappear. These specks,
 // hidden under the road, keep one material of each kind alive.
@@ -2711,41 +2696,8 @@ function createShaderKeepers() {
 }
 
 function createGround() {
-  const geometry = new THREE.BoxGeometry(1, 0.55, 1);
-  const material = new THREE.MeshStandardMaterial({
-    color: 0xffffff,
-    roughness: 0.96,
-    metalness: 0.0,
-  });
-  const columns = 23;
-  const rows = 74;
-  const mesh = new THREE.InstancedMesh(geometry, material, columns * rows);
-  mesh.castShadow = false;
-  mesh.receiveShadow = true;
-
-  let index = 0;
-  for (let z = ROAD_MIN_Z; z < ROAD_MAX_Z; z += 1) {
-    for (let x = -11; x <= 11; x += 1) {
-      const pathAmount = Math.max(0, 1 - Math.abs(x) / 3.2);
-      const ridge = Math.sin(x * 1.3 + z * 0.27) * 0.12 + Math.cos(z * 0.42) * 0.08;
-      const y = -0.38 + ridge * (1 - pathAmount * 0.8);
-      // A few verge blocks stand proud as boulders; path cobbles sit at slightly uneven heights.
-      const roll = groundNoise(x, z);
-      const isStone = Math.abs(x) > 4 && roll > 0.972;
-      const sy = isStone ? 1.9 + roll * 0.9 : 1;
-      const cobble = Math.abs(x) < 3.1 ? (groundNoise(x + 31, z + 7) - 0.5) * 0.05 : 0;
-      roadBlocks[index] = { x, y: y + cobble, z, sy, isStone };
-      reusableVector.set(x, y + cobble, z);
-      reusableQuaternion.identity();
-      reusableVectorTwo.set(1, sy, 1);
-      reusableMatrix.compose(reusableVector, reusableQuaternion, reusableVectorTwo);
-      mesh.setMatrixAt(index, reusableMatrix);
-      index += 1;
-    }
-  }
-  mesh.instanceMatrix.needsUpdate = true;
-  world.add(mesh);
-  sceneGroundMesh = mesh;
+  sceneGround = createLowPolyTerrain({ minZ: ROAD_MIN_Z, maxZ: ROAD_MAX_Z });
+  world.add(sceneGround.mesh);
 }
 
 function createLightningCrown() {
@@ -2840,62 +2792,42 @@ function createTorches() {
 }
 
 function createTrees() {
-  sceneTrunkMaterial = new THREE.MeshStandardMaterial({ color: 0x513820, roughness: 0.9, vertexColors: true });
+  sceneTrunkMaterial = new THREE.MeshStandardMaterial({ color: 0x513820, roughness: 0.95, flatShading: true });
   sceneLeafMaterials = [
-    new THREE.MeshStandardMaterial({ color: 0x1f5b38, roughness: 0.9, vertexColors: true }),
-    new THREE.MeshStandardMaterial({ color: 0x2f7247, roughness: 0.9, vertexColors: true }),
-    new THREE.MeshStandardMaterial({ color: 0x163d30, roughness: 0.92, vertexColors: true }),
+    new THREE.MeshStandardMaterial({ color: 0x1f5b38, roughness: 0.95, flatShading: true }),
+    new THREE.MeshStandardMaterial({ color: 0x2f7247, roughness: 0.95, flatShading: true }),
+    new THREE.MeshStandardMaterial({ color: 0x163d30, roughness: 0.95, flatShading: true }),
   ];
+  const rockMaterial = new THREE.MeshStandardMaterial({ color: 0xe2cfa0, roughness: 1, flatShading: true });
 
   for (let index = 0; index < 34; index += 1) {
     const side = index % 2 === 0 ? -1 : 1;
-    const x = side * (7.8 + Math.random() * 2.3);
-    const z = -52 + Math.random() * 62;
-    const height = 1.1 + Math.random() * 0.7;
-    const tree = new THREE.Group();
-    tree.position.set(x, -0.08, z);
-    tree.add(blockMesh(0.55, height, 0.55, sceneTrunkMaterial, 0, height * 0.5, 0));
-
-    const leafMaterial = sceneLeafMaterials[index % sceneLeafMaterials.length];
-    const lowerLeaves = blockMesh(1.5, 1.1, 1.5, leafMaterial, 0, height + 0.72, 0);
-    const upperLeaves = blockMesh(1.05, 0.86, 1.05, leafMaterial, 0, height + 1.38, 0);
-    tree.add(lowerLeaves);
-    tree.add(upperLeaves);
-    // Off-centre clumps in the neighbouring leaf shades break up the two stacked cubes.
-    const clumpCount = 2 + (index % 2);
-    for (let clump = 0; clump < clumpCount; clump += 1) {
-      const clumpMaterial = sceneLeafMaterials[(index + clump + 1) % sceneLeafMaterials.length];
-      const angle = Math.random() * Math.PI * 2;
-      const size = 0.5 + Math.random() * 0.34;
-      const clumpLeaves = blockMesh(
-        size, size * 0.86, size, clumpMaterial,
-        Math.cos(angle) * 0.72, height + 0.5 + Math.random() * 0.9, Math.sin(angle) * 0.72
-      );
-      tree.add(clumpLeaves);
+    const { group: tree, crowns } = createLowPolyTree({
+      kind: index % 3 === 2 ? 'pine' : 'round',
+      trunkMaterial: sceneTrunkMaterial,
+      leafMaterials: sceneLeafMaterials,
+      seed: index + 1,
+    });
+    tree.position.set(side * (7.8 + Math.random() * 2.3), -0.12, -52 + Math.random() * 62);
+    tree.scale.setScalar(index % 7 === 3 ? 1.9 : 1.05 + Math.random() * 0.55);
+    world.add(tree);
+    scrollingTrees.push({ group: tree, speed: 0.8 + Math.random() * 0.45 });
+    for (const crown of crowns) {
       canopyBlocks.push({
-        mesh: clumpLeaves,
-        baseY: clumpLeaves.position.y,
+        mesh: crown,
+        baseY: crown.position.y,
         phase: Math.random() * Math.PI * 2,
-        amount: 0.02 + Math.random() * 0.02,
+        amount: 0.018 + Math.random() * 0.02,
       });
     }
-    world.add(tree);
-    scrollingTrees.push({
-      group: tree,
-      speed: 0.8 + Math.random() * 0.45,
-    });
-    canopyBlocks.push({
-      mesh: lowerLeaves,
-      baseY: lowerLeaves.position.y,
-      phase: Math.random() * Math.PI * 2,
-      amount: 0.018 + Math.random() * 0.018,
-    });
-    canopyBlocks.push({
-      mesh: upperLeaves,
-      baseY: upperLeaves.position.y,
-      phase: Math.random() * Math.PI * 2,
-      amount: 0.024 + Math.random() * 0.018,
-    });
+  }
+
+  for (let index = 0; index < 16; index += 1) {
+    const side = index % 2 === 0 ? -1 : 1;
+    const rock = createLowPolyRock(rockMaterial, index + 1);
+    rock.position.set(side * (5.6 + Math.random() * 5.4), 0.05, -52 + Math.random() * 62);
+    world.add(rock);
+    scrollingTrees.push({ group: rock, speed: 1 });
   }
 }
 
@@ -3037,39 +2969,24 @@ function updateMeteors(delta) {
 }
 
 function buildCloudGroup(material, template) {
-  const group = new THREE.Group();
-  if (template === 0) {
-    group.add(blockMesh(5.2, 0.8, 2.0, material,  0.0, 0.0,  0));
-    group.add(blockMesh(2.8, 1.2, 1.7, material, -1.2, 0.52, 0));
-    group.add(blockMesh(3.2, 1.5, 1.6, material,  0.6, 0.68, 0));
-    group.add(blockMesh(2.2, 1.0, 1.5, material,  2.2, 0.45, 0));
-  } else if (template === 1) {
-    group.add(blockMesh(4.0, 0.7, 1.8, material,  0.0, 0.0,  0));
-    group.add(blockMesh(2.4, 1.3, 1.6, material,  0.0, 0.60, 0));
-    group.add(blockMesh(1.6, 0.9, 1.4, material, -1.6, 0.40, 0));
-    group.add(blockMesh(1.4, 0.8, 1.3, material,  1.8, 0.38, 0));
-  } else {
-    group.add(blockMesh(6.0, 0.75, 2.2, material,  0.0, 0.0,  0));
-    group.add(blockMesh(2.0, 1.0,  1.8, material, -2.4, 0.44, 0));
-    group.add(blockMesh(2.6, 1.2,  1.7, material, -0.6, 0.58, 0));
-    group.add(blockMesh(2.2, 1.1,  1.6, material,  1.4, 0.50, 0));
-    group.add(blockMesh(1.8, 0.85, 1.5, material,  2.9, 0.40, 0));
-  }
-  return group;
+  return createLowPolyCloud(material, template);
 }
 
 function createClouds() {
-  baseCloudMaterial = new THREE.MeshBasicMaterial({
+  // Lit, so the facets show, with enough self-glow that clouds stay bright.
+  baseCloudMaterial = new THREE.MeshLambertMaterial({
     color: 0xf0f2f8,
+    emissive: 0x6a6670,
     transparent: true,
-    opacity: 0.82,
-    vertexColors: true,
+    opacity: 0.92,
+    flatShading: true,
   });
-  weatherCloudMaterial = new THREE.MeshBasicMaterial({
+  weatherCloudMaterial = new THREE.MeshLambertMaterial({
     color: 0xd8e4f2,
+    emissive: 0x5a5a66,
     transparent: true,
     opacity: 0,
-    vertexColors: true,
+    flatShading: true,
   });
   const configs = [
     { x: -38, y: 17.5, z: -50, scale: 1.05, speed: 0.55, t: 0 },
@@ -3121,7 +3038,7 @@ function updateClouds(delta) {
   if (baseCloudMaterial) {
     baseCloudMaterial.color.setHex(isRainySummer ? 0xc9d1df : isSnowyWinter ? 0xf4fbff : 0xf0f2f8);
     baseCloudMaterial.color.lerp(scene.background, CLOUD_SKY_TINT);
-    baseCloudMaterial.opacity = 0.82 + cloudWeatherBlend * 0.08;
+    baseCloudMaterial.opacity = 0.9 + cloudWeatherBlend * 0.06;
   }
   if (weatherCloudMaterial) {
     weatherCloudMaterial.color.setHex(isRainySummer ? 0xb7c2d4 : 0xeaf6ff);
@@ -3913,26 +3830,13 @@ function updateSeasonFade(delta) {
 }
 
 function recolorGround(palette) {
-  if (!sceneGroundMesh) return;
-  const color = new THREE.Color();
-  let index = 0;
-  for (let z = ROAD_MIN_Z; z < ROAD_MAX_Z; z += 1) {
-    for (let x = -11; x <= 11; x += 1) {
-      const jitter = (groundNoise(x + 13, z + 5) - 0.5) * 0.07;
-      if (roadBlocks[index].isStone) {
-        color.setHSL(palette.groundPath.h, palette.groundPath.s * 0.5, 0.36 + jitter);
-      } else if (Math.abs(x) < 3.1) {
-        color.setHSL(palette.groundPath.h, palette.groundPath.s, palette.groundPath.lBase + Math.sin(z * 0.7) * 0.025 + jitter * 0.7);
-      } else if ((x + z) % 7 === 0) {
-        color.setHSL(palette.groundAlt1.h, palette.groundAlt1.s, palette.groundAlt1.l + jitter);
-      } else {
-        color.setHSL(palette.groundGrass.h, palette.groundGrass.s, palette.groundGrass.l + Math.sin(x * 2.3 + z * 1.7) * 0.03 + jitter);
-      }
-      sceneGroundMesh.setColorAt(index, color.multiplyScalar(GROUND_TONE));
-      index += 1;
-    }
-  }
-  sceneGroundMesh.instanceColor.needsUpdate = true;
+  if (!sceneGround) return;
+  sceneGround.recolor({
+    path: { h: palette.groundPath.h, s: palette.groundPath.s, l: palette.groundPath.lBase },
+    grass: palette.groundGrass,
+    patch: palette.groundAlt1,
+    tone: GROUND_TONE,
+  });
 }
 
 function accuracy() {

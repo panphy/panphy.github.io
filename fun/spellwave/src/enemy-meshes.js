@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import { shadedBoxGeometry, GLOW_GAIN } from './visuals.js';
+import { buildMudlug, buildCrimsonBulwark } from './lowpoly-creatures.js';
 
 const materialCache = new Map();
 
@@ -102,6 +103,31 @@ function createGlowAnchor(color, intensity, distance, decay = 2) {
   return anchor;
 }
 
+// What the low-poly creature builders need: faceted materials, glowing ones, and a
+// mesh factory that sets up shadows and stun tinting like blockMesh does.
+const lowPolyKit = {
+  mat(color, options = {}) {
+    return getCachedMaterial(`lowpoly-${color}-${options.side ?? 0}`, {
+      color, roughness: 0.92, metalness: 0, flatShading: true, vertexColors: false, ...options,
+    });
+  },
+  glow(color, intensity = 1.5) {
+    return getCachedMaterial(`lowpoly-glow-${color}-${intensity}`, {
+      color, emissive: color, emissiveIntensity: intensity, roughness: 0.4, flatShading: true, vertexColors: false,
+    });
+  },
+  mesh(geometry, material) {
+    const mesh = new THREE.Mesh(geometry, material);
+    mesh.castShadow = true;
+    mesh.receiveShadow = true;
+    if (material.userData.stunMaterial) {
+      mesh.userData.normalMaterial = material;
+      mesh.userData.stunMaterial = material.userData.stunMaterial;
+    }
+    return mesh;
+  },
+};
+
 export function createEnemyMesh(type) {
   if (!!type.isMedic) return createMedicHeartMesh(type);
   if (!!type.isMimic) return createMimicChestMesh(type);
@@ -114,7 +140,7 @@ function createNormalEnemyMesh(type) {
   const trimMat = getTrimMat(type.trim);
   const eyeMat = getEyeMat(type.eye);
   let g;
-  if (type.name === 'Mudlug') g = createSlugMesh(bodyMat, trimMat, eyeMat);
+  if (type.name === 'Mudlug') g = buildMudlug(type, lowPolyKit);
   else if (type.name === 'Glowmite') g = createInsectMesh(bodyMat, trimMat, eyeMat);
   else if (type.name === 'Ash Oaf') g = createGolemMesh(bodyMat, trimMat, eyeMat);
   else if (type.name === 'Cinder Imp') g = createImpMesh(bodyMat, trimMat, eyeMat);
@@ -395,7 +421,7 @@ export function createMimicChestMesh(type) {
 }
 
 function createSpecificBossMesh(type) {
-  if (type.name === 'Crimson Bulwark') return createDragonBossMesh(type);
+  if (type.name === 'Crimson Bulwark') return finishBossGroup(buildCrimsonBulwark(type, lowPolyKit), type);
   if (type.name === 'Verdant Colossus') return createDevilBossMesh(type);
   if (type.name === 'Storm Warden') return createSkeletonBossMesh(type);
   if (type.name === 'Solar Anvil') return createSolarAnvilMesh(type);
