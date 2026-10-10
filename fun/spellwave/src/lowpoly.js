@@ -71,7 +71,18 @@ export function createLowPolyTerrain({ minZ, maxZ, halfWidth = 14, cell = 2, per
   mesh.position.z = maxZ;
 
   let scrolled = 0;
+  let blendFrom = null;
+  let blendTo = null;
   const color = new THREE.Color();
+  const fill = (target, { path, grass, patch, tone = 1 }) => {
+    faces.forEach((face, index) => {
+      if (face.onRoad) color.setHSL(path.h, path.s, path.l + (face.seed - 0.5) * 0.07);
+      else if (face.seed > 0.82) color.setHSL(patch.h, patch.s, patch.l);
+      else color.setHSL(grass.h, grass.s, grass.l + (face.seed - 0.5) * 0.09);
+      color.multiplyScalar(tone);
+      for (let corner = 0; corner < 3; corner += 1) color.toArray(target, index * 9 + corner * 3);
+    });
+  };
 
   return {
     mesh,
@@ -80,14 +91,21 @@ export function createLowPolyTerrain({ minZ, maxZ, halfWidth = 14, cell = 2, per
       mesh.position.z = maxZ + scrolled;
     },
     // path, grass and patch are { h, s, l } colours; every facet gets its own slight tone.
-    recolor({ path, grass, patch, tone = 1 }) {
-      faces.forEach((face, index) => {
-        if (face.onRoad) color.setHSL(path.h, path.s, path.l + (face.seed - 0.5) * 0.07);
-        else if (face.seed > 0.82) color.setHSL(patch.h, patch.s, patch.l);
-        else color.setHSL(grass.h, grass.s, grass.l + (face.seed - 0.5) * 0.09);
-        color.multiplyScalar(tone);
-        for (let corner = 0; corner < 3; corner += 1) color.toArray(colors, index * 9 + corner * 3);
-      });
+    recolor(spec) {
+      fill(colors, spec);
+      geometry.attributes.color.needsUpdate = true;
+    },
+    // For a gradual change: remember the colours now and the colours wanted, then call blend(0..1).
+    startBlend(spec) {
+      blendFrom = colors.slice();
+      blendTo = new Float32Array(colors.length);
+      fill(blendTo, spec);
+    },
+    blend(amount) {
+      if (!blendFrom) return;
+      for (let index = 0; index < colors.length; index += 1) {
+        colors[index] = blendFrom[index] + (blendTo[index] - blendFrom[index]) * amount;
+      }
       geometry.attributes.color.needsUpdate = true;
     },
   };
