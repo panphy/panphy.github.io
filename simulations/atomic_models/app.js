@@ -37,14 +37,26 @@ const EXCITE_PHASES = [['in', 1.4], ['up', 0.6], ['stay', 1.6], ['down', 0.5], [
 
 const viewer = $('viewer');
 const viewerPanel = $('viewer-panel');
+const workspace = $('workspace');
+const sideControls = $('side-controls');
+const sideAside = workspace.querySelector('aside');
+const wideQuery = window.matchMedia('(min-width: 900px)');
 const readout = $('particle-readout');
 
 // ---------- Fullscreen ----------
 const fullscreenButton = $('fullscreen');
 let fallbackFullscreen = false;
+// In wide fullscreen the controls move to the top of the right-hand column, above the explanation.
+function placeControls() {
+  const inSide = workspace.classList.contains('is-fullscreen') && wideQuery.matches;
+  if (inSide && sideControls.parentElement !== sideAside) sideAside.prepend(sideControls);
+  else if (!inSide && sideControls.parentElement !== viewerPanel) viewerPanel.append(sideControls);
+}
+wideQuery.addEventListener('change', placeControls);
 function updateFullscreen() {
-  const expanded = document.fullscreenElement === viewerPanel || fallbackFullscreen;
-  viewerPanel.classList.toggle('is-fullscreen', expanded);
+  const expanded = document.fullscreenElement === workspace || fallbackFullscreen;
+  workspace.classList.toggle('is-fullscreen', expanded);
+  placeControls();
   document.body.classList.toggle('viewer-expanded', expanded);
   fullscreenButton.classList.toggle('is-fullscreen', expanded);
   fullscreenButton.setAttribute('aria-label', expanded ? 'Exit fullscreen' : 'Enter fullscreen');
@@ -56,14 +68,14 @@ function updateFullscreen() {
   fullscreenButton.focus({ preventScroll: true });
 }
 fullscreenButton.addEventListener('click', async () => {
-  if (document.fullscreenElement === viewerPanel) {
+  if (document.fullscreenElement === workspace) {
     await document.exitFullscreen();
   } else if (fallbackFullscreen) {
     fallbackFullscreen = false;
     updateFullscreen();
   } else {
     try {
-      await viewerPanel.requestFullscreen();
+      await workspace.requestFullscreen();
     } catch {
       // Keep an expanded viewer available on browsers without element fullscreen.
       fallbackFullscreen = true;
