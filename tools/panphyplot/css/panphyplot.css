@@ -1579,19 +1579,22 @@ select {
 
 .plot-all-container {
 	display: flex;
-	justify-content: center;
+	justify-content: flex-end;
 	margin-top: 10px;
 }
 
 /* Plot ALL Datasets - Periwinkle (Analysis action) */
 .plot-all-btn {
-	padding: 12px 24px;
+	flex: 0 0 auto;
+	min-height: 48px;
+	margin: 0;
+	padding: 10px 16px;
 	background-color: var(--btn-analyze);
 	color: #fff;
 	border: none;
 	border-radius: 12px;
 	cursor: pointer;
-	font-size: 0.95rem;
+	font-size: 0.9rem;
 	font-weight: 600;
 	transition: background-color 0.2s ease, transform 0.2s ease;
 }
