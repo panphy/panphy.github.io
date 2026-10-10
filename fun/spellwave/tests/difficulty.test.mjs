@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {
   NORMAL_PROMPT_LENGTH_CAPS, EARLY_BOSS_WAVES, HARD_GUEST_COUNTS,
-  typedLength, normalPromptLengthCap, bossWordLengthCap, previewLengthCap, withinLength, hardGuestCount,
+  typedLength, bossAnswerLengthCap, normalPromptLengthCap, bossWordLengthCap, previewLengthCap, withinLength, hardGuestCount,
 } from '../src/difficulty.js';
 import { EASY_WORDS, MEDIUM_WORDS, HARD_WORDS } from '../src/question-bank.js';
 
@@ -13,13 +13,16 @@ test('typed length ignores spaces and punctuation', () => {
   assert.equal(typedLength({ term: "Fleming's left hand rule" }), 20);
 });
 
-test('length caps never shrink from one wave to the next and end uncapped', () => {
+test('minion caps increase gently and stay capped in late waves', () => {
   for (let wave = 2; wave <= 10; wave += 1) {
     assert.ok(normalPromptLengthCap(wave) >= normalPromptLengthCap(wave - 1), `wave ${wave}`);
   }
-  assert.equal(normalPromptLengthCap(NORMAL_PROMPT_LENGTH_CAPS.length + 1), Infinity);
+  assert.equal(normalPromptLengthCap(NORMAL_PROMPT_LENGTH_CAPS.length + 1), 14);
+  assert.equal(normalPromptLengthCap(10), 14);
   assert.equal(bossWordLengthCap(EARLY_BOSS_WAVES + 1), Infinity);
-  assert.ok(previewLengthCap(1) >= bossWordLengthCap(1));
+  for (let wave = 1; wave <= 10; wave += 1) {
+    assert.equal(previewLengthCap(wave), normalPromptLengthCap(wave));
+  }
 });
 
 // Wave 1 draws only from the easy list, so an over-long easy keyword would be silently dropped.
@@ -54,5 +57,14 @@ test('every capped wave still has plenty of normal keywords', () => {
   const poolFor = (wave) => (wave >= 5 ? [...MEDIUM_WORDS, ...HARD_WORDS] : wave >= 3 ? [...EASY_WORDS, ...MEDIUM_WORDS] : EASY_WORDS);
   for (let wave = 1; wave <= NORMAL_PROMPT_LENGTH_CAPS.length; wave += 1) {
     assert.ok(withinLength(poolFor(wave), normalPromptLengthCap(wave)).length >= 40, `wave ${wave}`);
+  }
+});
+
+test('long phrases stay out of normal pools and previews at every wave', () => {
+  const longTerms = HARD_WORDS.filter(entry => typedLength(entry) > 14);
+  for (let wave = 1; wave <= 10; wave += 1) {
+    assert.equal(withinLength(longTerms, normalPromptLengthCap(wave)).length, 0);
+    assert.equal(withinLength(longTerms, previewLengthCap(wave)).length, 0);
+    assert.equal(bossAnswerLengthCap(wave), wave <= 2 ? 14 : 16);
   }
 });

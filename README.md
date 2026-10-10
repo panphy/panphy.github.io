@@ -37,7 +37,7 @@ Pages under `fun/`, `beta/`, `misc/` and `gcsephy/` need internet access, as do 
 | `sw.js`, `manifest.json` | Caching, updates, and PWA configuration |
 | `assets/` | Shared controls, icons, locally hosted fonts, and service-worker registration |
 | `tools/`, `simulations/`, `for_teachers/` | Published educational apps |
-| `fun/` | Network-only games and demos; Spellwave's text-logic tests run with `node --test fun/spellwave/tests/` |
+| `fun/` | Network-only games and demos; Spellwave's text-logic tests run with `node --test fun/spellwave/tests/*.test.mjs` |
 | `beta/` | Trial apps, listed in `beta/index.html`; `beta/do_now/` only forwards old links to `gcsephy/do-now/` |
 | `misc/` | Unlisted resources, inventoried in `misc/index.html` |
 | `gcsephy/` | GCSE Physics curriculum resources and the Do Now starters, inventoried in `gcsephy/index.html` |
