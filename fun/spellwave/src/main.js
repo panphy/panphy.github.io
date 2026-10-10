@@ -6,6 +6,7 @@ import { ALL_WORDS, EASY_WORDS, HARD_WORDS, MEDIUM_WORDS, EQUATION_WORDS } from 
 import { createEndingFX } from './ending-fx.js';
 import { createLeaderboard } from './leaderboard.js';
 import { createEnemyMesh, createMimicChestMesh, blockMesh } from './enemy-meshes.js';
+import { normalPromptLengthCap, bossWordLengthCap, previewLengthCap, withinLength, hardGuestCount } from './difficulty.js';
 import { createVisuals, shadedBoxGeometry, GLOW_GAIN, MOON_GLOW_GAIN } from './visuals.js';
 import { pickTarget, getInputCharacters, isMathOperatorInput, buildSearchPrompt, buildAltSearchPrompts, buildHintMask, getBossQuestionHintRange, escapeHtml, wrapSups, buildHintPart, buildTwoWordLimit, shouldUseVocabularyPromptLimit, promptIndexForProgress } from './prompt-utils.js';
 
@@ -3517,7 +3518,10 @@ function prepareWavePlan() {
     const quantities = getEquationQuantities(equationWord.term);
     const unseenQuantities = quantities.filter(q => !previewableWords.some(pw => pw.term === q.term));
     if (unseenQuantities.length > 0) {
-      const chosenQuantity = unseenQuantities[Math.floor(Math.random() * unseenQuantities.length)];
+      // Prefer a quantity short enough for this wave; an equation of long quantities still previews one.
+      const fitting = withinLength(unseenQuantities, previewLengthCap(waveSet));
+      const candidates = fitting.length > 0 ? fitting : unseenQuantities;
+      const chosenQuantity = candidates[Math.floor(Math.random() * candidates.length)];
       previewableWords.push(chosenQuantity);
     }
   }
@@ -3617,10 +3621,10 @@ function buildBossPreviewSchedule(target, words) {
 }
 
 function buildHardGuestSchedule(target) {
-  const count = 1 + Math.floor(Math.random() * 2);
+  const count = hardGuestCount(waveSet);
   const reservedTerms = new Set(bossWordsThisSet.map(w => w.term));
-  const available = HARD_WORDS.filter(w => !reservedTerms.has(w.term));
-  if (available.length === 0) return new Map();
+  const available = withinLength(HARD_WORDS, normalPromptLengthCap(waveSet)).filter(w => !reservedTerms.has(w.term));
+  if (count === 0 || available.length === 0) return new Map();
 
   const picked = [];
   const usedTerms = new Set();
@@ -3680,7 +3684,7 @@ function chooseEquationWord(usedTerms = new Set()) {
 function chooseBossPool() {
   if (waveSet >= 5) return [...MEDIUM_WORDS, ...HARD_WORDS];
   if (waveSet >= 3) return HARD_WORDS;
-  return MEDIUM_WORDS;
+  return withinLength(MEDIUM_WORDS, bossWordLengthCap(waveSet));
 }
 
 function choosePrompt() {
@@ -3722,9 +3726,10 @@ function chooseMedicPrompt() {
 }
 
 function currentKeywordPool() {
-  if (waveSet >= 5) return [...MEDIUM_WORDS, ...HARD_WORDS];
-  if (waveSet >= 3) return [...EASY_WORDS, ...MEDIUM_WORDS];
-  return EASY_WORDS;
+  const pool = waveSet >= 5 ? [...MEDIUM_WORDS, ...HARD_WORDS]
+    : waveSet >= 3 ? [...EASY_WORDS, ...MEDIUM_WORDS]
+    : EASY_WORDS;
+  return withinLength(pool, normalPromptLengthCap(waveSet));
 }
 
 function refreshWaveBossOrder(count) {
