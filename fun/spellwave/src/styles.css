@@ -3235,9 +3235,11 @@ body.is-running:not(.is-paused) .sw-leaderboard {
 
 .word-tag.is-boss.is-target {
   border-color: color-mix(in srgb, var(--boss-accent, var(--danger)) 80%, #3d2b1c 20%);
+  /* Two image layers, like the untargeted boss label. A plain colour here would make the
+     120ms background transition fade from see-through, which shows as a flash. */
   background:
     linear-gradient(90deg, color-mix(in srgb, var(--boss-accent, var(--danger)) 18%, transparent), transparent),
-    #fff;
+    linear-gradient(#fff, #fff);
   box-shadow: 0 0 0 3px color-mix(in srgb, var(--boss-accent, var(--danger)) 40%, transparent), 0 8px 22px rgba(74, 52, 28, 0.34);
 }
 
