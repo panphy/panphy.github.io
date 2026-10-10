@@ -1,5 +1,4 @@
 import * as THREE from 'three';
-import { shadedBoxGeometry } from './visuals.js';
 
 export function createSeasonalEffects({
   scene,
@@ -258,15 +257,19 @@ export function createSeasonalEffects({
   }
 
   function createSpringFlowers() {
-    const stemMaterial = new THREE.MeshStandardMaterial({ vertexColors: true, color: 0x2e7d48, roughness: 0.82 });
-    const centerMaterial = new THREE.MeshStandardMaterial({ vertexColors: true, color: 0xffd86f, roughness: 0.55, emissive: 0x6b3a00, emissiveIntensity: 0.18 });
+    const stemMaterial = new THREE.MeshStandardMaterial({ flatShading: true, color: 0x2e7d48, roughness: 0.82 });
+    const centerMaterial = new THREE.MeshStandardMaterial({ flatShading: true, color: 0xffd86f, roughness: 0.55, emissive: 0x6b3a00, emissiveIntensity: 0.18 });
     const petalMaterials = [
-      new THREE.MeshStandardMaterial({ vertexColors: true, color: 0xff8fbd, roughness: 0.72 }),
-      new THREE.MeshStandardMaterial({ vertexColors: true, color: 0xf9c7dc, roughness: 0.72 }),
-      new THREE.MeshStandardMaterial({ vertexColors: true, color: 0xd9f99d, roughness: 0.75 }),
-      new THREE.MeshStandardMaterial({ vertexColors: true, color: 0xbde7ff, roughness: 0.7 }),
+      new THREE.MeshStandardMaterial({ flatShading: true, color: 0xff8fbd, roughness: 0.72 }),
+      new THREE.MeshStandardMaterial({ flatShading: true, color: 0xf9c7dc, roughness: 0.72 }),
+      new THREE.MeshStandardMaterial({ flatShading: true, color: 0xd9f99d, roughness: 0.75 }),
+      new THREE.MeshStandardMaterial({ flatShading: true, color: 0xbde7ff, roughness: 0.7 }),
     ];
 
+    // Each flower is a thin stem, a flattened faceted bloom and a small centre.
+    const stemGeometry = new THREE.CylinderGeometry(0.02, 0.03, 1, 3);
+    const bloomGeometry = new THREE.IcosahedronGeometry(0.16, 0);
+    const centreGeometry = new THREE.OctahedronGeometry(0.06, 0);
     for (let patchIndex = 0; patchIndex < 42; patchIndex += 1) {
       const side = patchIndex % 2 === 0 ? -1 : 1;
       const group = new THREE.Group();
@@ -281,11 +284,19 @@ export function createSeasonalEffects({
         const localX = (Math.random() - 0.5) * 0.86;
         const localZ = (Math.random() - 0.5) * 0.68;
         const height = 0.28 + Math.random() * 0.2;
-        group.add(blockMesh(0.07, height, 0.07, stemMaterial, localX, height * 0.5, localZ));
-        group.add(blockMesh(0.34, 0.12, 0.13, petalMaterial, localX, height + 0.035, localZ));
-        const crossPetal = blockMesh(0.13, 0.12, 0.34, petalMaterial, localX, height + 0.035, localZ);
-        group.add(crossPetal);
-        group.add(blockMesh(0.11, 0.11, 0.11, centerMaterial, localX, height + 0.075, localZ));
+        const stem = new THREE.Mesh(stemGeometry, stemMaterial);
+        stem.scale.y = height;
+        stem.position.set(localX, height * 0.5, localZ);
+        const bloom = new THREE.Mesh(bloomGeometry, petalMaterial);
+        bloom.scale.set(1, 0.5, 1);
+        bloom.position.set(localX, height + 0.04, localZ);
+        bloom.rotation.y = Math.random() * Math.PI;
+        const centre = new THREE.Mesh(centreGeometry, centerMaterial);
+        centre.position.set(localX, height + 0.1, localZ);
+        for (const part of [stem, bloom, centre]) {
+          part.castShadow = true;
+          group.add(part);
+        }
       }
 
       group.visible = false;
@@ -301,16 +312,20 @@ export function createSeasonalEffects({
 
   function createAutumnFallenLeaves() {
     const leafMaterials = [
-      new THREE.MeshStandardMaterial({ vertexColors: true, color: 0xb33b12, roughness: 0.9 }),
-      new THREE.MeshStandardMaterial({ vertexColors: true, color: 0xd76818, roughness: 0.9 }),
-      new THREE.MeshStandardMaterial({ vertexColors: true, color: 0xe1a32c, roughness: 0.86 }),
-      new THREE.MeshStandardMaterial({ vertexColors: true, color: 0x7d2d18, roughness: 0.94 }),
+      new THREE.MeshStandardMaterial({ flatShading: true, color: 0xb33b12, roughness: 0.9 }),
+      new THREE.MeshStandardMaterial({ flatShading: true, color: 0xd76818, roughness: 0.9 }),
+      new THREE.MeshStandardMaterial({ flatShading: true, color: 0xe1a32c, roughness: 0.86 }),
+      new THREE.MeshStandardMaterial({ flatShading: true, color: 0x7d2d18, roughness: 0.94 }),
     ];
 
+    const leafGeometry = new THREE.OctahedronGeometry(1, 0);
     for (let index = 0; index < 92; index += 1) {
       const side = index % 2 === 0 ? -1 : 1;
       const material = leafMaterials[index % leafMaterials.length];
-      const mesh = blockMesh(0.24 + Math.random() * 0.18, 0.025, 0.1 + Math.random() * 0.14, material, 0, 0.01, 0);
+      const mesh = new THREE.Mesh(leafGeometry, material);
+      mesh.scale.set(0.14 + Math.random() * 0.1, 0.02, 0.07 + Math.random() * 0.08);
+      mesh.position.y = 0.01;
+      mesh.receiveShadow = true;
       mesh.position.x = side * (4.95 + Math.random() * 2.2);
       mesh.position.z = pathMarkerMinZ + Math.random() * (pathMarkerMaxZ - pathMarkerMinZ);
       mesh.rotation.y = Math.random() * Math.PI;
@@ -413,13 +428,6 @@ export function createSeasonalEffects({
     }
   }
 
-  function blockMesh(width, height, depth, material, x, y, z) {
-    const mesh = new THREE.Mesh(shadedBoxGeometry(width, height, depth, 0.8), material);
-    mesh.position.set(x, y, z);
-    mesh.castShadow = true;
-    mesh.receiveShadow = true;
-    return mesh;
-  }
 
   return {
     create,

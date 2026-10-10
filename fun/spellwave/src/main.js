@@ -5,10 +5,10 @@ import { createPotionSystem } from './potions.js';
 import { ALL_WORDS, EASY_WORDS, HARD_WORDS, MEDIUM_WORDS, EQUATION_WORDS } from './question-bank.js';
 import { createEndingFX } from './ending-fx.js';
 import { createLeaderboard } from './leaderboard.js';
-import { createEnemyMesh, createMimicChestMesh, blockMesh } from './enemy-meshes.js';
+import { createEnemyMesh, createMimicChestMesh } from './enemy-meshes.js';
 import { normalPromptLengthCap, bossWordLengthCap, previewLengthCap, withinLength, hardGuestCount } from './difficulty.js';
 import { createLowPolyTerrain, createLowPolyTree, createLowPolyRock, createLowPolyCloud } from './lowpoly.js';
-import { createVisuals, shadedBoxGeometry, GLOW_GAIN, MOON_GLOW_GAIN } from './visuals.js';
+import { createVisuals, GLOW_GAIN, MOON_GLOW_GAIN } from './visuals.js';
 import { pickTarget, getInputCharacters, isMathOperatorInput, buildSearchPrompt, buildAltSearchPrompts, buildHintMask, getBossQuestionHintRange, escapeHtml, wrapSups, buildHintPart, buildTwoWordLimit, shouldUseVocabularyPromptLimit, promptIndexForProgress } from './prompt-utils.js';
 
 const canvas = document.getElementById('gameCanvas');
@@ -340,10 +340,10 @@ const CLOUD_SKY_TINT = 0.42;
 const GROUND_TONE = 0.8;
 
 const SEASON_PALETTES = [
-  { // Spring (wave 1): paper-warm daylight, olive trees, sand road.
-    // Light levels stay modest so sunlit ground does not cross the bloom threshold.
+  // Light levels stay modest in every season so sunlit ground does not cross the bloom threshold.
+  { // Spring (wave 1): paper-warm daylight, olive trees, sand road
     name: 'spring',
-    bgColor: 0x9fd4c2, fogColor: 0xe6d6a4, fogNear: 34, fogFar: 96, skyTop: 0x3fa596,
+    bgColor: 0x9fd4c2, fogColor: 0xe6d6a4, fogNear: 42, fogFar: 118, skyTop: 0x3fa596,
     hemiSky: 0xd8ecd8, hemiGround: 0x9a7a44, hemiIntensity: 0.85,
     sunColor: 0xffe9bd, sunIntensity: 1.55,
     emberColor: 0xffc078, emberIntensity: 1.6,
@@ -354,44 +354,44 @@ const SEASON_PALETTES = [
     groundAlt1: { h: 0.16, s: 0.55, l: 0.44 },
     groundGrass: { h: 0.215, s: 0.6, l: 0.36 },
   },
-  { // Summer (wave 2): warm blue evening, lush greens
+  { // Summer (wave 2): moonlit night, deep greens, cool stone road
     name: 'summer',
-    bgColor: 0x243870, fogColor: 0x243870, fogNear: 26, fogFar: 88, skyTop: 0x0b1440,
-    hemiSky: 0x4878d0, hemiGround: 0x265028, hemiIntensity: 1.5,
-    sunColor: 0xfffac8, sunIntensity: 3.0,
-    emberColor: 0xffcc30, emberIntensity: 2.8,
+    bgColor: 0x2c4c8a, fogColor: 0x2a4476, fogNear: 42, fogFar: 118, skyTop: 0x0c1740,
+    hemiSky: 0x7f9fe0, hemiGround: 0x2a4a34, hemiIntensity: 0.9,
+    sunColor: 0xd6e4ff, sunIntensity: 1.5,
+    emberColor: 0xffcc30, emberIntensity: 2.2,
     pathMarkerColor: 0x58dfcf, pathMarkerEmissive: 0x0e6861,
-    leafColors: [0x2a7840, 0x3d9050, 0x1a5530], trunkColor: 0x3d2010,
-    moonColor: 0xfff1b8, starOpacity: 0.15,
-    groundPath: { h: 0.1, s: 0.22, lBase: 0.28 },
-    groundAlt1: { h: 0.28, s: 0.35, l: 0.34 },
-    groundGrass: { h: 0.3, s: 0.44, l: 0.24 },
+    leafColors: [0x2f8a4a, 0x43a058, 0x1f6a3c], trunkColor: 0x7a4a26,
+    moonColor: 0xfff1b8, starOpacity: 0.55,
+    groundPath: { h: 0.1, s: 0.22, lBase: 0.46 },
+    groundAlt1: { h: 0.3, s: 0.45, l: 0.38 },
+    groundGrass: { h: 0.36, s: 0.5, l: 0.3 },
   },
-  { // Autumn (wave 3): golden harvest dusk, amber sky, red/orange leaves
+  { // Autumn (wave 3): amber dusk under a mauve sky, red and gold leaves
     name: 'autumn',
-    bgColor: 0xd07840, fogColor: 0xb06030, fogNear: 22, fogFar: 72, skyTop: 0x5a3a78,
-    hemiSky: 0xe0b878, hemiGround: 0x703820, hemiIntensity: 1.4,
-    sunColor: 0xff9840, sunIntensity: 2.4,
-    emberColor: 0xff4818, emberIntensity: 2.8,
+    bgColor: 0xf0b070, fogColor: 0xe2a264, fogNear: 42, fogFar: 118, skyTop: 0x7a5690,
+    hemiSky: 0xf0cf98, hemiGround: 0x8a4a24, hemiIntensity: 0.85,
+    sunColor: 0xffb060, sunIntensity: 1.5,
+    emberColor: 0xff4818, emberIntensity: 2.2,
     pathMarkerColor: 0xe87830, pathMarkerEmissive: 0xa83808,
-    leafColors: [0xc04000, 0xd86810, 0xc89010], trunkColor: 0x3d2010,
-    moonColor: 0xfff1b8, starOpacity: 0.2,
-    groundPath: { h: 0.07, s: 0.3, lBase: 0.30 },
-    groundAlt1: { h: 0.06, s: 0.38, l: 0.32 },
-    groundGrass: { h: 0.07, s: 0.42, l: 0.26 },
+    leafColors: [0xc8501a, 0xe08a1c, 0xd6aa28], trunkColor: 0x6a3418,
+    moonColor: 0xffe0a8, starOpacity: 0.12,
+    groundPath: { h: 0.09, s: 0.45, lBase: 0.5 },
+    groundAlt1: { h: 0.06, s: 0.55, l: 0.42 },
+    groundGrass: { h: 0.11, s: 0.52, l: 0.38 },
   },
-  { // Winter (wave 4): cold steel-blue dusk, icy tones
+  { // Winter (wave 4): pale snowfields in blue dusk, frosted trees
     name: 'winter',
-    bgColor: 0x1e3050, fogColor: 0x1e3050, fogNear: 18, fogFar: 68, skyTop: 0x060d26,
-    hemiSky: 0x5070b0, hemiGround: 0x182840, hemiIntensity: 1.2,
-    sunColor: 0xb8d4ff, sunIntensity: 2.0,
+    bgColor: 0x8fa8c8, fogColor: 0xbccadd, fogNear: 40, fogFar: 112, skyTop: 0x334c7c,
+    hemiSky: 0xd8e4f8, hemiGround: 0x7a8aa0, hemiIntensity: 0.72,
+    sunColor: 0xdde8ff, sunIntensity: 1.1,
     emberColor: 0x6888ff, emberIntensity: 2.0,
     pathMarkerColor: 0x88ccff, pathMarkerEmissive: 0x3870d0,
-    leafColors: [0xc8dff0, 0xd8ecff, 0xbbd4f0], trunkColor: 0x708090,
-    moonColor: 0xfff1b8, starOpacity: 0.65,
-    groundPath: { h: 0.58, s: 0.08, lBase: 0.28 },
-    groundAlt1: { h: 0.58, s: 0.12, l: 0.32 },
-    groundGrass: { h: 0.6, s: 0.18, l: 0.24 },
+    leafColors: [0xd6e2f0, 0xe6eef8, 0xb8cbe2], trunkColor: 0x5e4c46,
+    moonColor: 0xfff1d8, starOpacity: 0.35,
+    groundPath: { h: 0.6, s: 0.14, lBase: 0.56 },
+    groundAlt1: { h: 0.58, s: 0.3, l: 0.62 },
+    groundGrass: { h: 0.6, s: 0.25, l: 0.7 },
   },
 ];
 
@@ -2696,7 +2696,8 @@ function createShaderKeepers() {
 }
 
 function createGround() {
-  sceneGround = createLowPolyTerrain({ minZ: ROAD_MIN_Z, maxZ: ROAD_MAX_Z });
+  // The ground runs well past the last trees so its far edge is lost in the haze.
+  sceneGround = createLowPolyTerrain({ minZ: ROAD_MIN_Z - 54, maxZ: ROAD_MAX_Z });
   world.add(sceneGround.mesh);
 }
 
@@ -2730,11 +2731,17 @@ function createLightningCrown() {
 }
 
 function createTorches() {
-  const shaftMat = new THREE.MeshStandardMaterial({ color: 0x2a1a10, roughness: 0.88, vertexColors: true });
-  const bandMat = new THREE.MeshStandardMaterial({ color: 0x9a7a48, roughness: 0.36, metalness: 0.8, vertexColors: true });
+  const shaftMat = new THREE.MeshStandardMaterial({ color: 0x6b4226, roughness: 0.9, flatShading: true });
+  const bandMat = new THREE.MeshStandardMaterial({ color: 0xd9a441, roughness: 0.4, metalness: 0.6, flatShading: true });
+  const wandPart = (geometry, material, y) => {
+    const mesh = new THREE.Mesh(geometry, material);
+    mesh.position.y = y;
+    mesh.castShadow = true;
+    return mesh;
+  };
   sceneCrystalMat = new THREE.MeshStandardMaterial({
     color: 0x58dfcf, emissive: 0x2dd4bf, emissiveIntensity: 2.6,
-    roughness: 0.1, metalness: 0.2, transparent: true, opacity: 0.9,
+    roughness: 0.1, metalness: 0.2, transparent: true, opacity: 0.9, flatShading: true,
   });
 
   for (const x of [-5.35, 5.35]) {
@@ -2747,27 +2754,30 @@ function createTorches() {
     wandGroups.push(wandGroup);
 
     // Shaft (local coords: x=0, z=0 relative to wand base)
-    wandGroup.add(blockMesh(0.15, 1.85, 0.15, shaftMat, 0, 0.925, 0));
+    wandGroup.add(wandPart(new THREE.CylinderGeometry(0.07, 0.12, 1.9, 5), shaftMat, 0.95));
     // Decorative bands
-    wandGroup.add(blockMesh(0.24, 0.1, 0.24, bandMat, 0, 0.38, 0));
-    wandGroup.add(blockMesh(0.24, 0.1, 0.24, bandMat, 0, 1.0, 0));
-    wandGroup.add(blockMesh(0.24, 0.1, 0.24, bandMat, 0, 1.74, 0));
+    wandGroup.add(wandPart(new THREE.CylinderGeometry(0.15, 0.15, 0.1, 6), bandMat, 0.38));
+    wandGroup.add(wandPart(new THREE.CylinderGeometry(0.13, 0.13, 0.1, 6), bandMat, 1.0));
+    wandGroup.add(wandPart(new THREE.CylinderGeometry(0.11, 0.11, 0.1, 6), bandMat, 1.74));
     // Crystal cage (metal brackets framing the orb)
-    wandGroup.add(blockMesh(0.32, 0.1, 0.32, bandMat, 0, 1.88, 0));
-    wandGroup.add(blockMesh(0.32, 0.1, 0.32, bandMat, 0, 2.34, 0));
+    wandGroup.add(wandPart(new THREE.CylinderGeometry(0.2, 0.12, 0.12, 6), bandMat, 1.88));
+    wandGroup.add(wandPart(new THREE.ConeGeometry(0.07, 0.16, 4), bandMat, 2.5));
 
     // Crystal cluster group (pulsed as a unit, local to wandGroup)
     const crystalGroup = new THREE.Group();
     crystalGroup.position.set(0, 2.11, 0);
-    const core = new THREE.Mesh(new THREE.BoxGeometry(0.36, 0.54, 0.36), sceneCrystalMat);
+    const core = new THREE.Mesh(new THREE.OctahedronGeometry(0.26, 0), sceneCrystalMat);
+    core.scale.set(1, 1.35, 1);
     core.castShadow = true;
     crystalGroup.add(core);
-    const leftShard = new THREE.Mesh(new THREE.BoxGeometry(0.14, 0.3, 0.14), sceneCrystalMat);
+    const leftShard = new THREE.Mesh(new THREE.OctahedronGeometry(0.12, 0), sceneCrystalMat);
+    leftShard.scale.set(1, 1.6, 1);
     leftShard.position.set(-0.2, 0.08, 0);
     leftShard.rotation.z = 0.35;
     leftShard.castShadow = true;
     crystalGroup.add(leftShard);
-    const rightShard = new THREE.Mesh(new THREE.BoxGeometry(0.14, 0.3, 0.14), sceneCrystalMat);
+    const rightShard = new THREE.Mesh(new THREE.OctahedronGeometry(0.12, 0), sceneCrystalMat);
+    rightShard.scale.set(1, 1.6, 1);
     rightShard.position.set(0.2, 0.08, 0);
     rightShard.rotation.z = -0.35;
     rightShard.castShadow = true;
@@ -2798,7 +2808,7 @@ function createTrees() {
     new THREE.MeshStandardMaterial({ color: 0x2f7247, roughness: 0.95, flatShading: true }),
     new THREE.MeshStandardMaterial({ color: 0x163d30, roughness: 0.95, flatShading: true }),
   ];
-  const rockMaterial = new THREE.MeshStandardMaterial({ color: 0xe2cfa0, roughness: 1, flatShading: true });
+  const rockMaterial = new THREE.MeshStandardMaterial({ color: 0xd6ccb4, roughness: 1, flatShading: true });
 
   for (let index = 0; index < 34; index += 1) {
     const side = index % 2 === 0 ? -1 : 1;
@@ -2837,10 +2847,18 @@ function createPathMarkers() {
     emissive: 0x0e6861,
     emissiveIntensity: 1.5,
     roughness: 0.55,
+    flatShading: true,
   });
+  // Flat glowing diamonds set into the road.
+  const markerGeometry = new THREE.OctahedronGeometry(1, 0);
+  const markerScale = new THREE.Vector3(0.16, 0.05, 0.6);
   for (let z = PATH_MARKER_MIN_Z; z <= PATH_MARKER_MAX_Z; z += PATH_MARKER_SPACING) {
-    const leftMarker = blockMesh(0.22, 0.1, 1.1, pathMarkerMaterial, -3.4, PATH_MARKER_BASE_Y, z);
-    const rightMarker = blockMesh(0.22, 0.1, 1.1, pathMarkerMaterial, 3.4, PATH_MARKER_BASE_Y, z);
+    const leftMarker = new THREE.Mesh(markerGeometry, pathMarkerMaterial);
+    leftMarker.position.set(-3.4, PATH_MARKER_BASE_Y, z);
+    const rightMarker = new THREE.Mesh(markerGeometry, pathMarkerMaterial);
+    rightMarker.position.set(3.4, PATH_MARKER_BASE_Y, z);
+    leftMarker.scale.copy(markerScale);
+    rightMarker.scale.copy(markerScale);
     configurePathMarker(leftMarker);
     configurePathMarker(rightMarker);
     world.add(leftMarker);
