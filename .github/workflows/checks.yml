@@ -31,4 +31,5 @@ jobs:
           node --test \
             tools/panphyplot/tests/regression.test.cjs \
             tools/motion_tracker/tests/regression.test.cjs \
-            fun/spellwave/tests/prompt-utils.test.mjs
+            fun/spellwave/tests/prompt-utils.test.mjs \
+            fun/spellwave/tests/difficulty.test.mjs
