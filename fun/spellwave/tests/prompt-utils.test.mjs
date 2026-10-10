@@ -148,3 +148,62 @@ test('typing another prompt switches targets immediately and discards old progre
   assert.equal(context.kills, 1);
   assert.equal(context.typedAttempts, 4);
 });
+
+
+function createBossPacingHarness() {
+  const source = readFileSync(new URL('../src/main.js', import.meta.url), 'utf8');
+  const start = source.indexOf('        if (bossesSpawned < BOSSES_PER_WAVE)');
+  const end = source.lastIndexOf('\n      }', source.indexOf('\n    updateEnemies(currentDelta'));
+  assert.ok(start >= 0 && end > start);
+  const context = vm.createContext({
+    BOSSES_PER_WAVE: 3,
+    bossesSpawned: 0, bossSpawnTimer: 1, currentDelta: 0,
+    waveClearDelayTimer: 0, clears: 0, enemies: [],
+    currentDifficulty: () => ({ bossSpawnGap: 2.8 }),
+  });
+  context.spawnBoss = () => context.enemies.push({ isBoss: true, dying: false });
+  context.startWaveCleared = () => { context.clears += 1; };
+  return {
+    context,
+    tick(delta) { context.currentDelta = delta; vm.runInContext(source.slice(start, end), context); },
+  };
+}
+
+test('all three bosses can overlap on the 2.8-second timer without a kill', () => {
+  const { context, tick } = createBossPacingHarness();
+  tick(1);
+  assert.equal(context.bossesSpawned, 1);
+  tick(2.7);
+  assert.equal(context.bossesSpawned, 1);
+  tick(0.11);
+  assert.equal(context.bossesSpawned, 2);
+  tick(2.8);
+  assert.equal(context.bossesSpawned, 3);
+  assert.equal(context.enemies.length, 3);
+  tick(5);
+  assert.equal(context.bossesSpawned, 3);
+  assert.equal(context.clears, 0);
+  context.enemies.length = 0;
+  tick(0.1);
+  tick(1.3);
+  assert.equal(context.clears, 1);
+});
+
+test('the finale can spawn more than two bosses without defeating earlier ones', () => {
+  const source = readFileSync(new URL('../src/main.js', import.meta.url), 'utf8');
+  const start = source.indexOf('          const nextEntry = finalWaveQueue[finalWaveQueueIndex];');
+  const end = source.indexOf('\n        }\n      } else {', start);
+  assert.ok(start >= 0 && end > start);
+  const context = vm.createContext({
+    finalWaveQueue: ['boss', 'boss', 'boss', 'boss'], finalWaveQueueIndex: 0,
+    bossesSpawned: 0, bossSpawnTimer: 0, currentDelta: 2.8, enemies: [],
+    currentDifficulty: () => ({ bossSpawnGap: 2.8 }),
+  });
+  context.spawnBoss = () => context.enemies.push({ isBoss: true, dying: false });
+  for (let index = 0; index < 4; index += 1) {
+    vm.runInContext(`{${source.slice(start, end)}}`, context);
+  }
+  assert.equal(context.bossesSpawned, 4);
+  assert.equal(context.enemies.length, 4);
+  assert.equal(context.finalWaveQueueIndex, 4);
+});
