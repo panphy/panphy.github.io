@@ -71,6 +71,12 @@
       if (start < 0 || end < 0) throw new Error(`Could not find ${name} in main.js`);
       return new Function(`return ${source.slice(start + `const ${name} = `.length, end + 2)}`)();
     };
+    const readNumber = (name) => {
+      const match = source.match(new RegExp(`const ${name} = (-?[\\d.]+);`));
+      if (!match) throw new Error(`Could not find ${name} in main.js`);
+      return Number(match[1]);
+    };
+    const HEIGHTS = { ground: readNumber('GROUND_ENEMY_Y'), flying: readNumber('FLYING_ENEMY_Y'), medic: readNumber('MEDIC_ENEMY_Y') };
     const sections = [
       ['Minions', readLiteral('ENEMY_TYPES', '[', ']')],
       ['Bosses', readLiteral('BOSS_TYPES', '[', ']')],
@@ -113,7 +119,8 @@
 
     const groundMaterial = new THREE.MeshStandardMaterial({ color: 0xbfae84, roughness: 1, flatShading: true });
     const ground = new THREE.Mesh(new THREE.CylinderGeometry(3.4, 3.4, 0.1, 10), groundMaterial);
-    ground.position.y = -0.05;
+    // Top face at the road's mean height in the game.
+    ground.position.y = -0.15;
     ground.receiveShadow = true;
     scene.add(ground);
 
@@ -160,7 +167,7 @@
         if (incomingBeacon) incomingBeacon.visible = false;
         if (targetMarker) targetMarker.visible = false;
         const flying = !!type.isFlying;
-        group.position.y = flying ? 2.4 : 0.32;
+        group.position.y = flying ? HEIGHTS.flying : type.isMedic ? HEIGHTS.medic : HEIGHTS.ground;
         const holder = new THREE.Group();
         holder.add(group);
         holder.visible = false;
