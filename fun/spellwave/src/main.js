@@ -6,10 +6,10 @@ import { ALL_WORDS, EASY_WORDS, HARD_WORDS, MEDIUM_WORDS, EQUATION_WORDS } from 
 import { createEndingFX } from './ending-fx.js';
 import { createLeaderboard } from './leaderboard.js';
 import { createEnemyMesh, createMimicChestMesh } from './enemy-meshes.js';
-import { normalPromptLengthCap, bossAnswerLengthCap, bossWordLengthCap, previewLengthCap, withinLength, hardGuestCount } from './difficulty.js?v=20261010-boss-pressure';
+import { normalPromptLengthCap, bossAnswerLengthCap, bossWordLengthCap, previewLengthCap, withinLength, hardGuestCount } from './difficulty.js?v=20261011-grounded-walkers';
 import { createLowPolyTerrain, createLowPolyTree, createLowPolyRock, createLowPolyCloud } from './lowpoly.js';
 import { createVisuals, GLOW_GAIN, MOON_GLOW_GAIN } from './visuals.js';
-import { pickTarget, getInputCharacters, isMathOperatorInput, buildSearchPrompt, buildAltSearchPrompts, buildHintMask, getBossQuestionHintRange, escapeHtml, wrapSups, buildHintPart, buildBossPrompt, promptIndexForProgress } from './prompt-utils.js?v=20261010-boss-pressure';
+import { pickTarget, getInputCharacters, isMathOperatorInput, buildSearchPrompt, buildAltSearchPrompts, buildHintMask, getBossQuestionHintRange, escapeHtml, wrapSups, buildHintPart, buildBossPrompt, promptIndexForProgress } from './prompt-utils.js?v=20261011-grounded-walkers';
 
 const canvas = document.getElementById('gameCanvas');
 const labelsLayer = document.getElementById('labelsLayer');
@@ -134,6 +134,13 @@ const ROAD_MIN_Z = -58;
 const ROAD_MAX_Z = 16;
 const ROAD_SPAN = ROAD_MAX_Z - ROAD_MIN_Z;
 const ROAD_SCROLL_MULTIPLIER = 1.0;
+// Monsters are modelled with their feet at y = 0, and the road surface undulates between
+// about -0.14 and -0.06, so walkers stand at its high points; any higher and they visibly
+// float above their own shadows.
+const GROUND_ENEMY_Y = -0.06;
+const FLYING_ENEMY_Y = 2.4;
+// The healer heart hovers just off the ground.
+const MEDIC_ENEMY_Y = 0.32;
 const ENEMY_TYPES = [
   {
     name: 'Mudlug',
@@ -2538,7 +2545,7 @@ function spawnEnemy(options = {}) {
   const lane = Number.isFinite(options.lane) ? options.lane : chooseSpawnLane(startZ);
   const revealZ = currentDifficulty().revealZ;
   const isFlying = isBoss && !!type.isFlying;
-  const spawnBaseY = isFlying ? 2.4 : 0.32;
+  const spawnBaseY = isFlying ? FLYING_ENEMY_Y : isMedic ? MEDIC_ENEMY_Y : GROUND_ENEMY_Y;
   group.position.set(lane, spawnBaseY, startZ);
   group.scale.setScalar(type.scale * (isClimaxBoss ? 1.5 : 1.0));
   enemyGroup.add(group);
