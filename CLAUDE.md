@@ -28,9 +28,10 @@ For a new or promoted general published app:
 
 1. Place it in the appropriate directory and update its previous inventory if moved.
 2. Link it from `index.html` and add it to `sitemap.xml`.
-3. For offline support, include `<script src="/assets/sw-register.js" defer></script>`, add the page and required assets to `ASSETS_TO_CACHE`, and add its homepage requirements to `OFFLINE_CARD_REQUIREMENTS` in `index.html`.
-4. For registered apps, name the page `<section>/<app>.html` with supporting files in `<section>/<app>/`, so that `getAssetGroup` in `sw.js` and `getAppGroup` in `assets/sw-register.js` give them one app name; otherwise add a matching rule to both.
-5. Bump `BUILD_ID` after cached-file changes, as below.
+3. Every app newly added to the main landing page, whether promoted from `beta/` or `misc/` or created from scratch, must support light/dark themes and keep its theme in sync with the landing page and all other published apps through the shared theme controls described below.
+4. For offline support, include `<script src="/assets/sw-register.js" defer></script>`, add the page and required assets to `ASSETS_TO_CACHE`, and add its homepage requirements to `OFFLINE_CARD_REQUIREMENTS` in `index.html`.
+5. For registered apps, name the page `<section>/<app>.html` with supporting files in `<section>/<app>/`, so that `getAssetGroup` in `sw.js` and `getAppGroup` in `assets/sw-register.js` give them one app name; otherwise add a matching rule to both.
+6. Bump `BUILD_ID` after cached-file changes, as below.
 
 Network-only apps omit registration and offline requirements. Public support/reference pages may use the service worker without a homepage listing.
 
@@ -49,7 +50,7 @@ Network-only apps omit registration and offline requirements. Public support/ref
 
 - Use camelCase for variables/functions, UPPER_SNAKE_CASE for constants, and a shared state object where useful.
 - For general published apps, follow the existing design in `tools/panphyplot.html` and `tools/panphyplot/css/panphyplot.css`: Manrope body text, DM Serif Display headings, IBM Plex Mono readouts, theme variables, dotted backgrounds, rounded panels, and a floating banner. Reuse shared controls in `assets/` where appropriate; adapt dimensions to the app.
-- Persist the theme through `data-theme` on `<html>` and localStorage. Apply the theme and browser theme metadata before first paint.
+- Use `/assets/theme.js` for the shared `panphy-theme` preference and `data-theme` on `<html>`; do not introduce app-specific theme storage keys. Load it synchronously in the head after `theme-color` metadata and before styles to apply the theme and browser theme metadata before first paint. Use `PanPhyTheme.toggle()` or `PanPhyThemeToggle.mount(button)` for controls, and listen for `panphy:theme-change` to refresh charts, scenes and other theme-dependent content, including changes from other open tabs.
 - Keep `apple-mobile-web-app-status-bar-style` at `default` in every theme; use `theme-color` for the bar colour. iOS/iPadOS 26+ home-screen apps still blur the top of the screen, so published pages link `/assets/standalone-top.css`, which reserves a flat strip in that mode. Offset anything pinned to the top edge (sticky headers, fixed buttons, fullscreen panes) by `var(--standalone-top)`.
 - Make layouts responsive and controls keyboard- and touch-accessible; aim for 48px touch targets. Use `viewport-fit: cover` where needed.
 - Physical quantities need precise entry or stepping. Pair sliders with numeric readouts or entry fields.
