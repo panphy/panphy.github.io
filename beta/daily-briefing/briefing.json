@@ -2,7 +2,7 @@
   "editions": [
     {
       "date": "2026-10-11",
-      "note": "創刊號｜精選近期值得留意的消息，涵蓋 10 月 5–9 日新訊及一則 9 月延伸閱讀；各則標明原文日期。",
+      "note": "十則擴充版｜保留今日五則科學、AI 與創客選文，加入三則企業與市場、兩則香港消息，預覽完整晨報格式。周末擴闊至 10 月 5–11 日，另附 9 月 21 日火星延伸閱讀；原文日期逐則列明，構想、承諾及預測不當作已實現成果。",
       "stories": [
         {
           "topic": "ai",
@@ -49,10 +49,10 @@
             "name": "Raspberry Pi"
           },
           "image": {
-            "url": "https://www.raspberrypi.com/app/uploads/2026/10/IMG_4808-1024x768.jpg",
-            "alt": "Dell 筆記型電腦上的 Raspberry Pi Desktop",
-            "caption": "Raspberry Pi Desktop 在 Dell 筆記型電腦上運行",
-            "credit": "Raspberry Pi"
+            "url": "https://upload.wikimedia.org/wikipedia/commons/5/52/Debian_13_Desktop.png",
+            "alt": "Debian 13 的 KDE Plasma 桌面",
+            "caption": "示意資料圖片：Debian 13 的 KDE 桌面（2025）；不是 Raspberry Pi Desktop 的介面",
+            "credit": "Debian Project / Elise Couper；桌面 GPL-2.0+（https://www.gnu.org/licenses/old-licenses/gpl-2.0.html）；桌布 CC BY-SA 4.0（https://creativecommons.org/licenses/by-sa/4.0/）；來源 Wikimedia Commons"
           }
         },
         {
@@ -66,10 +66,10 @@
             "name": "Raspberry Pi / Sixfab / DEEPX"
           },
           "image": {
-            "url": "https://www.raspberrypi.com/app/uploads/2026/09/Sixfab-AI-HAT-Plus-11.jpg",
-            "alt": "Sixfab AI HAT+ 加速板",
-            "caption": "Pi 5 的第三方 AI 加速板",
-            "credit": "Raspberry Pi / Sixfab"
+            "url": "https://upload.wikimedia.org/wikipedia/commons/e/ef/Raspberry_Pi_5_Board.jpg",
+            "alt": "Raspberry Pi 5 主板",
+            "caption": "資料圖片：Pi 5 主板（2024）；未裝上 Sixfab AI HAT+",
+            "credit": "SimonWaldherr / Wikimedia Commons；CC BY-SA 4.0（https://creativecommons.org/licenses/by-sa/4.0/）"
           }
         },
         {
@@ -87,6 +87,91 @@
             "alt": "毅力號拍攝的火星傑澤羅邊緣區全景",
             "caption": "毅力號拍攝的 Margin Unit 全景；影像攝於 2023 年",
             "credit": "NASA / JPL-Caltech / MSSS"
+          }
+        },
+        {
+          "topic": "markets",
+          "published": "2026-10-08",
+          "headline": "NVIDIA 承諾五年投入十億美元，支援美國科學研究",
+          "summary": "NVIDIA 宣布未來五年提供總值十億美元的支援，涵蓋量子運算、醫療、能源及安全研究，並與大學、政府和量子運算生態合作。這是分年推進的承諾，不代表款項已全數支出、已有同額收入，或科學難題已解決。",
+          "takeaway": "追蹤實際設備部署、研究合作及可重現成果。物理教學可比較傳統數值模擬與 AI 近似模型的速度、誤差及適用範圍。",
+          "source": {
+            "name": "NVIDIA 投資者關係",
+            "url": "https://investor.nvidia.com/news/press-release-details/2026/NVIDIA-Commits-1-Billion-to-Advance-US-Science-Over-the-Next-Five-Years/default.aspx"
+          },
+          "image": {
+            "url": "https://upload.wikimedia.org/wikipedia/commons/a/a4/NVIDIA_logo.svg",
+            "alt": "NVIDIA 公司標誌",
+            "caption": "識別用公司標誌；並非科研項目的現場照片",
+            "credit": "© NVIDIA Corporation / Wikimedia Commons；Apache-2.0（https://www.apache.org/licenses/LICENSE-2.0）；商標屬原權利人"
+          }
+        },
+        {
+          "topic": "markets",
+          "published": "2026-10-07",
+          "headline": "Microsoft 推出 AI 代理執行容器：用系統政策限制權限",
+          "summary": "Microsoft 宣布 Execution Containers 正式推出，讓開發者以政策限制 AI 代理可用的檔案、網絡及執行環境。限制由執行平台施行，不依賴模型自行遵守提示。不同隔離模式的支援範圍有別，MicroVM 模式仍屬實驗性；企業身分及管理整合亦有後續推出項目。",
+          "takeaway": "讓編程代理操作教學或機械人專案時，只開放所需工作目錄及網絡。容器權限與模型回答準確度是兩項不同問題。",
+          "source": {
+            "name": "Microsoft Windows Developer Blog",
+            "url": "https://blogs.windows.com/windowsdeveloper/2026/10/07/microsoft-execution-containers-policy-driven-containment-for-ai-agents/"
+          },
+          "image": {
+            "url": "https://msftstories.thesourcemediaassets.com/sites/759/2026/10/MXC.png",
+            "alt": "Microsoft Execution Containers 架構示意",
+            "caption": "Microsoft 官方新聞素材：AI 代理與政策執行層示意",
+            "credit": "Microsoft；官方新聞素材，供相關報道使用"
+          }
+        },
+        {
+          "topic": "markets",
+          "published": "2026-10-05",
+          "headline": "ASML 公布一周回購：27.7 萬股、約 4.42 億歐元",
+          "summary": "ASML 披露 9 月 28 日至 10 月 2 日的回購交易，合共 277,000 股，金額約 4.42 億歐元。這是既有回購計劃的執行紀錄，並非新的盈利數字、股息或訂單公告；表內成交均價也不是目前股價。",
+          "takeaway": "把回購與業績分開閱讀：回購會影響流通股數，但不能單憑回購規模判斷設備需求或盈利是否增長。",
+          "source": {
+            "name": "ASML 投資者關係",
+            "url": "https://www.investor.asml.com/news-releases/news-release-details/asml-reports-transactions-under-its-current-share-buyback-program-3"
+          },
+          "image": {
+            "url": "https://upload.wikimedia.org/wikipedia/commons/a/ae/ASML_headquarters_Veldhoven.jpg",
+            "alt": "荷蘭 Veldhoven 的 ASML 總部",
+            "caption": "資料圖片：ASML 總部，攝於 2008 年；並非本周活動",
+            "credit": "A ansems / Wikimedia Commons；公有領域"
+          }
+        },
+        {
+          "topic": "hk",
+          "published": "2026-10-11",
+          "headline": "新皇崗口岸明早啟用，提供二十四小時通關",
+          "summary": "香港政府宣布重建皇崗口岸將於 10 月 12 日香港時間上午 6 時 30 分投入服務，旅客及客車可二十四小時通關，採用一地兩檢及合作查驗模式。政府列出的每日二十萬人次是設計流量，不是已錄得客流；約五分鐘通關亦屬政府預期。",
+          "takeaway": "跨境出行前查看新口岸與新田公共運輸交匯處的接駁安排，勿沿用舊皇崗／落馬洲口岸的乘車路線。",
+          "source": {
+            "name": "香港政府新聞公報",
+            "url": "https://www.info.gov.hk/gia/general/202610/11/P2026101100371.htm"
+          },
+          "image": {
+            "url": "https://gia.info.gov.hk/general/202610/11/P2026101100371_photo_1340881.jpg",
+            "alt": "新皇崗口岸開通儀式",
+            "caption": "香港政府發布的皇崗口岸開通儀式照片，2026 年 10 月 11 日",
+            "credit": "香港特別行政區政府新聞處；政府新聞公報圖片"
+          }
+        },
+        {
+          "topic": "hk",
+          "published": "2026-10-11",
+          "headline": "財政司司長率團訪南京，聚焦創科與金融合作",
+          "summary": "政府公布陳茂波將於 10 月 12 日率領逾三十人的工商及專業服務代表團到南京，並於 13 日出席蘇港合作會議。代表團涵蓋金融、法律、電商、人工智能、綠色科技及生物科技；行程包括科技成果轉化及南京大學交流。這是公布行程，尚不是已簽訂投資或合作成果。",
+          "takeaway": "後續留意有沒有具名合作機構、實際項目與落實日期，區分交流活動和可使用的科研或商業資源。",
+          "source": {
+            "name": "香港政府新聞公報",
+            "url": "https://www.info.gov.hk/gia/general/202610/11/P2026101000581.htm"
+          },
+          "image": {
+            "url": "https://upload.wikimedia.org/wikipedia/commons/2/23/Hong_Kong_Skyline_Restitch_-_Dec_2007.jpg",
+            "alt": "太平山俯瞰香港夜景",
+            "caption": "示意資料圖片：香港夜景（2007）；並非南京訪問的現場照片",
+            "credit": "DAVID ILIFF / Wikimedia Commons；CC BY-SA 3.0（https://creativecommons.org/licenses/by-sa/3.0/）"
           }
         }
       ]
