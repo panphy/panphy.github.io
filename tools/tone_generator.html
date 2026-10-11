@@ -5,25 +5,10 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <meta name="theme-color" content="#F8F6F1">
+    <script src="/assets/theme.js" data-legacy-dark="tone-generator-dark" data-legacy-light="tone-generator-light"></script>
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <link rel="stylesheet" href="/assets/standalone-top.css">
-    <script>
-    (function() {
-      var hasDarkPreference = false;
-      try {
-        hasDarkPreference = Boolean(localStorage.getItem('tone-generator-dark'));
-      } catch (_) {
-        hasDarkPreference = false;
-      }
-
-      if (hasDarkPreference) {
-        document.documentElement.setAttribute('data-theme', 'dark');
-        var tc = document.querySelector('meta[name="theme-color"]');
-        if (tc) tc.setAttribute('content', '#111110');
-      }
-    })();
-    </script>
   <title>Two-Channel Tone Generator</title>
   <link rel="icon" type="image/png" href="/assets/favicon.png">
   <script src="/assets/sw-register.js" defer></script>
@@ -1085,74 +1070,7 @@
     })();
 
     // Theme Toggle
-    const themeButton = document.getElementById('theme-button');
-    const DARK_THEME_KEY = 'tone-generator-dark';
-    const LIGHT_THEME_KEY = 'tone-generator-light';
-    function safeStorageGet(key) {
-      try {
-        return localStorage.getItem(key);
-      } catch (_) {
-        return null;
-      }
-    }
-    function safeStorageSet(key, value) {
-      try {
-        localStorage.setItem(key, value);
-      } catch (_) {
-        // Ignore storage errors so theme toggle still works for this session.
-      }
-    }
-    function safeStorageRemove(key) {
-      try {
-        localStorage.removeItem(key);
-      } catch (_) {
-        // Ignore storage errors so theme toggle still works for this session.
-      }
-    }
-
-    const currentTheme = safeStorageGet(DARK_THEME_KEY)
-      ? 'dark'
-      : safeStorageGet(LIGHT_THEME_KEY)
-        ? 'light'
-        : 'light';
-
-    document.documentElement.setAttribute('data-theme', currentTheme);
-    updateAppChromeTheme(currentTheme);
-    updateButtonEmoji(currentTheme);
-
-    function updateAppChromeTheme(theme) {
-      const themeColorMeta = document.querySelector('meta[name="theme-color"]');
-      const isDarkTheme = theme === 'dark';
-
-      if (themeColorMeta) {
-        themeColorMeta.setAttribute('content', isDarkTheme ? '#111110' : '#F8F6F1');
-      }
-    }
-
-    window.addEventListener('pageshow', function () {
-      updateAppChromeTheme(document.documentElement.getAttribute('data-theme'));
-    });
-
-    function updateButtonEmoji(theme) {
-      themeButton.textContent = theme === 'dark' ? '\u{1F319}' : '\u{2600}\u{FE0F}';
-    }
-
-    themeButton.addEventListener('click', function () {
-      let theme = document.documentElement.getAttribute('data-theme');
-      if (theme === 'light') {
-        document.documentElement.setAttribute('data-theme', 'dark');
-        safeStorageSet(DARK_THEME_KEY, 'true');
-        safeStorageRemove(LIGHT_THEME_KEY);
-        updateAppChromeTheme('dark');
-        updateButtonEmoji('dark');
-      } else {
-        document.documentElement.setAttribute('data-theme', 'light');
-        safeStorageSet(LIGHT_THEME_KEY, 'true');
-        safeStorageRemove(DARK_THEME_KEY);
-        updateAppChromeTheme('light');
-        updateButtonEmoji('light');
-      }
-    });
+    window.PanPhyThemeToggle.mount(document.getElementById('theme-button'));
   </script>
 
   <script>

@@ -5,20 +5,10 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="description" content="Explore alpha, beta and gamma decay in interactive 3D. Watch unstable nuclei decay, balance nuclear equations, test penetration and measure half-life.">
   <meta name="theme-color" content="#F8F6F1">
+  <script src="/assets/theme.js" data-legacy-dark="nuclear-decay-dark" data-legacy-light="nuclear-decay-light"></script>
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
   <link rel="stylesheet" href="/assets/standalone-top.css">
-  <script>
-  (function() {
-    var dark = false;
-    try { dark = !!localStorage.getItem('nuclear-decay-dark'); } catch (error) {}
-    if (dark) {
-      document.documentElement.setAttribute('data-theme', 'dark');
-      var tc = document.querySelector('meta[name="theme-color"]');
-      if (tc) tc.setAttribute('content', '#111110');
-    }
-  })();
-  </script>
   <title>Nuclear Decay — PanPhy Labs</title>
   <link rel="icon" type="image/png" href="/assets/favicon.png">
   <link rel="apple-touch-icon" href="/assets/apple-touch-icon.png">
@@ -37,7 +27,7 @@
       <button id="theme-button" type="button" data-panphy-theme-toggle aria-label="Toggle light/dark theme" title="Toggle between light and dark themes"></button>
     </div>
   </header>
-  <script>window.PanPhyThemeToggle.mount(document.getElementById('theme-button'), { darkStorageKey: 'nuclear-decay-dark' });</script>
+  <script>window.PanPhyThemeToggle.mount(document.getElementById('theme-button'));</script>
   <main>
     <div class="intro"><div><p class="eyebrow">THE NUCLEUS LAB / UNSTABLE BY NATURE</p><h1>Unstable nucleus.<br>Random decay<span>!</span></h1></div><p>Trigger it. Balance it. Block it.<br>Explore three kinds of radiation and the clock of half-life.</p></div>
     <nav class="models" aria-label="Choose a type of decay">

@@ -75,7 +75,6 @@ let isSyncing = false;
 const STATE_SCHEMA_VERSION = 3;
 const STORAGE_KEY = 'panphyplot-state-v2';
 const LEGACY_STORAGE_KEYS = ['panphyplot-state-v1'];
-const THEME_KEY = 'panphyplot-theme';
 const DATASET_NAME_MAX_LENGTH = 20;
 
 function debounce(func, wait) {

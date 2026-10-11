@@ -2054,6 +2054,11 @@ if (typeof mobileQuery.addEventListener === 'function') {
   mobileQuery.addListener(handleMobileQueryChange);
 }
 
+window.addEventListener('panphy:theme-change', () => {
+  updatePresentThemeIcon();
+  updateMobileThemeToggle();
+});
+
 // Initialize the application
 updateOfflineFontState();
 initializeTheme();

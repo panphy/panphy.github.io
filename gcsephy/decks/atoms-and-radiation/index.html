@@ -6,20 +6,10 @@
   <meta name="robots" content="noindex, nofollow">
   <meta name="description" content="Teaching slides for AQA GCSE Physics atomic structure: the atom, changing atomic models, nuclear radiation and half-life.">
   <meta name="theme-color" content="#F8F6F1">
+  <script src="/assets/theme.js" data-legacy-dark="atoms-radiation-deck-dark" data-legacy-light="atoms-radiation-deck-light"></script>
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
   <link rel="stylesheet" href="/assets/standalone-top.css">
-  <script>
-  (function() {
-    var dark = false;
-    try { dark = !!localStorage.getItem('atoms-radiation-deck-dark'); } catch (error) {}
-    if (dark) {
-      document.documentElement.setAttribute('data-theme', 'dark');
-      var tc = document.querySelector('meta[name="theme-color"]');
-      if (tc) tc.setAttribute('content', '#111110');
-    }
-  })();
-  </script>
   <title>Atoms and Nuclear Radiation · GCSE Physics</title>
   <link rel="icon" type="image/png" href="/assets/favicon.png">
   <link rel="apple-touch-icon" href="/assets/apple-touch-icon.png">
@@ -40,7 +30,7 @@
       <button id="theme-button" type="button" data-panphy-theme-toggle aria-label="Toggle light/dark theme" title="Toggle between light and dark themes"></button>
     </div>
   </header>
-  <script>window.PanPhyThemeToggle.mount(document.getElementById('theme-button'), { darkStorageKey: 'atoms-radiation-deck-dark' });</script>
+  <script>window.PanPhyThemeToggle.mount(document.getElementById('theme-button'));</script>
 
   <nav class="thumbs" id="thumbs" aria-label="Slides"></nav>
 

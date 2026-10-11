@@ -5,18 +5,10 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
     <meta name="theme-color" content="#F8F6F1">
+    <script src="/assets/theme.js" data-legacy-dark="standing-wave-dark" data-legacy-light="standing-wave-light"></script>
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <link rel="stylesheet" href="/assets/standalone-top.css">
-    <script>
-    (function() {
-      if (localStorage.getItem('standing-wave-dark')) {
-        document.documentElement.setAttribute('data-theme', 'dark');
-        var tc = document.querySelector('meta[name="theme-color"]');
-        if (tc) tc.setAttribute('content', '#111110');
-      }
-    })();
-    </script>
     <title>Standing Wave Simulation</title>
     <link rel="icon" type="image/png" href="/assets/favicon.png">
     <script src="/assets/sw-register.js" defer></script>
@@ -856,53 +848,7 @@
 
     <script>
         // Theme Toggle
-        const themeButton = document.getElementById('theme-button');
-        const DARK_THEME_KEY = "standing-wave-dark";
-        const LIGHT_THEME_KEY = "standing-wave-light";
-
-        const currentTheme = localStorage.getItem(DARK_THEME_KEY) ?
-            "dark" :
-            localStorage.getItem(LIGHT_THEME_KEY) ?
-                "light" :
-                "light";
-
-        document.documentElement.setAttribute('data-theme', currentTheme);
-        updateAppChromeTheme(currentTheme);
-        updateButtonEmoji(currentTheme);
-
-        function updateAppChromeTheme(theme) {
-            const themeColorMeta = document.querySelector('meta[name="theme-color"]');
-            const isDarkTheme = theme === 'dark';
-
-            if (themeColorMeta) {
-                themeColorMeta.setAttribute('content', isDarkTheme ? '#111110' : '#F8F6F1');
-            }
-        }
-
-        window.addEventListener('pageshow', function () {
-            updateAppChromeTheme(document.documentElement.getAttribute('data-theme'));
-        });
-
-        function updateButtonEmoji(theme) {
-            themeButton.textContent = theme === 'dark' ? '\u{1F319}' : '\u{2600}\u{FE0F}';
-        }
-
-        themeButton.addEventListener('click', function () {
-            let theme = document.documentElement.getAttribute('data-theme');
-            if (theme === 'light') {
-                document.documentElement.setAttribute('data-theme', 'dark');
-                localStorage.setItem(DARK_THEME_KEY, 'true');
-                localStorage.removeItem(LIGHT_THEME_KEY);
-                updateAppChromeTheme('dark');
-                updateButtonEmoji('dark');
-            } else {
-                document.documentElement.setAttribute('data-theme', 'light');
-                localStorage.setItem(LIGHT_THEME_KEY, 'true');
-                localStorage.removeItem(DARK_THEME_KEY);
-                updateAppChromeTheme('light');
-                updateButtonEmoji('light');
-            }
-        });
+        window.PanPhyThemeToggle.mount(document.getElementById('theme-button'));
 
         // Offline font fallback
         function updateOfflineFontState() {
@@ -1189,6 +1135,9 @@
             return getComputedStyle(document.documentElement).getPropertyValue('--canvas-equilibrium').trim() || '#cbd5e1';
         }
 
+        let themeNeedsRedraw = false;
+        window.addEventListener('panphy:theme-change', () => { themeNeedsRedraw = true; });
+
         function draw(timestamp) {
             if (!lastTimestamp) {
                 lastTimestamp = timestamp;
@@ -1196,7 +1145,8 @@
             const deltaTime = (timestamp - lastTimestamp) / 1000;
             lastTimestamp = timestamp;
 
-            if (!isPaused) {
+            if (!isPaused || themeNeedsRedraw) {
+                themeNeedsRedraw = false;
                 ctx.clearRect(0, 0, canvasWidth, canvasHeight);
                 const desiredFraction = 0.8;
                 const amplitudeScale = (canvasHeight / 2 * desiredFraction) / 10;
@@ -1239,7 +1189,7 @@
                     drawParticle(greenX, greenY, "#22c55e");
                 }
 
-                time += deltaTime;
+                if (!isPaused) time += deltaTime;
             }
             requestAnimationFrame(draw);
         }

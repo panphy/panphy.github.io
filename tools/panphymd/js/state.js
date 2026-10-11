@@ -11,7 +11,6 @@ const STORAGE_KEYS = {
   SYNC_SCROLL: 'markdownSyncScroll',
   FONT_SIZE: 'markdownFontSize',
   PREVIEW_FONT: 'markdownPreviewFont',
-  THEME: 'theme',
   SUPPRESS_CLEAR_WARNING: 'markdownSuppressClearWarning',
   SUPPRESS_CLEAR_HISTORY_WARNING: 'markdownSuppressClearHistoryWarning',
   SUPPRESS_OPEN_WARNING: 'markdownSuppressOpenWarning',
@@ -159,22 +158,6 @@ export function savePreviewFontPreference(fontKey) {
  */
 export function loadPreviewFontPreference() {
   return safeGetStorageItem(STORAGE_KEYS.PREVIEW_FONT);
-}
-
-/**
- * Save theme preference
- * @param {string} theme - The theme value ('markdown-dark' or 'markdown-light')
- */
-export function saveThemePreference(theme) {
-  safeSetStorageItem(STORAGE_KEYS.THEME, theme);
-}
-
-/**
- * Load theme preference from localStorage
- * @returns {string|null} The saved theme or null
- */
-export function loadThemePreference() {
-  return safeGetStorageItem(STORAGE_KEYS.THEME);
 }
 
 // ------------------------------------------------------------------ //

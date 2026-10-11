@@ -5,18 +5,10 @@
 	<meta charset="UTF-8" />
 	<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
     <meta name="theme-color" content="#F8F6F1">
+    <script src="/assets/theme.js" data-legacy-dark="motion-tracker-dark" data-legacy-light="motion-tracker-light"></script>
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <link rel="stylesheet" href="/assets/standalone-top.css">
-    <script>
-    (function() {
-      if (localStorage.getItem('motion-tracker-dark')) {
-        document.documentElement.setAttribute('data-theme', 'dark');
-        var tc = document.querySelector('meta[name="theme-color"]');
-        if (tc) tc.setAttribute('content', '#111110');
-      }
-    })();
-    </script>
 	<title>Motion Tracker</title>
 	<link rel="icon" type="image/png" href="/assets/favicon.png">
     <script src="/assets/sw-register.js" defer></script>
@@ -1112,37 +1104,7 @@
 			const NEW_VIDEO_WARNING = "Loading a new video will clear your current analysis data. Continue?";
 
 		/* ===== Theme ===== */
-		const themeButton = document.getElementById('theme-button');
-		const DARK_THEME_KEY = "motion-tracker-dark";
-		const LIGHT_THEME_KEY = "motion-tracker-light";
-
-		const currentTheme = localStorage.getItem(DARK_THEME_KEY) ?
-			"dark" :
-			localStorage.getItem(LIGHT_THEME_KEY) ?
-				"light" :
-				"light";
-
-		document.documentElement.setAttribute('data-theme', currentTheme);
-		updateAppChromeTheme(currentTheme);
-		updateButtonEmoji(currentTheme);
-
-		function updateAppChromeTheme(theme) {
-			const themeColorMeta = document.querySelector('meta[name="theme-color"]');
-			const isDarkTheme = theme === 'dark';
-
-			if (themeColorMeta) {
-				themeColorMeta.setAttribute('content', isDarkTheme ? '#111110' : '#F8F6F1');
-			}
-		}
-
-		window.addEventListener('pageshow', function () {
-			updateAppChromeTheme(document.documentElement.getAttribute('data-theme'));
-		});
-
-		function updateButtonEmoji(theme) {
-			if (!themeButton) return;
-			themeButton.textContent = theme === 'dark' ? '🌙' : '☀️';
-		}
+		window.PanPhyThemeToggle.mount(document.getElementById('theme-button'));
 
 		function getCssVar(name) {
 			return getComputedStyle(document.documentElement).getPropertyValue(name).trim();
@@ -1169,26 +1131,10 @@
 			positionChart.update();
 		}
 
-		if (themeButton) {
-			themeButton.addEventListener('click', function () {
-				let theme = document.documentElement.getAttribute('data-theme');
-				if (theme === 'light') {
-					document.documentElement.setAttribute('data-theme', 'dark');
-					localStorage.setItem(DARK_THEME_KEY, 'true');
-					localStorage.removeItem(LIGHT_THEME_KEY);
-					updateAppChromeTheme('dark');
-					updateButtonEmoji('dark');
-				} else {
-					document.documentElement.setAttribute('data-theme', 'light');
-					localStorage.setItem(LIGHT_THEME_KEY, 'true');
-					localStorage.removeItem(DARK_THEME_KEY);
-					updateAppChromeTheme('light');
-					updateButtonEmoji('light');
-				}
-				applyThemeToChart();
-				drawOverlay();
-			});
-		}
+		window.addEventListener('panphy:theme-change', () => {
+			applyThemeToChart();
+			drawOverlay();
+		});
 
 		/* ===== DOM ===== */
 		const hiddenVideo = document.getElementById('hiddenVideo');

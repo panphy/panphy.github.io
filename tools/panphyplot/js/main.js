@@ -6,55 +6,19 @@ document.addEventListener("DOMContentLoaded", function() {
 	const savedState = tourState ? migratePersistedState(tourState) : loadState();
 	const themeButton = document.getElementById('theme-button');
 
-	const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
-	const storedTheme = localStorage.getItem(THEME_KEY);
-	const initialTheme = storedTheme || (prefersDark ? 'dark' : 'light');
-	document.documentElement.setAttribute('data-theme', initialTheme);
-	updateAppChromeTheme(initialTheme);
-
-
-	function updateAppChromeTheme(theme) {
-		const themeColorMeta = document.querySelector('meta[name="theme-color"]');
-		const isDarkTheme = theme === 'dark';
-
-		if (themeColorMeta) {
-			themeColorMeta.setAttribute('content', isDarkTheme ? '#111110' : '#F8F6F1');
+	window.PanPhyThemeToggle.mount(themeButton);
+	window.addEventListener('panphy:theme-change', () => {
+		lastPlotState.plot.data = null;
+		lastPlotState.plot.layout = null;
+		lastPlotState['popup-plot'].data = null;
+		lastPlotState['popup-plot'].layout = null;
+		updatePlotAndRenderLatex();
+		renderFitDiagnostics();
+		const popupContainer = document.getElementById('popup-container');
+		if (popupContainer && popupContainer.style.display === 'block') {
+			plotAllDatasets();
 		}
-	}
-
-	function updateThemeButton(theme) {
-		if (themeButton) {
-			themeButton.textContent = theme === 'dark' ? '🌙' : '☀️';
-		}
-	}
-
-	updateThemeButton(initialTheme);
-
-	window.addEventListener('pageshow', function() {
-		const currentTheme = document.documentElement.getAttribute('data-theme') || 'light';
-		updateAppChromeTheme(currentTheme);
 	});
-
-	if (themeButton) {
-		themeButton.addEventListener('click', function() {
-			const currentTheme = document.documentElement.getAttribute('data-theme') || 'light';
-			const nextTheme = currentTheme === 'light' ? 'dark' : 'light';
-			document.documentElement.setAttribute('data-theme', nextTheme);
-			localStorage.setItem(THEME_KEY, nextTheme);
-			updateAppChromeTheme(nextTheme);
-			updateThemeButton(nextTheme);
-			lastPlotState.plot.data = null;
-			lastPlotState.plot.layout = null;
-			lastPlotState['popup-plot'].data = null;
-			lastPlotState['popup-plot'].layout = null;
-			updatePlotAndRenderLatex();
-			renderFitDiagnostics();
-			const popupContainer = document.getElementById('popup-container');
-			if (popupContainer && popupContainer.style.display === 'block') {
-				plotAllDatasets();
-			}
-		});
-	}
 
 	if (savedState) {
 		rawData = Array.isArray(savedState.rawData) && savedState.rawData.length ? savedState.rawData : [[]];

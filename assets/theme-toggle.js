@@ -62,42 +62,11 @@
     });
   }
 
-  function mountAutoToggle(button, config) {
-    const options = Object.assign({
-      darkStorageKey: 'panphy-dark',
-      lightThemeColor: '#F8F6F1',
-      darkThemeColor: '#111110'
-    }, config || {});
-
+  function mountAutoToggle(button) {
     syncButton(button, getCurrentTheme());
-
-    if (button.dataset.panphyThemeAutoReady === 'true') {
-      return;
-    }
-
+    if (!button || button.dataset.panphyThemeAutoReady === 'true') return;
     button.dataset.panphyThemeAutoReady = 'true';
-    button.addEventListener('click', () => {
-      const next = getCurrentTheme() === 'dark' ? 'light' : 'dark';
-      document.documentElement.setAttribute('data-theme', next);
-
-      try {
-        if (next === 'dark') {
-          localStorage.setItem(options.darkStorageKey, '1');
-        } else {
-          localStorage.removeItem(options.darkStorageKey);
-        }
-      } catch (error) {
-        // The visible page theme still changes when storage is unavailable.
-      }
-
-      const themeColorMeta = document.querySelector('meta[name="theme-color"]');
-      if (themeColorMeta) {
-        themeColorMeta.setAttribute('content', next === 'dark' ? options.darkThemeColor : options.lightThemeColor);
-      }
-
-      syncAll(next);
-      window.dispatchEvent(new CustomEvent('panphy:theme-change', { detail: { theme: next } }));
-    });
+    button.addEventListener('click', () => window.PanPhyTheme.toggle());
   }
 
   function init() {

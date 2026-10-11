@@ -4,6 +4,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script src="/assets/theme.js" data-legacy-dark="panphy-dark" data-legacy-light="panphy-light"></script>
   <title>PanPhyPlot Math Reference</title>
   <link rel="icon" type="image/png" href="/assets/favicon.png">
   <script src="/assets/sw-register.js" defer></script>
@@ -637,37 +638,7 @@
   </footer>
 
   <script>
-    const themeButton = document.getElementById('theme-button');
-    const DARK_THEME_KEY = 'panphy-dark';
-    const LIGHT_THEME_KEY = 'panphy-light';
-
-    const currentTheme = localStorage.getItem(DARK_THEME_KEY)
-      ? 'dark'
-      : localStorage.getItem(LIGHT_THEME_KEY)
-        ? 'light'
-        : 'light';
-
-    document.documentElement.setAttribute('data-theme', currentTheme);
-    updateThemeButton(currentTheme);
-
-    function updateThemeButton(theme) {
-      themeButton.textContent = theme === 'dark' ? '🌙' : '☀️';
-    }
-
-    themeButton.addEventListener('click', function() {
-      const current = document.documentElement.getAttribute('data-theme');
-      if (current === 'light') {
-        document.documentElement.setAttribute('data-theme', 'dark');
-        localStorage.setItem(DARK_THEME_KEY, 'true');
-        localStorage.removeItem(LIGHT_THEME_KEY);
-        updateThemeButton('dark');
-      } else {
-        document.documentElement.setAttribute('data-theme', 'light');
-        localStorage.setItem(LIGHT_THEME_KEY, 'true');
-        localStorage.removeItem(DARK_THEME_KEY);
-        updateThemeButton('light');
-      }
-    });
+    window.PanPhyThemeToggle.mount(document.getElementById('theme-button'));
   </script>
   <script>
     // Gradient text: skip on Brave iOS where background-clip:text may fail.
