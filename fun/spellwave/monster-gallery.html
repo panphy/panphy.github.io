@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex">
+  <title>Spellwave monster gallery</title>
+  <script type="importmap">
+    {
+      "imports": {
+        "three": "https://cdn.jsdelivr.net/npm/three@0.186.1/build/three.module.js",
+        "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.186.1/examples/jsm/",
+        "three/examples/jsm/": "https://cdn.jsdelivr.net/npm/three@0.186.1/examples/jsm/",
+        "postprocessing": "https://cdn.jsdelivr.net/npm/postprocessing@6.39.5/build/index.js",
+        "n8ao": "https://cdn.jsdelivr.net/npm/n8ao@2.0.1/dist/N8AO.js"
+      }
+    }
+  </script>
+  <style>
+    :root { --ink: #3d2b1c; --muted: #7d6748; --border: rgba(110, 78, 40, 0.3); }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: #efe3c4; color: var(--ink); font: 15px/1.4 system-ui, sans-serif; }
+    #view { position: absolute; left: 0; top: 0; width: 100%; height: 100%; display: block; pointer-events: none; z-index: 1; }
+    header { position: sticky; top: 0; z-index: 3; display: flex; flex-wrap: wrap; gap: 8px 16px; align-items: center;
+      padding: 10px 16px; background: rgba(251, 245, 228, 0.96); border-bottom: 1px solid var(--border); }
+    header h1 { margin: 0 8px 0 0; font-size: 18px; }
+    header label { display: inline-flex; gap: 6px; align-items: center; }
+    select, button { font: inherit; color: inherit; padding: 6px 10px; border: 1px solid var(--border); border-radius: 8px; background: #fdf8ea; }
+    main { padding: 8px 16px 40px; }
+    h2 { margin: 22px 0 10px; font-size: 16px; }
+    .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 14px; }
+    .card { border: 1px solid var(--border); border-radius: 12px; overflow: hidden; background: #fdf8ea; }
+    .card.big { grid-column: 1 / -1; }
+    .stage { height: 270px; cursor: grab; touch-action: pan-y; }
+    .card.big .stage { height: min(78vh, 760px); }
+    .stage:active { cursor: grabbing; }
+    .info { position: relative; z-index: 2; display: flex; gap: 8px; align-items: center; padding: 8px 10px; background: #fdf8ea; }
+    .info strong { flex: 1; }
+    .info small { color: var(--muted); }
+    .swatch { width: 14px; height: 14px; border-radius: 4px; border: 1px solid rgba(0, 0, 0, 0.25); }
+    .info button { padding: 3px 8px; font-size: 13px; }
+    #error { padding: 16px; color: #a11; white-space: pre-wrap; }
+  </style>
+</head>
+<body>
+  <canvas id="view"></canvas>
+  <header>
+    <h1>Spellwave monsters</h1>
+    <label>Lighting
+      <select id="lighting"></select>
+    </label>
+    <label><input type="checkbox" id="spin" checked> Turntable</label>
+    <label><input type="checkbox" id="motion" checked> Animate</label>
+    <label><input type="checkbox" id="stun"> Stunned look</label>
+    <label><input type="checkbox" id="beacon"> Incoming beacon</label>
+    <button id="front" type="button">Face front</button>
+    <small>Drag a monster to turn it. “Enlarge” gives a close view.</small>
+  </header>
+  <main id="main"><div id="error"></div></main>
+
+  <script type="module">
+    import * as THREE from 'three';
+    import { createEnemyMesh } from './src/enemy-meshes.js';
+
+    // The type tables live inside main.js (the game entry, which cannot be imported
+    // without starting the game), so read them from its source to stay in step.
+    const source = await (await fetch('./src/main.js', { cache: 'no-store' })).text();
+    const readLiteral = (name, open, close) => {
+      const start = source.indexOf(`const ${name} = ${open}`);
+      const end = source.indexOf(`\n${close};`, start);
+      if (start < 0 || end < 0) throw new Error(`Could not find ${name} in main.js`);
+      return new Function(`return ${source.slice(start + `const ${name} = `.length, end + 2)}`)();
+    };
+    const sections = [
+      ['Minions', readLiteral('ENEMY_TYPES', '[', ']')],
+      ['Bosses', readLiteral('BOSS_TYPES', '[', ']')],
+      ['Support', [readLiteral('MEDIC_TYPE', '{', '}'), readLiteral('MIMIC_TYPE', '{', '}')]],
+    ];
+
+    // Sky and light values copied from SEASON_PALETTES in main.js.
+    const LIGHTING = {
+      'Studio (even light)': { bg: 0xd9d2c0, hemiSky: 0xffffff, hemiGround: 0x9a9080, hemi: 1.5, sun: 0xffffff, sunI: 1.3, ember: 0xffffff, emberI: 0, studio: true },
+      'Spring day (wave 1)': { bg: 0x9fd4c2, hemiSky: 0xd8ecd8, hemiGround: 0x9a7a44, hemi: 0.85, sun: 0xffe9bd, sunI: 1.55, ember: 0xffc078, emberI: 1.6 },
+      'Summer night (wave 2)': { bg: 0x2c4c8a, hemiSky: 0x7f9fe0, hemiGround: 0x2a4a34, hemi: 0.9, sun: 0xd6e4ff, sunI: 1.5, ember: 0xffcc30, emberI: 2.2 },
+      'Autumn dusk (wave 3)': { bg: 0xf0b070, hemiSky: 0xf0cf98, hemiGround: 0x8a4a24, hemi: 0.85, sun: 0xffb060, sunI: 1.5, ember: 0xff4818, emberI: 2.2 },
+      'Winter (wave 4)': { bg: 0x8fa8c8, hemiSky: 0xd8e4f8, hemiGround: 0x7a8aa0, hemi: 0.72, sun: 0xdde8ff, sunI: 1.1, ember: 0x6888ff, emberI: 2.0 },
+    };
+
+    const canvas = document.getElementById('view');
+    const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    renderer.outputColorSpace = THREE.SRGBColorSpace;
+    renderer.toneMapping = THREE.ACESFilmicToneMapping;
+    renderer.toneMappingExposure = 1.12;
+    renderer.shadowMap.enabled = true;
+    renderer.setScissorTest(true);
+
+    const scene = new THREE.Scene();
+    const hemiLight = new THREE.HemisphereLight();
+    const sunLight = new THREE.DirectionalLight();
+    sunLight.castShadow = true;
+    sunLight.shadow.mapSize.set(1024, 1024);
+    Object.assign(sunLight.shadow.camera, { left: -6, right: 6, top: 6, bottom: -6, near: 0.5, far: 60 });
+    sunLight.shadow.bias = -0.0004;
+    sunLight.shadow.normalBias = 0.02;
+    const emberLight = new THREE.PointLight(0xffffff, 0, 22, 1.8);
+    emberLight.position.set(0, 2.2, 6);
+    const rimLight = new THREE.DirectionalLight(0xd9f7e5, 0.9);
+    rimLight.position.set(0, 9, -46);
+    // Stands in for the pooled glow light each monster borrows in the game.
+    const glowLight = new THREE.PointLight(0xffffff, 0, 5, 2);
+    scene.add(hemiLight, sunLight, emberLight, rimLight, glowLight);
+
+    const groundMaterial = new THREE.MeshStandardMaterial({ color: 0xbfae84, roughness: 1, flatShading: true });
+    const ground = new THREE.Mesh(new THREE.CylinderGeometry(3.4, 3.4, 0.1, 10), groundMaterial);
+    ground.position.y = -0.05;
+    ground.receiveShadow = true;
+    scene.add(ground);
+
+    const camera = new THREE.PerspectiveCamera(34, 1, 0.1, 100);
+    const options = { spin: true, motion: true, stun: false, beacon: false, yaw: 0, light: null };
+
+    function applyLighting(name) {
+      const l = LIGHTING[name];
+      options.light = l;
+      hemiLight.color.set(l.hemiSky);
+      hemiLight.groundColor.set(l.hemiGround);
+      hemiLight.intensity = l.hemi;
+      sunLight.color.set(l.sun);
+      sunLight.intensity = l.sunI;
+      // In the game the sun sits behind the monsters; the studio lights them from the front.
+      if (l.studio) sunLight.position.set(6, 10, 9); else sunLight.position.set(18, 14, -28);
+      emberLight.color.set(l.ember);
+      emberLight.intensity = l.emberI;
+      rimLight.intensity = l.studio ? 0.5 : 0.9;
+      groundMaterial.color.set(l.bg).multiplyScalar(0.7);
+    }
+
+    const lightingSelect = document.getElementById('lighting');
+    for (const name of Object.keys(LIGHTING)) lightingSelect.add(new Option(name, name));
+    lightingSelect.addEventListener('change', () => applyLighting(lightingSelect.value));
+    applyLighting(lightingSelect.value);
+
+    const entries = [];
+    const main = document.getElementById('main');
+    const hex = (value) => `#${value.toString(16).padStart(6, '0')}`;
+
+    for (const [title, types] of sections) {
+      const heading = document.createElement('h2');
+      heading.textContent = `${title} (${types.length})`;
+      const grid = document.createElement('div');
+      grid.className = 'grid';
+      main.append(heading, grid);
+
+      for (const type of types) {
+        const group = createEnemyMesh(type);
+        group.scale.setScalar(type.scale);
+        const { incomingBeacon, targetMarker } = group.userData;
+        // Frame the body only, not the beacon that floats above it.
+        if (incomingBeacon) incomingBeacon.visible = false;
+        if (targetMarker) targetMarker.visible = false;
+        const flying = !!type.isFlying;
+        group.position.y = flying ? 2.4 : 0.32;
+        const holder = new THREE.Group();
+        holder.add(group);
+        holder.visible = false;
+        scene.add(holder);
+        holder.updateMatrixWorld(true);
+        const sphere = new THREE.Box3().setFromObject(group).getBoundingSphere(new THREE.Sphere());
+        const glow = [];
+        group.traverse((node) => { if (node.isGlow) glow.push(node); });
+
+        const card = document.createElement('div');
+        card.className = 'card';
+        const stage = document.createElement('div');
+        stage.className = 'stage';
+        const info = document.createElement('div');
+        info.className = 'info';
+        const name = document.createElement('strong');
+        name.textContent = type.name;
+        const note = document.createElement('small');
+        note.textContent = `${flying ? 'flying · ' : ''}scale ${type.scale}`;
+        info.append(name, note);
+        for (const key of ['body', 'trim', 'eye']) {
+          const swatch = document.createElement('span');
+          swatch.className = 'swatch';
+          swatch.style.background = hex(type[key]);
+          swatch.title = `${key} ${hex(type[key])}`;
+          info.append(swatch);
+        }
+        const enlarge = document.createElement('button');
+        enlarge.type = 'button';
+        enlarge.textContent = 'Enlarge';
+        enlarge.addEventListener('click', () => {
+          const big = card.classList.toggle('big');
+          enlarge.textContent = big ? 'Shrink' : 'Enlarge';
+          card.scrollIntoView({ block: 'nearest' });
+        });
+        info.append(enlarge);
+        card.append(stage, info);
+        grid.append(card);
+
+        const entry = { type, group, holder, sphere, stage, glow, yaw: 0, tilt: 0, enemy: { phase: entries.length * 1.7 } };
+        entries.push(entry);
+
+        stage.addEventListener('pointerdown', (event) => {
+          stage.setPointerCapture(event.pointerId);
+          let lastX = event.clientX;
+          let lastY = event.clientY;
+          const move = (e) => {
+            entry.yaw += (e.clientX - lastX) * 0.012;
+            entry.tilt = THREE.MathUtils.clamp(entry.tilt + (e.clientY - lastY) * 0.006, -0.35, 1.1);
+            lastX = e.clientX;
+            lastY = e.clientY;
+          };
+          const up = () => {
+            stage.removeEventListener('pointermove', move);
+            stage.removeEventListener('pointerup', up);
+            stage.removeEventListener('pointercancel', up);
+          };
+          stage.addEventListener('pointermove', move);
+          stage.addEventListener('pointerup', up);
+          stage.addEventListener('pointercancel', up);
+        });
+      }
+    }
+
+    for (const key of ['spin', 'motion', 'stun', 'beacon']) {
+      const box = document.getElementById(key);
+      box.addEventListener('change', () => {
+        options[key] = box.checked;
+        if (key === 'stun') applyStun();
+        if (key === 'beacon') for (const entry of entries) {
+          const beacon = entry.group.userData.incomingBeacon;
+          if (beacon) beacon.visible = box.checked;
+        }
+      });
+    }
+    document.getElementById('front').addEventListener('click', () => {
+      options.yaw = 0;
+      for (const entry of entries) { entry.yaw = 0; entry.tilt = 0; }
+      const spin = document.getElementById('spin');
+      spin.checked = false;
+      options.spin = false;
+    });
+
+    function applyStun() {
+      for (const entry of entries) entry.group.traverse((node) => {
+        if (node.isMesh && node.userData.stunMaterial) node.material = options.stun ? node.userData.stunMaterial : node.userData.normalMaterial;
+      });
+    }
+
+    const background = new THREE.Color();
+    let last = performance.now();
+    let seconds = 0;
+
+    function frame(now) {
+      requestAnimationFrame(frame);
+      const delta = Math.min((now - last) / 1000, 0.1);
+      last = now;
+      if (options.motion) seconds += delta;
+      if (options.spin) options.yaw += delta * 0.5;
+
+      const width = document.documentElement.clientWidth;
+      const height = window.innerHeight;
+      if (canvas.width !== Math.floor(width * renderer.getPixelRatio()) || canvas.height !== Math.floor(height * renderer.getPixelRatio())) {
+        renderer.setSize(width, height, false);
+      }
+      // Move the canvas with the page, so a frame drawn late still lines up with the cards.
+      canvas.style.transform = `translateY(${window.scrollY}px)`;
+      renderer.setScissor(0, 0, width, height);
+      renderer.setViewport(0, 0, width, height);
+      renderer.setClearColor(0x000000, 0);
+      renderer.clear();
+      background.set(options.light.bg);
+
+      for (const entry of entries) {
+        const rect = entry.stage.getBoundingClientRect();
+        if (rect.bottom < 0 || rect.top > height || rect.width === 0) continue;
+        const { group, holder, sphere, enemy } = entry;
+        if (options.motion && !options.stun && group.userData.animate) group.userData.animate(seconds, enemy);
+        const lid = group.userData.lidGroup;
+        if (lid) lid.rotation.x = -(0.22 + Math.sin(seconds * 2.2) * 0.12) * (Math.PI / 2.2);
+        holder.rotation.y = options.yaw + entry.yaw;
+        holder.visible = true;
+
+        const anchor = entry.glow[0];
+        if (anchor) {
+          anchor.getWorldPosition(glowLight.position);
+          glowLight.color.copy(anchor.color);
+          glowLight.intensity = anchor.intensity;
+          glowLight.distance = anchor.distance;
+          glowLight.decay = anchor.decay;
+        } else {
+          glowLight.intensity = 0;
+        }
+
+        camera.aspect = rect.width / rect.height;
+        const fit = sphere.radius / Math.sin(THREE.MathUtils.degToRad(camera.fov / 2)) * (camera.aspect < 1 ? 1 / camera.aspect : 1) * 1.02;
+        const pitch = 0.3 + entry.tilt;
+        camera.position.set(0, sphere.center.y + Math.sin(pitch) * fit, Math.cos(pitch) * fit);
+        camera.lookAt(0, sphere.center.y, 0);
+        camera.updateProjectionMatrix();
+        sunLight.target.position.set(0, sphere.center.y, 0);
+        sunLight.target.updateMatrixWorld();
+
+        const y = height - rect.bottom;
+        renderer.setViewport(rect.left, y, rect.width, rect.height);
+        renderer.setScissor(rect.left, y, rect.width, rect.height);
+        renderer.setClearColor(background, 1);
+        renderer.clear();
+        renderer.render(scene, camera);
+        holder.visible = false;
+      }
+    }
+    requestAnimationFrame(frame);
+    window.gallery = { entries };
+  </script>
+  <script>
+    window.addEventListener('error', (event) => { document.getElementById('error').textContent = event.message; });
+    window.addEventListener('unhandledrejection', (event) => { document.getElementById('error').textContent = String(event.reason); });
+  </script>
+</body>
+</html>
