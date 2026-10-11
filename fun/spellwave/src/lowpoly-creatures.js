@@ -603,38 +603,107 @@ export function buildStormWarden(type, kit) {
   return group;
 }
 
-// Solar Anvil — a floating forge anvil with glowing rune slits and a living hammer above it.
+// Solar Anvil — a winged sun lion: a mane of slowly turning sun rays, feathered wings,
+// a roaring jaw, paddling paws and a tufted tail.
 export function buildSolarAnvil(type, kit) {
   const b = builder(kit);
-  const iron = kit.mat(mix(type.body, 0x8a6a4a, 0.4));
-  const ironDark = kit.mat(mix(type.body, 0x8a6a4a, 0.12));
+  const furColor = mix(type.body, 0xc98a3c, 0.5);
+  const fur = kit.mat(furColor);
+  const furDark = kit.mat(tone(furColor, 0.62));
+  const pale = kit.mat(mix(type.trim, 0xfff2c0, 0.55));
   const gold = kit.mat(type.trim);
-  const rune = kit.glow(type.trim, 1.5);
+  const ray = kit.glow(type.trim, 0.45);
+  const feather = kit.mat(mix(type.trim, 0xfffbe8, 0.78), { side: THREE.DoubleSide });
+  const featherGold = kit.mat(mix(type.trim, 0xf0641a, 0.45), { side: THREE.DoubleSide });
+  const bone = kit.mat(BONE);
+  const dark = kit.mat(0x1c1008);
   const eyeGlow = kit.glow(type.eye, 1.7);
   const group = new THREE.Group();
 
-  b.place(group, b.cylinder(0.75, 0.88, 0.3, 6), ironDark, [0, 0.6, 0], [1, 1, 0.6]);
-  b.place(group, b.cylinder(0.36, 0.52, 0.42, 6), iron, [0, 0.94, 0], [1, 1, 0.6]);
-  b.place(group, b.box(1.7, 0.36, 0.82), iron, [0, 1.3, 0]);
-  b.place(group, b.cone(0.2, 0.72, 5), iron, [1.18, 1.3, 0], null, [0, 0, -Math.PI / 2]);
-  b.place(group, b.box(1.74, 0.08, 0.86), gold, [0, 1.48, 0]);
-  for (const x of [-0.5, 0, 0.5]) b.place(group, b.box(0.1, 0.24, 0.04), rune, [x, 1.28, 0.42], null, [0, 0, x * 0.5]);
-  for (const x of [-0.78, 0.78]) for (const z of [-0.36, 0.36]) b.place(group, b.octa(0.06), gold, [x, 1.54, z]);
+  const body = pivot(group, 0, 1.3, 0);
+  b.place(body, b.ico(0.55, 1), fur, [0, 0.05, 0.34], [1, 1, 1.05]);
+  b.place(body, b.ico(0.44, 0), fur, [0, -0.02, -0.1], [0.92, 0.9, 1.3]);
+  b.place(body, b.ico(0.46, 1), fur, [0, -0.04, -0.52], [0.98, 0.96, 1.1]);
+  b.place(body, b.ico(0.36, 0), pale, [0, -0.2, 0.3], [0.95, 0.8, 1.3]);
 
-  const hammer = pivot(group, 0, 2.2, 0);
-  b.place(hammer, b.cylinder(0.055, 0.055, 0.95, 5), ironDark, [0, -0.2, 0]);
-  b.place(hammer, b.box(0.7, 0.4, 0.4), gold, [0, 0.36, 0]);
-  b.place(hammer, b.box(0.12, 0.44, 0.44), iron, [-0.36, 0.36, 0]);
-  b.place(hammer, b.box(0.12, 0.44, 0.44), iron, [0.36, 0.36, 0]);
-  for (const side of [-1, 1]) b.place(hammer, b.octa(0.07), eyeGlow, [side * 0.14, 0.38, 0.21], [1.3, 0.8, 0.6]);
+  const head = pivot(body, 0, 0.46, 0.78);
+  head.scale.setScalar(1.18);
+  const mane = pivot(head, 0, 0, -0.14);
+  b.place(mane, b.ico(0.5, 0), gold, [0, 0, 0], [1.08, 1.08, 0.45]);
+  for (let index = 0; index < 10; index += 1) {
+    const angle = (index / 10) * Math.PI * 2;
+    const length = index % 2 === 0 ? 0.52 : 0.34;
+    const reach = 0.44 + length / 2;
+    b.place(mane, b.cone(0.11, length, 4), ray, [Math.cos(angle) * reach, Math.sin(angle) * reach, 0], [1, 1, 0.5], [0, 0, angle - Math.PI / 2]);
+  }
+  b.place(head, b.ico(0.36, 1), fur, [0, 0, 0], [1.05, 0.95, 1]);
+  b.place(head, b.box(0.32, 0.2, 0.28), pale, [0, -0.1, 0.32]);
+  b.place(head, b.octa(0.07), dark, [0, 0.0, 0.47], [1.3, 0.8, 0.8]);
+  for (const side of [-1, 1]) {
+    b.place(head, b.box(0.2, 0.07, 0.14), furDark, [side * 0.16, 0.17, 0.27], null, [0.2, 0, side * -0.35]);
+    b.place(head, b.octa(0.07), eyeGlow, [side * 0.16, 0.08, 0.31], [1.3, 0.75, 0.8]);
+    b.place(head, b.cone(0.1, 0.2, 4), fur, [side * 0.27, 0.32, 0.02], null, [0, 0, side * -0.4]);
+    b.place(head, b.cone(0.035, 0.13, 4), bone, [side * 0.1, -0.24, 0.4], null, [Math.PI, 0, 0]);
+  }
+  const jaw = pivot(head, 0, -0.2, 0.14);
+  b.place(jaw, b.box(0.26, 0.08, 0.28), furDark, [0, -0.04, 0.15]);
+  for (const side of [-1, 1]) b.place(jaw, b.cone(0.03, 0.1, 4), bone, [side * 0.09, 0.04, 0.26]);
+
+  const wings = [];
+  for (const side of [-1, 1]) {
+    const wing = pivot(body, side * 0.34, 0.36, -0.12);
+    wing.add(kit.mesh(featherWingGeometry(side, 1.7), featherGold));
+    const inner = kit.mesh(featherWingGeometry(side, 1.0), feather);
+    inner.position.z = 0.04;
+    wing.add(inner);
+    wings.push({ wing, side });
+  }
+
+  const legs = [];
+  for (const side of [-1, 1]) {
+    for (const [z, radius] of [[0.42, 0.13], [-0.56, 0.15]]) {
+      const leg = pivot(body, side * 0.36, -0.24, z);
+      b.place(leg, b.cylinder(radius * 0.8, radius, 0.46, 5), fur, [0, -0.2, 0]);
+      b.place(leg, b.ico(0.17, 0), furDark, [0, -0.48, 0.07], [1, 0.7, 1.3]);
+      for (const claw of [-1, 0, 1]) b.place(leg, b.cone(0.03, 0.1, 4), bone, [claw * 0.07, -0.53, 0.26], null, [Math.PI / 2, 0, 0]);
+      legs.push(leg);
+    }
+  }
+
+  const tail = [];
+  let tailParent = pivot(body, 0, 0.1, -0.92);
+  [0.07, 0.06, 0.05].forEach((radius, index) => {
+    const segment = index === 0 ? tailParent : pivot(tailParent, 0, 0, -0.36);
+    b.place(segment, b.cylinder(radius * 0.8, radius, 0.38, 4), fur, [0, 0, -0.18], null, [-Math.PI / 2, 0, 0]);
+    tail.push(segment);
+    tailParent = segment;
+  });
+  b.place(pivot(tailParent, 0, 0, -0.36), b.octa(0.16), ray, [0, 0, -0.1], [0.8, 0.8, 1.5]);
 
   group.userData.animate = (seconds, enemy) => {
     const phase = enemy.phase || 0;
-    // The hammer winds back, then snaps down.
-    const swing = Math.sin(seconds * 2.4 + phase);
-    hammer.rotation.z = 0.35 + (swing > 0 ? swing * 0.5 : swing * 0.15);
-    hammer.position.y = 2.2 + Math.sin(seconds * 2.4 + phase + 1.2) * 0.08;
-    hammer.rotation.y = Math.sin(seconds * 0.9 + phase) * 0.2;
+    const beat = Math.sin(seconds * 3.2 + phase);
+    for (const { wing, side } of wings) {
+      wing.rotation.x = -0.45;
+      wing.rotation.z = side * (0.3 + beat * 0.3);
+      wing.rotation.y = side * (-0.35 - beat * 0.12);
+    }
+    body.position.y = 1.3 + Math.sin(seconds * 3.2 + phase - 1.2) * 0.07;
+    body.rotation.x = -0.16;
+    mane.rotation.z = seconds * 0.35 + phase;
+    const roar = Math.pow(Math.max(0, Math.sin(seconds * 0.8 + phase)), 3);
+    jaw.rotation.x = 0.06 + roar * 0.6;
+    head.rotation.x = 0.2 - roar * 0.3;
+    head.rotation.y = Math.sin(seconds * 0.9 + phase) * 0.22;
+    legs.forEach((leg, index) => {
+      // Front paws reach forward, hind legs trail, and all four paddle the air.
+      const front = index % 2 === 0;
+      leg.rotation.x = (front ? -0.5 : 0.55) + Math.sin(seconds * 2.4 + phase + index * 1.6) * 0.22;
+    });
+    tail.forEach((segment, index) => {
+      segment.rotation.x = index === 0 ? 0.5 : 0.25;
+      segment.rotation.y = Math.sin(seconds * 2.2 + phase - index * 0.8) * 0.28;
+    });
   };
   group.userData.animate(0, {});
   return group;
@@ -690,50 +759,87 @@ export function buildGlacialTitan(type, kit) {
   return group;
 }
 
-// Magma Sovereign — a hunched heap of molten rock with lava seams, one arm raised.
+// Magma Sovereign — a molten king cobra: rock coils, a reared neck with a flared hood,
+// glowing belly seams, a crown of lava-tipped spikes and a flickering tongue.
 export function buildMagmaSovereign(type, kit) {
   const b = builder(kit);
   const rock = kit.mat(mix(type.body, 0x8a5a40, 0.42));
   const rockDark = kit.mat(mix(type.body, 0x8a5a40, 0.18));
+  const belly = kit.mat(mix(type.trim, 0x8a4a2a, 0.55));
   const lava = kit.glow(type.trim, 1.5);
+  const bone = kit.mat(BONE);
   const eyeGlow = kit.glow(type.eye, 1.8);
   const group = new THREE.Group();
 
-  const mass = pivot(group, 0, 1.0, 0);
-  b.place(mass, b.dodeca(0.85), rock, [-0.08, 0, 0], [1.2, 1, 1], [0.3, 0.2, 0.1]);
-  b.place(mass, b.dodeca(0.4), rockDark, [0.76, -0.3, 0.1], null, [0.5, 1, 0.2]);
-  b.place(mass, b.dodeca(0.42), rockDark, [-0.8, 0.5, -0.1], null, [1, 0.3, 0.6]);
-  [[-0.2, 0.1, 0.5, 0.34], [0.22, -0.16, -0.7, 0.3], [0.05, 0.34, 0.2, 0.22], [-0.42, -0.3, -0.3, 0.26]].forEach(([x, y, tilt, length]) => {
-    b.place(mass, b.box(0.06, length, 0.05), lava, [x, y, 0.8], null, [0, 0, tilt]);
+  const flat = [Math.PI / 2, 0, 0];
+  b.place(group, b.ring(0.8, 0.27, 10), rockDark, [0, 0.27, 0], null, flat);
+  b.place(group, b.ring(0.56, 0.25, 9), rock, [0.06, 0.66, -0.04], null, [Math.PI / 2, 0, 0.4]);
+  b.place(group, b.ring(0.8, 0.05, 10), lava, [0, 0.47, 0], [1.16, 1.16, 1], flat);
+
+  const tail = [];
+  let tailParent = pivot(group, 0.7, 0.24, 0.62);
+  [0.2, 0.14, 0.09].forEach((radius, index) => {
+    const segment = index === 0 ? tailParent : pivot(tailParent, 0.4, 0, 0);
+    b.place(segment, b.cylinder(radius * 0.7, radius, 0.44, 5), rockDark, [0.2, 0, 0], null, [0, 0, -Math.PI / 2]);
+    tail.push(segment);
+    tailParent = segment;
   });
-  const head = pivot(mass, 0, 0.74, 0.36);
-  b.place(head, b.dodeca(0.36), rockDark, [0, 0, 0], null, [0.4, 0.3, 0]);
-  for (const side of [-1, 1]) b.place(head, b.box(0.2, 0.06, 0.05), eyeGlow, [side * 0.17, 0.02, 0.32], null, [0, 0, side * 0.25]);
-  [[-0.22, 0.3, 0.3], [0, 0.42, 0], [0.22, 0.32, -0.3], [0.1, 0.24, -0.6]].forEach(([x, height, tilt]) => {
-    b.place(head, b.cone(0.09, height, 4), rock, [x, 0.26 + height / 2, -0.05], null, [0, 0, -tilt]);
-    b.place(head, b.octa(0.04), lava, [x - tilt * 0.14, 0.3 + height, -0.05]);
+  b.place(pivot(tailParent, 0.4, 0, 0), b.octa(0.11), lava, [0.04, 0, 0], [1.6, 0.8, 0.8]);
+
+  // The neck is a chain of segments, each hinged on the one below so the whole column can sway.
+  const neck = [];
+  let neckParent = pivot(group, 0, 0.78, -0.12);
+  [0.27, 0.25, 0.23, 0.21].forEach((radius, index) => {
+    const segment = index === 0 ? neckParent : pivot(neckParent, 0, 0.4, 0);
+    b.place(segment, b.cylinder(radius * 0.92, radius, 0.46, 6), rock, [0, 0.2, 0]);
+    b.place(segment, b.box(radius * 1.25, 0.3, 0.08), belly, [0, 0.2, radius * 0.86]);
+    b.place(segment, b.box(radius * 1.3, 0.045, 0.06), lava, [0, 0.4, radius * 0.88]);
+    neck.push(segment);
+    neckParent = segment;
   });
-  const armLeft = pivot(group, -0.96, 1.5, 0);
-  b.place(armLeft, b.dodeca(0.45), rock, [-0.1, 0.4, 0.1], [0.8, 1.5, 0.8], [0.2, 0.4, 0]);
-  const armRight = pivot(group, 0.96, 1.0, 0.1);
-  b.place(armRight, b.dodeca(0.36), rock, [0.05, -0.4, 0.1], [0.8, 1.4, 0.8], [0.5, 0.1, 0.3]);
-  const feet = [];
+  const hood = pivot(neck[2], 0, 0.3, -0.08);
+  b.place(hood, b.ico(0.56, 1), rockDark, [0, 0.1, 0], [1.5, 1.25, 0.2]);
   for (const side of [-1, 1]) {
-    const foot = pivot(group, side * 0.46, 0.28, 0.1);
-    b.place(foot, b.dodeca(0.36), rockDark, [0, 0, 0], [1, 0.75, 1.2], [side * 0.3, 0.2, 0]);
-    feet.push(foot);
+    b.place(hood, b.box(0.07, 0.5, 0.05), lava, [side * 0.42, 0.14, 0.1], null, [0, 0, side * 0.3]);
+    b.place(hood, b.box(0.06, 0.3, 0.05), lava, [side * 0.62, 0.12, 0.08], null, [0, 0, side * 0.5]);
   }
 
+  const head = pivot(neckParent, 0, 0.42, 0);
+  b.place(head, b.ico(0.3, 1), rock, [0, 0.06, 0.16], [1.1, 0.72, 1.4]);
+  b.place(head, b.box(0.3, 0.12, 0.3), rock, [0, 0.0, 0.5]);
+  for (const side of [-1, 1]) {
+    b.place(head, b.box(0.2, 0.06, 0.16), rockDark, [side * 0.18, 0.2, 0.34], null, [0.15, 0, side * -0.3]);
+    b.place(head, b.box(0.16, 0.06, 0.05), eyeGlow, [side * 0.21, 0.1, 0.43], null, [0, side * 0.5, side * 0.25]);
+    b.place(head, b.cone(0.035, 0.2, 4), bone, [side * 0.1, -0.14, 0.56], null, [Math.PI, 0, 0]);
+  }
+  [[-0.24, 0.26, 0.5], [-0.12, 0.34, 0.22], [0, 0.42, 0], [0.12, 0.34, -0.22], [0.24, 0.26, -0.5]].forEach(([x, height, tilt]) => {
+    b.place(head, b.cone(0.07, height, 4), rockDark, [x, 0.22 + height / 2, 0.02], null, [-0.2, 0, tilt]);
+    b.place(head, b.octa(0.04), lava, [x - tilt * 0.16, 0.25 + height, -0.06]);
+  });
+  const jaw = pivot(head, 0, -0.06, 0.12);
+  b.place(jaw, b.box(0.26, 0.07, 0.44), rockDark, [0, -0.04, 0.26]);
+  const tongue = pivot(jaw, 0, 0.02, 0.4);
+  b.place(tongue, b.box(0.04, 0.02, 0.3), lava, [0, 0, 0.15]);
+  for (const side of [-1, 1]) b.place(tongue, b.box(0.03, 0.02, 0.14), lava, [side * 0.04, 0, 0.35], null, [0, side * 0.45, 0]);
+
+  const lean = [-0.4, 0.05, 0.3, 0.3];
   group.userData.animate = (seconds, enemy) => {
     const phase = enemy.phase || 0;
-    const step = seconds * 3.4 + phase;
-    const breath = 1 + Math.sin(seconds * 1.8 + phase) * 0.03;
-    mass.scale.set(breath, breath, breath);
-    armLeft.rotation.z = Math.sin(seconds * 1.5 + phase) * 0.2;
-    armRight.rotation.x = Math.sin(step) * 0.3;
-    feet[0].position.y = 0.28 + Math.max(0, Math.sin(step)) * 0.14;
-    feet[1].position.y = 0.28 + Math.max(0, -Math.sin(step)) * 0.14;
-    head.rotation.z = Math.sin(seconds * 1.2 + phase) * 0.1;
+    neck.forEach((segment, index) => {
+      segment.rotation.x = lean[index] + Math.sin(seconds * 1.3 + phase - index * 0.5) * 0.06;
+      segment.rotation.z = Math.sin(seconds * 1.6 + phase - index * 0.7) * 0.12;
+    });
+    head.rotation.x = -0.05 + Math.sin(seconds * 1.3 + phase) * 0.08;
+    head.rotation.y = Math.sin(seconds * 0.9 + phase) * 0.3;
+    hood.scale.x = 1 + Math.sin(seconds * 1.8 + phase) * 0.07;
+    // A hiss every few seconds: the jaw drops and the tongue darts out.
+    const hiss = Math.pow(Math.max(0, Math.sin(seconds * 1.1 + phase)), 4);
+    jaw.rotation.x = 0.1 + hiss * 0.5;
+    tongue.scale.z = 0.35 + hiss * 0.9 + Math.sin(seconds * 14 + phase) * 0.08;
+    tail.forEach((segment, index) => {
+      segment.rotation.y = 0.5 + Math.sin(seconds * 2.4 + phase - index * 0.9) * 0.25;
+      segment.rotation.z = index === 2 ? 0.5 : 0.08;
+    });
   };
   group.userData.animate(0, {});
   return group;
@@ -908,49 +1014,87 @@ export function buildPhantomRift(type, kit) {
   return group;
 }
 
-// Stellar Dreadnought — an armoured war machine: tracked hull, command turret and four recoiling guns.
+// Stellar Dreadnought — a hulking star knight in dark plate: crested helm with a glowing
+// visor, a star on the breastplate, a hexagonal shield, a morning star and a cape.
 export function buildStellarDreadnought(type, kit) {
   const b = builder(kit);
-  const hull = kit.mat(mix(type.body, 0x4a5a7c, 0.6));
-  const hullDark = kit.mat(mix(type.body, 0x4a5a7c, 0.3));
+  const plate = kit.mat(mix(type.body, 0x4a5a7c, 0.6));
+  const plateDark = kit.mat(mix(type.body, 0x4a5a7c, 0.3));
   const gold = kit.mat(type.trim);
+  const cloth = kit.mat(tone(type.trim, 0.5), { side: THREE.DoubleSide });
   const eyeGlow = kit.glow(type.eye, 1.8);
   const lamp = kit.glow(type.trim, 1.3);
   const group = new THREE.Group();
 
-  for (const side of [-1, 1]) {
-    b.place(group, b.cylinder(0.3, 0.3, 1.6, 6), hullDark, [side * 0.86, 0.3, 0], null, [Math.PI / 2, 0, 0]);
-    b.place(group, b.cylinder(0.56, 0.56, 0.08, 6), gold, [side * 1.24, 0.9, 0], null, [0, 0, Math.PI / 2]);
+  b.place(group, b.cylinder(0.44, 0.5, 0.32, 6), plateDark, [0, 1.02, 0], [1, 1, 0.75]);
+  b.place(group, b.box(0.98, 0.09, 0.74), gold, [0, 1.16, 0]);
+  b.place(group, b.box(0.3, 0.42, 0.08), plate, [0, 0.82, 0.36], null, [-0.12, 0, 0]);
+
+  const torso = pivot(group, 0, 1.22, 0);
+  b.place(torso, b.ico(0.62, 1), plate, [0, 0.42, 0], [1.2, 1.02, 0.85]);
+  b.place(torso, b.cylinder(0.3, 0.36, 0.2, 6), gold, [0, 0.9, 0.02]);
+  // A four-pointed star on the breastplate.
+  b.place(torso, b.octa(0.14), lamp, [0, 0.45, 0.52], [0.5, 2, 0.3]);
+  b.place(torso, b.octa(0.14), lamp, [0, 0.45, 0.52], [1.6, 0.5, 0.3]);
+  const cape = pivot(torso, 0, 0.82, -0.42);
+  b.place(cape, b.cylinder(0.5, 0.82, 1.6, 5), cloth, [0, -0.78, -0.04], [1, 1, 0.14]);
+
+  const head = pivot(torso, 0, 0.96, 0.05);
+  b.place(head, b.cylinder(0.26, 0.3, 0.42, 6), plate, [0, 0.2, 0]);
+  b.place(head, b.ico(0.28, 0), plateDark, [0, 0.42, 0], [1, 0.7, 1]);
+  b.place(head, b.box(0.38, 0.06, 0.05), eyeGlow, [0, 0.26, 0.27]);
+  b.place(head, b.box(0.05, 0.22, 0.05), gold, [0, 0.12, 0.29]);
+  [[0.24, 0.3], [0.02, 0.4], [-0.2, 0.3]].forEach(([z, height]) => {
+    b.place(head, b.cone(0.09, height, 4), gold, [0, 0.56 + height / 2, z], [0.5, 1, 1.3], [-0.25, 0, 0]);
+  });
+
+  const limbs = {};
+  for (const [name, side] of [['Left', -1], ['Right', 1]]) {
+    b.place(torso, b.ico(0.34, 0), plateDark, [side * 0.84, 0.76, 0], [1.1, 0.8, 1.1]);
+    b.place(torso, b.cone(0.1, 0.34, 4), gold, [side * 0.92, 1.06, 0], null, [0, 0, side * -0.35]);
+    const arm = pivot(group, side * 0.88, 1.92, 0);
+    b.place(arm, b.cylinder(0.15, 0.17, 0.52, 5), plate, [0, -0.3, 0]);
+    b.place(arm, b.ico(0.2, 0), gold, [0, -0.68, 0.05]);
+    limbs[`arm${name}`] = arm;
+    const leg = pivot(group, side * 0.3, 0.96, 0);
+    b.place(leg, b.cylinder(0.2, 0.17, 0.46, 5), plate, [0, -0.22, 0]);
+    b.place(leg, b.ico(0.14, 0), gold, [0, -0.46, 0.12]);
+    b.place(leg, b.cylinder(0.16, 0.2, 0.4, 5), plateDark, [0, -0.66, 0]);
+    b.place(leg, b.box(0.34, 0.16, 0.5), plate, [0, -0.88, 0.08]);
+    limbs[`leg${name}`] = leg;
   }
-  b.place(group, b.cylinder(1.0, 1.16, 0.76, 6), hull, [0, 0.9, 0], [1, 1, 0.66]);
-  b.place(group, b.box(1.5, 0.07, 0.04), gold, [0, 1.0, 0.72]);
-  b.place(group, b.box(1.3, 0.07, 0.04), gold, [0, 0.76, 0.76]);
-  const turret = pivot(group, 0, 1.3, 0);
-  b.place(turret, b.cylinder(0.42, 0.52, 0.6, 6), hull, [0, 0.28, 0]);
-  b.place(turret, b.ico(0.42, 0), gold, [0, 0.62, 0], [1, 0.55, 1]);
-  for (const side of [-1, 1]) b.place(turret, b.box(0.2, 0.09, 0.05), eyeGlow, [side * 0.17, 0.32, 0.46]);
-  const antenna = pivot(turret, 0.2, 0.8, -0.1);
-  b.place(antenna, b.cylinder(0.012, 0.02, 0.6, 3), hullDark, [0, 0.3, 0]);
-  b.place(antenna, b.octa(0.05), lamp, [0, 0.62, 0]);
-  const guns = [];
-  for (const side of [-1, 1]) {
-    for (const [y, x] of [[1.32, 0.62], [1.02, 0.84]]) {
-      const gun = pivot(group, side * x, y, 0.3);
-      b.place(gun, b.cylinder(0.07, 0.09, 0.9, 5), hullDark, [0, 0, 0.45], null, [Math.PI / 2, 0, 0]);
-      b.place(gun, b.cylinder(0.1, 0.1, 0.1, 5), gold, [0, 0, 0.9], null, [Math.PI / 2, 0, 0]);
-      guns.push(gun);
-    }
+
+  const shield = pivot(limbs.armLeft, -0.05, -0.62, 0.3);
+  b.place(shield, b.cylinder(0.56, 0.56, 0.06, 6), gold, [0, 0, 0], [0.86, 1, 1.3], [Math.PI / 2, 0, 0]);
+  b.place(shield, b.cylinder(0.5, 0.5, 0.1, 6), plateDark, [0, 0, 0.02], [0.86, 1, 1.3], [Math.PI / 2, 0, 0]);
+  b.place(shield, b.octa(0.13), lamp, [0, 0, 0.1], [0.5, 2.2, 0.3]);
+  b.place(shield, b.octa(0.13), lamp, [0, 0, 0.1], [1.7, 0.5, 0.3]);
+
+  const mace = pivot(limbs.armRight, 0, -0.68, 0.08);
+  mace.rotation.x = 0.9;
+  b.place(mace, b.cylinder(0.04, 0.05, 1.1, 5), plateDark, [0, 0.4, 0]);
+  b.place(mace, b.ico(0.22, 0), gold, [0, 1.02, 0]);
+  for (const direction of [[1, 0, 0], [-1, 0, 0], [0, 1, 0], [0, 0, 1], [0, 0, -1], [0.7, 0.7, 0], [-0.7, 0.7, 0]]) {
+    const aim = new THREE.Vector3(...direction).normalize();
+    const spike = b.place(mace, b.cone(0.07, 0.26, 4), lamp, [aim.x * 0.28, 1.02 + aim.y * 0.28, aim.z * 0.28]);
+    spike.quaternion.setFromUnitVectors(UP, aim);
   }
 
   group.userData.animate = (seconds, enemy) => {
     const phase = enemy.phase || 0;
-    turret.rotation.y = Math.sin(seconds * 0.8 + phase) * 0.3;
-    antenna.rotation.z = Math.sin(seconds * 3 + phase) * 0.12;
-    guns.forEach((gun, index) => {
-      // Each gun kicks back in turn, then eases forward again.
-      const cycle = (seconds * 0.9 + phase * 0.16 + index * 0.25) % 1;
-      gun.position.z = 0.3 - Math.max(0, 1 - cycle * 6) * 0.22;
-    });
+    const step = seconds * 3.2 + phase;
+    limbs.legLeft.rotation.x = Math.sin(step) * 0.3;
+    limbs.legRight.rotation.x = -Math.sin(step) * 0.3;
+    torso.rotation.z = Math.sin(step) * 0.04;
+    torso.rotation.y = Math.sin(step) * 0.06;
+    head.rotation.y = Math.sin(seconds * 0.8 + phase) * 0.3;
+    // The shield stays braced in front; the mace arm winds up, then swings down.
+    limbs.armLeft.rotation.x = -0.55 + Math.sin(step) * 0.05;
+    limbs.armLeft.rotation.z = -0.12;
+    const swing = Math.sin(seconds * 1.6 + phase);
+    limbs.armRight.rotation.x = -0.5 - (swing > 0 ? swing * 0.9 : swing * 0.25);
+    limbs.armRight.rotation.z = 0.22;
+    cape.rotation.x = 0.16 + Math.sin(step + 0.6) * 0.07;
   };
   group.userData.animate(0, {});
   return group;

@@ -138,15 +138,16 @@ export function createMimicChestMesh(type) {
   return g;
 }
 
-// Height of the "incoming" beacon above each boss, to clear its head, horns or hammer.
+// Height of the "incoming" beacon above each boss, to clear its head, horns, wings or weapon.
 const BOSS_BEACON_HEIGHTS = {
   'Verdant Colossus': 3.2,
-  'Solar Anvil': 3.1,
+  'Solar Anvil': 3.2,
   'Glacial Titan': 3.3,
+  'Magma Sovereign': 3.3,
   'Void Specter': 3.1,
   'Celestial Arbiter': 3.2,
   'Phantom Rift': 3.2,
-  'Stellar Dreadnought': 2.7,
+  'Stellar Dreadnought': 3.4,
 };
 
 function createSpecificBossMesh(type) {
