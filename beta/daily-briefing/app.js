@@ -1,6 +1,7 @@
 'use strict';
 const state = { editions: [], current: null, topic: 'all' };
-const topics = { ai: '人工智能', space: '物理與太空', maker: '創客科技', markets: '企業與市場', hk: '香港要聞' };
+const topics = { markets: '企業與市場', hk: '香港要聞', ai: '人工智能', space: '物理與太空', maker: '創客科技' };
+const topicOrder = Object.keys(topics);
 const el = id => document.getElementById(id);
 function node(tag, text, className) {
   const element = document.createElement(tag);
@@ -19,7 +20,9 @@ function render() {
   el('note').textContent = issue.note;
   const grid = el('stories'); grid.replaceChildren();
   grid.classList.toggle('filtered', state.topic !== 'all');
-  const stories = issue.stories.filter(story => state.topic === 'all' || story.topic === state.topic);
+  const stories = issue.stories
+    .filter(story => state.topic === 'all' || story.topic === state.topic)
+    .sort((a, b) => topicOrder.indexOf(a.topic) - topicOrder.indexOf(b.topic));
   el('status').textContent = stories.length ? '' : '本期沒有此分類的新聞，請選擇其他版面。';
   stories.forEach(story => {
     const article = node('article', undefined, 'story');
