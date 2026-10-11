@@ -1,6 +1,6 @@
 'use strict';
 const state = { editions: [], current: null, topic: 'all' };
-const topics = { ai: '人工智能', space: '物理與太空', maker: '創客科技' };
+const topics = { ai: '人工智能', space: '物理與太空', maker: '創客科技', markets: '企業與市場', hk: '香港要聞' };
 const el = id => document.getElementById(id);
 function node(tag, text, className) {
   const element = document.createElement(tag);
