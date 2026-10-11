@@ -5,20 +5,10 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <meta name="theme-color" content="#F8F6F1">
+  <script src="/assets/theme.js" data-legacy-dark="ising-dark" data-legacy-light="ising-light"></script>
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
   <meta name="robots" content="noindex, nofollow">
-  <script>
-    (function () {
-      if (localStorage.getItem('ising-dark')) {
-        document.documentElement.setAttribute('data-theme', 'dark');
-        var tc = document.querySelector('meta[name="theme-color"]');
-        var sb = document.querySelector('meta[name="apple-mobile-web-app-status-bar-style"]');
-        if (tc) tc.setAttribute('content', '#111110');
-        if (sb) sb.setAttribute('content', 'black-translucent');
-      }
-    })();
-  </script>
   <title>2D Ising Model | PanPhy Labs</title>
   <link rel="icon" type="image/png" href="/assets/favicon.png">
   <style>
@@ -777,27 +767,8 @@
     });
 
     // ── Theme toggle ───────────────────────────────────────────────────────────
-    themeBtn.addEventListener('click', () => {
-      const dark = document.documentElement.getAttribute('data-theme') === 'dark';
-      const next = dark ? 'light' : 'dark';
-      document.documentElement.setAttribute('data-theme', next);
-      if (next === 'dark') {
-        localStorage.setItem('ising-dark', '1');
-        document.querySelector('meta[name="theme-color"]').setAttribute('content', '#111110');
-        document.querySelector('meta[name="apple-mobile-web-app-status-bar-style"]').setAttribute('content', 'black-translucent');
-      } else {
-        localStorage.removeItem('ising-dark');
-        document.querySelector('meta[name="theme-color"]').setAttribute('content', '#F8F6F1');
-        document.querySelector('meta[name="apple-mobile-web-app-status-bar-style"]').setAttribute('content', 'default');
-      }
-      themeBtn.textContent = next === 'dark' ? '🌙' : '☀️';
-      renderGrid();
-    });
-
-    // Sync icon on load
-    if (document.documentElement.getAttribute('data-theme') === 'dark') {
-      themeBtn.textContent = '🌙';
-    }
+    window.PanPhyThemeToggle.mount(themeBtn);
+    window.addEventListener('panphy:theme-change', renderGrid);
 
     // ── Keyboard shortcut ──────────────────────────────────────────────────────
     document.addEventListener('keydown', (e) => {

@@ -5,20 +5,10 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="description" content="Explore nuclear fission and fusion in interactive 3D. Split a uranium nucleus, run a chain reaction, fuse hydrogen nuclei and see why both release energy.">
   <meta name="theme-color" content="#F8F6F1">
+  <script src="/assets/theme.js" data-legacy-dark="fission-fusion-dark" data-legacy-light="fission-fusion-light"></script>
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
   <link rel="stylesheet" href="/assets/standalone-top.css">
-  <script>
-  (function() {
-    var dark = false;
-    try { dark = !!localStorage.getItem('fission-fusion-dark'); } catch (error) {}
-    if (dark) {
-      document.documentElement.setAttribute('data-theme', 'dark');
-      var tc = document.querySelector('meta[name="theme-color"]');
-      if (tc) tc.setAttribute('content', '#111110');
-    }
-  })();
-  </script>
   <title>Fission and Fusion — PanPhy Labs</title>
   <link rel="icon" type="image/png" href="/assets/favicon.png">
   <link rel="apple-touch-icon" href="/assets/apple-touch-icon.png">
@@ -37,7 +27,7 @@
       <button id="theme-button" type="button" data-panphy-theme-toggle aria-label="Toggle light/dark theme" title="Toggle between light and dark themes"></button>
     </div>
   </header>
-  <script>window.PanPhyThemeToggle.mount(document.getElementById('theme-button'), { darkStorageKey: 'fission-fusion-dark' });</script>
+  <script>window.PanPhyThemeToggle.mount(document.getElementById('theme-button'));</script>
   <main>
     <div class="intro"><div><p class="eyebrow">THE NUCLEUS LAB / ENERGY FROM THE NUCLEUS</p><h1>Split it. Join it.<br>Release energy<span>!</span></h1></div><p>Fire a neutron. Run a chain reaction. Heat hydrogen until it fuses.<br>Then find out why both release energy.</p></div>
     <nav class="models" aria-label="Choose a nuclear reaction">

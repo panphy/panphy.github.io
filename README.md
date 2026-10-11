@@ -23,6 +23,12 @@ The [GCSE Physics hub](https://panphy.app/gcsephy/) collects the author's school
 
 These public, open-source resources are intentionally outside the general homepage catalogue, but teachers and students are welcome to use and adapt them.
 
+## Theme
+
+Pages with a light/dark switch share one preference in the same browser and site origin, including open tabs. The first visit follows the device setting unless an existing page preference can be migrated. Fixed-design apps retain their appearance.
+
+Load `assets/theme.js` synchronously in the head before styles; use `PanPhyTheme.toggle()` or `PanPhyThemeToggle.mount(button)` for controls. Listen for `panphy:theme-change` to refresh charts, scenes or syntax highlighting.
+
 ## Offline use
 
 Most published tools and simulations work offline once cached: visit online first and check the homepage's **Offline Ready** indicator. Updates appear through an update prompt, shown only in apps whose own or shared files changed. Shared fonts in `assets/fonts/` are precached (about 336 KB).

@@ -6,22 +6,10 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <meta name="description" content="Explore solid, liquid and gas in a 3D particle model. Watch the sample melt, boil and freeze, the piston lid rise as it turns to gas, and a crystal regrow as it cools.">
   <meta name="theme-color" content="#F8F6F1">
+  <script src="/assets/theme.js" data-legacy-dark="panphy-dark" data-legacy-light="panphy-light"></script>
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
   <link rel="stylesheet" href="/assets/standalone-top.css">
-  <script>
-    (function () {
-      try {
-        if (localStorage.getItem('panphy-dark')) {
-          document.documentElement.setAttribute('data-theme', 'dark');
-          var tc = document.querySelector('meta[name="theme-color"]');
-          if (tc) tc.setAttribute('content', '#111110');
-        }
-      } catch (error) {
-        // Storage can be blocked; the page stays in the light theme.
-      }
-    })();
-  </script>
   <title>States of Matter | PanPhy Labs</title>
   <script src="/assets/sw-register.js" defer></script>
   <link rel="icon" type="image/png" href="/assets/favicon.png">

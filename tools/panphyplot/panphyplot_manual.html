@@ -4,6 +4,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script src="/assets/theme.js" data-legacy-dark="panphy-dark" data-legacy-light="panphy-light"></script>
   <title>PanPhyPlot Manual</title>
   <link rel="icon" type="image/png" href="/assets/favicon.png">
     <script src="/assets/sw-register.js" defer></script>
@@ -891,53 +892,17 @@
   </footer>
 
   <script>
-    // Theme Toggle Functionality
-    const themeButton = document.getElementById('theme-button');
-    const DARK_THEME_KEY = "panphy-dark";
-    const LIGHT_THEME_KEY = "panphy-light";
+    window.PanPhyThemeToggle.mount(document.getElementById('theme-button'));
     const hljsLight = document.getElementById('hljs-light');
     const hljsDark = document.getElementById('hljs-dark');
 
-    const currentTheme = localStorage.getItem(DARK_THEME_KEY) ?
-      "dark" :
-      localStorage.getItem(LIGHT_THEME_KEY) ?
-        "light" :
-        "light";
-
-    document.documentElement.setAttribute('data-theme', currentTheme);
-    updateButtonEmoji(currentTheme);
-    updateHighlightTheme(currentTheme);
-
-    function updateButtonEmoji(theme) {
-      themeButton.textContent = theme === 'dark' ? '🌙' : '☀️';
+    function updateHighlightTheme() {
+      const dark = window.PanPhyTheme.get() === 'dark';
+      hljsLight.disabled = dark;
+      hljsDark.disabled = !dark;
     }
-
-    function updateHighlightTheme(theme) {
-      if (theme === 'dark') {
-        hljsLight.disabled = true;
-        hljsDark.disabled = false;
-      } else {
-        hljsLight.disabled = false;
-        hljsDark.disabled = true;
-      }
-    }
-
-    themeButton.addEventListener('click', function () {
-      let theme = document.documentElement.getAttribute('data-theme');
-      if (theme === 'light') {
-        document.documentElement.setAttribute('data-theme', 'dark');
-        localStorage.setItem(DARK_THEME_KEY, 'true');
-        localStorage.removeItem(LIGHT_THEME_KEY);
-        updateButtonEmoji('dark');
-        updateHighlightTheme('dark');
-      } else {
-        document.documentElement.setAttribute('data-theme', 'light');
-        localStorage.setItem(LIGHT_THEME_KEY, 'true');
-        localStorage.removeItem(DARK_THEME_KEY);
-        updateButtonEmoji('light');
-        updateHighlightTheme('light');
-      }
-    });
+    updateHighlightTheme();
+    window.addEventListener('panphy:theme-change', updateHighlightTheme);
 
     // Initialize highlight.js
     window.addEventListener('DOMContentLoaded', () => {

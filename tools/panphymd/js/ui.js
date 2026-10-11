@@ -4,8 +4,6 @@
  */
 
 import {
-  loadThemePreference,
-  saveThemePreference,
   loadSyncScrollPreference,
   loadFontSizePreference,
   saveFontSizePreference,
@@ -17,24 +15,13 @@ import {
 } from './state.js';
 
 // DOM element references (set during initialization)
-let themeToggleButton = null;
 let highlightStyle = null;
-
-function updateAppChromeTheme(theme) {
-  const themeColorMeta = document.querySelector('meta[name="theme-color"]');
-  const isDarkTheme = theme === 'dark';
-
-  if (themeColorMeta) {
-    themeColorMeta.setAttribute('content', isDarkTheme ? '#111110' : '#F8F6F1');
-  }
-}
 
 /**
  * Initialize UI module with DOM references
  * @param {Object} elements - Object containing DOM element references
  */
 export function initUI(elements) {
-  themeToggleButton = elements.themeToggleButton;
   highlightStyle = elements.highlightStyle;
 }
 
@@ -63,78 +50,22 @@ export function isTouchInteractionMode() {
 }
 
 /**
- * Update the theme toggle button's icon and attributes.
+ * Keep syntax highlighting in step with the site-wide preference.
  */
-function updateThemeToggleButton() {
-  if (!themeToggleButton) return;
-
-  if (document.documentElement.getAttribute('data-theme') === 'dark') {
-    themeToggleButton.textContent = '\u{1F319}'; // Moon emoji
-    themeToggleButton.setAttribute('aria-label', 'Switch to Light Mode');
-    themeToggleButton.setAttribute('title', 'Switch to Light Mode');
-  } else {
-    themeToggleButton.textContent = '\u{2600}\u{FE0F}'; // Sun emoji
-    themeToggleButton.setAttribute('aria-label', 'Switch to Dark Mode');
-    themeToggleButton.setAttribute('title', 'Switch to Dark Mode');
+function updateHighlightTheme() {
+  if (highlightStyle) {
+    const style = window.PanPhyTheme.get() === 'dark' ? 'monokai' : 'default';
+    highlightStyle.href = `https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/${style}.min.css`;
   }
 }
 
-/**
- * Initialize the theme based on saved preference.
- */
 export function initializeTheme() {
-  const savedTheme = loadThemePreference();
-  if (savedTheme === 'markdown-dark') {
-    document.documentElement.setAttribute('data-theme', 'dark');
-    if (highlightStyle) {
-      highlightStyle.href = 'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/monokai.min.css';
-    }
-  } else {
-    document.documentElement.setAttribute('data-theme', 'light');
-    if (highlightStyle) {
-      highlightStyle.href = 'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/default.min.css';
-    }
-  }
-  updateThemeToggleButton();
-  updateAppChromeTheme(document.documentElement.getAttribute('data-theme'));
-
-  window.addEventListener('pageshow', () => {
-    updateAppChromeTheme(document.documentElement.getAttribute('data-theme'));
-  });
+  updateHighlightTheme();
+  window.addEventListener('panphy:theme-change', updateHighlightTheme);
 }
 
-
-/**
- * Toggle between dark and light themes and save the preference.
- */
 export function toggleTheme() {
-  const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
-  const next = isDark ? 'light' : 'dark';
-  document.documentElement.setAttribute('data-theme', next);
-
-  if (next === 'dark') {
-    if (themeToggleButton) {
-      themeToggleButton.textContent = '\u{1F319}'; // Moon emoji
-      themeToggleButton.setAttribute('aria-label', 'Switch to Light Mode');
-      themeToggleButton.setAttribute('title', 'Switch to Light Mode');
-    }
-    if (highlightStyle) {
-      highlightStyle.href = 'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/monokai.min.css';
-    }
-    saveThemePreference('markdown-dark');
-    updateAppChromeTheme('dark');
-  } else {
-    if (themeToggleButton) {
-      themeToggleButton.textContent = '\u{2600}\u{FE0F}'; // Sun emoji
-      themeToggleButton.setAttribute('aria-label', 'Switch to Dark Mode');
-      themeToggleButton.setAttribute('title', 'Switch to Dark Mode');
-    }
-    if (highlightStyle) {
-      highlightStyle.href = 'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/default.min.css';
-    }
-    saveThemePreference('markdown-light');
-    updateAppChromeTheme('light');
-  }
+  window.PanPhyTheme.toggle();
 }
 
 /**

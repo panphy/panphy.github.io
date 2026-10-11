@@ -7,33 +7,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <meta name="theme-color" content="#F8F6F1">
+    <script src="/assets/theme.js" data-legacy-dark="panphy-dark" data-legacy-light="panphy-light"></script>
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <link rel="stylesheet" href="/assets/standalone-top.css">
-    <script>
-    (function() {
-      var root = document.documentElement;
-      root.classList.add('js');
-      var dark = false;
-      try {
-        if (localStorage.getItem('panphy-dark')) {
-          dark = true;
-        } else if (!localStorage.getItem('panphy-light') &&
-                   window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
-          // First visit: follow the device setting and store it so every app page matches.
-          dark = true;
-          localStorage.setItem('panphy-dark', 'true');
-        }
-      } catch (error) {
-        dark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
-      }
-      if (dark) {
-        root.setAttribute('data-theme', 'dark');
-        var tc = document.querySelector('meta[name="theme-color"]');
-        if (tc) tc.setAttribute('content', '#111110');
-      }
-    })();
-    </script>
+    <script>document.documentElement.classList.add('js');</script>
     <title>PanPhy Labs | Physics Tools & Simulations</title>
     <meta name="description"
         content="PanPhy Labs is a portfolio of physics tools, simulations, and interactive mini apps.">
@@ -2418,47 +2396,7 @@
     </script>
     <script>
         // Theme Toggle Functionality
-        const themeButton = document.getElementById('theme-button');
-        const DARK_THEME_KEY = "panphy-dark";
-        const LIGHT_THEME_KEY = "panphy-light";
-
-        function storeTheme(theme) {
-            try {
-                if (theme === 'dark') {
-                    localStorage.setItem(DARK_THEME_KEY, 'true');
-                    localStorage.removeItem(LIGHT_THEME_KEY);
-                } else {
-                    localStorage.setItem(LIGHT_THEME_KEY, 'true');
-                    localStorage.removeItem(DARK_THEME_KEY);
-                }
-            } catch (error) {
-                // The visible theme still changes when storage is unavailable.
-            }
-        }
-
-        // The head script has already chosen the theme (stored choice or device setting).
-        updateAppChromeTheme(document.documentElement.getAttribute('data-theme'));
-
-        function updateAppChromeTheme(theme) {
-            const themeColorMeta = document.querySelector('meta[name="theme-color"]');
-            const isDarkTheme = theme === 'dark';
-
-            if (themeColorMeta) {
-                themeColorMeta.setAttribute('content', isDarkTheme ? '#111110' : '#F8F6F1');
-            }
-        }
-
-        window.addEventListener('pageshow', function () {
-            updateAppChromeTheme(document.documentElement.getAttribute('data-theme'));
-        });
-
-        themeButton.addEventListener('click', function () {
-            let theme = document.documentElement.getAttribute('data-theme');
-            const next = theme === 'light' ? 'dark' : 'light';
-            document.documentElement.setAttribute('data-theme', next);
-            storeTheme(next);
-            updateAppChromeTheme(next);
-        });
+        window.PanPhyThemeToggle.mount(document.getElementById('theme-button'));
 
         const OFFLINE_CARD_REQUIREMENTS = {
             '/tools/panphymd.html': [
@@ -2595,6 +2533,7 @@
             '/assets/fonts/manrope-normal-400-800-latin-ext.woff2',
             '/assets/fonts/manrope-normal-400-800-latin.woff2',
             '/assets/fonts/manrope-normal-400-800-vietnamese.woff2',
+            '/assets/theme.js',
             '/assets/theme-toggle.css',
             '/assets/theme-toggle.js',
             '/assets/standalone-top.css'

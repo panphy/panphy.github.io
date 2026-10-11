@@ -5,20 +5,10 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="description" content="Explore four atomic models in interactive 3D: plum pudding, Rutherford, Bohr and the electron cloud. Fire alpha particles, excite electrons and see how our picture of the atom changed.">
   <meta name="theme-color" content="#F8F6F1">
+  <script src="/assets/theme.js" data-legacy-dark="atomic-models-dark" data-legacy-light="atomic-models-light"></script>
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
   <link rel="stylesheet" href="/assets/standalone-top.css">
-  <script>
-  (function() {
-    var dark = false;
-    try { dark = !!localStorage.getItem('atomic-models-dark'); } catch (error) {}
-    if (dark) {
-      document.documentElement.setAttribute('data-theme', 'dark');
-      var tc = document.querySelector('meta[name="theme-color"]');
-      if (tc) tc.setAttribute('content', '#111110');
-    }
-  })();
-  </script>
   <title>Atomic Models — PanPhy Labs</title>
   <link rel="icon" type="image/png" href="/assets/favicon.png">
   <link rel="apple-touch-icon" href="/assets/apple-touch-icon.png">
@@ -37,7 +27,7 @@
       <button id="theme-button" type="button" data-panphy-theme-toggle aria-label="Toggle light/dark theme" title="Toggle between light and dark themes"></button>
     </div>
   </header>
-  <script>window.PanPhyThemeToggle.mount(document.getElementById('theme-button'), { darkStorageKey: 'atomic-models-dark' });</script>
+  <script>window.PanPhyThemeToggle.mount(document.getElementById('theme-button'));</script>
   <main>
     <div class="intro"><div><p class="eyebrow">THE ATOM LAB / EXPLORE THE INVISIBLE</p><h1>Tiny atom.<br>Huge discoveries<span>!</span></h1></div><p>Spin it. Fire at it. Get inside it.<br>Travel through four ideas that changed science.</p></div>
     <nav class="models" aria-label="Choose an atomic model">

@@ -1,4 +1,4 @@
-const BUILD_ID = '2026-10-10T18:19:03Z';
+const BUILD_ID = '2026-10-11T12:03:14Z';
 const CACHE_PREFIX = 'panphy-labs';
 const PRECACHE_NAME = `${CACHE_PREFIX}-precache-${BUILD_ID}`;
 const RUNTIME_CACHE = `${CACHE_PREFIX}-runtime-${BUILD_ID}`;
@@ -17,6 +17,7 @@ const ASSETS_TO_CACHE = [
   '/assets/favicon.png',
   '/assets/apple-touch-icon.png',
   '/assets/panphy.png',
+  '/assets/theme.js',
   '/assets/theme-toggle.css',
   '/assets/theme-toggle.js',
   '/assets/fullscreen-button.css',

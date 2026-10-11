@@ -5,20 +5,10 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="description" content="Explore electric motors in interactive 3D: the motor effect and F = BIL, a DC motor with a split-ring commutator, and a synchronous AC motor.">
   <meta name="theme-color" content="#F8F6F1">
+  <script src="/assets/theme.js" data-legacy-dark="electric-motors-dark" data-legacy-light="electric-motors-light"></script>
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
   <link rel="stylesheet" href="/assets/standalone-top.css">
-  <script>
-  (function() {
-    var dark = false;
-    try { dark = !!localStorage.getItem('electric-motors-dark'); } catch (error) {}
-    if (dark) {
-      document.documentElement.setAttribute('data-theme', 'dark');
-      var tc = document.querySelector('meta[name="theme-color"]');
-      if (tc) tc.setAttribute('content', '#111110');
-    }
-  })();
-  </script>
   <title>Electric Motors — PanPhy Labs</title>
   <link rel="icon" type="image/png" href="/assets/favicon.png">
   <link rel="apple-touch-icon" href="/assets/apple-touch-icon.png">
@@ -36,7 +26,7 @@
       <button id="theme-button" type="button" data-panphy-theme-toggle aria-label="Toggle light/dark theme" title="Toggle between light and dark themes"></button>
     </div>
   </header>
-  <script>window.PanPhyThemeToggle.mount(document.getElementById('theme-button'), { darkStorageKey: 'electric-motors-dark' });</script>
+  <script>window.PanPhyThemeToggle.mount(document.getElementById('theme-button'));</script>
   <main>
     <div class="intro"><div><p class="eyebrow">THE MOTOR LAB / ELECTRICITY INTO MOTION</p><h1>Current in. Motion out<span>!</span></h1></div><p>Push a wire with a magnet. Spin a coil. Follow the current.<br>Find out what keeps every electric motor turning.</p></div>
     <nav class="models" aria-label="Choose a motor">
