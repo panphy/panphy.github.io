@@ -1,0 +1,95 @@
+{
+  "editions": [
+    {
+      "date": "2026-10-11",
+      "note": "創刊號｜精選近期值得留意的消息，涵蓋 10 月 5–9 日新訊及一則 9 月延伸閱讀；各則標明原文日期。",
+      "stories": [
+        {
+          "topic": "ai",
+          "published": "2026-10-08",
+          "headline": "實驗室開始「自己做實驗」：AI 串起機械臂、光束與數據",
+          "summary": "SLAC 宣布 SPIRE 計劃，研究把 AI 代理、機械人與智能探測器連成自主實驗平台。目標包括精細處理樣本、根據量測調整 X 光與電子束，以及即時分析數據。這仍是建設中的研究計劃；部分自動化及代理工作流程已有示範，但整座自主實驗室尚未完成。",
+          "takeaway": "關鍵概念是回饋迴路：量測結果會改變下一步操作。可把它與固定程序的自動化比較，思考甚麼情況需要人作判斷。",
+          "source": {
+            "url": "https://www6.slac.stanford.edu/news/2026-10-08-slac-leads-new-project-build-self-driving-laboratory-future",
+            "name": "SLAC National Accelerator Laboratory"
+          },
+          "image": {
+            "url": "https://www6.slac.stanford.edu/sites/default/files/styles/extra_large_card/public/2026-09/self_driving_instruments_la_final.jpg?h=48fedc64&itok=uQW0c79V",
+            "alt": "自主實驗室概念圖",
+            "caption": "由光束控制到樣本與數據分析的自主實驗室構想",
+            "credit": "Greg Stewart / SLAC"
+          }
+        },
+        {
+          "topic": "space",
+          "published": "2026-10-09",
+          "headline": "衛星轉動也不怕：AI 用「記憶」辨認被遮住的部件",
+          "summary": "Alan Turing Institute 與伯明翰大學的研究團隊開發模型，從高解像度雷達影像辨認衛星的太陽能板、天線及其他部件。模型參考前後影像，在衛星旋轉、部件被遮擋時維持追蹤。研究可為在軌物體識別、交會及維修提供工具；並不代表已能完全自主避免碰撞。",
+          "takeaway": "雷達成像加上時間資訊，比單張照片更能理解運動物體。這是電磁波、遙測與機器視覺相遇的實例。",
+          "source": {
+            "url": "https://www.turing.ac.uk/news/new-ai-model-will-boost-uks-ability-safeguard-vital-satellites",
+            "name": "The Alan Turing Institute"
+          },
+          "image": {
+            "url": "https://science.nasa.gov/wp-content/uploads/2023/06/img-press-140106-suomi-npp-jpg.webp",
+            "alt": "Suomi NPP 衛星在地球上空的概念圖",
+            "caption": "資料圖片：Suomi NPP 衛星；並非研究使用的雷達影像",
+            "credit": "NASA / Suomi NPP"
+          }
+        },
+        {
+          "topic": "maker",
+          "published": "2026-10-06",
+          "headline": "舊電腦的新工作：Raspberry Pi Desktop 更新至 Debian Trixie",
+          "summary": "Raspberry Pi 發布更新的 PC 與 Mac 桌面系統，採用 64 位元 Debian Trixie，並加入 Raspberry Pi Connect 客戶端。可透過 USB 啟動體驗，也可安裝到電腦。它適用於兼容的 x86-64 PC 與 Intel Mac；Apple Silicon Mac 不在目前支援範圍。",
+          "takeaway": "可考慮把兼容的舊電腦變成編程或創客工作站。先用 USB 試行，確認硬件及所需軟件是否適用。",
+          "source": {
+            "url": "https://www.raspberrypi.com/news/raspberry-pi-desktop-now-available-for-pc-and-mac/",
+            "name": "Raspberry Pi"
+          },
+          "image": {
+            "url": "https://www.raspberrypi.com/app/uploads/2026/10/IMG_4808-1024x768.jpg",
+            "alt": "Dell 筆記型電腦上的 Raspberry Pi Desktop",
+            "caption": "Raspberry Pi Desktop 在 Dell 筆記型電腦上運行",
+            "credit": "Raspberry Pi"
+          }
+        },
+        {
+          "topic": "ai",
+          "published": "2026-10-05",
+          "headline": "把 AI 放在工作枱：低功耗加速板讓 Pi 5 看懂影像",
+          "summary": "Raspberry Pi 刊登 Sixfab 與 DEEPX 的技術介紹，展示 Pi 5 配合第三方 AI HAT+，在本機執行視覺及小型語言模型。文中 25 TOPS 版本的 NPU 典型持續功耗約為 3 W；這不是整套電腦的耗電量。應用重點是範圍明確的本地推論，而非取代大型雲端模型。",
+          "takeaway": "可作為 3D 打印監察或機械人視覺的研究起點。選硬件時，除運算峰值外，也要量度實際準確度、延遲及整機功耗。",
+          "source": {
+            "url": "https://www.raspberrypi.com/news/seeing-understanding-and-responding-low-power-cnn-vlm-and-slm-workloads-on-raspberry-pi-5/",
+            "name": "Raspberry Pi / Sixfab / DEEPX"
+          },
+          "image": {
+            "url": "https://www.raspberrypi.com/app/uploads/2026/09/Sixfab-AI-HAT-Plus-11.jpg",
+            "alt": "Sixfab AI HAT+ 加速板",
+            "caption": "Pi 5 的第三方 AI 加速板",
+            "credit": "Raspberry Pi / Sixfab"
+          }
+        },
+        {
+          "topic": "space",
+          "published": "2026-09-21",
+          "headline": "火星岩石留下水的「多次到訪」：不只是古老湖泊",
+          "summary": "毅力號在傑澤羅隕石坑邊緣區找到火成岩，當中的礦物與裂隙記錄至少三次與水互動的過程。研究涉及地下水、可能與古湖相關的作用，以及後來的熱水活動。團隊能推斷先後次序，但尚不能確定各事件的年代；結果也不是發現生命的證據。",
+          "takeaway": "延伸閱讀：SuperCam 利用雷射產生的電漿光譜分析岩石成分，把原子光譜與行星地質連起來。",
+          "source": {
+            "url": "https://www.jpl.nasa.gov/news/nasa-discovery-reveals-complex-water-systems-on-early-mars/",
+            "name": "NASA / JPL"
+          },
+          "image": {
+            "url": "https://d2pn8kiwq2w21t.cloudfront.net/images/1_-_PIA26815_-_Mastcam-Z_360_Turquoise_Bay_So.width-1024.jpg",
+            "alt": "毅力號拍攝的火星傑澤羅邊緣區全景",
+            "caption": "毅力號拍攝的 Margin Unit 全景；影像攝於 2023 年",
+            "credit": "NASA / JPL-Caltech / MSSS"
+          }
+        }
+      ]
+    }
+  ]
+}
