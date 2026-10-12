@@ -81,11 +81,11 @@
       stimulus: D.circuit({
         w: 360, h: 205,
         wires: [LOOP],
-        parts: [["battery", 180, 40, "h", "6.0 V"], ["ammeter", 40, 95, "v"], ["resistor", 130, 150, "h", "4.0 Ω", "b"], ["resistor", 250, 150, "h", "8.0 Ω", "b"]],
+        parts: [["battery", 180, 40, "h", "12 V"], ["ammeter", 40, 95, "v"], ["resistor", 130, 150, "h", "6.0 Ω", "b"], ["resistor", 250, 150, "h", "18 Ω", "b"]],
       }),
-      prompt: "Calculate the ammeter reading and the p.d. across the 8.0 Ω resistor.",
-      hint: "Add series resistances, find I = V ÷ R_total, then use V = I R for the 8.0 Ω resistor.",
-      answer: "R_total = 4.0 + 8.0 = 12 Ω (1 mark). I = 6.0 ÷ 12 = <strong>0.50 A</strong> (1 mark). V = I R = 0.50 × 8.0 (1 mark) = <strong>4.0 V</strong> (1 mark).",
+      prompt: "Calculate the ammeter reading and the p.d. across the 18 Ω resistor.",
+      hint: "Add series resistances, find I = V ÷ R_total, then use V = I R for the 18 Ω resistor.",
+      answer: "R_total = 6.0 + 18 = 24 Ω (1 mark). I = 12 ÷ 24 = <strong>0.50 A</strong> (1 mark). V = I R = 0.50 × 18 (1 mark) = <strong>9.0 V</strong> (1 mark).",
     },
     {
       section: "Round 3: Series and parallel",
@@ -94,12 +94,12 @@
       stimulus: D.circuit({
         w: 360, h: 225,
         wires: ["M40 40 H320 V185 H40 Z", "M40 115 H320"],
-        parts: [["battery", 180, 40, "h", "12 V"], ["ammeter", 40, 77, "v", "A₀", "r"], ["resistor", 200, 115, "h", "6.0 Ω"], ["ammeter", 110, 115, "h", "A₁"], ["resistor", 200, 185, "h", "12 Ω", "b"]],
+        parts: [["battery", 180, 40, "h", "12 V"], ["ammeter", 40, 77, "v", "A₀", "r"], ["resistor", 200, 115, "h", "6.0 Ω"], ["ammeter", 110, 115, "h", "A₁"], ["resistor", 200, 185, "h", "8.0 Ω", "b"]],
         dots: [[40, 115], [320, 115]],
       }),
       prompt: "Calculate the readings on ammeters A₁ and A₀.",
       hint: "Each parallel branch has the full 12 V across it. The main current is the sum of the branch currents.",
-      answer: "Each branch has 12 V across it (1 mark). A₁ = 12 ÷ 6.0 = <strong>2.0 A</strong> (1 mark). Other branch = 12 ÷ 12 = 1.0 A (1 mark). A₀ = 2.0 + 1.0 = <strong>3.0 A</strong> (1 mark).",
+      answer: "Each branch has 12 V across it (1 mark). A₁ = 12 ÷ 6.0 = <strong>2.0 A</strong> (1 mark). Other branch = 12 ÷ 8.0 = 1.5 A (1 mark). A₀ = 2.0 + 1.5 = <strong>3.5 A</strong> (1 mark).",
     },
     {
       section: "Round 3: Series and parallel",

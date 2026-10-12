@@ -94,7 +94,7 @@
         ], right: [
           { t: "p", h: "The nucleus does not change, so it is still the same element. (In chemistry you also meet negative ions, which form when atoms gain electrons.)" },
         ] },
-        { t: "worked", q: `A magnesium atom, ${N(24, 12, "Mg")}, loses 2 electrons. Find the numbers of protons, neutrons and electrons, and the charge on the ion.`, steps: [["Protons", "12 (unchanged)"], ["Neutrons", "24 − 12 = 12 (unchanged)"], ["Electrons", "12 − 2 = 10"], ["Charge", "+12 − 10 = +2, so Mg<sup>2+</sup>"]],
+        { t: "worked", q: `A magnesium atom, ${N(25, 12, "Mg")}, loses 2 electrons. Find the numbers of protons, neutrons and electrons, and the charge on the ion.`, steps: [["Protons", "12 (unchanged)"], ["Neutrons", "25 − 12 = 13 (unchanged)"], ["Electrons", "12 − 2 = 10"], ["Charge", "+12 − 10 = +2, so Mg<sup>2+</sup>"]],
           yt: { q: `An aluminium atom, ${N(27, 13, "Al")}, loses 3 electrons. Find the numbers of each particle and the charge.`, steps: [["Protons", "13"], ["Neutrons", "14"], ["Electrons", "13 − 3 = 10"], ["Charge", "+3, so Al<sup>3+</sup>"]] } },
       ],
       try: [

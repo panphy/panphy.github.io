@@ -104,13 +104,13 @@
     graphSkills: () => bigger(P.graphSkills(), 1.25),
 
     // Mission 5
-    series: () => D.circuit({ w: 360, h: 205, wires: [LOOP], parts: [['battery', 180, 40, 'h', '12 V'], ['ammeter', 40, 95, 'v', '1.0 A', 'r'], ['resistor', 120, 150, 'h', '4 Ω, 4 V', 'b'], ['resistor', 240, 150, 'h', '8 Ω, 8 V', 'b']], caption: 'R_total = 4 + 8 = 12 Ω, I = 12 ÷ 12 = 1.0 A' }),
-    // With data-animate, arrowhead size shows the size of the current: large (3 A) through
-    // the battery and ammeter, medium (2 A) in the 3 Ω branch, small (1 A) in the 6 Ω branch.
+    series: () => D.circuit({ w: 360, h: 205, wires: [LOOP], parts: [['battery', 180, 40, 'h', '6 V'], ['ammeter', 40, 95, 'v', '0.40 A', 'r'], ['resistor', 120, 150, 'h', '5 Ω, 2 V', 'b'], ['resistor', 240, 150, 'h', '10 Ω, 4 V', 'b']], caption: 'R_total = 5 + 10 = 15 Ω, I = 6 ÷ 15 = 0.40 A' }),
+    // With data-animate, arrowhead size shows the size of the current: large (5 A) through
+    // the battery and ammeter, medium (3 A) in the 4 Ω branch, small (2 A) in the 6 Ω branch.
     // Each stretch takes a whole number of 1.25 s intervals, so a large arrowhead reaching
     // the left junction is replaced by a medium and a small one at the same moment.
     parallel: el => {
-      const figure = D.circuit({ w: 360, h: 225, wires: ['M40 40 H320 V185 H40 Z', 'M40 115 H320'], parts: [['battery', 180, 40, 'h', '6 V'], ['ammeter', 40, 77, 'v', '3 A', 'r'], ['resistor', 180, 115, 'h', '3 Ω, 2 A'], ['resistor', 180, 185, 'h', '6 Ω, 1 A', 'b']], dots: [[40, 115], [320, 115]], caption: 'Each branch has 6 V across it; 2 A + 1 A = 3 A' });
+      const figure = D.circuit({ w: 360, h: 225, wires: ['M40 40 H320 V185 H40 Z', 'M40 115 H320'], parts: [['battery', 180, 40, 'h', '12 V'], ['ammeter', 40, 77, 'v', '5 A', 'r'], ['resistor', 180, 115, 'h', '4 Ω, 3 A'], ['resistor', 180, 185, 'h', '6 Ω, 2 A', 'b']], dots: [[40, 115], [320, 115]], caption: 'Each branch has 12 V across it; 3 A + 2 A = 5 A' });
       if (!('animate' in el.dataset)) return figure;
       const every = (n, gap = 1.25) => Array.from({ length: n }, (_, i) => i * gap);
       return currentFlow(figure, 'M40 115 H320', [['M320 115 V40 H40 V115', 7.5, every(6), 1.5], ['M40 115 H320', 5, every(4), 1.1], ['M40 115 V185 H320 V115', 7.5, every(6), 0.7]],

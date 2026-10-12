@@ -41,7 +41,7 @@ window.LESSONS = [
             "Uncertainty = (largest − smallest) ÷ 2.",
             "Write the final result as mean ± uncertainty, with a unit.",
           ],
-          formula: "1.20 s, 1.25 s, 1.22 s → mean = 1.22 s; range: from 1.20 s to 1.25 s; uncertainty = (1.25 − 1.20) ÷ 2 ≈ 0.03 s; result = 1.22 ± 0.03 s",
+          formula: "1.20 s, 1.25 s, 1.21 s → mean = 1.22 s; range: from 1.20 s to 1.25 s; uncertainty = (1.25 − 1.20) ÷ 2 ≈ 0.03 s; result = 1.22 ± 0.03 s",
         },
         {
           title: "Random and systematic errors need different fixes",
@@ -98,10 +98,10 @@ window.LESSONS = [
         type: "AQA-style",
         marks: 4,
         prompt:
-          "A stopwatch gives 1.84 s, 1.91 s and 1.87 s. Calculate the mean time and estimate the uncertainty from the largest and smallest readings. Give both answers to 2 decimal places.",
+          "A stopwatch gives 1.84 s, 1.91 s and 1.86 s. Calculate the mean time and estimate the uncertainty from the largest and smallest readings. Give both answers to 2 decimal places.",
         hint: "Mean = total ÷ number of readings. Uncertainty = (largest − smallest) ÷ 2.",
         answer:
-          "Mean = 5.62 ÷ 3 = 1.87 s (2 marks). Uncertainty = (1.91 − 1.84) ÷ 2 = 0.035 s, which rounds to 0.04 s (2 marks). Final result: 1.87 ± 0.04 s.",
+          "Mean = 5.61 ÷ 3 = 1.87 s (2 marks). Uncertainty = (1.91 − 1.84) ÷ 2 = 0.035 s, which rounds to 0.04 s (2 marks). Final result: 1.87 ± 0.04 s.",
       },
       {
         type: "AQA-style",
@@ -305,9 +305,9 @@ window.LESSONS = [
       {
         type: "Practice",
         prompt:
-          "A ball bounces 18 cm, 21 cm and 15 cm on sponge. Calculate the mean bounce height.",
+          "A ball bounces 16 cm, 21 cm and 17 cm on sponge. Calculate the mean bounce height.",
         hint: "Add the three bounce heights, then divide by 3.",
-        answer: "Mean = (18 + 21 + 15) ÷ 3 = 18 cm.",
+        answer: "Mean = (16 + 21 + 17) ÷ 3 = 18 cm.",
       },
       {
         type: "Practice",
@@ -425,10 +425,10 @@ window.LESSONS = [
       {
         type: "Practice",
         prompt:
-          "The distances at a ramp height of 15 cm are 51 cm, 54 cm and 57 cm. Calculate the mean and suggest why repeats are useful.",
+          "The distances at a ramp height of 15 cm are 51 cm, 53 cm and 58 cm. Calculate the mean and suggest why repeats are useful.",
         hint: "The mean represents the set better than one reading. Repeats also reveal spread.",
         answer:
-          "Mean = (51 + 54 + 57) ÷ 3 = 54 cm. Repeats reduce the effect of random variation when a mean is calculated and help reveal unusual results.",
+          "Mean = (51 + 53 + 58) ÷ 3 = 54 cm. Repeats reduce the effect of random variation when a mean is calculated and help reveal unusual results.",
       },
       {
         type: "AQA-style",

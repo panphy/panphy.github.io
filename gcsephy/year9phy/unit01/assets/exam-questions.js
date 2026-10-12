@@ -7,11 +7,11 @@ window.EXAM_QUESTIONS = [
       <table class="data-table">
         <caption>Time for ten oscillations of a pendulum</caption>
         <thead><tr><th>Trial</th><th>Time / s</th></tr></thead>
-        <tbody><tr><td>1</td><td>8.72</td></tr><tr><td>2</td><td>8.64</td></tr><tr><td>3</td><td>8.68</td></tr></tbody>
+        <tbody><tr><td>1</td><td>8.72</td></tr><tr><td>2</td><td>8.64</td></tr><tr><td>3</td><td>8.65</td></tr></tbody>
       </table>`,
     prompt: "Calculate the mean time and estimate its uncertainty from the largest and smallest readings. Write the final result in the form mean ± uncertainty.",
     hint: "Find the total and divide by three. Then subtract the minimum from the maximum and halve the result.",
-    answer: "<strong>Mean:</strong> (8.72 + 8.64 + 8.68) ÷ 3 = 8.68 s (2 marks).<br><strong>Uncertainty:</strong> (8.72 − 8.64) ÷ 2 = 0.04 s (1 mark).<br><strong>Reported result:</strong> 8.68 ± 0.04 s (1 mark).",
+    answer: "<strong>Mean:</strong> (8.72 + 8.64 + 8.65) ÷ 3 = 8.67 s (2 marks).<br><strong>Uncertainty:</strong> (8.72 − 8.64) ÷ 2 = 0.04 s (1 mark).<br><strong>Reported result:</strong> 8.67 ± 0.04 s (1 mark).",
   },
   {
     section: "Round 1: Data and uncertainty",
@@ -45,11 +45,11 @@ window.EXAM_QUESTIONS = [
       <table class="data-table">
         <caption>Maximum bounce height on different materials</caption>
         <thead><tr><th>Material</th><th>Trial 1 / cm</th><th>Trial 2 / cm</th><th>Trial 3 / cm</th></tr></thead>
-        <tbody><tr><td>Foam</td><td>9</td><td>11</td><td>10</td></tr><tr><td>Felt</td><td>18</td><td>17</td><td>19</td></tr><tr><td>Cardboard</td><td>26</td><td>44</td><td>25</td></tr></tbody>
+        <tbody><tr><td>Foam</td><td>8</td><td>11</td><td>11</td></tr><tr><td>Felt</td><td>18</td><td>17</td><td>19</td></tr><tr><td>Cardboard</td><td>26</td><td>44</td><td>25</td></tr></tbody>
       </table>`,
     prompt: "Calculate the mean bounce height for the foam. Identify the likely anomalous result in the full table and state what the student should do before deciding whether to exclude it.",
     hint: "Calculate using only the foam row. Then look for one reading that disagrees strongly with its repeats.",
-    answer: "Foam total = 9 + 11 + 10 = 30 cm (1 mark), so mean = 30 ÷ 3 = 10 cm (1 mark). The likely anomalous result is 44 cm for cardboard (1 mark). Check the recording and method, then repeat that reading before deciding; exclude it only if there is evidence of a problem (1 mark).",
+    answer: "Foam total = 8 + 11 + 11 = 30 cm (1 mark), so mean = 30 ÷ 3 = 10 cm (1 mark). The likely anomalous result is 44 cm for cardboard (1 mark). Check the recording and method, then repeat that reading before deciding; exclude it only if there is evidence of a problem (1 mark).",
   },
   {
     section: "Round 2: Patterns and evidence",

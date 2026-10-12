@@ -72,7 +72,7 @@
     // Repeated times grouped by data set, with a common time scale.
     dataSets: () => {
       const Y = v => 470 - (v - 0.85) / 0.65 * 420;
-      const sets = [['A', [1.20, 1.22, 1.21]], ['B', [1.05, 1.47, 1.12]], ['C', [0.91, 0.92, 0.91]]];
+      const sets = [['A', [1.20, 1.23, 1.19]], ['B', [1.05, 1.47, 1.12]], ['C', [0.90, 0.93, 0.89]]];
       let s = '';
       for (let v = 0.9; v <= 1.5001; v += 0.1) {
         s += line(120, Y(v), 680, Y(v), 'grid') + t(104, Y(v) + 8, v.toFixed(1), 'tick-t', 'end');
@@ -94,18 +94,18 @@
     // Not called the range: AQA keeps that word for the max and min values of a variable.
     uncertainty: () => {
       const X = v => 60 + (v - 1.18) / 0.09 * 680;
-      const mean = 1.2233;
+      const mean = 1.22;
       // Each part appears with its line of the worked example: mean, max − min, uncertainty.
       let s = sync('w3', `<rect x="${f(X(mean - 0.025))}" y="120" width="${f(X(mean + 0.025) - X(mean - 0.025))}" height="140" class="band"/>`);
       s += sync('w2', `<path class="bracket" d="M${f(X(1.2))} 102V80H${f(X(1.25))}V102"/>` + t((X(1.2) + X(1.25)) / 2, 62, 'MAX − MIN = 1.25 − 1.20 = 0.05 s', 'lab'));
-      [1.20, 1.22, 1.25].forEach(v => { s += cross(X(v), 190, 14); });
+      [1.20, 1.21, 1.25].forEach(v => { s += cross(X(v), 190, 14); });
       s += sync('w1', line(X(mean), 128, X(mean), 252, 'mean-line'));
       s += sync('w3', arrow(X(mean), 290, X(mean - 0.025), 290, 'arrow cyan') + arrow(X(mean), 290, X(mean + 0.025), 290, 'arrow cyan')
         + t(X(mean + 0.025) + 14, 299, '± 0.025 s', 'lab small', 'start'));
       s += `<path class="axis" d="M50 340H750"/>`;
       for (let v = 1.18; v <= 1.2701; v += 0.01) s += line(X(v), 340, X(v), 354, 'ink') + t(X(v), 386, v.toFixed(2), 'tick-t');
       s += t(400, 436, 'Time / s', 'axis-t');
-      return svg(800, 452, s, 'Three readings, 1.20, 1.22 and 1.25 seconds, on a number line; largest minus smallest, 1.25 minus 1.20, is 0.05 s; mean 1.22 s with an uncertainty band of plus or minus 0.025 s');
+      return svg(800, 452, s, 'Three readings, 1.20, 1.21 and 1.25 seconds, on a number line; largest minus smallest, 1.25 minus 1.20, is 0.05 s; mean 1.22 s with an uncertainty band of plus or minus 0.025 s');
     },
 
     // Random error: spread both ways around the true value.
