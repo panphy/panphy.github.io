@@ -276,22 +276,22 @@
       s += `<line x1="250" y1="230" x2="545" y2="80" class="guide"/><line x1="250" y1="230" x2="560" y2="178" class="guide"/>`;
       s += ball(250, 230, 5, 'proton');
       s += arrow(262, 300, 440, 300, 'text-secondary', 2.5) + `<line x1="250" y1="290" x2="250" y2="310" class="tick"/>`;
-      s += text(345, 288, 'radius ≈ 1 × 10⁻¹⁰ m', 'lbl mono halo');
+      s += text(345, 288, 'radius ≈ 10⁻¹⁰ m', 'lbl mono halo');
       s += text(250, 372, 'mostly empty space', 'lbl italic halo');
       s += `<circle cx="645" cy="130" r="100" class="inset"/>` + cluster(645, 130, 3, 4, 24);
-      s += text(645, 262, 'the nucleus', 'lbl strong') + text(645, 288, 'radius ≈ 10⁻¹⁵ m', 'lbl mono') + text(645, 310, '10⁵ times smaller', 'lbl mono');
-      return svg('0 0 760 460', s, 'An atom of radius about 1 times 10 to the minus 10 metres, with a nucleus about 100 000 times smaller at the centre');
+      s += text(645, 262, 'the nucleus', 'lbl strong') + text(645, 298, 'radius ≈ 10⁻¹⁵ m', 'lbl mono') + text(645, 330, '10⁵ times smaller', 'lbl mono');
+      return svg('0 0 790 460', s, 'An atom of radius about 1 times 10 to the minus 10 metres, with a nucleus about 100 000 times smaller at the centre');
     },
 
     notation: () => {
       let s = text(372, 262, 'C', 'big-symbol', 'start');
       s += text(356, 162, '12', 'big-num a', 'end') + text(356, 262, '6', 'big-num z', 'end');
-      s += text(30, 60, 'NUCLEON NUMBER A', 'lbl mono strong a', 'start') + text(30, 86, 'protons + neutrons', 'lbl', 'start');
-      s += arrow(190, 96, 250, 128, 'brand-primary', 2.5);
-      s += text(30, 322, 'PROTON NUMBER Z', 'lbl mono strong z', 'start') + text(30, 348, 'number of protons', 'lbl', 'start');
-      s += arrow(200, 320, 262, 272, 'brand-accent', 2.5);
-      s += text(560, 176, 'carbon-12', 'lbl display', 'start') + text(560, 210, '6 p, 6 n, 6 e', 'lbl mono', 'start');
-      return svg('0 0 760 380', s, 'Nuclear notation for carbon-12: nucleon number 12 at the top left, proton number 6 at the bottom left');
+      s += text(30, 60, 'NUCLEON NUMBER A', 'lbl mono strong a', 'start') + text(30, 90, 'protons + neutrons', 'lbl small', 'start');
+      s += arrow(204, 104, 250, 130, 'brand-primary', 2.5);
+      s += text(30, 322, 'PROTON NUMBER Z', 'lbl mono strong z', 'start') + text(30, 352, 'number of protons', 'lbl small', 'start');
+      s += arrow(250, 300, 296, 268, 'brand-accent', 2.5);
+      s += text(560, 176, 'carbon-12', 'lbl display', 'start') + text(560, 214, '6 p, 6 n, 6 e', 'lbl mono', 'start');
+      return svg('0 0 790 380', s, 'Nuclear notation for carbon-12: nucleon number 12 at the top left, proton number 6 at the bottom left');
     },
 
     'mini-solid': () => svg('0 0 160 160', shadow(80, 146, 50) + ball(80, 80, 54, 'solid'), 'A solid sphere'),
@@ -325,10 +325,10 @@
         s += `<path d="${d}" class="alpha-path ${kind}" marker-end="url(#m-alpha)"/>`;
       });
       s += text(330, 132, 'bounce back', 'lbl', 'middle', 'style="fill:var(--alpha)"');
-      s += text(760, 164, 'small', 'lbl', 'start', 'style="fill:var(--alpha)"') + text(760, 186, 'deflection', 'lbl', 'start', 'style="fill:var(--alpha)"');
+      s += text(760, 152, 'small', 'lbl', 'start', 'style="fill:var(--alpha)"') + text(760, 182, 'deflection', 'lbl', 'start', 'style="fill:var(--alpha)"');
       s += '</g><g class="scatter-live"></g>';
       s += `<rect x="516" y="96" width="8" height="268" rx="3" style="fill:var(--gold)"/>` + text(520, 84, 'thin gold foil', 'lbl strong');
-      s += text(760, 236, 'straight', 'lbl', 'start', 'style="fill:var(--alpha)"') + text(760, 258, 'through', 'lbl', 'start', 'style="fill:var(--alpha)"');
+      s += text(760, 232, 'straight', 'lbl', 'start', 'style="fill:var(--alpha)"') + text(760, 262, 'through', 'lbl', 'start', 'style="fill:var(--alpha)"');
       return svg('0 0 900 460', s, 'Alpha scattering: alpha particles fired at thin gold foil. Most pass straight through, some are deflected, a very few bounce back');
     },
 
@@ -403,10 +403,10 @@
         s += `<path d="M${f(x1)},${f(y1)} A${r},${r} 0 0 1 ${f(x2)},${f(y2)}" class="flow" marker-end="url(#m-brand-accent)"/>`;
       });
       nodes.forEach(([x, y, label], i) => {
-        s += `<rect x="${x - 90}" y="${y - 28}" width="180" height="56" rx="16" class="node ${i === 3 ? 'hot' : ''}"/>`;
+        s += `<rect x="${x - 104}" y="${y - 28}" width="208" height="56" rx="16" class="node ${i === 3 ? 'hot' : ''}"/>`;
         s += text(x, y + 7, label, 'lbl strong node-text');
       });
-      s += text(310, 222, 'model kept', 'lbl mono') + text(310, 248, 'or changed', 'lbl mono');
+      s += text(310, 220, 'model kept', 'lbl mono') + text(310, 250, 'or changed', 'lbl mono');
       return svg('0 0 620 460', s, 'Cycle: model, prediction, experiment, new evidence, back to the model');
     },
 
@@ -463,22 +463,22 @@
     // ---- E.1 additional higher level ----
 
     'nuclei-sizes': () => {
-      const data = [[105, 2, 2, 'helium-4', '1.90'], [285, 6, 6, 'carbon-12', '2.75'], [510, 26, 30, 'iron-56', '4.59'], [790, 79, 118, 'gold-197', '6.98']];
+      const data = [[105, 2, 2, 'helium-4', '1.90'], [315, 6, 6, 'carbon-12', '2.75'], [550, 26, 30, 'iron-56', '4.59'], [820, 79, 118, 'gold-197', '6.98']];
       let s = '';
       data.forEach(([x, p, n, name, radius]) => {
         s += cluster(x, 170, p, n, 12);
-        s += text(x, 330, name, 'lbl display') + text(x, 364, `R = ${radius} fm`, 'lbl mono');
+        s += text(x, 330, name, 'lbl display') + text(x, 366, `R = ${radius} fm`, 'lbl mono small');
       });
-      return svg('0 0 960 390', s, 'Nuclei of helium-4, carbon-12, iron-56 and gold-197 drawn to the same scale: radii 1.90, 2.75, 4.59 and 6.98 femtometres');
+      return svg('0 0 990 390', s, 'Nuclei of helium-4, carbon-12, iron-56 and gold-197 drawn to the same scale: radii 1.90, 2.75, 4.59 and 6.98 femtometres');
     },
 
     'closest-approach': () => {
       let s = `<line x1="70" y1="210" x2="760" y2="210" class="guide"/>`;
       s += ball(740, 210, 46, 'positive') + text(740, 118, 'gold nucleus', 'lbl strong') + text(740, 146, 'charge +79e', 'lbl mono small');
       s += ball(90, 210, 16, 'alpha') + arrow(116, 210, 230, 210, 'alpha', 4);
-      s += text(150, 118, 'far away', 'lbl strong') + text(150, 146, 'all kinetic energy', 'lbl mono small') + text(90, 262, 'alpha, +2e', 'lbl mono small');
+      s += text(150, 118, 'far away', 'lbl strong') + text(150, 148, 'all kinetic energy', 'lbl small') + text(90, 262, 'alpha, +2e', 'lbl mono small');
       s += `<circle cx="430" cy="210" r="22" class="ghost" style="stroke:var(--alpha)"/>` + ball(430, 210, 16, 'alpha');
-      s += text(430, 118, 'closest approach', 'lbl strong') + text(430, 146, 'kinetic energy = 0', 'lbl mono small');
+      s += text(430, 118, 'closest approach', 'lbl strong') + text(430, 148, 'kinetic energy = 0', 'lbl small');
       s += `<line x1="430" y1="244" x2="430" y2="318" class="tick"/><line x1="740" y1="268" x2="740" y2="318" class="tick"/>`;
       s += arrow(445, 302, 728, 302, 'brand-accent', 3) + arrow(725, 302, 442, 302, 'brand-accent', 3);
       s += text(585, 346, 'distance of closest approach, r', 'lbl mono') + text(585, 376, 'all electric potential energy', 'lbl mono small');
@@ -488,13 +488,13 @@
     deviation: () => {
       let s = arrow(90, 400, 90, 50, 'text-secondary', 2.5) + arrow(90, 400, 690, 400, 'text-secondary', 2.5);
       s += text(390, 446, 'energy of the alpha particles', 'lbl mono');
-      s += text(40, 225, 'counted, as a fraction of predicted', 'lbl mono small', 'middle', 'transform="rotate(-90 40 225)"');
+      s += text(40, 225, 'fraction of predicted count', 'lbl small', 'middle', 'transform="rotate(-90 40 225)"');
       s += `<rect x="430" y="60" width="260" height="340" style="fill:var(--hl);opacity:.09"/>`;
-      s += `<line x1="90" y1="150" x2="690" y2="150" class="guide"/>` + text(76, 157, '1', 'lbl mono', 'end') + text(104, 134, 'matches Rutherford’s formula', 'lbl small', 'start');
+      s += `<line x1="90" y1="150" x2="690" y2="150" class="guide"/>` + text(76, 157, '1', 'lbl mono', 'end') + text(104, 136, 'matches the formula', 'lbl small', 'start');
       s += `<path d="M90,150 L430,150 C480,150 500,190 530,250 C560,310 600,360 680,384" class="curve" style="stroke:var(--brand-primary)"/>`;
       s += `<line x1="430" y1="60" x2="430" y2="400" class="guide accent"/>`;
-      s += text(260, 190, 'agrees:', 'lbl strong') + text(260, 220, 'electric repulsion only', 'lbl small');
-      s += text(562, 92, 'falls below:', 'lbl strong', 'middle', 'style="fill:var(--hl)"') + text(562, 120, 'alpha reaches the nucleus', 'lbl small');
+      s += text(260, 196, 'agrees:', 'lbl strong') + text(260, 228, 'electric repulsion only', 'lbl small');
+      s += text(562, 88, 'falls below:', 'lbl strong', 'middle', 'style="fill:var(--hl)"') + text(562, 114, 'alpha reaches', 'lbl small') + text(562, 138, 'the nucleus', 'lbl small');
       return svg('0 0 720 460', s, 'Graph: at low energies the number of alpha particles counted at a fixed angle matches the number Rutherford’s formula predicts; above a certain energy it falls below the prediction');
     },
 
@@ -551,7 +551,7 @@
       s += plot('M110,400 L260,280 L400,280 L500,110 L690,330');
       s += text(236, 366, 'constant velocity', 'lbl small', 'start') + text(330, 262, 'at rest', 'lbl small');
       s += text(436, 180, 'steeper:', 'lbl small', 'end') + text(436, 204, 'faster', 'lbl small', 'end');
-      s += text(612, 196, 'moving back:', 'lbl small', 'start') + text(612, 220, 'negative gradient', 'lbl small', 'start');
+      s += text(566, 108, 'moving back:', 'lbl small', 'start') + text(566, 136, 'negative gradient', 'lbl small', 'start');
       return svg('0 0 800 460', s, 'Displacement against time in four stages: a straight rising line for constant velocity, a flat line at rest, a steeper line for a higher velocity and a falling line for moving back');
     },
 
@@ -592,7 +592,7 @@
       for (let y = 346; y > 140; y -= 54) s += `<line x1="${f(110 + 580 * Math.min(1, -Math.log(1 - (400 - y) / 270) / 3))}" y1="${y}" x2="690" y2="${y}" class="guide"/>`;
       s += axes(110, 400, 760, 40, 'time', 'velocity') + plot(sampled(at));
       s += `<line x1="165" y1="316.9" x2="375" y2="178.3" style="stroke:var(--brand-accent-strong);stroke-width:3.5;stroke-dasharray:10 7"/><circle cx="255" cy="257.5" r="8" style="fill:var(--brand-accent-strong)"/>`;
-      s += text(300, 96, 'gradient of tangent =', 'lbl strong', 'start') + text(300, 126, 'acceleration at that instant', 'lbl', 'start');
+      s += text(300, 90, 'gradient of tangent =', 'lbl strong', 'start') + text(300, 124, 'acceleration at that instant', 'lbl', 'start');
       s += text(500, 322, 'area = displacement', 'lbl strong halo') + text(500, 376, 'count the squares', 'lbl small halo');
       return svg('0 0 800 460', s, 'Velocity against time as a curve that rises more and more slowly: the gradient of the tangent is the acceleration at that instant and the area under the curve, found by counting squares, is the displacement');
     },
@@ -662,7 +662,7 @@
       s += text(440, 70, 'top: vertical velocity = 0', 'lbl strong') + text(456, 270, 'maximum', 'lbl small', 'start') + text(456, 294, 'height', 'lbl small', 'start');
       s += arrow(380, 428, 98, 428, 'text-secondary', 2.5) + arrow(500, 428, 770, 428, 'text-secondary', 2.5) + text(440, 436, 'range', 'lbl mono');
       s += `<line x1="40" y1="30" x2="84" y2="30" style="stroke:var(--brand-primary);stroke-width:5"/>` + text(96, 38, 'horizontal velocity: constant', 'lbl small', 'start');
-      s += `<line x1="560" y1="30" x2="604" y2="30" style="stroke:var(--brand-accent);stroke-width:5"/>` + text(616, 38, 'vertical velocity: changes at g', 'lbl small', 'start');
+      s += `<line x1="500" y1="30" x2="544" y2="30" style="stroke:var(--brand-accent);stroke-width:5"/>` + text(556, 38, 'vertical velocity: changes at g', 'lbl small', 'start');
       return svg('0 0 920 470', s, 'A projectile path with velocity components drawn at five points: the horizontal component is the same everywhere, while the vertical component shrinks to zero at the top and then grows downward');
     },
 
@@ -713,7 +713,7 @@
     'photon-budget': () => {
       const sub = t => `<tspan dy="7" font-size="70%">${t}</tspan><tspan dy="-7"> </tspan>`;
       // Bars take the deck palette, not the particle colours: they are amounts of energy, not particles.
-      const bar = (x, y, w, colour, label, note) => `<rect x="${x}" y="${y}" width="${w}" height="68" rx="10" style="fill:var(--bar-${colour})"/>` + text(x + w / 2, y + 31, label, 'lbl strong', 'middle', `style="fill:var(--on-bar-${colour})"`) + text(x + w / 2, y + 56, note, 'lbl small', 'middle', `style="fill:var(--on-bar-${colour})"`);
+      const bar = (x, y, w, colour, label, note) => `<rect x="${x}" y="${y}" width="${w}" height="68" rx="10" style="fill:var(--bar-${colour})"/>` + text(x + w / 2, y + 28, label, 'lbl strong', 'middle', `style="fill:var(--on-bar-${colour})"`) + text(x + w / 2, y + 59, note, 'lbl small', 'middle', `style="fill:var(--on-bar-${colour})"`);
       const sign = (x, y, t) => text(x, y, t, 'lbl display', 'middle', 'font-size="44"');
       let s = text(90, 38, 'Above the threshold: the photon has more than Φ', 'lbl strong a', 'start');
       s += bar(90, 54, 760, 'teal', 'photon energy hf', 'all of it goes to one electron');
@@ -735,7 +735,7 @@
       s += `<path d="M470,300 L700,154" class="curve" style="stroke:var(--text-secondary);stroke-width:3;stroke-dasharray:10 8"/>`;
       s += `<circle cx="300" cy="300" r="8" style="fill:var(--hl)"/>` + text(300, 338, 'f₀', 'lbl display', 'middle', 'style="fill:var(--hl)"') + text(300, 366, 'threshold', 'lbl mono small');
       s += `<circle cx="110" cy="420" r="8" style="fill:var(--hl)"/>` + text(96, 428, '−Φ', 'lbl display', 'end', 'style="fill:var(--hl)"');
-      s += `<path d="M430,218 H560 V135" class="guide accent"/>` + text(574, 184, 'gradient = h', 'lbl strong', 'start');
+      s += `<path d="M430,218 H560 V135" class="guide accent"/>` + text(520, 132, 'gradient = h', 'lbl strong', 'end');
       s += text(596, 262, 'another metal:', 'lbl small', 'start') + text(596, 288, 'same gradient', 'lbl small', 'start');
       s += text(205, 280, 'no emission', 'lbl italic small');
       return svg('0 0 800 460', s, 'Graph of maximum kinetic energy against frequency: a straight line of gradient h that meets the frequency axis at the threshold frequency and, extended back, the energy axis at minus the work function');
@@ -745,7 +745,7 @@
       let s = `<rect x="170" y="60" width="520" height="190" rx="95" class="inset"/>` + text(430, 48, 'evacuated tube', 'lbl mono small', 'middle');
       s += `<rect x="240" y="100" width="16" height="110" rx="4" style="fill:var(--aluminium)"/>` + text(226, 196, 'metal', 'lbl small', 'end');
       s += `<rect x="604" y="100" width="16" height="110" rx="4" style="fill:var(--lead)"/>` + text(634, 196, 'collector', 'lbl small', 'start');
-      s += wave(90, 20, 232, 130, { cycles: 6, amp: 8 }) + text(60, 22, 'light', 'lbl mono small', 'middle', 'style="fill:var(--photon)"');
+      s += wave(90, 20, 232, 130, { cycles: 6, amp: 8 }) + text(46, 44, 'light', 'lbl mono small', 'middle', 'style="fill:var(--photon)"');
       [[280, 130, 430], [280, 155, 520], [280, 180, 370]].forEach(([x, y, x2]) => { s += arrow(x, y, x2, y, 'electron', 3) + ball(x, y, 9, 'electron'); });
       s += text(290, 108, 'slowed by the reverse p.d.', 'lbl small', 'start');
       s += `<path d="M248,210 V360 H330 M400,360 H520 M580,360 H612 V210" class="cable"/>`;
@@ -758,7 +758,7 @@
     'ediff-setup': () => {
       let s = `<path d="M40,150 H250 L640,60 V360 L250,270 H40 Z" class="inset"/>`;
       s += `<rect x="70" y="180" width="90" height="60" rx="8" style="fill:var(--lead)"/>` + text(115, 268, 'electron gun', 'lbl small');
-      s += text(115, 140, 'accelerating p.d. V', 'lbl mono small');
+      s += text(115, 112, 'accelerating', 'lbl small') + text(115, 138, 'p.d. V', 'lbl small');
       s += `<line x1="160" y1="210" x2="300" y2="210" style="stroke:var(--electron)" stroke-width="4" stroke-dasharray="3 9" stroke-linecap="round"/>`;
       s += `<rect x="298" y="170" width="8" height="80" rx="3" style="fill:var(--text-main)"/>` + text(302, 300, 'thin graphite', 'lbl small');
       [-1, 1].forEach(k => { [52, 96].forEach(dy => { s += `<line x1="306" y1="210" x2="640" y2="${210 + k * dy}" style="stroke:var(--electron)" stroke-width="2" opacity=".5"/>`; }); });
@@ -791,11 +791,11 @@
       let s = `<line x1="60" y1="${ey}" x2="820" y2="${ey}" class="guide"/>`;
       s += wave(70, ey, ex - 24, ey, { cycles: 9, amp: 12 }) + text(210, ey - 44, 'incoming photon', 'lbl strong') + text(210, ey + 56, 'wavelength λ<tspan dy="6" font-size="70%">i</tspan>', 'lbl mono small');
       s += wave(ex + 22 * Math.cos(a), ey + 22 * Math.sin(a), ex + 300 * Math.cos(a), ey + 300 * Math.sin(a), { cycles: 5, amp: 12 });
-      s += text(650, 50, 'scattered photon', 'lbl strong', 'start') + text(650, 78, 'longer wavelength λ<tspan dy="6" font-size="70%">f</tspan>', 'lbl mono small', 'start');
+      s += text(650, 50, 'scattered photon', 'lbl strong', 'start') + text(650, 82, 'longer wavelength λ<tspan dy="6" font-size="70%">f</tspan>', 'lbl small', 'start');
       s += `<path d="M${ex + 110},${ey} A110,110 0 0 0 ${f(ex + 110 * Math.cos(a))},${f(ey + 110 * Math.sin(a))}" class="guide accent"/>` + text(ex + 134, ey - 34, 'θ', 'lbl greek');
       s += arrow(ex + 18, ey + 12, ex + 250, ey + 130, 'electron', 4) + ball(ex, ey, 18, 'electron');
       s += text(884, ey + 166, 'recoiling electron', 'lbl strong', 'end') + text(884, ey + 194, 'gains kinetic energy', 'lbl mono small', 'end');
-      s += text(ex, ey + 56, 'electron, at rest', 'lbl small');
+      s += text(ex - 8, ey + 98, 'electron, at rest', 'lbl small', 'end');
       return svg('0 0 900 460', s, 'Compton scattering: a photon hits an electron at rest; the photon leaves at an angle theta with a longer wavelength and the electron recoils');
     },
 
