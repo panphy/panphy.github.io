@@ -40,6 +40,22 @@ The Chadwick photo is from Los Alamos National Laboratory, which asks for this n
 
 The Unit review follows Lesson 10 and adds two GCSE Physics-only extension pages the deck omits: background radiation, half-life hazards and medical uses (4.4.3), and fission and fusion (4.4.4).
 
+## History dates
+
+Dates in the deck, these booklets and the [Atomic Models sim](../../../simulations/atomic_models.html) follow the laureates' biographical pages on nobelprize.org (checked 12 October 2026). Check any new or changed date against them and keep the three in step.
+
+| Date used | What it marks | Nobel page |
+|---|---|---|
+| 1897 | Thomson announces the electron (Royal Institution, 30 April). This is the discovery, not the model | [Thomson](https://www.nobelprize.org/prizes/physics/1906/thomson/biographical/) |
+| 1904 | Plum pudding model: Thomson's Yale lectures with "suggestions as to the structure of the atom" | Thomson |
+| 1911 | Nuclear model, dated by Rutherford's paper. The Nobel page dates the idea to his 1910 scattering investigations | [Rutherford](https://www.nobelprize.org/prizes/chemistry/1908/rutherford/biographical/) |
+| 1913 | Bohr model (at Manchester with Rutherford from 1912) | [Bohr](https://www.nobelprize.org/prizes/physics/1922/bohr/biographical/) |
+| 1919 | Protons: Rutherford knocks them out of nitrogen nuclei | Rutherford, [Chadwick](https://www.nobelprize.org/prizes/physics/1935/chadwick/biographical/) |
+| 1926 | Electron cloud (sim only): Schrödinger's wave equation | [Schrödinger](https://www.nobelprize.org/prizes/physics/1933/schrodinger/biographical/) |
+| 1932 | Chadwick proves the neutron exists (Nobel Prize 1935) | Chadwick |
+
+Not dated on those pages, so taken from elsewhere: Geiger and Marsden's 1909 scattering result, and "from 1898" for the Curies' polonium and radium.
+
 ## Rebuild
 
 Serve the repository root (`python3 -m http.server 8000`), then run `sh build-pdfs.sh` here. It writes all 22 PDFs to `pdf/` one at a time, retrying any that print blank, lack the deck's display font or carry the wrong title. Check that each booklet and its answer edition have the same page count.
