@@ -100,7 +100,7 @@
         [
           task(1, "Which data would you trust?", "5 min"),
           p("Three students timed the same toy car rolling down the same ramp. All three took three readings."),
-          { type: "table", cls: "num bf", align: ["", "r", "r", "r", "r"], head: ["Data set", "Trial 1 / s", "Trial 2 / s", "Trial 3 / s", "Mean / s"], rows: [["A", "1.20", "1.22", "1.21", "1.21"], ["B", "1.05", "1.47", "1.12", "1.21"], ["C", "0.91", "0.92", "0.91", "0.91"]] },
+          { type: "table", cls: "num bf", align: ["", "r", "r", "r", "r"], head: ["Data set", "Trial 1 / s", "Trial 2 / s", "Trial 3 / s", "Mean / s"], rows: [["A", "1.20", "1.23", "1.19", "1.21"], ["B", "1.05", "1.47", "1.12", "1.21"], ["C", "0.90", "0.93", "0.89", "0.91"]] },
           q("a", "Sets A and B have <i>exactly</i> the same mean. Which one would you rather rely on, and why?", 2),
         ]),
 
@@ -116,8 +116,8 @@
         task(3, "How big is the doubt?", "Worked example"),
         p("Every measurement has some doubt attached to it. With repeated readings you can put a number on that doubt."),
         { type: "box", eyebrow: "Follow every step", paras: [
-          "Three readings: 1.20 s, 1.25 s, 1.22 s",
-          "Step 1 — Mean. (1.20 + 1.25 + 1.22) ÷ 3 = 3.67 ÷ 3 = 1.22 s (to 2 d.p.)",
+          "Three readings: 1.20 s, 1.25 s, 1.21 s",
+          "Step 1 — Mean. (1.20 + 1.25 + 1.21) ÷ 3 = 3.66 ÷ 3 = 1.22 s",
           "Step 2 — Range. maximum and minimum values = from 1.20 s to 1.25 s",
           "Step 3 — Uncertainty. (largest − smallest) ÷ 2 = 0.05 ÷ 2 = 0.025 s, rounded sensibly to 0.03 s",
           "Step 4 — Write it properly. mean time = 1.22 s ± 0.03 s",
@@ -129,7 +129,7 @@
       { run: L1, blocks: [
         task(4, "Your turn", "10 min"),
         p("Complete the table, then show one full mean calculation underneath."),
-        { type: "table", cls: "num bf", widths: ["10%", "13.5%", "13%", "13.7%", "13%", "18.8%", "18%"], align: ["", "r", "r", "r", "r", "r", "r"], head: ["Set", "Trial 1", "Trial 2", "Trial 3", "Mean", "Range", "Uncertainty"], rows: [["A", "12.0", "12.2", "12.1", "", "", ""], ["B", "8.4", "9.1", "8.7", "", "", ""], ["C", "25.0", "25.0", "25.1", "", "", ""], ["D", "3.20", "3.65", "3.25", "", "", ""]] },
+        { type: "table", cls: "num bf", widths: ["10%", "13.5%", "13%", "13.7%", "13%", "18.8%", "18%"], align: ["", "r", "r", "r", "r", "r", "r"], head: ["Set", "Trial 1", "Trial 2", "Trial 3", "Mean", "Range", "Uncertainty"], rows: [["A", "12.0", "12.4", "12.1", "", "", ""], ["B", "8.4", "9.1", "8.6", "", "", ""], ["C", "24.9", "25.1", "25.1", "", "", ""], ["D", "3.20", "3.65", "3.25", "", "", ""]] },
         q("a", "Show your working for one mean:", 1),
         p("<span class=\"ql\">b</span>Most precise set: [[20]] &nbsp;&nbsp; Largest uncertainty: [[20]]"),
         q("c", "Which set would you insist on repeating before using it in a report, and why?", 2),

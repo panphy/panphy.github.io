@@ -68,9 +68,9 @@ Example question:
 
 | Data set | Trial 1 / s | Trial 2 / s | Trial 3 / s | Mean / s |
 |---|---:|---:|---:|---:|
-| A | 1.20 | 1.22 | 1.21 | 1.21 |
+| A | 1.20 | 1.23 | 1.19 | 1.21 |
 | B | 1.05 | 1.47 | 1.12 | 1.21 |
-| C | 0.91 | 0.92 | 0.91 | 0.91 |
+| C | 0.90 | 0.93 | 0.89 | 0.91 |
 
 Ask students:
 
@@ -146,7 +146,7 @@ Example:
 |---|---:|
 | 1 | 1.20 |
 | 2 | 1.25 |
-| 3 | 1.22 |
+| 3 | 1.21 |
 
 Step-by-step:
 
@@ -169,9 +169,9 @@ Students calculate the mean, state the range (the maximum and minimum values) an
 
 | Data set | Trial 1 | Trial 2 | Trial 3 | Mean | Range | Uncertainty |
 |---|---:|---:|---:|---:|---:|---:|
-| A | 12.0 | 12.2 | 12.1 |  |  |  |
-| B | 8.4 | 9.1 | 8.7 |  |  |  |
-| C | 25.0 | 25.0 | 25.1 |  |  |  |
+| A | 12.0 | 12.4 | 12.1 |  |  |  |
+| B | 8.4 | 9.1 | 8.6 |  |  |  |
+| C | 24.9 | 25.1 | 25.1 |  |  |  |
 | D | 3.20 | 3.65 | 3.25 |  |  |  |
 
 Challenge questions:

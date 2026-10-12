@@ -647,8 +647,8 @@
             figure: D.circuit({
               w: 360, h: 205,
               wires: [LOOP],
-              parts: [["battery", 180, 40, "h", "12 V"], ["ammeter", 40, 95, "v", "1.0 A", "r"], ["resistor", 120, 150, "h", "4 Ω, 4 V", "b"], ["resistor", 240, 150, "h", "8 Ω, 8 V", "b"]],
-              caption: "R_total = 4 + 8 = 12 Ω, so I = 12 ÷ 12 = 1.0 A. p.d.s: 1.0 × 4 = 4 V and 1.0 × 8 = 8 V.",
+              parts: [["battery", 180, 40, "h", "6 V"], ["ammeter", 40, 95, "v", "0.40 A", "r"], ["resistor", 120, 150, "h", "5 Ω, 2 V", "b"], ["resistor", 240, 150, "h", "10 Ω, 4 V", "b"]],
+              caption: "R_total = 5 + 10 = 15 Ω, so I = 6 ÷ 15 = 0.40 A. p.d.s: 0.40 × 5 = 2 V and 0.40 × 10 = 4 V.",
             }),
           },
           {
@@ -665,9 +665,9 @@
             figure: D.circuit({
               w: 360, h: 225,
               wires: ["M40 40 H320 V185 H40 Z", "M40 115 H320"],
-              parts: [["battery", 180, 40, "h", "6 V"], ["ammeter", 40, 77, "v", "3 A", "r"], ["resistor", 180, 115, "h", "3 Ω, 2 A"], ["resistor", 180, 185, "h", "6 Ω, 1 A", "b"]],
+              parts: [["battery", 180, 40, "h", "12 V"], ["ammeter", 40, 77, "v", "5 A", "r"], ["resistor", 180, 115, "h", "4 Ω, 3 A"], ["resistor", 180, 185, "h", "6 Ω, 2 A", "b"]],
               dots: [[40, 115], [320, 115]],
-              caption: "Each branch has 6 V across it: 6 ÷ 3 = 2 A and 6 ÷ 6 = 1 A. Total current = 2 + 1 = 3 A.",
+              caption: "Each branch has 12 V across it: 12 ÷ 4 = 3 A and 12 ÷ 6 = 2 A. Total current = 3 + 2 = 5 A.",
             }),
           },
           {
@@ -720,8 +720,8 @@
           kicker: "Go further: beyond the AQA GCSE spec",
           html: `<p>AQA does not ask you to calculate the total resistance of resistors in parallel, but it is a useful tool, especially if you are heading for separate physics or A level.</p>
             <div class="equation-block"><span class="eq">1 / R_total = 1 / R₁ + 1 / R₂</span><span class="eq-words">For two resistors this simplifies to R_total = (R₁ × R₂) ÷ (R₁ + R₂): “product over sum”.</span></div>
-            <p><strong>Example:</strong> 3 Ω and 6 Ω in parallel → R_total = (3 × 6) ÷ (3 + 6) = 18 ÷ 9 = 2 Ω.</p>
-            <p><strong>Check with currents:</strong> with 6 V across the pair, the branch currents are 2 A and 1 A, so 3 A in total, and 6 V ÷ 3 A = 2 Ω ✓. The answer is less than 3 Ω, the smallest resistor, just as the GCSE rule says.</p>`,
+            <p><strong>Example:</strong> 4 Ω and 6 Ω in parallel → R_total = (4 × 6) ÷ (4 + 6) = 24 ÷ 10 = 2.4 Ω.</p>
+            <p><strong>Check with currents:</strong> with 12 V across the pair, the branch currents are 3 A and 2 A, so 5 A in total, and 12 V ÷ 5 A = 2.4 Ω ✓. The answer is less than 4 Ω, the smallest resistor, just as the GCSE rule says.</p>`,
         },
         vocabulary: [
           ["Series", "Components joined one after another in a single loop."],
@@ -734,9 +734,9 @@
       questions: [
         {
           type: "Practice",
-          prompt: "A 2.0 Ω resistor and a 4.0 Ω resistor are connected in series to a 12 V battery. Calculate the total resistance, the current and the p.d. across each resistor.",
+          prompt: "A 3.0 Ω resistor and a 5.0 Ω resistor are connected in series to a 12 V battery. Calculate the total resistance, the current and the p.d. across each resistor.",
           hint: "Add the resistances, then I = V ÷ R_total. Then V = I R for each resistor.",
-          answer: "R_total = 2.0 + 4.0 = 6.0 Ω. I = 12 ÷ 6.0 = 2.0 A. p.d.s: 2.0 × 2.0 = <strong>4.0 V</strong> and 2.0 × 4.0 = <strong>8.0 V</strong> (they add to 12 V ✓).",
+          answer: "R_total = 3.0 + 5.0 = 8.0 Ω. I = 12 ÷ 8.0 = 1.5 A. p.d.s: 1.5 × 3.0 = <strong>4.5 V</strong> and 1.5 × 5.0 = <strong>7.5 V</strong> (they add to 12 V ✓).",
         },
         {
           type: "Practice",
@@ -758,10 +758,10 @@
           figure: D.circuit({
             w: 360, h: 205,
             wires: [LOOP],
-            parts: [["battery", 180, 40, "h", "6.0 V"], ["ammeter", 40, 95, "v"], ["resistor", 130, 150, "h", "R₁ = 15 Ω", "b"], ["resistor", 250, 150, "h", "R₂ = ?", "b"]],
+            parts: [["battery", 180, 40, "h", "6.0 V"], ["ammeter", 40, 95, "v"], ["resistor", 130, 150, "h", "R₁ = 12 Ω", "b"], ["resistor", 250, 150, "h", "R₂ = ?", "b"]],
           }),
           hint: "Find the total resistance from the supply p.d. and the current, then subtract R₁.",
-          answer: "R_total = V ÷ I = 6.0 ÷ 0.20 (1 mark) = 30 Ω (1 mark). R₂ = 30 − 15 = <strong>15 Ω</strong> (1 mark).",
+          answer: "R_total = V ÷ I = 6.0 ÷ 0.20 (1 mark) = 30 Ω (1 mark). R₂ = 30 − 12 = <strong>18 Ω</strong> (1 mark).",
         },
         {
           type: "AQA-style",
@@ -1027,7 +1027,7 @@
               units: "p = primary coil (input), s = secondary coil (output)",
               flag: "Higher tier: on the equation sheet",
             },
-            formula: "25 kV, 400 A in; 400 kV out → I_s = (25 000 × 400) ÷ 400 000 = 25 A",
+            formula: "25 kV, 1200 A in; 400 kV out → I_s = (25 000 × 1200) ÷ 400 000 = 75 A",
             remember: "Step up the p.d. and the current steps down by the same factor.",
           },
         ],
