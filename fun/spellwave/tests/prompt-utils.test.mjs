@@ -4,7 +4,7 @@ import vm from 'node:vm';
 import assert from 'node:assert/strict';
 import {
   pickTarget, buildSearchPrompt, buildAltSearchPrompts, buildTwoWordLimit,
-  getInputCharacters, isMathOperatorInput, promptIndexForProgress, buildBossPrompt,
+  getInputCharacters, isMathOperatorInput, promptIndexForProgress, buildBossPrompt, createBossQuestionBuilder, buildBossHintPart,
 } from '../src/prompt-utils.js';
 import { ALL_WORDS, EQUATION_WORDS, MEDIUM_WORDS, HARD_WORDS } from '../src/question-bank.js';
 
@@ -64,23 +64,25 @@ test('equation bosses always produce a hidden-word limit', () => {
   }
 });
 
-test('boss definitions do not repeat a word of the hidden term', () => {
-  const lowValue = new Set(['a', 'an', 'and', 'as', 'by', 'for', 'from', 'in', 'of', 'on', 'or', 'per', 'the', 'to', 'with']);
-  for (const { term, definition } of [...MEDIUM_WORDS, ...HARD_WORDS]) {
-    const clueWords = new Set(definition.toLowerCase().split(/[^a-z]+/));
-    const repeated = term.toLowerCase().split(/\s+/).filter(word => word.length > 3 && !lowValue.has(word) && clueWords.has(word));
-    assert.deepEqual(repeated, [], `"${term}" is given away by its definition`);
+const buildBossQuestion = createBossQuestionBuilder(ALL_WORDS, EQUATION_WORDS);
+const hiddenWords = prompt => prompt.parts.filter(part => part.isHidden).map(part => buildSearchPrompt(part.answerText));
+
+test('no boss clue prints the word it asks for', () => {
+  for (const entry of [...MEDIUM_WORDS, ...HARD_WORDS, ...EQUATION_WORDS]) {
+    const clueWords = new Set(entry.definition.toLowerCase().split(/[^a-z]+/));
+    for (const cap of [14, 16]) {
+      const repeated = hiddenWords(buildBossQuestion(entry, cap)).filter(word => clueWords.has(word));
+      assert.deepEqual(repeated, [], `"${entry.term}" is given away by its clue`);
+    }
   }
 });
 
-
-test('every boss has exactly one bounded content-word answer', () => {
+test('every boss has a bounded content-word answer', () => {
   for (const entry of [...MEDIUM_WORDS, ...HARD_WORDS, ...EQUATION_WORDS]) {
     for (const cap of [14, 16]) {
-      const options = { maxAnswerLength: cap, multiplicationAlias: !!entry.isEquation };
-      const prompt = buildBossPrompt(entry.term, options);
+      const prompt = buildBossQuestion(entry, cap);
       assert.ok(prompt, entry.term);
-      assert.equal(prompt.parts.filter(part => part.isHidden).length, 1, entry.term);
+      assert.ok(hiddenWords(prompt).length >= 1, entry.term);
       assert.ok(prompt.searchPrompt.length > 0 && prompt.searchPrompt.length <= cap, entry.term);
       assert.equal(prompt.parts.map(part => part.text).join(''), entry.term);
       assert.ok(prompt.altSearchPrompts.every(answer => answer.length <= cap), entry.term);
@@ -88,13 +90,64 @@ test('every boss has exactly one bounded content-word answer', () => {
   }
 });
 
-test('long vocabulary asks for a substantial word and preserves equation exponents', () => {
-  assert.equal(buildBossPrompt('limit of proportionality').searchPrompt, 'proportionality');
-  const prompt = buildBossPrompt('kinetic energy = 0.5 × mass × speed²', { multiplicationAlias: true });
-  assert.equal(prompt.searchPrompt, 'kinetic');
+test('every ask names words of its own term and is used when it fits', () => {
+  for (const entry of [...MEDIUM_WORDS, ...HARD_WORDS, ...EQUATION_WORDS].filter(item => item.ask)) {
+    assert.deepEqual(hiddenWords(buildBossQuestion(entry, 16)), entry.ask.split(' ').map(word => buildSearchPrompt(word)), entry.term);
+  }
+});
+
+test('bosses hide the word that tells a term apart from the rest of the bank', () => {
+  const answer = term => buildBossQuestion([...MEDIUM_WORDS, ...HARD_WORDS].find(entry => entry.term === term), 16).searchPrompt;
+  assert.equal(answer('Newton\'s first law'), 'first');
+  assert.equal(answer('series circuit'), 'series');
+  assert.equal(answer('nuclear fusion'), 'fusion');
+  assert.equal(answer('non renewable'), 'nonrenewable');
+  assert.equal(answer('limit of proportionality'), 'proportionality');
+});
+
+test('equation bosses skip repeated and filler words and preserve exponents', () => {
+  const equation = clue => buildBossQuestion(EQUATION_WORDS.find(entry => entry.definition === clue), 16);
+  assert.equal(equation('s = vt').searchPrompt, 'speed');
+  assert.equal(equation('Vp / Vs = np / ns').searchPrompt, 'turnsturns');
+  assert.equal(buildBossPrompt('kinetic energy = 0.5 × mass × speed²', { multiplicationAlias: true }).searchPrompt, 'kinetic');
   const squared = buildBossPrompt('speed² = time', { multiplicationAlias: true });
   assert.equal(squared.searchPrompt, 'speed');
   assert.equal(squared.parts.find(part => part.isHidden).exponentText, '²');
+});
+
+
+test('every hidden boss word shows a blank', () => {
+  for (const entry of [...MEDIUM_WORDS, ...HARD_WORDS, ...EQUATION_WORDS]) {
+    for (const cap of [14, 16]) {
+      for (const part of buildBossQuestion(entry, cap).parts.filter(item => item.isHidden)) {
+        assert.match(buildBossHintPart(part.answerText, { leadingTypeableCount: 3 }), /_/, entry.term);
+      }
+    }
+  }
+  assert.equal(buildBossHintPart('non', { leadingTypeableCount: 3 }), 'no_');
+  assert.equal(buildBossHintPart('Newton\'s', { leadingTypeableCount: 3 }), 'New___\'_');
+});
+
+test('bosses chosen for one wave never share an answer', () => {
+  const source = readFileSync(new URL('../src/main.js', import.meta.url), 'utf8');
+  const slice = (from, to) => source.slice(source.indexOf(from), source.indexOf(to));
+  const context = vm.createContext({
+    MEDIUM_WORDS, HARD_WORDS, EQUATION_WORDS, buildBossQuestion, BOSSES_PER_WAVE: 3, waveSet: 1,
+    bossAnswerLengthCap: wave => (wave <= 2 ? 14 : 16),
+    bossWordLengthCap: wave => (wave <= 2 ? 14 : Infinity),
+    withinLength: (entries, cap) => entries.filter(entry => buildSearchPrompt(entry.term).length <= cap),
+  });
+  vm.runInContext(slice('function chooseBossWordsForWave()', 'function chooseBossPool()')
+    + slice('function chooseBossPool()', 'function choosePrompt()'), context);
+  for (context.waveSet = 1; context.waveSet <= 9; context.waveSet += 1) {
+    for (let run = 0; run < 300; run += 1) {
+      const answers = vm.runInContext('chooseBossWordsForWave().map(bossAnswer)', context);
+      assert.equal(answers.length, 3);
+      for (const a of answers) {
+        assert.equal(answers.filter(b => a.startsWith(b) || b.startsWith(a)).length, 1, answers.join(', '));
+      }
+    }
+  }
 });
 
 

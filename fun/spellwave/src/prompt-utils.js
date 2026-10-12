@@ -132,10 +132,6 @@ function buildHintMask(term, options = {}) {
   });
 }
 
-function getBossQuestionHintRange() {
-  return { min: 3, max: 3 };
-}
-
 function escapeHtml(text) {
   return text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 }
@@ -154,6 +150,14 @@ function buildHintPart(text, options = {}) {
     else { result += '_'; }
   }
   return result;
+}
+
+// A boss's hidden word always keeps at least one blank, so a short word such as
+// "non" still reads as part of the answer.
+function buildBossHintPart(text, options = {}) {
+  const typeable = buildSearchPrompt(text, options).length;
+  const leadingTypeableCount = Math.min(options.leadingTypeableCount || 1, Math.max(1, typeable - 1));
+  return buildHintPart(text, { ...options, leadingTypeableCount });
 }
 
 function buildTwoWordLimit(term, options = {}) {
@@ -206,28 +210,102 @@ function buildTwoWordLimit(term, options = {}) {
   };
 }
 
-// Keep the full phrase visible, asking for one substantial word. Prefer longer
-// content words over generic words such as "energy", without exceeding the cap.
+// Equation wording that names no quantity, so it is never the word asked for.
+const EQUATION_FILLER_WORDS = new Set([
+  'change', 'done', 'final', 'initial', 'input', 'output', 'taken', 'total',
+  'transfer', 'transferred', 'travelled', 'useful',
+]);
+const SHORT_ANSWER_LENGTH = 5;
+
+function getAnswerWordKey(token) {
+  return buildSearchPrompt(getAnswerTokenText(token));
+}
+
+// How many terms each content word appears in. A word shared by many terms
+// ("energy", "Newton's") tells fewer of them apart than one used once.
+function countAnswerWords(entries) {
+  const counts = new Map();
+  for (const { term } of entries) {
+    const keys = new Set(term.split(/\s+/).filter(isWordToken).map(getAnswerWordKey));
+    for (const key of keys) counts.set(key, (counts.get(key) || 0) + 1);
+  }
+  return counts;
+}
+
+// Keep the full phrase visible and hide the word that identifies it: the rarest
+// content word in the bank, preferring words of five letters or more, then the
+// longest. options.ask names the hidden word or words explicitly instead.
 function buildBossPrompt(term, options = {}) {
-  const data = buildTwoWordLimit(term, { ...options, alwaysLimit: true, maxHiddenWords: 1 });
-  if (!data) return null;
-  const candidates = data.parts.filter(part => !part.isWhitespace
-    && isWordToken(getAnswerTokenText(part.text))
-    && !isLowValueAnswerToken(getAnswerTokenText(part.text))
-    && buildSearchPrompt(getAnswerTokenText(part.text), options).length <= (options.maxAnswerLength ?? 16));
-  candidates.sort((a, b) => buildSearchPrompt(getAnswerTokenText(b.text), options).length
-    - buildSearchPrompt(getAnswerTokenText(a.text), options).length);
-  const chosen = candidates[0];
-  if (!chosen) return null;
-  for (const part of data.parts) {
-    part.isHidden = part === chosen;
+  const maxAnswerLength = options.maxAnswerLength ?? 16;
+  const parts = term.split(/(\s+)/).filter(token => token !== '').map(token => ({
+    text: token,
+    answerText: token,
+    exponentText: '',
+    isWhitespace: /^\s+$/.test(token),
+    isGiven: false,
+    isHidden: false,
+  }));
+  const candidates = parts.filter((part) => {
+    if (part.isWhitespace) return false;
+    const answerText = getAnswerTokenText(part.text);
+    return isWordToken(answerText) && !isLowValueAnswerToken(answerText) && getAnswerWordKey(part.text).length > 0;
+  });
+  const keyOf = part => getAnswerWordKey(part.text);
+  const answerLength = chosen => chosen.reduce((sum, part) => sum + keyOf(part).length, 0);
+
+  let chosen = [];
+  if (options.ask) {
+    for (const word of options.ask.split(/\s+/)) {
+      const match = candidates.find(part => !chosen.includes(part) && keyOf(part) === getAnswerWordKey(word));
+      if (match) chosen.push(match);
+    }
+    if (answerLength(chosen) > maxAnswerLength) chosen = [];
+  }
+  if (chosen.length === 0) {
+    const fitting = candidates.filter(part => keyOf(part).length <= maxAnswerLength);
+    const repeats = key => candidates.filter(part => keyOf(part) === key).length > 1;
+    const unprinted = fitting.filter(part => !options.avoidWords?.has(keyOf(part)));
+    const distinctive = unprinted.filter(part => keyOf(part).length > 2 && !repeats(keyOf(part)));
+    const pool = [distinctive, unprinted, fitting].find(list => list.length > 0) || [];
+    const count = part => options.wordCounts?.get(keyOf(part)) ?? 1;
+    const isShort = part => keyOf(part).length < SHORT_ANSWER_LENGTH;
+    const best = [...pool].sort((a, b) => isShort(a) - isShort(b)
+      || count(a) - count(b)
+      || keyOf(b).length - keyOf(a).length)[0];
+    if (best) chosen = [best];
+  }
+  if (chosen.length === 0) return null;
+
+  for (const part of parts) {
+    part.isHidden = chosen.includes(part);
     part.isGiven = !part.isWhitespace && !part.isHidden;
     part.answerText = part.isHidden ? getAnswerTokenText(part.text) : part.text;
     part.exponentText = part.isHidden ? getTokenExponent(part.text) : '';
   }
-  data.searchPrompt = buildSearchPrompt(chosen.answerText, options);
-  data.altSearchPrompts = buildAltSearchPrompts(chosen.answerText, options);
-  return data;
+  const hiddenTexts = parts.filter(part => part.isHidden).map(part => part.answerText);
+  return {
+    parts,
+    searchPrompt: hiddenTexts.map(text => buildSearchPrompt(text, options)).join(''),
+    altSearchPrompts: buildAltSearchPrompts(hiddenTexts.join(' '), options),
+  };
+}
+
+// Boss questions for a bank: vocabulary and equations are counted separately,
+// and an equation never asks for a word that its symbol clue already prints.
+function createBossQuestionBuilder(vocabularyEntries, equationEntries) {
+  const vocabularyCounts = countAnswerWords(vocabularyEntries);
+  const equationCounts = countAnswerWords(equationEntries);
+  return (entry, maxAnswerLength) => {
+    const isEquation = !!entry.isEquation;
+    const clueWords = isEquation ? (entry.definition || '').toLowerCase().split(/[^a-z]+/) : [];
+    return buildBossPrompt(entry.term, {
+      multiplicationAlias: isEquation,
+      maxAnswerLength,
+      ask: entry.ask,
+      wordCounts: isEquation ? equationCounts : vocabularyCounts,
+      avoidWords: isEquation ? new Set([...EQUATION_FILLER_WORDS, ...clueWords]) : null,
+    });
+  };
 }
 
 function shouldUseVocabularyPromptLimit(term) {
@@ -272,12 +350,14 @@ export {
   buildSearchPrompt,
   buildAltSearchPrompts,
   buildHintMask,
-  getBossQuestionHintRange,
   escapeHtml,
   wrapSups,
   buildHintPart,
+  buildBossHintPart,
   buildTwoWordLimit,
   buildBossPrompt,
+  countAnswerWords,
+  createBossQuestionBuilder,
   shouldUseVocabularyPromptLimit,
   promptIndexForProgress,
 };

@@ -2,14 +2,16 @@ import * as THREE from 'three';
 import { createSpellwaveAudio } from './audio.js';
 import { createSeasonalEffects } from './seasonal-effects.js';
 import { createPotionSystem } from './potions.js';
-import { ALL_WORDS, EASY_WORDS, HARD_WORDS, MEDIUM_WORDS, EQUATION_WORDS } from './question-bank.js';
+import { ALL_WORDS, EASY_WORDS, HARD_WORDS, MEDIUM_WORDS, EQUATION_WORDS } from './question-bank.js?v=20261012-boss-questions';
 import { createEndingFX } from './ending-fx.js';
 import { createLeaderboard } from './leaderboard.js';
 import { createEnemyMesh, createMimicChestMesh } from './enemy-meshes.js';
-import { normalPromptLengthCap, bossAnswerLengthCap, bossWordLengthCap, previewLengthCap, withinLength, hardGuestCount } from './difficulty.js?v=20261011-grounded-walkers';
+import { bossHintLetters, normalPromptLengthCap, bossAnswerLengthCap, bossWordLengthCap, previewLengthCap, withinLength, hardGuestCount } from './difficulty.js?v=20261012-boss-questions';
 import { createLowPolyTerrain, createLowPolyTree, createLowPolyRock, createLowPolyCloud } from './lowpoly.js';
 import { createVisuals, GLOW_GAIN, MOON_GLOW_GAIN } from './visuals.js';
-import { pickTarget, getInputCharacters, isMathOperatorInput, buildSearchPrompt, buildAltSearchPrompts, buildHintMask, getBossQuestionHintRange, escapeHtml, wrapSups, buildHintPart, buildBossPrompt, promptIndexForProgress } from './prompt-utils.js?v=20261011-grounded-walkers';
+import { pickTarget, getInputCharacters, isMathOperatorInput, buildSearchPrompt, buildAltSearchPrompts, buildHintMask, escapeHtml, wrapSups, buildBossHintPart, createBossQuestionBuilder, promptIndexForProgress } from './prompt-utils.js?v=20261012-boss-questions';
+
+const buildBossQuestion = createBossQuestionBuilder(ALL_WORDS, EQUATION_WORDS);
 
 const canvas = document.getElementById('gameCanvas');
 const labelsLayer = document.getElementById('labelsLayer');
@@ -2319,13 +2321,13 @@ function buildLimitedPromptHtml(enemy, typedProgress) {
         if (wrapSquared) html += '(';
         html += `<span class="typed">${wrapSups(escapeHtml(typedPart))}</span>`;
         if (remainPart) {
-          const maskedPart = buildHintPart(answerText, hintOptions).slice(charPos);
+          const maskedPart = buildBossHintPart(answerText, hintOptions).slice(charPos);
           html += `<span class="remaining">${wrapSups(escapeHtml(maskedPart))}</span>`;
         }
         if (wrapSquared) html += `)${exponentHtml}`;
       } else {
         if (wrapSquared) html += '(';
-        html += `<span class="remaining">${wrapSups(escapeHtml(buildHintPart(answerText, hintOptions)))}</span>`;
+        html += `<span class="remaining">${wrapSups(escapeHtml(buildBossHintPart(answerText, hintOptions)))}</span>`;
         if (wrapSquared) html += `)${exponentHtml}`;
       }
     }
@@ -2527,7 +2529,7 @@ function spawnEnemy(options = {}) {
   const isEquationPrompt = !!wordData.isEquation;
   const showDefinition = !!wordData.definition && isBoss;
   const type = isBoss ? (options.bossType || chooseBossType(bossesSpawned)) : isMedic ? MEDIC_TYPE : isMimic ? MIMIC_TYPE : weightedPick(ENEMY_TYPES);
-  const hintRange = isBoss ? getBossQuestionHintRange() : null;
+  const hintRange = isBoss ? { min: bossHintLetters(waveSet), max: bossHintLetters(waveSet) } : null;
   if (isMedic && !firstMedicHintShown) {
     firstMedicHintShown = true;
     window.setTimeout(() => { if (mode === 'running') showBanner('TYPE TO HEAL!', 'medic-hint'); }, 1100);
@@ -2608,10 +2610,7 @@ function spawnEnemy(options = {}) {
 
   const promptOptions = { multiplicationAlias: isEquationPrompt };
   const twoWordData = isBoss
-    ? buildBossPrompt(wordData.term, {
-        ...promptOptions,
-        maxAnswerLength: bossAnswerLengthCap(waveSet),
-      })
+    ? buildBossQuestion(wordData, bossAnswerLengthCap(waveSet))
     : null;
   const enemy = {
     id: enemyId,
@@ -2632,11 +2631,11 @@ function spawnEnemy(options = {}) {
       ? buildHintMask(wordData.term, {
           ...promptOptions,
           hintRange,
-          leadingTypeableCount: isBoss ? 3 : 1,
+          leadingTypeableCount: isBoss ? bossHintLetters(waveSet) : 1,
         })
       : null,
     hintRange,
-    hintLetterCount: isBoss ? 3 : 1,
+    hintLetterCount: isBoss ? bossHintLetters(waveSet) : 1,
     lastPromptHtml: '',
     promptKind,
     isBoss,
@@ -3526,11 +3525,12 @@ function shouldSpawnMedic() {
 function chooseMimicPrompt() {
   const reservedBossTerms = new Set(bossWordsThisSet.map((w) => w.term));
   const nearExisting = new Set(enemies.map((e) => e.prompt));
+  const bossAnswers = liveAnswers(enemy => enemy.isBoss);
   const pool = withinLength(currentKeywordPool(), 12).filter((entry) => !reservedBossTerms.has(entry.term));
   const usablePool = pool.length > 0 ? pool : EASY_WORDS;
   for (let attempt = 0; attempt < 8; attempt += 1) {
     const entry = usablePool[Math.floor(Math.random() * usablePool.length)];
-    if (!nearExisting.has(entry.term)) return entry;
+    if (!nearExisting.has(entry.term) && !sharesAnswer(buildSearchPrompt(entry.term), bossAnswers)) return entry;
   }
   return usablePool[Math.floor(Math.random() * usablePool.length)];
 }
@@ -3616,12 +3616,12 @@ function chooseBossWordsForWave() {
   while (chosen.length < BOSSES_PER_WAVE - 1 && usedTerms.size < pool.length) {
     const entry = pool[Math.floor(Math.random() * pool.length)];
     if (usedTerms.has(entry.term)) continue;
-    chosen.push(entry);
     usedTerms.add(entry.term);
+    if (!sharesBossAnswer(entry, chosen.map(bossAnswer))) chosen.push(entry);
   }
 
   // Third boss is the equation question
-  chosen.push(chooseEquationWord(usedTerms));
+  chosen.push(chooseEquationWord(chosen));
 
   // Shuffle so the equation boss can appear in any position
   for (let i = chosen.length - 1; i > 0; i -= 1) {
@@ -3632,17 +3632,35 @@ function chooseBossWordsForWave() {
   return chosen;
 }
 
-function chooseEquationWord(usedTerms = new Set()) {
+// Bosses on screen together must not want the same word, or one that starts
+// another: typing it would hit the nearest boss whatever its clue says.
+function bossAnswer(entry) {
+  return buildBossQuestion(entry, bossAnswerLengthCap(waveSet))?.searchPrompt || '';
+}
+
+function sharesAnswer(answer, answers) {
+  return answers.some(other => answer.startsWith(other) || other.startsWith(answer));
+}
+
+function sharesBossAnswer(entry, answers) {
+  return sharesAnswer(bossAnswer(entry), answers);
+}
+
+function liveAnswers(filter = () => true) {
+  return enemies.filter(enemy => !enemy.dying && filter(enemy)).map(enemy => enemy.searchPrompt);
+}
+
+function chooseEquationWord(otherBosses = []) {
+  const answers = otherBosses.map(bossAnswer);
   for (let attempt = 0; attempt < 16; attempt += 1) {
     const entry = EQUATION_WORDS[Math.floor(Math.random() * EQUATION_WORDS.length)];
-    if (!usedTerms.has(entry.term)) return entry;
+    if (!sharesBossAnswer(entry, answers)) return entry;
   }
   return EQUATION_WORDS[Math.floor(Math.random() * EQUATION_WORDS.length)];
 }
 
 function chooseBossPool() {
-  if (waveSet >= 5) return [...MEDIUM_WORDS, ...HARD_WORDS];
-  if (waveSet >= 3) return HARD_WORDS;
+  if (waveSet >= 3) return [...MEDIUM_WORDS, ...HARD_WORDS];
   return withinLength(MEDIUM_WORDS, bossWordLengthCap(waveSet));
 }
 
@@ -3677,9 +3695,10 @@ function chooseMedicPrompt() {
     return length >= 4 && length <= 12;
   });
   const usablePool = compactPool.length > 0 ? compactPool : pool.length > 0 ? pool : EASY_WORDS;
+  const bossAnswers = liveAnswers(enemy => enemy.isBoss);
   for (let attempt = 0; attempt < 8; attempt += 1) {
     const entry = usablePool[Math.floor(Math.random() * usablePool.length)];
-    if (!nearExisting.has(entry.term)) return entry;
+    if (!nearExisting.has(entry.term) && !sharesAnswer(buildSearchPrompt(entry.term), bossAnswers)) return entry;
   }
   return usablePool[Math.floor(Math.random() * usablePool.length)];
 }
@@ -4234,9 +4253,10 @@ function spawnBoss() {
 function chooseBossWord() {
   const pool = chooseBossPool();
   const usedTerms = new Set(bossWordsThisSet.map(w => w.term));
-  for (let attempt = 0; attempt < 12; attempt += 1) {
+  const activeAnswers = liveAnswers();
+  for (let attempt = 0; attempt < 24; attempt += 1) {
     const entry = pool[Math.floor(Math.random() * pool.length)];
-    if (!usedTerms.has(entry.term)) return entry;
+    if (!usedTerms.has(entry.term) && !sharesBossAnswer(entry, activeAnswers)) return entry;
   }
   return pool[Math.floor(Math.random() * pool.length)];
 }
