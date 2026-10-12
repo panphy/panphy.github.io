@@ -46,6 +46,10 @@ export function hardGuestCount(wave, random = Math.random) {
   return range[0] + Math.floor(random() * (range[1] - range[0] + 1));
 }
 
+// Letters of a boss's hidden word shown as a hint. One letter cues recall and,
+// with the blanks, shows the length; more starts to give the word away.
+export const BOSS_HINT_LETTERS = 1;
+
 // Limit the actual answer, independently of the full vocabulary or equation.
 export function bossAnswerLengthCap(wave) {
   return wave <= EARLY_BOSS_WAVES ? 14 : 16;

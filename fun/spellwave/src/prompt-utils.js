@@ -132,10 +132,6 @@ function buildHintMask(term, options = {}) {
   });
 }
 
-function getBossQuestionHintRange() {
-  return { min: 3, max: 3 };
-}
-
 function escapeHtml(text) {
   return text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 }
@@ -354,7 +350,6 @@ export {
   buildSearchPrompt,
   buildAltSearchPrompts,
   buildHintMask,
-  getBossQuestionHintRange,
   escapeHtml,
   wrapSups,
   buildHintPart,
