@@ -3031,6 +3031,8 @@
             var NS = 'http://www.w3.org/2000/svg';
             var WIDTH = 520;
             var SWAP_MS = 350;
+            // Redraw at about 30 frames a second: these scenes move slowly, and it halves the work.
+            var FRAME_MS = 1000 / 30;
 
             function make(name, attrs, parent, text) {
                 var node = document.createElementNS(NS, name);
@@ -3061,7 +3063,7 @@
                     note: 'y = y₁ + y₂',
                     readouts: [['1', 'f₁ = 2.0 Hz'], ['2', 'f₂ = 2.3 Hz'], ['sum', 'beat = 0.3 Hz']],
                     still: 14,
-                    seconds: 12,
+                    seconds: 8.4,
                     build: function () {
                         make('path', { 'class': 'scope-axis', d: 'M0 150h520' });
                         var wave1 = make('path', { 'class': 'scope-wave scope-wave-1' });
@@ -3096,7 +3098,7 @@
                     note: 'N = N₀e⁻λᵗ',
                     readouts: [['sum', 'N₀ = 400'], ['1', 'T½ = 20 s'], ['2', 'counts']],
                     still: 9,
-                    seconds: 10.6,
+                    seconds: 7.4,
                     build: function () {
                         var SCATTER = [0.6, -0.9, 0.3, 1.1, -0.4, -1.2, 0.8, 0.1, -0.7, 1.0, -0.2, 0.5, -1.0, 0.4, 0.9, -0.5, 0.2, -0.8, 0.7, -0.3];
                         function yOf(n) { return 250 - 0.5 * n; }
@@ -3117,15 +3119,15 @@
                         });
                         var curve = make('path', { 'class': 'scope-wave scope-wave-sum' });
                         return function (seconds) {
-                            // Draw for 8 s, hold, then fade and start again.
-                            var t = seconds % 11;
-                            var pen = Math.min(WIDTH, (t / 8) * WIDTH);
+                            // Draw for 5.6 s, hold, then fade and start again.
+                            var t = seconds % 7.7;
+                            var pen = Math.min(WIDTH, (t / 5.6) * WIDTH);
                             var d = '';
                             for (var x = 0; x <= pen; x += 4) d += (x === 0 ? 'M' : 'L') + x + ' ' + yOf(nAt(x)).toFixed(1);
                             curve.setAttribute('d', d || 'M0 50');
                             dots.forEach(function (dot) { dot.node.setAttribute('opacity', dot.x <= pen ? 1 : 0); });
                             guides.forEach(function (guide) { guide.group.setAttribute('opacity', guide.x <= pen ? 1 : 0); });
-                            host.setAttribute('opacity', Math.min(1, (11 - t) / 0.6).toFixed(2));
+                            host.setAttribute('opacity', Math.min(1, (7.7 - t) / 0.6).toFixed(2));
                         };
                     }
                 },
@@ -3139,7 +3141,7 @@
                     note: 'r = mv/qB',
                     readouts: [['2', 'v = 400 km/s'], ['sum', 'F = qvB'], ['1', 'r = 4.2 cm']],
                     still: 0.6,
-                    seconds: 12,
+                    seconds: 8.4,
                     build: function () {
                         var CX = 260;
                         var CY = 150;
@@ -3155,7 +3157,7 @@
                         var velocity = make('path', { 'class': 'scope-wave scope-wave-2', 'stroke-width': 3, opacity: 1 });
                         var proton = make('circle', { 'class': 'scope-fill-1', r: 9 });
                         return function (seconds) {
-                            var angle = 2 * Math.PI * seconds / 4;
+                            var angle = 2 * Math.PI * seconds / 4.2;
                             var px = CX + R * Math.cos(angle);
                             var py = CY - R * Math.sin(angle);
                             var d = '';
@@ -3179,8 +3181,8 @@
                     scale: 'elastic collision',
                     note: 'Σp = const',
                     readouts: [['1', '2.0 kg'], ['2', '1.0 kg'], ['sum', 'p = 3.0 kg m/s']],
-                    still: 1.4,
-                    seconds: 11,
+                    still: 1.9,
+                    seconds: 7.5,
                     build: function () {
                         var PX_PER_M = 60;
                         make('path', { 'class': 'scope-wave scope-wave-sum', 'stroke-width': 2, d: 'M0 214h520' });
@@ -3204,11 +3206,12 @@
                             item.speed.textContent = v ? v.toFixed(1) + ' m/s' : 'at rest';
                         }
                         return function (seconds) {
-                            var loop = seconds % 5.6;
-                            var t = loop - 2.8;
+                            // One run-through lasts 7.6 s and covers 2.8 model seconds either side of the collision.
+                            var loop = seconds % 7.6;
+                            var t = loop * (5.6 / 7.6) - 2.8;
                             place(heavy, 260 - heavy.width + (t < 0 ? 1.5 : 0.5) * PX_PER_M * t, t < 0 ? 1.5 : 0.5);
                             place(light, 260 + (t < 0 ? 0 : 2.0) * PX_PER_M * t, t < 0 ? 0 : 2.0);
-                            host.setAttribute('opacity', Math.min(1, loop / 0.4, (5.6 - loop) / 0.4).toFixed(2));
+                            host.setAttribute('opacity', Math.min(1, loop / 0.4, (7.6 - loop) / 0.4).toFixed(2));
                         };
                     }
                 }
@@ -3267,6 +3270,9 @@
                     lastFrame = 0;
                     return;
                 }
+                frameId = requestAnimationFrame(frame);
+                // Allow a few milliseconds of slack so that a 60 Hz screen draws every second frame.
+                if (lastFrame && now - lastFrame < FRAME_MS - 4) return;
                 var delta = lastFrame ? Math.min((now - lastFrame) / 1000, 0.1) : 0;
                 lastFrame = now;
                 elapsed += delta;
@@ -3275,7 +3281,6 @@
                     // Stay on a scene the reader is pointing at or has focused, so the link under them does not change.
                     if (elapsed >= SCENES[current].seconds && !scope.matches(':hover, :focus')) next();
                 }
-                frameId = requestAnimationFrame(frame);
             }
 
             function resume() {
