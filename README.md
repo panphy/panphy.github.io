@@ -12,20 +12,12 @@ Browser-based physics tools, simulations, classroom utilities and games. Student
 - **Games and demos:** [Spellwave](fun/spellwave.html) and [ASCII Camera](fun/ascii_cam.html).
 - **In beta:** 3D simulations of [Electric Motors](beta/electric_motors.html) (motor effect, DC and synchronous AC), [Charges in Fields](beta/charges_in_fields.html) and the [Life Cycle of a Star](beta/star_life_cycle.html), awaiting review.
 
-## GCSE Physics
+## Curriculum hubs
 
-The [GCSE Physics hub](https://panphy.app/gcsephy/) collects the author's school curriculum resources for AQA GCSE Physics, available by direct link:
+Two hubs hold the author's course resources: teaching decks, workbooks, revision material and lesson starters. They are public and open source but sit outside the homepage catalogue, reached by direct link. Teachers and students are welcome to use and adapt them.
 
-- **Year 9 · [Work Like a Physicist](https://panphy.app/gcsephy/year9phy/unit01/):** a student companion site, revision guides, Exam Zone, 40-page workbook, lesson plans, and a [57-slide HTML teaching deck](https://panphy.app/gcsephy/decks/work-like-a-physicist/). See the [unit overview](gcsephy/year9phy/unit01/README.md) for materials and editable sources.
-- **Year 10 · [Electric Circuits](https://panphy.app/gcsephy/year10phy/unit01/):** revision notes, practice questions, an Exam Zone, required-practical resources, a twelve-lesson workbook with answer editions and a teacher guide, and an [HTML teaching deck](https://panphy.app/gcsephy/decks/electric-circuits/). See the [unit overview](gcsephy/year10phy/unit01/README.md).
-- **Year 11 · [Atoms and Nuclear Radiation](https://panphy.app/gcsephy/year11phy/unit01/):** a ten-lesson workbook with answer editions and a unit review, alongside an [HTML teaching deck](https://panphy.app/gcsephy/decks/atoms-and-radiation/). See the [workbook overview](gcsephy/year11phy/unit01/README.md).
-- **[Do Now starters](https://panphy.app/gcsephy/do-now/):** AO1 lesson starters by topic, with worksheets, flashcards, [printable revision sheets and required-practical method sheets](https://panphy.app/gcsephy/do-now/revision/), and an [exam statistics deck](https://panphy.app/gcsephy/do-now/exam-stats/) of where recall marks were in past papers. See the [Do Now overview](gcsephy/do-now/README.md) for the question bank and how to edit it.
-
-These public, open-source resources are intentionally outside the general homepage catalogue, but teachers and students are welcome to use and adapt them.
-
-## IB DP Physics
-
-The [IB DP Physics hub](https://panphy.app/ibdpphy/) collects resources for the IB Diploma Programme Physics course (first assessment 2025), also by direct link. It has a [course summary](https://panphy.app/ibdpphy/course-summary/), an [annotated data booklet](https://panphy.app/ibdpphy/data-booklet/) that explains every symbol, and two HTML teaching decks for Theme E, [E.1 Structure of the atom](https://panphy.app/ibdpphy/decks/e1-structure-of-the-atom/) and [E.2 Quantum physics](https://panphy.app/ibdpphy/decks/e2-quantum-physics/), with the additional higher level content marked on every slide it appears on. See the [folder overview](ibdpphy/README.md).
+- **[GCSE Physics](https://panphy.app/gcsephy/):** AQA GCSE Physics units for Years 9 to 11 and the Do Now starters. Each unit folder and `gcsephy/do-now/` has its own README.
+- **[IB DP Physics](https://panphy.app/ibdpphy/):** the IB Diploma Programme Physics course (first assessment 2025). See the [folder overview](ibdpphy/README.md).
 
 ## Theme
 
