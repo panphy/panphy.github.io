@@ -1050,6 +1050,7 @@
     const withAnswers = state.sheetKind === "key";
     els.sheet.classList.toggle("key", withAnswers);
     document.querySelectorAll("[data-sheet]").forEach((button) => button.setAttribute("aria-pressed", String(button.dataset.sheet === state.sheetKind)));
+    $("sheet-print").textContent = withAnswers ? "Save answer key PDF" : "Save worksheet PDF";
     const element = (tag, className, text) => {
       const node = document.createElement(tag);
       if (className) node.className = className;
@@ -1115,30 +1116,19 @@
     $("sheet-print").focus();
   }
 
-  // Print one page of the worksheet preview and resolve when its dialog closes.
-  // (print() blocks in some browsers and returns at once in others.)
-  async function printKind(kind, day) {
-    state.sheetKind = kind;
-    renderSheet();
+  // Print the page shown in the preview: the worksheet or its answer key.
+  async function printSheet() {
+    const title = document.title;
+    const kind = state.sheetKind;
     await Promise.all([...els.sheet.querySelectorAll("img")].map((image) => image.decode().catch(() => {})));
     // The PDF takes its file name from the page title.
-    document.title = `Do Now ${kind === "key" ? "answer key" : "worksheet"} ${day}`;
+    document.title = `Do Now ${kind === "key" ? "answer key" : "worksheet"} ${new Date().toISOString().slice(0, 10)}`;
+    // print() blocks in some browsers and returns at once in others.
     await new Promise((resolve) => {
       window.addEventListener("afterprint", resolve, { once: true });
       window.print();
     });
-  }
-
-  // One click saves two PDFs: the worksheet, then its answer key.
-  async function printSheet() {
-    const title = document.title;
-    const shownKind = state.sheetKind;
-    const day = new Date().toISOString().slice(0, 10);
-    await printKind("worksheet", day);
-    await printKind("key", day);
     document.title = title;
-    state.sheetKind = shownKind;
-    renderSheet();
   }
 
   function openLightbox(src) {
