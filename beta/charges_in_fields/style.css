@@ -268,7 +268,7 @@ button:disabled { cursor: default; opacity: .55; }
   border: 1px solid var(--input-border); border-radius: 12px; background: var(--card-bg);
   font: 700 1.1rem var(--font-body); color: var(--text-main); touch-action: manipulation;
 }
-.stepper button:hover:not(:disabled), .choice-row button:hover:not(:disabled) { border-color: var(--brand-accent); background: var(--muted-bg); }
+.stepper button:hover:not(:disabled), .choice-row button:hover:not(:disabled):not([aria-pressed=true]) { border-color: var(--brand-accent); background: var(--muted-bg); }
 .stepper input {
   width: 92px; min-height: 48px; padding: 0 8px;
   border: 1px solid var(--input-border); border-radius: 12px; background: var(--card-bg);
