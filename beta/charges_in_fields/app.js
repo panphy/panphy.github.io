@@ -34,12 +34,13 @@ const DISPLAY_DISTANCE = { efield: 0.05, bfield: 0.06, selector: 0.05 };
 const CYCLOTRON_TURN_TIME = 0.8;
 const AC_BOX = { w: 2.8, h: 1.65 };
 const B_REGION = { x: 9, y: 9, zMin: -30, zMax: 3 };
+const B_SOURCE_Z = (B_REGION.zMin + B_REGION.zMax) / 2;
 const SPEED_SPREAD = [0.3, 1.7];
 const HISTOGRAM_BINS = 14;
 
 const HOME = {
   efield: { extent: { w: 11, h: 6.5 }, target: [2, 0, 0], direction: [0.35, 0.3, 1.25] },
-  bfield: { extent: { w: 7.5, h: 7.5 }, target: [0, 0, -2], direction: [0.3, 0.22, 1.2] },
+  bfield: { extent: { w: 7.5, h: 7.5 }, target: [0, 0, B_SOURCE_Z], direction: [0.3, 0.22, 1.2] },
   selector: { extent: { w: 8.6, h: 4 }, target: [1, 0, 0], direction: [0.4, 0.35, 1.25] },
   cyclotron: { extent: { w: 6.6, h: 7.0 }, target: [0, -0.6, 0.8], direction: [0.25, 0.85, 1.0] }
 };
@@ -553,7 +554,7 @@ function buildBField() {
   bFieldLines(ticks, ticks, zMax, zMin, state.reverseB ? -1 : 1, { heads: 3, headScale: 1.5 });
   const gun = part(new THREE.Mesh(new THREE.CylinderGeometry(0.16, 0.2, 0.7, 20), material(palette.carbon, { metalness: 0.4 })), 'gun');
   gun.rotation.z = -Math.PI / 2;
-  gun.position.set(-0.45, 0, 0);
+  gun.position.set(-0.45, 0, B_SOURCE_Z);
   group.add(gun);
 }
 function buildSelector() {
@@ -759,7 +760,7 @@ function fireTracer(mode = state.mode) {
     const vel = new THREE.Vector3(speed * Math.sin(angle), 0, -speed * Math.cos(angle));
     const period = 2 * Math.PI * data.m / (Math.abs(data.q) * state.values.field / 1000);
     while (lab.tracers.length >= 4) removeTracer(lab.tracers[0]);
-    return makeTracer({ key, pos: new THREE.Vector3(0, 0, 0), vel, colour, realPerDisplay: DISPLAY_DISTANCE.bfield / speed, maxStep: Math.min(0.0004 / speed, period / 300), trailSize: 9000, dotInterval: 0.15 });
+    return makeTracer({ key, pos: new THREE.Vector3(0, 0, B_SOURCE_Z / SCALE.bfield), vel, colour, realPerDisplay: DISPLAY_DISTANCE.bfield / speed, maxStep: Math.min(0.0004 / speed, period / 300), trailSize: 9000, dotInterval: 0.15 });
   }
   if (mode === 'selector') {
     const reference = selectorReference(key);
