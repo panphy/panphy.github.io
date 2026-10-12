@@ -3660,8 +3660,7 @@ function chooseEquationWord(otherBosses = []) {
 }
 
 function chooseBossPool() {
-  if (waveSet >= 5) return [...MEDIUM_WORDS, ...HARD_WORDS];
-  if (waveSet >= 3) return HARD_WORDS;
+  if (waveSet >= 3) return [...MEDIUM_WORDS, ...HARD_WORDS];
   return withinLength(MEDIUM_WORDS, bossWordLengthCap(waveSet));
 }
 
