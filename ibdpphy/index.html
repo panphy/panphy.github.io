@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="robots" content="noindex, nofollow">
+  <meta name="description" content="IB Diploma Programme Physics resources from PanPhy Labs (first assessment 2025): teaching decks by syllabus topic, with the additional higher level content clearly marked.">
+  <meta name="theme-color" content="#2c4654">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <title>IB DP Physics - PanPhy Labs</title>
+  <link rel="icon" type="image/png" href="/assets/favicon.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="/assets/apple-touch-icon.png">
+  <link rel="stylesheet" href="/assets/standalone-top.css">
+  <link rel="stylesheet" href="/assets/fonts/fonts.css">
+  <link rel="stylesheet" href="/gcsephy/assets/fonts/archivo-black.css">
+  <style>
+    /* The hub for everything under ibdpphy/, laid out like the GCSE hub
+       (gcsephy/index.html) but dark: cream ink on a slate board, with the teal,
+       sage, sand and apricot of the decks. Terracotta always means higher
+       level only, here and inside the decks. */
+    :root {
+      color-scheme: dark;
+      --paper: #2c4654;
+      --ink: #f6eedb;
+      --muted: #a9bcc4;
+      --rule: rgba(246, 238, 219, .09);
+      --slate: #2c4654;
+      --teal: #4f9c8f;
+      --teal-deep: #2b7a70;
+      --sage: #96b083;
+      --sand: #e2c678;
+      --apricot: #e8a66c;
+      --hl: #d87759;
+      --hl-deep: #b5492c;
+      --display: "Arial Black", "Archivo Black", Arial, sans-serif;
+      --serif: 'DM Serif Display', Georgia, serif;
+      --body: 'Manrope', system-ui, Arial, sans-serif;
+      --mono: 'IBM Plex Mono', ui-monospace, Menlo, monospace;
+      --gutter: clamp(16px, 5vw, 72px);
+      --standalone-top-bg: #2c4654;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; }
+    html { scroll-behavior: smooth; -webkit-text-size-adjust: 100%; }
+    body {
+      margin: 0;
+      background-color: var(--paper);
+      background-image: linear-gradient(var(--rule) 1px, transparent 1px), linear-gradient(90deg, var(--rule) 1px, transparent 1px);
+      background-size: 58px 58px;
+      color: var(--ink);
+      font: 16px/1.5 var(--body);
+    }
+    a { color: inherit; text-decoration: none; -webkit-tap-highlight-color: transparent; }
+    a:focus-visible { outline: 3px solid var(--sand); outline-offset: 4px; }
+    .icon { width: 1em; height: 1em; flex: none; fill: none; stroke: currentColor; stroke-width: 2.6; stroke-linecap: round; stroke-linejoin: round; }
+
+    /* ---------- Top bar ---------- */
+    .topbar {
+      display: flex; align-items: center; justify-content: space-between; gap: 16px;
+      min-height: 76px; padding: 0 var(--gutter);
+      background: var(--paper); border-bottom: 2px solid var(--ink);
+    }
+    .brand { display: inline-flex; align-items: center; gap: 12px; min-height: 48px; font-weight: 800; letter-spacing: -.02em; }
+    .brand img { display: block; border: 2px solid var(--ink); border-radius: 8px; }
+    .spec { font: 600 .72rem/1.3 var(--mono); letter-spacing: .14em; text-transform: uppercase; color: var(--muted); text-align: right; }
+
+    /* ---------- Hero ---------- */
+    .hero {
+      display: grid; grid-template-columns: minmax(0, 1.15fr) minmax(260px, .85fr); gap: clamp(28px, 6vw, 90px); align-items: end;
+      padding: clamp(40px, 7vw, 96px) var(--gutter) clamp(44px, 6vw, 84px);
+      border-bottom: 2px solid var(--ink);
+    }
+    .eyebrow { margin: 0 0 20px; font: 600 .76rem/1.4 var(--mono); letter-spacing: .18em; text-transform: uppercase; }
+    .eyebrow span { background: var(--ink); color: var(--paper); padding: 3px 8px; margin-right: 6px; }
+    h1 { margin: 0; font: 900 clamp(52px, 8.8vw, 136px)/.8 var(--display); letter-spacing: -.085em; text-transform: uppercase; }
+    h1 i { font-style: normal; color: var(--paper); -webkit-text-stroke: 5px var(--ink); paint-order: stroke fill; }
+    h1 b { color: var(--apricot); }
+    .lead { max-width: 34rem; margin: clamp(22px, 3vw, 36px) 0 0; font-size: clamp(17px, 1.7vw, 21px); line-height: 1.5; color: #dbe4e3; }
+
+    /* Syllabus map: the five themes of the course. A theme becomes a link
+       once it has resources. */
+    .jump { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; }
+    .jump li > * {
+      display: flex; align-items: center; gap: 14px;
+      min-height: 52px; padding: 6px 16px; border: 2px solid var(--ink);
+      font: 800 1rem/1.2 var(--body);
+    }
+    .jump b { flex: none; width: 1.2em; font: 900 1.5rem/1 var(--display); }
+    .jump small { margin-left: auto; font: 500 .7rem/1 var(--mono); letter-spacing: .1em; text-transform: uppercase; white-space: nowrap; }
+    .jump a { background: var(--teal); border-color: var(--ink); color: #10262c; box-shadow: 5px 5px 0 var(--sand); transition: transform .12s ease, box-shadow .12s ease; }
+    .jump a:hover { transform: translate(-2px, -2px); box-shadow: 7px 7px 0 var(--sand); }
+    .jump span { border-style: dashed; border-color: rgba(246, 238, 219, .32); color: var(--muted); }
+
+    /* ---------- Sections ---------- */
+    .band {
+      display: grid; grid-template-columns: clamp(150px, 19vw, 260px) minmax(0, 1fr); gap: clamp(20px, 4vw, 56px);
+      padding: clamp(36px, 5vw, 68px) var(--gutter);
+      border-bottom: 2px solid var(--ink);
+      scroll-margin-top: 12px;
+    }
+    .band:nth-of-type(even) { background: rgba(255, 255, 255, .045); }
+    .rail { position: sticky; top: calc(var(--standalone-top, 0px) + 20px); align-self: start; }
+    .rail p { margin: 0 0 6px; font: 600 .72rem/1.4 var(--mono); letter-spacing: .16em; text-transform: uppercase; color: var(--muted); }
+    .rail h2 {
+      margin: 0; font: 900 clamp(84px, 11vw, 168px)/.8 var(--display); letter-spacing: -.09em;
+      color: transparent; -webkit-text-stroke: 2px var(--ink);
+    }
+    @supports not (-webkit-text-stroke: 2px black) { .rail h2 { color: var(--ink); } }
+    .cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 290px), 1fr)); gap: 22px 24px; align-content: start; }
+
+    /* ---------- Cards ---------- */
+    .card {
+      position: relative; isolation: isolate; overflow: hidden;
+      display: flex; flex-direction: column; min-height: 228px; padding: 20px 20px 16px;
+      border: 2px solid var(--ink); border-radius: var(--c-radius, 4px);
+      background-color: var(--c-bg); color: var(--c-fg); box-shadow: 7px 7px 0 var(--c-shadow);
+      transition: transform .14s ease, box-shadow .14s ease;
+    }
+    .card:hover, .card:focus-visible { transform: translate(-3px, -3px); box-shadow: 10px 10px 0 var(--c-shadow); }
+    .card::before { content: ""; position: absolute; inset: 0; z-index: -1; background-image: var(--c-texture, none); background-size: var(--c-texture-size, 58px 58px); }
+    .kind {
+      align-self: flex-start; padding: 4px 9px; border-radius: 999px;
+      background: var(--c-accent); color: var(--c-on-accent, var(--ink));
+      font: 600 .68rem/1.2 var(--mono); letter-spacing: .12em; text-transform: uppercase;
+    }
+    .title { margin: 16px 0 10px; font: var(--c-title, 900 clamp(1.5rem, 2.3vw, 1.95rem)/.95 var(--display)); letter-spacing: var(--c-tracking, -.055em); text-transform: var(--c-case, uppercase); }
+    .desc { color: var(--c-sub); font-size: .95rem; line-height: 1.45; }
+    .foot { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-top: auto; padding-top: 18px; }
+    .meta { font: 500 .72rem/1.3 var(--mono); letter-spacing: .08em; text-transform: uppercase; color: var(--c-sub); }
+    .go { display: grid; place-items: center; width: 44px; height: 44px; flex: none; border: 2px solid currentColor; border-radius: 50%; font-size: 20px; color: var(--c-arrow, var(--c-accent)); transition: transform .14s ease; }
+    .card:hover .go { transform: rotate(-45deg); }
+
+    /* The decks: cream dotted paper, serif headings, teal and apricot. */
+    .t-deck { --c-bg: #fbf6e9; --c-fg: #1f3340; --c-sub: #4f626b; --c-accent: var(--teal-deep); --c-on-accent: #fff; --c-shadow: var(--apricot); --c-arrow: var(--teal-deep); --c-radius: 18px; --c-title: 400 clamp(1.7rem, 2.5vw, 2.1rem)/1.05 var(--serif); --c-tracking: 0; --c-case: none; --c-texture: radial-gradient(#e6dcc3 1px, transparent 1px); --c-texture-size: 22px 22px; }
+    .card.t-deck { border-color: var(--slate); }
+    /* A resource that is higher level only: terracotta in place of teal and apricot. */
+    .t-deck.hl { --c-accent: var(--hl-deep); --c-shadow: var(--hl); --c-arrow: var(--hl-deep); }
+    .level { display: inline-block; padding: 2px 8px; border-radius: 999px; border: 1.5px solid var(--teal-deep); color: var(--teal-deep); font-weight: 600; }
+    .level.hl { border-color: var(--hl-deep); background: var(--hl-deep); color: #fff; }
+
+    /* ---------- Footer ---------- */
+    footer { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px 24px; padding: 22px var(--gutter) calc(28px + env(safe-area-inset-bottom, 0px)); font: 500 .74rem/1.4 var(--mono); letter-spacing: .1em; text-transform: uppercase; color: var(--muted); }
+    footer a { display: inline-flex; align-items: center; gap: 8px; min-height: 48px; color: var(--ink); font-weight: 600; }
+    footer a:hover { text-decoration: underline; text-underline-offset: 4px; }
+
+    /* ---------- Load-in ---------- */
+    @media (prefers-reduced-motion: no-preference) {
+      .hero > *, .jump li { animation: rise .5s cubic-bezier(.2, .8, .2, 1) both; }
+      .jump li:nth-child(1) { animation-delay: .10s; }
+      .jump li:nth-child(2) { animation-delay: .16s; }
+      .jump li:nth-child(3) { animation-delay: .22s; }
+      .jump li:nth-child(4) { animation-delay: .28s; }
+      .jump li:nth-child(5) { animation-delay: .34s; }
+      @keyframes rise { from { opacity: 0; transform: translateY(14px); } }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      html { scroll-behavior: auto; }
+      .card, .jump a, .go { transition: none; }
+    }
+
+    /* ---------- Narrow screens ---------- */
+    @media (max-width: 860px) {
+      .hero { grid-template-columns: 1fr; align-items: start; }
+      .jump { gap: 10px; }
+      .band { grid-template-columns: 1fr; gap: 22px; }
+      .rail { position: static; display: flex; align-items: flex-end; gap: 14px; }
+      .rail p { margin: 0 0 4px; max-width: 9rem; }
+      .rail h2 { font-size: 84px; }
+    }
+    @media (max-width: 480px) {
+      .spec { display: none; }
+      .card { min-height: 0; box-shadow: 5px 5px 0 var(--c-shadow); }
+      h1 { font-size: 17vw; }
+      h1 i { -webkit-text-stroke-width: 4px; }
+    }
+  </style>
+  <script src="/ibdpphy/sw-register.js" defer></script>
+</head>
+
+<body id="top">
+  <header class="topbar">
+    <a class="brand" href="/" aria-label="PanPhy Labs home"><img src="/assets/panphy.png" alt="PanPhy Labs" width="48" height="48"><span>PanPhy Labs</span></a>
+    <span class="spec">IB Diploma Programme<br>Physics · first assessment 2025</span>
+  </header>
+
+  <main>
+    <section class="hero">
+      <div>
+        <p class="eyebrow"><span>SL and HL</span> Topic by topic</p>
+        <h1>DP<br><i>Physics</i><b>.</b></h1>
+        <p class="lead">Teaching resources for IB Diploma Programme Physics, built topic by topic. Anything that is higher level only is marked in terracotta, here and on every slide.</p>
+      </div>
+      <nav aria-label="Syllabus themes">
+        <ul class="jump">
+          <li><span><b>A</b> Space, time and motion <small>Not yet</small></span></li>
+          <li><span><b>B</b> The particulate nature of matter <small>Not yet</small></span></li>
+          <li><span><b>C</b> Wave behaviour <small>Not yet</small></span></li>
+          <li><span><b>D</b> Fields <small>Not yet</small></span></li>
+          <li><a href="#theme-e"><b>E</b> Nuclear and quantum physics <small>2 decks</small></a></li>
+        </ul>
+      </nav>
+    </section>
+
+    <section class="band" id="theme-e" aria-labelledby="theme-e-title">
+      <div class="rail">
+        <p>Theme · Nuclear and quantum physics</p>
+        <h2 id="theme-e-title" aria-label="Theme E">E</h2>
+      </div>
+      <div class="cards">
+        <a class="card t-deck" href="decks/e1-structure-of-the-atom/">
+          <span class="kind">E.1 · Slide deck</span>
+          <strong class="title">Structure of the atom</strong>
+          <span class="desc">The Geiger–Marsden–Rutherford experiment, nuclear notation, energy levels and spectra. HL adds nuclear radius, closest approach and Bohr’s hydrogen.</span>
+          <span class="foot"><span class="meta"><span class="level">SL + HL</span> 38 slides</span><span class="go" aria-hidden="true"><svg class="icon" viewBox="0 0 24 24" focusable="false"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span></span>
+        </a>
+        <a class="card t-deck hl" href="decks/e2-quantum-physics/">
+          <span class="kind">E.2 · Slide deck</span>
+          <strong class="title">Quantum physics</strong>
+          <span class="desc">The photoelectric effect, the de Broglie wavelength and electron diffraction, and Compton scattering.</span>
+          <span class="foot"><span class="meta"><span class="level hl">HL only</span> 29 slides</span><span class="go" aria-hidden="true"><svg class="icon" viewBox="0 0 24 24" focusable="false"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span></span>
+        </a>
+      </div>
+    </section>
+
+    <!-- Add an entry whenever a page, deck or standalone resource is added under ibdpphy/, and turn its theme in the syllabus map into a link. -->
+    <!-- Remove or update the entry when a page is renamed or deleted. -->
+  </main>
+
+  <footer>
+    <span>IB DP Physics · PanPhy Labs</span>
+    <a href="/"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M19 12H5M11 6l-6 6 6 6"/></svg> All PanPhy Labs apps</a>
+  </footer>
+</body>
+
+</html>

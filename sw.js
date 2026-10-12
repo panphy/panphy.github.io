@@ -1,4 +1,4 @@
-const BUILD_ID = '2026-10-11T12:03:14Z';
+const BUILD_ID = '2026-10-12T10:14:11Z';
 const CACHE_PREFIX = 'panphy-labs';
 const PRECACHE_NAME = `${CACHE_PREFIX}-precache-${BUILD_ID}`;
 const RUNTIME_CACHE = `${CACHE_PREFIX}-runtime-${BUILD_ID}`;
@@ -385,6 +385,7 @@ self.addEventListener('fetch', (event) => {
   const isBetaPath = isSameOrigin && (url.pathname === '/beta' || url.pathname.startsWith('/beta/'));
   const isMiscPath = isSameOrigin && (url.pathname === '/misc' || url.pathname.startsWith('/misc/'));
   const isGcsePath = isSameOrigin && (url.pathname === '/gcsephy' || url.pathname.startsWith('/gcsephy/'));
+  const isIbdpPath = isSameOrigin && (url.pathname === '/ibdpphy' || url.pathname.startsWith('/ibdpphy/'));
 
   // Keep all beta routes/assets network-only (no SW cache reads/writes).
   if (isBetaPath) {
@@ -398,6 +399,11 @@ self.addEventListener('fetch', (event) => {
   }
   // GCSE curriculum resources are network-only too.
   if (isGcsePath) {
+    event.respondWith(fetch(req));
+    return;
+  }
+  // IB DP Physics resources are network-only too.
+  if (isIbdpPath) {
     event.respondWith(fetch(req));
     return;
   }

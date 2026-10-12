@@ -23,6 +23,10 @@ The [GCSE Physics hub](https://panphy.app/gcsephy/) collects the author's school
 
 These public, open-source resources are intentionally outside the general homepage catalogue, but teachers and students are welcome to use and adapt them.
 
+## IB DP Physics
+
+The [IB DP Physics hub](https://panphy.app/ibdpphy/) collects resources for the IB Diploma Programme Physics course (first assessment 2025), also by direct link. It starts with two HTML teaching decks for Theme E, [E.1 Structure of the atom](https://panphy.app/ibdpphy/decks/e1-structure-of-the-atom/) and [E.2 Quantum physics](https://panphy.app/ibdpphy/decks/e2-quantum-physics/), with the additional higher level content marked on every slide it appears on. See the [folder overview](ibdpphy/README.md).
+
 ## Theme
 
 Pages with a light/dark switch share one preference in the same browser and site origin, including open tabs. The first visit follows the device setting unless an existing page preference can be migrated. Fixed-design apps retain their appearance.
@@ -33,7 +37,7 @@ Load `assets/theme.js` synchronously in the head before styles; use `PanPhyTheme
 
 Most published tools and simulations work offline once cached: visit online first and check the homepage's **Offline Ready** indicator. Updates appear through an update prompt, shown only in apps whose own or shared files changed. Shared fonts in `assets/fonts/` are precached (about 336 KB).
 
-Pages under `fun/`, `beta/`, `misc/` and `gcsephy/` need internet access, as do Supabase features such as leaderboards. `gcsephy/` registers its own small worker (`gcsephy/sw.js`), which stores nothing and only revalidates requests so edits appear on the next load; a page that is already open offers a Reload banner when its files or its question bank change.
+Pages under `fun/`, `beta/`, `misc/`, `gcsephy/` and `ibdpphy/` need internet access, as do Supabase features such as leaderboards. `gcsephy/` registers its own small worker (`gcsephy/sw.js`), which stores nothing and only revalidates requests so edits appear on the next load; a page that is already open offers a Reload banner when its files or its question bank change. `ibdpphy/` has a copy of the same worker for its own scope.
 
 ## Repository map
 
@@ -47,6 +51,7 @@ Pages under `fun/`, `beta/`, `misc/` and `gcsephy/` need internet access, as do 
 | `beta/` | Trial apps, listed in `beta/index.html`; `beta/do_now/` only forwards old links to `gcsephy/do-now/` |
 | `misc/` | Unlisted resources, inventoried in `misc/index.html` |
 | `gcsephy/` | GCSE Physics curriculum resources and the Do Now starters, inventoried in `gcsephy/index.html` |
+| `ibdpphy/` | IB DP Physics teaching decks, inventoried in `ibdpphy/index.html` |
 | `.github/` | Repository automation: `workflows/checks.yml` runs `scripts/check.mjs` and the app tests on every pull request; `workflows/supabase-keepalive.yml` pings Supabase twice a week |
 
 ## Contact

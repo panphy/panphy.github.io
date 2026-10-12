@@ -42,7 +42,7 @@ The Unit review follows Lesson 10 and adds two GCSE Physics-only extension pages
 
 ## History dates
 
-Dates in the deck, these booklets and the [Atomic Models sim](../../../simulations/atomic_models.html) follow the laureates' biographical pages on nobelprize.org (checked 12 October 2026). Check any new or changed date against them and keep the three in step.
+Dates in the deck, these booklets and the [Atomic Models sim](../../../simulations/atomic_models.html) follow the laureates' biographical pages on nobelprize.org (checked 12 October 2026). Check any new or changed date against them and keep the three in step, along with the IB deck that reuses these story slides, [`ibdpphy/decks/e1-structure-of-the-atom/`](../../../ibdpphy/decks/e1-structure-of-the-atom/).
 
 | Date used | What it marks | Nobel page |
 |---|---|---|

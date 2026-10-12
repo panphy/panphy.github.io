@@ -21,6 +21,7 @@ PanPhy Labs is a static GitHub Pages PWA for physics tools, simulations, classro
 | `beta/` | New and trial apps; `beta/do_now/` holds only redirect pages for old Do Now links | Maintain `beta/index.html`; no service-worker registration or caching |
 | `misc/` | Unlisted pages and resources | Maintain links and short descriptions in `misc/index.html`; no registration or caching |
 | `gcsephy/` | Public school-specific GCSE curriculum resources (`year9phy/`, `year10phy/`) and the Do Now starters and flashcards in `do-now/` | Direct-link access, outside the root catalogue; maintain `gcsephy/index.html`; network-only in root `sw.js`; pages load `/gcsephy/sw-register.js`, whose `/gcsephy/`-scoped worker revalidates every request and stores nothing |
+| `ibdpphy/` | Public IB Diploma Programme Physics resources: teaching decks by syllabus topic in `decks/` | As `gcsephy/`: direct-link access, outside the root catalogue; maintain `ibdpphy/index.html`; network-only in root `sw.js`; pages load `/ibdpphy/sw-register.js`, the same freshness worker scoped to `/ibdpphy/` |
 
 Keep beta/misc inventories current when adding, moving, renaming, or removing entries. Supporting app files do not need separate entries.
 
@@ -35,14 +36,14 @@ For a new or promoted general published app:
 
 Network-only apps omit registration and offline requirements. Public support/reference pages may use the service worker without a homepage listing.
 
-`gcsephy/` is exempt from beta placement, general app styling, and homepage promotion. Do not add it to root `index.html`, `ASSETS_TO_CACHE` or `OFFLINE_CARD_REQUIREMENTS` unless requested. Its absence from the catalogue does not make it private.
+`gcsephy/` and `ibdpphy/` are exempt from beta placement, general app styling, and homepage promotion. Do not add them to root `index.html`, `ASSETS_TO_CACHE` or `OFFLINE_CARD_REQUIREMENTS` unless requested. Their absence from the catalogue does not make them private. In `ibdpphy/` decks, mark content that is additional higher level with the `hl` slide class so that it is never mistaken for standard level.
 
 ## Service worker
 
 - Files in `sw.js` → `ASSETS_TO_CACHE` are cache-first. After changing any of them, update `BUILD_ID` as the final code change using a UTC timestamp: `YYYY-MM-DDTHH:MM:SSZ`.
 - Cache URLs must match exactly, including CDN versions, paths, and query strings. Include required local modules and media for offline apps.
-- `/beta`, `/misc`, `/fun`, `/gcsephy`, and Supabase API calls remain network-only. Other resources can also be runtime-cached; do not assume an uncached resource is available offline.
-- `gcsephy/sw.js` is a separate freshness worker, not an offline cache: it uses `cache: 'no-cache'` fetches, no Cache Storage and no `BUILD_ID`. New `gcsephy/` pages include `<script src="/gcsephy/sw-register.js" defer></script>`, which also compares the open page's own HTML, scripts, stylesheets and images with the server (content hash, since GitHub Pages ETags change on every deploy) and offers a Reload banner when they change; it never reloads by itself. A page that loads data with `fetch` lists those files in `data-watch` on the script tag (as Do Now does for its CSVs) so that edits to them offer the reload too.
+- `/beta`, `/misc`, `/fun`, `/gcsephy`, `/ibdpphy`, and Supabase API calls remain network-only. Other resources can also be runtime-cached; do not assume an uncached resource is available offline.
+- `gcsephy/sw.js` is a separate freshness worker, not an offline cache: it uses `cache: 'no-cache'` fetches, no Cache Storage and no `BUILD_ID`. New `gcsephy/` pages include `<script src="/gcsephy/sw-register.js" defer></script>`, which also compares the open page's own HTML, scripts, stylesheets and images with the server (content hash, since GitHub Pages ETags change on every deploy) and offers a Reload banner when they change; it never reloads by itself. A page that loads data with `fetch` lists those files in `data-watch` on the script tag (as Do Now does for its CSVs) so that edits to them offer the reload too. `ibdpphy/sw.js` and `/ibdpphy/sw-register.js` are copies of the pair for the `/ibdpphy/` scope; keep the two pairs in step.
 - Update prompts are app-specific: at install the worker hashes each app's precached same-origin files, plus the shared `/assets/` files and `manifest.json`, into a per-app version, and a page prompts only when its own app's version differs. Keep `getAssetGroup` (`sw.js`) and `getAppGroup` (`assets/sw-register.js`) aligned; an app missing from the version map falls back to `BUILD_ID` and prompts on every build.
 - Preserve user-approved activation for normal updates. Keep precache repair limited to missing entries and rate-limited by the landing page.
 
@@ -54,7 +55,7 @@ Network-only apps omit registration and offline requirements. Public support/ref
 - Keep `apple-mobile-web-app-status-bar-style` at `default` in every theme; use `theme-color` for the bar colour. iOS/iPadOS 26+ home-screen apps still blur the top of the screen, so published pages link `/assets/standalone-top.css`, which reserves a flat strip in that mode. Offset anything pinned to the top edge (sticky headers, fixed buttons, fullscreen panes) by `var(--standalone-top)`.
 - Make layouts responsive and controls keyboard- and touch-accessible; aim for 48px touch targets. Use `viewport-fit: cover` where needed.
 - Physical quantities need precise entry or stepping. Pair sliders with numeric readouts or entry fields.
-- Beta and `gcsephy/` pages are exempt from the general visual style; the collision simulation retains its dark camera-based design.
+- Beta, `gcsephy/` and `ibdpphy/` pages are exempt from the general visual style; the collision simulation retains its dark camera-based design.
 - For flex-based Three.js canvases, use `renderer.setSize(w, h, false)` with CSS `height: 0; flex: 1; min-height: 0` to avoid sizing feedback loops.
 
 ## Documentation

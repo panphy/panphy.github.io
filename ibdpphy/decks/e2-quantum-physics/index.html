@@ -1,0 +1,769 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="robots" content="noindex, nofollow">
+  <meta name="description" content="Teaching slides for IB Diploma Programme Physics topic E.2 Quantum physics (higher level only): the photoelectric effect, matter waves and Compton scattering.">
+  <meta name="theme-color" content="#F8F6F1">
+  <script src="/assets/theme.js"></script>
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <link rel="stylesheet" href="/assets/standalone-top.css">
+  <title>E.2 Quantum physics · IB DP Physics</title>
+  <link rel="icon" type="image/png" href="/assets/favicon.png">
+  <link rel="apple-touch-icon" href="/assets/apple-touch-icon.png">
+  <link rel="stylesheet" href="../assets/deck.css">
+  <link rel="stylesheet" href="../assets/deck-notes.css">
+  <link rel="stylesheet" href="/assets/theme-toggle.css">
+  <link rel="stylesheet" href="/assets/fullscreen-button.css">
+  <script src="/assets/theme-toggle.js"></script>
+  <script src="/ibdpphy/sw-register.js" defer></script>
+</head>
+<body>
+  <header class="banner">
+    <a class="banner-logo" href="/" aria-label="PanPhy Labs home"><img src="/assets/panphy.png" alt="PanPhy Labs" width="38" height="38"></a>
+    <a class="banner-title" href="#1">E.2 Quantum physics</a>
+    <div class="banner-actions">
+      <button id="thumbs-toggle" class="icon-button" type="button" aria-controls="thumbs" aria-pressed="true" aria-label="Hide slide thumbnails" title="Show or hide slide thumbnails (T)"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path class="pane" d="M9.5 4.5H6A2.5 2.5 0 0 0 3.5 7v10A2.5 2.5 0 0 0 6 19.5h3.5z"/><rect x="3.5" y="4.5" width="17" height="15" rx="2.5"/><path d="M9.5 4.5v15"/></svg></button>
+      <button id="fullscreen" class="panphy-fullscreen-button" type="button" aria-pressed="false" aria-label="Present fullscreen" title="Present fullscreen (F)"><svg class="panphy-fs-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M4 9V4h5M15 4h5v5M20 15v5h-5M9 20H4v-5"/></svg></button>
+      <button id="theme-button" type="button" data-panphy-theme-toggle aria-label="Toggle light/dark theme" title="Toggle between light and dark themes"></button>
+    </div>
+  </header>
+  <script>window.PanPhyThemeToggle.mount(document.getElementById('theme-button'));</script>
+
+  <nav class="thumbs" id="thumbs" aria-label="Slides"></nav>
+
+  <main class="stage" id="stage">
+    <div class="deck" id="deck">
+
+      <!-- 1 · Title -->
+      <section class="slide title hl" data-title="E.2 Quantum physics">
+        <div class="title-grid">
+          <div>
+            <p class="eyebrow">IB DP Physics · Theme E · Nuclear and quantum physics</p>
+            <h1>Quantum physics<span>.</span></h1>
+            <p class="lead">E.2 · Photoelectric effect, matter waves, Compton scattering<br>Higher level only: there is no standard level content in E.2</p>
+            <div class="chips">
+              <span class="chip hl">Additional HL · 8 hours</span>
+              <a class="chip on" href="../e1-structure-of-the-atom/">E.1 Structure of the atom ↗</a>
+            </div>
+          </div>
+          <div class="fig" data-fig="photo-setup"></div>
+        </div>
+      </section>
+
+      <section class="slide hl" data-title="Lesson map">
+        <p class="eyebrow">The journey</p>
+        <h2>Three experiments<span>.</span></h2>
+        <div class="cards fill" style="grid-template-columns: repeat(3, 1fr);">
+          <div class="card">
+            <div class="fig" data-fig="photo-setup" style="height: 230px;"></div>
+            <p class="eyebrow">Part 01</p>
+            <h3>The photoelectric effect</h3>
+            <p>Light behaves as particles</p>
+          </div>
+          <div class="card">
+            <div class="fig" data-fig="matter-wave" style="height: 230px;"></div>
+            <p class="eyebrow">Part 02</p>
+            <h3>Electron diffraction</h3>
+            <p>Particles behave as waves</p>
+          </div>
+          <div class="card">
+            <div class="fig" data-fig="compton" style="height: 230px;"></div>
+            <p class="eyebrow">Part 03</p>
+            <h3>Compton scattering</h3>
+            <p>Photons carry momentum</p>
+          </div>
+        </div>
+        <div class="idea" style="margin-top: 22px;">Together: light and matter both show <b>wave–particle duality</b>.</div>
+        <div class="slide-foot"><span>E.2 QUANTUM PHYSICS · HL ONLY</span><span data-page></span></div>
+      </section>
+
+      <!-- Part 1 -->
+      <section class="slide section hl" data-title="Part 1: The photoelectric effect">
+        <div class="title-grid">
+          <div>
+            <p class="eyebrow">Part 01</p>
+            <h1>The photoelectric effect<span>.</span></h1>
+            <p class="lead">How can light be used to create an electric current?</p>
+          </div>
+          <div class="fig" data-fig="photon-budget"></div>
+        </div>
+        <div class="slide-foot"><span>E.2 QUANTUM PHYSICS · HL ONLY</span><span data-page></span></div>
+      </section>
+
+      <section class="slide hl" data-title="Photons: a reminder">
+        <p class="eyebrow">From E.1</p>
+        <h2>Photons: a reminder<span>.</span></h2>
+        <div class="split even">
+          <div class="stack">
+            <ul class="points">
+              <li>Light arrives as <b class="t-photon">photons</b></li>
+              <li>Energy of each depends on <b>frequency</b> only</li>
+              <li><b>Intensity</b>: how many arrive each second</li>
+            </ul>
+            <div class="equation small"><span>\(E = hf = \dfrac{hc}{\lambda}\)</span></div>
+          </div>
+          <table class="facts big">
+            <thead><tr><th>Radiation</th><th>Wavelength</th><th>Photon energy</th></tr></thead>
+            <tbody>
+              <tr><td>Red light</td><td class="num">700 nm</td><td class="num">1.77 eV</td></tr>
+              <tr><td>Violet light</td><td class="num">400 nm</td><td class="num">3.10 eV</td></tr>
+              <tr><td>Ultraviolet</td><td class="num">250 nm</td><td class="num">4.96 eV</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="slide-foot"><span>E.2 QUANTUM PHYSICS · HL ONLY</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>The shortcut used all through this topic.</b> The data booklet gives \(hc = 1.24 \times 10^{-6} \,\mathrm{eV} \,\mathrm{m}\). Divide it by the wavelength in metres and the photon energy comes out in eV: \(1.24 \times 10^{-6} \div 400 \times 10^{-9} = 3.10 \,\mathrm{eV}\).</p>
+            <p><b>Two separate things.</b> Frequency sets how much energy <b>each</b> photon has. Intensity sets how <b>many</b> photons arrive. A dim ultraviolet lamp sends few photons, but each one carries more energy than any photon from the brightest red lamp.</p>
+          </div>
+          <div class="rn-side">
+            <p class="tip">Work in eV in this topic. Work functions and electron energies are quoted in eV, so converting to joules is usually wasted effort.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide hl" data-title="The photoelectric effect">
+        <p class="eyebrow">The effect</p>
+        <h2>Light knocks electrons out of a metal<span>.</span></h2>
+        <div class="split wide-fig">
+          <div class="stack">
+            <ul class="points">
+              <li>Shine light on a <b>clean metal</b></li>
+              <li>Electrons may be <b>emitted</b></li>
+              <li>They are called <b class="t-electron">photoelectrons</b></li>
+            </ul>
+            <div class="idea">But only if the <b>frequency</b> is high enough.</div>
+          </div>
+          <div class="panel">
+            <div class="panel-head"><span>PHOTOELECTRIC EMISSION</span><span class="pill">NOT TO SCALE</span></div>
+            <div class="fig" data-fig="photo-setup"></div>
+          </div>
+        </div>
+        <div class="slide-foot"><span>E.2 QUANTUM PHYSICS · HL ONLY</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>A demonstration.</b> Put a clean zinc plate on a negatively charged electroscope. Under a bright filament lamp the leaf stays up. Under a weak ultraviolet lamp it falls at once: electrons are leaving the zinc. Put a sheet of glass in the way, which absorbs ultraviolet, and it stops.</p>
+            <p><b>What needs explaining.</b> The weak lamp works and the bright one does not. Whatever decides whether electrons escape, it is not how much energy arrives each second.</p>
+          </div>
+          <div class="rn-side">
+            <p class="more">A photoelectron is an ordinary electron. The name only says how it was released.</p>
+            <p class="tip">“Clean” matters: an oxide layer on the surface changes the energy needed to escape.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide hl" data-title="What experiments show">
+        <p class="eyebrow">The evidence</p>
+        <h2>Four things the experiments show<span>.</span></h2>
+        <div class="cards fill" style="grid-template-columns: 1fr 1fr; align-content: center;">
+          <div class="card"><p class="eyebrow">01 · Threshold</p><h3>No emission below a certain frequency</h3><p>The <b>threshold frequency</b> \(f_{0}\), different for each metal</p></div>
+          <div class="card step"><p class="eyebrow">02 · No delay</p><h3>Emission starts at once</h3><p>Even when the light is very dim</p></div>
+          <div class="card step"><p class="eyebrow">03 · Intensity</p><h3>Brighter light: more electrons</h3><p>But their maximum kinetic energy does not change</p></div>
+          <div class="card step"><p class="eyebrow">04 · Frequency</p><h3>Higher frequency: faster electrons</h3><p>Maximum kinetic energy rises with \(f\)</p></div>
+        </div>
+        <div class="slide-foot"><span>E.2 QUANTUM PHYSICS · HL ONLY</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>Why “maximum” kinetic energy?</b> The electrons come out with a range of energies. One at the very surface loses the least on the way out and leaves with the most. One from deeper in loses more in collisions. Only the maximum is a clean, repeatable number.</p>
+            <p><b>How these were measured.</b> Light of one frequency falls on a metal plate in a vacuum, and the current of photoelectrons is measured. Changing the frequency, the intensity and the metal one at a time gives the four results.</p>
+          </div>
+          <div class="rn-side">
+            <p class="tip">Learn these four as a set. Almost every extended question on the photoelectric effect asks you to explain two or three of them.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide hl" data-title="Why the wave theory fails">
+        <p class="eyebrow">Classical wave theory against the evidence</p>
+        <h2>Why the wave theory fails<span>.</span></h2>
+        <div class="stack center">
+          <table class="facts compare">
+            <thead><tr><th></th><th>A wave would…</th><th>What happens</th></tr></thead>
+            <tbody>
+              <tr><td>Frequency</td><td>Work at <b>any</b> frequency, if bright enough</td><td>Nothing below \(f_{0}\), however bright</td></tr>
+              <tr class="step"><td>Time</td><td>Need time to build up energy in dim light</td><td>Emission is <b>immediate</b></td></tr>
+              <tr class="step"><td>Intensity</td><td>Give each electron <b>more energy</b> when brighter</td><td>Same maximum energy: only <b>more electrons</b></td></tr>
+              <tr class="step"><td>Energy</td><td>Not depend on frequency</td><td>Maximum energy rises <b>with frequency</b></td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="slide-foot"><span>E.2 QUANTUM PHYSICS · HL ONLY</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>The wave picture.</b> A wave spreads its energy evenly over the whole surface, and a brighter wave delivers energy faster. So any electron should be able to soak up energy until it has enough to leave. A dim wave would just take longer, and a bright one of any colour would do it.</p>
+            <p><b>Putting a number on the delay.</b> For very dim light, spreading the energy over all the atoms of the surface gives each electron so little that it would need minutes or hours to collect enough. The measured delay is less than a billionth of a second.</p>
+          </div>
+          <div class="rn-side">
+            <p class="tip">For each feature, write what the wave theory predicts, what is seen, and that they disagree. Naming the feature alone does not earn the mark.</p>
+            <p class="trap">Saying the wave theory predicts no emission. It predicts emission; it gets the conditions wrong.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide hl" data-title="Einstein’s explanation">
+        <p class="eyebrow">Einstein (1905)</p>
+        <h2>One photon, one electron<span>.</span></h2>
+        <div class="split wide-fig">
+          <div class="stack">
+            <ul class="points small">
+              <li>Light is a stream of <b class="t-photon">photons</b>, each of energy \(hf\)</li>
+              <li>One photon gives <b>all</b> its energy to <b>one</b> electron</li>
+              <li class="step"><b>Work function \(\Phi\)</b>: the least energy needed to leave the metal</li>
+              <li class="step">What is left over is kinetic energy</li>
+            </ul>
+          </div>
+          <div class="panel">
+            <div class="panel-head"><span>WHERE THE PHOTON’S ENERGY GOES</span></div>
+            <div class="fig" data-fig="photon-budget"></div>
+          </div>
+        </div>
+        <div class="slide-foot"><span>E.2 QUANTUM PHYSICS · HL ONLY</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>How this explains all four results.</b></p>
+            <p><b>Threshold:</b> if \(hf\) is less than \(\Phi\), no single photon can free an electron, and photons do not team up. More photons do not help.</p>
+            <p><b>No delay:</b> the energy arrives in one lump, so the electron has enough the moment a photon reaches it.</p>
+            <p><b>Intensity:</b> brighter light is more photons each second, so more electrons each second. Each photon is no bigger, so the maximum energy is the same.</p>
+            <p><b>Frequency:</b> a higher frequency means more energy in each photon and more left over after paying \(\Phi\).</p>
+          </div>
+          <div class="rn-side">
+            <p class="more">Einstein’s Nobel Prize (1921) was for this explanation, not for relativity.</p>
+            <p class="tip">The work function belongs to the metal. It is the <b>minimum</b>: most electrons need more than \(\Phi\) to get out.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide hl" data-title="The photoelectric equation">
+        <p class="eyebrow">Einstein’s equation</p>
+        <h2>The photoelectric equation<span>.</span></h2>
+        <div class="split even">
+          <div class="stack">
+            <div class="equation"><span>\(E_{\mathrm{max}} = hf - \Phi\)</span></div>
+            <ul class="points small">
+              <li>\(E_{\mathrm{max}}\): maximum kinetic energy of the photoelectrons</li>
+              <li>\(\Phi\): work function of the metal</li>
+              <li class="step">At the threshold \(E_{\mathrm{max}} = 0\), so <b>\(hf_{0} = \Phi\)</b></li>
+            </ul>
+          </div>
+          <div class="work step">
+            <span class="say">Threshold for zinc · \(\Phi = 4.30 \,\mathrm{eV}\)</span>
+            <span>\(f_{0} = \dfrac{\Phi}{h} = \dfrac{4.30 \times 1.60 \times 10^{-19}}{6.63 \times 10^{-34}}\)</span>
+            <span class="step">&nbsp; \(= \class{res}{1.04 \times 10^{15} \,\mathrm{Hz}}\)</span>
+            <span class="step">\(\lambda _{0} = c/f_{0} = \class{res}{2.88 \times 10^{-7} \,\mathrm{m}}\)</span>
+            <span class="step">288 nm: <b>ultraviolet</b></span>
+          </div>
+        </div>
+        <div class="slide-foot"><span>E.2 QUANTUM PHYSICS · HL ONLY</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>It is conservation of energy.</b> Energy in (one photon, \(hf\)) = energy to escape \((\Phi )\) + kinetic energy left \((E_{\mathrm{max}})\). Nothing else is going on.</p>
+            <p><b>Why zinc ignores visible light.</b> Its threshold wavelength is 288 nm. Visible light runs from 400 to 700 nm, so every visible photon has too little energy, which is what the electroscope showed. Metals such as caesium and sodium have work functions near 2 eV and do respond to visible light.</p>
+          </div>
+          <div class="rn-side">
+            <p class="trap">Mixing units: \(hf\) worked out in joules with \(\Phi\) left in eV. Put both in the same unit before subtracting.</p>
+            <p class="tip">A negative answer for \(E_{\mathrm{max}}\) means the frequency is below the threshold: no electrons are emitted.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide hl" data-title="Graph of E max against frequency">
+        <p class="eyebrow">Einstein’s equation as a graph</p>
+        <h2>One straight line, three readings<span>.</span></h2>
+        <div class="split">
+          <div class="stack">
+            <ul class="points small">
+              <li>\(E_{\mathrm{max}} = hf - \Phi\) has the form \(y = mx + c\)</li>
+              <li class="step"><b>Gradient</b> = \(h\), the same for every metal</li>
+              <li class="step"><b>Intercept on the \(f\) axis</b> = \(f_{0}\)</li>
+              <li class="step"><b>Intercept on the energy axis</b> = \(-\Phi\)</li>
+            </ul>
+            <div class="idea step">Another metal: a <b>parallel</b> line.</div>
+          </div>
+          <div class="panel">
+            <div class="panel-head"><span>MAXIMUM KINETIC ENERGY AGAINST FREQUENCY</span></div>
+            <div class="fig" data-fig="emax-graph"></div>
+          </div>
+        </div>
+        <div class="slide-foot"><span>E.2 QUANTUM PHYSICS · HL ONLY</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>Reading the graph.</b> Below \(f_{0}\) there are no electrons, so there are no points; the dashed part is the line extended back to find \(-\Phi\). Above \(f_{0}\), each extra hertz adds the same extra energy, \(h\).</p>
+            <p><b>Why every metal gives the same gradient.</b> The gradient is the Planck constant, which belongs to light and not to the metal. Changing the metal changes only \(\Phi\), sliding the line sideways.</p>
+          </div>
+          <div class="rn-side">
+            <p class="more">Robert Millikan spent years measuring this line, expecting to prove Einstein wrong. His results, published in 1916, fitted the equation and gave an accurate value of \(h\).</p>
+            <p class="tip">If the energy axis is in eV, the gradient is \(h\) in eV s: multiply by \(1.60 \times 10^{-19}\) for J s.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide hl" data-title="Measuring E max: stopping potential">
+        <p class="eyebrow">Measuring the maximum kinetic energy</p>
+        <h2>Stopping the fastest electrons<span>.</span></h2>
+        <div class="split wide-fig">
+          <div class="stack">
+            <ul class="points small">
+              <li>Make the collector <b>negative</b></li>
+              <li>Raise the p.d. until the current is <b>zero</b></li>
+              <li>That p.d. is the <b>stopping potential</b> \(V_{\mathrm{s}}\)</li>
+            </ul>
+            <div class="equation small step"><span>\(eV_{\mathrm{s}} = E_{\mathrm{max}}\)</span></div>
+          </div>
+          <div class="panel">
+            <div class="panel-head"><span>PHOTOCELL</span><span class="pill">NOT TO SCALE</span></div>
+            <div class="fig" data-fig="stopping"></div>
+          </div>
+        </div>
+        <div class="slide-foot"><span>E.2 QUANTUM PHYSICS · HL ONLY</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>Why it works.</b> An electron crossing to a collector that is negative by \(V\) loses kinetic energy \(eV\). Slow electrons are turned back first. When even the fastest just fail to arrive, the work done against the field equals their kinetic energy: \(eV_{\mathrm{s}} = E_{\mathrm{max}}\).</p>
+            <p><b>The convenient part.</b> An electron stopped by 0.66 V had 0.66 eV. The stopping potential in volts is the maximum kinetic energy in electronvolts.</p>
+          </div>
+          <div class="rn-side">
+            <p class="tip">Brighter light of the same frequency gives a bigger current but the <b>same</b> stopping potential. Higher frequency gives a bigger stopping potential.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide hl" data-title="Photoelectric effect: worked example">
+        <p class="eyebrow">Worked example</p>
+        <h2>250 nm ultraviolet on zinc<span>.</span></h2>
+        <div class="split even">
+          <div class="work">
+            <span class="say">\(\Phi = 4.30 \,\mathrm{eV}\) · \(hc = 1.24 \times 10^{-6} \,\mathrm{eV} \,\mathrm{m}\)</span>
+            <span>Photon: \(E = \dfrac{hc}{\lambda} = \dfrac{1.24 \times 10^{-6}}{250 \times 10^{-9}} = \class{res}{4.96 \,\mathrm{eV}}\)</span>
+            <span class="step">\(E_{\mathrm{max}} = 4.96 - 4.30 = \class{res}{0.66 \,\mathrm{eV}}\)</span>
+            <span class="step">&nbsp; \(= 0.66 \times 1.60 \times 10^{-19} = \class{res}{1.1 \times 10^{-19} \,\mathrm{J}}\)</span>
+            <span class="step">Stopping potential \(V_{\mathrm{s}} = \class{res}{0.66 \,\mathrm{V}}\)</span>
+          </div>
+          <div class="stack center">
+            <ul class="points">
+              <li class="step">Double the <b>intensity</b>: still 0.66 eV, twice the current</li>
+              <li class="step">Use <b>300 nm</b> instead: 4.13 eV per photon, <b>no emission</b></li>
+            </ul>
+          </div>
+        </div>
+        <div class="slide-foot"><span>E.2 QUANTUM PHYSICS · HL ONLY</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>The order to work in.</b> Photon energy first, then compare it with the work function. If the photon has less, stop: there is no emission and nothing more to calculate. If it has more, the difference is \(E_{\mathrm{max}}\).</p>
+            <p><b>Finding the speed.</b> \(E_{\mathrm{max}} = \tfrac{1}{2}mv^{2}\) with the energy in joules: \(v = \sqrt{2 \times 1.06 \times 10^{-19} \div 9.11 \times 10^{-31}} = 4.8 \times 10^{5} \,\mathrm{m} \,\mathrm{s}^{-1}\).</p>
+          </div>
+          <div class="rn-side">
+            <p class="trap">Doubling the intensity does not double \(E_{\mathrm{max}}\). It doubles the number of photons, so the number of electrons.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide hl" data-title="Quick check: photoelectric effect">
+        <p class="eyebrow">Quick check</p>
+        <h2>The photoelectric effect<span>.</span></h2>
+        <div class="quiz fill">
+          <div class="q"><p><span class="n">01</span>What is the threshold frequency?</p><div class="ans step">Lowest frequency that gives emission</div></div>
+          <div class="q"><p><span class="n">02</span>What is the work function?</p><div class="ans step">Least energy needed to free an electron</div></div>
+          <div class="q"><p><span class="n">03</span>Photons of 5.0 eV, metal with \(\Phi = 2.3 \,\mathrm{eV}\). \(E_{\mathrm{max}}\)?</p><div class="ans step">5.0 − 2.3 = 2.7 eV</div></div>
+          <div class="q"><p><span class="n">04</span>Intensity doubles, same frequency. What changes?</p><div class="ans step">More electrons. Same \(E_{\mathrm{max}}\)</div></div>
+          <div class="q"><p><span class="n">05</span>Why can waves not explain the threshold?</p><div class="ans step">Any frequency should work if bright enough</div></div>
+          <div class="q"><p><span class="n">06</span>What is the gradient of \(E_{\mathrm{max}}\) against \(f\)?</p><div class="ans step">The Planck constant, \(h\)</div></div>
+        </div>
+        <div class="slide-foot"><span class="reveal-hint">PRESS → TO REVEAL EACH ANSWER</span><span data-page></span></div>
+      </section>
+
+      <!-- Part 2 -->
+      <section class="slide section hl" data-title="Part 2: Matter waves">
+        <div class="title-grid">
+          <div>
+            <p class="eyebrow">Part 02</p>
+            <h1>Matter waves<span>.</span></h1>
+            <p class="lead">How can particles diffract?</p>
+          </div>
+          <div class="fig" data-fig="ediff-setup"></div>
+        </div>
+        <div class="slide-foot"><span>E.2 QUANTUM PHYSICS · HL ONLY</span><span data-page></span></div>
+      </section>
+
+      <section class="slide hl" data-title="The de Broglie wavelength">
+        <p class="eyebrow">de Broglie (1924)</p>
+        <h2>If waves can be particles…<span>?</span></h2>
+        <div class="split even">
+          <div class="stack">
+            <ul class="points small">
+              <li>Light, a wave, also behaves as particles</li>
+              <li>de Broglie: particles should also behave as <b>waves</b></li>
+              <li class="step">Every moving particle has a wavelength</li>
+            </ul>
+            <div class="equation step"><span>\(\lambda = \dfrac{h}{p}\)</span></div>
+            <div class="idea step">\(p = mv\), the momentum. <b>More momentum</b> → <b>shorter</b> wavelength.</div>
+          </div>
+          <div class="panel">
+            <div class="panel-head"><span>THE DE BROGLIE WAVELENGTH</span></div>
+            <div class="fig" data-fig="matter-wave"></div>
+          </div>
+        </div>
+        <div class="slide-foot"><span>E.2 QUANTUM PHYSICS · HL ONLY</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>Where the idea came from.</b> A photon of wavelength \(\lambda\) has momentum \(p = h/\lambda\). de Broglie proposed, with no experimental evidence at the time, that the same relation holds for electrons and every other particle, read the other way round: \(\lambda = h/p\).</p>
+            <p><b>From energy to wavelength.</b> For a particle that is not moving close to the speed of light, \(E_{\mathrm{k}} = p^{2}/2m\), so \(p = \sqrt{2mE_{\mathrm{k}}}\). An electron accelerated from rest through a p.d. \(V\) has \(E_{\mathrm{k}} = eV\).</p>
+          </div>
+          <div class="rn-side">
+            <p class="more">This also answers a question left open in E.1. A whole number of electron wavelengths fitting round a Bohr orbit, \(2\pi r = n\lambda\), gives exactly Bohr’s rule \(mvr = nh/2\pi\).</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide hl" data-title="de Broglie wavelength: worked examples">
+        <p class="eyebrow">Worked examples</p>
+        <h2>An electron and a tennis ball<span>.</span></h2>
+        <div class="split even">
+          <div class="work">
+            <span class="say">Electron accelerated through 150 V</span>
+            <span>\(E_{\mathrm{k}} = eV = 1.60 \times 10^{-19} \times 150\)</span>
+            <span>&nbsp; \(= 2.40 \times 10^{-17} \,\mathrm{J}\)</span>
+            <span class="step">\(p = \sqrt{2mE_{\mathrm{k}}}\)</span>
+            <span class="step">&nbsp; \(= \sqrt{2 \times 9.11 \times 10^{-31} \times 2.40 \times 10^{-17}}\)</span>
+            <span class="step">&nbsp; \(= 6.61 \times 10^{-24} \,\mathrm{kg} \,\mathrm{m} \,\mathrm{s}^{-1}\)</span>
+            <span class="step">\(\lambda = h/p = \class{res}{1.0 \times 10^{-10} \,\mathrm{m}}\)</span>
+            <span class="step">About the spacing of atoms in a crystal</span>
+          </div>
+          <div class="work step">
+            <span class="say">Tennis ball · 0.058 kg at \(50 \,\mathrm{m} \,\mathrm{s}^{-1}\)</span>
+            <span>\(p = mv = 0.058 \times 50 = 2.9 \,\mathrm{kg} \,\mathrm{m} \,\mathrm{s}^{-1}\)</span>
+            <span class="step">\(\lambda = h/p = 6.63 \times 10^{-34} \div 2.9\)</span>
+            <span class="step">&nbsp; \(= \class{res}{2.3 \times 10^{-34} \,\mathrm{m}}\)</span>
+            <span class="step">Far smaller than a nucleus</span>
+          </div>
+        </div>
+        <div class="slide-foot"><span>E.2 QUANTUM PHYSICS · HL ONLY</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>Why we never see a ball diffract.</b> Diffraction is noticeable only when the gap is about as wide as the wavelength. An electron’s wavelength matches the gaps between atoms in a crystal, so a crystal diffracts it. The ball’s wavelength is \(10^{19}\) times smaller than a nucleus, and nothing has gaps that small.</p>
+            <p><b>Changing the wavelength.</b> For the electron, \(\lambda = h/\sqrt{2meV}\), so \(\lambda \propto 1/\sqrt{V}\). Four times the accelerating p.d. halves the wavelength.</p>
+          </div>
+          <div class="rn-side">
+            <p class="trap">Using \(\lambda = hc/E\) for an electron. That is for photons only. For a particle with mass use \(\lambda = h/p\).</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide hl" data-title="Electron diffraction">
+        <p class="eyebrow">The test · Davisson &amp; Germer, G. P. Thomson (1927)</p>
+        <h2>Electron diffraction<span>.</span></h2>
+        <div class="stack">
+          <ul class="points small" style="grid-template-columns: 1fr 1fr; gap: 14px 40px;">
+            <li>Fire electrons through thin <b>graphite</b></li>
+            <li>The screen shows <b>rings</b>, not one spot</li>
+            <li class="step">Rings are a <b>diffraction pattern</b></li>
+            <li class="step">Only <b>waves</b> diffract</li>
+          </ul>
+          <div class="panel fill">
+            <div class="panel-head"><span>ELECTRON DIFFRACTION TUBE</span><span class="pill">NOT TO SCALE</span></div>
+            <div class="fig" data-fig="ediff-setup"></div>
+          </div>
+        </div>
+        <div class="slide-foot"><span>E.2 QUANTUM PHYSICS · HL ONLY</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>Why graphite?</b> Its layers of carbon atoms are spaced about \(10^{-10} \,\mathrm{m}\) apart, close to the wavelength of electrons accelerated through a few thousand volts. The regular layers act as a diffraction grating. The tiny crystals in the film point in every direction, so each diffracted beam is spread round into a ring.</p>
+            <p><b>Why the rings are evidence.</b> Particles passing through a thin film would scatter into a blur that is brightest in the middle and fades steadily outwards. Bright rings with dark gaps between them mean that at some angles the electrons reinforce and at others they cancel: interference, which only waves do.</p>
+          </div>
+          <div class="rn-side">
+            <p class="more">The same pattern builds up even when electrons are sent through one at a time. Each lands at one point, like a particle; the points pile up into rings, like a wave.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide hl" data-title="What the rings show">
+        <p class="eyebrow">Evidence → conclusion</p>
+        <h2>Testing \(\lambda = h/p\)<span>.</span></h2>
+        <div class="stack center">
+          <div class="obs">
+            <div class="obs-head"><span>OBSERVATION</span><span>CONCLUSION</span></div>
+            <div class="obs-row"><div>Electrons form <b>rings</b> on the screen</div><span class="to">→</span><div>Electrons <b>diffract</b>: they have a wave nature</div></div>
+            <div class="obs-row step"><div>Higher accelerating p.d. → <b>smaller rings</b></div><span class="to">→</span><div>More momentum → <b>shorter wavelength</b></div></div>
+            <div class="obs-row step"><div>Ring size gives a wavelength</div><span class="to">→</span><div>It <b>equals</b> \(h/p\)</div></div>
+          </div>
+          <div class="idea step">Diffraction of particles is the evidence for the <b>wave nature of matter</b>.</div>
+        </div>
+        <div class="slide-foot"><span>E.2 QUANTUM PHYSICS · HL ONLY</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>Why do the rings shrink?</b> Raising the p.d. gives each electron more kinetic energy and so more momentum. By \(\lambda = h/p\) the wavelength falls. A shorter wavelength is diffracted through a smaller angle, as it is for light at a grating, so the rings close in.</p>
+            <p><b>A prediction that could have failed.</b> de Broglie’s equation says exactly what the wavelength should be for a given p.d. The wavelength measured from the rings, using the known spacing of the atoms, agreed.</p>
+          </div>
+          <div class="rn-side">
+            <p class="tip">Asked for evidence that matter has wave properties: name the experiment, say what is seen, and say that diffraction is something only waves do.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide hl" data-title="Where the minimum falls">
+        <p class="eyebrow">Diffraction of particles</p>
+        <h2>Where the first minimum falls<span>.</span></h2>
+        <div class="split">
+          <div class="stack">
+            <ul class="points small">
+              <li>Particles scattered by an obstacle of width \(D\)</li>
+              <li>Counted at each angle \(\theta\)</li>
+              <li class="step">Fewest arrive at the <b>first minimum</b></li>
+            </ul>
+            <div class="equation small step"><span>\(\sin \theta \approx \dfrac{\lambda}{D}\)<span class="where">with \(\lambda = h/p\)</span></span></div>
+            <div class="idea step">Measure \(\theta\) → find \(D\). This is how <b>nuclei</b> are measured.</div>
+          </div>
+          <div class="panel">
+            <div class="panel-head"><span>SCATTERED PARTICLES AGAINST ANGLE</span><span class="pill">SKETCH</span></div>
+            <div class="fig" data-fig="diff-min"></div>
+          </div>
+        </div>
+        <div class="slide-foot"><span>E.2 QUANTUM PHYSICS · HL ONLY</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>The same rule as for light.</b> In C.3, light of wavelength \(\lambda\) passing a slit of width \(b\) has its first minimum at \(\theta = \lambda /b\). Particles do the same with their de Broglie wavelength, and an obstacle diffracts like a gap of the same width.</p>
+            <p><b>Worked example.</b> Electrons with a de Broglie wavelength of 2.9 fm are scattered by carbon-12 nuclei, about 5.5 fm across. \(\sin \theta \approx 2.9 \div 5.5 = 0.53\), so the first minimum is near 32°.</p>
+            <p><b>Why very fast electrons?</b> To give a clear minimum the wavelength must be about the size of the nucleus, a few femtometres. That needs a very large momentum, so the electrons come from an accelerator.</p>
+          </div>
+          <div class="rn-side">
+            <p class="tip">Shorter wavelength (more momentum) or a bigger obstacle moves the minimum to a <b>smaller</b> angle.</p>
+            <p class="more">Electrons are used because they do not feel the strong nuclear force, so the pattern shows the size of the nucleus cleanly, unlike the alpha particles in E.1.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide hl" data-title="Wave–particle duality">
+        <p class="eyebrow">Putting it together</p>
+        <h2>Wave–particle duality<span>.</span></h2>
+        <div class="stack center">
+          <table class="facts big">
+            <thead><tr><th></th><th>Behaves as a wave</th><th>Behaves as a particle</th></tr></thead>
+            <tbody>
+              <tr><td>Light</td><td>Diffraction, interference</td><td>Photoelectric effect, Compton scattering</td></tr>
+              <tr class="step"><td>Electrons</td><td>Diffraction by crystals</td><td>Each arrives at one point, with charge and mass</td></tr>
+            </tbody>
+          </table>
+          <div class="idea step">Neither picture alone is complete. <b>Which one shows up depends on the experiment.</b></div>
+        </div>
+        <div class="slide-foot"><span>E.2 QUANTUM PHYSICS · HL ONLY</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>What duality does and does not say.</b> It does not say an electron is sometimes a little ball and sometimes a ripple. It says that “wave” and “particle” are both pictures taken from everyday objects, and that something as small as an electron or a photon fits neither one completely.</p>
+            <p><b>A rule of thumb.</b> How it <b>travels</b> (spreading through gaps, forming patterns) is described by a wave. How it <b>arrives</b> or exchanges energy (in one place, in one lump) is described by a particle.</p>
+          </div>
+          <div class="rn-side">
+            <p class="tip">The two equations that tie the pictures together: \(E = hf\) and \(p = h/\lambda\). In each, a particle quantity on the left equals \(h\) times a wave quantity.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide hl" data-title="Quick check: matter waves">
+        <p class="eyebrow">Quick check</p>
+        <h2>Matter waves<span>.</span></h2>
+        <div class="quiz fill">
+          <div class="q"><p><span class="n">01</span>State the de Broglie relation.</p><div class="ans step">\(\lambda = h/p\)</div></div>
+          <div class="q"><p><span class="n">02</span>An electron’s speed doubles. Its wavelength?</p><div class="ans step">Halves</div></div>
+          <div class="q"><p><span class="n">03</span>What is the evidence that electrons have a wave nature?</p><div class="ans step">They diffract: rings from a thin crystal</div></div>
+          <div class="q"><p><span class="n">04</span>The accelerating p.d. is raised. What happens to the rings?</p><div class="ans step">They get smaller: shorter wavelength</div></div>
+          <div class="q"><p><span class="n">05</span>Why does a tennis ball not diffract?</p><div class="ans step">Its wavelength is far smaller than any gap</div></div>
+          <div class="q"><p><span class="n">06</span>Where is the first minimum for an obstacle of width \(D\)?</p><div class="ans step">\(\sin \theta \approx \lambda /D\)</div></div>
+        </div>
+        <div class="slide-foot"><span class="reveal-hint">PRESS → TO REVEAL EACH ANSWER</span><span data-page></span></div>
+      </section>
+
+      <!-- Part 3 -->
+      <section class="slide section hl" data-title="Part 3: Compton scattering">
+        <div class="title-grid">
+          <div>
+            <p class="eyebrow">Part 03</p>
+            <h1>Compton scattering<span>.</span></h1>
+            <p class="lead">A photon collides with an electron</p>
+          </div>
+          <div class="fig" data-fig="compton"></div>
+        </div>
+        <div class="slide-foot"><span>E.2 QUANTUM PHYSICS · HL ONLY</span><span data-page></span></div>
+      </section>
+
+      <section class="slide hl" data-title="Compton scattering">
+        <p class="eyebrow">Compton (1923)</p>
+        <h2>X-rays that change wavelength<span>.</span></h2>
+        <div class="split wide-fig">
+          <div class="stack">
+            <ul class="points small">
+              <li>X-rays are scattered by <b>electrons</b></li>
+              <li>The scattered X-rays have a <b>longer wavelength</b></li>
+              <li class="step">The bigger the angle, the bigger the change</li>
+              <li class="step">The electron <b>recoils</b></li>
+            </ul>
+            <div class="idea step">A <b>collision</b> between two particles.</div>
+          </div>
+          <div class="panel">
+            <div class="panel-head"><span>ONE PHOTON, ONE ELECTRON</span><span class="pill">NOT TO SCALE</span></div>
+            <div class="fig" data-fig="compton"></div>
+            <div class="legend"><span><i class="photon">~</i> Photon</span><span><i class="electron">−</i> Electron</span></div>
+          </div>
+        </div>
+        <div class="slide-foot"><span>E.2 QUANTUM PHYSICS · HL ONLY</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>Why a longer wavelength?</b> The photon gives some of its energy to the electron. A photon cannot slow down: it always travels at \(c\). The only way it can have less energy is a lower frequency, \(E = hf\), and so a longer wavelength.</p>
+            <p><b>What the wave theory expected.</b> A wave shaking an electron makes it oscillate at the wave’s own frequency, and the electron then radiates at that same frequency. The scattered X-rays should have had exactly the wavelength of those going in.</p>
+          </div>
+          <div class="rn-side">
+            <p class="more">Compton used X-rays on graphite. The outer electrons of carbon are held so weakly compared with an X-ray photon’s energy that they behave as free electrons at rest.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide hl" data-title="The Compton shift">
+        <p class="eyebrow">The Compton formula</p>
+        <h2>The shift in wavelength<span>.</span></h2>
+        <div class="split even">
+          <div class="stack">
+            <div class="equation small"><span>\(\lambda _{\mathrm{f}} - \lambda _{\mathrm{i}} = \dfrac{h}{m_{\mathrm{e}}c}(1 - \cos \theta )\)</span></div>
+            <ul class="points small">
+              <li>\(\theta\): angle the photon is turned through</li>
+              <li class="step">\(h/m_{\mathrm{e}}c = \class{res}{2.43 \times 10^{-12} \,\mathrm{m}}\)</li>
+              <li class="step">The shift depends <b>only on the angle</b></li>
+            </ul>
+          </div>
+          <table class="facts big step">
+            <thead><tr><th class="nocase">Angle \(\theta\)</th><th class="nocase">\(1 - \cos \theta\)</th><th class="nocase">Shift \(\Delta \lambda\)</th></tr></thead>
+            <tbody>
+              <tr><td class="num">0°</td><td class="num">0</td><td class="num">0</td></tr>
+              <tr><td class="num">90°</td><td class="num">1</td><td class="num">2.43 pm</td></tr>
+              <tr><td class="num">180°</td><td class="num">2</td><td class="num">4.85 pm</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="slide-foot"><span>E.2 QUANTUM PHYSICS · HL ONLY</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>Reading the formula.</b> A photon that carries straight on \((\theta = 0)\) has not interacted, so nothing changes. One that bounces straight back \((\theta = 180^{\circ})\) has hit the electron hardest and gives it the most energy, so it has the largest shift.</p>
+            <p><b>What is not in the formula.</b> Neither the starting wavelength nor the material appears. Every photon scattered through 90° by a free electron gains 2.43 pm, whatever it started with.</p>
+            <p><b>Why X-rays are needed.</b> The shift is at most 4.85 pm. For X-rays of about 70 pm that is a few percent and can be measured. For visible light of 500 000 pm it is far too small to notice.</p>
+          </div>
+          <div class="rn-side">
+            <p class="tip">The formula is in the data booklet and its derivation is not required. \(1 \,\mathrm{pm} = 10^{-12} \,\mathrm{m}\).</p>
+            <p class="trap">Calculator in radians. Check with cos 90° = 0.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide hl" data-title="Compton scattering: worked example">
+        <p class="eyebrow">Worked example</p>
+        <h2>An X-ray scattered through 60°<span>.</span></h2>
+        <div class="split even">
+          <div class="work">
+            <span class="say">Incoming wavelength 71.0 pm</span>
+            <span>\(\Delta \lambda = 2.43 \times (1 - \cos 60^{\circ}) = 2.43 \times 0.500\)</span>
+            <span class="step">&nbsp; \(= \class{res}{1.2 \,\mathrm{pm}}\)</span>
+            <span class="step">\(\lambda _{\mathrm{f}} = 71.0 + 1.2 = \class{res}{72.2 \,\mathrm{pm}}\)</span>
+            <span class="step">Photon before: \(1.24 \times 10^{-6} \div 71.0 \times 10^{-12} = 17.46 \,\mathrm{keV}\)</span>
+            <span class="step">Photon after: \(1.24 \times 10^{-6} \div 72.2 \times 10^{-12} = 17.17 \,\mathrm{keV}\)</span>
+          </div>
+          <div class="stack center">
+            <ul class="points">
+              <li class="step">The photon has lost about <b>0.29 keV</b></li>
+              <li class="step">The electron has <b>gained</b> it as kinetic energy</li>
+            </ul>
+          </div>
+        </div>
+        <div class="slide-foot"><span>E.2 QUANTUM PHYSICS · HL ONLY</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>Two steps, never one.</b> The formula gives the <b>change</b> in wavelength. Add it to the starting wavelength to get the final one. The energy the electron receives is then the difference between the two photon energies.</p>
+            <p><b>Keep the extra figures.</b> The two photon energies differ by under 2%, so rounding them early would wipe out the answer. Carry four significant figures until the subtraction is done.</p>
+          </div>
+          <div class="rn-side">
+            <p class="trap">Giving 1.2 pm as the final wavelength. It is the shift.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide hl" data-title="Photon and electron as colliding balls">
+        <p class="eyebrow">Nature of science</p>
+        <h2>Like two balls colliding<span>?</span></h2>
+        <div class="stack center">
+          <div class="obs">
+            <div class="obs-head"><span>THE SAME</span><span>DIFFERENT</span></div>
+            <div class="obs-row"><div><b>Energy</b> is conserved</div><span class="to">≠</span><div>The photon has <b>no mass</b></div></div>
+            <div class="obs-row step"><div><b>Momentum</b> is conserved</div><span class="to">≠</span><div>It never slows: always at \(c\)</div></div>
+            <div class="obs-row step"><div>The target recoils, the projectile is deflected</div><span class="to">≠</span><div>Losing energy means a <b>longer wavelength</b></div></div>
+          </div>
+          <div class="idea step">A photon has momentum, \(p = h/\lambda\). <b>Only a particle model predicts the shift.</b></div>
+        </div>
+        <div class="slide-foot"><span>E.2 QUANTUM PHYSICS · HL ONLY</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>Why is this stronger evidence than the photoelectric effect?</b> The photoelectric effect shows that light delivers energy in lumps. Compton scattering shows more: the photon also has <b>momentum</b>, and energy and momentum are both conserved in a collision with a single electron, exactly as for two particles. The measured shift at every angle matches that calculation.</p>
+            <p><b>And it is seen directly.</b> Here the photon is still there afterwards, travelling in a new direction with a new wavelength that can be measured. In the photoelectric effect the photon disappears.</p>
+          </div>
+          <div class="rn-side">
+            <p class="tip">For a photon, \(p = h/\lambda = E/c\). It is the same relation as de Broglie’s, now applied to light.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide hl" data-title="Three experiments, one picture">
+        <p class="eyebrow">Summary</p>
+        <h2>Three experiments, one picture<span>.</span></h2>
+        <div class="cards fill" style="grid-template-columns: repeat(3, 1fr); align-content: center;">
+          <div class="card"><p class="eyebrow">Photoelectric effect</p><h3>Light as particles</h3><p>Threshold frequency, no delay<br>\(E_{\mathrm{max}} = hf - \Phi\)</p></div>
+          <div class="card step"><p class="eyebrow">Electron diffraction</p><h3>Matter as waves</h3><p>Rings from a crystal<br>\(\lambda = h/p\)</p></div>
+          <div class="card step"><p class="eyebrow">Compton scattering</p><h3>Photons have momentum</h3><p>Wavelength shift with angle<br>\(\Delta \lambda = (h/m_{\mathrm{e}}c)(1 - \cos \theta )\)</p></div>
+        </div>
+        <div class="idea step" style="margin-top: 22px;">Light and matter both show <b>wave–particle duality</b>.</div>
+        <div class="slide-foot"><span>E.2 QUANTUM PHYSICS · HL ONLY</span><span data-page></span></div>
+      </section>
+
+      <section class="slide hl" data-title="Quick check: Compton scattering">
+        <p class="eyebrow">Quick check</p>
+        <h2>Compton scattering<span>.</span></h2>
+        <div class="quiz fill">
+          <div class="q"><p><span class="n">01</span>What happens to the wavelength of a scattered photon?</p><div class="ans step">It increases</div></div>
+          <div class="q"><p><span class="n">02</span>Why does it increase?</p><div class="ans step">The photon gives energy to the electron: lower \(f\)</div></div>
+          <div class="q"><p><span class="n">03</span>At which angle is the shift greatest?</p><div class="ans step">180°: 4.85 pm</div></div>
+          <div class="q"><p><span class="n">04</span>Which two quantities are conserved?</p><div class="ans step">Energy and momentum</div></div>
+          <div class="q"><p><span class="n">05</span>Shift for scattering through 90°?</p><div class="ans step">2.43 pm</div></div>
+          <div class="q"><p><span class="n">06</span>What would the wave theory predict?</p><div class="ans step">No change in wavelength</div></div>
+        </div>
+        <div class="slide-foot"><span class="reveal-hint">PRESS → TO REVEAL EACH ANSWER</span><span data-page></span></div>
+      </section>
+
+      <section class="slide hl" data-title="Key words">
+        <p class="eyebrow">Summary</p>
+        <h2>Key words<span>.</span></h2>
+        <div class="terms fill" style="grid-template-columns: repeat(3, 1fr);">
+          <div class="term"><b>Photoelectric effect</b><span>Light frees electrons from a metal</span></div>
+          <div class="term"><b>Threshold frequency</b><span>\(f_{0}\): lowest that gives emission</span><span>\(hf_{0} = \Phi\)</span></div>
+          <div class="term"><b>Work function</b><span>\(\Phi\): least energy to leave the metal</span></div>
+          <div class="term"><b>Photoelectric equation</b><span>\(E_{\mathrm{max}} = hf - \Phi\)</span></div>
+          <div class="term"><b>Stopping potential</b><span>\(eV_{\mathrm{s}} = E_{\mathrm{max}}\)</span></div>
+          <div class="term"><b>de Broglie wavelength</b><span>\(\lambda = h/p\)</span></div>
+          <div class="term"><b>Electron diffraction</b><span>Evidence that matter has a wave nature</span></div>
+          <div class="term"><b>Compton scattering</b><span>Photon hits electron</span><span>Longer wavelength</span></div>
+          <div class="term"><b>Wave–particle duality</b><span>Light and matter show both behaviours</span></div>
+        </div>
+        <div class="slide-foot"><span>E.2 QUANTUM PHYSICS · HL ONLY</span><span data-page></span></div>
+      </section>
+
+    </div>
+  </main>
+
+  <nav class="controls" aria-label="Slide controls">
+    <button type="button" id="prev" aria-label="Previous slide"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg></button>
+    <span class="counter" id="counter" aria-live="polite"></span>
+    <button type="button" id="next" aria-label="Next slide"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 5l7 7-7 7"/></svg></button>
+  </nav>
+  <div class="progress" aria-hidden="true"><span id="progress-bar"></span></div>
+
+  <script src="../assets/figures.js"></script>
+  <script src="../assets/deck-math.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
+  <script src="../assets/deck-notes.js"></script>
+  <script src="../assets/deck.js"></script>
+</body>
+</html>

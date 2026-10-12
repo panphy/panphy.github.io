@@ -1,0 +1,1002 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="robots" content="noindex, nofollow">
+  <meta name="description" content="Teaching slides for IB Diploma Programme Physics topic E.1 Structure of the atom: the discovery of the nucleus, energy levels and spectra, with the additional higher level content marked.">
+  <meta name="theme-color" content="#F8F6F1">
+  <script src="/assets/theme.js"></script>
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <link rel="stylesheet" href="/assets/standalone-top.css">
+  <title>E.1 Structure of the atom · IB DP Physics</title>
+  <link rel="icon" type="image/png" href="/assets/favicon.png">
+  <link rel="apple-touch-icon" href="/assets/apple-touch-icon.png">
+  <link rel="stylesheet" href="../assets/deck.css">
+  <link rel="stylesheet" href="../assets/deck-notes.css">
+  <link rel="stylesheet" href="/assets/theme-toggle.css">
+  <link rel="stylesheet" href="/assets/fullscreen-button.css">
+  <script src="/assets/theme-toggle.js"></script>
+  <script src="/ibdpphy/sw-register.js" defer></script>
+</head>
+<body>
+  <header class="banner">
+    <a class="banner-logo" href="/" aria-label="PanPhy Labs home"><img src="/assets/panphy.png" alt="PanPhy Labs" width="38" height="38"></a>
+    <a class="banner-title" href="#1">E.1 Structure of the atom</a>
+    <div class="banner-actions">
+      <button id="thumbs-toggle" class="icon-button" type="button" aria-controls="thumbs" aria-pressed="true" aria-label="Hide slide thumbnails" title="Show or hide slide thumbnails (T)"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path class="pane" d="M9.5 4.5H6A2.5 2.5 0 0 0 3.5 7v10A2.5 2.5 0 0 0 6 19.5h3.5z"/><rect x="3.5" y="4.5" width="17" height="15" rx="2.5"/><path d="M9.5 4.5v15"/></svg></button>
+      <button id="fullscreen" class="panphy-fullscreen-button" type="button" aria-pressed="false" aria-label="Present fullscreen" title="Present fullscreen (F)"><svg class="panphy-fs-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M4 9V4h5M15 4h5v5M20 15v5h-5M9 20H4v-5"/></svg></button>
+      <button id="theme-button" type="button" data-panphy-theme-toggle aria-label="Toggle light/dark theme" title="Toggle between light and dark themes"></button>
+    </div>
+  </header>
+  <script>window.PanPhyThemeToggle.mount(document.getElementById('theme-button'));</script>
+
+  <nav class="thumbs" id="thumbs" aria-label="Slides"></nav>
+
+  <main class="stage" id="stage">
+    <div class="deck" id="deck">
+
+      <!-- 1 · Title -->
+      <section class="slide title" data-title="E.1 Structure of the atom">
+        <div class="title-grid">
+          <div>
+            <p class="eyebrow">IB DP Physics · Theme E · Nuclear and quantum physics</p>
+            <h1>Structure of the atom<span>.</span></h1>
+            <p class="lead">E.1 · The nucleus, energy levels, spectra<br>Standard level and higher level</p>
+            <div class="chips">
+              <span class="chip">SL + HL · 6 hours</span>
+              <span class="chip hl">Additional HL · 3 hours</span>
+              <a class="chip on" href="/simulations/atomic_models.html" target="_blank" rel="noopener">Atomic Models sim ↗</a>
+            </div>
+          </div>
+          <div class="fig" data-fig="hero"></div>
+        </div>
+      </section>
+
+      <!-- 2 · Roadmap -->
+      <section class="slide" data-title="Lesson map">
+        <p class="eyebrow">The journey</p>
+        <h2>Three parts<span>.</span></h2>
+        <div class="cards fill" style="grid-template-columns: repeat(3, 1fr);">
+          <div class="card">
+            <div class="fig" data-fig="mini-nuclear" style="height: 200px;"></div>
+            <p class="eyebrow">Part 01 · SL + HL</p>
+            <h3>How was the nucleus discovered?</h3>
+            <p>Geiger–Marsden–Rutherford, nuclear notation</p>
+          </div>
+          <div class="card">
+            <div class="fig" data-fig="mini-bohr" style="height: 200px;"></div>
+            <p class="eyebrow">Part 02 · SL + HL</p>
+            <h3>What do spectra tell us?</h3>
+            <p>Energy levels, photons, \(E = hf\)</p>
+          </div>
+          <div class="card hl">
+            <div class="fig" data-fig="mini-neutron" style="height: 200px;"></div>
+            <p class="eyebrow">Part 03 · HL only</p>
+            <h3>How big is a nucleus? Why these levels?</h3>
+            <p>Nuclear radius, closest approach, Bohr’s hydrogen</p>
+          </div>
+        </div>
+        <div class="idea" style="margin-top: 22px;">Slides with a crimson edge and an <span class="hl-tag">HL only</span> flag are additional higher level. Every other slide is for SL and HL.</div>
+        <div class="slide-foot"><span>E.1 STRUCTURE OF THE ATOM · SL + HL</span><span data-page></span></div>
+      </section>
+
+      <!-- Part 1 -->
+      <section class="slide section" data-title="Part 1: Discovering the nucleus">
+        <div class="title-grid">
+          <div>
+            <p class="eyebrow">Part 01 · SL + HL</p>
+            <h1>Discovering the nucleus<span>.</span></h1>
+            <p class="lead">New evidence → new model</p>
+          </div>
+          <div class="fig" data-fig="rutherford"></div>
+        </div>
+        <div class="slide-foot"><span>E.1 STRUCTURE OF THE ATOM · SL + HL</span><span data-page></span></div>
+      </section>
+
+      <section class="slide" data-title="Timeline of atomic models">
+        <p class="eyebrow">Changing models</p>
+        <h2>A model that kept changing<span>.</span></h2>
+        <div class="stack center">
+          <div class="timeline">
+            <div class="tl"><div class="fig" data-fig="mini-solid"></div><span class="year">Before 1897</span><h3>Solid spheres</h3><p>Tiny spheres that cannot be divided</p></div>
+            <div class="tl"><div class="fig" data-fig="mini-plum"></div><span class="year">1904</span><h3>Plum pudding</h3><p>After the electron was discovered</p></div>
+            <div class="tl"><div class="fig" data-fig="mini-nuclear"></div><span class="year">1911</span><h3>Nuclear model</h3><p>From alpha scattering</p></div>
+            <div class="tl"><div class="fig" data-fig="mini-bohr"></div><span class="year">1913</span><h3>Bohr model</h3><p>Electrons in energy levels</p></div>
+          </div>
+          <div class="idea">The <a href="/simulations/atomic_models.html" target="_blank" rel="noopener">Atomic Models sim ↗</a> adds the next step: the 1926 <b>electron cloud</b>, the model used today.</div>
+        </div>
+        <div class="slide-foot"><span>E.1 STRUCTURE OF THE ATOM · SL + HL</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>The same thing happens at every step.</b> A model explains the evidence of its day. An experiment gives a result it cannot explain. A new model is built that explains both the old evidence and the new.</p>
+            <p><b>Each model keeps what still works.</b> The nuclear model kept the electrons and moved the positive charge to the centre. Bohr kept the nucleus and organised the electrons. The earlier scientists were not foolish; each model was the best explanation of what was then known.</p>
+            <p><b>Old models stay useful.</b> A chemist counting electrons in shells is using Bohr’s picture. An engineer treating a gas as tiny hard spheres is using the oldest one. A model is kept wherever it still gives the right answer.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide history" data-title="Story: Thomson finds the electron">
+        <p class="eyebrow">The story · Cambridge, 1897</p>
+        <p class="not-examined">Background story · not assessed</p>
+        <h2>Thomson finds the electron<span>.</span></h2>
+        <div class="story" style="--photo-h: 330px;">
+          <div class="story-photos">
+            <figure><img src="images/thomson.jpg" width="500" height="688" alt="Portrait of J. J. Thomson, an older man with glasses and a moustache"><figcaption><b>J. J. Thomson</b></figcaption></figure>
+            <figure><img src="images/thomson-cathode-ray-tube.jpg" width="960" height="639" alt="A long glass tube with a bulb at each end and wire coils around the middle"><figcaption>The <b>cathode ray tube</b> he used in 1897, now in the Science Museum, London</figcaption></figure>
+          </div>
+          <div class="stack">
+            <ul class="points">
+              <li>Glowing <b>rays</b> crossed the tube. Nobody knew what they were</li>
+              <li>Magnets and electric fields <b>bent</b> the rays: they were <b>negative particles</b></li>
+              <li>Every metal he tried gave the <b>same</b> particles</li>
+              <li>So they must be inside <b>every atom</b>: the <b class="t-electron">electron</b></li>
+            </ul>
+            <div class="idea">Atoms <b>can be divided</b>. The solid sphere model had to go.</div>
+          </div>
+        </div>
+        <p class="credits">Portrait: <a href="https://commons.wikimedia.org/wiki/File:J.J._Thomson_LCCN2014715407.jpg" target="_blank" rel="noopener">Bain News Service, Library of Congress</a>, public domain. Tube: <a href="https://commons.wikimedia.org/wiki/File:J_J_Thomsons_cathode_ray_tube_with_magnet_coils,_1897._(9663807404).jpg" target="_blank" rel="noopener">Science Museum London</a>, <a href="https://creativecommons.org/licenses/by-sa/2.0/" target="_blank" rel="noopener">CC BY-SA 2.0</a>.</p>
+        <div class="slide-foot"><span>E.1 STRUCTURE OF THE ATOM · SL + HL</span><span data-page></span></div>
+      </section>
+
+      <section class="slide" data-title="Plum pudding model">
+        <p class="eyebrow">Thomson (1904)</p>
+        <h2>The plum pudding model<span>.</span></h2>
+        <div class="split">
+          <div class="stack">
+            <ul class="points">
+              <li>Electron discovered → atoms <b>can be divided</b></li>
+              <li>A <b>ball of positive charge</b></li>
+              <li><b>Negative electrons</b> embedded in it</li>
+              <li><b>No nucleus</b></li>
+            </ul>
+            <a class="try" href="/simulations/atomic_models.html" target="_blank" rel="noopener">Try it: Atomic Models sim ↗</a>
+          </div>
+          <div class="panel">
+            <div class="panel-head"><span>PLUM PUDDING MODEL</span><span class="pill">NOT TO SCALE</span></div>
+            <div class="fig" data-fig="plum"></div>
+            <div class="legend"><span><i class="electron">−</i> Electron</span><span><i class="positive">+</i> Positive charge (spread)</span></div>
+          </div>
+        </div>
+        <div class="slide-foot"><span>E.1 STRUCTURE OF THE ATOM · SL + HL</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>Why did Thomson suggest this?</b> He had shown that atoms contain negative electrons. Atoms are neutral, so there had to be positive charge to balance them. Nobody knew where it was, so he took the simplest idea: spread through the whole atom.</p>
+            <p><b>What it predicted.</b> With charge and mass spread thinly, nothing is concentrated enough to push a fast particle off course. The next experiment tested exactly that.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide history" data-title="Story: the gold foil team">
+        <p class="eyebrow">The story · Manchester, 1909</p>
+        <p class="not-examined">Background story · not assessed</p>
+        <h2>A professor, his assistant and a student<span>.</span></h2>
+        <div class="story band" style="--photo-h: 270px;">
+          <div class="story-photos">
+            <figure><img src="images/geiger-rutherford.jpg" width="1400" height="872" alt="Two men in dark suits sitting either side of a bench of laboratory apparatus"><figcaption><b>Hans Geiger</b> (left) and <b>Ernest Rutherford</b> in the laboratory</figcaption></figure>
+            <figure><img src="images/marsden.jpg" width="500" height="666" alt="Portrait of Ernest Marsden, a man with glasses in a suit"><figcaption><b>Ernest Marsden</b>, pictured in 1921</figcaption></figure>
+            <figure><img src="images/geiger-marsden-1913-diagram.png" width="421" height="444" alt="Line drawing of a round metal chamber in cross-section, with parts labelled by letters"><figcaption>Their apparatus, from the 1913 paper: source <b>R</b>, foil <b>F</b>, screen <b>S</b>, microscope <b>M</b></figcaption></figure>
+          </div>
+          <ul class="points">
+            <li>Each alpha particle made a tiny <b>flash</b> on a screen. Geiger counted flashes through a microscope, for hours in a <b>darkened</b> lab</li>
+            <li>Rutherford asked Marsden, a <b>20-year-old student</b>, to look for alpha particles bouncing <b>back</b>. Nobody expected any</li>
+            <li>In an early test with a platinum plate, about <b>1 in 8000</b> bounced back. The plum pudding model could not explain it</li>
+          </ul>
+        </div>
+        <p class="credits">Photos: <a href="https://commons.wikimedia.org/wiki/File:Geiger-Rutherford.jpg" target="_blank" rel="noopener">unknown photographer</a> and <a href="https://commons.wikimedia.org/wiki/File:Ernest_Marsden_1921.jpg" target="_blank" rel="noopener">S P Andrew Ltd</a>, public domain. Diagram: <a href="https://commons.wikimedia.org/wiki/File:Geiger-Marsden_diagram.gif" target="_blank" rel="noopener">Geiger and Marsden, 1913</a>, public domain.</p>
+        <div class="slide-foot"><span>E.1 STRUCTURE OF THE ATOM · SL + HL</span><span data-page></span></div>
+      </section>
+
+      <section class="slide" data-title="Geiger–Marsden–Rutherford experiment">
+        <p class="eyebrow">Geiger, Marsden &amp; Rutherford (1909–1911)</p>
+        <h2>The Geiger–Marsden–Rutherford experiment<span>.</span></h2>
+        <div class="split wide-fig">
+          <ul class="points">
+            <li>Fire <b class="t-alpha">alpha particles</b> (+) at thin <b>gold foil</b></li>
+            <li>Count them at <b>all angles</b></li>
+            <li>Plum pudding predicts: all pass through</li>
+            <li>Only <b>tiny</b> deflections expected</li>
+          </ul>
+          <div class="panel">
+            <div class="panel-head"><span>ALPHA SCATTERING</span><span class="pill">NOT TO SCALE</span></div>
+            <div class="fig" data-fig="scatter"></div>
+          </div>
+        </div>
+        <div class="slide-foot"><span>E.1 STRUCTURE OF THE ATOM · SL + HL</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>Why alpha particles?</b> They are positive, fast and heavy. Positive charge inside the atom would push on them, and how far they were pushed would show how that charge is arranged.</p>
+            <p><b>Why gold?</b> It can be beaten into an extremely thin foil, so an alpha particle is unlikely to be pushed off course more than once.</p>
+            <p><b>Why count at every angle, even back towards the source?</b> Nobody expected anything there. Checking anyway led to the discovery.</p>
+            <p><b>Why in a vacuum?</b> Alpha particles are stopped by a few centimetres of air, so the chamber was pumped out.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide" data-title="Alpha scattering results">
+        <p class="eyebrow">Evidence → conclusion</p>
+        <h2>What they saw. What it means<span>.</span></h2>
+        <div class="split">
+          <div class="obs">
+            <div class="obs-head"><span>OBSERVATION</span><span>CONCLUSION</span></div>
+            <div class="obs-row"><div>Most went <b>straight through</b></div><span class="to">→</span><div>Atom is mostly <b>empty space</b></div></div>
+            <div class="obs-row step"><div>Some were <b>deflected</b></div><span class="to">→</span><div>Centre is <b>positively charged</b></div></div>
+            <div class="obs-row step"><div>A very few <b>bounced back</b></div><span class="to">→</span><div><b>Mass concentrated</b> in a tiny centre</div></div>
+          </div>
+          <div class="panel">
+            <div class="panel-head"><span>CLOSE-UP</span><span class="pill">NOT TO SCALE</span></div>
+            <div class="fig" data-fig="scatter-zoom" data-animate></div>
+          </div>
+        </div>
+        <div class="slide-foot"><span>E.1 STRUCTURE OF THE ATOM · SL + HL</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>Why do the few that bounced back tell us the most?</b> To turn a fast, heavy alpha particle right round takes a large force from something much more massive than it. And because it happened so rarely, that something must be a very small target, seldom hit head-on.</p>
+            <p>Rutherford said it was as surprising as firing a shell at tissue paper and having it come back and hit you.</p>
+          </div>
+          <div class="rn-side">
+            <p class="tip">At standard level the experiment is qualitative: link each observation to its conclusion with “so” or “because”. The calculations come in the HL part.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide" data-title="Nuclear model">
+        <p class="eyebrow">Rutherford (1911)</p>
+        <h2>The nuclear model<span>.</span></h2>
+        <div class="split">
+          <ul class="points">
+            <li>A tiny, dense <b>nucleus</b> at the centre</li>
+            <li>The nucleus is <b>positive</b></li>
+            <li>Almost all the <b>mass</b> is in it</li>
+            <li><b>Electrons</b> outside the nucleus</li>
+            <li>Replaced the plum pudding model</li>
+          </ul>
+          <div class="panel">
+            <div class="panel-head"><span>NUCLEAR MODEL</span><span class="pill">NOT TO SCALE</span></div>
+            <div class="fig" data-fig="rutherford"></div>
+            <div class="legend"><span><i class="electron">−</i> Electron</span><span><i class="positive">+</i> Nucleus (positive)</span></div>
+          </div>
+        </div>
+        <div class="slide-foot"><span>E.1 STRUCTURE OF THE ATOM · SL + HL</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>Check that the new model explains all three results.</b></p>
+            <p><b>Straight through:</b> most alpha particles pass through empty space.</p>
+            <p><b>Deflected:</b> one passing near the positive nucleus is repelled.</p>
+            <p><b>Bounced back:</b> one heading straight at the nucleus is repelled so strongly that it reverses. The nucleus is tiny, so this is rare.</p>
+            <p>The plum pudding model could explain only the first.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide" data-title="Comparing the models">
+        <p class="eyebrow">Compare</p>
+        <h2>Plum pudding vs nuclear<span>.</span></h2>
+        <div class="stack center">
+        <table class="facts big">
+          <thead><tr><th></th><th><span class="icon-cell"><span class="fig" data-fig="mini-plum" style="width: 96px; height: 96px;"></span>Plum pudding</span></th><th><span class="icon-cell"><span class="fig" data-fig="mini-nuclear" style="width: 96px; height: 96px;"></span>Nuclear model</span></th></tr></thead>
+          <tbody>
+            <tr><td>Positive charge</td><td>Spread through the atom</td><td>In a tiny nucleus</td></tr>
+            <tr><td>Mass</td><td>Spread through the atom</td><td>Concentrated in the nucleus</td></tr>
+            <tr><td>Empty space?</td><td>No</td><td>Mostly empty space</td></tr>
+            <tr><td>Electrons</td><td>Embedded in the positive ball</td><td>Outside the nucleus</td></tr>
+          </tbody>
+        </table>
+        </div>
+        <div class="slide-foot"><span>E.1 STRUCTURE OF THE ATOM · SL + HL</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>Each row is tied to a piece of evidence.</b> “Mostly empty space” comes from the alpha particles that went straight through. “Positive charge in a tiny nucleus” from those that were deflected. “Mass concentrated in the nucleus” from the few that bounced back.</p>
+          </div>
+          <div class="rn-side">
+            <p class="tip">To compare, say how the same feature differs in the two models. “Whereas” helps: “the positive charge is spread through the atom, whereas in the nuclear model it is in a tiny nucleus”. If asked for a similarity: both contain electrons and are neutral overall.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide" data-title="Particles in an atom">
+        <p class="eyebrow">Inside the atom</p>
+        <h2>Three particles<span>.</span></h2>
+        <div class="stack center">
+          <table class="facts big">
+            <thead><tr><th>Particle</th><th>Charge</th><th>Mass</th><th>Where?</th></tr></thead>
+            <tbody>
+              <tr><td><span class="icon-cell"><span class="fig" data-fig="ball" data-kind="proton"></span>Proton</span></td><td class="num">\(+e\)</td><td class="num">≈ 1 u</td><td>Nucleus</td></tr>
+              <tr><td><span class="icon-cell"><span class="fig" data-fig="ball" data-kind="neutron"></span>Neutron</span></td><td class="num">0</td><td class="num">≈ 1 u</td><td>Nucleus</td></tr>
+              <tr><td><span class="icon-cell"><span class="fig" data-fig="ball" data-kind="electron"></span>Electron</span></td><td class="num">\(-e\)</td><td class="num">≈ 0.0005 u</td><td>Around the nucleus</td></tr>
+            </tbody>
+          </table>
+          <div class="idea"><b>Nucleon</b> = a proton or a neutron. A neutral atom has as many electrons as protons.</div>
+        </div>
+        <div class="slide-foot"><span>E.1 STRUCTURE OF THE ATOM · SL + HL</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>The units.</b> \(e\) is the elementary charge, \(1.60 \times 10^{-19} \,\mathrm{C}\). The unified atomic mass unit u is \(1.661 \times 10^{-27} \,\mathrm{kg}\), defined as one twelfth of the mass of a carbon-12 atom. Both are in the data booklet.</p>
+            <p><b>Why does only the nucleus count for mass?</b> An electron has about 1/1840 of the mass of a proton. Even gold’s 79 electrons add up to less than 0.03% of the mass of the atom.</p>
+          </div>
+          <div class="rn-side">
+            <p class="more">The neutron is very slightly heavier than the proton (1.008665 u against 1.007276 u). That small difference matters in E.3, where it decides which decays can happen.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide" data-title="Nuclear notation">
+        <p class="eyebrow">Inside the atom</p>
+        <h2>Nuclear notation<span>.</span></h2>
+        <div class="split">
+          <div class="stack">
+            <ul class="points">
+              <li><b>Nucleon number \(A\)</b> = protons + neutrons</li>
+              <li><b>Proton number \(Z\)</b> = protons</li>
+              <li>Neutrons: \(N = A - Z\)</li>
+              <li><b>X</b> is the chemical symbol, fixed by \(Z\)</li>
+            </ul>
+            <div class="idea step eqrow">Try: <span class="nuc"><span class="nums"><span>197</span><span>79</span></span>Au</span> <span class="step">→ <b>79 p, 118 n</b></span></div>
+          </div>
+          <div class="panel">
+            <div class="panel-head"><span>NUCLEAR NOTATION</span></div>
+            <div class="fig" data-fig="notation"></div>
+          </div>
+        </div>
+        <div class="slide-foot"><span>E.1 STRUCTURE OF THE ATOM · SL + HL</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>Work through another one.</b> Uranium with 235 on top and 92 below. Protons: 92. Neutrons: 235 − 92 = 143. Electrons in the neutral atom: 92.</p>
+            <p><b>Why do the protons decide the element?</b> \(Z\) sets the charge of the nucleus, so it sets how many electrons the neutral atom holds and how it behaves chemically. Change \(Z\) and it is a different element. Change \(N\) alone and it is another <b>isotope</b> of the same element: carbon-12 and carbon-14 both have \(Z = 6\).</p>
+          </div>
+          <div class="rn-side">
+            <p class="tip">You are not expected to recall chemical symbols. Questions give the symbol or the proton number.</p>
+            <p class="more">The same notation is used for particles: an alpha particle is helium-4 with \(A = 4, Z = 2\), and an electron is written with \(A = 0, Z = -1\).</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide" data-title="Size of an atom">
+        <p class="eyebrow">Inside the atom</p>
+        <h2>Mostly empty space<span>.</span></h2>
+        <div class="split wide-fig">
+          <ul class="points">
+            <li>Atom radius ≈ \(\class{res}{10^{-10} \,\mathrm{m}}\)</li>
+            <li>Nucleus radius ≈ \(\class{res}{10^{-15} \,\mathrm{m}}\)</li>
+            <li>Almost all the <b>mass</b> is in the nucleus</li>
+            <li>Electrons have only certain energies: <b>energy levels</b></li>
+          </ul>
+          <div class="panel">
+            <div class="panel-head"><span>AN ATOM</span><span class="pill">NOT TO SCALE</span></div>
+            <div class="fig" data-fig="scale"></div>
+          </div>
+        </div>
+        <div class="slide-foot"><span>E.1 STRUCTURE OF THE ATOM · SL + HL</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>How empty is “mostly empty”?</b> The radii differ by a factor of about \(10^{5}\). Scale an atom up to a stadium 200 m across and the nucleus is a bead 2 mm across on the centre spot.</p>
+            <p><b>Using the numbers.</b> Volume goes as radius cubed, so the nucleus fills about \((10^{-5})^{3} = 10^{-15}\) of the atom while holding more than 99.9% of its mass. Nuclear matter must be enormously dense: the HL part puts a number on it.</p>
+          </div>
+          <div class="rn-side">
+            <p class="more">Why can you not push your hand through a table? The electrons on the outside of your atoms repel the electrons on the outside of the table’s.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide" data-title="Why models change">
+        <p class="eyebrow">Nature of science</p>
+        <h2>Why models change<span>.</span></h2>
+        <div class="split">
+          <ul class="points">
+            <li>A model must explain the <b>evidence</b></li>
+            <li>It makes <b>predictions</b> we can test</li>
+            <li>New evidence can <b>change or replace</b> it</li>
+            <li>Results are <b>published</b> and <b>peer reviewed</b></li>
+          </ul>
+          <div class="panel">
+            <div class="panel-head"><span>THE SCIENCE CYCLE</span></div>
+            <div class="fig" data-fig="cycle"></div>
+          </div>
+        </div>
+        <div class="slide-foot"><span>E.1 STRUCTURE OF THE ATOM · SL + HL</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>The atom is the standard example.</b> The plum pudding model predicted that alpha particles would pass almost straight through gold foil. Some bounced back. The model could not explain that, so it was replaced by one that could.</p>
+            <p><b>Is the current model “proved”?</b> No model is. It is accepted because it explains all the evidence so far, and stays accepted until evidence turns up that it cannot explain.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide" data-title="Quick check: the nucleus">
+        <p class="eyebrow">Quick check</p>
+        <h2>The nucleus<span>.</span></h2>
+        <div class="quiz fill">
+          <div class="q"><p><span class="n">01</span>Why did most alpha particles pass straight through?</p><div class="ans step">The atom is mostly empty space</div></div>
+          <div class="q"><p><span class="n">02</span>Why did a very few come straight back?</p><div class="ans step">A tiny, dense, positive nucleus repelled them</div></div>
+          <div class="q"><p><span class="n">03</span>How many neutrons in <span class="nuc in-text"><span class="nums"><span>56</span><span>26</span></span>Fe</span>?</p><div class="ans step">56 − 26 = 30</div></div>
+          <div class="q"><p><span class="n">04</span>What is a nucleon?</p><div class="ans step">A proton or a neutron</div></div>
+          <div class="q"><p><span class="n">05</span>Roughly how many times larger is an atom than its nucleus?</p><div class="ans step">About \(10^{5}\) (\(10^{-10}\,\mathrm{m}\) against \(10^{-15}\,\mathrm{m}\))</div></div>
+          <div class="q"><p><span class="n">06</span>What could the plum pudding model not explain?</p><div class="ans step">Alpha particles scattered through large angles</div></div>
+        </div>
+        <div class="slide-foot"><span class="reveal-hint">PRESS → TO REVEAL EACH ANSWER</span><span data-page></span></div>
+      </section>
+
+      <!-- Part 2 -->
+      <section class="slide section" data-title="Part 2: Energy levels and spectra">
+        <div class="title-grid">
+          <div>
+            <p class="eyebrow">Part 02 · SL + HL</p>
+            <h1>Energy levels and spectra<span>.</span></h1>
+            <p class="lead">Light as a message from inside the atom</p>
+          </div>
+          <div class="fig" data-fig="level-diagram" data-arrows="3-2,1-2"></div>
+        </div>
+        <div class="slide-foot"><span>E.1 STRUCTURE OF THE ATOM · SL + HL</span><span data-page></span></div>
+      </section>
+
+      <section class="slide history" data-title="Story: Bohr fixes the nuclear model">
+        <p class="eyebrow">The story · Copenhagen, 1913</p>
+        <p class="not-examined">Background story · not assessed</p>
+        <h2>Bohr fixes the nuclear model<span>.</span></h2>
+        <div class="story" style="--photo-h: 430px;">
+          <div class="story-photos">
+            <figure><img src="images/bohr.jpg" width="500" height="703" alt="Portrait of Niels Bohr in a suit and tie"><figcaption><b>Niels Bohr</b>, pictured about 1922, the year he won the Nobel Prize</figcaption></figure>
+          </div>
+          <div class="stack">
+            <ul class="points">
+              <li>1912: Bohr, a 26-year-old from Denmark, works in <b>Rutherford’s laboratory</b></li>
+              <li>He sees a problem. An orbiting electron should <b>lose energy</b> and spiral into the nucleus. Atoms would collapse</li>
+              <li>1913: his answer. Electrons can only orbit at <b>certain distances</b></li>
+              <li>The test: his calculations <b>matched</b> the colours of light given out by hydrogen</li>
+            </ul>
+            <div class="idea">He kept Rutherford’s nucleus and changed only what the evidence demanded.</div>
+          </div>
+        </div>
+        <p class="credits">Photo: <a href="https://commons.wikimedia.org/wiki/File:Niels_Bohr.jpg" target="_blank" rel="noopener">AB Lagrelius &amp; Westphal</a>, public domain.</p>
+        <div class="slide-foot"><span>E.1 STRUCTURE OF THE ATOM · SL + HL</span><span data-page></span></div>
+      </section>
+
+      <section class="slide" data-title="Discrete energy levels">
+        <p class="eyebrow">Energy levels</p>
+        <h2>Only certain energies allowed<span>.</span></h2>
+        <div class="split">
+          <div class="stack">
+            <ul class="points">
+              <li>An electron in an atom can have only <b>certain energies</b></li>
+              <li>These are <b>discrete energy levels</b></li>
+              <li>Lowest level: the <b>ground state</b></li>
+              <li>Energies are <b>negative</b>: the electron is bound</li>
+            </ul>
+            <div class="idea">Zero energy = electron just <b>free</b> of the atom.</div>
+          </div>
+          <div class="panel">
+            <div class="panel-head"><span>HYDROGEN: ENERGY LEVELS</span><span class="pill">NOT TO SCALE</span></div>
+            <div class="fig" data-fig="level-diagram"></div>
+          </div>
+        </div>
+        <div class="slide-foot"><span>E.1 STRUCTURE OF THE ATOM · SL + HL</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>Think of a ladder.</b> You can stand on a rung, never between rungs. An electron in an atom is the same: it has one of the allowed energies and nothing in between. “Discrete” means separate, countable values.</p>
+            <p><b>Why negative?</b> Zero is chosen as the energy of an electron that has just escaped and is at rest. An electron held by the nucleus has less energy than that, so its energy is below zero. To free a ground-state hydrogen electron you must supply 13.6 eV: the <b>ionisation energy</b>.</p>
+          </div>
+          <div class="rn-side">
+            <p class="tip">The electronvolt is the energy gained by an electron moving through 1 V: \(1 \,\mathrm{eV} = 1.60 \times 10^{-19} \,\mathrm{J}\). Convert to joules before using \(E = hf\).</p>
+            <p class="trap">Reading the levels as distances. The diagram shows <b>energy</b>, not where the electron is.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide" data-title="Photons: E = hf">
+        <p class="eyebrow">Photons</p>
+        <h2>Light comes in packets<span>.</span></h2>
+        <div class="split even">
+          <div class="stack">
+            <ul class="points">
+              <li>Light is emitted and absorbed as <b class="t-photon">photons</b></li>
+              <li>Each photon carries one fixed amount of energy</li>
+              <li><b>Higher frequency</b> → more energy per photon</li>
+            </ul>
+            <div class="equation"><span>\(E = hf\)</span></div>
+            <div class="idea">\(h = 6.63 \times 10^{-34} \,\mathrm{J} \,\mathrm{s}\), the <b>Planck constant</b>. With \(c = f\lambda\): \(E = hc/\lambda\).</div>
+          </div>
+          <div class="work">
+            <span class="say">Worked example · green laser, \(\lambda = 532\,\mathrm{nm}\)</span>
+            <span>\(f = c/\lambda = 3.00 \times 10^{8} \div 532 \times 10^{-9}\)</span>
+            <span class="step">&nbsp; \(= \class{res}{5.64 \times 10^{14} \,\mathrm{Hz}}\)</span>
+            <span class="step">\(E = hf = 6.63 \times 10^{-34} \times 5.64 \times 10^{14}\)</span>
+            <span class="step">&nbsp; \(= \class{res}{3.74 \times 10^{-19} \,\mathrm{J}}\)</span>
+            <span class="step">&nbsp; \(= 3.74 \times 10^{-19} \div 1.60 \times 10^{-19} = \class{res}{2.34 \,\mathrm{eV}}\)</span>
+          </div>
+        </div>
+        <div class="slide-foot"><span>E.1 STRUCTURE OF THE ATOM · SL + HL</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>What is a photon?</b> A packet (quantum) of electromagnetic energy. Light of one frequency is a stream of identical photons. A brighter beam of the same colour has <b>more photons each second</b>, not bigger ones.</p>
+            <p><b>How small is one photon?</b> A 1 mW laser pointer giving out \(3.74 \times 10^{-19} \,\mathrm{J}\) photons emits \(0.001 \div 3.74 \times 10^{-19} \approx 2.7 \times 10^{15}\) of them every second. That is why light normally looks continuous.</p>
+          </div>
+          <div class="rn-side">
+            <p class="tip">Visible photons carry roughly 1.8 eV (red) to 3.1 eV (violet). An answer far outside that for visible light means a slip with powers of ten or with nm.</p>
+            <p class="trap">Leaving the wavelength in nm. \(532 \,\mathrm{nm} = 532 \times 10^{-9} \,\mathrm{m}\).</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide" data-title="Atomic transitions">
+        <p class="eyebrow">Atomic transitions</p>
+        <h2>One transition, one photon<span>.</span></h2>
+        <div class="stack">
+          <ul class="points" style="grid-template-columns: 1fr 1fr; gap: 16px 40px;">
+            <li><b>Absorb</b> a photon → jump <b>up</b> a level</li>
+            <li>Drop <b>down</b> a level → <b>emit</b> a photon</li>
+          </ul>
+          <div class="panel fill">
+            <div class="panel-head"><span>HYDROGEN ATOM</span><span class="pill">NOT TO SCALE</span></div>
+            <div class="fig" data-fig="levels" data-animate></div>
+            <div class="legend"><span><i class="electron">−</i> Electron</span><span><i class="proton">+</i> Proton</span><span><i class="photon">~</i> Photon, \(hf = E_{2} - E_{1}\)</span></div>
+          </div>
+        </div>
+        <div class="slide-foot"><span>E.1 STRUCTURE OF THE ATOM · SL + HL</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>Energy is conserved in every jump.</b> The photon’s energy is exactly the difference between the two levels: \(hf = E_{\mathrm{upper}} - E_{\mathrm{lower}}\). A big gap gives a high-frequency photon; a small gap, a low-frequency one.</p>
+            <p><b>Absorption is all or nothing.</b> A photon is absorbed only if its energy matches a gap exactly. One with slightly too little or slightly too much passes straight through. That is why a gas removes only certain frequencies from white light.</p>
+          </div>
+          <div class="rn-side">
+            <p class="more">An atom that has absorbed a photon is <b>excited</b>. It usually drops back within about \(10^{-8} \,\mathrm{s}\), sometimes in several smaller steps, emitting a photon for each.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide" data-title="From levels to a spectral line">
+        <p class="eyebrow">Worked example</p>
+        <h2>From levels to a spectral line<span>.</span></h2>
+        <div class="split even">
+          <div class="panel">
+            <div class="panel-head"><span>HYDROGEN: n = 3 → n = 2</span><span class="pill">NOT TO SCALE</span></div>
+            <div class="fig" data-fig="level-diagram" data-arrows="3-2"></div>
+          </div>
+          <div class="work">
+            <span class="say">Find the wavelength of the photon emitted</span>
+            <span>\(\Delta E = (-1.51) - (-3.40) = \class{res}{1.89 \,\mathrm{eV}}\)</span>
+            <span class="step">&nbsp; \(= 1.89 \times 1.60 \times 10^{-19} = \class{res}{3.02 \times 10^{-19} \,\mathrm{J}}\)</span>
+            <span class="step">\(f = \Delta E/h = 3.02 \times 10^{-19} \div 6.63 \times 10^{-34}\)</span>
+            <span class="step">&nbsp; \(= \class{res}{4.56 \times 10^{14} \,\mathrm{Hz}}\)</span>
+            <span class="step">\(\lambda = c/f = \class{res}{6.58 \times 10^{-7} \,\mathrm{m}}\) (red)</span>
+          </div>
+        </div>
+        <div class="slide-foot"><span>E.1 STRUCTURE OF THE ATOM · SL + HL</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>The method never changes.</b> Subtract the two level energies, convert eV to J, use \(E = hf\), then \(c = f\lambda\) if a wavelength is wanted.</p>
+            <p><b>Does it match?</b> Hydrogen’s red line is measured at 656 nm. We got 658 nm because the level energies were rounded to three significant figures. A subtraction of two rounded numbers loses precision.</p>
+          </div>
+          <div class="rn-side">
+            <p class="tip">A quicker route: the data booklet gives \(hc = 1.24 \times 10^{-6} \,\mathrm{eV} \,\mathrm{m}\), so \(\lambda = hc/\Delta E = 1.24 \times 10^{-6} \div 1.89 = 6.56 \times 10^{-7} \,\mathrm{m}\) with the energy left in eV.</p>
+            <p class="trap">Using one level energy instead of the difference between two.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide" data-title="Emission spectra">
+        <p class="eyebrow">Spectra</p>
+        <h2>Emission spectra<span>.</span></h2>
+        <div class="stack">
+          <ul class="points" style="grid-template-columns: 1fr 1fr; gap: 16px 40px;">
+            <li>Hot, low-pressure gas glows</li>
+            <li>Split the light: a few <b>bright lines</b></li>
+            <li>Each line: <b>one frequency</b> of photon</li>
+            <li>Not a continuous band of colour</li>
+          </ul>
+          <div class="panel fill">
+            <div class="panel-head"><span>VISIBLE SPECTRA</span><span class="pill">WAVELENGTH IN nm</span></div>
+            <div class="fig" data-fig="spectra" data-rows="continuous,h-emit"></div>
+          </div>
+        </div>
+        <div class="slide-foot"><span>E.1 STRUCTURE OF THE ATOM · SL + HL</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>Where do the lines come from?</b> Heating the gas, or passing a current through it, lifts electrons to higher levels. Each time one drops back it emits a photon whose energy is the gap between two levels. Only certain gaps exist, so only certain frequencies appear.</p>
+            <p><b>Hydrogen’s four visible lines</b> all end on \(n = 2\): from 3 (656 nm), 4 (486 nm), 5 (434 nm) and 6 (410 nm). Drops to \(n = 1\) release more energy and lie in the ultraviolet.</p>
+          </div>
+          <div class="rn-side">
+            <p class="more">A hot solid or a dense gas gives a continuous spectrum instead, because its atoms are so close together that their levels smear into bands.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide" data-title="Absorption spectra">
+        <p class="eyebrow">Spectra</p>
+        <h2>Absorption spectra<span>.</span></h2>
+        <div class="stack">
+          <ul class="points" style="grid-template-columns: 1fr 1fr; gap: 16px 40px;">
+            <li>White light through a <b>cool gas</b></li>
+            <li>Continuous spectrum with <b>dark lines</b></li>
+            <li>Dark lines: photons the gas <b>absorbed</b></li>
+            <li><b>Same wavelengths</b> as its emission lines</li>
+          </ul>
+          <div class="panel fill">
+            <div class="panel-head"><span>HYDROGEN</span><span class="pill">WAVELENGTH IN nm</span></div>
+            <div class="fig" data-fig="spectra" data-rows="h-emit,h-absorb"></div>
+          </div>
+        </div>
+        <div class="slide-foot"><span>E.1 STRUCTURE OF THE ATOM · SL + HL</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>Why the same wavelengths?</b> The gaps between levels are the same whether the electron goes up or down. A photon that fits a gap is absorbed and lifts the electron; the same gap gives the same photon when the electron falls.</p>
+            <p><b>If the atoms re-emit the light, why is the line dark?</b> The excited atoms do emit again, but in all directions, and often in several smaller steps. Very little of it carries on towards the observer, so that wavelength is much dimmer than its neighbours.</p>
+          </div>
+          <div class="rn-side">
+            <p class="trap">Saying the dark lines are “missing colours the source did not make”. The source made them; the gas removed them.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide" data-title="Evidence for discrete levels">
+        <p class="eyebrow">Evidence → conclusion</p>
+        <h2>Why lines mean levels<span>.</span></h2>
+        <div class="stack center">
+          <div class="obs">
+            <div class="obs-head"><span>OBSERVATION</span><span>CONCLUSION</span></div>
+            <div class="obs-row"><div>Spectra are <b>lines</b>, not continuous bands</div><span class="to">→</span><div>Photons have only <b>certain energies</b></div></div>
+            <div class="obs-row step"><div>Each photon comes from <b>one transition</b></div><span class="to">→</span><div>Only certain energy <b>differences</b> exist</div></div>
+            <div class="obs-row step"><div>The same lines appear <b>every time</b></div><span class="to">→</span><div>The atom has fixed, <b>discrete energy levels</b></div></div>
+          </div>
+          <div class="idea step">If an electron could have <b>any</b> energy, the spectrum would be continuous.</div>
+        </div>
+        <div class="slide-foot"><span>E.1 STRUCTURE OF THE ATOM · SL + HL</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>Writing the argument.</b> Start from what is seen (discrete lines), go through the photon (\(E = hf\), so discrete frequencies mean discrete photon energies), and finish at the atom (photon energy equals the difference between two levels, so the levels themselves must be discrete).</p>
+            <p><b>Counting lines.</b> Each pair of levels gives one possible line. Four levels give 6 pairs, so up to 6 lines: 4→3, 4→2, 4→1, 3→2, 3→1, 2→1.</p>
+          </div>
+          <div class="rn-side">
+            <p class="tip">“Explain how spectra provide evidence for energy levels” needs all three links. Stopping at “the lines are discrete” earns one mark at most.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide" data-title="Spectra and chemical composition">
+        <p class="eyebrow">Spectra</p>
+        <h2>A fingerprint for each element<span>.</span></h2>
+        <div class="split wide-fig">
+          <div class="stack">
+            <ul class="points">
+              <li>Every element has its <b>own set of levels</b></li>
+              <li>So its <b>own pattern</b> of lines</li>
+              <li>Match the lines → identify the element</li>
+            </ul>
+            <div class="idea step">The star’s light has crossed <b>hydrogen</b> and <b>sodium</b>, but not helium.</div>
+          </div>
+          <div class="panel">
+            <div class="panel-head"><span>WHAT IS THE STAR MADE OF?</span></div>
+            <div class="fig" data-fig="spectra" data-rows="h-emit,he-emit,na-emit,star"></div>
+          </div>
+        </div>
+        <div class="slide-foot"><span>E.1 STRUCTURE OF THE ATOM · SL + HL</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>Why is the pattern unique?</b> The levels depend on the charge of the nucleus and on how the electrons arrange themselves around it. No two elements share both, so no two share a set of energy gaps.</p>
+            <p><b>How a star is analysed.</b> Its hot, dense interior gives a continuous spectrum. The cooler gas of its outer layers absorbs at its own wavelengths. Comparing the dark lines with spectra measured in the laboratory shows which elements are there.</p>
+          </div>
+          <div class="rn-side">
+            <p class="tip">One shared line is not enough. Helium’s yellow line (588 nm) sits almost on top of sodium’s (589 nm), but helium’s other lines are missing from this star.</p>
+            <p class="more">Helium was found this way in the Sun’s spectrum in 1868, a yellow line that fitted no known element, before it was found on Earth. If all of a star’s lines are shifted by the same fraction, the shift gives its speed towards or away from us (Doppler effect, C.5).</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide" data-title="Quick check: levels and spectra">
+        <p class="eyebrow">Quick check</p>
+        <h2>Levels and spectra<span>.</span></h2>
+        <div class="quiz fill">
+          <div class="q"><p><span class="n">01</span>What is a photon?</p><div class="ans step">A packet of electromagnetic energy, \(E = hf\)</div></div>
+          <div class="q"><p><span class="n">02</span>Electron drops from −1.51 eV to −3.40 eV. Photon energy?</p><div class="ans step">1.89 eV</div></div>
+          <div class="q"><p><span class="n">03</span>Which photon has more energy: red or violet?</p><div class="ans step">Violet: higher frequency</div></div>
+          <div class="q"><p><span class="n">04</span>Why is an absorption line dark?</p><div class="ans step">The gas absorbed photons of that energy</div></div>
+          <div class="q"><p><span class="n">05</span>How do spectra show energy levels are discrete?</p><div class="ans step">Only certain photon energies appear</div></div>
+          <div class="q"><p><span class="n">06</span>How can we tell what a star is made of?</p><div class="ans step">Match its absorption lines to known elements</div></div>
+        </div>
+        <div class="slide-foot"><span class="reveal-hint">PRESS → TO REVEAL EACH ANSWER</span><span data-page></span></div>
+      </section>
+
+      <!-- Part 3 · Additional HL -->
+      <section class="slide section hl" data-title="Part 3: Additional HL">
+        <div class="title-grid">
+          <div>
+            <p class="eyebrow">Part 03 · Additional higher level</p>
+            <h1>The nucleus and Bohr’s hydrogen<span>.</span></h1>
+            <p class="lead">Nuclear radius and density · closest approach<br>Bohr’s energy levels · quantized angular momentum</p>
+          </div>
+          <div class="fig" data-fig="carbon-nucleus"></div>
+        </div>
+        <div class="slide-foot"><span>E.1 STRUCTURE OF THE ATOM · ADDITIONAL HL</span><span data-page></span></div>
+      </section>
+
+      <section class="slide hl" data-title="HL: Distance of closest approach">
+        <p class="eyebrow">Scattering, with numbers</p>
+        <h2>Distance of closest approach<span>.</span></h2>
+        <div class="split wide-fig">
+          <div class="stack">
+            <ul class="points small">
+              <li>Head-on alpha: slows, <b>stops</b>, returns</li>
+              <li>At the turning point: <b>all</b> kinetic energy → electric potential energy</li>
+            </ul>
+            <div class="equation small step"><span>\(E_{\mathrm{k}} = \dfrac{k(2e)(Ze)}{r}\)</span></div>
+            <div class="idea step">An <b>upper limit</b> on the radius of the nucleus.</div>
+          </div>
+          <div class="panel">
+            <div class="panel-head"><span>HEAD-ON COLLISION</span><span class="pill">NOT TO SCALE</span></div>
+            <div class="fig" data-fig="closest-approach"></div>
+          </div>
+        </div>
+        <div class="slide-foot"><span>E.1 STRUCTURE OF THE ATOM · ADDITIONAL HL</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>Why energy conservation is enough.</b> The alpha particle starts far away, where the electric potential energy is zero, with kinetic energy \(E_{\mathrm{k}}\). The repulsion does negative work on it all the way in. It stops when the potential energy \(kq_{1}q_{2}/r\) has taken all of \(E_{\mathrm{k}}\). Rearranged: \(r = 2kZe^{2}/E_{\mathrm{k}}\).</p>
+            <p><b>What is assumed?</b> A head-on path; a nucleus so heavy that it does not recoil; and only the electric force acting, which is true while the alpha stays outside the nucleus.</p>
+          </div>
+          <div class="rn-side">
+            <p class="tip">More energy → smaller \(r\). Larger \(Z\) → larger \(r\). Both follow directly from the formula.</p>
+            <p class="trap">Forgetting that the alpha particle’s charge is \(2e\), or leaving \(E_{\mathrm{k}}\) in MeV.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide hl" data-title="HL: Closest approach, worked example">
+        <p class="eyebrow">Worked example</p>
+        <h2>A 5.0 MeV alpha meets gold<span>.</span></h2>
+        <div class="split even">
+          <div class="work">
+            <span class="say">Gold: \(Z = 79\) · \(k = 8.99 \times 10^{9} \,\mathrm{N} \,\mathrm{m}^{2} \,\mathrm{C}^{-2}\)</span>
+            <span>\(E_{\mathrm{k}} = 5.0 \times 10^{6} \times 1.60 \times 10^{-19} \,\mathrm{J}\)</span>
+            <span>&nbsp; \(= \class{res}{8.0 \times 10^{-13} \,\mathrm{J}}\)</span>
+            <span class="step">\(r = \dfrac{2kZe^{2}}{E_{\mathrm{k}}}\)</span>
+            <span class="step">&nbsp; \(= \dfrac{2 \times 8.99 \times 10^{9} \times 79 \times (1.60 \times 10^{-19})^{2}}{8.0 \times 10^{-13}}\)</span>
+            <span class="step">&nbsp; \(= \class{res}{4.5 \times 10^{-14} \,\mathrm{m}}\)</span>
+          </div>
+          <div class="stack center">
+            <ul class="points">
+              <li class="step">The alpha turned back <b>45 fm</b> from the centre</li>
+              <li class="step">So the gold nucleus is <b>smaller</b> than that</li>
+              <li class="step">The atom is ≈ \(10^{-10} \,\mathrm{m}\): over <b>2000 times</b> bigger</li>
+            </ul>
+          </div>
+        </div>
+        <div class="slide-foot"><span>E.1 STRUCTURE OF THE ATOM · ADDITIONAL HL</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>Why only an upper limit?</b> The alpha particle never touched the nucleus; it was turned back by the electric force while still outside. All the experiment shows is that the nucleus fits inside \(4.5 \times 10^{-14} \,\mathrm{m}\). The next slides show gold’s radius is in fact about \(7 \times 10^{-15} \,\mathrm{m}\).</p>
+            <p><b>To get closer, use more energy.</b> Doubling \(E_{\mathrm{k}}\) halves \(r\). Rutherford was limited to the few MeV that radioactive sources provide.</p>
+          </div>
+          <div class="rn-side">
+            <p class="tip">1 fm (femtometre) = \(10^{-15} \,\mathrm{m}\), the natural unit for nuclei.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide hl" data-title="HL: Deviations from Rutherford scattering">
+        <p class="eyebrow">Scattering at high energies</p>
+        <h2>Where Rutherford’s formula fails<span>.</span></h2>
+        <div class="split">
+          <div class="stack">
+            <ul class="points small">
+              <li>Rutherford assumed <b>only electric repulsion</b></li>
+              <li>Low energy: prediction and count <b>agree</b></li>
+              <li class="step">High energy: the alpha gets <b>close enough to touch</b></li>
+              <li class="step">The <b>strong nuclear force</b> now acts too</li>
+              <li class="step">Fewer are scattered than predicted</li>
+            </ul>
+            <div class="idea step">The energy where it fails gives the <b>size of the nucleus</b>.</div>
+          </div>
+          <div class="panel">
+            <div class="panel-head"><span>ALPHAS SCATTERED AT ONE ANGLE</span><span class="pill">SKETCH</span></div>
+            <div class="fig" data-fig="deviation"></div>
+          </div>
+        </div>
+        <div class="slide-foot"><span>E.1 STRUCTURE OF THE ATOM · ADDITIONAL HL</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>What changes at high energy?</b> The strong nuclear force attracts nucleons but reaches only a few femtometres. A low-energy alpha is turned back long before that, so it feels only electric repulsion and Rutherford’s formula works. A fast one reaches the surface of the nucleus, where the strong force pulls on it and may absorb it. The simple electric calculation no longer describes what happens.</p>
+            <p><b>Turning the failure into a measurement.</b> At the energy where the counts first depart from the prediction, the distance of closest approach roughly equals the radius of the nucleus plus that of the alpha. For gold that is about 7.0 + 1.9 = 8.9 fm, which needs an alpha of roughly 26 MeV.</p>
+          </div>
+          <div class="rn-side">
+            <p class="tip">In scattering questions the energies are kept low enough that you only consider the electric force, unless the question is about the deviation itself.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide hl" data-title="HL: Nuclear radius">
+        <p class="eyebrow">Size of the nucleus</p>
+        <h2>Nuclear radius<span>.</span></h2>
+        <div class="stack">
+          <div class="eq-note">
+            <div class="equation small" style="padding: 18px 56px;"><span>\(R = R_{0}A^{1/3}\)</span></div>
+            <div class="idea">\(R_{0} = 1.20 \times 10^{-15} \,\mathrm{m}\), the <b>Fermi radius</b>. \(A\) is the nucleon number.</div>
+          </div>
+          <div class="panel fill">
+            <div class="panel-head"><span>FOUR NUCLEI, SAME SCALE</span><span class="pill">\(1 \,\mathrm{fm} = 10^{-15} \,\mathrm{m}\)</span></div>
+            <div class="fig" data-fig="nuclei-sizes"></div>
+            <div class="legend"><span><i class="proton">+</i> Proton</span><span><i class="neutron">0</i> Neutron</span></div>
+          </div>
+        </div>
+        <div class="slide-foot"><span>E.1 STRUCTURE OF THE ATOM · ADDITIONAL HL</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>Where does the cube root come from?</b> Nucleons pack like marbles in a bag: each takes up about the same space. So the volume of a nucleus is proportional to the number of nucleons, \(V \propto A\). Volume also goes as \(R^{3}\), so \(R^{3} \propto A\) and \(R \propto A^{1/3}\).</p>
+            <p><b>Worked example, gold-197.</b> \(197^{1/3} = 5.82\), so \(R = 1.20 \times 10^{-15} \times 5.82 = 6.98 \times 10^{-15} \,\mathrm{m}\).</p>
+            <p><b>The radius grows slowly.</b> Gold has 49 times the nucleons of helium-4 but less than 4 times the radius. To double the radius you need \(2^{3} = 8\) times as many nucleons.</p>
+          </div>
+          <div class="rn-side">
+            <p class="tip">On a calculator: \(A\) ^ (1 ÷ 3), with the brackets.</p>
+            <p class="trap">Using the proton number \(Z\) in place of \(A\).</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide hl" data-title="HL: Nuclear density">
+        <p class="eyebrow">Size of the nucleus</p>
+        <h2>Every nucleus has the same density<span>.</span></h2>
+        <div class="split even">
+          <div class="work">
+            <span class="say">Mass \(\approx A\,\mathrm{u}\) · volume \(= \tfrac{4}{3}\pi R^{3}\)</span>
+            <span>\(\rho = \dfrac{A\,\mathrm{u}}{\tfrac{4}{3}\pi (R_{0}A^{1/3})^{3}}\) <span class="step">\(= \dfrac{3\,\mathrm{u}}{4\pi R_{0}^{3}}\)</span></span>
+            <span class="step">&nbsp; \(= \dfrac{3 \times 1.661 \times 10^{-27}}{4\pi \times (1.20 \times 10^{-15})^{3}}\)</span>
+            <span class="step">&nbsp; \(\approx \class{res}{2.3 \times 10^{17} \,\mathrm{kg} \,\mathrm{m}^{-3}}\)</span>
+          </div>
+          <div class="stack center">
+            <ul class="points">
+              <li class="step">\(A\) <b>cancels</b>: the same for all nuclei</li>
+              <li class="step">About <b>\(10^{14}\) times</b> the density of water</li>
+              <li class="step">Ordinary matter is mostly empty space</li>
+            </ul>
+          </div>
+        </div>
+        <div class="slide-foot"><span>E.1 STRUCTURE OF THE ATOM · ADDITIONAL HL</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>Why does \(A\) cancel?</b> Mass is proportional to \(A\) (each nucleon is about 1 u). Volume is proportional to \(R^{3}\), and \((A^{1/3})^{3} = A\), so volume is proportional to \(A\) as well. The ratio does not depend on \(A\). A nucleus behaves like a drop of liquid: add more and it gets bigger, not denser.</p>
+            <p><b>Making sense of \(10^{17}\).</b> A teaspoon (\(5\,\mathrm{cm}^{3}\)) of nuclear matter would have a mass of about \(10^{12} \,\mathrm{kg}\), a billion tonnes.</p>
+          </div>
+          <div class="rn-side">
+            <p class="more">A neutron star is a star crushed until it is nuclear matter throughout: more than the mass of the Sun in a ball about 20 km across.</p>
+            <p class="tip">“Show that nuclear density is independent of \(A\)” is answered by the algebra on this slide. No numbers are needed.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide hl" data-title="HL: Bohr energy levels for hydrogen">
+        <p class="eyebrow">The Bohr model for hydrogen</p>
+        <h2>Bohr’s energy levels<span>.</span></h2>
+        <div class="split">
+          <div class="stack">
+            <div class="equation small"><span>\(E = -\dfrac{13.6}{n^{2}}\,\mathrm{eV}\)</span></div>
+            <ul class="points small">
+              <li>\(n = 1, 2, 3 \dots\) labels the level</li>
+              <li>\(n = 1\): <b>−13.6 eV</b>, the ground state</li>
+              <li class="step">Levels <b>crowd together</b> towards 0</li>
+              <li class="step">Ionisation energy: <b>13.6 eV</b></li>
+            </ul>
+          </div>
+          <div class="panel">
+            <div class="panel-head"><span>HYDROGEN</span><span class="pill">NOT TO SCALE</span></div>
+            <div class="fig" data-fig="level-diagram" data-arrows="2-1,3-2,4-2"></div>
+          </div>
+        </div>
+        <div class="slide-foot"><span>E.1 STRUCTURE OF THE ATOM · ADDITIONAL HL</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>Using the formula.</b> \(n = 2\): −13.6 ÷ 4 = −3.40 eV. \(n = 3\): −13.6 ÷ 9 = −1.51 eV. \(n = 4\): −13.6 ÷ 16 = −0.85 eV. As \(n\) → ∞ the energy → 0 and the electron is free.</p>
+            <p><b>A transition, the quick way.</b> For 4 → 2: \(\Delta E = -0.85 - (-3.40) = 2.55 \,\mathrm{eV}\). With \(hc = 1.24 \times 10^{-6} \,\mathrm{eV} \,\mathrm{m}, \lambda = 1.24 \times 10^{-6} \div 2.55 = 4.86 \times 10^{-7} \,\mathrm{m}\): hydrogen’s blue-green line at 486 nm.</p>
+            <p><b>Why it mattered.</b> One formula with one constant reproduced every line of hydrogen then measured, and predicted further infrared lines that were found afterwards.</p>
+          </div>
+          <div class="rn-side">
+            <p class="trap">Dropping the minus sign, or squaring the 13.6 instead of the \(n\).</p>
+            <p class="tip">At SL the level energies are given. At HL you may have to calculate them from this formula.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide hl" data-title="HL: Quantized angular momentum">
+        <p class="eyebrow">The Bohr model for hydrogen</p>
+        <h2>Why only those levels<span>?</span></h2>
+        <div class="split">
+          <div class="stack">
+            <ul class="points small">
+              <li>Bohr’s rule: angular momentum is <b>quantized</b></li>
+            </ul>
+            <div class="equation small"><span>\(mvr = \dfrac{nh}{2\pi}\)</span></div>
+            <ul class="points small">
+              <li class="step">Only certain <b>orbits</b> fit: \(r \propto n^{2}\)</li>
+              <li class="step">Each orbit has one energy: \(E \propto -1/n^{2}\)</li>
+            </ul>
+            <div class="idea step">Quantized angular momentum → quantized <b>orbits</b> and <b>energy</b>.</div>
+          </div>
+          <div class="panel">
+            <div class="panel-head"><span>BOHR ORBITS OF HYDROGEN</span><span class="pill">TO SCALE</span></div>
+            <div class="fig" data-fig="bohr-orbits"></div>
+            <div class="legend"><span><i class="electron">−</i> Electron</span><span><i class="proton">+</i> Proton</span></div>
+          </div>
+        </div>
+        <div class="slide-foot"><span>E.1 STRUCTURE OF THE ATOM · ADDITIONAL HL</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>How the rule fixes the orbits.</b> The electric force keeps the electron in a circle: \(ke^{2}/r^{2} = mv^{2}/r\). Bohr’s rule gives \(v = nh/2\pi mr\). Put one into the other and \(r = n^{2}h^{2}/4\pi ^{2}kme^{2}\). Everything except \(n\) is a constant, so \(r \propto n^{2}\). For \(n = 1\) it gives \(5.3 \times 10^{-11} \,\mathrm{m}\), the right size for an atom.</p>
+            <p><b>And the energies.</b> The total energy of the orbiting electron is \(-ke^{2}/2r\). With \(r \propto n^{2}\) this is proportional to \(-1/n^{2}\), and the constants multiply out to 13.6 eV.</p>
+          </div>
+          <div class="rn-side">
+            <p class="more">Why should angular momentum be quantized? Bohr could not say. E.2 gives a reason: an electron has a wavelength \(\lambda = h/mv\), and a whole number of wavelengths must fit round the orbit, \(2\pi r = n\lambda\). That is the same equation.</p>
+            <p class="tip">\(mvr\) is the angular momentum of a particle in a circular orbit. The derivation is not required, but you should be able to use the rule.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide hl" data-title="HL: Limits of the Bohr model">
+        <p class="eyebrow">Nature of science</p>
+        <h2>Where the Bohr model fails<span>.</span></h2>
+        <div class="stack center">
+          <div class="obs">
+            <div class="obs-head"><span>IT WORKS FOR</span><span>IT FAILS FOR</span></div>
+            <div class="obs-row"><div>Hydrogen: <b>one electron</b></div><span class="to">≠</span><div>Atoms with <b>two or more</b> electrons</div></div>
+            <div class="obs-row step"><div>The <b>wavelengths</b> of the lines</div><span class="to">≠</span><div>Why some lines are <b>brighter</b> than others</div></div>
+            <div class="obs-row step"><div>Assuming the quantization rule</div><span class="to">≠</span><div><b>Explaining</b> why the rule holds</div></div>
+          </div>
+          <div class="idea step">Replaced by <b>quantum mechanics</b>: the electron is described by a wave, not an orbit.</div>
+        </div>
+        <div class="slide-foot"><span>E.1 STRUCTURE OF THE ATOM · ADDITIONAL HL</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>Why does a second electron break it?</b> Bohr’s calculation has one electron attracted by one nucleus. Add another electron and the two repel each other, which the model has no way to include. It gives the wrong levels even for helium.</p>
+            <p><b>What else it gets wrong.</b> It mixes classical orbits with a quantum rule that has no justification. It cannot say how likely each transition is, so it cannot give line intensities. And an electron with a definite orbit has an exact position and momentum together, which later physics showed is impossible.</p>
+            <p><b>Why still teach it?</b> It was the first model to give discrete levels from a calculation, and its formula for hydrogen is exactly what quantum mechanics gives too.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide hl" data-title="HL quick check">
+        <p class="eyebrow">Quick check · HL</p>
+        <h2>The nucleus and Bohr<span>.</span></h2>
+        <div class="quiz fill">
+          <div class="q"><p><span class="n">01</span>Radius of a nucleus with \(A = 64\)? \((R_{0} = 1.20 \,\mathrm{fm})\)</p><div class="ans step">\(1.20 \times 64^{1/3} = 4.80 \,\mathrm{fm}\)</div></div>
+          <div class="q"><p><span class="n">02</span>Why do all nuclei have about the same density?</p><div class="ans step">Mass \(\propto A\) and volume \(\propto R^{3} \propto A\)</div></div>
+          <div class="q"><p><span class="n">03</span>At closest approach, what has the kinetic energy become?</p><div class="ans step">Electric potential energy</div></div>
+          <div class="q"><p><span class="n">04</span>Why does Rutherford’s formula fail at high energy?</p><div class="ans step">The alpha reaches the nucleus: the strong force acts</div></div>
+          <div class="q"><p><span class="n">05</span>Energy of the \(n = 5\) level of hydrogen?</p><div class="ans step">−13.6 ÷ 25 = −0.544 eV</div></div>
+          <div class="q"><p><span class="n">06</span>What did Bohr say is quantized?</p><div class="ans step">Angular momentum: \(mvr = nh/2\pi\)</div></div>
+        </div>
+        <div class="slide-foot"><span class="reveal-hint">PRESS → TO REVEAL EACH ANSWER</span><span data-page></span></div>
+      </section>
+
+      <section class="slide" data-title="Key words">
+        <p class="eyebrow">Summary</p>
+        <h2>Key words<span>.</span></h2>
+        <div class="terms fill">
+          <div class="term"><b>Nucleus</b><span>Tiny, dense, positive</span><span>Nearly all the mass</span></div>
+          <div class="term"><b>Nucleon number</b><span>\(A\): protons + neutrons</span></div>
+          <div class="term"><b>Proton number</b><span>\(Z\): fixes the element</span></div>
+          <div class="term"><b>Energy level</b><span>An allowed energy of the atom</span><span>Discrete</span></div>
+          <div class="term"><b>Photon</b><span>Packet of light energy</span><span>\(E = hf\)</span></div>
+          <div class="term"><b>Transition</b><span>Jump between levels</span><span>\(hf = \Delta E\)</span></div>
+          <div class="term"><b>Emission spectrum</b><span>Bright lines from a hot gas</span></div>
+          <div class="term"><b>Absorption spectrum</b><span>Dark lines on a continuous spectrum</span></div>
+          <div class="term hl"><b>Nuclear radius</b><span>\(R = R_{0}A^{1/3}\)</span><span>Density the same for all</span></div>
+          <div class="term hl"><b>Closest approach</b><span>\(E_{\mathrm{k}}\) → electric \(E_{\mathrm{p}}\)</span></div>
+          <div class="term hl"><b>Bohr levels</b><span>\(E = -13.6/n^{2} \,\mathrm{eV}\)</span><span>Hydrogen only</span></div>
+          <div class="term hl"><b>Quantization</b><span>\(mvr = nh/2\pi\)</span></div>
+        </div>
+        <div class="slide-foot"><span>E.1 STRUCTURE OF THE ATOM · SL + HL</span><span data-page></span></div>
+      </section>
+
+    </div>
+  </main>
+
+  <nav class="controls" aria-label="Slide controls">
+    <button type="button" id="prev" aria-label="Previous slide"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg></button>
+    <span class="counter" id="counter" aria-live="polite"></span>
+    <button type="button" id="next" aria-label="Next slide"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 5l7 7-7 7"/></svg></button>
+  </nav>
+  <div class="progress" aria-hidden="true"><span id="progress-bar"></span></div>
+
+  <script src="../assets/figures.js"></script>
+  <script src="../assets/deck-math.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
+  <script src="../assets/deck-notes.js"></script>
+  <script src="../assets/deck.js"></script>
+</body>
+</html>

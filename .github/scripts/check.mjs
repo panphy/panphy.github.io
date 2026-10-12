@@ -16,7 +16,7 @@ const SITE = "https://panphy.app";
 const EXAM_STATS = "gcsephy/do-now/exam-stats";
 const PAPER_MARKS = { "8463/1H": 100, "8463/2H": 100, "8464/P/1H": 70, "8464/P/2H": 70 };
 // Pages whose links to local files are checked.
-const LINK_PAGES = ["index.html", "beta/index.html", "misc/index.html", "gcsephy/index.html"];
+const LINK_PAGES = ["index.html", "beta/index.html", "misc/index.html", "gcsephy/index.html", "ibdpphy/index.html"];
 
 const baseAt = process.argv.indexOf("--base");
 const base = baseAt > -1 ? process.argv[baseAt + 1] : "";
