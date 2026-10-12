@@ -417,7 +417,7 @@
             text-transform: uppercase;
         }
 
-        /* Hero trace: a 2 s window of two waves and their sum, replayed at one tenth speed. */
+        /* Hero showcase: one framed panel that plays a short animated scene from one app, then moves on to another. */
         .scope {
             position: relative;
             display: block;
@@ -430,6 +430,7 @@
             animation: heroFadeUp 0.8s ease-out 0.25s both;
             transition: background-color 0.4s ease, border-color 0.4s ease, transform 0.25s ease;
             touch-action: manipulation;
+            container: scope / inline-size;
         }
 
         .scope:hover {
@@ -451,6 +452,7 @@
             font-family: var(--font-mono);
             font-size: 0.72rem;
             font-weight: 600;
+            line-height: 1.5;
             letter-spacing: 0.1em;
             text-transform: uppercase;
         }
@@ -531,14 +533,45 @@
         .scope-key-2 { background: var(--brand-accent); }
         .scope-key-sum { background: var(--text-main); }
 
-        .scope-cta {
-            color: var(--brand-primary);
-            white-space: nowrap;
+        .scope-fill-1 { fill: var(--brand-primary); }
+        .scope-fill-2 { fill: var(--brand-accent); }
+        .scope-fill-ink { fill: var(--text-main); }
+        .scope-fill-paper { fill: var(--card-bg); }
+        .scope-mute { stroke: var(--text-secondary); }
+
+        .scope-label {
+            fill: var(--text-secondary);
+            stroke: none;
+            font-family: var(--font-mono);
+            font-size: 13px;
+            font-weight: 600;
         }
 
-        .scope-cta::after {
-            content: '\2192';
-            margin-left: 0.5em;
+        .scope-label.scope-fill-paper { fill: var(--card-bg); }
+
+        /* A narrow panel uses a fixed arrangement (title above scale, readouts in two columns),
+           so that every scene has the same height and the page does not jump when it switches. */
+        @container scope (max-width: 460px) {
+            .scope-head {
+                flex-direction: column;
+                flex-wrap: nowrap;
+                align-items: flex-start;
+            }
+
+            .scope-readouts {
+                display: grid;
+                grid-template-columns: repeat(2, max-content);
+                white-space: nowrap;
+            }
+        }
+
+        /* The parts that change with the scene fade out and back in when it switches. */
+        .scope-swap {
+            transition: opacity 0.35s ease;
+        }
+
+        .scope.is-switching .scope-swap {
+            opacity: 0;
         }
 
         .scope-note {
@@ -553,7 +586,7 @@
             font-size: 0.85rem;
             font-weight: 600;
             transform: rotate(3deg);
-            transition: background-color 0.4s ease, color 0.4s ease;
+            transition: background-color 0.4s ease, color 0.4s ease, opacity 0.35s ease;
         }
 
         /* ========================================
@@ -1046,7 +1079,7 @@
         .card-body {
             position: relative;
             z-index: 1;
-            margin: 0.5rem 1.4rem 0;
+            margin: 0.5rem 1.4rem 1.4rem;
         }
 
         .card h3 {
@@ -1114,29 +1147,6 @@
 
         .card-offline-pill[data-state="warning"] {
             color: var(--status-warning);
-        }
-
-        .card-cta {
-            display: inline-flex;
-            align-items: center;
-            margin: auto 1.4rem 0;
-            padding: 1.3rem 0 1.4rem;
-            color: var(--brand-primary);
-            font-family: var(--font-mono);
-            font-size: 0.8rem;
-            font-weight: 600;
-            letter-spacing: 0.08em;
-            text-transform: uppercase;
-        }
-
-        .card-cta::after {
-            content: '\2192';
-            margin-left: 0.5rem;
-            transition: transform 0.25s ease;
-        }
-
-        .card:hover .card-cta::after {
-            transform: translateX(4px);
         }
 
         .back-to-top {
@@ -1571,26 +1581,22 @@
                 <li><strong>0</strong><span>installs</span></li>
             </ul>
         </div>
-        <a class="scope" href="/simulations/superposition.html" aria-label="Open the Wave Superposition simulation">
-            <span class="scope-note" aria-hidden="true">y = y₁ + y₂</span>
+        <a class="scope" id="scope" href="/simulations/superposition.html" aria-label="Open the Wave Superposition simulation">
+            <span class="scope-note scope-swap" id="scope-note" aria-hidden="true">y = y₁ + y₂</span>
             <span class="scope-head">
-                <span>Wave Superposition</span>
-                <span class="scope-scale">0.2 s/div · ×0.1 speed</span>
+                <span class="scope-swap" id="scope-title">Wave Superposition</span>
+                <span class="scope-scale scope-swap" id="scope-scale">0.2 s/div · ×0.1 speed</span>
             </span>
             <svg id="scope-trace" viewBox="0 0 520 300" aria-hidden="true" focusable="false">
                 <g class="scope-grid"><path d="M52 0v300"/><path d="M104 0v300"/><path d="M156 0v300"/><path d="M208 0v300"/><path d="M260 0v300"/><path d="M312 0v300"/><path d="M364 0v300"/><path d="M416 0v300"/><path d="M468 0v300"/><path d="M0 50h520"/><path d="M0 100h520"/><path d="M0 150h520"/><path d="M0 200h520"/><path d="M0 250h520"/></g>
-                <path class="scope-axis" d="M0 150h520"/>
-                <path class="scope-wave scope-wave-1" id="scope-wave-1"/>
-                <path class="scope-wave scope-wave-2" id="scope-wave-2"/>
-                <path class="scope-wave scope-wave-sum" id="scope-wave-sum"/>
+                <g class="scope-swap" id="scope-scene"></g>
             </svg>
             <span class="scope-foot">
-                <span class="scope-readouts">
+                <span class="scope-readouts scope-swap" id="scope-readouts">
                     <span><i class="scope-key-1"></i>f₁ = 2.0 Hz</span>
                     <span><i class="scope-key-2"></i>f₂ = 2.3 Hz</span>
                     <span><i class="scope-key-sum"></i>beat = 0.3 Hz</span>
                 </span>
-                <span class="scope-cta">Open sim</span>
             </span>
         </a>
     </header>
@@ -1661,7 +1667,6 @@
                     <h3>PanPhyMD</h3>
                     <p>A simple Markdown editor with LaTeX support.</p>
                 </div>
-                <span class="card-cta">Open editor</span>
             </a>
             <a class="card" href="/tools/panphyplot.html" data-topic="data">
                 <div class="card-art" aria-hidden="true">
@@ -1680,7 +1685,6 @@
                     <h3>PanPhyPlot</h3>
                     <p>Process data, plot graphs, add uncertainties, and run best-fit analysis.</p>
                 </div>
-                <span class="card-cta">Plot data</span>
             </a>
             <a class="card" href="/tools/motion_tracker.html" data-topic="data mechanics">
                 <div class="card-art" aria-hidden="true">
@@ -1701,7 +1705,6 @@
                     <h3>Motion Tracker</h3>
                     <p>Step through video frames, track objects, and extract motion data.</p>
                 </div>
-                <span class="card-cta">Track motion</span>
             </a>
             <a class="card" href="/tools/sound_analyzer.html" data-topic="sound waves">
                 <div class="card-art" aria-hidden="true">
@@ -1719,7 +1722,6 @@
                     <p>Visualize live audio as a frequency spectrum and waveform.</p>
                     <span class="card-note">Uses microphone</span>
                 </div>
-                <span class="card-cta">Analyze sound</span>
             </a>
             <a class="card" href="/tools/tone_generator.html" data-topic="sound waves">
                 <div class="card-art" aria-hidden="true">
@@ -1739,7 +1741,6 @@
                     <h3>Tone Generator</h3>
                     <p>Mix two sine-wave channels with precise frequency and level controls.</p>
                 </div>
-                <span class="card-cta">Generate tone</span>
             </a>
         </div>
         </div>
@@ -1774,7 +1775,6 @@
                     <h3>Virtual Ripple Tank</h3>
                     <p>Explore wave interference and refraction in a 3D ripple tank.</p>
                 </div>
-                <span class="card-cta">Launch sim</span>
             </a>
             <a class="card" href="/simulations/superposition.html" data-topic="waves">
                 <div class="card-art" aria-hidden="true">
@@ -1792,7 +1792,6 @@
                     <h3>Wave Superposition</h3>
                     <p>Combine waves and see how amplitude, phase, and interference interact.</p>
                 </div>
-                <span class="card-cta">Launch sim</span>
             </a>
             <a class="card" href="/simulations/standing_wave.html" data-topic="waves">
                 <div class="card-art" aria-hidden="true">
@@ -1811,7 +1810,6 @@
                     <h3>Standing Wave</h3>
                     <p>Visualize standing waves with different boundary conditions.</p>
                 </div>
-                <span class="card-cta">Launch sim</span>
             </a>
             <a class="card" href="/simulations/collision.html" data-topic="mechanics">
                 <div class="card-art" aria-hidden="true">
@@ -1832,7 +1830,6 @@
                     <p>Experiment with collision physics using interactive, real-time motion.</p>
                     <span class="card-note">Uses camera</span>
                 </div>
-                <span class="card-cta">Launch sim</span>
             </a>
             <a class="card" href="/simulations/states.html" data-topic="matter">
                 <div class="card-art" aria-hidden="true">
@@ -1851,7 +1848,6 @@
                     <h3>States of Matter</h3>
                     <p>Watch a 3D particle model melt, boil and freeze between solid, liquid and gas.</p>
                 </div>
-                <span class="card-cta">Launch sim</span>
             </a>
             <a class="card" href="/simulations/electric_motors.html" data-topic="electromagnetism">
                 <div class="card-art" aria-hidden="true">
@@ -1874,7 +1870,6 @@
                     <h3>Electric Motors</h3>
                     <p>See the motor effect, then run a DC motor and an AC motor in 3D.</p>
                 </div>
-                <span class="card-cta">Launch sim</span>
             </a>
             <a class="card" href="/simulations/charges_in_fields.html" data-topic="electromagnetism">
                 <div class="card-art" aria-hidden="true">
@@ -1901,7 +1896,6 @@
                     <h3>Charges in Fields</h3>
                     <p>Steer charged particles through electric and magnetic fields in 3D.</p>
                 </div>
-                <span class="card-cta">Launch sim</span>
             </a>
             <a class="card" href="/simulations/atomic_models.html" data-topic="atomic">
                 <div class="card-art" aria-hidden="true">
@@ -1922,7 +1916,6 @@
                     <h3>Atomic Models</h3>
                     <p>Explore four atomic models in 3D and see how our picture of the atom changed.</p>
                 </div>
-                <span class="card-cta">Launch sim</span>
             </a>
             <a class="card" href="/simulations/nuclear_decay.html" data-topic="atomic">
                 <div class="card-art" aria-hidden="true">
@@ -1945,7 +1938,6 @@
                     <h3>Nuclear Decay</h3>
                     <p>Watch alpha, beta and gamma decay in 3D, balance equations and measure half-life.</p>
                 </div>
-                <span class="card-cta">Launch sim</span>
             </a>
             <a class="card" href="/simulations/fission_fusion.html" data-topic="atomic">
                 <div class="card-art" aria-hidden="true">
@@ -1973,7 +1965,6 @@
                     <h3>Fission and Fusion</h3>
                     <p>Split uranium, run a chain reaction and fuse hydrogen in 3D.</p>
                 </div>
-                <span class="card-cta">Launch sim</span>
             </a>
             <a class="card" href="/simulations/star_life_cycle.html" data-topic="space">
                 <div class="card-art" aria-hidden="true">
@@ -1997,7 +1988,6 @@
                     <h3>Life Cycle of a Star</h3>
                     <p>Choose a star's mass and follow its whole life in 3D, from nebula to its final state.</p>
                 </div>
-                <span class="card-cta">Launch sim</span>
             </a>
             <a class="card" href="/simulations/lorentz.html" data-topic="relativity">
                 <div class="card-art" aria-hidden="true">
@@ -2020,7 +2010,6 @@
                     <h3>Lorentz Transform</h3>
                     <p>Learn how spacetime transforms between inertial frames.</p>
                 </div>
-                <span class="card-cta">Launch sim</span>
             </a>
         </div>
         </div>
@@ -2058,7 +2047,6 @@
                     <h3>Exam Timer</h3>
                     <p>Manage exam times with an automatic extra-time timer.</p>
                 </div>
-                <span class="card-cta">Open timer</span>
             </a>
             <a class="card" href="/for_teachers/visualizer.html">
                 <div class="card-art" aria-hidden="true">
@@ -2080,7 +2068,6 @@
                     <p>Project your device camera to the big screen, then snap and sketch.</p>
                     <span class="card-note">Uses camera</span>
                 </div>
-                <span class="card-cta">Use camera</span>
             </a>
         </div>
         </div>
@@ -2121,7 +2108,6 @@
                     <h3>Spellwave</h3>
                     <p>Type to cast spells and beat the monsters.</p>
                 </div>
-                <span class="card-cta">Play now</span>
             </a>
             <a class="card" href="/fun/ascii_cam.html">
                 <div class="card-art" aria-hidden="true">
@@ -2142,7 +2128,6 @@
                     <p>See yourself in 8-bit colour ASCII characters.</p>
                     <span class="card-note">Uses camera</span>
                 </div>
-                <span class="card-cta">Open camera</span>
             </a>
         </div>
         </div>
@@ -3031,51 +3016,265 @@
         startOfflineReadinessMonitor();
     </script>
     <script>
-        // Hero trace: waves of f1 = 2.0 Hz and f2 = 2.3 Hz over a 2 s window, drifting to the right at 0.1x speed
+        // Hero showcase: a short animated scene from one app at a time. It starts on a random
+        // scene and moves on when that scene's time is up, except while the panel is hovered or focused.
         (function () {
+            var scope = document.getElementById('scope');
             var svg = document.getElementById('scope-trace');
-            var wave1 = document.getElementById('scope-wave-1');
-            var wave2 = document.getElementById('scope-wave-2');
-            var waveSum = document.getElementById('scope-wave-sum');
-            if (!svg || !wave1 || !wave2 || !waveSum) return;
+            var host = document.getElementById('scope-scene');
+            var title = document.getElementById('scope-title');
+            var scale = document.getElementById('scope-scale');
+            var note = document.getElementById('scope-note');
+            var readouts = document.getElementById('scope-readouts');
+            if (!scope || !svg || !host || !title || !scale || !note || !readouts) return;
 
+            var NS = 'http://www.w3.org/2000/svg';
             var WIDTH = 520;
-            var MID = 150;
-            var AMPLITUDE = 44;
-            var WINDOW_S = 2;
-            var PLAYBACK = 0.1;
-            var F1 = 2.0;
-            var F2 = 2.3;
+            var SWAP_MS = 350;
 
-            function draw(seconds) {
-                var start = seconds * PLAYBACK;
-                var d1 = '';
-                var d2 = '';
-                var dSum = '';
-                for (var x = 0; x <= WIDTH; x += 4) {
-                    var t = (x / WIDTH) * WINDOW_S - start;
-                    var y1 = AMPLITUDE * Math.sin(2 * Math.PI * F1 * t);
-                    var y2 = AMPLITUDE * Math.sin(2 * Math.PI * F2 * t);
-                    var cmd = x === 0 ? 'M' : 'L';
-                    d1 += cmd + x + ' ' + (MID - y1).toFixed(1);
-                    d2 += cmd + x + ' ' + (MID - y2).toFixed(1);
-                    dSum += cmd + x + ' ' + (MID - y1 - y2).toFixed(1);
-                }
-                wave1.setAttribute('d', d1);
-                wave2.setAttribute('d', d2);
-                waveSum.setAttribute('d', dSum);
+            function make(name, attrs, parent, text) {
+                var node = document.createElementNS(NS, name);
+                for (var key in attrs) node.setAttribute(key, attrs[key]);
+                if (text !== undefined) node.textContent = text;
+                (parent || host).appendChild(node);
+                return node;
             }
 
-            draw(14);
-            if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+            // A straight arrow from (x1, y1) to (x2, y2) with an open head.
+            function arrow(x1, y1, x2, y2, head) {
+                var angle = Math.atan2(y2 - y1, x2 - x1);
+                var d = 'M' + x1.toFixed(1) + ' ' + y1.toFixed(1) + 'L' + x2.toFixed(1) + ' ' + y2.toFixed(1);
+                [-0.5, 0.5].forEach(function (side) {
+                    d += 'M' + x2.toFixed(1) + ' ' + y2.toFixed(1) + 'L' +
+                        (x2 - head * Math.cos(angle + side)).toFixed(1) + ' ' + (y2 - head * Math.sin(angle + side)).toFixed(1);
+                });
+                return d;
+            }
+
+            var SCENES = [
+                {
+                    // Waves of 2.0 Hz and 2.3 Hz over a 2 s window, drifting at one tenth speed.
+                    title: 'Wave Superposition',
+                    href: '/simulations/superposition.html',
+                    label: 'Open the Wave Superposition simulation',
+                    scale: '0.2 s/div · ×0.1 speed',
+                    note: 'y = y₁ + y₂',
+                    readouts: [['1', 'f₁ = 2.0 Hz'], ['2', 'f₂ = 2.3 Hz'], ['sum', 'beat = 0.3 Hz']],
+                    still: 14,
+                    seconds: 12,
+                    build: function () {
+                        make('path', { 'class': 'scope-axis', d: 'M0 150h520' });
+                        var wave1 = make('path', { 'class': 'scope-wave scope-wave-1' });
+                        var wave2 = make('path', { 'class': 'scope-wave scope-wave-2' });
+                        var waveSum = make('path', { 'class': 'scope-wave scope-wave-sum' });
+                        return function (seconds) {
+                            var start = (seconds + 14) * 0.1;
+                            var d1 = '';
+                            var d2 = '';
+                            var dSum = '';
+                            for (var x = 0; x <= WIDTH; x += 4) {
+                                var t = (x / WIDTH) * 2 - start;
+                                var y1 = 44 * Math.sin(2 * Math.PI * 2.0 * t);
+                                var y2 = 44 * Math.sin(2 * Math.PI * 2.3 * t);
+                                var cmd = x === 0 ? 'M' : 'L';
+                                d1 += cmd + x + ' ' + (150 - y1).toFixed(1);
+                                d2 += cmd + x + ' ' + (150 - y2).toFixed(1);
+                                dSum += cmd + x + ' ' + (150 - y1 - y2).toFixed(1);
+                            }
+                            wave1.setAttribute('d', d1);
+                            wave2.setAttribute('d', d2);
+                            waveSum.setAttribute('d', dSum);
+                        };
+                    }
+                },
+                {
+                    // 400 nuclei with a 20 s half-life: 10 s per division across, 100 nuclei per division up.
+                    title: 'Nuclear Decay',
+                    href: '/simulations/nuclear_decay.html',
+                    label: 'Open the Nuclear Decay simulation',
+                    scale: '10 s/div · 100 nuclei/div',
+                    note: 'N = N₀e⁻λᵗ',
+                    readouts: [['sum', 'N₀ = 400'], ['1', 'T½ = 20 s'], ['2', 'counts']],
+                    still: 9,
+                    seconds: 10.6,
+                    build: function () {
+                        var SCATTER = [0.6, -0.9, 0.3, 1.1, -0.4, -1.2, 0.8, 0.1, -0.7, 1.0, -0.2, 0.5, -1.0, 0.4, 0.9, -0.5, 0.2, -0.8, 0.7, -0.3];
+                        function yOf(n) { return 250 - 0.5 * n; }
+                        function nAt(x) { return 400 * Math.pow(2, -x / 104); }
+                        make('path', { 'class': 'scope-axis', d: 'M0 250h520' });
+                        var guides = [1, 2, 3].map(function (k) {
+                            var x = 104 * k;
+                            var y = yOf(400 / Math.pow(2, k));
+                            var group = make('g', {});
+                            make('path', { 'class': 'scope-wave scope-wave-1', 'stroke-dasharray': '5 6', d: 'M0 ' + y + 'H' + x + 'V250' }, group);
+                            make('text', { 'class': 'scope-label', x: x, y: 270, 'text-anchor': 'middle' }, group, (k === 1 ? '' : k) + 'T½');
+                            return { x: x, group: group };
+                        });
+                        var dots = SCATTER.map(function (z, i) {
+                            var x = 13 + 26 * i;
+                            var n = nAt(x);
+                            return { x: x, node: make('circle', { 'class': 'scope-fill-2', cx: x, cy: yOf(n + z * Math.sqrt(n)).toFixed(1), r: 4.5 }) };
+                        });
+                        var curve = make('path', { 'class': 'scope-wave scope-wave-sum' });
+                        return function (seconds) {
+                            // Draw for 8 s, hold, then fade and start again.
+                            var t = seconds % 11;
+                            var pen = Math.min(WIDTH, (t / 8) * WIDTH);
+                            var d = '';
+                            for (var x = 0; x <= pen; x += 4) d += (x === 0 ? 'M' : 'L') + x + ' ' + yOf(nAt(x)).toFixed(1);
+                            curve.setAttribute('d', d || 'M0 50');
+                            dots.forEach(function (dot) { dot.node.setAttribute('opacity', dot.x <= pen ? 1 : 0); });
+                            guides.forEach(function (guide) { guide.group.setAttribute('opacity', guide.x <= pen ? 1 : 0); });
+                            host.setAttribute('opacity', Math.min(1, (11 - t) / 0.6).toFixed(2));
+                        };
+                    }
+                },
+                {
+                    // A proton at 400 km/s in 100 mT: r = mv/(qB) = 4.2 cm, turning anticlockwise
+                    // when the field points into the page.
+                    title: 'Charges in Fields',
+                    href: '/simulations/charges_in_fields.html',
+                    label: 'Open the Charges in Fields simulation',
+                    scale: 'proton · B = 100 mT into page',
+                    note: 'r = mv/qB',
+                    readouts: [['2', 'v = 400 km/s'], ['sum', 'F = qvB'], ['1', 'r = 4.2 cm']],
+                    still: 0.6,
+                    seconds: 12,
+                    build: function () {
+                        var CX = 260;
+                        var CY = 150;
+                        var R = 92;
+                        var marks = '';
+                        for (var x = 26; x < WIDTH; x += 52) {
+                            for (var y = 25; y < 300; y += 50) marks += 'M' + (x - 5) + ' ' + (y - 5) + 'l10 10m0 -10l-10 10';
+                        }
+                        make('path', { 'class': 'scope-mute', 'stroke-width': 1.5, opacity: 0.55, d: marks });
+                        make('circle', { 'class': 'scope-mute', 'stroke-dasharray': '4 6', cx: CX, cy: CY, r: R });
+                        var trail = make('path', { 'class': 'scope-wave scope-wave-1', 'stroke-width': 3 });
+                        var force = make('path', { 'class': 'scope-wave scope-wave-sum', 'stroke-width': 3 });
+                        var velocity = make('path', { 'class': 'scope-wave scope-wave-2', 'stroke-width': 3, opacity: 1 });
+                        var proton = make('circle', { 'class': 'scope-fill-1', r: 9 });
+                        return function (seconds) {
+                            var angle = 2 * Math.PI * seconds / 4;
+                            var px = CX + R * Math.cos(angle);
+                            var py = CY - R * Math.sin(angle);
+                            var d = '';
+                            for (var i = 0; i <= 30; i += 1) {
+                                var a = angle - 2.4 + 2.4 * i / 30;
+                                d += (i === 0 ? 'M' : 'L') + (CX + R * Math.cos(a)).toFixed(1) + ' ' + (CY - R * Math.sin(a)).toFixed(1);
+                            }
+                            trail.setAttribute('d', d);
+                            velocity.setAttribute('d', arrow(px, py, px - 62 * Math.sin(angle), py - 62 * Math.cos(angle), 11));
+                            force.setAttribute('d', arrow(px, py, px - 50 * Math.cos(angle), py + 50 * Math.sin(angle), 11));
+                            proton.setAttribute('cx', px.toFixed(1));
+                            proton.setAttribute('cy', py.toFixed(1));
+                        };
+                    }
+                },
+                {
+                    // Elastic collision: 2.0 kg at 1.5 m/s meets 1.0 kg at rest; they leave at 0.5 m/s and 2.0 m/s.
+                    title: 'Collision Lab',
+                    href: '/simulations/collision.html',
+                    label: 'Open the Collision Lab simulation',
+                    scale: 'elastic collision',
+                    note: 'Σp = const',
+                    readouts: [['1', '2.0 kg'], ['2', '1.0 kg'], ['sum', 'p = 3.0 kg m/s']],
+                    still: 1.4,
+                    seconds: 11,
+                    build: function () {
+                        var PX_PER_M = 60;
+                        make('path', { 'class': 'scope-wave scope-wave-sum', 'stroke-width': 2, d: 'M0 214h520' });
+                        function cart(width, fill, mass) {
+                            var group = make('g', {});
+                            make('rect', { 'class': fill, x: 0, y: 160, width: width, height: 40, rx: 7 }, group);
+                            make('circle', { 'class': 'scope-fill-ink', cx: 18, cy: 204, r: 9 }, group);
+                            make('circle', { 'class': 'scope-fill-ink', cx: width - 18, cy: 204, r: 9 }, group);
+                            make('text', { 'class': 'scope-label scope-fill-paper', x: width / 2, y: 185, 'text-anchor': 'middle' }, group, mass);
+                            var shaft = make('path', { 'class': 'scope-wave scope-wave-sum', 'stroke-width': 3 }, group);
+                            var speed = make('text', { 'class': 'scope-label', x: width / 2, y: 118, 'text-anchor': 'middle' }, group);
+                            return { group: group, width: width, shaft: shaft, speed: speed };
+                        }
+                        var heavy = cart(96, 'scope-fill-1', '2.0 kg');
+                        var light = cart(64, 'scope-fill-2', '1.0 kg');
+                        function place(item, left, v) {
+                            item.group.setAttribute('transform', 'translate(' + left.toFixed(1) + ' 0)');
+                            var mid = item.width / 2;
+                            var half = v * 20;
+                            item.shaft.setAttribute('d', v ? arrow(mid - half, 138, mid + half, 138, 10) : '');
+                            item.speed.textContent = v ? v.toFixed(1) + ' m/s' : 'at rest';
+                        }
+                        return function (seconds) {
+                            var loop = seconds % 5.6;
+                            var t = loop - 2.8;
+                            place(heavy, 260 - heavy.width + (t < 0 ? 1.5 : 0.5) * PX_PER_M * t, t < 0 ? 1.5 : 0.5);
+                            place(light, 260 + (t < 0 ? 0 : 2.0) * PX_PER_M * t, t < 0 ? 0 : 2.0);
+                            host.setAttribute('opacity', Math.min(1, loop / 0.4, (5.6 - loop) / 0.4).toFixed(2));
+                        };
+                    }
+                }
+            ];
+
+            var reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+            var current = Math.floor(Math.random() * SCENES.length);
+            var draw = null;
+            var elapsed = 0;
+            var lastFrame = 0;
+            var switching = false;
+
+            function show(index) {
+                var scene = SCENES[index];
+                current = index;
+                host.replaceChildren();
+                host.removeAttribute('opacity');
+                title.textContent = scene.title;
+                scale.textContent = scene.scale;
+                note.textContent = scene.note;
+                scope.href = scene.href;
+                scope.setAttribute('aria-label', scene.label);
+                readouts.replaceChildren();
+                scene.readouts.forEach(function (item) {
+                    var span = document.createElement('span');
+                    var key = document.createElement('i');
+                    key.className = 'scope-key-' + item[0];
+                    span.appendChild(key);
+                    span.appendChild(document.createTextNode(item[1]));
+                    readouts.appendChild(span);
+                });
+                draw = scene.build();
+                draw(reduced ? scene.still : 0);
+                elapsed = 0;
+            }
+
+            show(current);
+            if (reduced) return;
+
+            function next() {
+                switching = true;
+                scope.classList.add('is-switching');
+                setTimeout(function () {
+                    show((current + 1) % SCENES.length);
+                    scope.classList.remove('is-switching');
+                    switching = false;
+                }, SWAP_MS);
+            }
 
             var inView = true;
             var frameId = 0;
 
             function frame(now) {
                 frameId = 0;
-                if (!inView || document.hidden) return;
-                draw(now / 1000);
+                if (!inView || document.hidden) {
+                    lastFrame = 0;
+                    return;
+                }
+                var delta = lastFrame ? Math.min((now - lastFrame) / 1000, 0.1) : 0;
+                lastFrame = now;
+                elapsed += delta;
+                if (!switching) {
+                    draw(elapsed);
+                    // Stay on a scene the reader is pointing at or has focused, so the link under them does not change.
+                    if (elapsed >= SCENES[current].seconds && !scope.matches(':hover, :focus')) next();
+                }
                 frameId = requestAnimationFrame(frame);
             }
 
