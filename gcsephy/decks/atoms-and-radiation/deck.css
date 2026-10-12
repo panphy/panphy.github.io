@@ -597,9 +597,6 @@ h2:has(+ .terms) { margin-bottom: 24px; }
   #deck .step:not(.shown) .wave-window { transform: scaleX(0); transition: none; }
   #deck .on-arrival { transition: opacity .3s ease var(--wait); }
   #deck .step:not(.shown) .on-arrival { opacity: 0; transition: none; }
-  /* Random decay: each nucleus changes at its own moment. */
-  #deck .pop { transition: opacity .25s ease var(--d); }
-  #deck .step:not(.shown) .pop { opacity: 0; transition-delay: 0s; }
   /* Alpha scattering close-up: a track appears with its observation row. */
   #deck .with-row { transition: opacity .4s ease; }
   #deck .slide:not(:has(.obs-row:nth-child(3).shown)) .with-row-1, #deck .slide:not(:has(.obs-row:nth-child(4).shown)) .with-row-2 { opacity: 0; }
@@ -616,7 +613,7 @@ h2:has(+ .terms) { margin-bottom: 24px; }
   .slide, .step, .progress span { transition: none; }
   .slide.active .draw { animation: none; stroke-dasharray: none; stroke-dashoffset: 0; }
   .slide.active .pulse { animation: none; }
-  #deck svg .step, #deck .fly, #deck svg .wipe, #deck .hop, #deck .pop, #deck .with-row, #deck .on-arrival { transition: none; }
+  #deck svg .step, #deck .fly, #deck svg .wipe, #deck .hop, #deck .with-row, #deck .on-arrival { transition: none; }
 }
 
 @media (max-width: 640px) {
