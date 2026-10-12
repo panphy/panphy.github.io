@@ -267,6 +267,31 @@ const vMinus = new THREE.Vector3();
 const vPrime = new THREE.Vector3();
 const tVec = new THREE.Vector3();
 const sVec = new THREE.Vector3();
+// The magnetic field region turns about the vertical axis through the source, so that the field
+// makes the chosen angle with the launch velocity (along +x). At 90° it points into the screen.
+function bTilt() {
+  return THREE.MathUtils.degToRad(state.values.angle ?? 90) - Math.PI / 2;
+}
+// A point (metres) in the frame of the turned field region.
+const bPoint = new THREE.Vector3();
+function bLocal(position) {
+  const tilt = bTilt();
+  const pivot = B_SOURCE_Z / SCALE.bfield;
+  const x = position.x;
+  const z = position.z - pivot;
+  return bPoint.set(x * Math.cos(tilt) - z * Math.sin(tilt), position.y, x * Math.sin(tilt) + z * Math.cos(tilt) + pivot);
+}
+function insideBRegion(position) {
+  const p = bLocal(position);
+  return Math.abs(p.x) < B_REGION.x / 100 && Math.abs(p.y) < B_REGION.y / 100 && p.z > B_REGION.zMin / 100 && p.z < B_REGION.zMax / 100;
+}
+function applyBTilt() {
+  if (lab?.kind !== 'bfield') return;
+  const tilt = bTilt();
+  const group = lab.fieldGroups.B;
+  group.rotation.y = tilt;
+  group.position.set(-B_SOURCE_Z * Math.sin(tilt), 0, B_SOURCE_Z * (1 - Math.cos(tilt)));
+}
 // Fields in SI units at a point (metres) and time (seconds).
 function fields(position, time) {
   E.set(0, 0, 0);
@@ -277,7 +302,11 @@ function fields(position, time) {
     const d = v.separation / 100;
     if (Math.abs(x) <= PLATE_LENGTH / 2 && Math.abs(y) < d / 2) E.set(0, -(v.voltage / d) * (state.swap ? -1 : 1), 0);
   } else if (state.mode === 'bfield') {
-    if (Math.abs(x) < B_REGION.x / 100 && Math.abs(y) < B_REGION.y / 100 && z > B_REGION.zMin / 100 && z < B_REGION.zMax / 100) B.set(0, 0, -(v.field / 1000) * (state.reverseB ? -1 : 1));
+    if (insideBRegion(position)) {
+      const strength = (v.field / 1000) * (state.reverseB ? -1 : 1);
+      const angle = THREE.MathUtils.degToRad(v.angle);
+      B.set(strength * Math.cos(angle), 0, -strength * Math.sin(angle));
+    }
   } else if (state.mode === 'selector') {
     if (Math.abs(x) <= PLATE_LENGTH / 2 && Math.abs(y) < SELECTOR_GAP / 2) {
       E.set(0, -v.selectorVoltage / SELECTOR_GAP, 0);
@@ -403,7 +432,7 @@ function checkBounds(tracer) {
       finish(tracer, 'lost');
     }
   } else if (state.mode === 'bfield') {
-    if (Math.abs(x) > B_REGION.x / 100 || Math.abs(y) > B_REGION.y / 100 || z < B_REGION.zMin / 100 || z > B_REGION.zMax / 100) finish(tracer, 'left');
+    if (!insideBRegion(tracer.pos)) finish(tracer, 'left');
     else if (tracer.displayTime > 45) finish(tracer, 'orbiting');
   } else if (state.mode === 'selector') {
     if (Math.abs(x) <= PLATE_LENGTH / 2 && Math.abs(y) >= SELECTOR_GAP / 2 - 0.0008) finish(tracer, 'plate');
@@ -556,6 +585,7 @@ function buildBField() {
   gun.rotation.z = -Math.PI / 2;
   gun.position.set(-0.45, 0, B_SOURCE_Z);
   group.add(gun);
+  applyBTilt();
 }
 function buildSelector() {
   const group = newLab('selector');
@@ -756,8 +786,8 @@ function fireTracer(mode = state.mode) {
   }
   if (mode === 'bfield') {
     const speed = state.values.speed * data.speed.unit;
-    const angle = THREE.MathUtils.degToRad(state.values.angle);
-    const vel = new THREE.Vector3(speed * Math.sin(angle), 0, -speed * Math.cos(angle));
+    // The source always fires along +x; the angle control turns the field instead.
+    const vel = new THREE.Vector3(speed, 0, 0);
     const period = 2 * Math.PI * data.m / (Math.abs(data.q) * state.values.field / 1000);
     while (lab.tracers.length >= 4) removeTracer(lab.tracers[0]);
     return makeTracer({ key, pos: new THREE.Vector3(0, 0, B_SOURCE_Z / SCALE.bfield), vel, colour, realPerDisplay: DISPLAY_DISTANCE.bfield / speed, maxStep: Math.min(0.0004 / speed, period / 300), trailSize: 9000, dotInterval: 0.15 });
@@ -1254,7 +1284,22 @@ $('clear').addEventListener('click', () => {
   clearTracks();
   readout.textContent = 'TRACKS CLEARED · Ready for the next particle.';
 });
-$('reset').addEventListener('click', () => resetView(true));
+// Reset is a full reset of this tab: tracks cleared, every control back to its starting value,
+// motion resumed and the starting view and readout restored.
+const DEFAULT_PARTICLE = { ...state.particle };
+function resetScene() {
+  const mode = state.mode;
+  state.particle[mode] = DEFAULT_PARTICLE[mode];
+  if (mode === 'efield') state.swap = false;
+  if (mode === 'bfield') state.reverseB = false;
+  if (mode === 'cyclotron') state.autotune = true;
+  state.showE = true;
+  state.showB = true;
+  for (const key of CONTROLS[mode].steppers) state.values[key] = stepperSpec(key).value;
+  setPlaying(!reducedMotion);
+  selectMode(mode, false);
+}
+$('reset').addEventListener('click', resetScene);
 
 function bindStepper(minus, plus, change) {
   for (const [button, direction] of [[minus, -1], [plus, 1]]) {
@@ -1299,6 +1344,17 @@ function onValueChange(key, user, changed) {
     button?.setAttribute('aria-pressed', 'false');
   }
   if (key === 'cycField' && state.autotune) tune();
+  if (key === 'angle') {
+    applyBTilt();
+    if (user && changed && lab.kind === 'bfield') {
+      const angle = state.values.angle;
+      readout.textContent = angle === 90
+        ? 'FIELD AT 90° · The field is at right angles to the velocity, so the path is a circle.'
+        : angle === 0
+          ? 'FIELD AT 0° · The field is parallel to the velocity, so there is no magnetic force and the path is straight.'
+          : `FIELD AT ${angle}° · The field now makes ${angle}° with the velocity. The part of the velocity along the field is unchanged, so the path is a helix.`;
+    }
+  }
   updateEquation();
   drawGraph();
 }
@@ -1459,7 +1515,7 @@ viewer.addEventListener('keydown', event => {
 // ---------- Mode selection ----------
 const DEFAULT_READOUT = {
   efield: 'PARALLEL PLATES · The top plate is positive, so the field points down. Choose a particle and press “Fire”, or tap a part.',
-  bfield: 'UNIFORM MAGNETIC FIELD · The field points into the screen (away from you). Fire a particle from the source at the centre.',
+  bfield: 'UNIFORM MAGNETIC FIELD · The arrows show the field: at 90° it points into the screen (away from you). Fire a particle from the source at the centre.',
   selector: 'VELOCITY SELECTOR · An electric field (down) and a magnetic field (into the screen) between the same plates. Start the beam.',
   cyclotron: 'CYCLOTRON · Two hollow dees between the poles of a magnet, with an alternating voltage across the gap. Inject a particle.'
 };

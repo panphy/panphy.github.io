@@ -1726,7 +1726,7 @@ $('spin').addEventListener('click', () => {
     ? 'SPIN · The coil is spun up to the supply’s speed and let go at the right moment in the cycle. If the current is big enough to keep it going, it locks in step: one turn per cycle.'
     : 'SPIN · With the supply off, there is nothing to keep it turning. Switch on the supply, then spin it.';
 });
-// Reset view: stop the model and go back to the starting position, view and readout, keeping the settings.
+// Reset: stop the model and go back to the starting position, view and readout, keeping the settings.
 function resetModel() {
   state.powered = false;
   setPlaying(!reducedMotion);
