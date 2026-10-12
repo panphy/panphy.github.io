@@ -572,7 +572,6 @@
 
     random: el => {
       const on = animated(el);
-      const delay = seeded(11);
       const rand = seeded(7);
       const order = Array.from({ length: 64 }, (_, i) => i).sort(() => rand() - 0.5);
       const decayed = [new Set(), new Set(order.slice(0, 31)), new Set(order.slice(0, 49))];
@@ -582,12 +581,10 @@
         let grid = '';
         for (let i = 0; i < 64; i++) {
           const x = x0 + (i % 8) * 28 + 14, y = 40 + Math.floor(i / 8) * 28 + 14;
-          // Deck build: nuclei that decay during this half-life change one by one, at random moments.
-          if (on && g && decayed[g].has(i) && !decayed[g - 1].has(i)) {
-            grid += ball(x, y, 11, 'undecayed') + `<g class="pop" style="--d:${f(0.5 + delay() * 2.5)}s">${ball(x, y, 11, 'decayed')}</g>`;
-          } else grid += ball(x, y, 11, decayed[g].has(i) ? 'decayed' : 'undecayed');
+          grid += ball(x, y, 11, decayed[g].has(i) ? 'decayed' : 'undecayed');
         }
         grid += text(x0 + 112, 310, labels[g][0], 'lbl mono strong') + text(x0 + 112, 340, labels[g][1], 'lbl');
+        // Deck build: each later grid appears complete on its own click.
         s += g ? stepG(on, g, grid) : grid;
       });
       return svg('0 0 960 360', s, 'Random decay of 64 nuclei: 33 remain after one half-life and 15 after two, close to but not exactly half each time');
