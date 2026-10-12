@@ -109,7 +109,7 @@
     return `<div class="scroll"><table class="constants"><thead><tr><th>Quantity</th><th>Symbol</th><th>Approximate value</th><th>What it is</th></tr></thead><tbody>${rows}</tbody></table></div>`;
   }
 
-  const multipliersHtml = () => `<div class="scroll"><table class="multipliers"><thead><tr><th>Prefix</th><th>Abbreviation</th><th>Value</th></tr></thead><tbody>${MULTIPLIERS.map(([name, abbr, power]) => `<tr><td>${name}</td><td class="sym">${abbr}</td><td>\\(10^{${power}}\\)</td></tr>`).join('')}</tbody></table></div>`;
+  const multipliersHtml = () => `<ul class="multipliers">${MULTIPLIERS.map(([name, abbr, power]) => `<li><b>${abbr}</b><span>${name}</span>\\(10^{${power}}\\)</li>`).join('')}</ul>`;
 
   const conversionsHtml = () => `<article class="card"><ul class="eqs">${CONVERSIONS.map(([label, tex, note]) => `<li class="eq"><span class="eq-label">${esc(label)}</span>${mathHtml(tex)}<span class="eq-note">${esc(note)}</span></li>`).join('')}</ul></article>`;
 
