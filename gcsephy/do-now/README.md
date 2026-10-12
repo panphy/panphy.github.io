@@ -45,7 +45,7 @@ Each topic's share follows how often it earned recall (AO1) marks in the AQA Hig
 
 ## Worksheet
 
-"Worksheet PDF" builds an A4 sheet from the questions on the board: name, class and date lines, then a two-column table of questions and answer spaces. "Save both PDFs" opens the browser's print dialog twice, first for the worksheet and then for a separate answer key; choose "Save as PDF" each time (cancel either dialog to skip that file). The preview can be switched between the two.
+"Worksheet PDF" builds an A4 sheet from the questions on the board: name, class and date lines, then a two-column table of questions and answer spaces. The preview can be switched between the worksheet and a separate answer key. The save button opens the browser's print dialog for whichever is shown ("Save worksheet PDF" or "Save answer key PDF"); choose "Save as PDF" there.
 
 ## Board shortcuts
 
