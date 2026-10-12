@@ -341,6 +341,12 @@ h3 { font-size: 34px; line-height: 1.15; }
    cannot be mistaken for standard level. .hl-tag marks one HL item on a mixed slide. */
 .slide.hl::before { content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: 16px; background: var(--hl); }
 .slide.hl::after { content: "HL only"; position: absolute; top: 0; right: 88px; padding: 18px 24px 12px; border-radius: 0 0 16px 16px; background: var(--hl); color: var(--hl-ink); font: 700 24px var(--font-mono); letter-spacing: .14em; text-transform: uppercase; }
+/* Presenting fullscreen on a screen that is not 16:9 leaves a margin round the slide. There
+   the bar and flag are drawn on the page instead, so they still reach the screen edges: the
+   bar runs the full height of the screen's left edge and the flag hangs from its top edge. */
+body.is-fullscreen #deck .slide.hl::before, body.is-fullscreen #deck .slide.hl::after { display: none; }
+body.is-fullscreen:has(#deck .slide.hl.active)::before { content: ""; position: fixed; z-index: 25; left: 0; top: 0; bottom: 0; width: calc(16px * var(--deck-scale, 1)); background: var(--hl); }
+body.is-fullscreen:has(#deck .slide.hl.active)::after { content: "HL only"; position: fixed; z-index: 25; top: 0; right: calc(var(--deck-gap-x, 0px) + 88px * var(--deck-scale, 1)); padding: calc(18px * var(--deck-scale, 1)) calc(24px * var(--deck-scale, 1)) calc(12px * var(--deck-scale, 1)); border-radius: 0 0 calc(16px * var(--deck-scale, 1)) calc(16px * var(--deck-scale, 1)); background: var(--hl); color: var(--hl-ink); font: 700 calc(24px * var(--deck-scale, 1)) var(--font-mono); letter-spacing: .14em; text-transform: uppercase; }
 .slide.hl .eyebrow { color: var(--hl-text); }
 .slide.hl h1 span, .slide.hl h2 span { color: var(--hl-text); }
 .slide.hl .slide-foot { color: var(--hl-text); opacity: 1; }

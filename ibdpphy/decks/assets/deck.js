@@ -25,6 +25,10 @@
     const left = (box.width - SLIDE_W * scale) / 2;
     const top = (box.height - SLIDE_H * scale) / 2;
     deck.style.transform = `translate(${left}px, ${top}px) scale(${scale})`;
+    // Where the slide sits on screen, for the HL bar and flag drawn at the screen edges when presenting.
+    const root = document.documentElement.style;
+    root.setProperty('--deck-scale', scale.toFixed(4));
+    root.setProperty('--deck-gap-x', `${Math.max(0, box.left + left).toFixed(1)}px`);
   }
 
   const hiddenSteps = slide => [...slide.querySelectorAll('.step:not(.shown)')];

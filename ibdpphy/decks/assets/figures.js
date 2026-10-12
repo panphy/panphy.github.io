@@ -476,7 +476,7 @@
     deviation: () => {
       let s = arrow(90, 400, 90, 50, 'text-secondary', 2.5) + arrow(90, 400, 690, 400, 'text-secondary', 2.5);
       s += text(390, 446, 'energy of the alpha particles', 'lbl mono');
-      s += text(40, 225, 'number counted ÷ number predicted', 'lbl mono small', 'middle', 'transform="rotate(-90 40 225)"');
+      s += text(40, 225, 'counted, as a fraction of predicted', 'lbl mono small', 'middle', 'transform="rotate(-90 40 225)"');
       s += `<rect x="430" y="60" width="260" height="340" style="fill:var(--hl);opacity:.09"/>`;
       s += `<line x1="90" y1="150" x2="690" y2="150" class="guide"/>` + text(100, 136, '1: matches Rutherford’s formula', 'lbl mono small', 'start');
       s += `<path d="M90,150 L430,150 C480,150 500,190 530,250 C560,310 600,360 680,384" class="curve" style="stroke:var(--alpha)"/>`;
