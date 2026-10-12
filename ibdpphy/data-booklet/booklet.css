@@ -14,7 +14,7 @@
 .key dt { text-align: right; }
 .key dd { margin: 0; font-size: .9rem; color: var(--muted); }
 
-table.constants td.sym, table.multipliers td.sym { font-size: 1.15rem; white-space: nowrap; }
+table.constants td.sym { font-size: 1.15rem; white-space: nowrap; }
 table.constants td.what { color: var(--muted); font-size: .88rem; min-width: 16rem; }
 table.constants td.value .eq-math { padding: 0; font-size: 1rem; }
 /* On a narrow screen each constant is a block: name and symbol, then its value, then what it is. */
@@ -27,8 +27,12 @@ table.constants td.value .eq-math { padding: 0; font-size: 1rem; }
   table.constants td.name { font-weight: 700; }
   table.constants td.value, table.constants td.what { grid-column: 1 / -1; min-width: 0; }
 }
-table.multipliers { max-width: 520px; }
-table.multipliers td.sym { font-family: var(--mono); font-weight: 600; }
+/* Fourteen prefixes: seven to a row on a wide screen, so the large ones sit above the small ones. */
+.multipliers { list-style: none; margin: 18px 0 0; padding: 0; display: grid; gap: 10px; grid-template-columns: repeat(auto-fill, minmax(min(100%, 96px), 1fr)); }
+@media (min-width: 1000px) { .multipliers { grid-template-columns: repeat(7, 1fr); } }
+.multipliers li { display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 12px 8px; border: 1.5px solid var(--line); border-radius: 16px; background: var(--card); text-align: center; }
+.multipliers b { font: 700 1.5rem/1.2 var(--mono); color: var(--teal); }
+.multipliers span { font-size: .9rem; color: var(--muted); }
 
 .symbols { margin-top: 18px; display: grid; gap: 14px; grid-template-columns: repeat(auto-fill, minmax(min(100%, 200px), 1fr)); }
 .symbols figure { margin: 0; padding: 14px 14px 12px; border: 1.5px solid var(--line); border-radius: 16px; background: var(--card); text-align: center; }
