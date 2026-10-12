@@ -1,0 +1,1025 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="robots" content="noindex, nofollow">
+  <meta name="description" content="Teaching slides for IB Diploma Programme Physics topic A.1 Kinematics: describing motion, motion graphs, the equations of motion, projectiles and fluid resistance.">
+  <meta name="theme-color" content="#F8F6F1">
+  <script src="/assets/theme.js"></script>
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <link rel="stylesheet" href="/assets/standalone-top.css">
+  <title>A.1 Kinematics · IB DP Physics</title>
+  <link rel="icon" type="image/png" href="/assets/favicon.png">
+  <link rel="apple-touch-icon" href="/assets/apple-touch-icon.png">
+  <link rel="stylesheet" href="../assets/deck.css">
+  <link rel="stylesheet" href="../assets/deck-notes.css">
+  <link rel="stylesheet" href="/assets/theme-toggle.css">
+  <link rel="stylesheet" href="/assets/fullscreen-button.css">
+  <script src="/assets/theme-toggle.js"></script>
+  <script src="/ibdpphy/sw-register.js" defer></script>
+</head>
+<body>
+  <header class="banner">
+    <a class="banner-logo" href="/" aria-label="PanPhy Labs home"><img src="/assets/panphy.png" alt="PanPhy Labs" width="38" height="38"></a>
+    <a class="banner-title" href="#1">A.1 Kinematics</a>
+    <div class="banner-actions">
+      <button id="thumbs-toggle" class="icon-button" type="button" aria-controls="thumbs" aria-pressed="true" aria-label="Hide slide thumbnails" title="Show or hide slide thumbnails (T)"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path class="pane" d="M9.5 4.5H6A2.5 2.5 0 0 0 3.5 7v10A2.5 2.5 0 0 0 6 19.5h3.5z"/><rect x="3.5" y="4.5" width="17" height="15" rx="2.5"/><path d="M9.5 4.5v15"/></svg></button>
+      <button id="fullscreen" class="panphy-fullscreen-button" type="button" aria-pressed="false" aria-label="Present fullscreen" title="Present fullscreen (F)"><svg class="panphy-fs-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M4 9V4h5M15 4h5v5M20 15v5h-5M9 20H4v-5"/></svg></button>
+      <button id="theme-button" type="button" data-panphy-theme-toggle aria-label="Toggle light/dark theme" title="Toggle between light and dark themes"></button>
+    </div>
+  </header>
+  <script>window.PanPhyThemeToggle.mount(document.getElementById('theme-button'));</script>
+
+  <nav class="thumbs" id="thumbs" aria-label="Slides"></nav>
+
+  <main class="stage" id="stage">
+    <div class="deck" id="deck">
+
+      <!-- 1 · Title -->
+      <section class="slide title" data-title="A.1 Kinematics">
+        <div class="title-grid">
+          <div>
+            <p class="eyebrow">IB DP Physics · Theme A · Space, time and motion</p>
+            <h1>Kinematics<span>.</span></h1>
+            <p class="lead">A.1 · Describing motion, equations of motion, projectiles<br>Standard level and higher level</p>
+            <div class="chips">
+              <span class="chip">SL + HL · 9 hours</span>
+              <a class="chip on" href="/tools/motion_tracker.html" target="_blank" rel="noopener">Motion Tracker ↗</a>
+            </div>
+          </div>
+          <div class="fig" data-fig="kin-hero"></div>
+        </div>
+      </section>
+
+      <section class="slide" data-title="Lesson map">
+        <p class="eyebrow">The journey</p>
+        <h2>Four parts<span>.</span></h2>
+        <div class="cards fill" style="grid-template-columns: repeat(4, 1fr);">
+          <div class="card">
+            <div class="fig" data-fig="path-displacement" style="height: 190px;"></div>
+            <p class="eyebrow">Part 01</p>
+            <h3>Describing motion</h3>
+            <p>Displacement, velocity, acceleration</p>
+          </div>
+          <div class="card">
+            <div class="fig" data-fig="st-graph" style="height: 190px;"></div>
+            <p class="eyebrow">Part 02</p>
+            <h3>Motion graphs</h3>
+            <p>What the gradient and the area mean</p>
+          </div>
+          <div class="card">
+            <div class="fig" data-fig="suvat-area" style="height: 190px;"></div>
+            <p class="eyebrow">Part 03</p>
+            <h3>Equations of motion</h3>
+            <p>Four equations for constant acceleration</p>
+          </div>
+          <div class="card">
+            <div class="fig" data-fig="drag-path" style="height: 190px;"></div>
+            <p class="eyebrow">Part 04</p>
+            <h3>Projectiles</h3>
+            <p>Two motions at once, then air resistance</p>
+          </div>
+        </div>
+        <div class="idea" style="margin-top: 22px;">Every slide is for SL and HL: A.1 has no additional higher level content.</div>
+        <div class="slide-foot"><span>A.1 KINEMATICS · SL + HL</span><span data-page></span></div>
+      </section>
+
+      <!-- Part 1 -->
+      <section class="slide section" data-title="Part 1: Describing motion">
+        <div class="title-grid">
+          <div>
+            <p class="eyebrow">Part 01 · SL + HL</p>
+            <h1>Describing motion<span>.</span></h1>
+            <p class="lead">Where is it, how fast, and how is that changing?</p>
+          </div>
+          <div class="fig" data-fig="path-displacement"></div>
+        </div>
+        <div class="slide-foot"><span>A.1 KINEMATICS · SL + HL</span><span data-page></span></div>
+      </section>
+
+      <section class="slide" data-title="Distance and displacement">
+        <p class="eyebrow">Where is it?</p>
+        <h2>Distance and displacement<span>.</span></h2>
+        <div class="split">
+          <ul class="points">
+            <li><b>Position</b>: where a body is, measured from a chosen origin</li>
+            <li><b>Distance</b>: the length of the path travelled. A <b>scalar</b></li>
+            <li><b>Displacement</b>: the change in position. A <b>vector</b>, with a direction</li>
+          </ul>
+          <div class="panel">
+            <div class="panel-head"><span>ONE JOURNEY, TWO MEASURES</span></div>
+            <div class="fig" data-fig="path-displacement"></div>
+          </div>
+        </div>
+        <div class="slide-foot"><span>A.1 KINEMATICS · SL + HL</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>A lap of a running track.</b> One lap is a distance of 400 m. The runner ends where they began, so the displacement is zero. Half a lap is 200 m of distance, but the displacement is only the straight line across the track, which is much shorter.</p>
+            <p><b>Direction in a straight line.</b> Along one line there are only two directions, so a plus or minus sign carries the direction. Choose which way is positive at the start of a problem and keep to it: a displacement of \(-3 \,\mathrm{m}\) then means 3 m the other way.</p>
+          </div>
+          <div class="rn-side">
+            <p class="tip">Distance can only grow as a journey goes on. Displacement can grow, shrink, pass through zero and become negative.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide" data-title="Speed and velocity">
+        <p class="eyebrow">How fast?</p>
+        <h2>Speed and velocity<span>.</span></h2>
+        <div class="split even">
+          <div class="stack">
+            <ul class="points">
+              <li><b>Speed</b>: rate of change of <b>distance</b>. A scalar</li>
+              <li><b>Velocity</b>: rate of change of <b>displacement</b>. A vector</li>
+            </ul>
+            <div class="equation"><span>\(v = \dfrac{\Delta s}{\Delta t}\)</span></div>
+          </div>
+          <div class="work step">
+            <span class="say">One 400 m lap in 50 s</span>
+            <span>Average speed \(= \dfrac{400}{50} = \class{res}{8.0 \,\mathrm{m} \,\mathrm{s}^{-1}}\)</span>
+            <span class="step">Displacement \(= 0\)</span>
+            <span class="step">Average velocity \(= \dfrac{0}{50} = \class{res}{0}\)</span>
+          </div>
+        </div>
+        <div class="slide-foot"><span>A.1 KINEMATICS · SL + HL</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>Velocity can change while speed does not.</b> A car rounding a bend at a steady 20 m s⁻¹ keeps the same speed, but its direction is changing, so its velocity is changing. That is why circular motion in A.2 counts as accelerated motion.</p>
+            <p><b>A negative velocity is not a low velocity.</b> With east as positive, \(-15 \,\mathrm{m} \,\mathrm{s}^{-1}\) is 15 m s⁻¹ towards the west. The sign is the direction; the size is the speed.</p>
+          </div>
+          <div class="rn-side">
+            <p class="tip">\(\Delta\) means “change in”: the final value minus the initial value. \(\Delta s\) is a displacement, not a position.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide" data-title="Average and instantaneous">
+        <p class="eyebrow">Over a journey, or at a moment?</p>
+        <h2>Average and instantaneous<span>.</span></h2>
+        <div class="split wide-fig">
+          <ul class="points small">
+            <li><b>Average</b> velocity: the whole displacement divided by the whole time</li>
+            <li><b>Instantaneous</b> velocity: the velocity at one moment</li>
+            <li class="step">On a displacement–time graph: a <b>chord</b> gives the average, a <b>tangent</b> the instantaneous</li>
+          </ul>
+          <div class="panel">
+            <div class="panel-head"><span>DISPLACEMENT AGAINST TIME</span></div>
+            <div class="fig" data-fig="chord-tangent"></div>
+          </div>
+        </div>
+        <div class="slide-foot"><span>A.1 KINEMATICS · SL + HL</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>How the two are connected.</b> Take the average over a shorter and shorter time around one moment. The two ends of the chord close in on each other and the chord swings round until it lies along the tangent. Instantaneous velocity is the average velocity over a time interval too short to matter.</p>
+            <p><b>In a car.</b> The speedometer shows instantaneous speed. Distance for the trip divided by the time it took is the average speed. A journey at an average of 60 km h⁻¹ can include stops and stretches at 100 km h⁻¹.</p>
+          </div>
+          <div class="rn-side">
+            <p class="tip">To draw a tangent, lay the ruler so that it touches the curve at the point with equal small gaps either side. Make the triangle for its gradient as large as the graph allows.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide history" data-title="Story: freezing a gallop">
+        <p class="eyebrow">The story · Palo Alto, California, 1878</p>
+        <p class="not-examined">Background story · not assessed</p>
+        <h2>Freezing a gallop<span>.</span></h2>
+        <div class="story band" style="--photo-h: 340px;">
+          <div class="story-photos">
+            <figure><img src="images/horse-in-motion.jpg" width="960" height="592" alt="A printed card of twelve photographs in three rows, eleven showing the silhouette of a galloping horse and rider at successive points of its stride against a wall marked with vertical lines, and the last showing the horse standing still"><figcaption><b>The Horse in Motion</b>: the mare Sallie Gardner on Leland Stanford’s track, 19 June 1878</figcaption></figure>
+          </div>
+          <ul class="points">
+            <li>Do all four hooves of a galloping horse leave the ground <b>at once</b>? No eye was quick enough</li>
+            <li>Eadweard Muybridge set <b>12 cameras</b> beside the track, each triggered in turn as the horse passed</li>
+            <li>The answer was <b>yes</b>. The frames are <b>27 inches</b> and about <b>1/25 s</b> apart: a speed of about <b>17 m s⁻¹</b></li>
+          </ul>
+        </div>
+        <p class="credits">Photographs: <a href="https://commons.wikimedia.org/wiki/File:The_Horse_in_Motion_high_res.jpg" target="_blank" rel="noopener">Eadweard Muybridge, Library of Congress</a>, public domain.</p>
+        <div class="slide-foot"><span>A.1 KINEMATICS · SL + HL</span><span data-page></span></div>
+      </section>
+
+      <section class="slide" data-title="Acceleration">
+        <p class="eyebrow">How is the velocity changing?</p>
+        <h2>Acceleration<span>.</span></h2>
+        <div class="split even">
+          <div class="stack">
+            <div class="equation"><span>\(a = \dfrac{\Delta v}{\Delta t} = \dfrac{v - u}{t}\)</span></div>
+            <ul class="points small">
+              <li>The rate of change of <b>velocity</b>. A vector</li>
+              <li>\(u\): initial velocity, \(v\): final velocity</li>
+              <li class="step"><b>Uniform</b> acceleration: the same at every moment</li>
+            </ul>
+          </div>
+          <div class="work step">
+            <span class="say">A car goes from 12 to 30 m s⁻¹ in 6.0 s</span>
+            <span>\(a = \dfrac{30 - 12}{6.0} = \class{res}{3.0 \,\mathrm{m} \,\mathrm{s}^{-2}}\)</span>
+            <span class="say step">Then brakes from 30 to 10 m s⁻¹ in 4.0 s</span>
+            <span class="step">\(a = \dfrac{10 - 30}{4.0} = \class{res}{-5.0 \,\mathrm{m} \,\mathrm{s}^{-2}}\)</span>
+          </div>
+        </div>
+        <div class="slide-foot"><span>A.1 KINEMATICS · SL + HL</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>What the unit says.</b> \(3.0 \,\mathrm{m} \,\mathrm{s}^{-2}\) means the velocity rises by 3.0 m s⁻¹ in every second: 12, 15, 18, 21 and so on.</p>
+            <p><b>What the sign says.</b> The sign of an acceleration is its direction, not whether the body is speeding up. Compare it with the sign of the velocity. Same sign: the speed increases. Opposite signs: the speed decreases. A ball thrown upwards has a downward acceleration the whole time: it slows on the way up and speeds up on the way down.</p>
+          </div>
+          <div class="rn-side">
+            <p class="trap">Reading every negative acceleration as “slowing down”. A body moving in the negative direction with a negative acceleration is getting faster.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide" data-title="Scalars and vectors of motion">
+        <p class="eyebrow">Summary of part 1</p>
+        <h2>Five quantities<span>.</span></h2>
+        <div class="stack center">
+          <table class="facts big">
+            <thead><tr><th>Quantity</th><th>Scalar or vector?</th><th>Unit</th><th>Tells you</th></tr></thead>
+            <tbody>
+              <tr><td>Distance</td><td>Scalar</td><td class="num">m</td><td>How far along the path</td></tr>
+              <tr><td>Displacement</td><td>Vector</td><td class="num">m</td><td>How far from the start, and which way</td></tr>
+              <tr><td>Speed</td><td>Scalar</td><td class="num">m s⁻¹</td><td>How fast</td></tr>
+              <tr><td>Velocity</td><td>Vector</td><td class="num">m s⁻¹</td><td>How fast, and which way</td></tr>
+              <tr><td>Acceleration</td><td>Vector</td><td class="num">m s⁻²</td><td>How quickly the velocity changes</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="slide-foot"><span>A.1 KINEMATICS · SL + HL</span><span data-page></span></div>
+      </section>
+
+      <!-- Part 2 -->
+      <section class="slide section" data-title="Part 2: Motion graphs">
+        <div class="title-grid">
+          <div>
+            <p class="eyebrow">Part 02 · SL + HL</p>
+            <h1>Motion graphs<span>.</span></h1>
+            <p class="lead">The gradient and the area tell the whole story</p>
+          </div>
+          <div class="fig" data-fig="vt-graph"></div>
+        </div>
+        <div class="slide-foot"><span>A.1 KINEMATICS · SL + HL</span><span data-page></span></div>
+      </section>
+
+      <section class="slide" data-title="Displacement–time graphs">
+        <p class="eyebrow">Graph 1</p>
+        <h2>Displacement–time graphs<span>.</span></h2>
+        <div class="split">
+          <ul class="points">
+            <li><b>Gradient = velocity</b></li>
+            <li>Straight line: <b>constant</b> velocity</li>
+            <li>Flat: <b>at rest</b></li>
+            <li>Curve: the velocity is <b>changing</b></li>
+          </ul>
+          <div class="panel">
+            <div class="panel-head"><span>DISPLACEMENT AGAINST TIME</span></div>
+            <div class="fig" data-fig="st-graph"></div>
+          </div>
+        </div>
+        <div class="slide-foot"><span>A.1 KINEMATICS · SL + HL</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>Why the gradient is the velocity.</b> A gradient is rise over run. Here the rise is a change in displacement and the run is the time it took, and \(\frac{\Delta s}{\Delta t}\) is the definition of velocity. Its unit confirms it: metres divided by seconds.</p>
+            <p><b>A falling line.</b> The displacement is getting smaller, so the body is heading back towards the origin. The gradient is negative and so is the velocity. Where the line crosses the time axis the body passes its starting point.</p>
+          </div>
+          <div class="rn-side">
+            <p class="trap">Treating the graph as a picture of the path. A line that rises and falls can describe a body that only ever moves along one straight road.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide" data-title="Velocity–time graphs">
+        <p class="eyebrow">Graph 2</p>
+        <h2>Velocity–time graphs<span>.</span></h2>
+        <div class="split">
+          <ul class="points">
+            <li><b>Gradient = acceleration</b></li>
+            <li><b>Area under the graph = displacement</b></li>
+            <li>Flat: constant velocity, <b>not</b> at rest</li>
+            <li class="step">Below the time axis: moving the other way</li>
+          </ul>
+          <div class="panel">
+            <div class="panel-head"><span>VELOCITY AGAINST TIME</span></div>
+            <div class="fig" data-fig="vt-graph"></div>
+          </div>
+        </div>
+        <div class="slide-foot"><span>A.1 KINEMATICS · SL + HL</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>Why the area is the displacement.</b> At a constant velocity, displacement is velocity × time, which is the height × width of a rectangle under the line. When the velocity changes, cut the time into thin strips. In each strip the velocity hardly changes, so each strip’s area is the displacement in that short time. Add the strips and you have the whole area.</p>
+            <p><b>Area below the axis.</b> It counts as negative displacement: the body is coming back. Add areas with their signs for the displacement. Add them all as positive for the distance travelled.</p>
+          </div>
+          <div class="rn-side">
+            <p class="trap">Reading a flat line as “stopped”. On a velocity–time graph only the time axis itself means at rest.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide" data-title="Three graphs of one motion">
+        <p class="eyebrow">Linking the graphs</p>
+        <h2>Three graphs, one motion<span>.</span></h2>
+        <div class="stack center" style="gap: 26px;">
+          <div class="panel">
+            <div class="panel-head"><span>UNIFORM ACCELERATION FROM REST</span></div>
+            <div class="fig" data-fig="three-graphs" style="height: 430px;"></div>
+          </div>
+          <div class="idea step">Area under an <b>acceleration–time</b> graph = the <b>change in velocity</b>.</div>
+        </div>
+        <div class="slide-foot"><span>A.1 KINEMATICS · SL + HL</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>Reading left to right.</b> The displacement curve gets steeper at a steady rate, so its gradient, the velocity, is a straight rising line. That line has one fixed gradient, so the acceleration is a horizontal line.</p>
+            <p><b>Reading right to left.</b> An area gives only a <b>change</b>. The area under the acceleration graph tells you how much the velocity changed, not what it is: you also need the velocity at the start. In the same way, the area under the velocity graph gives the displacement from wherever the body started.</p>
+          </div>
+          <div class="rn-side">
+            <p class="tip">Asked to sketch one graph from another, mark the special moments first: where the gradient is zero, the next graph crosses its axis.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide" data-title="Non-uniform acceleration">
+        <p class="eyebrow">When the acceleration changes</p>
+        <h2>Non-uniform acceleration<span>.</span></h2>
+        <div class="split wide-fig">
+          <div class="stack">
+            <ul class="points small">
+              <li>The velocity–time graph is a <b>curve</b></li>
+              <li>Acceleration at one moment: gradient of the <b>tangent</b></li>
+              <li>Displacement: still the <b>area</b>. Count squares</li>
+            </ul>
+            <div class="idea step">The equations of motion in part 3 do <b>not</b> apply.</div>
+          </div>
+          <div class="panel">
+            <div class="panel-head"><span>VELOCITY AGAINST TIME</span></div>
+            <div class="fig" data-fig="vt-curve"></div>
+          </div>
+        </div>
+        <div class="slide-foot"><span>A.1 KINEMATICS · SL + HL</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>Counting squares properly.</b> First find what one square is worth: its height in m s⁻¹ times its width in s. A square 2 m s⁻¹ high and 0.5 s wide is worth 1 m. Count the whole squares, then pair up part squares, counting those more than half full and ignoring the rest. Multiply the count by the value of one square.</p>
+            <p><b>Where this happens.</b> A falling object with air resistance, a car pulling away, a sprinter leaving the blocks: in each the acceleration is large at first and fades. Part 4 returns to the falling object.</p>
+          </div>
+          <div class="rn-side">
+            <p class="tip">A quick check on a square count: the area must lie between the largest triangle that fits under the curve and the rectangle that encloses it.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide" data-title="Motion graph: worked example">
+        <p class="eyebrow">Worked example</p>
+        <h2>Reading a journey<span>.</span></h2>
+        <div class="split even">
+          <div class="work">
+            <span class="say">First 4 s</span>
+            <span>\(a = \dfrac{12 - 0}{4.0} = \class{res}{3.0 \,\mathrm{m} \,\mathrm{s}^{-2}}\)</span>
+            <span class="say step">Last 3 s</span>
+            <span class="step">\(a = \dfrac{0 - 12}{3.0} = \class{res}{-4.0 \,\mathrm{m} \,\mathrm{s}^{-2}}\)</span>
+            <span class="say step">Whole journey: area</span>
+            <span class="step">\(s = 24 + 72 + 18 = \class{res}{114 \,\mathrm{m}}\)</span>
+            <span class="step">Average speed \(= \dfrac{114}{13} = \class{res}{8.8 \,\mathrm{m} \,\mathrm{s}^{-1}}\)</span>
+          </div>
+          <div class="panel">
+            <div class="panel-head"><span>A SHORT CAR JOURNEY</span></div>
+            <div class="fig" data-fig="vt-graph" data-numbers></div>
+          </div>
+        </div>
+        <div class="slide-foot"><span>A.1 KINEMATICS · SL + HL</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>The three areas.</b> Triangle: \(\frac{1}{2} \times 4.0 \times 12 = 24 \,\mathrm{m}\). Rectangle: \(6.0 \times 12 = 72 \,\mathrm{m}\). Triangle: \(\frac{1}{2} \times 3.0 \times 12 = 18 \,\mathrm{m}\).</p>
+            <p><b>A faster route.</b> The whole shape is a trapezium with parallel sides 13 s and 6 s, and height 12 m s⁻¹: \(\frac{1}{2}(13 + 6) \times 12 = 114 \,\mathrm{m}\).</p>
+          </div>
+          <div class="rn-side">
+            <p class="trap">Taking the average speed as half of 12 m s⁻¹. That works only when the velocity changes steadily for the whole time. Here the car spends 6 s at full speed, so the average is higher.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide" data-title="Quick check: describing motion">
+        <p class="eyebrow">Quick check</p>
+        <h2>Describing motion<span>.</span></h2>
+        <div class="quiz fill">
+          <div class="q"><p><span class="n">01</span>A swimmer swims two 25 m lengths, there and back. Distance? Displacement?</p><div class="ans step">50 m and zero</div></div>
+          <div class="q"><p><span class="n">02</span>What does the gradient of a displacement–time graph give?</p><div class="ans step">Velocity</div></div>
+          <div class="q"><p><span class="n">03</span>What does the area under a velocity–time graph give?</p><div class="ans step">Displacement</div></div>
+          <div class="q"><p><span class="n">04</span>A train goes from 8 to 20 m s⁻¹ in 30 s. Acceleration?</p><div class="ans step">\(\frac{20 - 8}{30} = 0.40 \,\mathrm{m} \,\mathrm{s}^{-2}\)</div></div>
+          <div class="q"><p><span class="n">05</span>Velocity −6 m s⁻¹, acceleration −2 m s⁻². Speeding up or slowing?</p><div class="ans step">Speeding up: same sign</div></div>
+          <div class="q"><p><span class="n">06</span>How do you find instantaneous velocity from a curved displacement–time graph?</p><div class="ans step">Gradient of the tangent at that time</div></div>
+        </div>
+        <div class="slide-foot"><span class="reveal-hint">PRESS → TO REVEAL EACH ANSWER</span><span data-page></span></div>
+      </section>
+
+      <!-- Part 3 -->
+      <section class="slide section" data-title="Part 3: Equations of motion">
+        <div class="title-grid">
+          <div>
+            <p class="eyebrow">Part 03 · SL + HL</p>
+            <h1>Equations of motion<span>.</span></h1>
+            <p class="lead">Four equations for uniform acceleration</p>
+          </div>
+          <div class="fig" data-fig="suvat-area"></div>
+        </div>
+        <div class="slide-foot"><span>A.1 KINEMATICS · SL + HL</span><span data-page></span></div>
+      </section>
+
+      <section class="slide history" data-title="Story: Galileo slows down a fall">
+        <p class="eyebrow">The story · Italy, published 1638</p>
+        <p class="not-examined">Background story · not assessed</p>
+        <h2>Galileo slows down a fall<span>.</span></h2>
+        <div class="story" style="--photo-h: 300px;">
+          <div class="story-photos">
+            <figure><img src="images/galileo.jpg" width="500" height="667" alt="Painted portrait of Galileo, an old man with a white beard looking upwards"><figcaption><b>Galileo Galilei</b>, from a portrait by Justus Sustermans</figcaption></figure>
+            <figure><img src="images/inclined-plane.jpg" width="960" height="855" alt="A long wooden ramp with a groove along its top edge and five small brass bells mounted along it at increasing distances"><figcaption>A demonstration <b>inclined plane</b>, Florence, early 1800s. The ball rings each bell in turn, at <b>equal time intervals</b></figcaption></figure>
+          </div>
+          <div class="stack">
+            <ul class="points">
+              <li>A falling body was too fast to time. So Galileo <b>slowed it down</b>: a bronze ball rolling down a gentle slope</li>
+              <li>His clock: he <b>weighed the water</b> that ran from a tank during each run</li>
+              <li>Twice the time: <b>four times</b> the distance</li>
+              <li>1638: published in his last book, <b>Two New Sciences</b></li>
+            </ul>
+            <div class="idea">Uniform acceleration, found by <b>measuring</b>.</div>
+          </div>
+        </div>
+        <p class="credits">Portrait: <a href="https://commons.wikimedia.org/wiki/File:Justus_Sustermans_-_Portrait_of_Galileo_Galilei,_1636_(cropped).jpg" target="_blank" rel="noopener">Justus Sustermans</a>, public domain. Inclined plane: <a href="https://commons.wikimedia.org/wiki/File:Piano_inclinato_inv_1041_IF_21341.jpg" target="_blank" rel="noopener">Museo Galileo</a>, <a href="https://creativecommons.org/licenses/by-sa/4.0/" target="_blank" rel="noopener">CC BY-SA 4.0</a>.</p>
+        <div class="slide-foot"><span>A.1 KINEMATICS · SL + HL</span><span data-page></span></div>
+      </section>
+
+      <section class="slide" data-title="Where the equations come from">
+        <p class="eyebrow">From the velocity–time graph</p>
+        <h2>Where the equations come from<span>.</span></h2>
+        <div class="split">
+          <div class="work">
+            <span class="say">Gradient = acceleration</span>
+            <span>\(a = \dfrac{v - u}{t}\) &nbsp;so&nbsp; \(\class{res}{v = u + at}\)</span>
+            <span class="say step">Area = displacement: rectangle + triangle</span>
+            <span class="step">\(\class{res}{s = ut + \tfrac{1}{2}at^{2}}\)</span>
+            <span class="say step">Area = displacement: a trapezium</span>
+            <span class="step">\(\class{res}{s = \dfrac{u + v}{2}t}\)</span>
+          </div>
+          <div class="panel">
+            <div class="panel-head"><span>UNIFORM ACCELERATION FROM u TO v</span></div>
+            <div class="fig" data-fig="suvat-area"></div>
+          </div>
+        </div>
+        <div class="slide-foot"><span>A.1 KINEMATICS · SL + HL</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>The triangle.</b> Its base is \(t\) and its height is the gain in velocity, \(v - u\), which is \(at\). Half base times height gives \(\frac{1}{2} \times t \times at = \frac{1}{2}at^{2}\).</p>
+            <p><b>The fourth equation.</b> It has no \(t\) in it. From the first, \(t = \frac{v - u}{a}\). Put that into \(s = \frac{u + v}{2}t\): \(s = \frac{(v + u)(v - u)}{2a} = \frac{v^{2} - u^{2}}{2a}\), which rearranges to \(v^{2} = u^{2} + 2as\).</p>
+            <p><b>What the trapezium says.</b> \(\frac{u + v}{2}\) is the average velocity when the velocity changes steadily. Displacement is average velocity × time.</p>
+          </div>
+          <div class="rn-side">
+            <p class="tip">You do not have to derive these in an examination: all four are in the data booklet. Knowing where they come from tells you when they can be used.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide" data-title="The four equations">
+        <p class="eyebrow">Uniform acceleration in a straight line</p>
+        <h2>The four equations<span>.</span></h2>
+        <div class="stack center">
+          <table class="facts big">
+            <thead><tr><th>Equation</th><th>Leaves out</th><th>Use it when…</th></tr></thead>
+            <tbody>
+              <tr><td>\(s = \dfrac{u + v}{2}t\)</td><td class="num">\(a\)</td><td>the acceleration is not given or wanted</td></tr>
+              <tr><td>\(v = u + at\)</td><td class="num">\(s\)</td><td>the displacement is not given or wanted</td></tr>
+              <tr><td>\(s = ut + \tfrac{1}{2}at^{2}\)</td><td class="num">\(v\)</td><td>the final velocity is not given or wanted</td></tr>
+              <tr><td>\(v^{2} = u^{2} + 2as\)</td><td class="num">\(t\)</td><td>the time is not given or wanted</td></tr>
+            </tbody>
+          </table>
+          <div class="idea step">Five quantities: \(s\), \(u\), \(v\), \(a\), \(t\). Know <b>three</b>, and you can find the other two.</div>
+        </div>
+        <div class="slide-foot"><span>A.1 KINEMATICS · SL + HL</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>Why three are enough.</b> Each equation links four of the five quantities. With three known, the equation that contains those three and the one you want has a single unknown.</p>
+            <p><b>The condition.</b> Every one of these was built on a straight velocity–time line. If the acceleration changes during the motion, split the motion into stages that each have a constant acceleration and treat them one at a time. The final velocity of one stage is the initial velocity of the next.</p>
+          </div>
+          <div class="rn-side">
+            <p class="tip">\(s\) is displacement, not distance. If a body turns round during the motion, \(s\) is still measured from the start in a straight line.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide" data-title="Solving a problem">
+        <p class="eyebrow">A method that always works</p>
+        <h2>Solving a problem<span>.</span></h2>
+        <div class="cards fill" style="grid-template-columns: 1fr 1fr; align-content: center;">
+          <div class="card"><p class="eyebrow">01 · Direction</p><h3>Choose which way is positive</h3><p>Anything pointing the other way is negative</p></div>
+          <div class="card step"><p class="eyebrow">02 · List</p><h3>Write down \(s\), \(u\), \(v\), \(a\), \(t\)</h3><p>Fill in the three you know and mark the one you want</p></div>
+          <div class="card step"><p class="eyebrow">03 · Choose</p><h3>Pick the equation</h3><p>The one without the quantity you neither know nor want</p></div>
+          <div class="card step"><p class="eyebrow">04 · Solve</p><h3>Substitute, with signs</h3><p>Then give the answer a unit and a direction</p></div>
+        </div>
+        <div class="slide-foot"><span>A.1 KINEMATICS · SL + HL</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>Values hidden in the wording.</b> “From rest” and “dropped” mean \(u = 0\). “Comes to rest” and “stops” mean \(v = 0\). “At its highest point” means the vertical velocity is zero. “Returns to where it started” means \(s = 0\). A body moving freely under gravity has \(a = 9.8 \,\mathrm{m} \,\mathrm{s}^{-2}\) downward.</p>
+            <p><b>Why choose a direction first.</b> Displacement, velocity and acceleration are all vectors. If up is positive, a ball on its way down has a negative velocity and an acceleration of \(-9.8 \,\mathrm{m} \,\mathrm{s}^{-2}\). Most wrong answers come from a sign that was never decided.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide" data-title="Equations of motion: braking car">
+        <p class="eyebrow">Worked example</p>
+        <h2>A car brakes to a stop<span>.</span></h2>
+        <div class="split even">
+          <div class="work">
+            <span class="say">\(u = 25 \,\mathrm{m} \,\mathrm{s}^{-1}\) · \(v = 0\) · \(a = -5.0 \,\mathrm{m} \,\mathrm{s}^{-2}\)</span>
+            <span>Distance: no \(t\), so \(v^{2} = u^{2} + 2as\)</span>
+            <span class="step">\(0 = 25^{2} + 2(-5.0)s\)</span>
+            <span class="step">\(s = \dfrac{625}{10} = \class{res}{62.5 \,\mathrm{m}}\)</span>
+            <span class="step">Time: \(v = u + at\) &nbsp;so&nbsp; \(t = \dfrac{25}{5.0} = \class{res}{5.0 \,\mathrm{s}}\)</span>
+          </div>
+          <div class="stack center">
+            <ul class="points">
+              <li class="step">Check: \(s = \dfrac{u + v}{2}t = 12.5 \times 5.0 = 62.5 \,\mathrm{m}\)</li>
+              <li class="step">At <b>twice</b> the speed: <b>four times</b> the distance</li>
+            </ul>
+          </div>
+        </div>
+        <div class="slide-foot"><span>A.1 KINEMATICS · SL + HL</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>Why four times.</b> With \(v = 0\), the equation gives \(s = \frac{u^{2}}{2 \times 5.0}\): the braking distance depends on the <b>square</b> of the starting speed. At 50 m s⁻¹ it is \(\frac{2500}{10} = 250 \,\mathrm{m}\). The time to stop only doubles, but the average speed during the stop doubles too.</p>
+            <p><b>The sign of the acceleration.</b> The car moves in the positive direction and slows, so the acceleration is negative. Leaving the minus sign out gives a negative distance: a sign that something was set up wrongly.</p>
+          </div>
+          <div class="rn-side">
+            <p class="more">This is braking distance only. The distance a car travels while the driver is still reacting is covered at constant speed and has to be added.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide" data-title="Free fall">
+        <p class="eyebrow">Motion under gravity alone</p>
+        <h2>Free fall<span>.</span></h2>
+        <div class="split">
+          <div class="stack">
+            <ul class="points">
+              <li>With no air resistance, <b>every</b> body falls with the same acceleration</li>
+              <li>Near the Earth’s surface: \(\class{res}{g = 9.8 \,\mathrm{m} \,\mathrm{s}^{-2}}\), downward</li>
+              <li class="step">It is the same on the way <b>up</b>, at the <b>top</b> and on the way <b>down</b></li>
+            </ul>
+          </div>
+          <div class="panel">
+            <div class="panel-head"><span>FALLING FROM REST</span><span class="pill">EQUAL TIME STEPS</span></div>
+            <div class="fig" data-fig="free-fall"></div>
+          </div>
+        </div>
+        <div class="slide-foot"><span>A.1 KINEMATICS · SL + HL</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>Why 1, 4, 9, 16.</b> From rest, \(s = \frac{1}{2}gt^{2}\): the distance fallen depends on the square of the time. After 1 s a body has fallen 4.9 m, after 2 s 19.6 m, after 3 s 44.1 m. Its velocity rises by 9.8 m s⁻¹ every second.</p>
+            <p><b>Mass does not matter.</b> A heavier body is pulled harder but is also harder to accelerate, and the two effects cancel exactly. In air a feather falls slowly only because air resistance is large compared with its weight. The next slide shows the same test done where there is no air at all.</p>
+          </div>
+          <div class="rn-side">
+            <p class="tip">Use the data booklet value, 9.8 m s⁻². In this topic \(g\) is treated as constant: the heights involved are tiny compared with the radius of the Earth.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide history" data-title="Story: a hammer and a feather on the Moon">
+        <p class="eyebrow">The story · The Moon, 2 August 1971</p>
+        <p class="not-examined">Background story · not assessed</p>
+        <h2>A hammer and a feather on the Moon<span>.</span></h2>
+        <div class="story" style="--photo-h: 300px;">
+          <div class="story-photos">
+            <figure><img src="images/scott.jpg" width="500" height="666" alt="Portrait of astronaut David Scott in a white spacesuit, holding his helmet"><figcaption><b>David Scott</b>, commander of Apollo 15</figcaption></figure>
+            <figure><img src="images/apollo15-hammer-feather.jpg" width="960" height="830" alt="A blurred colour television picture of an astronaut in a white spacesuit standing on the lunar surface in front of the lunar module"><figcaption>From the <b>television broadcast</b>: Scott watches the hammer and the feather reach the ground</figcaption></figure>
+          </div>
+          <div class="stack">
+            <ul class="points">
+              <li>The last minutes of the last moonwalk of <b>Apollo 15</b></li>
+              <li>In one hand a <b>1.32 kg</b> hammer. In the other a <b>falcon feather</b></li>
+              <li>He lets go of both from about <b>1.6 m</b></li>
+              <li>They fall side by side and <b>land together</b></li>
+            </ul>
+            <div class="idea">With no air, <b>mass makes no difference</b>.</div>
+          </div>
+        </div>
+        <p class="credits">Photos: <a href="https://commons.wikimedia.org/wiki/File:Dave_Scott_Apollo_15_CDR_(3x4_cropped).jpg" target="_blank" rel="noopener">NASA</a> and <a href="https://commons.wikimedia.org/wiki/File:Astronaut_David_Scott_watching_hammer_and_feather_fall_to_lunar_surface_(S71-43788).jpg" target="_blank" rel="noopener">NASA Johnson Space Center</a>, public domain.</p>
+        <div class="slide-foot"><span>A.1 KINEMATICS · SL + HL</span><span data-page></span></div>
+      </section>
+
+      <section class="slide" data-title="Equations of motion: thrown upwards">
+        <p class="eyebrow">Worked example</p>
+        <h2>A ball thrown straight up<span>.</span></h2>
+        <div class="split even">
+          <div class="work">
+            <span class="say">Up is positive · \(u = +14.7 \,\mathrm{m} \,\mathrm{s}^{-1}\) · \(a = -9.8 \,\mathrm{m} \,\mathrm{s}^{-2}\)</span>
+            <span>Top: \(v = 0\) &nbsp;so&nbsp; \(t = \dfrac{14.7}{9.8} = \class{res}{1.5 \,\mathrm{s}}\)</span>
+            <span class="step">Height: \(0 = 14.7^{2} + 2(-9.8)s\)</span>
+            <span class="step">&nbsp; \(s = \dfrac{216}{19.6} = \class{res}{11 \,\mathrm{m}}\)</span>
+            <span class="step">Back at the hand: \(t = \class{res}{3.0 \,\mathrm{s}}\), \(v = \class{res}{-14.7 \,\mathrm{m} \,\mathrm{s}^{-1}}\)</span>
+          </div>
+          <div class="panel">
+            <div class="panel-head"><span>VELOCITY AGAINST TIME</span></div>
+            <div class="fig" data-fig="throw-up"></div>
+          </div>
+        </div>
+        <div class="slide-foot"><span>A.1 KINEMATICS · SL + HL</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>The symmetry.</b> The graph is one straight line. The area above the axis is the height gained and the area below is the height lost. Back at the hand the two are equal, so the triangles are the same size: the time down equals the time up, and the speed on return equals the launch speed.</p>
+            <p><b>Checking the return.</b> Use \(s = ut + \frac{1}{2}at^{2}\) with \(s = 0\): \(0 = 14.7t - 4.9t^{2}\), so \(t = 0\) (the launch) or \(t = \frac{14.7}{4.9} = 3.0 \,\mathrm{s}\).</p>
+          </div>
+          <div class="rn-side">
+            <p class="trap">Saying the acceleration is zero at the top. The velocity is zero for an instant, but it is still changing at 9.8 m s⁻² downward. If the acceleration were zero the ball would stay there.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide" data-title="Measuring g">
+        <p class="eyebrow">Practical</p>
+        <h2>Measuring \(g\)<span>.</span></h2>
+        <div class="split">
+          <div class="stack">
+            <ul class="points small">
+              <li>Release a steel ball <b>from rest</b></li>
+              <li>Time its fall through a measured height \(h\)</li>
+              <li>Repeat for a range of heights</li>
+              <li class="step">\(h = \tfrac{1}{2}gt^{2}\): plot \(h\) against \(t^{2}\)</li>
+            </ul>
+            <div class="idea step">A straight line through the origin, gradient \(\tfrac{1}{2}g\).</div>
+          </div>
+          <div class="panel">
+            <div class="panel-head"><span>FREE-FALL TIMER</span><span class="pill">NOT TO SCALE</span></div>
+            <div class="fig" data-fig="g-drop"></div>
+          </div>
+        </div>
+        <div class="slide-foot"><span>A.1 KINEMATICS · SL + HL</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>Why a graph and not one drop.</b> A single height gives one value of \(g\) with no way of telling how good it is. A line through several points averages out the random scatter in the times, and the way the points sit about the line shows the quality of the data.</p>
+            <p><b>What a systematic error does.</b> An electromagnet does not let go at once, so every time is too long by about the same amount. The points then no longer fall on a line through the origin. If instead \(h\) is measured to the wrong part of the ball, every height is wrong by the same amount: the line is shifted and has an intercept, but its gradient, and so \(g\), is unchanged.</p>
+          </div>
+          <div class="rn-side">
+            <p class="tip">The times are short, about 0.3 s for a 0.5 m drop, so they must be measured electronically. A hand-held stopwatch has a reaction-time error as large as the reading.</p>
+            <p class="more">The <a href="/tools/motion_tracker.html" target="_blank" rel="noopener">Motion Tracker ↗</a> does the same from a video of a falling ball, frame by frame.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide" data-title="Quick check: equations of motion">
+        <p class="eyebrow">Quick check</p>
+        <h2>Equations of motion<span>.</span></h2>
+        <div class="quiz fill">
+          <div class="q"><p><span class="n">01</span>When can the four equations be used?</p><div class="ans step">Only when the acceleration is constant</div></div>
+          <div class="q"><p><span class="n">02</span>A stone is dropped from rest. How fast is it moving after 2.0 s?</p><div class="ans step">\(9.8 \times 2.0 = 19.6 \,\mathrm{m} \,\mathrm{s}^{-1}\)</div></div>
+          <div class="q"><p><span class="n">03</span>How far has it fallen in that time?</p><div class="ans step">\(\frac{1}{2} \times 9.8 \times 2.0^{2} = 19.6 \,\mathrm{m}\)</div></div>
+          <div class="q"><p><span class="n">04</span>Which equation has no \(t\) in it?</p><div class="ans step">\(v^{2} = u^{2} + 2as\)</div></div>
+          <div class="q"><p><span class="n">05</span>A cyclist accelerates from rest at 1.5 m s⁻² for 8.0 s. Final velocity?</p><div class="ans step">\(1.5 \times 8.0 = 12 \,\mathrm{m} \,\mathrm{s}^{-1}\)</div></div>
+          <div class="q"><p><span class="n">06</span>What is the acceleration of a ball at the top of its flight?</p><div class="ans step">9.8 m s⁻² downward</div></div>
+        </div>
+        <div class="slide-foot"><span class="reveal-hint">PRESS → TO REVEAL EACH ANSWER</span><span data-page></span></div>
+      </section>
+
+      <!-- Part 4 -->
+      <section class="slide section" data-title="Part 4: Projectile motion">
+        <div class="title-grid">
+          <div>
+            <p class="eyebrow">Part 04 · SL + HL</p>
+            <h1>Projectile motion<span>.</span></h1>
+            <p class="lead">Two simple motions happening at once</p>
+          </div>
+          <div class="fig" data-fig="drop-launch"></div>
+        </div>
+        <div class="slide-foot"><span>A.1 KINEMATICS · SL + HL</span><span data-page></span></div>
+      </section>
+
+      <section class="slide" data-title="Two independent motions">
+        <p class="eyebrow">The key idea</p>
+        <h2>Two independent motions<span>.</span></h2>
+        <div class="split wide-fig">
+          <div class="stack">
+            <ul class="points small">
+              <li><b>Horizontal</b>: no force, so <b>constant velocity</b></li>
+              <li><b>Vertical</b>: gravity, so <b>acceleration \(g\)</b></li>
+              <li class="step">Neither affects the other</li>
+            </ul>
+            <div class="idea step">The only thing they share is the <b>time</b>.</div>
+          </div>
+          <div class="panel">
+            <div class="panel-head"><span>RELEASED AT THE SAME MOMENT</span></div>
+            <div class="fig" data-fig="drop-launch"></div>
+          </div>
+        </div>
+        <div class="slide-foot"><span>A.1 KINEMATICS · SL + HL</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>Why they are independent.</b> Gravity pulls straight down. It has no sideways part, so it cannot change the sideways velocity. And moving sideways does not change how hard gravity pulls. So the vertical motion of the launched ball is exactly that of the dropped ball.</p>
+            <p><b>A demonstration.</b> Put one coin at the edge of a table and flick a second coin sideways off the table at the same moment as knocking the first straight off. Listen: they hit the floor together, however hard the flick.</p>
+          </div>
+          <div class="rn-side">
+            <p class="tip">This holds only while air resistance can be ignored, which is the case in every projectile calculation in this course.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide" data-title="Setting out a projectile problem">
+        <p class="eyebrow">Method</p>
+        <h2>Keep two columns<span>.</span></h2>
+        <div class="stack center">
+          <table class="facts big">
+            <thead><tr><th></th><th>Horizontal</th><th>Vertical</th></tr></thead>
+            <tbody>
+              <tr><td>Acceleration</td><td>Zero</td><td>\(g = 9.8 \,\mathrm{m} \,\mathrm{s}^{-2}\), downward</td></tr>
+              <tr><td>Velocity</td><td>Stays at its starting value</td><td>Changes: \(v = u + at\)</td></tr>
+              <tr><td>Displacement</td><td>velocity × time</td><td>\(s = ut + \tfrac{1}{2}at^{2}\)</td></tr>
+            </tbody>
+          </table>
+          <div class="idea step">Find the <b>time</b> from one column, then use it in the other.</div>
+        </div>
+        <div class="slide-foot"><span>A.1 KINEMATICS · SL + HL</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>Which column gives the time?</b> Usually the vertical one, because the flight ends when the body reaches the ground. The height it has to fall, or its vertical launch velocity, fixes how long it stays in the air. The horizontal column then turns that time into a distance.</p>
+            <p><b>Never mix the columns.</b> A horizontal velocity does not belong in a vertical equation. The four equations of motion are used in the vertical column only, with vertical values of \(s\), \(u\), \(v\) and \(a\).</p>
+          </div>
+          <div class="rn-side">
+            <p class="tip">You are not expected to know or use an equation for the shape of the path.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide" data-title="Projectile: launched horizontally">
+        <p class="eyebrow">Worked example</p>
+        <h2>Launched horizontally from a cliff<span>.</span></h2>
+        <div class="split even">
+          <div class="work">
+            <span class="say">44.1 m high · launched at 12 m s⁻¹ horizontally</span>
+            <span>Vertical: \(u = 0\), so \(s = \tfrac{1}{2}gt^{2}\)</span>
+            <span class="step">\(t = \sqrt{\dfrac{2 \times 44.1}{9.8}} = \class{res}{3.0 \,\mathrm{s}}\)</span>
+            <span class="step">Horizontal: \(12 \times 3.0 = \class{res}{36 \,\mathrm{m}}\) from the cliff</span>
+          </div>
+          <div class="work step">
+            <span class="say">Velocity on landing</span>
+            <span>Vertical: \(9.8 \times 3.0 = 29.4 \,\mathrm{m} \,\mathrm{s}^{-1}\)</span>
+            <span class="step">Speed \(= \sqrt{12^{2} + 29.4^{2}} = \class{res}{32 \,\mathrm{m} \,\mathrm{s}^{-1}}\)</span>
+            <span class="step">\(\tan \theta = \dfrac{29.4}{12}\) &nbsp;so&nbsp; \(\class{res}{68^{\circ}}\) below horizontal</span>
+          </div>
+        </div>
+        <div class="slide-foot"><span>A.1 KINEMATICS · SL + HL</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>Launched horizontally means the vertical velocity starts at zero.</b> All of the 12 m s⁻¹ is sideways. So the time in the air is the same as for a ball simply dropped from 44.1 m. Launching faster does not keep it up any longer: it only lands further out.</p>
+            <p><b>Putting the velocity back together.</b> The two components are at right angles, so the speed comes from Pythagoras and the direction from the tangent of the angle. The answer needs both: a velocity is a vector.</p>
+          </div>
+          <div class="rn-side">
+            <p class="trap">Adding the components: 12 + 29.4. Velocities at right angles combine by Pythagoras, never by simple addition.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide" data-title="Launched at an angle">
+        <p class="eyebrow">Resolving the launch velocity</p>
+        <h2>Launched at an angle<span>.</span></h2>
+        <div class="split">
+          <div class="stack">
+            <ul class="points small">
+              <li>Horizontal: \(u \cos \theta\). It never changes</li>
+              <li>Vertical: \(u \sin \theta\). It changes at \(g\)</li>
+              <li class="step">At the top the <b>vertical</b> velocity is zero</li>
+              <li class="step">Landing at launch height: the path is <b>symmetrical</b></li>
+            </ul>
+          </div>
+          <div class="panel">
+            <div class="panel-head"><span>COMPONENTS OF THE LAUNCH VELOCITY</span></div>
+            <div class="fig" data-fig="components"></div>
+          </div>
+        </div>
+        <div class="slide-foot"><span>A.1 KINEMATICS · SL + HL</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>Which is cos and which is sin?</b> The component next to the angle takes cos. With \(\theta\) measured from the horizontal, as here, the horizontal component is \(u \cos \theta\). If a question gives the angle to the vertical instead, they swap. Draw the triangle every time.</p>
+            <p><b>The body is not at rest at the top.</b> It still has all of its horizontal velocity, \(u \cos \theta\). That is its smallest speed in the whole flight.</p>
+          </div>
+          <div class="rn-side">
+            <p class="more">On level ground with no air resistance, 45° gives the greatest range, and two angles that add to 90°, such as 30° and 60°, give the same range.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide" data-title="Velocity along the path">
+        <p class="eyebrow">Following the velocity</p>
+        <h2>What changes, and what does not<span>.</span></h2>
+        <div class="stack center" style="gap: 26px;">
+          <div class="panel">
+            <div class="panel-head"><span>VELOCITY COMPONENTS AT EQUAL TIME STEPS</span><span class="pill">NO AIR RESISTANCE</span></div>
+            <div class="fig" data-fig="projectile-path" style="height: 440px;"></div>
+          </div>
+          <div class="idea step">The <b>acceleration</b> is the same at every point: \(g\), straight down.</div>
+        </div>
+        <div class="slide-foot"><span>A.1 KINEMATICS · SL + HL</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>Reading the arrows.</b> The vertical arrow loses the same length in each time step, because the vertical velocity changes by 9.8 m s⁻¹ every second all the way round: positive, through zero, to negative. The horizontal arrow is untouched.</p>
+            <p><b>The velocity is along the path.</b> At each point the two components add to give a velocity that is a tangent to the curve. The acceleration is not along the path: it points straight down everywhere, which is why the path bends.</p>
+          </div>
+          <div class="rn-side">
+            <p class="tip">At the same height on the way up and on the way down, the speed is the same. Only the direction of the vertical component has reversed.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide" data-title="Projectile: launched upwards at an angle">
+        <p class="eyebrow">Worked example</p>
+        <h2>20 m s⁻¹ at 30° above the horizontal<span>.</span></h2>
+        <div class="split even">
+          <div class="work">
+            <span class="say">Components</span>
+            <span>Horizontal: \(20 \cos 30^{\circ} = \class{res}{17.3 \,\mathrm{m} \,\mathrm{s}^{-1}}\)</span>
+            <span>Vertical: \(20 \sin 30^{\circ} = \class{res}{10.0 \,\mathrm{m} \,\mathrm{s}^{-1}}\)</span>
+            <span class="say step">Time to the top: vertical \(v = 0\)</span>
+            <span class="step">\(t = \dfrac{10.0}{9.8} = \class{res}{1.02 \,\mathrm{s}}\)</span>
+          </div>
+          <div class="work step">
+            <span class="say">Maximum height: \(v^{2} = u^{2} + 2as\)</span>
+            <span>\(s = \dfrac{10.0^{2}}{2 \times 9.8} = \class{res}{5.1 \,\mathrm{m}}\)</span>
+            <span class="say step">Lands at launch height</span>
+            <span class="step">Time of flight \(= 2 \times 1.02 = \class{res}{2.04 \,\mathrm{s}}\)</span>
+            <span class="step">Range \(= 17.3 \times 2.04 = \class{res}{35.3 \,\mathrm{m}}\)</span>
+          </div>
+        </div>
+        <div class="slide-foot"><span>A.1 KINEMATICS · SL + HL</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>The order of the steps.</b> Resolve first. Then the vertical column gives the time to the top and the height. The symmetry of the path doubles the time. Only at the end does the horizontal column turn the time of flight into a range.</p>
+            <p><b>Doubling the time is allowed only here.</b> It relies on the body landing at the height it was launched from. If it lands higher or lower, the two halves of the flight are not equal and the vertical column must be solved for the whole flight, as in the next example.</p>
+          </div>
+          <div class="rn-side">
+            <p class="tip">Check that the calculator is in degrees before finding the components.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide" data-title="Projectile: launched downwards at an angle">
+        <p class="eyebrow">Worked example</p>
+        <h2>Thrown downwards from a height<span>.</span></h2>
+        <div class="split even">
+          <div class="work">
+            <span class="say">8.0 m s⁻¹ at 30° below horizontal · 20 m above ground</span>
+            <span class="say">Down is positive</span>
+            <span>Horizontal: \(8.0 \cos 30^{\circ} = \class{res}{6.93 \,\mathrm{m} \,\mathrm{s}^{-1}}\)</span>
+            <span>Vertical: \(8.0 \sin 30^{\circ} = \class{res}{4.0 \,\mathrm{m} \,\mathrm{s}^{-1}}\)</span>
+          </div>
+          <div class="work step">
+            <span class="say">Vertical velocity on landing</span>
+            <span>\(v^{2} = 4.0^{2} + 2(9.8)(20) = 408\)</span>
+            <span class="step">\(v = \class{res}{20.2 \,\mathrm{m} \,\mathrm{s}^{-1}}\)</span>
+            <span class="step">\(t = \dfrac{v - u}{a} = \dfrac{20.2 - 4.0}{9.8} = \class{res}{1.65 \,\mathrm{s}}\)</span>
+            <span class="step">Lands \(6.93 \times 1.65 = \class{res}{11.4 \,\mathrm{m}}\) away</span>
+          </div>
+        </div>
+        <div class="slide-foot"><span>A.1 KINEMATICS · SL + HL</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>Why find the landing velocity first.</b> Going straight for the time with \(s = ut + \frac{1}{2}at^{2}\) gives \(20 = 4.0t + 4.9t^{2}\), a quadratic. Using \(v^{2} = u^{2} + 2as\) and then \(v = u + at\) reaches the same time in two easy steps.</p>
+            <p><b>Why down is positive here.</b> The launch velocity, the acceleration and the displacement all point downward. Calling down positive makes every vertical value positive, so there are no signs to lose.</p>
+          </div>
+          <div class="rn-side">
+            <p class="tip">Compare with dropping it from rest: \(t = \sqrt{\frac{2 \times 20}{9.8}} = 2.02 \,\mathrm{s}\). Starting with a downward velocity gets it to the ground sooner.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide" data-title="Fluid resistance on a projectile">
+        <p class="eyebrow">Real projectiles · no calculations</p>
+        <h2>Adding air resistance<span>.</span></h2>
+        <div class="split wide-fig">
+          <ul class="points small">
+            <li>Fluid resistance acts <b>against the velocity</b>, and grows with speed</li>
+            <li class="step"><b>Lower</b> maximum height</li>
+            <li class="step"><b>Shorter</b> range and time of flight</li>
+            <li class="step">Path <b>not symmetrical</b>: steeper coming down</li>
+          </ul>
+          <div class="panel">
+            <div class="panel-head"><span>THE SAME LAUNCH, WITH AND WITHOUT AIR</span></div>
+            <div class="fig" data-fig="drag-path"></div>
+          </div>
+        </div>
+        <div class="slide-foot"><span>A.1 KINEMATICS · SL + HL</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>Horizontal motion.</b> There is now a force against the sideways motion, so the horizontal velocity is no longer constant: it falls throughout the flight. The body covers less ground in each second than the one before, which shortens the range and makes the last part of the path steep.</p>
+            <p><b>Vertical motion.</b> On the way up, resistance and gravity both act downward, so the body slows more quickly than at \(g\) and does not climb as high. On the way down, resistance acts upward against gravity, so it speeds up more slowly than at \(g\). It therefore takes longer to come down than it took to go up, and lands more slowly than it was launched.</p>
+          </div>
+          <div class="rn-side">
+            <p class="tip">These effects are examined in words and sketches only. Describe the change and give the reason: which way the resistance acts and what it does to each component.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide" data-title="Terminal speed">
+        <p class="eyebrow">Falling through a fluid</p>
+        <h2>Terminal speed<span>.</span></h2>
+        <div class="split">
+          <ul class="points small">
+            <li>From rest: the acceleration starts at \(g\)</li>
+            <li class="step">As the speed rises, the resistance <b>rises</b></li>
+            <li class="step">So the acceleration <b>falls</b></li>
+            <li class="step">Resistance equals weight: <b>no acceleration</b>, constant <b>terminal speed</b></li>
+          </ul>
+          <div class="panel">
+            <div class="panel-head"><span>SPEED AGAINST TIME</span></div>
+            <div class="fig" data-fig="terminal"></div>
+          </div>
+        </div>
+        <div class="slide-foot"><span>A.1 KINEMATICS · SL + HL</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>The graph tells the same story.</b> Its gradient is the acceleration. It begins at \(g\), when the body is hardly moving and there is no resistance. The curve then bends over as the resistance grows, and becomes flat when the two forces balance.</p>
+            <p><b>A skydiver.</b> In free fall the terminal speed is about 55 m s⁻¹. Opening the parachute suddenly makes the resistance far greater than the weight, so the acceleration is upward and the skydiver slows. As the speed drops, so does the resistance, until the forces balance again at a new, much lower terminal speed of about 5 m s⁻¹.</p>
+          </div>
+          <div class="rn-side">
+            <p class="trap">Saying the resistance becomes greater than the weight as the body falls. It rises until it equals the weight and then stops rising, because the speed stops rising.</p>
+            <p class="more">The forces themselves, including the viscous drag on a small sphere, are in A.2.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide" data-title="Simple models, real motion">
+        <p class="eyebrow">Nature of science</p>
+        <h2>Every model leaves something out<span>.</span></h2>
+        <div class="stack center">
+          <div class="obs">
+            <div class="obs-head"><span>THIS TOPIC ASSUMES</span><span>IT STOPS WORKING WHEN</span></div>
+            <div class="obs-row"><div><b>No air resistance</b></div><span class="to">→</span><div>The body is light or fast: a shuttlecock, a raindrop</div></div>
+            <div class="obs-row step"><div><b>\(g\) is constant</b></div><span class="to">→</span><div>The height is not small compared with the Earth: a satellite</div></div>
+            <div class="obs-row step"><div><b>The body is a point</b></div><span class="to">→</span><div>Its size or its spin matters: a curving football</div></div>
+          </div>
+          <div class="idea step">A model is good enough when its predictions <b>agree with measurement</b> to the accuracy you need.</div>
+        </div>
+        <div class="slide-foot"><span>A.1 KINEMATICS · SL + HL</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>Why simplify at all?</b> With air resistance included there are no simple equations: the acceleration changes from moment to moment and the path has to be worked out step by step by computer. Leaving it out gives an answer in three lines, and for a dense, slow body such as a shot or a dropped stone that answer is very close to what is measured.</p>
+            <p><b>Galileo did the same.</b> His rolling ball was slowed a little by friction and by the air. He treated those as small disturbances to be reduced, with a hard ball and a smooth groove, and looked for the simple rule underneath. Deciding what can be ignored is part of doing physics.</p>
+          </div>
+          <div class="rn-side">
+            <p class="tip">When a question asks for an assumption, name the one that matters: “air resistance is negligible” for a projectile, “the acceleration is constant” for the equations of motion.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide" data-title="Quick check: projectiles">
+        <p class="eyebrow">Quick check</p>
+        <h2>Projectiles<span>.</span></h2>
+        <div class="quiz fill">
+          <div class="q"><p><span class="n">01</span>What is the horizontal acceleration of a projectile (no air resistance)?</p><div class="ans step">Zero</div></div>
+          <div class="q"><p><span class="n">02</span>A ball rolls off a table 1.25 m high. Time to reach the floor?</p><div class="ans step">\(\sqrt{\frac{2 \times 1.25}{9.8}} = 0.51 \,\mathrm{s}\)</div></div>
+          <div class="q"><p><span class="n">03</span>It left the table at 2.0 m s⁻¹. How far out does it land?</p><div class="ans step">\(2.0 \times 0.51 = 1.0 \,\mathrm{m}\)</div></div>
+          <div class="q"><p><span class="n">04</span>What is the velocity of a projectile at the top of its path?</p><div class="ans step">\(u \cos \theta\), horizontal</div></div>
+          <div class="q"><p><span class="n">05</span>Give two effects of air resistance on the path.</p><div class="ans step">Lower maximum height, shorter range</div></div>
+          <div class="q"><p><span class="n">06</span>What is true of the forces at terminal speed?</p><div class="ans step">Resistance equals weight: no resultant force</div></div>
+        </div>
+        <div class="slide-foot"><span class="reveal-hint">PRESS → TO REVEAL EACH ANSWER</span><span data-page></span></div>
+      </section>
+
+      <section class="slide" data-title="Summary">
+        <p class="eyebrow">Summary</p>
+        <h2>Kinematics on one slide<span>.</span></h2>
+        <div class="cards fill" style="grid-template-columns: 1fr 1fr; align-content: center;">
+          <div class="card"><p class="eyebrow">Describing motion</p><h3>Vectors have direction</h3><p>Displacement, velocity, acceleration<br>Average: over a journey. Instantaneous: at a moment</p></div>
+          <div class="card step"><p class="eyebrow">Motion graphs</p><h3>Gradient and area</h3><p>Gradient of \(s\)–\(t\) is \(v\); gradient of \(v\)–\(t\) is \(a\)<br>Area under \(v\)–\(t\) is displacement</p></div>
+          <div class="card step"><p class="eyebrow">Equations of motion</p><h3>Constant acceleration only</h3><p>Know three of \(s\), \(u\), \(v\), \(a\), \(t\)<br>Free fall: \(g = 9.8 \,\mathrm{m} \,\mathrm{s}^{-2}\)</p></div>
+          <div class="card step"><p class="eyebrow">Projectiles</p><h3>Two columns, one time</h3><p>Horizontal: constant velocity. Vertical: \(g\)<br>Air resistance: lower, shorter, not symmetrical</p></div>
+        </div>
+        <div class="slide-foot"><span>A.1 KINEMATICS · SL + HL</span><span data-page></span></div>
+      </section>
+
+      <section class="slide" data-title="Key words">
+        <p class="eyebrow">Summary</p>
+        <h2>Key words<span>.</span></h2>
+        <div class="terms fill" style="grid-template-columns: repeat(3, 1fr);">
+          <div class="term"><b>Displacement</b><span>Change in position</span><span>A vector</span></div>
+          <div class="term"><b>Velocity</b><span>Rate of change of displacement</span></div>
+          <div class="term"><b>Acceleration</b><span>Rate of change of velocity</span></div>
+          <div class="term"><b>Instantaneous</b><span>At one moment</span><span>Gradient of a tangent</span></div>
+          <div class="term"><b>Uniform acceleration</b><span>Constant in size and direction</span></div>
+          <div class="term"><b>Free fall</b><span>Gravity is the only force</span><span>\(g = 9.8 \,\mathrm{m} \,\mathrm{s}^{-2}\)</span></div>
+          <div class="term"><b>Projectile</b><span>Moves freely under gravity after launch</span></div>
+          <div class="term"><b>Range</b><span>Horizontal distance to landing</span></div>
+          <div class="term"><b>Terminal speed</b><span>Constant speed reached when resistance equals weight</span></div>
+        </div>
+        <div class="slide-foot"><span>A.1 KINEMATICS · SL + HL</span><span data-page></span></div>
+      </section>
+
+    </div>
+  </main>
+
+  <nav class="controls" aria-label="Slide controls">
+    <button type="button" id="prev" aria-label="Previous slide"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg></button>
+    <span class="counter" id="counter" aria-live="polite"></span>
+    <button type="button" id="next" aria-label="Next slide"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 5l7 7-7 7"/></svg></button>
+  </nav>
+  <div class="progress" aria-hidden="true"><span id="progress-bar"></span></div>
+
+  <script src="../assets/figures.js"></script>
+  <script src="../assets/deck-math.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
+  <script src="../assets/deck-notes.js"></script>
+  <script src="../assets/deck.js"></script>
+</body>
+</html>

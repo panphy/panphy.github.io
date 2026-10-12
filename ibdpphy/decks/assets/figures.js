@@ -1,11 +1,11 @@
-// SVG diagrams for the IB DP Physics decks (E.1 Structure of the atom and
-// E.2 Quantum physics). The atom figures began as copies of those in
+// SVG diagrams for the IB DP Physics decks (A.1 Kinematics, E.1 Structure of
+// the atom and E.2 Quantum physics). The atom figures began as copies of those in
 // gcsephy/decks/atoms-and-radiation and use the same particle colours and
 // glossy-sphere look as the Atomic Models and Nuclear Decay simulations.
 // Each <div data-fig="name"> is filled from FIGURES.
 (() => {
   const SYMBOL = { proton: '+', neutron: '0', electron: '−', alpha: 'α', positive: '+', solid: '' };
-  const GRADIENTS = ['proton', 'neutron', 'electron', 'alpha', 'positive', 'solid'];
+  const GRADIENTS = ['proton', 'neutron', 'electron', 'alpha', 'positive', 'solid', 'brand-accent-strong'];
   const MARKERS = ['text-secondary', 'alpha', 'electron', 'photon', 'brand-accent', 'brand-primary'];
   const TAU = Math.PI * 2;
   const f = n => Math.round(n * 10) / 10;
@@ -251,6 +251,18 @@
     });
     return s;
   }
+
+  // ---- A.1: kinematics helpers ----
+  // Graph axes from the origin (x0, y0), a plotted line in a palette colour, and the moving body.
+  const axes = (x0, y0, x1, y1, xLabel, yLabel) => arrow(x0, y0, x0, y1, 'text-secondary', 2.5) + arrow(x0, y0, x1, y0, 'text-secondary', 2.5) + text(x1 - 6, y0 + 36, xLabel, 'lbl mono', 'end') + text(x0 + 16, y1 + 14, yLabel, 'lbl mono', 'start');
+  const plot = (d, colour = 'brand-primary', extra = '') => `<path d="${d}" class="curve" style="stroke:var(--${colour})" ${extra}/>`;
+  const shade = (d, colour = 'brand-primary', opacity = 0.16) => `<path d="${d}" style="fill:var(--${colour});opacity:${opacity}"/>`;
+  const body = (x, y, r = 15) => ball(x, y, r, 'brand-accent-strong', '');
+  const both = (x1, y1, x2, y2, colour = 'text-secondary', width = 2.5) => arrow(x1, y1, x2, y2, colour, width) + arrow(x2, y2, x1, y1, colour, width);
+  // Points at equal time steps on a projectile path from (x0, y0) to (x1, y0) that rises by h.
+  const arcPoints = (x0, y0, x1, h, n) => Array.from({ length: n + 1 }, (_, i) => [x0 + (x1 - x0) * i / n, y0 - 4 * h * (i / n) * (1 - i / n)]);
+  const through = points => points.map(([x, y], i) => `${i ? 'L' : 'M'}${f(x)},${f(y)}`).join('');
+  const sampled = (fn, n = 60) => through(Array.from({ length: n + 1 }, (_, i) => fn(i / n)));
 
   const FIGURES = {
     hero: () => svg('0 0 560 560', bohrAtom(280, 270, false), 'Carbon atom: a nucleus of protons and neutrons with electrons in two energy levels'),
@@ -499,6 +511,188 @@
         s += text(540, y + 16, `radius ${radius}`, 'lbl mono small', 'start') + text(540, y + 42, `mvr = ${momentum}`, 'lbl mono small', 'start');
       });
       return svg('0 0 760 520', s, 'Bohr orbits of hydrogen for n = 1, 2 and 3: radii in the ratio 1 to 4 to 9, angular momentum 1, 2 and 3 times h over 2 pi');
+    },
+
+    // ---- A.1: kinematics ----
+
+    'kin-hero': () => {
+      const points = arcPoints(70, 470, 490, 340, 8);
+      let s = `<line x1="30" y1="488" x2="530" y2="488" class="tick"/>` + `<path d="${sampled(t => [70 + 420 * t, 470 - 1360 * t * (1 - t)])}" class="guide"/>`;
+      s += arrow(70, 470, 100, 373, 'brand-primary', 5) + arrow(280, 130, 372, 130, 'brand-primary', 5);
+      points.forEach(([x, y]) => { s += body(x, y, 16); });
+      return svg('0 0 560 560', s, 'A ball following a curved projectile path, shown at equal time intervals');
+    },
+
+    'path-displacement': () => {
+      let s = plot('M120,350 C220,480 380,420 400,300 C420,180 520,40 680,130', 'brand-primary', 'stroke-dasharray="2 12"');
+      s += arrow(120, 350, 662, 137, 'brand-accent', 5);
+      s += body(120, 350, 14) + body(680, 130, 14);
+      s += text(100, 326, 'start', 'lbl mono', 'end') + text(690, 96, 'finish', 'lbl mono');
+      s += text(100, 150, 'displacement:', 'lbl strong', 'start') + text(100, 180, 'straight from start to finish', 'lbl', 'start');
+      s += text(450, 400, 'distance:', 'lbl strong a', 'start') + text(450, 430, 'the length of the path', 'lbl', 'start');
+      return svg('0 0 800 460', s, 'A winding path from start to finish, whose length is the distance, and a straight arrow from start to finish, which is the displacement');
+    },
+
+    'chord-tangent': () => {
+      const at = t => [110 + 580 * t, 400 - 300 * t * t];
+      let s = axes(110, 400, 740, 40, 'time', 'displacement');
+      s += `<line x1="338" y1="366.5" x2="598" y2="205" style="stroke:var(--brand-accent-strong);stroke-width:3.5;stroke-dasharray:10 7"/>`;
+      s += `<line x1="${at(0.3)[0]}" y1="${at(0.3)[1]}" x2="${at(0.9)[0]}" y2="${at(0.9)[1]}" style="stroke:var(--brand-accent);stroke-width:4"/>`;
+      s += plot(sampled(at));
+      [0.3, 0.9].forEach(t => { s += `<circle cx="${at(t)[0]}" cy="${at(t)[1]}" r="8" style="fill:var(--brand-accent)"/>`; });
+      s += `<circle cx="458" cy="292" r="8" style="fill:var(--brand-accent-strong)"/>`;
+      s += text(420, 200, 'gradient of chord', 'lbl strong', 'end') + text(420, 230, '= average velocity', 'lbl', 'end');
+      s += text(480, 345, 'gradient of tangent', 'lbl strong', 'start') + text(480, 375, '= instantaneous velocity', 'lbl', 'start');
+      return svg('0 0 800 460', s, 'Displacement against time for a body speeding up: the gradient of a chord between two points is the average velocity and the gradient of the tangent at one point is the instantaneous velocity');
+    },
+
+    'st-graph': () => {
+      let s = axes(110, 400, 740, 40, 'time', 'displacement');
+      s += plot('M110,400 L260,280 L400,280 L500,110 L690,330');
+      s += text(236, 366, 'constant velocity', 'lbl small', 'start') + text(330, 262, 'at rest', 'lbl small');
+      s += text(436, 180, 'steeper:', 'lbl small', 'end') + text(436, 204, 'faster', 'lbl small', 'end');
+      s += text(612, 196, 'moving back:', 'lbl small', 'start') + text(612, 220, 'negative gradient', 'lbl small', 'start');
+      return svg('0 0 800 460', s, 'Displacement against time in four stages: a straight rising line for constant velocity, a flat line at rest, a steeper line for a higher velocity and a falling line for moving back');
+    },
+
+    // Used twice: as the general graph, and with data-numbers as the worked example's journey.
+    'vt-graph': el => {
+      const numbers = 'numbers' in el.dataset;
+      let s = shade('M110,400 L286,130 L550,130 L682,400 Z') + axes(110, 400, 760, 40, numbers ? '' : 'time', numbers ? 'v / m s⁻¹' : 'velocity');
+      s += plot('M110,400 L286,130 L550,130 L682,400');
+      if (numbers) {
+        [[286, '4'], [550, '10'], [682, '13']].forEach(([x, label]) => { s += `<line x1="${x}" y1="400" x2="${x}" y2="412" class="tick"/>` + text(x, 438, label, 'lbl mono'); });
+        s += `<line x1="98" y1="130" x2="110" y2="130" class="tick"/>` + text(88, 138, '12', 'lbl mono', 'end') + text(96, 438, '0', 'lbl mono', 'end');
+        s += text(772, 408, 't / s', 'lbl mono', 'start');
+        s += `<path d="M286,130 V400 M550,130 V400" class="guide"/>`;
+        s += text(226, 340, '24 m', 'lbl strong') + text(418, 280, '72 m', 'lbl strong') + text(594, 340, '18 m', 'lbl strong');
+      } else {
+        s += `<path d="M170,308 H250 V185" class="guide accent"/>` + text(268, 240, 'gradient = acceleration', 'lbl strong', 'start');
+        s += text(400, 335, 'area = displacement', 'lbl strong') + text(418, 112, 'constant velocity', 'lbl small');
+        s += text(636, 226, 'slowing', 'lbl small', 'start') + text(636, 250, 'down', 'lbl small', 'start');
+      }
+      return svg(numbers ? '0 0 850 460' : '0 0 800 460', s, numbers ? 'Velocity against time: rising from 0 to 12 metres per second in 4 seconds, steady until 10 seconds, then falling to zero at 13 seconds; the areas are 24, 72 and 18 metres' : 'Velocity against time: the gradient is the acceleration and the area under the graph is the displacement');
+    },
+
+    'three-graphs': () => {
+      const frame = (ox, title, d) => axes(ox + 30, 330, ox + 250, 96, 't', '') + text(ox + 140, 66, title, 'lbl strong') + plot(d);
+      let s = frame(30, 'displacement', sampled(t => [60 + 190 * t, 330 - 200 * t * t]));
+      s += frame(330, 'velocity', 'M360,330 L550,130') + frame(630, 'acceleration', 'M660,220 L850,220');
+      [[185, 465], [485, 765]].forEach(([x1, x2]) => {
+        s += arrow(x1, 412, x2, 412, 'brand-primary', 3) + text((x1 + x2) / 2, 402, 'gradient', 'lbl small a');
+        s += arrow(x2, 446, x1, 446, 'brand-accent', 3) + text((x1 + x2) / 2, 472, 'area', 'lbl small');
+      });
+      return svg('0 0 900 484', s, 'Three graphs against time for the same uniformly accelerated motion: displacement is a curve, velocity a straight line and acceleration a horizontal line. The gradient of each gives the next, and the area under each gives the change in the one before');
+    },
+
+    'vt-curve': () => {
+      const at = t => [110 + 580 * t, 400 - 270 * (1 - Math.exp(-3 * t))];
+      let s = shade(`${sampled(at)} L690,400 L110,400 Z`);
+      for (let x = 168; x <= 690; x += 58) s += `<line x1="${x}" y1="${f(at((x - 110) / 580)[1])}" x2="${x}" y2="400" class="guide"/>`;
+      for (let y = 346; y > 140; y -= 54) s += `<line x1="${f(110 + 580 * Math.min(1, -Math.log(1 - (400 - y) / 270) / 3))}" y1="${y}" x2="690" y2="${y}" class="guide"/>`;
+      s += axes(110, 400, 760, 40, 'time', 'velocity') + plot(sampled(at));
+      s += `<line x1="165" y1="316.9" x2="375" y2="178.3" style="stroke:var(--brand-accent-strong);stroke-width:3.5;stroke-dasharray:10 7"/><circle cx="255" cy="257.5" r="8" style="fill:var(--brand-accent-strong)"/>`;
+      s += text(300, 96, 'gradient of tangent =', 'lbl strong', 'start') + text(300, 126, 'acceleration at that instant', 'lbl', 'start');
+      s += text(500, 322, 'area = displacement', 'lbl strong halo') + text(500, 376, 'count the squares', 'lbl small halo');
+      return svg('0 0 800 460', s, 'Velocity against time as a curve that rises more and more slowly: the gradient of the tangent is the acceleration at that instant and the area under the curve, found by counting squares, is the displacement');
+    },
+
+    'suvat-area': () => {
+      let s = shade('M110,300 H640 V400 H110 Z', 'brand-accent-strong', 0.2) + shade('M110,300 L640,110 V300 Z', 'brand-accent', 0.34);
+      s += `<path d="M110,110 H640 M640,110 V400" class="guide"/>` + axes(110, 400, 760, 40, 'time', 'velocity') + plot('M110,300 L640,110');
+      s += text(92, 310, 'u', 'lbl display', 'end') + text(92, 120, 'v', 'lbl display', 'end') + text(640, 438, 't', 'lbl display');
+      s += text(375, 362, 'area = ut', 'lbl strong') + text(470, 262, 'area = ½ × t × at', 'lbl strong');
+      s += both(672, 296, 672, 114, 'text-secondary', 2.5) + text(688, 200, 'v − u', 'lbl mono', 'start') + text(688, 228, '= at', 'lbl mono', 'start');
+      return svg('0 0 860 460', s, 'Velocity against time for uniform acceleration from u to v in time t: the area is a rectangle u t plus a triangle of half t times a t');
+    },
+
+    'free-fall': () => {
+      let s = `<line x1="150" y1="40" x2="150" y2="568" class="guide"/>`;
+      ['0', 'T', '2T', '3T', '4T'].forEach((label, k) => {
+        const y = 40 + 33 * k * k;
+        s += body(150, y, 12) + text(60, y + 8, label, 'lbl mono', 'middle');
+        if (k) s += text(210, y + 8, `${k * k === 1 ? '' : k * k}d`, 'lbl mono strong', 'start');
+      });
+      s += text(60, 612, 'time', 'lbl small') + text(228, 612, 'distance fallen', 'lbl small');
+      s += arrow(370, 200, 370, 400, 'brand-accent', 5) + text(370, 446, 'g', 'lbl display') + text(370, 178, 'acceleration', 'lbl small');
+      return svg('0 0 460 630', s, 'A falling ball shown at equal time intervals: the distances fallen from rest are in the ratio 1 to 4 to 9 to 16');
+    },
+
+    'throw-up': () => {
+      let s = shade('M110,70 L390,230 H110 Z') + shade('M390,230 L670,390 V230 Z', 'brand-accent', 0.3);
+      s += arrow(110, 430, 110, 30, 'text-secondary', 2.5) + arrow(110, 230, 760, 230, 'text-secondary', 2.5) + text(754, 266, 'time', 'lbl mono', 'end') + text(126, 44, 'velocity', 'lbl mono', 'start');
+      s += `<path d="M670,230 V390" class="guide"/>` + plot('M110,70 L670,390');
+      s += text(94, 78, '+u', 'lbl display', 'end') + text(684, 398, '−u', 'lbl display', 'start') + text(94, 238, '0', 'lbl mono', 'end');
+      s += `<circle cx="390" cy="230" r="9" style="fill:var(--brand-accent-strong)"/>` + text(404, 208, 'top: v = 0', 'lbl strong', 'start');
+      s += text(440, 110, 'gradient = −g all the way', 'lbl', 'start');
+      s += text(122, 212, 'going up', 'lbl small', 'start') + text(660, 262, 'coming down', 'lbl small', 'end');
+      return svg('0 0 800 460', s, 'Velocity against time for a ball thrown straight up: a straight line of gradient minus g from plus u, through zero at the top, to minus u; the areas above and below the time axis are equal');
+    },
+
+    'drop-launch': () => {
+      const ys = [0, 1, 2, 3].map(k => 60 + 39 * k * k);
+      let s = `<line x1="60" y1="436" x2="760" y2="436" class="tick"/>` + `<path d="${sampled(t => [300 + 375 * t, 60 + 351 * t * t])}" class="guide"/><line x1="150" y1="60" x2="150" y2="411" class="guide"/>`;
+      ys.forEach((y, k) => { if (k) s += `<line x1="168" y1="${y}" x2="${284 + 125 * k}" y2="${y}" class="guide accent"/>`; });
+      ys.forEach((y, k) => { s += body(150, y, 15) + body(300 + 125 * k, y, 15); });
+      s += arrow(322, 60, 396, 60, 'brand-primary', 4);
+      s += text(150, 28, 'dropped', 'lbl mono') + text(300, 28, 'launched sideways', 'lbl mono', 'start');
+      s += text(184, 300, 'same height at', 'lbl small', 'start') + text(184, 324, 'every instant', 'lbl small', 'start');
+      s += text(590, 110, 'sideways:', 'lbl small', 'start') + text(590, 134, 'equal steps', 'lbl small', 'start');
+      return svg('0 0 800 460', s, 'Two balls released together, one dropped and one launched horizontally, shown at equal time intervals: they are always at the same height, and the launched ball moves equal distances sideways in each interval');
+    },
+
+    components: () => {
+      let s = `<line x1="60" y1="398" x2="760" y2="398" class="tick"/>` + `<path d="${sampled(t => [140 + 620 * t, 380 - 448 * t + 285 * t * t], 30)}" class="guide"/>`;
+      s += `<path d="M230,380 A90,90 0 0 0 213,327.3" class="guide accent"/>` + text(256, 362, 'θ', 'lbl greek');
+      s += arrow(140, 380, 494, 380, 'brand-accent', 4) + arrow(500, 380, 500, 128, 'brand-accent', 4) + arrow(140, 380, 494, 124, 'brand-primary', 6);
+      s += body(140, 380, 16);
+      s += text(296, 226, 'u', 'lbl display', 'end') + text(320, 432, 'u cos θ', 'lbl mono strong') + text(520, 262, 'u sin θ', 'lbl mono strong', 'start');
+      s += text(520, 292, 'vertical part', 'lbl small', 'start') + text(320, 456, 'horizontal part', 'lbl small');
+      return svg('0 0 800 470', s, 'A launch velocity u at angle theta above the horizontal, resolved into a horizontal component u cos theta and a vertical component u sin theta');
+    },
+
+    'projectile-path': () => {
+      const at = t => [90 + 700 * t, 380 - 1120 * t * (1 - t)];
+      let s = `<line x1="40" y1="398" x2="860" y2="398" class="tick"/>` + `<path d="${sampled(at)}" class="guide"/><line x1="440" y1="116" x2="440" y2="380" class="guide"/>`;
+      [0, 0.25, 0.5, 0.75, 1].forEach(t => {
+        const [x, y] = at(t), vy = 78 * (2 * t - 1);
+        if (Math.abs(vy) > 1) s += arrow(x, y, x, y + vy, 'brand-accent', 4);
+        s += arrow(x, y, x + 74, y, 'brand-primary', 4) + body(x, y, 14);
+      });
+      s += text(440, 70, 'top: vertical velocity = 0', 'lbl strong') + text(456, 270, 'maximum', 'lbl small', 'start') + text(456, 294, 'height', 'lbl small', 'start');
+      s += arrow(380, 428, 98, 428, 'text-secondary', 2.5) + arrow(500, 428, 770, 428, 'text-secondary', 2.5) + text(440, 436, 'range', 'lbl mono');
+      s += `<line x1="40" y1="30" x2="84" y2="30" style="stroke:var(--brand-primary);stroke-width:5"/>` + text(96, 38, 'horizontal velocity: constant', 'lbl small', 'start');
+      s += `<line x1="560" y1="30" x2="604" y2="30" style="stroke:var(--brand-accent);stroke-width:5"/>` + text(616, 38, 'vertical velocity: changes at g', 'lbl small', 'start');
+      return svg('0 0 920 470', s, 'A projectile path with velocity components drawn at five points: the horizontal component is the same everywhere, while the vertical component shrinks to zero at the top and then grows downward');
+    },
+
+    'drag-path': () => {
+      let s = `<line x1="40" y1="400" x2="860" y2="400" class="tick"/>` + `<path d="${sampled(t => [90 + 700 * t, 400 - 1200 * t * (1 - t)])}" class="guide" style="stroke-width:3;opacity:1"/>`;
+      s += plot('M90,400 C190,180 330,150 420,190 C500,225 560,300 600,400') + body(90, 400, 14);
+      s += text(660, 150, 'no air resistance', 'lbl small', 'start') + text(330, 300, 'with air resistance', 'lbl strong a');
+      s += both(440, 108, 440, 190, 'brand-accent', 3) + text(456, 158, 'lower', 'lbl small', 'start');
+      s += both(608, 432, 782, 432, 'brand-accent', 3) + text(695, 462, 'shorter range', 'lbl small');
+      s += text(624, 318, 'steeper', 'lbl small', 'start') + text(624, 342, 'descent', 'lbl small', 'start');
+      return svg('0 0 900 480', s, 'Two paths for the same launch: without air resistance a symmetrical curve; with air resistance a lower maximum height, a shorter range and a steeper descent');
+    },
+
+    terminal: () => {
+      const at = t => [110 + 600 * t, 400 - 250 * (1 - Math.exp(-4 * t))];
+      let s = axes(110, 400, 770, 40, 'time', 'speed') + `<line x1="110" y1="150" x2="730" y2="150" class="guide accent"/><line x1="110" y1="400" x2="218" y2="220" class="guide"/>`;
+      s += plot(sampled(at));
+      s += text(724, 132, 'terminal speed', 'lbl strong', 'end') + text(236, 96, 'at first: gradient = g', 'lbl small', 'start');
+      s += text(700, 318, 'gradient falls to zero:', 'lbl small', 'end') + text(700, 344, 'no acceleration', 'lbl small', 'end');
+      return svg('0 0 820 460', s, 'Speed against time for a body falling from rest through a fluid: the curve starts with gradient g, flattens, and levels off at the terminal speed');
+    },
+
+    'g-drop': () => {
+      let s = `<line x1="120" y1="30" x2="120" y2="436" class="tick" style="stroke-width:6"/><line x1="70" y1="438" x2="380" y2="438" class="tick" style="stroke-width:6"/><line x1="120" y1="66" x2="250" y2="66" class="tick" style="stroke-width:5"/>`;
+      s += `<rect x="250" y="50" width="80" height="32" rx="6" style="fill:var(--lead)"/>` + body(290, 97, 14) + `<line x1="290" y1="116" x2="290" y2="380" class="guide"/>`;
+      s += `<line x1="236" y1="392" x2="344" y2="392" class="tick" style="stroke-width:6"/>`;
+      s += `<path d="M330,66 H520 V190 M344,392 H520 V262" class="cable"/><rect x="446" y="190" width="150" height="72" rx="12" class="node"/>` + text(521, 235, 'timer', 'lbl strong');
+      s += both(396, 114, 396, 384, 'brand-accent', 3) + text(412, 258, 'h', 'lbl display', 'start');
+      s += text(290, 36, 'electromagnet', 'lbl small') + text(262, 104, 'steel ball', 'lbl small', 'end') + text(290, 424, 'trapdoor switch', 'lbl small');
+      return svg('0 0 620 460', s, 'Apparatus for measuring g: an electromagnet releases a steel ball, which falls a height h onto a trapdoor switch; a timer starts on release and stops when the trapdoor opens');
     },
 
     // ---- E.2: quantum physics ----
