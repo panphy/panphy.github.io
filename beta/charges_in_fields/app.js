@@ -32,6 +32,7 @@ const SCALE = { efield: 100, bfield: 100, selector: 100, cyclotron: 10 };
 // How far a particle travels per on-screen second, so every track is easy to follow.
 const DISPLAY_DISTANCE = { efield: 0.05, bfield: 0.06, selector: 0.05 };
 const CYCLOTRON_TURN_TIME = 0.8;
+const AC_BOX = { w: 2.8, h: 1.65 };
 const B_REGION = { x: 9, y: 9, zMin: -30, zMax: 3 };
 const SPEED_SPREAD = [0.3, 1.7];
 const HISTOGRAM_BINS = 14;
@@ -40,19 +41,31 @@ const HOME = {
   efield: { extent: { w: 11, h: 6.5 }, target: [2, 0, 0], direction: [0.35, 0.3, 1.25] },
   bfield: { extent: { w: 7.5, h: 7.5 }, target: [0, 0, -2], direction: [0.3, 0.22, 1.2] },
   selector: { extent: { w: 8.6, h: 4 }, target: [1, 0, 0], direction: [0.4, 0.35, 1.25] },
-  cyclotron: { extent: { w: 6.6, h: 4.6 }, target: [0, -0.6, 0.8], direction: [0.25, 0.85, 1.0] }
+  cyclotron: { extent: { w: 6.6, h: 7.0 }, target: [0, -0.6, 0.8], direction: [0.25, 0.85, 1.0] }
 };
 
 const viewer = $('viewer');
 const viewerPanel = $('viewer-panel');
+const workspace = $('workspace');
+const sideControls = $('side-controls');
+const sideAside = workspace.querySelector('aside');
+const wideQuery = window.matchMedia('(min-width: 900px)');
 const readout = $('particle-readout');
 
 // ---------- Fullscreen ----------
 const fullscreenButton = $('fullscreen');
 let fallbackFullscreen = false;
+// Match the published nuclear sims: wide fullscreen puts controls above the explanation.
+function placeControls() {
+  const inSide = workspace.classList.contains('is-fullscreen') && wideQuery.matches;
+  if (inSide && sideControls.parentElement !== sideAside) sideAside.prepend(sideControls);
+  else if (!inSide && sideControls.parentElement !== viewerPanel) viewerPanel.append(sideControls);
+}
+wideQuery.addEventListener('change', placeControls);
 function updateFullscreen() {
-  const expanded = document.fullscreenElement === viewerPanel || fallbackFullscreen;
-  viewerPanel.classList.toggle('is-fullscreen', expanded);
+  const expanded = document.fullscreenElement === workspace || fallbackFullscreen;
+  workspace.classList.toggle('is-fullscreen', expanded);
+  placeControls();
   document.body.classList.toggle('viewer-expanded', expanded);
   fullscreenButton.classList.toggle('is-fullscreen', expanded);
   fullscreenButton.setAttribute('aria-label', expanded ? 'Exit fullscreen' : 'Enter fullscreen');
@@ -64,14 +77,14 @@ function updateFullscreen() {
   fullscreenButton.focus({ preventScroll: true });
 }
 fullscreenButton.addEventListener('click', async () => {
-  if (document.fullscreenElement === viewerPanel) {
+  if (document.fullscreenElement === workspace) {
     await document.exitFullscreen();
   } else if (fallbackFullscreen) {
     fallbackFullscreen = false;
     updateFullscreen();
   } else {
     try {
-      await viewerPanel.requestFullscreen();
+      await workspace.requestFullscreen();
     } catch {
       // Keep an expanded viewer available on browsers without element fullscreen.
       fallbackFullscreen = true;
@@ -570,6 +583,103 @@ function buildSelector() {
   group.add(detector);
   lab.detector = detector;
 }
+// ---------- AC supply oscilloscope ----------
+// The AC supply's front panel works like a CRO: a beam sweeps across the screen at a fixed time base,
+// plotting the gap voltage against slowed time. The fixed time base means a higher frequency shows more cycles,
+// and the fixed vertical scale means a bigger peak shows a taller wave. The previous sweep fades out ahead of the beam.
+const SCOPE = { width: 512, height: 288, columns: 240, sweep: 2.5, screen: { x: 22, y: 18, w: 468, h: 206 } };
+function scopeFace() {
+  const canvas = document.createElement('canvas');
+  canvas.width = SCOPE.width;
+  canvas.height = SCOPE.height;
+  const texture = new THREE.CanvasTexture(canvas);
+  texture.colorSpace = THREE.SRGBColorSpace;
+  texture.anisotropy = 4;
+  buildTextures.push(texture);
+  const mesh = new THREE.Mesh(new THREE.PlaneGeometry(AC_BOX.w - 0.06, (AC_BOX.w - 0.06) * SCOPE.height / SCOPE.width), new THREE.MeshBasicMaterial({ map: texture }));
+  mesh.raycast = () => {};
+  mesh.userData.scope = { ctx: canvas.getContext('2d'), texture, samples: new Float32Array(SCOPE.columns), clock: 0, column: 0, value: 0 };
+  drawScope(mesh.userData.scope);
+  return mesh;
+}
+// Advance the beam by `elapsed` model seconds, writing `value` (−1 to 1) into the columns it passes.
+function advanceScope(scope, elapsed, value) {
+  if (!(elapsed > 0)) return;
+  scope.clock += elapsed;
+  const column = Math.floor(scope.clock / SCOPE.sweep * SCOPE.columns);
+  const count = Math.min(column - scope.column, SCOPE.columns);
+  for (let k = 1; k <= count; k++) {
+    scope.samples[(column - count + k) % SCOPE.columns] = scope.value + (value - scope.value) * k / count;
+  }
+  scope.column = column;
+  scope.value = value;
+  if (count > 0) drawScope(scope);
+}
+function drawScope(scope) {
+  const { ctx, samples } = scope;
+  const { width, height, columns } = SCOPE;
+  const { x, y, w, h } = SCOPE.screen;
+  const phosphor = '124, 255, 178';
+  ctx.fillStyle = '#1C2025';
+  ctx.fillRect(0, 0, width, height);
+  ctx.fillStyle = '#06140D';
+  ctx.beginPath();
+  ctx.roundRect(x, y, w, h, 14);
+  ctx.fill();
+  // Graticule: 10 by 6 divisions, with brighter axes.
+  ctx.lineWidth = 1;
+  for (let i = 1; i < 10; i++) {
+    ctx.strokeStyle = `rgba(${phosphor}, ${i === 5 ? 0.22 : 0.1})`;
+    ctx.beginPath();
+    ctx.moveTo(x + w * i / 10, y + 4);
+    ctx.lineTo(x + w * i / 10, y + h - 4);
+    ctx.stroke();
+  }
+  for (let i = 1; i < 6; i++) {
+    ctx.strokeStyle = `rgba(${phosphor}, ${i === 3 ? 0.3 : 0.1})`;
+    ctx.beginPath();
+    ctx.moveTo(x + 4, y + h * i / 6);
+    ctx.lineTo(x + w - 4, y + h * i / 6);
+    ctx.stroke();
+  }
+  const beam = scope.column % columns;
+  const px = c => x + 8 + (w - 16) * c / (columns - 1);
+  const py = v => y + h / 2 - v * h * 0.42;
+  const trace = (from, to, alpha, glow) => {
+    if (to - from < 1) return;
+    ctx.strokeStyle = `rgba(${phosphor}, ${alpha})`;
+    ctx.shadowColor = `rgba(${phosphor}, ${alpha})`;
+    ctx.shadowBlur = glow;
+    ctx.lineWidth = 4;
+    ctx.lineJoin = 'round';
+    ctx.beginPath();
+    for (let c = from; c <= to; c++) c === from ? ctx.moveTo(px(c), py(samples[c])) : ctx.lineTo(px(c), py(samples[c]));
+    ctx.stroke();
+    ctx.shadowBlur = 0;
+  };
+  // The previous sweep, fading, ahead of the beam; then the current sweep up to the beam.
+  trace(Math.min(beam + 6, columns - 1), columns - 1, 0.4, 0);
+  trace(0, beam, 0.95, 10);
+  ctx.fillStyle = `rgb(${phosphor})`;
+  ctx.shadowColor = `rgb(${phosphor})`;
+  ctx.shadowBlur = 14;
+  ctx.beginPath();
+  ctx.arc(px(beam), py(samples[beam]), 5, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.shadowBlur = 0;
+  // Panel lettering.
+  ctx.fillStyle = '#D7DCE1';
+  ctx.font = '700 30px Manrope, system-ui, sans-serif';
+  ctx.textBaseline = 'middle';
+  ctx.textAlign = 'left';
+  ctx.fillText('~ AC SUPPLY', x + 4, height - 32);
+  ctx.fillStyle = '#9AA3AD';
+  ctx.font = '600 22px "IBM Plex Mono", ui-monospace, monospace';
+  ctx.textAlign = 'right';
+  ctx.fillText('gap voltage / time', x + w - 4, height - 32);
+  scope.texture.needsUpdate = true;
+}
+
 function buildCyclotron() {
   const group = newLab('cyclotron');
   const R = DEE_RADIUS * 10;
@@ -615,16 +725,17 @@ function buildCyclotron() {
   for (const [x, z] of [[-3.6, -2.2], [3.6, -2.2], [-3.6, 2.2], [3.6, 2.2], [-1.6, -4], [1.6, -4], [-1.6, 4], [1.6, 4], [-1.8, 0], [1.8, 0]]) {
     fieldLine('B', new THREE.Vector3(x, -1, z), new THREE.Vector3(x, 1, z), 'bfieldUp');
   }
-  const oscillator = part(new THREE.Mesh(new THREE.BoxGeometry(1.4, 0.7, 0.8), material(palette.carbon)), 'oscillator');
+  const oscillator = part(new THREE.Mesh(new THREE.BoxGeometry(AC_BOX.w, AC_BOX.h, 0.8), material(palette.carbon, { roughness: 0.5 })), 'oscillator');
   oscillator.position.set(0, -0.6, R + 1.8);
+  const face = scopeFace();
+  face.position.z = 0.401;
+  oscillator.add(face);
+  lab.scope = face.userData.scope;
   group.add(oscillator);
-  const wave = faceLabel('~', '#ffffff', 0.55);
-  wave.position.set(0, -0.6, R + 2.21);
-  group.add(wave);
   const wireMat = material(palette.carbon, { roughness: 0.6 });
   for (const side of [1, -1]) {
     const path = new THREE.CurvePath();
-    const points = [new THREE.Vector3(side * 0.7, -0.6, R + 1.8), new THREE.Vector3(side * 2.2, -0.6, R + 1.8), new THREE.Vector3(side * 2.2, 0, R - 0.4)];
+    const points = [new THREE.Vector3(side * (AC_BOX.w / 2 + 0.02), -0.6, R + 1.8), new THREE.Vector3(side * 2.2, -0.6, R + 1.8), new THREE.Vector3(side * 2.2, 0, R - 0.4)];
     for (let i = 0; i < points.length - 1; i++) path.add(new THREE.LineCurve3(points[i], points[i + 1]));
     group.add(new THREE.Mesh(new THREE.TubeGeometry(path, 20, 0.05, 8, false), wireMat));
   }
@@ -669,6 +780,12 @@ function fireTracer(mode = state.mode) {
     lab.crossings = 0;
     const fc = cyclotronFrequency(key);
     const tracer = makeTracer({ key, pos: new THREE.Vector3(0, 0, 0), vel: new THREE.Vector3(0, 0, 0), colour, realPerDisplay: CYCLOTRON_TURN_TIME === 0 ? 1 : 1 / fc / CYCLOTRON_TURN_TIME, maxStep: 1 / fc / 700, trailSize: 40000, dots: false });
+    // A new injection starts a fresh trace at the same phase as the gap voltage.
+    lab.scope.samples.fill(0);
+    lab.scope.clock = 0;
+    lab.scope.column = 0;
+    lab.scope.value = gapVoltage(0) / (STEPPERS.gap.max * 1000);
+    drawScope(lab.scope);
     tracer.lastSide = 0;
     return tracer;
   }
@@ -1446,6 +1563,10 @@ function stepLab(delta) {
   if (state.mode === 'cyclotron') {
     const tracer = lab.tracers[0];
     if (tracer?.alive) lab.energy.push([tracer.displayTime, 0.5 * tracer.m * tracer.vel.lengthSq() / 1.602177e-13]);
+    // Use the particle's model time, so the scope agrees with the gap field and dee glow.
+    // The fixed vertical scale also shows changes in the peak gap voltage.
+    const scopeVoltage = tracer?.alive ? gapVoltage(tracer.t) / (STEPPERS.gap.max * 1000) : 0;
+    advanceScope(lab.scope, delta, scopeVoltage);
     // The dees glow with the sign of the alternating voltage.
     const voltage = tracer?.alive ? gapVoltage(tracer.t) / (state.values.gap * 1000) : 0;
     lab.dees.forEach((dee, i) => {
