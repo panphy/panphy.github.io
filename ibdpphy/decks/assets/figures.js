@@ -478,11 +478,11 @@
       s += text(390, 446, 'energy of the alpha particles', 'lbl mono');
       s += text(40, 225, 'counted, as a fraction of predicted', 'lbl mono small', 'middle', 'transform="rotate(-90 40 225)"');
       s += `<rect x="430" y="60" width="260" height="340" style="fill:var(--hl);opacity:.09"/>`;
-      s += `<line x1="90" y1="150" x2="690" y2="150" class="guide"/>` + text(100, 136, '1: matches Rutherford’s formula', 'lbl mono small', 'start');
+      s += `<line x1="90" y1="150" x2="690" y2="150" class="guide"/>` + text(76, 157, '1', 'lbl mono', 'end') + text(104, 134, 'matches Rutherford’s formula', 'lbl small', 'start');
       s += `<path d="M90,150 L430,150 C480,150 500,190 530,250 C560,310 600,360 680,384" class="curve" style="stroke:var(--alpha)"/>`;
       s += `<line x1="430" y1="60" x2="430" y2="400" class="guide accent"/>`;
       s += text(260, 190, 'agrees:', 'lbl strong') + text(260, 220, 'electric repulsion only', 'lbl small');
-      s += text(566, 100, 'falls below:', 'lbl strong', 'middle', 'style="fill:var(--hl)"') + text(566, 130, 'alpha reaches the nucleus', 'lbl small');
+      s += text(562, 92, 'falls below:', 'lbl strong', 'middle', 'style="fill:var(--hl)"') + text(562, 120, 'alpha reaches the nucleus', 'lbl small');
       return svg('0 0 720 460', s, 'Graph: at low energies the number of alpha particles counted at a fixed angle matches the number Rutherford’s formula predicts; above a certain energy it falls below the prediction');
     },
 
@@ -514,20 +514,28 @@
       return svg('0 0 900 420', s, 'Light falling on a clean metal surface releases electrons, called photoelectrons');
     },
 
+    // One photon's energy as a bar: it pays the work function and the rest is kinetic energy.
+    // Below the threshold the bar falls short of the work function, so nothing escapes.
     'photon-budget': () => {
-      const bar = (x, y, w, colour, label, sub) => `<rect x="${x}" y="${y}" width="${w}" height="64" rx="10" style="fill:var(--${colour})"/>` + text(x + w / 2, y + 30, label, 'lbl strong', 'middle', 'style="fill:#fff"') + text(x + w / 2, y + 54, sub, 'lbl mono small', 'middle', 'style="fill:#fff"');
-      let s = text(60, 44, 'Above the threshold: hf > Φ', 'lbl strong a', 'start');
-      s += bar(60, 60, 780, 'photon', 'photon energy hf', 'all given to one electron');
-      s += bar(60, 136, 470, 'lead', 'work function Φ', 'least energy needed to escape') + bar(540, 136, 300, 'electron', 'E max', 'kinetic energy left over');
-      s += text(60, 268, 'Below the threshold: hf < Φ', 'lbl strong a', 'start');
-      s += bar(60, 284, 360, 'photon', 'photon energy hf', 'too little') + `<rect x="60" y="360" width="470" height="64" rx="10" style="fill:none;stroke:var(--lead);stroke-width:3;stroke-dasharray:8 7"/>` + text(295, 400, 'work function Φ', 'lbl strong');
-      s += text(700, 330, 'no electron escapes,', 'lbl strong') + text(700, 362, 'however bright the light', 'lbl');
-      return svg('0 0 900 440', s, 'Energy of one photon: above the threshold frequency it pays the work function and the rest becomes the kinetic energy of the electron; below the threshold no electron escapes');
+      const sub = t => `<tspan dy="7" font-size="70%">${t}</tspan><tspan dy="-7"> </tspan>`;
+      const bar = (x, y, w, colour, label, note) => `<rect x="${x}" y="${y}" width="${w}" height="68" rx="10" style="fill:var(--${colour})"/>` + text(x + w / 2, y + 31, label, 'lbl strong', 'middle', 'style="fill:#fff"') + text(x + w / 2, y + 56, note, 'lbl small', 'middle', 'style="fill:#fff"');
+      const sign = (x, y, t) => text(x, y, t, 'lbl display', 'middle', 'font-size="44"');
+      let s = text(90, 38, 'Above the threshold: the photon has more than Φ', 'lbl strong a', 'start');
+      s += bar(90, 54, 760, 'photon', 'photon energy hf', 'all of it goes to one electron');
+      s += sign(54, 187, '=') + bar(90, 138, 430, 'lead', 'work function Φ', 'used up escaping the metal');
+      s += sign(545, 187, '+') + bar(570, 138, 280, 'electron', `kinetic energy E${sub('max')}`, 'what is left over');
+      s += text(90, 286, 'Below the threshold: the photon has less than Φ', 'lbl strong a', 'start');
+      s += `<rect x="90" y="302" width="430" height="68" rx="10" style="fill:none;stroke:var(--lead);stroke-width:3;stroke-dasharray:8 7"/>`;
+      s += bar(90, 302, 290, 'photon', 'photon energy hf', 'not enough') + text(450, 344, 'short', 'lbl italic small');
+      s += `<line x1="90" y1="380" x2="90" y2="404" class="tick"/><line x1="520" y1="380" x2="520" y2="404" class="tick"/>` + arrow(100, 392, 512, 392, 'text-secondary', 2.5) + arrow(510, 392, 98, 392, 'text-secondary', 2.5);
+      s += text(305, 428, 'work function Φ needed to escape', 'lbl small');
+      s += text(700, 330, 'no electron escapes,', 'lbl strong') + text(700, 360, 'however bright the light', 'lbl');
+      return svg('0 0 900 440', s, 'Energy of one photon: above the threshold frequency it equals the work function plus the kinetic energy of the electron; below the threshold it is less than the work function, so no electron escapes');
     },
 
     'emax-graph': () => {
       let s = arrow(110, 440, 110, 40, 'text-secondary', 2.5) + arrow(110, 300, 720, 300, 'text-secondary', 2.5);
-      s += text(700, 336, 'frequency f', 'lbl mono', 'end') + text(126, 52, 'E max', 'lbl mono', 'start');
+      s += text(700, 336, 'frequency f', 'lbl mono', 'end') + text(126, 52, 'E<tspan dy="6" font-size="70%">max</tspan>', 'lbl mono', 'start');
       s += `<line x1="110" y1="420" x2="300" y2="300" class="guide"/><path d="M300,300 L660,72" class="curve" style="stroke:var(--electron)"/>`;
       s += `<path d="M470,300 L700,154" class="curve" style="stroke:var(--neutron);stroke-width:3;stroke-dasharray:10 8"/>`;
       s += `<circle cx="300" cy="300" r="8" style="fill:var(--hl)"/>` + text(300, 338, 'f₀', 'lbl display', 'middle', 'style="fill:var(--hl)"') + text(300, 366, 'threshold', 'lbl mono small');
@@ -591,7 +599,7 @@
       s += text(650, 50, 'scattered photon', 'lbl strong', 'start') + text(650, 78, 'longer wavelength λ<tspan dy="6" font-size="70%">f</tspan>', 'lbl mono small', 'start');
       s += `<path d="M${ex + 110},${ey} A110,110 0 0 0 ${f(ex + 110 * Math.cos(a))},${f(ey + 110 * Math.sin(a))}" class="guide accent"/>` + text(ex + 134, ey - 34, 'θ', 'lbl greek');
       s += arrow(ex + 18, ey + 12, ex + 250, ey + 130, 'electron', 4) + ball(ex, ey, 18, 'electron');
-      s += text(ex + 300, ey + 150, 'recoiling electron', 'lbl strong', 'start') + text(ex + 300, ey + 178, 'gains kinetic energy', 'lbl mono small', 'start');
+      s += text(884, ey + 166, 'recoiling electron', 'lbl strong', 'end') + text(884, ey + 194, 'gains kinetic energy', 'lbl mono small', 'end');
       s += text(ex, ey + 56, 'electron, at rest', 'lbl small');
       return svg('0 0 900 460', s, 'Compton scattering: a photon hits an electron at rest; the photon leaves at an angle theta with a longer wavelength and the electron recoils');
     },
