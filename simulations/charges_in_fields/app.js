@@ -269,8 +269,19 @@ const tVec = new THREE.Vector3();
 const sVec = new THREE.Vector3();
 // The magnetic field region turns about the vertical axis through the source, so that the field
 // makes the chosen angle with the launch velocity (along +x). At 90° it points into the screen.
+// The field turns smoothly to a new angle, so bAngle (degrees) is where it is now; both the drawing
+// and the physics use it, and it follows state.values.angle.
+const B_TURN_RATE = 60;
+let bAngle = 90;
 function bTilt() {
-  return THREE.MathUtils.degToRad(state.values.angle ?? 90) - Math.PI / 2;
+  return THREE.MathUtils.degToRad(bAngle) - Math.PI / 2;
+}
+function turnBField(delta) {
+  const target = state.values.angle;
+  if (lab?.kind !== 'bfield' || target === undefined || bAngle === target) return;
+  const step = reducedMotion ? Infinity : B_TURN_RATE * delta;
+  bAngle = Math.abs(target - bAngle) <= step ? target : bAngle + Math.sign(target - bAngle) * step;
+  applyBTilt();
 }
 // A point (metres) in the frame of the turned field region.
 const bPoint = new THREE.Vector3();
@@ -304,7 +315,7 @@ function fields(position, time) {
   } else if (state.mode === 'bfield') {
     if (insideBRegion(position)) {
       const strength = (v.field / 1000) * (state.reverseB ? -1 : 1);
-      const angle = THREE.MathUtils.degToRad(v.angle);
+      const angle = THREE.MathUtils.degToRad(bAngle);
       B.set(strength * Math.cos(angle), 0, -strength * Math.sin(angle));
     }
   } else if (state.mode === 'selector') {
@@ -585,6 +596,8 @@ function buildBField() {
   gun.rotation.z = -Math.PI / 2;
   gun.position.set(-0.45, 0, B_SOURCE_Z);
   group.add(gun);
+  // A newly built field starts at the chosen angle.
+  bAngle = state.values.angle ?? 90;
   applyBTilt();
 }
 function buildSelector() {
@@ -1345,7 +1358,6 @@ function onValueChange(key, user, changed) {
   }
   if (key === 'cycField' && state.autotune) tune();
   if (key === 'angle') {
-    applyBTilt();
     if (user && changed && lab.kind === 'bfield') {
       const angle = state.values.angle;
       readout.textContent = angle === 90
@@ -1655,6 +1667,7 @@ function frame(time) {
   const delta = Math.min((time - previousTime) / 1000, 0.05);
   previousTime = time;
   if (!state.visible || document.hidden) return;
+  turnBField(delta);
   if (state.playing) stepLab(delta);
   if (fadeIn) {
     fadeIn.t += delta;
