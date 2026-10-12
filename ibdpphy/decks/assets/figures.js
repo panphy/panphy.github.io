@@ -479,7 +479,7 @@
       s += text(40, 225, 'counted, as a fraction of predicted', 'lbl mono small', 'middle', 'transform="rotate(-90 40 225)"');
       s += `<rect x="430" y="60" width="260" height="340" style="fill:var(--hl);opacity:.09"/>`;
       s += `<line x1="90" y1="150" x2="690" y2="150" class="guide"/>` + text(76, 157, '1', 'lbl mono', 'end') + text(104, 134, 'matches Rutherford’s formula', 'lbl small', 'start');
-      s += `<path d="M90,150 L430,150 C480,150 500,190 530,250 C560,310 600,360 680,384" class="curve" style="stroke:var(--alpha)"/>`;
+      s += `<path d="M90,150 L430,150 C480,150 500,190 530,250 C560,310 600,360 680,384" class="curve" style="stroke:var(--brand-primary)"/>`;
       s += `<line x1="430" y1="60" x2="430" y2="400" class="guide accent"/>`;
       s += text(260, 190, 'agrees:', 'lbl strong') + text(260, 220, 'electric repulsion only', 'lbl small');
       s += text(562, 92, 'falls below:', 'lbl strong', 'middle', 'style="fill:var(--hl)"') + text(562, 120, 'alpha reaches the nucleus', 'lbl small');
@@ -518,15 +518,16 @@
     // Below the threshold the bar falls short of the work function, so nothing escapes.
     'photon-budget': () => {
       const sub = t => `<tspan dy="7" font-size="70%">${t}</tspan><tspan dy="-7"> </tspan>`;
-      const bar = (x, y, w, colour, label, note) => `<rect x="${x}" y="${y}" width="${w}" height="68" rx="10" style="fill:var(--${colour})"/>` + text(x + w / 2, y + 31, label, 'lbl strong', 'middle', 'style="fill:#fff"') + text(x + w / 2, y + 56, note, 'lbl small', 'middle', 'style="fill:#fff"');
+      // Bars take the deck palette, not the particle colours: they are amounts of energy, not particles.
+      const bar = (x, y, w, colour, label, note) => `<rect x="${x}" y="${y}" width="${w}" height="68" rx="10" style="fill:var(--bar-${colour})"/>` + text(x + w / 2, y + 31, label, 'lbl strong', 'middle', `style="fill:var(--on-bar-${colour})"`) + text(x + w / 2, y + 56, note, 'lbl small', 'middle', `style="fill:var(--on-bar-${colour})"`);
       const sign = (x, y, t) => text(x, y, t, 'lbl display', 'middle', 'font-size="44"');
       let s = text(90, 38, 'Above the threshold: the photon has more than Φ', 'lbl strong a', 'start');
-      s += bar(90, 54, 760, 'photon', 'photon energy hf', 'all of it goes to one electron');
-      s += sign(54, 187, '=') + bar(90, 138, 430, 'lead', 'work function Φ', 'used up escaping the metal');
-      s += sign(545, 187, '+') + bar(570, 138, 280, 'electron', `kinetic energy E${sub('max')}`, 'what is left over');
+      s += bar(90, 54, 760, 'teal', 'photon energy hf', 'all of it goes to one electron');
+      s += sign(54, 187, '=') + bar(90, 138, 430, 'slate', 'work function Φ', 'used up escaping the metal');
+      s += sign(545, 187, '+') + bar(570, 138, 280, 'apricot', `kinetic energy E${sub('max')}`, 'what is left over');
       s += text(90, 286, 'Below the threshold: the photon has less than Φ', 'lbl strong a', 'start');
-      s += `<rect x="90" y="302" width="430" height="68" rx="10" style="fill:none;stroke:var(--lead);stroke-width:3;stroke-dasharray:8 7"/>`;
-      s += bar(90, 302, 290, 'photon', 'photon energy hf', 'not enough') + text(450, 344, 'short', 'lbl italic small');
+      s += `<rect x="90" y="302" width="430" height="68" rx="10" style="fill:none;stroke:var(--bar-slate);stroke-width:3;stroke-dasharray:8 7"/>`;
+      s += bar(90, 302, 290, 'teal', 'photon energy hf', 'not enough') + text(450, 344, 'short', 'lbl italic small');
       s += `<line x1="90" y1="380" x2="90" y2="404" class="tick"/><line x1="520" y1="380" x2="520" y2="404" class="tick"/>` + arrow(100, 392, 512, 392, 'text-secondary', 2.5) + arrow(510, 392, 98, 392, 'text-secondary', 2.5);
       s += text(305, 428, 'work function Φ needed to escape', 'lbl small');
       s += text(700, 330, 'no electron escapes,', 'lbl strong') + text(700, 360, 'however bright the light', 'lbl');
@@ -536,8 +537,8 @@
     'emax-graph': () => {
       let s = arrow(110, 440, 110, 40, 'text-secondary', 2.5) + arrow(110, 300, 720, 300, 'text-secondary', 2.5);
       s += text(700, 336, 'frequency f', 'lbl mono', 'end') + text(126, 52, 'E<tspan dy="6" font-size="70%">max</tspan>', 'lbl mono', 'start');
-      s += `<line x1="110" y1="420" x2="300" y2="300" class="guide"/><path d="M300,300 L660,72" class="curve" style="stroke:var(--electron)"/>`;
-      s += `<path d="M470,300 L700,154" class="curve" style="stroke:var(--neutron);stroke-width:3;stroke-dasharray:10 8"/>`;
+      s += `<line x1="110" y1="420" x2="300" y2="300" class="guide"/><path d="M300,300 L660,72" class="curve" style="stroke:var(--brand-primary)"/>`;
+      s += `<path d="M470,300 L700,154" class="curve" style="stroke:var(--text-secondary);stroke-width:3;stroke-dasharray:10 8"/>`;
       s += `<circle cx="300" cy="300" r="8" style="fill:var(--hl)"/>` + text(300, 338, 'f₀', 'lbl display', 'middle', 'style="fill:var(--hl)"') + text(300, 366, 'threshold', 'lbl mono small');
       s += `<circle cx="110" cy="420" r="8" style="fill:var(--hl)"/>` + text(96, 428, '−Φ', 'lbl display', 'end', 'style="fill:var(--hl)"');
       s += `<path d="M430,218 H560 V135" class="guide accent"/>` + text(574, 184, 'gradient = h', 'lbl strong', 'start');
@@ -569,8 +570,8 @@
       [-1, 1].forEach(k => { [52, 96].forEach(dy => { s += `<line x1="306" y1="210" x2="640" y2="${210 + k * dy}" style="stroke:var(--electron)" stroke-width="2" opacity=".5"/>`; }); });
       s += `<ellipse cx="640" cy="210" rx="26" ry="150" style="fill:color-mix(in srgb, var(--electron) 12%, var(--card-bg));stroke:var(--card-border)" stroke-width="2"/>`;
       s += `<circle cx="820" cy="210" r="120" style="fill:var(--spectrum-bg)"/>`;
-      [44, 82].forEach(r => { s += `<circle cx="820" cy="210" r="${r}" style="fill:none;stroke:#7CFFB2" stroke-width="9" opacity=".8"/>`; });
-      s += `<circle cx="820" cy="210" r="9" style="fill:#7CFFB2"/>` + text(820, 366, 'screen, seen face on', 'lbl small') + text(820, 394, 'bright rings', 'lbl strong');
+      [44, 82].forEach(r => { s += `<circle cx="820" cy="210" r="${r}" style="fill:none;stroke:var(--sage)" stroke-width="9" opacity=".8"/>`; });
+      s += `<circle cx="820" cy="210" r="9" style="fill:var(--sage)"/>` + text(820, 366, 'screen, seen face on', 'lbl small') + text(820, 394, 'bright rings', 'lbl strong');
       return svg('0 0 960 410', s, 'Electron diffraction tube: electrons from a gun pass through thin graphite and form bright rings on a fluorescent screen');
     },
 
@@ -583,7 +584,7 @@
       }
       let s = arrow(80, y0, 700, y0, 'text-secondary', 2.5) + arrow(x0, y0, x0, 40, 'text-secondary', 2.5);
       s += text(690, y0 + 40, 'angle θ', 'lbl mono', 'end') + text(x0 + 16, 54, 'number of particles', 'lbl mono small', 'start');
-      s += `<path d="${d}" class="curve" style="stroke:var(--electron)"/>`;
+      s += `<path d="${d}" class="curve" style="stroke:var(--brand-primary)"/>`;
       [-1, 1].forEach(k => { s += `<circle cx="${x0 + k * scale}" cy="${y0}" r="8" style="fill:var(--hl)"/>`; });
       s += `<line x1="${x0 + scale}" y1="${y0}" x2="${x0 + scale + 60}" y2="${y0 - 110}" class="guide"/>`;
       s += text(x0 + scale + 66, y0 - 150, 'first minimum', 'lbl strong', 'start', 'style="fill:var(--hl)"') + text(x0 + scale + 66, y0 - 120, 'sin θ ≈ λ / D', 'lbl mono', 'start');
