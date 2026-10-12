@@ -6,7 +6,7 @@ import { ALL_WORDS, EASY_WORDS, HARD_WORDS, MEDIUM_WORDS, EQUATION_WORDS } from 
 import { createEndingFX } from './ending-fx.js';
 import { createLeaderboard } from './leaderboard.js';
 import { createEnemyMesh, createMimicChestMesh } from './enemy-meshes.js';
-import { BOSS_HINT_LETTERS, normalPromptLengthCap, bossAnswerLengthCap, bossWordLengthCap, previewLengthCap, withinLength, hardGuestCount } from './difficulty.js?v=20261012-boss-questions';
+import { bossHintLetters, normalPromptLengthCap, bossAnswerLengthCap, bossWordLengthCap, previewLengthCap, withinLength, hardGuestCount } from './difficulty.js?v=20261012-boss-questions';
 import { createLowPolyTerrain, createLowPolyTree, createLowPolyRock, createLowPolyCloud } from './lowpoly.js';
 import { createVisuals, GLOW_GAIN, MOON_GLOW_GAIN } from './visuals.js';
 import { pickTarget, getInputCharacters, isMathOperatorInput, buildSearchPrompt, buildAltSearchPrompts, buildHintMask, escapeHtml, wrapSups, buildBossHintPart, createBossQuestionBuilder, promptIndexForProgress } from './prompt-utils.js?v=20261012-boss-questions';
@@ -2529,7 +2529,7 @@ function spawnEnemy(options = {}) {
   const isEquationPrompt = !!wordData.isEquation;
   const showDefinition = !!wordData.definition && isBoss;
   const type = isBoss ? (options.bossType || chooseBossType(bossesSpawned)) : isMedic ? MEDIC_TYPE : isMimic ? MIMIC_TYPE : weightedPick(ENEMY_TYPES);
-  const hintRange = isBoss ? { min: BOSS_HINT_LETTERS, max: BOSS_HINT_LETTERS } : null;
+  const hintRange = isBoss ? { min: bossHintLetters(waveSet), max: bossHintLetters(waveSet) } : null;
   if (isMedic && !firstMedicHintShown) {
     firstMedicHintShown = true;
     window.setTimeout(() => { if (mode === 'running') showBanner('TYPE TO HEAL!', 'medic-hint'); }, 1100);
@@ -2631,11 +2631,11 @@ function spawnEnemy(options = {}) {
       ? buildHintMask(wordData.term, {
           ...promptOptions,
           hintRange,
-          leadingTypeableCount: isBoss ? BOSS_HINT_LETTERS : 1,
+          leadingTypeableCount: isBoss ? bossHintLetters(waveSet) : 1,
         })
       : null,
     hintRange,
-    hintLetterCount: isBoss ? BOSS_HINT_LETTERS : 1,
+    hintLetterCount: isBoss ? bossHintLetters(waveSet) : 1,
     lastPromptHtml: '',
     promptKind,
     isBoss,

@@ -3,7 +3,7 @@ import { readFileSync } from 'node:fs';
 import assert from 'node:assert/strict';
 import {
   NORMAL_PROMPT_LENGTH_CAPS, EARLY_BOSS_WAVES, HARD_GUEST_COUNTS,
-  typedLength, bossAnswerLengthCap, normalPromptLengthCap, bossWordLengthCap, previewLengthCap, withinLength, hardGuestCount,
+  typedLength, bossAnswerLengthCap, normalPromptLengthCap, bossWordLengthCap, previewLengthCap, withinLength, hardGuestCount, bossHintLetters,
 } from '../src/difficulty.js';
 import { EASY_WORDS, MEDIUM_WORDS, HARD_WORDS } from '../src/question-bank.js';
 
@@ -81,4 +81,10 @@ test('startup dependencies share the page release version to avoid mixed cached 
   assert.ok(main.includes(`from './difficulty.js?v=${version}'`));
   assert.ok(main.includes(`from './prompt-utils.js?v=${version}'`));
   assert.ok(difficulty.includes(`from './prompt-utils.js?v=${version}'`));
+});
+
+test('boss hints shrink after the early waves and never grow back', () => {
+  assert.equal(bossHintLetters(1), 2);
+  assert.equal(bossHintLetters(EARLY_BOSS_WAVES), 2);
+  for (let wave = EARLY_BOSS_WAVES + 1; wave <= 10; wave += 1) assert.equal(bossHintLetters(wave), 1);
 });
