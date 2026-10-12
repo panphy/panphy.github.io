@@ -18,7 +18,7 @@ PanPhy Labs is a static GitHub Pages PWA for physics tools, simulations, classro
 | --- | --- | --- |
 | `tools/`, `simulations/`, `for_teachers/` | General published apps | Listed on the homepage and in `sitemap.xml`; offline by default |
 | `fun/` | Games and playful demos | May be listed publicly; always network-only |
-| `beta/` | New and trial apps; `beta/do_now/` holds only redirect pages for old Do Now links | Maintain `beta/index.html`; no service-worker registration or caching |
+| `beta/` | New and trial apps | Maintain `beta/index.html`; no service-worker registration or caching |
 | `misc/` | Unlisted pages and resources | Maintain links and short descriptions in `misc/index.html`; no registration or caching |
 | `gcsephy/` | Public school-specific GCSE curriculum resources (`year9phy/`, `year10phy/`) and the Do Now starters and flashcards in `do-now/` | Direct-link access, outside the root catalogue; maintain `gcsephy/index.html`; network-only in root `sw.js`; pages load `/gcsephy/sw-register.js`, whose `/gcsephy/`-scoped worker revalidates every request and stores nothing |
 | `ibdpphy/` | Public IB Diploma Programme Physics resources: a course summary, an annotated data booklet, and teaching decks by syllabus topic in `decks/` | As `gcsephy/`: direct-link access, outside the root catalogue; maintain `ibdpphy/index.html`; network-only in root `sw.js`; pages load `/ibdpphy/sw-register.js`, the same freshness worker scoped to `/ibdpphy/` |

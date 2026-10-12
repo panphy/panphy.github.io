@@ -51,6 +51,3 @@ Each topic's share follows how often it earned recall (AO1) marks in the AQA Hig
 
 `1`–`9`, `0`: show or hide that answer. `A`: all answers. `N`: new questions. `W`: worksheet. `F`: fullscreen. `Esc`: back to topics. `?` (or the "?" button): list of shortcuts. Clicking "Do Now" in the top bar also goes back. On a phone the less-used board buttons are behind the "⋯" button.
 
-## Old address
-
-The page used to live at `beta/do_now/`. The four HTML files left there (`index.html`, `revision/index.html`, `revision/sheet.html`, `revision/practical.html`) only forward old links here, keeping any query and hash. Old direct links to a PDF, CSV or image are not forwarded.
