@@ -10,7 +10,7 @@ Resources for the IB Diploma Programme Physics course (first assessment 2025), o
 |---|---|
 | `index.html` | Hub page. Its syllabus map lists themes A to E; a theme becomes a link once it has resources |
 | `decks/e1-structure-of-the-atom/` | E.1 teaching deck, 38 slides: SL and HL, then an additional HL part (slides 28 to 37) |
-| `decks/e2-quantum-physics/` | E.2 teaching deck, 29 slides: HL only |
+| `decks/e2-quantum-physics/` | E.2 teaching deck, 34 slides: HL only |
 | `decks/assets/deck.css`, `deck.js`, `figures.js`, `deck-math.js` | Styles, slide engine, SVG diagrams and MathJax setup shared by every deck here |
 | `decks/assets/deck-notes.css`, `deck-notes.js` | The note pane under each slide, copied unchanged from `gcsephy/decks/assets/` |
 | `sw.js`, `sw-register.js` | Freshness worker for `/ibdpphy/`, a copy of the `gcsephy/` pair; keep the two in step |
@@ -29,6 +29,8 @@ Terracotta (`--hl`, with `--hl-text` where it is text on paper) means higher lev
 Each slide is a `<section class="slide">` in the deck's `index.html`; a diagram is `<div class="fig" data-fig="name">`, drawn by the function of that name in `decks/assets/figures.js`. A student note goes inside the slide as `<aside class="revision-note" hidden>`. Maths is LaTeX between `\(` and `\)`, typeset by MathJax as in PanPhy Markdown (`decks/assets/deck-math.js` holds the setup); `\class{res}{…}` colours a result. Write a division as a fraction (`\frac`, or `\dfrac` in worked examples), never with ÷. Labels inside the SVG diagrams are plain text, not LaTeX. MathJax comes from the same CDN address as PanPhy Markdown; if it cannot load, the deck still opens and shows the LaTeX source.
 
 The atom diagrams and eleven slides of E.1 began as copies from `gcsephy/decks/atoms-and-radiation/`. The two decks are now separate: a change to one does not reach the other. The story-slide photographs in `decks/e1-structure-of-the-atom/images/` are copies too, and their credits and the history dates follow the table in [`gcsephy/year11phy/unit01/README.md`](../gcsephy/year11phy/unit01/README.md).
+
+E.2 has five story slides (8, 12, 17, 20 and 27) with photographs in `decks/e2-quantum-physics/images/`, all from Wikimedia Commons and either public domain or CC BY 4.0 (Thomson's camera and diffraction photograph, Science Museum Group). Each has a caption and a credit linking to its source; change a photo and its credit together. Their dates follow the laureates' pages on nobelprize.org (checked 12 October 2026): Einstein's light quanta 1905, Millikan's test 1912–1915 (published 1916), de Broglie's thesis 1924, electron diffraction 1927, and Compton's discovery 1922 (published 1923, the date on the Compton slides that follow).
 
 Constants are the values in the 2025 data booklet (checked 12 October 2026): `h` = 6.63 × 10⁻³⁴ J s, `hc` = 1.24 × 10⁻⁶ eV m, `k` = 8.99 × 10⁹ N m² C⁻², `e` = 1.60 × 10⁻¹⁹ C, `u` = 1.661 × 10⁻²⁷ kg, electron mass 9.11 × 10⁻³¹ kg and Fermi radius `R₀` = 1.20 × 10⁻¹⁵ m. Worked examples carry rounded values forward exactly as shown on the slide, so recheck every line of an example after changing one number.
 

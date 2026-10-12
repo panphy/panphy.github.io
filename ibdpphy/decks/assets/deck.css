@@ -19,6 +19,12 @@
   --brand-accent-strong: #2C4654;
   --sage: #96B083;
   --sand: #E2C678;
+  --bar-teal: #2B7A70;
+  --on-bar-teal: #fff;
+  --bar-slate: #2C4654;
+  --on-bar-slate: #fff;
+  --bar-apricot: #E8A66C;
+  --on-bar-apricot: #1F3340;
   --card-bg: #ffffff;
   --card-border: #E8E4DD;
   --card-shadow: 0 4px 16px rgba(0, 0, 0, 0.05);
@@ -83,6 +89,8 @@
   --gold: #E0B84A;
   --solid: #8A857D;
   --object: #7DB356;
+  --bar-teal: #2F8377;
+  --bar-slate: #456A7C;
   --hl: #E58A6C;
   --hl-ink: #2A0F08;
   --hl-text: #F0997C;
@@ -438,6 +446,8 @@ body.is-fullscreen:has(#deck .slide.history.active) { background-color: color-mi
 /* Story slides: photographs of the scientists and their apparatus (images/) beside a short
    account. Photos sit to the left of the text, or in a row above it with .band. The
    credits line under the story links each photo to its source. */
+/* On an HL slide the label sits below the "HL only" flag. */
+.slide.hl .not-examined { top: 78px; }
 .story { flex: 1; min-height: 0; display: grid; grid-template-columns: auto 1fr; gap: 50px; align-items: center; }
 .story.band { grid-template-columns: 1fr; gap: 30px; align-content: center; }
 .story-photos { display: flex; align-items: flex-start; gap: 20px; }
