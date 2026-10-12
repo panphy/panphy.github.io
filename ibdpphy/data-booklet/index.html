@@ -51,18 +51,8 @@
     <p>Annotated data booklet · IB DP Physics · PanPhy Labs · <a href="/ibdpphy/">Back to the DP Physics hub</a></p>
   </footer>
 
-  <div id="tip" role="tooltip" hidden></div>
-
+  <script src="../assets/equations.js"></script>
   <script src="booklet.js"></script>
-  <script>
-    // LaTeX is typeset as SVG, like the decks; the booklet script then finds each symbol in the output.
-    window.MathJax = {
-      tex: { inlineMath: [['\\(', '\\)']] },
-      svg: { fontCache: 'none' },
-      options: { enableMenu: false },
-      startup: { pageReady: () => MathJax.startup.defaultPageReady().then(() => window.BookletReady()) }
-    };
-  </script>
   <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js" async></script>
 </body>
 

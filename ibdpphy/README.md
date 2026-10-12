@@ -9,9 +9,10 @@ Resources for the IB Diploma Programme Physics course (first assessment 2025), o
 | File | Use |
 |---|---|
 | `index.html` | Hub page. Its syllabus map lists themes A to E; a theme becomes a link once it has resources |
-| `course-summary/` | One-page summary of the subject guide: hours, the content of every topic at SL and HL, the practical programme and assessment. Paraphrased and shortened; the guide is the authority |
-| `data-booklet/` | Annotated data booklet: `booklet.js` holds every constant and equation as LaTeX with a meaning for each symbol, and builds the page; `booklet.css` styles it |
-| `assets/page.css` | Styles shared by those two reference pages, light and dark |
+| `course-summary/` | One-page summary of the subject guide: hours, the content and equations of every topic at SL and HL, the practical programme and assessment. Paraphrased and shortened; the guide is the authority |
+| `data-booklet/` | Annotated data booklet: `booklet.js` holds the constants, conversions, mathematical equations and diagrams and builds the page; `booklet.css` styles it |
+| `assets/equations.js` | The equations of every topic as LaTeX with a meaning for each symbol, used by both reference pages; it also typesets them and shows the explanations |
+| `assets/page.css` | Styles shared by those two reference pages, light and dark, including the equation lists |
 | `decks/e1-structure-of-the-atom/` | E.1 teaching deck, 41 slides: SL and HL, then an additional HL part (slides 28 to 40) |
 | `decks/e2-quantum-physics/` | E.2 teaching deck, 34 slides: HL only |
 | `decks/assets/deck.css`, `deck.js`, `figures.js`, `deck-math.js` | Styles, slide engine, SVG diagrams and MathJax setup shared by every deck here |
@@ -20,7 +21,9 @@ Resources for the IB Diploma Programme Physics course (first assessment 2025), o
 
 ## Reference pages
 
-The course summary is plain HTML. The data booklet is data: in `data-booklet/booklet.js` each topic lists its equations and a `syms` dictionary, and every symbol found in the dictionary gets an explanation on hover, focus or tap. Write a symbol in `syms` exactly as it appears in the equation (`'F_\\mathrm{f}'`), and give an equation its own `syms` where a letter means something different there. The booklet follows version 1.2 (updated November 2023), the latest the author holds; when the IB revises the booklet or the guide, update the page, its version line and the course summary together. Both are the IB's copyright, so these pages explain and summarise and do not reproduce their text.
+The equations are data: in `assets/equations.js` each topic lists its equations and a `syms` dictionary, and every symbol found in the dictionary gets an explanation on hover, focus or tap. Write a symbol in `syms` exactly as it appears in the equation (`'F_\\mathrm{f}'`), and give an equation its own `syms` where a letter means something different there. The booklet shows every topic; the course summary, otherwise plain HTML, shows a topic's equations wherever it has `<div data-eqs="A.1 sl"></div>` (`hl` for the additional HL ones, placed inside the terracotta block), so an equation is edited once for both pages.
+
+No equation scrolls sideways. Each is typeset in parts, split before every top-level `=`, and the parts wrap; a part still wider than its column is scaled down. Keep a row to one relation where you can: a long chain or a “where” clause reads better as two rows. The booklet follows version 1.2 (updated November 2023), the latest the author holds; when the IB revises the booklet or the guide, update the page, its version line and the course summary together. Both are the IB's copyright, so these pages explain and summarise and do not reproduce their text.
 
 ## Marking higher level content
 
