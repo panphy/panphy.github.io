@@ -1084,7 +1084,7 @@ function resetCamera() {
   controls.target.set(0, 0, 0);
   controls.update();
 }
-// Reset view is a full reset: stop, go back to the start and restore the default view.
+// Reset is a full reset: stop, go back to the start and restore the default view.
 $('reset').addEventListener('click', () => {
   setPlaying(false);
   state.speed = 1;

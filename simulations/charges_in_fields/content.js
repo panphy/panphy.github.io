@@ -21,10 +21,10 @@ export const MODES = {
     level: 'A LEVEL · IB DP',
     heading: 'A magnetic force bends the path but never changes the speed.',
     description: 'A charge moving across a magnetic field feels a force F = qvB, at right angles to both its velocity and the field. Because the force is always at right angles to the motion, it changes the direction but not the speed: the particle moves in a circle. The magnetic force provides the centripetal force.',
-    look: 'Fire a proton into the field (the field points into the screen). Watch the force arrow: it always points to the centre of the circle. Now try an electron: it circles the other way. Change the speed or the field and see how the radius changes. Then set the angle to 45° to get a helix.',
+    look: 'Fire a proton into the field (at 90° the field points into the screen). Watch the force arrow: it always points to the centre of the circle. Now try an electron: it circles the other way. Change the speed or the field and see how the radius changes. Then set the field angle to 45°: the field turns, and the path becomes a helix.',
     evidence: 'Faster particles make bigger circles, and stronger fields make smaller ones, because r = mv/(qB). The kinetic energy graph stays flat: a magnetic force does no work. Any velocity along the field is unaffected, which is why the particle spirals along the field lines: this traps charged particles in Earth’s magnetic field and makes the aurora.',
     deeper: 'Setting qvB = mv²/r gives r = mv/(qB). The time for one orbit, T = 2πm/(qB), does not depend on the speed: faster particles make bigger circles in the same time. This fact makes the cyclotron possible. For a helix only the perpendicular part of the velocity, v sin θ, sets the radius.',
-    hint: 'Fire a proton, then change the speed, the field or the particle. Try an angle of 45° for a helix.'
+    hint: 'Fire a proton, then change the speed, the field or the particle. Set the field angle to 45° for a helix.'
   },
   selector: {
     title: 'VELOCITY SELECTOR',
@@ -90,7 +90,7 @@ export const STEPPERS = {
   separation: { label: 'Plate gap d (cm)', min: 2, max: 8, step: 1, value: 4, decimals: 0, aria: 'Plate separation in centimetres' },
   speed: { label: 'Speed v', from: 'speed', decimals: 1, aria: 'Particle speed' },
   field: { label: 'Field B (mT)', from: 'field', decimals: 1, aria: 'Magnetic flux density in millitesla' },
-  angle: { label: 'Angle to field (°)', min: 0, max: 90, step: 15, value: 90, decimals: 0, aria: 'Angle between the velocity and the field in degrees' },
+  angle: { label: 'Field angle θ (°)', min: 0, max: 90, step: 15, value: 90, decimals: 0, aria: 'Angle between the magnetic field and the velocity in degrees' },
   selectorVoltage: { label: 'Voltage V (V)', from: 'selectorVoltage', decimals: 0, aria: 'Plate voltage in volts' },
   selectorField: { label: 'Field B (mT)', from: 'selectorField', decimals: 2, aria: 'Magnetic flux density in millitesla' },
   cycField: { label: 'Field B (T)', min: 0.2, max: 1.5, step: 0.1, value: 0.5, decimals: 1, aria: 'Magnetic flux density in tesla' },
@@ -109,8 +109,8 @@ export const PARTS = {
   plus: 'POSITIVE PLATE · Connected to the + terminal. Field lines start on positive charge.',
   minus: 'NEGATIVE PLATE · Connected to the − terminal. Field lines end on negative charge.',
   efield: 'ELECTRIC FIELD · Uniform between the plates, pointing from + to −. Its strength is E = V/d (in V/m, the same as N/C).',
-  bfield: 'MAGNETIC FIELD · Uniform in the shaded region. Seen from the front, the field lines point into the screen, away from you.',
-  bfieldOut: 'MAGNETIC FIELD · Uniform in the shaded region. Reversed: seen from the front, the field lines now point out of the screen, towards you.',
+  bfield: 'MAGNETIC FIELD · Uniform in the shaded region, along the arrows. At 90° the field lines point into the screen, away from you.',
+  bfieldOut: 'MAGNETIC FIELD · Uniform in the shaded region, along the arrows. Reversed: at 90° the field lines now point out of the screen, towards you.',
   bfieldUp: 'MAGNETIC FIELD · Uniform and vertical through both dees. The field lines run up from the N pole to the S pole.',
   particle: 'PARTICLE · Tap Fire again to send another. The arrows show its velocity (blue) and the force on it (magenta).',
   particleSelector: 'PARTICLE · The arrows show its velocity (blue), the electric force qE (magenta) and the magnetic force qvB (pink).',
