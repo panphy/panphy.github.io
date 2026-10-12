@@ -1,6 +1,6 @@
 // difficulty.js — how long a keyword may be on each wave. The reasoning and the
 // full progression table are in fun/spellwave/README.md; keep the two in step.
-import { buildSearchPrompt } from './prompt-utils.js?v=20261012-boss-questions';
+import { buildSearchPrompt } from './prompt-utils.js?v=20261012-hard-lean';
 
 // Longest prompt, in typed characters, that a normal monster, healer or chest may
 // ask on waves 1, 2, 3… Late waves keep the final cap.
@@ -10,6 +10,15 @@ export const NORMAL_PROMPT_LENGTH_CAPS = [11, 12, 12, 13, 13, 14];
 // minion cap are previewed as normal monsters.
 export const EARLY_BOSS_WORD_LENGTH_CAP = 14;
 export const EARLY_BOSS_WAVES = 2;
+
+// From this wave a vocabulary boss comes from the hard list this often; before
+// it, waves 3–4 pick evenly across the medium and hard lists (about 3 in 8 hard).
+export const HARD_BOSS_LEAN_WAVE = 5;
+export const HARD_BOSS_SHARE = 0.7;
+
+export function hardBossShare(wave) {
+  return wave >= HARD_BOSS_LEAN_WAVE ? HARD_BOSS_SHARE : null;
+}
 
 // [fewest, most] hard words slipped into the second half of waves 1–4.
 export const HARD_GUEST_COUNTS = [[0, 0], [1, 1], [1, 2], [1, 2]];
