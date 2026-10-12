@@ -840,6 +840,91 @@
                         background-color 0.4s ease;
         }
 
+        /* A section with more than two rows of cards scrolls sideways instead.
+           The padding (cancelled by the margin) leaves room for the hover lift,
+           shadow and focus ring, which the scroll container would otherwise clip.
+           Columns are sized so that a strip of the next and previous column
+           shows under the edge fades. */
+        .grid-wrap {
+            position: relative;
+        }
+
+        .grid.is-scroller {
+            --scroller-pad: 14px;
+            --scroller-peek: 30px;
+            --fade-left: 0px;
+            --fade-right: 0px;
+            grid-template-columns: none;
+            grid-template-rows: repeat(2, auto);
+            grid-auto-flow: column;
+            grid-auto-columns: calc((100% - 4 * 1.5rem - 2 * var(--scroller-peek)) / 3);
+            padding: var(--scroller-pad) var(--scroller-pad) 30px;
+            margin: calc(-1 * var(--scroller-pad)) calc(-1 * var(--scroller-pad)) -30px;
+            overflow-x: auto;
+            overscroll-behavior-x: contain;
+            scroll-snap-type: x proximity;
+            scroll-padding-inline: calc(var(--scroller-pad) + var(--scroller-peek) + 1.5rem) var(--scroller-pad);
+            scrollbar-width: none;
+            -webkit-mask-image: linear-gradient(to right, transparent, #000 var(--fade-left), #000 calc(100% - var(--fade-right)), transparent);
+            mask-image: linear-gradient(to right, transparent, #000 var(--fade-left), #000 calc(100% - var(--fade-right)), transparent);
+        }
+
+        .grid.is-scroller::-webkit-scrollbar {
+            display: none;
+        }
+
+        .grid.is-scroller > .card {
+            scroll-snap-align: start;
+        }
+
+        .grid-wrap.has-more-left > .grid { --fade-left: 48px; }
+        .grid-wrap.has-more-right > .grid { --fade-right: 48px; }
+
+        .scroller-button {
+            position: absolute;
+            top: 50%;
+            z-index: 2;
+            display: none;
+            place-items: center;
+            width: 48px;
+            height: 48px;
+            margin-top: -24px;
+            padding: 0;
+            border: 1px solid var(--card-border);
+            border-radius: 50%;
+            background: var(--card-bg);
+            color: var(--text-main);
+            box-shadow: var(--card-shadow);
+            cursor: pointer;
+            transition: border-color 0.2s ease, transform 0.2s ease;
+        }
+
+        .scroller-button svg {
+            width: 20px;
+            height: 20px;
+            fill: none;
+            stroke: currentColor;
+            stroke-width: 2.4;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+        }
+
+        .scroller-button:hover {
+            border-color: var(--text-main);
+            transform: scale(1.06);
+        }
+
+        .scroller-prev { left: -10px; }
+        .scroller-next { right: -10px; }
+
+        /* Swiping covers touch screens; the buttons are for mouse users. */
+        @media (hover: hover) and (pointer: fine) {
+            .grid-wrap.has-more-left > .scroller-prev,
+            .grid-wrap.has-more-right > .scroller-next {
+                display: grid;
+            }
+        }
+
         .grid > .card:nth-child(3n + 2) { --card-tint: var(--tint-primary); }
         .grid > .card:nth-child(3n) { --card-tint: var(--tint-accent); }
 
@@ -1235,6 +1320,11 @@
                 grid-template-columns: repeat(2, minmax(0, 1fr));
             }
 
+            .grid.is-scroller {
+                grid-template-columns: none;
+                grid-auto-columns: calc((100% - 3 * 1.5rem - 2 * var(--scroller-peek)) / 2);
+            }
+
             .section-heading {
                 grid-template-columns: minmax(0, 1fr) minmax(230px, 340px);
             }
@@ -1353,6 +1443,12 @@
             .grid {
                 grid-template-columns: 1fr;
                 gap: 1rem;
+            }
+
+            .grid.is-scroller {
+                grid-template-columns: none;
+                grid-auto-columns: calc(100% - 2rem - 2 * var(--scroller-peek));
+                scroll-padding-inline-start: calc(var(--scroller-pad) + var(--scroller-peek) + 1rem);
             }
         }
 
@@ -1514,12 +1610,14 @@
                     <button class="filter-button" type="button" data-topic-filter="sound" aria-pressed="false">Sound</button>
                     <button class="filter-button" type="button" data-topic-filter="mechanics" aria-pressed="false">Mechanics</button>
                     <button class="filter-button" type="button" data-topic-filter="matter" aria-pressed="false">Matter</button>
+                    <button class="filter-button" type="button" data-topic-filter="electromagnetism" aria-pressed="false">Electromagnetism</button>
                     <button class="filter-button" type="button" data-topic-filter="atomic" aria-pressed="false">Atomic &amp; nuclear</button>
+                    <button class="filter-button" type="button" data-topic-filter="space" aria-pressed="false">Space</button>
                     <button class="filter-button" type="button" data-topic-filter="relativity" aria-pressed="false">Relativity</button>
                     <button class="filter-button" type="button" data-topic-filter="data" aria-pressed="false">Data &amp; video</button>
                 </div>
                 <p class="offline-status" id="offline-status" hidden></p>
-                <span class="sr-only" id="results-status" aria-live="polite">18 apps shown.</span>
+                <span class="sr-only" id="results-status" aria-live="polite">21 apps shown.</span>
             </div>
         </div>
     </section>
@@ -1536,6 +1634,7 @@
                 <span class="section-count">5 apps</span>
             </div>
         </div>
+        <div class="grid-wrap">
         <div class="grid">
             <a class="card" href="/tools/panphymd.html">
                 <div class="card-art" aria-hidden="true">
@@ -1643,6 +1742,7 @@
                 <span class="card-cta">Generate tone</span>
             </a>
         </div>
+        </div>
     </section>
 
     <section class="section app-section" id="simulations" data-section="02" data-category="simulations">
@@ -1653,10 +1753,11 @@
                 <h2>Simulations <span class="section-label">Interact</span></h2>
             </div>
             <div class="section-summary">
-                <p>Interactive models for exploring waves, mechanics, matter, nuclear physics, and relativity.</p>
-                <span class="section-count">9 apps</span>
+                <p>Interactive models for exploring waves, mechanics, matter, electromagnetism, nuclear physics, space, and relativity.</p>
+                <span class="section-count">12 apps</span>
             </div>
         </div>
+        <div class="grid-wrap">
         <div class="grid">
             <a class="card" href="/simulations/ripple_tank.html" data-topic="waves">
                 <div class="card-art" aria-hidden="true">
@@ -1752,6 +1853,56 @@
                 </div>
                 <span class="card-cta">Launch sim</span>
             </a>
+            <a class="card" href="/simulations/electric_motors.html" data-topic="electromagnetism">
+                <div class="card-art" aria-hidden="true">
+                    <svg viewBox="0 0 360 168" focusable="false">
+                        <rect class="a-ink a-pri-soft" x="40" y="40" width="46" height="88" rx="6" stroke-width="2"/>
+                        <rect class="a-ink a-acc-soft" x="274" y="40" width="46" height="88" rx="6" stroke-width="2"/>
+                        <text class="a-serif" x="63" y="91" text-anchor="middle">N</text>
+                        <text class="a-serif" x="297" y="91" text-anchor="middle">S</text>
+                        <path class="a-mut" stroke-width="1.6" stroke-dasharray="3 6" d="M94 56h172M94 84h172M94 112h172"/>
+                        <path class="a-mut" stroke-width="1.6" d="M112 84h136"/>
+                        <path class="a-acc" stroke-width="3" d="M138 106 198 62h24l-60 44z"/>
+                        <path class="a-ink" stroke-width="2.5" d="M150 82V46m-7 7 7-7 7 7M210 86v36m-7-7 7 7 7-7"/>
+                        <text class="a-ts" x="180" y="152" text-anchor="middle">F = BIL</text>
+                    </svg>
+                </div>
+                <div class="card-meta">
+                    <span class="card-type">Electromagnetism</span>
+                </div>
+                <div class="card-body">
+                    <h3>Electric Motors</h3>
+                    <p>See the motor effect, then run a DC motor and an AC motor in 3D.</p>
+                </div>
+                <span class="card-cta">Launch sim</span>
+            </a>
+            <a class="card" href="/simulations/charges_in_fields.html" data-topic="electromagnetism">
+                <div class="card-art" aria-hidden="true">
+                    <svg viewBox="0 0 360 168" focusable="false">
+                        <rect class="a-ink a-pri-soft" x="64" y="34" width="150" height="10" rx="3" stroke-width="2"/>
+                        <rect class="a-ink a-acc-soft" x="64" y="118" width="150" height="10" rx="3" stroke-width="2"/>
+                        <text class="a-ts" x="46" y="44">+</text>
+                        <text class="a-ts" x="46" y="128">−</text>
+                        <path class="a-mut" stroke-width="1.6" d="M94 52v56m-4-6 4 6 4-6M139 52v56m-4-6 4 6 4-6M184 52v56m-4-6 4 6 4-6"/>
+                        <path class="a-mut" stroke-width="1.6" stroke-dasharray="3 6" d="M22 86h42"/>
+                        <path class="a-acc" stroke-width="2.5" d="M64 86Q150 86 222 56"/>
+                        <circle class="a-acc-f" cx="222" cy="56" r="5"/>
+                        <circle class="a-pri" cx="296" cy="82" r="34" stroke-width="2.5"/>
+                        <circle class="a-pri-f" cx="296" cy="48" r="5"/>
+                        <g class="a-mut" stroke-width="1.6"><path d="M282 70l8 8m0-8-8 8M302 70l8 8m0-8-8 8M282 90l8 8m0-8-8 8M302 90l8 8m0-8-8 8"/></g>
+                        <text class="a-t" x="139" y="154" text-anchor="middle">E field</text>
+                        <text class="a-t" x="296" y="154" text-anchor="middle">B field</text>
+                    </svg>
+                </div>
+                <div class="card-meta">
+                    <span class="card-type">Electromagnetism</span>
+                </div>
+                <div class="card-body">
+                    <h3>Charges in Fields</h3>
+                    <p>Steer charged particles through electric and magnetic fields in 3D.</p>
+                </div>
+                <span class="card-cta">Launch sim</span>
+            </a>
             <a class="card" href="/simulations/atomic_models.html" data-topic="atomic">
                 <div class="card-art" aria-hidden="true">
                     <svg viewBox="0 0 360 168" focusable="false">
@@ -1824,6 +1975,30 @@
                 </div>
                 <span class="card-cta">Launch sim</span>
             </a>
+            <a class="card" href="/simulations/star_life_cycle.html" data-topic="space">
+                <div class="card-art" aria-hidden="true">
+                    <svg viewBox="0 0 360 168" focusable="false">
+                        <g class="a-mut-f"><circle cx="34" cy="70" r="2.5"/><circle cx="46" cy="58" r="2"/><circle cx="58" cy="72" r="2.5"/><circle cx="42" cy="84" r="2"/><circle cx="56" cy="92" r="2.5"/><circle cx="68" cy="60" r="2"/><circle cx="30" cy="94" r="2"/><circle cx="70" cy="84" r="2"/><circle cx="50" cy="104" r="2"/></g>
+                        <circle class="a-ink a-pri-soft" cx="118" cy="80" r="13" stroke-width="2"/>
+                        <circle class="a-ink a-pri-f" cx="212" cy="80" r="38" stroke-width="2"/>
+                        <circle class="a-mut" cx="310" cy="80" r="20" stroke-width="1.6" stroke-dasharray="3 6"/>
+                        <circle class="a-ink a-paper" cx="310" cy="80" r="6" stroke-width="2"/>
+                        <path class="a-ink" stroke-width="2" d="M82 80h14m-5-5 5 5-5 5M140 80h24m-5-5 5 5-5 5M258 80h24m-5-5 5 5-5 5"/>
+                        <text class="a-t" x="50" y="146" text-anchor="middle">nebula</text>
+                        <text class="a-t" x="118" y="146" text-anchor="middle">star</text>
+                        <text class="a-t" x="212" y="146" text-anchor="middle">red giant</text>
+                        <text class="a-t" x="310" y="146" text-anchor="middle">white dwarf</text>
+                    </svg>
+                </div>
+                <div class="card-meta">
+                    <span class="card-type">Astrophysics</span>
+                </div>
+                <div class="card-body">
+                    <h3>Life Cycle of a Star</h3>
+                    <p>Choose a star's mass and follow its whole life in 3D, from nebula to its final state.</p>
+                </div>
+                <span class="card-cta">Launch sim</span>
+            </a>
             <a class="card" href="/simulations/lorentz.html" data-topic="relativity">
                 <div class="card-art" aria-hidden="true">
                     <svg viewBox="0 0 360 168" focusable="false">
@@ -1848,6 +2023,7 @@
                 <span class="card-cta">Launch sim</span>
             </a>
         </div>
+        </div>
     </section>
 
     <section class="section app-section" id="for_teachers" data-section="03" data-category="for_teachers">
@@ -1862,6 +2038,7 @@
                 <span class="section-count">2 apps</span>
             </div>
         </div>
+        <div class="grid-wrap">
         <div class="grid">
             <a class="card" href="/for_teachers/timer.html">
                 <div class="card-art" aria-hidden="true">
@@ -1906,6 +2083,7 @@
                 <span class="card-cta">Use camera</span>
             </a>
         </div>
+        </div>
     </section>
 
     <section class="section app-section" id="fun" data-section="04" data-category="fun">
@@ -1920,6 +2098,7 @@
                 <span class="section-count">2 apps</span>
             </div>
         </div>
+        <div class="grid-wrap">
         <div class="grid">
             <a class="card" href="/fun/spellwave.html">
                 <div class="card-art" aria-hidden="true">
@@ -1965,6 +2144,7 @@
                 </div>
                 <span class="card-cta">Open camera</span>
             </a>
+        </div>
         </div>
     </section>
 
@@ -2077,8 +2257,63 @@
                 });
 
                 resultsStatus.textContent = visibleTotal + (visibleTotal === 1 ? ' app shown.' : ' apps shown.');
+                updateScrollers(true);
                 syncUrl();
             }
+
+            // A section with more than two rows of visible cards becomes a
+            // two-row sideways scroller; its edges fade while more cards lie beyond them.
+            var grids = appSections.map(function (section) { return section.querySelector('.grid'); });
+            var reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+
+            function columnsPerView() {
+                if (window.matchMedia('(max-width: 600px)').matches) return 1;
+                return window.matchMedia('(max-width: 1000px)').matches ? 2 : 3;
+            }
+
+            function updateScrollerFade(grid) {
+                var scrolling = grid.classList.contains('is-scroller');
+                var remaining = grid.scrollWidth - grid.clientWidth - grid.scrollLeft;
+                grid.parentNode.classList.toggle('has-more-left', scrolling && grid.scrollLeft > 4);
+                grid.parentNode.classList.toggle('has-more-right', scrolling && remaining > 4);
+            }
+
+            function updateScrollers(reset) {
+                var columns = columnsPerView();
+                grids.forEach(function (grid) {
+                    var visible = grid.querySelectorAll('.card:not([hidden])').length;
+                    grid.classList.toggle('is-scroller', visible > columns * 2);
+                    if (reset) grid.scrollLeft = 0;
+                    updateScrollerFade(grid);
+                });
+            }
+
+            grids.forEach(function (grid) {
+                [-1, 1].forEach(function (direction) {
+                    var button = document.createElement('button');
+                    button.type = 'button';
+                    button.className = 'scroller-button ' + (direction < 0 ? 'scroller-prev' : 'scroller-next');
+                    // Keyboard users reach every card by tabbing, which scrolls it into view.
+                    button.tabIndex = -1;
+                    button.setAttribute('aria-hidden', 'true');
+                    button.innerHTML = '<svg viewBox="0 0 24 24" focusable="false"><path d="' +
+                        (direction < 0 ? 'M15 5l-7 7 7 7' : 'M9 5l7 7-7 7') + '"/></svg>';
+                    button.addEventListener('click', function () {
+                        // Move by one screenful of whole columns.
+                        var cards = grid.querySelectorAll('.card:not([hidden])');
+                        var pitch = cards.length > 2 ? cards[2].offsetLeft - cards[0].offsetLeft : grid.clientWidth;
+                        grid.scrollBy({
+                            left: direction * pitch * columnsPerView(),
+                            behavior: reducedMotion.matches ? 'auto' : 'smooth'
+                        });
+                    });
+                    grid.parentNode.appendChild(button);
+                });
+                grid.addEventListener('scroll', function () { updateScrollerFade(grid); }, { passive: true });
+            });
+            window.addEventListener('resize', function () { updateScrollers(false); });
+            window.addEventListener('load', function () { updateScrollers(false); });
+            updateScrollers(false);
 
             function setTopic(topic) {
                 activeTopic = topic;
@@ -2443,6 +2678,43 @@
                 '/simulations/atomic_models/style.css',
                 '/simulations/atomic_models/app.js',
                 '/simulations/atomic_models/content.js',
+                '/assets/theme-toggle.css',
+                '/assets/theme-toggle.js',
+                '/assets/panphy.png',
+                'https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js',
+                'https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/controls/OrbitControls.js'
+            ],
+            '/simulations/electric_motors.html': [
+                '/simulations/electric_motors.html',
+                '/assets/fullscreen-button.css',
+                '/simulations/electric_motors/style.css',
+                '/simulations/electric_motors/app.js',
+                '/simulations/electric_motors/content.js',
+                '/assets/theme-toggle.css',
+                '/assets/theme-toggle.js',
+                '/assets/panphy.png',
+                'https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js',
+                'https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/controls/OrbitControls.js'
+            ],
+            '/simulations/charges_in_fields.html': [
+                '/simulations/charges_in_fields.html',
+                '/assets/fullscreen-button.css',
+                '/simulations/charges_in_fields/style.css',
+                '/simulations/charges_in_fields/app.js',
+                '/simulations/charges_in_fields/content.js',
+                '/assets/theme-toggle.css',
+                '/assets/theme-toggle.js',
+                '/assets/panphy.png',
+                'https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js',
+                'https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/controls/OrbitControls.js'
+            ],
+            '/simulations/star_life_cycle.html': [
+                '/simulations/star_life_cycle.html',
+                '/assets/fullscreen-button.css',
+                '/simulations/star_life_cycle/style.css',
+                '/simulations/star_life_cycle/app.js',
+                '/simulations/star_life_cycle/content.js',
+                '/simulations/star_life_cycle/physics.js',
                 '/assets/theme-toggle.css',
                 '/assets/theme-toggle.js',
                 '/assets/panphy.png',
@@ -2851,7 +3123,7 @@
                         observer.unobserve(entry.target);
                     }
                 });
-            }, { threshold: 0.05, rootMargin: '0px 0px -30px 0px' });
+            }, { threshold: 0.01, rootMargin: '0px 0px -30px 0px' });
 
             cards.forEach(function (c) { observer.observe(c); });
         })();
