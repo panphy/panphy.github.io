@@ -289,7 +289,7 @@
       s += text(30, 60, 'NUCLEON NUMBER A', 'lbl mono strong a', 'start') + text(30, 90, 'protons + neutrons', 'lbl small', 'start');
       s += arrow(204, 104, 250, 130, 'brand-primary', 2.5);
       s += text(30, 322, 'PROTON NUMBER Z', 'lbl mono strong z', 'start') + text(30, 352, 'number of protons', 'lbl small', 'start');
-      s += arrow(250, 300, 296, 268, 'brand-accent', 2.5);
+      s += arrow(248, 276, 298, 240, 'brand-accent', 2.5);
       s += text(560, 176, 'carbon-12', 'lbl display', 'start') + text(560, 214, '6 p, 6 n, 6 e', 'lbl mono', 'start');
       return svg('0 0 790 380', s, 'Nuclear notation for carbon-12: nucleon number 12 at the top left, proton number 6 at the bottom left');
     },
