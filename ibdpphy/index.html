@@ -90,6 +90,11 @@
     .jump small { margin-left: auto; font: 500 .7rem/1 var(--mono); letter-spacing: .1em; text-transform: uppercase; white-space: nowrap; }
     .jump a { background: var(--teal); border-color: var(--ink); color: #10262c; box-shadow: 5px 5px 0 var(--sand); transition: transform .12s ease, box-shadow .12s ease; }
     .jump a:hover { transform: translate(-2px, -2px); box-shadow: 7px 7px 0 var(--sand); }
+    /* Pages about the whole course sit above the themes, in cream. */
+    .jump a.course { background: var(--ink); color: #1f3340; box-shadow: 5px 5px 0 var(--apricot); }
+    .jump a.course:hover { box-shadow: 7px 7px 0 var(--apricot); }
+    .jump .jump-label { margin: 4px 0 -2px; font: 600 .7rem/1.4 var(--mono); letter-spacing: .16em; text-transform: uppercase; color: var(--muted); }
+    .jump .jump-label:not(:first-child) { margin-top: 12px; }
     .jump span { border-style: dashed; border-color: rgba(246, 238, 219, .32); color: var(--muted); }
 
     /* ---------- Sections ---------- */
@@ -191,8 +196,12 @@
         <h1>DP<br><i>Physics</i><b>.</b></h1>
         <p class="lead">Teaching resources for IB Diploma Programme Physics, built topic by topic. Anything that is higher level only is marked in terracotta, here and on every slide.</p>
       </div>
-      <nav aria-label="Syllabus themes">
+      <nav aria-label="Course pages and syllabus themes">
         <ul class="jump">
+          <li class="jump-label">Whole course</li>
+          <li><a class="course" href="course-summary/"><b>§</b> Course summary <small>Hours · content · assessment</small></a></li>
+          <li><a class="course" href="data-booklet/"><b>π</b> Annotated data booklet <small>Point at a symbol</small></a></li>
+          <li class="jump-label">Themes</li>
           <li><span><b>A</b> Space, time and motion <small>Not yet</small></span></li>
           <li><span><b>B</b> The particulate nature of matter <small>Not yet</small></span></li>
           <li><span><b>C</b> Wave behaviour <small>Not yet</small></span></li>
@@ -223,7 +232,7 @@
       </div>
     </section>
 
-    <!-- Add an entry whenever a page, deck or standalone resource is added under ibdpphy/, and turn its theme in the syllabus map into a link. -->
+    <!-- Add an entry whenever a page, deck or standalone resource is added under ibdpphy/: whole-course pages above the themes, and a theme in the syllabus map becomes a link once it has resources. -->
     <!-- Remove or update the entry when a page is renamed or deleted. -->
   </main>
 

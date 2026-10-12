@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="robots" content="noindex, nofollow">
+  <meta name="description" content="An annotated version of the IB Diploma Programme Physics data booklet (first assessment 2025): every constant and equation, with each symbol explained when you point at it.">
+  <meta name="theme-color" content="#F8F6F1">
+  <script src="/assets/theme.js"></script>
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <title>Annotated data booklet - IB DP Physics - PanPhy Labs</title>
+  <link rel="icon" type="image/png" href="/assets/favicon.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="/assets/apple-touch-icon.png">
+  <link rel="stylesheet" href="/assets/standalone-top.css">
+  <link rel="stylesheet" href="/assets/fonts/fonts.css">
+  <link rel="stylesheet" href="/assets/theme-toggle.css">
+  <link rel="stylesheet" href="../assets/page.css">
+  <link rel="stylesheet" href="booklet.css">
+  <script src="/assets/theme-toggle.js"></script>
+  <script src="/ibdpphy/sw-register.js" defer></script>
+</head>
+
+<body>
+  <header class="bar">
+    <a class="back" href="/ibdpphy/" aria-label="IB DP Physics hub"><img src="/assets/panphy.png" alt="" width="40" height="40"><span>DP Physics</span></a>
+    <nav aria-label="Sections on this page">
+      <a href="#constants">Constants</a>
+      <a href="#maths">Maths</a>
+      <a href="#circuit-symbols">Symbols</a>
+      <a href="#theme-a">A</a>
+      <a href="#theme-b">B</a>
+      <a href="#theme-c">C</a>
+      <a href="#theme-d">D</a>
+      <a href="#theme-e">E</a>
+    </nav>
+    <button id="theme-button" type="button" data-panphy-theme-toggle aria-label="Toggle light/dark theme" title="Toggle between light and dark themes"></button>
+  </header>
+  <script>window.PanPhyThemeToggle.mount(document.getElementById('theme-button'));</script>
+
+  <div class="head">
+    <p class="eyebrow">IB DP Physics · first assessment 2025</p>
+    <h1>Annotated data booklet<span>.</span></h1>
+    <p class="lead">Every constant and equation in the Physics data booklet, set out in the same order. <b>Point at a symbol</b>, tap it, or reach it with the <span class="how"><kbd>Tab</kbd></span> key, and it tells you what it stands for and its unit.</p>
+    <p class="notice">This is an unofficial study aid based on version 1.2 of the booklet (updated November 2023). It is not an IB publication and cannot be taken into an examination: use the clean copy your school provides. Equations give magnitudes only, as in the booklet.</p>
+  </div>
+
+  <main id="booklet"></main>
+
+  <footer>
+    <p>Annotated data booklet · IB DP Physics · PanPhy Labs · <a href="/ibdpphy/">Back to the DP Physics hub</a></p>
+  </footer>
+
+  <div id="tip" role="tooltip" hidden></div>
+
+  <script src="booklet.js"></script>
+  <script>
+    // LaTeX is typeset as SVG, like the decks; the booklet script then finds each symbol in the output.
+    window.MathJax = {
+      tex: { inlineMath: [['\\(', '\\)']] },
+      svg: { fontCache: 'none' },
+      options: { enableMenu: false },
+      startup: { pageReady: () => MathJax.startup.defaultPageReady().then(() => window.BookletReady()) }
+    };
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js" async></script>
+</body>
+
+</html>

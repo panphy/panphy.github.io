@@ -1,0 +1,68 @@
+/* Annotated data booklet: equation lists, tables, circuit symbols and the symbol explanations. */
+.eqs { list-style: none; margin: 12px 0 0; padding: 0; display: grid; gap: 4px 28px; grid-template-columns: repeat(auto-fill, minmax(min(100%, 320px), 1fr)); }
+.eq { display: flex; flex-direction: column; justify-content: center; gap: 2px; min-height: 58px; padding: 8px 0; border-bottom: 1px dashed var(--line); }
+.eq-label { font: 600 .7rem/1.3 var(--mono); letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+.eq-label mjx-container { text-transform: none; }
+.eq-math { font-size: 1.22rem; overflow-x: auto; overflow-y: hidden; padding: 4px 0; }
+.eq-note { font-size: .84rem; color: var(--muted); }
+.grid.two { display: grid; gap: 18px; grid-template-columns: minmax(0, 1fr); align-items: start; }
+.grid.two > .card { margin-top: 18px; }
+@media (min-width: 900px) { .grid.two { grid-template-columns: minmax(0, 1fr) 320px; } }
+
+/* A symbol with an explanation: dotted underline in the accent colour, a pointer, and a wider box to aim at. */
+mjx-container .sy { cursor: help; outline: none; }
+mjx-container .sy:hover, mjx-container .sy:focus { fill: var(--teal); stroke: var(--teal); }
+.card.hl mjx-container .sy:hover, .card.hl mjx-container .sy:focus { fill: var(--hl); stroke: var(--hl); }
+mjx-container .sy-hit { fill: transparent; stroke: none; pointer-events: all; }
+mjx-container .sy:focus-visible > .sy-hit { stroke: var(--apricot); stroke-width: 40; }
+#tip { position: fixed; z-index: 50; max-width: min(340px, calc(100vw - 16px)); padding: 9px 13px; border-radius: 10px; background: var(--slate); color: #F6EEDB; box-shadow: 0 8px 24px rgba(0, 0, 0, .28); font: 500 .9rem/1.4 var(--body); pointer-events: none; }
+[data-theme="dark"] #tip { background: #F6EEDB; color: #1F3340; }
+#tip[hidden] { display: none; }
+.how { display: inline-flex; align-items: center; gap: 8px; }
+.how kbd { padding: 1px 7px; border: 1.5px solid var(--line); border-radius: 6px; background: var(--card); font: 600 .8rem var(--mono); }
+
+.key { margin-top: 12px; }
+.key summary { cursor: pointer; min-height: 40px; display: inline-flex; align-items: center; font: 600 .76rem/1 var(--mono); letter-spacing: .08em; text-transform: uppercase; color: var(--teal); }
+.card.hl .key summary { color: var(--hl); }
+.key dl { margin: 8px 0 0; display: grid; gap: 6px 24px; grid-template-columns: repeat(auto-fill, minmax(min(100%, 300px), 1fr)); }
+.key dl > div { display: grid; grid-template-columns: 5.5em 1fr; gap: 10px; align-items: baseline; }
+.key dt { text-align: right; }
+.key dd { margin: 0; font-size: .9rem; color: var(--muted); }
+
+table.constants td.sym, table.multipliers td.sym { font-size: 1.15rem; white-space: nowrap; }
+table.constants td.what { color: var(--muted); font-size: .88rem; min-width: 16rem; }
+table.constants td:nth-child(3) { white-space: nowrap; }
+table.multipliers { max-width: 520px; }
+table.multipliers td.sym { font-family: var(--mono); font-weight: 600; }
+
+.symbols { margin-top: 18px; display: grid; gap: 14px; grid-template-columns: repeat(auto-fill, minmax(min(100%, 200px), 1fr)); }
+.symbols figure { margin: 0; padding: 14px 14px 12px; border: 1.5px solid var(--line); border-radius: 16px; background: var(--card); text-align: center; }
+.symbols svg { display: block; width: 132px; max-width: 100%; margin: 0 auto 8px; fill: none; stroke: var(--ink); stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.symbols svg text { fill: var(--ink); stroke: none; font: 700 17px var(--body); text-anchor: middle; }
+.symbols svg .fill { fill: var(--ink); }
+.symbols figcaption { font-size: .84rem; color: var(--muted); }
+.symbols figcaption b { display: block; color: var(--ink); font-size: .95rem; }
+
+.spectrum svg { display: block; min-width: 760px; width: 100%; height: auto; padding: 8px; }
+.spectrum path { stroke: var(--ink); stroke-width: 1.5; fill: none; }
+.spectrum .band { fill: var(--soft); stroke: var(--ink); stroke-width: 1.5; }
+.spectrum .band.alt { fill: var(--card); }
+.spectrum .vis, .spectrum .rainbow { fill: url(#rainbow); stroke: var(--ink); stroke-width: 1.5; }
+.spectrum text { fill: var(--ink); font: 600 14px var(--body); text-anchor: middle; }
+.spectrum .tick { font: 500 13px var(--mono); }
+.spectrum .axis { font: 600 13px var(--mono); fill: var(--muted); text-anchor: start; }
+.spectrum .axis[text-anchor="end"] { text-anchor: end; }
+.spectrum .vibgyor { fill: #fff; font: 700 13px var(--mono); letter-spacing: .1em; }
+.spectrum .arrow, .spectrum .zoom { stroke: var(--muted); stroke-dasharray: 4 4; }
+.spectrum .arrow { stroke-dasharray: none; }
+.spectrum .head { fill: var(--muted); stroke: none; }
+
+.vector { margin: 18px 0 0; padding: 14px; border: 1.5px solid var(--line); border-radius: 16px; background: var(--card); }
+.vector svg { display: block; width: 100%; height: auto; }
+.vector .dash { stroke: var(--muted); stroke-width: 1.5; stroke-dasharray: 5 5; fill: none; }
+.vector .vec { stroke: var(--teal); stroke-width: 3; }
+.vector .vhead { fill: var(--teal); }
+.vector .arc { stroke: var(--apricot); stroke-width: 2; fill: none; }
+.vector text { fill: var(--ink); font: italic 600 18px Georgia, serif; }
+
+@media print { .key[open] summary, #tip { display: none; } }
