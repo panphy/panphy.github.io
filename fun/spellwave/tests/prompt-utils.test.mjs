@@ -134,20 +134,31 @@ test('bosses chosen for one wave never share an answer', () => {
   const context = vm.createContext({
     MEDIUM_WORDS, HARD_WORDS, EQUATION_WORDS, buildBossQuestion, BOSSES_PER_WAVE: 3, waveSet: 1,
     bossAnswerLengthCap: wave => (wave <= 2 ? 14 : 16),
+    hardBossShare: wave => (wave >= 5 ? 0.7 : null),
     bossWordLengthCap: wave => (wave <= 2 ? 14 : Infinity),
     withinLength: (entries, cap) => entries.filter(entry => buildSearchPrompt(entry.term).length <= cap),
   });
   vm.runInContext(slice('function chooseBossWordsForWave()', 'function chooseBossPool()')
     + slice('function chooseBossPool()', 'function choosePrompt()'), context);
+  const vocabulary = Array(10).fill(0);
+  const hard = Array(10).fill(0);
   for (context.waveSet = 1; context.waveSet <= 9; context.waveSet += 1) {
     for (let run = 0; run < 300; run += 1) {
-      const answers = vm.runInContext('chooseBossWordsForWave().map(bossAnswer)', context);
+      const bosses = vm.runInContext('chooseBossWordsForWave()', context);
+      const answers = vm.runInContext('bosses => bosses.map(bossAnswer)', context)(bosses);
       assert.equal(answers.length, 3);
+      vocabulary[context.waveSet] += 2;
+      hard[context.waveSet] += bosses.filter(boss => HARD_WORDS.includes(boss)).length;
       for (const a of answers) {
         assert.equal(answers.filter(b => a.startsWith(b) || b.startsWith(a)).length, 1, answers.join(', '));
       }
     }
   }
+  // Hard bosses: none on waves 1–2, the minority on 3–4, the majority from wave 5.
+  const share = wave => hard[wave] / vocabulary[wave];
+  assert.equal(share(1) + share(2), 0);
+  assert.ok(share(3) > 0.25 && share(4) < 0.5, `${share(3)}, ${share(4)}`);
+  for (let wave = 5; wave <= 9; wave += 1) assert.ok(share(wave) > 0.6 && share(wave) < 0.8, `wave ${wave}: ${share(wave)}`);
 });
 
 

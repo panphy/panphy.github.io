@@ -2,14 +2,14 @@ import * as THREE from 'three';
 import { createSpellwaveAudio } from './audio.js';
 import { createSeasonalEffects } from './seasonal-effects.js';
 import { createPotionSystem } from './potions.js';
-import { ALL_WORDS, EASY_WORDS, HARD_WORDS, MEDIUM_WORDS, EQUATION_WORDS } from './question-bank.js?v=20261012-boss-questions';
+import { ALL_WORDS, EASY_WORDS, HARD_WORDS, MEDIUM_WORDS, EQUATION_WORDS } from './question-bank.js?v=20261012-hard-lean';
 import { createEndingFX } from './ending-fx.js';
 import { createLeaderboard } from './leaderboard.js';
 import { createEnemyMesh, createMimicChestMesh } from './enemy-meshes.js';
-import { bossHintLetters, normalPromptLengthCap, bossAnswerLengthCap, bossWordLengthCap, previewLengthCap, withinLength, hardGuestCount } from './difficulty.js?v=20261012-boss-questions';
+import { bossHintLetters, hardBossShare, normalPromptLengthCap, bossAnswerLengthCap, bossWordLengthCap, previewLengthCap, withinLength, hardGuestCount } from './difficulty.js?v=20261012-hard-lean';
 import { createLowPolyTerrain, createLowPolyTree, createLowPolyRock, createLowPolyCloud } from './lowpoly.js';
 import { createVisuals, GLOW_GAIN, MOON_GLOW_GAIN } from './visuals.js';
-import { pickTarget, getInputCharacters, isMathOperatorInput, buildSearchPrompt, buildAltSearchPrompts, buildHintMask, escapeHtml, wrapSups, buildBossHintPart, createBossQuestionBuilder, promptIndexForProgress } from './prompt-utils.js?v=20261012-boss-questions';
+import { pickTarget, getInputCharacters, isMathOperatorInput, buildSearchPrompt, buildAltSearchPrompts, buildHintMask, escapeHtml, wrapSups, buildBossHintPart, createBossQuestionBuilder, promptIndexForProgress } from './prompt-utils.js?v=20261012-hard-lean';
 
 const buildBossQuestion = createBossQuestionBuilder(ALL_WORDS, EQUATION_WORDS);
 
@@ -3608,12 +3608,12 @@ function buildHardGuestSchedule(target) {
 }
 
 function chooseBossWordsForWave() {
-  const pool = chooseBossPool();
   const chosen = [];
   const usedTerms = new Set();
 
   // First two bosses use vocabulary words
-  while (chosen.length < BOSSES_PER_WAVE - 1 && usedTerms.size < pool.length) {
+  for (let attempt = 0; attempt < 200 && chosen.length < BOSSES_PER_WAVE - 1; attempt += 1) {
+    const pool = chooseBossPool();
     const entry = pool[Math.floor(Math.random() * pool.length)];
     if (usedTerms.has(entry.term)) continue;
     usedTerms.add(entry.term);
@@ -3659,9 +3659,12 @@ function chooseEquationWord(otherBosses = []) {
   return EQUATION_WORDS[Math.floor(Math.random() * EQUATION_WORDS.length)];
 }
 
+// The list one vocabulary boss is drawn from; late waves favour the hard list.
 function chooseBossPool() {
-  if (waveSet >= 3) return [...MEDIUM_WORDS, ...HARD_WORDS];
-  return withinLength(MEDIUM_WORDS, bossWordLengthCap(waveSet));
+  if (waveSet < 3) return withinLength(MEDIUM_WORDS, bossWordLengthCap(waveSet));
+  const hardShare = hardBossShare(waveSet);
+  if (hardShare === null) return [...MEDIUM_WORDS, ...HARD_WORDS];
+  return Math.random() < hardShare ? HARD_WORDS : MEDIUM_WORDS;
 }
 
 function choosePrompt() {
@@ -4251,13 +4254,14 @@ function spawnBoss() {
 }
 
 function chooseBossWord() {
-  const pool = chooseBossPool();
   const usedTerms = new Set(bossWordsThisSet.map(w => w.term));
   const activeAnswers = liveAnswers();
   for (let attempt = 0; attempt < 24; attempt += 1) {
+    const pool = chooseBossPool();
     const entry = pool[Math.floor(Math.random() * pool.length)];
     if (!usedTerms.has(entry.term) && !sharesBossAnswer(entry, activeAnswers)) return entry;
   }
+  const pool = chooseBossPool();
   return pool[Math.floor(Math.random() * pool.length)];
 }
 
