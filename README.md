@@ -25,7 +25,7 @@ These public, open-source resources are intentionally outside the general homepa
 
 ## IB DP Physics
 
-The [IB DP Physics hub](https://panphy.app/ibdpphy/) collects resources for the IB Diploma Programme Physics course (first assessment 2025), also by direct link. It starts with two HTML teaching decks for Theme E, [E.1 Structure of the atom](https://panphy.app/ibdpphy/decks/e1-structure-of-the-atom/) and [E.2 Quantum physics](https://panphy.app/ibdpphy/decks/e2-quantum-physics/), with the additional higher level content marked on every slide it appears on. See the [folder overview](ibdpphy/README.md).
+The [IB DP Physics hub](https://panphy.app/ibdpphy/) collects resources for the IB Diploma Programme Physics course (first assessment 2025), also by direct link. It has a [course summary](https://panphy.app/ibdpphy/course-summary/), an [annotated data booklet](https://panphy.app/ibdpphy/data-booklet/) that explains every symbol, and two HTML teaching decks for Theme E, [E.1 Structure of the atom](https://panphy.app/ibdpphy/decks/e1-structure-of-the-atom/) and [E.2 Quantum physics](https://panphy.app/ibdpphy/decks/e2-quantum-physics/), with the additional higher level content marked on every slide it appears on. See the [folder overview](ibdpphy/README.md).
 
 ## Theme
 

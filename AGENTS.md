@@ -21,7 +21,7 @@ PanPhy Labs is a static GitHub Pages PWA for physics tools, simulations, classro
 | `beta/` | New and trial apps; `beta/do_now/` holds only redirect pages for old Do Now links | Maintain `beta/index.html`; no service-worker registration or caching |
 | `misc/` | Unlisted pages and resources | Maintain links and short descriptions in `misc/index.html`; no registration or caching |
 | `gcsephy/` | Public school-specific GCSE curriculum resources (`year9phy/`, `year10phy/`) and the Do Now starters and flashcards in `do-now/` | Direct-link access, outside the root catalogue; maintain `gcsephy/index.html`; network-only in root `sw.js`; pages load `/gcsephy/sw-register.js`, whose `/gcsephy/`-scoped worker revalidates every request and stores nothing |
-| `ibdpphy/` | Public IB Diploma Programme Physics resources: teaching decks by syllabus topic in `decks/` | As `gcsephy/`: direct-link access, outside the root catalogue; maintain `ibdpphy/index.html`; network-only in root `sw.js`; pages load `/ibdpphy/sw-register.js`, the same freshness worker scoped to `/ibdpphy/` |
+| `ibdpphy/` | Public IB Diploma Programme Physics resources: a course summary, an annotated data booklet, and teaching decks by syllabus topic in `decks/` | As `gcsephy/`: direct-link access, outside the root catalogue; maintain `ibdpphy/index.html`; network-only in root `sw.js`; pages load `/ibdpphy/sw-register.js`, the same freshness worker scoped to `/ibdpphy/` |
 
 Keep beta/misc inventories current when adding, moving, renaming, or removing entries. Supporting app files do not need separate entries.
 

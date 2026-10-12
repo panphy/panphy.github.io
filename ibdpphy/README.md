@@ -9,11 +9,18 @@ Resources for the IB Diploma Programme Physics course (first assessment 2025), o
 | File | Use |
 |---|---|
 | `index.html` | Hub page. Its syllabus map lists themes A to E; a theme becomes a link once it has resources |
+| `course-summary/` | One-page summary of the subject guide: hours, the content of every topic at SL and HL, the practical programme and assessment. Paraphrased and shortened; the guide is the authority |
+| `data-booklet/` | Annotated data booklet: `booklet.js` holds every constant and equation as LaTeX with a meaning for each symbol, and builds the page; `booklet.css` styles it |
+| `assets/page.css` | Styles shared by those two reference pages, light and dark |
 | `decks/e1-structure-of-the-atom/` | E.1 teaching deck, 41 slides: SL and HL, then an additional HL part (slides 28 to 40) |
 | `decks/e2-quantum-physics/` | E.2 teaching deck, 34 slides: HL only |
 | `decks/assets/deck.css`, `deck.js`, `figures.js`, `deck-math.js` | Styles, slide engine, SVG diagrams and MathJax setup shared by every deck here |
 | `decks/assets/deck-notes.css`, `deck-notes.js` | The note pane under each slide, copied unchanged from `gcsephy/decks/assets/` |
 | `sw.js`, `sw-register.js` | Freshness worker for `/ibdpphy/`, a copy of the `gcsephy/` pair; keep the two in step |
+
+## Reference pages
+
+The course summary is plain HTML. The data booklet is data: in `data-booklet/booklet.js` each topic lists its equations and a `syms` dictionary, and every symbol found in the dictionary gets an explanation on hover, focus or tap. Write a symbol in `syms` exactly as it appears in the equation (`'F_\\mathrm{f}'`), and give an equation its own `syms` where a letter means something different there. The booklet follows version 1.2 (updated November 2023), the latest the author holds; when the IB revises the booklet or the guide, update the page, its version line and the course summary together. Both are the IB's copyright, so these pages explain and summarise and do not reproduce their text.
 
 ## Marking higher level content
 
