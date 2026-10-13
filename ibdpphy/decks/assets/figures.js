@@ -738,11 +738,11 @@
 
     terminal: () => {
       const at = t => [110 + 600 * t, 400 - 250 * (1 - Math.exp(-4 * t))];
-      let s = axes(110, 400, 770, 40, 'time', 'speed') + `<line x1="110" y1="150" x2="730" y2="150" class="guide accent"/><line x1="110" y1="400" x2="218" y2="220" class="guide"/>`;
+      let s = axes(110, 400, 770, 40, 'time', 'velocity') + `<line x1="110" y1="150" x2="730" y2="150" class="guide accent"/><line x1="110" y1="400" x2="218" y2="220" class="guide"/>`;
       s += plot(sampled(at));
-      s += text(724, 132, 'terminal speed', 'lbl strong', 'end') + text(236, 96, 'at first: gradient = g', 'lbl small', 'start');
+      s += text(724, 132, 'terminal velocity', 'lbl strong', 'end') + text(236, 96, 'at first: gradient = g', 'lbl small', 'start');
       s += text(700, 318, 'gradient falls to zero:', 'lbl small', 'end') + text(700, 344, 'no acceleration', 'lbl small', 'end');
-      return svg('0 0 820 460', s, 'Speed against time for a body falling from rest through a fluid: the curve starts with gradient g, flattens, and levels off at the terminal speed');
+      return svg('0 0 820 460', s, 'Velocity against time for a body falling from rest through a fluid: the curve starts with gradient g, flattens, and levels off at the terminal velocity');
     },
 
     'g-drop': () => {
@@ -881,10 +881,10 @@
       };
       // Speed against time for the same fall: 5 s across the time axis, time constant 0.9 s, as in deck.css.
       const curve = plot(sampled(t => [460 + 340 * t, 440 - 190 * (1 - Math.exp(-5 * t / 0.9))], 80));
-      const graph = axes(460, 440, 836, 170, '', '') + text(830, 478, 'time', 'lbl', 'end') + text(476, 184, 'speed', 'lbl', 'start') + `<line x1="460" y1="250" x2="800" y2="250" class="guide accent"/>` + text(800, 230, 'terminal speed', 'lbl', 'end');
+      const graph = axes(460, 440, 836, 170, '', '') + text(830, 478, 'time', 'lbl', 'end') + text(476, 184, 'velocity', 'lbl', 'start') + `<line x1="460" y1="250" x2="800" y2="250" class="guide accent"/>` + text(800, 230, 'terminal velocity', 'lbl', 'end');
       const marker = `<circle cx="800" cy="250.7" r="8" style="fill:var(--brand-accent-strong)"/>`;
       const play = `<g class="sinker" style="--drop:320px">${sphere(130, true)}</g><g class="trace">${curve}</g><g class="trace-dot" style="--span:340px"><g class="grow-head" style="--len:189.3px">${marker}</g></g><g class="step k2"></g>`;
-      return svg('0 0 860 640', `${tank}${graph}<g class="still">${sphere(450, false)}${curve}${marker}</g><g class="mover">${play}</g>`, 'A small sphere falling through a deep column of fluid. Its weight acts downwards; the buoyancy force and the viscous drag act upwards. The drag grows with the speed until buoyancy and drag together equal the weight, and the sphere then falls at a constant terminal speed. Beside it, a graph of speed against time rises steeply at first, then curves over and levels off at the terminal speed');
+      return svg('0 0 860 640', `${tank}${graph}<g class="still">${sphere(450, false)}${curve}${marker}</g><g class="mover">${play}</g>`, 'A small sphere falling through a deep column of fluid. Its weight acts downwards; the buoyancy force and the viscous drag act upwards. The drag grows with the speed until buoyancy and drag together equal the weight, and the sphere then falls at a constant terminal velocity. Beside it, a graph of velocity against time rises steeply at first, then curves over and levels off at the terminal velocity');
     },
 
     // Also the small picture for part 3, with data-plain.

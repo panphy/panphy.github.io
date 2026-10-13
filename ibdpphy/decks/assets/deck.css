@@ -671,7 +671,7 @@ h2:has(+ .terms) { margin-bottom: 24px; }
   #deck .fig:has(.k2.shown) .mover .pre { opacity: 0; transition: opacity .2s ease var(--t1, 1.3s); }
   #deck .fig:not(:has(.k2.shown)) .mover .post { opacity: 0; }
   #deck .fig:has(.k2.shown) .mover .post { transition: opacity .2s ease var(--t1, 1.3s); }
-  /* Terminal speed (A.2): when step k2 is shown the sphere is released. It sinks, speeding up
+  /* Terminal velocity (A.2): when step k2 is shown the sphere is released. It sinks, speeding up
      and then steady, while the arrows that depend on its speed (drag and velocity) grow with it:
      .grow is an arrow's shaft and .grow-head its head, --len the arrow's full length. Beside it
      the speed–time curve (.trace) is uncovered from the left at a steady rate, led by a dot
