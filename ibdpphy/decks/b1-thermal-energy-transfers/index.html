@@ -1,0 +1,1050 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="robots" content="noindex, nofollow">
+  <meta name="description" content="Teaching slides for IB Diploma Programme Physics topic B.1 Thermal energy transfers, standard and higher level: the molecular model, temperature and internal energy, specific heat capacity and latent heat, conduction, convection and black-body radiation.">
+  <meta name="theme-color" content="#F8F6F1">
+  <script src="/assets/theme.js" data-theme-scope="ibdpphy"></script>
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <link rel="stylesheet" href="/assets/standalone-top.css">
+  <title>B.1 Thermal energy transfers · IB DP Physics</title>
+  <link rel="icon" type="image/png" href="/assets/favicon.png">
+  <link rel="apple-touch-icon" href="/assets/apple-touch-icon.png">
+  <link rel="stylesheet" href="../assets/deck.css">
+  <link rel="stylesheet" href="../assets/deck-notes.css">
+  <link rel="stylesheet" href="/assets/theme-toggle.css">
+  <link rel="stylesheet" href="/assets/fullscreen-button.css">
+  <script src="/assets/theme-toggle.js"></script>
+  <script src="/ibdpphy/sw-register.js" defer></script>
+</head>
+<body>
+  <header class="banner">
+    <a class="banner-logo" href="/" aria-label="PanPhy Labs home"><img src="/assets/panphy.png" alt="PanPhy Labs" width="38" height="38"></a>
+    <a class="banner-title" href="#1">B.1 Thermal energy transfers</a>
+    <div class="banner-actions">
+      <button id="thumbs-toggle" class="icon-button" type="button" aria-controls="thumbs" aria-pressed="true" aria-label="Hide slide thumbnails" title="Show or hide slide thumbnails (T)"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path class="pane" d="M9.5 4.5H6A2.5 2.5 0 0 0 3.5 7v10A2.5 2.5 0 0 0 6 19.5h3.5z"/><rect x="3.5" y="4.5" width="17" height="15" rx="2.5"/><path d="M9.5 4.5v15"/></svg></button>
+      <button id="fullscreen" class="panphy-fullscreen-button" type="button" aria-pressed="false" aria-label="Present fullscreen" title="Present fullscreen (F)"><svg class="panphy-fs-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M4 9V4h5M15 4h5v5M20 15v5h-5M9 20H4v-5"/></svg></button>
+      <button id="theme-button" type="button" data-panphy-theme-toggle aria-label="Toggle light/dark theme" title="Toggle between light and dark themes"></button>
+    </div>
+  </header>
+  <script>window.PanPhyThemeToggle.mount(document.getElementById('theme-button'));</script>
+
+  <nav class="thumbs" id="thumbs" aria-label="Slides"></nav>
+
+  <main class="stage" id="stage">
+    <div class="deck" id="deck">
+
+      <!-- 1 · Title -->
+      <section class="slide title" data-title="B.1 Thermal energy transfers">
+        <div class="title-grid">
+          <div>
+            <p class="eyebrow">IB DP Physics · Theme B · The particulate nature of matter</p>
+            <h1>Thermal energy transfers<span>.</span></h1>
+            <p class="lead">B.1 · Particles and temperature, heating and changes of phase, conduction, convection and radiation<br>Standard level and higher level</p>
+            <div class="chips">
+              <span class="chip">SL + HL · 6 hours</span>
+              <a class="chip on" href="../b4-thermodynamics/">B.4 Thermodynamics (HL) ↗</a>
+            </div>
+          </div>
+          <div class="fig" data-fig="b1-states" data-plain></div>
+        </div>
+      </section>
+
+      <section class="slide" data-title="Lesson map">
+        <p class="eyebrow">The journey</p>
+        <h2>Four parts<span>.</span></h2>
+        <div class="cards fill" style="grid-template-columns: repeat(4, 1fr);">
+          <div class="card">
+            <div class="fig" data-fig="b1-states" data-still data-plain style="height: 170px;"></div>
+            <p class="eyebrow">Part 01</p>
+            <h3>Particles and temperature</h3>
+            <p>The molecular model, the kelvin and internal energy</p>
+          </div>
+          <div class="card">
+            <div class="fig" data-fig="b1-heating-curve" data-still data-plain style="height: 170px;"></div>
+            <p class="eyebrow">Part 02</p>
+            <h3>Heating and changes of phase</h3>
+            <p>\(Q = mc \Delta T\) and \(Q = mL\)</p>
+          </div>
+          <div class="card">
+            <div class="fig" data-fig="b1-conduction" data-still data-plain style="height: 170px;"></div>
+            <p class="eyebrow">Part 03</p>
+            <h3>Conduction and convection</h3>
+            <p>Energy passed on by particles, and carried by a moving fluid</p>
+          </div>
+          <div class="card">
+            <div class="fig" data-fig="b1-planck" data-still data-plain style="height: 170px;"></div>
+            <p class="eyebrow">Part 04</p>
+            <h3>Thermal radiation</h3>
+            <p>Black bodies, luminosity, brightness and Wien’s law</p>
+          </div>
+        </div>
+        <div class="slide-foot"><span>B.1 THERMAL ENERGY TRANSFERS · SL + HL</span><span data-page></span></div>
+      </section>
+
+      <!-- Part 1 -->
+      <section class="slide section" data-title="Part 1: Particles and temperature">
+        <div class="title-grid">
+          <div>
+            <p class="eyebrow">Part 01</p>
+            <h1>Particles and temperature<span>.</span></h1>
+            <p class="lead">What a thermometer is telling you about the molecules</p>
+          </div>
+          <div class="fig" data-fig="b1-states" data-plain></div>
+        </div>
+        <div class="slide-foot"><span>B.1 THERMAL ENERGY TRANSFERS · SL + HL</span><span data-page></span></div>
+      </section>
+
+      <section class="slide" data-title="Solids, liquids and gases">
+        <p class="eyebrow">The molecular model</p>
+        <h2>Solids, liquids and gases<span>.</span></h2>
+        <div class="split wide-fig">
+          <div class="stack">
+            <ul class="points small">
+              <li>The <b>same particles</b> in all three phases</li>
+              <li class="step">What changes: their <b>spacing</b>, their <b>motion</b> and how strongly the <b>forces</b> between them act</li>
+            </ul>
+            <div class="idea step">Forces hold a solid in shape, hold a liquid together and are negligible in a gas.</div>
+          </div>
+          <div class="panel">
+            <div class="panel-head"><span>THE SAME PARTICLES, THREE ARRANGEMENTS</span></div>
+            <div class="fig" data-fig="b1-states"></div>
+          </div>
+        </div>
+        <div class="slide-foot"><span>B.1 THERMAL ENERGY TRANSFERS · SL + HL</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>What the model explains.</b> A solid keeps its shape because each particle is held in place by its neighbours and can only vibrate. A liquid flows, but keeps its volume, because the particles are still touching and still attract each other, yet are free to change places. A gas fills any container because its particles are so far apart that the forces between them hardly act: each one flies in a straight line until it hits something.</p>
+            <p><b>Why liquids and solids are hard to squash.</b> Their particles are already in contact. A gas is mostly empty space, so it can be compressed easily: in air, the molecules are about ten diameters apart.</p>
+          </div>
+          <div class="rn-side">
+            <p class="trap">Drawing the particles of a liquid far apart. A liquid is only slightly less dense than the solid: nearly all the particles still touch.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide" data-title="Density">
+        <p class="eyebrow">Mass per unit volume</p>
+        <h2>Density<span>.</span></h2>
+        <div class="split even">
+          <div class="stack">
+            <div class="equation"><span>\(\rho = \dfrac{m}{V}\)</span></div>
+            <ul class="points small">
+              <li>Unit: \(\mathrm{kg} \,\mathrm{m}^{-3}\)</li>
+              <li class="step">Solids and liquids: particles <b>touching</b>, similar densities</li>
+              <li class="step">Gases: about a <b>thousand times</b> less dense</li>
+            </ul>
+          </div>
+          <div class="work step">
+            <span class="say">An aluminium block: 5.0 cm × 4.0 cm × 2.0 cm · mass 108 g</span>
+            <span>\(V = 0.050 \times 0.040 \times 0.020 = 4.0 \times 10^{-5} \,\mathrm{m}^{3}\)</span>
+            <span class="step">\(\rho = \dfrac{m}{V} = \dfrac{0.108}{4.0 \times 10^{-5}}\)</span>
+            <span class="step">\(\rho = \class{res}{2.7 \times 10^{3} \,\mathrm{kg} \,\mathrm{m}^{-3}}\)</span>
+          </div>
+        </div>
+        <div class="slide-foot"><span>B.1 THERMAL ENERGY TRANSFERS · SL + HL</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>The factor of a thousand.</b> Water has a density of 1000 kg m⁻³ and steam at 100 °C about 0.6 kg m⁻³. The molecules are the same, so in steam each one has about 1700 times as much space. The cube root of 1700 is about 12: on average the molecules of the gas are twelve times further apart than in the liquid.</p>
+            <p><b>Water is unusual.</b> Ice (917 kg m⁻³) is less dense than liquid water, because its molecules lock into an open pattern. For nearly every other substance the solid is the denser phase and sinks in its own liquid.</p>
+          </div>
+          <div class="rn-side">
+            <p class="trap">Converting cm³ to m³ by dividing by 100. There are \(100^{3} = 10^{6}\) cubic centimetres in a cubic metre, so \(1 \,\mathrm{g} \,\mathrm{cm}^{-3} = 1000 \,\mathrm{kg} \,\mathrm{m}^{-3}\).</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide" data-title="Kelvin and Celsius">
+        <p class="eyebrow">Two scales with the same step</p>
+        <h2>Kelvin and Celsius<span>.</span></h2>
+        <div class="split wide-fig">
+          <div class="stack">
+            <div class="equation small"><span>\(T / \mathrm{K} = \theta / {}^{\circ}\mathrm{C} + 273\)</span></div>
+            <ul class="points small">
+              <li>The kelvin scale starts at <b>absolute zero</b></li>
+              <li class="step">One kelvin is the same size as one degree Celsius</li>
+              <li class="step">So a temperature <b>change</b> is the same number on both scales</li>
+            </ul>
+          </div>
+          <div class="panel">
+            <div class="panel-head"><span>THE TWO SCALES</span></div>
+            <div class="fig" data-fig="b1-scales"></div>
+          </div>
+        </div>
+        <div class="slide-foot"><span>B.1 THERMAL ENERGY TRANSFERS · SL + HL</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>When you must use kelvin.</b> Any equation with \(T\) itself in it needs the absolute temperature: \(\bar{E}_\mathrm{k} = \frac{3}{2} k_\mathrm{B} T\), the gas laws, \(L = \sigma A T^{4}\) and Wien’s law. Doubling the temperature of a gas from 20 °C does not mean heating it to 40 °C: it means going from 293 K to 586 K, which is 313 °C.</p>
+            <p><b>When either will do.</b> \(Q = mc \Delta T\) and the conduction equation contain only a difference of temperatures, and a difference is the same on both scales. Heating water from 20 °C to 50 °C is a rise of 30 °C and of 30 K.</p>
+          </div>
+          <div class="rn-side">
+            <p class="tip">There is no degree sign with the kelvin: write 300 K, not 300 °K. And no temperature in kelvin is ever negative.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide history" data-title="Story: Rumford’s cannons">
+        <p class="eyebrow">The story · Munich, 1798</p>
+        <p class="not-examined">Background story · not assessed</p>
+        <h2>Count Rumford bores a cannon<span>.</span></h2>
+        <div class="story" style="--photo-h: 400px;">
+          <div class="story-photos">
+            <figure><img src="images/rumford.jpg" width="598" height="880" alt="Ink drawing of Count Rumford, a man in a long coat and riding boots leaning against a rock under a tree, holding a rolled paper"><figcaption><b>Benjamin Thompson</b>, Count Rumford</figcaption></figure>
+            <figure><img src="images/rumford-cannon.jpg" width="1280" height="1066" alt="Engraving of a cannon barrel held in a boring machine, and below it a section through a box of water fitted round the end of the barrel"><figcaption>The barrel in its <b>box of water</b> (plate of 1870, after his paper)</figcaption></figure>
+          </div>
+          <div class="stack">
+            <ul class="points">
+              <li>In 1798 heat was thought to be a fluid, <b>caloric</b>, that could not be made or destroyed</li>
+              <li>At the Munich arsenal, a blunt borer turned in a barrel under water</li>
+              <li>The water <b>boiled</b> in about two and a half hours, and went on boiling</li>
+            </ul>
+            <div class="idea">A supply that never runs out cannot be a substance. What the borer gave the metal was <b>motion</b>.</div>
+          </div>
+        </div>
+        <p class="credits">Portrait: <a href="https://commons.wikimedia.org/wiki/File:Portrait_of_Sir_Benjamin_Thompson,_Count_von_Rumford_MET_49.19.107.jpg" target="_blank" rel="noopener">Jean François Bozio, Metropolitan Museum of Art</a>, CC0 (cropped). Engraving: <a href="https://commons.wikimedia.org/wiki/File:Rumford%27s_cannon_boring_experiment_at_the_Munich_arsenal_in_1798.jpg" target="_blank" rel="noopener">The Complete Works of Count Rumford, 1870</a>, no known restrictions.</p>
+        <div class="slide-foot"><span>B.1 THERMAL ENERGY TRANSFERS · SL + HL</span><span data-page></span></div>
+      </section>
+
+      <section class="slide" data-title="Temperature and kinetic energy">
+        <p class="eyebrow">What temperature measures</p>
+        <h2>Temperature and kinetic energy<span>.</span></h2>
+        <div class="split even">
+          <div class="stack">
+            <div class="equation"><span>\(\bar{E}_\mathrm{k} = \dfrac{3}{2} k_\mathrm{B} T\)</span></div>
+            <ul class="points small">
+              <li>\(\bar{E}_\mathrm{k}\): the <b>average</b> random kinetic energy of one particle</li>
+              <li class="step">\(T\) must be in <b>kelvin</b></li>
+              <li class="step">\(k_\mathrm{B} = 1.38 \times 10^{-23} \,\mathrm{J} \,\mathrm{K}^{-1}\), the Boltzmann constant</li>
+            </ul>
+          </div>
+          <div class="work step">
+            <span class="say">A molecule of air in a room at 27 °C</span>
+            <span>\(T = 27 + 273 = 300 \,\mathrm{K}\)</span>
+            <span class="step">\(\bar{E}_\mathrm{k} = \dfrac{3}{2} k_\mathrm{B} T = \dfrac{3}{2} \times 1.38 \times 10^{-23} \times 300\)</span>
+            <span class="step">\(\bar{E}_\mathrm{k} = \class{res}{6.2 \times 10^{-21} \,\mathrm{J}}\)</span>
+          </div>
+        </div>
+        <div class="slide-foot"><span>B.1 THERMAL ENERGY TRANSFERS · SL + HL</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>Same temperature, same kinetic energy.</b> The equation has no mass in it. In air at 300 K a light hydrogen molecule and a heavy carbon dioxide molecule have the same average kinetic energy. The lighter one must therefore be moving faster: hydrogen at about 1900 m s⁻¹, carbon dioxide at about 400 m s⁻¹.</p>
+            <p><b>Why “average”.</b> At any instant some molecules are almost at rest and a few are moving several times faster than the typical speed. They exchange energy at every collision. Temperature describes the whole crowd, not one member of it: a single molecule does not have a temperature.</p>
+            <p><b>Absolute zero.</b> Put \(T = 0\) in the equation and the random kinetic energy is zero. That is why nothing can be colder: there is no motion left to remove.</p>
+          </div>
+          <div class="rn-side">
+            <p class="tip">The energies are tiny, so they are often given in electronvolts: \(6.2 \times 10^{-21} \,\mathrm{J}\) is about 0.04 eV.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide" data-title="Internal energy">
+        <p class="eyebrow">The energy inside a body</p>
+        <h2>Internal energy<span>.</span></h2>
+        <div class="stack center" style="gap: 26px;">
+          <div class="cards" style="grid-template-columns: 1fr auto 1fr auto 1fr; align-items: center;">
+            <div class="card"><p class="eyebrow">Total random</p><h3>Kinetic energy</h3><p>From the random motion of the molecules. Rises with <b>temperature</b></p></div>
+            <div class="big-symbol">+</div>
+            <div class="card step"><p class="eyebrow">Total intermolecular</p><h3>Potential energy</h3><p>From the forces between the molecules. Changes with their <b>separation</b>, so with the <b>phase</b></p></div>
+            <div class="big-symbol step">=</div>
+            <div class="card step"><p class="eyebrow">The sum, for all the molecules</p><h3>Internal energy</h3><p>A property of the whole body, in joules</p></div>
+          </div>
+          <div class="idea step">Temperature is about the <b>average</b> kinetic energy of one molecule. Internal energy is the <b>total</b> for all of them.</div>
+        </div>
+        <div class="slide-foot"><span>B.1 THERMAL ENERGY TRANSFERS · SL + HL</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>A cup and a bath.</b> A cup of water at 80 °C is hotter than a bath at 40 °C: each of its molecules has more kinetic energy on average. But the bath has far more internal energy, because it has thousands of times as many molecules. Temperature tells you which way energy will flow. Internal energy tells you how much there is.</p>
+            <p><b>Why “random”.</b> Throw a ball and all its molecules gain the same extra velocity. That ordered motion is the ball’s ordinary kinetic energy and does not make the ball hotter. Internal energy counts only the disordered motion of the molecules relative to each other.</p>
+            <p><b>Energy without a temperature rise.</b> When ice melts, the energy supplied pulls the molecules out of their fixed places against the forces between them. The potential energy rises while the kinetic energy, and so the temperature, stays the same.</p>
+          </div>
+          <div class="rn-side">
+            <p class="more">An ideal gas has no forces between its molecules, so its internal energy is kinetic only: \(U = \frac{3}{2} N k_\mathrm{B} T\) in B.3.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide" data-title="Thermal equilibrium">
+        <p class="eyebrow">Which way the energy goes</p>
+        <h2>Thermal energy flows from hot to cold<span>.</span></h2>
+        <div class="split fig-first">
+          <div class="panel">
+            <div class="panel-head"><span>TWO BLOCKS IN CONTACT</span><span class="reveal-hint">PRESS → TO PLAY</span></div>
+            <div class="fig" data-fig="b1-equilibrium"></div>
+          </div>
+          <ul class="points small">
+            <li class="step">The <b>temperature difference</b> sets the direction of the resultant transfer</li>
+            <li class="step">It stops when the temperatures are <b>equal</b>: thermal equilibrium</li>
+            <li class="step">The final temperature is <b>not</b> usually half way between</li>
+          </ul>
+        </div>
+        <div class="slide-foot"><span>B.1 THERMAL ENERGY TRANSFERS · SL + HL</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>Why hot to cold.</b> Where the two blocks touch, fast molecules of the hot block collide with slow molecules of the cold one. In a collision between a fast and a slow particle the fast one usually loses energy and the slow one gains it. Energy also passes the other way in some collisions, which is why the slide says “resultant”: more goes from hot to cold than from cold to hot.</p>
+            <p><b>At equilibrium nothing has stopped.</b> The molecules are still colliding and still exchanging energy across the boundary, but now as much goes one way as the other.</p>
+            <p><b>Why not half way.</b> On the graph the cold block warms much more than the hot block cools. It has the smaller mass or the smaller specific heat capacity, so the same energy changes its temperature more. Part 2 puts numbers to this.</p>
+          </div>
+          <div class="rn-side">
+            <p class="trap">“Heat flows until both have the same energy.” It is the temperatures that become equal. The two bodies usually end with very different internal energies.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide" data-title="Quick check: particles and temperature">
+        <p class="eyebrow">Quick check</p>
+        <h2>Particles and temperature<span>.</span></h2>
+        <div class="quiz fill">
+          <div class="q"><p><span class="n">01</span>Convert 37 °C to kelvin.</p><div class="ans step">310 K</div></div>
+          <div class="q"><p><span class="n">02</span>A liquid is heated by 15 °C. What is the rise in kelvin?</p><div class="ans step">15 K</div></div>
+          <div class="q"><p><span class="n">03</span>The kelvin temperature of a gas doubles. The average kinetic energy of a molecule?</p><div class="ans step">It doubles</div></div>
+          <div class="q"><p><span class="n">04</span>Which two kinds of energy make up internal energy?</p><div class="ans step">Random kinetic and intermolecular potential</div></div>
+          <div class="q"><p><span class="n">05</span>What decides the direction of thermal energy transfer?</p><div class="ans step">The temperature difference</div></div>
+          <div class="q"><p><span class="n">06</span>A 2.0 m³ tank holds 1600 kg of oil. Density?</p><div class="ans step">\(\frac{1600}{2.0} = 800 \,\mathrm{kg} \,\mathrm{m}^{-3}\)</div></div>
+        </div>
+        <div class="slide-foot"><span class="reveal-hint">PRESS → TO REVEAL EACH ANSWER</span><span data-page></span></div>
+      </section>
+
+      <!-- Part 2 -->
+      <section class="slide section" data-title="Part 2: Heating and changes of phase">
+        <div class="title-grid">
+          <div>
+            <p class="eyebrow">Part 02</p>
+            <h1>Heating and changes of phase<span>.</span></h1>
+            <p class="lead">How much energy it takes to warm a substance, and to melt or boil it</p>
+          </div>
+          <div class="fig" data-fig="b1-heating-curve" data-plain></div>
+        </div>
+        <div class="slide-foot"><span>B.1 THERMAL ENERGY TRANSFERS · SL + HL</span><span data-page></span></div>
+      </section>
+
+      <section class="slide" data-title="Specific heat capacity">
+        <p class="eyebrow">Energy to change the temperature</p>
+        <h2>Specific heat capacity<span>.</span></h2>
+        <div class="split even">
+          <div class="stack">
+            <div class="equation"><span>\(Q = mc \Delta T\)</span></div>
+            <ul class="points small">
+              <li>\(c\): the energy to raise the temperature of <b>1 kg</b> by <b>1 K</b></li>
+              <li class="step">Unit: \(\mathrm{J} \,\mathrm{kg}^{-1} \,\mathrm{K}^{-1}\)</li>
+              <li class="step">A property of the <b>substance</b>, and of its phase</li>
+            </ul>
+          </div>
+          <table class="facts step">
+            <thead><tr><th>Substance (approximate values)</th><th class="nocase">c / J kg⁻¹ K⁻¹</th></tr></thead>
+            <tbody>
+              <tr><td>Water</td><td class="num">4200</td></tr>
+              <tr><td>Ice</td><td class="num">2100</td></tr>
+              <tr><td>Aluminium</td><td class="num">900</td></tr>
+              <tr><td>Copper</td><td class="num">390</td></tr>
+              <tr><td>Lead</td><td class="num">130</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="slide-foot"><span>B.1 THERMAL ENERGY TRANSFERS · SL + HL</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>Water is the odd one out.</b> It takes about ten times as much energy to warm a kilogram of water by one kelvin as a kilogram of copper. That is why the sea warms and cools so much more slowly than the land, why water is the usual coolant in engines and power stations, and why a hot-water bottle stays warm for hours.</p>
+            <p><b>Why metals are so low.</b> A kilogram of lead contains far fewer atoms than a kilogram of aluminium, because each lead atom is nearly eight times heavier. Each atom takes about the same energy to speed up, so the substance with fewer atoms per kilogram needs less energy per kilogram.</p>
+          </div>
+          <div class="rn-side">
+            <p class="tip">\(\Delta T\) is a difference, so °C and K give the same answer here. Do not add 273.</p>
+            <p class="more">“Specific” means “per unit mass”. The heat capacity of a whole object, \(mc\), is in J K⁻¹.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide" data-title="Specific heat capacity: a kettle">
+        <p class="eyebrow">Worked example</p>
+        <h2>Boiling a kettle<span>.</span></h2>
+        <div class="split even">
+          <div class="work">
+            <span class="say">1.2 kg of water at 18 °C is heated to 100 °C by a 2.0 kW element</span>
+            <span class="say">\(c = 4200 \,\mathrm{J} \,\mathrm{kg}^{-1} \,\mathrm{K}^{-1}\)</span>
+            <span>\(Q = mc \Delta T\)</span>
+            <span class="step">\(Q = 1.2 \times 4200 \times (100 - 18)\)</span>
+            <span class="step">\(Q = \class{res}{4.1 \times 10^{5} \,\mathrm{J}}\)</span>
+          </div>
+          <div class="work step">
+            <span class="say">The time it takes</span>
+            <span>\(P = \dfrac{Q}{t}\) &nbsp;so&nbsp; \(t = \dfrac{Q}{P}\)</span>
+            <span class="step">\(t = \dfrac{4.1 \times 10^{5}}{2.0 \times 10^{3}}\)</span>
+            <span class="step">\(t = \class{res}{2.1 \times 10^{2} \,\mathrm{s}}\)</span>
+          </div>
+        </div>
+        <div class="slide-foot"><span>B.1 THERMAL ENERGY TRANSFERS · SL + HL</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>What was assumed.</b> That every joule from the element went into the water. In a real kettle some warms the kettle itself and some escapes to the room, so the measured time is a little longer than three and a half minutes. If a question gives an efficiency, say 90%, the energy supplied must be \(\frac{4.1 \times 10^{5}}{0.90}\).</p>
+            <p><b>A sense of scale.</b> 410 kJ would lift the same 1.2 kg of water to a height of 35 km. Warming things takes a great deal of energy compared with moving them, which is why heating dominates household energy bills.</p>
+          </div>
+          <div class="rn-side">
+            <p class="trap">Using the final temperature, 100, in place of the rise, 82.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide" data-title="Measuring specific heat capacity">
+        <p class="eyebrow">An electrical method</p>
+        <h2>Measuring specific heat capacity<span>.</span></h2>
+        <div class="split">
+          <div class="stack">
+            <div class="work">
+              <span class="say">1.0 kg block · 48 W heater for 300 s · rise of 15 K</span>
+              <span>\(Pt = mc \Delta T\)</span>
+              <span class="step">\(c = \dfrac{Pt}{m \Delta T} = \dfrac{48 \times 300}{1.0 \times 15}\)</span>
+              <span class="step">\(c = \class{res}{960 \,\mathrm{J} \,\mathrm{kg}^{-1} \,\mathrm{K}^{-1}}\)</span>
+            </div>
+            <div class="idea step">Accepted value for aluminium: 900. Energy lost to the room makes the result <b>too high</b>.</div>
+          </div>
+          <div class="panel">
+            <div class="panel-head"><span>A HEATED METAL BLOCK</span></div>
+            <div class="fig" data-fig="b1-heater"></div>
+          </div>
+        </div>
+        <div class="slide-foot"><span>B.1 THERMAL ENERGY TRANSFERS · SL + HL</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>Why too high, not too low.</b> The calculation credits the block with all 14 400 J. In fact some of that energy leaked away, so the block received less and its temperature rose by less than it should have. A smaller \(\Delta T\) on the bottom of the fraction gives a larger \(c\). Whenever energy escapes, this method overestimates.</p>
+            <p><b>Reducing the error.</b> Insulate the block. Put a drop of oil in the thermometer hole so that the thermometer reads the temperature of the metal. Keep watching after switching off and record the highest temperature reached, because the energy takes time to spread through the block. Better still, start a few degrees below room temperature and finish the same amount above it, so that the gains and losses roughly cancel.</p>
+          </div>
+          <div class="rn-side">
+            <p class="tip">A graph of temperature against time for a steady heater has gradient \(\frac{P}{mc}\). Using the gradient of the straight part is better than using one pair of readings.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide" data-title="Mixing: hot copper into water">
+        <p class="eyebrow">Worked example</p>
+        <h2>Hot copper into cold water<span>.</span></h2>
+        <div class="split even">
+          <div class="work">
+            <span class="say">0.20 kg of copper at 100 °C goes into 0.50 kg of water at 20 °C</span>
+            <span class="say">\(c_\mathrm{Cu} = 390\) · \(c_\mathrm{w} = 4200 \,\mathrm{J} \,\mathrm{kg}^{-1} \,\mathrm{K}^{-1}\) · final temperature \(T\)</span>
+            <span>Energy lost by copper = energy gained by water</span>
+            <span class="step">\(m_\mathrm{Cu} c_\mathrm{Cu} (100 - T) = m_\mathrm{w} c_\mathrm{w} (T - 20)\)</span>
+            <span class="step">\(78 (100 - T) = 2100 (T - 20)\)</span>
+          </div>
+          <div class="work step">
+            <span>\(7800 + 42\,000 = 2178\,T\)</span>
+            <span class="step">\(T = \dfrac{49\,800}{2178}\)</span>
+            <span class="step">\(T = \class{res}{23 \,{}^{\circ}\mathrm{C}}\)</span>
+          </div>
+        </div>
+        <div class="slide-foot"><span>B.1 THERMAL ENERGY TRANSFERS · SL + HL</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>Why so close to 20 °C.</b> Compare the two heat capacities, \(mc\). For the copper it is 78 J K⁻¹; for the water it is 2100 J K⁻¹, twenty-seven times as much. Every joule that leaves the copper cools it twenty-seven times as much as it warms the water. The copper falls 77 K while the water rises 3 K.</p>
+            <p><b>Setting it up.</b> Write each temperature change as a positive number: the hot body falls from its starting temperature to \(T\), the cold one rises from its starting temperature to \(T\). Then “energy lost = energy gained” has no minus signs to go wrong.</p>
+          </div>
+          <div class="rn-side">
+            <p class="tip">Check that the answer lies between the two starting temperatures, and nearer to that of the body with the larger \(mc\).</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide" data-title="Changes of phase">
+        <p class="eyebrow">Heating ice until it is steam</p>
+        <h2>Changes of phase<span>.</span></h2>
+        <div class="split wide-fig">
+          <ul class="points small">
+            <li>Sloping parts: the temperature rises, \(Q = mc \Delta T\)</li>
+            <li class="step">Flat parts: the phase changes at <b>constant temperature</b></li>
+            <li class="step">The energy goes into <b>potential</b> energy, not kinetic</li>
+            <li class="step">Cooling runs the graph backwards: condensing and freezing <b>release</b> energy</li>
+          </ul>
+          <div class="panel">
+            <div class="panel-head"><span>WATER HEATED AT A STEADY RATE</span></div>
+            <div class="fig" data-fig="b1-heating-curve"></div>
+          </div>
+        </div>
+        <div class="slide-foot"><span>B.1 THERMAL ENERGY TRANSFERS · SL + HL</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>What the energy does on a flat part.</b> During melting, the energy supplied frees the molecules from their fixed places. During boiling, it pulls them right away from each other, against the forces that hold the liquid together. In both cases the separation of the molecules changes, so their potential energy rises. Their average kinetic energy does not, and that is why the thermometer does not move.</p>
+            <p><b>Reading the slopes.</b> The heater supplies energy at a steady rate, so a steeper line means a smaller specific heat capacity. Ice and steam both warm about twice as fast as liquid water: their specific heat capacities are about half as large.</p>
+            <p><b>The words.</b> Solid to liquid is melting and the reverse is freezing. Liquid to gas is boiling (or evaporation) and the reverse is condensing.</p>
+          </div>
+          <div class="rn-side">
+            <p class="tip">Asked to explain a flat part, say three things: the energy increases the potential energy of the molecules, the kinetic energy is unchanged, so the temperature is constant.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide" data-title="Specific latent heat">
+        <p class="eyebrow">Energy to change the phase</p>
+        <h2>Specific latent heat<span>.</span></h2>
+        <div class="split even">
+          <div class="stack">
+            <div class="equation"><span>\(Q = mL\)</span></div>
+            <ul class="points small">
+              <li>\(L\): the energy to change the phase of <b>1 kg</b> at constant temperature</li>
+              <li class="step">Unit: \(\mathrm{J} \,\mathrm{kg}^{-1}\)</li>
+              <li class="step"><b>Fusion</b>: solid ⇌ liquid. <b>Vaporization</b>: liquid ⇌ gas</li>
+            </ul>
+          </div>
+          <table class="facts step">
+            <thead><tr><th>Water</th><th class="nocase">L / J kg⁻¹</th></tr></thead>
+            <tbody>
+              <tr><td>Fusion, at 0 °C</td><td class="num">\(3.34 \times 10^{5}\)</td></tr>
+              <tr><td>Vaporization, at 100 °C</td><td class="num">\(2.26 \times 10^{6}\)</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="slide-foot"><span>B.1 THERMAL ENERGY TRANSFERS · SL + HL</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>Why vaporization takes so much more.</b> Melting only loosens the molecules: they stay in contact, and nearly all the bonds between neighbours survive. Boiling separates them completely, so every bond must be broken. For water that takes nearly seven times as much energy per kilogram.</p>
+            <p><b>Why steam scalds.</b> A gram of steam at 100 °C that condenses on your skin releases 2260 J before it has cooled at all. A gram of water at 100 °C cooling to skin temperature releases about 270 J. The same property is put to use in a power station: turning water into steam stores a great deal of energy in it, which the turbine then takes out.</p>
+          </div>
+          <div class="rn-side">
+            <p class="trap">Putting a temperature change into \(Q = mL\). There is none: the whole point is that the temperature stays constant.</p>
+            <p class="more">“Latent” means hidden: the energy goes in without showing on a thermometer.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide history" data-title="Story: Joseph Black">
+        <p class="eyebrow">The story · Glasgow, about 1761</p>
+        <p class="not-examined">Background story · not assessed</p>
+        <h2>Joseph Black and the hidden heat<span>.</span></h2>
+        <div class="story" style="--photo-h: 430px;">
+          <div class="story-photos">
+            <figure><img src="images/black.jpg" width="888" height="1093" alt="Painted portrait of Joseph Black, an older man with white hair at the sides of his head, wearing a dark gown"><figcaption><b>Joseph Black</b>, painted by David Martin in 1787</figcaption></figure>
+          </div>
+          <div class="stack">
+            <ul class="points">
+              <li>A professor at Glasgow, he noticed that melting ice takes in heat <b>without getting warmer</b></li>
+              <li>Boiling water does the same: more steam, no rise in temperature</li>
+              <li>He called the heat <b>latent</b>. He had already found that different substances need different amounts of heat to warm up</li>
+              <li>His friend at Glasgow, <b>James Watt</b>, went on to transform the steam engine, with Black’s support</li>
+            </ul>
+            <div class="idea">Both \(Q = mL\) and \(Q = mc \Delta T\) go back to Black.</div>
+          </div>
+        </div>
+        <p class="credits">Portrait: <a href="https://commons.wikimedia.org/wiki/File:Professor-joseph-black-1728-1799-chemist_cropped.jpg" target="_blank" rel="noopener">David Martin, 1787</a>, photograph CC BY-SA 4.0.</p>
+        <div class="slide-foot"><span>B.1 THERMAL ENERGY TRANSFERS · SL + HL</span><span data-page></span></div>
+      </section>
+
+      <section class="slide" data-title="Latent heat: ice to water">
+        <p class="eyebrow">Worked example</p>
+        <h2>Ice from the freezer<span>.</span></h2>
+        <div class="split even">
+          <div class="work">
+            <span class="say">0.050 kg of ice at −18 °C becomes water at 20 °C</span>
+            <span class="say">Warm the ice to 0 °C</span>
+            <span>\(Q_{1} = mc_\mathrm{ice} \Delta T = 0.050 \times 2100 \times 18 = 1.9 \times 10^{3} \,\mathrm{J}\)</span>
+            <span class="say step">Melt it</span>
+            <span class="step">\(Q_{2} = mL = 0.050 \times 3.34 \times 10^{5} = 1.67 \times 10^{4} \,\mathrm{J}\)</span>
+            <span class="say step">Warm the water to 20 °C</span>
+            <span class="step">\(Q_{3} = mc_\mathrm{w} \Delta T = 0.050 \times 4200 \times 20 = 4.2 \times 10^{3} \,\mathrm{J}\)</span>
+          </div>
+          <div class="stack step">
+            <div class="work">
+              <span>\(Q = Q_{1} + Q_{2} + Q_{3}\)</span>
+              <span class="step">\(Q = \class{res}{2.3 \times 10^{4} \,\mathrm{J}}\)</span>
+            </div>
+            <div class="idea step">Nearly three quarters of it is the <b>melting</b>.</div>
+          </div>
+        </div>
+        <div class="slide-foot"><span>B.1 THERMAL ENERGY TRANSFERS · SL + HL</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>One stage for every part of the graph.</b> Sketch the heating curve and mark where the substance starts and ends. Each sloping part it crosses needs an \(mc \Delta T\), with the specific heat capacity of that phase. Each flat part needs an \(mL\). Here the path crosses two slopes and one flat part, so there are three terms.</p>
+            <p><b>Why ice cools a drink so well.</b> The ice takes 23 kJ from the drink in all, and 17 kJ of that is absorbed at 0 °C, without the ice getting any warmer. The same mass of cold water at 0 °C would take only 4.2 kJ.</p>
+          </div>
+          <div class="rn-side">
+            <p class="trap">Using 4200 for the ice. Ice and water are different phases with different specific heat capacities.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide" data-title="Boiling and evaporation">
+        <p class="eyebrow">Two ways from liquid to gas</p>
+        <h2>Boiling and evaporation<span>.</span></h2>
+        <div class="stack center" style="gap: 26px;">
+          <div class="cards" style="grid-template-columns: 1fr 1fr;">
+            <div class="card"><p class="eyebrow">Boiling</p><h3>At one temperature, throughout the liquid</h3><p>Bubbles of vapour form inside the liquid. The temperature stays at the boiling point while energy is supplied</p></div>
+            <div class="card step"><p class="eyebrow">Evaporation</p><h3>At any temperature, from the surface</h3><p>The fastest molecules near the surface escape. Those left behind have less energy on average, so the liquid <b>cools</b></p></div>
+          </div>
+          <div class="idea step">Both need the specific latent heat of vaporization for every kilogram that changes phase.</div>
+        </div>
+        <div class="slide-foot"><span>B.1 THERMAL ENERGY TRANSFERS · SL + HL</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>Cooling by evaporation.</b> The molecules in a liquid have a range of speeds. Only the fastest, and only those at the surface and heading outwards, have enough energy to break free of their neighbours. Each one that leaves takes more than its share of energy with it, so the average kinetic energy of the rest falls: the liquid gets colder. This is how sweating cools you, and why you feel cold when you step out of a swimming pool into a breeze.</p>
+            <p><b>What speeds it up.</b> A higher temperature (more molecules fast enough to escape), a larger surface (more molecules in a position to escape), and a wind (which carries the escaped molecules away before they fall back in).</p>
+          </div>
+          <div class="rn-side">
+            <p class="tip">Sweating 1 g of water takes about 2400 J from your body: the latent heat is a little larger at skin temperature than at 100 °C.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide" data-title="Quick check: heating and changes of phase">
+        <p class="eyebrow">Quick check</p>
+        <h2>Heating and changes of phase<span>.</span></h2>
+        <div class="quiz fill">
+          <div class="q"><p><span class="n">01</span>Energy to warm 2.0 kg of water by 10 K? (\(c\) = 4200 J kg⁻¹ K⁻¹)</p><div class="ans step">\(2.0 \times 4200 \times 10 = 8.4 \times 10^{4} \,\mathrm{J}\)</div></div>
+          <div class="q"><p><span class="n">02</span>The same energy goes into 2.0 kg of copper. Larger or smaller rise?</p><div class="ans step">Larger: copper has a smaller \(c\)</div></div>
+          <div class="q"><p><span class="n">03</span>What happens to the temperature while a pure solid melts?</p><div class="ans step">It stays constant</div></div>
+          <div class="q"><p><span class="n">04</span>Which energy of the molecules rises during melting?</p><div class="ans step">Their potential energy</div></div>
+          <div class="q"><p><span class="n">05</span>Energy to boil away 0.10 kg of water at 100 °C? (\(L\) = 2.26 × 10⁶ J kg⁻¹)</p><div class="ans step">\(0.10 \times 2.26 \times 10^{6} = 2.3 \times 10^{5} \,\mathrm{J}\)</div></div>
+          <div class="q"><p><span class="n">06</span>Why does evaporation cool a liquid?</p><div class="ans step">The fastest molecules leave</div></div>
+        </div>
+        <div class="slide-foot"><span class="reveal-hint">PRESS → TO REVEAL EACH ANSWER</span><span data-page></span></div>
+      </section>
+
+      <!-- Part 3 -->
+      <section class="slide section" data-title="Part 3: Conduction and convection">
+        <div class="title-grid">
+          <div>
+            <p class="eyebrow">Part 03</p>
+            <h1>Conduction and convection<span>.</span></h1>
+            <p class="lead">Two of the three ways thermal energy gets from one place to another</p>
+          </div>
+          <div class="fig" data-fig="b1-conduction" data-plain></div>
+        </div>
+        <div class="slide-foot"><span>B.1 THERMAL ENERGY TRANSFERS · SL + HL</span><span data-page></span></div>
+      </section>
+
+      <section class="slide" data-title="Three mechanisms">
+        <p class="eyebrow">How thermal energy is transferred</p>
+        <h2>Three mechanisms<span>.</span></h2>
+        <div class="cards fill" style="grid-template-columns: repeat(3, 1fr);">
+          <div class="card">
+            <div class="fig" data-fig="b1-conduction" data-still data-plain style="height: 200px;"></div>
+            <p class="eyebrow">Conduction</p>
+            <h3>Passed from particle to particle</h3>
+            <p>The particles stay where they are. Best in solids, above all in metals</p>
+          </div>
+          <div class="card step">
+            <div class="fig" data-fig="b1-convection" data-still data-plain style="height: 200px;"></div>
+            <p class="eyebrow">Convection</p>
+            <h3>Carried by a moving fluid</h3>
+            <p>Warm fluid rises and cool fluid sinks. Liquids and gases only</p>
+          </div>
+          <div class="card step">
+            <div class="fig" data-fig="b1-planck" data-still data-plain style="height: 200px;"></div>
+            <p class="eyebrow">Radiation</p>
+            <h3>Emitted as electromagnetic waves</h3>
+            <p>Needs no medium at all. The only way across empty space</p>
+          </div>
+        </div>
+        <div class="slide-foot"><span>B.1 THERMAL ENERGY TRANSFERS · SL + HL</span><span data-page></span></div>
+      </section>
+
+      <section class="slide" data-title="Conduction">
+        <p class="eyebrow">Particle to particle</p>
+        <h2>Conduction<span>.</span></h2>
+        <div class="split wide-fig">
+          <ul class="points small">
+            <li>Particles at the hot end have <b>more kinetic energy</b></li>
+            <li class="step">They pass it to their neighbours through the forces between them</li>
+            <li class="step">In a metal, <b>free electrons</b> carry energy much further and faster</li>
+            <li class="step">Gases conduct poorly: the molecules are far apart</li>
+          </ul>
+          <div class="panel">
+            <div class="panel-head"><span>A BAR BETWEEN HOT AND COLD</span></div>
+            <div class="fig" data-fig="b1-conduction"></div>
+          </div>
+        </div>
+        <div class="slide-foot"><span>B.1 THERMAL ENERGY TRANSFERS · SL + HL</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>Why metals feel cold.</b> A metal bench and a wooden bench in the same room are at the same temperature, but the metal feels colder. Your hand is warmer than both. The metal conducts energy away from your skin quickly, so your skin temperature drops; the wood conducts so slowly that the layer you touch soon warms up. Your sense of touch reports the rate at which you lose energy, not the temperature of the object.</p>
+            <p><b>Why trapped air insulates.</b> Wool, feathers, foam and double glazing all work by holding air still. Air is a very poor conductor, and if it cannot move it cannot carry energy away by convection either.</p>
+          </div>
+          <div class="rn-side">
+            <p class="more">Good conductors of electricity are good conductors of thermal energy, for the same reason: free electrons. Diamond is a rare exception, an electrical insulator that conducts thermal energy better than copper.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide" data-title="The rate of conduction">
+        <p class="eyebrow">How fast energy is conducted</p>
+        <h2>The rate of conduction<span>.</span></h2>
+        <div class="split even">
+          <div class="stack">
+            <div class="equation"><span>\(\dfrac{\Delta Q}{\Delta t} = kA \dfrac{\Delta T}{\Delta x}\)</span></div>
+            <ul class="points small">
+              <li>\(k\): the <b>thermal conductivity</b> of the material, in \(\mathrm{W} \,\mathrm{m}^{-1} \,\mathrm{K}^{-1}\)</li>
+              <li class="step">\(A\): the cross-sectional area the energy passes through</li>
+              <li class="step frac">\(\dfrac{\Delta T}{\Delta x}\): the <b>temperature gradient</b></li>
+            </ul>
+          </div>
+          <table class="facts step">
+            <thead><tr><th>Material (approximate values)</th><th class="nocase">k / W m⁻¹ K⁻¹</th></tr></thead>
+            <tbody>
+              <tr><td>Copper</td><td class="num">400</td></tr>
+              <tr><td>Aluminium</td><td class="num">240</td></tr>
+              <tr><td>Glass</td><td class="num">0.80</td></tr>
+              <tr><td>Brick</td><td class="num">0.60</td></tr>
+              <tr><td>Still air</td><td class="num">0.025</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="slide-foot"><span>B.1 THERMAL ENERGY TRANSFERS · SL + HL</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>Each factor makes sense.</b> Twice the area gives twice as many paths for the energy, so twice the rate. Twice the temperature difference pushes energy through twice as fast. Twice the thickness halves the rate: the same temperature difference is spread over twice the distance, so the gradient is half as steep.</p>
+            <p><b>The sign.</b> The data booklet writes the equation with the sizes of the quantities. Energy always goes down the temperature gradient, from the hotter face to the colder one.</p>
+            <p><b>The same shape as Ohm’s law.</b> A temperature difference drives a flow of energy through a material, just as a potential difference drives a flow of charge through a resistor. A thick layer with a low \(k\) is a large “thermal resistance”. B.5 uses the same idea for electric current.</p>
+          </div>
+          <div class="rn-side">
+            <p class="tip">\(\frac{\Delta Q}{\Delta t}\) is a power, in watts. To find the energy conducted in a given time, multiply by the time in seconds.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide" data-title="Conduction: a window">
+        <p class="eyebrow">Worked example</p>
+        <h2>Energy lost through a window<span>.</span></h2>
+        <div class="split even">
+          <div class="work">
+            <span class="say">Glass: area 1.5 m² · thickness 4.0 mm · \(k = 0.80 \,\mathrm{W} \,\mathrm{m}^{-1} \,\mathrm{K}^{-1}\)</span>
+            <span class="say">Its two faces are at 12 °C and 7.0 °C</span>
+            <span>\(\dfrac{\Delta Q}{\Delta t} = kA \dfrac{\Delta T}{\Delta x}\)</span>
+            <span class="step">\(\dfrac{\Delta Q}{\Delta t} = 0.80 \times 1.5 \times \dfrac{12 - 7.0}{4.0 \times 10^{-3}}\)</span>
+            <span class="step">\(\dfrac{\Delta Q}{\Delta t} = \class{res}{1.5 \times 10^{3} \,\mathrm{W}}\)</span>
+          </div>
+          <div class="stack">
+            <ul class="points small">
+              <li class="step">In one hour: \(1500 \times 3600 = 5.4 \times 10^{6} \,\mathrm{J}\)</li>
+              <li class="step">Glass twice as thick: <b>half</b> the rate</li>
+              <li class="step">Two panes with still air between: far less</li>
+            </ul>
+          </div>
+        </div>
+        <div class="slide-foot"><span>B.1 THERMAL ENERGY TRANSFERS · SL + HL</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>The temperatures are those of the glass.</b> The room might be at 20 °C and the air outside at 0 °C, but the glass faces are at 12 °C and 7 °C. A thin layer of nearly still air clings to each side of the pane and, being a poor conductor, takes most of the 20 K difference. The equation needs the temperature difference across the material itself.</p>
+            <p><b>Why double glazing works.</b> A 16 mm gap of still air has a conductivity 30 times smaller than glass and is four times thicker than the pane, so for the same temperature difference it conducts over a hundred times less. The gap must be narrow enough that the air inside cannot set up a convection current.</p>
+          </div>
+          <div class="rn-side">
+            <p class="trap">Leaving the thickness in millimetres. 4.0 mm is \(4.0 \times 10^{-3}\) m.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide" data-title="Convection">
+        <p class="eyebrow">Carried by a moving fluid · described, not calculated</p>
+        <h2>Convection<span>.</span></h2>
+        <div class="split wide-fig">
+          <ul class="points small">
+            <li>The heated fluid <b>expands</b>: it becomes less dense</li>
+            <li class="step">Less dense fluid <b>rises</b>; cooler, denser fluid sinks to replace it</li>
+            <li class="step">The fluid itself moves, <b>carrying</b> its energy with it</li>
+            <li class="step">Not possible in a solid</li>
+          </ul>
+          <div class="panel">
+            <div class="panel-head"><span>A LIQUID HEATED FROM BELOW</span></div>
+            <div class="fig" data-fig="b1-convection"></div>
+          </div>
+        </div>
+        <div class="slide-foot"><span>B.1 THERMAL ENERGY TRANSFERS · SL + HL</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>It is a buoyancy effect.</b> From A.2, a body in a fluid feels an upward buoyancy force equal to the weight of the fluid it displaces. A parcel of warm fluid displaces cooler fluid of the same volume but greater density, so the buoyancy force on it is larger than its weight and it accelerates upwards. Convection therefore needs gravity: in an orbiting spacecraft a candle flame is a dim sphere, because the hot gas does not rise away from it.</p>
+            <p><b>Where you meet it.</b> Sea breezes: by day the land warms faster than the sea, air rises over the land and cooler air moves in from the sea. A room heater is placed low, and the element of a kettle at the bottom, so that the whole fluid circulates. Inside the Sun, the outer third of the radius carries energy to the surface by convection.</p>
+          </div>
+          <div class="rn-side">
+            <p class="trap">“Heat rises.” Thermal energy has no direction of its own. It is the warm, less dense fluid that rises.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide" data-title="Quick check: conduction and convection">
+        <p class="eyebrow">Quick check</p>
+        <h2>Conduction and convection<span>.</span></h2>
+        <div class="quiz fill">
+          <div class="q"><p><span class="n">01</span>Which mechanism cannot happen in a solid?</p><div class="ans step">Convection</div></div>
+          <div class="q"><p><span class="n">02</span>Why are metals the best conductors?</p><div class="ans step">Free electrons carry the energy</div></div>
+          <div class="q"><p><span class="n">03</span>A wall is made twice as thick. The rate of conduction?</p><div class="ans step">It halves</div></div>
+          <div class="q"><p><span class="n">04</span>What is the unit of thermal conductivity?</p><div class="ans step">W m⁻¹ K⁻¹</div></div>
+          <div class="q"><p><span class="n">05</span>Why does warm fluid rise?</p><div class="ans step">It expands and becomes less dense</div></div>
+          <div class="q"><p><span class="n">06</span>Why is trapped air a good insulator?</p><div class="ans step">Poor conductor, and it cannot convect</div></div>
+        </div>
+        <div class="slide-foot"><span class="reveal-hint">PRESS → TO REVEAL EACH ANSWER</span><span data-page></span></div>
+      </section>
+
+      <!-- Part 4 -->
+      <section class="slide section" data-title="Part 4: Thermal radiation">
+        <div class="title-grid">
+          <div>
+            <p class="eyebrow">Part 04</p>
+            <h1>Thermal radiation<span>.</span></h1>
+            <p class="lead">Every body emits electromagnetic waves because of its temperature</p>
+          </div>
+          <div class="fig" data-fig="b1-planck" data-plain></div>
+        </div>
+        <div class="slide-foot"><span>B.1 THERMAL ENERGY TRANSFERS · SL + HL</span><span data-page></span></div>
+      </section>
+
+      <section class="slide" data-title="Thermal radiation and black bodies">
+        <p class="eyebrow">Emission from a surface</p>
+        <h2>Thermal radiation and black bodies<span>.</span></h2>
+        <div class="stack center" style="gap: 26px;">
+          <ul class="points">
+            <li>Every surface above absolute zero <b>emits</b> electromagnetic waves</li>
+            <li class="step">At everyday temperatures, almost all of it is <b>infrared</b></li>
+            <li class="step">A <b>black body</b> absorbs all the radiation that falls on it, and is also the best possible emitter</li>
+          </ul>
+          <div class="cards step" style="grid-template-columns: 1fr 1fr 1fr;">
+            <div class="card"><p class="eyebrow">Near enough black</p><h3>A star</h3><p>Its spectrum is close to a black body’s</p></div>
+            <div class="card"><p class="eyebrow">Near enough black</p><h3>A small hole in a hot oven</h3><p>Whatever goes in is absorbed inside</p></div>
+            <div class="card"><p class="eyebrow">Far from black</p><h3>A polished metal surface</h3><p>Reflects most radiation and emits little</p></div>
+          </div>
+        </div>
+        <div class="slide-foot"><span>B.1 THERMAL ENERGY TRANSFERS · SL + HL</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>“Black” is about absorbing, not about looking dark.</b> A body that absorbs every wavelength reflects nothing, so at room temperature it looks black. Heat it and the same surface glows: it is now emitting visible light of its own. The Sun is a very good black body and is anything but dark.</p>
+            <p><b>Why a good absorber must be a good emitter.</b> Put a black object and a shiny one in an oven and wait. Both end at the temperature of the oven and stay there. The black one absorbs more of the radiation falling on it, so to stay at a steady temperature it must also emit more. If it did not, it would keep getting hotter than its surroundings by itself.</p>
+            <p><b>Net transfer.</b> You emit about 500 W of infrared, but the walls of the room radiate almost as much back to you. What matters is the difference. In a cold room, or under a clear night sky, less comes back and you feel cold even in still air.</p>
+          </div>
+          <div class="rn-side">
+            <p class="more">B.2 measures how far a real surface falls short of a black body with its emissivity, a number between 0 and 1.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide" data-title="The Stefan–Boltzmann law">
+        <p class="eyebrow">The power a black body radiates</p>
+        <h2>The Stefan–Boltzmann law<span>.</span></h2>
+        <div class="split even">
+          <div class="stack">
+            <div class="equation"><span>\(L = \sigma A T^{4}\)</span></div>
+            <ul class="points small">
+              <li>\(L\): the <b>luminosity</b>, the total power radiated, in watts</li>
+              <li class="step">\(A\): the <b>surface area</b> of the body</li>
+              <li class="step">\(\sigma = 5.67 \times 10^{-8} \,\mathrm{W} \,\mathrm{m}^{-2} \,\mathrm{K}^{-4}\)</li>
+            </ul>
+          </div>
+          <div class="work step">
+            <span class="say">The Sun: radius \(6.96 \times 10^{8} \,\mathrm{m}\) · surface at 5800 K</span>
+            <span>\(A = 4 \pi R^{2} = 4 \pi \times (6.96 \times 10^{8})^{2} = 6.09 \times 10^{18} \,\mathrm{m}^{2}\)</span>
+            <span class="step">\(L = \sigma A T^{4}\)</span>
+            <span class="step">\(L = 5.67 \times 10^{-8} \times 6.09 \times 10^{18} \times 5800^{4}\)</span>
+            <span class="step">\(L = \class{res}{3.9 \times 10^{26} \,\mathrm{W}}\)</span>
+          </div>
+        </div>
+        <div class="slide-foot"><span>B.1 THERMAL ENERGY TRANSFERS · SL + HL</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>The fourth power is steep.</b> Double the kelvin temperature and the power goes up by \(2^{4} = 16\). A star only 20% hotter than the Sun, with the same radius, would be twice as luminous, since \(1.2^{4} = 2.1\). This is why a small change in the temperature of a planet makes a noticeable change in the energy it radiates to space, which matters in B.2.</p>
+            <p><b>Two ways to be luminous.</b> \(L\) depends on area as well as temperature. A red giant is cool, about 3500 K, but so enormous that it outshines the Sun thousands of times over. A white dwarf is very hot but the size of the Earth, and faint. E.5 uses this equation to find the radius of a star from its luminosity and temperature.</p>
+          </div>
+          <div class="rn-side">
+            <p class="trap">Using °C. With a fourth power the error is huge: \(293^{4}\) is about 46 000 times \(20^{4}\).</p>
+            <p class="tip">A star’s luminosity may be given in units of the Sun’s, \(L_{\odot}\).</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide history" data-title="Story: Stefan and the Sun">
+        <p class="eyebrow">The story · Vienna, 1879</p>
+        <p class="not-examined">Background story · not assessed</p>
+        <h2>Stefan takes the temperature of the Sun<span>.</span></h2>
+        <div class="story" style="--photo-h: 430px;">
+          <div class="story-photos">
+            <figure><img src="images/stefan.jpg" width="843" height="996" alt="Engraved portrait of Josef Stefan, a bearded man in a dark jacket and bow tie"><figcaption><b>Josef Stefan</b>, director of the Physical Institute in Vienna</figcaption></figure>
+          </div>
+          <div class="stack">
+            <ul class="points">
+              <li>In <b>1879</b> Stefan studied other people’s measurements of hot bodies cooling, and spotted the pattern: power ∝ \(T^{4}\)</li>
+              <li>He used it on sunlight and found the Sun’s surface to be about <b>5430 °C</b>: the first sensible value</li>
+              <li>Today’s value is about 5500 °C</li>
+              <li>In <b>1884</b> his former student <b>Ludwig Boltzmann</b> derived the law from theory</li>
+            </ul>
+            <div class="idea">A law found in a laboratory in Vienna measured a star 150 million kilometres away.</div>
+          </div>
+        </div>
+        <p class="credits">Portrait: <a href="https://commons.wikimedia.org/wiki/File:Jozef_Stefan.jpg" target="_blank" rel="noopener">K. Schönbauer, by 1893</a>, public domain.</p>
+        <div class="slide-foot"><span>B.1 THERMAL ENERGY TRANSFERS · SL + HL</span><span data-page></span></div>
+      </section>
+
+      <section class="slide" data-title="Apparent brightness">
+        <p class="eyebrow">What reaches the observer</p>
+        <h2>Apparent brightness<span>.</span></h2>
+        <div class="split">
+          <div class="stack">
+            <div class="equation"><span>\(b = \dfrac{L}{4 \pi d^{2}}\)</span></div>
+            <ul class="points small">
+              <li>\(b\): the power received <b>per unit area</b>, in \(\mathrm{W} \,\mathrm{m}^{-2}\)</li>
+              <li class="step">The power \(L\) spreads over a sphere of area \(4 \pi d^{2}\)</li>
+              <li class="step">An <b>inverse square</b> law: twice as far, a quarter as bright</li>
+            </ul>
+          </div>
+          <div class="panel">
+            <div class="panel-head"><span>THE SAME POWER, A LARGER SPHERE</span></div>
+            <div class="fig" data-fig="b1-inverse-square"></div>
+          </div>
+        </div>
+        <div class="slide-foot"><span>B.1 THERMAL ENERGY TRANSFERS · SL + HL</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>Luminosity and brightness are different things.</b> Luminosity belongs to the star: it is how much power the star gives out, and it is the same wherever you stand. Apparent brightness belongs to the observer: it is how much of that power lands on each square metre where you are. A faint-looking star may be a feeble one nearby or a brilliant one far away. You cannot tell which without knowing the distance.</p>
+            <p><b>Where the sphere comes from.</b> The star radiates equally in all directions and nothing is absorbed on the way. By the time the light has travelled a distance \(d\), all of it is passing through the surface of an imaginary sphere of radius \(d\) centred on the star. Share the power equally over that surface and you have the brightness.</p>
+          </div>
+          <div class="rn-side">
+            <p class="tip">The same inverse square pattern appears for gravitational and electric field strength in D.1 and D.2, and for the same geometric reason.</p>
+            <p class="trap">Confusing \(A\) in \(L = \sigma A T^{4}\) (the surface of the star, radius \(R\)) with \(4 \pi d^{2}\) (a sphere reaching to the observer).</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide" data-title="Brightness: the solar constant">
+        <p class="eyebrow">Worked example</p>
+        <h2>Sunlight at the Earth<span>.</span></h2>
+        <div class="split even">
+          <div class="work">
+            <span class="say">\(L = 3.9 \times 10^{26} \,\mathrm{W}\) · Earth–Sun distance \(d = 1.50 \times 10^{11} \,\mathrm{m}\)</span>
+            <span>\(b = \dfrac{L}{4 \pi d^{2}}\)</span>
+            <span class="step">\(b = \dfrac{3.9 \times 10^{26}}{4 \pi \times (1.50 \times 10^{11})^{2}}\)</span>
+            <span class="step">\(b = \class{res}{1.4 \times 10^{3} \,\mathrm{W} \,\mathrm{m}^{-2}}\)</span>
+          </div>
+          <div class="stack">
+            <ul class="points small">
+              <li class="step">This is the <b>solar constant</b>, \(S\): 1.36 × 10³ W m⁻² in the data booklet</li>
+              <li class="step">At Mars, 1.5 times as far: \(\dfrac{1}{1.5^{2}} = 0.44\) of this</li>
+            </ul>
+          </div>
+        </div>
+        <div class="slide-foot"><span>B.1 THERMAL ENERGY TRANSFERS · SL + HL</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>Working backwards.</b> Astronomers do this calculation in reverse. The brightness of sunlight can be measured directly, and the distance to the Sun is known, so \(L = 4 \pi d^{2} b\) gives the Sun’s luminosity. With the Sun’s radius, the Stefan–Boltzmann law then gives its surface temperature. That chain of reasoning is what Stefan used in 1879.</p>
+            <p><b>What the number means.</b> 1.4 kW falls on every square metre facing the Sun at the top of the atmosphere: about the power of a small electric heater. Less reaches the ground, because some is reflected and absorbed on the way down. B.2 starts from this number to work out the temperature of the Earth.</p>
+          </div>
+          <div class="rn-side">
+            <p class="trap">Forgetting to square the distance, or squaring only the 1.50 and not the \(10^{11}\).</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide" data-title="The black-body spectrum and Wien’s law">
+        <p class="eyebrow">Colour and temperature</p>
+        <h2>The black-body spectrum and Wien’s law<span>.</span></h2>
+        <div class="split wide-fig">
+          <div class="stack">
+            <div class="equation small"><span>\(\lambda_\mathrm{max} T = 2.9 \times 10^{-3} \,\mathrm{m} \,\mathrm{K}\)</span></div>
+            <ul class="points small">
+              <li>A black body emits a <b>continuous</b> spectrum</li>
+              <li class="step">\(\lambda_\mathrm{max}\): the wavelength of the <b>peak</b></li>
+              <li class="step">Hotter: a <b>shorter</b> peak wavelength</li>
+            </ul>
+          </div>
+          <div class="panel">
+            <div class="panel-head"><span>THREE TEMPERATURES</span><span class="pill">FROM PLANCK’S LAW</span></div>
+            <div class="fig" data-fig="b1-planck"></div>
+          </div>
+        </div>
+        <div class="slide-foot"><span>B.1 THERMAL ENERGY TRANSFERS · SL + HL</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>Reading the graph.</b> The curves never cross: a hotter black body emits more than a cooler one at every wavelength. The area under a curve is the total power from each square metre, \(\sigma T^{4}\), so the 6000 K curve encloses five times the area of the 4000 K one, since \(1.5^{4} = 5.1\).</p>
+            <p><b>Colour as a thermometer.</b> A piece of iron in a fire glows dull red, then orange, then yellow-white as it heats, because the peak is moving from the infrared towards the visible. Stars work the same way: Betelgeuse, at about 3500 K, is red, the Sun is yellow-white, and Rigel, at about 12 000 K, is blue-white. Measuring the peak wavelength of a star gives its surface temperature without going there.</p>
+            <p><b>The shape is not symmetric.</b> The curve falls sharply on the short-wavelength side and has a long tail on the other. A body at 4000 K emits a little blue light, but it emits far more infrared than a quick look at the peak suggests.</p>
+          </div>
+          <div class="rn-side">
+            <p class="trap">Reading “m K” as millikelvin. It is the metre kelvin: wavelength in metres times temperature in kelvin.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide" data-title="Wien’s law: the Sun and a lamp">
+        <p class="eyebrow">Worked example</p>
+        <h2>A temperature from a peak wavelength<span>.</span></h2>
+        <div class="split even">
+          <div class="work">
+            <span class="say">Sunlight is most intense at 500 nm</span>
+            <span>\(\lambda_\mathrm{max} T = 2.9 \times 10^{-3} \,\mathrm{m} \,\mathrm{K}\)</span>
+            <span class="step">\(T = \dfrac{2.9 \times 10^{-3}}{\lambda_\mathrm{max}} = \dfrac{2.9 \times 10^{-3}}{500 \times 10^{-9}}\)</span>
+            <span class="step">\(T = \class{res}{5.8 \times 10^{3} \,\mathrm{K}}\)</span>
+          </div>
+          <div class="work step">
+            <span class="say">A lamp filament at 2800 K</span>
+            <span>\(\lambda_\mathrm{max} = \dfrac{2.9 \times 10^{-3}}{T} = \dfrac{2.9 \times 10^{-3}}{2800}\)</span>
+            <span class="step">\(\lambda_\mathrm{max} = \class{res}{1.0 \times 10^{-6} \,\mathrm{m}}\)</span>
+            <span class="say step">In the infrared: most of its output is not light</span>
+          </div>
+        </div>
+        <div class="slide-foot"><span>B.1 THERMAL ENERGY TRANSFERS · SL + HL</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>Why filament lamps were replaced.</b> The filament’s peak is at 1000 nm, beyond the red end of the visible spectrum at about 700 nm. Only the short-wavelength edge of its curve falls in the visible, so roughly 95% of the electrical energy leaves as infrared. An LED emits only in the visible and needs about a tenth of the power for the same light.</p>
+            <p><b>You are a black body too.</b> Skin at 305 K has \(\lambda_\mathrm{max} = \frac{2.9 \times 10^{-3}}{305} = 9.5 \times 10^{-6}\) m, far into the infrared. Thermal cameras are built to detect wavelengths around 10 μm for this reason. The Earth’s surface, at about 288 K, peaks at almost the same wavelength, which is the starting point for the greenhouse effect in B.2.</p>
+          </div>
+          <div class="rn-side">
+            <p class="tip">Wavelengths are usually given in nm or μm. Convert to metres before using the constant.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide" data-title="Quick check: thermal radiation">
+        <p class="eyebrow">Quick check</p>
+        <h2>Thermal radiation<span>.</span></h2>
+        <div class="quiz fill">
+          <div class="q"><p><span class="n">01</span>What is a black body?</p><div class="ans step">It absorbs all the radiation falling on it</div></div>
+          <div class="q"><p><span class="n">02</span>The kelvin temperature of a black body doubles. Its power?</p><div class="ans step">16 times as great</div></div>
+          <div class="q"><p><span class="n">03</span>A star is moved three times as far away. Its apparent brightness?</p><div class="ans step">One ninth</div></div>
+          <div class="q"><p><span class="n">04</span>Which is hotter: a red star or a blue star?</p><div class="ans step">The blue star</div></div>
+          <div class="q"><p><span class="n">05</span>A star has \(\lambda_\mathrm{max}\) = 290 nm. Its surface temperature?</p><div class="ans step">\(\frac{2.9 \times 10^{-3}}{2.9 \times 10^{-7}} = 1.0 \times 10^{4} \,\mathrm{K}\)</div></div>
+          <div class="q"><p><span class="n">06</span>What is the unit of apparent brightness?</p><div class="ans step">W m⁻²</div></div>
+        </div>
+        <div class="slide-foot"><span class="reveal-hint">PRESS → TO REVEAL EACH ANSWER</span><span data-page></span></div>
+      </section>
+
+      <section class="slide" data-title="Summary">
+        <p class="eyebrow">Summary</p>
+        <h2>Thermal energy transfers on one slide<span>.</span></h2>
+        <div class="cards fill" style="grid-template-columns: 1fr 1fr 1fr; align-content: center;">
+          <div class="card"><p class="eyebrow">Temperature</p><h3>\(\bar{E}_\mathrm{k} = \frac{3}{2} k_\mathrm{B} T\)</h3><p>In kelvin: \(T = \theta + 273\)<br>Internal energy = kinetic + potential</p></div>
+          <div class="card step"><p class="eyebrow">Heating</p><h3>\(Q = mc \Delta T\)</h3><p>The temperature changes<br>The kinetic energy changes</p></div>
+          <div class="card step"><p class="eyebrow">Changing phase</p><h3>\(Q = mL\)</h3><p>The temperature is constant<br>The potential energy changes</p></div>
+          <div class="card step"><p class="eyebrow">Conduction</p><h3>\(\frac{\Delta Q}{\Delta t} = kA \frac{\Delta T}{\Delta x}\)</h3><p>Convection: a fluid moves because its density changes</p></div>
+          <div class="card step"><p class="eyebrow">Black-body radiation</p><h3>\(L = \sigma A T^{4}\)</h3><p>Apparent brightness \(b = \frac{L}{4 \pi d^{2}}\)</p></div>
+          <div class="card step"><p class="eyebrow">Wien’s law</p><h3>\(\lambda_\mathrm{max} T = 2.9 \times 10^{-3}\) m K</h3><p>Hotter: a shorter peak wavelength</p></div>
+        </div>
+        <div class="slide-foot"><span>B.1 THERMAL ENERGY TRANSFERS · SL + HL</span><span data-page></span></div>
+      </section>
+
+      <section class="slide" data-title="Key words">
+        <p class="eyebrow">Summary</p>
+        <h2>Key words<span>.</span></h2>
+        <div class="terms fill" style="grid-template-columns: repeat(3, 1fr);">
+          <div class="term"><b>Absolute temperature</b><span>In kelvin; proportional to the average kinetic energy of a particle</span></div>
+          <div class="term"><b>Internal energy</b><span>Total random kinetic plus intermolecular potential energy</span></div>
+          <div class="term"><b>Thermal equilibrium</b><span>Same temperature: no resultant transfer</span></div>
+          <div class="term"><b>Specific heat capacity</b><span>Energy to warm 1 kg by 1 K</span></div>
+          <div class="term"><b>Specific latent heat</b><span>Energy to change the phase of 1 kg at constant temperature</span></div>
+          <div class="term"><b>Thermal conductivity</b><span>How well a material conducts</span></div>
+          <div class="term"><b>Black body</b><span>A perfect absorber and the best emitter</span></div>
+          <div class="term"><b>Luminosity</b><span>Total power radiated, in W</span></div>
+          <div class="term"><b>Apparent brightness</b><span>Power received per unit area, in W m⁻²</span></div>
+        </div>
+        <div class="slide-foot"><span>B.1 THERMAL ENERGY TRANSFERS · SL + HL</span><span data-page></span></div>
+      </section>
+
+    </div>
+  </main>
+
+  <nav class="controls" aria-label="Slide controls">
+    <button type="button" id="prev" aria-label="Previous slide"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg></button>
+    <span class="counter" id="counter" aria-live="polite"></span>
+    <button type="button" id="next" aria-label="Next slide"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 5l7 7-7 7"/></svg></button>
+  </nav>
+  <div class="progress" aria-hidden="true"><span id="progress-bar"></span></div>
+
+  <script src="../assets/figures.js"></script>
+  <script src="figures.js"></script>
+  <script src="../assets/deck-math.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
+  <script src="../assets/deck-notes.js"></script>
+  <script src="../assets/deck.js"></script>
+</body>
+</html>
