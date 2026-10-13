@@ -7,9 +7,10 @@ window.DeckFigures.add(P => {
   const positive = (x, y, r = 18) => ball(x, y, r, 'proton');
   const electron = (x, y, r = 16) => ball(x, y, r, 'electron');
   // A magnetic field at right angles to the page: crosses for into the page, dots for out of it.
-  const cross = (x, y, s = 9) => `<path d="M${x - s},${y - s} l${2 * s},${2 * s} m0,${-2 * s} l${-2 * s},${2 * s}" style="stroke:var(--brand-accent-strong);stroke-width:3;stroke-linecap:round;opacity:.55"/>`;
+  // Faint where labels are read over the field.
+  const cross = (x, y, faint = false, s = 9) => `<path d="M${x - s},${y - s} l${2 * s},${2 * s} m0,${-2 * s} l${-2 * s},${2 * s}" style="stroke:var(--brand-accent-strong);stroke-width:3;stroke-linecap:round;opacity:${faint ? .22 : .55}"/>`;
   const spot = (x, y) => `<circle cx="${x}" cy="${y}" r="5" style="fill:var(--brand-accent-strong);opacity:.6"/>`;
-  const fieldGrid = (x0, y0, nx, ny, step, out = false) => Array.from({ length: nx * ny }, (_, i) => (out ? spot : cross)(x0 + (i % nx) * step, y0 + Math.floor(i / nx) * step)).join('');
+  const fieldGrid = (x0, y0, nx, ny, step, out = false, faint = false) => Array.from({ length: nx * ny }, (_, i) => (out ? spot : cross)(x0 + (i % nx) * step, y0 + Math.floor(i / nx) * step, faint)).join('');
   const plate = (x, y, w, h, kind) => `<rect x="${x}" y="${y}" width="${w}" height="${h}" rx="5" style="fill:var(--${kind})"/>`;
   const once = { loop: false };
   const wire = (x1, y1, x2, y2) => `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" style="stroke:var(--brand-accent);stroke-width:10;stroke-linecap:round"/>`;
@@ -49,7 +50,7 @@ window.DeckFigures.add(P => {
     },
 
     // Fleming's left-hand rule as three arrows at right angles: the flat picture. On the slide,
-    // hand.js draws a hand in three dimensions over it; this one stays for thumbnails and print.
+    // hand.js draws a hand in three dimensions over it and in the thumbnail; this one stays for print.
     'd3-rule': () => {
       let s = arrow(330, 330, 330, 90, 'brand-primary', 7) + arrow(330, 330, 600, 330, 'brand-accent', 7) + arrow(330, 330, 500, 226, 'brand-accent-strong', 7, 'stroke-dasharray="14 8"') + `<circle cx="330" cy="330" r="9" style="fill:var(--text-main)"/>`;
       s += text(352, 110, 'Thumb', 'lbl strong', 'start') + text(352, 144, 'F: force', 'lbl', 'start');
@@ -61,9 +62,9 @@ window.DeckFigures.add(P => {
     // A positive particle circling in a uniform field into the page. Also the title picture, with data-plain.
     'd3-circle': el => {
       const on = labelled(el), cx = 400, cy = 270, r = 150;
-      let s = fieldGrid(140, 80, 8, 6, 76) + `<circle cx="${cx}" cy="${cy}" r="${r}" class="guide accent" style="stroke-width:3"/>`;
+      let s = fieldGrid(140, 80, 8, 6, 76, false, true) + `<circle cx="${cx}" cy="${cy}" r="${r}" class="guide accent" style="stroke-width:3"/>`;
       const body = arrow(cx, cy - r + 22, cx, cy - r + 110, 'brand-primary', 5) + arrow(cx - 24, cy - r, cx - 130, cy - r, 'brand-accent', 5) + positive(cx, cy - r);
-      if (on) s += `<circle cx="${cx}" cy="${cy}" r="${r - 14}" style="fill:var(--viewer-bg);opacity:.9"/>` + text(cx, cy + 62, 'F is always', 'lbl halo') + text(cx, cy + 96, 'towards the centre', 'lbl halo') + both(cx + 6, cy, cx + r - 4, cy) + text(cx + 78, cy - 14, 'r', 'lbl display halo');
+      if (on) s += text(cx, cy + 62, 'F is always', 'lbl halo') + text(cx, cy + 96, 'towards the centre', 'lbl halo') + both(cx + 6, cy, cx + r - 4, cy) + text(cx + 78, cy - 14, 'r', 'lbl display halo');
       return svg('100 50 620 450', s + twoState(body, `<g>${spin(cx, cy, 5, { turns: -1 })}${body}</g>`), 'A positive particle moving in a circle in a uniform magnetic field that points into the page. The magnetic force is always at right angles to the velocity and points to the centre of the circle, so the speed stays constant');
     },
 
