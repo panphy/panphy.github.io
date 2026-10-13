@@ -1,5 +1,7 @@
-// SVG diagrams for the IB DP Physics decks (A.1 Kinematics, A.2 Forces and momentum,
-// E.1 Structure of the atom and E.2 Quantum physics). The atom figures began as copies of those in
+// SVG diagrams for the IB DP Physics decks: the drawing helpers every deck uses, and the figures
+// of A.1 Kinematics, A.2 Forces and momentum, E.1 Structure of the atom and E.2 Quantum physics.
+// The other decks add their own figures from a figures.js beside their index.html (see
+// DeckFigures.add at the end of this file). The atom figures began as copies of those in
 // gcsephy/decks/atoms-and-radiation and use the same particle colours and
 // glossy-sphere look as the Atomic Models and Nuclear Decay simulations.
 // Each <div data-fig="name"> is filled from FIGURES.
