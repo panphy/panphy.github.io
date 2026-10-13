@@ -15,7 +15,7 @@ window.DeckFigures.add(P => {
         s += text(x, 334, `carbon-${a}`, 'lbl display');
         s += `<text x="${x}" y="366" class="lbl mono" text-anchor="middle"><tspan class="t-proton">6 p</tspan>, <tspan class="t-neutron">${n} n</tspan></text>`;
       });
-      return svg('0 0 960 390', s, 'Nuclei of carbon-12, carbon-13 and carbon-14: all have 6 protons but 6, 7 and 8 neutrons');
+      return svg('40 60 880 320', s, 'Nuclei of carbon-12, carbon-13 and carbon-14: all have 6 protons but 6, 7 and 8 neutrons');
     },
 
     'e3-alpha': el => {
