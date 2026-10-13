@@ -57,19 +57,19 @@
         <h2>Three parts<span>.</span></h2>
         <div class="cards fill" style="grid-template-columns: repeat(3, 1fr);">
           <div class="card">
-            <div class="fig" data-fig="d3-accelerate" data-plain style="height: 200px;"></div>
+            <div class="fig" data-fig="d3-accelerate" data-still data-plain style="height: 200px;"></div>
             <p class="eyebrow">Part 01</p>
             <h3>Charges in electric fields</h3>
             <p>Constant force: speeding up, and parabolic paths</p>
           </div>
           <div class="card">
-            <div class="fig" data-fig="d3-circle" data-plain style="height: 200px;"></div>
+            <div class="fig" data-fig="d3-circle" data-still data-plain style="height: 200px;"></div>
             <p class="eyebrow">Part 02</p>
             <h3>Charges in magnetic fields</h3>
             <p>Circular paths, charge-to-mass ratio, crossed fields</p>
           </div>
           <div class="card">
-            <div class="fig" data-fig="d3-wire-force" data-plain style="height: 200px;"></div>
+            <div class="fig" data-fig="d3-wire-force" data-still data-plain style="height: 200px;"></div>
             <p class="eyebrow">Part 03</p>
             <h3>Forces on currents</h3>
             <p>A wire in a field, and two parallel wires</p>
@@ -273,21 +273,21 @@
           <div class="stack">
             <ul class="points small">
               <li>At right angles to <b>both</b> the field and the velocity</li>
-              <li class="step"><b>Left-hand rule</b>: First finger Field, seCond finger Current, thuMb Motion</li>
-              <li class="step">“Current” is the way a <b>positive</b> charge moves</li>
+              <li class="step"><b>Left-hand rule</b>, “<b>FBI</b>”: thumb \(F\), index finger \(B\), middle finger \(I\)</li>
+              <li class="step">\(I\), the current, is the way a <b>positive</b> charge moves</li>
             </ul>
-            <div class="idea step">For an electron, point the second finger <b>opposite</b> to its velocity.</div>
+            <div class="idea step">For an electron, point the middle finger <b>opposite</b> to its velocity.</div>
           </div>
           <div class="panel">
-            <div class="panel-head"><span>THE LEFT HAND</span></div>
-            <div class="fig" data-fig="d3-rule"></div>
+            <div class="panel-head"><span>THE LEFT HAND</span><span class="pill">F · B · I</span></div>
+            <div class="fig" data-fig="d3-rule" data-hand></div>
           </div>
         </div>
         <div class="slide-foot"><span>D.3 MOTION IN ELECTROMAGNETIC FIELDS · SL + HL</span><span data-page></span></div>
         <aside class="revision-note" hidden>
           <div class="rn-main">
-            <p><b>Using the rule.</b> Hold the thumb, first finger and second finger of your <b>left</b> hand at right angles to one another. Point the first finger along the field and the second finger along the conventional current. The thumb then shows the force. Check it on the last slide: field into the page, positive charge moving right, force up the page.</p>
-            <p><b>Negative charges.</b> An electron moving to the right is a conventional current to the left. Either point the second finger opposite to the electron’s velocity, or use the rule as for a positive charge and reverse the answer.</p>
+            <p><b>Using the rule.</b> Hold the thumb, index finger and middle finger of your <b>left</b> hand at right angles to one another. Point the index finger along the field \(B\) and the middle finger along the conventional current \(I\). The thumb then shows the force \(F\). Thumb, index, middle: F, B, I. Check it on the last slide: field into the page, positive charge moving right, force up the page.</p>
+            <p><b>Negative charges.</b> An electron moving to the right is a conventional current to the left. Either point the middle finger opposite to the electron’s velocity, or use the rule as for a positive charge and reverse the answer.</p>
           </div>
           <div class="rn-side">
             <p class="tip">Any correct rule earns the marks. Some books use a right-hand rule with the palm: fingers along the field, thumb along the current, and the palm pushes in the direction of the force. Choose one and always use it.</p>
@@ -567,7 +567,7 @@
         <aside class="revision-note" hidden>
           <div class="rn-main">
             <p><b>Where it comes from.</b> The force on the wire is the total of the forces on all the moving charges inside it. In a time \(t\) a charge \(q = It\) passes along a length \(L = vt\) of wire. The force on that charge is \(qvB = (It) \left(\frac{L}{t}\right) B = BIL\). The two equations describe the same force, once for a single charge and once for a current.</p>
-            <p><b>Checking the direction in the diagram.</b> First finger along the field, from N to S: to the right. Second finger along the current: out of the page, towards you. The thumb points up the page.</p>
+            <p><b>Checking the direction in the diagram.</b> Index finger along the field, from N to S: to the right. Middle finger along the current: out of the page, towards you. The thumb points up the page.</p>
             <p><b>What it is used for.</b> This force turns every electric motor and moves the cone of every loudspeaker. A coil carrying a current in a magnetic field feels forces on its two sides in opposite directions, and so it turns.</p>
           </div>
           <div class="rn-side">
@@ -610,8 +610,11 @@
         <h2>The force between two parallel wires<span>.</span></h2>
         <div class="split fig-first">
           <div class="panel">
-            <div class="panel-head"><span>LONG STRAIGHT WIRES</span><span class="reveal-hint">PRESS → TO SWITCH ON</span></div>
-            <div class="fig" data-fig="d3-parallel"></div>
+            <div class="panel-head"><span>LONG STRAIGHT WIRES</span><span class="reveal-hint">PRESS → FOR EACH PAIR</span></div>
+            <div style="flex: 1; min-height: 0; display: flex; gap: 10px;">
+              <div class="fig" data-fig="d3-parallel"></div>
+              <div class="fig" data-fig="d3-parallel" data-kind="opposite"></div>
+            </div>
           </div>
           <div class="stack">
             <div class="equation small step"><span>\(\dfrac{F}{L} = \mu_{0} \dfrac{I_{1} I_{2}}{2 \pi r}\)</span></div>
@@ -655,8 +658,8 @@
         <div class="slide-foot"><span>D.3 MOTION IN ELECTROMAGNETIC FIELDS · SL + HL</span><span data-page></span></div>
         <aside class="revision-note" hidden>
           <div class="rn-main">
-            <p><b>Following the two rules.</b> Wire 1 carries current out of the page, so by the right-hand grip rule its field circles anticlockwise. At wire 2, to the right of wire 1, that field points up the page. Now the left-hand rule at wire 2: first finger up the page, second finger out of the page, and the thumb points to the left, towards wire 1.</p>
-            <p><b>Reversing one current.</b> If the current in wire 2 goes into the page, the second finger reverses and so does the thumb: wire 2 is pushed away. You only need to know the field of a straight wire as a pattern; the expression for \(B_{1}\) is not in the data booklet, but the final equation is.</p>
+            <p><b>Following the two rules.</b> Wire 1 carries current out of the page, so by the right-hand grip rule its field circles anticlockwise. At wire 2, to the right of wire 1, that field points up the page. Now the left-hand rule at wire 2: index finger up the page, middle finger out of the page, and the thumb points to the left, towards wire 1.</p>
+            <p><b>Reversing one current.</b> If the current in wire 2 goes into the page, the middle finger reverses and so does the thumb: wire 2 is pushed away. You only need to know the field of a straight wire as a pattern; the expression for \(B_{1}\) is not in the data booklet, but the final equation is.</p>
           </div>
           <div class="rn-side">
             <p class="tip">Apply the same steps the other way round, with wire 1 in the field of wire 2, and the force on wire 1 comes out equal and opposite.</p>
@@ -752,7 +755,7 @@
           <div class="term"><b>Electronvolt</b><span>Energy of charge e through 1 V</span></div>
           <div class="term"><b>Magnetic field strength</b><span>B, in tesla. Also called flux density</span></div>
           <div class="term"><b>Tesla</b><span>1 N on 1 C moving at 1 m s⁻¹</span></div>
-          <div class="term"><b>Left-hand rule</b><span>Field, current, force at right angles</span></div>
+          <div class="term"><b>Left-hand rule</b><span>Thumb F, index B, middle I</span></div>
           <div class="term"><b>Charge-to-mass ratio</b><span>q / m, in C kg⁻¹</span></div>
           <div class="term"><b>Helix</b><span>Circling while moving along the field</span></div>
           <div class="term"><b>Velocity selector</b><span>Crossed fields pass one speed</span></div>
@@ -777,5 +780,6 @@
   <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
   <script src="../assets/deck-notes.js"></script>
   <script src="../assets/deck.js"></script>
+  <script type="module" src="hand.js"></script>
 </body>
 </html>

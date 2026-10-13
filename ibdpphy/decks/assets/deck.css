@@ -642,6 +642,8 @@ h2:has(+ .terms) { margin-bottom: 24px; }
 @keyframes stream { 0% { transform: translateX(0); opacity: 1; } 95% { opacity: 1; } 100% { transform: translateX(var(--travel)); opacity: 0; } }
 /* Where the moving streams play, the particles and waves drawn in place step aside. */
 @media screen and (prefers-reduced-motion: no-preference) { #deck .still { display: none; } }
+/* A figure drawn in three dimensions (D.3's hand) replaces its flat picture on screen even with reduced motion. */
+@media screen { #deck .fig:has(.hand3d) .still { display: none; } }
 @keyframes pulse { 50% { transform: scale(1.08); opacity: .75; } }
 /* A sphere falling through a fluid (A.2): position and speed at steps of the fall, for a speed
    that rises as 1 − e^(−t/τ) with τ = 0.9 s over a 5 s fall. */

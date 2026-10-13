@@ -1110,7 +1110,10 @@
       const make = FIGURES[el.dataset.fig];
       if (!make) return;
       el.innerHTML = make(el);
-      if (reduce) el.querySelectorAll('.mover').forEach(node => node.remove());
+      // data-still (lesson maps): the still picture only, with nothing to play or press.
+      const fixed = 'still' in el.dataset;
+      if (reduce || fixed) el.querySelectorAll(fixed ? '.mover, .step.play' : '.mover').forEach(node => node.remove());
+      if (fixed) el.querySelectorAll('.still').forEach(node => node.classList.remove('still'));
     });
   }
 

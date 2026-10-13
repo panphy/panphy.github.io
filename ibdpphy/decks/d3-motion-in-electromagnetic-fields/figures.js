@@ -48,13 +48,14 @@ window.DeckFigures.add(P => {
       return svg('100 50 620 440', s, 'A positive charge moving to the right through a magnetic field that points into the page. The force on it is upwards, at right angles to both its velocity and the field');
     },
 
-    // Fleming's left-hand rule as three arrows at right angles.
+    // Fleming's left-hand rule as three arrows at right angles: the flat picture. On the slide,
+    // hand.js draws a hand in three dimensions over it; this one stays for thumbnails and print.
     'd3-rule': () => {
       let s = arrow(330, 330, 330, 90, 'brand-primary', 7) + arrow(330, 330, 600, 330, 'brand-accent', 7) + arrow(330, 330, 500, 226, 'brand-accent-strong', 7, 'stroke-dasharray="14 8"') + `<circle cx="330" cy="330" r="9" style="fill:var(--text-main)"/>`;
-      s += text(352, 110, 'thuMb', 'lbl strong', 'start') + text(352, 144, 'force (Motion)', 'lbl', 'start');
-      s += text(620, 320, 'seCond finger', 'lbl strong', 'start') + text(620, 354, 'Current', 'lbl', 'start');
-      s += text(520, 206, 'First finger', 'lbl strong', 'start') + text(520, 240, 'Field (here into the page)', 'lbl', 'start');
-      return svg('180 60 760 340', s, 'Three arrows at right angles from one point, for the left hand: the thumb gives the force, the first finger the field and the second finger the current, which is the way a positive charge moves');
+      s += text(352, 110, 'Thumb', 'lbl strong', 'start') + text(352, 144, 'F: force', 'lbl', 'start');
+      s += text(620, 320, 'Middle finger', 'lbl strong', 'start') + text(620, 354, 'I: current', 'lbl', 'start');
+      s += text(520, 206, 'Index finger', 'lbl strong', 'start') + text(520, 240, 'B: field (here into the page)', 'lbl', 'start');
+      return svg('180 60 760 340', s, 'Fleming’s left-hand rule. The thumb, index finger and middle finger of the left hand are held at right angles to one another: the thumb gives the force F, the index finger the field B and the middle finger the current I, which is the way a positive charge moves');
     },
 
     // A positive particle circling in a uniform field into the page. Also the title picture, with data-plain.
@@ -62,7 +63,7 @@ window.DeckFigures.add(P => {
       const on = labelled(el), cx = 400, cy = 270, r = 150;
       let s = fieldGrid(140, 80, 8, 6, 76) + `<circle cx="${cx}" cy="${cy}" r="${r}" class="guide accent" style="stroke-width:3"/>`;
       const body = arrow(cx, cy - r + 22, cx, cy - r + 110, 'brand-primary', 5) + arrow(cx - 24, cy - r, cx - 130, cy - r, 'brand-accent', 5) + positive(cx, cy - r);
-      if (on) s += `<circle cx="${cx}" cy="${cy}" r="${r - 14}" style="fill:var(--viewer-bg);opacity:.9"/>` + text(cx, cy + 12, 'F is always', 'lbl halo') + text(cx, cy + 46, 'towards the centre', 'lbl halo') + both(cx + 6, cy, cx + r - 4, cy) + text(cx + 78, cy - 14, 'r', 'lbl display halo');
+      if (on) s += `<circle cx="${cx}" cy="${cy}" r="${r - 14}" style="fill:var(--viewer-bg);opacity:.9"/>` + text(cx, cy + 62, 'F is always', 'lbl halo') + text(cx, cy + 96, 'towards the centre', 'lbl halo') + both(cx + 6, cy, cx + r - 4, cy) + text(cx + 78, cy - 14, 'r', 'lbl display halo');
       return svg('100 50 620 450', s + twoState(body, `<g>${spin(cx, cy, 5, { turns: -1 })}${body}</g>`), 'A positive particle moving in a circle in a uniform magnetic field that points into the page. The magnetic force is always at right angles to the velocity and points to the centre of the circle, so the speed stays constant');
     },
 
@@ -108,25 +109,25 @@ window.DeckFigures.add(P => {
       return svg('60 70 680 370', s, 'A wire carrying a current out of the page sits between the north and south poles of a magnet, where the field points from left to right. The force on the wire is upwards, at right angles to both the current and the field');
     },
 
-    // Two pairs of long parallel wires. Played with →: currents the same way attract, opposite ways repel.
-    'd3-parallel': () => {
-      const pair = (x, same) => {
-        const k = same ? 1 : -1, a = x - 60, b = x + 60;
-        const one = (wx, up, dir, side) => wire(wx, 410, wx, 100) + (up ? arrow(wx + side * 26, 200, wx + side * 26, 120, 'brand-accent', 5) : arrow(wx + side * 26, 120, wx + side * 26, 200, 'brand-accent', 5)) + text(wx + side * 26, 236, 'I', 'lbl display') + arrow(wx, 320, wx + dir * 44, 320, 'brand-primary', 5);
-        const still = one(a, true, k, -1) + one(b, same, -k, 1);
-        const shift = (body, d) => `<g>${track([[0, 0], [d, 0]], 1.2, { loop: false, extra: 'calcMode="spline" keySplines=".3 0 .3 1" keyTimes="0;1"' })}${body}</g>`;
-        return { still, mover: shift(one(a, true, k, -1), k * 18) + shift(one(b, same, -k, 1), -k * 18), note: text(x, 470, same ? 'same direction: attract' : 'opposite: repel', 'lbl strong') };
-      };
-      const left = pair(230, true), right = pair(610, false);
-      return svg('40 60 760 430', left.note + right.note + twoState(left.still + right.still, left.mover + right.mover + PLAY), 'Two pairs of long parallel wires. When the currents are in the same direction the wires attract each other. When the currents are in opposite directions they repel');
+    // A pair of long parallel wires: data-kind="opposite" for currents in opposite directions,
+    // otherwise the same direction. The first pair waits for a press of → and then moves; the
+    // opposite pair is drawn inside its PLAY step, so the same press shows it and sets it moving.
+    'd3-parallel': el => {
+      const same = el.dataset.kind !== 'opposite', k = same ? 1 : -1, a = 300, b = 480;
+      const one = (wx, up, dir, side) => wire(wx, 410, wx, 100) + (up ? arrow(wx + side * 30, 200, wx + side * 30, 120, 'brand-accent', 5) : arrow(wx + side * 30, 120, wx + side * 30, 200, 'brand-accent', 5)) + text(wx + side * 30, 238, 'I', 'lbl display') + arrow(wx + dir * 8, 320, wx + dir * 54, 320, 'brand-primary', 5);
+      const shift = (body, d) => `<g>${track([[0, 0], [d, 0]], 1.2, { loop: false, extra: 'calcMode="spline" keySplines=".3 0 .3 1" keyTimes="0;1"' })}${body}</g>`;
+      const note = text(390, 474, same ? 'same direction: attract' : 'opposite directions: repel', 'lbl strong');
+      const still = one(a, true, k, -1) + one(b, same, -k, 1), mover = shift(one(a, true, k, -1), k * 20) + shift(one(b, same, -k, 1), -k * 20);
+      const label = same ? 'Two long parallel wires carrying currents in the same direction: they attract each other' : 'Two long parallel wires carrying currents in opposite directions: they repel each other';
+      return svg('190 80 400 420', same ? note + twoState(still, mover + PLAY) : `<g class="still">${note}${still}</g><g class="mover"><g class="step play">${note}${mover}</g></g>`, label);
     },
 
     // Why parallel currents attract: wire 2 sits in the field of wire 1.
     'd3-parallel-end': () => {
       let s = [70, 130, 250].map(r => `<circle cx="280" cy="260" r="${r}" style="fill:none;stroke:var(--brand-accent-strong);stroke-width:3;opacity:.6"/>`).join('');
-      s += [[70, 200], [130, 250], [250, 180]].map(([r, deg]) => { const a = deg * Math.PI / 180, x = 280 + r * Math.cos(a), y = 260 + r * Math.sin(a); return `<path d="M-10,-8 L8,0 L-10,8 Z" transform="translate(${f(x)} ${f(y)}) rotate(${deg - 90})" style="fill:var(--brand-accent-strong)"/>`; }).join('');
-      s += arrow(530, 330, 530, 190, 'brand-accent-strong', 5) + arrow(506, 260, 400, 260, 'brand-primary', 6) + wireEnd(280, 260, true) + wireEnd(530, 260, true);
-      s += text(280, 316, 'wire 1', 'lbl strong halo') + text(560, 316, 'wire 2', 'lbl strong halo', 'start') + text(546, 196, sub('B', '1'), 'lbl display', 'start') + text(440, 236, 'F', 'lbl display');
+      s += [[70, 200], [130, 250], [250, 180]].map(([r, deg]) => { const a = deg * Math.PI / 180, x = 280 + r * Math.cos(a), y = 260 + r * Math.sin(a); return `<path d="M-9,-8 L9,0 L-9,8 Z" transform="translate(${f(x)} ${f(y)}) rotate(${deg - 90})" style="fill:var(--brand-accent-strong)"/>`; }).join('');
+      s += arrow(530, 260, 530, 150, 'brand-accent-strong', 5) + arrow(506, 260, 400, 260, 'brand-primary', 6) + wireEnd(280, 260, true) + wireEnd(530, 260, true);
+      s += text(280, 316, 'wire 1', 'lbl strong halo') + text(560, 316, 'wire 2', 'lbl strong halo', 'start') + text(546, 176, sub('B', '1'), 'lbl display', 'start') + text(440, 236, 'F', 'lbl display');
       s += `<line x1="280" y1="420" x2="280" y2="470" class="guide"/><line x1="530" y1="420" x2="530" y2="470" class="guide"/>` + both(286, 456, 524, 456) + text(405, 444, 'r', 'lbl display halo');
       return svg('10 0 720 500', s, 'Two parallel wires seen end on, both with current out of the page, a distance r apart. Wire 1 makes a circular field which points upwards at wire 2. The force on wire 2 is towards wire 1, so the wires attract');
     }
