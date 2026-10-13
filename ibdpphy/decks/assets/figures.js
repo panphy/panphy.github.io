@@ -1,5 +1,5 @@
-// SVG diagrams for the IB DP Physics decks (A.1 Kinematics, E.1 Structure of
-// the atom and E.2 Quantum physics). The atom figures began as copies of those in
+// SVG diagrams for the IB DP Physics decks (A.1 Kinematics, A.2 Forces and momentum,
+// E.1 Structure of the atom and E.2 Quantum physics). The atom figures began as copies of those in
 // gcsephy/decks/atoms-and-radiation and use the same particle colours and
 // glossy-sphere look as the Atomic Models and Nuclear Decay simulations.
 // Each <div data-fig="name"> is filled from FIGURES.
@@ -263,6 +263,40 @@
   const arcPoints = (x0, y0, x1, h, n) => Array.from({ length: n + 1 }, (_, i) => [x0 + (x1 - x0) * i / n, y0 - 4 * h * (i / n) * (1 - i / n)]);
   const through = points => points.map(([x, y], i) => `${i ? 'L' : 'M'}${f(x)},${f(y)}`).join('');
   const sampled = (fn, n = 60) => through(Array.from({ length: n + 1 }, (_, i) => fn(i / n)));
+
+  // ---- A.2: forces and momentum helpers ----
+  // A subscripted symbol, a block, a point on a body, a surface and a coiled spring. Forces are
+  // teal, velocities and components apricot. data-plain leaves the labels off a small copy.
+  const sub = (a, b) => `${a}<tspan dy="9" font-size="24">${b}</tspan><tspan dy="-9">​</tspan>`;
+  const box = (cx, cy, w, h, extra = '') => `<rect x="${f(cx - w / 2)}" y="${f(cy - h / 2)}" width="${w}" height="${h}" rx="10" style="fill:color-mix(in srgb, var(--brand-accent-strong) 18%, var(--viewer-bg));stroke:var(--brand-accent-strong);stroke-width:3" ${extra}/>`;
+  const dot = (x, y, r = 7) => `<circle cx="${f(x)}" cy="${f(y)}" r="${r}" style="fill:var(--text-main)"/>`;
+  const surface = (x1, y1, x2, y2) => `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" class="tick" style="stroke-width:4"/>`;
+  const labelled = el => !('plain' in el.dataset);
+  function spring(x, y1, y2, turns = 9, amp = 16) {
+    const lead = 14, step = (y2 - y1 - 2 * lead) / (turns * 2);
+    let d = `M${x},${y1} V${y1 + lead}`;
+    for (let i = 0; i < turns * 2; i++) d += ` L${x + (i % 2 ? -amp : amp)},${f(y1 + lead + step * (i + 0.5))}`;
+    return `<path d="${d} L${x},${y2 - lead} V${y2}" class="cable" stroke-linejoin="round"/>`;
+  }
+  // One row of a before-and-after collision picture: blocks on a track, each with its mass
+  // below and its velocity above. An item with dir 0 is at rest; with no dir it has no arrow.
+  function trackRow(y, items, on) {
+    let s = surface(150, y, 760, y);
+    items.forEach(({ x, w = 120, m, v, dir, ax = x, len = 100 }) => {
+      s += box(x, y - 37, w, 70);
+      if (!on) { if (dir) s += arrow(ax - dir * len / 2, y - 100, ax + dir * len / 2, y - 100, 'brand-accent', 5); return; }
+      s += text(x, y + 34, m, 'lbl mono');
+      if (dir) s += arrow(ax - dir * len / 2, y - 100, ax + dir * len / 2, y - 100, 'brand-accent', 5) + text(ax, y - 116, v, 'lbl mono strong');
+      else if (dir === 0) s += text(ax, y - 92, 'at rest', 'lbl small');
+    });
+    return s;
+  }
+  const COLLISIONS = {
+    general: { before: [{ x: 280, m: 'm₁', v: 'u₁', dir: 1, len: 130 }, { x: 560, m: 'm₂', v: 'u₂', dir: 1, len: 60 }], after: [{ x: 360, m: 'm₁', v: 'v₁', dir: 1, len: 60 }, { x: 620, m: 'm₂', v: 'v₂', dir: 1, len: 130 }], label: 'Two bodies on a track before and after a collision: masses m 1 and m 2 have velocities u 1 and u 2 before and v 1 and v 2 after' },
+    stick: { before: [{ x: 280, w: 140, m: '1200 kg', v: '15 m s⁻¹', dir: 1, len: 130 }, { x: 580, w: 110, m: '800 kg', dir: 0 }], after: [{ x: 430, w: 140, m: '1200 kg', v: 'v = ?', dir: 1, ax: 485, len: 80 }, { x: 555, w: 110, m: '800 kg' }], label: 'Before: a 1200 kilogram car at 15 metres per second approaches an 800 kilogram car at rest. After: the two move off joined together at an unknown velocity v' },
+    elastic: { before: [{ x: 280, m: '2.0 kg', v: '3.0 m s⁻¹', dir: 1, len: 130 }, { x: 560, w: 90, m: '1.0 kg', dir: 0 }], after: [{ x: 380, m: '2.0 kg', v: '1.0 m s⁻¹', dir: 1, len: 50 }, { x: 610, w: 90, m: '1.0 kg', v: 'v = ?', dir: 1, len: 150 }], label: 'Before: a 2.0 kilogram trolley at 3.0 metres per second approaches a 1.0 kilogram trolley at rest. After: the 2.0 kilogram trolley moves at 1.0 metre per second and the 1.0 kilogram trolley at an unknown velocity v' },
+    explode: { before: [{ x: 400, w: 120, m: '60 kg', dir: 0, ax: 455 }, { x: 510, w: 100, m: '40 kg' }], after: [{ x: 290, w: 120, m: '60 kg', v: 'v = ?', dir: -1, len: 80 }, { x: 620, w: 100, m: '40 kg', v: '3.0 m s⁻¹', dir: 1, len: 120 }], label: 'Before: a 60 kilogram skater and a 40 kilogram skater stand together at rest. After pushing apart, the 40 kilogram skater moves right at 3.0 metres per second and the 60 kilogram skater moves left at an unknown velocity v' }
+  };
 
   const FIGURES = {
     hero: () => svg('0 0 560 560', bohrAtom(280, 270, false), 'Carbon atom: a nucleus of protons and neutrons with electrons in two energy levels'),
@@ -693,6 +727,196 @@
       s += both(396, 114, 396, 384, 'brand-accent', 3) + text(412, 258, 'h', 'lbl display', 'start');
       s += text(290, 36, 'electromagnet', 'lbl small') + text(262, 104, 'steel ball', 'lbl small', 'end') + text(290, 424, 'trapdoor switch', 'lbl small');
       return svg('0 0 620 460', s, 'Apparatus for measuring g: an electromagnet releases a steel ball, which falls a height h onto a trapdoor switch; a timer starts on release and stops when the trapdoor opens');
+    },
+
+    // ---- A.2: forces and momentum ----
+
+    // Also the small picture for part 1, with data-plain.
+    'fbd-block': el => {
+      const on = labelled(el);
+      let s = `<line x1="90" y1="302" x2="710" y2="302" class="guide"/>` + box(380, 245, 170, 110);
+      s += arrow(380, 245, 380, 78, 'brand-primary', 5) + arrow(380, 245, 380, 412, 'brand-primary', 5) + arrow(380, 245, 660, 245, 'brand-primary', 5) + arrow(380, 245, 200, 245, 'brand-primary', 5) + dot(380, 245);
+      if (on) {
+        s += text(398, 100, sub('F', 'N'), 'lbl display', 'start') + text(456, 98, 'normal force', 'lbl small', 'start');
+        s += text(398, 408, sub('F', 'g'), 'lbl display', 'start') + text(452, 406, 'weight', 'lbl small', 'start');
+        s += text(572, 224, 'F', 'lbl display') + text(572, 284, 'applied force', 'lbl small');
+        s += text(232, 224, sub('F', 'f'), 'lbl display') + text(232, 284, 'friction', 'lbl small');
+      }
+      return svg('0 0 800 460', s, 'Free-body diagram of a block pulled along a table: the normal force up, the weight down, the applied force forwards and a smaller friction force backwards, all drawn from the block');
+    },
+
+    resultant: () => {
+      let s = `<path d="M580,380 V80 H180" class="guide"/><path d="M250,380 A70,70 0 0 0 236,338" class="guide accent"/>`;
+      s += arrow(180, 380, 574, 380, 'brand-primary', 5) + arrow(180, 380, 180, 86, 'brand-primary', 5) + arrow(180, 380, 574, 84.5, 'brand-accent', 6) + dot(180, 380);
+      s += text(380, 426, '4.0 N', 'lbl mono strong') + text(160, 240, '3.0 N', 'lbl mono strong', 'end') + text(272, 364, 'θ', 'lbl greek');
+      s += text(430, 280, 'resultant', 'lbl strong', 'start') + text(430, 312, '5.0 N', 'lbl mono strong', 'start');
+      return svg('0 0 800 460', s, 'Two forces at right angles on one body, 4.0 newtons to the right and 3.0 newtons upwards, and their resultant of 5.0 newtons along the diagonal at angle theta to the 4.0 newton force');
+    },
+
+    'hang-two': () => {
+      let s = surface(120, 50, 680, 50) + `<path d="M162,50 L400,250 L638,50" class="cable"/><line x1="250" y1="250" x2="550" y2="250" class="guide"/>`;
+      s += `<path d="M330,250 A70,70 0 0 1 346.4,205 M470,250 A70,70 0 0 0 453.6,205" class="guide accent"/>`;
+      s += arrow(400, 250, 285, 153.6, 'brand-primary', 5) + arrow(400, 250, 515, 153.6, 'brand-primary', 5) + arrow(400, 250, 400, 400, 'brand-primary', 5) + body(400, 250, 18);
+      s += text(266, 150, 'T', 'lbl display', 'end') + text(534, 150, 'T', 'lbl display', 'start') + text(418, 398, '49 N', 'lbl mono strong', 'start');
+      s += text(292, 238, '40°', 'lbl mono') + text(508, 238, '40°', 'lbl mono');
+      return svg('0 0 800 460', s, 'A body of weight 49 newtons hangs at rest from two strings, each at 40 degrees to the horizontal and each with tension T');
+    },
+
+    'third-law': () => {
+      let s = text(210, 40, 'gravitational pair', 'lbl strong') + text(590, 40, 'contact pair', 'lbl strong');
+      s += `<path d="M50,416 Q210,300 370,416 Z" style="fill:color-mix(in srgb, var(--brand-primary) 22%, var(--viewer-bg));stroke:var(--brand-primary);stroke-width:2.5"/>` + text(210, 404, 'Earth', 'lbl small');
+      s += box(210, 110, 130, 46) + arrow(195, 133, 195, 232, 'brand-primary', 5) + arrow(225, 356, 225, 258, 'brand-accent', 5);
+      s += text(178, 196, 'on the book', 'lbl small', 'end') + text(242, 312, 'on the Earth', 'lbl small', 'start');
+      s += `<path d="M440,250 H740 M462,250 V410 M718,250 V410" class="tick" style="stroke-width:6;fill:none"/>` + box(590, 224, 130, 46);
+      s += arrow(570, 246, 570, 112, 'brand-primary', 5) + arrow(610, 256, 610, 388, 'brand-accent', 5);
+      s += text(552, 150, 'on the book', 'lbl small', 'end') + text(626, 330, 'on the', 'lbl small', 'start') + text(626, 358, 'table', 'lbl small', 'start');
+      return svg('0 0 800 460', s, 'Two Newton third law pairs for a book on a table. Gravitational pair: the Earth pulls the book down and the book pulls the Earth up. Contact pair: the table pushes the book up and the book pushes the table down');
+    },
+
+    lift: () => {
+      let s = `<line x1="230" y1="8" x2="230" y2="60" class="cable"/><rect x="110" y="60" width="240" height="352" rx="10" class="node" style="stroke:var(--text-secondary);stroke-width:3"/>` + box(230, 331, 84, 160);
+      s += arrow(230, 331, 230, 140, 'brand-primary', 5) + arrow(230, 331, 230, 478, 'brand-primary', 5) + dot(230, 331);
+      s += text(248, 162, sub('F', 'N'), 'lbl display', 'start') + text(248, 476, sub('F', 'g'), 'lbl display', 'start');
+      s += arrow(408, 300, 408, 190, 'brand-accent', 5) + text(408, 340, 'a', 'lbl display');
+      return svg('0 0 460 500', s, 'A person in a lift that accelerates upwards: the normal force from the floor, drawn upwards, is larger than the weight, drawn downwards');
+    },
+
+    // Also the title picture and the small picture for part 2, with data-plain.
+    'slope-fbd': el => {
+      const on = labelled(el);
+      let s = `<path d="M700,120 L100,400 H760" class="tick" style="stroke-width:4;fill:none"/>` + box(507.3, 176.9, 90, 60, 'transform="rotate(-25 507.3 176.9)"');
+      s += `<path d="M507.3,366.9 L434.5,210.8 M507.3,366.9 L580.1,333" class="guide"/>`;
+      s += arrow(507.3, 176.9, 434.5, 210.8, 'brand-accent', 3.5, 'stroke-dasharray="9 7"') + arrow(507.3, 176.9, 580.1, 333, 'brand-accent', 3.5, 'stroke-dasharray="9 7"');
+      s += arrow(507.3, 176.9, 507.3, 361, 'brand-primary', 5) + arrow(507.3, 176.9, 437, 26, 'brand-primary', 5) + arrow(507.3, 176.9, 575, 145.4, 'brand-primary', 5) + dot(507.3, 176.9);
+      if (on) {
+        s += `<path d="M190,400 A90,90 0 0 0 181.6,362" class="guide accent"/>` + text(216, 390, 'θ', 'lbl greek');
+        s += text(420, 40, sub('F', 'N'), 'lbl display', 'end') + text(592, 132, sub('F', 'f'), 'lbl display', 'start') + text(492, 380, 'mg', 'lbl display', 'end');
+        s += text(420, 204, 'mg sin θ', 'lbl mono', 'end') + text(598, 366, 'mg cos θ', 'lbl mono', 'start');
+      }
+      return svg('0 0 800 460', s, 'A block on a slope at angle theta: the weight m g acts straight down and is resolved into m g sine theta down the slope and m g cosine theta into the slope; the normal force acts at right angles to the slope and friction acts up the slope');
+    },
+
+    'friction-graph': () => {
+      let s = axes(110, 400, 760, 40, 'applied force', 'friction') + `<line x1="110" y1="140" x2="370" y2="140" class="guide accent"/><line x1="110" y1="205" x2="392" y2="205" class="guide accent"/>`;
+      s += plot('M110,400 L370,140 L392,205 L720,205');
+      s += text(98, 148, sub('μ', 's') + sub('F', 'N'), 'lbl mono', 'end') + text(98, 213, sub('μ', 'd') + sub('F', 'N'), 'lbl mono', 'end');
+      s += text(384, 128, 'starts to slide', 'lbl small', 'start') + text(560, 186, 'dynamic: constant', 'lbl strong');
+      s += text(300, 300, 'static', 'lbl strong', 'start') + text(300, 332, 'grows to match the applied force', 'lbl small', 'start');
+      return svg('0 0 800 460', s, 'Friction against applied force: static friction rises in step with the applied force up to a maximum of mu s times the normal force, then the body slides and friction drops to a constant, smaller dynamic value of mu d times the normal force');
+    },
+
+    atwood: () => {
+      let s = `<line x1="230" y1="8" x2="230" y2="90" class="tick" style="stroke-width:5"/><path d="M180,355 V90 A50,50 0 0 1 280,90 V245" class="cable"/><circle cx="230" cy="90" r="50" class="node" style="stroke:var(--text-secondary);stroke-width:3"/>` + dot(230, 90, 6);
+      s += box(180, 400, 90, 90) + box(280, 280, 70, 70);
+      s += arrow(158, 350, 158, 250, 'brand-primary', 5) + arrow(180, 446, 180, 536, 'brand-primary', 5) + arrow(302, 240, 302, 140, 'brand-primary', 5) + arrow(280, 316, 280, 386, 'brand-primary', 5);
+      s += text(142, 306, 'T', 'lbl display', 'end') + text(318, 196, 'T', 'lbl display', 'start');
+      s += text(120, 410, '3.0 kg', 'lbl mono strong', 'end') + text(330, 290, '2.0 kg', 'lbl mono strong', 'start');
+      s += text(198, 524, '29.4 N', 'lbl mono', 'start') + text(298, 378, '19.6 N', 'lbl mono', 'start');
+      s += arrow(60, 470, 60, 544, 'brand-accent', 4) + text(60, 458, 'a', 'lbl display') + arrow(462, 320, 462, 246, 'brand-accent', 4) + text(462, 358, 'a', 'lbl display');
+      return svg('0 0 500 560', s, 'A light string over a pulley joins a 3.0 kilogram mass, weight 29.4 newtons, to a 2.0 kilogram mass, weight 19.6 newtons. The same tension T pulls up on each; the heavier mass accelerates down and the lighter one up');
+    },
+
+    hooke: () => {
+      let s = surface(60, 40, 330, 40) + spring(130, 40, 240) + spring(260, 40, 330, 9) + box(260, 362, 64, 64);
+      s += `<line x1="100" y1="240" x2="340" y2="240" class="guide"/><line x1="290" y1="330" x2="340" y2="330" class="guide"/>` + both(326, 246, 326, 324, 'brand-accent', 3) + text(342, 296, 'x', 'lbl display', 'start');
+      s += arrow(216, 362, 216, 290, 'brand-primary', 5) + text(200, 336, sub('F', 'H'), 'lbl display', 'end') + arrow(260, 394, 260, 448, 'brand-primary', 5) + text(278, 446, 'mg', 'lbl display', 'start');
+      s += text(130, 270, 'natural', 'lbl small') + text(130, 296, 'length', 'lbl small');
+      s += axes(470, 400, 780, 60, 'extension x', 'force') + plot('M470,400 L730,120') + `<path d="M545,319 H640 V217" class="guide accent"/>`;
+      s += text(764, 330, 'gradient = k', 'lbl strong', 'end');
+      return svg('0 0 800 460', s, 'A spring at its natural length beside the same spring stretched by an extension x by a hanging mass, with the restoring force F H upwards and the weight downwards; and a straight-line graph of force against extension through the origin, whose gradient is the spring constant k');
+    },
+
+    // With data-drag the sphere is falling and the viscous drag is added.
+    'sphere-fluid': el => {
+      const drag = 'drag' in el.dataset;
+      let s = `<rect x="52" y="80" width="356" height="438" style="fill:var(--brand-primary);opacity:.13"/><path d="M50,40 V520 H410 V40" class="tick" style="stroke-width:4;fill:none"/><line x1="52" y1="80" x2="408" y2="80" class="guide accent"/>` + body(230, 290, 44);
+      s += arrow(230, 336, 230, 474, 'brand-primary', 5) + text(248, 476, sub('F', 'g'), 'lbl display', 'start') + text(248, 440, 'weight', 'lbl small', 'start');
+      if (drag) {
+        s += arrow(206, 250, 206, 152, 'brand-primary', 5) + text(190, 160, sub('F', 'b'), 'lbl display', 'end') + text(190, 196, 'buoyancy', 'lbl small', 'end');
+        s += arrow(256, 250, 256, 196, 'brand-primary', 5) + text(272, 204, sub('F', 'd'), 'lbl display', 'start') + text(272, 238, 'drag', 'lbl small', 'start');
+        s += arrow(326, 300, 326, 372, 'brand-accent', 4) + text(326, 408, 'v', 'lbl display');
+      } else {
+        s += arrow(230, 244, 230, 124, 'brand-primary', 5) + text(248, 136, sub('F', 'b'), 'lbl display', 'start') + text(248, 172, 'buoyancy', 'lbl small', 'start');
+      }
+      return svg('0 0 460 560', s, drag ? 'A small sphere falling through a fluid: its weight acts downwards, and the buoyancy force and the viscous drag both act upwards' : 'A sphere under the surface of a fluid: its weight acts downwards and the buoyancy force acts upwards');
+    },
+
+    // Also the small picture for part 3, with data-plain.
+    'impulse-graph': el => {
+      const on = labelled(el), at = t => [200 + 400 * t, 400 - 260 * Math.sin(Math.PI * t) ** 2];
+      let s = shade(`${sampled(at)} Z`) + axes(110, 400, 760, 40, on ? 'time' : '', on ? 'force' : '') + `<path d="M200,400 V270 H600 V400" class="guide accent"/>` + plot(sampled(at));
+      if (on) {
+        s += text(400, 350, 'area = impulse', 'lbl strong halo') + text(616, 264, 'average', 'lbl small', 'start') + text(616, 290, 'force', 'lbl small', 'start') + text(400, 116, 'peak force', 'lbl small');
+        s += both(206, 428, 594, 428, 'text-secondary', 2.5) + text(400, 456, 'Δt: time of contact', 'lbl small halo');
+      }
+      return svg('0 0 800 460', s, 'Force against time during a collision: the force rises to a peak and falls back to zero. The area under the curve is the impulse, equal to the area of a rectangle whose height is the average force and whose width is the time of contact');
+    },
+
+    bounce: () => {
+      let s = `<line x1="650" y1="50" x2="650" y2="390" class="tick" style="stroke-width:10"/>` + text(110, 148, 'before', 'lbl mono', 'start') + text(110, 318, 'after', 'lbl mono', 'start');
+      s += body(330, 140, 24) + arrow(366, 140, 500, 140, 'brand-accent', 5) + text(434, 112, '12 m s⁻¹', 'lbl mono strong');
+      s += body(520, 310, 24) + arrow(484, 310, 396, 310, 'brand-accent', 5) + text(440, 282, '8.0 m s⁻¹', 'lbl mono strong');
+      s += arrow(638, 225, 528, 225, 'brand-primary', 5) + text(584, 200, 'F', 'lbl display') + text(572, 258, 'on the ball', 'lbl small');
+      s += arrow(300, 420, 420, 420, 'text-secondary', 2.5) + text(436, 428, 'positive', 'lbl small', 'start');
+      return svg('0 0 800 460', s, 'A ball moves towards a wall at 12 metres per second and rebounds at 8.0 metres per second. The force of the wall on the ball points away from the wall. Towards the wall is taken as positive');
+    },
+
+    // data-kind chooses the bodies (COLLISIONS); with data-plain it is the small picture for part 4.
+    collide: el => {
+      const on = labelled(el), set = COLLISIONS[el.dataset.kind] || COLLISIONS.general;
+      let s = trackRow(180, set.before, on) + trackRow(390, set.after, on);
+      if (on) s += text(30, 60, 'BEFORE', 'lbl mono', 'start') + text(30, 270, 'AFTER', 'lbl mono', 'start');
+      return svg('0 0 800 460', s, set.label);
+    },
+
+    'collide-2d': () => {
+      let s = `<line x1="60" y1="250" x2="770" y2="250" class="guide"/><path d="M510,250 A110,110 0 0 1 502.1,290.9" class="guide accent"/>`;
+      s += arrow(142, 250, 366, 250, 'brand-accent', 5) + arrow(400, 222, 400, 104, 'brand-accent', 5) + arrow(424, 259.6, 656, 352.4, 'brand-accent', 5);
+      s += body(110, 250, 22) + `<circle cx="400" cy="250" r="26" style="fill:none;stroke:var(--text-secondary);stroke-width:2.5;stroke-dasharray:5 6"/>` + body(400, 74, 22) + body(688, 365, 26);
+      s += text(110, 306, '2.0 kg', 'lbl mono') + text(250, 226, '5.0 m s⁻¹', 'lbl mono strong');
+      s += text(366, 308, '3.0 kg', 'lbl mono', 'end') + text(366, 336, 'at rest', 'lbl small', 'end');
+      s += text(432, 82, '2.0 kg', 'lbl mono', 'start') + text(418, 170, '2.0 m s⁻¹', 'lbl mono strong', 'start');
+      s += text(688, 424, '3.0 kg', 'lbl mono') + text(530, 356, 'v = ?', 'lbl mono strong', 'end') + text(556, 284, 'θ', 'lbl greek');
+      s += arrow(70, 430, 140, 430, 'text-secondary', 2.5) + arrow(70, 430, 70, 360, 'text-secondary', 2.5) + text(154, 438, 'x', 'lbl mono', 'start') + text(70, 344, 'y', 'lbl mono');
+      return svg('0 0 800 460', s, 'A 2.0 kilogram puck moving at 5.0 metres per second along x strikes a 3.0 kilogram puck at rest. Afterwards the 2.0 kilogram puck moves at 2.0 metres per second along y, at right angles to its first direction, and the 3.0 kilogram puck moves off at an unknown speed v at angle theta below the x direction');
+    },
+
+    'ang-vel': () => {
+      let s = `<circle cx="280" cy="270" r="190" class="orbit" style="stroke-width:2.5;stroke-opacity:.6"/><path d="M470,270 H280 L402.1,124.5" class="tick" style="fill:none"/>`;
+      s += `<path d="M470,270 A190,190 0 0 0 402.1,124.5" style="fill:none;stroke:var(--brand-accent);stroke-width:7;stroke-linecap:round"/><path d="M350,270 A70,70 0 0 0 325,216.4" class="guide accent"/>`;
+      s += arrow(402.1, 124.5, 290, 30.5, 'brand-primary', 5) + dot(280, 270) + body(402.1, 124.5, 18);
+      s += text(376, 252, 'Δθ', 'lbl mono strong', 'start') + text(390, 304, 'r', 'lbl display') + text(354, 56, 'v', 'lbl display', 'start') + text(470, 180, 'arc = r Δθ', 'lbl mono', 'start');
+      return svg('0 0 680 500', s, 'A body moving round a circle of radius r: as the radius turns through an angle delta theta the body moves along an arc of length r times delta theta, and its velocity v is along the tangent');
+    },
+
+    // data-vector="F" labels the inward arrow as the force; data-plain is the small picture for part 5.
+    'circ-va': el => {
+      const on = labelled(el), inward = el.dataset.vector || 'a';
+      let s = `<circle cx="280" cy="270" r="180" class="orbit" style="stroke-width:2.5;stroke-opacity:.6"/>` + dot(280, 270);
+      [60, 180, 300].forEach(deg => {
+        const c = Math.cos(deg * Math.PI / 180), n = Math.sin(deg * Math.PI / 180), x = 280 + 180 * c, y = 270 - 180 * n;
+        s += arrow(x, y, x - 110 * n, y - 110 * c, 'brand-accent', 5) + arrow(x, y, x - 92 * c, y + 92 * n, 'brand-primary', 5) + body(x, y, 17);
+      });
+      if (on) s += text(262, 52, 'v', 'lbl display', 'end') + text(340, 206, inward, 'lbl display', 'start') + text(280, 310, 'centre', 'lbl small');
+      return svg('0 0 560 520', s, `A body shown at three points of a circular path: its velocity is along the tangent at each point and its ${inward === 'F' ? 'resultant force' : 'acceleration'} points towards the centre`);
+    },
+
+    conical: () => {
+      let s = surface(130, 40, 330, 40) + `<line x1="230" y1="40" x2="230" y2="334" class="guide"/><ellipse cx="230" cy="334" rx="170" ry="34" class="guide"/><line x1="230" y1="40" x2="400" y2="334.4" class="cable"/>`;
+      s += `<path d="M230,110 A70,70 0 0 0 265,100.6" class="guide accent"/><path d="M315,187.2 H400 M315,187.2 V334.4" class="guide"/>`;
+      s += arrow(400, 334.4, 400, 193, 'brand-accent', 3.5, 'stroke-dasharray="9 7"') + arrow(400, 334.4, 321, 334.4, 'brand-accent', 3.5, 'stroke-dasharray="9 7"');
+      s += arrow(400, 334.4, 318, 192.4, 'brand-primary', 5) + arrow(400, 334.4, 400, 476, 'brand-primary', 5) + body(400, 334.4, 20);
+      s += text(300, 178, 'T', 'lbl display', 'end') + text(418, 476, 'mg', 'lbl display', 'start') + text(418, 262, 'T cos θ', 'lbl mono', 'start') + text(330, 398, 'T sin θ', 'lbl mono') + text(254, 150, 'θ', 'lbl greek');
+      return svg('0 0 560 520', s, 'A conical pendulum: a bob on a string moves in a horizontal circle with the string at angle theta to the vertical. The tension T is resolved into T cosine theta upwards, which balances the weight m g, and T sine theta towards the centre of the circle');
+    },
+
+    'vertical-circle': () => {
+      let s = `<circle cx="280" cy="280" r="170" class="guide"/>` + dot(280, 280) + `<line x1="280" y1="110" x2="280" y2="450" class="cable" style="opacity:.35"/>`;
+      s += arrow(256, 110, 176, 110, 'brand-accent', 4) + arrow(262, 132, 262, 212, 'brand-primary', 5) + arrow(298, 132, 298, 196, 'brand-primary', 5) + body(280, 110, 20);
+      s += arrow(304, 450, 430, 450, 'brand-accent', 4) + arrow(280, 428, 280, 306, 'brand-primary', 5) + arrow(280, 472, 280, 548, 'brand-primary', 5) + body(280, 450, 20);
+      s += text(246, 206, 'mg', 'lbl display', 'end') + text(314, 190, 'T', 'lbl display', 'start') + text(298, 372, 'T', 'lbl display', 'start') + text(298, 544, 'mg', 'lbl display', 'start');
+      s += text(280, 66, 'top', 'lbl small') + text(150, 458, 'bottom', 'lbl small') + text(176, 92, 'v', 'lbl display', 'end') + text(444, 440, 'v', 'lbl display', 'start');
+      return svg('0 0 560 570', s, 'A ball on a string moving in a vertical circle. At the top the tension and the weight both act downwards, towards the centre. At the bottom the tension acts upwards, towards the centre, and the weight downwards; the ball moves faster at the bottom');
     },
 
     // ---- E.2: quantum physics ----
