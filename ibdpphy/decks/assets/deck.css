@@ -654,12 +654,13 @@ h2:has(+ .terms) { margin-bottom: 24px; }
   /* Collisions (A.2): each body waits at its starting place. When step k2 is shown it slides
      to the point of contact and straight on to where it is drawn, without a pause (--t1 and
      --t2 are the times of the two parts). What is written above a body before the collision
-     (.pre) goes at the moment of contact; what is written after it (.post) appears on arrival. */
+     (.pre) changes to what is written after it (.post) at the moment of contact, so a body
+     is never without its label. */
   #deck .cbody { transform: translate(var(--x0), var(--y0, 0px)); }
   #deck .fig:has(.k2.shown) .cbody { transform: none; animation: body-approach var(--t1, 1.3s) linear, body-depart var(--t2, 1.3s) linear var(--t1, 1.3s); }
   #deck .fig:has(.k2.shown) .mover .pre { opacity: 0; transition: opacity .2s ease var(--t1, 1.3s); }
   #deck .fig:not(:has(.k2.shown)) .mover .post { opacity: 0; }
-  #deck .fig:has(.k2.shown) .mover .post { transition: opacity .3s ease calc(var(--t1, 1.3s) + var(--t2, 1.3s) - .1s); }
+  #deck .fig:has(.k2.shown) .mover .post { transition: opacity .2s ease var(--t1, 1.3s); }
   /* Radiation and graph readings sweep in from the left. */
   #deck svg .wipe { clip-path: inset(-40px -40px -40px -40px); transition: opacity .4s ease, clip-path 1.1s ease-in-out; }
   #deck svg .wipe.late { transition-delay: .6s; }
