@@ -389,6 +389,10 @@ mjx-container .res { fill: var(--brand-primary); stroke: var(--brand-primary); }
 .split { flex: 1; min-height: 0; display: grid; grid-template-columns: .86fr 1.26fr; gap: 48px; align-items: center; }
 .split.wide-fig { grid-template-columns: .76fr 1.38fr; }
 .split.even { grid-template-columns: 1fr 1fr; }
+/* A figure that is played before the text beside it is revealed comes first in the page
+   but still sits on the right. */
+.split.fig-first > :first-child { grid-column: 2; grid-row: 1; }
+.split.fig-first > :last-child { grid-column: 1; grid-row: 1; }
 /* An .idea that sums up the figure comes after the panel in the page, so it is revealed
    after the figure's steps, but still sits under the points on the left. */
 .split.idea-last { grid-template-rows: 1fr auto auto 1fr; row-gap: 26px; }
@@ -645,6 +649,16 @@ h2:has(+ .terms) { margin-bottom: 24px; }
   /* A particle travels from its source to where it is drawn. */
   #deck .fly { transition: transform 1.1s cubic-bezier(.2, .7, .3, 1) .25s; }
   #deck .step:not(.shown) .fly { transform: translate(var(--fx), var(--fy)); transition-delay: 0s; }
+  /* Collisions (A.2): each body waits at its starting place, slides to the point of contact
+     when step k1 is shown and on to where it is drawn when k2 is. What is written above a body
+     before the collision (.pre) gives way to what is written after it (.post). */
+  #deck .cbody { transform: translate(var(--x0), var(--y0, 0px)); transition: transform 1.3s linear; }
+  #deck .fig:has(.k1.shown) .cbody { transform: translate(var(--x1), var(--y1, 0px)); }
+  #deck .fig:has(.k2.shown) .cbody { transform: none; transition-duration: var(--t2, 1.3s); }
+  #deck .mover .pre, #deck .mover .post { transition: opacity .3s ease; }
+  /* The velocities after the collision appear once the bodies have arrived. */
+  #deck .fig:has(.k2.shown) .mover .post { transition-delay: calc(var(--t2, 1.3s) - .1s); }
+  #deck .fig:has(.k1.shown) .mover .pre, #deck .fig:has(.k2.shown) .mover .pre, #deck .fig:not(:has(.k2.shown)) .mover .post { opacity: 0; }
   /* Radiation and graph readings sweep in from the left. */
   #deck svg .wipe { clip-path: inset(-40px -40px -40px -40px); transition: opacity .4s ease, clip-path 1.1s ease-in-out; }
   #deck svg .wipe.late { transition-delay: .6s; }
@@ -683,6 +697,7 @@ h2:has(+ .terms) { margin-bottom: 24px; }
   .slide.active .draw { animation: none; stroke-dasharray: none; stroke-dashoffset: 0; }
   .slide.active .pulse { animation: none; }
   #deck svg .step, #deck .fly, #deck svg .wipe, #deck .hop, #deck .pop, #deck .with-row, #deck .on-arrival { transition: none; }
+  .panel-head .reveal-hint { display: none; }
 }
 
 @media (max-width: 640px) {
