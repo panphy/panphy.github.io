@@ -110,8 +110,8 @@ window.DeckFigures.add(P => {
     },
 
     // A pair of long parallel wires: data-kind="opposite" for currents in opposite directions,
-    // otherwise the same direction. The first pair waits for a press of → and then moves; the
-    // opposite pair is drawn inside its PLAY step, so the same press shows it and sets it moving.
+    // otherwise the same direction. Each pair waits for a press of → and then moves. On the slide
+    // the second figure is itself a step, so one press shows its wires and the next sets them moving.
     'd3-parallel': el => {
       const same = el.dataset.kind !== 'opposite', k = same ? 1 : -1, a = 300, b = 480;
       const one = (wx, up, dir, side) => wire(wx, 410, wx, 100) + (up ? arrow(wx + side * 30, 200, wx + side * 30, 120, 'brand-accent', 5) : arrow(wx + side * 30, 120, wx + side * 30, 200, 'brand-accent', 5)) + text(wx + side * 30, 238, 'I', 'lbl display') + arrow(wx + dir * 8, 320, wx + dir * 54, 320, 'brand-primary', 5);
@@ -119,7 +119,7 @@ window.DeckFigures.add(P => {
       const note = text(390, 474, same ? 'same direction: attract' : 'opposite directions: repel', 'lbl strong');
       const still = one(a, true, k, -1) + one(b, same, -k, 1), mover = shift(one(a, true, k, -1), k * 20) + shift(one(b, same, -k, 1), -k * 20);
       const label = same ? 'Two long parallel wires carrying currents in the same direction: they attract each other' : 'Two long parallel wires carrying currents in opposite directions: they repel each other';
-      return svg('190 80 400 420', same ? note + twoState(still, mover + PLAY) : `<g class="still">${note}${still}</g><g class="mover"><g class="step play">${note}${mover}</g></g>`, label);
+      return svg('190 80 400 420', note + twoState(still, mover + PLAY), label);
     },
 
     // Why parallel currents attract: wire 2 sits in the field of wire 1.
