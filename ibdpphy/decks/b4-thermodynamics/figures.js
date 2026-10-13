@@ -52,8 +52,8 @@ window.DeckFigures.add(P => {
       let s = wall(700);
       if (on) s += text(300, 130, 'gas at pressure P', 'lbl') + `<line x1="473" y1="380" x2="473" y2="440" class="guide"/><line x1="613" y1="380" x2="613" y2="440" class="guide"/>` + arrow(479, 426, 607, 426, 'brand-accent', 4) + text(543, 462, 'Δx', 'lbl display') + text(300, 462, 'piston of area A', 'lbl');
       const box = gas(134, 154, w, 212, 26, 11, { grow: (w + dx) / w, mode, dur });
-      const still = box.still + `<g transform="translate(${dx} 0)">${piston}${force}</g>`;
-      const mover = box.mover + carried(piston + force, dx, mode, dur) + (on ? PLAY : '');
+      const still = box.still + `<g transform="translate(${dx} 0)">${piston}${on ? force : ''}</g>`;
+      const mover = box.mover + carried(piston + (on ? force : ''), dx, mode, dur) + (on ? PLAY : '');
       return svg(on ? '100 100 720 380' : '100 120 740 280', s + twoState(still, mover), 'A gas at pressure P in a cylinder pushes a piston of area A outwards through a distance delta x. The force on the piston is P times A, so the work done by the gas is P times the change in volume');
     },
 

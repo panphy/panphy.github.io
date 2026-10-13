@@ -196,7 +196,7 @@ window.DeckFigures.add(P => {
     // The same field seen along the wire: current out of the page and into the page.
     'd2-wire-end': () => {
       const view = (cx, out) => {
-        const radii = [40, 68, 112, 180], heads = radii.map((r, i) => [0, 180].map(a => { const [x, y] = polar(cx, 250, r, a + i * 40); return `<path d="M-10,-8 L8,0 L-10,8 Z" transform="translate(${f(x)} ${f(y)}) rotate(${a + i * 40 + (out ? -90 : 90)})" style="fill:var(--brand-accent-strong)"/>`; }).join('')).join('');
+        const radii = [40, 68, 112, 180], heads = radii.map((r, i) => [0, 180].map(a => { const [x, y] = polar(cx, 250, r, a + i * 40); return `<path d="M-9,-8 L9,0 L-9,8 Z" transform="translate(${f(x)} ${f(y)}) rotate(${a + i * 40 + (out ? -90 : 90)})" style="fill:var(--brand-accent-strong)"/>`; }).join('')).join('');
         return radii.map(r => `<circle cx="${cx}" cy="250" r="${r}" style="fill:none;stroke:var(--brand-accent-strong);stroke-width:3"/>`).join('') + heads + wireEnd(cx, 250, out, 17);
       };
       return svg('0 40 880 480', view(215, true) + view(665, false) + text(215, 478, 'out of the page: anticlockwise', 'lbl') + text(665, 478, 'into the page: clockwise', 'lbl'), 'A wire seen end on. With the current coming out of the page, shown by a dot, the field lines are circles pointing anticlockwise. With the current going into the page, shown by a cross, they point clockwise. The circles are further apart further from the wire');
