@@ -20,7 +20,7 @@ Two hubs hold the author's course resources: teaching decks, workbooks, revision
 
 ## Theme
 
-Pages with a light/dark switch share one preference in the same browser and site origin, including open tabs. The first visit follows the device setting unless an existing page preference can be migrated. Fixed-design apps retain their appearance.
+The landing page and the apps it lists share one light/dark preference in the same browser and site origin, including open tabs. `gcsephy/` and `ibdpphy/` each keep a preference of their own, independent of the main site and of each other: their pages add `data-theme-scope` to the script tag. The first visit follows the device setting unless an existing page preference can be migrated. Fixed-design apps retain their appearance.
 
 Load `assets/theme.js` synchronously in the head before styles; use `PanPhyTheme.toggle()` or `PanPhyThemeToggle.mount(button)` for controls. Listen for `panphy:theme-change` to refresh charts, scenes or syntax highlighting.
 

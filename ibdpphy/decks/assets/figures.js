@@ -898,19 +898,23 @@
     },
 
     // Still picture and played picture, as for collide. The arrows stay where they are; the pucks move.
+    // The collision is off-centre: at contact the line joining the centres lies along the heavier
+    // puck's final velocity, 21.8° below x, because the force on it acts along that line. So the
+    // lighter puck comes in along a line 23 above the other's centre (62 sin 21.8°, radii 28 + 34).
     'collide-2d': () => {
       const [a, b] = BODY_COLOURS;
       const puck = (x, y, r, colour) => ball(x, y, r, colour, '');
-      let s = `<line x1="60" y1="250" x2="770" y2="250" class="guide"/>` + arrow(142, 250, 366, 250, a, 5) + text(236, 284, '5.0 m s⁻¹', 'lbl mono strong');
+      let s = `<path d="M60,227 H342.4 M400,250 H770" class="guide"/>` + arrow(144, 227, 304, 227, a, 5) + text(236, 264, '5.0 m s⁻¹', 'lbl mono strong');
       s += arrow(70, 430, 140, 430, 'text-secondary', 2.5) + arrow(70, 430, 70, 360, 'text-secondary', 2.5) + text(154, 438, 'x', 'lbl mono', 'start') + text(70, 344, 'y', 'lbl mono');
-      const after = `<path d="M510,250 A110,110 0 0 1 502.1,290.9" class="guide accent"/>` + arrow(400, 222, 400, 104, a, 5) + arrow(424, 259.6, 656, 352.4, b, 5) + text(418, 170, '2.0 m s⁻¹', 'lbl mono strong', 'start') + text(530, 356, 'v = ?', 'lbl mono strong', 'end') + text(556, 284, 'θ', 'lbl greek');
-      let still = after + puck(110, 250, 22, a) + `<circle cx="400" cy="250" r="26" style="fill:none;stroke:var(--${b});stroke-width:2.5;stroke-dasharray:5 6"/>` + puck(400, 74, 22, a) + puck(688, 365, 26, b);
-      still += text(110, 306, '2.0 kg', 'lbl mono') + text(366, 308, '3.0 kg', 'lbl mono', 'end') + text(366, 336, 'at rest', 'lbl small', 'end') + text(432, 82, '2.0 kg', 'lbl mono', 'start') + text(688, 424, '3.0 kg', 'lbl mono');
+      const after = `<path d="M510,250 A110,110 0 0 1 502.1,290.9" class="guide accent"/>` + arrow(342.4, 193, 342.4, 105, a, 5) + arrow(435.3, 264.1, 648, 349, b, 5) + text(362, 156, '2.0 m s⁻¹', 'lbl mono strong', 'start') + text(530, 356, 'v = ?', 'lbl mono strong', 'end') + text(556, 284, 'θ', 'lbl greek');
+      const ghost = (x, y, r, colour) => `<circle cx="${x}" cy="${y}" r="${r}" style="fill:none;stroke:var(--${colour});stroke-width:2.5;stroke-dasharray:5 6"/>`;
+      let still = after + puck(110, 227, 28, a) + ghost(342.4, 227, 28, a) + ghost(400, 250, 34, b) + puck(342.4, 67, 28, a) + puck(688, 365, 34, b);
+      still += text(110, 290, '2.0 kg', 'lbl mono') + text(400, 318, '3.0 kg', 'lbl mono') + text(400, 346, 'at rest', 'lbl small') + text(382, 76, '2.0 kg', 'lbl mono', 'start') + text(688, 428, '3.0 kg', 'lbl mono');
       let play = `<g class="post">${after}</g>`;
-      play += `<g class="cbody" style="--x0:-290px;--y0:176px;--x1:-50px;--y1:176px">${puck(400, 74, 22, a)}${text(400, 38, '2.0 kg', 'lbl mono')}</g>`;
-      play += `<g class="cbody" style="--x0:-288px;--y0:-115px;--x1:-288px;--y1:-115px;--t2:2.3s">${puck(688, 365, 26, b)}${text(688, 424, '3.0 kg', 'lbl mono')}<g class="pre">${text(688, 452, 'at rest', 'lbl small')}</g></g>`;
-      play = `<g style="--t2:2.5s">${play}</g><g class="step k2"></g>`;
-      return svg('0 0 800 460', `${s}<g class="still">${still}</g><g class="mover">${play}</g>`, 'A 2.0 kilogram puck moving at 5.0 metres per second along x strikes a 3.0 kilogram puck at rest. Afterwards the 2.0 kilogram puck moves at 2.0 metres per second along y, at right angles to its first direction, and the 3.0 kilogram puck moves off at an unknown speed v at angle theta below the x direction');
+      play += `<g class="cbody" style="--x0:-232.4px;--y0:160px;--x1:0px;--y1:160px">${puck(342.4, 67, 28, a)}${text(342.4, 28, '2.0 kg', 'lbl mono')}</g>`;
+      play += `<g class="cbody" style="--x0:-288px;--y0:-115px;--x1:-288px;--y1:-115px">${puck(688, 365, 34, b)}${text(688, 428, '3.0 kg', 'lbl mono')}<g class="pre">${text(688, 456, 'at rest', 'lbl small')}</g></g>`;
+      play = `<g style="--t2:2.3s">${play}</g><g class="step k2"></g>`;
+      return svg('0 0 800 460', `${s}<g class="still">${still}</g><g class="mover">${play}</g>`, 'Seen from above, a 2.0 kilogram puck moving at 5.0 metres per second along x strikes a 3.0 kilogram puck at rest off-centre, touching its upper left side. Afterwards the 2.0 kilogram puck moves at 2.0 metres per second along y, at right angles to its first direction, and the 3.0 kilogram puck moves off at an unknown speed v at angle theta below the x direction, along the line that joined the two centres at contact');
     },
 
     'ang-vel': () => {
