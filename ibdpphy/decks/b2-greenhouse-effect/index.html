@@ -1,0 +1,778 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="robots" content="noindex, nofollow">
+  <meta name="description" content="Teaching slides for IB Diploma Programme Physics topic B.2 Greenhouse effect, standard and higher level: emissivity, albedo, the solar constant, the energy balance of a planet, greenhouse gases and the enhanced greenhouse effect.">
+  <meta name="theme-color" content="#F8F6F1">
+  <script src="/assets/theme.js" data-theme-scope="ibdpphy"></script>
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <link rel="stylesheet" href="/assets/standalone-top.css">
+  <title>B.2 Greenhouse effect · IB DP Physics</title>
+  <link rel="icon" type="image/png" href="/assets/favicon.png">
+  <link rel="apple-touch-icon" href="/assets/apple-touch-icon.png">
+  <link rel="stylesheet" href="../assets/deck.css">
+  <link rel="stylesheet" href="../assets/deck-notes.css">
+  <link rel="stylesheet" href="/assets/theme-toggle.css">
+  <link rel="stylesheet" href="/assets/fullscreen-button.css">
+  <script src="/assets/theme-toggle.js"></script>
+  <script src="/ibdpphy/sw-register.js" defer></script>
+</head>
+<body>
+  <header class="banner">
+    <a class="banner-logo" href="/" aria-label="PanPhy Labs home"><img src="/assets/panphy.png" alt="PanPhy Labs" width="38" height="38"></a>
+    <a class="banner-title" href="#1">B.2 Greenhouse effect</a>
+    <div class="banner-actions">
+      <button id="thumbs-toggle" class="icon-button" type="button" aria-controls="thumbs" aria-pressed="true" aria-label="Hide slide thumbnails" title="Show or hide slide thumbnails (T)"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path class="pane" d="M9.5 4.5H6A2.5 2.5 0 0 0 3.5 7v10A2.5 2.5 0 0 0 6 19.5h3.5z"/><rect x="3.5" y="4.5" width="17" height="15" rx="2.5"/><path d="M9.5 4.5v15"/></svg></button>
+      <button id="fullscreen" class="panphy-fullscreen-button" type="button" aria-pressed="false" aria-label="Present fullscreen" title="Present fullscreen (F)"><svg class="panphy-fs-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M4 9V4h5M15 4h5v5M20 15v5h-5M9 20H4v-5"/></svg></button>
+      <button id="theme-button" type="button" data-panphy-theme-toggle aria-label="Toggle light/dark theme" title="Toggle between light and dark themes"></button>
+    </div>
+  </header>
+  <script>window.PanPhyThemeToggle.mount(document.getElementById('theme-button'));</script>
+
+  <nav class="thumbs" id="thumbs" aria-label="Slides"></nav>
+
+  <main class="stage" id="stage">
+    <div class="deck" id="deck">
+
+      <!-- 1 · Title -->
+      <section class="slide title" data-title="B.2 Greenhouse effect">
+        <div class="title-grid">
+          <div>
+            <p class="eyebrow">IB DP Physics · Theme B · The particulate nature of matter</p>
+            <h1>Greenhouse effect<span>.</span></h1>
+            <p class="lead">B.2 · The energy balance of a planet, greenhouse gases and the enhanced greenhouse effect<br>Standard level and higher level</p>
+            <div class="chips">
+              <span class="chip">SL + HL · 6 hours</span>
+              <a class="chip on" href="../b1-thermal-energy-transfers/">B.1 Thermal energy transfers ↗</a>
+            </div>
+          </div>
+          <div class="fig" data-fig="b2-balance" data-plain></div>
+        </div>
+      </section>
+
+      <section class="slide" data-title="Lesson map">
+        <p class="eyebrow">The journey</p>
+        <h2>Three parts<span>.</span></h2>
+        <div class="cards fill" style="grid-template-columns: repeat(3, 1fr);">
+          <div class="card">
+            <div class="fig" data-fig="b2-balance" data-still data-plain style="height: 220px;"></div>
+            <p class="eyebrow">Part 01</p>
+            <h3>Energy in, energy out</h3>
+            <p>Emissivity, albedo, the solar constant and a planet with no atmosphere</p>
+          </div>
+          <div class="card">
+            <div class="fig" data-fig="b2-reemit" data-still data-plain style="height: 220px;"></div>
+            <p class="eyebrow">Part 02</p>
+            <h3>Greenhouse gases</h3>
+            <p>Which gases absorb infrared, and why</p>
+          </div>
+          <div class="card">
+            <div class="fig" data-fig="b2-layer" data-still data-plain style="height: 220px;"></div>
+            <p class="eyebrow">Part 03</p>
+            <h3>The balance with an atmosphere</h3>
+            <p>A model of the greenhouse effect, and how human activity enhances it</p>
+          </div>
+        </div>
+        <div class="idea" style="margin-top: 22px;">B.1 gave the tools: \(\sigma T^{4}\), the inverse square law and Wien’s law. Here they are used on a whole planet.</div>
+        <div class="slide-foot"><span>B.2 GREENHOUSE EFFECT · SL + HL</span><span data-page></span></div>
+      </section>
+
+      <!-- Part 1 -->
+      <section class="slide section" data-title="Part 1: Energy in, energy out">
+        <div class="title-grid">
+          <div>
+            <p class="eyebrow">Part 01</p>
+            <h1>Energy in, energy out<span>.</span></h1>
+            <p class="lead">What sets the temperature of a planet</p>
+          </div>
+          <div class="fig" data-fig="b2-balance" data-plain></div>
+        </div>
+        <div class="slide-foot"><span>B.2 GREENHOUSE EFFECT · SL + HL</span><span data-page></span></div>
+      </section>
+
+      <section class="slide" data-title="The energy balance of a planet">
+        <p class="eyebrow">Conservation of energy</p>
+        <h2>The energy balance of a planet<span>.</span></h2>
+        <div class="split wide-fig">
+          <div class="stack">
+            <ul class="points small">
+              <li>The only way in or out is <b>radiation</b></li>
+              <li class="step">In: sunlight, less what is <b>reflected</b></li>
+              <li class="step">Out: <b>infrared</b> from the planet</li>
+            </ul>
+            <div class="idea step">Steady temperature: power absorbed = power radiated.</div>
+          </div>
+          <div class="panel">
+            <div class="panel-head"><span>A PLANET IN SUNLIGHT</span></div>
+            <div class="fig" data-fig="b2-balance"></div>
+          </div>
+        </div>
+        <div class="slide-foot"><span>B.2 GREENHOUSE EFFECT · SL + HL</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>Why radiation only.</b> A planet is surrounded by empty space. Conduction and convection need matter, so they can move energy around inside the planet and its atmosphere but cannot carry any across the gap to or from the Sun.</p>
+            <p><b>The balance finds itself.</b> Suppose the planet absorbed more than it radiated. Its temperature would rise, and by the Stefan–Boltzmann law a hotter body radiates more, as \(T^{4}\). The temperature would keep rising until the output had caught up with the input, and then stop. If it radiated more than it absorbed it would cool until the two matched. Whatever the starting point, the planet settles at the one temperature where power out equals power in. Change either side of the balance and the planet moves to a new equilibrium temperature.</p>
+          </div>
+          <div class="rn-side">
+            <p class="tip">Almost every calculation in this topic is one line of physics: write power in = power out, then solve for the unknown.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide" data-title="Emissivity">
+        <p class="eyebrow">Real surfaces are not black bodies</p>
+        <h2>Emissivity<span>.</span></h2>
+        <div class="split even">
+          <div class="stack">
+            <div class="equation small"><span>\(\text{emissivity} = \dfrac{\text{power radiated per unit area}}{\sigma T^{4}}\)</span></div>
+            <ul class="points small">
+              <li>Compares a surface with a <b>black body</b> at the same temperature</li>
+              <li class="step">A number from 0 to 1, with no unit</li>
+              <li class="step frac">So the power radiated per unit area is \(e \sigma T^{4}\)</li>
+            </ul>
+          </div>
+          <table class="facts step">
+            <thead><tr><th>Surface (approximate values)</th><th class="nocase">emissivity e</th></tr></thead>
+            <tbody>
+              <tr><td>Black body</td><td class="num">1</td></tr>
+              <tr><td>Ocean</td><td class="num">0.96</td></tr>
+              <tr><td>Soil, vegetation</td><td class="num">0.9 to 0.98</td></tr>
+              <tr><td>The Earth and its atmosphere, seen from space</td><td class="num">0.6</td></tr>
+              <tr><td>Polished aluminium</td><td class="num">0.05</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="slide-foot"><span>B.2 GREENHOUSE EFFECT · SL + HL</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>A worked case.</b> A black body at 288 K radiates \(\sigma T^{4} = 5.67 \times 10^{-8} \times 288^{4} = 390 \,\mathrm{W} \,\mathrm{m}^{-2}\). A field at the same temperature that radiates 370 W m⁻² has an emissivity of \(\frac{370}{390} = 0.95\).</p>
+            <p><b>Why the Earth as a whole is only 0.6.</b> The ground and sea are nearly black in the infrared. But a satellite looking down measures about 240 W m⁻² leaving the planet, not the 390 W m⁻² that the surface emits. The atmosphere has absorbed part of it on the way up. Treating the whole planet as a single surface at 288 K, its emissivity is \(\frac{240}{390} = 0.6\). That low number is the greenhouse effect expressed as an emissivity.</p>
+          </div>
+          <div class="rn-side">
+            <p class="tip">The data booklet gives emissivity only in words. In symbols, with \(e\) for emissivity: \(P = e \sigma A T^{4}\).</p>
+            <p class="more">A good absorber is a good emitter: at each wavelength a surface absorbs the same fraction that it emits, compared with a black body.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide" data-title="Albedo">
+        <p class="eyebrow">How much is reflected</p>
+        <h2>Albedo<span>.</span></h2>
+        <div class="split even">
+          <div class="stack">
+            <div class="equation small"><span>\(\text{albedo} = \dfrac{\text{total scattered power}}{\text{total incident power}}\)</span></div>
+            <ul class="points small">
+              <li>From 0 (absorbs everything) to 1 (reflects everything)</li>
+              <li class="step">The fraction <b>absorbed</b> is \(1 - a\)</li>
+              <li class="step">The Earth’s albedo varies <b>daily</b>, with <b>cloud</b> cover and with <b>latitude</b></li>
+            </ul>
+          </div>
+          <table class="facts step">
+            <thead><tr><th>Surface (approximate values)</th><th class="nocase">albedo a</th></tr></thead>
+            <tbody>
+              <tr><td>Fresh snow</td><td class="num">0.85</td></tr>
+              <tr><td>Thick cloud</td><td class="num">0.7</td></tr>
+              <tr><td>Desert sand</td><td class="num">0.4</td></tr>
+              <tr><td>Forest</td><td class="num">0.15</td></tr>
+              <tr><td>Ocean</td><td class="num">0.06</td></tr>
+              <tr><td><b>The Earth, on average</b></td><td class="num"><b>0.30</b></td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="slide-foot"><span>B.2 GREENHOUSE EFFECT · SL + HL</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>Why it varies.</b> Clouds are bright from above, so a cloudy day reflects more sunlight than a clear one over the same sea. Near the poles there is ice and snow, and the Sun is low, so light strikes the surface at a glancing angle and more is reflected. The seasons change the snow cover and the leaves on the trees. The figure of 0.30 is an average over the whole globe and the whole year.</p>
+            <p><b>Ice and albedo.</b> Ice reflects about 85% of the sunlight that reaches it; the open sea that replaces it when it melts reflects about 6%. So a warmer planet with less ice absorbs more sunlight, which warms it further. A change that feeds itself in this way is called a positive feedback, and it is one reason the Arctic is warming faster than the rest of the planet.</p>
+          </div>
+          <div class="rn-side">
+            <p class="trap">Multiplying by the albedo to find the power absorbed. The albedo is the part sent back. The part absorbed is \(1 - a\): 70% for the Earth.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide" data-title="The solar constant">
+        <p class="eyebrow">What arrives from the Sun</p>
+        <h2>The solar constant<span>.</span></h2>
+        <div class="split even">
+          <div class="stack">
+            <div class="equation small"><span>\(S = 1.36 \times 10^{3} \,\mathrm{W} \,\mathrm{m}^{-2}\)</span></div>
+            <ul class="points small">
+              <li>The intensity of sunlight at the Earth’s distance, <b>above the atmosphere</b></li>
+              <li class="step">On a surface at <b>right angles</b> to the rays</li>
+              <li class="step">It is the Sun’s apparent brightness from B.1</li>
+            </ul>
+          </div>
+          <div class="work step">
+            <span class="say">For another planet: the inverse square law</span>
+            <span>\(S = \dfrac{L}{4 \pi d^{2}}\) &nbsp;so&nbsp; \(S \propto \dfrac{1}{d^{2}}\)</span>
+            <span class="say step">Venus is at 0.72 of the Earth’s distance</span>
+            <span class="step">\(S_\mathrm{V} = \dfrac{S}{0.72^{2}} = \dfrac{1.36 \times 10^{3}}{0.72^{2}}\)</span>
+            <span class="step">\(S_\mathrm{V} = \class{res}{2.6 \times 10^{3} \,\mathrm{W} \,\mathrm{m}^{-2}}\)</span>
+          </div>
+        </div>
+        <div class="slide-foot"><span>B.2 GREENHOUSE EFFECT · SL + HL</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>“Constant” is generous.</b> The Earth’s orbit is slightly elliptical, so the intensity is about 7% higher in early January, when the Earth is closest to the Sun, than in early July. The Sun’s own output also rises and falls by about 0.1% over its eleven-year cycle. 1.36 × 10³ W m⁻² is the average.</p>
+            <p><b>Why the ground gets less.</b> About 1000 W m⁻² reaches the ground at noon on a clear day with the Sun overhead, because the atmosphere reflects and absorbs the rest. When the Sun is lower, the same beam is spread over a larger area of ground, so each square metre receives less. That, far more than distance, is why the poles are cold and why winter is cold.</p>
+          </div>
+          <div class="rn-side">
+            <p class="tip">The solar constant is in the data booklet. A question may give a different “constant” for another star or planet: use it in exactly the same way.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide" data-title="A quarter of the solar constant">
+        <p class="eyebrow">Averaging over the whole planet</p>
+        <h2>A quarter of the solar constant<span>.</span></h2>
+        <div class="split">
+          <div class="stack">
+            <div class="work">
+              <span class="say">Power intercepted: a disc of radius \(R\)</span>
+              <span>\(P = S \pi R^{2}\)</span>
+              <span class="say step">Shared over the whole sphere</span>
+              <span class="step">\(\text{mean intensity} = \dfrac{S \pi R^{2}}{4 \pi R^{2}} = \dfrac{S}{4}\)</span>
+            </div>
+            <div class="idea step">For the Earth: \(\dfrac{1360}{4} = 340 \,\mathrm{W} \,\mathrm{m}^{-2}\).</div>
+          </div>
+          <div class="panel">
+            <div class="panel-head"><span>A DISC AND A SPHERE</span></div>
+            <div class="fig" data-fig="b2-quarter"></div>
+          </div>
+        </div>
+        <div class="slide-foot"><span>B.2 GREENHOUSE EFFECT · SL + HL</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>Where the disc comes from.</b> Stand far behind the planet and look towards the Sun. The planet blocks a circular patch of sunlight: its shadow. Every ray that would have passed through that circle has landed on the planet instead, so the power intercepted is the intensity times the area of the circle, \(\pi R^{2}\). The guide calls this the projected surface along the direction of the rays.</p>
+            <p><b>Two halvings.</b> You can also see the quarter as two factors of a half. Half the planet is in darkness at any moment. And on the sunlit half most of the surface is tilted to the rays, so the beam is spread out: averaged over a hemisphere, the tilt halves the intensity again.</p>
+            <p><b>Why an average is fair.</b> The planet spins, and its winds and oceans move energy around, so the temperature differences between day and night and between the equator and the poles are small compared with 288 K. The model treats the whole surface as being at one temperature.</p>
+          </div>
+          <div class="rn-side">
+            <p class="trap">Using \(S\) itself for the mean intensity, or halving it for “day and night”. Over the whole surface it is \(\frac{S}{4}\).</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide" data-title="The Earth with no greenhouse effect">
+        <p class="eyebrow">Worked example</p>
+        <h2>The Earth with no greenhouse effect<span>.</span></h2>
+        <div class="split even">
+          <div class="work">
+            <span class="say">Albedo 0.30 · the planet radiates as a black body</span>
+            <span>Power absorbed = power radiated, per square metre</span>
+            <span class="step">\((1 - a) \dfrac{S}{4} = \sigma T^{4}\)</span>
+            <span class="step">\(T^{4} = \dfrac{(1 - a) S}{4 \sigma} = \dfrac{0.70 \times 1.36 \times 10^{3}}{4 \times 5.67 \times 10^{-8}}\)</span>
+            <span class="step">\(T^{4} = 4.20 \times 10^{9} \,\mathrm{K}^{4}\)</span>
+            <span class="step">\(T = \class{res}{255 \,\mathrm{K}}\)</span>
+          </div>
+          <div class="stack">
+            <ul class="points small">
+              <li class="step">That is <b>−18 °C</b></li>
+              <li class="step">The measured mean surface temperature is <b>288 K</b>, +15 °C</li>
+            </ul>
+            <div class="idea step">The 33 K difference is the <b>greenhouse effect</b>.</div>
+          </div>
+        </div>
+        <div class="slide-foot"><span>B.2 GREENHOUSE EFFECT · SL + HL</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>The numbers on the way.</b> Of the 340 W m⁻² arriving on average, 30% is reflected and 70% is absorbed: \(0.70 \times 340 = 238 \,\mathrm{W} \,\mathrm{m}^{-2}\). At equilibrium the planet must radiate 238 W m⁻² to space. A black body does that at 255 K.</p>
+            <p><b>255 K is a real temperature.</b> Seen from space, the Earth does radiate like a body at 255 K: satellites measure about 240 W m⁻² of infrared leaving it. The balance at the top of the atmosphere is correct. What the calculation gets wrong is where that radiation comes from. Most of it is emitted by the cold upper atmosphere, not by the ground. The ground, underneath the absorbing gases, is 33 K warmer.</p>
+            <p><b>A fourth root is forgiving.</b> Because \(T \propto (\text{intensity})^{\frac{1}{4}}\), a 1% change in the absorbed intensity changes \(T\) by only about 0.25%. On 255 K that is 0.6 K, which is still a large change for a climate.</p>
+          </div>
+          <div class="rn-side">
+            <p class="tip">To take a fourth root, press the square-root key twice, or raise to the power 0.25.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide" data-title="Quick check: energy in, energy out">
+        <p class="eyebrow">Quick check</p>
+        <h2>Energy in, energy out<span>.</span></h2>
+        <div class="quiz fill">
+          <div class="q"><p><span class="n">01</span>A surface has albedo 0.25. What fraction does it absorb?</p><div class="ans step">0.75</div></div>
+          <div class="q"><p><span class="n">02</span>What is the emissivity of a black body?</p><div class="ans step">1</div></div>
+          <div class="q"><p><span class="n">03</span>Why is the mean intensity \(\frac{S}{4}\), not \(S\)?</p><div class="ans step">A disc \(\pi R^{2}\) intercepts; a sphere \(4 \pi R^{2}\) shares it</div></div>
+          <div class="q"><p><span class="n">04</span>A planet is twice as far from its star as the Earth. Its solar constant?</p><div class="ans step">A quarter of \(S\)</div></div>
+          <div class="q"><p><span class="n">05</span>Ice melts to open sea. What happens to the albedo there?</p><div class="ans step">It falls, so more is absorbed</div></div>
+          <div class="q"><p><span class="n">06</span>A surface at 300 K radiates 413 W m⁻²; a black body would radiate 459. Emissivity?</p><div class="ans step">\(\frac{413}{459} = 0.90\)</div></div>
+        </div>
+        <div class="slide-foot"><span class="reveal-hint">PRESS → TO REVEAL EACH ANSWER</span><span data-page></span></div>
+      </section>
+
+      <!-- Part 2 -->
+      <section class="slide section" data-title="Part 2: Greenhouse gases">
+        <div class="title-grid">
+          <div>
+            <p class="eyebrow">Part 02</p>
+            <h1>Greenhouse gases<span>.</span></h1>
+            <p class="lead">Why a few trace gases matter so much more than nitrogen and oxygen</p>
+          </div>
+          <div class="fig" data-fig="b2-reemit" data-plain></div>
+        </div>
+        <div class="slide-foot"><span>B.2 GREENHOUSE EFFECT · SL + HL</span><span data-page></span></div>
+      </section>
+
+      <section class="slide history" data-title="Story: Tyndall’s tube">
+        <p class="eyebrow">The story · London, 1859</p>
+        <p class="not-examined">Background story · not assessed</p>
+        <h2>John Tyndall tests the air<span>.</span></h2>
+        <div class="story" style="--photo-h: 400px;">
+          <div class="story-photos">
+            <figure><img src="images/tyndall.jpg" width="960" height="1313" alt="Photograph of John Tyndall, an elderly man with a long white beard, seated in a dark coat"><figcaption><b>John Tyndall</b>, about 1885</figcaption></figure>
+            <figure><img src="images/tyndall-apparatus.jpg" width="1280" height="1191" alt="Engraving of Tyndall’s apparatus with modern labels: a long tube holding the gas to be tested, a source of heat at each end, a thermopile to compare them, a vacuum pump and a gas supply"><figcaption>His apparatus, drawn in 1861 (labels added later)</figcaption></figure>
+          </div>
+          <div class="stack">
+            <ul class="points">
+              <li>Professor at the Royal Institution, he began on <b>9 May 1859</b></li>
+              <li>Radiant heat passed down a tube of gas to a <b>thermopile</b>, which compared it with a second source</li>
+              <li>He measured nitrogen, oxygen, water vapour, carbon dioxide, methane and more</li>
+              <li><b>Water vapour</b> was the strongest absorber in the atmosphere</li>
+            </ul>
+            <div class="idea">The gases that make up 99% of the air let the heat through. The trace gases did not.</div>
+          </div>
+        </div>
+        <p class="credits">Portrait: <a href="https://commons.wikimedia.org/wiki/File:John_Tyndall_(ca._1885).jpg" target="_blank" rel="noopener">Herbert Rose Barraud, 1880s</a>, public domain. Apparatus: <a href="https://commons.wikimedia.org/wiki/File:Tyndalls_setup_for_measuring_radiant_heat_absorption_by_gases_annotated.svg" target="_blank" rel="noopener">John Tyndall, 1861, annotated</a>, public domain.</p>
+        <div class="slide-foot"><span>B.2 GREENHOUSE EFFECT · SL + HL</span><span data-page></span></div>
+      </section>
+
+      <section class="slide" data-title="Sunlight in, infrared out">
+        <p class="eyebrow">Two very different spectra</p>
+        <h2>Sunlight in, infrared out<span>.</span></h2>
+        <div class="split wide-fig">
+          <ul class="points small">
+            <li>From the Sun: peak near <b>0.5 μm</b>, visible</li>
+            <li class="step">From the Earth: peak near <b>10 μm</b>, infrared</li>
+            <li class="step">The atmosphere is mostly <b>transparent</b> to the first</li>
+            <li class="step">Greenhouse gases <b>absorb</b> much of the second</li>
+          </ul>
+          <div class="panel">
+            <div class="panel-head"><span>TWO BLACK BODIES</span><span class="pill">EACH SCALED TO THE SAME HEIGHT</span></div>
+            <div class="fig" data-fig="b2-two-spectra"></div>
+          </div>
+        </div>
+        <div class="slide-foot"><span>B.2 GREENHOUSE EFFECT · SL + HL</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>The two peaks from Wien’s law.</b> For the Sun, \(\lambda_\mathrm{max} = \frac{2.9 \times 10^{-3}}{5800} = 5.0 \times 10^{-7}\) m. For the Earth’s surface, \(\lambda_\mathrm{max} = \frac{2.9 \times 10^{-3}}{288} = 1.0 \times 10^{-5}\) m, twenty times longer. The two curves barely overlap, which is why the incoming and outgoing radiation can be treated so differently.</p>
+            <p><b>A one-way valve.</b> The whole greenhouse effect rests on this difference. The atmosphere lets most of the short-wavelength sunlight straight through to warm the ground. The ground sends the energy back as long-wavelength infrared, and for that the same atmosphere is partly opaque. Energy gets in more easily than it gets out.</p>
+          </div>
+          <div class="rn-side">
+            <p class="more">The name is a poor one. A garden greenhouse stays warm mainly because its glass stops warm air from rising away, not because of what the glass does to infrared.</p>
+            <p class="tip">The curves are drawn to the same height so that both can be seen. Sunlight is far more intense at its source.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide" data-title="The main greenhouse gases">
+        <p class="eyebrow">Four to know</p>
+        <h2>The main greenhouse gases<span>.</span></h2>
+        <table class="facts compare">
+          <thead><tr><th>Gas</th><th>Natural sources</th><th>Sources from human activity</th></tr></thead>
+          <tbody>
+            <tr><td><b>Water vapour</b>, H₂O</td><td>Evaporation from oceans, lakes and plants</td><td>Irrigation; burning fuels; more evaporation as the planet warms</td></tr>
+            <tr class="step"><td><b>Carbon dioxide</b>, CO₂</td><td>Respiration, decay, volcanoes, wildfires</td><td><b>Burning fossil fuels</b>; clearing forests; making cement</td></tr>
+            <tr class="step"><td><b>Methane</b>, CH₄</td><td>Wetlands; termites</td><td>Cattle and rice fields; landfill; leaks of natural gas</td></tr>
+            <tr class="step"><td><b>Nitrous oxide</b>, N₂O</td><td>Bacteria in soils and oceans</td><td>Nitrogen fertilisers; burning fuels</td></tr>
+          </tbody>
+        </table>
+        <div class="slide-foot"><span>B.2 GREENHOUSE EFFECT · SL + HL</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>How little there is.</b> Dry air is 78% nitrogen, 21% oxygen and 0.9% argon. Carbon dioxide is 0.04%, methane 0.0002% and nitrous oxide 0.00003%. Water vapour varies from almost nothing over a cold desert to about 4% in the humid tropics. The gases that control the planet’s loss of infrared add up to well under 1% of the air.</p>
+            <p><b>Why water vapour is treated differently.</b> It causes more of the natural greenhouse effect than any other gas. But the amount in the air is set by the temperature: add extra and it rains out within days. Carbon dioxide stays for centuries. So carbon dioxide sets the temperature, and water vapour follows and strengthens the change: warmer air holds more water vapour, which absorbs more infrared.</p>
+            <p><b>Molecule for molecule.</b> Methane and nitrous oxide absorb far more strongly than carbon dioxide, but there is much less of them, and methane breaks down in about twelve years. Carbon dioxide dominates the human contribution because so much of it is emitted and it lasts so long.</p>
+          </div>
+          <div class="rn-side">
+            <p class="tip">Be ready to name all four with their formulae, and to give one natural and one human source for each.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide" data-title="Absorption: molecular energy levels">
+        <p class="eyebrow">First explanation</p>
+        <h2>Molecular energy levels<span>.</span></h2>
+        <div class="split wide-fig">
+          <ul class="points small">
+            <li>A molecule can vibrate only with certain <b>discrete</b> energies</li>
+            <li class="step">It absorbs a photon whose energy \(hf\) <b>matches a gap</b></li>
+            <li class="step">For these gases the gaps match <b>infrared</b> photons</li>
+            <li class="step">It then emits a photon in a <b>random direction</b></li>
+          </ul>
+          <div class="panel">
+            <div class="panel-head"><span>VIBRATIONAL ENERGY LEVELS</span></div>
+            <div class="fig" data-fig="b2-levels"></div>
+          </div>
+        </div>
+        <div class="slide-foot"><span>B.2 GREENHOUSE EFFECT · SL + HL</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>The same idea as atomic spectra.</b> In E.1 an atom absorbs a photon only if its energy equals the difference between two electron energy levels. A molecule has an extra set of levels, for the energy of its vibration. The steps between them are much smaller than the steps between electron levels: about 0.1 eV, against a few eV. A photon of 0.1 eV has a wavelength of about 12 μm, in the middle of the Earth’s infrared emission.</p>
+            <p><b>Why sunlight passes.</b> A visible photon carries 2 to 3 eV. That matches none of the vibrational gaps, and it is too little for most of the electron transitions in these molecules. With no gap to fit, it is not absorbed.</p>
+            <p><b>What happens to the absorbed energy.</b> The excited molecule may emit a photon, in any direction. More often, in the lower atmosphere, it collides with a nitrogen or oxygen molecule first and passes the energy on as kinetic energy: the air warms. Either way the energy has been stopped on its way to space.</p>
+          </div>
+          <div class="rn-side">
+            <p class="tip">Use \(hc = 1.24 \times 10^{-6}\) eV m from the data booklet: \(E = \frac{hc}{\lambda}\).</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide" data-title="Absorption: resonance">
+        <p class="eyebrow">Second explanation</p>
+        <h2>Resonance<span>.</span></h2>
+        <div class="split wide-fig">
+          <ul class="points small">
+            <li>The atoms of a molecule vibrate at a <b>natural frequency</b></li>
+            <li class="step">Infrared is an oscillating electric field: it <b>drives</b> the molecule</li>
+            <li class="step">When the two frequencies match, the amplitude grows: <b>resonance</b></li>
+            <li class="step">Energy passes from the radiation to the molecule</li>
+          </ul>
+          <div class="panel">
+            <div class="panel-head"><span>A MOLECULE DRIVEN BY INFRARED</span></div>
+            <div class="fig" data-fig="b2-molecule"></div>
+          </div>
+        </div>
+        <div class="slide-foot"><span>B.2 GREENHOUSE EFFECT · SL + HL</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>A mass on a spring.</b> The bonds in a molecule behave like springs joining the atoms. From C.1, a mass on a spring has one natural frequency, set by the mass and the stiffness. Atoms are very light and bonds are very stiff, so the natural frequencies are enormous: about \(2 \times 10^{13}\) Hz for the bending of carbon dioxide. That is the frequency of infrared of wavelength 15 μm. C.4 treats resonance fully: a system driven at its natural frequency takes in energy most readily.</p>
+            <p><b>Why nitrogen and oxygen do not absorb.</b> The field of the wave can only push on charge. In carbon dioxide the oxygen atoms are slightly negative and the carbon slightly positive, so when the molecule bends, its charge moves and the field can drive it. N₂ and O₂ are two identical atoms. However they vibrate, there is no separation of charge for the field to act on, so infrared passes straight through them.</p>
+            <p><b>Where the model falls short.</b> It does not explain why absorption happens only in definite amounts of energy. For that you need the energy levels of the last slide. The two explanations describe the same thing: the level spacing is \(hf\), where \(f\) is the natural frequency.</p>
+          </div>
+          <div class="rn-side">
+            <p class="tip">The guide expects both models. If asked to “explain how a greenhouse gas absorbs infrared”, either is accepted; name the one you are using.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide" data-title="Re-emission in all directions">
+        <p class="eyebrow">The result</p>
+        <h2>Absorbed, then emitted in all directions<span>.</span></h2>
+        <div class="split wide-fig">
+          <div class="stack">
+            <ul class="points small">
+              <li>The surface radiates infrared <b>upwards</b></li>
+              <li class="step">Greenhouse gases absorb it and emit in <b>all</b> directions</li>
+              <li class="step">Part comes <b>back down</b> and warms the surface</li>
+            </ul>
+            <div class="idea step">The surface receives sunlight <b>and</b> infrared from the atmosphere.</div>
+          </div>
+          <div class="panel">
+            <div class="panel-head"><span>INFRARED IN THE ATMOSPHERE</span><span class="pill">DOTS: GREENHOUSE GAS MOLECULES</span></div>
+            <div class="fig" data-fig="b2-reemit"></div>
+          </div>
+        </div>
+        <div class="slide-foot"><span>B.2 GREENHOUSE EFFECT · SL + HL</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>Why the surface must be warmer.</b> The surface now has two sources of energy: the sunlight it absorbs, and the infrared sent down by the atmosphere. To be in balance it must radiate away the sum of the two, which is more than it would radiate with no atmosphere. By \(\sigma T^{4}\), radiating more means being hotter.</p>
+            <p><b>Nothing is trapped for ever.</b> Words such as “trapped” suggest that energy cannot get out. It always does, and at equilibrium exactly as much leaves the planet as arrives. The greenhouse gases delay it: the energy is absorbed and emitted many times on the way up, and the surface below has to be warmer to push the same power through.</p>
+            <p><b>Not reflection.</b> The gases do not reflect the infrared. Each molecule absorbs a photon and later emits a new one in a direction that has nothing to do with where the first came from.</p>
+          </div>
+          <div class="rn-side">
+            <p class="trap">Saying that greenhouse gases “reflect heat back” or “trap sunlight”. They absorb infrared from the surface and re-radiate it in all directions.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide" data-title="Quick check: greenhouse gases">
+        <p class="eyebrow">Quick check</p>
+        <h2>Greenhouse gases<span>.</span></h2>
+        <div class="quiz fill">
+          <div class="q"><p><span class="n">01</span>Name the four main greenhouse gases.</p><div class="ans step">H₂O, CO₂, CH₄, N₂O</div></div>
+          <div class="q"><p><span class="n">02</span>Which part of the spectrum do they absorb?</p><div class="ans step">Infrared</div></div>
+          <div class="q"><p><span class="n">03</span>Why does sunlight pass through them?</p><div class="ans step">Its photon energies match no gap</div></div>
+          <div class="q"><p><span class="n">04</span>In the resonance model, what must match?</p><div class="ans step">The infrared and natural frequencies</div></div>
+          <div class="q"><p><span class="n">05</span>In which direction is the absorbed energy re-emitted?</p><div class="ans step">All directions</div></div>
+          <div class="q"><p><span class="n">06</span>Give a human source of methane.</p><div class="ans step">Cattle, rice fields, landfill or gas leaks</div></div>
+        </div>
+        <div class="slide-foot"><span class="reveal-hint">PRESS → TO REVEAL EACH ANSWER</span><span data-page></span></div>
+      </section>
+
+      <!-- Part 3 -->
+      <section class="slide section" data-title="Part 3: The balance with an atmosphere">
+        <div class="title-grid">
+          <div>
+            <p class="eyebrow">Part 03</p>
+            <h1>The balance with an atmosphere<span>.</span></h1>
+            <p class="lead">A model of the greenhouse effect, and what happens when the atmosphere changes</p>
+          </div>
+          <div class="fig" data-fig="b2-layer" data-plain></div>
+        </div>
+        <div class="slide-foot"><span>B.2 GREENHOUSE EFFECT · SL + HL</span><span data-page></span></div>
+      </section>
+
+      <section class="slide" data-title="A one-layer model">
+        <p class="eyebrow">Surface and atmosphere</p>
+        <h2>A one-layer model of the atmosphere<span>.</span></h2>
+        <div class="split wide-fig">
+          <div class="stack">
+            <ul class="points small">
+              <li>The layer lets <b>sunlight</b> through</li>
+              <li class="step">It absorbs <b>all</b> the infrared from the surface</li>
+              <li class="step">It radiates <b>equally</b> up and down</li>
+            </ul>
+            <div class="idea step">Each part is in balance: what it absorbs, it radiates.</div>
+          </div>
+          <div class="panel">
+            <div class="panel-head"><span>THREE BALANCES</span><span class="pill">INTENSITIES IN W m⁻²</span></div>
+            <div class="fig" data-fig="b2-layer"></div>
+          </div>
+        </div>
+        <div class="slide-foot"><span>B.2 GREENHOUSE EFFECT · SL + HL</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>Start at the top.</b> The planet as a whole must still send 238 W m⁻² to space, to match the sunlight it absorbs. In this model the only radiation that reaches space comes from the upper face of the layer, so the layer radiates 238 W m⁻² upwards.</p>
+            <p><b>Then the layer.</b> A layer has two faces and radiates the same from both: 238 W m⁻² down as well as up, 476 W m⁻² in all. Its only income is the infrared from the surface. For the layer to be in balance, the surface must be radiating 476 W m⁻².</p>
+            <p><b>Check the surface.</b> It absorbs 238 W m⁻² of sunlight and 238 W m⁻² of infrared from the layer: 476 W m⁻² in, 476 W m⁻² out. All three balances hold together. The surface emits twice what it would with no atmosphere.</p>
+          </div>
+          <div class="rn-side">
+            <p class="tip">Draw the diagram and write a balance for each box: the surface, the atmosphere, and the planet as a whole. Any two of the three are enough to solve the problem.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide" data-title="One-layer model: the surface temperature">
+        <p class="eyebrow">Worked example</p>
+        <h2>The surface under one layer<span>.</span></h2>
+        <div class="split even">
+          <div class="work">
+            <span class="say">Sunlight absorbed: 238 W m⁻²</span>
+            <span class="say">Layer at \(T_\mathrm{a}\) · surface at \(T_\mathrm{s}\)</span>
+            <span class="say">Whole planet</span>
+            <span>\(\sigma T_\mathrm{a}^{4} = 238 \,\mathrm{W} \,\mathrm{m}^{-2}\) &nbsp;so&nbsp; \(T_\mathrm{a} = 255 \,\mathrm{K}\)</span>
+            <span class="say step">Layer: two radiating faces</span>
+            <span class="step">\(\sigma T_\mathrm{s}^{4} = 2 \sigma T_\mathrm{a}^{4} = 476 \,\mathrm{W} \,\mathrm{m}^{-2}\)</span>
+          </div>
+          <div class="stack step">
+            <div class="work">
+              <span>\(T_\mathrm{s}^{4} = \dfrac{476}{\sigma} = \dfrac{476}{5.67 \times 10^{-8}}\)</span>
+              <span class="step">\(T_\mathrm{s}^{4} = 8.40 \times 10^{9} \,\mathrm{K}^{4}\)</span>
+              <span class="step">\(T_\mathrm{s} = \class{res}{303 \,\mathrm{K}}\)</span>
+            </div>
+            <div class="idea step">Too warm: the real atmosphere does not absorb <b>all</b> the infrared.</div>
+          </div>
+        </div>
+        <div class="slide-foot"><span>B.2 GREENHOUSE EFFECT · SL + HL</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>A neat result.</b> \(T_\mathrm{s}^{4} = 2 T_\mathrm{a}^{4}\), so \(T_\mathrm{s} = 2^{\frac{1}{4}} T_\mathrm{a} = 1.19 \times 255 = 303\) K. A perfectly absorbing layer raises the surface temperature by 19%, whatever the planet.</p>
+            <p><b>What the model gets right.</b> No atmosphere gives 255 K. A layer that absorbs everything gives 303 K. The real Earth, at 288 K, lies between the two, as it should for an atmosphere that absorbs most but not all of the infrared. The model also shows the mechanism clearly: the upper atmosphere, at 255 K, is what space “sees”, while the surface underneath is warmer.</p>
+            <p><b>What it leaves out.</b> Convection and evaporation carry a good deal of energy up from the surface without radiation. The real atmosphere also absorbs some sunlight directly, has many layers at different temperatures, and has clouds.</p>
+          </div>
+          <div class="rn-side">
+            <p class="trap">Giving the layer only one radiating face. It emits upwards and downwards, so the factor of 2 is essential.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide" data-title="A partly absorbing atmosphere">
+        <p class="eyebrow">Worked example</p>
+        <h2>An atmosphere that absorbs 78%<span>.</span></h2>
+        <div class="split even">
+          <div class="work">
+            <span class="say">The layer absorbs a fraction \(e = 0.78\) of the infrared</span>
+            <span class="say">so its emissivity is also \(e\)</span>
+            <span class="say">Layer</span>
+            <span>\(e \sigma T_\mathrm{s}^{4} = 2 e \sigma T_\mathrm{a}^{4}\) &nbsp;so&nbsp; \(\sigma T_\mathrm{a}^{4} = \tfrac{1}{2} \sigma T_\mathrm{s}^{4}\)</span>
+            <span class="say step">Surface: sunlight + radiation from the layer</span>
+            <span class="step">\(238 + e \sigma T_\mathrm{a}^{4} = \sigma T_\mathrm{s}^{4}\)</span>
+          </div>
+          <div class="work step">
+            <span>\(238 = \sigma T_\mathrm{s}^{4} \left(1 - \dfrac{e}{2}\right)\)</span>
+            <span class="step">\(\sigma T_\mathrm{s}^{4} = \dfrac{238}{1 - 0.39} = 390 \,\mathrm{W} \,\mathrm{m}^{-2}\)</span>
+            <span class="step">\(T_\mathrm{s}^{4} = \dfrac{390}{5.67 \times 10^{-8}} = 6.88 \times 10^{9} \,\mathrm{K}^{4}\)</span>
+            <span class="step">\(T_\mathrm{s} = \class{res}{288 \,\mathrm{K}}\)</span>
+          </div>
+        </div>
+        <div class="slide-foot"><span>B.2 GREENHOUSE EFFECT · SL + HL</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>Why the same \(e\) twice.</b> A layer that absorbs only 78% of the infrared passing through it is not a black body, and a poor absorber is an equally poor emitter. So it radiates \(e \sigma T_\mathrm{a}^{4}\) from each face, not \(\sigma T_\mathrm{a}^{4}\). The \(e\) cancels in the layer’s own balance but not in the surface’s.</p>
+            <p><b>Checking the top.</b> Space receives the 22% of the surface radiation that gets through, \(0.22 \times 390 = 86\), plus the layer’s upward emission, \(0.78 \times 195 = 152\). Together that is 238 W m⁻², equal to the sunlight absorbed, as it must be.</p>
+            <p><b>The enhanced greenhouse effect in one line.</b> Add greenhouse gases and \(e\) rises. Put \(e = 0.80\) into the same working and the surface comes out at 289 K: about one kelvin warmer, for a change of two parts in a hundred in the absorption.</p>
+          </div>
+          <div class="rn-side">
+            <p class="tip">Exam questions give the fraction absorbed or the emissivity of the atmosphere. The method never changes: one balance per box.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide" data-title="Another planet: Venus">
+        <p class="eyebrow">Worked example</p>
+        <h2>The same physics on Venus<span>.</span></h2>
+        <div class="split even">
+          <div class="work">
+            <span class="say">Venus: solar constant \(2.6 \times 10^{3} \,\mathrm{W} \,\mathrm{m}^{-2}\) · albedo 0.76</span>
+            <span class="say">With no greenhouse effect</span>
+            <span>\((1 - a) \dfrac{S_\mathrm{V}}{4} = \sigma T^{4}\)</span>
+            <span class="step">\(T^{4} = \dfrac{(1 - a) S_\mathrm{V}}{4 \sigma} = \dfrac{0.24 \times 2.6 \times 10^{3}}{4 \times 5.67 \times 10^{-8}}\)</span>
+            <span class="step">\(T^{4} = 2.75 \times 10^{9} \,\mathrm{K}^{4}\)</span>
+            <span class="step">\(T = \class{res}{229 \,\mathrm{K}}\)</span>
+          </div>
+          <div class="stack">
+            <ul class="points small">
+              <li class="step">Colder than the Earth’s 255 K, although Venus is closer to the Sun: its clouds reflect three quarters of the sunlight</li>
+              <li class="step">The measured surface temperature is about <b>735 K</b></li>
+            </ul>
+            <div class="idea step">An atmosphere of 96% carbon dioxide, at ninety times the pressure of ours.</div>
+          </div>
+        </div>
+        <div class="slide-foot"><span>B.2 GREENHOUSE EFFECT · SL + HL</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>Two effects pulling opposite ways.</b> Venus receives almost twice the intensity that the Earth does, but absorbs less of it: \(0.24 \times \frac{2600}{4} = 156\) W m⁻², against the Earth’s 238 W m⁻². On the balance at the top of the atmosphere alone, Venus should be the colder planet. Its surface is instead hot enough to melt lead, about 500 K above that estimate. The whole difference is its greenhouse effect.</p>
+            <p><b>Why one layer is not enough.</b> A single perfectly absorbing layer would give \(1.19 \times 229 = 272\) K. Venus’s atmosphere is so thick that infrared is absorbed and re-emitted again and again on the way up, as if there were many layers stacked on each other, each warming the one below.</p>
+          </div>
+          <div class="rn-side">
+            <p class="more">Mars has an atmosphere of carbon dioxide too, but less than a hundredth as dense as the Earth’s. Its greenhouse effect is only a few kelvin.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide" data-title="The enhanced greenhouse effect">
+        <p class="eyebrow">Human activity</p>
+        <h2>The enhanced greenhouse effect<span>.</span></h2>
+        <div class="split wide-fig">
+          <div class="stack">
+            <ul class="points small">
+              <li>The <b>natural</b> effect keeps the Earth at 288 K, not 255 K</li>
+              <li class="step">Human activity <b>adds</b> greenhouse gases, mainly by <b>burning fossil fuels</b></li>
+              <li class="step">More infrared is absorbed, so the surface warms to restore the balance</li>
+            </ul>
+            <div class="idea step">The extra warming is the <b>enhanced</b> greenhouse effect.</div>
+          </div>
+          <div class="panel">
+            <div class="panel-head"><span>CARBON DIOXIDE AT MAUNA LOA</span><span class="pill">A FIT TO THE RECORD</span></div>
+            <div class="fig" data-fig="b2-keeling"></div>
+          </div>
+        </div>
+        <div class="slide-foot"><span>B.2 GREENHOUSE EFFECT · SL + HL</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>Keep the two effects apart.</b> The greenhouse effect itself is natural and necessary: without it the mean surface temperature would be below freezing. The enhanced greenhouse effect is the additional warming caused by the gases people have added. Exam answers lose marks by describing the natural effect as a problem.</p>
+            <p><b>The chain of reasoning.</b> More greenhouse gas means that more of the surface’s infrared is absorbed and more is radiated back down. For a time the planet radiates less to space than it absorbs from the Sun. The surface warms, and goes on warming until the planet is once more sending out as much as it takes in. The new equilibrium is at a higher surface temperature.</p>
+            <p><b>How we know the extra carbon dioxide is ours.</b> Carbon from coal, oil and gas contains no carbon-14, which has long since decayed, and is poor in carbon-13. The carbon in the air has been shifting towards exactly that signature, and the oxygen in the air has fallen by the amount that burning would use.</p>
+          </div>
+          <div class="rn-side">
+            <p class="tip">“The burning of fossil fuels is a primary cause of the enhanced greenhouse effect” is the sentence in the guide. Be able to say it and to explain the mechanism.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide history" data-title="Story: Keeling’s curve">
+        <p class="eyebrow">The story · Hawaii, 1958</p>
+        <p class="not-examined">Background story · not assessed</p>
+        <h2>A measurement that never stopped<span>.</span></h2>
+        <div class="story band" style="--photo-h: 300px;">
+          <div class="story-photos">
+            <figure><img src="images/mauna-loa.jpg" width="1280" height="716" alt="Aerial photograph of a small group of white buildings and a tall mast on a bare slope of dark lava, under a clear blue sky"><figcaption>The <b>Mauna Loa Observatory</b>, high on a Hawaiian volcano, far from cities and forests</figcaption></figure>
+          </div>
+          <ul class="points">
+            <li><b>Charles David Keeling</b> began measuring the carbon dioxide in the air here in March <b>1958</b>: 313 parts per million</li>
+            <li>The record has run ever since. It passed <b>400</b> on 9 May 2013. Its yearly ripple is the northern forests growing each summer</li>
+            <li>Air trapped in ice shows <b>275 to 285</b> for thousands of years before the nineteenth century</li>
+          </ul>
+        </div>
+        <p class="credits">Photograph: <a href="https://commons.wikimedia.org/wiki/File:Mauna_Loa_Observatory_north_flank_of_Mauna_Loa.jpg" target="_blank" rel="noopener">Brian Vasel, NOAA</a>, public domain.</p>
+        <div class="slide-foot"><span>B.2 GREENHOUSE EFFECT · SL + HL</span><span data-page></span></div>
+      </section>
+
+      <section class="slide" data-title="A change in albedo">
+        <p class="eyebrow">Worked example</p>
+        <h2>What a small change in albedo does<span>.</span></h2>
+        <div class="split even">
+          <div class="work">
+            <span class="say">The Earth’s albedo falls from 0.30 to 0.29 as ice melts</span>
+            <span>\(\sigma T^{4} = (1 - a) \dfrac{S}{4}\) &nbsp;so&nbsp; \(T \propto (1 - a)^{\frac{1}{4}}\)</span>
+            <span class="step">\(\dfrac{T_{2}}{T_{1}} = \left(\dfrac{1 - a_{2}}{1 - a_{1}}\right)^{\frac{1}{4}} = \left(\dfrac{0.71}{0.70}\right)^{\frac{1}{4}}\)</span>
+            <span class="step">\(\dfrac{T_{2}}{T_{1}} = 1.0036\)</span>
+            <span class="step">\(\Delta T = 0.0036 \times 255 = \class{res}{0.9 \,\mathrm{K}}\)</span>
+          </div>
+          <div class="stack">
+            <ul class="points small">
+              <li class="step">An extra \(0.01 \times 340 = 3.4 \,\mathrm{W} \,\mathrm{m}^{-2}\) absorbed</li>
+              <li class="step">Warmer, so <b>more</b> ice melts and the albedo falls again</li>
+            </ul>
+            <div class="idea step">A <b>positive feedback</b>: the change strengthens itself.</div>
+          </div>
+        </div>
+        <div class="slide-foot"><span>B.2 GREENHOUSE EFFECT · SL + HL</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>Using a ratio.</b> When one quantity in a balance changes slightly, there is no need to work out both temperatures in full. Write how \(T\) depends on the quantity, here \(T \propto (1 - a)^{\frac{1}{4}}\), and take the ratio. Everything that has not changed cancels.</p>
+            <p><b>Feedback both ways.</b> The same loop runs in reverse. A cooler planet grows more ice, reflects more sunlight and cools further, which is part of how ice ages deepen. Not all feedbacks are positive: a warmer body radiates more, as \(T^{4}\), and that is the negative feedback that brings any planet to a steady temperature in the end.</p>
+          </div>
+          <div class="rn-side">
+            <p class="tip">0.9 K sounds small. The whole of the warming since the nineteenth century is a little over 1 K.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide" data-title="Quick check: the balance with an atmosphere">
+        <p class="eyebrow">Quick check</p>
+        <h2>The balance with an atmosphere<span>.</span></h2>
+        <div class="quiz fill">
+          <div class="q"><p><span class="n">01</span>The Earth absorbs 238 W m⁻² of sunlight. How much must it radiate to space?</p><div class="ans step">238 W m⁻²</div></div>
+          <div class="q"><p><span class="n">02</span>Why does the layer in the model radiate twice \(\sigma T_\mathrm{a}^{4}\)?</p><div class="ans step">It has two faces: up and down</div></div>
+          <div class="q"><p><span class="n">03</span>Which two inputs warm the surface?</p><div class="ans step">Sunlight, and infrared from the atmosphere</div></div>
+          <div class="q"><p><span class="n">04</span>What is the enhanced greenhouse effect?</p><div class="ans step">Extra warming from gases added by human activity</div></div>
+          <div class="q"><p><span class="n">05</span>Its primary cause?</p><div class="ans step">Burning fossil fuels</div></div>
+          <div class="q"><p><span class="n">06</span>More greenhouse gas is added. What happens to the emissivity of the atmosphere?</p><div class="ans step">It rises</div></div>
+        </div>
+        <div class="slide-foot"><span class="reveal-hint">PRESS → TO REVEAL EACH ANSWER</span><span data-page></span></div>
+      </section>
+
+      <section class="slide" data-title="Summary">
+        <p class="eyebrow">Summary</p>
+        <h2>The greenhouse effect on one slide<span>.</span></h2>
+        <div class="cards fill" style="grid-template-columns: 1fr 1fr 1fr; align-content: center;">
+          <div class="card"><p class="eyebrow">Emissivity</p><h3>\(\frac{\text{power per unit area}}{\sigma T^{4}}\)</h3><p>1 for a black body<br>Power per unit area \(= e \sigma T^{4}\)</p></div>
+          <div class="card step"><p class="eyebrow">Albedo</p><h3>\(\frac{\text{scattered power}}{\text{incident power}}\)</h3><p>0.30 for the Earth<br>Varies with cloud, ice and latitude</p></div>
+          <div class="card step"><p class="eyebrow">Incoming</p><h3>Mean intensity \(\frac{S}{4}\)</h3><p>A disc intercepts, a sphere shares<br>Absorbed: \((1 - a) \frac{S}{4}\)</p></div>
+          <div class="card step"><p class="eyebrow">Balance</p><h3>Power in = power out</h3><p>For the surface, the atmosphere and the whole planet</p></div>
+          <div class="card step"><p class="eyebrow">Greenhouse gases</p><h3>H₂O, CO₂, CH₄, N₂O</h3><p>Absorb infrared: energy levels, or resonance<br>Re-emit in all directions</p></div>
+          <div class="card step"><p class="eyebrow">Enhanced effect</p><h3>More gas, warmer surface</h3><p>Mainly from burning fossil fuels</p></div>
+        </div>
+        <div class="slide-foot"><span>B.2 GREENHOUSE EFFECT · SL + HL</span><span data-page></span></div>
+      </section>
+
+      <section class="slide" data-title="Key words">
+        <p class="eyebrow">Summary</p>
+        <h2>Key words<span>.</span></h2>
+        <div class="terms fill" style="grid-template-columns: repeat(3, 1fr);">
+          <div class="term"><b>Emissivity</b><span>Power radiated compared with a black body at the same temperature</span></div>
+          <div class="term"><b>Albedo</b><span>Fraction of incident power scattered back</span></div>
+          <div class="term"><b>Solar constant</b><span>Intensity of sunlight above the atmosphere: 1.36 × 10³ W m⁻²</span></div>
+          <div class="term"><b>Equilibrium temperature</b><span>Where power absorbed = power radiated</span></div>
+          <div class="term"><b>Greenhouse gas</b><span>Absorbs infrared and re-emits it in all directions</span></div>
+          <div class="term"><b>Resonance</b><span>Large response when the driving and natural frequencies match</span></div>
+          <div class="term"><b>Greenhouse effect</b><span>The natural warming of the surface by the atmosphere</span></div>
+          <div class="term"><b>Enhanced greenhouse effect</b><span>The extra warming from human activity</span></div>
+          <div class="term"><b>Positive feedback</b><span>A change that strengthens itself</span></div>
+        </div>
+        <div class="slide-foot"><span>B.2 GREENHOUSE EFFECT · SL + HL</span><span data-page></span></div>
+      </section>
+
+    </div>
+  </main>
+
+  <nav class="controls" aria-label="Slide controls">
+    <button type="button" id="prev" aria-label="Previous slide"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg></button>
+    <span class="counter" id="counter" aria-live="polite"></span>
+    <button type="button" id="next" aria-label="Next slide"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 5l7 7-7 7"/></svg></button>
+  </nav>
+  <div class="progress" aria-hidden="true"><span id="progress-bar"></span></div>
+
+  <script src="../assets/figures.js"></script>
+  <script src="figures.js"></script>
+  <script src="../assets/deck-math.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
+  <script src="../assets/deck-notes.js"></script>
+  <script src="../assets/deck.js"></script>
+</body>
+</html>
