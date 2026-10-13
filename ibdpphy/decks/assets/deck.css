@@ -378,7 +378,7 @@ mjx-container .res { fill: var(--brand-primary); stroke: var(--brand-primary); }
 .eq-note .idea { align-self: center; }
 .equation.left { justify-content: flex-start; }
 .equation .where { margin-left: 26px; font: 500 24px var(--font-body); color: var(--text-secondary); }
-.work { display: grid; gap: 12px; margin: 0; padding: 22px 26px; border: 1px solid var(--card-border); border-radius: 20px; background: var(--card-bg); box-shadow: var(--card-shadow); font: 500 29px/1.5 var(--font-body); }
+.work { display: grid; gap: 22px; margin: 0; padding: 22px 26px; border: 1px solid var(--card-border); border-radius: 20px; background: var(--card-bg); box-shadow: var(--card-shadow); font: 500 29px/1.5 var(--font-body); }
 .work > span { display: block; white-space: nowrap; }
 .work .say { font: 600 24px var(--font-mono); letter-spacing: .02em; color: var(--text-secondary); }
 .work .say mjx-container { font-size: 109%; }

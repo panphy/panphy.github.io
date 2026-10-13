@@ -138,9 +138,9 @@
           </div>
           <div class="work step">
             <span class="say">One 400 m lap in 50 s</span>
-            <span>Average speed \(= \dfrac{400}{50} = \class{res}{8.0 \,\mathrm{m} \,\mathrm{s}^{-1}}\)</span>
+            <span>Average speed \(= \dfrac{\text{distance}}{\text{time}} = \dfrac{400}{50} = \class{res}{8.0 \,\mathrm{m} \,\mathrm{s}^{-1}}\)</span>
             <span class="step">Displacement \(= 0\)</span>
-            <span class="step">Average velocity \(= \dfrac{0}{50} = \class{res}{0}\)</span>
+            <span class="step">Average velocity \(= \dfrac{\Delta s}{\Delta t} = \dfrac{0}{50} = \class{res}{0}\)</span>
           </div>
         </div>
         <div class="slide-foot"><span>A.1 KINEMATICS · SL + HL</span><span data-page></span></div>
@@ -213,9 +213,9 @@
           </div>
           <div class="work step">
             <span class="say">A car goes from 12 to 30 m s⁻¹ in 6.0 s</span>
-            <span>\(a = \dfrac{30 - 12}{6.0} = \class{res}{3.0 \,\mathrm{m} \,\mathrm{s}^{-2}}\)</span>
+            <span>\(a = \dfrac{v - u}{t} = \dfrac{30 - 12}{6.0} = \class{res}{3.0 \,\mathrm{m} \,\mathrm{s}^{-2}}\)</span>
             <span class="say step">Then brakes from 30 to 10 m s⁻¹ in 4.0 s</span>
-            <span class="step">\(a = \dfrac{10 - 30}{4.0} = \class{res}{-5.0 \,\mathrm{m} \,\mathrm{s}^{-2}}\)</span>
+            <span class="step">\(a = \dfrac{v - u}{t} = \dfrac{10 - 30}{4.0} = \class{res}{-5.0 \,\mathrm{m} \,\mathrm{s}^{-2}}\)</span>
           </div>
         </div>
         <div class="slide-foot"><span>A.1 KINEMATICS · SL + HL</span><span data-page></span></div>
@@ -371,13 +371,13 @@
         <h2>Reading a journey<span>.</span></h2>
         <div class="split">
           <div class="work">
-            <span class="say">First 4 s</span>
-            <span>\(a = \dfrac{12 - 0}{4.0} = \class{res}{3.0 \,\mathrm{m} \,\mathrm{s}^{-2}}\)</span>
-            <span class="say step">Last 3 s</span>
-            <span class="step">\(a = \dfrac{0 - 12}{3.0} = \class{res}{-4.0 \,\mathrm{m} \,\mathrm{s}^{-2}}\)</span>
+            <span class="say">First 4 s: gradient</span>
+            <span>\(a = \dfrac{\Delta v}{\Delta t} = \dfrac{12 - 0}{4.0} = \class{res}{3.0 \,\mathrm{m} \,\mathrm{s}^{-2}}\)</span>
+            <span class="say step">Last 3 s: gradient</span>
+            <span class="step">\(a = \dfrac{\Delta v}{\Delta t} = \dfrac{0 - 12}{3.0} = \class{res}{-4.0 \,\mathrm{m} \,\mathrm{s}^{-2}}\)</span>
             <span class="say step">Whole journey: area</span>
-            <span class="step">\(s = 24 + 72 + 18 = \class{res}{114 \,\mathrm{m}}\)</span>
-            <span class="step">Average speed \(= \dfrac{114}{13} = \class{res}{8.8 \,\mathrm{m} \,\mathrm{s}^{-1}}\)</span>
+            <span class="step">\(s = \text{area} = 24 + 72 + 18 = \class{res}{114 \,\mathrm{m}}\)</span>
+            <span class="step">Average speed \(= \dfrac{s}{t} = \dfrac{114}{13} = \class{res}{8.8 \,\mathrm{m} \,\mathrm{s}^{-1}}\)</span>
           </div>
           <div class="panel">
             <div class="panel-head"><span>A SHORT CAR JOURNEY</span></div>
@@ -528,9 +528,9 @@
           <div class="work">
             <span class="say">\(u = 30 \,\mathrm{m} \,\mathrm{s}^{-1}\) · \(v = 0\) · \(a = -5.0 \,\mathrm{m} \,\mathrm{s}^{-2}\)</span>
             <span>Distance: no \(t\), so \(v^{2} = u^{2} + 2as\)</span>
-            <span class="step">\(0 = 30^{2} + 2(-5.0)s\)</span>
-            <span class="step">\(s = \dfrac{900}{10} = \class{res}{90 \,\mathrm{m}}\)</span>
-            <span class="step">Time: \(v = u + at\) &nbsp;so&nbsp; \(t = \dfrac{30}{5.0} = \class{res}{6.0 \,\mathrm{s}}\)</span>
+            <span class="step">\(s = \dfrac{v^{2} - u^{2}}{2a} = \dfrac{0 - 30^{2}}{2(-5.0)} = \class{res}{90 \,\mathrm{m}}\)</span>
+            <span class="step">Time: \(v = u + at\)</span>
+            <span class="step">\(t = \dfrac{v - u}{a} = \dfrac{0 - 30}{-5.0} = \class{res}{6.0 \,\mathrm{s}}\)</span>
           </div>
           <div class="stack center">
             <ul class="points">
@@ -609,9 +609,10 @@
           <div class="work">
             <span class="say">Up is positive</span>
             <span class="say">\(u = +14.7 \,\mathrm{m} \,\mathrm{s}^{-1}\) · \(a = -9.8 \,\mathrm{m} \,\mathrm{s}^{-2}\)</span>
-            <span>Top: \(v = 0\) &nbsp;so&nbsp; \(t = \dfrac{14.7}{9.8} = \class{res}{1.5 \,\mathrm{s}}\)</span>
-            <span class="step">Height: \(0 = 14.7^{2} + 2(-9.8)s\)</span>
-            <span class="step">&nbsp; \(s = \dfrac{216}{19.6} = \class{res}{11 \,\mathrm{m}}\)</span>
+            <span>Top: \(v = 0\), and \(v = u + at\)</span>
+            <span class="step">\(t = \dfrac{v - u}{a} = \dfrac{0 - 14.7}{-9.8} = \class{res}{1.5 \,\mathrm{s}}\)</span>
+            <span class="step">Height: \(v^{2} = u^{2} + 2as\)</span>
+            <span class="step">\(s = \dfrac{v^{2} - u^{2}}{2a} = \dfrac{0 - 14.7^{2}}{2(-9.8)} = \class{res}{11 \,\mathrm{m}}\)</span>
             <span class="step">Back at the hand: \(t = \class{res}{3.0 \,\mathrm{s}}\), \(v = \class{res}{-14.7 \,\mathrm{m} \,\mathrm{s}^{-1}}\)</span>
           </div>
           <div class="panel">
@@ -749,16 +750,17 @@
         <h2>Launched horizontally from a cliff<span>.</span></h2>
         <div class="split even">
           <div class="work">
-            <span class="say">44.1 m high · launched at 12 m s⁻¹ horizontally</span>
+            <span class="say">44.1 m high</span>
+            <span class="say">Launched horizontally at 12 m s⁻¹</span>
             <span>Vertical: \(u = 0\), so \(s = \tfrac{1}{2}gt^{2}\)</span>
-            <span class="step">\(t = \sqrt{\dfrac{2 \times 44.1}{9.8}} = \class{res}{3.0 \,\mathrm{s}}\)</span>
-            <span class="step">Horizontal: \(12 \times 3.0 = \class{res}{36 \,\mathrm{m}}\) from the cliff</span>
+            <span class="step">\(t = \sqrt{\dfrac{2s}{g}} = \sqrt{\dfrac{2 \times 44.1}{9.8}} = \class{res}{3.0 \,\mathrm{s}}\)</span>
+            <span class="step">Horizontal: \(x = u_{x}t = 12 \times 3.0 = \class{res}{36 \,\mathrm{m}}\)</span>
           </div>
           <div class="work step">
             <span class="say">Velocity on landing</span>
-            <span>Vertical: \(9.8 \times 3.0 = 29.4 \,\mathrm{m} \,\mathrm{s}^{-1}\)</span>
-            <span class="step">Speed \(= \sqrt{12^{2} + 29.4^{2}} = \class{res}{32 \,\mathrm{m} \,\mathrm{s}^{-1}}\)</span>
-            <span class="step">\(\tan \theta = \dfrac{29.4}{12}\) &nbsp;so&nbsp; \(\class{res}{68^{\circ}}\) below horizontal</span>
+            <span>Vertical: \(v_{y} = gt = 9.8 \times 3.0 = 29.4 \,\mathrm{m} \,\mathrm{s}^{-1}\)</span>
+            <span class="step">\(v = \sqrt{v_{x}^{2} + v_{y}^{2}} = \sqrt{12^{2} + 29.4^{2}} = \class{res}{32 \,\mathrm{m} \,\mathrm{s}^{-1}}\)</span>
+            <span class="step">\(\tan \theta = \dfrac{v_{y}}{v_{x}} = \dfrac{29.4}{12}\) &nbsp;so&nbsp; \(\class{res}{68^{\circ}}\) below horizontal</span>
           </div>
         </div>
         <div class="slide-foot"><span>A.1 KINEMATICS · SL + HL</span><span data-page></span></div>
@@ -830,17 +832,17 @@
         <div class="split even">
           <div class="work">
             <span class="say">Components</span>
-            <span>Horizontal: \(20 \cos 30^{\circ} = \class{res}{17.3 \,\mathrm{m} \,\mathrm{s}^{-1}}\)</span>
-            <span>Vertical: \(20 \sin 30^{\circ} = \class{res}{10.0 \,\mathrm{m} \,\mathrm{s}^{-1}}\)</span>
+            <span>Horizontal: \(u \cos \theta = 20 \cos 30^{\circ} = \class{res}{17.3 \,\mathrm{m} \,\mathrm{s}^{-1}}\)</span>
+            <span>Vertical: \(u \sin \theta = 20 \sin 30^{\circ} = \class{res}{10.0 \,\mathrm{m} \,\mathrm{s}^{-1}}\)</span>
             <span class="say step">Time to the top: vertical \(v = 0\)</span>
-            <span class="step">\(t = \dfrac{10.0}{9.8} = \class{res}{1.02 \,\mathrm{s}}\)</span>
+            <span class="step">\(t = \dfrac{u_{y}}{g} = \dfrac{10.0}{9.8} = \class{res}{1.02 \,\mathrm{s}}\)</span>
           </div>
           <div class="work step">
             <span class="say">Maximum height: \(v^{2} = u^{2} + 2as\)</span>
-            <span>\(s = \dfrac{10.0^{2}}{2 \times 9.8} = \class{res}{5.1 \,\mathrm{m}}\)</span>
+            <span>\(s = \dfrac{u_{y}^{2}}{2g} = \dfrac{10.0^{2}}{2 \times 9.8} = \class{res}{5.1 \,\mathrm{m}}\)</span>
             <span class="say step">Lands at launch height</span>
-            <span class="step">Time of flight \(= 2 \times 1.02 = \class{res}{2.04 \,\mathrm{s}}\)</span>
-            <span class="step">Range \(= 17.3 \times 2.04 = \class{res}{35.3 \,\mathrm{m}}\)</span>
+            <span class="step">Time of flight \(= 2t = 2 \times 1.02 = \class{res}{2.04 \,\mathrm{s}}\)</span>
+            <span class="step">Range \(= u_{x} \times 2t = 17.3 \times 2.04 = \class{res}{35.3 \,\mathrm{m}}\)</span>
           </div>
         </div>
         <div class="slide-foot"><span>A.1 KINEMATICS · SL + HL</span><span data-page></span></div>
@@ -860,17 +862,17 @@
         <h2>Thrown downwards from a height<span>.</span></h2>
         <div class="split even">
           <div class="work">
-            <span class="say">8.0 m s⁻¹ at 30° below horizontal · 25 m above ground</span>
-            <span class="say">Down is positive</span>
-            <span>Horizontal: \(8.0 \cos 30^{\circ} = \class{res}{6.93 \,\mathrm{m} \,\mathrm{s}^{-1}}\)</span>
-            <span>Vertical: \(8.0 \sin 30^{\circ} = \class{res}{4.0 \,\mathrm{m} \,\mathrm{s}^{-1}}\)</span>
+            <span class="say">8.0 m s⁻¹ at 30° below horizontal</span>
+            <span class="say">25 m above ground · down is positive</span>
+            <span>Horizontal: \(u \cos \theta = 8.0 \cos 30^{\circ} = \class{res}{6.93 \,\mathrm{m} \,\mathrm{s}^{-1}}\)</span>
+            <span>Vertical: \(u \sin \theta = 8.0 \sin 30^{\circ} = \class{res}{4.0 \,\mathrm{m} \,\mathrm{s}^{-1}}\)</span>
           </div>
           <div class="work step">
             <span class="say">Vertical velocity on landing</span>
-            <span>\(v^{2} = 4.0^{2} + 2(9.8)(25) = 506\)</span>
+            <span>\(v^{2} = u^{2} + 2as = 4.0^{2} + 2(9.8)(25) = 506\)</span>
             <span class="step">\(v = \class{res}{22.5 \,\mathrm{m} \,\mathrm{s}^{-1}}\)</span>
             <span class="step">\(t = \dfrac{v - u}{a} = \dfrac{22.5 - 4.0}{9.8} = \class{res}{1.89 \,\mathrm{s}}\)</span>
-            <span class="step">Lands \(6.93 \times 1.89 = \class{res}{13.1 \,\mathrm{m}}\) away</span>
+            <span class="step">Lands \(u_{x}t = 6.93 \times 1.89 = \class{res}{13.1 \,\mathrm{m}}\) away</span>
           </div>
         </div>
         <div class="slide-foot"><span>A.1 KINEMATICS · SL + HL</span><span data-page></span></div>
