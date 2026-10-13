@@ -76,7 +76,7 @@ window.DeckFigures.add(P => {
       const at = (e, t) => { const u = ((e.start - t) % 1 + 1) % 1; return [x1 - 20 + (x2 - x1 + 40) * u, e.y + 9 * Math.sin(e.wob + t * TAU * 9)]; };
       const still = rows.map(e => `<g transform="translate(${at(e, 0.2).map(f).join(' ')})">${electron}</g>`).join('');
       // Each electron crosses the wire once in a cycle and jumps back to the start outside the clipped area.
-      const clip = `b5-wire-clip-${++clips}`, mover = `<clipPath id="${clip}"><rect x="${x1 + 3}" y="${y1}" width="${x2 - x1 - 6}" height="${y2 - y1}" rx="12"/></clipPath><g clip-path="url(#${clip})">` + rows.map(e => { const n = 120, pts = Array.from({ length: n + 1 }, (_, i) => [x2 + 20 - (x2 - x1 + 40) * i / n, e.y + 9 * Math.sin(e.wob + i / n * TAU * 9)]); return `<g>${track(pts, 12, { extra: `begin="-${f(e.start * 12)}s"` })}${electron}</g>`; }).join('') + '</g>';
+      const clip = `b5-wire-clip-${++clips}`, mover = `<clipPath id="${clip}"><rect x="${x1 + 3}" y="${y1}" width="${x2 - x1 - 6}" height="${y2 - y1}" rx="12" style="visibility:visible"/></clipPath><g clip-path="url(#${clip})">` + rows.map(e => { const n = 120, pts = Array.from({ length: n + 1 }, (_, i) => [x2 + 20 - (x2 - x1 + 40) * i / n, e.y + 9 * Math.sin(e.wob + i / n * TAU * 9)]); return `<g>${track(pts, 12, { extra: `begin="-${f(e.start * 12)}s"` })}${electron}</g>`; }).join('') + '</g>';
       return svg(on ? '80 50 720 430' : '90 150 700 220', s + twoState(still, mover), 'A piece of metal wire. Its positive ions are fixed in a regular pattern; free electrons wander between them and drift slowly towards the positive end of the wire. Conventional current is in the opposite direction to the drift of the electrons');
     },
 
