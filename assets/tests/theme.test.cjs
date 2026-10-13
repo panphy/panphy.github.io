@@ -105,3 +105,35 @@ test('blocked storage and invalid preferences do not break theme controls', () =
   assert.equal(page.api.get(), 'light');
   assert.equal(openPage({ values: new Map([['panphy-theme', 'invalid']]), darkDevice: true }).api.get(), 'dark');
 });
+
+test('a scoped section keeps its own preference, apart from the shared one and from other scopes', () => {
+  const values = new Map();
+  const home = openPage({ values });
+  const ib = openPage({ values, legacy: { themeScope: 'ibdpphy' } });
+  const gcse = openPage({ values, legacy: { themeScope: 'gcsephy' } });
+  ib.api.set('dark');
+  assert.equal(values.get('panphy-theme-ibdpphy'), 'dark');
+  assert.equal(values.has('panphy-theme'), false);
+  assert.equal(openPage({ values }).api.get(), 'light');
+  assert.equal(openPage({ values, legacy: { themeScope: 'gcsephy' } }).api.get(), 'light');
+  assert.equal(openPage({ values, legacy: { themeScope: 'ibdpphy' } }).api.get(), 'dark');
+
+  home.api.set('dark');
+  ib.api.set('light');
+  home.storageEvent('panphy-theme-ibdpphy', 'light');
+  gcse.storageEvent('panphy-theme', 'dark');
+  assert.equal(home.api.get(), 'dark');
+  assert.equal(gcse.api.get(), 'light');
+  ib.storageEvent('panphy-theme-ibdpphy', 'dark');
+  assert.equal(ib.api.get(), 'dark');
+});
+
+test('a scoped section ignores the old site-wide preferences and follows the device at first', () => {
+  const values = new Map([['panphy-dark', '1'], ['panphy-theme', 'dark']]);
+  assert.equal(openPage({ values, legacy: { themeScope: 'ibdpphy' } }).api.get(), 'light');
+  assert.equal(openPage({ values, legacy: { themeScope: 'ibdpphy' }, darkDevice: true }).api.get(), 'dark');
+  assert.equal(values.has('panphy-theme-ibdpphy'), false);
+  const own = new Map([['old-deck-dark', '1']]);
+  assert.equal(openPage({ values: own, legacy: { themeScope: 'gcsephy', legacyDark: 'old-deck-dark' } }).api.get(), 'dark');
+  assert.equal(own.get('panphy-theme-gcsephy'), 'dark');
+});

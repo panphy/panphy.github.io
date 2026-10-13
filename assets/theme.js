@@ -1,7 +1,10 @@
 (function () {
-  const STORAGE_KEY = 'panphy-theme';
   const root = document.documentElement;
   const legacy = document.currentScript ? document.currentScript.dataset : {};
+  // The landing page and the apps it lists share one preference. A section outside that
+  // catalogue names itself with data-theme-scope on this script tag and keeps its own.
+  const scope = /^[a-z0-9-]+$/.test(legacy.themeScope || '') ? legacy.themeScope : '';
+  const STORAGE_KEY = scope ? `panphy-theme-${scope}` : 'panphy-theme';
 
   function isTheme(value) {
     return value === 'light' || value === 'dark';
@@ -48,8 +51,8 @@
     apply(theme);
   }
 
-  // Migrate the first visited page's explicit choice, then the old homepage
-  // preference. Once a shared choice exists, stale app preferences cannot win.
+  // Migrate the first visited page's explicit choice, then (for the shared preference only)
+  // the old homepage preference. Once a choice exists, stale app preferences cannot win.
   let initial = read(STORAGE_KEY);
   if (!isTheme(initial)) {
     const oldTheme = read(legacy.legacyTheme);
@@ -58,8 +61,8 @@
     else if (oldTheme === 'markdown-light') initial = 'light';
     else if (read(legacy.legacyDark)) initial = 'dark';
     else if (read(legacy.legacyLight)) initial = 'light';
-    else if (read('panphy-dark')) initial = 'dark';
-    else if (read('panphy-light')) initial = 'light';
+    else if (!scope && read('panphy-dark')) initial = 'dark';
+    else if (!scope && read('panphy-light')) initial = 'light';
     if (isTheme(initial)) save(initial);
     else initial = deviceTheme();
   }
