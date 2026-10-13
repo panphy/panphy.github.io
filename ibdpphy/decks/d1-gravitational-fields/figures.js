@@ -2,15 +2,16 @@
 // Forces and field lines are teal, velocities apricot, the Sun amber, planets teal and small
 // orbiting bodies slate. Terracotta appears only in the additional higher level figures.
 window.DeckFigures.add(P => {
-  const { svg, ball, arrow, text, sub, dot, axes, plot, shade, both, through, sampled, labelled, track, anim, spin, twoState, f, TAU } = P;
+  const { svg, ball, arrow, fline, text, sub, dot, axes, plot, shade, both, through, sampled, labelled, track, anim, spin, twoState, f, TAU } = P;
   const sun = (x, y, r) => ball(x, y, r, 'positive', '');
   const planet = (x, y, r) => ball(x, y, r, 'brand-primary', '');
   const craft = (x, y, r = 13) => ball(x, y, r, 'brand-accent-strong', '');
   const polar = (cx, cy, r, deg) => [cx + r * Math.cos(deg * Math.PI / 180), cy + r * Math.sin(deg * Math.PI / 180)];
-  // n field lines pointing inwards from radius r1 to radius r0.
-  const radial = (cx, cy, r0, r1, n, width = 3.5, turn = 0) => Array.from({ length: n }, (_, i) => {
+  // n field lines running inwards from radius r1 and ending on the body at radius r0 (draw the
+  // body afterwards, over their ends). Each arrowhead sits at radius `head`, part of the way in.
+  const radial = (cx, cy, r0, r1, n, width = 3.5, turn = 0, head = (r0 + r1) / 2) => Array.from({ length: n }, (_, i) => {
     const deg = turn + i * 360 / n, [x1, y1] = polar(cx, cy, r1, deg), [x2, y2] = polar(cx, cy, r0, deg);
-    return arrow(x1, y1, x2, y2, 'brand-primary', width);
+    return fline(x1, y1, x2, y2, 'brand-primary', width, (r1 - head) / (r1 - r0));
   }).join('');
   const hlLine = 'style="fill:none;stroke:var(--hl);stroke-width:2.5"';
 
@@ -85,18 +86,18 @@ window.DeckFigures.add(P => {
 
     // Outside a uniform sphere the field is the same as that of a point mass at its centre.
     'd1-sphere-point': () => {
-      let s = radial(220, 220, 96, 200, 8) + planet(220, 220, 84) + text(220, 446, 'uniform sphere, mass M', 'lbl');
-      s += text(450, 232, '=', 'lbl display') + radial(680, 220, 22, 200, 8) + dot(680, 220, 12) + text(680, 446, 'point mass M at its centre', 'lbl');
-      return svg('0 0 900 470', s, 'The gravitational field outside a uniform sphere of mass M is the same as the field of a point mass M placed at its centre: the same field lines pointing inwards');
+      let s = radial(220, 220, 60, 196, 8, 3.5, 0, 142) + planet(220, 220, 84) + text(220, 452, 'uniform sphere, mass M', 'lbl');
+      s += text(450, 232, '=', 'lbl display') + radial(680, 220, 0, 196, 8, 3.5, 0, 142) + `<circle cx="680" cy="220" r="84" class="guide"/>` + dot(680, 220, 12) + text(680, 452, 'point mass M at its centre', 'lbl');
+      return svg('0 0 900 470', s, 'The gravitational field outside a uniform sphere of mass M is the same as the field of a point mass M placed at its centre: outside the surface of the sphere, shown dashed round the point mass, the field lines are identical');
     },
 
     // data-kind="radial" gives the small picture; the default shows a radial and a uniform field.
     'd1-field-lines': el => {
       const on = labelled(el);
-      if (el.dataset.kind === 'radial') return svg('0 0 460 460', radial(230, 230, 82, 216, 12) + planet(230, 230, 70), 'Radial gravitational field lines pointing in towards a planet');
-      let s = radial(240, 232, 84, 216, 12) + planet(240, 232, 72);
+      if (el.dataset.kind === 'radial') return svg('0 0 460 460', radial(230, 230, 50, 216, 12, 3.5, 0, 146) + planet(230, 230, 70), 'Radial gravitational field lines pointing in towards a planet');
+      let s = radial(240, 232, 50, 216, 12, 3.5, 0, 148) + planet(240, 232, 72);
       s += `<rect x="560" y="388" width="350" height="40" rx="6" style="fill:var(--brand-primary);opacity:.3"/><line x1="560" y1="388" x2="910" y2="388" class="tick" style="stroke-width:4"/>`;
-      [600, 667, 735, 802, 870].forEach(x => { s += arrow(x, 70, x, 378, 'brand-primary', 3.5); });
+      [600, 667, 735, 802, 870].forEach(x => { s += fline(x, 70, x, 388, 'brand-primary', 3.5); });
       if (on) s += text(240, 486, 'radial field', 'lbl strong') + text(240, 518, 'lines spread out: weaker', 'lbl') + text(735, 486, 'uniform field', 'lbl strong') + text(735, 518, 'close to the surface', 'lbl');
       return svg('0 0 960 530', s, 'Two gravitational fields. Round a planet the field lines are radial, pointing to its centre and spreading apart further out. Close to the surface they are parallel and evenly spaced: a uniform field');
     },
@@ -104,10 +105,10 @@ window.DeckFigures.add(P => {
     'd1-g-graph': () => {
       const at = r => [110 + 140 * r, 400 - 34 * 9.8 / (r * r)];
       let s = `<rect x="110" y="50" width="140" height="350" style="fill:var(--brand-primary);opacity:.12"/>` + text(180, 240, 'inside', 'lbl small') + text(180, 268, 'the Earth', 'lbl small');
-      s += axes(110, 400, 780, 30, 'distance from the centre', 'g / N kg⁻¹');
+      s += axes(110, 400, 780, 30, '', '') + text(445, 484, 'distance from the centre', 'lbl mono') + text(96, 8, 'g / N kg⁻¹', 'lbl mono', 'start');
       [[1, '9.8'], [2, '2.5'], [3, '1.1']].forEach(([r, g]) => { const [x, y] = at(r); s += `<path d="M110,${f(y)} H${x} V400" class="guide"/>` + text(x, 436, r === 1 ? 'R' : `${r}R`, 'lbl mono') + `<circle cx="${x}" cy="${f(y)}" r="9" style="fill:var(--brand-accent-strong)"/>` + text(x + 18, f(y) - 14, g, 'lbl mono strong', 'start'); });
       s += plot(sampled(t => at(1 + 3.6 * t)));
-      return svg('0 0 800 460', s, 'Graph of the gravitational field strength of the Earth against distance from its centre, starting at the surface. It is 9.8 newtons per kilogram at the surface, distance R, 2.5 at 2 R and 1.1 at 3 R');
+      return svg('0 -24 800 524', s, 'Graph of the gravitational field strength of the Earth against distance from its centre, starting at the surface. It is 9.8 newtons per kilogram at the surface, distance R, 2.5 at 2 R and 1.1 at 3 R');
     },
 
     // Not to scale: the point where the fields cancel is really nine tenths of the way to the Moon.
@@ -146,13 +147,13 @@ window.DeckFigures.add(P => {
     'd1-equipotentials': el => {
       const on = labelled(el), cx = 300, cy = 300, R = 70;
       const rings = [[-50, 1.25, 30], [-40, 1.56, 150], [-30, 2.08, -150], [-20, 3.13, -30]];
-      let s = radial(cx, cy, R + 12, 288, 12, 3, 15);
+      let s = radial(cx, cy, R - 20, 288, 12, 3, 15, 255);
       rings.forEach(([v, k, deg]) => {
         s += `<circle cx="${cx}" cy="${cy}" r="${f(R * k)}" ${hlLine}/>`;
         if (on) { const [x, y] = polar(cx, cy, R * k, deg); s += text(f(x), f(y) + 9, `−${-v}`, 'lbl mono strong halo'); }
       });
       s += planet(cx, cy, R);
-      if (on) s += `<line x1="610" y1="120" x2="660" y2="120" ${hlLine}/>` + text(672, 112, 'equipotential', 'lbl', 'start') + text(672, 144, 'in MJ kg⁻¹', 'lbl', 'start') + arrow(660, 210, 612, 210, 'brand-primary', 3) + text(672, 219, 'field line', 'lbl', 'start');
+      if (on) s += `<line x1="610" y1="120" x2="660" y2="120" ${hlLine}/>` + text(672, 112, 'equipotential', 'lbl', 'start') + text(672, 144, 'in MJ kg⁻¹', 'lbl', 'start') + fline(660, 210, 610, 210, 'brand-primary', 3) + text(672, 219, 'field line', 'lbl', 'start');
       return svg(on ? '0 0 860 600' : '0 0 600 600', s, 'Equipotential surfaces round the Earth, drawn as circles at minus 50, minus 40, minus 30 and minus 20 megajoules per kilogram. They get further apart further out. The field lines point inwards and cross every equipotential at right angles');
     },
 

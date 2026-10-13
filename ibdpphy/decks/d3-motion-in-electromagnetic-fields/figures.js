@@ -3,7 +3,7 @@
 // slate; a positive particle is red and an electron blue. Nothing here is terracotta: D.3 has no
 // additional higher level content.
 window.DeckFigures.add(P => {
-  const { svg, ball, arrow, text, sub, both, through, sampled, labelled, track, anim, spin, twoState, PLAY, f } = P;
+  const { svg, ball, arrow, fline, text, sub, both, through, sampled, labelled, track, anim, spin, twoState, PLAY, f } = P;
   const positive = (x, y, r = 18) => ball(x, y, r, 'proton');
   const electron = (x, y, r = 16) => ball(x, y, r, 'electron');
   // A magnetic field at right angles to the page: crosses for into the page, dots for out of it.
@@ -20,7 +20,7 @@ window.DeckFigures.add(P => {
     'd3-accelerate': el => {
       const on = labelled(el);
       let s = plate(170, 110, 16, 300, 'electron') + plate(600, 110, 16, 120, 'proton') + plate(600, 290, 16, 120, 'proton');
-      s += [150, 205, 315, 370].map(y => arrow(592, y, 196, y, 'brand-primary', 2.5, 'opacity=".45"')).join('') + `<line x1="200" y1="260" x2="780" y2="260" class="guide"/>`;
+      s += [150, 205, 315, 370].map(y => fline(600, y, 186, y, 'brand-primary', 2.5, 0.5, 'opacity=".45"')).join('') + `<line x1="200" y1="260" x2="780" y2="260" class="guide"/>`;
       if (on) s += text(178, 90, '−', 'lbl display') + text(608, 90, '+', 'lbl display') + text(390, 470, 'potential difference V', 'lbl mono') + both(196, 440, 592, 440) + text(700, 232, 'v', 'lbl display') + text(390, 136, 'field E', 'lbl', 'middle', 'style="fill:var(--brand-primary)"');
       const still = electron(400, 260) + arrow(424, 260, 520, 260, 'brand-primary', 5) + (on ? text(470, 300, 'F = qE', 'lbl mono strong') : '');
       const ride = Array.from({ length: 31 }, (_, i) => { const t = i / 30 * 1.5; return [t < 1 ? 210 + 398 * t * t : 608 + 796 * (t - 1) * 0.5, 260]; });
@@ -32,7 +32,7 @@ window.DeckFigures.add(P => {
     'd3-deflect': () => {
       const x0 = 250, x1 = 550, k = 70 / (300 * 300), slope = 2 * k * 300;
       const path = t => { const x = 100 + 680 * t; return [x, x < x0 ? 260 : x < x1 ? 260 - k * (x - x0) ** 2 : 190 - slope * (x - x1)]; };
-      let s = plate(x0, 104, 300, 16, 'proton') + plate(x0, 400, 300, 16, 'electron') + [290, 350, 410, 470, 510].map(x => arrow(x, 126, x, 394, 'brand-primary', 2.5, 'opacity=".4"')).join('');
+      let s = plate(x0, 104, 300, 16, 'proton') + plate(x0, 400, 300, 16, 'electron') + [290, 350, 410, 470, 510].map(x => fline(x, 120, x, 400, 'brand-primary', 2.5, 0.8, 'opacity=".4"')).join('');
       s += `<path d="${sampled(path, 80)}" class="guide accent" style="stroke-width:3"/><line x1="100" y1="260" x2="780" y2="260" class="guide"/>` + arrow(110, 260, 200, 260, 'brand-accent', 5);
       s += text(150, 236, 'v', 'lbl display') + text(400, 88, '+', 'lbl display') + text(400, 452, '−', 'lbl display') + text(400, 320, 'parabola', 'lbl strong halo') + text(770, 200, 'then a', 'lbl', 'end') + text(770, 232, 'straight line', 'lbl', 'end');
       const [px, py] = path(0.42);
@@ -79,7 +79,7 @@ window.DeckFigures.add(P => {
     // Velocity at an angle to the field: the particle spirals along the field lines.
     'd3-helix': () => {
       const at = t => { const a = t * 5 * 2 * Math.PI; return [120 + 560 * t + 44 * Math.cos(a), 260 - 90 * Math.sin(a)]; };
-      let s = [110, 185, 335, 410].map(y => arrow(90, y, 760, y, 'brand-accent-strong', 3, 'opacity=".5"')).join('') + `<path d="${sampled(at, 300)}" class="guide accent" style="stroke-width:3;stroke-dasharray:none"/>`;
+      let s = [110, 185, 335, 410].map(y => fline(90, y, 760, y, 'brand-accent-strong', 3, 0.94, 'opacity=".5"')).join('') + `<path d="${sampled(at, 300)}" class="guide accent" style="stroke-width:3;stroke-dasharray:none"/>`;
       s += text(770, 100, 'B', 'lbl display', 'start') + text(430, 470, 'along the field: constant velocity', 'lbl') + text(430, 62, 'across the field: a circle', 'lbl');
       const points = Array.from({ length: 151 }, (_, i) => at(i / 150)), [px, py] = at(0.33);
       return svg('60 30 760 460', s + twoState(positive(px, py, 14), `<g>${track(points, 5)}${positive(0, 0, 14)}</g>`), 'A charged particle whose velocity is at an angle to a uniform magnetic field. The part of its velocity along the field is unchanged and the part across the field becomes circular motion, so it follows a helix along the field lines');
@@ -103,7 +103,7 @@ window.DeckFigures.add(P => {
     'd3-wire-force': el => {
       const on = labelled(el);
       let s = `<rect x="80" y="150" width="150" height="220" rx="8" style="fill:var(--proton)"/><rect x="570" y="150" width="150" height="220" rx="8" style="fill:var(--electron)"/>` + text(155, 274, 'N', 'lbl display', 'middle', 'style="fill:#fff"') + text(645, 274, 'S', 'lbl display', 'middle', 'style="fill:#fff"');
-      s += [190, 260, 330].map(y => arrow(238, y, 562, y, 'brand-accent-strong', 3, 'opacity=".6"')).join('') + arrow(400, 238, 400, 96, 'brand-primary', 6) + wireEnd(400, 260, true, 22);
+      s += [190, 260, 330].map(y => fline(230, y, 570, y, 'brand-accent-strong', 3, 0.3, 'opacity=".6"')).join('') + arrow(400, 238, 400, 96, 'brand-primary', 6) + wireEnd(400, 260, true, 22);
       if (on) s += text(424, 116, 'F', 'lbl display', 'start') + text(400, 420, 'current I out of the page', 'lbl') + text(310, 176, 'B', 'lbl display');
       return svg('60 70 680 370', s, 'A wire carrying a current out of the page sits between the north and south poles of a magnet, where the field points from left to right. The force on the wire is upwards, at right angles to both the current and the field');
     },

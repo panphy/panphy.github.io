@@ -73,9 +73,11 @@
         figure.dataset.played = '1';
         figure.querySelectorAll('[begin="indefinite"]').forEach(node => node.beginElement?.());
       } else if (!on && figure.dataset.played) {
-        const fresh = figure.cloneNode(true);
-        delete fresh.dataset.played;
-        figure.replaceWith(fresh);
+        // Parsed afresh from its markup: a clone can keep the frozen end state of an animation.
+        delete figure.dataset.played;
+        const holder = document.createElement('div');
+        holder.innerHTML = figure.outerHTML;
+        figure.replaceWith(holder.firstElementChild);
       }
     });
   }

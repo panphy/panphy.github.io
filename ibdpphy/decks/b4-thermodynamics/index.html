@@ -57,7 +57,7 @@
         <h2>Four parts<span>.</span></h2>
         <div class="cards fill" style="grid-template-columns: repeat(4, 1fr);">
           <div class="card">
-            <div class="fig" data-fig="b4-piston" data-plain style="height: 180px;"></div>
+            <div class="fig" data-fig="b4-piston" data-plain data-still style="height: 180px;"></div>
             <p class="eyebrow">Part 01</p>
             <h3>The first law</h3>
             <p>Heat, work and internal energy</p>
@@ -159,7 +159,7 @@
         <h2>Work done by a gas<span>.</span></h2>
         <div class="split fig-first">
           <div class="panel">
-            <div class="panel-head"><span>GAS IN A CYLINDER</span><span class="reveal-hint">PRESS → TO EXPAND</span></div>
+            <div class="panel-head"><span>GAS IN A CYLINDER</span><span class="reveal-hint">PRESS → TO LET IT EXPAND</span></div>
             <div class="fig" data-fig="b4-piston"></div>
           </div>
           <div class="stack">
@@ -218,9 +218,9 @@
         <h2>The first law of thermodynamics<span>.</span></h2>
         <div class="split even">
           <div class="stack">
-            <div class="equation"><span>\(Q = \Delta U + W\)</span></div>
+            <div class="equation"><span>\(\Delta U = Q - W\)</span></div>
             <ul class="points small">
-              <li>Thermal energy supplied either <b>raises the internal energy</b> or leaves again as <b>work</b></li>
+              <li>Internal energy rises by the thermal energy <b>supplied</b>, less the work the gas <b>does</b></li>
               <li class="step">For a <b>closed</b> system</li>
             </ul>
           </div>
@@ -236,8 +236,9 @@
         <div class="slide-foot"><span>B.4 THERMODYNAMICS · HL ONLY</span><span data-page></span></div>
         <aside class="revision-note" hidden>
           <div class="rn-main">
-            <p><b>Reading it as a budget.</b> \(Q\) is income. \(\Delta U\) is what goes into savings. \(W\) is what is spent. Income equals the change in savings plus spending. If the gas spends more in work than it receives as heat, its savings, the internal energy, must fall.</p>
+            <p><b>Reading it as a budget.</b> \(Q\) is income. \(W\) is what is spent. \(\Delta U\) is the change in savings: income minus spending. If the gas spends more in work than it receives as heat, its savings, the internal energy, must fall.</p>
             <p><b>The sign convention.</b> This is the Clausius convention, and it is the one used in every exam question: \(Q\) is counted positive when it goes <b>into</b> the gas, \(W\) is positive when it is done <b>by</b> the gas. Some books write \(\Delta U = Q + W\) with \(W\) as the work done on the gas. The physics is identical, but mixing the two gives wrong signs.</p>
+            <p><b>The data booklet.</b> It prints the same law rearranged, as \(Q = \Delta U + W\). Nothing is different: add \(W\) to both sides of the form on the slide.</p>
           </div>
           <div class="rn-side">
             <p class="tip">Before substituting, write beside each quantity whether it is into or out of the gas, and give it its sign. Most mistakes are sign mistakes.</p>
@@ -314,7 +315,7 @@
             <li class="step"><b>Adiabatic</b>: no thermal energy in or out</li>
           </ul>
           <div class="panel">
-            <div class="panel-head"><span>FROM THE SAME STARTING STATE</span></div>
+            <div class="panel-head"><span>FOUR LINES THROUGH ONE STATE</span><span class="pill">EITHER DIRECTION</span></div>
             <div class="fig" data-fig="b4-processes"></div>
           </div>
         </div>
@@ -326,6 +327,7 @@
           </div>
           <div class="rn-side">
             <p class="tip">Each point on a P–V diagram is one state of the gas, with one temperature: \(T = \frac{PV}{nR}\). Further from the origin means hotter.</p>
+            <p class="tip">The lines have no arrows because each change can go either way: to the right is an expansion, to the left a compression. An arrow belongs on a diagram only when a question says which way the gas went.</p>
           </div>
         </aside>
       </section>
@@ -336,8 +338,8 @@
         <div class="split even">
           <div class="stack">
             <div class="cards" style="grid-template-columns: 1fr;">
-              <div class="card"><p class="eyebrow">Isovolumetric</p><h3>\(W = 0\), so \(Q = \Delta U\)</h3><p>All the heat supplied raises the temperature</p></div>
-              <div class="card step"><p class="eyebrow">Isobaric</p><h3>\(W = P \Delta V\), so \(Q = \Delta U + P \Delta V\)</h3><p>Some of the heat is spent on work</p></div>
+              <div class="card"><p class="eyebrow">Isovolumetric</p><h3>\(W = 0\), so \(\Delta U = Q\)</h3><p>All the heat supplied raises the temperature</p></div>
+              <div class="card step"><p class="eyebrow">Isobaric</p><h3>\(W = P \Delta V\), so \(\Delta U = Q - P \Delta V\)</h3><p>Some of the heat is spent on work</p></div>
             </div>
           </div>
           <div class="work step">
@@ -345,7 +347,7 @@
             <span class="say">\(V\) from \(2.0 \times 10^{-3}\) to \(5.0 \times 10^{-3} \,\mathrm{m}^{3}\)</span>
             <span>\(W = P \Delta V = 1.0 \times 10^{5} \times 3.0 \times 10^{-3} = \class{res}{300 \,\mathrm{J}}\)</span>
             <span class="step">\(\Delta U = \dfrac{3}{2} P \Delta V = \dfrac{3}{2} \times 300 = \class{res}{450 \,\mathrm{J}}\)</span>
-            <span class="step">\(Q = \Delta U + W = 450 + 300 = \class{res}{750 \,\mathrm{J}}\)</span>
+            <span class="step">\(\Delta U = Q - W\) &nbsp;so&nbsp; \(Q = \Delta U + W = \class{res}{750 \,\mathrm{J}}\)</span>
           </div>
         </div>
         <div class="slide-foot"><span>B.4 THERMODYNAMICS · HL ONLY</span><span data-page></span></div>
@@ -367,13 +369,13 @@
           <div class="stack">
             <ul class="points small">
               <li>\(T\) constant, so \(\Delta U = 0\)</li>
-              <li class="step">First law: \(Q = W\)</li>
+              <li class="step">First law: \(0 = Q - W\), so \(Q = W\)</li>
               <li class="step">\(PV\) = constant: Boyle’s law</li>
             </ul>
             <div class="idea step">All the heat supplied comes straight out as work.</div>
           </div>
           <div class="panel">
-            <div class="panel-head"><span>AN ISOTHERMAL EXPANSION</span></div>
+            <div class="panel-head"><span>AN ISOTHERMAL CHANGE</span></div>
             <div class="fig" data-fig="b4-processes" data-show="isothermal"></div>
           </div>
         </div>
@@ -456,9 +458,9 @@
           <table class="facts big">
             <thead><tr><th>Process</th><th>Constant</th><th>First law becomes</th><th>On a P–V diagram</th></tr></thead>
             <tbody>
-              <tr><td>Isovolumetric</td><td>\(V\)</td><td>\(Q = \Delta U\)</td><td>Vertical line</td></tr>
-              <tr class="step"><td>Isobaric</td><td>\(P\)</td><td>\(Q = \Delta U + P \Delta V\)</td><td>Horizontal line</td></tr>
-              <tr class="step"><td>Isothermal</td><td>\(T\)</td><td>\(Q = W\)</td><td>Curve, \(PV\) constant</td></tr>
+              <tr><td>Isovolumetric</td><td>\(V\)</td><td>\(\Delta U = Q\)</td><td>Vertical line</td></tr>
+              <tr class="step"><td>Isobaric</td><td>\(P\)</td><td>\(\Delta U = Q - P \Delta V\)</td><td>Horizontal line</td></tr>
+              <tr class="step"><td>Isothermal</td><td>\(T\)</td><td>\(\Delta U = 0\), so \(Q = W\)</td><td>Curve, \(PV\) constant</td></tr>
               <tr class="step"><td>Adiabatic</td><td>none: \(Q = 0\)</td><td>\(\Delta U = -W\)</td><td>Steeper curve</td></tr>
             </tbody>
           </table>
@@ -466,7 +468,7 @@
         <div class="slide-foot"><span>B.4 THERMODYNAMICS · HL ONLY</span><span data-page></span></div>
         <aside class="revision-note" hidden>
           <div class="rn-main">
-            <p><b>One idea, four times.</b> In each process one term of \(Q = \Delta U + W\) is zero, or one quantity is easy to find, and the law collapses to something simpler. Constant volume: no work. Constant temperature: no change in internal energy. Adiabatic: no heat. Constant pressure: all three terms survive, but the work is simply \(P \Delta V\).</p>
+            <p><b>One idea, four times.</b> In each process one term of \(\Delta U = Q - W\) is zero, or one quantity is easy to find, and the law collapses to something simpler. Constant volume: no work. Constant temperature: no change in internal energy. Adiabatic: no heat. Constant pressure: all three terms survive, but the work is simply \(P \Delta V\).</p>
             <p><b>A plan for any question.</b> Name the process. Write down which term vanishes. Find the others from \(W = P \Delta V\) or the area, from \(\Delta U = \frac{3}{2} n R \Delta T\), and from the first law.</p>
           </div>
           <div class="rn-side">
@@ -934,7 +936,7 @@
         <p class="eyebrow">Summary</p>
         <h2>Thermodynamics on one slide<span>.</span></h2>
         <div class="cards fill" style="grid-template-columns: 1fr 1fr 1fr; align-content: center;">
-          <div class="card"><p class="eyebrow">First law</p><h3>\(Q = \Delta U + W\)</h3><p>\(Q\) into the gas, \(W\) done by it<br>\(\Delta U = \frac{3}{2} n R \Delta T\)</p></div>
+          <div class="card"><p class="eyebrow">First law</p><h3>\(\Delta U = Q - W\)</h3><p>\(Q\) into the gas, \(W\) done by it<br>\(\Delta U = \frac{3}{2} n R \Delta T\)</p></div>
           <div class="card step"><p class="eyebrow">Work</p><h3>\(W = P \Delta V\)</h3><p>Area under a P–V path<br>Area inside a cycle: net work</p></div>
           <div class="card step"><p class="eyebrow">Processes</p><h3>One thing fixed</h3><p>Isovolumetric, isobaric, isothermal<br>Adiabatic: \(P V^{\frac{5}{3}}\) constant</p></div>
           <div class="card step"><p class="eyebrow">Entropy</p><h3>\(S = k_\mathrm{B} \ln \Omega\)</h3><p>\(\Delta S = \frac{\Delta Q}{T}\)<br>A measure of disorder</p></div>

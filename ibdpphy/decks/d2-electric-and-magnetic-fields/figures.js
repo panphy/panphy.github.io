@@ -3,7 +3,7 @@
 // electrons are in the other decks. Electric field lines and forces are teal, magnetic field
 // lines slate, currents apricot. Terracotta (equipotentials) appears only in the higher level figures.
 window.DeckFigures.add(P => {
-  const { svg, ball, arrow, text, sub, dot, axes, plot, both, through, sampled, labelled, animated, stepG, track, anim, spin, twoState, PLAY, f } = P;
+  const { svg, ball, arrow, fline, text, sub, dot, axes, plot, both, through, sampled, labelled, animated, stepG, track, anim, spin, twoState, PLAY, f } = P;
   const plus = (x, y, r = 22) => ball(x, y, r, 'proton');
   const minus = (x, y, r = 22) => ball(x, y, r, 'electron');
   const polar = (cx, cy, r, deg) => [cx + r * Math.cos(deg * Math.PI / 180), cy + r * Math.sin(deg * Math.PI / 180)];
@@ -82,18 +82,23 @@ window.DeckFigures.add(P => {
     },
 
     // Charging a metal sphere by induction in four stages; with data-animate each press of → adds one.
+    // The negative rod stays clear of the sphere, to its left. The sphere starts neutral, so stage 1
+    // shows as many − as +; from stage 2 the four + that remain are all that is drawn.
     'd2-induction': el => {
-      const on = animated(el), stand = x => `<path d="M${x},258 V360 M${x - 40},360 H${x + 40}" class="tick" style="stroke-width:5"/>`;
-      const sphere = x => `<circle cx="${x}" cy="200" r="58" style="fill:color-mix(in srgb, var(--neutron) 22%, var(--viewer-bg));stroke:var(--neutron);stroke-width:3"/>`;
-      const rodAt = x => `<rect x="${x - 86}" y="60" width="40" height="150" rx="20" transform="rotate(-24 ${x - 66} 135)" style="fill:color-mix(in srgb, var(--electron) 30%, var(--viewer-bg));stroke:var(--electron);stroke-width:3"/>` + text(x - 96, 70, '− − −', 'lbl strong', 'middle', 'style="fill:var(--electron)"');
-      const mark = (x, y, s) => text(x, y, s, 'lbl strong', 'middle', `style="fill:var(--${s === '+' ? 'proton' : 'electron'})"`);
-      const earth = x => `<path d="M${x + 56},214 H${x + 96} V300 M${x + 72},300 H${x + 120} M${x + 82},314 H${x + 110} M${x + 90},328 H${x + 102}" class="tick" style="fill:none;stroke-width:3.5"/>`;
-      const stage = (i, x, body, a, b) => stepG(on && i > 0, i + 1, stand(x) + sphere(x) + body + text(x, 412, a, 'lbl strong') + text(x, 446, b, 'lbl'));
-      let s = stage(0, 150, rodAt(150) + mark(118, 196, '+') + mark(130, 228, '+') + mark(176, 178, '−') + mark(190, 214, '−'), '1 Rod near', 'charges separate');
-      s += stage(1, 400, rodAt(400) + mark(368, 196, '+') + mark(380, 228, '+') + earth(400) + arrow(520, 250, 520, 290, 'electron', 4), '2 Earth it', 'electrons leave');
-      s += stage(2, 650, rodAt(650) + mark(618, 196, '+') + mark(630, 228, '+'), '3 Remove earth', 'charge trapped');
-      s += stage(3, 880, mark(850, 190, '+') + mark(910, 214, '+'), '4 Remove rod', 'left positive');
-      return svg('0 30 1000 440', s, 'Charging a metal sphere by induction in four stages. A negative rod is brought near and the charges in the sphere separate. The sphere is earthed and electrons leave to earth. The earth connection is removed. Finally the rod is removed and the sphere is left with a positive charge');
+      const on = animated(el), cy = 200, R = 56;
+      const sign = (x, y, s) => text(f(x), f(y) + 10, s, 'lbl strong', 'middle', `style="fill:var(--${s === '+' ? 'proton' : 'electron'})"`);
+      const at = (cx, degs, s, r = 38) => degs.map(deg => { const [x, y] = polar(cx, cy, r, deg); return sign(x, y, s); }).join('');
+      const stand = cx => `<path d="M${cx},${cy + R} V360 M${cx - 40},360 H${cx + 40}" class="tick" style="stroke-width:5"/>`;
+      const sphere = cx => `<circle cx="${cx}" cy="${cy}" r="${R}" style="fill:color-mix(in srgb, var(--neutron) 22%, var(--viewer-bg));stroke:var(--neutron);stroke-width:3"/>`;
+      const rod = cx => `<rect x="${cx - 204}" y="${cy - 22}" width="128" height="44" rx="22" style="fill:color-mix(in srgb, var(--electron) 24%, var(--viewer-bg));stroke:var(--electron);stroke-width:3"/>` + [-180, -152, -124, -96].map(dx => sign(cx + dx, cy, '−')).join('');
+      const earth = cx => `<path d="M${cx + 40},${cy + 40} V306 M${cx + 18},306 H${cx + 62} M${cx + 27},319 H${cx + 53} M${cx + 35},332 H${cx + 45}" class="tick" style="fill:none;stroke-width:3.5"/>` + arrow(cx + 76, 250, cx + 76, 300, 'electron', 4) + sign(cx + 76, 226, '−');
+      const near = [135, 165, 195, 225], far = [-45, -15, 15, 45], even = [45, 135, 225, 315];
+      const stage = (i, cx, body, a, b) => stepG(on && i > 0, i + 1, stand(cx) + sphere(cx) + body + text(cx - (i < 3 ? 40 : 0), 412, a, 'lbl strong') + text(cx - (i < 3 ? 40 : 0), 446, b, 'lbl'));
+      let s = stage(0, 240, rod(240) + at(240, near, '+') + at(240, far, '−'), '1 Rod near', 'electrons repelled');
+      s += stage(1, 540, rod(540) + at(540, near, '+') + earth(540), '2 Earth it', 'electrons leave');
+      s += stage(2, 840, rod(840) + at(840, near, '+'), '3 Earth removed', 'left positive');
+      s += stage(3, 1090, at(1090, even, '+'), '4 Rod removed', 'charge spreads out');
+      return svg('20 110 1210 350', s, 'Charging a metal sphere by induction in four stages. A negatively charged rod is brought near the left of a neutral sphere without touching it: electrons in the sphere are pushed to the far side, leaving the near side positive. The sphere is earthed and those electrons leave to earth. The earth connection is removed, leaving the sphere positive. Finally the rod is removed and the positive charge spreads evenly over the sphere');
     },
 
     // Coulomb's law. Also the small picture for part 1, with data-plain.
@@ -110,7 +115,7 @@ window.DeckFigures.add(P => {
     // An oil drop between charged plates. Played with →: it falls, then the field is switched on and holds it.
     'd2-millikan': () => {
       const frame = plate(150, 650, 110, true) + plate(150, 650, 410, false) + signs(170, 630, 96, 7, '+') + signs(170, 630, 446, 7, '−');
-      const lines = [220, 310, 400, 490, 580].map(x => arrow(x, 126, x, 392, 'brand-primary', 2.5, 'opacity=".45"')).join('');
+      const lines = [220, 310, 400, 490, 580].map(x => fline(x, 118, x, 402, 'brand-primary', 2.5, 0.5, 'opacity=".45"')).join('');
       const forces = arrow(400, 268, 400, 172, 'brand-primary', 6) + arrow(400, 268, 400, 364, 'brand-primary', 6) + text(418, 184, 'qE', 'lbl display', 'start') + text(418, 364, 'mg', 'lbl display', 'start');
       const drop = y => `<circle cx="400" cy="${y}" r="15" style="fill:var(--sand);stroke:var(--text-main);stroke-width:2"/>` + text(400, y + 8, '−', 'lbl strong');
       const notes = text(680, 200, 'uniform field', 'lbl', 'start') + text(680, 234, 'E = V / d', 'lbl mono', 'start') + text(120, 276, 'oil drop', 'lbl', 'end');
@@ -121,7 +126,7 @@ window.DeckFigures.add(P => {
 
     // Radial fields of a positive and a negative point charge.
     'd2-point-fields': () => {
-      const one = (cx, positive) => spread(12).map(deg => { const [x1, y1] = polar(cx, 230, 34, deg), [x2, y2] = polar(cx, 230, 178, deg); return positive ? arrow(x1, y1, x2, y2, 'brand-primary', 3.5) : arrow(x2, y2, x1, y1, 'brand-primary', 3.5); }).join('') + (positive ? plus : minus)(cx, 230, 26);
+      const one = (cx, positive) => spread(12).map(deg => { const [x1, y1] = polar(cx, 230, 10, deg), [x2, y2] = polar(cx, 230, 184, deg); return positive ? fline(x1, y1, x2, y2, 'brand-primary', 3.5, 0.55) : fline(x2, y2, x1, y1, 'brand-primary', 3.5, 0.45); }).join('') + (positive ? plus : minus)(cx, 230, 26);
       return svg('0 30 900 460', one(220, true) + one(680, false) + text(220, 462, 'positive: lines point away', 'lbl') + text(680, 462, 'negative: lines point in', 'lbl'), 'The radial electric field lines of a positive point charge point away from it. Those of a negative point charge point towards it');
     },
 
@@ -145,7 +150,7 @@ window.DeckFigures.add(P => {
 
     // A charged conducting sphere: no field inside, and outside the field of a point charge at its centre.
     'd2-sphere': () => {
-      let s = spread(12, 15).map(deg => { const [x1, y1] = polar(400, 260, 104, deg), [x2, y2] = polar(400, 260, 244, deg); return arrow(x1, y1, x2, y2, 'brand-primary', 3.5); }).join('');
+      let s = spread(12, 15).map(deg => { const [x1, y1] = polar(400, 260, 90, deg), [x2, y2] = polar(400, 260, 248, deg); return fline(x1, y1, x2, y2, 'brand-primary', 3.5, 0.55); }).join('');
       s += `<circle cx="400" cy="260" r="100" style="fill:color-mix(in srgb, var(--neutron) 20%, var(--viewer-bg));stroke:var(--neutron);stroke-width:3"/>`;
       s += spread(12).map(deg => { const [x, y] = polar(400, 260, 82, deg); return text(f(x), f(y) + 10, '+', 'lbl strong', 'middle', 'style="fill:var(--proton)"'); }).join('');
       return svg('100 0 600 520', s + text(400, 256, 'E = 0', 'lbl mono strong') + text(400, 288, 'inside', 'lbl'), 'A positively charged conducting sphere. The charge sits on its surface. There is no field inside, and outside the field lines are radial and leave the surface at right angles');
@@ -156,8 +161,10 @@ window.DeckFigures.add(P => {
     'd2-plates': el => {
       const on = labelled(el), equi = 'equi' in el.dataset;
       let s = plate(200, 600, 100, true) + plate(200, 600, 420, false) + signs(220, 580, 86, 8, '+') + signs(220, 580, 458, 8, '−');
-      s += [250, 310, 370, 430, 490, 550].map(x => arrow(x, 116, x, 404, 'brand-primary', 3.5)).join('');
-      s += [[-1, 196, 110], [1, 604, 110]].map(([k, x]) => `<path d="M${x},112 C${x + k * 78},170 ${x + k * 78},350 ${x},408" style="fill:none;stroke:var(--brand-primary);stroke-width:3.5" marker-end="url(#m-brand-primary)"/><path d="M${x + k * 2},100 C${x + k * 130},110 ${x + k * 130},410 ${x + k * 2},420" style="fill:none;stroke:var(--brand-primary);stroke-width:3.5" marker-end="url(#m-brand-primary)"/>`).join('');
+      s += [250, 310, 370, 430, 490, 550].map(x => fline(x, 108, x, 412, 'brand-primary', 3.5)).join('');
+      // The curved lines at the two edges, from the positive plate round to the negative one.
+      const bulge = (x, dx, y1, y2) => fieldLine(Array.from({ length: 41 }, (_, i) => { const t = i / 40, u = 1 - t; return [x + 3 * u * t * dx, u * u * u * y1 + 3 * u * u * t * (y1 + (y2 - y1) * 0.18) + 3 * u * t * t * (y2 - (y2 - y1) * 0.18) + t * t * t * y2]; }));
+      s += [[-1, 200], [1, 600]].map(([k, x]) => bulge(x, k * 78, 108, 412) + bulge(x, k * 130, 100, 420)).join('');
       if (equi) s += [[164, '300 V'], [228, '200 V'], [292, '100 V']].map(([y, v], i) => `<line x1="204" y1="${y + 32}" x2="596" y2="${y + 32}" ${hlStroke}/>` + text(400, y + 24, v, 'lbl mono strong halo')).join('') + text(722, 110, '400 V', 'lbl mono strong', 'start') + text(722, 430, '0 V', 'lbl mono strong', 'start');
       else if (on) s += both(222, 114, 222, 406) + text(236, 270, 'd', 'lbl display halo', 'start') + text(722, 226, 'weaker,', 'lbl', 'start') + text(722, 260, 'curved field', 'lbl', 'start') + text(722, 294, 'at the edges', 'lbl', 'start');
       return svg(on ? '60 50 860 440' : '80 50 640 440', s, 'Two parallel plates, the upper one positive. Between them the field lines are parallel, evenly spaced and point from the positive plate to the negative plate: a uniform field. At the edges the lines bulge outwards, where the field is weaker');
@@ -190,7 +197,7 @@ window.DeckFigures.add(P => {
     'd2-wire-end': () => {
       const view = (cx, out) => {
         const radii = [40, 68, 112, 180], heads = radii.map((r, i) => [0, 180].map(a => { const [x, y] = polar(cx, 250, r, a + i * 40); return `<path d="M-10,-8 L8,0 L-10,8 Z" transform="translate(${f(x)} ${f(y)}) rotate(${a + i * 40 + (out ? -90 : 90)})" style="fill:var(--brand-accent-strong)"/>`; }).join('')).join('');
-        return radii.map(r => `<circle cx="${cx}" cy="250" r="${r}" style="fill:none;stroke:var(--brand-accent-strong);stroke-width:3"/>`).join('') + twoState(heads, `<g>${spin(cx, 250, 9, { turns: out ? -1 : 1 })}${heads}</g>`) + wireEnd(cx, 250, out, 17);
+        return radii.map(r => `<circle cx="${cx}" cy="250" r="${r}" style="fill:none;stroke:var(--brand-accent-strong);stroke-width:3"/>`).join('') + heads + wireEnd(cx, 250, out, 17);
       };
       return svg('0 40 880 480', view(215, true) + view(665, false) + text(215, 478, 'out of the page: anticlockwise', 'lbl') + text(665, 478, 'into the page: clockwise', 'lbl'), 'A wire seen end on. With the current coming out of the page, shown by a dot, the field lines are circles pointing anticlockwise. With the current going into the page, shown by a cross, they point clockwise. The circles are further apart further from the wire');
     },
@@ -224,9 +231,9 @@ window.DeckFigures.add(P => {
     // Equipotentials and field lines of a positive point charge, at equal steps of potential.
     'd2-equi-point': el => {
       const on = labelled(el), radii = [72, 108, 216];
-      let s = spread(12, 15).map(deg => { const [x1, y1] = polar(300, 260, 30, deg), [x2, y2] = polar(300, 260, 250, deg); return arrow(x1, y1, x2, y2, 'brand-primary', 3); }).join('');
+      let s = spread(12, 15).map(deg => { const [x1, y1] = polar(300, 260, 10, deg), [x2, y2] = polar(300, 260, 252, deg); return fline(x1, y1, x2, y2, 'brand-primary', 3, 0.62); }).join('');
       s += radii.map((r, i) => `<circle cx="300" cy="260" r="${r}" ${hlStroke}/>` + (on ? text(300, i ? 260 - r - 8 : 260 + r + 30, ['300 V', '200 V', '100 V'][i], 'lbl mono strong halo') : '')).join('') + plus(300, 260, 24);
-      if (on) s += `<line x1="590" y1="150" x2="640" y2="150" ${hlStroke}/>` + text(652, 159, 'equipotential', 'lbl', 'start') + arrow(590, 220, 640, 220, 'brand-primary', 3) + text(652, 229, 'field line', 'lbl', 'start');
+      if (on) s += `<line x1="590" y1="150" x2="640" y2="150" ${hlStroke}/>` + text(652, 159, 'equipotential', 'lbl', 'start') + fline(590, 220, 640, 220, 'brand-primary', 3) + text(652, 229, 'field line', 'lbl', 'start');
       return svg(on ? '20 0 840 520' : '40 0 520 520', s, 'Equipotential surfaces round a positive point charge, drawn as circles at 300, 200 and 100 volts. They are further apart further out. The field lines point outwards and cross every equipotential at right angles');
     },
 

@@ -2,7 +2,7 @@
 // ../assets/figures.js. Magnetic field lines and symbols are slate, velocities and currents
 // apricot, forces teal; flux curves are teal and emf curves terracotta.
 window.DeckFigures.add(P => {
-  const { svg, arrow, text, sub, axes, both, through, sampled, labelled, spring, track, anim, spin, twoState, PLAY, f, TAU } = P;
+  const { svg, arrow, fline, text, sub, axes, both, through, sampled, labelled, spring, track, anim, spin, twoState, PLAY, f, TAU } = P;
   const cross = (x, y, s = 9) => `<path d="M${x - s},${y - s} l${2 * s},${2 * s} m0,${-2 * s} l${-2 * s},${2 * s}" style="stroke:var(--brand-accent-strong);stroke-width:3;stroke-linecap:round;opacity:.5"/>`;
   const fieldGrid = (x0, y0, nx, ny, step) => Array.from({ length: nx * ny }, (_, i) => cross(x0 + (i % nx) * step, y0 + Math.floor(i / nx) * step)).join('');
   // A bar magnet with its north pole at the end given by `north` ('left', 'right', 'up' or 'down').
@@ -33,7 +33,7 @@ window.DeckFigures.add(P => {
 
     // Flux through a loop whose normal makes an angle θ with the field.
     'd4-flux': () => {
-      let s = [110, 180, 250, 320, 390].map(y => arrow(80, y, 740, y, 'brand-accent-strong', 3, 'opacity=".55"')).join('');
+      let s = [110, 180, 250, 320, 390].map(y => fline(80, y, 740, y, 'brand-accent-strong', 3, 0.94, 'opacity=".55"')).join('');
       s += `<ellipse cx="400" cy="250" rx="60" ry="150" transform="rotate(-30 400 250)" style="fill:color-mix(in srgb, var(--brand-primary) 22%, transparent);stroke:var(--brand-primary);stroke-width:4"/>`;
       s += arrow(400, 250, 573, 150, 'hl', 5) + `<line x1="400" y1="250" x2="600" y2="250" class="guide"/><path d="M490,250 A90,90 0 0 0 478,205" class="guide accent"/>`;
       s += text(516, 238, 'θ', 'lbl greek') + text(590, 136, 'normal', 'lbl strong', 'start') + text(748, 100, 'B', 'lbl display', 'start') + text(300, 440, 'area A', 'lbl strong');
@@ -120,7 +120,7 @@ window.DeckFigures.add(P => {
     'd4-generator': el => {
       const on = labelled(el), T = 4, n = 72, cx = 230, cy = 250;
       let s = `<rect x="20" y="150" width="60" height="200" rx="6" style="fill:var(--proton)"/><rect x="380" y="150" width="60" height="200" rx="6" style="fill:var(--electron)"/>` + text(50, 262, 'N', 'lbl display', 'middle', 'style="fill:#fff"') + text(410, 262, 'S', 'lbl display', 'middle', 'style="fill:#fff"');
-      s += [180, 250, 320].map(y => arrow(88, y, 372, y, 'brand-accent-strong', 3, 'opacity=".5"')).join('');
+      s += [180, 250, 320].map(y => fline(80, y, 380, y, 'brand-accent-strong', 3, 0.2, 'opacity=".5"')).join('');
       const blade = `<line x1="${cx}" y1="${cy - 96}" x2="${cx}" y2="${cy + 96}" style="stroke:var(--brand-accent);stroke-width:9;stroke-linecap:round"/><circle cx="${cx}" cy="${cy - 96}" r="13" style="fill:var(--brand-accent)"/><circle cx="${cx}" cy="${cy + 96}" r="13" style="fill:var(--brand-accent)"/>` + arrow(cx, cy, cx + 80, cy, 'hl', 4);
       const gx = t => 520 + 330 * t, gy = t => 250 - 110 * Math.sin(t * TAU);
       if (on) {
