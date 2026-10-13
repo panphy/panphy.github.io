@@ -640,6 +640,8 @@ h2:has(+ .terms) { margin-bottom: 24px; }
 /* Where the moving streams play, the particles and waves drawn in place step aside. */
 @media screen and (prefers-reduced-motion: no-preference) { #deck .still { display: none; } }
 @keyframes pulse { 50% { transform: scale(1.08); opacity: .75; } }
+@keyframes body-approach { from { transform: translate(var(--x0), var(--y0, 0px)); } to { transform: translate(var(--x1), var(--y1, 0px)); } }
+@keyframes body-depart { from { transform: translate(var(--x1), var(--y1, 0px)); } to { transform: none; } }
 
 /* Click-through figure builds (data-animate): each press of → shows the next stage of the
    process. Scoped to the live deck on screen, so thumbnails and print keep the finished diagram. */
@@ -649,16 +651,15 @@ h2:has(+ .terms) { margin-bottom: 24px; }
   /* A particle travels from its source to where it is drawn. */
   #deck .fly { transition: transform 1.1s cubic-bezier(.2, .7, .3, 1) .25s; }
   #deck .step:not(.shown) .fly { transform: translate(var(--fx), var(--fy)); transition-delay: 0s; }
-  /* Collisions (A.2): each body waits at its starting place, slides to the point of contact
-     when step k1 is shown and on to where it is drawn when k2 is. What is written above a body
-     before the collision (.pre) gives way to what is written after it (.post). */
-  #deck .cbody { transform: translate(var(--x0), var(--y0, 0px)); transition: transform 1.3s linear; }
-  #deck .fig:has(.k1.shown) .cbody { transform: translate(var(--x1), var(--y1, 0px)); }
-  #deck .fig:has(.k2.shown) .cbody { transform: none; transition-duration: var(--t2, 1.3s); }
-  #deck .mover .pre, #deck .mover .post { transition: opacity .3s ease; }
-  /* The velocities after the collision appear once the bodies have arrived. */
-  #deck .fig:has(.k2.shown) .mover .post { transition-delay: calc(var(--t2, 1.3s) - .1s); }
-  #deck .fig:has(.k1.shown) .mover .pre, #deck .fig:has(.k2.shown) .mover .pre, #deck .fig:not(:has(.k2.shown)) .mover .post { opacity: 0; }
+  /* Collisions (A.2): each body waits at its starting place. When step k2 is shown it slides
+     to the point of contact and straight on to where it is drawn, without a pause (--t1 and
+     --t2 are the times of the two parts). What is written above a body before the collision
+     (.pre) goes at the moment of contact; what is written after it (.post) appears on arrival. */
+  #deck .cbody { transform: translate(var(--x0), var(--y0, 0px)); }
+  #deck .fig:has(.k2.shown) .cbody { transform: none; animation: body-approach var(--t1, 1.3s) linear, body-depart var(--t2, 1.3s) linear var(--t1, 1.3s); }
+  #deck .fig:has(.k2.shown) .mover .pre { opacity: 0; transition: opacity .2s ease var(--t1, 1.3s); }
+  #deck .fig:not(:has(.k2.shown)) .mover .post { opacity: 0; }
+  #deck .fig:has(.k2.shown) .mover .post { transition: opacity .3s ease calc(var(--t1, 1.3s) + var(--t2, 1.3s) - .1s); }
   /* Radiation and graph readings sweep in from the left. */
   #deck svg .wipe { clip-path: inset(-40px -40px -40px -40px); transition: opacity .4s ease, clip-path 1.1s ease-in-out; }
   #deck svg .wipe.late { transition-delay: .6s; }
