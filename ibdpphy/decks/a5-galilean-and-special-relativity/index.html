@@ -1,0 +1,918 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="robots" content="noindex, nofollow">
+  <meta name="description" content="Teaching slides for IB Diploma Programme Physics topic A.5 Galilean and special relativity, higher level only: reference frames, the Galilean and Lorentz transformations, velocity addition, simultaneity, time dilation, length contraction, the space–time interval, muon decay and space–time diagrams.">
+  <meta name="theme-color" content="#F8F6F1">
+  <script src="/assets/theme.js" data-theme-scope="ibdpphy"></script>
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <link rel="stylesheet" href="/assets/standalone-top.css">
+  <title>A.5 Galilean and special relativity · IB DP Physics</title>
+  <link rel="icon" type="image/png" href="/assets/favicon.png">
+  <link rel="apple-touch-icon" href="/assets/apple-touch-icon.png">
+  <link rel="stylesheet" href="../assets/deck.css">
+  <link rel="stylesheet" href="../assets/deck-notes.css">
+  <link rel="stylesheet" href="/assets/theme-toggle.css">
+  <link rel="stylesheet" href="/assets/fullscreen-button.css">
+  <script src="/assets/theme-toggle.js"></script>
+  <script src="/ibdpphy/sw-register.js" defer></script>
+</head>
+<body>
+  <header class="banner">
+    <a class="banner-logo" href="/" aria-label="PanPhy Labs home"><img src="/assets/panphy.png" alt="PanPhy Labs" width="38" height="38"></a>
+    <a class="banner-title" href="#1">A.5 Galilean and special relativity</a>
+    <div class="banner-actions">
+      <button id="thumbs-toggle" class="icon-button" type="button" aria-controls="thumbs" aria-pressed="true" aria-label="Hide slide thumbnails" title="Show or hide slide thumbnails (T)"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path class="pane" d="M9.5 4.5H6A2.5 2.5 0 0 0 3.5 7v10A2.5 2.5 0 0 0 6 19.5h3.5z"/><rect x="3.5" y="4.5" width="17" height="15" rx="2.5"/><path d="M9.5 4.5v15"/></svg></button>
+      <button id="fullscreen" class="panphy-fullscreen-button" type="button" aria-pressed="false" aria-label="Present fullscreen" title="Present fullscreen (F)"><svg class="panphy-fs-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M4 9V4h5M15 4h5v5M20 15v5h-5M9 20H4v-5"/></svg></button>
+      <button id="theme-button" type="button" data-panphy-theme-toggle aria-label="Toggle light/dark theme" title="Toggle between light and dark themes"></button>
+    </div>
+  </header>
+  <script>window.PanPhyThemeToggle.mount(document.getElementById('theme-button'));</script>
+
+  <nav class="thumbs" id="thumbs" aria-label="Slides"></nav>
+
+  <main class="stage" id="stage">
+    <div class="deck" id="deck">
+
+      <!-- 1 · Title -->
+      <section class="slide title hl" data-title="A.5 Galilean and special relativity">
+        <div class="title-grid">
+          <div>
+            <p class="eyebrow">IB DP Physics · Theme A · Space, time and motion</p>
+            <h1>Galilean and special relativity<span>.</span></h1>
+            <p class="lead">A.5 · Reference frames, the Lorentz transformations, time dilation, length contraction and space–time diagrams<br>Higher level only: there is no standard level content in A.5</p>
+            <div class="chips">
+              <span class="chip hl">Additional HL · 8 hours</span>
+              <a class="chip on" href="../a1-kinematics/">A.1 Kinematics ↗</a>
+            </div>
+          </div>
+          <div class="fig" data-fig="a5-st" data-kind="axes" data-plain></div>
+        </div>
+      </section>
+
+      <section class="slide hl" data-title="Lesson map">
+        <p class="eyebrow">The journey</p>
+        <h2>Four parts<span>.</span></h2>
+        <div class="cards fill" style="grid-template-columns: repeat(4, 1fr);">
+          <div class="card">
+            <div class="fig" data-fig="a5-frames" data-still data-plain style="height: 170px;"></div>
+            <p class="eyebrow">Part 01</p>
+            <h3>Galilean relativity</h3>
+            <p>Reference frames, and the common-sense rules for changing between them</p>
+          </div>
+          <div class="card">
+            <div class="fig" data-fig="a5-gamma" data-still style="height: 170px;"></div>
+            <p class="eyebrow">Part 02</p>
+            <h3>Einstein’s postulates</h3>
+            <p>The Lorentz transformations and velocity addition</p>
+          </div>
+          <div class="card">
+            <div class="fig" data-fig="a5-light-clock" data-still data-plain style="height: 170px;"></div>
+            <p class="eyebrow">Part 03</p>
+            <h3>Time and length</h3>
+            <p>Simultaneity, time dilation, length contraction and muons</p>
+          </div>
+          <div class="card">
+            <div class="fig" data-fig="a5-st" data-kind="axes" data-still data-plain style="height: 170px;"></div>
+            <p class="eyebrow">Part 04</p>
+            <h3>Space–time diagrams</h3>
+            <p>World lines, and two frames on one diagram</p>
+          </div>
+        </div>
+        <div class="slide-foot"><span>A.5 GALILEAN AND SPECIAL RELATIVITY · HL ONLY</span><span data-page></span></div>
+      </section>
+
+      <!-- Part 1 -->
+      <section class="slide section hl" data-title="Part 1: Galilean relativity">
+        <div class="title-grid">
+          <div>
+            <p class="eyebrow">Part 01 · HL only</p>
+            <h1>Galilean relativity<span>.</span></h1>
+            <p class="lead">How Newton’s physics compares the views of two observers</p>
+          </div>
+          <div class="fig" data-fig="a5-frames" data-plain></div>
+        </div>
+        <div class="slide-foot"><span>A.5 GALILEAN AND SPECIAL RELATIVITY · HL ONLY</span><span data-page></span></div>
+      </section>
+
+      <section class="slide hl" data-title="Reference frames and events">
+        <p class="eyebrow">Where and when</p>
+        <h2>Reference frames and events<span>.</span></h2>
+        <div class="split wide-fig">
+          <ul class="points small">
+            <li>An <b>event</b>: something that happens at one place and one time</li>
+            <li class="step">A <b>reference frame</b>: axes and clocks used to give it coordinates, \((x, t)\)</li>
+            <li class="step">An <b>inertial</b> frame is one that is <b>not accelerating</b></li>
+          </ul>
+          <div class="panel">
+            <div class="panel-head"><span>TWO FRAMES, ONE EVENT</span></div>
+            <div class="fig" data-fig="a5-frames"></div>
+          </div>
+        </div>
+        <div class="slide-foot"><span>A.5 GALILEAN AND SPECIAL RELATIVITY · HL ONLY</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>What a frame is.</b> Imagine a grid of metre rules filling space, with a clock at every point, all synchronised with each other. An observer “in” that frame reads the position and time of any event from the rule and the clock that are right beside it when it happens. That is what the coordinates \((x, t)\) mean. A second observer, moving relative to the first, carries a grid and clocks of their own and writes \((x', t')\) for the same event.</p>
+            <p><b>Why inertial.</b> In a frame that is not accelerating, a body with no resultant force on it moves in a straight line at constant speed: Newton’s first law holds. In an accelerating car, a ball on the floor rolls backwards with nothing pushing it. The whole of this topic deals with inertial frames only, moving at constant velocity relative to each other.</p>
+            <p><b>The convention.</b> Frame S′ moves at velocity \(v\) along the \(x\) axis of frame S, and the two origins coincide at \(t = t' = 0\).</p>
+          </div>
+          <div class="rn-side">
+            <p class="tip">Before any calculation, decide which frame is S, which is S′, and what the sign of \(v\) is. Most errors start there.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide hl" data-title="Galilean relativity">
+        <p class="eyebrow">Newton’s laws in every inertial frame</p>
+        <h2>Galilean relativity<span>.</span></h2>
+        <div class="split even">
+          <div class="stack">
+            <ul class="points small">
+              <li>Newton’s laws of motion are the <b>same</b> in all inertial frames</li>
+              <li class="step">No experiment in mechanics can tell you whether you are “really” moving</li>
+            </ul>
+            <div class="idea step">Only <b>relative</b> motion has any meaning.</div>
+          </div>
+          <div class="work step">
+            <span class="say">The Galilean transformations</span>
+            <span>\(x' = x - vt\)</span>
+            <span class="step">\(t' = t\)</span>
+            <span class="say step">Time is the same for everyone</span>
+          </div>
+        </div>
+        <div class="slide-foot"><span>A.5 GALILEAN AND SPECIAL RELATIVITY · HL ONLY</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>Galileo’s ship.</b> Shut yourself in a cabin below decks on a ship sailing smoothly at constant velocity. Drop a ball: it falls straight down at your feet. Throw it to a friend: it needs the same effort in every direction. Nothing you can do inside the cabin reveals whether the ship is moving or tied up in harbour. Galileo used this, in 1632, to answer those who said the Earth could not be moving because we would feel it.</p>
+            <p><b>The transformations.</b> In a time \(t\) the origin of S′ has moved a distance \(vt\) along the \(x\) axis. So an event at position \(x\) in S is \(vt\) closer to the origin of S′: \(x' = x - vt\). As for time, Newton took it for granted that a second is a second for every observer: \(t' = t\). It seems too obvious to write down. It is the assumption that special relativity overturns.</p>
+          </div>
+          <div class="rn-side">
+            <p class="more">Accelerations come out the same in both frames, because the frames differ only by a constant velocity. With the same forces and the same masses, \(F = ma\) holds in both.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide hl" data-title="Galilean velocity addition">
+        <p class="eyebrow">Velocities in two frames</p>
+        <h2>Galilean velocity addition<span>.</span></h2>
+        <div class="split even">
+          <div class="stack">
+            <div class="equation"><span>\(u' = u - v\)</span></div>
+            <ul class="points small">
+              <li>\(u\): velocity of an object, measured in S</li>
+              <li class="step">\(u'\): velocity of the same object, measured in S′</li>
+              <li class="step">\(v\): velocity of S′ relative to S</li>
+            </ul>
+          </div>
+          <div class="work step">
+            <span class="say">A train passes a platform at 30 m s⁻¹</span>
+            <span class="say">A ball rolls forward along the carriage at 5.0 m s⁻¹</span>
+            <span>\(u' = u - v\) &nbsp;so&nbsp; \(u = u' + v\)</span>
+            <span class="step">\(u = 5.0 + 30 = \class{res}{35 \,\mathrm{m} \,\mathrm{s}^{-1}}\)</span>
+            <span class="say step">relative to the platform</span>
+          </div>
+        </div>
+        <div class="slide-foot"><span>A.5 GALILEAN AND SPECIAL RELATIVITY · HL ONLY</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>Common sense, written as an equation.</b> Walk forward along a moving train and your speed over the ground is the train’s speed plus your walking speed. Walk towards the back and it is the difference. Divide the transformation \(x' = x - vt\) by the time and that is what comes out, provided the time is the same in both frames.</p>
+            <p><b>Signs do the work.</b> Take one direction as positive for everything. A ball rolling towards the back of the carriage has \(u' = -5.0\) m s⁻¹ and \(u = 25\) m s⁻¹. Two cars approaching each other at 20 m s⁻¹ each have velocities \(+20\) and \(-20\); from the first, the second has \(u' = -20 - 20 = -40\) m s⁻¹.</p>
+            <p><b>What it predicts for light.</b> Shine a torch forward from the train. By this rule, the light should pass the platform at \(c + 30\) m s⁻¹. That prediction is the subject of the next two slides.</p>
+          </div>
+          <div class="rn-side">
+            <p class="trap">Mixing up which velocity is which. \(v\) belongs to the frame; \(u\) and \(u'\) belong to the object.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide hl" data-title="The problem with light">
+        <p class="eyebrow">Where Galilean relativity fails</p>
+        <h2>The problem with light<span>.</span></h2>
+        <div class="stack center" style="gap: 26px;">
+          <div class="cards" style="grid-template-columns: 1fr 1fr;">
+            <div class="card"><p class="eyebrow">Maxwell’s theory, 1860s</p><h3>Light travels at one speed, \(c\)</h3><p>Fixed by the constants of electricity and magnetism. No frame is mentioned</p></div>
+            <div class="card step"><p class="eyebrow">Galilean velocity addition</p><h3>Its speed should depend on the observer</h3><p>\(c - v\) if you chase it, \(c + v\) if you run to meet it</p></div>
+          </div>
+          <div class="idea step">Both cannot be right. Either there is one special frame in which light has speed \(c\), or the rule for adding velocities is wrong.</div>
+        </div>
+        <div class="slide-foot"><span>A.5 GALILEAN AND SPECIAL RELATIVITY · HL ONLY</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>The nineteenth-century answer.</b> Every wave then known travelled in a medium: sound in air, ripples on water. Physicists assumed that light did too, and called its medium the aether. The speed \(c\) would be the speed of light relative to the aether, just as 340 m s⁻¹ is the speed of sound relative to the air. An observer moving through the aether would measure a different speed, exactly as the Galilean rule says.</p>
+            <p><b>A testable prediction.</b> The Earth moves round the Sun at 30 km s⁻¹, so it must be moving through the aether. Light sent along the direction of that motion and light sent across it should take slightly different times to cover the same distance and return. The difference would be tiny, one part in a hundred million, but an instrument using the interference of light (C.3) could detect it.</p>
+          </div>
+          <div class="rn-side">
+            <p class="more">If the aether existed, there would be one frame, at rest in it, that was different from all others, and Galilean relativity would not apply to light.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide history hl" data-title="Story: Michelson and Morley">
+        <p class="eyebrow">The story · Cleveland, Ohio, 1887</p>
+        <p class="not-examined">Background story · not assessed</p>
+        <h2>The most famous failed experiment<span>.</span></h2>
+        <div class="story band" style="--photo-h: 290px;">
+          <div class="story-photos">
+            <figure><img src="images/michelson-morley.jpg" width="742" height="432" alt="Black and white photograph of a large square stone slab carrying optical parts, resting on a round trough in a brick-walled basement"><figcaption>The <b>interferometer</b> of 1887 on its stone slab, which floated on mercury</figcaption></figure>
+          </div>
+          <ul class="points">
+            <li>Albert Michelson and Edward Morley sent two beams of light at right angles, back and forth across a sandstone slab, and made them <b>interfere</b></li>
+            <li>Turning the slab should have shifted the fringes by about <b>0.4</b> of a fringe as the Earth moved through the aether</li>
+            <li>They saw less than <b>0.02</b>. The speed of light was the same in every direction</li>
+          </ul>
+        </div>
+        <p class="credits">Photograph: <a href="https://commons.wikimedia.org/wiki/File:Michelson_morley_experiment_1887.jpg" target="_blank" rel="noopener">Case Western Reserve University, about 1887</a>, public domain.</p>
+        <div class="slide-foot"><span>A.5 GALILEAN AND SPECIAL RELATIVITY · HL ONLY</span><span data-page></span></div>
+      </section>
+
+      <section class="slide hl" data-title="Quick check: Galilean relativity">
+        <p class="eyebrow">Quick check</p>
+        <h2>Galilean relativity<span>.</span></h2>
+        <div class="quiz fill">
+          <div class="q"><p><span class="n">01</span>What is an inertial reference frame?</p><div class="ans step">One that is not accelerating</div></div>
+          <div class="q"><p><span class="n">02</span>What does Galilean relativity say about time?</p><div class="ans step">\(t' = t\): the same in every frame</div></div>
+          <div class="q"><p><span class="n">03</span>S′ moves at 4.0 m s⁻¹. An event is at \(x\) = 50 m, \(t\) = 5.0 s. Find \(x'\).</p><div class="ans step">\(50 - 4.0 \times 5.0 = 30 \,\mathrm{m}\)</div></div>
+          <div class="q"><p><span class="n">04</span>A car at 25 m s⁻¹ is overtaken by one at 35 m s⁻¹. Velocity of the second, seen from the first?</p><div class="ans step">10 m s⁻¹</div></div>
+          <div class="q"><p><span class="n">05</span>What did the Galilean rule predict for the speed of light?</p><div class="ans step">That it depends on the observer’s motion</div></div>
+          <div class="q"><p><span class="n">06</span>What did Michelson and Morley find?</p><div class="ans step">No difference: the same speed in all directions</div></div>
+        </div>
+        <div class="slide-foot"><span class="reveal-hint">PRESS → TO REVEAL EACH ANSWER</span><span data-page></span></div>
+      </section>
+
+      <!-- Part 2 -->
+      <section class="slide section hl" data-title="Part 2: Einstein’s postulates">
+        <div class="title-grid">
+          <div>
+            <p class="eyebrow">Part 02 · HL only</p>
+            <h1>Einstein’s postulates<span>.</span></h1>
+            <p class="lead">Keep the principle of relativity, keep the speed of light, and change everything else</p>
+          </div>
+          <div class="fig" data-fig="a5-gamma"></div>
+        </div>
+        <div class="slide-foot"><span>A.5 GALILEAN AND SPECIAL RELATIVITY · HL ONLY</span><span data-page></span></div>
+      </section>
+
+      <section class="slide history hl" data-title="Story: Einstein in 1905">
+        <p class="eyebrow">The story · Bern, 1905</p>
+        <p class="not-examined">Background story · not assessed</p>
+        <h2>A patent clerk’s paper<span>.</span></h2>
+        <div class="story" style="--photo-h: 430px;">
+          <div class="story-photos">
+            <figure><img src="images/einstein.jpg" width="960" height="1424" alt="Photograph of the young Albert Einstein standing beside a desk in a suit, with dark curly hair and a moustache"><figcaption><b>Albert Einstein</b> at the patent office, about 1905</figcaption></figure>
+          </div>
+          <div class="stack">
+            <ul class="points">
+              <li>Einstein was working as a <b>patent examiner</b> in Bern, with no university post</li>
+              <li>In one year he published four papers that changed physics: among them the photon (E.2) and \(E = mc^{2}\) (E.3)</li>
+              <li>“On the Electrodynamics of Moving Bodies” was received on 30 June and printed on <b>26 September 1905</b></li>
+              <li>It needed no aether, and started from two short statements</li>
+            </ul>
+            <div class="idea">He kept the speed of light and gave up absolute time.</div>
+          </div>
+        </div>
+        <p class="credits">Photograph: <a href="https://commons.wikimedia.org/wiki/File:Einstein_patentoffice_full.jpg" target="_blank" rel="noopener">Lucien Chavan, 1904 or 1905</a>, public domain.</p>
+        <div class="slide-foot"><span>A.5 GALILEAN AND SPECIAL RELATIVITY · HL ONLY</span><span data-page></span></div>
+      </section>
+
+      <section class="slide hl" data-title="The two postulates">
+        <p class="eyebrow">The whole theory rests on these</p>
+        <h2>The two postulates of special relativity<span>.</span></h2>
+        <div class="stack center" style="gap: 26px;">
+          <div class="cards" style="grid-template-columns: 1fr 1fr;">
+            <div class="card hl"><p class="eyebrow">First postulate</p><h3>The laws of physics are the same in all inertial frames</h3><p>Not just mechanics: electricity, magnetism and light as well</p></div>
+            <div class="card hl step"><p class="eyebrow">Second postulate</p><h3>The speed of light in a vacuum is the same in all inertial frames</h3><p>Whatever the motion of the source or of the observer</p></div>
+          </div>
+          <div class="idea step">Two observers moving relative to each other measure the <b>same</b> speed for the <b>same</b> beam of light.</div>
+        </div>
+        <div class="slide-foot"><span>A.5 GALILEAN AND SPECIAL RELATIVITY · HL ONLY</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>The first is Galileo’s idea, widened.</b> Galilean relativity said that no mechanical experiment can detect uniform motion. Einstein extended it to every law of physics. If Maxwell’s equations are among those laws, and they give a definite speed for light, then that speed must come out the same in every inertial frame. The second postulate follows naturally from the first.</p>
+            <p><b>How strange the second is.</b> Chase a beam of light at 99% of its speed and measure how fast it is leaving you. It is still leaving at \(3.00 \times 10^{8}\) m s⁻¹, not at 1% of that. Nothing else behaves this way. A speed is a distance divided by a time. If two observers are to agree on the speed of the same light, they must disagree about the distances and the times. The rest of this deck is the working out of that sentence.</p>
+          </div>
+          <div class="rn-side">
+            <p class="tip">Learn both postulates as statements. “State the postulates of special relativity” is a standard question.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide hl" data-title="The Lorentz factor">
+        <p class="eyebrow">One number that appears everywhere</p>
+        <h2>The Lorentz factor<span>.</span></h2>
+        <div class="split wide-fig">
+          <div class="stack">
+            <div class="equation"><span>\(\gamma = \dfrac{1}{\sqrt{1 - \dfrac{v^{2}}{c^{2}}}}\)</span></div>
+            <ul class="points small">
+              <li>Always <b>1 or more</b>, with no unit</li>
+              <li class="step">Almost exactly 1 at everyday speeds</li>
+              <li class="step">Grows without limit as \(v \rightarrow c\)</li>
+            </ul>
+          </div>
+          <div class="panel">
+            <div class="panel-head"><span>GAMMA AGAINST SPEED</span></div>
+            <div class="fig" data-fig="a5-gamma"></div>
+          </div>
+        </div>
+        <div class="slide-foot"><span>A.5 GALILEAN AND SPECIAL RELATIVITY · HL ONLY</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>Why we never notice.</b> For an aircraft at 250 m s⁻¹, \(\frac{v^{2}}{c^{2}}\) is about \(7 \times 10^{-13}\) and \(\gamma\) differs from 1 only in the thirteenth decimal place. Even for the Earth in its orbit, at 30 km s⁻¹, the difference is five parts in a thousand million. Our intuitions about space and time were formed at speeds where relativity makes no measurable difference.</p>
+            <p><b>Work with \(\frac{v}{c}\).</b> Speeds in this topic are nearly always given as fractions of \(c\). For \(v = 0.60c\): \(\frac{v^{2}}{c^{2}} = 0.36\), so \(\gamma = \frac{1}{\sqrt{0.64}} = \frac{1}{0.80} = 1.25\). For \(0.80c\): \(\gamma = \frac{1}{\sqrt{0.36}} = \frac{1}{0.60} = 1.67\). These two turn up constantly because they give exact answers.</p>
+            <p><b>Why nothing reaches \(c\).</b> At \(v = c\) the bottom of the fraction is zero. For \(v > c\) it is the square root of a negative number.</p>
+          </div>
+          <div class="rn-side">
+            <p class="trap">Forgetting to square: it is \(\frac{v^{2}}{c^{2}}\) under the root, not \(\frac{v}{c}\).</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide hl" data-title="The Lorentz transformations">
+        <p class="eyebrow">Replacing the Galilean ones</p>
+        <h2>The Lorentz transformations<span>.</span></h2>
+        <div class="split even">
+          <div class="stack">
+            <div class="equation small"><span>\(x' = \gamma (x - vt)\)</span></div>
+            <div class="equation small step"><span>\(t' = \gamma \left(t - \dfrac{vx}{c^{2}}\right)\)</span></div>
+          </div>
+          <ul class="points small">
+            <li class="step">The coordinates of the <b>same event</b> in two frames</li>
+            <li class="step">Time is no longer the same: \(t'\) depends on <b>where</b> the event is as well as when</li>
+            <li class="step">At low speed, \(\gamma \approx 1\) and \(\dfrac{vx}{c^{2}} \approx 0\): back to \(x' = x - vt\), \(t' = t\)</li>
+          </ul>
+        </div>
+        <div class="slide-foot"><span>A.5 GALILEAN AND SPECIAL RELATIVITY · HL ONLY</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>They are forced on us.</b> These equations are not a guess. They are the only way of relating two frames that keeps the speed of light the same in both and still treats the two frames even-handedly. You do not need to derive them.</p>
+            <p><b>The new feature is in the time equation.</b> In the Galilean version every observer shared one time. Here the time of an event in S′ involves its position in S. Two events that happen at the same time \(t\) but at different places \(x\) get different values of \(t'\). That one term, \(\frac{vx}{c^{2}}\), is the source of the relativity of simultaneity, of time dilation and of length contraction.</p>
+            <p><b>Newton is still inside.</b> For everyday speeds the Lorentz transformations give the Galilean ones to very high accuracy. Relativity does not overthrow Newtonian mechanics; it contains it as the low-speed case.</p>
+          </div>
+          <div class="rn-side">
+            <p class="tip">For intervals between two events the same equations hold with \(\Delta x\) and \(\Delta t\) in place of \(x\) and \(t\). That is how they are most often used.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide hl" data-title="Lorentz transformation of an event">
+        <p class="eyebrow">Worked example</p>
+        <h2>One event, two frames<span>.</span></h2>
+        <div class="split even">
+          <div class="work">
+            <span class="say">S′ moves at \(v = 0.60c\) · \(\gamma = 1.25\)</span>
+            <span class="say">In S: \(x = 1.2 \times 10^{9} \,\mathrm{m}\), \(t = 5.0 \,\mathrm{s}\)</span>
+            <span>\(x' = \gamma (x - vt)\)</span>
+            <span class="step">\(x' = 1.25 \times (1.2 \times 10^{9} - 0.60 \times 3.00 \times 10^{8} \times 5.0)\)</span>
+            <span class="step">\(x' = \class{res}{3.8 \times 10^{8} \,\mathrm{m}}\)</span>
+          </div>
+          <div class="work step">
+            <span>\(t' = \gamma \left(t - \dfrac{vx}{c^{2}}\right)\)</span>
+            <span class="step">\(\dfrac{vx}{c^{2}} = \dfrac{0.60 \times 1.2 \times 10^{9}}{3.00 \times 10^{8}} = 2.4 \,\mathrm{s}\)</span>
+            <span class="step">\(t' = 1.25 \times (5.0 - 2.4)\)</span>
+            <span class="step">\(t' = \class{res}{3.3 \,\mathrm{s}}\)</span>
+          </div>
+        </div>
+        <div class="slide-foot"><span>A.5 GALILEAN AND SPECIAL RELATIVITY · HL ONLY</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>A short cut for \(\frac{vx}{c^{2}}\).</b> Write \(v\) as \(0.60c\) and one \(c\) cancels: \(\frac{vx}{c^{2}} = 0.60 \times \frac{x}{c}\). The quantity \(\frac{x}{c}\) is the time light takes to cover the distance \(x\): here \(\frac{1.2 \times 10^{9}}{3.00 \times 10^{8}} = 4.0\) s. Many questions give distances in light seconds or light years for exactly this reason.</p>
+            <p><b>Compare with Galileo.</b> The Galilean answers would have been \(x' = 3.0 \times 10^{8}\) m and \(t' = 5.0\) s. The position differs by the factor \(\gamma\). The time differs completely: the two observers do not agree on when the event happened, though their clocks were set together at the origin.</p>
+          </div>
+          <div class="rn-side">
+            <p class="tip">Keep these numbers. A later slide uses both sets of coordinates to check that the space–time interval is the same in the two frames.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide hl" data-title="Relativistic velocity addition">
+        <p class="eyebrow">Velocities that never exceed c</p>
+        <h2>Relativistic velocity addition<span>.</span></h2>
+        <div class="split even">
+          <div class="stack">
+            <div class="equation"><span>\(u' = \dfrac{u - v}{1 - \dfrac{uv}{c^{2}}}\)</span></div>
+            <ul class="points small">
+              <li>The top is Galileo’s rule</li>
+              <li class="step">The bottom is the correction</li>
+            </ul>
+          </div>
+          <div class="work step">
+            <span class="say">Two ships approach: \(u = 0.80c\), \(v = -0.60c\) in S</span>
+            <span>\(u' = \dfrac{0.80c - (-0.60c)}{1 - (0.80)(-0.60)}\)</span>
+            <span class="step">\(u' = \dfrac{1.40c}{1.48} = \class{res}{0.95c}\)</span>
+            <span class="say step">Light instead: \(u = c\)</span>
+            <span class="step">\(u' = \dfrac{c - v}{1 - \dfrac{v}{c}} = \class{res}{c}\)</span>
+          </div>
+        </div>
+        <div class="slide-foot"><span>A.5 GALILEAN AND SPECIAL RELATIVITY · HL ONLY</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>The two ships.</b> Seen from the Earth, one ship moves at \(+0.80c\) and the other at \(-0.60c\). Take the second ship as the frame S′, so \(v = -0.60c\). Galileo would give \(u' = 1.40c\) for the speed at which the first ship approaches. The correct answer is \(0.95c\). However close to \(c\) two velocities are, they never combine to more than \(c\).</p>
+            <p><b>The second postulate, recovered.</b> Put \(u = c\) into the equation: \(u' = \frac{c - v}{1 - \frac{v}{c}} = \frac{c (c - v)}{c - v} = c\), whatever \(v\) is. The equation has the constancy of the speed of light built into it.</p>
+            <p><b>At low speeds</b> the product \(\frac{uv}{c^{2}}\) is negligible, the bottom is 1 and the rule becomes \(u' = u - v\) again.</p>
+          </div>
+          <div class="rn-side">
+            <p class="trap">Losing a minus sign. Decide the positive direction first, give every velocity its sign, and substitute with brackets.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide hl" data-title="Quick check: the postulates">
+        <p class="eyebrow">Quick check</p>
+        <h2>Einstein’s postulates<span>.</span></h2>
+        <div class="quiz fill">
+          <div class="q"><p><span class="n">01</span>State the second postulate.</p><div class="ans step">The speed of light in a vacuum is the same in all inertial frames</div></div>
+          <div class="q"><p><span class="n">02</span>\(\gamma\) for \(v = 0.60c\)?</p><div class="ans step">1.25</div></div>
+          <div class="q"><p><span class="n">03</span>\(\gamma\) for \(v = 0.80c\)?</p><div class="ans step">1.67</div></div>
+          <div class="q"><p><span class="n">04</span>What do the Lorentz transformations become at low speed?</p><div class="ans step">The Galilean transformations</div></div>
+          <div class="q"><p><span class="n">05</span>A ship at \(0.50c\) fires a probe forward at \(0.50c\) relative to itself. Probe’s speed from the Earth?</p><div class="ans step">\(1.00c \div 1.25 = 0.80c\)</div></div>
+          <div class="q"><p><span class="n">06</span>The ship shines a laser forward. Speed of the light from the Earth?</p><div class="ans step">\(c\)</div></div>
+        </div>
+        <div class="slide-foot"><span class="reveal-hint">PRESS → TO REVEAL EACH ANSWER</span><span data-page></span></div>
+      </section>
+
+      <!-- Part 3 -->
+      <section class="slide section hl" data-title="Part 3: Time and length">
+        <div class="title-grid">
+          <div>
+            <p class="eyebrow">Part 03 · HL only</p>
+            <h1>Time and length<span>.</span></h1>
+            <p class="lead">What two observers no longer agree about</p>
+          </div>
+          <div class="fig" data-fig="a5-light-clock" data-plain></div>
+        </div>
+        <div class="slide-foot"><span>A.5 GALILEAN AND SPECIAL RELATIVITY · HL ONLY</span><span data-page></span></div>
+      </section>
+
+      <section class="slide hl" data-title="The relativity of simultaneity">
+        <p class="eyebrow">At the same time, for whom?</p>
+        <h2>The relativity of simultaneity<span>.</span></h2>
+        <div class="split wide-fig">
+          <div class="stack">
+            <ul class="points small">
+              <li>A lamp at the <b>centre</b> of a carriage flashes</li>
+              <li class="step">Light travels at \(c\) in <b>both</b> frames</li>
+              <li class="step">On the platform, the back wall moves to <b>meet</b> its flash</li>
+            </ul>
+            <div class="idea step">Simultaneous in one frame, <b>not</b> in another.</div>
+          </div>
+          <div class="panel">
+            <div class="panel-head"><span>ONE PAIR OF EVENTS, TWO FRAMES</span></div>
+            <div class="fig" data-fig="a5-simultaneity"></div>
+          </div>
+        </div>
+        <div class="slide-foot"><span>A.5 GALILEAN AND SPECIAL RELATIVITY · HL ONLY</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>Nobody is being fooled.</b> This is not about how long light takes to reach someone’s eyes, and neither observer is mistaken. Each has corrected for the travel time of the light. In the carriage frame the two arrivals happen at the same time. In the platform frame they happen at different times. Both descriptions are correct, each in its own frame. There is no third, “true” answer.</p>
+            <p><b>Why the second postulate forces this.</b> In Galilean physics the platform observer would say that the forward flash travels faster than \(c\) and the backward one slower, which would exactly make up for the motion of the walls, and everyone would agree. With light at \(c\) in both directions in both frames, that escape is closed.</p>
+            <p><b>From the equations.</b> Two events with the same \(t\) but a separation \(\Delta x\) have \(\Delta t' = -\gamma \frac{v \Delta x}{c^{2}}\), which is not zero. Events at the same place, \(\Delta x = 0\), stay simultaneous in every frame.</p>
+          </div>
+          <div class="rn-side">
+            <p class="tip">Simultaneity is relative only for events at <b>different places</b> along the direction of motion.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide hl" data-title="Time dilation">
+        <p class="eyebrow">Moving clocks run slow</p>
+        <h2>Time dilation<span>.</span></h2>
+        <div class="split wide-fig">
+          <div class="stack">
+            <div class="equation"><span>\(\Delta t = \gamma \Delta t_{0}\)</span></div>
+            <ul class="points small">
+              <li>\(\Delta t_{0}\): the <b>proper time</b>, in the frame where both events happen at the <b>same place</b></li>
+              <li class="step">Every other frame measures a <b>longer</b> time</li>
+            </ul>
+          </div>
+          <div class="panel">
+            <div class="panel-head"><span>A LIGHT CLOCK</span></div>
+            <div class="fig" data-fig="a5-light-clock"></div>
+          </div>
+        </div>
+        <div class="slide-foot"><span>A.5 GALILEAN AND SPECIAL RELATIVITY · HL ONLY</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>The light clock.</b> A pulse of light bounces between two mirrors; each return trip is one tick. For someone travelling with the clock the light goes straight up and down. For someone watching it fly past, the mirrors move while the light is in flight, so the light follows a longer, slanting path. The light’s speed is \(c\) for both observers, so a longer path means a longer time. The moving clock ticks more slowly.</p>
+            <p><b>Not just light clocks.</b> If a light clock on a spaceship ran slow compared with a wristwatch beside it, the crew could tell they were moving, which the first postulate forbids. So every process on the ship runs slow by the same factor as seen from outside: watches, heartbeats, the decay of unstable particles.</p>
+            <p><b>Finding the proper time.</b> Ask: in which frame do the two events happen at the same place? The two ticks of a clock happen at the same place for whoever is carrying the clock. That observer’s time is \(\Delta t_{0}\), the shortest that anyone measures.</p>
+          </div>
+          <div class="rn-side">
+            <p class="trap">Thinking that the crew feel time passing slowly. To them everything is normal, and it is the clocks left behind that run slow.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide hl" data-title="Length contraction">
+        <p class="eyebrow">Moving objects are shorter</p>
+        <h2>Length contraction<span>.</span></h2>
+        <div class="split even">
+          <div class="stack">
+            <div class="equation"><span>\(L = \dfrac{L_{0}}{\gamma}\)</span></div>
+            <ul class="points small">
+              <li>\(L_{0}\): the <b>proper length</b>, in the frame where the object is <b>at rest</b></li>
+              <li class="step">Every other frame measures a <b>shorter</b> length</li>
+              <li class="step">Only along the <b>direction of motion</b></li>
+            </ul>
+          </div>
+          <div class="work step">
+            <span class="say">A ship of proper length 120 m passes at \(0.80c\) · \(\gamma = 1.67\)</span>
+            <span>\(L = \dfrac{L_{0}}{\gamma} = \dfrac{120}{1.67}\)</span>
+            <span class="step">\(L = \class{res}{72 \,\mathrm{m}}\)</span>
+            <span class="say step">Its width and height are unchanged</span>
+          </div>
+        </div>
+        <div class="slide-foot"><span>A.5 GALILEAN AND SPECIAL RELATIVITY · HL ONLY</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>It follows from time dilation.</b> A ship travels from the Earth to a star at speed \(v\). Earth observers say the distance is \(L_{0}\) and the trip takes \(\Delta t = \frac{L_{0}}{v}\). The crew’s clocks record less time, \(\frac{\Delta t}{\gamma}\). But the crew agree that the star approached them at speed \(v\). The only way both can be true is if, for the crew, the distance to the star was shorter: \(\frac{L_{0}}{\gamma}\).</p>
+            <p><b>What a length is.</b> To measure a moving object you must mark where its two ends are at the same time. But observers in different frames disagree about what “the same time” means. Length contraction is a consequence of the relativity of simultaneity, not a squashing of the object by any force.</p>
+            <p><b>Each sees the other contracted.</b> The crew find the Earth-to-star distance shortened; Earth observers find the ship shortened. There is no contradiction, because the two are measuring different things with different ideas of simultaneity.</p>
+          </div>
+          <div class="rn-side">
+            <p class="tip">Proper time is the shortest time; proper length is the longest length. Check every answer against that.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide hl" data-title="A journey to a star">
+        <p class="eyebrow">Worked example</p>
+        <h2>A journey to a star<span>.</span></h2>
+        <div class="split even">
+          <div class="work">
+            <span class="say">Star 4.0 light years away · ship at \(0.80c\) · \(\gamma = 1.67\)</span>
+            <span class="say">Earth frame</span>
+            <span>\(\Delta t = \dfrac{L_{0}}{v} = \dfrac{4.0 \,\mathrm{ly}}{0.80c} = \class{res}{5.0 \,\text{years}}\)</span>
+            <span class="say step">Ship’s clock: the proper time</span>
+            <span class="step">\(\Delta t_{0} = \dfrac{\Delta t}{\gamma} = \dfrac{5.0}{1.67} = \class{res}{3.0 \,\text{years}}\)</span>
+          </div>
+          <div class="work step">
+            <span class="say">Ship frame: the distance is contracted</span>
+            <span>\(L = \dfrac{L_{0}}{\gamma} = \dfrac{4.0}{1.67} = 2.4 \,\mathrm{ly}\)</span>
+            <span class="step">\(\Delta t_{0} = \dfrac{L}{v} = \dfrac{2.4 \,\mathrm{ly}}{0.80c} = \class{res}{3.0 \,\text{years}}\)</span>
+            <span class="say step">Both frames agree on the ship’s clock</span>
+          </div>
+        </div>
+        <div class="slide-foot"><span>A.5 GALILEAN AND SPECIAL RELATIVITY · HL ONLY</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>One fact, two explanations.</b> Everyone agrees on what the ship’s clock reads on arrival: three years. They disagree about why. On Earth they say the trip took five years and the ship’s clocks ran slow. On the ship they say their clocks were fine and the trip was short because the distance was only 2.4 light years. Time dilation in one frame is length contraction in the other.</p>
+            <p><b>Which is the proper time?</b> Departure and arrival both happen at the ship, as far as the crew are concerned: at the same place in the ship’s frame. So the ship’s three years is the proper time. The Earth frame needs two clocks in different places, one on Earth and one at the star, to time the trip.</p>
+            <p><b>Light years make it easy.</b> A distance in light years divided by a speed in units of \(c\) gives a time in years directly.</p>
+          </div>
+          <div class="rn-side">
+            <p class="trap">Applying \(\gamma\) twice: shortening the distance and also slowing the clock in the same frame. Use one effect per frame.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide hl" data-title="Muon decay">
+        <p class="eyebrow">Experimental evidence</p>
+        <h2>Muon decay<span>.</span></h2>
+        <div class="split wide-fig">
+          <div class="stack">
+            <ul class="points small">
+              <li>Made high in the atmosphere, moving at \(0.995c\)</li>
+              <li class="step">Mean lifetime at rest: <b>2.2 μs</b></li>
+              <li class="step">In one lifetime: about 660 m</li>
+            </ul>
+            <div class="idea step">Without relativity almost none should reach sea level. In fact most do.</div>
+          </div>
+          <div class="panel">
+            <div class="panel-head"><span>THE LAST 1920 m · γ = 10</span></div>
+            <div class="fig" data-fig="a5-muons"></div>
+          </div>
+        </div>
+        <div class="slide-foot"><span>A.5 GALILEAN AND SPECIAL RELATIVITY · HL ONLY</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>The puzzle.</b> Muons are unstable particles made when cosmic rays strike the top of the atmosphere. At rest they last 2.2 μs on average. Even at almost the speed of light, a muon would cover only \(0.995 \times 3.00 \times 10^{8} \times 2.2 \times 10^{-6} = 660\) m in one lifetime. A descent of 1920 m takes 6.4 μs, nearly three lifetimes, and after three lifetimes only about one in twenty would be left.</p>
+            <p><b>The measurement.</b> In 1963 David Frisch and James Smith counted muons of this speed on Mount Washington, 1917 m up, and again at sea level. On the mountain: 563 an hour. At sea level, without relativity, they should have found about 27. They found 412.</p>
+            <p><b>Two explanations, one result.</b> In the Earth frame the muons’ clocks run slow by \(\gamma = 10\): they live 22 μs, and 6.4 μs is less than a third of a lifetime. In the muons’ frame they live 2.2 μs as usual, but the mountain is only 192 m high and rushes past in 0.64 μs: again less than a third of a lifetime. The same fraction survives either way.</p>
+          </div>
+          <div class="rn-side">
+            <p class="tip">Muon decay is the evidence named in the guide for both time dilation and length contraction. Be able to tell it from either frame.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide hl" data-title="Muons: the numbers">
+        <p class="eyebrow">Worked example</p>
+        <h2>Muons in two frames<span>.</span></h2>
+        <div class="split even">
+          <div class="work">
+            <span class="say">\(v = 0.995c\) · \(\gamma = 10\) · height 1920 m · \(\Delta t_{0} = 2.2 \,\mu\mathrm{s}\)</span>
+            <span class="say">Earth frame</span>
+            <span>Time of flight \(= \dfrac{L_{0}}{v} = \dfrac{1920}{0.995 \times 3.00 \times 10^{8}} = 6.4 \,\mu\mathrm{s}\)</span>
+            <span class="step">Lifetime \(\Delta t = \gamma \Delta t_{0} = 10 \times 2.2 = \class{res}{22 \,\mu\mathrm{s}}\)</span>
+            <span class="step">\(\dfrac{6.4}{22} = 0.29\) of a lifetime</span>
+          </div>
+          <div class="work step">
+            <span class="say">Muon frame</span>
+            <span>\(L = \dfrac{L_{0}}{\gamma} = \dfrac{1920}{10} = \class{res}{192 \,\mathrm{m}}\)</span>
+            <span class="step">Time \(= \dfrac{L}{v} = \dfrac{192}{0.995 \times 3.00 \times 10^{8}} = 0.64 \,\mu\mathrm{s}\)</span>
+            <span class="step">\(\dfrac{0.64}{2.2} = 0.29\) of a lifetime</span>
+          </div>
+        </div>
+        <div class="slide-foot"><span>A.5 GALILEAN AND SPECIAL RELATIVITY · HL ONLY</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>The agreement is the point.</b> Each frame uses one relativistic effect and gets 0.29 of a lifetime. With the exponential decay law of E.3, the fraction surviving is \(e^{-0.29} = 0.75\). Frisch and Smith measured \(\frac{412}{563} = 0.73\). Without relativity the flight would last \(\frac{6.4}{2.2} = 2.9\) lifetimes and the fraction would be \(e^{-2.9} = 0.055\).</p>
+            <p><b>Which quantities are proper.</b> The muon’s lifetime in its own frame, 2.2 μs, is a proper time: its creation and its decay happen at the same place for the muon. The height of the mountain measured from the ground, 1920 m, is a proper length: the mountain is at rest in the Earth frame.</p>
+          </div>
+          <div class="rn-side">
+            <p class="tip">\(\gamma = \frac{1}{\sqrt{1 - 0.995^{2}}} = \frac{1}{\sqrt{0.00998}} = 10.0\).</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide hl" data-title="The space–time interval">
+        <p class="eyebrow">Something everyone agrees on</p>
+        <h2>The space–time interval<span>.</span></h2>
+        <div class="split even">
+          <div class="stack">
+            <div class="equation small"><span>\((\Delta s)^{2} = (c \Delta t)^{2} - (\Delta x)^{2}\)</span></div>
+            <ul class="points small">
+              <li>For any <b>two events</b></li>
+              <li class="step"><b>Invariant</b>: the same in every inertial frame</li>
+              <li class="step">Though \(\Delta t\) and \(\Delta x\) each differ from frame to frame</li>
+            </ul>
+          </div>
+          <div class="work step">
+            <span class="say">The event of Part 2, measured from the origin</span>
+            <span class="say">S: \(c \Delta t = 1.5 \times 10^{9}\) m, \(\Delta x = 1.2 \times 10^{9}\) m</span>
+            <span>\((\Delta s)^{2} = (1.5^{2} - 1.2^{2}) \times 10^{18} = \class{res}{8.1 \times 10^{17} \,\mathrm{m}^{2}}\)</span>
+            <span class="say step">S′: \(c \Delta t' = 9.75 \times 10^{8}\) m, \(\Delta x' = 3.75 \times 10^{8}\) m</span>
+            <span class="step">\((\Delta s)^{2} = (9.75^{2} - 3.75^{2}) \times 10^{16} = \class{res}{8.1 \times 10^{17} \,\mathrm{m}^{2}}\)</span>
+          </div>
+        </div>
+        <div class="slide-foot"><span>A.5 GALILEAN AND SPECIAL RELATIVITY · HL ONLY</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>Like a distance, with a minus sign.</b> Two people using maps turned at different angles disagree about how far east and how far north a town is, but agree on its distance, because \(\text{east}^{2} + \text{north}^{2}\) does not depend on how the map is turned. Two observers in relative motion disagree about the time and the distance between two events, but agree on \((c \Delta t)^{2} - (\Delta x)^{2}\). Space and time are mixed together by motion, and the interval is what survives.</p>
+            <p><b>Its link to proper time.</b> In the frame where the two events happen at the same place, \(\Delta x = 0\) and the interval is just \(c \Delta t_{0}\). So for any pair of events that one clock could be present at, \(\Delta s = c \times\) the proper time between them. In the example, \(\Delta s = \sqrt{8.1 \times 10^{17}} = 9.0 \times 10^{8}\) m, and the proper time is 3.0 s.</p>
+            <p><b>Time dilation in one line.</b> \((c \Delta t)^{2} - (v \Delta t)^{2} = (c \Delta t_{0})^{2}\) gives \(\Delta t = \gamma \Delta t_{0}\) directly.</p>
+          </div>
+          <div class="rn-side">
+            <p class="tip">Use the interval when a question gives \(\Delta x\) and \(\Delta t\) in one frame and one of them in another. It avoids the Lorentz transformations altogether.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide hl" data-title="Quick check: time and length">
+        <p class="eyebrow">Quick check</p>
+        <h2>Time and length<span>.</span></h2>
+        <div class="quiz fill">
+          <div class="q"><p><span class="n">01</span>What is a proper time interval?</p><div class="ans step">Measured where both events happen at the same place</div></div>
+          <div class="q"><p><span class="n">02</span>A clock moves at \(0.60c\). 8.0 s pass on it. Time in the lab?</p><div class="ans step">\(1.25 \times 8.0 = 10 \,\mathrm{s}\)</div></div>
+          <div class="q"><p><span class="n">03</span>A 100 m rod moves along its length at \(0.60c\). Length in the lab?</p><div class="ans step">\(100 \div 1.25 = 80 \,\mathrm{m}\)</div></div>
+          <div class="q"><p><span class="n">04</span>Which dimension of a moving object is contracted?</p><div class="ans step">Only the one along its motion</div></div>
+          <div class="q"><p><span class="n">05</span>Which quantity is the same in all inertial frames?</p><div class="ans step">The space–time interval (and \(c\))</div></div>
+          <div class="q"><p><span class="n">06</span>How do muons provide evidence for relativity?</p><div class="ans step">Far more reach the ground than their lifetime at rest allows</div></div>
+        </div>
+        <div class="slide-foot"><span class="reveal-hint">PRESS → TO REVEAL EACH ANSWER</span><span data-page></span></div>
+      </section>
+
+      <!-- Part 4 -->
+      <section class="slide section hl" data-title="Part 4: Space–time diagrams">
+        <div class="title-grid">
+          <div>
+            <p class="eyebrow">Part 04 · HL only</p>
+            <h1>Space–time diagrams<span>.</span></h1>
+            <p class="lead">Relativity as a picture</p>
+          </div>
+          <div class="fig" data-fig="a5-st" data-kind="basic" data-plain></div>
+        </div>
+        <div class="slide-foot"><span>A.5 GALILEAN AND SPECIAL RELATIVITY · HL ONLY</span><span data-page></span></div>
+      </section>
+
+      <section class="slide history hl" data-title="Story: Minkowski">
+        <p class="eyebrow">The story · Germany, 1908</p>
+        <p class="not-examined">Background story · not assessed</p>
+        <h2>Einstein’s teacher draws the picture<span>.</span></h2>
+        <div class="story" style="--photo-h: 430px;">
+          <div class="story-photos">
+            <figure><img src="images/minkowski.jpg" width="813" height="1093" alt="Portrait photograph of Hermann Minkowski, a man with a moustache and pince-nez in a dark suit"><figcaption><b>Hermann Minkowski</b></figcaption></figure>
+          </div>
+          <div class="stack">
+            <ul class="points">
+              <li>Minkowski had been one of Einstein’s mathematics teachers in Zurich</li>
+              <li>By 1908 he saw that special relativity is best understood as the geometry of <b>four dimensions</b>: three of space and one of time</li>
+              <li>His lecture “Space and Time”, on 21 September 1908, introduced the diagrams of this part</li>
+              <li>He died of appendicitis four months later, aged 44</li>
+            </ul>
+            <div class="idea">“Henceforth space by itself, and time by itself, are doomed to fade away into mere shadows.”</div>
+          </div>
+        </div>
+        <p class="credits">Photograph: <a href="https://commons.wikimedia.org/wiki/File:Hermann_Minkowski_Portrait.jpg" target="_blank" rel="noopener">unknown photographer</a>, public domain.</p>
+        <div class="slide-foot"><span>A.5 GALILEAN AND SPECIAL RELATIVITY · HL ONLY</span><span data-page></span></div>
+      </section>
+
+      <section class="slide hl" data-title="Space–time diagrams">
+        <p class="eyebrow">A graph of where and when</p>
+        <h2>Space–time diagrams and world lines<span>.</span></h2>
+        <div class="split wide-fig">
+          <ul class="points small">
+            <li>\(x\) across, \(ct\) <b>upwards</b>: both in metres</li>
+            <li class="step">A <b>point</b> is an event</li>
+            <li class="step">A <b>world line</b> is the path of an object through space and time</li>
+            <li class="step">Light: a line at <b>45°</b></li>
+          </ul>
+          <div class="panel">
+            <div class="panel-head"><span>FRAME S</span></div>
+            <div class="fig" data-fig="a5-st" data-kind="basic"></div>
+          </div>
+        </div>
+        <div class="slide-foot"><span>A.5 GALILEAN AND SPECIAL RELATIVITY · HL ONLY</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>A displacement–time graph on its side.</b> In A.1 time ran across and position up. Here position runs across and time runs up, so the diagram reads like a film strip: each horizontal line is a snapshot of the \(x\) axis at one moment, and later moments are higher. An object at rest stays at the same \(x\) while time passes: a vertical line. A moving object leans over, more for a greater speed.</p>
+            <p><b>Why \(ct\).</b> Multiplying the time by \(c\) turns it into a distance, the distance light would travel in that time, so both axes have the same unit. Light then covers one unit of \(x\) for every unit of \(ct\): a line at 45°. Nothing material can have a world line that leans further than that.</p>
+            <p><b>Constant velocity only.</b> A straight world line means a constant velocity. The course deals with straight world lines only.</p>
+          </div>
+          <div class="rn-side">
+            <p class="trap">Reading a steep line as fast. On these axes steeper means slower. A vertical line is at rest.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide hl" data-title="The angle of a world line">
+        <p class="eyebrow">Speed from a diagram</p>
+        <h2>The angle of a world line<span>.</span></h2>
+        <div class="split wide-fig">
+          <div class="stack">
+            <div class="equation"><span>\(\tan \theta = \dfrac{v}{c}\)</span></div>
+            <ul class="points small">
+              <li>\(\theta\): the angle between the world line and the <b>\(ct\) axis</b></li>
+              <li class="step">At rest: \(\theta = 0\). Light: \(\theta = 45^{\circ}\)</li>
+            </ul>
+            <div class="work step">
+              <span>\(v = 0.60c\): \(\theta = \tan^{-1} 0.60 = \class{res}{31^{\circ}}\)</span>
+            </div>
+          </div>
+          <div class="panel">
+            <div class="panel-head"><span>A PARTICLE MOVING AT CONSTANT VELOCITY</span></div>
+            <div class="fig" data-fig="a5-st" data-kind="angle"></div>
+          </div>
+        </div>
+        <div class="slide-foot"><span>A.5 GALILEAN AND SPECIAL RELATIVITY · HL ONLY</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>Where it comes from.</b> In a time \(t\) the particle moves a distance \(x = vt\). On the diagram that is a step of \(vt\) across for a step of \(ct\) up. The tangent of the angle from the vertical axis is across over up: \(\frac{vt}{ct} = \frac{v}{c}\).</p>
+            <p><b>Reading a speed.</b> Pick any two points on a world line, read off \(\Delta x\) and \(\Delta (ct)\), and divide: \(\frac{v}{c} = \frac{\Delta x}{\Delta (ct)}\). A world line that goes 2 squares across for every 5 up belongs to something moving at \(0.40c\).</p>
+            <p><b>The scale is not linear in angle.</b> \(0.60c\) is at 31°, \(0.90c\) at 42° and \(0.99c\) at 44.7°. The speeds close to \(c\) are crowded against the light line.</p>
+          </div>
+          <div class="rn-side">
+            <p class="tip">The angle is measured from the \(ct\) axis, not from the \(x\) axis.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide hl" data-title="The axes of a moving frame">
+        <p class="eyebrow">Two frames on one diagram</p>
+        <h2>The axes of a moving frame<span>.</span></h2>
+        <div class="split wide-fig">
+          <ul class="points small">
+            <li>\(ct'\) axis: the <b>world line</b> of the origin of S′</li>
+            <li class="step">\(x'\) axis: all the events at \(t' = 0\)</li>
+            <li class="step">Each makes the <b>same angle</b> \(\theta\) with its unprimed axis</li>
+            <li class="step">Light is at 45° to both sets: the same speed \(c\)</li>
+          </ul>
+          <div class="panel">
+            <div class="panel-head"><span>S′ MOVING AT 0.6 c</span></div>
+            <div class="fig" data-fig="a5-st" data-kind="axes"></div>
+          </div>
+        </div>
+        <div class="slide-foot"><span>A.5 GALILEAN AND SPECIAL RELATIVITY · HL ONLY</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>The \(ct'\) axis.</b> The time axis of any frame is the set of events at its origin, \(x' = 0\). Seen from S, the origin of S′ is an object moving at \(v\), so its world line is tilted at \(\theta\) from the \(ct\) axis, with \(\tan \theta = \frac{v}{c}\).</p>
+            <p><b>The \(x'\) axis.</b> The space axis of a frame is the set of events that happen at its time zero, \(t' = 0\). From the Lorentz transformation, \(t' = 0\) means \(t = \frac{vx}{c^{2}}\), or \(ct = \frac{v}{c} x\): a line tilted up from the \(x\) axis by the same angle. That the \(x'\) axis is not horizontal is the relativity of simultaneity drawn on paper.</p>
+            <p><b>The light line bisects both.</b> It lies half way between \(ct\) and \(x\), and half way between \(ct'\) and \(x'\). An observer in either frame finds that light covers equal amounts of their distance and their time.</p>
+          </div>
+          <div class="rn-side">
+            <p class="tip">To read an event’s coordinates in S′, draw lines through it parallel to the \(ct'\) and \(x'\) axes, not perpendicular to them.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide hl" data-title="Simultaneity on a diagram">
+        <p class="eyebrow">Seeing it, not calculating it</p>
+        <h2>Simultaneity on a diagram<span>.</span></h2>
+        <div class="split wide-fig">
+          <ul class="points small">
+            <li>Simultaneous in S: on a line <b>parallel to the \(x\) axis</b></li>
+            <li class="step">Simultaneous in S′: on a line <b>parallel to the \(x'\) axis</b></li>
+            <li class="step">A and B share the first kind of line but not the second</li>
+          </ul>
+          <div class="panel">
+            <div class="panel-head"><span>TWO EVENTS, TWO FRAMES</span></div>
+            <div class="fig" data-fig="a5-st" data-kind="simultaneity"></div>
+          </div>
+        </div>
+        <div class="slide-foot"><span>A.5 GALILEAN AND SPECIAL RELATIVITY · HL ONLY</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>Reading the diagram.</b> A and B are at the same height, so they happen at the same \(ct\): simultaneous in S. Now find when each happens in S′. Slide from each event along a line parallel to the \(x'\) axis until you reach the \(ct'\) axis. B’s line lands lower on the \(ct'\) axis than A’s. In S′, B happened first.</p>
+            <p><b>The carriage again.</b> This is the flash experiment of Part 3 in graphical form. The event that is further forward, in the direction S′ is moving, happens earlier in S′.</p>
+            <p><b>Order can change, cause cannot.</b> The order of two events can differ between frames only if they are so far apart in space, and so close in time, that not even light could travel from one to the other. Then neither can have caused the other. If one event could have caused another, every observer agrees which came first.</p>
+          </div>
+          <div class="rn-side">
+            <p class="tip">Time dilation, length contraction and simultaneity can all be shown on these diagrams. Simultaneity is the one most often asked for.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide hl" data-title="The scales of the axes">
+        <p class="eyebrow">Why the primed axes are stretched</p>
+        <h2>The scales of the axes<span>.</span></h2>
+        <div class="split wide-fig">
+          <div class="stack">
+            <ul class="points small">
+              <li>One unit on \(ct'\) is <b>not</b> the same length on the page as one unit on \(ct\)</li>
+              <li class="step">The units are set by curves of <b>constant space–time interval</b></li>
+              <li class="step">On the tilted axes the marks are <b>further out</b></li>
+            </ul>
+          </div>
+          <div class="panel">
+            <div class="panel-head"><span>WHERE “1” IS ON EACH AXIS</span></div>
+            <div class="fig" data-fig="a5-st" data-kind="scale"></div>
+          </div>
+        </div>
+        <div class="slide-foot"><span>A.5 GALILEAN AND SPECIAL RELATIVITY · HL ONLY</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>Why the interval sets the scale.</b> An event at one unit of time on a frame’s own time axis has \(x' = 0\) and \(ct' = 1\), so its interval from the origin is 1. Every observer agrees on that interval. In S the same event therefore satisfies \((ct)^{2} - x^{2} = 1\). All the “one unit of time” marks, for frames of every speed, lie on that one curve. It is a hyperbola, and it gets further from the origin as it nears the light line.</p>
+            <p><b>Time dilation on the diagram.</b> Follow the \(ct'\) axis out to its mark “1′”: one tick of the moving clock. Now read that event’s height on the \(ct\) axis. It is above 1: it is at \(\gamma\). A clock moving with S′ takes \(\gamma\) units of S time to tick once.</p>
+            <p><b>The same for length.</b> The curve \(x^{2} - (ct)^{2} = 1\) marks one unit of length on every \(x\) axis.</p>
+          </div>
+          <div class="rn-side">
+            <p class="trap">Measuring along a primed axis with the unprimed scale. The two axes need their own tick marks.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide hl" data-title="Quick check: space–time diagrams">
+        <p class="eyebrow">Quick check</p>
+        <h2>Space–time diagrams<span>.</span></h2>
+        <div class="quiz fill">
+          <div class="q"><p><span class="n">01</span>What does a vertical world line show?</p><div class="ans step">An object at rest in that frame</div></div>
+          <div class="q"><p><span class="n">02</span>At what angle is the world line of light?</p><div class="ans step">45°</div></div>
+          <div class="q"><p><span class="n">03</span>A world line makes 20° with the \(ct\) axis. Speed?</p><div class="ans step">\(\tan 20^{\circ} = 0.36c\)</div></div>
+          <div class="q"><p><span class="n">04</span>What is the \(ct'\) axis, seen from S?</p><div class="ans step">The world line of the origin of S′</div></div>
+          <div class="q"><p><span class="n">05</span>How do you find events simultaneous in S′?</p><div class="ans step">On a line parallel to the \(x'\) axis</div></div>
+          <div class="q"><p><span class="n">06</span>What fixes the scales on the primed axes?</p><div class="ans step">Curves of constant space–time interval</div></div>
+        </div>
+        <div class="slide-foot"><span class="reveal-hint">PRESS → TO REVEAL EACH ANSWER</span><span data-page></span></div>
+      </section>
+
+      <section class="slide hl" data-title="Summary">
+        <p class="eyebrow">Summary</p>
+        <h2>Relativity on one slide<span>.</span></h2>
+        <div class="cards fill" style="grid-template-columns: 1fr 1fr 1fr; align-content: center;">
+          <div class="card"><p class="eyebrow">Galilean</p><h3>\(x' = x - vt\) · \(t' = t\)</h3><p>\(u' = u - v\)<br>Fails for light</p></div>
+          <div class="card step"><p class="eyebrow">Postulates</p><h3>Same laws · same \(c\)</h3><p>In every inertial frame</p></div>
+          <div class="card step"><p class="eyebrow">Lorentz</p><h3>\(x' = \gamma (x - vt)\)</h3><p>\(t' = \gamma \left(t - \dfrac{vx}{c^{2}}\right)\)<br>Velocities never combine to more than \(c\)</p></div>
+          <div class="card step"><p class="eyebrow">Time and length</p><h3>\(\Delta t = \gamma \Delta t_{0}\) · \(L = L_{0} \div \gamma\)</h3><p>Simultaneity is relative<br>Evidence: muon decay</p></div>
+          <div class="card step"><p class="eyebrow">Invariant</p><h3>\((\Delta s)^{2} = (c \Delta t)^{2} - (\Delta x)^{2}\)</h3><p>The same in every inertial frame</p></div>
+          <div class="card step"><p class="eyebrow">Space–time diagrams</p><h3>\(\tan \theta = \dfrac{v}{c}\)</h3><p>\(ct\) upwards, light at 45°</p></div>
+        </div>
+        <div class="slide-foot"><span>A.5 GALILEAN AND SPECIAL RELATIVITY · HL ONLY</span><span data-page></span></div>
+      </section>
+
+      <section class="slide hl" data-title="Key words">
+        <p class="eyebrow">Summary</p>
+        <h2>Key words<span>.</span></h2>
+        <div class="terms fill" style="grid-template-columns: repeat(3, 1fr);">
+          <div class="term"><b>Event</b><span>Something that happens at one place and one time</span></div>
+          <div class="term"><b>Inertial frame</b><span>A reference frame that is not accelerating</span></div>
+          <div class="term"><b>Lorentz factor</b><span>\(\gamma\): 1 at low speed, larger as \(v\) nears \(c\)</span></div>
+          <div class="term"><b>Proper time</b><span>Between events at the same place: the shortest</span></div>
+          <div class="term"><b>Proper length</b><span>In the object’s rest frame: the longest</span></div>
+          <div class="term"><b>Simultaneity</b><span>Relative: it depends on the frame</span></div>
+          <div class="term"><b>Space–time interval</b><span>The same for all inertial observers</span></div>
+          <div class="term"><b>World line</b><span>An object’s path on a space–time diagram</span></div>
+          <div class="term"><b>Muon</b><span>An unstable particle whose survival shows time dilation</span></div>
+        </div>
+        <div class="slide-foot"><span>A.5 GALILEAN AND SPECIAL RELATIVITY · HL ONLY</span><span data-page></span></div>
+      </section>
+
+    </div>
+  </main>
+
+  <nav class="controls" aria-label="Slide controls">
+    <button type="button" id="prev" aria-label="Previous slide"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg></button>
+    <span class="counter" id="counter" aria-live="polite"></span>
+    <button type="button" id="next" aria-label="Next slide"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 5l7 7-7 7"/></svg></button>
+  </nav>
+  <div class="progress" aria-hidden="true"><span id="progress-bar"></span></div>
+
+  <script src="../assets/figures.js"></script>
+  <script src="figures.js"></script>
+  <script src="../assets/deck-math.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
+  <script src="../assets/deck-notes.js"></script>
+  <script src="../assets/deck.js"></script>
+</body>
+</html>
