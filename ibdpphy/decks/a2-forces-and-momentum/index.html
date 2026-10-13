@@ -459,12 +459,13 @@
             <span>\(F_\mathrm{N} = mg = 5.0 \times 9.8 = 49 \,\mathrm{N}\)</span>
             <span class="step">Most static friction: \(0.40 \times 49 = \class{res}{19.6 \,\mathrm{N}}\)</span>
             <span class="step">A 15 N push: it stays at rest. Friction \(= \class{res}{15 \,\mathrm{N}}\)</span>
+            <span class="say step">A 25 N push: it slides</span>
+            <span class="step">\(F_\mathrm{f} = 0.30 \times 49 = 14.7 \,\mathrm{N}\)</span>
+            <span class="step">\(a = \dfrac{25 - 14.7}{5.0} = \class{res}{2.1 \,\mathrm{m} \,\mathrm{s}^{-2}}\)</span>
           </div>
-          <div class="work step">
-            <span class="say">A 25 N push: it slides</span>
-            <span>\(F_\mathrm{f} = 0.30 \times 49 = 14.7 \,\mathrm{N}\)</span>
-            <span class="step">Resultant \(= 25 - 14.7 = 10.3 \,\mathrm{N}\)</span>
-            <span class="step">\(a = \dfrac{10.3}{5.0} = \class{res}{2.1 \,\mathrm{m} \,\mathrm{s}^{-2}}\)</span>
+          <div class="panel">
+            <div class="panel-head"><span>FORCES ON THE CRATE</span></div>
+            <div class="fig" data-fig="fbd-block" data-view="170 50 520 390"></div>
           </div>
         </div>
         <div class="slide-foot"><span>A.2 FORCES AND MOMENTUM · SL + HL</span><span data-page></span></div>
@@ -485,12 +486,13 @@
             <span>\(F_\mathrm{N} = mg \cos 20^{\circ}\)</span>
             <span class="step">\(F_\mathrm{f} = 0.25 \, mg \cos 20^{\circ}\)</span>
             <span class="step">\(ma = mg \sin 20^{\circ} - 0.25 \, mg \cos 20^{\circ}\)</span>
-          </div>
-          <div class="work step">
-            <span class="say">The mass cancels</span>
-            <span>\(a = 9.8(\sin 20^{\circ} - 0.25 \cos 20^{\circ})\)</span>
-            <span class="step">\(a = 9.8(0.342 - 0.235)\)</span>
+            <span class="say step">The mass cancels</span>
+            <span class="step">\(a = 9.8(0.342 - 0.25 \times 0.940)\)</span>
             <span class="step">\(a = \class{res}{1.0 \,\mathrm{m} \,\mathrm{s}^{-2}}\) down the slope</span>
+          </div>
+          <div class="panel">
+            <div class="panel-head"><span>FORCES ON THE BLOCK</span><span class="pill">NOT TO SCALE</span></div>
+            <div class="fig" data-fig="slope-fbd" data-view="90 0 680 460" data-angle="20°"></div>
           </div>
         </div>
         <div class="slide-foot"><span>A.2 FORCES AND MOMENTUM · SL + HL</span><span data-page></span></div>
@@ -909,17 +911,17 @@
       <section class="slide" data-title="Conservation of momentum">
         <p class="eyebrow">The principle</p>
         <h2>Conservation of momentum<span>.</span></h2>
-        <div class="split wide-fig">
+        <div class="split fig-first wide-fig">
+          <div class="panel">
+            <div class="panel-head"><span>TWO BODIES COLLIDE</span><span class="pill reveal-hint">PRESS → TO PLAY</span></div>
+            <div class="fig" data-fig="collide"></div>
+          </div>
           <div class="stack">
             <ul class="points small">
               <li>The <b>total</b> momentum of a system stays constant…</li>
               <li>…unless a <b>resultant external force</b> acts on it</li>
             </ul>
             <div class="equation small step"><span>\(m_{1}u_{1} + m_{2}u_{2} = m_{1}v_{1} + m_{2}v_{2}\)</span></div>
-          </div>
-          <div class="panel">
-            <div class="panel-head"><span>TWO BODIES COLLIDE</span></div>
-            <div class="fig" data-fig="collide"></div>
           </div>
         </div>
         <div class="slide-foot"><span>A.2 FORCES AND MOMENTUM · SL + HL</span><span data-page></span></div>
@@ -938,7 +940,11 @@
       <section class="slide" data-title="Collision: the bodies join">
         <p class="eyebrow">Worked example</p>
         <h2>Two cars lock together<span>.</span></h2>
-        <div class="split">
+        <div class="split fig-first">
+          <div class="panel">
+            <div class="panel-head"><span>A MOVING CAR HITS A PARKED CAR</span><span class="pill reveal-hint">PRESS → TO PLAY</span></div>
+            <div class="fig" data-fig="collide" data-kind="stick"></div>
+          </div>
           <div class="work">
             <span class="say">Momentum before = momentum after</span>
             <span>\(1200 \times 15 = (1200 + 800)v\)</span>
@@ -946,10 +952,6 @@
             <span class="say step">Kinetic energy</span>
             <span class="step">Before: \(\tfrac{1}{2} \times 1200 \times 15^{2} = 135 \,\mathrm{kJ}\)</span>
             <span class="step">After: \(\tfrac{1}{2} \times 2000 \times 9.0^{2} = \class{res}{81 \,\mathrm{kJ}}\)</span>
-          </div>
-          <div class="panel">
-            <div class="panel-head"><span>A MOVING CAR HITS A PARKED CAR</span></div>
-            <div class="fig" data-fig="collide" data-kind="stick"></div>
           </div>
         </div>
         <div class="slide-foot"><span>A.2 FORCES AND MOMENTUM · SL + HL</span><span data-page></span></div>
@@ -993,7 +995,11 @@
       <section class="slide" data-title="Collision: is it elastic?">
         <p class="eyebrow">Worked example</p>
         <h2>Is this collision elastic<span>?</span></h2>
-        <div class="split">
+        <div class="split fig-first">
+          <div class="panel">
+            <div class="panel-head"><span>TWO TROLLEYS ON A TRACK</span><span class="pill reveal-hint">PRESS → TO PLAY</span></div>
+            <div class="fig" data-fig="collide" data-kind="elastic"></div>
+          </div>
           <div class="work">
             <span class="say">Momentum</span>
             <span>\(2.0 \times 3.0 = 2.0 \times 1.0 + 1.0v\)</span>
@@ -1001,10 +1007,6 @@
             <span class="say step">Kinetic energy</span>
             <span class="step">Before: \(\tfrac{1}{2} \times 2.0 \times 3.0^{2} = 9.0 \,\mathrm{J}\)</span>
             <span class="step">After: \(1.0 + 8.0 = 9.0 \,\mathrm{J}\) &nbsp; <b>Elastic</b></span>
-          </div>
-          <div class="panel">
-            <div class="panel-head"><span>TWO TROLLEYS ON A TRACK</span></div>
-            <div class="fig" data-fig="collide" data-kind="elastic"></div>
           </div>
         </div>
         <div class="slide-foot"><span>A.2 FORCES AND MOMENTUM · SL + HL</span><span data-page></span></div>
@@ -1022,7 +1024,11 @@
       <section class="slide" data-title="Explosions">
         <p class="eyebrow">A collision in reverse</p>
         <h2>Explosions<span>.</span></h2>
-        <div class="split">
+        <div class="split fig-first">
+          <div class="panel">
+            <div class="panel-head"><span>TWO SKATERS PUSH APART</span><span class="pill reveal-hint">PRESS → TO PLAY</span></div>
+            <div class="fig" data-fig="collide" data-kind="explode"></div>
+          </div>
           <div class="work">
             <span class="say">Total momentum before = 0</span>
             <span>\(0 = 60v + 40 \times 3.0\)</span>
@@ -1030,10 +1036,6 @@
             <span class="say step">Kinetic energy</span>
             <span class="step">Before: \(0\)</span>
             <span class="step">After: \(120 + 180 = \class{res}{300 \,\mathrm{J}}\)</span>
-          </div>
-          <div class="panel">
-            <div class="panel-head"><span>TWO SKATERS PUSH APART</span></div>
-            <div class="fig" data-fig="collide" data-kind="explode"></div>
           </div>
         </div>
         <div class="slide-foot"><span>A.2 FORCES AND MOMENTUM · SL + HL</span><span data-page></span></div>
@@ -1051,17 +1053,17 @@
       <section class="slide hl" data-title="HL: collisions in two dimensions">
         <p class="eyebrow">Higher level only</p>
         <h2>Collisions in two dimensions<span>.</span></h2>
-        <div class="split wide-fig">
+        <div class="split fig-first wide-fig">
+          <div class="panel">
+            <div class="panel-head"><span>A GLANCING COLLISION, SEEN FROM ABOVE</span><span class="pill reveal-hint">PRESS → TO PLAY</span></div>
+            <div class="fig" data-fig="collide-2d"></div>
+          </div>
           <div class="stack">
             <ul class="points small">
               <li>Momentum is a <b>vector</b></li>
               <li class="step">It is conserved along \(x\) and along \(y\) <b>separately</b></li>
               <li class="step">Resolve every momentum, then write <b>one equation for each direction</b></li>
             </ul>
-          </div>
-          <div class="panel">
-            <div class="panel-head"><span>A GLANCING COLLISION, SEEN FROM ABOVE</span></div>
-            <div class="fig" data-fig="collide-2d"></div>
           </div>
         </div>
         <div class="slide-foot"><span>A.2 FORCES AND MOMENTUM · ADDITIONAL HL</span><span data-page></span></div>
