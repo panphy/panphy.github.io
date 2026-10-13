@@ -1,0 +1,979 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="robots" content="noindex, nofollow">
+  <meta name="description" content="Teaching slides for IB Diploma Programme Physics topic C.3 Wave phenomena, standard and higher level: wavefronts and rays, reflection, refraction and Snell’s law, total internal reflection, diffraction, superposition and double-slit interference, and at higher level single-slit diffraction and diffraction gratings.">
+  <meta name="theme-color" content="#F8F6F1">
+  <script src="/assets/theme.js" data-theme-scope="ibdpphy"></script>
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <link rel="stylesheet" href="/assets/standalone-top.css">
+  <title>C.3 Wave phenomena · IB DP Physics</title>
+  <link rel="icon" type="image/png" href="/assets/favicon.png">
+  <link rel="apple-touch-icon" href="/assets/apple-touch-icon.png">
+  <link rel="stylesheet" href="../assets/deck.css">
+  <link rel="stylesheet" href="../assets/deck-notes.css">
+  <link rel="stylesheet" href="/assets/theme-toggle.css">
+  <link rel="stylesheet" href="/assets/fullscreen-button.css">
+  <script src="/assets/theme-toggle.js"></script>
+  <script src="/ibdpphy/sw-register.js" defer></script>
+</head>
+<body>
+  <header class="banner">
+    <a class="banner-logo" href="/" aria-label="PanPhy Labs home"><img src="/assets/panphy.png" alt="PanPhy Labs" width="38" height="38"></a>
+    <a class="banner-title" href="#1">C.3 Wave phenomena</a>
+    <div class="banner-actions">
+      <button id="thumbs-toggle" class="icon-button" type="button" aria-controls="thumbs" aria-pressed="true" aria-label="Hide slide thumbnails" title="Show or hide slide thumbnails (T)"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path class="pane" d="M9.5 4.5H6A2.5 2.5 0 0 0 3.5 7v10A2.5 2.5 0 0 0 6 19.5h3.5z"/><rect x="3.5" y="4.5" width="17" height="15" rx="2.5"/><path d="M9.5 4.5v15"/></svg></button>
+      <button id="fullscreen" class="panphy-fullscreen-button" type="button" aria-pressed="false" aria-label="Present fullscreen" title="Present fullscreen (F)"><svg class="panphy-fs-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M4 9V4h5M15 4h5v5M20 15v5h-5M9 20H4v-5"/></svg></button>
+      <button id="theme-button" type="button" data-panphy-theme-toggle aria-label="Toggle light/dark theme" title="Toggle between light and dark themes"></button>
+    </div>
+  </header>
+  <script>window.PanPhyThemeToggle.mount(document.getElementById('theme-button'));</script>
+
+  <nav class="thumbs" id="thumbs" aria-label="Slides"></nav>
+
+  <main class="stage" id="stage">
+    <div class="deck" id="deck">
+
+      <!-- 1 · Title -->
+      <section class="slide title" data-title="C.3 Wave phenomena">
+        <div class="title-grid">
+          <div>
+            <p class="eyebrow">IB DP Physics · Theme C · Wave behaviour</p>
+            <h1>Wave phenomena<span>.</span></h1>
+            <p class="lead">C.3 · Reflection, refraction, diffraction and interference<br>Standard level and higher level</p>
+            <div class="chips">
+              <span class="chip">SL + HL · 5 hours</span>
+              <span class="chip hl">Additional HL · 6 hours</span>
+            </div>
+          </div>
+          <div class="fig" data-fig="c3-two-sources" data-plain></div>
+        </div>
+      </section>
+
+      <section class="slide" data-title="Lesson map">
+        <p class="eyebrow">The journey</p>
+        <h2>Four parts<span>.</span></h2>
+        <div class="cards fill" style="grid-template-columns: repeat(4, 1fr);">
+          <div class="card">
+            <div class="fig" data-fig="c3-boundary" data-still data-plain style="height: 170px;"></div>
+            <p class="eyebrow">Part 01</p>
+            <h3>Waves at a boundary</h3>
+            <p>Wavefronts and rays, Snell’s law and total internal reflection</p>
+          </div>
+          <div class="card">
+            <div class="fig" data-fig="c3-edge" data-still style="height: 170px;"></div>
+            <p class="eyebrow">Part 02</p>
+            <h3>Diffraction and superposition</h3>
+            <p>Spreading round obstacles, and what happens when waves meet</p>
+          </div>
+          <div class="card">
+            <div class="fig" data-fig="c3-two-sources" data-still data-plain style="height: 170px;"></div>
+            <p class="eyebrow">Part 03</p>
+            <h3>Interference</h3>
+            <p>Coherent sources, path difference and Young’s double slit</p>
+          </div>
+          <div class="card hl">
+            <div class="fig" data-fig="c3-intensity" data-kind="modulated" data-still style="height: 170px;"></div>
+            <p class="eyebrow">Part 04 · HL only</p>
+            <h3>Slits and gratings</h3>
+            <p>The single slit, the modulated double slit and the diffraction grating</p>
+          </div>
+        </div>
+        <div class="slide-foot"><span>C.3 WAVE PHENOMENA · SL + HL</span><span data-page></span></div>
+      </section>
+
+      <!-- Part 1 -->
+      <section class="slide section" data-title="Part 1: Waves at a boundary">
+        <div class="title-grid">
+          <div>
+            <p class="eyebrow">Part 01</p>
+            <h1>Waves at a boundary<span>.</span></h1>
+            <p class="lead">What a wave does when the medium changes</p>
+          </div>
+          <div class="fig" data-fig="c3-refraction" data-plain></div>
+        </div>
+        <div class="slide-foot"><span>C.3 WAVE PHENOMENA · SL + HL</span><span data-page></span></div>
+      </section>
+
+      <section class="slide" data-title="Wavefronts and rays">
+        <p class="eyebrow">Two ways to draw a wave</p>
+        <h2>Wavefronts and rays<span>.</span></h2>
+        <div class="split wide-fig">
+          <ul class="points small">
+            <li>A <b>wavefront</b> joins points that are in phase: a crest, say</li>
+            <li class="step">Neighbouring wavefronts are <b>one wavelength</b> apart</li>
+            <li class="step">A <b>ray</b> shows the direction the wave travels</li>
+            <li class="step">Rays are always at <b>right angles</b> to wavefronts</li>
+          </ul>
+          <div class="panel">
+            <div class="panel-head"><span>NEAR A SOURCE, AND FAR FROM ONE</span></div>
+            <div class="fig" data-fig="c3-wavefronts"></div>
+          </div>
+        </div>
+        <div class="slide-foot"><span>C.3 WAVE PHENOMENA · SL + HL</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>Two pictures of the same thing.</b> Drop a stone in a pond and the ripples you see are wavefronts: each ring is a line of crests. The direction in which any part of a ring is moving is outwards, along a radius: that is the ray. You can always draw one from the other, because a ray must cross every wavefront at right angles.</p>
+            <p><b>Why distant sources give plane waves.</b> A small piece of a very large circle is nearly straight. Light from the Sun, or from a lamp across the room passing through a small slit, arrives with wavefronts that are flat for all practical purposes, and its rays are parallel.</p>
+            <p><b>Which to draw.</b> Rays are best for showing direction: reflection, refraction and lenses. Wavefronts are best for showing wavelength and for anything where the wave nature matters: diffraction and interference. Exam questions ask for both.</p>
+          </div>
+          <div class="rn-side">
+            <p class="tip">When you draw wavefronts, keep them evenly spaced in one medium: the spacing is the wavelength, and it does not change unless the speed does.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide" data-title="Reflection, refraction and transmission">
+        <p class="eyebrow">Where two media meet</p>
+        <h2>Reflection, refraction and transmission<span>.</span></h2>
+        <div class="split wide-fig">
+          <ul class="points small">
+            <li>Part of the wave is <b>reflected</b>: same angle to the normal</li>
+            <li class="step">Part is <b>transmitted</b> into the new medium</li>
+            <li class="step">If its speed changes, it changes direction: <b>refraction</b></li>
+            <li class="step">All angles are measured from the <b>normal</b></li>
+          </ul>
+          <div class="panel">
+            <div class="panel-head"><span>ONE RAY IN, TWO RAYS OUT</span></div>
+            <div class="fig" data-fig="c3-boundary"></div>
+          </div>
+        </div>
+        <div class="slide-foot"><span>C.3 WAVE PHENOMENA · SL + HL</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>Both happen at once.</b> Look at a shop window: you see the goods inside by transmitted light and your own reflection by reflected light. The energy of the incoming wave is shared between the two. For light meeting glass head-on, about 4% is reflected and 96% transmitted; at glancing angles much more is reflected.</p>
+            <p><b>Which way it bends.</b> Going into a medium where it travels more slowly, the ray bends towards the normal. Going into one where it travels faster, it bends away. A ray along the normal is not bent at all, though its speed still changes.</p>
+            <p><b>Why the normal.</b> Angles could be measured from the surface, but for a curved surface, a lens or a raindrop, “the surface” has no single direction. The normal at the point where the ray lands always does.</p>
+          </div>
+          <div class="rn-side">
+            <p class="trap">Measuring angles from the surface. If a question gives the angle between a ray and the surface, subtract it from 90° first.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide" data-title="Why a wave refracts">
+        <p class="eyebrow">Wavefronts at a boundary</p>
+        <h2>Why a wave refracts<span>.</span></h2>
+        <div class="split wide-fig">
+          <div class="stack">
+            <ul class="points small">
+              <li>The <b>frequency</b> cannot change: it is set by the source</li>
+              <li class="step">Slower medium: \(\lambda = \dfrac{v}{f}\) is <b>shorter</b></li>
+              <li class="step">Each wavefront must stay <b>joined</b> across the boundary, so it has to turn</li>
+            </ul>
+          </div>
+          <div class="panel">
+            <div class="panel-head"><span>INTO A SLOWER MEDIUM</span></div>
+            <div class="fig" data-fig="c3-refraction"></div>
+          </div>
+        </div>
+        <div class="slide-foot"><span>C.3 WAVE PHENOMENA · SL + HL</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>Why the frequency is fixed.</b> Count the crests arriving at the boundary each second, and the crests leaving it. They must be equal: crests cannot pile up at the surface or be created there. So the frequency is the same on both sides, and if the speed drops, the wavelength must drop in the same ratio.</p>
+            <p><b>Why the wave turns.</b> Follow one wavefront as it crosses at an angle. The end that reaches the boundary first slows down first, while the rest of the front is still travelling at full speed. That part gets ahead, and the wavefront swings round to face more nearly into the new medium. A line of soldiers marching at an angle from a road into mud turns for the same reason.</p>
+            <p><b>The geometry.</b> Along the boundary the wavefronts on the two sides meet point for point. The distance between those meeting points is \(\frac{\lambda_{1}}{\sin \theta_{1}}\) on one side and \(\frac{\lambda_{2}}{\sin \theta_{2}}\) on the other, and the two must be equal. That is Snell’s law.</p>
+          </div>
+          <div class="rn-side">
+            <p class="tip">Asked what changes when light enters glass: speed and wavelength both fall; frequency stays the same. The colour, which depends on frequency, does not change.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide" data-title="Snell’s law">
+        <p class="eyebrow">How much it bends</p>
+        <h2>Snell’s law<span>.</span></h2>
+        <div class="split even">
+          <div class="stack">
+            <div class="equation"><span>\(\dfrac{n_{1}}{n_{2}} = \dfrac{\sin \theta_{2}}{\sin \theta_{1}} = \dfrac{v_{2}}{v_{1}}\)</span></div>
+            <ul class="points small">
+              <li>\(n\): the <b>refractive index</b> of a medium, \(n = \dfrac{c}{v}\)</li>
+              <li class="step">Equivalent form: \(n_{1} \sin \theta_{1} = n_{2} \sin \theta_{2}\)</li>
+            </ul>
+          </div>
+          <table class="facts step">
+            <thead><tr><th>Medium (approximate, for light)</th><th class="nocase">n</th></tr></thead>
+            <tbody>
+              <tr><td>Vacuum</td><td class="num">1 exactly</td></tr>
+              <tr><td>Air</td><td class="num">1.00</td></tr>
+              <tr><td>Water</td><td class="num">1.33</td></tr>
+              <tr><td>Glass</td><td class="num">1.50</td></tr>
+              <tr><td>Diamond</td><td class="num">2.42</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="slide-foot"><span>C.3 WAVE PHENOMENA · SL + HL</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>What the refractive index means.</b> It says how many times slower light travels in the medium than in a vacuum. In glass of index 1.50, light travels at \(\frac{3.00 \times 10^{8}}{1.50} = 2.00 \times 10^{8}\) m s⁻¹. A larger index means slower light and more bending. An index can never be less than 1, because nothing travels faster than light in a vacuum.</p>
+            <p><b>Reading the data booklet’s form.</b> The fraction looks upside down at first: \(\frac{n_{1}}{n_{2}}\) equals \(\frac{\sin \theta_{2}}{\sin \theta_{1}}\). The pattern is that in each medium, the product \(n \sin \theta\) is the same. Where \(n\) is bigger, \(\sin \theta\) and the angle are smaller. Many students find \(n_{1} \sin \theta_{1} = n_{2} \sin \theta_{2}\) harder to get wrong.</p>
+            <p><b>Not only for light.</b> The right-hand part, \(\frac{\sin \theta_{2}}{\sin \theta_{1}} = \frac{v_{2}}{v_{1}}\), holds for any wave: water waves slowing in the shallows, sound passing from warm air to cold, earthquake waves in rock.</p>
+          </div>
+          <div class="rn-side">
+            <p class="tip">Subscript 1 is the medium the wave comes from, subscript 2 the medium it goes into. Label the diagram before substituting.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide" data-title="Snell’s law: air to glass">
+        <p class="eyebrow">Worked example</p>
+        <h2>Light entering glass<span>.</span></h2>
+        <div class="split even">
+          <div class="work">
+            <span class="say">Air (\(n_{1} = 1.00\)) into glass (\(n_{2} = 1.50\))</span>
+            <span class="say">\(\theta_{1} = 40^{\circ}\)</span>
+            <span>\(n_{1} \sin \theta_{1} = n_{2} \sin \theta_{2}\)</span>
+            <span class="step">\(\sin \theta_{2} = \dfrac{n_{1} \sin \theta_{1}}{n_{2}} = \dfrac{1.00 \times \sin 40^{\circ}}{1.50}\)</span>
+            <span class="step">\(\sin \theta_{2} = 0.429\)</span>
+            <span class="step">\(\theta_{2} = \class{res}{25^{\circ}}\)</span>
+          </div>
+          <div class="work step">
+            <span class="say">The speed in the glass</span>
+            <span>\(v = \dfrac{c}{n} = \dfrac{3.00 \times 10^{8}}{1.50}\)</span>
+            <span class="step">\(v = \class{res}{2.00 \times 10^{8} \,\mathrm{m} \,\mathrm{s}^{-1}}\)</span>
+            <span class="say step">Light of 600 nm in air is 400 nm in the glass</span>
+          </div>
+        </div>
+        <div class="slide-foot"><span>C.3 WAVE PHENOMENA · SL + HL</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>Is the answer sensible?</b> Light is going into the slower medium, so it should bend towards the normal: the angle should be smaller than 40°. It is. Make this check every time; it catches an upside-down fraction immediately.</p>
+            <p><b>Coming out again.</b> At the far side of a parallel-sided block the ray meets the glass–air surface at 25° and, by the same equation run backwards, leaves at 40°. It emerges parallel to its original direction but shifted sideways.</p>
+            <p><b>Measuring a refractive index.</b> Shine a ray into a glass block at several angles and trace the rays. A graph of \(\sin \theta_{1}\) against \(\sin \theta_{2}\) is a straight line through the origin whose gradient is the refractive index of the glass.</p>
+          </div>
+          <div class="rn-side">
+            <p class="trap">Dividing the angles instead of their sines. \(\frac{40}{1.5} = 26.7^{\circ}\) is close here, but the error grows quickly at larger angles.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide" data-title="Critical angle and total internal reflection">
+        <p class="eyebrow">Going from slow to fast</p>
+        <h2>Total internal reflection<span>.</span></h2>
+        <div class="split wide-fig">
+          <div class="stack">
+            <div class="equation"><span>\(\sin \theta_\mathrm{c} = \dfrac{n_{2}}{n_{1}}\)</span></div>
+            <ul class="points small">
+              <li>Only on the way into a medium of <b>lower</b> refractive index</li>
+              <li class="step">Only <b>beyond</b> the critical angle \(\theta_\mathrm{c}\)</li>
+              <li class="step">Then <b>all</b> the light is reflected</li>
+            </ul>
+          </div>
+          <div class="panel">
+            <div class="panel-head"><span>LIGHT INSIDE GLASS</span><span class="pill">GLASS TO AIR: 42°</span></div>
+            <div class="fig" data-fig="c3-tir"></div>
+          </div>
+        </div>
+        <div class="slide-foot"><span>C.3 WAVE PHENOMENA · SL + HL</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>Where the critical angle comes from.</b> Leaving glass for air, the ray bends away from the normal, so the angle in the air is always the larger. Increase the angle in the glass and the angle in the air reaches 90° first: the refracted ray skims the surface. Put \(\theta_{2} = 90^{\circ}\) in Snell’s law, \(n_{1} \sin \theta_\mathrm{c} = n_{2} \sin 90^{\circ}\), and \(\sin \theta_\mathrm{c} = \frac{n_{2}}{n_{1}}\). Beyond that angle, Snell’s law would need a sine greater than 1, which is impossible: there is no refracted ray.</p>
+            <p><b>“Total” means total.</b> Below the critical angle some light is reflected and some escapes. Beyond it, all of the light is reflected. No mirror does as well, which is why prisms, not mirrors, turn the light in binoculars.</p>
+            <p><b>Optical fibres.</b> A thin glass fibre is coated with glass of slightly lower refractive index. Light sent in at one end meets the wall at a large angle, beyond the critical angle, and is totally reflected again and again along the whole length. Fibres carry telephone and internet signals under the oceans, and let surgeons see inside the body.</p>
+          </div>
+          <div class="rn-side">
+            <p class="trap">Expecting total internal reflection when light goes from air into glass. It can only happen on the way out of the slower medium.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide" data-title="Critical angle: glass and water">
+        <p class="eyebrow">Worked example</p>
+        <h2>Two critical angles<span>.</span></h2>
+        <div class="split even">
+          <div class="work">
+            <span class="say">Glass (\(n_{1} = 1.50\)) to air (\(n_{2} = 1.00\))</span>
+            <span>\(\sin \theta_\mathrm{c} = \dfrac{n_{2}}{n_{1}} = \dfrac{1.00}{1.50}\)</span>
+            <span class="step">\(\theta_\mathrm{c} = \class{res}{42^{\circ}}\)</span>
+          </div>
+          <div class="work step">
+            <span class="say">Water (\(n_{1} = 1.33\)) to air</span>
+            <span>\(\sin \theta_\mathrm{c} = \dfrac{1.00}{1.33}\)</span>
+            <span class="step">\(\theta_\mathrm{c} = \class{res}{49^{\circ}}\)</span>
+            <span class="say step">A larger index: a smaller critical angle</span>
+          </div>
+        </div>
+        <div class="slide-foot"><span>C.3 WAVE PHENOMENA · SL + HL</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>What a diver sees.</b> Looking up from under water, a diver sees the whole world above the surface squeezed into a bright circle overhead, a cone of half-angle 49°. Outside that circle the surface acts as a mirror and shows a reflection of the bottom.</p>
+            <p><b>Why diamonds sparkle.</b> Diamond has a refractive index of 2.42, so its critical angle is only \(\sin^{-1} \frac{1}{2.42} = 24^{\circ}\). Light that gets in is likely to strike the inside faces beyond that angle and be reflected several times before it finds a way out. The stone is cut to make sure it does.</p>
+            <p><b>A 45° prism.</b> Light entering the short face of a right-angled glass prism meets the long face at 45°. That is more than 42°, so it is totally reflected and turned through a right angle.</p>
+          </div>
+          <div class="rn-side">
+            <p class="tip">If the second medium is not air, keep its index in the equation: for glass to water, \(\sin \theta_\mathrm{c} = \frac{1.33}{1.50}\), giving 62°.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide" data-title="Quick check: waves at a boundary">
+        <p class="eyebrow">Quick check</p>
+        <h2>Waves at a boundary<span>.</span></h2>
+        <div class="quiz fill">
+          <div class="q"><p><span class="n">01</span>What angle does a ray make with a wavefront?</p><div class="ans step">90°</div></div>
+          <div class="q"><p><span class="n">02</span>Light enters water from air. Which of \(v\), \(f\) and \(\lambda\) stays the same?</p><div class="ans step">The frequency</div></div>
+          <div class="q"><p><span class="n">03</span>Speed of light in water, \(n\) = 1.33?</p><div class="ans step">\(\frac{3.00 \times 10^{8}}{1.33} = 2.26 \times 10^{8} \,\mathrm{m} \,\mathrm{s}^{-1}\)</div></div>
+          <div class="q"><p><span class="n">04</span>Going into a slower medium, which way does a ray bend?</p><div class="ans step">Towards the normal</div></div>
+          <div class="q"><p><span class="n">05</span>Two conditions for total internal reflection?</p><div class="ans step">Into lower \(n\); beyond the critical angle</div></div>
+          <div class="q"><p><span class="n">06</span>Critical angle for a medium of \(n\) = 2.00 in air?</p><div class="ans step">\(\sin^{-1} 0.500 = 30^{\circ}\)</div></div>
+        </div>
+        <div class="slide-foot"><span class="reveal-hint">PRESS → TO REVEAL EACH ANSWER</span><span data-page></span></div>
+      </section>
+
+      <!-- Part 2 -->
+      <section class="slide section" data-title="Part 2: Diffraction and superposition">
+        <div class="title-grid">
+          <div>
+            <p class="eyebrow">Part 02</p>
+            <h1>Diffraction and superposition<span>.</span></h1>
+            <p class="lead">Two things that only waves do</p>
+          </div>
+          <div class="fig" data-fig="c3-pulses" data-kind="same"></div>
+        </div>
+        <div class="slide-foot"><span>C.3 WAVE PHENOMENA · SL + HL</span><span data-page></span></div>
+      </section>
+
+      <section class="slide" data-title="Diffraction through an aperture">
+        <p class="eyebrow">Spreading out</p>
+        <h2>Diffraction through an aperture<span>.</span></h2>
+        <div class="stack center" style="gap: 20px;">
+          <div class="panel" style="height: 470px; align-self: stretch;">
+            <div class="panel-head"><span>THE SAME WAVE, TWO GAPS</span><span class="pill">WAVELENGTH UNCHANGED</span></div>
+            <div class="fig" data-fig="c3-gap"></div>
+          </div>
+          <div class="idea step">Diffraction is greatest when the gap is about the <b>same size</b> as the wavelength.</div>
+        </div>
+        <div class="slide-foot"><span>C.3 WAVE PHENOMENA · SL + HL</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>Why you can hear round a corner but not see round it.</b> Speech has wavelengths of about a metre, the size of a doorway, so sound spreads right round the frame and fills the next room. Light has a wavelength two million times smaller than the doorway, so it passes almost straight through and casts a sharp-edged patch on the far wall. Both are waves; the difference is the ratio of wavelength to gap.</p>
+            <p><b>What does not change.</b> The medium is the same on both sides of the barrier, so the speed, the frequency and the wavelength are all unchanged. Only the shape of the wavefronts, and the direction in which the energy spreads, is different. In a sketch, keep the wavefront spacing the same before and after the gap.</p>
+            <p><b>Less gets through a narrow gap.</b> The wave beyond a small gap spreads widely but is weaker: less of the incoming wavefront passes through, and its energy is spread over a larger arc.</p>
+          </div>
+          <div class="rn-side">
+            <p class="trap">Drawing the wavefronts closer together after the gap. That would mean a shorter wavelength, which only a change of medium can cause.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide" data-title="Diffraction round a body">
+        <p class="eyebrow">Into the shadow</p>
+        <h2>Diffraction round a body<span>.</span></h2>
+        <div class="split wide-fig">
+          <ul class="points small">
+            <li>A wave passing an <b>edge</b> bends into the region behind it</li>
+            <li class="step">Longer wavelength: <b>more</b> bending</li>
+            <li class="step">A body much smaller than the wavelength hardly casts a shadow at all</li>
+          </ul>
+          <div class="panel">
+            <div class="panel-head"><span>PAST THE EDGE OF AN OBSTACLE</span></div>
+            <div class="fig" data-fig="c3-edge"></div>
+          </div>
+        </div>
+        <div class="slide-foot"><span>C.3 WAVE PHENOMENA · SL + HL</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>Radio in the hills.</b> Long-wave radio, with wavelengths of a kilometre or more, bends over hills and round buildings and can be received in a valley. FM radio and television use wavelengths of a few metres and less, which diffract far less round a hill, so a valley may need its own relay transmitter. Mobile phone signals, at about 10 cm, are shadowed even by buildings.</p>
+            <p><b>Looking at small things.</b> A wave cannot give a sharp image of anything smaller than about its own wavelength: it simply bends round the object and closes up behind it. This sets the limit of an optical microscope at around half a micrometre. To see atoms you need a wave of much shorter wavelength: X-rays, or the electrons of E.2.</p>
+          </div>
+          <div class="rn-side">
+            <p class="more">Each point on a wavefront acts as a source of small secondary waves, and these add up to give the next wavefront. Near an edge some of them are missing, and the rest spread sideways. This idea is due to Huygens, of the pendulum clock in C.1.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide" data-title="Superposition of pulses">
+        <p class="eyebrow">When waves meet</p>
+        <h2>The principle of superposition<span>.</span></h2>
+        <div class="split wide-fig">
+          <div class="stack">
+            <ul class="points small">
+              <li>Where two waves overlap, the displacement is the <b>sum</b> of their separate displacements</li>
+              <li class="step">Displacements have signs: up and down <b>cancel</b></li>
+              <li class="step">Afterwards each wave carries on <b>unchanged</b></li>
+            </ul>
+          </div>
+          <div class="panel">
+            <div class="panel-head"><span>TWO PULSES ON A STRING</span></div>
+            <div class="fig" data-fig="c3-pulses" data-kind="same"></div>
+          </div>
+        </div>
+        <div class="slide-foot"><span>C.3 WAVE PHENOMENA · SL + HL</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>Waves pass through each other.</b> Two balls thrown at each other collide and bounce off. Two pulses on a string meet, add together for a moment and then separate, each exactly as it was. This is how you can follow one conversation in a room full of them, and how the beams of two torches cross without deflecting each other.</p>
+            <p><b>An upward and a downward pulse.</b> At the instant they overlap completely, the string is flat: the two displacements add to zero. The energy has not vanished. The string is flat but moving fast: at that instant all the energy is kinetic, and a moment later the two pulses reappear.</p>
+            <p><b>How to add them.</b> Work point by point along the string. At each position, add the two displacements, taking upwards as positive and downwards as negative. Exam questions give two pulse shapes on a grid and ask for the resultant at a stated time.</p>
+          </div>
+          <div class="rn-side">
+            <p class="tip">Move each pulse the correct distance first (speed × time), then add. Most errors come from adding the pulses where they started.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide" data-title="Constructive and destructive interference">
+        <p class="eyebrow">Superposition of continuous waves</p>
+        <h2>Constructive and destructive<span>.</span></h2>
+        <div class="cards" style="grid-template-columns: 1fr 1fr; gap: 20px; flex: 1; min-height: 0;">
+          <div class="panel">
+            <div class="panel-head"><span>IN PHASE</span><span class="pill">CONSTRUCTIVE</span></div>
+            <div class="fig" data-fig="c3-superpose" data-kind="in"></div>
+          </div>
+          <div class="panel step">
+            <div class="panel-head"><span>IN ANTIPHASE</span><span class="pill">DESTRUCTIVE</span></div>
+            <div class="fig" data-fig="c3-superpose" data-kind="anti"></div>
+          </div>
+        </div>
+        <div class="slide-foot"><span>C.3 WAVE PHENOMENA · SL + HL</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>Crest on crest, crest on trough.</b> If two waves of the same frequency arrive at a point in phase, their crests coincide and so do their troughs: the resultant has twice the amplitude. If they arrive in antiphase, half a cycle apart, each crest of one meets a trough of the other and the resultant is zero. Anything in between gives something in between.</p>
+            <p><b>Energy.</b> The energy of a wave goes as the square of its amplitude. Twice the amplitude is four times the energy, not twice. That does not break conservation of energy: where waves from two sources interfere constructively in some places, they interfere destructively in others. The energy is redistributed, not created.</p>
+            <p><b>Noise-cancelling headphones</b> use the right-hand picture. A microphone picks up the noise, and the earpiece emits the same wave inverted, so that the two cancel at your eardrum.</p>
+          </div>
+          <div class="rn-side">
+            <p class="tip">Complete cancellation needs equal amplitudes. If they differ, the minimum is the difference of the two amplitudes, not zero.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide" data-title="Quick check: diffraction and superposition">
+        <p class="eyebrow">Quick check</p>
+        <h2>Diffraction and superposition<span>.</span></h2>
+        <div class="quiz fill">
+          <div class="q"><p><span class="n">01</span>When is diffraction through a gap greatest?</p><div class="ans step">Gap about equal to the wavelength</div></div>
+          <div class="q"><p><span class="n">02</span>Does diffraction change the wavelength?</p><div class="ans step">No</div></div>
+          <div class="q"><p><span class="n">03</span>State the principle of superposition.</p><div class="ans step">Resultant displacement = sum of the displacements</div></div>
+          <div class="q"><p><span class="n">04</span>A +3 cm pulse meets a −1 cm pulse. Displacement where they overlap?</p><div class="ans step">+2 cm</div></div>
+          <div class="q"><p><span class="n">05</span>Two equal waves meet in antiphase. Resultant amplitude?</p><div class="ans step">Zero</div></div>
+          <div class="q"><p><span class="n">06</span>Why does sound bend round a doorway but light does not, noticeably?</p><div class="ans step">Its wavelength is comparable with the gap</div></div>
+        </div>
+        <div class="slide-foot"><span class="reveal-hint">PRESS → TO REVEAL EACH ANSWER</span><span data-page></span></div>
+      </section>
+
+      <!-- Part 3 -->
+      <section class="slide section" data-title="Part 3: Interference">
+        <div class="title-grid">
+          <div>
+            <p class="eyebrow">Part 03</p>
+            <h1>Interference<span>.</span></h1>
+            <p class="lead">A steady pattern from two sources in step</p>
+          </div>
+          <div class="fig" data-fig="c3-two-sources" data-plain></div>
+        </div>
+        <div class="slide-foot"><span>C.3 WAVE PHENOMENA · SL + HL</span><span data-page></span></div>
+      </section>
+
+      <section class="slide" data-title="Two sources">
+        <p class="eyebrow">Double-source interference</p>
+        <h2>The pattern of two sources<span>.</span></h2>
+        <div class="split wide-fig">
+          <div class="stack">
+            <ul class="points small">
+              <li>Along some lines the waves always meet <b>in phase</b></li>
+              <li class="step">Between them, always in <b>antiphase</b></li>
+              <li class="step">The pattern stays put only if the sources are <b>coherent</b></li>
+            </ul>
+            <div class="idea step">Coherent: a <b>constant phase difference</b>, which needs the same frequency.</div>
+          </div>
+          <div class="panel">
+            <div class="panel-head"><span>TWO SOURCES IN STEP</span></div>
+            <div class="fig" data-fig="c3-two-sources"></div>
+          </div>
+        </div>
+        <div class="slide-foot"><span>C.3 WAVE PHENOMENA · SL + HL</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>Why coherence matters.</b> At a given point the waves from the two sources arrive with a certain phase difference. If the sources keep a constant phase relationship, that difference never changes, and the point is permanently bright, or permanently dark. If the sources drift in and out of step, each point flickers between the two faster than anything can detect, and all you see is an even average.</p>
+            <p><b>Why two lamps give no fringes.</b> A lamp emits light in short bursts from billions of atoms, each with its own random phase. Two separate lamps have no fixed phase relationship for longer than about a hundred-millionth of a second. The classic way round this is to take light from one source and split it in two: whatever the source does, both halves do together. Two loudspeakers wired to the same signal generator are coherent for the same reason.</p>
+          </div>
+          <div class="rn-side">
+            <p class="tip">“Coherent” does not mean “in phase”. Two sources exactly in antiphase are coherent: their phase difference is constant, at π. The bright and dark lines simply swap places.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide" data-title="Path difference">
+        <p class="eyebrow">Bright or dark?</p>
+        <h2>Path difference<span>.</span></h2>
+        <div class="split">
+          <div class="stack">
+            <div class="work">
+              <span class="say">Constructive</span>
+              <span>\(\text{path difference} = n \lambda\)</span>
+              <span class="say step">Destructive</span>
+              <span class="step">\(\text{path difference} = \left(n + \tfrac{1}{2}\right) \lambda\)</span>
+              <span class="say step">\(n = 0, 1, 2, \dots\) · for sources in phase</span>
+            </div>
+          </div>
+          <div class="panel">
+            <div class="panel-head"><span>TWO ROUTES TO ONE POINT</span></div>
+            <div class="fig" data-fig="c3-path"></div>
+          </div>
+        </div>
+        <div class="slide-foot"><span>C.3 WAVE PHENOMENA · SL + HL</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>Why whole wavelengths give brightness.</b> The two waves leave their sources in step. If one has to travel exactly one wavelength further, it arrives one full cycle late, which is the same as arriving on time: crest still meets crest. The same is true for two, three or any whole number of extra wavelengths. If the extra distance is half a wavelength, or one and a half, it arrives half a cycle late: crest meets trough.</p>
+            <p><b>A worked case.</b> Two loudspeakers in phase emit a 1000 Hz note, wavelength 0.34 m. A listener is 3.20 m from one and 3.71 m from the other. The path difference is 0.51 m, which is \(\frac{0.51}{0.34} = 1.5\) wavelengths: destructive interference. The sound there is quiet.</p>
+            <p><b>The central line.</b> Every point equidistant from the two sources has zero path difference (\(n = 0\)) and is a maximum.</p>
+          </div>
+          <div class="rn-side">
+            <p class="tip">Method: find the path difference, divide by the wavelength, then look at the answer. A whole number: constructive. A whole number and a half: destructive.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide history" data-title="Story: Thomas Young">
+        <p class="eyebrow">The story · London, 1801</p>
+        <p class="not-examined">Background story · not assessed</p>
+        <h2>Thomas Young against Newton<span>.</span></h2>
+        <div class="story band" style="--photo-h: 270px;">
+          <div class="story-photos">
+            <figure><img src="images/young.jpg" width="898" height="1138" alt="Painted portrait of Thomas Young, a man with short dark hair in a dark coat and white cravat"><figcaption><b>Thomas Young</b>, after Thomas Lawrence</figcaption></figure>
+            <figure><img src="images/young-sketch.jpg" width="1280" height="568" alt="Engraving of two sets of circular waves spreading from points A and B and crossing, with lines of cancellation reaching the right-hand edge at points labelled C, D, E and F"><figcaption>His drawing of waves from <b>two sources</b>, A and B</figcaption></figure>
+          </div>
+          <ul class="points">
+            <li>For a century Newton’s view had ruled: light is a stream of <b>particles</b></li>
+            <li>In 1801 Young, a London doctor, showed interference with <b>water waves</b> and argued that light does the same. The two-slit experiment is in his lectures of 1807</li>
+            <li>He was attacked in print and went back to medicine. Fresnel’s work won the argument after 1817</li>
+          </ul>
+        </div>
+        <p class="credits">Portrait: <a href="https://commons.wikimedia.org/wiki/File:Thomas_Young_(scientist).jpg" target="_blank" rel="noopener">after Thomas Lawrence, before 1830</a>, public domain. Drawing: <a href="https://commons.wikimedia.org/wiki/File:Young_Diffraction.png" target="_blank" rel="noopener">Thomas Young</a>, public domain.</p>
+        <div class="slide-foot"><span>C.3 WAVE PHENOMENA · SL + HL</span><span data-page></span></div>
+      </section>
+
+      <section class="slide" data-title="Young’s double slit">
+        <p class="eyebrow">Interference of light</p>
+        <h2>Young’s double slit<span>.</span></h2>
+        <div class="split wide-fig">
+          <div class="stack">
+            <div class="equation"><span>\(s = \dfrac{\lambda D}{d}\)</span></div>
+            <ul class="points small">
+              <li>\(s\): the separation of neighbouring fringes</li>
+              <li class="step">\(d\): the separation of the slits</li>
+              <li class="step">\(D\): the distance from slits to screen</li>
+            </ul>
+          </div>
+          <div class="panel">
+            <div class="panel-head"><span>ONE SOURCE, TWO SLITS</span><span class="pill">NOT TO SCALE</span></div>
+            <div class="fig" data-fig="c3-young"></div>
+          </div>
+        </div>
+        <div class="slide-foot"><span>C.3 WAVE PHENOMENA · SL + HL</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>Why two slits work when two lamps do not.</b> Both slits are lit by the same wavefront from one source, so the light leaving them is coherent. Each slit is narrow enough to diffract the light into a wide fan, and where the two fans overlap on the screen they interfere.</p>
+            <p><b>Where the equation comes from.</b> The first bright fringe away from the centre is where the path difference is one wavelength. With the screen far away, that happens at a small angle \(\theta\) where \(d \sin \theta = \lambda\), so \(\theta \approx \frac{\lambda}{d}\). On a screen at distance \(D\) that angle corresponds to a distance \(D \theta = \frac{\lambda D}{d}\) from the centre. Each further fringe needs one more wavelength, so they are evenly spaced.</p>
+            <p><b>Reading the equation.</b> A longer wavelength spreads the fringes: red fringes are wider apart than blue. Slits closer together spread them too, which surprises people. A more distant screen gives the pattern more room to open out.</p>
+          </div>
+          <div class="rn-side">
+            <p class="tip">Measure across many fringes and divide: ten fringe spacings can be measured ten times more precisely than one.</p>
+            <p class="trap">Mixing up \(d\) (slit separation, a fraction of a millimetre) and \(D\) (distance to the screen, metres).</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide" data-title="Double slit: fringe spacing">
+        <p class="eyebrow">Worked example</p>
+        <h2>Fringes from a laser<span>.</span></h2>
+        <div class="split even">
+          <div class="work">
+            <span class="say">\(\lambda = 630 \,\mathrm{nm}\) · \(d = 0.50 \,\mathrm{mm}\) · \(D = 2.0 \,\mathrm{m}\)</span>
+            <span>\(s = \dfrac{\lambda D}{d}\)</span>
+            <span class="step">\(s = \dfrac{630 \times 10^{-9} \times 2.0}{0.50 \times 10^{-3}}\)</span>
+            <span class="step">\(s = \class{res}{2.5 \times 10^{-3} \,\mathrm{m}}\)</span>
+          </div>
+          <div class="work step">
+            <span class="say">Ten fringe spacings measure 21 mm with another laser</span>
+            <span>\(\lambda = \dfrac{s d}{D} = \dfrac{2.1 \times 10^{-3} \times 0.50 \times 10^{-3}}{2.0}\)</span>
+            <span class="step">\(\lambda = \class{res}{5.3 \times 10^{-7} \,\mathrm{m}}\)</span>
+            <span class="say step">525 nm: green</span>
+          </div>
+        </div>
+        <div class="slide-foot"><span>C.3 WAVE PHENOMENA · SL + HL</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>A ruler for light.</b> The second column is how the wavelength of light was first measured. A wavelength of half a thousandth of a millimetre cannot be measured directly, but the experiment magnifies it by the factor \(\frac{D}{d}\), here 4000, into a fringe spacing of millimetres that an ordinary ruler can handle.</p>
+            <p><b>With white light.</b> Each colour makes its own set of fringes with its own spacing. All colours agree at the centre, which is white. Further out they fall out of step: the first bright fringe on each side has a blue inner edge and a red outer edge, and after a few fringes the colours overlap into a blur.</p>
+          </div>
+          <div class="rn-side">
+            <p class="trap">Three different prefixes in one line: nm, mm and m. Convert everything to metres before substituting.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide" data-title="The double-slit pattern">
+        <p class="eyebrow">What the screen shows</p>
+        <h2>The double-slit pattern<span>.</span></h2>
+        <div class="split wide-fig">
+          <ul class="points small">
+            <li>Bright fringes where the path difference is \(n \lambda\)</li>
+            <li class="step">Dark fringes half way between</li>
+            <li class="step"><b>Equally spaced</b></li>
+            <li class="step">For very narrow slits: all about <b>equally bright</b></li>
+          </ul>
+          <div class="panel">
+            <div class="panel-head"><span>INTENSITY ACROSS THE SCREEN</span><span class="pill">IDEAL SLITS</span></div>
+            <div class="fig" data-fig="c3-intensity" data-kind="double"></div>
+          </div>
+        </div>
+        <div class="slide-foot"><span>C.3 WAVE PHENOMENA · SL + HL</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>The shape between the peaks.</b> The intensity does not jump from bright to dark. As you move across the screen the phase difference between the two waves changes smoothly, so the resultant amplitude does too, and the intensity follows a smooth curve from a maximum down to zero and back.</p>
+            <p><b>How bright is bright.</b> At a maximum the amplitude is twice that from one slit, so the intensity is four times as great. At a minimum it is zero. Averaged across the screen, that is twice the intensity of one slit: exactly the energy that two slits let through.</p>
+            <p><b>Evidence for the wave nature of light.</b> Opening a second slit makes some places on the screen darker than they were with one slit alone. Adding light and getting darkness is something particles could not do, and superposition explains it at once.</p>
+          </div>
+          <div class="rn-side">
+            <p class="more">Real slits have some width, and the fringes then fade away from the centre. Part 4 (HL) explains why.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide" data-title="Quick check: interference">
+        <p class="eyebrow">Quick check</p>
+        <h2>Interference<span>.</span></h2>
+        <div class="quiz fill">
+          <div class="q"><p><span class="n">01</span>What does “coherent” mean?</p><div class="ans step">A constant phase difference</div></div>
+          <div class="q"><p><span class="n">02</span>Path difference 2.5λ, sources in phase. Bright or dark?</p><div class="ans step">Dark: destructive</div></div>
+          <div class="q"><p><span class="n">03</span>The slits are moved closer together. The fringes?</p><div class="ans step">Further apart</div></div>
+          <div class="q"><p><span class="n">04</span>Red light is replaced by blue. The fringes?</p><div class="ans step">Closer together</div></div>
+          <div class="q"><p><span class="n">05</span>\(\lambda\) = 500 nm, \(D\) = 1.0 m, \(d\) = 0.25 mm. Fringe spacing?</p><div class="ans step">\(\frac{500 \times 10^{-9} \times 1.0}{0.25 \times 10^{-3}} = 2.0 \,\mathrm{mm}\)</div></div>
+          <div class="q"><p><span class="n">06</span>Why do two separate lamps not give fringes?</p><div class="ans step">They are not coherent</div></div>
+        </div>
+        <div class="slide-foot"><span class="reveal-hint">PRESS → TO REVEAL EACH ANSWER</span><span data-page></span></div>
+      </section>
+
+      <!-- Part 4 · HL -->
+      <section class="slide section hl" data-title="Part 4: Additional HL">
+        <div class="title-grid">
+          <div>
+            <p class="eyebrow">Part 04 · Additional higher level</p>
+            <h1>Slits and gratings<span>.</span></h1>
+            <p class="lead">The single-slit pattern · how it shapes the double-slit pattern<br>Multiple slits and diffraction gratings</p>
+          </div>
+          <div class="fig" data-fig="c3-intensity" data-kind="single"></div>
+        </div>
+        <div class="slide-foot"><span>C.3 WAVE PHENOMENA · ADDITIONAL HL</span><span data-page></span></div>
+      </section>
+
+      <section class="slide hl" data-title="HL: Single-slit diffraction">
+        <p class="eyebrow">One slit has a pattern of its own</p>
+        <h2>Single-slit diffraction<span>.</span></h2>
+        <div class="split wide-fig">
+          <div class="stack">
+            <div class="equation"><span>\(\theta = \dfrac{\lambda}{b}\)</span></div>
+            <ul class="points small">
+              <li>\(\theta\): the angle of the <b>first minimum</b>, in radians</li>
+              <li class="step">\(b\): the <b>width</b> of the slit</li>
+              <li class="step">Central maximum: <b>twice</b> as wide as the others, and far brighter</li>
+            </ul>
+          </div>
+          <div class="panel">
+            <div class="panel-head"><span>ONE SLIT, MONOCHROMATIC LIGHT</span></div>
+            <div class="fig" data-fig="c3-intensity" data-kind="single"></div>
+          </div>
+        </div>
+        <div class="slide-foot"><span>C.3 WAVE PHENOMENA · ADDITIONAL HL</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>Why one slit gives dark bands.</b> Think of the slit as a row of many tiny sources, all in phase. Straight ahead, their waves all travel the same distance and add up: the bright centre. Now look in the direction where the wave from one edge of the slit travels exactly one wavelength further than the wave from the other edge. Then the wave from the top edge is half a wavelength out of step with the wave from the middle, and they cancel. The same is true of every source in the top half and its partner in the bottom half. Everything cancels in pairs: the first minimum. That direction is where \(b \sin \theta = \lambda\), and for small angles \(\theta = \frac{\lambda}{b}\).</p>
+            <p><b>The other maxima are faint.</b> The first one on each side has less than 5% of the intensity of the central maximum, and they fade quickly after that.</p>
+          </div>
+          <div class="rn-side">
+            <p class="trap">Using this for the double slit. Here \(b\) is the width of one slit; in \(s = \frac{\lambda D}{d}\), \(d\) is the distance between two slits.</p>
+            <p class="tip">The angle comes out in radians. To convert a small angle to a distance on a screen at distance \(D\), multiply: \(y = D \theta\).</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide hl" data-title="HL: The width of the central maximum">
+        <p class="eyebrow">Worked example</p>
+        <h2>The width of the central maximum<span>.</span></h2>
+        <div class="split even">
+          <div class="work">
+            <span class="say">\(\lambda = 600 \,\mathrm{nm}\) · slit width \(b = 0.10 \,\mathrm{mm}\)</span>
+            <span>\(\theta = \dfrac{\lambda}{b} = \dfrac{600 \times 10^{-9}}{0.10 \times 10^{-3}}\)</span>
+            <span class="step">\(\theta = \class{res}{6.0 \times 10^{-3} \,\mathrm{rad}}\)</span>
+          </div>
+          <div class="work step">
+            <span class="say">On a screen 2.0 m away</span>
+            <span>First minimum: \(y = D \theta = 2.0 \times 6.0 \times 10^{-3} = 12 \,\mathrm{mm}\)</span>
+            <span class="step">Width of central maximum \(= 2y = \class{res}{24 \,\mathrm{mm}}\)</span>
+            <span class="say step">The slit itself is only 0.10 mm wide</span>
+          </div>
+        </div>
+        <div class="slide-foot"><span>C.3 WAVE PHENOMENA · ADDITIONAL HL</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>Geometry would predict a thin line.</b> If light travelled strictly in straight lines, a 0.10 mm slit would cast a 0.10 mm stripe of light on the screen. The actual patch is 24 mm across, 240 times wider. Diffraction is not a small correction here: it decides the whole pattern.</p>
+            <p><b>Why telescopes are large.</b> The same spreading happens when light passes through any opening, including the front of a telescope or the pupil of your eye. A point of light is imaged as a small blur whose angular size is about \(\frac{\lambda}{b}\). A wider opening gives a smaller blur and finer detail, which is one reason astronomers build mirrors many metres across.</p>
+          </div>
+          <div class="rn-side">
+            <p class="trap">Giving 12 mm as the width. The central maximum reaches from the first minimum on one side to the first minimum on the other: twice the distance.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide hl" data-title="HL: The effect of slit width">
+        <p class="eyebrow">Qualitative</p>
+        <h2>The effect of slit width<span>.</span></h2>
+        <div class="split wide-fig">
+          <div class="stack">
+            <ul class="points small">
+              <li><b>Narrower</b> slit: \(\theta = \dfrac{\lambda}{b}\) is larger, so the pattern is <b>wider</b></li>
+              <li class="step">Less light gets through, spread over more screen: much <b>fainter</b></li>
+              <li class="step"><b>Wider</b> slit: a narrow, bright pattern</li>
+            </ul>
+          </div>
+          <div class="panel">
+            <div class="panel-head"><span>TWO SLIT WIDTHS, THE SAME LIGHT</span></div>
+            <div class="fig" data-fig="c3-intensity" data-kind="widths"></div>
+          </div>
+        </div>
+        <div class="slide-foot"><span>C.3 WAVE PHENOMENA · ADDITIONAL HL</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>Squeeze the slit and the light spreads.</b> It runs against intuition: closing a slit down makes the patch of light on the screen wider, not narrower. This is the same rule as in Part 2, diffraction is greatest when the gap is close to the wavelength, now with a number attached.</p>
+            <p><b>Why the brightness falls so fast.</b> Halving the width halves the light that gets through, and spreads it over twice the width of screen. The intensity at the centre therefore falls to a quarter.</p>
+            <p><b>Wavelength does the opposite.</b> For a given slit, red light gives a wider pattern than blue, since \(\theta\) is proportional to \(\lambda\). The course treats the single slit with monochromatic light only.</p>
+          </div>
+          <div class="rn-side">
+            <p class="tip">The slit is rectangular: long and narrow. The pattern spreads in the direction of the narrow dimension.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide hl" data-title="HL: The modulated double-slit pattern">
+        <p class="eyebrow">Two effects at once</p>
+        <h2>The real double-slit pattern<span>.</span></h2>
+        <div class="split wide-fig">
+          <div class="stack">
+            <ul class="points small">
+              <li>Fringe <b>spacing</b>: set by the slit separation \(d\)</li>
+              <li class="step">Fringe <b>brightness</b>: set by the single-slit pattern of width \(b\)</li>
+              <li class="step">A fringe that falls on a single-slit minimum is <b>missing</b></li>
+            </ul>
+            <div class="idea step">The single-slit pattern <b>modulates</b> the double-slit pattern.</div>
+          </div>
+          <div class="panel">
+            <div class="panel-head"><span>SLIT SEPARATION FOUR TIMES THE SLIT WIDTH</span></div>
+            <div class="fig" data-fig="c3-intensity" data-kind="modulated"></div>
+          </div>
+        </div>
+        <div class="slide-foot"><span>C.3 WAVE PHENOMENA · ADDITIONAL HL</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>Why they multiply.</b> Two-slit interference needs light from both slits to reach a point on the screen. How much light each slit sends in a given direction is decided by its own diffraction pattern. In a direction where a single slit sends nothing, there is nothing to interfere, whatever the path difference. So the intensity is the ideal fringe pattern scaled, point by point, by the single-slit envelope.</p>
+            <p><b>Counting fringes.</b> On the slide \(d = 4b\). Bright fringes are at angles \(\frac{n \lambda}{d}\); the first minimum of the envelope is at \(\frac{\lambda}{b} = \frac{4 \lambda}{d}\). So the fourth fringe on each side lands on the minimum and is missing. Inside the central maximum of the envelope there are fringes \(n = 0, \pm 1, \pm 2, \pm 3\): seven in all. In general, with \(\frac{d}{b}\) a whole number, there are \(2 \frac{d}{b} - 1\).</p>
+          </div>
+          <div class="rn-side">
+            <p class="tip">In a sketch, draw the dashed envelope first, then fit equally spaced fringes underneath it.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide hl" data-title="HL: Multiple slits">
+        <p class="eyebrow">From two slits to many</p>
+        <h2>Multiple slits<span>.</span></h2>
+        <div class="split wide-fig">
+          <ul class="points small">
+            <li>The same slit spacing: main maxima at the <b>same angles</b></li>
+            <li class="step">More slits: the maxima are <b>narrower</b> and <b>brighter</b></li>
+            <li class="step">Between them: almost nothing</li>
+          </ul>
+          <div class="panel">
+            <div class="panel-head"><span>TWO, FIVE AND TWENTY SLITS</span></div>
+            <div class="fig" data-fig="c3-intensity" data-kind="slits"></div>
+          </div>
+        </div>
+        <div class="slide-foot"><span>C.3 WAVE PHENOMENA · ADDITIONAL HL</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>Why the positions do not move.</b> A main maximum is a direction in which light from each slit is exactly a whole number of wavelengths ahead of the light from its neighbour. If that is true for one pair of neighbouring slits it is true for every pair, however many there are. The condition involves only the spacing \(d\).</p>
+            <p><b>Why they sharpen.</b> With two slits, moving slightly off the maximum changes the phase difference a little and the intensity falls gently. With a thousand slits, a tiny phase difference between neighbours builds up along the row: the first and the five-hundredth slit are soon half a cycle apart and cancel, as do the second and the five-hundred-and-first, and so on. A very small change of angle is enough to destroy the maximum.</p>
+            <p><b>Why they brighten.</b> At a maximum, \(N\) slits give an amplitude \(N\) times that of one, and an intensity \(N^{2}\) times as great.</p>
+          </div>
+          <div class="rn-side">
+            <p class="more">Between two main maxima there are \(N - 2\) faint extra maxima. With many slits they are too weak to see.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide history hl" data-title="Story: Fraunhofer">
+        <p class="eyebrow">The story · Munich, 1814–1821</p>
+        <p class="not-examined">Background story · not assessed</p>
+        <h2>The glassmaker’s apprentice<span>.</span></h2>
+        <div class="story" style="--photo-h: 430px;">
+          <div class="story-photos">
+            <figure><img src="images/fraunhofer.jpg" width="960" height="1315" alt="Portrait of Joseph von Fraunhofer, a young man with curly hair in a dark coat with a high collar"><figcaption><b>Joseph von Fraunhofer</b></figcaption></figure>
+          </div>
+          <div class="stack">
+            <ul class="points">
+              <li>Orphaned at 11 and apprenticed to a harsh glassmaker</li>
+              <li>In 1801 the workshop <b>collapsed</b> on him. The prince who led the rescue gave him books and time to study</li>
+              <li><b>1814</b>: he mapped <b>574 dark lines</b> in the spectrum of the Sun</li>
+              <li><b>1821</b>: he made a <b>diffraction grating</b> and was the first to measure the wavelengths of spectral lines with one</li>
+            </ul>
+            <div class="idea">He died at 39, poisoned by the vapours of his trade.</div>
+          </div>
+        </div>
+        <p class="credits">Portrait: <a href="https://commons.wikimedia.org/wiki/File:Joseph_von_Fraunhofer_Portrait.jpg" target="_blank" rel="noopener">unknown artist, 19th century</a>, public domain.</p>
+        <div class="slide-foot"><span>C.3 WAVE PHENOMENA · ADDITIONAL HL</span><span data-page></span></div>
+      </section>
+
+      <section class="slide hl" data-title="HL: The diffraction grating">
+        <p class="eyebrow">Thousands of slits</p>
+        <h2>The diffraction grating<span>.</span></h2>
+        <div class="split wide-fig">
+          <div class="stack">
+            <div class="equation"><span>\(n \lambda = d \sin \theta\)</span></div>
+            <ul class="points small">
+              <li>\(d\): the spacing of neighbouring slits</li>
+              <li class="step">\(n\): the <b>order</b> of the maximum: 0, 1, 2 …</li>
+              <li class="step">\(\theta\): its angle from the straight-through direction</li>
+            </ul>
+          </div>
+          <div class="panel">
+            <div class="panel-head"><span>LIGHT AT NORMAL INCIDENCE</span></div>
+            <div class="fig" data-fig="c3-grating"></div>
+          </div>
+        </div>
+        <div class="slide-foot"><span>C.3 WAVE PHENOMENA · ADDITIONAL HL</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>The equation is a path difference.</b> Light leaving two neighbouring slits at an angle \(\theta\) differs in path by \(d \sin \theta\). A maximum needs that to be a whole number of wavelengths: \(d \sin \theta = n \lambda\). It is the constructive interference condition of Part 3, written with the angle.</p>
+            <p><b>Finding \(d\).</b> Gratings are labelled with the number of lines in each millimetre. With 300 lines per millimetre, \(d = \frac{1}{300}\) mm \(= 3.33 \times 10^{-6}\) m.</p>
+            <p><b>No small-angle shortcut.</b> The beams from a grating leave at large angles, tens of degrees, so \(\sin \theta\) must be kept as it is. That is the difference from the double slit, where the fringes are close together and \(s = \frac{\lambda D}{d}\) is good enough.</p>
+            <p><b>How many orders.</b> \(\sin \theta\) cannot exceed 1, so \(n\) cannot exceed \(\frac{d}{\lambda}\). The highest order is that number rounded down.</p>
+          </div>
+          <div class="rn-side">
+            <p class="trap">Using the number of lines per millimetre as \(d\). \(d\) is its reciprocal, converted to metres.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide hl" data-title="HL: Grating angles and orders">
+        <p class="eyebrow">Worked example</p>
+        <h2>Sodium light on a grating<span>.</span></h2>
+        <div class="split even">
+          <div class="work">
+            <span class="say">300 lines per mm · \(\lambda = 589 \,\mathrm{nm}\)</span>
+            <span>\(d = \dfrac{1.0 \times 10^{-3}}{300} = 3.33 \times 10^{-6} \,\mathrm{m}\)</span>
+            <span class="step">\(\sin \theta = \dfrac{n \lambda}{d} = \dfrac{1 \times 589 \times 10^{-9}}{3.33 \times 10^{-6}}\)</span>
+            <span class="step">\(\sin \theta = 0.177\)</span>
+            <span class="step">\(\theta = \class{res}{10^{\circ}}\) for the first order</span>
+          </div>
+          <div class="work step">
+            <span class="say">The highest order</span>
+            <span>\(n \le \dfrac{d}{\lambda} = \dfrac{3.33 \times 10^{-6}}{589 \times 10^{-9}} = 5.7\)</span>
+            <span class="step">Highest order: \(\class{res}{n = 5}\)</span>
+            <span class="say step">Eleven beams in all: 5 each side and the centre</span>
+          </div>
+        </div>
+        <div class="slide-foot"><span>C.3 WAVE PHENOMENA · ADDITIONAL HL</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>The orders are not evenly spaced in angle.</b> The second order has \(\sin \theta = 0.354\), so \(\theta = 20.7^{\circ}\), about double the first. But the fifth has \(\sin \theta = 0.884\) and \(\theta = 62^{\circ}\), far more than five times 10°. Equal steps in \(\sin \theta\) are not equal steps in \(\theta\).</p>
+            <p><b>Measuring a wavelength.</b> The grating does this far better than the double slit. Its maxima are sharp and bright, and the angles are large enough to measure accurately with a spectrometer. Measure the angle between the two first-order beams, halve it, and use \(\lambda = d \sin \theta\). The yellow light of sodium turns out to be two lines, at 589.0 nm and 589.6 nm, and a good grating separates them.</p>
+          </div>
+          <div class="rn-side">
+            <p class="tip">Always round the highest order down. An order of 5.7 does not exist, and 6 would need \(\sin \theta > 1\).</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide hl" data-title="HL: White light through a grating">
+        <p class="eyebrow">Spectra</p>
+        <h2>White light through a grating<span>.</span></h2>
+        <div class="stack center" style="gap: 22px;">
+          <div class="panel" style="height: 380px; align-self: stretch;">
+            <div class="panel-head"><span>ON THE SCREEN</span><span class="pill">NORMAL INCIDENCE</span></div>
+            <div class="fig" data-fig="c3-grating-white"></div>
+          </div>
+          <ul class="points small">
+            <li class="step">\(n = 0\): every wavelength goes straight on, so the centre is <b>white</b></li>
+            <li class="step">Other orders: \(\sin \theta \propto \lambda\), so <b>red</b> is deviated more than violet, and each order is a <b>spectrum</b></li>
+          </ul>
+        </div>
+        <div class="slide-foot"><span>C.3 WAVE PHENOMENA · ADDITIONAL HL</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>Why the centre is white.</b> For \(n = 0\) the equation gives \(\theta = 0\) whatever the wavelength: all the colours land in the same place and recombine.</p>
+            <p><b>Higher orders are wider, and overlap.</b> In each order the spread between violet and red is proportional to \(n\), so the second-order spectrum is twice as wide as the first. Third-order violet (\(3 \times 400 = 1200\) nm) lies at a smaller angle than second-order red (\(2 \times 700 = 1400\) nm), so from there on the spectra run into each other.</p>
+            <p><b>A grating and a prism.</b> Both split white light, but in opposite orders: a prism bends violet most, a grating bends red most. A grating’s spreading follows a simple equation, so it can measure wavelengths; a prism’s depends on the properties of the glass.</p>
+            <p><b>Several separate wavelengths.</b> Light from a gas lamp contains only certain wavelengths. Each forms its own sharp line in every order: a line spectrum, the fingerprint of the element (E.1).</p>
+          </div>
+          <div class="rn-side">
+            <p class="tip">The surface of a CD or DVD is a reflecting grating: its tracks are about a micrometre apart, which is why it shows colours.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide hl" data-title="HL quick check">
+        <p class="eyebrow">Quick check · HL</p>
+        <h2>Slits and gratings<span>.</span></h2>
+        <div class="quiz fill">
+          <div class="q"><p><span class="n">01</span>A single slit is made narrower. The central maximum?</p><div class="ans step">Wider and fainter</div></div>
+          <div class="q"><p><span class="n">02</span>\(\lambda\) = 500 nm, \(b\) = 0.050 mm. Angle of the first minimum?</p><div class="ans step">\(\frac{500 \times 10^{-9}}{5.0 \times 10^{-5}} = 0.010 \,\mathrm{rad}\)</div></div>
+          <div class="q"><p><span class="n">03</span>What sets the spacing of the fringes in a real double-slit pattern?</p><div class="ans step">The slit separation \(d\)</div></div>
+          <div class="q"><p><span class="n">04</span>More slits, same spacing. What happens to the maxima?</p><div class="ans step">Same angles; sharper and brighter</div></div>
+          <div class="q"><p><span class="n">05</span>A grating has 500 lines per mm. Slit spacing?</p><div class="ans step">\(2.0 \times 10^{-6} \,\mathrm{m}\)</div></div>
+          <div class="q"><p><span class="n">06</span>In a grating spectrum, which colour is deviated most?</p><div class="ans step">Red</div></div>
+        </div>
+        <div class="slide-foot"><span class="reveal-hint">PRESS → TO REVEAL EACH ANSWER</span><span data-page></span></div>
+      </section>
+
+      <section class="slide" data-title="Summary">
+        <p class="eyebrow">Summary</p>
+        <h2>Wave phenomena on one slide<span>.</span></h2>
+        <div class="cards fill" style="grid-template-columns: 1fr 1fr 1fr; align-content: center;">
+          <div class="card"><p class="eyebrow">Refraction</p><h3>\(\frac{n_{1}}{n_{2}} = \frac{\sin \theta_{2}}{\sin \theta_{1}} = \frac{v_{2}}{v_{1}}\)</h3><p>Frequency unchanged<br>Critical angle: \(\sin \theta_\mathrm{c} = \frac{n_{2}}{n_{1}}\)</p></div>
+          <div class="card step"><p class="eyebrow">Diffraction</p><h3>Spreading at a gap or edge</h3><p>Greatest when the gap is about one wavelength</p></div>
+          <div class="card step"><p class="eyebrow">Interference</p><h3>\(n \lambda\) · \(\left(n + \frac{1}{2}\right) \lambda\)</h3><p>Path difference for constructive and destructive<br>Coherent sources</p></div>
+          <div class="card step"><p class="eyebrow">Young’s double slit</p><h3>\(s = \frac{\lambda D}{d}\)</h3><p>Equally spaced fringes</p></div>
+          <div class="card hl step"><p class="eyebrow">Single slit</p><h3>\(\theta = \frac{\lambda}{b}\)</h3><p>First minimum<br>It modulates the double-slit pattern</p></div>
+          <div class="card hl step"><p class="eyebrow">Grating</p><h3>\(n \lambda = d \sin \theta\)</h3><p>Sharp, bright maxima<br>White light: a spectrum in each order</p></div>
+        </div>
+        <div class="slide-foot"><span>C.3 WAVE PHENOMENA · SL + HL</span><span data-page></span></div>
+      </section>
+
+      <section class="slide" data-title="Key words">
+        <p class="eyebrow">Summary</p>
+        <h2>Key words<span>.</span></h2>
+        <div class="terms fill" style="grid-template-columns: repeat(3, 1fr);">
+          <div class="term"><b>Wavefront</b><span>A line joining points in phase</span></div>
+          <div class="term"><b>Refractive index</b><span>\(n = \frac{c}{v}\)</span></div>
+          <div class="term"><b>Critical angle</b><span>Angle of incidence that gives refraction at 90°</span></div>
+          <div class="term"><b>Diffraction</b><span>Spreading of a wave at a gap or edge</span></div>
+          <div class="term"><b>Superposition</b><span>Displacements add where waves overlap</span></div>
+          <div class="term"><b>Coherent</b><span>Constant phase difference</span></div>
+          <div class="term"><b>Path difference</b><span>Extra distance travelled by one wave</span></div>
+          <div class="term hl"><b>Modulation</b><span>The single-slit envelope shaping the fringes</span></div>
+          <div class="term hl"><b>Order</b><span>The whole number \(n\) of a grating maximum</span></div>
+        </div>
+        <div class="slide-foot"><span>C.3 WAVE PHENOMENA · SL + HL</span><span data-page></span></div>
+      </section>
+
+    </div>
+  </main>
+
+  <nav class="controls" aria-label="Slide controls">
+    <button type="button" id="prev" aria-label="Previous slide"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg></button>
+    <span class="counter" id="counter" aria-live="polite"></span>
+    <button type="button" id="next" aria-label="Next slide"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 5l7 7-7 7"/></svg></button>
+  </nav>
+  <div class="progress" aria-hidden="true"><span id="progress-bar"></span></div>
+
+  <script src="../assets/figures.js"></script>
+  <script src="figures.js"></script>
+  <script src="../assets/deck-math.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
+  <script src="../assets/deck-notes.js"></script>
+  <script src="../assets/deck.js"></script>
+</body>
+</html>

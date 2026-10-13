@@ -1,0 +1,685 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="robots" content="noindex, nofollow">
+  <meta name="description" content="Teaching slides for IB Diploma Programme Physics topic E.4 Fission, standard and higher level: spontaneous and neutron-induced fission, the energy released, chain reactions, the parts of a nuclear power plant, and the products of fission and their management.">
+  <meta name="theme-color" content="#F8F6F1">
+  <script src="/assets/theme.js" data-theme-scope="ibdpphy"></script>
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <link rel="stylesheet" href="/assets/standalone-top.css">
+  <title>E.4 Fission · IB DP Physics</title>
+  <link rel="icon" type="image/png" href="/assets/favicon.png">
+  <link rel="apple-touch-icon" href="/assets/apple-touch-icon.png">
+  <link rel="stylesheet" href="../assets/deck.css">
+  <link rel="stylesheet" href="../assets/deck-notes.css">
+  <link rel="stylesheet" href="/assets/theme-toggle.css">
+  <link rel="stylesheet" href="/assets/fullscreen-button.css">
+  <script src="/assets/theme-toggle.js"></script>
+  <script src="/ibdpphy/sw-register.js" defer></script>
+</head>
+<body>
+  <header class="banner">
+    <a class="banner-logo" href="/" aria-label="PanPhy Labs home"><img src="/assets/panphy.png" alt="PanPhy Labs" width="38" height="38"></a>
+    <a class="banner-title" href="#1">E.4 Fission</a>
+    <div class="banner-actions">
+      <button id="thumbs-toggle" class="icon-button" type="button" aria-controls="thumbs" aria-pressed="true" aria-label="Hide slide thumbnails" title="Show or hide slide thumbnails (T)"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path class="pane" d="M9.5 4.5H6A2.5 2.5 0 0 0 3.5 7v10A2.5 2.5 0 0 0 6 19.5h3.5z"/><rect x="3.5" y="4.5" width="17" height="15" rx="2.5"/><path d="M9.5 4.5v15"/></svg></button>
+      <button id="fullscreen" class="panphy-fullscreen-button" type="button" aria-pressed="false" aria-label="Present fullscreen" title="Present fullscreen (F)"><svg class="panphy-fs-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M4 9V4h5M15 4h5v5M20 15v5h-5M9 20H4v-5"/></svg></button>
+      <button id="theme-button" type="button" data-panphy-theme-toggle aria-label="Toggle light/dark theme" title="Toggle between light and dark themes"></button>
+    </div>
+  </header>
+  <script>window.PanPhyThemeToggle.mount(document.getElementById('theme-button'));</script>
+
+  <nav class="thumbs" id="thumbs" aria-label="Slides"></nav>
+
+  <main class="stage" id="stage">
+    <div class="deck" id="deck">
+
+      <!-- 1 · Title -->
+      <section class="slide title" data-title="E.4 Fission">
+        <div class="title-grid">
+          <div>
+            <p class="eyebrow">IB DP Physics · Theme E · Nuclear and quantum physics</p>
+            <h1>Fission<span>.</span></h1>
+            <p class="lead">E.4 · Splitting heavy nuclei: the energy released, chain reactions, reactors and waste<br>Standard level and higher level</p>
+            <div class="chips">
+              <span class="chip">SL + HL · 4 hours</span>
+              <a class="chip on" href="../e3-radioactive-decay/">E.3 Radioactive decay ↗</a>
+            </div>
+          </div>
+          <div class="fig" data-fig="e4-chain" data-still data-plain></div>
+        </div>
+      </section>
+
+      <section class="slide" data-title="Lesson map">
+        <p class="eyebrow">The journey</p>
+        <h2>Three parts<span>.</span></h2>
+        <div class="cards fill" style="grid-template-columns: repeat(3, 1fr);">
+          <div class="card">
+            <div class="fig" data-fig="e4-curve" data-still style="height: 220px;"></div>
+            <p class="eyebrow">Part 01</p>
+            <h3>Fission and its energy</h3>
+            <p>What happens, why energy is released, and how much</p>
+          </div>
+          <div class="card">
+            <div class="fig" data-fig="e4-chain" data-still data-plain style="height: 220px;"></div>
+            <p class="eyebrow">Part 02</p>
+            <h3>Chain reactions and reactors</h3>
+            <p>Moderator, control rods, heat exchanger and shielding</p>
+          </div>
+          <div class="card">
+            <div class="fig" data-fig="e4-waste" data-still style="height: 220px;"></div>
+            <p class="eyebrow">Part 03</p>
+            <h3>The products of fission</h3>
+            <p>What is left behind, and how it is managed</p>
+          </div>
+        </div>
+        <div class="idea" style="margin-top: 22px;">E.3 gave the tools: mass defect, binding energy per nucleon and \(E = mc^{2}\).</div>
+        <div class="slide-foot"><span>E.4 FISSION · SL + HL</span><span data-page></span></div>
+      </section>
+
+      <!-- Part 1 -->
+      <section class="slide section" data-title="Part 1: Fission and its energy">
+        <div class="title-grid">
+          <div>
+            <p class="eyebrow">Part 01</p>
+            <h1>Fission and its energy<span>.</span></h1>
+            <p class="lead">A heavy nucleus splits in two, and a little mass disappears</p>
+          </div>
+          <div class="fig" data-fig="e4-curve"></div>
+        </div>
+        <div class="slide-foot"><span>E.4 FISSION · SL + HL</span><span data-page></span></div>
+      </section>
+
+      <section class="slide" data-title="What fission is">
+        <p class="eyebrow">Splitting a heavy nucleus</p>
+        <h2>What fission is<span>.</span></h2>
+        <div class="split fig-first">
+          <div class="panel">
+            <div class="panel-head"><span>NEUTRON-INDUCED FISSION</span><span class="reveal-hint">PRESS → TO PLAY</span></div>
+            <div class="fig" data-fig="e4-fission"></div>
+          </div>
+          <ul class="points small">
+            <li class="step">A heavy nucleus splits into <b>two lighter nuclei</b> and a few <b>neutrons</b></li>
+            <li class="step"><b>Neutron-induced</b>: it first absorbs a neutron</li>
+            <li class="step"><b>Spontaneous</b>: it splits by itself, a rare kind of radioactive decay</li>
+            <li class="step">Either way, <b>energy is released</b></li>
+          </ul>
+        </div>
+        <div class="slide-foot"><span>E.4 FISSION · SL + HL</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>One reaction of many.</b> The slide shows \({}^{1}_{0}\mathrm{n} + {}^{235}_{92}\mathrm{U} \rightarrow {}^{141}_{56}\mathrm{Ba} + {}^{92}_{36}\mathrm{Kr} + 3\,{}^{1}_{0}\mathrm{n}\). Check it as in E.3: nucleon numbers, \(1 + 235 = 141 + 92 + 3\); proton numbers, \(0 + 92 = 56 + 36 + 0\). A uranium nucleus can split in dozens of different ways, into different pairs of fragments with two or three neutrons. The two fragments are usually unequal in size.</p>
+            <p><b>Why a neutron works so well.</b> A neutron has no charge, so the nucleus does not repel it. Even a very slow one can drift in. When it is absorbed, the nucleus gains its binding energy and is left wobbling violently, like a drop of liquid that has been struck. It stretches, narrows in the middle and, pushed apart by the repulsion between its two positively charged halves, breaks in two.</p>
+            <p><b>Spontaneous fission</b> needs no neutron. It happens in the heaviest nuclei, but for uranium it is extremely rare compared with alpha decay.</p>
+          </div>
+          <div class="rn-side">
+            <p class="tip">In any fission equation, find a missing number by balancing nucleon number and proton number, exactly as for a decay equation.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide history" data-title="Story: Meitner and Hahn">
+        <p class="eyebrow">The story · Berlin and Sweden, December 1938</p>
+        <p class="not-examined">Background story · not assessed</p>
+        <h2>The nucleus that split<span>.</span></h2>
+        <div class="story" style="--photo-h: 430px;">
+          <div class="story-photos">
+            <figure><img src="images/meitner-hahn.jpg" width="960" height="1257" alt="Black and white photograph of Lise Meitner and Otto Hahn standing at a laboratory bench in front of tall windows"><figcaption><b>Lise Meitner</b> and <b>Otto Hahn</b> in their laboratory, 1913</figcaption></figure>
+          </div>
+          <div class="stack">
+            <ul class="points">
+              <li>In Berlin, Otto Hahn and Fritz Strassmann fired neutrons at uranium and found <b>barium</b>: an element half its size</li>
+              <li>Their colleague of thirty years, Lise Meitner, had fled Germany that July</li>
+              <li>At Christmas in Sweden, she and her nephew Otto Frisch worked it out: the nucleus had <b>split</b>, releasing about <b>200 MeV</b></li>
+              <li>Frisch named it <b>fission</b>, after the division of a living cell</li>
+            </ul>
+            <div class="idea">The Nobel Prize for the discovery went to Hahn alone.</div>
+          </div>
+        </div>
+        <p class="credits">Photograph: <a href="https://commons.wikimedia.org/wiki/File:Otto_Hahn_und_Lise_Meitner.jpg" target="_blank" rel="noopener">unknown photographer, 1913</a>, public domain.</p>
+        <div class="slide-foot"><span>E.4 FISSION · SL + HL</span><span data-page></span></div>
+      </section>
+
+      <section class="slide" data-title="Why energy is released">
+        <p class="eyebrow">Binding energy per nucleon</p>
+        <h2>Why energy is released<span>.</span></h2>
+        <div class="split wide-fig">
+          <div class="stack">
+            <ul class="points small">
+              <li>Uranium: about <b>7.6 MeV</b> per nucleon</li>
+              <li class="step">The fragments: about <b>8.4 MeV</b> per nucleon</li>
+              <li class="step">More tightly bound means <b>less mass</b></li>
+            </ul>
+            <div class="idea step">The difference in binding energy is released.</div>
+          </div>
+          <div class="panel">
+            <div class="panel-head"><span>MOVING UP THE CURVE</span></div>
+            <div class="fig" data-fig="e4-curve"></div>
+          </div>
+        </div>
+        <div class="slide-foot"><span>E.4 FISSION · SL + HL</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>Reading the curve.</b> Binding energy per nucleon measures how tightly a nucleus is held together: the higher on the graph, the more energy each nucleon gave up when the nucleus was formed, and the more stable it is. The peak is near iron and nickel. Uranium sits on the downward slope to the right. Split it into two middle-sized nuclei and each of its 235 nucleons ends up about 0.8 MeV more tightly bound. That is roughly \(235 \times 0.8 \approx 190\) MeV released in all.</p>
+            <p><b>Where the slope comes from.</b> Every proton in a nucleus repels every other, over the whole width of the nucleus, while the strong nuclear force only acts between neighbours. In a very large nucleus the repulsion adds up and the nucleons are less tightly bound on average. Two smaller nuclei have less of that repulsion to fight.</p>
+            <p><b>The other side of the peak.</b> Very light nuclei can also move up the curve, by joining together. That is fusion, in E.5.</p>
+          </div>
+          <div class="rn-side">
+            <p class="trap">Saying that the fragments have less binding energy. They have more. Binding energy is energy already given out: more of it means a lower, more stable state.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide" data-title="Energy from binding energies">
+        <p class="eyebrow">Worked example · first method</p>
+        <h2>Energy released, from binding energies<span>.</span></h2>
+        <div class="split even">
+          <div class="work">
+            <span class="say">Binding energy per nucleon / MeV</span>
+            <span class="say">²³⁵U: 7.59 · ¹⁴¹Ba: 8.33 · ⁹²Kr: 8.51</span>
+            <span>Before: \(235 \times 7.59 = 1784 \,\mathrm{MeV}\)</span>
+            <span class="step">After: \(141 \times 8.33 + 92 \times 8.51\)</span>
+            <span class="step">\(= 1175 + 783 = 1958 \,\mathrm{MeV}\)</span>
+          </div>
+          <div class="stack step">
+            <div class="work">
+              <span>Energy released = binding energy after − before</span>
+              <span class="step">\(= 1958 - 1784\)</span>
+              <span class="step">\(= \class{res}{174 \,\mathrm{MeV}}\)</span>
+            </div>
+            <div class="idea step">Free neutrons have no binding energy: leave them out.</div>
+          </div>
+        </div>
+        <div class="slide-foot"><span>E.4 FISSION · SL + HL</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>Total, not per nucleon.</b> The numbers in the table are per nucleon. Multiply each by its nucleon number to get the total binding energy of that nucleus before adding or subtracting anything. Subtracting the per-nucleon values directly, \(8.4 - 7.6\), gives the gain for one nucleon, not for the reaction.</p>
+            <p><b>After minus before.</b> The products are more tightly bound, so their total binding energy is larger. The increase is the energy that has been given out.</p>
+            <p><b>How big is 174 MeV?</b> Burning one atom of carbon releases about 4 eV. One fission releases over forty million times as much. That ratio is why a nuclear power station uses a few tonnes of fuel a year where a coal station burns millions of tonnes.</p>
+          </div>
+          <div class="rn-side">
+            <p class="tip">The incoming neutron and the three released are free particles with zero binding energy. They appear in the mass calculation on the next slide, but not in this one.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide" data-title="Energy from the mass defect">
+        <p class="eyebrow">Worked example · second method</p>
+        <h2>Energy released, from masses<span>.</span></h2>
+        <div class="split even">
+          <div class="work">
+            <span class="say">Masses / u</span>
+            <span class="say">²³⁵U 235.043930 · n 1.008665</span>
+            <span class="say">¹⁴¹Ba 140.914411 · ⁹²Kr 91.926156</span>
+            <span>Before: \(235.043930 + 1.008665 = 236.052595\)</span>
+            <span class="step">After: \(140.914411 + 91.926156 + 3 \times 1.008665\)</span>
+            <span class="step">\(= 235.866562\)</span>
+          </div>
+          <div class="work step">
+            <span>\(\Delta m = 236.052595 - 235.866562\)</span>
+            <span class="step">\(\Delta m = 0.186033 \,\mathrm{u}\)</span>
+            <span class="step">\(E = \Delta m \times 931.5 \,\mathrm{MeV} \,c^{-2}\) per u</span>
+            <span class="step">\(E = 0.186033 \times 931.5 = \class{res}{173 \,\mathrm{MeV}}\)</span>
+          </div>
+        </div>
+        <div class="slide-foot"><span>E.4 FISSION · SL + HL</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>The same answer, a different route.</b> The products have less mass than what went in. The missing mass, 0.186 u, about a fifth of the mass of one nucleon, has been converted to energy: \(E = mc^{2}\). The two methods agree, as they must: binding energy is mass defect expressed as energy.</p>
+            <p><b>Keep every figure.</b> The answer comes from the difference of two numbers that agree to four significant figures. Round the masses to 236.05 and 235.87 and the difference becomes 0.18, an error of several per cent. Subtract first and round at the end.</p>
+            <p><b>In joules.</b> \(173 \,\mathrm{MeV} = 173 \times 10^{6} \times 1.60 \times 10^{-19} = 2.8 \times 10^{-11}\) J for one fission.</p>
+          </div>
+          <div class="rn-side">
+            <p class="tip">Data booklet: \(1 \,\mathrm{u} = 931.5 \,\mathrm{MeV} \,c^{-2}\). Multiplying a mass defect in u by 931.5 gives the energy in MeV directly.</p>
+            <p class="trap">Forgetting that one neutron goes in and three come out. Count all the particles on both sides.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide" data-title="Energy from a kilogram of fuel">
+        <p class="eyebrow">Worked example</p>
+        <h2>A kilogram of uranium-235<span>.</span></h2>
+        <div class="split even">
+          <div class="work">
+            <span class="say">173 MeV per fission · molar mass 235 g mol⁻¹</span>
+            <span>\(N = \dfrac{m}{M} N_\mathrm{A} = \dfrac{1000}{235} \times 6.02 \times 10^{23}\)</span>
+            <span class="step">\(N = 2.56 \times 10^{24}\) nuclei</span>
+            <span class="step">\(E = N \times 173 \times 1.60 \times 10^{-13}\)</span>
+            <span class="step">\(E = \class{res}{7.1 \times 10^{13} \,\mathrm{J}}\)</span>
+          </div>
+          <div class="stack">
+            <ul class="points small">
+              <li class="step">Coal gives about \(3 \times 10^{7}\) J per kilogram</li>
+              <li class="step">So 1 kg of uranium-235 matches over <b>two thousand tonnes</b> of coal</li>
+              <li class="step">Most of the energy is the <b>kinetic energy of the fragments</b></li>
+            </ul>
+          </div>
+        </div>
+        <div class="slide-foot"><span>E.4 FISSION · SL + HL</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>Where the 173 MeV goes.</b> The two fragments are both positively charged and start almost touching, so they repel each other fiercely and fly apart. They carry about 165 MeV as kinetic energy between them. The neutrons take a few MeV, and the rest leaves as gamma rays. The fragments travel only a few thousandths of a millimetre through the fuel before collisions bring them to rest, and their kinetic energy becomes thermal energy of the fuel rod. A reactor is a way of heating metal rods.</p>
+            <p><b>Specific energy.</b> \(7.1 \times 10^{13}\) J kg⁻¹ is the figure in the fuel table of A.3: about a million times that of any chemical fuel.</p>
+          </div>
+          <div class="rn-side">
+            <p class="tip">\(1 \,\mathrm{MeV} = 1.60 \times 10^{-13}\) J. Converting once, at the end, avoids carrying powers of ten through the working.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide" data-title="Quick check: fission and its energy">
+        <p class="eyebrow">Quick check</p>
+        <h2>Fission and its energy<span>.</span></h2>
+        <div class="quiz fill">
+          <div class="q"><p><span class="n">01</span>What is the difference between spontaneous and induced fission?</p><div class="ans step">Induced fission first absorbs a neutron</div></div>
+          <div class="q"><p><span class="n">02</span>n + ²³⁵U → ¹⁴⁴Ba + ⁸⁹Kr + ? neutrons</p><div class="ans step">3 neutrons</div></div>
+          <div class="q"><p><span class="n">03</span>Which is more tightly bound per nucleon: uranium or its fragments?</p><div class="ans step">The fragments</div></div>
+          <div class="q"><p><span class="n">04</span>A mass defect of 0.20 u. Energy released?</p><div class="ans step">\(0.20 \times 931.5 = 186 \,\mathrm{MeV}\)</div></div>
+          <div class="q"><p><span class="n">05</span>In what form is most of the energy released?</p><div class="ans step">Kinetic energy of the fragments</div></div>
+          <div class="q"><p><span class="n">06</span>Why can a slow neutron enter a nucleus easily?</p><div class="ans step">It has no charge: no repulsion</div></div>
+        </div>
+        <div class="slide-foot"><span class="reveal-hint">PRESS → TO REVEAL EACH ANSWER</span><span data-page></span></div>
+      </section>
+
+      <!-- Part 2 -->
+      <section class="slide section" data-title="Part 2: Chain reactions and reactors">
+        <div class="title-grid">
+          <div>
+            <p class="eyebrow">Part 02</p>
+            <h1>Chain reactions and reactors<span>.</span></h1>
+            <p class="lead">Keeping the reaction going, and keeping it steady</p>
+          </div>
+          <div class="fig" data-fig="e4-reactor" data-plain></div>
+        </div>
+        <div class="slide-foot"><span>E.4 FISSION · SL + HL</span><span data-page></span></div>
+      </section>
+
+      <section class="slide" data-title="Chain reactions">
+        <p class="eyebrow">Neutrons making more neutrons</p>
+        <h2>Chain reactions<span>.</span></h2>
+        <div class="split fig-first">
+          <div class="panel">
+            <div class="panel-head"><span>EACH FISSION CAUSES TWO MORE</span><span class="reveal-hint">PRESS → TO PLAY</span></div>
+            <div class="fig" data-fig="e4-chain"></div>
+          </div>
+          <ul class="points small">
+            <li class="step">Each fission needs <b>one</b> neutron and releases <b>two or three</b></li>
+            <li class="step">Those neutrons can cause further fissions: a <b>chain reaction</b></li>
+            <li class="step">If more than one goes on to cause a fission, the rate <b>grows</b></li>
+          </ul>
+        </div>
+        <div class="slide-foot"><span>E.4 FISSION · SL + HL</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>How fast it can grow.</b> In pure uranium-235 the time from one generation of fissions to the next is about a hundred-millionth of a second. If every fission caused two more, eighty generations, less than a millionth of a second, would be enough to split every nucleus in a kilogram. That is a bomb. A reactor is built so that this cannot happen.</p>
+            <p><b>Not every neutron causes a fission.</b> Some escape through the surface of the fuel. Some are absorbed by other nuclei without causing fission, especially by uranium-238, which makes up over 99% of natural uranium. What matters is how many, on average, go on to cause another fission.</p>
+            <p><b>Critical mass.</b> A small lump of fuel has a large surface for its volume, and too many neutrons leak out. Above a certain mass, enough stay inside to keep the chain going. That least mass is the critical mass.</p>
+          </div>
+          <div class="rn-side">
+            <p class="tip">A chain reaction: the neutrons released by one fission go on to induce further fissions.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide" data-title="Controlling a chain reaction">
+        <p class="eyebrow">One neutron, on average</p>
+        <h2>Controlling a chain reaction<span>.</span></h2>
+        <div class="stack center" style="gap: 26px;">
+          <div class="cards" style="grid-template-columns: 1fr 1fr 1fr;">
+            <div class="card"><p class="eyebrow">Fewer than one goes on</p><h3>The reaction dies away</h3><p>Sub-critical: shutting down</p></div>
+            <div class="card step"><p class="eyebrow">Exactly one goes on</p><h3>A steady rate</h3><p>Critical: a reactor running at constant power</p></div>
+            <div class="card step"><p class="eyebrow">More than one goes on</p><h3>The rate grows</h3><p>Supercritical: raising the power, or, unchecked, an explosion</p></div>
+          </div>
+          <div class="idea step">A reactor needs two things: enough <b>slow</b> neutrons to keep the chain going, and a way to <b>absorb</b> the surplus.</div>
+        </div>
+        <div class="slide-foot"><span>E.4 FISSION · SL + HL</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>A fine balance.</b> “Critical” sounds like an emergency, but in a reactor it is the normal working state: every fission leads, on average, to exactly one more, so the number of fissions each second, and the power, stay constant. To raise the power the operators let the number creep slightly above one for a while, then bring it back to one at the new level.</p>
+            <p><b>The two jobs.</b> The neutrons released by fission are fast, and fast neutrons are poor at causing fission in uranium-235. They must be slowed: that is the moderator’s job. And since each fission releases two or three neutrons where only one is wanted, the extra ones must be removed: that is the job of the control rods. The next slides take these in turn.</p>
+          </div>
+          <div class="rn-side">
+            <p class="more">A power reactor cannot explode like a bomb. Its fuel is only a few per cent uranium-235, far too dilute for a fast chain reaction.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide" data-title="The moderator">
+        <p class="eyebrow">Slowing the neutrons</p>
+        <h2>The moderator<span>.</span></h2>
+        <div class="split wide-fig">
+          <ul class="points small">
+            <li>Fission neutrons are <b>fast</b>: about 1 MeV</li>
+            <li class="step">Slow, <b>thermal</b> neutrons are far more likely to cause fission in ²³⁵U</li>
+            <li class="step">The moderator slows them by <b>collisions</b> with light nuclei</li>
+            <li class="step">Water or graphite</li>
+          </ul>
+          <div class="panel">
+            <div class="panel-head"><span>A NEUTRON IN THE MODERATOR</span></div>
+            <div class="fig" data-fig="e4-moderator"></div>
+          </div>
+        </div>
+        <div class="slide-foot"><span>E.4 FISSION · SL + HL</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>Why light nuclei.</b> This is a collision problem from A.2. A ball that hits a much heavier ball bounces off with almost all its speed. A ball that hits one of its own mass can hand over most of its kinetic energy in a single collision. A neutron slows fastest by colliding with nuclei close to its own mass: the hydrogen in water, or carbon in graphite. Bouncing off uranium nuclei would hardly slow it at all.</p>
+            <p><b>Why slow is better.</b> A slow neutron spends longer near a nucleus, so it is more likely to be captured. For uranium-235 a thermal neutron is hundreds of times more likely to cause fission than a fast one. “Thermal” means in thermal equilibrium with the moderator: a kinetic energy of about \(\frac{3}{2} k_\mathrm{B} T\), a fraction of an electronvolt.</p>
+            <p><b>A good moderator</b> slows neutrons without absorbing them, which rules out many materials.</p>
+          </div>
+          <div class="rn-side">
+            <p class="trap">Saying that the moderator slows the reaction. It slows the neutrons, which makes the reaction go. Without a moderator the chain reaction would stop.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide" data-title="Control rods">
+        <p class="eyebrow">Absorbing the surplus</p>
+        <h2>Control rods<span>.</span></h2>
+        <div class="stack center" style="gap: 26px;">
+          <ul class="points">
+            <li>Rods of a material that <b>absorbs neutrons</b> strongly, such as boron or cadmium</li>
+            <li class="step">Lowered <b>further in</b>: more neutrons absorbed, fewer fissions, <b>less power</b></li>
+            <li class="step">Raised: more fissions, more power</li>
+          </ul>
+          <div class="cards step" style="grid-template-columns: 1fr 1fr;">
+            <div class="card"><p class="eyebrow">Moderator</p><h3>Slows neutrons</h3><p>So that they can cause fission</p></div>
+            <div class="card"><p class="eyebrow">Control rods</p><h3>Absorb neutrons</h3><p>So that only one per fission goes on</p></div>
+          </div>
+        </div>
+        <div class="slide-foot"><span>E.4 FISSION · SL + HL</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>How the power is held steady.</b> Instruments count the neutrons in the core. If the count starts to rise, the rods are moved a little further in and absorb more; if it falls, they are eased out. The adjustment is continuous and automatic.</p>
+            <p><b>Shutting down.</b> In an emergency the rods are dropped fully into the core, in many designs simply by releasing them to fall under gravity. Within seconds the chain reaction stops. The core does not go cold, though: the fission products already in the fuel go on decaying and giving out thermal energy, at first about 7% of full power, so cooling must continue for a long time afterwards. Loss of that cooling was what destroyed the reactors at Fukushima in 2011.</p>
+          </div>
+          <div class="rn-side">
+            <p class="trap">Mixing up the two. Control rods absorb; the moderator slows without absorbing.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide" data-title="A nuclear power plant">
+        <p class="eyebrow">From fission to electricity</p>
+        <h2>A nuclear power plant<span>.</span></h2>
+        <div class="split wide-fig">
+          <ul class="points small">
+            <li><b>Fuel rods</b>: fission heats them</li>
+            <li class="step"><b>Heat exchanger</b>: hot coolant from the core boils water in a <b>separate</b> loop</li>
+            <li class="step">Steam turns a <b>turbine</b> and generator</li>
+            <li class="step"><b>Shielding</b>: steel and concrete absorb neutrons and gamma rays</li>
+          </ul>
+          <div class="panel">
+            <div class="panel-head"><span>A PRESSURISED-WATER REACTOR</span><span class="pill">SCHEMATIC</span></div>
+            <div class="fig" data-fig="e4-reactor"></div>
+          </div>
+        </div>
+        <div class="slide-foot"><span>E.4 FISSION · SL + HL</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>Why two loops.</b> The water that flows through the core becomes radioactive, and it could carry traces of fission products if a fuel rod leaked. The heat exchanger passes its thermal energy through the walls of metal tubes to a second, separate supply of water, which never touches the core. Only that clean water, as steam, goes out to the turbine hall.</p>
+            <p><b>From here on it is an ordinary power station.</b> Steam drives a turbine, which turns a generator (D.4); the steam is condensed and pumped back. The reactor replaces the furnace of a coal or gas station and nothing else. Like them it is a heat engine, with an efficiency of about a third (B.4).</p>
+            <p><b>What the shielding stops.</b> Neutrons and gamma rays are both very penetrating. A steel pressure vessel and several metres of concrete surround the core, to protect the people working there and to contain the radioactive material if something goes wrong.</p>
+          </div>
+          <div class="rn-side">
+            <p class="tip">Know the job of each of the four named parts: moderator, control rods, heat exchanger and shielding.</p>
+            <p class="more">In this design the same water is both coolant and moderator.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide history" data-title="Story: Chicago Pile-1">
+        <p class="eyebrow">The story · Chicago, 2 December 1942</p>
+        <p class="not-examined">Background story · not assessed</p>
+        <h2>A reactor in a squash court<span>.</span></h2>
+        <div class="story" style="--photo-h: 400px;">
+          <div class="story-photos">
+            <figure><img src="images/cp1.jpg" width="1280" height="1004" alt="Drawing of a large stack of dark blocks, as tall as a room, built inside a timber frame with a ladder leaning against it"><figcaption><b>Chicago Pile-1</b>, drawn by Melvin A. Miller</figcaption></figure>
+          </div>
+          <div class="stack">
+            <ul class="points">
+              <li>Under the stands of a university sports field, Enrico Fermi’s team stacked <b>45 000 blocks of graphite</b> with uranium between them</li>
+              <li>Graphite was the <b>moderator</b>. Strips of wood covered in cadmium were the <b>control rods</b></li>
+              <li>At <b>15:25</b> the chain reaction became self-sustaining, at about <b>half a watt</b></li>
+              <li>No shielding and no cooling: it was never meant to run at power</li>
+            </ul>
+            <div class="idea">The message sent in code: “The Italian navigator has landed in the New World.”</div>
+          </div>
+        </div>
+        <p class="credits">Drawing: <a href="https://commons.wikimedia.org/wiki/File:Stagg_Field_reactor.jpg" target="_blank" rel="noopener">Melvin A. Miller, Argonne National Laboratory</a>, public domain.</p>
+        <div class="slide-foot"><span>E.4 FISSION · SL + HL</span><span data-page></span></div>
+      </section>
+
+      <section class="slide" data-title="Fuel used by a power station">
+        <p class="eyebrow">Worked example</p>
+        <h2>The fuel used in a day<span>.</span></h2>
+        <div class="split even">
+          <div class="work">
+            <span class="say">1000 MW of electrical power · efficiency 33%</span>
+            <span class="say">173 MeV = \(2.77 \times 10^{-11}\) J per fission</span>
+            <span>\(P_\mathrm{in} = \dfrac{P_\mathrm{out}}{\eta} = \dfrac{1.0 \times 10^{9}}{0.33} = 3.0 \times 10^{9} \,\mathrm{W}\)</span>
+            <span class="step">Fissions per second \(= \dfrac{3.0 \times 10^{9}}{2.77 \times 10^{-11}}\)</span>
+            <span class="step">\(= 1.1 \times 10^{20} \,\mathrm{s}^{-1}\)</span>
+          </div>
+          <div class="work step">
+            <span class="say">In one day: 86 400 s</span>
+            <span>\(N = 1.1 \times 10^{20} \times 86\,400 = 9.5 \times 10^{24}\)</span>
+            <span class="step">\(m = N \times 235 \,\mathrm{u}\)</span>
+            <span class="step">\(m = 9.5 \times 10^{24} \times 235 \times 1.661 \times 10^{-27}\)</span>
+            <span class="step">\(m = \class{res}{3.7 \,\mathrm{kg}}\) of ²³⁵U</span>
+          </div>
+        </div>
+        <div class="slide-foot"><span>E.4 FISSION · SL + HL</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>A sense of scale.</b> A large power station, enough for a city of a million people, consumes less than four kilograms of uranium-235 a day: a lump the size of a tennis ball. A coal station of the same output burns about ten thousand tonnes of coal a day, several trainloads, and sends some thirty thousand tonnes of carbon dioxide into the air.</p>
+            <p><b>Fuel rods hold more than that.</b> Reactor fuel is only 3 to 5% uranium-235; the rest is uranium-238, which does not sustain the chain reaction. So the fuel actually loaded is some thirty times the mass calculated here, and it stays in the core for several years.</p>
+          </div>
+          <div class="rn-side">
+            <p class="tip">The method: electrical power → thermal power (divide by the efficiency) → fissions per second (divide by the energy of one) → mass (multiply by the mass of one nucleus).</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide" data-title="Quick check: chain reactions and reactors">
+        <p class="eyebrow">Quick check</p>
+        <h2>Chain reactions and reactors<span>.</span></h2>
+        <div class="quiz fill">
+          <div class="q"><p><span class="n">01</span>What carries a chain reaction from one fission to the next?</p><div class="ans step">Neutrons</div></div>
+          <div class="q"><p><span class="n">02</span>How many neutrons per fission must go on, for steady power?</p><div class="ans step">Exactly one, on average</div></div>
+          <div class="q"><p><span class="n">03</span>What does the moderator do?</p><div class="ans step">Slows the neutrons by collisions</div></div>
+          <div class="q"><p><span class="n">04</span>What do the control rods do?</p><div class="ans step">Absorb neutrons</div></div>
+          <div class="q"><p><span class="n">05</span>Why is there a heat exchanger?</p><div class="ans step">To keep radioactive coolant out of the turbine</div></div>
+          <div class="q"><p><span class="n">06</span>The control rods are lowered further. What happens to the power?</p><div class="ans step">It falls</div></div>
+        </div>
+        <div class="slide-foot"><span class="reveal-hint">PRESS → TO REVEAL EACH ANSWER</span><span data-page></span></div>
+      </section>
+
+      <!-- Part 3 -->
+      <section class="slide section" data-title="Part 3: The products of fission">
+        <div class="title-grid">
+          <div>
+            <p class="eyebrow">Part 03</p>
+            <h1>The products of fission<span>.</span></h1>
+            <p class="lead">What comes out of a reactor, and what has to be done with it</p>
+          </div>
+          <div class="fig" data-fig="e4-waste"></div>
+        </div>
+        <div class="slide-foot"><span>E.4 FISSION · SL + HL</span><span data-page></span></div>
+      </section>
+
+      <section class="slide" data-title="The products of fission">
+        <p class="eyebrow">What is in spent fuel</p>
+        <h2>The products of fission<span>.</span></h2>
+        <div class="split even">
+          <ul class="points small">
+            <li>The fragments have <b>too many neutrons</b> for their size</li>
+            <li class="step">So they are <b>radioactive</b>: beta-minus emitters, with gamma rays</li>
+            <li class="step">Half-lives from seconds to millions of years</li>
+            <li class="step">Neutrons also turn ²³⁸U into <b>plutonium</b> and other heavy nuclei</li>
+          </ul>
+          <table class="facts step">
+            <thead><tr><th>In spent fuel</th><th>Half-life</th></tr></thead>
+            <tbody>
+              <tr><td>Iodine-131</td><td class="num">8 days</td></tr>
+              <tr><td>Strontium-90</td><td class="num">29 years</td></tr>
+              <tr><td>Caesium-137</td><td class="num">30 years</td></tr>
+              <tr><td>Plutonium-239</td><td class="num">24 000 years</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="slide-foot"><span>E.4 FISSION · SL + HL</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>Why the fragments are neutron-rich.</b> Stable heavy nuclei need many more neutrons than protons: uranium-235 has 143 neutrons to 92 protons, a ratio of 1.55. Stable nuclei of middle size need fewer: about 1.3 neutrons per proton. When uranium splits, the fragments inherit its high ratio. Barium-141 has 85 neutrons where the stable isotopes of barium have at most 82. Such nuclei correct the imbalance by beta-minus decay, turning neutrons into protons, usually several times in succession.</p>
+            <p><b>Why spent fuel is so much more dangerous than new fuel.</b> Fresh uranium fuel is only weakly radioactive and can be handled with gloves. After years in a reactor the same rods are filled with intensely radioactive fission products and would deliver a fatal dose in minutes. They also go on producing thermal energy from their decay.</p>
+            <p><b>Middle half-lives are the worst.</b> A very short half-life means fierce activity that is soon over. A very long one means feeble activity. Strontium-90 and caesium-137, at about thirty years, are active enough to be dangerous and last long enough to be a problem for centuries.</p>
+          </div>
+          <div class="rn-side">
+            <p class="more">Strontium behaves chemically like calcium and is taken up by bone; iodine collects in the thyroid gland. Where a nuclide goes in the body matters as much as its activity.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide" data-title="Managing nuclear waste">
+        <p class="eyebrow">What is done with it</p>
+        <h2>Managing nuclear waste<span>.</span></h2>
+        <div class="split wide-fig">
+          <div class="stack">
+            <ul class="points small">
+              <li><b>First years</b>: under water in cooling ponds, which absorb radiation and remove heat</li>
+              <li class="step"><b>Then</b>: sealed in steel and concrete casks, or reprocessed and set in glass</li>
+              <li class="step"><b>Finally</b>: burial deep in stable rock</li>
+            </ul>
+          </div>
+          <div class="panel">
+            <div class="panel-head"><span>ACTIVITY OF SPENT FUEL</span><span class="pill">A SKETCH</span></div>
+            <div class="fig" data-fig="e4-waste"></div>
+          </div>
+        </div>
+        <div class="slide-foot"><span>E.4 FISSION · SL + HL</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>Two timescales.</b> The graph has a logarithmic time axis: each step is ten times longer than the last. For the first few hundred years the activity is dominated by fission products such as strontium-90 and caesium-137. After ten half-lives, about 300 years, only a thousandth of them is left. What remains is a much lower activity from plutonium and other heavy nuclei, which lasts for tens of thousands of years. A store has to be safe on both timescales.</p>
+            <p><b>The impact of long-term storage.</b> The waste must be kept from groundwater and from people for longer than any human institution has lasted. That means choosing rock that has been stable for millions of years, containers that will not corrode, and some way of warning generations who may not share our languages. It also means cost, transport of dangerous material, and the consent of whoever lives nearby. Against that, the volume is small: all the high-level waste a person’s lifetime of electricity would produce fits in a drinks can.</p>
+          </div>
+          <div class="rn-side">
+            <p class="tip">The guide expects you to consider the impact of long-term storage. Be ready with points on both sides: the long timescale and its risks, and the small volume and the possibility of deep, stable burial.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide history" data-title="Story: Onkalo">
+        <p class="eyebrow">The story · Olkiluoto, Finland</p>
+        <p class="not-examined">Background story · not assessed</p>
+        <h2>A cave built to be forgotten<span>.</span></h2>
+        <div class="story band" style="--photo-h: 300px;">
+          <div class="story-photos">
+            <figure><img src="images/onkalo.jpg" width="1280" height="802" alt="A wide tunnel cut through bare rock, lit by lamps, with a side chamber opening on the right and a wet gravel floor"><figcaption>A tunnel in the <b>Onkalo</b> repository. The name means “small cave”</figcaption></figure>
+          </div>
+          <ul class="points">
+            <li>Excavation into granite bedrock began in <b>2004</b> and reached a depth of <b>520 m</b></li>
+            <li>Spent fuel goes into steel canisters inside <b>copper</b> capsules, each in its own hole, packed round with <b>clay</b></li>
+            <li>The first permanent store for spent fuel in the world. Its capsules are meant to last <b>100 000 years</b></li>
+          </ul>
+        </div>
+        <p class="credits">Photograph: <a href="https://commons.wikimedia.org/wiki/File:Onkalo_spent_nuclear_fuel_repository.jpg" target="_blank" rel="noopener">kallerna</a>, CC BY-SA 4.0.</p>
+        <div class="slide-foot"><span>E.4 FISSION · SL + HL</span><span data-page></span></div>
+      </section>
+
+      <section class="slide" data-title="Waste: how long?">
+        <p class="eyebrow">Worked example</p>
+        <h2>How long it must be stored<span>.</span></h2>
+        <div class="split even">
+          <div class="work">
+            <span class="say">Caesium-137: half-life 30 years</span>
+            <span class="say">What fraction remains after 300 years?</span>
+            <span>Number of half-lives \(= \dfrac{300}{30} = 10\)</span>
+            <span class="step">Fraction remaining \(= \left(\dfrac{1}{2}\right)^{10}\)</span>
+            <span class="step">\(= \class{res}{\dfrac{1}{1024}}\)</span>
+          </div>
+          <div class="stack">
+            <ul class="points small">
+              <li class="step">About a <b>thousandth</b> after three centuries</li>
+              <li class="step">Plutonium-239 over the same time: \(\dfrac{300}{24\,000}\) of a half-life. Hardly any has gone</li>
+            </ul>
+            <div class="idea step">Ten half-lives: a factor of a thousand.</div>
+          </div>
+        </div>
+        <div class="slide-foot"><span>E.4 FISSION · SL + HL</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>A rule of thumb.</b> \(2^{10} = 1024\), so every ten half-lives reduce the activity about a thousandfold, and twenty half-lives a millionfold. For caesium-137 and strontium-90 that is 300 and 600 years: long, but within the span of buildings that still stand. For plutonium-239 ten half-lives is 240 000 years.</p>
+            <p><b>This is E.3 put to work.</b> The method is the half-life calculation for whole numbers of half-lives. At HL, a time that is not a whole number of half-lives needs \(N = N_{0} e^{-\lambda t}\).</p>
+          </div>
+          <div class="rn-side">
+            <p class="tip">Activity and the number of undecayed nuclei fall by the same fraction, so the answer serves for either.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide" data-title="Quick check: the products of fission">
+        <p class="eyebrow">Quick check</p>
+        <h2>The products of fission<span>.</span></h2>
+        <div class="quiz fill">
+          <div class="q"><p><span class="n">01</span>Why are fission fragments radioactive?</p><div class="ans step">Too many neutrons for their size</div></div>
+          <div class="q"><p><span class="n">02</span>Which decay do they mostly undergo?</p><div class="ans step">Beta-minus</div></div>
+          <div class="q"><p><span class="n">03</span>Why is spent fuel first stored under water?</p><div class="ans step">To absorb radiation and remove heat</div></div>
+          <div class="q"><p><span class="n">04</span>Strontium-90 has a half-life of 29 years. Fraction left after 87 years?</p><div class="ans step">\(\frac{1}{8}\)</div></div>
+          <div class="q"><p><span class="n">05</span>Why is plutonium a long-term problem?</p><div class="ans step">Its half-life is 24 000 years</div></div>
+          <div class="q"><p><span class="n">06</span>Where is high-level waste finally stored?</p><div class="ans step">Deep underground, in stable rock</div></div>
+        </div>
+        <div class="slide-foot"><span class="reveal-hint">PRESS → TO REVEAL EACH ANSWER</span><span data-page></span></div>
+      </section>
+
+      <section class="slide" data-title="Summary">
+        <p class="eyebrow">Summary</p>
+        <h2>Fission on one slide<span>.</span></h2>
+        <div class="cards fill" style="grid-template-columns: 1fr 1fr 1fr; align-content: center;">
+          <div class="card"><p class="eyebrow">Fission</p><h3>A heavy nucleus splits</h3><p>Spontaneous, or induced by a neutron<br>Two fragments and a few neutrons</p></div>
+          <div class="card step"><p class="eyebrow">Energy</p><h3>\(E = \Delta m \, c^{2}\)</h3><p>Or the rise in total binding energy<br>About 200 MeV per fission</p></div>
+          <div class="card step"><p class="eyebrow">Chain reaction</p><h3>Neutrons cause more fissions</h3><p>Steady when one per fission goes on</p></div>
+          <div class="card step"><p class="eyebrow">Moderator · control rods</p><h3>Slow · absorb</h3><p>Slow neutrons cause fission; surplus neutrons are removed</p></div>
+          <div class="card step"><p class="eyebrow">Heat exchanger · shielding</p><h3>Transfer · protect</h3><p>Steam for the turbine from a separate loop</p></div>
+          <div class="card step"><p class="eyebrow">Products</p><h3>Radioactive, some for millennia</h3><p>Cooling ponds, casks, deep burial</p></div>
+        </div>
+        <div class="slide-foot"><span>E.4 FISSION · SL + HL</span><span data-page></span></div>
+      </section>
+
+      <section class="slide" data-title="Key words">
+        <p class="eyebrow">Summary</p>
+        <h2>Key words<span>.</span></h2>
+        <div class="terms fill" style="grid-template-columns: repeat(3, 1fr);">
+          <div class="term"><b>Fission</b><span>The splitting of a heavy nucleus</span></div>
+          <div class="term"><b>Induced fission</b><span>Triggered by absorbing a neutron</span></div>
+          <div class="term"><b>Chain reaction</b><span>Neutrons from one fission cause others</span></div>
+          <div class="term"><b>Critical mass</b><span>The least mass that sustains a chain reaction</span></div>
+          <div class="term"><b>Thermal neutron</b><span>A slow neutron, in equilibrium with the moderator</span></div>
+          <div class="term"><b>Moderator</b><span>Slows neutrons by collisions</span></div>
+          <div class="term"><b>Control rod</b><span>Absorbs neutrons</span></div>
+          <div class="term"><b>Heat exchanger</b><span>Passes thermal energy to a separate loop</span></div>
+          <div class="term"><b>Fission products</b><span>The radioactive fragments</span></div>
+        </div>
+        <div class="slide-foot"><span>E.4 FISSION · SL + HL</span><span data-page></span></div>
+      </section>
+
+    </div>
+  </main>
+
+  <nav class="controls" aria-label="Slide controls">
+    <button type="button" id="prev" aria-label="Previous slide"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg></button>
+    <span class="counter" id="counter" aria-live="polite"></span>
+    <button type="button" id="next" aria-label="Next slide"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 5l7 7-7 7"/></svg></button>
+  </nav>
+  <div class="progress" aria-hidden="true"><span id="progress-bar"></span></div>
+
+  <script src="../assets/figures.js"></script>
+  <script src="figures.js"></script>
+  <script src="../assets/deck-math.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
+  <script src="../assets/deck-notes.js"></script>
+  <script src="../assets/deck.js"></script>
+</body>
+</html>

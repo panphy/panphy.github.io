@@ -1,0 +1,812 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="robots" content="noindex, nofollow">
+  <meta name="description" content="Teaching slides for IB Diploma Programme Physics topic A.4 Rigid body mechanics, higher level only: torque and rotational equilibrium, the equations of rotational motion, moment of inertia, Newton’s second law for rotation, angular momentum and rotational kinetic energy.">
+  <meta name="theme-color" content="#F8F6F1">
+  <script src="/assets/theme.js" data-theme-scope="ibdpphy"></script>
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <link rel="stylesheet" href="/assets/standalone-top.css">
+  <title>A.4 Rigid body mechanics · IB DP Physics</title>
+  <link rel="icon" type="image/png" href="/assets/favicon.png">
+  <link rel="apple-touch-icon" href="/assets/apple-touch-icon.png">
+  <link rel="stylesheet" href="../assets/deck.css">
+  <link rel="stylesheet" href="../assets/deck-notes.css">
+  <link rel="stylesheet" href="/assets/theme-toggle.css">
+  <link rel="stylesheet" href="/assets/fullscreen-button.css">
+  <script src="/assets/theme-toggle.js"></script>
+  <script src="/ibdpphy/sw-register.js" defer></script>
+</head>
+<body>
+  <header class="banner">
+    <a class="banner-logo" href="/" aria-label="PanPhy Labs home"><img src="/assets/panphy.png" alt="PanPhy Labs" width="38" height="38"></a>
+    <a class="banner-title" href="#1">A.4 Rigid body mechanics</a>
+    <div class="banner-actions">
+      <button id="thumbs-toggle" class="icon-button" type="button" aria-controls="thumbs" aria-pressed="true" aria-label="Hide slide thumbnails" title="Show or hide slide thumbnails (T)"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path class="pane" d="M9.5 4.5H6A2.5 2.5 0 0 0 3.5 7v10A2.5 2.5 0 0 0 6 19.5h3.5z"/><rect x="3.5" y="4.5" width="17" height="15" rx="2.5"/><path d="M9.5 4.5v15"/></svg></button>
+      <button id="fullscreen" class="panphy-fullscreen-button" type="button" aria-pressed="false" aria-label="Present fullscreen" title="Present fullscreen (F)"><svg class="panphy-fs-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M4 9V4h5M15 4h5v5M20 15v5h-5M9 20H4v-5"/></svg></button>
+      <button id="theme-button" type="button" data-panphy-theme-toggle aria-label="Toggle light/dark theme" title="Toggle between light and dark themes"></button>
+    </div>
+  </header>
+  <script>window.PanPhyThemeToggle.mount(document.getElementById('theme-button'));</script>
+
+  <nav class="thumbs" id="thumbs" aria-label="Slides"></nav>
+
+  <main class="stage" id="stage">
+    <div class="deck" id="deck">
+
+      <!-- 1 · Title -->
+      <section class="slide title hl" data-title="A.4 Rigid body mechanics">
+        <div class="title-grid">
+          <div>
+            <p class="eyebrow">IB DP Physics · Theme A · Space, time and motion</p>
+            <h1>Rigid body mechanics<span>.</span></h1>
+            <p class="lead">A.4 · Torque, rotational motion, moment of inertia and angular momentum<br>Higher level only: there is no standard level content in A.4</p>
+            <div class="chips">
+              <span class="chip hl">Additional HL · 7 hours</span>
+              <a class="chip on" href="../a2-forces-and-momentum/">A.2 Forces and momentum ↗</a>
+            </div>
+          </div>
+          <div class="fig" data-fig="a4-wheel" data-plain></div>
+        </div>
+      </section>
+
+      <section class="slide hl" data-title="Lesson map">
+        <p class="eyebrow">The journey</p>
+        <h2>Four parts<span>.</span></h2>
+        <div class="cards fill" style="grid-template-columns: repeat(4, 1fr);">
+          <div class="card">
+            <div class="fig" data-fig="a4-beam" data-kind="seesaw" data-still style="height: 170px;"></div>
+            <p class="eyebrow">Part 01</p>
+            <h3>Torque and equilibrium</h3>
+            <p>\(\tau = Fr \sin \theta\), and when a body does not start to turn</p>
+          </div>
+          <div class="card">
+            <div class="fig" data-fig="a4-wheel" data-still data-plain style="height: 170px;"></div>
+            <p class="eyebrow">Part 02</p>
+            <h3>Rotational motion</h3>
+            <p>Angular displacement, velocity and acceleration</p>
+          </div>
+          <div class="card">
+            <div class="fig" data-fig="a4-inertia" data-still data-plain style="height: 170px;"></div>
+            <p class="eyebrow">Part 03</p>
+            <h3>Moment of inertia</h3>
+            <p>\(I = \Sigma m r^{2}\) and \(\tau = I \alpha\)</p>
+          </div>
+          <div class="card">
+            <div class="fig" data-fig="a4-skater" data-still data-plain style="height: 170px;"></div>
+            <p class="eyebrow">Part 04</p>
+            <h3>Angular momentum and energy</h3>
+            <p>\(L = I \omega\), its conservation, and \(\frac{1}{2} I \omega^{2}\)</p>
+          </div>
+        </div>
+        <div class="idea" style="margin-top: 22px;">Every idea here has a twin in A.1 to A.3. Force becomes torque, mass becomes moment of inertia.</div>
+        <div class="slide-foot"><span>A.4 RIGID BODY MECHANICS · HL ONLY</span><span data-page></span></div>
+      </section>
+
+      <!-- Part 1 -->
+      <section class="slide section hl" data-title="Part 1: Torque and equilibrium">
+        <div class="title-grid">
+          <div>
+            <p class="eyebrow">Part 01 · HL only</p>
+            <h1>Torque and equilibrium<span>.</span></h1>
+            <p class="lead">The turning effect of a force, and how to balance it</p>
+          </div>
+          <div class="fig" data-fig="a4-beam" data-kind="seesaw"></div>
+        </div>
+        <div class="slide-foot"><span>A.4 RIGID BODY MECHANICS · HL ONLY</span><span data-page></span></div>
+      </section>
+
+      <section class="slide hl" data-title="Torque">
+        <p class="eyebrow">The turning effect of a force</p>
+        <h2>Torque<span>.</span></h2>
+        <div class="split wide-fig">
+          <div class="stack">
+            <div class="equation"><span>\(\tau = F r \sin \theta\)</span></div>
+            <ul class="points small">
+              <li>\(r\): from the <b>axis</b> to where the force acts</li>
+              <li class="step">\(\theta\): the angle between the force and that line</li>
+              <li class="step">Unit: <b>N m</b></li>
+              <li class="step">A sense: <b>clockwise</b> or <b>anticlockwise</b></li>
+            </ul>
+          </div>
+          <div class="panel">
+            <div class="panel-head"><span>A SPANNER ON A NUT</span></div>
+            <div class="fig" data-fig="a4-torque"></div>
+          </div>
+        </div>
+        <div class="slide-foot"><span>A.4 RIGID BODY MECHANICS · HL ONLY</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>Three things matter.</b> How hard you push, how far from the axis, and in what direction. A door shows all three. Push near the hinge and it hardly moves, however hard you push. Push at the handle, far from the hinge, and it swings easily. Push at the handle but straight towards the hinge, along the door, and nothing happens at all: \(\theta = 0\), so \(\sin \theta = 0\).</p>
+            <p><b>Two ways to read the equation.</b> Group it as \((F \sin \theta) \times r\): only the part of the force at right angles to the handle turns the nut, and it acts at the full distance \(r\). Or group it as \(F \times (r \sin \theta)\): the whole force, times the perpendicular distance from the axis to the line along which the force acts. Both give the same number. Use whichever the diagram makes easier.</p>
+            <p><b>The unit.</b> N m is also what a joule is made of, but a torque is not an energy and is never written in joules.</p>
+          </div>
+          <div class="rn-side">
+            <p class="tip">The largest torque for a given force is when it acts at right angles to the handle: \(\sin 90^{\circ} = 1\) and \(\tau = Fr\).</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide history hl" data-title="Story: Archimedes’ lever">
+        <p class="eyebrow">The story · Syracuse, third century BC</p>
+        <p class="not-examined">Background story · not assessed</p>
+        <h2>A lever to move the world<span>.</span></h2>
+        <div class="story band" style="--photo-h: 300px;">
+          <div class="story-photos">
+            <figure><img src="images/archimedes-lever.jpg" width="640" height="427" alt="Engraving of a bearded man pushing down on the end of a long lever resting on a rock, lifting a globe of the Earth at its other end"><figcaption><b>Archimedes</b> moving the Earth, from the <i>Mechanics Magazine</i> of 1824</figcaption></figure>
+          </div>
+          <ul class="points">
+            <li>People had used levers for thousands of years: the Egyptians moved obelisks of over a hundred tonnes with them</li>
+            <li>The earliest surviving writing on <b>why</b> they work is from the third century BC, and is credited to <b>Archimedes</b></li>
+            <li>The boast attributed to him: give me a lever long enough and a place to rest it, and I shall <b>move the world</b></li>
+          </ul>
+        </div>
+        <p class="credits">Engraving: <a href="https://commons.wikimedia.org/wiki/File:Archimedes_lever_(Small).jpg" target="_blank" rel="noopener">Mechanics Magazine, 1824</a>, public domain.</p>
+        <div class="slide-foot"><span>A.4 RIGID BODY MECHANICS · HL ONLY</span><span data-page></span></div>
+      </section>
+
+      <section class="slide hl" data-title="Rotational equilibrium">
+        <p class="eyebrow">No resultant torque</p>
+        <h2>Rotational equilibrium<span>.</span></h2>
+        <div class="split wide-fig">
+          <div class="stack">
+            <ul class="points small">
+              <li>Resultant <b>torque</b> zero: clockwise torques = anticlockwise torques</li>
+              <li class="step">About <b>any</b> axis you choose</li>
+              <li class="step">For complete equilibrium, the resultant <b>force</b> is zero too</li>
+            </ul>
+            <div class="equation small step"><span>\(W_{1} d_{1} = W_{2} d_{2}\)</span></div>
+          </div>
+          <div class="panel">
+            <div class="panel-head"><span>A BALANCED SEESAW</span></div>
+            <div class="fig" data-fig="a4-beam" data-kind="seesaw"></div>
+          </div>
+        </div>
+        <div class="slide-foot"><span>A.4 RIGID BODY MECHANICS · HL ONLY</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>Two conditions, two kinds of motion.</b> A body can move in two ways: its centre of mass can accelerate, and it can start to spin. A resultant force causes the first. A resultant torque causes the second. A body is in equilibrium only if neither happens, so both must be zero. Two equal and opposite forces applied to opposite edges of a steering wheel add up to no force at all, yet the wheel turns: zero resultant force does not guarantee zero torque.</p>
+            <p><b>Choosing the axis.</b> If a body is in equilibrium, the torques balance about every point, so you may take torques about whichever point is most convenient. Choose a point through which an unknown force acts: its distance from the axis is zero, so it drops out of the equation.</p>
+            <p><b>The pivot force.</b> On the seesaw the pivot pushes up with a force equal to the two weights together. It has no torque about the pivot, which is why it is missing from \(W_{1} d_{1} = W_{2} d_{2}\).</p>
+          </div>
+          <div class="rn-side">
+            <p class="more">The weight of an extended body can be taken to act at one point, its centre of mass. For a uniform plank that is the midpoint. You will not be asked to calculate where it is.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide hl" data-title="Equilibrium: a loaded plank">
+        <p class="eyebrow">Worked example</p>
+        <h2>A plank on two supports<span>.</span></h2>
+        <div class="split">
+          <div class="stack">
+            <div class="work">
+              <span class="say">Torques about the left-hand support</span>
+              <span>\(F_{2} \times 3.0 = 200 \times 1.0 + 60 \times 1.5\)</span>
+              <span class="step">\(F_{2} = \dfrac{290}{3.0} = \class{res}{97 \,\mathrm{N}}\)</span>
+              <span class="say step">Resultant force zero</span>
+              <span class="step">\(F_{1} + F_{2} = 200 + 60\)</span>
+              <span class="step">\(F_{1} = 260 - 97 = \class{res}{163 \,\mathrm{N}}\)</span>
+            </div>
+          </div>
+          <div class="panel">
+            <div class="panel-head"><span>UNIFORM PLANK, WEIGHT 60 N</span></div>
+            <div class="fig" data-fig="a4-beam" data-kind="plank"></div>
+          </div>
+        </div>
+        <div class="slide-foot"><span>A.4 RIGID BODY MECHANICS · HL ONLY</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>Why that axis.</b> Two forces are unknown. Taking torques about the left-hand support removes \(F_{1}\) from the equation, because it acts at the axis itself. One equation, one unknown. The second unknown then comes from the forces.</p>
+            <p><b>Where the plank’s weight acts.</b> The plank is uniform, so its centre of mass is at its midpoint, 1.5 m from each end. Its 60 N acts there.</p>
+            <p><b>Does it make sense?</b> The load is nearer the left-hand support, so that support should carry more of it: 163 N against 97 N. As a check, take torques about the right-hand support instead: \(F_{1} \times 3.0 = 200 \times 2.0 + 60 \times 1.5 = 490\), so \(F_{1} = 163\) N again.</p>
+          </div>
+          <div class="rn-side">
+            <p class="trap">Leaving out the weight of the plank itself. If a question gives a mass or weight for the beam, it must appear in the torque equation.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide hl" data-title="Quick check: torque and equilibrium">
+        <p class="eyebrow">Quick check</p>
+        <h2>Torque and equilibrium<span>.</span></h2>
+        <div class="quiz fill">
+          <div class="q"><p><span class="n">01</span>A 20 N force acts at right angles, 0.30 m from an axis. Torque?</p><div class="ans step">6.0 N m</div></div>
+          <div class="q"><p><span class="n">02</span>The same force acts along the line to the axis. Torque?</p><div class="ans step">Zero</div></div>
+          <div class="q"><p><span class="n">03</span>State the two conditions for equilibrium.</p><div class="ans step">Zero resultant force; zero resultant torque</div></div>
+          <div class="q"><p><span class="n">04</span>400 N sits 1.5 m from a pivot. Where must 600 N sit to balance it?</p><div class="ans step">1.0 m on the other side</div></div>
+          <div class="q"><p><span class="n">05</span>Why take torques about a point where an unknown force acts?</p><div class="ans step">Its torque is zero there</div></div>
+          <div class="q"><p><span class="n">06</span>Where does the weight of a uniform beam act?</p><div class="ans step">At its midpoint, the centre of mass</div></div>
+        </div>
+        <div class="slide-foot"><span class="reveal-hint">PRESS → TO REVEAL EACH ANSWER</span><span data-page></span></div>
+      </section>
+
+      <!-- Part 2 -->
+      <section class="slide section hl" data-title="Part 2: Rotational motion">
+        <div class="title-grid">
+          <div>
+            <p class="eyebrow">Part 02 · HL only</p>
+            <h1>Rotational motion<span>.</span></h1>
+            <p class="lead">A.1 again, with angles in place of distances</p>
+          </div>
+          <div class="fig" data-fig="a4-wheel" data-plain></div>
+        </div>
+        <div class="slide-foot"><span>A.4 RIGID BODY MECHANICS · HL ONLY</span><span data-page></span></div>
+      </section>
+
+      <section class="slide hl" data-title="Describing rotation">
+        <p class="eyebrow">Three angular quantities</p>
+        <h2>Describing rotation<span>.</span></h2>
+        <div class="split wide-fig">
+          <ul class="points small">
+            <li><b>Angular displacement</b> \(\Delta \theta\), in rad</li>
+            <li class="step frac"><b>Angular velocity</b> \(\omega = \dfrac{\Delta \theta}{\Delta t}\), in rad s⁻¹</li>
+            <li class="step frac"><b>Angular acceleration</b> \(\alpha = \dfrac{\Delta \omega}{\Delta t}\), in rad s⁻²</li>
+            <li class="step">A point at radius \(r\): \(v = \omega r\) and \(a = \alpha r\)</li>
+          </ul>
+          <div class="panel">
+            <div class="panel-head"><span>A TURNING WHEEL</span></div>
+            <div class="fig" data-fig="a4-wheel"></div>
+          </div>
+        </div>
+        <div class="slide-foot"><span>A.4 RIGID BODY MECHANICS · HL ONLY</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>Why angles.</b> Different points on a turning wheel move at different speeds: the rim travels much faster than a point near the hub. But they all turn through the same angle in the same time. Describing the motion by angle gives one number for the whole body, which is what makes a rigid body simple to deal with.</p>
+            <p><b>Why radians.</b> An angle in radians is arc length divided by radius, \(\theta = \frac{s}{r}\). So the distance a point moves is \(s = r \theta\), its speed is \(v = r \omega\) and its acceleration along its path is \(a = r \alpha\), with no awkward constants. These links work only in radians. One revolution is \(2 \pi\) rad.</p>
+            <p><b>Two accelerations.</b> \(a = \alpha r\) is the acceleration along the circle, present only while the wheel is speeding up or slowing down. Every point also has the centripetal acceleration \(\omega^{2} r\) of A.2, towards the axis, whenever the wheel is turning.</p>
+          </div>
+          <div class="rn-side">
+            <p class="tip">To convert revolutions per minute to rad s⁻¹, multiply by \(\frac{2 \pi}{60}\). 300 rev min⁻¹ is 31.4 rad s⁻¹.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide hl" data-title="The equations of rotational motion">
+        <p class="eyebrow">Constant angular acceleration</p>
+        <h2>The equations of rotational motion<span>.</span></h2>
+        <table class="facts compare">
+          <thead><tr><th>Linear, from A.1</th><th>Rotational</th><th>Missing</th></tr></thead>
+          <tbody>
+            <tr><td>\(s = \dfrac{u + v}{2} t\)</td><td>\(\Delta \theta = \dfrac{\omega_\mathrm{f} + \omega_\mathrm{i}}{2} t\)</td><td>\(\alpha\)</td></tr>
+            <tr class="step"><td>\(v = u + at\)</td><td>\(\omega_\mathrm{f} = \omega_\mathrm{i} + \alpha t\)</td><td>\(\Delta \theta\)</td></tr>
+            <tr class="step"><td>\(s = ut + \dfrac{1}{2} a t^{2}\)</td><td>\(\Delta \theta = \omega_\mathrm{i} t + \dfrac{1}{2} \alpha t^{2}\)</td><td>\(\omega_\mathrm{f}\)</td></tr>
+            <tr class="step"><td>\(v^{2} - u^{2} = 2as\)</td><td>\(\omega_\mathrm{f}^{2} - \omega_\mathrm{i}^{2} = 2 \alpha \Delta \theta\)</td><td>\(t\)</td></tr>
+          </tbody>
+        </table>
+        <div class="slide-foot"><span>A.4 RIGID BODY MECHANICS · HL ONLY</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>Nothing new to learn.</b> Replace \(s\) with \(\Delta \theta\), \(u\) and \(v\) with \(\omega_\mathrm{i}\) and \(\omega_\mathrm{f}\), and \(a\) with \(\alpha\), and the four equations of A.1 become the four on the right. They come from the same reasoning, the definitions of velocity and acceleration with a constant acceleration, so they have the same form.</p>
+            <p><b>The same method.</b> List the five quantities, \(\Delta \theta\), \(\omega_\mathrm{i}\), \(\omega_\mathrm{f}\), \(\alpha\) and \(t\). Three will be known and one wanted. The last column shows which equation leaves out the fifth.</p>
+            <p><b>The same condition.</b> The angular acceleration must be constant. If the torque on the body changes during the motion, these equations do not apply.</p>
+          </div>
+          <div class="rn-side">
+            <p class="tip">The data booklet writes the last one as \(\omega_\mathrm{f}^{2} = \omega_\mathrm{i}^{2} + 2 \alpha \Delta \theta\). It is the same equation.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide hl" data-title="Rotational motion: a flywheel">
+        <p class="eyebrow">Worked example</p>
+        <h2>Speeding up and slowing down<span>.</span></h2>
+        <div class="split even">
+          <div class="work">
+            <span class="say">From rest, \(\alpha = 2.5 \,\mathrm{rad} \,\mathrm{s}^{-2}\) for 8.0 s</span>
+            <span>\(\omega_\mathrm{f} = \omega_\mathrm{i} + \alpha t = 0 + 2.5 \times 8.0\)</span>
+            <span class="step">\(\omega_\mathrm{f} = \class{res}{20 \,\mathrm{rad} \,\mathrm{s}^{-1}}\)</span>
+            <span class="step">\(\Delta \theta = \omega_\mathrm{i} t + \dfrac{1}{2} \alpha t^{2} = \dfrac{1}{2} \times 2.5 \times 8.0^{2}\)</span>
+            <span class="step">\(\Delta \theta = \class{res}{80 \,\mathrm{rad}}\)</span>
+          </div>
+          <div class="work step">
+            <span class="say">A disc at 30 rad s⁻¹ stops in 50 rad</span>
+            <span>\(\omega_\mathrm{f}^{2} - \omega_\mathrm{i}^{2} = 2 \alpha \Delta \theta\)</span>
+            <span class="step">\(\alpha = \dfrac{\omega_\mathrm{f}^{2} - \omega_\mathrm{i}^{2}}{2 \Delta \theta} = \dfrac{0 - 30^{2}}{2 \times 50}\)</span>
+            <span class="step">\(\alpha = \class{res}{-9.0 \,\mathrm{rad} \,\mathrm{s}^{-2}}\)</span>
+          </div>
+        </div>
+        <div class="slide-foot"><span>A.4 RIGID BODY MECHANICS · HL ONLY</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>In revolutions.</b> 80 rad is \(\frac{80}{2 \pi} = 12.7\) revolutions. Work in radians throughout and convert only at the end, if the question asks.</p>
+            <p><b>The minus sign.</b> The disc’s angular acceleration is negative because it is opposite to the angular velocity: the disc is slowing. As in A.1, choose one sense of rotation as positive at the start and keep to it.</p>
+            <p><b>A point on the rim.</b> If the flywheel has a radius of 0.25 m, a point on its rim ends at \(v = \omega r = 20 \times 0.25 = 5.0\) m s⁻¹, and has travelled \(s = r \Delta \theta = 0.25 \times 80 = 20\) m round the circle.</p>
+          </div>
+          <div class="rn-side">
+            <p class="tip">Time for the disc to stop: \(t = \frac{\omega_\mathrm{f} - \omega_\mathrm{i}}{\alpha} = \frac{0 - 30}{-9.0} = 3.3\) s.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide hl" data-title="Graphs of rotational motion">
+        <p class="eyebrow">Gradient and area</p>
+        <h2>Graphs of rotational motion<span>.</span></h2>
+        <div class="split wide-fig">
+          <ul class="points small">
+            <li>Gradient of an \(\omega\)–\(t\) graph: the <b>angular acceleration</b></li>
+            <li class="step">Area under it: the <b>angular displacement</b></li>
+            <li class="step">Gradient of a \(\theta\)–\(t\) graph: the <b>angular velocity</b></li>
+          </ul>
+          <div class="panel">
+            <div class="panel-head"><span>CONSTANT ANGULAR ACCELERATION</span></div>
+            <div class="fig" data-fig="a4-wt"></div>
+          </div>
+        </div>
+        <div class="slide-foot"><span>A.4 RIGID BODY MECHANICS · HL ONLY</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>The first equation, seen.</b> The shaded shape is a trapezium of width \(t\) whose parallel sides are \(\omega_\mathrm{i}\) and \(\omega_\mathrm{f}\). Its area is their average times the width: \(\Delta \theta = \frac{\omega_\mathrm{f} + \omega_\mathrm{i}}{2} t\). This is exactly how the first equation of motion was found in A.1.</p>
+            <p><b>When the acceleration is not constant</b> the graph is a curve, and the equations of the last slide fail, but the graph still works: the gradient of the tangent at any moment is the angular acceleration then, and the area under the curve is still the angle turned.</p>
+          </div>
+          <div class="rn-side">
+            <p class="more">Part 4 adds one more: the area under a graph of torque against time is the change in angular momentum.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide hl" data-title="Quick check: rotational motion">
+        <p class="eyebrow">Quick check</p>
+        <h2>Rotational motion<span>.</span></h2>
+        <div class="quiz fill">
+          <div class="q"><p><span class="n">01</span>How many radians in one revolution?</p><div class="ans step">\(2 \pi\)</div></div>
+          <div class="q"><p><span class="n">02</span>A wheel turns at 12 rad s⁻¹. Speed of a point 0.50 m from the axis?</p><div class="ans step">6.0 m s⁻¹</div></div>
+          <div class="q"><p><span class="n">03</span>From 4.0 to 10 rad s⁻¹ in 3.0 s. Angular acceleration?</p><div class="ans step">2.0 rad s⁻²</div></div>
+          <div class="q"><p><span class="n">04</span>And the angle turned in that time?</p><div class="ans step">\(\frac{4.0 + 10}{2} \times 3.0 = 21 \,\mathrm{rad}\)</div></div>
+          <div class="q"><p><span class="n">05</span>What does the area under an \(\omega\)–\(t\) graph give?</p><div class="ans step">Angular displacement</div></div>
+          <div class="q"><p><span class="n">06</span>What must be true for the four equations to apply?</p><div class="ans step">Constant angular acceleration</div></div>
+        </div>
+        <div class="slide-foot"><span class="reveal-hint">PRESS → TO REVEAL EACH ANSWER</span><span data-page></span></div>
+      </section>
+
+      <!-- Part 3 -->
+      <section class="slide section hl" data-title="Part 3: Moment of inertia">
+        <div class="title-grid">
+          <div>
+            <p class="eyebrow">Part 03 · HL only</p>
+            <h1>Moment of inertia<span>.</span></h1>
+            <p class="lead">How hard a body is to spin up, and Newton’s second law for rotation</p>
+          </div>
+          <div class="fig" data-fig="a4-inertia" data-plain></div>
+        </div>
+        <div class="slide-foot"><span>A.4 RIGID BODY MECHANICS · HL ONLY</span><span data-page></span></div>
+      </section>
+
+      <section class="slide hl" data-title="Moment of inertia">
+        <p class="eyebrow">The rotational twin of mass</p>
+        <h2>Moment of inertia<span>.</span></h2>
+        <div class="split wide-fig">
+          <div class="stack">
+            <div class="equation"><span>\(I = \Sigma m r^{2}\)</span></div>
+            <ul class="points small">
+              <li>\(r\): the distance of each mass from the <b>axis</b></li>
+              <li class="step">Unit: \(\mathrm{kg} \,\mathrm{m}^{2}\)</li>
+              <li class="step">Depends on how the mass is <b>distributed</b>, and on which axis</li>
+            </ul>
+          </div>
+          <div class="panel">
+            <div class="panel-head"><span>THE SAME MASS, TWO ARRANGEMENTS</span></div>
+            <div class="fig" data-fig="a4-inertia"></div>
+          </div>
+        </div>
+        <div class="slide-foot"><span>A.4 RIGID BODY MECHANICS · HL ONLY</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>Why distance counts twice.</b> A mass far from the axis has to move faster for the same angular velocity (\(v = \omega r\)), so it is harder to get going. And the force that accelerates it acts at that same distance from the axis, so the torque needed grows by the same factor again. The two effects together give \(r^{2}\). Doubling the distance of a mass from the axis makes it four times as hard to spin up.</p>
+            <p><b>A worked case.</b> Two 2.0 kg masses on a light rod, each 0.50 m from the axis: \(I = 2.0 \times 0.50^{2} + 2.0 \times 0.50^{2} = 1.0\) kg m². Slide them in to 0.25 m and \(I = 2 \times 2.0 \times 0.25^{2} = 0.25\) kg m²: a quarter as much, with the same mass.</p>
+            <p><b>One body, many moments of inertia.</b> Mass is a single number for a body. Moment of inertia is not: it depends on the axis. A long rod is easy to spin about its own length and much harder to spin about an axis across its middle.</p>
+          </div>
+          <div class="rn-side">
+            <p class="tip">Tightrope walkers carry a long pole. It gives them a large moment of inertia about the rope, so that they tip slowly and have time to correct.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide hl" data-title="Moments of inertia of common shapes">
+        <p class="eyebrow">Given when needed</p>
+        <h2>Some moments of inertia<span>.</span></h2>
+        <div class="split even">
+          <table class="facts">
+            <thead><tr><th>Body of mass M, about its axis of symmetry</th><th class="nocase">I</th></tr></thead>
+            <tbody>
+              <tr><td>Hoop or thin ring, radius \(R\)</td><td class="num">\(M R^{2}\)</td></tr>
+              <tr><td>Solid disc or cylinder, radius \(R\)</td><td class="num">\(\tfrac{1}{2} M R^{2}\)</td></tr>
+              <tr><td>Solid sphere, radius \(R\)</td><td class="num">\(\tfrac{2}{5} M R^{2}\)</td></tr>
+              <tr><td>Thin rod, length \(L\), about its centre</td><td class="num">\(\tfrac{1}{12} M L^{2}\)</td></tr>
+            </tbody>
+          </table>
+          <div class="stack">
+            <ul class="points small">
+              <li class="step">A hoop has <b>all</b> its mass at radius \(R\): the largest \(I\) for its size</li>
+              <li class="step">A disc or sphere has much of its mass <b>nearer</b> the axis</li>
+            </ul>
+            <div class="idea step">The formula for a shape is <b>provided</b> in the question. Do not learn them.</div>
+          </div>
+        </div>
+        <div class="slide-foot"><span>A.4 RIGID BODY MECHANICS · HL ONLY</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>Where the fractions come from.</b> Each is \(\Sigma m r^{2}\) added up over every particle of the body. For a hoop every particle is at the same distance \(R\), so the sum is simply \(M R^{2}\). For a disc the particles are at all distances from 0 to \(R\), and the average of \(r^{2}\) comes to half of \(R^{2}\). In a sphere even more of the mass lies close to the axis, and the fraction falls to two fifths.</p>
+            <p><b>Using them.</b> A solid disc of mass 4.0 kg and radius 0.30 m has \(I = \frac{1}{2} \times 4.0 \times 0.30^{2} = 0.18\) kg m². A hoop of the same mass and radius has twice as much, 0.36 kg m².</p>
+            <p><b>Adding bodies.</b> Moments of inertia about the same axis add. A point mass \(m\) placed at radius \(r\) on a disc increases the total by \(m r^{2}\).</p>
+          </div>
+          <div class="rn-side">
+            <p class="tip">The smaller the fraction, the more easily the body rolls down a slope. That is the last worked example of this deck.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide hl" data-title="Newton’s second law for rotation">
+        <p class="eyebrow">Torque and angular acceleration</p>
+        <h2>Newton’s second law for rotation<span>.</span></h2>
+        <div class="split even">
+          <div class="stack">
+            <div class="equation"><span>\(\tau = I \alpha\)</span></div>
+            <ul class="points small">
+              <li>\(\tau\): the <b>resultant</b> torque</li>
+              <li class="step">The rotational form of \(F = ma\)</li>
+              <li class="step">A larger \(I\): a smaller \(\alpha\) for the same torque</li>
+            </ul>
+          </div>
+          <div class="work step">
+            <span class="say">A disc, \(I = 0.18 \,\mathrm{kg} \,\mathrm{m}^{2}\), radius 0.30 m</span>
+            <span class="say">A 6.0 N force acts along its rim</span>
+            <span>\(\tau = Fr = 6.0 \times 0.30 = 1.8 \,\mathrm{N} \,\mathrm{m}\)</span>
+            <span class="step">\(\alpha = \dfrac{\tau}{I} = \dfrac{1.8}{0.18}\)</span>
+            <span class="step">\(\alpha = \class{res}{10 \,\mathrm{rad} \,\mathrm{s}^{-2}}\)</span>
+          </div>
+        </div>
+        <div class="slide-foot"><span>A.4 RIGID BODY MECHANICS · HL ONLY</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>From \(F = ma\) to \(\tau = I \alpha\).</b> Take one small mass \(m\) of the body, at radius \(r\). A force \(F\) along its path gives it an acceleration \(a = \alpha r\), so \(F = m \alpha r\). Multiply both sides by \(r\): the left is the torque \(Fr\) and the right is \(m r^{2} \alpha\). Add up over every particle and \(\tau = (\Sigma m r^{2}) \alpha = I \alpha\).</p>
+            <p><b>Resultant torque.</b> As with forces, it is the total that counts. If a driving torque of 5.0 N m acts on a wheel against a frictional torque of 2.0 N m, the resultant is 3.0 N m, and that is what goes into the equation.</p>
+            <p><b>Constant torque, constant \(\alpha\).</b> The disc in the example gains 10 rad s⁻¹ every second for as long as the force acts, and the equations of Part 2 apply.</p>
+          </div>
+          <div class="rn-side">
+            <p class="trap">Putting the force into the equation in place of the torque. Find \(\tau = Fr \sin \theta\) first.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide hl" data-title="A falling mass turns a wheel">
+        <p class="eyebrow">Worked example · two bodies joined</p>
+        <h2>A falling mass turns a wheel<span>.</span></h2>
+        <div class="split">
+          <div class="work">
+            <span class="say">\(m = 0.50 \,\mathrm{kg}\) · \(I = 0.020 \,\mathrm{kg} \,\mathrm{m}^{2}\) · \(r = 0.10 \,\mathrm{m}\)</span>
+            <span>Mass: \(mg - T = ma\)</span>
+            <span class="step">Wheel: \(Tr = I \alpha\) &nbsp;with&nbsp; \(a = \alpha r\)</span>
+            <span class="step">\(a = \dfrac{mg}{m + \dfrac{I}{r^{2}}} = \dfrac{0.50 \times 9.8}{0.50 + 2.0}\)</span>
+            <span class="step">\(a = \class{res}{2.0 \,\mathrm{m} \,\mathrm{s}^{-2}}\)</span>
+            <span class="step">\(T = m(g - a) = \class{res}{3.9 \,\mathrm{N}}\)</span>
+          </div>
+          <div class="panel">
+            <div class="panel-head"><span>A STRING WOUND ROUND THE RIM</span></div>
+            <div class="fig" data-fig="a4-falling"></div>
+          </div>
+        </div>
+        <div class="slide-foot"><span>A.4 RIGID BODY MECHANICS · HL ONLY</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>One law for each body.</b> The hanging mass moves in a straight line, so it gets \(F = ma\): its weight down, the tension up. The wheel turns, so it gets \(\tau = I \alpha\): the only torque on it is the tension, acting at the rim. The string does not slip, so the acceleration of the mass and the angular acceleration of the wheel are tied together by \(a = \alpha r\).</p>
+            <p><b>The algebra.</b> From the wheel, \(T = \frac{I \alpha}{r} = \frac{I a}{r^{2}}\). Put that into the first equation: \(mg - \frac{I a}{r^{2}} = ma\), so \(a \left(m + \frac{I}{r^{2}}\right) = mg\).</p>
+            <p><b>Reading the result.</b> \(\frac{I}{r^{2}}\) behaves like an extra mass that has to be accelerated: here 2.0 kg, four times the hanging mass. So the mass falls at only a fifth of \(g\). The tension is less than the weight, as it must be for the mass to accelerate downwards.</p>
+          </div>
+          <div class="rn-side">
+            <p class="tip">Timing a mass as it falls a known distance gives \(a\), and from it the moment of inertia of the wheel: a standard experiment.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide hl" data-title="Quick check: moment of inertia">
+        <p class="eyebrow">Quick check</p>
+        <h2>Moment of inertia<span>.</span></h2>
+        <div class="quiz fill">
+          <div class="q"><p><span class="n">01</span>A 3.0 kg point mass is 2.0 m from an axis. Moment of inertia?</p><div class="ans step">12 kg m²</div></div>
+          <div class="q"><p><span class="n">02</span>It is moved to 1.0 m. Moment of inertia now?</p><div class="ans step">3.0 kg m²: a quarter</div></div>
+          <div class="q"><p><span class="n">03</span>Which has the larger \(I\): a hoop or a disc of the same mass and radius?</p><div class="ans step">The hoop</div></div>
+          <div class="q"><p><span class="n">04</span>A torque of 8.0 N m acts on \(I\) = 2.0 kg m². Angular acceleration?</p><div class="ans step">4.0 rad s⁻²</div></div>
+          <div class="q"><p><span class="n">05</span>What is the unit of moment of inertia?</p><div class="ans step">kg m²</div></div>
+          <div class="q"><p><span class="n">06</span>What links \(a\) and \(\alpha\) for a string round a wheel of radius \(r\)?</p><div class="ans step">\(a = \alpha r\)</div></div>
+        </div>
+        <div class="slide-foot"><span class="reveal-hint">PRESS → TO REVEAL EACH ANSWER</span><span data-page></span></div>
+      </section>
+
+      <!-- Part 4 -->
+      <section class="slide section hl" data-title="Part 4: Angular momentum and energy">
+        <div class="title-grid">
+          <div>
+            <p class="eyebrow">Part 04 · HL only</p>
+            <h1>Angular momentum and energy<span>.</span></h1>
+            <p class="lead">Two more conservation laws, for things that spin</p>
+          </div>
+          <div class="fig" data-fig="a4-skater" data-plain></div>
+        </div>
+        <div class="slide-foot"><span>A.4 RIGID BODY MECHANICS · HL ONLY</span><span data-page></span></div>
+      </section>
+
+      <section class="slide hl" data-title="Angular momentum">
+        <p class="eyebrow">The rotational twin of momentum</p>
+        <h2>Angular momentum<span>.</span></h2>
+        <div class="split wide-fig">
+          <div class="stack">
+            <div class="equation"><span>\(L = I \omega\)</span></div>
+            <ul class="points small">
+              <li>Unit: \(\mathrm{kg} \,\mathrm{m}^{2} \,\mathrm{s}^{-1}\)</li>
+              <li class="step"><b>Conserved</b> unless a resultant torque acts from outside</li>
+              <li class="step">If \(I\) falls, \(\omega\) must <b>rise</b></li>
+            </ul>
+          </div>
+          <div class="panel">
+            <div class="panel-head"><span>A SKATER, SEEN FROM ABOVE</span></div>
+            <div class="fig" data-fig="a4-skater"></div>
+          </div>
+        </div>
+        <div class="slide-foot"><span>A.4 RIGID BODY MECHANICS · HL ONLY</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>Why the skater speeds up.</b> On smooth ice almost no torque acts on the skater from outside, so \(I \omega\) cannot change. Pulling the arms in brings mass closer to the axis and lowers \(I\). The only way for the product to stay the same is for \(\omega\) to go up. Nothing pushes the skater round faster: the conservation law demands it.</p>
+            <p><b>The same law everywhere.</b> A diver tucks to somersault quickly and opens out to slow the spin before entering the water. A cloud of gas collapsing to form a star spins faster and faster as it shrinks. A neutron star, the collapsed core of a star that once turned every few weeks, can spin hundreds of times a second.</p>
+            <p><b>The condition.</b> No resultant external torque. Forces inside the system, such as the skater’s muscles pulling the arms in, cannot change its total angular momentum, just as internal forces cannot change the total linear momentum in A.2.</p>
+          </div>
+          <div class="rn-side">
+            <p class="tip">The guide expects problems where the moment of inertia of an extended body changes, and problems where two bodies couple together.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide hl" data-title="Conservation: a skater">
+        <p class="eyebrow">Worked example</p>
+        <h2>A skater pulls in their arms<span>.</span></h2>
+        <div class="split even">
+          <div class="work">
+            <span class="say">\(I\) falls from 4.0 to 1.6 kg m² · \(\omega_{1} = 3.0 \,\mathrm{rad} \,\mathrm{s}^{-1}\)</span>
+            <span>\(I_{1} \omega_{1} = I_{2} \omega_{2}\)</span>
+            <span class="step">\(\omega_{2} = \dfrac{I_{1} \omega_{1}}{I_{2}} = \dfrac{4.0 \times 3.0}{1.6}\)</span>
+            <span class="step">\(\omega_{2} = \class{res}{7.5 \,\mathrm{rad} \,\mathrm{s}^{-1}}\)</span>
+          </div>
+          <div class="work step">
+            <span class="say">Rotational kinetic energy, \(E_\mathrm{k} = \tfrac{1}{2} I \omega^{2}\)</span>
+            <span>Before: \(\tfrac{1}{2} \times 4.0 \times 3.0^{2} = 18 \,\mathrm{J}\)</span>
+            <span class="step">After: \(\tfrac{1}{2} \times 1.6 \times 7.5^{2} = \class{res}{45 \,\mathrm{J}}\)</span>
+            <span class="say step">Work done by the skater: 27 J</span>
+          </div>
+        </div>
+        <div class="slide-foot"><span>A.4 RIGID BODY MECHANICS · HL ONLY</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>Momentum conserved, energy not.</b> The angular momentum is 12 kg m² s⁻¹ before and after. The kinetic energy has more than doubled. That is not a contradiction: no outside torque acted, so angular momentum had to be conserved, but the skater’s muscles did work. Each arm is moving in a circle and must be pulled inwards against its tendency to carry straight on. That work becomes rotational kinetic energy.</p>
+            <p><b>Using \(E_\mathrm{k} = \frac{L^{2}}{2I}\).</b> With \(L\) fixed at 12, the energy is \(\frac{12^{2}}{2I}\): 18 J when \(I = 4.0\) and 45 J when \(I = 1.6\). This form shows at once that, at constant angular momentum, a smaller moment of inertia means more kinetic energy.</p>
+          </div>
+          <div class="rn-side">
+            <p class="trap">Assuming that kinetic energy is conserved because angular momentum is. Check each separately.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide history hl" data-title="Story: Foucault’s gyroscope">
+        <p class="eyebrow">The story · Paris, 1852</p>
+        <p class="not-examined">Background story · not assessed</p>
+        <h2>A wheel that shows the Earth turning<span>.</span></h2>
+        <div class="story" style="--photo-h: 430px;">
+          <div class="story-photos">
+            <figure><img src="images/foucault-gyroscope.jpg" width="960" height="1422" alt="A brass instrument in a museum case: a heavy wheel mounted inside rings that let it turn in any direction, with a small viewing microscope beside it"><figcaption><b>Foucault’s gyroscope</b>, with its microscope</figcaption></figure>
+          </div>
+          <div class="stack">
+            <ul class="points">
+              <li>A fast-spinning wheel in freely turning rings: no torque can reach it</li>
+              <li>So its angular momentum, and the <b>direction of its axis</b>, stay fixed</li>
+              <li>In <b>1852</b> Léon Foucault watched one through a microscope and saw the laboratory, and the Earth, turn slowly round it</li>
+              <li>He could watch for 8 to 10 minutes before friction slowed the wheel</li>
+            </ul>
+            <div class="idea">He named it from the Greek for “to see the rotation”.</div>
+          </div>
+        </div>
+        <p class="credits">Photograph: <a href="https://commons.wikimedia.org/wiki/File:Foucault%27s_gyroscope.jpg" target="_blank" rel="noopener">Stéphane Magnenat</a>, public domain.</p>
+        <div class="slide-foot"><span>A.4 RIGID BODY MECHANICS · HL ONLY</span><span data-page></span></div>
+      </section>
+
+      <section class="slide hl" data-title="Coupled bodies">
+        <p class="eyebrow">Worked example · two bodies join</p>
+        <h2>One disc dropped onto another<span>.</span></h2>
+        <div class="split">
+          <div class="work">
+            <span class="say">Spinning: \(I_{1} = 0.20 \,\mathrm{kg} \,\mathrm{m}^{2}\) at \(12 \,\mathrm{rad} \,\mathrm{s}^{-1}\)</span>
+            <span class="say">Dropped on: \(I_{2} = 0.10 \,\mathrm{kg} \,\mathrm{m}^{2}\), at rest</span>
+            <span>\(I_{1} \omega_{1} = (I_{1} + I_{2}) \omega\)</span>
+            <span class="step">\(\omega = \dfrac{I_{1} \omega_{1}}{I_{1} + I_{2}} = \dfrac{0.20 \times 12}{0.30}\)</span>
+            <span class="step">\(\omega = \class{res}{8.0 \,\mathrm{rad} \,\mathrm{s}^{-1}}\)</span>
+          </div>
+          <div class="panel">
+            <div class="panel-head"><span>ON THE SAME AXLE</span></div>
+            <div class="fig" data-fig="a4-coupled"></div>
+          </div>
+        </div>
+        <div class="slide-foot"><span>A.4 RIGID BODY MECHANICS · HL ONLY</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>A collision, in rotation.</b> This is the joined-trolleys problem of A.2 turned through a right angle. Two bodies end up moving together, the total momentum before equals the total after, and the shared speed comes from dividing by the total inertia. Friction between the discs is an internal force of the system and cannot change its total angular momentum.</p>
+            <p><b>Energy is lost.</b> Before: \(\frac{1}{2} \times 0.20 \times 12^{2} = 14.4\) J. After: \(\frac{1}{2} \times 0.30 \times 8.0^{2} = 9.6\) J. A third of the kinetic energy has become thermal energy as the discs rubbed against each other until they turned at the same rate. It is an inelastic collision.</p>
+          </div>
+          <div class="rn-side">
+            <p class="tip">If the second disc were already spinning the opposite way, its angular momentum would go in with a minus sign.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide hl" data-title="Angular impulse">
+        <p class="eyebrow">Changing angular momentum</p>
+        <h2>Angular impulse<span>.</span></h2>
+        <div class="split even">
+          <div class="stack">
+            <div class="equation"><span>\(\Delta L = \tau \Delta t = \Delta (I \omega)\)</span></div>
+            <ul class="points small">
+              <li>A resultant torque acting for a time <b>changes</b> the angular momentum</li>
+              <li class="step">\(\tau \Delta t\): the <b>angular impulse</b></li>
+              <li class="step">The area under a torque–time graph</li>
+            </ul>
+          </div>
+          <div class="work step">
+            <span class="say">A torque of 3.0 N m acts for 4.0 s</span>
+            <span class="say">on a wheel of \(I = 2.0 \,\mathrm{kg} \,\mathrm{m}^{2}\)</span>
+            <span>\(\Delta L = \tau \Delta t = 3.0 \times 4.0\)</span>
+            <span class="step">\(\Delta L = \class{res}{12 \,\mathrm{kg} \,\mathrm{m}^{2} \,\mathrm{s}^{-1}}\)</span>
+            <span class="step">\(\Delta \omega = \dfrac{\Delta L}{I} = \dfrac{12}{2.0} = \class{res}{6.0 \,\mathrm{rad} \,\mathrm{s}^{-1}}\)</span>
+          </div>
+        </div>
+        <div class="slide-foot"><span>A.4 RIGID BODY MECHANICS · HL ONLY</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>The twin of impulse.</b> In A.2, \(F \Delta t = \Delta p\): a force acting for a time changes the momentum. Here \(\tau \Delta t = \Delta L\). The reasoning is the same, and so is the usefulness: when a torque varies during the time it acts, you can still find the total change in angular momentum from the area under the torque–time graph.</p>
+            <p><b>Torque as a rate.</b> Rearranged, \(\tau = \frac{\Delta L}{\Delta t}\): torque is the rate of change of angular momentum. If \(I\) is constant this is \(I \frac{\Delta \omega}{\Delta t} = I \alpha\), the second law of Part 3. Written with \(L\) it still holds when the moment of inertia changes.</p>
+            <p><b>And conservation.</b> Put \(\tau = 0\) and \(\Delta L = 0\): with no resultant torque the angular momentum cannot change. The conservation law is a special case of this equation.</p>
+          </div>
+          <div class="rn-side">
+            <p class="tip">The units agree: \(\mathrm{N} \,\mathrm{m} \,\mathrm{s} = \mathrm{kg} \,\mathrm{m}^{2} \,\mathrm{s}^{-1}\).</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide hl" data-title="Rotational kinetic energy and rolling">
+        <p class="eyebrow">Energy of a spinning body</p>
+        <h2>Rotational kinetic energy and rolling<span>.</span></h2>
+        <div class="split wide-fig">
+          <div class="stack">
+            <div class="equation small"><span>\(E_\mathrm{k} = \dfrac{1}{2} I \omega^{2} = \dfrac{L^{2}}{2I}\)</span></div>
+            <ul class="points small">
+              <li><b>Rolling without slipping</b>: \(v = \omega r\)</li>
+              <li class="step frac">Total: \(\dfrac{1}{2} m v^{2} + \dfrac{1}{2} I \omega^{2}\)</li>
+            </ul>
+          </div>
+          <div class="panel">
+            <div class="panel-head"><span>A RACE DOWN A SLOPE</span></div>
+            <div class="fig" data-fig="a4-rolling"></div>
+          </div>
+        </div>
+        <div class="slide-foot"><span>A.4 RIGID BODY MECHANICS · HL ONLY</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>Two kinds of kinetic energy at once.</b> A rolling body is moving along and turning. Its centre of mass carries \(\frac{1}{2} m v^{2}\), as if all the mass were there, and the turning about the centre adds \(\frac{1}{2} I \omega^{2}\). If it does not slip, the point touching the ground is momentarily at rest, which fixes \(v = \omega r\).</p>
+            <p><b>Why the sphere wins.</b> Both start with the same potential energy per kilogram. Both must share it between moving and turning. The hoop, with all its mass at the rim, has to put half into rotation. The solid sphere needs only two sevenths for rotation, leaving more for getting down the slope. Neither the mass nor the radius matters: every solid sphere beats every hoop.</p>
+            <p><b>Friction without loss.</b> Friction is what makes the body turn instead of slide. But the point of contact does not move while it is touching, so the friction does no work, and mechanical energy is conserved.</p>
+          </div>
+          <div class="rn-side">
+            <p class="tip">Combined rotation and translation is limited to rolling without slipping.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide hl" data-title="Rolling: a sphere down a slope">
+        <p class="eyebrow">Worked example</p>
+        <h2>A sphere rolls down a slope<span>.</span></h2>
+        <div class="split even">
+          <div class="work">
+            <span class="say">Solid sphere, \(I = \tfrac{2}{5} m r^{2}\) · height fallen \(h = 1.0 \,\mathrm{m}\)</span>
+            <span>\(mgh = \dfrac{1}{2} m v^{2} + \dfrac{1}{2} I \omega^{2}\) &nbsp;with&nbsp; \(\omega = \dfrac{v}{r}\)</span>
+            <span class="step">\(mgh = \dfrac{1}{2} m v^{2} + \dfrac{1}{5} m v^{2} = \dfrac{7}{10} m v^{2}\)</span>
+            <span class="step">\(v = \sqrt{\dfrac{10 g h}{7}} = \sqrt{\dfrac{10 \times 9.8 \times 1.0}{7}}\)</span>
+            <span class="step">\(v = \class{res}{3.7 \,\mathrm{m} \,\mathrm{s}^{-1}}\)</span>
+          </div>
+          <div class="stack">
+            <ul class="points small">
+              <li class="step">A hoop, \(I = m r^{2}\): \(v = \sqrt{gh} = 3.1 \,\mathrm{m} \,\mathrm{s}^{-1}\)</li>
+              <li class="step">Sliding with no friction: \(v = \sqrt{2gh} = 4.4 \,\mathrm{m} \,\mathrm{s}^{-1}\)</li>
+            </ul>
+            <div class="idea step">The mass and the radius have <b>cancelled</b>.</div>
+          </div>
+        </div>
+        <div class="slide-foot"><span>A.4 RIGID BODY MECHANICS · HL ONLY</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>Where \(\frac{1}{5}\) comes from.</b> \(\frac{1}{2} I \omega^{2} = \frac{1}{2} \times \frac{2}{5} m r^{2} \times \frac{v^{2}}{r^{2}} = \frac{1}{5} m v^{2}\). The \(r^{2}\) in the moment of inertia cancels the \(r^{2}\) from \(\omega = \frac{v}{r}\). That is why the radius does not matter, and since \(m\) is in every term, the mass does not either.</p>
+            <p><b>The three speeds compared.</b> A block sliding without friction keeps all its energy as motion along the slope and arrives fastest. A rolling sphere arrives with five sevenths of its energy in that form, and a hoop with half. The more of the mass that is far from the axis, the more of the energy the rotation takes.</p>
+          </div>
+          <div class="rn-side">
+            <p class="tip">The method is conservation of energy from A.3 with one extra term. Write the term, substitute \(\omega = \frac{v}{r}\), and solve.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide hl" data-title="Linear and rotational">
+        <p class="eyebrow">The twins, side by side</p>
+        <h2>Linear and rotational<span>.</span></h2>
+        <table class="facts compare">
+          <thead><tr><th></th><th>Linear</th><th>Rotational</th></tr></thead>
+          <tbody>
+            <tr><td><b>Position, velocity, acceleration</b></td><td>\(s\), \(v\), \(a\)</td><td>\(\theta\), \(\omega\), \(\alpha\)</td></tr>
+            <tr class="step"><td><b>Inertia</b></td><td>Mass \(m\)</td><td>Moment of inertia \(I\)</td></tr>
+            <tr class="step"><td><b>Cause of acceleration</b></td><td>Force: \(F = ma\)</td><td>Torque: \(\tau = I \alpha\)</td></tr>
+            <tr class="step"><td><b>Momentum</b></td><td>\(p = mv\)</td><td>\(L = I \omega\)</td></tr>
+            <tr class="step"><td><b>Impulse</b></td><td>\(F \Delta t = \Delta p\)</td><td>\(\tau \Delta t = \Delta L\)</td></tr>
+            <tr class="step"><td><b>Kinetic energy</b></td><td>\(\tfrac{1}{2} m v^{2} = \dfrac{p^{2}}{2m}\)</td><td>\(\tfrac{1}{2} I \omega^{2} = \dfrac{L^{2}}{2I}\)</td></tr>
+          </tbody>
+        </table>
+        <div class="slide-foot"><span>A.4 RIGID BODY MECHANICS · HL ONLY</span><span data-page></span></div>
+      </section>
+
+      <section class="slide hl" data-title="Quick check: angular momentum and energy">
+        <p class="eyebrow">Quick check</p>
+        <h2>Angular momentum and energy<span>.</span></h2>
+        <div class="quiz fill">
+          <div class="q"><p><span class="n">01</span>\(I\) = 0.50 kg m², \(\omega\) = 6.0 rad s⁻¹. Angular momentum?</p><div class="ans step">3.0 kg m² s⁻¹</div></div>
+          <div class="q"><p><span class="n">02</span>When is angular momentum conserved?</p><div class="ans step">No resultant external torque</div></div>
+          <div class="q"><p><span class="n">03</span>A spinning star shrinks to half its moment of inertia. Its angular velocity?</p><div class="ans step">It doubles</div></div>
+          <div class="q"><p><span class="n">04</span>And its rotational kinetic energy?</p><div class="ans step">It doubles: \(\frac{L^{2}}{2I}\)</div></div>
+          <div class="q"><p><span class="n">05</span>Rotational kinetic energy for \(I\) = 0.50 kg m² at 6.0 rad s⁻¹?</p><div class="ans step">\(\frac{1}{2} \times 0.50 \times 6.0^{2} = 9.0 \,\mathrm{J}\)</div></div>
+          <div class="q"><p><span class="n">06</span>Which reaches the bottom of a slope first: a rolling hoop or a rolling solid sphere?</p><div class="ans step">The sphere</div></div>
+        </div>
+        <div class="slide-foot"><span class="reveal-hint">PRESS → TO REVEAL EACH ANSWER</span><span data-page></span></div>
+      </section>
+
+      <section class="slide hl" data-title="Summary">
+        <p class="eyebrow">Summary</p>
+        <h2>Rigid body mechanics on one slide<span>.</span></h2>
+        <div class="cards fill" style="grid-template-columns: 1fr 1fr 1fr; align-content: center;">
+          <div class="card"><p class="eyebrow">Torque</p><h3>\(\tau = F r \sin \theta\)</h3><p>Equilibrium: resultant torque and resultant force both zero</p></div>
+          <div class="card step"><p class="eyebrow">Rotational motion</p><h3>\(\omega_\mathrm{f} = \omega_\mathrm{i} + \alpha t\)</h3><p>The equations of A.1, with \(\Delta \theta\), \(\omega\) and \(\alpha\)</p></div>
+          <div class="card step"><p class="eyebrow">Moment of inertia</p><h3>\(I = \Sigma m r^{2}\)</h3><p>Depends on where the mass is, and on the axis</p></div>
+          <div class="card step"><p class="eyebrow">Second law</p><h3>\(\tau = I \alpha\)</h3><p>Angular impulse: \(\Delta L = \tau \Delta t\)</p></div>
+          <div class="card step"><p class="eyebrow">Angular momentum</p><h3>\(L = I \omega\)</h3><p>Conserved when no resultant external torque acts</p></div>
+          <div class="card step"><p class="eyebrow">Energy</p><h3>\(E_\mathrm{k} = \frac{1}{2} I \omega^{2} = \frac{L^{2}}{2I}\)</h3><p>Rolling: add \(\frac{1}{2} m v^{2}\), with \(v = \omega r\)</p></div>
+        </div>
+        <div class="slide-foot"><span>A.4 RIGID BODY MECHANICS · HL ONLY</span><span data-page></span></div>
+      </section>
+
+      <section class="slide hl" data-title="Key words">
+        <p class="eyebrow">Summary</p>
+        <h2>Key words<span>.</span></h2>
+        <div class="terms fill" style="grid-template-columns: repeat(3, 1fr);">
+          <div class="term"><b>Torque</b><span>The turning effect of a force about an axis</span></div>
+          <div class="term"><b>Rotational equilibrium</b><span>Zero resultant torque</span></div>
+          <div class="term"><b>Centre of mass</b><span>Where the mass can be taken to be for linear motion</span></div>
+          <div class="term"><b>Angular velocity</b><span>Rate of change of angle, in rad s⁻¹</span></div>
+          <div class="term"><b>Angular acceleration</b><span>Rate of change of angular velocity</span></div>
+          <div class="term"><b>Moment of inertia</b><span>Resistance to angular acceleration: \(\Sigma m r^{2}\)</span></div>
+          <div class="term"><b>Angular momentum</b><span>\(I \omega\)</span></div>
+          <div class="term"><b>Angular impulse</b><span>Torque × time: the change in angular momentum</span></div>
+          <div class="term"><b>Rolling without slipping</b><span>\(v = \omega r\)</span></div>
+        </div>
+        <div class="slide-foot"><span>A.4 RIGID BODY MECHANICS · HL ONLY</span><span data-page></span></div>
+      </section>
+
+    </div>
+  </main>
+
+  <nav class="controls" aria-label="Slide controls">
+    <button type="button" id="prev" aria-label="Previous slide"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg></button>
+    <span class="counter" id="counter" aria-live="polite"></span>
+    <button type="button" id="next" aria-label="Next slide"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 5l7 7-7 7"/></svg></button>
+  </nav>
+  <div class="progress" aria-hidden="true"><span id="progress-bar"></span></div>
+
+  <script src="../assets/figures.js"></script>
+  <script src="figures.js"></script>
+  <script src="../assets/deck-math.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
+  <script src="../assets/deck-notes.js"></script>
+  <script src="../assets/deck.js"></script>
+</body>
+</html>

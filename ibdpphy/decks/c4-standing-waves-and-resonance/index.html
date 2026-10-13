@@ -1,0 +1,666 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="robots" content="noindex, nofollow">
+  <meta name="description" content="Teaching slides for IB Diploma Programme Physics topic C.4 Standing waves and resonance, standard and higher level: how standing waves form, nodes and antinodes, harmonics of strings and pipes, natural frequency, resonance and damping.">
+  <meta name="theme-color" content="#F8F6F1">
+  <script src="/assets/theme.js" data-theme-scope="ibdpphy"></script>
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <link rel="stylesheet" href="/assets/standalone-top.css">
+  <title>C.4 Standing waves and resonance · IB DP Physics</title>
+  <link rel="icon" type="image/png" href="/assets/favicon.png">
+  <link rel="apple-touch-icon" href="/assets/apple-touch-icon.png">
+  <link rel="stylesheet" href="../assets/deck.css">
+  <link rel="stylesheet" href="../assets/deck-notes.css">
+  <link rel="stylesheet" href="/assets/theme-toggle.css">
+  <link rel="stylesheet" href="/assets/fullscreen-button.css">
+  <script src="/assets/theme-toggle.js"></script>
+  <script src="/ibdpphy/sw-register.js" defer></script>
+</head>
+<body>
+  <header class="banner">
+    <a class="banner-logo" href="/" aria-label="PanPhy Labs home"><img src="/assets/panphy.png" alt="PanPhy Labs" width="38" height="38"></a>
+    <a class="banner-title" href="#1">C.4 Standing waves and resonance</a>
+    <div class="banner-actions">
+      <button id="thumbs-toggle" class="icon-button" type="button" aria-controls="thumbs" aria-pressed="true" aria-label="Hide slide thumbnails" title="Show or hide slide thumbnails (T)"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path class="pane" d="M9.5 4.5H6A2.5 2.5 0 0 0 3.5 7v10A2.5 2.5 0 0 0 6 19.5h3.5z"/><rect x="3.5" y="4.5" width="17" height="15" rx="2.5"/><path d="M9.5 4.5v15"/></svg></button>
+      <button id="fullscreen" class="panphy-fullscreen-button" type="button" aria-pressed="false" aria-label="Present fullscreen" title="Present fullscreen (F)"><svg class="panphy-fs-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M4 9V4h5M15 4h5v5M20 15v5h-5M9 20H4v-5"/></svg></button>
+      <button id="theme-button" type="button" data-panphy-theme-toggle aria-label="Toggle light/dark theme" title="Toggle between light and dark themes"></button>
+    </div>
+  </header>
+  <script>window.PanPhyThemeToggle.mount(document.getElementById('theme-button'));</script>
+
+  <nav class="thumbs" id="thumbs" aria-label="Slides"></nav>
+
+  <main class="stage" id="stage">
+    <div class="deck" id="deck">
+
+      <!-- 1 · Title -->
+      <section class="slide title" data-title="C.4 Standing waves and resonance">
+        <div class="title-grid">
+          <div>
+            <p class="eyebrow">IB DP Physics · Theme C · Wave behaviour</p>
+            <h1>Standing waves and resonance<span>.</span></h1>
+            <p class="lead">C.4 · Nodes and antinodes, strings and pipes, driven oscillations and damping<br>Standard level and higher level</p>
+            <div class="chips">
+              <span class="chip">SL + HL · 4 hours</span>
+              <a class="chip on" href="../c3-wave-phenomena/">C.3 Wave phenomena ↗</a>
+            </div>
+          </div>
+          <div class="fig" data-fig="c4-string" data-plain></div>
+        </div>
+      </section>
+
+      <section class="slide" data-title="Lesson map">
+        <p class="eyebrow">The journey</p>
+        <h2>Three parts<span>.</span></h2>
+        <div class="cards fill" style="grid-template-columns: repeat(3, 1fr);">
+          <div class="card">
+            <div class="fig" data-fig="c4-string" data-still data-plain style="height: 220px;"></div>
+            <p class="eyebrow">Part 01</p>
+            <h3>Standing waves</h3>
+            <p>How they form, nodes and antinodes, amplitude and phase</p>
+          </div>
+          <div class="card">
+            <div class="fig" data-fig="c4-harmonics" data-kind="closed" data-still style="height: 220px;"></div>
+            <p class="eyebrow">Part 02</p>
+            <h3>Strings and pipes</h3>
+            <p>Boundary conditions and the harmonics they allow</p>
+          </div>
+          <div class="card">
+            <div class="fig" data-fig="c4-resonance" data-kind="damped" data-still style="height: 220px;"></div>
+            <p class="eyebrow">Part 03</p>
+            <h3>Resonance and damping</h3>
+            <p>Natural and driving frequencies, and the effect of damping</p>
+          </div>
+        </div>
+        <div class="idea" style="margin-top: 22px;">C.3 added two waves. Here the two waves are the same wave, going both ways.</div>
+        <div class="slide-foot"><span>C.4 STANDING WAVES AND RESONANCE · SL + HL</span><span data-page></span></div>
+      </section>
+
+      <!-- Part 1 -->
+      <section class="slide section" data-title="Part 1: Standing waves">
+        <div class="title-grid">
+          <div>
+            <p class="eyebrow">Part 01</p>
+            <h1>Standing waves<span>.</span></h1>
+            <p class="lead">A wave that oscillates without going anywhere</p>
+          </div>
+          <div class="fig" data-fig="c4-string" data-n="2" data-plain></div>
+        </div>
+        <div class="slide-foot"><span>C.4 STANDING WAVES AND RESONANCE · SL + HL</span><span data-page></span></div>
+      </section>
+
+      <section class="slide" data-title="How a standing wave forms">
+        <p class="eyebrow">Superposition again</p>
+        <h2>How a standing wave forms<span>.</span></h2>
+        <div class="split wide-fig">
+          <div class="stack">
+            <ul class="points small">
+              <li><b>Two identical waves</b> travelling in <b>opposite</b> directions</li>
+              <li class="step">Usually a wave and its own <b>reflection</b></li>
+              <li class="step">Their sum has fixed points that never move</li>
+            </ul>
+            <div class="idea step">Same frequency, same wavelength, same amplitude.</div>
+          </div>
+          <div class="panel">
+            <div class="panel-head"><span>TWO TRAVELLING WAVES AND THEIR SUM</span></div>
+            <div class="fig" data-fig="c4-formation"></div>
+          </div>
+        </div>
+        <div class="slide-foot"><span>C.4 STANDING WAVES AND RESONANCE · SL + HL</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>Watch one dot.</b> At each black dot on the bottom line, the two travelling waves are always exactly opposite: whenever one has a displacement upwards there, the other has an equal displacement downwards. Their sum is zero at every moment, so that point never moves. Half way between two dots the waves are always in step with each other, and the sum swings to twice the amplitude of either.</p>
+            <p><b>Where the second wave comes from.</b> Pluck a guitar string and a wave runs along it, reflects at the fixed end and runs back through the wave that is still arriving. The outgoing and returning waves are automatically identical, apart from direction. Sound reflecting from the end of a pipe, and microwaves reflecting from the metal wall of an oven, do the same.</p>
+            <p><b>Why “standing”.</b> The crests of a travelling wave move along. Here the pattern stays where it is: the positions of greatest and of zero movement are fixed. It is also called a stationary wave.</p>
+          </div>
+          <div class="rn-side">
+            <p class="tip">A definition worth learning: a standing wave is formed by the superposition of two waves of the same frequency and amplitude travelling in opposite directions.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide" data-title="Nodes and antinodes">
+        <p class="eyebrow">The fixed points and the busiest points</p>
+        <h2>Nodes and antinodes<span>.</span></h2>
+        <div class="split wide-fig">
+          <ul class="points small">
+            <li><b>Node</b>: the displacement is <b>always zero</b></li>
+            <li class="step"><b>Antinode</b>: the amplitude is <b>greatest</b></li>
+            <li class="step frac">Node to next node: \(\dfrac{\lambda}{2}\)</li>
+            <li class="step frac">Node to next antinode: \(\dfrac{\lambda}{4}\)</li>
+          </ul>
+          <div class="panel">
+            <div class="panel-head"><span>THREE LOOPS</span></div>
+            <div class="fig" data-fig="c4-string"></div>
+          </div>
+        </div>
+        <div class="slide-foot"><span>C.4 STANDING WAVES AND RESONANCE · SL + HL</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>Finding a wavelength.</b> One loop of a standing wave is half a wavelength, not a whole one: a full wavelength of a sine curve has a crest and a trough, and those are two neighbouring loops. If the nodes on a string are 0.40 m apart, the wavelength is 0.80 m. This is the most direct way there is of measuring a wavelength, since the nodes stay still to be measured.</p>
+            <p><b>A microwave oven.</b> With the turntable removed, a bar of chocolate heats in patches. The melted spots are antinodes of the standing wave inside the oven, and they are about 6 cm apart. So \(\lambda = 12\) cm, and with the frequency printed on the back of the oven, 2.45 GHz, \(v = f \lambda = 2.45 \times 10^{9} \times 0.12 = 2.9 \times 10^{8}\) m s⁻¹: the speed of light, measured in a kitchen.</p>
+          </div>
+          <div class="rn-side">
+            <p class="trap">Taking the distance between neighbouring nodes as the wavelength. It is half the wavelength.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide" data-title="Amplitude and phase">
+        <p class="eyebrow">How the points of a standing wave move</p>
+        <h2>Amplitude and phase<span>.</span></h2>
+        <div class="split wide-fig">
+          <ul class="points small">
+            <li>Every point oscillates with the <b>same frequency</b></li>
+            <li class="step">The <b>amplitude</b> varies: zero at a node, greatest at an antinode</li>
+            <li class="step">Between two nodes: all <b>in phase</b></li>
+            <li class="step">Either side of a node: in <b>antiphase</b></li>
+          </ul>
+          <div class="panel">
+            <div class="panel-head"><span>ONE INSTANT</span></div>
+            <div class="fig" data-fig="c4-phase"></div>
+          </div>
+        </div>
+        <div class="slide-foot"><span>C.4 STANDING WAVES AND RESONANCE · SL + HL</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>Compare with a travelling wave.</b> In a travelling wave every particle has the same amplitude, and each is slightly behind its neighbour in phase, so the phase changes steadily along the wave. A standing wave is the reverse on both counts. The amplitude depends on where you are. The phase has only two possible values: every point in a loop reaches its greatest displacement at the same instant as all the others in that loop, and exactly half a cycle away from the points in the loops next door.</p>
+            <p><b>Twice a cycle the string is flat.</b> All the points pass through their equilibrium positions at the same moment. At that instant the string is straight, but every part of it is moving, fastest at the antinodes. All the energy is kinetic. A quarter of a cycle later the string is at its greatest displacement and momentarily at rest: all the energy is potential.</p>
+          </div>
+          <div class="rn-side">
+            <p class="tip">Phase difference between two points on a standing wave: 0 if there is an even number of nodes between them (including none), π if there is an odd number.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide" data-title="Standing and travelling waves">
+        <p class="eyebrow">Compare</p>
+        <h2>Standing and travelling waves<span>.</span></h2>
+        <table class="facts compare">
+          <thead><tr><th></th><th>Travelling wave</th><th>Standing wave</th></tr></thead>
+          <tbody>
+            <tr><td><b>Energy</b></td><td>Transferred along the wave</td><td>Not transferred: stored between the nodes</td></tr>
+            <tr class="step"><td><b>Amplitude</b></td><td>The same for every point</td><td>Varies from zero at nodes to greatest at antinodes</td></tr>
+            <tr class="step"><td><b>Phase</b></td><td>Changes steadily along the wave</td><td>The same within a loop; opposite in the next</td></tr>
+            <tr class="step"><td><b>Pattern</b></td><td>Moves at the wave speed</td><td>Stays in place</td></tr>
+            <tr class="step"><td><b>Wavelength</b></td><td>Crest to crest</td><td>Twice the node-to-node distance</td></tr>
+          </tbody>
+        </table>
+        <div class="slide-foot"><span>C.4 STANDING WAVES AND RESONANCE · SL + HL</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>Why no energy is transferred.</b> The two travelling waves carry equal amounts of energy in opposite directions, so the net flow is zero. You can also see it at a node: energy would have to pass through it to get along the string, but a point that never moves cannot do work on its neighbour. The energy of each loop is shut in between its two nodes.</p>
+            <p><b>What stays the same.</b> Both kinds of wave have a frequency and a wavelength, and \(v = f \lambda\) still links them, where \(v\) is the speed of the two travelling waves that make up the standing wave.</p>
+          </div>
+          <div class="rn-side">
+            <p class="tip">This comparison is a favourite exam question. Energy transfer, amplitude and phase are the three points that earn the marks.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide" data-title="Quick check: standing waves">
+        <p class="eyebrow">Quick check</p>
+        <h2>Standing waves<span>.</span></h2>
+        <div class="quiz fill">
+          <div class="q"><p><span class="n">01</span>What two waves make a standing wave?</p><div class="ans step">Identical waves in opposite directions</div></div>
+          <div class="q"><p><span class="n">02</span>What is a node?</p><div class="ans step">A point of zero displacement at all times</div></div>
+          <div class="q"><p><span class="n">03</span>Neighbouring nodes are 0.30 m apart. Wavelength?</p><div class="ans step">0.60 m</div></div>
+          <div class="q"><p><span class="n">04</span>Two points in the same loop. Phase difference?</p><div class="ans step">Zero</div></div>
+          <div class="q"><p><span class="n">05</span>Two points in neighbouring loops. Phase difference?</p><div class="ans step">π rad</div></div>
+          <div class="q"><p><span class="n">06</span>Does a standing wave transfer energy along the string?</p><div class="ans step">No</div></div>
+        </div>
+        <div class="slide-foot"><span class="reveal-hint">PRESS → TO REVEAL EACH ANSWER</span><span data-page></span></div>
+      </section>
+
+      <!-- Part 2 -->
+      <section class="slide section" data-title="Part 2: Strings and pipes">
+        <div class="title-grid">
+          <div>
+            <p class="eyebrow">Part 02</p>
+            <h1>Strings and pipes<span>.</span></h1>
+            <p class="lead">The ends decide which standing waves fit</p>
+          </div>
+          <div class="fig" data-fig="c4-harmonics" data-kind="string"></div>
+        </div>
+        <div class="slide-foot"><span>C.4 STANDING WAVES AND RESONANCE · SL + HL</span><span data-page></span></div>
+      </section>
+
+      <section class="slide history" data-title="Story: Chladni’s figures">
+        <p class="eyebrow">The story · Leipzig, 1787</p>
+        <p class="not-examined">Background story · not assessed</p>
+        <h2>Chladni makes sound visible<span>.</span></h2>
+        <div class="story band" style="--photo-h: 280px;">
+          <div class="story-photos">
+            <figure><img src="images/chladni.jpg" width="960" height="1055" alt="Engraved profile portrait of Ernst Chladni, a man with curly hair in a dark coat"><figcaption><b>Ernst Chladni</b>, drawn in 1809</figcaption></figure>
+            <figure><img src="images/chladni-plate.jpg" width="1280" height="670" alt="Four brass plates of different shapes on wooden stands, each covered with a pattern of curved lines of sand"><figcaption><b>Chladni figures</b> on brass plates (a modern exhibit)</figcaption></figure>
+          </div>
+          <ul class="points">
+            <li>Chladni, a physicist and musician, sprinkled <b>sand</b> on a metal plate and drew a violin bow across its edge</li>
+            <li>The sand jumped off the moving parts and gathered along the <b>nodal lines</b>: a standing wave in two dimensions</li>
+            <li>In Paris in 1808 Napoleon watched, and set a prize for the mathematics of the patterns</li>
+          </ul>
+        </div>
+        <p class="credits">Portrait: <a href="https://commons.wikimedia.org/wiki/File:Chladni_portrait_by_Chretien_1809.jpg" target="_blank" rel="noopener">Gilles-Louis Chrétien, 1809</a>, public domain. Photograph: <a href="https://commons.wikimedia.org/wiki/File:Chladni_plate_10.jpg" target="_blank" rel="noopener">Rodrigo Tetsuo Argenton; exhibit by Estes Objethos Atelier</a>, CC BY-SA 4.0.</p>
+        <div class="slide-foot"><span>C.4 STANDING WAVES AND RESONANCE · SL + HL</span><span data-page></span></div>
+      </section>
+
+      <section class="slide" data-title="Boundary conditions">
+        <p class="eyebrow">What the ends allow</p>
+        <h2>Boundary conditions<span>.</span></h2>
+        <div class="stack center" style="gap: 26px;">
+          <div class="cards" style="grid-template-columns: 1fr 1fr;">
+            <div class="card"><p class="eyebrow">A fixed end of a string · a closed end of a pipe</p><h3>Node</h3><p>The string is held, or the air is up against a wall: nothing can move there</p></div>
+            <div class="card step"><p class="eyebrow">A free end of a string · an open end of a pipe</p><h3>Antinode</h3><p>Nothing holds it back, so the movement is greatest there</p></div>
+          </div>
+          <div class="idea step">Only wavelengths that put the right thing at <b>each end</b> can form a standing wave.</div>
+        </div>
+        <div class="slide-foot"><span>C.4 STANDING WAVES AND RESONANCE · SL + HL</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>Three cases, for strings and for pipes.</b> Two nodes at the ends: a string fixed at both ends, or a pipe closed at both ends. Two antinodes at the ends: a string free at both ends, or a pipe open at both ends. A node at one end and an antinode at the other: a string fixed at one end only, or a pipe closed at one end. The first two cases give the same list of wavelengths. The third gives a different one.</p>
+            <p><b>What moves in a pipe.</b> The air. Its molecules oscillate to and fro along the length of the pipe: a longitudinal standing wave. The diagrams draw the size of that movement as a curve across the pipe, but the air is not moving sideways. In this course the nodes and antinodes of a pipe always refer to displacement.</p>
+            <p><b>Why an open end is an antinode.</b> At the mouth of a pipe the air is free to move in and out into the room, with nothing to stop it, so its movement is greatest there.</p>
+          </div>
+          <div class="rn-side">
+            <p class="tip">Pipes are described as open or closed. The lowest mode is the first harmonic; the words “fundamental” and “overtone” are not used in this course.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide" data-title="A string fixed at both ends">
+        <p class="eyebrow">A node at each end</p>
+        <h2>A string fixed at both ends<span>.</span></h2>
+        <div class="split wide-fig">
+          <div class="stack">
+            <div class="work">
+              <span class="say">Whole half wavelengths fit</span>
+              <span>\(L = n \dfrac{\lambda}{2}\) &nbsp;so&nbsp; \(\lambda_{n} = \dfrac{2L}{n}\)</span>
+              <span class="step">\(f_{n} = \dfrac{v}{\lambda_{n}} = \dfrac{n v}{2L} = n f_{1}\)</span>
+            </div>
+            <div class="idea step">\(n = 1, 2, 3 \dots\): the <b>harmonics</b>. All are possible.</div>
+          </div>
+          <div class="panel">
+            <div class="panel-head"><span>THE FIRST THREE HARMONICS</span></div>
+            <div class="fig" data-fig="c4-harmonics" data-kind="string"></div>
+          </div>
+        </div>
+        <div class="slide-foot"><span>C.4 STANDING WAVES AND RESONANCE · SL + HL</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>Why only these.</b> A wave on the string reflects at each end and overlaps with itself again and again. For most wavelengths the many reflections are out of step and cancel. Only when a whole number of half wavelengths fits exactly between the two fixed ends do they all reinforce, and a large, steady standing wave builds up.</p>
+            <p><b>A real string does several at once.</b> A plucked string vibrates in a mixture of harmonics. The first sets the pitch you hear. The others, at twice, three times and more of that frequency, give the note its character, which is why a guitar and a violin playing the same note sound different.</p>
+            <p><b>Changing the note.</b> \(f_{1} = \frac{v}{2L}\). Shorten the string by pressing it against a fret and the note rises. Tighten it and the wave speed increases, so the note rises. A heavier string has a lower wave speed and a lower note.</p>
+          </div>
+          <div class="rn-side">
+            <p class="tip">The same results hold for a pipe closed at both ends, and (with antinodes for nodes) for a string free at both ends.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide" data-title="String: frequencies of the harmonics">
+        <p class="eyebrow">Worked example</p>
+        <h2>A guitar string<span>.</span></h2>
+        <div class="split even">
+          <div class="work">
+            <span class="say">\(L = 0.65 \,\mathrm{m}\) · wave speed \(v = 286 \,\mathrm{m} \,\mathrm{s}^{-1}\)</span>
+            <span>\(\lambda_{1} = 2L = 2 \times 0.65 = 1.30 \,\mathrm{m}\)</span>
+            <span class="step">\(f_{1} = \dfrac{v}{\lambda_{1}} = \dfrac{286}{1.30}\)</span>
+            <span class="step">\(f_{1} = \class{res}{220 \,\mathrm{Hz}}\)</span>
+          </div>
+          <div class="work step">
+            <span class="say">The third harmonic</span>
+            <span>\(\lambda_{3} = \dfrac{2L}{3} = \dfrac{1.30}{3} = 0.433 \,\mathrm{m}\)</span>
+            <span class="step">\(f_{3} = 3 f_{1} = 3 \times 220 = \class{res}{660 \,\mathrm{Hz}}\)</span>
+            <span class="say step">Nodes every 0.217 m along the string</span>
+          </div>
+        </div>
+        <div class="slide-foot"><span>C.4 STANDING WAVES AND RESONANCE · SL + HL</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>The method for any harmonic.</b> Sketch the pattern. Count the loops and write the length of the string as that many half wavelengths. Find the wavelength, then use \(f = \frac{v}{\lambda}\). The sketch does the remembering: there is no need to learn a formula for each case.</p>
+            <p><b>Two wavelengths, two speeds.</b> 1.30 m is the wavelength of the wave on the string, which travels at 286 m s⁻¹. The sound it makes in the air has the same frequency, 220 Hz, but travels at 340 m s⁻¹, so its wavelength in the air is \(\frac{340}{220} = 1.5\) m. The string forces the air to vibrate at its own frequency; the wavelength then depends on the medium.</p>
+          </div>
+          <div class="rn-side">
+            <p class="tip">Touch a vibrating string lightly at its midpoint and you force a node there. The odd harmonics die, and the second harmonic sings out an octave higher.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide" data-title="A pipe open at both ends">
+        <p class="eyebrow">An antinode at each end</p>
+        <h2>A pipe open at both ends<span>.</span></h2>
+        <div class="split wide-fig">
+          <div class="stack">
+            <div class="work">
+              <span class="say">Whole half wavelengths again</span>
+              <span>\(\lambda_{n} = \dfrac{2L}{n}\)</span>
+              <span class="step">\(f_{n} = \dfrac{n v}{2L} = n f_{1}\)</span>
+            </div>
+            <div class="idea step">The same wavelengths as the string. <b>All</b> harmonics.</div>
+          </div>
+          <div class="panel">
+            <div class="panel-head"><span>DISPLACEMENT OF THE AIR</span><span class="pill">ANTINODES AT BOTH ENDS</span></div>
+            <div class="fig" data-fig="c4-harmonics" data-kind="open"></div>
+          </div>
+        </div>
+        <div class="slide-foot"><span>C.4 STANDING WAVES AND RESONANCE · SL + HL</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>Reading the picture.</b> The curves show how far the air moves at each place along the pipe, to and fro along its length. Where the two curves are far apart the air is surging in and out: an antinode. Where they cross the air stays still: a node. In the first harmonic the air at the two ends moves in opposite directions, rushing out of both ends together and then in at both ends together, while the air in the middle does not move at all.</p>
+            <p><b>Why the same list as a string.</b> From one antinode to the next is half a wavelength, just as from one node to the next. A pipe with an antinode at each end therefore fits a whole number of half wavelengths, like a string with a node at each end.</p>
+            <p><b>How sound reflects from an open end.</b> There is no wall, but there is a sudden change: inside, the air is confined; outside, it is not. Part of the wave is reflected at any such change, and that reflected wave makes the standing wave.</p>
+          </div>
+          <div class="rn-side">
+            <p class="more">A flute and an open organ pipe behave like this. Opening a hole in the side of a flute shortens the vibrating column of air and raises the note.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide" data-title="A pipe closed at one end">
+        <p class="eyebrow">A node at one end, an antinode at the other</p>
+        <h2>A pipe closed at one end<span>.</span></h2>
+        <div class="split wide-fig">
+          <div class="stack">
+            <div class="work">
+              <span class="say">Odd quarter wavelengths fit</span>
+              <span>\(L = n \dfrac{\lambda}{4}\) &nbsp;so&nbsp; \(\lambda_{n} = \dfrac{4L}{n}\)</span>
+              <span class="step">\(f_{n} = \dfrac{n v}{4L} = n f_{1}\)</span>
+            </div>
+            <div class="idea step">\(n = 1, 3, 5 \dots\): <b>odd</b> harmonics only.</div>
+          </div>
+          <div class="panel">
+            <div class="panel-head"><span>DISPLACEMENT OF THE AIR</span><span class="pill">CLOSED AT THE LEFT</span></div>
+            <div class="fig" data-fig="c4-harmonics" data-kind="closed"></div>
+          </div>
+        </div>
+        <div class="slide-foot"><span>C.4 STANDING WAVES AND RESONANCE · SL + HL</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>Why a quarter.</b> The shortest piece of a standing wave that has a node at one end and an antinode at the other is a quarter of a wavelength. So the first harmonic has \(\lambda = 4L\): twice the wavelength, and half the frequency, of an open pipe of the same length. A closed pipe sounds an octave lower than an open one.</p>
+            <p><b>Why the even harmonics are missing.</b> To get from a node back to an antinode you must add whole half wavelengths: \(\frac{1}{4}, \frac{3}{4}, \frac{5}{4} \dots\) of a wavelength in the pipe. Two quarters or four quarters would put a node, or an antinode, at both ends, which the pipe does not allow. The second pattern in the diagram is therefore the third harmonic, at three times the frequency of the first.</p>
+            <p><b>The same holds</b> for a string fixed at one end and free at the other.</p>
+          </div>
+          <div class="rn-side">
+            <p class="trap">Calling the second pattern of a closed pipe the “second harmonic”. Its frequency is \(3 f_{1}\), so it is the third harmonic. There is no second.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide" data-title="Pipes: frequencies">
+        <p class="eyebrow">Worked example</p>
+        <h2>Two pipes of the same length<span>.</span></h2>
+        <div class="split even">
+          <div class="work">
+            <span class="say">\(L = 0.50 \,\mathrm{m}\) · closed at one end · \(v = 340 \,\mathrm{m} \,\mathrm{s}^{-1}\)</span>
+            <span>\(\lambda_{1} = 4L = 2.0 \,\mathrm{m}\)</span>
+            <span class="step">\(f_{1} = \dfrac{v}{\lambda_{1}} = \dfrac{340}{2.0} = \class{res}{170 \,\mathrm{Hz}}\)</span>
+            <span class="step">Next: \(f_{3} = 3 f_{1} = \class{res}{510 \,\mathrm{Hz}}\)</span>
+          </div>
+          <div class="work step">
+            <span class="say">The same pipe, open at both ends</span>
+            <span>\(\lambda_{1} = 2L = 1.0 \,\mathrm{m}\)</span>
+            <span class="step">\(f_{1} = \dfrac{v}{\lambda_{1}} = \dfrac{340}{1.0} = \class{res}{340 \,\mathrm{Hz}}\)</span>
+            <span class="step">Next: \(f_{2} = 2 f_{1} = \class{res}{680 \,\mathrm{Hz}}\)</span>
+          </div>
+        </div>
+        <div class="slide-foot"><span>C.4 STANDING WAVES AND RESONANCE · SL + HL</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>Measuring the speed of sound.</b> Hold a tuning fork of known frequency over a tube that stands in water, and raise the tube slowly. The sound swells when the air column is the right length for a standing wave. The first loud position is at a quarter of a wavelength and the next at three quarters, so the distance between the two is exactly half a wavelength. With a 512 Hz fork and positions 33.2 cm apart, \(\lambda = 0.664\) m and \(v = 512 \times 0.664 = 340\) m s⁻¹.</p>
+            <p><b>Why use the difference.</b> The antinode at an open end actually sits slightly beyond the end of the tube. Taking the difference between two positions cancels that small shift. The course ignores it elsewhere: no end corrections are needed in calculations.</p>
+          </div>
+          <div class="rn-side">
+            <p class="tip">Blowing across a bottle makes a closed pipe. Add water and the air column shortens, so the note rises.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide" data-title="Quick check: strings and pipes">
+        <p class="eyebrow">Quick check</p>
+        <h2>Strings and pipes<span>.</span></h2>
+        <div class="quiz fill">
+          <div class="q"><p><span class="n">01</span>What is found at the closed end of a pipe?</p><div class="ans step">A displacement node</div></div>
+          <div class="q"><p><span class="n">02</span>A 1.2 m string fixed at both ends, first harmonic. Wavelength?</p><div class="ans step">2.4 m</div></div>
+          <div class="q"><p><span class="n">03</span>Its first harmonic is 100 Hz. Frequency of the fourth?</p><div class="ans step">400 Hz</div></div>
+          <div class="q"><p><span class="n">04</span>Which harmonics does a pipe closed at one end have?</p><div class="ans step">Odd ones only</div></div>
+          <div class="q"><p><span class="n">05</span>A pipe closed at one end is 0.85 m long. First harmonic? (340 m s⁻¹)</p><div class="ans step">\(\frac{340}{4 \times 0.85} = 100 \,\mathrm{Hz}\)</div></div>
+          <div class="q"><p><span class="n">06</span>Its closed end is opened. The first harmonic becomes?</p><div class="ans step">200 Hz: double</div></div>
+        </div>
+        <div class="slide-foot"><span class="reveal-hint">PRESS → TO REVEAL EACH ANSWER</span><span data-page></span></div>
+      </section>
+
+      <!-- Part 3 -->
+      <section class="slide section" data-title="Part 3: Resonance and damping">
+        <div class="title-grid">
+          <div>
+            <p class="eyebrow">Part 03</p>
+            <h1>Resonance and damping<span>.</span></h1>
+            <p class="lead">What happens when an oscillator is pushed, and when it is held back</p>
+          </div>
+          <div class="fig" data-fig="c4-resonance" data-kind="single"></div>
+        </div>
+        <div class="slide-foot"><span>C.4 STANDING WAVES AND RESONANCE · SL + HL</span><span data-page></span></div>
+      </section>
+
+      <section class="slide" data-title="Natural frequency and driving frequency">
+        <p class="eyebrow">Free and forced oscillations</p>
+        <h2>Natural and driving frequency<span>.</span></h2>
+        <div class="stack center" style="gap: 26px;">
+          <div class="cards" style="grid-template-columns: 1fr 1fr;">
+            <div class="card"><p class="eyebrow">Left to itself</p><h3>Natural frequency</h3><p>The frequency at which a system oscillates freely after being displaced and released. Set by the system: \(m\) and \(k\), or \(l\) and \(g\)</p></div>
+            <div class="card step"><p class="eyebrow">Pushed from outside</p><h3>Driving frequency</h3><p>The frequency of a periodic force applied to the system. Set by whatever is doing the pushing</p></div>
+          </div>
+          <div class="idea step">A driven system ends up oscillating at the <b>driving</b> frequency. How <b>much</b> it oscillates depends on how close that is to its natural frequency.</div>
+        </div>
+        <div class="slide-foot"><span>C.4 STANDING WAVES AND RESONANCE · SL + HL</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>A child on a swing.</b> Let go and the swing moves back and forth at its natural frequency, set by its length as for any pendulum (C.1). Now push it. Push at random and little happens. Push once every swing, at the natural frequency, and each push adds to the motion already there: the amplitude grows and grows.</p>
+            <p><b>Everything has natural frequencies.</b> A wine glass rings at one when tapped. A string or a column of air has a whole set: the harmonics of Part 2. A building, a bridge and a car on its springs each have theirs. A molecule of carbon dioxide has natural frequencies in the infrared, which is why it absorbs infrared (B.2).</p>
+          </div>
+          <div class="rn-side">
+            <p class="tip">Three frequencies to keep apart: the natural frequency (of the system), the driving frequency (of the force), and the frequency of the resulting oscillation, which equals the driving frequency.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide" data-title="Resonance">
+        <p class="eyebrow">Driving at the natural frequency</p>
+        <h2>Resonance<span>.</span></h2>
+        <div class="split wide-fig">
+          <div class="stack">
+            <ul class="points small">
+              <li>The amplitude is greatest when driving frequency = <b>natural frequency</b></li>
+              <li class="step">Energy is transferred from the driver <b>most efficiently</b></li>
+              <li class="step">Far from that frequency the response is small</li>
+            </ul>
+          </div>
+          <div class="panel">
+            <div class="panel-head"><span>THE RESPONSE OF A DRIVEN OSCILLATOR</span></div>
+            <div class="fig" data-fig="c4-resonance" data-kind="single"></div>
+          </div>
+        </div>
+        <div class="slide-foot"><span>C.4 STANDING WAVES AND RESONANCE · SL + HL</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>Why the peak.</b> At resonance the driving force is always pushing in the direction the system is already moving, so it does positive work during every part of every cycle. At any other frequency the force and the motion fall out of step, and for part of each cycle the force acts against the motion and takes energy back out.</p>
+            <p><b>What limits the amplitude.</b> The amplitude does not grow for ever. As it grows, more energy is lost in each cycle to friction and air resistance. It settles at the size for which the energy supplied by the driver in each cycle equals the energy lost. Less resistance means a larger amplitude before the two balance.</p>
+            <p><b>The two ends of the graph.</b> Driven very slowly, the system simply follows the driver, moving with about the driver’s own amplitude. Driven very fast, its inertia stops it responding in time, and it hardly moves.</p>
+          </div>
+          <div class="rn-side">
+            <p class="tip">Barton’s pendulums show this in the laboratory: several light pendulums of different lengths are driven by one heavy one, and the one of matching length swings most.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide" data-title="Damping">
+        <p class="eyebrow">Losing energy</p>
+        <h2>Damping<span>.</span></h2>
+        <div class="split wide-fig">
+          <div class="stack">
+            <ul class="points small">
+              <li><b>Damping</b>: a resistive force takes energy from the oscillation</li>
+              <li class="step"><b>Light</b>: many oscillations, slowly shrinking</li>
+              <li class="step"><b>Critical</b>: back to rest in the <b>shortest</b> time, with no oscillation</li>
+              <li class="step"><b>Heavy</b>: no oscillation, a slow return</li>
+            </ul>
+          </div>
+          <div class="panel">
+            <div class="panel-head"><span>RELEASED FROM REST</span></div>
+            <div class="fig" data-fig="c4-damping"></div>
+          </div>
+        </div>
+        <div class="slide-foot"><span>C.4 STANDING WAVES AND RESONANCE · SL + HL</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>Light damping.</b> A pendulum swinging in air. Each swing is slightly smaller than the last, and the amplitude falls by the same fraction in every cycle, so the peaks lie on a smooth decaying curve. The period hardly changes: it is very slightly longer than with no damping at all.</p>
+            <p><b>Critical damping.</b> A car’s suspension is designed to be close to this. After a bump the body should return to its level smoothly and quickly, without bouncing. The same is wanted of a door closer, and of the needle of a measuring instrument, which should settle on its reading at once.</p>
+            <p><b>Heavy damping.</b> Picture the pendulum hanging in thick oil. Pulled aside and released, it oozes back towards the vertical and takes a long time to arrive. More damping than critical does not mean a quicker return: it means a slower one.</p>
+          </div>
+          <div class="rn-side">
+            <p class="trap">Thinking that the heaviest damping stops the motion fastest. Critical damping is the quickest way back to equilibrium.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide" data-title="Damping and resonance">
+        <p class="eyebrow">Qualitative</p>
+        <h2>Damping and resonance<span>.</span></h2>
+        <div class="split wide-fig">
+          <div class="stack">
+            <ul class="points small">
+              <li>More damping: a <b>lower</b> peak</li>
+              <li class="step">A <b>broader</b> peak</li>
+              <li class="step">At a slightly <b>lower</b> frequency</li>
+            </ul>
+            <div class="idea step">Light damping: a tall, sharp resonance, exactly where the natural frequency is.</div>
+          </div>
+          <div class="panel">
+            <div class="panel-head"><span>THREE AMOUNTS OF DAMPING</span></div>
+            <div class="fig" data-fig="c4-resonance" data-kind="damped"></div>
+          </div>
+        </div>
+        <div class="slide-foot"><span>C.4 STANDING WAVES AND RESONANCE · SL + HL</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>Lower.</b> A damped system loses more energy in each cycle, so the balance between energy supplied and energy lost is reached at a smaller amplitude.</p>
+            <p><b>Broader.</b> A lightly damped system responds strongly only to a narrow range of driving frequencies and ignores the rest. A heavily damped one responds modestly to a wide range. Engineers choose between the two. A radio tuner needs a sharp resonance, to pick one station out of hundreds. A loudspeaker cone needs a broad one, so that it reproduces all the notes of the music about equally and does not boom at one of them.</p>
+            <p><b>Shifted.</b> With heavier damping the greatest amplitude occurs at a driving frequency a little below the natural frequency. For light damping the shift is too small to notice.</p>
+          </div>
+          <div class="rn-side">
+            <p class="tip">A sketch of the effect of extra damping needs all three: a lower peak, a wider peak, and the top moved slightly to the left. The curves should never cross.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide" data-title="Resonance: useful and destructive">
+        <p class="eyebrow">Where it matters</p>
+        <h2>Resonance: useful and destructive<span>.</span></h2>
+        <div class="cards fill" style="grid-template-columns: repeat(3, 1fr); align-content: center;">
+          <div class="card"><p class="eyebrow">Useful</p><h3>Musical instruments</h3><p>Strings and air columns resonate at their harmonics; the body of a violin strengthens the sound</p></div>
+          <div class="card step"><p class="eyebrow">Useful</p><h3>Tuning a radio</h3><p>A circuit is set to resonate at the frequency of one station</p></div>
+          <div class="card step"><p class="eyebrow">Useful</p><h3>Microwave ovens and MRI</h3><p>Radiation at a frequency that molecules, or nuclei in a magnet, respond to</p></div>
+          <div class="card step"><p class="eyebrow">Destructive</p><h3>Buildings in earthquakes</h3><p>Ground motion near a building’s natural frequency can bring it down</p></div>
+          <div class="card step"><p class="eyebrow">Destructive</p><h3>Bridges and footsteps</h3><p>Soldiers break step on a bridge; walkways are fitted with dampers</p></div>
+          <div class="card step"><p class="eyebrow">Destructive</p><h3>Machinery</h3><p>An unbalanced wheel or engine shakes a car violently at one particular speed</p></div>
+        </div>
+        <div class="slide-foot"><span>C.4 STANDING WAVES AND RESONANCE · SL + HL</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>Two ways to prevent damage.</b> Move the natural frequency away from the driving frequency, by changing the mass or the stiffness of the structure. Or add damping, so that the resonance peak is low even if it is driven. Tall buildings in earthquake zones use both: flexible foundations, and in some a huge suspended mass near the top that swings against the motion of the building and absorbs its energy.</p>
+            <p><b>The wine glass.</b> A glass has very little damping, so its resonance is sharp and tall. A loud note at exactly its natural frequency can drive the rim to an amplitude large enough to break it. A note that is slightly off does nothing: the peak is too narrow.</p>
+          </div>
+          <div class="rn-side">
+            <p class="tip">Have two useful and two destructive examples ready, and be able to say what is driving and what is resonating in each.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide history" data-title="Story: Tacoma Narrows">
+        <p class="eyebrow">The story · Washington State, 7 November 1940</p>
+        <p class="not-examined">Background story · not assessed</p>
+        <h2>Galloping Gertie<span>.</span></h2>
+        <div class="story" style="--photo-h: 400px;">
+          <div class="story-photos">
+            <figure><img src="images/tacoma.jpg" width="1280" height="960" alt="A frame of black and white film showing the roadway of a suspension bridge breaking and falling into the water between its towers"><figcaption>The <b>Tacoma Narrows Bridge</b> as its deck fell, filmed by Barney Elliott</figcaption></figure>
+          </div>
+          <div class="stack">
+            <ul class="points">
+              <li>Opened on 1 July 1940. Its 853 m span moved so much in wind that the builders gave it a nickname</li>
+              <li>Four months later, in a wind of about <b>64 km h⁻¹</b>, the deck began to <b>twist</b> and tore itself apart</li>
+              <li>Textbooks long called it <b>resonance</b>. It was not</li>
+            </ul>
+            <div class="idea">The cause was <b>aeroelastic flutter</b>: the twisting deck changed the airflow, and the airflow fed the twisting. A steady wind, not a periodic push.</div>
+          </div>
+        </div>
+        <p class="credits">Film still: <a href="https://commons.wikimedia.org/wiki/File:Tacoma_Narrows_still.png" target="_blank" rel="noopener">Barney Elliott, 1940</a>, public domain.</p>
+        <div class="slide-foot"><span>C.4 STANDING WAVES AND RESONANCE · SL + HL</span><span data-page></span></div>
+      </section>
+
+      <section class="slide" data-title="Quick check: resonance and damping">
+        <p class="eyebrow">Quick check</p>
+        <h2>Resonance and damping<span>.</span></h2>
+        <div class="quiz fill">
+          <div class="q"><p><span class="n">01</span>At what frequency does a driven system oscillate?</p><div class="ans step">The driving frequency</div></div>
+          <div class="q"><p><span class="n">02</span>When does resonance occur?</p><div class="ans step">Driving frequency = natural frequency</div></div>
+          <div class="q"><p><span class="n">03</span>Which damping returns a system to rest fastest?</p><div class="ans step">Critical damping</div></div>
+          <div class="q"><p><span class="n">04</span>Damping is increased. What happens to the height of the resonance peak?</p><div class="ans step">It falls</div></div>
+          <div class="q"><p><span class="n">05</span>And to the frequency of the peak?</p><div class="ans step">Slightly lower</div></div>
+          <div class="q"><p><span class="n">06</span>Give one useful example of resonance.</p><div class="ans step">Tuning a radio; a musical instrument</div></div>
+        </div>
+        <div class="slide-foot"><span class="reveal-hint">PRESS → TO REVEAL EACH ANSWER</span><span data-page></span></div>
+      </section>
+
+      <section class="slide" data-title="Summary">
+        <p class="eyebrow">Summary</p>
+        <h2>Standing waves and resonance on one slide<span>.</span></h2>
+        <div class="cards fill" style="grid-template-columns: 1fr 1fr 1fr; align-content: center;">
+          <div class="card"><p class="eyebrow">Standing wave</p><h3>Two identical waves, opposite ways</h3><p>No energy transferred<br>Node to node: \(\frac{\lambda}{2}\)</p></div>
+          <div class="card step"><p class="eyebrow">Along the wave</p><h3>Amplitude varies; phase 0 or π</h3><p>In phase within a loop, antiphase in the next</p></div>
+          <div class="card step"><p class="eyebrow">Same ends</p><h3>\(\lambda_{n} = \frac{2L}{n}\)</h3><p>String fixed at both ends; pipe open at both ends<br>All harmonics</p></div>
+          <div class="card step"><p class="eyebrow">Different ends</p><h3>\(\lambda_{n} = \frac{4L}{n}\), \(n\) odd</h3><p>Pipe closed at one end<br>Odd harmonics only</p></div>
+          <div class="card step"><p class="eyebrow">Resonance</p><h3>Driving = natural frequency</h3><p>Greatest amplitude and energy transfer</p></div>
+          <div class="card step"><p class="eyebrow">Damping</p><h3>Light · critical · heavy</h3><p>More damping: a lower, broader peak at a slightly lower frequency</p></div>
+        </div>
+        <div class="slide-foot"><span>C.4 STANDING WAVES AND RESONANCE · SL + HL</span><span data-page></span></div>
+      </section>
+
+      <section class="slide" data-title="Key words">
+        <p class="eyebrow">Summary</p>
+        <h2>Key words<span>.</span></h2>
+        <div class="terms fill" style="grid-template-columns: repeat(3, 1fr);">
+          <div class="term"><b>Standing wave</b><span>A pattern that oscillates in place</span></div>
+          <div class="term"><b>Node</b><span>Zero displacement at all times</span></div>
+          <div class="term"><b>Antinode</b><span>Greatest amplitude</span></div>
+          <div class="term"><b>Harmonic</b><span>One of the allowed standing wave patterns</span></div>
+          <div class="term"><b>First harmonic</b><span>The pattern of lowest frequency</span></div>
+          <div class="term"><b>Natural frequency</b><span>The frequency of free oscillation</span></div>
+          <div class="term"><b>Driving frequency</b><span>The frequency of the applied force</span></div>
+          <div class="term"><b>Resonance</b><span>Greatest amplitude: driving = natural frequency</span></div>
+          <div class="term"><b>Critical damping</b><span>The quickest return with no oscillation</span></div>
+        </div>
+        <div class="slide-foot"><span>C.4 STANDING WAVES AND RESONANCE · SL + HL</span><span data-page></span></div>
+      </section>
+
+    </div>
+  </main>
+
+  <nav class="controls" aria-label="Slide controls">
+    <button type="button" id="prev" aria-label="Previous slide"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg></button>
+    <span class="counter" id="counter" aria-live="polite"></span>
+    <button type="button" id="next" aria-label="Next slide"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 5l7 7-7 7"/></svg></button>
+  </nav>
+  <div class="progress" aria-hidden="true"><span id="progress-bar"></span></div>
+
+  <script src="../assets/figures.js"></script>
+  <script src="figures.js"></script>
+  <script src="../assets/deck-math.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
+  <script src="../assets/deck-notes.js"></script>
+  <script src="../assets/deck.js"></script>
+</body>
+</html>

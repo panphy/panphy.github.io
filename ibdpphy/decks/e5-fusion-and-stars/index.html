@@ -1,0 +1,772 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="robots" content="noindex, nofollow">
+  <meta name="description" content="Teaching slides for IB Diploma Programme Physics topic E.5 Fusion and stars, standard and higher level: nuclear fusion and the conditions it needs, the balance inside a star, how mass decides a star’s life, the Hertzsprung–Russell diagram, stellar parallax and stellar radii.">
+  <meta name="theme-color" content="#F8F6F1">
+  <script src="/assets/theme.js" data-theme-scope="ibdpphy"></script>
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <link rel="stylesheet" href="/assets/standalone-top.css">
+  <title>E.5 Fusion and stars · IB DP Physics</title>
+  <link rel="icon" type="image/png" href="/assets/favicon.png">
+  <link rel="apple-touch-icon" href="/assets/apple-touch-icon.png">
+  <link rel="stylesheet" href="../assets/deck.css">
+  <link rel="stylesheet" href="../assets/deck-notes.css">
+  <link rel="stylesheet" href="/assets/theme-toggle.css">
+  <link rel="stylesheet" href="/assets/fullscreen-button.css">
+  <script src="/assets/theme-toggle.js"></script>
+  <script src="/ibdpphy/sw-register.js" defer></script>
+</head>
+<body>
+  <header class="banner">
+    <a class="banner-logo" href="/" aria-label="PanPhy Labs home"><img src="/assets/panphy.png" alt="PanPhy Labs" width="38" height="38"></a>
+    <a class="banner-title" href="#1">E.5 Fusion and stars</a>
+    <div class="banner-actions">
+      <button id="thumbs-toggle" class="icon-button" type="button" aria-controls="thumbs" aria-pressed="true" aria-label="Hide slide thumbnails" title="Show or hide slide thumbnails (T)"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path class="pane" d="M9.5 4.5H6A2.5 2.5 0 0 0 3.5 7v10A2.5 2.5 0 0 0 6 19.5h3.5z"/><rect x="3.5" y="4.5" width="17" height="15" rx="2.5"/><path d="M9.5 4.5v15"/></svg></button>
+      <button id="fullscreen" class="panphy-fullscreen-button" type="button" aria-pressed="false" aria-label="Present fullscreen" title="Present fullscreen (F)"><svg class="panphy-fs-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M4 9V4h5M15 4h5v5M20 15v5h-5M9 20H4v-5"/></svg></button>
+      <button id="theme-button" type="button" data-panphy-theme-toggle aria-label="Toggle light/dark theme" title="Toggle between light and dark themes"></button>
+    </div>
+  </header>
+  <script>window.PanPhyThemeToggle.mount(document.getElementById('theme-button'));</script>
+
+  <nav class="thumbs" id="thumbs" aria-label="Slides"></nav>
+
+  <main class="stage" id="stage">
+    <div class="deck" id="deck">
+
+      <!-- 1 · Title -->
+      <section class="slide title" data-title="E.5 Fusion and stars">
+        <div class="title-grid">
+          <div>
+            <p class="eyebrow">IB DP Physics · Theme E · Nuclear and quantum physics</p>
+            <h1>Fusion and stars<span>.</span></h1>
+            <p class="lead">E.5 · Where starlight comes from, how stars live and die, and how we measure them<br>Standard level and higher level</p>
+            <div class="chips">
+              <span class="chip">SL + HL · 6 hours</span>
+              <a class="chip on" href="../e4-fission/">E.4 Fission ↗</a>
+            </div>
+          </div>
+          <div class="fig" data-fig="e5-hr" data-plain></div>
+        </div>
+      </section>
+
+      <section class="slide" data-title="Lesson map">
+        <p class="eyebrow">The journey</p>
+        <h2>Four parts<span>.</span></h2>
+        <div class="cards fill" style="grid-template-columns: repeat(4, 1fr);">
+          <div class="card">
+            <div class="fig" data-fig="e5-fusion" data-still data-plain style="height: 170px;"></div>
+            <p class="eyebrow">Part 01</p>
+            <h3>Fusion</h3>
+            <p>The energy released, and the temperature and density it needs</p>
+          </div>
+          <div class="card">
+            <div class="fig" data-fig="e5-balance" data-still data-plain style="height: 170px;"></div>
+            <p class="eyebrow">Part 02</p>
+            <h3>The life of a star</h3>
+            <p>Equilibrium, and how mass decides what happens</p>
+          </div>
+          <div class="card">
+            <div class="fig" data-fig="e5-hr" data-still data-plain style="height: 170px;"></div>
+            <p class="eyebrow">Part 03</p>
+            <h3>The HR diagram</h3>
+            <p>Its regions, and lines of constant radius</p>
+          </div>
+          <div class="card">
+            <div class="fig" data-fig="e5-parallax" data-still style="height: 170px;"></div>
+            <p class="eyebrow">Part 04</p>
+            <h3>Measuring stars</h3>
+            <p>Distance by parallax, and radius from luminosity and temperature</p>
+          </div>
+        </div>
+        <div class="slide-foot"><span>E.5 FUSION AND STARS · SL + HL</span><span data-page></span></div>
+      </section>
+
+      <!-- Part 1 -->
+      <section class="slide section" data-title="Part 1: Fusion">
+        <div class="title-grid">
+          <div>
+            <p class="eyebrow">Part 01</p>
+            <h1>Fusion<span>.</span></h1>
+            <p class="lead">Light nuclei joining together: the energy source of the stars</p>
+          </div>
+          <div class="fig" data-fig="e5-fusion" data-still data-plain></div>
+        </div>
+        <div class="slide-foot"><span>E.5 FUSION AND STARS · SL + HL</span><span data-page></span></div>
+      </section>
+
+      <section class="slide" data-title="What fusion is">
+        <p class="eyebrow">Joining light nuclei</p>
+        <h2>What fusion is<span>.</span></h2>
+        <div class="split fig-first">
+          <div class="panel">
+            <div class="panel-head"><span>DEUTERIUM AND TRITIUM</span><span class="reveal-hint">PRESS → TO PLAY</span></div>
+            <div class="fig" data-fig="e5-fusion"></div>
+          </div>
+          <ul class="points small">
+            <li class="step">Two <b>light nuclei</b> join to make a <b>heavier</b> one</li>
+            <li class="step">The product is more <b>tightly bound</b>: mass is lost and <b>energy released</b></li>
+            <li class="step">Per kilogram of fuel, several times more than fission</li>
+          </ul>
+        </div>
+        <div class="slide-foot"><span>E.5 FUSION AND STARS · SL + HL</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>The reaction on the slide.</b> \({}^{2}_{1}\mathrm{H} + {}^{3}_{1}\mathrm{H} \rightarrow {}^{4}_{2}\mathrm{He} + {}^{1}_{0}\mathrm{n}\). Nucleon numbers: \(2 + 3 = 4 + 1\). Proton numbers: \(1 + 1 = 2 + 0\). It releases 17.6 MeV, most of it carried by the neutron, and it is the reaction that experimental fusion reactors on the Earth use, because it is the easiest to start.</p>
+            <p><b>Fission and fusion compared.</b> Both release energy by ending with nuclei that are more tightly bound than the ones they began with. Fission gets there by splitting the heaviest nuclei; fusion by joining the lightest. One fusion releases less energy than one fission, 17.6 MeV against about 170 MeV, but the fuel is fifty times lighter, so the energy per kilogram is greater.</p>
+            <p><b>In the Sun</b> the fuel is ordinary hydrogen, and it takes a chain of three steps to build one helium-4 nucleus from four protons.</p>
+          </div>
+          <div class="rn-side">
+            <p class="tip">²H is deuterium and ³H is tritium: the isotopes of hydrogen with one and two neutrons.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide" data-title="Why fusion releases energy">
+        <p class="eyebrow">Binding energy per nucleon</p>
+        <h2>Why fusion releases energy<span>.</span></h2>
+        <div class="split wide-fig">
+          <div class="stack">
+            <ul class="points small">
+              <li>The curve is <b>steep</b> for light nuclei</li>
+              <li class="step">²H: 1.1 MeV per nucleon. ⁴He: <b>7.1 MeV</b> per nucleon</li>
+              <li class="step">Fusion releases energy up to <b>iron</b>, at the peak</li>
+            </ul>
+            <div class="idea step">Beyond iron, fusing nuclei would <b>take in</b> energy.</div>
+          </div>
+          <div class="panel">
+            <div class="panel-head"><span>MEASURED VALUES</span><span class="pill">HORIZONTAL SCALE STRETCHED BELOW 60</span></div>
+            <div class="fig" data-fig="e5-curve"></div>
+          </div>
+        </div>
+        <div class="slide-foot"><span>E.5 FUSION AND STARS · SL + HL</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>The same curve as E.4, read from the other end.</b> Fission starts at the far right and moves up towards the peak by splitting. Fusion starts at the far left and moves up towards the peak by joining. Both end closer to iron-56, the most tightly bound region.</p>
+            <p><b>Why the left side is so steep.</b> The strong nuclear force acts only between neighbouring nucleons. In deuterium each nucleon has one neighbour. In helium-4 each has three, all close together, so each is bound far more tightly. Helium-4 is an especially stable arrangement, which is why it stands above the line of its neighbours on the graph and why it is the particle emitted in alpha decay.</p>
+            <p><b>Why iron is the end.</b> A star can only gain energy by fusing nuclei that end up higher on the curve. Once the core of a massive star has turned to iron, no further fusion can support it, and Part 2 shows what follows.</p>
+          </div>
+          <div class="rn-side">
+            <p class="more">The elements heavier than iron in the Earth, and in you, were made where energy was available to be absorbed: in exploding stars and colliding neutron stars.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide" data-title="Fusion: energy released">
+        <p class="eyebrow">Worked example</p>
+        <h2>Energy released in fusion<span>.</span></h2>
+        <div class="split even">
+          <div class="work">
+            <span class="say">²H + ³H → ⁴He + n · masses / u</span>
+            <span class="say">²H 2.014102 · ³H 3.016049</span>
+            <span class="say">⁴He 4.002602 · n 1.008665</span>
+            <span>Before: \(2.014102 + 3.016049 = 5.030151\)</span>
+            <span class="step">After: \(4.002602 + 1.008665 = 5.011267\)</span>
+            <span class="step">\(\Delta m = 0.018884 \,\mathrm{u}\)</span>
+            <span class="step">\(E = 0.018884 \times 931.5 = \class{res}{17.6 \,\mathrm{MeV}}\)</span>
+          </div>
+          <div class="work step">
+            <span class="say">In the Sun, overall: 4 ¹H → ⁴He</span>
+            <span class="say">¹H 1.007825 u</span>
+            <span>\(\Delta m = 4 \times 1.007825 - 4.002602\)</span>
+            <span class="step">\(\Delta m = 0.028698 \,\mathrm{u}\)</span>
+            <span class="step">\(E = 0.028698 \times 931.5 = \class{res}{26.7 \,\mathrm{MeV}}\)</span>
+          </div>
+        </div>
+        <div class="slide-foot"><span>E.5 FUSION AND STARS · SL + HL</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>The fraction of mass that disappears.</b> For hydrogen turning into helium, 0.0287 u vanishes out of 4.0313 u: 0.71%. Seven parts in a thousand of the mass of the hydrogen is converted to energy. In fission the figure is less than one part in a thousand. That fraction, 0.007, is the number that decides how long a star can shine.</p>
+            <p><b>Method.</b> It is exactly the mass-defect calculation of E.3 and E.4: add up the masses on each side, subtract, and multiply the difference in u by 931.5 to get MeV. Keep all the decimal places until the subtraction is done.</p>
+          </div>
+          <div class="rn-side">
+            <p class="tip">The masses used are those of neutral atoms, which include electrons. In these reactions the electrons balance on the two sides, so they make no difference.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide" data-title="The conditions for fusion">
+        <p class="eyebrow">Temperature and density</p>
+        <h2>The conditions for fusion<span>.</span></h2>
+        <div class="split wide-fig">
+          <div class="stack">
+            <ul class="points small">
+              <li>Nuclei are positive: they <b>repel</b></li>
+              <li class="step">The strong force acts only within about \(10^{-15}\) m</li>
+              <li class="step"><b>High temperature</b>: enough kinetic energy to get that close</li>
+              <li class="step"><b>High density</b>: enough collisions each second</li>
+            </ul>
+          </div>
+          <div class="panel">
+            <div class="panel-head"><span>TWO PROTONS APPROACHING</span></div>
+            <div class="fig" data-fig="e5-barrier"></div>
+          </div>
+        </div>
+        <div class="slide-foot"><span>E.5 FUSION AND STARS · SL + HL</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>How hot.</b> From B.1, the average kinetic energy of a particle is \(\frac{3}{2} k_\mathrm{B} T\), so a hotter gas has faster nuclei. Two protons approaching head-on convert their kinetic energy into electric potential energy as they close in (D.2). To get within reach of the strong force they must not be stopped and turned back first. In the core of the Sun the temperature is about fifteen million kelvin.</p>
+            <p><b>How dense.</b> Even at that temperature a head-on collision at the right speed is rare, and most collisions that do happen fail to produce fusion. A high density of nuclei means an enormous number of collisions each second, so that enough of them succeed. The centre of the Sun is about 150 times as dense as water, and still a gas of bare nuclei and electrons: a plasma.</p>
+            <p><b>Why fusion is hard on the Earth.</b> A star holds its hot, dense fuel together by its own gravity. A laboratory has to do it with magnetic fields or lasers, at temperatures of a hundred million kelvin, far hotter than the Sun, to make up for a much lower density.</p>
+          </div>
+          <div class="rn-side">
+            <p class="tip">Two conditions, two reasons: high temperature to overcome the repulsion; high density for a high rate of collisions.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide history" data-title="Story: Eddington and the Sun">
+        <p class="eyebrow">The story · England, the 1920s</p>
+        <p class="not-examined">Background story · not assessed</p>
+        <h2>What keeps the Sun shining<span>.</span></h2>
+        <div class="story" style="--photo-h: 430px;">
+          <div class="story-photos">
+            <figure><img src="images/eddington.jpg" width="960" height="1247" alt="Photograph of Arthur Eddington"><figcaption><b>Arthur Eddington</b></figcaption></figure>
+          </div>
+          <div class="stack">
+            <ul class="points">
+              <li>The Sun has shone for thousands of millions of years. No chemical fuel, and no slow shrinking under gravity, could last so long</li>
+              <li>Four hydrogen nuclei have slightly <b>more mass</b> than one helium nucleus</li>
+              <li>Eddington proposed that the Sun is powered by <b>fusing hydrogen into helium</b>, and built the physics of stars on the idea in his book of <b>1926</b></li>
+              <li>Fusion had not yet been seen in any laboratory</li>
+            </ul>
+            <div class="idea">A star explained from a table of atomic masses and \(E = mc^{2}\).</div>
+          </div>
+        </div>
+        <p class="credits">Photograph: <a href="https://commons.wikimedia.org/wiki/File:Portrait_of_Arthur_Stanley_Eddington_(1882-1944),_Astronomer_(2575160361).jpg" target="_blank" rel="noopener">Smithsonian Institution</a>, no known restrictions.</p>
+        <div class="slide-foot"><span>E.5 FUSION AND STARS · SL + HL</span><span data-page></span></div>
+      </section>
+
+      <section class="slide" data-title="The Sun’s fuel">
+        <p class="eyebrow">Worked example</p>
+        <h2>How long can the Sun shine<span>.</span></h2>
+        <div class="split even">
+          <div class="work">
+            <span class="say">\(L_{\odot} = 3.85 \times 10^{26} \,\mathrm{W}\)</span>
+            <span class="say">Mass converted to energy each second</span>
+            <span>\(E = mc^{2}\) &nbsp;so&nbsp; \(\dfrac{\Delta m}{\Delta t} = \dfrac{L}{c^{2}}\)</span>
+            <span class="step">\(= \dfrac{3.85 \times 10^{26}}{(3.00 \times 10^{8})^{2}}\)</span>
+            <span class="step">\(= \class{res}{4.3 \times 10^{9} \,\mathrm{kg} \,\mathrm{s}^{-1}}\)</span>
+          </div>
+          <div class="work step">
+            <span class="say">Mass \(2.0 \times 10^{30}\) kg · 10% of it fuses</span>
+            <span class="say">0.71% of that mass becomes energy</span>
+            <span>\(E = 0.10 \times 2.0 \times 10^{30} \times 0.0071 \times c^{2}\)</span>
+            <span class="step">\(E = 1.3 \times 10^{44} \,\mathrm{J}\)</span>
+            <span class="step">\(t = \dfrac{E}{L} = \dfrac{1.3 \times 10^{44}}{3.85 \times 10^{26}} = 3.3 \times 10^{17} \,\mathrm{s}\)</span>
+            <span class="step">\(t = \class{res}{1.0 \times 10^{10} \,\text{years}}\)</span>
+          </div>
+        </div>
+        <div class="slide-foot"><span>E.5 FUSION AND STARS · SL + HL</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>Four million tonnes a second.</b> The Sun’s mass falls by \(4.3 \times 10^{9}\) kg every second, and it has done so for 4.6 thousand million years. It is so massive that in all that time it has lost less than a thousandth of its mass in this way.</p>
+            <p><b>Why only 10%.</b> Fusion happens only in the core, where it is hot and dense enough. The hydrogen in the outer layers never gets there. When the core’s hydrogen is used up, after about ten thousand million years, the Sun leaves the main sequence. It is roughly half way through.</p>
+            <p><b>What the estimate rests on.</b> A luminosity, a mass, and the 0.71% from the last worked example. Nothing else. A calculation this short settled a question that had puzzled the nineteenth century, when the best available answer, gravitational shrinking, gave the Sun only a few tens of millions of years.</p>
+          </div>
+          <div class="rn-side">
+            <p class="tip">One year is \(3.16 \times 10^{7}\) s.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide" data-title="Quick check: fusion">
+        <p class="eyebrow">Quick check</p>
+        <h2>Fusion<span>.</span></h2>
+        <div class="quiz fill">
+          <div class="q"><p><span class="n">01</span>What is nuclear fusion?</p><div class="ans step">Light nuclei joining to make a heavier one</div></div>
+          <div class="q"><p><span class="n">02</span>Why do nuclei have to be moving fast to fuse?</p><div class="ans step">To overcome their electric repulsion</div></div>
+          <div class="q"><p><span class="n">03</span>Why is a high density needed?</p><div class="ans step">For a high rate of collisions</div></div>
+          <div class="q"><p><span class="n">04</span>A mass defect of 0.0050 u. Energy released?</p><div class="ans step">\(0.0050 \times 931.5 = 4.7 \,\mathrm{MeV}\)</div></div>
+          <div class="q"><p><span class="n">05</span>Up to which element does fusion release energy?</p><div class="ans step">Iron</div></div>
+          <div class="q"><p><span class="n">06</span>²H + ²H → ³He + ?</p><div class="ans step">A neutron</div></div>
+        </div>
+        <div class="slide-foot"><span class="reveal-hint">PRESS → TO REVEAL EACH ANSWER</span><span data-page></span></div>
+      </section>
+
+      <!-- Part 2 -->
+      <section class="slide section" data-title="Part 2: The life of a star">
+        <div class="title-grid">
+          <div>
+            <p class="eyebrow">Part 02</p>
+            <h1>The life of a star<span>.</span></h1>
+            <p class="lead">A long balance between gravity and pressure, and what happens when it ends</p>
+          </div>
+          <div class="fig" data-fig="e5-balance" data-plain></div>
+        </div>
+        <div class="slide-foot"><span>E.5 FUSION AND STARS · SL + HL</span><span data-page></span></div>
+      </section>
+
+      <section class="slide" data-title="A star in equilibrium">
+        <p class="eyebrow">Why a star keeps its size</p>
+        <h2>A star in equilibrium<span>.</span></h2>
+        <div class="split wide-fig">
+          <div class="stack">
+            <ul class="points small">
+              <li><b>Gravity</b> pulls every part of the star <b>inwards</b></li>
+              <li class="step"><b>Radiation pressure</b> and gas pressure push <b>outwards</b></li>
+              <li class="step">Fusion in the core supplies the energy that keeps the pressure up</li>
+            </ul>
+            <div class="idea step">Balanced: a stable star.</div>
+          </div>
+          <div class="panel">
+            <div class="panel-head"><span>INWARDS AND OUTWARDS</span></div>
+            <div class="fig" data-fig="e5-balance"></div>
+          </div>
+        </div>
+        <div class="slide-foot"><span>E.5 FUSION AND STARS · SL + HL</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>A balance that corrects itself.</b> Suppose the fusion in the core speeds up a little. The core gets hotter, the pressure rises and the star expands. Expanding cools the core and thins it out, so the fusion slows again. If instead the fusion slackens, the pressure drops, gravity squeezes the core, the core heats up and the fusion recovers. The star is its own thermostat, which is how the Sun has kept almost the same output for thousands of millions of years.</p>
+            <p><b>What radiation pressure is.</b> Light carries momentum, so it pushes on whatever absorbs it. Photons from the core are absorbed and re-emitted countless times on their way out, each time giving the gas an outward push. In stars like the Sun the pressure of the hot gas does most of the work; in the most massive stars the pressure of the radiation takes over.</p>
+          </div>
+          <div class="rn-side">
+            <p class="tip">The phrase the guide uses: an equilibrium between outward radiation pressure and inward gravitational forces.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide" data-title="Mass decides">
+        <p class="eyebrow">One number sets the story</p>
+        <h2>Mass decides<span>.</span></h2>
+        <div class="split even">
+          <ul class="points small">
+            <li>More mass: stronger gravity, so a <b>hotter, denser core</b></li>
+            <li class="step">Fusion runs <b>far faster</b>: much greater luminosity</li>
+            <li class="step">So the fuel is used up <b>sooner</b></li>
+            <li class="step">And the star <b>ends</b> differently</li>
+          </ul>
+          <table class="facts step">
+            <thead><tr><th>Mass (Sun = 1)</th><th>Luminosity (Sun = 1)</th><th>Time on the main sequence</th></tr></thead>
+            <tbody>
+              <tr><td>0.5</td><td class="num">about 0.1</td><td class="num">\(\sim 10^{11}\) years</td></tr>
+              <tr><td>1</td><td class="num">1</td><td class="num">\(\sim 10^{10}\) years</td></tr>
+              <tr><td>10</td><td class="num">about 3000</td><td class="num">\(\sim 3 \times 10^{7}\) years</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="slide-foot"><span>E.5 FUSION AND STARS · SL + HL</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>Why bigger stars die younger.</b> It seems the wrong way round: a star with ten times the fuel should last longer. But the rate of fusion is extremely sensitive to temperature, and the extra weight of a massive star makes its core much hotter. A star of ten solar masses has ten times the fuel and burns it about three thousand times as fast. Its life is \(\frac{10}{3000}\), about a three-hundredth, of the Sun’s.</p>
+            <p><b>Check the table by ratio.</b> Lifetime is proportional to fuel divided by the rate of using it: mass ÷ luminosity. For the half-mass star, \(\frac{0.5}{0.1} = 5\) times the Sun’s life. Such stars have not had time to die since the universe began.</p>
+            <p><b>Birth.</b> Every star starts as a cloud of gas and dust that collapses under its own gravity. Gravitational potential energy becomes thermal energy, the centre heats up, and when it is hot and dense enough for hydrogen to fuse, the collapse stops and a main sequence star is born.</p>
+          </div>
+          <div class="rn-side">
+            <p class="tip">The figures in the table are rounded orders of magnitude. What you need is the trend, and the reason for it.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide" data-title="A star like the Sun">
+        <p class="eyebrow">Up to about eight solar masses</p>
+        <h2>The life of a star like the Sun<span>.</span></h2>
+        <div class="stack center" style="gap: 20px;">
+          <div class="panel" style="height: 400px; align-self: stretch;">
+            <div class="panel-head"><span>FOUR STAGES</span><span class="pill">SIZES NOT TO SCALE</span></div>
+            <div class="fig" data-fig="e5-life" data-kind="low"></div>
+          </div>
+          <div class="idea step">When the core runs out of hydrogen, fusion there stops, the core <b>contracts</b> and heats, and the outer layers <b>swell</b> and cool.</div>
+        </div>
+        <div class="slide-foot"><span>E.5 FUSION AND STARS · SL + HL</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>Red giant.</b> With no fusion to hold it up, the helium core is squeezed by gravity and gets hotter. Hydrogen goes on fusing in a shell round it, faster than before. The extra output pushes the outer layers outwards to a hundred times their old size. Spread over that huge surface, the star is very luminous but cool, and so red. In the core, helium eventually starts fusing to carbon and oxygen.</p>
+            <p><b>Planetary nebula.</b> A star of this mass never gets hot enough to fuse carbon. Its outer layers drift away into space as a glowing shell. The name is historical: in a small telescope such a shell looks like the disc of a planet.</p>
+            <p><b>White dwarf.</b> What remains is the bare core: about the mass of the Sun in a body the size of the Earth. No fusion happens in it. It is hot, so it shines, and it simply cools for the rest of time.</p>
+          </div>
+          <div class="rn-side">
+            <p class="more">A white dwarf is held up not by thermal pressure but by electrons resisting being squeezed into the same state. That works only up to 1.4 solar masses.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide" data-title="A massive star">
+        <p class="eyebrow">More than about eight solar masses</p>
+        <h2>The life of a massive star<span>.</span></h2>
+        <div class="stack center" style="gap: 20px;">
+          <div class="panel" style="height: 400px; align-self: stretch;">
+            <div class="panel-head"><span>FOUR STAGES</span><span class="pill">SIZES NOT TO SCALE</span></div>
+            <div class="fig" data-fig="e5-life" data-kind="high"></div>
+          </div>
+          <div class="idea step">The core is hot enough to fuse heavier and heavier nuclei, until it is <b>iron</b>. Then fusion can supply no more energy.</div>
+        </div>
+        <div class="slide-foot"><span>E.5 FUSION AND STARS · SL + HL</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>Red supergiant.</b> Each time a fuel runs out, the core contracts, heats up and lights the next: helium to carbon, carbon to neon, and on through oxygen and silicon to iron. Each stage is shorter than the last: the final one takes about a day. The star ends with layers like an onion, the heaviest elements at the centre.</p>
+            <p><b>Supernova.</b> Iron is at the peak of the binding energy curve. Fusing it would absorb energy, not release it. With nothing to hold it up, the iron core collapses in less than a second. The outer layers fall in, rebound and are blown into space in an explosion that can briefly outshine a whole galaxy.</p>
+            <p><b>What is left.</b> The collapsed core is a neutron star: more than the mass of the Sun packed into a ball about 20 km across, at the density of an atomic nucleus (E.1). If the core is more massive still, nothing can stop the collapse, and it becomes a black hole.</p>
+          </div>
+          <div class="rn-side">
+            <p class="more">The carbon, oxygen and iron scattered by such explosions are the raw material of later stars, of planets and of living things.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide history" data-title="Story: Cecilia Payne">
+        <p class="eyebrow">The story · Harvard, 1925</p>
+        <p class="not-examined">Background story · not assessed</p>
+        <h2>What the stars are made of<span>.</span></h2>
+        <div class="story band" style="--photo-h: 260px;">
+          <div class="story-photos">
+            <figure><img src="images/payne.jpg" width="1280" height="987" alt="Black and white photograph of Cecilia Payne seated at a desk with papers, in front of filing cabinets and shelves"><figcaption><b>Cecilia Payne</b> at the Harvard College Observatory</figcaption></figure>
+          </div>
+          <ul class="points">
+            <li>She came from England to Harvard in 1923. Her thesis of <b>1925</b> used the lines in stellar spectra to work out what stars are made of</li>
+            <li>Her answer: mainly <b>hydrogen and helium</b>. The leading astronomer of the day called it “spurious” and urged her not to claim it</li>
+            <li>In 1929 he reached the same result himself. Her thesis was later called the most brilliant ever written in astronomy</li>
+          </ul>
+        </div>
+        <p class="credits">Photograph: <a href="https://commons.wikimedia.org/wiki/File:Cecilia_Helena_Payne-Gaposchkin_(1900-1979)_-_Science_Service.jpg" target="_blank" rel="noopener">Smithsonian Institution, Science Service</a>, public domain.</p>
+        <div class="slide-foot"><span>E.5 FUSION AND STARS · SL + HL</span><span data-page></span></div>
+      </section>
+
+      <section class="slide" data-title="Quick check: the life of a star">
+        <p class="eyebrow">Quick check</p>
+        <h2>The life of a star<span>.</span></h2>
+        <div class="quiz fill">
+          <div class="q"><p><span class="n">01</span>Which two things balance in a stable star?</p><div class="ans step">Gravity inwards; radiation (and gas) pressure outwards</div></div>
+          <div class="q"><p><span class="n">02</span>What decides how a star’s life goes?</p><div class="ans step">Its mass</div></div>
+          <div class="q"><p><span class="n">03</span>Which lives longer: a star of 0.5 or of 10 solar masses?</p><div class="ans step">The 0.5 solar mass star</div></div>
+          <div class="q"><p><span class="n">04</span>What does the Sun become after the red giant stage?</p><div class="ans step">A planetary nebula, then a white dwarf</div></div>
+          <div class="q"><p><span class="n">05</span>Why does fusion stop at iron in a massive star?</p><div class="ans step">Iron is at the peak of the binding energy curve</div></div>
+          <div class="q"><p><span class="n">06</span>What can a supernova leave behind?</p><div class="ans step">A neutron star or a black hole</div></div>
+        </div>
+        <div class="slide-foot"><span class="reveal-hint">PRESS → TO REVEAL EACH ANSWER</span><span data-page></span></div>
+      </section>
+
+      <!-- Part 3 -->
+      <section class="slide section" data-title="Part 3: The HR diagram">
+        <div class="title-grid">
+          <div>
+            <p class="eyebrow">Part 03</p>
+            <h1>The HR diagram<span>.</span></h1>
+            <p class="lead">One graph on which every star has a place</p>
+          </div>
+          <div class="fig" data-fig="e5-hr" data-plain></div>
+        </div>
+        <div class="slide-foot"><span>E.5 FUSION AND STARS · SL + HL</span><span data-page></span></div>
+      </section>
+
+      <section class="slide" data-title="The Hertzsprung–Russell diagram">
+        <p class="eyebrow">Luminosity against temperature</p>
+        <h2>The Hertzsprung–Russell diagram<span>.</span></h2>
+        <div class="split wide-fig">
+          <ul class="points small">
+            <li><b>Luminosity</b> upwards, in units of the Sun’s</li>
+            <li class="step"><b>Temperature</b> across, <b>decreasing</b> to the right</li>
+            <li class="step">Both scales are <b>logarithmic</b></li>
+            <li class="step">Stars fall into a few <b>regions</b>, not everywhere</li>
+          </ul>
+          <div class="panel">
+            <div class="panel-head"><span>EACH DOT IS A STAR</span><span class="pill">ILLUSTRATIVE</span></div>
+            <div class="fig" data-fig="e5-hr"></div>
+          </div>
+        </div>
+        <div class="slide-foot"><span>E.5 FUSION AND STARS · SL + HL</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>The backwards axis.</b> Temperature runs from hot on the left to cool on the right. This is a historical accident: the diagram was first drawn with the classes of stellar spectra along the bottom, and the classes had been lettered before anyone knew they were a temperature sequence. The convention has stuck. Blue-white stars are on the left, red stars on the right.</p>
+            <p><b>Why logarithmic.</b> Stars range over a factor of ten thousand million in luminosity, from a ten-thousandth of the Sun’s to a million times it. On an ordinary scale all but the brightest would be squashed against the axis. On a logarithmic scale each step up is a factor of a hundred.</p>
+            <p><b>What the empty spaces mean.</b> If any combination of temperature and luminosity were possible, the dots would be scattered evenly. They are not. The pattern is a record of how stars work: only certain combinations are stable, and stars spend most of their lives in one of them.</p>
+          </div>
+          <div class="rn-side">
+            <p class="trap">Drawing the temperature axis increasing to the right. In an exam sketch, label the hot end and the cool end.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide" data-title="The regions of the HR diagram">
+        <p class="eyebrow">Who lives where</p>
+        <h2>The regions of the HR diagram<span>.</span></h2>
+        <table class="facts compare">
+          <thead><tr><th>Region</th><th>Where on the diagram</th><th>What the stars are like</th></tr></thead>
+          <tbody>
+            <tr><td><b>Main sequence</b></td><td>A band from upper left to lower right</td><td>Fusing hydrogen in the core. About 90% of stars</td></tr>
+            <tr class="step"><td><b>Red giants</b></td><td>Above the main sequence, on the right</td><td>Cool but luminous, so very large</td></tr>
+            <tr class="step"><td><b>Supergiants</b></td><td>Across the top</td><td>The most luminous and the largest</td></tr>
+            <tr class="step"><td><b>White dwarfs</b></td><td>Lower left</td><td>Hot but faint, so very small</td></tr>
+            <tr class="step"><td><b>Instability strip</b></td><td>A narrow band crossing above the main sequence</td><td>Stars that pulsate, varying in brightness</td></tr>
+          </tbody>
+        </table>
+        <div class="slide-foot"><span>E.5 FUSION AND STARS · SL + HL</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>The main sequence is a sequence of mass.</b> Part 2 showed that a more massive star is hotter and far more luminous. So the heavy stars sit at the upper left of the band and the light ones at the lower right. A star stays at very nearly the same point on the band for as long as it is fusing hydrogen in its core. It does not slide along the main sequence as it ages.</p>
+            <p><b>Reasoning about size.</b> A red giant has a low surface temperature, so each square metre of its surface radiates little. Yet its luminosity is high. The only way to radiate a great deal from a cool surface is to have an enormous surface. A white dwarf is the opposite case: hot, so each square metre radiates strongly, yet faint overall, so it must be tiny.</p>
+            <p><b>Why most stars are on the main sequence.</b> Fusing hydrogen is by far the longest stage of a star’s life. Catch a star at a random moment and that is most likely what it is doing.</p>
+          </div>
+          <div class="rn-side">
+            <p class="tip">You need to know that the instability strip exists and where it is. The pulsating stars in it, including Cepheid variables, are not part of the course.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide" data-title="Lines of constant radius">
+        <p class="eyebrow">Size on the HR diagram</p>
+        <h2>Lines of constant radius<span>.</span></h2>
+        <div class="split wide-fig">
+          <div class="stack">
+            <div class="equation small"><span>\(L = \sigma A T^{4} = 4 \pi R^{2} \sigma T^{4}\)</span></div>
+            <ul class="points small">
+              <li>For one radius, \(L \propto T^{4}\): a <b>straight line</b> on these axes</li>
+              <li class="step">Sloping down to the right</li>
+              <li class="step">Larger stars: lines further <b>up and right</b></li>
+            </ul>
+          </div>
+          <div class="panel">
+            <div class="panel-head"><span>THREE RADII</span></div>
+            <div class="fig" data-fig="e5-hr" data-kind="radius"></div>
+          </div>
+        </div>
+        <div class="slide-foot"><span>E.5 FUSION AND STARS · SL + HL</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>Where the lines come from.</b> A star is nearly a black body, so by the Stefan–Boltzmann law of B.1 its luminosity is \(4 \pi R^{2} \sigma T^{4}\). Fix the radius and the luminosity depends only on \(T^{4}\). Halving the temperature cuts the luminosity by sixteen. On logarithmic axes a power law is a straight line, and since temperature decreases to the right, the line slopes down to the right.</p>
+            <p><b>Reading sizes.</b> The white dwarfs lie along the line for a hundredth of the Sun’s radius: about the size of the Earth. The main sequence cuts across the lines at a shallow angle, from a tenth of a solar radius at the cool end to about ten at the hot end. Red giants are near a hundred solar radii, and the largest supergiants reach a thousand: larger than the orbit of Jupiter.</p>
+            <p><b>Moving at right angles to the lines</b>, up and to the right, means getting bigger.</p>
+          </div>
+          <div class="rn-side">
+            <p class="tip">Sketching and interpreting lines of constant radius is required. Two stars on the same line have the same size, however different they look.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide" data-title="The Sun on the HR diagram">
+        <p class="eyebrow">A life as a path</p>
+        <h2>The Sun’s path on the HR diagram<span>.</span></h2>
+        <div class="split wide-fig">
+          <ul class="points small">
+            <li><b>Now</b>: on the main sequence, hardly moving</li>
+            <li class="step"><b>Red giant</b>: up and to the right. Cooler, larger, more luminous</li>
+            <li class="step"><b>Outer layers lost</b>: across to the left as the hot core is uncovered</li>
+            <li class="step"><b>White dwarf</b>: down to the lower left, then cooling</li>
+          </ul>
+          <div class="panel">
+            <div class="panel-head"><span>A SKETCH OF THE PATH</span></div>
+            <div class="fig" data-fig="e5-hr" data-kind="track"></div>
+          </div>
+        </div>
+        <div class="slide-foot"><span>E.5 FUSION AND STARS · SL + HL</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>The speed along the path is very uneven.</b> The dot on the slide moves steadily, but a real star does not. The Sun will spend about ten thousand million years at its starting point, about a thousand million as a red giant, a few tens of thousands crossing to the left, and then the rest of time fading as a white dwarf. The number of stars seen in each region reflects how long stars spend there.</p>
+            <p><b>The path is not a journey through space.</b> The diagram is a graph of properties. A star “moving” on it is staying where it is in the sky while its temperature and luminosity change.</p>
+            <p><b>A massive star</b> starts higher up the main sequence and moves to the right across the top of the diagram, into the supergiants, before it explodes.</p>
+          </div>
+          <div class="rn-side">
+            <p class="tip">Each move can be explained with \(L = 4 \pi R^{2} \sigma T^{4}\). Up and right: \(R\) is growing faster than \(T^{4}\) is falling.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide" data-title="Quick check: the HR diagram">
+        <p class="eyebrow">Quick check</p>
+        <h2>The HR diagram<span>.</span></h2>
+        <div class="quiz fill">
+          <div class="q"><p><span class="n">01</span>What is plotted on each axis?</p><div class="ans step">Luminosity up; temperature across</div></div>
+          <div class="q"><p><span class="n">02</span>Which way does temperature increase?</p><div class="ans step">To the left</div></div>
+          <div class="q"><p><span class="n">03</span>Where are white dwarfs?</p><div class="ans step">Lower left: hot and faint</div></div>
+          <div class="q"><p><span class="n">04</span>A star is cool but very luminous. What does that say about its size?</p><div class="ans step">It is very large</div></div>
+          <div class="q"><p><span class="n">05</span>Where on the main sequence are the most massive stars?</p><div class="ans step">Upper left</div></div>
+          <div class="q"><p><span class="n">06</span>Two stars lie on the same line of constant radius. What do they share?</p><div class="ans step">The same radius</div></div>
+        </div>
+        <div class="slide-foot"><span class="reveal-hint">PRESS → TO REVEAL EACH ANSWER</span><span data-page></span></div>
+      </section>
+
+      <!-- Part 4 -->
+      <section class="slide section" data-title="Part 4: Measuring stars">
+        <div class="title-grid">
+          <div>
+            <p class="eyebrow">Part 04</p>
+            <h1>Measuring stars<span>.</span></h1>
+            <p class="lead">How far away, how bright, how hot and how big, from a point of light</p>
+          </div>
+          <div class="fig" data-fig="e5-parallax"></div>
+        </div>
+        <div class="slide-foot"><span>E.5 FUSION AND STARS · SL + HL</span><span data-page></span></div>
+      </section>
+
+      <section class="slide" data-title="Stellar parallax">
+        <p class="eyebrow">Distance by geometry</p>
+        <h2>Stellar parallax<span>.</span></h2>
+        <div class="split wide-fig">
+          <div class="stack">
+            <div class="equation small"><span>\(d \,\text{(parsec)} = \dfrac{1}{p \,\text{(arc-second)}}\)</span></div>
+            <ul class="points small">
+              <li>A nearby star <b>shifts</b> against distant ones as the Earth orbits</li>
+              <li class="step">\(p\): half the total shift in six months</li>
+              <li class="step">Further away: a <b>smaller</b> angle</li>
+            </ul>
+          </div>
+          <div class="panel">
+            <div class="panel-head"><span>NOT TO SCALE</span></div>
+            <div class="fig" data-fig="e5-parallax"></div>
+          </div>
+        </div>
+        <div class="slide-foot"><span>E.5 FUSION AND STARS · SL + HL</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>Try it.</b> Hold up a finger at arm’s length and look at it with one eye, then the other. It jumps against the background. Bring it closer and it jumps further. Your eyes are a few centimetres apart; for a star, the two viewpoints are opposite sides of the Earth’s orbit, 300 million kilometres apart.</p>
+            <p><b>Why the equation is so simple.</b> In the long thin triangle of the diagram, \(\tan p = \frac{1 \,\mathrm{AU}}{d}\), and for such tiny angles \(\tan p = p\) in radians. The parsec is defined to make the constants disappear: it is the distance at which the parallax is exactly one arc-second. So a parallax of 0.5 arc-second means 2 pc, and 0.1 arc-second means 10 pc.</p>
+            <p><b>How small the angles are.</b> An arc-second is \(\frac{1}{3600}\) of a degree: the width of a small coin seen from four kilometres. No star has a parallax as large as one arc-second. The first to be measured was 61 Cygni, by Friedrich Bessel in 1838. From the ground the method reaches a few hundred parsecs; the Gaia spacecraft, launched in 2013, measures angles of tens of millionths of an arc-second.</p>
+          </div>
+          <div class="rn-side">
+            <p class="trap">Using the whole shift. The parallax angle is half the shift between two sightings six months apart.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide" data-title="Units of distance">
+        <p class="eyebrow">AU, light years and parsecs</p>
+        <h2>Units of distance<span>.</span></h2>
+        <div class="split even">
+          <table class="facts">
+            <thead><tr><th>Unit</th><th>Value</th></tr></thead>
+            <tbody>
+              <tr><td><b>Astronomical unit</b>, AU: the Earth–Sun distance</td><td class="num">\(1.50 \times 10^{11} \,\mathrm{m}\)</td></tr>
+              <tr><td><b>Light year</b>, ly: the distance light travels in a year</td><td class="num">\(9.46 \times 10^{15} \,\mathrm{m}\)</td></tr>
+              <tr><td><b>Parsec</b>, pc: parallax of one arc-second</td><td class="num">3.26 ly</td></tr>
+            </tbody>
+          </table>
+          <div class="work step">
+            <span class="say">The nearest star: \(p = 0.769\) arc-second</span>
+            <span>\(d = \dfrac{1}{p} = \dfrac{1}{0.769} = \class{res}{1.30 \,\mathrm{pc}}\)</span>
+            <span class="step">\(d = 1.30 \times 3.26 = \class{res}{4.24 \,\mathrm{ly}}\)</span>
+            <span class="step">\(d = 4.24 \times 9.46 \times 10^{15} = \class{res}{4.0 \times 10^{16} \,\mathrm{m}}\)</span>
+            <span class="step">\(d = \dfrac{4.0 \times 10^{16}}{1.50 \times 10^{11}} = \class{res}{2.7 \times 10^{5} \,\mathrm{AU}}\)</span>
+          </div>
+        </div>
+        <div class="slide-foot"><span>E.5 FUSION AND STARS · SL + HL</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>Which unit for what.</b> The astronomical unit suits a planetary system: Neptune is 30 AU from the Sun. The light year is the unit of popular writing, and says how old the light is that you are seeing. The parsec is the working unit of astronomers, because it comes straight out of the parallax measurement.</p>
+            <p><b>The emptiness of space.</b> The nearest star, Proxima Centauri, is 270 000 times further from us than the Sun is. If the Sun were a grapefruit in London, the Earth would be a grain of sand eleven metres away, and the nearest star another grapefruit in Moscow.</p>
+            <p><b>One parsec in metres.</b> \(3.26 \times 9.46 \times 10^{15} = 3.08 \times 10^{16}\) m. All three conversions are in the data booklet, and converting between AU, light years and parsecs is required.</p>
+          </div>
+          <div class="rn-side">
+            <p class="trap">Treating a light year as a time. It is a distance.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide" data-title="The radius of a star">
+        <p class="eyebrow">Worked example</p>
+        <h2>The radius of a star<span>.</span></h2>
+        <div class="split even">
+          <div class="work">
+            <span class="say">Sirius: \(L = 9.8 \times 10^{27} \,\mathrm{W}\) · \(T = 9940 \,\mathrm{K}\)</span>
+            <span>\(L = 4 \pi R^{2} \sigma T^{4}\)</span>
+            <span class="step">\(R = \sqrt{\dfrac{L}{4 \pi \sigma T^{4}}}\)</span>
+            <span class="step">\(R = \sqrt{\dfrac{9.8 \times 10^{27}}{4 \pi \times 5.67 \times 10^{-8} \times 9940^{4}}}\)</span>
+            <span class="step">\(R = \class{res}{1.2 \times 10^{9} \,\mathrm{m}}\)</span>
+          </div>
+          <div class="work step">
+            <span class="say">The same, as a ratio to the Sun (5800 K)</span>
+            <span>\(\dfrac{R}{R_{\odot}} = \sqrt{\dfrac{L}{L_{\odot}}} \left(\dfrac{T_{\odot}}{T}\right)^{2}\)</span>
+            <span class="step">\(= \sqrt{25.4} \times \left(\dfrac{5800}{9940}\right)^{2}\)</span>
+            <span class="step">\(= \class{res}{1.7}\)</span>
+          </div>
+        </div>
+        <div class="slide-foot"><span>E.5 FUSION AND STARS · SL + HL</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>Why a ratio is easier.</b> Divide \(L = 4 \pi R^{2} \sigma T^{4}\) for the star by the same equation for the Sun and the constants cancel: \(\frac{L}{L_{\odot}} = \left(\frac{R}{R_{\odot}}\right)^{2} \left(\frac{T}{T_{\odot}}\right)^{4}\). Luminosities are usually given in units of the Sun’s, so this form avoids large powers of ten altogether.</p>
+            <p><b>Sirius has a companion.</b> Sirius B has almost the same surface temperature as Sirius but only 0.026 of the Sun’s luminosity. The same working gives a radius under a hundredth of the Sun’s: a white dwarf, the first ever identified. Two stars side by side in the sky, equally hot, one ten thousand times fainter than the other, differ only in size.</p>
+          </div>
+          <div class="rn-side">
+            <p class="trap">Raising the temperature to the fourth power but forgetting that the radius is squared, so a square root is needed at the end.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide" data-title="From a point of light">
+        <p class="eyebrow">Putting it together</p>
+        <h2>Everything from a point of light<span>.</span></h2>
+        <div class="cards fill" style="grid-template-columns: repeat(4, 1fr); align-content: center;">
+          <div class="card"><p class="eyebrow">Step 1 · Parallax</p><h3>Distance</h3><p>\(d = \frac{1}{p}\)</p></div>
+          <div class="card step"><p class="eyebrow">Step 2 · Brightness</p><h3>Luminosity</h3><p>\(L = 4 \pi d^{2} b\)<br>from B.1</p></div>
+          <div class="card step"><p class="eyebrow">Step 3 · Spectrum</p><h3>Temperature and composition</h3><p>Wien’s law for the peak; the lines for the elements</p></div>
+          <div class="card step"><p class="eyebrow">Step 4 · Stefan–Boltzmann</p><h3>Radius</h3><p>\(R = \sqrt{\frac{L}{4 \pi \sigma T^{4}}}\)</p></div>
+        </div>
+        <div class="idea step" style="margin-top: 22px;">With \(L\) and \(T\) the star has a place on the HR diagram, and from that its stage of life.</div>
+        <div class="slide-foot"><span>E.5 FUSION AND STARS · SL + HL</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>What is actually measured.</b> A star is too far away to show a disc in most telescopes. All that arrives is light. From it astronomers measure three things: the direction it comes from, which over a year gives the parallax; how much power arrives per square metre, the apparent brightness; and how that power is spread across the wavelengths, the spectrum. Everything on the slide follows from those three.</p>
+            <p><b>Temperature and composition from the spectrum.</b> The wavelength at which the spectrum peaks gives the surface temperature by Wien’s law, \(\lambda_\mathrm{max} T = 2.9 \times 10^{-3}\) m K. The dark lines crossing it are the fingerprints of the elements in the star’s outer layers (E.1): this is what Cecilia Payne read.</p>
+            <p><b>A chain is as strong as its first link.</b> An error in the distance is squared in the luminosity and carries through to the radius. This is why precise parallaxes matter so much.</p>
+          </div>
+          <div class="rn-side">
+            <p class="tip">A typical long question walks down this chain. Recognise which step each part is asking for.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide" data-title="Quick check: measuring stars">
+        <p class="eyebrow">Quick check</p>
+        <h2>Measuring stars<span>.</span></h2>
+        <div class="quiz fill">
+          <div class="q"><p><span class="n">01</span>A star has a parallax of 0.20 arc-second. Distance?</p><div class="ans step">5.0 pc</div></div>
+          <div class="q"><p><span class="n">02</span>Convert 10 pc to light years.</p><div class="ans step">32.6 ly</div></div>
+          <div class="q"><p><span class="n">03</span>Why does parallax fail for very distant stars?</p><div class="ans step">The angle is too small to measure</div></div>
+          <div class="q"><p><span class="n">04</span>A star has the Sun’s temperature and 100 times its luminosity. Radius?</p><div class="ans step">10 solar radii</div></div>
+          <div class="q"><p><span class="n">05</span>What two things does a star’s spectrum give?</p><div class="ans step">Surface temperature and composition</div></div>
+          <div class="q"><p><span class="n">06</span>Which law gives the temperature from the peak wavelength?</p><div class="ans step">Wien’s displacement law</div></div>
+        </div>
+        <div class="slide-foot"><span class="reveal-hint">PRESS → TO REVEAL EACH ANSWER</span><span data-page></span></div>
+      </section>
+
+      <section class="slide" data-title="Summary">
+        <p class="eyebrow">Summary</p>
+        <h2>Fusion and stars on one slide<span>.</span></h2>
+        <div class="cards fill" style="grid-template-columns: 1fr 1fr 1fr; align-content: center;">
+          <div class="card"><p class="eyebrow">Fusion</p><h3>Light nuclei join</h3><p>\(E = \Delta m \, c^{2}\)<br>Needs high temperature and high density</p></div>
+          <div class="card step"><p class="eyebrow">A stable star</p><h3>Gravity = pressure</h3><p>Inward gravity against outward radiation pressure</p></div>
+          <div class="card step"><p class="eyebrow">Mass decides</p><h3>Heavier: brighter, shorter</h3><p>White dwarf, or supernova and neutron star or black hole</p></div>
+          <div class="card step"><p class="eyebrow">HR diagram</p><h3>\(L\) up, \(T\) falling to the right</h3><p>Main sequence, red giants, supergiants, white dwarfs, instability strip</p></div>
+          <div class="card step"><p class="eyebrow">Distance</p><h3>\(d = \frac{1}{p}\)</h3><p>Parsecs and arc-seconds<br>1 pc = 3.26 ly</p></div>
+          <div class="card step"><p class="eyebrow">Radius</p><h3>\(L = 4 \pi R^{2} \sigma T^{4}\)</h3><p>Lines of constant radius slope down to the right</p></div>
+        </div>
+        <div class="slide-foot"><span>E.5 FUSION AND STARS · SL + HL</span><span data-page></span></div>
+      </section>
+
+      <section class="slide" data-title="Key words">
+        <p class="eyebrow">Summary</p>
+        <h2>Key words<span>.</span></h2>
+        <div class="terms fill" style="grid-template-columns: repeat(3, 1fr);">
+          <div class="term"><b>Fusion</b><span>Light nuclei joining to make a heavier one</span></div>
+          <div class="term"><b>Radiation pressure</b><span>The outward push of light on matter</span></div>
+          <div class="term"><b>Main sequence</b><span>Stars fusing hydrogen in their cores</span></div>
+          <div class="term"><b>Red giant</b><span>Cool, luminous and very large</span></div>
+          <div class="term"><b>White dwarf</b><span>Hot, faint and very small: a dead core</span></div>
+          <div class="term"><b>Supernova</b><span>The explosion of a massive star</span></div>
+          <div class="term"><b>HR diagram</b><span>Luminosity against surface temperature</span></div>
+          <div class="term"><b>Parallax</b><span>Apparent shift of a nearby star as the Earth orbits</span></div>
+          <div class="term"><b>Parsec</b><span>Distance for a parallax of one arc-second</span></div>
+        </div>
+        <div class="slide-foot"><span>E.5 FUSION AND STARS · SL + HL</span><span data-page></span></div>
+      </section>
+
+    </div>
+  </main>
+
+  <nav class="controls" aria-label="Slide controls">
+    <button type="button" id="prev" aria-label="Previous slide"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg></button>
+    <span class="counter" id="counter" aria-live="polite"></span>
+    <button type="button" id="next" aria-label="Next slide"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 5l7 7-7 7"/></svg></button>
+  </nav>
+  <div class="progress" aria-hidden="true"><span id="progress-bar"></span></div>
+
+  <script src="../assets/figures.js"></script>
+  <script src="figures.js"></script>
+  <script src="../assets/deck-math.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
+  <script src="../assets/deck-notes.js"></script>
+  <script src="../assets/deck.js"></script>
+</body>
+</html>

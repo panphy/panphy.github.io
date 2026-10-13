@@ -1,0 +1,946 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="robots" content="noindex, nofollow">
+  <meta name="description" content="Teaching slides for IB Diploma Programme Physics topic B.5 Current and circuits, standard and higher level: current, potential difference, resistance and resistivity, power, series and parallel circuits, emf and internal resistance, and variable resistors.">
+  <meta name="theme-color" content="#F8F6F1">
+  <script src="/assets/theme.js" data-theme-scope="ibdpphy"></script>
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <link rel="stylesheet" href="/assets/standalone-top.css">
+  <title>B.5 Current and circuits · IB DP Physics</title>
+  <link rel="icon" type="image/png" href="/assets/favicon.png">
+  <link rel="apple-touch-icon" href="/assets/apple-touch-icon.png">
+  <link rel="stylesheet" href="../assets/deck.css">
+  <link rel="stylesheet" href="../assets/deck-notes.css">
+  <link rel="stylesheet" href="/assets/theme-toggle.css">
+  <link rel="stylesheet" href="/assets/fullscreen-button.css">
+  <script src="/assets/theme-toggle.js"></script>
+  <script src="/ibdpphy/sw-register.js" defer></script>
+</head>
+<body>
+  <header class="banner">
+    <a class="banner-logo" href="/" aria-label="PanPhy Labs home"><img src="/assets/panphy.png" alt="PanPhy Labs" width="38" height="38"></a>
+    <a class="banner-title" href="#1">B.5 Current and circuits</a>
+    <div class="banner-actions">
+      <button id="thumbs-toggle" class="icon-button" type="button" aria-controls="thumbs" aria-pressed="true" aria-label="Hide slide thumbnails" title="Show or hide slide thumbnails (T)"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path class="pane" d="M9.5 4.5H6A2.5 2.5 0 0 0 3.5 7v10A2.5 2.5 0 0 0 6 19.5h3.5z"/><rect x="3.5" y="4.5" width="17" height="15" rx="2.5"/><path d="M9.5 4.5v15"/></svg></button>
+      <button id="fullscreen" class="panphy-fullscreen-button" type="button" aria-pressed="false" aria-label="Present fullscreen" title="Present fullscreen (F)"><svg class="panphy-fs-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M4 9V4h5M15 4h5v5M20 15v5h-5M9 20H4v-5"/></svg></button>
+      <button id="theme-button" type="button" data-panphy-theme-toggle aria-label="Toggle light/dark theme" title="Toggle between light and dark themes"></button>
+    </div>
+  </header>
+  <script>window.PanPhyThemeToggle.mount(document.getElementById('theme-button'));</script>
+
+  <nav class="thumbs" id="thumbs" aria-label="Slides"></nav>
+
+  <main class="stage" id="stage">
+    <div class="deck" id="deck">
+
+      <!-- 1 · Title -->
+      <section class="slide title" data-title="B.5 Current and circuits">
+        <div class="title-grid">
+          <div>
+            <p class="eyebrow">IB DP Physics · Theme B · The particulate nature of matter</p>
+            <h1>Current and circuits<span>.</span></h1>
+            <p class="lead">B.5 · Charge, current and potential difference, resistance, circuits, and cells with internal resistance<br>Standard level and higher level</p>
+            <div class="chips">
+              <span class="chip">SL + HL · 6 hours</span>
+              <a class="chip on" href="../d2-electric-and-magnetic-fields/">D.2 Electric and magnetic fields ↗</a>
+            </div>
+          </div>
+          <div class="fig" data-fig="b5-circuit" data-plain></div>
+        </div>
+      </section>
+
+      <section class="slide" data-title="Lesson map">
+        <p class="eyebrow">The journey</p>
+        <h2>Four parts<span>.</span></h2>
+        <div class="cards fill" style="grid-template-columns: repeat(4, 1fr);">
+          <div class="card">
+            <div class="fig" data-fig="b5-wire" data-still data-plain style="height: 170px;"></div>
+            <p class="eyebrow">Part 01</p>
+            <h3>Current and potential difference</h3>
+            <p>Charge carriers, cells and circuit diagrams</p>
+          </div>
+          <div class="card">
+            <div class="fig" data-fig="b5-iv" data-still data-plain style="height: 170px;"></div>
+            <p class="eyebrow">Part 02</p>
+            <h3>Resistance and power</h3>
+            <p>Ohm’s law, resistivity and the heating effect</p>
+          </div>
+          <div class="card">
+            <div class="fig" data-fig="b5-combine" data-kind="parallel" data-still data-plain style="height: 170px;"></div>
+            <p class="eyebrow">Part 03</p>
+            <h3>Series and parallel</h3>
+            <p>Combining resistors, and the potential divider</p>
+          </div>
+          <div class="card">
+            <div class="fig" data-fig="b5-internal" data-still data-plain style="height: 170px;"></div>
+            <p class="eyebrow">Part 04</p>
+            <h3>Real cells and sensors</h3>
+            <p>Internal resistance, thermistors, LDRs and potentiometers</p>
+          </div>
+        </div>
+        <div class="slide-foot"><span>B.5 CURRENT AND CIRCUITS · SL + HL</span><span data-page></span></div>
+      </section>
+
+      <!-- Part 1 -->
+      <section class="slide section" data-title="Part 1: Current and potential difference">
+        <div class="title-grid">
+          <div>
+            <p class="eyebrow">Part 01</p>
+            <h1>Current and potential difference<span>.</span></h1>
+            <p class="lead">What flows round a circuit, and what makes it flow</p>
+          </div>
+          <div class="fig" data-fig="b5-wire" data-plain></div>
+        </div>
+        <div class="slide-foot"><span>B.5 CURRENT AND CIRCUITS · SL + HL</span><span data-page></span></div>
+      </section>
+
+      <section class="slide history" data-title="Story: Volta’s pile">
+        <p class="eyebrow">The story · Italy, 1800</p>
+        <p class="not-examined">Background story · not assessed</p>
+        <h2>Volta builds the first battery<span>.</span></h2>
+        <div class="story" style="--photo-h: 420px;">
+          <div class="story-photos">
+            <figure><img src="images/volta.jpg" width="960" height="1392" alt="Engraved portrait of Alessandro Volta, a man in a high-collared coat"><figcaption><b>Alessandro Volta</b>, engraved in 1837</figcaption></figure>
+            <figure><img src="images/pile.jpg" width="440" height="750" alt="A tall stack of metal discs held upright between four thin rods on a wooden base, in a museum case"><figcaption>A <b>voltaic pile</b> in the Tempio Voltiano, Como</figcaption></figure>
+          </div>
+          <div class="stack">
+            <ul class="points">
+              <li>Luigi Galvani had made frogs’ legs twitch with two metals. He and Volta <b>argued</b> over why</li>
+              <li>Volta stacked discs of <b>zinc and copper</b> (or silver), separated by cloth soaked in brine</li>
+              <li><b>20 March 1800</b>: he describes it in a letter to the Royal Society</li>
+              <li>Within months it was used to split <b>water</b> into hydrogen and oxygen</li>
+            </ul>
+            <div class="idea">The first source of a <b>continuous</b> current. Every circuit starts here.</div>
+          </div>
+        </div>
+        <p class="credits">Portrait: <a href="https://commons.wikimedia.org/wiki/File:Alessandro_Volta._Gaetano_Bonatti_inc.jpg" target="_blank" rel="noopener">Gaetano Bonatti, 1837</a>, CC0. Photograph: <a href="https://commons.wikimedia.org/wiki/File:Voltaic_pile.jpg" target="_blank" rel="noopener">GuidoB</a>, CC BY-SA 3.0 (cropped).</p>
+        <div class="slide-foot"><span>B.5 CURRENT AND CIRCUITS · SL + HL</span><span data-page></span></div>
+      </section>
+
+      <section class="slide" data-title="Electric current">
+        <p class="eyebrow">A flow of charge carriers</p>
+        <h2>Electric current<span>.</span></h2>
+        <div class="split wide-fig">
+          <div class="stack">
+            <div class="equation"><span>\(I = \dfrac{\Delta q}{\Delta t}\)</span></div>
+            <ul class="points small">
+              <li>Unit: the <b>ampere</b>, \(1 \,\mathrm{A} = 1 \,\mathrm{C} \,\mathrm{s}^{-1}\)</li>
+              <li class="step">In a metal the carriers are <b>free electrons</b></li>
+              <li class="step"><b>Conventional current</b>: from + to −, opposite to the electrons</li>
+            </ul>
+          </div>
+          <div class="panel">
+            <div class="panel-head"><span>INSIDE A METAL WIRE</span></div>
+            <div class="fig" data-fig="b5-wire"></div>
+          </div>
+        </div>
+        <div class="slide-foot"><span>B.5 CURRENT AND CIRCUITS · SL + HL</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>Fast, slow and instant.</b> Three speeds are easy to confuse. The free electrons in a metal move at random at about \(10^{6}\) m s⁻¹, with or without a current. A current is a slow drift added to that motion: typically a fraction of a millimetre each second. Yet a lamp lights the moment the switch closes, because the electric field that pushes the electrons travels along the wire at nearly the speed of light, and every electron in the circuit starts to drift at once.</p>
+            <p><b>Why two directions.</b> The direction of current was fixed, as from positive to negative, long before the electron was discovered. Electrons are negative, so they move the other way. Every rule in the course, including the left-hand rule in D.3, uses conventional current.</p>
+            <p><b>Other carriers.</b> In salt solutions and in batteries the carriers are positive and negative ions, moving in opposite directions. Both contribute to the current in the same sense.</p>
+          </div>
+          <div class="rn-side">
+            <p class="tip">One electron carries \(1.60 \times 10^{-19}\) C, so one coulomb is \(6.25 \times 10^{18}\) electrons.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide" data-title="Conductors and insulators">
+        <p class="eyebrow">Mobility of charge carriers</p>
+        <h2>Conductors and insulators<span>.</span></h2>
+        <div class="stack center" style="gap: 26px;">
+          <div class="cards" style="grid-template-columns: 1fr 1fr 1fr;">
+            <div class="card"><p class="eyebrow">Conductor</p><h3>Many carriers, free to move</h3><p>A metal: about one free electron for every atom, moving through the whole solid</p></div>
+            <div class="card step"><p class="eyebrow">Insulator</p><h3>Carriers bound in place</h3><p>Plastic, glass, dry air: the electrons are held to their atoms</p></div>
+            <div class="card step"><p class="eyebrow">In between</p><h3>A few carriers, set free by energy</h3><p>Semiconductors such as silicon: heat or light frees more carriers</p></div>
+          </div>
+          <div class="idea step">What matters is how many charge carriers there are and how <b>freely</b> they can move.</div>
+        </div>
+        <div class="slide-foot"><span>B.5 CURRENT AND CIRCUITS · SL + HL</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>The size of the difference.</b> Copper conducts about \(10^{20}\) times better than glass. Few physical properties vary so much from one material to another. The reason is not that the charges in glass are any different: every material is full of electrons. In glass they are all attached to particular atoms. In copper the outermost electron of each atom belongs to the whole piece of metal.</p>
+            <p><b>The third card matters later.</b> A thermistor and a light-dependent resistor, in Part 4, are made of semiconductor. Warming one, or shining light on the other, frees more carriers, so its resistance falls. A metal behaves in the opposite way when heated, as Part 2 explains.</p>
+          </div>
+          <div class="rn-side">
+            <p class="more">The same free electrons carry thermal energy, which is why good electrical conductors are also good thermal conductors (B.1).</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide" data-title="Potential difference">
+        <p class="eyebrow">Energy per unit charge</p>
+        <h2>Potential difference<span>.</span></h2>
+        <div class="split even">
+          <div class="stack">
+            <div class="equation"><span>\(V = \dfrac{W}{q}\)</span></div>
+            <ul class="points small">
+              <li>The <b>work done per unit charge</b> in moving a positive charge between two points</li>
+              <li class="step">Unit: the <b>volt</b>, \(1 \,\mathrm{V} = 1 \,\mathrm{J} \,\mathrm{C}^{-1}\)</li>
+              <li class="step">Always <b>between two points</b>: “across” a component</li>
+            </ul>
+          </div>
+          <div class="work step">
+            <span class="say">A lamp with 6.0 V across it carries 0.25 A for 2.0 minutes</span>
+            <span>\(\Delta q = I \Delta t = 0.25 \times 120 = \class{res}{30 \,\mathrm{C}}\)</span>
+            <span class="step">\(W = qV = 30 \times 6.0 = \class{res}{180 \,\mathrm{J}}\)</span>
+            <span class="say step">Number of electrons</span>
+            <span class="step">\(N = \dfrac{\Delta q}{e} = \dfrac{30}{1.60 \times 10^{-19}} = \class{res}{1.9 \times 10^{20}}\)</span>
+          </div>
+        </div>
+        <div class="slide-foot"><span>B.5 CURRENT AND CIRCUITS · SL + HL</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>What the volt tells you.</b> 6.0 V across the lamp means that every coulomb passing through it transfers 6.0 J, as light and heating. Current tells you how many coulombs pass each second. Potential difference tells you how much energy each one delivers. A torch bulb and a car headlamp may carry similar currents; the headlamp is brighter because each coulomb gives up more energy.</p>
+            <p><b>Current is not used up.</b> The same 30 C that entered the lamp left it: charge is conserved. What the charge lost on the way through was energy. A common picture is water turning a wheel: the same water flows on downstream, but it is lower than before.</p>
+          </div>
+          <div class="rn-side">
+            <p class="trap">Speaking of the potential difference “through” a component or the current “across” it. Current goes through; potential difference is across.</p>
+            <p class="more">D.2 (HL) defines electric potential at a point. The potential difference is the difference between its values at two points.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide" data-title="Cells and emf">
+        <p class="eyebrow">Where the energy comes from</p>
+        <h2>Cells as sources of emf<span>.</span></h2>
+        <div class="stack center" style="gap: 24px;">
+          <ul class="points">
+            <li>A cell does work on charge: its <b>emf</b> is the energy it supplies to each coulomb, in volts</li>
+          </ul>
+          <table class="facts compare step">
+            <thead><tr><th></th><th>Chemical cell</th><th>Solar (photovoltaic) cell</th></tr></thead>
+            <tbody>
+              <tr><td><b>Energy from</b></td><td>A chemical reaction inside the cell</td><td>Light falling on a semiconductor</td></tr>
+              <tr><td><b>For</b></td><td>Portable; works anywhere, at any time; steady emf</td><td>No fuel and nothing emitted in use; lasts for decades</td></tr>
+              <tr><td><b>Against</b></td><td>Runs down; limited energy stored; materials must be mined and recycled</td><td>Output depends on the light: none at night; low emf per cell, so large areas are needed</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="slide-foot"><span>B.5 CURRENT AND CIRCUITS · SL + HL</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>Emf and potential difference.</b> Both are measured in volts and both are energy per unit charge, so they are easy to mix up. The emf of a source is the energy given to each coulomb by the source: chemical or light energy becoming electrical energy. A potential difference across a component is the energy each coulomb gives up there. Round a complete circuit, the energy supplied to a coulomb equals the energy it gives up.</p>
+            <p><b>“Electromotive force” is not a force.</b> The name is historical. An emf is measured in volts, not newtons, and the abbreviation is now used as a word in its own right.</p>
+            <p><b>Primary and secondary cells.</b> A primary cell is thrown away when its chemicals are used up. In a secondary cell the reaction can be reversed by driving a current backwards through it, which is recharging. Solar cells are often paired with rechargeable cells so that energy collected by day is available at night.</p>
+          </div>
+          <div class="rn-side">
+            <p class="tip">The guide asks for advantages and disadvantages of different sources of electrical energy. Have two of each ready for both kinds of cell.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide" data-title="Circuit symbols">
+        <p class="eyebrow">Circuit diagrams</p>
+        <h2>Circuit symbols<span>.</span></h2>
+        <div class="stack center" style="gap: 18px;">
+          <div class="panel" style="height: 500px; align-self: stretch;">
+            <div class="panel-head"><span>AS IN THE DATA BOOKLET</span><span class="pill">THE LONGER LINE OF A CELL IS POSITIVE</span></div>
+            <div class="fig" data-fig="b5-symbols"></div>
+          </div>
+        </div>
+        <div class="slide-foot"><span>B.5 CURRENT AND CIRCUITS · SL + HL</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>A diagram is not a picture.</b> A circuit diagram shows what is connected to what, and nothing else. Straight lines stand for wires of negligible resistance, however long or tangled the real ones are. Two diagrams that look different are the same circuit if the same components are joined at the same junctions. When a circuit confuses you, redraw it: mark every junction, then lay the branches out afresh.</p>
+            <p><b>Three that look alike.</b> A variable resistor has an arrow through it. A thermistor has a line through it with a flat end. A potentiometer has an arrow that touches it from the side: a third terminal, the sliding contact.</p>
+          </div>
+          <div class="rn-side">
+            <p class="tip">The symbols are printed in the data booklet, so there is no need to memorise them, but drawing them quickly and correctly earns marks.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide" data-title="Quick check: current and potential difference">
+        <p class="eyebrow">Quick check</p>
+        <h2>Current and potential difference<span>.</span></h2>
+        <div class="quiz fill">
+          <div class="q"><p><span class="n">01</span>12 C passes a point in 4.0 s. Current?</p><div class="ans step">3.0 A</div></div>
+          <div class="q"><p><span class="n">02</span>Which way do electrons move, compared with conventional current?</p><div class="ans step">The opposite way</div></div>
+          <div class="q"><p><span class="n">03</span>60 J is transferred when 5.0 C passes through a heater. Potential difference?</p><div class="ans step">12 V</div></div>
+          <div class="q"><p><span class="n">04</span>What is one volt in terms of joules and coulombs?</p><div class="ans step">1 J C⁻¹</div></div>
+          <div class="q"><p><span class="n">05</span>What makes a metal a good conductor?</p><div class="ans step">Many free electrons</div></div>
+          <div class="q"><p><span class="n">06</span>Give one disadvantage of a solar cell.</p><div class="ans step">No output in the dark</div></div>
+        </div>
+        <div class="slide-foot"><span class="reveal-hint">PRESS → TO REVEAL EACH ANSWER</span><span data-page></span></div>
+      </section>
+
+      <!-- Part 2 -->
+      <section class="slide section" data-title="Part 2: Resistance and power">
+        <div class="title-grid">
+          <div>
+            <p class="eyebrow">Part 02</p>
+            <h1>Resistance and power<span>.</span></h1>
+            <p class="lead">How hard it is to drive a current, and what that costs in energy</p>
+          </div>
+          <div class="fig" data-fig="b5-iv" data-plain></div>
+        </div>
+        <div class="slide-foot"><span>B.5 CURRENT AND CIRCUITS · SL + HL</span><span data-page></span></div>
+      </section>
+
+      <section class="slide" data-title="Resistance">
+        <p class="eyebrow">Opposition to current</p>
+        <h2>Resistance<span>.</span></h2>
+        <div class="split even">
+          <div class="stack">
+            <div class="equation"><span>\(R = \dfrac{V}{I}\)</span></div>
+            <ul class="points small">
+              <li>Unit: the <b>ohm</b>, \(1 \,\Omega = 1 \,\mathrm{V} \,\mathrm{A}^{-1}\)</li>
+              <li class="step">The equation <b>defines</b> resistance, for any component</li>
+            </ul>
+          </div>
+          <div class="stack step">
+            <ul class="points small">
+              <li><b>Origin</b>: drifting electrons collide with the vibrating ions of the metal</li>
+              <li class="step">Each collision passes energy to the ions: the wire gets <b>hot</b></li>
+              <li class="step">Hotter metal: the ions vibrate more, so <b>more</b> resistance</li>
+            </ul>
+          </div>
+        </div>
+        <div class="slide-foot"><span>B.5 CURRENT AND CIRCUITS · SL + HL</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>The picture behind it.</b> The field in the wire accelerates each free electron. Before it has gone far, it collides with an ion and loses the extra energy it had gained, then starts again. The result is a steady average drift, not a steady acceleration, and a steady transfer of energy to the ions, whose vibration is the wire’s thermal energy. Resistance measures how effectively the lattice gets in the way.</p>
+            <p><b>Why heating a metal raises its resistance.</b> Ions that vibrate with a larger amplitude present a bigger target, so the electrons are scattered more often and drift more slowly for the same potential difference. A lamp filament at 2500 °C has more than ten times its resistance when cold.</p>
+            <p><b>A definition, not a law.</b> \(R = \frac{V}{I}\) can be applied to anything: at each point on its graph a lamp has a resistance, the ratio of \(V\) to \(I\) there. Whether that ratio stays the same as the current changes is a separate question, answered by Ohm’s law.</p>
+          </div>
+          <div class="rn-side">
+            <p class="trap">Finding resistance from the gradient of a curved \(I\)–\(V\) graph. Resistance is the ratio \(\frac{V}{I}\) at the point, not the gradient of the tangent.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide history" data-title="Story: Georg Ohm">
+        <p class="eyebrow">The story · Cologne, 1827</p>
+        <p class="not-examined">Background story · not assessed</p>
+        <h2>A schoolteacher’s law<span>.</span></h2>
+        <div class="story" style="--photo-h: 430px;">
+          <div class="story-photos">
+            <figure><img src="images/ohm.jpg" width="960" height="1236" alt="Portrait of Georg Ohm, an older man with white hair in a dark coat"><figcaption><b>Georg Simon Ohm</b></figcaption></figure>
+          </div>
+          <div class="stack">
+            <ul class="points">
+              <li>Ohm taught mathematics and physics at a school in Cologne, and built his own apparatus</li>
+              <li>He tested wires of different <b>lengths</b> and found how the current depended on them</li>
+              <li><b>1827</b>: he published his law in <i>The Galvanic Circuit Investigated Mathematically</i></li>
+              <li>It was coldly received. He resigned his post</li>
+              <li><b>1841</b>: the Royal Society awarded him its Copley Medal</li>
+            </ul>
+            <div class="idea">A professor at last, in Munich, in 1852: two years before he died.</div>
+          </div>
+        </div>
+        <p class="credits">Portrait: <a href="https://commons.wikimedia.org/wiki/File:Georg_Simon_Ohm3.jpg" target="_blank" rel="noopener">unknown artist</a>, public domain.</p>
+        <div class="slide-foot"><span>B.5 CURRENT AND CIRCUITS · SL + HL</span><span data-page></span></div>
+      </section>
+
+      <section class="slide" data-title="Ohm’s law">
+        <p class="eyebrow">Ohmic and non-ohmic behaviour</p>
+        <h2>Ohm’s law<span>.</span></h2>
+        <div class="split">
+          <div class="stack">
+            <ul class="points small">
+              <li>For a metal at <b>constant temperature</b>: \(I \propto V\)</li>
+              <li class="step"><b>Ohmic</b>: constant resistance, a straight line through the origin</li>
+              <li class="step">A <b>filament lamp</b> is non-ohmic: it heats up, and its resistance rises</li>
+            </ul>
+          </div>
+          <div class="cards" style="grid-template-columns: 1fr 1fr; gap: 16px;">
+            <div class="panel" style="height: 420px;">
+              <div class="panel-head"><span>OHMIC</span></div>
+              <div class="fig" data-fig="b5-iv" data-kind="ohmic" data-plain></div>
+            </div>
+            <div class="panel step" style="height: 420px;">
+              <div class="panel-head"><span>FILAMENT LAMP</span></div>
+              <div class="fig" data-fig="b5-iv" data-kind="lamp" data-plain></div>
+            </div>
+          </div>
+        </div>
+        <div class="slide-foot"><span>B.5 CURRENT AND CIRCUITS · SL + HL</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>Reading the two graphs.</b> Both are graphs of current (up) against potential difference (across). On the left the ratio \(\frac{V}{I}\) is the same at every point. On the right the curve bends towards the \(V\) axis: each extra volt brings less extra current than the one before, so \(\frac{V}{I}\) is growing. Both graphs are symmetric, because neither a resistor nor a lamp cares which way the current goes.</p>
+            <p><b>The lamp does not break Ohm’s law.</b> The law is about a metal at constant temperature, and the filament’s temperature is far from constant: it rises by more than two thousand kelvin. If the filament could be kept cool, it would be ohmic like any other piece of metal. The curve is the heating effect made visible.</p>
+          </div>
+          <div class="rn-side">
+            <p class="trap">Stating Ohm’s law as “\(V = IR\)”. That is the definition of resistance and is always true. Ohm’s law is the statement that \(R\) is constant, at constant temperature.</p>
+            <p class="tip">Check which way round the axes are. With \(V\) up and \(I\) across, the lamp’s curve bends the other way.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide" data-title="Resistivity">
+        <p class="eyebrow">The material, not the object</p>
+        <h2>Resistivity<span>.</span></h2>
+        <div class="split even">
+          <div class="stack">
+            <div class="equation"><span>\(\rho = \dfrac{RA}{L}\)</span></div>
+            <ul class="points small">
+              <li class="frac">So \(R = \dfrac{\rho L}{A}\): longer means more resistance, thicker means less</li>
+              <li class="step">Unit: \(\Omega \,\mathrm{m}\)</li>
+              <li class="step">A property of the <b>material</b> at a given temperature</li>
+            </ul>
+          </div>
+          <table class="facts step">
+            <thead><tr><th>Material at 20 °C (approximate)</th><th class="nocase">ρ / Ω m</th></tr></thead>
+            <tbody>
+              <tr><td>Copper</td><td class="num">\(1.7 \times 10^{-8}\)</td></tr>
+              <tr><td>Aluminium</td><td class="num">\(2.8 \times 10^{-8}\)</td></tr>
+              <tr><td>Nichrome (heating wire)</td><td class="num">\(1.1 \times 10^{-6}\)</td></tr>
+              <tr><td>Silicon</td><td class="num">\(\sim 10^{3}\)</td></tr>
+              <tr><td>Glass</td><td class="num">\(\sim 10^{12}\)</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="slide-foot"><span>B.5 CURRENT AND CIRCUITS · SL + HL</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>Why length and area.</b> A wire twice as long is two of the original in series: the electrons meet twice as many obstacles, so the resistance doubles. A wire of twice the cross-sectional area is two of the original side by side, in parallel: there are twice as many electrons to carry the current, so the resistance halves.</p>
+            <p><b>Resistance and resistivity.</b> Resistance belongs to a particular component: this wire, that lamp. Resistivity belongs to the material, whatever its shape. It plays the same part as density, which describes a material where mass describes an object.</p>
+            <p><b>Choosing a material.</b> Copper is used for wiring because of its low resistivity. Overhead power lines use aluminium, which is a worse conductor but so much lighter that a thicker, lighter cable does the same job. Nichrome is chosen for heating elements because its resistivity is high and changes little as it heats.</p>
+          </div>
+          <div class="rn-side">
+            <p class="trap">Using the diameter as the area. \(A = \pi r^{2}\), with the radius in metres: a 1.0 mm diameter is \(r = 0.50 \times 10^{-3}\) m.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide" data-title="Resistivity: a copper cable">
+        <p class="eyebrow">Worked example</p>
+        <h2>A length of copper cable<span>.</span></h2>
+        <div class="split even">
+          <div class="work">
+            <span class="say">20 m of copper wire, diameter 1.0 mm · \(\rho = 1.7 \times 10^{-8} \,\Omega \,\mathrm{m}\)</span>
+            <span>\(A = \pi r^{2} = \pi \times (0.50 \times 10^{-3})^{2}\)</span>
+            <span class="step">\(A = 7.9 \times 10^{-7} \,\mathrm{m}^{2}\)</span>
+            <span class="step">\(R = \dfrac{\rho L}{A} = \dfrac{1.7 \times 10^{-8} \times 20}{7.9 \times 10^{-7}}\)</span>
+            <span class="step">\(R = \class{res}{0.43 \,\Omega}\)</span>
+          </div>
+          <div class="stack">
+            <ul class="points small">
+              <li class="step">Twice the diameter: four times the area, so <b>a quarter</b> of the resistance</li>
+              <li class="step">The same wire in nichrome: \(\dfrac{1.1 \times 10^{-6}}{1.7 \times 10^{-8}} = 65\) times as much, 28 Ω</li>
+            </ul>
+          </div>
+        </div>
+        <div class="slide-foot"><span>B.5 CURRENT AND CIRCUITS · SL + HL</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>Why connecting wires can be ignored.</b> Twenty metres of ordinary wire has less than half an ohm. The short leads in a laboratory circuit have a few hundredths of an ohm, against tens or hundreds of ohms for the components. Treating the wires as having no resistance is a very good approximation, and it is why every point along one wire in a diagram is at the same potential.</p>
+            <p><b>Measuring resistivity.</b> Measure the diameter of a wire with a micrometer in several places and average it. Then measure the resistance of different lengths and plot \(R\) against \(L\). The graph is a straight line through the origin with gradient \(\frac{\rho}{A}\), so \(\rho\) = gradient × \(A\). The diameter matters most: it is squared, so its percentage uncertainty counts twice.</p>
+          </div>
+          <div class="rn-side">
+            <p class="tip">Keep the current small when measuring a wire’s resistance. A large current heats the wire and changes the thing you are measuring.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide" data-title="Electrical power">
+        <p class="eyebrow">The heating effect</p>
+        <h2>Electrical power<span>.</span></h2>
+        <div class="stack center" style="gap: 26px;">
+          <div class="eq-note">
+            <div class="equation"><span>\(P = IV = I^{2} R = \dfrac{V^{2}}{R}\)</span></div>
+            <ul class="points small">
+              <li>The rate at which energy is transferred in a component</li>
+              <li class="step">In a resistor, all of it becomes <b>thermal energy</b></li>
+            </ul>
+          </div>
+          <div class="cards step" style="grid-template-columns: 1fr 1fr 1fr;">
+            <div class="card"><p class="eyebrow">Always</p><h3>\(P = IV\)</h3><p>Coulombs per second × joules per coulomb</p></div>
+            <div class="card"><p class="eyebrow">When you know the current</p><h3>\(P = I^{2} R\)</h3><p>Components in series; losses in cables</p></div>
+            <div class="card"><p class="eyebrow">When you know the p.d.</p><h3>\(P = \frac{V^{2}}{R}\)</h3><p>Components in parallel; appliances on the mains</p></div>
+          </div>
+        </div>
+        <div class="slide-foot"><span>B.5 CURRENT AND CIRCUITS · SL + HL</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>Where \(IV\) comes from.</b> \(I\) is the charge passing each second and \(V\) is the energy each coulomb transfers. Multiply them and the coulombs cancel: joules per second, which is watts. The other two forms follow by replacing \(V\) with \(IR\) or \(I\) with \(\frac{V}{R}\).</p>
+            <p><b>Does more resistance mean more heating, or less?</b> Both, depending on what is held fixed. Two resistors in series carry the same current, so by \(I^{2} R\) the larger one gets hotter. Two resistors in parallel have the same potential difference, so by \(\frac{V^{2}}{R}\) the smaller one gets hotter. A mains heater has a low resistance so that it draws a large current.</p>
+            <p><b>Why power is sent at high voltage.</b> A cable of resistance \(R\) wastes \(I^{2} R\). Delivering the same power at ten times the voltage needs a tenth of the current and wastes a hundredth as much in the cable.</p>
+          </div>
+          <div class="rn-side">
+            <p class="tip">Energy = power × time. A 2 kW heater running for 3 hours uses 6 kWh, or \(2000 \times 3 \times 3600 = 2.2 \times 10^{7}\) J.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide" data-title="Power: a kettle and its cable">
+        <p class="eyebrow">Worked example</p>
+        <h2>A kettle and its cable<span>.</span></h2>
+        <div class="split even">
+          <div class="work">
+            <span class="say">A 2.0 kW kettle on a 230 V supply</span>
+            <span>\(I = \dfrac{P}{V} = \dfrac{2.0 \times 10^{3}}{230} = \class{res}{8.7 \,\mathrm{A}}\)</span>
+            <span class="step">\(R = \dfrac{V^{2}}{P} = \dfrac{230^{2}}{2.0 \times 10^{3}} = \class{res}{26 \,\Omega}\)</span>
+          </div>
+          <div class="work step">
+            <span class="say">Its cable has a resistance of 0.10 Ω</span>
+            <span>\(P_\mathrm{cable} = I^{2} R = 8.7^{2} \times 0.10\)</span>
+            <span class="step">\(P_\mathrm{cable} = \class{res}{7.6 \,\mathrm{W}}\)</span>
+            <span class="say step">Under 0.5% of the power: it stays cool</span>
+          </div>
+        </div>
+        <div class="slide-foot"><span>B.5 CURRENT AND CIRCUITS · SL + HL</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>Why the element glows and the cable does not.</b> The same 8.7 A passes through both, one after the other. The element has 26 Ω and the cable 0.10 Ω, so by \(I^{2} R\) the element takes 260 times the power. Almost all of the 230 V is across the element and less than 1 V across the cable.</p>
+            <p><b>What a thin extension lead does.</b> A long, thin lead might have 2 Ω. At 8.7 A it would dissipate \(8.7^{2} \times 2 = 150\) W along its length, enough to become dangerously hot if it is left coiled up. This is why leads carry a maximum current rating.</p>
+          </div>
+          <div class="rn-side">
+            <p class="tip">A fuse is a thin wire that melts when the current exceeds its rating. For this kettle a 13 A fuse is suitable: above the working current, and low enough to protect the cable.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide" data-title="Quick check: resistance and power">
+        <p class="eyebrow">Quick check</p>
+        <h2>Resistance and power<span>.</span></h2>
+        <div class="quiz fill">
+          <div class="q"><p><span class="n">01</span>A resistor carries 0.20 A with 9.0 V across it. Resistance?</p><div class="ans step">45 Ω</div></div>
+          <div class="q"><p><span class="n">02</span>What does the \(I\)–\(V\) graph of an ohmic conductor look like?</p><div class="ans step">A straight line through the origin</div></div>
+          <div class="q"><p><span class="n">03</span>Why does the resistance of a filament rise as it heats?</p><div class="ans step">The ions vibrate more: more collisions</div></div>
+          <div class="q"><p><span class="n">04</span>A wire is stretched to twice its length with the same volume. Resistance?</p><div class="ans step">Four times: twice \(L\), half \(A\)</div></div>
+          <div class="q"><p><span class="n">05</span>Power in a 10 Ω resistor carrying 3.0 A?</p><div class="ans step">\(3.0^{2} \times 10 = 90 \,\mathrm{W}\)</div></div>
+          <div class="q"><p><span class="n">06</span>What is the unit of resistivity?</p><div class="ans step">Ω m</div></div>
+        </div>
+        <div class="slide-foot"><span class="reveal-hint">PRESS → TO REVEAL EACH ANSWER</span><span data-page></span></div>
+      </section>
+
+      <!-- Part 3 -->
+      <section class="slide section" data-title="Part 3: Series and parallel">
+        <div class="title-grid">
+          <div>
+            <p class="eyebrow">Part 03</p>
+            <h1>Series and parallel<span>.</span></h1>
+            <p class="lead">Two ways to join components, and two conservation laws that explain them</p>
+          </div>
+          <div class="fig" data-fig="b5-combine" data-kind="parallel" data-plain></div>
+        </div>
+        <div class="slide-foot"><span>B.5 CURRENT AND CIRCUITS · SL + HL</span><span data-page></span></div>
+      </section>
+
+      <section class="slide" data-title="Series circuits">
+        <p class="eyebrow">One path</p>
+        <h2>Resistors in series<span>.</span></h2>
+        <div class="split wide-fig">
+          <div class="stack">
+            <div class="work">
+              <span>\(I = I_{1} = I_{2} = \dots\)</span>
+              <span class="step">\(V = V_{1} + V_{2} + \dots\)</span>
+              <span class="step">\(R_\mathrm{s} = R_{1} + R_{2} + \dots\)</span>
+            </div>
+            <div class="idea step">The total is <b>larger</b> than the largest resistor.</div>
+          </div>
+          <div class="panel">
+            <div class="panel-head"><span>IN SERIES</span></div>
+            <div class="fig" data-fig="b5-combine" data-kind="series"></div>
+          </div>
+        </div>
+        <div class="slide-foot"><span>B.5 CURRENT AND CIRCUITS · SL + HL</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>Two conservation laws.</b> The current is the same everywhere in a single loop because charge is conserved: there is nowhere for it to pile up or leak away, so as much must leave each component every second as enters it. The potential differences add up to that of the cell because energy is conserved: each coulomb is given a certain energy by the cell and gives all of it up on the way round.</p>
+            <p><b>Where the resistance rule comes from.</b> \(V = V_{1} + V_{2}\) becomes \(I R_\mathrm{s} = I R_{1} + I R_{2}\), and the current, being the same throughout, cancels.</p>
+            <p><b>Sharing the potential difference.</b> With the same current in each, \(V = IR\) gives the larger resistor the larger share, in proportion to its resistance. A 2 Ω and a 4 Ω resistor in series across 6 V take 2 V and 4 V.</p>
+          </div>
+          <div class="rn-side">
+            <p class="tip">Old strings of decorative lights were wired in series: when one lamp failed, the single path was broken and all of them went out.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide" data-title="Parallel circuits">
+        <p class="eyebrow">More than one path</p>
+        <h2>Resistors in parallel<span>.</span></h2>
+        <div class="split wide-fig">
+          <div class="stack">
+            <div class="work">
+              <span>\(V = V_{1} = V_{2} = \dots\)</span>
+              <span class="step">\(I = I_{1} + I_{2} + \dots\)</span>
+              <span class="step">\(\dfrac{1}{R_\mathrm{p}} = \dfrac{1}{R_{1}} + \dfrac{1}{R_{2}} + \dots\)</span>
+            </div>
+            <div class="idea step">The total is <b>smaller</b> than the smallest resistor.</div>
+          </div>
+          <div class="panel">
+            <div class="panel-head"><span>IN PARALLEL</span></div>
+            <div class="fig" data-fig="b5-combine" data-kind="parallel"></div>
+          </div>
+        </div>
+        <div class="slide-foot"><span>B.5 CURRENT AND CIRCUITS · SL + HL</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>The same two laws.</b> Charge is conserved at a junction: the current arriving equals the total current leaving, so the branch currents add up to the current from the cell. Energy is conserved along each route: a coulomb gives up the same energy whichever branch it takes between the same two junctions, so every branch has the same potential difference.</p>
+            <p><b>Why adding a resistor lowers the total.</b> Each new branch is one more path for charge. The existing branches carry exactly what they did before, since each still has the full potential difference across it, and the new one adds its own current. More current from the same cell means less resistance overall.</p>
+            <p><b>Two useful short cuts.</b> For two resistors, \(R_\mathrm{p} = \frac{R_{1} R_{2}}{R_{1} + R_{2}}\): product over sum. For \(n\) equal resistors \(R\) in parallel, \(R_\mathrm{p} = \frac{R}{n}\).</p>
+          </div>
+          <div class="rn-side">
+            <p class="trap">Stopping at \(\frac{1}{R_\mathrm{p}}\). After adding the reciprocals, turn the answer upside down.</p>
+            <p class="tip">Household sockets are in parallel: each appliance gets the full supply voltage and works independently of the others.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide" data-title="Series and parallel together">
+        <p class="eyebrow">Worked example</p>
+        <h2>A combination<span>.</span></h2>
+        <div class="split">
+          <div class="work">
+            <span class="say">The parallel pair</span>
+            <span>\(\dfrac{1}{R_\mathrm{p}} = \dfrac{1}{4.0} + \dfrac{1}{12} = \dfrac{4}{12}\) &nbsp;so&nbsp; \(R_\mathrm{p} = 3.0 \,\Omega\)</span>
+            <span class="say step">The whole circuit</span>
+            <span class="step">\(R = 6.0 + 3.0 = 9.0 \,\Omega\)</span>
+            <span class="step">\(I = \dfrac{V}{R} = \dfrac{9.0}{9.0} = \class{res}{1.0 \,\mathrm{A}}\)</span>
+            <span class="say step">Across the pair</span>
+            <span class="step">\(V_\mathrm{p} = I R_\mathrm{p} = 1.0 \times 3.0 = \class{res}{3.0 \,\mathrm{V}}\)</span>
+          </div>
+          <div class="panel">
+            <div class="panel-head"><span>THREE RESISTORS</span></div>
+            <div class="fig" data-fig="b5-combine" data-kind="combo"></div>
+          </div>
+        </div>
+        <div class="slide-foot"><span>B.5 CURRENT AND CIRCUITS · SL + HL</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>Finishing it off.</b> With 3.0 V across each branch of the pair, the 4.0 Ω resistor carries \(\frac{3.0}{4.0} = 0.75\) A and the 12 Ω resistor \(\frac{3.0}{12} = 0.25\) A. They add up to the 1.0 A from the cell, as they must. The 6.0 Ω resistor has \(1.0 \times 6.0 = 6.0\) V across it, and \(6.0 + 3.0 = 9.0\) V, the emf of the cell.</p>
+            <p><b>The method for any network.</b> Work inwards to find the total resistance: replace each parallel group by its single equivalent, then add the series parts. Find the current from the cell. Then work back outwards, using \(V = IR\) on each part, to find what each component gets.</p>
+            <p><b>Notice the split.</b> The smaller resistor of the pair carries the larger current: three times the current in a third of the resistance.</p>
+          </div>
+          <div class="rn-side">
+            <p class="tip">Always finish with the two checks: currents at each junction add up, and potential differences round each loop add up to the emf.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide" data-title="The potential divider">
+        <p class="eyebrow">Sharing a potential difference</p>
+        <h2>The potential divider<span>.</span></h2>
+        <div class="split">
+          <div class="stack">
+            <div class="work">
+              <span class="say">The same current in both resistors</span>
+              <span>\(I = \dfrac{V_\mathrm{in}}{R_{1} + R_{2}}\)</span>
+              <span class="step">\(V_\mathrm{out} = I R_{2}\)</span>
+              <span class="step">\(V_\mathrm{out} = \class{res}{\dfrac{R_{2}}{R_{1} + R_{2}} V_\mathrm{in}}\)</span>
+            </div>
+            <div class="idea step">Each resistor takes a share in proportion to its resistance.</div>
+          </div>
+          <div class="panel">
+            <div class="panel-head"><span>TWO RESISTORS IN SERIES</span></div>
+            <div class="fig" data-fig="b5-divider"></div>
+          </div>
+        </div>
+        <div class="slide-foot"><span>B.5 CURRENT AND CIRCUITS · SL + HL</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>Why bother.</b> A supply gives one fixed potential difference, and a circuit often needs a smaller one. Two resistors in series divide it in whatever ratio you choose. With a 12 V supply, \(R_{1} = 3\) kΩ and \(R_{2} = 1\) kΩ, the output is \(\frac{1}{4} \times 12 = 3\) V.</p>
+            <p><b>The idea behind sensors.</b> If one of the two resistances changes, with temperature or with light, the way the potential difference is shared changes too, and the output follows. Part 4 uses this to turn a temperature or a light level into a voltage.</p>
+            <p><b>A hidden assumption.</b> The formula is exact only if nothing draws current from the output. Connect a component across \(R_{2}\) and it forms a parallel pair with it, of lower resistance, so the output falls. The effect is small if whatever is connected has a much larger resistance than \(R_{2}\).</p>
+          </div>
+          <div class="rn-side">
+            <p class="tip">The potential divider equation is not in the data booklet. It is two lines from \(V = IR\), and it is quicker to reason by ratio than to remember it.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide" data-title="Ammeters and voltmeters">
+        <p class="eyebrow">Measuring without disturbing</p>
+        <h2>Ammeters and voltmeters<span>.</span></h2>
+        <div class="split wide-fig">
+          <ul class="points small">
+            <li><b>Ammeter</b>: in <b>series</b>, so that the current passes through it</li>
+            <li class="step">Ideal ammeter: <b>zero</b> resistance</li>
+            <li class="step"><b>Voltmeter</b>: in <b>parallel</b>, across the component</li>
+            <li class="step">Ideal voltmeter: <b>infinite</b> resistance</li>
+          </ul>
+          <div class="panel">
+            <div class="panel-head"><span>WHERE THE METERS GO</span></div>
+            <div class="fig" data-fig="b5-meters"></div>
+          </div>
+        </div>
+        <div class="slide-foot"><span>B.5 CURRENT AND CIRCUITS · SL + HL</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>Why those ideals.</b> A meter should report what was happening before it was connected. An ammeter is added in series, so any resistance of its own would add to the circuit’s and reduce the very current it is measuring: it should have none. A voltmeter is added in parallel, so it offers the charge an extra path round the component: it should carry no current, which means an infinite resistance.</p>
+            <p><b>A real voltmeter.</b> Suppose a voltmeter of resistance 10 kΩ is placed across a 10 kΩ resistor that is in series with another 10 kΩ resistor on a 6.0 V supply. Before, each resistor had 3.0 V. The voltmeter and its resistor now form a parallel pair of 5.0 kΩ, so the reading is \(\frac{5.0}{15} \times 6.0 = 2.0\) V. The meter has changed what it set out to measure. A modern digital voltmeter has about 10 MΩ, and the same reading would be 3.0 V.</p>
+          </div>
+          <div class="rn-side">
+            <p class="tip">Meters are ideal unless a question says otherwise. If one is not, treat it as an ordinary resistor of constant resistance and include it in the circuit.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide" data-title="Quick check: series and parallel">
+        <p class="eyebrow">Quick check</p>
+        <h2>Series and parallel<span>.</span></h2>
+        <div class="quiz fill">
+          <div class="q"><p><span class="n">01</span>10 Ω and 15 Ω in series. Total?</p><div class="ans step">25 Ω</div></div>
+          <div class="q"><p><span class="n">02</span>Two 10 Ω resistors in parallel. Total?</p><div class="ans step">5.0 Ω</div></div>
+          <div class="q"><p><span class="n">03</span>3.0 Ω and 6.0 Ω in parallel. Total?</p><div class="ans step">\(\frac{3.0 \times 6.0}{9.0} = 2.0 \,\Omega\)</div></div>
+          <div class="q"><p><span class="n">04</span>Which conservation law explains why currents add at a junction?</p><div class="ans step">Conservation of charge</div></div>
+          <div class="q"><p><span class="n">05</span>2.0 kΩ above 4.0 kΩ across 12 V. P.d. across the 4.0 kΩ?</p><div class="ans step">\(\frac{4.0}{6.0} \times 12 = 8.0 \,\mathrm{V}\)</div></div>
+          <div class="q"><p><span class="n">06</span>How is a voltmeter connected, and what is its ideal resistance?</p><div class="ans step">In parallel; infinite</div></div>
+        </div>
+        <div class="slide-foot"><span class="reveal-hint">PRESS → TO REVEAL EACH ANSWER</span><span data-page></span></div>
+      </section>
+
+      <!-- Part 4 -->
+      <section class="slide section" data-title="Part 4: Real cells and sensors">
+        <div class="title-grid">
+          <div>
+            <p class="eyebrow">Part 04</p>
+            <h1>Real cells and sensors<span>.</span></h1>
+            <p class="lead">A cell with resistance of its own, and resistors that respond to the world</p>
+          </div>
+          <div class="fig" data-fig="b5-internal" data-plain></div>
+        </div>
+        <div class="slide-foot"><span>B.5 CURRENT AND CIRCUITS · SL + HL</span><span data-page></span></div>
+      </section>
+
+      <section class="slide" data-title="Emf and internal resistance">
+        <p class="eyebrow">A real cell</p>
+        <h2>Emf and internal resistance<span>.</span></h2>
+        <div class="split wide-fig">
+          <div class="stack">
+            <div class="equation"><span>\(\varepsilon = I(R + r)\)</span></div>
+            <ul class="points small">
+              <li>\(r\): the resistance of the cell itself</li>
+              <li class="step">Terminal p.d.: \(V = \varepsilon - Ir\)</li>
+              <li class="step">\(Ir\): the “lost volts”, dissipated inside the cell</li>
+            </ul>
+          </div>
+          <div class="panel">
+            <div class="panel-head"><span>AN IDEAL CELL IN SERIES WITH r</span></div>
+            <div class="fig" data-fig="b5-internal"></div>
+          </div>
+        </div>
+        <div class="slide-foot"><span>B.5 CURRENT AND CIRCUITS · SL + HL</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>Energy for each coulomb.</b> The cell gives each coulomb \(\varepsilon\) joules. The coulomb gives up \(Ir\) of it in getting through the cell’s own materials and the rest, \(IR\), in the external circuit: \(\varepsilon = IR + Ir\). The equation in the data booklet is that energy balance.</p>
+            <p><b>What you notice.</b> The potential difference at the terminals depends on the current. With nothing connected, \(I = 0\), no volts are lost and a voltmeter across the cell reads the emf. Draw a large current and the reading drops. Car headlamps dim for a moment when the starter motor runs, because the motor draws hundreds of amperes and the lost volts inside the battery become large.</p>
+            <p><b>Why a flat battery still “has its voltage”.</b> As a cell runs down, its internal resistance rises. Measured with a voltmeter, which draws almost no current, it may still read close to its emf, yet it cannot supply a useful current without most of that being lost inside it.</p>
+          </div>
+          <div class="rn-side">
+            <p class="tip">Treat \(r\) as one more resistor in series with the rest of the circuit. Nothing else about the method changes.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide" data-title="Internal resistance: a torch cell">
+        <p class="eyebrow">Worked example</p>
+        <h2>A cell and a lamp<span>.</span></h2>
+        <div class="split even">
+          <div class="work">
+            <span class="say">\(\varepsilon = 1.5 \,\mathrm{V}\) · \(r = 0.50 \,\Omega\) · lamp \(R = 2.5 \,\Omega\)</span>
+            <span>\(\varepsilon = I(R + r)\) &nbsp;so&nbsp; \(I = \dfrac{\varepsilon}{R + r}\)</span>
+            <span class="step">\(I = \dfrac{1.5}{2.5 + 0.50} = \class{res}{0.50 \,\mathrm{A}}\)</span>
+            <span class="step">\(V = IR = 0.50 \times 2.5 = \class{res}{1.25 \,\mathrm{V}}\)</span>
+            <span class="step">Lost volts \(= Ir = 0.50 \times 0.50 = 0.25 \,\mathrm{V}\)</span>
+          </div>
+          <div class="work step">
+            <span class="say">Where the power goes</span>
+            <span>Cell supplies: \(\varepsilon I = 1.5 \times 0.50 = 0.75 \,\mathrm{W}\)</span>
+            <span class="step">Lamp: \(I^{2} R = 0.50^{2} \times 2.5 = 0.625 \,\mathrm{W}\)</span>
+            <span class="step">Inside the cell: \(I^{2} r = 0.50^{2} \times 0.50 = 0.125 \,\mathrm{W}\)</span>
+          </div>
+        </div>
+        <div class="slide-foot"><span>B.5 CURRENT AND CIRCUITS · SL + HL</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>The energy check.</b> \(0.625 + 0.125 = 0.75\) W: everything the cell supplies is accounted for. Five sixths reaches the lamp and one sixth warms the cell, in the same ratio as the two resistances, 2.5 to 0.50.</p>
+            <p><b>Short circuit.</b> Join the terminals with a thick wire and \(R\) is nearly zero. The current is limited only by the internal resistance: \(\frac{1.5}{0.50} = 3.0\) A, and the whole 4.5 W heats the cell. For a car battery, with \(r\) of about 0.01 Ω and an emf of 12 V, the short-circuit current is over a thousand amperes, which is why a spanner dropped across its terminals is dangerous.</p>
+          </div>
+          <div class="rn-side">
+            <p class="more">A source delivers the most power to a load whose resistance equals its internal resistance, but then half the energy is wasted inside the source.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide" data-title="Measuring emf and internal resistance">
+        <p class="eyebrow">From a graph</p>
+        <h2>Measuring emf and internal resistance<span>.</span></h2>
+        <div class="split wide-fig">
+          <div class="stack">
+            <div class="equation small"><span>\(V = \varepsilon - Ir\)</span></div>
+            <ul class="points small">
+              <li>Vary the external resistance; record \(V\) and \(I\)</li>
+              <li class="step">A straight line: compare with \(y = c + mx\)</li>
+              <li class="step"><b>Intercept</b> = \(\varepsilon\)</li>
+              <li class="step"><b>Gradient</b> = \(-r\)</li>
+            </ul>
+          </div>
+          <div class="panel">
+            <div class="panel-head"><span>TERMINAL P.D. AGAINST CURRENT</span></div>
+            <div class="fig" data-fig="b5-cell-graph"></div>
+          </div>
+        </div>
+        <div class="slide-foot"><span>B.5 CURRENT AND CIRCUITS · SL + HL</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>The circuit.</b> Connect a variable resistor across the cell, with an ammeter in series and a voltmeter across the cell’s terminals. For each setting of the variable resistor, read both meters. Open the switch between readings, so that the cell does not run down or warm up and change its internal resistance during the experiment.</p>
+            <p><b>Why a graph beats one pair of readings.</b> The emf is the reading you would get at zero current, which you cannot quite reach with a real voltmeter. Extending the line back to the axis finds it. And the gradient uses every reading, not just two.</p>
+            <p><b>The other intercept.</b> Where the line would meet the current axis, \(V = 0\): the cell is short-circuited and the current is \(\frac{\varepsilon}{r}\). Nobody takes that reading, but it can be read from the extended line.</p>
+          </div>
+          <div class="rn-side">
+            <p class="tip">Fruit and vegetable “batteries” have internal resistances of thousands of ohms. They show their emf on a voltmeter but cannot light a lamp.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide" data-title="Variable resistors">
+        <p class="eyebrow">Resistance that changes</p>
+        <h2>Thermistors and LDRs<span>.</span></h2>
+        <div class="split wide-fig">
+          <ul class="points small">
+            <li><b>Thermistor</b>: hotter, <b>lower</b> resistance</li>
+            <li class="step"><b>LDR</b>: brighter, <b>lower</b> resistance</li>
+            <li class="step">Both are semiconductors: energy frees more charge carriers</li>
+            <li class="step">Neither is ohmic</li>
+          </ul>
+          <div class="panel">
+            <div class="panel-head"><span>TWO SENSORS</span></div>
+            <div class="fig" data-fig="b5-sensor-curves"></div>
+          </div>
+        </div>
+        <div class="slide-foot"><span>B.5 CURRENT AND CIRCUITS · SL + HL</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>The opposite of a metal.</b> Heating a metal makes its ions vibrate more, which gets in the way of the electrons: resistance rises. In a semiconductor that still happens, but a far bigger effect swamps it. Most of its electrons are bound, and warming the material shakes more of them free. The number of carriers can rise many times over for a few tens of kelvin, so the resistance falls steeply. In an LDR the energy to free the carriers comes from photons of light.</p>
+            <p><b>The sizes involved.</b> A typical thermistor might fall from 10 kΩ at 0 °C to a few hundred ohms at 100 °C. A typical LDR might go from about 1 MΩ in the dark to a few hundred ohms in bright light.</p>
+          </div>
+          <div class="rn-side">
+            <p class="more">The thermistors of this course are the NTC type: negative temperature coefficient, meaning resistance falls as temperature rises.</p>
+            <p class="tip">The variable resistors required are the thermistor, the LDR and the potentiometer.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide" data-title="A sensor circuit">
+        <p class="eyebrow">Worked example</p>
+        <h2>A thermistor in a potential divider<span>.</span></h2>
+        <div class="split">
+          <div class="work">
+            <span class="say">\(V_\mathrm{in} = 6.0 \,\mathrm{V}\) · \(R_{2} = 10 \,\mathrm{k}\Omega\) · thermistor \(R_{1}\)</span>
+            <span>\(V_\mathrm{out} = \dfrac{R_{2}}{R_{1} + R_{2}} V_\mathrm{in}\)</span>
+            <span class="say step">Cold: \(R_{1} = 5.0 \,\mathrm{k}\Omega\)</span>
+            <span class="step">\(V_\mathrm{out} = \dfrac{10}{5.0 + 10} \times 6.0 = \class{res}{4.0 \,\mathrm{V}}\)</span>
+            <span class="say step">Hot: \(R_{1} = 1.0 \,\mathrm{k}\Omega\)</span>
+            <span class="step">\(V_\mathrm{out} = \dfrac{10}{1.0 + 10} \times 6.0 = \class{res}{5.5 \,\mathrm{V}}\)</span>
+          </div>
+          <div class="panel">
+            <div class="panel-head"><span>THERMISTOR ABOVE, FIXED RESISTOR BELOW</span></div>
+            <div class="fig" data-fig="b5-divider" data-kind="thermistor"></div>
+          </div>
+        </div>
+        <div class="slide-foot"><span>B.5 CURRENT AND CIRCUITS · SL + HL</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>Reasoning without the formula.</b> The two components share 6.0 V in proportion to their resistances. When the thermistor warms, its resistance falls, so its share falls. Whatever it gives up, the fixed resistor gains, because the two shares must still add up to 6.0 V. So the output, taken across the fixed resistor, rises with temperature.</p>
+            <p><b>Turning it round.</b> Take the output across the thermistor instead and it falls as the temperature rises: 2.0 V cold and 0.5 V hot. Which arrangement you choose depends on what the output has to switch on: a heater when it is cold, or a fan when it is hot.</p>
+            <p><b>Light sensors work the same way.</b> Replace the thermistor with an LDR and the output across the fixed resistor rises as the light gets brighter. Street lamps that switch on at dusk use the other arrangement.</p>
+          </div>
+          <div class="rn-side">
+            <p class="trap">Deciding which way the output moves by guessing. Ask first what happens to the sensor’s resistance, then to its share of the potential difference, then to the other component’s share.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide" data-title="The potentiometer">
+        <p class="eyebrow">A variable potential divider</p>
+        <h2>The potentiometer<span>.</span></h2>
+        <div class="split wide-fig">
+          <div class="stack">
+            <ul class="points small">
+              <li>One resistor with a <b>sliding contact</b></li>
+              <li class="step">The contact divides it into two parts, \(R_{1}\) and \(R_{2}\)</li>
+              <li class="step">Moving it changes \(V_\mathrm{out}\) smoothly, from <b>0</b> to \(V_\mathrm{in}\)</li>
+            </ul>
+            <div class="idea step">Volume controls and dimmers are potentiometers.</div>
+          </div>
+          <div class="panel">
+            <div class="panel-head"><span>THREE TERMINALS</span></div>
+            <div class="fig" data-fig="b5-divider" data-kind="pot"></div>
+          </div>
+        </div>
+        <div class="slide-foot"><span>B.5 CURRENT AND CIRCUITS · SL + HL</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>Potentiometer or variable resistor?</b> The same component can be wired in two ways. Use two of its terminals, one end and the slider, and it is a variable resistor in series with the load: it changes the current, but can never reduce it to zero, because the load itself still has the supply across it. Use all three terminals as on the slide and it is a potential divider: the output can be taken all the way down to 0 V.</p>
+            <p><b>Why that matters in the laboratory.</b> To plot the full \(I\)–\(V\) graph of a lamp, starting from the origin, you need potential differences right down to zero. A variable resistor in series cannot provide them. A potentiometer can, which is why it is the standard circuit for that experiment.</p>
+            <p><b>With a uniform track</b> the output is proportional to the position of the slider: half way along gives half the input, provided little current is drawn from the output.</p>
+          </div>
+          <div class="rn-side">
+            <p class="tip">In exam diagrams, look for the third connection. An arrow touching the side of a resistor is a potentiometer; an arrow drawn through it is a variable resistor.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide" data-title="Quick check: real cells and sensors">
+        <p class="eyebrow">Quick check</p>
+        <h2>Real cells and sensors<span>.</span></h2>
+        <div class="quiz fill">
+          <div class="q"><p><span class="n">01</span>A cell of emf 6.0 V and \(r\) = 1.0 Ω drives 0.50 A. Terminal p.d.?</p><div class="ans step">\(6.0 - 0.50 \times 1.0 = 5.5 \,\mathrm{V}\)</div></div>
+          <div class="q"><p><span class="n">02</span>When does the terminal p.d. equal the emf?</p><div class="ans step">When no current flows</div></div>
+          <div class="q"><p><span class="n">03</span>On a graph of \(V\) against \(I\) for a cell, what is the gradient?</p><div class="ans step">\(-r\)</div></div>
+          <div class="q"><p><span class="n">04</span>A thermistor is warmed. Its resistance?</p><div class="ans step">It falls</div></div>
+          <div class="q"><p><span class="n">05</span>An LDR is the upper resistor of a divider. It gets dark. The output across the lower resistor?</p><div class="ans step">It falls</div></div>
+          <div class="q"><p><span class="n">06</span>How many terminals of a potentiometer are used in a potential divider?</p><div class="ans step">Three</div></div>
+        </div>
+        <div class="slide-foot"><span class="reveal-hint">PRESS → TO REVEAL EACH ANSWER</span><span data-page></span></div>
+      </section>
+
+      <section class="slide" data-title="Summary">
+        <p class="eyebrow">Summary</p>
+        <h2>Current and circuits on one slide<span>.</span></h2>
+        <div class="cards fill" style="grid-template-columns: 1fr 1fr 1fr; align-content: center;">
+          <div class="card"><p class="eyebrow">Current and p.d.</p><h3>\(I = \frac{\Delta q}{\Delta t}\) · \(V = \frac{W}{q}\)</h3><p>Coulombs per second; joules per coulomb</p></div>
+          <div class="card step"><p class="eyebrow">Resistance</p><h3>\(R = \frac{V}{I}\) · \(\rho = \frac{RA}{L}\)</h3><p>Ohmic: \(R\) constant at constant temperature</p></div>
+          <div class="card step"><p class="eyebrow">Power</p><h3>\(P = IV = I^{2} R = \frac{V^{2}}{R}\)</h3><p>The heating effect of a current</p></div>
+          <div class="card step"><p class="eyebrow">Series</p><h3>\(R_\mathrm{s} = R_{1} + R_{2}\)</h3><p>Same current; potential differences add</p></div>
+          <div class="card step"><p class="eyebrow">Parallel</p><h3>\(\frac{1}{R_\mathrm{p}} = \frac{1}{R_{1}} + \frac{1}{R_{2}}\)</h3><p>Same potential difference; currents add</p></div>
+          <div class="card step"><p class="eyebrow">Real cell</p><h3>\(\varepsilon = I(R + r)\)</h3><p>Terminal p.d. \(V = \varepsilon - Ir\)</p></div>
+        </div>
+        <div class="slide-foot"><span>B.5 CURRENT AND CIRCUITS · SL + HL</span><span data-page></span></div>
+      </section>
+
+      <section class="slide" data-title="Key words">
+        <p class="eyebrow">Summary</p>
+        <h2>Key words<span>.</span></h2>
+        <div class="terms fill" style="grid-template-columns: repeat(3, 1fr);">
+          <div class="term"><b>Current</b><span>Rate of flow of charge</span></div>
+          <div class="term"><b>Potential difference</b><span>Work done per unit charge between two points</span></div>
+          <div class="term"><b>Emf</b><span>Energy supplied per unit charge by a source</span></div>
+          <div class="term"><b>Resistance</b><span>Ratio of potential difference to current</span></div>
+          <div class="term"><b>Resistivity</b><span>The resistance property of a material</span></div>
+          <div class="term"><b>Ohmic</b><span>Current proportional to potential difference</span></div>
+          <div class="term"><b>Internal resistance</b><span>The resistance of the cell itself</span></div>
+          <div class="term"><b>Terminal p.d.</b><span>What the cell delivers to the circuit: \(\varepsilon - Ir\)</span></div>
+          <div class="term"><b>Potential divider</b><span>Resistors in series sharing a potential difference</span></div>
+        </div>
+        <div class="slide-foot"><span>B.5 CURRENT AND CIRCUITS · SL + HL</span><span data-page></span></div>
+      </section>
+
+    </div>
+  </main>
+
+  <nav class="controls" aria-label="Slide controls">
+    <button type="button" id="prev" aria-label="Previous slide"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg></button>
+    <span class="counter" id="counter" aria-live="polite"></span>
+    <button type="button" id="next" aria-label="Next slide"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 5l7 7-7 7"/></svg></button>
+  </nav>
+  <div class="progress" aria-hidden="true"><span id="progress-bar"></span></div>
+
+  <script src="../assets/figures.js"></script>
+  <script src="figures.js"></script>
+  <script src="../assets/deck-math.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
+  <script src="../assets/deck-notes.js"></script>
+  <script src="../assets/deck.js"></script>
+</body>
+</html>
