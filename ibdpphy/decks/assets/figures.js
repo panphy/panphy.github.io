@@ -313,11 +313,11 @@
       label: 'Before: a 1200 kilogram car at 15 metres per second approaches an 800 kilogram car at rest. After: the two move off joined together at an unknown velocity v'
     },
     elastic: {
-      bodies: [{ m: '2.0 kg', x: [150, 300, 350], pre: { label: '3.0 m s⁻¹', len: 130 }, post: { label: '1.0 m s⁻¹', len: 50 } }, { w: 90, m: '1.0 kg', x: [405, 405, 605], pre: { rest: true }, post: { label: 'v = ?', len: 150 } }],
+      bodies: [{ m: '2.0 kg', x: [150, 300, 350], pre: { label: '3.0 m s⁻¹', len: 130 }, post: { label: '1.0 m s⁻¹', len: 50 } }, { w: 90, m: '1.0 kg', x: [405, 405, 605], pre: { rest: true }, post: { label: 'v₂ = ?', len: 150 } }],
       label: 'Before: a 2.0 kilogram trolley at 3.0 metres per second approaches a 1.0 kilogram trolley at rest. After: the 2.0 kilogram trolley moves at 1.0 metre per second and the 1.0 kilogram trolley at an unknown velocity v'
     },
     explode: {
-      bodies: [{ m: '60 kg', x: [345, 345, 225], pre: { rest: true, ax: 55 }, post: { label: 'v = ?', dir: -1, len: 80 } }, { w: 100, m: '40 kg', x: [455, 455, 635], post: { label: '3.0 m s⁻¹', len: 120 } }],
+      bodies: [{ m: '60 kg', x: [345, 345, 225], pre: { rest: true, ax: 55 }, post: { label: 'v₁ = ?', dir: -1, len: 80 } }, { w: 100, m: '40 kg', x: [455, 455, 635], post: { label: '3.0 m s⁻¹', len: 120 } }],
       label: 'Before: a 60 kilogram skater and a 40 kilogram skater stand together at rest. After pushing apart, the 40 kilogram skater moves right at 3.0 metres per second and the 60 kilogram skater moves left at an unknown velocity v'
     }
   };
@@ -906,7 +906,7 @@
       const puck = (x, y, r, colour) => ball(x, y, r, colour, '');
       let s = `<path d="M60,227 H342.4 M400,250 H770" class="guide"/>` + arrow(144, 227, 304, 227, a, 5) + text(236, 264, '5.0 m s⁻¹', 'lbl mono strong');
       s += arrow(70, 430, 140, 430, 'text-secondary', 2.5) + arrow(70, 430, 70, 360, 'text-secondary', 2.5) + text(154, 438, 'x', 'lbl mono', 'start') + text(70, 344, 'y', 'lbl mono');
-      const after = `<path d="M510,250 A110,110 0 0 1 502.1,290.9" class="guide accent"/>` + arrow(342.4, 193, 342.4, 105, a, 5) + arrow(435.3, 264.1, 648, 349, b, 5) + text(362, 156, '2.0 m s⁻¹', 'lbl mono strong', 'start') + text(530, 356, 'v = ?', 'lbl mono strong', 'end') + text(556, 284, 'θ', 'lbl greek');
+      const after = `<path d="M510,250 A110,110 0 0 1 502.1,290.9" class="guide accent"/>` + arrow(342.4, 193, 342.4, 105, a, 5) + arrow(435.3, 264.1, 648, 349, b, 5) + text(362, 156, '2.0 m s⁻¹', 'lbl mono strong', 'start') + text(530, 356, 'v₂ = ?', 'lbl mono strong', 'end') + text(556, 284, 'θ', 'lbl greek');
       const ghost = (x, y, r, colour) => `<circle cx="${x}" cy="${y}" r="${r}" style="fill:none;stroke:var(--${colour});stroke-width:2.5;stroke-dasharray:5 6"/>`;
       let still = after + puck(110, 227, 28, a) + ghost(342.4, 227, 28, a) + ghost(400, 250, 34, b) + puck(342.4, 67, 28, a) + puck(688, 365, 34, b);
       still += text(110, 290, '2.0 kg', 'lbl mono') + text(400, 318, '3.0 kg', 'lbl mono') + text(400, 346, 'at rest', 'lbl small') + text(382, 76, '2.0 kg', 'lbl mono', 'start') + text(688, 428, '3.0 kg', 'lbl mono');

@@ -168,8 +168,8 @@
               <li class="step">In two dimensions: add as <b>vectors</b></li>
             </ul>
             <div class="work step">
-              <span>\(F = \sqrt{4.0^{2} + 3.0^{2}} = \class{res}{5.0 \,\mathrm{N}}\)</span>
-              <span class="step">\(\tan \theta = \dfrac{3.0}{4.0}\) &nbsp;so&nbsp; \(\theta = \class{res}{37^{\circ}}\)</span>
+              <span>\(F = \sqrt{F_{x}^{2} + F_{y}^{2}} = \sqrt{4.0^{2} + 3.0^{2}} = \class{res}{5.0 \,\mathrm{N}}\)</span>
+              <span class="step">\(\tan \theta = \dfrac{F_{y}}{F_{x}} = \dfrac{3.0}{4.0}\) &nbsp;so&nbsp; \(\theta = \class{res}{37^{\circ}}\)</span>
             </div>
           </div>
           <div class="panel">
@@ -200,8 +200,8 @@
             </ul>
             <div class="work step">
               <span class="say">Vertical forces balance</span>
-              <span>\(2T \sin 40^{\circ} = 49\)</span>
-              <span class="step">\(T = \dfrac{49}{2 \times 0.643} = \class{res}{38 \,\mathrm{N}}\)</span>
+              <span>\(2T \sin \theta = mg\)</span>
+              <span class="step">\(T = \dfrac{mg}{2 \sin \theta} = \dfrac{49}{2 \sin 40^{\circ}} = \class{res}{38 \,\mathrm{N}}\)</span>
             </div>
           </div>
           <div class="panel">
@@ -236,7 +236,8 @@
           <div class="work step">
             <span class="say">A 1200 kg car · driving force 3000 N</span>
             <span class="say">Resistive forces 600 N</span>
-            <span>Resultant \(= 3000 - 600 = 2400 \,\mathrm{N}\)</span>
+            <span>Resultant \(F\) = driving force − resistive forces</span>
+            <span class="step">\(F = 3000 - 600 = 2400 \,\mathrm{N}\)</span>
             <span class="step">\(a = \dfrac{F}{m} = \dfrac{2400}{1200} = \class{res}{2.0 \,\mathrm{m} \,\mathrm{s}^{-2}}\)</span>
           </div>
         </div>
@@ -309,11 +310,11 @@
         <h2>A 70 kg person in a lift<span>.</span></h2>
         <div class="split">
           <div class="work">
-            <span class="say">Up is positive · weight \(= 70 \times 9.8 = 686 \,\mathrm{N}\)</span>
-            <span>\(F_\mathrm{N} - mg = ma\)</span>
-            <span class="say step">Accelerating upwards at 1.5 m s⁻²</span>
+            <span class="say">Up is positive · \(m = 70 \,\mathrm{kg}\)</span>
+            <span>\(F_\mathrm{N} - mg = ma\) &nbsp;so&nbsp; \(F_\mathrm{N} = m(g + a)\)</span>
+            <span class="say step">Accelerating upwards: \(a = +1.5 \,\mathrm{m} \,\mathrm{s}^{-2}\)</span>
             <span class="step">\(F_\mathrm{N} = 70(9.8 + 1.5) = \class{res}{791 \,\mathrm{N}}\)</span>
-            <span class="say step">Accelerating downwards at 1.5 m s⁻²</span>
+            <span class="say step">Accelerating downwards: \(a = -1.5 \,\mathrm{m} \,\mathrm{s}^{-2}\)</span>
             <span class="step">\(F_\mathrm{N} = 70(9.8 - 1.5) = \class{res}{581 \,\mathrm{N}}\)</span>
           </div>
           <div class="panel">
@@ -457,11 +458,11 @@
           <div class="work">
             <span class="say">Level floor · \(\mu_\mathrm{s} = 0.40\) · \(\mu_\mathrm{d} = 0.30\)</span>
             <span>\(F_\mathrm{N} = mg = 5.0 \times 9.8 = 49 \,\mathrm{N}\)</span>
-            <span class="step">Most static friction: \(0.40 \times 49 = \class{res}{19.6 \,\mathrm{N}}\)</span>
+            <span class="step">Most static friction: \(\mu_\mathrm{s} F_\mathrm{N} = 0.40 \times 49 = \class{res}{19.6 \,\mathrm{N}}\)</span>
             <span class="step">A 15 N push: it stays at rest. Friction \(= \class{res}{15 \,\mathrm{N}}\)</span>
             <span class="say step">A 25 N push: it slides</span>
-            <span class="step">\(F_\mathrm{f} = 0.30 \times 49 = 14.7 \,\mathrm{N}\)</span>
-            <span class="step">\(a = \dfrac{25 - 14.7}{5.0} = \class{res}{2.1 \,\mathrm{m} \,\mathrm{s}^{-2}}\)</span>
+            <span class="step">\(F_\mathrm{f} = \mu_\mathrm{d} F_\mathrm{N} = 0.30 \times 49 = 14.7 \,\mathrm{N}\)</span>
+            <span class="step">\(a = \dfrac{F - F_\mathrm{f}}{m} = \dfrac{25 - 14.7}{5.0} = \class{res}{2.1 \,\mathrm{m} \,\mathrm{s}^{-2}}\)</span>
           </div>
           <div class="panel">
             <div class="panel-head"><span>FORCES ON THE CRATE</span></div>
@@ -482,13 +483,13 @@
         <h2>Sliding down a 20° slope<span>.</span></h2>
         <div class="split even">
           <div class="work">
-            <span class="say">\(\mu_\mathrm{d} = 0.25\) · find the acceleration</span>
-            <span>\(F_\mathrm{N} = mg \cos 20^{\circ}\)</span>
-            <span class="step">\(F_\mathrm{f} = 0.25 \, mg \cos 20^{\circ}\)</span>
-            <span class="step">\(ma = mg \sin 20^{\circ} - 0.25 \, mg \cos 20^{\circ}\)</span>
+            <span class="say">\(\mu_\mathrm{d} = 0.25\) · \(\theta = 20^{\circ}\) · find the acceleration</span>
+            <span>\(F_\mathrm{N} = mg \cos \theta\)</span>
+            <span class="step">\(F_\mathrm{f} = \mu_\mathrm{d} F_\mathrm{N} = \mu_\mathrm{d} \, mg \cos \theta\)</span>
+            <span class="step">\(ma = mg \sin \theta - \mu_\mathrm{d} \, mg \cos \theta\)</span>
             <span class="say step">The mass cancels</span>
-            <span class="step">\(a = 9.8(0.342 - 0.25 \times 0.940)\)</span>
-            <span class="step">\(a = \class{res}{1.0 \,\mathrm{m} \,\mathrm{s}^{-2}}\) down the slope</span>
+            <span class="step">\(a = g(\sin \theta - \mu_\mathrm{d} \cos \theta)\)</span>
+            <span class="step">\(a = 9.8(\sin 20^{\circ} - 0.25 \cos 20^{\circ}) = \class{res}{1.0 \,\mathrm{m} \,\mathrm{s}^{-2}}\)</span>
           </div>
           <div class="panel">
             <div class="panel-head"><span>FORCES ON THE BLOCK</span><span class="pill">NOT TO SCALE</span></div>
@@ -517,9 +518,10 @@
               <li>A light string has the <b>same tension</b> all the way along</li>
             </ul>
             <div class="work step">
-              <span>\(a = \dfrac{29.4 - 19.6}{3.0 + 2.0} = \class{res}{1.96 \,\mathrm{m} \,\mathrm{s}^{-2}}\)</span>
-              <span class="step">\(T - 19.6 = 2.0 \times 1.96\)</span>
-              <span class="step">\(T = \class{res}{23.5 \,\mathrm{N}}\)</span>
+              <span class="say">\(m_{1} = 3.0 \,\mathrm{kg}\) · \(m_{2} = 2.0 \,\mathrm{kg}\)</span>
+              <span>\(a = \dfrac{(m_{1} - m_{2})g}{m_{1} + m_{2}} = \dfrac{1.0 \times 9.8}{5.0} = \class{res}{1.96 \,\mathrm{m} \,\mathrm{s}^{-2}}\)</span>
+              <span class="step">\(T - m_{2}g = m_{2}a\)</span>
+              <span class="step">\(T = m_{2}(g + a) = 2.0(9.8 + 1.96) = \class{res}{23.5 \,\mathrm{N}}\)</span>
             </div>
           </div>
           <div class="panel">
@@ -658,10 +660,10 @@
         <h2>A steel ball falling through oil<span>.</span></h2>
         <div class="split even">
           <div class="work">
-            <span class="say">\(r = 1.0 \,\mathrm{mm}\) · steel 7800, oil 900 kg m⁻³ · \(\eta = 0.50 \,\mathrm{Pa} \,\mathrm{s}\)</span>
+            <span class="say">\(r = 1.0 \,\mathrm{mm}\) · \(\rho_\mathrm{s} = 7800\), \(\rho_\mathrm{o} = 900 \,\mathrm{kg} \,\mathrm{m}^{-3}\) · \(\eta = 0.50 \,\mathrm{Pa} \,\mathrm{s}\)</span>
             <span>\(V = \tfrac{4}{3} \pi r^{3} = 4.19 \times 10^{-9} \,\mathrm{m}^{3}\)</span>
-            <span class="step">\(F_\mathrm{g} = 7800 \times V \times 9.8 = 3.20 \times 10^{-4} \,\mathrm{N}\)</span>
-            <span class="step">\(F_\mathrm{b} = 900 \times V \times 9.8 = 0.37 \times 10^{-4} \,\mathrm{N}\)</span>
+            <span class="step">\(F_\mathrm{g} = \rho_\mathrm{s} V g = 7800 \times V \times 9.8 = 3.20 \times 10^{-4} \,\mathrm{N}\)</span>
+            <span class="step">\(F_\mathrm{b} = \rho_\mathrm{o} V g = 900 \times V \times 9.8 = 0.37 \times 10^{-4} \,\mathrm{N}\)</span>
           </div>
           <div class="work step">
             <span class="say">At terminal speed</span>
@@ -749,9 +751,9 @@
           </div>
           <div class="work step">
             <span class="say">A 1500 kg car at 20 m s⁻¹</span>
-            <span>\(p = 1500 \times 20 = \class{res}{3.0 \times 10^{4} \,\mathrm{kg} \,\mathrm{m} \,\mathrm{s}^{-1}}\)</span>
+            <span>\(p = mv = 1500 \times 20 = \class{res}{3.0 \times 10^{4} \,\mathrm{kg} \,\mathrm{m} \,\mathrm{s}^{-1}}\)</span>
             <span class="say step">A 0.050 kg ball at 40 m s⁻¹, the other way</span>
-            <span class="step">\(p = 0.050 \times (-40) = \class{res}{-2.0 \,\mathrm{kg} \,\mathrm{m} \,\mathrm{s}^{-1}}\)</span>
+            <span class="step">\(p = mv = 0.050 \times (-40) = \class{res}{-2.0 \,\mathrm{kg} \,\mathrm{m} \,\mathrm{s}^{-1}}\)</span>
           </div>
         </div>
         <div class="slide-foot"><span>A.2 FORCES AND MOMENTUM · SL + HL</span><span data-page></span></div>
@@ -852,7 +854,7 @@
           <div class="work">
             <span class="say">Burns 2.5 kg of fuel each second</span>
             <span class="say">Exhaust leaves at 2000 m s⁻¹ relative to the rocket</span>
-            <span>In 1 s the gas gains \(\Delta p = 2.5 \times 2000\)</span>
+            <span>In 1.0 s the gas gains \(\Delta p = \Delta m \, v = 2.5 \times 2000\)</span>
             <span class="step">\(F = \dfrac{\Delta p}{\Delta t} = \dfrac{5000}{1.0} = \class{res}{5000 \,\mathrm{N}}\)</span>
           </div>
           <div class="stack center">
@@ -947,9 +949,10 @@
           </div>
           <div class="work">
             <span class="say">Momentum before = momentum after</span>
-            <span>\(1200 \times 15 = (1200 + 800)v\)</span>
-            <span class="step">\(v = \dfrac{18\,000}{2000} = \class{res}{9.0 \,\mathrm{m} \,\mathrm{s}^{-1}}\)</span>
-            <span class="say step">Kinetic energy</span>
+            <span>\(m_{1}u_{1} = (m_{1} + m_{2})v\)</span>
+            <span class="step">\(v = \dfrac{m_{1}u_{1}}{m_{1} + m_{2}}\)</span>
+            <span class="step">&nbsp; \(= \dfrac{1200 \times 15}{2000} = \class{res}{9.0 \,\mathrm{m} \,\mathrm{s}^{-1}}\)</span>
+            <span class="say step">Kinetic energy: \(E_\mathrm{k} = \tfrac{1}{2}mv^{2}\)</span>
             <span class="step">Before: \(\tfrac{1}{2} \times 1200 \times 15^{2} = 135 \,\mathrm{kJ}\)</span>
             <span class="step">After: \(\tfrac{1}{2} \times 2000 \times 9.0^{2} = \class{res}{81 \,\mathrm{kJ}}\)</span>
           </div>
@@ -1001,10 +1004,11 @@
             <div class="fig" data-fig="collide" data-kind="elastic"></div>
           </div>
           <div class="work">
-            <span class="say">Momentum</span>
-            <span>\(2.0 \times 3.0 = 2.0 \times 1.0 + 1.0v\)</span>
-            <span class="step">\(v = \class{res}{4.0 \,\mathrm{m} \,\mathrm{s}^{-1}}\)</span>
-            <span class="say step">Kinetic energy</span>
+            <span class="say">Momentum before = momentum after</span>
+            <span>\(m_{1}u_{1} = m_{1}v_{1} + m_{2}v_{2}\)</span>
+            <span class="step">\(v_{2} = \dfrac{m_{1}(u_{1} - v_{1})}{m_{2}}\)</span>
+            <span class="step">&nbsp; \(= \dfrac{2.0(3.0 - 1.0)}{1.0} = \class{res}{4.0 \,\mathrm{m} \,\mathrm{s}^{-1}}\)</span>
+            <span class="say step">Kinetic energy: \(E_\mathrm{k} = \tfrac{1}{2}mv^{2}\)</span>
             <span class="step">Before: \(\tfrac{1}{2} \times 2.0 \times 3.0^{2} = 9.0 \,\mathrm{J}\)</span>
             <span class="step">After: \(1.0 + 8.0 = 9.0 \,\mathrm{J}\) &nbsp; <b>Elastic</b></span>
           </div>
@@ -1031,9 +1035,10 @@
           </div>
           <div class="work">
             <span class="say">Total momentum before = 0</span>
-            <span>\(0 = 60v + 40 \times 3.0\)</span>
-            <span class="step">\(v = \class{res}{-2.0 \,\mathrm{m} \,\mathrm{s}^{-1}}\)</span>
-            <span class="say step">Kinetic energy</span>
+            <span>\(0 = m_{1}v_{1} + m_{2}v_{2}\)</span>
+            <span class="step">\(v_{1} = -\dfrac{m_{2}v_{2}}{m_{1}}\)</span>
+            <span class="step">&nbsp; \(= -\dfrac{40 \times 3.0}{60} = \class{res}{-2.0 \,\mathrm{m} \,\mathrm{s}^{-1}}\)</span>
+            <span class="say step">Kinetic energy: \(E_\mathrm{k} = \tfrac{1}{2}mv^{2}\)</span>
             <span class="step">Before: \(0\)</span>
             <span class="step">After: \(120 + 180 = \class{res}{300 \,\mathrm{J}}\)</span>
           </div>
@@ -1085,16 +1090,17 @@
         <div class="split even">
           <div class="work">
             <span class="say">Along \(x\)</span>
-            <span>\(2.0 \times 5.0 = 3.0 \, v_{x}\)</span>
-            <span class="step">\(v_{x} = \class{res}{3.33 \,\mathrm{m} \,\mathrm{s}^{-1}}\)</span>
+            <span>\(m_{1}u_{1} = m_{2}v_{2x}\)</span>
+            <span class="step">\(v_{2x} = \dfrac{m_{1}u_{1}}{m_{2}} = \dfrac{2.0 \times 5.0}{3.0} = \class{res}{3.33 \,\mathrm{m} \,\mathrm{s}^{-1}}\)</span>
             <span class="say step">Along \(y\)</span>
-            <span class="step">\(0 = 2.0 \times 2.0 + 3.0 \, v_{y}\)</span>
-            <span class="step">\(v_{y} = \class{res}{-1.33 \,\mathrm{m} \,\mathrm{s}^{-1}}\)</span>
+            <span class="step">\(0 = m_{1}v_{1} + m_{2}v_{2y}\)</span>
+            <span class="step">\(v_{2y} = -\dfrac{m_{1}v_{1}}{m_{2}} = -\dfrac{2.0 \times 2.0}{3.0} = \class{res}{-1.33 \,\mathrm{m} \,\mathrm{s}^{-1}}\)</span>
           </div>
           <div class="work step">
             <span class="say">Put the components together</span>
-            <span>\(v = \sqrt{3.33^{2} + 1.33^{2}} = \class{res}{3.6 \,\mathrm{m} \,\mathrm{s}^{-1}}\)</span>
-            <span class="step">\(\tan \theta = \dfrac{1.33}{3.33}\)</span>
+            <span>\(v_{2} = \sqrt{v_{2x}^{2} + v_{2y}^{2}}\)</span>
+            <span class="step">&nbsp; \(= \sqrt{3.33^{2} + 1.33^{2}} = \class{res}{3.6 \,\mathrm{m} \,\mathrm{s}^{-1}}\)</span>
+            <span class="step">\(\tan \theta = \dfrac{|v_{2y}|}{v_{2x}} = \dfrac{1.33}{3.33}\)</span>
             <span class="step">\(\theta = \class{res}{22^{\circ}}\) below the \(x\) direction</span>
           </div>
         </div>
@@ -1149,8 +1155,8 @@
             </ul>
             <div class="work step">
               <span class="say">\(r = 2.0 \,\mathrm{m}\) · \(T = 5.0 \,\mathrm{s}\)</span>
-              <span>\(\omega = \dfrac{2 \pi}{5.0} = \class{res}{1.26 \,\mathrm{rad} \,\mathrm{s}^{-1}}\)</span>
-              <span class="step">\(v = 1.26 \times 2.0 = \class{res}{2.5 \,\mathrm{m} \,\mathrm{s}^{-1}}\)</span>
+              <span>\(\omega = \dfrac{2 \pi}{T} = \dfrac{2 \pi}{5.0} = \class{res}{1.26 \,\mathrm{rad} \,\mathrm{s}^{-1}}\)</span>
+              <span class="step">\(v = \omega r = 1.26 \times 2.0 = \class{res}{2.5 \,\mathrm{m} \,\mathrm{s}^{-1}}\)</span>
             </div>
           </div>
           <div class="panel">
@@ -1326,7 +1332,7 @@
         <h2>A 0.25 kg ball on a 0.80 m string<span>.</span></h2>
         <div class="split even">
           <div class="work">
-            <span class="say">Weight \(= 0.25 \times 9.8 = 2.45 \,\mathrm{N}\)</span>
+            <span class="say">Weight \(mg = 0.25 \times 9.8 = 2.45 \,\mathrm{N}\)</span>
             <span class="say">Bottom · \(v = 7.0 \,\mathrm{m} \,\mathrm{s}^{-1}\)</span>
             <span>\(T = \dfrac{mv^{2}}{r} + mg\)</span>
             <span class="step">\(T = \dfrac{0.25 \times 7.0^{2}}{0.80} + 2.45 = \class{res}{17.8 \,\mathrm{N}}\)</span>
@@ -1335,7 +1341,7 @@
             <span class="say">Top · \(v = 4.2 \,\mathrm{m} \,\mathrm{s}^{-1}\)</span>
             <span>\(T = \dfrac{mv^{2}}{r} - mg\)</span>
             <span class="step">\(T = \dfrac{0.25 \times 4.2^{2}}{0.80} - 2.45 = \class{res}{3.1 \,\mathrm{N}}\)</span>
-            <span class="step">Least speed at the top: \(\sqrt{9.8 \times 0.80} = \class{res}{2.8 \,\mathrm{m} \,\mathrm{s}^{-1}}\)</span>
+            <span class="step">Least at the top: \(v = \sqrt{gr} = \sqrt{9.8 \times 0.80} = \class{res}{2.8 \,\mathrm{m} \,\mathrm{s}^{-1}}\)</span>
           </div>
         </div>
         <div class="slide-foot"><span>A.2 FORCES AND MOMENTUM · SL + HL</span><span data-page></span></div>
