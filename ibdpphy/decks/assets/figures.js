@@ -266,7 +266,9 @@
 
   // ---- A.2: forces and momentum helpers ----
   // A subscripted symbol, a block, a point on a body, a surface and a coiled spring. Forces are
-  // teal, velocities and components apricot. data-plain leaves the labels off a small copy.
+  // teal, velocities and components apricot. A force arrow starts where the force acts: weight
+  // at the centre of mass (marked with a dot), a normal force or friction at the surface in
+  // contact, a tension where the string is attached, an applied force where it is applied. data-plain leaves the labels off a small copy.
   const sub = (a, b) => `${a}<tspan dy="9" font-size="24">${b}</tspan><tspan dy="-9">​</tspan>`;
   const box = (cx, cy, w, h, extra = '') => `<rect x="${f(cx - w / 2)}" y="${f(cy - h / 2)}" width="${w}" height="${h}" rx="10" style="fill:color-mix(in srgb, var(--brand-accent-strong) 18%, var(--viewer-bg));stroke:var(--brand-accent-strong);stroke-width:3" ${extra}/>`;
   const dot = (x, y, r = 7) => `<circle cx="${f(x)}" cy="${f(y)}" r="${r}" style="fill:var(--text-main)"/>`;
@@ -759,14 +761,14 @@
     'fbd-block': el => {
       const on = labelled(el);
       let s = `<line x1="90" y1="302" x2="710" y2="302" class="guide"/>` + box(380, 245, 170, 110);
-      s += arrow(380, 245, 380, 78, 'brand-primary', 5) + arrow(380, 245, 380, 412, 'brand-primary', 5) + arrow(380, 245, 660, 245, 'brand-primary', 5) + arrow(380, 245, 200, 245, 'brand-primary', 5) + dot(380, 245);
+      s += arrow(380, 245, 380, 412, 'brand-primary', 5) + arrow(412, 300, 412, 110, 'brand-primary', 5) + arrow(465, 245, 660, 245, 'brand-primary', 5) + arrow(348, 300, 196, 300, 'brand-primary', 5) + dot(380, 245);
       if (on) {
-        s += text(398, 100, sub('F', 'N'), 'lbl display', 'start') + text(456, 98, 'normal force', 'lbl small', 'start');
+        s += text(430, 130, sub('F', 'N'), 'lbl display', 'start') + text(488, 128, 'normal force', 'lbl small', 'start');
         s += text(398, 408, sub('F', 'g'), 'lbl display', 'start') + text(452, 406, 'weight', 'lbl small', 'start');
         s += text(572, 224, 'F', 'lbl display') + text(572, 284, 'applied force', 'lbl small');
-        s += text(232, 224, sub('F', 'f'), 'lbl display') + text(232, 284, 'friction', 'lbl small');
+        s += text(236, 280, sub('F', 'f'), 'lbl display') + text(236, 338, 'friction', 'lbl small');
       }
-      return svg(el.dataset.view || '0 0 800 460', s, 'Free-body diagram of a block pulled along a table: the normal force up, the weight down, the applied force forwards and a smaller friction force backwards, all drawn from the block');
+      return svg(el.dataset.view || '0 0 800 460', s, 'Free-body diagram of a block pulled along a table, each force drawn from where it acts: the weight down from the centre of the block, the normal force up from its base, the applied force forwards from its front face and a smaller friction force backwards along its base');
     },
 
     resultant: () => {
@@ -778,18 +780,18 @@
     },
 
     'hang-two': () => {
-      let s = surface(120, 50, 680, 50) + `<path d="M162,50 L400,250 L638,50" class="cable"/><line x1="250" y1="250" x2="550" y2="250" class="guide"/>`;
-      s += `<path d="M330,250 A70,70 0 0 1 346.4,205 M470,250 A70,70 0 0 0 453.6,205" class="guide accent"/>`;
-      s += arrow(400, 250, 285, 153.6, 'brand-primary', 5) + arrow(400, 250, 515, 153.6, 'brand-primary', 5) + arrow(400, 250, 400, 400, 'brand-primary', 5) + body(400, 250, 18);
-      s += text(326, 148, 'T', 'lbl display', 'start') + text(474, 148, 'T', 'lbl display', 'end') + text(418, 398, '49 N', 'lbl mono strong', 'start');
-      s += text(292, 238, '40°', 'lbl mono') + text(508, 238, '40°', 'lbl mono');
-      return svg('0 0 800 460', s, 'A body of weight 49 newtons hangs at rest from two strings, each at 40 degrees to the horizontal and each with tension T');
+      let s = surface(70, 50, 730, 50) + `<path d="M99.5,50 L320,235 M700.5,50 L480,235" class="cable"/><path d="M180,235 H320 M480,235 H620" class="guide"/>`;
+      s += `<path d="M260,235 A60,60 0 0 1 274,196.4 M540,235 A60,60 0 0 0 526,196.4" class="guide accent"/>` + box(400, 270, 160, 70);
+      s += arrow(320, 235, 220.4, 151.4, 'brand-primary', 5) + arrow(480, 235, 579.6, 151.4, 'brand-primary', 5) + arrow(400, 270, 400, 420, 'brand-primary', 5) + dot(400, 270);
+      s += text(262, 148, 'T', 'lbl display', 'start') + text(538, 148, 'T', 'lbl display', 'end') + text(418, 418, '49 N', 'lbl mono strong', 'start');
+      s += text(246, 226, '40°', 'lbl mono', 'end') + text(554, 226, '40°', 'lbl mono', 'start');
+      return svg('0 0 800 460', s, 'A sign of weight 49 newtons hangs at rest from two strings fixed to its top corners, each at 40 degrees to the horizontal. Each tension T acts from the corner where its string is attached, and the weight acts from the centre of the sign');
     },
 
     'third-law': () => {
       let s = text(210, 40, 'gravitational pair', 'lbl strong') + text(590, 40, 'contact pair', 'lbl strong');
-      s += `<path d="M50,416 Q210,300 370,416 Z" style="fill:color-mix(in srgb, var(--brand-primary) 22%, var(--viewer-bg));stroke:var(--brand-primary);stroke-width:2.5"/>` + text(210, 404, 'Earth', 'lbl small');
-      s += box(210, 110, 130, 46) + arrow(210, 133, 210, 232, 'brand-primary', 5) + arrow(210, 356, 210, 258, 'brand-accent', 5);
+      s += `<path d="M50,416 Q210,300 370,416 Z" style="fill:color-mix(in srgb, var(--brand-primary) 22%, var(--viewer-bg));stroke:var(--brand-primary);stroke-width:2.5"/>` + text(292, 404, 'Earth', 'lbl small');
+      s += box(210, 110, 130, 46) + arrow(210, 110, 210, 232, 'brand-primary', 5) + arrow(210, 400, 210, 268, 'brand-accent', 5) + dot(210, 110, 6);
       s += text(192, 196, 'on the book', 'lbl small', 'end') + text(228, 312, 'on the Earth', 'lbl small', 'start');
       s += `<path d="M440,250 H740 M462,250 V410 M718,250 V410" class="tick" style="stroke-width:6;fill:none"/>` + box(590, 224, 130, 46);
       s += arrow(590, 246, 590, 112, 'brand-primary', 5) + arrow(590, 256, 590, 388, 'brand-accent', 5);
@@ -799,10 +801,10 @@
 
     lift: () => {
       let s = `<line x1="230" y1="8" x2="230" y2="60" class="cable"/><rect x="110" y="60" width="240" height="352" rx="10" class="node" style="stroke:var(--text-secondary);stroke-width:3"/>` + box(230, 331, 84, 160);
-      s += arrow(230, 331, 230, 140, 'brand-primary', 5) + arrow(230, 331, 230, 478, 'brand-primary', 5) + dot(230, 331);
-      s += text(248, 162, sub('F', 'N'), 'lbl display', 'start') + text(248, 476, sub('F', 'g'), 'lbl display', 'start');
+      s += arrow(208, 410, 208, 222, 'brand-primary', 5) + arrow(230, 331, 230, 478, 'brand-primary', 5) + dot(230, 331);
+      s += text(176, 246, sub('F', 'N'), 'lbl display', 'end') + text(248, 476, sub('F', 'g'), 'lbl display', 'start');
       s += arrow(408, 300, 408, 190, 'brand-accent', 5) + text(408, 340, 'a', 'lbl display');
-      return svg('0 0 460 500', s, 'A person in a lift that accelerates upwards: the normal force from the floor, drawn upwards, is larger than the weight, drawn downwards');
+      return svg('0 0 460 500', s, 'A person in a lift that accelerates upwards: the normal force, drawn upwards from the floor under the feet, is larger than the weight, drawn downwards from the centre of the body');
     },
 
     // Also the title picture and the small picture for part 2, with data-plain. For a worked
@@ -812,10 +814,10 @@
       let s = `<path d="M700,120 L100,400 H760" class="tick" style="stroke-width:4;fill:none"/>` + box(507.3, 176.9, 90, 60, 'transform="rotate(-25 507.3 176.9)"');
       s += `<path d="M507.3,366.9 L434.5,210.8 M507.3,366.9 L580.1,333" class="guide"/>`;
       s += arrow(507.3, 176.9, 434.5, 210.8, 'brand-accent', 3.5, 'stroke-dasharray="9 7"') + arrow(507.3, 176.9, 580.1, 333, 'brand-accent', 3.5, 'stroke-dasharray="9 7"');
-      s += arrow(507.3, 176.9, 507.3, 361, 'brand-primary', 5) + arrow(507.3, 176.9, 437, 26, 'brand-primary', 5) + arrow(507.3, 176.9, 575, 145.4, 'brand-primary', 5) + dot(507.3, 176.9);
+      s += arrow(507.3, 176.9, 507.3, 361, 'brand-primary', 5) + arrow(520, 204.1, 449, 52, 'brand-primary', 5) + arrow(520, 204.1, 615, 159.8, 'brand-primary', 5) + dot(507.3, 176.9);
       if (on) {
         s += `<path d="M190,400 A90,90 0 0 0 181.6,362" class="guide accent"/>` + (el.dataset.angle ? text(206, 390, angle, 'lbl mono', 'start') + arrow(300, 262, 227.5, 295.8, 'brand-accent', 4) + text(250, 256, 'a', 'lbl display', 'end') : text(216, 390, 'θ', 'lbl greek'));
-        s += text(420, 40, sub('F', 'N'), 'lbl display', 'end') + text(592, 132, sub('F', 'f'), 'lbl display', 'start') + text(492, 380, 'mg', 'lbl display', 'end');
+        s += text(432, 62, sub('F', 'N'), 'lbl display', 'end') + text(612, 134, sub('F', 'f'), 'lbl display', 'start') + text(492, 380, 'mg', 'lbl display', 'end');
         s += text(420, 204, `mg sin ${angle}`, 'lbl mono', 'end') + text(598, 366, `mg cos ${angle}`, 'lbl mono', 'start');
       }
       return svg(el.dataset.view || '0 0 800 460', s, 'A block on a slope at angle theta: the weight m g acts straight down and is resolved into m g sine theta down the slope and m g cosine theta into the slope; the normal force acts at right angles to the slope and friction acts up the slope');
@@ -833,18 +835,18 @@
     atwood: () => {
       let s = `<line x1="230" y1="8" x2="230" y2="90" class="tick" style="stroke-width:5"/><path d="M180,355 V90 A50,50 0 0 1 280,90 V245" class="cable"/><circle cx="230" cy="90" r="50" class="node" style="stroke:var(--text-secondary);stroke-width:3"/>` + dot(230, 90, 6);
       s += box(180, 400, 90, 90) + box(280, 280, 70, 70);
-      s += arrow(158, 350, 158, 250, 'brand-primary', 5) + arrow(180, 446, 180, 536, 'brand-primary', 5) + arrow(302, 240, 302, 140, 'brand-primary', 5) + arrow(280, 316, 280, 386, 'brand-primary', 5);
-      s += text(142, 306, 'T', 'lbl display', 'end') + text(318, 196, 'T', 'lbl display', 'start');
+      s += arrow(180, 355, 180, 250, 'brand-primary', 5) + arrow(180, 400, 180, 536, 'brand-primary', 5) + arrow(280, 245, 280, 140, 'brand-primary', 5) + arrow(280, 280, 280, 386, 'brand-primary', 5) + dot(180, 400) + dot(280, 280);
+      s += text(164, 306, 'T', 'lbl display', 'end') + text(296, 196, 'T', 'lbl display', 'start');
       s += text(120, 410, '3.0 kg', 'lbl mono strong', 'end') + text(330, 290, '2.0 kg', 'lbl mono strong', 'start');
       s += text(198, 524, '29.4 N', 'lbl mono', 'start') + text(298, 378, '19.6 N', 'lbl mono', 'start');
       s += arrow(60, 470, 60, 544, 'brand-accent', 4) + text(60, 458, 'a', 'lbl display') + arrow(462, 320, 462, 246, 'brand-accent', 4) + text(462, 358, 'a', 'lbl display');
-      return svg('0 0 500 560', s, 'A light string over a pulley joins a 3.0 kilogram mass, weight 29.4 newtons, to a 2.0 kilogram mass, weight 19.6 newtons. The same tension T pulls up on each; the heavier mass accelerates down and the lighter one up');
+      return svg('0 0 500 560', s, 'A light string over a pulley joins a 3.0 kilogram mass, weight 29.4 newtons, to a 2.0 kilogram mass, weight 19.6 newtons. The same tension T pulls up on each from the point where the string is attached, and each weight acts from the centre of its mass; the heavier mass accelerates down and the lighter one up');
     },
 
     hooke: () => {
       let s = surface(60, 40, 330, 40) + spring(130, 40, 240) + spring(260, 40, 330, 9) + box(260, 362, 64, 64);
       s += `<line x1="100" y1="240" x2="340" y2="240" class="guide"/><line x1="290" y1="330" x2="340" y2="330" class="guide"/>` + both(326, 246, 326, 324, 'brand-accent', 3) + text(342, 296, 'x', 'lbl display', 'start');
-      s += arrow(216, 362, 216, 290, 'brand-primary', 5) + text(200, 336, sub('F', 'H'), 'lbl display', 'end') + arrow(260, 394, 260, 448, 'brand-primary', 5) + text(278, 446, 'mg', 'lbl display', 'start');
+      s += arrow(260, 330, 260, 246, 'brand-primary', 5) + text(238, 300, sub('F', 'H'), 'lbl display', 'end') + arrow(260, 362, 260, 446, 'brand-primary', 5) + dot(260, 362, 6) + text(278, 446, 'mg', 'lbl display', 'start');
       s += text(130, 270, 'natural', 'lbl small') + text(130, 296, 'length', 'lbl small');
       s += axes(470, 400, 780, 60, 'extension x', 'force') + plot('M470,400 L730,120') + `<path d="M545,319 H640 V217" class="guide accent"/>`;
       s += text(764, 330, 'gradient = k', 'lbl strong', 'end');
@@ -854,14 +856,14 @@
     // With data-drag the sphere is falling and the viscous drag is added.
     'sphere-fluid': el => {
       const drag = 'drag' in el.dataset;
-      let s = `<rect x="52" y="80" width="356" height="438" style="fill:var(--brand-primary);opacity:.13"/><path d="M50,40 V520 H410 V40" class="tick" style="stroke-width:4;fill:none"/><line x1="52" y1="80" x2="408" y2="80" class="guide accent"/>` + body(230, 290, 44);
-      s += arrow(230, 336, 230, 474, 'brand-primary', 5) + text(248, 476, sub('F', 'g'), 'lbl display', 'start') + text(248, 440, 'weight', 'lbl small', 'start');
+      let s = `<rect x="52" y="80" width="356" height="438" style="fill:var(--brand-primary);opacity:.13"/><path d="M50,40 V520 H410 V40" class="tick" style="stroke-width:4;fill:none"/><line x1="52" y1="80" x2="408" y2="80" class="guide accent"/>` + `<circle cx="230" cy="290" r="44" style="fill:color-mix(in srgb, var(--brand-accent-strong) 18%, var(--viewer-bg));stroke:var(--brand-accent-strong);stroke-width:3"/>`;
+      s += arrow(230, 290, 230, 474, 'brand-primary', 5) + dot(230, 290, 6) + text(248, 476, sub('F', 'g'), 'lbl display', 'start') + text(248, 440, 'weight', 'lbl small', 'start');
       if (drag) {
-        s += arrow(206, 250, 206, 152, 'brand-primary', 5) + text(190, 160, sub('F', 'b'), 'lbl display', 'end') + text(190, 196, 'buoyancy', 'lbl small', 'end');
-        s += arrow(256, 250, 256, 196, 'brand-primary', 5) + text(272, 204, sub('F', 'd'), 'lbl display', 'start') + text(272, 238, 'drag', 'lbl small', 'start');
+        s += arrow(218, 290, 218, 152, 'brand-primary', 5) + text(190, 160, sub('F', 'b'), 'lbl display', 'end') + text(190, 196, 'buoyancy', 'lbl small', 'end');
+        s += arrow(244, 290, 244, 196, 'brand-primary', 5) + text(262, 204, sub('F', 'd'), 'lbl display', 'start') + text(262, 236, 'drag', 'lbl small', 'start');
         s += arrow(326, 300, 326, 372, 'brand-accent', 4) + text(326, 408, 'v', 'lbl display');
       } else {
-        s += arrow(230, 244, 230, 124, 'brand-primary', 5) + text(248, 136, sub('F', 'b'), 'lbl display', 'start') + text(248, 172, 'buoyancy', 'lbl small', 'start');
+        s += arrow(230, 290, 230, 124, 'brand-primary', 5) + text(248, 136, sub('F', 'b'), 'lbl display', 'start') + text(248, 172, 'buoyancy', 'lbl small', 'start');
       }
       return svg('0 0 460 560', s, drag ? 'A small sphere falling through a fluid: its weight acts downwards, and the buoyancy force and the viscous drag both act upwards' : 'A sphere under the surface of a fluid: its weight acts downwards and the buoyancy force acts upwards');
     },
@@ -939,20 +941,20 @@
 
     conical: () => {
       let s = surface(130, 40, 330, 40) + `<line x1="230" y1="40" x2="230" y2="334" class="guide"/><ellipse cx="230" cy="334" rx="170" ry="34" class="guide"/><line x1="230" y1="40" x2="400" y2="334.4" class="cable"/>`;
-      s += `<path d="M230,110 A70,70 0 0 0 265,100.6" class="guide accent"/><path d="M315,187.2 H400 M315,187.2 V334.4" class="guide"/>`;
-      s += arrow(400, 334.4, 400, 193, 'brand-accent', 3.5, 'stroke-dasharray="9 7"') + arrow(400, 334.4, 321, 334.4, 'brand-accent', 3.5, 'stroke-dasharray="9 7"');
-      s += arrow(400, 334.4, 318, 192.4, 'brand-primary', 5) + arrow(400, 334.4, 400, 476, 'brand-primary', 5) + body(400, 334.4, 20);
+      s += `<path d="M230,110 A70,70 0 0 0 265,100.6" class="guide accent"/><path d="M318,192.4 H390 M318,192.4 V317.1" class="guide"/>`;
+      s += arrow(390, 317.1, 390, 198, 'brand-accent', 3.5, 'stroke-dasharray="9 7"') + arrow(390, 317.1, 324, 317.1, 'brand-accent', 3.5, 'stroke-dasharray="9 7"');
+      s += body(400, 334.4, 20) + arrow(390, 317.1, 318, 192.4, 'brand-primary', 5) + arrow(400, 334.4, 400, 476, 'brand-primary', 5) + `<circle cx="400" cy="334.4" r="5" style="fill:var(--viewer-bg)"/>`;
       s += text(296, 214, 'T', 'lbl display', 'end') + text(418, 476, 'mg', 'lbl display', 'start') + text(418, 262, 'T cos θ', 'lbl mono', 'start') + text(330, 398, 'T sin θ', 'lbl mono') + text(254, 150, 'θ', 'lbl greek');
       return svg('0 0 560 520', s, 'A conical pendulum: a bob on a string moves in a horizontal circle with the string at angle theta to the vertical. The tension T is resolved into T cosine theta upwards, which balances the weight m g, and T sine theta towards the centre of the circle');
     },
 
     'vertical-circle': () => {
       let s = `<circle cx="280" cy="280" r="170" class="guide"/>` + dot(280, 280) + `<line x1="280" y1="110" x2="280" y2="450" class="cable" style="opacity:.35"/>`;
-      s += arrow(256, 110, 176, 110, 'brand-accent', 4) + arrow(262, 132, 262, 212, 'brand-primary', 5) + arrow(298, 132, 298, 196, 'brand-primary', 5) + body(280, 110, 20);
-      s += arrow(304, 450, 430, 450, 'brand-accent', 4) + arrow(280, 428, 280, 306, 'brand-primary', 5) + arrow(280, 472, 280, 548, 'brand-primary', 5) + body(280, 450, 20);
-      s += text(246, 206, 'mg', 'lbl display', 'end') + text(314, 190, 'T', 'lbl display', 'start') + text(298, 372, 'T', 'lbl display', 'start') + text(298, 544, 'mg', 'lbl display', 'start');
-      s += text(280, 66, 'top', 'lbl small') + text(150, 458, 'bottom', 'lbl small') + text(176, 92, 'v', 'lbl display', 'end') + text(444, 440, 'v', 'lbl display', 'start');
-      return svg('0 0 560 570', s, 'A ball on a string moving in a vertical circle. At the top the tension and the weight both act downwards, towards the centre. At the bottom the tension acts upwards, towards the centre, and the weight downwards; the ball moves faster at the bottom');
+      s += arrow(256, 110, 176, 110, 'brand-accent', 4) + body(280, 110, 20) + arrow(267, 110, 267, 200, 'brand-primary', 5) + arrow(293, 127, 293, 206, 'brand-primary', 5);
+      s += arrow(304, 450, 430, 450, 'brand-accent', 4) + body(280, 450, 20) + arrow(280, 430, 280, 306, 'brand-primary', 5) + arrow(280, 450, 280, 548, 'brand-primary', 5) + `<circle cx="280" cy="450" r="5" style="fill:var(--viewer-bg)"/>`;
+      s += text(251, 196, 'mg', 'lbl display', 'end') + text(309, 196, sub('T', 'top'), 'lbl display', 'start') + text(298, 372, sub('T', 'bottom'), 'lbl display', 'start') + text(298, 544, 'mg', 'lbl display', 'start');
+      s += text(280, 66, 'top', 'lbl small') + text(150, 458, 'bottom', 'lbl small') + text(176, 92, sub('v', 'top'), 'lbl display', 'end') + text(444, 440, sub('v', 'bottom'), 'lbl display', 'start');
+      return svg('0 0 560 570', s, 'A ball on a string moving in a vertical circle. At the top the tension T top and the weight both act downwards, towards the centre. At the bottom the larger tension T bottom acts upwards, towards the centre, and the weight downwards; the ball moves faster at the bottom');
     },
 
     // ---- E.2: quantum physics ----
