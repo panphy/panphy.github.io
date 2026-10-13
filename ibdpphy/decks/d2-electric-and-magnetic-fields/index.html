@@ -1,0 +1,1114 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="robots" content="noindex, nofollow">
+  <meta name="description" content="Teaching slides for IB Diploma Programme Physics topic D.2 Electric and magnetic fields: charge and Coulomb’s law, Millikan’s experiment, electric field strength and field lines, magnetic field patterns, and at higher level electric potential and equipotentials.">
+  <meta name="theme-color" content="#F8F6F1">
+  <script src="/assets/theme.js" data-theme-scope="ibdpphy"></script>
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <link rel="stylesheet" href="/assets/standalone-top.css">
+  <title>D.2 Electric and magnetic fields · IB DP Physics</title>
+  <link rel="icon" type="image/png" href="/assets/favicon.png">
+  <link rel="apple-touch-icon" href="/assets/apple-touch-icon.png">
+  <link rel="stylesheet" href="../assets/deck.css">
+  <link rel="stylesheet" href="../assets/deck-notes.css">
+  <link rel="stylesheet" href="/assets/theme-toggle.css">
+  <link rel="stylesheet" href="/assets/fullscreen-button.css">
+  <script src="/assets/theme-toggle.js"></script>
+  <script src="/ibdpphy/sw-register.js" defer></script>
+</head>
+<body>
+  <header class="banner">
+    <a class="banner-logo" href="/" aria-label="PanPhy Labs home"><img src="/assets/panphy.png" alt="PanPhy Labs" width="38" height="38"></a>
+    <a class="banner-title" href="#1">D.2 Electric and magnetic fields</a>
+    <div class="banner-actions">
+      <button id="thumbs-toggle" class="icon-button" type="button" aria-controls="thumbs" aria-pressed="true" aria-label="Hide slide thumbnails" title="Show or hide slide thumbnails (T)"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path class="pane" d="M9.5 4.5H6A2.5 2.5 0 0 0 3.5 7v10A2.5 2.5 0 0 0 6 19.5h3.5z"/><rect x="3.5" y="4.5" width="17" height="15" rx="2.5"/><path d="M9.5 4.5v15"/></svg></button>
+      <button id="fullscreen" class="panphy-fullscreen-button" type="button" aria-pressed="false" aria-label="Present fullscreen" title="Present fullscreen (F)"><svg class="panphy-fs-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M4 9V4h5M15 4h5v5M20 15v5h-5M9 20H4v-5"/></svg></button>
+      <button id="theme-button" type="button" data-panphy-theme-toggle aria-label="Toggle light/dark theme" title="Toggle between light and dark themes"></button>
+    </div>
+  </header>
+  <script>window.PanPhyThemeToggle.mount(document.getElementById('theme-button'));</script>
+
+  <nav class="thumbs" id="thumbs" aria-label="Slides"></nav>
+
+  <main class="stage" id="stage">
+    <div class="deck" id="deck">
+
+      <!-- 1 · Title -->
+      <section class="slide title" data-title="D.2 Electric and magnetic fields">
+        <div class="title-grid">
+          <div>
+            <p class="eyebrow">IB DP Physics · Theme D · Fields</p>
+            <h1>Electric and magnetic fields<span>.</span></h1>
+            <p class="lead">D.2 · Charge, Coulomb’s law, electric fields, magnetic field patterns and electric potential<br>Standard level and higher level</p>
+            <div class="chips">
+              <span class="chip">SL + HL · 8 hours</span>
+              <span class="chip hl">Additional HL · 6 hours</span>
+            </div>
+          </div>
+          <div class="fig" data-fig="d2-pair-fields" data-plain></div>
+        </div>
+      </section>
+
+      <section class="slide" data-title="Lesson map">
+        <p class="eyebrow">The journey</p>
+        <h2>Four parts<span>.</span></h2>
+        <div class="cards fill" style="grid-template-columns: repeat(4, 1fr);">
+          <div class="card">
+            <div class="fig" data-fig="d2-charges" data-plain style="height: 180px;"></div>
+            <p class="eyebrow">Part 01 · SL + HL</p>
+            <h3>Electric charge</h3>
+            <p>Two types, Coulomb’s law, charging, Millikan</p>
+          </div>
+          <div class="card">
+            <div class="fig" data-fig="d2-plates" data-plain style="height: 180px;"></div>
+            <p class="eyebrow">Part 02 · SL + HL</p>
+            <h3>Electric fields</h3>
+            <p>Field strength, field lines, parallel plates</p>
+          </div>
+          <div class="card">
+            <div class="fig" data-fig="d2-bar-magnet" style="height: 180px;"></div>
+            <p class="eyebrow">Part 03 · SL + HL</p>
+            <h3>Magnetic fields</h3>
+            <p>Magnets, wires, coils and solenoids</p>
+          </div>
+          <div class="card hl">
+            <div class="fig" data-fig="d2-equi-point" data-plain style="height: 180px;"></div>
+            <p class="eyebrow">Part 04 · HL only</p>
+            <h3>Electric potential</h3>
+            <p>Potential energy, potential and equipotentials</p>
+          </div>
+        </div>
+        <div class="idea" style="margin-top: 22px;">Slides with a terracotta edge and an <span class="hl-tag">HL only</span> flag are additional higher level. Every other slide is for SL and HL.</div>
+        <div class="slide-foot"><span>D.2 ELECTRIC AND MAGNETIC FIELDS · SL + HL</span><span data-page></span></div>
+      </section>
+
+      <!-- Part 1 -->
+      <section class="slide section" data-title="Part 1: Electric charge">
+        <div class="title-grid">
+          <div>
+            <p class="eyebrow">Part 01 · SL + HL</p>
+            <h1>Electric charge<span>.</span></h1>
+            <p class="lead">Two types of charge, how bodies become charged, and the force between them</p>
+          </div>
+          <div class="fig" data-fig="d2-coulomb" data-plain></div>
+        </div>
+        <div class="slide-foot"><span>D.2 ELECTRIC AND MAGNETIC FIELDS · SL + HL</span><span data-page></span></div>
+      </section>
+
+      <section class="slide" data-title="Two types of charge">
+        <p class="eyebrow">Positive and negative</p>
+        <h2>Two types of charge<span>.</span></h2>
+        <div class="split wide-fig">
+          <ul class="points small">
+            <li><b>Like</b> charges repel. <b>Unlike</b> charges attract</li>
+            <li class="step">Charge is measured in <b>coulombs</b>, C</li>
+            <li class="step">Protons are positive, electrons negative, with the same size of charge:<br>\(e = 1.60 \times 10^{-19} \,\mathrm{C}\)</li>
+            <li class="step">A neutral body has <b>equal amounts</b> of both</li>
+          </ul>
+          <div class="panel">
+            <div class="panel-head"><span>FORCES BETWEEN CHARGES</span></div>
+            <div class="fig" data-fig="d2-charges"></div>
+          </div>
+        </div>
+        <div class="slide-foot"><span>D.2 ELECTRIC AND MAGNETIC FIELDS · SL + HL</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>Why only two types.</b> Every electrical experiment ever done can be explained with two kinds of charge that cancel when they are combined. Which one is called positive is a historical accident: Benjamin Franklin chose the names long before the electron was found, and the electron ended up with the negative sign.</p>
+            <p><b>Neutral does not mean empty.</b> A copper coin contains about \(10^{24}\) electrons and exactly as many protons, so its total charge is zero. Charging an object means moving a tiny fraction of its electrons on or off. One coulomb is a huge charge by everyday standards: a rubbed balloon carries less than a millionth of a coulomb.</p>
+          </div>
+          <div class="rn-side">
+            <p class="tip">In solids only electrons move. A body becomes positive by <b>losing</b> electrons, never by gaining protons.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide" data-title="Conservation of charge">
+        <p class="eyebrow">A conservation law</p>
+        <h2>Charge is conserved<span>.</span></h2>
+        <div class="stack center" style="gap: 30px;">
+          <ul class="points">
+            <li>The <b>total charge</b> of an isolated system never changes</li>
+            <li class="step">Charge can be <b>moved</b> from one body to another, but not created or destroyed</li>
+          </ul>
+          <div class="cards step" style="grid-template-columns: 1fr 1fr 1fr;">
+            <div class="card"><p class="eyebrow">Rubbing</p><h3>0 = (−q) + (+q)</h3><p>Rod and cloth start neutral and end with equal and opposite charges</p></div>
+            <div class="card"><p class="eyebrow">Touching</p><h3>+6 nC and −2 nC</h3><p>Two identical spheres share the total: +2 nC each</p></div>
+            <div class="card"><p class="eyebrow">Circuits</p><h3>Junctions</h3><p>The current into a junction equals the current out of it</p></div>
+          </div>
+        </div>
+        <div class="slide-foot"><span>D.2 ELECTRIC AND MAGNETIC FIELDS · SL + HL</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>The spheres, step by step.</b> The total charge is \(+6 + (-2) = +4 \,\mathrm{nC}\). When identical conducting spheres touch, they end with equal charges, so each takes \(+2 \,\mathrm{nC}\). The total is still \(+4 \,\mathrm{nC}\). If the spheres were different sizes the charge would not split equally, but the total would still be +4 nC.</p>
+            <p><b>It holds even when particles are created.</b> In beta-minus decay a neutron (charge 0) becomes a proton (+e), an electron (−e) and an antineutrino (0). New particles appear, but the total charge is zero before and after. No process has ever been found that changes the total charge.</p>
+          </div>
+          <div class="rn-side">
+            <p class="tip">Add charges with their signs. A common slip is to add the sizes: +6 nC and −2 nC do not make 8 nC.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide" data-title="Charging by friction and by contact">
+        <p class="eyebrow">Moving electrons</p>
+        <h2>Charging by friction and by contact<span>.</span></h2>
+        <div class="split fig-first">
+          <div class="panel">
+            <div class="panel-head"><span>RUBBING A ROD WITH A CLOTH</span><span class="reveal-hint">PRESS → TO RUB</span></div>
+            <div class="fig" data-fig="d2-friction"></div>
+          </div>
+          <ul class="points small">
+            <li class="step"><b>Friction</b>: rubbing moves electrons from one insulator to the other</li>
+            <li class="step">The two end with <b>equal and opposite</b> charges</li>
+            <li class="step"><b>Contact</b>: touch a charged body to a conductor and charge is <b>shared</b></li>
+            <li class="step">An insulator holds its charge in place. In a conductor it <b>spreads</b></li>
+          </ul>
+        </div>
+        <div class="slide-foot"><span>D.2 ELECTRIC AND MAGNETIC FIELDS · SL + HL</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>Which way the electrons go.</b> It depends on the pair of materials. Polythene holds electrons more strongly than a woollen cloth, so it takes electrons and becomes negative. Acetate or glass rubbed with the same cloth gives up electrons and becomes positive. Rubbing only brings the surfaces into close contact over a large area; it is not the rubbing itself that creates the charge.</p>
+            <p><b>Why you cannot charge a metal rod held in your hand.</b> Metals and your body are conductors. Any charge that the rod gains flows through you to the ground at once. Hold the metal with an insulating handle and it charges just as well as plastic.</p>
+          </div>
+          <div class="rn-side">
+            <p class="trap">Writing that “positive charges move onto the rod”. The positive charges are protons, fixed in the nuclei. Only electrons transfer.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide" data-title="Charging by induction">
+        <p class="eyebrow">Charging without touching</p>
+        <h2>Charging by induction<span>.</span></h2>
+        <div class="stack center" style="gap: 20px;">
+          <div class="panel" style="height: 500px; align-self: stretch;">
+            <div class="panel-head"><span>A METAL SPHERE ON AN INSULATING STAND</span><span class="reveal-hint">PRESS → FOR EACH STAGE</span></div>
+            <div class="fig" data-fig="d2-induction" data-animate style="flex: none; height: 410px;"></div>
+          </div>
+          <div class="idea">The sphere ends with the <b>opposite</b> charge to the rod, and the rod loses none of its own. <b>Earthing</b> (grounding) gives electrons a path to or from the ground.</div>
+        </div>
+        <div class="slide-foot"><span>D.2 ELECTRIC AND MAGNETIC FIELDS · SL + HL</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>What happens at each stage.</b> The negative rod repels the free electrons in the metal to the far side: the sphere is still neutral overall but its charge is separated. Connecting it to earth lets those repelled electrons escape further, into the ground. Breaking the earth connection first traps the shortage of electrons on the sphere. Only then is the rod taken away, and the positive charge spreads evenly over the surface.</p>
+            <p><b>Why the order matters.</b> If the rod is removed before the earth connection is broken, the electrons simply flow back up from the ground and the sphere ends neutral.</p>
+            <p><b>What earth is.</b> The Earth is so large that it can supply or accept electrons without its own potential changing. Touching the sphere with a finger works as an earth connection.</p>
+          </div>
+          <div class="rn-side">
+            <p class="tip">With a <b>positive</b> rod everything reverses: electrons flow up from the earth onto the sphere, and it ends negative.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide history" data-title="Story: Coulomb’s torsion balance">
+        <p class="eyebrow">The story · Paris, 1785</p>
+        <p class="not-examined">Background story · not assessed</p>
+        <h2>Coulomb’s torsion balance<span>.</span></h2>
+        <div class="story" style="--photo-h: 420px;">
+          <div class="story-photos">
+            <figure><img src="images/coulomb.jpg" width="774" height="1000" alt="Painted portrait of Charles-Augustin de Coulomb in a dark coat with a powdered wig, holding a brass instrument"><figcaption><b>Charles-Augustin de Coulomb</b>, military engineer</figcaption></figure>
+            <figure><img src="images/coulomb-torsion-balance.png" width="960" height="1203" alt="Engraved plate from 1785 showing a tall glass cylinder with a thin vertical tube on top. Inside, a light horizontal rod with a small ball at one end hangs from a fine thread, near a second fixed ball"><figcaption>His <b>torsion balance</b>, from the 1785 memoir</figcaption></figure>
+          </div>
+          <div class="stack">
+            <ul class="points">
+              <li>A light rod hung from a <b>fine thread</b>, with a charged ball at one end</li>
+              <li>A second charged ball pushed it round. The <b>twist of the thread</b> measured the force</li>
+              <li>Halving the distance needed <b>four times</b> the twist</li>
+              <li>Published in <b>1785</b>. Cavendish used the same idea for gravity in 1798</li>
+            </ul>
+            <div class="idea">An inverse square law, like <b>Newton’s</b> for gravity.</div>
+          </div>
+        </div>
+        <p class="credits">Portrait: <a href="https://commons.wikimedia.org/wiki/File:Charles_de_Coulomb.png" target="_blank" rel="noopener">Louis Hierle, 1894</a>, public domain. Balance: <a href="https://commons.wikimedia.org/wiki/File:Bcoulomb.png" target="_blank" rel="noopener">Charles-Augustin de Coulomb, 1785</a>, public domain.</p>
+        <div class="slide-foot"><span>D.2 ELECTRIC AND MAGNETIC FIELDS · SL + HL</span><span data-page></span></div>
+      </section>
+
+      <section class="slide" data-title="Coulomb’s law">
+        <p class="eyebrow">The force between two point charges</p>
+        <h2>Coulomb’s law<span>.</span></h2>
+        <div class="split">
+          <div class="stack">
+            <div class="equation"><span>\(F = k \dfrac{q_{1} q_{2}}{r^{2}}\)</span></div>
+            <ul class="points small">
+              <li>Along the line joining the charges</li>
+              <li class="step">\(k = 8.99 \times 10^{9} \,\mathrm{N} \,\mathrm{m}^{2} \,\mathrm{C}^{-2}\) in a vacuum</li>
+              <li class="step">An <b>inverse square law</b>, for point charges</li>
+            </ul>
+          </div>
+          <div class="panel">
+            <div class="panel-head"><span>TWO POINT CHARGES</span><span class="pill">EQUAL AND OPPOSITE FORCES</span></div>
+            <div class="fig" data-fig="d2-coulomb"></div>
+          </div>
+        </div>
+        <div class="slide-foot"><span>D.2 ELECTRIC AND MAGNETIC FIELDS · SL + HL</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>Reading the sign.</b> Put the charges in with their signs. A positive answer (two like charges) means repulsion; a negative answer (unlike charges) means attraction. Many people prefer to calculate the size of the force from the sizes of the charges and then decide the direction by thinking: both methods are accepted.</p>
+            <p><b>How strong it is.</b> Compare it with gravity for the electron and proton in a hydrogen atom. The electric attraction is \(8.2 \times 10^{-8} \,\mathrm{N}\). The gravitational attraction between the same two particles is \(3.6 \times 10^{-47} \,\mathrm{N}\), smaller by a factor of about \(10^{39}\). Gravity wins on the scale of planets only because matter is almost exactly neutral, so the electric forces cancel.</p>
+          </div>
+          <div class="rn-side">
+            <p class="tip">Charges are usually given in μC or nC, and distances in cm. Convert to C and m before you start.</p>
+            <p class="more">A charged sphere acts as a point charge at its centre, for anything outside it, as a uniform sphere does for gravity.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide" data-title="Coulomb’s law: two charged spheres">
+        <p class="eyebrow">Worked example</p>
+        <h2>The force between two small charged spheres<span>.</span></h2>
+        <div class="split even">
+          <div class="work">
+            <span class="say">\(q_{1} = +3.0 \,\mathrm{\mu C}\) · \(q_{2} = -5.0 \,\mathrm{\mu C}\)</span>
+            <span class="say">Centres \(r = 0.20 \,\mathrm{m}\) apart, in air</span>
+            <span>\(F = k \dfrac{q_{1} q_{2}}{r^{2}}\)</span>
+            <span class="step">\(F = \dfrac{8.99 \times 10^{9} \times 3.0 \times 10^{-6} \times 5.0 \times 10^{-6}}{0.20^{2}}\)</span>
+            <span class="step">\(F = \class{res}{3.4 \,\mathrm{N}}\), attractive</span>
+          </div>
+          <div class="stack">
+            <ul class="points small">
+              <li>Sizes of the charges in the equation; direction from the <b>signs</b></li>
+              <li class="step">\(\mathrm{\mu C} = 10^{-6} \,\mathrm{C}\) and \(\mathrm{nC} = 10^{-9} \,\mathrm{C}\)</li>
+              <li class="step">Each sphere feels 3.4 N, towards the other</li>
+            </ul>
+            <div class="idea step">Air is so close to a vacuum that the same \(k\) is used.</div>
+          </div>
+        </div>
+        <div class="slide-foot"><span>D.2 ELECTRIC AND MAGNETIC FIELDS · SL + HL</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>Ratios again.</b> If the spheres are moved to 0.40 m apart, the distance has doubled and the force falls to a quarter: 0.84 N. If instead one charge is doubled, the force doubles. Many multiple-choice questions on Coulomb’s law need only this kind of reasoning and no calculation.</p>
+            <p><b>A sense of scale.</b> A few microcoulombs on objects a hand’s width apart give a force of a few newtons, easy to feel. This is why charged clothes cling and a rubbed balloon sticks to a wall.</p>
+          </div>
+          <div class="rn-side">
+            <p class="trap">Forgetting to square the distance, or squaring it in centimetres. \(r\) must be in metres before it is squared.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide" data-title="The Coulomb constant and permittivity">
+        <p class="eyebrow">Charges inside a material</p>
+        <h2>The Coulomb constant and permittivity<span>.</span></h2>
+        <div class="split even">
+          <div class="stack">
+            <div class="equation"><span>\(k = \dfrac{1}{4 \pi \varepsilon_{0}}\)</span></div>
+            <ul class="points small">
+              <li>\(\varepsilon_{0} = 8.85 \times 10^{-12} \,\mathrm{C}^{2} \,\mathrm{N}^{-1} \,\mathrm{m}^{-2}\): the <b>permittivity of free space</b></li>
+              <li class="step">In a material, replace \(\varepsilon_{0}\) by its permittivity \(\varepsilon\)</li>
+              <li class="step">Larger \(\varepsilon\): <b>smaller</b> force</li>
+            </ul>
+          </div>
+          <div class="work step">
+            <span class="say">The same two spheres, now in water</span>
+            <span class="say">\(\varepsilon = 80 \varepsilon_{0}\)</span>
+            <span>\(F = \dfrac{1}{4 \pi \varepsilon} \dfrac{q_{1} q_{2}}{r^{2}}\)</span>
+            <span class="step">\(F = \dfrac{F_\mathrm{air}}{80} = \dfrac{3.4}{80} = \class{res}{0.042 \,\mathrm{N}}\)</span>
+          </div>
+        </div>
+        <div class="slide-foot"><span>D.2 ELECTRIC AND MAGNETIC FIELDS · SL + HL</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>Why a material weakens the force.</b> The molecules of an insulating material are distorted or turned by the field of the charges, so that their own positive and negative ends line up against it. Their fields partly cancel the original one. Water molecules do this particularly well, which is why water has such a high permittivity.</p>
+            <p><b>Why this matters in chemistry.</b> In a crystal of salt the sodium and chloride ions are held together by electric attraction. In water that attraction is 80 times weaker, and thermal motion is enough to pull the ions apart. That is why salt dissolves in water but not in oil.</p>
+          </div>
+          <div class="rn-side">
+            <p class="tip">Check that \(\frac{1}{4 \pi \times 8.85 \times 10^{-12}}\) gives \(8.99 \times 10^{9}\) on your calculator. Both constants are in the data booklet.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide" data-title="Millikan’s experiment">
+        <p class="eyebrow">Evidence that charge is quantized</p>
+        <h2>Millikan’s oil drop experiment<span>.</span></h2>
+        <div class="split fig-first">
+          <div class="panel">
+            <div class="panel-head"><span>ONE CHARGED OIL DROP</span><span class="reveal-hint">PRESS → TO SWITCH ON THE FIELD</span></div>
+            <div class="fig" data-fig="d2-millikan"></div>
+          </div>
+          <div class="stack">
+            <ul class="points small">
+              <li class="step">Adjust the voltage until the drop <b>hangs at rest</b>: \(qE = mg\)</li>
+              <li class="step">Measure \(q\) for many drops</li>
+              <li class="step">Every charge is a <b>whole-number multiple</b> of one value, \(e\)</li>
+            </ul>
+            <div class="idea step">Charge is <b>quantized</b>: \(q = ne\).</div>
+          </div>
+        </div>
+        <div class="slide-foot"><span>D.2 ELECTRIC AND MAGNETIC FIELDS · SL + HL</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>What “quantized” means.</b> Charge comes in lumps. A drop can carry 1, 2, 3 or more extra electrons, but never 2.5. Millikan’s drops gave charges such as \(3.2\), \(4.8\), \(8.0\) and \(1.6 \times 10^{-19} \,\mathrm{C}\). No drop ever had a charge between these steps, and the size of one step is the charge of a single electron.</p>
+            <p><b>How the mass was found.</b> A drop is far too small to weigh. With the field switched off it falls at a steady terminal velocity, where its weight is balanced by viscous drag and buoyancy. Measuring that velocity through a microscope gives the radius of the drop, and so its mass. The drops picked up their charge from friction in the spray nozzle, or from air ionized by X-rays.</p>
+          </div>
+          <div class="rn-side">
+            <p class="tip">To find \(e\) from data: look for the largest value that divides exactly into every measured charge.</p>
+            <p class="more">E.2 tells the story of Millikan’s other famous experiment, on the photoelectric effect.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide" data-title="Millikan: a balanced drop">
+        <p class="eyebrow">Worked example</p>
+        <h2>How many extra electrons on the drop?<span>.</span></h2>
+        <div class="split even">
+          <div class="work">
+            <span class="say">Mass \(4.9 \times 10^{-15} \,\mathrm{kg}\), at rest between plates</span>
+            <span class="say">\(V = 500 \,\mathrm{V}\) · plates \(d = 5.0 \,\mathrm{mm}\) apart</span>
+            <span>\(qE = mg\) &nbsp;with&nbsp; \(E = \dfrac{V}{d}\)</span>
+            <span class="step">\(q = \dfrac{mgd}{V} = \dfrac{4.9 \times 10^{-15} \times 9.8 \times 5.0 \times 10^{-3}}{500}\)</span>
+            <span class="step">\(q = \class{res}{4.8 \times 10^{-19} \,\mathrm{C}}\)</span>
+          </div>
+          <div class="work step">
+            <span class="say">Number of extra electrons</span>
+            <span>\(n = \dfrac{q}{e}\)</span>
+            <span class="step">\(n = \dfrac{4.8 \times 10^{-19}}{1.60 \times 10^{-19}} = \class{res}{3}\)</span>
+          </div>
+        </div>
+        <div class="slide-foot"><span>D.2 ELECTRIC AND MAGNETIC FIELDS · SL + HL</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>Which plate is positive?</b> The electric force must point up to balance the weight. The drop is negative, so it is attracted to the positive plate: the top plate must be positive. For a positive drop the plates would have to be connected the other way round.</p>
+            <p><b>What happens if the voltage changes.</b> Raise the voltage and the electric force exceeds the weight, so the drop accelerates upwards. Lower it and the drop falls. If the drop suddenly gains or loses an electron while you watch, it starts to move, and a new voltage is needed to hold it: direct evidence of charge changing in steps.</p>
+          </div>
+          <div class="rn-side">
+            <p class="trap">Leaving \(d\) in millimetres. The field strength \(\frac{V}{d}\) needs the separation in metres.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide history" data-title="Story: Millikan and Fletcher">
+        <p class="eyebrow">The story · Chicago, 1909–1913</p>
+        <p class="not-examined">Background story · not assessed</p>
+        <h2>Millikan, Fletcher and the oil drops<span>.</span></h2>
+        <div class="story" style="--photo-h: 430px;">
+          <div class="story-photos">
+            <figure><img src="images/millikan-apparatus.jpg" width="710" height="1000" alt="Museum display of a dull metal drum about the size of a bucket, with small windows and taps in its side, and a round brass plate with a ring of bolts held above it"><figcaption><b>Oil drop apparatus</b> of about 1916, with one of its brass plates lifted out</figcaption></figure>
+          </div>
+          <div class="stack">
+            <ul class="points">
+              <li>A drop that <b>evaporates</b> changes its mass while it is being measured</li>
+              <li>In <b>1909</b> Robert Millikan and his student <b>Harvey Fletcher</b> used an oil that hardly evaporates</li>
+              <li>The 1913 paper gave \(e = 1.592 \times 10^{-19} \,\mathrm{C}\), within <b>0.6%</b> of today’s value</li>
+              <li>Millikan alone received the Nobel Prize, in <b>1923</b></li>
+            </ul>
+            <div class="idea">The first measurement of the charge of a <b>single electron</b>.</div>
+          </div>
+        </div>
+        <p class="credits">Apparatus: <a href="https://commons.wikimedia.org/wiki/File:Millikan%27s_Oil_Drop_apparatus,_c._1916,_used_by_Robert_Millikan_and_Harvey_Fletcher_in_several_experiments_to_measure_an_electron%27s_charge_-_Museum_of_Science_and_Industry_(Chicago)_-_DSC06505.JPG" target="_blank" rel="noopener">Daderot, Museum of Science and Industry, Chicago</a>, CC0.</p>
+        <div class="slide-foot"><span>D.2 ELECTRIC AND MAGNETIC FIELDS · SL + HL</span><span data-page></span></div>
+      </section>
+
+      <section class="slide" data-title="Quick check: charge">
+        <p class="eyebrow">Quick check</p>
+        <h2>Electric charge<span>.</span></h2>
+        <div class="quiz fill">
+          <div class="q"><p><span class="n">01</span>A rod becomes positive when rubbed. What has it gained or lost?</p><div class="ans step">It has lost electrons</div></div>
+          <div class="q"><p><span class="n">02</span>Identical spheres with +8 nC and −2 nC touch. Charge on each afterwards?</p><div class="ans step">\(\frac{8 - 2}{2} = +3 \,\mathrm{nC}\)</div></div>
+          <div class="q"><p><span class="n">03</span>The distance between two charges is trebled. What happens to the force?</p><div class="ans step">It falls to one ninth</div></div>
+          <div class="q"><p><span class="n">04</span>A sphere is charged by induction with a negative rod. Its final charge?</p><div class="ans step">Positive</div></div>
+          <div class="q"><p><span class="n">05</span>What did Millikan’s experiment show about charge?</p><div class="ans step">It is quantized: multiples of \(e\)</div></div>
+          <div class="q"><p><span class="n">06</span>Could a drop carry \(4.0 \times 10^{-19} \,\mathrm{C}\)?</p><div class="ans step">No: that is 2.5\(e\)</div></div>
+        </div>
+        <div class="slide-foot"><span class="reveal-hint">PRESS → TO REVEAL EACH ANSWER</span><span data-page></span></div>
+      </section>
+
+      <!-- Part 2 -->
+      <section class="slide section" data-title="Part 2: Electric fields">
+        <div class="title-grid">
+          <div>
+            <p class="eyebrow">Part 02 · SL + HL</p>
+            <h1>Electric fields<span>.</span></h1>
+            <p class="lead">Field strength, field lines and the uniform field between parallel plates</p>
+          </div>
+          <div class="fig" data-fig="d2-plates" data-plain></div>
+        </div>
+        <div class="slide-foot"><span>D.2 ELECTRIC AND MAGNETIC FIELDS · SL + HL</span><span data-page></span></div>
+      </section>
+
+      <section class="slide" data-title="Electric field strength">
+        <p class="eyebrow">Force per unit charge</p>
+        <h2>Electric field strength<span>.</span></h2>
+        <div class="split even">
+          <div class="stack">
+            <div class="equation"><span>\(E = \dfrac{F}{q}\)</span></div>
+            <ul class="points small">
+              <li>The <b>force per unit charge</b> on a small <b>positive</b> test charge at that point</li>
+              <li class="step">A <b>vector</b>, in N C⁻¹</li>
+              <li class="step">Force on any charge placed there: \(F = qE\)</li>
+            </ul>
+          </div>
+          <div class="cards step" style="grid-template-columns: 1fr;">
+            <div class="card"><p class="eyebrow">Direction</p><h3>The force on a positive charge</h3><p>A negative charge is pushed the <b>opposite</b> way to the field</p></div>
+            <div class="card"><p class="eyebrow">Round a point charge</p><h3>\(E = k \dfrac{Q}{r^{2}}\)</h3><p>From Coulomb’s law with \(q_{2}\) as the test charge</p></div>
+          </div>
+        </div>
+        <div class="slide-foot"><span>D.2 ELECTRIC AND MAGNETIC FIELDS · SL + HL</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>The same idea as in D.1.</b> Gravitational field strength is force per unit mass; electric field strength is force per unit charge. Both describe the place, not the object you put there. The one new feature is the sign: mass is always positive, but charge is not, so the force on a charge can be along the field or against it.</p>
+            <p><b>A worked case.</b> At a point 0.30 m from a charge of +4.0 nC, \(E = \frac{8.99 \times 10^{9} \times 4.0 \times 10^{-9}}{0.30^{2}} = 400 \,\mathrm{N} \,\mathrm{C}^{-1}\), pointing away from the charge. An electron placed there feels \(1.60 \times 10^{-19} \times 400 = 6.4 \times 10^{-17} \,\mathrm{N}\), towards the charge.</p>
+          </div>
+          <div class="rn-side">
+            <p class="trap">Using the test charge in \(E = k \frac{Q}{r^{2}}\). \(Q\) is the charge that <b>makes</b> the field. The test charge cancelled.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide" data-title="Electric field lines">
+        <p class="eyebrow">Drawing a field</p>
+        <h2>Electric field lines<span>.</span></h2>
+        <div class="split wide-fig">
+          <ul class="points small">
+            <li>Show the direction of the force on a <b>positive</b> charge</li>
+            <li class="step">Start on positive charge, end on negative charge</li>
+            <li class="step">Never cross</li>
+            <li class="step"><b>Closer together</b>: a <b>stronger</b> field</li>
+          </ul>
+          <div class="panel">
+            <div class="panel-head"><span>RADIAL FIELDS OF POINT CHARGES</span></div>
+            <div class="fig" data-fig="d2-point-fields"></div>
+          </div>
+        </div>
+        <div class="slide-foot"><span>D.2 ELECTRIC AND MAGNETIC FIELDS · SL + HL</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>Why density means strength.</b> Draw 12 lines from a point charge. At any distance, all 12 lines pass through a sphere centred on the charge. The area of that sphere grows as \(r^{2}\), so the number of lines through each square metre falls as \(\frac{1}{r^{2}}\), exactly as the field strength does. The picture of lines spreading out is the inverse square law in visual form.</p>
+            <p><b>What field lines are not.</b> They are not the path a charge would follow. A charge released from rest starts off along the line, but once it is moving its momentum carries it across curved lines. A field line shows the direction of the <b>force</b> at each point, and nothing more.</p>
+          </div>
+          <div class="rn-side">
+            <p class="tip">Sketching: equal angles between lines from a point charge, arrows on every line, and the number of lines in proportion to the size of the charge.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide" data-title="The field of two point charges">
+        <p class="eyebrow">Fields add as vectors</p>
+        <h2>The field of two point charges<span>.</span></h2>
+        <div class="cards fill" style="grid-template-columns: 1fr 1fr; align-content: center;">
+          <div class="panel" style="height: 520px;">
+            <div class="panel-head"><span>UNLIKE CHARGES</span><span class="pill">LINES JOIN THEM</span></div>
+            <div class="fig" data-fig="d2-pair-fields"></div>
+          </div>
+          <div class="panel step" style="height: 520px;">
+            <div class="panel-head"><span>LIKE CHARGES</span><span class="pill">ZERO FIELD MIDWAY</span></div>
+            <div class="fig" data-fig="d2-pair-fields" data-kind="like"></div>
+          </div>
+        </div>
+        <div class="slide-foot"><span>D.2 ELECTRIC AND MAGNETIC FIELDS · SL + HL</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>How the patterns arise.</b> At every point, the field of each charge is worked out as if the other were not there, and the two are added as vectors. Close to either charge its own field is much the stronger, so the lines there look radial. Further away the two fields are of similar size and the lines bend.</p>
+            <p><b>The midpoint.</b> Between two equal like charges the fields are equal and opposite at the centre, so the field there is zero: no line passes through that point. Between unlike charges the two fields at the centre point the same way, from the positive charge to the negative one, and they add. For +4.0 nC and −4.0 nC placed 0.60 m apart, each gives 400 N C⁻¹ at the midpoint, so the field there is 800 N C⁻¹.</p>
+          </div>
+          <div class="rn-side">
+            <p class="tip">Lines must leave and meet each charge evenly spaced and at right angles to its surface. Far from two unlike charges of equal size, the field becomes very weak.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide" data-title="A charged conducting sphere">
+        <p class="eyebrow">Inside and outside</p>
+        <h2>The field of a charged conducting sphere<span>.</span></h2>
+        <div class="split">
+          <div class="stack">
+            <ul class="points small">
+              <li>The charge spreads over the <b>surface</b></li>
+              <li class="step"><b>Inside</b>: no field at all</li>
+              <li class="step"><b>Outside</b>: the field of a point charge at the centre</li>
+              <li class="step">Lines meet the surface at <b>right angles</b></li>
+            </ul>
+          </div>
+          <div class="panel">
+            <div class="panel-head"><span>A POSITIVE SPHERE</span></div>
+            <div class="fig" data-fig="d2-sphere"></div>
+          </div>
+        </div>
+        <div class="slide-foot"><span>D.2 ELECTRIC AND MAGNETIC FIELDS · SL + HL</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>Why the charge goes to the surface.</b> The extra charges repel one another and are free to move through the metal, so they get as far apart as they can: onto the outside surface, evenly spread on a sphere.</p>
+            <p><b>Why there is no field inside.</b> If there were a field inside the metal, the free electrons would feel a force and move. They would keep moving until their new arrangement cancelled the field. Within a tiny fraction of a second the charges settle, and when nothing is moving the field inside must be zero. This is true for a solid sphere and for a hollow one.</p>
+            <p><b>Why the lines are at right angles.</b> Any component of the field along the surface would push charge along the surface. At rest, there can be none.</p>
+          </div>
+          <div class="rn-side">
+            <p class="more">A hollow metal box shields its inside from outside electric fields in the same way. A car body protects its passengers in a lightning strike.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide" data-title="The uniform field between parallel plates">
+        <p class="eyebrow">Parallel plates</p>
+        <h2>The uniform field between parallel plates<span>.</span></h2>
+        <div class="split">
+          <div class="stack">
+            <div class="equation"><span>\(E = \dfrac{V}{d}\)</span></div>
+            <ul class="points small">
+              <li>\(V\): potential difference between the plates. \(d\): their separation</li>
+              <li class="step">Same strength and direction <b>everywhere</b> between the plates</li>
+              <li class="step">\(\mathrm{V} \,\mathrm{m}^{-1}\) is the same unit as \(\mathrm{N} \,\mathrm{C}^{-1}\)</li>
+            </ul>
+          </div>
+          <div class="panel">
+            <div class="panel-head"><span>OPPOSITELY CHARGED PLATES</span><span class="pill">EDGE EFFECTS</span></div>
+            <div class="fig" data-fig="d2-plates"></div>
+          </div>
+        </div>
+        <div class="slide-foot"><span>D.2 ELECTRIC AND MAGNETIC FIELDS · SL + HL</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>Where the equation comes from.</b> Move a charge \(q\) from one plate to the other. The force on it is \(qE\) all the way, so the work done is \(qEd\). By the definition of potential difference the work is also \(qV\). Setting them equal gives \(E = \frac{V}{d}\).</p>
+            <p><b>Why the field is uniform.</b> Each plate carries an even sheet of charge. Move towards one plate and its pull grows a little, but you are also moving away from the other, and the two changes cancel. The force on a charge is the same at every point between the plates, so a charge there has a <b>constant acceleration</b>, like a mass in the uniform gravitational field near the ground.</p>
+            <p><b>The edges.</b> Near the edges the lines bulge outwards and are further apart: the field is weaker and no longer uniform. Calculations assume plates that are large compared with their separation, so that the edges can be ignored.</p>
+          </div>
+          <div class="rn-side">
+            <p class="tip">Draw the lines between the plates with a ruler, evenly spaced, starting and ending exactly on the plates, with one curved line at each edge.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide" data-title="Parallel plates: an electron">
+        <p class="eyebrow">Worked example</p>
+        <h2>An electron between charged plates<span>.</span></h2>
+        <div class="split even">
+          <div class="work">
+            <span class="say">\(V = 600 \,\mathrm{V}\) · plates \(d = 3.0 \,\mathrm{cm}\) apart</span>
+            <span>\(E = \dfrac{V}{d} = \dfrac{600}{0.030} = \class{res}{2.0 \times 10^{4} \,\mathrm{V} \,\mathrm{m}^{-1}}\)</span>
+            <span class="step">\(F = qE = 1.60 \times 10^{-19} \times 2.0 \times 10^{4}\)</span>
+            <span class="step">\(F = \class{res}{3.2 \times 10^{-15} \,\mathrm{N}}\)</span>
+          </div>
+          <div class="work step">
+            <span class="say">Electron mass \(9.11 \times 10^{-31} \,\mathrm{kg}\)</span>
+            <span>\(a = \dfrac{F}{m} = \dfrac{3.2 \times 10^{-15}}{9.11 \times 10^{-31}}\)</span>
+            <span class="step">\(a = \class{res}{3.5 \times 10^{15} \,\mathrm{m} \,\mathrm{s}^{-2}}\)</span>
+            <span class="step">Towards the <b>positive</b> plate</span>
+          </div>
+        </div>
+        <div class="slide-foot"><span>D.2 ELECTRIC AND MAGNETIC FIELDS · SL + HL</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>Why the weight is ignored.</b> The weight of an electron is \(9.11 \times 10^{-31} \times 9.8 = 8.9 \times 10^{-30} \,\mathrm{N}\). The electric force here is larger by a factor of \(10^{14}\). For electrons, protons and ions in electric fields, gravity can always be left out. For an oil drop, which has billions of times more mass, it cannot.</p>
+            <p><b>The force is the same everywhere.</b> Because the field is uniform, the answer does not depend on where the electron is between the plates. Its acceleration is constant, so the equations of motion from A.1 apply. D.3 uses this to follow a charged particle through the plates.</p>
+          </div>
+          <div class="rn-side">
+            <p class="trap">Sending the electron along the field. Field lines show the force on a positive charge: the electron accelerates the opposite way.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide" data-title="Gravitational and electric fields compared">
+        <p class="eyebrow">Two inverse square laws</p>
+        <h2>Gravitational and electric fields compared<span>.</span></h2>
+        <div class="stack center">
+          <table class="facts big compare">
+            <thead><tr><th></th><th>Gravitational</th><th>Electric</th></tr></thead>
+            <tbody>
+              <tr><td>Acts on</td><td>Mass</td><td>Charge</td></tr>
+              <tr class="step"><td>Force law</td><td>\(F = G \dfrac{m_{1} m_{2}}{r^{2}}\)</td><td>\(F = k \dfrac{q_{1} q_{2}}{r^{2}}\)</td></tr>
+              <tr class="step"><td>Field strength</td><td>\(g = \dfrac{F}{m}\), in N kg⁻¹</td><td>\(E = \dfrac{F}{q}\), in N C⁻¹</td></tr>
+              <tr class="step"><td>Direction</td><td>Always attractive</td><td>Attractive or repulsive</td></tr>
+              <tr class="step"><td>Uniform field</td><td>Near a planet’s surface</td><td>Between parallel plates</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="slide-foot"><span>D.2 ELECTRIC AND MAGNETIC FIELDS · SL + HL</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>What is the same.</b> Both forces act at a distance, both obey an inverse square law for point bodies, and both are described by a field strength that is a force per unit of the property the force acts on. A uniform sphere behaves as a point at its centre in both cases. Learn one and you have most of the other.</p>
+            <p><b>What is different.</b> There is only one kind of mass, so gravity always attracts and can never be shielded. There are two kinds of charge, so electric forces can attract or repel, and equal amounts of both kinds cancel. The constants differ enormously: \(G\) is about \(10^{-10}\) and \(k\) about \(10^{10}\) in SI units.</p>
+          </div>
+          <div class="rn-side">
+            <p class="more">Using the same words for both (field strength, field line, and at HL potential and equipotential) is deliberate: the mathematics is identical.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide" data-title="Quick check: electric fields">
+        <p class="eyebrow">Quick check</p>
+        <h2>Electric fields<span>.</span></h2>
+        <div class="quiz fill">
+          <div class="q"><p><span class="n">01</span>Define electric field strength.</p><div class="ans step">Force per unit charge on a small positive test charge</div></div>
+          <div class="q"><p><span class="n">02</span>A 2.0 μC charge feels a force of 0.010 N. Field strength?</p><div class="ans step">\(\frac{0.010}{2.0 \times 10^{-6}} = 5.0 \times 10^{3} \,\mathrm{N} \,\mathrm{C}^{-1}\)</div></div>
+          <div class="q"><p><span class="n">03</span>Which way do field lines point near a negative charge?</p><div class="ans step">Towards it</div></div>
+          <div class="q"><p><span class="n">04</span>Plates 2.0 cm apart have 100 V across them. Field strength?</p><div class="ans step">\(\frac{100}{0.020} = 5.0 \times 10^{3} \,\mathrm{V} \,\mathrm{m}^{-1}\)</div></div>
+          <div class="q"><p><span class="n">05</span>What is the field inside a charged conducting sphere?</p><div class="ans step">Zero</div></div>
+          <div class="q"><p><span class="n">06</span>Where between parallel plates is the field not uniform?</p><div class="ans step">At the edges</div></div>
+        </div>
+        <div class="slide-foot"><span class="reveal-hint">PRESS → TO REVEAL EACH ANSWER</span><span data-page></span></div>
+      </section>
+
+      <!-- Part 3 -->
+      <section class="slide section" data-title="Part 3: Magnetic fields">
+        <div class="title-grid">
+          <div>
+            <p class="eyebrow">Part 03 · SL + HL</p>
+            <h1>Magnetic fields<span>.</span></h1>
+            <p class="lead">The field patterns of a bar magnet, a straight wire, a circular coil and a solenoid</p>
+          </div>
+          <div class="fig" data-fig="d2-bar-magnet"></div>
+        </div>
+        <div class="slide-foot"><span>D.2 ELECTRIC AND MAGNETIC FIELDS · SL + HL</span><span data-page></span></div>
+      </section>
+
+      <section class="slide" data-title="Magnetic field lines">
+        <p class="eyebrow">A bar magnet</p>
+        <h2>Magnetic field lines<span>.</span></h2>
+        <div class="split wide-fig">
+          <ul class="points small">
+            <li>Show the direction of the force on a <b>north pole</b>: the way a compass points</li>
+            <li class="step">Outside a magnet: from <b>N to S</b></li>
+            <li class="step">Closer together: a stronger field</li>
+            <li class="step">Always <b>closed loops</b>: they continue inside the magnet</li>
+          </ul>
+          <div class="panel">
+            <div class="panel-head"><span>THE FIELD OF A BAR MAGNET</span></div>
+            <div class="fig" data-fig="d2-bar-magnet"></div>
+          </div>
+        </div>
+        <div class="slide-foot"><span>D.2 ELECTRIC AND MAGNETIC FIELDS · SL + HL</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>How this differs from an electric field.</b> Electric field lines begin on positive charges and end on negative ones. Nobody has ever found a separate north or south pole: cut a magnet in half and you get two smaller magnets, each with both poles. So magnetic field lines have nowhere to begin or end. They run round in closed loops, out of the north pole, round to the south pole and back through the magnet.</p>
+            <p><b>The Earth.</b> A compass needle is a small magnet, and its north pole points towards geographic north. Since unlike poles attract, the magnetic pole near the Earth’s geographic north is a magnetic <b>south</b> pole.</p>
+          </div>
+          <div class="rn-side">
+            <p class="tip">Magnetic field strength is also called magnetic flux density. Its symbol is \(B\) and its unit the tesla, T. D.3 defines it from the force on a current.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide history" data-title="Story: Ørsted’s compass">
+        <p class="eyebrow">The story · Copenhagen, 1820</p>
+        <p class="not-examined">Background story · not assessed</p>
+        <h2>Ørsted’s compass needle<span>.</span></h2>
+        <div class="story" style="--photo-h: 330px;">
+          <div class="story-photos">
+            <figure><img src="images/orsted.jpg" width="576" height="768" alt="Painted portrait of Hans Christian Ørsted, a man with grey hair in a dark coat wearing a decoration"><figcaption><b>Hans Christian Ørsted</b>, painted by C. A. Jensen</figcaption></figure>
+            <figure><img src="images/orsted-experiment.png" width="736" height="452" alt="Engraving of a compass needle on a stand between two horizontal wires held by posts. Arrows show the current in the upper wire and the needle swinging round"><figcaption>A current in the wire <b>turns the needle</b> (engraving of 1876)</figcaption></figure>
+          </div>
+          <div class="stack">
+            <ul class="points">
+              <li>Electricity and magnetism were thought to be <b>unrelated</b></li>
+              <li>In <b>1820</b> Ørsted reported that a current in a wire <b>deflects a compass needle</b> nearby</li>
+              <li>The needle set itself <b>across</b> the wire, not along it: the field circles the wire</li>
+              <li>Ampère soon showed that two currents exert forces on <b>each other</b></li>
+            </ul>
+            <div class="idea">A moving charge makes a <b>magnetic field</b>.</div>
+          </div>
+        </div>
+        <p class="credits">Portrait: <a href="https://commons.wikimedia.org/wiki/File:H._C._%C3%98rsted_(C._A._Jensen).jpg" target="_blank" rel="noopener">C. A. Jensen</a>, public domain. Engraving: <a href="https://commons.wikimedia.org/wiki/File:Oersted_experiment.png" target="_blank" rel="noopener">Augustin Privat-Deschanel, 1876</a>, public domain.</p>
+        <div class="slide-foot"><span>D.2 ELECTRIC AND MAGNETIC FIELDS · SL + HL</span><span data-page></span></div>
+      </section>
+
+      <section class="slide" data-title="The field of a straight wire">
+        <p class="eyebrow">A current-carrying wire</p>
+        <h2>The field of a straight wire<span>.</span></h2>
+        <div class="split">
+          <div class="stack">
+            <ul class="points small">
+              <li>Field lines are <b>circles</b> centred on the wire</li>
+              <li class="step">Further apart further out: the field gets <b>weaker</b></li>
+              <li class="step"><b>Right-hand grip rule</b>: thumb along the current, fingers curl the way of the field</li>
+            </ul>
+            <div class="idea step">Reverse the current and the field reverses.</div>
+          </div>
+          <div class="panel">
+            <div class="panel-head"><span>CURRENT UPWARDS</span></div>
+            <div class="fig" data-fig="d2-wire-3d"></div>
+          </div>
+        </div>
+        <div class="slide-foot"><span>D.2 ELECTRIC AND MAGNETIC FIELDS · SL + HL</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>Using the grip rule.</b> Imagine holding the wire in your <b>right</b> hand with the thumb pointing the way the conventional current flows, from positive to negative. Your fingers wrap round the wire in the direction of the field lines. For the wire in the diagram, with the current upwards, the field is anticlockwise when you look down from above.</p>
+            <p><b>Why the circles spread out.</b> The field strength round a long straight wire is proportional to \(\frac{1}{r}\): twice as far from the wire, half the field. It is also proportional to the current. This is not an inverse square law, because the source is a long line, not a point.</p>
+          </div>
+          <div class="rn-side">
+            <p class="trap">Using the left hand, or the direction of electron flow. The rule is for the right hand and conventional current.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide" data-title="Dots and crosses">
+        <p class="eyebrow">Looking along the wire</p>
+        <h2>Dots and crosses<span>.</span></h2>
+        <div class="split wide-fig">
+          <ul class="points small">
+            <li><b>Dot</b>: out of the page, towards you</li>
+            <li><b>Cross</b>: into the page, away from you</li>
+            <li class="step">Out of the page: field <b>anticlockwise</b></li>
+            <li class="step">Into the page: field <b>clockwise</b></li>
+          </ul>
+          <div class="panel">
+            <div class="panel-head"><span>A WIRE SEEN END ON</span></div>
+            <div class="fig" data-fig="d2-wire-end"></div>
+          </div>
+        </div>
+        <div class="slide-foot"><span>D.2 ELECTRIC AND MAGNETIC FIELDS · SL + HL</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>Remembering the symbols.</b> Think of an arrow or a dart. Coming towards you, you see its point: a dot. Going away from you, you see the crossed feathers of its tail: a cross. The same two symbols are used for currents and for field lines that are at right angles to the page.</p>
+            <p><b>Checking with the grip rule.</b> For the dot, point your right thumb out of the page towards your face. Your fingers curl anticlockwise. For the cross, point the thumb into the page and they curl clockwise.</p>
+          </div>
+          <div class="rn-side">
+            <p class="tip">These end-on views are how most exam diagrams of wires, coils and solenoids are drawn. Practise sketching both from memory.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide" data-title="A circular coil and a solenoid">
+        <p class="eyebrow">Shaping the field</p>
+        <h2>A circular coil and a solenoid<span>.</span></h2>
+        <div class="cards fill" style="grid-template-columns: .8fr 1.2fr; align-content: center;">
+          <div class="panel" style="height: 520px;">
+            <div class="panel-head"><span>FLAT CIRCULAR COIL</span><span class="pill">CROSS-SECTION</span></div>
+            <div class="fig" data-fig="d2-coil"></div>
+          </div>
+          <div class="panel step" style="height: 520px;">
+            <div class="panel-head"><span>AIR-CORE SOLENOID</span><span class="pill">CROSS-SECTION</span></div>
+            <div class="fig" data-fig="d2-solenoid"></div>
+          </div>
+        </div>
+        <div class="slide-foot"><span>D.2 ELECTRIC AND MAGNETIC FIELDS · SL + HL</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>The coil.</b> Each short piece of the loop makes circles of field round itself. Inside the loop all these circles point the same way, through the coil, so they add up to a strong field there. Outside the loop they partly cancel.</p>
+            <p><b>The solenoid.</b> A solenoid is many loops side by side. Their fields add inside to give a field that is strong, parallel to the axis and nearly uniform, which is why solenoids are used wherever a uniform magnetic field is needed. Outside, the pattern is the same as that of a bar magnet. The field is stronger for a larger current and for more turns on each metre of length.</p>
+            <p><b>Which end is north?</b> Grip the solenoid in your right hand with the fingers curling the way the current flows round the turns. Your thumb points to the north pole, the end the field lines leave from.</p>
+          </div>
+          <div class="rn-side">
+            <p class="tip">Looking at one end of a solenoid: current <b>a</b>nticlockwise means that end is a north pole; clockwise means south.</p>
+            <p class="more">Only these four patterns are required: bar magnet, straight wire, circular coil and air-core solenoid.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide" data-title="Quick check: magnetic fields">
+        <p class="eyebrow">Quick check</p>
+        <h2>Magnetic fields<span>.</span></h2>
+        <div class="quiz fill">
+          <div class="q"><p><span class="n">01</span>Which way do field lines run outside a bar magnet?</p><div class="ans step">From the north pole to the south pole</div></div>
+          <div class="q"><p><span class="n">02</span>What shape are the field lines round a long straight wire?</p><div class="ans step">Circles centred on the wire</div></div>
+          <div class="q"><p><span class="n">03</span>A current flows into the page. Direction of the field?</p><div class="ans step">Clockwise</div></div>
+          <div class="q"><p><span class="n">04</span>Describe the field inside a solenoid.</p><div class="ans step">Strong and uniform, along the axis</div></div>
+          <div class="q"><p><span class="n">05</span>How do magnetic field lines differ from electric ones?</p><div class="ans step">They are closed loops, with no start or end</div></div>
+          <div class="q"><p><span class="n">06</span>The current in a wire is reversed. What happens to its field?</p><div class="ans step">It reverses direction</div></div>
+        </div>
+        <div class="slide-foot"><span class="reveal-hint">PRESS → TO REVEAL EACH ANSWER</span><span data-page></span></div>
+      </section>
+
+      <!-- Part 4 · Additional HL -->
+      <section class="slide section hl" data-title="Part 4: Additional HL">
+        <div class="title-grid">
+          <div>
+            <p class="eyebrow">Part 04 · Additional higher level</p>
+            <h1>Electric potential<span>.</span></h1>
+            <p class="lead">Potential energy and potential · the potential gradient<br>Work done on a charge · equipotential surfaces</p>
+          </div>
+          <div class="fig" data-fig="d2-equi-point" data-plain></div>
+        </div>
+        <div class="slide-foot"><span>D.2 ELECTRIC AND MAGNETIC FIELDS · ADDITIONAL HL</span><span data-page></span></div>
+      </section>
+
+      <section class="slide hl" data-title="HL: Electric potential energy">
+        <p class="eyebrow">Energy of two charges</p>
+        <h2>Electric potential energy<span>.</span></h2>
+        <div class="split even">
+          <div class="stack">
+            <div class="equation"><span>\(E_\mathrm{p} = k \dfrac{q_{1} q_{2}}{r}\)</span></div>
+            <ul class="points small">
+              <li>The <b>work done to assemble</b> the system from infinite separation</li>
+              <li class="step"><b>Zero</b> at infinite separation</li>
+              <li class="step">Keep the <b>signs</b> of the charges</li>
+            </ul>
+          </div>
+          <div class="cards step" style="grid-template-columns: 1fr;">
+            <div class="card"><p class="eyebrow">Like charges</p><h3>\(E_\mathrm{p}\) is positive</h3><p>Work must be done to push them together: they would fly apart</p></div>
+            <div class="card"><p class="eyebrow">Unlike charges</p><h3>\(E_\mathrm{p}\) is negative</h3><p>They are bound: work must be done to pull them apart</p></div>
+          </div>
+        </div>
+        <div class="slide-foot"><span>D.2 ELECTRIC AND MAGNETIC FIELDS · ADDITIONAL HL</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>Compare with gravity.</b> Gravitational potential energy, \(-G \frac{m_{1} m_{2}}{r}\), is always negative because gravity always attracts. Two unlike charges also attract, and putting one positive and one negative charge into \(k \frac{q_{1} q_{2}}{r}\) gives a negative answer in the same way. Two like charges repel, which has no parallel in gravity: their potential energy is positive.</p>
+            <p><b>A worked case: the hydrogen atom.</b> For a proton and an electron \(5.3 \times 10^{-11} \,\mathrm{m}\) apart: \(E_\mathrm{p} = \frac{8.99 \times 10^{9} \times (1.60 \times 10^{-19}) \times (-1.60 \times 10^{-19})}{5.3 \times 10^{-11}} = -4.3 \times 10^{-18} \,\mathrm{J}\), which is −27 eV. The negative sign says the atom is bound.</p>
+          </div>
+          <div class="rn-side">
+            <p class="trap">Squaring \(r\), as in Coulomb’s law. Force has \(r^{2}\) underneath; energy has \(r\).</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide hl" data-title="HL: Electric potential">
+        <p class="eyebrow">Energy per unit charge</p>
+        <h2>Electric potential<span>.</span></h2>
+        <div class="split">
+          <div class="stack">
+            <div class="equation"><span>\(V_\mathrm{e} = \dfrac{kQ}{r}\)</span></div>
+            <ul class="points small">
+              <li>The <b>work done per unit charge</b> in bringing a small positive test charge from infinity to the point</li>
+              <li class="step">A <b>scalar</b>, in volts. Zero at infinity</li>
+              <li class="step">Potentials of several charges <b>add as numbers</b></li>
+            </ul>
+          </div>
+          <div class="panel">
+            <div class="panel-head"><span>POTENTIAL ROUND A POINT CHARGE</span></div>
+            <div class="fig" data-fig="d2-potential-graph"></div>
+          </div>
+        </div>
+        <div class="slide-foot"><span>D.2 ELECTRIC AND MAGNETIC FIELDS · ADDITIONAL HL</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>Reading the two curves.</b> To bring a positive test charge towards a positive charge you must push against a repulsion, so you do positive work: the potential is positive and rises as you get closer. Towards a negative charge the test charge is pulled in and the field does the work: the potential is negative.</p>
+            <p><b>The volt.</b> One volt is one joule per coulomb. The potential difference across a cell in a circuit is the same quantity as here: the difference in the electric potential between two points. A point at 180 V is one where each coulomb of positive charge would have 180 J of potential energy.</p>
+          </div>
+          <div class="rn-side">
+            <p class="trap">Dropping the sign of \(Q\). Potential is a scalar but it does have a sign, and it matters when you add the potentials of several charges.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide hl" data-title="HL: The potential of two charges">
+        <p class="eyebrow">Worked example</p>
+        <h2>The potential near two charges<span>.</span></h2>
+        <div class="split even">
+          <div class="work">
+            <span class="say">P is 0.10 m from \(Q_{1} = +2.0 \,\mathrm{nC}\)</span>
+            <span class="say">and 0.20 m from \(Q_{2} = -3.0 \,\mathrm{nC}\)</span>
+            <span>\(V_\mathrm{e} = \dfrac{k Q_{1}}{r_{1}} + \dfrac{k Q_{2}}{r_{2}}\)</span>
+            <span class="step">\(V_{1} = \dfrac{8.99 \times 10^{9} \times 2.0 \times 10^{-9}}{0.10} = +180 \,\mathrm{V}\)</span>
+            <span class="step">\(V_{2} = \dfrac{8.99 \times 10^{9} \times (-3.0 \times 10^{-9})}{0.20} = -135 \,\mathrm{V}\)</span>
+            <span class="step">\(V_\mathrm{e} = 180 - 135 = \class{res}{+45 \,\mathrm{V}}\)</span>
+          </div>
+          <div class="stack">
+            <ul class="points small">
+              <li>No directions, no components: just <b>add</b></li>
+              <li class="step">It does not matter <b>where</b> P is, only how far it is from each charge</li>
+            </ul>
+            <div class="idea step">Field strengths at P would have to be added as <b>vectors</b>.</div>
+          </div>
+        </div>
+        <div class="slide-foot"><span>D.2 ELECTRIC AND MAGNETIC FIELDS · ADDITIONAL HL</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>Zero potential is not zero field.</b> Move P until it is 0.15 m from the negative charge and the two potentials are +180 V and −180 V: the total is zero. But the field there is certainly not zero, because a test charge at that point would still be pushed by one charge and pulled by the other. A potential of zero only means that no net work is needed to bring a charge there from infinity.</p>
+            <p><b>And zero field is not zero potential.</b> Midway between two equal positive charges the fields cancel, but the potentials, both positive, add.</p>
+          </div>
+          <div class="rn-side">
+            <p class="tip">Up to four point charges can appear in a question. The method is the same: one term for each charge, each with its own sign and distance.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide hl" data-title="HL: Work done in moving a charge">
+        <p class="eyebrow">Joules and electronvolts</p>
+        <h2>Work done in moving a charge<span>.</span></h2>
+        <div class="split even">
+          <div class="stack">
+            <div class="equation"><span>\(W = q \Delta V_\mathrm{e}\)</span></div>
+            <ul class="points small">
+              <li>Depends only on the potentials at the <b>start and end</b>, not on the path</li>
+              <li class="step"><b>Electronvolt</b>: the work done when a charge \(e\) moves through 1 V</li>
+              <li class="step">\(1 \,\mathrm{eV} = 1.60 \times 10^{-19} \,\mathrm{J}\)</li>
+            </ul>
+          </div>
+          <div class="work step">
+            <span class="say">An electron, from rest, moves through +500 V</span>
+            <span>Energy gained \(= e \Delta V_\mathrm{e} = \class{res}{500 \,\mathrm{eV}}\)</span>
+            <span class="step">\(= 500 \times 1.60 \times 10^{-19} = 8.0 \times 10^{-17} \,\mathrm{J}\)</span>
+            <span class="step">\(v = \sqrt{\dfrac{2 E_\mathrm{k}}{m}} = \sqrt{\dfrac{2 \times 8.0 \times 10^{-17}}{9.11 \times 10^{-31}}}\)</span>
+            <span class="step">\(v = \class{res}{1.3 \times 10^{7} \,\mathrm{m} \,\mathrm{s}^{-1}}\)</span>
+          </div>
+        </div>
+        <div class="slide-foot"><span>D.2 ELECTRIC AND MAGNETIC FIELDS · ADDITIONAL HL</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>Who does the work?</b> \(W = q \Delta V_\mathrm{e}\) is the work an outside agent must do to move the charge without changing its speed. For the electron, \(q\) is negative and \(\Delta V_\mathrm{e}\) is positive, so \(W\) is negative: no one has to push. The field does the work, the potential energy falls by 500 eV and the kinetic energy rises by 500 eV.</p>
+            <p><b>Why the electronvolt is convenient.</b> An electron accelerated through 500 V gains 500 eV. A particle with charge \(2e\), such as an alpha particle, gains 1000 eV through the same voltage. The number of electronvolts is the number of volts times the charge in units of \(e\), with no powers of ten to carry.</p>
+          </div>
+          <div class="rn-side">
+            <p class="trap">Putting an energy in eV straight into \(\frac{1}{2} m v^{2}\). Convert to joules first.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide hl" data-title="HL: Field strength as the potential gradient">
+        <p class="eyebrow">Linking the two descriptions</p>
+        <h2>Field strength is the potential gradient<span>.</span></h2>
+        <div class="split">
+          <div class="stack">
+            <div class="equation"><span>\(E = -\dfrac{\Delta V_\mathrm{e}}{\Delta r}\)</span></div>
+            <ul class="points small">
+              <li>The field points from <b>high</b> potential to <b>low</b> potential</li>
+              <li class="step">Potential changing quickly with distance: a <b>strong</b> field</li>
+              <li class="step frac">Between plates: \(E = \dfrac{400}{0.040} = 1.0 \times 10^{4} \,\mathrm{V} \,\mathrm{m}^{-1}\)</li>
+            </ul>
+          </div>
+          <div class="panel">
+            <div class="panel-head"><span>PLATES 4.0 cm APART</span><span class="pill">EQUIPOTENTIALS EVERY 1.0 cm</span></div>
+            <div class="fig" data-fig="d2-plates" data-equi></div>
+          </div>
+        </div>
+        <div class="slide-foot"><span>D.2 ELECTRIC AND MAGNETIC FIELDS · ADDITIONAL HL</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>The parallel plates are the simplest case.</b> The potential falls steadily from 400 V at the positive plate to 0 V at the negative plate, by 100 V for every centimetre. The gradient is the same everywhere, so the field is uniform, and \(E = \frac{V}{d}\) from the SL part is this equation for a constant gradient.</p>
+            <p><b>Why the minus sign.</b> The potential decreases in the direction of the field, so \(\Delta V_\mathrm{e}\) is negative when \(\Delta r\) is taken along the field. The minus sign makes \(E\) come out positive in that direction. A positive charge is pushed “downhill” in potential, as a ball rolls downhill in height.</p>
+          </div>
+          <div class="rn-side">
+            <p class="tip">On a graph of potential against distance, the field strength is minus the gradient. On a graph of field strength against distance, the area under the curve is the change in potential.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide hl" data-title="HL: Equipotential surfaces">
+        <p class="eyebrow">Mapping a field with potential</p>
+        <h2>Equipotential surfaces<span>.</span></h2>
+        <div class="split wide-fig">
+          <ul class="points small">
+            <li>Join points at the <b>same potential</b></li>
+            <li class="step"><b>No work</b> is done moving a charge along one</li>
+            <li class="step">Always at <b>right angles</b> to the field lines</li>
+            <li class="step">Round a point charge: <b>spheres</b>. Between plates: <b>planes</b></li>
+          </ul>
+          <div class="panel">
+            <div class="panel-head"><span>A POSITIVE POINT CHARGE</span><span class="pill">STEPS OF 100 V</span></div>
+            <div class="fig" data-fig="d2-equi-point"></div>
+          </div>
+        </div>
+        <div class="slide-foot"><span>D.2 ELECTRIC AND MAGNETIC FIELDS · ADDITIONAL HL</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>Why the circles spread out.</b> The potential is \(\frac{kQ}{r}\), so halving the potential means doubling the distance. The surfaces at 300 V and 200 V are close together; those at 200 V and 100 V are three times as far apart. Closely spaced equipotentials mean a large potential gradient, and so a strong field: near the charge.</p>
+            <p><b>Why no work is done.</b> \(W = q \Delta V_\mathrm{e}\), and along an equipotential \(\Delta V_\mathrm{e} = 0\). In terms of force: the field, and so the force on the charge, is at right angles to the surface, and a force at right angles to the motion does no work.</p>
+          </div>
+          <div class="rn-side">
+            <p class="tip">To turn a map of equipotentials into field lines, draw curves that cross every equipotential at right angles, with arrows pointing from higher potential to lower.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide hl" data-title="HL: Equipotentials of several charges">
+        <p class="eyebrow">Recognizing the patterns</p>
+        <h2>Equipotentials of two and four charges<span>.</span></h2>
+        <div class="cards fill" style="grid-template-columns: 1.2fr .8fr; align-content: center;">
+          <div class="panel" style="height: 520px;">
+            <div class="panel-head"><span>UNLIKE CHARGES</span><span class="pill">WITH FIELD LINES</span></div>
+            <div class="fig" data-fig="d2-pair-fields" data-equi></div>
+          </div>
+          <div class="panel step" style="height: 520px;">
+            <div class="panel-head"><span>FOUR CHARGES</span><span class="pill">EQUIPOTENTIALS ONLY</span></div>
+            <div class="fig" data-fig="d2-equi-four"></div>
+          </div>
+        </div>
+        <div class="slide-foot"><span>D.2 ELECTRIC AND MAGNETIC FIELDS · ADDITIONAL HL</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>How to read the two-charge map.</b> Close to each charge the equipotentials are nearly circles, positive round the positive charge and negative round the negative one. Exactly halfway between, every point is the same distance from both charges, so the two potentials cancel: the mid-plane is the 0 V equipotential. Every field line crosses every dashed curve at a right angle.</p>
+            <p><b>The four charges.</b> The same reasoning gives two planes of zero potential, between each positive charge and its negative neighbours. You are expected to recognize patterns like these and to sketch field lines on them, not to calculate them.</p>
+          </div>
+          <div class="rn-side">
+            <p class="tip">Two equipotentials can never cross, for the same reason that two field lines cannot: a point cannot have two different potentials.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide hl" data-title="HL: A charged conducting sphere">
+        <p class="eyebrow">Solid or hollow</p>
+        <h2>Field and potential of a charged sphere<span>.</span></h2>
+        <div class="split">
+          <div class="stack">
+            <ul class="points small">
+              <li><b>Outside</b>: as a point charge at the centre</li>
+              <li class="step"><b>Inside</b>: the field is zero, so the potential <b>does not change</b></li>
+              <li class="step frac">The whole sphere is at the surface potential \(\dfrac{kQ}{R}\)</li>
+            </ul>
+            <div class="work step">
+              <span class="say">\(Q = 2.0 \,\mathrm{nC}\) · \(R = 0.10 \,\mathrm{m}\)</span>
+              <span>\(V_\mathrm{e} = \dfrac{kQ}{R} = \class{res}{180 \,\mathrm{V}}\) throughout</span>
+            </div>
+          </div>
+          <div class="panel">
+            <div class="panel-head"><span>AGAINST DISTANCE FROM THE CENTRE</span></div>
+            <div class="fig" data-fig="d2-sphere-graphs"></div>
+          </div>
+        </div>
+        <div class="slide-foot"><span>D.2 ELECTRIC AND MAGNETIC FIELDS · ADDITIONAL HL</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>Why the potential is constant inside.</b> \(E = -\frac{\Delta V_\mathrm{e}}{\Delta r}\). Inside the conductor \(E = 0\), so the potential gradient is zero and the potential cannot change from one point to another. No work is needed to move a charge around inside. The whole conductor, surface and interior, is one equipotential.</p>
+            <p><b>Solid and hollow spheres behave alike.</b> In both, the charge is on the outer surface and the field inside is zero, so the graphs are the same. Outside, the equipotentials are spheres centred on the conductor, as for a point charge.</p>
+            <p><b>The field at the surface.</b> \(E = \frac{kQ}{R^{2}} = \frac{8.99 \times 10^{9} \times 2.0 \times 10^{-9}}{0.10^{2}} = 1800 \,\mathrm{V} \,\mathrm{m}^{-1}\). This is the gradient of the lower graph just outside the surface.</p>
+          </div>
+          <div class="rn-side">
+            <p class="trap">Drawing the potential falling to zero inside because the field does. Zero field means zero <b>change</b> in potential.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide hl" data-title="HL quick check">
+        <p class="eyebrow">Quick check · additional higher level</p>
+        <h2>Electric potential<span>.</span></h2>
+        <div class="quiz fill">
+          <div class="q"><p><span class="n">01</span>Is electric potential a scalar or a vector?</p><div class="ans step">A scalar</div></div>
+          <div class="q"><p><span class="n">02</span>Sign of the potential energy of a proton and an electron?</p><div class="ans step">Negative: they attract</div></div>
+          <div class="q"><p><span class="n">03</span>A proton moves through a potential difference of 2000 V. Energy gained?</p><div class="ans step">2000 eV = \(3.2 \times 10^{-16} \,\mathrm{J}\)</div></div>
+          <div class="q"><p><span class="n">04</span>The potential falls by 50 V over 2.0 mm. Field strength?</p><div class="ans step">\(\frac{50}{2.0 \times 10^{-3}} = 2.5 \times 10^{4} \,\mathrm{V} \,\mathrm{m}^{-1}\)</div></div>
+          <div class="q"><p><span class="n">05</span>At what angle do field lines cross equipotentials?</p><div class="ans step">90°</div></div>
+          <div class="q"><p><span class="n">06</span>The surface of a metal sphere is at 300 V. Potential at its centre?</p><div class="ans step">300 V</div></div>
+        </div>
+        <div class="slide-foot"><span class="reveal-hint">PRESS → TO REVEAL EACH ANSWER</span><span data-page></span></div>
+      </section>
+
+      <section class="slide" data-title="Summary">
+        <p class="eyebrow">Summary</p>
+        <h2>Electric and magnetic fields on one slide<span>.</span></h2>
+        <div class="cards fill" style="grid-template-columns: 1fr 1fr 1fr; align-content: center;">
+          <div class="card"><p class="eyebrow">Charge</p><h3>Two types, conserved, quantized</h3><p>Friction, contact and induction move electrons<br>Millikan: \(q = ne\)</p></div>
+          <div class="card step"><p class="eyebrow">Coulomb’s law</p><h3>An inverse square force</h3><p>\(F = k \frac{q_{1} q_{2}}{r^{2}}\) with \(k = \frac{1}{4 \pi \varepsilon_{0}}\)</p></div>
+          <div class="card step"><p class="eyebrow">Electric field</p><h3>Force per unit charge</h3><p>\(E = \frac{F}{q}\). Uniform between plates: \(E = \frac{V}{d}\)<br>Zero inside a conductor</p></div>
+          <div class="card step"><p class="eyebrow">Magnetic field</p><h3>Closed loops</h3><p>Bar magnet, wire, coil, solenoid<br>Right-hand grip rule for the direction</p></div>
+          <div class="card hl step"><p class="eyebrow">Potential · HL</p><h3>Energy per unit charge</h3><p>\(V_\mathrm{e} = \frac{kQ}{r}\), a scalar<br>\(W = q \Delta V_\mathrm{e}\), in J or eV</p></div>
+          <div class="card hl step"><p class="eyebrow">Equipotentials · HL</p><h3>At right angles to the field</h3><p>\(E = -\frac{\Delta V_\mathrm{e}}{\Delta r}\)<br>A conductor is one equipotential</p></div>
+        </div>
+        <div class="slide-foot"><span>D.2 ELECTRIC AND MAGNETIC FIELDS · SL + HL</span><span data-page></span></div>
+      </section>
+
+      <section class="slide" data-title="Key words">
+        <p class="eyebrow">Summary</p>
+        <h2>Key words<span>.</span></h2>
+        <div class="terms fill" style="grid-template-columns: repeat(3, 1fr);">
+          <div class="term"><b>Conservation of charge</b><span>Total charge never changes</span></div>
+          <div class="term"><b>Quantized</b><span>In whole multiples of e</span></div>
+          <div class="term"><b>Induction</b><span>Charging without contact</span></div>
+          <div class="term"><b>Earthing</b><span>A path for electrons to the ground</span></div>
+          <div class="term"><b>Permittivity</b><span>How a medium weakens the force</span></div>
+          <div class="term"><b>Electric field strength</b><span>Force per unit positive charge</span></div>
+          <div class="term"><b>Uniform field</b><span>Same strength and direction everywhere</span></div>
+          <div class="term"><b>Solenoid</b><span>A long coil of many turns</span></div>
+          <div class="term"><b>Right-hand grip rule</b><span>Thumb: current. Fingers: field</span></div>
+          <div class="term hl"><b>Electric potential</b><span>Work per unit charge from infinity</span></div>
+          <div class="term hl"><b>Electronvolt</b><span>Energy of charge e through 1 V</span></div>
+          <div class="term hl"><b>Equipotential surface</b><span>Joins points at the same potential</span></div>
+        </div>
+        <div class="slide-foot"><span>D.2 ELECTRIC AND MAGNETIC FIELDS · SL + HL</span><span data-page></span></div>
+      </section>
+
+    </div>
+  </main>
+
+  <nav class="controls" aria-label="Slide controls">
+    <button type="button" id="prev" aria-label="Previous slide"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg></button>
+    <span class="counter" id="counter" aria-live="polite"></span>
+    <button type="button" id="next" aria-label="Next slide"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 5l7 7-7 7"/></svg></button>
+  </nav>
+  <div class="progress" aria-hidden="true"><span id="progress-bar"></span></div>
+
+  <script src="../assets/figures.js"></script>
+  <script src="figures.js"></script>
+  <script src="../assets/deck-math.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
+  <script src="../assets/deck-notes.js"></script>
+  <script src="../assets/deck.js"></script>
+</body>
+</html>

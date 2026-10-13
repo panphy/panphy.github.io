@@ -1,0 +1,819 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="robots" content="noindex, nofollow">
+  <meta name="description" content="Teaching slides for IB Diploma Programme Physics topic A.3 Work, energy and power: work done by a force, kinetic, gravitational and elastic potential energy, conservation of mechanical energy, power, efficiency, Sankey diagrams and energy density.">
+  <meta name="theme-color" content="#F8F6F1">
+  <script src="/assets/theme.js" data-theme-scope="ibdpphy"></script>
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <link rel="stylesheet" href="/assets/standalone-top.css">
+  <title>A.3 Work, energy and power · IB DP Physics</title>
+  <link rel="icon" type="image/png" href="/assets/favicon.png">
+  <link rel="apple-touch-icon" href="/assets/apple-touch-icon.png">
+  <link rel="stylesheet" href="../assets/deck.css">
+  <link rel="stylesheet" href="../assets/deck-notes.css">
+  <link rel="stylesheet" href="/assets/theme-toggle.css">
+  <link rel="stylesheet" href="/assets/fullscreen-button.css">
+  <script src="/assets/theme-toggle.js"></script>
+  <script src="/ibdpphy/sw-register.js" defer></script>
+</head>
+<body>
+  <header class="banner">
+    <a class="banner-logo" href="/" aria-label="PanPhy Labs home"><img src="/assets/panphy.png" alt="PanPhy Labs" width="38" height="38"></a>
+    <a class="banner-title" href="#1">A.3 Work, energy and power</a>
+    <div class="banner-actions">
+      <button id="thumbs-toggle" class="icon-button" type="button" aria-controls="thumbs" aria-pressed="true" aria-label="Hide slide thumbnails" title="Show or hide slide thumbnails (T)"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path class="pane" d="M9.5 4.5H6A2.5 2.5 0 0 0 3.5 7v10A2.5 2.5 0 0 0 6 19.5h3.5z"/><rect x="3.5" y="4.5" width="17" height="15" rx="2.5"/><path d="M9.5 4.5v15"/></svg></button>
+      <button id="fullscreen" class="panphy-fullscreen-button" type="button" aria-pressed="false" aria-label="Present fullscreen" title="Present fullscreen (F)"><svg class="panphy-fs-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M4 9V4h5M15 4h5v5M20 15v5h-5M9 20H4v-5"/></svg></button>
+      <button id="theme-button" type="button" data-panphy-theme-toggle aria-label="Toggle light/dark theme" title="Toggle between light and dark themes"></button>
+    </div>
+  </header>
+  <script>window.PanPhyThemeToggle.mount(document.getElementById('theme-button'));</script>
+
+  <nav class="thumbs" id="thumbs" aria-label="Slides"></nav>
+
+  <main class="stage" id="stage">
+    <div class="deck" id="deck">
+
+      <!-- 1 · Title -->
+      <section class="slide title" data-title="A.3 Work, energy and power">
+        <div class="title-grid">
+          <div>
+            <p class="eyebrow">IB DP Physics · Theme A · Space, time and motion</p>
+            <h1>Work, energy and power<span>.</span></h1>
+            <p class="lead">A.3 · Work done by a force, mechanical energy and its conservation, power, efficiency and fuels<br>Standard level and higher level</p>
+            <div class="chips">
+              <span class="chip">SL + HL · 8 hours</span>
+            </div>
+          </div>
+          <div class="fig" data-fig="a3-coaster" data-plain></div>
+        </div>
+      </section>
+
+      <section class="slide" data-title="Lesson map">
+        <p class="eyebrow">The journey</p>
+        <h2>Four parts<span>.</span></h2>
+        <div class="cards fill" style="grid-template-columns: repeat(4, 1fr);">
+          <div class="card">
+            <div class="fig" data-fig="a3-work" data-plain style="height: 170px;"></div>
+            <p class="eyebrow">Part 01</p>
+            <h3>Work</h3>
+            <p>A force transfers energy</p>
+          </div>
+          <div class="card">
+            <div class="fig" data-fig="a3-fs-graph" data-kind="spring" data-plain style="height: 170px;"></div>
+            <p class="eyebrow">Part 02</p>
+            <h3>Kinetic and potential energy</h3>
+            <p>Three kinds of mechanical energy</p>
+          </div>
+          <div class="card">
+            <div class="fig" data-fig="a3-coaster" data-plain style="height: 170px;"></div>
+            <p class="eyebrow">Part 03</p>
+            <h3>Conservation</h3>
+            <p>With and without resistive forces</p>
+          </div>
+          <div class="card">
+            <div class="fig" data-fig="a3-sankey" data-plain style="height: 170px;"></div>
+            <p class="eyebrow">Part 04</p>
+            <h3>Power and efficiency</h3>
+            <p>Rates, Sankey diagrams, energy density</p>
+          </div>
+        </div>
+        <div class="idea" style="margin-top: 22px;">A.3 has <b>no additional higher level content</b>: every slide is for SL and HL.</div>
+        <div class="slide-foot"><span>A.3 WORK, ENERGY AND POWER · SL + HL</span><span data-page></span></div>
+      </section>
+
+      <!-- Part 1 -->
+      <section class="slide section" data-title="Part 1: Work">
+        <div class="title-grid">
+          <div>
+            <p class="eyebrow">Part 01 · SL + HL</p>
+            <h1>Work<span>.</span></h1>
+            <p class="lead">Energy is conserved. Work is how a force moves it from one place to another</p>
+          </div>
+          <div class="fig" data-fig="a3-work" data-plain></div>
+        </div>
+        <div class="slide-foot"><span>A.3 WORK, ENERGY AND POWER · SL + HL</span><span data-page></span></div>
+      </section>
+
+      <section class="slide" data-title="Conservation of energy">
+        <p class="eyebrow">The principle behind the whole topic</p>
+        <h2>Conservation of energy<span>.</span></h2>
+        <div class="stack center" style="gap: 30px;">
+          <ul class="points">
+            <li>Energy cannot be <b>created or destroyed</b>. It can only be <b>transferred</b> or changed from one form to another</li>
+            <li class="step">The total energy of an <b>isolated system</b> stays constant</li>
+          </ul>
+          <div class="cards step" style="grid-template-columns: 1fr 1fr 1fr;">
+            <div class="card"><p class="eyebrow">Mechanical energy</p><h3>Kinetic and potential</h3><p>Of moving bodies, raised masses and stretched springs</p></div>
+            <div class="card"><p class="eyebrow">Transfer by a force</p><h3>Work</h3><p>A force acting through a distance</p></div>
+            <div class="card"><p class="eyebrow">Other forms</p><h3>Thermal, chemical, nuclear …</h3><p>Where “lost” mechanical energy goes, and where fuels store it</p></div>
+          </div>
+        </div>
+        <div class="slide-foot"><span>A.3 WORK, ENERGY AND POWER · SL + HL</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>Why energy is so useful.</b> Forces and accelerations change from moment to moment and have directions. Energy is a single number that stays the same from start to finish. If you know the energy of a system at the beginning and can account for what enters and leaves, you know its energy at the end, without following the motion in between. Many problems that are long with Newton’s laws take two lines with energy.</p>
+            <p><b>Choosing the system.</b> “Conserved” applies to a system that nothing enters or leaves. A falling ball alone is not isolated: the Earth pulls on it. The ball and the Earth together are, so their total energy is constant. Whenever energy seems to appear or vanish, the system has been drawn too small.</p>
+          </div>
+          <div class="rn-side">
+            <p class="tip">Energy is a <b>scalar</b>, measured in joules. There are no components to resolve, which is much of its appeal.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide" data-title="Work done by a force">
+        <p class="eyebrow">Transferring energy</p>
+        <h2>Work done by a force<span>.</span></h2>
+        <div class="split">
+          <div class="stack">
+            <div class="equation"><span>\(W = Fs \cos \theta\)</span></div>
+            <ul class="points small">
+              <li>For a <b>constant</b> force</li>
+              <li class="step">\(\theta\): the angle between the force and the displacement</li>
+              <li class="step">Work done = <b>energy transferred</b>. Unit: \(1 \,\mathrm{J} = 1 \,\mathrm{N} \,\mathrm{m}\)</li>
+            </ul>
+          </div>
+          <div class="panel">
+            <div class="panel-head"><span>PULLING A BLOCK</span></div>
+            <div class="fig" data-fig="a3-work"></div>
+          </div>
+        </div>
+        <div class="slide-foot"><span>A.3 WORK, ENERGY AND POWER · SL + HL</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>Two ways to read the equation.</b> \((F \cos \theta) \times s\): the component of the force along the motion, times the distance moved. Or \(F \times (s \cos \theta)\): the whole force, times the distance moved in the direction of the force. They give the same number. Use whichever is easier to see in the diagram.</p>
+            <p><b>What the rest of the force does.</b> The component at right angles to the motion, \(F \sin \theta\), does no work. In the diagram it lifts the block slightly, reducing the normal force, but it moves the block no distance in its own direction.</p>
+            <p><b>Work in physics is not effort.</b> Holding a heavy bag still, you tire, but the force on the bag moves through no distance, so no work is done on the bag. Your muscles are transferring energy internally, which is a different matter.</p>
+          </div>
+          <div class="rn-side">
+            <p class="trap">Leaving out \(\cos \theta\) when the force is not along the motion, or using \(\sin \theta\) because the angle was given from the vertical.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide" data-title="Positive, negative and zero work">
+        <p class="eyebrow">The sign of the work</p>
+        <h2>Positive, negative and zero work<span>.</span></h2>
+        <div class="cards fill" style="grid-template-columns: 1fr 1fr 1fr; align-content: center;">
+          <div class="card"><p class="eyebrow">θ less than 90°</p><h3>Positive work</h3><p>The force has a component <b>along</b> the motion. It gives energy to the body<br><br>Example: gravity on a falling ball</p></div>
+          <div class="card step"><p class="eyebrow">θ = 90°</p><h3>No work</h3><p>The force is <b>at right angles</b> to the motion<br><br>Examples: the normal force on a sliding block, the centripetal force in a circle</p></div>
+          <div class="card step"><p class="eyebrow">θ more than 90°</p><h3>Negative work</h3><p>The force has a component <b>against</b> the motion. It takes energy from the body<br><br>Example: friction, \(\cos 180^{\circ} = -1\)</p></div>
+        </div>
+        <div class="slide-foot"><span>A.3 WORK, ENERGY AND POWER · SL + HL</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>Why a satellite needs no engine.</b> In a circular orbit, gravity is always at right angles to the velocity. It does no work, so the satellite’s kinetic energy never changes, and it can orbit for centuries without fuel. The same is true of the tension in the string of a conical pendulum and of the magnetic force on a moving charge.</p>
+            <p><b>Negative work is still a transfer.</b> When friction does −50 J of work on a sliding box, the box loses 50 J of kinetic energy. That energy has not gone: it has been transferred to thermal energy of the box and the floor.</p>
+          </div>
+          <div class="rn-side">
+            <p class="tip">Total work on a body = the sum of the work done by each force = the work done by the <b>resultant</b> force.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide" data-title="Work: pulling a sledge">
+        <p class="eyebrow">Worked example</p>
+        <h2>Pulling a sledge across snow<span>.</span></h2>
+        <div class="split even">
+          <div class="work">
+            <span class="say">Rope at \(30^{\circ}\) to the ground · tension \(F = 120 \,\mathrm{N}\)</span>
+            <span class="say">The sledge moves \(s = 25 \,\mathrm{m}\)</span>
+            <span>\(W = Fs \cos \theta\)</span>
+            <span class="step">\(W = 120 \times 25 \times \cos 30^{\circ}\)</span>
+            <span class="step">\(W = \class{res}{2.6 \times 10^{3} \,\mathrm{J}}\)</span>
+          </div>
+          <div class="work step">
+            <span class="say">Friction 104 N, at constant velocity</span>
+            <span>\(W_\mathrm{f} = F_\mathrm{f} s \cos 180^{\circ}\)</span>
+            <span class="step">\(W_\mathrm{f} = 104 \times 25 \times (-1) = \class{res}{-2.6 \times 10^{3} \,\mathrm{J}}\)</span>
+            <span class="step">Total work: <b>zero</b></span>
+          </div>
+        </div>
+        <div class="slide-foot"><span>A.3 WORK, ENERGY AND POWER · SL + HL</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>Why the total is zero.</b> At constant velocity the resultant force is zero, so the forward component of the tension, \(120 \cos 30^{\circ} = 104 \,\mathrm{N}\), equals the friction. The rope puts 2600 J into the sledge and friction takes 2600 J out. The kinetic energy of the sledge does not change, and the energy ends up as thermal energy in the snow and the runners.</p>
+            <p><b>The forces that do nothing.</b> The weight and the normal force are both at right angles to the motion and do no work, however large they are.</p>
+          </div>
+          <div class="rn-side">
+            <p class="tip">Set your calculator to degrees, and check with a value you know: \(\cos 60^{\circ} = 0.5\).</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide" data-title="Work from a graph">
+        <p class="eyebrow">When the force is not constant</p>
+        <h2>Work from a force–displacement graph<span>.</span></h2>
+        <div class="split wide-fig">
+          <ul class="points small">
+            <li>Work done = the <b>area</b> under a force–displacement graph</li>
+            <li class="step">Constant force: a rectangle, \(F \times s\)</li>
+            <li class="step">Varying force: count squares, or split into simple shapes</li>
+            <li class="step">Use the component of force <b>along</b> the displacement</li>
+          </ul>
+          <div class="panel">
+            <div class="panel-head"><span>A VARYING FORCE</span></div>
+            <div class="fig" data-fig="a3-fs-graph"></div>
+          </div>
+        </div>
+        <div class="slide-foot"><span>A.3 WORK, ENERGY AND POWER · SL + HL</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>Why the area.</b> Cut the displacement into thin strips. Across one strip the force hardly changes, so the work done is the height of the strip times its width: its area. Adding the strips gives the whole area under the curve. The same argument gave displacement from a velocity–time graph in A.1 and impulse from a force–time graph in A.2.</p>
+            <p><b>Check the axes first.</b> Area under force against <b>displacement</b> is work, in joules. Area under force against <b>time</b> is impulse, in newton seconds. The two graphs can look alike and mean quite different things.</p>
+          </div>
+          <div class="rn-side">
+            <p class="tip">Counting squares: work out what one square is worth, for example \(5 \,\mathrm{N} \times 0.2 \,\mathrm{m} = 1 \,\mathrm{J}\), then count, taking part squares in pairs.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide history" data-title="Story: Joule’s paddle wheel">
+        <p class="eyebrow">The story · Manchester, 1845</p>
+        <p class="not-examined">Background story · not assessed</p>
+        <h2>Joule’s paddle wheel<span>.</span></h2>
+        <div class="story" style="--photo-h: 360px;">
+          <div class="story-photos">
+            <figure><img src="images/joule.jpg" width="755" height="1000" alt="Photograph of James Prescott Joule as an older man with a white beard, seated beside a table"><figcaption><b>James Prescott Joule</b>, brewer and amateur scientist</figcaption></figure>
+            <figure><img src="images/joule-apparatus.png" width="1280" height="1054" alt="Engraving of Joule’s apparatus: a weight hanging from a string that passes over a pulley and turns a spindle with paddles inside a closed vessel of water, with a thermometer in the lid"><figcaption>A <b>falling weight</b> turns paddles in water (engraving of 1869)</figcaption></figure>
+          </div>
+          <div class="stack">
+            <ul class="points">
+              <li>Heat was thought to be a <b>fluid</b>, separate from mechanical energy</li>
+              <li>Joule let a falling weight churn water and measured the tiny <b>rise in temperature</b></li>
+              <li>The same work always gave the <b>same heating</b></li>
+              <li>His 1850 value is within <b>1%</b> of the modern one</li>
+            </ul>
+            <div class="idea">Work and heat are both <b>transfers of energy</b>. The unit carries his name.</div>
+          </div>
+        </div>
+        <p class="credits">Portrait: <a href="https://commons.wikimedia.org/wiki/File:Joule_James_sitting.jpg" target="_blank" rel="noopener">from Henry Roscoe, 1906</a>, public domain. Apparatus: <a href="https://commons.wikimedia.org/wiki/File:Joule%27s_Apparatus_(Harper%27s_Scan).png" target="_blank" rel="noopener">Harper’s New Monthly Magazine, 1869</a>, public domain.</p>
+        <div class="slide-foot"><span>A.3 WORK, ENERGY AND POWER · SL + HL</span><span data-page></span></div>
+      </section>
+
+      <section class="slide" data-title="Quick check: work">
+        <p class="eyebrow">Quick check</p>
+        <h2>Work<span>.</span></h2>
+        <div class="quiz fill">
+          <div class="q"><p><span class="n">01</span>A 20 N force moves a box 3.0 m in its own direction. Work done?</p><div class="ans step">\(20 \times 3.0 = 60 \,\mathrm{J}\)</div></div>
+          <div class="q"><p><span class="n">02</span>The same force acts at 60° to the motion. Work done?</p><div class="ans step">\(60 \cos 60^{\circ} = 30 \,\mathrm{J}\)</div></div>
+          <div class="q"><p><span class="n">03</span>How much work does the normal force do on a sliding block?</p><div class="ans step">None: it is at right angles to the motion</div></div>
+          <div class="q"><p><span class="n">04</span>Friction of 8.0 N acts over 5.0 m. Work done by friction?</p><div class="ans step">\(-40 \,\mathrm{J}\)</div></div>
+          <div class="q"><p><span class="n">05</span>What does the area under a force–displacement graph give?</p><div class="ans step">The work done</div></div>
+          <div class="q"><p><span class="n">06</span>Is work a scalar or a vector?</p><div class="ans step">A scalar</div></div>
+        </div>
+        <div class="slide-foot"><span class="reveal-hint">PRESS → TO REVEAL EACH ANSWER</span><span data-page></span></div>
+      </section>
+
+      <!-- Part 2 -->
+      <section class="slide section" data-title="Part 2: Kinetic and potential energy">
+        <div class="title-grid">
+          <div>
+            <p class="eyebrow">Part 02 · SL + HL</p>
+            <h1>Kinetic and potential energy<span>.</span></h1>
+            <p class="lead">The three kinds of mechanical energy, each found from the work done</p>
+          </div>
+          <div class="fig" data-fig="a3-fs-graph" data-kind="spring" data-plain></div>
+        </div>
+        <div class="slide-foot"><span>A.3 WORK, ENERGY AND POWER · SL + HL</span><span data-page></span></div>
+      </section>
+
+      <section class="slide" data-title="Kinetic energy">
+        <p class="eyebrow">Energy of motion</p>
+        <h2>Kinetic energy<span>.</span></h2>
+        <div class="split even">
+          <div class="stack">
+            <div class="equation"><span>\(E_\mathrm{k} = \dfrac{1}{2} m v^{2} = \dfrac{p^{2}}{2m}\)</span></div>
+            <ul class="points small">
+              <li>Depends on the <b>square</b> of the speed</li>
+              <li class="step">A scalar: never negative, whatever the direction</li>
+              <li class="step">\(p = mv\) is the momentum</li>
+            </ul>
+          </div>
+          <div class="work step">
+            <span class="say">A resultant force \(F\) acts over a distance \(s\), from rest</span>
+            <span>\(W = Fs = mas\)</span>
+            <span class="step">\(v^{2} - u^{2} = 2as\) &nbsp;with&nbsp; \(u = 0\): &nbsp;\(as = \dfrac{v^{2}}{2}\)</span>
+            <span class="step">\(W = \dfrac{1}{2} m v^{2}\)</span>
+          </div>
+        </div>
+        <div class="slide-foot"><span>A.3 WORK, ENERGY AND POWER · SL + HL</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>What the square means.</b> Double the speed and the kinetic energy is four times as large. A car at 100 km h⁻¹ has four times the kinetic energy it has at 50 km h⁻¹, and with the same braking force it needs four times the distance to stop. Speed matters far more than mass.</p>
+            <p><b>The momentum form.</b> Put \(v = \frac{p}{m}\) into \(\frac{1}{2} m v^{2}\) and you get \(\frac{p^{2}}{2m}\). It is the quickest route when a question gives momentum, as after a collision or an explosion. Two bodies with the same momentum do <b>not</b> have the same kinetic energy: the lighter one has more. That is why the bullet, not the rifle, carries nearly all the energy.</p>
+          </div>
+          <div class="rn-side">
+            <p class="trap">Squaring the whole of \(\frac{1}{2} m v\). Only the speed is squared.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide" data-title="Work and change in kinetic energy">
+        <p class="eyebrow">Work done by the resultant force</p>
+        <h2>Work and the change in kinetic energy<span>.</span></h2>
+        <div class="split even">
+          <div class="stack">
+            <ul class="points small">
+              <li>The work done by the <b>resultant</b> force equals the <b>change in kinetic energy</b></li>
+              <li class="step frac">\(F s = \dfrac{1}{2} m v^{2} - \dfrac{1}{2} m u^{2}\)</li>
+              <li class="step">No times, no accelerations: just the start and the end</li>
+            </ul>
+          </div>
+          <div class="work step">
+            <span class="say">A 1200 kg car at \(20 \,\mathrm{m} \,\mathrm{s}^{-1}\) · braking force 6000 N</span>
+            <span>Work done by the brakes = kinetic energy lost</span>
+            <span class="step">\(F s = \dfrac{1}{2} m u^{2}\) &nbsp;so&nbsp; \(s = \dfrac{m u^{2}}{2F}\)</span>
+            <span class="step">\(s = \dfrac{1200 \times 20^{2}}{2 \times 6000} = \class{res}{40 \,\mathrm{m}}\)</span>
+          </div>
+        </div>
+        <div class="slide-foot"><span>A.3 WORK, ENERGY AND POWER · SL + HL</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>The same answer the long way.</b> With Newton’s second law: \(a = \frac{6000}{1200} = 5.0 \,\mathrm{m} \,\mathrm{s}^{-2}\), then \(v^{2} - u^{2} = 2as\) gives \(s = \frac{20^{2}}{2 \times 5.0} = 40 \,\mathrm{m}\). The energy method reaches it in one step, and it still works when the force is not constant, where the equations of motion do not.</p>
+            <p><b>Why braking distance goes as speed squared.</b> From \(s = \frac{m u^{2}}{2F}\): at 40 m s⁻¹ the same car needs 160 m. Where the energy goes: the brake discs get hot. The brakes have done −240 kJ of work on the car, and 240 kJ of thermal energy has appeared.</p>
+          </div>
+          <div class="rn-side">
+            <p class="tip">Use the resultant force. If the car were also on a slope, the component of its weight along the slope would do work too.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide" data-title="Gravitational potential energy">
+        <p class="eyebrow">Energy of position</p>
+        <h2>Gravitational potential energy<span>.</span></h2>
+        <div class="split">
+          <div class="stack">
+            <div class="equation"><span>\(\Delta E_\mathrm{p} = mg \Delta h\)</span></div>
+            <ul class="points small">
+              <li>The work done <b>against gravity</b> in raising a mass</li>
+              <li class="step">Only the <b>change in height</b> matters, not the route</li>
+              <li class="step">Valid <b>close to the Earth’s surface</b>, where \(g\) is constant</li>
+            </ul>
+          </div>
+          <div class="panel">
+            <div class="panel-head"><span>TWO ROUTES TO THE SAME HEIGHT</span></div>
+            <div class="fig" data-fig="a3-gpe"></div>
+          </div>
+        </div>
+        <div class="slide-foot"><span>A.3 WORK, ENERGY AND POWER · SL + HL</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>Why the route does not matter.</b> Lifted straight up, the block needs a force \(mg\) over a distance \(\Delta h\): work \(mg \Delta h\). On a smooth ramp at angle \(\theta\), the force needed is smaller, \(mg \sin \theta\), but the distance along the ramp is longer, \(\frac{\Delta h}{\sin \theta}\). Multiply them and \(\sin \theta\) cancels: \(mg \Delta h\) again. A ramp trades force for distance; it does not save energy.</p>
+            <p><b>Why only changes.</b> The equation gives a change in potential energy, not an amount. You may choose any level as zero, the floor or the bench or the ground outside, because only differences in height affect the motion. Choose the lowest point in the problem and every value is positive.</p>
+          </div>
+          <div class="rn-side">
+            <p class="more">Far from the surface \(g\) is not constant, and \(E_\mathrm{p} = -\frac{G M m}{r}\) must be used: D.1, higher level.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide" data-title="Elastic potential energy">
+        <p class="eyebrow">Energy stored in a spring</p>
+        <h2>Elastic potential energy<span>.</span></h2>
+        <div class="split">
+          <div class="stack">
+            <div class="equation"><span>\(E_\mathrm{H} = \dfrac{1}{2} k (\Delta x)^{2}\)</span></div>
+            <ul class="points small">
+              <li>\(k\): spring constant. \(\Delta x\): extension or compression</li>
+              <li class="step">The force grows from 0 to \(k \Delta x\): the <b>average</b> force is half of that</li>
+              <li class="step">The same for stretching and for squashing</li>
+            </ul>
+          </div>
+          <div class="panel">
+            <div class="panel-head"><span>FORCE AGAINST EXTENSION</span></div>
+            <div class="fig" data-fig="a3-fs-graph" data-kind="spring"></div>
+          </div>
+        </div>
+        <div class="slide-foot"><span>A.3 WORK, ENERGY AND POWER · SL + HL</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>Where the half comes from.</b> The force needed to stretch a spring is not constant. It starts at zero and rises steadily to \(k \Delta x\) (Hooke’s law, A.2). The work done is the area under the graph, a triangle: \(\frac{1}{2} \times \Delta x \times k \Delta x\). Or think of the average force, \(\frac{1}{2} k \Delta x\), acting over the distance \(\Delta x\).</p>
+            <p><b>The square again.</b> Double the extension and the stored energy is four times as large. Pulling a bowstring back twice as far stores four times the energy.</p>
+          </div>
+          <div class="rn-side">
+            <p class="trap">Using \(F \times \Delta x\) with the final force. That gives twice the right answer: it is the rectangle, not the triangle.</p>
+            <p class="tip">\(\Delta x\) is measured from the natural length of the spring, not from wherever it happened to start.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide" data-title="Elastic energy: a spring launcher">
+        <p class="eyebrow">Worked example</p>
+        <h2>A spring launcher<span>.</span></h2>
+        <div class="split">
+          <div class="stack">
+            <div class="work">
+              <span class="say">\(k = 200 \,\mathrm{N} \,\mathrm{m}^{-1}\) · \(\Delta x = 0.15 \,\mathrm{m}\) · ball 0.050 kg</span>
+              <span>\(E_\mathrm{H} = \dfrac{1}{2} k (\Delta x)^{2}\)</span>
+              <span>\(E_\mathrm{H} = \dfrac{1}{2} \times 200 \times 0.15^{2} = \class{res}{2.25 \,\mathrm{J}}\)</span>
+              <span class="step">\(\dfrac{1}{2} m v^{2} = E_\mathrm{H}\) &nbsp;so&nbsp; \(v = \sqrt{\dfrac{2 E_\mathrm{H}}{m}}\)</span>
+              <span class="step">\(v = \sqrt{\dfrac{2 \times 2.25}{0.050}} = \class{res}{9.5 \,\mathrm{m} \,\mathrm{s}^{-1}}\)</span>
+            </div>
+          </div>
+          <div class="panel">
+            <div class="panel-head"><span>BEFORE RELEASE</span></div>
+            <div class="fig" data-fig="a3-launcher"></div>
+          </div>
+        </div>
+        <div class="slide-foot"><span>A.3 WORK, ENERGY AND POWER · SL + HL</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>Why energy is the only sensible method here.</b> The force of the spring on the ball falls as the spring expands, so the acceleration is not constant and the equations of motion cannot be used. Energy does not care how the force varies on the way: all 2.25 J stored in the spring ends up as kinetic energy of the ball, if friction and the mass of the spring are ignored.</p>
+            <p><b>Fired straight up instead.</b> The same 2.25 J would become gravitational potential energy at the top: \(\Delta h = \frac{E_\mathrm{H}}{mg} = \frac{2.25}{0.050 \times 9.8} = 4.6 \,\mathrm{m}\) above the release point.</p>
+          </div>
+          <div class="rn-side">
+            <p class="tip">Compress the spring twice as far and the ball leaves at twice the speed: the energy is four times as large, and speed goes as the square root of energy.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide" data-title="Quick check: energy">
+        <p class="eyebrow">Quick check</p>
+        <h2>Kinetic and potential energy<span>.</span></h2>
+        <div class="quiz fill">
+          <div class="q"><p><span class="n">01</span>A 2.0 kg mass moves at 3.0 m s⁻¹. Kinetic energy?</p><div class="ans step">\(\frac{1}{2} \times 2.0 \times 3.0^{2} = 9.0 \,\mathrm{J}\)</div></div>
+          <div class="q"><p><span class="n">02</span>Its speed doubles. What happens to its kinetic energy?</p><div class="ans step">Four times as large</div></div>
+          <div class="q"><p><span class="n">03</span>A 5.0 kg mass is raised 2.0 m. Gain in potential energy?</p><div class="ans step">\(5.0 \times 9.8 \times 2.0 = 98 \,\mathrm{J}\)</div></div>
+          <div class="q"><p><span class="n">04</span>A spring with \(k = 400 \,\mathrm{N} \,\mathrm{m}^{-1}\) is stretched 0.10 m. Energy stored?</p><div class="ans step">\(\frac{1}{2} \times 400 \times 0.10^{2} = 2.0 \,\mathrm{J}\)</div></div>
+          <div class="q"><p><span class="n">05</span>A body has momentum 6.0 kg m s⁻¹ and mass 3.0 kg. Kinetic energy?</p><div class="ans step">\(\frac{6.0^{2}}{2 \times 3.0} = 6.0 \,\mathrm{J}\)</div></div>
+          <div class="q"><p><span class="n">06</span>What equals the work done by the resultant force?</p><div class="ans step">The change in kinetic energy</div></div>
+        </div>
+        <div class="slide-foot"><span class="reveal-hint">PRESS → TO REVEAL EACH ANSWER</span><span data-page></span></div>
+      </section>
+
+      <!-- Part 3 -->
+      <section class="slide section" data-title="Part 3: Conservation of mechanical energy">
+        <div class="title-grid">
+          <div>
+            <p class="eyebrow">Part 03 · SL + HL</p>
+            <h1>Conservation of mechanical energy<span>.</span></h1>
+            <p class="lead">When it holds, when it does not, and where the missing energy has gone</p>
+          </div>
+          <div class="fig" data-fig="a3-coaster" data-plain></div>
+        </div>
+        <div class="slide-foot"><span>A.3 WORK, ENERGY AND POWER · SL + HL</span><span data-page></span></div>
+      </section>
+
+      <section class="slide" data-title="Mechanical energy">
+        <p class="eyebrow">Without resistive forces</p>
+        <h2>Mechanical energy is conserved<span>.</span></h2>
+        <div class="stack center" style="gap: 20px;">
+          <div class="panel" style="height: 470px; align-self: stretch;">
+            <div class="panel-head"><span>A CART ON A FRICTIONLESS TRACK</span><span class="pill">KINETIC + POTENTIAL = CONSTANT</span></div>
+            <div class="fig" data-fig="a3-coaster"></div>
+          </div>
+          <div class="idea">Total mechanical energy = \(E_\mathrm{k} + E_\mathrm{p} + E_\mathrm{H}\). With <b>no frictional or resistive forces</b>, it stays the same.</div>
+        </div>
+        <div class="slide-foot"><span>A.3 WORK, ENERGY AND POWER · SL + HL</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>What to watch.</b> As the cart drops, the teal bar shrinks and the apricot bar grows by exactly the same amount. At the bottom of the dip nearly all the energy is kinetic and the cart is at its fastest. On the second hill, which is lower than the first, the cart still has some kinetic energy left at the top, so it gets over. It could never climb a hill higher than the one it started from.</p>
+            <p><b>The speed depends only on the height.</b> The shape of the track between two points makes no difference to the speed at the second one. Two tracks from the same height to the same level, one steep and one gentle, deliver the cart at the same speed, though not after the same time.</p>
+          </div>
+          <div class="rn-side">
+            <p class="tip">Work, in this picture, is the amount of energy changed from one mechanical form to another: gravity does positive work on the way down, turning potential energy into kinetic.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide" data-title="Conservation: falling through a height">
+        <p class="eyebrow">Worked example</p>
+        <h2>A roller coaster drops 20 m<span>.</span></h2>
+        <div class="split even">
+          <div class="work">
+            <span class="say">From rest at the top · no resistive forces</span>
+            <span>Potential energy lost = kinetic energy gained</span>
+            <span class="step">\(mg \Delta h = \dfrac{1}{2} m v^{2}\)</span>
+            <span class="step">\(v = \sqrt{2 g \Delta h} = \sqrt{2 \times 9.8 \times 20}\)</span>
+            <span class="step">\(v = \class{res}{20 \,\mathrm{m} \,\mathrm{s}^{-1}}\)</span>
+          </div>
+          <div class="stack">
+            <ul class="points small">
+              <li>The mass <b>cancels</b>: every car reaches the same speed</li>
+              <li class="step">The <b>shape</b> of the track does not matter</li>
+              <li class="step">If it starts at \(5.0 \,\mathrm{m} \,\mathrm{s}^{-1}\): \(v = \sqrt{u^{2} + 2 g \Delta h} = 20.4 \,\mathrm{m} \,\mathrm{s}^{-1}\)</li>
+            </ul>
+          </div>
+        </div>
+        <div class="slide-foot"><span>A.3 WORK, ENERGY AND POWER · SL + HL</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>A method for every problem of this kind.</b> Pick two moments, a start and an end. Write the total mechanical energy at each: kinetic, gravitational and elastic. Set them equal. Cross out anything that is zero or the same on both sides. What is left is usually one line of algebra.</p>
+            <p><b>Why starting at 5.0 m s⁻¹ adds so little.</b> Energies add, not speeds. The starting kinetic energy, proportional to \(5.0^{2} = 25\), is small beside the \(2 g \Delta h = 392\) gained in the fall. The final speed is \(\sqrt{25 + 392} = 20.4\), barely more than before.</p>
+          </div>
+          <div class="rn-side">
+            <p class="trap">Using the equations of motion along a curved track. The acceleration is not constant there. Energy is the right tool.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide" data-title="With resistive forces">
+        <p class="eyebrow">When mechanical energy is not conserved</p>
+        <h2>With frictional and resistive forces<span>.</span></h2>
+        <div class="split even">
+          <div class="stack">
+            <ul class="points small">
+              <li>Friction and drag do <b>negative work</b>: mechanical energy falls</li>
+              <li class="step">Change in mechanical energy = work done by the <b>non-conservative</b> forces</li>
+              <li class="step">The “lost” energy becomes <b>thermal</b> energy</li>
+            </ul>
+            <div class="idea step">Total energy is still conserved.</div>
+          </div>
+          <div class="work step">
+            <span class="say">A 70 kg skier descends 30 m, from rest, and arrives at \(18 \,\mathrm{m} \,\mathrm{s}^{-1}\)</span>
+            <span>\(W = \Delta E = \dfrac{1}{2} m v^{2} - mg \Delta h\)</span>
+            <span class="step">\(W = \dfrac{1}{2} \times 70 \times 18^{2} - 70 \times 9.8 \times 30\)</span>
+            <span class="step">\(W = 11\,340 - 20\,580 = \class{res}{-9.2 \times 10^{3} \,\mathrm{J}}\)</span>
+          </div>
+        </div>
+        <div class="slide-foot"><span>A.3 WORK, ENERGY AND POWER · SL + HL</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>Reading the answer.</b> The skier started with 20 580 J of potential energy and finished with 11 340 J of kinetic energy. The difference, 9240 J, is the work done against friction and air resistance. It is negative because those forces act against the motion and take mechanical energy away.</p>
+            <p><b>Finding the force.</b> If the slope is 120 m long, the average resistive force is \(\frac{9240}{120} = 77 \,\mathrm{N}\). Work done by friction depends on the length of the path, unlike the work done by gravity, which depends only on the height. That difference is what “non-conservative” means.</p>
+          </div>
+          <div class="rn-side">
+            <p class="tip">Conservative forces (gravity, the force of a spring) store energy that can be got back. Non-conservative forces (friction, drag) turn it into thermal energy that cannot.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide" data-title="Quick check: conservation">
+        <p class="eyebrow">Quick check</p>
+        <h2>Conservation of mechanical energy<span>.</span></h2>
+        <div class="quiz fill">
+          <div class="q"><p><span class="n">01</span>Name the three kinds of mechanical energy.</p><div class="ans step">Kinetic, gravitational potential, elastic potential</div></div>
+          <div class="q"><p><span class="n">02</span>When is the total mechanical energy conserved?</p><div class="ans step">When there are no frictional or resistive forces</div></div>
+          <div class="q"><p><span class="n">03</span>A ball is dropped 5.0 m. Speed at the bottom, ignoring drag?</p><div class="ans step">\(\sqrt{2 \times 9.8 \times 5.0} = 9.9 \,\mathrm{m} \,\mathrm{s}^{-1}\)</div></div>
+          <div class="q"><p><span class="n">04</span>Does that speed depend on the mass of the ball?</p><div class="ans step">No: the mass cancels</div></div>
+          <div class="q"><p><span class="n">05</span>A block loses 50 J of potential energy and gains 35 J of kinetic. Work done by friction?</p><div class="ans step">\(-15 \,\mathrm{J}\)</div></div>
+          <div class="q"><p><span class="n">06</span>Where has that energy gone?</p><div class="ans step">To thermal energy of the surfaces</div></div>
+        </div>
+        <div class="slide-foot"><span class="reveal-hint">PRESS → TO REVEAL EACH ANSWER</span><span data-page></span></div>
+      </section>
+
+      <!-- Part 4 -->
+      <section class="slide section" data-title="Part 4: Power and efficiency">
+        <div class="title-grid">
+          <div>
+            <p class="eyebrow">Part 04 · SL + HL</p>
+            <h1>Power and efficiency<span>.</span></h1>
+            <p class="lead">How fast energy is transferred, how much of it is useful, and how much a fuel holds</p>
+          </div>
+          <div class="fig" data-fig="a3-sankey" data-plain></div>
+        </div>
+        <div class="slide-foot"><span>A.3 WORK, ENERGY AND POWER · SL + HL</span><span data-page></span></div>
+      </section>
+
+      <section class="slide" data-title="Power">
+        <p class="eyebrow">The rate of doing work</p>
+        <h2>Power<span>.</span></h2>
+        <div class="split even">
+          <div class="stack">
+            <div class="equation"><span>\(P = \dfrac{\Delta W}{\Delta t} = Fv\)</span></div>
+            <ul class="points small">
+              <li>The <b>rate</b> of doing work, or of transferring energy</li>
+              <li class="step">Unit: the watt, \(1 \,\mathrm{W} = 1 \,\mathrm{J} \,\mathrm{s}^{-1}\)</li>
+              <li class="step">\(P = Fv\) for a force along the velocity</li>
+            </ul>
+          </div>
+          <div class="work step">
+            <span class="say">A lift raises 800 kg through 15 m in 12 s</span>
+            <span>\(P = \dfrac{\Delta W}{\Delta t} = \dfrac{mg \Delta h}{\Delta t} = \dfrac{800 \times 9.8 \times 15}{12} = \class{res}{9.8 \,\mathrm{kW}}\)</span>
+            <span class="say step">A car at a steady \(30 \,\mathrm{m} \,\mathrm{s}^{-1}\) against 600 N of drag</span>
+            <span class="step">\(P = Fv = 600 \times 30 = \class{res}{18 \,\mathrm{kW}}\)</span>
+          </div>
+        </div>
+        <div class="slide-foot"><span>A.3 WORK, ENERGY AND POWER · SL + HL</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>Where \(P = Fv\) comes from.</b> In a time \(\Delta t\) a body moving at speed \(v\) covers a distance \(v \Delta t\). A force \(F\) along the motion does work \(F v \Delta t\). Divide by \(\Delta t\): \(P = Fv\). It gives the power at one instant, even while the speed is changing.</p>
+            <p><b>Why cars have a top speed.</b> At a steady speed the driving force equals the resistive force, and the engine’s power is \(Fv\). Drag rises steeply with speed, roughly as \(v^{2}\), so the power needed rises roughly as \(v^{3}\). Doubling the top speed would take about eight times the power.</p>
+          </div>
+          <div class="rn-side">
+            <p class="tip">Energy = power × time. A kilowatt-hour is 1 kW for one hour: \(1000 \times 3600 = 3.6 \times 10^{6} \,\mathrm{J}\). It is a unit of energy, not of power.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide history" data-title="Story: Watt and the horse">
+        <p class="eyebrow">The story · Birmingham, 1780s</p>
+        <p class="not-examined">Background story · not assessed</p>
+        <h2>Watt and the horse<span>.</span></h2>
+        <div class="story" style="--photo-h: 380px;">
+          <div class="story-photos">
+            <figure><img src="images/watt.jpg" width="797" height="1000" alt="Painted portrait of James Watt, a grey-haired man in a dark coat, seated with a drawing of an engine in front of him"><figcaption><b>James Watt</b>, painted by Carl Frederik von Breda in 1792</figcaption></figure>
+            <figure><img src="images/boulton-watt-engine.jpg" width="669" height="1000" alt="A large steam engine in a museum, with a wooden beam overhead, a tall vertical cylinder and a big spoked flywheel"><figcaption>A <b>Boulton &amp; Watt engine</b> of 1785, now in Sydney</figcaption></figure>
+          </div>
+          <div class="stack">
+            <ul class="points">
+              <li>In <b>1765</b> Watt saw how to stop the steam engine wasting most of its fuel: a <b>separate condenser</b></li>
+              <li>His customers were replacing <b>horses</b>, so he needed a way to compare</li>
+              <li>He settled on <b>33 000 foot-pounds per minute</b> for one horse: about 746 W</li>
+              <li>In 1882 it was proposed to name the unit of power the <b>watt</b></li>
+            </ul>
+            <div class="idea">An engine is sold by its <b>power</b>, not its energy.</div>
+          </div>
+        </div>
+        <p class="credits">Portrait: <a href="https://commons.wikimedia.org/wiki/File:Watt_James_von_Breda.jpg" target="_blank" rel="noopener">Carl Frederik von Breda, 1792</a>, public domain. Engine: <a href="https://commons.wikimedia.org/wiki/File:Boulton_%26_Watt_steam_engine,_Sydney_Powerhouse_Museum,_2014_(15243331353).jpg" target="_blank" rel="noopener">David Maciulaitis</a>, <a href="https://creativecommons.org/licenses/by/2.0/" target="_blank" rel="noopener">CC BY 2.0</a>.</p>
+        <div class="slide-foot"><span>A.3 WORK, ENERGY AND POWER · SL + HL</span><span data-page></span></div>
+      </section>
+
+      <section class="slide" data-title="Efficiency and Sankey diagrams">
+        <p class="eyebrow">How much is useful?</p>
+        <h2>Efficiency and Sankey diagrams<span>.</span></h2>
+        <div class="split">
+          <div class="stack">
+            <div class="equation small"><span>\(\eta = \dfrac{E_\mathrm{output}}{E_\mathrm{input}} = \dfrac{P_\mathrm{output}}{P_\mathrm{input}}\)</span></div>
+            <ul class="points small">
+              <li>The <b>useful</b> output as a fraction of the total input</li>
+              <li class="step">No unit. Always <b>less than 1</b></li>
+              <li class="step">Sankey diagram: the <b>width</b> of each arrow shows the energy</li>
+            </ul>
+          </div>
+          <div class="panel">
+            <div class="panel-head"><span>A PETROL ENGINE</span><span class="pill">η = 0.30</span></div>
+            <div class="fig" data-fig="a3-sankey"></div>
+          </div>
+        </div>
+        <div class="slide-foot"><span>A.3 WORK, ENERGY AND POWER · SL + HL</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>Reading a Sankey diagram.</b> Energy flows from left to right. The input arrow is 100 units wide. The useful output carries straight on; the wasted energy peels away, usually downwards. The widths of all the outputs must add up to the width of the input: that is conservation of energy, drawn to scale. Here \(30 + 70 = 100\), and the efficiency is \(\frac{30}{100} = 0.30\), or 30%.</p>
+            <p><b>Why it is never 1.</b> Some energy always goes to thermal energy through friction, electrical resistance or hot exhaust gases. That energy still exists, but it has spread out into the surroundings and cannot be gathered up to do useful work. B.4 explains at higher level why engines that run on heat have a limit well below 100%.</p>
+          </div>
+          <div class="rn-side">
+            <p class="tip">When drawing one: choose a scale such as 1 mm for 1 J, keep the widths in proportion and label each arrow with its form of energy.</p>
+            <p class="trap">Giving an efficiency greater than 1, or 100%. If that happens, the input and output have been swapped.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide" data-title="Efficiency: an electric motor">
+        <p class="eyebrow">Worked example</p>
+        <h2>The efficiency of an electric motor<span>.</span></h2>
+        <div class="split even">
+          <div class="work">
+            <span class="say">Input power 500 W</span>
+            <span class="say">It lifts 20 kg at a steady \(1.5 \,\mathrm{m} \,\mathrm{s}^{-1}\)</span>
+            <span>\(P_\mathrm{output} = Fv = mgv\)</span>
+            <span class="step">\(P_\mathrm{output} = 20 \times 9.8 \times 1.5 = 294 \,\mathrm{W}\)</span>
+            <span class="step">\(\eta = \dfrac{P_\mathrm{output}}{P_\mathrm{input}} = \dfrac{294}{500} = \class{res}{0.59}\)</span>
+          </div>
+          <div class="stack">
+            <ul class="points small">
+              <li>At a steady speed the lifting force equals the <b>weight</b></li>
+              <li class="step">As a percentage: <b>59%</b></li>
+              <li class="step">Wasted: \(500 - 294 = 206 \,\mathrm{W}\), as thermal energy</li>
+            </ul>
+          </div>
+        </div>
+        <div class="slide-foot"><span>A.3 WORK, ENERGY AND POWER · SL + HL</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>Machines in a chain.</b> When one machine feeds another, the efficiencies multiply. A power station at 0.40, transmission lines at 0.95 and this motor at 0.59 give \(0.40 \times 0.95 \times 0.59 = 0.22\) overall. Less than a quarter of the energy of the fuel ends up as potential energy of the load.</p>
+            <p><b>Working backwards.</b> How much power must a motor of efficiency 0.80 take in to deliver 2.0 kW? \(P_\mathrm{input} = \frac{P_\mathrm{output}}{\eta} = \frac{2.0}{0.80} = 2.5 \,\mathrm{kW}\). The input is always the larger number.</p>
+          </div>
+          <div class="rn-side">
+            <p class="tip">Efficiency can be given as a decimal or a percentage. In a calculation, use the decimal.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide" data-title="Energy density of fuels">
+        <p class="eyebrow">How much energy a fuel holds</p>
+        <h2>Energy density of fuels<span>.</span></h2>
+        <div class="split even">
+          <div class="stack">
+            <ul class="points small">
+              <li><b>Specific energy</b>: energy released per unit <b>mass</b>, in J kg⁻¹</li>
+              <li class="step"><b>Energy density</b>: energy released per unit <b>volume</b>, in J m⁻³</li>
+              <li class="step">High values: less fuel to carry and to store</li>
+            </ul>
+            <div class="idea step">Hydrogen: the most energy per kilogram, very little per cubic metre.</div>
+          </div>
+          <table class="facts step">
+            <thead><tr><th>Fuel (approximate values)</th><th class="nocase">MJ kg⁻¹</th><th class="nocase">MJ m⁻³</th></tr></thead>
+            <tbody>
+              <tr><td>Wood, dry</td><td class="num">16</td><td class="num">\(1 \times 10^{4}\)</td></tr>
+              <tr><td>Petrol</td><td class="num">46</td><td class="num">\(3.4 \times 10^{4}\)</td></tr>
+              <tr><td>Natural gas, as a gas</td><td class="num">55</td><td class="num">38</td></tr>
+              <tr><td>Hydrogen, as a gas</td><td class="num">142</td><td class="num">12</td></tr>
+              <tr><td>Uranium-235, fission</td><td class="num">\(8 \times 10^{7}\)</td><td class="num">\(1.5 \times 10^{12}\)</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="slide-foot"><span>A.3 WORK, ENERGY AND POWER · SL + HL</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>Why both numbers matter.</b> An aircraft cares most about mass: every kilogram of fuel has to be lifted. A car or a ship cares about volume as well: the fuel has to fit in a tank. Petrol does well on both counts, which is a large part of why it has been so hard to replace.</p>
+            <p><b>The trouble with gases.</b> A kilogram of hydrogen releases three times the energy of a kilogram of petrol, but at atmospheric pressure it fills about 11 cubic metres. To be useful as a fuel it must be compressed to hundreds of atmospheres or cooled to a liquid at −253 °C, and both take energy and heavy tanks.</p>
+            <p><b>Nuclear fuel.</b> Fission releases energy from the nucleus, not from the electrons, so the scale is different altogether: one kilogram of uranium-235 gives as much as about two thousand tonnes of petrol.</p>
+          </div>
+          <div class="rn-side">
+            <p class="tip">Energy released = specific energy × mass, or energy density × volume. Check which of the two a question gives you by its unit.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide" data-title="Energy density: a power station">
+        <p class="eyebrow">Worked example</p>
+        <h2>How much coal does a power station burn?<span>.</span></h2>
+        <div class="split even">
+          <div class="work">
+            <span class="say">Electrical output 500 MW · efficiency 0.35</span>
+            <span class="say">Specific energy of coal \(30 \,\mathrm{MJ} \,\mathrm{kg}^{-1}\)</span>
+            <span>\(P_\mathrm{input} = \dfrac{P_\mathrm{output}}{\eta} = \dfrac{500}{0.35} = 1430 \,\mathrm{MW}\)</span>
+            <span class="step">Mass each second \(= \dfrac{P_\mathrm{input}}{\text{specific energy}}\)</span>
+            <span class="step">\(= \dfrac{1430 \times 10^{6}}{30 \times 10^{6}} = \class{res}{48 \,\mathrm{kg} \,\mathrm{s}^{-1}}\)</span>
+          </div>
+          <div class="stack">
+            <ul class="points small">
+              <li>Power is energy each second, so this gives <b>mass each second</b></li>
+              <li class="step">In a day: \(48 \times 86\,400 = 4.1 \times 10^{6} \,\mathrm{kg}\)</li>
+              <li class="step">About 4000 tonnes: several long trains of coal, every day</li>
+            </ul>
+          </div>
+        </div>
+        <div class="slide-foot"><span>A.3 WORK, ENERGY AND POWER · SL + HL</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>The order of the steps.</b> Always go from the useful output back to the input first, by dividing by the efficiency. Only then bring in the fuel. Dividing the 500 MW output directly by the specific energy gives 17 kg s⁻¹, the amount an impossible, perfectly efficient station would burn.</p>
+            <p><b>The same station on uranium.</b> With \(8 \times 10^{7} \,\mathrm{MJ} \,\mathrm{kg}^{-1}\), the rate would be \(\frac{1430}{8 \times 10^{7}} = 1.8 \times 10^{-5} \,\mathrm{kg} \,\mathrm{s}^{-1}\) of uranium-235: about 1.5 kg a day.</p>
+          </div>
+          <div class="rn-side">
+            <p class="trap">Mixing MW with J. Either keep everything in MJ and MW, as here, or convert everything to J and W.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide" data-title="Quick check: power and efficiency">
+        <p class="eyebrow">Quick check</p>
+        <h2>Power and efficiency<span>.</span></h2>
+        <div class="quiz fill">
+          <div class="q"><p><span class="n">01</span>600 J of work is done in 4.0 s. Power?</p><div class="ans step">\(\frac{600}{4.0} = 150 \,\mathrm{W}\)</div></div>
+          <div class="q"><p><span class="n">02</span>A boat moves at 5.0 m s⁻¹ against 400 N of drag. Engine power?</p><div class="ans step">\(400 \times 5.0 = 2.0 \,\mathrm{kW}\)</div></div>
+          <div class="q"><p><span class="n">03</span>A lamp takes in 60 W and gives out 9 W of light. Efficiency?</p><div class="ans step">\(\frac{9}{60} = 0.15\)</div></div>
+          <div class="q"><p><span class="n">04</span>What does the width of an arrow on a Sankey diagram show?</p><div class="ans step">The amount of energy, or power</div></div>
+          <div class="q"><p><span class="n">05</span>2.0 kg of fuel with specific energy 45 MJ kg⁻¹ is burned. Energy released?</p><div class="ans step">90 MJ</div></div>
+          <div class="q"><p><span class="n">06</span>What is the unit of energy density?</p><div class="ans step">J m⁻³</div></div>
+        </div>
+        <div class="slide-foot"><span class="reveal-hint">PRESS → TO REVEAL EACH ANSWER</span><span data-page></span></div>
+      </section>
+
+      <section class="slide" data-title="Summary">
+        <p class="eyebrow">Summary</p>
+        <h2>Work, energy and power on one slide<span>.</span></h2>
+        <div class="cards fill" style="grid-template-columns: 1fr 1fr 1fr; align-content: center;">
+          <div class="card"><p class="eyebrow">Work</p><h3>\(W = Fs \cos \theta\)</h3><p>A transfer of energy<br>Area under a force–displacement graph</p></div>
+          <div class="card step"><p class="eyebrow">Kinetic energy</p><h3>\(E_\mathrm{k} = \frac{1}{2} m v^{2} = \frac{p^{2}}{2m}\)</h3><p>Work by the resultant force changes it</p></div>
+          <div class="card step"><p class="eyebrow">Potential energy</p><h3>\(mg \Delta h\) and \(\frac{1}{2} k (\Delta x)^{2}\)</h3><p>Gravitational, near the surface<br>Elastic, in a spring</p></div>
+          <div class="card step"><p class="eyebrow">Conservation</p><h3>Mechanical energy constant</h3><p>If there are no resistive forces<br>Otherwise the change is the work they do</p></div>
+          <div class="card step"><p class="eyebrow">Power</p><h3>\(P = \frac{\Delta W}{\Delta t} = Fv\)</h3><p>The rate of transferring energy, in watts</p></div>
+          <div class="card step"><p class="eyebrow">Efficiency and fuels</p><h3>\(\eta = \frac{E_\mathrm{output}}{E_\mathrm{input}}\)</h3><p>Sankey diagrams show it to scale<br>Energy density: J m⁻³</p></div>
+        </div>
+        <div class="slide-foot"><span>A.3 WORK, ENERGY AND POWER · SL + HL</span><span data-page></span></div>
+      </section>
+
+      <section class="slide" data-title="Key words">
+        <p class="eyebrow">Summary</p>
+        <h2>Key words<span>.</span></h2>
+        <div class="terms fill" style="grid-template-columns: repeat(3, 1fr);">
+          <div class="term"><b>Work</b><span>Force × distance along the force</span></div>
+          <div class="term"><b>Kinetic energy</b><span>Energy of a moving body</span></div>
+          <div class="term"><b>Gravitational potential energy</b><span>Energy of a raised mass</span></div>
+          <div class="term"><b>Elastic potential energy</b><span>Energy of a stretched spring</span></div>
+          <div class="term"><b>Mechanical energy</b><span>Kinetic + potential</span></div>
+          <div class="term"><b>Non-conservative force</b><span>Friction or drag: path matters</span></div>
+          <div class="term"><b>Power</b><span>Rate of transferring energy</span></div>
+          <div class="term"><b>Efficiency</b><span>Useful output as a fraction of input</span></div>
+          <div class="term"><b>Sankey diagram</b><span>Arrow widths show energy</span></div>
+          <div class="term"><b>Specific energy</b><span>Energy per kilogram of fuel</span></div>
+          <div class="term"><b>Energy density</b><span>Energy per cubic metre of fuel</span></div>
+          <div class="term"><b>Isolated system</b><span>Nothing enters or leaves</span></div>
+        </div>
+        <div class="slide-foot"><span>A.3 WORK, ENERGY AND POWER · SL + HL</span><span data-page></span></div>
+      </section>
+
+    </div>
+  </main>
+
+  <nav class="controls" aria-label="Slide controls">
+    <button type="button" id="prev" aria-label="Previous slide"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg></button>
+    <span class="counter" id="counter" aria-live="polite"></span>
+    <button type="button" id="next" aria-label="Next slide"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 5l7 7-7 7"/></svg></button>
+  </nav>
+  <div class="progress" aria-hidden="true"><span id="progress-bar"></span></div>
+
+  <script src="../assets/figures.js"></script>
+  <script src="figures.js"></script>
+  <script src="../assets/deck-math.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
+  <script src="../assets/deck-notes.js"></script>
+  <script src="../assets/deck.js"></script>
+</body>
+</html>

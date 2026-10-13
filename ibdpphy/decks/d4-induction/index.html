@@ -1,0 +1,721 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="robots" content="noindex, nofollow">
+  <meta name="description" content="Teaching slides for IB Diploma Programme Physics topic D.4 Induction, higher level only: magnetic flux, Faraday’s law, Lenz’s law, the emf across a moving conductor and the alternating emf of a rotating coil.">
+  <meta name="theme-color" content="#F8F6F1">
+  <script src="/assets/theme.js" data-theme-scope="ibdpphy"></script>
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <link rel="stylesheet" href="/assets/standalone-top.css">
+  <title>D.4 Induction · IB DP Physics</title>
+  <link rel="icon" type="image/png" href="/assets/favicon.png">
+  <link rel="apple-touch-icon" href="/assets/apple-touch-icon.png">
+  <link rel="stylesheet" href="../assets/deck.css">
+  <link rel="stylesheet" href="../assets/deck-notes.css">
+  <link rel="stylesheet" href="/assets/theme-toggle.css">
+  <link rel="stylesheet" href="/assets/fullscreen-button.css">
+  <script src="/assets/theme-toggle.js"></script>
+  <script src="/ibdpphy/sw-register.js" defer></script>
+</head>
+<body>
+  <header class="banner">
+    <a class="banner-logo" href="/" aria-label="PanPhy Labs home"><img src="/assets/panphy.png" alt="PanPhy Labs" width="38" height="38"></a>
+    <a class="banner-title" href="#1">D.4 Induction</a>
+    <div class="banner-actions">
+      <button id="thumbs-toggle" class="icon-button" type="button" aria-controls="thumbs" aria-pressed="true" aria-label="Hide slide thumbnails" title="Show or hide slide thumbnails (T)"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path class="pane" d="M9.5 4.5H6A2.5 2.5 0 0 0 3.5 7v10A2.5 2.5 0 0 0 6 19.5h3.5z"/><rect x="3.5" y="4.5" width="17" height="15" rx="2.5"/><path d="M9.5 4.5v15"/></svg></button>
+      <button id="fullscreen" class="panphy-fullscreen-button" type="button" aria-pressed="false" aria-label="Present fullscreen" title="Present fullscreen (F)"><svg class="panphy-fs-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M4 9V4h5M15 4h5v5M20 15v5h-5M9 20H4v-5"/></svg></button>
+      <button id="theme-button" type="button" data-panphy-theme-toggle aria-label="Toggle light/dark theme" title="Toggle between light and dark themes"></button>
+    </div>
+  </header>
+  <script>window.PanPhyThemeToggle.mount(document.getElementById('theme-button'));</script>
+
+  <nav class="thumbs" id="thumbs" aria-label="Slides"></nav>
+
+  <main class="stage" id="stage">
+    <div class="deck" id="deck">
+
+      <!-- 1 · Title -->
+      <section class="slide title hl" data-title="D.4 Induction">
+        <div class="title-grid">
+          <div>
+            <p class="eyebrow">IB DP Physics · Theme D · Fields</p>
+            <h1>Induction<span>.</span></h1>
+            <p class="lead">D.4 · Magnetic flux, Faraday’s law, Lenz’s law and the rotating coil<br>Higher level only: there is no standard level content in D.4</p>
+            <div class="chips">
+              <span class="chip hl">Additional HL · 6 hours</span>
+              <a class="chip on" href="../d3-motion-in-electromagnetic-fields/">D.3 Motion in electromagnetic fields ↗</a>
+            </div>
+          </div>
+          <div class="fig" data-fig="d4-magnet-coil" data-plain></div>
+        </div>
+      </section>
+
+      <section class="slide hl" data-title="Lesson map">
+        <p class="eyebrow">The journey</p>
+        <h2>Three parts<span>.</span></h2>
+        <div class="cards fill" style="grid-template-columns: repeat(3, 1fr);">
+          <div class="card">
+            <div class="fig" data-fig="d4-magnet-coil" data-plain style="height: 220px;"></div>
+            <p class="eyebrow">Part 01</p>
+            <h3>Flux and Faraday’s law</h3>
+            <p>A changing flux induces an emf</p>
+          </div>
+          <div class="card">
+            <div class="fig" data-fig="d4-rod" data-plain style="height: 220px;"></div>
+            <p class="eyebrow">Part 02</p>
+            <h3>Lenz’s law and moving conductors</h3>
+            <p>The direction of the emf, and \(\varepsilon = BvL\)</p>
+          </div>
+          <div class="card">
+            <div class="fig" data-fig="d4-generator" data-plain style="height: 220px;"></div>
+            <p class="eyebrow">Part 03</p>
+            <h3>The rotating coil</h3>
+            <p>A sinusoidal emf, and the effect of frequency</p>
+          </div>
+        </div>
+        <div class="idea" style="margin-top: 22px;">In D.3 a current in a field gave a <b>force</b>. Here motion in a field gives an <b>emf</b>.</div>
+        <div class="slide-foot"><span>D.4 INDUCTION · HL ONLY</span><span data-page></span></div>
+      </section>
+
+      <!-- Part 1 -->
+      <section class="slide section hl" data-title="Part 1: Flux and Faraday’s law">
+        <div class="title-grid">
+          <div>
+            <p class="eyebrow">Part 01 · HL only</p>
+            <h1>Flux and Faraday’s law<span>.</span></h1>
+            <p class="lead">What has to change for an emf to appear, and how large the emf is</p>
+          </div>
+          <div class="fig" data-fig="d4-magnet-coil" data-plain></div>
+        </div>
+        <div class="slide-foot"><span>D.4 INDUCTION · HL ONLY</span><span data-page></span></div>
+      </section>
+
+      <section class="slide history hl" data-title="Story: Faraday’s ring">
+        <p class="eyebrow">The story · London, 1831</p>
+        <p class="not-examined">Background story · not assessed</p>
+        <h2>Faraday makes electricity from magnetism<span>.</span></h2>
+        <div class="story" style="--photo-h: 400px;">
+          <div class="story-photos">
+            <figure><img src="images/faraday.jpg" width="772" height="1000" alt="Painted portrait of Michael Faraday, a man with wavy grey hair in a dark coat and white cravat"><figcaption><b>Michael Faraday</b>, painted by Thomas Phillips in 1842</figcaption></figure>
+            <figure><img src="images/faraday-disk.jpg" width="1000" height="781" alt="Engraving of a copper disc mounted on an axle between the poles of a horseshoe magnet, with a handle to turn it and sliding contacts at its axle and rim"><figcaption>His <b>disc generator</b> of 1831 (engraving of 1884)</figcaption></figure>
+          </div>
+          <div class="stack">
+            <ul class="points">
+              <li>A bookbinder’s apprentice at 14, with little schooling</li>
+              <li>Ørsted got magnetism from electricity. Faraday wanted the <b>reverse</b></li>
+              <li><b>1831</b>: two coils on an iron ring. Switching one gave a <b>brief current</b> in the other</li>
+              <li>Then a magnet into a coil, and a spinning copper disc</li>
+            </ul>
+            <div class="idea">A steady field does nothing. Only a <b>change</b> induces a current.</div>
+          </div>
+        </div>
+        <p class="credits">Portrait: <a href="https://commons.wikimedia.org/wiki/File:M_Faraday_Th_Phillips_oil_1842.jpg" target="_blank" rel="noopener">Thomas Phillips, 1842</a>, public domain. Engraving: <a href="https://commons.wikimedia.org/wiki/File:Faraday_disk_generator.jpg" target="_blank" rel="noopener">Émile Alglave, 1884</a>, public domain.</p>
+        <div class="slide-foot"><span>D.4 INDUCTION · HL ONLY</span><span data-page></span></div>
+      </section>
+
+      <section class="slide hl" data-title="Inducing an emf">
+        <p class="eyebrow">The basic observation</p>
+        <h2>Inducing an emf<span>.</span></h2>
+        <div class="split wide-fig">
+          <ul class="points small">
+            <li>Magnet <b>moving in</b>: the meter deflects</li>
+            <li class="step">Magnet <b>at rest</b>: nothing</li>
+            <li class="step">Magnet <b>moving out</b>: deflects the <b>other way</b></li>
+            <li class="step">Faster, a stronger magnet or more turns: a <b>larger</b> emf</li>
+          </ul>
+          <div class="panel">
+            <div class="panel-head"><span>A MAGNET AND A COIL</span></div>
+            <div class="fig" data-fig="d4-magnet-coil"></div>
+          </div>
+        </div>
+        <div class="slide-foot"><span>D.4 INDUCTION · HL ONLY</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>Only relative motion matters.</b> Hold the magnet still and move the coil over it, and the meter deflects in exactly the same way. An emf is induced whenever the magnetic field through the coil is changing, whatever the cause.</p>
+            <p><b>Why “emf” and not “current”.</b> The change always induces an emf: energy per unit charge made available to drive charge round. A current flows only if the circuit is complete. With the meter disconnected there is still an emf across the ends of the coil, and you could measure it with a voltmeter.</p>
+          </div>
+          <div class="rn-side">
+            <p class="tip">Watch the needle and the magnet together. The deflection is largest when the magnet is moving fastest, in the middle of its swing, and zero at each end, where it stops for an instant.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide hl" data-title="Magnetic flux">
+        <p class="eyebrow">How much field passes through</p>
+        <h2>Magnetic flux<span>.</span></h2>
+        <div class="split">
+          <div class="stack">
+            <div class="equation"><span>\(\Phi = BA \cos \theta\)</span></div>
+            <ul class="points small">
+              <li>\(\theta\): the angle between the field and the <b>normal</b> to the area</li>
+              <li class="step">Unit: the <b>weber</b>, \(1 \,\mathrm{Wb} = 1 \,\mathrm{T} \,\mathrm{m}^{2}\)</li>
+              <li class="step">For a coil of \(N\) turns, the <b>flux linkage</b> is \(N \Phi\)</li>
+            </ul>
+          </div>
+          <div class="panel">
+            <div class="panel-head"><span>A LOOP IN A UNIFORM FIELD</span></div>
+            <div class="fig" data-fig="d4-flux"></div>
+          </div>
+        </div>
+        <div class="slide-foot"><span>D.4 INDUCTION · HL ONLY</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>A picture for flux.</b> Think of the field lines as rain falling straight down and the loop as the mouth of a bucket. Held level, the bucket catches the most rain. Tilted, it catches less. Held on its side, none goes in at all. Flux measures how much field passes through the loop: the number of field lines it catches.</p>
+            <p><b>Why the angle is to the normal.</b> The flux is greatest when the loop faces the field squarely. In that position the field is at right angles to the plane of the loop but along its normal, so \(\theta = 0\) and \(\cos \theta = 1\). When the plane of the loop lies along the field, \(\theta = 90^{\circ}\) and the flux is zero.</p>
+            <p><b>This is why \(B\) is called flux density.</b> Rearranged for a loop facing the field, \(B = \frac{\Phi}{A}\): the flux through each square metre.</p>
+          </div>
+          <div class="rn-side">
+            <p class="trap">Using the angle between the field and the <b>plane</b> of the coil. If a question gives that angle, subtract it from 90° first.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide hl" data-title="Flux: a tilted coil">
+        <p class="eyebrow">Worked example</p>
+        <h2>The flux through a coil<span>.</span></h2>
+        <div class="split even">
+          <div class="work">
+            <span class="say">\(B = 0.20 \,\mathrm{T}\) · area \(A = 0.030 \,\mathrm{m}^{2}\)</span>
+            <span>\(\Phi = BA \cos \theta\)</span>
+            <span class="say step">Facing the field: \(\theta = 0^{\circ}\)</span>
+            <span class="step">\(\Phi = 0.20 \times 0.030 \times \cos 0^{\circ} = \class{res}{6.0 \times 10^{-3} \,\mathrm{Wb}}\)</span>
+            <span class="say step">Normal at \(60^{\circ}\) to the field</span>
+            <span class="step">\(\Phi = 0.20 \times 0.030 \times \cos 60^{\circ} = \class{res}{3.0 \times 10^{-3} \,\mathrm{Wb}}\)</span>
+          </div>
+          <div class="work step">
+            <span class="say">The coil has 50 turns</span>
+            <span>Flux linkage \(= N \Phi\)</span>
+            <span class="step">\(= 50 \times 6.0 \times 10^{-3} = \class{res}{0.30 \,\mathrm{Wb}}\)</span>
+            <span class="step">when facing the field</span>
+          </div>
+        </div>
+        <div class="slide-foot"><span>D.4 INDUCTION · HL ONLY</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>What the numbers say.</b> Turning the coil through 60° halves the flux, although nothing about the field or the coil itself has changed. Turn it a further 30° and the flux is zero. Rotating a coil is therefore one way of changing the flux through it, and it is how every generator works.</p>
+            <p><b>Why flux linkage.</b> Each turn of the coil has the same flux through it and the same emf induced in it. The turns are joined in series, so the emfs add. A coil of 50 turns gives 50 times the emf of a single loop for the same change of flux.</p>
+          </div>
+          <div class="rn-side">
+            <p class="tip">Areas are often given in cm². \(1 \,\mathrm{cm}^{2} = 10^{-4} \,\mathrm{m}^{2}\), so 300 cm² is 0.030 m².</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide hl" data-title="Faraday’s law">
+        <p class="eyebrow">The size of the induced emf</p>
+        <h2>Faraday’s law of induction<span>.</span></h2>
+        <div class="stack center" style="gap: 26px;">
+          <div class="eq-note">
+            <div class="equation"><span>\(\varepsilon = -N \dfrac{\Delta \Phi}{\Delta t}\)</span></div>
+            <ul class="points small">
+              <li>The induced emf equals the <b>rate of change of flux linkage</b></li>
+              <li class="step">The minus sign: the emf <b>opposes</b> the change (Part 2)</li>
+            </ul>
+          </div>
+          <div class="cards step" style="grid-template-columns: 1fr 1fr 1fr;">
+            <div class="card"><p class="eyebrow">Change \(B\)</p><h3>A time-varying field</h3><p>Move a magnet, or change the current in a nearby coil</p></div>
+            <div class="card"><p class="eyebrow">Change \(A\)</p><h3>A moving conductor</h3><p>The area of the circuit in the field grows or shrinks</p></div>
+            <div class="card"><p class="eyebrow">Change \(\theta\)</p><h3>A rotating coil</h3><p>The coil turns to face the field, then away</p></div>
+          </div>
+        </div>
+        <div class="slide-foot"><span>D.4 INDUCTION · HL ONLY</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>It is the rate that matters.</b> A huge flux that stays constant induces nothing. A small flux that changes quickly can induce a large emf. Pushing a magnet into a coil in 0.1 s gives ten times the emf of pushing it in over 1 s, although the change of flux is the same.</p>
+            <p><b>One law, three situations.</b> \(\Phi = BA \cos \theta\) has three factors, and changing any of them changes the flux. The rest of this deck works through the three cards on the slide one by one. In every case the method is the same: find the change in flux, divide by the time taken and multiply by the number of turns.</p>
+          </div>
+          <div class="rn-side">
+            <p class="tip">Check the unit: \(\frac{\mathrm{Wb}}{\mathrm{s}} = \frac{\mathrm{T} \,\mathrm{m}^{2}}{\mathrm{s}} = \mathrm{V}\). One weber of flux change in one second induces one volt in one turn.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide hl" data-title="Faraday’s law: a changing field">
+        <p class="eyebrow">Worked example</p>
+        <h2>A coil in a changing field<span>.</span></h2>
+        <div class="split even">
+          <div class="work">
+            <span class="say">200 turns · area \(4.0 \times 10^{-4} \,\mathrm{m}^{2}\), facing the field</span>
+            <span class="say">\(B\) rises from 0.10 T to 0.50 T in 0.020 s</span>
+            <span>\(\Delta \Phi = A \Delta B\)</span>
+            <span class="step">\(\Delta \Phi = 4.0 \times 10^{-4} \times 0.40 = 1.6 \times 10^{-4} \,\mathrm{Wb}\)</span>
+            <span class="step">\(\varepsilon = N \dfrac{\Delta \Phi}{\Delta t} = \dfrac{200 \times 1.6 \times 10^{-4}}{0.020}\)</span>
+            <span class="step">\(\varepsilon = \class{res}{1.6 \,\mathrm{V}}\)</span>
+          </div>
+          <div class="stack">
+            <ul class="points small">
+              <li>Only the <b>change</b> in \(B\) matters: 0.40 T</li>
+              <li class="step">For the size of the emf, leave out the minus sign</li>
+              <li class="step">If \(B\) then stays at 0.50 T, the emf is <b>zero</b></li>
+            </ul>
+          </div>
+        </div>
+        <div class="slide-foot"><span>D.4 INDUCTION · HL ONLY</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>What you could change.</b> Double the number of turns and the emf doubles. Make the same change of field in half the time and the emf doubles. Use a coil of twice the area and it doubles again. Each of these is a factor in \(N \frac{\Delta \Phi}{\Delta t}\).</p>
+            <p><b>Where the field might come from.</b> A common arrangement is a small “search” coil inside a solenoid. When the current in the solenoid changes, so does the field inside it, and an emf appears in the small coil even though nothing moves. This is the principle of the transformer: a changing current in one coil induces an emf in another.</p>
+          </div>
+          <div class="rn-side">
+            <p class="trap">Using the final field, 0.50 T, in place of the change. A coil sitting in a steady 0.50 T field has no emf at all.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide hl" data-title="Flux and emf graphs">
+        <p class="eyebrow">Reading graphs</p>
+        <h2>Emf is the gradient of the flux graph<span>.</span></h2>
+        <div class="split wide-fig">
+          <ul class="points small">
+            <li>Emf = minus the <b>gradient</b> of a flux–time graph</li>
+            <li class="step">Flux constant: <b>no</b> emf</li>
+            <li class="step">Steeper: a <b>larger</b> emf</li>
+            <li class="step">Flux falling: the emf <b>changes sign</b></li>
+          </ul>
+          <div class="panel">
+            <div class="panel-head"><span>FLUX AND EMF AGAINST TIME</span></div>
+            <div class="fig" data-fig="d4-flux-graphs"></div>
+          </div>
+        </div>
+        <div class="slide-foot"><span>D.4 INDUCTION · HL ONLY</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>How to draw the lower graph from the upper one.</b> Work along the time axis one section at a time. Where the flux graph is a straight sloping line, the gradient is constant, so the emf is a constant horizontal line. Where the flux graph is flat, the emf is zero. Where the flux falls twice as steeply as it rose, the emf is twice as big and on the other side of the axis.</p>
+            <p><b>Going the other way.</b> The area under an emf–time graph gives the total change in flux linkage. On the slide the two blocks of the emf graph have equal areas, one below the axis and one above, because the flux returns to where it started.</p>
+          </div>
+          <div class="rn-side">
+            <p class="tip">The same relationship as velocity and displacement in A.1: one graph is the gradient of the other.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide hl" data-title="Quick check: flux and Faraday’s law">
+        <p class="eyebrow">Quick check</p>
+        <h2>Flux and Faraday’s law<span>.</span></h2>
+        <div class="quiz fill">
+          <div class="q"><p><span class="n">01</span>What is the unit of magnetic flux?</p><div class="ans step">The weber, Wb (T m²)</div></div>
+          <div class="q"><p><span class="n">02</span>The plane of a coil lies along the field. Flux through it?</p><div class="ans step">Zero</div></div>
+          <div class="q"><p><span class="n">03</span>A magnet rests inside a coil. Induced emf?</p><div class="ans step">Zero: the flux is not changing</div></div>
+          <div class="q"><p><span class="n">04</span>Flux through one turn changes by 0.020 Wb in 0.10 s. Emf in 50 turns?</p><div class="ans step">\(\frac{50 \times 0.020}{0.10} = 10 \,\mathrm{V}\)</div></div>
+          <div class="q"><p><span class="n">05</span>The same change happens in half the time. The emf?</p><div class="ans step">It doubles</div></div>
+          <div class="q"><p><span class="n">06</span>What does the gradient of a flux–time graph give?</p><div class="ans step">The size of the induced emf, per turn</div></div>
+        </div>
+        <div class="slide-foot"><span class="reveal-hint">PRESS → TO REVEAL EACH ANSWER</span><span data-page></span></div>
+      </section>
+
+      <!-- Part 2 -->
+      <section class="slide section hl" data-title="Part 2: Lenz’s law and moving conductors">
+        <div class="title-grid">
+          <div>
+            <p class="eyebrow">Part 02 · HL only</p>
+            <h1>Lenz’s law and moving conductors<span>.</span></h1>
+            <p class="lead">Which way the induced current flows, and why it could not be otherwise</p>
+          </div>
+          <div class="fig" data-fig="d4-rod" data-plain></div>
+        </div>
+        <div class="slide-foot"><span>D.4 INDUCTION · HL ONLY</span><span data-page></span></div>
+      </section>
+
+      <section class="slide hl" data-title="Lenz’s law">
+        <p class="eyebrow">The direction of the induced emf</p>
+        <h2>Lenz’s law<span>.</span></h2>
+        <div class="split wide-fig">
+          <div class="stack">
+            <ul class="points small">
+              <li>The induced current flows in the direction that <b>opposes the change</b> that causes it</li>
+              <li class="step">Flux increasing: its field is <b>against</b> the applied field</li>
+              <li class="step">Flux decreasing: its field is <b>with</b> it</li>
+            </ul>
+            <div class="idea step">It opposes the <b>change</b> in flux, not the flux.</div>
+          </div>
+          <div class="panel">
+            <div class="panel-head"><span>A MAGNET AND A COIL</span></div>
+            <div class="fig" data-fig="d4-lenz"></div>
+          </div>
+        </div>
+        <div class="slide-foot"><span>D.4 INDUCTION · HL ONLY</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>A method that always works.</b> One: which way does the applied field point through the coil? Two: is the flux increasing or decreasing? Three: the induced current must make a field through the coil that points against the applied field if the flux is increasing, and with it if the flux is decreasing. Four: use the right-hand grip rule from D.2 to find the current that makes that field.</p>
+            <p><b>The poles picture.</b> For a magnet and a coil there is a shortcut. The coil becomes an electromagnet whose near end repels an approaching pole and attracts a departing one. Either way, you have to do work to move the magnet.</p>
+          </div>
+          <div class="rn-side">
+            <p class="more">Heinrich Lenz, working in St Petersburg, stated the rule in 1834, three years after Faraday’s discovery. It is the reason for the minus sign in Faraday’s law.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide hl" data-title="Lenz’s law and energy">
+        <p class="eyebrow">Why it must oppose</p>
+        <h2>Lenz’s law is conservation of energy<span>.</span></h2>
+        <div class="split fig-first">
+          <div class="panel">
+            <div class="panel-head"><span>THE SAME MAGNET, TWO TUBES</span><span class="reveal-hint">PRESS → TO DROP</span></div>
+            <div class="fig" data-fig="d4-tube"></div>
+          </div>
+          <ul class="points small">
+            <li class="step">If the current <b>helped</b> the change, the magnet would speed up by itself: energy from nothing</li>
+            <li class="step">Because it opposes, <b>work must be done</b> to move the magnet</li>
+            <li class="step">That work becomes <b>electrical energy</b> in the circuit</li>
+          </ul>
+        </div>
+        <div class="slide-foot"><span>D.4 INDUCTION · HL ONLY</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>The copper tube.</b> Copper is not magnetic: a magnet does not stick to it. But as the magnet falls, the flux through each ring of the tube wall changes, so currents are induced round the tube. By Lenz’s law their fields oppose the motion: the copper below repels the falling magnet and the copper above attracts it. The magnet soon reaches a steady speed at which this upward force equals its weight.</p>
+            <p><b>Where the energy goes.</b> At a steady speed the magnet is losing gravitational potential energy without gaining kinetic energy. All of it is transferred, through the induced currents, to thermal energy in the copper. In the plastic tube no current can flow, so nothing opposes the fall.</p>
+          </div>
+          <div class="rn-side">
+            <p class="tip">The same effect brakes trains and roller coasters without any contact or wear: magnets move past a metal fin, and the induced currents slow them.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide hl" data-title="A straight conductor moving across a field">
+        <p class="eyebrow">Changing the area</p>
+        <h2>A straight conductor moving across a field<span>.</span></h2>
+        <div class="split">
+          <div class="stack">
+            <div class="work">
+              <span class="say">In a time \(\Delta t\) the rod moves \(v \Delta t\)</span>
+              <span>\(\Delta \Phi = B \Delta A = B L v \Delta t\)</span>
+              <span class="step">\(\varepsilon = \dfrac{\Delta \Phi}{\Delta t}\)</span>
+              <span class="step">\(\varepsilon = BvL\)</span>
+            </div>
+            <div class="idea step">Field, velocity and rod all at <b>right angles</b>.</div>
+          </div>
+          <div class="panel">
+            <div class="panel-head"><span>A ROD ON TWO RAILS</span></div>
+            <div class="fig" data-fig="d4-rod"></div>
+          </div>
+        </div>
+        <div class="slide-foot"><span>D.4 INDUCTION · HL ONLY</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>The same result from the force on a charge.</b> The free electrons in the rod are moving to the right with the rod, across the field. Each feels a magnetic force \(qvB\) along the rod, from D.3. Charge is pushed towards one end until the electric field set up in the rod balances the magnetic force: \(qE = qvB\), so \(E = vB\). The potential difference across a rod of length \(L\) is \(EL = BvL\). Faraday’s law and the force on a moving charge give the same emf.</p>
+            <p><b>The direction.</b> The flux into the page through the circuit is increasing, so by Lenz’s law the induced current must make a field out of the page inside the loop. By the grip rule that is an anticlockwise current: up the rod, as shown.</p>
+          </div>
+          <div class="rn-side">
+            <p class="tip">A rod moving alone, with no rails, still has the emf \(BvL\) between its ends, but no current flows. The wings of an aircraft crossing the Earth’s field have a small emf between their tips.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide hl" data-title="Moving conductor: energy check">
+        <p class="eyebrow">Worked example</p>
+        <h2>A rod pulled along rails<span>.</span></h2>
+        <div class="split even">
+          <div class="work">
+            <span class="say">\(B = 0.40 \,\mathrm{T}\) · \(L = 0.25 \,\mathrm{m}\) · \(v = 3.0 \,\mathrm{m} \,\mathrm{s}^{-1}\) · \(R = 1.5 \,\Omega\)</span>
+            <span>\(\varepsilon = BvL = 0.40 \times 3.0 \times 0.25 = \class{res}{0.30 \,\mathrm{V}}\)</span>
+            <span class="step">\(I = \dfrac{\varepsilon}{R} = \dfrac{0.30}{1.5} = \class{res}{0.20 \,\mathrm{A}}\)</span>
+            <span class="step">\(F = BIL = 0.40 \times 0.20 \times 0.25 = \class{res}{0.020 \,\mathrm{N}}\)</span>
+          </div>
+          <div class="work step">
+            <span class="say">Power to keep the rod moving</span>
+            <span>\(P = Fv = 0.020 \times 3.0 = \class{res}{0.060 \,\mathrm{W}}\)</span>
+            <span class="say step">Power dissipated in the resistor</span>
+            <span class="step">\(P = I^{2} R = 0.20^{2} \times 1.5 = \class{res}{0.060 \,\mathrm{W}}\)</span>
+          </div>
+        </div>
+        <div class="slide-foot"><span>D.4 INDUCTION · HL ONLY</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>What the two powers show.</b> The induced current flows through the rod, and a current in a field feels a force \(BIL\). By Lenz’s law this force is against the motion. To keep the rod moving at a steady speed, someone must pull forwards with 0.020 N, doing 0.060 J of work every second. Exactly that much energy appears as heating in the resistor. Energy is conserved, and Lenz’s law is what guarantees it.</p>
+            <p><b>If nobody pulls.</b> The opposing force slows the rod. A slower rod gives a smaller emf, a smaller current and a smaller force, so the rod slows more and more gently and never reverses.</p>
+          </div>
+          <div class="rn-side">
+            <p class="tip">Three equations from three topics in one question: \(\varepsilon = BvL\) (D.4), \(V = IR\) (B.5) and \(F = BIL\) (D.3). This combination is a favourite in exams.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide hl" data-title="A coil moving through a field">
+        <p class="eyebrow">In and out of a field</p>
+        <h2>A rectangular coil moving through a field<span>.</span></h2>
+        <div class="split wide-fig">
+          <div class="stack">
+            <ul class="points small">
+              <li><b>Entering</b>: flux rising, an emf</li>
+              <li class="step"><b>Fully inside</b>: flux constant, <b>no</b> emf</li>
+              <li class="step"><b>Leaving</b>: flux falling, an emf of <b>opposite</b> sign</li>
+            </ul>
+            <div class="idea step">While entering or leaving: \(\varepsilon = NBvL\).</div>
+          </div>
+          <div class="panel">
+            <div class="panel-head"><span>CONSTANT SPEED</span></div>
+            <div class="fig" data-fig="d4-coil-through"></div>
+          </div>
+        </div>
+        <div class="slide-foot"><span>D.4 INDUCTION · HL ONLY</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>Why nothing happens in the middle.</b> When the whole coil is inside the field, the front and back edges are both cutting field lines. Each has an emf \(BvL\), but they drive current in opposite directions round the coil, so they cancel. In terms of flux: the coil has as much field through it at the end of each instant as at the start.</p>
+            <p><b>While entering.</b> Only the front edge is in the field. It acts as the moving rod of the last two slides, with \(L\) the length of that edge. For \(N\) turns the emf is \(NBvL\). It lasts for the time the coil takes to travel its own width.</p>
+            <p><b>The direction.</b> Entering, the flux is increasing and the induced current opposes the increase. Leaving, the flux is decreasing and the current reverses to oppose the decrease. In both cases the force on the coil is backwards, against its motion.</p>
+          </div>
+          <div class="rn-side">
+            <p class="tip">A faster coil gives taller, narrower pulses on the graph. The area of each pulse, emf × time, stays the same: it equals the change in flux linkage.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide hl" data-title="A magnet on a spring">
+        <p class="eyebrow">Induction and oscillations</p>
+        <h2>A magnet oscillating above a coil<span>.</span></h2>
+        <div class="split wide-fig">
+          <ul class="points small">
+            <li>The flux through the coil <b>rises and falls</b> as the magnet moves</li>
+            <li class="step">The emf <b>alternates</b>, at the frequency of the oscillation</li>
+            <li class="step">Largest when the magnet moves <b>fastest</b></li>
+            <li class="step">If a current flows, the oscillation is <b>damped</b></li>
+          </ul>
+          <div class="panel">
+            <div class="panel-head"><span>A MAGNET ON A SPRING</span></div>
+            <div class="fig" data-fig="d4-spring-magnet"></div>
+          </div>
+        </div>
+        <div class="slide-foot"><span>D.4 INDUCTION · HL ONLY</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>Linking the emf to the motion.</b> The magnet moves fastest as it passes through its equilibrium position, so the flux changes fastest there and the emf is at its peak. At the top and bottom of the motion the magnet is momentarily at rest and the emf is zero. The emf is therefore in step with the velocity of the magnet, not with its displacement.</p>
+            <p><b>Why the oscillation dies away.</b> When the coil is part of a complete circuit, a current flows and energy is dissipated in its resistance. That energy comes from the oscillation, by way of the Lenz’s law force on the magnet, which always acts against its motion. With the circuit open no current flows, there is no opposing force, and the magnet oscillates for much longer.</p>
+          </div>
+          <div class="rn-side">
+            <p class="more">C.1 and C.4 treat oscillations and damping. This is electromagnetic damping.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide hl" data-title="Self-induction">
+        <p class="eyebrow">A coil acting on itself · qualitative only</p>
+        <h2>Self-induction<span>.</span></h2>
+        <div class="stack center" style="gap: 30px;">
+          <ul class="points">
+            <li>A coil carrying a current sits in its <b>own</b> magnetic field</li>
+            <li class="step">When the current <b>changes</b>, the flux through the coil changes, so an emf is induced in the coil itself</li>
+            <li class="step">By Lenz’s law that emf <b>opposes the change</b> of current</li>
+          </ul>
+          <div class="cards step" style="grid-template-columns: 1fr 1fr;">
+            <div class="card"><p class="eyebrow">Switching on</p><h3>The current rises gradually</h3><p>The induced emf acts against the supply while the current is growing</p></div>
+            <div class="card"><p class="eyebrow">Switching off</p><h3>The current is hard to stop</h3><p>The induced emf tries to keep it flowing, and can make a spark at the switch</p></div>
+          </div>
+        </div>
+        <div class="slide-foot"><span>D.4 INDUCTION · HL ONLY</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>An analogy.</b> Self-induction gives a current something like inertia. A heavy flywheel cannot be set spinning or stopped in an instant; a coil does not let its current start or stop in an instant. In both cases a steady state is not opposed at all: a constant current in a coil feels no induced emf.</p>
+            <p><b>Why the spark.</b> Opening a switch tries to bring the current to zero in a very short time. The flux collapses quickly, so \(\frac{\Delta \Phi}{\Delta t}\) is very large and the induced emf can be far greater than the supply voltage, enough to drive a spark across the opening contacts. The ignition coil of a petrol engine uses this to produce thousands of volts from a 12 V battery.</p>
+          </div>
+          <div class="rn-side">
+            <p class="tip">Only this description in words is required. Inductance and circuits with resistors and inductors are not part of the course.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide hl" data-title="Quick check: Lenz’s law">
+        <p class="eyebrow">Quick check</p>
+        <h2>Lenz’s law and moving conductors<span>.</span></h2>
+        <div class="quiz fill">
+          <div class="q"><p><span class="n">01</span>State Lenz’s law.</p><div class="ans step">The induced current opposes the change that causes it</div></div>
+          <div class="q"><p><span class="n">02</span>Which conservation law does it follow from?</p><div class="ans step">Conservation of energy</div></div>
+          <div class="q"><p><span class="n">03</span>A 0.50 m rod moves at 4.0 m s⁻¹ across a 0.20 T field. Emf?</p><div class="ans step">\(0.20 \times 4.0 \times 0.50 = 0.40 \,\mathrm{V}\)</div></div>
+          <div class="q"><p><span class="n">04</span>A coil is completely inside a uniform field and moving. Emf?</p><div class="ans step">Zero</div></div>
+          <div class="q"><p><span class="n">05</span>A north pole approaches a coil. Polarity of the near end?</p><div class="ans step">North</div></div>
+          <div class="q"><p><span class="n">06</span>Why does a magnet fall slowly through a copper tube?</p><div class="ans step">Induced currents oppose its motion</div></div>
+        </div>
+        <div class="slide-foot"><span class="reveal-hint">PRESS → TO REVEAL EACH ANSWER</span><span data-page></span></div>
+      </section>
+
+      <!-- Part 3 -->
+      <section class="slide section hl" data-title="Part 3: The rotating coil">
+        <div class="title-grid">
+          <div>
+            <p class="eyebrow">Part 03 · HL only</p>
+            <h1>The rotating coil<span>.</span></h1>
+            <p class="lead">Changing the angle: how a generator makes an alternating emf</p>
+          </div>
+          <div class="fig" data-fig="d4-generator" data-plain></div>
+        </div>
+        <div class="slide-foot"><span>D.4 INDUCTION · HL ONLY</span><span data-page></span></div>
+      </section>
+
+      <section class="slide hl" data-title="A coil rotating in a uniform field">
+        <p class="eyebrow">Changing the angle</p>
+        <h2>A coil rotating in a uniform field<span>.</span></h2>
+        <div class="stack center" style="gap: 20px;">
+          <div class="panel" style="height: 470px; align-self: stretch;">
+            <div class="panel-head"><span>ONE ROTATION</span><span class="pill">COIL AND EMF IN STEP</span></div>
+            <div class="fig" data-fig="d4-generator"></div>
+          </div>
+          <div class="idea">The flux linkage is \(NBA \cos \theta\). As the coil turns steadily, \(\theta\) grows steadily and the induced emf varies as a <b>sine curve</b>.</div>
+        </div>
+        <div class="slide-foot"><span>D.4 INDUCTION · HL ONLY</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>Follow one turn.</b> When the normal to the coil points along the field, the flux through the coil is at its greatest, but for an instant it is not changing: the sides of the coil are moving parallel to the field lines. The emf is zero. A quarter of a turn later the plane of the coil lies along the field. The flux is zero, but it is changing at its fastest: the sides are cutting straight across the field lines. The emf is at its peak.</p>
+            <p><b>Why it alternates.</b> In the second half of the turn each side of the coil moves through the field in the opposite direction, so the emf reverses. One complete rotation gives one complete cycle of alternating emf.</p>
+          </div>
+          <div class="rn-side">
+            <p class="tip">The emf is greatest when the flux is zero, and zero when the flux is greatest. Examiners often ask for this.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide hl" data-title="Flux and emf of a rotating coil">
+        <p class="eyebrow">Two sine curves</p>
+        <h2>Flux and emf, a quarter of a cycle apart<span>.</span></h2>
+        <div class="split">
+          <div class="stack">
+            <ul class="points small">
+              <li>Flux linkage: \(N \Phi = NBA \cos \omega t\)</li>
+              <li class="step">Emf: minus its gradient, \(\varepsilon = NBA \omega \sin \omega t\)</li>
+              <li class="step">Peak emf: \(\varepsilon_{0} = NBA \omega\), with \(\omega = 2 \pi f\)</li>
+            </ul>
+            <div class="idea step">More turns, a stronger field, a larger coil or faster rotation: a <b>larger</b> emf.</div>
+          </div>
+          <div class="panel">
+            <div class="panel-head"><span>ONE AND A HALF ROTATIONS</span></div>
+            <div class="fig" data-fig="d4-ac-graphs"></div>
+          </div>
+        </div>
+        <div class="slide-foot"><span>D.4 INDUCTION · HL ONLY</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>Seeing the gradient on the graph.</b> Look where the flux curve crosses the axis: it is at its steepest there, and the emf curve is at a peak. Look at the top of the flux curve: for an instant it is flat, and the emf curve crosses zero. Where the flux is falling, the emf is positive; where the flux is rising, it is negative. That is the minus sign in Faraday’s law.</p>
+            <p><b>Where \(\omega\) comes from.</b> The coil turns through the angle \(\theta = \omega t\). The faster it turns, the more quickly the flux swings from positive to negative, so the gradient of the flux curve at each point is proportional to \(\omega\). That is why \(\omega\) appears in the peak emf.</p>
+          </div>
+          <div class="rn-side">
+            <p class="tip">\(\varepsilon_{0} = NBA \omega\) is not in the data booklet. Be ready to reason it from the graphs and from Faraday’s law.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide hl" data-title="Changing the frequency of rotation">
+        <p class="eyebrow">Turning the coil faster</p>
+        <h2>Changing the frequency of rotation<span>.</span></h2>
+        <div class="split wide-fig">
+          <div class="stack">
+            <ul class="points small">
+              <li>Double the frequency of rotation:</li>
+              <li class="step">The <b>period halves</b>: twice as many cycles each second</li>
+              <li class="step">The <b>peak emf doubles</b>: the flux changes twice as fast</li>
+            </ul>
+            <div class="idea step">Both change together.</div>
+          </div>
+          <div class="panel">
+            <div class="panel-head"><span>THE SAME COIL AT TWO SPEEDS</span></div>
+            <div class="fig" data-fig="d4-frequency"></div>
+          </div>
+        </div>
+        <div class="slide-foot"><span>D.4 INDUCTION · HL ONLY</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>Why both change.</b> The maximum flux through the coil, \(BA\), does not depend on how fast it turns. But at twice the frequency the flux goes from its greatest value to zero in half the time, so its rate of change, and with it the emf, is doubled at every point of the cycle. And since each rotation still gives one cycle, twice the rotations each second means twice the frequency of the emf.</p>
+            <p><b>Sketching the new curve.</b> Start from the original. Squash it to half its width and stretch it to twice its height. A common exam question gives one curve and asks for the other on the same axes.</p>
+          </div>
+          <div class="rn-side">
+            <p class="trap">Doubling only the frequency of the curve and leaving its height unchanged. The peak emf is proportional to the frequency.</p>
+            <p class="more">Power stations hold their generators at a fixed frequency, 50 Hz or 60 Hz, and control the output in other ways.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide hl" data-title="Rotating coil: peak emf">
+        <p class="eyebrow">Worked example</p>
+        <h2>A small generator<span>.</span></h2>
+        <div class="split even">
+          <div class="work">
+            <span class="say">100 turns · \(A = 0.020 \,\mathrm{m}^{2}\) · \(B = 0.30 \,\mathrm{T}\)</span>
+            <span class="say">Rotating at \(f = 50 \,\mathrm{Hz}\)</span>
+            <span>\(\varepsilon_{0} = NBA \omega\) &nbsp;with&nbsp; \(\omega = 2 \pi f\)</span>
+            <span class="step">\(\omega = 2 \pi \times 50 = 314 \,\mathrm{rad} \,\mathrm{s}^{-1}\)</span>
+            <span class="step">\(\varepsilon_{0} = 100 \times 0.30 \times 0.020 \times 314\)</span>
+            <span class="step">\(\varepsilon_{0} = \class{res}{190 \,\mathrm{V}}\)</span>
+          </div>
+          <div class="stack">
+            <ul class="points small">
+              <li>Greatest flux linkage: \(NBA = 0.60 \,\mathrm{Wb}\)</li>
+              <li class="step">At 25 Hz the peak emf would be <b>94 V</b></li>
+              <li class="step">The emf passes through zero <b>100 times</b> a second</li>
+            </ul>
+          </div>
+        </div>
+        <div class="slide-foot"><span>D.4 INDUCTION · HL ONLY</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>Checking it with Faraday’s law.</b> In a quarter of a turn, 0.0050 s, the flux linkage falls from 0.60 Wb to zero. The average emf over that time is \(\frac{0.60}{0.0050} = 120 \,\mathrm{V}\). The peak is larger than the average, as it must be for a curve that starts from zero: 190 V.</p>
+            <p><b>How generators get more.</b> Real generators wind the coil on an iron core, which increases the field through it many times, and use many more turns. Large ones rotate the magnet and keep the coils still, so that the large output current does not have to pass through sliding contacts.</p>
+          </div>
+          <div class="rn-side">
+            <p class="trap">Using the frequency \(f\) where the angular speed \(\omega\) is needed. \(\omega = 2 \pi f\) is about six times larger.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide hl" data-title="Quick check: the rotating coil">
+        <p class="eyebrow">Quick check</p>
+        <h2>The rotating coil<span>.</span></h2>
+        <div class="quiz fill">
+          <div class="q"><p><span class="n">01</span>What shape is the graph of emf against time for a steadily rotating coil?</p><div class="ans step">A sine curve</div></div>
+          <div class="q"><p><span class="n">02</span>In which position of the coil is the emf greatest?</p><div class="ans step">Plane of the coil along the field</div></div>
+          <div class="q"><p><span class="n">03</span>What is the flux through the coil at that moment?</p><div class="ans step">Zero</div></div>
+          <div class="q"><p><span class="n">04</span>The frequency of rotation is trebled. What happens to the peak emf?</p><div class="ans step">It trebles</div></div>
+          <div class="q"><p><span class="n">05</span>And to the period of the emf?</p><div class="ans step">It falls to one third</div></div>
+          <div class="q"><p><span class="n">06</span>Give two other ways to increase the peak emf.</p><div class="ans step">More turns, a stronger field or a larger area</div></div>
+        </div>
+        <div class="slide-foot"><span class="reveal-hint">PRESS → TO REVEAL EACH ANSWER</span><span data-page></span></div>
+      </section>
+
+      <section class="slide hl" data-title="Summary">
+        <p class="eyebrow">Summary</p>
+        <h2>Induction on one slide<span>.</span></h2>
+        <div class="cards fill" style="grid-template-columns: 1fr 1fr 1fr; align-content: center;">
+          <div class="card"><p class="eyebrow">Flux</p><h3>\(\Phi = BA \cos \theta\)</h3><p>In webers. \(\theta\) is measured from the normal<br>Flux linkage \(N \Phi\)</p></div>
+          <div class="card step"><p class="eyebrow">Faraday’s law</p><h3>\(\varepsilon = -N \frac{\Delta \Phi}{\Delta t}\)</h3><p>The rate of change of flux linkage<br>Gradient of a flux–time graph</p></div>
+          <div class="card step"><p class="eyebrow">Lenz’s law</p><h3>Opposes the change</h3><p>A consequence of conservation of energy</p></div>
+          <div class="card step"><p class="eyebrow">Moving conductor</p><h3>\(\varepsilon = BvL\)</h3><p>A coil entering or leaving a field<br>No emf while fully inside</p></div>
+          <div class="card step"><p class="eyebrow">Self-induction</p><h3>A coil opposes changes in its own current</h3><p>Qualitative only</p></div>
+          <div class="card step"><p class="eyebrow">Rotating coil</p><h3>A sinusoidal emf</h3><p>Peak when the flux is zero<br>Double the frequency: double the peak, half the period</p></div>
+        </div>
+        <div class="slide-foot"><span>D.4 INDUCTION · HL ONLY</span><span data-page></span></div>
+      </section>
+
+      <section class="slide hl" data-title="Key words">
+        <p class="eyebrow">Summary</p>
+        <h2>Key words<span>.</span></h2>
+        <div class="terms fill" style="grid-template-columns: repeat(3, 1fr);">
+          <div class="term"><b>Magnetic flux</b><span>Field × area facing the field</span></div>
+          <div class="term"><b>Weber</b><span>The unit of flux: 1 T m²</span></div>
+          <div class="term"><b>Flux linkage</b><span>Flux × number of turns</span></div>
+          <div class="term"><b>Induced emf</b><span>Caused by a changing flux</span></div>
+          <div class="term"><b>Faraday’s law</b><span>Emf = rate of change of flux linkage</span></div>
+          <div class="term"><b>Lenz’s law</b><span>The emf opposes the change</span></div>
+          <div class="term"><b>Self-induction</b><span>A coil’s emf from its own changing current</span></div>
+          <div class="term"><b>Alternating emf</b><span>Reverses direction every half cycle</span></div>
+          <div class="term"><b>Peak emf</b><span>The greatest value in a cycle</span></div>
+        </div>
+        <div class="slide-foot"><span>D.4 INDUCTION · HL ONLY</span><span data-page></span></div>
+      </section>
+
+    </div>
+  </main>
+
+  <nav class="controls" aria-label="Slide controls">
+    <button type="button" id="prev" aria-label="Previous slide"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg></button>
+    <span class="counter" id="counter" aria-live="polite"></span>
+    <button type="button" id="next" aria-label="Next slide"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 5l7 7-7 7"/></svg></button>
+  </nav>
+  <div class="progress" aria-hidden="true"><span id="progress-bar"></span></div>
+
+  <script src="../assets/figures.js"></script>
+  <script src="figures.js"></script>
+  <script src="../assets/deck-math.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
+  <script src="../assets/deck-notes.js"></script>
+  <script src="../assets/deck.js"></script>
+</body>
+</html>

@@ -1,0 +1,984 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="robots" content="noindex, nofollow">
+  <meta name="description" content="Teaching slides for IB Diploma Programme Physics topic B.4 Thermodynamics, higher level only: the first law, work done by a gas, the four gas processes, entropy and the second law, heat engines and the Carnot cycle.">
+  <meta name="theme-color" content="#F8F6F1">
+  <script src="/assets/theme.js" data-theme-scope="ibdpphy"></script>
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <link rel="stylesheet" href="/assets/standalone-top.css">
+  <title>B.4 Thermodynamics · IB DP Physics</title>
+  <link rel="icon" type="image/png" href="/assets/favicon.png">
+  <link rel="apple-touch-icon" href="/assets/apple-touch-icon.png">
+  <link rel="stylesheet" href="../assets/deck.css">
+  <link rel="stylesheet" href="../assets/deck-notes.css">
+  <link rel="stylesheet" href="/assets/theme-toggle.css">
+  <link rel="stylesheet" href="/assets/fullscreen-button.css">
+  <script src="/assets/theme-toggle.js"></script>
+  <script src="/ibdpphy/sw-register.js" defer></script>
+</head>
+<body>
+  <header class="banner">
+    <a class="banner-logo" href="/" aria-label="PanPhy Labs home"><img src="/assets/panphy.png" alt="PanPhy Labs" width="38" height="38"></a>
+    <a class="banner-title" href="#1">B.4 Thermodynamics</a>
+    <div class="banner-actions">
+      <button id="thumbs-toggle" class="icon-button" type="button" aria-controls="thumbs" aria-pressed="true" aria-label="Hide slide thumbnails" title="Show or hide slide thumbnails (T)"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path class="pane" d="M9.5 4.5H6A2.5 2.5 0 0 0 3.5 7v10A2.5 2.5 0 0 0 6 19.5h3.5z"/><rect x="3.5" y="4.5" width="17" height="15" rx="2.5"/><path d="M9.5 4.5v15"/></svg></button>
+      <button id="fullscreen" class="panphy-fullscreen-button" type="button" aria-pressed="false" aria-label="Present fullscreen" title="Present fullscreen (F)"><svg class="panphy-fs-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M4 9V4h5M15 4h5v5M20 15v5h-5M9 20H4v-5"/></svg></button>
+      <button id="theme-button" type="button" data-panphy-theme-toggle aria-label="Toggle light/dark theme" title="Toggle between light and dark themes"></button>
+    </div>
+  </header>
+  <script>window.PanPhyThemeToggle.mount(document.getElementById('theme-button'));</script>
+
+  <nav class="thumbs" id="thumbs" aria-label="Slides"></nav>
+
+  <main class="stage" id="stage">
+    <div class="deck" id="deck">
+
+      <!-- 1 · Title -->
+      <section class="slide title hl" data-title="B.4 Thermodynamics">
+        <div class="title-grid">
+          <div>
+            <p class="eyebrow">IB DP Physics · Theme B · The particulate nature of matter</p>
+            <h1>Thermodynamics<span>.</span></h1>
+            <p class="lead">B.4 · The first law, gas processes, entropy and the second law, heat engines<br>Higher level only: there is no standard level content in B.4</p>
+            <div class="chips">
+              <span class="chip hl">Additional HL · 8 hours</span>
+            </div>
+          </div>
+          <div class="fig" data-fig="b4-carnot" data-plain></div>
+        </div>
+      </section>
+
+      <section class="slide hl" data-title="Lesson map">
+        <p class="eyebrow">The journey</p>
+        <h2>Four parts<span>.</span></h2>
+        <div class="cards fill" style="grid-template-columns: repeat(4, 1fr);">
+          <div class="card">
+            <div class="fig" data-fig="b4-piston" data-plain style="height: 180px;"></div>
+            <p class="eyebrow">Part 01</p>
+            <h3>The first law</h3>
+            <p>Heat, work and internal energy</p>
+          </div>
+          <div class="card">
+            <div class="fig" data-fig="b4-processes" data-plain style="height: 180px;"></div>
+            <p class="eyebrow">Part 02</p>
+            <h3>Gas processes</h3>
+            <p>Four special changes, and cycles</p>
+          </div>
+          <div class="card">
+            <div class="fig" data-fig="b4-coins" data-plain style="height: 180px;"></div>
+            <p class="eyebrow">Part 03</p>
+            <h3>Entropy</h3>
+            <p>Disorder, and the second law</p>
+          </div>
+          <div class="card">
+            <div class="fig" data-fig="b4-engine" data-plain style="height: 180px;"></div>
+            <p class="eyebrow">Part 04</p>
+            <h3>Heat engines</h3>
+            <p>Efficiency and the Carnot limit</p>
+          </div>
+        </div>
+        <div class="idea" style="margin-top: 22px;">All calculations use a <b>monatomic ideal gas</b>, from B.3.</div>
+        <div class="slide-foot"><span>B.4 THERMODYNAMICS · HL ONLY</span><span data-page></span></div>
+      </section>
+
+      <!-- Part 1 -->
+      <section class="slide section hl" data-title="Part 1: The first law">
+        <div class="title-grid">
+          <div>
+            <p class="eyebrow">Part 01 · HL only</p>
+            <h1>The first law<span>.</span></h1>
+            <p class="lead">Conservation of energy for a gas: heat in, work out, internal energy changed</p>
+          </div>
+          <div class="fig" data-fig="b4-piston" data-plain></div>
+        </div>
+        <div class="slide-foot"><span>B.4 THERMODYNAMICS · HL ONLY</span><span data-page></span></div>
+      </section>
+
+      <section class="slide hl" data-title="Systems">
+        <p class="eyebrow">What are we talking about?</p>
+        <h2>System and surroundings<span>.</span></h2>
+        <div class="stack center" style="gap: 30px;">
+          <ul class="points">
+            <li>The <b>system</b> is the thing studied, usually a fixed amount of gas. Everything else is the <b>surroundings</b></li>
+          </ul>
+          <div class="cards step" style="grid-template-columns: 1fr 1fr;">
+            <div class="card"><p class="eyebrow">Closed system</p><h3>No mass in or out</h3><p><b>Energy</b> can cross the boundary, as heat or as work<br><br>Example: gas sealed in a cylinder with a piston</p></div>
+            <div class="card"><p class="eyebrow">Isolated system</p><h3>Neither mass nor energy in or out</h3><p>Its total energy is fixed<br><br>Example: a sealed, perfectly insulated flask. The whole universe</p></div>
+          </div>
+        </div>
+        <div class="slide-foot"><span>B.4 THERMODYNAMICS · HL ONLY</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>Why the distinction matters.</b> The first law is written for a closed system: it keeps account of the energy that crosses the boundary. The second law, in its simplest form, is about an isolated system: it says what the entropy inside can do when nothing crosses. Using a law with the wrong kind of system is the most common source of confusion in this topic.</p>
+            <p><b>Heat and work are transfers, not contents.</b> A gas does not “contain” heat or work. It contains internal energy. Heat is energy crossing the boundary because of a temperature difference; work is energy crossing because the boundary moves against a force.</p>
+          </div>
+          <div class="rn-side">
+            <p class="tip">Draw a dotted line round the system before you start. Anything crossing that line is \(Q\) or \(W\). Anything that stays inside is \(U\).</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide hl" data-title="Internal energy of an ideal gas">
+        <p class="eyebrow">Energy inside the gas</p>
+        <h2>Internal energy of a monatomic ideal gas<span>.</span></h2>
+        <div class="split even">
+          <div class="stack">
+            <div class="equation small"><span>\(\Delta U = \dfrac{3}{2} n R \Delta T = \dfrac{3}{2} N k_\mathrm{B} \Delta T\)</span></div>
+            <ul class="points small">
+              <li>The total <b>random kinetic energy</b> of the atoms</li>
+              <li class="step">Depends <b>only on temperature</b>, for a fixed amount of gas</li>
+              <li class="step">\(n\) moles, or \(N\) atoms</li>
+            </ul>
+          </div>
+          <div class="work step">
+            <span class="say">2.0 mol of helium heated from 300 K to 450 K</span>
+            <span>\(\Delta U = \dfrac{3}{2} n R \Delta T\)</span>
+            <span class="step">\(\Delta U = \dfrac{3}{2} \times 2.0 \times 8.31 \times 150\)</span>
+            <span class="step">\(\Delta U = \class{res}{3.7 \times 10^{3} \,\mathrm{J}}\)</span>
+          </div>
+        </div>
+        <div class="slide-foot"><span>B.4 THERMODYNAMICS · HL ONLY</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>Where the equation comes from.</b> In B.3 the average kinetic energy of one atom of an ideal gas is \(\frac{3}{2} k_\mathrm{B} T\). An ideal gas has no forces between its atoms, so no potential energy. Its internal energy is just the kinetic energy of all \(N\) atoms: \(U = \frac{3}{2} N k_\mathrm{B} T\). Since \(N k_\mathrm{B} = nR\), the two forms are the same.</p>
+            <p><b>The key consequence.</b> If the temperature of the gas does not change, its internal energy does not change, whatever happens to its pressure and volume. If the temperature returns to its starting value, so does the internal energy. This one fact settles half the questions in the topic.</p>
+          </div>
+          <div class="rn-side">
+            <p class="tip">Because \(PV = nRT\), you can also write \(\Delta U = \frac{3}{2} \Delta (PV)\). It saves working out the temperatures when a question gives pressures and volumes.</p>
+            <p class="trap">Using this for a gas of molecules such as oxygen or nitrogen. The factor \(\frac{3}{2}\) is for single atoms only.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide hl" data-title="Work done by a gas">
+        <p class="eyebrow">Moving the boundary</p>
+        <h2>Work done by a gas<span>.</span></h2>
+        <div class="split fig-first">
+          <div class="panel">
+            <div class="panel-head"><span>GAS IN A CYLINDER</span><span class="reveal-hint">PRESS → TO EXPAND</span></div>
+            <div class="fig" data-fig="b4-piston"></div>
+          </div>
+          <div class="stack">
+            <div class="work step">
+              <span>\(W = F \Delta x = P A \Delta x\)</span>
+              <span class="step">\(W = P \Delta V\)</span>
+            </div>
+            <ul class="points small">
+              <li class="step">At <b>constant pressure</b></li>
+              <li class="step">Expansion: work done <b>by</b> the gas, positive</li>
+              <li class="step">Compression: work done <b>on</b> the gas, negative</li>
+            </ul>
+          </div>
+        </div>
+        <div class="slide-foot"><span>B.4 THERMODYNAMICS · HL ONLY</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>The step in the middle.</b> The piston has area \(A\) and moves a distance \(\Delta x\), so the volume of the gas grows by \(A \Delta x\). That is \(\Delta V\). Force times distance has become pressure times change in volume, and the shape of the container no longer matters: the same result holds for a balloon or a bubble.</p>
+            <p><b>Where the energy comes from.</b> Atoms that hit a piston moving away from them bounce off more slowly, as a ball does off a bat that is being pulled back. So a gas that does work loses internal energy, and cools, unless heat is supplied at the same time to make up for it.</p>
+          </div>
+          <div class="rn-side">
+            <p class="tip">A numerical case: a gas at \(1.0 \times 10^{5} \,\mathrm{Pa}\) expands by \(2.0 \times 10^{-3} \,\mathrm{m}^{3}\), two litres. \(W = 1.0 \times 10^{5} \times 2.0 \times 10^{-3} = 200 \,\mathrm{J}\).</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide hl" data-title="Work on a P–V diagram">
+        <p class="eyebrow">When the pressure changes</p>
+        <h2>Work on a pressure–volume diagram<span>.</span></h2>
+        <div class="split wide-fig">
+          <ul class="points small">
+            <li>Work done = the <b>area</b> under the path</li>
+            <li class="step">Path to the <b>right</b>: expansion, work done <b>by</b> the gas</li>
+            <li class="step">Path to the <b>left</b>: compression, work done <b>on</b> the gas</li>
+            <li class="step">Vertical path: <b>no</b> work</li>
+          </ul>
+          <div class="panel">
+            <div class="panel-head"><span>AN EXPANSION</span></div>
+            <div class="fig" data-fig="b4-pv-area"></div>
+          </div>
+        </div>
+        <div class="slide-foot"><span>B.4 THERMODYNAMICS · HL ONLY</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>Why the area.</b> Split the change into thin vertical strips. Across each strip the pressure is nearly constant, so the work is \(P \Delta V\): the height of the strip times its width. Adding the strips gives the area under the curve. It is the same argument as for a force–displacement graph in A.3.</p>
+            <p><b>Work depends on the route.</b> There are many paths between the same two states on the diagram, and each has a different area under it. So the work done, and the heat needed, depend on how the change is carried out. The change in internal energy does not: it depends only on the two end states. That is why \(U\) is called a property of the state, and \(Q\) and \(W\) are not.</p>
+          </div>
+          <div class="rn-side">
+            <p class="tip">Estimate an awkward area by counting squares, after working out how many joules one square is worth: pascals times cubic metres.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide hl" data-title="The first law of thermodynamics">
+        <p class="eyebrow">Conservation of energy</p>
+        <h2>The first law of thermodynamics<span>.</span></h2>
+        <div class="split even">
+          <div class="stack">
+            <div class="equation"><span>\(Q = \Delta U + W\)</span></div>
+            <ul class="points small">
+              <li>Thermal energy supplied either <b>raises the internal energy</b> or leaves again as <b>work</b></li>
+              <li class="step">For a <b>closed</b> system</li>
+            </ul>
+          </div>
+          <table class="facts step">
+            <thead><tr><th></th><th>Positive</th><th>Negative</th></tr></thead>
+            <tbody>
+              <tr><td>\(Q\)</td><td>Thermal energy <b>supplied to</b> the system</td><td>Thermal energy lost by it</td></tr>
+              <tr><td>\(W\)</td><td>Work done <b>by</b> the system</td><td>Work done on it</td></tr>
+              <tr><td>\(\Delta U\)</td><td>Temperature <b>rises</b></td><td>Temperature falls</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="slide-foot"><span>B.4 THERMODYNAMICS · HL ONLY</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>Reading it as a budget.</b> \(Q\) is income. \(\Delta U\) is what goes into savings. \(W\) is what is spent. Income equals the change in savings plus spending. If the gas spends more in work than it receives as heat, its savings, the internal energy, must fall.</p>
+            <p><b>The sign convention.</b> This is the Clausius convention, and it is the one used in every exam question: \(Q\) is counted positive when it goes <b>into</b> the gas, \(W\) is positive when it is done <b>by</b> the gas. Some books write \(\Delta U = Q + W\) with \(W\) as the work done on the gas. The physics is identical, but mixing the two gives wrong signs.</p>
+          </div>
+          <div class="rn-side">
+            <p class="tip">Before substituting, write beside each quantity whether it is into or out of the gas, and give it its sign. Most mistakes are sign mistakes.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide hl" data-title="First law: two examples">
+        <p class="eyebrow">Worked example</p>
+        <h2>Using the first law<span>.</span></h2>
+        <div class="split even">
+          <div class="work">
+            <span class="say">A gas is supplied with 500 J of thermal energy</span>
+            <span class="say">and does 200 J of work as it expands</span>
+            <span>\(\Delta U = Q - W\)</span>
+            <span class="step">\(\Delta U = 500 - 200 = \class{res}{+300 \,\mathrm{J}}\)</span>
+            <span class="step">Its temperature <b>rises</b></span>
+          </div>
+          <div class="work step">
+            <span class="say">150 J of work is done <b>on</b> a gas</span>
+            <span class="say">while it <b>loses</b> 400 J of thermal energy</span>
+            <span>\(Q = -400 \,\mathrm{J}\) &nbsp;·&nbsp; \(W = -150 \,\mathrm{J}\)</span>
+            <span class="step">\(\Delta U = Q - W = -400 - (-150) = \class{res}{-250 \,\mathrm{J}}\)</span>
+            <span class="step">Its temperature <b>falls</b></span>
+          </div>
+        </div>
+        <div class="slide-foot"><span>B.4 THERMODYNAMICS · HL ONLY</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>Checking the second one by common sense.</b> Compressing the gas puts 150 J in. Cooling it takes 400 J out. The gas ends 250 J down. The signs in the equation only keep track of that.</p>
+            <p><b>From internal energy to temperature.</b> For 0.50 mol of a monatomic gas, a change of −250 J means \(\Delta T = \frac{\Delta U}{\frac{3}{2} n R} = \frac{-250}{1.5 \times 0.50 \times 8.31} = -40 \,\mathrm{K}\).</p>
+          </div>
+          <div class="rn-side">
+            <p class="trap">Writing \(W = +150 \,\mathrm{J}\) because “work is done”. Work done <b>on</b> the system is negative in this convention.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide hl" data-title="Quick check: the first law">
+        <p class="eyebrow">Quick check</p>
+        <h2>The first law<span>.</span></h2>
+        <div class="quiz fill">
+          <div class="q"><p><span class="n">01</span>What can cross the boundary of a closed system?</p><div class="ans step">Energy, but not mass</div></div>
+          <div class="q"><p><span class="n">02</span>On what does the internal energy of an ideal gas depend?</p><div class="ans step">Its temperature (and the amount of gas)</div></div>
+          <div class="q"><p><span class="n">03</span>A gas at \(2.0 \times 10^{5} \,\mathrm{Pa}\) expands by \(3.0 \times 10^{-3} \,\mathrm{m}^{3}\). Work done?</p><div class="ans step">\(600 \,\mathrm{J}\), by the gas</div></div>
+          <div class="q"><p><span class="n">04</span>What is the sign of \(W\) when a gas is compressed?</p><div class="ans step">Negative</div></div>
+          <div class="q"><p><span class="n">05</span>\(Q = +800 \,\mathrm{J}\) and \(W = +300 \,\mathrm{J}\). Change in internal energy?</p><div class="ans step">\(+500 \,\mathrm{J}\)</div></div>
+          <div class="q"><p><span class="n">06</span>What does the area under a P–V graph give?</p><div class="ans step">The work done</div></div>
+        </div>
+        <div class="slide-foot"><span class="reveal-hint">PRESS → TO REVEAL EACH ANSWER</span><span data-page></span></div>
+      </section>
+
+      <!-- Part 2 -->
+      <section class="slide section hl" data-title="Part 2: Gas processes">
+        <div class="title-grid">
+          <div>
+            <p class="eyebrow">Part 02 · HL only</p>
+            <h1>Gas processes<span>.</span></h1>
+            <p class="lead">Four changes, each with one thing held fixed, and how they join into a cycle</p>
+          </div>
+          <div class="fig" data-fig="b4-processes" data-plain></div>
+        </div>
+        <div class="slide-foot"><span>B.4 THERMODYNAMICS · HL ONLY</span><span data-page></span></div>
+      </section>
+
+      <section class="slide hl" data-title="Four processes">
+        <p class="eyebrow">Keeping one variable fixed</p>
+        <h2>Four processes<span>.</span></h2>
+        <div class="split wide-fig">
+          <ul class="points small">
+            <li><b>Isobaric</b>: constant pressure</li>
+            <li class="step"><b>Isovolumetric</b>: constant volume</li>
+            <li class="step"><b>Isothermal</b>: constant temperature</li>
+            <li class="step"><b>Adiabatic</b>: no thermal energy in or out</li>
+          </ul>
+          <div class="panel">
+            <div class="panel-head"><span>FROM THE SAME STARTING STATE</span></div>
+            <div class="fig" data-fig="b4-processes"></div>
+          </div>
+        </div>
+        <div class="slide-foot"><span>B.4 THERMODYNAMICS · HL ONLY</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>The names.</b> “Iso” means the same. Bar is pressure, as in barometer; therm is temperature, as in thermometer. Adiabatic comes from Greek words meaning “not passing through”: no heat passes through the walls.</p>
+            <p><b>Telling the two curves apart.</b> An isothermal and an adiabatic expansion both curve downwards, but the adiabatic curve is steeper. In an isothermal expansion heat flows in and keeps the temperature up. In an adiabatic expansion nothing replaces the energy the gas spends on work, so it cools, and its pressure falls for two reasons at once: larger volume and lower temperature.</p>
+          </div>
+          <div class="rn-side">
+            <p class="tip">Each point on a P–V diagram is one state of the gas, with one temperature: \(T = \frac{PV}{nR}\). Further from the origin means hotter.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide hl" data-title="Isovolumetric and isobaric">
+        <p class="eyebrow">Constant volume, constant pressure</p>
+        <h2>Isovolumetric and isobaric changes<span>.</span></h2>
+        <div class="split even">
+          <div class="stack">
+            <div class="cards" style="grid-template-columns: 1fr;">
+              <div class="card"><p class="eyebrow">Isovolumetric</p><h3>\(W = 0\), so \(Q = \Delta U\)</h3><p>All the heat supplied raises the temperature</p></div>
+              <div class="card step"><p class="eyebrow">Isobaric</p><h3>\(W = P \Delta V\), so \(Q = \Delta U + P \Delta V\)</h3><p>Some of the heat is spent on work</p></div>
+            </div>
+          </div>
+          <div class="work step">
+            <span class="say">Isobaric: \(P = 1.0 \times 10^{5} \,\mathrm{Pa}\)</span>
+            <span class="say">\(V\) from \(2.0 \times 10^{-3}\) to \(5.0 \times 10^{-3} \,\mathrm{m}^{3}\)</span>
+            <span>\(W = P \Delta V = 1.0 \times 10^{5} \times 3.0 \times 10^{-3} = \class{res}{300 \,\mathrm{J}}\)</span>
+            <span class="step">\(\Delta U = \dfrac{3}{2} P \Delta V = \dfrac{3}{2} \times 300 = \class{res}{450 \,\mathrm{J}}\)</span>
+            <span class="step">\(Q = \Delta U + W = 450 + 300 = \class{res}{750 \,\mathrm{J}}\)</span>
+          </div>
+        </div>
+        <div class="slide-foot"><span>B.4 THERMODYNAMICS · HL ONLY</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>Why heating at constant pressure costs more.</b> To raise the temperature of the same gas by the same amount, more heat is needed at constant pressure than at constant volume. At constant volume every joule goes into the internal energy. At constant pressure the gas must expand as it warms, and for a monatomic ideal gas only \(\frac{3}{5}\) of the heat raises the internal energy: here 450 J out of 750 J. The other \(\frac{2}{5}\) leaves as work.</p>
+            <p><b>Where \(\Delta U = \frac{3}{2} P \Delta V\) comes from.</b> \(\Delta U = \frac{3}{2} n R \Delta T\), and at constant pressure \(n R \Delta T = P \Delta V\) from the ideal gas equation.</p>
+          </div>
+          <div class="rn-side">
+            <p class="tip">In an isovolumetric change, \(\frac{P}{T}\) is constant. In an isobaric change, \(\frac{V}{T}\) is constant. Both follow from \(PV = nRT\).</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide hl" data-title="Isothermal changes">
+        <p class="eyebrow">Constant temperature</p>
+        <h2>Isothermal changes<span>.</span></h2>
+        <div class="split">
+          <div class="stack">
+            <ul class="points small">
+              <li>\(T\) constant, so \(\Delta U = 0\)</li>
+              <li class="step">First law: \(Q = W\)</li>
+              <li class="step">\(PV\) = constant: Boyle’s law</li>
+            </ul>
+            <div class="idea step">All the heat supplied comes straight out as work.</div>
+          </div>
+          <div class="panel">
+            <div class="panel-head"><span>AN ISOTHERMAL EXPANSION</span></div>
+            <div class="fig" data-fig="b4-processes" data-show="isothermal"></div>
+          </div>
+        </div>
+        <div class="slide-foot"><span>B.4 THERMODYNAMICS · HL ONLY</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>How to do it in practice.</b> The gas must be able to exchange heat freely with surroundings at a fixed temperature, and the change must be slow, so that heat has time to flow. Push a piston in slowly on a gas in a thin metal cylinder standing in a water bath and the compression is very nearly isothermal.</p>
+            <p><b>Compression.</b> Everything reverses. Work is done on the gas, \(W\) is negative, so \(Q\) is negative by the same amount: the gas must give out heat equal to the work done on it, or its temperature would rise.</p>
+          </div>
+          <div class="rn-side">
+            <p class="trap">Assuming “no temperature change” means “no heat”. In an isothermal change heat <b>does</b> flow. It is the internal energy that does not change.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide hl" data-title="Adiabatic changes">
+        <p class="eyebrow">No thermal energy transferred</p>
+        <h2>Adiabatic changes<span>.</span></h2>
+        <div class="split">
+          <div class="stack">
+            <div class="equation small"><span>\(P V^{\frac{5}{3}} = \text{constant}\)</span></div>
+            <ul class="points small">
+              <li>\(Q = 0\), so \(\Delta U = -W\)</li>
+              <li class="step">Expansion: the gas does work and <b>cools</b></li>
+              <li class="step">Compression: work is done on it and it <b>warms</b></li>
+            </ul>
+          </div>
+          <div class="panel">
+            <div class="panel-head"><span>ADIABATIC AND ISOTHERMAL COMPARED</span></div>
+            <div class="fig" data-fig="b4-processes" data-show="isothermal,adiabatic"></div>
+          </div>
+        </div>
+        <div class="slide-foot"><span>B.4 THERMODYNAMICS · HL ONLY</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>How to do it in practice.</b> Either insulate the gas well, or make the change so fast that heat has no time to flow. A bicycle pump gets hot because the air in it is compressed quickly. Gas escaping from a pressurised can expands quickly and comes out cold. Sound waves compress and expand air so rapidly that the changes are adiabatic.</p>
+            <p><b>Where the temperature goes.</b> With no heat exchanged, the work done by the gas comes entirely out of its internal energy: \(\Delta U = -W\). Internal energy is temperature, for an ideal gas, so the temperature must fall.</p>
+          </div>
+          <div class="rn-side">
+            <p class="tip">The power \(\frac{5}{3}\) is for a monatomic ideal gas only. It is given in the data booklet.</p>
+            <p class="more">Clouds form this way: moist air rises, expands adiabatically in the lower pressure, cools, and its water vapour condenses.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide hl" data-title="Adiabatic: a compression">
+        <p class="eyebrow">Worked example</p>
+        <h2>An adiabatic compression<span>.</span></h2>
+        <div class="split even">
+          <div class="work">
+            <span class="say">\(P_{1} = 1.0 \times 10^{5} \,\mathrm{Pa}\) · \(V_{1} = 4.0 \times 10^{-3} \,\mathrm{m}^{3}\) · \(T_{1} = 300 \,\mathrm{K}\)</span>
+            <span class="say">Compressed to \(V_{2} = 1.0 \times 10^{-3} \,\mathrm{m}^{3}\)</span>
+            <span>\(P_{1} V_{1}^{\frac{5}{3}} = P_{2} V_{2}^{\frac{5}{3}}\) &nbsp;so&nbsp; \(P_{2} = P_{1} \left(\dfrac{V_{1}}{V_{2}}\right)^{\frac{5}{3}}\)</span>
+            <span class="step">\(P_{2} = 1.0 \times 10^{5} \times 4.0^{\frac{5}{3}} = \class{res}{1.0 \times 10^{6} \,\mathrm{Pa}}\)</span>
+          </div>
+          <div class="work step">
+            <span class="say">The new temperature</span>
+            <span>\(\dfrac{P_{1} V_{1}}{T_{1}} = \dfrac{P_{2} V_{2}}{T_{2}}\)</span>
+            <span class="step">\(T_{2} = T_{1} \dfrac{P_{2} V_{2}}{P_{1} V_{1}} = 300 \times \dfrac{10.1 \times 1.0}{1.0 \times 4.0}\)</span>
+            <span class="step">\(T_{2} = \class{res}{760 \,\mathrm{K}}\)</span>
+          </div>
+        </div>
+        <div class="slide-foot"><span>B.4 THERMODYNAMICS · HL ONLY</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>Compare with an isothermal compression.</b> Squeezed slowly to a quarter of its volume at 300 K, the gas would reach only four times the pressure, \(4.0 \times 10^{5} \,\mathrm{Pa}\). Done adiabatically the pressure rises tenfold, because the gas has also become much hotter. A diesel engine compresses air so sharply that the fuel ignites without a spark.</p>
+            <p><b>The work done.</b> With \(Q = 0\), the work done on the gas equals the rise in its internal energy: \(\Delta U = \frac{3}{2} (P_{2} V_{2} - P_{1} V_{1}) = \frac{3}{2} (1010 - 400) = 910 \,\mathrm{J}\).</p>
+          </div>
+          <div class="rn-side">
+            <p class="tip">On a calculator, \(4.0^{\frac{5}{3}}\) is 4 ^ (5 / 3) = 10.1. The brackets matter.</p>
+            <p class="trap">Using \(P_{1} V_{1} = P_{2} V_{2}\). That is the isothermal law. The ideal gas equation with temperatures still holds for any change.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide hl" data-title="The four processes compared">
+        <p class="eyebrow">Side by side</p>
+        <h2>The four processes compared<span>.</span></h2>
+        <div class="stack center">
+          <table class="facts big">
+            <thead><tr><th>Process</th><th>Constant</th><th>First law becomes</th><th>On a P–V diagram</th></tr></thead>
+            <tbody>
+              <tr><td>Isovolumetric</td><td>\(V\)</td><td>\(Q = \Delta U\)</td><td>Vertical line</td></tr>
+              <tr class="step"><td>Isobaric</td><td>\(P\)</td><td>\(Q = \Delta U + P \Delta V\)</td><td>Horizontal line</td></tr>
+              <tr class="step"><td>Isothermal</td><td>\(T\)</td><td>\(Q = W\)</td><td>Curve, \(PV\) constant</td></tr>
+              <tr class="step"><td>Adiabatic</td><td>none: \(Q = 0\)</td><td>\(\Delta U = -W\)</td><td>Steeper curve</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="slide-foot"><span>B.4 THERMODYNAMICS · HL ONLY</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>One idea, four times.</b> In each process one term of \(Q = \Delta U + W\) is zero, or one quantity is easy to find, and the law collapses to something simpler. Constant volume: no work. Constant temperature: no change in internal energy. Adiabatic: no heat. Constant pressure: all three terms survive, but the work is simply \(P \Delta V\).</p>
+            <p><b>A plan for any question.</b> Name the process. Write down which term vanishes. Find the others from \(W = P \Delta V\) or the area, from \(\Delta U = \frac{3}{2} n R \Delta T\), and from the first law.</p>
+          </div>
+          <div class="rn-side">
+            <p class="tip">The ideal gas equation, \(PV = nRT\), holds at every point of every process. Use it to find any temperature you need.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide hl" data-title="Cyclic processes">
+        <p class="eyebrow">Back to the start</p>
+        <h2>Cyclic processes<span>.</span></h2>
+        <div class="split">
+          <div class="stack">
+            <ul class="points small">
+              <li>The gas returns to its <b>starting state</b>: over a cycle \(\Delta U = 0\)</li>
+              <li class="step">Net work done = the <b>area enclosed</b></li>
+              <li class="step"><b>Clockwise</b>: net work done <b>by</b> the gas</li>
+            </ul>
+            <div class="work step">
+              <span class="say">Pressure in \(10^{5} \,\mathrm{Pa}\) · volume in \(10^{-3} \,\mathrm{m}^{3}\)</span>
+              <span>\(W = \Delta P \, \Delta V\)</span>
+              <span>\(W = 2.0 \times 10^{5} \times 3.0 \times 10^{-3} = \class{res}{600 \,\mathrm{J}}\)</span>
+            </div>
+          </div>
+          <div class="panel">
+            <div class="panel-head"><span>A RECTANGULAR CYCLE</span></div>
+            <div class="fig" data-fig="b4-cycle"></div>
+          </div>
+        </div>
+        <div class="slide-foot"><span>B.4 THERMODYNAMICS · HL ONLY</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>Why the enclosed area.</b> From A to B the gas expands at high pressure and does work equal to the whole area under the top edge: \(3.0 \times 10^{5} \times 3.0 \times 10^{-3} = 900 \,\mathrm{J}\). From C to D it is compressed at low pressure, and work is done on it equal to the area under the bottom edge, 300 J. The two vertical sides involve no work. The net work is the difference, 600 J: the area inside the loop.</p>
+            <p><b>Where it comes from.</b> Over the cycle \(\Delta U = 0\), so the first law gives \(Q_\mathrm{net} = W_\mathrm{net}\). The gas takes in more heat than it gives out, and the difference appears as work. A gas taken round and round such a loop is an engine.</p>
+          </div>
+          <div class="rn-side">
+            <p class="tip">Go round the loop anticlockwise and the net work is done <b>on</b> the gas: that is a refrigerator or heat pump.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide hl" data-title="Quick check: gas processes">
+        <p class="eyebrow">Quick check</p>
+        <h2>Gas processes<span>.</span></h2>
+        <div class="quiz fill">
+          <div class="q"><p><span class="n">01</span>In which process is no work done?</p><div class="ans step">Isovolumetric</div></div>
+          <div class="q"><p><span class="n">02</span>In which process is \(\Delta U = 0\)?</p><div class="ans step">Isothermal</div></div>
+          <div class="q"><p><span class="n">03</span>A gas expands adiabatically. What happens to its temperature?</p><div class="ans step">It falls</div></div>
+          <div class="q"><p><span class="n">04</span>Which is steeper on a P–V diagram, an isothermal or an adiabatic curve?</p><div class="ans step">The adiabatic curve</div></div>
+          <div class="q"><p><span class="n">05</span>What is \(\Delta U\) over one complete cycle?</p><div class="ans step">Zero</div></div>
+          <div class="q"><p><span class="n">06</span>What does the area inside a cycle on a P–V diagram give?</p><div class="ans step">The net work done</div></div>
+        </div>
+        <div class="slide-foot"><span class="reveal-hint">PRESS → TO REVEAL EACH ANSWER</span><span data-page></span></div>
+      </section>
+
+      <!-- Part 3 -->
+      <section class="slide section hl" data-title="Part 3: Entropy and the second law">
+        <div class="title-grid">
+          <div>
+            <p class="eyebrow">Part 03 · HL only</p>
+            <h1>Entropy and the second law<span>.</span></h1>
+            <p class="lead">Why some things happen by themselves and their reverse never does</p>
+          </div>
+          <div class="fig" data-fig="b4-coins" data-plain></div>
+        </div>
+        <div class="slide-foot"><span>B.4 THERMODYNAMICS · HL ONLY</span><span data-page></span></div>
+      </section>
+
+      <section class="slide hl" data-title="Irreversible processes">
+        <p class="eyebrow">A direction for time</p>
+        <h2>Processes that only go one way<span>.</span></h2>
+        <div class="split fig-first">
+          <div class="panel">
+            <div class="panel-head"><span>GAS IN HALF A BOX</span><span class="reveal-hint">PRESS → TO REMOVE THE PARTITION</span></div>
+            <div class="fig" data-fig="b4-expand"></div>
+          </div>
+          <ul class="points small">
+            <li class="step">The gas spreads out. It never <b>un-spreads</b></li>
+            <li class="step">Heat flows from hot to cold, never back</li>
+            <li class="step">Energy would be conserved either way: the <b>first law</b> allows both</li>
+            <li class="step">Real processes are <b>irreversible</b></li>
+          </ul>
+        </div>
+        <div class="slide-foot"><span>B.4 THERMODYNAMICS · HL ONLY</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>What needs explaining.</b> Film a ball bouncing to rest, an ice cube melting in a warm drink or smoke spreading through a room, and run the film backwards. Nothing in the reversed film breaks conservation of energy. The floor could cool slightly and give its thermal energy back to the ball. Yet it never happens. Some other law must pick out the direction in which things really go.</p>
+            <p><b>The answer in one sentence.</b> There are overwhelmingly more ways for the gas to be spread through the whole box than for it to be in one half, so that is where chance takes it. The rest of this part makes that idea exact.</p>
+          </div>
+          <div class="rn-side">
+            <p class="tip">A reversible process is an ideal limit: one carried out so slowly and gently, with no friction and no temperature differences, that it could be run backwards leaving no trace.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide hl" data-title="Microstates">
+        <p class="eyebrow">Counting the ways</p>
+        <h2>Microstates and macrostates<span>.</span></h2>
+        <div class="split wide-fig">
+          <div class="stack">
+            <ul class="points small">
+              <li><b>Macrostate</b>: what you can see, such as “2 heads”</li>
+              <li class="step"><b>Microstate</b>: the exact arrangement, such as HTHT</li>
+              <li class="step">Every microstate is <b>equally likely</b></li>
+              <li class="step">\(\Omega\): the number of microstates of a macrostate</li>
+            </ul>
+          </div>
+          <div class="panel">
+            <div class="panel-head"><span>FOUR COINS</span><span class="pill">16 MICROSTATES</span></div>
+            <div class="fig" data-fig="b4-coins"></div>
+          </div>
+        </div>
+        <div class="slide-foot"><span>B.4 THERMODYNAMICS · HL ONLY</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>The six ways to get two heads.</b> HHTT, HTHT, HTTH, THHT, THTH, TTHH. Each is exactly as likely as HHHH, which can happen in only one way. So “two heads” turns up six times as often as “four heads”, not because any arrangement is favoured but because more arrangements fit the description.</p>
+            <p><b>What happens with more coins.</b> With 100 coins there are \(2^{100} \approx 10^{30}\) microstates. Only one of them is all heads. The macrostates close to 50 heads account for nearly all the rest. Shake the coins and you will always find a number close to 50. For the \(10^{23}\) atoms of a gas the same effect is so extreme that the most likely macrostate is the only one ever seen.</p>
+          </div>
+          <div class="rn-side">
+            <p class="tip">For the gas: the macrostate is its pressure, volume and temperature. A microstate is the position and velocity of every atom.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide hl" data-title="Entropy">
+        <p class="eyebrow">A measure of disorder</p>
+        <h2>Entropy<span>.</span></h2>
+        <div class="split even">
+          <div class="stack">
+            <div class="equation"><span>\(S = k_\mathrm{B} \ln \Omega\)</span></div>
+            <ul class="points small">
+              <li>More microstates: more <b>disorder</b>, more entropy</li>
+              <li class="step">Unit: J K⁻¹</li>
+              <li class="step">\(k_\mathrm{B} = 1.38 \times 10^{-23} \,\mathrm{J} \,\mathrm{K}^{-1}\)</li>
+            </ul>
+          </div>
+          <div class="work step">
+            <span class="say">Four coins, all heads: \(\Omega = 1\)</span>
+            <span>\(S = k_\mathrm{B} \ln 1 = \class{res}{0}\)</span>
+            <span class="say step">Two heads and two tails: \(\Omega = 6\)</span>
+            <span class="step">\(S = 1.38 \times 10^{-23} \times \ln 6\)</span>
+            <span class="step">\(S = \class{res}{2.5 \times 10^{-23} \,\mathrm{J} \,\mathrm{K}^{-1}}\)</span>
+          </div>
+        </div>
+        <div class="slide-foot"><span>B.4 THERMODYNAMICS · HL ONLY</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>Why a logarithm.</b> Put two systems side by side. Every microstate of one can go with every microstate of the other, so the numbers of microstates multiply: \(\Omega = \Omega_{1} \Omega_{2}\). But we want entropy to add, like energy or volume: two identical blocks should have twice the entropy of one. The logarithm turns multiplying into adding: \(\ln (\Omega_{1} \Omega_{2}) = \ln \Omega_{1} + \ln \Omega_{2}\).</p>
+            <p><b>What “disorder” means here.</b> Not untidiness, but the number of ways the atoms could be arranged without your noticing any difference. A crystal has few. A gas has vastly more. A gas in a large container has more than the same gas in a small one.</p>
+          </div>
+          <div class="rn-side">
+            <p class="tip">Entropy rises when a solid melts, a liquid boils, a gas expands, two substances mix, or anything is heated.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide history hl" data-title="Story: Boltzmann’s equation">
+        <p class="eyebrow">The story · Vienna, 1877–1906</p>
+        <p class="not-examined">Background story · not assessed</p>
+        <h2>The equation on a tombstone<span>.</span></h2>
+        <div class="story" style="--photo-h: 400px;">
+          <div class="story-photos">
+            <figure><img src="images/boltzmann.jpg" width="448" height="647" alt="Photographic portrait of Ludwig Boltzmann, a man with a full beard and small round glasses"><figcaption><b>Ludwig Boltzmann</b> in 1898</figcaption></figure>
+            <figure><img src="images/boltzmann-grave.jpg" width="735" height="1000" alt="A white marble tombstone with a bust of Boltzmann on top and the formula S = k. log W carved above it"><figcaption>His grave in Vienna, with <b>S = k. log W</b> carved above the bust</figcaption></figure>
+          </div>
+          <div class="stack">
+            <ul class="points">
+              <li>In <b>1877</b> Boltzmann linked entropy to the <b>number of arrangements</b> of atoms</li>
+              <li>Many physicists then doubted that atoms existed at all</li>
+              <li>He defended the idea for thirty years, and died in <b>1906</b></li>
+              <li>Within a few years experiments on Brownian motion had settled the question</li>
+            </ul>
+            <div class="idea">His W is our \(\Omega\). The constant \(k\) now carries his name.</div>
+          </div>
+        </div>
+        <p class="credits">Portrait: <a href="https://commons.wikimedia.org/wiki/File:Ludwig_Boltzmann_1898.jpg" target="_blank" rel="noopener">Rudolf Fenzl, 1898</a>, public domain. Grave: <a href="https://commons.wikimedia.org/wiki/File:Zentralfriedhof_Vienna_Ludwig_Boltzmann_2018-03-05.jpg" target="_blank" rel="noopener">Feldkurat Katz</a>, <a href="https://creativecommons.org/licenses/by-sa/4.0/" target="_blank" rel="noopener">CC BY-SA 4.0</a>.</p>
+        <div class="slide-foot"><span>B.4 THERMODYNAMICS · HL ONLY</span><span data-page></span></div>
+      </section>
+
+      <section class="slide hl" data-title="Entropy and thermal energy">
+        <p class="eyebrow">The large-scale view</p>
+        <h2>Entropy change from thermal energy<span>.</span></h2>
+        <div class="split even">
+          <div class="stack">
+            <div class="equation"><span>\(\Delta S = \dfrac{\Delta Q}{T}\)</span></div>
+            <ul class="points small">
+              <li>\(\Delta Q\): thermal energy transferred at absolute temperature \(T\)</li>
+              <li class="step">Energy <b>in</b>: entropy rises. Energy <b>out</b>: it falls</li>
+              <li class="step">The same heat counts for <b>more</b> at a <b>low</b> temperature</li>
+            </ul>
+          </div>
+          <div class="work step">
+            <span class="say">0.10 kg of ice melts at 273 K</span>
+            <span class="say">Specific latent heat \(3.34 \times 10^{5} \,\mathrm{J} \,\mathrm{kg}^{-1}\)</span>
+            <span>\(\Delta Q = mL = 0.10 \times 3.34 \times 10^{5} = 3.34 \times 10^{4} \,\mathrm{J}\)</span>
+            <span class="step">\(\Delta S = \dfrac{\Delta Q}{T} = \dfrac{3.34 \times 10^{4}}{273}\)</span>
+            <span class="step">\(\Delta S = \class{res}{+122 \,\mathrm{J} \,\mathrm{K}^{-1}}\)</span>
+          </div>
+        </div>
+        <div class="slide-foot"><span>B.4 THERMODYNAMICS · HL ONLY</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>Two definitions, one quantity.</b> Clausius defined entropy this way in 1865, from heat and temperature, with no mention of atoms. Boltzmann’s counting of microstates came later and gives the same numbers. Adding thermal energy to a body gives its atoms more energy to share out, and so more ways to share it: more microstates.</p>
+            <p><b>Why temperature is underneath.</b> A given amount of heat makes a big difference to a cold body, whose atoms have little energy, and a small difference to a hot one, which already has a huge number of microstates. A whisper is noticed in a library and lost in a crowded street.</p>
+          </div>
+          <div class="rn-side">
+            <p class="tip">Use this form when the temperature stays constant during the transfer: a change of state, an isothermal process, or a reservoir so large that its temperature hardly changes.</p>
+            <p class="trap">Using °C. The temperature must be in kelvin.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide hl" data-title="The second law">
+        <p class="eyebrow">Three ways of saying it</p>
+        <h2>The second law of thermodynamics<span>.</span></h2>
+        <div class="cards fill" style="grid-template-columns: 1fr 1fr 1fr; align-content: center;">
+          <div class="card"><p class="eyebrow">Entropy form</p><h3>The entropy of an isolated system never decreases</h3><p>Reversible process: it stays the same<br>Irreversible process: it <b>increases</b></p></div>
+          <div class="card step"><p class="eyebrow">Clausius form</p><h3>Heat does not flow by itself from cold to hot</h3><p>Moving thermal energy from a colder body to a hotter one needs <b>work</b></p></div>
+          <div class="card step"><p class="eyebrow">Kelvin form</p><h3>No engine can turn heat entirely into work</h3><p>Working in a cycle, it must <b>reject</b> some thermal energy to a colder body</p></div>
+        </div>
+        <div class="slide-foot"><span>B.4 THERMODYNAMICS · HL ONLY</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>They are the same law.</b> Suppose heat could flow by itself from cold to hot, against Clausius. Then the waste heat of any engine could be sent back to its hot source for nothing, and the engine would in effect turn heat entirely into work, against Kelvin. Each statement implies the other, and both follow from the entropy form, as the next slide shows for the first.</p>
+            <p><b>Real processes.</b> Friction, heat flow across a temperature difference, mixing and sudden expansion all increase entropy, and one or more of them is present in every real process. So in practice the entropy of an isolated system always goes up. It can never be brought back down, which is exactly what “irreversible” means.</p>
+          </div>
+          <div class="rn-side">
+            <p class="more">The universe as a whole is an isolated system. Its entropy has been rising since the beginning, and this is what gives time its direction.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide hl" data-title="Second law: heat flow">
+        <p class="eyebrow">Worked example</p>
+        <h2>Why heat flows from hot to cold<span>.</span></h2>
+        <div class="split even">
+          <div class="work">
+            <span class="say">600 J flows from a body at 400 K to one at 300 K</span>
+            <span>\(\Delta S = \dfrac{\Delta Q}{T}\) for each body</span>
+            <span class="step">Hot body: \(\Delta S = \dfrac{-600}{400} = -1.5 \,\mathrm{J} \,\mathrm{K}^{-1}\)</span>
+            <span class="step">Cold body: \(\Delta S = \dfrac{+600}{300} = +2.0 \,\mathrm{J} \,\mathrm{K}^{-1}\)</span>
+            <span class="step">Total: \(\class{res}{+0.5 \,\mathrm{J} \,\mathrm{K}^{-1}}\)</span>
+          </div>
+          <div class="stack">
+            <ul class="points small">
+              <li>The total entropy <b>rises</b>: this happens by itself</li>
+              <li class="step">Reversed, the total would be \(-0.5 \,\mathrm{J} \,\mathrm{K}^{-1}\): <b>forbidden</b></li>
+              <li class="step">The hot body’s entropy fell, but the cold body’s rose by more</li>
+            </ul>
+          </div>
+        </div>
+        <div class="slide-foot"><span>B.4 THERMODYNAMICS · HL ONLY</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>The Clausius form, derived.</b> The same 600 J is divided by a smaller temperature for the cold body than for the hot one, so the gain is always larger than the loss. Heat flowing from hot to cold always raises the total entropy. Heat flowing the other way would always lower it. The entropy form of the second law therefore forbids it.</p>
+            <p><b>Equal temperatures.</b> If both bodies were at 350 K, the two changes would cancel and the total entropy would not change. That is the reversible limit, and also the reason heat stops flowing once two bodies reach the same temperature.</p>
+          </div>
+          <div class="rn-side">
+            <p class="tip">Always add up the entropy changes of <b>everything</b> involved. One part can go down as long as the total does not.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide hl" data-title="Local decreases in entropy">
+        <p class="eyebrow">Systems that are not isolated</p>
+        <h2>Entropy can fall locally<span>.</span></h2>
+        <div class="stack center" style="gap: 30px;">
+          <ul class="points">
+            <li>The entropy of a system that is <b>not isolated</b> can decrease</li>
+            <li class="step">The entropy of its <b>surroundings</b> then rises by at least as much</li>
+          </ul>
+          <div class="cards step" style="grid-template-columns: 1fr 1fr 1fr;">
+            <div class="card"><p class="eyebrow">Water freezing</p><h3>Liquid to ordered crystal</h3><p>The latent heat it gives out raises the entropy of the colder air</p></div>
+            <div class="card"><p class="eyebrow">A refrigerator</p><h3>Cools its contents</h3><p>It rejects more thermal energy to the room than it removes</p></div>
+            <div class="card"><p class="eyebrow">A living thing</p><h3>Builds order from food</h3><p>It gives out heat and waste of higher entropy</p></div>
+          </div>
+        </div>
+        <div class="slide-foot"><span>B.4 THERMODYNAMICS · HL ONLY</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>A freezing pond, with numbers.</b> 1.0 kg of water freezes at 273 K, giving out \(3.34 \times 10^{5} \,\mathrm{J}\) to air at 263 K. The water’s entropy changes by \(\frac{-3.34 \times 10^{5}}{273} = -1223 \,\mathrm{J} \,\mathrm{K}^{-1}\). The air’s changes by \(\frac{+3.34 \times 10^{5}}{263} = +1270 \,\mathrm{J} \,\mathrm{K}^{-1}\). The total is \(+47 \,\mathrm{J} \,\mathrm{K}^{-1}\): the water has become more ordered, and the universe less.</p>
+            <p><b>Life does not break the second law.</b> A growing plant or animal is a highly ordered arrangement of atoms. It is not isolated. It takes in low-entropy energy, sunlight or food, and gives back heat at a low temperature. The entropy it exports is far greater than the entropy it loses.</p>
+          </div>
+          <div class="rn-side">
+            <p class="tip">When a question says entropy has decreased, look for what is outside the system. The answer is always there.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide hl" data-title="Quick check: entropy">
+        <p class="eyebrow">Quick check</p>
+        <h2>Entropy and the second law<span>.</span></h2>
+        <div class="quiz fill">
+          <div class="q"><p><span class="n">01</span>What is a microstate?</p><div class="ans step">One exact arrangement of all the particles</div></div>
+          <div class="q"><p><span class="n">02</span>How many microstates have three heads from four coins?</p><div class="ans step">4</div></div>
+          <div class="q"><p><span class="n">03</span>900 J is supplied to a body at 300 K. Entropy change?</p><div class="ans step">\(\frac{900}{300} = +3.0 \,\mathrm{J} \,\mathrm{K}^{-1}\)</div></div>
+          <div class="q"><p><span class="n">04</span>What happens to the entropy of a real isolated system?</p><div class="ans step">It always increases</div></div>
+          <div class="q"><p><span class="n">05</span>State the Clausius form of the second law.</p><div class="ans step">Heat does not flow by itself from cold to hot</div></div>
+          <div class="q"><p><span class="n">06</span>Water freezes: its entropy falls. Why is that allowed?</p><div class="ans step">The surroundings gain more</div></div>
+        </div>
+        <div class="slide-foot"><span class="reveal-hint">PRESS → TO REVEAL EACH ANSWER</span><span data-page></span></div>
+      </section>
+
+      <!-- Part 4 -->
+      <section class="slide section hl" data-title="Part 4: Heat engines">
+        <div class="title-grid">
+          <div>
+            <p class="eyebrow">Part 04 · HL only</p>
+            <h1>Heat engines<span>.</span></h1>
+            <p class="lead">Turning thermal energy into work, and the limit that no design can beat</p>
+          </div>
+          <div class="fig" data-fig="b4-engine" data-plain></div>
+        </div>
+        <div class="slide-foot"><span>B.4 THERMODYNAMICS · HL ONLY</span><span data-page></span></div>
+      </section>
+
+      <section class="slide history hl" data-title="Story: Carnot’s question">
+        <p class="eyebrow">The story · Paris, 1824</p>
+        <p class="not-examined">Background story · not assessed</p>
+        <h2>Carnot’s question<span>.</span></h2>
+        <div class="story" style="--photo-h: 400px;">
+          <div class="story-photos">
+            <figure><img src="images/carnot.jpg" width="743" height="1000" alt="Painted portrait of Sadi Carnot as a young man in the dark uniform of the École polytechnique"><figcaption><b>Sadi Carnot</b> at 17, painted by Louis-Léopold Boilly</figcaption></figure>
+            <figure><img src="images/newcomen-engine.jpg" width="666" height="1000" alt="Engraving of an early steam engine: a brick boiler and furnace below a vertical cylinder, whose piston hangs from one end of a large rocking beam with pump rods on the other end"><figcaption>A <b>Newcomen engine</b>, from an engraving of 1717</figcaption></figure>
+          </div>
+          <div class="stack">
+            <ul class="points">
+              <li>Steam engines had been pumping mines since <b>1712</b>, improved by trial and error</li>
+              <li>Carnot, a young army engineer, asked: is there a <b>limit</b> to how good an engine can be?</li>
+              <li>His answer, in <b>1824</b>: yes, and it depends only on the <b>two temperatures</b></li>
+              <li>He paid to print 600 copies. He died of cholera at <b>36</b></li>
+            </ul>
+            <div class="idea">The limit came before the first and second laws were known.</div>
+          </div>
+        </div>
+        <p class="credits">Portrait: <a href="https://commons.wikimedia.org/wiki/File:Sadi_Carnot.jpeg" target="_blank" rel="noopener">Louis-Léopold Boilly, 1813</a>, public domain. Engine: <a href="https://commons.wikimedia.org/wiki/File:Newcomen%27s_atmospheric_engine_based_on_a_1717_engraving_-_DPLA_-_105b591781f4cd6605692e139f9b837e.jpg" target="_blank" rel="noopener">Digital Public Library of America</a>, public domain.</p>
+        <div class="slide-foot"><span>B.4 THERMODYNAMICS · HL ONLY</span><span data-page></span></div>
+      </section>
+
+      <section class="slide hl" data-title="Heat engines">
+        <p class="eyebrow">Work from thermal energy</p>
+        <h2>Heat engines<span>.</span></h2>
+        <div class="split">
+          <div class="stack">
+            <div class="equation small"><span>\(\eta = \dfrac{\text{useful work}}{\text{input energy}} = \dfrac{W}{Q_\mathrm{h}}\)</span></div>
+            <ul class="points small">
+              <li>Takes in \(Q_\mathrm{h}\) from a <b>hot reservoir</b></li>
+              <li class="step">Does work \(W\), using a gas taken round a <b>cycle</b></li>
+              <li class="step">Rejects \(Q_\mathrm{c}\) to a <b>cold reservoir</b></li>
+              <li class="step">\(W = Q_\mathrm{h} - Q_\mathrm{c}\)</li>
+            </ul>
+          </div>
+          <div class="panel">
+            <div class="panel-head"><span>ENERGY FLOW IN ONE CYCLE</span></div>
+            <div class="fig" data-fig="b4-engine"></div>
+          </div>
+        </div>
+        <div class="slide-foot"><span>B.4 THERMODYNAMICS · HL ONLY</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>Why some heat must be thrown away.</b> Over a cycle the gas returns to its starting state, so its entropy returns to its starting value. But it gained entropy when it took in \(Q_\mathrm{h}\). It must get rid of that entropy before the next cycle, and the only way to remove entropy is to give out thermal energy. That is \(Q_\mathrm{c}\). An engine with no cold reservoir would break the Kelvin form of the second law.</p>
+            <p><b>A worked case.</b> An engine takes in 2000 J and rejects 1400 J each cycle. \(W = 2000 - 1400 = 600 \,\mathrm{J}\), and \(\eta = \frac{600}{2000} = 0.30\). Equivalently, \(\eta = 1 - \frac{Q_\mathrm{c}}{Q_\mathrm{h}}\).</p>
+          </div>
+          <div class="rn-side">
+            <p class="tip">A reservoir is a body so large that its temperature does not change when it gives out or takes in the heat: the furnace gases, the atmosphere, a river.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide hl" data-title="The Carnot cycle">
+        <p class="eyebrow">The best possible engine</p>
+        <h2>The Carnot cycle<span>.</span></h2>
+        <div class="split wide-fig">
+          <ul class="points small">
+            <li><b>A → B</b>: isothermal expansion at \(T_\mathrm{h}\), taking in \(Q_\mathrm{h}\)</li>
+            <li class="step"><b>B → C</b>: adiabatic expansion, cooling to \(T_\mathrm{c}\)</li>
+            <li class="step"><b>C → D</b>: isothermal compression at \(T_\mathrm{c}\), rejecting \(Q_\mathrm{c}\)</li>
+            <li class="step"><b>D → A</b>: adiabatic compression, warming to \(T_\mathrm{h}\)</li>
+          </ul>
+          <div class="panel">
+            <div class="panel-head"><span>TWO ISOTHERMALS, TWO ADIABATICS</span></div>
+            <div class="fig" data-fig="b4-carnot"></div>
+          </div>
+        </div>
+        <div class="slide-foot"><span>B.4 THERMODYNAMICS · HL ONLY</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>Why these four steps.</b> Entropy is created whenever heat flows across a temperature difference. To waste nothing, heat must enter the gas only while the gas is at the temperature of the hot reservoir, and leave only while it is at the temperature of the cold one: two isothermal steps. To get the gas from one temperature to the other without any heat flow at all, the other two steps must be adiabatic.</p>
+            <p><b>Why nobody builds one.</b> A reversible isothermal step would have to be infinitely slow, so a true Carnot engine would deliver its work at zero power. It is a yardstick, not a design: every real engine is compared with it.</p>
+          </div>
+          <div class="rn-side">
+            <p class="tip">Heat is exchanged only on the two apricot curves. On the two terracotta curves \(Q = 0\).</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide hl" data-title="Carnot efficiency">
+        <p class="eyebrow">The limit</p>
+        <h2>The Carnot efficiency<span>.</span></h2>
+        <div class="split even">
+          <div class="stack">
+            <div class="equation"><span>\(\eta_\mathrm{Carnot} = 1 - \dfrac{T_\mathrm{c}}{T_\mathrm{h}}\)</span></div>
+            <ul class="points small">
+              <li>The <b>greatest</b> efficiency possible between two reservoirs</li>
+              <li class="step">Depends only on their <b>temperatures</b>, in kelvin</li>
+              <li class="step">Real engines always do <b>worse</b></li>
+            </ul>
+          </div>
+          <div class="work step">
+            <span class="say">Steam at 800 K · cooling water at 300 K</span>
+            <span>\(\eta_\mathrm{Carnot} = 1 - \dfrac{T_\mathrm{c}}{T_\mathrm{h}} = 1 - \dfrac{300}{800} = \class{res}{0.63}\)</span>
+            <span class="say step">A real engine: 2000 J in, 600 J of work</span>
+            <span class="step">\(\eta = \dfrac{W}{Q_\mathrm{h}} = \dfrac{600}{2000} = \class{res}{0.30}\)</span>
+          </div>
+        </div>
+        <div class="slide-foot"><span>B.4 THERMODYNAMICS · HL ONLY</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>Where the limit comes from.</b> In the reversible Carnot cycle the total entropy does not change. The hot reservoir loses \(\frac{Q_\mathrm{h}}{T_\mathrm{h}}\) and the cold one gains \(\frac{Q_\mathrm{c}}{T_\mathrm{c}}\), so these are equal: \(\frac{Q_\mathrm{c}}{Q_\mathrm{h}} = \frac{T_\mathrm{c}}{T_\mathrm{h}}\). Put that into \(\eta = 1 - \frac{Q_\mathrm{c}}{Q_\mathrm{h}}\). Any real engine creates extra entropy, has to reject more heat to carry it away, and so does less work.</p>
+            <p><b>How to make an engine better.</b> Raise \(T_\mathrm{h}\) or lower \(T_\mathrm{c}\). The cold reservoir is the air or a river, near 300 K, and cannot be changed much. So engineers push the hot temperature as high as materials allow. This is why power stations use steam at very high temperature and pressure, and why even the best turn well under two thirds of their heat into electricity.</p>
+          </div>
+          <div class="rn-side">
+            <p class="trap">Using °C. With 527 °C and 27 °C the formula gives 0.95: quite wrong. Convert to kelvin first.</p>
+            <p class="tip">An efficiency of 1 would need \(T_\mathrm{c} = 0 \,\mathrm{K}\), which cannot be reached.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide history hl" data-title="Story: Clausius names entropy">
+        <p class="eyebrow">The story · Zürich, 1865</p>
+        <p class="not-examined">Background story · not assessed</p>
+        <h2>Clausius names entropy<span>.</span></h2>
+        <div class="story" style="--photo-h: 400px;">
+          <div class="story-photos">
+            <figure><img src="images/clausius.jpg" width="803" height="1000" alt="Photographic portrait of Rudolf Clausius, an older man with white hair and a white beard, in a dark coat"><figcaption><b>Rudolf Clausius</b></figcaption></figure>
+          </div>
+          <div class="stack">
+            <ul class="points">
+              <li>In <b>1850</b> Clausius put Carnot’s result together with Joule’s: energy is conserved, <b>and</b> heat will not flow uphill</li>
+              <li>In <b>1865</b> he found the quantity that measures this, \(\frac{\Delta Q}{T}\), and named it <b>entropy</b></li>
+              <li>He built the word from the Greek for “transformation”, to sound like “energy”</li>
+            </ul>
+            <div class="idea">His summary: the energy of the universe is constant; its entropy tends to a maximum.</div>
+          </div>
+        </div>
+        <p class="credits">Portrait: <a href="https://commons.wikimedia.org/wiki/File:Portrait_of_Clausius.jpg" target="_blank" rel="noopener">AIP Emilio Segrè Visual Archives</a>, CC0.</p>
+        <div class="slide-foot"><span>B.4 THERMODYNAMICS · HL ONLY</span><span data-page></span></div>
+      </section>
+
+      <section class="slide hl" data-title="Quick check: heat engines">
+        <p class="eyebrow">Quick check</p>
+        <h2>Heat engines<span>.</span></h2>
+        <div class="quiz fill">
+          <div class="q"><p><span class="n">01</span>An engine takes in 500 J and rejects 350 J. Work done?</p><div class="ans step">150 J</div></div>
+          <div class="q"><p><span class="n">02</span>Its efficiency?</p><div class="ans step">\(\frac{150}{500} = 0.30\)</div></div>
+          <div class="q"><p><span class="n">03</span>Which four processes make up a Carnot cycle?</p><div class="ans step">Two isothermal and two adiabatic</div></div>
+          <div class="q"><p><span class="n">04</span>Reservoirs at 600 K and 300 K. Greatest possible efficiency?</p><div class="ans step">\(1 - \frac{300}{600} = 0.50\)</div></div>
+          <div class="q"><p><span class="n">05</span>Why must an engine reject heat?</p><div class="ans step">To remove the entropy it took in</div></div>
+          <div class="q"><p><span class="n">06</span>How can the Carnot efficiency be raised?</p><div class="ans step">Hotter source or colder sink</div></div>
+        </div>
+        <div class="slide-foot"><span class="reveal-hint">PRESS → TO REVEAL EACH ANSWER</span><span data-page></span></div>
+      </section>
+
+      <section class="slide hl" data-title="Summary">
+        <p class="eyebrow">Summary</p>
+        <h2>Thermodynamics on one slide<span>.</span></h2>
+        <div class="cards fill" style="grid-template-columns: 1fr 1fr 1fr; align-content: center;">
+          <div class="card"><p class="eyebrow">First law</p><h3>\(Q = \Delta U + W\)</h3><p>\(Q\) into the gas, \(W\) done by it<br>\(\Delta U = \frac{3}{2} n R \Delta T\)</p></div>
+          <div class="card step"><p class="eyebrow">Work</p><h3>\(W = P \Delta V\)</h3><p>Area under a P–V path<br>Area inside a cycle: net work</p></div>
+          <div class="card step"><p class="eyebrow">Processes</p><h3>One thing fixed</h3><p>Isovolumetric, isobaric, isothermal<br>Adiabatic: \(P V^{\frac{5}{3}}\) constant</p></div>
+          <div class="card step"><p class="eyebrow">Entropy</p><h3>\(S = k_\mathrm{B} \ln \Omega\)</h3><p>\(\Delta S = \frac{\Delta Q}{T}\)<br>A measure of disorder</p></div>
+          <div class="card step"><p class="eyebrow">Second law</p><h3>Entropy never decreases</h3><p>In an isolated system<br>Clausius and Kelvin forms</p></div>
+          <div class="card step"><p class="eyebrow">Heat engines</p><h3>\(\eta_\mathrm{Carnot} = 1 - \frac{T_\mathrm{c}}{T_\mathrm{h}}\)</h3><p>\(\eta = \frac{W}{Q_\mathrm{h}}\), always below the Carnot limit</p></div>
+        </div>
+        <div class="slide-foot"><span>B.4 THERMODYNAMICS · HL ONLY</span><span data-page></span></div>
+      </section>
+
+      <section class="slide hl" data-title="Key words">
+        <p class="eyebrow">Summary</p>
+        <h2>Key words<span>.</span></h2>
+        <div class="terms fill" style="grid-template-columns: repeat(3, 1fr);">
+          <div class="term"><b>Closed system</b><span>Energy can cross, mass cannot</span></div>
+          <div class="term"><b>Isolated system</b><span>Nothing crosses its boundary</span></div>
+          <div class="term"><b>Internal energy</b><span>Total random energy of the particles</span></div>
+          <div class="term"><b>Isothermal</b><span>At constant temperature</span></div>
+          <div class="term"><b>Adiabatic</b><span>No thermal energy transferred</span></div>
+          <div class="term"><b>Isobaric</b><span>At constant pressure</span></div>
+          <div class="term"><b>Isovolumetric</b><span>At constant volume</span></div>
+          <div class="term"><b>Microstate</b><span>One exact arrangement</span></div>
+          <div class="term"><b>Entropy</b><span>A measure of disorder, in J K⁻¹</span></div>
+          <div class="term"><b>Irreversible</b><span>Raises the total entropy</span></div>
+          <div class="term"><b>Heat engine</b><span>Turns thermal energy into work</span></div>
+          <div class="term"><b>Carnot cycle</b><span>The most efficient cycle possible</span></div>
+        </div>
+        <div class="slide-foot"><span>B.4 THERMODYNAMICS · HL ONLY</span><span data-page></span></div>
+      </section>
+
+    </div>
+  </main>
+
+  <nav class="controls" aria-label="Slide controls">
+    <button type="button" id="prev" aria-label="Previous slide"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg></button>
+    <span class="counter" id="counter" aria-live="polite"></span>
+    <button type="button" id="next" aria-label="Next slide"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 5l7 7-7 7"/></svg></button>
+  </nav>
+  <div class="progress" aria-hidden="true"><span id="progress-bar"></span></div>
+
+  <script src="../assets/figures.js"></script>
+  <script src="figures.js"></script>
+  <script src="../assets/deck-math.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
+  <script src="../assets/deck-notes.js"></script>
+  <script src="../assets/deck.js"></script>
+</body>
+</html>
