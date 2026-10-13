@@ -1,0 +1,875 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="robots" content="noindex, nofollow">
+  <meta name="description" content="Teaching slides for IB Diploma Programme Physics topic C.1 Simple harmonic motion, standard and higher level: the defining equation, period and frequency, the mass–spring system and the simple pendulum, energy changes, and at higher level the equations of motion, phase angle and energy calculations.">
+  <meta name="theme-color" content="#F8F6F1">
+  <script src="/assets/theme.js" data-theme-scope="ibdpphy"></script>
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <link rel="stylesheet" href="/assets/standalone-top.css">
+  <title>C.1 Simple harmonic motion · IB DP Physics</title>
+  <link rel="icon" type="image/png" href="/assets/favicon.png">
+  <link rel="apple-touch-icon" href="/assets/apple-touch-icon.png">
+  <link rel="stylesheet" href="../assets/deck.css">
+  <link rel="stylesheet" href="../assets/deck-notes.css">
+  <link rel="stylesheet" href="/assets/theme-toggle.css">
+  <link rel="stylesheet" href="/assets/fullscreen-button.css">
+  <script src="/assets/theme-toggle.js"></script>
+  <script src="/ibdpphy/sw-register.js" defer></script>
+</head>
+<body>
+  <header class="banner">
+    <a class="banner-logo" href="/" aria-label="PanPhy Labs home"><img src="/assets/panphy.png" alt="PanPhy Labs" width="38" height="38"></a>
+    <a class="banner-title" href="#1">C.1 Simple harmonic motion</a>
+    <div class="banner-actions">
+      <button id="thumbs-toggle" class="icon-button" type="button" aria-controls="thumbs" aria-pressed="true" aria-label="Hide slide thumbnails" title="Show or hide slide thumbnails (T)"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path class="pane" d="M9.5 4.5H6A2.5 2.5 0 0 0 3.5 7v10A2.5 2.5 0 0 0 6 19.5h3.5z"/><rect x="3.5" y="4.5" width="17" height="15" rx="2.5"/><path d="M9.5 4.5v15"/></svg></button>
+      <button id="fullscreen" class="panphy-fullscreen-button" type="button" aria-pressed="false" aria-label="Present fullscreen" title="Present fullscreen (F)"><svg class="panphy-fs-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M4 9V4h5M15 4h5v5M20 15v5h-5M9 20H4v-5"/></svg></button>
+      <button id="theme-button" type="button" data-panphy-theme-toggle aria-label="Toggle light/dark theme" title="Toggle between light and dark themes"></button>
+    </div>
+  </header>
+  <script>window.PanPhyThemeToggle.mount(document.getElementById('theme-button'));</script>
+
+  <nav class="thumbs" id="thumbs" aria-label="Slides"></nav>
+
+  <main class="stage" id="stage">
+    <div class="deck" id="deck">
+
+      <!-- 1 · Title -->
+      <section class="slide title" data-title="C.1 Simple harmonic motion">
+        <div class="title-grid">
+          <div>
+            <p class="eyebrow">IB DP Physics · Theme C · Wave behaviour</p>
+            <h1>Simple harmonic motion<span>.</span></h1>
+            <p class="lead">C.1 · Oscillations, the mass–spring system, the pendulum and energy<br>Standard level and higher level</p>
+            <div class="chips">
+              <span class="chip">SL + HL · 3 hours</span>
+              <span class="chip hl">Additional HL · 4 hours</span>
+            </div>
+          </div>
+          <div class="fig" data-fig="c1-spring" data-plain></div>
+        </div>
+      </section>
+
+      <section class="slide" data-title="Lesson map">
+        <p class="eyebrow">The journey</p>
+        <h2>Four parts<span>.</span></h2>
+        <div class="cards fill" style="grid-template-columns: repeat(4, 1fr);">
+          <div class="card">
+            <div class="fig" data-fig="c1-circle" data-still data-plain style="height: 170px;"></div>
+            <p class="eyebrow">Part 01</p>
+            <h3>What makes motion simple harmonic</h3>
+            <p>\(a = -\omega^{2} x\), period and frequency</p>
+          </div>
+          <div class="card">
+            <div class="fig" data-fig="c1-pendulum" data-still data-plain style="height: 170px;"></div>
+            <p class="eyebrow">Part 02</p>
+            <h3>Two oscillators</h3>
+            <p>The mass on a spring and the simple pendulum</p>
+          </div>
+          <div class="card">
+            <div class="fig" data-fig="c1-energy" data-still data-plain style="height: 170px;"></div>
+            <p class="eyebrow">Part 03</p>
+            <h3>Energy</h3>
+            <p>Kinetic and potential energy through a cycle</p>
+          </div>
+          <div class="card hl">
+            <div class="fig" data-fig="c1-xva" data-still style="height: 170px;"></div>
+            <p class="eyebrow">Part 04 · HL only</p>
+            <h3>The equations of the motion</h3>
+            <p>Displacement, velocity, phase angle and energy</p>
+          </div>
+        </div>
+        <div class="slide-foot"><span>C.1 SIMPLE HARMONIC MOTION · SL + HL</span><span data-page></span></div>
+      </section>
+
+      <!-- Part 1 -->
+      <section class="slide section" data-title="Part 1: What makes motion simple harmonic">
+        <div class="title-grid">
+          <div>
+            <p class="eyebrow">Part 01</p>
+            <h1>What makes motion simple harmonic<span>.</span></h1>
+            <p class="lead">One condition on the force, and everything that follows from it</p>
+          </div>
+          <div class="fig" data-fig="c1-circle" data-plain></div>
+        </div>
+        <div class="slide-foot"><span>C.1 SIMPLE HARMONIC MOTION · SL + HL</span><span data-page></span></div>
+      </section>
+
+      <section class="slide" data-title="Describing an oscillation">
+        <p class="eyebrow">The vocabulary</p>
+        <h2>Describing an oscillation<span>.</span></h2>
+        <div class="split wide-fig">
+          <ul class="points small">
+            <li><b>Equilibrium position</b>: where the resultant force is zero</li>
+            <li class="step"><b>Displacement</b> \(x\): distance from equilibrium, with a direction</li>
+            <li class="step"><b>Amplitude</b> \(x_{0}\): the greatest displacement</li>
+            <li class="step"><b>Period</b> \(T\): the time for one complete oscillation</li>
+          </ul>
+          <div class="panel">
+            <div class="panel-head"><span>A MASS ON A SPRING</span></div>
+            <div class="fig" data-fig="c1-spring"></div>
+          </div>
+        </div>
+        <div class="slide-foot"><span>C.1 SIMPLE HARMONIC MOTION · SL + HL</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>One complete oscillation.</b> Follow the block from any point until it is next at the same point and moving the same way. From the right-hand end that means: to the centre, to the left-hand end, back to the centre, back to the right-hand end. The block passes through the centre twice in each oscillation, once in each direction.</p>
+            <p><b>How far it travels.</b> In one oscillation the block covers four amplitudes: out, back, out the other way and back. A common slip is to call the full width of the motion, end to end, the amplitude. That width is two amplitudes.</p>
+          </div>
+          <div class="rn-side">
+            <p class="tip">To measure a period, time ten or twenty oscillations and divide. Count “nought” as you start the clock, not “one”, and time from the centre, where the block is moving fastest and the moment it passes is sharpest.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide" data-title="Period, frequency and angular frequency">
+        <p class="eyebrow">Three ways to say how fast</p>
+        <h2>Period, frequency and angular frequency<span>.</span></h2>
+        <div class="split even">
+          <div class="stack">
+            <div class="equation"><span>\(T = \dfrac{1}{f} = \dfrac{2 \pi}{\omega}\)</span></div>
+            <ul class="points small">
+              <li>\(f\): oscillations per second, in <b>hertz</b></li>
+              <li class="step">\(\omega = 2 \pi f\): the <b>angular frequency</b>, in \(\mathrm{rad} \,\mathrm{s}^{-1}\)</li>
+            </ul>
+          </div>
+          <div class="work step">
+            <span class="say">A mass makes 20 oscillations in 16 s</span>
+            <span>\(T = \dfrac{16}{20} = \class{res}{0.80 \,\mathrm{s}}\)</span>
+            <span class="step">\(f = \dfrac{1}{T} = \dfrac{1}{0.80} = \class{res}{1.25 \,\mathrm{Hz}}\)</span>
+            <span class="step">\(\omega = \dfrac{2 \pi}{T} = \dfrac{2 \pi}{0.80} = \class{res}{7.9 \,\mathrm{rad} \,\mathrm{s}^{-1}}\)</span>
+          </div>
+        </div>
+        <div class="slide-foot"><span>C.1 SIMPLE HARMONIC MOTION · SL + HL</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>Why a third quantity.</b> The equations of simple harmonic motion are full of sines and cosines, and those work in angles. One complete oscillation corresponds to one complete turn, \(2 \pi\) radians. \(\omega\) is the number of radians of that cycle covered each second, so it is \(2 \pi\) times the number of cycles each second. Using \(\omega\) keeps factors of \(2 \pi\) out of every other equation. The slide after next shows where the angle comes from.</p>
+            <p><b>The same symbol as in A.2.</b> There \(\omega\) was the angular velocity of a body moving in a circle. That is no coincidence, as Part 1 goes on to show.</p>
+          </div>
+          <div class="rn-side">
+            <p class="trap">Using \(f\) where \(\omega\) is needed. \(\omega\) is about six times larger than \(f\), and it is \(\omega\) that appears in \(a = -\omega^{2} x\).</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide" data-title="The condition for simple harmonic motion">
+        <p class="eyebrow">What the force must do</p>
+        <h2>The condition for simple harmonic motion<span>.</span></h2>
+        <div class="stack center" style="gap: 26px;">
+          <div class="cards" style="grid-template-columns: 1fr 1fr;">
+            <div class="card"><p class="eyebrow">Condition 1</p><h3>The force is proportional to the displacement</h3><p>Twice as far from equilibrium: twice the force</p></div>
+            <div class="card step"><p class="eyebrow">Condition 2</p><h3>The force is directed towards equilibrium</h3><p>Always opposite to the displacement: a <b>restoring</b> force</p></div>
+          </div>
+          <div class="eq-row step">
+            <div class="equation"><span>\(F = -kx\)</span></div>
+            <div class="idea">Since \(F = ma\), the <b>acceleration</b> is also proportional to the displacement and opposite to it.</div>
+          </div>
+        </div>
+        <div class="slide-foot"><span>C.1 SIMPLE HARMONIC MOTION · SL + HL</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>Both conditions are needed.</b> A ball bouncing on a hard floor moves back and forth, but the force on it is its constant weight, not a force that grows with displacement: its motion is periodic, not simple harmonic. A force proportional to displacement but pointing away from equilibrium would not give an oscillation at all: the body would run away faster and faster.</p>
+            <p><b>Why so many things do it.</b> Push almost any stable system a little way from equilibrium and the force pulling it back is, to a good approximation, proportional to how far it was pushed. Atoms in a solid, a ruler clamped to a bench, the air in a bottle, a building in an earthquake and the carbon dioxide molecules of B.2 all oscillate with simple harmonic motion for small displacements.</p>
+          </div>
+          <div class="rn-side">
+            <p class="tip">Asked for “the conditions for simple harmonic motion”, give both: acceleration (or force) proportional to displacement, and directed towards the equilibrium position.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide" data-title="The defining equation">
+        <p class="eyebrow">The two conditions in one line</p>
+        <h2>The defining equation<span>.</span></h2>
+        <div class="split">
+          <div class="stack">
+            <div class="equation"><span>\(a = -\omega^{2} x\)</span></div>
+            <ul class="points small">
+              <li>\(a \propto x\): the graph is a <b>straight line</b> through the origin</li>
+              <li class="step">The <b>minus sign</b>: \(a\) is always opposite to \(x\)</li>
+              <li class="step">The constant, \(\omega^{2}\), sets the period</li>
+            </ul>
+          </div>
+          <div class="panel">
+            <div class="panel-head"><span>ACCELERATION AGAINST DISPLACEMENT</span></div>
+            <div class="fig" data-fig="c1-ax"></div>
+          </div>
+        </div>
+        <div class="slide-foot"><span>C.1 SIMPLE HARMONIC MOTION · SL + HL</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>What the minus sign does.</b> When the body is to the right of equilibrium (\(x\) positive) its acceleration is to the left (negative), whichever way it happens to be moving. If it is moving outwards, it slows. If it is moving back, it speeds up. Either way it is being pulled towards the centre, and that is what keeps it oscillating instead of leaving.</p>
+            <p><b>Where it accelerates most.</b> At the two ends, where \(x\) is largest, the acceleration is largest, although the body is momentarily at rest there. At the centre, where it is moving fastest, the acceleration is zero. Speed and acceleration are greatest at different places.</p>
+            <p><b>Why the constant is written as a square.</b> Whatever the constant is, it must be positive for the motion to be an oscillation. Writing it as \(\omega^{2}\) guarantees that, and \(\omega\) turns out to be the angular frequency: a larger constant means a stronger pull back and a quicker oscillation.</p>
+          </div>
+          <div class="rn-side">
+            <p class="tip">To show that a motion is simple harmonic, show that its acceleration can be written as \(-(\text{a positive constant}) \times x\). The constant is then \(\omega^{2}\).</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide" data-title="Simple harmonic motion and circular motion">
+        <p class="eyebrow">Where ω comes from</p>
+        <h2>The shadow of circular motion<span>.</span></h2>
+        <div class="split wide-fig">
+          <ul class="points small">
+            <li>A point moves round a circle at a steady angular speed \(\omega\)</li>
+            <li class="step">Seen from the side, it moves back and forth: <b>simple harmonic motion</b></li>
+            <li class="step">Radius → amplitude \(x_{0}\)</li>
+            <li class="step">One revolution → one period: \(T = \dfrac{2 \pi}{\omega}\)</li>
+          </ul>
+          <div class="panel">
+            <div class="panel-head"><span>A CIRCLE SEEN EDGE ON</span></div>
+            <div class="fig" data-fig="c1-circle"></div>
+          </div>
+        </div>
+        <div class="slide-foot"><span>C.1 SIMPLE HARMONIC MOTION · SL + HL</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>Why the shadow obeys \(a = -\omega^{2} x\).</b> From A.2, the point on the circle has a centripetal acceleration \(\omega^{2} r\) directed towards the centre. The shadow shows only the vertical part of everything. The vertical part of the position is the displacement \(x\); the vertical part of an acceleration that points at the centre and has size \(\omega^{2} r\) is \(\omega^{2} x\), directed back towards the middle. So the shadow’s acceleration is \(-\omega^{2} x\).</p>
+            <p><b>Watch the speed.</b> The point on the circle never changes speed. Its shadow moves fastest through the middle, where the point is travelling straight up or down, and stops for an instant at the top and bottom, where the point is travelling sideways.</p>
+          </div>
+          <div class="rn-side">
+            <p class="more">This picture is the reason for the name “angular frequency”, and at HL it is where the phase angle comes from: the angle the rotating radius has turned through.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide" data-title="Displacement, velocity and acceleration">
+        <p class="eyebrow">Three graphs against time</p>
+        <h2>Displacement, velocity and acceleration<span>.</span></h2>
+        <div class="split wide-fig">
+          <ul class="points small">
+            <li>All three are <b>sinusoidal</b>, with the same period</li>
+            <li class="step">Velocity: the <b>gradient</b> of displacement. Zero at the ends, greatest at the centre</li>
+            <li class="step">Acceleration: displacement turned <b>upside down</b></li>
+          </ul>
+          <div class="panel">
+            <div class="panel-head"><span>RELEASED FROM THE GREATEST DISPLACEMENT</span></div>
+            <div class="fig" data-fig="c1-xva"></div>
+          </div>
+        </div>
+        <div class="slide-foot"><span>C.1 SIMPLE HARMONIC MOTION · SL + HL</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>Reading down the dashed lines.</b> At the start the displacement is at its greatest, the velocity is zero and the acceleration is at its most negative: the body is at rest at one end, being pulled back hardest. A quarter of a period later it is at the centre: zero displacement, the greatest speed (negative, because it is heading back) and no acceleration. After half a period it is at the other end, and everything is reversed.</p>
+            <p><b>Building one graph from another.</b> Velocity is the gradient of the displacement graph, as in A.1: where displacement peaks, its gradient and so the velocity are zero. Acceleration is the gradient of the velocity graph. It is also, more simply, \(-\omega^{2}\) times the displacement, which is why it is the displacement graph flipped over.</p>
+          </div>
+          <div class="rn-side">
+            <p class="trap">Drawing velocity in step with displacement. They are a quarter of a cycle apart: when one is at a peak, the other is at zero.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide" data-title="Using the defining equation">
+        <p class="eyebrow">Worked example</p>
+        <h2>The greatest acceleration<span>.</span></h2>
+        <div class="split even">
+          <div class="work">
+            <span class="say">A platform oscillates with period 0.50 s and amplitude 4.0 cm</span>
+            <span>\(\omega = \dfrac{2 \pi}{T} = \dfrac{2 \pi}{0.50} = 12.6 \,\mathrm{rad} \,\mathrm{s}^{-1}\)</span>
+            <span class="say step">The size of \(a\) is greatest at \(x = x_{0}\)</span>
+            <span class="step">\(a = \omega^{2} x_{0} = 12.6^{2} \times 0.040\)</span>
+            <span class="step">\(a = \class{res}{6.3 \,\mathrm{m} \,\mathrm{s}^{-2}}\)</span>
+          </div>
+          <div class="stack">
+            <ul class="points small">
+              <li class="step">At \(x = 2.0\) cm: half the displacement, <b>half</b> the acceleration</li>
+              <li class="step">At the centre: <b>zero</b></li>
+              <li class="step">Halve the period and \(\omega^{2}\), and so \(a\), is <b>four times</b> as great</li>
+            </ul>
+          </div>
+        </div>
+        <div class="slide-foot"><span>C.1 SIMPLE HARMONIC MOTION · SL + HL</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>A question that follows from this.</b> A coin rests on a platform that oscillates up and down. At the top of the motion the platform is accelerating downwards with \(\omega^{2} x_{0}\). If that is more than \(g\), the platform falls away faster than the coin can follow, and the coin loses contact. Here \(6.3 < 9.8\), so the coin stays on. It would leave if the amplitude exceeded \(\frac{g}{\omega^{2}} = \frac{9.8}{12.6^{2}} = 6.2\) cm.</p>
+            <p><b>Why frequency matters so much.</b> The acceleration depends on the square of the frequency. A loudspeaker cone moving 1 mm at 1 kHz has a greatest acceleration of \((2 \pi \times 1000)^{2} \times 0.001 \approx 4 \times 10^{4}\) m s⁻², thousands of times \(g\).</p>
+          </div>
+          <div class="rn-side">
+            <p class="trap">Leaving the amplitude in centimetres. 4.0 cm is 0.040 m.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide" data-title="Quick check: simple harmonic motion">
+        <p class="eyebrow">Quick check</p>
+        <h2>What makes motion simple harmonic<span>.</span></h2>
+        <div class="quiz fill">
+          <div class="q"><p><span class="n">01</span>State the defining equation of simple harmonic motion.</p><div class="ans step">\(a = -\omega^{2} x\)</div></div>
+          <div class="q"><p><span class="n">02</span>What does the minus sign mean?</p><div class="ans step">\(a\) is opposite to \(x\): towards equilibrium</div></div>
+          <div class="q"><p><span class="n">03</span>An oscillator has \(f\) = 2.0 Hz. Period?</p><div class="ans step">0.50 s</div></div>
+          <div class="q"><p><span class="n">04</span>Where is the speed greatest?</p><div class="ans step">At the equilibrium position</div></div>
+          <div class="q"><p><span class="n">05</span>Where is the acceleration greatest?</p><div class="ans step">At the greatest displacement</div></div>
+          <div class="q"><p><span class="n">06</span>How far does an oscillator travel in one period?</p><div class="ans step">Four amplitudes</div></div>
+        </div>
+        <div class="slide-foot"><span class="reveal-hint">PRESS → TO REVEAL EACH ANSWER</span><span data-page></span></div>
+      </section>
+
+      <!-- Part 2 -->
+      <section class="slide section" data-title="Part 2: Two oscillators">
+        <div class="title-grid">
+          <div>
+            <p class="eyebrow">Part 02</p>
+            <h1>Two oscillators<span>.</span></h1>
+            <p class="lead">The mass on a spring and the simple pendulum, and what sets their periods</p>
+          </div>
+          <div class="fig" data-fig="c1-pendulum" data-plain></div>
+        </div>
+        <div class="slide-foot"><span>C.1 SIMPLE HARMONIC MOTION · SL + HL</span><span data-page></span></div>
+      </section>
+
+      <section class="slide" data-title="The mass–spring system">
+        <p class="eyebrow">First oscillator</p>
+        <h2>A mass on a spring<span>.</span></h2>
+        <div class="split even">
+          <div class="work">
+            <span class="say">Hooke’s law gives the restoring force</span>
+            <span>\(F = -kx\)</span>
+            <span class="step">\(a = \dfrac{F}{m} = -\dfrac{k}{m} x\)</span>
+            <span class="say step">Compare with \(a = -\omega^{2} x\)</span>
+            <span class="step">\(\omega^{2} = \dfrac{k}{m}\)</span>
+          </div>
+          <div class="stack step">
+            <div class="equation"><span>\(T = 2 \pi \sqrt{\dfrac{m}{k}}\)</span></div>
+            <ul class="points small">
+              <li>More mass: a <b>longer</b> period</li>
+              <li class="step">A stiffer spring: a <b>shorter</b> period</li>
+              <li class="step">The amplitude does <b>not</b> appear</li>
+            </ul>
+          </div>
+        </div>
+        <div class="slide-foot"><span>C.1 SIMPLE HARMONIC MOTION · SL + HL</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>Why each factor acts as it does.</b> A larger mass has more inertia: the same spring force gives it a smaller acceleration, so it takes longer to get anywhere. A stiffer spring pulls harder at every displacement, so the mass is hurried back and forth more quickly.</p>
+            <p><b>Why the amplitude makes no difference.</b> Double the amplitude and the mass has twice as far to go. But the spring force at every stage is also doubled, so every acceleration and every speed is doubled. Twice the distance at twice the speed takes the same time. This property, a period independent of amplitude, is called isochronism, and it belongs to simple harmonic motion alone.</p>
+            <p><b>Hanging vertically.</b> The same formula holds for a mass hanging from a spring. Gravity only shifts the equilibrium position downwards. Measured from that new equilibrium, the resultant force is still \(-kx\).</p>
+          </div>
+          <div class="rn-side">
+            <p class="tip">Because \(T \propto \sqrt{m}\), four times the mass is needed to double the period.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide" data-title="Mass–spring: a period">
+        <p class="eyebrow">Worked example</p>
+        <h2>The period of a mass on a spring<span>.</span></h2>
+        <div class="split even">
+          <div class="work">
+            <span class="say">A 0.40 kg mass on a spring of \(k = 25 \,\mathrm{N} \,\mathrm{m}^{-1}\)</span>
+            <span>\(T = 2 \pi \sqrt{\dfrac{m}{k}}\)</span>
+            <span class="step">\(T = 2 \pi \sqrt{\dfrac{0.40}{25}}\)</span>
+            <span class="step">\(T = \class{res}{0.79 \,\mathrm{s}}\)</span>
+          </div>
+          <div class="work step">
+            <span class="say">What mass would give a period of 1.0 s?</span>
+            <span>\(T^{2} = \dfrac{4 \pi^{2} m}{k}\) &nbsp;so&nbsp; \(m = \dfrac{k T^{2}}{4 \pi^{2}}\)</span>
+            <span class="step">\(m = \dfrac{25 \times 1.0^{2}}{4 \pi^{2}}\)</span>
+            <span class="step">\(m = \class{res}{0.63 \,\mathrm{kg}}\)</span>
+          </div>
+        </div>
+        <div class="slide-foot"><span>C.1 SIMPLE HARMONIC MOTION · SL + HL</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>Weighing without gravity.</b> An astronaut in orbit cannot stand on scales: nothing presses down on them. Instead the astronaut sits in a chair mounted on springs of known stiffness and is set oscillating. Rearranging the formula as in the second column gives the mass from the measured period. The method works because the period of a spring oscillator depends on inertia, not on weight.</p>
+            <p><b>Finding a spring constant.</b> Hang different masses on a spring, time the oscillations, and plot \(T^{2}\) against \(m\). The graph is a straight line through the origin of gradient \(\frac{4 \pi^{2}}{k}\).</p>
+          </div>
+          <div class="rn-side">
+            <p class="trap">Forgetting the square root, or squaring \(2 \pi\) but not \(T\) when rearranging. Square the whole equation first, then rearrange.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide" data-title="The simple pendulum">
+        <p class="eyebrow">Second oscillator</p>
+        <h2>The simple pendulum<span>.</span></h2>
+        <div class="split">
+          <div class="stack">
+            <div class="equation"><span>\(T = 2 \pi \sqrt{\dfrac{l}{g}}\)</span></div>
+            <ul class="points small">
+              <li>A small bob on a light string of length \(l\)</li>
+              <li class="step">Longer: a <b>longer</b> period</li>
+              <li class="step">Neither the <b>mass</b> nor the <b>amplitude</b> appears</li>
+              <li class="step">True for <b>small angles</b> only</li>
+            </ul>
+          </div>
+          <div class="panel">
+            <div class="panel-head"><span>A SMALL SWING</span></div>
+            <div class="fig" data-fig="c1-pendulum"></div>
+          </div>
+        </div>
+        <div class="slide-foot"><span>C.1 SIMPLE HARMONIC MOTION · SL + HL</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>Why the mass cancels.</b> The force pulling the bob back towards the centre is a component of its weight, so it is proportional to the mass. The inertia that resists the acceleration is also proportional to the mass. Double the mass and both double, leaving the acceleration, and the period, unchanged. It is the same reason all bodies fall with the same acceleration in A.1.</p>
+            <p><b>Why only small angles.</b> The restoring force is \(mg \sin \theta\), where \(\theta\) is the angle of the string to the vertical. Simple harmonic motion needs a force proportional to the displacement, which would be \(mg \theta\). For small angles in radians, \(\sin \theta\) and \(\theta\) are almost equal: at 10° they differ by half a per cent. At larger angles the force falls short of what is needed, and the period grows with amplitude.</p>
+            <p><b>\(l\) is measured to the centre of the bob</b>, from the point of suspension.</p>
+          </div>
+          <div class="rn-side">
+            <p class="tip">Keep the swing below about 10° in any experiment. The period of a 1 m pendulum is then within 0.2% of the formula.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide history" data-title="Story: Huygens’s clock">
+        <p class="eyebrow">The story · The Hague, 1656</p>
+        <p class="not-examined">Background story · not assessed</p>
+        <h2>Huygens puts a pendulum in a clock<span>.</span></h2>
+        <div class="story" style="--photo-h: 430px;">
+          <div class="story-photos">
+            <figure><img src="images/huygens.jpg" width="765" height="789" alt="Painted portrait of Christiaan Huygens, a man with long dark curled hair and a lace collar"><figcaption><b>Christiaan Huygens</b>, painted by Caspar Netscher in 1671</figcaption></figure>
+            <figure><img src="images/huygens-clock.jpg" width="327" height="933" alt="Engraving of the mechanism of a clock seen from the side, with gear wheels, hanging weights on pulleys and a long pendulum ending in a round bob"><figcaption>His <b>first pendulum clock</b>, as he drew it in 1658</figcaption></figure>
+          </div>
+          <div class="stack">
+            <ul class="points">
+              <li>About 1602, Galileo had found that a pendulum’s period does not depend on the size of its swing</li>
+              <li>On <b>25 December 1656</b> Huygens invented a clock regulated by a pendulum</li>
+              <li>The best clocks went from errors of about <b>15 minutes</b> a day to about <b>15 seconds</b></li>
+              <li>He also found that <b>wide</b> swings spoil the timekeeping</li>
+            </ul>
+            <div class="idea">Pendulum clocks were the most precise timekeepers in the world until the 1930s.</div>
+          </div>
+        </div>
+        <p class="credits">Portrait: <a href="https://commons.wikimedia.org/wiki/File:Christiaan_Huygens-painting_(cropped).jpeg" target="_blank" rel="noopener">Caspar Netscher, 1671</a>, public domain. Drawing: <a href="https://commons.wikimedia.org/wiki/File:Huygens_first_pendulum_clock.png" target="_blank" rel="noopener">Christiaan Huygens, 1658</a>, public domain.</p>
+        <div class="slide-foot"><span>C.1 SIMPLE HARMONIC MOTION · SL + HL</span><span data-page></span></div>
+      </section>
+
+      <section class="slide" data-title="Pendulum: length and period">
+        <p class="eyebrow">Worked example</p>
+        <h2>A pendulum that ticks seconds<span>.</span></h2>
+        <div class="split even">
+          <div class="work">
+            <span class="say">Find the length for a period of 2.0 s</span>
+            <span class="say">\(g = 9.8 \,\mathrm{m} \,\mathrm{s}^{-2}\)</span>
+            <span>\(T^{2} = \dfrac{4 \pi^{2} l}{g}\) &nbsp;so&nbsp; \(l = \dfrac{g T^{2}}{4 \pi^{2}}\)</span>
+            <span class="step">\(l = \dfrac{9.8 \times 2.0^{2}}{4 \pi^{2}}\)</span>
+            <span class="step">\(l = \class{res}{0.99 \,\mathrm{m}}\)</span>
+          </div>
+          <div class="work step">
+            <span class="say">On the Moon: \(g = 1.6 \,\mathrm{m} \,\mathrm{s}^{-2}\)</span>
+            <span>\(T = 2 \pi \sqrt{\dfrac{l}{g}} = 2 \pi \sqrt{\dfrac{0.99}{1.6}}\)</span>
+            <span class="step">\(T = \class{res}{4.9 \,\mathrm{s}}\)</span>
+            <span class="say step">A spring oscillator would not change</span>
+          </div>
+        </div>
+        <div class="slide-foot"><span>C.1 SIMPLE HARMONIC MOTION · SL + HL</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>The seconds pendulum.</b> A pendulum with a period of 2.0 s swings from one side to the other in exactly one second, so each tick or tock of the clock marks a second. Its length, just under a metre, is why grandfather clocks are the height they are.</p>
+            <p><b>The two oscillators compared.</b> The pendulum’s restoring force comes from gravity, so its period depends on \(g\) and changes from place to place. The spring’s restoring force comes from the spring, so its period depends on \(k\) and \(m\) and is the same on the Earth, on the Moon and in orbit. A pendulum clock taken up a mountain runs slow; a watch regulated by a spring does not.</p>
+          </div>
+          <div class="rn-side">
+            <p class="tip">\(T \propto \sqrt{l}\): to double the period, make the pendulum four times as long.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide" data-title="Measuring g with a pendulum">
+        <p class="eyebrow">A classic experiment</p>
+        <h2>Measuring \(g\) with a pendulum<span>.</span></h2>
+        <div class="split wide-fig">
+          <div class="stack">
+            <div class="equation small"><span>\(T^{2} = \dfrac{4 \pi^{2}}{g} \, l\)</span></div>
+            <ul class="points small">
+              <li>Time 20 swings for each of several lengths</li>
+              <li class="step">Plot \(T^{2}\) against \(l\): a straight line through the origin</li>
+              <li class="step frac">\(g = \dfrac{4 \pi^{2}}{\text{gradient}}\)</li>
+            </ul>
+          </div>
+          <div class="panel">
+            <div class="panel-head"><span>PERIOD SQUARED AGAINST LENGTH</span></div>
+            <div class="fig" data-fig="c1-t2"></div>
+          </div>
+        </div>
+        <div class="slide-foot"><span>C.1 SIMPLE HARMONIC MOTION · SL + HL</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>Why square the period.</b> A graph of \(T\) against \(l\) is a curve, and a curve cannot be tested by eye or used to find a constant. Squaring the equation gives \(T^{2}\) proportional to \(l\): a straight line, whose gradient contains \(g\). Choosing what to plot so as to get a straight line is the standard way to test a relationship.</p>
+            <p><b>Getting a good value.</b> Timing twenty swings and dividing by twenty cuts the effect of your reaction time by a factor of twenty. Use small swings. Measure the length to the centre of the bob. A careful school experiment gives \(g\) to about 1%.</p>
+            <p><b>If the line misses the origin.</b> A small positive or negative intercept usually means that every length was measured to the wrong point on the bob, by the same amount. The gradient, and so the value of \(g\), is not affected: one more advantage of using a graph.</p>
+          </div>
+          <div class="rn-side">
+            <p class="tip">For a gradient of 4.03 s² m⁻¹: \(g = \frac{4 \pi^{2}}{4.03} = 9.8\) m s⁻².</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide" data-title="Quick check: two oscillators">
+        <p class="eyebrow">Quick check</p>
+        <h2>Two oscillators<span>.</span></h2>
+        <div class="quiz fill">
+          <div class="q"><p><span class="n">01</span>The mass on a spring is made four times as large. The period?</p><div class="ans step">It doubles</div></div>
+          <div class="q"><p><span class="n">02</span>The amplitude of a mass on a spring is doubled. The period?</p><div class="ans step">Unchanged</div></div>
+          <div class="q"><p><span class="n">03</span>A pendulum’s bob is replaced by a heavier one. The period?</p><div class="ans step">Unchanged</div></div>
+          <div class="q"><p><span class="n">04</span>A pendulum is taken to the Moon. The period?</p><div class="ans step">Longer: \(g\) is smaller</div></div>
+          <div class="q"><p><span class="n">05</span>Why must a pendulum’s swings be small?</p><div class="ans step">So the restoring force is proportional to displacement</div></div>
+          <div class="q"><p><span class="n">06</span>Period of 0.50 kg on a spring of 200 N m⁻¹?</p><div class="ans step">\(2 \pi \sqrt{\frac{0.50}{200}} = 0.31 \,\mathrm{s}\)</div></div>
+        </div>
+        <div class="slide-foot"><span class="reveal-hint">PRESS → TO REVEAL EACH ANSWER</span><span data-page></span></div>
+      </section>
+
+      <!-- Part 3 -->
+      <section class="slide section" data-title="Part 3: Energy">
+        <div class="title-grid">
+          <div>
+            <p class="eyebrow">Part 03</p>
+            <h1>Energy<span>.</span></h1>
+            <p class="lead">An oscillation as energy passing back and forth between two forms</p>
+          </div>
+          <div class="fig" data-fig="c1-energy" data-plain></div>
+        </div>
+        <div class="slide-foot"><span>C.1 SIMPLE HARMONIC MOTION · SL + HL</span><span data-page></span></div>
+      </section>
+
+      <section class="slide" data-title="Energy during one cycle">
+        <p class="eyebrow">Kinetic and potential</p>
+        <h2>Energy during one cycle<span>.</span></h2>
+        <div class="split wide-fig">
+          <ul class="points small">
+            <li>At each <b>end</b>: at rest, so all <b>potential</b></li>
+            <li class="step">At the <b>centre</b>: fastest, so all <b>kinetic</b></li>
+            <li class="step">In between: some of each</li>
+            <li class="step">With no resistive forces the <b>total</b> stays the same</li>
+          </ul>
+          <div class="panel">
+            <div class="panel-head"><span>ENERGY PASSING BACK AND FORTH</span></div>
+            <div class="fig" data-fig="c1-energy"></div>
+          </div>
+        </div>
+        <div class="slide-foot"><span>C.1 SIMPLE HARMONIC MOTION · SL + HL</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>What the potential energy is.</b> For the mass on a spring it is the elastic potential energy of the stretched or compressed spring. For a pendulum it is gravitational potential energy: the bob is highest at each end of its swing and lowest at the centre. In both cases the energy is stored when the body is displaced and returned as the body comes back.</p>
+            <p><b>Why an oscillation happens at all.</b> At the centre there is no force, but the body has kinetic energy and overshoots. Moving outwards, it does work against the restoring force and slows, until all the kinetic energy has been stored. Then the stored energy is handed back and the body returns. Inertia carries it through the centre; the restoring force brings it back. Take away either and there is no oscillation.</p>
+          </div>
+          <div class="rn-side">
+            <p class="tip">At SL you describe these changes in words and with sketch graphs. Calculations of the energy are for HL, in Part 4.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide" data-title="Energy against displacement">
+        <p class="eyebrow">Where the energy is</p>
+        <h2>Energy against displacement<span>.</span></h2>
+        <div class="split wide-fig">
+          <ul class="points small">
+            <li><b>Potential</b>: zero at the centre, greatest at \(\pm x_{0}\)</li>
+            <li class="step"><b>Kinetic</b>: the reverse</li>
+            <li class="step">The curves are <b>parabolas</b></li>
+            <li class="step"><b>Total</b>: a horizontal line</li>
+          </ul>
+          <div class="panel">
+            <div class="panel-head"><span>ONE OSCILLATOR, THREE CURVES</span></div>
+            <div class="fig" data-fig="c1-energy-x"></div>
+          </div>
+        </div>
+        <div class="slide-foot"><span>C.1 SIMPLE HARMONIC MOTION · SL + HL</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>Why parabolas.</b> The energy stored in a spring is \(\frac{1}{2} k x^{2}\), from A.3: proportional to the square of the displacement. That is the potential energy curve. The kinetic energy is whatever is left of the total, so its curve is the same parabola turned upside down.</p>
+            <p><b>Where the two are equal.</b> The curves cross where each is half the total. That is not half way out. Half the greatest potential energy needs \(x^{2} = \frac{1}{2} x_{0}^{2}\), so \(x = \frac{x_{0}}{\sqrt{2}} = 0.71 x_{0}\): about seven tenths of the way to the end. For most of the distance the energy is mainly kinetic.</p>
+            <p><b>Doubling the amplitude</b> quadruples the total energy, since the potential energy at the end is proportional to \(x_{0}^{2}\).</p>
+          </div>
+          <div class="rn-side">
+            <p class="trap">Drawing the curves as straight lines, or as sine curves. Against displacement they are parabolas. Sine-like curves appear only when energy is plotted against time.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide" data-title="Energy against time">
+        <p class="eyebrow">When the energy is where</p>
+        <h2>Energy against time<span>.</span></h2>
+        <div class="split wide-fig">
+          <ul class="points small">
+            <li>Each energy rises and falls <b>twice</b> in every period</li>
+            <li class="step">Never negative</li>
+            <li class="step">When one is greatest the other is <b>zero</b></li>
+            <li class="step">Their sum is constant</li>
+          </ul>
+          <div class="panel">
+            <div class="panel-head"><span>ONE PERIOD, STARTING AT AN END</span></div>
+            <div class="fig" data-fig="c1-energy-t"></div>
+          </div>
+        </div>
+        <div class="slide-foot"><span>C.1 SIMPLE HARMONIC MOTION · SL + HL</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>Why twice.</b> In one period the body visits both ends. The potential energy is at its greatest at each of them, whichever side it is on, because energy depends on the square of the displacement and does not care about the sign. So the potential energy peaks twice in a period. The kinetic energy peaks each time the body passes the centre, which also happens twice.</p>
+            <p><b>The frequency of the energy</b> is therefore double the frequency of the oscillation. An oscillator of period 2.0 s has kinetic energy that goes through a full cycle every 1.0 s.</p>
+          </div>
+          <div class="rn-side">
+            <p class="tip">A sketch needs: both curves between zero and the same greatest value, never below the axis, two humps of each per period, and the peaks of one above the zeros of the other.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide" data-title="Quick check: energy">
+        <p class="eyebrow">Quick check</p>
+        <h2>Energy<span>.</span></h2>
+        <div class="quiz fill">
+          <div class="q"><p><span class="n">01</span>Where is the kinetic energy greatest?</p><div class="ans step">At the equilibrium position</div></div>
+          <div class="q"><p><span class="n">02</span>Where is the potential energy greatest?</p><div class="ans step">At the greatest displacement</div></div>
+          <div class="q"><p><span class="n">03</span>What form is the potential energy of a pendulum?</p><div class="ans step">Gravitational</div></div>
+          <div class="q"><p><span class="n">04</span>What shape is the graph of potential energy against displacement?</p><div class="ans step">A parabola</div></div>
+          <div class="q"><p><span class="n">05</span>An oscillator has period 4.0 s. Period of its kinetic energy?</p><div class="ans step">2.0 s</div></div>
+          <div class="q"><p><span class="n">06</span>What happens to the total energy if there are no resistive forces?</p><div class="ans step">It stays constant</div></div>
+        </div>
+        <div class="slide-foot"><span class="reveal-hint">PRESS → TO REVEAL EACH ANSWER</span><span data-page></span></div>
+      </section>
+
+      <!-- Part 4 · HL -->
+      <section class="slide section hl" data-title="Part 4: Additional HL">
+        <div class="title-grid">
+          <div>
+            <p class="eyebrow">Part 04 · Additional higher level</p>
+            <h1>The equations of the motion<span>.</span></h1>
+            <p class="lead">Displacement and velocity as functions of time · phase angle<br>Calculating the energy</p>
+          </div>
+          <div class="fig" data-fig="c1-phase"></div>
+        </div>
+        <div class="slide-foot"><span>C.1 SIMPLE HARMONIC MOTION · ADDITIONAL HL</span><span data-page></span></div>
+      </section>
+
+      <section class="slide hl" data-title="HL: Displacement and velocity">
+        <p class="eyebrow">Where it is and how fast, at any time</p>
+        <h2>Displacement and velocity<span>.</span></h2>
+        <div class="stack center" style="gap: 26px;">
+          <div class="eq-row">
+            <div class="equation"><span>\(x = x_{0} \sin (\omega t + \phi)\)</span></div>
+            <div class="equation"><span>\(v = \omega x_{0} \cos (\omega t + \phi)\)</span></div>
+          </div>
+          <div class="cards step" style="grid-template-columns: 1fr 1fr 1fr;">
+            <div class="card hl"><p class="eyebrow">Greatest speed</p><h3>\(\omega x_{0}\)</h3><p>At the equilibrium position</p></div>
+            <div class="card hl"><p class="eyebrow">Greatest acceleration</p><h3>\(\omega^{2} x_{0}\)</h3><p>At each end</p></div>
+            <div class="card hl"><p class="eyebrow">Angles</p><h3>In radians</h3><p>\(\omega t + \phi\) is an angle: set the calculator to radians</p></div>
+          </div>
+        </div>
+        <div class="slide-foot"><span>C.1 SIMPLE HARMONIC MOTION · ADDITIONAL HL</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>Checking against the defining equation.</b> Velocity is the rate of change of displacement, and the gradient of a sine curve is a cosine curve, scaled by \(\omega\): that gives \(v\). The gradient of the cosine curve is minus a sine curve, scaled by \(\omega\) again: \(a = -\omega^{2} x_{0} \sin (\omega t + \phi)\), which is \(-\omega^{2} x\). The sine function is the solution of \(a = -\omega^{2} x\).</p>
+            <p><b>The circle again.</b> \(\omega t + \phi\) is the angle the rotating radius of Part 1 has turned through. \(\phi\) is where it started. The sine of that angle, times the radius, is the height of the shadow.</p>
+            <p><b>The greatest values.</b> Sine and cosine never exceed 1, so the greatest displacement is \(x_{0}\) and the greatest speed is \(\omega x_{0}\). A larger amplitude or a higher frequency both mean a faster passage through the centre.</p>
+          </div>
+          <div class="rn-side">
+            <p class="trap">Working in degrees. \(\omega t\) is in radians: with \(\omega = 7.85\) rad s⁻¹ and \(t = 0.10\) s the angle is 0.785 rad, not 0.785°.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide hl" data-title="HL: Phase angle">
+        <p class="eyebrow">Where in the cycle it starts</p>
+        <h2>Phase angle<span>.</span></h2>
+        <div class="split wide-fig">
+          <div class="stack">
+            <ul class="points small">
+              <li>\(\phi\) sets the displacement at \(t = 0\): \(x = x_{0} \sin \phi\)</li>
+              <li class="step">\(\phi = 0\): starts at the centre, moving in the positive direction</li>
+              <li class="step frac">\(\phi = \dfrac{\pi}{2}\): starts at \(+x_{0}\), and \(x = x_{0} \cos \omega t\)</li>
+            </ul>
+            <div class="idea step">A whole cycle is \(2 \pi\) rad.</div>
+          </div>
+          <div class="panel">
+            <div class="panel-head"><span>THE SAME OSCILLATION, STARTED EARLIER</span></div>
+            <div class="fig" data-fig="c1-phase"></div>
+          </div>
+        </div>
+        <div class="slide-foot"><span>C.1 SIMPLE HARMONIC MOTION · ADDITIONAL HL</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>Phase difference between two oscillators.</b> Two oscillations of the same frequency keep a fixed relationship: one always reaches its peak a certain fraction of a cycle before the other. That fraction, as an angle, is their phase difference. Half a cycle apart is \(\pi\) rad: when one is at \(+x_{0}\) the other is at \(-x_{0}\), and they are said to be in antiphase. A whole cycle apart is \(2 \pi\) rad, which is the same as being in phase.</p>
+            <p><b>From a time to an angle.</b> A time difference \(\Delta t\) is the fraction \(\frac{\Delta t}{T}\) of a cycle, so the phase difference is \(\frac{\Delta t}{T} \times 2 \pi\). For two oscillators of period 0.80 s, one 0.20 s ahead of the other, it is \(\frac{0.20}{0.80} \times 2 \pi = \frac{\pi}{2}\) rad.</p>
+            <p><b>Within one oscillator.</b> Velocity leads displacement by \(\frac{\pi}{2}\), and acceleration is \(\pi\) out of phase with displacement: the three graphs of Part 1, restated as phase angles.</p>
+          </div>
+          <div class="rn-side">
+            <p class="tip">The phase angle matters again in C.3 and C.4: waves that meet in phase reinforce, and waves that meet in antiphase cancel.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide hl" data-title="HL: Displacement and velocity at a given time">
+        <p class="eyebrow">Worked example</p>
+        <h2>Position and velocity at a given time<span>.</span></h2>
+        <div class="split even">
+          <div class="work">
+            <span class="say">\(x_{0} = 0.050 \,\mathrm{m}\) · \(T = 0.80 \,\mathrm{s}\) · \(\phi = 0\)</span>
+            <span>\(\omega = \dfrac{2 \pi}{T} = \dfrac{2 \pi}{0.80} = 7.85 \,\mathrm{rad} \,\mathrm{s}^{-1}\)</span>
+            <span class="step">\(\omega t = 7.85 \times 0.10 = 0.785 \,\mathrm{rad}\)</span>
+            <span class="step">\(x = x_{0} \sin \omega t = 0.050 \times \sin 0.785\)</span>
+            <span class="step">\(x = \class{res}{0.035 \,\mathrm{m}}\)</span>
+          </div>
+          <div class="work step">
+            <span>\(v = \omega x_{0} \cos \omega t\)</span>
+            <span class="step">\(v = 7.85 \times 0.050 \times \cos 0.785\)</span>
+            <span class="step">\(v = \class{res}{0.28 \,\mathrm{m} \,\mathrm{s}^{-1}}\)</span>
+            <span class="say step">Greatest speed: \(\omega x_{0} = 0.39 \,\mathrm{m} \,\mathrm{s}^{-1}\)</span>
+          </div>
+        </div>
+        <div class="slide-foot"><span>C.1 SIMPLE HARMONIC MOTION · ADDITIONAL HL</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>Does the answer make sense?</b> 0.10 s is an eighth of the 0.80 s period, so the oscillator is an eighth of the way round its cycle: half way, in time, from the centre to the end. Yet it has already covered 0.035 m of the 0.050 m, seven tenths of the distance. It moves fastest near the centre and slows as it approaches the end, so it covers most of the ground early.</p>
+            <p><b>The time to reach a given place.</b> Rearranged: \(t = \frac{1}{\omega} \sin^{-1} \frac{x}{x_{0}}\). To reach half the amplitude takes \(\frac{1}{7.85} \sin^{-1} 0.5 = \frac{0.524}{7.85} = 0.067\) s: a twelfth of a period, not an eighth.</p>
+          </div>
+          <div class="rn-side">
+            <p class="tip">\(0.785 = \frac{\pi}{4}\). Whenever \(t\) is a simple fraction of \(T\), the angle is the same fraction of \(2 \pi\).</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide hl" data-title="HL: Velocity and displacement">
+        <p class="eyebrow">Speed at a place, without the time</p>
+        <h2>Velocity and displacement<span>.</span></h2>
+        <div class="split even">
+          <div class="stack">
+            <div class="equation"><span>\(v = \pm \omega \sqrt{x_{0}^{2} - x^{2}}\)</span></div>
+            <ul class="points small">
+              <li>At \(x = 0\): \(v = \pm \omega x_{0}\), the greatest speed</li>
+              <li class="step">At \(x = \pm x_{0}\): \(v = 0\)</li>
+              <li class="step">\(\pm\): at each place it may be moving either way</li>
+            </ul>
+          </div>
+          <div class="work step">
+            <span class="say">\(\omega = 7.85 \,\mathrm{rad} \,\mathrm{s}^{-1}\) · \(x_{0} = 0.050 \,\mathrm{m}\) · find the speed at \(x = 0.030 \,\mathrm{m}\)</span>
+            <span>\(v = \omega \sqrt{x_{0}^{2} - x^{2}}\)</span>
+            <span class="step">\(v = 7.85 \sqrt{0.050^{2} - 0.030^{2}}\)</span>
+            <span class="step">\(v = 7.85 \times 0.040 = \class{res}{0.31 \,\mathrm{m} \,\mathrm{s}^{-1}}\)</span>
+          </div>
+        </div>
+        <div class="slide-foot"><span>C.1 SIMPLE HARMONIC MOTION · ADDITIONAL HL</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>Where the equation comes from.</b> Take \(x = x_{0} \sin \theta\) and \(v = \omega x_{0} \cos \theta\), where \(\theta\) stands for \(\omega t + \phi\). Since \(\sin^{2} \theta + \cos^{2} \theta = 1\), \(\left(\frac{x}{x_{0}}\right)^{2} + \left(\frac{v}{\omega x_{0}}\right)^{2} = 1\). Rearranging for \(v\) gives the equation on the slide. The time has been eliminated.</p>
+            <p><b>The same thing from energy.</b> Kinetic energy = total energy − potential energy: \(\frac{1}{2} m v^{2} = \frac{1}{2} m \omega^{2} x_{0}^{2} - \frac{1}{2} m \omega^{2} x^{2}\). Cancel \(\frac{1}{2} m\) and take the square root. The velocity equation is conservation of energy in disguise.</p>
+          </div>
+          <div class="rn-side">
+            <p class="trap">Subtracting before squaring: \(\sqrt{x_{0}^{2} - x^{2}}\) is not \(x_{0} - x\). Here it is \(\sqrt{0.0025 - 0.0009} = 0.040\), not 0.020.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide hl" data-title="HL: Calculating the energy">
+        <p class="eyebrow">Putting numbers to Part 3</p>
+        <h2>Calculating the energy<span>.</span></h2>
+        <div class="split wide-fig">
+          <div class="stack">
+            <div class="work">
+              <span>\(E_\mathrm{T} = \dfrac{1}{2} m \omega^{2} x_{0}^{2}\)</span>
+              <span class="step">\(E_\mathrm{p} = \dfrac{1}{2} m \omega^{2} x^{2}\)</span>
+              <span class="step">\(E_\mathrm{k} = E_\mathrm{T} - E_\mathrm{p}\)</span>
+            </div>
+            <div class="idea step">Total energy ∝ amplitude<b>²</b> and ∝ frequency<b>²</b>.</div>
+          </div>
+          <div class="panel">
+            <div class="panel-head"><span>ENERGY AGAINST DISPLACEMENT</span></div>
+            <div class="fig" data-fig="c1-energy-x"></div>
+          </div>
+        </div>
+        <div class="slide-foot"><span>C.1 SIMPLE HARMONIC MOTION · ADDITIONAL HL</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>Where the total comes from.</b> At the centre all the energy is kinetic and the speed is \(\omega x_{0}\), so \(E_\mathrm{T} = \frac{1}{2} m (\omega x_{0})^{2}\). The potential energy at displacement \(x\) is the same expression with \(x\) in place of \(x_{0}\): for a spring, \(m \omega^{2} = k\), and it is the familiar \(\frac{1}{2} k x^{2}\).</p>
+            <p><b>The kinetic energy in full.</b> \(E_\mathrm{k} = \frac{1}{2} m \omega^{2} (x_{0}^{2} - x^{2})\). It is not in the data booklet, because it is just the difference of the two that are.</p>
+            <p><b>The squares matter.</b> Double the amplitude and the energy is four times as great. The same is true of frequency. This is why the energy carried by a wave, in C.2, is proportional to the square of its amplitude.</p>
+          </div>
+          <div class="rn-side">
+            <p class="tip">Fractions are quick here: at \(x = \frac{1}{2} x_{0}\) the potential energy is \(\frac{1}{4}\) of the total, so the kinetic energy is \(\frac{3}{4}\).</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide hl" data-title="HL: Energy of an oscillator">
+        <p class="eyebrow">Worked example</p>
+        <h2>The energy of an oscillator<span>.</span></h2>
+        <div class="split even">
+          <div class="work">
+            <span class="say">\(m = 0.20 \,\mathrm{kg}\) · \(\omega = 7.85 \,\mathrm{rad} \,\mathrm{s}^{-1}\) · \(x_{0} = 0.050 \,\mathrm{m}\)</span>
+            <span>\(E_\mathrm{T} = \dfrac{1}{2} m \omega^{2} x_{0}^{2}\)</span>
+            <span class="step">\(E_\mathrm{T} = \dfrac{1}{2} \times 0.20 \times 7.85^{2} \times 0.050^{2}\)</span>
+            <span class="step">\(E_\mathrm{T} = \class{res}{1.5 \times 10^{-2} \,\mathrm{J}}\)</span>
+          </div>
+          <div class="work step">
+            <span class="say">At \(x = 0.030 \,\mathrm{m}\)</span>
+            <span>\(E_\mathrm{p} = \dfrac{1}{2} m \omega^{2} x^{2} = \dfrac{1}{2} \times 0.20 \times 7.85^{2} \times 0.030^{2}\)</span>
+            <span class="step">\(E_\mathrm{p} = \class{res}{5.5 \times 10^{-3} \,\mathrm{J}}\)</span>
+            <span class="step">\(E_\mathrm{k} = E_\mathrm{T} - E_\mathrm{p} = \class{res}{9.9 \times 10^{-3} \,\mathrm{J}}\)</span>
+          </div>
+        </div>
+        <div class="slide-foot"><span>C.1 SIMPLE HARMONIC MOTION · ADDITIONAL HL</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>A check with the last example.</b> At \(x = 0.030\) m the speed was 0.314 m s⁻¹. Then \(E_\mathrm{k} = \frac{1}{2} \times 0.20 \times 0.314^{2} = 9.9 \times 10^{-3}\) J, the same as here. The energy equations and the velocity equation agree, as they must.</p>
+            <p><b>A check by ratio.</b> \(x\) is \(\frac{3}{5}\) of the amplitude, so the potential energy is \(\frac{9}{25}\) of the total, 36%, and the kinetic energy is the other 64%. \(0.36 \times 0.0154 = 0.0055\) J.</p>
+          </div>
+          <div class="rn-side">
+            <p class="trap">Squaring only part of the expression. Both \(\omega\) and \(x\) are squared, and \(\frac{1}{2} m\) is not.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide hl" data-title="HL quick check">
+        <p class="eyebrow">Quick check · HL</p>
+        <h2>The equations of the motion<span>.</span></h2>
+        <div class="quiz fill">
+          <div class="q"><p><span class="n">01</span>What is the greatest speed of an oscillator, in terms of \(\omega\) and \(x_{0}\)?</p><div class="ans step">\(\omega x_{0}\)</div></div>
+          <div class="q"><p><span class="n">02</span>What phase angle makes \(x = x_{0} \sin (\omega t + \phi)\) start at \(+x_{0}\)?</p><div class="ans step">\(\frac{\pi}{2}\) rad</div></div>
+          <div class="q"><p><span class="n">03</span>Two oscillators are half a cycle apart. Phase difference?</p><div class="ans step">\(\pi\) rad</div></div>
+          <div class="q"><p><span class="n">04</span>The amplitude is trebled. The total energy?</p><div class="ans step">Nine times as great</div></div>
+          <div class="q"><p><span class="n">05</span>At \(x = \frac{1}{2} x_{0}\), what fraction of the energy is kinetic?</p><div class="ans step">\(\frac{3}{4}\)</div></div>
+          <div class="q"><p><span class="n">06</span>\(\omega\) = 10 rad s⁻¹, \(x_{0}\) = 0.10 m. Speed at \(x\) = 0.060 m?</p><div class="ans step">\(10 \sqrt{0.10^{2} - 0.060^{2}} = 0.80 \,\mathrm{m} \,\mathrm{s}^{-1}\)</div></div>
+        </div>
+        <div class="slide-foot"><span class="reveal-hint">PRESS → TO REVEAL EACH ANSWER</span><span data-page></span></div>
+      </section>
+
+      <section class="slide" data-title="Summary">
+        <p class="eyebrow">Summary</p>
+        <h2>Simple harmonic motion on one slide<span>.</span></h2>
+        <div class="cards fill" style="grid-template-columns: 1fr 1fr 1fr; align-content: center;">
+          <div class="card"><p class="eyebrow">Defining equation</p><h3>\(a = -\omega^{2} x\)</h3><p>Proportional to displacement, towards equilibrium</p></div>
+          <div class="card step"><p class="eyebrow">Period</p><h3>\(T = \frac{1}{f} = \frac{2 \pi}{\omega}\)</h3><p>Independent of amplitude</p></div>
+          <div class="card step"><p class="eyebrow">Two oscillators</p><h3>\(2 \pi \sqrt{\frac{m}{k}}\) · \(2 \pi \sqrt{\frac{l}{g}}\)</h3><p>Mass on a spring; pendulum at small angles</p></div>
+          <div class="card step"><p class="eyebrow">Energy</p><h3>Kinetic ⇌ potential</h3><p>All potential at the ends, all kinetic at the centre</p></div>
+          <div class="card hl step"><p class="eyebrow">Motion in time</p><h3>\(x = x_{0} \sin (\omega t + \phi)\)</h3><p>\(v = \omega x_{0} \cos (\omega t + \phi)\)<br>\(v = \pm \omega \sqrt{x_{0}^{2} - x^{2}}\)</p></div>
+          <div class="card hl step"><p class="eyebrow">Energy calculations</p><h3>\(E_\mathrm{T} = \frac{1}{2} m \omega^{2} x_{0}^{2}\)</h3><p>\(E_\mathrm{p} = \frac{1}{2} m \omega^{2} x^{2}\)</p></div>
+        </div>
+        <div class="slide-foot"><span>C.1 SIMPLE HARMONIC MOTION · SL + HL</span><span data-page></span></div>
+      </section>
+
+      <section class="slide" data-title="Key words">
+        <p class="eyebrow">Summary</p>
+        <h2>Key words<span>.</span></h2>
+        <div class="terms fill" style="grid-template-columns: repeat(3, 1fr);">
+          <div class="term"><b>Equilibrium position</b><span>Where the resultant force is zero</span></div>
+          <div class="term"><b>Displacement</b><span>Distance from equilibrium, with a direction</span></div>
+          <div class="term"><b>Amplitude</b><span>The greatest displacement</span></div>
+          <div class="term"><b>Period</b><span>Time for one complete oscillation</span></div>
+          <div class="term"><b>Frequency</b><span>Oscillations per second</span></div>
+          <div class="term"><b>Angular frequency</b><span>\(\omega = 2 \pi f\), in rad s⁻¹</span></div>
+          <div class="term"><b>Restoring force</b><span>Directed towards equilibrium</span></div>
+          <div class="term"><b>Isochronous</b><span>Period independent of amplitude</span></div>
+          <div class="term hl"><b>Phase angle</b><span>Where in its cycle an oscillation starts, in radians</span></div>
+        </div>
+        <div class="slide-foot"><span>C.1 SIMPLE HARMONIC MOTION · SL + HL</span><span data-page></span></div>
+      </section>
+
+    </div>
+  </main>
+
+  <nav class="controls" aria-label="Slide controls">
+    <button type="button" id="prev" aria-label="Previous slide"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg></button>
+    <span class="counter" id="counter" aria-live="polite"></span>
+    <button type="button" id="next" aria-label="Next slide"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 5l7 7-7 7"/></svg></button>
+  </nav>
+  <div class="progress" aria-hidden="true"><span id="progress-bar"></span></div>
+
+  <script src="../assets/figures.js"></script>
+  <script src="figures.js"></script>
+  <script src="../assets/deck-math.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
+  <script src="../assets/deck-notes.js"></script>
+  <script src="../assets/deck.js"></script>
+</body>
+</html>
