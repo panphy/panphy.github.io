@@ -333,6 +333,8 @@ h3 { font-size: 34px; line-height: 1.15; }
 .points { list-style: none; margin: 0; padding: 0; display: grid; gap: 22px; align-content: start; }
 .points li { position: relative; padding-left: 42px; font-size: 35px; line-height: 1.3; }
 .points li::before { content: ""; position: absolute; left: 4px; top: .42em; width: 14px; height: 14px; border-radius: 50%; background: var(--brand-accent); box-shadow: 0 0 0 5px color-mix(in srgb, var(--brand-accent), transparent 80%); }
+/* A one-line point with a tall fraction: the dot sits level with the text, not at the top of the line. */
+.points li.frac::before { top: 50%; margin-top: -10px; }
 .points.small li { font-size: 31px; }
 .points.tight { gap: 16px; }
 .points b { color: var(--brand-primary); font-weight: 800; }
