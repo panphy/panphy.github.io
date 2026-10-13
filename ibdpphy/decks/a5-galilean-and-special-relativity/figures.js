@@ -21,7 +21,7 @@ window.DeckFigures.add(P => {
       let s = `<line x1="40" y1="${gy + 20}" x2="860" y2="${gy + 20}" class="tick" style="stroke-width:5"/>` + arrow(90, gy + 20, 90, 110, 'brand-primary', 3) + arrow(90, gy + 20, 300, gy + 20, 'brand-primary', 3);
       if (on) s += text(74, 120, 'y', 'lbl display italic', 'end') + text(300, gy + 60, 'x', 'lbl display italic', 'end') + text(100, 90, 'frame S: the platform', 'lbl strong', 'start', 'style="fill:var(--brand-primary)"');
       const moving = car(280, 150) + arrow(-140, 0, -140, -220, 'hl', 3) + arrow(-140, 0, 60, 0, 'hl', 3) + flash(60, -90) + (on ? text(-156, -212, 'y′', 'lbl display italic', 'end') + text(56, 40, 'x′', 'lbl display italic', 'end') + text(40, -82, 'event', 'lbl halo', 'end') + arrow(150, -180, 230, -180, 'brand-accent', 5) + text(190, -196, 'v', 'lbl display italic') + text(-130, -250, 'frame S′: the carriage', 'lbl strong', 'start', 'style="fill:var(--hl-text)"') : '');
-      return svg(on ? '20 60 860 420' : '40 110 800 340', s + twoState(at(520, gy, moving), `<g>${track([[330, gy], [640, gy], [330, gy]], T)}${moving}</g>`), 'Two reference frames. Frame S is fixed to a railway platform. Frame S prime is fixed to a carriage moving along the platform at velocity v. An event, such as a flash of light inside the carriage, has coordinates in both frames');
+      return svg(on ? '20 60 860 420' : '40 110 800 340', s + twoState(at(520, gy, moving), `<g>${track([[330, gy], [640, gy], [640, gy]], T, { extra: 'keyTimes="0;0.8;1"' })}${moving}</g>`), 'Two reference frames. Frame S is fixed to a railway platform. Frame S prime is fixed to a carriage moving along the platform at velocity v. An event, such as a flash of light inside the carriage, has coordinates in both frames');
     },
 
     // The Lorentz factor against speed.
@@ -50,15 +50,15 @@ window.DeckFigures.add(P => {
 
     // A light clock at rest and the same clock moving: the moving light has further to go.
     'a5-light-clock': el => {
-      const on = labelled(el), h = 160, top = 150, bot = top + h, T0 = 1, g = 1.25, c = 2 * h / T0, v = 0.6 * c, T = 3, xs = 120, xm = 300;
+      const on = labelled(el), h = 160, top = 150, bot = top + h, T0 = 1, g = 1.25, c = 2 * h / T0, v = 0.6 * c, K = 1.2, xs = 120, xm = 300;
       const mirrors = `<line x1="-44" y1="${top}" x2="44" y2="${top}" style="stroke:var(--text-main);stroke-width:7;stroke-linecap:round"/><line x1="-44" y1="${bot}" x2="44" y2="${bot}" style="stroke:var(--text-main);stroke-width:7;stroke-linecap:round"/>`;
-      // The pulse in the clock at rest bounces three times in the loop; in the moving clock, twice.
-      const rest = [[xs, bot], [xs, top], [xs, bot], [xs, top], [xs, bot], [xs, top], [xs, bot]];
+      // Each loop is two ticks of its own clock, so both pulses move at c and the moving clock takes γ times as long.
+      const rest = [[xs, bot], [xs, top], [xs, bot], [xs, top], [xs, bot]], Tr = 2 * T0 * K, Tm = 2 * g * T0 * K;
       const half = g * T0 / 2, zig = [0, 1, 2, 3, 4].map(i => [xm + v * half * i, i % 2 ? top : bot]);
       let s = at(xs, 0, mirrors) + line(through(zig), 'brand-accent', 2, 'stroke-dasharray="8 7" opacity=".7"');
       if (on) s += text(xs, 100, 'at rest', 'lbl strong') + text(xm + 250, 100, 'moving at 0.6 c', 'lbl strong', 'middle', 'style="fill:var(--hl-text)"') + text(xs, bot + 60, 'one tick:', 'lbl') + text(xs, bot + 94, sub('Δt', '0'), 'lbl mono strong') + text(xm + 250, bot + 60, 'the light goes further at the same speed c:', 'lbl') + text(xm + 250, bot + 94, 'one tick takes γ ' + sub('Δt', '0'), 'lbl strong') + arrow(xm + 410, top - 30, xm + 490, top - 30, 'hl', 5);
       const still = flash(xs, top + 50) + at(zig[1][0] + 40, 0, mirrors) + flash(zig[1][0] + 40, top + 40);
-      const mover = `<g>${track(rest, T)}${flash(0, 0)}</g><g>${track([[xm, 0], [zig[4][0], 0]], T)}${mirrors}</g><g>${track(zig, T)}${flash(0, 0)}</g>`;
+      const mover = `<g>${track(rest, Tr)}${flash(0, 0)}</g><g>${track([[xm, 0], [zig[4][0], 0]], Tm)}${mirrors}</g><g>${track(zig, Tm)}${flash(0, 0)}</g>`;
       return svg(on ? '40 60 840 420' : '60 120 800 220', s + twoState(still, mover), 'Two identical light clocks, each a pulse of light bouncing between two mirrors. In the clock at rest the light goes straight up and down. In the clock moving sideways at 0.6 c, the light follows a longer zigzag path at the same speed c, so each tick takes longer: gamma times as long');
     },
 

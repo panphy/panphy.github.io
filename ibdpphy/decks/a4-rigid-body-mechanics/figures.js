@@ -98,7 +98,8 @@ window.DeckFigures.add(P => {
       // Accelerations in the ratio 5/7 (solid sphere) to 1/2 (hoop): the hoop has covered 0.7 of the slope when the sphere arrives.
       const path = (k, lane) => Array.from({ length: n + 1 }, (_, i) => along(Math.min(1, k * (i / n) ** 2) * (len - 70) + 30, lane));
       const ball = `<circle r="${r}" style="${BODY}"/><line x1="${-r}" y1="0" x2="${r}" y2="0" style="stroke:var(--brand-accent-strong);stroke-width:3"/>`, hoop = `<circle r="${r}" style="fill:none;stroke:var(--brand-accent);stroke-width:8"/><line x1="${-r}" y1="0" x2="${r}" y2="0" style="stroke:var(--brand-accent);stroke-width:3"/>`;
-      const rolling = (body, k) => `<g><animateTransform attributeName="transform" type="rotate" values="0;${f(k * 620)}" dur="${T}s" repeatCount="indefinite" calcMode="spline" keySplines="0.4 0 1 1" keyTimes="0;1"/>${body}</g>`;
+      // The angle turned is the distance rolled divided by the radius, sampled like the path, so nothing slips.
+      const rolling = (body, k) => `<g><animateTransform attributeName="transform" type="rotate" values="${Array.from({ length: n + 1 }, (_, i) => f(Math.min(1, k * (i / n) ** 2) * (len - 70) / r * 180 / Math.PI)).join(';')}" dur="${T}s" repeatCount="indefinite"/>${body}</g>`;
       let s = `<path d="M${x0},${y0} L${x1},${y1} L${x0},${y1} Z" style="fill:color-mix(in srgb, var(--neutron) 22%, transparent);stroke:var(--text-secondary);stroke-width:3"/>`;
       if (on) s += text(560, 180, 'solid sphere: in front', 'lbl strong', 'start') + text(560, 214, 'hoop: behind', 'lbl', 'start', 'style="fill:var(--brand-accent)"') + both(x0 - 40, y0, x0 - 40, y1) + text(x0 - 54, (y0 + y1) / 2 + 8, 'h', 'lbl display italic', 'end') + text(430, 450, 'released together, rolling without slipping', 'lbl');
       const still = at(...along(0.6 * (len - 70) + 30, 0).map(f), hoop) + at(...along(0.86 * (len - 70) + 30, 0).map(f), ball);
