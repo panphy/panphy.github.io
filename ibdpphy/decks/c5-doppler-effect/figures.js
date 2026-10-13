@@ -15,7 +15,7 @@ window.DeckFigures.add(P => {
       const on = labelled(el), N = 7, lam = 40, d = 20, xs = 330, cy = 250, T = 0.9;
       // Wavefront k was emitted when the source was at xs + k·d; at the end of the run it has radius (N − k)·λ.
       const still = Array.from({ length: N }, (_, k) => ring(xs + k * d, cy, (N - k) * lam)).join('') + `<circle cx="${xs + N * d}" cy="${cy}" r="14" style="fill:var(--brand-accent-strong)"/>`;
-      const mover = Array.from({ length: N }, (_, k) => `<circle cx="${xs + k * d}" cy="${cy}" r="0" style="fill:none;stroke:var(--brand-primary);stroke-width:3.5">${anim('r', [0, 0, (N - k) * lam], N * T, { extra: `keyTimes="0;${f(k / N * 1000) / 1000};1"` })}</circle>`).join('') + `<g>${track([[xs, cy], [xs + N * d, cy]], N * T)}<circle r="14" style="fill:var(--brand-accent-strong)"/></g>`;
+      const mover = Array.from({ length: N }, (_, k) => `<circle cx="${xs + k * d}" cy="${cy}" r="0" style="fill:none;stroke:var(--brand-primary);stroke-width:3.5">${anim('r', [0, 0, (N - k) * lam, (N - k) * lam], N * T / 0.8, { extra: `keyTimes="0;${f(k / N * 800) / 1000};0.8;1"` })}</circle>`).join('') + `<g>${track([[xs, cy], [xs + N * d, cy], [xs + N * d, cy]], N * T / 0.8, { extra: 'keyTimes="0;0.8;1"' })}<circle r="14" style="fill:var(--brand-accent-strong)"/></g>`;
       let s = '';
       if (on) s += arrow(xs + N * d + 24, cy - 40, xs + N * d + 104, cy - 40, 'brand-accent-strong', 5) + person(110, cy) + person(790, cy) + text(110, cy + 90, 'behind:', 'lbl') + text(110, cy + 124, 'longer λ, lower f', 'lbl strong') + text(790, cy + 90, 'ahead:', 'lbl') + text(790, cy + 124, 'shorter λ, higher f', 'lbl strong');
       return svg(on ? '-20 -40 950 560' : '30 -40 760 580', clipped(-20, -40, 950, 580, twoState(still, mover)) + s, 'A source of waves moving to the right. Each wavefront is a circle centred on the place where the source was when it was emitted, so the wavefronts are crowded together ahead of the source and spread out behind it. An observer ahead receives a shorter wavelength and a higher frequency; an observer behind receives a longer wavelength and a lower frequency');
@@ -25,7 +25,7 @@ window.DeckFigures.add(P => {
     'c5-observer': () => {
       const sx = 250, cy = 250, lam = 44, T = 1.2;
       const rings = move => Array.from({ length: 13 }, (_, k) => `<circle cx="${sx}" cy="${cy}" r="${k * lam + 6}" style="fill:none;stroke:var(--brand-primary);stroke-width:3.5">${move ? anim('r', [k * lam + 6, (k + 1) * lam + 6], T) : ''}</circle>`).join('');
-      let s = `<circle cx="${sx}" cy="${cy}" r="14" style="fill:var(--brand-accent-strong)"/>` + text(sx, cy + 60, 'source at rest', 'lbl halo') + text(640, 470, 'the observer meets the wavefronts more often', 'lbl strong halo', 'middle');
+      let s = `<circle cx="${sx}" cy="${cy}" r="14" style="fill:var(--brand-accent-strong)"/>` + text(sx, cy + 60, 'source at rest', 'lbl halo');
       const walker = person(0, 0) + arrow(-24, -70, -100, -70, 'brand-accent', 5);
       return svg('20 0 860 500', clipped(20, 0, 860, 500, twoState(rings(false), rings(true))) + s + twoState(`<g transform="translate(640 ${cy})">${walker}</g>`, `<g>${track([[800, cy], [480, cy]], 7)}${walker}</g>`), 'A stationary source sending out evenly spaced circular wavefronts, and an observer moving towards it. The wavelength is unchanged, but the observer crosses the wavefronts more often than if standing still, and so receives a higher frequency');
     },
