@@ -1,7 +1,7 @@
 // A left hand in three dimensions for Fleming's left-hand rule: thumb F (force), index finger B
 // (field), middle finger I (current). It replaces the flat picture in every [data-hand] figure
-// once Three.js has loaded; the flat picture stays as the still copy for thumbnails and print,
-// and is all there is if the library cannot be fetched.
+// once Three.js has loaded, and a still of it replaces the flat picture in the slide's thumbnail;
+// the flat picture stays for print, and is all there is if the library cannot be fetched.
 const THREE_URL = 'https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js';
 const PARTS = [
   { key: 'F', word: 'force', finger: 'Thumb', colour: '--brand-primary', from: [0.15, 1.5, 0.06], to: [0.15, 2.6, 0.06], side: 'right' },
@@ -24,7 +24,7 @@ const ARM = [[0.02, -0.05, 1.5, 0.25, 0.4], [0.02, -0.04, 1.15, 0.22, 0.37], [0.
 
 const cssColour = name => getComputedStyle(document.documentElement).getPropertyValue(name).trim() || '#888';
 
-function build(THREE, fig) {
+function build(THREE, fig, index) {
   const flat = fig.querySelector('svg');
   const holder = document.createElement('div');
   holder.className = 'mover hand3d';
@@ -136,7 +136,6 @@ function build(THREE, fig) {
 
   const paint = () => labels.forEach(({ part, material }) => material.color.set(cssColour(part.colour)));
   paint();
-  document.addEventListener('panphy:theme-change', paint);
 
   if (flat) flat.classList.add('still');
   fig.appendChild(holder);
@@ -144,11 +143,10 @@ function build(THREE, fig) {
   const slide = fig.closest('.slide'), still = window.matchMedia('(prefers-reduced-motion: reduce)');
   let width = 0, height = 0;
   const point = new THREE.Vector3();
-  function frame(time) {
-    requestAnimationFrame(frame);
-    if (!slide.classList.contains('active') || document.hidden) return;
+  // Draws the hand turned to `angle` and puts the labels at the arrow tips. False if the figure has no size yet.
+  function draw(angle) {
     const w = holder.clientWidth, h = holder.clientHeight;
-    if (!w || !h) return;
+    if (!w || !h) return false;
     if (w !== width || h !== height) {
       width = w; height = h;
       renderer.setPixelRatio(Math.min(2, window.devicePixelRatio || 1));
@@ -156,8 +154,7 @@ function build(THREE, fig) {
       camera.aspect = w / h;
       camera.updateProjectionMatrix();
     }
-    // A slow sway, so that the three directions read as being at right angles in depth.
-    hand.rotation.y = still.matches ? -0.6 : -0.6 + 0.32 * Math.sin(time / 1700);
+    hand.rotation.y = angle;
     hand.updateMatrixWorld();
     renderer.render(scene, camera);
     labels.forEach(({ tip, label, part }) => {
@@ -165,15 +162,39 @@ function build(THREE, fig) {
       label.style.left = `${((point.x + 1) / 2 * w + (part.side === 'left' ? -14 : 14)).toFixed(1)}px`;
       label.style.top = `${((1 - point.y) / 2 * h).toFixed(1)}px`;
     });
+    return true;
+  }
+  function frame(time) {
+    requestAnimationFrame(frame);
+    if (!slide.classList.contains('active') || document.hidden) return;
+    // A slow sway, so that the three directions read as being at right angles in depth.
+    draw(still.matches ? -0.6 : -0.6 + 0.32 * Math.sin(time / 1700));
   }
   requestAnimationFrame(frame);
+
+  // The slide's thumbnail is a copy made before the hand was built: give it a still of the hand,
+  // labels included, in place of the flat picture.
+  const copy = document.querySelectorAll('#thumbs [data-hand]')[index];
+  function snapshot() {
+    if (!copy || !draw(-0.6)) return;
+    const shot = holder.cloneNode(true), image = new Image();
+    image.src = canvas.toDataURL();
+    image.alt = '';
+    image.style.cssText = canvas.style.cssText;
+    shot.querySelector('canvas').replaceWith(image);
+    copy.querySelector('.hand3d')?.remove();
+    copy.querySelectorAll('svg').forEach(svg => { svg.style.display = 'none'; });
+    copy.appendChild(shot);
+  }
+  snapshot();
+  document.addEventListener('panphy:theme-change', () => { paint(); snapshot(); });
 }
 
 // The deck draws its figures when it starts, after the maths is typeset: wait for the flat picture.
 const drawn = fig => new Promise(resolve => { const check = () => (fig.querySelector('svg') ? resolve() : setTimeout(check, 120)); check(); });
 const figures = [...document.querySelectorAll('#deck [data-hand]')];
 if (figures.length) {
-  import(THREE_URL).then(THREE => figures.forEach(fig => drawn(fig).then(() => {
-    try { build(THREE, fig); } catch (error) { console.warn('The 3D hand could not be drawn; the flat picture stays.', error); }
+  import(THREE_URL).then(THREE => figures.forEach((fig, index) => drawn(fig).then(() => {
+    try { build(THREE, fig, index); } catch (error) { console.warn('The 3D hand could not be drawn; the flat picture stays.', error); }
   }))).catch(() => {});
 }
