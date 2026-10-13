@@ -863,7 +863,8 @@
 
     // A sphere falling through a deep column of fluid. The still picture shows it at terminal
     // speed, where buoyancy and drag together equal the weight. Played with →, it is released
-    // near the surface: deck.css sinks it and grows the drag and velocity arrows with its speed.
+    // near the surface: deck.css sinks it, grows the drag and velocity arrows with its speed and
+    // draws the speed–time graph beside it in step.
     'sphere-fall': () => {
       const tank = `<rect x="132" y="70" width="196" height="548" style="fill:var(--brand-primary);opacity:.13"/><path d="M130,24 V620 H330 V24" class="tick" style="stroke-width:4;fill:none"/><line x1="132" y1="70" x2="328" y2="70" class="guide accent"/>`;
       // An arrow of the given length from (x, y): up for a force, down for the velocity. With
@@ -878,8 +879,12 @@
         s += `<g${grow ? ' class="with-speed"' : ''}>${text(258, y - 60, sub('F', 'd'), 'lbl display', 'start')}${text(298, y + 96, 'v', 'lbl display')}</g>`;
         return s + dot(230, y, 6);
       };
-      const play = `<g class="sinker" style="--drop:320px">${sphere(130, true)}</g><g class="step k2"></g>`;
-      return svg('0 0 460 640', `${tank}<g class="still">${sphere(450, false)}</g><g class="mover">${play}</g>`, 'A small sphere falling through a deep column of fluid. Its weight acts downwards; the buoyancy force and the viscous drag act upwards. The drag grows with the speed until buoyancy and drag together equal the weight, and the sphere then falls at a constant terminal speed');
+      // Speed against time for the same fall: 5 s across the time axis, time constant 0.9 s, as in deck.css.
+      const curve = plot(sampled(t => [460 + 340 * t, 440 - 190 * (1 - Math.exp(-5 * t / 0.9))], 80));
+      const graph = axes(460, 440, 836, 170, '', '') + text(830, 478, 'time', 'lbl', 'end') + text(476, 184, 'speed', 'lbl', 'start') + `<line x1="460" y1="250" x2="800" y2="250" class="guide accent"/>` + text(800, 230, 'terminal speed', 'lbl', 'end');
+      const marker = `<circle cx="800" cy="250.7" r="8" style="fill:var(--brand-accent-strong)"/>`;
+      const play = `<g class="sinker" style="--drop:320px">${sphere(130, true)}</g><g class="trace">${curve}</g><g class="trace-dot" style="--span:340px"><g class="grow-head" style="--len:189.3px">${marker}</g></g><g class="step k2"></g>`;
+      return svg('0 0 860 640', `${tank}${graph}<g class="still">${sphere(450, false)}${curve}${marker}</g><g class="mover">${play}</g>`, 'A small sphere falling through a deep column of fluid. Its weight acts downwards; the buoyancy force and the viscous drag act upwards. The drag grows with the speed until buoyancy and drag together equal the weight, and the sphere then falls at a constant terminal speed. Beside it, a graph of speed against time rises steeply at first, then curves over and levels off at the terminal speed');
     },
 
     // Also the small picture for part 3, with data-plain.

@@ -648,6 +648,8 @@ h2:has(+ .terms) { margin-bottom: 24px; }
 @keyframes sink { 0% { transform: translateY(calc(var(--drop) * 0.000)); } 5% { transform: translateY(calc(var(--drop) * 0.008)); } 10% { transform: translateY(calc(var(--drop) * 0.028)); } 15% { transform: translateY(calc(var(--drop) * 0.059)); } 20% { transform: translateY(calc(var(--drop) * 0.097)); } 30% { transform: translateY(calc(var(--drop) * 0.188)); } 40% { transform: translateY(calc(var(--drop) * 0.292)); } 50% { transform: translateY(calc(var(--drop) * 0.404)); } 60% { transform: translateY(calc(var(--drop) * 0.520)); } 80% { transform: translateY(calc(var(--drop) * 0.758)); } 100% { transform: translateY(calc(var(--drop) * 1.000)); } }
 @keyframes speed-grow { 0% { transform: scaleY(0.000); } 5% { transform: scaleY(0.243); } 10% { transform: scaleY(0.426); } 15% { transform: scaleY(0.565); } 20% { transform: scaleY(0.671); } 30% { transform: scaleY(0.811); } 40% { transform: scaleY(0.892); } 50% { transform: scaleY(0.938); } 60% { transform: scaleY(0.964); } 80% { transform: scaleY(0.988); } 100% { transform: scaleY(0.996); } }
 @keyframes speed-head { 0% { transform: translateY(calc(var(--len) * 1.000)); } 5% { transform: translateY(calc(var(--len) * 0.757)); } 10% { transform: translateY(calc(var(--len) * 0.574)); } 15% { transform: translateY(calc(var(--len) * 0.435)); } 20% { transform: translateY(calc(var(--len) * 0.329)); } 30% { transform: translateY(calc(var(--len) * 0.189)); } 40% { transform: translateY(calc(var(--len) * 0.108)); } 50% { transform: translateY(calc(var(--len) * 0.062)); } 60% { transform: translateY(calc(var(--len) * 0.036)); } 80% { transform: translateY(calc(var(--len) * 0.012)); } 100% { transform: translateY(calc(var(--len) * 0.004)); } }
+@keyframes trace-run { to { clip-path: inset(-20px -20px -20px -20px); } }
+@keyframes dot-run { to { transform: translateX(0); } }
 @keyframes body-approach { from { transform: translate(var(--x0), var(--y0, 0px)); } to { transform: translate(var(--x1), var(--y1, 0px)); } }
 @keyframes body-depart { from { transform: translate(var(--x1), var(--y1, 0px)); } to { transform: none; } }
 
@@ -671,14 +673,20 @@ h2:has(+ .terms) { margin-bottom: 24px; }
   #deck .fig:has(.k2.shown) .mover .post { transition: opacity .2s ease var(--t1, 1.3s); }
   /* Terminal speed (A.2): when step k2 is shown the sphere is released. It sinks, speeding up
      and then steady, while the arrows that depend on its speed (drag and velocity) grow with it:
-     .grow is an arrow's shaft and .grow-head its head, --len the arrow's full length. */
-  #deck .sinker .grow { transform: scaleY(0); }
-  #deck .sinker .grow-head { transform: translateY(var(--len)); }
-  #deck .sinker .with-speed { opacity: 0; }
+     .grow is an arrow's shaft and .grow-head its head, --len the arrow's full length. Beside it
+     the speed–time curve (.trace) is uncovered from the left at a steady rate, led by a dot
+     (.trace-dot, --span the width of the graph) that rises with the same speed. */
+  #deck .mover .grow { transform: scaleY(0); }
+  #deck .mover .grow-head { transform: translateY(var(--len)); }
+  #deck .mover .with-speed { opacity: 0; }
+  #deck .mover .trace { clip-path: inset(-20px 100% -20px -20px); }
+  #deck .mover .trace-dot { transform: translateX(calc(var(--span) * -1)); }
   #deck .fig:has(.k2.shown) .sinker { animation: sink 5s linear forwards; }
-  #deck .fig:has(.k2.shown) .sinker .grow { animation: speed-grow 5s linear forwards; }
-  #deck .fig:has(.k2.shown) .sinker .grow-head { animation: speed-head 5s linear forwards; }
-  #deck .fig:has(.k2.shown) .sinker .with-speed { opacity: 1; transition: opacity .25s ease .1s; }
+  #deck .fig:has(.k2.shown) .mover .grow { animation: speed-grow 5s linear forwards; }
+  #deck .fig:has(.k2.shown) .mover .grow-head { animation: speed-head 5s linear forwards; }
+  #deck .fig:has(.k2.shown) .mover .with-speed { opacity: 1; transition: opacity .25s ease .1s; }
+  #deck .fig:has(.k2.shown) .mover .trace { animation: trace-run 5s linear forwards; }
+  #deck .fig:has(.k2.shown) .mover .trace-dot { animation: dot-run 5s linear forwards; }
   /* Radiation and graph readings sweep in from the left. */
   #deck svg .wipe { clip-path: inset(-40px -40px -40px -40px); transition: opacity .4s ease, clip-path 1.1s ease-in-out; }
   #deck svg .wipe.late { transition-delay: .6s; }
