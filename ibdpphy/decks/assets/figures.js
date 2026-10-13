@@ -824,12 +824,12 @@
     },
 
     'friction-graph': () => {
-      let s = axes(110, 400, 760, 40, 'applied force', 'friction') + `<line x1="110" y1="140" x2="370" y2="140" class="guide accent"/><line x1="110" y1="205" x2="392" y2="205" class="guide accent"/>`;
-      s += plot('M110,400 L370,140 L392,205 L720,205');
-      s += text(98, 148, sub('μ', 's') + sub('F', 'N'), 'lbl mono', 'end') + text(98, 213, sub('μ', 'd') + sub('F', 'N'), 'lbl mono', 'end');
-      s += text(384, 128, 'starts to slide', 'lbl small', 'start') + text(560, 186, 'dynamic: constant', 'lbl strong');
+      let s = axes(110, 400, 760, 40, 'applied force', 'friction') + `<line x1="110" y1="140" x2="370" y2="140" class="guide accent"/><line x1="110" y1="178" x2="384" y2="178" class="guide accent"/>`;
+      s += plot('M110,400 L370,140 L384,178 L720,178');
+      s += text(98, 144, sub('μ', 's') + sub('F', 'N'), 'lbl mono', 'end') + text(98, 190, sub('μ', 'd') + sub('F', 'N'), 'lbl mono', 'end');
+      s += text(384, 128, 'starts to slide', 'lbl small', 'start') + text(560, 160, 'dynamic: constant', 'lbl strong');
       s += text(300, 300, 'static', 'lbl strong', 'start') + text(300, 332, 'grows to match the applied force', 'lbl small', 'start');
-      return svg('0 0 800 460', s, 'Friction against applied force: static friction rises in step with the applied force up to a maximum of mu s times the normal force, then the body slides and friction drops to a constant, smaller dynamic value of mu d times the normal force');
+      return svg('0 0 800 460', s, 'Friction against applied force: static friction rises in step with the applied force up to a maximum of mu s times the normal force, then the body slides and friction drops a little to a constant dynamic value of mu d times the normal force');
     },
 
     atwood: () => {
@@ -853,19 +853,33 @@
       return svg('0 0 800 460', s, 'A spring at its natural length beside the same spring stretched by an extension x by a hanging mass, with the restoring force F H upwards and the weight downwards; and a straight-line graph of force against extension through the origin, whose gradient is the spring constant k');
     },
 
-    // With data-drag the sphere is falling and the viscous drag is added.
-    'sphere-fluid': el => {
-      const drag = 'drag' in el.dataset;
+    // A sphere held under the surface, with its weight and the buoyancy force.
+    'sphere-fluid': () => {
       let s = `<rect x="52" y="80" width="356" height="438" style="fill:var(--brand-primary);opacity:.13"/><path d="M50,40 V520 H410 V40" class="tick" style="stroke-width:4;fill:none"/><line x1="52" y1="80" x2="408" y2="80" class="guide accent"/>` + `<circle cx="230" cy="290" r="44" style="fill:color-mix(in srgb, var(--brand-accent-strong) 18%, var(--viewer-bg));stroke:var(--brand-accent-strong);stroke-width:3"/>`;
       s += arrow(230, 290, 230, 474, 'brand-primary', 5) + dot(230, 290, 6) + text(248, 476, sub('F', 'g'), 'lbl display', 'start') + text(248, 440, 'weight', 'lbl small', 'start');
-      if (drag) {
-        s += arrow(218, 290, 218, 152, 'brand-primary', 5) + text(190, 160, sub('F', 'b'), 'lbl display', 'end') + text(190, 196, 'buoyancy', 'lbl small', 'end');
-        s += arrow(244, 290, 244, 196, 'brand-primary', 5) + text(262, 204, sub('F', 'd'), 'lbl display', 'start') + text(262, 236, 'drag', 'lbl small', 'start');
-        s += arrow(326, 300, 326, 372, 'brand-accent', 4) + text(326, 408, 'v', 'lbl display');
-      } else {
-        s += arrow(230, 290, 230, 124, 'brand-primary', 5) + text(248, 136, sub('F', 'b'), 'lbl display', 'start') + text(248, 172, 'buoyancy', 'lbl small', 'start');
-      }
-      return svg('0 0 460 560', s, drag ? 'A small sphere falling through a fluid: its weight acts downwards, and the buoyancy force and the viscous drag both act upwards' : 'A sphere under the surface of a fluid: its weight acts downwards and the buoyancy force acts upwards');
+      s += arrow(230, 290, 230, 124, 'brand-primary', 5) + text(248, 136, sub('F', 'b'), 'lbl display', 'start') + text(248, 172, 'buoyancy', 'lbl small', 'start');
+      return svg('0 0 460 560', s, 'A sphere under the surface of a fluid: its weight acts downwards and the buoyancy force acts upwards');
+    },
+
+    // A sphere falling through a deep column of fluid. The still picture shows it at terminal
+    // speed, where buoyancy and drag together equal the weight. Played with →, it is released
+    // near the surface: deck.css sinks it and grows the drag and velocity arrows with its speed.
+    'sphere-fall': () => {
+      const tank = `<rect x="132" y="70" width="196" height="548" style="fill:var(--brand-primary);opacity:.13"/><path d="M130,24 V620 H330 V24" class="tick" style="stroke-width:4;fill:none"/><line x1="132" y1="70" x2="328" y2="70" class="guide accent"/>`;
+      // An arrow of the given length from (x, y): up for a force, down for the velocity. With
+      // grow, its shaft and head are separate so that the stylesheet can lengthen it.
+      const shaft = (x, y, len, colour, grow) => `<line x1="${x}" y1="${y}" x2="${x}" y2="${y - len + Math.sign(len) * 9}" style="stroke:var(--${colour});transform-origin:${x}px ${y}px" stroke-width="5" stroke-linecap="round"${grow ? ' class="grow"' : ''}/>`;
+      const head = (x, y, len, colour, grow) => { const d = Math.sign(len), t = y - len; return `<path d="M${x - 8},${t + d * 11} L${x},${t - d * 5} L${x + 8},${t + d * 11} Z" style="fill:var(--${colour});--len:${len}px"${grow ? ' class="grow-head"' : ''}/>`; };
+      const vector = (x, y, len, colour, grow) => shaft(x, y, len, colour, grow) + head(x, y, len, colour, grow);
+      const sphere = (y, grow) => {
+        let s = `<circle cx="230" cy="${y}" r="30" style="fill:color-mix(in srgb, var(--brand-accent-strong) 18%, var(--viewer-bg));stroke:var(--brand-accent-strong);stroke-width:3"/>`;
+        s += vector(230, y, -150, 'brand-primary') + vector(218, y, 45, 'brand-primary') + text(246, y + 152, sub('F', 'g'), 'lbl display', 'start') + text(200, y - 34, sub('F', 'b'), 'lbl display', 'end');
+        s += `<g${grow ? ' class="with-speed"' : ''}>${vector(242, y, 105, 'brand-primary', grow)}${vector(298, y - 12, -70, 'brand-accent', grow)}</g>`;
+        s += `<g${grow ? ' class="with-speed"' : ''}>${text(258, y - 60, sub('F', 'd'), 'lbl display', 'start')}${text(298, y + 96, 'v', 'lbl display')}</g>`;
+        return s + dot(230, y, 6);
+      };
+      const play = `<g class="sinker" style="--drop:320px">${sphere(130, true)}</g><g class="step k2"></g>`;
+      return svg('0 0 460 640', `${tank}<g class="still">${sphere(450, false)}</g><g class="mover">${play}</g>`, 'A small sphere falling through a deep column of fluid. Its weight acts downwards; the buoyancy force and the viscous drag act upwards. The drag grows with the speed until buoyancy and drag together equal the weight, and the sphere then falls at a constant terminal speed');
     },
 
     // Also the small picture for part 3, with data-plain.
