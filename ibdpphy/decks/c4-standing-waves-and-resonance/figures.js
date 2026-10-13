@@ -53,7 +53,7 @@ window.DeckFigures.add(P => {
 
     // The first three standing wave patterns. data-kind: string (two fixed ends), open (pipe open at both ends) or closed (pipe closed at one end).
     'c4-harmonics': el => {
-      const kind = el.dataset.kind || 'string', x0 = 150, x1 = 620, amp = 40, T = 1.6, rows = [90, 240, 390];
+      const kind = el.dataset.kind || 'string', x0 = 150, x1 = 540, amp = 40, T = 1.6, rows = [90, 240, 390];
       const modes = kind === 'closed' ? [[0.5, 'first harmonic', 'λ = 4L', 'f₁'], [1.5, 'third harmonic', 'λ = 4L/3', '3f₁'], [2.5, 'fifth harmonic', 'λ = 4L/5', '5f₁']] : [[1, 'first harmonic', 'λ = 2L', 'f₁'], [2, 'second harmonic', 'λ = L', '2f₁'], [3, 'third harmonic', 'λ = 2L/3', '3f₁']];
       // A string is drawn with sine (nodes at both ends); a pipe closed at the left with sine; a pipe open at both ends with cosine (antinodes at both ends).
       const fn = kind === 'open' ? Math.cos : Math.sin;
@@ -67,14 +67,14 @@ window.DeckFigures.add(P => {
       });
       s += both(x0, 462, x1, 462) + text((x0 + x1) / 2, 498, 'L', 'lbl display italic');
       const what = { string: 'a string fixed at both ends, with a node at each end', open: 'the air in a pipe open at both ends, with a displacement antinode at each end', closed: 'the air in a pipe closed at one end, with a displacement node at the closed end and an antinode at the open end' }[kind];
-      return svg('120 20 800 490', s + twoState(still, mover), `The first three standing wave patterns for ${what}. ${kind === 'closed' ? 'The wavelengths are 4 L, 4 L over 3 and 4 L over 5: only odd harmonics are possible' : 'The wavelengths are 2 L, L and 2 L over 3, and the frequencies are one, two and three times that of the first harmonic'}`);
+      return svg('120 20 700 490', s + twoState(still, mover), `The first three standing wave patterns for ${what}. ${kind === 'closed' ? 'The wavelengths are 4 L, 4 L over 3 and 4 L over 5: only odd harmonics are possible' : 'The wavelengths are 2 L, L and 2 L over 3, and the frequencies are one, two and three times that of the first harmonic'}`);
     },
 
     // Amplitude against driving frequency. data-kind: single, or damped (three amounts of damping).
     'c4-resonance': el => {
       const damped = el.dataset.kind === 'damped', x0 = 120, base = 420, X = r => x0 + 320 * r, top = damped ? response(1, 0.07) : response(1, 0.1), Y = a => base - 330 * a / top;
       const curve = (z, colour, w = 5) => line(sampled(t => { const r = 0.02 + 1.98 * t; return [X(r), Y(response(r, z))]; }, 160), colour, w);
-      let s = axes(x0, base, 800, 50, 'driving frequency', 'amplitude') + `<line x1="${X(1)}" y1="${base}" x2="${X(1)}" y2="70" class="guide accent"/>` + text(X(1), base + 40, 'natural frequency', 'lbl mono');
+      let s = axes(x0, base, 800, 50, 'driving frequency', 'amplitude') + `<line x1="${X(1)}" y1="${base}" x2="${X(1)}" y2="70" class="guide accent"/>` + text(X(1), 56, 'natural frequency', 'lbl mono');
       if (damped) s += curve(0.07, 'brand-primary') + curve(0.16, 'brand-accent') + curve(0.4, 'brand-accent-strong') + text(X(1) + 30, Y(response(1, 0.07)) + 30, 'light damping', 'lbl strong halo', 'start', 'style="fill:var(--brand-primary)"') + text(X(1) + 66, Y(response(1, 0.16)) + 30, 'more damping', 'lbl strong halo', 'start') + text(X(1) + 130, Y(response(1, 0.4)) - 2, 'heavy damping', 'lbl strong halo', 'start');
       else s += curve(0.1, 'brand-primary', 6) + text(X(1) + 40, Y(response(1, 0.1)) + 40, 'resonance', 'lbl strong halo', 'start') + text(X(0.3), Y(1) - 50, 'follows the driver', 'lbl small halo') + text(X(1.75), Y(0.5) - 50, 'cannot keep up', 'lbl small halo');
       return svg('60 30 780 450', s, damped ? 'Graphs of amplitude against driving frequency for three amounts of damping. With light damping the peak at the natural frequency is tall and sharp. With more damping the peak is lower and broader, and it moves to a slightly lower frequency' : 'A graph of the amplitude of a driven oscillator against the driving frequency. The amplitude rises to a sharp peak when the driving frequency equals the natural frequency: resonance');
@@ -87,7 +87,7 @@ window.DeckFigures.add(P => {
       const curve = (fn, colour) => line(sampled(u => [x0 + (x1 - x0) * u, y0 - amp * fn(u * tmax)], 200), colour, 5);
       let s = arrow(x0, 460, x0, 40, 'text-secondary', 2.5) + arrow(x0, y0, x1 + 30, y0, 'text-secondary', 2.5) + text(x0 + 16, 54, 'displacement', 'lbl mono', 'start') + text(x1 + 30, y0 + 40, 'time', 'lbl mono', 'end');
       s += line(sampled(u => [x0 + (x1 - x0) * u, y0 - amp * Math.exp(-0.35 * u * tmax)], 60), 'brand-primary', 2, 'stroke-dasharray="8 7" opacity=".6"') + curve(light, 'brand-primary') + curve(heavy, 'brand-accent-strong') + curve(critical, 'brand-accent');
-      s += text(470, 400, 'light: oscillates, amplitude dies away', 'lbl strong halo', 'start', 'style="fill:var(--brand-primary)"') + text(330, 150, 'heavy: creeps back slowly', 'lbl strong halo', 'start') + text(190, 210, 'critical:', 'lbl strong halo', 'start', 'style="fill:var(--brand-accent)"') + text(190, 244, 'quickest, no overshoot', 'lbl halo', 'start');
+      s += text(330, 430, 'light: oscillates, dying away', 'lbl strong halo', 'start', 'style="fill:var(--brand-primary)"') + text(330, 150, 'heavy: creeps back slowly', 'lbl strong halo', 'start') + text(400, 90, 'critical: quickest, no overshoot', 'lbl strong halo', 'start', 'style="fill:var(--brand-accent)"');
       return svg('60 20 780 460', s, 'Graphs of displacement against time for an oscillator released from rest with three amounts of damping. With light damping it oscillates with an amplitude that dies away gradually. With critical damping it returns to equilibrium in the shortest time without oscillating. With heavy damping it also does not oscillate, but takes much longer to return');
     }
   };
