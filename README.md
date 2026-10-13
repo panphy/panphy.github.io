@@ -18,12 +18,6 @@ Two hubs hold the author's course resources: teaching decks, workbooks, revision
 - **[GCSE Physics](https://panphy.app/gcsephy/):** AQA GCSE Physics units for Years 9 to 11 and the Do Now starters. Each unit folder and `gcsephy/do-now/` has its own README.
 - **[IB DP Physics](https://panphy.app/ibdpphy/):** the IB Diploma Programme Physics course (first assessment 2025). See the [folder overview](ibdpphy/README.md).
 
-## Theme
-
-The landing page and the apps it lists share one light/dark preference in the same browser and site origin, including open tabs. `gcsephy/` and `ibdpphy/` each keep a preference of their own, independent of the main site and of each other: their pages add `data-theme-scope` to the script tag. The first visit follows the device setting unless an existing page preference can be migrated. Fixed-design apps retain their appearance.
-
-Load `assets/theme.js` synchronously in the head before styles; use `PanPhyTheme.toggle()` or `PanPhyThemeToggle.mount(button)` for controls. Listen for `panphy:theme-change` to refresh charts, scenes or syntax highlighting.
-
 ## Offline use
 
 Most published tools and simulations work offline once cached: visit online first and check the homepage's **Offline Ready** indicator. Updates appear through an update prompt, shown only in apps whose own or shared files changed. Shared fonts in `assets/fonts/` are precached (about 336 KB).
