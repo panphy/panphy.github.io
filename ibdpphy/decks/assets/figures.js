@@ -294,14 +294,14 @@
     return surface(60, y, 760, y) + bodies.map(({ w = 120, m, x, pre, post }, i) => block(x[stage], y, w, BODY_COLOURS[i]) + (on ? text(x[stage], y + 34, m, 'lbl mono') : '') + velocity(x[stage], y - 100, stage ? post : pre, BODY_COLOURS[i], on)).join('');
   }
   // The picture that moves: one track, each body drawn where it ends and shifted back to where
-  // it starts. deck.css moves it to the point of contact when step k1 is shown, and on when k2 is.
+  // it starts. When step k2 is shown, deck.css slides it to the point of contact and straight on.
   function trackPlay(y, bodies) {
     const approach = bodies.some(({ x }) => x[0] !== x[1]);
     let s = surface(60, y, 760, y) + `<g class="pre">${text(30, 60, 'BEFORE', 'lbl mono', 'start')}</g><g class="post">${text(30, 60, 'AFTER', 'lbl mono', 'start')}</g>`;
     bodies.forEach(({ w = 120, m, x, pre, post }, i) => {
       s += `<g class="cbody" style="--x0:${x[0] - x[2]}px;--x1:${x[1] - x[2]}px">${block(x[2], y, w, BODY_COLOURS[i])}${text(x[2], y + 34, m, 'lbl mono')}<g class="pre">${velocity(x[2], y - 100, pre, BODY_COLOURS[i])}</g><g class="post">${velocity(x[2], y - 100, post, BODY_COLOURS[i])}</g></g>`;
     });
-    return s + (approach ? '<g class="step k1"></g>' : '') + '<g class="step k2"></g>';
+    return `<g style="--t1:${approach ? '1.3s' : '0s'}">${s}</g><g class="step k2"></g>`;
   }
   const COLLISIONS = {
     general: {
@@ -888,7 +888,7 @@
 
     // data-kind chooses the bodies (COLLISIONS); with data-plain it is the small picture for part 4.
     // On its slide the two rows are the still picture (thumbnails, print, reduced motion) and the
-    // single track is played by pressing →.
+    // single track is played by one press of →.
     collide: el => {
       const on = labelled(el), set = COLLISIONS[el.dataset.kind] || COLLISIONS.general;
       const rows = trackRow(180, set.bodies, 0, on) + trackRow(390, set.bodies, 2, on);
@@ -906,10 +906,10 @@
       const after = `<path d="M510,250 A110,110 0 0 1 502.1,290.9" class="guide accent"/>` + arrow(400, 222, 400, 104, a, 5) + arrow(424, 259.6, 656, 352.4, b, 5) + text(418, 170, '2.0 m s⁻¹', 'lbl mono strong', 'start') + text(530, 356, 'v = ?', 'lbl mono strong', 'end') + text(556, 284, 'θ', 'lbl greek');
       let still = after + puck(110, 250, 22, a) + `<circle cx="400" cy="250" r="26" style="fill:none;stroke:var(--${b});stroke-width:2.5;stroke-dasharray:5 6"/>` + puck(400, 74, 22, a) + puck(688, 365, 26, b);
       still += text(110, 306, '2.0 kg', 'lbl mono') + text(366, 308, '3.0 kg', 'lbl mono', 'end') + text(366, 336, 'at rest', 'lbl small', 'end') + text(432, 82, '2.0 kg', 'lbl mono', 'start') + text(688, 424, '3.0 kg', 'lbl mono');
-      let play = `<g class="post" style="--t2:2.5s">${after}</g>`;
-      play += `<g class="cbody" style="--x0:-290px;--y0:176px;--x1:-50px;--y1:176px;--t2:2.5s">${puck(400, 74, 22, a)}${text(400, 38, '2.0 kg', 'lbl mono')}</g>`;
+      let play = `<g class="post">${after}</g>`;
+      play += `<g class="cbody" style="--x0:-290px;--y0:176px;--x1:-50px;--y1:176px">${puck(400, 74, 22, a)}${text(400, 38, '2.0 kg', 'lbl mono')}</g>`;
       play += `<g class="cbody" style="--x0:-288px;--y0:-115px;--x1:-288px;--y1:-115px;--t2:2.3s">${puck(688, 365, 26, b)}${text(688, 424, '3.0 kg', 'lbl mono')}<g class="pre">${text(688, 452, 'at rest', 'lbl small')}</g></g>`;
-      play += '<g class="step k1"></g><g class="step k2"></g>';
+      play = `<g style="--t2:2.5s">${play}</g><g class="step k2"></g>`;
       return svg('0 0 800 460', `${s}<g class="still">${still}</g><g class="mover">${play}</g>`, 'A 2.0 kilogram puck moving at 5.0 metres per second along x strikes a 3.0 kilogram puck at rest. Afterwards the 2.0 kilogram puck moves at 2.0 metres per second along y, at right angles to its first direction, and the 3.0 kilogram puck moves off at an unknown speed v at angle theta below the x direction');
     },
 
