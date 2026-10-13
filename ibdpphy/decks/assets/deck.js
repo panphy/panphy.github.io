@@ -43,6 +43,7 @@
     });
     const slide = state.slides[state.index];
     slide.querySelectorAll('.step').forEach(step => step.classList.toggle('shown', fromEnd));
+    syncPlays(slide);
     const n = state.index + 1;
     const total = state.slides.length;
     counter.innerHTML = `<b>${String(n).padStart(2, '0')}</b> / ${String(total).padStart(2, '0')}`;
@@ -63,11 +64,28 @@
     setScatterActive();
   }
 
+  // Figures that play once: SMIL animations with begin="indefinite" start when the figure's empty
+  // .step.play is shown. Hiding that step again swaps in a fresh copy, back at the start.
+  function syncPlays(slide) {
+    slide.querySelectorAll('svg:has(.step.play)').forEach(figure => {
+      const on = !!figure.querySelector('.step.play.shown');
+      if (on && !figure.dataset.played) {
+        figure.dataset.played = '1';
+        figure.querySelectorAll('[begin="indefinite"]').forEach(node => node.beginElement?.());
+      } else if (!on && figure.dataset.played) {
+        const fresh = figure.cloneNode(true);
+        delete fresh.dataset.played;
+        figure.replaceWith(fresh);
+      }
+    });
+  }
+
   function next() {
     const slide = state.slides[state.index];
     const pending = hiddenSteps(slide);
     if (pending.length) {
       pending[0].classList.add('shown');
+      syncPlays(slide);
       nextButton.disabled = state.index === state.slides.length - 1 && pending.length === 1;
       return;
     }
@@ -79,6 +97,7 @@
     const shown = slide.querySelectorAll('.step.shown');
     if (shown.length) {
       shown[shown.length - 1].classList.remove('shown');
+      syncPlays(slide);
       nextButton.disabled = false;
       return;
     }

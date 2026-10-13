@@ -1,0 +1,1101 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="robots" content="noindex, nofollow">
+  <meta name="description" content="Teaching slides for IB Diploma Programme Physics topic D.1 Gravitational fields: Kepler’s laws, Newton’s law of gravitation, field strength and field lines, and at higher level potential, equipotentials, orbital speed and escape speed.">
+  <meta name="theme-color" content="#F8F6F1">
+  <script src="/assets/theme.js" data-theme-scope="ibdpphy"></script>
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <link rel="stylesheet" href="/assets/standalone-top.css">
+  <title>D.1 Gravitational fields · IB DP Physics</title>
+  <link rel="icon" type="image/png" href="/assets/favicon.png">
+  <link rel="apple-touch-icon" href="/assets/apple-touch-icon.png">
+  <link rel="stylesheet" href="../assets/deck.css">
+  <link rel="stylesheet" href="../assets/deck-notes.css">
+  <link rel="stylesheet" href="/assets/theme-toggle.css">
+  <link rel="stylesheet" href="/assets/fullscreen-button.css">
+  <script src="/assets/theme-toggle.js"></script>
+  <script src="/ibdpphy/sw-register.js" defer></script>
+</head>
+<body>
+  <header class="banner">
+    <a class="banner-logo" href="/" aria-label="PanPhy Labs home"><img src="/assets/panphy.png" alt="PanPhy Labs" width="38" height="38"></a>
+    <a class="banner-title" href="#1">D.1 Gravitational fields</a>
+    <div class="banner-actions">
+      <button id="thumbs-toggle" class="icon-button" type="button" aria-controls="thumbs" aria-pressed="true" aria-label="Hide slide thumbnails" title="Show or hide slide thumbnails (T)"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path class="pane" d="M9.5 4.5H6A2.5 2.5 0 0 0 3.5 7v10A2.5 2.5 0 0 0 6 19.5h3.5z"/><rect x="3.5" y="4.5" width="17" height="15" rx="2.5"/><path d="M9.5 4.5v15"/></svg></button>
+      <button id="fullscreen" class="panphy-fullscreen-button" type="button" aria-pressed="false" aria-label="Present fullscreen" title="Present fullscreen (F)"><svg class="panphy-fs-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M4 9V4h5M15 4h5v5M20 15v5h-5M9 20H4v-5"/></svg></button>
+      <button id="theme-button" type="button" data-panphy-theme-toggle aria-label="Toggle light/dark theme" title="Toggle between light and dark themes"></button>
+    </div>
+  </header>
+  <script>window.PanPhyThemeToggle.mount(document.getElementById('theme-button'));</script>
+
+  <nav class="thumbs" id="thumbs" aria-label="Slides"></nav>
+
+  <main class="stage" id="stage">
+    <div class="deck" id="deck">
+
+      <!-- 1 · Title -->
+      <section class="slide title" data-title="D.1 Gravitational fields">
+        <div class="title-grid">
+          <div>
+            <p class="eyebrow">IB DP Physics · Theme D · Fields</p>
+            <h1>Gravitational fields<span>.</span></h1>
+            <p class="lead">D.1 · Kepler’s laws, Newton’s law of gravitation, field strength, potential and orbits<br>Standard level and higher level</p>
+            <div class="chips">
+              <span class="chip">SL + HL · 5 hours</span>
+              <span class="chip hl">Additional HL · 7 hours</span>
+            </div>
+          </div>
+          <div class="fig" data-fig="d1-kepler2" data-plain></div>
+        </div>
+      </section>
+
+      <section class="slide" data-title="Lesson map">
+        <p class="eyebrow">The journey</p>
+        <h2>Four parts<span>.</span></h2>
+        <div class="cards fill" style="grid-template-columns: repeat(4, 1fr);">
+          <div class="card">
+            <div class="fig" data-fig="d1-ellipse" data-plain style="height: 180px;"></div>
+            <p class="eyebrow">Part 01 · SL + HL</p>
+            <h3>Kepler’s laws</h3>
+            <p>How the planets move round the Sun</p>
+          </div>
+          <div class="card">
+            <div class="fig" data-fig="d1-two-masses" data-plain style="height: 180px;"></div>
+            <p class="eyebrow">Part 02 · SL + HL</p>
+            <h3>Newton’s law of gravitation</h3>
+            <p>The force between any two masses</p>
+          </div>
+          <div class="card">
+            <div class="fig" data-fig="d1-field-lines" data-kind="radial" style="height: 180px;"></div>
+            <p class="eyebrow">Part 03 · SL + HL</p>
+            <h3>Gravitational fields</h3>
+            <p>Field strength and field lines</p>
+          </div>
+          <div class="card hl">
+            <div class="fig" data-fig="d1-equipotentials" data-plain style="height: 180px;"></div>
+            <p class="eyebrow">Part 04 · HL only</p>
+            <h3>Energy and orbits</h3>
+            <p>Potential, orbital speed and escape speed</p>
+          </div>
+        </div>
+        <div class="idea" style="margin-top: 22px;">Slides with a terracotta edge and an <span class="hl-tag">HL only</span> flag are additional higher level. Every other slide is for SL and HL.</div>
+        <div class="slide-foot"><span>D.1 GRAVITATIONAL FIELDS · SL + HL</span><span data-page></span></div>
+      </section>
+
+      <!-- Part 1 -->
+      <section class="slide section" data-title="Part 1: Kepler’s laws">
+        <div class="title-grid">
+          <div>
+            <p class="eyebrow">Part 01 · SL + HL</p>
+            <h1>Kepler’s laws<span>.</span></h1>
+            <p class="lead">Three rules that describe every orbit, found before anyone knew why</p>
+          </div>
+          <div class="fig" data-fig="d1-ellipse" data-plain></div>
+        </div>
+        <div class="slide-foot"><span>D.1 GRAVITATIONAL FIELDS · SL + HL</span><span data-page></span></div>
+      </section>
+
+      <section class="slide history" data-title="Story: Tycho’s numbers, Kepler’s laws">
+        <p class="eyebrow">The story · Prague, 1600–1619</p>
+        <p class="not-examined">Background story · not assessed</p>
+        <h2>Tycho’s numbers, Kepler’s laws<span>.</span></h2>
+        <div class="story" style="--photo-h: 420px;">
+          <div class="story-photos">
+            <figure><img src="images/tycho-mural-quadrant.jpg" width="740" height="1000" alt="Coloured engraving of Tycho Brahe seated inside his observatory, pointing upwards, beside a large brass quadrant fixed to the wall, with assistants reading the instrument and a clock"><figcaption><b>Tycho Brahe</b> and his great mural quadrant, engraved in 1598</figcaption></figure>
+            <figure><img src="images/astronomia-nova.jpg" width="460" height="831" alt="Printed Latin title page of Astronomia Nova"><figcaption>Kepler’s <b>Astronomia Nova</b>, 1609</figcaption></figure>
+          </div>
+          <div class="stack">
+            <ul class="points">
+              <li>Tycho measured planets by eye, with no telescope, to about <b>one arcminute</b></li>
+              <li>Johannes Kepler joined him in Prague in <b>1600</b> and worked on the orbit of Mars</li>
+              <li>His best circular model missed Tycho’s data by <b>eight arcminutes</b>. He trusted the data and gave up circles</li>
+              <li>Two laws in <b>1609</b>, the third in <b>1619</b></li>
+            </ul>
+            <div class="idea">A small disagreement with <b>good data</b> overturned 2000 years of circles.</div>
+          </div>
+        </div>
+        <p class="credits">Quadrant: <a href="https://commons.wikimedia.org/wiki/File:Tycho-Brahe-Mural-Quadrant.jpg" target="_blank" rel="noopener">from Tycho’s Astronomiae instauratae mechanica</a>, public domain. Title page: <a href="https://commons.wikimedia.org/wiki/File:Astronomia_Nova.jpg" target="_blank" rel="noopener">Johannes Kepler</a>, public domain.</p>
+        <div class="slide-foot"><span>D.1 GRAVITATIONAL FIELDS · SL + HL</span><span data-page></span></div>
+      </section>
+
+      <section class="slide" data-title="Kepler’s first law">
+        <p class="eyebrow">The shape of an orbit</p>
+        <h2>Kepler’s first law<span>.</span></h2>
+        <div class="split wide-fig">
+          <ul class="points small">
+            <li>Each planet moves in an <b>ellipse</b></li>
+            <li>The Sun is at <b>one focus</b> of the ellipse</li>
+            <li class="step">The distance from the Sun <b>changes</b> round the orbit</li>
+            <li class="step">A <b>circle</b> is the special ellipse whose two foci coincide</li>
+          </ul>
+          <div class="panel">
+            <div class="panel-head"><span>AN ELLIPTICAL ORBIT</span><span class="pill">MUCH EXAGGERATED</span></div>
+            <div class="fig" data-fig="d1-ellipse"></div>
+          </div>
+        </div>
+        <div class="slide-foot"><span>D.1 GRAVITATIONAL FIELDS · SL + HL</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>What an ellipse is.</b> Pin the two ends of a loose string to a board and pull it tight with a pencil. As the pencil moves, it draws an ellipse, and the two pins are the foci. For every point on the curve, the two distances to the foci add up to the same total: the length of the string.</p>
+            <p><b>How stretched are real orbits?</b> Much less than the drawing. The Earth is 147 million km from the Sun at its closest and 152 million km at its furthest, a difference of about 3%. Drawn to scale, its orbit could not be told from a circle by eye. That is why calculations in this topic treat orbits as circles.</p>
+          </div>
+          <div class="rn-side">
+            <p class="trap">Putting the Sun at the centre of the ellipse. It is at a focus, to one side of the centre, and nothing at all is at the other focus.</p>
+            <p class="more">The same law holds for moons round planets and for satellites round the Earth: the body at the focus is whatever is being orbited.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide" data-title="Kepler’s second law">
+        <p class="eyebrow">The speed round an orbit</p>
+        <h2>Kepler’s second law<span>.</span></h2>
+        <div class="split wide-fig">
+          <div class="stack">
+            <ul class="points small">
+              <li>The line from the Sun to a planet sweeps out <b>equal areas in equal times</b></li>
+              <li class="step">Near the Sun the line is short, so the planet must move <b>faster</b></li>
+              <li class="step">Far from the Sun it moves <b>slower</b></li>
+            </ul>
+            <div class="idea step">In a <b>circular</b> orbit the speed is constant.</div>
+          </div>
+          <div class="panel">
+            <div class="panel-head"><span>ONE ORBIT, AT THE RIGHT SPEEDS</span></div>
+            <div class="fig" data-fig="d1-kepler2"></div>
+          </div>
+        </div>
+        <div class="slide-foot"><span>D.1 GRAVITATIONAL FIELDS · SL + HL</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>Why it speeds up: an energy argument.</b> As the planet falls closer to the Sun, gravitational potential energy is transferred to kinetic energy, like a ball rolling down into a dip. As it climbs away again, it slows. The total energy stays the same all the way round.</p>
+            <p><b>Why it speeds up: a force argument.</b> In a circular orbit the pull of the Sun is always at right angles to the velocity, so it changes only the direction. In an ellipse the pull has a component along the path: forwards while the planet approaches the Sun, backwards while it moves away.</p>
+          </div>
+          <div class="rn-side">
+            <p class="tip">The two shaded sectors look very different, one short and wide, the other long and thin, but they have the same area and take the same time.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide" data-title="Kepler’s third law">
+        <p class="eyebrow">Comparing orbits</p>
+        <h2>Kepler’s third law<span>.</span></h2>
+        <div class="split even">
+          <div class="stack">
+            <div class="equation"><span>\(T^{2} \propto r^{3}\)</span></div>
+            <ul class="points small">
+              <li>\(T\): the orbital <b>period</b></li>
+              <li>\(r\): the <b>average radius</b> of the orbit</li>
+              <li class="step frac">So \(\dfrac{T^{2}}{r^{3}}\) is the <b>same</b> for every body orbiting the same centre</li>
+            </ul>
+          </div>
+          <table class="facts step">
+            <thead><tr><th>Planet</th><th>\(r\) / AU</th><th>\(T\) / years</th><th>\(\frac{T^{2}}{r^{3}}\)</th></tr></thead>
+            <tbody>
+              <tr><td>Mercury</td><td class="num">0.387</td><td class="num">0.241</td><td class="num">1.00</td></tr>
+              <tr><td>Earth</td><td class="num">1.00</td><td class="num">1.00</td><td class="num">1.00</td></tr>
+              <tr><td>Mars</td><td class="num">1.52</td><td class="num">1.88</td><td class="num">1.00</td></tr>
+              <tr><td>Jupiter</td><td class="num">5.20</td><td class="num">11.9</td><td class="num">1.00</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="slide-foot"><span>D.1 GRAVITATIONAL FIELDS · SL + HL</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>What the law says in words.</b> Planets further out take longer, and by more than you would guess from the longer path alone. Jupiter’s orbit is 5.2 times as long as the Earth’s, but its year is 11.9 times as long, so Jupiter must also be moving more slowly. A weaker pull, further from the Sun, needs a lower speed.</p>
+            <p><b>Why the units in the table work.</b> With \(r\) in astronomical units and \(T\) in years, the Earth has \(r = 1\) and \(T = 1\), so the constant is exactly 1 for everything that orbits the Sun. In SI units the constant is a different number, but it is still the same for every planet.</p>
+          </div>
+          <div class="rn-side">
+            <p class="trap">Comparing a planet with a moon. The constant depends on the mass of the body at the centre, so the law compares only bodies that orbit the <b>same</b> centre.</p>
+            <p class="more">Part 2 shows where the law comes from, and what the constant is.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide" data-title="Kepler’s third law: an asteroid">
+        <p class="eyebrow">Worked example</p>
+        <h2>How long is the year of Ceres?<span>.</span></h2>
+        <div class="split even">
+          <div class="work">
+            <span class="say">Ceres orbits the Sun at \(r = 2.77 \,\mathrm{AU}\)</span>
+            <span class="say">Earth: \(r_\mathrm{E} = 1.00 \,\mathrm{AU}\), \(T_\mathrm{E} = 1.00\) year</span>
+            <span>\(\dfrac{T^{2}}{r^{3}} = \dfrac{T_\mathrm{E}^{2}}{r_\mathrm{E}^{3}}\)</span>
+            <span class="step">\(T = T_\mathrm{E} \left(\dfrac{r}{r_\mathrm{E}}\right)^{\frac{3}{2}}\)</span>
+            <span class="step">\(T = 1.00 \times 2.77^{\frac{3}{2}} = \class{res}{4.61 \text{ years}}\)</span>
+          </div>
+          <div class="stack">
+            <ul class="points small">
+              <li>Compare with a body whose orbit you <b>know</b></li>
+              <li class="step">Use any units, as long as they are the <b>same</b> for both bodies</li>
+              <li class="step">The power \(\frac{3}{2}\) means “cube, then square root”</li>
+            </ul>
+          </div>
+        </div>
+        <div class="slide-foot"><span>D.1 GRAVITATIONAL FIELDS · SL + HL</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>Check that the answer is sensible.</b> Ceres is between Mars (1.88 years) and Jupiter (11.9 years), and closer to Mars, so a period of 4.6 years fits. A quick check like this catches the most common slip: raising to the power \(\frac{2}{3}\) instead of \(\frac{3}{2}\), which would give 1.97 years.</p>
+            <p><b>Going the other way.</b> If you know the period and want the radius, rearrange to \(r = r_\mathrm{E} \left(\frac{T}{T_\mathrm{E}}\right)^{\frac{2}{3}}\). A comet with a period of 8.0 years has \(r = 8.0^{\frac{2}{3}} = 4.0 \,\mathrm{AU}\).</p>
+          </div>
+          <div class="rn-side">
+            <p class="tip">Ratios save work. You never need the mass of the Sun or the value of \(G\) to compare two orbits round the same body.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide" data-title="Quick check: Kepler’s laws">
+        <p class="eyebrow">Quick check</p>
+        <h2>Kepler’s laws<span>.</span></h2>
+        <div class="quiz fill">
+          <div class="q"><p><span class="n">01</span>What shape is the orbit of a planet, and where is the Sun?</p><div class="ans step">An ellipse, with the Sun at one focus</div></div>
+          <div class="q"><p><span class="n">02</span>Where in its orbit does a planet move fastest?</p><div class="ans step">Where it is closest to the Sun</div></div>
+          <div class="q"><p><span class="n">03</span>What is the same for two equal time intervals on one orbit?</p><div class="ans step">The area swept out by the line from the Sun</div></div>
+          <div class="q"><p><span class="n">04</span>Which quantity is the same for every planet round the Sun?</p><div class="ans step">\(\frac{T^{2}}{r^{3}}\)</div></div>
+          <div class="q"><p><span class="n">05</span>A planet orbits at 4.0 AU. Its period?</p><div class="ans step">\(4.0^{\frac{3}{2}} = 8.0\) years</div></div>
+          <div class="q"><p><span class="n">06</span>Can the third law compare the Moon with Mars?</p><div class="ans step">No: they orbit different bodies</div></div>
+        </div>
+        <div class="slide-foot"><span class="reveal-hint">PRESS → TO REVEAL EACH ANSWER</span><span data-page></span></div>
+      </section>
+
+      <!-- Part 2 -->
+      <section class="slide section" data-title="Part 2: Newton’s law of gravitation">
+        <div class="title-grid">
+          <div>
+            <p class="eyebrow">Part 02 · SL + HL</p>
+            <h1>Newton’s law of gravitation<span>.</span></h1>
+            <p class="lead">One force explains the falling apple, the Moon and all three of Kepler’s laws</p>
+          </div>
+          <div class="fig" data-fig="d1-two-masses" data-plain></div>
+        </div>
+        <div class="slide-foot"><span>D.1 GRAVITATIONAL FIELDS · SL + HL</span><span data-page></span></div>
+      </section>
+
+      <section class="slide" data-title="Newton’s universal law of gravitation">
+        <p class="eyebrow">The force between two masses</p>
+        <h2>Newton’s universal law of gravitation<span>.</span></h2>
+        <div class="split">
+          <div class="stack">
+            <div class="equation"><span>\(F = G \dfrac{m_{1} m_{2}}{r^{2}}\)</span></div>
+            <ul class="points small">
+              <li>Every mass <b>attracts</b> every other mass</li>
+              <li class="step">\(r\) is the distance between their <b>centres</b></li>
+              <li class="step">\(G = 6.67 \times 10^{-11} \,\mathrm{N} \,\mathrm{m}^{2} \,\mathrm{kg}^{-2}\)</li>
+            </ul>
+          </div>
+          <div class="panel">
+            <div class="panel-head"><span>TWO MASSES</span><span class="pill">EQUAL AND OPPOSITE FORCES</span></div>
+            <div class="fig" data-fig="d1-two-masses"></div>
+          </div>
+        </div>
+        <div class="slide-foot"><span>D.1 GRAVITATIONAL FIELDS · SL + HL</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>Why the two forces are equal.</b> They are a Newton’s third law pair: the force of body 1 on body 2 and the force of body 2 on body 1. The equation shows it too, because swapping \(m_{1}\) and \(m_{2}\) changes nothing. The Earth pulls you with about 700 N and you pull the Earth with about 700 N. Only the accelerations differ, because the masses do.</p>
+            <p><b>Why you never notice it between everyday objects.</b> \(G\) is tiny. Two 70 kg people standing 1.0 m apart attract each other with \(6.67 \times 10^{-11} \times \frac{70 \times 70}{1.0^{2}} = 3.3 \times 10^{-7} \,\mathrm{N}\), about the weight of a grain of fine sand. Gravity matters only when at least one of the masses is enormous.</p>
+          </div>
+          <div class="rn-side">
+            <p class="trap">Confusing \(G\) with \(g\). \(G\) is a universal constant, the same everywhere. \(g\) is the field strength at one place, 9.8 N kg⁻¹ only near the Earth’s surface.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide" data-title="An inverse square law">
+        <p class="eyebrow">How the force depends on distance</p>
+        <h2>An inverse square law<span>.</span></h2>
+        <div class="split wide-fig">
+          <div class="stack">
+            <ul class="points small">
+              <li class="frac">\(F \propto \dfrac{1}{r^{2}}\)</li>
+              <li class="step"><b>Double</b> the separation: a <b>quarter</b> of the force</li>
+              <li class="step"><b>Three times</b> the separation: <b>one ninth</b></li>
+              <li class="step">The force never quite reaches zero</li>
+            </ul>
+          </div>
+          <div class="panel">
+            <div class="panel-head"><span>FORCE AGAINST SEPARATION</span></div>
+            <div class="fig" data-fig="d1-inverse-square"></div>
+          </div>
+        </div>
+        <div class="slide-foot"><span>D.1 GRAVITATIONAL FIELDS · SL + HL</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>Where the square comes from.</b> Picture the influence of a mass spreading out evenly in all directions. At distance \(r\) it is spread over a sphere of area \(4 \pi r^{2}\). Twice as far away, the sphere has four times the area, so the influence at each point is four times weaker. Light from a lamp and the electric force of a charge fall off in the same way, for the same reason.</p>
+            <p><b>Using ratios.</b> A satellite moves from 7000 km to 21 000 km from the centre of the Earth. The distance has tripled, so the force is \(\frac{1}{3^{2}} = \frac{1}{9}\) of what it was. No masses and no \(G\) are needed.</p>
+          </div>
+          <div class="rn-side">
+            <p class="trap">Measuring \(r\) from the surface. A satellite 400 km above the ground is 6770 km from the centre of the Earth, not 400 km: its weight is only about 11% less than on the ground.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide" data-title="Point masses and spheres">
+        <p class="eyebrow">When is a body a point?</p>
+        <h2>Point masses and spheres<span>.</span></h2>
+        <div class="split wide-fig">
+          <div class="stack">
+            <ul class="points small">
+              <li>The law is for <b>point masses</b></li>
+              <li class="step">A body acts as a point mass when it is <b>small compared with the separation</b></li>
+              <li class="step">A <b>uniform sphere</b> acts as if all its mass were at its <b>centre</b>, for anything outside it</li>
+            </ul>
+          </div>
+          <div class="panel">
+            <div class="panel-head"><span>OUTSIDE THE SPHERE, THE SAME FIELD</span></div>
+            <div class="fig" data-fig="d1-sphere-point"></div>
+          </div>
+        </div>
+        <div class="slide-foot"><span>D.1 GRAVITATIONAL FIELDS · SL + HL</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>Why the sphere result matters.</b> An apple on a tree is a few metres from the nearest rock and 12 700 km from the rock on the far side of the Earth. Each piece of the Earth pulls it with a different force in a different direction. Newton proved that for a sphere all these pulls add up to exactly the force of one point mass at the centre. That is why the distance in every calculation is measured to the centre of the planet.</p>
+            <p><b>When it fails.</b> The result needs a sphere whose density depends only on the distance from its centre, and a point outside it. It does not work for an irregular asteroid seen from close by, and it does not work inside the planet.</p>
+          </div>
+          <div class="rn-side">
+            <p class="tip">The Earth and the Sun are 150 million km apart and the Sun is 1.4 million km across. Even without the sphere result, treating both as points is an excellent approximation.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide history" data-title="Story: Cavendish weighs the Earth">
+        <p class="eyebrow">The story · London, 1798</p>
+        <p class="not-examined">Background story · not assessed</p>
+        <h2>Cavendish weighs the Earth<span>.</span></h2>
+        <div class="story" style="--photo-h: 400px;">
+          <div class="story-photos">
+            <figure><img src="images/cavendish-apparatus.png" width="699" height="524" alt="Engraved cross-section of a room containing a long horizontal rod hung from a wire, with a small lead ball at each end and a large lead ball hung close to each of them"><figcaption>The <b>torsion balance</b>, from Cavendish’s paper of 1798</figcaption></figure>
+          </div>
+          <div class="stack">
+            <ul class="points">
+              <li>The force between laboratory masses is tiny: Newton never knew the value of \(G\)</li>
+              <li>John Michell designed the apparatus but died in 1793. <b>Henry Cavendish</b> rebuilt it</li>
+              <li>Two <b>158 kg</b> lead balls pulled two <b>0.73 kg</b> balls on a 1.8 m rod, twisting the wire that held it</li>
+              <li>His result: the Earth is <b>5.45 times</b> as dense as water. Today’s value is 5.51</li>
+            </ul>
+            <div class="idea">From his result comes \(G\), and from \(G\) the <b>mass of the Earth</b>.</div>
+          </div>
+        </div>
+        <p class="credits">Drawing: <a href="https://commons.wikimedia.org/wiki/File:Cavendish_Experiment.png" target="_blank" rel="noopener">Henry Cavendish, Philosophical Transactions, 1798</a>, public domain.</p>
+        <div class="slide-foot"><span>D.1 GRAVITATIONAL FIELDS · SL + HL</span><span data-page></span></div>
+      </section>
+
+      <section class="slide" data-title="Gravitation: the Earth and the Moon">
+        <p class="eyebrow">Worked example</p>
+        <h2>The force that holds the Moon<span>.</span></h2>
+        <div class="split even">
+          <div class="work">
+            <span class="say">Earth \(5.97 \times 10^{24} \,\mathrm{kg}\) · Moon \(7.35 \times 10^{22} \,\mathrm{kg}\)</span>
+            <span class="say">Centre to centre: \(r = 3.84 \times 10^{8} \,\mathrm{m}\)</span>
+            <span>\(F = G \dfrac{m_{1} m_{2}}{r^{2}}\)</span>
+            <span class="step">\(F = \dfrac{6.67 \times 10^{-11} \times 5.97 \times 10^{24} \times 7.35 \times 10^{22}}{(3.84 \times 10^{8})^{2}}\)</span>
+            <span class="step">\(F = \class{res}{1.98 \times 10^{20} \,\mathrm{N}}\)</span>
+          </div>
+          <div class="stack">
+            <ul class="points small">
+              <li>Distances in <b>metres</b>, between <b>centres</b></li>
+              <li class="step">Square the <b>whole</b> of \(r\), including its power of ten</li>
+              <li class="step">The same force acts on the Earth, towards the Moon</li>
+            </ul>
+            <div class="idea step">This force is the Moon’s <b>centripetal force</b>.</div>
+          </div>
+        </div>
+        <div class="slide-foot"><span>D.1 GRAVITATIONAL FIELDS · SL + HL</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>Checking it against the Moon’s motion.</b> The Moon goes round once in 27.3 days, \(2.36 \times 10^{6} \,\mathrm{s}\). Its centripetal acceleration is \(\frac{4 \pi^{2} r}{T^{2}} = 2.72 \times 10^{-3} \,\mathrm{m} \,\mathrm{s}^{-2}\), so the force needed is \(7.35 \times 10^{22} \times 2.72 \times 10^{-3} = 2.0 \times 10^{20} \,\mathrm{N}\). The force that gravity supplies and the force that circular motion needs agree.</p>
+            <p><b>Newton’s own check.</b> The Moon is 60 Earth radii away, so by the inverse square law gravity there should be \(\frac{1}{60^{2}} = \frac{1}{3600}\) of its value at the surface: \(\frac{9.8}{3600} = 2.7 \times 10^{-3} \,\mathrm{m} \,\mathrm{s}^{-2}\). The falling apple and the orbiting Moon obey the same law.</p>
+          </div>
+          <div class="rn-side">
+            <p class="tip">Work out the powers of ten separately: \(-11 + 24 + 22 - 16 = 19\). It catches most calculator slips.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide" data-title="Where Kepler’s third law comes from">
+        <p class="eyebrow">Gravitation and circular motion</p>
+        <h2>Where Kepler’s third law comes from<span>.</span></h2>
+        <div class="split even">
+          <div class="work">
+            <span class="say">A body of mass \(m\) in a circular orbit round mass \(M\)</span>
+            <span>Gravitational force = centripetal force</span>
+            <span class="step">\(G \dfrac{M m}{r^{2}} = \dfrac{4 \pi^{2} m r}{T^{2}}\)</span>
+            <span class="step">\(T^{2} = \dfrac{4 \pi^{2}}{G M} r^{3}\)</span>
+          </div>
+          <div class="stack">
+            <ul class="points small">
+              <li>Gravity is the <b>only</b> force: it provides all the centripetal force</li>
+              <li class="step">The orbiting mass \(m\) <b>cancels</b></li>
+              <li class="step frac">The constant is \(\dfrac{4 \pi^{2}}{G M}\): it depends only on the <b>central mass</b></li>
+            </ul>
+          </div>
+        </div>
+        <div class="slide-foot"><span>D.1 GRAVITATIONAL FIELDS · SL + HL</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>The centripetal force used here.</b> From A.2, the centripetal acceleration is \(\omega^{2} r\) with \(\omega = \frac{2 \pi}{T}\), which gives \(\frac{4 \pi^{2} r}{T^{2}}\). If a question gives a speed and not a period, use \(\frac{m v^{2}}{r}\) for the centripetal force.</p>
+            <p><b>Why the cancelling matters.</b> Because \(m\) cancels, an astronaut, a spanner and a space station at the same height all orbit together with the same period. This is why astronauts float inside the station: everything is falling round the Earth at the same rate. It is not because there is no gravity up there.</p>
+          </div>
+          <div class="rn-side">
+            <p class="tip">Learn the first line, not the last. “Gravitational force = centripetal force” is the starting point of every orbit calculation.</p>
+            <p class="more">Kepler found the law from data in 1619. Newton explained it nearly seventy years later.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide" data-title="Gravitation: the mass of the Sun">
+        <p class="eyebrow">Worked example</p>
+        <h2>Finding the mass of the Sun<span>.</span></h2>
+        <div class="split even">
+          <div class="work">
+            <span class="say">Earth’s orbit: \(r = 1.50 \times 10^{11} \,\mathrm{m}\)</span>
+            <span class="say">\(T = 1\) year \(= 3.16 \times 10^{7} \,\mathrm{s}\)</span>
+            <span>\(T^{2} = \dfrac{4 \pi^{2}}{G M} r^{3}\) &nbsp;so&nbsp; \(M = \dfrac{4 \pi^{2} r^{3}}{G T^{2}}\)</span>
+            <span class="step">\(M = \dfrac{4 \pi^{2} \times (1.50 \times 10^{11})^{3}}{6.67 \times 10^{-11} \times (3.16 \times 10^{7})^{2}}\)</span>
+            <span class="step">\(M = \class{res}{2.00 \times 10^{30} \,\mathrm{kg}}\)</span>
+          </div>
+          <div class="stack">
+            <ul class="points small">
+              <li>An orbit <b>measures</b> the mass at its centre</li>
+              <li class="step">Only \(r\) and \(T\) of the orbiting body are needed</li>
+              <li class="step">The mass of the <b>Earth</b> does not appear</li>
+            </ul>
+          </div>
+        </div>
+        <div class="slide-foot"><span>D.1 GRAVITATIONAL FIELDS · SL + HL</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>Why this method is so useful.</b> Nobody can put a star or a planet on a balance. But anything with a satellite can be weighed: watch the satellite, measure its period and the size of its orbit, and the central mass follows. The mass of Jupiter comes from its moons, the mass of the Earth from the Moon, and the mass of the black hole at the centre of our galaxy from the stars that orbit it.</p>
+            <p><b>What cannot be found.</b> The orbit tells you nothing about the mass of the orbiting body, because that mass cancelled in the derivation. To find the mass of a planet with no moon, such as Venus, astronomers had to wait for a spacecraft to fly past it.</p>
+          </div>
+          <div class="rn-side">
+            <p class="trap">Leaving the period in days or years. With \(G\) in SI units, \(T\) must be in seconds and \(r\) in metres.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide" data-title="Quick check: gravitation">
+        <p class="eyebrow">Quick check</p>
+        <h2>Newton’s law of gravitation<span>.</span></h2>
+        <div class="quiz fill">
+          <div class="q"><p><span class="n">01</span>The separation of two masses is doubled. What happens to the force?</p><div class="ans step">It falls to a quarter</div></div>
+          <div class="q"><p><span class="n">02</span>One of the masses is doubled. What happens to the force?</p><div class="ans step">It doubles</div></div>
+          <div class="q"><p><span class="n">03</span>The Earth pulls the Moon. How big is the force of the Moon on the Earth?</p><div class="ans step">The same size, in the opposite direction</div></div>
+          <div class="q"><p><span class="n">04</span>From where is \(r\) measured for a planet?</p><div class="ans step">From its centre</div></div>
+          <div class="q"><p><span class="n">05</span>What provides the centripetal force on a satellite?</p><div class="ans step">The gravitational force</div></div>
+          <div class="q"><p><span class="n">06</span>Which mass sets the constant in \(T^{2} \propto r^{3}\)?</p><div class="ans step">The central mass \(M\)</div></div>
+        </div>
+        <div class="slide-foot"><span class="reveal-hint">PRESS → TO REVEAL EACH ANSWER</span><span data-page></span></div>
+      </section>
+
+      <!-- Part 3 -->
+      <section class="slide section" data-title="Part 3: Gravitational fields">
+        <div class="title-grid">
+          <div>
+            <p class="eyebrow">Part 03 · SL + HL</p>
+            <h1>Gravitational fields<span>.</span></h1>
+            <p class="lead">What a mass does to the space around it</p>
+          </div>
+          <div class="fig" data-fig="d1-field-lines" data-kind="radial"></div>
+        </div>
+        <div class="slide-foot"><span>D.1 GRAVITATIONAL FIELDS · SL + HL</span><span data-page></span></div>
+      </section>
+
+      <section class="slide" data-title="Gravitational field strength">
+        <p class="eyebrow">Force per unit mass</p>
+        <h2>Gravitational field strength<span>.</span></h2>
+        <div class="split even">
+          <div class="stack">
+            <div class="equation"><span>\(g = \dfrac{F}{m}\)</span></div>
+            <ul class="points small">
+              <li>A <b>field</b> is a region where a mass experiences a force</li>
+              <li class="step">\(g\) is the <b>force per unit mass</b> on a small point mass placed at that point</li>
+              <li class="step">A <b>vector</b>, in N kg⁻¹, pointing the way the force acts</li>
+            </ul>
+          </div>
+          <div class="cards step" style="grid-template-columns: 1fr;">
+            <div class="card"><p class="eyebrow">Why “small”?</p><h3>A test mass</h3><p>It must not disturb the mass that produces the field</p></div>
+            <div class="card"><p class="eyebrow">Same quantity, two names</p><h3>N kg⁻¹ = m s⁻²</h3><p>The field strength at a point equals the acceleration of free fall there</p></div>
+          </div>
+        </div>
+        <div class="slide-foot"><span>D.1 GRAVITATIONAL FIELDS · SL + HL</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>Why bother with a field?</b> The force on a body depends on the body: a 2 kg mass is pulled twice as hard as a 1 kg mass. Dividing by the mass removes that, leaving a quantity that belongs to the place alone. Once you know \(g\) at a point, the force on anything put there is \(F = mg\), with no need to think about the planet again.</p>
+            <p><b>Why field strength equals acceleration.</b> A body of mass \(m\) in free fall has only its weight \(mg\) acting. Newton’s second law gives \(a = \frac{mg}{m} = g\). The mass cancels, which is why a hammer and a feather fall together on the Moon.</p>
+          </div>
+          <div class="rn-side">
+            <p class="tip">\(g = 9.8 \,\mathrm{N} \,\mathrm{kg}^{-1}\) means: each kilogram at this place is pulled with 9.8 N.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide" data-title="The field of a point mass">
+        <p class="eyebrow">Field strength round a planet</p>
+        <h2>The field of a point mass or sphere<span>.</span></h2>
+        <div class="split wide-fig">
+          <div class="stack">
+            <div class="equation small"><span>\(g = \dfrac{F}{m} = G \dfrac{M}{r^{2}}\)</span></div>
+            <ul class="points small">
+              <li>\(M\): the mass that <b>produces</b> the field</li>
+              <li class="step">An <b>inverse square law</b> again</li>
+              <li class="step">Valid at the surface and <b>outside</b> it</li>
+            </ul>
+          </div>
+          <div class="panel">
+            <div class="panel-head"><span>THE EARTH’S FIELD STRENGTH</span></div>
+            <div class="fig" data-fig="d1-g-graph"></div>
+          </div>
+        </div>
+        <div class="slide-foot"><span>D.1 GRAVITATIONAL FIELDS · SL + HL</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>Where the equation comes from.</b> Put a test mass \(m\) at distance \(r\) from \(M\). The force on it is \(G \frac{M m}{r^{2}}\). Divide by \(m\) and the test mass disappears, leaving \(G \frac{M}{r^{2}}\): the field depends only on the mass that makes it and on how far away you are.</p>
+            <p><b>Comparing planets.</b> Surface gravity depends on both mass and radius. Mars has 0.107 of the Earth’s mass and 0.532 of its radius, so \(g_\mathrm{Mars} = 9.8 \times \frac{0.107}{0.532^{2}} = 3.7 \,\mathrm{N} \,\mathrm{kg}^{-1}\). A planet with less mass can still have strong surface gravity if it is small enough.</p>
+          </div>
+          <div class="rn-side">
+            <p class="trap">Thinking \(g\) is zero in orbit. At the height of the space station it is still about 8.7 N kg⁻¹, nearly 90% of its value on the ground.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide" data-title="Gravitational field lines">
+        <p class="eyebrow">Drawing a field</p>
+        <h2>Gravitational field lines<span>.</span></h2>
+        <div class="split wide-fig">
+          <ul class="points small">
+            <li>An arrow shows the direction of the <b>force on a mass</b>: always towards the mass that makes the field</li>
+            <li class="step">Lines <b>closer together</b>: a <b>stronger</b> field</li>
+            <li class="step">Lines never cross</li>
+            <li class="step">Close to the surface the field is nearly <b>uniform</b></li>
+          </ul>
+          <div class="panel">
+            <div class="panel-head"><span>TWO FIELDS TO KNOW</span></div>
+            <div class="fig" data-fig="d1-field-lines"></div>
+          </div>
+        </div>
+        <div class="slide-foot"><span>D.1 GRAVITATIONAL FIELDS · SL + HL</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>Why a field near the ground counts as uniform.</b> The lines really do point to the centre of the Earth, 6370 km below. Across a room, or even across a city, they are so nearly parallel, and the distance to the centre changes so little, that \(g\) has the same size and direction everywhere. Climbing 1.0 km changes \(g\) by only 0.03%.</p>
+            <p><b>Why lines cannot cross.</b> A field line shows the direction of the force on a mass at that point. If two lines crossed, a mass there would have two different force directions at once. Where the fields of two bodies overlap, they add as vectors to give one resultant direction.</p>
+          </div>
+          <div class="rn-side">
+            <p class="tip">When you sketch a radial field, use a ruler, space the lines evenly round the body, make them meet the surface at right angles and put an arrow on every one.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide" data-title="Field strength: at the surface and in orbit">
+        <p class="eyebrow">Worked example</p>
+        <h2>The Earth’s field, on the ground and in orbit<span>.</span></h2>
+        <div class="split even">
+          <div class="work">
+            <span class="say">\(M = 5.97 \times 10^{24} \,\mathrm{kg}\) · radius \(R = 6.37 \times 10^{6} \,\mathrm{m}\)</span>
+            <span>\(g = G \dfrac{M}{r^{2}}\)</span>
+            <span class="say step">At the surface: \(r = R\)</span>
+            <span class="step">\(g = \dfrac{6.67 \times 10^{-11} \times 5.97 \times 10^{24}}{(6.37 \times 10^{6})^{2}} = \class{res}{9.81 \,\mathrm{N} \,\mathrm{kg}^{-1}}\)</span>
+          </div>
+          <div class="work step">
+            <span class="say">400 km up: \(r = R + h = 6.77 \times 10^{6} \,\mathrm{m}\)</span>
+            <span>\(g = \dfrac{6.67 \times 10^{-11} \times 5.97 \times 10^{24}}{(6.77 \times 10^{6})^{2}}\)</span>
+            <span class="step">\(g = \class{res}{8.69 \,\mathrm{N} \,\mathrm{kg}^{-1}}\)</span>
+          </div>
+        </div>
+        <div class="slide-foot"><span>D.1 GRAVITATIONAL FIELDS · SL + HL</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>What the first answer shows.</b> The familiar 9.8 is not a separate fact of nature. It follows from the mass and radius of the Earth and the value of \(G\). On another planet the same equation gives a different number.</p>
+            <p><b>A quicker way for the second part.</b> Use a ratio: \(\frac{g_\mathrm{orbit}}{g_\mathrm{surface}} = \left(\frac{R}{R + h}\right)^{2} = \left(\frac{6.37}{6.77}\right)^{2} = 0.885\), so \(g = 0.885 \times 9.81 = 8.69 \,\mathrm{N} \,\mathrm{kg}^{-1}\). The masses and \(G\) cancel.</p>
+          </div>
+          <div class="rn-side">
+            <p class="trap">Using the height \(h\) in place of \(r\). The distance is always from the centre of the planet: add the radius.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide" data-title="The resultant field of two bodies">
+        <p class="eyebrow">Adding fields</p>
+        <h2>The resultant field of two bodies<span>.</span></h2>
+        <div class="split">
+          <div class="stack">
+            <ul class="points small">
+              <li>Field strengths add as <b>vectors</b></li>
+              <li class="step">On the line between two bodies they point <b>opposite ways</b>: subtract</li>
+            </ul>
+            <div class="work step">
+              <span class="say">Zero resultant field at P</span>
+              <span>\(G \dfrac{M_\mathrm{E}}{x^{2}} = G \dfrac{M_\mathrm{M}}{(d - x)^{2}}\)</span>
+              <span class="step">\(\dfrac{x}{d - x} = \sqrt{\dfrac{M_\mathrm{E}}{M_\mathrm{M}}} = \sqrt{81.2} = 9.01\)</span>
+              <span class="step">\(x = \dfrac{9.01}{10.01} d = \class{res}{0.90 d}\)</span>
+            </div>
+          </div>
+          <div class="panel">
+            <div class="panel-head"><span>BETWEEN THE EARTH AND THE MOON</span><span class="pill">NOT TO SCALE</span></div>
+            <div class="fig" data-fig="d1-two-body"></div>
+          </div>
+        </div>
+        <div class="slide-foot"><span>D.1 GRAVITATIONAL FIELDS · SL + HL</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>Why the point is so close to the Moon.</b> The Earth has 81 times the mass of the Moon. For the two fields to be equal, the Moon’s smaller mass must be made up for by a shorter distance, and because of the inverse square law the distances are in the ratio \(\sqrt{81} = 9\) to 1. The point is nine tenths of the way to the Moon, about 346 000 km from the Earth.</p>
+            <p><b>Other points on the line.</b> Anywhere else between the two bodies, work out each field strength, then subtract the smaller from the larger. The resultant points towards the body whose field wins. Beyond either body, both fields point the same way, back towards the pair, so add them.</p>
+          </div>
+          <div class="rn-side">
+            <p class="tip">Take the square root of both sides before you rearrange. It turns a quadratic equation into a one-line ratio.</p>
+            <p class="more">Only points on the line joining the two bodies are examined.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide" data-title="Quick check: fields">
+        <p class="eyebrow">Quick check</p>
+        <h2>Gravitational fields<span>.</span></h2>
+        <div class="quiz fill">
+          <div class="q"><p><span class="n">01</span>Define gravitational field strength.</p><div class="ans step">Force per unit mass on a small point mass</div></div>
+          <div class="q"><p><span class="n">02</span>A 3.0 kg mass feels 11.1 N on Mars. Field strength?</p><div class="ans step">\(\frac{11.1}{3.0} = 3.7 \,\mathrm{N} \,\mathrm{kg}^{-1}\)</div></div>
+          <div class="q"><p><span class="n">03</span>\(g\) is 9.8 N kg⁻¹ at the surface. What is it at \(r = 2R\)?</p><div class="ans step">\(\frac{9.8}{4} = 2.5 \,\mathrm{N} \,\mathrm{kg}^{-1}\)</div></div>
+          <div class="q"><p><span class="n">04</span>What do field lines that spread apart tell you?</p><div class="ans step">The field is getting weaker</div></div>
+          <div class="q"><p><span class="n">05</span>Describe the field lines of a uniform field.</p><div class="ans step">Parallel and evenly spaced</div></div>
+          <div class="q"><p><span class="n">06</span>Which way do gravitational field lines point?</p><div class="ans step">Towards the mass that produces the field</div></div>
+        </div>
+        <div class="slide-foot"><span class="reveal-hint">PRESS → TO REVEAL EACH ANSWER</span><span data-page></span></div>
+      </section>
+
+      <!-- Part 4 · Additional HL -->
+      <section class="slide section hl" data-title="Part 4: Additional HL">
+        <div class="title-grid">
+          <div>
+            <p class="eyebrow">Part 04 · Additional higher level</p>
+            <h1>Energy and orbits<span>.</span></h1>
+            <p class="lead">Potential energy and potential · equipotentials<br>Orbital speed · escape speed · atmospheric drag</p>
+          </div>
+          <div class="fig" data-fig="d1-equipotentials" data-plain></div>
+        </div>
+        <div class="slide-foot"><span>D.1 GRAVITATIONAL FIELDS · ADDITIONAL HL</span><span data-page></span></div>
+      </section>
+
+      <section class="slide hl" data-title="HL: Gravitational potential energy">
+        <p class="eyebrow">Energy of two masses</p>
+        <h2>Gravitational potential energy<span>.</span></h2>
+        <div class="split">
+          <div class="stack">
+            <div class="equation"><span>\(E_\mathrm{p} = -G \dfrac{m_{1} m_{2}}{r}\)</span></div>
+            <ul class="points small">
+              <li>The <b>work done to assemble</b> the system from infinite separation</li>
+              <li class="step"><b>Zero</b> when the masses are infinitely far apart</li>
+              <li class="step"><b>Negative</b> everywhere else: the masses are bound</li>
+            </ul>
+          </div>
+          <div class="panel">
+            <div class="panel-head"><span>A MASS NEAR A PLANET</span></div>
+            <div class="fig" data-fig="d1-potential" data-quantity="Ep"></div>
+          </div>
+        </div>
+        <div class="slide-foot"><span>D.1 GRAVITATIONAL FIELDS · ADDITIONAL HL</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>Why it is negative.</b> Gravity only attracts. As two masses come together from far apart, the field does work on them and they speed up: they gain kinetic energy, so they must have lost potential energy. Starting from zero and losing energy leaves a negative amount. To separate them again you would have to give that energy back.</p>
+            <p><b>How this fits with \(mg \Delta h\).</b> Raise a mass from \(r\) to \(r + \Delta h\) near the surface. The change in \(-\frac{G M m}{r}\) is \(G M m \left(\frac{1}{r} - \frac{1}{r + \Delta h}\right) \approx \frac{G M m}{r^{2}} \Delta h = mg \Delta h\). The equation from A.3 is the short-distance version of this one, valid while \(g\) hardly changes.</p>
+          </div>
+          <div class="rn-side">
+            <p class="trap">Squaring \(r\). Force and field strength have \(r^{2}\) underneath. Energy and potential have \(r\).</p>
+            <p class="tip">“Higher” always means “less negative”. Moving away from a planet increases the potential energy towards zero.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide hl" data-title="HL: Gravitational potential">
+        <p class="eyebrow">Energy per unit mass</p>
+        <h2>Gravitational potential<span>.</span></h2>
+        <div class="split">
+          <div class="stack">
+            <div class="equation"><span>\(V_\mathrm{g} = -G \dfrac{M}{r}\)</span></div>
+            <ul class="points small">
+              <li>The <b>work done per unit mass</b> in bringing a mass from infinity to the point</li>
+              <li class="step">A <b>scalar</b>, in J kg⁻¹. Zero at infinity</li>
+              <li class="step">Potential energy of a mass \(m\) there: \(E_\mathrm{p} = m V_\mathrm{g}\)</li>
+            </ul>
+          </div>
+          <div class="panel">
+            <div class="panel-head"><span>THE EARTH’S POTENTIAL</span></div>
+            <div class="fig" data-fig="d1-potential"></div>
+          </div>
+        </div>
+        <div class="slide-foot"><span>D.1 GRAVITATIONAL FIELDS · ADDITIONAL HL</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>Potential is to energy what field strength is to force.</b> Field strength is force per kilogram. Potential is potential energy per kilogram. Both describe the place, not the body you put there. The potential at the Earth’s surface, −62.5 MJ kg⁻¹, means that every kilogram resting on the ground has 62.5 MJ less potential energy than it would have far out in space.</p>
+            <p><b>Adding potentials is easy.</b> Potential is a scalar, so the potentials of two bodies simply add as numbers, with no directions to think about. At a point between the Earth and the Moon the total potential is the sum of two negative numbers. This is one reason energy methods are often simpler than force methods.</p>
+          </div>
+          <div class="rn-side">
+            <p class="trap">Giving potential a direction. It has a sign but no direction: the minus sign means “lower than at infinity”, not “downwards”.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide hl" data-title="HL: Work done in moving a mass">
+        <p class="eyebrow">Worked example</p>
+        <h2>Lifting a 500 kg satellite<span>.</span></h2>
+        <div class="split even">
+          <div class="work">
+            <span class="say">From the surface, \(R = 6.37 \times 10^{6} \,\mathrm{m}\), to \(r = 2R\)</span>
+            <span>\(W = m \Delta V_\mathrm{g}\) &nbsp;with&nbsp; \(V_\mathrm{g} = -\dfrac{G M}{r}\)</span>
+            <span class="step">\(V_\mathrm{surface} = -\dfrac{3.98 \times 10^{14}}{6.37 \times 10^{6}} = -6.25 \times 10^{7} \,\mathrm{J} \,\mathrm{kg}^{-1}\)</span>
+            <span class="step">\(V_{2R} = -3.13 \times 10^{7} \,\mathrm{J} \,\mathrm{kg}^{-1}\)</span>
+            <span class="step">\(W = 500 \times (-3.13 + 6.25) \times 10^{7} = \class{res}{1.56 \times 10^{10} \,\mathrm{J}}\)</span>
+          </div>
+          <div class="stack">
+            <ul class="points small">
+              <li>\(G M = 3.98 \times 10^{14} \,\mathrm{N} \,\mathrm{m}^{2} \,\mathrm{kg}^{-1}\) for the Earth</li>
+              <li class="step">\(\Delta V_\mathrm{g}\) = final − initial: here it is <b>positive</b></li>
+              <li class="step">The work does <b>not</b> depend on the path taken</li>
+            </ul>
+          </div>
+        </div>
+        <div class="slide-foot"><span>D.1 GRAVITATIONAL FIELDS · ADDITIONAL HL</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>Why \(mg \Delta h\) fails here.</b> With \(g = 9.81 \,\mathrm{N} \,\mathrm{kg}^{-1}\) and \(\Delta h = 6.37 \times 10^{6} \,\mathrm{m}\) it gives \(3.1 \times 10^{10} \,\mathrm{J}\), twice the right answer. The field strength falls to a quarter on the way up, so the average force is much less than the weight at the ground. Potential takes this into account automatically.</p>
+            <p><b>What the answer does not include.</b> This is only the energy needed to raise the satellite. To stay at that height it must also be moving at the orbital speed, which needs kinetic energy as well. Later slides add the two together.</p>
+          </div>
+          <div class="rn-side">
+            <p class="tip">The sign tells you who does the work. Moving outwards, \(\Delta V_\mathrm{g}\) is positive and an engine must supply the energy. Moving inwards, it is negative and the field supplies it.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide hl" data-title="HL: Field strength as the potential gradient">
+        <p class="eyebrow">Linking the two descriptions</p>
+        <h2>Field strength is the potential gradient<span>.</span></h2>
+        <div class="split">
+          <div class="stack">
+            <div class="equation"><span>\(g = -\dfrac{\Delta V_\mathrm{g}}{\Delta r}\)</span></div>
+            <ul class="points small">
+              <li>The <b>gradient</b> of a potential–distance graph gives the field strength</li>
+              <li class="step">Steep graph: <b>strong</b> field</li>
+              <li class="step">The minus sign: the field points towards <b>lower</b> potential</li>
+            </ul>
+          </div>
+          <div class="panel">
+            <div class="panel-head"><span>THE TANGENT AT 2R</span></div>
+            <div class="fig" data-fig="d1-potential" data-tangent></div>
+          </div>
+        </div>
+        <div class="slide-foot"><span>D.1 GRAVITATIONAL FIELDS · ADDITIONAL HL</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>Why the gradient is the field.</b> Move a 1 kg mass outwards by a small distance \(\Delta r\). You push against a force of \(g\) newtons, so you do work \(g \Delta r\), and that is the gain in potential. So the size of \(g\) is \(\frac{\Delta V_\mathrm{g}}{\Delta r}\): the potential gained per metre. A contour map works the same way: where the height changes quickly over a short distance, the hill is steep.</p>
+            <p><b>Checking with numbers.</b> Between \(r = 6.37 \times 10^{6} \,\mathrm{m}\) and \(6.47 \times 10^{6} \,\mathrm{m}\), the potential rises from −62.5 to −61.5 MJ kg⁻¹. The gradient is \(\frac{1.0 \times 10^{6}}{1.0 \times 10^{5}} = 10 \,\mathrm{N} \,\mathrm{kg}^{-1}\), close to the 9.8 expected near the surface.</p>
+          </div>
+          <div class="rn-side">
+            <p class="tip">On a graph of \(g\) against \(r\), the <b>area</b> under the curve between two distances is the change in potential. Gradient one way, area the other.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide hl" data-title="HL: Equipotential surfaces">
+        <p class="eyebrow">Mapping a field with potential</p>
+        <h2>Equipotential surfaces<span>.</span></h2>
+        <div class="split wide-fig">
+          <ul class="points small">
+            <li>A surface on which the potential is the <b>same everywhere</b></li>
+            <li class="step"><b>No work</b> is done moving a mass along one</li>
+            <li class="step">Field lines cross them at <b>right angles</b></li>
+            <li class="step">Equal steps of potential: surfaces <b>closer together</b> where the field is <b>stronger</b></li>
+          </ul>
+          <div class="panel">
+            <div class="panel-head"><span>ROUND THE EARTH</span><span class="pill">STEPS OF 10 MJ kg⁻¹</span></div>
+            <div class="fig" data-fig="d1-equipotentials"></div>
+          </div>
+        </div>
+        <div class="slide-foot"><span>D.1 GRAVITATIONAL FIELDS · ADDITIONAL HL</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>Why the right angle.</b> If a field line met an equipotential at any other angle, the field would have a component along the surface. Moving a mass along the surface would then need work, and the potential would change, which contradicts the surface being an equipotential. So the field can have no component along it.</p>
+            <p><b>Reading the map.</b> These are the contour lines of gravity. Round a spherical planet they are spheres centred on the planet. In the uniform field near the ground they are horizontal planes, evenly spaced: every metre you climb adds the same 9.8 J kg⁻¹. A satellite in a circular orbit stays on one equipotential, which is why gravity does no work on it and its speed stays constant.</p>
+          </div>
+          <div class="rn-side">
+            <p class="tip">Given equipotentials, you can draw the field lines: at right angles to every surface, pointing from higher potential to lower. Given field lines, you can sketch the equipotentials the same way.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide history hl" data-title="Story: Newton’s cannon">
+        <p class="eyebrow">The story · published 1728</p>
+        <p class="not-examined">Background story · not assessed</p>
+        <h2>Newton’s cannon on a mountain<span>.</span></h2>
+        <div class="story" style="--photo-h: 430px;">
+          <div class="story-photos">
+            <figure><img src="images/newton-cannonball.jpg" width="960" height="1067" alt="Engraving of the Earth with a mountain at the top. Curved paths leave the mountain top: short ones fall back to the ground, longer ones reach further round, and the longest go all the way round the Earth"><figcaption>From <b>A Treatise of the System of the World</b>, 1728</figcaption></figure>
+          </div>
+          <div class="stack">
+            <ul class="points">
+              <li>Fire a cannonball <b>horizontally</b> from a very high mountain</li>
+              <li>Faster shots land <b>further away</b>, as the ground curves away beneath them</li>
+              <li>Fast enough, and the ball falls <b>all the way round</b> without ever landing</li>
+              <li>Printed the year after Newton died. The first artificial satellite flew <b>229 years</b> later</li>
+            </ul>
+            <div class="idea">An orbit is <b>free fall</b> that keeps missing the ground.</div>
+          </div>
+        </div>
+        <p class="credits">Engraving: <a href="https://commons.wikimedia.org/wiki/File:Newton%27s_cannonball_cropped.svg" target="_blank" rel="noopener">Isaac Newton, 1728</a>, public domain.</p>
+        <div class="slide-foot"><span>D.1 GRAVITATIONAL FIELDS · ADDITIONAL HL</span><span data-page></span></div>
+      </section>
+
+      <section class="slide hl" data-title="HL: Orbital speed">
+        <p class="eyebrow">Staying in a circular orbit</p>
+        <h2>Orbital speed<span>.</span></h2>
+        <div class="split">
+          <div class="stack">
+            <div class="work">
+              <span>\(G \dfrac{M m}{r^{2}} = \dfrac{m v^{2}}{r}\)</span>
+              <span class="step">\(v_\mathrm{orbital} = \sqrt{\dfrac{G M}{r}}\)</span>
+            </div>
+            <ul class="points small">
+              <li class="step">One speed for each radius. The mass of the satellite <b>cancels</b></li>
+              <li class="step">A <b>larger</b> orbit needs a <b>lower</b> speed</li>
+            </ul>
+          </div>
+          <div class="panel">
+            <div class="panel-head"><span>TWO CIRCULAR ORBITS</span></div>
+            <div class="fig" data-fig="d1-orbits"></div>
+          </div>
+        </div>
+        <div class="slide-foot"><span>D.1 GRAVITATIONAL FIELDS · ADDITIONAL HL</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>A worked case.</b> For the space station, \(r = 6.77 \times 10^{6} \,\mathrm{m}\): \(v = \sqrt{\frac{3.98 \times 10^{14}}{6.77 \times 10^{6}}} = 7.67 \times 10^{3} \,\mathrm{m} \,\mathrm{s}^{-1}\). One orbit is \(2 \pi r = 4.25 \times 10^{7} \,\mathrm{m}\), so the period is \(\frac{4.25 \times 10^{7}}{7.67 \times 10^{3}} = 5540 \,\mathrm{s}\), about 92 minutes. The crew see sixteen sunrises a day.</p>
+            <p><b>Why there is no choice of speed.</b> At a given radius gravity supplies a fixed centripetal acceleration, \(\frac{G M}{r^{2}}\). Circular motion at that radius needs \(\frac{v^{2}}{r}\). Only one speed makes the two match. Go faster and gravity cannot bend the path tightly enough: the orbit becomes an ellipse reaching further out. Go slower and the path drops inside the circle.</p>
+          </div>
+          <div class="rn-side">
+            <p class="trap">Thinking a higher orbit needs a higher speed. Further out the pull is weaker, so less speed is needed. But reaching a higher orbit still takes more energy.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide hl" data-title="HL: The energy of a satellite">
+        <p class="eyebrow">Kinetic, potential and total</p>
+        <h2>The energy of a satellite in orbit<span>.</span></h2>
+        <div class="split">
+          <div class="stack">
+            <ul class="points small">
+              <li class="frac">Kinetic: \(E_\mathrm{k} = \dfrac{1}{2} m v^{2} = \dfrac{G M m}{2r}\)</li>
+              <li class="step frac">Potential: \(E_\mathrm{p} = -\dfrac{G M m}{r}\)</li>
+              <li class="step frac">Total: \(E = E_\mathrm{k} + E_\mathrm{p} = -\dfrac{G M m}{2r}\)</li>
+            </ul>
+            <div class="idea step">A larger orbit has <b>more</b> total energy but <b>less</b> kinetic energy.</div>
+          </div>
+          <div class="panel">
+            <div class="panel-head"><span>ENERGY AGAINST ORBITAL RADIUS</span></div>
+            <div class="fig" data-fig="d1-orbit-energy"></div>
+          </div>
+        </div>
+        <div class="slide-foot"><span>D.1 GRAVITATIONAL FIELDS · ADDITIONAL HL</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>Where the kinetic energy comes from.</b> Put \(v^{2} = \frac{G M}{r}\) from the last slide into \(\frac{1}{2} m v^{2}\). The kinetic energy is always exactly half the size of the potential energy, so the total is negative and equal to minus the kinetic energy.</p>
+            <p><b>What a negative total means.</b> The satellite is bound. It does not have enough kinetic energy to climb out to infinity, where its potential energy would be zero. To free it you would have to supply \(\frac{G M m}{2r}\), the size of its total energy.</p>
+            <p><b>The apparent paradox.</b> To move a satellite to a higher orbit you must give it energy, yet it ends up slower. The potential energy rises by twice as much as the kinetic energy falls, so the total still goes up.</p>
+          </div>
+          <div class="rn-side">
+            <p class="tip">These three results are not in the data booklet. Derive them from \(v_\mathrm{orbital}\) and \(E_\mathrm{p}\), which are.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide hl" data-title="HL: Changing orbit">
+        <p class="eyebrow">Worked example</p>
+        <h2>Raising a 500 kg satellite to a higher orbit<span>.</span></h2>
+        <div class="split even">
+          <div class="work">
+            <span class="say">From \(r_{1} = 6.77 \times 10^{6} \,\mathrm{m}\) to \(r_{2} = 4.22 \times 10^{7} \,\mathrm{m}\)</span>
+            <span>\(E = -\dfrac{G M m}{2r}\)</span>
+            <span class="step">\(\Delta E = \dfrac{G M m}{2} \left(\dfrac{1}{r_{1}} - \dfrac{1}{r_{2}}\right)\)</span>
+            <span class="step">\(\Delta E = \dfrac{3.98 \times 10^{14} \times 500}{2} \left(\dfrac{1}{6.77 \times 10^{6}} - \dfrac{1}{4.22 \times 10^{7}}\right)\)</span>
+            <span class="step">\(\Delta E = \class{res}{1.23 \times 10^{10} \,\mathrm{J}}\)</span>
+          </div>
+          <div class="stack">
+            <table class="facts step">
+              <thead><tr><th></th><th>Low orbit</th><th>High orbit</th></tr></thead>
+              <tbody>
+                <tr><td>\(E_\mathrm{k}\) / GJ</td><td class="num">+14.7</td><td class="num">+2.4</td></tr>
+                <tr><td>\(E_\mathrm{p}\) / GJ</td><td class="num">−29.4</td><td class="num">−4.7</td></tr>
+                <tr><td>Total / GJ</td><td class="num">−14.7</td><td class="num">−2.4</td></tr>
+              </tbody>
+            </table>
+            <div class="idea step">Kinetic energy <b>falls</b> by 12.3 GJ. Potential energy <b>rises</b> by 24.7 GJ.</div>
+          </div>
+        </div>
+        <div class="slide-foot"><span>D.1 GRAVITATIONAL FIELDS · ADDITIONAL HL</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>Reading the table.</b> In each column the potential energy is minus twice the kinetic energy and the total is minus the kinetic energy, as the last slide showed. Check that pattern in your own answers: if it fails, a sign has gone wrong.</p>
+            <p><b>Where the energy comes from.</b> The rocket engine does 12.3 GJ of work on the satellite. The speeds follow from \(v = \sqrt{\frac{G M}{r}}\): 7.67 km s⁻¹ in the low orbit and 3.07 km s⁻¹ in the high one, which is the orbit of a geostationary satellite. The engine fires forwards to speed the satellite up, and it still arrives moving more slowly, because it loses speed as it climbs.</p>
+          </div>
+          <div class="rn-side">
+            <p class="trap">Finding only the change in potential energy. A change of orbit changes the kinetic energy as well: use the total.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide hl" data-title="HL: Escape speed">
+        <p class="eyebrow">Leaving for good</p>
+        <h2>Escape speed<span>.</span></h2>
+        <div class="split">
+          <div class="stack">
+            <div class="work">
+              <span class="say">Just escapes: total energy zero</span>
+              <span>\(\dfrac{1}{2} m v_\mathrm{esc}^{2} - \dfrac{G M m}{r} = 0\)</span>
+              <span class="step">\(v_\mathrm{esc} = \sqrt{\dfrac{2 G M}{r}}\)</span>
+              <span class="say step">From the Earth’s surface</span>
+              <span class="step">\(\sqrt{\dfrac{2 \times 3.98 \times 10^{14}}{6.37 \times 10^{6}}} = \class{res}{11.2 \,\mathrm{km} \,\mathrm{s}^{-1}}\)</span>
+            </div>
+          </div>
+          <div class="panel">
+            <div class="panel-head"><span>FOUR LAUNCH SPEEDS</span></div>
+            <div class="fig" data-fig="d1-escape"></div>
+          </div>
+        </div>
+        <div class="slide-foot"><span>D.1 GRAVITATIONAL FIELDS · ADDITIONAL HL</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>What escape speed is.</b> It is the least speed a body needs at a given point so that, with no engine and no further push, it never falls back. It slows all the way out, but gravity weakens so quickly with distance that the body never quite stops. The direction of launch does not matter, as long as it misses the planet: energy is a scalar.</p>
+            <p><b>How it compares with orbital speed.</b> At the same radius, \(v_\mathrm{esc} = \sqrt{2} \times v_\mathrm{orbital}\). A satellite already in a circular orbit has half the kinetic energy it would need to escape. Increase its speed by 41% and it leaves.</p>
+          </div>
+          <div class="rn-side">
+            <p class="trap">Thinking a rocket must reach 11.2 km s⁻¹ to leave the Earth. Escape speed is for a body that coasts. A rocket whose engine keeps firing could leave at walking pace.</p>
+            <p class="tip">The mass of the escaping body cancels: the escape speed is the same for a molecule and for a spacecraft.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide hl" data-title="HL: Launching into orbit">
+        <p class="eyebrow">Worked example</p>
+        <h2>From the launch pad to a low orbit<span>.</span></h2>
+        <div class="split even">
+          <div class="work">
+            <span class="say">A 500 kg satellite, at rest on a planet that does not rotate</span>
+            <span class="say">\(R = 6.37 \times 10^{6} \,\mathrm{m}\) · orbit \(r = 6.77 \times 10^{6} \,\mathrm{m}\)</span>
+            <span>\(E_\mathrm{surface} = -\dfrac{G M m}{R}\) &nbsp;·&nbsp; \(E_\mathrm{orbit} = -\dfrac{G M m}{2r}\)</span>
+            <span class="step">\(\Delta E = G M m \left(\dfrac{1}{R} - \dfrac{1}{2r}\right)\)</span>
+            <span class="step">\(\Delta E = 3.98 \times 10^{14} \times 500 \left(\dfrac{1}{6.37 \times 10^{6}} - \dfrac{1}{1.354 \times 10^{7}}\right)\)</span>
+            <span class="step">\(\Delta E = \class{res}{1.65 \times 10^{10} \,\mathrm{J}}\)</span>
+          </div>
+          <div class="stack">
+            <ul class="points small">
+              <li>On the pad: potential energy <b>only</b></li>
+              <li class="step">In orbit: potential <b>and</b> kinetic</li>
+              <li class="step">Most of the energy goes into <b>speed</b>, not height</li>
+            </ul>
+            <div class="idea step">To escape from that orbit: a further \(\dfrac{G M m}{2r} = 1.47 \times 10^{10} \,\mathrm{J}\).</div>
+          </div>
+        </div>
+        <div class="slide-foot"><span>D.1 GRAVITATIONAL FIELDS · ADDITIONAL HL</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>Speed, not height.</b> Split the 16.5 GJ into its parts. Raising the satellite 400 km increases its potential energy by only 1.8 GJ. Giving it the orbital speed of 7.67 km s⁻¹ takes 14.7 GJ. Getting into orbit is mostly about going sideways very fast.</p>
+            <p><b>Why “a planet that does not rotate”.</b> On the real Earth a satellite on the launch pad at the equator is already moving east at 465 m s⁻¹ with the ground. It starts with some kinetic energy, which is why rockets are launched eastwards from sites near the equator. The exam model leaves this out, so the starting kinetic energy is zero.</p>
+          </div>
+          <div class="rn-side">
+            <p class="tip">The energy to escape from an orbit is minus its total energy: the amount that brings the total up to zero.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide hl" data-title="HL: Atmospheric drag on a satellite">
+        <p class="eyebrow">A small resistive force</p>
+        <h2>A satellite in the thin upper atmosphere<span>.</span></h2>
+        <div class="split">
+          <div class="stack">
+            <ul class="points small">
+              <li>A small <b>viscous drag</b> does negative work: the <b>total</b> energy falls</li>
+              <li class="step frac">Total energy \(-\dfrac{G M m}{2r}\) falls, so \(r\) gets <b>smaller</b></li>
+              <li class="step frac">\(v = \sqrt{\dfrac{G M}{r}}\), so the speed <b>rises</b></li>
+            </ul>
+            <div class="idea step">Drag makes the satellite go <b>faster</b>.</div>
+          </div>
+          <div class="panel">
+            <div class="panel-head"><span>A SLOWLY DECAYING ORBIT</span><span class="pill">MUCH EXAGGERATED</span></div>
+            <div class="fig" data-fig="d1-drag"></div>
+          </div>
+        </div>
+        <div class="slide-foot"><span>D.1 GRAVITATIONAL FIELDS · ADDITIONAL HL</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>How a resistive force can speed something up.</b> As the orbit shrinks, the satellite falls towards the Earth and loses potential energy. Half of the potential energy lost becomes kinetic energy, and the other half is transferred to the atmosphere and the satellite as thermal energy by the drag. The kinetic energy rises, the potential energy falls by twice as much, and the total falls.</p>
+            <p><b>Why it gets worse.</b> Lower down, the air is denser and the satellite is faster, so the drag is larger and the orbit decays more quickly. Each orbit is very nearly a circle, but the height falls faster and faster until the satellite burns up. The space station loses about 2 km of height a month and has to be boosted by rocket engines.</p>
+          </div>
+          <div class="rn-side">
+            <p class="tip">A model answer has three steps: total energy decreases, so the radius decreases, so the speed increases. Quote the equation that justifies each step.</p>
+            <p class="more">Only this qualitative argument is required.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide hl" data-title="HL quick check">
+        <p class="eyebrow">Quick check · additional higher level</p>
+        <h2>Energy and orbits<span>.</span></h2>
+        <div class="quiz fill">
+          <div class="q"><p><span class="n">01</span>Where is gravitational potential zero?</p><div class="ans step">At infinity</div></div>
+          <div class="q"><p><span class="n">02</span>The potential at a point is −40 MJ kg⁻¹. Potential energy of 2.0 kg there?</p><div class="ans step">\(2.0 \times (-40) = -80 \,\mathrm{MJ}\)</div></div>
+          <div class="q"><p><span class="n">03</span>How much work is done moving a mass along an equipotential?</p><div class="ans step">None</div></div>
+          <div class="q"><p><span class="n">04</span>What does the gradient of a potential–distance graph give?</p><div class="ans step">The field strength (with a minus sign)</div></div>
+          <div class="q"><p><span class="n">05</span>The orbital speed at some radius is 5.0 km s⁻¹. Escape speed there?</p><div class="ans step">\(\sqrt{2} \times 5.0 = 7.1 \,\mathrm{km} \,\mathrm{s}^{-1}\)</div></div>
+          <div class="q"><p><span class="n">06</span>Drag acts on a satellite. What happens to its speed?</p><div class="ans step">It increases, as the orbit shrinks</div></div>
+        </div>
+        <div class="slide-foot"><span class="reveal-hint">PRESS → TO REVEAL EACH ANSWER</span><span data-page></span></div>
+      </section>
+
+      <section class="slide" data-title="Summary">
+        <p class="eyebrow">Summary</p>
+        <h2>Gravitational fields on one slide<span>.</span></h2>
+        <div class="cards fill" style="grid-template-columns: 1fr 1fr 1fr; align-content: center;">
+          <div class="card"><p class="eyebrow">Kepler’s laws</p><h3>How orbits behave</h3><p>Ellipses with the Sun at a focus. Equal areas in equal times<br>\(T^{2} \propto r^{3}\)</p></div>
+          <div class="card step"><p class="eyebrow">Newton’s law</p><h3>An inverse square force</h3><p>\(F = G \frac{m_{1} m_{2}}{r^{2}}\), between centres<br>Gravity is the centripetal force of an orbit</p></div>
+          <div class="card step"><p class="eyebrow">Field strength</p><h3>Force per unit mass</h3><p>\(g = \frac{F}{m} = G \frac{M}{r^{2}}\), a vector<br>Radial round a planet, uniform near its surface</p></div>
+          <div class="card hl step"><p class="eyebrow">Potential · HL</p><h3>Energy per unit mass</h3><p>\(V_\mathrm{g} = -\frac{G M}{r}\), zero at infinity<br>\(W = m \Delta V_\mathrm{g}\) and \(g = -\frac{\Delta V_\mathrm{g}}{\Delta r}\)</p></div>
+          <div class="card hl step"><p class="eyebrow">Equipotentials · HL</p><h3>At right angles to the field</h3><p>No work is done along one<br>Closer together where the field is stronger</p></div>
+          <div class="card hl step"><p class="eyebrow">Orbits · HL</p><h3>Two speeds</h3><p>\(v_\mathrm{orbital} = \sqrt{\frac{G M}{r}}\) and \(v_\mathrm{esc} = \sqrt{\frac{2 G M}{r}}\)<br>Drag: smaller orbit, higher speed</p></div>
+        </div>
+        <div class="slide-foot"><span>D.1 GRAVITATIONAL FIELDS · SL + HL</span><span data-page></span></div>
+      </section>
+
+      <section class="slide" data-title="Key words">
+        <p class="eyebrow">Summary</p>
+        <h2>Key words<span>.</span></h2>
+        <div class="terms fill" style="grid-template-columns: repeat(3, 1fr);">
+          <div class="term"><b>Ellipse</b><span>The shape of an orbit</span></div>
+          <div class="term"><b>Orbital period</b><span>The time for one complete orbit</span></div>
+          <div class="term"><b>Point mass</b><span>Small compared with the separation</span></div>
+          <div class="term"><b>Inverse square law</b><span>Force ∝ 1 / r²</span></div>
+          <div class="term"><b>Gravitational field strength</b><span>Force per unit mass. A vector</span></div>
+          <div class="term"><b>Field line</b><span>Direction of the force on a mass</span></div>
+          <div class="term"><b>Uniform field</b><span>Same strength and direction everywhere</span></div>
+          <div class="term hl"><b>Gravitational potential</b><span>Work done per unit mass from infinity</span></div>
+          <div class="term hl"><b>Potential gradient</b><span>Potential change per metre</span></div>
+          <div class="term hl"><b>Equipotential surface</b><span>Joins points at the same potential</span></div>
+          <div class="term hl"><b>Orbital speed</b><span>Speed for a circular orbit</span></div>
+          <div class="term hl"><b>Escape speed</b><span>The least speed to reach infinity</span></div>
+        </div>
+        <div class="slide-foot"><span>D.1 GRAVITATIONAL FIELDS · SL + HL</span><span data-page></span></div>
+      </section>
+
+    </div>
+  </main>
+
+  <nav class="controls" aria-label="Slide controls">
+    <button type="button" id="prev" aria-label="Previous slide"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg></button>
+    <span class="counter" id="counter" aria-live="polite"></span>
+    <button type="button" id="next" aria-label="Next slide"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 5l7 7-7 7"/></svg></button>
+  </nav>
+  <div class="progress" aria-hidden="true"><span id="progress-bar"></span></div>
+
+  <script src="../assets/figures.js"></script>
+  <script src="figures.js"></script>
+  <script src="../assets/deck-math.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
+  <script src="../assets/deck-notes.js"></script>
+  <script src="../assets/deck.js"></script>
+</body>
+</html>

@@ -6,7 +6,7 @@
 (() => {
   const SYMBOL = { proton: '+', neutron: '0', electron: '−', alpha: 'α', positive: '+', solid: '' };
   const GRADIENTS = ['proton', 'neutron', 'electron', 'alpha', 'positive', 'solid', 'brand-accent-strong', 'brand-primary'];
-  const MARKERS = ['text-secondary', 'alpha', 'electron', 'photon', 'brand-accent', 'brand-primary', 'brand-accent-strong'];
+  const MARKERS = ['text-secondary', 'alpha', 'electron', 'photon', 'brand-accent', 'brand-primary', 'brand-accent-strong', 'hl', 'proton'];
   const TAU = Math.PI * 2;
   const f = n => Math.round(n * 10) / 10;
 
@@ -1101,5 +1101,21 @@
     });
   }
 
-  window.DeckFigures = { render, orbitPoint };
+  // Moving pictures drawn with SMIL. A figure shows .still in thumbnails, print and reduced motion
+  // and .mover on screen. track() moves a group through points at equal time steps and anim()
+  // changes one attribute; both loop unless { loop: false }, which waits for the figure's empty
+  // PLAY step to be shown (deck.js then starts every animation with begin="indefinite").
+  const timing = (dur, loop, extra) => `dur="${dur}s" ${loop ? 'repeatCount="indefinite"' : 'begin="indefinite" fill="freeze"'} ${extra}`;
+  const track = (points, dur, { loop = true, extra = '' } = {}) => `<animateTransform attributeName="transform" type="translate" values="${points.map(([x, y]) => `${f(x)},${f(y)}`).join(';')}" ${timing(dur, loop, extra)}/>`;
+  const anim = (attr, values, dur, { loop = true, extra = '' } = {}) => `<animate attributeName="${attr}" values="${values.join(';')}" ${timing(dur, loop, extra)}/>`;
+  const spin = (cx, cy, dur, { turns = 1, loop = true, extra = '' } = {}) => `<animateTransform attributeName="transform" type="rotate" from="0 ${cx} ${cy}" to="${360 * turns} ${cx} ${cy}" ${timing(dur, loop, extra)}/>`;
+  const twoState = (still, mover) => `<g class="still">${still}</g><g class="mover">${mover}</g>`;
+  const PLAY = '<g class="step play"></g>';
+
+  // A deck's own figures.js adds its diagrams with DeckFigures.add(parts => ({ name: el => svg }));
+  // the shared drawing helpers arrive as parts. Prefix the names with the topic (d1-…).
+  const PARTS = { svg, ball, cluster, shadow, arrow, wave, text, ring, orbiter, seeded, animated, stepG, fly, axes, plot, shade, body, both, arcPoints, through, sampled, sub, box, dot, surface, labelled, spring, track, anim, spin, twoState, PLAY, f, TAU };
+  const add = make => Object.assign(FIGURES, make(PARTS));
+
+  window.DeckFigures = { render, orbitPoint, add };
 })();
