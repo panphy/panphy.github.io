@@ -1,0 +1,781 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="robots" content="noindex, nofollow">
+  <meta name="description" content="Teaching slides for IB Diploma Programme Physics topic D.3 Motion in electromagnetic fields: charged particles in uniform electric and magnetic fields and in crossed fields, the force on a moving charge and on a current-carrying conductor, and the force between parallel wires.">
+  <meta name="theme-color" content="#F8F6F1">
+  <script src="/assets/theme.js" data-theme-scope="ibdpphy"></script>
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <link rel="stylesheet" href="/assets/standalone-top.css">
+  <title>D.3 Motion in electromagnetic fields · IB DP Physics</title>
+  <link rel="icon" type="image/png" href="/assets/favicon.png">
+  <link rel="apple-touch-icon" href="/assets/apple-touch-icon.png">
+  <link rel="stylesheet" href="../assets/deck.css">
+  <link rel="stylesheet" href="../assets/deck-notes.css">
+  <link rel="stylesheet" href="/assets/theme-toggle.css">
+  <link rel="stylesheet" href="/assets/fullscreen-button.css">
+  <script src="/assets/theme-toggle.js"></script>
+  <script src="/ibdpphy/sw-register.js" defer></script>
+</head>
+<body>
+  <header class="banner">
+    <a class="banner-logo" href="/" aria-label="PanPhy Labs home"><img src="/assets/panphy.png" alt="PanPhy Labs" width="38" height="38"></a>
+    <a class="banner-title" href="#1">D.3 Motion in electromagnetic fields</a>
+    <div class="banner-actions">
+      <button id="thumbs-toggle" class="icon-button" type="button" aria-controls="thumbs" aria-pressed="true" aria-label="Hide slide thumbnails" title="Show or hide slide thumbnails (T)"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path class="pane" d="M9.5 4.5H6A2.5 2.5 0 0 0 3.5 7v10A2.5 2.5 0 0 0 6 19.5h3.5z"/><rect x="3.5" y="4.5" width="17" height="15" rx="2.5"/><path d="M9.5 4.5v15"/></svg></button>
+      <button id="fullscreen" class="panphy-fullscreen-button" type="button" aria-pressed="false" aria-label="Present fullscreen" title="Present fullscreen (F)"><svg class="panphy-fs-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M4 9V4h5M15 4h5v5M20 15v5h-5M9 20H4v-5"/></svg></button>
+      <button id="theme-button" type="button" data-panphy-theme-toggle aria-label="Toggle light/dark theme" title="Toggle between light and dark themes"></button>
+    </div>
+  </header>
+  <script>window.PanPhyThemeToggle.mount(document.getElementById('theme-button'));</script>
+
+  <nav class="thumbs" id="thumbs" aria-label="Slides"></nav>
+
+  <main class="stage" id="stage">
+    <div class="deck" id="deck">
+
+      <!-- 1 · Title -->
+      <section class="slide title" data-title="D.3 Motion in electromagnetic fields">
+        <div class="title-grid">
+          <div>
+            <p class="eyebrow">IB DP Physics · Theme D · Fields</p>
+            <h1>Motion in electromagnetic fields<span>.</span></h1>
+            <p class="lead">D.3 · Charged particles in electric and magnetic fields, and the forces on currents<br>Standard level and higher level</p>
+            <div class="chips">
+              <span class="chip">SL + HL · 6 hours</span>
+            </div>
+          </div>
+          <div class="fig" data-fig="d3-circle" data-plain></div>
+        </div>
+      </section>
+
+      <section class="slide" data-title="Lesson map">
+        <p class="eyebrow">The journey</p>
+        <h2>Three parts<span>.</span></h2>
+        <div class="cards fill" style="grid-template-columns: repeat(3, 1fr);">
+          <div class="card">
+            <div class="fig" data-fig="d3-accelerate" data-plain style="height: 200px;"></div>
+            <p class="eyebrow">Part 01</p>
+            <h3>Charges in electric fields</h3>
+            <p>Constant force: speeding up, and parabolic paths</p>
+          </div>
+          <div class="card">
+            <div class="fig" data-fig="d3-circle" data-plain style="height: 200px;"></div>
+            <p class="eyebrow">Part 02</p>
+            <h3>Charges in magnetic fields</h3>
+            <p>Circular paths, charge-to-mass ratio, crossed fields</p>
+          </div>
+          <div class="card">
+            <div class="fig" data-fig="d3-wire-force" data-plain style="height: 200px;"></div>
+            <p class="eyebrow">Part 03</p>
+            <h3>Forces on currents</h3>
+            <p>A wire in a field, and two parallel wires</p>
+          </div>
+        </div>
+        <div class="idea" style="margin-top: 22px;">D.3 has <b>no additional higher level content</b>: every slide is for SL and HL.</div>
+        <div class="slide-foot"><span>D.3 MOTION IN ELECTROMAGNETIC FIELDS · SL + HL</span><span data-page></span></div>
+      </section>
+
+      <!-- Part 1 -->
+      <section class="slide section" data-title="Part 1: Charges in electric fields">
+        <div class="title-grid">
+          <div>
+            <p class="eyebrow">Part 01 · SL + HL</p>
+            <h1>Charges in electric fields<span>.</span></h1>
+            <p class="lead">A uniform field gives a constant force, so a constant acceleration</p>
+          </div>
+          <div class="fig" data-fig="d3-accelerate" data-plain></div>
+        </div>
+        <div class="slide-foot"><span>D.3 MOTION IN ELECTROMAGNETIC FIELDS · SL + HL</span><span data-page></span></div>
+      </section>
+
+      <section class="slide" data-title="A charge in a uniform electric field">
+        <p class="eyebrow">Along the field</p>
+        <h2>A charge in a uniform electric field<span>.</span></h2>
+        <div class="split fig-first">
+          <div class="panel">
+            <div class="panel-head"><span>AN ELECTRON BETWEEN TWO PLATES</span><span class="reveal-hint">PRESS → TO RELEASE</span></div>
+            <div class="fig" data-fig="d3-accelerate"></div>
+          </div>
+          <div class="stack">
+            <ul class="points small">
+              <li class="step">Constant force \(F = qE\), so <b>constant acceleration</b></li>
+              <li class="step frac">\(a = \dfrac{qE}{m}\)</li>
+              <li class="step">Work done by the field becomes <b>kinetic energy</b></li>
+            </ul>
+            <div class="equation small step"><span>\(qV = \dfrac{1}{2} m v^{2}\)</span></div>
+          </div>
+        </div>
+        <div class="slide-foot"><span>D.3 MOTION IN ELECTROMAGNETIC FIELDS · SL + HL</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>Two ways to find the final speed.</b> The force is constant, so the equations of motion from A.1 work: \(v^{2} - u^{2} = 2as\) with \(a = \frac{qE}{m}\). But energy is quicker. The field does work \(qV\) on the charge whatever the distance between the plates, and all of it becomes kinetic energy. The speed depends only on the potential difference crossed, not on how far apart the plates are.</p>
+            <p><b>Why gravity is ignored.</b> For an electron in a typical laboratory field, the electric force is more than \(10^{13}\) times its weight. The electron falls by far less than the width of an atom while it crosses the apparatus.</p>
+          </div>
+          <div class="rn-side">
+            <p class="tip">An electron accelerated from rest through \(V\) volts has a kinetic energy of \(V\) electronvolts. A “2 keV electron” has been through 2000 V.</p>
+            <p class="trap">Sending a negative charge along the field. An electron accelerates towards the positive plate, against the field lines.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide" data-title="Electric field: an electron gun">
+        <p class="eyebrow">Worked example</p>
+        <h2>An electron accelerated through 2000 V<span>.</span></h2>
+        <div class="split even">
+          <div class="work">
+            <span class="say">From rest · \(V = 2000 \,\mathrm{V}\)</span>
+            <span class="say">\(e = 1.60 \times 10^{-19} \,\mathrm{C}\) · \(m = 9.11 \times 10^{-31} \,\mathrm{kg}\)</span>
+            <span>\(eV = \dfrac{1}{2} m v^{2}\) &nbsp;so&nbsp; \(v = \sqrt{\dfrac{2eV}{m}}\)</span>
+            <span class="step">\(v = \sqrt{\dfrac{2 \times 1.60 \times 10^{-19} \times 2000}{9.11 \times 10^{-31}}}\)</span>
+            <span class="step">\(v = \class{res}{2.65 \times 10^{7} \,\mathrm{m} \,\mathrm{s}^{-1}}\)</span>
+          </div>
+          <div class="stack">
+            <ul class="points small">
+              <li>Kinetic energy gained: \(2000 \,\mathrm{eV} = 3.2 \times 10^{-16} \,\mathrm{J}\)</li>
+              <li class="step">About <b>9%</b> of the speed of light</li>
+              <li class="step">Four times the voltage gives <b>twice</b> the speed</li>
+            </ul>
+          </div>
+        </div>
+        <div class="slide-foot"><span>D.3 MOTION IN ELECTROMAGNETIC FIELDS · SL + HL</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>Why speed goes as the square root of voltage.</b> The energy gained is proportional to \(V\), and kinetic energy is proportional to \(v^{2}\). So \(v \propto \sqrt{V}\): to double the speed you need four times the accelerating voltage.</p>
+            <p><b>A different particle.</b> A proton through the same 2000 V gains the same energy, 2000 eV, because its charge has the same size. But its mass is 1836 times larger, so its speed is \(\sqrt{1836} = 43\) times smaller: \(6.2 \times 10^{5} \,\mathrm{m} \,\mathrm{s}^{-1}\).</p>
+          </div>
+          <div class="rn-side">
+            <p class="more">Above about 10% of the speed of light this equation starts to overestimate the speed, and relativity (A.5, HL) is needed. Exam questions stay below that.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide" data-title="Entering a field at right angles">
+        <p class="eyebrow">Across the field</p>
+        <h2>Entering an electric field at right angles<span>.</span></h2>
+        <div class="split fig-first">
+          <div class="panel">
+            <div class="panel-head"><span>AN ELECTRON BETWEEN CHARGED PLATES</span><span class="reveal-hint">PRESS → TO FIRE</span></div>
+            <div class="fig" data-fig="d3-deflect"></div>
+          </div>
+          <ul class="points small">
+            <li class="step">Along the plates: no force, <b>constant velocity</b></li>
+            <li class="step">Across the plates: constant force, <b>constant acceleration</b></li>
+            <li class="step">The path is a <b>parabola</b>, like a projectile</li>
+            <li class="step">Outside the field: a <b>straight line</b></li>
+          </ul>
+        </div>
+        <div class="slide-foot"><span>D.3 MOTION IN ELECTROMAGNETIC FIELDS · SL + HL</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>Projectile motion with a different force.</b> In A.1 a ball thrown horizontally keeps its horizontal velocity while gravity accelerates it downwards, and it follows a parabola. Here the constant force is \(qE\) and the acceleration is \(\frac{qE}{m}\) instead of \(g\). Everything else is the same: treat the two directions separately and link them through the time.</p>
+            <p><b>The method.</b> Find the time inside the field from the motion along the plates, \(t = \frac{L}{v}\). Use that time for the motion across: deflection \(\frac{1}{2} a t^{2}\) and sideways velocity \(at\). After the plates, both components of velocity are constant, so the path is straight, along the tangent to the parabola at the exit.</p>
+          </div>
+          <div class="rn-side">
+            <p class="tip">The kinetic energy of the particle <b>increases</b> in an electric field: the field does work on it. Compare this with a magnetic field, in Part 2.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide" data-title="Electric field: deflection">
+        <p class="eyebrow">Worked example</p>
+        <h2>How far is the electron deflected?<span>.</span></h2>
+        <div class="split even">
+          <div class="work">
+            <span class="say">\(v = 2.0 \times 10^{7} \,\mathrm{m} \,\mathrm{s}^{-1}\) along plates of length \(L = 5.0 \,\mathrm{cm}\)</span>
+            <span class="say">Field \(E = 2.0 \times 10^{4} \,\mathrm{V} \,\mathrm{m}^{-1}\)</span>
+            <span>\(t = \dfrac{L}{v} = \dfrac{0.050}{2.0 \times 10^{7}} = 2.5 \times 10^{-9} \,\mathrm{s}\)</span>
+            <span class="step">\(a = \dfrac{eE}{m} = \dfrac{1.60 \times 10^{-19} \times 2.0 \times 10^{4}}{9.11 \times 10^{-31}}\)</span>
+            <span class="step">\(a = 3.5 \times 10^{15} \,\mathrm{m} \,\mathrm{s}^{-2}\)</span>
+          </div>
+          <div class="work step">
+            <span class="say">Deflection across the plates</span>
+            <span>\(y = \dfrac{1}{2} a t^{2}\)</span>
+            <span class="step">\(y = \dfrac{1}{2} \times 3.5 \times 10^{15} \times (2.5 \times 10^{-9})^{2}\)</span>
+            <span class="step">\(y = \class{res}{1.1 \times 10^{-2} \,\mathrm{m}}\)</span>
+          </div>
+        </div>
+        <div class="slide-foot"><span>D.3 MOTION IN ELECTROMAGNETIC FIELDS · SL + HL</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>What sets the deflection.</b> Putting the steps together, \(y = \frac{eEL^{2}}{2mv^{2}}\). A faster electron spends less time in the field and is deflected less, by the square of its speed. A stronger field or longer plates deflect it more.</p>
+            <p><b>The velocity on leaving.</b> The sideways velocity is \(at = 3.5 \times 10^{15} \times 2.5 \times 10^{-9} = 8.8 \times 10^{6} \,\mathrm{m} \,\mathrm{s}^{-1}\). The electron leaves at an angle \(\theta\) to its original direction with \(\tan \theta = \frac{8.8 \times 10^{6}}{2.0 \times 10^{7}}\), so \(\theta = 24^{\circ}\). Its speed is now \(\sqrt{(2.0 \times 10^{7})^{2} + (8.8 \times 10^{6})^{2}} = 2.2 \times 10^{7} \,\mathrm{m} \,\mathrm{s}^{-1}\).</p>
+          </div>
+          <div class="rn-side">
+            <p class="tip">Check that the particle does not hit a plate: here the plates would need to be more than 2.2 cm apart for an electron entering midway between them.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide" data-title="Quick check: electric fields">
+        <p class="eyebrow">Quick check</p>
+        <h2>Charges in electric fields<span>.</span></h2>
+        <div class="quiz fill">
+          <div class="q"><p><span class="n">01</span>What kind of acceleration does a charge have in a uniform electric field?</p><div class="ans step">Constant</div></div>
+          <div class="q"><p><span class="n">02</span>A proton is accelerated from rest through 500 V. Kinetic energy gained?</p><div class="ans step">500 eV = \(8.0 \times 10^{-17} \,\mathrm{J}\)</div></div>
+          <div class="q"><p><span class="n">03</span>What shape is the path when a charge enters at right angles to the field?</p><div class="ans step">A parabola</div></div>
+          <div class="q"><p><span class="n">04</span>Which component of its velocity stays constant?</p><div class="ans step">The one at right angles to the field</div></div>
+          <div class="q"><p><span class="n">05</span>The accelerating voltage is made nine times larger. The final speed?</p><div class="ans step">Three times larger</div></div>
+          <div class="q"><p><span class="n">06</span>Which way does an electron accelerate, relative to the field lines?</p><div class="ans step">Against them</div></div>
+        </div>
+        <div class="slide-foot"><span class="reveal-hint">PRESS → TO REVEAL EACH ANSWER</span><span data-page></span></div>
+      </section>
+
+      <!-- Part 2 -->
+      <section class="slide section" data-title="Part 2: Charges in magnetic fields">
+        <div class="title-grid">
+          <div>
+            <p class="eyebrow">Part 02 · SL + HL</p>
+            <h1>Charges in magnetic fields<span>.</span></h1>
+            <p class="lead">A force at right angles to the motion: it changes the direction, never the speed</p>
+          </div>
+          <div class="fig" data-fig="d3-circle" data-plain></div>
+        </div>
+        <div class="slide-foot"><span>D.3 MOTION IN ELECTROMAGNETIC FIELDS · SL + HL</span><span data-page></span></div>
+      </section>
+
+      <section class="slide" data-title="The force on a moving charge">
+        <p class="eyebrow">The magnetic force</p>
+        <h2>The force on a moving charge<span>.</span></h2>
+        <div class="split">
+          <div class="stack">
+            <div class="equation"><span>\(F = qvB \sin \theta\)</span></div>
+            <ul class="points small">
+              <li>\(B\): magnetic field strength, in <b>tesla</b> (T)</li>
+              <li class="step">\(\theta\): the angle between the velocity and the field</li>
+              <li class="step">Greatest at 90°. <b>Zero</b> when moving along the field, and zero at rest</li>
+            </ul>
+          </div>
+          <div class="panel">
+            <div class="panel-head"><span>A POSITIVE CHARGE, AT RIGHT ANGLES TO B</span></div>
+            <div class="fig" data-fig="d3-qvb"></div>
+          </div>
+        </div>
+        <div class="slide-foot"><span>D.3 MOTION IN ELECTROMAGNETIC FIELDS · SL + HL</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>How this differs from the electric force.</b> An electric field pushes any charge, moving or not, along the field lines. A magnetic field pushes only a <b>moving</b> charge, and the push is sideways: at right angles to the field and at right angles to the velocity. A charge at rest in a magnetic field feels nothing at all.</p>
+            <p><b>The tesla.</b> Rearranging, \(B = \frac{F}{qv}\) for motion at right angles to the field. A field of 1 T gives a force of 1 N on a charge of 1 C moving across it at 1 m s⁻¹. One tesla is a strong field: the Earth’s field is about \(5 \times 10^{-5} \,\mathrm{T}\), a small bar magnet gives about 0.01 T close to a pole, and a hospital MRI scanner uses 1.5 T or more.</p>
+          </div>
+          <div class="rn-side">
+            <p class="tip">A numerical case: an electron crossing a 2.0 mT field at \(2.0 \times 10^{7} \,\mathrm{m} \,\mathrm{s}^{-1}\) feels \(1.60 \times 10^{-19} \times 2.0 \times 10^{7} \times 2.0 \times 10^{-3} = 6.4 \times 10^{-15} \,\mathrm{N}\).</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide" data-title="The direction of the magnetic force">
+        <p class="eyebrow">Which way?</p>
+        <h2>The direction of the magnetic force<span>.</span></h2>
+        <div class="split wide-fig">
+          <div class="stack">
+            <ul class="points small">
+              <li>At right angles to <b>both</b> the field and the velocity</li>
+              <li class="step"><b>Left-hand rule</b>: First finger Field, seCond finger Current, thuMb Motion</li>
+              <li class="step">“Current” is the way a <b>positive</b> charge moves</li>
+            </ul>
+            <div class="idea step">For an electron, point the second finger <b>opposite</b> to its velocity.</div>
+          </div>
+          <div class="panel">
+            <div class="panel-head"><span>THE LEFT HAND</span></div>
+            <div class="fig" data-fig="d3-rule"></div>
+          </div>
+        </div>
+        <div class="slide-foot"><span>D.3 MOTION IN ELECTROMAGNETIC FIELDS · SL + HL</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>Using the rule.</b> Hold the thumb, first finger and second finger of your <b>left</b> hand at right angles to one another. Point the first finger along the field and the second finger along the conventional current. The thumb then shows the force. Check it on the last slide: field into the page, positive charge moving right, force up the page.</p>
+            <p><b>Negative charges.</b> An electron moving to the right is a conventional current to the left. Either point the second finger opposite to the electron’s velocity, or use the rule as for a positive charge and reverse the answer.</p>
+          </div>
+          <div class="rn-side">
+            <p class="tip">Any correct rule earns the marks. Some books use a right-hand rule with the palm: fingers along the field, thumb along the current, and the palm pushes in the direction of the force. Choose one and always use it.</p>
+            <p class="trap">Mixing this up with the right-hand <b>grip</b> rule from D.2. The grip rule gives the direction of the field made by a current. This rule gives the force on a current in a field.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide" data-title="Circular motion in a magnetic field">
+        <p class="eyebrow">At right angles to the field</p>
+        <h2>Circular motion in a magnetic field<span>.</span></h2>
+        <div class="split">
+          <div class="stack">
+            <div class="work">
+              <span>Magnetic force = centripetal force</span>
+              <span class="step">\(qvB = \dfrac{m v^{2}}{r}\)</span>
+              <span class="step">\(r = \dfrac{mv}{qB}\)</span>
+            </div>
+            <ul class="points small">
+              <li class="step">The force does <b>no work</b>: the speed and kinetic energy stay <b>constant</b></li>
+            </ul>
+          </div>
+          <div class="panel">
+            <div class="panel-head"><span>A POSITIVE PARTICLE, FIELD INTO THE PAGE</span></div>
+            <div class="fig" data-fig="d3-circle"></div>
+          </div>
+        </div>
+        <div class="slide-foot"><span>D.3 MOTION IN ELECTROMAGNETIC FIELDS · SL + HL</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>Why a circle.</b> The force is always at right angles to the velocity, so it can never speed the particle up or slow it down. It only turns it. A force of constant size, always at right angles to the motion, is exactly the condition for uniform circular motion from A.2.</p>
+            <p><b>Why no work is done.</b> Work is force times the distance moved in the direction of the force. The particle never moves in the direction of the magnetic force, not even slightly, so the work done is zero and the kinetic energy cannot change.</p>
+            <p><b>Reading \(r = \frac{mv}{qB}\).</b> The top line is the momentum. A particle with more momentum is harder to turn, so its circle is larger. A stronger field or a larger charge gives a tighter circle. A negative particle circles the opposite way round.</p>
+          </div>
+          <div class="rn-side">
+            <p class="trap">Writing that the magnetic field accelerates the particle “to a higher speed”. It does accelerate it, because the direction of the velocity changes, but the speed is unchanged.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide" data-title="Magnetic field: radius and period">
+        <p class="eyebrow">Worked example</p>
+        <h2>An electron in a 2.0 mT field<span>.</span></h2>
+        <div class="split even">
+          <div class="work">
+            <span class="say">\(v = 2.0 \times 10^{7} \,\mathrm{m} \,\mathrm{s}^{-1}\), at right angles to \(B\)</span>
+            <span>\(r = \dfrac{mv}{eB}\)</span>
+            <span class="step">\(r = \dfrac{9.11 \times 10^{-31} \times 2.0 \times 10^{7}}{1.60 \times 10^{-19} \times 2.0 \times 10^{-3}}\)</span>
+            <span class="step">\(r = \class{res}{5.7 \times 10^{-2} \,\mathrm{m}}\)</span>
+          </div>
+          <div class="work step">
+            <span class="say">Time for one circle</span>
+            <span>\(T = \dfrac{2 \pi r}{v} = \dfrac{2 \pi m}{eB}\)</span>
+            <span class="step">\(T = \dfrac{2 \pi \times 9.11 \times 10^{-31}}{1.60 \times 10^{-19} \times 2.0 \times 10^{-3}}\)</span>
+            <span class="step">\(T = \class{res}{1.8 \times 10^{-8} \,\mathrm{s}}\)</span>
+          </div>
+        </div>
+        <div class="slide-foot"><span>D.3 MOTION IN ELECTROMAGNETIC FIELDS · SL + HL</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>The surprising thing about the period.</b> Substitute \(r = \frac{mv}{eB}\) into \(\frac{2 \pi r}{v}\) and the speed cancels: \(T = \frac{2 \pi m}{eB}\). A faster particle moves round a bigger circle, and the two effects cancel exactly, so fast and slow particles of the same kind take the same time for one orbit. The period depends only on the field and on the charge-to-mass ratio of the particle.</p>
+            <p><b>Why that matters.</b> A voltage that switches direction at this fixed rate can give a particle a push twice in every orbit, however fast the particle is already going. That is the idea behind the cyclotron, on the next slide.</p>
+          </div>
+          <div class="rn-side">
+            <p class="tip">A proton at the same speed in the same field has a radius 1836 times larger: 105 m. Heavy particles need strong fields or large machines.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide history" data-title="Story: Lawrence’s cyclotron">
+        <p class="eyebrow">The story · Berkeley, 1930–1939</p>
+        <p class="not-examined">Background story · not assessed</p>
+        <h2>Lawrence’s cyclotron<span>.</span></h2>
+        <div class="story band" style="--photo-h: 290px;">
+          <div class="story-photos">
+            <figure><img src="images/cyclotron-patent.png" width="1280" height="690" alt="Patent drawing of two hollow D-shaped electrodes seen from above, with a spiral path drawn from the centre outwards across the gap between them, and a side view of the electrodes between the poles of a magnet"><figcaption>From Lawrence’s <b>patent</b>: a spiral path through two hollow “dees”</figcaption></figure>
+            <figure><img src="images/cyclotron-27-inch.jpg" width="1000" height="746" alt="Photograph looking down into an open round metal vacuum chamber containing two D-shaped electrodes, with pipes and connections round its rim"><figcaption>The dees of the <b>27-inch cyclotron</b>, 1935</figcaption></figure>
+          </div>
+          <ul class="points">
+            <li>A magnetic field keeps the particles <b>circling</b>. The period does not depend on their speed</li>
+            <li>An alternating voltage across the gap <b>speeds them up</b> twice in every turn, so the circle grows</li>
+            <li>Ernest Lawrence’s 27-inch machine of 1932 reached <b>4.8 MeV</b>. Nobel Prize, <b>1939</b></li>
+          </ul>
+        </div>
+        <p class="credits">Patent drawing: <a href="https://commons.wikimedia.org/wiki/File:Cyclotron_patent.png" target="_blank" rel="noopener">Ernest O. Lawrence, 1934</a>, public domain. Photograph: <a href="https://commons.wikimedia.org/wiki/File:Lawrence_27_inch_cyclotron_dees_1935.jpg" target="_blank" rel="noopener">John B. Livingood, 1935</a>, public domain.</p>
+        <div class="slide-foot"><span>D.3 MOTION IN ELECTROMAGNETIC FIELDS · SL + HL</span><span data-page></span></div>
+      </section>
+
+      <section class="slide" data-title="The charge-to-mass ratio">
+        <p class="eyebrow">Identifying a particle from its path</p>
+        <h2>The charge-to-mass ratio<span>.</span></h2>
+        <div class="split">
+          <div class="stack">
+            <div class="work">
+              <span class="say">Accelerate through \(V\), then bend in \(B\)</span>
+              <span>\(qV = \dfrac{1}{2} m v^{2}\) &nbsp;and&nbsp; \(qvB = \dfrac{m v^{2}}{r}\)</span>
+              <span class="step">\(v = \dfrac{qBr}{m}\)</span>
+              <span class="step">\(\dfrac{q}{m} = \dfrac{2V}{B^{2} r^{2}}\)</span>
+            </div>
+            <div class="idea step">Measure \(V\), \(B\) and \(r\): the path gives \(\dfrac{q}{m}\).</div>
+          </div>
+          <div class="panel">
+            <div class="panel-head"><span>A FINE BEAM TUBE</span></div>
+            <div class="fig" data-fig="d3-fine-beam"></div>
+          </div>
+        </div>
+        <div class="slide-foot"><span>D.3 MOTION IN ELECTROMAGNETIC FIELDS · SL + HL</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>The algebra.</b> From the circular motion, \(v = \frac{qBr}{m}\). Put this into the energy equation: \(qV = \frac{1}{2} m \left(\frac{qBr}{m}\right)^{2} = \frac{q^{2} B^{2} r^{2}}{2m}\). Divide both sides by \(q\) and rearrange to get \(\frac{q}{m} = \frac{2V}{B^{2} r^{2}}\). If the speed is known directly, the shorter form \(\frac{q}{m} = \frac{v}{Br}\) does the same job.</p>
+            <p><b>Why only the ratio.</b> Charge and mass always appear together as \(\frac{q}{m}\) in the motion of a particle in electric and magnetic fields. No experiment of this kind can find either one separately. J. J. Thomson measured the ratio for cathode rays in 1897; it took Millikan’s oil drops to find \(e\) on its own, and then the mass of the electron followed.</p>
+            <p><b>How the tube works.</b> The bulb holds gas at low pressure. Electrons that hit gas atoms make them glow, so the path shows as a thin bright ring whose diameter can be measured with a ruler. The uniform field comes from a pair of large coils, one on each side of the bulb.</p>
+          </div>
+          <div class="rn-side">
+            <p class="tip">A mass spectrometer uses the same physics to sort ions: for the same charge and speed, heavier ions follow wider circles.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide" data-title="Charge-to-mass ratio: the electron">
+        <p class="eyebrow">Worked example</p>
+        <h2>Measuring \(\frac{e}{m}\) for the electron<span>.</span></h2>
+        <div class="split even">
+          <div class="work">
+            <span class="say">\(V = 250 \,\mathrm{V}\) · \(B = 1.0 \,\mathrm{mT}\)</span>
+            <span class="say">Diameter of the ring 10.6 cm, so \(r = 5.3 \,\mathrm{cm}\)</span>
+            <span>\(\dfrac{e}{m} = \dfrac{2V}{B^{2} r^{2}}\)</span>
+            <span class="step">\(\dfrac{e}{m} = \dfrac{2 \times 250}{(1.0 \times 10^{-3})^{2} \times (5.3 \times 10^{-2})^{2}}\)</span>
+            <span class="step">\(\dfrac{e}{m} = \class{res}{1.8 \times 10^{11} \,\mathrm{C} \,\mathrm{kg}^{-1}}\)</span>
+          </div>
+          <div class="stack">
+            <ul class="points small">
+              <li>Accepted value: \(1.76 \times 10^{11} \,\mathrm{C} \,\mathrm{kg}^{-1}\)</li>
+              <li class="step">Measure the <b>diameter</b> and halve it</li>
+              <li class="step">\(r\) is squared: its uncertainty counts <b>twice</b></li>
+            </ul>
+          </div>
+        </div>
+        <div class="slide-foot"><span>D.3 MOTION IN ELECTROMAGNETIC FIELDS · SL + HL</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>How large this number is.</b> One kilogram of electrons would carry a charge of \(1.76 \times 10^{11} \,\mathrm{C}\). For a hydrogen ion, a single proton, the ratio is \(9.6 \times 10^{7} \,\mathrm{C} \,\mathrm{kg}^{-1}\), 1836 times smaller. When Thomson found such an enormous ratio for cathode rays, he concluded that the particles must be far lighter than any atom.</p>
+            <p><b>Improving the experiment.</b> A single reading gives one value. A better method is to change the voltage, measure the radius each time and plot \(r^{2}\) against \(V\). The graph is a straight line through the origin with gradient \(\frac{2m}{eB^{2}}\), and the gradient uses all the readings at once.</p>
+          </div>
+          <div class="rn-side">
+            <p class="trap">Leaving the field in millitesla or the radius in centimetres. Both are squared, so the error is a factor of a million or ten thousand.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide" data-title="Velocity at an angle to the field">
+        <p class="eyebrow">Neither along nor across</p>
+        <h2>Velocity at an angle to the field<span>.</span></h2>
+        <div class="split wide-fig">
+          <div class="stack">
+            <ul class="points small">
+              <li>Component <b>along</b> \(B\): no force, carries on at constant velocity</li>
+              <li class="step">Component <b>across</b> \(B\): circular motion</li>
+              <li class="step">Together: a <b>helix</b> round the field lines</li>
+            </ul>
+            <div class="idea step">Only \(v \sin \theta\), across the field, appears in the force.</div>
+          </div>
+          <div class="panel">
+            <div class="panel-head"><span>A HELICAL PATH</span></div>
+            <div class="fig" data-fig="d3-helix"></div>
+          </div>
+        </div>
+        <div class="slide-foot"><span>D.3 MOTION IN ELECTROMAGNETIC FIELDS · SL + HL</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>Where the \(\sin \theta\) comes from.</b> Resolve the velocity into a part along the field, \(v \cos \theta\), and a part at right angles to it, \(v \sin \theta\). Only the second part gives a force, so \(F = q (v \sin \theta) B\). The radius of the helix is \(\frac{m v \sin \theta}{qB}\).</p>
+            <p><b>Why charged particles follow field lines.</b> The particle cannot easily cross the field, because any motion across is bent back into a circle. It can slide freely along it. Charged particles are therefore guided along magnetic field lines, like beads on a wire. This is used to hold the hot plasma in a fusion reactor away from the walls.</p>
+          </div>
+          <div class="rn-side">
+            <p class="more">The next slide shows the same thing happening above the Earth.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide history" data-title="Story: the aurora">
+        <p class="eyebrow">In the sky · seen from orbit</p>
+        <p class="not-examined">Background story · not assessed</p>
+        <h2>The aurora<span>.</span></h2>
+        <div class="story" style="--photo-h: 400px;">
+          <div class="story-photos">
+            <figure><img src="images/aurora-iss.jpg" width="1000" height="665" alt="Photograph from orbit of the curved edge of the Earth at night, with a glowing green band of aurora above the clouds and part of the space station in the foreground"><figcaption>The <b>aurora borealis</b> photographed from the International Space Station, 2014</figcaption></figure>
+          </div>
+          <div class="stack">
+            <ul class="points">
+              <li>The Sun sends out a stream of <b>electrons and protons</b></li>
+              <li>They spiral along the Earth’s <b>magnetic field lines</b></li>
+              <li>The lines dip into the atmosphere near the <b>poles</b></li>
+              <li>There the particles hit oxygen and nitrogen, which <b>glow</b></li>
+            </ul>
+            <div class="idea">A helix round a field line, a hundred kilometres up.</div>
+          </div>
+        </div>
+        <p class="credits">Photograph: <a href="https://commons.wikimedia.org/wiki/File:ISS-42_Aurora_borealis_over_North_Atlantic_Ocean.jpg" target="_blank" rel="noopener">NASA / Samantha Cristoforetti</a>, public domain.</p>
+        <div class="slide-foot"><span>D.3 MOTION IN ELECTROMAGNETIC FIELDS · SL + HL</span><span data-page></span></div>
+      </section>
+
+      <section class="slide" data-title="Crossed electric and magnetic fields">
+        <p class="eyebrow">Both fields at once</p>
+        <h2>Crossed electric and magnetic fields<span>.</span></h2>
+        <div class="split fig-first">
+          <div class="panel">
+            <div class="panel-head"><span>A VELOCITY SELECTOR</span><span class="reveal-hint">PRESS → TO FIRE THREE PARTICLES</span></div>
+            <div class="fig" data-fig="d3-selector"></div>
+          </div>
+          <div class="stack">
+            <ul class="points small">
+              <li class="step">The fields are at right angles, and the two forces <b>oppose</b></li>
+              <li class="step">Straight through when \(qE = qvB\)</li>
+            </ul>
+            <div class="equation small step"><span>\(v = \dfrac{E}{B}\)</span></div>
+            <div class="idea step">The charge <b>cancels</b>: one speed passes, whatever the particle.</div>
+          </div>
+        </div>
+        <div class="slide-foot"><span>D.3 MOTION IN ELECTROMAGNETIC FIELDS · SL + HL</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>Why only one speed gets through.</b> The electric force \(qE\) is the same for every speed. The magnetic force \(qvB\) grows with speed. For a particle that is too fast, the magnetic force wins and it curves one way. For one that is too slow, the electric force wins and it curves the other way. Only at \(v = \frac{E}{B}\) do they balance, and the particle obeys Newton’s first law.</p>
+            <p><b>A worked case.</b> With \(E = 2.0 \times 10^{4} \,\mathrm{V} \,\mathrm{m}^{-1}\) and \(B = 1.0 \,\mathrm{mT}\): \(v = \frac{2.0 \times 10^{4}}{1.0 \times 10^{-3}} = 2.0 \times 10^{7} \,\mathrm{m} \,\mathrm{s}^{-1}\). Changing either field selects a different speed.</p>
+            <p><b>Negative particles.</b> For an electron both forces reverse, so they still oppose each other, and the same speed passes straight through.</p>
+          </div>
+          <div class="rn-side">
+            <p class="tip">Thomson used crossed fields to find the speed of his cathode rays, then switched one field off and measured the deflection to get \(\frac{e}{m}\).</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide" data-title="Quick check: magnetic fields">
+        <p class="eyebrow">Quick check</p>
+        <h2>Charges in magnetic fields<span>.</span></h2>
+        <div class="quiz fill">
+          <div class="q"><p><span class="n">01</span>What is the magnetic force on a charge moving along the field lines?</p><div class="ans step">Zero</div></div>
+          <div class="q"><p><span class="n">02</span>What happens to the kinetic energy of a particle in a magnetic field?</p><div class="ans step">It stays constant</div></div>
+          <div class="q"><p><span class="n">03</span>The speed of a particle is doubled. What happens to the radius of its circle?</p><div class="ans step">It doubles</div></div>
+          <div class="q"><p><span class="n">04</span>And to the time for one circle?</p><div class="ans step">It does not change</div></div>
+          <div class="q"><p><span class="n">05</span>Fields \(E = 600 \,\mathrm{V} \,\mathrm{m}^{-1}\) and \(B = 2.0 \,\mathrm{mT}\) are crossed. Which speed passes undeflected?</p><div class="ans step">\(\frac{600}{2.0 \times 10^{-3}} = 3.0 \times 10^{5} \,\mathrm{m} \,\mathrm{s}^{-1}\)</div></div>
+          <div class="q"><p><span class="n">06</span>What path does a particle follow when its velocity is at 30° to the field?</p><div class="ans step">A helix</div></div>
+        </div>
+        <div class="slide-foot"><span class="reveal-hint">PRESS → TO REVEAL EACH ANSWER</span><span data-page></span></div>
+      </section>
+
+      <!-- Part 3 -->
+      <section class="slide section" data-title="Part 3: Forces on currents">
+        <div class="title-grid">
+          <div>
+            <p class="eyebrow">Part 03 · SL + HL</p>
+            <h1>Forces on currents<span>.</span></h1>
+            <p class="lead">A current is a stream of moving charges, so a wire in a field feels a force</p>
+          </div>
+          <div class="fig" data-fig="d3-wire-force" data-plain></div>
+        </div>
+        <div class="slide-foot"><span>D.3 MOTION IN ELECTROMAGNETIC FIELDS · SL + HL</span><span data-page></span></div>
+      </section>
+
+      <section class="slide" data-title="The force on a current-carrying conductor">
+        <p class="eyebrow">A wire in a magnetic field</p>
+        <h2>The force on a current-carrying conductor<span>.</span></h2>
+        <div class="split">
+          <div class="stack">
+            <div class="equation"><span>\(F = BIL \sin \theta\)</span></div>
+            <ul class="points small">
+              <li>\(L\): the length of wire <b>in the field</b></li>
+              <li class="step">\(\theta\): the angle between the current and the field</li>
+              <li class="step">Direction: the same <b>left-hand rule</b></li>
+            </ul>
+          </div>
+          <div class="panel">
+            <div class="panel-head"><span>A WIRE BETWEEN THE POLES OF A MAGNET</span></div>
+            <div class="fig" data-fig="d3-wire-force"></div>
+          </div>
+        </div>
+        <div class="slide-foot"><span>D.3 MOTION IN ELECTROMAGNETIC FIELDS · SL + HL</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>Where it comes from.</b> The force on the wire is the total of the forces on all the moving charges inside it. In a time \(t\) a charge \(q = It\) passes along a length \(L = vt\) of wire. The force on that charge is \(qvB = (It) \left(\frac{L}{t}\right) B = BIL\). The two equations describe the same force, once for a single charge and once for a current.</p>
+            <p><b>Checking the direction in the diagram.</b> First finger along the field, from N to S: to the right. Second finger along the current: out of the page, towards you. The thumb points up the page.</p>
+            <p><b>What it is used for.</b> This force turns every electric motor and moves the cone of every loudspeaker. A coil carrying a current in a magnetic field feels forces on its two sides in opposite directions, and so it turns.</p>
+          </div>
+          <div class="rn-side">
+            <p class="tip">A wire lying <b>along</b> the field feels no force: \(\sin 0^{\circ} = 0\). The force is greatest when the wire is at right angles to the field.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide" data-title="Force on a conductor: worked example">
+        <p class="eyebrow">Worked example</p>
+        <h2>A wire in a 0.050 T field<span>.</span></h2>
+        <div class="split even">
+          <div class="work">
+            <span class="say">\(I = 3.0 \,\mathrm{A}\) · \(L = 0.20 \,\mathrm{m}\) of wire in the field</span>
+            <span>\(F = BIL \sin \theta\)</span>
+            <span class="say step">At right angles to the field: \(\theta = 90^{\circ}\)</span>
+            <span class="step">\(F = 0.050 \times 3.0 \times 0.20 \times \sin 90^{\circ} = \class{res}{0.030 \,\mathrm{N}}\)</span>
+          </div>
+          <div class="work step">
+            <span class="say">The wire is turned to \(\theta = 30^{\circ}\)</span>
+            <span>\(F = 0.050 \times 3.0 \times 0.20 \times \sin 30^{\circ}\)</span>
+            <span class="step">\(F = \class{res}{0.015 \,\mathrm{N}}\)</span>
+            <span class="step">Still at right angles to the wire <b>and</b> to the field</span>
+          </div>
+        </div>
+        <div class="slide-foot"><span>D.3 MOTION IN ELECTROMAGNETIC FIELDS · SL + HL</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>Measuring a field with a balance.</b> Place a magnet on a top-pan balance and clamp a wire between its poles. When a current flows, the magnet pushes the wire up, so by Newton’s third law the wire pushes the magnet down and the reading rises. A change in reading of 3.1 g means a force of \(3.1 \times 10^{-3} \times 9.8 = 0.030 \,\mathrm{N}\). Knowing the current and the length of wire in the field, \(B = \frac{F}{IL}\).</p>
+            <p><b>A better version.</b> Change the current, record the force each time and plot force against current. The line passes through the origin and its gradient is \(BL\).</p>
+          </div>
+          <div class="rn-side">
+            <p class="trap">Using the whole length of the wire. Only the part inside the field counts.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide" data-title="Two parallel wires">
+        <p class="eyebrow">Currents act on each other</p>
+        <h2>The force between two parallel wires<span>.</span></h2>
+        <div class="split fig-first">
+          <div class="panel">
+            <div class="panel-head"><span>LONG STRAIGHT WIRES</span><span class="reveal-hint">PRESS → TO SWITCH ON</span></div>
+            <div class="fig" data-fig="d3-parallel"></div>
+          </div>
+          <div class="stack">
+            <div class="equation small step"><span>\(\dfrac{F}{L} = \mu_{0} \dfrac{I_{1} I_{2}}{2 \pi r}\)</span></div>
+            <ul class="points small">
+              <li class="step">\(\dfrac{F}{L}\): the force on each <b>metre</b> of wire</li>
+              <li class="step">\(r\): the separation of the wires</li>
+              <li class="step">\(\mu_{0} = 4 \pi \times 10^{-7} \,\mathrm{T} \,\mathrm{m} \,\mathrm{A}^{-1}\)</li>
+            </ul>
+          </div>
+        </div>
+        <div class="slide-foot"><span>D.3 MOTION IN ELECTROMAGNETIC FIELDS · SL + HL</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>The opposite of charges.</b> Like charges repel, but like currents <b>attract</b>: two wires carrying current in the same direction pull together. Currents in opposite directions push apart.</p>
+            <p><b>Equal forces.</b> The force on each metre of wire 1 is the same size as the force on each metre of wire 2, even if the currents are different. They are a Newton’s third law pair, and the equation is unchanged if \(I_{1}\) and \(I_{2}\) are swapped.</p>
+            <p><b>The constant.</b> \(\mu_{0}\) is the permeability of free space. It does for magnetic fields what \(\varepsilon_{0}\) does for electric fields: it sets how strong a field a given current produces in a vacuum.</p>
+          </div>
+          <div class="rn-side">
+            <p class="tip">The two wires of a mains cable carry equal currents in opposite directions, so they repel. At ordinary currents the force is far too small to notice.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide" data-title="Why parallel currents attract">
+        <p class="eyebrow">One wire in the field of the other</p>
+        <h2>Why parallel currents attract<span>.</span></h2>
+        <div class="split">
+          <div class="stack">
+            <ul class="points small">
+              <li class="frac">Wire 1 makes a field at wire 2: \(B_{1} = \dfrac{\mu_{0} I_{1}}{2 \pi r}\)</li>
+              <li class="step">Wire 2 carries a current in that field: \(F = B_{1} I_{2} L\)</li>
+              <li class="step frac">So \(\dfrac{F}{L} = \mu_{0} \dfrac{I_{1} I_{2}}{2 \pi r}\)</li>
+            </ul>
+            <div class="idea step">Grip rule for the field, left-hand rule for the force.</div>
+          </div>
+          <div class="panel">
+            <div class="panel-head"><span>SEEN END ON</span><span class="pill">BOTH CURRENTS OUT OF THE PAGE</span></div>
+            <div class="fig" data-fig="d3-parallel-end"></div>
+          </div>
+        </div>
+        <div class="slide-foot"><span>D.3 MOTION IN ELECTROMAGNETIC FIELDS · SL + HL</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>Following the two rules.</b> Wire 1 carries current out of the page, so by the right-hand grip rule its field circles anticlockwise. At wire 2, to the right of wire 1, that field points up the page. Now the left-hand rule at wire 2: first finger up the page, second finger out of the page, and the thumb points to the left, towards wire 1.</p>
+            <p><b>Reversing one current.</b> If the current in wire 2 goes into the page, the second finger reverses and so does the thumb: wire 2 is pushed away. You only need to know the field of a straight wire as a pattern; the expression for \(B_{1}\) is not in the data booklet, but the final equation is.</p>
+          </div>
+          <div class="rn-side">
+            <p class="tip">Apply the same steps the other way round, with wire 1 in the field of wire 2, and the force on wire 1 comes out equal and opposite.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide" data-title="Parallel wires: worked example">
+        <p class="eyebrow">Worked example</p>
+        <h2>Two wires 2.0 cm apart<span>.</span></h2>
+        <div class="split even">
+          <div class="work">
+            <span class="say">\(I_{1} = 5.0 \,\mathrm{A}\) · \(I_{2} = 8.0 \,\mathrm{A}\), in the same direction</span>
+            <span>\(\dfrac{F}{L} = \mu_{0} \dfrac{I_{1} I_{2}}{2 \pi r}\)</span>
+            <span class="step">\(\dfrac{F}{L} = \dfrac{4 \pi \times 10^{-7} \times 5.0 \times 8.0}{2 \pi \times 0.020}\)</span>
+            <span class="step">\(\dfrac{F}{L} = \class{res}{4.0 \times 10^{-4} \,\mathrm{N} \,\mathrm{m}^{-1}}\), attractive</span>
+          </div>
+          <div class="stack">
+            <ul class="points small">
+              <li>The \(\pi\) cancels: \(\dfrac{4 \pi}{2 \pi} = 2\)</li>
+              <li class="step">On 1.5 m of either wire: \(4.0 \times 10^{-4} \times 1.5 = 6.0 \times 10^{-4} \,\mathrm{N}\)</li>
+              <li class="step">Halve the separation: <b>double</b> the force</li>
+            </ul>
+          </div>
+        </div>
+        <div class="slide-foot"><span>D.3 MOTION IN ELECTROMAGNETIC FIELDS · SL + HL</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>Not an inverse square law.</b> The force per metre is proportional to \(\frac{1}{r}\), not \(\frac{1}{r^{2}}\), because the field of a long straight wire falls off as \(\frac{1}{r}\). Doubling the separation halves the force.</p>
+            <p><b>When the force becomes large.</b> The answer here is tiny, about the weight of a few grains of rice on every metre. But the force goes as the product of the currents. In a short circuit at a power station, where currents of tens of thousands of amperes flow in conductors a few centimetres apart, the forces can bend thick copper bars, and the supports have to be built to resist them.</p>
+          </div>
+          <div class="rn-side">
+            <p class="trap">Leaving the separation in centimetres. It must be in metres to match \(\mu_{0}\).</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide history" data-title="Story: Ampère and the ampere">
+        <p class="eyebrow">The story · Paris, 1820</p>
+        <p class="not-examined">Background story · not assessed</p>
+        <h2>Ampère and the ampere<span>.</span></h2>
+        <div class="story" style="--photo-h: 400px;">
+          <div class="story-photos">
+            <figure><img src="images/ampere.jpg" width="493" height="666" alt="Engraved portrait of André-Marie Ampère, a man with curly hair in a high-collared coat"><figcaption><b>André-Marie Ampère</b>, engraved in 1825</figcaption></figure>
+          </div>
+          <div class="stack">
+            <ul class="points">
+              <li>In <b>September 1820</b> Ørsted’s discovery was shown in Paris</li>
+              <li>Within weeks Ampère found that two parallel wires <b>attract or repel</b>, with no magnet involved</li>
+              <li>From 1948 this force <b>defined the ampere</b>: \(2 \times 10^{-7} \,\mathrm{N}\) on each metre of two wires 1 m apart</li>
+              <li>Since <b>2019</b> the ampere is defined from the charge of the electron</li>
+            </ul>
+            <div class="idea">That old definition is where the value \(\mu_{0} = 4 \pi \times 10^{-7}\) comes from.</div>
+          </div>
+        </div>
+        <p class="credits">Portrait: <a href="https://commons.wikimedia.org/wiki/File:Ampere_Andre_1825.jpg" target="_blank" rel="noopener">Ambroise Tardieu, 1825</a>, public domain.</p>
+        <div class="slide-foot"><span>D.3 MOTION IN ELECTROMAGNETIC FIELDS · SL + HL</span><span data-page></span></div>
+      </section>
+
+      <section class="slide" data-title="Quick check: forces on currents">
+        <p class="eyebrow">Quick check</p>
+        <h2>Forces on currents<span>.</span></h2>
+        <div class="quiz fill">
+          <div class="q"><p><span class="n">01</span>A wire lies along the field lines. Force on it?</p><div class="ans step">Zero</div></div>
+          <div class="q"><p><span class="n">02</span>0.10 m of wire carries 2.0 A at right angles to a 0.50 T field. Force?</p><div class="ans step">\(0.50 \times 2.0 \times 0.10 = 0.10 \,\mathrm{N}\)</div></div>
+          <div class="q"><p><span class="n">03</span>Two parallel wires carry currents in the same direction. Attract or repel?</p><div class="ans step">Attract</div></div>
+          <div class="q"><p><span class="n">04</span>Both currents are doubled. What happens to the force per metre?</p><div class="ans step">It becomes four times larger</div></div>
+          <div class="q"><p><span class="n">05</span>The separation of the wires is trebled. Force per metre?</p><div class="ans step">One third</div></div>
+          <div class="q"><p><span class="n">06</span>Wire 1 carries 1 A and wire 2 carries 5 A. Which feels the larger force?</p><div class="ans step">Neither: the forces are equal</div></div>
+        </div>
+        <div class="slide-foot"><span class="reveal-hint">PRESS → TO REVEAL EACH ANSWER</span><span data-page></span></div>
+      </section>
+
+      <section class="slide" data-title="Summary">
+        <p class="eyebrow">Summary</p>
+        <h2>Motion in electromagnetic fields on one slide<span>.</span></h2>
+        <div class="cards fill" style="grid-template-columns: 1fr 1fr 1fr; align-content: center;">
+          <div class="card"><p class="eyebrow">Electric field</p><h3>Constant force</h3><p>\(F = qE\), and \(qV = \frac{1}{2} m v^{2}\)<br>A parabola when entering at right angles</p></div>
+          <div class="card step"><p class="eyebrow">Magnetic field</p><h3>A sideways force</h3><p>\(F = qvB \sin \theta\)<br>No work done: speed constant</p></div>
+          <div class="card step"><p class="eyebrow">Circular paths</p><h3>\(r = \frac{mv}{qB}\)</h3><p>Period independent of speed<br>The path gives \(\frac{q}{m}\)</p></div>
+          <div class="card step"><p class="eyebrow">Crossed fields</p><h3>\(v = \frac{E}{B}\)</h3><p>Only one speed passes straight through</p></div>
+          <div class="card step"><p class="eyebrow">A wire in a field</p><h3>\(F = BIL \sin \theta\)</h3><p>Left-hand rule for the direction</p></div>
+          <div class="card step"><p class="eyebrow">Parallel wires</p><h3>\(\frac{F}{L} = \mu_{0} \frac{I_{1} I_{2}}{2 \pi r}\)</h3><p>Same direction: attract<br>Opposite directions: repel</p></div>
+        </div>
+        <div class="slide-foot"><span>D.3 MOTION IN ELECTROMAGNETIC FIELDS · SL + HL</span><span data-page></span></div>
+      </section>
+
+      <section class="slide" data-title="Key words">
+        <p class="eyebrow">Summary</p>
+        <h2>Key words<span>.</span></h2>
+        <div class="terms fill" style="grid-template-columns: repeat(3, 1fr);">
+          <div class="term"><b>Uniform field</b><span>Same strength and direction everywhere</span></div>
+          <div class="term"><b>Electronvolt</b><span>Energy of charge e through 1 V</span></div>
+          <div class="term"><b>Magnetic field strength</b><span>B, in tesla. Also called flux density</span></div>
+          <div class="term"><b>Tesla</b><span>1 N on 1 C moving at 1 m s⁻¹</span></div>
+          <div class="term"><b>Left-hand rule</b><span>Field, current, force at right angles</span></div>
+          <div class="term"><b>Charge-to-mass ratio</b><span>q / m, in C kg⁻¹</span></div>
+          <div class="term"><b>Helix</b><span>Circling while moving along the field</span></div>
+          <div class="term"><b>Velocity selector</b><span>Crossed fields pass one speed</span></div>
+          <div class="term"><b>Permeability of free space</b><span>μ₀, the magnetic constant</span></div>
+        </div>
+        <div class="slide-foot"><span>D.3 MOTION IN ELECTROMAGNETIC FIELDS · SL + HL</span><span data-page></span></div>
+      </section>
+
+    </div>
+  </main>
+
+  <nav class="controls" aria-label="Slide controls">
+    <button type="button" id="prev" aria-label="Previous slide"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg></button>
+    <span class="counter" id="counter" aria-live="polite"></span>
+    <button type="button" id="next" aria-label="Next slide"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 5l7 7-7 7"/></svg></button>
+  </nav>
+  <div class="progress" aria-hidden="true"><span id="progress-bar"></span></div>
+
+  <script src="../assets/figures.js"></script>
+  <script src="figures.js"></script>
+  <script src="../assets/deck-math.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
+  <script src="../assets/deck-notes.js"></script>
+  <script src="../assets/deck.js"></script>
+</body>
+</html>
