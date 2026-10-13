@@ -1,0 +1,1190 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="robots" content="noindex, nofollow">
+  <meta name="description" content="Teaching slides for IB Diploma Programme Physics topic E.3 Radioactive decay: binding energy and mass defect, the strong nuclear force, alpha, beta and gamma decay, half-life, and at higher level nuclear energy levels, the neutrino and the decay law.">
+  <meta name="theme-color" content="#F8F6F1">
+  <script src="/assets/theme.js" data-theme-scope="ibdpphy"></script>
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <link rel="stylesheet" href="/assets/standalone-top.css">
+  <title>E.3 Radioactive decay · IB DP Physics</title>
+  <link rel="icon" type="image/png" href="/assets/favicon.png">
+  <link rel="apple-touch-icon" href="/assets/apple-touch-icon.png">
+  <link rel="stylesheet" href="../assets/deck.css">
+  <link rel="stylesheet" href="../assets/deck-notes.css">
+  <link rel="stylesheet" href="/assets/theme-toggle.css">
+  <link rel="stylesheet" href="/assets/fullscreen-button.css">
+  <script src="/assets/theme-toggle.js"></script>
+  <script src="/ibdpphy/sw-register.js" defer></script>
+</head>
+<body>
+  <header class="banner">
+    <a class="banner-logo" href="/" aria-label="PanPhy Labs home"><img src="/assets/panphy.png" alt="PanPhy Labs" width="38" height="38"></a>
+    <a class="banner-title" href="#1">E.3 Radioactive decay</a>
+    <div class="banner-actions">
+      <button id="thumbs-toggle" class="icon-button" type="button" aria-controls="thumbs" aria-pressed="true" aria-label="Hide slide thumbnails" title="Show or hide slide thumbnails (T)"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path class="pane" d="M9.5 4.5H6A2.5 2.5 0 0 0 3.5 7v10A2.5 2.5 0 0 0 6 19.5h3.5z"/><rect x="3.5" y="4.5" width="17" height="15" rx="2.5"/><path d="M9.5 4.5v15"/></svg></button>
+      <button id="fullscreen" class="panphy-fullscreen-button" type="button" aria-pressed="false" aria-label="Present fullscreen" title="Present fullscreen (F)"><svg class="panphy-fs-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M4 9V4h5M15 4h5v5M20 15v5h-5M9 20H4v-5"/></svg></button>
+      <button id="theme-button" type="button" data-panphy-theme-toggle aria-label="Toggle light/dark theme" title="Toggle between light and dark themes"></button>
+    </div>
+  </header>
+  <script>window.PanPhyThemeToggle.mount(document.getElementById('theme-button'));</script>
+
+  <nav class="thumbs" id="thumbs" aria-label="Slides"></nav>
+
+  <main class="stage" id="stage">
+    <div class="deck" id="deck">
+
+      <!-- 1 · Title -->
+      <section class="slide title" data-title="E.3 Radioactive decay">
+        <div class="title-grid">
+          <div>
+            <p class="eyebrow">IB DP Physics · Theme E · Nuclear and quantum physics</p>
+            <h1>Radioactive decay<span>.</span></h1>
+            <p class="lead">E.3 · Binding energy, the strong nuclear force, alpha, beta and gamma decay, half-life<br>Standard level and higher level</p>
+            <div class="chips">
+              <span class="chip">SL + HL · 7 hours</span>
+              <span class="chip hl">Additional HL · 5 hours</span>
+              <a class="chip on" href="/simulations/nuclear_decay.html" target="_blank" rel="noopener">Nuclear Decay sim ↗</a>
+            </div>
+          </div>
+          <div class="fig" data-fig="e3-alpha"></div>
+        </div>
+      </section>
+
+      <section class="slide" data-title="Lesson map">
+        <p class="eyebrow">The journey</p>
+        <h2>Four parts<span>.</span></h2>
+        <div class="cards fill" style="grid-template-columns: repeat(4, 1fr);">
+          <div class="card">
+            <div class="fig" data-fig="carbon-nucleus" style="height: 180px;"></div>
+            <p class="eyebrow">Part 01 · SL + HL</p>
+            <h3>What holds a nucleus together?</h3>
+            <p>The strong force, mass defect, binding energy</p>
+          </div>
+          <div class="card">
+            <div class="fig" data-fig="e3-alpha" style="height: 180px;"></div>
+            <p class="eyebrow">Part 02 · SL + HL</p>
+            <h3>How does a nucleus change?</h3>
+            <p>Alpha, beta and gamma decay</p>
+          </div>
+          <div class="card">
+            <div class="fig" data-fig="e3-half-life" style="height: 180px;"></div>
+            <p class="eyebrow">Part 03 · SL + HL</p>
+            <h3>How fast does it happen?</h3>
+            <p>Activity, half-life, background</p>
+          </div>
+          <div class="card hl">
+            <div class="fig" data-fig="e3-nz" style="height: 180px;"></div>
+            <p class="eyebrow">Part 04 · HL only</p>
+            <h3>Stability and the decay law</h3>
+            <p>Energy levels, the neutrino, \(N = N_{0} e^{-\lambda t}\)</p>
+          </div>
+        </div>
+        <div class="idea" style="margin-top: 22px;">Slides with a terracotta edge and an <span class="hl-tag">HL only</span> flag are additional higher level. Every other slide is for SL and HL.</div>
+        <div class="slide-foot"><span>E.3 RADIOACTIVE DECAY · SL + HL</span><span data-page></span></div>
+      </section>
+
+      <!-- Part 1 -->
+      <section class="slide section" data-title="Part 1: Binding energy">
+        <div class="title-grid">
+          <div>
+            <p class="eyebrow">Part 01 · SL + HL</p>
+            <h1>What holds a nucleus together<span>?</span></h1>
+            <p class="lead">Isotopes, the strong nuclear force, mass defect and binding energy</p>
+          </div>
+          <div class="fig" data-fig="carbon-nucleus"></div>
+        </div>
+        <div class="slide-foot"><span>E.3 RADIOACTIVE DECAY · SL + HL</span><span data-page></span></div>
+      </section>
+
+      <section class="slide" data-title="Isotopes">
+        <p class="eyebrow">Same element, different nuclei</p>
+        <h2>Isotopes<span>.</span></h2>
+        <div class="stack center" style="gap: 24px;">
+          <div class="panel" style="height: 400px; align-self: stretch;">
+            <div class="panel-head"><span>THREE ISOTOPES OF CARBON</span></div>
+            <div class="fig" data-fig="e3-isotopes"></div>
+          </div>
+          <ul class="points small" style="grid-template-columns: 1fr 1fr; gap: 14px 40px;">
+            <li>Same number of <b>protons</b>: the same element, the same chemistry</li>
+            <li>Different numbers of <b>neutrons</b>: a different mass</li>
+            <li class="step">A <b>nuclide</b> is one kind of nucleus: <span class="nuc in-text"><span class="nums"><span>14</span><span>6</span></span>C</span> has \(A = 14\) and \(Z = 6\)</li>
+            <li class="step">Some isotopes are <b>stable</b>, others are <b>radioactive</b></li>
+          </ul>
+        </div>
+        <div class="slide-foot"><span>E.3 RADIOACTIVE DECAY · SL + HL</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>Why the chemistry is the same.</b> Chemical behaviour is decided by the electrons, and a neutral atom has as many electrons as it has protons. Extra neutrons change the mass of the nucleus but not its charge, so all three kinds of carbon form the same compounds. Carbon dioxide made with carbon-14 behaves in the atmosphere, and in a plant, exactly like ordinary carbon dioxide.</p>
+            <p><b>Why the nuclear behaviour differs.</b> Stability depends on the balance of protons and neutrons in the nucleus. Carbon-12 and carbon-13 are stable. Carbon-14 has too many neutrons for its six protons and decays, with a half-life of 5730 years. This is what makes radiocarbon dating possible, later in the deck.</p>
+          </div>
+          <div class="rn-side">
+            <p class="tip">Nucleon number \(A\) = protons + neutrons. Proton number \(Z\) = protons. Neutrons = \(A - Z\). E.1 introduced this notation.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide" data-title="The strong nuclear force">
+        <p class="eyebrow">Holding the protons in</p>
+        <h2>The strong nuclear force<span>.</span></h2>
+        <div class="split wide-fig">
+          <ul class="points small">
+            <li>Protons <b>repel</b> one another, yet nuclei exist</li>
+            <li class="step">An <b>attractive</b> force acts between nucleons: proton or neutron alike</li>
+            <li class="step"><b>Short range</b>: only between near neighbours</li>
+            <li class="step">Much <b>stronger</b> than the electric force at that range</li>
+          </ul>
+          <div class="panel">
+            <div class="panel-head"><span>TWO PROTONS</span><span class="pill">SKETCH, NOT TO SCALE</span></div>
+            <div class="fig" data-fig="e3-strong"></div>
+          </div>
+        </div>
+        <div class="slide-foot"><span>E.3 RADIOACTIVE DECAY · SL + HL</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>How big the problem is.</b> Two protons 2 fm apart repel with \(\frac{8.99 \times 10^{9} \times (1.60 \times 10^{-19})^{2}}{(2 \times 10^{-15})^{2}} = 58 \,\mathrm{N}\). That is the weight of a 6 kg mass, acting on a particle of mass \(1.7 \times 10^{-27} \,\mathrm{kg}\). Gravity between them is weaker by a factor of about \(10^{36}\). Something far stronger must hold them, and it must act on neutrons too, since neutrons stay in the nucleus.</p>
+            <p><b>Why short range matters.</b> A nucleon feels the strong force only from the nucleons touching it, but a proton feels the electric repulsion of <b>every</b> other proton in the nucleus. In a large nucleus the repulsion adds up while the attraction does not. That is why heavy nuclei need extra neutrons, and why the very heaviest are unstable.</p>
+          </div>
+          <div class="rn-side">
+            <p class="more">At separations below about 0.5 fm the strong force becomes repulsive. This stops the nucleus collapsing and is why all nuclei have about the same density (E.1, HL).</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide" data-title="Mass defect">
+        <p class="eyebrow">Mass and energy</p>
+        <h2>Mass defect<span>.</span></h2>
+        <div class="split">
+          <div class="stack">
+            <div class="equation"><span>\(E = mc^{2}\)</span></div>
+            <ul class="points small">
+              <li>A nucleus has <b>less mass</b> than its separate nucleons</li>
+              <li class="step">The difference is the <b>mass defect</b></li>
+              <li class="step">The missing mass was released as <b>energy</b> when the nucleus formed</li>
+            </ul>
+          </div>
+          <div class="panel">
+            <div class="panel-head"><span>MAKING HELIUM-4</span></div>
+            <div class="fig" data-fig="e3-mass-defect"></div>
+          </div>
+        </div>
+        <div class="slide-foot"><span>E.3 RADIOACTIVE DECAY · SL + HL</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>What \(E = mc^{2}\) says.</b> Mass and energy are two measures of the same thing, linked by the factor \(c^{2}\). When a system gives out energy \(E\), its mass falls by \(\frac{E}{c^{2}}\). This happens in a chemical reaction too, but there the change is about one part in \(10^{10}\) and cannot be measured. In nuclear changes it is nearly one percent, and it can.</p>
+            <p><b>Three units of mass.</b> Nuclear masses are given in kilograms, in unified atomic mass units (u), or in \(\mathrm{MeV} \,c^{-2}\). The last one makes the arithmetic disappear: a mass of \(1 \,\mathrm{u}\) is equivalent to \(931.5 \,\mathrm{MeV}\) of energy, so \(1 \,\mathrm{u} = 931.5 \,\mathrm{MeV} \,c^{-2}\). A proton has a mass of \(938 \,\mathrm{MeV} \,c^{-2}\).</p>
+          </div>
+          <div class="rn-side">
+            <p class="tip">\(1 \,\mathrm{u} = 1.661 \times 10^{-27} \,\mathrm{kg}\) is one twelfth of the mass of a carbon-12 atom. All of these values are in the data booklet.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide" data-title="Binding energy">
+        <p class="eyebrow">How tightly a nucleus is held</p>
+        <h2>Nuclear binding energy<span>.</span></h2>
+        <div class="split even">
+          <div class="stack">
+            <ul class="points small">
+              <li>The energy needed to <b>separate</b> a nucleus completely into its nucleons</li>
+              <li class="step">Equal to the energy released when the nucleus <b>forms</b></li>
+              <li class="step">Binding energy = mass defect × \(c^{2}\)</li>
+            </ul>
+            <div class="idea step">Divide by \(A\) for the <b>binding energy per nucleon</b>: a measure of stability.</div>
+          </div>
+          <div class="work step">
+            <span class="say">Helium-4 nucleus: \(4.001506 \,\mathrm{u}\)</span>
+            <span class="say">Proton \(1.007276 \,\mathrm{u}\) · neutron \(1.008665 \,\mathrm{u}\)</span>
+            <span>\(\Delta m = 2 m_\mathrm{p} + 2 m_\mathrm{n} - m_\mathrm{He}\)</span>
+            <span class="step">\(\Delta m = 4.031882 - 4.001506 = 0.030376 \,\mathrm{u}\)</span>
+            <span class="step">\(E = 0.030376 \times 931.5 = \class{res}{28.3 \,\mathrm{MeV}}\)</span>
+            <span class="step">Per nucleon: \(\dfrac{28.3}{4} = \class{res}{7.07 \,\mathrm{MeV}}\)</span>
+          </div>
+        </div>
+        <div class="slide-foot"><span>E.3 RADIOACTIVE DECAY · SL + HL</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>Binding energy is not energy the nucleus has.</b> The name is misleading. It is energy the nucleus has <b>lost</b>: the amount you would have to put back in to pull every nucleon free. A nucleus with a large binding energy sits deep in an energy well and is hard to break up. Think of it as a debt, not as savings.</p>
+            <p><b>Why divide by the number of nucleons.</b> A big nucleus has a large total binding energy simply because it has many nucleons. To compare how firmly each nucleon is held in different nuclei, divide by \(A\). The higher the binding energy per nucleon, the more stable the nucleus.</p>
+          </div>
+          <div class="rn-side">
+            <p class="trap">Rounding the masses early. The mass defect is a small difference between large numbers: keep every digit you are given until the subtraction is done.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide" data-title="Binding energy per nucleon">
+        <p class="eyebrow">The most important graph in nuclear physics</p>
+        <h2>The binding energy curve<span>.</span></h2>
+        <div class="split wide-fig">
+          <div class="stack">
+            <ul class="points small">
+              <li>Rises steeply for <b>light</b> nuclei</li>
+              <li class="step">Peaks near <b>iron-56</b>: the most stable nuclei, about 8.8 MeV</li>
+              <li class="step">Falls slowly for <b>heavy</b> nuclei</li>
+            </ul>
+            <div class="idea step">Any change that moves <b>up</b> the curve releases energy.</div>
+          </div>
+          <div class="panel">
+            <div class="panel-head"><span>BINDING ENERGY PER NUCLEON</span><span class="pill">MEASURED VALUES</span></div>
+            <div class="fig" data-fig="e3-be-curve" data-arrows></div>
+          </div>
+        </div>
+        <div class="slide-foot"><span>E.3 RADIOACTIVE DECAY · SL + HL</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>Fusion and fission on one graph.</b> Joining two light nuclei gives a product further to the right and higher up: each nucleon is more tightly bound than before, so energy is released. That is fusion, the source of the Sun’s energy. Splitting a very heavy nucleus gives two products further to the left, also higher up: fission. Both move towards iron, from opposite ends.</p>
+            <p><b>How much energy.</b> The energy released is the total binding energy of the products minus that of what you started with. When uranium-235 (7.6 MeV per nucleon) splits into fragments at about 8.5 MeV per nucleon, each of the 235 nucleons gains about 0.9 MeV: roughly 200 MeV for one fission, millions of times more than any chemical reaction between two atoms.</p>
+            <p><b>The spike at helium-4.</b> Helium-4 is far more tightly bound than its neighbours. This is why alpha particles, and not single protons or neutrons, are what heavy nuclei throw out.</p>
+          </div>
+          <div class="rn-side">
+            <p class="trap">Saying iron has the most binding energy. It has the most binding energy <b>per nucleon</b>. Uranium has a far larger total.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide" data-title="Energy released in a decay">
+        <p class="eyebrow">Worked example</p>
+        <h2>The energy released when radium-226 decays<span>.</span></h2>
+        <div class="split even">
+          <div class="work">
+            <div class="eqline"><span class="nuc"><span class="nums"><span>226</span><span>88</span></span>Ra</span> <span class="op">→</span> <span class="nuc"><span class="nums"><span>222</span><span>86</span></span>Rn</span> <span class="op">+</span> <span class="nuc alpha"><span class="nums"><span>4</span><span>2</span></span>He</span></div>
+            <span class="say">Masses: \(226.025410 \,\mathrm{u}\) → \(222.017578 \,\mathrm{u}\) + \(4.002603 \,\mathrm{u}\)</span>
+            <span>\(\Delta m = m_\mathrm{before} - m_\mathrm{after}\)</span>
+            <span class="step">\(\Delta m = 226.025410 - 226.020181 = 0.005229 \,\mathrm{u}\)</span>
+            <span class="step">\(E = 0.005229 \times 931.5 = \class{res}{4.87 \,\mathrm{MeV}}\)</span>
+          </div>
+          <div class="stack">
+            <ul class="points small">
+              <li>The products have <b>less mass</b>: energy is released</li>
+              <li class="step">It appears as <b>kinetic energy</b>, mostly of the alpha particle</li>
+              <li class="step">In joules: \(4.87 \times 10^{6} \times 1.60 \times 10^{-19} = 7.8 \times 10^{-13} \,\mathrm{J}\)</li>
+            </ul>
+          </div>
+        </div>
+        <div class="slide-foot"><span>E.3 RADIOACTIVE DECAY · SL + HL</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>Why the alpha particle takes most of the energy.</b> The radium nucleus is at rest, so the total momentum afterwards must be zero: the alpha particle and the radon nucleus fly apart with equal and opposite momenta (A.2). Kinetic energy is \(\frac{p^{2}}{2m}\), so for the same momentum the lighter particle has more of it. The alpha particle, with 4 of the 226 mass units, carries \(\frac{222}{226}\) of the energy: 4.78 MeV.</p>
+            <p><b>A decay can only happen if mass is lost.</b> If the products would have more mass than the original nucleus, the decay cannot happen by itself, because it would need energy from nowhere. This test tells you which decays are possible.</p>
+          </div>
+          <div class="rn-side">
+            <p class="tip">These are masses of whole atoms, electrons included. The 88 electrons on the left balance the 86 + 2 on the right, so they cancel.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide" data-title="Quick check: binding energy">
+        <p class="eyebrow">Quick check</p>
+        <h2>Binding energy<span>.</span></h2>
+        <div class="quiz fill">
+          <div class="q"><p><span class="n">01</span>How do isotopes of an element differ?</p><div class="ans step">In their number of neutrons</div></div>
+          <div class="q"><p><span class="n">02</span>Give two properties of the strong nuclear force.</p><div class="ans step">Attractive between nucleons, short range</div></div>
+          <div class="q"><p><span class="n">03</span>What is the mass defect of a nucleus?</p><div class="ans step">Mass of its separate nucleons minus its own mass</div></div>
+          <div class="q"><p><span class="n">04</span>A mass defect of 0.100 u. Binding energy?</p><div class="ans step">\(0.100 \times 931.5 = 93.2 \,\mathrm{MeV}\)</div></div>
+          <div class="q"><p><span class="n">05</span>Which nuclei have the greatest binding energy per nucleon?</p><div class="ans step">Those near iron-56</div></div>
+          <div class="q"><p><span class="n">06</span>Why does fusing light nuclei release energy?</p><div class="ans step">The product is higher on the curve</div></div>
+        </div>
+        <div class="slide-foot"><span class="reveal-hint">PRESS → TO REVEAL EACH ANSWER</span><span data-page></span></div>
+      </section>
+
+      <!-- Part 2 -->
+      <section class="slide section" data-title="Part 2: Radioactive decay">
+        <div class="title-grid">
+          <div>
+            <p class="eyebrow">Part 02 · SL + HL</p>
+            <h1>How does a nucleus change<span>?</span></h1>
+            <p class="lead">Alpha, beta and gamma decay, the neutrino, and what each radiation does to matter</p>
+          </div>
+          <div class="fig" data-fig="e3-alpha"></div>
+        </div>
+        <div class="slide-foot"><span>E.3 RADIOACTIVE DECAY · SL + HL</span><span data-page></span></div>
+      </section>
+
+      <section class="slide history" data-title="Story: Becquerel’s plate">
+        <p class="eyebrow">The story · Paris, 1896</p>
+        <p class="not-examined">Background story · not assessed</p>
+        <h2>Becquerel’s fogged plate<span>.</span></h2>
+        <div class="story" style="--photo-h: 380px;">
+          <div class="story-photos">
+            <figure><img src="images/becquerel.jpg" width="752" height="1000" alt="Photographic portrait of Henri Becquerel, a bearded man in a dark suit, seated"><figcaption><b>Henri Becquerel</b>, photographed by Paul Nadar</figcaption></figure>
+            <figure><img src="images/becquerel-plate.jpg" width="492" height="397" alt="A photographic plate with two dark smudges and handwritten notes above them. In the lower smudge the pale outline of a cross can be seen"><figcaption>His <b>photographic plate</b>, darkened by uranium salts</figcaption></figure>
+          </div>
+          <div class="stack">
+            <ul class="points">
+              <li>X-rays had just been discovered. Becquerel thought sunlight made uranium salts give them out</li>
+              <li>He left the salts on a <b>wrapped</b> photographic plate in a dark drawer</li>
+              <li>The plate darkened <b>anyway</b>, with no sunlight</li>
+              <li>The radiation came from the <b>uranium itself</b>. Nobel Prize with the Curies, <b>1903</b></li>
+            </ul>
+            <div class="idea"><b>Spontaneous</b>: nothing was done to the uranium to make it happen.</div>
+          </div>
+        </div>
+        <p class="credits">Portrait: <a href="https://commons.wikimedia.org/wiki/File:Paul_Nadar_-_Henri_Becquerel_(cropped).jpg" target="_blank" rel="noopener">Paul Nadar</a>, public domain. Plate: <a href="https://commons.wikimedia.org/wiki/File:Becquerel_plate.jpg" target="_blank" rel="noopener">Henri Becquerel, 1896</a>, public domain.</p>
+        <div class="slide-foot"><span>E.3 RADIOACTIVE DECAY · SL + HL</span><span data-page></span></div>
+      </section>
+
+      <section class="slide" data-title="Random and spontaneous">
+        <p class="eyebrow">The nature of radioactive decay</p>
+        <h2>Random and spontaneous<span>.</span></h2>
+        <div class="stack center" style="gap: 30px;">
+          <ul class="points">
+            <li>An unstable nucleus changes into a more stable one and <b>emits radiation</b></li>
+          </ul>
+          <div class="cards step" style="grid-template-columns: 1fr 1fr;">
+            <div class="card"><p class="eyebrow">Random</p><h3>Impossible to predict</h3><p>Nobody can say <b>which</b> nucleus will decay next, or <b>when</b> a particular one will. Each has the same chance in each second</p></div>
+            <div class="card"><p class="eyebrow">Spontaneous</p><h3>Impossible to influence</h3><p>Temperature, pressure and chemical state make <b>no difference</b>. The decay happens by itself</p></div>
+          </div>
+          <div class="idea step">Random for one nucleus, yet very <b>predictable</b> for a large number.</div>
+        </div>
+        <div class="slide-foot"><span>E.3 RADIOACTIVE DECAY · SL + HL</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>How something random can be predictable.</b> Nobody can say whether a single coin will land heads. Toss a million coins and you can be sure that very close to half a million will. A sample of radioactive material holds an enormous number of nuclei, so the fraction that decays in a given time is extremely steady, even though each decay is a matter of chance. That steady fraction is what half-life measures.</p>
+            <p><b>Why chemistry cannot touch it.</b> Heating, squeezing or reacting a substance changes how its electrons and atoms behave. The energies involved are a few electronvolts. Changes inside a nucleus involve millions of electronvolts, so the nucleus does not notice what the electrons are doing.</p>
+          </div>
+          <div class="rn-side">
+            <p class="tip">Evidence for randomness: the count rate from a steady source is never perfectly steady. It fluctuates from one second to the next.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide" data-title="Alpha decay">
+        <p class="eyebrow">Emitting a helium nucleus</p>
+        <h2>Alpha decay<span>.</span></h2>
+        <div class="split wide-fig">
+          <div class="stack">
+            <ul class="points small">
+              <li>An alpha particle is a <b>helium-4 nucleus</b>: 2 protons and 2 neutrons</li>
+              <li class="step">\(A\) falls by <b>4</b>, \(Z\) falls by <b>2</b></li>
+              <li class="step">Typical of <b>heavy</b> nuclei</li>
+            </ul>
+            <div class="equation small step"><span class="nuc"><span class="nums"><span>241</span><span>95</span></span>Am</span><span class="op">→</span><span class="nuc"><span class="nums"><span>237</span><span>93</span></span>Np</span><span class="op">+</span><span class="nuc alpha"><span class="nums"><span>4</span><span>2</span></span>He</span></div>
+          </div>
+          <div class="panel">
+            <div class="panel-head"><span>AMERICIUM-241</span><span class="reveal-hint">PRESS → TO DECAY</span></div>
+            <div class="fig" data-fig="e3-alpha" data-animate></div>
+          </div>
+        </div>
+        <div class="slide-foot"><span>E.3 RADIOACTIVE DECAY · SL + HL</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>Why heavy nuclei do this.</b> A nucleus with more than 82 protons is too large for the short-range strong force to hold against the long-range repulsion of all its protons. Throwing out two protons and two neutrons together reduces the charge and moves the nucleus up the binding energy curve. The helium-4 group is so tightly bound itself that emitting it as one piece releases far more energy than emitting four separate nucleons would.</p>
+            <p><b>One energy.</b> All the alpha particles from a given decay come out with the same kinetic energy, typically 4 to 9 MeV. That sharp energy is evidence that nuclei have discrete energy levels, which the HL part returns to.</p>
+          </div>
+          <div class="rn-side">
+            <p class="tip">In any decay equation the top numbers balance and the bottom numbers balance: \(241 = 237 + 4\) and \(95 = 93 + 2\).</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide" data-title="Beta-minus decay">
+        <p class="eyebrow">A neutron becomes a proton</p>
+        <h2>Beta-minus decay<span>.</span></h2>
+        <div class="split wide-fig">
+          <div class="stack">
+            <ul class="points small">
+              <li>A neutron changes into a <b>proton</b>, an <b>electron</b> and an <b>antineutrino</b></li>
+              <li class="step">\(A\) unchanged, \(Z\) rises by <b>1</b></li>
+              <li class="step">Nuclei with <b>too many neutrons</b></li>
+            </ul>
+            <div class="equation small step"><span class="nuc"><span class="nums"><span>14</span><span>6</span></span>C</span><span class="op">→</span><span class="nuc"><span class="nums"><span>14</span><span>7</span></span>N</span><span class="op">+</span><span class="nuc electron"><span class="nums"><span>0</span><span>−1</span></span>e</span><span class="op">+</span><span>\(\bar{\nu}\)</span></div>
+          </div>
+          <div class="panel">
+            <div class="panel-head"><span>CARBON-14</span><span class="reveal-hint">PRESS → FOR EACH STAGE</span></div>
+            <div class="fig" data-fig="e3-beta" data-animate></div>
+          </div>
+        </div>
+        <div class="slide-foot"><span>E.3 RADIOACTIVE DECAY · SL + HL</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>The electron was not there before.</b> There are no electrons inside a nucleus. The beta particle is created at the instant of the decay, when one of the neutrons turns into a proton, and it leaves at once. It is an ordinary electron, but it comes from the nucleus, not from the electron shells of the atom.</p>
+            <p><b>Why the bottom number is −1.</b> The electron is written <span class="nuc in-text"><span class="nums"><span>0</span><span>−1</span></span>e</span>: nucleon number 0, because it is not a nucleon, and “proton number” −1, standing for its charge. Then both rows balance: \(14 = 14 + 0\) and \(6 = 7 - 1\). Charge is conserved: one positive proton and one negative electron appear together.</p>
+          </div>
+          <div class="rn-side">
+            <p class="trap">Saying the nucleus loses a neutron and therefore has a smaller nucleon number. It has one neutron fewer and one proton more: the total is unchanged.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide" data-title="Beta-plus decay">
+        <p class="eyebrow">A proton becomes a neutron</p>
+        <h2>Beta-plus decay<span>.</span></h2>
+        <div class="split wide-fig">
+          <div class="stack">
+            <ul class="points small">
+              <li>A proton changes into a <b>neutron</b>, a <b>positron</b> and a <b>neutrino</b></li>
+              <li class="step">\(A\) unchanged, \(Z\) falls by <b>1</b></li>
+              <li class="step">Nuclei with <b>too few neutrons</b></li>
+            </ul>
+            <div class="equation small step"><span class="nuc"><span class="nums"><span>18</span><span>9</span></span>F</span><span class="op">→</span><span class="nuc"><span class="nums"><span>18</span><span>8</span></span>O</span><span class="op">+</span><span class="nuc electron"><span class="nums"><span>0</span><span>+1</span></span>e</span><span class="op">+</span><span>\(\nu\)</span></div>
+          </div>
+          <div class="panel">
+            <div class="panel-head"><span>FLUORINE-18</span><span class="reveal-hint">PRESS → FOR EACH STAGE</span></div>
+            <div class="fig" data-fig="e3-beta" data-kind="plus" data-animate></div>
+          </div>
+        </div>
+        <div class="slide-foot"><span>E.3 RADIOACTIVE DECAY · SL + HL</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>The positron.</b> A positron is the antiparticle of the electron: the same mass, the opposite charge. It does not last long. Within a fraction of a millimetre in a solid it meets an electron and the two annihilate, their mass turning into two gamma photons that travel in opposite directions.</p>
+            <p><b>Where this is used.</b> Fluorine-18 is the isotope used in PET scans. It is attached to a sugar that collects in active tissue. Detectors on opposite sides of the patient pick up the pairs of gamma photons, and a computer works back to where each pair came from.</p>
+            <p><b>Only inside a nucleus.</b> A free proton never decays like this, because a neutron has more mass than a proton. Inside a nucleus the energy can come from the rest of the nucleus becoming more tightly bound.</p>
+          </div>
+          <div class="rn-side">
+            <p class="tip">Minus goes with <b>anti</b>neutrino, plus with neutrino. In each decay one particle and one antiparticle are created.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide" data-title="Neutrinos and antineutrinos">
+        <p class="eyebrow">The third particle</p>
+        <h2>Neutrinos and antineutrinos<span>.</span></h2>
+        <div class="stack center" style="gap: 30px;">
+          <ul class="points">
+            <li>Every beta decay also emits a <b>neutrino</b> \(\nu\) or an <b>antineutrino</b> \(\bar{\nu}\)</li>
+          </ul>
+          <div class="cards step" style="grid-template-columns: 1fr 1fr 1fr;">
+            <div class="card"><p class="eyebrow">Charge</p><h3>None</h3><p>Not affected by electric or magnetic fields</p></div>
+            <div class="card"><p class="eyebrow">Mass</p><h3>Almost none</h3><p>Less than about a millionth of the mass of an electron</p></div>
+            <div class="card"><p class="eyebrow">Interaction</p><h3>Hardly any</h3><p>Passes through the whole Earth almost unhindered</p></div>
+          </div>
+          <div class="idea step">It carries away <b>energy and momentum</b>. Without it, beta decay would break the conservation laws.</div>
+        </div>
+        <div class="slide-foot"><span>E.3 RADIOACTIVE DECAY · SL + HL</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>How anyone knows it is there.</b> When a nucleus at rest emits a single particle, the two must fly apart back to back and share the energy in a fixed way. In beta decay the electron and the recoiling nucleus are often seen <b>not</b> moving back to back, and the electron’s energy varies from one decay to the next. Something unseen must be taking the missing momentum and energy.</p>
+            <p><b>How many there are.</b> The Sun’s fusion reactions make neutrinos in vast numbers. About \(6 \times 10^{10}\) of them pass through every square centimetre of you each second, day and night, since the Earth does not stop them. Almost none interact.</p>
+          </div>
+          <div class="rn-side">
+            <p class="more">The force responsible for beta decay, the weak nuclear force, is not part of this course. You need the neutrino’s existence and its place in the equations.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide" data-title="Gamma decay">
+        <p class="eyebrow">Losing energy, not particles</p>
+        <h2>Gamma decay<span>.</span></h2>
+        <div class="split wide-fig">
+          <div class="stack">
+            <ul class="points small">
+              <li>A nucleus left <b>excited</b> gives out its extra energy as a <b>photon</b></li>
+              <li class="step">\(A\) and \(Z\) do <b>not</b> change</li>
+              <li class="step">Usually follows an alpha or beta decay</li>
+            </ul>
+            <div class="equation small step"><span class="nuc"><span class="nums"><span>99m</span><span>43</span></span>Tc</span><span class="op">→</span><span class="nuc"><span class="nums"><span>99</span><span>43</span></span>Tc</span><span class="op">+</span><span class="nuc gamma">γ</span></div>
+          </div>
+          <div class="panel">
+            <div class="panel-head"><span>TECHNETIUM-99m</span><span class="reveal-hint">PRESS → TO DECAY</span></div>
+            <div class="fig" data-fig="e3-gamma" data-animate></div>
+          </div>
+        </div>
+        <div class="slide-foot"><span>E.3 RADIOACTIVE DECAY · SL + HL</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>The same idea as atomic spectra.</b> In E.1 an electron dropping to a lower level in an atom emits a photon whose energy equals the difference between the levels. A nucleus also has energy levels. After an alpha or beta decay the new nucleus is often left in an excited level, and it drops to its ground state by emitting a photon. The difference is the size of the energy: a few eV for an atom, hundreds of keV or several MeV for a nucleus.</p>
+            <p><b>Photons from a nucleus have much shorter wavelengths.</b> A 1.0 MeV gamma photon has \(\lambda = \frac{hc}{E} = \frac{1.24 \times 10^{-6}}{1.0 \times 10^{6}} = 1.2 \times 10^{-12} \,\mathrm{m}\), about half a million times shorter than visible light.</p>
+          </div>
+          <div class="rn-side">
+            <p class="tip">The “m” in technetium-99m means metastable: an excited state that lasts unusually long, hours in this case and not a tiny fraction of a second.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide" data-title="Decay equations">
+        <p class="eyebrow">Balancing the numbers</p>
+        <h2>Decay equations<span>.</span></h2>
+        <div class="stack center">
+          <table class="facts big">
+            <thead><tr><th>Decay</th><th>Emitted</th><th>\(A\)</th><th>\(Z\)</th><th>Example</th></tr></thead>
+            <tbody>
+              <tr><td>Alpha</td><td><span class="nuc alpha"><span class="nums"><span>4</span><span>2</span></span>He</span></td><td>−4</td><td>−2</td><td><span class="nuc"><span class="nums"><span>238</span><span>92</span></span>U</span> → <span class="nuc"><span class="nums"><span>234</span><span>90</span></span>Th</span> + <span class="nuc alpha"><span class="nums"><span>4</span><span>2</span></span>He</span></td></tr>
+              <tr class="step"><td>Beta-minus</td><td><span class="nuc electron"><span class="nums"><span>0</span><span>−1</span></span>e</span> + \(\bar{\nu}\)</td><td>0</td><td>+1</td><td><span class="nuc"><span class="nums"><span>90</span><span>38</span></span>Sr</span> → <span class="nuc"><span class="nums"><span>90</span><span>39</span></span>Y</span> + <span class="nuc electron"><span class="nums"><span>0</span><span>−1</span></span>e</span> + \(\bar{\nu}\)</td></tr>
+              <tr class="step"><td>Beta-plus</td><td><span class="nuc electron"><span class="nums"><span>0</span><span>+1</span></span>e</span> + \(\nu\)</td><td>0</td><td>−1</td><td><span class="nuc"><span class="nums"><span>22</span><span>11</span></span>Na</span> → <span class="nuc"><span class="nums"><span>22</span><span>10</span></span>Ne</span> + <span class="nuc electron"><span class="nums"><span>0</span><span>+1</span></span>e</span> + \(\nu\)</td></tr>
+              <tr class="step"><td>Gamma</td><td><span class="nuc gamma">γ</span></td><td>0</td><td>0</td><td><span class="nuc"><span class="nums"><span>60</span><span>28</span></span>Ni</span>* → <span class="nuc"><span class="nums"><span>60</span><span>28</span></span>Ni</span> + <span class="nuc gamma">γ</span></td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="slide-foot"><span>E.3 RADIOACTIVE DECAY · SL + HL</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>Two conservation laws do all the work.</b> The top numbers must add up to the same total on both sides: nucleons are neither created nor destroyed. The bottom numbers must add up too: that is conservation of charge. Neutrinos and photons have zero for both, so they never affect the balance.</p>
+            <p><b>Working out an unknown.</b> Polonium-210 (\(Z = 84\)) decays by alpha emission. The new nucleus has \(A = 210 - 4 = 206\) and \(Z = 84 - 2 = 82\). Look up \(Z = 82\): lead. So the product is lead-206. Always find the element from the proton number.</p>
+          </div>
+          <div class="rn-side">
+            <p class="tip">The star on nickel-60 marks an excited state. It was left that way by the beta decay of cobalt-60, which is why cobalt-60 is used as a gamma source.</p>
+            <p class="trap">Leaving out the neutrino or antineutrino. It is needed for full marks in a beta decay equation.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide" data-title="Penetration and ionization">
+        <p class="eyebrow">What the radiation does to matter</p>
+        <h2>Penetrating and ionizing ability<span>.</span></h2>
+        <div class="stack center" style="gap: 20px;">
+          <div class="panel" style="height: 470px; align-self: stretch;">
+            <div class="panel-head"><span>WHAT STOPS EACH RADIATION</span><span class="reveal-hint">PRESS → FOR EACH RADIATION</span></div>
+            <div class="fig" data-fig="e3-penetration" data-animate style="flex: none; height: 396px;"></div>
+          </div>
+          <div class="idea">The <b>more strongly</b> a radiation ionizes, the <b>sooner</b> it loses its energy and stops.</div>
+        </div>
+        <div class="slide-foot"><span>E.3 RADIOACTIVE DECAY · SL + HL</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>Ionizing and penetrating are opposites.</b> Radiation loses energy each time it knocks an electron out of an atom. An alpha particle is slow, heavy and has charge \(+2e\): it ionizes thousands of atoms in every millimetre of air, so its energy is used up within a few centimetres. A beta particle is fast and light with charge \(e\), ionizes far less often, and travels metres. A gamma photon has no charge and ionizes only when it happens to hit an electron, so it can pass through centimetres of lead.</p>
+            <p><b>Gamma radiation is never completely stopped.</b> Each centimetre of lead removes the same fraction of the photons. The intensity keeps falling, but it never reaches exactly zero, which is why the diagram says “reduced”.</p>
+          </div>
+          <div class="rn-side">
+            <p class="tip">The danger follows from this. Outside the body, gamma is the most hazardous because it gets in. Inside the body, alpha is the worst, because all its energy is delivered to a tiny volume of tissue.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide" data-title="Comparing alpha, beta and gamma">
+        <p class="eyebrow">Side by side</p>
+        <h2>Comparing alpha, beta and gamma<span>.</span></h2>
+        <div class="stack center">
+          <table class="facts">
+            <thead><tr><th></th><th>Alpha</th><th>Beta</th><th>Gamma</th></tr></thead>
+            <tbody>
+              <tr><td>What it is</td><td>Helium-4 nucleus</td><td>Electron or positron</td><td>Photon</td></tr>
+              <tr class="step"><td>Charge</td><td>\(+2e\)</td><td>\(-e\) or \(+e\)</td><td>0</td></tr>
+              <tr class="step"><td>Ionizing ability</td><td>Very strong</td><td>Moderate</td><td>Weak</td></tr>
+              <tr class="step"><td>Range in air</td><td>A few cm</td><td>About a metre</td><td>Very long</td></tr>
+              <tr class="step"><td>Stopped by</td><td>Paper, or skin</td><td>A few mm of aluminium</td><td>Reduced by cm of lead</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="slide-foot"><span>E.3 RADIOACTIVE DECAY · SL + HL</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>Telling them apart in the laboratory.</b> Put absorbers between a source and a detector. If a sheet of paper cuts the count rate sharply, alpha is present. If paper makes little difference but a few millimetres of aluminium cuts it, beta. If the count rate is still well above background behind aluminium, gamma.</p>
+            <p><b>Using a field.</b> In a magnetic field alpha and beta-minus particles curve in opposite directions, because their charges have opposite signs, and gamma goes straight on. The beta particles curve much more sharply than the alpha particles: they have a far smaller mass, so much less momentum for the same sort of energy (D.3).</p>
+          </div>
+          <div class="rn-side">
+            <p class="tip">Choosing a source for a job means matching this table to the task: what must the radiation pass through, and what must stop it?</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide history" data-title="Story: Marie Curie’s notebooks">
+        <p class="eyebrow">The story · Paris, from 1898</p>
+        <p class="not-examined">Background story · not assessed</p>
+        <h2>Marie Curie’s notebooks<span>.</span></h2>
+        <div class="story" style="--photo-h: 300px;">
+          <div class="story-photos">
+            <figure><img src="images/curie.jpg" width="566" height="800" alt="Portrait of Marie Curie, an older woman with her hair tied back"><figcaption><b>Marie Curie</b>, pictured about 1920</figcaption></figure>
+            <figure><img src="images/curie-notebook.jpg" width="900" height="703" alt="An open notebook with squared yellowed pages covered in handwriting and small sketches of apparatus"><figcaption>One of her <b>laboratory notebooks</b>, now in London. Tests found radium on it</figcaption></figure>
+          </div>
+          <div class="stack">
+            <ul class="points">
+              <li>She and her husband Pierre discovered <b>polonium</b> and <b>radium</b></li>
+              <li>Nobody knew the danger. She kept tubes of radioactive material in her <b>pocket</b></li>
+              <li>Radioactive atoms got onto her things. Her notebooks are still <b>contaminated</b></li>
+            </ul>
+            <div class="idea">Radium-226 has a half-life of about <b>1600 years</b>: they will stay radioactive for well over 1000 more.</div>
+          </div>
+        </div>
+        <p class="credits">Portrait: <a href="https://commons.wikimedia.org/wiki/File:Portrait_of_Marie_Curie_(1867_-_1934),_Polish_chemist_Wellcome_M0000113.jpg" target="_blank" rel="noopener">Henri Manuel, Wellcome Collection</a>, <a href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noopener">CC BY 4.0</a> (cropped). Notebook: <a href="https://commons.wikimedia.org/wiki/File:Marie_Curie;_Holograph_Notebook._Wellcome_L0021265.jpg" target="_blank" rel="noopener">Wellcome Collection</a>, <a href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noopener">CC BY 4.0</a>.</p>
+        <div class="slide-foot"><span>E.3 RADIOACTIVE DECAY · SL + HL</span><span data-page></span></div>
+      </section>
+
+      <section class="slide" data-title="Quick check: decay">
+        <p class="eyebrow">Quick check</p>
+        <h2>Radioactive decay<span>.</span></h2>
+        <div class="quiz fill">
+          <div class="q"><p><span class="n">01</span>What does “spontaneous” mean for radioactive decay?</p><div class="ans step">It cannot be influenced from outside</div></div>
+          <div class="q"><p><span class="n">02</span><span class="nuc in-text"><span class="nums"><span>226</span><span>88</span></span>Ra</span> emits an alpha particle. \(A\) and \(Z\) of the product?</p><div class="ans step">222 and 86</div></div>
+          <div class="q"><p><span class="n">03</span>What is emitted with the electron in beta-minus decay?</p><div class="ans step">An antineutrino</div></div>
+          <div class="q"><p><span class="n">04</span><span class="nuc in-text"><span class="nums"><span>14</span><span>6</span></span>C</span> decays by beta-minus. \(A\) and \(Z\) of the product?</p><div class="ans step">14 and 7</div></div>
+          <div class="q"><p><span class="n">05</span>Which radiation is the most ionizing?</p><div class="ans step">Alpha</div></div>
+          <div class="q"><p><span class="n">06</span>What happens to \(A\) and \(Z\) in gamma decay?</p><div class="ans step">Neither changes</div></div>
+        </div>
+        <div class="slide-foot"><span class="reveal-hint">PRESS → TO REVEAL EACH ANSWER</span><span data-page></span></div>
+      </section>
+
+      <!-- Part 3 -->
+      <section class="slide section" data-title="Part 3: Half-life">
+        <div class="title-grid">
+          <div>
+            <p class="eyebrow">Part 03 · SL + HL</p>
+            <h1>How fast does it happen<span>?</span></h1>
+            <p class="lead">Activity, count rate, half-life and background radiation</p>
+          </div>
+          <div class="fig" data-fig="e3-half-life"></div>
+        </div>
+        <div class="slide-foot"><span>E.3 RADIOACTIVE DECAY · SL + HL</span><span data-page></span></div>
+      </section>
+
+      <section class="slide" data-title="Activity and count rate">
+        <p class="eyebrow">Measuring decay</p>
+        <h2>Activity and count rate<span>.</span></h2>
+        <div class="stack center" style="gap: 30px;">
+          <div class="cards" style="grid-template-columns: 1fr 1fr;">
+            <div class="card"><p class="eyebrow">Activity</p><h3>Decays per second in the source</h3><p>Measured in <b>becquerels</b>: 1 Bq = 1 decay per second. A property of the sample</p></div>
+            <div class="card step"><p class="eyebrow">Count rate</p><h3>Counts per second at a detector</h3><p>Only the radiation that <b>reaches</b> the detector and is <b>recorded</b>. Depends on the set-up</p></div>
+          </div>
+          <ul class="points step">
+            <li>With a fixed arrangement, the count rate is <b>proportional</b> to the activity</li>
+            <li class="step">Both are proportional to the number of <b>undecayed nuclei</b> in the sample</li>
+          </ul>
+        </div>
+        <div class="slide-foot"><span>E.3 RADIOACTIVE DECAY · SL + HL</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>Why the count rate is smaller than the activity.</b> A source sends radiation out in all directions and the detector covers only a small part of the sphere round it. Some radiation is absorbed by the air or by the source itself on the way, and some passes through the detector without being recorded. A source of activity 40 000 Bq might give a count rate of a few hundred counts per second.</p>
+            <p><b>Why that does not matter for half-life.</b> If nothing in the arrangement is moved, the detector always catches the same fraction. When the activity halves, the count rate halves. So the half-life can be found from the count rate without ever knowing the activity itself.</p>
+          </div>
+          <div class="rn-side">
+            <p class="tip">Activity is proportional to the number of undecayed nuclei because each nucleus has the same chance of decaying in each second: twice as many nuclei, twice as many decays.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide" data-title="Half-life">
+        <p class="eyebrow">The time to halve</p>
+        <h2>Half-life<span>.</span></h2>
+        <div class="split wide-fig">
+          <div class="stack">
+            <ul class="points small">
+              <li>The time for <b>half</b> the undecayed nuclei in a sample to decay</li>
+              <li class="step">Also the time for the <b>activity</b>, or the count rate, to halve</li>
+              <li class="step">Always the <b>same</b> for a given nuclide, whenever you start</li>
+            </ul>
+            <div class="idea step">After \(n\) half-lives: \(\left(\dfrac{1}{2}\right)^{n}\) remains.</div>
+          </div>
+          <div class="panel">
+            <div class="panel-head"><span>HALF-LIFE 8 DAYS</span><span class="reveal-hint">PRESS → FOR EACH HALF-LIFE</span></div>
+            <div class="fig" data-fig="e3-half-life" data-animate></div>
+          </div>
+        </div>
+        <div class="slide-foot"><span>E.3 RADIOACTIVE DECAY · SL + HL</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>Why it halves and does not fall steadily.</b> Each nucleus has the same chance of decaying in the next second, however long it has already survived. With half as many nuclei left, half as many decay each second. So the sample loses the same <b>fraction</b> in equal times, not the same number: a half in the first 8 days, a half of what is left in the next 8 days.</p>
+            <p><b>It never quite reaches zero.</b> After 10 half-lives about one thousandth remains, \(\left(\frac{1}{2}\right)^{10} = \frac{1}{1024}\). After 20, about one millionth. Half-lives range from a tiny fraction of a second to billions of years: 4.5 billion years for uranium-238, about the age of the Earth.</p>
+          </div>
+          <div class="rn-side">
+            <p class="trap">Thinking everything has decayed after two half-lives. After two, a quarter remains.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide" data-title="Random decay and half-life">
+        <p class="eyebrow">Chance, in large numbers</p>
+        <h2>Random decay, predictable half-life<span>.</span></h2>
+        <div class="stack center" style="gap: 20px;">
+          <div class="panel" style="height: 440px; align-self: stretch;">
+            <div class="panel-head"><span>64 NUCLEI</span><span class="reveal-hint">PRESS → FOR EACH HALF-LIFE</span></div>
+            <div class="fig" data-fig="e3-random" data-animate></div>
+          </div>
+          <div class="legend"><span><i class="undecayed"></i>undecayed</span><span><i class="decayed"></i>decayed</span></div>
+          <div class="idea">About half decay in each half-life, but <b>not exactly</b> half, and nobody can say which ones.</div>
+        </div>
+        <div class="slide-foot"><span>E.3 RADIOACTIVE DECAY · SL + HL</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>What the grids show.</b> With only 64 nuclei, chance matters: 33 survive the first half-life where 32 were expected, and 15 survive the second where 16 or 17 were expected. Run it again and the numbers would be slightly different, with different nuclei surviving.</p>
+            <p><b>Why real samples behave so regularly.</b> The scatter is roughly the square root of the number expected. For 32 it is about 6, nearly 20%. For a real sample with \(10^{20}\) nuclei it is about \(10^{10}\), one part in ten billion. The randomness is still there, but it is far too small to see.</p>
+          </div>
+          <div class="rn-side">
+            <p class="tip">A good classroom model: throw 100 dice, remove every six, and repeat. The number left falls with a “half-life” of just under four throws.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide" data-title="Half-life: whole numbers of half-lives">
+        <p class="eyebrow">Worked example</p>
+        <h2>Counting half-lives<span>.</span></h2>
+        <div class="split even">
+          <div class="work">
+            <span class="say">Activity 800 Bq · half-life 6.0 hours</span>
+            <span class="say">Activity after 24 hours?</span>
+            <span>Number of half-lives \(n = \dfrac{t}{T_{\frac{1}{2}}} = \dfrac{24}{6.0} = 4\)</span>
+            <span class="step">\(A = A_{0} \left(\dfrac{1}{2}\right)^{n} = 800 \times \left(\dfrac{1}{2}\right)^{4}\)</span>
+            <span class="step">\(A = \class{res}{50 \,\mathrm{Bq}}\)</span>
+          </div>
+          <div class="work step">
+            <span class="say">A sample falls to \(\frac{1}{8}\) of its activity in 15 days</span>
+            <span>\(\dfrac{1}{8} = \left(\dfrac{1}{2}\right)^{3}\): three half-lives</span>
+            <span class="step">\(T_{\frac{1}{2}} = \dfrac{15}{3} = \class{res}{5.0 \text{ days}}\)</span>
+          </div>
+        </div>
+        <div class="slide-foot"><span>E.3 RADIOACTIVE DECAY · SL + HL</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>A table works just as well.</b> 0 h: 800 Bq. 6 h: 400. 12 h: 200. 18 h: 100. 24 h: 50. Writing out the halvings is slower but hard to get wrong, and it shows the working clearly.</p>
+            <p><b>What has decayed.</b> If \(\frac{1}{16}\) remains, then \(\frac{15}{16}\) of the original nuclei have decayed. Read the question carefully: “fraction remaining” and “fraction decayed” add up to 1.</p>
+          </div>
+          <div class="rn-side">
+            <p class="tip">At standard level, times are always a whole number of half-lives. Higher level uses the exponential law for any time, in Part 4.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide" data-title="Background radiation">
+        <p class="eyebrow">Radiation that is always there</p>
+        <h2>Background radiation<span>.</span></h2>
+        <div class="split even">
+          <div class="stack">
+            <ul class="points small">
+              <li>A detector counts even with <b>no source</b> present</li>
+              <li class="step">From rocks and soil, radon gas, cosmic rays, food, medical uses</li>
+              <li class="step"><b>Subtract</b> it from every reading</li>
+            </ul>
+            <div class="idea step">Corrected count rate = measured − background.</div>
+          </div>
+          <div class="work step">
+            <span class="say">Background: 110 counts in 5 minutes</span>
+            <span>Background rate \(= \dfrac{110}{5} = 22\) counts per minute</span>
+            <span class="say step">With the source: 126 counts per minute</span>
+            <span class="step">Corrected \(= 126 - 22 = \class{res}{104}\) counts per minute</span>
+          </div>
+        </div>
+        <div class="slide-foot"><span>E.3 RADIOACTIVE DECAY · SL + HL</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>Why measure the background for a long time.</b> The background count rate is low and random, so a short measurement is unreliable: 20 counts in one minute could easily have been 15 or 25. Counting for several minutes and dividing gives a much steadier average.</p>
+            <p><b>When it matters most.</b> For a strong source the background is a small correction. But as the source decays, its count rate falls towards the background, and in the end most of what the detector records has nothing to do with the source. Without the correction, the count rate would seem to level off above zero and the half-life would come out too long.</p>
+          </div>
+          <div class="rn-side">
+            <p class="tip">Measure the background with the source well away, in the same place and with the same detector, before or after the experiment.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide" data-title="Finding a half-life">
+        <p class="eyebrow">From a graph</p>
+        <h2>Finding a half-life from a graph<span>.</span></h2>
+        <div class="split wide-fig">
+          <div class="stack">
+            <ul class="points small">
+              <li>Subtract the <b>background</b> first</li>
+              <li class="step">Plot corrected count rate against time and draw a <b>smooth curve</b></li>
+              <li class="step">Read off the time for the count rate to <b>halve</b></li>
+              <li class="step">Repeat from another point and <b>average</b></li>
+            </ul>
+          </div>
+          <div class="panel">
+            <div class="panel-head"><span>HALF-LIFE 2.0 HOURS</span></div>
+            <div class="fig" data-fig="e3-count-graph"></div>
+          </div>
+        </div>
+        <div class="slide-foot"><span>E.3 RADIOACTIVE DECAY · SL + HL</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>Reading this graph.</b> The corrected count rate starts at 480 counts per minute. It reaches 240 after 2.0 hours and 120 after 4.0 hours: two readings of the half-life, both 2.0 hours. Starting from 400 and reading the time to reach 200 would give a third. Agreement between them is the check that the decay really is exponential.</p>
+            <p><b>What goes wrong without the correction.</b> The measured curve starts at 510 and would need to fall to 255. That takes about 2.2 hours, and the next halving takes longer still. A “half-life” that keeps growing is the sign that the background has not been removed.</p>
+          </div>
+          <div class="rn-side">
+            <p class="tip">Draw the curve through the scatter of the points, not from point to point. Each reading is uncertain because decay is random.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide" data-title="Using radioactive sources">
+        <p class="eyebrow">Choosing the right isotope</p>
+        <h2>Putting radioactivity to work<span>.</span></h2>
+        <div class="cards fill" style="grid-template-columns: 1fr 1fr; align-content: center;">
+          <div class="card"><p class="eyebrow">Medical tracer</p><h3>Gamma · half-life of hours</h3><p>Must leave the body to reach a camera, and be gone within a day or so. Technetium-99m: 6 hours</p></div>
+          <div class="card step"><p class="eyebrow">Leaks in underground pipes</p><h3>Gamma · half-life of hours or days</h3><p>Must pass through soil to a detector above, and not linger in the water supply</p></div>
+          <div class="card step"><p class="eyebrow">Thickness of materials</p><h3>Beta · half-life of years</h3><p>Partly absorbed by paper or foil, so the count rate shows the thickness. Must stay steady</p></div>
+          <div class="card step"><p class="eyebrow">Radioactive dating</p><h3>Half-life similar to the age</h3><p>Carbon-14, 5730 years, for once-living material. Uranium-238 for rocks</p></div>
+        </div>
+        <div class="slide-foot"><span>E.3 RADIOACTIVE DECAY · SL + HL</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>Two questions decide every choice.</b> First, penetration: what does the radiation have to get through, and what should it not get through? Alpha would never leave the body or the pipe. Gamma would pass through a sheet of paper as if it were not there, so it could not measure its thickness. Second, half-life: long enough to do the job, short enough not to remain a hazard afterwards.</p>
+            <p><b>How carbon dating works.</b> Cosmic rays keep making carbon-14 in the atmosphere, and living things take it in, so while they are alive they contain a steady, known proportion. At death the intake stops and the carbon-14 decays. The fraction left tells you how long ago that was. After about ten half-lives too little is left to measure.</p>
+          </div>
+          <div class="rn-side">
+            <p class="tip">A sample has a quarter of the carbon-14 of living wood. A quarter is two half-lives: \(2 \times 5730 = 11\,460\) years old.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide" data-title="Quick check: half-life">
+        <p class="eyebrow">Quick check</p>
+        <h2>Half-life<span>.</span></h2>
+        <div class="quiz fill">
+          <div class="q"><p><span class="n">01</span>What is the unit of activity?</p><div class="ans step">The becquerel, Bq: one decay per second</div></div>
+          <div class="q"><p><span class="n">02</span>What fraction of a sample remains after 3 half-lives?</p><div class="ans step">\(\frac{1}{8}\)</div></div>
+          <div class="q"><p><span class="n">03</span>Activity falls from 1200 Bq to 150 Bq in 12 hours. Half-life?</p><div class="ans step">3 half-lives, so 4.0 hours</div></div>
+          <div class="q"><p><span class="n">04</span>A detector reads 95 counts per minute; background is 15. Corrected count rate?</p><div class="ans step">80 counts per minute</div></div>
+          <div class="q"><p><span class="n">05</span>Which radiation would suit a gauge for the thickness of paper?</p><div class="ans step">Beta</div></div>
+          <div class="q"><p><span class="n">06</span>Why does a medical tracer need a short half-life?</p><div class="ans step">So the patient’s dose is small</div></div>
+        </div>
+        <div class="slide-foot"><span class="reveal-hint">PRESS → TO REVEAL EACH ANSWER</span><span data-page></span></div>
+      </section>
+
+      <!-- Part 4 · Additional HL -->
+      <section class="slide section hl" data-title="Part 4: Additional HL">
+        <div class="title-grid">
+          <div>
+            <p class="eyebrow">Part 04 · Additional higher level</p>
+            <h1>Stability and the decay law<span>.</span></h1>
+            <p class="lead">Evidence for the strong force · neutrons and stability<br>Nuclear energy levels · the neutrino · \(N = N_{0} e^{-\lambda t}\)</p>
+          </div>
+          <div class="fig" data-fig="e3-nz"></div>
+        </div>
+        <div class="slide-foot"><span>E.3 RADIOACTIVE DECAY · ADDITIONAL HL</span><span data-page></span></div>
+      </section>
+
+      <section class="slide hl" data-title="HL: Evidence for the strong nuclear force">
+        <p class="eyebrow">How do we know?</p>
+        <h2>Evidence for the strong nuclear force<span>.</span></h2>
+        <div class="stack center" style="gap: 26px;">
+          <div class="cards" style="grid-template-columns: 1fr 1fr 1fr;">
+            <div class="card"><p class="eyebrow">Nuclei exist</p><h3>Protons stay together</h3><p>An attraction stronger than their electric repulsion must act at nuclear distances</p></div>
+            <div class="card step"><p class="eyebrow">Scattering</p><h3>Rutherford’s law fails</h3><p>Alpha particles that come very close to a nucleus are not scattered as the electric force alone predicts (E.1)</p></div>
+            <div class="card step"><p class="eyebrow">Binding energy</p><h3>Roughly constant per nucleon</h3><p>About 8 MeV for every nucleon in a medium or heavy nucleus: each binds only to its neighbours</p></div>
+          </div>
+          <div class="idea step">Together: a force that is <b>strong</b>, <b>attractive</b>, <b>short range</b> and the same for protons and neutrons.</div>
+        </div>
+        <div class="slide-foot"><span>E.3 RADIOACTIVE DECAY · ADDITIONAL HL</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>Why constant binding energy means short range.</b> Suppose every nucleon attracted every other nucleon, as every mass attracts every other mass. The number of pairs among \(A\) nucleons grows as \(A^{2}\), so the binding energy per nucleon would grow in proportion to \(A\). It does not: above \(A = 60\) it stays close to 8 MeV. So each nucleon must be bound only to the few nucleons next to it. Adding more nucleons to the far side of the nucleus makes no difference to it. The force is said to <b>saturate</b>.</p>
+            <p><b>Why the curve still droops.</b> The electric repulsion is long range: every proton does repel every other proton. That energy grows faster than the number of nucleons and slowly lowers the binding energy per nucleon for heavy nuclei, from 8.8 MeV at iron to 7.6 MeV at uranium.</p>
+          </div>
+          <div class="rn-side">
+            <p class="tip">A liquid behaves the same way: each molecule is held only by its neighbours, so the energy needed to boil off a gram is the same whatever the size of the drop.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide hl" data-title="HL: Neutrons and stability">
+        <p class="eyebrow">The ratio of neutrons to protons</p>
+        <h2>Neutrons and stability<span>.</span></h2>
+        <div class="split wide-fig">
+          <div class="stack">
+            <ul class="points small">
+              <li>Light stable nuclei: \(N \approx Z\)</li>
+              <li class="step">Heavy stable nuclei need <b>more neutrons</b>: about 1.5 for each proton</li>
+              <li class="step">Off the band: beta decay moves a nucleus <b>back towards it</b></li>
+              <li class="step">Beyond lead, \(Z = 82\): no stable nuclides</li>
+            </ul>
+          </div>
+          <div class="panel">
+            <div class="panel-head"><span>THE BAND OF STABILITY</span></div>
+            <div class="fig" data-fig="e3-nz"></div>
+          </div>
+        </div>
+        <div class="slide-foot"><span>E.3 RADIOACTIVE DECAY · ADDITIONAL HL</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>What the neutrons do.</b> A neutron adds strong attraction without adding any electric repulsion. It also spaces the protons further apart. In a small nucleus equal numbers are enough. As \(Z\) grows, the total repulsion grows quickly, and more and more neutrons are needed to hold the protons in: lead-208 has 82 protons and 126 neutrons.</p>
+            <p><b>How decay follows the chart.</b> A nucleus above the band has too many neutrons. Beta-minus decay turns one neutron into a proton: one step down and one step right, towards the band. A nucleus below the band has too few. Beta-plus decay turns a proton into a neutron: one step up and one left. Alpha decay removes two of each, moving a heavy nucleus diagonally down the chart.</p>
+          </div>
+          <div class="rn-side">
+            <p class="tip">Carbon-14 has \(N = 8\), \(Z = 6\): above the band, so beta-minus. Fluorine-18 has \(N = 9\), \(Z = 9\): below the band for its size, so beta-plus.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide hl" data-title="HL: Nuclear energy levels">
+        <p class="eyebrow">Evidence from alpha and gamma spectra</p>
+        <h2>Discrete nuclear energy levels<span>.</span></h2>
+        <div class="split wide-fig">
+          <div class="stack">
+            <ul class="points small">
+              <li>Alpha particles from one nuclide have a <b>few sharp energies</b></li>
+              <li class="step">Gamma photons have <b>sharp energies</b> too</li>
+              <li class="step">The differences between the alpha energies <b>match</b> the gamma energies</li>
+            </ul>
+            <div class="idea step">A nucleus, like an atom, has <b>discrete energy levels</b>.</div>
+          </div>
+          <div class="panel">
+            <div class="panel-head"><span>ONE PARENT, TWO ROUTES</span></div>
+            <div class="fig" data-fig="e3-levels"></div>
+          </div>
+        </div>
+        <div class="slide-foot"><span>E.3 RADIOACTIVE DECAY · ADDITIONAL HL</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>The argument.</b> The parent nucleus starts with a fixed energy. If the daughter could be left with any energy at all, the alpha particles would come out with a continuous spread. They do not: their energies are a short list of exact values. So the daughter can be left only in certain states: its ground state, or one of a few excited states, each with a definite energy.</p>
+            <p><b>The check.</b> A daughter left in an excited state then drops to the ground state and emits a gamma photon. Its energy should equal the difference between the two alpha routes, apart from the small recoil of the nucleus. Measurements agree: most alpha particles from americium-241 have about 60 keV less than the most energetic ones, and the decay is followed by a 59.5 keV gamma photon.</p>
+          </div>
+          <div class="rn-side">
+            <p class="more">Compare E.1: line spectra are the evidence for discrete energy levels in atoms. Nuclear levels are about a million times further apart.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide hl" data-title="HL: The beta spectrum">
+        <p class="eyebrow">A spectrum that should not be continuous</p>
+        <h2>The beta spectrum and the neutrino<span>.</span></h2>
+        <div class="split wide-fig">
+          <div class="stack">
+            <ul class="points small">
+              <li>Beta particles have a <b>continuous</b> range of energies, up to a maximum</li>
+              <li class="step">Yet the nucleus changes between two <b>fixed</b> levels</li>
+              <li class="step">The rest of the energy goes to a <b>third particle</b>: the neutrino</li>
+            </ul>
+            <div class="idea step">\(E_\mathrm{max}\) is the full energy of the decay.</div>
+          </div>
+          <div class="panel">
+            <div class="panel-head"><span>BETA PARTICLES FROM ONE NUCLIDE</span></div>
+            <div class="fig" data-fig="e3-beta-spectrum"></div>
+          </div>
+        </div>
+        <div class="slide-foot"><span>E.3 RADIOACTIVE DECAY · ADDITIONAL HL</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>Why two particles would give one energy.</b> If the decay produced only the daughter nucleus and an electron, conservation of momentum and energy together would fix how the energy is shared, as in alpha decay. Every electron would come out with the same energy, close to the maximum. The measured spread means that energy and momentum are being shared among three bodies, and three bodies can share them in endless ways.</p>
+            <p><b>Reading the graph.</b> An electron with nearly \(E_\mathrm{max}\) left almost nothing for the neutrino. An electron with very little energy came from a decay in which the neutrino took nearly all of it. In every decay the electron and the neutrino together carry \(E_\mathrm{max}\).</p>
+          </div>
+          <div class="rn-side">
+            <p class="tip">Contrast the three spectra: alpha and gamma are <b>discrete</b>, evidence for nuclear energy levels. Beta is <b>continuous</b>, evidence for the neutrino.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide history hl" data-title="Story: the particle nobody could find">
+        <p class="eyebrow">The story · 1930 to 1956</p>
+        <p class="not-examined">Background story · not assessed</p>
+        <h2>The particle nobody could find<span>.</span></h2>
+        <div class="story" style="--photo-h: 330px;">
+          <div class="story-photos">
+            <figure><img src="images/pauli.jpg" width="280" height="396" alt="Photographic portrait of Wolfgang Pauli, a man with dark hair in a suit and tie"><figcaption><b>Wolfgang Pauli</b>, 1945</figcaption></figure>
+            <figure><img src="images/cowan-reines.jpg" width="977" height="1000" alt="Two men in shirts and ties working at a large bank of electronic instruments covered in dials and cables"><figcaption><b>Clyde Cowan</b> and <b>Frederick Reines</b> with their detector’s electronics</figcaption></figure>
+          </div>
+          <div class="stack">
+            <ul class="points">
+              <li>The beta spectrum seemed to break <b>conservation of energy</b></li>
+              <li><b>1930</b>: Pauli proposed a light, neutral particle in a letter that began “Dear radioactive ladies and gentlemen”</li>
+              <li><b>1956</b>: Cowan and Reines detected antineutrinos from a nuclear reactor at Savannah River</li>
+              <li>Nobel Prize for Reines in <b>1995</b></li>
+            </ul>
+            <div class="idea">Trusting a conservation law <b>predicted</b> a new particle.</div>
+          </div>
+        </div>
+        <p class="credits">Pauli: <a href="https://commons.wikimedia.org/wiki/File:Pauli.jpg" target="_blank" rel="noopener">Nobel Foundation, 1945</a>, public domain. Cowan and Reines: <a href="https://commons.wikimedia.org/wiki/File:Clyde_Cowan_and_Frederick_Reines.jpg" target="_blank" rel="noopener">Savannah River Site</a>, public domain.</p>
+        <div class="slide-foot"><span>E.3 RADIOACTIVE DECAY · ADDITIONAL HL</span><span data-page></span></div>
+      </section>
+
+      <section class="slide hl" data-title="HL: The decay constant">
+        <p class="eyebrow">The chance of decay</p>
+        <h2>The decay constant and the decay law<span>.</span></h2>
+        <div class="split even">
+          <div class="stack">
+            <div class="equation"><span>\(N = N_{0} e^{-\lambda t}\)</span></div>
+            <ul class="points small">
+              <li>\(\lambda\): the <b>decay constant</b>, in s⁻¹</li>
+              <li class="step">The <b>probability</b> that a nucleus decays in unit time</li>
+              <li class="step">\(N\): undecayed nuclei left after time \(t\)</li>
+            </ul>
+          </div>
+          <div class="cards step" style="grid-template-columns: 1fr;">
+            <div class="card"><p class="eyebrow">Where it comes from</p><h3>Decays per second ∝ nuclei left</h3><p>A quantity that falls at a rate proportional to itself falls <b>exponentially</b></p></div>
+            <div class="card"><p class="eyebrow">A limit on “probability”</p><h3>Only when \(\lambda t\) is small</h3><p>\(\lambda \times t\) is the chance of decay in time \(t\) only if it is much less than 1</p></div>
+          </div>
+        </div>
+        <div class="slide-foot"><span>E.3 RADIOACTIVE DECAY · ADDITIONAL HL</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>What \(\lambda\) means.</b> If \(\lambda = 0.010 \,\mathrm{s}^{-1}\), each nucleus has a 1% chance of decaying in the next second, and in a large sample 1% of the nuclei do decay in that second. A large \(\lambda\) means a short-lived nuclide.</p>
+            <p><b>Why only for small \(\lambda t\).</b> Take iodine-131, with \(\lambda = 0.0864\) per day. Over one day, \(\lambda t = 0.086\) and the true fraction that decays is \(1 - e^{-0.0864} = 0.083\): close. Over 20 days, \(\lambda t = 1.73\), which cannot be a probability at all, since it is more than 1. The true fraction decayed is \(1 - e^{-1.73} = 0.82\). The simple product works only while the number of nuclei has hardly changed during the interval.</p>
+          </div>
+          <div class="rn-side">
+            <p class="tip">\(\lambda\) and \(t\) must use the same unit of time: per second with seconds, per day with days. Their product has no unit.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide hl" data-title="HL: Activity and half-life">
+        <p class="eyebrow">Three linked equations</p>
+        <h2>Activity and half-life<span>.</span></h2>
+        <div class="split even">
+          <div class="stack">
+            <div class="equation small"><span>\(A = \lambda N = \lambda N_{0} e^{-\lambda t}\)</span></div>
+            <ul class="points small">
+              <li>Activity is the <b>rate of decay</b></li>
+              <li class="step">It falls with the <b>same</b> exponential as \(N\): \(A = A_{0} e^{-\lambda t}\)</li>
+            </ul>
+          </div>
+          <div class="work step">
+            <span class="say">At \(t = T_{\frac{1}{2}}\), half the nuclei are left</span>
+            <span>\(\dfrac{1}{2} N_{0} = N_{0} e^{-\lambda T_{\frac{1}{2}}}\)</span>
+            <span class="step">\(\ln 2 = \lambda T_{\frac{1}{2}}\)</span>
+            <span class="step">\(T_{\frac{1}{2}} = \dfrac{\ln 2}{\lambda}\)</span>
+          </div>
+        </div>
+        <div class="slide-foot"><span>E.3 RADIOACTIVE DECAY · ADDITIONAL HL</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>Why \(A = \lambda N\).</b> Each of the \(N\) nuclei has a probability \(\lambda\) of decaying in each second, so the number of decays per second is \(\lambda N\). This one line connects something you can measure with a detector, the activity, to something you cannot count directly, the number of nuclei.</p>
+            <p><b>The half-life step.</b> Cancel \(N_{0}\) to get \(\frac{1}{2} = e^{-\lambda T}\). Take natural logarithms: \(\ln \frac{1}{2} = -\lambda T\). Since \(\ln \frac{1}{2} = -\ln 2\), the minus signs cancel. \(\ln 2 = 0.693\), so a quick form is \(T_{\frac{1}{2}} = \frac{0.693}{\lambda}\).</p>
+          </div>
+          <div class="rn-side">
+            <p class="tip">A long half-life means a small decay constant and, for the same number of nuclei, a low activity. Uranium-238 is only weakly radioactive because its half-life is so long.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide hl" data-title="HL: Decay law, any time">
+        <p class="eyebrow">Worked example</p>
+        <h2>Iodine-131 after 20 days<span>.</span></h2>
+        <div class="split even">
+          <div class="work">
+            <span class="say">Half-life 8.02 days · initial activity 400 kBq</span>
+            <span>\(\lambda = \dfrac{\ln 2}{T_{\frac{1}{2}}} = \dfrac{0.693}{8.02} = 0.0864 \text{ day}^{-1}\)</span>
+            <span class="step">\(A = A_{0} e^{-\lambda t}\)</span>
+            <span class="step">\(A = 400 \times e^{-0.0864 \times 20} = 400 \times 0.178\)</span>
+            <span class="step">\(A = \class{res}{71 \,\mathrm{kBq}}\)</span>
+          </div>
+          <div class="stack">
+            <ul class="points small">
+              <li>20 days is <b>2.5</b> half-lives: not a whole number</li>
+              <li class="step">Check: between \(\frac{1}{4}\) (100 kBq) and \(\frac{1}{8}\) (50 kBq)</li>
+              <li class="step">Time in days, so \(\lambda\) in day⁻¹</li>
+            </ul>
+          </div>
+        </div>
+        <div class="slide-foot"><span>E.3 RADIOACTIVE DECAY · ADDITIONAL HL</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>Another route to the same answer.</b> \(A = A_{0} \left(\frac{1}{2}\right)^{n}\) works for any \(n\), not only whole numbers. Here \(n = \frac{20}{8.02} = 2.49\), and \(400 \times 0.5^{2.49} = 71 \,\mathrm{kBq}\). The two forms are the same equation written in two ways.</p>
+            <p><b>Finding the time instead.</b> How long until the activity is 25 kBq? Rearrange: \(e^{-\lambda t} = \frac{25}{400}\), so \(\lambda t = \ln \frac{400}{25} = 2.77\) and \(t = \frac{2.77}{0.0864} = 32\) days. Here that is exactly four half-lives, a good check.</p>
+          </div>
+          <div class="rn-side">
+            <p class="trap">Forgetting the minus sign in the exponent. \(e^{+1.73}\) is 5.6, which would make the activity grow.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide hl" data-title="HL: Activity from the number of nuclei">
+        <p class="eyebrow">Worked example</p>
+        <h2>The activity of 1.0 μg of cobalt-60<span>.</span></h2>
+        <div class="split even">
+          <div class="work">
+            <span class="say">Half-life 5.27 years \(= 1.66 \times 10^{8} \,\mathrm{s}\)</span>
+            <span>\(\lambda = \dfrac{\ln 2}{T_{\frac{1}{2}}} = \dfrac{0.693}{1.66 \times 10^{8}} = 4.17 \times 10^{-9} \,\mathrm{s}^{-1}\)</span>
+            <span class="say step">Mass of one atom ≈ \(60 \,\mathrm{u}\)</span>
+            <span class="step">\(N = \dfrac{1.0 \times 10^{-9}}{60 \times 1.661 \times 10^{-27}} = 1.00 \times 10^{16}\)</span>
+            <span class="step">\(A = \lambda N = 4.17 \times 10^{-9} \times 1.00 \times 10^{16}\)</span>
+            <span class="step">\(A = \class{res}{4.2 \times 10^{7} \,\mathrm{Bq}}\)</span>
+          </div>
+          <div class="stack">
+            <ul class="points small">
+              <li>For becquerels, \(\lambda\) must be in <b>s⁻¹</b></li>
+              <li class="step">\(N\) from the mass and the mass of one atom</li>
+              <li class="step">A millionth of a gram: forty million decays every second</li>
+            </ul>
+          </div>
+        </div>
+        <div class="slide-foot"><span>E.3 RADIOACTIVE DECAY · ADDITIONAL HL</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>Measuring a very long half-life.</b> This calculation can be run backwards. Nobody can watch uranium-238 for 4.5 billion years. But you can weigh a sample, work out \(N\), measure its activity \(A\) with a detector, and find \(\lambda = \frac{A}{N}\). The half-life follows from \(\frac{\ln 2}{\lambda}\). Long half-lives are measured this way, without waiting for any noticeable change.</p>
+            <p><b>Using moles.</b> The number of atoms can also be found as \(\frac{\text{mass}}{\text{molar mass}} \times N_\mathrm{A}\): \(\frac{1.0 \times 10^{-6} \,\mathrm{g}}{60 \,\mathrm{g} \,\mathrm{mol}^{-1}} \times 6.02 \times 10^{23} = 1.0 \times 10^{16}\). Both routes give the same number.</p>
+          </div>
+          <div class="rn-side">
+            <p class="tip">One year is \(3.16 \times 10^{7} \,\mathrm{s}\). It is worth remembering for this topic and for D.1.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide hl" data-title="HL: A straight-line graph">
+        <p class="eyebrow">Finding λ from data</p>
+        <h2>A straight-line graph for decay<span>.</span></h2>
+        <div class="split">
+          <div class="stack">
+            <div class="work">
+              <span>\(A = A_{0} e^{-\lambda t}\)</span>
+              <span class="step">\(\ln A = \ln A_{0} - \lambda t\)</span>
+            </div>
+            <ul class="points small">
+              <li class="step">Plot \(\ln A\) against \(t\): a <b>straight line</b></li>
+              <li class="step">Gradient \(= -\lambda\)</li>
+              <li class="step frac">Then \(T_{\frac{1}{2}} = \dfrac{\ln 2}{\lambda}\)</li>
+            </ul>
+          </div>
+          <div class="panel">
+            <div class="panel-head"><span>LOGARITHM OF ACTIVITY AGAINST TIME</span></div>
+            <div class="fig" data-fig="e3-ln-graph"></div>
+          </div>
+        </div>
+        <div class="slide-foot"><span>E.3 RADIOACTIVE DECAY · ADDITIONAL HL</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>Why bother.</b> Judging a half-life from a curve depends on how well the curve has been drawn through scattered points. A straight line is much easier to judge by eye, and its gradient uses every reading at once. If the points do not lie on a straight line, the decay is not a single exponential: perhaps the background was not subtracted, or there are two nuclides in the sample.</p>
+            <p><b>A case with numbers.</b> If \(\ln A\) falls from 6.0 to 3.0 while \(t\) goes from 0 to 25 minutes, the gradient is \(\frac{3.0 - 6.0}{25} = -0.12 \,\mathrm{min}^{-1}\). So \(\lambda = 0.12 \,\mathrm{min}^{-1}\) and \(T_{\frac{1}{2}} = \frac{0.693}{0.12} = 5.8\) minutes.</p>
+            <p><b>Radioactive dating at higher level.</b> A piece of wood has 35% of the carbon-14 activity of living wood. \(\lambda = \frac{0.693}{5730} = 1.21 \times 10^{-4} \,\mathrm{year}^{-1}\), and \(t = \frac{\ln \left(\frac{1}{0.35}\right)}{\lambda} = \frac{1.05}{1.21 \times 10^{-4}} = 8700\) years.</p>
+          </div>
+          <div class="rn-side">
+            <p class="tip">The corrected count rate can be used in place of the activity. It only shifts the line up or down, and the gradient is the same.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide hl" data-title="HL quick check">
+        <p class="eyebrow">Quick check · additional higher level</p>
+        <h2>Stability and the decay law<span>.</span></h2>
+        <div class="quiz fill">
+          <div class="q"><p><span class="n">01</span>Why do heavy stable nuclei need extra neutrons?</p><div class="ans step">More attraction, no more repulsion</div></div>
+          <div class="q"><p><span class="n">02</span>Which spectra are evidence for nuclear energy levels?</p><div class="ans step">Alpha and gamma: both discrete</div></div>
+          <div class="q"><p><span class="n">03</span>What does the continuous beta spectrum show?</p><div class="ans step">A third particle: the neutrino</div></div>
+          <div class="q"><p><span class="n">04</span>A nuclide has \(\lambda = 0.050 \,\mathrm{s}^{-1}\). Half-life?</p><div class="ans step">\(\frac{0.693}{0.050} = 14 \,\mathrm{s}\)</div></div>
+          <div class="q"><p><span class="n">05</span>\(N = 2.0 \times 10^{12}\), \(\lambda = 1.5 \times 10^{-6} \,\mathrm{s}^{-1}\). Activity?</p><div class="ans step">\(3.0 \times 10^{6} \,\mathrm{Bq}\)</div></div>
+          <div class="q"><p><span class="n">06</span>What is the gradient of a graph of \(\ln A\) against \(t\)?</p><div class="ans step">\(-\lambda\)</div></div>
+        </div>
+        <div class="slide-foot"><span class="reveal-hint">PRESS → TO REVEAL EACH ANSWER</span><span data-page></span></div>
+      </section>
+
+      <section class="slide" data-title="Summary">
+        <p class="eyebrow">Summary</p>
+        <h2>Radioactive decay on one slide<span>.</span></h2>
+        <div class="cards fill" style="grid-template-columns: 1fr 1fr 1fr; align-content: center;">
+          <div class="card"><p class="eyebrow">Binding energy</p><h3>Mass defect × \(c^{2}\)</h3><p>\(1 \,\mathrm{u} = 931.5 \,\mathrm{MeV} \,c^{-2}\)<br>Per nucleon: greatest near iron-56</p></div>
+          <div class="card step"><p class="eyebrow">Strong nuclear force</p><h3>Short range, attractive</h3><p>Between all nucleons<br>Balances the repulsion of the protons</p></div>
+          <div class="card step"><p class="eyebrow">Decay</p><h3>Random and spontaneous</h3><p>Alpha, beta-minus with \(\bar{\nu}\), beta-plus with \(\nu\), gamma<br>\(A\) and \(Z\) balance</p></div>
+          <div class="card step"><p class="eyebrow">Half-life</p><h3>The time to halve</h3><p>\(\left(\frac{1}{2}\right)^{n}\) remains after \(n\) half-lives<br>Subtract the background</p></div>
+          <div class="card hl step"><p class="eyebrow">Evidence · HL</p><h3>Spectra</h3><p>Alpha and gamma discrete: nuclear levels<br>Beta continuous: the neutrino</p></div>
+          <div class="card hl step"><p class="eyebrow">Decay law · HL</p><h3>\(N = N_{0} e^{-\lambda t}\)</h3><p>\(A = \lambda N\) and \(T_{\frac{1}{2}} = \frac{\ln 2}{\lambda}\)</p></div>
+        </div>
+        <div class="slide-foot"><span>E.3 RADIOACTIVE DECAY · SL + HL</span><span data-page></span></div>
+      </section>
+
+      <section class="slide" data-title="Key words">
+        <p class="eyebrow">Summary</p>
+        <h2>Key words<span>.</span></h2>
+        <div class="terms fill" style="grid-template-columns: repeat(3, 1fr);">
+          <div class="term"><b>Isotopes</b><span>Same protons, different neutrons</span></div>
+          <div class="term"><b>Mass defect</b><span>Mass lost when a nucleus forms</span></div>
+          <div class="term"><b>Binding energy</b><span>Energy to separate every nucleon</span></div>
+          <div class="term"><b>Strong nuclear force</b><span>Short-range attraction of nucleons</span></div>
+          <div class="term"><b>Spontaneous</b><span>Not affected by outside conditions</span></div>
+          <div class="term"><b>Antineutrino</b><span>Emitted in beta-minus decay</span></div>
+          <div class="term"><b>Activity</b><span>Decays per second, in Bq</span></div>
+          <div class="term"><b>Half-life</b><span>Time for half the nuclei to decay</span></div>
+          <div class="term"><b>Background radiation</b><span>Always present. Subtract it</span></div>
+          <div class="term hl"><b>Decay constant</b><span>Probability of decay per unit time</span></div>
+          <div class="term hl"><b>Band of stability</b><span>Stable nuclides on an N–Z chart</span></div>
+          <div class="term hl"><b>Continuous spectrum</b><span>Every energy up to a maximum</span></div>
+        </div>
+        <div class="slide-foot"><span>E.3 RADIOACTIVE DECAY · SL + HL</span><span data-page></span></div>
+      </section>
+
+    </div>
+  </main>
+
+  <nav class="controls" aria-label="Slide controls">
+    <button type="button" id="prev" aria-label="Previous slide"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg></button>
+    <span class="counter" id="counter" aria-live="polite"></span>
+    <button type="button" id="next" aria-label="Next slide"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 5l7 7-7 7"/></svg></button>
+  </nav>
+  <div class="progress" aria-hidden="true"><span id="progress-bar"></span></div>
+
+  <script src="../assets/figures.js"></script>
+  <script src="figures.js"></script>
+  <script src="../assets/deck-math.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
+  <script src="../assets/deck-notes.js"></script>
+  <script src="../assets/deck.js"></script>
+</body>
+</html>

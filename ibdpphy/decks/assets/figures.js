@@ -5,7 +5,7 @@
 // Each <div data-fig="name"> is filled from FIGURES.
 (() => {
   const SYMBOL = { proton: '+', neutron: '0', electron: '−', alpha: 'α', positive: '+', solid: '' };
-  const GRADIENTS = ['proton', 'neutron', 'electron', 'alpha', 'positive', 'solid', 'brand-accent-strong', 'brand-primary'];
+  const GRADIENTS = ['proton', 'neutron', 'electron', 'alpha', 'positive', 'solid', 'brand-accent-strong', 'brand-primary', 'decayed', 'undecayed'];
   const MARKERS = ['text-secondary', 'alpha', 'electron', 'photon', 'brand-accent', 'brand-primary', 'brand-accent-strong', 'hl', 'proton'];
   const TAU = Math.PI * 2;
   const f = n => Math.round(n * 10) / 10;
@@ -145,6 +145,10 @@
     const changed = new Set();
     for (let k = order.length - 1; k >= 0 && changed.size < protons - base[0]; k--) {
       if (kinds[order[k]] === 'neutron') { kinds[order[k]] = 'proton'; changed.add(order[k]); }
+    }
+    // Fewer protons than the parent (beta-plus decay): front protons become neutrons.
+    for (let k = order.length - 1; k >= 0 && changed.size < base[0] - protons; k--) {
+      if (kinds[order[k]] === 'proton') { kinds[order[k]] = 'neutron'; changed.add(order[k]); }
     }
     const depth = 16;
     const back = Math.min(...points.map(point => point[2])) || -1;
