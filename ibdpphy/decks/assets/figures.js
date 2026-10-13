@@ -311,8 +311,8 @@
       label: 'Two bodies on a track before and after a collision: masses m 1 and m 2 have velocities u 1 and u 2 before and v 1 and v 2 after'
     },
     stick: {
-      bodies: [{ w: 140, m: '1200 kg', x: [175, 400, 535], pre: { label: '15 m s⁻¹', len: 130 }, post: { label: 'v = ?', len: 80, ax: 55 } }, { w: 110, m: '800 kg', x: [525, 525, 660], pre: { rest: true } }],
-      label: 'Before: a 1200 kilogram car at 15 metres per second approaches an 800 kilogram car at rest. After: the two move off joined together at an unknown velocity v'
+      bodies: [{ w: 110, m: '800 kg', x: [190, 415, 505], pre: { label: '15 m s⁻¹', len: 130 }, post: { label: 'v = ?', len: 52, ax: 70 } }, { w: 140, m: '1200 kg', x: [540, 540, 630], pre: { rest: true } }],
+      label: 'Before: an 800 kilogram car at 15 metres per second approaches a 1200 kilogram car at rest. After: the two move off joined together at an unknown velocity v'
     },
     elastic: {
       bodies: [{ m: '2.0 kg', x: [150, 300, 350], pre: { label: '3.0 m s⁻¹', len: 130 }, post: { label: '1.0 m s⁻¹', len: 50 } }, { w: 90, m: '1.0 kg', x: [405, 405, 605], pre: { rest: true }, post: { label: 'v₂ = ?', len: 150 } }],
