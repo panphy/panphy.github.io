@@ -185,6 +185,13 @@
     return `<path d="${d}" class="wave" style="stroke:var(--${color});opacity:${opacity}" ${head ? `marker-end="url(#m-${color})"` : ''}/>`;
   }
 
+  // A straight field line from (x1, y1) to (x2, y2): one unbroken line that ends on the body,
+  // with its arrowhead part of the way along (at), never at the tip.
+  function fline(x1, y1, x2, y2, color = 'brand-primary', width = 3.5, at = 0.5, extra = '') {
+    const hx = x1 + (x2 - x1) * at, hy = y1 + (y2 - y1) * at, deg = Math.atan2(y2 - y1, x2 - x1) * 180 / Math.PI;
+    return `<g ${extra}><line x1="${f(x1)}" y1="${f(y1)}" x2="${f(x2)}" y2="${f(y2)}" style="stroke:var(--${color})" stroke-width="${width}" stroke-linecap="round"/><path d="M-10,-8 L8,0 L-10,8 Z" transform="translate(${f(hx)} ${f(hy)}) rotate(${f(deg)})" style="fill:var(--${color})"/></g>`;
+  }
+
   const text = (x, y, content, cls = 'lbl', anchor = 'middle', extra = '') => `<text x="${x}" y="${y}" class="${cls}" text-anchor="${anchor}" ${extra}>${content}</text>`;
 
   // An electron that the deck script moves around an (optionally tilted) ellipse.
@@ -1120,7 +1127,7 @@
 
   // A deck's own figures.js adds its diagrams with DeckFigures.add(parts => ({ name: el => svg }));
   // the shared drawing helpers arrive as parts. Prefix the names with the topic (d1-…).
-  const PARTS = { svg, ball, cluster, shadow, arrow, wave, text, ring, orbiter, seeded, animated, stepG, fly, axes, plot, shade, body, both, arcPoints, through, sampled, sub, box, dot, surface, labelled, spring, track, anim, spin, twoState, PLAY, f, TAU };
+  const PARTS = { svg, ball, cluster, shadow, arrow, fline, wave, text, ring, orbiter, seeded, animated, stepG, fly, axes, plot, shade, body, both, arcPoints, through, sampled, sub, box, dot, surface, labelled, spring, track, anim, spin, twoState, PLAY, f, TAU };
   const add = make => Object.assign(FIGURES, make(PARTS));
 
   window.DeckFigures = { render, orbitPoint, add };

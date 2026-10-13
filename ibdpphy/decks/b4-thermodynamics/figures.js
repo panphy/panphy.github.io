@@ -14,23 +14,47 @@ window.DeckFigures.add(P => {
   const point = (v, p, label, dx = 14, dy = -12) => `<circle cx="${f(X(v))}" cy="${f(Y(p))}" r="8" style="fill:var(--text-main)"/>` + (label ? text(f(X(v)) + dx, f(Y(p)) + dy, label, 'lbl display', dx < 0 ? 'end' : 'start') : '');
   const once = { loop: false };
 
+  // A box of gas whose atoms never stop: each one bounces between the walls for ever. The box is
+  // w wide at first and stretches to w × grow: once, when the figure's PLAY step is shown
+  // ('once'), again and again ('loop'), or never (grow = 1). The atoms are drawn inside a group
+  // that is stretched sideways, and each is squeezed back by the same factor so that it stays round.
+  function gas(x0, y0, w, h, n, seed, { grow = 1, mode = 'once', dur = 2.4, r = 7, tint = true } = {}) {
+    const rand = seeded(seed), T = 10, steps = 100, tri = u => { const v = ((u % 2) + 2) % 2; return v < 1 ? v : 2 - v; };
+    const atoms = Array.from({ length: n }, () => ({ a: 1 + Math.floor(rand() * 3), b: 1 + Math.floor(rand() * 3), p: rand() * 2, q: rand() * 2 }));
+    const at = (atom, t, width) => [r + (width - 2 * r) * tri(atom.p + 2 * atom.a * t), y0 + r + (h - 2 * r) * tri(atom.q + 2 * atom.b * t)];
+    const dot = `<circle r="${r}" style="fill:var(--brand-primary)"/>`, shade = width => tint ? `<rect x="0" y="${y0}" width="${f(width)}" height="${h}" style="fill:var(--brand-primary);opacity:.16"/>` : '';
+    const stretch = (from, to) => grow === 1 ? '' : mode === 'loop'
+      ? `<animateTransform attributeName="transform" type="scale" values="${from} 1;${to} 1;${to} 1;${from} 1;${from} 1" keyTimes="0;0.4;0.5;0.9;1" dur="${dur}s" repeatCount="indefinite"/>`
+      : `<animateTransform attributeName="transform" type="scale" values="${from} 1;${to} 1" dur="${dur}s" begin="indefinite" fill="freeze"/>`;
+    const still = `<g transform="translate(${x0} 0)">${shade(w * grow)}${atoms.map(atom => { const [x, y] = at(atom, 0.37, w * grow); return `<g transform="translate(${f(x)} ${f(y)})">${dot}</g>`; }).join('')}</g>`;
+    const mover = `<g transform="translate(${x0} 0)"><g>${stretch(1, f(grow * 1000) / 1000)}${shade(w)}${atoms.map(atom => `<g>${track(Array.from({ length: steps + 1 }, (_, i) => at(atom, i / steps, w)), T)}<g>${stretch(1, f(1000 / grow) / 1000)}${dot}</g></g>`).join('')}</g></g>`;
+    return { still, mover };
+  }
+  // What moves with the stretching wall, by the distance the wall moves.
+  const carried = (body, dx, mode, dur) => mode === 'loop'
+    ? `<g><animateTransform attributeName="transform" type="translate" values="0,0;${dx},0;${dx},0;0,0;0,0" keyTimes="0;0.4;0.5;0.9;1" dur="${dur}s" repeatCount="indefinite"/>${body}</g>`
+    : `<g>${track([[0, 0], [dx, 0]], dur, { loop: false })}${body}</g>`;
+
   // The Carnot cycle used on the slides: A→B and C→D are isothermal, B→C and D→A adiabatic.
   const G = 5 / 3, A = [0.8, 6.2], B = [2, 2.48], C = [3.4, 2.48 * (2 / 3.4) ** G], D = [1.36, 6.2 * (0.8 / 1.36) ** G];
   const CARNOT = [curve(A[0], A[1], B[0], 1), curve(B[0], B[1], C[0], G), curve(C[0], C[1], D[0], 1), curve(D[0], D[1], A[0], G)];
 
   return {
-    // A gas in a cylinder pushes a piston out. Played with →. Also drawn small, with data-plain.
+    // A gas in a cylinder with a piston; its atoms are always moving. With labels, one press of →
+    // lets the gas push the piston out. data-plain breathes in and out by itself, and data-still
+    // (the lesson map) does not move at all.
     'b4-piston': el => {
-      const on = labelled(el), rand = seeded(11);
-      const dots = Array.from({ length: 26 }, () => [150 + 300 * rand(), 170 + 180 * rand()]).map(([x, y]) => `<circle cx="${f(x)}" cy="${f(y)}" r="7" style="fill:var(--brand-primary)"/>`).join('');
-      let s = `<path d="M130,150 H700 M130,370 H700 M130,150 V370" style="fill:none;stroke:var(--text-secondary);stroke-width:6;stroke-linecap:round"/>`;
-      const gas = (w, extra = '') => `<rect x="134" y="154" width="${w}" height="212" style="fill:var(--brand-primary);opacity:.16">${extra}</rect>`;
-      const piston = `<rect x="460" y="156" width="26" height="208" rx="4" style="fill:var(--brand-accent-strong)"/><rect x="486" y="250" width="200" height="20" style="fill:var(--brand-accent-strong)"/>`;
+      const on = labelled(el), fixed = 'still' in el.dataset, mode = on ? 'once' : 'loop', dur = on ? 2.4 : 7, w = 326, dx = 140;
+      const wall = x2 => `<path d="M130,150 H${x2} M130,370 H${x2} M130,150 V370" style="fill:none;stroke:var(--text-secondary);stroke-width:6;stroke-linecap:round"/>`;
+      const piston = `<rect x="460" y="156" width="26" height="208" rx="4" style="fill:var(--brand-accent-strong)"/><rect x="486" y="250" width="${fixed ? 110 : 200}" height="20" style="fill:var(--brand-accent-strong)"/>`;
       const force = arrow(486, 210, 590, 210, 'brand-primary', 6) + (on ? text(540, 190, 'F = PA', 'lbl mono strong') : '');
+      if (fixed) return svg('90 120 560 280', wall(540) + gas(134, 154, w, 212, 26, 11).still + piston, 'A gas in a cylinder closed by a piston');
+      let s = wall(700);
       if (on) s += text(300, 130, 'gas at pressure P', 'lbl') + `<line x1="473" y1="380" x2="473" y2="440" class="guide"/><line x1="613" y1="380" x2="613" y2="440" class="guide"/>` + arrow(479, 426, 607, 426, 'brand-accent', 4) + text(543, 462, 'Δx', 'lbl display') + text(300, 462, 'piston of area A', 'lbl');
-      const still = gas(466) + dots + `<g transform="translate(140 0)">${piston}${force}</g>`;
-      const mover = gas(326, anim('width', [326, 466], 2.4, { loop: false, extra: 'calcMode="spline" keySplines=".3 0 .3 1" keyTimes="0;1"' })) + dots + `<g>${track([[0, 0], [140, 0]], 2.4, { loop: false, extra: 'calcMode="spline" keySplines=".3 0 .3 1" keyTimes="0;1"' })}${piston}${force}</g>` + PLAY;
-      return svg(on ? '100 100 720 380' : '100 120 640 280', s + twoState(still, mover), 'A gas at pressure P in a cylinder pushes a piston of area A outwards through a distance delta x. The force on the piston is P times A, so the work done by the gas is P times the change in volume');
+      const box = gas(134, 154, w, 212, 26, 11, { grow: (w + dx) / w, mode, dur });
+      const still = box.still + `<g transform="translate(${dx} 0)">${piston}${force}</g>`;
+      const mover = box.mover + carried(piston + force, dx, mode, dur) + (on ? PLAY : '');
+      return svg(on ? '100 100 720 380' : '100 120 740 280', s + twoState(still, mover), 'A gas at pressure P in a cylinder pushes a piston of area A outwards through a distance delta x. The force on the piston is P times A, so the work done by the gas is P times the change in volume');
     },
 
     // The work done by a gas is the area under its path on a pressure–volume diagram.
@@ -41,18 +65,19 @@ window.DeckFigures.add(P => {
       return svg('40 20 780 490', s, 'A pressure–volume diagram for a gas expanding from volume V 1 to volume V 2 while its pressure falls. The shaded area under the curve is the work done by the gas');
     },
 
-    // Four changes from the same starting state. data-show limits which are drawn; data-plain removes labels.
+    // The four special changes, drawn as lines through one state: a gas can follow each of them in
+    // either direction, so they carry no arrowheads. data-show limits which are drawn; data-plain removes labels.
     'b4-processes': el => {
       const on = labelled(el), show = (el.dataset.show || 'isobaric,isovolumetric,isothermal,adiabatic').split(',');
-      const start = [1.2, 5], kinds = {
-        isobaric: { pts: [[X(1.2), Y(5)], [X(3.2), Y(5)]], colour: 'brand-primary', label: ['isobaric', X(3.2) - 6, Y(5) - 18, 'end'] },
-        isovolumetric: { pts: [[X(1.2), Y(5)], [X(1.2), Y(1.2)]], colour: 'brand-accent-strong', label: ['isovolumetric', X(1.2) + 20, Y(1.3), 'start'] },
-        isothermal: { pts: curve(1.2, 5, 3.2, 1), colour: 'brand-accent', label: ['isothermal', X(3.2) - 4, Y(1.875) - 20, 'end'] },
-        adiabatic: { pts: curve(1.2, 5, 3.2, G), colour: 'hl', label: ['adiabatic', X(3.2) - 4, Y(0.975) + 44, 'end'] }
+      const state = [2, 3], through1 = (v1, v2, gamma) => curve(v1, state[1] * (state[0] / v1) ** gamma, v2, gamma), kinds = {
+        isobaric: { pts: [[X(0.7), Y(3)], [X(3.4), Y(3)]], colour: 'brand-primary', label: ['isobaric', X(0.72), Y(3) - 16, 'start'] },
+        isovolumetric: { pts: [[X(2), Y(5.9)], [X(2), Y(0.6)]], colour: 'brand-accent-strong', label: ['isovolumetric', X(2) + 16, Y(5.7), 'start'] },
+        isothermal: { pts: through1(1.05, 3.4, 1), colour: 'brand-accent', label: ['isothermal', X(3.4), Y(1.76) - 18, 'end'] },
+        adiabatic: { pts: through1(1.34, 3.4, G), colour: 'hl', label: ['adiabatic', X(3.4), Y(1.24) + 42, 'end'] }
       };
       let s = pvAxes(on);
-      show.forEach(name => { const k = kinds[name]; s += path(k.pts, k.colour) + head(k.pts, 0.55, k.colour) + (on ? text(f(k.label[1]), f(k.label[2]), k.label[0], 'lbl strong halo', k.label[3], `style="fill:var(--${k.colour === 'hl' ? 'hl-text' : k.colour})"`) : ''); });
-      return svg('40 20 780 490', s + point(start[0], start[1], ''), 'A pressure–volume diagram showing four changes from the same starting state: an isobaric expansion along a horizontal line, an isovolumetric fall in pressure down a vertical line, an isothermal expansion along a curve, and an adiabatic expansion along a steeper curve');
+      show.forEach(name => { const k = kinds[name]; s += path(k.pts, k.colour) + (on ? text(f(k.label[1]), f(k.label[2]), k.label[0], 'lbl strong halo', k.label[3], `style="fill:var(--${k.colour === 'hl' ? 'hl-text' : k.colour})"`) : ''); });
+      return svg('40 20 780 490', s + point(state[0], state[1], ''), 'A pressure–volume diagram showing four kinds of change as lines through the same state: isobaric along a horizontal line, isovolumetric along a vertical line, isothermal along a curve, and adiabatic along a steeper curve. A gas can follow each line in either direction');
     },
 
     // A rectangular cycle: the area enclosed is the net work done in one cycle.
@@ -65,15 +90,13 @@ window.DeckFigures.add(P => {
       return svg('20 20 800 490', s, 'A pressure–volume diagram of a cycle A B C D round a rectangle, clockwise. The pressure is 3.0 along the top and 1.0 along the bottom, in units of 10 to the 5 pascals; the volume is 1.0 on the left and 4.0 on the right, in units of 10 to the minus 3 cubic metres. The shaded area inside the rectangle is the net work done by the gas in one cycle');
     },
 
-    // A gas released into the empty half of a box. Played with →.
+    // A gas released into the empty half of a box: its atoms never stop moving. Played with →.
     'b4-expand': () => {
-      const rand = seeded(5), n = 36;
-      const from = Array.from({ length: n }, () => [110 + 250 * rand(), 110 + 260 * rand()]), to = Array.from({ length: n }, () => [110 + 560 * rand(), 110 + 260 * rand()]);
-      const ball = `<circle r="9" style="fill:var(--brand-primary)"/>`;
       const frame = `<rect x="90" y="90" width="600" height="300" rx="8" style="fill:none;stroke:var(--text-secondary);stroke-width:5"/>`;
-      const still = to.map(([x, y]) => `<g transform="translate(${f(x)} ${f(y)})">${ball}</g>`).join('') + `<line x1="390" y1="90" x2="390" y2="390" class="guide"/>`;
-      const mover = from.map(([x, y], i) => `<g transform="translate(${f(x)} ${f(y)})">${track([[x, y], to[i]], 1.6 + rand(), once)}${ball}</g>`).join('') + `<line x1="390" y1="92" x2="390" y2="388" style="stroke:var(--text-secondary);stroke-width:5">${anim('opacity', [1, 0], 0.4, once)}</line>` + PLAY;
-      return svg('60 60 660 420', frame + twoState(still, mover) + text(390, 440, 'It never goes back by itself', 'lbl strong'), 'A box with a partition down the middle and all the gas molecules in the left half. When the partition is removed the molecules spread out to fill the whole box, and they never gather in one half again by themselves');
+      const box = gas(96, 96, 290, 288, 36, 5, { grow: 588 / 290, dur: 3, r: 9, tint: false });
+      const still = box.still + `<line x1="390" y1="90" x2="390" y2="390" class="guide"/>`;
+      const mover = box.mover + `<line x1="390" y1="92" x2="390" y2="388" style="stroke:var(--text-secondary);stroke-width:5">${anim('opacity', [1, 0], 0.4, once)}</line>` + PLAY;
+      return svg('60 60 660 420', frame + twoState(still, mover) + text(390, 440, 'It never goes back by itself', 'lbl strong'), 'A box with a partition down the middle and all the gas molecules, always moving, in the left half. When the partition is removed the molecules spread out to fill the whole box, and they never gather in one half again by themselves');
     },
 
     // Four coins: the number of microstates for each number of heads. Also drawn small, with data-plain.
