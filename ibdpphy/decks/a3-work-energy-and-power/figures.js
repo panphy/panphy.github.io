@@ -3,7 +3,7 @@
 // force arrow starts where the force acts. Kinetic energy is apricot, potential energy teal and
 // the total slate. Nothing here is terracotta: A.3 has no additional higher level content.
 window.DeckFigures.add(P => {
-  const { svg, arrow, text, sub, box, dot, surface, axes, plot, shade, both, through, sampled, labelled, spring, track, anim, twoState, f } = P;
+  const { svg, arrow, text, sub, box, dot, surface, axes, plot, shade, both, through, sampled, labelled, spring, track, anim, twoState, PLAY, f } = P;
   const bar = (x, y, w, h, colour, extra = '') => `<rect x="${x}" y="${f(y)}" width="${w}" height="${f(h)}" rx="6" style="fill:var(--${colour})">${extra}</rect>`;
 
   // The roller-coaster track: height above the lowest point, in pixels, at horizontal position x.
@@ -73,9 +73,9 @@ window.DeckFigures.add(P => {
 
     // A compressed spring launching a ball: the spring, drawn horizontally.
     'a3-launcher': () => {
-      // The spring lies along the line through the ball's centre and touches it. Animated: the spring
-      // pushes the ball out to the natural length (a quarter of an oscillation), then the ball leaves at v.
-      const wall = 96, cy = 298, r = 30, L0 = 192, Ln = 350, T = 2.6, n = 52, hold = 0.6, tq = 0.5, w = Math.PI / (2 * tq), vx = (Ln - L0) * w;
+      // The spring lies along the line through the ball's centre and touches it. Played once on a press: the
+      // spring pushes the ball out to the natural length (a quarter of an oscillation), then the ball leaves at v.
+      const wall = 96, cy = 298, r = 30, L0 = 192, Ln = 350, n = 80, hold = 0.3, tq = 1.2, w = Math.PI / (2 * tq), vx = (Ln - L0) * w, T = hold + tq + (800 - wall - Ln - r) / vx;
       const coil = L => spring(0, 0, L, 9, 28).match(/d="([^"]+)"/)[1];
       const lengthAt = t => t < hold ? L0 : t < hold + tq ? L0 + (Ln - L0) * (1 - Math.cos(w * (t - hold))) : Ln;
       const ballAt = t => t < hold + tq ? wall + lengthAt(t) + r : wall + Ln + r + vx * (t - hold - tq);
@@ -85,9 +85,9 @@ window.DeckFigures.add(P => {
       let s = surface(60, 330, 760, 330) + `<rect x="70" y="210" width="26" height="120" style="fill:var(--text-secondary)"/>`;
       s += `<line x1="${wall + L0}" y1="180" x2="${wall + L0}" y2="330" class="guide"/><line x1="${wall + Ln}" y1="180" x2="${wall + Ln}" y2="330" class="guide"/>` + both(wall + L0 + 6, 196, wall + Ln - 6, 196) + text(wall + (L0 + Ln) / 2, 180, 'Δx', 'lbl display') + text(wall + Ln, 372, 'natural length', 'lbl strong');
       const still = `<g transform="translate(${wall} ${cy}) rotate(-90)"><path class="cable" stroke-linejoin="round" d="${coil(L0)}"/></g><g transform="translate(${wall + L0 + r} ${cy})">${ball}${vArrow}</g>`;
-      const mover = `<g transform="translate(${wall} ${cy}) rotate(-90)"><path class="cable" stroke-linejoin="round" d="${coil(L0)}">${anim('d', times.map(t => coil(f(lengthAt(t)))), T)}</path></g>` +
-        `<g transform="translate(${wall + L0 + r} ${cy})">${track(times.map(t => [ballAt(t), cy]), T)}${ball}<g opacity="0">${anim('opacity', [0, 0, 1, 1], T, { extra: `keyTimes="0;${f((hold + tq) / T * 1000) / 1000};${f((hold + tq) / T * 1000 + 1) / 1000};1"` })}${vArrow}</g></g>`;
-      return svg('40 140 740 250', s + twoState(still, mover), 'A ball rests against a spring that has been compressed by a distance delta x from its natural length. When released, the spring pushes the ball until the spring reaches its natural length, and the elastic potential energy of the spring becomes the kinetic energy of the ball, which then moves off at speed v');
+      const mover = `<g transform="translate(${wall} ${cy}) rotate(-90)"><path class="cable" stroke-linejoin="round" d="${coil(L0)}">${anim('d', times.map(t => coil(f(lengthAt(t)))), T, { loop: false })}</path></g>` +
+        `<g transform="translate(${wall + L0 + r} ${cy})">${track(times.map(t => [ballAt(t), cy]), T, { loop: false })}${ball}<g opacity="0">${anim('opacity', [0, 0, 1, 1], T, { loop: false, extra: `keyTimes="0;${f((hold + tq) / T * 1000) / 1000};${f((hold + tq) / T * 1000 + 1) / 1000};1"` })}${vArrow}</g></g>`;
+      return svg('40 140 740 250', s + twoState(still, mover) + PLAY, 'A ball rests against a spring that has been compressed by a distance delta x from its natural length. When released, the spring pushes the ball until the spring reaches its natural length, and the elastic potential energy of the spring becomes the kinetic energy of the ball, which then moves off at speed v');
     },
 
     // A Sankey diagram for a petrol engine: the width of each arrow shows the energy. Also drawn small, with data-plain.

@@ -67,8 +67,11 @@ window.DeckFigures.add(P => {
     // A mass on a string wound round a wheel: the falling mass turns the wheel.
     'a4-falling': () => {
       const cx = 380, cy = 180, r = 100;
-      let s = `<line x1="${cx - 150}" y1="${cy}" x2="${cx + 150}" y2="${cy}" class="tick" style="stroke-width:6"/>` + at(cx, cy, `<g transform="rotate(20)">${wheel(r)}</g>`) + `<line x1="${cx + r}" y1="${cy}" x2="${cx + r}" y2="400" class="cable"/><rect x="${cx + r - 34}" y="400" width="68" height="60" rx="8" style="${BODY}"/>`;
-      s += arrow(cx + r, 400, cx + r, 310, 'brand-primary', 6) + text(cx + r + 16, 340, 'T', 'lbl display', 'start') + dot(cx + r, 430, 6) + arrow(cx + r, 430, cx + r, 540, 'brand-primary', 6) + text(cx + r + 16, 540, 'mg', 'lbl display', 'start') + arrow(cx + r - 70, 420, cx + r - 70, 480, 'brand-accent', 5) + text(cx + r - 86, 460, 'a', 'lbl display', 'end') + turn(cx, cy, r + 30, -150, -30) + text(cx, cy - r - 44, 'α', 'lbl greek') + both(cx, cy + 30, cx + r, cy + 30) + text(cx + r / 2, cy + 66, 'r', 'lbl display italic') + text(cx - 190, cy + 10, 'wheel,', 'lbl', 'end') + text(cx - 190, cy + 44, 'moment of inertia I', 'lbl', 'end');
+      // The radius r drawn beside one spoke (the one at 120°, down and to the left), parallel to it.
+      const ang = 120 * Math.PI / 180, ux = Math.cos(ang), uy = Math.sin(ang), ox = -uy * 20, oy = ux * 20;
+      const rArrow = both(f(cx + ox), f(cy + oy), f(cx + ox + r * ux), f(cy + oy + r * uy)) + text(f(cx + 2.4 * ox + 0.55 * r * ux), f(cy + 2.4 * oy + 0.55 * r * uy) + 10, 'r', 'lbl display italic');
+      let s = `<line x1="${cx - 150}" y1="${cy}" x2="${cx + 150}" y2="${cy}" class="tick" style="stroke-width:6"/>` + at(cx, cy, wheel(r)) + `<line x1="${cx + r}" y1="${cy}" x2="${cx + r}" y2="400" class="cable"/><rect x="${cx + r - 34}" y="400" width="68" height="60" rx="8" style="${BODY}"/>`;
+      s += arrow(cx + r, 400, cx + r, 310, 'brand-primary', 6) + text(cx + r + 16, 340, 'T', 'lbl display', 'start') + dot(cx + r, 430, 6) + arrow(cx + r, 430, cx + r, 540, 'brand-primary', 6) + text(cx + r + 16, 540, 'mg', 'lbl display', 'start') + arrow(cx + r - 70, 420, cx + r - 70, 480, 'brand-accent', 5) + text(cx + r - 86, 460, 'a', 'lbl display', 'end') + turn(cx, cy, r + 30, -150, -30) + text(cx, cy - r - 44, 'α', 'lbl greek') + rArrow + text(cx - 190, cy + 10, 'wheel,', 'lbl', 'end') + text(cx - 190, cy + 44, 'moment of inertia I', 'lbl', 'end');
       return svg('-120 -10 760 580', s, 'A wheel free to turn on a fixed axle, with a string wound round its rim and a mass hanging from the string. The weight of the mass acts downwards at its centre and the tension acts upwards where the string is attached. As the mass accelerates downwards, the tension exerts a torque on the wheel and gives it an angular acceleration');
     },
 
@@ -85,24 +88,13 @@ window.DeckFigures.add(P => {
 
     // A disc at rest dropped onto a spinning disc: afterwards they turn together, more slowly.
     'a4-coupled': () => {
-      // Seen from the side, each disc's top face is an ellipse and a dot on the face shows it turning.
-      // Before, the lower disc turns once every 2 s. After, the pair turn together at 8.0 rad/s
-      // instead of 12, so once every 3 s. The axis of rotation is the dashed line.
-      const ry = 26, disc = (cx, cy, w, colour) => `<ellipse cx="${cx}" cy="${cy}" rx="${w}" ry="${ry}" style="fill:color-mix(in srgb, var(--${colour}) 40%, var(--viewer-bg));stroke:var(--${colour});stroke-width:3"/>`;
+      // The flat picture: what prints, and what shows if discs.js cannot load Three.js. On screen
+      // discs.js puts a model of the two discs over it, turning about the dashed axis.
+      const disc = (cx, cy, w, colour) => `<ellipse cx="${cx}" cy="${cy}" rx="${w}" ry="26" style="fill:color-mix(in srgb, var(--${colour}) 40%, var(--viewer-bg));stroke:var(--${colour});stroke-width:3"/>`;
       const axis = cx => `<line x1="${cx}" y1="140" x2="${cx}" y2="440" class="guide" style="stroke-width:3"/>`;
-      // A point on a disc face at angle a in degrees; 90 is the front of the disc.
-      const markAt = (cx, cy, w, a) => [f(cx + 0.8 * w * Math.cos(a * Math.PI / 180)), f(cy + 0.8 * ry * Math.sin(a * Math.PI / 180))];
-      const dotAt = ([x, y], colour) => `<circle cx="${x}" cy="${y}" r="9" style="fill:var(--${colour})"/>`;
-      // The front of each disc moves left to right, as the curved arrows show, so the angle decreases.
-      const mark = (cx, cy, w, colour, a, period) => {
-        const pts = Array.from({ length: 49 }, (_, i) => markAt(cx, cy, w, a - i / 48 * 360));
-        return twoState(dotAt(pts[0], colour), period ? `<circle r="9" style="fill:var(--${colour})"><animateMotion dur="${period}s" repeatCount="indefinite" path="M${pts.map(p => p.join(',')).join(' L')}"/></circle>` : dotAt(pts[0], colour));
-      };
-      let s = axis(220) + disc(220, 340, 130, 'brand-accent-strong') + mark(220, 340, 130, 'brand-accent-strong', 120, 2) + disc(220, 190, 90, 'brand-accent') + mark(220, 190, 90, 'brand-accent-strong', 60, 0);
-      s += turn(220, 340, 150, 160, 20, 'hl', 5) + text(220, 520, 'before', 'lbl strong') + text(50, 300, sub('ω', '1'), 'lbl greek', 'end') + text(330, 196, 'at rest', 'lbl', 'start');
-      s += axis(640) + disc(640, 340, 130, 'brand-accent-strong') + mark(640, 340, 130, 'brand-accent-strong', 120, 3) + disc(640, 314, 90, 'brand-accent') + mark(640, 314, 90, 'brand-accent-strong', 60, 3);
-      s += turn(640, 340, 150, 160, 80, 'hl', 5) + text(640, 520, 'after', 'lbl strong') + text(480, 300, 'ω', 'lbl greek', 'end') + text(640, 130, 'turning together', 'lbl');
-      return svg('-10 90 820 450', s, 'Two discs on the same axis of rotation, shown dashed. Before, the lower disc is spinning with angular velocity omega 1 and the upper disc is at rest above it. After the upper disc is dropped onto the lower one, friction makes them turn together with a smaller angular velocity: a mark on each disc goes round once every 3 seconds instead of once every 2');
+      let s = disc(220, 340, 130, 'brand-accent-strong') + disc(220, 190, 90, 'brand-accent') + axis(220) + turn(220, 340, 150, 160, 20, 'hl', 5) + text(220, 520, 'before', 'lbl strong') + text(50, 300, sub('ω', '1'), 'lbl greek', 'end') + text(330, 196, 'at rest', 'lbl', 'start');
+      s += disc(640, 340, 130, 'brand-accent-strong') + disc(640, 314, 90, 'brand-accent') + axis(640) + turn(640, 340, 150, 160, 80, 'hl', 5) + text(640, 520, 'after', 'lbl strong') + text(480, 300, 'ω', 'lbl greek', 'end') + text(640, 130, 'turning together', 'lbl');
+      return svg('-10 90 820 450', s, 'Two discs on the same axis of rotation, shown dashed. Before, the lower disc is spinning with angular velocity omega 1 and the upper disc is at rest above it. After the upper disc is dropped onto the lower one, friction makes them turn together with a smaller angular velocity');
     },
 
     // A solid sphere and a hoop rolling down the same slope: the sphere wins. Also drawn plain.
