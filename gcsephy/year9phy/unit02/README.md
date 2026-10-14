@@ -2,7 +2,7 @@
 
 **Year 9 Physics · AQA GCSE energy · nine lessons**
 
-A student workbook (with an answer edition), a teaching deck and nine lesson plans. There is no companion website; [`index.html`](index.html) is a short page linking the files.
+A student workbook (with an answer edition), a teaching deck and nine lesson plans. There is no companion website; [`index.html`](index.html) is a short page linking the workbook, its answers and the deck. The lesson plans are not linked there.
 
 ## Scope
 

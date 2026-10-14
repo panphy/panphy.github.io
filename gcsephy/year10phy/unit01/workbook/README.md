@@ -7,7 +7,7 @@ Twelve 50-minute lessons for AQA GCSE Combined Science: Trilogy (Higher) and GCS
 | File | Use |
 |---|---|
 | `pdf/` | 12 lesson booklets (8–12 pages), a 14-page Unit review, an answer edition of each with the same page numbers, and `Electric Circuits - Year 10 Teacher Guide.pdf` (hosted but not linked from any page) |
-| `index.html` | Student page linking the thirteen booklets and answer editions |
+| `index.html` | Student page linking the thirteen booklets and answer editions; it does not link the unit website |
 | `workbook.html` | PDF source: `?lesson=1`…`12` or `?review`, add `&answers`; `?labs` is the virtual labs booklet |
 | `teacher-guide.html` | Guide source (`?lesson=N` for one plan) |
 | `assets/content.js`, `assets/plans-data.js` | All workbook content; teacher notes per lesson |
