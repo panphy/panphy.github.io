@@ -14,7 +14,8 @@ model3d('house3d', ({ THREE, scene, label }) => {
   };
   const box = (w, h, d, m, x, y, z) => { const b = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), m); b.position.set(x, y, z); scene.add(b); return b; };
 
-  const W = 4.4, D = 3.4, H = 2.5, T = [0.14, 0.12, 0.1];   // outer size, wall height, layer thicknesses
+  const W = 4.4, D = 3.4, H = 2.5, T = [0.14, 0.12, 0.1];   // outer size, ceiling height, layer thicknesses
+  const TOP = H + 0.4;   // the walls rise above the ceiling, so the roof clears the loft insulation
   const TT = T[0] + T[1] + T[2];
   const LAYERS = [M.brick, M.wool, M.inner];
 
@@ -37,39 +38,41 @@ model3d('house3d', ({ THREE, scene, label }) => {
   box(W - 2 * TT, 0.04, D - TT, M.carpet, 0, -0.04, TT / 2);
 
   // Back wall with a door opening (x from -1.5 to -0.6, up to 2.0 m), where the open front shows it.
-  wall('x', -D / 2, -W / 2, -1.5, 0, H);
-  wall('x', -D / 2, -0.6, W / 2, 0, H);
-  wall('x', -D / 2, -1.5, -0.6, 2.0, H);
+  wall('x', -D / 2, -W / 2, -1.5, 0, TOP);
+  wall('x', -D / 2, -0.6, W / 2, 0, TOP);
+  wall('x', -D / 2, -1.5, -0.6, 2.0, TOP);
   box(0.9, 1.96, 0.08, M.door, -1.05, 0.98, -D / 2 + TT - 0.05);
   box(0.9, 0.08, 0.14, M.strip, -1.05, 0.04, -D / 2 + TT + 0.02);
 
   // Right wall with a window opening (z from -0.6 to 0.6, height 0.9 to 1.9 m), double glazed.
-  wall('z', W / 2, -D / 2 + TT, -0.6, 0, H);
-  wall('z', W / 2, 0.6, D / 2, 0, H);
+  wall('z', W / 2, -D / 2 + TT, -0.6, 0, TOP);
+  wall('z', W / 2, 0.6, D / 2, 0, TOP);
   wall('z', W / 2, -0.6, 0.6, 0, 0.9);
-  wall('z', W / 2, -0.6, 0.6, 1.9, H);
+  wall('z', W / 2, -0.6, 0.6, 1.9, TOP);
   box(TT, 0.06, 1.2, M.frame, W / 2 - TT / 2, 1.4, 0);
   box(0.02, 1.0, 1.2, M.glass, W / 2 - 0.08, 1.4, 0);
   box(0.02, 1.0, 1.2, M.glass, W / 2 - TT + 0.08, 1.4, 0);
 
   // Side walls start inside the back wall, so no two layers overlap (overlaps flicker).
   // Left wall, whole. The front wall is left out: that is the cut-away.
-  wall('z', -W / 2, -D / 2 + TT, D / 2, 0, H);
+  wall('z', -W / 2, -D / 2 + TT, D / 2, 0, TOP);
 
   // Ceiling, then a thick layer of loft insulation on top of it.
-  box(W, 0.06, D, M.ceiling, 0, H + 0.03, 0);
-  box(W - 0.2, 0.3, D - 0.2, M.wool, 0, H + 0.21, 0);
+  // Ceiling and loft insulation fill the inside of the walls exactly: nothing pokes into a wall.
+  const inW = W - 2 * TT, inD = D - TT, inZ = TT / 2;
+  box(inW, 0.06, inD, M.ceiling, 0, H + 0.03, inZ);
+  box(inW, 0.3, inD, M.wool, 0, H + 0.21, inZ);
 
   // Pitched roof: two slopes meeting at a ridge along x, with gable ends filled in brick.
   const rise = 1.3, half = D / 2 + 0.25, slope = Math.atan2(rise, half), len = Math.hypot(rise, half) + 0.1;
   // Only the back slope is kept: with the front wall, the front slope is cut away too, so the loft shows.
-  const back = box(W + 0.5, 0.1, len, M.roof, 0, H + rise / 2 + 0.05, -half / 2);
+  const back = box(W + 0.5, 0.1, len, M.roof, 0, TOP + rise / 2 + 0.05, -half / 2);
   back.rotation.x = -slope;
   const gable = new THREE.Shape([new THREE.Vector2(-D / 2, 0), new THREE.Vector2(D / 2, 0), new THREE.Vector2(0, rise * (D / 2) / half)]);
   [-1, 1].forEach(side => {
     const g = new THREE.Mesh(new THREE.ExtrudeGeometry(gable, { depth: T[0], bevelEnabled: false }), M.brick);
     g.rotation.y = Math.PI / 2;
-    g.position.set(side > 0 ? W / 2 - T[0] : -W / 2, H, 0);
+    g.position.set(side > 0 ? W / 2 - T[0] : -W / 2, TOP, 0);
     scene.add(g);
   });
 
