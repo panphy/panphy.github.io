@@ -8,40 +8,37 @@ const THREE_URL = 'https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module
 // The worked example: I₁ = 0.20 kg m² at 12 rad/s, then I₁ + I₂ = 0.30 kg m² at 8.0 rad/s.
 // On screen the speeds are scaled down by the same factor, so their ratio is still 3 : 2.
 const OMEGA_1 = 12, OMEGA = 8, SHOWN = 0.2;
-// The loop, in seconds: spin alone, drop, slip, turn together, fade out.
-const SPIN = 3.4, DROP = 0.55, SLIP = 0.6, TOGETHER = 4.4, FADE = 0.6;
-const LOOP = SPIN + DROP + SLIP + TOGETHER + FADE;
+// After the press: the fall and the slip, in seconds.
+const DROP = 0.55, SLIP = 0.6;
 const LOWER = { radius: 1.3, thick: 0.24, colour: '--brand-accent-strong' };
 const UPPER = { radius: 0.9, thick: 0.24, colour: '--brand-accent', held: 1.25 };
 const SIDES = 12;
 
 const cssColour = name => getComputedStyle(document.documentElement).getPropertyValue(name).trim() || '#888';
 
-// The state of the two discs at time t: the upper disc's height and the two angles. During the
-// slip, friction changes ω by equal and opposite angular impulses: ΔL of one is −ΔL of the other.
-function at(t) {
+// The state of the two discs at time t, when the upper disc was let go at `drop` (null: not yet).
+// The lower disc always spins. During the slip, friction changes ω by equal and opposite angular
+// impulses: ΔL of one is −ΔL of the other.
+function at(t, drop) {
   const w1 = OMEGA_1 * SHOWN, w = OMEGA * SHOWN, rest = LOWER.thick / 2 + UPPER.thick / 2;
-  let lower = 0, upper = 0, height = rest + UPPER.held;
-  if (t < SPIN + DROP) {
-    lower = w1 * t;
-    const d = Math.max(0, t - SPIN) / DROP;
-    height = rest + UPPER.held * (1 - d * d);
-  } else {
-    const s = Math.min(t - SPIN - DROP, SLIP);
-    lower = w1 * (SPIN + DROP) + w1 * s + (w - w1) * s * s / (2 * SLIP);
-    upper = w * s * s / (2 * SLIP);
-    if (t > SPIN + DROP + SLIP) { const k = t - SPIN - DROP - SLIP; lower += w * k; upper += w * k; }
-    height = rest;
+  if (drop === null || t < drop + DROP) {
+    const d = drop === null ? 0 : Math.max(0, t - drop) / DROP;
+    return { lower: w1 * t, upper: 0, height: rest + UPPER.held * (1 - d * d), phase: 'before' };
   }
-  const phase = t < SPIN + DROP ? 'before' : t < SPIN + DROP + SLIP ? 'slip' : 'after';
-  return { lower, upper, height, phase };
+  const start = drop + DROP, s = Math.min(t - start, SLIP), k = Math.max(0, t - start - SLIP);
+  return {
+    lower: w1 * (start + s) + (w - w1) * s * s / (2 * SLIP) + w * k,
+    upper: w * s * s / (2 * SLIP) + w * k,
+    height: rest,
+    phase: k > 0 ? 'after' : 'slip'
+  };
 }
 
 function build(THREE, fig, index) {
   const flat = fig.querySelector('svg');
   const holder = document.createElement('div');
   holder.className = 'mover discs3d';
-  holder.style.cssText = 'position:absolute;inset:0;transition:opacity .25s linear;';
+  holder.style.cssText = 'position:absolute;inset:0;';
   const canvas = document.createElement('canvas');
   canvas.style.cssText = 'position:absolute;inset:0;width:100%;height:100%;display:block;';
   canvas.setAttribute('role', 'img');
@@ -101,7 +98,7 @@ function build(THREE, fig, index) {
   const slide = fig.closest('.slide');
   let width = 0, height = 0, shown = '';
   // Draws the discs at time t. False if the figure has no size yet.
-  function draw(t) {
+  function draw(t, drop) {
     const w = holder.clientWidth, h = holder.clientHeight;
     if (!w || !h) return false;
     if (w !== width || h !== height) {
@@ -111,7 +108,7 @@ function build(THREE, fig, index) {
       camera.aspect = w / h;
       camera.updateProjectionMatrix();
     }
-    const state = at(t);
+    const state = at(t, drop);
     lower.group.rotation.y = state.lower;
     upper.group.rotation.y = state.upper;
     upper.group.position.y = state.height;
@@ -119,17 +116,21 @@ function build(THREE, fig, index) {
     if (state.phase !== shown) { shown = state.phase; caption.innerHTML = words[shown]; }
     return true;
   }
-  // The loop starts again each time the slide is opened.
-  let start = null, wasActive = false;
+  // The lower disc spins from when the slide opens. The figure's play step is the press that drops
+  // the upper disc; hiding it again (going back) lifts the disc again. If the slide opens with the
+  // step already shown, the discs are already turning together.
+  let start = null, drop = null, wasActive = false;
   function frame(time) {
     requestAnimationFrame(frame);
     const active = slide.classList.contains('active') && !document.hidden;
-    if (active && !wasActive) start = time;
+    const pressed = !!fig.querySelector('.step.play.shown');
+    if (active && !wasActive) { start = time; drop = pressed ? -10 : null; }
     wasActive = active;
     if (!active) return;
-    const t = ((time - start) / 1000) % LOOP;
-    holder.style.opacity = t > LOOP - FADE || t < 0.05 ? '0' : '1';
-    draw(t);
+    const t = (time - start) / 1000;
+    if (pressed && drop === null) drop = t;
+    if (!pressed) drop = null;
+    draw(t, drop);
   }
   requestAnimationFrame(frame);
 
@@ -137,12 +138,11 @@ function build(THREE, fig, index) {
   // turning together, in place of the flat picture.
   const copy = document.querySelectorAll('#thumbs [data-discs]')[index];
   function snapshot() {
-    if (!copy || !draw(SPIN + DROP + SLIP + 0.9)) return;
+    if (!copy || !draw(2.3, 0)) return;
     const shot = holder.cloneNode(true), image = new Image();
     image.src = canvas.toDataURL();
     image.alt = '';
     image.style.cssText = canvas.style.cssText;
-    shot.style.opacity = '1';
     shot.querySelector('canvas').replaceWith(image);
     copy.querySelector('.discs3d')?.remove();
     copy.querySelectorAll('svg').forEach(svg => { svg.style.display = 'none'; });
