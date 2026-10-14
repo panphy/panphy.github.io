@@ -4,7 +4,7 @@ The nine lesson plans for *Energy: Stores and Transfers* as printable A4 PDFs, p
 
 | File | Use |
 |---|---|
-| `Lesson 1 - …pdf` to `Lesson 9 - …pdf` | The guides to read before teaching (built by `build-pdf.sh`) |
+| `Lesson 1 - …pdf` to `Lesson 9 - …pdf` | The guides to read before teaching |
 | `source/*.md` | Editable text, one file per lesson |
 | `guide.html` | Browser preview: `guide.html?lesson=3` (1 to 9) |
 | `assets/guide.css`, `assets/guide.js` | Print styles and the small Markdown renderer (copied from Unit 1) |
