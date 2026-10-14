@@ -44,7 +44,7 @@
     thermistor: { half: 20, size: 15, body: '<rect x="-20" y="-8" width="40" height="16"/><path d="M-27 15 H-18 L18 -15"/>' },
     ldr: {
       half: 22, size: 24,
-      body: `<circle r="22"/><rect x="-15" y="-6" width="30" height="12"/>${arrowLine(-36, -34, -22, -20)}${arrowLine(-24, -42, -10, -28)}`,
+      body: `<circle r="22"/><path d="M-22 0H-15M15 0H22"/><rect x="-15" y="-6" width="30" height="12"/>${arrowLine(-36, -34, -22, -20)}${arrowLine(-24, -42, -10, -28)}`,
     },
     lamp: { half: 12, size: 13, body: '<circle r="12"/><line x1="-8.5" y1="-8.5" x2="8.5" y2="8.5"/><line x1="-8.5" y1="8.5" x2="8.5" y2="-8.5"/>' },
     ammeter: { half: 12, size: 13, body: '<circle r="12"/>', letter: "A" },

@@ -174,14 +174,24 @@
 
   /* Sankey diagram. input, useful, wasted in the same unit; s = pixels per unit.
      Useful energy goes straight on; wasted energy bends down. */
-  function sankey({ input, useful, wasted, s = 1.6, unit = "J", inLabel = "input", useLabel = "useful", wasteLabel = "wasted" }) {
+  let sankeyId = 0;
+  function sankey({ blend = false, input, useful, wasted, s = 1.6, unit = "J", inLabel = "input", useLabel = "useful", wasteLabel = "wasted" }) {
     const x0 = 100, xs = 190, xe = 330, y0 = 30, H = input * s, U = useful * s, Wd = wasted * s, r = 18, head = 16;
     const yc = y0 + H + r, R = r + Wd, yEnd = yc + 40;
     const use = `<path class="ink cool-t s-cool" d="M${xs} ${y0}H${xe}L${xe + head} ${y0 + U / 2}L${xe} ${y0 + U}H${xs}Z"/>`;
     const waste = `<path class="ink hot-t s-hot" d="M${xs} ${y0 + U}A${R} ${R} 0 0 1 ${xs + R} ${yc}V${yEnd}L${xs + R + 6} ${yEnd}L${xs + (r + R) / 2} ${yEnd + head}L${xs + r - 6} ${yEnd}L${xs + r} ${yEnd}V${yc}A${r} ${r} 0 0 0 ${xs} ${y0 + H}Z"/>`;
     const inp = `<rect class="ink soft" x="${x0}" y="${y0}" width="${xs - x0}" height="${H}"/>`;
+    let arrows = inp + use + waste;
+    if (blend) {
+      const id = `sankey-blend-${++sankeyId}`;
+      const gradient = (name, colour) => `<linearGradient id="${id}-${name}" gradientUnits="userSpaceOnUse" x1="${x0}" x2="${xs + 80}"><stop stop-color="var(--year-colour)"/><stop offset="1" stop-color="${colour}"/></linearGradient>`;
+      const usefulPath = `M${x0} ${y0}H${xe}L${xe + head} ${y0 + U / 2}L${xe} ${y0 + U}H${x0}Z`;
+      const wastePath = `M${x0} ${y0 + U}H${xs}A${R} ${R} 0 0 1 ${xs + R} ${yc}V${yEnd}H${xs + R + 6}L${xs + (r + R) / 2} ${yEnd + head}L${xs + r - 6} ${yEnd}H${xs + r}V${yc}A${r} ${r} 0 0 0 ${xs} ${y0 + H}H${x0}Z`;
+      const outline = `M${x0} ${y0}H${xe}L${xe + head} ${y0 + U / 2}L${xe} ${y0 + U}H${xs}A${R} ${R} 0 0 1 ${xs + R} ${yc}V${yEnd}H${xs + R + 6}L${xs + (r + R) / 2} ${yEnd + head}L${xs + r - 6} ${yEnd}H${xs + r}V${yc}A${r} ${r} 0 0 0 ${xs} ${y0 + H}H${x0}Z`;
+      arrows = `<defs>${gradient('useful', 'var(--cyan)')}${gradient('waste', 'var(--hot)')}</defs><path fill="url(#${id}-useful)" d="${usefulPath}"/><path fill="url(#${id}-waste)" d="${wastePath}"/><path class="ink" fill="none" d="${outline}"/>`;
+    }
     return svg(560, yEnd + head + 34, `Sankey diagram: ${input} ${unit} in, ${useful} ${unit} useful, ${wasted} ${unit} wasted`,
-      inp + use + waste +
+      arrows +
       t(x0 - 8, y0 + H / 2 - 2, inLabel, { a: "end", c: "lg" }) + t(x0 - 8, y0 + H / 2 + 18, `${input} ${unit}`, { a: "end", c: "lg" }) +
       t(xe + head + 8, y0 + U / 2 - 3, `${useful} ${unit}`, { a: "start", c: "lg" }) + t(xe + head + 8, y0 + U / 2 + 16, useLabel, { a: "start", c: "lg" }) +
       t(xs + R + 14, yEnd - 12, `${wasted} ${unit}`, { a: "start", c: "lg" }) + t(xs + R + 14, yEnd + 8, wasteLabel, { a: "start", c: "lg" }));

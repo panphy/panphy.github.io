@@ -9,6 +9,14 @@
     slide.appendChild(badge);
   });
   document.querySelectorAll('#deck table').forEach(table => {
+    // Reveal the content, while keeping the table structure and grid visible.
+    table.querySelectorAll('td, th').forEach(cell => {
+      if (!cell.matches('.step') && !cell.parentElement.matches('.step')) return;
+      const content = document.createElement('span');
+      content.className = 'cell-content';
+      while (cell.firstChild) content.appendChild(cell.firstChild);
+      cell.appendChild(content);
+    });
     const wrapper = document.createElement('div');
     wrapper.className = 'table-scroll';
     table.before(wrapper);

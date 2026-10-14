@@ -116,7 +116,7 @@
     for (let i = 0; i < 8; i++) dashes += `<rect class="dk-roadline" data-dash="${i}" x="0" y="333" width="34" height="6"/>`;
     host.innerHTML = `<div class="dk-stage"><svg class="dk one-store" viewBox="0 0 920 470" role="img" aria-label="A car driving to the right past trees, and a bar chart of the energy in its kinetic store at 10, 20 and 30 metres per second">
       <rect class="dk-sky" x="0" y="20" width="480" height="270"/><g class="dk-trees">${trees}</g>
-      <rect class="dk-road" x="0" y="290" width="480" height="90"/><g>${dashes}</g>
+      <rect class="dk-road" x="0" y="290" width="480" height="90"/><svg x="0" y="290" width="480" height="90" viewBox="0 290 480 90" overflow="hidden">${dashes}</svg>
       <g class="dk-car">
         <path class="dk-body" d="M92 300V262q0-14 14-16l40-6 34-34h96l44 34 44 8q16 3 16 18V300Z"/>
         <path class="dk-window" d="M188 214h38v30h-66ZM236 214h36l34 30h-70Z"/>
@@ -222,10 +222,10 @@
   // ---------- 4. Elastic potential energy: a block on a smooth surface, pulled out ----------
   function elastic(host) {
     const es = [0.04, 0.08, 0.12], k = 50, max = 0.4, x0 = 580, y0 = 50, w = 300, h = 300;
-    const wall = 50, rest = 300, scale = 1200, floor = 300, bw = 80;
+    const wall = 50, rest = 270, scale = 900, floor = 300, bw = 70;
     host.innerHTML = `<div class="dk-stage"><svg class="dk one-store elastic" viewBox="0 0 920 470" role="img" aria-label="A spring fixed to a wall holds a block on a smooth surface; the block is pulled out by 0.04, 0.08 or 0.12 metres; a bar chart shows the energy stored">
       <rect class="dk-wall" x="20" y="150" width="${wall - 20}" height="${floor - 150}"/><path class="dk-ink thick" d="M${wall} 150V${floor}"/>
-      <path class="dk-ink thick" d="M20 ${floor}H540"/>${t(290, floor + 34, 'smooth surface: no friction', 'dk-small')}
+      <path class="dk-ink thick" d="M20 ${floor}H550"/>${t(290, floor + 34, 'smooth surface: no friction', 'dk-small')}
       <path class="dk-guide" d="M${rest} 120V${floor}"/>${t(rest, 110, 'end of the spring, unstretched', 'dk-small')}
       <g class="dk-hspring"></g>
       ${bars(x0, y0, w, h, ['0.04 m', '0.08 m', '0.12 m'])}${t(x0 + 6, 36, 'elastic potential energy', 'dk-small', 'start')}
@@ -429,9 +429,9 @@
     springRig: () => F.springRig(3), pendulum: () => F.pendulum(), stairs: stairsBig, house: () => F.house(false),
     houseMarks: () => F.house(true), bounce: () => F.bounce(), cups: () => F.cups(['none', 'newspaper', 'bubble wrap', 'cotton wool', 'felt']),
     barsTop: () => F.barChart({ title: 'released', values: [20, 0, 0] }), barsMid: () => F.barChart({ title: 'half-way down', values: [10, 10, 0] }), barsLow: () => F.barChart({ title: 'just before landing', values: [0, 20, 0] }),
-    sankeyLamp: () => F.sankey({ input: 100, useful: 10, wasted: 90, s: 1.6, useLabel: 'by light', wasteLabel: 'heating the room' }),
-    sankeyLed: () => F.sankey({ input: 100, useful: 40, wasted: 60, s: 1.6, useLabel: 'by light', wasteLabel: 'heating the room' }),
-    sankeyLesson: () => F.sankey({ input: 100, useful: 20, wasted: 80, s: 1.6, useLabel: 'by light', wasteLabel: 'heating the room' }),
+    sankeyLamp: () => F.sankey({ blend: true, input: 100, useful: 10, wasted: 90, s: 1.6, useLabel: 'by light', wasteLabel: 'heating the room' }),
+    sankeyLed: () => F.sankey({ blend: true, input: 100, useful: 40, wasted: 60, s: 1.6, useLabel: 'by light', wasteLabel: 'heating the room' }),
+    sankeyLesson: () => F.sankey({ blend: true, input: 100, useful: 20, wasted: 80, s: 1.6, useLabel: 'by light', wasteLabel: 'heating the room' }),
     twoGraphs, rods, coolingChart, story: () => F.storyStrip(), coverArt: () => F.coverArt(),
   };
   const WIDGETS = { ramp: h => swing(h, 'ramp'), pendulum: h => swing(h, 'pendulum'), kinetic, springLab, elastic, motors, lift, bounce };

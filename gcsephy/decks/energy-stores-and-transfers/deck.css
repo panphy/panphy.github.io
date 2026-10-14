@@ -139,10 +139,6 @@ mjx-container { line-height: 0; }
 .tool p { font-size: 22px; }
 .tool .re { font-size: 24px; }
 
-/* The 3D Eco House (house3d.js) covers its flat drawing on screen; print keeps the drawing. */
-@media screen { #deck .fig:has(.model3d) > svg.still { display: none; } }
-@media print { .model3d { display: none; } }
-
 /* ----- models, second pass: fixed sizes, so nothing rescales when a button is pressed ----- */
 .dk-controls { flex: none; }
 .dk-readout { flex: none; height: 84px; overflow: hidden; display: flex; align-items: center; flex-wrap: wrap; gap: 0 10px; }

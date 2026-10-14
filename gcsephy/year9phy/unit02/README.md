@@ -53,6 +53,6 @@ To rebuild: serve the repository root (`python3 -m http.server 8000`), then run 
 
 ## Deck
 
-`index.html` in the deck folder holds the slides and revision notes; `figures.js` draws the figures (reusing the workbook's `figures.js`) and six interactive models: a half-pipe and a pendulum with live energy bars, a kinetic-energy explorer, a spring lab that plots both graphs, an elastic-energy explorer and two motors lifting the same load. `house3d.js` adds a low-poly cut-away Eco House with Three.js through `../assets/model3d.js`; the flat drawing stays for print and reduced motion. News slides use Wikimedia Commons photographs in `images/`, credited under each photo.
+`index.html` in the deck folder holds the slides and revision notes; `figures.js` draws the figures (reusing the workbook's `figures.js`) and six interactive models: a half-pipe and a pendulum with live energy bars, a kinetic-energy explorer, a spring lab that plots both graphs, an elastic-energy explorer and two motors lifting the same load. The Eco House uses a labelled cutaway illustration in `images/eco-house-illustration.png`, including print and reduced motion; its generation prompt is recorded in `images/eco-house-illustration.md`. News slides use Wikimedia Commons photographs in `images/`, credited under each photo.
 
 The teaching deck uses the shared calm GCSE style with a light-orange Year 9 accent and the GCSE section theme preference. See [`../../decks/README.md`](../../decks/README.md) for shared styling and controls.
