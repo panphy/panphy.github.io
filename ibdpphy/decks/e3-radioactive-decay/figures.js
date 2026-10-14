@@ -26,9 +26,9 @@ window.DeckFigures.add(P => {
       after += shadow(440, 300, 95) + cluster(440, 200, 93, 144, 10);
       after += `<line x1="530" y1="160" x2="598" y2="112" class="trail" style="stroke:var(--alpha)"/>` + fly(on, -106, 74, cluster(636, 86, 2, 2, 10));
       const afterLabels = text(440, 344, 'neptunium-237', 'lbl display') + text(440, 372, '93 p, 144 n', 'lbl mono')
-        + text(636, 162, 'alpha particle', 'lbl display') + text(636, 190, '2 p, 2 n', 'lbl mono');
+        + text(680, 162, 'alpha particle', 'lbl display') + text(680, 190, '2 p, 2 n', 'lbl mono');
       s += on ? parentLabels + stepG(on, 1, after + afterLabels) : after + parentLabels + afterLabels;
-      return svg('0 0 770 400', s, 'Alpha decay: americium-241 emits an alpha particle of 2 protons and 2 neutrons and becomes neptunium-237');
+      return svg('0 0 790 400', s, 'Alpha decay: americium-241 emits an alpha particle of 2 protons and 2 neutrons and becomes neptunium-237');
     },
 
     'e3-gamma': el => {
@@ -182,7 +182,7 @@ window.DeckFigures.add(P => {
       s += text(440, 506, 'nucleon number A', 'lbl') + text(40, 236, 'binding energy per nucleon / MeV', 'lbl', 'middle', 'transform="rotate(-90 40 236)"');
       s += `<path d="${through(data.map(([a, b]) => [X(a), Y(b)]))}" class="curve draw" style="stroke:var(--brand-primary);stroke-width:4"/>` + data.map(([a, b]) => `<circle cx="${f(X(a))}" cy="${f(Y(b))}" r="5" style="fill:var(--brand-accent-strong)"/>`).join('');
       s += `<line x1="${X(4) + 6}" y1="${Y(7.07) + 6}" x2="${X(22)}" y2="${Y(5)}" class="guide"/>` + text(X(24), Y(4.7), 'helium-4', 'lbl', 'start') + text(X(56), Y(8.79) - 18, 'iron-56', 'lbl strong') + text(X(235) - 4, Y(7.59) + 40, 'uranium-235', 'lbl', 'end') + text(X(2) + 16, Y(1.11) + 8, 'hydrogen-2', 'lbl', 'start');
-      if ('arrows' in el.dataset) s += arrow(X(40), Y(1.4), X(70), Y(4.2), 'brand-accent', 5) + text(X(74), Y(2.6), 'fusion', 'lbl strong', 'start') + arrow(X(226), Y(5.2), X(150), Y(6.2), 'brand-accent', 5) + text(X(200), Y(4.5), 'fission', 'lbl strong');
+      if ('arrows' in el.dataset) s += arrow(X(24), Y(2.4), X(78), Y(4.3), 'brand-accent', 5) + text(X(56), Y(2.6), 'fusion', 'lbl strong', 'start') + arrow(X(226), Y(5.2), X(150), Y(6.2), 'brand-accent', 5) + text(X(200), Y(4.5), 'fission', 'lbl strong');
       return svg('0 20 800 500', s, 'Graph of binding energy per nucleon against nucleon number. It rises steeply for light nuclei, with a sharp peak at helium-4, reaches a maximum of about 8.8 mega electronvolts near iron-56 and then falls slowly to about 7.6 for uranium');
     },
 
@@ -204,17 +204,19 @@ window.DeckFigures.add(P => {
 
     // Neutron number against proton number: the band of stable nuclides and the decays that lead towards it.
     'e3-nz': () => {
-      const X = z => 110 + 6 * z, Y = n => 440 - 2.6 * n, band = z => z + 0.0062 * z * z;
-      let s = `<line x1="110" y1="440" x2="770" y2="440" class="axis"/><line x1="110" y1="440" x2="110" y2="30" class="axis"/>`;
+      // N and Z share one scale, so the line N = Z runs at 45° and the band visibly bends away from it.
+      const u = 2.9, X = z => 110 + u * z, Y = n => 440 - u * n, band = z => z + 0.0062 * z * z;
+      let s = `<line x1="110" y1="440" x2="${X(104)}" y2="440" class="axis"/><line x1="110" y1="440" x2="110" y2="${Y(142)}" class="axis"/>`;
       [0, 20, 40, 60, 80, 100].forEach(z => { s += `<line x1="${X(z)}" y1="440" x2="${X(z)}" y2="448" class="axis"/>` + text(X(z), 476, z, 'lbl mono'); });
-      [0, 50, 100, 150].forEach(n => { s += `<line x1="102" y1="${Y(n)}" x2="110" y2="${Y(n)}" class="axis"/>` + text(94, Y(n) + 9, n, 'lbl mono', 'end'); });
-      s += text(440, 516, 'proton number Z', 'lbl') + text(36, 236, 'neutron number N', 'lbl', 'middle', 'transform="rotate(-90 36 236)"');
-      s += `<line x1="${X(0)}" y1="${Y(0)}" x2="${X(100)}" y2="${Y(100)}" class="guide"/>` + text(X(100) + 6, Y(100) + 30, 'N = Z', 'lbl mono', 'end');
-      s += `<path d="${sampled(t => [X(83 * t), Y(band(83 * t))])}" style="fill:none;stroke:var(--hl);stroke-width:20;stroke-linecap:round;opacity:.75"/>`;
-      s += text(X(8), Y(96), 'too many neutrons:', 'lbl strong', 'start') + text(X(8), Y(96) + 34, 'beta-minus decay', 'lbl', 'start', 'style="fill:var(--electron)"') + arrow(X(40), Y(74), X(45), Y(64), 'electron', 4);
-      s += text(X(56), Y(30), 'too few neutrons:', 'lbl strong', 'start') + text(X(56), Y(30) + 34, 'beta-plus decay', 'lbl', 'start', 'style="fill:var(--positive)"') + arrow(X(60), Y(58), X(55), Y(68), 'positive', 4);
-      s += text(X(74), Y(140), 'too heavy: alpha decay', 'lbl strong', 'end') + arrow(X(91), Y(142), X(86), Y(132), 'alpha', 4) + text(X(86), Y(108), 'stable', 'lbl strong', 'start', 'style="fill:var(--hl-text)"');
-      return svg('0 10 800 520', s, 'Graph of neutron number against proton number. The stable nuclides lie in a narrow band that follows the line N equals Z for light nuclei and curves above it for heavier ones. Nuclides above the band have too many neutrons and decay by beta-minus emission. Those below it have too few and decay by beta-plus emission. The heaviest nuclides decay by alpha emission');
+      [0, 20, 40, 60, 80, 100, 120, 140].forEach(n => { s += `<line x1="102" y1="${Y(n)}" x2="110" y2="${Y(n)}" class="axis"/>` + text(94, Y(n) + 9, n, 'lbl mono', 'end'); });
+      s += text(X(50), 516, 'proton number Z', 'lbl') + text(36, Y(70), 'neutron number N', 'lbl', 'middle', `transform="rotate(-90 36 ${Y(70)})"`);
+      s += `<line x1="${X(0)}" y1="${Y(0)}" x2="${X(104)}" y2="${Y(104)}" class="guide"/>` + text(X(104) + 10, Y(104) + 8, 'N = Z', 'lbl mono', 'start');
+      s += `<path d="${sampled(t => [X(83 * t), Y(band(83 * t))])}" style="fill:none;stroke:var(--hl);stroke-width:18;stroke-linecap:round;opacity:.75"/>` + text(X(83) + 22, Y(band(83)) + 44, 'stable', 'lbl strong', 'start', 'style="fill:var(--hl-text)"');
+      // Each decay as a short arrow of its own slope: beta-minus (Z + 1, N − 1), beta-plus (Z − 1, N + 1), alpha (Z − 2, N − 2).
+      s += text(X(4), Y(134), 'too many', 'lbl strong', 'start') + text(X(4), Y(134) + 32, 'neutrons:', 'lbl strong', 'start') + text(X(4), Y(134) + 64, 'beta-minus', 'lbl', 'start', 'style="fill:var(--electron)"') + text(X(4), Y(134) + 96, 'decay', 'lbl', 'start', 'style="fill:var(--electron)"') + arrow(X(32), Y(68), X(44), Y(56), 'electron', 5);
+      s += text(X(52), Y(34), 'too few neutrons:', 'lbl strong', 'start') + text(X(52), Y(34) + 32, 'beta-plus decay', 'lbl', 'start', 'style="fill:var(--positive)"') + arrow(X(70), Y(60), X(58), Y(72), 'positive', 5);
+      s += text(X(92), Y(140), 'too heavy:', 'lbl strong', 'start') + text(X(92), Y(140) + 32, 'alpha decay', 'lbl', 'start', 'style="fill:var(--alpha)"') + arrow(X(95), Y(132), X(87), Y(124), 'alpha', 5);
+      return svg('0 0 580 530', s, 'Graph of neutron number against proton number, with both axes on the same scale so that the line N equals Z is at 45 degrees. The stable nuclides lie in a narrow band that follows the line N equals Z for light nuclei and curves above it for heavier ones. Nuclides above the band have too many neutrons and decay by beta-minus emission. Those below it have too few and decay by beta-plus emission. The heaviest nuclides decay by alpha emission');
     },
 
     // An alpha decay that can leave the daughter nucleus in an excited state, followed by a gamma photon.
