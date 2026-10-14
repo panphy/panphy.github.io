@@ -169,7 +169,6 @@
     {
       section: "Round 4: Mains and power",
       skill: "Calculation",
-      tier: "HT",
       marks: 3,
       prompt: "A step-down transformer changes 132 000 V to 33 000 V. The current in the secondary coil is 200 A. Calculate the current in the primary coil. Assume the transformer is 100% efficient.",
       hint: "V_p × I_p = V_s × I_s. This equation is on the equation sheet.",

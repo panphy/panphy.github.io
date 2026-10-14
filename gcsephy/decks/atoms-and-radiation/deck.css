@@ -37,8 +37,6 @@
   --gold: #C9A227;
   --solid: #9A948C;
   --object: #6E9F45;
-  --ht-bg: #EDE7FB;
-  --ht-text: #5B2DB8;
   --thumb-w: 184px;
 }
 
@@ -75,8 +73,6 @@
   --gold: #E0B84A;
   --solid: #8A857D;
   --object: #7DB356;
-  --ht-bg: #2B2140;
-  --ht-text: #C4B5FD;
 }
 
 * { box-sizing: border-box; }
@@ -326,7 +322,6 @@ h3 { font-size: 34px; line-height: 1.15; }
 .t-photon { color: var(--photon); font-weight: 800; }
 .t-accent { color: var(--brand-accent-strong); font-weight: 800; }
 
-.ht { display: inline-block; vertical-align: .2em; margin-left: 8px; padding: 2px 10px; border-radius: 999px; background: var(--ht-bg); color: var(--ht-text); font: 700 19px var(--font-mono); letter-spacing: .06em; }
 
 /* Layouts */
 .split { flex: 1; min-height: 0; display: grid; grid-template-columns: 1fr 1.12fr; gap: 56px; align-items: center; }

@@ -165,6 +165,8 @@ strong { font-weight: 700; }
 .question > .qn { position: absolute; left: 0; top: .6mm; width: 6.6mm; height: 6.6mm; border: 1.6px solid var(--ink); border-radius: 50%; display: grid; place-items: center; font: 900 8.6pt/1 Arial, sans-serif; background: var(--accent); }
 .question .prompt { margin-bottom: 1.5mm; }
 .question .marks { float: right; margin-left: 3mm; font-weight: 700; white-space: nowrap; }
+/* Physics 8463 only, not Combined Science: Trilogy (as the deck's "Triple Science only" flag). */
+.triple-tag { display: inline-block; margin-left: 2mm; padding: .2mm 1.8mm; border: 1px solid currentColor; border-radius: 99px; font: 700 7.5pt/1.5 Arial, sans-serif; letter-spacing: .08em; text-transform: uppercase; vertical-align: .6mm; }
 .question .type { display: inline-block; margin-right: 1.5mm; padding: .1mm 1.5mm; border: 1px solid var(--ink); font: 700 7.5pt/1.5 Arial, sans-serif; letter-spacing: .08em; text-transform: uppercase; vertical-align: .3mm; background: white; }
 .lines { position: relative; min-height: calc(var(--n, 2) * 8mm); background: repeating-linear-gradient(to bottom, transparent 0 7.7mm, var(--rule) 7.7mm 8mm); line-height: 8mm; padding-top: .8mm; }
 .box { min-height: var(--h, 30mm); border: 1.5px solid var(--rule); background: #fff; position: relative; padding: 2mm 3mm; }

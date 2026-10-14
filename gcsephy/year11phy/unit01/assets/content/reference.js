@@ -16,7 +16,7 @@
     { lesson: 6, wide: true, title: "Nuclear equations", h: `<div class="split top" style="margin:0"><div>${table(["Emitted", "Symbol", "Mass no.", "Atomic no."], [["alpha", ALPHA, "− 4", "− 2"], ["beta", BETA, "no change", "+ 1"], ["gamma", GAMMA, "no change", "no change"], ["neutron", NEUTRON, "− 1", "no change"]])}</div><div><p>Top numbers balance; bottom numbers balance.</p>${EQ([N(226, 88, "Ra"), "→", N(222, 86, "Rn"), "+", ALPHA])}${EQ([N(14, 6, "C"), "→", N(14, 7, "N"), "+", BETA])}</div></div>` },
     { lesson: 7, wide: true, title: "Properties of radiation", h: table(["", "Alpha", "Beta", "Gamma"], [["Ionising", "strongly", "moderately", "weakly"], ["Range in air", "a few cm", "about 1 m", "very far"], ["Stopped by", "paper, skin", "a few mm of aluminium", "reduced by thick lead or concrete"], ["Typical use", "smoke alarm", "thickness gauge", "medical tracer"]]) + "<p style='margin:1.5mm 0 0'>More ionising → less penetrating.</p>" },
     { lesson: 8, title: "Half-life from a graph", h: "<ol><li>Read the start value.</li><li>Halve it.</li><li>Across to the curve, down to the time axis.</li><li>Check with a second halving.</li></ol>" },
-    { lesson: 9, title: "Half-life calculations", h: "<ul><li>Number of half-lives = time ÷ half-life.</li><li>After <em>n</em> half-lives, (½)<sup><em>n</em></sup> is left: ½, ¼, ⅛, 1/16…</li><li><strong>HT</strong> net decline = initial − final; as a ratio of the initial, 1 − (½)<sup><em>n</em></sup>: ½, ¾, ⅞…</li></ul>" },
+    { lesson: 9, title: "Half-life calculations", h: "<ul><li>Number of half-lives = time ÷ half-life.</li><li>After <em>n</em> half-lives, (½)<sup><em>n</em></sup> is left: ½, ¼, ⅛, 1/16…</li><li>Net decline = initial − final; as a ratio of the initial, 1 − (½)<sup><em>n</em></sup>: ½, ¾, ⅞…</li></ul>" },
     { lesson: 10, title: "Contamination and irradiation", h: "<ul><li><strong>Irradiation</strong>: exposed to radiation; does not become radioactive.</li><li><strong>Contamination</strong>: radioactive atoms on or in an object.</li><li>Outside the body γ is most hazardous; inside, α is.</li><li>Tongs, distance, short time, lead, dosimeter.</li></ul>" },
   ];
 
@@ -34,7 +34,7 @@
     { t: "q", p: "A student measures the count rate from a source with different absorbers. The background count rate is 25 counts per minute. Which types of radiation does the source emit? Explain your answer.", marks: 3, table: { head: ["Absorber", "none", "paper", "5 mm aluminium", "2 cm lead"], rows: [["Count rate / counts per minute", "410", "405", "150", "60"]] }, lines: 3, a: "No alpha: paper makes almost no difference (1). Beta: aluminium reduces the count a lot (1). Gamma: some gets through the aluminium and the lead, and the count is still above background (1)." },
     { t: "q", p: "A doctor needs a radioactive tracer that is injected into a patient and detected outside the body. Which isotope should be used? Give two reasons.", marks: 3, table: { head: ["Isotope", "Radiation emitted", "Half-life"], rows: [["A", "alpha", "6 hours"], ["B", "gamma", "6 hours"], ["C", "gamma", "30 years"], ["D", "beta", "8 days"]] }, lines: 3, a: "B (1). Gamma passes out of the body to the detector and is only weakly ionising (1). A short half-life means it does not stay radioactive in the body for long, but lasts long enough for the scan (1)." },
     { t: "q", p: "The table shows the count rate from a sample. Determine the half-life.", marks: 2, table: { head: ["Time / hours", "0", "1", "2", "3", "4", "5", "6"], rows: [["Count rate / counts per second", "640", "453", "320", "226", "160", "113", "80"]] }, lines: 2, a: "640 halves to 320 at 2 hours (320 → 160 also takes 2 h) (1); half-life = 2 hours (1)." },
-    { t: "q", type: "Higher tier", p: "A source has an initial activity of 800 Bq. Calculate its activity after 4 half-lives, and the net decline as a ratio of the initial activity.", marks: 2, lines: 2, a: "800 → 400 → 200 → 100 → 50 Bq (1); net decline 750 : 800 = 15 : 16 (1)." },
+    { t: "q", p: "A source has an initial activity of 800 Bq. Calculate its activity after 4 half-lives, and the net decline as a ratio of the initial activity.", marks: 2, lines: 2, a: "800 → 400 → 200 → 100 → 50 Bq (1); net decline 750 : 800 = 15 : 16 (1)." },
     { t: "q", p: "Explain why a sample of 50 unstable nuclei rarely has exactly 25 left after one half-life.", marks: 2, lines: 2, a: "Radioactive decay is random (1); in a small sample the number that decay varies around half (1)." },
     { t: "q", p: "Compare the hazards of irradiation and contamination by an alpha source.", marks: 4, lines: 4, a: "Irradiation by alpha from outside is low risk: alpha is stopped by the skin or a few cm of air (1), and the person does not become radioactive (1). Contamination puts the alpha source on or inside the body (1), where its strongly ionising alpha particles damage nearby cells, and it keeps emitting until removed (1)." },
     { t: "q", p: "Explain why scientists' model of the atom has changed over time. Use one example.", marks: 3, lines: 3, a: "Models change when new evidence does not fit the old model (1). Example: alpha particles bouncing back could not be explained by the plum pudding model (1), so it was replaced by the nuclear model (1). (Or Bohr's energy levels / Chadwick's neutron.)" },
@@ -44,7 +44,7 @@
   // ---------- separate Physics extension pages ----------
   const extension = [
     {
-      eyebrow: "Separate Physics only (AQA 4.4.3)", title: "Background radiation and medical uses",
+      eyebrow: "Triple Science only (AQA 4.4.3)", title: "Background radiation and medical uses",
       intro: "Only for students taking GCSE Physics (separate science). Combined Science students can skip these pages.",
       learn: [
         { t: "sub", h: "Background radiation" },
@@ -63,7 +63,7 @@
       ],
     },
     {
-      eyebrow: "Separate Physics only (AQA 4.4.4)", title: "Nuclear fission and fusion",
+      eyebrow: "Triple Science only (AQA 4.4.4)", title: "Nuclear fission and fusion",
       intro: "Only for students taking GCSE Physics (separate science). These ideas build on nuclear equations (Lesson 6).",
       learn: [
         { t: "sub", h: "Nuclear fission" },
@@ -107,7 +107,7 @@
     ["Isotopes", "Atoms of the same element with different numbers of neutrons.", 2],
     ["Mass number", "The total number of protons and neutrons in the nucleus.", 1],
     ["Model", "A simplified explanation of something we cannot see directly; changed when new evidence does not fit.", 3],
-    ["Net decline", "(HT) How much the activity has fallen; often given as a ratio of the initial activity.", 9],
+    ["Net decline", "How much the activity has fallen; often given as a ratio of the initial activity.", 9],
     ["Neutron", "A particle in the nucleus with no charge and a relative mass of 1.", 1],
     ["Nuclear equation", "An equation showing a decay, in which the mass numbers and atomic numbers balance.", 6],
     ["Nuclear model", "A tiny, dense, positive nucleus with electrons outside it (Rutherford, 1911).", 3],

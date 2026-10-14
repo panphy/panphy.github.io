@@ -420,8 +420,8 @@ window.DeckSvgTex = {
     let s = '';
     mats.forEach(([m, k], i) => {
       const y = 50 + i * 70;
-      s += `<rect class="dk-rod" x="120" y="${y}" width="420" height="20" rx="4"/>` + t(110, y + 16, m, 'dk-label', 'end');
-      for (let p = 0; p < 5; p++) { const x = 180 + p * 80, gone = p < Math.round(k * 5); s += `<path class="dk-pin${gone ? ' gone' : ''}" d="M${x} ${y + 20}v${gone ? 0 : 16}"/>${gone ? '' : `<circle class="dk-wax" cx="${x}" cy="${y + 22}" r="6"/>`}`; }
+      s += `<rect class="dk-rod" x="166" y="${y}" width="374" height="20" rx="4"/>` + t(156, y + 16, m, 'dk-label', 'end');
+      for (let p = 0; p < 5; p++) { const x = 205 + p * 74, gone = p < Math.round(k * 5); s += `<path class="dk-pin${gone ? ' gone' : ''}" d="M${x} ${y + 20}v${gone ? 0 : 16}"/>${gone ? '' : `<circle class="dk-wax" cx="${x}" cy="${y + 22}" r="6"/>`}`; }
     });
     s += `<path class="dk-flame" d="M560 330c-30-40 10-60 0-100 30 30 40 60 20 100Z"/>` + t(560, 360, 'heated end', 'dk-small');
     s += `<path class="dk-ink" d="M540 60V330"/>`;

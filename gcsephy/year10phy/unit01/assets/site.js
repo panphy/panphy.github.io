@@ -55,13 +55,12 @@
     const remember = section.remember
       ? `<p class="remember-note"><strong>Remember:</strong> ${sub(section.remember)}</p>`
       : "";
-    const ht = section.ht ? '<span class="ht-flag">HT</span>' : "";
     const componentImages = section.componentImages?.length
       ? `<div class="component-gallery" aria-label="Component appearance">${section.componentImages.map((component) => `
           <figure class="component-photo"><img src="../../assets/components/${component.file}" alt="${component.alt}" loading="lazy" width="768" height="768"><figcaption>${component.label}</figcaption></figure>`).join("")}</div>`
       : "";
 
-    const heading = `<div class="revision-card-heading"><span>${String(sectionIndex + 1).padStart(2, "0")}</span><h3>${sub(section.title)}${ht}</h3></div>`;
+    const heading = `<div class="revision-card-heading"><span>${String(sectionIndex + 1).padStart(2, "0")}</span><h3>${sub(section.title)}</h3></div>`;
     const copy = `<div class="revision-copy">${paragraphs}${equationBlock(section.equation)}${componentImages}${section.figure || ""}${points}${formula}${remember}</div>`;
 
     // Required-practical cards open the full practical page.
@@ -104,7 +103,6 @@
     const rows = question.marks && question.marks >= 5 ? 8 : isExam ? 6 : 4;
     const tagClass = isExam ? "exam-tag" : question.type === "Go further" ? "further-tag" : "practice-tag";
     const marks = question.marks ? `<span class="marks">[${question.marks} mark${question.marks === 1 ? "" : "s"}]</span>` : "";
-    const tier = question.tier ? `<span class="tier-tag">${question.tier === "HT" ? "Higher tier" : question.tier}</span>` : "";
     const placeholder = isExam
       ? "Show each step and use precise scientific language…"
       : "Write your thinking here…";
@@ -116,7 +114,7 @@
     return `
       <article class="question-card">
         <div class="question-meta">
-          <span class="${tagClass}">${question.type}</span>${tier}${marks}
+          <span class="${tagClass}">${question.type}</span>${marks}
           <span class="question-count">Q${questionIndex + 1}</span>
         </div>
         ${stimulus}${question.figure || ""}

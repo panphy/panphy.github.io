@@ -98,14 +98,14 @@
 .case-card .big-eq { margin: 18px 0 6px; padding: 20px; border: 2px solid var(--ink); background: var(--navy); color: var(--hi); font: 900 64px/1 var(--display); text-align: center; letter-spacing: -.02em; }
 
 /* Equation toolkit */
-.toolkit { display: grid; grid-template-columns: repeat(4, 1fr); gap: 18px; }
+.toolkit { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 18px; }
 .tool { display: flex; flex-direction: column; gap: 8px; padding: 20px 22px; border: 2px solid var(--ink); background: var(--card); box-shadow: 6px 6px 0 var(--accent); }
 .tool .eq { font: 900 38px/1.05 var(--display); letter-spacing: -.03em; }
+.tool .eq.long { font-size: 33px; } /* the widest equation, to fit a quarter-width card */
 .tool .words { font-size: 23px; font-weight: 800; }
 .tool .units { font-size: 21px; color: var(--muted); line-height: 1.35; }
 .tool .where { margin-top: auto; padding-top: 10px; border-top: 1px solid var(--line); font: 900 16px Arial, sans-serif; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); }
 .tool.given { background: #f1edff; }
-.ht { display: inline-block; margin-left: 10px; padding: 3px 9px; border: 2px solid var(--ink); background: var(--hot); color: var(--ink); font: 900 17px Arial, sans-serif; letter-spacing: .1em; vertical-align: middle; }
 
 /* Two sketch cards side by side */
 .sketch-card { display: flex; flex-direction: column; }
