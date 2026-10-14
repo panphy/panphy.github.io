@@ -1,62 +1,58 @@
-/* Revision-note pane beneath the slide (deck-notes.js). Each deck's own
-   stylesheet sets the --rn-* colours and fonts; this file owns the layout.
-   Load it after the deck stylesheet: it moves the bottom of the stage. */
+/* Revision notes (deck-notes.js): a corner control and an overlay panel.
+   Each deck sets the --rn-* colours and fonts. Load after its stylesheet.
+   Neither note availability nor opening the panel changes the slide size. */
 :root {
-  --notes-bar: 52px;
   --notes-open: clamp(150px, 27vh, 280px);
   --thumbs-w: 252px;
 }
 .slide .revision-note { display: none; }
 
-body:not(.is-fullscreen) .stage { bottom: calc(74px + var(--notes-bar) + var(--vv-bottom, 0px)); }
-body.notes-open:not(.is-fullscreen) .stage { bottom: calc(74px + var(--notes-bar) + var(--notes-open) + var(--vv-bottom, 0px)); }
-/* A slide without a note has no pane, so the slide takes its space. */
-body.no-note:not(.is-fullscreen) .stage { bottom: calc(74px + var(--vv-bottom, 0px)); }
-
+/* Align the 48px note pill with the buttons inside the navigation pill. */
 .notes {
   position: fixed;
-  left: 0;
-  right: 0;
-  bottom: calc(74px + var(--vv-bottom, 0px));
-  z-index: 16;
-  display: flex;
-  flex-direction: column;
-  padding: 0 max(28px, env(safe-area-inset-right)) 0 max(28px, env(safe-area-inset-left));
+  right: max(12px, env(safe-area-inset-right));
+  bottom: calc(max(10px, env(safe-area-inset-bottom)) + 6px + var(--vv-bottom, 0px));
+  z-index: 20;
   color: var(--rn-ink);
   font: var(--rn-font);
 }
-body.show-thumbs .notes { left: var(--thumbs-w); }
 body.is-fullscreen .notes, .notes[hidden] { display: none; }
 
 .notes-toggle {
   display: flex;
   align-items: center;
-  gap: 10px;
-  width: 100%;
-  height: 44px;
-  padding: 0 14px;
-  border: var(--rn-border);
-  border-radius: var(--rn-radius);
-  background: var(--rn-bar);
+  gap: 6px;
+  min-height: 48px;
+  padding: 0 12px;
+  border: 1px solid color-mix(in srgb, var(--rn-accent) 55%, var(--rn-ink) 45%);
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--rn-accent) 14%, var(--rn-bar) 86%);
   color: var(--rn-ink);
   font: var(--rn-label-font);
-  letter-spacing: var(--rn-label-spacing, normal);
+  font-size: 13px;
+  letter-spacing: .04em;
   text-transform: var(--rn-label-case, none);
   text-align: left;
 }
-.notes-toggle svg { flex: none; width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; }
-.notes-chevron { margin-left: auto; transition: transform .2s ease; }
+.notes-toggle svg { flex: none; width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; }
+.notes-toggle .notes-chevron { width: 14px; height: 14px; transition: transform .2s ease; }
 .notes-toggle[aria-expanded="true"] .notes-chevron { transform: rotate(180deg); }
-body.notes-open .notes-toggle { border-bottom-left-radius: 0; border-bottom-right-radius: 0; }
+.notes-toggle:hover, .notes-toggle[aria-expanded="true"] { background: color-mix(in srgb, var(--rn-accent) 24%, var(--rn-bar) 76%); }
+.notes-toggle:focus-visible { outline: 3px solid var(--rn-accent); outline-offset: 3px; }
 
 .notes-body {
+  position: fixed;
+  left: max(28px, env(safe-area-inset-left));
+  right: max(28px, env(safe-area-inset-right));
+  bottom: calc(80px + var(--vv-bottom, 0px) + env(safe-area-inset-bottom, 0px));
+  max-height: calc(100dvh - 150px - var(--standalone-top, 0px) - var(--vv-bottom, 0px) - env(safe-area-inset-bottom, 0px));
   height: var(--notes-open);
   padding: 14px 20px 16px;
   overflow-y: auto;
   overscroll-behavior: contain;
   border: var(--rn-border);
-  border-top: 0;
-  border-radius: 0 0 var(--rn-radius) var(--rn-radius);
+  border-radius: var(--rn-radius);
+  box-shadow: 0 8px 28px rgb(0 0 0 / .16);
   background: var(--rn-bg);
   scrollbar-width: thin;
 }
@@ -77,9 +73,16 @@ body.notes-open .notes-toggle { border-bottom-left-radius: 0; border-bottom-righ
 .rn-side .more::before { content: "Go further"; color: var(--rn-more); }
 .revision-note sub, .revision-note sup { line-height: 0; }
 
+body.show-thumbs .notes-body { left: calc(var(--thumbs-w) + 28px); }
 @media (max-width: 900px) {
-  body.show-thumbs .notes { left: 0; }
-  .notes { padding: 0 max(12px, env(safe-area-inset-right)) 0 max(12px, env(safe-area-inset-left)); }
+  .notes-body, body.show-thumbs .notes-body { left: max(12px, env(safe-area-inset-left)); right: max(12px, env(safe-area-inset-right)); }
+}
+/* Keep room for the corner control on narrow screens, even without a note. */
+@media (max-width: 600px) {
+  .controls, body.show-thumbs .controls { left: max(12px, env(safe-area-inset-left)); transform: none; gap: 4px; }
+  .controls .counter { min-width: 72px; }
+  .controls button { width: 44px; }
+  .notes-toggle { padding: 0 10px; }
 }
 @media (max-width: 760px) {
   .revision-note { flex-direction: column; align-items: stretch; }
@@ -89,25 +92,14 @@ body.notes-open .notes-toggle { border-bottom-left-radius: 0; border-bottom-righ
   :root { --notes-open: clamp(170px, 40vh, 380px); }
 }
 
-/* Short screens (a phone on its side): the toggle sits beside the slide
-   controls and an open note covers the lower part of the slide, so the slide
-   keeps its size. */
+/* On a phone on its side, keep the panel within the visible page. */
 @media (max-height: 520px) {
-  body:not(.is-fullscreen) .stage, body.notes-open:not(.is-fullscreen) .stage { bottom: calc(74px + var(--vv-bottom, 0px)); }
-  .notes { bottom: calc(max(10px, env(safe-area-inset-bottom)) + 7px + var(--vv-bottom, 0px)); right: auto; flex-direction: column-reverse; pointer-events: none; }
-  .notes-toggle { width: auto; pointer-events: auto; border-radius: 999px; }
-  body.notes-open .notes-toggle { border-radius: 999px; }
-  .notes-chevron { margin-left: 2px; }
-  .notes-body { position: fixed; left: max(12px, env(safe-area-inset-left)); right: max(12px, env(safe-area-inset-right)); bottom: calc(74px + var(--vv-bottom, 0px)); height: auto; max-height: calc(100vh - 150px); border-top: var(--rn-border); border-radius: var(--rn-radius); pointer-events: auto; }
-  body.show-thumbs .notes-body { left: calc(var(--thumbs-w) + 12px); }
-}
-@media (max-height: 520px) and (max-width: 900px) {
-  body.show-thumbs .notes-body { left: max(12px, env(safe-area-inset-left)); }
+  .notes-body { height: auto; }
 }
 
 @media print {
   .notes { display: none !important; }
 }
 @media (prefers-reduced-motion: reduce) {
-  .notes-chevron { transition: none; }
+  .notes-toggle .notes-chevron { transition: none; }
 }
