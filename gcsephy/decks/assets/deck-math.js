@@ -67,7 +67,7 @@ window.DeckMath = (() => {
       const out = window.MathJax.tex2svg(tex, { display: false }).querySelector('svg');
       const [, vy, vw, vh] = out.getAttribute('viewBox').split(/[\s,]+/).map(Number);
       // MathJax's glyphs run smaller than the bold sans labels beside them.
-      const k = size * 1.12 / 1000;
+      const k = size * 1.06 / 1000;
       out.removeAttribute('style');
       out.setAttribute('x', x.toFixed(2));
       out.setAttribute('y', (vy * k).toFixed(2));
@@ -96,17 +96,24 @@ window.DeckMath = (() => {
     return g;
   }
 
-  // Typeset every listed label under root. Safe to call again: unchanged labels are skipped.
+  // Typeset every listed label under root (the deck or one figure). Safe to call again:
+  // unchanged labels are skipped.
   function labels(root = document) {
     if (!ready()) return;
-    // HTML in a figure (captions, readouts) is drawn after the page was typeset.
-    const html = [...root.querySelectorAll('[data-fig], [data-widget]')].filter(el => /\\\(/.test(el.textContent));
+    // HTML captions in a figure are drawn after the page was typeset. Widgets typeset their own readouts.
+    const figs = root.matches?.('[data-fig]') ? [root] : [...root.querySelectorAll('[data-fig]')];
+    const html = figs.filter(el => /\\\(/.test(el.textContent));
     if (html.length) window.MathJax.typeset(html);
     root.querySelectorAll('svg text').forEach(text => {
       if (text.closest('.svg-math, mjx-container')) return;
-      const label = text.dataset.texLabel ?? lookup(text);
-      if (!label) return;
       const copy = done.get(text) || (text.nextElementSibling?.matches('.svg-math') ? text.nextElementSibling : null);
+      // A label that a figure rewrites (or empties) is looked up again.
+      if (text.dataset.texSource !== undefined && text.dataset.texSource !== text.textContent) delete text.dataset.texLabel;
+      const label = text.dataset.texLabel ?? lookup(text);
+      if (!label) {
+        if (copy) { copy.remove(); done.delete(text); text.style.display = ''; delete text.dataset.texSource; }
+        return;
+      }
       if (copy && text.dataset.texLabel === label && text.dataset.texSource === text.textContent) return;
       copy?.remove();
       text.dataset.texLabel = label;
@@ -125,14 +132,25 @@ window.DeckMath = (() => {
     });
   }
 
-  // Redo labels when a figure redraws, and re-measure the words once the fonts have loaded.
+  // Redo labels when a figure redraws, only in that figure, and re-measure the words once the
+  // fonts have loaded. Our own inserted copies are ignored.
   function watch(root) {
     if (!root || !ready()) return;
-    let queued = false;
+    const ours = n => n.nodeType === 1 && n.matches('.svg-math');
+    const pending = new Set();
     new MutationObserver(records => {
-      if (queued || records.every(r => [...r.addedNodes].every(n => n.nodeType === 1 && n.matches?.('.svg-math')))) return;
-      queued = true;
-      queueMicrotask(() => { queued = false; labels(root); });
+      records.forEach(r => {
+        const nodes = [...r.addedNodes, ...r.removedNodes];
+        if (nodes.length && nodes.every(ours)) return;
+        const el = r.target.nodeType === 1 ? r.target : r.target.parentElement;
+        if (!el || el.closest('.svg-math')) return;
+        pending.add(el.closest('[data-fig], [data-widget]') || el.closest('svg') || el);
+      });
+      if (pending.size) queueMicrotask(() => {
+        const figs = [...pending];
+        pending.clear();
+        figs.forEach(fig => { if (fig.isConnected) labels(fig); });
+      });
     }).observe(root, { childList: true, subtree: true, characterData: true });
     document.fonts?.ready.then(() => {
       root.querySelectorAll('svg text[data-tex-label]').forEach(text => { delete text.dataset.texSource; });

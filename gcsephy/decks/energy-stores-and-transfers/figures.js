@@ -11,7 +11,8 @@ window.DeckSvgTex = {
   'h = 300 m': '\\(h = 300\\) m',
   'h = height of one step × number of steps': '\\(h =\\) height of one step \\(\\times\\) number of steps',
   'h1 = 1.00 m': '\\(h_1 = 1.00\\) m',
-  'h2 = 0.65 m': '\\(h_2 = 0.65\\) m'
+  'h2 = 0.65 m': '\\(h_2 = 0.65\\) m',
+  'G.P.E. gained = 2.0 × 9.8 × 1.5 = 29.4 J': 'G.P.E. gained \\(= 2.0 \\times 9.8 \\times 1.5 = 29.4\\) J'
 };
 (() => {
   const F = window.EnergyFigures;
@@ -157,7 +158,7 @@ window.DeckSvgTex = {
       speeds.forEach((v, j) => setBar(root, j, shown.has(j) ? 0.5 * mass * v * v / max : 0, y0, h));
       root.querySelectorAll('.dk-bar').forEach((r, j) => r.classList.toggle('on', j === i));
       const e = 0.5 * mass * speed * speed;
-      out.innerHTML = String.raw`\(E_k = \tfrac{1}{2}\,m\,v^2 = 0.5 \times ${mass} \times ${speed}^2 = ${fmt(e).replace(/\u2009/g, '\\,')}\ \text{J}\)` + (i ? ` <b>= ${(i + 1) ** 2} × the energy at 10 m/s</b>` : '');
+      out.innerHTML = String.raw`\(E_k = \tfrac{1}{2}\,m\,v^2 = 0.5 \times ${mass} \times ${speed}^2 = ${fmt(e).replace(/\u2009/g, '\\,')}\ \text{J}\)` + (i ? ` <b>\\(= ${(i + 1) ** 2} \\times\\) the energy at 10 m/s</b>` : '');
       typeset(out);
       if (!running && !reduced()) { running = true; animate(host, dt => { offset += speed * 14 * dt; scenery(); return running; }); }
     }
@@ -209,7 +210,7 @@ window.DeckSvgTex = {
       for (let i = 0; i < n; i++) masses += `<rect class="dk-mass" x="${x - 32}" y="${bar + 10 + i * 8}" width="64" height="7" rx="2"/>`;
       sp.innerHTML = `<path class="dk-ink" d="${d}L${x} ${bar - 8}V${bar}"/><path class="dk-ink" d="M${x} ${bar}v${n * 8 + 14}"/>${masses}` +
         `<path class="dk-pointer" d="M${x - 24} ${bar}H262"/>`;
-      out.innerHTML = `Mass added <b>${n * 100} g</b> · force <b>${n} N</b> · pointer at <b>${(L0 + e).toFixed(1)} cm</b> · extension <b>${e.toFixed(1)} cm = ${(e / 100).toFixed(3)} m</b>`;
+      out.innerHTML = `Mass added <b>${n * 100} g</b> · force <b>${n} N</b> · pointer at <b>${(L0 + e).toFixed(1)} cm</b> · extension <b>${e.toFixed(1)} cm</b>, or <b>${(e / 100).toFixed(3)} m</b>`;
     }
     function drawGraph() {
       const a = graphAxes(gx, gy, gw, gh, g1);
@@ -263,13 +264,14 @@ window.DeckSvgTex = {
       es.forEach((e, j) => setBar(root, j, shown.has(j) ? 0.5 * k * e * e / max : 0, y0, h));
       moveTo(es[i]);
       const e = es[i], E = 0.5 * k * e * e;
-      out.innerHTML = String.raw`\(E_e = \tfrac{1}{2}\,k\,e^2 = 0.5 \times ${k} \times ${e}^2 = ${E.toFixed(2)}\ \text{J}\)` + (i ? ` <b>= ${(i + 1) ** 2} × the energy at 0.04 m</b>` : '');
+      out.innerHTML = String.raw`\(E_e = \tfrac{1}{2}\,k\,e^2 = 0.5 \times ${k} \times ${e}^2 = ${E.toFixed(2)}\ \text{J}\)` + (i ? ` <b>\\(= ${(i + 1) ** 2} \\times\\) the energy at 0.04 m</b>` : '');
       typeset(out);
     }
     es.forEach((_, i) => host.querySelector(`[data-act="e${i}"]`).addEventListener('click', () => pick(i)));
-    host.querySelector('[data-act="r"]').addEventListener('click', () => { moveTo(0); out.textContent = 'Spring constant k = 50 N/m. Choose an extension.'; });
+    const intro = () => { out.innerHTML = 'Spring constant \\(k = 50\\)&nbsp;N/m. Choose an extension.'; typeset(out); };
+    host.querySelector('[data-act="r"]').addEventListener('click', () => { moveTo(0); intro(); });
     draw();
-    out.textContent = 'Spring constant k = 50 N/m. Choose an extension.';
+    intro();
   }
 
   // ---------- 5. Two motors lift the same load through the same height ----------
@@ -295,7 +297,8 @@ window.DeckSvgTex = {
         root.querySelector(`.m-label-${name}`).setAttribute('y', (y + bh / 2 + 9).toFixed(1));
         root.querySelector(`.clock-${name}`).textContent = `${Math.min(sec, T).toFixed(1)} s`;
       });
-      out.innerHTML = sec >= 6 ? 'Both loads gain <b>29.4 J</b>. A: 29.4 ÷ 2 = <b>14.7 W</b>. B: 29.4 ÷ 6 = <b>4.9 W</b>. Same energy, different power.' : 'Each motor lifts a 2.0 kg load through 1.5 m. Press Start.';
+      const msg = sec >= 6 ? 'Both loads gain <b>29.4 J</b>. A: \\(29.4 \\div 2 =\\) <b>14.7 W</b>. B: \\(29.4 \\div 6 =\\) <b>4.9 W</b>. Same energy, different power.' : 'Each motor lifts a 2.0 kg load through 1.5 m. Press Start.';
+      if (out.dataset.msg !== msg) { out.dataset.msg = msg; out.innerHTML = msg; typeset(out); }
     }
     host.querySelector('[data-act="go"]').addEventListener('click', () => {
       sec = 0;
