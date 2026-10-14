@@ -3,6 +3,16 @@
 // match. <div data-fig="name"> is filled with a drawing; <div data-widget="name"> becomes an
 // interactive model with its own buttons. Models only move on the live slide, and only when a
 // button is pressed, so thumbnails and print show the starting picture.
+// Diagram labels with maths, typeset by ../assets/deck-math.js (plain label: label with LaTeX).
+// The drawings are shared with the workbook, which prints the plain labels.
+window.DeckSvgTex = {
+  'h': '\\(h\\)',
+  'h = 1.5 m': '\\(h = 1.5\\) m',
+  'h = 300 m': '\\(h = 300\\) m',
+  'h = height of one step × number of steps': '\\(h =\\) height of one step \\(\\times\\) number of steps',
+  'h1 = 1.00 m': '\\(h_1 = 1.00\\) m',
+  'h2 = 0.65 m': '\\(h_2 = 0.65\\) m'
+};
 (() => {
   const F = window.EnergyFigures;
   const NS = 'http://www.w3.org/2000/svg';

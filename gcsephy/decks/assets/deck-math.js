@@ -66,7 +66,8 @@ window.DeckMath = (() => {
       last = at + whole.length;
       const out = window.MathJax.tex2svg(tex, { display: false }).querySelector('svg');
       const [, vy, vw, vh] = out.getAttribute('viewBox').split(/[\s,]+/).map(Number);
-      const k = size / 1000;
+      // MathJax's glyphs run smaller than the bold sans labels beside them.
+      const k = size * 1.12 / 1000;
       out.removeAttribute('style');
       out.setAttribute('x', x.toFixed(2));
       out.setAttribute('y', (vy * k).toFixed(2));
@@ -98,6 +99,9 @@ window.DeckMath = (() => {
   // Typeset every listed label under root. Safe to call again: unchanged labels are skipped.
   function labels(root = document) {
     if (!ready()) return;
+    // HTML in a figure (captions, readouts) is drawn after the page was typeset.
+    const html = [...root.querySelectorAll('[data-fig], [data-widget]')].filter(el => /\\\(/.test(el.textContent));
+    if (html.length) window.MathJax.typeset(html);
     root.querySelectorAll('svg text').forEach(text => {
       if (text.closest('.svg-math, mjx-container')) return;
       const label = text.dataset.texLabel ?? lookup(text);
@@ -136,6 +140,8 @@ window.DeckMath = (() => {
     });
   }
 
-  document.addEventListener('panphy:theme-change', () => requestAnimationFrame(repaint));
+  // Any theme change, from the button or another tab, rewrites data-theme on <html>.
+  // Repaint again once any colour transition has finished.
+  new MutationObserver(() => { requestAnimationFrame(repaint); setTimeout(repaint, 500); }).observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme', 'class'] });
   return { labels, watch, repaint };
 })();

@@ -2,6 +2,15 @@
 // Year 9 companion site (gcsephy/year9phy/unit01): navy ink, lime points,
 // coral anomalous results, cyan trend lines and bold Arial labels. Each
 // <div data-fig="name"> is filled from FIGURES; colours come from deck CSS.
+// Diagram labels with maths, typeset by ../assets/deck-math.js (plain label: label with LaTeX).
+window.DeckSvgTex = {
+  'TRUE VALUE ≈ 1.21 s': 'TRUE VALUE \\(\\approx 1.21\\) s',
+  'MAX − MIN = 1.25 − 1.20 = 0.05 s': 'MAX \\(-\\) MIN \\(= 1.25 - 1.20 = 0.05\\) s',
+  '± 0.025 s': '\\(\\pm\\, 0.025\\) s',
+  'd': '\\(d\\)',
+  'h': '\\(h\\)',
+  'wing length L': 'wing length \\(L\\)'
+};
 (() => {
   const f = n => Math.round(n * 10) / 10;
   const svg = (w, h, body, label) => `<svg class="wf" viewBox="0 0 ${w} ${h}" role="img" aria-label="${label}">${body}</svg>`;
