@@ -122,6 +122,9 @@ window.DeckFigures.add(P => {
       let s = `<circle cx="150" cy="260" r="34" style="fill:var(--sand);stroke:var(--brand-accent);stroke-width:4"/>` + text(150, 330, 'source,', 'lbl') + text(150, 362, 'luminosity L', 'lbl');
       const ray = y => `<line x1="150" y1="260" x2="760" y2="${y}" class="guide"/>`;
       s += [80, 200, 320, 440].map(ray).join('');
+      // Arcs of the two spheres, radius d and 2d about the source: the power spreads over the whole of each.
+      const arc = (r, deg) => { const a = deg * Math.PI / 180; return `<path d="M${f(150 + r * Math.cos(a))},${f(260 - r * Math.sin(a))} A${r},${r} 0 0 1 ${f(150 + r * Math.cos(a))},${f(260 + r * Math.sin(a))}" class="guide accent"/>`; };
+      s += arc(270, 62) + arc(540, 26);
       const patch = (x, n) => { const h = (x - 150) * 360 / 610, y = 260 - h / 2; let g = `<rect x="${x - 5}" y="${f(y)}" width="10" height="${f(h)}" style="fill:var(--brand-primary);opacity:.85"/>`; for (let i = 1; i < n; i++) g += `<line x1="${x - 12}" y1="${f(y + h * i / n)}" x2="${x + 12}" y2="${f(y + h * i / n)}" class="tick"/>`; return g; };
       s += patch(420, 1) + patch(690, 2) + P.both(150, 470, 420, 470) + text(285, 506, 'd', 'lbl display') + P.both(150, 540, 690, 540) + text(420, 576, '2d', 'lbl display');
       s += text(420, 150, 'area A', 'lbl strong halo') + text(690, 60, 'area 4A', 'lbl strong halo') + text(420, 620, 'at 2d: a quarter of the brightness', 'lbl');
