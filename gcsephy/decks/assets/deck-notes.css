@@ -10,6 +10,8 @@
 
 body:not(.is-fullscreen) .stage { bottom: calc(74px + var(--notes-bar) + var(--vv-bottom, 0px)); }
 body.notes-open:not(.is-fullscreen) .stage { bottom: calc(74px + var(--notes-bar) + var(--notes-open) + var(--vv-bottom, 0px)); }
+/* A slide without a note has no pane, so the slide takes its space. */
+body.no-note:not(.is-fullscreen) .stage { bottom: calc(74px + var(--vv-bottom, 0px)); }
 
 .notes {
   position: fixed;
@@ -24,7 +26,7 @@ body.notes-open:not(.is-fullscreen) .stage { bottom: calc(74px + var(--notes-bar
   font: var(--rn-font);
 }
 body.show-thumbs .notes { left: var(--thumbs-w); }
-body.is-fullscreen .notes { display: none; }
+body.is-fullscreen .notes, .notes[hidden] { display: none; }
 
 .notes-toggle {
   display: flex;
@@ -45,9 +47,6 @@ body.is-fullscreen .notes { display: none; }
 .notes-toggle svg { flex: none; width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; }
 .notes-chevron { margin-left: auto; transition: transform .2s ease; }
 .notes-toggle[aria-expanded="true"] .notes-chevron { transform: rotate(180deg); }
-.notes-none { display: none; color: var(--rn-muted); font-weight: 600; letter-spacing: normal; text-transform: none; }
-.notes.is-empty .notes-none { display: inline; }
-.notes.is-empty .notes-label, .notes.is-empty .notes-icon { opacity: .55; }
 body.notes-open .notes-toggle { border-bottom-left-radius: 0; border-bottom-right-radius: 0; }
 
 .notes-body {
@@ -62,7 +61,6 @@ body.notes-open .notes-toggle { border-bottom-left-radius: 0; border-bottom-righ
   scrollbar-width: thin;
 }
 .notes-body:focus-visible { outline: 3px solid var(--rn-accent); outline-offset: -3px; }
-.notes-empty { margin: 0; color: var(--rn-muted); }
 
 /* A note: the explanation on the left, call-outs (mistake, exam tip, go further) beside it. */
 .revision-note { display: flex; gap: 10px 28px; align-items: flex-start; max-width: 1280px; margin: 0 auto; font-size: 16.5px; line-height: 1.45; }
@@ -99,7 +97,6 @@ body.notes-open .notes-toggle { border-bottom-left-radius: 0; border-bottom-righ
   .notes { bottom: calc(max(10px, env(safe-area-inset-bottom)) + 7px + var(--vv-bottom, 0px)); right: auto; flex-direction: column-reverse; pointer-events: none; }
   .notes-toggle { width: auto; pointer-events: auto; border-radius: 999px; }
   body.notes-open .notes-toggle { border-radius: 999px; }
-  .notes-none { display: none !important; }
   .notes-chevron { margin-left: 2px; }
   .notes-body { position: fixed; left: max(12px, env(safe-area-inset-left)); right: max(12px, env(safe-area-inset-right)); bottom: calc(74px + var(--vv-bottom, 0px)); height: auto; max-height: calc(100vh - 150px); border-top: var(--rn-border); border-radius: var(--rn-radius); pointer-events: auto; }
   body.show-thumbs .notes-body { left: calc(var(--thumbs-w) + 12px); }
