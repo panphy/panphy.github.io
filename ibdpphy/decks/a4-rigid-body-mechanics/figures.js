@@ -11,7 +11,8 @@ window.DeckFigures.add(P => {
   const rad = deg => deg * Math.PI / 180;
   // An arc with an arrowhead, showing the sense of a rotation about (cx, cy). Angles in degrees, measured clockwise from the +x direction as SVG does.
   const turn = (cx, cy, r, a1, a2, colour = 'hl', width = 5) => { const p = a => [cx + r * Math.cos(rad(a)), cy + r * Math.sin(rad(a))], [x1, y1] = p(a1), [x2, y2] = p(a2), cw = a2 > a1, t = rad(a2) + (cw ? Math.PI / 2 : -Math.PI / 2); return `<path d="M${f(x1)},${f(y1)} A${r},${r} 0 ${Math.abs(a2 - a1) > 180 ? 1 : 0} ${cw ? 1 : 0} ${f(x2)},${f(y2)}" style="fill:none;stroke:var(--${colour});stroke-width:${width};stroke-linecap:round"/><path d="M12,0 L-10,-9 V9 Z" transform="translate(${f(x2)} ${f(y2)}) rotate(${f(t * 180 / Math.PI)})" style="fill:var(--${colour})"/>`; };
-  const wheel = (r, spokes = 6) => `<circle r="${r}" style="${BODY}"/>` + Array.from({ length: spokes }, (_, k) => `<line x1="0" y1="0" x2="${f(r * Math.cos(k * TAU / spokes))}" y2="${f(r * Math.sin(k * TAU / spokes))}" style="stroke:var(--brand-accent-strong);stroke-width:4"/>`).join('') + `<circle cx="${f(r * 0.72)}" cy="0" r="10" style="fill:var(--brand-accent)"/><circle r="9" style="fill:var(--text-main)"/>`;
+  // mark: a dot on the rim, for a figure that follows one point of the wheel.
+  const wheel = (r, spokes = 6, mark = false) => `<circle r="${r}" style="${BODY}"/>` + Array.from({ length: spokes }, (_, k) => `<line x1="0" y1="0" x2="${f(r * Math.cos(k * TAU / spokes))}" y2="${f(r * Math.sin(k * TAU / spokes))}" style="stroke:var(--brand-accent-strong);stroke-width:4"/>`).join('') + (mark ? `<circle cx="${r}" cy="0" r="11" style="fill:var(--brand-accent)"/>` : '') + `<circle r="9" style="fill:var(--text-main)"/>`;
   const at = (x, y, body) => `<g transform="translate(${x} ${y})">${body}</g>`;
 
   return {
@@ -20,7 +21,7 @@ window.DeckFigures.add(P => {
       const on = labelled(el), cx = 400, cy = 250, r = 150;
       let s = '';
       if (on) s += `<line x1="${cx}" y1="${cy}" x2="${cx + r + 60}" y2="${cy}" class="guide"/><line x1="${cx}" y1="${cy}" x2="${f(cx + (r + 60) * Math.cos(rad(-50)))}" y2="${f(cy + (r + 60) * Math.sin(rad(-50)))}" class="guide"/>` + turn(cx, cy, r + 40, 0, -50) + text(cx + r + 70, cy - 70, 'Δθ', 'lbl greek', 'start') + text(cx, cy + r + 70, 'every point: the same angle', 'lbl');
-      return svg(on ? '150 40 560 480' : '220 70 360 360', twoState(at(cx, cy, `<g transform="rotate(-50)">${wheel(r)}</g>`), at(cx, cy, `<g><animateTransform attributeName="transform" type="rotate" from="0" to="-360" dur="5s" repeatCount="indefinite"/>${wheel(r)}</g>`)) + s, 'A wheel turning about a fixed axis through its centre. A mark on the wheel has turned through an angular displacement delta theta; every point of the wheel turns through the same angle in the same time');
+      return svg(on ? '150 40 560 480' : '220 70 360 360', twoState(at(cx, cy, `<g transform="rotate(-50)">${wheel(r, 6, on)}</g>`), at(cx, cy, `<g><animateTransform attributeName="transform" type="rotate" from="0" to="-360" dur="5s" repeatCount="indefinite"/>${wheel(r, 6, on)}</g>`)) + s, 'A wheel turning about a fixed axis through its centre. A mark on the wheel has turned through an angular displacement delta theta; every point of the wheel turns through the same angle in the same time');
     },
 
     // The torque of a force on a spanner: force, distance from the axis and the angle between them.
@@ -84,11 +85,24 @@ window.DeckFigures.add(P => {
 
     // A disc at rest dropped onto a spinning disc: afterwards they turn together, more slowly.
     'a4-coupled': () => {
-      const disc = (cx, cy, w, colour) => `<ellipse cx="${cx}" cy="${cy}" rx="${w}" ry="26" style="fill:color-mix(in srgb, var(--${colour}) 40%, var(--viewer-bg));stroke:var(--${colour});stroke-width:3"/>`;
-      const axle = cx => `<line x1="${cx}" y1="150" x2="${cx}" y2="430" style="stroke:var(--text-secondary);stroke-width:6"/>`;
-      let s = axle(220) + disc(220, 340, 130, 'brand-accent-strong') + disc(220, 190, 90, 'brand-accent') + arrow(220, 226, 220, 296, 'text-secondary', 3) + turn(220, 340, 150, 160, 20, 'hl', 5) + text(220, 520, 'before', 'lbl strong') + text(50, 300, sub('ω', '1'), 'lbl greek', 'end') + text(330, 196, 'at rest', 'lbl', 'start');
-      s += axle(640) + disc(640, 340, 130, 'brand-accent-strong') + disc(640, 314, 90, 'brand-accent') + turn(640, 340, 150, 160, 80, 'hl', 5) + text(640, 520, 'after', 'lbl strong') + text(480, 300, 'ω', 'lbl greek', 'end') + text(640, 130, 'turning together', 'lbl');
-      return svg('-10 90 820 450', s, 'Two discs on the same axle. Before, the lower disc is spinning with angular velocity omega 1 and the upper disc is at rest above it. After the upper disc is dropped onto the lower one, friction makes them turn together with a smaller angular velocity');
+      // Seen from the side, each disc's top face is an ellipse and a dot on the face shows it turning.
+      // Before, the lower disc turns once every 2 s. After, the pair turn together at 8.0 rad/s
+      // instead of 12, so once every 3 s. The axis of rotation is the dashed line.
+      const ry = 26, disc = (cx, cy, w, colour) => `<ellipse cx="${cx}" cy="${cy}" rx="${w}" ry="${ry}" style="fill:color-mix(in srgb, var(--${colour}) 40%, var(--viewer-bg));stroke:var(--${colour});stroke-width:3"/>`;
+      const axis = cx => `<line x1="${cx}" y1="140" x2="${cx}" y2="440" class="guide" style="stroke-width:3"/>`;
+      // A point on a disc face at angle a in degrees; 90 is the front of the disc.
+      const markAt = (cx, cy, w, a) => [f(cx + 0.8 * w * Math.cos(a * Math.PI / 180)), f(cy + 0.8 * ry * Math.sin(a * Math.PI / 180))];
+      const dotAt = ([x, y], colour) => `<circle cx="${x}" cy="${y}" r="9" style="fill:var(--${colour})"/>`;
+      // The front of each disc moves left to right, as the curved arrows show, so the angle decreases.
+      const mark = (cx, cy, w, colour, a, period) => {
+        const pts = Array.from({ length: 49 }, (_, i) => markAt(cx, cy, w, a - i / 48 * 360));
+        return twoState(dotAt(pts[0], colour), period ? `<circle r="9" style="fill:var(--${colour})"><animateMotion dur="${period}s" repeatCount="indefinite" path="M${pts.map(p => p.join(',')).join(' L')}"/></circle>` : dotAt(pts[0], colour));
+      };
+      let s = axis(220) + disc(220, 340, 130, 'brand-accent-strong') + mark(220, 340, 130, 'brand-accent-strong', 120, 2) + disc(220, 190, 90, 'brand-accent') + mark(220, 190, 90, 'brand-accent-strong', 60, 0);
+      s += turn(220, 340, 150, 160, 20, 'hl', 5) + text(220, 520, 'before', 'lbl strong') + text(50, 300, sub('ω', '1'), 'lbl greek', 'end') + text(330, 196, 'at rest', 'lbl', 'start');
+      s += axis(640) + disc(640, 340, 130, 'brand-accent-strong') + mark(640, 340, 130, 'brand-accent-strong', 120, 3) + disc(640, 314, 90, 'brand-accent') + mark(640, 314, 90, 'brand-accent-strong', 60, 3);
+      s += turn(640, 340, 150, 160, 80, 'hl', 5) + text(640, 520, 'after', 'lbl strong') + text(480, 300, 'ω', 'lbl greek', 'end') + text(640, 130, 'turning together', 'lbl');
+      return svg('-10 90 820 450', s, 'Two discs on the same axis of rotation, shown dashed. Before, the lower disc is spinning with angular velocity omega 1 and the upper disc is at rest above it. After the upper disc is dropped onto the lower one, friction makes them turn together with a smaller angular velocity: a mark on each disc goes round once every 3 seconds instead of once every 2');
     },
 
     // A solid sphere and a hoop rolling down the same slope: the sphere wins. Also drawn plain.
