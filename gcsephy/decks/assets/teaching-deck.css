@@ -98,6 +98,7 @@ body {
 .companion-deck .banner-logo { display: flex; align-items: center; min-height: 48px; justify-self: start; }
 .companion-deck .banner-logo img { width: 38px; height: 38px; }
 .banner-actions { justify-self: end; display: flex; align-items: center; gap: 6px; }
+.banner-start { justify-self: start; display: flex; align-items: center; gap: 10px; }
 .nav-pill { display: inline-flex; align-items: center; gap: 8px; min-height: 48px; padding: 0 14px; border: 1px solid var(--input-border); border-radius: 999px; background: var(--card-bg); color: var(--text-main); font: 600 13px var(--font-body); text-decoration: none; }
 .nav-pill:hover { background: var(--muted-bg); color: var(--text-main); }
 .nav-pill svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 2.4; }
@@ -191,6 +192,8 @@ table.data { border-collapse: separate; border-spacing: 0; background: var(--car
 .q .ans { border: 0; border-left: 4px solid var(--brand-primary); border-radius: 0 12px 12px 0; background: var(--formula); color: var(--text-main); font-weight: 600; }
 .reveal-hint { font: 500 17px var(--font-mono); color: var(--text-secondary); letter-spacing: .05em; }
 .terms { background: var(--card-bg); color: var(--text-main); border: 1px solid var(--card-border); border-radius: 22px; box-shadow: none; }
+/* In Year 11, .terms is a grid of separate .term cards, not one panel. */
+.deck-y11 .terms { background: none; border: 0; border-radius: 0; }
 .term { border-color: var(--card-border); }
 .term b { font: 400 32px/1.15 var(--font-display); text-transform: none; color: var(--brand-primary); }
 .term span { color: var(--text-secondary); }
@@ -273,6 +276,7 @@ body.is-fullscreen .deck { border-radius: 0; }
 @media (max-width: 900px) {
   .banner { grid-template-columns: auto 1fr auto !important; gap: 8px; }
   .banner-title { min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-size: 18px; }
+  .deck-y11 .banner-title { display: block; justify-self: stretch; line-height: 48px; } /* its flex title would not truncate */
   .nav-pill .wide { display: none; }
 }
 @media print {
