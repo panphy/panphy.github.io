@@ -23,10 +23,12 @@
       return;
     }
     const box = stage.getBoundingClientRect();
-    const pad = document.body.classList.contains('is-fullscreen') ? 0 : 16;
+    const full = document.body.classList.contains('is-fullscreen');
+    const pad = full ? 0 : 16;
     const scale = Math.min((box.width - pad * 2) / SLIDE_W, (box.height - pad * 2) / SLIDE_H);
     const left = (box.width - SLIDE_W * scale) / 2;
-    const top = (box.height - SLIDE_H * scale) / 2;
+    // Fullscreen pins the slide to the top, so its year bar and badge stay at the top of a screen taller than 16:9.
+    const top = full ? 0 : (box.height - SLIDE_H * scale) / 2;
     deck.style.transform = `translate(${left}px, ${top}px) scale(${scale})`;
   }
 
