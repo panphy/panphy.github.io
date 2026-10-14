@@ -38,7 +38,7 @@ function mount(THREE, fig, index, attr, make) {
   const labels = [];
   const label = (html, anchor) => {
     const el = document.createElement('div');
-    el.style.cssText = 'position:absolute;transform:translate(-50%,-50%);white-space:nowrap;text-align:center;pointer-events:none;font:700 22px/1.3 Arial, Helvetica, sans-serif;color:var(--ink);';
+    el.style.cssText = 'position:absolute;transform:translate(-50%,-50%);white-space:nowrap;text-align:center;pointer-events:none;font:700 22px/1.3 Arial, Helvetica, sans-serif;color:var(--ink);padding:2px 8px;border-radius:4px;background:rgba(255,253,247,.88);';
     el.innerHTML = html;
     holder.appendChild(el);
     labels.push({ el, anchor: new THREE.Vector3(...anchor) });

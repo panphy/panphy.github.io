@@ -1,62 +1,91 @@
-// A low-poly Eco House, cut away at the front corner so the layers show: brick, cavity-wall
-// insulation and the inner wall; loft insulation under the roof; double glazing; an insulated
-// floor; a draught-proofed door. The flat drawing stays for print, reduced motion and offline.
+// A low-poly Eco House seen as a doll's house: the front wall and the front roof slope are taken away so the inside and the
+// cut edges show. Every wall is three layers (brick, cavity-wall insulation, inner block); a thick
+// layer of loft insulation lies on the ceiling under a pitched roof; the side window is double
+// glazed; the floor is slab, insulation and carpet; the back door has a draught strip. The flat
+// drawing stays for print, reduced motion and offline.
 import { model3d } from '../assets/model3d.js';
 
 model3d('house3d', ({ THREE, scene, label }) => {
   const mat = (color, extra = {}) => new THREE.MeshLambertMaterial({ color, flatShading: true, ...extra });
   const M = {
-    brick: mat(0xb5523b), inner: mat(0xeee6d6), wool: mat(0xffd45a), floor: mat(0x8a8f98), carpet: mat(0x6f9ccf),
-    roof: mat(0x4b5563), glass: mat(0x9fd8f0, { transparent: true, opacity: 0.45 }), frame: mat(0xffffff), door: mat(0x7a4a2a), ground: mat(0x9cc36a),
+    brick: mat(0xa9472f), wool: mat(0xf2c94c), inner: mat(0xe8e1d2), slab: mat(0x7c828c), carpet: mat(0x5d86b8),
+    roof: mat(0x3d4552), ceiling: mat(0xf4f1ea), ground: mat(0x8fb86a), frame: mat(0xffffff), door: mat(0x7a4a2a),
+    glass: mat(0xa9dcf2, { transparent: true, opacity: 0.4, depthWrite: false }), strip: mat(0x2a2f38),
   };
   const box = (w, h, d, m, x, y, z) => { const b = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), m); b.position.set(x, y, z); scene.add(b); return b; };
-  const H = 2.4, W = 4, D = 3;
-  // Ground and an insulated floor: slab, insulation, carpet.
-  box(7, 0.1, 6, M.ground, 0, -0.35, 0);
-  box(W, 0.2, D, M.floor, 0, -0.2, 0);
-  box(W - 0.4, 0.08, D - 0.4, M.wool, 0, -0.06, 0);
-  box(W - 0.4, 0.03, D - 0.4, M.carpet, 0, 0, 0);
-  // A wall of three layers, as boxes along x (dir 'x') or z (dir 'z'), from a to b.
-  function wall(dir, at, a, b) {
-    const len = b - a, mid = (a + b) / 2, layers = [[0.14, M.brick, 0.07], [0.12, M.wool, 0.2], [0.1, M.inner, 0.31]];
-    layers.forEach(([th, m, off]) => {
-      const sign = at > 0 ? -1 : 1, p = at + sign * off;
-      if (dir === 'x') box(len, H, th, m, mid, H / 2, p); else box(th, H, len, m, p, H / 2, mid);
+
+  const W = 4.4, D = 3.4, H = 2.5, T = [0.14, 0.12, 0.1];   // outer size, wall height, layer thicknesses
+  const TT = T[0] + T[1] + T[2];
+  const LAYERS = [M.brick, M.wool, M.inner];
+
+  // One wall: three layers stacked inwards from its outer face. along = 'x' (front/back wall) or
+  // 'z' (side wall); out = the outer face's coordinate; [a0, a1] its extent along the wall; [y0, y1] its height.
+  function wall(along, out, a0, a1, y0, y1) {
+    const inward = out > 0 ? -1 : 1;
+    let off = 0;
+    T.forEach((th, i) => {
+      const c = out + inward * (off + th / 2), len = a1 - a0, mid = (a0 + a1) / 2, h = y1 - y0, y = (y0 + y1) / 2;
+      if (along === 'x') box(len, h, th, LAYERS[i], mid, y, c); else box(th, h, len, LAYERS[i], c, y, mid);
+      off += th;
     });
   }
-  wall('x', -D / 2, -W / 2, W / 2);       // back wall, whole
-  wall('z', -W / 2, -D / 2, D / 2);       // left wall, whole
-  wall('x', D / 2, -W / 2, 0);            // front wall, cut at x = 0
-  wall('z', W / 2, -D / 2, 0);            // right wall, cut at z = 0
-  // Double glazing on the left wall: a white frame holding two panes with a gap between them.
-  box(0.16, 1.06, 1.16, M.frame, -W / 2 - 0.08, 1.35, 0.3);
-  box(0.02, 0.9, 1.0, M.glass, -W / 2 - 0.17, 1.35, 0.3);
-  box(0.02, 0.9, 1.0, M.glass, -W / 2 - 0.27, 1.35, 0.3);
-  // A door in the front wall, with a draught strip along its foot.
-  box(0.8, 1.9, 0.42, M.door, -1.2, 0.95, D / 2 - 0.21);
-  box(0.8, 0.06, 0.46, M.wool, -1.2, 0.03, D / 2 - 0.21);
-  // Ceiling and a thick layer of loft insulation over the back half, under one roof slope.
-  box(W, 0.08, D, M.inner, 0, H + 0.04, 0);
-  box(W - 0.3, 0.3, D / 2, M.wool, 0, H + 0.23, -D / 4);
-  const slope = box(W + 0.3, 0.1, Math.hypot(D / 2, 1.3) + 0.2, M.roof, 0, H + 0.65, -D / 4 - 0.05);
-  slope.rotation.x = Math.atan2(1.3, D / 2);
-  // Gable on the left wall.
-  const gable = new THREE.Shape([new THREE.Vector2(-D / 2, 0), new THREE.Vector2(D / 2, 0), new THREE.Vector2(0, 1.3)]);
-  const g = new THREE.Mesh(new THREE.ShapeGeometry(gable), M.brick);
-  g.rotation.y = Math.PI / 2; g.position.set(-W / 2 + 0.01, H, 0); g.material.side = THREE.DoubleSide; scene.add(g);
 
-  scene.add(new THREE.AmbientLight(0xffffff, 0.75));
-  const sun = new THREE.DirectionalLight(0xffffff, 1.6); sun.position.set(4, 7, 5); scene.add(sun);
+  // Ground, then the floor: concrete slab, insulation, carpet.
+  box(7.4, 0.08, 6, M.ground, 0, -0.42, 0.6);
+  box(W, 0.22, D, M.slab, 0, -0.27, 0);
+  box(W - 2 * TT, 0.1, D - TT, M.wool, 0, -0.11, TT / 2);
+  box(W - 2 * TT, 0.04, D - TT, M.carpet, 0, -0.04, TT / 2);
 
-  label('loft insulation', [0.4, H + 0.6, -0.6]);
-  label('cavity wall insulation', [1.6, 1.3, 0.05]);
-  label('double glazing', [-2.6, 2.05, 0.3]);
-  label('floor insulation', [0.6, -0.55, 1.2]);
-  label('draught strip', [-1.2, -0.45, 1.9]);
+  // Back wall with a door opening (x from -1.5 to -0.6, up to 2.0 m), where the open front shows it.
+  wall('x', -D / 2, -W / 2, -1.5, 0, H);
+  wall('x', -D / 2, -0.6, W / 2, 0, H);
+  wall('x', -D / 2, -1.5, -0.6, 2.0, H);
+  box(0.9, 1.96, 0.08, M.door, -1.05, 0.98, -D / 2 + TT - 0.05);
+  box(0.9, 0.08, 0.14, M.strip, -1.05, 0.04, -D / 2 + TT + 0.02);
+
+  // Right wall with a window opening (z from -0.6 to 0.6, height 0.9 to 1.9 m), double glazed.
+  wall('z', W / 2, -D / 2 + TT, -0.6, 0, H);
+  wall('z', W / 2, 0.6, D / 2, 0, H);
+  wall('z', W / 2, -0.6, 0.6, 0, 0.9);
+  wall('z', W / 2, -0.6, 0.6, 1.9, H);
+  box(TT, 0.06, 1.2, M.frame, W / 2 - TT / 2, 1.4, 0);
+  box(0.02, 1.0, 1.2, M.glass, W / 2 - 0.08, 1.4, 0);
+  box(0.02, 1.0, 1.2, M.glass, W / 2 - TT + 0.08, 1.4, 0);
+
+  // Side walls start inside the back wall, so no two layers overlap (overlaps flicker).
+  // Left wall, whole. The front wall is left out: that is the cut-away.
+  wall('z', -W / 2, -D / 2 + TT, D / 2, 0, H);
+
+  // Ceiling, then a thick layer of loft insulation on top of it.
+  box(W, 0.06, D, M.ceiling, 0, H + 0.03, 0);
+  box(W - 0.2, 0.3, D - 0.2, M.wool, 0, H + 0.21, 0);
+
+  // Pitched roof: two slopes meeting at a ridge along x, with gable ends filled in brick.
+  const rise = 1.3, half = D / 2 + 0.25, slope = Math.atan2(rise, half), len = Math.hypot(rise, half) + 0.1;
+  // Only the back slope is kept: with the front wall, the front slope is cut away too, so the loft shows.
+  const back = box(W + 0.5, 0.1, len, M.roof, 0, H + rise / 2 + 0.05, -half / 2);
+  back.rotation.x = -slope;
+  const gable = new THREE.Shape([new THREE.Vector2(-D / 2, 0), new THREE.Vector2(D / 2, 0), new THREE.Vector2(0, rise * (D / 2) / half)]);
+  [-1, 1].forEach(side => {
+    const g = new THREE.Mesh(new THREE.ExtrudeGeometry(gable, { depth: T[0], bevelEnabled: false }), M.brick);
+    g.rotation.y = Math.PI / 2;
+    g.position.set(side > 0 ? W / 2 - T[0] : -W / 2, H, 0);
+    scene.add(g);
+  });
+
+  scene.add(new THREE.AmbientLight(0xffffff, 0.8));
+  const sun = new THREE.DirectionalLight(0xffffff, 1.5); sun.position.set(-3, 8, 6); scene.add(sun);
+  const fill = new THREE.DirectionalLight(0xffffff, 0.5); fill.position.set(5, 3, 4); scene.add(fill);
+
+  label('loft insulation', [0.2, H + 0.75, 0.6]);
+  label('cavity wall insulation', [-W / 2 - 0.4, 1.3, D / 2]);
+  label('double glazing', [W / 2 - 0.5, 2.15, 0]);
+  label('floor insulation', [0.6, -0.7, D / 2 + 0.2]);
+  label('draught strip', [-1.05, 0.2, -D / 2 + 0.45]);
 
   return {
-    look: [0, 1.1, 0], view: { turn: 0.75, lift: 0.42, far: 12 }, sway: 0.25,
-    alt: 'A house cut away at one corner, showing loft insulation, cavity wall insulation, double glazing, floor insulation and a draught strip under the door',
+    look: [0, 1.4, 0], view: { turn: -0.32, lift: 0.42, far: 12 }, sway: 0.15,
+    alt: 'A cut-away house with its front wall removed: three-layer cavity walls, thick loft insulation on the ceiling under a pitched roof, a double-glazed side window, an insulated floor and a back door with a draught strip',
     paint: () => {}, still: 1,
   };
 });
