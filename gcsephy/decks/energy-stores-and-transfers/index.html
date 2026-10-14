@@ -1,0 +1,1375 @@
+<!DOCTYPE html>
+<html lang="en" class="deck-y9">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="robots" content="noindex, nofollow">
+  <meta name="description" content="Teaching slides for the Year 9 Energy unit: energy stores and systems, kinetic, gravitational and elastic potential energy, springs, conservation of energy, power, wasted energy and efficiency.">
+  <meta name="theme-color" content="#030c1e">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <title>Energy: Stores and Transfers · Teaching deck</title>
+  <link rel="icon" type="image/png" href="/assets/favicon.png">
+  <link rel="apple-touch-icon" href="/assets/apple-touch-icon.png">
+  <link rel="stylesheet" href="/assets/standalone-top.css">
+  <link rel="stylesheet" href="../assets/companion-deck.css">
+  <link rel="stylesheet" href="/gcsephy/year9phy/unit02/workbook/assets/figures.css">
+  <link rel="stylesheet" href="deck.css">
+  <link rel="stylesheet" href="../assets/deck-notes.css">
+  <script>
+    // Maths is LaTeX between \( and \). SVG output with no shared font cache, so thumbnail copies stay complete.
+    window.MathJax = { tex: { inlineMath: [['\\(', '\\)']] }, svg: { fontCache: 'none' }, options: { enableMenu: false } };
+  </script>
+  <script src="/gcsephy/sw-register.js" defer></script>
+</head>
+<body data-deck-key="energy-stores-and-transfers" data-deck-title="Energy: Stores and Transfers">
+  <header class="topbar">
+    <div class="brand"><a class="brand-logo" href="/" aria-label="PanPhy Labs home"><img src="/assets/favicon.png" alt="" width="32" height="32"></a><a class="brand-name" href="#1"><span>Energy: Stores and Transfers</span></a></div>
+    <div class="top-actions">
+      <button id="thumbs-toggle" class="nav-pill icon-only" type="button" aria-controls="thumbs" aria-pressed="true" aria-label="Hide slide thumbnails" title="Show or hide slide thumbnails (T)"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path class="pane" d="M9.5 4.5H6A2.5 2.5 0 0 0 3.5 7v10A2.5 2.5 0 0 0 6 19.5h3.5z"/><rect x="3.5" y="4.5" width="17" height="15" rx="2.5"/><path d="M9.5 4.5v15"/></svg></button>
+      <a class="nav-pill" href="/gcsephy/year9phy/unit02/" target="_blank" rel="noopener"><span class="wide">Workbook</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 17L17 7M9 7h8v8"/></svg></a>
+      <button id="fullscreen" class="nav-pill" type="button" aria-pressed="false" aria-label="Present fullscreen" title="Present fullscreen (F)"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9V4h5M15 4h5v5M20 15v5h-5M9 20H4v-5"/></svg><span class="wide">Present</span></button>
+    </div>
+  </header>
+
+  <nav class="thumbs" id="thumbs" aria-label="Slides"></nav>
+
+  <main class="stage" id="stage">
+    <div class="deck" id="deck">
+
+      <!-- Title -->
+      <section class="slide dark a-hi" data-title="Energy: Stores and Transfers">
+        <div class="hero">
+          <div>
+            <p class="eyebrow"><span class="on">Year 9 physics</span>, unit 2, nine lessons</p>
+            <h1>Energy.<br><em>Follow it.</em></h1>
+            <p class="lead">It is never made and never destroyed. It only moves.</p>
+            <div class="unlocks"><span>stores</span><span>transfers</span><span>\(E_k\)</span><span>\(E_p\)</span><span>\(E_e\)</span><span>power</span><span>efficiency</span></div>
+          </div>
+          <div class="case-card">
+            <div class="label">THE WHOLE UNIT IN ONE PICTURE</div>
+            <h3>Down, up, down, up… lower each time</h3>
+            <div class="fig" data-fig="coverArt" style="background: var(--navy); border: 2px solid var(--ink);"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Map -->
+      <section class="slide a-hi" data-title="Nine lessons">
+        <p class="eyebrow">The route</p>
+        <h2>Nine <em>lessons</em></h2>
+        <div class="missions nine fill">
+          <div class="mission a-hi"><div class="mission-top"><span class="lesson-number">01</span><span class="lesson-icon">J</span></div><h3>Stores &amp; systems</h3><p>Where energy is, how it moves</p></div>
+          <div class="mission a-cyan"><div class="mission-top"><span class="lesson-number">02</span><span class="lesson-icon">\(E_k\)</span></div><h3>Kinetic store</h3><p>\(E_k = \tfrac{1}{2}mv^2\)</p></div>
+          <div class="mission a-hot"><div class="mission-top"><span class="lesson-number">03</span><span class="lesson-icon">\(E_p\)</span></div><h3>Gravitational store</h3><p>\(E_p = mgh\), finding \(h\) or \(m\)</p></div>
+          <div class="mission a-violet"><div class="mission-top"><span class="lesson-number">04</span><span class="lesson-icon">k</span></div><h3>Stretching springs</h3><p>\(F = ke\), two graphs</p></div>
+          <div class="mission a-alt"><div class="mission-top"><span class="lesson-number">05</span><span class="lesson-icon">\(E_e\)</span></div><h3>Elastic store</h3><p>\(E_e = \tfrac{1}{2}ke^2\)</p></div>
+          <div class="mission a-hi"><div class="mission-top"><span class="lesson-number">06</span><span class="lesson-icon">=</span></div><h3>Conservation</h3><p>Nothing is lost; bar charts</p></div>
+          <div class="mission a-cyan"><div class="mission-top"><span class="lesson-number">07</span><span class="lesson-icon">P</span></div><h3>Power</h3><p>\(P = \dfrac{E}{t}\)</p></div>
+          <div class="mission a-hot"><div class="mission-top"><span class="lesson-number">08</span><span class="lesson-icon">~</span></div><h3>Wasted energy</h3><p>Lubrication, insulation</p></div>
+          <div class="mission a-violet"><div class="mission-top"><span class="lesson-number">09</span><span class="lesson-icon">%</span></div><h3>Efficiency</h3><p>Useful ÷ total, Sankey</p></div>
+        </div>
+        <div class="slide-foot"><span class="tag">Energy: stores and transfers</span><span data-page></span></div>
+      </section>
+
+      <!-- ============ Lesson 1 ============ -->
+      <section class="slide dark a-hi" data-title="Lesson 1: Energy stores and systems">
+        <div class="hero section">
+          <div>
+            <p class="eyebrow"><span class="num">01</span> Lesson 1: <span class="on">Where does the energy go?</span></p>
+            <h1>Stores &amp; <em>systems</em></h1>
+            <div class="unlocks"><span>eight stores</span><span>four ways to transfer</span><span>closed systems</span></div>
+          </div>
+          <div class="case-card">
+            <div class="label">KEY RULE</div>
+            <h3>Energy is never used up. It moves.</h3>
+            <ul class="points"><li>Stores <b>hold</b> energy</li><li>Transfers <b>move</b> it</li><li>Measured in <b>joules (J)</b></li></ul>
+          </div>
+        </div>
+        <div class="slide-foot"><span class="tag">Lesson 1: Stores and systems</span><span data-page></span></div>
+      </section>
+
+      <section class="slide a-hi" data-title="The half-pipe">
+        <p class="eyebrow"><span class="num">01</span> Big question</p>
+        <h2>Why never <em>quite</em> as high?</h2>
+        <div class="split wide-fig">
+          <ul class="points small">
+            <li>Press <b>Play</b>. Watch the bars.</li>
+            <li class="step">Down: <b>G.P.E.</b> bar falls, <b>kinetic</b> bar grows</li>
+            <li class="step">The total stays the <b>same</b></li>
+            <li class="step">Turn <b>friction on</b>: a <b>thermal</b> bar appears</li>
+            <li class="step">The total <b>still</b> stays the same</li>
+          </ul>
+          <div class="panel"><div class="panel-head"><span>Half-pipe</span><span class="pill">interactive</span></div><div class="widget" data-widget="ramp"></div></div>
+        </div>
+        <div class="slide-foot"><span class="tag">Lesson 1: Stores and systems</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>Why the bars matter.</b> Each bar is the energy in one store at that instant. As the ball drops, height turns into speed and back again, but the three bars always add up to the same total. That one fact, that the total never changes, is the whole of this unit.</p>
+            <p><b>Where does the "lost" height go?</b> With friction on, the ball and the track get very slightly warmer. That warmth is energy in the thermal store. Nothing has vanished: it has moved to a store we cannot easily get back.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide a-hi" data-title="Energy stores">
+        <p class="eyebrow"><span class="num">01</span> Know them</p>
+        <h2>Eight energy <em>stores</em></h2>
+        <div class="stores fill">
+          <div class="store"><b>Kinetic</b><span>it is moving</span><i>a rolling football</i></div>
+          <div class="store"><b>Gravitational potential</b><span>it is raised up</span><i>a book on a high shelf</i></div>
+          <div class="store"><b>Elastic potential</b><span>it is stretched or squashed</span><i>a drawn bow</i></div>
+          <div class="store"><b>Thermal</b><span>it is hot</span><i>a cup of tea</i></div>
+          <div class="store"><b>Chemical</b><span>of what it is made of</span><i>food, fuel, a battery</i></div>
+          <div class="store"><b>Magnetic</b><span>magnets attract or repel</span><i>fridge magnets held apart</i></div>
+          <div class="store"><b>Electrostatic</b><span>charges attract or repel</span><i>a charged balloon</i></div>
+          <div class="store"><b>Nuclear</b><span>of the nucleus</span><i>uranium fuel</i></div>
+        </div>
+        <div class="slide-foot"><span class="tag">Lesson 1: Stores and systems</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>A store is a place to keep count.</b> Physicists track energy like money in bank accounts: each store is an account, and a change moves joules from one account to another. The total in all the accounts never changes.</p>
+            <p><b>Thermal is the store everything ends up in.</b> Hot things have faster-moving particles. Almost every real process leaves a little extra energy in the thermal store of the surroundings, which is why it turns up in nearly every answer in this unit.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide a-hi" data-title="Four ways to transfer energy">
+        <p class="eyebrow"><span class="num">01</span> How energy moves</p>
+        <h2>Four <em>transfers</em></h2>
+        <div class="row four fill" style="align-content: center;">
+          <div class="card"><p class="eyebrow">01</p><h3>Mechanically</h3><p>A force moves something. Pushing a trolley. A sound wave.</p></div>
+          <div class="card"><p class="eyebrow">02</p><h3>Electrically</h3><p>A current flows. A battery lighting a lamp.</p></div>
+          <div class="card"><p class="eyebrow">03</p><h3>By heating</h3><p>Hot warms cold. A hob heating a pan.</p></div>
+          <div class="card"><p class="eyebrow">04</p><h3>By radiation</h3><p>Light or infrared. The Sun warming your face.</p></div>
+        </div>
+        <div class="remember">Light, sound and electricity are <b>not stores</b>. They are ways energy travels between stores.</div>
+        <div class="slide-foot"><span class="tag">Lesson 1: Stores and systems</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>Why is light not a store?</b> You cannot keep light in a box. The moment it is made, it travels away and is absorbed, warming whatever it hits. Light is the delivery van, not the warehouse.</p>
+            <p><b>"Electrical energy" is a trap.</b> Write "energy is transferred electrically". The battery's chemical store empties and some other store fills; the current is just the route.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide a-hi" data-title="Describe a change">
+        <p class="eyebrow"><span class="num">01</span> Three steps</p>
+        <h2>Describe <em>any</em> change</h2>
+        <div class="split even top">
+          <ol class="steps">
+            <li>Which store <b>empties</b>?</li>
+            <li>Which store <b>fills</b>?</li>
+            <li><b>How</b> is it transferred?</li>
+          </ol>
+          <div class="worked">
+            <div class="wq"><span>Example</span>A car brakes and stops.</div>
+            <dl>
+              <div class="step"><dt>Empties</dt><dd>kinetic store of the car</dd></div>
+              <div class="step"><dt>Fills</dt><dd>thermal store of the brakes</dd></div>
+              <div class="step"><dt>How</dt><dd>mechanically: friction is a force</dd></div>
+              <div class="step"><dt>Write</dt><dd class="ans">Energy is transferred mechanically from the kinetic store of the car to the thermal store of the brakes.</dd></div>
+            </dl>
+          </div>
+        </div>
+        <div class="slide-foot"><span class="tag">Lesson 1: Stores and systems</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>Why a sentence with "from … to …"?</b> Exam mark schemes give one mark for the store that empties and one for the store that fills. "The car's energy turns into heat" names neither store properly and usually scores nothing.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide a-hi" data-title="The five changes">
+        <p class="eyebrow"><span class="num">01</span> The five AQA examples</p>
+        <h2>Five <em>changes</em></h2>
+        <div class="table-wrap">
+          <table class="data five">
+            <thead><tr><th>Change</th><th>Store that empties</th><th>Store that fills</th></tr></thead>
+            <tbody>
+              <tr><th>Ball thrown upwards</th><td class="step">kinetic</td><td class="step">gravitational potential</td></tr>
+              <tr><th>Moving car hits a wall</th><td class="step">kinetic</td><td class="step">thermal (car, wall, air)</td></tr>
+              <tr><th>Trolley pushed by a steady force</th><td class="step">chemical (the pusher)</td><td class="step">kinetic (and thermal)</td></tr>
+              <tr><th>Car braking</th><td class="step">kinetic</td><td class="step">thermal (brakes)</td></tr>
+              <tr><th>Kettle boiling water</th><td class="step">(energy arrives electrically)</td><td class="step">thermal (water)</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="slide-foot"><span class="reveal-hint">PRESS → TO REVEAL EACH ANSWER</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>The kettle is different.</b> Its energy does not come from a store inside the kettle: it arrives electrically from the mains. So we start the description at the transfer: "energy is transferred electrically to the element, then by heating to the thermal store of the water".</p>
+            <p><b>The crash makes sound too.</b> Sound is a transfer, not a store. The sound fades as the air it shakes warms up, so it also ends in the thermal store of the surroundings.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide a-hi" data-title="Systems">
+        <p class="eyebrow"><span class="num">01</span> What are we looking at?</p>
+        <h2>Closed <em>systems</em></h2>
+        <div class="split even">
+          <ul class="points">
+            <li>A <b>system</b>: the object or group of objects we choose to study</li>
+            <li>A <b>closed system</b>: no energy gets in or out</li>
+            <li>In a closed system the <b>total</b> energy stays the same</li>
+            <li>Energy only <b>moves between stores</b> inside it</li>
+          </ul>
+          <div class="card navy"><p class="eyebrow" style="color: var(--hi);">Example</p><h3 style="color:#fff">Ball + Earth</h3><p>A falling ball and the Earth form a closed system. The energy that leaves the gravitational potential store arrives in the kinetic store. Nothing enters from outside.</p></div>
+        </div>
+        <div class="slide-foot"><span class="tag">Lesson 1: Stores and systems</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>Why choose a system at all?</b> Choosing what is "inside" decides what counts as a transfer. Draw a boundary round a hot drink and the air: no energy leaves, the drink cools and the air warms. Draw it round the drink alone and energy leaves it by heating. Both are right; they are different systems.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide a-hi" data-title="Quick check: Lesson 1">
+        <p class="eyebrow"><span class="num">01</span> Checkpoint</p>
+        <h2>Quick check</h2>
+        <div class="quiz fill">
+          <div class="q"><p><span class="n">1</span>Unit of energy?</p><div class="ans step">joule (J)</div></div>
+          <div class="q"><p><span class="n">2</span>Is light a store?</p><div class="ans step">No: it is a way energy is transferred (by radiation)</div></div>
+          <div class="q"><p><span class="n">3</span>Ball thrown up: which store fills?</p><div class="ans step">gravitational potential</div></div>
+          <div class="q"><p><span class="n">4</span>Car brakes: which store fills?</p><div class="ans step">thermal store of the brakes</div></div>
+          <div class="q"><p><span class="n">5</span>What is a closed system?</p><div class="ans step">No energy gets in or out; the total stays the same</div></div>
+          <div class="q"><p><span class="n">6</span>"The energy was used up." Fix it.</p><div class="ans step">It was transferred to the thermal store of the surroundings</div></div>
+        </div>
+        <div class="slide-foot"><span class="reveal-hint">PRESS → TO REVEAL EACH ANSWER</span><span data-page></span></div>
+      </section>
+
+      <!-- ============ Lesson 2 ============ -->
+      <section class="slide dark a-cyan" data-title="Lesson 2: The kinetic store">
+        <div class="hero section">
+          <div>
+            <p class="eyebrow"><span class="num">02</span> Lesson 2: <span class="on">Energy in motion</span></p>
+            <h1>The kinetic <em>store</em></h1>
+            <div class="unlocks"><span>\(E_k = \tfrac{1}{2}mv^2\)</span><span>grams → kilograms</span><span>2 × speed = 4 × energy</span></div>
+          </div>
+          <div class="case-card">
+            <div class="label">BIG QUESTION</div>
+            <h3>Twice as fast: twice the energy?</h3>
+            <ul class="points"><li>A tennis ball or a bowling ball at 20 m/s?</li><li>A car at 10 m/s or at 30 m/s?</li><li>A lorry at 2 m/s or a bullet at 400 m/s?</li></ul>
+          </div>
+        </div>
+        <div class="slide-foot"><span class="tag">Lesson 2: The kinetic store</span><span data-page></span></div>
+      </section>
+
+      <section class="slide a-cyan" data-title="Kinetic energy">
+        <p class="eyebrow"><span class="num">02</span> Know and apply</p>
+        <h2>Kinetic <em>energy</em></h2>
+        <div class="split even top">
+          <div class="col">
+            <div class="eq-block"><span class="eq">\(E_k = \tfrac{1}{2}\,m\,v^2\)</span><span class="eq-words">kinetic energy = 0.5 × mass × (speed)²</span><span class="eq-units">\(E_k\) in J, \(m\) in kg, \(v\) in m/s</span><span class="flag">On the equation sheet</span></div>
+            <div class="remember">Only the <b>speed</b> is squared. Square it <b>first</b>.</div>
+          </div>
+          <div class="col">
+            <div class="worked">
+              <div class="wq"><span>Example 1</span>A 1200 kg car moves at 15 m/s.</div>
+              <dl>
+                <div class="step"><dt>Equation</dt><dd>\(E_k = \tfrac{1}{2}\,m\,v^2\)</dd></div>
+                <div class="step"><dt>Substitute</dt><dd>\(E_k = 0.5 \times 1200 \times 15^2\)</dd></div>
+                <div class="step"><dt>Answer</dt><dd class="ans">\(E_k = 135\,000\) J</dd></div>
+              </dl>
+            </div>
+            <div class="worked">
+              <div class="wq"><span>Example 2</span>A 450 g football is kicked at 20 m/s.</div>
+              <dl>
+                <div class="step"><dt>Convert</dt><dd>\(m = 450\ \text{g} = 0.450\ \text{kg}\)</dd></div>
+                <div class="step"><dt>Equation</dt><dd>\(E_k = \tfrac{1}{2}\,m\,v^2\)</dd></div>
+                <div class="step"><dt>Substitute</dt><dd>\(E_k = 0.5 \times 0.450 \times 20^2\)</dd></div>
+                <div class="step"><dt>Answer</dt><dd class="ans">\(E_k = 90\) J</dd></div>
+              </dl>
+            </div>
+          </div>
+        </div>
+        <div class="slide-foot"><span class="tag">Lesson 2: The kinetic store</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>The calculator trap.</b> Typing 0.5 × 1200 × 15 and then pressing x² squares everything: you get 81 000 000, not 135 000. Work out \(15^2 = 225\) on its own line first, then multiply.</p>
+            <p><b>Why kilograms?</b> The joule is defined using kilograms, metres and seconds. Put grams in and the answer is 1000 times too big: the football would carry 90 000 J, more than a car at walking pace.</p>
+          </div>
+          <div class="rn-side"><p class="tip">Sense check: a football is tens of joules; a moving car is hundreds of thousands.</p></div>
+        </aside>
+      </section>
+
+      <section class="slide a-cyan" data-title="Double the speed">
+        <p class="eyebrow"><span class="num">02</span> Try it</p>
+        <h2>Double the speed, <em>×4</em></h2>
+        <div class="split wide-fig">
+          <ul class="points small">
+            <li>Pick each speed in turn</li>
+            <li class="step">2 × the speed → \(2^2 = 4\) × the energy</li>
+            <li class="step">3 × the speed → \(3^2 = 9\) × the energy</li>
+            <li class="step">Now double the <b>mass</b>: only 2 × the energy</li>
+          </ul>
+          <div class="panel"><div class="panel-head"><span>Car, 1000 kg</span><span class="pill">interactive</span></div><div class="widget" data-widget="kinetic"></div></div>
+        </div>
+        <div class="slide-foot"><span class="tag">Lesson 2: The kinetic store</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>Why it matters on the road.</b> To stop, the brakes must transfer all of the kinetic energy to their thermal store. At 60 mph a car carries four times the energy it has at 30 mph, so with the same braking force it needs about four times the distance to stop.</p>
+            <p><b>Why mass and speed are not equal partners.</b> Mass appears once in the equation; speed appears twice (squared). Speed always wins.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide a-cyan" data-title="Practical: a moving trolley">
+        <p class="eyebrow"><span class="num">02</span> Practical</p>
+        <h2>Measure a <em>trolley</em></h2>
+        <div class="split even top">
+          <ol class="steps">
+            <li>Mass on the balance, in g → kg</li>
+            <li>Mark 1.00 m on the track</li>
+            <li>Push gently; time the 1.00 m</li>
+            <li>Three runs, mean time</li>
+            <li>speed = distance ÷ time, then \(E_k\)</li>
+          </ol>
+          <div class="worked">
+            <div class="wq"><span>Sample</span>500 g trolley, mean time 1.59 s</div>
+            <dl>
+              <div class="step"><dt>Speed</dt><dd>\(v = \dfrac{s}{t} = \dfrac{1.00}{1.59} = 0.63\) m/s</dd></div>
+              <div class="step"><dt>Equation</dt><dd>\(E_k = \tfrac{1}{2}\,m\,v^2\)</dd></div>
+              <div class="step"><dt>Substitute</dt><dd>\(E_k = 0.5 \times 0.500 \times 0.63^2\)</dd></div>
+              <div class="step"><dt>Answer</dt><dd class="ans">\(E_k = 0.10\) J</dd></div>
+            </dl>
+          </div>
+        </div>
+        <div class="slide-foot"><span class="tag">Lesson 2: The kinetic store</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>Which reading matters most?</b> The time. A 0.1 s slip in reaction time changes the speed by about 6%, and squaring it changes the energy by about 12%. An error in the mass passes straight through unchanged.</p>
+            <p><b>Why so small?</b> 0.10 J is tiny because the trolley is light and slow. Compare a 1200 kg car at 15 m/s: more than a million times as much.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide a-cyan" data-title="Quick check: Lesson 2">
+        <p class="eyebrow"><span class="num">02</span> Checkpoint</p>
+        <h2>Quick check</h2>
+        <div class="quiz fill">
+          <div class="q"><p><span class="n">1</span>60 kg runner at 5.0 m/s?</p><div class="ans step">\(0.5 \times 60 \times 5.0^2 = 750\) J</div></div>
+          <div class="q"><p><span class="n">2</span>250 g in kg?</p><div class="ans step">0.250 kg</div></div>
+          <div class="q"><p><span class="n">3</span>Speed doubles. Energy?</p><div class="ans step">× 4</div></div>
+          <div class="q"><p><span class="n">4</span>Speed halves. Energy?</p><div class="ans step">a quarter (÷ 4)</div></div>
+          <div class="q"><p><span class="n">5</span>10 g bullet at 400 m/s?</p><div class="ans step">\(0.5 \times 0.010 \times 400^2 = 800\) J</div></div>
+          <div class="q"><p><span class="n">6</span>Mass doubles. Energy?</p><div class="ans step">× 2</div></div>
+        </div>
+        <div class="slide-foot"><span class="reveal-hint">PRESS → TO REVEAL EACH ANSWER</span><span data-page></span></div>
+      </section>
+
+      <!-- ============ Lesson 3 ============ -->
+      <section class="slide dark a-hot" data-title="Lesson 3: The gravitational potential store">
+        <div class="hero section">
+          <div>
+            <p class="eyebrow"><span class="num">03</span> Lesson 3: <span class="on">Energy from height</span></p>
+            <h1>Gravitational <em>potential</em></h1>
+            <div class="unlocks"><span>\(g = 9.8\) N/kg</span><span>\(E_p = mgh\)</span><span>height gained</span><span>find \(h\) or \(m\)</span></div>
+          </div>
+          <div class="case-card">
+            <div class="label">KEY RULE</div>
+            <h3>Gravity pulls each kilogram with 9.8 N</h3>
+            <div class="fig" data-fig="shelf"></div>
+          </div>
+        </div>
+        <div class="slide-foot"><span class="tag">Lesson 3: Gravitational store</span><span data-page></span></div>
+      </section>
+
+      <section class="slide news a-hot" data-title="In the news: a battery made of water">
+        <div class="masthead"><span class="paper-name">The Energy Times</span><span class="dateline">Wales</span><span class="edition">Lesson 3 · the case</span></div>
+        <div class="front fill">
+          <figure class="news-photo">
+            <img src="images/case-marchlyn-mawr.jpg" width="1100" height="825" alt="A large reservoir held by a curved dam high in the mountains">
+            <figcaption>Marchlyn Mawr, the upper lake of the Dinorwig power station in Snowdonia. <span class="credit">Photo: Ian Greig, <a href="https://creativecommons.org/licenses/by-sa/2.0/" target="_blank" rel="noopener">CC BY-SA 2.0</a>, via <a href="https://commons.wikimedia.org/wiki/File:Marchlyn_Mawr_reservoir_-_geograph.org.uk_-_488547.jpg" target="_blank" rel="noopener">Wikimedia Commons</a></span></figcaption>
+          </figure>
+          <div class="story">
+            <p class="kicker">Electric Mountain</p>
+            <h2>A battery made of <em>water</em></h2>
+            <p class="standfirst">At night, Dinorwig pumps water up into this lake, about 500 m above the power station. When the country suddenly needs electricity, the water rushes down through turbines.</p>
+            <p class="follow-up"><b>Where is the energy?</b>In the water's gravitational potential store, until it falls.</p>
+            <p class="ask"><b>Talk about it</b>What two things would you need to know to work out how much energy the lake stores?</p>
+          </div>
+        </div>
+        <div class="slide-foot"><span class="tag">Lesson 3: Gravitational store</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>Answer to the question:</b> the mass of water and its height above the turbines (with \(g\), which is given). Every cubic metre of water has a mass of 1000 kg; falling 500 m, it gives up \(1000 \times 9.8 \times 500 \approx 4.9\) million joules.</p>
+            <p><b>Why build it?</b> Power stations cannot start up in seconds; falling water can. The lake is filled when electricity is cheap and spare, and emptied when it is needed fast.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide a-hot" data-title="What g means">
+        <p class="eyebrow"><span class="num">03</span> Gravitational field strength</p>
+        <h2>What \(g\) <em>means</em></h2>
+        <div class="split even">
+          <div class="col">
+            <div class="rule"><strong>On Earth</strong><span>Gravity pulls every kilogram down with <b>9.8 N</b>: \(g = 9.8\) N/kg</span></div>
+            <table class="data compact">
+              <thead><tr><th>Where</th><th>\(g\) / N/kg</th><th>Pull on 1 kg</th></tr></thead>
+              <tbody><tr><th>Earth</th><td>9.8</td><td>9.8 N</td></tr><tr><th>Moon</th><td>1.6</td><td>1.6 N</td></tr><tr><th>Jupiter</th><td>about 25</td><td>about 25 N</td></tr></tbody>
+            </table>
+          </div>
+          <ul class="points small">
+            <li>A newton (N) is the unit of <b>force</b></li>
+            <li class="step">A kilogram (kg) is the unit of <b>mass</b></li>
+            <li class="step">Mass is <b>not</b> a force: the same 1 kg is pulled by 9.8 N on Earth and 1.6 N on the Moon</li>
+            <li class="step">So the same lift stores <b>less energy</b> on the Moon</li>
+          </ul>
+        </div>
+        <div class="slide-foot"><span class="tag">Lesson 3: Gravitational store</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>Why not 10?</b> 9.8 N/kg is the value AQA gives in every question; rounding to 10 changes your answer by 2% and can cost the accuracy mark. Use the value the question gives.</p>
+            <p><b>"Weight" comes later.</b> In the Forces unit you will call the pull of gravity on an object its weight. For now, all you need is: each kilogram is pulled with 9.8 N.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide a-hot" data-title="Gravitational potential energy">
+        <p class="eyebrow"><span class="num">03</span> Know and apply</p>
+        <h2>\(E_p = mgh\)</h2>
+        <div class="split even top">
+          <div class="col">
+            <div class="eq-block"><span class="eq">\(E_p = m\,g\,h\)</span><span class="eq-words">G.P.E. = mass × gravitational field strength × height</span><span class="eq-units">\(E_p\) in J, \(m\) in kg, \(g\) in N/kg, \(h\) in m</span><span class="flag">On the equation sheet</span></div>
+            <div class="panel" style="height: 260px;"><div class="fig" data-fig="hike"></div></div>
+          </div>
+          <div class="col">
+            <div class="worked">
+              <div class="wq"><span>Example 1</span>A 2.0 kg book is lifted onto a 1.5 m shelf.</div>
+              <dl>
+                <div class="step"><dt>Equation</dt><dd>\(E_p = m\,g\,h\)</dd></div>
+                <div class="step"><dt>Substitute</dt><dd>\(E_p = 2.0 \times 9.8 \times 1.5\)</dd></div>
+                <div class="step"><dt>Answer</dt><dd class="ans">\(E_p = 29.4\) J</dd></div>
+              </dl>
+            </div>
+            <div class="worked">
+              <div class="wq"><span>Example 2</span>A 55 kg hiker climbs from 120 m to 420 m above sea level.</div>
+              <dl>
+                <div class="step"><dt>Height</dt><dd>\(h = 420 - 120 = 300\) m</dd></div>
+                <div class="step"><dt>Substitute</dt><dd>\(E_p = 55 \times 9.8 \times 300\)</dd></div>
+                <div class="step"><dt>Answer</dt><dd class="ans">\(E_p = 161\,700\) J</dd></div>
+              </dl>
+            </div>
+          </div>
+        </div>
+        <div class="slide-foot"><span class="tag">Lesson 3: Gravitational store</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>Why the height gained, not the height above the ground?</b> Energy is only transferred while the object rises. The hiker did not climb the first 120 m that day, so it does not count. Questions often give two heights to see whether you subtract.</p>
+            <p><b>Where does the energy come from?</b> The hiker's chemical store (food). The equation tells you only the energy that ends up in the gravitational store; the hiker also warms up, so they used more than 161 700 J.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide a-hot" data-title="Finding a height or a mass">
+        <p class="eyebrow"><span class="num">03</span> Rearranging</p>
+        <h2>Find \(h\) <em>or</em> \(m\)</h2>
+        <div class="split even top">
+          <div class="col">
+            <div class="formula"><span>Rearranged</span>\(h = \dfrac{E_p}{m\,g}\qquad m = \dfrac{E_p}{g\,h}\)</div>
+            <div class="remember">Work out the bottom first: \(60 \times 9.8 = 588\). Then divide.</div>
+            <div class="worked">
+              <div class="wq"><span>Example 4</span>A crate lifted 2.0 m gains 392 J. Its mass?</div>
+              <dl>
+                <div class="step"><dt>Rearrange</dt><dd>\(m = \dfrac{E_p}{g\,h}\)</dd></div>
+                <div class="step"><dt>Substitute</dt><dd>\(m = \dfrac{392}{9.8 \times 2.0}\)</dd></div>
+                <div class="step"><dt>Answer</dt><dd class="ans">\(m = 20\) kg</dd></div>
+              </dl>
+            </div>
+          </div>
+          <div class="col">
+            <div class="worked">
+              <div class="wq"><span>Example 3</span>A 60 kg climber gains 17 640 J. How high?</div>
+              <dl>
+                <div class="step"><dt>Equation</dt><dd>\(E_p = m\,g\,h\)</dd></div>
+                <div class="step"><dt>Rearrange</dt><dd>\(h = \dfrac{E_p}{m\,g}\)</dd></div>
+                <div class="step"><dt>Substitute</dt><dd>\(h = \dfrac{17\,640}{60 \times 9.8}\)</dd></div>
+                <div class="step"><dt>Answer</dt><dd class="ans">\(h = 30\) m</dd></div>
+              </dl>
+            </div>
+          </div>
+        </div>
+        <div class="slide-foot"><span class="tag">Lesson 3: Gravitational store</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>The commonest slip:</b> \(17\,640 \div 60 \times 9.8\) on a calculator divides by 60 and then <i>multiplies</i> by 9.8, giving 2881 m. Divide by the whole of \(m\,g\): use brackets, or work out 588 first.</p>
+            <p><b>Check it the other way.</b> Put your answer back in: \(60 \times 9.8 \times 30 = 17\,640\). If it comes back to the number you started with, you rearranged correctly.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide a-hot" data-title="Quick check: Lesson 3">
+        <p class="eyebrow"><span class="num">03</span> Checkpoint</p>
+        <h2>Quick check</h2>
+        <div class="quiz fill">
+          <div class="q"><p><span class="n">1</span>What does \(g = 9.8\) N/kg mean?</p><div class="ans step">Each kilogram is pulled down with 9.8 N</div></div>
+          <div class="q"><p><span class="n">2</span>5.0 kg lifted 2.0 m?</p><div class="ans step">\(5.0 \times 9.8 \times 2.0 = 98\) J</div></div>
+          <div class="q"><p><span class="n">3</span>0.50 kg ball gains 24.5 J. Height?</p><div class="ans step">\(\dfrac{24.5}{0.50 \times 9.8} = 5.0\) m</div></div>
+          <div class="q"><p><span class="n">4</span>Same lift on the Moon?</p><div class="ans step">Less energy: \(g\) is smaller</div></div>
+          <div class="q"><p><span class="n">5</span>From 30 m to 80 m up. \(h\)?</p><div class="ans step">50 m</div></div>
+          <div class="q"><p><span class="n">6</span>Height doubles. Energy?</p><div class="ans step">× 2</div></div>
+        </div>
+        <div class="slide-foot"><span class="reveal-hint">PRESS → TO REVEAL EACH ANSWER</span><span data-page></span></div>
+      </section>
+
+      <!-- ============ Lesson 4 ============ -->
+      <section class="slide dark a-violet" data-title="Lesson 4: Stretching springs">
+        <div class="hero section">
+          <div>
+            <p class="eyebrow"><span class="num">04</span> Lesson 4: <span class="on">How stiff is a spring?</span></p>
+            <h1>Stretching <em>springs</em></h1>
+            <div class="unlocks"><span>two forces</span><span>extension</span><span>\(F = ke\)</span><span>two graphs</span></div>
+          </div>
+          <div class="case-card">
+            <div class="label">WHY WE NEED k</div>
+            <h3>k tells us how much energy a spring stores</h3>
+            <div class="fig" data-fig="twoForces"></div>
+          </div>
+        </div>
+        <div class="slide-foot"><span class="tag">Lesson 4: Stretching springs</span><span data-page></span></div>
+      </section>
+
+      <section class="slide a-violet" data-title="Two forces, two kinds of stretch">
+        <p class="eyebrow"><span class="num">04</span> Changing shape</p>
+        <h2>Two <em>forces</em></h2>
+        <div class="split">
+          <ul class="points small">
+            <li>To stretch a spring and keep it still: <b>two forces</b>, one at each end</li>
+            <li class="step">Here: the clamp pulls the <b>top</b> up; the load pulls the <b>bottom</b> down</li>
+            <li class="step"><b>Elastic</b> deformation: goes back to its original length</li>
+            <li class="step"><b>Inelastic</b> deformation: stays stretched</li>
+          </ul>
+          <div class="panel"><div class="fig" data-fig="twoForces"></div></div>
+        </div>
+        <div class="slide-foot"><span class="tag">Lesson 4: Stretching springs</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>Why two forces?</b> Pull one end of a spring lying on a table and it just slides towards you, still the same length. Something must hold the other end back. A spring stays stretched only while it is pulled both ways at once.</p>
+            <p><b>Each force acts where it touches.</b> The clamp's pull acts at the top hook; the load's pull acts at the bottom hook. That is why the arrows start at the ends of the spring.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide a-violet" data-title="Extension and F = ke">
+        <p class="eyebrow"><span class="num">04</span> Know and apply</p>
+        <h2>\(F = k\,e\)</h2>
+        <div class="split even top">
+          <div class="col">
+            <div class="eq-block"><span class="eq">\(F = k\,e\)</span><span class="eq-words">force = spring constant × extension</span><span class="eq-units">\(F\) in N, \(k\) in N/m, \(e\) in m</span><span class="flag">On the equation sheet</span></div>
+            <div class="remember"><b>extension</b> = stretched length − original length</div>
+            <div class="panel" style="height: 230px;"><div class="fig" data-fig="extension"></div></div>
+          </div>
+          <div class="col">
+            <div class="worked">
+              <div class="wq"><span>Example</span>2.0 N stretches a spring by 4.0 cm. Find \(k\).</div>
+              <dl>
+                <div class="step"><dt>Convert</dt><dd>\(e = 4.0\ \text{cm} = 0.040\ \text{m}\)</dd></div>
+                <div class="step"><dt>Rearrange</dt><dd>\(k = \dfrac{F}{e}\)</dd></div>
+                <div class="step"><dt>Substitute</dt><dd>\(k = \dfrac{2.0}{0.040}\)</dd></div>
+                <div class="step"><dt>Answer</dt><dd class="ans">\(k = 50\) N/m</dd></div>
+              </dl>
+            </div>
+            <div class="rule step"><strong>Hooke's law</strong><span>Extension is directly proportional to force, up to the <b>limit of proportionality</b></span></div>
+          </div>
+        </div>
+        <div class="slide-foot"><span class="tag">Lesson 4: Stretching springs</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>What does 50 N/m mean?</b> It would take 50 N to stretch this spring by a whole metre, if it did not break first. More usefully: 0.5 N per centimetre. A stiffer spring has a bigger \(k\).</p>
+            <p><b>Why metres?</b> \(k\) is in newtons per <i>metre</i>. Use 4.0 instead of 0.040 and you get 0.5 N/m, a hundred times too small, and every energy you calculate from it in Lesson 5 is wrong too.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide a-violet" data-title="Masses into forces">
+        <p class="eyebrow"><span class="num">04</span> At the bench</p>
+        <h2>Masses into <em>forces</em></h2>
+        <div class="split even">
+          <div class="col">
+            <div class="rule"><strong>Bench rule</strong><span>Each 100 g pulls down with about <b>1 N</b></span></div>
+            <ul class="points small">
+              <li>From Lesson 3: each kg is pulled with 9.8 N</li>
+              <li class="step">So 100 g = 0.1 kg is pulled with 0.98 N ≈ 1 N</li>
+              <li class="step">Record the force in <b>newtons</b>, never grams</li>
+            </ul>
+          </div>
+          <div class="mistakes">
+            <div class="mistake"><p class="wrong">"I added a force of 300 g."</p><p class="right">"I added 300 g, which pulls down with about 3 N."</p></div>
+            <div class="mistake"><p class="wrong">Plot grams against centimetres.</p><p class="right">Plot newtons against metres, so \(k\) comes out in N/m.</p></div>
+          </div>
+        </div>
+        <div class="slide-foot"><span class="tag">Lesson 4: Stretching springs</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>Mass is not a force.</b> Mass is how much stuff there is (kg); force is a push or pull (N). On the Moon the same 100 g mass would pull the spring with only 0.16 N, and the spring would stretch far less.</p>
+            <p><b>The rounding is a small systematic error.</b> Each 100 g really pulls with 0.98 N, not 1 N, so every force we record is 2% too big and our \(k\) comes out 2% too big. It is the same error every time, just like a ruler with a worn end.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide a-violet" data-title="Spring lab">
+        <p class="eyebrow"><span class="num">04</span> Practical</p>
+        <h2>Spring <em>lab</em></h2>
+        <div class="panel fill"><div class="panel-head"><span>Add 100 g at a time. Graph 1 first; swap the axes for graph 2</span><span class="pill">interactive</span></div><div class="widget" data-widget="springLab"></div></div>
+        <div class="slide-foot"><span class="tag">Lesson 4: Stretching springs</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>Read the extension, not the length.</b> The ruler shows where the pointer is. Subtract the starting position (5.0 cm here) every time, or your graph will not start at the origin.</p>
+            <p><b>Watch the last point.</b> From 600 g to 700 g the extension jumps by 5.5 cm, not 4 cm. The spring has passed its limit of proportionality: the point leaves the straight line.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide a-violet" data-title="Two graphs of the same results">
+        <p class="eyebrow"><span class="num">04</span> Same results, two graphs</p>
+        <h2>Which way <em>round</em>?</h2>
+        <div class="stack">
+          <div class="panel" style="flex: 1;"><div class="fig" data-fig="twoGraphs"></div></div>
+          <table class="data compact">
+            <thead><tr><th></th><th>y-axis</th><th>x-axis</th><th>Gradient means</th></tr></thead>
+            <tbody>
+              <tr><th>Graph 1</th><td>extension</td><td>force (independent)</td><td class="step">how <b>stretchy</b>: 0.04 m per N</td></tr>
+              <tr><th>Graph 2</th><td>force</td><td>extension</td><td class="step">how <b>stiff</b>: \(k\) = 25 N/m</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="slide-foot"><span class="tag">Lesson 4: Stretching springs</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>Graph 1 follows the Unit 1 rule.</b> We chose the force, so it is the independent variable and goes on the x-axis. That graph answers our question directly: the extension grows in proportion to the force.</p>
+            <p><b>Graph 2 is the physicist's graph.</b> With force on the y-axis, the gradient is force ÷ extension, which is exactly \(k\). AQA exam questions almost always draw it this way, so you must be able to read both.</p>
+            <p><b>Stiffer spring?</b> Steeper on graph 2 (more force per metre), shallower on graph 1 (less stretch per newton).</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide a-violet" data-title="Quick check: Lesson 4">
+        <p class="eyebrow"><span class="num">04</span> Checkpoint</p>
+        <h2>Quick check</h2>
+        <div class="quiz fill">
+          <div class="q"><p><span class="n">1</span>6.0 cm long, then 9.5 cm. Extension?</p><div class="ans step">3.5 cm</div></div>
+          <div class="q"><p><span class="n">2</span>200 N/m spring, \(e = 0.050\) m. Force?</p><div class="ans step">\(200 \times 0.050 = 10\) N</div></div>
+          <div class="q"><p><span class="n">3</span>3.0 N stretches 10 cm. \(k\)?</p><div class="ans step">\(\dfrac{3.0}{0.10} = 30\) N/m</div></div>
+          <div class="q"><p><span class="n">4</span>40 N/m spring, 2.0 N. Extension?</p><div class="ans step">\(\dfrac{2.0}{40} = 0.050\) m = 5.0 cm</div></div>
+          <div class="q"><p><span class="n">5</span>Stays stretched when let go?</p><div class="ans step">Inelastic deformation</div></div>
+          <div class="q"><p><span class="n">6</span>Force–extension graph: gradient?</p><div class="ans step">the spring constant \(k\)</div></div>
+        </div>
+        <div class="slide-foot"><span class="reveal-hint">PRESS → TO REVEAL EACH ANSWER</span><span data-page></span></div>
+      </section>
+
+      <!-- ============ Lesson 5 ============ -->
+      <section class="slide dark a-alt" data-title="Lesson 5: The elastic potential store">
+        <div class="hero section">
+          <div>
+            <p class="eyebrow"><span class="num">05</span> Lesson 5: <span class="on">Stretch and release</span></p>
+            <h1>Elastic <em>potential</em></h1>
+            <div class="unlocks"><span>\(E_e = \tfrac{1}{2}ke^2\)</span><span>find \(k\) first</span><span>2 × stretch = 4 × energy</span></div>
+          </div>
+          <div class="case-card">
+            <div class="label">BIG QUESTION</div>
+            <h3>Pull the bow back twice as far…</h3>
+            <ul class="points"><li>Twice the energy?</li><li>Or more?</li></ul>
+          </div>
+        </div>
+        <div class="slide-foot"><span class="tag">Lesson 5: Elastic store</span><span data-page></span></div>
+      </section>
+
+      <section class="slide news a-alt" data-title="In the news: the cord that catches you">
+        <div class="masthead"><span class="paper-name">The Energy Times</span><span class="dateline">Norway</span><span class="edition">Lesson 5 · the case</span></div>
+        <div class="front fill">
+          <figure class="news-photo">
+            <img src="images/case-bungee.jpg" width="1100" height="731" alt="A bungee jumper hangs on a long cord below a footbridge over a rocky gorge">
+            <figcaption>A bungee jump from the Gorsa bridge in Norway. <span class="credit">Photo: Strikkhopper, <a href="https://creativecommons.org/licenses/by-sa/4.0/" target="_blank" rel="noopener">CC BY-SA 4.0</a>, via <a href="https://commons.wikimedia.org/wiki/File:Bungee_Jumping_from_Gorsabrua_(Gorsa_Bridge).JPG" target="_blank" rel="noopener">Wikimedia Commons</a></span></figcaption>
+          </figure>
+          <div class="story">
+            <p class="kicker">The cord that catches you</p>
+            <h2>Stretch to <em>stop</em></h2>
+            <p class="standfirst">As the jumper falls, the cord stretches and fills its elastic potential store. The more it stretches, the harder it pulls back, until the jumper stops.</p>
+            <p class="follow-up"><b>The engineer's job</b>Choose a cord with the right spring constant for the jumper's mass and the drop.</p>
+            <p class="ask"><b>Talk about it</b>What would happen with a cord that is too stiff? Too stretchy?</p>
+          </div>
+        </div>
+        <div class="slide-foot"><span class="tag">Lesson 5: Elastic store</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>Too stiff:</b> a big \(k\) stops the jumper over a short distance, so the cord must pull very hard: a painful jolt. <b>Too stretchy:</b> a small \(k\) needs a long stretch to store all the energy, and the jumper may reach the ground first.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide a-alt" data-title="Elastic potential energy">
+        <p class="eyebrow"><span class="num">05</span> Know and apply</p>
+        <h2>\(E_e = \tfrac{1}{2}ke^2\)</h2>
+        <div class="split even top">
+          <div class="col">
+            <div class="eq-block"><span class="eq">\(E_e = \tfrac{1}{2}\,k\,e^2\)</span><span class="eq-words">elastic potential energy = 0.5 × spring constant × (extension)²</span><span class="eq-units">\(E_e\) in J, \(k\) in N/m, \(e\) in m</span><span class="flag">On the equation sheet</span></div>
+            <div class="remember">Work done stretching a spring = energy stored, <b>up to the limit of proportionality</b></div>
+          </div>
+          <div class="col">
+            <div class="worked">
+              <div class="wq"><span>Example 1</span>\(k = 50\) N/m, stretched by 0.040 m.</div>
+              <dl>
+                <div class="step"><dt>Equation</dt><dd>\(E_e = \tfrac{1}{2}\,k\,e^2\)</dd></div>
+                <div class="step"><dt>Substitute</dt><dd>\(E_e = 0.5 \times 50 \times 0.040^2\)</dd></div>
+                <div class="step"><dt>Answer</dt><dd class="ans">\(E_e = 0.04\) J</dd></div>
+              </dl>
+            </div>
+            <div class="worked">
+              <div class="wq"><span>Example 2</span>3.0 N stretches a spring by 10 cm. Energy stored?</div>
+              <dl>
+                <div class="step"><dt>Step 1</dt><dd>\(k = \dfrac{F}{e} = \dfrac{3.0}{0.10} = 30\) N/m</dd></div>
+                <div class="step"><dt>Step 2</dt><dd>\(E_e = \tfrac{1}{2}\,k\,e^2 = 0.5 \times 30 \times 0.10^2\)</dd></div>
+                <div class="step"><dt>Answer</dt><dd class="ans">\(E_e = 0.15\) J</dd></div>
+              </dl>
+            </div>
+          </div>
+        </div>
+        <div class="slide-foot"><span class="tag">Lesson 5: Elastic store</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>Why a half?</b> The force is not constant while you stretch: it starts at zero and rises to \(k\,e\). On average you pull with half the final force, \(\tfrac{1}{2}k\,e\), through the distance \(e\). Average force × distance = \(\tfrac{1}{2}k\,e \times e = \tfrac{1}{2}k\,e^2\).</p>
+            <p><b>The centimetre disaster.</b> Put \(e = 10\) instead of 0.10 into example 2 and you get 1500 J, ten thousand times too big. A lab spring stores fractions of a joule.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide a-alt" data-title="Double the stretch">
+        <p class="eyebrow"><span class="num">05</span> Try it</p>
+        <h2>Double the stretch, <em>×4</em></h2>
+        <div class="split wide-fig">
+          <ul class="points small">
+            <li>Stretch it 0.04 m, then 0.08 m, then 0.12 m</li>
+            <li class="step">2 × the extension → 4 × the energy</li>
+            <li class="step">3 × the extension → 9 × the energy</li>
+            <li class="step">Same pattern as \(E_k\): the extension is <b>squared</b></li>
+          </ul>
+          <div class="panel"><div class="panel-head"><span>Spring, k = 50 N/m</span><span class="pill">interactive</span></div><div class="widget" data-widget="elastic"></div></div>
+        </div>
+        <div class="slide-foot"><span class="tag">Lesson 5: Elastic store</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>Why squared?</b> The further you stretch, the harder you have to pull. The second centimetre needs more force than the first, so it takes more work. Double the stretch and you pull twice as hard on average for twice the distance: 2 × 2 = 4 times the energy.</p>
+            <p><b>Back to the big question:</b> pulling the bow twice as far gives the arrow about four times the energy, not twice.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide a-alt" data-title="Quick check: Lesson 5">
+        <p class="eyebrow"><span class="num">05</span> Checkpoint</p>
+        <h2>Quick check</h2>
+        <div class="quiz fill">
+          <div class="q"><p><span class="n">1</span>\(k = 80\) N/m, \(e = 0.10\) m. \(E_e\)?</p><div class="ans step">\(0.5 \times 80 \times 0.10^2 = 0.40\) J</div></div>
+          <div class="q"><p><span class="n">2</span>\(k = 400\) N/m, squashed 20 mm?</p><div class="ans step">\(0.5 \times 400 \times 0.020^2 = 0.08\) J</div></div>
+          <div class="q"><p><span class="n">3</span>Extension triples. Energy?</p><div class="ans step">× 9</div></div>
+          <div class="q"><p><span class="n">4</span>6.0 N stretches 0.15 m. Energy?</p><div class="ans step">\(k = 40\) N/m; \(E_e = 0.45\) J</div></div>
+          <div class="q"><p><span class="n">5</span>When can't you use \(E_e = \tfrac{1}{2}ke^2\)?</p><div class="ans step">Beyond the limit of proportionality</div></div>
+          <div class="q"><p><span class="n">6</span>Where does the work done go?</p><div class="ans step">Into the spring's elastic potential store</div></div>
+        </div>
+        <div class="slide-foot"><span class="reveal-hint">PRESS → TO REVEAL EACH ANSWER</span><span data-page></span></div>
+      </section>
+
+      <!-- ============ Lesson 6 ============ -->
+      <section class="slide dark a-hi" data-title="Lesson 6: Conservation of energy">
+        <div class="hero section">
+          <div>
+            <p class="eyebrow"><span class="num">06</span> Lesson 6: <span class="on">Nothing is lost</span></p>
+            <h1>Conservation <em>of energy</em></h1>
+            <div class="unlocks"><span>closed systems</span><span>energy bar charts</span><span>falling and swinging</span><span>dissipation</span></div>
+          </div>
+          <div class="case-card">
+            <div class="label">KEY RULE</div>
+            <h3>Energy cannot be created or destroyed</h3>
+            <div class="fig" data-fig="pendulum"></div>
+          </div>
+        </div>
+        <div class="slide-foot"><span class="tag">Lesson 6: Conservation</span><span data-page></span></div>
+      </section>
+
+      <section class="slide a-hi" data-title="Will it hit you?">
+        <p class="eyebrow"><span class="num">06</span> Big question</p>
+        <h2>Will it <em>hit you</em>?</h2>
+        <div class="split wide-fig">
+          <ul class="points small">
+            <li>Release from rest at your nose. Never push.</li>
+            <li class="step">It swings back to <b>almost</b> the same height</li>
+            <li class="step">It cannot go higher: that would need <b>more</b> energy than it started with</li>
+            <li class="step">Air resistance on: each swing a little <b>lower</b></li>
+          </ul>
+          <div class="panel"><div class="panel-head"><span>Pendulum</span><span class="pill">interactive</span></div><div class="widget" data-widget="pendulum"></div></div>
+        </div>
+        <div class="slide-foot"><span class="tag">Lesson 6: Conservation</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>Why it is safe.</b> To swing higher than your nose, the bob would need more energy in its gravitational potential store than it started with. Energy cannot be created, so it can only come back to the same height, and in real air it falls a little short.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide a-hi" data-title="The principle">
+        <p class="eyebrow"><span class="num">06</span> Learn the wording</p>
+        <h2>The <em>principle</em></h2>
+        <div class="stack center">
+          <div class="rule"><strong>Conservation of energy</strong><span>Energy can be transferred usefully, stored or dissipated, but cannot be created or destroyed.</span></div>
+          <div class="bars3">
+            <div class="panel"><div class="fig" data-fig="barsTop"></div></div>
+            <div class="panel"><div class="fig" data-fig="barsMid"></div></div>
+            <div class="panel"><div class="fig" data-fig="barsLow"></div></div>
+          </div>
+          <div class="remember">A falling ball: the bars change, the <b>total</b> stays 20 J.</div>
+        </div>
+        <div class="slide-foot"><span class="tag">Lesson 6: Conservation</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>How to draw an energy bar chart.</b> Use the same scale for every moment, one bar per store. Then check: do the bars at each moment add up to the same total? If not, energy has been created or lost, and something is wrong.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide a-hi" data-title="Using conservation">
+        <p class="eyebrow"><span class="num">06</span> Calculations</p>
+        <h2>Lost here, <em>gained there</em></h2>
+        <div class="split even top">
+          <div class="worked">
+            <div class="wq"><span>Example 1</span>A 0.50 kg ball is dropped from 3.0 m. \(E_k\) just before it lands?</div>
+            <dl>
+              <div class="step"><dt>Idea</dt><dd>\(E_k\) gained = \(E_p\) lost</dd></div>
+              <div class="step"><dt>Equation</dt><dd>\(E_p = m\,g\,h\)</dd></div>
+              <div class="step"><dt>Substitute</dt><dd>\(E_p = 0.50 \times 9.8 \times 3.0\)</dd></div>
+              <div class="step"><dt>Answer</dt><dd class="ans">\(E_k = 14.7\) J</dd></div>
+            </dl>
+          </div>
+          <div class="worked">
+            <div class="wq"><span>Example 2</span>A 0.25 kg ball is thrown up with 20 J of \(E_k\). Greatest height?</div>
+            <dl>
+              <div class="step"><dt>Idea</dt><dd>at the top, \(E_p = 20\) J</dd></div>
+              <div class="step"><dt>Rearrange</dt><dd>\(h = \dfrac{E_p}{m\,g}\)</dd></div>
+              <div class="step"><dt>Substitute</dt><dd>\(h = \dfrac{20}{0.25 \times 9.8}\)</dd></div>
+              <div class="step"><dt>Answer</dt><dd class="ans">\(h = 8.2\) m</dd></div>
+            </dl>
+          </div>
+        </div>
+        <div class="slide-foot"><span class="tag">Lesson 6: Conservation</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>"Ignore air resistance" is the key phrase.</b> It tells you the system is closed, so every joule leaving one store arrives in the other. Without it, the kinetic energy at the bottom would be a little less than 14.7 J.</p>
+            <p><b>Three stores, one chain:</b> a toy launcher (\(k = 200\) N/m, squashed 0.050 m) stores \(E_e = 0.25\) J. Fired straight up, a 10 g ball could reach \(h = \dfrac{0.25}{0.010 \times 9.8} = 2.6\) m.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide news a-hi" data-title="In the news: why the first hill is the highest">
+        <div class="masthead"><span class="paper-name">The Energy Times</span><span class="dateline">Theme parks</span><span class="edition">Lesson 6 · the case</span></div>
+        <div class="front fill">
+          <figure class="news-photo">
+            <img src="images/case-roller-coaster.jpg" width="1100" height="733" alt="A wooden roller coaster with a tall first hill followed by smaller hills">
+            <figcaption>The wooden roller coaster at Lagoon, Utah: one tall lift hill, then smaller hills. <span class="credit">Photo: Jeremy Thompson, <a href="https://creativecommons.org/licenses/by/2.0/" target="_blank" rel="noopener">CC BY 2.0</a>, via <a href="https://commons.wikimedia.org/wiki/File:Lagoon_Roller_Coaster_(cropped).jpg" target="_blank" rel="noopener">Wikimedia Commons</a></span></figcaption>
+          </figure>
+          <div class="story">
+            <p class="kicker">Ride design</p>
+            <h2>Why the first hill is the <em>highest</em></h2>
+            <p class="standfirst">A chain hauls the train to the top of the first hill. After that there is no motor: the ride runs on the energy in the gravitational potential store.</p>
+            <p class="follow-up"><b>The rule designers follow</b>Every later hill must be lower than the first.</p>
+            <p class="ask"><b>Talk about it</b>Use conservation of energy to explain the rule.</p>
+          </div>
+        </div>
+        <div class="slide-foot"><span class="tag">Lesson 6: Conservation</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>The explanation.</b> To climb a hill as high as the first, the train would need all of its starting energy back in its gravitational potential store. Friction and air resistance dissipate some energy on every metre of track, so it never has enough. Every later hill must be lower, or the train stops part-way up.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide a-hi" data-title="Practical: the pendulum">
+        <p class="eyebrow"><span class="num">06</span> Practical</p>
+        <h2>Does it keep its <em>energy</em>?</h2>
+        <div class="split even top">
+          <div class="col">
+            <ol class="steps">
+              <li>Release from rest, 0.20 m above the lowest point</li>
+              <li>Read the height after 1 swing (film it)</li>
+              <li>Read the height after 10 swings</li>
+              <li>\(E_p = m\,g\,h\) each time</li>
+            </ol>
+          </div>
+          <div class="col">
+          <table class="data compact">
+            <thead><tr><th>0.20 kg bob</th><th>Height / m</th><th>\(E_p\) / J</th></tr></thead>
+            <tbody>
+              <tr><th>Released</th><td>0.20</td><td class="step">0.39</td></tr>
+              <tr><th>After 1 swing</th><td>0.19</td><td class="step">0.37</td></tr>
+              <tr><th>After 10 swings</th><td>0.12</td><td class="step">0.24</td></tr>
+            </tbody>
+          </table>
+          <div class="panel" style="height: 330px;"><div class="fig" data-fig="pendulum"></div></div>
+          </div>
+        </div>
+        <div class="slide-foot"><span class="tag">Lesson 6: Conservation</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>Why heights, not speeds?</b> A stopwatch is too slow to time the bob at the bottom: your reaction time would be a big part of the reading, and squaring the speed makes the error bigger still. A height can be read calmly from a video.</p>
+            <p><b>Where did 0.15 J go?</b> Into the thermal store of the air and the clamp, through air resistance and friction at the pivot. Energy was conserved; some of it was dissipated.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide a-hi" data-title="Quick check: Lesson 6">
+        <p class="eyebrow"><span class="num">06</span> Checkpoint</p>
+        <h2>Quick check</h2>
+        <div class="quiz fill">
+          <div class="q"><p><span class="n">1</span>State the principle.</p><div class="ans step">Transferred, stored or dissipated; never created or destroyed</div></div>
+          <div class="q"><p><span class="n">2</span>2.0 kg rock falls 5.0 m. \(E_k\) at the bottom?</p><div class="ans step">\(2.0 \times 9.8 \times 5.0 = 98\) J</div></div>
+          <div class="q"><p><span class="n">3</span>0.10 kg ball up with 4.9 J. Height?</p><div class="ans step">\(\dfrac{4.9}{0.10 \times 9.8} = 5.0\) m</div></div>
+          <div class="q"><p><span class="n">4</span>Pendulum lower each swing. Why?</p><div class="ans step">Energy dissipated to the thermal store of the air</div></div>
+          <div class="q"><p><span class="n">5</span>Top of the swing: most energy in?</p><div class="ans step">gravitational potential store</div></div>
+          <div class="q"><p><span class="n">6</span>Is energy destroyed by friction?</p><div class="ans step">No: it is dissipated</div></div>
+        </div>
+        <div class="slide-foot"><span class="reveal-hint">PRESS → TO REVEAL EACH ANSWER</span><span data-page></span></div>
+      </section>
+
+      <!-- ============ Lesson 7 ============ -->
+      <section class="slide dark a-cyan" data-title="Lesson 7: Power">
+        <div class="hero section">
+          <div>
+            <p class="eyebrow"><span class="num">07</span> Lesson 7: <span class="on">How fast?</span></p>
+            <h1>Power</h1>
+            <div class="unlocks"><span>rate of energy transfer</span><span>\(P = \dfrac{E}{t}\)</span><span>watts</span><span>how powerful are you?</span></div>
+          </div>
+          <div class="case-card">
+            <div class="label">BIG QUESTION</div>
+            <h3>Same stairs, same bag. One runs, one walks.</h3>
+            <ul class="points"><li>Who transferred more energy?</li><li>Who was more powerful?</li></ul>
+          </div>
+        </div>
+        <div class="slide-foot"><span class="tag">Lesson 7: Power</span><span data-page></span></div>
+      </section>
+
+      <section class="slide a-cyan" data-title="Same job, different power">
+        <p class="eyebrow"><span class="num">07</span> Watch</p>
+        <h2>Same job, <em>different power</em></h2>
+        <div class="split wide-fig">
+          <ul class="points small">
+            <li>Same load, same height: <b>same energy</b>, 29.4 J</li>
+            <li class="step">A takes 2 s; B takes 6 s</li>
+            <li class="step">A transfers energy <b>faster</b>: A is more <b>powerful</b></li>
+            <li class="step">Power = energy transferred <b>per second</b></li>
+          </ul>
+          <div class="panel"><div class="panel-head"><span>Two motors</span><span class="pill">interactive</span></div><div class="widget" data-widget="motors"></div></div>
+        </div>
+        <div class="slide-foot"><span class="tag">Lesson 7: Power</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>Energy is "how much"; power is "how fast".</b> Both motors put 29.4 J into the load's gravitational potential store. Motor A does it three times as fast, so its power is three times as big.</p>
+            <p><b>Back to the stairs:</b> the runner and the walker transfer the same energy (same mass, same height), but the runner does it in less time, so the runner's power is greater.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide a-cyan" data-title="P = E ÷ t">
+        <p class="eyebrow"><span class="num">07</span> Know and apply</p>
+        <h2>Calculating <em>power</em></h2>
+        <div class="split even top">
+          <div class="col">
+            <div class="eq-block"><span class="eq">\(P = \dfrac{E}{t}\)</span><span class="eq-words">power = energy transferred ÷ time</span><span class="eq-units">\(P\) in W, \(E\) in J, \(t\) in s</span><span class="flag">On the equation sheet</span></div>
+            <div class="rule"><strong>1 watt</strong><span>= 1 joule per second. 1 kW = 1000 W.</span></div>
+            <div class="formula"><span>Rearranged</span>\(E = P\,t \qquad t = \dfrac{E}{P}\)</div>
+          </div>
+          <div class="col">
+            <div class="worked">
+              <div class="wq"><span>Example 1</span>A motor transfers 600 J in 4.0 s.</div>
+              <dl>
+                <div class="step"><dt>Equation</dt><dd>\(P = \dfrac{E}{t}\)</dd></div>
+                <div class="step"><dt>Substitute</dt><dd>\(P = \dfrac{600}{4.0}\)</dd></div>
+                <div class="step"><dt>Answer</dt><dd class="ans">\(P = 150\) W</dd></div>
+              </dl>
+            </div>
+            <div class="worked">
+              <div class="wq"><span>Example 2</span>A 2.0 kW kettle runs for 2.0 minutes. Energy?</div>
+              <dl>
+                <div class="step"><dt>Convert</dt><dd>\(P = 2000\) W, \(t = 120\) s</dd></div>
+                <div class="step"><dt>Rearrange</dt><dd>\(E = P\,t\)</dd></div>
+                <div class="step"><dt>Substitute</dt><dd>\(E = 2000 \times 120\)</dd></div>
+                <div class="step"><dt>Answer</dt><dd class="ans">\(E = 240\,000\) J</dd></div>
+              </dl>
+            </div>
+          </div>
+        </div>
+        <div class="slide-foot"><span class="tag">Lesson 7: Power</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>Reading a label.</b> "60 W" on a lamp means it transfers 60 J every second. Leave it on for a minute and it has transferred \(60 \times 60 = 3600\) J.</p>
+            <p><b>Convert before you substitute.</b> Minutes into seconds (× 60), kW into W (× 1000). Forget the minutes and the kettle's answer is 60 times too small.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide a-cyan" data-title="How powerful are you?">
+        <p class="eyebrow"><span class="num">07</span> Practical</p>
+        <h2>How powerful <em>are you</em>?</h2>
+        <div class="split">
+          <div class="col">
+            <div class="worked">
+              <div class="wq"><span>Sample</span>18 steps of 0.17 m, mass 50 kg, time 5.0 s</div>
+              <dl>
+                <div class="step"><dt>Height</dt><dd>\(h = 18 \times 0.17 = 3.06\) m</dd></div>
+                <div class="step"><dt>Energy</dt><dd>\(E_p = 50 \times 9.8 \times 3.06 = 1500\) J</dd></div>
+                <div class="step"><dt>Power</dt><dd>\(P = \dfrac{1500}{5.0}\)</dd></div>
+                <div class="step"><dt>Answer</dt><dd class="ans">\(P = 300\) W</dd></div>
+              </dl>
+            </div>
+            <div class="remember">Walk briskly. <b>Never run.</b> Hold the handrail. Everyone uses 50 kg.</div>
+          </div>
+          <div class="panel"><div class="fig" data-fig="stairs"></div></div>
+        </div>
+        <div class="slide-foot"><span class="tag">Lesson 7: Power</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>Your real power was higher.</b> The calculation counts only the energy that ended up in your gravitational potential store. You also sped up (kinetic store) and warmed up (thermal store), so your muscles transferred more than 1500 J in those 5 seconds.</p>
+            <p><b>For scale:</b> a kettle is about 2000 W; a family car's engine can be 100 000 W. A person climbing stairs is a few hundred watts.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide a-cyan" data-title="Quick check: Lesson 7">
+        <p class="eyebrow"><span class="num">07</span> Checkpoint</p>
+        <h2>Quick check</h2>
+        <div class="quiz fill">
+          <div class="q"><p><span class="n">1</span>What is power?</p><div class="ans step">The rate of energy transfer: joules per second</div></div>
+          <div class="q"><p><span class="n">2</span>600 J in 10 s?</p><div class="ans step">60 W</div></div>
+          <div class="q"><p><span class="n">3</span>40 W fan for 5.0 minutes?</p><div class="ans step">\(40 \times 300 = 12\,000\) J</div></div>
+          <div class="q"><p><span class="n">4</span>1500 W motor, 45 000 J. Time?</p><div class="ans step">\(\dfrac{45\,000}{1500} = 30\) s</div></div>
+          <div class="q"><p><span class="n">5</span>3.0 kW in watts?</p><div class="ans step">3000 W</div></div>
+          <div class="q"><p><span class="n">6</span>More powerful motor, same job?</p><div class="ans step">Same energy, less time</div></div>
+        </div>
+        <div class="slide-foot"><span class="reveal-hint">PRESS → TO REVEAL EACH ANSWER</span><span data-page></span></div>
+      </section>
+
+      <!-- ============ Lesson 8 ============ -->
+      <section class="slide dark a-hot" data-title="Lesson 8: Wasted energy">
+        <div class="hero section">
+          <div>
+            <p class="eyebrow"><span class="num">08</span> Lesson 8: <span class="on">Where does it go?</span></p>
+            <h1>Wasted <em>energy</em></h1>
+            <div class="unlocks"><span>dissipation</span><span>lubrication</span><span>thermal conductivity</span><span>insulation</span><span>Eco House</span></div>
+          </div>
+          <div class="case-card">
+            <div class="label">BIG QUESTION</div>
+            <h3>Why does hot chocolate always go cold?</h3>
+            <div class="fig" data-fig="cups"></div>
+          </div>
+        </div>
+        <div class="slide-foot"><span class="tag">Lesson 8: Wasted energy</span><span data-page></span></div>
+      </section>
+
+      <section class="slide a-hot" data-title="Dissipation">
+        <p class="eyebrow"><span class="num">08</span> Every real transfer</p>
+        <h2>Some is always <em>dissipated</em></h2>
+        <div class="split even">
+          <ul class="points small">
+            <li>Some energy always goes to the <b>thermal store of the surroundings</b></li>
+            <li class="step">It is spread out: <b>dissipated</b>. We call it "wasted"</li>
+            <li class="step">It is <b>not destroyed</b>. We just cannot use it again</li>
+          </ul>
+          <div class="mistakes">
+            <div class="mistake"><p class="wrong">"The energy is lost."</p><p class="right">"The energy is dissipated to the thermal store of the surroundings."</p></div>
+            <div class="mistake"><p class="wrong">"Insulation keeps the cold out."</p><p class="right">"Insulation slows the energy transfer from the warm house to the cold outside."</p></div>
+          </div>
+        </div>
+        <div class="slide-foot"><span class="tag">Lesson 8: Wasted energy</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>Why can't we use it again?</b> Dissipated energy is spread very thinly: a cup of tea's thermal energy ends up warming the whole room by a fraction of a degree. There is still the same number of joules, but spread so thin that it can no longer do anything useful.</p>
+            <p><b>There is no "cold" to keep out.</b> Energy always moves from hot to cold. In winter it flows out of your house; insulation slows that flow.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide a-hot" data-title="Reducing unwanted transfers">
+        <p class="eyebrow"><span class="num">08</span> Fight the waste</p>
+        <h2>Reduce unwanted <em>transfers</em></h2>
+        <div class="row three fill" style="align-content: center;">
+          <div class="card"><p class="eyebrow">Friction</p><h3>Lubricate</h3><p>Oil or grease lets parts slide past each other easily, so less energy goes to the thermal store.</p></div>
+          <div class="card"><p class="eyebrow">Air resistance</p><h3>Streamline</h3><p>A smooth shape means the air pushes back less, so less energy is dissipated in the air.</p></div>
+          <div class="card"><p class="eyebrow">Conduction</p><h3>Insulate</h3><p>Materials with a low thermal conductivity slow the transfer through walls and roofs.</p></div>
+        </div>
+        <div class="slide-foot"><span class="tag">Lesson 8: Wasted energy</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>Feel it.</b> Rub your hands together hard: they warm up. That is friction transferring energy to the thermal store. In a dry bicycle chain the same thing happens at every link, and the energy comes from your legs. Oil lets the links slide, so more of your effort goes into moving the bike.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide a-hot" data-title="Thermal conductivity">
+        <p class="eyebrow"><span class="num">08</span> Conduction</p>
+        <h2>Thermal <em>conductivity</em></h2>
+        <div class="split">
+          <ul class="points small">
+            <li><b>Higher</b> thermal conductivity → energy conducted <b>faster</b></li>
+            <li class="step">Pins drop off <b>copper</b> first, glass last</li>
+            <li class="step">Air, wool, foam: <b>low</b> conductivity, good <b>insulators</b></li>
+            <li class="step">A house cools more slowly with <b>thicker</b> walls of <b>lower</b> conductivity</li>
+          </ul>
+          <div class="panel"><div class="panel-head"><span>Wax-and-pin rods</span><span class="pill">demo</span></div><div class="fig" data-fig="rods"></div></div>
+        </div>
+        <div class="slide-foot"><span class="tag">Lesson 8: Wasted energy</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>Why trapped air works.</b> Air has a very low thermal conductivity, but loose air moves and carries energy away with it. Wool, foam, bubble wrap and loft insulation trap the air in tiny pockets so it cannot move. That is why so many insulators are fluffy.</p>
+            <p><b>Why metal feels cold.</b> A metal bench and a wooden bench in the same park are at the same temperature. The metal feels colder because its high conductivity takes energy from your hand faster.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide a-hot" data-title="Practical: cooling cups">
+        <p class="eyebrow"><span class="num">08</span> Practical</p>
+        <h2>Cooling <em>cups</em></h2>
+        <div class="split even">
+          <div class="col">
+            <table class="data compact">
+              <tbody>
+                <tr><th>Independent</th><td>wrapping material (categoric)</td></tr>
+                <tr><th>Dependent</th><td>temperature drop in 10 min</td></tr>
+                <tr><th>Control</th><td>volume, start temperature, cup, lid, thickness</td></tr>
+              </tbody>
+            </table>
+            <div class="remember step">Categoric independent variable → <b>bar chart</b> (Unit 1)</div>
+            <div class="remember step">Best insulator: <b>smallest drop</b>, cotton wool here</div>
+          </div>
+          <div class="panel"><div class="fig" data-fig="coolingChart"></div></div>
+        </div>
+        <div class="slide-foot"><span class="tag">Lesson 8: Wasted energy</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>The smallest drop wins.</b> A good insulator slows the energy transfer from the hot water to the air, so its water stays hot. Students often pick the biggest bar by mistake: decide what "best" means before you look at the chart.</p>
+            <p><b>Why a lid and the same thickness?</b> Hot water also loses energy from its open top. If one cup had a lid and another did not, the lid, not the wrapping, could explain the difference.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide a-hot" data-title="Design an Eco House">
+        <p class="eyebrow"><span class="num">08</span> Apply it</p>
+        <h2>Design an <em>Eco House</em></h2>
+        <div class="split wide-fig">
+          <ul class="points small">
+            <li><b>Loft</b>: thick insulation</li>
+            <li><b>Walls</b>: cavity wall insulation</li>
+            <li><b>Windows</b>: double glazing</li>
+            <li><b>Floor</b>: insulation under the carpet</li>
+            <li><b>Doors</b>: draught strips</li>
+            <li class="step">Explain each with <b>thermal conductivity</b> or <b>thickness</b></li>
+          </ul>
+          <div class="panel"><div class="panel-head"><span>Cut-away house</span></div><div class="fig" data-fig="house" data-house3d></div></div>
+        </div>
+        <div class="slide-foot"><span class="tag">Lesson 8: Wasted energy</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>Every feature uses the same two ideas.</b> Loft insulation is a thick layer with a low thermal conductivity. Cavity wall foam replaces moving air with trapped air. Double glazing traps a layer of air or gas between the panes. A full answer names the feature and says which of the two ideas makes it work.</p>
+            <p><b>Which saves most?</b> In a typical house the most energy escapes through the walls and the roof, because they have the largest area.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide a-hot" data-title="Quick check: Lesson 8">
+        <p class="eyebrow"><span class="num">08</span> Checkpoint</p>
+        <h2>Quick check</h2>
+        <div class="quiz fill">
+          <div class="q"><p><span class="n">1</span>Where does dissipated energy end up?</p><div class="ans step">Thermal store of the surroundings</div></div>
+          <div class="q"><p><span class="n">2</span>How does oil help a bike chain?</p><div class="ans step">Less friction, so less energy dissipated</div></div>
+          <div class="q"><p><span class="n">3</span>Copper or glass: faster conduction?</p><div class="ans step">Copper: higher thermal conductivity</div></div>
+          <div class="q"><p><span class="n">4</span>Thicker wall: cools faster or slower?</p><div class="ans step">Slower</div></div>
+          <div class="q"><p><span class="n">5</span>Why do many insulators work?</p><div class="ans step">They trap air, a poor conductor</div></div>
+          <div class="q"><p><span class="n">6</span>Cooling cups: best insulator?</p><div class="ans step">The one with the smallest temperature drop</div></div>
+        </div>
+        <div class="slide-foot"><span class="reveal-hint">PRESS → TO REVEAL EACH ANSWER</span><span data-page></span></div>
+      </section>
+
+      <!-- ============ Lesson 9 ============ -->
+      <section class="slide dark a-violet" data-title="Lesson 9: Efficiency">
+        <div class="hero section">
+          <div>
+            <p class="eyebrow"><span class="num">09</span> Lesson 9: <span class="on">How much is useful?</span></p>
+            <h1>Effic&shy;iency</h1>
+            <div class="unlocks"><span>useful ÷ total</span><span>decimal or %</span><span>Sankey diagrams</span><span>bouncing balls</span></div>
+          </div>
+          <div class="case-card">
+            <div class="label">BIG QUESTION</div>
+            <h3>Same light. Why does the LED cost less?</h3>
+            <div class="fig" data-fig="sankeyLamp"></div>
+          </div>
+        </div>
+        <div class="slide-foot"><span class="tag">Lesson 9: Efficiency</span><span data-page></span></div>
+      </section>
+
+      <section class="slide a-violet" data-title="Efficiency">
+        <p class="eyebrow"><span class="num">09</span> Know and apply</p>
+        <h2>Efficiency</h2>
+        <div class="split even top">
+          <div class="col">
+            <div class="eq-block"><span class="eq" style="font-size: 44px;">\(\text{efficiency} = \dfrac{\text{useful output}}{\text{total input}}\)</span><span class="eq-words">energy in J, or power in W. No unit.</span><span class="eq-units">A decimal up to 1; × 100 for a percentage</span><span class="flag">On the equation sheet</span></div>
+            <div class="formula"><span>Rearranged</span>useful = efficiency × total &nbsp; \(\text{total} = \dfrac{\text{useful}}{\text{efficiency}}\)</div>
+          </div>
+          <div class="col">
+            <div class="worked">
+              <div class="wq"><span>Example 1</span>500 J in, 400 J useful.</div>
+              <dl>
+                <div class="step"><dt>Equation</dt><dd>\(\text{efficiency} = \dfrac{\text{useful}}{\text{total}}\)</dd></div>
+                <div class="step"><dt>Substitute</dt><dd>\(\dfrac{400}{500}\)</dd></div>
+                <div class="step"><dt>Answer</dt><dd class="ans">0.80, or 80%</dd></div>
+              </dl>
+            </div>
+            <div class="worked">
+              <div class="wq"><span>Example 2</span>A 60 W lamp, 25% efficient. Useful power?</div>
+              <dl>
+                <div class="step"><dt>Convert</dt><dd>25% = 0.25</dd></div>
+                <div class="step"><dt>Rearrange</dt><dd>useful = efficiency × total</dd></div>
+                <div class="step"><dt>Answer</dt><dd class="ans">0.25 × 60 = 15 W</dd></div>
+              </dl>
+            </div>
+          </div>
+        </div>
+        <div class="slide-foot"><span class="tag">Lesson 9: Efficiency</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>The one-second check.</b> Efficiency can never be more than 1 (100%): that would mean more useful energy out than went in, and energy cannot be created. If you get 1.25, you have divided the wrong way up.</p>
+            <p><b>Finding the input:</b> a motor 0.80 efficient gives 400 J usefully. Total = \(\dfrac{400}{0.80} = 500\) J. Check: the input must be bigger than the useful output.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide a-violet" data-title="Sankey diagrams">
+        <p class="eyebrow"><span class="num">09</span> Picture it</p>
+        <h2>Sankey <em>diagrams</em></h2>
+        <div class="split">
+          <ol class="steps">
+            <li>Arrow <b>width</b> shows the amount of energy</li>
+            <li class="step">Useful goes <b>straight on</b>; wasted <b>bends away</b></li>
+            <li class="step">input = useful + wasted: 100 = 20 + 80</li>
+            <li class="step">efficiency = \(\dfrac{20}{100}\) = 0.20 (20%)</li>
+          </ol>
+          <div class="panel"><div class="panel-head"><span>A lamp</span></div><div class="fig" data-fig="sankeyLesson"></div></div>
+        </div>
+        <div class="slide-foot"><span class="tag">Lesson 9: Efficiency</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>Why a picture?</b> You can see the efficiency at a glance: a thin useful arrow means an inefficient device. Draw them on squared paper with a scale, such as 1 square = 10 J, and the widths must add up.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide a-violet" data-title="Filament lamp or LED">
+        <p class="eyebrow"><span class="num">09</span> Higher: increasing efficiency</p>
+        <h2>Lamp or <em>LED</em>?</h2>
+        <div class="row two fill">
+          <div class="panel"><div class="panel-head"><span>Filament lamp</span><span class="pill">about 10%</span></div><div class="fig" data-fig="sankeyLamp"></div></div>
+          <div class="panel"><div class="panel-head"><span>LED</span><span class="pill">about 40%</span></div><div class="fig" data-fig="sankeyLed"></div></div>
+        </div>
+        <div class="remember">Increase efficiency: <b>lubricate</b>, <b>streamline</b>, <b>insulate</b>, choose devices that waste less.</div>
+        <div class="slide-foot"><span class="tag">Lesson 9: Efficiency</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>Answer to the big question.</b> For the same light (10 J each second), the filament lamp needs 100 J each second and the LED only 25 J. You pay for the input, so the LED costs about a quarter as much to run.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide a-violet" data-title="Practical: a bouncing ball">
+        <p class="eyebrow"><span class="num">09</span> Practical</p>
+        <h2>How efficient is a <em>bounce</em>?</h2>
+        <div class="split">
+          <div class="col">
+            <div class="formula"><span>Same mass, same \(g\)</span>\(\text{efficiency} = \dfrac{m\,g\,h_2}{m\,g\,h_1} = \dfrac{h_2}{h_1}\)</div>
+            <div class="worked">
+              <div class="wq"><span>Sample</span>Dropped from 1.00 m, mean bounce 0.65 m</div>
+              <dl>
+                <div class="step"><dt>Equation</dt><dd>\(\text{efficiency} = \dfrac{h_2}{h_1}\)</dd></div>
+                <div class="step"><dt>Answer</dt><dd class="ans">\(\dfrac{0.65}{1.00} = 0.65\) (65%)</dd></div>
+              </dl>
+            </div>
+          </div>
+          <div class="panel"><div class="fig" data-fig="bounce"></div></div>
+        </div>
+        <div class="slide-foot"><span class="tag">Lesson 9: Efficiency</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>Why the mass cancels.</b> Useful output and total input are both gravitational potential energies of the same ball, \(m\,g\,h_2\) and \(m\,g\,h_1\). Dividing one by the other, \(m\) and \(g\) cancel, leaving the ratio of heights.</p>
+            <p><b>Link to Unit 1:</b> the best shock absorber gave the lowest bounce. A shock absorber is meant to be inefficient: it is designed to dissipate the energy.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide a-violet" data-title="Quick check: Lesson 9">
+        <p class="eyebrow"><span class="num">09</span> Checkpoint</p>
+        <h2>Quick check</h2>
+        <div class="quiz fill">
+          <div class="q"><p><span class="n">1</span>300 J useful from 1200 J?</p><div class="ans step">0.25 (25%)</div></div>
+          <div class="q"><p><span class="n">2</span>Efficiency of 1.4?</p><div class="ans step">Impossible: more than 100%</div></div>
+          <div class="q"><p><span class="n">3</span>400 W motor, 75%. Useful power?</p><div class="ans step">0.75 × 400 = 300 W</div></div>
+          <div class="q"><p><span class="n">4</span>0.20 efficient, 12 J useful. Input?</p><div class="ans step">\(\dfrac{12}{0.20} = 60\) J</div></div>
+          <div class="q"><p><span class="n">5</span>Unit of efficiency?</p><div class="ans step">None</div></div>
+          <div class="q"><p><span class="n">6</span>Sankey: which arrow is wasted?</p><div class="ans step">The one that bends away</div></div>
+        </div>
+        <div class="slide-foot"><span class="reveal-hint">PRESS → TO REVEAL EACH ANSWER</span><span data-page></span></div>
+      </section>
+
+      <!-- ============ Summary ============ -->
+      <section class="slide a-hi" data-title="Equation toolkit">
+        <p class="eyebrow">Summary</p>
+        <h2>Equation <em>toolkit</em></h2>
+        <div class="toolkit fill">
+          <div class="tool"><div class="eq">\(E_k = \tfrac{1}{2}mv^2\)</div><p>J, kg, m/s</p><div class="re">calculate \(E_k\) only</div></div>
+          <div class="tool"><div class="eq">\(E_p = mgh\)</div><p>J, kg, N/kg, m</p><div class="re">\(h = \dfrac{E_p}{mg}\), \(m = \dfrac{E_p}{gh}\)</div></div>
+          <div class="tool"><div class="eq">\(F = ke\)</div><p>N, N/m, m</p><div class="re">\(k = \dfrac{F}{e}\), \(e = \dfrac{F}{k}\)</div></div>
+          <div class="tool"><div class="eq">\(E_e = \tfrac{1}{2}ke^2\)</div><p>J, N/m, m</p><div class="re">calculate \(E_e\) only</div></div>
+          <div class="tool"><div class="eq">\(P = \dfrac{E}{t}\)</div><p>W, J, s</p><div class="re">\(E = Pt\), \(t = \dfrac{E}{P}\)</div></div>
+          <div class="tool"><div class="eq">\(s = vt\)</div><p>m, m/s, s</p><div class="re">\(v = \dfrac{s}{t}\)</div></div>
+          <div class="tool" style="grid-column: span 2;"><div class="eq">\(\text{eff.} = \dfrac{\text{useful output}}{\text{total input}}\)</div><p>energy or power; no unit</p><div class="re">useful = eff. × total; \(\text{total} = \dfrac{\text{useful}}{\text{eff.}}\)</div></div>
+        </div>
+        <div class="remember">All on the AQA equation sheet. \(g = 9.8\) N/kg. Convert first: g → kg, cm → m, kJ → J, minutes → s, % → decimal.</div>
+        <div class="slide-foot"><span class="tag">Energy: stores and transfers</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <p><b>Two equations have a square.</b> \(E_k\) and \(E_e\) both square one quantity, so doubling the speed or the extension gives four times the energy. In this unit you only use them forwards, to find the energy.</p>
+            <p><b>Choosing an equation:</b> list what you are given and what you want, then pick the equation that has exactly those quantities. If none fits, it is a two-step question: the first step finds the missing quantity, such as \(k\) from \(F = ke\).</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide a-hi" data-title="Key words">
+        <p class="eyebrow">Summary</p>
+        <h2>Key words</h2>
+        <div class="terms fill">
+          <div class="term"><b>Energy store</b><span>Where energy is held, in joules</span></div>
+          <div class="term"><b>Closed system</b><span>No energy in or out; total constant</span></div>
+          <div class="term"><b>Gravitational field strength</b><span>9.8 N on each kg</span></div>
+          <div class="term"><b>Extension</b><span>Stretched length − original length</span></div>
+          <div class="term"><b>Spring constant</b><span>Force per metre of extension (N/m)</span></div>
+          <div class="term"><b>Limit of proportionality</b><span>Past it, \(F\) and \(e\) are not proportional</span></div>
+          <div class="term"><b>Conservation of energy</b><span>Never created or destroyed</span></div>
+          <div class="term"><b>Dissipated</b><span>Spread to the thermal store of the surroundings</span></div>
+          <div class="term"><b>Power</b><span>Energy transferred per second (W)</span></div>
+          <div class="term"><b>Thermal conductivity</b><span>Higher = faster conduction</span></div>
+          <div class="term"><b>Efficiency</b><span>Useful output ÷ total input</span></div>
+          <div class="term"><b>Sankey diagram</b><span>Arrow width shows energy</span></div>
+        </div>
+        <div class="slide-foot"><span class="tag">Energy: stores and transfers</span><span data-page></span></div>
+      </section>
+
+    </div>
+  </main>
+
+  <nav class="controls" aria-label="Slide controls">
+    <button type="button" id="prev" aria-label="Previous slide"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg></button>
+    <span class="counter" id="counter" aria-live="polite"></span>
+    <button type="button" id="next" aria-label="Next slide"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 5l7 7-7 7"/></svg></button>
+  </nav>
+  <div class="progress" aria-hidden="true"><span id="progress-bar"></span></div>
+
+  <script src="/gcsephy/year9phy/unit02/workbook/assets/figures.js"></script>
+  <script src="figures.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
+  <script src="../assets/deck-notes.js"></script>
+  <script src="../assets/companion-deck.js"></script>
+  <script type="module" src="house3d.js"></script>
+</body>
+</html>

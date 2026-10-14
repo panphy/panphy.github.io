@@ -2,6 +2,7 @@
 // touch / button controls, step reveals, URL hash and fullscreen. Student
 // revision notes beneath the slide come from deck-notes.js.
 // Each deck fills its diagrams first through window.DeckFigures.render().
+// A deck with maths loads MathJax first; the deck waits for it to typeset.
 (() => {
   const SLIDE_W = 1600;
   const SLIDE_H = 900;
@@ -240,5 +241,7 @@
     window.addEventListener('beforeprint', () => state.slides.forEach(slide => slide.querySelectorAll('.step').forEach(step => step.classList.add('shown'))));
   }
 
-  init();
+  // A deck that loads MathJax is typeset first, so thumbnails copy the finished maths.
+  // Without MathJax (or offline) the deck starts straight away.
+  Promise.resolve(window.MathJax?.startup?.promise).then(init, init);
 })();
