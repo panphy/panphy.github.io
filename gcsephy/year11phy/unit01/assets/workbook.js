@@ -150,7 +150,7 @@
 
   function question(b) {
     qNum += 1;
-    const type = b.type ? `<span class="type${/higher/i.test(b.type) ? " ht" : ""}">${b.type}</span>` : "";
+    const type = b.type ? `<span class="type">${b.type}</span>` : "";
     const marks = b.marks ? `<span class="marks">[${b.marks} mark${b.marks > 1 ? "s" : ""}]</span>` : "";
     let body = "";
     if (b.say) body += `<div class="say" data-who="${b.say[0]}">${b.say[1]}</div>`;

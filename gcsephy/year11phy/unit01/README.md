@@ -17,7 +17,7 @@ Ten 50-minute lessons for AQA GCSE Physics 4.4.1–4.4.2 and Combined Science: T
 | `assets/figures-print.css` | Deck figure styles for print; keep in step with `../../decks/atoms-and-radiation/deck.css` |
 | `build-pdfs.sh` | Rebuilds the PDFs with headless Chrome; name booklets (`3 7 review`) to rebuild only those |
 
-Diagrams come from `/gcsephy/decks/atoms-and-radiation/figures.js` (`window.DeckFigures`); rebuild the PDFs after changing a deck figure the workbook uses. The deck's click-through builds are opt-in (`data-animate` on a slide's figure), so figures drawn here are always complete. As in Year 10, every page after the cover prints 1.2× larger (12 pt text, ~9.6 mm writing lines), and grid columns use `minmax(0, 1fr)` because Chrome shrinks the whole print if anything overflows. A lesson whose Exam corner would jump to a new page whole can set `examSplit: true` (Lesson 3 does), which gives each exam question its own card so the section can break between them.
+Diagrams come from `/gcsephy/decks/atoms-and-radiation/figures.js` (`window.DeckFigures`); rebuild the PDFs after changing a deck figure the workbook uses. The deck's click-through builds are opt-in (`data-animate` on a slide's figure), so figures drawn here are always complete. As in Year 10, every page after the cover prints 1.2× larger (12 pt text, ~9.6 mm writing lines), and grid columns use `minmax(0, 1fr)` because Chrome shrinks the whole print if anything overflows. Physics-only content (AQA 4.4.3–4.4.4) is on the "Triple Science only" extension pages of the Unit review; a single item elsewhere takes `<span class="triple-tag">Triple only</span>` (the medical tracer in Lesson 7). Higher-tier content is not marked. A lesson whose Exam corner would jump to a new page whole can set `examSplit: true` (Lesson 3 does), which gives each exam question its own card so the section can break between them.
 
 The deck has five story slides (11, 13, 18, 22 and 39) with photographs of the scientists, Thomson's tube and Marie Curie's notebook, kept in `../../decks/atoms-and-radiation/images/` and not used in the booklets. Each photo has a caption and a credit linking to its source; change a photo and its credit together, and use only public domain or Creative Commons images that allow reuse. Adding or removing a deck slide shifts the numbers below: update `deck.slides` in the lesson files and this table, then rebuild the PDFs.
 
@@ -35,7 +35,7 @@ The Chadwick photo is from Los Alamos National Laboratory, which asks for this n
 | 6 | Nuclear equations | 28–31 | 4.4.2.2 · 6.4.2.2 |
 | 7 | Properties and uses of radiation | 32–34 | 4.4.2.1 · 6.4.2.1 |
 | 8 | Half-life and random decay (half-life lab) | 35–37 | 4.4.2.3 · 6.4.2.3 |
-| 9 | Half-life calculations (HT: net decline) | 36 | 4.4.2.3 · 6.4.2.3 |
+| 9 | Half-life calculations (with net decline) | 36 | 4.4.2.3 · 6.4.2.3 |
 | 10 | Contamination and irradiation | 38–41 | 4.4.2.4 · 6.4.2.4 |
 
 The Unit review follows Lesson 10 and adds two GCSE Physics-only extension pages the deck omits: background radiation, half-life hazards and medical uses (4.4.3), and fission and fusion (4.4.4).

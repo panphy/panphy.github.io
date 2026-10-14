@@ -47,7 +47,7 @@ The second lesson of week 5 is for revision and catch-up; the end-of-unit test i
 | `workbook/assets/figures.js`, `figures.css` | Line drawings, shared with the deck |
 | `workbook/build-pdfs.sh` | Rebuilds both PDFs with headless Chrome |
 
-Maths is LaTeX between `\(` and `\)`, typeset by MathJax from a CDN, so previews and builds need a network connection; text is written as `String.raw` templates so backslashes survive. In sentences, `[[answer|a / b / c]]` prints a blank followed by its options and `{{a|b*|c}}` prints an AQA-style ring box with `*` on the answer: every gap shows its choices. Every page after the cover prints 1.2× larger, as in Year 10; the toolkit prints at normal size so it fits on the last page.
+Maths is LaTeX between `\(` and `\)`, typeset by MathJax from a CDN, so previews and builds need a network connection; text is written as `String.raw` templates so backslashes survive. In sentences, `[[answer|a / b / c]]` prints a blank followed by its options and `{{a|b*|c}}` prints an AQA-style ring box with `*` on the answer: every gap shows its choices. Content examined only in GCSE Physics (8463), not Combined Science: Trilogy, carries `<span class="triple-tag">Triple only</span>` (the cooling cups practical). The workbook marks no Higher-tier content: both courses are taught at Higher. Every page after the cover prints 1.2× larger, as in Year 10; the toolkit prints at normal size so it fits on the last page.
 
 To rebuild: serve the repository root (`python3 -m http.server 8000`), then run `sh build-pdfs.sh` in `workbook/`. Check that both PDFs have the same page count and that the toolkit is still one page.
 

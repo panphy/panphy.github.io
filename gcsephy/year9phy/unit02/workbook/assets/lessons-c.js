@@ -147,7 +147,7 @@
         { t: "p", h: "Energy is transferred through a solid by <strong>conduction</strong>, from the hotter side to the colder side. A material with a <strong>higher thermal conductivity</strong> transfers energy <strong>faster</strong>. Metals have a high thermal conductivity. Air, wool and plastic foam have a low thermal conductivity, so they are good <strong>thermal insulators</strong>. Many insulators work because they trap air." },
         { t: "key", h: "A house cools <strong>more slowly</strong> if its walls are <strong>thicker</strong> and have a <strong>lower thermal conductivity</strong>." },
       ],
-      lab: { title: "Practical: cooling cups", aside: "Your teacher pours the hot water.", blocks: [
+      lab: { title: 'Practical: cooling cups <span class="triple-tag">Triple only</span>', aside: "Your teacher pours the hot water.", blocks: [
         { t: "fig", h: F.cups(["none", "newspaper", "bubble wrap", "cotton wool", "felt"]), cls: "fig-small" },
         { t: "p", h: "<strong>Question:</strong> which material is the best thermal insulator?" },
         { t: "vars", rows: [["Independent variable", "", "the insulating material"], ["Dependent variable", "", "the temperature drop in 10 minutes"], ["Control variables (two)", "", "volume of water, starting temperature, type of cup, thickness of wrapping, lid"]] },
@@ -186,7 +186,7 @@
       spec: "AQA Physics 4.1.2.2; Combined Science 6.1.2.2",
       mapLine: "Efficiency from energy or power, decimals and percentages, Sankey diagrams",
       big: "An old filament lamp and an LED give out the same light. Why does the LED cost much less to run?",
-      goals: ["calculate efficiency as a decimal and as a percentage", "explain why no device is 100% efficient", "find the useful output or the total input from the efficiency", "draw and read Sankey diagrams", "<em>Higher:</em> describe ways to increase efficiency"],
+      goals: ["calculate efficiency as a decimal and as a percentage", "explain why no device is 100% efficient", "find the useful output or the total input from the efficiency", "draw and read Sankey diagrams", "describe ways to increase efficiency"],
       keywords: ["efficiency", "useful output", "wasted output", "total input", "Sankey diagram"],
       story: { title: "Lamps", text: "A filament lamp transfers only about 1 joule in every 10 by light. The rest heats the room. An LED transfers several times more of its energy by light, so it needs much less energy for the same brightness." },
       doNow: [
@@ -206,7 +206,7 @@
           yt: { q: "A motor is 0.80 efficient. It transfers 400 J usefully. Calculate the total energy supplied.", steps: [["Know", "efficiency = 0.80, useful = 400 J"], ["Rearrange", R`\(\text{total} = \dfrac{\text{useful}}{\text{efficiency}}\)`], ["Substitute", R`\(\text{total} = \dfrac{400}{0.80}\)`], ["Answer", "500 J"]] } },
         { t: "sub", h: "Sankey diagrams" },
         { t: "split", left: [{ t: "steps", items: ["The <strong>width</strong> of each arrow shows the amount of energy.", "Useful energy goes <strong>straight on</strong>. Wasted energy <strong>bends away</strong>, usually downwards.", "Input = useful + wasted. Here: 100 J = 20 J + 80 J.", "Efficiency = 20 ÷ 100 = 0.20 (20%)."] }], right: [{ t: "fig", h: F.sankey({ input: 100, useful: 20, wasted: 80, s: 1.4, useLabel: "by light", wasteLabel: "heating the room" }), cap: "A lamp: 100 J in, 20 J by light." }] },
-        { t: "sub", h: "Higher: increasing efficiency" },
+        { t: "sub", h: "Increasing efficiency" },
         { t: "p", h: "Reduce the wasted energy: <strong>lubricate</strong> moving parts (less friction), <strong>streamline</strong> vehicles (less air resistance), <strong>insulate</strong> hot things (less energy transferred by heating), and choose devices that waste less, such as LEDs instead of filament lamps." },
       ],
       lab: { title: "Practical: how efficient is a bounce?", aside: "Filming the bounce against the ruler makes it much easier to read.", blocks: [
@@ -224,7 +224,7 @@
         { t: "q", p: "This is the Sankey diagram for an electric motor. Calculate its efficiency.", fig: F.sankey({ input: 200, useful: 50, wasted: 150, s: 0.8, useLabel: "kinetic", wasteLabel: "thermal" }), figCls: "fig-small", frame: frame3, frameA: [R`\(\text{efficiency} = \dfrac{\text{useful}}{\text{total}}\)`, R`\(\text{efficiency} = \dfrac{50}{200}\)`, "0.25 (25%)"] },
         { t: "q", p: "A kettle is supplied with 2000 J. It transfers 1800 J to the thermal store of the water, and 200 J heats the kettle and the room. Draw its Sankey diagram. Let 1 square = 100 J.", box: 56, grid: true, a: "Input arrow 20 squares wide; useful arrow 18 squares wide straight on (water); wasted arrow 2 squares wide bending down (kettle and room)." },
         { t: "q", p: "Complete the table. Show your working underneath.", table: { head: ["Device", "Total input", "Useful output", "Efficiency"], rows: [["TV", "200 J", "60 J", null], ["Electric motor", "1000 J", null, "0.75"], ["Solar panel", null, "30 W", "0.15"]], ans: [[null, null, null, "0.30 (30%)"], [null, null, "750 J", null], [null, "200 W", null, null]] }, box: 24, grid: true },
-        { t: "q", type: "Higher", p: "Complete the sentences. The choices are after each gap.", fill: [R`Oiling the gears of a machine [[increases|increases / decreases]] its efficiency, because less energy is transferred by [[friction|friction / light]].`, R`An LED is [[more|more / less]] efficient than a filament lamp, because [[less|more / less]] energy is wasted heating the room.`] },
+        { t: "q", p: "Complete the sentences. The choices are after each gap.", fill: [R`Oiling the gears of a machine [[increases|increases / decreases]] its efficiency, because less energy is transferred by [[friction|friction / light]].`, R`An LED is [[more|more / less]] efficient than a filament lamp, because [[less|more / less]] energy is wasted heating the room.`] },
       ],
       exam: [
         { tip: "Check: is your efficiency less than 1 (100%)?", p: "A 1200 W hair dryer has a useful power output of 1080 W. Calculate its efficiency as a percentage.", marks: 3, frame: frame3, frameA: [R`\(\text{efficiency} = \dfrac{\text{useful power output}}{\text{total power input}}\)`, R`\(\dfrac{1080}{1200} = 0.90\) (1)(1)`, "90% (1)"] },
@@ -232,7 +232,7 @@
       ],
       summary: [R`\(\text{efficiency} = \dfrac{\text{useful output}}{\text{total input}}\), using energy or power.`, "As a decimal (at most 1) or a percentage (at most 100%). No unit.", "useful = efficiency × total; total = useful ÷ efficiency.", "Sankey diagrams: arrow width shows energy; wasted energy bends away.", "Higher: lubricate, streamline, insulate to increase efficiency."],
       recall: [["Write the equation for efficiency using energy.", "efficiency = useful output energy transfer ÷ total input energy transfer"], ["A device transfers 30 J usefully from 120 J. What is its efficiency?", "0.25 (25%)"], ["Why can efficiency never be more than 100%?", "Energy cannot be created: the useful output can never be more than the input."], ["On a Sankey diagram, what does the width of an arrow show?", "The amount of energy."]],
-      cando: ["calculate efficiency as a decimal and a percentage", "find the useful output or the total input", "draw and read a Sankey diagram", "describe ways to increase efficiency (Higher)"],
+      cando: ["calculate efficiency as a decimal and a percentage", "find the useful output or the total input", "draw and read a Sankey diagram", "describe ways to increase efficiency"],
     },
   ];
 

@@ -7,7 +7,7 @@ Energy: Stores and Transfers
 Students calculate efficiency from energy or power, as a decimal and a percentage, find the useful output from a given efficiency, measure the efficiency of a bouncing ball, and draw and read Sankey diagrams.
 
 ## Specification
-AQA GCSE Physics 4.1.2.2 Efficiency. The specification asks students to recall and apply both efficiency equations; both are also on the AQA Physics equation sheet. Describing ways to increase efficiency is Higher tier only. Sankey diagrams are not in the specification; they are used here to picture efficiency.
+AQA GCSE Physics 4.1.2.2 Efficiency. The specification asks students to recall and apply both efficiency equations; both are also on the AQA Physics equation sheet. Sankey diagrams are not in the specification; they are used here to picture efficiency.
 
 ## Scope
 Students calculate efficiency, and rearrange to find the useful output or the total input.
@@ -19,7 +19,7 @@ By the end of the lesson, students should be able to:
 2. Explain why no real device is 100% efficient.
 3. Calculate the useful output or the total input from the efficiency.
 4. Draw and interpret a Sankey diagram.
-5. (Higher) Describe ways to increase the efficiency of an energy transfer.
+5. Describe ways to increase the efficiency of an energy transfer.
 
 ## Key vocabulary
 
@@ -108,7 +108,7 @@ Rules:
 
 Students then read efficiency from a given Sankey diagram, and draw one for the motor in worked example 1.
 
-## Higher: Increasing efficiency
+## Increasing efficiency
 
 | Way | Reduces |
 |---|---|

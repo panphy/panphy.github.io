@@ -388,7 +388,7 @@
     const S = U.staticExt;
     qNum = 0;
     return `<section class="lesson" style="--accent:var(--cyan);--accent-t:var(--cyan-t)">
-      <div class="eyebrow">Separate Physics only (AQA 4.2.5)</div><h2 class="page-title">Extension: static electricity</h2>
+      <div class="eyebrow">Triple Science only (AQA 4.2.5)</div><h2 class="page-title">Extension: static electricity</h2>
       <p class="page-intro">Only for students taking GCSE Physics (separate science). Combined Science students can skip this page.</p>
       ${renderBlocks(S.learn)}${S.questions.map((q) => question(q)).join("")}</section>`;
   }

@@ -85,7 +85,7 @@
         { t: "fig", h: deckFig("penetration", "", "", 50) },
         { t: "key", h: "<strong>More ionising → less penetrating.</strong> Alpha loses its energy fastest, so it is stopped most easily. Gamma ionises weakly, so it travels furthest." },
         { t: "sub", h: "Choosing the right source" },
-        { t: "figs", cols: 3, items: [deckFig("use-smoke", "<b>Alpha: smoke alarm</b><br>Alpha ionises the air, so a small current flows. Smoke absorbs the alpha particles, the current falls and the alarm sounds.", "", 34), deckFig("use-gauge", "<b>Beta: thickness gauge</b><br>Paper absorbs some beta. If the paper gets thicker, the count rate falls, and the rollers adjust.", "", 34), deckFig("use-tracer", "<b>Gamma: medical tracer</b><br>Gamma passes out of the body to a detector and is only weakly ionising.", "", 34)] },
+        { t: "figs", cols: 3, items: [deckFig("use-smoke", "<b>Alpha: smoke alarm</b><br>Alpha ionises the air, so a small current flows. Smoke absorbs the alpha particles, the current falls and the alarm sounds.", "", 34), deckFig("use-gauge", "<b>Beta: thickness gauge</b><br>Paper absorbs some beta. If the paper gets thicker, the count rate falls, and the rollers adjust.", "", 34), deckFig("use-tracer", "<b>Gamma: medical tracer</b> <span class=\"triple-tag\">Triple only</span><br>Gamma passes out of the body to a detector and is only weakly ionising.", "", 34)] },
         { t: "p", h: "To choose a source, think about <strong>penetration</strong> (must it pass through something, or be stopped?), <strong>ionising power</strong>, and <strong>half-life</strong>: how long it keeps giving out radiation (Lesson 8)." },
         { t: "sub", h: "Identifying radiation from absorbers" },
         { t: "p", h: "A detector measures the count rate from a source as different absorbers are placed in between. The background count rate is 30 counts per minute." },
@@ -174,10 +174,10 @@
     // ============================================================ 9
     {
       n: 9, accent: "alpha", title: "Half-life calculations",
-      spec: "AQA Physics 4.4.2.3; Combined Science 6.4.2.3; Higher tier: net decline",
-      mapLine: "Counting half-lives, finding a half-life from data, net decline as a ratio (HT)",
+      spec: "AQA Physics 4.4.2.3; Combined Science 6.4.2.3",
+      mapLine: "Counting half-lives, finding a half-life from data, net decline as a ratio",
       big: "A hospital uses iodine-131, with a half-life of 8 days. How long before less than 1% of it is left, and why does that matter?",
-      goals: ["count half-lives to find how much is left", "find a half-life from data", "find how long it takes to fall to a given value", "(Higher) work out the net decline as a ratio"],
+      goals: ["count half-lives to find how much is left", "find a half-life from data", "find how long it takes to fall to a given value", "work out the net decline as a ratio"],
       keywords: ["half-life", "number of half-lives", "initial activity", "fraction remaining", "net decline", "ratio"],
       deck: { slides: "36", text: "Using half-life: from a graph, counting halvings, and as a ratio." },
       doNow: [
@@ -194,7 +194,7 @@
         { t: "sub", h: "Finding the half-life from data" },
         { t: "worked", q: "The activity of a sample falls from 2400 Bq to 300 Bq in 36 minutes. Calculate the half-life.", steps: [["Halvings", "2400 → 1200 → 600 → 300: 3 halvings"], ["Half-life", "36 ÷ 3"], ["Answer", "12 minutes"]],
           yt: { q: "A count rate falls from 960 to 60 counts per minute in 20 hours. Calculate the half-life.", steps: [["Halvings", "960 → 480 → 240 → 120 → 60: 4"], ["Half-life", "20 ÷ 4"], ["Answer", "5 hours"]] } },
-        { t: "sub", h: "Net decline as a ratio (Higher tier)" },
+        { t: "sub", h: "Net decline as a ratio" },
         { t: "split", cls: "top", left: [
           { t: "p", h: "After <em>n</em> half-lives, the fraction left is (½)<sup><em>n</em></sup>. The <strong>net decline</strong> is how much the activity has fallen. As a ratio of the initial activity, it is 1 − (½)<sup><em>n</em></sup>." },
           { t: "p", h: "Example: 200 Bq falls to 50 Bq in 2 half-lives. Net decline = 200 − 50 = 150 Bq. As a ratio of the initial activity: 150 : 200 = <strong>3 : 4</strong>, or ¾." },
@@ -205,17 +205,17 @@
         { t: "q", type: "On your own", p: "How long does it take for the activity of a source to fall from 1000 Bq to 125 Bq, if its half-life is 6 hours?", lines: 2, a: "1000 → 500 → 250 → 125 is 3 half-lives; 3 × 6 = 18 hours." },
         { t: "q", p: "Use the data to find the half-life. (Hint: find when the count rate is half of 800.)", table: { head: ["Time / min", "0", "10", "20", "30", "40"], rows: [["Count rate / counts per minute", "800", "566", "400", "283", "200"]] }, lines: 2, a: "800 halves to 400 at 20 minutes (and 400 → 200 from 20 to 40 min), so the half-life is 20 minutes." },
         { t: "q", say: ["Mia", "The half-life is 10 minutes, so the activity will be zero after 20 minutes."], p: "Explain why Mia is wrong. What fraction is really left after 20 minutes?", lines: 2, a: "Each half-life only halves the activity; it never jumps to zero. 20 minutes is 2 half-lives, so a quarter (¼) is left." },
-        { t: "q", type: "Higher tier", p: "A source has an initial activity of 1200 Bq. Calculate its activity after 3 half-lives, and the net decline as a ratio of the initial activity.", lines: 3, a: "1200 → 600 → 300 → 150 Bq. Net decline = 1200 − 150 = 1050 Bq; 1050 : 1200 = 7 : 8 (⅞)." },
+        { t: "q", p: "A source has an initial activity of 1200 Bq. Calculate its activity after 3 half-lives, and the net decline as a ratio of the initial activity.", lines: 3, a: "1200 → 600 → 300 → 150 Bq. Net decline = 1200 − 150 = 1050 Bq; 1050 : 1200 = 7 : 8 (⅞)." },
         { t: "q", type: "Challenge", p: "Iodine-131 has a half-life of 8 days. (a) What fraction is left after 32 days? (b) How many whole half-lives until less than 1% is left? How many days is that?", lines: 3, a: "(a) 32 ÷ 8 = 4 half-lives: 1/16 (6.25%) is left. (b) (½)<sup>6</sup> = 1.6%, (½)<sup>7</sup> = 0.78%, so 7 half-lives = 56 days." },
       ],
       exam: [
         { tip: "Show the halvings, not just the answer. Units: keep kBq as kBq.", p: "Cobalt-60 has a half-life of 5.3 years. A source has an activity of 400 kBq. Calculate its activity after 15.9 years.", marks: 2, lines: 2, a: "15.9 ÷ 5.3 = 3 half-lives (1); 400 → 200 → 100 → 50 kBq (1)." },
-        { type: "Higher tier", p: "Calculate the net decline in the activity of the cobalt-60 source after 15.9 years, as a ratio of its initial activity.", marks: 2, lines: 2, a: "Net decline = 400 − 50 = 350 kBq (1); 350 : 400 = 7 : 8 (or ⅞) (1)." },
+        { p: "Calculate the net decline in the activity of the cobalt-60 source after 15.9 years, as a ratio of its initial activity.", marks: 2, lines: 2, a: "Net decline = 400 − 50 = 350 kBq (1); 350 : 400 = 7 : 8 (or ⅞) (1)." },
         { p: "The graph shows the count rate from a sample. Determine the half-life. Show on the graph how you found it.", marks: 2, graph: { w: 140, h: 90, x: [1, 1], y: [30, 1], xLabel: "time / days", yLabel: "count rate / counts per second", givenFit: (t) => 240 * Math.pow(2, -t / 3), givenRange: [0, 14], read: [[3, 120], [6, 60]] }, lines: 1, a: "240 → 120 at 3 days, lines drawn on the graph (1); half-life = 3 days (1)." },
       ],
       summary: ["Number of half-lives = time ÷ half-life (same units).", "Halve the starting value once for each half-life.", "Half-life from data: count the halvings, then divide the time by that number.", "After n half-lives, (½)<sup>n</sup> is left.", "HT: net decline = initial − final; as a ratio of the initial, 1 − (½)<sup>n</sup>."],
       recall: [["What fraction is left after 3 half-lives?", "⅛"], ["800 Bq falls to 100 Bq. How many half-lives?", "3"], ["Half-life 4 h. How long for 640 Bq to fall to 80 Bq?", "3 half-lives = 12 hours."], ["HT: net decline after 2 half-lives, as a ratio?", "¾ (3 : 4)"]],
-      cando: ["calculate how much is left after a number of half-lives", "find a half-life from data or a graph", "find how long a source takes to fall to a value", "(HT) express the net decline as a ratio"],
+      cando: ["calculate how much is left after a number of half-lives", "find a half-life from data or a graph", "find how long a source takes to fall to a value", "express the net decline as a ratio"],
     },
 
     // ============================================================ 10

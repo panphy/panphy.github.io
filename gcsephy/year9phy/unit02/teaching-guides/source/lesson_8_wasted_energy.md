@@ -7,7 +7,7 @@ Energy: Stores and Transfers
 Students learn that in every real change some energy is dissipated to the thermal store of the surroundings. They explain how lubrication and thermal insulation reduce unwanted transfers, test insulating materials with cooling cups, and apply the ideas to designing an energy-efficient house.
 
 ## Specification
-AQA GCSE Physics 4.1.2.1 Energy transfers in a system. Students do not need the formal definition of thermal conductivity.
+AQA GCSE Physics 4.1.2.1 Energy transfers in a system. Students do not need the formal definition of thermal conductivity. The cooling cups practical is required practical 2 in GCSE Physics (8463) only; it is not in Combined Science: Trilogy (8464).
 
 ## Learning objectives
 By the end of the lesson, students should be able to:
@@ -71,7 +71,7 @@ Then the two rules for a building:
 
 Trapped air is a very poor conductor. Many insulators (wool, foam, bubble wrap, loft insulation, double glazing) work because they trap air.
 
-## Practical: Cooling cups
+## Practical: Cooling cups (Triple only)
 
 Investigation question: which material is the best thermal insulator?
 

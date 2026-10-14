@@ -20,7 +20,6 @@
     currentSection = question.section;
     const rows = Math.min(8, Math.max(3, question.marks + 1));
     const stimulus = question.stimulus ? `<div class="question-stimulus">${question.stimulus}</div>` : "";
-    const tier = question.tier ? '<span class="tier-tag">Higher tier</span>' : "";
     const options = question.options
       ? `<ol class="mcq-options">${question.options.map((option, i) => `<li><b>${"ABCD"[i]}</b>${option}</li>`).join("")}</ol>`
       : "";
@@ -29,7 +28,7 @@
       <article class="question-card exam-question-card">
         <div class="question-meta">
           <span class="exam-tag">AQA-style</span>
-          <span class="skill-tag">${question.skill}</span>${tier}
+          <span class="skill-tag">${question.skill}</span>
           <span class="marks">[${question.marks} mark${question.marks === 1 ? "" : "s"}]</span>
           <span class="question-count">Q${index + 1}</span>
         </div>

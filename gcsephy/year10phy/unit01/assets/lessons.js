@@ -1017,7 +1017,6 @@
           },
           {
             title: "Trans&shy;former equation",
-            ht: true,
             paragraphs: [
               "For a transformer that is 100% efficient, the power in equals the power out. In Combined Science you do not need to know how a transformer is built; separate Physics covers that with electromagnetism.",
             ],
@@ -1025,7 +1024,7 @@
               eq: "V_p I_p = V_s I_s",
               words: "p.d. across primary × current in primary = p.d. across secondary × current in secondary",
               units: "p = primary coil (input), s = secondary coil (output)",
-              flag: "Higher tier: on the equation sheet",
+              flag: "On the equation sheet",
             },
             formula: "25 kV, 1200 A in; 400 kV out → I_s = (25 000 × 1200) ÷ 400 000 = 75 A",
             remember: "Step up the p.d. and the current steps down by the same factor.",
@@ -1080,7 +1079,6 @@
         },
         {
           type: "AQA-style",
-          tier: "HT",
           marks: 3,
           prompt: "A step-up transformer has 25 000 V across its primary coil and a current of 800 A in it. The p.d. across the secondary coil is 400 000 V. Calculate the current in the secondary coil. Assume the transformer is 100% efficient.",
           hint: "V_p × I_p = V_s × I_s. Rearrange for I_s.",

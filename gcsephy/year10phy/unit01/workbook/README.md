@@ -16,7 +16,7 @@ Twelve 50-minute lessons for AQA GCSE Combined Science: Trilogy (Higher) and GCS
 | `assets/workbook.css`, `assets/diagrams-print.css` | Print styles; the latter copies the site's diagram styles, so keep it in step with `../assets/styles.css` |
 | `build-pdfs.sh` | Rebuilds all PDFs with headless Chrome; name booklets (`3 7 review labs guide`) to rebuild only those |
 
-Diagrams use the site's `../assets/diagrams.js`. Each booklet is self-contained: cover, how-to page, lesson, toolkit so far, key words and quick answers. The Unit review adds static electricity (Physics only), the full toolkit, all key words and a progress tracker. Every page after the cover prints 1.2× larger (12 pt body text, 1.45 line spacing, ~9.6 mm writing lines) for students with additional learning needs; graph paper is scaled back to keep 2 mm and 1 cm squares, and grid columns use `minmax(0, 1fr)` because Chrome shrinks the whole print if anything overflows. Check body text is still 12 pt after changing a layout.
+Diagrams use the site's `../assets/diagrams.js`. Each booklet is self-contained: cover, how-to page, lesson, toolkit so far, key words and quick answers. The Unit review adds static electricity (Triple Science only), the full toolkit, all key words and a progress tracker. Every page after the cover prints 1.2× larger (12 pt body text, 1.45 line spacing, ~9.6 mm writing lines) for students with additional learning needs; graph paper is scaled back to keep 2 mm and 1 cm squares, and grid columns use `minmax(0, 1fr)` because Chrome shrinks the whole print if anything overflows. Check body text is still 12 pt after changing a layout.
 
 ## Sequence
 
