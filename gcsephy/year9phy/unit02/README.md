@@ -34,7 +34,7 @@ The second lesson of week 5 is for revision and catch-up; the end-of-unit test i
 | `Energy - Year 9 Student Workbook (Answers).pdf` | The same pages with answers filled in, so page numbers match |
 | `workbook/` | Workbook source; see below |
 | `teaching-guides/` | Nine lesson-plan PDFs and their Markdown source; see its README |
-| [`../../decks/energy-stores-and-transfers/`](../../decks/energy-stores-and-transfers/) | 60-slide teaching deck |
+| [`../../decks/energy-stores-and-transfers/`](../../decks/energy-stores-and-transfers/) | 63-slide teaching deck |
 
 ## Workbook source
 
@@ -54,3 +54,5 @@ To rebuild: serve the repository root (`python3 -m http.server 8000`), then run 
 ## Deck
 
 `index.html` in the deck folder holds the slides and revision notes; `figures.js` draws the figures (reusing the workbook's `figures.js`) and six interactive models: a half-pipe and a pendulum with live energy bars, a kinetic-energy explorer, a spring lab that plots both graphs, an elastic-energy explorer and two motors lifting the same load. `house3d.js` adds a low-poly cut-away Eco House with Three.js through `../assets/model3d.js`; the flat drawing stays for print and reduced motion. News slides use Wikimedia Commons photographs in `images/`, credited under each photo.
+
+The teaching deck uses the shared calm GCSE style with a light-orange Year 9 accent and the GCSE section theme preference. See [`../../decks/README.md`](../../decks/README.md) for shared styling and controls.

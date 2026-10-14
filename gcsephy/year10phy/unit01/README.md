@@ -57,7 +57,7 @@ AQA gives every student the full Physics Equations Sheet as an insert with each 
 
 To edit content, change `assets/lessons.js`, `exam-questions.js` or `practicals.js`; there is no build step. The workbook uses `assets/diagrams.js`, so rebuild its PDFs after changing a circuit symbol.
 
-The teaching deck (`../../decks/electric-circuits/`) has three photo slides: the components, the National Grid and the inside of a UK plug. The Grid and plug photos are in the deck's `images/` folder, each with a credit on the slide linking to its source; change a photo and its credit together, and use only public domain or Creative Commons images that allow reuse.
+The 55-slide teaching deck (`../../decks/electric-circuits/`) uses the shared calm GCSE style with a lime Year 10 accent and the GCSE section theme preference; see [`../../decks/README.md`](../../decks/README.md). It has three photo slides: the components, the National Grid and the inside of a UK plug. The Grid and plug photos are in the deck's `images/` folder, each with a credit on the slide linking to its source; change a photo and its credit together, and use only public domain or Creative Commons images that allow reuse.
 
 ## Hosting
 
