@@ -8,8 +8,9 @@ const THREE_URL = 'https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module
 // The worked example: I₁ = 0.20 kg m² at 12 rad/s, then I₁ + I₂ = 0.30 kg m² at 8.0 rad/s.
 // On screen the speeds are scaled down by the same factor, so their ratio is still 3 : 2.
 const OMEGA_1 = 12, OMEGA = 8, SHOWN = 0.2;
-// After the press: the fall and the slip, in seconds.
-const DROP = 0.55, SLIP = 0.6;
+// After the press: the fall and the slip, in seconds. The slip is slowed down so that the change
+// in each disc's speed can be watched.
+const DROP = 0.55, SLIP = 3;
 const LOWER = { radius: 1.3, thick: 0.24, colour: '--brand-accent-strong' };
 const UPPER = { radius: 0.9, thick: 0.24, colour: '--brand-accent', held: 1.25 };
 const SIDES = 12;
@@ -72,15 +73,18 @@ function build(THREE, fig, index) {
   axis.renderOrder = 10;
   scene.add(axis);
 
-  // One line of text above the model saying what is happening, in the deck's fonts.
+  // What has happened so far, one line per stage, in the deck's fonts. Earlier lines stay, in a
+  // quieter colour, so none of them disappears before it can be read.
   const caption = document.createElement('div');
-  caption.style.cssText = 'position:absolute;left:0;right:0;top:4px;text-align:center;font:600 28px/1.3 var(--font-body);color:var(--text-main);';
+  caption.style.cssText = 'position:absolute;left:12px;top:4px;font:500 26px/1.35 var(--font-body);color:var(--text-secondary);';
   holder.appendChild(caption);
+  const STAGES = ['before', 'slip', 'after'];
   const words = {
-    before: 'Lower disc alone at <i>ω</i>₁ = 12 rad s⁻¹; upper disc at rest',
-    slip: 'Dropped on: friction slows one disc and speeds up the other',
-    after: 'Turning together at <i>ω</i> = 8.0 rad s⁻¹'
+    before: '1. Lower disc alone at <i>ω</i>₁ = 12 rad s⁻¹',
+    slip: '2. Dropped on: friction slows the lower disc<br>&nbsp;&nbsp;&nbsp;&nbsp;and speeds up the upper one',
+    after: '3. Turning together at <i>ω</i> = 8.0 rad s⁻¹'
   };
+  const describe = phase => STAGES.slice(0, STAGES.indexOf(phase) + 1).map(p => `<div style="${p === phase ? 'color:var(--text-main);font-weight:700' : ''}">${words[p]}</div>`).join('');
 
   const paint = () => {
     [[lower, LOWER], [upper, UPPER]].forEach(([d, spec]) => {
@@ -113,7 +117,7 @@ function build(THREE, fig, index) {
     upper.group.rotation.y = state.upper;
     upper.group.position.y = state.height;
     renderer.render(scene, camera);
-    if (state.phase !== shown) { shown = state.phase; caption.innerHTML = words[shown]; }
+    if (state.phase !== shown) { shown = state.phase; caption.innerHTML = describe(shown); }
     return true;
   }
   // The lower disc spins from when the slide opens. The figure's play step is the press that drops
