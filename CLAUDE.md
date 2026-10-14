@@ -38,6 +38,8 @@ Network-only apps omit registration and offline requirements. Public support/ref
 
 `gcsephy/` and `ibdpphy/` are exempt from beta placement, general app styling, and homepage promotion. Do not add them to root `index.html`, `ASSETS_TO_CACHE` or `OFFLINE_CARD_REQUIREMENTS` unless requested. Their absence from the catalogue does not make them private. In `ibdpphy/` decks, mark content that is additional higher level with the `hl` slide class so that it is never mistaken for standard level.
 
+In `ibdpphy/` decks, typeset all mathematics with MathJax as LaTeX between `\(` and `\)`: variables and Greek letters, subscripts and superscripts, fractions, arithmetic, scientific notation and nuclide symbols (`\({}^{235}\mathrm{U}\)`), in slides, revision notes and the HTML labels of 3D models. Never use Unicode superscripts or subscripts for mathematics. Write division as a fraction (`\frac`, or `\dfrac` in displayed working), never with ÷, `\div` or an inline slash such as `S/4`. Units in running text (such as m s⁻¹), word equations, chemical formulas (such as CO₂) and the text labels inside SVG figures may stay plain text. `gcsephy/` pages do not load MathJax and may use ÷.
+
 ## Service worker
 
 - Files in `sw.js` → `ASSETS_TO_CACHE` are cache-first. After changing any of them, update `BUILD_ID` as the final code change using a UTC timestamp: `YYYY-MM-DDTHH:MM:SSZ`.
