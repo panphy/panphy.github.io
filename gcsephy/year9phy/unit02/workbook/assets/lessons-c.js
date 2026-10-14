@@ -155,7 +155,7 @@
         { t: "lab", blocks: [
           { t: "q", p: "Record your results.", table: { head: ["Material", "Start / °C", "After 10 min / °C", "Drop / °C"], rows: [["none", null, null, null], ["newspaper", null, null, null], ["bubble wrap", null, null, null], ["cotton wool", null, null, null], ["felt", null, null, null]], ans: [[null, "60", "47", "13"], [null, "60", "52", "8"], [null, "60", "54", "6"], [null, "60", "55", "5"], [null, "60", "53", "7"]] } },
           { t: "q", p: R`The material is a categoric variable, so draw a {{line graph|bar chart*}} of the temperature drop. Draw it here.`, box: 52, grid: true, a: "Bar chart: one bar per material, temperature drop / °C on the y-axis." },
-          { t: "q", p: "Complete the conclusion.", fill: [R`The best insulator is the material whose cup had the [[smallest|biggest / smallest]] temperature drop.`, R`In my results, the best insulator was [[cotton wool (sample)|40]].`, R`Good insulators trap air, which has a [[low|high / low]] thermal conductivity.`] },
+          { t: "q", p: "Complete the conclusion.", fill: [R`The best insulator is the material whose cup had the [[smallest|biggest / smallest]] temperature drop.`, R`In my results, the best insulator was [[cotton wool (sample)|none / newspaper / bubble wrap / cotton wool / felt]].`, R`Good insulators trap air, which has a [[low|high / low]] thermal conductivity.`] },
         ] },
       ] },
       try: [
@@ -205,7 +205,7 @@
         { t: "worked", q: "A 60 W lamp has an efficiency of 25%. Calculate its useful power output.", steps: [["Convert", "efficiency = 25% = 0.25"], ["Rearrange", "useful = efficiency × total"], ["Substitute", "useful = 0.25 × 60"], ["Answer", "15 W"]],
           yt: { q: "A motor is 0.80 efficient. It transfers 400 J usefully. Calculate the total energy supplied.", steps: [["Know", "efficiency = 0.80, useful = 400 J"], ["Rearrange", R`\(\text{total} = \dfrac{\text{useful}}{\text{efficiency}}\)`], ["Substitute", R`\(\text{total} = \dfrac{400}{0.80}\)`], ["Answer", "500 J"]] } },
         { t: "sub", h: "Sankey diagrams" },
-        { t: "split", left: [{ t: "steps", items: ["The <strong>width</strong> of each arrow shows the amount of energy.", "Useful energy goes <strong>straight on</strong>. Wasted energy <strong>bends away</strong>, usually downwards.", "Input = useful + wasted. Here: 100 J = 20 J + 80 J.", "Efficiency = 20 ÷ 100 = 0.20 (20%)."] }], right: [{ t: "fig", h: F.sankey({ input: 100, useful: 20, wasted: 80, s: 1.4, useLabel: "by light", wasteLabel: "heating the room" }), cap: "A filament lamp." }] },
+        { t: "split", left: [{ t: "steps", items: ["The <strong>width</strong> of each arrow shows the amount of energy.", "Useful energy goes <strong>straight on</strong>. Wasted energy <strong>bends away</strong>, usually downwards.", "Input = useful + wasted. Here: 100 J = 20 J + 80 J.", "Efficiency = 20 ÷ 100 = 0.20 (20%)."] }], right: [{ t: "fig", h: F.sankey({ input: 100, useful: 20, wasted: 80, s: 1.4, useLabel: "by light", wasteLabel: "heating the room" }), cap: "A lamp: 100 J in, 20 J by light." }] },
         { t: "sub", h: "Higher: increasing efficiency" },
         { t: "p", h: "Reduce the wasted energy: <strong>lubricate</strong> moving parts (less friction), <strong>streamline</strong> vehicles (less air resistance), <strong>insulate</strong> hot things (less energy transferred by heating), and choose devices that waste less, such as LEDs instead of filament lamps." },
       ],

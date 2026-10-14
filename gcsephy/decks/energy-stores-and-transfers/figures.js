@@ -131,7 +131,7 @@
       <g class="dk-graph"></g>
     </svg></div>` + buttons([['minus', '− 100 g'], ['plus', '+ 100 g'], ['swap', 'Swap the axes'], ['fit', 'Best-fit line', 'aria-pressed="false"'], ['clear', 'Clear']]) + '<p class="dk-readout" aria-live="polite"></p>';
     const root = host.querySelector('svg'), sp = root.querySelector('.dk-spring'), gr = root.querySelector('.dk-graph'), out = host.querySelector('.dk-readout');
-    let n = 0, swapped = false, fit = false;
+    let n = 0, swapped = true, fit = false; // graph 1 (extension against force) first, as in the workbook
     const done = new Set([0]);
     function drawSpring() {
       const e = SPRING[n], len = (L0 + e) * pxcm, y2 = top + len, turns = 7, step = (len - 12) / turns, x = 160, w = 14;
@@ -144,7 +144,7 @@
       out.innerHTML = `Mass added <b>${n * 100} g</b> · force <b>${n} N</b> · length <b>${(L0 + e).toFixed(1)} cm</b> · extension <b>${e.toFixed(1)} cm = ${(e / 100).toFixed(3)} m</b>`;
     }
     function drawGraph() {
-      // Graph 2 (default): force on y against extension in metres on x. Swapped: graph 1.
+      // Swapped (the default): graph 1, extension against force. Otherwise graph 2, force against extension in metres.
       const xs = swapped ? [0, 8, 1] : [0, 0.32, 0.04], ys = swapped ? [0, 32, 4] : [0, 8, 1];
       const X = v => gx + (v - xs[0]) / (xs[1] - xs[0]) * gw, Y = v => gy + gh - (v - ys[0]) / (ys[1] - ys[0]) * gh;
       let s = '';
