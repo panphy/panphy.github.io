@@ -170,6 +170,7 @@ ol.steps li::before { border: 0; color: var(--year-ink); font: 600 21px var(--fo
 .eq-block .eq-words, .eq-block .eq-units { color: var(--text-secondary); font-weight: 500; }
 .eq-block .eq-units { border-color: var(--card-border); }
 .eq-block .flag { border-color: var(--input-border); color: var(--text-secondary); font-family: var(--font-mono); }
+mjx-container { line-height: 0; }
 .eq-block .eq mjx-container { color: var(--text-main); }
 .worked { border: 1px solid var(--card-border); border-radius: 20px; background: var(--card-bg); box-shadow: none; overflow: hidden; }
 .worked .wq { border: 0; border-bottom: 1px solid var(--card-border); background: var(--formula); color: var(--text-main); font-weight: 600; }

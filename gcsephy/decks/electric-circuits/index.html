@@ -21,6 +21,7 @@
   <script src="/assets/theme-toggle.js"></script>
   <script src="/gcsephy/sw-register.js" defer></script>
   <link rel="stylesheet" href="../assets/teaching-deck.css">
+  <script src="../assets/deck-math.js"></script>
 </head>
 <body data-deck-key="electric-circuits" data-deck-title="Electric Circuits">
   <header class="banner">
@@ -46,7 +47,7 @@
             <p class="eyebrow"><span class="on">Year 10 physics</span>, AQA GCSE electricity</p>
             <h1>Follow the charge.<br><em>Track the energy.</em></h1>
             <p class="lead">Circuits, current, p.d., resistance, power, mains</p>
-            <div class="unlocks"><span>Q = I t</span><span>E = Q V</span><span>V = I R</span><span>P = V I</span><span>P = I² R</span><span>E = P t</span></div>
+            <div class="unlocks"><span>\(Q = I\,t\)</span><span>\(E = Q\,V\)</span><span>\(V = I\,R\)</span><span>\(P = V\,I\)</span><span>\(P = I^2\,R\)</span><span>\(E = P\,t\)</span></div>
           </div>
           <div class="machine" aria-label="A simple circuit with charge flowing round it">
             <div class="sticky one">electrons: − → +</div>
@@ -56,7 +57,7 @@
               <svg role="img" aria-label="A battery, lamp, resistor and ammeter in one loop, with charges flowing round" class="cd" viewBox="0 0 380 250" xmlns="http://www.w3.org/2000/svg"><path d="M40 50 H340 V200 H40 Z"/><g transform="translate(190 50) rotate(0)"><rect class="mask" x="-21.5" y="-4" width="43" height="8"/><g class="body"><line x1="-21.5" y1="-15" x2="-21.5" y2="15"/><line x1="-14.5" y1="-8" x2="-14.5" y2="8"/><line x1="-10.5" y1="0" x2="-8.6" y2="0"/><line x1="-4.1" y1="0" x2="-2.2" y2="0"/><line x1="2.2" y1="0" x2="4.1" y2="0"/><line x1="8.6" y1="0" x2="10.5" y2="0"/><line x1="14.5" y1="-15" x2="14.5" y2="15"/><line x1="21.5" y1="-8" x2="21.5" y2="8"/></g></g><text x="190" y="27" text-anchor="middle">6 V</text><g transform="translate(340 125) rotate(90)"><rect class="mask" x="-12" y="-4" width="24" height="8"/><g class="body"><circle r="12"/><line x1="-8.5" y1="-8.5" x2="8.5" y2="8.5"/><line x1="-8.5" y1="8.5" x2="8.5" y2="-8.5"/></g></g><g transform="translate(190 200) rotate(0)"><rect class="mask" x="-20" y="-4" width="40" height="8"/><g class="body"><rect x="-20" y="-8" width="40" height="16"/></g></g><text x="190" y="226" text-anchor="middle">10 Ω</text><g transform="translate(40 125) rotate(90)"><rect class="mask" x="-12" y="-4" width="24" height="8"/><g class="body"><circle r="12"/></g></g><text class="meter-letter" x="40" y="130" text-anchor="middle">A</text><text x="60" y="130" text-anchor="start">0.60 A</text><circle class="charge-dot" r="5"><animateMotion dur="9s" repeatCount="indefinite" begin="-0.00s" path="M40 50 H340 V200 H40 Z"/></circle><circle class="charge-dot" r="5"><animateMotion dur="9s" repeatCount="indefinite" begin="-1.50s" path="M40 50 H340 V200 H40 Z"/></circle><circle class="charge-dot" r="5"><animateMotion dur="9s" repeatCount="indefinite" begin="-3.00s" path="M40 50 H340 V200 H40 Z"/></circle><circle class="charge-dot" r="5"><animateMotion dur="9s" repeatCount="indefinite" begin="-4.50s" path="M40 50 H340 V200 H40 Z"/></circle><circle class="charge-dot" r="5"><animateMotion dur="9s" repeatCount="indefinite" begin="-6.00s" path="M40 50 H340 V200 H40 Z"/></circle><circle class="charge-dot" r="5"><animateMotion dur="9s" repeatCount="indefinite" begin="-7.50s" path="M40 50 H340 V200 H40 Z"/></circle></svg>
               <p>Same current<br>all the way round.</p>
             </div>
-            <div class="stamp">V&nbsp;=&nbsp;IR</div>
+            <div class="stamp">\(V = I\,R\)</div>
           </div>
         </div>
       </section>
@@ -67,12 +68,12 @@
         <h2>Eight missions<em>.</em></h2>
         <div class="missions fill" style="grid-template-rows: 1fr 1fr;">
           <div class="mission a-alt"><div class="mission-top"><span class="lesson-number">01</span><span class="lesson-icon">A</span></div><h3>Build &amp; measure</h3><p>Loops, symbols, ammeter</p></div>
-          <div class="mission a-cyan"><div class="mission-top"><span class="lesson-number">02</span><span class="lesson-icon">Q</span></div><h3>Charge on the move</h3><p>Current, Q = I t</p></div>
-          <div class="mission a-hi"><div class="mission-top"><span class="lesson-number">03</span><span class="lesson-icon">V</span></div><h3>Energy per coulomb</h3><p>p.d., E = Q V, voltmeter</p></div>
-          <div class="mission a-hot"><div class="mission-top"><span class="lesson-number">04</span><span class="lesson-icon">Ω</span></div><h3>Resistance &amp;<br>V = IR</h3><p>Ohm’s law, RP: wire length</p></div>
-          <div class="mission a-cyan"><div class="mission-top"><span class="lesson-number">05</span><span class="lesson-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M1 12h3M20 12h3M4 5v14M20 5v14M4 5h4M16 5h4M4 19h4M16 19h4M8 3h8v4H8zM8 17h8v4H8z"/></svg></span></div><h3>Series &amp; parallel</h3><p>The rules, R<sub>total</sub></p></div>
-          <div class="mission a-violet"><div class="mission-top"><span class="lesson-number">06</span><span class="lesson-icon" style="font-size: 17px;">I–V</span></div><h3>I–V characteristics</h3><p>Lamp, diode, sensors, RP</p></div>
-          <div class="mission a-hi"><div class="mission-top"><span class="lesson-number">07</span><span class="lesson-icon">P</span></div><h3>Power &amp; the Grid</h3><p>P = V I, E = P t, transformers</p></div>
+          <div class="mission a-cyan"><div class="mission-top"><span class="lesson-number">02</span><span class="lesson-icon">Q</span></div><h3>Charge on the move</h3><p>Current, \(Q = I\,t\)</p></div>
+          <div class="mission a-hi"><div class="mission-top"><span class="lesson-number">03</span><span class="lesson-icon">V</span></div><h3>Energy per coulomb</h3><p>p.d., \(E = Q\,V\), voltmeter</p></div>
+          <div class="mission a-hot"><div class="mission-top"><span class="lesson-number">04</span><span class="lesson-icon">Ω</span></div><h3>Resistance &amp;<br>\(V = I\,R\)</h3><p>Ohm’s law, RP: wire length</p></div>
+          <div class="mission a-cyan"><div class="mission-top"><span class="lesson-number">05</span><span class="lesson-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M1 12h3M20 12h3M4 5v14M20 5v14M4 5h4M16 5h4M4 19h4M16 19h4M8 3h8v4H8zM8 17h8v4H8z"/></svg></span></div><h3>Series &amp; parallel</h3><p>The rules, \(R_{\text{total}}\)</p></div>
+          <div class="mission a-violet"><div class="mission-top"><span class="lesson-number">06</span><span class="lesson-icon" style="font-size: 17px;">I–V</span></div><h3>\(I\)–\(V\) characteristics</h3><p>Lamp, diode, sensors, RP</p></div>
+          <div class="mission a-hi"><div class="mission-top"><span class="lesson-number">07</span><span class="lesson-icon">P</span></div><h3>Power &amp; the Grid</h3><p>\(P = V\,I\), \(E = P\,t\), transformers</p></div>
           <div class="mission a-hot"><div class="mission-top"><span class="lesson-number">08</span><span class="lesson-icon">~</span></div><h3>Mains &amp; safety</h3><p>ac, 230 V, earth wire</p></div>
         </div>
         <div class="slide-foot"><span class="tag">Electric circuits</span><span data-page></span></div>
@@ -175,7 +176,7 @@
               <li>Same charge flows through both</li>
               <li>Ideal ammeter: <b>almost zero</b> resistance</li>
             </ul>
-            <div class="remember">One loop = a <b>series circuit</b></div>
+            <div class="remember">One loop \(=\) a <b>series circuit</b></div>
           </div>
           <div class="panel"><div class="fig" data-fig="ammeter"></div></div>
         </div>
@@ -197,7 +198,7 @@
           <div>
             <p class="eyebrow"><span class="num">02</span> Mission 2: <span class="on">Measure the flow</span></p>
             <h1>Charge <em>on the move</em></h1>
-            <div class="unlocks"><span>current as a rate</span><span>Q = I t</span><span>electrons vs conventional current</span></div>
+            <div class="unlocks"><span>current as a rate</span><span>\(Q = I\,t\)</span><span>electrons vs conventional current</span></div>
           </div>
           <div class="case-card">
             <div class="label">KEY RULE</div>
@@ -214,9 +215,9 @@
         <div class="split">
           <ul class="points">
             <li>Current = rate of flow of <b>charge</b></li>
-            <li>Charge <b>Q</b> in coulombs (<b>C</b>)</li>
+            <li>Charge <b>\(Q\)</b> in coulombs (<b>C</b>)</li>
             <li>Current <b>I</b> in amperes (<b>A</b>)</li>
-            <li><b>1 A</b> = 1 C passing a point each second</li>
+            <li><b>1 A</b> \(=\) 1 C passing a point each second</li>
             <li>In metals: <b>free electrons</b> move</li>
             <li>Needs a closed loop + a <b>p.d.</b></li>
           </ul>
@@ -239,23 +240,23 @@
         <h2>Charge flow</h2>
         <div class="split even top">
           <div class="col">
-            <div class="eq-block"><span class="eq">Q = I t</span><span class="eq-words">charge flow = current × time</span><span class="eq-units">Q in C, I in A, t in s</span></div>
-            <div class="remember">Time in <b>seconds</b>: min × 60, h × 3600</div>
+            <div class="eq-block"><span class="eq">\(Q = I\,t\)</span><span class="eq-words">\(\text{charge flow} = \text{current} \times \text{time}\)</span><span class="eq-units">\(Q\) in C, \(I\) in A, \(t\) in s</span></div>
+            <div class="remember">Time in <b>seconds</b>: min \(\times 60\), h \(\times 3600\)</div>
           </div>
           <div class="col">
             <div class="worked">
               <div class="wq"><span>Example 1</span>0.40 A for 3.0 minutes</div>
               <dl>
-                <div class="step"><dt>Convert</dt><dd>t = 3.0 × 60 = 180 s</dd></div>
-                <div class="step"><dt>Substitute</dt><dd>Q = 0.40 × 180</dd></div>
-                <div class="step"><dt>Answer</dt><dd class="ans">Q = 72 C</dd></div>
+                <div class="step"><dt>Convert</dt><dd>\(t = 3.0 \times 60 = 180\) s</dd></div>
+                <div class="step"><dt>Substitute</dt><dd>\(Q = 0.40 \times 180\)</dd></div>
+                <div class="step"><dt>Answer</dt><dd class="ans">\(Q = 72\) C</dd></div>
               </dl>
             </div>
             <div class="worked">
               <div class="wq"><span>Example 2</span>5400 C at 1.2 A. Time in minutes?</div>
               <dl>
-                <div class="step"><dt>Rearrange</dt><dd>t = Q ÷ I = 5400 ÷ 1.2</dd></div>
-                <div class="step"><dt>Answer</dt><dd class="ans">4500 s = 75 min</dd></div>
+                <div class="step"><dt>Rearrange</dt><dd>\(t = Q \div I = 5400 \div 1.2\)</dd></div>
+                <div class="step"><dt>Answer</dt><dd class="ans">\(4500\ \text{s} = 75\ \text{min}\)</dd></div>
               </dl>
             </div>
           </div>
@@ -265,7 +266,7 @@
           <div class="rn-main">
             <p><b>The equation is the definition of current, rearranged.</b> Current is the charge passing each second. So the total charge that passes is the current multiplied by the number of seconds.</p>
             <p><b>That is why time must be in seconds.</b> One ampere is one coulomb per <b>second</b>. Put minutes in and the answer is 60 times too small.</p>
-            <p><b>Know the sizes.</b> A phone charging at 2 A for an hour: 2 × 3600 = 7200 C. If you get 0.002 C for a kettle, look for a unit you did not convert.</p>
+            <p><b>Know the sizes.</b> A phone charging at 2 A for an hour: \(2 \times 3600 = 7200\) C. If you get 0.002 C for a kettle, look for a unit you did not convert.</p>
           </div>
         </aside>
       </section>
@@ -324,8 +325,8 @@
         <p class="eyebrow"><span class="num">01–02</span> Checkpoint</p>
         <h2>Quick check</h2>
         <div class="quiz fill">
-          <div class="q"><p><span class="n">1</span>45 C flows in 30 s. Current?</p><div class="ans step">I = 45 ÷ 30 = 1.5 A</div></div>
-          <div class="q"><p><span class="n">2</span>0.25 A for 2.0 min. Charge?</p><div class="ans step">0.25 × 120 = 30 C</div></div>
+          <div class="q"><p><span class="n">1</span>45 C flows in 30 s. Current?</p><div class="ans step">\(I = 45 \div 30 = 1.5\) A</div></div>
+          <div class="q"><p><span class="n">2</span>0.25 A for 2.0 min. Charge?</p><div class="ans step">\(0.25 \times 120 = 30\) C</div></div>
           <div class="q"><p><span class="n">3</span>Ammeter: series or parallel?</p><div class="ans step">Series, in the same loop</div></div>
           <div class="q"><p><span class="n">4</span>Which way do electrons flow?</p><div class="ans step">− terminal → + terminal</div></div>
           <div class="q"><p><span class="n">5</span>Ammeters before and after a lamp?</p><div class="ans step">Same reading</div></div>
@@ -349,11 +350,11 @@
           <div>
             <p class="eyebrow"><span class="num">03</span> Mission 3: <span class="on">Follow the energy</span></p>
             <h1>Energy per <em>coulomb</em></h1>
-            <div class="unlocks"><span>p.d. = energy per coulomb</span><span>E = Q V</span><span>voltmeter across</span></div>
+            <div class="unlocks"><span>p.d. \(=\) energy per coulomb</span><span>\(E = Q\,V\)</span><span>voltmeter across</span></div>
           </div>
           <div class="case-card">
             <div class="label">KEY RULE</div>
-            <h3>1 V = 1 J per coulomb</h3>
+            <h3>1 V \(=\) 1 J per coulomb</h3>
             <div class="fig" data-fig="energy"></div>
           </div>
         </div>
@@ -370,15 +371,15 @@
               <li>Measured in <b>volts (V)</b></li>
               <li>6 V across a resistor → <b>6 J per C</b></li>
             </ul>
-            <div class="eq-block"><span class="eq">E = Q V</span><span class="eq-words">energy = charge flow × p.d.</span><span class="eq-units">E in J, Q in C, V in V</span></div>
+            <div class="eq-block"><span class="eq">\(E = Q\,V\)</span><span class="eq-words">\(\text{energy} = \text{charge flow} \times \text{p.d.}\)</span><span class="eq-units">\(E\) in J, \(Q\) in C, \(V\) in V</span></div>
           </div>
           <div class="worked">
             <div class="wq"><span>Two steps</span>12 V motor, 0.50 A for 40 s. Energy?</div>
             <dl>
-              <div class="step"><dt>Charge</dt><dd>Q = I t = 0.50 × 40 = 20 C</dd></div>
-              <div class="step"><dt>Equation</dt><dd>E = Q V</dd></div>
-              <div class="step"><dt>Substitute</dt><dd>E = 20 × 12</dd></div>
-              <div class="step"><dt>Answer</dt><dd class="ans">E = 240 J</dd></div>
+              <div class="step"><dt>Charge</dt><dd>\(Q = I\,t = 0.50 \times 40 = 20\) C</dd></div>
+              <div class="step"><dt>Equation</dt><dd>\(E = Q\,V\)</dd></div>
+              <div class="step"><dt>Substitute</dt><dd>\(E = 20 \times 12\)</dd></div>
+              <div class="step"><dt>Answer</dt><dd class="ans">\(E = 240\) J</dd></div>
             </dl>
           </div>
         </div>
@@ -387,7 +388,7 @@
           <div class="rn-main">
             <p><b>What does “6 V” mean?</b> Joules per coulomb. Each coulomb that passes through a 6 V battery picks up 6 J. Each coulomb that passes through a lamp with 6 V across it gives up 6 J.</p>
             <p><b>Why “difference”?</b> A coulomb entering the lamp carries more energy than one leaving it. The p.d. is that difference, so it always involves two places.</p>
-            <p><b>Where E = Q V comes from:</b> if each coulomb transfers V joules, then Q coulombs transfer Q × V joules.</p>
+            <p><b>Where \(E = Q\,V\) comes from:</b> if each coulomb transfers \(V\) joules, then \(Q\) coulombs transfer \(Q \times V\) joules.</p>
           </div>
         </aside>
       </section>
@@ -447,8 +448,8 @@
         <div class="hero section">
           <div>
             <p class="eyebrow"><span class="num">04</span> Mission 4: <span class="on">Control the current</span></p>
-            <h1>Resistance <em>&amp; <span class="equation-inline">V = IR</span></em></h1>
-            <div class="unlocks"><span>V = I R</span><span>Ohm’s law</span><span>why metals resist</span><span>RP: length of a wire</span></div>
+            <h1>Resistance <em>&amp; <span class="equation-inline">\(V = I\,R\)</span></em></h1>
+            <div class="unlocks"><span>\(V = I\,R\)</span><span>Ohm’s law</span><span>why metals resist</span><span>RP: length of a wire</span></div>
           </div>
           <div class="case-card">
             <div class="label">KEY RULE</div>
@@ -461,35 +462,35 @@
 
       <section class="slide a-hot" data-title="V = I R">
         <p class="eyebrow"><span class="num">04</span> Know and apply</p>
-        <h2>p.d. = current × <em>resistance</em></h2>
+        <h2>p.d. \(=\) current \(\times\) <em>resistance</em></h2>
         <div class="split even top">
           <div class="col">
-            <div class="eq-block"><span class="eq">V = I R</span><span class="eq-words">p.d. = current × resistance</span><span class="eq-units">V in V, I in A, R in Ω</span></div>
+            <div class="eq-block"><span class="eq">\(V = I\,R\)</span><span class="eq-words">\(\text{p.d.} = \text{current} \times \text{resistance}\)</span><span class="eq-units">\(V\) in V, \(I\) in A, \(R\) in Ω</span></div>
             <ul class="points small tight">
-              <li>R = V ÷ I and I = V ÷ R</li>
-              <li>Same p.d., double R → <b>half</b> the current</li>
-              <li><b>mA ÷ 1000</b> → A</li>
+              <li>\(R = V \div I\) and \(I = V \div R\)</li>
+              <li>Same p.d., double \(R\) → <b>half</b> the current</li>
+              <li><b>mA \(\div 1000\)</b> → A</li>
             </ul>
           </div>
           <div class="col">
             <div class="worked">
               <div class="wq"><span>Example 1</span>0.20 A through 15 Ω. p.d.?</div>
-              <dl><div class="step"><dt>Substitute</dt><dd>V = 0.20 × 15</dd></div><div class="step"><dt>Answer</dt><dd class="ans">V = 3.0 V</dd></div></dl>
+              <dl><div class="step"><dt>Substitute</dt><dd>\(V = 0.20 \times 15\)</dd></div><div class="step"><dt>Answer</dt><dd class="ans">\(V = 3.0\) V</dd></div></dl>
             </div>
             <div class="worked">
               <div class="wq"><span>Example 2</span>6.0 V, 250 mA. Resistance?</div>
-              <dl><div class="step"><dt>Convert</dt><dd>250 mA = 0.25 A</dd></div><div class="step"><dt>Answer</dt><dd class="ans">R = 6.0 ÷ 0.25 = 24 Ω</dd></div></dl>
+              <dl><div class="step"><dt>Convert</dt><dd>\(250\ \text{mA} = 0.25\ \text{A}\)</dd></div><div class="step"><dt>Answer</dt><dd class="ans">\(R = 6.0 \div 0.25 = 24\) Ω</dd></div></dl>
             </div>
           </div>
         </div>
         <div class="slide-foot"><span class="tag">Mission 4: Resistance</span><span data-page></span></div>
         <aside class="revision-note" hidden>
           <div class="rn-main">
-            <p><b>Read resistance as “volts needed per amp”.</b> A 15 Ω resistor needs 15 V for each amp through it. For 0.20 A it needs 0.20 × 15 = 3.0 V, which is Example 1.</p>
+            <p><b>Read resistance as “volts needed per amp”.</b> A 15 Ω resistor needs 15 V for each amp through it. For 0.20 A it needs \(0.20 \times 15 = 3.0\) V, which is Example 1.</p>
             <p><b>Predict before you calculate.</b> Same p.d. and double the resistance: the current must halve. If your answer goes the other way, the equation was rearranged wrongly.</p>
           </div>
           <div class="rn-side">
-            <p class="trap">Mixing components. V, I and R must all belong to the same component: the p.d. across the lamp, the current through the lamp, the resistance of the lamp.</p>
+            <p class="trap">Mixing components. \(V\), \(I\) and \(R\) must all belong to the same component: the p.d. across the lamp, the current through the lamp, the resistance of the lamp.</p>
           </div>
         </aside>
       </section>
@@ -500,7 +501,7 @@
         <div class="split">
           <div class="col">
             <ul class="points">
-              <li>I <b>directly proportional</b> to V</li>
+              <li>\(I\) <b>directly proportional</b> to \(V\)</li>
               <li>Only at <b>constant temperature</b></li>
               <li>Straight line <b>through the origin</b></li>
               <li>Resistance stays <b>constant</b></li>
@@ -512,7 +513,7 @@
         <div class="slide-foot"><span class="tag">Mission 4: Resistance</span><span data-page></span></div>
         <aside class="revision-note" hidden>
           <div class="rn-main">
-            <p><b>How to test for “directly proportional” in a results table.</b> Work out V ÷ I for each row. If it is the same every time, the current is directly proportional to the p.d., and that constant value is the resistance.</p>
+            <p><b>How to test for “directly proportional” in a results table.</b> Work out \(V \div I\) for each row. If it is the same every time, the current is directly proportional to the p.d., and that constant value is the resistance.</p>
             <p><b>What the slope tells you.</b> Current is on the y-axis, so a steeper line means more current for the same p.d.: a <b>lower</b> resistance.</p>
           </div>
           <div class="rn-side">
@@ -530,7 +531,7 @@
             <li>Collisions <b>oppose</b> the current</li>
             <li>Energy transferred → wire <b>heats up</b></li>
             <li>Hotter → ions vibrate more → <b>more collisions</b></li>
-            <li>So <b>R increases</b> with temperature</li>
+            <li>So <b>\(R\) increases</b> with temperature</li>
           </ul>
           <div class="panel"><div class="fig" data-fig="ions"></div></div>
         </div>
@@ -547,21 +548,21 @@
 
       <section class="slide a-hot" data-title="Measuring resistance">
         <p class="eyebrow"><span class="num">04</span> The standard circuit</p>
-        <h2>Measure <em>R</em></h2>
+        <h2>Measure <em>\(R\)</em></h2>
         <div class="split">
           <ol class="steps">
             <li>Ammeter <b>in series</b></li>
             <li>Voltmeter <b>across</b> the component</li>
             <li>Variable resistor → change I</li>
-            <li>Record V and I for several pairs</li>
-            <li><b>R = V ÷ I</b>, then a mean or a graph</li>
+            <li>Record \(V\) and \(I\) for several pairs</li>
+            <li><b>\(R = V \div I\)</b>, then a mean or a graph</li>
           </ol>
           <div class="panel"><div class="fig" data-fig="measureR"></div></div>
         </div>
         <div class="slide-foot"><span class="tag">Mission 4: Resistance</span><span data-page></span></div>
         <aside class="revision-note" hidden>
           <div class="rn-main">
-            <p><b>Why not take one pair of readings and stop?</b> One pair gives one value of R with no way of knowing whether you misread a meter. Several pairs show whether V ÷ I comes out the same each time.</p>
+            <p><b>Why not take one pair of readings and stop?</b> One pair gives one value of \(R\) with no way of knowing whether you misread a meter. Several pairs show whether \(V \div I\) comes out the same each time.</p>
             <p><b>A graph does better still.</b> A line of best fit averages all the readings at once, shows up any that do not fit, and shows whether the component is ohmic.</p>
           </div>
           <div class="rn-side">
@@ -582,8 +583,8 @@
             </ul>
             <ol class="steps">
               <li>10 → 100 cm, in steps</li>
-              <li>Read V and I</li>
-              <li>R = V ÷ I</li>
+              <li>Read \(V\) and \(I\)</li>
+              <li>\(R = V \div I\)</li>
               <li>Switch off between readings</li>
             </ol>
           </div>
@@ -603,16 +604,16 @@
 
       <section class="slide a-hot" data-title="Wire length results">
         <p class="eyebrow"><span class="num">RP</span> Results and evaluation</p>
-        <h2>R <svg class="prop" viewBox="0 0 26 16" width="0.9em" height="0.56em" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" role="img" aria-label="is proportional to"><path d="M23 3.5C16 3.5 13 12.5 7.5 12.5 4.5 12.5 2.5 10.5 2.5 8S4.5 3.5 7.5 3.5C13 3.5 16 12.5 23 12.5"/></svg> <em>length</em></h2>
+        <h2>\(R \propto\) <em>length</em></h2>
         <div class="split wide-fig" style="grid-template-columns: .72fr 1.28fr;">
           <div class="col">
             <ul class="points small">
-              <li>Straight line through origin → <b>R <svg class="prop" viewBox="0 0 26 16" width="0.9em" height="0.56em" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" role="img" aria-label="is proportional to"><path d="M23 3.5C16 3.5 13 12.5 7.5 12.5 4.5 12.5 2.5 10.5 2.5 8S4.5 3.5 7.5 3.5C13 3.5 16 12.5 23 12.5"/></svg> L</b></li>
+              <li>Straight line through origin → <b>\(R \propto L\)</b></li>
               <li>Longer wire → <b>more collisions</b></li>
-              <li>Wire heats → R rises → keep current <b>small</b></li>
+              <li>Wire heats → \(R\) rises → keep current <b>small</b></li>
               <li>Measure to the <b>same contact point</b> of the clip</li>
             </ul>
-            <div class="mistakes"><div class="mistake"><p class="wrong">“Human error.”</p><p class="right">“The wire heated up, so R increased.”</p></div></div>
+            <div class="mistakes"><div class="mistake"><p class="wrong">“Human error.”</p><p class="right">“The wire heated up, so \(R\) increased.”</p></div></div>
           </div>
           <div class="panel"><div class="fig" data-fig="graphSkills"></div></div>
         </div>
@@ -630,12 +631,12 @@
         <p class="eyebrow"><span class="num">03–04</span> Checkpoint</p>
         <h2>Quick check</h2>
         <div class="quiz fill">
-          <div class="q"><p><span class="n">1</span>5.0 C through a 12 V lamp. Energy?</p><div class="ans step">E = 5.0 × 12 = 60 J</div></div>
-          <div class="q"><p><span class="n">2</span>69 000 J, 300 C. p.d.?</p><div class="ans step">V = 69 000 ÷ 300 = 230 V</div></div>
+          <div class="q"><p><span class="n">1</span>5.0 C through a 12 V lamp. Energy?</p><div class="ans step">\(E = 5.0 \times 12 = 60\) J</div></div>
+          <div class="q"><p><span class="n">2</span>69 000 J, 300 C. p.d.?</p><div class="ans step">\(V = 69\,000 \div 300 = 230\) V</div></div>
           <div class="q"><p><span class="n">3</span>How is a voltmeter connected?</p><div class="ans step">In parallel, across the component</div></div>
-          <div class="q"><p><span class="n">4</span>6.0 V, 0.30 A. Resistance?</p><div class="ans step">R = 6.0 ÷ 0.30 = 20 Ω</div></div>
-          <div class="q"><p><span class="n">5</span>Wire length doubles. Resistance?</p><div class="ans step">Doubles: R <svg class="prop" viewBox="0 0 26 16" width="0.9em" height="0.56em" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" role="img" aria-label="is proportional to"><path d="M23 3.5C16 3.5 13 12.5 7.5 12.5 4.5 12.5 2.5 10.5 2.5 8S4.5 3.5 7.5 3.5C13 3.5 16 12.5 23 12.5"/></svg> L</div></div>
-          <div class="q"><p><span class="n">6</span>Why switch off between readings?</p><div class="ans step">Stops the wire heating, so R stays constant</div></div>
+          <div class="q"><p><span class="n">4</span>6.0 V, 0.30 A. Resistance?</p><div class="ans step">\(R = 6.0 \div 0.30 = 20\) Ω</div></div>
+          <div class="q"><p><span class="n">5</span>Wire length doubles. Resistance?</p><div class="ans step">Doubles: \(R \propto L\)</div></div>
+          <div class="q"><p><span class="n">6</span>Why switch off between readings?</p><div class="ans step">Stops the wire heating, so \(R\) stays constant</div></div>
         </div>
         <div class="slide-foot"><span class="reveal-hint">PRESS → TO REVEAL EACH ANSWER</span><span data-page></span></div>
       </section>
@@ -646,7 +647,7 @@
           <div>
             <p class="eyebrow"><span class="num">05</span> Mission 5: <span class="on">Crack any network</span></p>
             <h1>Series <em>&amp; parallel</em></h1>
-            <div class="unlocks"><span>series rules</span><span>parallel rules</span><span>R<sub>total</sub> = R₁ + R₂</span></div>
+            <div class="unlocks"><span>series rules</span><span>parallel rules</span><span>\(R_{\text{total}} = R_1 + R_2\)</span></div>
           </div>
           <div class="case-card">
             <div class="label">KEY RULE</div>
@@ -665,9 +666,9 @@
             <ul class="points">
               <li><b>Same current</b> through every part</li>
               <li>Supply p.d. <b>shared</b> between parts</li>
-              <li>Bigger R → <b>bigger share</b> of p.d.</li>
+              <li>Bigger \(R\) → <b>bigger share</b> of p.d.</li>
             </ul>
-            <div class="eq-block"><span class="eq" style="font-size: 46px;">R<sub>total</sub> = R₁ + R₂</span><span class="eq-words">total resistance in series</span></div>
+            <div class="eq-block"><span class="eq" style="font-size: 46px;">\(R_{\text{total}} = R_1 + R_2\)</span><span class="eq-words">total resistance in series</span></div>
           </div>
           <div class="panel"><div class="fig" data-fig="series"></div></div>
         </div>
@@ -675,8 +676,8 @@
         <aside class="revision-note" hidden>
           <div class="rn-main">
             <p><b>Why the same current?</b> There is one path. Charge that passes through the first component has nowhere else to go.</p>
-            <p><b>Why does the bigger resistor get more p.d.?</b> Both carry the same current, and V = I R. Twice the resistance needs twice the p.d.</p>
-            <p><b>Check it on the slide’s circuit.</b> The current is 0.40 A in both resistors, so the p.d.s are 0.40 × 5 = 2 V and 0.40 × 10 = 4 V. The 10 Ω resistor has twice the resistance and takes twice the p.d., and the two add to the 6 V supply.</p>
+            <p><b>Why does the bigger resistor get more p.d.?</b> Both carry the same current, and \(V = I\,R\). Twice the resistance needs twice the p.d.</p>
+            <p><b>Check it on the slide’s circuit.</b> The current is 0.40 A in both resistors, so the p.d.s are \(0.40 \times 5 = 2\) V and \(0.40 \times 10 = 4\) V. The 10 Ω resistor has twice the resistance and takes twice the p.d., and the two add to the 6 V supply.</p>
           </div>
         </aside>
       </section>
@@ -689,8 +690,8 @@
             <ul class="points">
               <li><b>Same p.d.</b> across each branch</li>
               <li>Branch currents <b>add up</b> to the total</li>
-              <li>Smaller R → <b>bigger</b> branch current</li>
-              <li>R<sub>total</sub> <b>less than</b> the smallest resistor</li>
+              <li>Smaller \(R\) → <b>bigger</b> branch current</li>
+              <li>\(R_{\text{total}}\) <b>less than</b> the smallest resistor</li>
             </ul>
             <div class="remember">Each branch gets the <b>full</b> supply p.d.</div>
           </div>
@@ -700,22 +701,22 @@
         <aside class="revision-note" hidden>
           <div class="rn-main">
             <p><b>Why the same p.d. across every branch?</b> Trace the wires. The top of every branch joins the same point, and so does the bottom. Each branch is connected straight across the supply.</p>
-            <p><b>Check it on the slide’s circuit.</b> Each branch has 12 V across it, so the currents are 12 ÷ 4 = 3 A and 12 ÷ 6 = 2 A: 5 A in total.</p>
-            <p><b>Now the total resistance:</b> R = V ÷ I = 12 ÷ 5 = 2.4 Ω, less than either resistor.</p>
+            <p><b>Check it on the slide’s circuit.</b> Each branch has 12 V across it, so the currents are \(12 \div 4 = 3\) A and \(12 \div 6 = 2\) A: 5 A in total.</p>
+            <p><b>Now the total resistance:</b> \(R = V \div I = 12 \div 5 = 2.4\) Ω, less than either resistor.</p>
           </div>
         </aside>
       </section>
 
       <section class="slide a-cyan" data-title="Why parallel lowers resistance">
         <p class="eyebrow"><span class="num">RP</span> Resistance: Part B</p>
-        <h2>Another path<em>,</em> <em>less R</em></h2>
+        <h2>Another path<em>,</em> <em>less \(R\)</em></h2>
         <div class="split wide-fig" style="grid-template-columns: .75fr 1.25fr;">
           <div class="col">
             <ul class="points small">
-              <li>Series: add a resistor → R<sub>total</sub> <b>up</b></li>
+              <li>Series: add a resistor → \(R_{\text{total}}\) <b>up</b></li>
               <li>Parallel: add a branch → more paths</li>
               <li>More current at the same p.d.</li>
-              <li>So R<sub>total</sub> = V ÷ I goes <b>down</b></li>
+              <li>So \(R_{\text{total}} = V \div I\) goes <b>down</b></li>
             </ul>
             <table class="data compact">
               <caption>Two 10 Ω resistors</caption>
@@ -738,15 +739,15 @@
 
       <section class="slide a-cyan" data-title="Solving a series problem">
         <p class="eyebrow"><span class="num">05</span> Worked example</p>
-        <h2>Find the lamp’s <em>R</em></h2>
+        <h2>Find the lamp’s <em>\(R\)</em></h2>
         <div class="split even">
           <div class="worked">
             <div class="wq"><span>9.0 V supply, 10 Ω reads 6.0 V</span>Resistance of the lamp?</div>
             <dl>
-              <div class="step"><dt>Current</dt><dd>I = 6.0 ÷ 10 = 0.60 A</dd></div>
-              <div class="step"><dt>Lamp p.d.</dt><dd>9.0 − 6.0 = 3.0 V</dd></div>
+              <div class="step"><dt>Current</dt><dd>\(I = 6.0 \div 10 = 0.60\) A</dd></div>
+              <div class="step"><dt>Lamp p.d.</dt><dd>\(9.0 - 6.0 = 3.0\) V</dd></div>
               <div class="step"><dt>Same I</dt><dd>0.60 A in series</dd></div>
-              <div class="step"><dt>Answer</dt><dd class="ans">R = 3.0 ÷ 0.60 = 5.0 Ω</dd></div>
+              <div class="step"><dt>Answer</dt><dd class="ans">\(R = 3.0 \div 0.60 = 5.0\) Ω</dd></div>
             </dl>
           </div>
           <div class="panel"><div class="fig" data-fig="seriesProblem"></div></div>
@@ -755,12 +756,12 @@
         <aside class="revision-note" hidden>
           <div class="rn-main">
             <p><b>The method works for any circuit problem.</b></p>
-            <p><b>1.</b> Make a table: a row for each component, columns V, I and R. Fill in what you are given.</p>
-            <p><b>2.</b> Find a row with two of the three. V = I R gives the third. Here it is the 10 Ω resistor.</p>
-            <p><b>3.</b> Use the circuit rules to fill in other rows. In series, every component has the same current, and the p.d.s add up to the supply. So the lamp also has 0.60 A, and its p.d. is 9.0 − 6.0 = 3.0 V.</p>
+            <p><b>1.</b> Make a table: a row for each component, columns \(V\), \(I\) and \(R\). Fill in what you are given.</p>
+            <p><b>2.</b> Find a row with two of the three. \(V = I\,R\) gives the third. Here it is the 10 Ω resistor.</p>
+            <p><b>3.</b> Use the circuit rules to fill in other rows. In series, every component has the same current, and the p.d.s add up to the supply. So the lamp also has 0.60 A, and its p.d. is \(9.0 - 6.0 = 3.0\) V.</p>
           </div>
           <div class="rn-side">
-            <p class="tip">Check by another route: total resistance 15 Ω, and 9.0 ÷ 15 = 0.60 A, which matches.</p>
+            <p class="tip">Check by another route: total resistance 15 Ω, and \(9.0 \div 15 = 0.60\) A, which matches.</p>
           </div>
         </aside>
       </section>
@@ -769,17 +770,17 @@
         <p class="eyebrow"><span class="num">05</span> Checkpoint</p>
         <h2>Quick check</h2>
         <div class="quiz fill">
-          <div class="q"><p><span class="n">1</span>5 Ω and 15 Ω in series. R<sub>total</sub>?</p><div class="ans step">5 + 15 = 20 Ω</div></div>
+          <div class="q"><p><span class="n">1</span>5 Ω and 15 Ω in series. \(R_{\text{total}}\)?</p><div class="ans step">\(5 + 15 = 20\) Ω</div></div>
           <div class="q"><p><span class="n">2</span>Series: 12 V supply, one part has 5 V?</p><div class="ans step">The other has 7 V</div></div>
-          <div class="q"><p><span class="n">3</span>Branches: 0.4 A and 0.6 A. Supply current?</p><div class="ans step">0.4 + 0.6 = 1.0 A</div></div>
+          <div class="q"><p><span class="n">3</span>Branches: 0.4 A and 0.6 A. Supply current?</p><div class="ans step">\(0.4 + 0.6 = 1.0\) A</div></div>
           <div class="q"><p><span class="n">4</span>p.d. across each parallel branch?</p><div class="ans step">The full supply p.d.</div></div>
-          <div class="q"><p><span class="n">5</span>Add a resistor in parallel. R<sub>total</sub>?</p><div class="ans step">Decreases</div></div>
-          <div class="q"><p><span class="n">6</span>6.0 V, 0.20 A, R₁ = 12 Ω. R₂ in series?</p><div class="ans step">30 − 12 = 18 Ω</div></div>
+          <div class="q"><p><span class="n">5</span>Add a resistor in parallel. \(R_{\text{total}}\)?</p><div class="ans step">Decreases</div></div>
+          <div class="q"><p><span class="n">6</span>6.0 V, 0.20 A, \(R_1 = 12\) Ω. \(R_2\) in series?</p><div class="ans step">\(30 - 12 = 18\) Ω</div></div>
         </div>
         <div class="slide-foot"><span class="reveal-hint">PRESS → TO REVEAL EACH ANSWER</span><span data-page></span></div>
         <aside class="revision-note" hidden>
           <div class="rn-main">
-            <p><b>Question 6 takes two steps.</b> First find the total resistance of the circuit from the supply p.d. and the current: R<sub>total</sub> = 6.0 ÷ 0.20 = 30 Ω. In series the total is R<sub>1</sub> + R<sub>2</sub>, so R<sub>2</sub> = 30 − 12 = 18 Ω.</p>
+            <p><b>Question 6 takes two steps.</b> First find the total resistance of the circuit from the supply p.d. and the current: \(R_{\text{total}} = 6.0 \div 0.20 = 30\) Ω. In series the total is \(R_1 + R_2\), so \(R_2 = 30 - 12 = 18\) Ω.</p>
           </div>
           <div class="rn-side">
             <p class="tip">Before you calculate, decide whether the circuit is series or parallel, because the rules are opposite. Series: the current is the same everywhere and the p.d. is shared. Parallel: the p.d. is the same across each branch and the current is shared.</p>
@@ -792,16 +793,16 @@
         <div class="hero section">
           <div>
             <p class="eyebrow"><span class="num">06</span> Mission 6: <span class="on">A component’s fingerprint</span></p>
-            <h1>I–V <em>character&shy;istics</em></h1>
-            <div class="unlocks"><span>resistor, lamp, diode</span><span>thermistors and LDRs</span><span>RP: I–V</span></div>
+            <h1>\(I\)–\(V\) <em>character&shy;istics</em></h1>
+            <div class="unlocks"><span>resistor, lamp, diode</span><span>thermistors and LDRs</span><span>RP: \(I\)–\(V\)</span></div>
           </div>
           <div class="case-card">
             <div class="label">KEY RULE</div>
-            <h3>Curved graph, changing R</h3>
+            <h3>Curved graph, changing \(R\)</h3>
             <div class="fig" data-fig="ivLamp"></div>
           </div>
         </div>
-        <div class="slide-foot"><span class="tag">Mission 6: I–V characteristics</span><span data-page></span></div>
+        <div class="slide-foot"><span class="tag">Mission 6: \(I\)–\(V\) characteristics</span><span data-page></span></div>
       </section>
 
       <section class="slide a-violet" data-title="Reading an I–V graph">
@@ -810,23 +811,23 @@
         <div class="split">
           <div class="col">
             <ul class="points">
-              <li>p.d. on x, current on y</li>
+              <li>p.d. on \(x\), current on \(y\)</li>
               <li><b>Negative</b> values: supply reversed</li>
               <li>Straight through origin → <b>ohmic</b></li>
-              <li>Curve → <b>R changes</b></li>
+              <li>Curve → <b>\(R\) changes</b></li>
             </ul>
             <div class="remember">Fixed resistor: same shape both ways</div>
           </div>
           <div class="panel"><div class="fig" data-fig="ivResistor"></div></div>
         </div>
-        <div class="slide-foot"><span class="tag">Mission 6: I–V characteristics</span><span data-page></span></div>
+        <div class="slide-foot"><span class="tag">Mission 6: \(I\)–\(V\) characteristics</span><span data-page></span></div>
         <aside class="revision-note" hidden>
           <div class="rn-main">
-            <p><b>Getting resistance from the graph.</b> Pick a point on the line, read its p.d. and current, and calculate R = V ÷ I. On a curve the answer is different at different points.</p>
+            <p><b>Getting resistance from the graph.</b> Pick a point on the line, read its p.d. and current, and calculate \(R = V \div I\). On a curve the answer is different at different points.</p>
             <p><b>What the negative half is for.</b> It shows the component with the supply connected the other way round. A resistor gives the same shape in both halves. A diode does not, and you only find that out by testing both directions.</p>
           </div>
           <div class="rn-side">
-            <p class="trap">Using the gradient of a curve to find resistance. Read V and I at the point and divide.</p>
+            <p class="trap">Using the gradient of a curve to find resistance. Read \(V\) and \(I\) at the point and divide.</p>
           </div>
         </aside>
       </section>
@@ -840,7 +841,7 @@
             <div class="fig" data-fig="ivLamp"></div>
             <ul class="points small tight">
               <li>More current → filament <b>hotter</b></li>
-              <li>Hotter → <b>R increases</b></li>
+              <li>Hotter → <b>\(R\) increases</b></li>
               <li>Graph gets <b>less steep</b></li>
             </ul>
           </div>
@@ -849,12 +850,12 @@
             <div class="fig" data-fig="ivDiode"></div>
             <ul class="points small tight">
               <li>Current in <b>one direction</b> only</li>
-              <li><b>Very high R</b> in reverse</li>
+              <li><b>Very high \(R\)</b> in reverse</li>
               <li>Forward: a diode conducts above ~0.6 V (an LED needs more)</li>
             </ul>
           </div>
         </div>
-        <div class="slide-foot"><span class="tag">Mission 6: I–V characteristics</span><span data-page></span></div>
+        <div class="slide-foot"><span class="tag">Mission 6: \(I\)–\(V\) characteristics</span><span data-page></span></div>
         <aside class="revision-note" hidden>
           <div class="rn-main">
             <p><b>The lamp’s curve comes from electrons colliding with ions (Mission 4).</b> At low current the filament is cool, its resistance is low and the line is steep. As it heats up, each extra volt gives less extra current, so the line bends over.</p>
@@ -874,7 +875,7 @@
             <p class="eyebrow">Thermistor</p>
             <div class="fig" data-fig="thermistor"></div>
             <ul class="points small tight">
-              <li>Temperature ↑ → <b>R ↓</b></li>
+              <li>Temperature ↑ → <b>\(R\) ↓</b></li>
               <li>Thermostats, fire alarms</li>
             </ul>
           </div>
@@ -882,12 +883,12 @@
             <p class="eyebrow">Light-dependent resistor</p>
             <div class="fig" data-fig="ldr"></div>
             <ul class="points small tight">
-              <li>Light intensity ↑ → <b>R ↓</b></li>
+              <li>Light intensity ↑ → <b>\(R\) ↓</b></li>
               <li>Streetlights, night lights</li>
             </ul>
           </div>
         </div>
-        <div class="slide-foot"><span class="tag">Mission 6: I–V characteristics</span><span data-page></span></div>
+        <div class="slide-foot"><span class="tag">Mission 6: \(I\)–\(V\) characteristics</span><span data-page></span></div>
         <aside class="revision-note" hidden>
           <div class="rn-main">
             <p><b>These go the opposite way to a metal wire.</b> A hot wire has more resistance. A hot thermistor has less. Exam questions put the two side by side.</p>
@@ -903,14 +904,14 @@
         <p class="eyebrow"><span class="num">06</span> On the bench</p>
         <h2>What they <em>look like</em></h2>
         <div class="components fill">
-          <figure class="component"><img src="/gcsephy/year10phy/unit01/assets/components/filament-lamp.jpg" width="640" height="768" alt="Clear glass filament lamp with a visible coiled wire inside"><figcaption><b>Filament lamp</b><span>Hotter → <b>R ↑</b></span></figcaption></figure>
+          <figure class="component"><img src="/gcsephy/year10phy/unit01/assets/components/filament-lamp.jpg" width="640" height="768" alt="Clear glass filament lamp with a visible coiled wire inside"><figcaption><b>Filament lamp</b><span>Hotter → <b>\(R\) ↑</b></span></figcaption></figure>
           <figure class="component"><img src="/gcsephy/year10phy/unit01/assets/components/diode.jpg" width="768" height="512" alt="Black cylindrical diode with a silver polarity band and two wire leads"><figcaption><b>Diode</b><span>Current <b>one way</b> only</span></figcaption></figure>
           <figure class="component"><img src="/gcsephy/year10phy/unit01/assets/components/led.jpg" width="640" height="768" alt="Red light-emitting diode with a rounded plastic case and two wire leads"><figcaption><b>LED</b><span>A diode that <b>emits light</b></span></figcaption></figure>
-          <figure class="component"><img src="/gcsephy/year10phy/unit01/assets/components/thermistor.jpg" width="640" height="768" alt="Small black bead thermistor with two wire leads"><figcaption><b>Thermistor</b><span>Temperature ↑ → <b>R ↓</b></span></figcaption></figure>
-          <figure class="component"><img src="/gcsephy/year10phy/unit01/assets/components/ldr.jpg" width="729" height="768" alt="Round light-dependent resistor with a dark zigzag track and two leads"><figcaption><b>LDR</b><span>Light intensity ↑ → <b>R ↓</b></span></figcaption></figure>
-          <figure class="component"><img src="/gcsephy/year10phy/unit01/assets/components/variable-resistor.jpg" width="768" height="512" alt="Sliding variable resistor with a wire-wound tube and an adjustable contact"><figcaption><b>Variable resistor</b><span>Sets <b>R</b> by hand</span></figcaption></figure>
+          <figure class="component"><img src="/gcsephy/year10phy/unit01/assets/components/thermistor.jpg" width="640" height="768" alt="Small black bead thermistor with two wire leads"><figcaption><b>Thermistor</b><span>Temperature ↑ → <b>\(R\) ↓</b></span></figcaption></figure>
+          <figure class="component"><img src="/gcsephy/year10phy/unit01/assets/components/ldr.jpg" width="729" height="768" alt="Round light-dependent resistor with a dark zigzag track and two leads"><figcaption><b>LDR</b><span>Light intensity ↑ → <b>\(R\) ↓</b></span></figcaption></figure>
+          <figure class="component"><img src="/gcsephy/year10phy/unit01/assets/components/variable-resistor.jpg" width="768" height="512" alt="Sliding variable resistor with a wire-wound tube and an adjustable contact"><figcaption><b>Variable resistor</b><span>Sets <b>\(R\)</b> by hand</span></figcaption></figure>
         </div>
-        <div class="slide-foot"><span class="tag">Mission 6: I–V characteristics</span><span data-page></span></div>
+        <div class="slide-foot"><span class="tag">Mission 6: \(I\)–\(V\) characteristics</span><span data-page></span></div>
       </section>
 
       <section class="slide a-violet" data-title="Sensor circuits">
@@ -922,13 +923,13 @@
               <li class="step">Light gets brighter</li>
               <li class="step">LDR resistance <b>decreases</b></li>
               <li class="step">Total resistance <b>decreases</b></li>
-              <li class="step">I = V ÷ R → current <b>increases</b></li>
+              <li class="step">\(I = V \div R\) → current <b>increases</b></li>
             </ol>
-            <div class="formula step"><span>6.0 V supply</span>Bright: 6.0 ÷ 600 Ω = 0.010 A<br>Dark: 6.0 ÷ 1500 Ω = 0.0040 A</div>
+            <div class="formula step"><span>6.0 V supply</span>Bright: \(6.0 \div 600 = 0.010\) A<br>Dark: \(6.0 \div 1500 = 0.0040\) A</div>
           </div>
           <div class="panel"><div class="fig" data-fig="sensor"></div></div>
         </div>
-        <div class="slide-foot"><span class="tag">Mission 6: I–V characteristics</span><span data-page></span></div>
+        <div class="slide-foot"><span class="tag">Mission 6: \(I\)–\(V\) characteristics</span><span data-page></span></div>
         <aside class="revision-note" hidden>
           <div class="rn-main">
             <p><b>Why does the total resistance change?</b> The LDR is in series with a fixed resistor, and series resistances add. When the LDR’s resistance falls, the total falls by the same amount.</p>
@@ -941,20 +942,20 @@
       </section>
 
       <section class="slide a-violet" data-title="Required practical: I–V characteristics">
-        <p class="eyebrow"><span class="num">RP</span> I–V characteristics</p>
+        <p class="eyebrow"><span class="num">RP</span> \(I\)–\(V\) characteristics</p>
         <h2>Test each <em>component</em></h2>
         <div class="split">
           <ol class="steps">
             <li>Build the circuit</li>
             <li>Change the p.d. with the variable resistor</li>
-            <li>Record V and I for several values</li>
+            <li>Record \(V\) and \(I\) for several values</li>
             <li><b>Reverse</b> the supply, then repeat</li>
-            <li>Plot I against V</li>
+            <li>Plot \(I\) against \(V\)</li>
             <li>Repeat: resistor, lamp, diode</li>
           </ol>
           <div class="panel"><div class="fig" data-fig="ivCircuit"></div></div>
         </div>
-        <div class="slide-foot"><span class="tag">Required practical: I–V</span><span data-page></span></div>
+        <div class="slide-foot"><span class="tag">Required practical: \(I\)–\(V\)</span><span data-page></span></div>
         <aside class="revision-note" hidden>
           <div class="rn-main">
             <p><b>Why these three components?</b> They show three behaviours: constant resistance (resistor), resistance that rises with current (lamp), and resistance that depends on direction (diode).</p>
@@ -973,7 +974,7 @@
           <div class="panel"><div class="fig" data-fig="reverse"></div></div>
           <div class="panel"><div class="fig" data-fig="diodeWay"></div></div>
         </div>
-        <div class="slide-foot"><span class="tag">Required practical: I–V</span><span data-page></span></div>
+        <div class="slide-foot"><span class="tag">Required practical: \(I\)–\(V\)</span><span data-page></span></div>
         <aside class="revision-note" hidden>
           <div class="rn-main">
             <p><b>What reversing does.</b> Swapping the two leads at the supply sends the current round the other way. Nothing else in the circuit is changed. The meters now read negative, and those readings go in the bottom-left of the graph.</p>
@@ -990,9 +991,9 @@
         <h2>Quick check</h2>
         <div class="quiz fill">
           <div class="q"><p><span class="n">1</span>Straight line through the origin?</p><div class="ans step">An ohmic conductor, e.g. a fixed resistor at constant temperature</div></div>
-          <div class="q"><p><span class="n">2</span>Why does the lamp graph curve?</p><div class="ans step">Filament heats, so R increases</div></div>
-          <div class="q"><p><span class="n">3</span>Diode in reverse?</p><div class="ans step">Very high R, so almost no current</div></div>
-          <div class="q"><p><span class="n">4</span>Thermistor gets hotter. R?</p><div class="ans step">Decreases</div></div>
+          <div class="q"><p><span class="n">2</span>Why does the lamp graph curve?</p><div class="ans step">Filament heats, so \(R\) increases</div></div>
+          <div class="q"><p><span class="n">3</span>Diode in reverse?</p><div class="ans step">Very high \(R\), so almost no current</div></div>
+          <div class="q"><p><span class="n">4</span>Thermistor gets hotter. \(R\)?</p><div class="ans step">Decreases</div></div>
           <div class="q"><p><span class="n">5</span>Sensor for a streetlight?</p><div class="ans step">LDR</div></div>
           <div class="q"><p><span class="n">6</span>Why reverse the supply?</p><div class="ans step">To get the negative readings</div></div>
         </div>
@@ -1013,13 +1014,13 @@
           <div>
             <p class="eyebrow"><span class="num">07</span> Mission 7: <span class="on">Count the joules</span></p>
             <h1>Power &amp; the <em>National Grid</em></h1>
-            <div class="unlocks"><span>P = V I, P = I² R</span><span>E = P t</span><span>step-up, step-down</span></div>
+            <div class="unlocks"><span>\(P = V\,I\), \(P = I^2\,R\)</span><span>\(E = P\,t\)</span><span>step-up, step-down</span></div>
           </div>
           <div class="case-card">
             <div class="label">KEY RULE</div>
             <h3>Power = energy per second</h3>
-            <div class="big-eq">P = V I</div>
-            <ul class="points small tight"><li>1 W = 1 J per second</li><li>1 kW = 1000 W</li></ul>
+            <div class="big-eq">\(P = V\,I\)</div>
+            <ul class="points small tight"><li>1 W \(=\) 1 J per second</li><li>1 kW \(=\) 1000 W</li></ul>
           </div>
         </div>
         <div class="slide-foot"><span class="tag">Mission 7: Power &amp; the Grid</span><span data-page></span></div>
@@ -1030,20 +1031,20 @@
         <h2>Two power <em>equations</em></h2>
         <div class="row two fill" style="align-content: center;">
           <div class="col">
-            <div class="eq-block"><span class="eq">P = V I</span><span class="eq-words">power = p.d. × current</span><span class="eq-units">P in W, V in V, I in A</span></div>
-            <div class="formula"><span>Example</span>230 V, 4.0 A → P = 230 × 4.0 = <b>920 W</b></div>
+            <div class="eq-block"><span class="eq">\(P = V\,I\)</span><span class="eq-words">\(\text{power} = \text{p.d.} \times \text{current}\)</span><span class="eq-units">\(P\) in W, \(V\) in V, \(I\) in A</span></div>
+            <div class="formula"><span>Example</span>230 V, 4.0 A → \(P = 230 \times 4.0 =\) <b>920 W</b></div>
           </div>
           <div class="col">
-            <div class="eq-block a-hot"><span class="eq">P = I² R</span><span class="eq-words">power = current² × resistance</span><span class="eq-units">P in W, I in A, R in Ω</span></div>
-            <div class="formula"><span>Example</span>2.0 A, 15 Ω → P = 2.0² × 15 = <b>60 W</b></div>
+            <div class="eq-block a-hot"><span class="eq">\(P = I^2\,R\)</span><span class="eq-words">\(\text{power} = \text{current}^2 \times \text{resistance}\)</span><span class="eq-units">\(P\) in W, \(I\) in A, \(R\) in Ω</span></div>
+            <div class="formula"><span>Example</span>2.0 A, 15 Ω → \(P = 2.0^2 \times 15 =\) <b>60 W</b></div>
           </div>
         </div>
-        <div class="remember" style="margin-bottom: 8px;">Square the current <b>first</b>: double I → <b>4 ×</b> the power</div>
+        <div class="remember" style="margin-bottom: 8px;">Square the current <b>first</b>: double \(I\) → <b>\(4 \times\)</b> the power</div>
         <div class="slide-foot"><span class="tag">Mission 7: Power &amp; the Grid</span><span data-page></span></div>
         <aside class="revision-note" hidden>
           <div class="rn-main">
-            <p><b>Where P = V I comes from.</b> Volts are joules per coulomb. Amps are coulombs per second. Multiply them and the coulombs cancel: joules per second, which is power.</p>
-            <p><b>Why does doubling the current give four times the power?</b> To push twice the current through the same resistor you need twice the p.d. In P = V I both have doubled, and 2 × 2 = 4. P = I² R says the same in one step.</p>
+            <p><b>Where \(P = V\,I\) comes from.</b> Volts are joules per coulomb. Amps are coulombs per second. Multiply them and the coulombs cancel: joules per second, which is power.</p>
+            <p><b>Why does doubling the current give four times the power?</b> To push twice the current through the same resistor you need twice the p.d. In \(P = V\,I\) both have doubled, and \(2 \times 2 = 4\). \(P = I^2\,R\) says the same in one step.</p>
           </div>
         </aside>
       </section>
@@ -1053,7 +1054,7 @@
         <h2>Energy <em>transferred</em></h2>
         <div class="split even top">
           <div class="col">
-            <div class="eq-block"><span class="eq">E = P t</span><span class="eq-words">energy = power × time</span><span class="eq-units">E in J, P in W, t in s</span></div>
+            <div class="eq-block"><span class="eq">\(E = P\,t\)</span><span class="eq-words">\(\text{energy} = \text{power} \times \text{time}\)</span><span class="eq-units">\(E\) in J, \(P\) in W, \(t\) in s</span></div>
             <ul class="points small tight">
               <li>Kettle → <b>thermal</b> store of water</li>
               <li>Fan motor → <b>kinetic</b> energy</li>
@@ -1063,10 +1064,10 @@
           <div class="worked">
             <div class="wq"><span>Example</span>2.0 kW kettle for 3.0 minutes</div>
             <dl>
-              <div class="step"><dt>Convert</dt><dd>P = 2000 W, t = 180 s</dd></div>
-              <div class="step"><dt>Equation</dt><dd>E = P t</dd></div>
-              <div class="step"><dt>Substitute</dt><dd>E = 2000 × 180</dd></div>
-              <div class="step"><dt>Answer</dt><dd class="ans">E = 360 000 J</dd></div>
+              <div class="step"><dt>Convert</dt><dd>\(P = 2000\) W, \(t = 180\) s</dd></div>
+              <div class="step"><dt>Equation</dt><dd>\(E = P\,t\)</dd></div>
+              <div class="step"><dt>Substitute</dt><dd>\(E = 2000 \times 180\)</dd></div>
+              <div class="step"><dt>Answer</dt><dd class="ans">\(E = 360\,000\) J</dd></div>
             </dl>
           </div>
         </div>
@@ -1074,10 +1075,10 @@
         <aside class="revision-note" hidden>
           <div class="rn-main">
             <p><b>Power is a rate; energy is a total.</b> A powerful appliance used briefly can transfer less energy than a weak one left on all day.</p>
-            <p><b>Compare:</b> the 2 kW kettle for 3 minutes transfers 360 000 J. A 10 W lamp left on for 10 hours transfers 10 × 36 000 = 360 000 J. The same.</p>
+            <p><b>Compare:</b> the 2 kW kettle for 3 minutes transfers 360 000 J. A 10 W lamp left on for 10 hours transfers \(10 \times 36\,000 = 360\,000\) J. The same.</p>
           </div>
           <div class="rn-side">
-            <p class="tip">E = P t when you know power and time. E = Q V when you know charge and p.d. Choose by what the question gives you.</p>
+            <p class="tip">\(E = P\,t\) when you know power and time. \(E = Q\,V\) when you know charge and p.d. Choose by what the question gives you.</p>
           </div>
         </aside>
       </section>
@@ -1101,8 +1102,8 @@
         <div class="slide-foot"><span class="tag">Mission 7: Power &amp; the Grid</span><span data-page></span></div>
         <aside class="revision-note" hidden>
           <div class="rn-main">
-            <p><b>Why does a high p.d. help?</b> The power station has a fixed power to send, and P = V I. Raise the p.d. and the same power needs a smaller current.</p>
-            <p><b>Why does a small current matter so much?</b> The power wasted heating the cables is P = I² R. The current is squared: make the p.d. 10 times bigger, the current is 10 times smaller and the waste is 100 times smaller.</p>
+            <p><b>Why does a high p.d. help?</b> The power station has a fixed power to send, and \(P = V\,I\). Raise the p.d. and the same power needs a smaller current.</p>
+            <p><b>Why does a small current matter so much?</b> The power wasted heating the cables is \(P = I^2\,R\). The current is squared: make the p.d. 10 times bigger, the current is 10 times smaller and the waste is 100 times smaller.</p>
           </div>
           <div class="rn-side">
             <p class="trap">Saying a high p.d. makes the electricity travel faster. The point is the smaller current.</p>
@@ -1127,25 +1128,25 @@
         <h2>Transformer <em>equation</em> <span class="ht">HT</span></h2>
         <div class="split even top">
           <div class="col">
-            <div class="eq-block"><span class="eq">V<sub>p</sub> I<sub>p</sub> = V<sub>s</sub> I<sub>s</sub></span><span class="eq-words">power in = power out</span><span class="eq-units">p = primary (input), s = secondary (output)</span><span class="flag">Assumes 100% efficient</span></div>
+            <div class="eq-block"><span class="eq">\(V_{\mathrm{p}}\,I_{\mathrm{p}} = V_{\mathrm{s}}\,I_{\mathrm{s}}\)</span><span class="eq-words">power in = power out</span><span class="eq-units">\(\mathrm{p}\) = primary (input), \(\mathrm{s}\) = secondary (output)</span><span class="flag">Assumes 100% efficient</span></div>
           </div>
           <div class="col">
             <div class="worked">
-              <div class="wq"><span>Example</span>25 kV, 1200 A in, 400 kV out. I<sub>s</sub>?</div>
+              <div class="wq"><span>Example</span>25 kV, 1200 A in, 400 kV out. \(I_{\mathrm{s}}\)?</div>
               <dl>
-                <div class="step"><dt>Rearrange</dt><dd>I<sub>s</sub> = V<sub>p</sub> I<sub>p</sub> ÷ V<sub>s</sub></dd></div>
-                <div class="step"><dt>Substitute</dt><dd>25 000 × 1200 ÷ 400 000</dd></div>
-                <div class="step"><dt>Answer</dt><dd class="ans">I<sub>s</sub> = 75 A</dd></div>
+                <div class="step"><dt>Rearrange</dt><dd>\(I_{\mathrm{s}} = V_{\mathrm{p}}\,I_{\mathrm{p}} \div V_{\mathrm{s}}\)</dd></div>
+                <div class="step"><dt>Substitute</dt><dd>\(25\,000 \times 1200 \div 400\,000\)</dd></div>
+                <div class="step"><dt>Answer</dt><dd class="ans">\(I_{\mathrm{s}} = 75\) A</dd></div>
               </dl>
             </div>
-            <div class="remember step">p.d. stepped up × 16 → current stepped down × 16</div>
+            <div class="remember step">p.d. stepped up \(\times 16\) → current stepped down \(\times 16\)</div>
           </div>
         </div>
         <div class="slide-foot"><span class="tag">Mission 7: Power &amp; the Grid</span><span data-page></span></div>
         <aside class="revision-note" hidden>
           <div class="rn-main">
-            <p><b>The equation is conservation of energy.</b> V<sub>p</sub> I<sub>p</sub> is the power going in; V<sub>s</sub> I<sub>s</sub> is the power coming out. A transformer cannot create energy, so at best they are equal.</p>
-            <p><b>Think in ratios to check an answer.</b> In the example the p.d. goes from 25 kV to 400 kV, 16 times bigger. So the current must be 16 times smaller: 1200 ÷ 16 = 75 A.</p>
+            <p><b>The equation is conservation of energy.</b> \(V_{\mathrm{p}}\,I_{\mathrm{p}}\) is the power going in; \(V_{\mathrm{s}}\,I_{\mathrm{s}}\) is the power coming out. A transformer cannot create energy, so at best they are equal.</p>
+            <p><b>Think in ratios to check an answer.</b> In the example the p.d. goes from 25 kV to 400 kV, 16 times bigger. So the current must be 16 times smaller: \(1200 \div 16 = 75\) A.</p>
           </div>
         </aside>
       </section>
@@ -1154,9 +1155,9 @@
         <p class="eyebrow"><span class="num">07</span> Checkpoint</p>
         <h2>Quick check</h2>
         <div class="quiz fill">
-          <div class="q"><p><span class="n">1</span>12 V headlamp, 5.0 A. Power?</p><div class="ans step">P = 12 × 5.0 = 60 W</div></div>
-          <div class="q"><p><span class="n">2</span>3.0 A through 20 Ω. Power?</p><div class="ans step">P = 3.0² × 20 = 180 W</div></div>
-          <div class="q"><p><span class="n">3</span>9.0 kW shower for 8.0 min. Energy?</p><div class="ans step">9000 × 480 = 4 320 000 J</div></div>
+          <div class="q"><p><span class="n">1</span>12 V headlamp, 5.0 A. Power?</p><div class="ans step">\(P = 12 \times 5.0 = 60\) W</div></div>
+          <div class="q"><p><span class="n">2</span>3.0 A through 20 Ω. Power?</p><div class="ans step">\(P = 3.0^2 \times 20 = 180\) W</div></div>
+          <div class="q"><p><span class="n">3</span>9.0 kW shower for 8.0 min. Energy?</p><div class="ans step">\(9000 \times 480 = 4\,320\,000\) J</div></div>
           <div class="q"><p><span class="n">4</span>Current doubles, same R. Power?</p><div class="ans step">4 times bigger</div></div>
           <div class="q"><p><span class="n">5</span>Why transmit at high p.d.?</p><div class="ans step">Small current, less heating, more efficient</div></div>
           <div class="q"><p><span class="n">6</span>Job of a step-down transformer?</p><div class="ans step">Lowers the p.d. to a safer value for homes</div></div>
@@ -1164,10 +1165,10 @@
         <div class="slide-foot"><span class="reveal-hint">PRESS → TO REVEAL EACH ANSWER</span><span data-page></span></div>
         <aside class="revision-note" hidden>
           <div class="rn-main">
-            <p><b>Question 4: why four times?</b> With the same resistance, doubling the current needs double the p.d., so in P = V I both have doubled.</p>
+            <p><b>Question 4: why four times?</b> With the same resistance, doubling the current needs double the p.d., so in \(P = V\,I\) both have doubled.</p>
           </div>
           <div class="rn-side">
-            <p class="tip">In question 2, square first: 3.0² = 9.0, then 9.0 × 20 = 180 W. Squaring 3.0 × 20 gives 3600, which is wrong.</p>
+            <p class="tip">In question 2, square first: \(3.0^2 = 9.0\), then \(9.0 \times 20 = 180\) W. Squaring \(3.0 \times 20\) gives 3600, which is wrong.</p>
           </div>
         </aside>
       </section>
@@ -1211,7 +1212,7 @@
         <aside class="revision-note" hidden>
           <div class="rn-main">
             <p><b>What do the electrons do in ac?</b> They move a tiny distance one way, then back, 50 times a second. They do not travel from the power station to your home. Energy is still transferred, because the electrons in the appliance are pushed back and forth too. In a heater, each push makes collisions that heat the element.</p>
-            <p><b>50 Hz on a graph:</b> each complete cycle lasts 1 ÷ 50 = 0.02 s.</p>
+            <p><b>50 Hz on a graph:</b> each complete cycle lasts \(1 \div 50 = 0.02\) s.</p>
           </div>
           <div class="rn-side">
             <p class="more">Mains is ac because transformers only work with a changing current, and the National Grid depends on them.</p>
@@ -1227,7 +1228,7 @@
             <thead><tr><th>Wire</th><th>Colour</th><th>Job</th></tr></thead>
             <tbody>
               <tr><th>Live</th><td>Brown</td><td>Carries the alternating p.d.</td></tr>
-              <tr><th>Neutral</th><td>Blue</td><td>Completes the circuit, ≈&nbsp;0&nbsp;V</td></tr>
+              <tr><th>Neutral</th><td>Blue</td><td>Completes the circuit, \(\approx 0\)&nbsp;V</td></tr>
               <tr><th>Earth</th><td>Green + yellow</td><td>Safety wire at 0 V; current only in a fault</td></tr>
             </tbody>
           </table>
@@ -1313,19 +1314,19 @@
         <p class="eyebrow">Learn to use these</p>
         <h2>Equation <em>toolkit</em></h2>
         <div class="toolkit fill" style="grid-template-rows: 1fr 1fr;">
-          <div class="tool a-cyan"><span class="eq">Q = I t</span><span class="words">charge = current × time</span><span class="units">Q in C, I in A, t in s</span><span class="where">On the sheet</span></div>
-          <div class="tool"><span class="eq">E = Q V</span><span class="words">energy = charge × p.d.</span><span class="units">E in J, Q in C, V in V</span><span class="where">On the sheet</span></div>
-          <div class="tool a-hot"><span class="eq">V = I R</span><span class="words">p.d. = current × resistance</span><span class="units">V in V, I in A, R in Ω</span><span class="where">On the sheet</span></div>
-          <div class="tool a-cyan"><span class="eq">R<sub>total</sub> = R₁ + R₂</span><span class="words">series resistance</span><span class="units">all in Ω, series only</span><span class="where">Learn it</span></div>
-          <div class="tool"><span class="eq">P = V I</span><span class="words">power = p.d. × current</span><span class="units">P in W, V in V, I in A</span><span class="where">On the sheet</span></div>
-          <div class="tool"><span class="eq">P = I² R</span><span class="words">power = current² × resistance</span><span class="units">P in W, I in A, R in Ω</span><span class="where">On the sheet</span></div>
-          <div class="tool"><span class="eq">E = P t</span><span class="words">energy = power × time</span><span class="units">E in J, P in W, t in s</span><span class="where">On the sheet</span></div>
-          <div class="tool given a-violet"><span class="eq">V<sub>p</sub> I<sub>p</sub> = V<sub>s</sub> I<sub>s</sub></span><span class="words">transformer: power in = power out</span><span class="units">p = primary, s = secondary</span><span class="where">Higher, on the sheet</span></div>
+          <div class="tool a-cyan"><span class="eq">\(Q = I\,t\)</span><span class="words">\(\text{charge} = \text{current} \times \text{time}\)</span><span class="units">\(Q\) in C, \(I\) in A, \(t\) in s</span><span class="where">On the sheet</span></div>
+          <div class="tool"><span class="eq">\(E = Q\,V\)</span><span class="words">\(\text{energy} = \text{charge} \times \text{p.d.}\)</span><span class="units">\(E\) in J, \(Q\) in C, \(V\) in V</span><span class="where">On the sheet</span></div>
+          <div class="tool a-hot"><span class="eq">\(V = I\,R\)</span><span class="words">\(\text{p.d.} = \text{current} \times \text{resistance}\)</span><span class="units">\(V\) in V, \(I\) in A, \(R\) in Ω</span><span class="where">On the sheet</span></div>
+          <div class="tool a-cyan"><span class="eq">\(R_{\text{total}} = R_1 + R_2\)</span><span class="words">series resistance</span><span class="units">all in Ω, series only</span><span class="where">Learn it</span></div>
+          <div class="tool"><span class="eq">\(P = V\,I\)</span><span class="words">\(\text{power} = \text{p.d.} \times \text{current}\)</span><span class="units">\(P\) in W, \(V\) in V, \(I\) in A</span><span class="where">On the sheet</span></div>
+          <div class="tool"><span class="eq">\(P = I^2\,R\)</span><span class="words">\(\text{power} = \text{current}^2 \times \text{resistance}\)</span><span class="units">\(P\) in W, \(I\) in A, \(R\) in Ω</span><span class="where">On the sheet</span></div>
+          <div class="tool"><span class="eq">\(E = P\,t\)</span><span class="words">\(\text{energy} = \text{power} \times \text{time}\)</span><span class="units">\(E\) in J, \(P\) in W, \(t\) in s</span><span class="where">On the sheet</span></div>
+          <div class="tool given a-violet"><span class="eq">\(V_{\mathrm{p}}\,I_{\mathrm{p}} = V_{\mathrm{s}}\,I_{\mathrm{s}}\)</span><span class="words">transformer: power in = power out</span><span class="units">\(\mathrm{p}\) = primary, \(\mathrm{s}\) = secondary</span><span class="where">Higher, on the sheet</span></div>
         </div>
         <div class="slide-foot"><span class="tag">Electric circuits</span><span data-page></span></div>
         <aside class="revision-note" hidden>
           <div class="rn-main">
-            <p><b>The equations connect.</b> Q = I t counts the coulombs that pass. E = Q V counts the joules those coulombs transfer. P = V I is joules per second; put V = I R into it and you get P = I² R; multiply by time and you get E = P t.</p>
+            <p><b>The equations connect.</b> \(Q = I\,t\) counts the coulombs that pass. \(E = Q\,V\) counts the joules those coulombs transfer. \(P = V\,I\) is joules per second; put \(V = I\,R\) into it and you get \(P = I^2\,R\); multiply by time and you get \(E = P\,t\).</p>
             <p><b>Choosing one:</b> list what you are given and what you want, then pick the equation with exactly those quantities. If none fits, you need two steps, and the first finds the missing quantity.</p>
           </div>
         </aside>
@@ -1337,8 +1338,8 @@
         <div class="terms fill">
           <div class="term"><b>Current</b><span>Rate of flow of charge (A)</span></div>
           <div class="term"><b>Potential difference</b><span>Energy per coulomb (V)</span></div>
-          <div class="term"><b>Resistance</b><span>Opposes current; R = V ÷ I (Ω)</span></div>
-          <div class="term"><b>Ohmic conductor</b><span>I <svg class="prop" viewBox="0 0 26 16" width="0.9em" height="0.56em" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" role="img" aria-label="is proportional to"><path d="M23 3.5C16 3.5 13 12.5 7.5 12.5 4.5 12.5 2.5 10.5 2.5 8S4.5 3.5 7.5 3.5C13 3.5 16 12.5 23 12.5"/></svg> V at constant temperature</span></div>
+          <div class="term"><b>Resistance</b><span>Opposes current; \(R = V \div I\) (Ω)</span></div>
+          <div class="term"><b>Ohmic conductor</b><span>\(I \propto V\) at constant temperature</span></div>
           <div class="term"><b>Series</b><span>One loop, same current</span></div>
           <div class="term"><b>Parallel</b><span>Branches, same p.d.</span></div>
           <div class="term"><b>Diode</b><span>Current one way only</span></div>
@@ -1364,6 +1365,7 @@
   <script src="/gcsephy/year10phy/unit01/assets/diagrams.js"></script>
   <script src="/gcsephy/year10phy/unit01/assets/practical-diagrams.js"></script>
   <script src="figures.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
   <script src="../assets/teaching-deck.js"></script>
   <script src="../assets/deck-notes.js"></script>
   <script src="../assets/companion-deck.js"></script>

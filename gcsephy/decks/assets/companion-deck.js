@@ -212,6 +212,9 @@
 
   function init() {
     if (window.DeckFigures) window.DeckFigures.render();
+    // Typeset the diagram labels before the thumbnails copy them, then follow redraws.
+    window.DeckMath?.labels(deck);
+    window.DeckMath?.watch(deck);
     state.slides = [...deck.querySelectorAll('.slide')];
     if (window.DeckNotes) window.DeckNotes.collect(state.slides);
     state.slides.forEach((slide, i) => {

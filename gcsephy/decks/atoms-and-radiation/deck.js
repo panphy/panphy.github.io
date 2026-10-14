@@ -316,6 +316,9 @@
 
   function init() {
     window.DeckFigures.render();
+    // Typeset the diagram labels before the thumbnails copy them, then follow redraws.
+    window.DeckMath?.labels(deck);
+    window.DeckMath?.watch(deck);
     state.slides = [...deck.querySelectorAll('.slide')];
     if (window.DeckNotes) window.DeckNotes.collect(state.slides);
     const scatterSvg = deck.querySelector('[data-fig="scatter"] svg');
@@ -355,5 +358,7 @@
     state.orbitFrame = requestAnimationFrame(animateOrbits);
   }
 
-  init();
+  // MathJax typesets the slides first, so thumbnails copy the finished maths.
+  // Without MathJax (offline) the deck starts straight away, showing the LaTeX source.
+  Promise.resolve(window.MathJax?.startup?.promise).then(init, init);
 })();
