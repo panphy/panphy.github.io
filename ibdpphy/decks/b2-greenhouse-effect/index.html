@@ -131,11 +131,11 @@
             <ul class="points small">
               <li>Compares a surface with a <b>black body</b> at the same temperature</li>
               <li class="step">A number from 0 to 1, with no unit</li>
-              <li class="step frac">So the power radiated per unit area is \(e \sigma T^{4}\)</li>
+              <li class="step frac">So the power radiated per unit area is \(\epsilon \sigma T^{4}\)</li>
             </ul>
           </div>
           <table class="facts step">
-            <thead><tr><th>Surface (approximate values)</th><th class="nocase">emissivity e</th></tr></thead>
+            <thead><tr><th>Surface (approximate values)</th><th style="white-space: nowrap;">Emissivity \(\epsilon\)</th></tr></thead>
             <tbody>
               <tr><td>Black body</td><td class="num">1</td></tr>
               <tr><td>Ocean</td><td class="num">0.96</td></tr>
@@ -152,7 +152,7 @@
             <p><b>Why the Earth as a whole is only 0.6.</b> The ground and sea are nearly black in the infrared. But a satellite looking down measures about 240 W m⁻² leaving the planet, not the 390 W m⁻² that the surface emits. The atmosphere has absorbed part of it on the way up. Treating the whole planet as a single surface at 288 K, its emissivity is \(\frac{240}{390} = 0.6\). That low number is the greenhouse effect expressed as an emissivity.</p>
           </div>
           <div class="rn-side">
-            <p class="tip">The data booklet gives emissivity only in words. In symbols, with \(e\) for emissivity: \(P = e \sigma A T^{4}\).</p>
+            <p class="tip">The data booklet gives emissivity only in words. In symbols, with \(\epsilon\) for emissivity: \(P = \epsilon \sigma A T^{4}\). Albedo has no symbol there either; these slides write \(\alpha\)..</p>
             <p class="more">A good absorber is a good emitter: at each wavelength a surface absorbs the same fraction that it emits, compared with a black body.</p>
           </div>
         </aside>
@@ -166,12 +166,12 @@
             <div class="equation small"><span>\(\text{albedo} = \dfrac{\text{total scattered power}}{\text{total incident power}}\)</span></div>
             <ul class="points small">
               <li>From 0 (absorbs everything) to 1 (reflects everything)</li>
-              <li class="step">The fraction <b>absorbed</b> is \(1 - a\)</li>
+              <li class="step">The fraction <b>absorbed</b> is \(1 - \alpha\)</li>
               <li class="step">The Earth’s albedo varies <b>daily</b>, with <b>cloud</b> cover and with <b>latitude</b></li>
             </ul>
           </div>
           <table class="facts step">
-            <thead><tr><th>Surface (approximate values)</th><th>Albedo \(a\)</th></tr></thead>
+            <thead><tr><th>Surface (approximate values)</th><th>Albedo \(\alpha\)</th></tr></thead>
             <tbody>
               <tr><td>Fresh snow</td><td class="num">0.85</td></tr>
               <tr><td>Thick cloud</td><td class="num">0.7</td></tr>
@@ -189,7 +189,7 @@
             <p><b>Ice and albedo.</b> Ice reflects about 85% of the sunlight that reaches it; the open sea that replaces it when it melts reflects about 6%. So a warmer planet with less ice absorbs more sunlight, which warms it further. A change that feeds itself in this way is called a positive feedback, and it is one reason the Arctic is warming faster than the rest of the planet.</p>
           </div>
           <div class="rn-side">
-            <p class="trap">Multiplying by the albedo to find the power absorbed. The albedo is the part sent back. The part absorbed is \(1 - a\): 70% for the Earth.</p>
+            <p class="trap">Multiplying by the albedo to find the power absorbed. The albedo is the part sent back. The part absorbed is \(1 - \alpha\): 70% for the Earth.</p>
           </div>
         </aside>
       </section>
@@ -264,8 +264,8 @@
           <div class="work">
             <span class="say">Albedo 0.30 · the planet radiates as a black body</span>
             <span>Power absorbed = power radiated, per square metre</span>
-            <span class="step">\((1 - a) \dfrac{S}{4} = \sigma T^{4}\)</span>
-            <span class="step">\(T^{4} = \dfrac{(1 - a) S}{4 \sigma} = \dfrac{0.70 \times 1.36 \times 10^{3}}{4 \times 5.67 \times 10^{-8}}\)</span>
+            <span class="step">\((1 - \alpha) \dfrac{S}{4} = \sigma T^{4}\)</span>
+            <span class="step">\(T^{4} = \dfrac{(1 - \alpha) S}{4 \sigma} = \dfrac{0.70 \times 1.36 \times 10^{3}}{4 \times 5.67 \times 10^{-8}}\)</span>
             <span class="step">\(T^{4} = 4.20 \times 10^{9} \,\mathrm{K}^{4}\)</span>
             <span class="step">\(T = \class{res}{255 \,\mathrm{K}}\)</span>
           </div>
@@ -575,15 +575,15 @@
         <h2>An atmosphere that absorbs 78%<span>.</span></h2>
         <div class="split even">
           <div class="work">
-            <span class="say">The layer absorbs a fraction \(e = 0.78\) of the infrared</span>
-            <span class="say">so its emissivity is also \(e\)</span>
+            <span class="say">The layer absorbs a fraction \(\epsilon = 0.78\) of the infrared</span>
+            <span class="say">so its emissivity is also \(\epsilon\)</span>
             <span class="say">Layer</span>
-            <span>\(e \sigma T_\mathrm{s}^{4} = 2 e \sigma T_\mathrm{a}^{4}\) &nbsp;so&nbsp; \(\sigma T_\mathrm{a}^{4} = \tfrac{1}{2} \sigma T_\mathrm{s}^{4}\)</span>
+            <span>\(\epsilon \sigma T_\mathrm{s}^{4} = 2 \epsilon \sigma T_\mathrm{a}^{4}\) &nbsp;so&nbsp; \(\sigma T_\mathrm{a}^{4} = \tfrac{1}{2} \sigma T_\mathrm{s}^{4}\)</span>
             <span class="say step">Surface: sunlight + radiation from the layer</span>
-            <span class="step">\(238 + e \sigma T_\mathrm{a}^{4} = \sigma T_\mathrm{s}^{4}\)</span>
+            <span class="step">\(238 + \epsilon \sigma T_\mathrm{a}^{4} = \sigma T_\mathrm{s}^{4}\)</span>
           </div>
           <div class="work step">
-            <span>\(238 = \sigma T_\mathrm{s}^{4} \left(1 - \dfrac{e}{2}\right)\)</span>
+            <span>\(238 = \sigma T_\mathrm{s}^{4} \left(1 - \dfrac{\epsilon}{2}\right)\)</span>
             <span class="step">\(\sigma T_\mathrm{s}^{4} = \dfrac{238}{1 - 0.39} = 390 \,\mathrm{W} \,\mathrm{m}^{-2}\)</span>
             <span class="step">\(T_\mathrm{s}^{4} = \dfrac{390}{5.67 \times 10^{-8}} = 6.88 \times 10^{9} \,\mathrm{K}^{4}\)</span>
             <span class="step">\(T_\mathrm{s} = \class{res}{288 \,\mathrm{K}}\)</span>
@@ -592,9 +592,9 @@
         <div class="slide-foot"><span>B.2 GREENHOUSE EFFECT · SL + HL</span><span data-page></span></div>
         <aside class="revision-note" hidden>
           <div class="rn-main">
-            <p><b>Why the same \(e\) twice.</b> A layer that absorbs only 78% of the infrared passing through it is not a black body, and a poor absorber is an equally poor emitter. So it radiates \(e \sigma T_\mathrm{a}^{4}\) from each face, not \(\sigma T_\mathrm{a}^{4}\). The \(e\) cancels in the layer’s own balance but not in the surface’s.</p>
+            <p><b>Why the same \(\epsilon\) twice.</b> A layer that absorbs only 78% of the infrared passing through it is not a black body, and a poor absorber is an equally poor emitter. So it radiates \(\epsilon \sigma T_\mathrm{a}^{4}\) from each face, not \(\sigma T_\mathrm{a}^{4}\). The \(\epsilon\) cancels in the layer’s own balance but not in the surface’s.</p>
             <p><b>Checking the top.</b> Space receives the 22% of the surface radiation that gets through, \(0.22 \times 390 = 86\), plus the layer’s upward emission, \(0.78 \times 195 = 152\). Together that is 238 W m⁻², equal to the sunlight absorbed, as it must be.</p>
-            <p><b>The enhanced greenhouse effect in one line.</b> Add greenhouse gases and \(e\) rises. Put \(e = 0.80\) into the same working and the surface comes out at 289 K: about one kelvin warmer, for a change of two parts in a hundred in the absorption.</p>
+            <p><b>The enhanced greenhouse effect in one line.</b> Add greenhouse gases and \(\epsilon\) rises. Put \(\epsilon = 0.80\) into the same working and the surface comes out at 289 K: about one kelvin warmer, for a change of two parts in a hundred in the absorption.</p>
           </div>
           <div class="rn-side">
             <p class="tip">Exam questions give the fraction absorbed or the emissivity of the atmosphere. The method never changes: one balance per box.</p>
@@ -609,8 +609,8 @@
           <div class="work">
             <span class="say">Venus: solar constant \(2.6 \times 10^{3} \,\mathrm{W} \,\mathrm{m}^{-2}\) · albedo 0.76</span>
             <span class="say">With no greenhouse effect</span>
-            <span>\((1 - a) \dfrac{S_\mathrm{V}}{4} = \sigma T^{4}\)</span>
-            <span class="step">\(T^{4} = \dfrac{(1 - a) S_\mathrm{V}}{4 \sigma} = \dfrac{0.24 \times 2.6 \times 10^{3}}{4 \times 5.67 \times 10^{-8}}\)</span>
+            <span>\((1 - \alpha) \dfrac{S_\mathrm{V}}{4} = \sigma T^{4}\)</span>
+            <span class="step">\(T^{4} = \dfrac{(1 - \alpha) S_\mathrm{V}}{4 \sigma} = \dfrac{0.24 \times 2.6 \times 10^{3}}{4 \times 5.67 \times 10^{-8}}\)</span>
             <span class="step">\(T^{4} = 2.75 \times 10^{9} \,\mathrm{K}^{4}\)</span>
             <span class="step">\(T = \class{res}{229 \,\mathrm{K}}\)</span>
           </div>
@@ -688,8 +688,8 @@
         <div class="split even">
           <div class="work">
             <span class="say">The Earth’s albedo falls from 0.30 to 0.29 as ice melts</span>
-            <span>\(\sigma T^{4} = (1 - a) \dfrac{S}{4}\) &nbsp;so&nbsp; \(T \propto (1 - a)^{\frac{1}{4}}\)</span>
-            <span class="step">\(\dfrac{T_{2}}{T_{1}} = \left(\dfrac{1 - a_{2}}{1 - a_{1}}\right)^{\frac{1}{4}} = \left(\dfrac{0.71}{0.70}\right)^{\frac{1}{4}}\)</span>
+            <span>\(\sigma T^{4} = (1 - \alpha) \dfrac{S}{4}\) &nbsp;so&nbsp; \(T \propto (1 - \alpha)^{\frac{1}{4}}\)</span>
+            <span class="step">\(\dfrac{T_{2}}{T_{1}} = \left(\dfrac{1 - \alpha_{2}}{1 - \alpha_{1}}\right)^{\frac{1}{4}} = \left(\dfrac{0.71}{0.70}\right)^{\frac{1}{4}}\)</span>
             <span class="step">\(\dfrac{T_{2}}{T_{1}} = 1.0036\)</span>
             <span class="step">\(\Delta T = 0.0036 \times 255 = \class{res}{0.9 \,\mathrm{K}}\)</span>
           </div>
@@ -704,7 +704,7 @@
         <div class="slide-foot"><span>B.2 GREENHOUSE EFFECT · SL + HL</span><span data-page></span></div>
         <aside class="revision-note" hidden>
           <div class="rn-main">
-            <p><b>Using a ratio.</b> When one quantity in a balance changes slightly, there is no need to work out both temperatures in full. Write how \(T\) depends on the quantity, here \(T \propto (1 - a)^{\frac{1}{4}}\), and take the ratio. Everything that has not changed cancels.</p>
+            <p><b>Using a ratio.</b> When one quantity in a balance changes slightly, there is no need to work out both temperatures in full. Write how \(T\) depends on the quantity, here \(T \propto (1 - \alpha)^{\frac{1}{4}}\), and take the ratio. Everything that has not changed cancels.</p>
             <p><b>Feedback both ways.</b> The same loop runs in reverse. A cooler planet grows more ice, reflects more sunlight and cools further, which is part of how ice ages deepen. Not all feedbacks are positive: a warmer body radiates more, as \(T^{4}\), and that is the negative feedback that brings any planet to a steady temperature in the end.</p>
           </div>
           <div class="rn-side">
@@ -731,9 +731,9 @@
         <p class="eyebrow">Summary</p>
         <h2>The greenhouse effect on one slide<span>.</span></h2>
         <div class="cards fill" style="grid-template-columns: 1fr 1fr 1fr; align-content: center;">
-          <div class="card"><p class="eyebrow">Emissivity</p><h3>\(\frac{\text{power per unit area}}{\sigma T^{4}}\)</h3><p>1 for a black body<br>Power per unit area \(= e \sigma T^{4}\)</p></div>
+          <div class="card"><p class="eyebrow">Emissivity</p><h3>\(\frac{\text{power per unit area}}{\sigma T^{4}}\)</h3><p>1 for a black body<br>Power per unit area \(= \epsilon \sigma T^{4}\)</p></div>
           <div class="card step"><p class="eyebrow">Albedo</p><h3>\(\frac{\text{scattered power}}{\text{incident power}}\)</h3><p>0.30 for the Earth<br>Varies with cloud, ice and latitude</p></div>
-          <div class="card step"><p class="eyebrow">Incoming</p><h3>Mean intensity \(\frac{S}{4}\)</h3><p>A disc intercepts, a sphere shares<br>Absorbed: \((1 - a) \frac{S}{4}\)</p></div>
+          <div class="card step"><p class="eyebrow">Incoming</p><h3>Mean intensity \(\frac{S}{4}\)</h3><p>A disc intercepts, a sphere shares<br>Absorbed: \((1 - \alpha) \frac{S}{4}\)</p></div>
           <div class="card step"><p class="eyebrow">Balance</p><h3>Power in = power out</h3><p>For the surface, the atmosphere and the whole planet</p></div>
           <div class="card step"><p class="eyebrow">Greenhouse gases</p><h3>H₂O, CO₂, CH₄, N₂O</h3><p>Absorb infrared: energy levels, or resonance<br>Re-emit in all directions</p></div>
           <div class="card step"><p class="eyebrow">Enhanced effect</p><h3>More gas, warmer surface</h3><p>Mainly from burning fossil fuels</p></div>

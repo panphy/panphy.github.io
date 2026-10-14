@@ -41,8 +41,8 @@ window.DeckFigures.add(P => {
     'b2-two-spectra': () => {
       const X = l => 110 + 230 * Math.log10(l / 0.1), curve = (T, colour) => { const top = planck(2898 / T, T); return line(sampled(t => { const l = 0.1 * 10 ** (3 * t); return [X(l), 420 - 320 * planck(l, T) / top]; }, 160), colour); };
       let s = `<rect x="${f(X(0.4))}" y="34" width="${f(X(0.7) - X(0.4))}" height="386" style="fill:var(--sand);opacity:.3"/>` + arrow(110, 420, 110, 40, 'text-secondary', 2.5) + arrow(110, 420, 840, 420, 'text-secondary', 2.5);
-      s += curve(5800, 'positive') + curve(288, 'proton') + [0.1, 1, 10, 100].map(l => `<line x1="${X(l)}" y1="420" x2="${X(l)}" y2="432" class="tick"/>` + text(X(l), 462, String(l), 'lbl mono')).join('');
-      s += text(126, 54, 'intensity', 'lbl mono', 'start') + text(834, 500, 'wavelength / μm', 'lbl mono', 'end') + text(X(0.53), 22, 'visible', 'lbl small') + text(X(1.1), 130, 'from the Sun,', 'lbl strong halo', 'start', 'style="fill:var(--positive)"') + text(X(1.1), 164, '5800 K', 'lbl mono halo', 'start') + text(X(22), 130, 'from the Earth,', 'lbl strong halo', 'start', 'style="fill:var(--proton)"') + text(X(22), 164, '288 K', 'lbl mono halo', 'start');
+      s += curve(5800, 'positive') + curve(288, 'alpha', 3) + [0.1, 1, 10, 100].map(l => `<line x1="${X(l)}" y1="420" x2="${X(l)}" y2="432" class="tick"/>` + text(X(l), 462, String(l), 'lbl mono')).join('');
+      s += text(126, 54, 'intensity', 'lbl mono', 'start') + text(834, 500, 'wavelength / μm', 'lbl mono', 'end') + text(X(0.53), 22, 'visible', 'lbl small') + text(X(1.1), 130, 'from the Sun,', 'lbl strong halo', 'start', 'style="fill:var(--positive)"') + text(X(1.1), 164, '5800 K', 'lbl mono halo', 'start') + text(X(22), 130, 'from the Earth,', 'lbl strong halo', 'start', 'style="fill:var(--alpha)"') + text(X(22), 164, '288 K', 'lbl mono halo', 'start');
       return svg('60 -10 800 530', s, 'Two black-body spectra on a logarithmic wavelength scale, each drawn to the same height. Radiation from the Sun at 5800 kelvin peaks at 0.5 micrometres, in the visible, and lies almost entirely below 3 micrometres. Radiation from the Earth at 288 kelvin peaks at 10 micrometres, in the infrared, and lies almost entirely above 3 micrometres. The two hardly overlap');
     },
 
@@ -101,7 +101,7 @@ window.DeckFigures.add(P => {
       s += arrow(200, 40, 200, 422, 'brand-accent', 7) + ir(400, 424, 400, 268) + ir(560, 186, 560, 60, 'brand-primary') + ir(660, 262, 660, 424, 'brand-primary');
       if (on) {
         s += text(140, 234, 'atmosphere', 'lbl strong', 'start') + text(440, 500, 'surface', 'lbl strong');
-        s += text(216, 110, 'sunlight absorbed', 'lbl', 'start') + text(216, 144, '(1 − a) S / 4', 'lbl mono strong', 'start');
+        s += text(216, 110, 'sunlight absorbed', 'lbl', 'start') + text(216, 144, '(1 − α) S / 4', 'lbl mono strong', 'start');
         s += text(416, 360, 'surface', 'lbl', 'start') + text(416, 394, 'radiates', 'lbl', 'start') + text(576, 110, 'atmosphere', 'lbl', 'start') + text(576, 144, 'radiates up …', 'lbl', 'start') + text(676, 350, '… and', 'lbl', 'start') + text(676, 384, 'down', 'lbl', 'start');
       }
       return svg(on ? '70 20 760 500' : '80 20 720 470', s, 'A model with one layer of atmosphere above the surface. Sunlight passes through the atmosphere and is absorbed by the surface. The surface radiates infrared, which the atmosphere absorbs. The atmosphere radiates infrared both upwards to space and downwards to the surface, so the surface receives more than the sunlight alone');
