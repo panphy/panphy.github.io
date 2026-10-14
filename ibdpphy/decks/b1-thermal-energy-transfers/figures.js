@@ -14,7 +14,7 @@ window.DeckFigures.add(P => {
     return at(x, y, `<g>${track(pts, f(dur * (0.8 + 0.4 * rand())))}${atom(r, colour)}</g>`);
   };
   const boxOf = (x, y, w, h) => `<rect x="${x}" y="${y}" width="${w}" height="${h}" rx="10" style="fill:var(--card-bg);stroke:var(--text-secondary);stroke-width:3"/>`;
-  // Planck's law for wavelength l in micrometres and temperature T in kelvin, in arbitrary units.
+  // Planck's law for wavelength l in micrometres (the axis is labelled in nm) and temperature T in kelvin, in arbitrary units.
   const planck = (l, T) => 1 / (l ** 5 * (Math.exp(14388 / (l * T)) - 1));
 
   return {
@@ -47,7 +47,7 @@ window.DeckFigures.add(P => {
       const hot = t => 110 + 80 * (1 - Math.exp(-3 * t)), cold = t => 380 - 190 * (1 - Math.exp(-3 * t)), gx = t => 470 + 380 * t;
       let s = `<rect x="60" y="170" width="150" height="150" rx="8" style="fill:color-mix(in srgb, var(--proton) 55%, var(--viewer-bg));stroke:var(--proton);stroke-width:3"/><rect x="210" y="170" width="150" height="150" rx="8" style="fill:color-mix(in srgb, var(--electron) 45%, var(--viewer-bg));stroke:var(--electron);stroke-width:3"/>`;
       s += text(135, 150, 'hot', 'lbl strong') + text(285, 150, 'cold', 'lbl strong') + arrow(150, 245, 270, 245, 'brand-accent', 7) + text(210, 370, 'thermal energy', 'lbl') + text(210, 404, 'flows hot to cold', 'lbl');
-      s += P.axes(470, 420, 880, 60, 'time', 'temperature') + line(sampled(t => [gx(t), hot(t)], 50), 'proton') + line(sampled(t => [gx(t), cold(t)], 50), 'electron') + `<line x1="470" y1="190" x2="860" y2="190" class="guide"/>` + text(870, 84, 'same temperature:', 'lbl', 'end') + text(870, 118, 'thermal equilibrium', 'lbl strong', 'end');
+      s += P.axes(470, 420, 880, 60, 'time', 'temperature') + line(sampled(t => [gx(t), hot(t)], 50), 'proton') + line(sampled(t => [gx(t), cold(t)], 50), 'electron') + `<line x1="470" y1="190" x2="860" y2="190" class="guide"/>` + text(870, 300, 'same temperature:', 'lbl', 'end') + text(870, 334, 'thermal equilibrium', 'lbl strong', 'end');
       const dots = (a, b) => `<circle r="10" style="fill:var(--proton)" transform="translate(${f(gx(a))} ${f(hot(a))})"/><circle r="10" style="fill:var(--electron)" transform="translate(${f(gx(b))} ${f(cold(b))})"/>`;
       const run = (fn, colour) => `<g transform="translate(${gx(0)} ${fn(0)})">${track(Array.from({ length: 41 }, (_, i) => [gx(i / 40), fn(i / 40)]), 5, { loop: false })}<circle r="10" style="fill:var(--${colour})"/></g>`;
       return svg('30 30 880 440', s + twoState(dots(1, 1), run(hot, 'proton') + run(cold, 'electron') + PLAY), 'A hot block touching a cold block: thermal energy flows from the hot one to the cold one. A graph of temperature against time shows the hot block cooling and the cold block warming until both reach the same temperature, which is thermal equilibrium');
@@ -63,10 +63,7 @@ window.DeckFigures.add(P => {
         s += text(255, 320, 'melting', 'lbl strong halo') + text(585, 130, 'boiling', 'lbl strong halo') + text(196, 420, 'ice', 'lbl halo', 'start') + text(410, 270, 'water', 'lbl halo', 'start') + text(770, 130, 'steam', 'lbl halo', 'start');
         s += text(585, 194, 'temperature constant', 'lbl small');
       }
-      // The marker moves at a steady rate of energy supplied, so it spends longest on the flat parts.
-      const path = Array.from({ length: 68 }, (_, i) => { const x = 120 + 10 * i; const k = Math.max(1, pts.findIndex(p => p[0] >= x)), [x1, y1] = pts[k - 1], [x2, y2] = pts[k]; return [x, y1 + (y2 - y1) * (x - x1) / (x2 - x1)]; });
-      const dot = `<circle r="12" style="fill:var(--brand-accent-strong);stroke:var(--viewer-bg);stroke-width:3"/>`;
-      return svg(on ? '0 20 850 500' : '90 40 760 450', s + twoState(at(585, 150, dot), `<g>${track(path, 9)}${dot}</g>`), 'A graph of temperature against energy supplied for ice heated at a steady rate. The temperature rises while the ice warms, stays constant at 0 degrees Celsius while it melts, rises again as water, stays constant at 100 degrees Celsius while it boils, then rises as steam. The flat part for boiling is much longer than the flat part for melting');
+      return svg(on ? '0 20 850 500' : '90 40 760 450', s, 'A graph of temperature against energy supplied for ice heated at a steady rate. The temperature rises while the ice warms, stays constant at 0 degrees Celsius while it melts, rises again as water, stays constant at 100 degrees Celsius while it boils, then rises as steam. The flat part for boiling is much longer than the flat part for melting');
     },
 
     // Measuring specific heat capacity with an electrical heater.
@@ -79,13 +76,27 @@ window.DeckFigures.add(P => {
 
     // Conduction along a bar between a hot body and a cold body. Also drawn plain.
     'b1-conduction': el => {
-      const on = labelled(el), rand = seeded(3), cols = 12, rows = 3, x0 = 215, step = 34;
+      // Animated: at first only the particles touching the hot body vibrate strongly. The strong
+      // vibration is passed from each particle to the next, so it spreads along the bar until the
+      // vibration falls steadily from the hot end to the cold end; then the loop starts again.
+      const on = labelled(el), rand = seeded(3), cols = 12, rows = 3, x0 = 215, step = 34, T = 10, n = 200;
       let s = `<rect x="60" y="150" width="130" height="200" rx="8" style="fill:color-mix(in srgb, var(--proton) 55%, var(--viewer-bg));stroke:var(--proton);stroke-width:3"/><rect x="610" y="150" width="130" height="200" rx="8" style="fill:color-mix(in srgb, var(--electron) 45%, var(--viewer-bg));stroke:var(--electron);stroke-width:3"/><rect x="190" y="194" width="420" height="112" style="fill:var(--card-bg);stroke:var(--text-secondary);stroke-width:3"/>`;
       if (on) s += text(125, 130, 'hot', 'lbl strong') + text(675, 130, 'cold', 'lbl strong') + arrow(290, 150, 510, 150, 'brand-accent', 7) + text(400, 124, 'thermal energy', 'lbl') + P.both(194, 380, 606, 380) + text(400, 420, 'thickness Δx', 'lbl') + text(400, 470, 'particles pass on their vibration to their neighbours', 'lbl');
       const spots = Array.from({ length: cols * rows }, (_, i) => [x0 + (i % cols) * step, 216 + Math.floor(i / cols) * step, i % cols]);
-      const still = spots.map(([x, y]) => at(x, y, atom(11))).join('');
-      const mover = spots.map(([x, y, c]) => shaker(x, y, 11, 7 - 5.5 * c / (cols - 1), rand, 'brand-primary', 0.42)).join('');
-      return svg(on ? '40 90 720 400' : '40 130 720 240', s + twoState(still, mover), 'A bar joining a hot body to a cold body. The particles at the hot end vibrate most; each passes some of its vibration to its neighbour, so thermal energy travels along the bar towards the cold end while the particles stay in place');
+      // The size of a particle's vibration: its final share of the gradient, reached once the front
+      // has passed. The front takes 6 s to cross the bar; the last 4 s hold the steady state.
+      const final = c => 7 - 5.5 * c / (cols - 1), small = 1.2;
+      const size = (c, t) => { const u = Math.min(1, Math.max(0, (t * (cols + 1) / 6 - c) / 2)), k = u * u * (3 - 2 * u); return small + (final(c) - small) * k; };
+      const warmth = (c, t) => (size(c, t) - small) / (7 - small);
+      const still = spots.map(([x, y, c]) => at(x, y, atom(11) + `<circle r="11" style="fill:var(--proton);opacity:${f(0.7 * warmth(c, T))}"/>`)).join('');
+      const mover = spots.map(([x, y, c]) => {
+        const a = rand() * TAU, b = rand() * TAU, period = 0.36 + 0.12 * rand();
+        const times = Array.from({ length: n + 1 }, (_, i) => i / n * T);
+        const pts = times.map((tm, i) => { const A = i === n ? small : size(c, tm), w = TAU * tm / period; return [A * Math.cos(a + w), A * Math.sin(b + 1.3 * w)]; });
+        pts[n] = pts[0];
+        return at(x, y, `<g>${track(pts, T)}${atom(11)}<circle r="11" style="fill:var(--proton)" opacity="0">${anim('opacity', times.map(tm => f(0.7 * warmth(c, tm))).map((v, i) => (i === n ? 0 : v)), T)}</circle></g>`);
+      }).join('');
+      return svg(on ? '40 90 720 400' : '40 130 720 240', s + twoState(still, mover), 'A bar joining a hot body to a cold body. At first only the particles next to the hot body vibrate strongly. Each passes some of its vibration to its neighbour, so the strong vibration spreads along the bar towards the cold end while the particles stay in place, until the vibration falls steadily from the hot end to the cold end');
     },
 
     // A convection current in a heated liquid. Also drawn plain.
@@ -96,10 +107,13 @@ window.DeckFigures.add(P => {
       let s = `<path d="M200,110 V420 H600 V110" style="fill:color-mix(in srgb, var(--electron) 14%, var(--viewer-bg));stroke:var(--text-secondary);stroke-width:5;stroke-linejoin:round"/><rect x="215" y="424" width="110" height="22" rx="6" style="fill:var(--proton)"/>`;
       s += `<ellipse cx="400" cy="270" rx="150" ry="120" class="guide"/>`;
       if (on) s += text(270, 482, 'heater', 'lbl') + text(180, 250, 'warm fluid:', 'lbl', 'end') + text(180, 284, 'less dense,', 'lbl', 'end') + text(180, 318, 'rises', 'lbl strong', 'end') + text(620, 250, 'cooler fluid:', 'lbl', 'start') + text(620, 284, 'denser,', 'lbl', 'start') + text(620, 318, 'sinks', 'lbl strong', 'start');
-      const n = 10, blob = k => { const [x] = way(k); return `<circle r="13" style="fill:var(--${x < 400 ? 'proton' : 'electron'})"/>`; };
+      // How cool the fluid is at a point of the loop (0 warm, 1 cool): warmest as it leaves the heater and
+      // starts to rise, cooling gradually across the top and down the far side, coolest at the bottom,
+      // then warming quickly as it passes back over the heater.
+      const coolness = t => { const u = ((t % 1) + 1) % 1; return u < 0.75 ? u / 0.75 : (1 - u) / 0.25; };
+      const n = 10, blob = k => `<circle r="13" style="fill:var(--proton)"/><circle r="13" style="fill:var(--electron);opacity:${f(coolness(k))}"/>`;
       const still = Array.from({ length: n }, (_, k) => at(...way(k / n), blob(k / n))).join('') + arrow(250, 300, 250, 220, 'proton', 5) + arrow(550, 240, 550, 320, 'electron', 5);
-      const cool = k => Array.from({ length: 12 }, (_, i) => way(k / n + (i + 0.5) / 12)[0] < 400 ? 0 : 1);
-      const mover = Array.from({ length: n }, (_, k) => `<g>${track(Array.from({ length: 61 }, (_, i) => way(k / n + i / 60)), 8)}<circle r="13" style="fill:var(--proton)"/><circle r="13" style="fill:var(--electron)">${anim('opacity', cool(k), 8, { extra: 'calcMode="discrete"' })}</circle></g>`).join('');
+      const mover = Array.from({ length: n }, (_, k) => `<g>${track(Array.from({ length: 61 }, (_, i) => way(k / n + i / 60)), 8)}<circle r="13" style="fill:var(--proton)"/><circle r="13" style="fill:var(--electron)">${anim('opacity', Array.from({ length: 61 }, (_, i) => f(coolness(k / n + i / 60))), 8)}</circle></g>`).join('');
       return svg(on ? '-40 90 880 410' : '180 90 440 370', s + twoState(still, mover), 'A convection current in a liquid heated at the bottom on one side. The warm liquid above the heater expands, becomes less dense and rises; cooler, denser liquid sinks on the other side and moves in to take its place, so the liquid circulates');
     },
 
@@ -120,8 +134,8 @@ window.DeckFigures.add(P => {
       const X = l => 110 + 230 * l, Y = v => 440 - 380 * v / top;
       let s = `<rect x="${X(0.4)}" y="12" width="${X(0.7) - X(0.4)}" height="428" style="fill:var(--sand);opacity:.28"/>` + arrow(110, 440, 110, 30, 'text-secondary', 2.5) + arrow(110, 440, 840, 440, 'text-secondary', 2.5);
       temps.forEach(([T, colour]) => { s += line(sampled(t => { const l = 0.08 + 2.95 * t; return [X(l), Y(planck(l, T))]; }, 140), colour); if (on) { const l = 2898 / T; s += `<line x1="${f(X(l))}" y1="${f(Y(planck(l, T)))}" x2="${f(X(l))}" y2="440" class="guide"/>` + text(f(X(l)) + 30, f(Y(planck(l, T))) + 26, `${T} K`, 'lbl mono strong halo', 'start'); } });
-      if (on) s += text(126, 44, 'intensity', 'lbl mono', 'start') + text(834, 500, 'wavelength / μm', 'lbl mono', 'end') + [0.5, 1, 1.5, 2, 2.5, 3].map(l => `<line x1="${X(l)}" y1="440" x2="${X(l)}" y2="450" class="tick"/>` + text(X(l), 478, l.toFixed(1), 'lbl mono')).join('') + text(X(0.55), 0, 'visible', 'lbl small') + text(600, 300, 'hotter: more at every wavelength,', 'lbl halo') + text(600, 334, 'and a peak at a shorter wavelength', 'lbl halo');
-      return svg(on ? '40 -30 820 550' : '90 30 760 420', s, 'Black-body spectra at 4000, 5000 and 6000 kelvin: graphs of intensity against wavelength. Each rises steeply to a peak and falls away slowly. The hotter the body, the higher the whole curve and the shorter the wavelength of its peak: about 0.72 micrometres at 4000 kelvin, 0.58 at 5000 and 0.48 at 6000');
+      if (on) s += text(126, 44, 'intensity', 'lbl mono', 'start') + text(834, 530, 'wavelength / nm', 'lbl mono', 'end') + [0.5, 1, 1.5, 2, 2.5, 3].map(l => `<line x1="${X(l)}" y1="440" x2="${X(l)}" y2="450" class="tick"/>` + text(X(l), 478, l * 1000, 'lbl mono')).join('') + text(X(0.55), 0, 'visible', 'lbl small') + text(600, 300, 'hotter: more at every wavelength,', 'lbl halo') + text(600, 334, 'and a peak at a shorter wavelength', 'lbl halo');
+      return svg(on ? '40 -30 820 580' : '90 30 760 420', s, 'Black-body spectra at 4000, 5000 and 6000 kelvin: graphs of intensity against wavelength. Each rises steeply to a peak and falls away slowly. The hotter the body, the higher the whole curve and the shorter the wavelength of its peak: about 720 nanometres at 4000 kelvin, 580 at 5000 and 480 at 6000');
     }
   };
 });
