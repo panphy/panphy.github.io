@@ -34,7 +34,7 @@ mjx-container { line-height: 0; }
 .dk .dk-grid { stroke: rgba(7, 22, 47, .1); stroke-width: 1.5; }
 .dk .dk-guide { stroke: var(--ink); stroke-width: 2; stroke-dasharray: 8 7; fill: none; }
 .dk .dk-total { stroke: var(--ink); stroke-width: 3; stroke-dasharray: 10 8; }
-.dk .dk-bar { stroke: var(--ink); stroke-width: 3; transition: y .12s linear, height .12s linear; }
+.dk .dk-bar { stroke: var(--ink); stroke-width: 3; }
 .dk .dk-bar.b0 { fill: var(--alt); }
 .dk .dk-bar.b1 { fill: var(--cyan); }
 .dk .dk-bar.b2 { fill: var(--hot); }
@@ -142,3 +142,42 @@ mjx-container { line-height: 0; }
 /* The 3D Eco House (house3d.js) covers its flat drawing on screen; print keeps the drawing. */
 @media screen { #deck .fig:has(.model3d) > svg.still { display: none; } }
 @media print { .model3d { display: none; } }
+
+/* ----- models, second pass: fixed sizes, so nothing rescales when a button is pressed ----- */
+.dk-controls { flex: none; }
+.dk-readout { flex: none; height: 84px; overflow: hidden; display: flex; align-items: center; flex-wrap: wrap; gap: 0 10px; }
+.case-card .widget .dk-controls button { min-height: 48px; font-size: 19px; padding: 6px 14px; }
+.dk .dk-sky { fill: #e3f1f8; }
+.dk .dk-trunk { fill: #8a5a35; stroke: var(--ink); stroke-width: 2.5; }
+.dk .dk-canopy { fill: #6fae4f; stroke: var(--ink); stroke-width: 3; }
+.dk .dk-road { fill: #5d6470; }
+.dk .dk-roadline { fill: #fff; }
+.dk .dk-window { fill: #cfe9f6; stroke: var(--ink); stroke-width: 3; stroke-linejoin: round; }
+.dk .dk-headlight { fill: #ffe066; stroke: var(--ink); stroke-width: 2.5; }
+.dk .dk-taillight { fill: #e0422a; stroke: var(--ink); stroke-width: 2; }
+.dk .dk-hub { fill: #c9ced6; }
+.dk .dk-dim { stroke: var(--ink); stroke-width: 3; fill: none; }
+.dk .dk-head { fill: var(--ink); }
+.dk .dk-head.hot { fill: #c2410c; }
+.dk .dk-pull { stroke: #c2410c; stroke-width: 5; }
+.dk .dk-wall { fill: #c9ced6; stroke: var(--ink); stroke-width: 2; }
+.dk .dk-block { fill: var(--alt); stroke: var(--ink); stroke-width: 4; }
+.dk .dk-pulley { fill: #c9ced6; stroke: var(--ink); stroke-width: 3; }
+.dk .dk-clock { font: 900 30px Arial, sans-serif; }
+.dk .dk-shelf { fill: #c8a46a; stroke: var(--ink); stroke-width: 3; }
+.dk .dk-ghost { fill: none; stroke: var(--ink); stroke-width: 2.5; stroke-dasharray: 7 6; }
+.dk .dk-bookbody { fill: var(--hot); stroke: var(--ink); stroke-width: 3; }
+.dk .dk-ball { fill: var(--hot); stroke: var(--ink); stroke-width: 3; }
+.dk .dk-sea { fill: #bfe3f2; stroke: var(--ink); stroke-width: 2; }
+.dk .dk-hill { fill: #cfe8b0; stroke: var(--ink); stroke-width: 3; stroke-linejoin: round; }
+.dk .dk-dot { fill: var(--ink); }
+.dk .dk-steps { fill: #e7e2d4; stroke: var(--ink); stroke-width: 3; stroke-linejoin: round; }
+.dk .dk-head-c { fill: var(--diagram-bg); stroke: var(--ink); stroke-width: 3; }
+/* Text in the models must read from the back of a classroom: sizes are in drawing units. */
+.dk .dk-label { font-size: 30px; }
+.dk .dk-small { font-size: 25px; }
+.dk .dk-tick { font-size: 22px; }
+.dk .dk-big { font: 800 34px Arial, sans-serif; }
+/* One store per chart: every bar the same colour. */
+.dk.one-store .dk-bar { fill: var(--cyan); }
+.dk.one-store.elastic .dk-bar { fill: var(--alt); }

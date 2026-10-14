@@ -51,16 +51,18 @@
   ].join("");
 
   // ---------- Lesson 3: heights ----------
-  const shelf = () => svg(300, 190, "A 2.0 kg book lifted from the floor onto a shelf 1.5 m high",
-    '<path class="ink" d="M10 160H290"/><rect class="ink soft" x="150" y="40" width="90" height="8"/><path class="ink" d="M160 48V160M230 48V160"/>' +
-    '<rect class="ink sun-t" x="172" y="18" width="40" height="22" rx="2"/><rect class="ink sun-t" x="40" y="138" width="40" height="22" rx="2"/>' +
-    arrow(70, 132, 165, 50, "dash") + dim(262, 160, 262, 40, "1.5 m", 1) + t(60, 180, "2.0 kg book"));
+  // The book goes straight up through h, then across onto the shelf: only the vertical part counts.
+  const shelf = () => svg(300, 190, "A 2.0 kg book lifted straight up from the floor through 1.5 m, then slid onto a shelf",
+    '<path class="ink" d="M10 160H290"/><rect class="ink soft" x="150" y="40" width="130" height="8"/><path class="ink" d="M280 30V160"/>' +
+    '<rect class="ink sun-t" x="190" y="18" width="40" height="22" rx="2"/><rect class="ink sun-t" x="40" y="138" width="40" height="22" rx="2"/>' +
+    '<path class="ink thin dash" d="M60 132V29H182"/>' + arrow(60, 60, 60, 36, "", 7) + arrow(150, 29, 184, 29, "", 7) +
+    dim(120, 160, 120, 40, "1.5 m", -1) + t(60, 180, "2.0 kg book"));
 
   const hike = () => svg(340, 190, "A hiker climbs from a car park 120 m above sea level to a summit 420 m above sea level",
     '<path class="ink cool-t" d="M5 178H335V186H5Z"/>' + t(300, 174, "sea level", { c: "sm muted" }) +
     '<path class="ink leaf-t" d="M5 178L50 140L90 132L180 26L250 178Z"/>' +
     '<path class="ink thin dash" d="M70 132H300M180 26H300"/><circle class="solid" cx="70" cy="132" r="3"/><circle class="solid" cx="180" cy="26" r="3"/>' +
-    t(70, 158, "car park: 120 m", { c: "sm" }) + t(176, 18, "summit: 420 m", { a: "end", c: "sm" }) +
+    t(150, 160, "car park: 120 m", { c: "sm" }) + t(176, 18, "summit: 420 m", { a: "end", c: "sm" }) +
     dim(290, 132, 290, 26, "h", 1));
 
   // ---------- Lesson 4: springs ----------
@@ -161,13 +163,14 @@
     (marks ? [[170, 92, "1"], [57, 150, "2"], [145, 150, "3"], [170, 233, "4"], [227, 186, "5"]].map(([x, y, n]) => `<circle class="ink paper" cx="${x}" cy="${y}" r="9"/>${t(x, y + 4.5, n, { c: "sm" })}`).join("") : ""));
 
   // ---------- Lesson 9: bounce and Sankey ----------
-  const bounce = () => svg(260, 230, "A ball dropped from height h1 bounces back up to a smaller height h2, measured against a vertical ruler",
+  // The ball falls and bounces on the same vertical line: down arrow on the left of it, up arrow on the right.
+  const bounce = () => svg(260, 230, "A ball dropped from height h1 falls straight down and bounces straight back up to a smaller height h2, measured against a vertical ruler",
     '<path class="ink" d="M10 214H250"/><rect class="ink sun-t" x="120" y="14" width="20" height="200"/>' +
     Array.from({ length: 21 }, (_, i) => `<path class="ink thin" d="M120 ${14 + i * 10}h${i % 5 ? 5 : 10}"/>`).join("") +
-    '<circle class="ink hot-t" cx="70" cy="30" r="12"/><circle class="ink hot-t" cx="190" cy="84" r="12"/><circle class="ink mid" cx="130" cy="202" r="12"/>' +
-    arrow(70, 46, 112, 188, "dash") + arrow(148, 188, 186, 100, "dash") +
-    '<path class="ink thin dash" d="M58 42H120M178 96H140"/>' +
-    dim(30, 42, 30, 214, "h₁", 1) + dim(230, 96, 230, 214, "h₂", -1));
+    '<circle class="ink thin dash" cx="90" cy="30" r="12" style="fill:none"/><circle class="ink hot-t" cx="90" cy="84" r="12"/>' +
+    arrow(76, 50, 76, 196, "dash") + arrow(104, 196, 104, 104, "dash") +
+    '<path class="ink thin dash" d="M40 42H120M40 96H120"/>' +
+    dim(30, 42, 30, 214, "h₁", 1) + dim(200, 96, 200, 214, "h₂", -1));
 
   /* Sankey diagram. input, useful, wasted in the same unit; s = pixels per unit.
      Useful energy goes straight on; wasted energy bends down. */

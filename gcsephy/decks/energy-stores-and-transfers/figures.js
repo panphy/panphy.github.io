@@ -89,164 +89,318 @@
     paint();
   }
 
-  // ---------- 2. Kinetic energy: pick a speed and a mass ----------
+  // Runs step(dt) on each frame while the slide is live, until step returns false.
+  function animate(host, step) {
+    let last = null;
+    const frame = time => {
+      if (!isLive(host)) { last = null; requestAnimationFrame(frame); return; }
+      const dt = last === null ? 0 : Math.min(0.05, (time - last) / 1000);
+      last = time;
+      if (step(dt) !== false) requestAnimationFrame(frame);
+    };
+    requestAnimationFrame(frame);
+  }
+  const dimV = (x, y1, y2, label, side = 1) => `<path class="dk-dim" d="M${x} ${y1 + 12}V${y2 - 12}"/><path class="dk-head" d="M${x} ${y1}l-8 14h16Z"/><path class="dk-head" d="M${x} ${y2}l-8 -14h16Z"/>` +
+    t(x + side * 14, (y1 + y2) / 2 + 9, label, 'dk-label', side > 0 ? 'start' : 'end');
+  const dimH = (x1, x2, y, label) => `<path class="dk-dim" d="M${x1 + 12} ${y}H${x2 - 12}"/><path class="dk-head" d="M${x1} ${y}l14 -8v16Z"/><path class="dk-head" d="M${x2} ${y}l-14 -8v16Z"/>` + t((x1 + x2) / 2, y + 36, label, 'dk-label');
+
+  // ---------- 2. Kinetic energy: a car passing trees, and its energy ----------
+  // The car stays in the middle of the view; the trees and road markings stream past it, faster
+  // at higher speed. Headlight and windscreen at the right: the car drives to the right.
   function kinetic(host) {
-    const speeds = [10, 20, 30], max = 900000;
-    const x0 = 520, y0 = 40, w = 360, h = 330;
-    host.innerHTML = `<div class="dk-stage"><svg class="dk" viewBox="0 0 920 430" role="img" aria-label="A car and a bar chart of the energy in its kinetic store at 10, 20 and 30 metres per second">
-      <path class="dk-ink" d="M20 300H460"/><g class="dk-car"><rect class="dk-body" x="120" y="226" width="200" height="50" rx="10"/><path class="dk-body" d="M160 226l26-38h80l30 38Z"/>
-      <circle class="dk-wheel" cx="165" cy="282" r="18"/><circle class="dk-wheel" cx="280" cy="282" r="18"/></g>
-      <g class="dk-lines"><path d="M20 238h70M40 256h60M10 274h80"/></g>
-      ${bars(x0, y0, w, h, ['10 m/s', '20 m/s', '30 m/s'])}${t(x0 + 6, 28, 'kinetic energy', 'dk-small', 'start')}
+    const speeds = [10, 20, 30], max = 900000, x0 = 540, y0 = 50, w = 340, h = 300;
+    const TREES = 6, SPAN = 480;
+    let trees = '';
+    for (let i = 0; i < TREES; i++) trees += `<g class="dk-tree" data-tree="${i}"><rect class="dk-trunk" x="-6" y="-34" width="12" height="34"/><circle class="dk-canopy" cx="0" cy="-62" r="${i % 2 ? 30 : 36}"/></g>`;
+    let dashes = '';
+    for (let i = 0; i < 8; i++) dashes += `<rect class="dk-roadline" data-dash="${i}" x="0" y="333" width="34" height="6"/>`;
+    host.innerHTML = `<div class="dk-stage"><svg class="dk one-store" viewBox="0 0 920 470" role="img" aria-label="A car driving to the right past trees, and a bar chart of the energy in its kinetic store at 10, 20 and 30 metres per second">
+      <rect class="dk-sky" x="0" y="20" width="480" height="270"/><g class="dk-trees">${trees}</g>
+      <rect class="dk-road" x="0" y="290" width="480" height="90"/><g>${dashes}</g>
+      <g class="dk-car">
+        <path class="dk-body" d="M92 300V262q0-14 14-16l40-6 34-34h96l44 34 44 8q16 3 16 18V300Z"/>
+        <path class="dk-window" d="M188 214h38v30h-66ZM236 214h36l34 30h-70Z"/>
+        <circle class="dk-headlight" cx="372" cy="270" r="8"/><rect class="dk-taillight" x="92" y="262" width="10" height="16"/>
+        <circle class="dk-wheel" cx="148" cy="302" r="24"/><circle class="dk-hub" cx="148" cy="302" r="9"/>
+        <circle class="dk-wheel" cx="320" cy="302" r="24"/><circle class="dk-hub" cx="320" cy="302" r="9"/>
+      </g>
+      <path class="dk-dim" d="M150 70H330"/><path class="dk-head" d="M346 70l-18 -10v20Z"/>${t(240, 54, 'direction of travel', 'dk-small')}
+      ${bars(x0, y0, w, h, ['10 m/s', '20 m/s', '30 m/s'])}${t(x0 + 6, 36, 'energy in the kinetic store', 'dk-small', 'start')}
     </svg></div>` + buttons([['v0', '10 m/s'], ['v1', '20 m/s'], ['v2', '30 m/s'], ['m', 'Mass: 1000 kg', 'aria-pressed="false"']]) + '<p class="dk-readout" aria-live="polite"></p>';
-    const root = host.querySelector('svg'), out = host.querySelector('.dk-readout'), lines = root.querySelector('.dk-lines');
-    let mass = 1000, shown = new Set();
+    const root = host.querySelector('svg'), out = host.querySelector('.dk-readout');
+    const treeEls = [...root.querySelectorAll('[data-tree]')], dashEls = [...root.querySelectorAll('[data-dash]')];
+    let mass = 1000, speed = 0, offset = 0, running = false;
+    const shown = new Set();
+    function scenery() {
+      treeEls.forEach((g, i) => {
+        const x = ((i * SPAN / TREES - offset * 0.6) % SPAN + SPAN) % SPAN - 20;
+        g.setAttribute('transform', `translate(${x.toFixed(1)} 250)`);
+        g.style.visibility = x > 440 || x < 30 ? 'hidden' : 'visible';
+      });
+      dashEls.forEach((r, i) => {
+        const x = ((i * 70 - offset) % 560 + 560) % 560 - 40;
+        r.setAttribute('x', x.toFixed(1)); r.style.visibility = x > 446 ? 'hidden' : 'visible';
+      });
+    }
     function pick(i) {
-      shown.add(i);
+      shown.add(i); speed = speeds[i];
       speeds.forEach((v, j) => setBar(root, j, shown.has(j) ? 0.5 * mass * v * v / max : 0, y0, h));
       root.querySelectorAll('.dk-bar').forEach((r, j) => r.classList.toggle('on', j === i));
-      const v = speeds[i], e = 0.5 * mass * v * v;
-      lines.style.setProperty('--dur', `${1.2 / (i + 1)}s`);
-      out.innerHTML = String.raw`\(E_k = \tfrac{1}{2}\,m\,v^2 = 0.5 \times ${mass} \times ${v}^2 = ${fmt(e).replace(/\u2009/g, '\\,')}\ \text{J}\)` + (i ? ` <b>= ${(i + 1) ** 2} × the energy at 10 m/s</b>` : '');
+      const e = 0.5 * mass * speed * speed;
+      out.innerHTML = String.raw`\(E_k = \tfrac{1}{2}\,m\,v^2 = 0.5 \times ${mass} \times ${speed}^2 = ${fmt(e).replace(/\u2009/g, '\\,')}\ \text{J}\)` + (i ? ` <b>= ${(i + 1) ** 2} × the energy at 10 m/s</b>` : '');
       typeset(out);
+      if (!running && !reduced()) { running = true; animate(host, dt => { offset += speed * 14 * dt; scenery(); return running; }); }
     }
     speeds.forEach((_, i) => host.querySelector(`[data-act="v${i}"]`).addEventListener('click', () => pick(i)));
     const mb = host.querySelector('[data-act="m"]');
-    mb.addEventListener('click', () => { mass = mass === 1000 ? 2000 : 1000; mb.textContent = `Mass: ${mass} kg`; mb.setAttribute('aria-pressed', String(mass === 2000)); const last = [...shown].pop(); if (last !== undefined) pick(last); });
-    out.textContent = 'Choose a speed.';
+    mb.addEventListener('click', () => { mass = mass === 1000 ? 2000 : 1000; mb.textContent = `Mass: ${mass} kg`; mb.setAttribute('aria-pressed', String(mass === 2000)); if (speed) pick(speeds.indexOf(speed)); });
+    scenery();
+    out.textContent = 'Choose a speed. The trees stream past faster as the car goes faster.';
   }
 
   // ---------- 3. Spring lab: add masses, read the extension, plot either graph ----------
   // The sample spring of Lesson 4: about 4.0 cm per newton up to 6 N, then past its limit.
+  // Both graphs use the same scales (0 to 8 N, 0 to 0.40 m), so swapping the axes reflects the line:
+  // graph 1 (extension against force) is shallow, graph 2 (force against extension) is steep.
   const SPRING = [0, 4.0, 8.1, 12.0, 16.0, 20.1, 24.0, 29.5];
+  function graphAxes(gx, gy, gw, gh, g1) {
+    const xs = g1 ? [0, 8, 1] : [0, 0.4, 0.05], ys = g1 ? [0, 0.4, 0.05] : [0, 8, 1];
+    const X = v => gx + (v - xs[0]) / (xs[1] - xs[0]) * gw, Y = v => gy + gh - (v - ys[0]) / (ys[1] - ys[0]) * gh;
+    const lab = v => (g1 ? [String(v), v.toFixed(2)] : [v.toFixed(2), String(v)]);
+    let s = '';
+    for (let i = 0, v = xs[0]; v <= xs[1] + 1e-9; i++, v += xs[2]) s += `<path class="dk-grid" d="M${X(v)} ${gy}V${gy + gh}"/>` + (i % 2 ? '' : t(X(v), gy + gh + 28, lab(v)[0], 'dk-tick'));
+    for (let i = 0, v = ys[0]; v <= ys[1] + 1e-9; i++, v += ys[2]) s += `<path class="dk-grid" d="M${gx} ${Y(v)}H${gx + gw}"/>` + (i % 2 || !v ? '' : t(gx - 10, Y(v) + 7, lab(v)[1], 'dk-tick', 'end'));
+    s += `<path class="dk-ink" d="M${gx} ${gy - 8}V${gy + gh}H${gx + gw + 8}"/>`;
+    s += t(gx + gw, gy + gh + 60, g1 ? 'force / N' : 'extension / m', 'dk-label', 'end') + t(gx + 4, gy - 18, g1 ? 'extension / m' : 'force / N', 'dk-label', 'start');
+    const pt = i => (g1 ? [X(i), Y(SPRING[i] / 100)] : [X(SPRING[i] / 100), Y(i)]);
+    const fit = g1 ? [X(0), Y(0), X(8), Y(0.32)] : [X(0), Y(0), X(0.32), Y(8)];
+    return { s, pt, fit };
+  }
   function springLab(host) {
-    const top = 50, pxcm = 9, L0 = 5.0;
+    const top = 50, pxcm = 9, L0 = 5.0, x = 160;
     let ticks = '';
-    for (let c = 0; c <= 40; c++) ticks += `<path class="dk-ink thin" d="M262 ${top + c * pxcm}h${c % 5 ? 8 : 16}"/>` + (c % 5 ? '' : t(296, top + c * pxcm + 6, c, 'dk-tick', 'start'));
-    const gx = 400, gy = 40, gw = 480, gh = 360;
+    for (let c = 0; c <= 40; c++) ticks += `<path class="dk-ink thin" d="M262 ${top + c * pxcm}h${c % 5 ? 8 : 16}"/>` + (c % 5 ? '' : t(296, top + c * pxcm + 7, c, 'dk-tick', 'start'));
+    const gx = 420, gy = 50, gw = 440, gh = 330;
     host.innerHTML = `<div class="dk-stage"><svg class="dk" viewBox="0 0 920 470" role="img" aria-label="A spring hanging beside a ruler, with a graph of the results">
-      <path class="dk-ink thick" d="M40 ${top}H230"/><path class="dk-ink thick" d="M60 ${top}V450M30 450H200"/>
-      <rect class="dk-ruler" x="258" y="${top - 10}" width="34" height="${40 * pxcm + 20}"/>${ticks}
-      <g class="dk-spring"></g>
-      <g class="dk-graph"></g>
-    </svg></div>` + buttons([['minus', '− 100 g'], ['plus', '+ 100 g'], ['swap', 'Swap the axes'], ['fit', 'Best-fit line', 'aria-pressed="false"'], ['clear', 'Clear']]) + '<p class="dk-readout" aria-live="polite"></p>';
+      <path class="dk-ink thick" d="M40 ${top}H230M60 ${top}V455M30 455H200"/>
+      <rect class="dk-ruler" x="258" y="${top - 10}" width="34" height="${40 * pxcm + 20}"/>${ticks}${t(275, top - 18, 'cm', 'dk-tick')}
+      <g class="dk-spring"></g><g class="dk-graph"></g>
+    </svg></div>` + buttons([['minus', '− 100 g'], ['plus', '+ 100 g'], ['swap', 'Show graph 2'], ['fit', 'Best-fit line', 'aria-pressed="false"'], ['clear', 'Clear']]) + '<p class="dk-readout" aria-live="polite"></p>';
     const root = host.querySelector('svg'), sp = root.querySelector('.dk-spring'), gr = root.querySelector('.dk-graph'), out = host.querySelector('.dk-readout');
-    let n = 0, swapped = true, fit = false; // graph 1 (extension against force) first, as in the workbook
+    const swapBtn = host.querySelector('[data-act="swap"]');
+    let n = 0, g1 = true, fit = false;
     const done = new Set([0]);
     function drawSpring() {
-      const e = SPRING[n], len = (L0 + e) * pxcm, y2 = top + len, turns = 7, step = (len - 12) / turns, x = 160, w = 14;
+      // The pointer is fixed to the hanger's bar, so it marks the bottom of the spring on the ruler.
+      const e = SPRING[n], bar = top + (L0 + e) * pxcm, len = bar - top - 8, turns = 5, step = (len - 12) / turns, w = 18;
       let d = `M${x} ${top}V${top + 6}`;
       for (let i = 0; i < turns; i++) d += `L${x + w} ${top + 6 + step * (i + 0.25)}L${x - w} ${top + 6 + step * (i + 0.75)}`;
       let masses = '';
-      for (let i = 0; i < n; i++) masses += `<rect class="dk-mass" x="${x - 32}" y="${y2 + 16 + i * 8}" width="64" height="7" rx="2"/>`;
-      sp.innerHTML = `<path class="dk-ink" d="${d}L${x} ${y2 - 6}V${y2}"/><path class="dk-ink" d="M${x} ${y2}v8M${x - 22} ${y2 + 8}h44M${x} ${y2 + 8}v${n * 8 + 10}"/>${masses}` +
-        `<path class="dk-pointer" d="M${x + 6} ${y2 + 2}H262"/>`;
-      out.innerHTML = `Mass added <b>${n * 100} g</b> · force <b>${n} N</b> · length <b>${(L0 + e).toFixed(1)} cm</b> · extension <b>${e.toFixed(1)} cm = ${(e / 100).toFixed(3)} m</b>`;
+      for (let i = 0; i < n; i++) masses += `<rect class="dk-mass" x="${x - 32}" y="${bar + 10 + i * 8}" width="64" height="7" rx="2"/>`;
+      sp.innerHTML = `<path class="dk-ink" d="${d}L${x} ${bar - 8}V${bar}"/><path class="dk-ink" d="M${x} ${bar}v${n * 8 + 14}"/>${masses}` +
+        `<path class="dk-pointer" d="M${x - 24} ${bar}H262"/>`;
+      out.innerHTML = `Mass added <b>${n * 100} g</b> · force <b>${n} N</b> · pointer at <b>${(L0 + e).toFixed(1)} cm</b> · extension <b>${e.toFixed(1)} cm = ${(e / 100).toFixed(3)} m</b>`;
     }
     function drawGraph() {
-      // Swapped (the default): graph 1, extension against force. Otherwise graph 2, force against extension in metres.
-      const xs = swapped ? [0, 8, 1] : [0, 0.32, 0.04], ys = swapped ? [0, 32, 4] : [0, 8, 1];
-      const X = v => gx + (v - xs[0]) / (xs[1] - xs[0]) * gw, Y = v => gy + gh - (v - ys[0]) / (ys[1] - ys[0]) * gh;
-      let s = '';
-      for (let v = xs[0]; v <= xs[1] + 1e-9; v += xs[2]) s += `<path class="dk-grid" d="M${X(v)} ${gy}V${gy + gh}"/>` + t(X(v), gy + gh + 26, swapped ? v : v.toFixed(2), 'dk-tick');
-      for (let v = ys[0]; v <= ys[1] + 1e-9; v += ys[2]) s += `<path class="dk-grid" d="M${gx} ${Y(v)}H${gx + gw}"/>` + (v ? t(gx - 10, Y(v) + 6, v, 'dk-tick', 'end') : '');
-      s += `<path class="dk-ink" d="M${gx} ${gy - 8}V${gy + gh}H${gx + gw + 8}"/>`;
-      s += t(gx + gw, gy + gh + 56, swapped ? 'force / N' : 'extension / m', 'dk-label', 'end') + t(gx + 4, gy - 16, swapped ? 'extension / cm' : 'force / N', 'dk-label', 'start');
-      if (fit) s += swapped ? `<path class="dk-fit" d="M${X(0)} ${Y(0)}L${X(7.5)} ${Y(30)}"/>` : `<path class="dk-fit" d="M${X(0)} ${Y(0)}L${X(0.30)} ${Y(7.5)}"/>`;
-      done.forEach(i => { const px = swapped ? X(i) : X(SPRING[i] / 100), py = swapped ? Y(SPRING[i]) : Y(i); s += `<path class="dk-cross${i === 7 ? ' odd' : ''}" d="M${px - 8} ${py - 8}l16 16m0 -16l-16 16"/>`; });
-      if (fit && !swapped) s += t(X(0.16), Y(6.9), 'gradient = k = 25 N/m', 'dk-label hot', 'middle');
-      if (fit && swapped) s += t(X(4.2), Y(28), 'gradient = 4 cm per N', 'dk-label hot', 'middle');
+      const a = graphAxes(gx, gy, gw, gh, g1);
+      let s = a.s;
+      if (fit) s += `<path class="dk-fit" d="M${a.fit[0]} ${a.fit[1]}L${a.fit[2]} ${a.fit[3]}"/>` + t(gx + gw / 2, gy + 30, g1 ? 'gradient = 0.04 m per N' : 'gradient = k = 25 N/m', 'dk-label hot');
+      done.forEach(i => { const [px, py] = a.pt(i); s += `<path class="dk-cross${i === 7 ? ' odd' : ''}" d="M${px - 9} ${py - 9}l18 18m0 -18l-18 18"/>`; });
+      s += t(gx + gw, gy - 18, g1 ? 'Graph 1' : 'Graph 2', 'dk-label', 'end');
       gr.innerHTML = s;
     }
     const update = () => { done.add(n); drawSpring(); drawGraph(); };
     host.querySelector('[data-act="plus"]').addEventListener('click', () => { if (n < 7) { n++; update(); } });
     host.querySelector('[data-act="minus"]').addEventListener('click', () => { if (n > 0) { n--; update(); } });
-    host.querySelector('[data-act="swap"]').addEventListener('click', () => { swapped = !swapped; drawGraph(); });
+    swapBtn.addEventListener('click', () => { g1 = !g1; swapBtn.textContent = g1 ? 'Show graph 2' : 'Show graph 1'; drawGraph(); });
     const fb = host.querySelector('[data-act="fit"]');
     fb.addEventListener('click', () => { fit = !fit; fb.setAttribute('aria-pressed', String(fit)); drawGraph(); });
     host.querySelector('[data-act="clear"]').addEventListener('click', () => { done.clear(); n = 0; fit = false; fb.setAttribute('aria-pressed', 'false'); update(); });
     update();
   }
 
-  // ---------- 4. Elastic potential energy: pick an extension ----------
+  // ---------- 4. Elastic potential energy: a block on a smooth surface, pulled out ----------
   function elastic(host) {
-    const es = [0.04, 0.08, 0.12], k = 50, max = 0.4;
-    const x0 = 520, y0 = 40, w = 360, h = 330;
-    host.innerHTML = `<div class="dk-stage"><svg class="dk" viewBox="0 0 920 430" role="img" aria-label="A spring stretched by 4, 8 and 12 centimetres and a bar chart of the energy it stores">
-      <path class="dk-ink thick" d="M40 120V300"/><g class="dk-hspring"></g>
-      ${bars(x0, y0, w, h, ['0.04 m', '0.08 m', '0.12 m'])}${t(x0 + 6, 28, 'elastic potential energy', 'dk-small', 'start')}
-    </svg></div>` + buttons([['e0', 'stretch 0.04 m'], ['e1', 'stretch 0.08 m'], ['e2', 'stretch 0.12 m']]) + '<p class="dk-readout" aria-live="polite"></p>';
+    const es = [0.04, 0.08, 0.12], k = 50, max = 0.4, x0 = 580, y0 = 50, w = 300, h = 300;
+    const wall = 50, rest = 300, scale = 1200, floor = 300, bw = 80;
+    host.innerHTML = `<div class="dk-stage"><svg class="dk one-store elastic" viewBox="0 0 920 470" role="img" aria-label="A spring fixed to a wall holds a block on a smooth surface; the block is pulled out by 0.04, 0.08 or 0.12 metres; a bar chart shows the energy stored">
+      <rect class="dk-wall" x="20" y="150" width="${wall - 20}" height="${floor - 150}"/><path class="dk-ink thick" d="M${wall} 150V${floor}"/>
+      <path class="dk-ink thick" d="M20 ${floor}H540"/>${t(290, floor + 34, 'smooth surface: no friction', 'dk-small')}
+      <path class="dk-guide" d="M${rest} 120V${floor}"/>${t(rest, 110, 'end of the spring, unstretched', 'dk-small')}
+      <g class="dk-hspring"></g>
+      ${bars(x0, y0, w, h, ['0.04 m', '0.08 m', '0.12 m'])}${t(x0 + 6, 36, 'elastic potential energy', 'dk-small', 'start')}
+    </svg></div>` + buttons([['e0', 'Stretch 0.04 m'], ['e1', 'Stretch 0.08 m'], ['e2', 'Stretch 0.12 m'], ['r', 'Reset']]) + '<p class="dk-readout" aria-live="polite"></p>';
     const root = host.querySelector('svg'), hs = root.querySelector('.dk-hspring'), out = host.querySelector('.dk-readout');
     const shown = new Set();
-    function spring(e) {
-      const L = 160 + e * 1800, turns = 10, step = (L - 20) / turns;
-      let d = 'M40 210H50';
-      for (let i = 0; i < turns; i++) d += `L${50 + step * (i + 0.25)} 190L${50 + step * (i + 0.75)} 230`;
-      const end = 50 + L - 20;
-      hs.innerHTML = `<path class="dk-ink" d="${d}L${end} 210H${end + 10}"/><circle class="dk-bob" cx="${end + 26}" cy="210" r="16"/>` +
-        (e ? `<path class="dk-guide" d="M210 250V290M${end} 250V290"/>` + F.arrow(210, 280, end, 280, '', 9) + t((210 + end) / 2, 316, `e = ${e} m`, 'dk-label') : '');
+    let pos = 0, target = 0, moving = false;
+    function draw() {
+      const end = rest + pos * scale, turns = 10, step = (end - wall - 20) / turns, cy = floor - bw / 2;
+      let d = `M${wall} ${cy}H${wall + 10}`;
+      for (let i = 0; i < turns; i++) d += `L${wall + 10 + step * (i + 0.25)} ${cy - 18}L${wall + 10 + step * (i + 0.75)} ${cy + 18}`;
+      hs.innerHTML = `<path class="dk-ink" d="${d}L${end - 10} ${cy}H${end}"/><rect class="dk-block" x="${end}" y="${floor - bw}" width="${bw}" height="${bw}"/>` +
+        (pos > 0.001 ? `<path class="dk-pull" d="M${end + bw} ${cy}H${end + bw + 70}"/><path class="dk-head hot" d="M${end + bw + 86} ${cy}l-18 -10v20Z"/>${t(end + bw + 44, cy - 18, 'pull', 'dk-label hot')}` +
+          dimH(rest, end, floor + 70, `e = ${(Math.round(pos * 100) / 100).toFixed(2)} m`) : '');
+    }
+    function moveTo(e) {
+      target = e;
+      if (reduced()) { pos = e; draw(); return; }
+      if (moving) return;
+      moving = true;
+      animate(host, dt => { const step = Math.sign(target - pos) * Math.min(Math.abs(target - pos), 0.15 * dt); pos += step; draw(); if (Math.abs(target - pos) < 1e-4) { pos = target; draw(); moving = false; return false; } return true; });
     }
     function pick(i) {
       shown.add(i);
       es.forEach((e, j) => setBar(root, j, shown.has(j) ? 0.5 * k * e * e / max : 0, y0, h));
-      spring(es[i]);
+      moveTo(es[i]);
       const e = es[i], E = 0.5 * k * e * e;
       out.innerHTML = String.raw`\(E_e = \tfrac{1}{2}\,k\,e^2 = 0.5 \times ${k} \times ${e}^2 = ${E.toFixed(2)}\ \text{J}\)` + (i ? ` <b>= ${(i + 1) ** 2} × the energy at 0.04 m</b>` : '');
       typeset(out);
     }
     es.forEach((_, i) => host.querySelector(`[data-act="e${i}"]`).addEventListener('click', () => pick(i)));
-    spring(0);
+    host.querySelector('[data-act="r"]').addEventListener('click', () => { moveTo(0); out.textContent = 'Spring constant k = 50 N/m. Choose an extension.'; });
+    draw();
     out.textContent = 'Spring constant k = 50 N/m. Choose an extension.';
   }
 
-  // ---------- 5. Two motors lift the same load ----------
+  // ---------- 5. Two motors lift the same load through the same height ----------
   function motors(host) {
-    const H = 200, base = 380;
-    const rig = (x, name) => `<path class="dk-ink thick" d="M${x} 400V60H${x + 130}"/><path class="dk-ink" d="M${x + 120} 60V80"/><rect class="dk-motor" x="${x - 28}" y="40" width="56" height="40" rx="6"/>${t(x, 66, name, 'dk-label')}
-      <line class="dk-string m-${name}" x1="${x + 120}" y1="80" x2="${x + 120}" y2="${base - 34}"/><rect class="dk-mass m-${name}" x="${x + 92}" y="${base - 34}" width="56" height="34" rx="4"/>
-      <path class="dk-guide" d="M${x + 160} ${base - H}H${x + 200}M${x + 160} ${base}H${x + 200}"/>${t(x + 210, base - H / 2 + 8, '1.5 m', 'dk-small', 'start')}${t(x + 120, 444, '', `dk-label clock-${name}`)}`;
+    const H = 210, base = 400, bwid = 80, bh = 60;
+    const rig = (x, name) => `<path class="dk-ink thick" d="M${x} ${base}V70H${x + 150}"/><circle class="dk-pulley" cx="${x + 140}" cy="78" r="10"/>
+      <rect class="dk-motor" x="${x - 34}" y="44" width="68" height="50" rx="6"/>${t(x, 78, name, 'dk-label')}
+      <line class="dk-string m-${name}" x1="${x + 140}" y1="88" x2="${x + 140}" y2="${base - bh}"/><rect class="dk-mass m-${name}" x="${x + 140 - bwid / 2}" y="${base - bh}" width="${bwid}" height="${bh}" rx="4"/>
+      ${t(x + 140, base - bh / 2 + 9, '2.0 kg', 'dk-small m-label-' + name)}
+      ${dimV(x + 140 + bwid / 2 + 30, base - H, base, '1.5 m')}
+      ${t(x + 140, 450, '0.0 s', `dk-clock clock-${name}`)}`;
     host.innerHTML = `<div class="dk-stage"><svg class="dk" viewBox="0 0 920 470" role="img" aria-label="Two motors, A and B, each lift a 2.0 kilogram load through 1.5 metres; A takes 2 seconds and B takes 6 seconds">
-      <path class="dk-ink" d="M20 400H900"/>${rig(120, 'A')}${rig(560, 'B')}
+      <path class="dk-ink" d="M20 ${base}H900"/>${rig(80, 'A')}${rig(520, 'B')}
     </svg></div>` + buttons([['go', 'Start'], ['reset', 'Reset']]) + '<p class="dk-readout" aria-live="polite"></p>';
     const root = host.querySelector('svg'), out = host.querySelector('.dk-readout');
     const parts = { A: 2, B: 6 };
-    let t0 = null, running = false;
-    function paint(sec) {
+    let sec = 0, running = false;
+    function paint() {
       Object.entries(parts).forEach(([name, T]) => {
-        const f = Math.min(1, sec / T), y = base - 34 - f * H;
+        const f = Math.min(1, sec / T), y = base - bh - f * H;
         root.querySelector(`rect.m-${name}`).setAttribute('y', y.toFixed(1));
         root.querySelector(`line.m-${name}`).setAttribute('y2', y.toFixed(1));
+        root.querySelector(`.m-label-${name}`).setAttribute('y', (y + bh / 2 + 9).toFixed(1));
         root.querySelector(`.clock-${name}`).textContent = `${Math.min(sec, T).toFixed(1)} s`;
       });
-      out.innerHTML = sec >= 6 ? 'Both loads gain <b>29.4 J</b>. A: 29.4 ÷ 2 = <b>14.7 W</b>. B: 29.4 ÷ 6 = <b>4.9 W</b>. Same energy, different power.' : 'Each motor lifts a 2.0 kg load through 1.5 m.';
-    }
-    function tick(time) {
-      if (!running) return;
-      if (!isLive(host)) { requestAnimationFrame(tick); return; }
-      if (t0 === null) t0 = time;
-      const sec = (time - t0) / 1000;
-      paint(sec);
-      if (sec < 6) requestAnimationFrame(tick); else running = false;
+      out.innerHTML = sec >= 6 ? 'Both loads gain <b>29.4 J</b>. A: 29.4 ÷ 2 = <b>14.7 W</b>. B: 29.4 ÷ 6 = <b>4.9 W</b>. Same energy, different power.' : 'Each motor lifts a 2.0 kg load through 1.5 m. Press Start.';
     }
     host.querySelector('[data-act="go"]').addEventListener('click', () => {
-      if (reduced()) { paint(6); return; }
-      t0 = null; running = true; requestAnimationFrame(tick);
+      sec = 0;
+      if (reduced()) { sec = 6; paint(); return; }
+      if (running) return;
+      running = true;
+      animate(host, dt => { sec += dt; paint(); if (sec >= 6) { running = false; return false; } return running; });
     });
-    host.querySelector('[data-act="reset"]').addEventListener('click', () => { running = false; paint(0); });
-    paint(0);
+    host.querySelector('[data-act="reset"]').addEventListener('click', () => { running = false; sec = 0; paint(); });
+    paint();
   }
 
-  // ---------- static drawings made for the deck ----------
-  function twoGraphs() {
-    const g = (ox, swap) => {
-      const W = 300, H = 230, pts = [0, 1, 2, 3, 4, 5, 6].map(f => swap ? [f / 7, SPRING[f] / 32] : [SPRING[f] / 32, f / 8]);
-      let s = `<path class="dk-ink" d="M${ox} 20V${20 + H}H${ox + W}"/>`;
-      s += `<path class="dk-fit" d="M${ox} ${20 + H}L${ox + (swap ? 6.4 / 7 : 25.6 / 32) * W} ${20 + H - (swap ? 25.6 / 32 : 6.4 / 8) * H}"/>`;
-      pts.forEach(([a, b]) => { const x = ox + a * W, y = 20 + H - b * H; s += `<path class="dk-cross" d="M${x - 6} ${y - 6}l12 12m0 -12l-12 12"/>`; });
-      s += t(ox + W, 20 + H + 34, swap ? 'force / N' : 'extension / m', 'dk-label', 'end') + t(ox + 6, 10, swap ? 'extension / m' : 'force / N', 'dk-label', 'start');
-      return s;
+  // ---------- 6. Lift a book onto a shelf: straight up, then across ----------
+  function lift(host) {
+    const floor = 380, shelfTop = 150, bookW = 90, bookH = 34, x0 = 120, shelfX = 360, xEnd = 420;
+    host.innerHTML = `<div class="dk-stage"><svg class="dk" viewBox="0 0 640 430" role="img" aria-label="A 2.0 kilogram book is lifted straight up through 1.5 metres and slid onto a shelf">
+      <path class="dk-ink thick" d="M20 ${floor}H620"/><rect class="dk-wall" x="590" y="40" width="30" height="${floor - 40}"/>
+      <rect class="dk-shelf" x="${shelfX}" y="${shelfTop}" width="${590 - shelfX}" height="14"/><path class="dk-ink" d="M560 ${shelfTop + 14}L590 ${shelfTop + 54}"/>
+      <path class="dk-guide" d="M${x0 + bookW / 2} ${floor - bookH - 6}V${shelfTop - bookH / 2}H${xEnd + bookW / 2 - 14}"/>
+      <path class="dk-guide" d="M${shelfX - 70} ${shelfTop}H${shelfX}"/>${dimV(shelfX - 40, shelfTop, floor, 'h = 1.5 m', -1)}
+      <rect class="dk-ghost" x="${x0}" y="${floor - bookH}" width="${bookW}" height="${bookH}" rx="3"/>
+      <g class="dk-book"><rect class="dk-bookbody" x="0" y="0" width="${bookW}" height="${bookH}" rx="3"/>${t(bookW / 2, bookH / 2 + 8, '2.0 kg', 'dk-small')}</g>
+      <text x="320" y="${floor + 40}" class="dk-label dk-gain" text-anchor="middle"></text>
+    </svg></div>` + buttons([['go', 'Lift the book'], ['reset', 'Reset']]);
+    const root = host.querySelector('svg'), book = root.querySelector('.dk-book'), gain = root.querySelector('.dk-gain');
+    let s = 0, running = false;
+    const UP = 1.2, ACROSS = 0.6;
+    function paint() {
+      const up = Math.min(1, s / UP), across = Math.max(0, Math.min(1, (s - UP) / ACROSS));
+      const ease = u => u * u * (3 - 2 * u);
+      const y = floor - bookH - ease(up) * (floor - shelfTop), x = x0 + ease(across) * (xEnd - x0);
+      book.setAttribute('transform', `translate(${x.toFixed(1)} ${y.toFixed(1)})`);
+      gain.textContent = up >= 1 ? 'G.P.E. gained = 2.0 × 9.8 × 1.5 = 29.4 J' : '';
+    }
+    const go = () => {
+      if (reduced()) { s = UP + ACROSS; paint(); return; }
+      if (running) return;
+      s = 0; running = true;
+      animate(host, dt => { s += dt; paint(); if (s >= UP + ACROSS) { running = false; return false; } return true; });
     };
-    return `<svg class="dk" viewBox="0 0 760 300" role="img" aria-label="Graph 1, extension against force, and graph 2, force against extension, for the same spring">${g(40, true)}${g(420, false)}</svg>`;
+    host.querySelector('[data-act="go"]').addEventListener('click', go);
+    host.querySelector('[data-act="reset"]').addEventListener('click', () => { running = false; s = 0; paint(); });
+    paint();
+  }
+
+  // ---------- 7. Bounce: the ball falls and rises on the same vertical line ----------
+  function bounce(host) {
+    const floor = 430, m = 400, h1 = 1.0, h2 = 0.65, r = 18, bx = 250;  // 400 px per metre
+    const yOf = hgt => floor - r - hgt * m;
+    let ticks = '';
+    for (let c = 0; c <= 100; c += 5) ticks += `<path class="dk-ink thin" d="M300 ${floor - c * 4}h${c % 10 ? 10 : 20}"/>` + (c % 20 || !c ? '' : t(336, floor - c * 4 + 7, (c / 100).toFixed(1), 'dk-tick', 'start'));
+    host.innerHTML = `<div class="dk-stage"><svg class="dk" viewBox="0 0 720 470" role="img" aria-label="A ball dropped from 1.00 metre beside a metre rule falls straight down and bounces straight back up to 0.65 metres">
+      <path class="dk-ink thick" d="M20 ${floor}H700"/><rect class="dk-ruler" x="296" y="${floor - m - 10}" width="34" height="${m + 10}"/>${ticks}${t(316, floor - m - 20, 'm', 'dk-tick')}
+      <circle class="dk-ghost" cx="${bx}" cy="${yOf(h1)}" r="${r}"/>
+      <path class="dk-guide" d="M${bx - 40} ${floor - h1 * m}H296M376 ${floor - h1 * m}H560"/>${dimV(520, floor - h1 * m, floor, 'h<tspan dy="8" font-size="20">1</tspan><tspan dy="-8"> = 1.00 m</tspan>')}
+      <g class="dk-bounce-mark"><path class="dk-guide" d="M${bx - 40} ${floor - h2 * m}H296M376 ${floor - h2 * m}H460"/>${dimV(420, floor - h2 * m, floor, 'h<tspan dy="8" font-size="20">2</tspan><tspan dy="-8"> = 0.65 m</tspan>', -1)}</g>
+      <circle class="dk-ball" cx="${bx}" cy="${yOf(h1)}" r="${r}"/>
+    </svg></div>` + buttons([['go', 'Drop the ball'], ['reset', 'Reset']]) + '<p class="dk-readout" aria-live="polite">Released from rest at 1.00 m, measured from the bottom of the ball.</p>';
+    const root = host.querySelector('svg'), ball = root.querySelector('.dk-ball'), mark = root.querySelector('.dk-bounce-mark'), out = host.querySelector('.dk-readout');
+    // Times scaled up 1.6× so the fall can be followed by eye.
+    const g = 9.8, slow = 1.6, tFall = Math.sqrt(2 * h1 / g), tRise = Math.sqrt(2 * h2 / g);
+    let s = 0, running = false;
+    function paint() {
+      const tt = s / slow;
+      const hgt = tt < tFall ? h1 - 0.5 * g * tt * tt : tt < tFall + tRise ? (() => { const u = tt - tFall, v = g * tRise; return v * u - 0.5 * g * u * u; })() : h2;
+      ball.setAttribute('cy', yOf(Math.max(0, hgt)).toFixed(1));
+      const done = tt >= tFall + tRise;
+      mark.style.visibility = done ? 'visible' : 'hidden';
+      out.innerHTML = done ? String.raw`Efficiency \(= \dfrac{h_2}{h_1} = \dfrac{0.65}{1.00} = 0.65\), or 65%` : 'Released from rest at 1.00 m, measured from the bottom of the ball.';
+      if (done) typeset(out);
+    }
+    host.querySelector('[data-act="go"]').addEventListener('click', () => {
+      s = 0;
+      if (reduced()) { s = slow * (tFall + tRise); paint(); return; }
+      if (running) return;
+      running = true;
+      animate(host, dt => { s += dt; paint(); if (s >= slow * (tFall + tRise)) { running = false; return false; } return true; });
+    });
+    host.querySelector('[data-act="reset"]').addEventListener('click', () => { running = false; s = 0; paint(); });
+    paint();
+  }
+
+  // ---------- static drawings made for the deck, with labels large enough for the back row ----------
+  function twoGraphs() {
+    const one = (gx, g1) => { const a = graphAxes(gx, 90, 300, 240, g1); let s = a.s + `<path class="dk-fit" d="M${a.fit[0]} ${a.fit[1]}L${a.fit[2]} ${a.fit[3]}"/>`; for (let i = 0; i <= 6; i++) { const [x, y] = a.pt(i); s += `<path class="dk-cross" d="M${x - 7} ${y - 7}l14 14m0 -14l-14 14"/>`; } return s + t(gx + 150, 30, g1 ? 'Graph 1' : 'Graph 2', 'dk-big'); };
+    return `<svg class="dk" viewBox="0 0 900 420" role="img" aria-label="The same spring results on the same scales: graph 1, extension against force, has a shallow line; graph 2, force against extension, has a steep line">${one(110, true)}${one(560, false)}</svg>`;
+  }
+  function hikeBig() {
+    return `<svg class="dk" viewBox="0 0 780 400" role="img" aria-label="A hiker climbs from a car park 120 m above sea level to a summit 420 m above sea level: a height gain of 300 m">
+      <rect class="dk-sea" x="10" y="360" width="760" height="22"/>${t(760, 348, 'sea level', 'dk-small', 'end')}
+      <path class="dk-hill" d="M10 360L90 290L200 282L400 70L560 360Z"/>
+      <path class="dk-guide" d="M150 286H640M400 70H640"/><circle class="dk-dot" cx="150" cy="286" r="9"/><circle class="dk-dot" cx="400" cy="70" r="9"/>
+      ${t(250, 334, 'car park: 120 m', 'dk-big')}${t(400, 44, 'summit: 420 m', 'dk-big')}
+      ${dimV(610, 70, 286, 'h = 300 m', 1)}
+    </svg>`;
+  }
+  function extensionBig() {
+    const coil = (x, y1, y2, turns = 7, w = 20) => { const st = (y2 - y1 - 16) / turns; let d = `M${x} ${y1}V${y1 + 8}`; for (let i = 0; i < turns; i++) d += `L${x + w} ${y1 + 8 + st * (i + 0.25)}L${x - w} ${y1 + 8 + st * (i + 0.75)}`; return `<path class="dk-ink" d="${d}L${x} ${y2 - 8}V${y2}"/>`; };
+    return `<svg class="dk" viewBox="0 0 760 400" role="img" aria-label="The same spring with no load and with a load: the extension is the stretched length minus the original length">
+      <path class="dk-ink thick" d="M60 30H640"/>${coil(270, 30, 170)}${coil(490, 30, 280)}<rect class="dk-mass" x="452" y="280" width="76" height="40" rx="4"/>
+      <path class="dk-guide" d="M230 170H600"/>
+      ${dimV(200, 30, 170, '', -1)}${t(186, 94, 'original', 'dk-big', 'end')}${t(186, 128, 'length', 'dk-big', 'end')}
+      ${dimV(580, 170, 280, 'extension', 1)}
+      ${t(270, 380, 'no load', 'dk-big')}${t(490, 380, 'with a load', 'dk-big')}
+    </svg>`;
+  }
+  function stairsBig() {
+    let d = 'M60 420', x = 60, y = 420;
+    for (let i = 0; i < 8; i++) { y -= 30; d += `V${y}`; x += 64; d += `H${x}`; }
+    const person = (px, py) => `<g transform="translate(${px} ${py})"><circle class="dk-head-c" cx="0" cy="-74" r="11"/><path class="dk-ink" d="M0 -63V-30M0 -54L-14 -38M0 -54L14 -38M0 -30L-11 0M0 -30L11 0"/></g>`;
+    return `<svg class="dk" viewBox="0 0 820 470" role="img" aria-label="A student walks up a flight of eight steps; the vertical height h is the height of one step times the number of steps">
+      <path class="dk-steps" d="${d}V420Z"/><path class="dk-ink thick" d="M30 420H800"/>${person(100, 390)}${person(560, 180)}
+      <path class="dk-guide" d="M572 180H770"/>${dimV(740, 180, 420, 'h', -1)}
+      ${t(410, 458, 'h = height of one step × number of steps', 'dk-label')}
+    </svg>`;
   }
   function rods() {
     const mats = [['copper', 1], ['aluminium', 0.6], ['steel', 0.25], ['glass', 0.05]];
@@ -265,14 +419,14 @@
     const x0 = 80, y0 = 30, w = 620, h = 280, bw = w / data.length;
     let s = `<path class="dk-ink" d="M${x0} ${y0 - 6}V${y0 + h}H${x0 + w}"/>`;
     for (let v = 0; v <= 14; v += 2) s += `<path class="dk-grid" d="M${x0} ${y0 + h - v / 14 * h}H${x0 + w}"/>` + t(x0 - 10, y0 + h - v / 14 * h + 6, v, 'dk-tick', 'end');
-    data.forEach(([m, d], i) => { const bh = d / 14 * h; s += `<rect class="dk-bar b1" x="${x0 + i * bw + 18}" y="${y0 + h - bh}" width="${bw - 36}" height="${bh}"/>` + t(x0 + i * bw + bw / 2, y0 + h + 30, m, 'dk-small'); });
+    data.forEach(([m, d], i) => { const bh = d / 14 * h, cx = x0 + i * bw + bw / 2; s += `<rect class="dk-bar b1" x="${x0 + i * bw + 18}" y="${y0 + h - bh}" width="${bw - 36}" height="${bh}"/>` + m.split(' ').map((w, j) => t(cx, y0 + h + 30 + j * 26, w, 'dk-small')).join(''); });
     s += t(24, y0 + h / 2, 'drop / °C', 'dk-label', 'middle').replace('<text', `<text transform="rotate(-90 24 ${y0 + h / 2})"`);
     return `<svg class="dk" viewBox="0 0 720 360" role="img" aria-label="Bar chart of the temperature drop in 10 minutes for each wrapping: none 13, newspaper 8, felt 7, bubble wrap 6, cotton wool 5 degrees">${s}</svg>`;
   }
 
   const FIGURES = {
-    shelf: () => F.shelf(), hike: () => F.hike(), twoForces: () => F.twoForces(), extension: () => F.extension(),
-    springRig: () => F.springRig(3), pendulum: () => F.pendulum(), stairs: () => F.stairs(), house: () => F.house(false),
+    shelf: () => F.shelf(), hike: hikeBig, twoForces: () => F.twoForces(), extension: extensionBig,
+    springRig: () => F.springRig(3), pendulum: () => F.pendulum(), stairs: stairsBig, house: () => F.house(false),
     houseMarks: () => F.house(true), bounce: () => F.bounce(), cups: () => F.cups(['none', 'newspaper', 'bubble wrap', 'cotton wool', 'felt']),
     barsTop: () => F.barChart({ title: 'released', values: [20, 0, 0] }), barsMid: () => F.barChart({ title: 'half-way down', values: [10, 10, 0] }), barsLow: () => F.barChart({ title: 'just before landing', values: [0, 20, 0] }),
     sankeyLamp: () => F.sankey({ input: 100, useful: 10, wasted: 90, s: 1.6, useLabel: 'by light', wasteLabel: 'heating the room' }),
@@ -280,7 +434,7 @@
     sankeyLesson: () => F.sankey({ input: 100, useful: 20, wasted: 80, s: 1.6, useLabel: 'by light', wasteLabel: 'heating the room' }),
     twoGraphs, rods, coolingChart, story: () => F.storyStrip(), coverArt: () => F.coverArt(),
   };
-  const WIDGETS = { ramp: h => swing(h, 'ramp'), pendulum: h => swing(h, 'pendulum'), kinetic, springLab, elastic, motors };
+  const WIDGETS = { ramp: h => swing(h, 'ramp'), pendulum: h => swing(h, 'pendulum'), kinetic, springLab, elastic, motors, lift, bounce };
 
   function render() {
     document.querySelectorAll('#deck [data-fig]').forEach(el => { if (!el.firstElementChild && FIGURES[el.dataset.fig]) el.innerHTML = FIGURES[el.dataset.fig](); });
