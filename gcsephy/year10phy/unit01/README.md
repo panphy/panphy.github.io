@@ -61,7 +61,7 @@ The teaching deck (`../../decks/electric-circuits/`) has three photo slides: the
 
 ## Hosting
 
-Under `gcsephy/`: `noindex`, network-only, loads `/gcsephy/sw-register.js`, listed in `gcsephy/index.html`.
+Under `gcsephy/`: `noindex`, network-only, loads `/gcsephy/sw-register.js`, available by direct link; the GCSE landing page links the teaching deck and workbook hub instead of this companion site.
 
 ---
 
