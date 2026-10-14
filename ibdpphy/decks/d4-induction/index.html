@@ -128,7 +128,7 @@
           </ul>
           <div class="panel">
             <div class="panel-head"><span>A MAGNET AND A COIL</span></div>
-            <div class="fig" data-fig="d4-magnet-coil"></div>
+            <div class="fig" data-fig="d4-magnet-coil" data-magnet-coil></div>
           </div>
         </div>
         <div class="slide-foot"><span>D.4 INDUCTION · HL ONLY</span><span data-page></span></div>
@@ -157,7 +157,7 @@
           </div>
           <div class="panel">
             <div class="panel-head"><span>A LOOP IN A UNIFORM FIELD</span></div>
-            <div class="fig" data-fig="d4-flux"></div>
+            <div class="fig" data-fig="d4-flux" data-flux></div>
           </div>
         </div>
         <div class="slide-foot"><span>D.4 INDUCTION · HL ONLY</span><span data-page></span></div>
@@ -333,7 +333,7 @@
           </div>
           <div class="panel">
             <div class="panel-head"><span>A MAGNET AND A COIL</span></div>
-            <div class="fig" data-fig="d4-lenz"></div>
+            <div class="fig" data-fig="d4-lenz" data-lenz></div>
           </div>
         </div>
         <div class="slide-foot"><span>D.4 INDUCTION · HL ONLY</span><span data-page></span></div>
@@ -353,8 +353,8 @@
         <h2>Lenz’s law is conservation of energy<span>.</span></h2>
         <div class="split fig-first">
           <div class="panel">
-            <div class="panel-head"><span>THE SAME MAGNET, TWO TUBES</span><span class="reveal-hint">PRESS → TO DROP</span></div>
-            <div class="fig" data-fig="d4-tube"></div>
+            <div class="panel-head"><span>ONE MAGNET, TWO TUBES</span><span class="reveal-hint">PRESS → TO DROP</span></div>
+            <div class="fig" data-fig="d4-tube" data-tube></div>
           </div>
           <ul class="points small">
             <li class="step">If the current <b>helped</b> the change, the magnet would speed up by itself: energy from nothing</li>
@@ -389,14 +389,14 @@
           </div>
           <div class="panel">
             <div class="panel-head"><span>A ROD ON TWO RAILS</span></div>
-            <div class="fig" data-fig="d4-rod"></div>
+            <div class="fig" data-fig="d4-rod" data-rod></div>
           </div>
         </div>
         <div class="slide-foot"><span>D.4 INDUCTION · HL ONLY</span><span data-page></span></div>
         <aside class="revision-note" hidden>
           <div class="rn-main">
             <p><b>The same result from the force on a charge.</b> The free electrons in the rod are moving to the right with the rod, across the field. Each feels a magnetic force \(qvB\) along the rod, from D.3. Charge is pushed towards one end until the electric field set up in the rod balances the magnetic force: \(qE = qvB\), so \(E = vB\). The potential difference across a rod of length \(L\) is \(EL = BvL\). Faraday’s law and the force on a moving charge give the same emf.</p>
-            <p><b>The direction.</b> The flux into the page through the circuit is increasing, so by Lenz’s law the induced current must make a field out of the page inside the loop. By the grip rule that is an anticlockwise current: up the rod, as shown.</p>
+            <p><b>The direction.</b> The flux through the circuit is increasing, so by Lenz’s law the induced current must make a field inside the loop opposite to \(B\). Seen from above, looking along \(B\), the grip rule gives an anticlockwise current: along the rod towards the far rail, as shown.</p>
           </div>
           <div class="rn-side">
             <p class="tip">A rod moving alone, with no rails, still has the emf \(BvL\) between its ends, but no current flows. The wings of an aircraft crossing the Earth’s field have a small emf between their tips.</p>
@@ -475,7 +475,7 @@
           </ul>
           <div class="panel">
             <div class="panel-head"><span>A MAGNET ON A SPRING</span></div>
-            <div class="fig" data-fig="d4-spring-magnet"></div>
+            <div class="fig" data-fig="d4-spring-magnet" data-spring></div>
           </div>
         </div>
         <div class="slide-foot"><span>D.4 INDUCTION · HL ONLY</span><span data-page></span></div>
@@ -549,7 +549,7 @@
         <div class="stack center" style="gap: 20px;">
           <div class="panel" style="height: 470px; align-self: stretch;">
             <div class="panel-head"><span>ONE ROTATION</span><span class="pill">COIL AND EMF IN STEP</span></div>
-            <div class="fig" data-fig="d4-generator"></div>
+            <div class="fig" data-fig="d4-generator" data-generator></div>
           </div>
           <div class="idea">The flux linkage is \(NBA \cos \theta\). As the coil turns steadily, \(\theta\) grows steadily and the induced emf varies as a <b>sine curve</b>.</div>
         </div>
@@ -717,5 +717,6 @@
   <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
   <script src="../assets/deck-notes.js"></script>
   <script src="../assets/deck.js"></script>
+  <script type="module" src="models.js"></script>
 </body>
 </html>
