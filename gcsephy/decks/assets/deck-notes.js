@@ -1,7 +1,7 @@
-// Revision notes for students, shown in a collapsible pane beneath the slide.
+// Revision notes for students, opened above the navigation by a corner pill.
 // A slide's note is written inside its <section> as
 // <aside class="revision-note" hidden>…</aside>; on slides without one the
-// pane is hidden and the slide takes its space. The pane starts collapsed on
+// control and panel are hidden without changing slide size. The panel starts collapsed on
 // every load and, once opened, stays open from slide to slide. Each deck engine calls collect() before it
 // builds thumbnails and show() whenever the slide changes.
 (() => {
