@@ -33,7 +33,7 @@ By the end of the lesson, students should be able to:
 
 - Starter: two toy cars or bicycle wheels, one with oiled axles
 - Per group: four identical cups or beakers, thermometers or temperature probes, stopwatch, measuring cylinder, lids
-- Insulating materials: bubble wrap, cotton wool, newspaper, aluminium foil, felt (one cup left bare as the control)
+- Insulating materials: bubble wrap, cotton wool, newspaper, felt (one cup left bare as the control)
 - Hot water from a kettle, cooled to about 60 °C and poured by the teacher
 - Elastic bands to hold the wrappings
 - Optional demonstration: rods of different metals with wax and drawing pins along them, heated at one end
@@ -46,7 +46,7 @@ By the end of the lesson, students should be able to:
 
 ## Starter: Back to Lesson 6
 
-Remind students that the trolley's kinetic store got less than the gravitational potential store lost. Ask: where did the rest go?
+Remind students that in Lesson 6 the pendulum never swung back to its release height. Ask: where did the energy go?
 
 Rub hands together hard. Then spin two wheels, one with oiled axles. Which spins for longer, and why?
 
@@ -93,7 +93,6 @@ Sample results:
 | Material | Start / °C | After 10 min / °C | Drop / °C |
 |---|---:|---:|---:|
 | None (control) | 60 | 47 | 13 |
-| Aluminium foil | 60 | 50 | 10 |
 | Newspaper | 60 | 52 | 8 |
 | Bubble wrap | 60 | 54 | 6 |
 | Cotton wool | 60 | 55 | 5 |

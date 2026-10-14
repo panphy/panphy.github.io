@@ -4,7 +4,7 @@
 Energy: Stores and Transfers
 
 ## Lesson focus
-Students use the principle of conservation of energy to link the three stores they can calculate. They follow energy from one store to another in a closed system, draw energy bar charts, and test the idea on a ramp.
+Students use the principle of conservation of energy to link the three stores they can calculate. They follow energy from one store to another in a closed system, draw energy bar charts, and test the idea with a pendulum.
 
 ## Specification
 AQA GCSE Physics 4.1.2.1 Energy transfers in a system, and 4.1.1.1 (calculating how the total energy is redistributed when a system changes).
@@ -39,12 +39,14 @@ In a closed system, the total energy before a change equals the total energy aft
 ## Equipment and resources
 
 - A pendulum (a heavy bob on a string, clamped high)
-- Per group: ramp, trolley, books or blocks to raise the ramp, metre rule, stopwatch, balance; optional light gate
+- Per group: clamp stand, string and a bob of known mass, metre rule, a phone to film the swing; optional ramp, trolley and light gate
 - Calculators
 
 ## Starter: The pendulum that will not hit you
 
 Demonstrate (or show a video): a heavy pendulum bob is held against the teacher's nose and released. It swings away and comes back, stopping just short.
+
+Safety: release the bob from rest and never push it; stand completely still until it has swung back. Rehearse before the lesson, and hang it from a ceiling hook or a firmly clamped stand that cannot tip.
 
 Ask: why does it not come back higher and hit the teacher? Why does it not quite come back as high? Collect answers; the first is conservation, the second is dissipation.
 
@@ -93,28 +95,39 @@ Draw a bar for each store at three moments, always to the same scale. For the dr
 
 Then repeat for a swinging pendulum (top of swing, bottom, other side). Finally, a real pendulum after many swings: a growing thermal bar, the other two shrinking.
 
-## Practical: Does the ramp keep its energy?
+## Practical: Does the pendulum keep its energy?
 
-Groups test whether the energy lost from the gravitational potential store all reaches the kinetic store.
+Groups test whether a pendulum keeps all its energy. Every reading is a height, so no fast timing is needed.
 
-1. Measure the trolley's mass.
-2. Raise the start of the ramp; measure the vertical height h of the start above the bottom.
-3. Mark a 0.50 m section on the flat bench just after the bottom of the ramp.
-4. Release the trolley from rest at the start. Time it across the section. Repeat three times.
-5. Calculate Eₚ lost = m g h.
-6. Calculate the speed (0.50 ÷ mean time) and Eₖ = ½ m v².
-7. Compare.
+1. Hang a bob of known mass (for example 0.20 kg) from a clamp, with a metre rule clamped vertically just behind it.
+2. Note the height of the bottom of the bob at its lowest point.
+3. Pull the bob aside until it is 0.20 m higher than its lowest point. Release it from rest.
+4. Read the height it reaches on the far side of its first swing. Filming the swing against the rule with a phone makes this much easier.
+5. Let it swing on. Read the height it reaches after 10 swings.
+6. Calculate Eₚ = m g h at the release height, after one swing and after 10 swings.
 
-Sample results: m = 0.50 kg, h = 0.10 m, so Eₚ = 0.49 J. Mean time across 0.50 m = 0.42 s, so v = 1.19 m/s and Eₖ = 0.35 J.
+Sample results (m = 0.20 kg):
 
-Discussion: Eₖ is less than Eₚ. Where did 0.14 J go? (Thermal store of the wheels, ramp and air, and sound.) Is this system closed? Students should conclude that energy was conserved, but some was dissipated. This sets up Lesson 8.
+| Moment | Height above lowest point / m | Eₚ / J |
+|---|---:|---:|
+| Release | 0.20 | 0.39 |
+| After 1 swing | 0.19 | 0.37 |
+| After 10 swings | 0.12 | 0.24 |
+
+Discussion:
+
+1. At the lowest point, how much energy is in the kinetic store on the first swing? (About 0.39 J: the energy lost from the gravitational potential store.)
+2. Where did the missing energy (about 0.15 J) go after 10 swings? (The thermal store of the air and the string's support, through air resistance and friction.)
+3. Is this system closed? Students should conclude that energy was conserved, but some was dissipated each swing. This sets up Lesson 8.
+
+If you have light gates, the ramp version also works: a trolley released from a measured height, its speed measured by a light gate at the bottom, and Eₖ compared with Eₚ. Do not time a short run at the bottom with a stopwatch: reaction time is a large fraction of the time, and the error in Eₖ is larger still, because the speed is squared.
 
 ## Check for understanding
 
 1. State the principle of conservation of energy.
 2. A 2.0 kg rock falls 5.0 m. How much energy is in its kinetic store when it lands? Ignore air resistance. (98 J)
 3. A 0.10 kg ball is thrown up with 4.9 J in its kinetic store. How high does it go? (5.0 m)
-4. In the ramp practical, Eₖ was less than Eₚ. Does this break the principle of conservation? Explain.
+4. In the practical, the pendulum swung lower each time. Does this break the principle of conservation? Explain.
 
 ## Plenary
 
@@ -129,4 +142,4 @@ Draw energy bar charts for a rollercoaster car at the top of the first hill, at 
 1. Insist on "energy is transferred from … to …". Students often write "gravitational energy turns into kinetic energy". Accept it early on, then upgrade the language.
 2. Air resistance is a force, not a store. The energy it transfers goes to the thermal store of the air.
 3. Students may notice that the bob's or ball's mass cancels when finding h. Do not develop this; it is a good stretch question for students who spot it.
-4. The ramp practical gives a real shortfall of 20–40%. Do not present it as a failed experiment. It is the evidence for dissipation.
+4. The pendulum loses only a little on each swing, so the one-swing reading may look like no loss at all. The 10-swing reading shows the trend clearly. Do not present the shortfall as a failed experiment: it is the evidence for dissipation.

@@ -7,7 +7,7 @@ Energy: Stores and Transfers
 Students learn that power is the rate of energy transfer, calculate it with P = E ÷ t, rearrange to find energy or time, and measure their own power by walking up a flight of stairs.
 
 ## Specification
-AQA GCSE Physics 4.1.1.4 Power. The specification also gives power = work done ÷ time; this unit uses P = E ÷ t only, and work done (W = F s) is left to the Forces unit.
+AQA GCSE Physics 4.1.1.4 Power. The equation is on the AQA Physics equation sheet. The specification also gives power = work done ÷ time; this unit uses P = E ÷ t only, and work done (W = F s) is left to the Forces unit.
 
 ## Scope
 Students calculate P, and rearrange to find E (E = P t) or t (t = E ÷ P).

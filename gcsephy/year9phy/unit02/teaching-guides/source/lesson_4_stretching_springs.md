@@ -7,7 +7,7 @@ Energy: Stores and Transfers
 Students stretch a spring, plot force against extension and find its spring constant k, using F = k e. The point of k is Lesson 5: it is the number that tells us how much energy a stretched spring stores.
 
 ## Specification
-AQA GCSE Physics 4.5.3 Forces and elasticity (taught here ahead of the Forces unit). Students should be able to recall and apply F = k e.
+AQA GCSE Physics 4.5.3 Forces and elasticity (taught here ahead of the Forces unit). The specification asks students to recall and apply F = k e; it is also on the AQA Physics equation sheet.
 
 ## Scope
 Students calculate F, and rearrange to find k from a force and an extension. They also find k as the gradient of a force–extension graph.
