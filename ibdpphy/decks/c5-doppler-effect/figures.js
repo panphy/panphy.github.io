@@ -20,12 +20,13 @@ window.DeckFigures.add(P => {
   // and the rate at which they arrive; the glow fades over about a tenth of a second.
   const flashOf = (phase, rate) => (phase < 0 ? 0 : Math.exp(-(phase - Math.floor(phase)) / rate / 0.1));
   // What an observer hears over the last `span` seconds, newest on the right: one cycle for each
-  // wavefront received. phase(τ) is the number of wavefronts received by time τ (null: none yet).
+  // wavefront received. phase(τ) is the number of wavefronts received by time τ (null: none yet),
+  // or [phase, loudness from 0 to 1] for a wave that dies away and starts again.
   function trace(x, y, w, h, t, span, phase, colour = 'brand-primary') {
     const n = 180, pts = [];
     for (let i = 0; i <= n; i++) {
-      const p = phase(t - span + span * i / n);
-      pts.push(`${f(x + 12 + (w - 24) * i / n)},${f(y + h / 2 - (p === null ? 0 : (h / 2 - 12) * Math.cos(TAU * p)))}`);
+      const v = phase(t - span + span * i / n), [p, amp] = v === null ? [0, 0] : Array.isArray(v) ? v : [v, 1];
+      pts.push(`${f(x + 12 + (w - 24) * i / n)},${f(y + h / 2 - amp * (h / 2 - 12) * Math.cos(TAU * p))}`);
     }
     return `<rect x="${x}" y="${y}" width="${w}" height="${h}" rx="14" style="fill:var(--viewer-bg);stroke:var(--card-border);stroke-width:2"/><polyline points="${pts.join(' ')}" style="fill:none;stroke:var(--${colour});stroke-width:3.5;stroke-linejoin:round"/>`;
   }
@@ -78,10 +79,12 @@ window.DeckFigures.add(P => {
     // Waves received by time τ: wavefronts emitted up to τ, less those still on their way.
     const path = on ? WALK : PLAIN_WALK;
     const heardStill = tau => (c * tau - (xs - OBS.still)) / lam;
-    const heardWalker = tau => (c * tau - (walkerAt(tau, path).x - xs)) / lam;
+    // The walker sets off again from the same place every loop, and each loop moves them on by a
+    // whole number of wavelengths (u × LOOP), so the waves they meet carry on without a jump.
+    const heardWalker = tau => ((c + OBS.u) * tau - (path.x0 - xs)) / lam;
     const w = walkerAt(t, path);
     if (on) s += person(OBS.still, y, 1, still ? 0 : flashOf(heardStill(t), c / lam));
-    s += person(w.x, y, w.op, still ? 0 : flashOf(heardWalker(t), (c + (w.moving ? OBS.u : 0)) / lam)) + `<g style="opacity:${f(w.op * 100) / 100}">${arrow(w.x - 26, y - 76, w.x - 100, y - 76, 'brand-accent', 5)}</g>`;
+    s += person(w.x, y, w.op, still ? 0 : flashOf(heardWalker(t), (c + OBS.u) / lam)) + `<g style="opacity:${f(w.op * 100) / 100}">${arrow(w.x - 26, y - 76, w.x - 100, y - 76, 'brand-accent', 5)}</g>`;
     if (!on) return s;
     // The readouts sit on a clear band below the wavefronts.
     s += `<rect x="0" y="284" width="900" height="200" style="fill:var(--viewer-bg)"/>` + trace(20, 316, 250, 76, t, 2.4, heardStill) + trace(560, 316, 330, 76, t, 2.4, heardWalker);
@@ -121,9 +124,16 @@ window.DeckFigures.add(P => {
     }
     if (!on) return s;
     // Waves received back by τ: count the returns, sharing each interval evenly between two of
-    // them. Between one car and the next nothing comes back.
+    // them. Between one car and the next nothing comes back: the wave dies away after the last
+    // return and grows again before the next, carried on at the rate of its neighbours.
     times.sort((p, q) => p - q);
-    const heardBack = tau => { const i = times.findIndex(tb => tb > tau); return i < 1 || times[i] - times[i - 1] > 2 * T ? null : i - 1 + (tau - times[i - 1]) / (times[i] - times[i - 1]); };
+    const heardBack = tau => {
+      const i = times.findIndex(tb => tb > tau);
+      if (i > 0 && times[i] - times[i - 1] <= 2 * T) return i - 1 + (tau - times[i - 1]) / (times[i] - times[i - 1]);
+      const end = i < 0 ? times.length : i, before = end >= 2 ? [end - 1 + (tau - times[end - 1]) / (times[end - 1] - times[end - 2]), 1 - ease((tau - times[end - 1]) / 0.3)] : null;
+      const after = i >= 0 && i + 1 < times.length ? [i - (times[i] - tau) / (times[i + 1] - times[i]), 1 - ease((times[i] - tau) / 0.3)] : null;
+      return [before, after].filter(Boolean).sort((p, q) => q[1] - p[1])[0] ?? null;
+    };
     s += trace(60, 404, 360, 72, t, 2, tau => tau / T) + trace(500, 404, 360, 72, t, 2, still ? tau => tau / T * 5 / 3 : heardBack, 'proton');
     return s;
   }
