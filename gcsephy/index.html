@@ -81,9 +81,9 @@
     .jump a small { font: 500 .65rem/1.4 var(--mono); text-transform: none; letter-spacing: .02em; opacity: .85; }
     .jump a:hover { transform: translate(-2px, -2px); box-shadow: 7px 7px 0 var(--j-shadow); }
     .jump li:nth-child(1) { --j-bg: #0c3a3f; --j-fg: #ffc145; --j-shadow: #ff8fa3; }
-    .jump li:nth-child(2) { --j-bg: #07162f; --j-fg: #c9ee49; --j-shadow: #42cbe8; }
-    .jump li:nth-child(3) { --j-bg: #0a1326; --j-fg: #ffd23f; --j-shadow: #ff8a4c; }
-    .jump li:nth-child(4) { --j-bg: #fff; --j-fg: #c2410c; --j-shadow: #0d9488; }
+    .jump li:nth-child(2) { --j-bg: #f6cea8; --j-fg: #5c3810; --j-shadow: #80501e; }
+    .jump li:nth-child(3) { --j-bg: #d8eaa1; --j-fg: #34481a; --j-shadow: #49651f; }
+    .jump li:nth-child(4) { --j-bg: #f6e7a5; --j-fg: #574511; --j-shadow: #78601b; }
     .jump a { border-radius: 10px; padding: 14px 18px; min-height: 72px; }
     .jump a span { display: grid; gap: 8px; }
 
@@ -137,12 +137,26 @@
     .go { display: grid; place-items: center; width: 44px; height: 44px; flex: none; border: 2px solid currentColor; border-radius: 50%; font-size: 20px; color: var(--c-arrow, var(--c-accent)); transition: transform .14s ease; }
     .card:hover .go { transform: rotate(-45deg); }
 
-    /* Year 9, Work Like a Physicist: navy, lime and cyan. */
-    .t-y9 { --c-bg: #07162f; --c-fg: #fff; --c-sub: #c5d0e2; --c-accent: #c9ee49; --c-shadow: #42cbe8; --c-texture: linear-gradient(rgba(68, 168, 200, .16) 1px, transparent 1px), linear-gradient(90deg, rgba(68, 168, 200, .16) 1px, transparent 1px); }
-    /* Year 10, Electric Circuits: deeper navy, spark yellow and copper. */
-    .t-y10 { --c-bg: #0a1326; --c-fg: #fff; --c-sub: #d5deeb; --c-accent: #ffd23f; --c-shadow: #ff8a4c; --c-texture: linear-gradient(rgba(68, 168, 200, .16) 1px, transparent 1px), linear-gradient(90deg, rgba(68, 168, 200, .16) 1px, transparent 1px); }
-    /* Year 11 and the atoms deck: dotted paper, serif headings, orange and teal. */
-    .t-y11 { --c-bg: #fff; --c-fg: #1b1b1b; --c-sub: #5f5954; --c-accent: #c2410c; --c-on-accent: #fff; --c-shadow: #0d9488; --c-arrow: #0f766e; --c-radius: 18px; --c-title: 400 clamp(1.7rem, 2.5vw, 2.1rem)/1.05 var(--serif); --c-tracking: 0; --c-case: none; --c-texture: radial-gradient(#e4dfd4 1px, transparent 1px); --c-texture-size: 22px 22px; }
+    /* Teaching decks: the calm deck style, a cream slide with a year-coloured top edge,
+       a year badge and serif title, in the deck's own year colours (gcsephy/decks/assets/teaching-deck.css). */
+    .t-y9 { --year-colour: #f6cea8; --year-ink: #80501e; }
+    .t-y10 { --year-colour: #d8eaa1; --year-ink: #49651f; }
+    .t-y11 { --year-colour: #f6e7a5; --year-ink: #78601b; }
+    .card.deck-card {
+      --c-bg: #f8f6f1; --c-fg: #1b1b1b; --c-sub: #5f5954; --c-accent: var(--year-colour); --c-on-accent: var(--year-ink); --c-arrow: var(--year-ink);
+      --c-radius: 20px; --c-title: 400 clamp(1.7rem, 2.5vw, 2.1rem)/1.05 var(--serif); --c-tracking: 0; --c-case: none;
+      --c-texture: radial-gradient(#ede9e0 1.5px, transparent 1.5px); --c-texture-size: 24px 24px;
+      border: 1px solid #ded9cf; border-top: 10px solid var(--year-colour);
+      box-shadow: 0 4px 16px rgba(0, 0, 0, .06);
+    }
+    .card.deck-card:hover, .card.deck-card:focus-visible { transform: translateY(-3px); box-shadow: 0 10px 26px rgba(0, 0, 0, .1); }
+    .deck-card .year { position: absolute; top: 16px; right: 18px; padding: 4px 11px; border-radius: 999px; background: var(--year-colour); color: var(--year-ink); font: 600 .72rem/1.2 var(--mono); }
+    .deck-card .kind { margin-right: 84px; background: #fff; border: 1px solid #ded9cf; color: var(--year-ink); }
+    .deck-card .go { border-width: 1px; border-color: #bcb5a8; background: #fff; }
+    .deck-card:hover .go { background: var(--year-colour); }
+    .unit .workbook-link { border: 1px solid #bcb5a8; border-radius: 999px; background: #fff; color: #1b1b1b; box-shadow: 0 2px 8px rgba(0, 0, 0, .05); }
+    .unit .workbook-link .icon { color: var(--year-ink); }
+    .unit .workbook-link:hover { transform: translateY(-2px); background: var(--year-colour); box-shadow: 0 6px 16px rgba(0, 0, 0, .08); }
     /* Do Now: teal board, marigold and pink. */
     .t-dn { --c-bg: #0c3a3f; --c-fg: #fff; --c-sub: #dcebe9; --c-accent: #ffc145; --c-shadow: #ff8fa3; --c-radius: 12px; --c-texture: linear-gradient(rgba(140, 214, 204, .13) 1px, transparent 1px), linear-gradient(90deg, rgba(140, 214, 204, .13) 1px, transparent 1px); }
     .t-dn-sheet { --c-bg: #fffdf7; --c-fg: #0b2a2e; --c-sub: #4f6163; --c-accent: #ff8fa3; --c-shadow: #ffc145; --c-arrow: #0b2a2e; --c-radius: 12px; }
@@ -244,8 +258,9 @@
       </div>
       <div class="cards">
         <div class="unit t-y9">
-          <a class="card t-y9" href="decks/work-like-a-physicist/">
-            <span class="kind">Year 9 slide deck</span>
+          <a class="card deck-card t-y9" href="decks/work-like-a-physicist/">
+            <span class="year">Year 9</span>
+            <span class="kind">Slide deck</span>
             <strong class="title">Work Like a Physicist</strong>
             <span class="desc">Uncertainty, errors, variables, graphs and investigations.</span>
             <span class="foot"><span class="meta">Present fullscreen</span><span class="go" aria-hidden="true"><svg class="icon" viewBox="0 0 24 24" focusable="false"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span></span>
@@ -253,8 +268,9 @@
           <a class="workbook-link" href="year9phy/unit01/workbook/" aria-label="Work Like a Physicist workbook hub">Workbook hub <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
         </div>
         <div class="unit t-y9">
-          <a class="card t-y9" href="decks/energy-stores-and-transfers/">
-            <span class="kind">Year 9 slide deck</span>
+          <a class="card deck-card t-y9" href="decks/energy-stores-and-transfers/">
+            <span class="year">Year 9</span>
+            <span class="kind">Slide deck</span>
             <strong class="title">Energy: Stores and Transfers</strong>
             <span class="desc">Stores, kinetic, gravitational and elastic energy, springs, power and efficiency.</span>
             <span class="foot"><span class="meta">Present fullscreen</span><span class="go" aria-hidden="true"><svg class="icon" viewBox="0 0 24 24" focusable="false"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span></span>
@@ -271,8 +287,9 @@
       </div>
       <div class="cards">
         <div class="unit t-y10">
-          <a class="card t-y10" href="decks/electric-circuits/">
-            <span class="kind">Year 10 slide deck</span>
+          <a class="card deck-card t-y10" href="decks/electric-circuits/">
+            <span class="year">Year 10</span>
+            <span class="kind">Slide deck</span>
             <strong class="title">Electric Circuits</strong>
             <span class="desc">Current, p.d., resistance, I–V, power and mains safety.</span>
             <span class="foot"><span class="meta">Present fullscreen</span><span class="go" aria-hidden="true"><svg class="icon" viewBox="0 0 24 24" focusable="false"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span></span>
@@ -289,7 +306,8 @@
       </div>
       <div class="cards">
         <div class="unit t-y11">
-          <a class="card t-y11" href="decks/atoms-and-radiation/">
+          <a class="card deck-card t-y11" href="decks/atoms-and-radiation/">
+            <span class="year">Year 11</span>
             <span class="kind">Slide deck</span>
             <strong class="title">Atoms and Nuclear Radiation</strong>
             <span class="desc">Atomic models, alpha, beta, gamma and half-life.</span>
