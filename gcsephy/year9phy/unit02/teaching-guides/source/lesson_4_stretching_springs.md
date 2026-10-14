@@ -10,7 +10,7 @@ Students stretch a spring, plot force against extension and find its spring cons
 AQA GCSE Physics 4.5.3 Forces and elasticity (taught here ahead of the Forces unit). The specification asks students to recall and apply F = k e; it is also on the AQA Physics equation sheet.
 
 ## Scope
-Students calculate F, and rearrange to find k from a force and an extension. They also find k as the gradient of a force–extension graph.
+Students calculate F, and rearrange to find k (k = F ÷ e) or e (e = F ÷ k). They plot two graphs of the same results: extension against force first, then force against extension, whose gradient is k.
 
 ## Learning objectives
 By the end of the lesson, students should be able to:
@@ -19,7 +19,7 @@ By the end of the lesson, students should be able to:
 2. Describe the difference between elastic and inelastic deformation.
 3. Calculate extension from the stretched and original lengths.
 4. Use F = k e to calculate a force or a spring constant.
-5. Find k from the gradient of a force–extension graph, and identify the limit of proportionality.
+5. Plot extension against force, then force against extension; explain why they look different; find k from the gradient of the second; identify the limit of proportionality.
 
 ## Key vocabulary
 
@@ -43,7 +43,7 @@ By the end of the lesson, students should be able to:
 > F = k e  
 > force = spring constant × extension
 
-Rearranged: k = F ÷ e.
+Rearranged: k = F ÷ e, and e = F ÷ k.
 
 Hooke's law: the extension of a spring is directly proportional to the force on it, provided the limit of proportionality is not exceeded.
 
@@ -105,15 +105,28 @@ Sample results (original length 5.0 cm):
 | 600 | 6 | 29.0 | 24.0 |
 | 700 | 7 | 34.5 | 29.5 |
 
-## Graph and spring constant
+## Two graphs of the same results
 
-Students plot force (y-axis, N) against extension (x-axis, converted to m). They draw a straight best-fit line through the origin for the first six points.
+**Graph 1: extension against force.** Force is the independent variable (we choose it by adding masses), so, as in Unit 1, it goes on the x-axis and extension on the y-axis. Students plot the points and draw a straight best-fit line through the origin for the first six points.
+
+> This graph answers the question we asked: what happens to the extension when the force increases? It increases in proportion, up to the limit of proportionality.
+
+**Graph 2: force against extension.** Now swap the axes: extension on the x-axis, force on the y-axis, extension in metres.
 
 > k = gradient = change in force ÷ change in extension  
 > k = 6 N ÷ 0.240 m  
 > k = 25 N/m
 
-The 700 g point lies off the line: the spring has passed its limit of proportionality. Check whether it returned to 5.0 cm; if not, it was also inelastically deformed.
+**Explain the difference.** Both graphs show the same results, so both show the same straight line through the origin, just reflected. What changes is the gradient:
+
+| Graph | y-axis | x-axis | Gradient means |
+|---|---|---|---|
+| 1 | extension | force | extension per newton (0.04 m per N): how stretchy the spring is |
+| 2 | force | extension | force per metre, which is k: how stiff the spring is |
+
+Physicists draw graph 2 because its gradient is the spring constant, the number we need for elastic potential energy in Lesson 5. AQA exam questions usually show graph 2. A stiffer spring gives a steeper line on graph 2, but a shallower line on graph 1.
+
+On both graphs the 700 g point lies off the line: the spring has passed its limit of proportionality. Check whether it returned to 5.0 cm; if not, it was also inelastically deformed.
 
 Worked example (no graph):
 
@@ -130,6 +143,8 @@ Worked example (no graph):
 3. Spring A has k = 20 N/m; spring B has k = 80 N/m. Which is stiffer?
 4. Calculate the force needed to stretch a 40 N/m spring by 0.15 m. (6.0 N)
 5. How can you tell from the graph where the limit of proportionality is?
+6. A spring has k = 40 N/m. What extension does a 2.0 N force give? (0.050 m = 5.0 cm)
+7. Spring A is stiffer than spring B. Whose line is steeper on a force–extension graph?
 
 ## Plenary
 
@@ -137,7 +152,7 @@ Hold up two springs with different k. Ask: if I stretch both by 10 cm, which one
 
 ## Possible prep
 
-Students finish their graph and spring constant if needed. Stretch: explain why a graph of length against force is a straight line but does not go through the origin.
+Students finish both graphs and the spring constant if needed. Stretch: explain why a graph of length against force is a straight line but does not go through the origin.
 
 ## Teacher notes
 

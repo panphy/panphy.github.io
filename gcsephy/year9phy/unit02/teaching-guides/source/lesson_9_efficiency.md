@@ -10,14 +10,14 @@ Students calculate efficiency from energy or power, as a decimal and a percentag
 AQA GCSE Physics 4.1.2.2 Efficiency. The specification asks students to recall and apply both efficiency equations; both are also on the AQA Physics equation sheet. Describing ways to increase efficiency is Higher tier only. Sankey diagrams are not in the specification; they are used here to picture efficiency.
 
 ## Scope
-Students calculate efficiency, and rearrange to find the useful output. They are not asked to find the total input.
+Students calculate efficiency, and rearrange to find the useful output or the total input.
 
 ## Learning objectives
 By the end of the lesson, students should be able to:
 
 1. Calculate efficiency from energy or power, as a decimal and as a percentage.
 2. Explain why no real device is 100% efficient.
-3. Calculate the useful output from the efficiency and the total input.
+3. Calculate the useful output or the total input from the efficiency.
 4. Draw and interpret a Sankey diagram.
 5. (Higher) Describe ways to increase the efficiency of an energy transfer.
 
@@ -38,7 +38,7 @@ By the end of the lesson, students should be able to:
 
 Efficiency has no unit. As a decimal it is between 0 and 1; multiply by 100 for a percentage.
 
-Rearranged: useful output = efficiency × total input (with efficiency as a decimal).
+Rearranged (with efficiency as a decimal): useful output = efficiency × total input, and total input = useful output ÷ efficiency.
 
 Also:
 
@@ -122,7 +122,8 @@ Students then read efficiency from a given Sankey diagram, and draw one for the 
 1. A device transfers 300 J usefully from 1200 J supplied. What is its efficiency? (0.25, or 25%)
 2. Why can efficiency never be more than 100%?
 3. A 400 W motor is 75% efficient. Calculate its useful power output. (300 W)
-4. On a Sankey diagram, how do you know which arrow is the wasted energy?
+4. A lamp is 0.20 efficient and gives 12 J by light. How much energy was supplied? (60 J)
+5. On a Sankey diagram, how do you know which arrow is the wasted energy?
 
 ## Plenary
 

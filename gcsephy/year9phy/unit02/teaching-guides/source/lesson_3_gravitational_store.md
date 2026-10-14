@@ -10,7 +10,7 @@ Students meet gravitational field strength as "newtons per kilogram", calculate 
 AQA GCSE Physics 4.1.1.2 Changes in energy. The equation is on the AQA Physics equation sheet, and g is always given in calculations. This unit uses g = 9.8 N/kg throughout.
 
 ## Scope
-Students calculate Eₚ, and rearrange to find h. They are **not** expected to find m.
+Students calculate Eₚ, and rearrange to find h or m.
 
 Weight (W = m g) is taught later, in the Forces unit. This lesson only needs the idea that gravity pulls each kilogram down with 9.8 N. That one sentence is reused in Lesson 4.
 
@@ -20,7 +20,7 @@ By the end of the lesson, students should be able to:
 1. Explain what the gravitational field strength g means.
 2. Calculate the energy in the gravitational potential store using Eₚ = m g h.
 3. Use the change in height, not the height above the ground, when an object moves between two points.
-4. Rearrange the equation to find a height.
+4. Rearrange the equation to find a height or a mass.
 
 ## Key vocabulary
 
@@ -95,7 +95,8 @@ Rearrange in symbols first, then substitute.
 
 > Eₚ = m g h  
 > Divide both sides by m g:  
-> h = Eₚ ÷ (m g)
+> h = Eₚ ÷ (m g)  
+> In the same way, m = Eₚ ÷ (g h)
 
 Worked example 3:
 
@@ -113,7 +114,7 @@ Workbook page in three sections:
 
 1. Straight substitution (masses in kg, then in g).
 2. Change in height (stairs, lifts, a ski slope).
-3. Finding h, including one in kilojoules (convert to joules first).
+3. Finding h or m, including one in kilojoules (convert to joules first).
 
 ## Activity 2: Lift it
 
@@ -125,6 +126,7 @@ Pairs choose three objects, measure the mass and the height of a shelf or bench,
 2. Calculate Eₚ for a 5.0 kg bag lifted 2.0 m. (98 J)
 3. Why would the same lift store less energy on the Moon?
 4. A 0.50 kg ball gains 24.5 J. How high was it lifted? (5.0 m)
+5. A crate lifted 2.0 m gains 392 J. What is its mass? (20 kg)
 
 ## Plenary
 
