@@ -1,6 +1,6 @@
 # Electric Circuits — Year 10 workbook and teacher guide
 
-Twelve 50-minute lessons for AQA GCSE Combined Science: Trilogy (Higher) and GCSE Physics, sections 6.2.1–6.2.4 / 4.2.1–4.2.4, for students with no prior knowledge of electricity. Part of the unit's companion site ([`../`](../)); students reach it from the unit home's Resources section, which opens [`index.html`](index.html) here.
+Twelve 50-minute lessons for AQA GCSE Combined Science: Trilogy (Higher) and GCSE Physics, sections 6.2.1–6.2.4 / 4.2.1–4.2.4, for students with no prior knowledge of electricity. Part of the unit's companion site ([`../`](../)); students reach [`index.html`](index.html) here from the GCSE landing page or the unit home's Resources section.
 
 ## Files
 

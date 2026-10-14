@@ -5,7 +5,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="robots" content="noindex, nofollow">
-  <meta name="description" content="AQA GCSE Physics (8463) and Combined Science: Trilogy (8464) resources from PanPhy Labs: unit companion sites, workbooks, Do Now lesson starters, revision sheets and teaching decks.">
+  <meta name="description" content="AQA GCSE Physics (8463) and Combined Science: Trilogy (8464) resources from PanPhy Labs: teaching decks, workbook hubs, Do Now lesson starters and AO1 revision resources.">
   <meta name="theme-color" content="#f5f1e6">
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
   <title>GCSE Physics - PanPhy Labs</title>
@@ -78,15 +78,14 @@
       font: 900 1rem/1 var(--display); letter-spacing: -.03em; text-transform: uppercase;
       transition: transform .12s ease, box-shadow .12s ease;
     }
-    .jump a small { font: 500 .7rem/1 var(--mono); letter-spacing: .1em; opacity: .85; }
+    .jump a small { font: 500 .65rem/1.4 var(--mono); text-transform: none; letter-spacing: .02em; opacity: .85; }
     .jump a:hover { transform: translate(-2px, -2px); box-shadow: 7px 7px 0 var(--j-shadow); }
-    .jump li:nth-child(1) { --j-bg: #07162f; --j-fg: #c9ee49; --j-shadow: #42cbe8; margin-right: 18%; }
-    .jump li:nth-child(2) { --j-bg: #0a1326; --j-fg: #ffd23f; --j-shadow: #3fd0e8; margin: 0 9%; }
-    .jump li:nth-child(3) { --j-bg: #fff; --j-fg: #c2410c; --j-shadow: #0d9488; margin-left: 18%; }
-    .jump li:nth-child(3) a { border-radius: 14px; font: 400 1.25rem/1 var(--serif); letter-spacing: 0; text-transform: none; }
-    .jump li:nth-child(4) { --j-bg: #0c3a3f; --j-fg: #ffc145; --j-shadow: #ff8fa3; margin: 0 9%; }
-    .jump li:nth-child(4) a { border-radius: 10px; }
-    .jump li:nth-child(5) { --j-bg: #a895ff; --j-fg: #0b1730; --j-shadow: #0b1730; margin-right: 18%; }
+    .jump li:nth-child(1) { --j-bg: #0c3a3f; --j-fg: #ffc145; --j-shadow: #ff8fa3; }
+    .jump li:nth-child(2) { --j-bg: #07162f; --j-fg: #c9ee49; --j-shadow: #42cbe8; }
+    .jump li:nth-child(3) { --j-bg: #0a1326; --j-fg: #ffd23f; --j-shadow: #ff8a4c; }
+    .jump li:nth-child(4) { --j-bg: #fff; --j-fg: #c2410c; --j-shadow: #0d9488; }
+    .jump a { border-radius: 10px; padding: 14px 18px; min-height: 72px; }
+    .jump a span { display: grid; gap: 8px; }
 
     /* ---------- Sections ---------- */
     .band {
@@ -105,6 +104,16 @@
     .rail h2.word { font-size: clamp(54px, 6.4vw, 96px); letter-spacing: -.07em; text-transform: uppercase; }
     @supports not (-webkit-text-stroke: 2px black) { .rail h2 { color: var(--ink); } }
     .cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 290px), 1fr)); gap: 22px 24px; align-content: start; }
+
+    .unit { display: flex; flex-direction: column; gap: 16px; min-width: 0; }
+    .unit .card { flex: 1; }
+    .workbook-link {
+      display: flex; align-items: center; justify-content: space-between; gap: 12px;
+      min-height: 52px; padding: 12px 16px; border: 2px solid var(--ink); border-radius: var(--c-radius, 4px);
+      background: var(--paper); color: var(--ink); font-weight: 800;
+      box-shadow: 4px 4px 0 var(--c-shadow); transition: transform .14s ease, box-shadow .14s ease;
+    }
+    .workbook-link:hover { transform: translate(-2px, -2px); box-shadow: 6px 6px 0 var(--c-shadow); }
 
     /* ---------- Cards ---------- */
     .card {
@@ -132,8 +141,6 @@
     .t-y9 { --c-bg: #07162f; --c-fg: #fff; --c-sub: #c5d0e2; --c-accent: #c9ee49; --c-shadow: #42cbe8; --c-texture: linear-gradient(rgba(68, 168, 200, .16) 1px, transparent 1px), linear-gradient(90deg, rgba(68, 168, 200, .16) 1px, transparent 1px); }
     /* Year 10, Electric Circuits: deeper navy, spark yellow and copper. */
     .t-y10 { --c-bg: #0a1326; --c-fg: #fff; --c-sub: #d5deeb; --c-accent: #ffd23f; --c-shadow: #ff8a4c; --c-texture: linear-gradient(rgba(68, 168, 200, .16) 1px, transparent 1px), linear-gradient(90deg, rgba(68, 168, 200, .16) 1px, transparent 1px); }
-    /* Year 10 workbook page: paper card, navy ink, cyan shadow. */
-    .t-y10-book { --c-bg: #fffdf7; --c-fg: #0a1326; --c-sub: #4a5360; --c-accent: #ffd23f; --c-shadow: #3fd0e8; --c-arrow: #0a1326; }
     /* Year 11 and the atoms deck: dotted paper, serif headings, orange and teal. */
     .t-y11 { --c-bg: #fff; --c-fg: #1b1b1b; --c-sub: #5f5954; --c-accent: #c2410c; --c-on-accent: #fff; --c-shadow: #0d9488; --c-arrow: #0f766e; --c-radius: 18px; --c-title: 400 clamp(1.7rem, 2.5vw, 2.1rem)/1.05 var(--serif); --c-tracking: 0; --c-case: none; --c-texture: radial-gradient(#e4dfd4 1px, transparent 1px); --c-texture-size: 22px 22px; }
     /* Do Now: teal board, marigold and pink. */
@@ -152,12 +159,11 @@
       .jump li:nth-child(2) { animation-delay: .16s; }
       .jump li:nth-child(3) { animation-delay: .22s; }
       .jump li:nth-child(4) { animation-delay: .28s; }
-      .jump li:nth-child(5) { animation-delay: .34s; }
       @keyframes rise { from { opacity: 0; transform: translateY(14px); } }
     }
     @media (prefers-reduced-motion: reduce) {
       html { scroll-behavior: auto; }
-      .card, .jump a, .go { transition: none; }
+      .card, .workbook-link, .jump a, .go { transition: none; }
     }
 
     /* ---------- Narrow screens ---------- */
@@ -192,74 +198,16 @@
       <div>
         <p class="eyebrow"><span>Years 9 to 11</span> Unit by unit</p>
         <h1>GCSE<br><i>Physics</i><b>.</b></h1>
-        <p class="lead">Unit companions, workbooks, lesson starters and teaching decks for AQA GCSE Physics (8463) and Combined Science: Trilogy (8464). Each one keeps its own colours here, so you will know it when you get there.</p>
+        <p class="lead">Teaching decks, workbooks, lesson starters and AO1 revision resources for AQA GCSE Physics (8463) and Combined Science: Trilogy (8464). Each one keeps its own colours here, so you will know it when you get there.</p>
       </div>
       <nav aria-label="Sections on this page">
         <ul class="jump">
-          <li><a href="#year9">Year 9 <small>01</small></a></li>
-          <li><a href="#year10">Year 10 <small>02</small></a></li>
-          <li><a href="#year11">Year 11 <small>03</small></a></li>
-          <li><a href="#starters">Do Now <small>04</small></a></li>
-          <li><a href="#decks">Decks <small>05</small></a></li>
+          <li><a href="#starters"><span>AO1<small>Starters &amp; revision</small></span><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M6 13l6 6 6-6"/></svg></a></li>
+          <li><a href="#year9"><span>Year 9<small>Decks &amp; workbooks</small></span><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M6 13l6 6 6-6"/></svg></a></li>
+          <li><a href="#year10"><span>Year 10<small>Decks &amp; workbooks</small></span><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M6 13l6 6 6-6"/></svg></a></li>
+          <li><a href="#year11"><span>Year 11<small>Decks &amp; workbooks</small></span><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M6 13l6 6 6-6"/></svg></a></li>
         </ul>
       </nav>
-    </section>
-
-    <section class="band" id="year9" aria-labelledby="year9-title">
-      <div class="rail">
-        <p>Year</p>
-        <h2 id="year9-title" aria-label="Year 9">9</h2>
-      </div>
-      <div class="cards">
-        <a class="card t-y9" href="year9phy/unit01/">
-          <span class="kind">Unit 1 companion</span>
-          <strong class="title">Work Like a Physicist</strong>
-          <span class="desc">Working scientifically: revision notes for each mission, fresh practice and the Exam Zone.</span>
-          <span class="foot"><span class="meta">8 lessons · 40 questions</span><span class="go" aria-hidden="true"><svg class="icon" viewBox="0 0 24 24" focusable="false"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span></span>
-        </a>
-        <a class="card t-y9" href="year9phy/unit02/">
-          <span class="kind">Unit 2 resources</span>
-          <strong class="title">Energy: Stores and Transfers</strong>
-          <span class="desc">Stores, kinetic, gravitational and elastic energy, power and efficiency: the workbook, its answers and the lesson plans.</span>
-          <span class="foot"><span class="meta">9 lessons · workbook</span><span class="go" aria-hidden="true"><svg class="icon" viewBox="0 0 24 24" focusable="false"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span></span>
-        </a>
-      </div>
-    </section>
-
-    <section class="band" id="year10" aria-labelledby="year10-title">
-      <div class="rail">
-        <p>Year</p>
-        <h2 id="year10-title" aria-label="Year 10">10</h2>
-      </div>
-      <div class="cards">
-        <a class="card t-y10" href="year10phy/unit01/">
-          <span class="kind">Unit companion</span>
-          <strong class="title">Electric Circuits</strong>
-          <span class="desc">Electricity companion: revision notes, practice and the Exam Zone.</span>
-          <span class="foot"><span class="meta">59 questions · 8 guides</span><span class="go" aria-hidden="true"><svg class="icon" viewBox="0 0 24 24" focusable="false"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span></span>
-        </a>
-        <a class="card t-y10-book" href="year10phy/unit01/workbook/">
-          <span class="kind">Workbook</span>
-          <strong class="title">Electric Circuits workbook</strong>
-          <span class="desc">Twelve-lesson workbook, one printable booklet per lesson, with answer editions.</span>
-          <span class="foot"><span class="meta">12 lesson booklets</span><span class="go" aria-hidden="true"><svg class="icon" viewBox="0 0 24 24" focusable="false"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span></span>
-        </a>
-      </div>
-    </section>
-
-    <section class="band" id="year11" aria-labelledby="year11-title">
-      <div class="rail">
-        <p>Year</p>
-        <h2 id="year11-title" aria-label="Year 11">11</h2>
-      </div>
-      <div class="cards">
-        <a class="card t-y11" href="year11phy/unit01/">
-          <span class="kind">Workbook</span>
-          <strong class="title">Atoms and Nuclear Radiation workbook</strong>
-          <span class="desc">Ten-lesson workbook, one printable booklet per lesson, with answer editions and a unit review.</span>
-          <span class="foot"><span class="meta">10 lesson booklets</span><span class="go" aria-hidden="true"><svg class="icon" viewBox="0 0 24 24" focusable="false"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span></span>
-        </a>
-      </div>
     </section>
 
     <section class="band" id="starters" aria-labelledby="starters-title">
@@ -289,36 +237,66 @@
       </div>
     </section>
 
-    <section class="band" id="decks" aria-labelledby="decks-title">
+    <section class="band" id="year9" aria-labelledby="year9-title">
       <div class="rail">
-        <p>Teaching decks</p>
-        <h2 class="word" id="decks-title" aria-label="Teaching decks">Deck</h2>
+        <p>Year</p>
+        <h2 id="year9-title" aria-label="Year 9">9</h2>
       </div>
       <div class="cards">
-        <a class="card t-y9" href="decks/work-like-a-physicist/">
-          <span class="kind">Year 9 slide deck</span>
-          <strong class="title">Work Like a Physicist</strong>
-          <span class="desc">Uncertainty, errors, variables, graphs and investigations.</span>
-          <span class="foot"><span class="meta">Present fullscreen</span><span class="go" aria-hidden="true"><svg class="icon" viewBox="0 0 24 24" focusable="false"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span></span>
-        </a>
-        <a class="card t-y9" href="decks/energy-stores-and-transfers/">
-          <span class="kind">Year 9 slide deck</span>
-          <strong class="title">Energy: Stores and Transfers</strong>
-          <span class="desc">Stores, kinetic, gravitational and elastic energy, springs, power and efficiency.</span>
-          <span class="foot"><span class="meta">Present fullscreen</span><span class="go" aria-hidden="true"><svg class="icon" viewBox="0 0 24 24" focusable="false"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span></span>
-        </a>
-        <a class="card t-y10" href="decks/electric-circuits/">
-          <span class="kind">Year 10 slide deck</span>
-          <strong class="title">Electric Circuits</strong>
-          <span class="desc">Current, p.d., resistance, I–V, power and mains safety.</span>
-          <span class="foot"><span class="meta">Present fullscreen</span><span class="go" aria-hidden="true"><svg class="icon" viewBox="0 0 24 24" focusable="false"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span></span>
-        </a>
-        <a class="card t-y11" href="decks/atoms-and-radiation/">
-          <span class="kind">Slide deck</span>
-          <strong class="title">Atoms and Nuclear Radiation</strong>
-          <span class="desc">Atomic models, alpha, beta, gamma and half-life.</span>
-          <span class="foot"><span class="meta">Present fullscreen</span><span class="go" aria-hidden="true"><svg class="icon" viewBox="0 0 24 24" focusable="false"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span></span>
-        </a>
+        <div class="unit t-y9">
+          <a class="card t-y9" href="decks/work-like-a-physicist/">
+            <span class="kind">Year 9 slide deck</span>
+            <strong class="title">Work Like a Physicist</strong>
+            <span class="desc">Uncertainty, errors, variables, graphs and investigations.</span>
+            <span class="foot"><span class="meta">Present fullscreen</span><span class="go" aria-hidden="true"><svg class="icon" viewBox="0 0 24 24" focusable="false"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span></span>
+          </a>
+          <a class="workbook-link" href="year9phy/unit01/workbook/" aria-label="Work Like a Physicist workbook hub">Workbook hub <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+        </div>
+        <div class="unit t-y9">
+          <a class="card t-y9" href="decks/energy-stores-and-transfers/">
+            <span class="kind">Year 9 slide deck</span>
+            <strong class="title">Energy: Stores and Transfers</strong>
+            <span class="desc">Stores, kinetic, gravitational and elastic energy, springs, power and efficiency.</span>
+            <span class="foot"><span class="meta">Present fullscreen</span><span class="go" aria-hidden="true"><svg class="icon" viewBox="0 0 24 24" focusable="false"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span></span>
+          </a>
+          <a class="workbook-link" href="year9phy/unit02/" aria-label="Energy: Stores and Transfers workbook hub">Workbook hub <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+        </div>
+      </div>
+    </section>
+
+    <section class="band" id="year10" aria-labelledby="year10-title">
+      <div class="rail">
+        <p>Year</p>
+        <h2 id="year10-title" aria-label="Year 10">10</h2>
+      </div>
+      <div class="cards">
+        <div class="unit t-y10">
+          <a class="card t-y10" href="decks/electric-circuits/">
+            <span class="kind">Year 10 slide deck</span>
+            <strong class="title">Electric Circuits</strong>
+            <span class="desc">Current, p.d., resistance, I–V, power and mains safety.</span>
+            <span class="foot"><span class="meta">Present fullscreen</span><span class="go" aria-hidden="true"><svg class="icon" viewBox="0 0 24 24" focusable="false"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span></span>
+          </a>
+          <a class="workbook-link" href="year10phy/unit01/workbook/" aria-label="Electric Circuits workbook hub">Workbook hub <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+        </div>
+      </div>
+    </section>
+
+    <section class="band" id="year11" aria-labelledby="year11-title">
+      <div class="rail">
+        <p>Year</p>
+        <h2 id="year11-title" aria-label="Year 11">11</h2>
+      </div>
+      <div class="cards">
+        <div class="unit t-y11">
+          <a class="card t-y11" href="decks/atoms-and-radiation/">
+            <span class="kind">Slide deck</span>
+            <strong class="title">Atoms and Nuclear Radiation</strong>
+            <span class="desc">Atomic models, alpha, beta, gamma and half-life.</span>
+            <span class="foot"><span class="meta">Present fullscreen</span><span class="go" aria-hidden="true"><svg class="icon" viewBox="0 0 24 24" focusable="false"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span></span>
+          </a>
+          <a class="workbook-link" href="year11phy/unit01/" aria-label="Atoms and Nuclear Radiation workbook hub">Workbook hub <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+        </div>
       </div>
     </section>
 

@@ -15,7 +15,7 @@ Browser-based physics tools, simulations, classroom utilities and games. Student
 
 Two hubs hold the author's course resources: teaching decks, workbooks, revision material and lesson starters. They are public and open source but sit outside the homepage catalogue, reached by direct link. Teachers and students are welcome to use and adapt them.
 
-- **[GCSE Physics](https://panphy.app/gcsephy/):** AQA GCSE Physics units for Years 9 to 11 and the Do Now starters. Each unit folder and `gcsephy/do-now/` has its own README.
+- **[GCSE Physics](https://panphy.app/gcsephy/):** AO1 starters and revision resources, followed by teaching decks and workbook hubs for Years 9 to 11. Each unit folder and `gcsephy/do-now/` has its own README.
 - **[IB DP Physics](https://panphy.app/ibdpphy/):** the IB Diploma Programme Physics course (first assessment 2025). See the [folder overview](ibdpphy/README.md).
 
 ## Offline use

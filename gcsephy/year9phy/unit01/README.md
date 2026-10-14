@@ -63,7 +63,7 @@ A student revision hub for use alongside the workbook, after an absence, or befo
 - a hint and full worked answer for every question, hidden behind a click, and a typing area so students attempt first
 - links to the printable workbook and its answers PDF
 
-Answers are visible by design; to set questions as unseen homework, copy the prompts rather than sharing the link. The site is static and lives under `gcsephy/`, which is network-only.
+Answers are visible by design; to set questions as unseen homework, copy the prompts rather than sharing the link. The site is static and lives under `gcsephy/`, which is network-only. It remains available by direct link; the GCSE landing page links the teaching deck and separate [`workbook/`](workbook/) hub instead.
 
 ---
 
