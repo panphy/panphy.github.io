@@ -375,7 +375,12 @@ body.is-fullscreen .deck { border-radius: 0; }
 [data-theme="dark"] .wf .f-accent, [data-theme="dark"] .wf .f-hi, [data-theme="dark"] .wf .f-alt { fill: var(--formula); }
 .card.navy .eyebrow { color: var(--brand-primary) !important; }
 .card.navy h3 { color: var(--text-main) !important; }
-[data-fig="coverArt"] .ef text { fill: #fff; }
+[data-fig="coverArt"] { background: var(--viewer-bg); border: 1px solid var(--card-border); border-radius: 14px; }
+[data-fig="coverArt"] .ef text { fill: var(--ink); }
+[data-fig="coverArt"] .ef > path:first-child { stroke: var(--brand-primary); }
+[data-fig="coverArt"] .ef > path:nth-child(2) { fill: var(--year-colour); opacity: .4; }
+[data-fig="coverArt"] .ef > circle { fill: var(--year-colour); stroke: var(--brand-primary); stroke-width: 2; }
+[data-fig="coverArt"] .ef > circle:nth-of-type(2) { fill: var(--brand-primary); }
 .dk .dk-book .dk-small { fill: #fff; }
 .dk .dk-bookbody { fill: #9b422d; }
 .dk .dk-small.m-label-A, .dk .dk-small.m-label-B { fill: var(--ink); }
@@ -472,3 +477,21 @@ body.is-fullscreen .deck { border-radius: 0; }
 }
 .wf .band { fill: color-mix(in srgb, var(--cyan) 15%, var(--diagram-bg)); stroke: var(--cyan); stroke-width: 2.5; opacity: 1; }
 .orbit { stroke: var(--text-secondary); stroke-opacity: 1; stroke-width: 2.2; }
+
+/* History is enrichment: the background is a persistent exam-scope signal. */
+.deck-y11 .slide.history,
+.deck-y11 body.is-fullscreen:has(#deck .slide.history.active) {
+  background-color: color-mix(in srgb, var(--brand-primary) 15%, var(--bg-color));
+}
+.symbol-grid .cd { stroke-width: 2.5; }
+.symbol-grid .cd .body { stroke-width: inherit; }
+.equation-inline { white-space: nowrap; }
+.data tr.step:not(.shown), .data td.step:not(.shown), .data th.step:not(.shown) { opacity: 1; transform: none; }
+.data tr.step:not(.shown) > td > .cell-content,
+.data tr.step:not(.shown) > th > .cell-content,
+.data td.step:not(.shown) > .cell-content,
+.data th.step:not(.shown) > .cell-content { opacity: 0; }
+.cell-content { transition: opacity .3s ease; }
+@media print { .data .step:not(.shown) > .cell-content { opacity: 1 !important; } }
+.eco-house { display: block; width: 100%; height: auto; }
+.eco-house-frame { background: #f8f6f1; border-radius: 12px; padding: 12px; }
