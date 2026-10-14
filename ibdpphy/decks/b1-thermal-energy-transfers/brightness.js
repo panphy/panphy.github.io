@@ -2,7 +2,8 @@
 // every sphere around it, of area 4πr². A low-poly model replaces the flat picture in every
 // [data-brightness] figure once Three.js has loaded, and a still of it replaces the flat picture
 // in the slide's thumbnail; the flat picture stays for print and reduced motion, and is all there
-// is if the library cannot be fetched.
+// is if the library cannot be fetched. Drag to turn the model; scroll or pinch to zoom; double-click
+// or double-tap to go back to the starting view.
 const THREE_URL = 'https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js';
 
 const D = 1.5;                  // the radius d of the inner sphere; the outer one is 2d
@@ -15,7 +16,7 @@ function build(THREE, fig, index) {
   const flat = fig.querySelector('svg');
   const holder = document.createElement('div');
   holder.className = 'mover model3d';
-  holder.style.cssText = 'position:absolute;inset:0;';
+  holder.style.cssText = 'position:absolute;inset:0;overflow:hidden;';
   const canvas = document.createElement('canvas');
   canvas.style.cssText = 'position:absolute;inset:0;width:100%;height:100%;display:block;';
   canvas.setAttribute('role', 'img');
@@ -71,9 +72,13 @@ function build(THREE, fig, index) {
     scene.add(edge);
   });
 
-  // A wavefront: a faint sphere that grows from the source and fades as it spreads out.
+  // A wavefront: a sphere that grows from the source and fades as it spreads out, drawn as a
+  // tinted skin with its facet lines over it.
   const waveMaterial = new THREE.MeshBasicMaterial({ wireframe: true, transparent: true, depthWrite: false });
-  const wave = new THREE.Mesh(new THREE.SphereGeometry(1, 18, 12), waveMaterial);
+  const waveSkin = new THREE.MeshBasicMaterial({ transparent: true, depthWrite: false, side: THREE.DoubleSide });
+  const waveGeometry = new THREE.SphereGeometry(1, 18, 12);
+  const wave = new THREE.Group();
+  wave.add(new THREE.Mesh(waveGeometry, waveSkin), new THREE.Mesh(waveGeometry, waveMaterial));
   scene.add(wave);
 
   // Labels in the deck's fonts, placed at points of the model each frame.
@@ -102,7 +107,9 @@ function build(THREE, fig, index) {
     edgeMaterials.forEach(m => m.color.set(ink));
     patchMaterials.forEach(({ material }) => { material.color.set(sand); material.emissive.copy(accent); });
     coneMaterial.color.set(ink);
-    waveMaterial.color.copy(accent);
+    // A deeper apricot, so that the wavefront shows against a light background as well as a dark one.
+    waveMaterial.color.copy(accent).lerp(new THREE.Color(cssColour('--text-main')), 0.3);
+    waveSkin.color.copy(accent);
   };
   paint();
 
@@ -111,6 +118,10 @@ function build(THREE, fig, index) {
 
   const slide = fig.closest('.slide'), point = new THREE.Vector3();
   let width = 0, height = 0;
+  // The camera sits on a sphere round `look`: turned by `angle` about the vertical, raised by `lift`,
+  // at distance `far`. Dragging and zooming change these.
+  const START = { lift: 0.32, far: 11.6 };
+  let lift = START.lift, far = START.far, turn = null;
   // Draws the model at time t (seconds), with the camera swung by `angle`. False if the figure has no size yet.
   function draw(t, angle) {
     const w = holder.clientWidth, h = holder.clientHeight;
@@ -122,12 +133,13 @@ function build(THREE, fig, index) {
       camera.aspect = w / h;
       camera.updateProjectionMatrix();
     }
-    camera.position.set(look.x + 11 * Math.sin(angle), 3.6, 11 * Math.cos(angle));
+    camera.position.set(look.x + far * Math.cos(lift) * Math.sin(angle), look.y + far * Math.sin(lift), far * Math.cos(lift) * Math.cos(angle));
     camera.lookAt(look);
     // The wavefront's brightness falls as 1/r², like the light it carries.
-    const r = 0.2 + (2 * D + 0.4) * ((t % WAVE) / WAVE);
+    const r = 0.2 + (2 * D + 0.4) * ((t % WAVE) / WAVE), fade = Math.min(1, (D / r) ** 2);
     wave.scale.setScalar(r);
-    waveMaterial.opacity = Math.min(0.5, 0.18 / (r * r));
+    waveMaterial.opacity = 0.75 * fade;
+    waveSkin.opacity = 0.28 * fade;
     renderer.render(scene, camera);
     labels.forEach(({ el, anchor }) => {
       point.copy(anchor).project(camera);
@@ -139,15 +151,56 @@ function build(THREE, fig, index) {
   function frame(time) {
     requestAnimationFrame(frame);
     if (!slide.classList.contains('active') || document.hidden) return;
-    // A slow sway, so that the spheres and patches read in depth.
-    draw(time / 1000, 0.7 + 0.1 * Math.sin(time / 2600));
+    // A slow sway, so that the spheres and patches read in depth, until someone turns the model.
+    draw(time / 1000, turn ?? 0.7 + 0.1 * Math.sin(time / 2600));
   }
   requestAnimationFrame(frame);
+
+  // Dragging and zooming. The canvas keeps its touches, so a drag never changes the slide.
+  canvas.style.touchAction = 'none';
+  canvas.style.cursor = 'grab';
+  const pointers = new Map();
+  let pinch = 0;
+  const spread = () => { const [a, b] = [...pointers.values()]; return Math.hypot(a.x - b.x, a.y - b.y); };
+  const zoom = k => { far = Math.min(22, Math.max(6, far * k)); };
+  canvas.addEventListener('pointerdown', event => {
+    canvas.setPointerCapture(event.pointerId);
+    pointers.set(event.pointerId, { x: event.clientX, y: event.clientY });
+    if (pointers.size === 2) pinch = spread();
+    canvas.style.cursor = 'grabbing';
+    event.stopPropagation();
+  });
+  canvas.addEventListener('pointermove', event => {
+    const last = pointers.get(event.pointerId);
+    if (!last) return;
+    if (pointers.size === 1) {
+      const sway = 0.7 + 0.1 * Math.sin(performance.now() / 2600);
+      turn = (turn ?? sway) - (event.clientX - last.x) * 0.008;
+      lift = Math.min(1.35, Math.max(-0.6, lift + (event.clientY - last.y) * 0.006));
+    }
+    pointers.set(event.pointerId, { x: event.clientX, y: event.clientY });
+    if (pointers.size === 2) { const now = spread(); if (pinch) zoom(pinch / now); pinch = now; }
+  });
+  const release = event => { pointers.delete(event.pointerId); pinch = 0; if (!pointers.size) canvas.style.cursor = 'grab'; };
+  canvas.addEventListener('pointerup', release);
+  canvas.addEventListener('pointercancel', release);
+  canvas.addEventListener('wheel', event => { event.preventDefault(); zoom(Math.exp(event.deltaY * 0.0012)); }, { passive: false });
+  canvas.addEventListener('dblclick', () => { turn = null; lift = START.lift; far = START.far; });
+  ['touchstart', 'touchend', 'click', 'keydown'].forEach(type => canvas.addEventListener(type, event => event.stopPropagation()));
+  // The labels must not catch the pointer.
+  holder.querySelectorAll('div').forEach(el => { el.style.pointerEvents = 'none'; });
+  // Tell the viewer they can turn it: a hint in the panel heading, shown only on screen.
+  const head = fig.closest('.panel')?.querySelector('.panel-head');
+  if (head && !head.querySelector('.drag-hint')) head.insertAdjacentHTML('beforeend', '<span class="pill reveal-hint drag-hint">DRAG · ZOOM</span>');
 
   // The slide's thumbnail is a copy made before the model was built: give it a still of the model.
   const copy = document.querySelectorAll('#thumbs [data-brightness]')[index];
   function snapshot() {
-    if (!copy || !draw(WAVE * 0.3, 0.7)) return;
+    const keep = { lift, far };
+    lift = START.lift; far = START.far;
+    const ok = copy && draw(WAVE * 0.3, 0.7);
+    ({ lift, far } = keep);
+    if (!ok) return;
     const shot = holder.cloneNode(true), image = new Image();
     image.src = canvas.toDataURL();
     image.alt = '';
