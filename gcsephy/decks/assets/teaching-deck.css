@@ -218,7 +218,7 @@ table.data { border-collapse: separate; border-spacing: 0; background: var(--car
 .tool .eq { font-family: var(--font-mono); font-weight: 600; }
 .ring-box, .ring-box > span { background: var(--card-bg); color: var(--text-main); }
 .ring-box > span.right.step.shown { color: var(--cyan); outline-color: var(--cyan); }
-.masthead { border-bottom: 2px solid var(--card-border); }
+.masthead { border-bottom: 2px solid var(--card-border); padding-right: 150px; } /* clear of the year badge */
 .masthead .paper-name { font: 400 42px var(--font-display); letter-spacing: -.015em; }
 .masthead .edition { border: 0; border-radius: 999px; background: var(--formula); color: var(--text-main); font: 600 17px var(--font-mono); }
 .masthead .dateline { font: 500 17px var(--font-mono); letter-spacing: .05em; }
@@ -358,7 +358,7 @@ body.is-fullscreen .deck { border-radius: 0; }
   body:not(.is-fullscreen) .tool .eq { font-size: 24px; }
   body:not(.is-fullscreen) .tool p, body:not(.is-fullscreen) .tool .re { font-size: 16px; }
   body:not(.is-fullscreen) .front { margin-top: 26px; }
-  body:not(.is-fullscreen) .masthead { flex-wrap: wrap; gap: 10px; }
+  body:not(.is-fullscreen) .masthead { flex-wrap: wrap; gap: 10px; padding-right: 0; }
   body:not(.is-fullscreen) .masthead .paper-name { font-size: 26px; }
   body:not(.is-fullscreen) .masthead .dateline, body:not(.is-fullscreen) .masthead .edition { font-size: 12px; }
   body:not(.is-fullscreen) .news-photo figcaption { font-size: 16px; }

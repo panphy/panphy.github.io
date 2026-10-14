@@ -105,16 +105,18 @@ window.DeckSvgTex = {
       const X = v => 60 + (v - 1.18) / 0.09 * 680;
       const mean = 1.22;
       // Each part appears with its line of the worked example: mean, max − min, uncertainty.
-      let s = sync('w3', `<rect x="${f(X(mean - 0.025))}" y="120" width="${f(X(mean + 0.025) - X(mean - 0.025))}" height="140" class="band"/>`);
+      // The band covers the readings, max to min; the arrows split it into the two halves.
+      const mid = (1.2 + 1.25) / 2;
+      let s = sync('w3', `<rect x="${f(X(1.2))}" y="120" width="${f(X(1.25) - X(1.2))}" height="140" class="band"/>`);
       s += sync('w2', `<path class="bracket" d="M${f(X(1.2))} 102V80H${f(X(1.25))}V102"/>` + t((X(1.2) + X(1.25)) / 2, 62, 'MAX − MIN = 1.25 − 1.20 = 0.05 s', 'lab'));
       [1.20, 1.21, 1.25].forEach(v => { s += cross(X(v), 190, 14); });
       s += sync('w1', line(X(mean), 128, X(mean), 252, 'mean-line'));
-      s += sync('w3', arrow(X(mean), 290, X(mean - 0.025), 290, 'arrow cyan') + arrow(X(mean), 290, X(mean + 0.025), 290, 'arrow cyan')
-        + t(X(mean + 0.025) + 14, 299, '± 0.025 s', 'lab small', 'start'));
+      s += sync('w3', line(X(mid), 278, X(mid), 302, 'ink') + arrow(X(mid), 290, X(1.2), 290, 'arrow cyan') + arrow(X(mid), 290, X(1.25), 290, 'arrow cyan')
+        + t(X(1.25) + 14, 299, '± 0.025 s', 'lab small', 'start'));
       s += `<path class="axis" d="M50 340H750"/>`;
       for (let v = 1.18; v <= 1.2701; v += 0.01) s += line(X(v), 340, X(v), 354, 'ink') + t(X(v), 386, v.toFixed(2), 'tick-t');
       s += t(400, 436, 'Time / s', 'axis-t');
-      return svg(800, 452, s, 'Three readings, 1.20, 1.21 and 1.25 seconds, on a number line; largest minus smallest, 1.25 minus 1.20, is 0.05 s; mean 1.22 s with an uncertainty band of plus or minus 0.025 s');
+      return svg(800, 452, s, 'Three readings, 1.20, 1.21 and 1.25 seconds, on a number line; largest minus smallest, 1.25 minus 1.20, is 0.05 s; mean 1.22 s; the band from 1.20 to 1.25 s splits into two halves of 0.025 s, the uncertainty');
     },
 
     // Random error: spread both ways around the true value.
@@ -336,8 +338,8 @@ window.DeckSvgTex = {
       let out = s + line(X(1), Y(8.5), X(28), Y(89.5), 'trend');
       out += pts.map(([a, b]) => cross(X(a), Y(b), 9)).join('');
       out += `<circle cx="${f(X(20))}" cy="${f(Y(96))}" r="26" class="out-ring"/>`;
-      out += t(480, 38, 'Mean distance travelled against ramp height', 'lab');
-      out += tag(1, 110, 32) + tag(2, 330, 505) + tag(3, X(30) + 46, Y(0) + 22) + tag(4, X(15) - 34, Y(52) - 30) + tag(5, X(27) + 22, Y(95) + 12) + tag(6, X(20) + 44, Y(96) - 14);
+      out += t(64, 38, 'Mean distance travelled against ramp height', 'lab', 'start');
+      out += tag(1, 32, 32) + tag(2, 330, 505) + tag(3, X(30) + 46, Y(0) + 22) + tag(4, X(15) - 34, Y(52) - 30) + tag(5, X(27) + 22, Y(95) + 12) + tag(6, X(20) + 44, Y(96) - 14);
       return svg(880, 600, out, 'Annotated line graph: 1 title, 2 axis labels with units, 3 even scale, 4 small crosses, 5 one best-fit line, 6 anomalous result circled');
     },
 

@@ -137,26 +137,27 @@
     .go { display: grid; place-items: center; width: 44px; height: 44px; flex: none; border: 2px solid currentColor; border-radius: 50%; font-size: 20px; color: var(--c-arrow, var(--c-accent)); transition: transform .14s ease; }
     .card:hover .go { transform: rotate(-45deg); }
 
-    /* Teaching decks: the calm deck style, a cream slide with a year-coloured top edge,
-       a year badge and serif title, in the deck's own year colours (gcsephy/decks/assets/teaching-deck.css). */
-    .t-y9 { --year-colour: #f6cea8; --year-ink: #80501e; }
-    .t-y10 { --year-colour: #d8eaa1; --year-ink: #49651f; }
-    .t-y11 { --year-colour: #f6e7a5; --year-ink: #78601b; }
+    /* Teaching decks: each card is filled with its year colour, turned up from the pastel the
+       decks use (gcsephy/decks/assets/teaching-deck.css), with the deck's serif title and a hard
+       shadow in the year's deep ink. */
+    .t-y9 { --year-colour: #f6cea8; --year-strong: #f7a25c; --year-ink: #80501e; }
+    .t-y10 { --year-colour: #d8eaa1; --year-strong: #b4d84e; --year-ink: #49651f; }
+    .t-y11 { --year-colour: #f6e7a5; --year-strong: #f7d23e; --year-ink: #78601b; }
     .card.deck-card {
-      --c-bg: #f8f6f1; --c-fg: #1b1b1b; --c-sub: #5f5954; --c-accent: var(--year-colour); --c-on-accent: var(--year-ink); --c-arrow: var(--year-ink);
-      --c-radius: 20px; --c-title: 400 clamp(1.7rem, 2.5vw, 2.1rem)/1.05 var(--serif); --c-tracking: 0; --c-case: none;
-      --c-texture: radial-gradient(#ede9e0 1.5px, transparent 1.5px); --c-texture-size: 24px 24px;
-      border: 1px solid #ded9cf; border-top: 10px solid var(--year-colour);
-      box-shadow: 0 4px 16px rgba(0, 0, 0, .06);
+      --c-bg: var(--year-strong); --c-fg: #16130f; --c-sub: #2e2820; --c-accent: #16130f; --c-on-accent: var(--year-strong);
+      --c-arrow: var(--year-strong); --c-shadow: var(--year-ink); --c-radius: 20px;
+      --c-title: 400 clamp(1.8rem, 2.6vw, 2.25rem)/1.02 var(--serif); --c-tracking: 0; --c-case: none;
+      --c-texture: radial-gradient(rgba(22, 19, 15, .13) 1.5px, transparent 1.5px); --c-texture-size: 22px 22px;
     }
-    .card.deck-card:hover, .card.deck-card:focus-visible { transform: translateY(-3px); box-shadow: 0 10px 26px rgba(0, 0, 0, .1); }
-    .deck-card .year { position: absolute; top: 16px; right: 18px; padding: 4px 11px; border-radius: 999px; background: var(--year-colour); color: var(--year-ink); font: 600 .72rem/1.2 var(--mono); }
-    .deck-card .kind { margin-right: 84px; background: #fff; border: 1px solid #ded9cf; color: var(--year-ink); }
-    .deck-card .go { border-width: 1px; border-color: #bcb5a8; background: #fff; }
-    .deck-card:hover .go { background: var(--year-colour); }
-    .unit .workbook-link { border: 1px solid #bcb5a8; border-radius: 999px; background: #fff; color: #1b1b1b; box-shadow: 0 2px 8px rgba(0, 0, 0, .05); }
+    .deck-card .year { position: absolute; top: 16px; right: 18px; padding: 4px 11px; border: 2px solid #16130f; border-radius: 999px; background: #fffdf7; color: #16130f; font: 700 .72rem/1.2 var(--mono); }
+    .deck-card .kind { margin-right: 84px; }
+    .deck-card .desc { font-weight: 600; }
+    .deck-card .meta { font-weight: 600; }
+    .deck-card .go { border-color: #16130f; background: #16130f; }
+    .deck-card:hover .go { background: #fffdf7; color: #16130f; }
+    .unit .workbook-link { border-radius: 999px; background: var(--year-colour); color: #16130f; box-shadow: 4px 4px 0 var(--year-ink); }
     .unit .workbook-link .icon { color: var(--year-ink); }
-    .unit .workbook-link:hover { transform: translateY(-2px); background: var(--year-colour); box-shadow: 0 6px 16px rgba(0, 0, 0, .08); }
+    .unit .workbook-link:hover { box-shadow: 6px 6px 0 var(--year-ink); }
     /* Do Now: teal board, marigold and pink. */
     .t-dn { --c-bg: #0c3a3f; --c-fg: #fff; --c-sub: #dcebe9; --c-accent: #ffc145; --c-shadow: #ff8fa3; --c-radius: 12px; --c-texture: linear-gradient(rgba(140, 214, 204, .13) 1px, transparent 1px), linear-gradient(90deg, rgba(140, 214, 204, .13) 1px, transparent 1px); }
     .t-dn-sheet { --c-bg: #fffdf7; --c-fg: #0b2a2e; --c-sub: #4f6163; --c-accent: #ff8fa3; --c-shadow: #ffc145; --c-arrow: #0b2a2e; --c-radius: 12px; }
