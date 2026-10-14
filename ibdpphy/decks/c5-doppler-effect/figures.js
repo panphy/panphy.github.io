@@ -10,7 +10,7 @@
 // The model behind each moving figure, by name, for the redraw at the end of this file.
 const MODELS = {};
 window.DeckFigures.add(P => {
-  const { svg, arrow, text, labelled, twoState, f, TAU } = P;
+  const { svg, arrow, text, labelled, twoState, PLAY, f, TAU } = P;
   const ease = s => (s <= 0 ? 0 : s >= 1 ? 1 : s * s * (3 - 2 * s));
   const ring = (cx, cy, r, op) => `<circle cx="${f(cx)}" cy="${cy}" r="${f(r)}" style="fill:none;stroke:var(--brand-primary);stroke-width:3.5;opacity:${f(op * 100) / 100}"/>`;
   const dot = (x, y, r, colour, op = 1) => `<circle cx="${f(x)}" cy="${f(y)}" r="${r}" style="fill:var(--${colour});opacity:${f(op * 100) / 100}"/>`;
@@ -141,8 +141,10 @@ window.DeckFigures.add(P => {
   // Hydrogen lines in the laboratory and from a galaxy moving away (z = 0.08). Every wavelength
   // is stretched by the same fraction, so the lines at the red end move furthest.
   const H = [410.2, 434.0, 486.1, 656.3], Z = 0.08, X0 = 110, W = 700, xOf = nm => X0 + (nm - 380) / 370 * W;
-  function linesAt(t, on, still) {
-    const tl = t % 7, z = still ? Z : Z * ease((tl - 0.8) / 1.8), op = still ? 1 : ease(tl / 0.3) * (1 - ease((tl - 6.2) / 0.5));
+  // Looping, the lines glide across, hold and start again; played once (data-play), they glide
+  // across from the moment of the press and stay.
+  function linesAt(t, on, still, once) {
+    const tl = t % 7, z = still ? Z : once ? Z * ease((t - 0.2) / 1.8) : Z * ease((tl - 0.8) / 1.8), op = still || once ? 1 : ease(tl / 0.3) * (1 - ease((tl - 6.2) / 0.5));
     const strip = y => `<rect x="${X0}" y="${y}" width="${W}" height="80" rx="4" fill="url(#g-spectrum)"/>`;
     const line = (x, y, o = 1) => `<rect x="${f(x - 3)}" y="${y}" width="6" height="80" style="fill:#0B0B10;opacity:${f(o * 100) / 100}"/>`;
     let s = strip(110) + strip(300) + H.map(nm => line(xOf(nm), 110)).join('');
@@ -152,8 +154,9 @@ window.DeckFigures.add(P => {
     return s + '</g>';
   }
 
-  // The still and the moving copy of one model. The moving group starts drawn at t = 0.
-  const live = (name, model, on, stillT, startT = 0) => twoState(model(stillT, on, true), `<g data-live="${name}" data-start="${startT}"${on ? ' data-on=""' : ''}>${model(startT, on, false)}</g>`);
+  // The still and the moving copy of one model. The moving group starts drawn at t = startT; with
+  // once, it waits at t = 0 for the figure's PLAY step and then plays once.
+  const live = (name, model, on, stillT, startT = 0, once = false) => twoState(model(stillT, on, true), `<g data-live="${name}" data-start="${once ? 0 : startT}"${on ? ' data-on=""' : ''}${once ? ' data-play=""' : ''}>${model(once ? 0 : startT, on, false, once)}</g>`) + (once ? PLAY : '');
   Object.assign(MODELS, { 'c5-source': sourceAt, 'c5-observer': observerAt, 'c5-radar': radarAt, 'c5-lines': linesAt });
 
   return {
@@ -176,10 +179,11 @@ window.DeckFigures.add(P => {
       return svg(view.join(' '), s, 'A stationary source sending out evenly spaced circular wavefronts, an observer standing still and an observer walking towards the source at half the wave speed. The wavelength is the same everywhere, but the walker meets the wavefronts more often: the traces of what each one hears show the walker receiving one and a half times the frequency');
     },
 
-    // The same spectral lines in the laboratory and from a receding galaxy.
+    // The same spectral lines in the laboratory and from a receding galaxy. data-play: the lines
+    // move on a press of →, not in a loop.
     'c5-lines': el => {
       const on = labelled(el);
-      let s = live('c5-lines', linesAt, on, 0, 0) + text(X0, 94, 'hydrogen in the laboratory', 'lbl strong', 'start') + text(X0, 284, 'the same lines from a galaxy moving away', 'lbl strong', 'start');
+      let s = live('c5-lines', linesAt, on, 0, 0, 'play' in el.dataset) + text(X0, 94, 'hydrogen in the laboratory', 'lbl strong', 'start') + text(X0, 284, 'the same lines from a galaxy moving away', 'lbl strong', 'start');
       s += text(X0, 232, 'violet', 'lbl small', 'start') + text(X0 + W, 232, 'red', 'lbl small', 'end');
       if (on) s += text(460, 492, 'every λ grows by the same fraction', 'lbl small');
       return svg(on ? '80 60 760 450' : '80 60 760 340', s, 'Two spectra. The upper one shows the four visible lines of hydrogen measured in the laboratory. The lower one shows the same lines in the light from a galaxy moving away: every wavelength is stretched by the same fraction, so every line moves towards the red end, and the lines at the red end move furthest');
@@ -197,7 +201,7 @@ window.DeckFigures.add(P => {
 });
 
 // Redraw the moving figures on the visible slide each frame. A figure's clock starts at its
-// data-start when its slide is shown.
+// data-start when its slide is shown, or, with data-play, when its PLAY step is shown.
 (() => {
   const started = new Map();
   function frame(now) {
@@ -205,9 +209,15 @@ window.DeckFigures.add(P => {
     const shown = new Set(document.querySelectorAll('#deck .slide.active [data-live]'));
     started.forEach((at, g) => { if (!shown.has(g)) started.delete(g); });
     shown.forEach(g => {
+      const once = 'play' in g.dataset;
+      if (once && !g.closest('svg').querySelector('.step.play.shown')) {
+        started.delete(g);
+        g.innerHTML = MODELS[g.dataset.live](0, 'on' in g.dataset, false, true);
+        return;
+      }
       if (!started.has(g)) started.set(g, now);
       const t = Number(g.dataset.start) + (now - started.get(g)) / 1000;
-      g.innerHTML = MODELS[g.dataset.live](t, 'on' in g.dataset, false);
+      g.innerHTML = MODELS[g.dataset.live](t, 'on' in g.dataset, false, once);
     });
   }
   requestAnimationFrame(frame);
