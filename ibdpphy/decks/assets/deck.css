@@ -422,6 +422,8 @@ mjx-container .res { fill: var(--brand-primary); stroke: var(--brand-primary); }
 .pill { color: var(--text-secondary); font-size: 19px; border: 1px solid var(--input-border); border-radius: 999px; padding: 4px 12px; }
 .fig { position: relative; flex: 1; min-height: 0; }
 .fig svg { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
+/* Maths typeset in the labels of a 3D model keeps MathJax's own size and sits in the line. */
+.fig .model3d mjx-container svg { position: static; inset: auto; width: auto; height: auto; display: inline-block; }
 .panel .fig { margin: 8px 0; }
 .legend { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; }
 .legend > span { display: inline-flex; align-items: center; gap: 8px; padding: 4px 14px 4px 5px; border-radius: 999px; background: var(--card-bg); border: 1px solid var(--card-border); font-size: 22px; }

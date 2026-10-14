@@ -62,11 +62,11 @@ model3d('quarter', ({ THREE, scene, css, label, caption }) => {
   // Light that misses the planet passes it by.
   [[1.7, 0], [0, 1.7]].forEach(([y, z]) => ray(y, z, 5.0));
 
-  label('sunlight,<br>intensity <i>S</i>', [DISC - 3.3, 0.9, 0]);
-  label('<i>R</i>', [DISC, R * 0.5, -0.25]);
-  label('<b>intercepted</b>: a disc,<br>area π<i>R</i>²', [DISC - 0.3, -R - 0.75, 0]);
-  label('<b>shared</b> over a sphere,<br>area 4π<i>R</i>²', [0.4, R + 0.6, 0]);
-  caption('Mean intensity: <i>S</i> × π<i>R</i>² ÷ 4π<i>R</i>² = <b><i>S</i>/4</b>');
+  label('sunlight,<br>intensity \\(S\\)', [DISC - 3.3, 0.9, 0]);
+  label('\\(R\\)', [DISC, R * 0.5, -0.25]);
+  label('<b>intercepted</b>: a disc,<br>area \\(\\pi R^{2}\\)', [DISC - 0.3, -R - 0.75, 0]);
+  label('<b>shared</b> over a sphere,<br>area \\(4 \\pi R^{2}\\)', [0.4, R + 0.6, 0]);
+  caption('Mean intensity \\(= \\dfrac{S \\pi R^{2}}{4 \\pi R^{2}} = \\dfrac{S}{4}\\)');
 
   return {
     look: [-1.6, 0, 0],

@@ -43,7 +43,7 @@ Resources for the IB Diploma Programme Physics course (first assessment 2025), o
 | `decks/b1-thermal-energy-transfers/brightness.js` | The spheres of radius d and 2d on slide 34, drawn with Three.js over the flat `b1-inverse-square` figure |
 | `decks/b2-greenhouse-effect/quarter.js` | The planet, its intercepting disc and the sunlight of slide 8, drawn with Three.js over the flat `b2-quarter` figure |
 | `decks/d3-motion-in-electromagnetic-fields/hand.js` | The left hand of slide 11, drawn with Three.js (from the CDN the rest of the site uses) over the flat `d3-rule` figure |
-| `decks/assets/model3d.js` | Puts a deck's Three.js models over their flat figures, with drag to turn, scroll or pinch to zoom, a thumbnail still and the theme; used by `brightness.js` and `quarter.js` |
+| `decks/assets/model3d.js` | Puts a deck's Three.js models over their flat figures, with drag to turn, scroll or pinch to zoom, MathJax in their labels, a thumbnail still and the theme; used by `brightness.js` and `quarter.js` |
 | `decks/assets/deck-notes.css`, `deck-notes.js` | The note pane under each slide, copied unchanged from `gcsephy/decks/assets/` |
 | `sw.js`, `sw-register.js` | Freshness worker for `/ibdpphy/`, a copy of the `gcsephy/` pair; keep the two in step |
 

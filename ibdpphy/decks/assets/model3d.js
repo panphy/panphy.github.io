@@ -15,7 +15,8 @@
 //   tick   (t) => void  moves the model to time t in seconds (optional)
 //   still  the time drawn for the thumbnail (optional)
 // css('--name') reads a colour from the theme; label(html, [x, y, z]) places a label at a point of
-// the model; caption(html) adds a line of text along the bottom.
+// the model; caption(html) adds a line of text along the bottom. Labels and captions may hold maths
+// between \( and \), typeset by MathJax like the rest of the slide.
 const THREE_URL = 'https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js';
 const css = name => getComputedStyle(document.documentElement).getPropertyValue(name).trim() || '#888';
 
@@ -143,7 +144,8 @@ function mount(THREE, fig, index, attr, make) {
     copy.querySelectorAll('svg').forEach(svg => { svg.style.display = 'none'; });
     copy.appendChild(shot);
   }
-  snapshot();
+  // Typeset any maths in the labels and caption, then take the thumbnail still.
+  Promise.resolve(window.MathJax?.typesetPromise?.([holder])).catch(() => {}).then(snapshot);
   document.addEventListener('panphy:theme-change', () => { model.paint(); snapshot(); });
 }
 

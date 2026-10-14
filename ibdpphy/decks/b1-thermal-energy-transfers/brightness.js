@@ -62,10 +62,10 @@ model3d('brightness', ({ THREE, scene, css, label, caption }) => {
   wave.add(new THREE.Mesh(waveGeometry, waveSkin), new THREE.Mesh(waveGeometry, waveMaterial));
   scene.add(wave);
 
-  label('source,<br>luminosity <i>L</i>', [-0.1, 0.5, 0]);
-  label('<b>area <i>A</i></b><br>radius <i>d</i>', [D * 0.92, -D * Math.tan(CONE) - 0.62, 0]);
-  label('<b>area 4<i>A</i></b><br>radius 2<i>d</i>', [2 * D, 2 * D * Math.tan(CONE) + 0.42, 0]);
-  caption('The power <i>L</i> spreads over the whole sphere, 4π<i>r</i>²<br>At 2<i>d</i>: four times the area, <b>a quarter</b> of the brightness');
+  label('source,<br>luminosity \\(L\\)', [-0.1, 0.5, 0]);
+  label('<b>area</b> \\(A\\)<br>radius \\(d\\)', [D * 0.92, -D * Math.tan(CONE) - 0.62, 0]);
+  label('<b>area</b> \\(4A\\)<br>radius \\(2d\\)', [2 * D, 2 * D * Math.tan(CONE) + 0.42, 0]);
+  caption('The power \\(L\\) spreads over the whole sphere, \\(4 \\pi r^{2}\\)<br>At \\(2d\\): four times the area, <b>a quarter</b> of the brightness');
 
   return {
     look: [0.7, -0.1, 0],
