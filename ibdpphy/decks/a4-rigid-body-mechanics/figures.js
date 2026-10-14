@@ -4,7 +4,7 @@
 // a tension where the string is attached. Bodies are slate; terracotta marks the turning
 // effect (torques and angular quantities), since the whole topic is higher level only.
 window.DeckFigures.add(P => {
-  const { svg, arrow, text, sub, both, through, sampled, labelled, track, anim, spin, twoState, f, TAU } = P;
+  const { svg, arrow, text, sub, both, through, sampled, labelled, track, anim, spin, twoState, PLAY, f, TAU } = P;
   const line = (d, colour, width = 5, extra = '') => `<path d="${d}" style="fill:none;stroke:var(--${colour});stroke-width:${width};stroke-linecap:round;stroke-linejoin:round" ${extra}/>`;
   const BODY = 'fill:color-mix(in srgb, var(--brand-accent-strong) 30%, var(--viewer-bg));stroke:var(--brand-accent-strong);stroke-width:3';
   const dot = (x, y, r = 7) => `<circle cx="${f(x)}" cy="${f(y)}" r="${r}" style="fill:var(--text-main)"/>`;
@@ -89,12 +89,13 @@ window.DeckFigures.add(P => {
     // A disc at rest dropped onto a spinning disc: afterwards they turn together, more slowly.
     'a4-coupled': () => {
       // The flat picture: what prints, and what shows if discs.js cannot load Three.js. On screen
-      // discs.js puts a model of the two discs over it, turning about the dashed axis.
+      // discs.js puts a model of the two discs over it, turning about the dashed axis. Its PLAY step
+      // is the press that drops the upper disc.
       const disc = (cx, cy, w, colour) => `<ellipse cx="${cx}" cy="${cy}" rx="${w}" ry="26" style="fill:color-mix(in srgb, var(--${colour}) 40%, var(--viewer-bg));stroke:var(--${colour});stroke-width:3"/>`;
       const axis = cx => `<line x1="${cx}" y1="140" x2="${cx}" y2="440" class="guide" style="stroke-width:3"/>`;
       let s = disc(220, 340, 130, 'brand-accent-strong') + disc(220, 190, 90, 'brand-accent') + axis(220) + turn(220, 340, 150, 160, 20, 'hl', 5) + text(220, 520, 'before', 'lbl strong') + text(50, 300, sub('ω', '1'), 'lbl greek', 'end') + text(330, 196, 'at rest', 'lbl', 'start');
       s += disc(640, 340, 130, 'brand-accent-strong') + disc(640, 314, 90, 'brand-accent') + axis(640) + turn(640, 340, 150, 160, 80, 'hl', 5) + text(640, 520, 'after', 'lbl strong') + text(480, 300, 'ω', 'lbl greek', 'end') + text(640, 130, 'turning together', 'lbl');
-      return svg('-10 90 820 450', s, 'Two discs on the same axis of rotation, shown dashed. Before, the lower disc is spinning with angular velocity omega 1 and the upper disc is at rest above it. After the upper disc is dropped onto the lower one, friction makes them turn together with a smaller angular velocity');
+      return svg('-10 90 820 450', s + PLAY, 'Two discs on the same axis of rotation, shown dashed. Before, the lower disc is spinning with angular velocity omega 1 and the upper disc is at rest above it. After the upper disc is dropped onto the lower one, friction makes them turn together with a smaller angular velocity');
     },
 
     // A solid sphere and a hoop rolling down the same slope: the sphere wins. Also drawn plain.
