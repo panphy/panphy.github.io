@@ -5,18 +5,23 @@
 // double-tap goes back to the starting view. A still of it replaces the flat picture in the
 // slide's thumbnail, and again when the theme changes.
 //
-// make({ THREE, scene, css, label, caption }) builds the scene and returns:
+// make({ THREE, scene, css, label, caption, fig, holder }) builds the scene and returns:
 //   look   [x, y, z]  the point the camera looks at
 //   view   { turn, lift, far }  the starting camera: angle about the vertical, angle above the
 //          horizontal (radians) and distance
 //   sway   how far the camera swings to and fro until someone turns the model (radians)
 //   alt    the canvas's description for screen readers
 //   paint  () => void  sets the colours from the theme
-//   tick   (t) => void  moves the model to time t in seconds (optional)
+//   tick   (t, still) => void  moves the model to time t in seconds (optional); still is true
+//          when the thumbnail is being drawn
 //   still  the time drawn for the thumbnail (optional)
+//   frame  CSS that places the canvas in part of the figure, such as 'width:55%' (optional), so
+//          that a flat graph added to `holder` can sit beside the model
 // css('--name') reads a colour from the theme; label(html, [x, y, z]) places a label at a point of
-// the model; caption(html) adds a line of text along the bottom. Labels and captions may hold maths
-// between \( and \), typeset by MathJax like the rest of the slide.
+// the model, and returns the element, whose `anchor` (a Vector3) the model may move; caption(html)
+// adds a line of text along the bottom. Labels and captions may hold maths between \( and \),
+// typeset by MathJax like the rest of the slide. `fig` is the figure, for a model that plays on a
+// step (.step.play.shown), and `holder` the box over it that holds the canvas and labels.
 const THREE_URL = 'https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js';
 const css = name => getComputedStyle(document.documentElement).getPropertyValue(name).trim() || '#888';
 
@@ -40,7 +45,8 @@ function mount(THREE, fig, index, attr, make) {
     el.style.cssText = 'position:absolute;transform:translate(-50%,-50%);white-space:nowrap;text-align:center;pointer-events:none;font:500 24px/1.3 var(--font-body);color:var(--text-main);';
     el.innerHTML = html;
     holder.appendChild(el);
-    labels.push({ el, anchor: new THREE.Vector3(...anchor) });
+    el.anchor = new THREE.Vector3(...anchor);
+    labels.push({ el, anchor: el.anchor });
     return el;
   };
   const caption = html => {
@@ -51,7 +57,8 @@ function mount(THREE, fig, index, attr, make) {
     return el;
   };
 
-  const model = make({ THREE, scene, css, label, caption });
+  const model = make({ THREE, scene, css, label, caption, fig, holder });
+  if (model.frame) canvas.style.cssText += model.frame;
   canvas.setAttribute('aria-label', model.alt || flat?.getAttribute('aria-label') || '');
   const look = new THREE.Vector3(...model.look), start = { ...model.view }, sway = model.sway ?? 0.1;
   let { lift, far } = start, turn = null;
@@ -63,8 +70,8 @@ function mount(THREE, fig, index, attr, make) {
   const slide = fig.closest('.slide'), point = new THREE.Vector3();
   let width = 0, height = 0;
   // Draws the model at time t (seconds) with the camera turned by `angle`. False if the figure has no size yet.
-  function draw(t, angle) {
-    const w = holder.clientWidth, h = holder.clientHeight;
+  function draw(t, angle, still = false) {
+    const w = canvas.clientWidth, h = canvas.clientHeight;
     if (!w || !h) return false;
     if (w !== width || h !== height) {
       width = w; height = h;
@@ -75,12 +82,12 @@ function mount(THREE, fig, index, attr, make) {
     }
     camera.position.set(look.x + far * Math.cos(lift) * Math.sin(angle), look.y + far * Math.sin(lift), look.z + far * Math.cos(lift) * Math.cos(angle));
     camera.lookAt(look);
-    model.tick?.(t);
+    model.tick?.(t, still);
     renderer.render(scene, camera);
     labels.forEach(({ el, anchor }) => {
       point.copy(anchor).project(camera);
-      el.style.left = `${((point.x + 1) / 2 * w).toFixed(1)}px`;
-      el.style.top = `${((1 - point.y) / 2 * h).toFixed(1)}px`;
+      el.style.left = `${(canvas.offsetLeft + (point.x + 1) / 2 * w).toFixed(1)}px`;
+      el.style.top = `${(canvas.offsetTop + (1 - point.y) / 2 * h).toFixed(1)}px`;
       el.style.visibility = point.z < 1 ? 'visible' : 'hidden';
     });
     return true;
@@ -132,7 +139,7 @@ function mount(THREE, fig, index, attr, make) {
   function snapshot() {
     const keep = { lift, far };
     ({ lift, far } = start);
-    const ok = copy && draw(model.still ?? 1, start.turn);
+    const ok = copy && draw(model.still ?? 1, start.turn, true);
     ({ lift, far } = keep);
     if (!ok) return;
     const shot = holder.cloneNode(true), image = new Image();
