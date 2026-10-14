@@ -41,8 +41,8 @@ window.DeckFigures.add(P => {
     'b2-two-spectra': () => {
       const X = l => 110 + 230 * Math.log10(l / 0.1), curve = (T, colour) => { const top = planck(2898 / T, T); return line(sampled(t => { const l = 0.1 * 10 ** (3 * t); return [X(l), 420 - 320 * planck(l, T) / top]; }, 160), colour); };
       let s = `<rect x="${f(X(0.4))}" y="34" width="${f(X(0.7) - X(0.4))}" height="386" style="fill:var(--sand);opacity:.3"/>` + arrow(110, 420, 110, 40, 'text-secondary', 2.5) + arrow(110, 420, 840, 420, 'text-secondary', 2.5);
-      s += curve(5800, 'brand-accent') + curve(288, 'proton') + [0.1, 1, 10, 100].map(l => `<line x1="${X(l)}" y1="420" x2="${X(l)}" y2="432" class="tick"/>` + text(X(l), 462, String(l), 'lbl mono')).join('');
-      s += text(126, 54, 'intensity', 'lbl mono', 'start') + text(834, 500, 'wavelength / μm', 'lbl mono', 'end') + text(X(0.53), 22, 'visible', 'lbl small') + text(X(1.1), 130, 'from the Sun,', 'lbl strong halo', 'start') + text(X(1.1), 164, '5800 K', 'lbl mono halo', 'start') + text(X(22), 130, 'from the Earth,', 'lbl strong halo', 'start') + text(X(22), 164, '288 K', 'lbl mono halo', 'start');
+      s += curve(5800, 'positive') + curve(288, 'proton') + [0.1, 1, 10, 100].map(l => `<line x1="${X(l)}" y1="420" x2="${X(l)}" y2="432" class="tick"/>` + text(X(l), 462, String(l), 'lbl mono')).join('');
+      s += text(126, 54, 'intensity', 'lbl mono', 'start') + text(834, 500, 'wavelength / μm', 'lbl mono', 'end') + text(X(0.53), 22, 'visible', 'lbl small') + text(X(1.1), 130, 'from the Sun,', 'lbl strong halo', 'start', 'style="fill:var(--positive)"') + text(X(1.1), 164, '5800 K', 'lbl mono halo', 'start') + text(X(22), 130, 'from the Earth,', 'lbl strong halo', 'start', 'style="fill:var(--proton)"') + text(X(22), 164, '288 K', 'lbl mono halo', 'start');
       return svg('60 -10 800 530', s, 'Two black-body spectra on a logarithmic wavelength scale, each drawn to the same height. Radiation from the Sun at 5800 kelvin peaks at 0.5 micrometres, in the visible, and lies almost entirely below 3 micrometres. Radiation from the Earth at 288 kelvin peaks at 10 micrometres, in the infrared, and lies almost entirely above 3 micrometres. The two hardly overlap');
     },
 
@@ -74,17 +74,23 @@ window.DeckFigures.add(P => {
       const mols = Array.from({ length: 12 }, (_, i) => [150 + (i % 4) * 170 + (rand() - 0.5) * 70, 150 + Math.floor(i / 4) * 85 + (rand() - 0.5) * 30]);
       let s = ground(80, 800, base) + mols.map(([x, y]) => `<circle cx="${f(x)}" cy="${f(y)}" r="13" style="fill:var(--brand-primary)"/>`).join('');
       if (on) s += text(440, 494, 'warm surface', 'lbl') + text(440, 56, 'space', 'lbl');
-      // A photon leaves the ground, hops between a few molecules and ends in space or back at the ground.
-      const journey = k => {
-        const pts = [[130 + k * 82 + rand() * 30, base]]; let m = 8 + (k % 4);
-        for (let hop = 0; hop < 3; hop++) { pts.push(mols[m]); const up = rand() < 0.5; const next = m + (up ? -4 : 4) + (rand() < 0.5 ? 0 : (m % 4 < 3 ? 1 : -1)); if (next < 0) { pts.push([mols[m][0] + (rand() - 0.5) * 120, top]); break; } if (next > 11) { pts.push([mols[m][0] + (rand() - 0.5) * 120, base]); break; } m = next; if (hop === 2) pts.push([mols[m][0], up ? top : base]); }
-        // Equal time steps along the whole path.
-        const out = []; for (let i = 1; i < pts.length; i++) { const [x1, y1] = pts[i - 1], [x2, y2] = pts[i], n = Math.max(2, Math.round(Math.hypot(x2 - x1, y2 - y1) / 16)); for (let j = 0; j < n; j++) out.push([x1 + (x2 - x1) * j / n, y1 + (y2 - y1) * j / n]); }
-        out.push(pts[pts.length - 1]); return out;
-      };
-      const paths = Array.from({ length: 8 }, (_, k) => journey(k));
-      const still = ir(250, base - 6, mols[8][0] + 4, mols[8][1] + 18) + ir(mols[8][0], mols[8][1] - 16, mols[5][0] - 8, mols[5][1] + 16) + ir(mols[5][0] + 8, mols[5][1] + 16, 470, base - 6) + ir(600, base - 6, mols[6][0], mols[6][1] + 18) + ir(mols[6][0], mols[6][1] - 16, mols[6][0] + 40, top);
-      const mover = paths.map((pts, k) => `<g>${track(pts, f(pts.length * 0.075), { extra: `begin="-${f(k * 0.55)}s"` })}<circle r="9" style="fill:var(--proton)"/></g>`).join('');
+      // The same five infrared arrows as the still picture, shown one after another: absorbed by a
+      // molecule, then emitted again in a new direction. Each molecule glows as it absorbs.
+      const steps = [
+        [ir(250, base - 6, mols[8][0] + 4, mols[8][1] + 18), 8],
+        [ir(mols[8][0], mols[8][1] - 16, mols[5][0] - 8, mols[5][1] + 16), 5],
+        [ir(mols[5][0] + 8, mols[5][1] + 16, 470, base - 6), null],
+        [ir(600, base - 6, mols[6][0], mols[6][1] + 18), 6],
+        [ir(mols[6][0], mols[6][1] - 16, mols[6][0] + 40, top), null]
+      ];
+      const still = steps.map(([arrowSvg]) => arrowSvg).join('');
+      const T = 9, slot = 1.4, k = x => f(x / T * 1000) / 1000;
+      const mover = steps.map(([arrowSvg, m], i) => {
+        const on = slot * i, glow = on + slot * 0.7;
+        let g = `<g opacity="0">${anim('opacity', [0, 0, 1, 1, 0], T, { extra: `keyTimes="0;${k(on)};${k(on + 0.35)};${k(T - 0.6)};1"` })}${arrowSvg}</g>`;
+        if (m !== null) g += `<circle cx="${f(mols[m][0])}" cy="${f(mols[m][1])}" r="13" style="fill:var(--proton)" opacity="0">${anim('opacity', [0, 0, 0.9, 0, 0], T, { extra: `keyTimes="0;${k(glow)};${k(glow + 0.25)};${k(glow + 0.9)};1"` })}</circle>`;
+        return g;
+      }).join('');
       return svg(on ? '60 20 760 490' : '70 60 740 410', s + twoState(still, mover), 'Infrared radiation leaves the warm surface of a planet. Greenhouse gas molecules in the atmosphere absorb it and emit it again in random directions. Some escapes to space, but about half of what each molecule emits heads back towards the surface');
     },
 
