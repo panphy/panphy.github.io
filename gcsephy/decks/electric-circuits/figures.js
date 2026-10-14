@@ -2,6 +2,17 @@
 // National Grid come straight from the Year 10 companion site's own helpers
 // (gcsephy/year10phy/unit01/assets/diagrams.js and practical-diagrams.js), so
 // every symbol matches. A few extra pictures use the same .cd drawing style.
+// Diagram labels with maths, typeset by ../assets/deck-math.js (plain label: label with LaTeX).
+// The circuit and practical drawings are shared with the Year 10 site, which shows the plain labels.
+window.DeckSvgTex = {
+  'R₁': '\\(R_1\\)',
+  'R₂': '\\(R_2\\)',
+  'R₁: 3 V': '\\(R_1\\): 3 V',
+  'R₂: 3 V': '\\(R_2\\): 3 V',
+  'The charge goes through R₁ and then R₂.': 'The charge goes through \\(R_1\\) and then \\(R_2\\).',
+  'for the same p.d., so the total R is smaller.': 'for the same p.d., so the total \\(R\\) is smaller.',
+  'length L': 'length \\(L\\)'
+};
 (() => {
   const D = window.Diagrams;
   const P = window.PracticalDiagrams;
@@ -72,11 +83,11 @@
 
     // Mission 3
     voltmeter: () => D.circuit({ w: 360, h: 240, wires: [LOOP, 'M130 150 V205 H230 V150'], parts: [['battery', 180, 40, 'h', '6 V'], ['ammeter', 40, 95, 'v'], ['resistor', 180, 150, 'h', '10 Ω'], ['voltmeter', 180, 205, 'h', 'reads 6 V', 'b']], dots: [[130, 150], [230, 150]], caption: 'Ammeter in series. Voltmeter across the resistor, in parallel.' }),
-    energy: () => D.circuit({ w: 360, h: 200, wires: [LOOP], parts: [['battery', 180, 40, 'h', '6 V: 6 J gained per C'], ['resistor', 110, 150, 'h', 'R₁: 3 V', 'b'], ['resistor', 250, 150, 'h', 'R₂: 3 V', 'b']], caption: 'Each coulomb transfers 3 J in R₁ and 3 J in R₂.' }),
+    energy: () => D.circuit({ w: 360, h: 200, wires: [LOOP], parts: [['battery', 180, 40, 'h', '6 V: 6 J gained per C'], ['resistor', 110, 150, 'h', 'R₁: 3 V', 'b'], ['resistor', 250, 150, 'h', 'R₂: 3 V', 'b']], label: 'Series circuit: a 6 volt battery and two resistors with 3 volts across each, so each coulomb transfers 3 joules in each resistor', caption: 'Each coulomb transfers 3 J in \\(R_1\\) and 3 J in \\(R_2\\).' }),
     wrongVoltmeter: () => D.circuit({ w: 360, h: 200, wires: [LOOP], parts: [['battery', 180, 40, 'h', '6 V'], ['lamp', 120, 150, 'h', 'lamp', 'b'], ['voltmeter', 240, 150, 'h', 'reads ≈ 6 V', 'b']], caption: 'Voltmeter in series: almost no current, lamp stays off.' }),
 
     // Mission 4
-    ohmic: () => D.graph({ w: 360, h: 250, x: [0, 6, 1], y: [0, 0.6, 0.1], xLabel: 'potential difference / V', yLabel: 'current / A', series: [{ fn: x => 0.1 * x, from: 0, to: 6 }, { points: [[1, 0.1], [2, 0.2], [3, 0.3], [4, 0.4], [5, 0.5], [6, 0.6]] }], caption: 'A 10 Ω resistor: every point gives V ÷ I = 10 Ω.' }),
+    ohmic: () => D.graph({ w: 360, h: 250, x: [0, 6, 1], y: [0, 0.6, 0.1], xLabel: 'potential difference / V', yLabel: 'current / A', series: [{ fn: x => 0.1 * x, from: 0, to: 6 }, { points: [[1, 0.1], [2, 0.2], [3, 0.3], [4, 0.4], [5, 0.5], [6, 0.6]] }], label: 'Straight line through the origin: current against potential difference for a 10 ohm resistor', caption: 'A 10 Ω resistor: every point gives \\(V \\div I = 10\\)&nbsp;Ω.' }),
     // Two live panels driven by latticeModel. Same slow vibration rate in both;
     // the hot ions swing further, so electrons hit them more often.
     ions: () => {
@@ -104,13 +115,13 @@
     graphSkills: () => bigger(P.graphSkills(), 1.25),
 
     // Mission 5
-    series: () => D.circuit({ w: 360, h: 205, wires: [LOOP], parts: [['battery', 180, 40, 'h', '6 V'], ['ammeter', 40, 95, 'v', '0.40 A', 'r'], ['resistor', 120, 150, 'h', '5 Ω, 2 V', 'b'], ['resistor', 240, 150, 'h', '10 Ω, 4 V', 'b']], caption: 'R_total = 5 + 10 = 15 Ω, I = 6 ÷ 15 = 0.40 A' }),
+    series: () => D.circuit({ w: 360, h: 205, wires: [LOOP], parts: [['battery', 180, 40, 'h', '6 V'], ['ammeter', 40, 95, 'v', '0.40 A', 'r'], ['resistor', 120, 150, 'h', '5 Ω, 2 V', 'b'], ['resistor', 240, 150, 'h', '10 Ω, 4 V', 'b']], label: 'Series circuit: 6 volt supply, 5 ohm and 10 ohm resistors, total resistance 15 ohms and current 0.40 amps', caption: '\\(R_{\\text{total}} = 5 + 10 = 15\\)&nbsp;Ω, \\(I = 6 \\div 15 = 0.40\\)&nbsp;A' }),
     // With data-animate, arrowhead size shows the size of the current: large (5 A) through
     // the battery and ammeter, medium (3 A) in the 4 Ω branch, small (2 A) in the 6 Ω branch.
     // Each stretch takes a whole number of 1.25 s intervals, so a large arrowhead reaching
     // the left junction is replaced by a medium and a small one at the same moment.
     parallel: el => {
-      const figure = D.circuit({ w: 360, h: 225, wires: ['M40 40 H320 V185 H40 Z', 'M40 115 H320'], parts: [['battery', 180, 40, 'h', '12 V'], ['ammeter', 40, 77, 'v', '5 A', 'r'], ['resistor', 180, 115, 'h', '4 Ω, 3 A'], ['resistor', 180, 185, 'h', '6 Ω, 2 A', 'b']], dots: [[40, 115], [320, 115]], caption: 'Each branch has 12 V across it; 3 A + 2 A = 5 A' });
+      const figure = D.circuit({ w: 360, h: 225, wires: ['M40 40 H320 V185 H40 Z', 'M40 115 H320'], parts: [['battery', 180, 40, 'h', '12 V'], ['ammeter', 40, 77, 'v', '5 A', 'r'], ['resistor', 180, 115, 'h', '4 Ω, 3 A'], ['resistor', 180, 185, 'h', '6 Ω, 2 A', 'b']], dots: [[40, 115], [320, 115]], label: 'Parallel circuit: 12 volts across 4 ohm and 6 ohm branches carrying 3 amps and 2 amps, 5 amps in total', caption: 'Each branch has 12 V across it; 3 A \\(+\\) 2 A \\(=\\) 5 A' });
       if (!('animate' in el.dataset)) return figure;
       const every = (n, gap = 1.25) => Array.from({ length: n }, (_, i) => i * gap);
       return currentFlow(figure, 'M40 115 H320', [['M320 115 V40 H40 V115', 7.5, every(6), 1.5], ['M40 115 H320', 5, every(4), 1.1], ['M40 115 V185 H320 V115', 7.5, every(6), 0.7]],
@@ -131,7 +142,8 @@
     diodeWay: () => bigger(P.diodeWay(), 1.25),
 
     // Mission 7
-    grid: () => D.nationalGrid(),
+    // The Year 10 site shows "≈ 25 kV" as plain text; the deck typesets the symbol.
+    grid: () => D.nationalGrid().replace('>≈ 25 kV<', '>\\(\\approx\\) 25 kV<'),
 
     // Mission 8
     acdc: () => D.graph({ sketch: true, w: 340, h: 220, x: [0, 1], y: [-1, 1], xLabel: 'time', yLabel: 'p.d.', series: [{ fn: () => 0.45, from: 0, to: 0.8, cls: 'curve-2' }, { fn: x => 0.85 * Math.sin(2 * Math.PI * 2.5 * x), from: 0, to: 0.8 }], notes: [[0.86, 0.41, 'dc', 'start', 'cool'], [0.37, -0.82, 'ac', 'start', 'hot']], caption: 'dc (blue): one direction. ac (orange): keeps reversing.' }),

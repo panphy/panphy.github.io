@@ -17,15 +17,12 @@
   <link rel="stylesheet" href="/gcsephy/year9phy/unit02/workbook/assets/figures.css">
   <link rel="stylesheet" href="deck.css">
   <link rel="stylesheet" href="../assets/deck-notes.css">
-  <script>
-    // Maths is LaTeX between \( and \). SVG output with no shared font cache, so thumbnail copies stay complete.
-    window.MathJax = { tex: { inlineMath: [['\\(', '\\)']] }, svg: { fontCache: 'none' }, options: { enableMenu: false } };
-  </script>
   <link rel="stylesheet" href="/assets/theme-toggle.css">
   <link rel="stylesheet" href="/assets/fullscreen-button.css">
   <script src="/assets/theme-toggle.js"></script>
   <script src="/gcsephy/sw-register.js" defer></script>
   <link rel="stylesheet" href="../assets/teaching-deck.css">
+  <script src="../assets/deck-math.js"></script>
 </head>
 <body data-deck-key="energy-stores-and-transfers" data-deck-title="Energy: Stores and Transfers">
   <header class="banner">
@@ -74,7 +71,7 @@
           <div class="mission a-hi"><div class="mission-top"><span class="lesson-number">06</span><span class="lesson-icon">=</span></div><h3>Conservation</h3><p>Nothing is lost; bar charts</p></div>
           <div class="mission a-cyan"><div class="mission-top"><span class="lesson-number">07</span><span class="lesson-icon">P</span></div><h3>Power</h3><p>\(P = \dfrac{E}{t}\)</p></div>
           <div class="mission a-hot"><div class="mission-top"><span class="lesson-number">08</span><span class="lesson-icon">~</span></div><h3>Wasted energy</h3><p>Lubrication, insulation</p></div>
-          <div class="mission a-violet"><div class="mission-top"><span class="lesson-number">09</span><span class="lesson-icon">%</span></div><h3>Efficiency</h3><p>Useful ÷ total, Sankey</p></div>
+          <div class="mission a-violet"><div class="mission-top"><span class="lesson-number">09</span><span class="lesson-icon">%</span></div><h3>Efficiency</h3><p>Useful \(\div\) total, Sankey</p></div>
         </div>
         <div class="slide-foot"><span class="tag">Energy: stores and transfers</span><span data-page></span></div>
       </section>
@@ -250,7 +247,7 @@
           <div>
             <p class="eyebrow"><span class="num">02</span> Lesson 2: <span class="on">Energy in motion</span></p>
             <h1>The kinetic <em>store</em></h1>
-            <div class="unlocks"><span>\(E_k = \tfrac{1}{2}mv^2\)</span><span>grams → kilograms</span><span>2 × speed = 4 × energy</span></div>
+            <div class="unlocks"><span>\(E_k = \tfrac{1}{2}mv^2\)</span><span>grams → kilograms</span><span>\(2 \times\) speed \(= 4 \times\) energy</span></div>
           </div>
           <div class="case-card">
             <div class="label">BIG QUESTION</div>
@@ -266,7 +263,7 @@
         <h2>Kinetic <em>energy</em></h2>
         <div class="split even top">
           <div class="col">
-            <div class="eq-block"><span class="eq">\(E_k = \tfrac{1}{2}\,m\,v^2\)</span><span class="eq-words">kinetic energy = 0.5 × mass × (speed)²</span><span class="eq-units">\(E_k\) in J, \(m\) in kg, \(v\) in m/s</span><span class="flag">On the equation sheet</span></div>
+            <div class="eq-block"><span class="eq">\(E_k = \tfrac{1}{2}\,m\,v^2\)</span><span class="eq-words">\(\text{kinetic energy} = 0.5 \times \text{mass} \times (\text{speed})^2\)</span><span class="eq-units">\(E_k\) in J, \(m\) in kg, \(v\) in m/s</span><span class="flag">On the equation sheet</span></div>
             <div class="remember">Only the <b>speed</b> is squared. Square it <b>first</b>.</div>
           </div>
           <div class="col">
@@ -275,7 +272,7 @@
               <dl>
                 <div class="step"><dt>Equation</dt><dd>\(E_k = \tfrac{1}{2}\,m\,v^2\)</dd></div>
                 <div class="step"><dt>Substitute</dt><dd>\(E_k = 0.5 \times 1200 \times 15^2\)</dd></div>
-                <div class="step"><dt>Answer</dt><dd class="ans">\(E_k = 135\,000\) J</dd></div>
+                <div class="step"><dt>Answer</dt><dd class="ans">\(E_k = 135\,000\)&nbsp;J</dd></div>
               </dl>
             </div>
             <div class="worked">
@@ -284,7 +281,7 @@
                 <div class="step"><dt>Convert</dt><dd>\(m = 450\ \text{g} = 0.450\ \text{kg}\)</dd></div>
                 <div class="step"><dt>Equation</dt><dd>\(E_k = \tfrac{1}{2}\,m\,v^2\)</dd></div>
                 <div class="step"><dt>Substitute</dt><dd>\(E_k = 0.5 \times 0.450 \times 20^2\)</dd></div>
-                <div class="step"><dt>Answer</dt><dd class="ans">\(E_k = 90\) J</dd></div>
+                <div class="step"><dt>Answer</dt><dd class="ans">\(E_k = 90\)&nbsp;J</dd></div>
               </dl>
             </div>
           </div>
@@ -292,7 +289,7 @@
         <div class="slide-foot"><span class="tag">Lesson 2: The kinetic store</span><span data-page></span></div>
         <aside class="revision-note" hidden>
           <div class="rn-main">
-            <p><b>The calculator trap.</b> Typing 0.5 × 1200 × 15 and then pressing x² squares everything: you get 81 000 000, not 135 000. Work out \(15^2 = 225\) on its own line first, then multiply.</p>
+            <p><b>The calculator trap.</b> Typing \(0.5 \times 1200 \times 15\) and then pressing \(x^2\) squares everything: you get 81 000 000, not 135 000. Work out \(15^2 = 225\) on its own line first, then multiply.</p>
             <p><b>Why kilograms?</b> The joule is defined using kilograms, metres and seconds. Put grams in and the answer is 1000 times too big: the football would carry 90 000 J, more than a car at walking pace.</p>
           </div>
           <div class="rn-side"><p class="tip">Sense check: a football is tens of joules; a moving car is hundreds of thousands.</p></div>
@@ -301,13 +298,13 @@
 
       <section class="slide a-cyan" data-title="Double the speed">
         <p class="eyebrow"><span class="num">02</span> Try it</p>
-        <h2>Double the speed, <em>×4</em></h2>
+        <h2>Double the speed, <em>\(\times 4\)</em></h2>
         <div class="split wide-fig">
           <ul class="points small">
             <li>Pick each speed in turn</li>
-            <li class="step">2 × the speed → \(2^2 = 4\) × the energy</li>
-            <li class="step">3 × the speed → \(3^2 = 9\) × the energy</li>
-            <li class="step">Now double the <b>mass</b>: only 2 × the energy</li>
+            <li class="step">\(2 \times\) the speed → \(2^2 = 4 \times\) the energy</li>
+            <li class="step">\(3 \times\) the speed → \(3^2 = 9 \times\) the energy</li>
+            <li class="step">Now double the <b>mass</b>: only \(2 \times\) the energy</li>
           </ul>
           <div class="panel"><div class="panel-head"><span>Car, 1000 kg</span><span class="pill">interactive</span></div><div class="widget" data-widget="kinetic"></div></div>
         </div>
@@ -329,15 +326,15 @@
             <li>Mark 1.00 m on the track</li>
             <li>Push gently; time the 1.00 m</li>
             <li>Three runs, mean time</li>
-            <li>speed = distance ÷ time, then \(E_k\)</li>
+            <li>\(\text{speed} = \text{distance} \div \text{time}\), then \(E_k\)</li>
           </ol>
           <div class="worked">
             <div class="wq"><span>Sample</span>500 g trolley, mean time 1.59 s</div>
             <dl>
-              <div class="step"><dt>Speed</dt><dd>\(v = \dfrac{s}{t} = \dfrac{1.00}{1.59} = 0.63\) m/s</dd></div>
+              <div class="step"><dt>Speed</dt><dd>\(v = \dfrac{s}{t} = \dfrac{1.00}{1.59} = 0.63\)&nbsp;m/s</dd></div>
               <div class="step"><dt>Equation</dt><dd>\(E_k = \tfrac{1}{2}\,m\,v^2\)</dd></div>
               <div class="step"><dt>Substitute</dt><dd>\(E_k = 0.5 \times 0.500 \times 0.63^2\)</dd></div>
-              <div class="step"><dt>Answer</dt><dd class="ans">\(E_k = 0.10\) J</dd></div>
+              <div class="step"><dt>Answer</dt><dd class="ans">\(E_k = 0.10\)&nbsp;J</dd></div>
             </dl>
           </div>
         </div>
@@ -354,12 +351,12 @@
         <p class="eyebrow"><span class="num">02</span> Checkpoint</p>
         <h2>Quick check</h2>
         <div class="quiz fill">
-          <div class="q"><p><span class="n">1</span>60 kg runner at 5.0 m/s?</p><div class="ans step">\(0.5 \times 60 \times 5.0^2 = 750\) J</div></div>
+          <div class="q"><p><span class="n">1</span>60 kg runner at 5.0 m/s?</p><div class="ans step">\(0.5 \times 60 \times 5.0^2 = 750\)&nbsp;J</div></div>
           <div class="q"><p><span class="n">2</span>250 g in kg?</p><div class="ans step">0.250 kg</div></div>
-          <div class="q"><p><span class="n">3</span>Speed doubles. Energy?</p><div class="ans step">× 4</div></div>
-          <div class="q"><p><span class="n">4</span>Speed halves. Energy?</p><div class="ans step">a quarter (÷ 4)</div></div>
-          <div class="q"><p><span class="n">5</span>10 g bullet at 400 m/s?</p><div class="ans step">\(0.5 \times 0.010 \times 400^2 = 800\) J</div></div>
-          <div class="q"><p><span class="n">6</span>Mass doubles. Energy?</p><div class="ans step">× 2</div></div>
+          <div class="q"><p><span class="n">3</span>Speed doubles. Energy?</p><div class="ans step">\(\times 4\)</div></div>
+          <div class="q"><p><span class="n">4</span>Speed halves. Energy?</p><div class="ans step">a quarter (\(\div 4\))</div></div>
+          <div class="q"><p><span class="n">5</span>10 g bullet at 400 m/s?</p><div class="ans step">\(0.5 \times 0.010 \times 400^2 = 800\)&nbsp;J</div></div>
+          <div class="q"><p><span class="n">6</span>Mass doubles. Energy?</p><div class="ans step">\(\times 2\)</div></div>
         </div>
         <div class="slide-foot"><span class="reveal-hint">PRESS → TO REVEAL EACH ANSWER</span><span data-page></span></div>
       </section>
@@ -370,7 +367,7 @@
           <div>
             <p class="eyebrow"><span class="num">03</span> Lesson 3: <span class="on">Energy from height</span></p>
             <h1>Gravitational <em>potential</em></h1>
-            <div class="unlocks"><span>\(g = 9.8\) N/kg</span><span>\(E_p = mgh\)</span><span>height gained</span><span>find \(h\) or \(m\)</span></div>
+            <div class="unlocks"><span>\(g = 9.8\)&nbsp;N/kg</span><span>\(E_p = mgh\)</span><span>height gained</span><span>find \(h\) or \(m\)</span></div>
           </div>
           <div class="case-card">
             <div class="label">KEY RULE</div>
@@ -431,7 +428,7 @@
         <h2>What \(g\) <em>means</em></h2>
         <div class="split even">
           <div class="col">
-            <div class="rule"><strong>On Earth</strong><span>Gravity pulls every kilogram down with <b>9.8 N</b>: \(g = 9.8\) N/kg</span></div>
+            <div class="rule"><strong>On Earth</strong><span>Gravity pulls every kilogram down with <b>9.8 N</b>: \(g = 9.8\)&nbsp;N/kg</span></div>
             <table class="data compact">
               <thead><tr><th>Where</th><th>\(g\) / N/kg</th><th>Pull on 1 kg</th></tr></thead>
               <tbody><tr><th>Earth</th><td>9.8</td><td>9.8 N</td></tr><tr><th>Moon</th><td>1.6</td><td>1.6 N</td></tr><tr><th>Jupiter</th><td>about 25</td><td>about 25 N</td></tr></tbody>
@@ -458,7 +455,7 @@
         <h2>\(E_p = mgh\)</h2>
         <div class="split even top">
           <div class="col">
-            <div class="eq-block"><span class="eq">\(E_p = m\,g\,h\)</span><span class="eq-words">G.P.E. = mass × gravitational field strength × height</span><span class="eq-units">\(E_p\) in J, \(m\) in kg, \(g\) in N/kg, \(h\) in m</span><span class="flag">On the equation sheet</span></div>
+            <div class="eq-block"><span class="eq">\(E_p = m\,g\,h\)</span><span class="eq-words">\(\text{G.P.E.} = \text{mass} \times \text{gravitational field strength} \times \text{height}\)</span><span class="eq-units">\(E_p\) in J, \(m\) in kg, \(g\) in N/kg, \(h\) in m</span><span class="flag">On the equation sheet</span></div>
             <div class="remember">Mass in <b>kg</b>, height in <b>m</b>. \(g\) is always given: 9.8 N/kg.</div>
           </div>
           <div class="col">
@@ -467,7 +464,7 @@
               <dl>
                 <div class="step"><dt>Equation</dt><dd>\(E_p = m\,g\,h\)</dd></div>
                 <div class="step"><dt>Substitute</dt><dd>\(E_p = 2.0 \times 9.8 \times 1.5\)</dd></div>
-                <div class="step"><dt>Answer</dt><dd class="ans">\(E_p = 29.4\) J</dd></div>
+                <div class="step"><dt>Answer</dt><dd class="ans">\(E_p = 29.4\)&nbsp;J</dd></div>
               </dl>
             </div>
           </div>
@@ -489,9 +486,9 @@
               <div class="worked">
               <div class="wq"><span>Example 2</span>A 55 kg hiker climbs from 120 m to 420 m above sea level.</div>
               <dl>
-                <div class="step"><dt>Height</dt><dd>\(h = 420 - 120 = 300\) m</dd></div>
+                <div class="step"><dt>Height</dt><dd>\(h = 420 - 120 = 300\)&nbsp;m</dd></div>
                 <div class="step"><dt>Substitute</dt><dd>\(E_p = 55 \times 9.8 \times 300\)</dd></div>
-                <div class="step"><dt>Answer</dt><dd class="ans">\(E_p = 161\,700\) J</dd></div>
+                <div class="step"><dt>Answer</dt><dd class="ans">\(E_p = 161\,700\)&nbsp;J</dd></div>
               </dl>
             </div>
             <div class="remember">Only the <b>change</b> in height counts.</div>
@@ -519,7 +516,7 @@
               <dl>
                 <div class="step"><dt>Rearrange</dt><dd>\(m = \dfrac{E_p}{g\,h}\)</dd></div>
                 <div class="step"><dt>Substitute</dt><dd>\(m = \dfrac{392}{9.8 \times 2.0}\)</dd></div>
-                <div class="step"><dt>Answer</dt><dd class="ans">\(m = 20\) kg</dd></div>
+                <div class="step"><dt>Answer</dt><dd class="ans">\(m = 20\)&nbsp;kg</dd></div>
               </dl>
             </div>
           </div>
@@ -530,7 +527,7 @@
                 <div class="step"><dt>Equation</dt><dd>\(E_p = m\,g\,h\)</dd></div>
                 <div class="step"><dt>Rearrange</dt><dd>\(h = \dfrac{E_p}{m\,g}\)</dd></div>
                 <div class="step"><dt>Substitute</dt><dd>\(h = \dfrac{17\,640}{60 \times 9.8}\)</dd></div>
-                <div class="step"><dt>Answer</dt><dd class="ans">\(h = 30\) m</dd></div>
+                <div class="step"><dt>Answer</dt><dd class="ans">\(h = 30\)&nbsp;m</dd></div>
               </dl>
             </div>
           </div>
@@ -548,12 +545,12 @@
         <p class="eyebrow"><span class="num">03</span> Checkpoint</p>
         <h2>Quick check</h2>
         <div class="quiz fill">
-          <div class="q"><p><span class="n">1</span>What does \(g = 9.8\) N/kg mean?</p><div class="ans step">Each kilogram is pulled down with 9.8 N</div></div>
-          <div class="q"><p><span class="n">2</span>5.0 kg lifted 2.0 m?</p><div class="ans step">\(5.0 \times 9.8 \times 2.0 = 98\) J</div></div>
-          <div class="q"><p><span class="n">3</span>0.50 kg ball gains 24.5 J. Height?</p><div class="ans step">\(\dfrac{24.5}{0.50 \times 9.8} = 5.0\) m</div></div>
+          <div class="q"><p><span class="n">1</span>What does \(g = 9.8\)&nbsp;N/kg mean?</p><div class="ans step">Each kilogram is pulled down with 9.8 N</div></div>
+          <div class="q"><p><span class="n">2</span>5.0 kg lifted 2.0 m?</p><div class="ans step">\(5.0 \times 9.8 \times 2.0 = 98\)&nbsp;J</div></div>
+          <div class="q"><p><span class="n">3</span>0.50 kg ball gains 24.5 J. Height?</p><div class="ans step">\(\dfrac{24.5}{0.50 \times 9.8} = 5.0\)&nbsp;m</div></div>
           <div class="q"><p><span class="n">4</span>Same lift on the Moon?</p><div class="ans step">Less energy: \(g\) is smaller</div></div>
           <div class="q"><p><span class="n">5</span>From 30 m to 80 m up. \(h\)?</p><div class="ans step">50 m</div></div>
-          <div class="q"><p><span class="n">6</span>Height doubles. Energy?</p><div class="ans step">× 2</div></div>
+          <div class="q"><p><span class="n">6</span>Height doubles. Energy?</p><div class="ans step">\(\times 2\)</div></div>
         </div>
         <div class="slide-foot"><span class="reveal-hint">PRESS → TO REVEAL EACH ANSWER</span><span data-page></span></div>
       </section>
@@ -567,8 +564,8 @@
             <div class="unlocks"><span>two forces</span><span>extension</span><span>\(F = ke\)</span><span>two graphs</span></div>
           </div>
           <div class="case-card">
-            <div class="label">WHY WE NEED k</div>
-            <h3>k tells us how much energy a spring stores</h3>
+            <div class="label">WHY WE NEED \(k\)</div>
+            <h3>\(k\) tells us how much energy a spring stores</h3>
             <div class="fig" data-fig="twoForces"></div>
           </div>
         </div>
@@ -605,7 +602,7 @@
             <ul class="points small">
               <li>No load: 5.0 cm long</li>
               <li class="step">With a load: 9.0 cm long</li>
-              <li class="step">Extension = 9.0 − 5.0 = <b>4.0 cm</b></li>
+              <li class="step">\(\text{Extension} = 9.0 - 5.0 =\) <b>4.0 cm</b></li>
             </ul>
           </div>
           <div class="panel"><div class="fig" data-fig="extension"></div></div>
@@ -623,7 +620,7 @@
         <h2>Spring <em>constant</em></h2>
         <div class="split even top">
           <div class="col">
-            <div class="eq-block"><span class="eq">\(F = k\,e\)</span><span class="eq-words">force = spring constant × extension</span><span class="eq-units">\(F\) in N, \(k\) in N/m, \(e\) in m</span><span class="flag">On the equation sheet</span></div>
+            <div class="eq-block"><span class="eq">\(F = k\,e\)</span><span class="eq-words">\(\text{force} = \text{spring constant} \times \text{extension}\)</span><span class="eq-units">\(F\) in N, \(k\) in N/m, \(e\) in m</span><span class="flag">On the equation sheet</span></div>
             <div class="remember"><b>extension</b> = stretched length − original length</div>
           </div>
           <div class="col">
@@ -633,7 +630,7 @@
                 <div class="step"><dt>Convert</dt><dd>\(e = 4.0\ \text{cm} = 0.040\ \text{m}\)</dd></div>
                 <div class="step"><dt>Rearrange</dt><dd>\(k = \dfrac{F}{e}\)</dd></div>
                 <div class="step"><dt>Substitute</dt><dd>\(k = \dfrac{2.0}{0.040}\)</dd></div>
-                <div class="step"><dt>Answer</dt><dd class="ans">\(k = 50\) N/m</dd></div>
+                <div class="step"><dt>Answer</dt><dd class="ans">\(k = 50\)&nbsp;N/m</dd></div>
               </dl>
             </div>
             <div class="rule step"><strong>Hooke's law</strong><span>Extension is directly proportional to force, up to the <b>limit of proportionality</b></span></div>
@@ -656,7 +653,7 @@
             <div class="rule"><strong>Bench rule</strong><span>Each 100 g pulls down with about <b>1 N</b></span></div>
             <ul class="points small">
               <li>From Lesson 3: each kg is pulled with 9.8 N</li>
-              <li class="step">So 100 g = 0.1 kg is pulled with 0.98 N ≈ 1 N</li>
+              <li class="step">So 100 g \(=\) 0.1 kg is pulled with 0.98 N \(\approx\) 1 N</li>
               <li class="step">Record the force in <b>newtons</b>, never grams</li>
             </ul>
           </div>
@@ -696,7 +693,7 @@
             <thead><tr><th></th><th>y-axis</th><th>x-axis</th><th>Gradient means</th></tr></thead>
             <tbody>
               <tr><th>Graph 1</th><td>extension</td><td>force (independent)</td><td class="step">how <b>stretchy</b>: 0.04 m per N</td></tr>
-              <tr><th>Graph 2</th><td>force</td><td>extension</td><td class="step">how <b>stiff</b>: \(k\) = 25 N/m</td></tr>
+              <tr><th>Graph 2</th><td>force</td><td>extension</td><td class="step">how <b>stiff</b>: \(k = 25\)&nbsp;N/m</td></tr>
             </tbody>
           </table>
         </div>
@@ -704,7 +701,7 @@
         <aside class="revision-note" hidden>
           <div class="rn-main">
             <p><b>Graph 1 follows the Unit 1 rule.</b> We chose the force, so it is the independent variable and goes on the x-axis. That graph answers our question directly: the extension grows in proportion to the force.</p>
-            <p><b>Graph 2 is the physicist's graph.</b> With force on the y-axis, the gradient is force ÷ extension, which is exactly \(k\). AQA exam questions almost always draw it this way, so you must be able to read both.</p>
+            <p><b>Graph 2 is the physicist's graph.</b> With force on the y-axis, the gradient is \(\text{force} \div \text{extension}\), which is exactly \(k\). AQA exam questions almost always draw it this way, so you must be able to read both.</p>
             <p><b>Stiffer spring?</b> Steeper on graph 2 (more force per metre), shallower on graph 1 (less stretch per newton).</p>
           </div>
         </aside>
@@ -715,9 +712,9 @@
         <h2>Quick check</h2>
         <div class="quiz fill">
           <div class="q"><p><span class="n">1</span>6.0 cm long, then 9.5 cm. Extension?</p><div class="ans step">3.5 cm</div></div>
-          <div class="q"><p><span class="n">2</span>200 N/m spring, \(e = 0.050\) m. Force?</p><div class="ans step">\(200 \times 0.050 = 10\) N</div></div>
-          <div class="q"><p><span class="n">3</span>3.0 N stretches 10 cm. \(k\)?</p><div class="ans step">\(\dfrac{3.0}{0.10} = 30\) N/m</div></div>
-          <div class="q"><p><span class="n">4</span>40 N/m spring, 2.0 N. Extension?</p><div class="ans step">\(\dfrac{2.0}{40} = 0.050\) m = 5.0 cm</div></div>
+          <div class="q"><p><span class="n">2</span>200 N/m spring, \(e = 0.050\)&nbsp;m. Force?</p><div class="ans step">\(200 \times 0.050 = 10\)&nbsp;N</div></div>
+          <div class="q"><p><span class="n">3</span>3.0 N stretches 10 cm. \(k\)?</p><div class="ans step">\(\dfrac{3.0}{0.10} = 30\)&nbsp;N/m</div></div>
+          <div class="q"><p><span class="n">4</span>40 N/m spring, 2.0 N. Extension?</p><div class="ans step">\(\dfrac{2.0}{40} = 0.050\)&nbsp;m, or 5.0 cm</div></div>
           <div class="q"><p><span class="n">5</span>Stays stretched when let go?</p><div class="ans step">Inelastic deformation</div></div>
           <div class="q"><p><span class="n">6</span>Force–extension graph: gradient?</p><div class="ans step">the spring constant \(k\)</div></div>
         </div>
@@ -730,7 +727,7 @@
           <div>
             <p class="eyebrow"><span class="num">05</span> Lesson 5: <span class="on">Stretch and release</span></p>
             <h1>Elastic <em>potential</em></h1>
-            <div class="unlocks"><span>\(E_e = \tfrac{1}{2}ke^2\)</span><span>find \(k\) first</span><span>2 × stretch = 4 × energy</span></div>
+            <div class="unlocks"><span>\(E_e = \tfrac{1}{2}ke^2\)</span><span>find \(k\) first</span><span>\(2 \times\) stretch \(= 4 \times\) energy</span></div>
           </div>
           <div class="case-card">
             <div class="label">BIG QUESTION</div>
@@ -769,24 +766,24 @@
         <h2>\(E_e = \tfrac{1}{2}ke^2\)</h2>
         <div class="split even top">
           <div class="col">
-            <div class="eq-block"><span class="eq">\(E_e = \tfrac{1}{2}\,k\,e^2\)</span><span class="eq-words">elastic potential energy = 0.5 × spring constant × (extension)²</span><span class="eq-units">\(E_e\) in J, \(k\) in N/m, \(e\) in m</span><span class="flag">On the equation sheet</span></div>
+            <div class="eq-block"><span class="eq">\(E_e = \tfrac{1}{2}\,k\,e^2\)</span><span class="eq-words">\(\text{elastic potential energy} = 0.5 \times \text{spring constant} \times (\text{extension})^2\)</span><span class="eq-units">\(E_e\) in J, \(k\) in N/m, \(e\) in m</span><span class="flag">On the equation sheet</span></div>
             <div class="remember">Work done stretching a spring = energy stored, <b>up to the limit of proportionality</b></div>
           </div>
           <div class="col">
             <div class="worked">
-              <div class="wq"><span>Example 1</span>\(k = 50\) N/m, stretched by 0.040 m.</div>
+              <div class="wq"><span>Example 1</span>\(k = 50\)&nbsp;N/m, stretched by 0.040 m.</div>
               <dl>
                 <div class="step"><dt>Equation</dt><dd>\(E_e = \tfrac{1}{2}\,k\,e^2\)</dd></div>
                 <div class="step"><dt>Substitute</dt><dd>\(E_e = 0.5 \times 50 \times 0.040^2\)</dd></div>
-                <div class="step"><dt>Answer</dt><dd class="ans">\(E_e = 0.04\) J</dd></div>
+                <div class="step"><dt>Answer</dt><dd class="ans">\(E_e = 0.04\)&nbsp;J</dd></div>
               </dl>
             </div>
             <div class="worked">
               <div class="wq"><span>Example 2</span>3.0 N stretches a spring by 10 cm. Energy stored?</div>
               <dl>
-                <div class="step"><dt>Step 1</dt><dd>\(k = \dfrac{F}{e} = \dfrac{3.0}{0.10} = 30\) N/m</dd></div>
+                <div class="step"><dt>Step 1</dt><dd>\(k = \dfrac{F}{e} = \dfrac{3.0}{0.10} = 30\)&nbsp;N/m</dd></div>
                 <div class="step"><dt>Step 2</dt><dd>\(E_e = \tfrac{1}{2}\,k\,e^2 = 0.5 \times 30 \times 0.10^2\)</dd></div>
-                <div class="step"><dt>Answer</dt><dd class="ans">\(E_e = 0.15\) J</dd></div>
+                <div class="step"><dt>Answer</dt><dd class="ans">\(E_e = 0.15\)&nbsp;J</dd></div>
               </dl>
             </div>
           </div>
@@ -794,7 +791,7 @@
         <div class="slide-foot"><span class="tag">Lesson 5: Elastic store</span><span data-page></span></div>
         <aside class="revision-note" hidden>
           <div class="rn-main">
-            <p><b>Why a half?</b> The force is not constant while you stretch: it starts at zero and rises to \(k\,e\). On average you pull with half the final force, \(\tfrac{1}{2}k\,e\), through the distance \(e\). Average force × distance = \(\tfrac{1}{2}k\,e \times e = \tfrac{1}{2}k\,e^2\).</p>
+            <p><b>Why a half?</b> The force is not constant while you stretch: it starts at zero and rises to \(k\,e\). On average you pull with half the final force, \(\tfrac{1}{2}k\,e\), through the distance \(e\). Average force \(\times\) distance \(=\) \(\tfrac{1}{2}k\,e \times e = \tfrac{1}{2}k\,e^2\).</p>
             <p><b>The centimetre disaster.</b> Put \(e = 10\) instead of 0.10 into example 2 and you get 1500 J, ten thousand times too big. A lab spring stores fractions of a joule.</p>
           </div>
         </aside>
@@ -802,20 +799,20 @@
 
       <section class="slide a-alt" data-title="Double the stretch">
         <p class="eyebrow"><span class="num">05</span> Try it</p>
-        <h2>Double the stretch, <em>×4</em></h2>
+        <h2>Double the stretch, <em>\(\times 4\)</em></h2>
         <div class="split wide-fig">
           <ul class="points small">
             <li>Stretch it 0.04 m, then 0.08 m, then 0.12 m</li>
-            <li class="step">2 × the extension → 4 × the energy</li>
-            <li class="step">3 × the extension → 9 × the energy</li>
+            <li class="step">\(2 \times\) the extension → \(4 \times\) the energy</li>
+            <li class="step">\(3 \times\) the extension → \(9 \times\) the energy</li>
             <li class="step">Same pattern as \(E_k\): the extension is <b>squared</b></li>
           </ul>
-          <div class="panel"><div class="panel-head"><span>Spring, k = 50 N/m</span><span class="pill">interactive</span></div><div class="widget" data-widget="elastic"></div></div>
+          <div class="panel"><div class="panel-head"><span>Spring, \(k = 50\)&nbsp;N/m</span><span class="pill">interactive</span></div><div class="widget" data-widget="elastic"></div></div>
         </div>
         <div class="slide-foot"><span class="tag">Lesson 5: Elastic store</span><span data-page></span></div>
         <aside class="revision-note" hidden>
           <div class="rn-main">
-            <p><b>Why squared?</b> The further you stretch, the harder you have to pull. The second centimetre needs more force than the first, so it takes more work. Double the stretch and you pull twice as hard on average for twice the distance: 2 × 2 = 4 times the energy.</p>
+            <p><b>Why squared?</b> The further you stretch, the harder you have to pull. The second centimetre needs more force than the first, so it takes more work. Double the stretch and you pull twice as hard on average for twice the distance: \(2 \times 2 = 4\) times the energy.</p>
             <p><b>Back to the big question:</b> pulling the bow twice as far gives the arrow about four times the energy, not twice.</p>
           </div>
         </aside>
@@ -825,10 +822,10 @@
         <p class="eyebrow"><span class="num">05</span> Checkpoint</p>
         <h2>Quick check</h2>
         <div class="quiz fill">
-          <div class="q"><p><span class="n">1</span>\(k = 80\) N/m, \(e = 0.10\) m. \(E_e\)?</p><div class="ans step">\(0.5 \times 80 \times 0.10^2 = 0.40\) J</div></div>
-          <div class="q"><p><span class="n">2</span>\(k = 400\) N/m, squashed 20 mm?</p><div class="ans step">\(0.5 \times 400 \times 0.020^2 = 0.08\) J</div></div>
-          <div class="q"><p><span class="n">3</span>Extension triples. Energy?</p><div class="ans step">× 9</div></div>
-          <div class="q"><p><span class="n">4</span>6.0 N stretches 0.15 m. Energy?</p><div class="ans step">\(k = 40\) N/m; \(E_e = 0.45\) J</div></div>
+          <div class="q"><p><span class="n">1</span>\(k = 80\)&nbsp;N/m, \(e = 0.10\)&nbsp;m. \(E_e\)?</p><div class="ans step">\(0.5 \times 80 \times 0.10^2 = 0.40\)&nbsp;J</div></div>
+          <div class="q"><p><span class="n">2</span>\(k = 400\)&nbsp;N/m, squashed 20 mm?</p><div class="ans step">\(0.5 \times 400 \times 0.020^2 = 0.08\)&nbsp;J</div></div>
+          <div class="q"><p><span class="n">3</span>Extension triples. Energy?</p><div class="ans step">\(\times 9\)</div></div>
+          <div class="q"><p><span class="n">4</span>6.0 N stretches 0.15 m. Energy?</p><div class="ans step">\(k = 40\)&nbsp;N/m; \(E_e = 0.45\)&nbsp;J</div></div>
           <div class="q"><p><span class="n">5</span>When can't you use \(E_e = \tfrac{1}{2}ke^2\)?</p><div class="ans step">Beyond the limit of proportionality</div></div>
           <div class="q"><p><span class="n">6</span>Where does the work done go?</p><div class="ans step">Into the spring's elastic potential store</div></div>
         </div>
@@ -899,19 +896,19 @@
           <div class="worked">
             <div class="wq"><span>Example 1</span>A 0.50 kg ball is dropped from 3.0 m. \(E_k\) just before it lands?</div>
             <dl>
-              <div class="step"><dt>Idea</dt><dd>\(E_k\) gained = \(E_p\) lost</dd></div>
+              <div class="step"><dt>Idea</dt><dd>\(E_k\) gained \(=\) \(E_p\) lost</dd></div>
               <div class="step"><dt>Equation</dt><dd>\(E_p = m\,g\,h\)</dd></div>
               <div class="step"><dt>Substitute</dt><dd>\(E_p = 0.50 \times 9.8 \times 3.0\)</dd></div>
-              <div class="step"><dt>Answer</dt><dd class="ans">\(E_k = 14.7\) J</dd></div>
+              <div class="step"><dt>Answer</dt><dd class="ans">\(E_k = 14.7\)&nbsp;J</dd></div>
             </dl>
           </div>
           <div class="worked">
             <div class="wq"><span>Example 2</span>A 0.25 kg ball is thrown up with 20 J of \(E_k\). Greatest height?</div>
             <dl>
-              <div class="step"><dt>Idea</dt><dd>at the top, \(E_p = 20\) J</dd></div>
+              <div class="step"><dt>Idea</dt><dd>at the top, \(E_p = 20\)&nbsp;J</dd></div>
               <div class="step"><dt>Rearrange</dt><dd>\(h = \dfrac{E_p}{m\,g}\)</dd></div>
               <div class="step"><dt>Substitute</dt><dd>\(h = \dfrac{20}{0.25 \times 9.8}\)</dd></div>
-              <div class="step"><dt>Answer</dt><dd class="ans">\(h = 8.2\) m</dd></div>
+              <div class="step"><dt>Answer</dt><dd class="ans">\(h = 8.2\)&nbsp;m</dd></div>
             </dl>
           </div>
         </div>
@@ -919,7 +916,7 @@
         <aside class="revision-note" hidden>
           <div class="rn-main">
             <p><b>"Ignore air resistance" is the key phrase.</b> It tells you the system is closed, so every joule leaving one store arrives in the other. Without it, the kinetic energy at the bottom would be a little less than 14.7 J.</p>
-            <p><b>Three stores, one chain:</b> a toy launcher (\(k = 200\) N/m, squashed 0.050 m) stores \(E_e = 0.25\) J. Fired straight up, a 10 g ball could reach \(h = \dfrac{0.25}{0.010 \times 9.8} = 2.6\) m.</p>
+            <p><b>Three stores, one chain:</b> a toy launcher (\(k = 200\)&nbsp;N/m, squashed 0.050 m) stores \(E_e = 0.25\)&nbsp;J. Fired straight up, a 10 g ball could reach \(h = \dfrac{0.25}{0.010 \times 9.8} = 2.6\)&nbsp;m.</p>
           </div>
         </aside>
       </section>
@@ -985,8 +982,8 @@
         <h2>Quick check</h2>
         <div class="quiz fill">
           <div class="q"><p><span class="n">1</span>State the principle.</p><div class="ans step">Transferred, stored or dissipated; never created or destroyed</div></div>
-          <div class="q"><p><span class="n">2</span>2.0 kg rock falls 5.0 m. \(E_k\) at the bottom?</p><div class="ans step">\(2.0 \times 9.8 \times 5.0 = 98\) J</div></div>
-          <div class="q"><p><span class="n">3</span>0.10 kg ball up with 4.9 J. Height?</p><div class="ans step">\(\dfrac{4.9}{0.10 \times 9.8} = 5.0\) m</div></div>
+          <div class="q"><p><span class="n">2</span>2.0 kg rock falls 5.0 m. \(E_k\) at the bottom?</p><div class="ans step">\(2.0 \times 9.8 \times 5.0 = 98\)&nbsp;J</div></div>
+          <div class="q"><p><span class="n">3</span>0.10 kg ball up with 4.9 J. Height?</p><div class="ans step">\(\dfrac{4.9}{0.10 \times 9.8} = 5.0\)&nbsp;m</div></div>
           <div class="q"><p><span class="n">4</span>Pendulum lower each swing. Why?</p><div class="ans step">Energy dissipated to the thermal store of the air</div></div>
           <div class="q"><p><span class="n">5</span>Top of the swing: most energy in?</p><div class="ans step">gravitational potential store</div></div>
           <div class="q"><p><span class="n">6</span>Is energy destroyed by friction?</p><div class="ans step">No: it is dissipated</div></div>
@@ -1037,8 +1034,8 @@
         <h2>Calculating <em>power</em></h2>
         <div class="split even top">
           <div class="col">
-            <div class="eq-block"><span class="eq">\(P = \dfrac{E}{t}\)</span><span class="eq-words">power = energy transferred ÷ time</span><span class="eq-units">\(P\) in W, \(E\) in J, \(t\) in s</span><span class="flag">On the equation sheet</span></div>
-            <div class="rule"><strong>1 watt</strong><span>= 1 joule per second. 1 kW = 1000 W.</span></div>
+            <div class="eq-block"><span class="eq">\(P = \dfrac{E}{t}\)</span><span class="eq-words">\(\text{power} = \text{energy transferred} \div \text{time}\)</span><span class="eq-units">\(P\) in W, \(E\) in J, \(t\) in s</span><span class="flag">On the equation sheet</span></div>
+            <div class="rule"><strong>1 watt</strong><span>= 1 joule per second. 1 kW \(=\) 1000 W.</span></div>
             <div class="formula"><span>Rearranged</span>\(E = P\,t \qquad t = \dfrac{E}{P}\)</div>
           </div>
           <div class="col">
@@ -1047,16 +1044,16 @@
               <dl>
                 <div class="step"><dt>Equation</dt><dd>\(P = \dfrac{E}{t}\)</dd></div>
                 <div class="step"><dt>Substitute</dt><dd>\(P = \dfrac{600}{4.0}\)</dd></div>
-                <div class="step"><dt>Answer</dt><dd class="ans">\(P = 150\) W</dd></div>
+                <div class="step"><dt>Answer</dt><dd class="ans">\(P = 150\)&nbsp;W</dd></div>
               </dl>
             </div>
             <div class="worked">
               <div class="wq"><span>Example 2</span>A 2.0 kW kettle runs for 2.0 minutes. Energy?</div>
               <dl>
-                <div class="step"><dt>Convert</dt><dd>\(P = 2000\) W, \(t = 120\) s</dd></div>
+                <div class="step"><dt>Convert</dt><dd>\(P = 2000\)&nbsp;W, \(t = 120\)&nbsp;s</dd></div>
                 <div class="step"><dt>Rearrange</dt><dd>\(E = P\,t\)</dd></div>
                 <div class="step"><dt>Substitute</dt><dd>\(E = 2000 \times 120\)</dd></div>
-                <div class="step"><dt>Answer</dt><dd class="ans">\(E = 240\,000\) J</dd></div>
+                <div class="step"><dt>Answer</dt><dd class="ans">\(E = 240\,000\)&nbsp;J</dd></div>
               </dl>
             </div>
           </div>
@@ -1064,8 +1061,8 @@
         <div class="slide-foot"><span class="tag">Lesson 7: Power</span><span data-page></span></div>
         <aside class="revision-note" hidden>
           <div class="rn-main">
-            <p><b>Reading a label.</b> "60 W" on a lamp means it transfers 60 J every second. Leave it on for a minute and it has transferred \(60 \times 60 = 3600\) J.</p>
-            <p><b>Convert before you substitute.</b> Minutes into seconds (× 60), kW into W (× 1000). Forget the minutes and the kettle's answer is 60 times too small.</p>
+            <p><b>Reading a label.</b> "60 W" on a lamp means it transfers 60 J every second. Leave it on for a minute and it has transferred \(60 \times 60 = 3600\)&nbsp;J.</p>
+            <p><b>Convert before you substitute.</b> Minutes into seconds (\(\times 60\)), kW into W (\(\times 1000\)). Forget the minutes and the kettle's answer is 60 times too small.</p>
           </div>
         </aside>
       </section>
@@ -1078,10 +1075,10 @@
             <div class="worked">
               <div class="wq"><span>Sample</span>18 steps of 0.17 m, mass 50 kg, time 5.0 s</div>
               <dl>
-                <div class="step"><dt>Height</dt><dd>\(h = 18 \times 0.17 = 3.06\) m</dd></div>
-                <div class="step"><dt>Energy</dt><dd>\(E_p = 50 \times 9.8 \times 3.06 = 1500\) J</dd></div>
+                <div class="step"><dt>Height</dt><dd>\(h = 18 \times 0.17 = 3.06\)&nbsp;m</dd></div>
+                <div class="step"><dt>Energy</dt><dd>\(E_p = 50 \times 9.8 \times 3.06 = 1500\)&nbsp;J</dd></div>
                 <div class="step"><dt>Power</dt><dd>\(P = \dfrac{1500}{5.0}\)</dd></div>
-                <div class="step"><dt>Answer</dt><dd class="ans">\(P = 300\) W</dd></div>
+                <div class="step"><dt>Answer</dt><dd class="ans">\(P = 300\)&nbsp;W</dd></div>
               </dl>
             </div>
             <div class="remember">Walk briskly. <b>Never run.</b> Hold the handrail. Everyone uses 50 kg.</div>
@@ -1103,8 +1100,8 @@
         <div class="quiz fill">
           <div class="q"><p><span class="n">1</span>What is power?</p><div class="ans step">The rate of energy transfer: joules per second</div></div>
           <div class="q"><p><span class="n">2</span>600 J in 10 s?</p><div class="ans step">60 W</div></div>
-          <div class="q"><p><span class="n">3</span>40 W fan for 5.0 minutes?</p><div class="ans step">\(40 \times 300 = 12\,000\) J</div></div>
-          <div class="q"><p><span class="n">4</span>1500 W motor, 45 000 J. Time?</p><div class="ans step">\(\dfrac{45\,000}{1500} = 30\) s</div></div>
+          <div class="q"><p><span class="n">3</span>40 W fan for 5.0 minutes?</p><div class="ans step">\(40 \times 300 = 12\,000\)&nbsp;J</div></div>
+          <div class="q"><p><span class="n">4</span>1500 W motor, 45 000 J. Time?</p><div class="ans step">\(\dfrac{45\,000}{1500} = 30\)&nbsp;s</div></div>
           <div class="q"><p><span class="n">5</span>3.0 kW in watts?</p><div class="ans step">3000 W</div></div>
           <div class="q"><p><span class="n">6</span>More powerful motor, same job?</p><div class="ans step">Same energy, less time</div></div>
         </div>
@@ -1188,7 +1185,7 @@
         </aside>
       </section>
 
-      <section class="slide a-hot" data-title="Practical: cooling cups">
+      <section class="slide a-hot triple" data-title="Practical: cooling cups">
         <p class="eyebrow"><span class="num">08</span> Practical</p>
         <h2>Cooling <em>cups</em></h2>
         <div class="split even">
@@ -1246,7 +1243,7 @@
           <div class="q"><p><span class="n">3</span>Copper or glass: faster conduction?</p><div class="ans step">Copper: higher thermal conductivity</div></div>
           <div class="q"><p><span class="n">4</span>Thicker wall: cools faster or slower?</p><div class="ans step">Slower</div></div>
           <div class="q"><p><span class="n">5</span>Why do many insulators work?</p><div class="ans step">They trap air, a poor conductor</div></div>
-          <div class="q"><p><span class="n">6</span>Cooling cups: best insulator?</p><div class="ans step">The one with the smallest temperature drop</div></div>
+          <div class="q"><p><span class="n">6</span>Cooling cups: best insulator? <span class="triple-tag">Triple only</span></p><div class="ans step">The one with the smallest temperature drop</div></div>
         </div>
         <div class="slide-foot"><span class="reveal-hint">PRESS → TO REVEAL EACH ANSWER</span><span data-page></span></div>
       </section>
@@ -1257,7 +1254,7 @@
           <div>
             <p class="eyebrow"><span class="num">09</span> Lesson 9: <span class="on">How much is useful?</span></p>
             <h1>Effic&shy;iency</h1>
-            <div class="unlocks"><span>useful ÷ total</span><span>decimal or %</span><span>Sankey diagrams</span><span>bouncing balls</span></div>
+            <div class="unlocks"><span>useful \(\div\) total</span><span>decimal or %</span><span>Sankey diagrams</span><span>bouncing balls</span></div>
           </div>
           <div class="case-card">
             <div class="label">BIG QUESTION</div>
@@ -1273,8 +1270,8 @@
         <h2>Efficiency</h2>
         <div class="split even top">
           <div class="col">
-            <div class="eq-block"><span class="eq" style="font-size: 44px;">\(\text{efficiency} = \dfrac{\text{useful output}}{\text{total input}}\)</span><span class="eq-words">energy in J, or power in W. No unit.</span><span class="eq-units">A decimal up to 1; × 100 for a percentage</span><span class="flag">On the equation sheet</span></div>
-            <div class="formula"><span>Rearranged</span>useful = efficiency × total &nbsp; \(\text{total} = \dfrac{\text{useful}}{\text{efficiency}}\)</div>
+            <div class="eq-block"><span class="eq" style="font-size: 44px;">\(\text{efficiency} = \dfrac{\text{useful output}}{\text{total input}}\)</span><span class="eq-words">energy in J, or power in W. No unit.</span><span class="eq-units">A decimal up to 1; \(\times 100\) for a percentage</span><span class="flag">On the equation sheet</span></div>
+            <div class="formula"><span>Rearranged</span>\(\text{useful} = \text{efficiency} \times \text{total}\) &nbsp; \(\text{total} = \dfrac{\text{useful}}{\text{efficiency}}\)</div>
           </div>
           <div class="col">
             <div class="worked">
@@ -1288,9 +1285,9 @@
             <div class="worked">
               <div class="wq"><span>Example 2</span>A 60 W lamp, 25% efficient. Useful power?</div>
               <dl>
-                <div class="step"><dt>Convert</dt><dd>25% = 0.25</dd></div>
-                <div class="step"><dt>Rearrange</dt><dd>useful = efficiency × total</dd></div>
-                <div class="step"><dt>Answer</dt><dd class="ans">0.25 × 60 = 15 W</dd></div>
+                <div class="step"><dt>Convert</dt><dd>\(25\% = 0.25\)</dd></div>
+                <div class="step"><dt>Rearrange</dt><dd>\(\text{useful} = \text{efficiency} \times \text{total}\)</dd></div>
+                <div class="step"><dt>Answer</dt><dd class="ans">\(0.25 \times 60 = 15\)&nbsp;W</dd></div>
               </dl>
             </div>
           </div>
@@ -1299,7 +1296,7 @@
         <aside class="revision-note" hidden>
           <div class="rn-main">
             <p><b>The one-second check.</b> Efficiency can never be more than 1 (100%): that would mean more useful energy out than went in, and energy cannot be created. If you get 1.25, you have divided the wrong way up.</p>
-            <p><b>Finding the input:</b> a motor 0.80 efficient gives 400 J usefully. Total = \(\dfrac{400}{0.80} = 500\) J. Check: the input must be bigger than the useful output.</p>
+            <p><b>Finding the input:</b> a motor 0.80 efficient gives 400 J usefully. \(\text{Total} = \dfrac{400}{0.80} = 500\)&nbsp;J. Check: the input must be bigger than the useful output.</p>
           </div>
         </aside>
       </section>
@@ -1311,8 +1308,8 @@
           <ol class="steps">
             <li>Arrow <b>width</b> shows the amount of energy</li>
             <li class="step">Useful goes <b>straight on</b>; wasted <b>bends away</b></li>
-            <li class="step">input = useful + wasted: 100 = 20 + 80</li>
-            <li class="step">efficiency = \(\dfrac{20}{100}\) = 0.20 (20%)</li>
+            <li class="step">\(\text{input} = \text{useful} + \text{wasted}\): \(100 = 20 + 80\)</li>
+            <li class="step">\(\text{efficiency} = \dfrac{20}{100} = 0.20\) (20%)</li>
           </ol>
           <div class="panel"><div class="panel-head"><span>A lamp</span></div><div class="fig" data-fig="sankeyLesson"></div></div>
         </div>
@@ -1371,8 +1368,8 @@
         <div class="quiz fill">
           <div class="q"><p><span class="n">1</span>300 J useful from 1200 J?</p><div class="ans step">0.25 (25%)</div></div>
           <div class="q"><p><span class="n">2</span>Efficiency of 1.4?</p><div class="ans step">Impossible: more than 100%</div></div>
-          <div class="q"><p><span class="n">3</span>400 W motor, 75%. Useful power?</p><div class="ans step">0.75 × 400 = 300 W</div></div>
-          <div class="q"><p><span class="n">4</span>0.20 efficient, 12 J useful. Input?</p><div class="ans step">\(\dfrac{12}{0.20} = 60\) J</div></div>
+          <div class="q"><p><span class="n">3</span>400 W motor, 75%. Useful power?</p><div class="ans step">\(0.75 \times 400 = 300\)&nbsp;W</div></div>
+          <div class="q"><p><span class="n">4</span>0.20 efficient, 12 J useful. Input?</p><div class="ans step">\(\dfrac{12}{0.20} = 60\)&nbsp;J</div></div>
           <div class="q"><p><span class="n">5</span>Unit of efficiency?</p><div class="ans step">None</div></div>
           <div class="q"><p><span class="n">6</span>Sankey: which arrow is wasted?</p><div class="ans step">The one that bends away</div></div>
         </div>
@@ -1390,9 +1387,9 @@
           <div class="tool"><div class="eq">\(E_e = \tfrac{1}{2}ke^2\)</div><p>J, N/m, m</p><div class="re">calculate \(E_e\) only</div></div>
           <div class="tool"><div class="eq">\(P = \dfrac{E}{t}\)</div><p>W, J, s</p><div class="re">\(E = Pt\), \(t = \dfrac{E}{P}\)</div></div>
           <div class="tool"><div class="eq">\(s = vt\)</div><p>m, m/s, s</p><div class="re">\(v = \dfrac{s}{t}\)</div></div>
-          <div class="tool" style="grid-column: span 2;"><div class="eq">\(\text{eff.} = \dfrac{\text{useful output}}{\text{total input}}\)</div><p>energy or power; no unit</p><div class="re">useful = eff. × total; \(\text{total} = \dfrac{\text{useful}}{\text{eff.}}\)</div></div>
+          <div class="tool" style="grid-column: span 2;"><div class="eq">\(\text{eff.} = \dfrac{\text{useful output}}{\text{total input}}\)</div><p>energy or power; no unit</p><div class="re">\(\text{useful} = \text{eff.} \times \text{total}\); \(\text{total} = \dfrac{\text{useful}}{\text{eff.}}\)</div></div>
         </div>
-        <div class="remember">All on the AQA equation sheet. \(g = 9.8\) N/kg. Convert first: g → kg, cm → m, kJ → J, minutes → s, % → decimal.</div>
+        <div class="remember">All on the AQA equation sheet. \(g = 9.8\)&nbsp;N/kg. Convert first: g → kg, cm → m, kJ → J, minutes → s, % → decimal.</div>
         <div class="slide-foot"><span class="tag">Energy: stores and transfers</span><span data-page></span></div>
         <aside class="revision-note" hidden>
           <div class="rn-main">
@@ -1416,7 +1413,7 @@
           <div class="term"><b>Dissipated</b><span>Spread to the thermal store of the surroundings</span></div>
           <div class="term"><b>Power</b><span>Energy transferred per second (W)</span></div>
           <div class="term"><b>Thermal conductivity</b><span>Higher = faster conduction</span></div>
-          <div class="term"><b>Efficiency</b><span>Useful output ÷ total input</span></div>
+          <div class="term"><b>Efficiency</b><span>Useful output \(\div\) total input</span></div>
           <div class="term"><b>Sankey diagram</b><span>Arrow width shows energy</span></div>
         </div>
         <div class="slide-foot"><span class="tag">Energy: stores and transfers</span><span data-page></span></div>

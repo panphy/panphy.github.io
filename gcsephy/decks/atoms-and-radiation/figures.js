@@ -1,10 +1,34 @@
 // SVG diagrams for the Atoms and Nuclear Radiation deck. They use the same
 // particle colours and glossy-sphere look as the Atomic Models and Nuclear
 // Decay simulations. Each <div data-fig="name"> is filled from FIGURES.
+// Diagram labels with maths, typeset in the deck by ../assets/deck-math.js (plain label: label
+// with LaTeX; "figure|label" for one figure). The Year 11 workbooks print the plain labels.
+window.DeckSvgTex = {
+  'radius ≈ 1 × 10⁻¹⁰ m': 'radius \\(\\approx 1 \\times 10^{-10}\\) m',
+  'radius < 1/10 000': 'radius \\(< \\frac{1}{10\\,000}\\)',
+  'notation|C': '\\(\\mathrm{C}\\)',
+  'notation|12': '\\(12\\)',
+  'notation|6': '\\(6\\)',
+  'outer e⁻ lost': 'outer \\(\\mathrm{e}^-\\) lost',
+  'loses 1 e⁻': 'loses 1 \\(\\mathrm{e}^-\\)',
+  'lithium ion, Li⁺': 'lithium ion, \\(\\mathrm{Li}^+\\)',
+  'n = 1': '\\(n = 1\\)',
+  'n = 2': '\\(n = 2\\)',
+  'n=1': '\\(n = 1\\)',
+  'n=2': '\\(n = 2\\)',
+  'α': '\\(\\alpha\\)',
+  'β': '\\(\\beta\\)',
+  'γ': '\\(\\gamma\\)',
+  '½': '\\(\\frac{1}{2}\\)',
+  '¼': '\\(\\frac{1}{4}\\)',
+  '⅛': '\\(\\frac{1}{8}\\)',
+  '33 undecayed (≈ 32)': '33 undecayed (\\(\\approx 32\\))',
+  '15 undecayed (≈ 16)': '15 undecayed (\\(\\approx 16\\))'
+};
 (() => {
   const SYMBOL = { proton: '+', neutron: '0', electron: '−', alpha: 'α', positive: '+', undecayed: '', decayed: '', solid: '' };
   const GRADIENTS = ['proton', 'neutron', 'electron', 'alpha', 'positive', 'solid', 'undecayed', 'decayed', 'object'];
-  const MARKERS = ['text-secondary', 'alpha', 'electron', 'photon', 'brand-accent', 'brand-primary', 'neutron'];
+  const MARKERS = ['text-secondary', 'alpha', 'electron', 'photon', 'brand-accent', 'brand-accent-strong', 'brand-primary', 'neutron'];
   const TAU = Math.PI * 2;
   const f = n => Math.round(n * 10) / 10;
 
@@ -250,9 +274,10 @@
       let s = text(372, 262, 'C', 'big-symbol', 'start');
       s += text(356, 162, '12', 'big-num a', 'end') + text(356, 262, '6', 'big-num z', 'end');
       s += text(30, 60, 'MASS NUMBER', 'lbl mono strong a', 'start') + text(30, 86, 'protons + neutrons', 'lbl', 'start');
-      s += arrow(190, 96, 250, 128, 'brand-primary', 2.5);
+      s += arrow(196, 104, 262, 132, 'brand-primary', 2.5);
       s += text(30, 322, 'ATOMIC NUMBER', 'lbl mono strong z', 'start') + text(30, 348, 'number of protons', 'lbl', 'start');
-      s += arrow(200, 320, 262, 272, 'brand-accent', 2.5);
+      // Starts clear of the label and stops short of the 6, in the same strong colour as the 6.
+      s += arrow(216, 304, 298, 256, 'brand-accent-strong', 2.5);
       s += text(560, 176, 'carbon-12', 'lbl display', 'start') + text(560, 210, '6 p, 6 n, 6 e', 'lbl mono', 'start');
       return svg('0 0 760 380', s, 'Nuclear notation for carbon-12: mass number 12 at the top left, atomic number 6 at the bottom left');
     },

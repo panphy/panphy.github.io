@@ -7,6 +7,13 @@
     badge.className = 'year-badge';
     badge.textContent = `Year ${year}`;
     slide.appendChild(badge);
+    // GCSE Physics (8463) only, not Combined Science: Trilogy. The top edge holds the year badge.
+    if (slide.classList.contains('triple')) {
+      const flag = document.createElement('span');
+      flag.className = 'triple-flag';
+      flag.textContent = 'Triple Science only';
+      slide.appendChild(flag);
+    }
   });
   document.querySelectorAll('#deck table').forEach(table => {
     // Reveal the content, while keeping the table structure and grid visible.

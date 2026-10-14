@@ -20,6 +20,7 @@
   <script src="/assets/theme-toggle.js"></script>
   <script src="/gcsephy/sw-register.js" defer></script>
   <link rel="stylesheet" href="../assets/teaching-deck.css">
+  <script src="../assets/deck-math.js"></script>
 </head>
 <body>
   <header class="banner">
@@ -27,6 +28,7 @@
     <a class="banner-title" href="#1">Atoms &amp; Nuclear Radiation</a>
     <div class="banner-actions">
       <button id="thumbs-toggle" class="icon-button" type="button" aria-controls="thumbs" aria-pressed="true" aria-label="Hide slide thumbnails" title="Show or hide slide thumbnails (T)"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path class="pane" d="M9.5 4.5H6A2.5 2.5 0 0 0 3.5 7v10A2.5 2.5 0 0 0 6 19.5h3.5z"/><rect x="3.5" y="4.5" width="17" height="15" rx="2.5"/><path d="M9.5 4.5v15"/></svg></button>
+      <a class="nav-pill" aria-label="Open workbook resources" href="/gcsephy/year11phy/unit01/" target="_blank" rel="noopener"><span class="wide">Workbook</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 17L17 7M9 7h8v8"/></svg></a>
       <button id="fullscreen" class="panphy-fullscreen-button" type="button" aria-pressed="false" aria-label="Present fullscreen" title="Present fullscreen (F)"><svg class="panphy-fs-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M4 9V4h5M15 4h5v5M20 15v5h-5M9 20H4v-5"/></svg></button>
       <button id="theme-button" type="button" data-panphy-theme-toggle aria-label="Toggle light/dark theme" title="Toggle between light and dark themes"></button>
     </div>
@@ -125,8 +127,8 @@
         <h2>Mostly empty space<span>.</span></h2>
         <div class="split wide-fig">
           <ul class="points">
-            <li>Atom radius ≈ <b>1 × 10⁻¹⁰ m</b></li>
-            <li>Nucleus radius <b>&lt; 1/10 000</b> of the atom’s</li>
+            <li>Atom radius \(\approx\) <b>\(1 \times 10^{-10}\)&nbsp;m</b></li>
+            <li>Nucleus radius <b>\(< \dfrac{1}{10\,000}\)</b> of the atom’s</li>
             <li>Almost all the <b>mass</b> is in the nucleus</li>
             <li>Electrons at different distances: <b>energy levels</b></li>
           </ul>
@@ -139,7 +141,7 @@
         <aside class="revision-note" hidden>
           <div class="rn-main">
             <p><b>How empty is “mostly empty”?</b> Scale an atom up to a football stadium and the nucleus is a pea on the centre spot.</p>
-            <p><b>Using the numbers.</b> One ten-thousandth of 1 × 10<sup>−10</sup> m is 1 × 10<sup>−14</sup> m. Dividing by 10 000 lowers the power of ten by 4, from −10 to −14.</p>
+            <p><b>Using the numbers.</b> One ten-thousandth of \(1 \times 10^{-10}\)&nbsp;m is \(1 \times 10^{-14}\)&nbsp;m. Dividing by \(10\,000\) lowers the power of ten by 4, from \(-10\) to \(-14\).</p>
           </div>
           <div class="rn-side">
             <p class="more">Why can you not push your hand through a table? The electrons on the outside of your atoms repel the electrons on the outside of the table’s.</p>
@@ -158,7 +160,7 @@
               <li>Neutrons = mass no. − atomic no.</li>
               <li>Protons decide the <b>element</b></li>
             </ul>
-            <div class="idea step eqrow">Try: <span class="nuc"><span class="nums"><span>23</span><span>11</span></span>Na</span> <span class="step">→ <b>11 p, 12 n, 11 e</b></span></div>
+            <div class="idea step eqrow">Try: <span class="nuc">\({}^{23}_{11}\mathrm{Na}\)</span> <span class="step">→ <b>11 p, 12 n, 11 e</b></span></div>
           </div>
           <div class="panel">
             <div class="panel-head"><span>NUCLEAR NOTATION</span></div>
@@ -168,7 +170,7 @@
         <div class="slide-foot"><span>ATOMS &amp; NUCLEAR RADIATION</span><span data-page></span></div>
         <aside class="revision-note" hidden>
           <div class="rn-main">
-            <p><b>Work through another one.</b> Chlorine with 35 on top and 17 below. Protons: 17. Neutrons: 35 − 17 = 18. Electrons in a neutral atom: 17.</p>
+            <p><b>Work through another one.</b> Chlorine with 35 on top and 17 below. Protons: 17. Neutrons: \(35 - 17 = 18\). Electrons in a neutral atom: 17.</p>
             <p><b>Why do the protons decide the element?</b> The number of protons sets how many electrons the neutral atom holds, and that sets how it behaves chemically. Change the protons and it is a different element. Change the neutrons and it is the same element with a different mass.</p>
           </div>
         </aside>
@@ -473,7 +475,7 @@
               <li>These are <b>energy levels</b></li>
               <li>His <b>calculations agreed</b> with experiments</li>
             </ul>
-            <div class="idea">Carbon: <b>2</b> electrons in n = 1, <b>4</b> in n = 2</div>
+            <div class="idea">Carbon: <b>2</b> electrons in \(n = 1\), <b>4</b> in \(n = 2\)</div>
           </div>
           <div class="panel">
             <div class="panel-head"><span>BOHR MODEL: CARBON-12</span><span class="pill">NOT TO SCALE</span></div>
@@ -622,7 +624,7 @@
         <h2>Atoms and models<span>.</span></h2>
         <div class="quiz fill">
           <div class="q"><p><span class="n">01</span>What is in the nucleus?</p><div class="ans step">Protons and neutrons</div></div>
-          <div class="q"><p><span class="n">02</span>How many neutrons in <span class="nuc in-text"><span class="nums"><span>37</span><span>17</span></span>Cl</span>?</p><div class="ans step">37 − 17 = 20</div></div>
+          <div class="q"><p><span class="n">02</span>How many neutrons in <span class="nuc in-text">\({}^{37}_{17}\mathrm{Cl}\)</span>?</p><div class="ans step">\(37 - 17 = 20\)</div></div>
           <div class="q"><p><span class="n">03</span>Why did most alpha particles pass straight through?</p><div class="ans step">The atom is mostly empty space</div></div>
           <div class="q"><p><span class="n">04</span>Why did a very few bounce back?</p><div class="ans step">Tiny, dense, positive nucleus</div></div>
           <div class="q"><p><span class="n">05</span>An electron absorbs EM radiation. What happens?</p><div class="ans step">Moves to a higher energy level (further out)</div></div>
@@ -674,7 +676,7 @@
       </section>
 
       <section class="slide" data-title="Alpha decay">
-        <p class="eyebrow"><span class="nocase">α</span>: Americium-241</p>
+        <p class="eyebrow"><span class="nocase">\(\alpha\)</span>: Americium-241</p>
         <h2>Alpha decay<span>.</span></h2>
         <div class="split">
           <div class="stack center">
@@ -685,8 +687,8 @@
               <li>Atomic number <b>− 2</b> → new element</li>
             </ul>
             <div>
-              <div class="equation"><span class="nuc"><span class="nums"><span>241</span><span>95</span></span>Am</span><span class="op">→</span><span class="nuc"><span class="nums"><span>237</span><span>93</span></span>Np</span><span class="op">+</span><span class="nuc alpha"><span class="nums"><span>4</span><span>2</span></span>He</span></div>
-              <p class="eq-check">TOP: 241 = 237 + 4 <b>✓</b>, BOTTOM: 95 = 93 + 2 <b>✓</b></p>
+              <div class="equation"><span class="nuc">\({}^{241}_{\phantom{0}95}\mathrm{Am}\)</span><span class="op">→</span><span class="nuc">\({}^{237}_{\phantom{0}93}\mathrm{Np}\)</span><span class="op">+</span><span class="nuc alpha">\({}^{4}_{2}\mathrm{He}\)</span></div>
+              <p class="eq-check">TOP: \(241 = 237 + 4\) <b>✓</b>, BOTTOM: \(95 = 93 + 2\) <b>✓</b></p>
             </div>
           </div>
           <div class="panel">
@@ -705,7 +707,7 @@
       </section>
 
       <section class="slide" data-title="Beta decay">
-        <p class="eyebrow"><span class="nocase">β⁻</span>: Carbon-14</p>
+        <p class="eyebrow"><span class="nocase">\(\beta^-\)</span>: Carbon-14</p>
         <h2>Beta decay<span>.</span></h2>
         <div class="split">
           <div class="stack center">
@@ -716,8 +718,8 @@
               <li>Atomic number <b>+ 1</b> → new element</li>
             </ul>
             <div>
-              <div class="equation"><span class="nuc"><span class="nums"><span>14</span><span>6</span></span>C</span><span class="op">→</span><span class="nuc"><span class="nums"><span>14</span><span>7</span></span>N</span><span class="op">+</span><span class="nuc electron"><span class="nums"><span>0</span><span>−1</span></span>e</span></div>
-              <p class="eq-check">TOP: 14 = 14 + 0 <b>✓</b>, BOTTOM: 6 = 7 + (−1) <b>✓</b></p>
+              <div class="equation"><span class="nuc">\({}^{14}_{\phantom{0}6}\mathrm{C}\)</span><span class="op">→</span><span class="nuc">\({}^{14}_{\phantom{0}7}\mathrm{N}\)</span><span class="op">+</span><span class="nuc electron">\({}^{\phantom{0}0}_{-1}\mathrm{e}\)</span></div>
+              <p class="eq-check">TOP: \(14 = 14 + 0\) <b>✓</b>, BOTTOM: \(6 = 7 + (-1)\) <b>✓</b></p>
             </div>
           </div>
           <div class="panel">
@@ -739,7 +741,7 @@
       </section>
 
       <section class="slide" data-title="Gamma emission">
-        <p class="eyebrow"><span class="nocase">γ</span>: Technetium-99m</p>
+        <p class="eyebrow"><span class="nocase">\(\gamma\)</span>: Technetium-99m</p>
         <h2>Gamma emission<span>.</span></h2>
         <div class="split">
           <div class="stack center">
@@ -750,7 +752,7 @@
               <li>Atomic number <b>unchanged</b></li>
             </ul>
             <div>
-              <div class="equation"><span class="nuc"><span class="nums"><span>99m</span><span>43</span></span>Tc</span><span class="op">→</span><span class="nuc"><span class="nums"><span>99</span><span>43</span></span>Tc</span><span class="op">+</span><span class="nuc gamma">γ</span></div>
+              <div class="equation"><span class="nuc">\({}^{99\mathrm{m}}_{\phantom{0}43}\mathrm{Tc}\)</span><span class="op">→</span><span class="nuc">\({}^{99}_{43}\mathrm{Tc}\)</span><span class="op">+</span><span class="nuc gamma">\(\gamma\)</span></div>
               <p class="eq-check">SAME PROTONS, SAME NEUTRONS, LESS ENERGY <b>✓</b></p>
             </div>
           </div>
@@ -776,22 +778,22 @@
           <table class="facts">
             <thead><tr><th>Emitted</th><th>Symbol</th><th>Mass number</th><th>Atomic number</th></tr></thead>
             <tbody>
-              <tr><td class="t-alpha">Alpha</td><td><span class="nuc alpha"><span class="nums"><span>4</span><span>2</span></span>He</span></td><td class="num">− 4</td><td class="num">− 2</td></tr>
-              <tr><td class="t-electron">Beta</td><td><span class="nuc electron"><span class="nums"><span>0</span><span>−1</span></span>e</span></td><td>No change</td><td class="num">+ 1</td></tr>
-              <tr><td class="t-photon">Gamma</td><td><span class="nuc gamma">γ</span></td><td>No change</td><td>No change</td></tr>
-              <tr><td class="t-neutron">Neutron</td><td><span class="nuc"><span class="nums"><span>1</span><span>0</span></span>n</span></td><td class="num">− 1</td><td>No change</td></tr>
+              <tr><td class="t-alpha">Alpha</td><td><span class="nuc alpha">\({}^{4}_{2}\mathrm{He}\)</span></td><td class="num">\(-4\)</td><td class="num">\(-2\)</td></tr>
+              <tr><td class="t-electron">Beta</td><td><span class="nuc electron">\({}^{\phantom{0}0}_{-1}\mathrm{e}\)</span></td><td>No change</td><td class="num">\(+1\)</td></tr>
+              <tr><td class="t-photon">Gamma</td><td><span class="nuc gamma">\(\gamma\)</span></td><td>No change</td><td>No change</td></tr>
+              <tr><td class="t-neutron">Neutron</td><td><span class="nuc">\({}^{1}_{0}\mathrm{n}\)</span></td><td class="num">\(-1\)</td><td>No change</td></tr>
             </tbody>
           </table>
           <div class="eq-row">
-            <div class="idea step">Complete: <span class="nuc"><span class="nums"><span>226</span><span>88</span></span>Ra</span> → <span class="nuc"><span class="nums"><span>222</span><span>86</span></span>Rn</span> + <b>?</b></div>
-            <div class="idea step"><span class="calc"><span class="calc-label">Top</span><span>226 − 222 = <b>4</b></span><span class="calc-label">Bottom</span><span>88 − 86 = <b>2</b></span></span> → <span class="nuc alpha"><span class="nums"><span>4</span><span>2</span></span>He</span> <b>alpha</b></div>
+            <div class="idea step">Complete: <span class="nuc">\({}^{226}_{\phantom{0}88}\mathrm{Ra}\)</span> → <span class="nuc">\({}^{222}_{\phantom{0}86}\mathrm{Rn}\)</span> + <b>?</b></div>
+            <div class="idea step"><span class="calc"><span class="calc-label">Top</span><span>\(226 - 222 =\) <b>4</b></span><span class="calc-label">Bottom</span><span>\(88 - 86 =\) <b>2</b></span></span> → <span class="nuc alpha">\({}^{4}_{2}\mathrm{He}\)</span> <b>alpha</b></div>
           </div>
         </div>
         <div class="slide-foot"><span>ATOMS &amp; NUCLEAR RADIATION</span><span data-page></span></div>
         <aside class="revision-note" hidden>
           <div class="rn-main">
             <p><b>The two rules are two things that do not change.</b> The top row counts protons plus neutrons, and that total stays the same. The bottom row counts charge, which is conserved.</p>
-            <p><b>Finding a missing nucleus.</b> Uranium-238 (atomic number 92) emits an alpha particle: top 238 − 4 = 234, bottom 92 − 2 = 90. The new nucleus has mass number 234 and atomic number 90. You do not need to name the element.</p>
+            <p><b>Finding a missing nucleus.</b> Uranium-238 (atomic number 92) emits an alpha particle: top \(238 - 4 = 234\), bottom \(92 - 2 = 90\). The new nucleus has mass number 234 and atomic number 90. You do not need to name the element.</p>
           </div>
           <div class="rn-side">
             <p class="trap">Making the atomic number go down in beta decay. It goes up: a neutron has become a proton.</p>
@@ -804,7 +806,7 @@
         <h2>Alpha, beta, gamma<span>.</span></h2>
         <div class="stack center">
         <table class="facts big compare">
-          <thead><tr><th></th><th class="t-alpha"><span class="nocase">α</span> Alpha</th><th class="t-electron"><span class="nocase">β</span> Beta</th><th class="t-photon"><span class="nocase">γ</span> Gamma</th></tr></thead>
+          <thead><tr><th></th><th class="t-alpha"><span class="nocase">\(\alpha\)</span> Alpha</th><th class="t-electron"><span class="nocase">\(\beta\)</span> Beta</th><th class="t-photon"><span class="nocase">\(\gamma\)</span> Gamma</th></tr></thead>
           <tbody>
             <tr><td>What is it?</td><td>Helium nucleus</td><td>Fast electron</td><td>EM wave</td></tr>
             <tr><td>Charge</td><td class="num">+2</td><td class="num">−1</td><td class="num">0</td></tr>
@@ -851,7 +853,7 @@
           <div class="uses">
             <div class="card use"><div class="fig" data-fig="use-smoke"></div><p class="eyebrow">Alpha</p><h3>Smoke alarm</h3><p>Ionises air; smoke blocks it; long half-life</p></div>
             <div class="card use"><div class="fig" data-fig="use-gauge"></div><p class="eyebrow">Beta</p><h3>Thickness gauge</h3><p>Partly absorbed by paper; count rate shows thickness</p></div>
-            <div class="card use"><div class="fig" data-fig="use-tracer"></div><p class="eyebrow">Gamma</p><h3>Medical tracer</h3><p>Passes out of the body, weakly ionising, short half-life</p></div>
+            <div class="card use"><div class="fig" data-fig="use-tracer"></div><p class="eyebrow">Gamma</p><h3>Medical tracer <span class="triple-tag">Triple only</span></h3><p>Passes out of the body, weakly ionising, short half-life</p></div>
           </div>
           <div class="idea">Choose by: <b>penetration</b>, <b>ionising power</b>, <b>half-life</b></div>
         </div>
@@ -881,7 +883,7 @@
             <div class="panel-head"><span>DECAY CURVE: IODINE-131</span></div>
             <div class="fig" data-fig="half-life" data-animate></div>
           </div>
-          <div class="idea step">Iodine-131: half-life ≈ <b>8 days</b></div>
+          <div class="idea step">Iodine-131: half-life \(\approx\) <b>8 days</b></div>
         </div>
         <div class="slide-foot"><span>ATOMS &amp; NUCLEAR RADIATION</span><span data-page></span></div>
         <aside class="revision-note" hidden>
@@ -911,9 +913,9 @@
           </div>
           <div class="card">
             <p class="eyebrow">Count the halvings</p>
-            <h3 class="step">T½ = 8 days<br>After 24 days?</h3>
+            <h3 class="step">\(T_{\frac{1}{2}} = 8\) days<br>After 24 days?</h3>
             <ul class="points tight" style="margin-top: 18px;">
-              <li class="step">24 ÷ 8 = <b>3</b> half-lives</li>
+              <li class="step">\(24 \div 8 =\) <b>3</b> half-lives</li>
               <li class="step">400 → 200 → 100 → <b>50</b></li>
             </ul>
           </div>
@@ -921,8 +923,8 @@
             <p class="eyebrow">As a ratio <span class="ht">HT</span></p>
             <h3 class="step">Net decline</h3>
             <ul class="points tight" style="margin-top: 18px;">
-              <li class="step">Left after n half-lives: <b>(½)ⁿ</b></li>
-              <li class="step">3 half-lives: <b>⅛ left</b></li>
+              <li class="step">Left after \(n\) half-lives: <b>\(\left(\dfrac{1}{2}\right)^{n}\)</b></li>
+              <li class="step">3 half-lives: <b>\(\dfrac{1}{8}\) left</b></li>
               <li class="step">Net decline: <b>⅞</b></li>
             </ul>
           </div>
@@ -934,7 +936,7 @@
             <p><b>Working backwards.</b> A count rate falls from 80 to 10 in 6 hours. Count the halvings: 80 → 40 → 20 → 10 is three. Three half-lives take 6 hours, so one takes 2 hours.</p>
           </div>
           <div class="rn-side">
-            <p class="trap">Dividing by the number of half-lives. Three half-lives is ÷ 2 three times, which is ÷ 8, not ÷ 3.</p>
+            <p class="trap">Dividing by the number of half-lives. Three half-lives is \(\div 2\) three times, which is \(\div 8\), not \(\div 3\).</p>
           </div>
         </aside>
       </section>
@@ -1010,11 +1012,11 @@
         <p class="eyebrow">Quick check</p>
         <h2>Nuclear radiation<span>.</span></h2>
         <div class="quiz fill">
-          <div class="q"><p><span class="n">01</span>Complete: <span class="nuc in-text"><span class="nums"><span>210</span><span>84</span></span>Po</span> → <span class="nuc in-text"><span class="nums"><span>206</span><span>82</span></span>Pb</span> + ?</p><div class="ans step"><span class="nuc in-text alpha"><span class="nums"><span>4</span><span>2</span></span>He</span> (alpha)</div></div>
+          <div class="q"><p><span class="n">01</span>Complete: <span class="nuc in-text">\({}^{210}_{\phantom{0}84}\mathrm{Po}\)</span> → <span class="nuc in-text">\({}^{206}_{\phantom{0}82}\mathrm{Pb}\)</span> + ?</p><div class="ans step"><span class="nuc in-text alpha">\({}^{4}_{2}\mathrm{He}\)</span> (alpha)</div></div>
           <div class="q"><p><span class="n">02</span>Beta decay: change in atomic number?</p><div class="ans step">+1: a neutron becomes a proton</div></div>
           <div class="q"><p><span class="n">03</span>Which radiation is most ionising?</p><div class="ans step">Alpha</div></div>
           <div class="q"><p><span class="n">04</span>What stops beta radiation?</p><div class="ans step">A few mm of aluminium</div></div>
-          <div class="q"><p><span class="n">05</span>Half-life 6 hours. Fraction left after 18 hours?</p><div class="ans step">3 half-lives → ⅛</div></div>
+          <div class="q"><p><span class="n">05</span>Half-life 6 hours. Fraction left after 18 hours?</p><div class="ans step">3 half-lives → \(\dfrac{1}{8}\)</div></div>
           <div class="q"><p><span class="n">06</span>Does irradiated food become radioactive?</p><div class="ans step">No: its nuclei do not become unstable</div></div>
         </div>
         <div class="slide-foot"><span class="reveal-hint">PRESS → TO REVEAL EACH ANSWER</span><span data-page></span></div>
@@ -1051,6 +1053,7 @@
   <div class="progress" aria-hidden="true"><span id="progress-bar"></span></div>
 
   <script src="figures.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
   <script src="../assets/teaching-deck.js"></script>
   <script src="../assets/deck-notes.js"></script>
   <script src="deck.js"></script>
