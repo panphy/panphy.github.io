@@ -404,7 +404,7 @@ body.is-fullscreen:has(#deck .slide.history.active) { background-color: color-mi
 
 /* Cards and tables */
 .cards { display: grid; gap: 22px; }
-.cards.calc { align-content: center; }
+.cards.calc { align-content: center; align-items: stretch; } /* not the baseline of .calc below */
 .cards.calc .card { min-height: 440px; }
 .cards.calc h3 { font-size: 38px; }
 .card { padding: 26px 28px; border: 1px solid var(--card-border); border-radius: 22px; background: var(--card-bg); box-shadow: var(--card-shadow); }

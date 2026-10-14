@@ -31,7 +31,8 @@
     const pad = full ? 0 : 28;
     const scale = Math.min((box.width - pad * 2) / SLIDE_W, (box.height - pad * 2) / SLIDE_H);
     const left = (box.width - SLIDE_W * scale) / 2 - (full ? 0 : 6 * scale);
-    const top = (box.height - SLIDE_H * scale) / 2 - (full ? 0 : 6 * scale);
+    // Fullscreen pins the slide to the top, so its year bar and badge stay at the top of a screen taller than 16:9.
+    const top = full ? 0 : (box.height - SLIDE_H * scale) / 2 - 6 * scale;
     deck.style.transform = `translate(${left}px, ${top}px) scale(${scale})`;
   }
 
