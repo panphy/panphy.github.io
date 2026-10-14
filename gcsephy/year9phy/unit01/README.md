@@ -28,7 +28,7 @@ Producing evidence that convinces people who were not there. Over eight lessons 
 ## Sources and how the parts fit
 
 - `teaching-guides/source/*.md` are the editable masters of the lesson plans; rebuild the PDFs with `teaching-guides/build-pdf.sh` and keep the two in step.
-- The teaching deck source is `../../decks/work-like-a-physicist/`.
+- The teaching deck source is `../../decks/work-like-a-physicist/`; its shared calm style uses the light-orange Year 9 accent. See [`../../decks/README.md`](../../decks/README.md) for styling and controls.
 - `workbook/assets/content.js` is the workbook source (rebuilt from the published PDF after the original was lost); re-export with `workbook/build-pdf.sh` and keep the PDF in step.
 - `index.html`, `lesson/` and `assets/` are the static companion site; `source/` archives the original Sites/React version.
 

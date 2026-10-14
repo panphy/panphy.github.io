@@ -18,6 +18,10 @@
   const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
 
   function fit() {
+    if (window.matchMedia('(max-width: 600px) and (orientation: portrait)').matches && !document.body.classList.contains('is-fullscreen')) {
+      deck.style.transform = 'none';
+      return;
+    }
     const box = stage.getBoundingClientRect();
     const pad = document.body.classList.contains('is-fullscreen') ? 0 : 16;
     const scale = Math.min((box.width - pad * 2) / SLIDE_W, (box.height - pad * 2) / SLIDE_H);
@@ -37,6 +41,7 @@
       slide.inert = !active;
     });
     const slide = state.slides[state.index];
+    if (window.matchMedia('(max-width: 600px) and (orientation: portrait)').matches && !document.body.classList.contains('is-fullscreen')) window.scrollTo(0, 0);
     slide.querySelectorAll('.step').forEach(step => step.classList.toggle('shown', fromEnd));
     const n = state.index + 1;
     const total = state.slides.length;
@@ -107,6 +112,7 @@
       button.setAttribute('aria-label', `Slide ${i + 1}: ${slide.dataset.title || ''}`);
       const copy = slide.cloneNode(true);
       copy.classList.remove('active');
+      copy.querySelectorAll('.step').forEach(step => step.classList.add('shown'));
       copy.removeAttribute('aria-hidden');
       copy.querySelectorAll('.mover, [id]').forEach(node => (node.classList.contains('mover') ? node.remove() : node.removeAttribute('id')));
       copy.querySelectorAll('.pulse, .draw').forEach(node => node.classList.remove('pulse', 'draw'));

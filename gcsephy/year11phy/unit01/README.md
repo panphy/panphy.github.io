@@ -1,6 +1,6 @@
 # Atoms and Nuclear Radiation — Year 11 workbook
 
-Ten 50-minute lessons for AQA GCSE Physics 4.4.1–4.4.2 and Combined Science: Trilogy 6.4.1–6.4.2. They follow the teaching deck, [`../../decks/atoms-and-radiation/`](../../decks/atoms-and-radiation/), and reuse its fonts, colours and particle diagrams.
+Ten 50-minute lessons for AQA GCSE Physics 4.4.1–4.4.2 and Combined Science: Trilogy 6.4.1–6.4.2. They follow the teaching deck, [`../../decks/atoms-and-radiation/`](../../decks/atoms-and-radiation/), and reuse its fonts and particle diagrams. The 41-slide deck uses the shared calm GCSE style with a light-yellow Year 11 accent; workbook print colours are separate. See [`../../decks/README.md`](../../decks/README.md) for deck styling and controls.
 
 **Address:** <https://panphy.app/gcsephy/year11phy/unit01/>
 

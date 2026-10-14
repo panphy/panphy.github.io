@@ -38,6 +38,7 @@ function mount(THREE, fig, index, attr, make) {
   const labels = [];
   const label = (html, anchor) => {
     const el = document.createElement('div');
+    el.className = 'model-label';
     el.style.cssText = 'position:absolute;transform:translate(-50%,-50%);white-space:nowrap;text-align:center;pointer-events:none;font:700 22px/1.3 Arial, Helvetica, sans-serif;color:var(--ink);padding:2px 8px;border-radius:4px;background:rgba(255,253,247,.88);';
     el.innerHTML = html;
     holder.appendChild(el);
@@ -147,7 +148,7 @@ function mount(THREE, fig, index, attr, make) {
   }
   // Typeset any maths in the labels and caption, then take the thumbnail still.
   Promise.resolve(window.MathJax?.typesetPromise?.([holder])).catch(() => {}).then(snapshot);
-  document.addEventListener('panphy:theme-change', () => { model.paint(); snapshot(); });
+  window.addEventListener('panphy:theme-change', () => { model.paint(); snapshot(); });
 }
 
 // The deck draws its figures when it starts, after the maths is typeset: wait for the flat picture.
