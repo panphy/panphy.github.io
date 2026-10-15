@@ -81,6 +81,7 @@ strong { font-weight: 700; }
 .big-q { grid-column: 1 / -1; margin: 4mm 0 0; padding: 3mm 4mm; background: var(--spark); color: var(--ink); border: 2px solid var(--ink); box-shadow: 1.6mm 1.6mm 0 var(--accent); font-size: 11pt; font-weight: 700; line-height: 1.35; transform: rotate(-.4deg); }
 .big-q::before { content: "Big question  "; font: 900 7.5pt/1 Arial, sans-serif; letter-spacing: .16em; text-transform: uppercase; }
 .opener-foot { display: grid; grid-template-columns: 1.35fr 1fr; gap: 4mm; margin: 3mm 0 2mm; }
+.opener-foot.solo { grid-template-columns: minmax(0, 1fr); }
 .goals, .online { padding: 3mm 3.5mm; border: 1.5px solid var(--ink); font-size: 9.4pt; }
 .goals h3, .online h3 { margin: 0 0 1.5mm; font: 900 7.5pt/1 Arial, sans-serif; letter-spacing: .16em; text-transform: uppercase; }
 .goals ul { margin: 0; padding-left: 4.5mm; }

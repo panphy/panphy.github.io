@@ -160,7 +160,6 @@
       big: "Your torch won't switch on. The bulb is fine and the batteries are new. What could be wrong?",
       goals: ["explain why a lamp only lights in a complete loop", "recognise and draw standard circuit symbols", "turn a real circuit into a neat circuit diagram", "connect an ammeter in series to measure current"],
       keywords: ["circuit", "component", "cell", "battery", "switch", "circuit diagram", "series", "ammeter"],
-      online: { label: "Mission 1: Build & measure", path: "lesson/build-and-measure/", text: "Notes on circuits, symbols and drawing rules, with 5 practice questions and worked answers." },
       doNow: [
         ["Name two things that run on a battery and two that plug into the wall.", "e.g. torch, phone; kettle, TV."],
         ["When a lamp is on, what do you think is moving in the wires?", "Tiny charged particles (electrons): you learn this today."],
@@ -216,7 +215,6 @@
       big: "Flick a switch and the lamp lights instantly, yet each electron drifts through the wire slower than a snail. How can both be true?",
       goals: ["describe current as the rate of flow of charge", "use Q = I t, with time in seconds", "explain why the current is the same everywhere in a single loop"],
       keywords: ["charge (C)", "current (A)", "coulomb", "ampere", "electron", "conventional current"],
-      online: { label: "Mission 2: Charge on the move", path: "lesson/charge-and-current/", text: "Revision notes and 5 practice questions with worked answers." },
       doNow: [
         ["Draw the symbols for a cell and a lamp.", "Cell: a long line and a shorter line (the long line is +). Lamp: circle with a cross."],
         ["How must an ammeter be connected?", "In series (in the loop)."],
@@ -274,7 +272,6 @@
       big: "An AA battery says 1.5 V. A car battery says 12 V. What is that number actually telling you?",
       goals: ["explain p.d. as the energy transferred per coulomb", "connect a voltmeter in parallel across a component", "use E = Q V", "explain why the p.d.s in a loop add up to the supply p.d."],
       keywords: ["potential difference (p.d.)", "volt (V)", "voltmeter", "parallel", "energy", "joule (J)"],
-      online: { label: "Mission 3: Energy per coulomb", path: "lesson/potential-difference/", text: "Revision notes and 5 practice questions with worked answers." },
       doNow: [
         ["What is current?", "The rate of flow of charge."],
         ["0.50 A flows for 20 s. How much charge flows?", "Q = 0.50 × 20 = 10 C"],
@@ -332,7 +329,6 @@
       big: "A dimmer switch makes a lamp glow less brightly. What is it actually changing?",
       goals: ["describe resistance and its unit, the ohm (Ω)", "use V = I R, including mA and kΩ", "recognise an ohmic conductor from data or a graph", "explain why heating a metal increases its resistance"],
       keywords: ["resistance", "ohm (Ω)", "ohmic conductor", "directly proportional", "variable resistor"],
-      online: { label: "Mission 4: Resistance & V = IR", path: "lesson/resistance/", text: "Revision notes and 5 practice questions with worked answers." },
       doNow: [
         ["What does ‘6 V across a lamp’ mean?", "6 J of energy is transferred per coulomb."],
         ["Which meter measures p.d., and how is it connected?", "Voltmeter, in parallel (across)."],
@@ -389,7 +385,6 @@
       big: "If you double the length of a wire, what happens to its resistance?",
       goals: ["set up a circuit to find resistance from V and I", "identify and control the variables", "record, process and graph results", "write a conclusion using evidence"],
       keywords: ["independent variable", "dependent variable", "control variable", "anomaly", "line of best fit"],
-      online: { label: "Required practical: Resistance", path: "practical/resistance/", text: "Method, diagrams and example results (Part A)." },
       order: ["doNow", "learn", "lab", "try", "exam", "revise"],
       doNow: [
         ["Calculate R for 1.2 V and 0.40 A.", "R = 1.2 ÷ 0.40 = 3.0 Ω"],
@@ -435,7 +430,6 @@
       big: "When one bulb in your kitchen blows, why don't all the other lights in the house go out?",
       goals: ["tell series and parallel circuits apart", "use the rules for current and p.d. in each", "calculate total resistance in series", "explain why adding a parallel branch lowers the total resistance"],
       keywords: ["series", "parallel", "branch", "junction", "total resistance"],
-      online: { label: "Mission 5: Series & parallel", path: "lesson/series-and-parallel/", text: "Revision notes, 6 practice questions and a go-further box." },
       doNow: [
         ["0.50 A flows through a 12 Ω resistor. Calculate the p.d.", "V = 0.50 × 12 = 6.0 V"],
         ["How does the resistance of a wire depend on its length?", "Directly proportional."],
@@ -481,7 +475,6 @@
       big: "Two identical resistors, three ways to connect them. Which arrangement lets the most current flow?",
       goals: ["measure the total resistance of resistors in series and in parallel", "compare results with R_total = R₁ + R₂", "explain the results using paths and current", "evaluate the measurements"],
       keywords: ["total resistance", "prediction", "uncertainty", "resolution", "evaluate"],
-      online: { label: "Required practical: Resistance (Part B)", path: "practical/resistance/", text: "Method, diagrams and example results (Part B)." },
       order: ["doNow", "learn", "lab", "try", "exam", "revise"],
       doNow: [
         ["Total resistance of 10 Ω and 15 Ω in series?", "25 Ω"],
@@ -524,7 +517,6 @@
       big: "Every component has a ‘fingerprint’: the shape of its I–V graph. Could you identify a component from its graph alone?",
       goals: ["read an I–V graph, including negative values", "sketch and recognise the graphs for a fixed resistor, a filament lamp and a diode", "calculate the resistance at a point with R = V ÷ I", "explain the shape of each graph"],
       keywords: ["I–V characteristic", "filament lamp", "diode", "LED", "forward", "reverse"],
-      online: { label: "Mission 6: I–V characteristics", path: "lesson/iv-characteristics/", text: "Revision notes with graphs and 5 practice questions." },
       doNow: [
         ["What is an ohmic conductor?", "Current ∝ p.d. at constant temperature (constant resistance)."],
         ["Why does a metal's resistance increase when it gets hot?", "Ions vibrate more, so more collisions."],
@@ -568,7 +560,6 @@
       big: "Can you produce the fingerprint graphs of a resistor, a lamp and a diode yourself?",
       goals: ["set up a circuit to vary the p.d. and measure the current", "take readings in both directions, safely", "plot an I–V graph with positive and negative values", "describe how the method changes for a diode"],
       keywords: ["variable resistor", "protective resistor", "reverse", "range", "interval"],
-      online: { label: "Required practical: I–V characteristics", path: "practical/iv-characteristics/", text: "Method, diagrams, example results and graphs." },
       order: ["doNow", "learn", "lab", "try", "exam", "revise"],
       doNow: [
         ["Sketch the I–V graph shape for a diode.", "Zero current for negative p.d.; almost none until a small positive p.d., then rises steeply."],
@@ -613,7 +604,6 @@
       big: "How does a streetlight know it's getting dark, and how does a fire alarm know the room is hot?",
       goals: ["describe how a thermistor's resistance changes with temperature", "describe how an LDR's resistance changes with light intensity", "predict the current in a sensor circuit", "choose the right sensor for a job"],
       keywords: ["thermistor", "LDR", "light intensity", "sensor"],
-      online: { label: "Mission 6: Thermistor and LDR", path: "lesson/iv-characteristics/", text: "Read the ‘Thermistor’ and ‘Light-dependent resistor’ sections and their questions." },
       doNow: [
         ["Which component's I–V graph gets less steep?", "Filament lamp."],
         ["At a fixed p.d., what happens to the current if the resistance doubles?", "It halves."],
@@ -656,7 +646,6 @@
       big: "Which transfers more energy: a 3 kW kettle boiling for 3 minutes, or a 10 W LED lamp left on for 5 hours?",
       goals: ["describe power as the energy transferred per second", "use E = P t, P = V I and P = I² R with the right units", "describe the energy transfers in everyday appliances", "choose the right equation for a question"],
       keywords: ["power", "watt (W)", "kilowatt (kW)", "energy transferred", "power rating"],
-      online: { label: "Mission 7: Power & the National Grid", path: "lesson/power-and-national-grid/", text: "Read the power and energy sections, then try questions 1–4." },
       doNow: [
         ["5.0 C passes through a 12 V lamp. How much energy is transferred?", "E = Q V = 60 J"],
         ["2.0 A flows for 1 minute. How much charge flows?", "Q = 2.0 × 60 = 120 C"],
@@ -701,7 +690,6 @@
       big: "Pylon cables carry up to 400 000 V. Why so high, and why do we only get 230 V at the plug?",
       goals: ["describe the difference between ac and dc", "state the UK mains values: 230 V, 50 Hz", "explain how the earth wire and fuse protect you", "explain why the National Grid uses very high p.d.s"],
       keywords: ["alternating (ac)", "direct (dc)", "live", "neutral", "earth", "fuse", "National Grid", "transformer"],
-      online: { label: "Missions 7 and 8", path: "lesson/mains-electricity/", text: "Mission 8: Mains & safety, then the National Grid sections of Mission 7." },
       doNow: [
         ["A 230 V appliance draws 10 A. Calculate its power.", "P = V I = 2300 W"],
         ["The current in a cable is halved. What happens to the heating (P = I² R)?", "It falls to a quarter."],

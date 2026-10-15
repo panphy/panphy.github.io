@@ -20,7 +20,7 @@
       misconceptions: [["The cell ‘fills up’ the wire with electricity, which travels from the cell to the lamp.", "Use the bike-chain model: the charges are already in the wire and all move together."], ["Current is used up by the lamp.", "Plant the idea with two ammeters now; test it properly in Lesson 2."], ["Symbols can go anywhere near the wire.", "Q4 makes the rule explicit: the wire must go into the symbol."]],
       support: "Give out a symbol card set to match with real components before drawing. Allow tracing the symbol bank for Q2.",
       stretch: "Draw a circuit with two lamps and a switch that controls only one of them (early preview of parallel).",
-      homework: "Companion website, Mission 1: notes and all five questions. Workbook: Revise it.",
+      homework: "Workbook: Revise it, then check with the quick answers at the back.",
     },
     2: {
       why: "Current is defined as a rate before students calculate with it. The model (bike chain, then ticket barrier) explains the instant switch-on puzzle and why current is conserved, so Q = I t is attached to meaning rather than a triangle.",
@@ -36,7 +36,7 @@
       misconceptions: [["Current is used up.", "Virtual Lab 1 plus Q7. Language: charge goes round; energy is transferred."], ["Minutes go straight into Q = I t.", "Every supported frame has a ‘Convert’ row first."], ["Electrons flow from + to −.", "Show both arrows on one diagram; exam diagrams use conventional current."]],
       support: "Keep the frames; give a units card (C, A, s).",
       stretch: "How many electrons pass in 1 s at 1 A? (≈ 6 × 10¹⁸.) Explain why a bigger current does not need faster-moving electrons in a thicker wire.",
-      homework: "Mission 2 practice questions (with worked answers). Finish Virtual Lab 1 pp. 4–6 if not done.",
+      homework: "Prep 1 (Lessons 1–2). Finish Virtual Lab 1 pp. 4–6 if not done.",
     },
     3: {
       why: "p.d. is the hardest idea in the unit. It is taught as energy per coulomb, with a model (delivery vans) and an explicit contrast with current, before it is used in V = I R. The voltmeter is introduced here, when students know what it measures.",
@@ -52,7 +52,7 @@
       misconceptions: [["Voltage is the speed or ‘strength’ of the current.", "Q6 (Leo). Energy per coulomb, not speed."], ["p.d. ‘at’ a point.", "A p.d. is always between two points; insist on ‘across’."], ["Voltage is used up so current falls.", "Energy is transferred; current stays the same (link to Lesson 2)."]],
       support: "Current vs p.d. comparison table on a card; sentence starter ‘___ J of energy is transferred for every ___’.",
       stretch: "A 9 V battery drives 0.50 A for 40 s. Find the charge and then the energy (two-step).",
-      homework: "Mission 3 practice questions. Revise it box.",
+      homework: "Revise it box, then check with the quick answers at the back.",
     },
     4: {
       why: "V = I R now joins current and p.d., which students understand separately. The particle picture of resistance (collisions with ions) is taught here so that the lamp curve in Lesson 8 is a consequence, not a new fact.",
@@ -66,13 +66,13 @@
       ],
       hinge: "Q1: same battery, 10 Ω vs 30 Ω. Tests the direction of the relationship before any number work.",
       misconceptions: [["Bigger resistance → bigger current (‘more resistor, more electricity’).", "Two circuits side by side at the same p.d."], ["Any straight line means ohmic.", "Straight line through the origin; check V ÷ I."], ["mA used as A.", "Worked example 2 converts explicitly."]],
-      support: "Rearranging help: the companion website's equation triangles (optional). Keep frames.",
-      stretch: "Mission 4 question 5 (electrons and ions). Why does a lamp's resistance rise but a resistor's not (in normal use)?",
-      homework: "Mission 4 practice questions.",
+      support: "Rearranging help: the equation triangles on the toolkit page (optional). Keep frames.",
+      stretch: "Explain resistance in terms of electrons colliding with ions. Why does a lamp's resistance rise but a resistor's not (in normal use)?",
+      homework: "Prep 2 (Lessons 3–4).",
     },
     5: {
       why: "The first required practical. Students can now draw the circuit, place both meters and calculate R, so the practical is about method, variables and evidence rather than new content.",
-      prep: "Per group: low-voltage dc supply (≈ 2 V), switch, ammeter, voltmeter, 1.1 m of constantan/nichrome wire (e.g. 0.3 mm) taped to a metre ruler, two crocodile clips, leads. Website practical page (Resistance, Part A) for reference.",
+      prep: "Per group: low-voltage dc supply (≈ 2 V), switch, ammeter, voltmeter, 1.1 m of constantan/nichrome wire (e.g. 0.3 mm) taped to a metre ruler, two crocodile clips, leads.",
       timing: [
         [0, 6, "Do now", "Retrieval: R = V ÷ I, heating, meter symbols."],
         [6, 14, "Plan", "Complete the variables table (Q1). Walk through the circuit and safety. Stress switch-off between readings."],
@@ -84,7 +84,7 @@
       misconceptions: [["‘Measure resistance with the voltmeter.’", "Resistance is calculated from V and I."], ["Line of best fit = dot-to-dot.", "Model a single straight line through the origin region, ignoring the anomaly."], ["Increasing length reduces current, so ‘current is the DV’.", "The DV is R (calculated)."]],
       support: "The length axis is pre-scaled; give a resistance scale (e.g. 2 cm for 1 Ω) and a partially completed example table.",
       stretch: "Q8: explain a non-zero intercept (zero error at the clip).",
-      homework: "Finish graph. Exam corner six-mark method. Mission 4 questions 6–9 (measuring resistance and the wire practical).",
+      homework: "Finish graph. Exam corner six-mark method.",
     },
     6: {
       why: "The series/parallel rules are taught as consequences of the Lesson 2–3 ideas: current is conserved (so it splits and rejoins) and energy per coulomb is shared (so p.d.s add in series).",
@@ -99,12 +99,12 @@
       hinge: "Q5: 6 Ω and 12 Ω in parallel. Anyone choosing 18 Ω is adding in parallel.",
       misconceptions: [["Current splits equally at every junction.", "Use unequal branch currents (0.25 A, 0.15 A)."], ["p.d. splits between parallel branches.", "Each branch has the full supply p.d."], ["Adding a resistor always increases total resistance.", "Checkout model: another route lowers it."]],
       support: "Rules table on a card beside every question.",
-      stretch: "Mission 5 go-further box: 1/R = 1/R₁ + 1/R₂ (beyond AQA, clearly labelled).",
-      homework: "Mission 5 questions 1–5.",
+      stretch: "Go further: 1/R = 1/R₁ + 1/R₂ for two resistors in parallel (beyond AQA; label it as such).",
+      homework: "Prep 3 (Lessons 5–6).",
     },
     7: {
       why: "The second part of the resistance practical tests the Lesson 6 rules with measurements, and gives evaluation practice (specific error and improvement).",
-      prep: "Per group: low-voltage supply, switch, ammeter, voltmeter, two identical resistors (e.g. 10 Ω), leads. Website practical page (Resistance, Part B) for reference.",
+      prep: "Per group: low-voltage supply, switch, ammeter, voltmeter, two identical resistors (e.g. 10 Ω), leads.",
       timing: [
         [0, 6, "Do now", "Retrieval: series total, parallel rules."],
         [6, 12, "Predict", "Q1: rank the three arrangements. Record predictions on the board."],
@@ -116,7 +116,7 @@
       misconceptions: [["Measure V across one resistor only in parallel.", "Across the combination."], ["Evaluation: ‘human error’.", "Name a specific error (lead resistance, resolution, heating) and a matching improvement."]],
       support: "Circuit diagrams printed at each station.",
       stretch: "Predict the result for three identical resistors in parallel and test it.",
-      homework: "Workbook Revise it; Mission 5 question 6.",
+      homework: "Workbook Revise it, then check with the quick answers at the back.",
     },
     8: {
       why: "I–V graphs are taught as ‘fingerprints’ after students already know R = V ÷ I, ohmic behaviour and why heating raises resistance. The graph shapes follow from ideas they already have.",
@@ -131,12 +131,12 @@
       hinge: "Q1: identify the three unlabelled graphs.",
       misconceptions: [["Resistance = gradient of the I–V graph.", "Use R = V ÷ I at a point; a curve's gradient does not give R."], ["The lamp graph flattens because the current ‘runs out’.", "Heating raises resistance."], ["Diode conducts both ways but less one way.", "Very high resistance in reverse: almost zero current."]],
       support: "Sketch templates with axes pre-drawn.",
-      stretch: "Mission 6 diode threshold question (≈ 0.6 V).",
-      homework: "Mission 6 questions 1–2 and 4.",
+      stretch: "Why does a diode pass almost no current until the p.d. reaches about 0.6 V?",
+      homework: "Prep 4 (Lessons 7–8).",
     },
     9: {
       why: "Students now know what each graph should look like, so the practical tests predictions and focuses on method: varying p.d., reversing, safety and the diode's extra steps.",
-      prep: "Per group: variable low-voltage supply or supply + variable resistor, ammeter (and milliammeter), voltmeter, fixed resistor, 6 V filament lamp, diode + protective resistor (e.g. 100 Ω), leads. Website practical page (I–V characteristics) for reference.",
+      prep: "Per group: variable low-voltage supply or supply + variable resistor, ammeter (and milliammeter), voltmeter, fixed resistor, 6 V filament lamp, diode + protective resistor (e.g. 100 Ω), leads.",
       timing: [
         [0, 6, "Do now + safety", "Retrieval. Lamp rating, hot lamp, protective resistor."],
         [6, 12, "Set up", "Check ammeter in series and voltmeter across the component only."],
@@ -148,7 +148,7 @@
       misconceptions: [["Plotting reversed readings as positive.", "Q8."], ["Voltmeter across the diode and protective resistor.", "Across the diode only."]],
       support: "Given target p.d.s in the table.",
       stretch: "Explain why the lamp's resistance at 1 V is still larger than at 0.1 V.",
-      homework: "Exam corner six-mark question. Mission 6 question 4.",
+      homework: "Exam corner six-mark question.",
     },
     10: {
       why: "Thermistors and LDRs are taught as applications of ‘lower total R → bigger current at fixed p.d.’, so they revise V = I R and series circuits while adding two new components.",
@@ -164,7 +164,7 @@
       misconceptions: [["Brighter light increases LDR resistance.", "Both are ‘more → less’."], ["Changing resistance changes the supply p.d.", "The supply p.d. is fixed; the current changes."]],
       support: "The ‘more → less’ key box as a card.",
       stretch: "Explain why the p.d. across the fixed resistor rises as the LDR is lit (qualitative potential divider).",
-      homework: "Mission 6 questions 3 and 5.",
+      homework: "Prep 5 (Lessons 9–10).",
     },
     11: {
       why: "Power pulls together earlier quantities. Students choose between equations (the decision table) instead of memorising a list, and P = I² R prepares the National Grid argument in Lesson 12.",
@@ -180,7 +180,7 @@
       misconceptions: [["P = I² R calculated as (I R)² or I × 2 × R.", "Square first, then multiply."], ["kW and minutes substituted directly.", "Convert row in every frame."]],
       support: "Decision table on a card.",
       stretch: "Q6 (lamp current and resistance); cost of energy if the teacher adds kWh.",
-      homework: "Mission 7 questions 1–4.",
+      homework: "Workbook Revise it, then check with the quick answers at the back.",
     },
     12: {
       why: "Mains safety and the National Grid close the unit as one story, from power station to plug. The grid explanation uses P = V I and P = I² R from Lesson 11.",
@@ -196,7 +196,7 @@
       misconceptions: [["Earth wire carries current all the time.", "Only during a fault."], ["Step-up transformers make extra energy.", "Power in = power out; p.d. up, current down."], ["Neutral is ‘safe’ and live only matters when on.", "Live is at ~230 V whenever connected."]],
       support: "Fault story as cut-out cards.",
       stretch: "Higher-tier transformer question (Q6); explain why ac is needed for transformers.",
-      homework: "Unit review (workbook), then Exam Zone on the companion website.",
+      homework: "Prep 6 (Lessons 11–12), then the Unit review booklet.",
     },
   };
 })();

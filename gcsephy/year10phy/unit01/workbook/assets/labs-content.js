@@ -48,7 +48,7 @@
   const labs = [
     {
       n: 1, accent: "cyan", title: "Is current used up?",
-      spec: "Current and charge; Q = I t; workbook Lesson 2; website Mission 2",
+      spec: "Current and charge; Q = I t; workbook Lesson 2",
       big: "A resistor gets warm when there is a current in it. Does that mean it uses up some of the current?",
       sections: [
         { icon: "learn", kind: "Predict", title: "Predict before you measure", blocks: [
@@ -88,7 +88,7 @@
     },
     {
       n: 2, accent: "copper", title: "What does a volt mean?",
-      spec: "Energy per coulomb; E = Q V; workbook Lesson 3; website Missions 3 and 5",
+      spec: "Energy per coulomb; E = Q V; workbook Lesson 3",
       big: "The current is the same all the way round a loop. So what changes when you turn up the battery?",
       sections: [
         { icon: "learn", kind: "Explain", title: "Energy per coulomb", blocks: [
@@ -128,7 +128,7 @@
     },
     {
       n: 3, accent: "leaf", title: "Discover the resistance rule",
-      spec: "Current, potential difference and resistance; V = I R; workbook Lesson 4; website Mission 4",
+      spec: "Current, potential difference and resistance; V = I R; workbook Lesson 4",
       big: "If you know the p.d. across a resistor, can you predict the current before you measure it?",
       sections: [
         { icon: "lab", kind: "Investigate", title: "Predict and collect evidence", blocks: [

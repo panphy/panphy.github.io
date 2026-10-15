@@ -19,7 +19,6 @@
   const LESSONS = ONE ? [ONE] : REVIEW ? [] : U.lessons;
   const LAST = ONE ? ONE.n : U.lessons[U.lessons.length - 1].n;
   const pad = (n) => String(n).padStart(2, "0");
-  const SITE = "https://panphy.app/gcsephy/year10phy/unit01/";
   if (answers && !LABS) document.body.classList.add("answers");
 
   const which = ONE ? `Lesson ${ONE.n}` : REVIEW ? "Unit review" : "";
@@ -267,12 +266,10 @@
   // ---------- lessons ----------
   function lesson(l) {
     qNum = 0;
-    const url = SITE + l.online.path;
     const opener = `<header class="opener"><div class="num"><small>Lesson</small>${pad(l.n)}</div>
       <div><h2>${l.title}</h2><div class="spec">${l.spec}</div></div><div class="big-q">${l.big}</div></header>
-      <div class="opener-foot"><div class="goals"><h3>By the end you can</h3><ul>${l.goals.map((g) => `<li>${D.sub(g)}</li>`).join("")}</ul>
-      <div class="keywords">${l.keywords.map((k) => `<span>${k}</span>`).join("")}</div></div>
-      <div class="online"><div><h3>Online companion</h3><p><strong>${l.online.label}</strong></p><p>${l.online.text}</p><p class="url">${url.replace("https://", "").replace(/\//g, "/<wbr>")}</p></div></div></div>`;
+      <div class="opener-foot solo"><div class="goals"><h3>By the end you can</h3><ul>${l.goals.map((g) => `<li>${D.sub(g)}</li>`).join("")}</ul>
+      <div class="keywords">${l.keywords.map((k) => `<span>${k}</span>`).join("")}</div></div></div>`;
 
     const doNow = keep(`${secHead("doNow", l.n === 1 ? "What do you already think?" : "Do now", l.n === 1 ? "No wrong answers: this is your starting point." : "From earlier lessons. No notes!")}
       <div class="do-now-box">${l.doNow.map(([q, a], i) => `<div><b>${i + 1}</b>${q}${lines(2, a)}</div>`).join("")}</div>`);
@@ -318,7 +315,7 @@
       <p class="lede">Mixed exam practice from the whole unit, a fix-it log, and a static electricity page for GCSE Physics students.</p>`;
     } else {
       middle = `<p class="lede">Charge, energy and resistance: twelve lessons, from your first circuit to confident exam answers. Learn with it in class and revise from it at home.</p>
-      <div class="cover-stats"><div><b>12</b>lessons</div><div><b>3</b>required practicals</div><div><b>3</b>virtual labs</div><div><b>1</b>companion website</div></div>`;
+      <div class="cover-stats"><div><b>12</b>lessons</div><div><b>3</b>required practicals</div><div><b>3</b>virtual labs</div></div>`;
     }
     return `<section class="cover"><div class="eyebrow">Year 10 Physics, AQA GCSE, ${LABS ? "Virtual labs" : ONE ? `Lesson ${ONE.n} of ${U.lessons.length}` : REVIEW ? "Unit review" : "Unit booklet"}</div>
       <h1>Electric<br><em>Circuits</em></h1>
@@ -339,16 +336,15 @@
       ["exam", "Exam corner", "An AQA-style question with a tip on how the marks are given."],
       ["revise", "Revise it", "Summary, cover-and-answer questions and an “I can” check to colour in."],
     ];
-    const rows = U.lessons.map((l) => `<tr><td>${pad(l.n)}</td><td><strong>${l.title}</strong>${l.rp ? `<span class="tag">${l.rp}</span>` : ""}<br><span class="map-line">${l.mapLine}</span></td><td>${l.online.label}</td></tr>`).join("");
+    const rows = U.lessons.map((l) => `<tr><td>${pad(l.n)}</td><td><strong>${l.title}</strong>${l.rp ? `<span class="tag">${l.rp}</span>` : ""}<br><span class="map-line">${l.mapLine}</span></td></tr>`).join("");
     return `<section class="new-page" style="break-before:auto">
       <div class="eyebrow">Start here</div><h2 class="page-title">How this booklet works</h2>
       <p class="page-intro">${ONE && ONE.n > 1 ? `This is the booklet for <strong>Lesson ${ONE.n}</strong> of the Electric Circuits unit. It builds on the lessons before it; the “Do now” questions and the quick answers at the back help you check what you remember.` : "This booklet assumes you have <strong>never studied electricity before</strong>. Every lesson starts from the ideas you already have and builds one step at a time."} Keep it: it is your classwork book <em>and</em> your revision guide.</p>
       <div class="legend">${items.map(([k, name, text]) => `<div>${icon(k)}<div><b>${name}</b><p>${text}</p></div></div>`).join("")}</div>
-      <div class="key"><strong>Revising at home?</strong> (1) Read the Learn it pages. (2) Cover them and answer the “Cover the page” questions in Revise it. (3) Check with the quick answers at the back. (4) Do the matching mission on the companion website, which has more questions with answers.</div>
+      <div class="key"><strong>Revising at home?</strong> (1) Read the Learn it pages. (2) Cover them and answer the “Cover the page” questions in Revise it. (3) Check with the quick answers at the back.</div>
       <h4 class="sub">The route through the unit${ONE ? ` (this lesson is highlighted)` : ""}</h4>
-      ${ONE ? `<ol class="route-grid">${U.lessons.map((l) => `<li class="${l.n === ONE.n ? "this" : ""}"><b>${pad(l.n)}</b><span>${l.title}${l.rp ? '<span class="tag">RP</span>' : ""}${l.n === ONE.n ? `<span class="map-line">${l.mapLine} (${l.online.label})</span>` : ""}</span></li>`).join("")}</ol>`
-        : `<table class="route"><thead><tr><th>#</th><th>Lesson</th><th>Companion website</th></tr></thead><tbody>${rows}</tbody></table>`}
-      <p style="margin-top:3mm;font-size:9pt;color:#56606e">Companion website: <strong>panphy.app/gcsephy/year10phy/unit01</strong>: missions, interactive equation triangles, required-practical pages and the Exam Zone.</p>
+      ${ONE ? `<ol class="route-grid">${U.lessons.map((l) => `<li class="${l.n === ONE.n ? "this" : ""}"><b>${pad(l.n)}</b><span>${l.title}${l.rp ? '<span class="tag">RP</span>' : ""}${l.n === ONE.n ? `<span class="map-line">${l.mapLine}</span>` : ""}</span></li>`).join("")}</ol>`
+        : `<table class="route"><thead><tr><th>#</th><th>Lesson</th></tr></thead><tbody>${rows}</tbody></table>`}
     </section>`;
   }
 
@@ -366,8 +362,7 @@
       <tr><td>milliamps (mA) → amps (A)</td><td>÷ 1000</td><td>250 mA = 0.25 A</td></tr>
       <tr><td>kilowatts (kW) → watts (W); kilohms (kΩ) → ohms (Ω)</td><td>× 1000</td><td>2.2 kW = 2200 W</td></tr>
       <tr><td>kilovolts (kV) → volts (V)</td><td>× 1000</td><td>400 kV = 400 000 V</td></tr></tbody></table>
-      ${triangleSection(met)}
-      <p style="font-size:9pt;color:#56606e">Interactive version: <strong>panphy.app/gcsephy/year10phy/unit01/equation-triangles</strong>.</p></section>`;
+      ${triangleSection(met)}</section>`;
   }
 
   function review() {
