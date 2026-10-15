@@ -10,7 +10,7 @@ The student hub uses `/gcsephy/assets/workbook-hub.css`, shared by all four work
 
 | File | Use |
 |---|---|
-| `index.html` | Student page linking the eleven booklets, the five Preps and their answer editions |
+| `index.html` | Student page linking the eleven booklets, the booklets' answer editions and the five Preps (not their answers) |
 | `pdf/` | One booklet per lesson (10–12 pages), a 16-page Unit review (42 marks, extension pages, key words, tracker) and an answer edition of each with the same page numbers |
 | `workbook.html` | PDF source: `?lesson=1`…`10` or `?review`, add `&answers`; with neither it previews the whole unit |
 | `assets/content/helpers.js` | Nuclide notation, nuclear equations, diagrams from the deck's drawing parts |
@@ -18,7 +18,7 @@ The student hub uses `/gcsephy/assets/workbook-hub.css`, shared by all four work
 | `assets/workbook.js`, `assets/workbook.css` | Renderer (adapted from Year 10) and print styles |
 | `assets/figures-print.css` | Deck figure styles for print; keep in step with `../../decks/atoms-and-radiation/deck.css` |
 | `build-pdfs.sh` | Rebuilds the PDFs with headless Chrome; name booklets (`3 7 review`) to rebuild only those |
-| `prep/` | One-page Prep (homework) sheets, one per two lessons, each out of 10, with answer editions: `content.js` (questions), `prep.html` (preview, `?n=2&answers`) and `pdf/`. The hub links them. See [`../../assets/prep/README.md`](../../assets/prep/README.md) |
+| `prep/` | One-page Prep (homework) sheets, one per two lessons, each out of 10, with answer editions: `content.js` (questions), `prep.html` (preview, `?n=2&answers`) and `pdf/`. The hub links the sheets, not the answer editions. See [`../../assets/prep/README.md`](../../assets/prep/README.md) |
 
 Diagrams come from `/gcsephy/decks/atoms-and-radiation/figures.js` (`window.DeckFigures`); rebuild the PDFs after changing a deck figure the workbook uses. The deck's click-through builds are opt-in (`data-animate` on a slide's figure), so figures drawn here are always complete. As in Year 10, every page after the cover prints 1.2× larger (12 pt text, ~9.6 mm writing lines), and grid columns use `minmax(0, 1fr)` because Chrome shrinks the whole print if anything overflows. Physics-only content (AQA 4.4.3–4.4.4) is on the "Triple Science only" extension pages of the Unit review; a single item elsewhere takes `<span class="triple-tag">Triple only</span>` (the medical tracer in Lesson 7). Higher-tier content is not marked. A lesson whose Exam corner would jump to a new page whole can set `examSplit: true` (Lesson 3 does), which gives each exam question its own card so the section can break between them.
 
