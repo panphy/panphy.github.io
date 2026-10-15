@@ -2,7 +2,7 @@
 
 **Year 9 Physics · AQA GCSE energy · nine lessons**
 
-A student workbook (with an answer edition), a teaching deck and nine lesson plans. There is no companion website; [`index.html`](index.html) is a short page linking the workbook, its answers and the deck. The lesson plans are not linked there.
+A student workbook (with an answer edition), a teaching deck and nine lesson plans. There is no companion website; [`index.html`](index.html) is a short page linking the workbook, its answers, the deck and the five Preps. The lesson plans are not linked there.
 
 ## Scope
 
@@ -36,6 +36,7 @@ The student hub uses `/gcsephy/assets/workbook-hub.css`, shared by all four work
 | `Energy - Year 9 Student Workbook (Answers).pdf` | The same pages with answers filled in, so page numbers match |
 | `workbook/` | Workbook source; see below |
 | `teaching-guides/` | Nine lesson-plan PDFs and their Markdown source; see its README |
+| `prep/` | One-page Prep (homework) sheets, one per week (Prep 5 follows Lesson 9), each out of 10, with answer editions: `content.js` (questions), `prep.html` (preview, `?n=2&answers`) and `pdf/`. The hub links them. See [`../../assets/prep/README.md`](../../assets/prep/README.md). Maths is LaTeX for MathJax, as in the workbook |
 | [`../../decks/energy-stores-and-transfers/`](../../decks/energy-stores-and-transfers/) | 63-slide teaching deck |
 
 ## Workbook source
