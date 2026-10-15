@@ -24,8 +24,9 @@ window.DeckFigures.add(P => {
       s += [150, 205, 315, 370].map(y => fline(600, y, 186, y, 'brand-primary', 2.5, 0.5, 'opacity=".45"')).join('') + `<line x1="200" y1="260" x2="780" y2="260" class="guide"/>`;
       if (on) s += text(178, 90, '−', 'lbl display') + text(608, 90, '+', 'lbl display') + text(390, 470, 'potential difference V', 'lbl mono') + both(196, 440, 592, 440) + text(700, 232, 'v', 'lbl display') + text(390, 136, 'field E', 'lbl', 'middle', 'style="fill:var(--brand-primary)"');
       const still = electron(400, 260) + arrow(424, 260, 520, 260, 'brand-primary', 5) + (on ? text(470, 300, 'F = qE', 'lbl mono strong') : '');
-      const ride = Array.from({ length: 31 }, (_, i) => { const t = i / 30 * 1.5; return [t < 1 ? 210 + 398 * t * t : 608 + 796 * (t - 1) * 0.5, 260]; });
-      const mover = `<g transform="translate(210 260)">${track(ride, 2.4, once)}${electron(0, 0)}</g>` + PLAY;
+      // Past the hole there is no field, so the electron keeps the speed it left with.
+      const ride = Array.from({ length: 31 }, (_, i) => { const t = i / 30 * 1.25; return [t < 1 ? 210 + 398 * t * t : 608 + 796 * (t - 1), 260]; });
+      const mover = `<g transform="translate(210 260)">${track(ride, 2, once)}${electron(0, 0)}</g>` + PLAY;
       return svg('120 60 700 430', s + twoState(still + arrow(640, 260, 760, 260, 'brand-accent', 5), mover + arrow(640, 260, 760, 260, 'brand-accent', 5, 'opacity=".5"')), 'An electron accelerated from rest by the uniform electric field between a negative plate and a positive plate. The force on it is constant, so it gains speed steadily and leaves through a hole in the positive plate with speed v');
     },
 
@@ -91,7 +92,8 @@ window.DeckFigures.add(P => {
     'd3-selector': () => {
       let s = fieldGrid(250, 150, 5, 4, 72) + plate(220, 96, 340, 16, 'proton') + plate(220, 408, 340, 16, 'electron') + `<path d="M690,60 V236 M690,284 V460" class="tick" style="stroke-width:10"/>`;
       const straight = [[90, 260], [780, 260]];
-      const bend = k => Array.from({ length: 41 }, (_, i) => { const x = 90 + 590 * i / 40, u = Math.max(0, x - 220); return [x, 260 + k * u * u]; });
+      // Curved between the plates (x 220 to 560), then straight along the tangent where the fields end.
+      const bend = k => Array.from({ length: 41 }, (_, i) => { const x = 90 + 590 * i / 40, u = Math.min(Math.max(0, x - 220), 340), w = Math.max(0, x - 560); return [x, 260 + k * u * u + 2 * k * 340 * w]; });
       const slow = bend(0.00052), fast = bend(-0.00052);
       s += `<path d="${through(slow)} ${through(fast)} ${through(straight)}" class="guide accent" style="stroke-width:2.5"/>`;
       s += text(390, 80, '+', 'lbl display') + text(390, 460, '−', 'lbl display') + text(100, 232, 'v', 'lbl display', 'start') + arrow(96, 260, 190, 260, 'brand-accent', 5);

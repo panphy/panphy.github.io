@@ -21,6 +21,8 @@ window.DeckFigures.add(P => {
     pot: { h: 38, body: box + `<path d="M0,-60 V-20" style="${INK}"/><g transform="translate(0 -15) rotate(90)">${head}</g>` },
     heater: { h: 44, body: `<rect x="-44" y="-14" width="88" height="28" style="${BOX}"/><path d="M-22,-14 V14 M0,-14 V14 M22,-14 V14" style="${INK}"/>` },
     lamp: { h: 24, body: `<circle r="24" style="${BOX}"/><path d="M-17,-17 L17,17 M17,-17 L-17,17" style="${INK}"/>` },
+    led: { h: 20, body: `<path d="M-20,-22 V22 L18,0 Z" style="${BOX}"/><path d="M20,-22 V22 M0,-30 L14,-48 M18,-26 L32,-44" style="${INK}"/><g transform="translate(17 -52) rotate(-52)">${head}</g><g transform="translate(35 -48) rotate(-52)">${head}</g>` },
+    motor: { h: 24, body: `<circle r="24" style="${BOX}"/>`, letter: 'M' },
     ammeter: { h: 24, body: `<circle r="24" style="${BOX}"/>`, letter: 'A' },
     voltmeter: { h: 24, body: `<circle r="24" style="${BOX}"/>`, letter: 'V' },
     open: { h: 24, body: `<path d="M-24,0 L20,-20" style="${INK}"/><circle cx="-24" r="5" style="fill:var(--text-main)"/><circle cx="24" r="5" style="fill:var(--text-main)"/>` },
@@ -82,9 +84,10 @@ window.DeckFigures.add(P => {
 
     // The circuit symbols needed for the course.
     'b5-symbols': () => {
-      const items = [['cell', 'cell'], ['battery', 'battery'], ['closed', 'switch'], ['resistor', 'resistor'], ['variable', 'variable resistor'], ['pot', 'potentiometer'], ['thermistor', 'thermistor'], ['ldr', 'LDR'], ['lamp', 'lamp'], ['ammeter', 'ammeter'], ['voltmeter', 'voltmeter'], ['heater', 'heating element']];
-      const s = items.map(([kind, name], i) => { const x = 70 + (i % 6) * 225, y = 90 + Math.floor(i / 6) * 170; return branch(x, y, x + 150, y, [{ kind: kind === 'closed' ? 'open' : kind, at: 0.5 }]) + text(x + 75, y + 70, name, 'lbl'); }).join('');
-      return svg('30 20 1380 330', s, 'Twelve circuit symbols: cell, battery, switch, resistor, variable resistor, potentiometer, thermistor, light-dependent resistor, lamp, ammeter, voltmeter and heating element');
+      const items = [['cell', 'cell'], ['battery', 'battery'], ['closed', 'switch'], ['resistor', 'resistor'], ['variable', 'variable resistor'], ['pot', 'potentiometer'], ['thermistor', 'thermistor'], ['ldr', 'LDR'], ['lamp', 'lamp'], ['heater', 'heating element'], ['ammeter', 'ammeter'], ['voltmeter', 'voltmeter'], ['led', 'LED'], ['motor', 'motor'], ['earth', 'earth']];
+      const earth = (x, y) => `<path d="M${x},${y} H${x + 75} V${y + 16} M${x + 45},${y + 16} H${x + 105} M${x + 55},${y + 28} H${x + 95} M${x + 65},${y + 40} H${x + 85}" style="${INK}"/>`;
+      const s = items.map(([kind, name], i) => { const x = 70 + (i % 5) * 270, y = 80 + Math.floor(i / 5) * 150; return (kind === 'earth' ? earth(x, y) : branch(x, y, x + 150, y, [{ kind: kind === 'closed' ? 'open' : kind, at: 0.5 }])) + text(x + 75, y + 70, name, 'lbl'); }).join('');
+      return svg('30 10 1300 480', s, 'Fifteen circuit symbols: cell, battery, switch, resistor, variable resistor, potentiometer, thermistor, light-dependent resistor, lamp, heating element, ammeter, voltmeter, light-emitting diode, motor and earth');
     },
 
     // Current against potential difference. data-kind: ohmic or lamp. Also drawn plain.

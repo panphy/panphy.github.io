@@ -82,11 +82,14 @@ window.DeckFigures.add(P => {
 
     // A rectangular cycle: the area enclosed is the net work done in one cycle.
     'b4-cycle': () => {
-      const a = [1, 5], b = [3, 5], c = [3, 2], d = [1, 2], corners = [a, b, c, d].map(([v, p]) => [X(v), Y(p)]);
-      let s = `<path d="${through(corners)} Z" style="fill:var(--brand-primary);opacity:.2"/>` + pvAxes(true) + `<path d="M110,${Y(5)} H${X(1)} M110,${Y(2)} H${X(1)} M${X(1)},${Y(2)} V420 M${X(3)},${Y(2)} V420" class="guide"/>`;
+      // Drawn to scale from the origin, in the units of the worked example: V in 10⁻³ m³ and P in 10⁵ Pa.
+      const X = v => 110 + 150 * v, Y = p => 420 - 100 * p;
+      const point = (v, p, label, dx = 14, dy = -12) => `<circle cx="${X(v)}" cy="${Y(p)}" r="8" style="fill:var(--text-main)"/>` + text(X(v) + dx, Y(p) + dy, label, 'lbl display', dx < 0 ? 'end' : 'start');
+      const a = [1, 3], b = [4, 3], c = [4, 1], d = [1, 1], corners = [a, b, c, d].map(([v, p]) => [X(v), Y(p)]);
+      let s = `<path d="${through(corners)} Z" style="fill:var(--brand-primary);opacity:.2"/>` + pvAxes(false) + text(126, 46, 'P / 10⁵ Pa', 'lbl mono', 'start') + text(784, 492, 'V / 10⁻³ m³', 'lbl mono', 'end') + text(98, 450, '0', 'lbl mono', 'end') + `<path d="M110,${Y(3)} H${X(1)} M110,${Y(1)} H${X(1)} M${X(1)},${Y(1)} V420 M${X(4)},${Y(1)} V420" class="guide"/>`;
       [[a, b], [b, c], [c, d], [d, a]].forEach(([p, q]) => { const seg = [[X(p[0]), Y(p[1])], [(X(p[0]) + X(q[0])) / 2, (Y(p[1]) + Y(q[1])) / 2], [X(q[0]), Y(q[1])]]; s += path(seg, 'brand-primary') + head(seg, 0.6, 'brand-primary'); });
-      s += point(1, 5, 'A', -14, -12) + point(3, 5, 'B') + point(3, 2, 'C', 14, 36) + point(1, 2, 'D', -14, 36);
-      s += text(98, Y(5) + 9, '3.0', 'lbl mono', 'end') + text(98, Y(2) + 9, '1.0', 'lbl mono', 'end') + text(X(1), 456, '1.0', 'lbl mono') + text(X(3), 456, '4.0', 'lbl mono') + text(X(2), Y(3.5) + 10, 'net work', 'lbl strong');
+      s += point(1, 3, 'A', -14, -12) + point(4, 3, 'B') + point(4, 1, 'C', 14, 36) + point(1, 1, 'D', -14, 36);
+      s += text(98, Y(3) + 9, '3.0', 'lbl mono', 'end') + text(98, Y(1) + 9, '1.0', 'lbl mono', 'end') + text(X(1), 456, '1.0', 'lbl mono') + text(X(4), 456, '4.0', 'lbl mono') + text(X(2.5), Y(2) + 10, 'net work', 'lbl strong');
       return svg('20 20 800 490', s, 'A pressure–volume diagram of a cycle A B C D round a rectangle, clockwise. The pressure is 3.0 along the top and 1.0 along the bottom, in units of 10 to the 5 pascals; the volume is 1.0 on the left and 4.0 on the right, in units of 10 to the minus 3 cubic metres. The shaded area inside the rectangle is the net work done by the gas in one cycle');
     },
 
