@@ -8,7 +8,7 @@
 (() => {
   const SYMBOL = { proton: '+', neutron: '0', electron: '−', alpha: 'α', positive: '+', solid: '' };
   const GRADIENTS = ['proton', 'neutron', 'electron', 'alpha', 'positive', 'solid', 'brand-accent-strong', 'brand-primary', 'decayed', 'undecayed'];
-  const MARKERS = ['text-secondary', 'alpha', 'electron', 'photon', 'brand-accent', 'brand-primary', 'brand-accent-strong', 'hl', 'proton'];
+  const MARKERS = ['text-secondary', 'alpha', 'electron', 'photon', 'brand-accent', 'brand-primary', 'brand-accent-strong', 'hl', 'proton', 'neutron'];
   const TAU = Math.PI * 2;
   const f = n => Math.round(n * 10) / 10;
 
