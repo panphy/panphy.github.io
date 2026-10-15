@@ -6,7 +6,6 @@
   const U = window.UNIT;
   const P = window.PLANS;
   const only = Number(new URLSearchParams(location.search).get("lesson")) || 0;
-  const SITE = "panphy.app/gcsephy/year10phy/unit01/";
 
   const style = document.createElement("style");
   style.textContent = '@page { @bottom-left { content: "Electric Circuits, Year 10 teacher guide"; } }';
@@ -16,17 +15,16 @@
   const list = (items) => `<ul>${items.map((i) => `<li>${i}</li>`).join("")}</ul>`;
 
   function overview() {
-    const rows = U.lessons.map((l) => `<tr><td>${l.n}</td><td><strong>${l.title}</strong>${l.rp ? `<span class="tag">${l.rp}</span>` : ""}<br><span style="color:#56606e">${l.mapLine}</span></td><td>${l.online.label}</td></tr>`).join("");
+    const rows = U.lessons.map((l) => `<tr><td>${l.n}</td><td><strong>${l.title}</strong>${l.rp ? `<span class="tag">${l.rp}</span>` : ""}<br><span style="color:#56606e">${l.mapLine}</span></td></tr>`).join("");
     return `<section>
       <div class="eyebrow">Year 10 Physics, AQA GCSE Combined Science: Trilogy (Higher) and Physics</div>
       <h1 class="page-title">Electric Circuits: Teacher guide</h1>
-      <p class="page-intro">Twelve 50-minute lessons, written for students with <strong>no prior knowledge of electricity</strong>. Each lesson has a matching section in the student workbook and a mission on the companion website.</p>
+      <p class="page-intro">Twelve 50-minute lessons, written for students with <strong>no prior knowledge of electricity</strong>. Each lesson has its own booklet in the student workbook.</p>
       <h4 class="sub">How the three resources fit together</h4>
       <table class="compare"><thead><tr><th>Resource</th><th>Used for</th></tr></thead><tbody>
         <tr><th>Student workbook</th><td>One booklet per lesson (12 pt text, wide writing lines), each with its toolkit, key words and quick answers, plus a Unit review booklet with the static electricity page (Triple only) and progress tracker. Every lesson: explanations, worked examples, graded practice, lab records, an exam question and a revision box. It is the students' classwork book and their revision guide.</td></tr>
         <tr><th>Answer edition</th><td>Same pages and page numbers as each booklet, with answers in blue. For marking, and for release to students for self-marking if you choose.</td></tr>
-        <tr><th>Companion website</th><td>${SITE}: homework and revision. Missions carry more questions with hints and worked answers; the Exam Zone is for the end of the unit.</td></tr>
-        <tr><th>Virtual labs, practicals</th><td>Lessons 2–4 use the Virtual Labs worksheet (PhET) for the full investigation; the workbook holds a short record. Lab 3 plots current against p.d., as AQA does. Lessons 5, 7 and 9 are the required practicals: the workbook is the lab sheet, and the website has a matching page for each.</td></tr>
+        <tr><th>Virtual labs, practicals</th><td>Lessons 2–4 use the Virtual Labs worksheet (PhET) for the full investigation; the workbook holds a short record. Lab 3 plots current against p.d., as AQA does. Lessons 5, 7 and 9 are the required practicals: the workbook is the lab sheet.</td></tr>
       </tbody></table>
       <h4 class="sub">Design principles</h4>
       ${list([
@@ -37,7 +35,7 @@
         "<strong>Equations are still learned.</strong> AQA provides the full Physics Equations Sheet in every paper, confirmed for 2027 and from 2028 onwards. It does not include R<sub>total</sub> = R₁ + R₂, and students who know the equations work faster, so the booklet still teaches recall.",
       ])}
       <h4 class="sub">Sequence</h4>
-      <table class="route"><thead><tr><th>#</th><th>Lesson</th><th>Companion website</th></tr></thead><tbody>${rows}</tbody></table>
+      <table class="route"><thead><tr><th>#</th><th>Lesson</th></tr></thead><tbody>${rows}</tbody></table>
     </section>`;
   }
 

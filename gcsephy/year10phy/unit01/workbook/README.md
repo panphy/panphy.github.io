@@ -1,6 +1,6 @@
 # Electric Circuits — Year 10 workbook and teacher guide
 
-Twelve 50-minute lessons for AQA GCSE Combined Science: Trilogy (Higher) and GCSE Physics, sections 6.2.1–6.2.4 / 4.2.1–4.2.4, for students with no prior knowledge of electricity. Part of the unit's companion site ([`../`](../)); students reach [`index.html`](index.html) here from the GCSE landing page or the unit home's Resources section.
+Twelve 50-minute lessons for AQA GCSE Combined Science: Trilogy (Higher) and GCSE Physics, sections 6.2.1–6.2.4 / 4.2.1–4.2.4, for students with no prior knowledge of electricity. The booklets are self-contained and do not refer to the unit website ([`../`](../)); students reach [`index.html`](index.html) here from the GCSE landing page or the unit home's Resources section.
 
 The student hub uses `/gcsephy/assets/workbook-hub.css`, shared by all four workbook hubs: navy headers, bold headings and square cards, with the landing page’s stronger year accent (orange for Year 9, green for Year 10, yellow for Year 11). This stylesheet does not affect the printed workbooks.
 
@@ -22,30 +22,29 @@ Diagrams use the site's `../assets/diagrams.js`. Each booklet is self-contained:
 
 ## Sequence
 
-| # | Lesson | Website |
-|---:|---|---|
-| 1 | Complete circuits and symbols | Mission 1 |
-| 2 | Current and charge · Virtual Lab 1 | Mission 2 |
-| 3 | Potential difference · Virtual Lab 2 | Mission 3 |
-| 4 | Resistance and V = I R · Virtual Lab 3 | Mission 4 |
-| 5 | RP: resistance of a wire | Practical: Resistance, Part A |
-| 6 | Series and parallel circuits | Mission 5 |
-| 7 | RP: resistors in series and parallel | Practical: Resistance, Part B |
-| 8 | I–V graphs | Mission 6 |
-| 9 | RP: I–V characteristics | Practical: I–V characteristics |
-| 10 | Thermistors, LDRs and sensors | Mission 6 |
-| 11 | Power and energy transfer | Mission 7 |
-| 12 | Mains, safety and the National Grid | Missions 8 and 7 |
+| # | Lesson |
+|---:|---|
+| 1 | Complete circuits and symbols |
+| 2 | Current and charge · Virtual Lab 1 |
+| 3 | Potential difference · Virtual Lab 2 |
+| 4 | Resistance and V = I R · Virtual Lab 3 |
+| 5 | RP: resistance of a wire |
+| 6 | Series and parallel circuits |
+| 7 | RP: resistors in series and parallel |
+| 8 | I–V graphs |
+| 9 | RP: I–V characteristics |
+| 10 | Thermistors, LDRs and sensors |
+| 11 | Power and energy transfer |
+| 12 | Mains, safety and the National Grid |
 
-After Lesson 12: the Unit review (41 marks), then the website Exam Zone.
+After Lesson 12: the Unit review (41 marks). The teacher guide sets a Prep as homework after every second lesson.
 
 Each lesson runs: opener → Do now → Learn it (models, diagrams, worked example with "Your turn") → Try it (supported → independent → challenge) → Lab where relevant → Exam corner → Revise it.
 
 ## Design notes
 
-- Lesson 1 teaches circuits and symbols before testing; Q = I t comes in Lesson 2 and the voltmeter in Lesson 3. The website's missions follow the same order.
+- Lesson 1 teaches circuits and symbols before testing; Q = I t comes in Lesson 2 and the voltmeter in Lesson 3.
 - AQA provides the full equation sheet in every paper, including from 2028 (evidence and links: [`../README.md`](../README.md#equation-sheet)). The toolkit still teaches each equation, with triangles as rearranging help; R_total = R₁ + R₂ is not on the sheet.
-- No QR codes; students rarely have phones in lessons, so openers give the mission name and address as text.
 - The student edition reserves the space answers take up, with answers hidden, so both editions have identical page numbers. Each lesson starts on a new page, so some end with white space.
 
 ## Rebuild
