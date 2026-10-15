@@ -15,7 +15,7 @@ Browser-based physics tools, simulations, classroom utilities and games. Student
 
 Two hubs hold the author's course resources: teaching decks, workbooks, revision material and lesson starters. They are public and open source but sit outside the homepage catalogue, reached by direct link. Teachers and students are welcome to use and adapt them.
 
-- **[GCSE Physics](https://panphy.app/gcsephy/):** AO1 starters and revision resources, followed by teaching decks and workbook hubs for Years 9 to 11. Each unit folder and `gcsephy/do-now/` has its own README; [teaching deck styles and controls](gcsephy/decks/README.md) are documented separately.
+- **[GCSE Physics](https://panphy.app/gcsephy/):** course summaries of AQA Physics 8463 and the physics in Combined Science: Trilogy 8464, AO1 starters and revision resources, then teaching decks and workbook hubs for Years 9 to 11. Each unit folder, `gcsephy/course-summary/` and `gcsephy/do-now/` has its own README; [teaching deck styles and controls](gcsephy/decks/README.md) are documented separately.
 - **[IB DP Physics](https://panphy.app/ibdpphy/):** the IB Diploma Programme Physics course (first assessment 2025). See the [folder overview](ibdpphy/README.md).
 
 ## Offline use
@@ -35,7 +35,7 @@ Pages under `fun/`, `beta/`, `misc/`, `gcsephy/` and `ibdpphy/` need internet ac
 | `fun/` | Network-only games and demos; Spellwave's text-logic tests run with `node --test fun/spellwave/tests/*.test.mjs` |
 | `beta/` | Trial apps, listed in `beta/index.html` |
 | `misc/` | Unlisted resources, inventoried in `misc/index.html` |
-| `gcsephy/` | GCSE Physics curriculum resources and the Do Now starters, inventoried in `gcsephy/index.html` |
+| `gcsephy/` | GCSE Physics curriculum resources, course summaries and the Do Now starters, inventoried in `gcsephy/index.html` |
 | `ibdpphy/` | IB DP Physics teaching decks, inventoried in `ibdpphy/index.html` |
 | `.github/` | Repository automation: `workflows/checks.yml` runs `scripts/check.mjs` and the app tests on every pull request; `workflows/supabase-keepalive.yml` pings Supabase twice a week |
 
