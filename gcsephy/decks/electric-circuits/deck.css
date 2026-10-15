@@ -40,13 +40,49 @@
 .cd .inner { stroke-width: 2.5; }
 .cd .heater { fill: #fdebe1; stroke-width: 2.5; }
 .cd .spark { fill: var(--hi); stroke: var(--ink); stroke-width: 1.5; }
-/* Static electricity (Mission 9): charged balls, a cloth and a spark. */
-.cd .q-pos { fill: #e8590c; stroke: var(--ink); stroke-width: 2; }
-.cd .q-neg { fill: #1c7ed6; stroke: var(--ink); stroke-width: 2; }
+/* Static electricity (Mission 9): drawn larger than the circuits, with Manrope labels. */
+.cd text.sx { font: 700 30px/1 var(--font-body, Arial, sans-serif); fill: var(--ink); }
+.cd text.sx.strong { font-weight: 800; }
+.cd text.sx.neg { fill: var(--cyan); }
+.cd text.sx.pos { fill: var(--hot); }
+.cd .q-pos { fill: #e8590c; stroke: none; }
+.cd .q-neg { fill: #1c7ed6; stroke: none; }
+.cd .q-neutral { fill: #c3cad3; stroke: none; }
+.cd .q-shine { fill: #fff; stroke: none; opacity: .35; }
 .cd .charge-sign { stroke: #fff; }
-.cd .cloth { fill: #f3e2b3; stroke-width: 2.5; }
-.cd .zap { stroke: #e8590c; stroke-width: 5; }
-[data-theme="dark"] .cd .cloth { fill: #5c4a26; }
+.cd .sx-rod { fill: #e7ecf2; stroke-width: 3; }
+.cd .sx-cloth { fill: #f3e2b3; stroke-width: 3; }
+.cd .sx-thread { stroke-width: 2.5; }
+.cd .sx-bar { stroke-width: 7; }
+.cd .sx-divider { stroke: var(--card-border); stroke-width: 2; stroke-dasharray: 8 8; }
+.cd .sx-force { stroke: var(--hot); stroke-width: 5; }
+.cd .sx-force-head { fill: var(--hot); stroke: none; }
+.cd .sx-eflow { stroke: var(--cyan); stroke-width: 4; stroke-dasharray: 10 8; }
+.cd .sx-eflow-head { fill: var(--cyan); stroke: none; }
+.cd .sx-fline { stroke-width: 3; }
+.cd .sx-fline.faint { opacity: .55; }
+.cd .sx-fline-head { fill: var(--ink); stroke: none; }
+.cd .sx-metal { fill: #dfe3e8; stroke-width: 3; }
+.cd .sx-column { fill: #f6efe0; stroke-width: 3; }
+.cd .sx-zap { stroke: #f59f00; stroke-width: 6; }
+.cd .sx-zap-glow { stroke: #ffd43b; stroke-width: 18; opacity: .45; }
+[data-theme="dark"] .cd .sx-rod { fill: #2b3340; }
+[data-theme="dark"] .cd .sx-cloth { fill: #5c4a26; }
+[data-theme="dark"] .cd .sx-metal { fill: #3a424e; }
+[data-theme="dark"] .cd .sx-column { fill: #4a4232; }
+/* Live deck only: the electrons rise from the cloth, and the balls are charged and swing, on the click. */
+@media screen {
+  #deck .cd .sx-travel { transition: transform 1.3s cubic-bezier(.3, 0, .3, 1) .15s; }
+  #deck .cd:not(:has(.k1.shown)) .sx-travel { transform: translate(var(--fx), var(--fy)); }
+  #deck .cd .sx-swing { transform-box: view-box; transition: transform 1.1s cubic-bezier(.3, 0, .3, 1) .3s; }
+  #deck .cd:not(:has(.k1.shown)) .sx-swing { transform: rotate(var(--rot)); }
+  #deck .cd .sx-charged, #deck .cd .sx-forces { transition: opacity .35s ease; }
+  #deck .cd .sx-forces { transition-delay: 1.2s; }
+  #deck .cd:not(:has(.k1.shown)) .sx-charged, #deck .cd:not(:has(.k1.shown)) .sx-forces { opacity: 0; transition-delay: 0s; }
+  .slide.active .cd .sx-zap-g { animation: sx-zap 2.4s steps(1) infinite; }
+}
+@keyframes sx-zap { 0%, 30%, 38%, 70%, 74% { opacity: 1; } 32%, 36%, 72%, 100% { opacity: 0; } 85% { opacity: 0; } }
+@media (prefers-reduced-motion: reduce) { #deck .cd .sx-travel, #deck .cd .sx-swing { transition: none; } .slide.active .cd .sx-zap-g { animation: none; } }
 
 .cd text { font-size: 13px; }
 .fig > .circuit-figure .cable-key { display: flex; flex-wrap: wrap; gap: 8px 22px; font-size: 24px; }
@@ -198,3 +234,25 @@ h2 .prop { stroke-width: 3.4; }
 .wires .earth { --wire: repeating-linear-gradient(135deg, #2e9e4f 0 9px, #f2d21b 9px 18px); }
 .wires .neutral { --wire: #2f6fd6; }
 .wires .live { --wire: #8a4b2a; }
+
+/* ----- news slides (as in the Year 9 decks; Mission 9 story) ----- */
+.masthead { display: flex; align-items: center; gap: 22px; padding-bottom: 14px; border-bottom: 6px double var(--ink); }
+.masthead .paper-name { font: 900 44px/1 var(--display); letter-spacing: -.05em; text-transform: uppercase; }
+.masthead .dateline { margin-left: auto; font: 900 18px Arial, sans-serif; letter-spacing: .16em; text-transform: uppercase; color: var(--muted); }
+.masthead .edition { padding: 6px 14px; border: 2px solid var(--ink); border-radius: 999px; background: var(--accent); font: 900 17px Arial, sans-serif; letter-spacing: .1em; text-transform: uppercase; white-space: nowrap; }
+.front { display: grid; grid-template-columns: 690px 1fr; gap: 50px; margin-top: 28px; }
+.news-photo { margin: 0; min-height: 0; }
+.news-photo img { display: block; width: 100%; height: auto; max-height: 520px; object-fit: cover; border: 2px solid var(--ink); box-shadow: 10px 10px 0 var(--accent); background: #05060c; }
+.news-photo figcaption { margin-top: 22px; font-size: 22px; font-weight: 700; line-height: 1.3; }
+.news-photo .credit { display: block; margin-top: 5px; font-size: 15px; font-weight: 600; color: var(--muted); text-decoration: none; }
+.news-photo .credit a { color: inherit; }
+.story { display: flex; flex-direction: column; min-height: 0; }
+.story .kicker { align-self: flex-start; margin: 0; padding: 6px 13px; background: var(--ink); color: var(--paper); font: 900 17px Arial, sans-serif; letter-spacing: .2em; text-transform: uppercase; }
+.story h2 { margin: 18px 0 20px; font-size: 62px; }
+.story .standfirst { margin: 0; font-size: 29px; font-weight: 700; line-height: 1.3; }
+.story .follow-up { margin: 22px 0 0; padding: 12px 18px 14px; border-left: 8px solid var(--accent); background: var(--card); font-size: 26px; line-height: 1.3; }
+.story .ask { margin: auto 0 0; padding: 14px 20px 16px; border: 2px solid var(--ink); background: var(--accent); font-size: 28px; font-weight: 800; line-height: 1.2; box-shadow: 6px 6px 0 rgba(7, 22, 47, .12); }
+.story .follow-up b, .story .ask b { display: block; margin-bottom: 5px; font: 900 16px Arial, sans-serif; letter-spacing: .18em; text-transform: uppercase; }
+.story .follow-up b { color: var(--muted); }
+/* An engraving on white keeps its whole page in view. */
+.news-photo.engraving img { object-fit: contain; background: #fff; }

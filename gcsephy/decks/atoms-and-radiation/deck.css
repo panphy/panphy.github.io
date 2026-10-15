@@ -555,6 +555,7 @@ h2:has(+ .terms) { margin-bottom: 24px; }
 .curve { fill: none; stroke: var(--undecayed); stroke-width: 5; stroke-linecap: round; }
 .roller { fill: var(--muted-bg); stroke: var(--input-border); stroke-width: 2; }
 .body { fill: var(--muted-bg); stroke: var(--input-border); stroke-width: 2; }
+.body.edge { stroke: var(--text-secondary); stroke-width: 3; }
 .stem { fill: none; stroke: #6B4F2A; stroke-width: 5; stroke-linecap: round; }
 .divider { stroke: var(--card-border); stroke-width: 2; }
 .slide.active .draw { stroke-dasharray: 1400; stroke-dashoffset: 1400; animation: draw 2.4s ease forwards .3s; }
@@ -595,7 +596,18 @@ h2:has(+ .terms) { margin-bottom: 24px; }
   /* Alpha scattering close-up: a track appears with its observation row. */
   #deck .with-row { transition: opacity .4s ease; }
   #deck .slide:not(:has(.obs-row:nth-child(3).shown)) .with-row-1, #deck .slide:not(:has(.obs-row:nth-child(4).shown)) .with-row-2 { opacity: 0; }
+  /* Fission and fusion: copies of the incoming particles run in (.absorb, .meet), the originals
+     fade (.spent-k1), then the products appear and fly out of the meeting point. */
+  #deck .fig:has(.k1.shown) .absorb, #deck .fig:has(.k1.shown) .meet { animation: run-in .7s ease-in forwards; }
+  #deck .spent-k1 { transition: opacity .3s ease .6s; }
+  #deck .fig:has(.k1.shown) .spent-k1 { opacity: .3; }
+  #deck svg .step.after-absorb { transition: opacity .3s ease .62s; }
+  #deck svg .step.after-absorb:not(.shown) { transition-delay: 0s; }
+  #deck .after-absorb.shown .fly { transition-delay: .62s; }
 }
+/* The running copies are hidden everywhere else: thumbnails and print show the still picture. */
+.absorb, .meet { opacity: 0; }
+@keyframes run-in { 0% { opacity: 1; transform: none; } 85% { opacity: 1; transform: translate(var(--fx), var(--fy)); } 100% { opacity: 0; transform: translate(var(--fx), var(--fy)); } }
 /* Thumbnails show a built figure complete. */
 .thumb-slide svg .step:not(.shown) { opacity: 1; transform: none; }
 
@@ -608,7 +620,8 @@ h2:has(+ .terms) { margin-bottom: 24px; }
   .slide, .step, .progress span { transition: none; }
   .slide.active .draw { animation: none; stroke-dasharray: none; stroke-dashoffset: 0; }
   .slide.active .pulse { animation: none; }
-  #deck svg .step, #deck .fly, #deck svg .wipe, #deck .hop, #deck .with-row, #deck .on-arrival { transition: none; }
+  #deck svg .step, #deck .fly, #deck svg .wipe, #deck .hop, #deck .with-row, #deck .on-arrival, #deck .spent-k1 { transition: none; }
+  #deck .fig:has(.k1.shown) .absorb, #deck .fig:has(.k1.shown) .meet { animation: none; }
 }
 
 @media (max-width: 640px) {

@@ -21,11 +21,19 @@ window.DeckSvgTex = {
   const txt = (x, y, s, cls = '', anchor = 'middle') => `<text x="${x}" y="${y}" class="${cls}" text-anchor="${anchor}">${s}</text>`;
   const head = (x, y, a, cls = 'flow') => `<g transform="translate(${x} ${y}) rotate(${a})"><path class="${cls}" d="M7 0 L-5 -6 L-5 6 Z"/></g>`;
   const f = n => Math.round(n * 10) / 10;
-  // A charged ball or speck: orange with + for positive, cyan with − for negative.
-  const charge = (x, y, sign, r) => {
-    const k = r * 0.45;
-    const mark = `<path d="M${f(x - k)} ${y} H${f(x + k)}${sign > 0 ? ` M${x} ${f(y - k)} V${f(y + k)}` : ''}" class="charge-sign" style="stroke-width:${f(Math.max(2, r / 6))}"/>`;
-    return `<circle cx="${x}" cy="${y}" r="${r}" class="${sign > 0 ? 'q-pos' : 'q-neg'}"/>` + mark;
+  // Mission 9 (static electricity) pictures are drawn larger than the circuits, with Manrope
+  // labels (.sx), so they read from the back of the room. A charged ball has a soft highlight:
+  // sign 1 is positive (orange, +), −1 negative (blue, −), 0 uncharged (grey).
+  const sxt = (x, y, s, cls = '', anchor = 'middle') => `<text x="${x}" y="${y}" class="sx ${cls}" text-anchor="${anchor}">${s}</text>`;
+  const qball = (x, y, r, sign) => {
+    const k = r * 0.42, cls = sign > 0 ? 'q-pos' : sign < 0 ? 'q-neg' : 'q-neutral';
+    const mark = sign ? `<path d="M${f(x - k)} ${f(y)} H${f(x + k)}${sign > 0 ? ` M${f(x)} ${f(y - k)} V${f(y + k)}` : ''}" class="charge-sign" style="stroke-width:${f(Math.max(2.5, r / 6))}"/>` : '';
+    return `<circle cx="${f(x)}" cy="${f(y)}" r="${r}" class="${cls}"/><circle cx="${f(x - r * 0.32)}" cy="${f(y - r * 0.36)}" r="${f(r * 0.28)}" class="q-shine"/>` + mark;
+  };
+  // A line with a filled arrowhead at (x2, y2), sized for the larger pictures.
+  const sxArrow = (x1, y1, x2, y2, cls) => {
+    const a = Math.atan2(y2 - y1, x2 - x1), back = 14;
+    return `<path d="M${f(x1)} ${f(y1)} L${f(x2 - back * Math.cos(a))} ${f(y2 - back * Math.sin(a))}" class="${cls}"/><path d="M14 0 L-8 -11 L-8 11 Z" class="${cls}-head" transform="translate(${f(x2)} ${f(y2)}) rotate(${f(a * 180 / Math.PI)})"/>`;
   };
   // Current going round a circuit: orange arrowheads in the conventional direction
   // (+ to −), as every slide after "Conventional current" shows it. They sit just above
@@ -185,51 +193,66 @@ window.DeckSvgTex = {
 
     // Mission 9 (GCSE Physics only): static electricity. Negative charge is cyan like the
     // electrons elsewhere in the deck; positive charge is orange.
-    rubbing: () => {
-      let s = `<rect x="40" y="50" width="300" height="34" rx="17" class="case"/>` + txt(190, 36, 'polythene rod', 'note');
-      [80, 130, 180, 230, 280].forEach(x => { s += charge(x, 67, -1, 9); });
-      s += txt(40, 110, 'gains electrons: negative', 'note', 'start');
-      s += `<path d="M270 180 q20 -14 44 -4 q26 10 52 -2 q26 -10 50 4 l14 54 q-26 12 -52 2 q-26 -10 -52 2 q-24 10 -46 -2 z" class="cloth"/>`;
-      [[300, 204], [342, 216], [384, 200], [328, 232], [372, 238]].forEach(([x, y]) => { s += charge(x, y, 1, 9); });
-      s += txt(350, 270, 'cloth loses electrons:', 'note') + txt(350, 288, 'equally positive', 'note');
-      s += `<path d="M300 176 V102" class="electron-line"/>` + head(300, 98, 270, 'electron') + txt(288, 142, 'electrons move', 'note cool', 'end') + txt(288, 160, 'cloth → rod', 'note cool', 'end');
-      return svg(480, 300, s, 'After rubbing, electrons have moved from the cloth to the polythene rod: the rod is negative and the cloth is equally positive');
+    rubbing: el => {
+      // Data-animate: the electrons start on the cloth, paired with its positive charges, and move up to the rod on the click.
+      const on = 'animate' in el.dataset, xs = [260, 355, 450, 545, 640];
+      let s = `<rect x="180" y="70" width="540" height="62" rx="31" class="sx-rod"/>` + sxt(450, 50, 'polythene rod', 'strong');
+      s += `<path d="M200 350 q60 -30 120 -6 q60 24 120 -2 q60 -26 120 -2 q50 18 90 2 l10 112 q-50 18 -100 0 q-60 -22 -120 0 q-60 22 -120 0 q-60 -20 -110 6 z" class="sx-cloth"/>` + sxt(188, 452, 'cloth', 'strong', 'end');
+      s += xs.map(x => qball(x - 18, 418, 16, 1)).join('');
+      s += xs.map(x => { const e = qball(x, 101, 16, -1); return on ? `<g class="sx-travel" style="--fx:18px;--fy:300px">${e}</g>` : e; }).join('');
+      const after = sxArrow(80, 390, 80, 120, 'sx-eflow') + sxt(104, 238, 'electrons', 'neg strong', 'start') + sxt(104, 272, 'move up', 'neg', 'start')
+        + sxt(450, 184, 'gains electrons: negative', 'neg strong') + sxt(450, 530, 'cloth loses electrons: equally positive', 'pos strong');
+      s += on ? `<g class="step k1">${after}</g>` : after;
+      return svg(760, 540, s, 'A polythene rod rubbed with a cloth. Electrons move from the cloth up to the rod: the rod becomes negative and the cloth is left with an equal positive charge').replace('viewBox="0 0 760 540"', 'viewBox="20 20 760 530"');
     },
 
-    attraction: () => {
-      let s = `<path d="M20 22 H480" class="thick"/>`;
-      const hang = (x1, x2, y, sign) => `<path d="M${x1} 22 L${x2} ${y - 20}"/>` + charge(x2, y, sign, 20);
-      // Each force arrow starts at the centre of the ball it acts on; the attracting pair's arrows stop short of each other.
-      const push = (x, y, dir, len) => `<path d="M${x} ${y} h${dir * len}" class="flow-line" style="stroke-width:3"/>` + head(x + dir * (len + 2), y, dir > 0 ? 0 : 180);
-      s += hang(110, 74, 180, -1) + hang(150, 186, 180, -1) + push(74, 180, -1, 44) + push(186, 180, 1, 44);
-      s += hang(326, 342, 180, -1) + hang(434, 418, 180, 1) + push(342, 180, 1, 26) + push(418, 180, -1, 26);
-      s += txt(130, 240, 'like charges repel', 'note') + txt(370, 240, 'unlike charges attract', 'note');
-      s += `<line x1="250" y1="40" x2="250" y2="250" class="dash grid"/>`;
-      return svg(500, 260, s, 'Two negatively charged balls hanging side by side push apart; a negative and a positive ball pull together');
+    attraction: el => {
+      // Data-animate: two pairs of uncharged balls hang straight down; on the click they are charged and swing apart or together.
+      const on = 'animate' in el.dataset, top = 40, L = 260;
+      const pendulum = (px, bx, sign, dir, len) => {
+        const by = top + Math.sqrt(L * L - (bx - px) ** 2), rot = f(Math.atan2(bx - px, by - top) * 180 / Math.PI);
+        // The force acts on the whole ball, so its arrow starts at the centre (drawn under the ball).
+        const force = `<g class="sx-forces">${sxArrow(bx, by, bx + dir * len, by, 'sx-force')}</g>`;
+        const ball = on ? qball(bx, by, 30, 0) + `<g class="sx-charged">${qball(bx, by, 30, sign)}</g>` : qball(bx, by, 30, sign);
+        const body = `<line x1="${px}" y1="${top}" x2="${bx}" y2="${f(by)}" class="sx-thread"/>` + force + ball;
+        return on ? `<g class="sx-swing" style="--rot:${rot}deg;transform-origin:${px}px ${top}px">${body}</g>` : body;
+      };
+      let s = `<path d="M60 ${top} H880" class="sx-bar"/><line x1="505" y1="70" x2="505" y2="400" class="sx-divider"/>`;
+      s += pendulum(230, 150, -1, -1, 80) + pendulum(310, 390, -1, 1, 80) + pendulum(560, 600, -1, 1, 64) + pendulum(820, 780, 1, -1, 64);
+      const labels = sxt(270, 410, 'like charges repel', 'strong') + sxt(690, 410, 'unlike charges attract', 'strong');
+      s += on ? `<g class="step k1">${labels}</g>` : labels;
+      return svg(900, 430, s, 'Two negatively charged balls hanging from threads push each other apart; a negative ball and a positive ball pull each other together').replace('viewBox="0 0 900 430"', 'viewBox="40 10 860 420"');
     },
 
     sphereField: () => {
       let s = '';
-      [[130, 1, 'positive: lines point away'], [390, -1, 'negative: lines point in']].forEach(([cx, sign, label]) => {
+      [[200, 1, 'positive: lines point away'], [620, -1, 'negative: lines point in']].forEach(([cx, sign, label]) => {
         for (let i = 0; i < 12; i++) {
-          const a = i * Math.PI / 6 + Math.PI / 12, c = Math.cos(a), si = Math.sin(a);
-          s += `<line x1="${f(cx + 34 * c)}" y1="${f(130 + 34 * si)}" x2="${f(cx + 112 * c)}" y2="${f(130 + 112 * si)}"/>`;
-          // Arrowhead part-way along the line, in the direction a positive charge would be pushed.
-          s += head(f(cx + 74 * c), f(130 + 74 * si), f(a * 180 / Math.PI + (sign < 0 ? 180 : 0)), 'fill');
+          const a = (i * 30 + 15) * Math.PI / 180, c = Math.cos(a), si = Math.sin(a);
+          s += `<line x1="${f(cx + 40 * c)}" y1="${f(210 + 40 * si)}" x2="${f(cx + 172 * c)}" y2="${f(210 + 172 * si)}" class="sx-fline"/>`;
+          // Arrowhead part-way along: the way a positive charge would be pushed.
+          s += `<path d="M12 0 L-8 -10 L-8 10 Z" class="sx-fline-head" transform="translate(${f(cx + 112 * c)} ${f(210 + 112 * si)}) rotate(${f(a * 180 / Math.PI + (sign < 0 ? 180 : 0))})"/>`;
         }
-        s += charge(cx, 130, sign, 30) + txt(cx, 278, label, 'note');
+        s += qball(cx, 210, 40, sign) + sxt(cx, 432, label, 'strong');
       });
-      return svg(520, 290, s, 'Electric field lines around isolated charged spheres: straight out from a positive sphere and straight in towards a negative one');
+      return svg(820, 440, s, 'Electric field lines around isolated charged spheres: straight out from a positive sphere and straight in towards a negative one').replace('viewBox="0 0 820 440"', 'viewBox="0 20 820 430"');
     },
 
     sparkGap: () => {
-      let s = `<circle cx="150" cy="130" r="76" class="case"/>`;
-      for (let i = 0; i < 10; i++) { const a = i * Math.PI / 5; s += charge(f(150 + 56 * Math.cos(a)), f(130 + 56 * Math.sin(a)), -1, 9); }
-      s += `<path d="M150 206 V262 M150 262 H130 M150 262 H170"/>` + txt(150, 284, 'insulating stand', 'note');
-      s += `<circle cx="400" cy="130" r="30" class="case"/><path d="M400 160 V236 M384 236 H416 M390 244 H410 M396 252 H404"/>` + txt(400, 278, 'earthed sphere', 'note');
-      s += `<path d="M230 130 L254 116 L270 142 L292 112 L312 146 L332 120 L368 130" class="zap"/>`;
-      s += txt(300, 82, 'very strong field', 'note hot') + txt(300, 100, 'air ionised: a spark', 'note hot');
-      return svg(500, 290, s, 'A highly charged metal dome on an insulating stand next to an earthed sphere: the strong field across the gap ionises the air and a spark jumps');
+      let s = `<rect x="205" y="262" width="50" height="140" rx="6" class="sx-column"/><rect x="140" y="400" width="180" height="26" rx="8" class="sx-metal"/>`;
+      s += `<circle cx="230" cy="170" r="108" class="sx-metal"/>`;
+      for (let i = 0; i < 14; i++) { const a = i * Math.PI / 7; s += qball(230 + 84 * Math.cos(a), 170 + 84 * Math.sin(a), 11, -1); }
+      s += `<path d="M640 215 V372 M608 372 H672 M620 386 H660 M632 400 H648" class="sx-thread" style="stroke-width:4"/><circle cx="640" cy="170" r="46" class="sx-metal"/>`;
+      // Field lines across the gap, pointing towards the negative dome.
+      [[-46, 120], [46, 220]].forEach(([dy, y]) => {
+        const y0 = 170 + dy * 0.55, y2 = 170 + dy * 0.75, my = 0.25 * y0 + 0.5 * y + 0.25 * y2;
+        s += `<path d="M596 ${f(y0)} Q470 ${y} 334 ${f(y2)}" class="sx-fline faint"/><path d="M12 0 L-8 -10 L-8 10 Z" class="sx-fline-head" transform="translate(467 ${f(my)}) rotate(180)"/>`;
+      });
+      const zap = 'M340 170 L378 146 L404 192 L444 144 L476 196 L512 150 L548 190 L594 170';
+      s += `<g class="sx-zap-g"><path d="${zap}" class="sx-zap-glow"/><path d="${zap}" class="sx-zap"/></g>`;
+      s += sxt(230, 40, 'charged dome', 'strong') + sxt(620, 92, 'earthed sphere', 'strong') + sxt(275, 340, 'insulating', '', 'start') + sxt(275, 368, 'column', '', 'start');
+      s += sxt(468, 262, 'strong field', 'pos strong') + sxt(468, 292, 'ionises the air', 'pos');
+      return svg(760, 440, s, 'A charged metal dome on an insulating column next to an earthed metal sphere. The strong electric field in the gap ionises the air and a spark jumps across').replace('viewBox="0 0 760 440"', 'viewBox="100 10 640 430"');
     }
   };
 

@@ -58,7 +58,7 @@ AQA gives every student the full Physics Equations Sheet as an insert with each 
 
 To edit content, change `assets/lessons.js`, `exam-questions.js` or `practicals.js`; there is no build step. The workbook uses `assets/diagrams.js`, so rebuild its PDFs after changing a circuit symbol.
 
-The 61-slide teaching deck (`../../decks/electric-circuits/`) uses the shared calm GCSE style with a lime Year 10 accent and the GCSE section theme preference; see [`../../decks/README.md`](../../decks/README.md). Slides 56–61 (Mission 9, static electricity) are GCSE Physics only and come after the Key words slide; the workbook does not cover them. It has three photo slides: the components, the National Grid and the inside of a UK plug. The Grid and plug photos are in the deck's `images/` folder, each with a credit on the slide linking to its source; change a photo and its credit together, and use only public domain or Creative Commons images that allow reuse.
+The 62-slide teaching deck (`../../decks/electric-circuits/`) uses the shared calm GCSE style with a lime Year 10 accent and the GCSE section theme preference; see [`../../decks/README.md`](../../decks/README.md). Slides 56–62 (Mission 9, static electricity) are GCSE Physics only and come after the Key words slide; the workbook does not cover them. It has three photo slides, the components, the National Grid and the inside of a UK plug, and a news-page story of Coulomb’s torsion balance (slide 59, an engraving shared with the IB D.2 deck). The Grid, plug and Coulomb pictures are in the deck's `images/` folder, each with a credit on the slide linking to its source; change a photo and its credit together, and use only public domain or Creative Commons images that allow reuse.
 
 ## Hosting
 
