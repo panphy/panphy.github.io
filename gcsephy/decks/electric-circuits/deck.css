@@ -40,6 +40,13 @@
 .cd .inner { stroke-width: 2.5; }
 .cd .heater { fill: #fdebe1; stroke-width: 2.5; }
 .cd .spark { fill: var(--hi); stroke: var(--ink); stroke-width: 1.5; }
+/* Static electricity (Mission 9): charged balls, a cloth and a spark. */
+.cd .q-pos { fill: #e8590c; stroke: var(--ink); stroke-width: 2; }
+.cd .q-neg { fill: #1c7ed6; stroke: var(--ink); stroke-width: 2; }
+.cd .charge-sign { stroke: #fff; }
+.cd .cloth { fill: #f3e2b3; stroke-width: 2.5; }
+.cd .zap { stroke: #e8590c; stroke-width: 5; }
+[data-theme="dark"] .cd .cloth { fill: #5c4a26; }
 
 .cd text { font-size: 13px; }
 .fig > .circuit-figure .cable-key { display: flex; flex-wrap: wrap; gap: 8px 22px; font-size: 24px; }

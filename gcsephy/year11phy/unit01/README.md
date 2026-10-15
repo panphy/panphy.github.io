@@ -1,6 +1,6 @@
 # Atoms and Nuclear Radiation — Year 11 workbook
 
-Ten 50-minute lessons for AQA GCSE Physics 4.4.1–4.4.2 and Combined Science: Trilogy 6.4.1–6.4.2. They follow the teaching deck, [`../../decks/atoms-and-radiation/`](../../decks/atoms-and-radiation/), and reuse its fonts and particle diagrams. The 41-slide deck uses the shared calm GCSE style with a light-yellow Year 11 accent; workbook print colours are separate. See [`../../decks/README.md`](../../decks/README.md) for deck styling and controls.
+Ten 50-minute lessons for AQA GCSE Physics 4.4.1–4.4.2 and Combined Science: Trilogy 6.4.1–6.4.2. They follow the teaching deck, [`../../decks/atoms-and-radiation/`](../../decks/atoms-and-radiation/), and reuse its fonts and particle diagrams. The 54-slide deck uses the shared calm GCSE style with a light-yellow Year 11 accent; workbook print colours are separate. See [`../../decks/README.md`](../../decks/README.md) for deck styling and controls.
 
 **Address:** <https://panphy.app/gcsephy/year11phy/unit01/>
 
@@ -41,7 +41,7 @@ The Chadwick photo is from Los Alamos National Laboratory, which asks for this n
 | 9 | Half-life calculations (with net decline) | 36 | 4.4.2.3 · 6.4.2.3 |
 | 10 | Contamination and irradiation | 38–41 | 4.4.2.4 · 6.4.2.4 |
 
-The Unit review follows Lesson 10 and adds two GCSE Physics-only extension pages the deck omits: background radiation, half-life hazards and medical uses (4.4.3), and fission and fusion (4.4.4).
+The Unit review follows Lesson 10 and adds two GCSE Physics-only extension pages: background radiation, half-life hazards and medical uses (4.4.3), and fission and fusion (4.4.4). The deck teaches them in Part 4, slides 42–54, after the Key words slide.
 
 ## History dates
 
