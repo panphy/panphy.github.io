@@ -716,9 +716,9 @@ window.DeckSvgTex = {
       let s = arrow(100, 400, 712, 400, 'text-main', 2.5) + arrow(100, 400, 100, 40, 'text-main', 2.5);
       s += text(406, 446, 'time', 'lbl') + text(48, 222, 'activity', 'lbl', 'middle', 'transform="rotate(-90 48 222)"');
       const curve = (start, half, color) => {
-        let d = '', area = `M${X(0)},400`;
-        for (let t = 0; t <= 10; t += 0.1) { const pt = `${f(X(t))},${f(Y(start * Math.pow(2, -t / half)))}`; d += `${t ? 'L' : 'M'}${pt}`; area += `L${pt}`; }
-        return `<path d="${area}L${X(10)},400Z" style="fill:var(--${color});opacity:.1"/><path d="${d}" class="curve" style="stroke:var(--${color});stroke-width:6"/>`;
+        let d = '';
+        for (let t = 0; t <= 10; t += 0.1) d += `${t ? 'L' : 'M'}${f(X(t))},${f(Y(start * Math.pow(2, -t / half)))}`;
+        return `<path d="${d}" class="curve" style="stroke:var(--${color});stroke-width:6"/>`;
       };
       s += curve(110, 40, 'electron') + curve(390, 0.8, 'proton');
       // Half-life of the short source marked on its curve.
