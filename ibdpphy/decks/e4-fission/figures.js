@@ -3,7 +3,7 @@
 // the numbers its label gives, and one drawn as a plain sphere stands for the whole nucleus.
 // Hot water and steam are red, cool water blue. Nothing here is terracotta: E.4 has no additional HL content.
 window.DeckFigures.add(P => {
-  const { svg, ball, cluster, arrow, text, sub, both, through, sampled, labelled, animated, stepG, track, anim, twoState, PLAY, f, TAU } = P;
+  const { svg, ball, cluster, arrow, text, sub, both, through, sampled, labelled, animated, stepG, track, anim, spin, twoState, PLAY, f, TAU } = P;
   const line = (d, colour, width = 5, extra = '') => `<path d="${d}" style="fill:none;stroke:var(--${colour});stroke-width:${width};stroke-linecap:round;stroke-linejoin:round" ${extra}/>`;
   const once = { loop: false };
   const neutron = (x, y, r = 11) => ball(x, y, r, 'neutron', '');
@@ -14,9 +14,6 @@ window.DeckFigures.add(P => {
   const leave = (dx, dy, at, dur) => track([[0, 0], [0, 0], [dx, dy]], dur, { loop: false, extra: `keyTimes="0;${at};1"` });
   // Binding energy per nucleon from the semi-empirical mass formula, in MeV, for the most stable nucleus of mass number A.
   const bind = A => { const Z = A / (2 + 0.015 * A ** (2 / 3)); return 15.75 - 17.8 / A ** (1 / 3) - 0.711 * Z * Z / A ** (4 / 3) - 23.7 * (A - 2 * Z) ** 2 / (A * A); };
-  // Points at equal steps round a closed path given by its corners, and dots that travel round it for ever.
-  const round = (corners, step = 10) => { const out = []; corners.forEach(([x1, y1], i) => { const [x2, y2] = corners[(i + 1) % corners.length], n = Math.max(1, Math.round(Math.hypot(x2 - x1, y2 - y1) / step)); for (let j = 0; j < n; j++) out.push([x1 + (x2 - x1) * j / n, y1 + (y2 - y1) * j / n]); }); return out; };
-  const flowing = (corners, n, dur, colour) => { const pts = round(corners); return Array.from({ length: n }, (_, k) => { const s = Math.round(k * pts.length / n), loop = [...pts.slice(s), ...pts.slice(0, s)]; loop.push(loop[0]); return `<g>${track(loop, dur)}<circle r="7" style="fill:var(--${colour})"/></g>`; }).join(''); };
 
   return {
     // Neutron-induced fission of uranium-235 into barium-141 and krypton-92. Played with →. Also the title picture.
@@ -79,22 +76,41 @@ window.DeckFigures.add(P => {
       return svg('20 40 840 450', s, 'A fast neutron enters the moderator and collides with one light nucleus after another. Each collision takes away some of its kinetic energy, so it leaves as a slow, thermal neutron');
     },
 
-    // A pressurised-water reactor: core, control rods, moderator, heat exchanger, turbine and shielding. Also drawn plain.
+    // A pressurised-water reactor with its two water loops. Loop 1 is sealed and stays liquid under pressure: hot water
+    // leaves the core, cools as it passes through the coil of the heat exchanger and is pumped back. Loop 2 boils round
+    // the coil; its steam drives the turbine, is condensed by cooling water and is pumped back. On screen liquid water
+    // flows as close dashes and steam as sparse, fast puffs; bubbles rise in the heat exchanger and the turbine turns.
+    // The still picture keeps the arrowheads. Also drawn plain.
     'e4-reactor': el => {
       const on = labelled(el);
-      let s = `<rect x="60" y="70" width="470" height="400" rx="18" style="fill:color-mix(in srgb, var(--neutron) 22%, transparent);stroke:var(--neutron);stroke-width:10"/>`;
-      // Reactor vessel with fuel rods and control rods.
-      s += `<rect x="110" y="170" width="170" height="250" rx="16" style="fill:color-mix(in srgb, var(--electron) 28%, var(--viewer-bg));stroke:var(--text-secondary);stroke-width:4"/>` + [135, 175, 215, 255].map(x => `<rect x="${x - 8}" y="260" width="16" height="130" rx="4" style="fill:var(--proton)"/>`).join('') + [155, 195, 235].map(x => `<rect x="${x - 6}" y="130" width="12" height="190" rx="3" style="fill:var(--text-main)"/>`).join('');
-      // Heat exchanger: the primary loop passes through it; water outside the tube boils.
-      s += `<rect x="370" y="150" width="120" height="230" rx="16" style="fill:color-mix(in srgb, var(--electron) 14%, var(--viewer-bg));stroke:var(--text-secondary);stroke-width:4"/>`;
-      const primary = [[280, 210], [400, 210], [400, 340], [460, 340], [460, 250], [430, 250], [430, 370], [280, 370]];
-      s += line(through(primary), 'proton', 5) + line('M280,370 H430', 'electron', 5);
-      // Secondary loop: steam to the turbine, water back from the condenser.
-      const secondary = [[430, 150], [430, 110], [640, 110], [640, 200], [640, 330], [640, 420], [470, 420], [470, 380]];
-      s += line('M430,150 V110 H640 V170', 'proton', 5) + line('M640,290 V420 H470 V380', 'electron', 5) + `<path d="M600,170 H680 L700,290 H580 Z" style="fill:var(--card-bg);stroke:var(--text-secondary);stroke-width:4"/><rect x="720" y="196" width="140" height="70" rx="10" style="fill:var(--card-bg);stroke:var(--text-secondary);stroke-width:4"/><line x1="696" y1="230" x2="720" y2="230" style="stroke:var(--text-secondary);stroke-width:8"/>`;
-      if (on) s += text(195, 110, 'control rods', 'lbl strong') + text(180, 510, 'fuel in moderator', 'lbl') + text(300, 54, 'shielding', 'lbl strong') + text(640, 240, 'turbine', 'lbl small') + text(790, 240, 'generator', 'lbl small') + text(590, 92, 'steam', 'lbl', 'middle', 'style="fill:var(--proton)"') + text(590, 456, 'water', 'lbl', 'middle', 'style="fill:var(--electron)"') + text(450, 510, 'heat exchanger', 'lbl');
-      const mover = flowing(primary, 9, 9, 'proton') + flowing(secondary, 9, 9, 'brand-accent');
-      return svg(on ? '30 20 850 510' : '40 50 840 440', s + twoState('', mover), 'A nuclear power plant. Inside thick shielding, fuel rods sit in a moderator in the reactor vessel, with control rods that can be lowered between them. Hot water from the reactor passes through a heat exchanger, where it boils water in a separate loop. The steam drives a turbine joined to a generator, is condensed and returns to the heat exchanger');
+      const pipe = (d, paint, w = 14) => `<path d="${d}" style="fill:none;stroke:${paint};stroke-width:${w};stroke-opacity:.3;stroke-linecap:round;stroke-linejoin:round"/>`;
+      const head = (x, y, deg, paint) => `<path d="M-9,-9 L8,0 L-9,9 Z" transform="translate(${x} ${y}) rotate(${deg})" style="fill:${paint}"/>`;
+      // Dashes that run along a path: [dash, gap] and the time one pattern takes to pass.
+      const flow = (d, paint, [dash, gap], dur, w = 7) => `<path d="${d}" style="fill:none;stroke:${paint};stroke-width:${w};stroke-linecap:round;stroke-dasharray:${dash} ${gap}">${anim('stroke-dashoffset', [dash + gap, 0], dur)}</path>`;
+      const hot = 'var(--proton)', cool = 'var(--electron)', coil = 'url(#e4-coil)';
+      const loop1 = through([[250, 250], [445, 250], [445, 295], [375, 295], [375, 340], [445, 340], [445, 385], [300, 385], [300, 445], [170, 445], [170, 420]]);
+      const steam = 'M405,120 V92 H640 V170', exhaust = 'M640,290 V330', feed = 'M640,400 V445 H455 V418', cooling = 'M780,350 H605 V385 H780';
+      // The coil fades from hot to cool as the water in it gives its energy to loop 2.
+      let s = `<defs><linearGradient id="e4-coil" gradientUnits="userSpaceOnUse" x1="0" y1="255" x2="0" y2="380"><stop offset="0" style="stop-color:var(--proton)"/><stop offset="1" style="stop-color:var(--electron)"/></linearGradient></defs>`;
+      // Shielding round the reactor vessel and heat exchanger.
+      s += `<rect x="50" y="70" width="470" height="400" rx="18" style="fill:color-mix(in srgb, var(--neutron) 22%, transparent);stroke:var(--neutron);stroke-width:10"/>`;
+      // Reactor vessel full of water (coolant and moderator), with fuel rods and control rods.
+      s += `<rect x="90" y="170" width="160" height="250" rx="16" style="fill:color-mix(in srgb, var(--electron) 28%, var(--viewer-bg));stroke:var(--text-secondary);stroke-width:4"/>` + [115, 150, 185, 220].map(x => `<rect x="${x - 8}" y="260" width="16" height="130" rx="4" style="fill:var(--proton)"/>`).join('') + [132, 167, 202].map(x => `<rect x="${x - 6}" y="130" width="12" height="190" rx="3" style="fill:var(--text-main)"/>`).join('');
+      // Heat exchanger: loop 2 water fills the lower part round the coil; steam collects above it.
+      s += `<rect x="340" y="120" width="130" height="300" rx="30" style="fill:var(--viewer-bg);stroke:var(--text-secondary);stroke-width:4"/><path d="M342,215 H468 V390 A28,28 0 0 1 440,418 H370 A28,28 0 0 1 342,390 Z" style="fill:color-mix(in srgb, var(--electron) 22%, var(--viewer-bg))"/><line x1="342" y1="215" x2="468" y2="215" style="stroke:var(--electron);stroke-width:2"/>`;
+      // Turbine, generator and condenser with its cooling water.
+      s += `<path d="M600,170 H680 L700,290 H580 Z" style="fill:var(--card-bg);stroke:var(--text-secondary);stroke-width:4"/><rect x="720" y="196" width="140" height="70" rx="10" style="fill:var(--card-bg);stroke:var(--text-secondary);stroke-width:4"/><line x1="696" y1="230" x2="720" y2="230" style="stroke:var(--text-secondary);stroke-width:8"/><rect x="585" y="330" width="110" height="70" rx="10" style="fill:var(--card-bg);stroke:var(--text-secondary);stroke-width:4"/>`;
+      s += pipe(loop1, coil) + pipe(steam, hot, 18) + pipe(exhaust, hot, 18) + pipe(feed, cool) + pipe(cooling, cool, 10);
+      // Pumps drive both loops.
+      const pump = (x, y, deg, paint) => `<circle cx="${x}" cy="${y}" r="17" style="fill:var(--card-bg);stroke:var(--text-secondary);stroke-width:4"/>` + head(x, y, deg, paint);
+      s += pump(235, 445, 180, cool) + pump(560, 445, 180, cool);
+      const blades = [0, 90, 180, 270].map(deg => `<ellipse cx="640" cy="212" rx="6" ry="17" transform="rotate(${deg} 640 230)" style="fill:var(--text-secondary)"/>`).join('') + '<circle cx="640" cy="230" r="6" style="fill:var(--text-main)"/>';
+      const still = head(300, 250, 0, hot) + head(170, 445, 180, cool) + head(520, 92, 0, hot) + head(640, 312, 90, hot) + head(400, 445, 180, cool) + head(700, 385, 0, cool) + blades;
+      const bubbles = [[358, 0], [392, 1.1], [425, 0.5], [455, 1.6], [408, 2.1], [374, 0.8]].map(([x, t]) => `<circle cx="${x}" cy="0" r="5" style="fill:var(--viewer-bg);stroke:var(--electron);stroke-width:2">${anim('cy', [395, 222], 2.4, { extra: `begin="-${t}s"` })}${anim('opacity', [0, 1, 1, 0], 2.4, { extra: `begin="-${t}s" keyTimes="0;0.15;0.85;1"` })}</circle>`).join('');
+      const mover = flow(loop1, coil, [16, 12], 0.9) + flow(feed, cool, [16, 12], 0.9) + flow(cooling, cool, [12, 12], 1.2, 5) + flow(steam, hot, [7, 33], 0.35, 9) + flow(exhaust, hot, [7, 33], 0.35, 9) + bubbles + `<g>${spin(640, 230, 1.6)}${blades}</g>`;
+      if (on) s += text(167, 115, 'control rods', 'lbl strong') + text(170, 505, 'fuel in moderator', 'lbl') + text(285, 54, 'shielding', 'lbl strong') + text(405, 505, 'heat exchanger', 'lbl') + text(295, 228, 'loop 1', 'lbl mono small', 'middle', 'style="fill:var(--proton)"') + text(700, 470, 'loop 2', 'lbl mono small', 'start', 'style="fill:var(--electron)"')
+        + text(655, 128, 'steam', 'lbl', 'start', 'style="fill:var(--proton)"') + text(700, 162, 'turbine', 'lbl small', 'start') + text(790, 240, 'generator', 'lbl small') + text(705, 318, 'condenser', 'lbl small', 'start') + text(790, 362, 'cooling', 'lbl small', 'start') + text(790, 390, 'water', 'lbl small', 'start') + text(560, 495, 'water', 'lbl', 'middle', 'style="fill:var(--electron)"');
+      return svg(on ? '30 20 850 500' : '40 50 840 440', s + twoState(still, mover), 'A pressurised-water reactor and its two separate water loops. Inside thick shielding, fuel rods sit in water, the moderator, in the reactor vessel, with control rods that can be lowered between them. In loop 1, water kept under high pressure so that it does not boil leaves the core hot, passes through a coil in the heat exchanger, cools as it heats the water round the coil and is pumped back to the core. In loop 2, the water round the coil boils; the steam drives a turbine joined to a generator, is turned back into water in a condenser cooled by outside water, and is pumped back to the heat exchanger. The two loops never mix');
     },
 
     // The activity of spent fuel falling with time: fission products first, then long-lived heavy nuclei.
