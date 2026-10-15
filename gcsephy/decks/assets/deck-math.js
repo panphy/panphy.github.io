@@ -57,6 +57,8 @@ window.DeckMath = (() => {
       t.setAttribute('y', 0);
       t.setAttribute('text-anchor', 'start');
       t.style.dominantBaseline = 'alphabetic';
+      // The original's font, which may be an inline style the class rules cannot see.
+      t.style.font = ctx.font;
       t.textContent = s.replace(/ /g, ' ');
       g.appendChild(t);
       x += ctx.measureText(s).width;

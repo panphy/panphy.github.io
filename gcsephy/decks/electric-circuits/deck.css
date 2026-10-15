@@ -9,9 +9,9 @@
 .cd .thick { stroke-width: 4.5; }
 .cd .dash { stroke-dasharray: 3 4; }
 .cd .dot { fill: var(--ink); stroke: none; }
-.cd text { fill: var(--ink); stroke: none; font: 700 13px/1 Arial, Helvetica, sans-serif; }
-.cd text.meter-letter { font: 900 14px/1 Arial, Helvetica, sans-serif; }
-.cd text.note { font-size: 15px; font-weight: 800; fill: #3a4452; }
+.cd text { fill: var(--ink); stroke: none; font: 700 15px/1 Arial, Helvetica, sans-serif; }
+.cd text.meter-letter { font: 900 16px/1 Arial, Helvetica, sans-serif; }
+.cd text.note { font-size: 17px; font-weight: 800; fill: #3a4452; }
 .cd text.hot { fill: #b44a12; }
 .cd text.cool { fill: #1479a8; }
 .cd .flow { fill: #d9480f; stroke: none; }
@@ -23,8 +23,8 @@
 .cd .curve { stroke: #d9480f; stroke-width: 3.2; }
 .cd .curve-2 { stroke: #1479a8; stroke-width: 3.2; }
 .cd .pt { fill: var(--hi); stroke: var(--ink); stroke-width: 2; }
-.cd text.tick { font: 600 13px/1 Arial, Helvetica, sans-serif; fill: #4b5563; }
-.cd text.axis-label { font: 800 14px/1 Arial, Helvetica, sans-serif; }
+.cd text.tick { font: 600 15px/1 Arial, Helvetica, sans-serif; fill: #4b5563; }
+.cd text.axis-label { font: 800 16px/1 Arial, Helvetica, sans-serif; }
 .cd .charge-dot { fill: var(--cyan); stroke: var(--ink); stroke-width: 2; }
 /* Moving current arrowheads keep the orange of the fixed ones. */
 .cd .charge-dot.flow { fill: #d9480f; stroke: none; }
@@ -84,7 +84,7 @@
 @keyframes sx-zap { 0%, 30%, 38%, 70%, 74% { opacity: 1; } 32%, 36%, 72%, 100% { opacity: 0; } 85% { opacity: 0; } }
 @media (prefers-reduced-motion: reduce) { #deck .cd .sx-travel, #deck .cd .sx-swing { transition: none; } .slide.active .cd .sx-zap-g { animation: none; } }
 
-.cd text { font-size: 13px; }
+.cd text { font-size: 15px; }
 .fig > .circuit-figure .cable-key { display: flex; flex-wrap: wrap; gap: 8px 22px; font-size: 24px; }
 .cable-key > span { display: inline-flex; align-items: center; gap: 6px; white-space: nowrap; }
 .cable-key i { display: inline-block; width: 30px; height: 16px; margin-right: 4px; border: 2px solid var(--ink); border-radius: 8px; }
@@ -97,7 +97,7 @@
 .fig-html .symbol-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 14px; margin: 0; }
 .symbol-tile { margin: 0; padding: 12px 8px 12px; border: 2px solid var(--ink); background: var(--diagram-bg); text-align: center; box-shadow: 5px 5px 0 rgba(7, 22, 47, .1); }
 .symbol-tile svg { display: block; width: 100%; height: 110px; }
-.symbol-tile figcaption { margin-top: 8px; font-size: 21px; font-weight: 900; letter-spacing: .03em; text-transform: uppercase; line-height: 1.15; }
+.symbol-tile figcaption { margin-top: 8px; font-size: 24px; font-weight: 900; letter-spacing: .03em; text-transform: uppercase; line-height: 1.15; }
 
 /* National Grid route (Diagrams.nationalGrid), scaled up */
 .fig-html .circuit-figure { margin: 0; padding: 0; border: 0; background: none; }
@@ -116,19 +116,19 @@
 .grid-stage-homes .grid-icon { background: #eaf7d5; }
 .grid-text { font-size: 25px; line-height: 1.3; }
 .grid-head { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 10px; margin-bottom: 3px; }
-.grid-head strong { font-size: 20px; letter-spacing: .08em; text-transform: uppercase; }
-.grid-pd { padding: 2px 9px; border: 2px solid var(--ink); border-radius: 999px; font: 800 18px/1.3 Arial, Helvetica, sans-serif; white-space: nowrap; }
+.grid-head strong { font-size: 22px; letter-spacing: .08em; text-transform: uppercase; }
+.grid-pd { padding: 2px 9px; border: 2px solid var(--ink); border-radius: 999px; font: 800 20px/1.3 Arial, Helvetica, sans-serif; white-space: nowrap; }
 .grid-pd.pd-low { background: #d7f0b0; }
 .grid-pd.pd-mid { background: #ffe89a; }
 .grid-pd.pd-high { background: #d9480f; border-color: #d9480f; color: #fff; }
 .grid-route .grid-band { position: relative; margin: 2px -10px; padding: 12px 8px 14px; border: 2px dashed #1479a8; border-radius: 16px; background: #e9f7fb; }
-.grid-band-tag { display: block; margin: 0 4px 12px 86px; font-size: 19px; font-weight: 700; color: #0f5f85; line-height: 1.2; }
-.grid-band-tag strong { margin-right: 6px; font-size: 19px; font-weight: 900; letter-spacing: .1em; text-transform: uppercase; color: var(--navy); }
+.grid-band-tag { display: block; margin: 0 4px 12px 86px; font-size: 22px; font-weight: 700; color: #0f5f85; line-height: 1.2; }
+.grid-band-tag strong { margin-right: 6px; font-size: 22px; font-weight: 900; letter-spacing: .1em; text-transform: uppercase; color: var(--navy); }
 
 /* Hero circuit card (companion home page) */
 .machine { position: relative; display: grid; place-items: center; height: 640px; }
 .circuit-card { width: 540px; padding: 26px; background: var(--paper); color: var(--ink); transform: rotate(2deg); box-shadow: 18px 18px 0 var(--cyan); }
-.circuit-card .plot-label { padding-bottom: 12px; border-bottom: 2px solid; font: 900 18px Arial, sans-serif; letter-spacing: .2em; }
+.circuit-card .plot-label { padding-bottom: 12px; border-bottom: 2px solid; font: 900 22px Arial, sans-serif; letter-spacing: .2em; }
 .circuit-card svg { display: block; width: 100%; height: auto; margin-top: 16px; background: var(--diagram-bg); }
 .circuit-card p { margin: 18px 0 0; font: 900 28px/1.08 var(--display); text-transform: uppercase; letter-spacing: -.04em; }
 .machine .sticky.one { left: -30px; top: 6px; transform: rotate(-6deg); box-shadow: 5px 5px 0 var(--cyan); }
@@ -143,11 +143,15 @@
 .toolkit { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 18px; }
 .tool { display: flex; flex-direction: column; gap: 8px; padding: 20px 22px; border: 2px solid var(--ink); background: var(--card); box-shadow: 6px 6px 0 var(--accent); }
 .tool .eq { font: 900 38px/1.05 var(--display); letter-spacing: -.03em; }
-.tool .eq.long { font-size: 33px; } /* the widest equation, to fit a quarter-width card */
-.tool .words { font-size: 23px; font-weight: 800; }
-.tool .units { font-size: 21px; color: var(--muted); line-height: 1.35; }
-.tool .where { margin-top: auto; padding-top: 10px; border-top: 1px solid var(--line); font: 900 16px Arial, sans-serif; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); }
+.tool .eq.long { font-size: 33px; } /* the widest equation */
+.tool .words { font-size: 24px; font-weight: 800; }
+.tool .units { font-size: 24px; color: var(--muted); line-height: 1.35; }
+.tool .where { margin-top: auto; padding-top: 10px; border-top: 1px solid var(--line); font: 900 20px Arial, sans-serif; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); }
 .tool.given { background: #f1edff; }
+/* Three across, so each word equation fits on one line at full size. */
+.toolkit.three { grid-template-columns: repeat(3, minmax(0, 1fr)); grid-template-rows: repeat(3, 1fr); gap: 12px; }
+.toolkit.three .tool { gap: 4px; padding: 12px 22px; }
+.toolkit.three .tool .where { padding-top: 6px; }
 
 /* Two sketch cards side by side */
 .sketch-card { display: flex; flex-direction: column; }
@@ -171,8 +175,8 @@
 .cd .lattice-ion { fill: #f7d278; stroke-width: 1.6; transition: fill .15s; }
 .cd .lattice-ion.hit { fill: #ff8a3d; }
 .cd .lattice-ion-plus { stroke-width: 1.8; }
-.cd text.lattice-title { font: 900 15px/1 Arial, Helvetica, sans-serif; letter-spacing: .06em; }
-.cd text.lattice-count { font: 800 14px/1 Arial, Helvetica, sans-serif; }
+.cd text.lattice-title { font: 900 17px/1 Arial, Helvetica, sans-serif; letter-spacing: .06em; }
+.cd text.lattice-count { font: 800 16px/1 Arial, Helvetica, sans-serif; }
 
 /* The finished earth-fault picture has a melted fuse: no wire through it, a hot tint and a gap. */
 .cd .fuse-wire { opacity: 0; }
@@ -214,7 +218,7 @@ h2 .prop { stroke-width: 3.4; }
 .component { display: flex; flex-direction: column; min-height: 0; margin: 0; border: 2px solid var(--ink); background: #f9f7f2; box-shadow: 7px 7px 0 var(--accent); }
 .component img { flex: 1; min-height: 0; width: 100%; object-fit: contain; }
 .component figcaption { display: flex; align-items: baseline; justify-content: space-between; gap: 16px; padding: 9px 16px; border-top: 2px solid var(--ink); background: var(--card); font-size: 24px; }
-.component figcaption > b { font: 900 19px Arial, sans-serif; letter-spacing: .1em; text-transform: uppercase; white-space: nowrap; }
+.component figcaption > b { font: 900 22px Arial, sans-serif; letter-spacing: .1em; text-transform: uppercase; white-space: nowrap; }
 .component figcaption span b { font-weight: 900; }
 .photo-pair { display: grid; grid-template-columns: 1fr 1fr; gap: 44px; align-items: start; }
 .photo { margin: 0; }
@@ -229,7 +233,7 @@ h2 .prop { stroke-width: 3.4; }
 .wires { list-style: none; margin: 0; padding: 0; display: grid; gap: 18px; }
 .wires li { display: grid; grid-template-columns: 150px 1fr; align-items: center; gap: 20px; padding: 16px 20px 16px 34px; border: 2px solid var(--ink); background: var(--card); font-size: 30px; line-height: 1.25; position: relative; }
 .wires li::before { content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: 16px; border-right: 2px solid var(--ink); background: var(--wire); }
-.wires li > b { font: 900 22px Arial, sans-serif; letter-spacing: .12em; text-transform: uppercase; }
+.wires li > b { font: 900 24px Arial, sans-serif; letter-spacing: .12em; text-transform: uppercase; }
 .wires span b { font-weight: 900; }
 .wires .earth { --wire: repeating-linear-gradient(135deg, #2e9e4f 0 9px, #f2d21b 9px 18px); }
 .wires .neutral { --wire: #2f6fd6; }
@@ -238,21 +242,21 @@ h2 .prop { stroke-width: 3.4; }
 /* ----- news slides (as in the Year 9 decks; Mission 9 story) ----- */
 .masthead { display: flex; align-items: center; gap: 22px; padding-bottom: 14px; border-bottom: 6px double var(--ink); }
 .masthead .paper-name { font: 900 44px/1 var(--display); letter-spacing: -.05em; text-transform: uppercase; }
-.masthead .dateline { margin-left: auto; font: 900 18px Arial, sans-serif; letter-spacing: .16em; text-transform: uppercase; color: var(--muted); }
-.masthead .edition { padding: 6px 14px; border: 2px solid var(--ink); border-radius: 999px; background: var(--accent); font: 900 17px Arial, sans-serif; letter-spacing: .1em; text-transform: uppercase; white-space: nowrap; }
+.masthead .dateline { margin-left: auto; font: 900 20px Arial, sans-serif; letter-spacing: .16em; text-transform: uppercase; color: var(--muted); }
+.masthead .edition { padding: 6px 14px; border: 2px solid var(--ink); border-radius: 999px; background: var(--accent); font: 900 20px Arial, sans-serif; letter-spacing: .1em; text-transform: uppercase; white-space: nowrap; }
 .front { display: grid; grid-template-columns: 690px 1fr; gap: 50px; margin-top: 28px; }
 .news-photo { margin: 0; min-height: 0; }
 .news-photo img { display: block; width: 100%; height: auto; max-height: 520px; object-fit: cover; border: 2px solid var(--ink); box-shadow: 10px 10px 0 var(--accent); background: #05060c; }
-.news-photo figcaption { margin-top: 22px; font-size: 22px; font-weight: 700; line-height: 1.3; }
+.news-photo figcaption { margin-top: 22px; font-size: 24px; font-weight: 700; line-height: 1.3; }
 .news-photo .credit { display: block; margin-top: 5px; font-size: 15px; font-weight: 600; color: var(--muted); text-decoration: none; }
 .news-photo .credit a { color: inherit; }
 .story { display: flex; flex-direction: column; min-height: 0; }
-.story .kicker { align-self: flex-start; margin: 0; padding: 6px 13px; background: var(--ink); color: var(--paper); font: 900 17px Arial, sans-serif; letter-spacing: .2em; text-transform: uppercase; }
+.story .kicker { align-self: flex-start; margin: 0; padding: 6px 13px; background: var(--ink); color: var(--paper); font: 900 20px Arial, sans-serif; letter-spacing: .2em; text-transform: uppercase; }
 .story h2 { margin: 18px 0 20px; font-size: 62px; }
 .story .standfirst { margin: 0; font-size: 29px; font-weight: 700; line-height: 1.3; }
 .story .follow-up { margin: 22px 0 0; padding: 12px 18px 14px; border-left: 8px solid var(--accent); background: var(--card); font-size: 26px; line-height: 1.3; }
 .story .ask { margin: auto 0 0; padding: 14px 20px 16px; border: 2px solid var(--ink); background: var(--accent); font-size: 28px; font-weight: 800; line-height: 1.2; box-shadow: 6px 6px 0 rgba(7, 22, 47, .12); }
-.story .follow-up b, .story .ask b { display: block; margin-bottom: 5px; font: 900 16px Arial, sans-serif; letter-spacing: .18em; text-transform: uppercase; }
+.story .follow-up b, .story .ask b { display: block; margin-bottom: 5px; font: 900 20px Arial, sans-serif; letter-spacing: .18em; text-transform: uppercase; }
 .story .follow-up b { color: var(--muted); }
 /* An engraving on white keeps its whole page in view. */
 .news-photo.engraving img { object-fit: contain; background: #fff; }
