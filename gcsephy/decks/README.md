@@ -11,7 +11,7 @@ Four browser presentations, available by direct link from the GCSE hub:
 
 Serve the repository root and open a deck's `index.html`. Edit that file for slides and revision notes, and the deck's `figures.js` for diagrams. No build step is needed. Preserve slide order when lesson guides or workbook links refer to slide numbers.
 
-Year 11 slides 43 and 46 use generated background-radiation and medical illustrations from `atoms-and-radiation/images/`; prompts are in `background-illustrations.md` and `medical-illustrations.md` alongside the PNGs. Slide 43 retains SVG labels and its dose chart; the medical illustrations are slide-only assets, with the shared workbook diagrams remaining in `figures.js`.
+Year 11 slides 34, 43 and 46 use generated source-use, background-radiation and medical illustrations from `atoms-and-radiation/images/`; prompts are in `source-illustrations.md`, `background-illustrations.md` and `medical-illustrations.md` alongside the PNGs. Slide 43 retains SVG labels and its dose chart; source-use and medical illustrations are slide-only assets, with the shared workbook diagrams remaining in `figures.js`. Slides 34 and 46 share the cartoon medical tracer.
 
 `assets/teaching-deck.css` provides the shared calm typography, year accents, light/dark palettes and diagram contrast overrides. Load it after the deck's layout and figure styles. `assets/teaching-deck.js` adds year labels, table scrolling, persistent grid borders during answer reveals and the theme control before the viewer builds thumbnails. Both viewers retain answer reveals, keyboard and touch navigation, fullscreen and print layouts. Portrait phones show a readable scrolling slide; presentation mode retains 16:9.
 
