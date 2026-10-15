@@ -2,6 +2,8 @@
 
 Editable source for `../Work Like a Physicist - Year 9 Student Workbook.pdf`, the 40-page A4 booklet. It was rebuilt from the published PDF after the original source was lost, with wording, fonts, colours and page breaks matched to it.
 
+The student hub uses `/gcsephy/assets/workbook-hub.css`, shared by all four workbook hubs: navy headers, bold headings and square cards, with the landing page’s stronger year accent (orange for Year 9, green for Year 10, yellow for Year 11). This stylesheet does not affect the printed workbooks.
+
 ## Files
 
 | File | Use |
