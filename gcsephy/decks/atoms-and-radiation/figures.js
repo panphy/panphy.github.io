@@ -630,6 +630,137 @@ window.DeckSvgTex = {
       });
       s += text(730, 330, 'radioactive atoms on or in it', 'lbl display') + text(730, 360, 'keeps emitting until removed', 'lbl mono');
       return svg('0 0 960 380', s, 'Irradiation: an object exposed to radiation does not become radioactive. Contamination: radioactive atoms on or in the object keep emitting radiation');
+    },
+
+    // Part 4 (GCSE Physics only). Uranium-235 splits into barium-141, krypton-92 and three
+    // neutrons (236 = 141 + 92 + 3); every nucleus is drawn nucleon by nucleon.
+    'mini-fission': () => {
+      let s = `<circle cx="120" cy="85" r="70" fill="url(#g-glow)"/>`;
+      s += ball(14, 85, 7, 'neutron') + arrow(24, 85, 48, 85, 'neutron', 2);
+      s += cluster(98, 58, 56, 85, 3.6) + cluster(104, 118, 36, 56, 3.6);
+      [[168, 46], [184, 86], [168, 126]].forEach(([x, y]) => { s += ball(x, y, 6, 'neutron'); });
+      return svg('0 0 200 170', s, 'A uranium nucleus splitting into two smaller nuclei and three neutrons');
+    },
+
+    background: () => {
+      const ground = (x1, x2) => `<rect x="${x1}" y="300" width="${x2 - x1}" height="58" rx="10" style="fill:color-mix(in srgb, var(--paper) 70%, transparent);stroke:var(--card-border)" stroke-width="2"/>`;
+      const speck = (x, y) => `<circle cx="${x}" cy="${y}" r="6" style="fill:var(--undecayed);stroke:#fff" stroke-width="1.5"/>`;
+      let s = text(240, 36, 'NATURAL', 'lbl mono strong a') + text(720, 36, 'MAN-MADE', 'lbl mono strong a');
+      s += `<line x1="480" y1="60" x2="480" y2="420" class="divider"/>`;
+      // Natural: cosmic rays from space, and radon gas seeping from rocks into a house.
+      s += ground(20, 460) + [[70, 330, 30], [180, 336, 22], [400, 328, 26]].map(([x, y, r]) => `<ellipse cx="${x}" cy="${y}" rx="${r}" ry="${f(r * 0.55)}" style="fill:var(--lead);opacity:.55"/>`).join('');
+      s += `<path d="M262,300 V222 H388 V300 Z M250,224 L325,170 L400,224 Z" class="body"/>`;
+      s += [[300, 334], [318, 312], [292, 286], [336, 262], [306, 244]].map(([x, y]) => speck(x, y)).join('');
+      s += [[60, 84], [130, 72], [200, 84]].map(([x, y]) => arrow(x, y + 20, x + 46, y + 160, 'brand-accent-strong', 2.5)).join('');
+      s += text(130, 64, 'cosmic rays from space', 'lbl strong');
+      s += text(240, 392, 'rocks give off', 'lbl strong') + text(240, 420, 'radon gas', 'lbl strong');
+      // Man-made: a nuclear power station after an accident, and fallout from weapons tests.
+      s += ground(500, 940);
+      s += `<path d="M540,300 C556,250 556,210 546,172 H626 C616,210 616,250 632,300 Z" class="body"/><path d="M646,300 V246 A34,34 0 0 1 714,246 V300 Z" class="body"/>`;
+      s += [[586, 150], [604, 124], [578, 104], [612, 90]].map(([x, y]) => speck(x, y)).join('');
+      s += `<path d="M770,122 a34,30 0 0 1 52,-28 a38,32 0 0 1 70,10 a30,26 0 0 1 8,48 H780 a26,22 0 0 1 -10,-30 Z" class="body"/>`;
+      s += [[796, 190], [842, 214], [880, 186], [818, 254], [864, 276]].map(([x, y]) => speck(x, y)).join('');
+      s += [[796, 200, 232], [880, 196, 238]].map(([x, y1, y2]) => arrow(x, y1 + 8, x, y2, 'text-secondary', 2)).join('');
+      s += text(610, 392, 'nuclear', 'lbl strong') + text(610, 420, 'accidents', 'lbl strong') + text(840, 392, 'weapons-test', 'lbl strong') + text(840, 420, 'fallout', 'lbl strong');
+      return svg('0 0 960 436', s, 'Background radiation. Natural sources: cosmic rays from space and radon gas from rocks. Man-made sources: nuclear accidents and fallout from nuclear weapons tests');
+    },
+
+    'half-lives': () => {
+      const X = t => 90 + t * 60, Y = a => 400 - a * 0.85;
+      let s = `<line x1="90" y1="400" x2="700" y2="400" class="axis"/><line x1="90" y1="400" x2="90" y2="44" class="axis"/>`;
+      s += text(395, 440, 'time', 'lbl') + text(40, 222, 'activity', 'lbl', 'middle', 'transform="rotate(-90 40 222)"');
+      const curve = (start, half, color) => {
+        let d = '';
+        for (let t = 0; t <= 10; t += 0.1) d += `${t ? 'L' : 'M'}${f(X(t))},${f(Y(start * Math.pow(2, -t / half)))}`;
+        return `<path d="${d}" class="curve" style="stroke:var(--${color})"/>`;
+      };
+      s += curve(390, 0.8, 'brand-primary') + curve(110, 40, 'brand-accent');
+      s += text(150, 76, 'short half-life', 'lbl strong', 'start', 'style="fill:var(--brand-primary)"') + text(150, 104, 'very active, then soon gone', 'lbl', 'start');
+      s += text(420, 276, 'long half-life', 'lbl strong', 'start', 'style="fill:var(--brand-accent-strong)"') + text(420, 304, 'less active, for a very long time', 'lbl', 'start');
+      return svg('0 0 720 460', s, 'Activity against time: a short half-life source starts very active and soon falls to almost nothing; a long half-life source is less active but stays active for a long time');
+    },
+
+    radiotherapy: () => {
+      let s = `<ellipse cx="240" cy="160" rx="160" ry="100" class="body"/>`;
+      s += `<circle cx="252" cy="160" r="40" fill="url(#g-glow)"/><circle cx="252" cy="160" r="16" style="fill:var(--brand-primary)"/>`;
+      [[252, 14, 252, 140], [30, 274, 236, 172], [470, 274, 268, 172]].forEach(([x1, y1, x2, y2]) => {
+        s += `<rect x="${x1 - 16}" y="${y1 - 12}" width="32" height="24" rx="6" style="fill:var(--lead)"/>` + wave(x1, y1, x2, y2, { cycles: 6, amp: 6 });
+      });
+      s += text(330, 132, 'tumour', 'lbl strong', 'start');
+      return svg('0 0 480 300', s, 'Radiotherapy: gamma beams from three directions cross at a tumour, so it gets a much larger dose than the tissue around it');
+    },
+
+    fission: el => {
+      const on = animated(el);
+      let s = fly(on, 60, 0, ball(40, 220, 12, 'neutron')) + arrow(58, 220, 112, 220, 'neutron', 2.5);
+      s += text(40, 186, 'neutron', 'lbl strong', 'middle', 'style="fill:var(--neutron)"');
+      s += `<circle cx="220" cy="220" r="96" fill="url(#g-glow)"/>` + cluster(220, 220, 92, 143, 8);
+      const parentLabels = text(220, 330, 'uranium-235', 'lbl display') + text(220, 358, '92 p, 143 n', 'lbl mono');
+      let after = arrow(300, 220, 362, 220, 'text-secondary', 3);
+      after += cluster(470, 116, 56, 85, 8) + cluster(470, 326, 36, 56, 8);
+      after += text(536, 102, 'barium-141', 'lbl display', 'start') + text(536, 130, '56 p, 85 n', 'lbl mono', 'start');
+      after += text(530, 334, 'krypton-92', 'lbl display', 'start') + text(530, 362, '36 p, 56 n', 'lbl mono', 'start');
+      [[820, 170], [860, 222], [820, 274]].forEach(([x, y]) => {
+        after += arrow(520, 222, x - 18, y, 'neutron', 2.5) + fly(on, 520 - x, 222 - y, ball(x, y, 12, 'neutron'));
+      });
+      after += text(900, 330, 'neutrons', 'lbl strong', 'end', 'style="fill:var(--neutron)"');
+      after += wave(410, 190, 340, 76, { cycles: 4, amp: 7 }) + text(340, 56, 'gamma rays', 'lbl strong', 'middle', 'style="fill:var(--photon)"');
+      after += text(480, 440, 'every product moves off fast: energy released', 'lbl italic');
+      s += on ? parentLabels + stepG(on, 1, after) : parentLabels + after;
+      return svg('0 0 960 460', s, 'Fission: uranium-235 absorbs a neutron and splits into barium-141 and krypton-92, giving out three neutrons and gamma rays');
+    },
+
+    chain: el => {
+      const on = animated(el);
+      const R = 2.6;
+      // One fission: the two products, still close together where the nucleus split.
+      const split = (x, y) => `<circle cx="${x}" cy="${y}" r="34" fill="url(#g-glow)"/>` + cluster(x - 4, y - 15, 56, 85, R) + cluster(x + 4, y + 16, 36, 56, R);
+      const shot = (x1, y1, x2, y2) => {
+        const len = Math.hypot(x2 - x1, y2 - y1), ux = (x2 - x1) / len, uy = (y2 - y1) / len;
+        return arrow(x1 + ux * 26, y1 + uy * 26, x2 - ux * 26, y2 - uy * 26, 'neutron', 2.5) + ball(x1 + ux * len * 0.45, y1 + uy * len * 0.45, 7, 'neutron');
+      };
+      const first = [120, 250], second = [100, 250, 400].map(y => [400, y]), third = Array.from({ length: 9 }, (_, i) => [720, 40 + i * 52]);
+      let s = ball(26, 250, 8, 'neutron') + arrow(36, 250, 92, 250, 'neutron', 2.5) + split(...first);
+      s += text(120, 510, 'one nucleus splits', 'lbl mono small');
+      let gen2 = second.map(p => shot(...first, ...p) + split(...p)).join('') + text(400, 510, '3 more split', 'lbl mono small');
+      let gen3 = third.map((p, i) => shot(...second[Math.floor(i / 3)], ...p) + cluster(...p, 92, 143, R)).join('');
+      gen3 += text(720, 510, '9 more hit', 'lbl mono small') + text(800, 258, '…', 'lbl display', 'start');
+      s += stepG(on, 1, gen2) + stepG(on, 2, gen3);
+      return svg('0 0 860 530', s, 'Chain reaction: one fission releases three neutrons, which split three more uranium nuclei, whose neutrons go on to hit nine more');
+    },
+
+    controlled: () => {
+      const R = 2.6;
+      const split = (x, y) => `<circle cx="${x}" cy="${y}" r="34" fill="url(#g-glow)"/>` + cluster(x - 4, y - 15, 56, 85, R) + cluster(x + 4, y + 16, 36, 56, R);
+      let s = '';
+      [220, 440, 660].forEach(x => {
+        s += `<rect x="${x - 14}" y="20" width="28" height="118" rx="8" style="fill:var(--lead)"/><rect x="${x - 14}" y="222" width="28" height="118" rx="8" style="fill:var(--lead)"/>`;
+      });
+      [110, 330, 550, 770].forEach((x, i) => {
+        s += split(x, 180);
+        const next = x + 220;
+        if (i < 3) s += arrow(x + 28, 180, next - 30, 180, 'neutron', 2.5) + ball(x + 96, 180, 7, 'neutron');
+        else s += arrow(x + 28, 180, 900, 180, 'neutron', 2.5) + ball(x + 80, 180, 7, 'neutron');
+        // The other two neutrons from this fission end in a control rod.
+        if (i < 3) [-1, 1].forEach(k => { s += arrow(x + 24, 180 + k * 20, x + 92, 180 + k * 64, 'neutron', 2.5) + ball(x + 58, 180 + k * 42, 7, 'neutron'); });
+      });
+      s += text(440, 372, 'control rods absorb the spare neutrons', 'lbl strong');
+      return svg('0 0 920 390', s, 'Controlled chain reaction: control rods absorb two of the three neutrons from each fission, so one goes on to cause the next fission');
+    },
+
+    fusion: el => {
+      const on = animated(el);
+      let s = cluster(130, 170, 1, 1, 26) + text(130, 270, 'hydrogen-2', 'lbl display') + text(130, 298, '1 p, 1 n', 'lbl mono');
+      s += text(250, 182, '+', 'lbl display');
+      s += cluster(360, 170, 1, 2, 26) + text(360, 270, 'hydrogen-3', 'lbl display') + text(360, 298, '1 p, 2 n', 'lbl mono');
+      let after = arrow(462, 170, 536, 170, 'text-secondary', 3);
+      after += `<circle cx="650" cy="170" r="110" fill="url(#g-glow)" class="pulse"/>` + cluster(650, 170, 2, 2, 26);
+      after += text(650, 270, 'helium-4', 'lbl display') + text(650, 298, '2 p, 2 n', 'lbl mono');
+      after += arrow(712, 170, 826, 170, 'neutron', 2.5) + fly(on, -180, 0, ball(860, 170, 26, 'neutron'));
+      after += text(860, 270, 'neutron', 'lbl display') + text(860, 298, '0 p, 1 n', 'lbl mono');
+      after += text(650, 360, 'a little less mass: the rest becomes energy', 'lbl italic');
+      s += stepG(on, 1, after);
+      return svg('0 0 960 390', s, 'Fusion: hydrogen-2 and hydrogen-3 nuclei join to make helium-4 and a neutron, releasing energy');
     }
   };
 
