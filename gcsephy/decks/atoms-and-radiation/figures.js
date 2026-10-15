@@ -22,6 +22,7 @@ window.DeckSvgTex = {
   '½': '\\(\\frac{1}{2}\\)',
   '¼': '\\(\\frac{1}{4}\\)',
   '⅛': '\\(\\frac{1}{8}\\)',
+  'T½': '\\(T_{\\frac{1}{2}}\\)',
   '33 undecayed (≈ 32)': '33 undecayed (\\(\\approx 32\\))',
   '15 undecayed (≈ 16)': '15 undecayed (\\(\\approx 16\\))'
 };
@@ -642,60 +643,125 @@ window.DeckSvgTex = {
       return svg('0 0 200 170', s, 'A uranium nucleus splitting into two smaller nuclei and three neutrons');
     },
 
+    // Four sources as illustrated tiles, natural then man-made, over a bar of how the UK
+    // average dose splits (UKHSA: about 2.7 mSv a year; about 84% natural, 15% medical, under 1% the rest).
     background: () => {
-      const ground = (x1, x2) => `<rect x="${x1}" y="300" width="${x2 - x1}" height="58" rx="10" style="fill:color-mix(in srgb, var(--paper) 70%, transparent);stroke:var(--card-border)" stroke-width="2"/>`;
-      const speck = (x, y) => `<circle cx="${x}" cy="${y}" r="8" style="fill:var(--undecayed);stroke:#fff" stroke-width="1.5"/>`;
-      let s = text(240, 36, 'NATURAL', 'lbl mono strong a') + text(720, 36, 'MAN-MADE', 'lbl mono strong a');
-      s += `<line x1="480" y1="60" x2="480" y2="420" class="divider"/>`;
-      // Natural: cosmic rays from space, and radon gas seeping from rocks into a house.
-      s += ground(20, 460) + [[70, 330, 30], [180, 336, 22], [400, 328, 26]].map(([x, y, r]) => `<ellipse cx="${x}" cy="${y}" rx="${r}" ry="${f(r * 0.55)}" style="fill:var(--lead);opacity:.8"/>`).join('');
-      s += `<path d="M262,300 V222 H388 V300 Z M250,224 L325,170 L400,224 Z" class="body edge"/>`;
-      s += [[300, 334], [318, 312], [292, 286], [336, 262], [306, 244]].map(([x, y]) => speck(x, y)).join('');
-      s += [[60, 84], [130, 72], [200, 84]].map(([x, y]) => arrow(x, y + 20, x + 46, y + 160, 'brand-accent-strong', 2.5)).join('');
-      s += text(130, 64, 'cosmic rays from space', 'lbl strong');
-      s += text(240, 392, 'rocks give off', 'lbl strong') + text(240, 420, 'radon gas', 'lbl strong');
-      // Man-made: a nuclear power station after an accident, and fallout from weapons tests.
-      s += ground(500, 940);
-      s += `<path d="M540,300 C556,250 556,210 546,172 H626 C616,210 616,250 632,300 Z" class="body edge"/><path d="M646,300 V246 A34,34 0 0 1 714,246 V300 Z" class="body edge"/>`;
-      s += [[586, 150], [604, 124], [578, 104], [612, 90]].map(([x, y]) => speck(x, y)).join('');
-      s += `<path d="M770,122 a34,30 0 0 1 52,-28 a38,32 0 0 1 70,10 a30,26 0 0 1 8,48 H780 a26,22 0 0 1 -10,-30 Z" class="body edge"/>`;
-      s += [[796, 190], [842, 214], [880, 186], [818, 254], [864, 276]].map(([x, y]) => speck(x, y)).join('');
-      s += [[796, 200, 232], [880, 196, 238]].map(([x, y1, y2]) => arrow(x, y1 + 8, x, y2, 'text-secondary', 2)).join('');
-      s += text(610, 392, 'nuclear', 'lbl strong') + text(610, 420, 'accidents', 'lbl strong') + text(840, 392, 'weapons-test', 'lbl strong') + text(840, 420, 'fallout', 'lbl strong');
-      return svg('0 0 960 436', s, 'Background radiation. Natural sources: cosmic rays from space and radon gas from rocks. Man-made sources: nuclear accidents and fallout from nuclear weapons tests');
+      const W = 222, H = 300, top = 52, xs = [0, 238, 500, 738];
+      const tile = x => `<rect x="${x}" y="${top}" width="${W}" height="${H}" rx="22" style="fill:var(--card-bg);stroke:var(--card-border)" stroke-width="2"/>`;
+      const speck = (x, y, r = 7, o = 1) => `<circle cx="${f(x)}" cy="${f(y)}" r="${r}" style="fill:var(--undecayed);stroke:var(--card-bg);opacity:${o}" stroke-width="2"/>`;
+      const ground = (x, y, h = 46) => `<rect x="${x + 14}" y="${y}" width="${W - 28}" height="${h}" rx="10" style="fill:color-mix(in srgb, var(--positive) 32%, var(--card-bg))"/>`;
+      const label = (x, a, b) => text(x + W / 2, top + H - 46, a, 'lbl strong') + text(x + W / 2, top + H - 16, b, 'lbl mono small');
+      let s = `<rect x="0" y="0" width="460" height="34" rx="17" style="fill:color-mix(in srgb, var(--object) 18%, var(--card-bg))"/>` + text(230, 24, 'NATURAL', 'lbl mono strong', 'middle', 'style="fill:var(--object)"');
+      s += `<rect x="500" y="0" width="460" height="34" rx="17" style="fill:color-mix(in srgb, var(--proton) 14%, var(--card-bg))"/>` + text(730, 24, 'MAN-MADE', 'lbl mono strong', 'middle', 'style="fill:var(--proton)"');
+      s += xs.map(tile).join('');
+
+      // 1 Radon: granite under a house; the gas seeps up through the floor and collects indoors.
+      let x = xs[0], cx = x + W / 2;
+      s += ground(x, 206) + [[cx - 66, 228, 20], [cx - 4, 238, 14], [cx + 56, 226, 18]].map(([gx, gy, r]) => `<ellipse cx="${gx}" cy="${gy}" rx="${r}" ry="${f(r * 0.6)}" style="fill:var(--lead);opacity:.75"/>`).join('');
+      s += `<path d="M${cx - 62},206 V138 H${cx + 62} V206 Z" style="fill:var(--muted-bg);stroke:var(--text-main)" stroke-width="3" stroke-linejoin="round"/>`;
+      s += `<path d="M${cx - 76},140 L${cx},86 L${cx + 76},140 Z" style="fill:color-mix(in srgb, var(--proton) 55%, var(--card-bg));stroke:var(--text-main)" stroke-width="3" stroke-linejoin="round"/>`;
+      s += `<rect x="${cx + 22}" y="166" width="26" height="40" rx="3" style="fill:var(--card-bg);stroke:var(--text-main)" stroke-width="2.5"/><rect x="${cx - 48}" y="152" width="34" height="26" rx="3" style="fill:color-mix(in srgb, var(--electron) 25%, var(--card-bg));stroke:var(--text-main)" stroke-width="2.5"/>`;
+      s += [[cx - 20, 236, .5], [cx - 8, 214, .7], [cx - 26, 192, 1], [cx + 2, 170, 1], [cx - 30, 160, 1], [cx + 8, 196, 1], [cx + 34, 224, .6]].map(([px, py, o]) => speck(px, py, 6, o)).join('');
+      s += label(x, 'Radon from rocks', 'the biggest share');
+
+      // 2 Cosmic rays: fast particles from space reach the ground; more at high altitude.
+      x = xs[1]; cx = x + W / 2;
+      s += `<clipPath id="bg-sky"><rect x="${x + 14}" y="${top + 14}" width="${W - 28}" height="178" rx="14"/></clipPath><g clip-path="url(#bg-sky)"><rect x="${x + 14}" y="${top + 14}" width="${W - 28}" height="178" style="fill:#1E2433"/>`;
+      s += [[20, 30], [60, 18], [150, 40], [180, 14], [110, 26], [40, 70], [170, 80]].map(([sx, sy]) => `<circle cx="${x + 14 + sx}" cy="${top + 14 + sy}" r="1.8" style="fill:#fff;opacity:.8"/>`).join('');
+      s += `<circle cx="${cx}" cy="${top + 520}" r="360" style="fill:#2F7D5B"/><circle cx="${cx}" cy="${top + 520}" r="372" style="fill:none;stroke:#7FB8E6;stroke-width:10;opacity:.45"/></g>`;
+      s += [[-70, 0], [-14, -6], [46, 4]].map(([dx, dy]) => arrow(cx + dx - 26, top + 26 + dy, cx + dx + 10, top + 150, 'photon', 3.5)).join('');
+      s += label(x, 'Cosmic rays', 'from space');
+
+      // 3 Fallout: a test explosion far away; radioactive dust drifts down on the wind.
+      x = xs[2]; cx = x + W / 2;
+      s += ground(x, 216, 36);
+      // A mushroom cloud: a stem widening at the ground, a skirt, and a broad billowing cap.
+      const smoke = 'fill:color-mix(in srgb, var(--positive) 30%, var(--aluminium));stroke:var(--text-secondary)';
+      const cloud = `<path d="M${cx - 30},216 C${cx - 14},206 ${cx - 10},180 ${cx - 9},140 H${cx + 9} C${cx + 10},180 ${cx + 14},206 ${cx + 30},216 Z" style="${smoke}" stroke-width="2"/>`
+        + `<ellipse cx="${cx}" cy="150" rx="26" ry="7" style="${smoke}" stroke-width="2"/>`
+        + `<path d="M${cx - 58},128 C${cx - 64},104 ${cx - 46},86 ${cx - 28},90 C${cx - 22},70 ${cx + 22},70 ${cx + 28},90 C${cx + 46},86 ${cx + 64},104 ${cx + 58},128 C${cx + 40},140 ${cx - 40},140 ${cx - 58},128 Z" style="${smoke}" stroke-width="2.5"/>`
+        + `<path d="M${cx - 40},122 C${cx - 20},130 ${cx + 20},130 ${cx + 40},122" style="fill:none;stroke:var(--text-secondary);stroke-width:2;opacity:.6"/>`;
+      s += `<g transform="translate(-30 0)">${cloud}</g>`;
+      s += [[cx + 38, 106], [cx + 58, 140], [cx + 44, 172], [cx + 78, 186], [cx + 62, 208]].map(([px, py]) => speck(px, py, 6)).join('');
+      s += `<path d="M${cx + 40},92 q36 30 30 80 M${cx + 74},120 q22 26 14 70" style="fill:none;stroke:var(--text-secondary);stroke-width:2;stroke-dasharray:4 6"/>`;
+      s += label(x, 'Weapons tests', 'fallout settles');
+
+      // 4 Accidents: a damaged power station releases radioactive material in its plume.
+      x = xs[3]; cx = x + W / 2;
+      s += ground(x, 216, 36);
+      s += `<path d="M${cx - 80},216 C${cx - 64},180 ${cx - 64},144 ${cx - 74},110 H${cx - 18} C${cx - 28},144 ${cx - 28},180 ${cx - 12},216 Z" style="fill:var(--muted-bg);stroke:var(--text-main)" stroke-width="3" stroke-linejoin="round"/>`;
+      s += `<path d="M${cx + 2},216 V168 A36,36 0 0 1 ${cx + 74},168 V216 Z" style="fill:var(--muted-bg);stroke:var(--text-main)" stroke-width="3"/>`;
+      s += [[-46, 96, 16], [-32, 80, 20], [-8, 70, 22]].map(([dx, py, r]) => `<circle cx="${cx + dx}" cy="${py}" r="${r}" style="fill:color-mix(in srgb, var(--aluminium) 50%, var(--card-bg))"/>`).join('');
+      s += [[cx - 42, 92], [cx - 18, 76], [cx + 6, 84]].map(([px, py]) => speck(px, py, 6)).join('');
+      // Radiation hazard sign on the reactor building.
+      const tc = [cx + 38, 182], tre = [-90, 30, 150].map(a => { const r1 = 5, r2 = 15, p = d => [tc[0] + Math.cos(d * Math.PI / 180), tc[1] + Math.sin(d * Math.PI / 180)], q = (r, d) => `${f(tc[0] + r * Math.cos(d * Math.PI / 180))},${f(tc[1] + r * Math.sin(d * Math.PI / 180))}`; return `<path d="M${q(r1, a - 30)} L${q(r2, a - 30)} A${r2},${r2} 0 0 1 ${q(r2, a + 30)} L${q(r1, a + 30)} A${r1},${r1} 0 0 0 ${q(r1, a - 30)} Z" style="fill:#1B1B1B"/>`; }).join('');
+      s += `<circle cx="${tc[0]}" cy="${tc[1]}" r="19" style="fill:#F6C90E;stroke:#1B1B1B" stroke-width="2"/>` + tre + `<circle cx="${tc[0]}" cy="${tc[1]}" r="3" style="fill:#1B1B1B"/>`;
+      s += label(x, 'Nuclear accidents', 'e.g. Chernobyl');
+
+      // The UK average dose as a ring: about 84% natural, 15% medical, under 1% fallout and accidents.
+      const dcx = 1160, dcy = 156, dr = 84, C = 2 * Math.PI * dr, parts = [[0.84, 'object'], [0.15, 'neutron'], [0.01, 'proton']];
+      s += `<rect x="986" y="0" width="334" height="352" rx="22" style="fill:var(--card-bg);stroke:var(--card-border)" stroke-width="2"/>` + text(1153, 30, 'UK AVERAGE DOSE', 'lbl mono small strong');
+      let start = 0;
+      s += parts.map(([frac, colour]) => { const arc = `<circle cx="${dcx}" cy="${dcy}" r="${dr}" style="fill:none;stroke:var(--${colour});stroke-width:34;stroke-dasharray:${f(frac * C)} ${f(C)};stroke-dashoffset:${f(-start * C)}" transform="rotate(-90 ${dcx} ${dcy})"/>`; start += frac; return arc; }).join('');
+      s += text(dcx, dcy - 4, '2.7 mSv', 'lbl display') + text(dcx, dcy + 24, 'a year', 'lbl mono small');
+      s += [['object', 'natural', 'about 84%'], ['neutron', 'medical', 'about 15%'], ['proton', 'tests, accidents', 'under 1%']].map(([colour, a, b], k) => {
+        const y = 278 + k * 28;
+        return `<rect x="1006" y="${y - 15}" width="18" height="18" rx="4" style="fill:var(--${colour})"/>` + text(1034, y, a, 'lbl small', 'start', 'style="fill:var(--text-main)"') + text(1300, y, b, 'lbl mono small', 'end');
+      }).join('');
+      return svg('-4 -4 1328 362', s, 'Four sources of background radiation. Natural: radon gas from rocks such as granite, which collects in houses, and cosmic rays from space. Man-made: fallout from nuclear weapons tests and nuclear accidents. A ring chart shows the UK average dose of about 2.7 millisieverts a year: about 84 percent natural, about 15 percent medical, and under 1 percent from fallout and accidents');
     },
 
     'half-lives': () => {
-      const X = t => 90 + t * 60, Y = a => 400 - a * 0.85;
-      let s = `<line x1="90" y1="400" x2="700" y2="400" class="axis"/><line x1="90" y1="400" x2="90" y2="44" class="axis"/>`;
-      s += text(395, 440, 'time', 'lbl') + text(40, 222, 'activity', 'lbl', 'middle', 'transform="rotate(-90 40 222)"');
+      const X = t => 100 + t * 60, Y = a => 400 - a * 0.85;
+      let s = arrow(100, 400, 712, 400, 'text-main', 2.5) + arrow(100, 400, 100, 40, 'text-main', 2.5);
+      s += text(406, 446, 'time', 'lbl') + text(48, 222, 'activity', 'lbl', 'middle', 'transform="rotate(-90 48 222)"');
       const curve = (start, half, color) => {
-        let d = '';
-        for (let t = 0; t <= 10; t += 0.1) d += `${t ? 'L' : 'M'}${f(X(t))},${f(Y(start * Math.pow(2, -t / half)))}`;
-        return `<path d="${d}" class="curve" style="stroke:var(--${color})"/>`;
+        let d = '', area = `M${X(0)},400`;
+        for (let t = 0; t <= 10; t += 0.1) { const pt = `${f(X(t))},${f(Y(start * Math.pow(2, -t / half)))}`; d += `${t ? 'L' : 'M'}${pt}`; area += `L${pt}`; }
+        return `<path d="${area}L${X(10)},400Z" style="fill:var(--${color});opacity:.1"/><path d="${d}" class="curve" style="stroke:var(--${color});stroke-width:6"/>`;
       };
-      s += curve(390, 0.8, 'brand-primary') + curve(110, 40, 'brand-accent');
-      s += text(150, 76, 'short half-life', 'lbl strong', 'start', 'style="fill:var(--brand-primary)"') + text(150, 104, 'very active, then soon gone', 'lbl', 'start');
-      s += text(420, 276, 'long half-life', 'lbl strong', 'start', 'style="fill:var(--brand-accent-strong)"') + text(420, 304, 'less active, for a very long time', 'lbl', 'start');
-      return svg('0 0 720 460', s, 'Activity against time: a short half-life source starts very active and soon falls to almost nothing; a long half-life source is less active but stays active for a long time');
+      s += curve(110, 40, 'electron') + curve(390, 0.8, 'proton');
+      // Half-life of the short source marked on its curve.
+      s += `<path d="M100,${Y(195)} H${X(0.8)} V400" class="guide" style="stroke:var(--proton);opacity:1"/>` + text(X(0.8), 432, 'T½', 'lbl strong', 'middle', 'style="fill:var(--proton)"');
+      s += text(170, 86, 'short half-life', 'lbl strong', 'start', 'style="fill:var(--proton)"') + text(170, 116, 'very active, then soon gone', 'lbl', 'start', 'style="fill:var(--text-main)"');
+      s += text(420, 262, 'long half-life', 'lbl strong', 'start', 'style="fill:var(--electron)"') + text(420, 292, 'less active, for a very long time', 'lbl', 'start', 'style="fill:var(--text-main)"');
+      return svg('0 30 720 430', s, 'Activity against time: a short half-life source starts very active and soon falls to almost nothing; a long half-life source is less active but stays active for a long time');
     },
 
+    // A patient lying under a gamma camera: the tracer collects in one organ (a kidney) and the
+    // camera builds a picture of it on the screen.
+    'gamma-camera': () => {
+      let s = `<rect x="40" y="246" width="300" height="14" rx="5" style="fill:var(--aluminium)"/><rect x="70" y="260" width="12" height="30" style="fill:var(--aluminium)"/><rect x="300" y="260" width="12" height="30" style="fill:var(--aluminium)"/>`;
+      s += `<rect x="60" y="196" width="250" height="50" rx="25" style="fill:color-mix(in srgb, var(--positive) 22%, var(--card-bg));stroke:var(--text-secondary)" stroke-width="2.5"/><circle cx="326" cy="214" r="26" style="fill:color-mix(in srgb, var(--positive) 22%, var(--card-bg));stroke:var(--text-secondary)" stroke-width="2.5"/>`;
+      s += `<path d="M168,206 c-18,0 -26,14 -20,26 c6,10 18,8 22,2 c4,-6 12,-6 14,-14 c2,-10 -6,-14 -16,-14 z" style="fill:color-mix(in srgb, var(--photon) 40%, var(--card-bg));stroke:var(--photon)" stroke-width="2"/>`;
+      s += [[156, 220], [166, 230], [172, 214]].map(([x, y]) => `<circle cx="${x}" cy="${y}" r="4" style="fill:var(--photon)"/>`).join('');
+      s += `<rect x="90" y="40" width="160" height="56" rx="10" style="fill:var(--lead)"/><rect x="98" y="88" width="144" height="10" rx="3" style="fill:var(--aluminium)"/>` + text(170, 74, 'gamma camera', 'lbl small', 'middle', 'style="fill:#fff"');
+      s += [[142, 196, 128, 104], [168, 196, 168, 104], [190, 196, 212, 104]].map(([x1, y1, x2, y2]) => wave(x1, y1, x2, y2, { cycles: 4, amp: 5 })).join('');
+      s += `<path d="M250,68 H300 V100" style="fill:none;stroke:var(--text-secondary);stroke-width:2.5"/><rect x="290" y="100" width="150" height="96" rx="10" style="fill:#1E2433;stroke:var(--text-secondary)" stroke-width="2"/>`;
+      s += `<path d="M352,124 c-24,0 -34,20 -26,36 c8,14 24,12 30,2 c6,-8 16,-8 18,-20 c2,-12 -8,-18 -22,-18 z" style="fill:#F6C90E;opacity:.9"/><path d="M350,134 c-10,2 -14,12 -10,20" style="fill:none;stroke:#F07F2E;stroke-width:6;stroke-linecap:round"/>`;
+      return svg('20 20 440 280', s, 'A patient lies under a gamma camera. A tracer injected into the body collects in a kidney; gamma rays from it pass out of the body to the camera, which shows a picture of the kidney on a screen');
+    },
+
+    // Radiotherapy: the source moves round the patient. Each beam alone is weak; where they all
+    // cross, at the tumour, the doses add up.
     radiotherapy: () => {
-      let s = `<ellipse cx="240" cy="160" rx="160" ry="100" class="body"/>`;
-      s += `<circle cx="252" cy="160" r="40" fill="url(#g-glow)"/><circle cx="252" cy="160" r="16" style="fill:var(--brand-primary)"/>`;
-      [[252, 14, 252, 140], [30, 274, 236, 172], [470, 274, 268, 172]].forEach(([x1, y1, x2, y2]) => {
-        s += `<rect x="${x1 - 16}" y="${y1 - 12}" width="32" height="24" rx="6" style="fill:var(--lead)"/>` + wave(x1, y1, x2, y2, { cycles: 6, amp: 6 });
-      });
-      s += text(330, 132, 'tumour', 'lbl strong', 'start');
-      return svg('0 0 480 300', s, 'Radiotherapy: gamma beams from three directions cross at a tumour, so it gets a much larger dose than the tissue around it');
+      const cx = 240, cy = 160, angles = [-90, -30, 30, 150, 210];
+      let s = `<ellipse cx="${cx}" cy="${cy}" rx="150" ry="98" style="fill:color-mix(in srgb, var(--positive) 22%, var(--card-bg));stroke:var(--text-secondary)" stroke-width="2.5"/>`;
+      s += `<circle cx="${cx}" cy="${cy}" r="140" style="fill:none;stroke:var(--text-secondary);stroke-width:2;stroke-dasharray:6 8;opacity:.6"/>`;
+      // Each beam runs from its source through the tumour and fades out just beyond it.
+      s += `<defs><linearGradient id="rt-beam" x1="0" x2="1"><stop offset="0" style="stop-color:var(--photon);stop-opacity:0"/><stop offset=".3" style="stop-color:var(--photon);stop-opacity:.28"/><stop offset="1" style="stop-color:var(--photon);stop-opacity:.28"/></linearGradient></defs>`;
+      s += angles.map(a => `<rect x="${cx - 60}" y="${cy - 9}" width="192" height="18" fill="url(#rt-beam)" transform="rotate(${a} ${cx} ${cy})"/>`).join('');
+      s += angles.map(a => `<rect x="${cx + 132}" y="${cy - 14}" width="30" height="28" rx="6" style="fill:var(--lead)" transform="rotate(${a} ${cx} ${cy})"/>`).join('');
+      s += `<circle cx="${cx}" cy="${cy}" r="30" fill="url(#g-glow)"/><circle cx="${cx}" cy="${cy}" r="15" style="fill:var(--photon);stroke:var(--card-bg)" stroke-width="2"/>`;
+      s += `<path d="M${cx},${cy + 17} V${cy + 128}" style="stroke:var(--text-main);stroke-width:2"/>` + text(cx, cy + 152, 'tumour: all beams cross, big dose', 'lbl small', 'middle', 'style="fill:var(--text-main);font-weight:700"');
+      s += `<path d="M${cx - 96},${cy - 48} L${cx - 150},${cy - 120}" style="stroke:var(--text-main);stroke-width:2"/>` + text(cx - 214, cy - 140, 'healthy tissue:', 'lbl small', 'start', 'style="fill:var(--text-main)"') + text(cx - 214, cy - 118, 'one beam, small dose', 'lbl small', 'start', 'style="fill:var(--text-main)"');
+      return svg('20 0 460 320', s, 'Radiotherapy: gamma beams aimed from five directions round the patient all pass through the tumour. Healthy tissue gets one weak beam; the tumour, where they all cross, gets a large dose');
     },
 
-    // Data-animate: on the click the neutron is absorbed, the uranium nucleus fades and the
-    // products fly out of it (deck.css). The still picture shows before and after side by side.
     fission: el => {
       const on = animated(el);
       // A copy of the neutron (.absorb, hidden except while it runs) travels into the nucleus on the click.
-      let s = `<g class="spent-k1">${ball(40, 220, 12, 'neutron')}</g>` + (on ? `<g class="absorb" style="--fx:170px;--fy:0px">${ball(40, 220, 12, 'neutron')}</g>` : '') + arrow(58, 220, 112, 220, 'neutron', 2.5);
+      let s = `<g class="launched">${ball(40, 220, 12, 'neutron')}</g>` + (on ? `<g class="absorb" style="--fx:170px;--fy:0px">${ball(40, 220, 12, 'neutron')}</g>` : '') + arrow(58, 220, 112, 220, 'neutron', 2.5);
       s += text(40, 186, 'neutron', 'lbl strong', 'middle', 'style="fill:var(--neutron)"');
       s += `<g class="spent-k1"><circle cx="220" cy="220" r="96" fill="url(#g-glow)"/>${cluster(220, 220, 92, 143, 8)}</g>`;
       s += text(220, 330, 'uranium-235', 'lbl display') + text(220, 358, '92 p, 143 n', 'lbl mono');
@@ -759,9 +825,9 @@ window.DeckSvgTex = {
       const on = animated(el);
       // Data-animate: on the click copies of the two nuclei rush together, the originals fade and the products fly out of the meeting point.
       const d = cluster(130, 170, 1, 1, 26), t = cluster(360, 170, 1, 2, 26);
-      let s = `<g class="spent-k1">${d}</g>` + (on ? `<g class="meet" style="--fx:110px;--fy:0px">${d}</g>` : '') + text(130, 270, 'hydrogen-2', 'lbl display') + text(130, 298, '1 p, 1 n', 'lbl mono');
+      let s = `<g class="launched">${d}</g>` + (on ? `<g class="meet" style="--fx:110px;--fy:0px">${d}</g>` : '') + text(130, 270, 'hydrogen-2', 'lbl display') + text(130, 298, '1 p, 1 n', 'lbl mono');
       s += text(250, 182, '+', 'lbl display');
-      s += `<g class="spent-k1">${t}</g>` + (on ? `<g class="meet" style="--fx:-120px;--fy:0px">${t}</g>` : '') + text(360, 270, 'hydrogen-3', 'lbl display') + text(360, 298, '1 p, 2 n', 'lbl mono');
+      s += `<g class="launched">${t}</g>` + (on ? `<g class="meet" style="--fx:-120px;--fy:0px">${t}</g>` : '') + text(360, 270, 'hydrogen-3', 'lbl display') + text(360, 298, '1 p, 2 n', 'lbl mono');
       let after = arrow(462, 170, 536, 170, 'text-secondary', 3);
       after += `<circle cx="650" cy="170" r="110" fill="url(#g-glow)" class="pulse"/>` + fly(on, -400, 0, cluster(650, 170, 2, 2, 26));
       after += text(650, 270, 'helium-4', 'lbl display') + text(650, 298, '2 p, 2 n', 'lbl mono');
