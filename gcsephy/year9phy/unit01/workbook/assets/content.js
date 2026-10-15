@@ -162,10 +162,11 @@
         p("Three claims. For each, decide what you would need to know before believing it, and name the error you are most suspicious of."),
         { type: "table", widths: ["38%", "40%", "22%"], head: ["The claim", "What I would need to know first", "Suspected error"], rh: 18.4, rows: [["“Our reaction times improved after training.” The two tests were timed by different people.", "", ""], ["“This spring stretches 4.0 cm per 100 g.” One reading was taken for each mass.", "", ""], ["“The classroom is exactly 6.000 m long.” Measured once, with a tape held slightly slack.", "", ""]] },
         { type: "checkpoint", title: "Checkpoint — Lesson 1", items: [
+          "Use these words: <b>precise</b> · <b>accurate</b> · <b>random</b> · <b>systematic</b> · <b>the largest and smallest readings</b>",
           "1. A set of results that are close together is [[48]].",
           "2. A result that is close to the true value is [[48]].",
           "3. Uncertainty is calculated using [[48]].",
-          { html: "4. Repeats fix [[24]] errors but not [[24]] errors, because", lines: 1 },
+          { html: "4. Repeats reduce the effect of [[24]] errors but do not correct [[24]] errors, because", lines: 1 },
           { html: "5. One thing I would do differently to make my data more repeatable:", lines: 2 },
         ] },
         { type: "home", paras: ["Find a claim with a number in it — an advert, a headline, a sports statistic. Write down one question you would have to ask before you believed it, and bring it to Lesson 2."], lines: 2 },
@@ -178,7 +179,7 @@
           "Imagine an energy drink company runs a trial. Students who drank their product scored higher in a maths test than students who did not. The advert writes itself: drink this, get smarter.",
           "Except the drinkers took the test in the morning and the non-drinkers took it after lunch. They were different students, in different rooms. One group had been told they were being studied.",
           "The drink was changed — but so was everything else. When more than one thing changes at a time, no result can tell you which change caused what. The study is not weak evidence. It is no evidence.",
-        ], punch: "Change one thing. Measure one thing. Nail everything else down." },
+        ], punch: "Change one thing. Measure one thing. Keep everything else the same." },
         ["Identify the independent, dependent and control variables in any investigation", "Decide whether data is continuous or categoric", "Choose a line graph or a bar chart — and justify it using the right word"],
         [
           task(1, "Take the question apart", "10 min"),
@@ -345,7 +346,7 @@
           "Satellites had been watching the same sky. The values they recorded were so far below anything expected that the processing software flagged them as readings it could not trust. The scientists did not bin them, and did not believe them straight away either: they checked them against measurements taken from the ground.",
           "The ground-based results were published first. A few months later the satellite team showed their maps, and the hole was there in the record.",
         ], punch: "An odd result is a question, not rubbish. Ask it before you bin it." },
-        ["Draw a best-fit line — straight or curved — that shows the trend", "Explain why dot-to-dot is wrong for experimental data", "Identify a possible anomalous result and say what you would do about it", "Improve a graph against a checklist", "Write a conclusion that quotes evidence instead of vibes"],
+        ["Draw a best-fit line — straight or curved — that shows the trend", "Explain why dot-to-dot is wrong for experimental data", "Identify a possible anomalous result and say what you would do about it", "Improve a graph against a checklist", "Write a conclusion supported by measurements"],
         [
           task(1, "Which graph is better?", "5 min"),
           p("Your teacher will show you three versions of the same data: dot-to-dot, a best-fit straight line, and a best-fit curve."),
@@ -401,15 +402,15 @@
         { type: "split", cols: "48% 1fr", gap: 6,
           left: [
             { type: "table", cls: "num", align: ["r", "r"], head: ["Mass / g", "Extension / cm"], rh: 8.6, rows: [["100", "2.1"], ["200", "4.0"], ["300", "6.2"], ["400", "7.9"], ["500", "10.1"]] },
-            { type: "note", html: "Their graph: axes unlabelled, no units, points joined dot-to-dot, and everything squashed into the bottom-left corner." },
+            { type: "html", html: '<svg class="faulty-graph" viewBox="0 0 86 50" style="display:block;width:100%;height:auto;margin-top:3mm" role="img" aria-label="The student\'s graph: unlabelled axes running to 2000 and 50, with five points joined dot-to-dot in the bottom-left corner"><g stroke="#c9d3e0" stroke-width="0.2"><line x1="12.00" y1="4" x2="12.00" y2="44"/><line x1="20.75" y1="4" x2="20.75" y2="44"/><line x1="29.50" y1="4" x2="29.50" y2="44"/><line x1="38.25" y1="4" x2="38.25" y2="44"/><line x1="47.00" y1="4" x2="47.00" y2="44"/><line x1="55.75" y1="4" x2="55.75" y2="44"/><line x1="64.50" y1="4" x2="64.50" y2="44"/><line x1="73.25" y1="4" x2="73.25" y2="44"/><line x1="82.00" y1="4" x2="82.00" y2="44"/><line x1="12" y1="44.00" x2="82" y2="44.00"/><line x1="12" y1="40.00" x2="82" y2="40.00"/><line x1="12" y1="36.00" x2="82" y2="36.00"/><line x1="12" y1="32.00" x2="82" y2="32.00"/><line x1="12" y1="28.00" x2="82" y2="28.00"/><line x1="12" y1="24.00" x2="82" y2="24.00"/><line x1="12" y1="20.00" x2="82" y2="20.00"/><line x1="12" y1="16.00" x2="82" y2="16.00"/><line x1="12" y1="12.00" x2="82" y2="12.00"/><line x1="12" y1="8.00" x2="82" y2="8.00"/><line x1="12" y1="4.00" x2="82" y2="4.00"/></g><g stroke="#1f2937" stroke-width="0.4"><line x1="12" y1="4" x2="12" y2="44"/><line x1="12" y1="44" x2="82" y2="44"/></g><g font-size="3" font-family="Arial, sans-serif" fill="#1f2937"><text x="12.00" y="48.2" text-anchor="middle">0</text><text x="29.50" y="48.2" text-anchor="middle">500</text><text x="47.00" y="48.2" text-anchor="middle">1000</text><text x="64.50" y="48.2" text-anchor="middle">1500</text><text x="82.00" y="48.2" text-anchor="middle">2000</text><text x="10.5" y="45.20" text-anchor="end">0</text><text x="10.5" y="37.20" text-anchor="end">10</text><text x="10.5" y="29.20" text-anchor="end">20</text><text x="10.5" y="21.20" text-anchor="end">30</text><text x="10.5" y="13.20" text-anchor="end">40</text><text x="10.5" y="5.20" text-anchor="end">50</text></g><polyline points="15.50,42.32 19.00,40.80 22.50,39.04 26.00,37.68 29.50,35.92" fill="none" stroke="#1f2937" stroke-width="0.4"/><g fill="#1f2937"><circle cx="15.50" cy="42.32" r="0.7"/><circle cx="19.00" cy="40.80" r="0.7"/><circle cx="22.50" cy="39.04" r="0.7"/><circle cx="26.00" cy="37.68" r="0.7"/><circle cx="29.50" cy="35.92" r="0.7"/></g></svg>' },
           ],
           right: [q("a", "The four problems:", 4), q("b", "Which one costs the most marks, and why?", 1)] },
-        p("<span class=\"ql\">c</span>Redraw it properly here, with a best-fit line.", { mb: 2 }),
-        { type: "draw", h: 82 },
       ] },
 
       /* 24 */
       { run: L5, blocks: [
+        p("<span class=\"ql\">c</span>Redraw the student's graph properly here, with a best-fit line.", { mb: 2 }),
+        { type: "draw", h: 82 },
         { type: "checkpoint", title: "Checkpoint — Lesson 5", items: [
           "1. A best-fit line is [[80]].",
           "2. We avoid dot-to-dot lines because [[70]].",

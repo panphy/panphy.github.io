@@ -61,7 +61,7 @@
         ],
         questions: [
           { q: "The activity of a source is measured in {{becquerels (Bq)*|counts|joules (J)}}", m: 1, lines: 0 },
-          { q: "Explain why the count-rate measured by a detector is always less than the activity.", m: 1, lines: 1, a: "The detector picks up only some of the radiation emitted ✓" },
+          { q: "A detector is placed near a radioactive source. Explain why it records only some of the radiation the source emits.", m: 1, lines: 1, a: "Radiation leaves the source in all directions, so most of it misses the detector ✓" },
           { q: "An alpha particle is {{two protons and two neutrons*|a high-speed electron|electromagnetic radiation}}", m: 1, lines: 0 },
           { stem: "Complete the nuclear equations. Mass numbers and atomic numbers must balance.",
             parts: [

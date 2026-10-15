@@ -118,7 +118,7 @@
             ] },
           { q: "As the temperature of a thermistor increases, its resistance {{increases|decreases*|stays the same}}", m: 1, lines: 0 },
           { q: "In the dark, the resistance of an LDR is {{high*|low}}", m: 1, lines: 0 },
-          { stem: "A thermistor is used in a circuit that switches on a fan when a room gets hot.",
+          { stem: "A thermistor is connected in series with a fixed resistor and a battery. The circuit switches on a fan when the room gets hot.",
             q: "Explain what happens to the current in the thermistor as the room warms up.", m: 2, lines: 2,
             a: "The resistance of the thermistor decreases ✓<br>so the current increases (and can switch on the fan) ✓" },
         ] },

@@ -162,7 +162,7 @@
         { t: "q", p: "Draw a line from each unwanted energy transfer to the best way to reduce it.", match: { left: ["Friction in a bike chain", "Air resistance on a lorry", "Conduction through a loft", "Draughts under a door"], right: ["a draught excluder", "oil on the chain", "a streamlined shape", "thick loft insulation"], a: [[0, 1], [1, 2], [2, 3], [3, 0]] } },
         { t: "q", p: "Draw a ring around the correct answer in each box.", ring: [["Copper has a high thermal conductivity, so copper is a good", ["thermal insulator", "thermal conductor"], 1], ["Making a wall twice as thick makes the house cool", ["faster", "more slowly"], 1]] },
         { t: "q", say: ["Lily", "Insulation keeps the cold out."], p: "Explain what insulation really does.", lines: 2, a: "Insulation slows down the transfer of energy from the warm inside of the house to the colder outside." },
-        { t: "q", type: "Design", p: "<strong>Design an Eco House.</strong> For each numbered place on the house, name a feature that reduces energy transfer out of the house, and explain why it works. Use the words <em>thermal conductivity</em> or <em>thickness</em>.", fig: F.house(), figCls: "fig-mid", after: [{ t: "compare", head: ["Place", "Feature", "Why it works"], rows: [
+        { t: "q", type: "Design", p: "<strong>Design an Eco House.</strong> For each numbered place on the house, name a feature that reduces energy transfer out of the house, and explain why it works. Where they fit, use the words <em>thermal conductivity</em> or <em>thickness</em>. For gaps, explain how the feature stops warm air escaping.", fig: F.house(), figCls: "fig-mid", after: [{ t: "compare", head: ["Place", "Feature", "Why it works"], rows: [
           ["1 Roof", { a: "thick loft insulation" }, { a: "a thick layer of trapped air with a low thermal conductivity" }],
           ["2 Walls", { a: "cavity wall insulation" }, { a: "foam fills the gap; it has a low thermal conductivity" }],
           ["3 Window", { a: "double glazing" }, { a: "trapped air or gas between the panes has a low thermal conductivity" }],
@@ -186,7 +186,7 @@
       spec: "AQA Physics 4.1.2.2; Combined Science 6.1.2.2",
       mapLine: "Efficiency from energy or power, decimals and percentages, Sankey diagrams",
       big: "An old filament lamp and an LED give out the same light. Why does the LED cost much less to run?",
-      goals: ["calculate efficiency as a decimal and as a percentage", "explain why no device is 100% efficient", "find the useful output or the total input from the efficiency", "draw and read Sankey diagrams", "describe ways to increase efficiency"],
+      goals: ["calculate efficiency as a decimal and as a percentage", "explain why efficiency can never be more than 100%", "find the useful output or the total input from the efficiency", "draw and read Sankey diagrams", "describe ways to increase efficiency"],
       keywords: ["efficiency", "useful output", "wasted output", "total input", "Sankey diagram"],
       story: { title: "Lamps", text: "A filament lamp transfers only about 1 joule in every 10 by light. The rest heats the room. An LED transfers several times more of its energy by light, so it needs much less energy for the same brightness." },
       doNow: [

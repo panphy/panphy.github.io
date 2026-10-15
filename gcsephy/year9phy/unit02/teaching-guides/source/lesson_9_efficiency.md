@@ -16,7 +16,7 @@ Students calculate efficiency, and rearrange to find the useful output or the to
 By the end of the lesson, students should be able to:
 
 1. Calculate efficiency from energy or power, as a decimal and as a percentage.
-2. Explain why no real device is 100% efficient.
+2. Explain why efficiency can never be more than 100%, and why most devices are much less efficient.
 3. Calculate the useful output or the total input from the efficiency.
 4. Draw and interpret a Sankey diagram.
 5. Describe ways to increase the efficiency of an energy transfer.
@@ -127,7 +127,7 @@ Students then read efficiency from a given Sankey diagram, and draw one for the 
 
 ## Plenary
 
-Students complete: "A device can never be 100% efficient, because …" (some energy is always dissipated, usually to the thermal store of the surroundings).
+Students complete: "A device can never be more than 100% efficient, because …" (energy cannot be created, so the useful output cannot be more than the total input). Extension: "Most devices are much less efficient, because …" (some energy is dissipated, usually to the thermal store of the surroundings).
 
 ## Possible prep
 
