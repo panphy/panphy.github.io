@@ -1071,12 +1071,15 @@
         <p class="eyebrow">Hazards</p>
         <h2>Background radiation<span>.</span></h2>
         <div class="split wide-fig">
-          <ul class="points">
-            <li>Radiation <b>around us all the time</b></li>
-            <li>Natural: <b>rocks</b> and <b>cosmic rays</b></li>
-            <li>Man-made: <b>weapons-test fallout</b> and <b>nuclear accidents</b></li>
-            <li>Subtract it from every count rate you measure</li>
-          </ul>
+          <div class="stack">
+            <ul class="points small">
+              <li>Radiation <b>around us all the time</b></li>
+              <li>Natural: <b>rocks</b> and <b>cosmic rays</b></li>
+              <li>Man-made: <b>weapons-test fallout</b> and <b>nuclear accidents</b></li>
+              <li><b>Subtract</b> it from every count rate you measure</li>
+            </ul>
+            <div class="idea step">Corrected = measured − background<br>\(185 - 25 = 160\) counts per minute</div>
+          </div>
           <div class="panel">
             <div class="panel-head"><span>WHERE IT COMES FROM</span><span class="pill">NOT TO SCALE</span></div>
             <div class="fig" data-fig="background"></div>
@@ -1230,32 +1233,54 @@
         </aside>
       </section>
 
+      <section class="slide history triple" data-title="Story: Meitner and Hahn">
+        <p class="eyebrow">The story · Berlin and Sweden, 1938</p>
+        <p class="not-examined">Background story · the exam tests fission, not these details</p>
+        <h2>The nucleus that split<span>.</span></h2>
+        <div class="story" style="--photo-h: 420px;">
+          <div class="story-photos">
+            <figure><img src="images/meitner-hahn.jpg" width="960" height="1257" alt="Black and white photograph of Lise Meitner and Otto Hahn standing at a laboratory bench in front of tall windows"><figcaption><b>Lise Meitner</b> and <b>Otto Hahn</b> in their laboratory, 1913</figcaption></figure>
+          </div>
+          <div class="stack">
+            <ul class="points">
+              <li>In Berlin, Otto Hahn fired <b>neutrons</b> at uranium and found <b>barium</b>, an element about half its size</li>
+              <li>His colleague of thirty years, <b>Lise Meitner</b>, had fled Nazi Germany that summer</li>
+              <li>At Christmas in Sweden, she and her nephew Otto Frisch worked it out: the uranium nucleus had <b>split in two</b></li>
+              <li>Frisch named it <b>fission</b>, after the way a living cell divides</li>
+            </ul>
+            <div class="idea">The Nobel Prize for the discovery went to Hahn alone.</div>
+          </div>
+        </div>
+        <p class="credits">Photograph: <a href="https://commons.wikimedia.org/wiki/File:Otto_Hahn_und_Lise_Meitner.jpg" target="_blank" rel="noopener">unknown photographer, 1913</a>, public domain.</p>
+        <div class="slide-foot"><span>ATOMS &amp; NUCLEAR RADIATION</span><span data-page></span></div>
+      </section>
+
       <section class="slide triple" data-title="Chain reaction">
         <p class="eyebrow">Fission</p>
         <h2>Chain reaction<span>.</span></h2>
-        <div class="split wide-fig">
-          <div class="stack center">
+        <div class="split wide-fig idea-last">
+          <div class="stack">
             <ul class="points small">
               <li>Each fission gives out <b>2 or 3 neutrons</b></li>
               <li>Each neutron can split <b>another</b> nucleus</li>
               <li>The number of fissions <b>multiplies</b> at every step</li>
             </ul>
-            <div class="idea step">Every step: \(\times 3\). After 10 steps: \(3^{10} \approx 59\,000\) fissions</div>
           </div>
           <div class="panel">
             <div class="panel-head"><span>EACH FISSION STARTS MORE</span><span class="pill">NOT TO SCALE</span></div>
             <div class="fig" data-fig="chain" data-animate></div>
-            <div class="legend"><span><i class="neutron">0</i> Neutron</span><span><i class="proton">+</i> Uranium-235 and its products</span></div>
+            <div class="legend"><span><i class="neutron">0</i> Neutron</span><span><i class="proton"></i> Uranium-235</span><span><i class="proton" style="width:22px;height:22px"></i><i class="proton" style="width:18px;height:18px;margin-left:-12px"></i> Pair: has just split</span></div>
           </div>
+          <div class="idea step">Two go on each time: after 10 steps, \(2^{10} \approx 1000\) fissions</div>
         </div>
         <div class="slide-foot"><span>ATOMS &amp; NUCLEAR RADIATION</span><span data-page></span></div>
         <aside class="revision-note" hidden>
           <div class="rn-main">
             <p><b>Drawing one.</b> Start with one neutron hitting one nucleus. Show it split into two smaller nuclei and two or three neutrons. Draw each new neutron hitting another nucleus, which splits in the same way. Two generations are enough to show the idea.</p>
-            <p><b>Why so fast?</b> Each step takes a tiny fraction of a second, so the multiplying happens almost at once. That is why it must be controlled, or it releases its energy as an explosion.</p>
+            <p><b>Why so fast?</b> Each step takes a tiny fraction of a second, so the multiplying happens almost at once. About eighty steps of doubling would split every nucleus in a kilogram of uranium-235. That is why the chain must be controlled, or it releases its energy as an explosion.</p>
           </div>
           <div class="rn-side">
-            <p class="tip">Not every neutron causes a fission: some escape and some are absorbed. A chain reaction keeps going only if, on average, at least one from each fission does.</p>
+            <p class="more">Not every neutron causes a fission: some escape, like the faint ones in the diagram, and some are absorbed. A chain reaction keeps going only if, on average, at least one neutron from each fission splits another nucleus.</p>
           </div>
         </aside>
       </section>
@@ -1283,6 +1308,28 @@
             <p class="more">A moderator, such as water or graphite, slows the neutrons down, because slow neutrons are absorbed by uranium-235 more easily.</p>
           </div>
         </aside>
+      </section>
+
+      <section class="slide history triple" data-title="Story: Chicago Pile-1">
+        <p class="eyebrow">The story · Chicago, 2 December 1942</p>
+        <p class="not-examined">Background story · the exam tests the reactor, not these details</p>
+        <h2>A reactor under a stadium<span>.</span></h2>
+        <div class="story" style="--photo-h: 390px;">
+          <div class="story-photos">
+            <figure><img src="images/cp1.jpg" width="1280" height="1004" alt="Drawing of a large stack of dark blocks, as tall as a room, built inside a timber frame with a ladder leaning against it"><figcaption><b>Chicago Pile-1</b>, drawn by Melvin A. Miller</figcaption></figure>
+          </div>
+          <div class="stack">
+            <ul class="points">
+              <li>Under the seats of a university sports ground, Enrico Fermi’s team built a pile of <b>graphite blocks</b> with uranium between them</li>
+              <li>Wooden strips covered in cadmium were the <b>control rods</b>: they absorbed neutrons</li>
+              <li>As the rods were pulled out, the count rate climbed. At <b>3:25 pm</b> the chain reaction kept itself going</li>
+              <li>Its power was about <b>half a watt</b>: less than a torch bulb</li>
+            </ul>
+            <div class="idea">The world’s first <b>controlled</b> chain reaction, with no shielding at all.</div>
+          </div>
+        </div>
+        <p class="credits">Drawing: <a href="https://commons.wikimedia.org/wiki/File:Stagg_Field_reactor.jpg" target="_blank" rel="noopener">Melvin A. Miller, Argonne National Laboratory</a>, public domain.</p>
+        <div class="slide-foot"><span>ATOMS &amp; NUCLEAR RADIATION</span><span data-page></span></div>
       </section>
 
       <section class="slide triple" data-title="Nuclear fusion">

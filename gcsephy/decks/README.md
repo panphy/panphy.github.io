@@ -6,8 +6,8 @@ Four browser presentations, available by direct link from the GCSE hub:
 | --- | --- | ---: | --- |
 | `work-like-a-physicist/` | 9 | 57 | Light orange |
 | `energy-stores-and-transfers/` | 9 | 63 | Light orange |
-| `electric-circuits/` | 10 | 61 | Lime |
-| `atoms-and-radiation/` | 11 | 54 | Light yellow |
+| `electric-circuits/` | 10 | 62 | Lime |
+| `atoms-and-radiation/` | 11 | 56 | Light yellow |
 
 Serve the repository root and open a deck's `index.html`. Edit that file for slides and revision notes, and the deck's `figures.js` for diagrams. No build step is needed. Preserve slide order when lesson guides or workbook links refer to slide numbers.
 

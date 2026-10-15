@@ -1,6 +1,6 @@
 # Atoms and Nuclear Radiation — Year 11 workbook
 
-Ten 50-minute lessons for AQA GCSE Physics 4.4.1–4.4.2 and Combined Science: Trilogy 6.4.1–6.4.2. They follow the teaching deck, [`../../decks/atoms-and-radiation/`](../../decks/atoms-and-radiation/), and reuse its fonts and particle diagrams. The 54-slide deck uses the shared calm GCSE style with a light-yellow Year 11 accent; workbook print colours are separate. See [`../../decks/README.md`](../../decks/README.md) for deck styling and controls.
+Ten 50-minute lessons for AQA GCSE Physics 4.4.1–4.4.2 and Combined Science: Trilogy 6.4.1–6.4.2. They follow the teaching deck, [`../../decks/atoms-and-radiation/`](../../decks/atoms-and-radiation/), and reuse its fonts and particle diagrams. The 56-slide deck uses the shared calm GCSE style with a light-yellow Year 11 accent; workbook print colours are separate. See [`../../decks/README.md`](../../decks/README.md) for deck styling and controls.
 
 **Address:** <https://panphy.app/gcsephy/year11phy/unit01/>
 
@@ -22,7 +22,7 @@ The student hub uses `/gcsephy/assets/workbook-hub.css`, shared by all four work
 
 Diagrams come from `/gcsephy/decks/atoms-and-radiation/figures.js` (`window.DeckFigures`); rebuild the PDFs after changing a deck figure the workbook uses. The deck's click-through builds are opt-in (`data-animate` on a slide's figure), so figures drawn here are always complete. As in Year 10, every page after the cover prints 1.2× larger (12 pt text, ~9.6 mm writing lines), and grid columns use `minmax(0, 1fr)` because Chrome shrinks the whole print if anything overflows. Physics-only content (AQA 4.4.3–4.4.4) is on the "Triple Science only" extension pages of the Unit review; a single item elsewhere takes `<span class="triple-tag">Triple only</span>` (the medical tracer in Lesson 7). Higher-tier content is not marked. A lesson whose Exam corner would jump to a new page whole can set `examSplit: true` (Lesson 3 does), which gives each exam question its own card so the section can break between them.
 
-The deck has five story slides (11, 13, 18, 22 and 39) with photographs of the scientists, Thomson's tube and Marie Curie's notebook, kept in `../../decks/atoms-and-radiation/images/` and not used in the booklets. Each photo has a caption and a credit linking to its source; change a photo and its credit together, and use only public domain or Creative Commons images that allow reuse. Adding or removing a deck slide shifts the numbers below: update `deck.slides` in the lesson files and this table, then rebuild the PDFs.
+The deck has seven story slides (11, 13, 18, 22, 39, 49 and 52) with photographs of the scientists, Thomson's tube, Marie Curie's notebook, Meitner and Hahn, and a drawing of Chicago Pile-1 (the last two shared with the IB E.4 deck), kept in `../../decks/atoms-and-radiation/images/` and not used in the booklets. Each photo has a caption and a credit linking to its source; change a photo and its credit together, and use only public domain or Creative Commons images that allow reuse. Adding or removing a deck slide shifts the numbers below: update `deck.slides` in the lesson files and this table, then rebuild the PDFs.
 
 The Chadwick photo is from Los Alamos National Laboratory, which asks for this notice to accompany copies: "Unless otherwise indicated, this information has been authored by an employee or employees of the Los Alamos National Security, LLC (LANS), operator of the Los Alamos National Laboratory under Contract No. DE-AC52-06NA25396 with the U.S. Department of Energy. The U.S. Government has rights to use, reproduce, and distribute this information. The public may copy and use this information without charge, provided that this Notice and any statement of authorship are reproduced on all copies. Neither the Government nor LANS makes any warranty, express or implied, or assumes any liability or responsibility for the use of this information."
 
@@ -41,7 +41,7 @@ The Chadwick photo is from Los Alamos National Laboratory, which asks for this n
 | 9 | Half-life calculations (with net decline) | 36 | 4.4.2.3 · 6.4.2.3 |
 | 10 | Contamination and irradiation | 38–41 | 4.4.2.4 · 6.4.2.4 |
 
-The Unit review follows Lesson 10 and adds two GCSE Physics-only extension pages: background radiation, half-life hazards and medical uses (4.4.3), and fission and fusion (4.4.4). The deck teaches them in Part 4, slides 42–54, after the Key words slide.
+The Unit review follows Lesson 10 and adds two GCSE Physics-only extension pages: background radiation, half-life hazards and medical uses (4.4.3), and fission and fusion (4.4.4). The deck teaches them in Part 4, slides 42–56, after the Key words slide.
 
 ## History dates
 
