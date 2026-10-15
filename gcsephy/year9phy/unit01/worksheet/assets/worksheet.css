@@ -1,0 +1,31 @@
+/* Extra styles for the Lesson 5 worksheet; the page furniture comes from ../../workbook/assets/workbook.css. */
+.ws-graph { margin: 0 0 5pt; border: 1.6pt solid var(--navy); background: #fff; }
+.ws-graph svg { display: block; width: 100%; height: auto; }
+.ws-graph .min { stroke: #e3e8ee; stroke-width: .18; }
+.ws-graph .maj { stroke: #b9c4d0; stroke-width: .3; }
+.ws-graph .axis { fill: none; stroke: var(--navy); stroke-width: .55; }
+.ws-graph text { font: 3.1px Lato, Arial, sans-serif; fill: #3b4654; }
+.ws-graph text.ttl { font: 700 3.4px Lato, Arial, sans-serif; fill: var(--navy); }
+.ws-graph .pt { fill: none; stroke: var(--navy); stroke-width: .55; stroke-linecap: round; }
+.ws-graph .ans { fill: none; stroke: var(--orange); stroke-width: .75; stroke-linecap: round; }
+.ws-graph .ans.thin { stroke: #7d8a99; stroke-width: .5; stroke-linejoin: round; }
+.ws-graph .ans.thick { stroke: #7d8a99; stroke-width: 1.1; }
+.ws-graph .ring { fill: none; stroke: #c0392b; stroke-width: .6; }
+.ws-graph .ans-dot { fill: var(--orange); }
+.ws-graph text.note-t { font: 700 3.1px Lato, Arial, sans-serif; fill: #c0392b; }
+
+.mini-row { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 4mm; margin: 0 0 6pt; }
+.mini .cap { margin: 0 0 3pt; font: 700 9pt/12pt Poppins, Arial, sans-serif; color: var(--navy); }
+.mini .ws-graph { margin-bottom: 4pt; }
+.mini .opts { display: flex; gap: 9pt; align-items: center; font: 8.5pt/12pt Lato, Arial, sans-serif; }
+.mini .opts span { display: inline-flex; align-items: center; gap: 3pt; }
+.mini .opts i { display: inline-block; width: 9pt; height: 9pt; border: 1.2px solid #5c6672; border-radius: 1.5pt; }
+.mini .why { height: 17pt; border-bottom: 1.1pt solid var(--line); font: 8pt/17pt Lato, Arial, sans-serif; color: var(--muted); }
+
+.talk { margin: 0 0 6pt; }
+.talk .bubbles { display: grid; grid-template-columns: 1fr 1fr; gap: 9pt; margin: 0 0 6pt; }
+.talk .bubble { padding: 6pt 9pt; border: 1px solid var(--rule); border-radius: 8pt; background: #fff; font-size: 9pt; line-height: 12.5pt; }
+.talk .bubble b { color: var(--blue); }
+
+.ans-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0 6mm; }
+.ans-note { margin: 0 0 8pt; font-size: 9pt; line-height: 12.5pt; }
