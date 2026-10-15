@@ -298,7 +298,7 @@ body.is-window-fullscreen .stage { top: var(--standalone-top); bottom: calc(env(
 }
 
 /* Typography */
-.eyebrow { margin: 0; font: 600 23px var(--font-mono); letter-spacing: .14em; color: var(--brand-primary); text-transform: uppercase; }
+.eyebrow { margin: 0; font: 600 24px var(--font-mono); letter-spacing: .14em; color: var(--brand-primary); text-transform: uppercase; }
 h1, h2, h3 { font-family: var(--font-display); font-weight: 400; margin: 0; }
 h1 { font-size: 118px; line-height: 1; letter-spacing: -.02em; margin-top: 18px; }
 h1 span, h2 span { color: var(--brand-primary); }
@@ -349,9 +349,9 @@ h3 { font-size: 34px; line-height: 1.15; }
   background: var(--viewer-bg);
   box-shadow: var(--card-shadow);
 }
-.panel-head { display: flex; align-items: center; gap: 12px; font: 600 19px var(--font-mono); letter-spacing: .1em; }
+.panel-head { display: flex; align-items: center; gap: 12px; font: 600 24px var(--font-mono); letter-spacing: .1em; }
 .panel-head span:first-child { margin-right: auto; }
-.pill { color: var(--text-secondary); font-size: 16px; border: 1px solid var(--input-border); border-radius: 999px; padding: 4px 12px; }
+.pill { color: var(--text-secondary); font-size: 20px; border: 1px solid var(--input-border); border-radius: 999px; padding: 4px 12px; }
 .medical-illustration, .source-illustration { display: block; width: 100%; height: 330px; flex: none; object-fit: contain; background: #fff; border-radius: 12px; }
 .source-illustration { height: 250px; margin-bottom: 14px; }
 .exposure-panel { padding-bottom: 32px; }
@@ -365,12 +365,15 @@ h3 { font-size: 34px; line-height: 1.15; }
   body:not(.is-fullscreen) .exposure-headings h3 { font-size: 18px; }
   body:not(.is-fullscreen) .exposure-illustration { height: auto; min-height: 0; flex: none; object-fit: contain; padding: 0; }
   body:not(.is-fullscreen) .exposure-captions p { font-size: 16px; }
+  /* Inline two-column grids (background radiation) stack, and their inline sizes give way, so word equations keep one line. */
+  body:not(.is-fullscreen) .stack > div[style*="grid-template-columns"], body:not(.is-fullscreen) .points[style*="grid-template-columns"] { grid-template-columns: minmax(0, 1fr) !important; }
+  body:not(.is-fullscreen) .points li[style*="font-size"], body:not(.is-fullscreen) .idea[style*="font-size"] { font-size: 18px !important; }
 }
 .fig { position: relative; flex: 1; min-height: 0; }
 .fig svg { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
 .panel .fig { margin: 8px 0; }
 .legend { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; }
-.legend > span { display: inline-flex; align-items: center; gap: 8px; padding: 4px 14px 4px 5px; border-radius: 999px; background: var(--card-bg); border: 1px solid var(--card-border); font-size: 22px; }
+.legend > span { display: inline-flex; align-items: center; gap: 8px; padding: 4px 14px 4px 5px; border-radius: 999px; background: var(--card-bg); border: 1px solid var(--card-border); font-size: 24px; }
 .legend i { font-style: normal; display: inline-grid; place-items: center; border-radius: 50%; width: 30px; height: 30px; font-size: 18px; font-weight: 800; color: #fff; }
 .legend .proton { background: var(--proton); }
 .legend .neutron { background: var(--neutron); }
@@ -394,7 +397,7 @@ h3 { font-size: 34px; line-height: 1.15; }
    reaches the screen edges when the screen is not 16:9. */
 body.is-fullscreen { transition: background-color .35s ease; }
 body.is-fullscreen:has(#deck .slide.history.active) { background-color: color-mix(in srgb, var(--brand-primary) 9%, var(--bg-color)); background-image: radial-gradient(color-mix(in srgb, var(--brand-primary) 16%, var(--bg-pattern)) 1px, transparent 1px); }
-.not-examined { position: absolute; top: 62px; right: 88px; margin: 0; padding: 5px 14px; border: 1px solid color-mix(in srgb, var(--brand-primary) 35%, transparent); border-radius: 999px; font: 600 15px var(--font-mono); letter-spacing: .1em; text-transform: uppercase; color: var(--text-secondary); }
+.not-examined { position: absolute; top: 62px; right: 88px; margin: 0; padding: 5px 14px; border: 1px solid color-mix(in srgb, var(--brand-primary) 35%, transparent); border-radius: 999px; font: 600 18px var(--font-mono); letter-spacing: .1em; text-transform: uppercase; color: var(--text-secondary); }
 
 /* Story slides: photographs of the scientists and their apparatus (images/) beside a short
    account. Photos sit to the left of the text, or in a row above it with .band. The
@@ -406,14 +409,15 @@ body.is-fullscreen:has(#deck .slide.history.active) { background-color: color-mi
 .story-photos figure { margin: 0; }
 .story-photos img { display: block; width: auto; height: var(--photo-h, 360px); border-radius: 16px; border: 1px solid var(--card-border); box-shadow: var(--card-shadow); background: #fff; }
 /* A caption wraps to its photo's width. */
-.story-photos figcaption { width: 0; min-width: 100%; margin-top: 12px; font-size: 21px; line-height: 1.3; color: var(--text-secondary); }
+/* --caption-min lets a caption under a narrow photo run wider than it. */
+.story-photos figcaption { width: 0; min-width: max(100%, var(--caption-min, 0px)); margin-top: 12px; font-size: 24px; line-height: 1.3; color: var(--text-secondary); }
 .story-photos figcaption b { color: var(--text-main); }
 .story .points { gap: 18px; }
 .story .points li { font-size: 30px; }
 .story.band .points { grid-template-columns: repeat(3, 1fr); gap: 16px 36px; }
 .story.band .points li { font-size: 28px; }
 .story .stack { flex: none; }
-.credits { margin: 12px 0 0; font-size: 14px; color: var(--text-secondary); }
+.credits { margin: 12px 0 0; font-size: 16px; color: var(--text-secondary); }
 .credits a { color: inherit; }
 
 /* Cards and tables */
@@ -422,14 +426,14 @@ body.is-fullscreen:has(#deck .slide.history.active) { background-color: color-mi
 .cards.calc .card { min-height: 440px; }
 .cards.calc h3 { font-size: 38px; }
 .card { padding: 26px 28px; border: 1px solid var(--card-border); border-radius: 22px; background: var(--card-bg); box-shadow: var(--card-shadow); }
-.card .eyebrow { font-size: 19px; }
+.card .eyebrow { font-size: 22px; }
 .card h3 { margin: 8px 0 10px; }
 .card p { margin: 0; font-size: 28px; color: var(--text-secondary); line-height: 1.35; }
 
 table.facts { width: 100%; border-collapse: separate; border-spacing: 0; font-size: 28px; background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 22px; overflow: hidden; box-shadow: var(--card-shadow); }
 .facts th, .facts td { padding: 18px 22px; text-align: left; border-bottom: 1px solid var(--card-border); vertical-align: middle; }
 .facts tr:last-child td { border-bottom: 0; }
-.facts thead th { background: var(--muted-bg); font: 600 20px var(--font-mono); letter-spacing: .1em; text-transform: uppercase; color: var(--text-secondary); }
+.facts thead th { background: var(--muted-bg); font: 600 22px var(--font-mono); letter-spacing: .1em; text-transform: uppercase; color: var(--text-secondary); }
 .facts td:first-child { font-weight: 800; }
 .facts .icon-cell { display: flex; align-items: center; gap: 16px; }
 .facts .icon-cell .fig { flex: none; width: 52px; height: 52px; }
@@ -441,7 +445,7 @@ table.facts.compare { table-layout: fixed; font-size: 30px; }
 .facts.compare th:first-child { width: 22%; }
 .facts.compare th:nth-child(2) { width: 22%; }
 .facts.compare th:nth-child(3) { width: 25%; }
-.facts.big thead th { font-size: 22px; padding: 20px 26px; }
+.facts.big thead th { font-size: 24px; padding: 20px 26px; }
 .facts.big .icon-cell .fig { width: 68px; height: 68px; }
 
 /* Nuclide notation, as in the nuclear decay sim */
@@ -460,7 +464,7 @@ table.facts.compare { table-layout: fixed; font-size: 30px; }
 .eq-row .idea { display: flex; align-items: center; gap: 12px; }
 .calc { display: grid; grid-template-columns: auto auto; column-gap: 14px; row-gap: 2px; align-items: baseline; }
 .calc > span:nth-child(even) { text-align: right; }
-.calc-label { font: 600 .62em var(--font-mono); letter-spacing: .1em; text-transform: uppercase; color: var(--text-secondary); }
+.calc-label { font: 600 .75em var(--font-mono); letter-spacing: .1em; text-transform: uppercase; color: var(--text-secondary); }
 .idea .nuc { font-size: 1.25em; }
 .facts .nuc { font-size: 1.3em; }
 .eq-check { margin: 10px 0 0; text-align: center; font: 600 24px var(--font-mono); color: var(--text-secondary); }
@@ -472,7 +476,7 @@ table.facts.compare { table-layout: fixed; font-size: 30px; }
 .title-grid .lead { margin-top: 30px; border-left: 4px solid var(--card-border); padding-left: 26px; }
 .title-grid .fig { height: 700px; }
 .chips { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 40px; }
-.chip { padding: 10px 20px; border-radius: 999px; border: 1px solid var(--card-border); background: var(--card-bg); font: 600 22px var(--font-mono); letter-spacing: .06em; }
+.chip { padding: 10px 20px; border-radius: 999px; border: 1px solid var(--card-border); background: var(--card-bg); font: 600 24px var(--font-mono); letter-spacing: .06em; }
 .chip.on { background: var(--brand-accent-strong); border-color: var(--brand-accent-strong); color: #fff; }
 [data-theme="dark"] .chip.on { background: var(--brand-accent); border-color: var(--brand-accent); color: #0B1F1D; }
 .slide.section { justify-content: center; }
@@ -496,7 +500,7 @@ table.facts.compare { table-layout: fixed; font-size: 30px; }
 .obs-row > div:first-child { border-left: 4px solid var(--alpha); }
 .obs-row > div:last-child { border-left: 4px solid var(--brand-accent); }
 .obs-row .to { font-size: 30px; color: var(--text-secondary); text-align: center; }
-.obs-head { display: grid; grid-template-columns: 1fr 36px 1fr; gap: 12px; font: 600 19px var(--font-mono); letter-spacing: .12em; color: var(--text-secondary); }
+.obs-head { display: grid; grid-template-columns: 1fr 36px 1fr; gap: 12px; font: 600 22px var(--font-mono); letter-spacing: .12em; color: var(--text-secondary); }
 .obs-head span:last-child { grid-column: 3; }
 
 /* Quiz */
@@ -510,7 +514,7 @@ table.facts.compare { table-layout: fixed; font-size: 30px; }
 .nuc.in-text { display: inline; vertical-align: baseline; font-size: 1em; font-family: inherit; font-weight: 800; }
 .nuc.in-text .nums { display: inline-block; vertical-align: -.24em; margin: -.2em 2px -.2em 0; text-align: right; font-family: var(--font-mono); font-size: .52em; line-height: .95; }
 .nuc.in-text .nums > span { display: block; }
-.q .n { display: inline-block; margin-right: 10px; font: 600 22px var(--font-mono); color: var(--brand-primary); }
+.q .n { display: inline-block; margin-right: 10px; font: 600 24px var(--font-mono); color: var(--brand-primary); }
 .q .ans { margin-top: auto; padding: 10px 16px; border-radius: 12px; background: #E5F2EA; color: #2B5A3A; border: 1px solid #3F7A55; font-size: 27px; font-weight: 700; }
 [data-theme="dark"] .q .ans { background: #183324; color: #BBF7D0; border-color: #4ADE80; }
 .step { transition: opacity .3s ease, transform .3s ease; }
