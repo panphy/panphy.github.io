@@ -5,7 +5,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="robots" content="noindex, nofollow">
-  <meta name="description" content="AQA GCSE Physics (8463) and Combined Science: Trilogy (8464) resources from PanPhy Labs: teaching decks, workbook hubs, Do Now lesson starters and AO1 revision resources.">
+  <meta name="description" content="AQA GCSE Physics (8463) and Combined Science: Trilogy (8464) resources from PanPhy Labs: course summaries, teaching decks, workbook hubs, Do Now lesson starters and AO1 revision resources.">
   <meta name="theme-color" content="#f5f1e6">
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
   <title>GCSE Physics - PanPhy Labs</title>
@@ -80,10 +80,11 @@
     }
     .jump a small { font: 500 .65rem/1.4 var(--mono); text-transform: none; letter-spacing: .02em; opacity: .85; }
     .jump a:hover { transform: translate(-2px, -2px); box-shadow: 7px 7px 0 var(--j-shadow); }
-    .jump li:nth-child(1) { --j-bg: #0c3a3f; --j-fg: #ffc145; --j-shadow: #ff8fa3; }
-    .jump li:nth-child(2) { --j-bg: #f6cea8; --j-fg: #5c3810; --j-shadow: #80501e; }
-    .jump li:nth-child(3) { --j-bg: #d8eaa1; --j-fg: #34481a; --j-shadow: #49651f; }
-    .jump li:nth-child(4) { --j-bg: #f6e7a5; --j-fg: #574511; --j-shadow: #78601b; }
+    .jump li:nth-child(1) { --j-bg: #1f2160; --j-fg: #7fd3ff; --j-shadow: #4b1840; }
+    .jump li:nth-child(2) { --j-bg: #0c3a3f; --j-fg: #ffc145; --j-shadow: #ff8fa3; }
+    .jump li:nth-child(3) { --j-bg: #f6cea8; --j-fg: #5c3810; --j-shadow: #80501e; }
+    .jump li:nth-child(4) { --j-bg: #d8eaa1; --j-fg: #34481a; --j-shadow: #49651f; }
+    .jump li:nth-child(5) { --j-bg: #f6e7a5; --j-fg: #574511; --j-shadow: #78601b; }
     .jump a { border-radius: 10px; padding: 14px 18px; min-height: 72px; }
     .jump a span { display: grid; gap: 8px; }
 
@@ -94,7 +95,8 @@
       border-bottom: 2px solid var(--ink);
       scroll-margin-top: 12px;
     }
-    .band:nth-of-type(even) { background: rgba(255, 253, 247, .72); }
+    /* The hero and the Spec band come first, so AO1 and Year 10 are the tinted ones. */
+    .band:nth-of-type(odd) { background: rgba(255, 253, 247, .72); }
     .rail { position: sticky; top: calc(var(--standalone-top, 0px) + 20px); align-self: start; }
     .rail p { margin: 0 0 6px; font: 600 .72rem/1.4 var(--mono); letter-spacing: .16em; text-transform: uppercase; color: var(--muted); }
     .rail h2 {
@@ -160,6 +162,9 @@
     .unit .workbook-link:hover { box-shadow: 6px 6px 0 var(--year-ink); }
     /* Do Now: teal board, marigold and pink. */
     .t-dn { --c-bg: #0c3a3f; --c-fg: #fff; --c-sub: #dcebe9; --c-accent: #ffc145; --c-shadow: #ff8fa3; --c-radius: 12px; --c-texture: linear-gradient(rgba(140, 214, 204, .13) 1px, transparent 1px), linear-gradient(90deg, rgba(140, 214, 204, .13) 1px, transparent 1px); }
+    /* Course summaries: indigo, sky and coral for 8463; plum, mint and periwinkle for 8464. */
+    .t-cs63 { --c-bg: #1f2160; --c-fg: #fff; --c-sub: #dfe2ff; --c-accent: #7fd3ff; --c-shadow: #ff8a73; --c-radius: 12px; --c-texture: linear-gradient(rgba(150, 170, 255, .14) 1px, transparent 1px), linear-gradient(90deg, rgba(150, 170, 255, .14) 1px, transparent 1px); }
+    .t-cs64 { --c-bg: #4b1840; --c-fg: #fff; --c-sub: #f3dcec; --c-accent: #86e8bd; --c-shadow: #a9b8ff; --c-radius: 12px; --c-texture: linear-gradient(rgba(255, 170, 225, .13) 1px, transparent 1px), linear-gradient(90deg, rgba(255, 170, 225, .13) 1px, transparent 1px); }
     .t-dn-sheet { --c-bg: #fffdf7; --c-fg: #0b2a2e; --c-sub: #4f6163; --c-accent: #ff8fa3; --c-shadow: #ffc145; --c-arrow: #0b2a2e; --c-radius: 12px; }
 
     /* ---------- Footer ---------- */
@@ -174,6 +179,7 @@
       .jump li:nth-child(2) { animation-delay: .16s; }
       .jump li:nth-child(3) { animation-delay: .22s; }
       .jump li:nth-child(4) { animation-delay: .28s; }
+      .jump li:nth-child(5) { animation-delay: .34s; }
       @keyframes rise { from { opacity: 0; transform: translateY(14px); } }
     }
     @media (prefers-reduced-motion: reduce) {
@@ -213,10 +219,11 @@
       <div>
         <p class="eyebrow"><span>Years 9 to 11</span> Unit by unit</p>
         <h1>GCSE<br><i>Physics</i><b>.</b></h1>
-        <p class="lead">Teaching decks, workbooks, lesson starters and AO1 revision resources for AQA GCSE Physics (8463) and Combined Science: Trilogy (8464). Each one keeps its own colours here, so you will know it when you get there.</p>
+        <p class="lead">Course summaries, teaching decks, workbooks, lesson starters and AO1 revision resources for AQA GCSE Physics (8463) and Combined Science: Trilogy (8464). Each one keeps its own colours here, so you will know it when you get there.</p>
       </div>
       <nav aria-label="Sections on this page">
         <ul class="jump">
+          <li><a href="#course"><span>Spec<small>Course summaries</small></span><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M6 13l6 6 6-6"/></svg></a></li>
           <li><a href="#starters"><span>AO1<small>Starters &amp; revision</small></span><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M6 13l6 6 6-6"/></svg></a></li>
           <li><a href="#year9"><span>Year 9<small>Decks &amp; workbooks</small></span><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M6 13l6 6 6-6"/></svg></a></li>
           <li><a href="#year10"><span>Year 10<small>Decks &amp; workbooks</small></span><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M6 13l6 6 6-6"/></svg></a></li>
@@ -225,6 +232,26 @@
       </nav>
     </section>
 
+    <section class="band" id="course" aria-labelledby="course-title">
+      <div class="rail">
+        <p>Course summaries</p>
+        <h2 class="word" id="course-title" aria-label="Course summaries">Spec</h2>
+      </div>
+      <div class="cards">
+        <a class="card t-cs63" href="course-summary/physics-8463/">
+          <span class="kind">Course summary</span>
+          <strong class="title">Physics 8463</strong>
+          <span class="desc">The two exam papers and every topic of the separate science, with Higher tier and physics-only content marked.</span>
+          <span class="foot"><span class="meta">Exams · content · practicals</span><span class="go" aria-hidden="true"><svg class="icon" viewBox="0 0 24 24" focusable="false"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span></span>
+        </a>
+        <a class="card t-cs64" href="course-summary/combined-8464/">
+          <span class="kind">Course summary</span>
+          <strong class="title">Trilogy 8464</strong>
+          <span class="desc">The physics of Combined Science: its exam papers, how the double grade is awarded, and every physics topic.</span>
+          <span class="foot"><span class="meta">Exams · grades · content</span><span class="go" aria-hidden="true"><svg class="icon" viewBox="0 0 24 24" focusable="false"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span></span>
+        </a>
+      </div>
+    </section>
     <section class="band" id="starters" aria-labelledby="starters-title">
       <div class="rail">
         <p>Lesson starters and revision</p>
