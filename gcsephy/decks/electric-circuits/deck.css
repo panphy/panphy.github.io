@@ -95,7 +95,6 @@
 /* Section card with a diagram */
 .case-card .fig { height: 300px; margin-top: 16px; background: var(--diagram-bg); border: 2px solid var(--ink); }
 .case-card .fig > .circuit-figure { padding: 10px; }
-.case-card .big-eq { margin: 18px 0 6px; padding: 20px; border: 2px solid var(--ink); background: var(--navy); color: var(--hi); font: 900 64px/1 var(--display); text-align: center; letter-spacing: -.02em; }
 
 /* Equation toolkit */
 .toolkit { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 18px; }
