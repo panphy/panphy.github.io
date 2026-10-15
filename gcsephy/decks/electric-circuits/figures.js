@@ -31,8 +31,9 @@ window.DeckSvgTex = {
     return `<circle cx="${f(x)}" cy="${f(y)}" r="${r}" class="${cls}"/><circle cx="${f(x - r * 0.32)}" cy="${f(y - r * 0.36)}" r="${f(r * 0.28)}" class="q-shine"/>` + mark;
   };
   // A line with a filled arrowhead at (x2, y2), sized for the larger pictures.
+  // The shaft runs on under the head, whose base is 8 behind (x2, y2), so the two join.
   const sxArrow = (x1, y1, x2, y2, cls) => {
-    const a = Math.atan2(y2 - y1, x2 - x1), back = 14;
+    const a = Math.atan2(y2 - y1, x2 - x1), back = 2;
     return `<path d="M${f(x1)} ${f(y1)} L${f(x2 - back * Math.cos(a))} ${f(y2 - back * Math.sin(a))}" class="${cls}"/><path d="M14 0 L-8 -11 L-8 11 Z" class="${cls}-head" transform="translate(${f(x2)} ${f(y2)}) rotate(${f(a * 180 / Math.PI)})"/>`;
   };
   // Current going round a circuit: orange arrowheads in the conventional direction
