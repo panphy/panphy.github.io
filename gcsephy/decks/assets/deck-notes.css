@@ -71,6 +71,8 @@ body.is-fullscreen .notes, .notes[hidden] { display: none; }
 .rn-side .tip::before { content: "Exam tip"; color: var(--rn-tip); }
 .rn-side .more { border-left-color: var(--rn-more); }
 .rn-side .more::before { content: "Go further"; color: var(--rn-more); }
+.rn-side .spec { border-left-color: var(--rn-more); }
+.rn-side .spec::before { content: "Beyond the specification"; color: var(--rn-more); }
 .revision-note sub, .revision-note sup { line-height: 0; }
 
 body.show-thumbs .notes-body { left: calc(var(--thumbs-w) + 28px); }
