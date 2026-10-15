@@ -1,6 +1,6 @@
 # Prep sheets (shared renderer)
 
-Prep is the school's word for homework. Each GCSE unit has one A4 Prep sheet for every two lessons, out of 10 so it is quick to mark: up to three 1-mark questions from the [Do Now bank](../../do-now/questions.csv) on earlier learning (shown with their bank number, `DN 852`), then short questions on the key ideas of the two latest lessons. Each sheet has an answer edition with the same layout. The unit's workbook hub links the sheets only: the answer editions are for teachers and are not linked anywhere, though their PDFs are still public at their addresses.
+Prep is the school's word for homework. Each GCSE unit has one A4 Prep sheet for every two lessons, out of 10 so it is quick to mark: up to three 1-mark questions from the [Do Now bank](../../do-now/questions.csv) on earlier learning (the answer edition shows each one's bank number, `DN 852`), then short questions on the key ideas of the two latest lessons. Each sheet has an answer edition with the same layout. The unit's workbook hub links the sheets only: the answer editions are for teachers and are not linked anywhere, though their PDFs are still public at their addresses.
 
 | File | Use |
 |---|---|
