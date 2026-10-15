@@ -243,11 +243,6 @@ window.DeckSvgTex = {
       s += `<circle cx="230" cy="170" r="108" class="sx-metal"/>`;
       for (let i = 0; i < 14; i++) { const a = i * Math.PI / 7; s += qball(230 + 84 * Math.cos(a), 170 + 84 * Math.sin(a), 11, -1); }
       s += `<path d="M640 215 V372 M608 372 H672 M620 386 H660 M632 400 H648" class="sx-thread" style="stroke-width:4"/><circle cx="640" cy="170" r="46" class="sx-metal"/>`;
-      // Field lines across the gap, pointing towards the negative dome.
-      [[-46, 120], [46, 220]].forEach(([dy, y]) => {
-        const y0 = 170 + dy * 0.55, y2 = 170 + dy * 0.75, my = 0.25 * y0 + 0.5 * y + 0.25 * y2;
-        s += `<path d="M596 ${f(y0)} Q470 ${y} 334 ${f(y2)}" class="sx-fline faint"/><path d="M12 0 L-8 -10 L-8 10 Z" class="sx-fline-head" transform="translate(467 ${f(my)}) rotate(180)"/>`;
-      });
       const zap = 'M340 170 L378 146 L404 192 L444 144 L476 196 L512 150 L548 190 L594 170';
       s += `<g class="sx-zap-g"><path d="${zap}" class="sx-zap-glow"/><path d="${zap}" class="sx-zap"/></g>`;
       s += sxt(230, 40, 'charged dome', 'strong') + sxt(620, 92, 'earthed sphere', 'strong') + sxt(275, 340, 'insulating', '', 'start') + sxt(275, 368, 'column', '', 'start');
