@@ -26,6 +26,8 @@ Weight (W = m g) is taught in Forces. Here g = 9.8 N/kg is "each kilogram is pul
 
 The second lesson of week 5 is for revision and catch-up; the end-of-unit test is planned for week 6.
 
+The student hub uses `/gcsephy/assets/workbook-hub.css`, shared by all four workbook hubs: navy headers, bold headings and square cards, with the landing page’s stronger year accent (orange for Year 9, green for Year 10, yellow for Year 11). This stylesheet does not affect the printed workbooks.
+
 ## Files
 
 | Path | What it is |
