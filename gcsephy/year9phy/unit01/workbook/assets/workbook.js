@@ -1,13 +1,16 @@
 /* Renderer for the Year 9 workbook. Reads WORKBOOK from content.js and draws one
-   A4 sheet per entry in WORKBOOK.pages. See ../README.md for the block types. */
+   A4 sheet per entry in WORKBOOK.pages. See ../README.md for the block types.
+   With ?answers (the Unit review), answers given as q's `a`, [[w|answer]] or <span class="ans">
+   are shown; review.css hides them in the student edition, which keeps their space. */
 (function () {
   "use strict";
   const W = window.WORKBOOK;
+  const ANSWERS = new URLSearchParams(location.search).has("answers");
 
-  /* [[]] or [[24]] in any text becomes a blank to write on (width in mm). */
-  const fmt = (s) => String(s ?? "").replace(/\[\[(\d*)\]\]/g, (m, w) => `<span class="blank"${w ? ` style="--w:${w}mm"` : ""}></span>`).replace(/→/g, '<span class="ar">→</span>');
+  /* [[]] or [[24]] in any text becomes a blank to write on (width in mm); [[24|answer]] holds an answer. */
+  const fmt = (s) => String(s ?? "").replace(/\[\[(\d*)(?:\|([^\]]*))?\]\]/g, (m, w, a) => `<span class="blank"${w ? ` style="--w:${w}mm"` : ""}>${a ? `<span class="ans">${a}</span>` : ""}</span>`).replace(/→/g, '<span class="ar">→</span>');
   const el = (cls, html, tag = "div") => `<${tag} class="${cls}">${html}</${tag}>`;
-  const lines = (n) => (n ? `<div class="lines">${"<i></i>".repeat(n)}</div>` : "");
+  const lines = (n, a) => (n ? `<div class="lines">${"<i></i>".repeat(n)}${a ? `<div class="ans-over">${fmt(a)}</div>` : ""}</div>` : "");
 
   function cellHtml(c) {
     if (c && typeof c === "object") return { html: fmt(c.html ?? ""), cls: c.cls || "", span: c.span };
@@ -20,7 +23,7 @@
     mission: (b) => `<div class="mission"><div class="eyebrow">${b.title || "Your mission"}</div><ul>${b.items.map((i) => `<li>${i}</li>`).join("")}</ul></div>`,
     task: (b) => `<div class="task"><span class="n">${b.n}</span><h2>${b.title}</h2>${b.tag ? `<span class="tag">${b.tag}</span>` : ""}</div>`,
     p: (b) => `<p${b.cls ? ` class="${b.cls}"` : ""}${b.mb != null ? ` style="margin-bottom:${b.mb}mm"` : ""}>${fmt(b.html)}</p>`,
-    q: (b) => `<p class="q"><span class="ql">${b.l}</span>${fmt(b.html)}</p>${lines(b.lines)}`,
+    q: (b) => `<p class="q"><span class="ql">${b.l}</span>${fmt(b.html)}${b.a && !b.lines ? ` <span class="ans">${fmt(b.a)}</span>` : ""}</p>${lines(b.lines, b.a)}`,
     lines: (b) => lines(b.n),
     spacer: (b) => `<div style="height:${b.mm}mm"></div>`,
     h3: (b) => el("h3", fmt(b.html)),
@@ -100,6 +103,7 @@
   }
 
   function build() {
+    if (ANSWERS) document.documentElement.classList.add("answers");
     const bar = `<div class="screen-bar"><span>${W.title}: ${W.pages.length} pages. Print from Chrome as A4, margins none, background graphics on.</span></div>`;
     document.body.innerHTML = bar + `<main class="book">${W.pages.map(page).join("")}</main>`;
     document.title = W.title;

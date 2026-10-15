@@ -1,5 +1,5 @@
 #!/bin/sh
-# Rebuild the student workbook and its answer edition with headless Chrome.
+# Rebuild the student workbook, the Unit review and their answer editions with headless Chrome.
 # Serve the repository root first:  python3 -m http.server 8000
 # Then run from this folder:        sh build-pdfs.sh
 # MathJax is fetched from a CDN, so the build needs a network connection.
@@ -25,5 +25,10 @@ pdf() { # output, url, attempt
   else echo "FAILED: $1"; rm -rf "$profile"; fi
 }
 
-[ -z "$ONLY_ANSWERS" ] && pdf "$OUT/Energy - Year 9 Student Workbook.pdf" "$BASE/workbook.html"
-pdf "$OUT/Energy - Year 9 Student Workbook (Answers).pdf" "$BASE/workbook.html?answers"
+# ONLY_REVIEW=1 builds just the Unit review and its answers; ONLY_ANSWERS=1 skips both student editions.
+if [ -z "$ONLY_REVIEW" ]; then
+  [ -z "$ONLY_ANSWERS" ] && pdf "$OUT/Energy - Year 9 Student Workbook.pdf" "$BASE/workbook.html"
+  pdf "$OUT/Energy - Year 9 Student Workbook (Answers).pdf" "$BASE/workbook.html?answers"
+fi
+[ -z "$ONLY_ANSWERS" ] && pdf "$OUT/Energy - Year 9 Unit Review.pdf" "$BASE/workbook.html?review"
+pdf "$OUT/Energy - Year 9 Unit Review (Answers).pdf" "$BASE/workbook.html?review&answers"
