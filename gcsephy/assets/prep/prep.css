@@ -1,0 +1,127 @@
+@import url('/gcsephy/assets/fonts/year9-workbook-fonts.css');
+
+/* One-page A4 Prep (homework) sheets for the GCSE units, after the Year 9 Lesson 5 worksheet.
+   Each .page is exactly one A4 sheet; prep.js outlines a page in red if its content overflows.
+   The year accent follows the GCSE landing page: orange (Year 9), green (Year 10), yellow (Year 11). */
+@page { size: A4; margin: 0; }
+
+:root {
+  --navy: #1d3557; --ink: #1d2733; --muted: #6b7684; --rule: #c8cdd4; --line: #b7bfcb; --ans: #1558b0;
+  --accent: #f7a25c; --accent-t: #fdf0e3; --accent-ink: #80501e;
+}
+:root[data-year="10"] { --accent: #b4d84e; --accent-t: #f1f7dc; --accent-ink: #49651f; }
+:root[data-year="11"] { --accent: #f7d23e; --accent-t: #fdf7da; --accent-ink: #78601b; }
+
+* { box-sizing: border-box; }
+html { background: #d9dcdf; }
+body { margin: 0; color: var(--ink); font: 10pt/14.5pt Lato, Arial, Helvetica, sans-serif; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+p { margin: 0 0 5pt; }
+b, strong { font-weight: 700; }
+sub, sup { font-size: 70%; line-height: 0; }
+
+.screen-bar { max-width: 210mm; margin: 0 auto; padding: 10px 0; font: 13px/1.4 Arial, sans-serif; color: #333; }
+.screen-bar a { margin-right: 10px; color: #1558b0; }
+@media print { .screen-bar { display: none; } html { background: none; } }
+
+/* ----- sheet ----- */
+.page { position: relative; width: 210mm; height: 297mm; margin: 0 auto 8mm; padding: 50pt 42pt 0; overflow: hidden; background: #fff; break-after: page; break-inside: avoid; }
+.page:last-child { break-after: auto; }
+.page::before { content: ""; position: absolute; left: 0; right: 0; top: 0; height: 9pt; background: var(--accent); }
+.page.overflow { outline: 3px solid #d00; }
+.run-head { position: absolute; left: 42pt; right: 42pt; top: 24pt; display: flex; justify-content: space-between; font: 700 7.5pt/10pt Poppins, Arial, sans-serif; letter-spacing: .15em; text-transform: uppercase; color: var(--navy); }
+.run-head span:last-child { font-weight: 400; color: var(--muted); }
+.run-foot { position: absolute; left: 42pt; right: 42pt; bottom: 20pt; display: flex; justify-content: space-between; font: 7.5pt/10pt Lato, Arial, sans-serif; color: var(--muted); }
+.run-foot b { color: var(--navy); font-family: Poppins, Arial, sans-serif; }
+
+/* ----- title block ----- */
+.top { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 14pt; align-items: end; }
+.badge { display: inline-block; margin: 0 0 7pt; padding: 5pt 9pt; border-radius: 3pt; background: var(--accent); color: #16130f; font: 700 7.5pt/7pt Poppins, Arial, sans-serif; letter-spacing: .21em; text-transform: uppercase; }
+.title { margin: 0; color: var(--navy); font: 700 19pt/23pt Poppins, Arial, sans-serif; letter-spacing: -.015em; }
+.subtitle { margin: 3pt 0 0; color: var(--muted); font-size: 9.5pt; line-height: 13pt; }
+.score { width: 64pt; padding: 6pt 0 5pt; border: 2px solid var(--navy); border-radius: 3pt; text-align: center; color: var(--navy); }
+.score span { display: block; font: 700 6.5pt/8pt Poppins, Arial, sans-serif; letter-spacing: .18em; text-transform: uppercase; }
+.score b { display: block; margin-top: 4pt; font: 700 15pt/18pt Poppins, Arial, sans-serif; }
+.score b i { display: inline-block; width: 22pt; }
+.title-rule { margin: 9pt 0 8pt; border-top: 2px solid var(--navy); }
+.fields { display: grid; grid-template-columns: 2.3fr 1fr 1.2fr; gap: 14pt; margin: 0 0 9pt; font-weight: 700; color: var(--navy); }
+.fields div { display: flex; gap: 5pt; }
+.fields i { flex: 1; border-bottom: 1.1pt solid #8f99a6; }
+
+/* ----- sections ----- */
+.sec { display: flex; align-items: baseline; gap: 8pt; margin: 10pt 0 6pt; padding: 0 0 3pt; border-bottom: 1.4px solid var(--rule); }
+.sec h2 { margin: 0; color: var(--navy); font: 700 11.5pt/15pt Poppins, Arial, sans-serif; }
+.sec .tag { padding: 2pt 6pt; border-radius: 2pt; background: var(--accent-t); color: var(--accent-ink); font: 700 7pt/9pt Poppins, Arial, sans-serif; letter-spacing: .14em; text-transform: uppercase; }
+.sec .aside { margin-left: auto; color: var(--muted); font-size: 8.5pt; }
+.donow { padding: 7pt 11pt 3pt; border-left: 3.4pt solid var(--accent); border-radius: 0 3.5pt 3.5pt 0; background: var(--accent-t); }
+.donow .sec { margin-top: 0; border-color: rgba(0, 0, 0, .12); }
+.donow .lines i { border-color: #c9bfae; }
+
+/* ----- questions ----- */
+.q { display: grid; grid-template-columns: 17pt minmax(0, 1fr); margin: 0 0 6pt; }
+.q > .n { width: 14pt; height: 14pt; margin-top: .5pt; display: grid; place-items: center; border-radius: 7pt; background: var(--navy); color: #fff; font: 700 7.5pt/1 Poppins, Arial, sans-serif; }
+.q-body > :last-child { margin-bottom: 0; }
+.stem { margin: 0 0 3pt; }
+.part { display: grid; grid-template-columns: 11pt minmax(0, 1fr); margin: 0 0 4pt; }
+.part > .l { font-weight: 700; color: var(--accent-ink); }
+.line-q { display: flex; gap: 8pt; align-items: baseline; }
+.line-q > span:first-child { flex: 1; }
+.mk { flex: none; margin-left: auto; color: var(--muted); font: 700 8pt/12pt Poppins, Arial, sans-serif; white-space: nowrap; }
+.bank { margin-left: 4pt; color: #9aa3ae; font-size: 7pt; font-weight: 400; letter-spacing: .04em; }
+
+.lines { position: relative; margin: 1pt 0 0; }
+.lines i { display: block; height: 19pt; border-bottom: 1.1pt solid var(--line); }
+.blank { display: inline-block; min-width: var(--w, 24mm); padding: 0 1mm; border-bottom: 1.1pt solid #8f99a6; text-align: center; line-height: 1.2; }
+.opts { margin-left: 1mm; font-size: 8.8pt; font-weight: 700; color: #333c48; }
+.ring-box { display: inline-flex; flex-wrap: wrap; vertical-align: middle; margin: .4mm 1mm; border: 1.4px solid var(--ink); background: #fff; }
+.ring-box > span { padding: .4mm 2.2mm; border-left: 1px solid var(--rule); font-weight: 700; font-size: 9.2pt; line-height: 1.45; }
+.ring-box > span:first-child { border-left: 0; }
+
+/* ----- answers ----- */
+.ans, .ans-over { color: var(--ans); font-weight: 700; }
+.blank .ans { font-size: 9.5pt; }
+.ans-over { position: absolute; left: 1mm; right: 0; top: 4pt; font-size: 9pt; line-height: 19pt; }
+.ans-over .alt { font-weight: 400; font-style: italic; }
+body.answers .ring-box > span.correct { color: var(--ans); outline: 1.6px solid var(--ans); outline-offset: -1.8px; border-radius: 99px; }
+/* The student edition keeps the answers' space, so both editions have the same layout. */
+body:not(.answers) .ans, body:not(.answers) .ans-over { visibility: hidden; }
+
+/* ----- extras ----- */
+.split { display: grid; grid-template-columns: var(--cols, 1fr 1fr); gap: 0 6mm; align-items: start; }
+.box { margin: 0 0 6pt; padding: 6pt 10pt; border: 1px solid var(--rule); border-radius: 3pt; background: #f7f8fa; font-size: 9.5pt; line-height: 13.5pt; }
+.tbl { width: 100%; margin: 2pt 0 5pt; border-collapse: collapse; table-layout: fixed; font-size: 9pt; line-height: 12pt; }
+.tbl th { padding: 4pt 5pt; background: var(--navy); color: #fff; font: 700 8pt/10pt Poppins, Arial, sans-serif; text-align: center; }
+.tbl td { height: 17pt; padding: 2pt 5pt; border: .6pt solid var(--rule); text-align: center; }
+.tbl td:first-child { font-weight: 700; text-align: left; }
+.tbl tr > :first-child { width: 27%; }
+.nuc { display: inline-flex; align-items: center; vertical-align: middle; line-height: 1; }
+.nuc .az { display: inline-flex; flex-direction: column; align-items: flex-end; margin-right: .3pt; font-size: 70%; line-height: 1.05; }
+.nuc-eq { display: inline-block; margin: 2pt 0 4pt 6pt; font-size: 14pt; line-height: 30pt; }
+.nuc-eq .blank { font-size: 10pt; line-height: 15pt; }
+.check { display: inline-block; width: 9pt; height: 9pt; margin: 0 3pt -1pt 0; border: 1.2px solid #5c6672; border-radius: 1.5pt; }
+body.answers .check.on { background: var(--ans); border-color: var(--ans); box-shadow: inset 0 0 0 1.4pt #fff; }
+.fig { margin: 0 0 4pt; }
+.fig svg { display: block; width: 100%; height: auto; }
+
+/* ----- graph paper (graph.js) ----- */
+.pg-graph { margin: 0 0 4pt; border: 1.4pt solid var(--navy); background: #fff; }
+.pg-graph svg { display: block; width: 100%; height: auto; }
+.pg-graph .min { stroke: #e3e8ee; stroke-width: .18; }
+.pg-graph .maj { stroke: #b9c4d0; stroke-width: .3; }
+.pg-graph .axis { fill: none; stroke: var(--navy); stroke-width: .55; }
+.pg-graph text { font: 3.1px Lato, Arial, sans-serif; fill: #3b4654; }
+.pg-graph text.ttl { font: 700 3.4px Lato, Arial, sans-serif; fill: var(--navy); }
+.pg-graph .pt { fill: none; stroke: var(--navy); stroke-width: .55; stroke-linecap: round; }
+.pg-graph .crv { fill: none; stroke: var(--navy); stroke-width: .6; }
+.pg-graph .ans { fill: none; stroke: var(--ans); stroke-width: .7; stroke-linecap: round; }
+.pg-graph .ring { fill: none; stroke: var(--ans); stroke-width: .6; }
+.pg-graph .guide { fill: none; stroke: var(--ans); stroke-width: .4; stroke-dasharray: 1.2 .9; }
+body:not(.answers) .pg-graph .ans, body:not(.answers) .pg-graph .ring, body:not(.answers) .pg-graph .guide { display: none; }
+
+/* ----- shared unit figures (circuits, I–V sketches) ----- */
+figure.circuit-figure { margin: 0; }
+figure.circuit-figure svg { display: block; width: 100%; height: auto; }
+figure.circuit-figure figcaption { margin-top: 2pt; color: var(--muted); font-size: 8pt; text-align: center; }
+.iv-row { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8mm; padding: 0 8mm; }
+.iv { position: relative; }
+.iv > b { position: absolute; left: 0; top: 0; color: var(--navy); font: 700 10pt/1 Poppins, Arial, sans-serif; }
+mjx-container { line-height: 0; }

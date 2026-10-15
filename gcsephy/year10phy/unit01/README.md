@@ -53,6 +53,7 @@ AQA gives every student the full Physics Equations Sheet as an insert with each 
 | `assets/components/` | Component pictures for the I–V mission; the teaching deck's "What they look like" slide uses the same files, so renaming one means updating `../../decks/electric-circuits/index.html` too |
 | `Y10 Electricity Virtual Labs.pdf` | Class worksheet with its answers at the back, built from `workbook/workbook.html?labs`. Missions deep-link to its pages, so if they move, update `lab` in `assets/lessons.js`, the table above, and the page references in `workbook/assets/content.js` and `plans-data.js` |
 | `Y10 Electricity Virtual Labs Teacher Guide.pdf` | Hosted but not linked; no source in this repository |
+| `prep/` | One-page Prep (homework) sheets, one per two lessons, each out of 10, with answer editions: `content.js` (questions), `prep.html` (preview, `?n=2&answers`) and `pdf/`. The hub links them. See [`../../assets/prep/README.md`](../../assets/prep/README.md). Circuits and I–V sketches come from `assets/diagrams.js` |
 | `workbook/` | Twelve-lesson workbook, unit review, answer editions and teacher guide. See [`workbook/README.md`](workbook/README.md) |
 
 To edit content, change `assets/lessons.js`, `exam-questions.js` or `practicals.js`; there is no build step. The workbook uses `assets/diagrams.js`, so rebuild its PDFs after changing a circuit symbol.
