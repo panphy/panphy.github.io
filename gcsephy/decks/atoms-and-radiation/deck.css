@@ -354,15 +354,16 @@ h3 { font-size: 34px; line-height: 1.15; }
 .pill { color: var(--text-secondary); font-size: 16px; border: 1px solid var(--input-border); border-radius: 999px; padding: 4px 12px; }
 .medical-illustration, .source-illustration { display: block; width: 100%; height: 330px; flex: none; object-fit: contain; background: #fff; border-radius: 12px; }
 .source-illustration { height: 250px; margin-bottom: 14px; }
-.exposure-headings, .exposure-captions { display: grid; grid-template-columns: 1fr 1fr; gap: 28px; text-align: center; }
+.exposure-panel { padding-bottom: 32px; }
+.exposure-headings, .exposure-captions { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 28px; text-align: center; flex-shrink: 0; }
 .exposure-headings h3 { margin: 0; }
-.exposure-illustration { display: block; width: 100%; height: 0; min-height: 320px; flex: 1; object-fit: cover; background: #fff; border-radius: 16px; margin: 18px 0; }
-.exposure-captions p { margin: 4px 0; font-size: 26px; }
+.exposure-illustration { display: block; width: 100%; height: 0; min-height: 0; flex: 1; object-fit: cover; padding: 0 80px; background: #fff; border-radius: 16px; margin: 18px 0; }
+.exposure-captions p { margin: 4px 0; font-size: 24px; line-height: 1.3; }
 @media screen and (max-width: 600px) and (orientation: portrait) {
   body:not(.is-fullscreen) .medical-illustration, body:not(.is-fullscreen) .source-illustration { height: auto; }
   body:not(.is-fullscreen) .exposure-headings, body:not(.is-fullscreen) .exposure-captions { gap: 12px; }
   body:not(.is-fullscreen) .exposure-headings h3 { font-size: 18px; }
-  body:not(.is-fullscreen) .exposure-illustration { height: auto; min-height: 0; flex: none; object-fit: contain; }
+  body:not(.is-fullscreen) .exposure-illustration { height: auto; min-height: 0; flex: none; object-fit: contain; padding: 0; }
   body:not(.is-fullscreen) .exposure-captions p { font-size: 16px; }
 }
 .fig { position: relative; flex: 1; min-height: 0; }
