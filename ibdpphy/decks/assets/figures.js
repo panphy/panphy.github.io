@@ -725,12 +725,13 @@
     },
 
     'projectile-path': () => {
+      // The components are drawn to one scale: 49 across and 78 up at launch, the slope of the path there (1120 / 700).
       const at = t => [90 + 700 * t, 380 - 1120 * t * (1 - t)];
       let s = `<line x1="40" y1="398" x2="860" y2="398" class="tick"/>` + `<path d="${sampled(at)}" class="guide"/><line x1="440" y1="116" x2="440" y2="380" class="guide"/>`;
       [0, 0.25, 0.5, 0.75, 1].forEach(t => {
         const [x, y] = at(t), vy = 78 * (2 * t - 1);
         if (Math.abs(vy) > 1) s += arrow(x, y, x, y + vy, 'brand-accent', 4);
-        s += arrow(x, y, x + 74, y, 'brand-primary', 4) + body(x, y, 14);
+        s += arrow(x, y, x + 49, y, 'brand-primary', 4) + body(x, y, 14);
       });
       s += text(440, 70, 'top: vertical velocity = 0', 'lbl strong') + text(456, 270, 'maximum', 'lbl small', 'start') + text(456, 294, 'height', 'lbl small', 'start');
       s += arrow(380, 428, 98, 428, 'text-secondary', 2.5) + arrow(500, 428, 770, 428, 'text-secondary', 2.5) + text(440, 436, 'range', 'lbl mono');
@@ -741,7 +742,7 @@
 
     'drag-path': () => {
       let s = `<line x1="40" y1="400" x2="860" y2="400" class="tick"/>` + `<path d="${sampled(t => [90 + 700 * t, 400 - 1200 * t * (1 - t)])}" class="guide" style="stroke-width:3;opacity:1"/>`;
-      s += plot('M90,400 C190,180 330,150 420,190 C500,225 560,300 600,400') + body(90, 400, 14);
+      s += plot('M90,400 C218,180 330,150 420,190 C500,225 560,300 600,400') + body(90, 400, 14);
       s += text(660, 150, 'no air resistance', 'lbl small', 'start') + text(330, 300, 'with air resistance', 'lbl strong a');
       s += both(440, 108, 440, 190, 'brand-accent', 3) + text(456, 158, 'lower', 'lbl small', 'start');
       s += both(608, 432, 782, 432, 'brand-accent', 3) + text(695, 462, 'shorter range', 'lbl small');
@@ -774,9 +775,9 @@
     'fbd-block': el => {
       const on = labelled(el);
       let s = `<line x1="90" y1="302" x2="710" y2="302" class="guide"/>` + box(380, 245, 170, 110);
-      s += arrow(380, 245, 380, 412, 'brand-primary', 5) + arrow(412, 300, 412, 110, 'brand-primary', 5) + arrow(465, 245, 660, 245, 'brand-primary', 5) + arrow(348, 300, 196, 300, 'brand-primary', 5) + dot(380, 245);
+      s += arrow(380, 245, 380, 412, 'brand-primary', 5) + arrow(412, 300, 412, 133, 'brand-primary', 5) + arrow(465, 245, 660, 245, 'brand-primary', 5) + arrow(348, 300, 196, 300, 'brand-primary', 5) + dot(380, 245);
       if (on) {
-        s += text(430, 130, sub('F', 'N'), 'lbl display', 'start') + text(488, 128, 'normal force', 'lbl small', 'start');
+        s += text(430, 152, sub('F', 'N'), 'lbl display', 'start') + text(488, 150, 'normal force', 'lbl small', 'start');
         s += text(398, 408, sub('F', 'g'), 'lbl display', 'start') + text(452, 406, 'weight', 'lbl small', 'start');
         s += text(572, 224, 'F', 'lbl display') + text(572, 284, 'applied force', 'lbl small');
         s += text(236, 280, sub('F', 'f'), 'lbl display') + text(236, 338, 'friction', 'lbl small');

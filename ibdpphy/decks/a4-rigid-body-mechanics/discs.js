@@ -80,9 +80,9 @@ function build(THREE, fig, index) {
   holder.appendChild(caption);
   const STAGES = ['before', 'slip', 'after'];
   const words = {
-    before: '1. Lower disc alone at <i>ω</i>₁ = 12 rad s⁻¹',
+    before: '1. Lower disc alone at \\(\\omega_{1} = 12\\) rad s⁻¹',
     slip: '2. Dropped on: friction slows the lower disc<br>&nbsp;&nbsp;&nbsp;&nbsp;and speeds up the upper one',
-    after: '3. Turning together at <i>ω</i> = 8.0 rad s⁻¹'
+    after: '3. Turning together at \\(\\omega = 8.0\\) rad s⁻¹'
   };
   const describe = phase => STAGES.slice(0, STAGES.indexOf(phase) + 1).map(p => `<div style="${p === phase ? 'color:var(--text-main);font-weight:700' : ''}">${words[p]}</div>`).join('');
 
@@ -117,7 +117,7 @@ function build(THREE, fig, index) {
     upper.group.rotation.y = state.upper;
     upper.group.position.y = state.height;
     renderer.render(scene, camera);
-    if (state.phase !== shown) { shown = state.phase; caption.innerHTML = describe(shown); }
+    if (state.phase !== shown) { shown = state.phase; caption.innerHTML = describe(shown); window.MathJax?.typesetPromise?.([caption]).catch(() => {}); }
     return true;
   }
   // The lower disc spins from when the slide opens. The figure's play step is the press that drops

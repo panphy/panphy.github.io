@@ -28,7 +28,7 @@ window.DeckFigures.add(P => {
     'b3-box': el => {
       const on = labelled(el), box = gas(206, 126, 388, 268, 30, 4);
       let s = walls(200, 120, 600, 400);
-      if (on) s += arrow(690, 260, 612, 260, 'brand-accent', 6) + text(700, 240, 'each collision', 'lbl', 'start') + text(700, 274, 'pushes the wall', 'lbl', 'start');
+      if (on) s += arrow(606, 260, 684, 260, 'brand-accent', 6) + text(700, 248, 'each collision', 'lbl', 'start') + text(700, 282, 'pushes the wall', 'lbl', 'start');
       return svg(on ? '170 90 740 340' : '170 90 460 340', s + twoState(box.still, box.mover), 'A closed box of gas. The molecules move in all directions and bounce off the walls. Each collision pushes on the wall, and the enormous number of collisions each second gives a steady pressure');
     },
 

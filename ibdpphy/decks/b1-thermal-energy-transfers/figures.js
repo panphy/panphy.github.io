@@ -55,13 +55,15 @@ window.DeckFigures.add(P => {
 
     // Temperature against energy supplied for ice turned into steam: two flat parts. Also drawn plain.
     'b1-heating-curve': el => {
-      const on = labelled(el), pts = [[120, 430], [180, 340], [330, 340], [450, 150], [720, 150], [790, 70]];
+      // At a steady heating rate, ice and steam warm about twice as steeply as water. The melting plateau is to
+      // scale with the water slope; the boiling plateau is drawn shorter than to scale, so that it fits.
+      const on = labelled(el), pts = [[120, 430], [156, 340], [276, 340], [426, 150], [756, 150], [788, 70]];
       let s = arrow(120, 470, 120, 40, 'text-secondary', 2.5) + arrow(120, 470, 830, 470, 'text-secondary', 2.5) + line(through(pts), 'brand-primary', 6);
       s += line(through(pts.slice(1, 3)), 'brand-accent', 8) + line(through(pts.slice(3, 5)), 'brand-accent', 8);
       if (on) {
-        s += text(136, 54, 'temperature', 'lbl mono', 'start') + text(824, 506, 'energy supplied', 'lbl mono', 'end') + `<line x1="120" y1="340" x2="180" y2="340" class="guide"/><line x1="120" y1="150" x2="450" y2="150" class="guide"/>` + text(106, 350, '0 °C', 'lbl mono', 'end') + text(106, 160, '100 °C', 'lbl mono', 'end');
-        s += text(255, 320, 'melting', 'lbl strong halo') + text(585, 130, 'boiling', 'lbl strong halo') + text(196, 420, 'ice', 'lbl halo', 'start') + text(410, 270, 'water', 'lbl halo', 'start') + text(770, 130, 'steam', 'lbl halo', 'start');
-        s += text(585, 194, 'temperature constant', 'lbl small');
+        s += text(136, 54, 'temperature', 'lbl mono', 'start') + text(824, 506, 'energy supplied', 'lbl mono', 'end') + `<line x1="120" y1="340" x2="156" y2="340" class="guide"/><line x1="120" y1="150" x2="450" y2="150" class="guide"/>` + text(106, 350, '0 °C', 'lbl mono', 'end') + text(106, 160, '100 °C', 'lbl mono', 'end');
+        s += text(216, 320, 'melting', 'lbl strong halo') + text(591, 130, 'boiling', 'lbl strong halo') + text(168, 420, 'ice', 'lbl halo', 'start') + text(372, 270, 'water', 'lbl halo', 'start') + text(770, 130, 'steam', 'lbl halo', 'start');
+        s += text(591, 194, 'temperature constant', 'lbl small');
       }
       return svg(on ? '0 20 850 500' : '90 40 760 450', s, 'A graph of temperature against energy supplied for ice heated at a steady rate. The temperature rises while the ice warms, stays constant at 0 degrees Celsius while it melts, rises again as water, stays constant at 100 degrees Celsius while it boils, then rises as steam. The flat part for boiling is much longer than the flat part for melting');
     },

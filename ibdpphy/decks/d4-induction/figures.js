@@ -105,14 +105,15 @@ window.DeckFigures.add(P => {
 
     // A magnet bouncing on a spring above a coil, and the alternating emf it induces.
     'd4-spring-magnet': () => {
-      const steps = 24, y = i => 190 + 46 * Math.sin(i / steps * TAU), body = magnet(-26, 0, 52, 90, 'down');
+      // The fallback swing dies away with the emf trace (4.5 cycles, e^−1.6t), then starts again.
+      const steps = 108, y = i => 190 - 46 * Math.exp(-1.6 * i / steps) * Math.cos(i / steps * 4.5 * TAU), body = magnet(-26, 0, 52, 90, 'down');
       const coilShape = Array.from({ length: 5 }, (_, i) => `<ellipse cx="200" cy="${400 + i * 18}" rx="74" ry="14" style="fill:none;stroke:var(--brand-accent);stroke-width:5"/>`).join('');
       let s = `<line x1="110" y1="40" x2="290" y2="40" class="tick" style="stroke-width:6"/>` + coilShape + `<path d="M274,400 H330 M274,472 H330" style="fill:none;stroke:var(--brand-accent);stroke-width:4"/>` + text(200, 524, 'coil', 'lbl');
       s += arrow(430, 420, 430, 100, 'text-secondary', 2.5) + arrow(430, 260, 830, 260, 'text-secondary', 2.5) + text(446, 114, 'emf', 'lbl mono', 'start') + text(830, 222, 'time', 'lbl mono', 'end');
       s += line(sampled(t => [430 + 380 * t, 260 - 110 * Math.exp(-1.6 * t) * Math.sin(t * 4.5 * TAU)], 200), 'hl', 4) + text(640, 440, 'the oscillation dies away:', 'lbl') + text(640, 474, 'energy goes to the coil circuit', 'lbl');
       const springs = Array.from({ length: steps + 1 }, (_, i) => spring(200, 40, y(i), 8, 18).match(/d="([^"]+)"/)[1]);
       const still = spring(200, 40, 190, 8, 18) + `<g transform="translate(200 190)">${body}</g>`;
-      const mover = `<path class="cable" stroke-linejoin="round" d="${springs[0]}">${anim('d', springs, 1.6)}</path><g>${track(Array.from({ length: steps + 1 }, (_, i) => [200, y(i)]), 1.6)}${body}</g>`;
+      const mover = `<path class="cable" stroke-linejoin="round" d="${springs[0]}">${anim('d', springs, 7.2)}</path><g>${track(Array.from({ length: steps + 1 }, (_, i) => [200, y(i)]), 7.2)}${body}</g>`;
       return svg('80 10 780 530', s + twoState(still, mover), 'A magnet hangs from a spring and oscillates up and down above a coil. The flux through the coil changes as the magnet moves, so an alternating emf is induced. The graph of emf against time is a sine curve whose amplitude dies away, because the induced current takes energy from the oscillation');
     },
 

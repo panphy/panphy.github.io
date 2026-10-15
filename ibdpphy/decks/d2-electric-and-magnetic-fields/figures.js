@@ -165,7 +165,7 @@ window.DeckFigures.add(P => {
       // The curved lines at the two edges, from the positive plate round to the negative one.
       const bulge = (x, dx, y1, y2) => fieldLine(Array.from({ length: 41 }, (_, i) => { const t = i / 40, u = 1 - t; return [x + 3 * u * t * dx, u * u * u * y1 + 3 * u * u * t * (y1 + (y2 - y1) * 0.18) + 3 * u * t * t * (y2 - (y2 - y1) * 0.18) + t * t * t * y2]; }));
       s += [[-1, 200], [1, 600]].map(([k, x]) => bulge(x, k * 78, 108, 412) + bulge(x, k * 130, 100, 420)).join('');
-      if (equi) s += [[164, '300 V'], [228, '200 V'], [292, '100 V']].map(([y, v], i) => `<line x1="204" y1="${y + 32}" x2="596" y2="${y + 32}" ${hlStroke}/>` + text(400, y + 24, v, 'lbl mono strong halo')).join('') + text(722, 110, '400 V', 'lbl mono strong', 'start') + text(722, 430, '0 V', 'lbl mono strong', 'start');
+      if (equi) s += [[152, '300 V'], [228, '200 V'], [304, '100 V']].map(([y, v], i) => `<line x1="204" y1="${y + 32}" x2="596" y2="${y + 32}" ${hlStroke}/>` + text(400, y + 24, v, 'lbl mono strong halo')).join('') + text(722, 110, '400 V', 'lbl mono strong', 'start') + text(722, 430, '0 V', 'lbl mono strong', 'start');
       else if (on) s += both(222, 114, 222, 406) + text(236, 270, 'd', 'lbl display halo', 'start') + text(722, 226, 'weaker,', 'lbl', 'start') + text(722, 260, 'curved field', 'lbl', 'start') + text(722, 294, 'at the edges', 'lbl', 'start');
       return svg(on ? '60 50 860 440' : '80 50 640 440', s, 'Two parallel plates, the upper one positive. Between them the field lines are parallel, evenly spaced and point from the positive plate to the negative plate: a uniform field. At the edges the lines bulge outwards, where the field is weaker');
     },
