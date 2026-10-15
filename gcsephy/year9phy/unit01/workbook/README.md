@@ -10,11 +10,13 @@ The student hub uses `/gcsephy/assets/workbook-hub.css`, shared by all four work
 |---|---|
 | `assets/content.js` | All the words: one entry per printed page. Edit here |
 | `assets/workbook.css`, `assets/workbook.js` | Print styles; renderer that builds A4 pages and flags overflow |
-| `index.html` | Student hub linking the workbook PDF, answers PDF, slide deck and the four Preps (`../prep/`); linked from the GCSE landing page |
+| `index.html` | Student hub linking the workbook PDF, answers PDF, Unit review, slide deck and the four Preps (`../prep/`); linked from the GCSE landing page |
 | `workbook.html` | Preview of all 40 pages |
 | `build-pdf.sh` | Prints the PDF with headless Chrome and checks the page count |
 | `answers.html`, `assets/answers.js`, `assets/answers.css` | Answer key: one entry per task and part, with workbook page numbers (not a page-for-page copy) |
 | `build-answers-pdf.sh` | Prints `../Work Like a Physicist - Year 9 Student Workbook (Answers).pdf` |
+| `review.html`, `assets/review.js`, `assets/review.css` | Unit review (7 pages): `review.js` holds its pages in the same format as `content.js` and borrows the toolkit page from it; `?answers` shows the answers (a `q` block's `a`, `[[24\|answer]]` in a blank, or `<span class="ans">`), which the student edition hides but keeps space for. Its graph uses `/gcsephy/assets/prep/graph.js` |
+| `build-review-pdf.sh` | Prints `../Work Like a Physicist - Year 9 Unit Review.pdf` and its answers; warns if either is not 7 pages |
 | `../../../assets/fonts/year9-workbook-fonts.css` | Poppins, Lato and Lora (OFL) |
 
 ## Editing

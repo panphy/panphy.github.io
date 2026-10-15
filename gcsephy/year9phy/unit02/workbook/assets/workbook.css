@@ -463,3 +463,4 @@ td.blank-cell { height: 10mm; vertical-align: top; }
 .book:not(.guide) > section.toolkit-page { zoom: 1; }
 .toolkit-page .method-steps { break-inside: avoid; }
 .toolkit-page .tool:last-child:nth-child(odd) { grid-column: 1 / -1; }
+.question.part { padding-left: 0; margin-top: 2mm; }

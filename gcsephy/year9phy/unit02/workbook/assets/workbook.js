@@ -1,21 +1,23 @@
 /* Renders the Energy: Stores and Transfers student workbook from window.UNIT (assets/content.js).
    workbook.html is the student booklet; workbook.html?answers is the answer edition, with the
-   same page numbers. Maths is LaTeX between \( and \), typeset by MathJax before printing.
+   same page numbers. workbook.html?review prints the Unit review booklet (add &answers). Maths is LaTeX between \( and \), typeset by MathJax before printing.
    Print with Chrome: A4, default margins, no headers or footers. */
 (function () {
   "use strict";
 
   const U = window.UNIT;
   const F = window.EnergyFigures;
-  const answers = new URLSearchParams(location.search).has("answers");
+  const params = new URLSearchParams(location.search);
+  const answers = params.has("answers");
+  const REVIEW = params.has("review");
   const pad = (n) => String(n).padStart(2, "0");
   if (answers) document.body.classList.add("answers");
 
-  const footer = `Energy: Stores and Transfers, Year 9 workbook${answers ? " (ANSWERS)" : ""}`;
+  const footer = `Energy: Stores and Transfers, Year 9 ${REVIEW ? "Unit review" : "workbook"}${answers ? " (ANSWERS)" : ""}`;
   const pageStyle = document.createElement("style");
   pageStyle.textContent = `@page { @bottom-left { content: "${footer}"; } } @page cover { @bottom-left { content: none; } }`;
   document.head.appendChild(pageStyle);
-  document.title = `Energy - Stores and Transfers - Year 9 Workbook${answers ? " (Answers)" : ""}`;
+  document.title = `Energy - Stores and Transfers - Year 9 ${REVIEW ? "Unit Review" : "Workbook"}${answers ? " (Answers)" : ""}`;
 
   // ---------- small helpers ----------
   const ans = (html) => (html ? `<span class="ans">${html}</span>` : "");
@@ -153,6 +155,7 @@
       case "vars": return `<table class="vars">${b.rows.map(([k, given, a]) => `<tr><th>${k}</th><td>${given || ans(a)}</td></tr>`).join("")}</table>`;
       case "graph": return graphPaper(b);
       case "q": return question(b);
+      case "part": return question(Object.assign({}, b, { part: true })); // an unnumbered part of a question
       case "lab": return `<div class="lab-card">${b.title ? `<h4 class="sub">${b.title}</h4>` : ""}${renderBlocks(b.blocks)}</div>`;
       default: return "";
     }
@@ -175,7 +178,7 @@
   }
 
   function question(b) {
-    qNum += 1;
+    if (!b.part) qNum += 1;
     const type = b.type ? `<span class="type">${b.type}</span>` : "";
     const mk = b.marks ? `<span class="marks">[${b.marks} mark${b.marks > 1 ? "s" : ""}]</span>` : "";
     let body = "";
@@ -205,6 +208,7 @@
     if (b.lines) body += lines(b.lines, b.a);
     else if (b.box) body += box(b.box, b.a, b.grid);
     else if (b.a && !b.frame) body += ansNote(b.a);
+    if (b.part) return `<div class="question part"><div class="prompt">${mk}${marks(b.p || "")}</div>${body}</div>`;
     return `<div class="question"><span class="qn">${qNum}</span><div class="prompt">${mk}${type}${marks(b.p || "")}</div>${body}</div>`;
   }
 
@@ -251,10 +255,14 @@
 
   // ---------- front and back matter ----------
   function cover() {
-    return `<section class="cover"><div class="eyebrow">Year 9 Physics, AQA GCSE, Unit 2</div>
+    const middle = REVIEW
+      ? `<div class="cover-part"><b>Unit review</b><span>After Lesson ${U.lessons.length}</span></div>
+      <p class="lede">Mixed exam-style questions from the whole unit, a fix-it log and the equation toolkit.</p>`
+      : `<p class="lede">Where energy is stored, how it moves, how fast it moves and how much of it is useful: nine lessons, from your first energy store to confident exam answers.</p>
+      <div class="cover-stats"><div><b>9</b>lessons</div><div><b>6</b>practicals</div><div><b>8</b>equations</div></div>`;
+    return `<section class="cover"><div class="eyebrow">Year 9 Physics, AQA GCSE, Unit 2${REVIEW ? ", Unit review" : ""}</div>
       <h1>Energy<br><em>Stores and<br>Transfers</em></h1>
-      <p class="lede">Where energy is stored, how it moves, how fast it moves and how much of it is useful: nine lessons, from your first energy store to confident exam answers.</p>
-      <div class="cover-stats"><div><b>9</b>lessons</div><div><b>6</b>practicals</div><div><b>8</b>equations</div></div>
+      ${middle}
       ${answers ? '<div class="edition">Answer edition for teachers and self-marking</div>' : ""}
       <div class="cover-foot">
         <div class="cover-circuit">${F.coverArt()}</div>
@@ -305,6 +313,20 @@
         <h4>Do now</h4>${list(l.doNow)}<h4>Cover the page</h4>${list(l.recall)}</div>`).join("")}</div></section>`;
   }
 
+  // Unit review: mixed exam practice from assets/review.js, then a fix-it log.
+  function review() {
+    qNum = 0;
+    const total = U.review.reduce((s, q) => s + (q.marks || 0), 0);
+    return `<section class="lesson" style="--accent:var(--violet);--accent-t:var(--violet-t)">
+      <div class="eyebrow">After Lesson ${U.lessons.length}, at home or in class</div><h2 class="page-title">Unit review</h2>
+      <p class="page-intro">Mixed questions from the whole unit, like a real exam. Try each question without looking back. The equation toolkit is on the last page. Then mark your answers with your teacher and fill in the “fix it” log.</p>
+      ${secHead("exam", "Mixed exam practice", `${total} marks, about 45 minutes`)}
+      ${U.review.map((q) => keep((q.tip ? `<div class="tip">${q.tip}</div>` : "") + question(q))).join("")}
+      ${keep(`${secHead("revise", "Fix-it log", "Turn every lost mark into a target.")}
+      <table class="fix-log"><thead><tr><th style="width:14mm">Q</th><th>What went wrong?</th><th>The correct physics (or method) is…</th><th style="width:26mm">Lesson to revisit</th></tr></thead>
+      <tbody>${"<tr><td></td><td></td><td></td><td></td></tr>".repeat(6)}</tbody></table>`)}</section>`;
+  }
+
   function toolkit() {
     const tools = U.equations.map((e) => `<div class="tool${e.tri ? " has-tri" : ""}"><div class="eq">${e.eq}</div><span class="lesson-tag">Lesson ${e.lesson}</span><div class="words">${e.words}</div><div class="units">${e.units}</div><div class="recall-cover">${e.re}</div>${e.tri ? `<div class="tool-tri">${triangleSvg(e.tri, "24mm")}</div>` : ""}</div>`).join("");
     return `<section class="new-page toolkit-page"><div class="eyebrow">Reference</div><h2 class="page-title">Equation toolkit</h2>
@@ -318,8 +340,12 @@
 
   const book = document.createElement("main");
   book.className = "book";
-  const bar = `<div class="screen-bar">Print preview. <a href="?${answers ? "" : "answers"}">${answers ? "Student edition" : "Answer edition"}</a>. Print with Chrome, A4, headers and footers off</div>`;
-  book.innerHTML = bar + cover() + howTo() + U.lessons.map(lesson).join("") + glossary() + tracker() + quickAnswers() + toolkit();
+  const here = REVIEW ? "review" : "";
+  const link = (q, a) => `?${[q, a ? "answers" : ""].filter(Boolean).join("&")}`;
+  const bar = `<div class="screen-bar">Print preview. <a href="${link(REVIEW ? "" : "review", answers)}">${REVIEW ? "Workbook" : "Unit review"}</a>. <a href="${link(here, !answers)}">${answers ? "Student edition" : "Answer edition"}</a>. Print with Chrome, A4, headers and footers off</div>`;
+  book.innerHTML = bar + (REVIEW
+    ? cover() + review() + toolkit()
+    : cover() + howTo() + U.lessons.map(lesson).join("") + glossary() + tracker() + quickAnswers() + toolkit());
   document.body.appendChild(book);
 
   // Typeset the maths, then tell the PDF build the page is ready. Offline, the LaTeX source stays.

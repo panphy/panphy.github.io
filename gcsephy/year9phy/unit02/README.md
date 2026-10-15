@@ -2,7 +2,7 @@
 
 **Year 9 Physics · AQA GCSE energy · nine lessons**
 
-A student workbook (with an answer edition), a teaching deck and nine lesson plans. There is no companion website; [`index.html`](index.html) is a short page linking the workbook, its answers, the deck and the five Preps. The lesson plans are not linked there.
+A student workbook and a Unit review (each with an answer edition), a teaching deck and nine lesson plans. There is no companion website; [`index.html`](index.html) is a short page linking the workbook, the Unit review, their answers, the deck and the five Preps. The lesson plans are not linked there.
 
 ## Scope
 
@@ -34,6 +34,7 @@ The student hub uses `/gcsephy/assets/workbook-hub.css`, shared by all four work
 |---|---|
 | `Energy - Year 9 Student Workbook.pdf` | 66-page A4 booklet, one per student: nine lessons, key words, progress tracker, quick answers and the equation toolkit with formula triangles on the last page |
 | `Energy - Year 9 Student Workbook (Answers).pdf` | The same pages with answers filled in, so page numbers match |
+| `Energy - Year 9 Unit Review.pdf`, `… (Answers).pdf` | 7-page unit review after Lesson 9: 40 marks of mixed AQA-style questions, a fix-it log and the equation toolkit; the answer edition has the same pages |
 | `workbook/` | Workbook source; see below |
 | `teaching-guides/` | Nine lesson-plan PDFs and their Markdown source; see its README |
 | `prep/` | One-page Prep (homework) sheets, one per week (Prep 5 follows Lesson 9), each out of 10, with answer editions: `content.js` (questions), `prep.html` (preview, `?n=2&answers`) and `pdf/`. The hub links the sheets, not the answer editions. See [`../../assets/prep/README.md`](../../assets/prep/README.md). Maths is LaTeX for MathJax, as in the workbook |
@@ -43,12 +44,13 @@ The student hub uses `/gcsephy/assets/workbook-hub.css`, shared by all four work
 
 | File | Use |
 |---|---|
-| `workbook/workbook.html` | Print preview; `?answers` for the answer edition |
+| `workbook/workbook.html` | Print preview; `?answers` for the answer edition, `?review` (with or without `&answers`) for the Unit review |
 | `workbook/assets/lessons-a.js`, `lessons-b.js`, `lessons-c.js` | Lessons 1–2, 3–5 and 6–9: all the words and questions |
 | `workbook/assets/content.js` | Joins the lessons and holds the equation toolkit and key words |
+| `workbook/assets/review.js` | The Unit review questions (`window.UNIT.review`), in the Exam corner format; `t: "part"` gives an unnumbered part |
 | `workbook/assets/workbook.js`, `workbook.css` | Renderer and print styles, adapted from the Year 10 workbook |
 | `workbook/assets/figures.js`, `figures.css` | Line drawings, shared with the deck |
-| `workbook/build-pdfs.sh` | Rebuilds both PDFs with headless Chrome |
+| `workbook/build-pdfs.sh` | Rebuilds the workbook, the Unit review and their answer editions with headless Chrome (`ONLY_REVIEW=1` for the review only) |
 
 Maths is LaTeX between `\(` and `\)`, typeset by MathJax from a CDN, so previews and builds need a network connection; text is written as `String.raw` templates so backslashes survive. In sentences, `[[answer|a / b / c]]` prints a blank followed by its options and `{{a|b*|c}}` prints an AQA-style ring box with `*` on the answer: every gap shows its choices. Content examined only in GCSE Physics (8463), not Combined Science: Trilogy, carries `<span class="triple-tag">Triple only</span>` (the cooling cups practical). The workbook marks no Higher-tier content: both courses are taught at Higher. Every page after the cover prints 1.2× larger, as in Year 10; the toolkit prints at normal size so it fits on the last page.
 
