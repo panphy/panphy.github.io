@@ -84,6 +84,8 @@ sub, sup { font-size: 70%; line-height: 0; }
 body.answers .ring-box > span.correct { color: var(--ans); outline: 1.6px solid var(--ans); outline-offset: -1.8px; border-radius: 99px; }
 /* The student edition keeps the answers' space, so both editions have the same layout. */
 body:not(.answers) .ans, body:not(.answers) .ans-over { visibility: hidden; }
+/* Do Now bank numbers (DN 852) are for the teacher: answer edition only. */
+body:not(.answers) .bank { visibility: hidden; }
 
 /* ----- extras ----- */
 .split { display: grid; grid-template-columns: var(--cols, 1fr 1fr); gap: 0 6mm; align-items: start; }
