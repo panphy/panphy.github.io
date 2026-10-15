@@ -10,7 +10,7 @@ The student hub uses `/gcsephy/assets/workbook-hub.css`, shared by all four work
 |---|---|
 | `assets/content.js` | All the words: one entry per printed page. Edit here |
 | `assets/workbook.css`, `assets/workbook.js` | Print styles; renderer that builds A4 pages and flags overflow |
-| `index.html` | Student hub linking the workbook PDF, answers PDF, teaching deck and the four Preps (`../prep/`); linked from the GCSE landing page |
+| `index.html` | Student hub linking the workbook PDF, answers PDF, slide deck and the four Preps (`../prep/`); linked from the GCSE landing page |
 | `workbook.html` | Preview of all 40 pages |
 | `build-pdf.sh` | Prints the PDF with headless Chrome and checks the page count |
 | `answers.html`, `assets/answers.js`, `assets/answers.css` | Answer key: one entry per task and part, with workbook page numbers (not a page-for-page copy) |
