@@ -317,7 +317,6 @@ window.DeckSvgTex = {
     host.innerHTML = `<div class="dk-stage"><svg class="dk" viewBox="0 0 640 430" role="img" aria-label="A 2.0 kilogram book is lifted straight up through 1.5 metres and slid onto a shelf">
       <path class="dk-ink thick" d="M20 ${floor}H620"/><rect class="dk-wall" x="590" y="40" width="30" height="${floor - 40}"/>
       <rect class="dk-shelf" x="${shelfX}" y="${shelfTop}" width="${590 - shelfX}" height="14"/><path class="dk-ink" d="M560 ${shelfTop + 14}L590 ${shelfTop + 54}"/>
-      <path class="dk-guide" d="M${x0 + bookW / 2} ${floor - bookH - 6}V${shelfTop - bookH / 2}H${xEnd + bookW / 2 - 14}"/>
       <path class="dk-guide" d="M${shelfX - 70} ${shelfTop}H${shelfX}"/>${dimV(shelfX - 40, shelfTop, floor, 'h = 1.5 m', -1)}
       <rect class="dk-ghost" x="${x0}" y="${floor - bookH}" width="${bookW}" height="${bookH}" rx="3"/>
       <g class="dk-book"><rect class="dk-bookbody" x="0" y="0" width="${bookW}" height="${bookH}" rx="3"/>${t(bookW / 2, bookH / 2 + 8, '2.0 kg', 'dk-small')}</g>
@@ -381,6 +380,45 @@ window.DeckSvgTex = {
     paint();
   }
 
+  // ---------- 8. Wax-and-pin rods: heat spreads from the flame, pins drop as it arrives ----------
+  // The heated region grows at a rate set by each rod's conductivity. A pin falls once the heat
+  // reaches it, so copper loses all five, aluminium three, steel one and glass none by the end.
+  function rodsLab(host) {
+    const mats = [['copper', 1], ['aluminium', 0.6], ['steel', 0.25], ['glass', 0.05]];
+    const end = 540, len = 374, T = 6, FALL = 0.7;
+    let s = '';
+    mats.forEach(([m, k], i) => {
+      const y = 50 + i * 70;
+      s += `<rect class="dk-rod" x="${end - len}" y="${y}" width="${len}" height="20" rx="4"/><rect class="dk-rod-hot" data-rod="${i}" x="${end}" y="${y + 1.5}" width="0" height="17" rx="3"/>` + t(156, y + 16, m, 'dk-label', 'end');
+      for (let p = 0; p < 5; p++) { const x = 205 + p * 74; s += `<g class="dk-pin-g" data-rod="${i}" data-d="${end - x}"><path class="dk-pin" d="M${x} ${y + 20}v16"/><circle class="dk-wax" cx="${x}" cy="${y + 22}" r="6"/></g>`; }
+    });
+    s += `<path class="dk-flame" d="M560 330c-30-40 10-60 0-100 30 30 40 60 20 100Z"/>` + t(560, 360, 'heated end', 'dk-small');
+    s += `<path class="dk-ink" d="M540 60V330"/>`;
+    host.innerHTML = `<div class="dk-stage"><svg class="dk" viewBox="0 0 640 380" role="img" aria-label="Rods of copper, aluminium, steel and glass heated at one end; heat spreads fastest along copper, so its wax melts and pins drop first, and glass last">${s}</svg></div>` +
+      buttons([['go', 'Heat the rods'], ['reset', 'Reset']]);
+    const root = host.querySelector('svg'), hot = [...root.querySelectorAll('.dk-rod-hot')], pins = [...root.querySelectorAll('.dk-pin-g')];
+    const front = (i, tt) => mats[i][1] * len * Math.min(tt, T) / T;
+    let tt = 0, running = false;
+    function paint() {
+      hot.forEach((r, i) => { const w = front(i, tt); r.setAttribute('x', (end - w).toFixed(1)); r.setAttribute('width', w.toFixed(1)); });
+      pins.forEach(g => {
+        const k = mats[g.dataset.rod][1], d = +g.dataset.d, at = k ? d * T / (k * len) : Infinity;
+        const u = at <= T ? Math.max(0, tt - at) : 0;
+        g.setAttribute('transform', `translate(0 ${(0.5 * 400 * u * u).toFixed(1)})`);
+        g.style.opacity = u ? Math.max(0, 1 - u / FALL).toFixed(2) : '';
+      });
+    }
+    const stop = T + FALL;
+    host.querySelector('[data-act="go"]').addEventListener('click', () => {
+      if (reduced()) { tt = stop; paint(); return; }
+      if (running) return;
+      tt = 0; running = true;
+      animate(host, dt => { if (!running) return false; tt += dt; paint(); if (tt >= stop) { running = false; return false; } return true; });
+    });
+    host.querySelector('[data-act="reset"]').addEventListener('click', () => { running = false; tt = 0; paint(); });
+    paint();
+  }
+
   // ---------- static drawings made for the deck, with labels large enough for the back row ----------
   function twoGraphs() {
     const one = (gx, g1) => { const a = graphAxes(gx, 90, 300, 240, g1); let s = a.s + `<path class="dk-fit" d="M${a.fit[0]} ${a.fit[1]}L${a.fit[2]} ${a.fit[3]}"/>`; for (let i = 0; i <= 6; i++) { const [x, y] = a.pt(i); s += `<path class="dk-cross" d="M${x - 7} ${y - 7}l14 14m0 -14l-14 14"/>`; } return s + t(gx + 150, 30, g1 ? 'Graph 1' : 'Graph 2', 'dk-big'); };
@@ -415,18 +453,6 @@ window.DeckSvgTex = {
       ${t(410, 458, 'h = height of one step × number of steps', 'dk-label')}
     </svg>`;
   }
-  function rods() {
-    const mats = [['copper', 1], ['aluminium', 0.6], ['steel', 0.25], ['glass', 0.05]];
-    let s = '';
-    mats.forEach(([m, k], i) => {
-      const y = 50 + i * 70;
-      s += `<rect class="dk-rod" x="166" y="${y}" width="374" height="20" rx="4"/>` + t(156, y + 16, m, 'dk-label', 'end');
-      for (let p = 0; p < 5; p++) { const x = 205 + p * 74, gone = p < Math.round(k * 5); s += `<path class="dk-pin${gone ? ' gone' : ''}" d="M${x} ${y + 20}v${gone ? 0 : 16}"/>${gone ? '' : `<circle class="dk-wax" cx="${x}" cy="${y + 22}" r="6"/>`}`; }
-    });
-    s += `<path class="dk-flame" d="M560 330c-30-40 10-60 0-100 30 30 40 60 20 100Z"/>` + t(560, 360, 'heated end', 'dk-small');
-    s += `<path class="dk-ink" d="M540 60V330"/>`;
-    return `<svg class="dk" viewBox="0 0 640 380" role="img" aria-label="Rods of copper, aluminium, steel and glass heated at one end; wax and pins drop off copper first">${s}</svg>`;
-  }
   function coolingChart() {
     const data = [['none', 13], ['newspaper', 8], ['felt', 7], ['bubble wrap', 6], ['cotton wool', 5]];
     const x0 = 80, y0 = 30, w = 620, h = 280, bw = w / data.length;
@@ -445,9 +471,9 @@ window.DeckSvgTex = {
     sankeyLamp: () => F.sankey({ blend: true, input: 100, useful: 10, wasted: 90, s: 1.6, useLabel: 'by light', wasteLabel: 'heating the room' }),
     sankeyLed: () => F.sankey({ blend: true, input: 100, useful: 40, wasted: 60, s: 1.6, useLabel: 'by light', wasteLabel: 'heating the room' }),
     sankeyLesson: () => F.sankey({ blend: true, input: 100, useful: 20, wasted: 80, s: 1.6, useLabel: 'by light', wasteLabel: 'heating the room' }),
-    twoGraphs, rods, coolingChart, story: () => F.storyStrip(), coverArt: () => F.coverArt(),
+    twoGraphs, coolingChart, story: () => F.storyStrip(), coverArt: () => F.coverArt(),
   };
-  const WIDGETS = { ramp: h => swing(h, 'ramp'), pendulum: h => swing(h, 'pendulum'), kinetic, springLab, elastic, motors, lift, bounce };
+  const WIDGETS = { ramp: h => swing(h, 'ramp'), pendulum: h => swing(h, 'pendulum'), kinetic, springLab, elastic, motors, lift, bounce, rods: rodsLab };
 
   function render() {
     document.querySelectorAll('#deck [data-fig]').forEach(el => { if (!el.firstElementChild && FIGURES[el.dataset.fig]) el.innerHTML = FIGURES[el.dataset.fig](); });
