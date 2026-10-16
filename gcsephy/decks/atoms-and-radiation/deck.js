@@ -30,6 +30,8 @@
     // Fullscreen pins the slide to the top, so its year bar and badge stay at the top of a screen taller than 16:9.
     const top = full ? 0 : (box.height - SLIDE_H * scale) / 2;
     deck.style.transform = `translate(${left}px, ${top}px) scale(${scale})`;
+    // The band left under the slide on a screen taller than 16:9, where the Triple flag hangs.
+    deck.style.setProperty('--fs-extra', `${full ? Math.max(0, box.height / scale - SLIDE_H) : 0}px`);
   }
 
   const hiddenSteps = slide => [...slide.querySelectorAll('.step:not(.shown)')];

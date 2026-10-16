@@ -138,6 +138,12 @@ body {
 :root[data-theme="dark"] { --triple-bg: #20434b; --triple-ink: #b4e2ea; --triple-edge: #6cbccb; }
 .slide.triple { box-shadow: inset 0 -10px 0 var(--triple-edge); }
 .triple-flag { position: absolute; left: 50%; bottom: 10px; transform: translateX(-50%); padding: 10px 22px 8px; border-radius: 14px 14px 0 0; background: var(--triple-bg); color: var(--triple-ink); font: 700 20px var(--font-mono); letter-spacing: .12em; text-transform: uppercase; white-space: nowrap; }
+/* Presenting on a screen taller than 16:9 (an iPad), the slide stays pinned to the top with its year bar and badge,
+   and the flag and its edge drop to the bottom of the screen. */
+body.is-fullscreen .deck { overflow: visible; clip-path: inset(0 0 calc(-1 * var(--fs-extra, 0px)) 0); }
+body.is-fullscreen .slide.triple { box-shadow: none; }
+body.is-fullscreen .slide.triple::after { content: ""; position: absolute; left: 0; right: 0; bottom: calc(-1 * var(--fs-extra, 0px)); height: 10px; background: var(--triple-edge); }
+body.is-fullscreen .triple-flag { bottom: calc(10px - var(--fs-extra, 0px)); }
 .triple-tag { display: inline-block; vertical-align: .16em; margin: 0 4px; padding: 2px 10px; border-radius: 999px; background: var(--triple-bg); color: var(--triple-ink); font: 700 max(18px, .6em) var(--font-mono); letter-spacing: .08em; text-transform: uppercase; white-space: nowrap; }
 .slide-foot, .slide.dark .slide-foot { border: 0; padding-top: 0; color: var(--text-secondary); font: 600 18px var(--font-mono); letter-spacing: .06em; opacity: 1; }
 .slide-foot .tag::before { display: none; }
