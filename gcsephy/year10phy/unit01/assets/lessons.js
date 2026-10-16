@@ -856,7 +856,7 @@
               series: [{ fn: (x) => 0.9 * Math.exp(-2.6 * x) + 0.05, from: 0.03, to: 1 }],
               caption: "Brighter light → lower resistance.",
             }),
-            componentImages: [{ file: "ldr.jpg", label: "LDR", alt: "Round light-dependent resistor with a dark zigzag track and two leads emerging from behind the disc" }],
+            componentImages: [{ file: "ldr.jpg", label: "LDR", alt: "Light-dependent resistor with an upward-facing serpentine sensing surface and two leads beneath the disc" }],
           },
           {
             title: "Required practical: I–V charac&shy;teristics",
