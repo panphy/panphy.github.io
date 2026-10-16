@@ -131,8 +131,8 @@
 .circuit-card .plot-label { padding-bottom: 12px; border-bottom: 2px solid; font: 900 22px Arial, sans-serif; letter-spacing: .2em; }
 .circuit-card svg { display: block; width: 100%; height: auto; margin-top: 16px; background: var(--diagram-bg); }
 .circuit-card p { margin: 18px 0 0; font: 900 28px/1.08 var(--display); text-transform: uppercase; letter-spacing: -.04em; }
-.machine .sticky.one { left: -30px; top: 6px; transform: rotate(-6deg); box-shadow: 5px 5px 0 var(--cyan); }
-.machine .sticky.two { right: -30px; bottom: 120px; transform: rotate(7deg); box-shadow: 5px 5px 0 var(--cyan); }
+.machine .stamp.one { left: -24px; right: auto; top: -64px; transform: rotate(-9deg); }
+.machine .stamp.two { top: auto; right: -16px; bottom: 80px; transform: rotate(6deg); }
 .machine .stamp { right: -16px; top: 40px; border-color: var(--hot); color: var(--hot); }
 
 /* Section card with a diagram */
