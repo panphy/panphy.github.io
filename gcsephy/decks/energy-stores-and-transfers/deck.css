@@ -84,6 +84,7 @@ mjx-container { line-height: 0; }
 
 /* ----- store cards ----- */
 .stores { display: grid; grid-template-columns: repeat(4, 1fr); gap: 18px; }
+.stores.main { grid-template-columns: repeat(5, 1fr); }
 .store { padding: 14px 18px; border: 2px solid var(--ink); background: var(--card); box-shadow: 6px 6px 0 var(--accent); }
 .store b { display: block; font: 900 26px/1.05 var(--display); text-transform: uppercase; letter-spacing: -.02em; }
 .store span { display: block; margin-top: 8px; font-size: 24px; color: var(--muted); line-height: 1.25; }

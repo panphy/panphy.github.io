@@ -20,7 +20,7 @@
         ],
         questions: [
           { stem: "A cyclist brakes and stops. Complete the sentence.",
-            q: "Energy is transferred [[mechanically|22]] <span class=\"opts\">(mechanically / electrically / by radiation)</span> from the [[kinetic|18]] <span class=\"opts\">(kinetic / chemical / thermal)</span> store of the cyclist to the [[thermal|18]] <span class=\"opts\">(elastic / thermal / nuclear)</span> store of the brakes.",
+            q: "Energy is transferred [[mechanically|22]] <span class=\"opts\">(mechanically / electrically / by waves)</span> from the [[kinetic|18]] <span class=\"opts\">(kinetic / chemical / thermal)</span> store of the cyclist to the [[thermal|18]] <span class=\"opts\">(elastic / thermal / nuclear)</span> store of the brakes.",
             m: 2, lines: 0, a: R`<span class="alt">All three ✓✓; two ✓</span>` },
           { stem: R`A ball of mass 0.50 kg moves at 4.0 m/s. Use \(E_k = \tfrac{1}{2}\,m\,v^2\)`,
             q: "Calculate the energy in the kinetic store of the ball.", m: 3, lines: 3,
@@ -33,7 +33,7 @@
       { lessons: "3–4", title: "Lifting and stretching", subtitle: "Gravitational potential energy · stretching springs · spring constant",
         doNow: [
           [5, "State the standard unit of energy.", "Joule (J)"],
-          [16, "Name the four ways energy is transferred between stores.", "Mechanically, electrically, by heating and by radiation"],
+          [16, "Name the four ways energy is transferred between stores.", "Mechanically, electrically, by heating and by waves (or by radiation)"],
           [643, "Name the two quantities that kinetic energy depends on.", "Mass and speed"],
         ],
         questions: [

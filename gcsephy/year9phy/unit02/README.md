@@ -38,7 +38,7 @@ The student hub uses `/gcsephy/assets/workbook-hub.css`, shared by all four work
 | `workbook/` | Workbook source; see below |
 | `teaching-guides/` | Nine lesson-plan PDFs and their Markdown source; see its README |
 | `prep/` | One-page Prep (homework) sheets, one per week (Prep 5 follows Lesson 9), each out of 10, with answer editions: `content.js` (questions), `prep.html` (preview, `?n=2&answers`) and `pdf/`. The hub links the sheets, not the answer editions. See [`../../assets/prep/README.md`](../../assets/prep/README.md). Maths is LaTeX for MathJax, as in the workbook |
-| [`../../decks/energy-stores-and-transfers/`](../../decks/energy-stores-and-transfers/) | 63-slide teaching deck |
+| [`../../decks/energy-stores-and-transfers/`](../../decks/energy-stores-and-transfers/) | 64-slide teaching deck |
 
 ## Workbook source
 

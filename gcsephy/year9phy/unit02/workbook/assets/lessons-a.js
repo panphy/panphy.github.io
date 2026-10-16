@@ -31,29 +31,27 @@
       learnTitle: "Stores and transfers",
       learn: [
         { t: "p", h: "Energy is never made and never used up. It is <strong>stored</strong>, and it is <strong>transferred</strong> (moved) from one store to another. Energy is measured in <strong>joules (J)</strong>." },
-        { t: "sub", h: "The energy stores" },
+        { t: "sub", h: "The five main energy stores" },
         { t: "compare", head: ["Store", "Energy is stored because…", "Example"], rows: [
           ["Kinetic", "the object is moving", "a rolling football"],
           ["Gravitational potential", "the object is raised up", "a book on a high shelf"],
           ["Elastic potential", "the object is stretched or squashed", "a stretched spring, a drawn bow"],
           ["Thermal", "the object is hot", "a cup of tea"],
           ["Chemical", "of the substances it is made of", "food, fuel, a battery"],
-          ["Magnetic", "magnets attract or repel", "two fridge magnets held apart"],
-          ["Electrostatic", "charges attract or repel", "a charged balloon"],
-          ["Nuclear", "of the particles in the nucleus", "uranium fuel"],
         ] },
+        { t: "p", h: "You may also meet the <strong>magnetic</strong> store (two magnets held apart), the <strong>electrostatic</strong> store (a charged balloon) and the <strong>nuclear</strong> store (uranium fuel), but GCSE questions rarely use them." },
         { t: "sub", h: "Four ways to transfer energy" },
         { t: "compare", head: ["Transferred…", "What happens", "Example"], rows: [
-          ["mechanically", "a force moves something", "pushing a trolley; a sound wave"],
+          ["mechanically", "a force moves something", "pushing a trolley"],
           ["electrically", "a current flows", "a battery lighting a lamp"],
           ["by heating", "a hotter object warms a colder one", "a hob heating a pan"],
-          ["by radiation", "light or infrared carries it", "the Sun warming your face"],
+          ["by waves", "a wave carries it: light, infrared (both called radiation) or sound", "the Sun warming your face; a loudspeaker"],
         ] },
         { t: "key", h: "<strong>Stores hold energy. Transfers move it.</strong> Light, sound and electricity are <strong>not</strong> stores: they are ways energy travels from one store to another." },
         { t: "sub", h: "Systems" },
         { t: "p", h: "A <strong>system</strong> is the object, or group of objects, that we choose to study. In a <strong>closed system</strong>, no energy gets in or out, so the <strong>total</strong> energy stays the same. The energy only moves between stores." },
         { t: "sub", h: "Describe any change in three steps" },
-        { t: "steps", items: ["Which store <strong>empties</strong>?", "Which store <strong>fills</strong>?", "<strong>How</strong> is the energy transferred: mechanically, electrically, by heating or by radiation?"] },
+        { t: "steps", items: ["Which store <strong>empties</strong>?", "Which store <strong>fills</strong>?", "<strong>How</strong> is the energy transferred: mechanically, electrically, by heating or by waves?"] },
         { t: "model", title: "Example: a car braking", h: "The kinetic store of the car empties. The thermal store of the brakes fills. Friction is a force, so the energy is transferred mechanically. <strong>Write:</strong> “Energy is transferred mechanically from the kinetic store of the car to the thermal store of the brakes.”" },
       ],
       try: [
@@ -75,7 +73,7 @@
         { t: "q", type: "Supported", p: "Complete each sentence. The choices are after each gap.", fill: [
           R`A ball is thrown upwards. Energy is transferred from the [[kinetic|kinetic / chemical]] store to the [[gravitational potential|gravitational potential / thermal]] store.`,
           R`A moving car hits a wall. Energy is transferred from the [[kinetic|kinetic / elastic potential]] store of the car to the [[thermal|thermal / chemical]] store of the car, the wall and the surroundings.`,
-          R`A kettle boils water. Energy is transferred [[electrically|electrically / by radiation]] to the [[thermal|thermal / kinetic]] store of the water.`,
+          R`A kettle boils water. Energy is transferred [[electrically|electrically / by waves]] to the [[thermal|thermal / kinetic]] store of the water.`,
         ] },
         { t: "q", type: "On your own", p: "A bungee jumper falls, and the cord stretches until the jumper stops at the bottom. Describe the energy transfers. Use the three steps.", lines: 3, a: "As the jumper falls, energy is transferred from the gravitational potential store of the jumper to the kinetic store. As the cord stretches, energy is transferred from the kinetic store to the elastic potential store of the cord." },
         { t: "q", say: ["Sam", "When the car stopped, its energy was used up."], p: "Explain what is wrong with what Sam says.", lines: 3, a: "Energy cannot be used up (destroyed). The energy in the car's kinetic store was transferred to the thermal store of the brakes and the surroundings." },
@@ -85,8 +83,8 @@
         { p: "What is the unit of energy? Tick <strong>one</strong> box.", marks: 1, mcq: { o: ["joule", "newton", "watt", "kilogram"], c: 0, cols: 4 } },
         { p: "Describe the energy transfer when an electric kettle heats water.", marks: 2, lines: 2, a: "Energy is transferred electrically (1) to the thermal store of the water (1)." },
       ],
-      summary: ["Energy is measured in <strong>joules (J)</strong>. It is never made or destroyed.", "Stores: kinetic, gravitational potential, elastic potential, thermal, chemical, magnetic, electrostatic, nuclear.", "Transfers: mechanically, electrically, by heating, by radiation.", "In a closed system, the total energy stays the same."],
-      recall: [["What is the unit of energy?", "Joule (J)."], ["Name four energy stores.", "Any four of: kinetic, gravitational potential, elastic potential, thermal, chemical, magnetic, electrostatic, nuclear."], ["Is light a store or a way of transferring energy?", "A way of transferring energy (by radiation)."], ["What is a closed system?", "A system that no energy enters or leaves, so its total energy stays the same."]],
+      summary: ["Energy is measured in <strong>joules (J)</strong>. It is never made or destroyed.", "Main stores: kinetic, gravitational potential, elastic potential, thermal, chemical.", "Transfers: mechanically, electrically, by heating, by waves.", "In a closed system, the total energy stays the same."],
+      recall: [["What is the unit of energy?", "Joule (J)."], ["Name four energy stores.", "Any four of: kinetic, gravitational potential, elastic potential, thermal, chemical."], ["Is light a store or a way of transferring energy?", "A way of transferring energy (by waves)."], ["What is a closed system?", "A system that no energy enters or leaves, so its total energy stays the same."]],
       cando: ["name the energy stores", "name the four ways energy is transferred", "explain what a system is", "describe energy transfers using “from … to …”"],
     },
 
@@ -102,7 +100,7 @@
       doNow: [
         ["Which store does a moving object have energy in?", "The kinetic store."],
         ["A car brakes. Which store fills?", "The thermal store (of the brakes and the surroundings)."],
-        [R`Light is [[a way energy is transferred|a store / a way energy is transferred]].`, "A way energy is transferred (by radiation)."],
+        [R`Light is [[a way energy is transferred|a store / a way energy is transferred]].`, "A way energy is transferred (by waves)."],
       ],
       learnTitle: "Energy in a moving object",
       learn: [

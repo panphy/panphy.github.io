@@ -17,7 +17,7 @@
   ];
 
   const glossary = [
-    ["Energy store", "Where energy is held: kinetic, gravitational potential, elastic potential, thermal, chemical, magnetic, electrostatic or nuclear", 1],
+    ["Energy store", "Where energy is held. The main stores are kinetic, gravitational potential, elastic potential, thermal and chemical", 1],
     ["Joule (J)", "The unit of energy", 1],
     ["System", "The object or group of objects that we choose to study", 1],
     ["Closed system", "A system that no energy enters or leaves; its total energy stays the same", 1],

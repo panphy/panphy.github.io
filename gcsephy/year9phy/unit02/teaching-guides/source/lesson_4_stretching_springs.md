@@ -86,6 +86,16 @@ Draw the spring before and after, with the original length, stretched length and
 
 ## Practical: Force and extension
 
+Before anyone touches a spring, students write the question the practical answers and name its variables (the workbook has a box for each):
+
+Investigation question: how does the extension of a spring depend on the force pulling it?
+
+| Variable | |
+|---|---|
+| Independent | The force (the load we add) |
+| Dependent | The extension |
+| Control | The same spring for every reading |
+
 1. Clamp the spring and metre rule; line the pointer up with the scale. Record the original length (with the empty hanger, counted as the zero load, or with the hanger's mass included: decide as a class).
 2. Add 100 g. Record the new length.
 3. Repeat in 100 g steps up to 700 g.
