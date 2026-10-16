@@ -2,7 +2,8 @@
 // A slide's note is written inside its <section> as
 // <aside class="revision-note" hidden>…</aside>; on slides without one the
 // control and panel are hidden without changing slide size. The panel starts collapsed on
-// every load and, once opened, stays open from slide to slide. Each deck engine calls collect() before it
+// every load and, once opened, stays open from slide to slide; a click or tap anywhere
+// else except the slide navigation and thumbnails closes it. Each deck engine calls collect() before it
 // builds thumbnails and show() whenever the slide changes.
 (() => {
   const notes = new Map();
@@ -32,6 +33,12 @@
     controls.parentNode.insertBefore(pane, controls);
     setOpen(false);
     toggle.addEventListener('click', () => setOpen(body.hidden));
+    // Captured, so a control that stops its click still closes the note; the click itself goes on.
+    document.addEventListener('click', event => {
+      if (body.hidden || !(event.target instanceof Element)) return;
+      if (event.target.closest('.notes, .controls, #thumbs')) return;
+      setOpen(false);
+    }, true);
     // With focus in the note these keys scroll it; left and right still change slide.
     body.addEventListener('keydown', event => {
       if (['ArrowUp', 'ArrowDown', 'PageUp', 'PageDown', 'Home', 'End', ' '].includes(event.key)) event.stopPropagation();
