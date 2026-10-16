@@ -18,9 +18,12 @@
   const DECK_TITLE = document.title;
   const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
 
+  // A landscape phone fills the screen with the slide, as when presenting.
+  const LANDSCAPE_PHONE = window.matchMedia('screen and (orientation: landscape) and (max-height: 500px)');
+
   function fit() {
     const box = stage.getBoundingClientRect();
-    const pad = document.body.classList.contains('is-fullscreen') ? 0 : 16;
+    const pad = document.body.classList.contains('is-fullscreen') || LANDSCAPE_PHONE.matches ? 0 : 16;
     const scale = Math.min((box.width - pad * 2) / SLIDE_W, (box.height - pad * 2) / SLIDE_H);
     const left = (box.width - SLIDE_W * scale) / 2;
     const top = (box.height - SLIDE_H * scale) / 2;

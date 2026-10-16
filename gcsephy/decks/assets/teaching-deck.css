@@ -399,8 +399,15 @@ body.is-fullscreen .deck { border-radius: 0; }
 @media screen and (orientation: portrait) and (max-width: 600px) {
   .stage::after { content: "↻  Turn your phone sideways"; position: absolute; left: 50%; bottom: 14px; z-index: 5; transform: translateX(-50%); width: max-content; max-width: calc(100% - 32px); padding: 8px 14px; border: 1px solid var(--card-border); border-radius: 999px; background: var(--card-bg); color: var(--text-secondary); font: 500 13px/1.3 var(--font-mono); text-align: center; pointer-events: none; }
 }
-/* A landscape phone gives the slide the full height: the navigation stacks in the left margin. */
+/* A landscape phone gives the slide the whole screen: no banner, and slim controls in the side margins. */
 @media screen and (orientation: landscape) and (max-height: 500px) {
-  body:not(.is-fullscreen) .stage { bottom: var(--vv-bottom, 0px); }
-  body:not(.is-fullscreen) .controls { left: max(10px, env(safe-area-inset-left)); top: calc(50% + 30px); bottom: auto; transform: translateY(-50%); flex-direction: column; }
+  body:not(.is-fullscreen) .banner, body:not(.is-fullscreen) .progress { display: none; }
+  body:not(.is-fullscreen) .stage { top: var(--standalone-top); bottom: var(--vv-bottom, 0px); left: 0; }
+  body:not(.is-fullscreen) .controls { left: max(6px, env(safe-area-inset-left)); top: 50%; bottom: auto; transform: translateY(-50%); flex-direction: column; gap: 4px; padding: 4px; }
+  body:not(.is-fullscreen) .controls button { width: 40px; height: 40px; }
+  body:not(.is-fullscreen) .controls .counter { min-width: 0; font-size: 12px; line-height: 1.2; text-align: center; }
+  body:not(.is-fullscreen) .notes { right: max(6px, env(safe-area-inset-right)); bottom: max(8px, env(safe-area-inset-bottom)); }
+  body:not(.is-fullscreen) .notes-toggle { min-height: 40px; padding: 0 9px; }
+  body:not(.is-fullscreen) .notes-toggle :is(.notes-label, .notes-chevron) { display: none; }
+  body:not(.is-fullscreen) .notes .notes-body { left: calc(max(6px, env(safe-area-inset-left)) + 58px); right: calc(max(6px, env(safe-area-inset-right)) + 58px); bottom: max(8px, env(safe-area-inset-bottom)); max-height: calc(100dvh - 16px - var(--standalone-top, 0px)); padding: 12px 18px 14px; }
 }

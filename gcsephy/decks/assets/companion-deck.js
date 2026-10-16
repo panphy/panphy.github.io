@@ -21,9 +21,12 @@
   const THUMBS_KEY = `${document.body.dataset.deckKey || 'companion'}-deck-thumbs-hidden`;
   const deckTitle = document.body.dataset.deckTitle || document.title;
 
+  // A landscape phone fills the screen with the slide, as when presenting.
+  const LANDSCAPE_PHONE = window.matchMedia('screen and (orientation: landscape) and (max-height: 500px)');
+
   function fit() {
     const box = stage.getBoundingClientRect();
-    const full = document.body.classList.contains('is-fullscreen');
+    const full = document.body.classList.contains('is-fullscreen') || LANDSCAPE_PHONE.matches;
     const pad = full ? 0 : 28;
     const scale = Math.min((box.width - pad * 2) / SLIDE_W, (box.height - pad * 2) / SLIDE_H);
     const left = (box.width - SLIDE_W * scale) / 2 - (full ? 0 : 6 * scale);
