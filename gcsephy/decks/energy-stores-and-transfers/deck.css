@@ -58,6 +58,7 @@ mjx-container { line-height: 0; }
 .dk .dk-rod { fill: #c9ced6; stroke: var(--ink); stroke-width: 3; }
 .dk .dk-pin { stroke: var(--ink); stroke-width: 3; }
 .dk .dk-wax { fill: #fff3c4; stroke: var(--ink); stroke-width: 2; }
+.dk .dk-rod-hot { fill: var(--hot); opacity: 0.55; }
 .dk .dk-flame { fill: var(--hot); stroke: var(--ink); stroke-width: 2.5; }
 @keyframes dk-whoosh { to { stroke-dashoffset: -88; } }
 .dk-controls { display: flex; flex-wrap: wrap; gap: 12px; }
