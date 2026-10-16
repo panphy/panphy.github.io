@@ -160,7 +160,7 @@
       ${t(30, 22, "real diode", { size: 11, anchor: "start" })}
       <line x1="30" y1="50" x2="100" y2="50" stroke="#9ca3af" stroke-width="3"/><line x1="200" y1="50" x2="270" y2="50" stroke="#9ca3af" stroke-width="3"/>
       <rect x="100" y="34" width="100" height="32" rx="6" fill="#1f2937" stroke="${INK}" stroke-width="1.5"/>
-      <rect x="176" y="34" width="12" height="32" fill="#d1d5db"/>
+      <rect x="176" y="34.75" width="12" height="30.5" fill="#d1d5db" stroke="none"/>
       ${pointer(182, 70, 182, 110)}${t(206, 94, "band", { size: 10, weight: 600, anchor: "start" })}
       ${t(30, 118, "symbol", { size: 11, anchor: "start" })}
       <line x1="30" y1="140" x2="270" y2="140" stroke="${INK}" stroke-width="2.5"/>
