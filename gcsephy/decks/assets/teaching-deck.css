@@ -46,6 +46,9 @@
   --nav-border: var(--card-border);
   --soft-shadow: 0 4px 14px rgba(0, 0, 0, .04);
   --card-shadow: 0 4px 16px rgba(0, 0, 0, .05);
+}
+/* Revision-note pane; set on .notes so it replaces the deck stylesheets' own. */
+.notes {
   --rn-ink: var(--text-main);
   --rn-muted: var(--text-secondary);
   --rn-bg: var(--card-bg);
