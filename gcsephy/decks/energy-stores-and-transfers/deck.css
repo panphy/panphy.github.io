@@ -60,6 +60,8 @@ mjx-container { line-height: 0; }
 .dk .dk-wax { fill: #fff3c4; stroke: var(--ink); stroke-width: 2; }
 .dk .dk-rod-hot { fill: var(--hot); opacity: 0.55; }
 .dk .dk-flame { fill: var(--hot); stroke: var(--ink); stroke-width: 2.5; }
+.dk .dk-flame-core { fill: #ffd36b; opacity: 0; transition: opacity .3s; }
+.dk .dk-flame-g.lit .dk-flame-core { opacity: 1; }
 @keyframes dk-whoosh { to { stroke-dashoffset: -88; } }
 .dk-controls { display: flex; flex-wrap: wrap; gap: 12px; }
 .dk-controls button { min-height: 52px; padding: 8px 20px; border: 2px solid var(--ink); background: var(--card); font: 900 24px Arial, sans-serif; box-shadow: 4px 4px 0 rgba(7, 22, 47, .15); }
