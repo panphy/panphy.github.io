@@ -9,7 +9,7 @@ Four browser presentations, available by direct link from the GCSE hub:
 | `electric-circuits/` | 10 | 62 | Lime |
 | `atoms-and-radiation/` | 11 | 56 | Light yellow |
 
-Serve the repository root and open a deck's `index.html`. Edit that file for slides and revision notes, and the deck's `figures.js` for diagrams. No build step is needed. Preserve slide order when lesson guides or workbook links refer to slide numbers.
+Serve the repository root and open a deck's `index.html`. Edit that file for slides and revision notes, and the deck's `figures.js` for diagrams. Each point of a note opens with its question or heading on its own line, `<h3 class="rn-head">`, followed by the explanation in `<p>`; call-outs go in `<div class="rn-side">`. No build step is needed. Preserve slide order when lesson guides or workbook links refer to slide numbers.
 
 Year 11 slides 34, 38, 43 and 46 use generated illustrations from `atoms-and-radiation/images/`; prompts are in `source-illustrations.md`, `exposure-illustration.md`, `background-illustrations.md` and `medical-illustrations.md` alongside the PNGs. Slide 38 keeps its comparison labels as HTML, and slide 43 retains SVG labels and its dose chart. Source-use, exposure and medical illustrations are slide-only assets, with the shared workbook diagrams remaining in `figures.js`. Slides 34 and 46 share the cartoon medical tracer.
 
