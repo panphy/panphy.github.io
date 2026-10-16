@@ -392,11 +392,11 @@ window.DeckSvgTex = {
       s += `<rect class="dk-rod" x="${end - len}" y="${y}" width="${len}" height="20" rx="4"/><rect class="dk-rod-hot" data-rod="${i}" x="${end}" y="${y + 1.5}" width="0" height="17" rx="3"/>` + t(156, y + 16, m, 'dk-label', 'end');
       for (let p = 0; p < 5; p++) { const x = 205 + p * 74; s += `<g class="dk-pin-g" data-rod="${i}" data-d="${end - x}"><path class="dk-pin" d="M${x} ${y + 20}v16"/><circle class="dk-wax" cx="${x}" cy="${y + 22}" r="6"/></g>`; }
     });
-    s += `<path class="dk-flame" d="M560 330c-30-40 10-60 0-100 30 30 40 60 20 100Z"/>` + t(560, 360, 'heated end', 'dk-small');
+    s += `<g class="dk-flame-g"><path class="dk-flame" d="M560 330c-30-40 10-60 0-100 30 30 40 60 20 100Z"/><path class="dk-flame-core" d="M563 328c-14-20 2-34 0-56 14 18 20 36 9 56Z"/></g>` + t(560, 360, 'heated end', 'dk-small');
     s += `<path class="dk-ink" d="M540 60V330"/>`;
     host.innerHTML = `<div class="dk-stage"><svg class="dk" viewBox="0 0 640 380" role="img" aria-label="Rods of copper, aluminium, steel and glass heated at one end; heat spreads fastest along copper, so its wax melts and pins drop first, and glass last">${s}</svg></div>` +
       buttons([['go', 'Heat the rods'], ['reset', 'Reset']]);
-    const root = host.querySelector('svg'), hot = [...root.querySelectorAll('.dk-rod-hot')], pins = [...root.querySelectorAll('.dk-pin-g')];
+    const root = host.querySelector('svg'), hot = [...root.querySelectorAll('.dk-rod-hot')], pins = [...root.querySelectorAll('.dk-pin-g')], flame = root.querySelector('.dk-flame-g');
     const front = (i, tt) => mats[i][1] * len * Math.min(tt, T) / T;
     let tt = 0, running = false;
     function paint() {
@@ -407,13 +407,18 @@ window.DeckSvgTex = {
         g.setAttribute('transform', `translate(0 ${(0.5 * 400 * u * u).toFixed(1)})`);
         g.style.opacity = u ? Math.max(0, 1 - u / FALL).toFixed(2) : '';
       });
+      // The flame flickers and sways about its base while the rods are heating.
+      const lit = running && tt < stop, sy = lit ? 1 + 0.1 * Math.sin(17 * tt) + 0.05 * Math.sin(29 * tt) : 1;
+      const sx = lit ? 1 - 0.05 * Math.sin(23 * tt) : 1, sk = lit ? 4 * Math.sin(7 * tt) : 0;
+      flame.setAttribute('transform', `translate(560 330) skewX(${sk.toFixed(2)}) scale(${sx.toFixed(3)} ${sy.toFixed(3)}) translate(-560 -330)`);
+      flame.classList.toggle('lit', lit);
     }
     const stop = T + FALL;
     host.querySelector('[data-act="go"]').addEventListener('click', () => {
       if (reduced()) { tt = stop; paint(); return; }
       if (running) return;
       tt = 0; running = true;
-      animate(host, dt => { if (!running) return false; tt += dt; paint(); if (tt >= stop) { running = false; return false; } return true; });
+      animate(host, dt => { if (!running) return false; tt += dt; if (tt >= stop) running = false; paint(); return running; });
     });
     host.querySelector('[data-act="reset"]').addEventListener('click', () => { running = false; tt = 0; paint(); });
     paint();
