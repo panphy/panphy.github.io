@@ -1,0 +1,38 @@
+Copyright (c) 2026 PanPhy Labs. All rights reserved.
+
+This repository and the website it publishes (https://panphy.app/),
+including its source code, text, teaching decks, workbooks, worksheets,
+diagrams, images, simulations and other content, are the work of
+PanPhy Labs and are protected by copyright. The source is public so
+that it can be read; it is not open source.
+
+You may, without asking:
+
+- use the published website, including showing it in lessons;
+- link to any page of it;
+- print or download pages for your own study, or for teaching your own
+  students, free of charge, with this copyright notice left in place.
+
+You may not, without prior written permission from PanPhy Labs:
+
+- copy, reproduce or republish the code or content, in whole or in part,
+  on another website, platform, repository or app;
+- modify, adapt, translate or build other works from it;
+- sell, license or distribute it, or use it in a commercial product or
+  service;
+- remove or hide copyright notices or credits.
+
+Forking this repository on GitHub, as GitHub's Terms of Service allow,
+grants no further rights.
+
+Third-party material keeps its own licence and is not covered by this
+notice. This includes open-source libraries loaded from CDNs or bundled
+in the repository (such as tools/panphyplot/js/vendor/math.min.js), the
+fonts in assets/fonts/ and gcsephy/assets/fonts/ (see the *-OFL.txt
+files), and photographs and figures credited on the slides and pages
+where they appear. Exam board specifications and names are referred to
+for teaching purposes and belong to their owners.
+
+To ask for permission, email panphylabs@icloud.com.
+
+THE WEBSITE AND CODE ARE PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND.
