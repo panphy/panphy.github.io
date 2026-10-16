@@ -5,11 +5,11 @@
 @page {
   size: A4;
   margin: 13mm 13mm 16mm;
-  @bottom-left { content: "panphy.app · Do Now AO1 revision"; font: 8pt Arial, Helvetica, sans-serif; color: #4f6163; }
+  @bottom-left { content: "panphy.app · Do Now AO1 revision · © 2026 PanPhy Labs. All rights reserved."; font: 8pt Arial, Helvetica, sans-serif; color: #4f6163; }
   @bottom-right { content: "Page " counter(page) " of " counter(pages); font: 8pt Arial, Helvetica, sans-serif; color: #4f6163; }
 }
 @page practical {
-  @bottom-left { content: "panphy.app · Do Now required practical"; font: 8pt Arial, Helvetica, sans-serif; color: #4f6163; }
+  @bottom-left { content: "panphy.app · Do Now required practical · © 2026 PanPhy Labs. All rights reserved."; font: 8pt Arial, Helvetica, sans-serif; color: #4f6163; }
   @bottom-right { content: "Page " counter(page) " of " counter(pages); font: 8pt Arial, Helvetica, sans-serif; color: #4f6163; }
 }
 .practical { page: practical; }
