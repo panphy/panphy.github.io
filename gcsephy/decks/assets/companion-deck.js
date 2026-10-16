@@ -22,10 +22,6 @@
   const deckTitle = document.body.dataset.deckTitle || document.title;
 
   function fit() {
-    if (window.matchMedia('(max-width: 600px) and (orientation: portrait)').matches && !document.body.classList.contains('is-fullscreen')) {
-      deck.style.transform = 'none';
-      return;
-    }
     const box = stage.getBoundingClientRect();
     const full = document.body.classList.contains('is-fullscreen');
     const pad = full ? 0 : 28;
@@ -52,7 +48,6 @@
       slide.inert = !active;
     });
     const slide = state.slides[state.index];
-    if (window.matchMedia('(max-width: 600px) and (orientation: portrait)').matches && !document.body.classList.contains('is-fullscreen')) window.scrollTo(0, 0);
     slide.querySelectorAll('.step').forEach(step => step.classList.toggle('shown', fromEnd));
     const n = state.index + 1;
     const total = state.slides.length;

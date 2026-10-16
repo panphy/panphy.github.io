@@ -302,91 +302,6 @@ body.is-fullscreen .deck { border-radius: 0; }
 
 .slide.dark .eyebrow span.on { color: var(--brand-primary); }
 .table-scroll { overflow-x: auto; max-width: 100%; }
-/* Phones read one slide vertically. Fullscreen retains the classroom 16:9 view. */
-@media screen and (max-width: 600px) and (orientation: portrait) {
-  body:not(.is-fullscreen) { overflow-y: auto; }
-  body:not(.is-fullscreen) .stage { position: relative; inset: auto; margin: calc(76px + var(--standalone-top)) 12px 104px; }
-  body:not(.is-fullscreen) .deck { position: relative; width: 100%; height: auto; transform: none !important; overflow: visible; border: 0; box-shadow: none; }
-  body:not(.is-fullscreen) .slide { display: none; position: relative; visibility: visible; opacity: 1; padding: 64px 18px 62px; min-height: calc(100svh - 180px); height: auto; }
-  body:not(.is-fullscreen) .slide.active { display: flex; }
-  body:not(.is-fullscreen) .year-badge { top: 20px; right: 18px; padding: 5px 12px; font-size: 14px; }
-  body:not(.is-fullscreen) .triple-flag { padding: 6px 12px 5px; font-size: 11px; }
-  body:not(.is-fullscreen) .slide.triple { padding-bottom: 100px; }
-  body:not(.is-fullscreen) .slide.triple .slide-foot { bottom: 50px; }
-  body:not(.is-fullscreen) h1, body:not(.is-fullscreen) .slide.dark h1, body:not(.is-fullscreen) .hero.section h1 { font-size: 42px; line-height: 1.05; }
-  body:not(.is-fullscreen) h2, body:not(.is-fullscreen) .story h2 { font-size: 32px; margin: 18px 0 24px; }
-  body:not(.is-fullscreen) h3, body:not(.is-fullscreen) .case-card h3 { font-size: 26px; }
-  body:not(.is-fullscreen) .eyebrow { font-size: 13px; flex-wrap: wrap; gap: 8px; }
-  body:not(.is-fullscreen) .lead, body:not(.is-fullscreen) .slide.dark .lead { font-size: 20px; margin-top: 20px; }
-  body:not(.is-fullscreen) :is(.split,.row,.cards,.hero,.front,.terms,.missions,.quiz,.path,.outcomes,.chain,.stores,.toolkit,.route,.eq-note,.obs) { grid-template-columns: minmax(0,1fr) !important; grid-template-rows: auto; gap: 22px; height: auto; }
-  body:not(.is-fullscreen) .split > *, body:not(.is-fullscreen) .split.idea-last > * { grid-column: auto; grid-row: auto; }
-  body:not(.is-fullscreen) :is(.col,.stack,.fill) { gap: 18px; min-height: 0; flex: none; }
-  body:not(.is-fullscreen) .points li { font-size: 20px; padding-left: 24px; }
-  body:not(.is-fullscreen) .points li::before { width: 8px; height: 8px; }
-  body:not(.is-fullscreen) .points { gap: 15px; }
-  body:not(.is-fullscreen) .points.cols, body:not(.is-fullscreen) .points.cols3 { grid-template-columns: 1fr; }
-  body:not(.is-fullscreen) ol.steps li { font-size: 20px; padding-left: 48px; }
-  body:not(.is-fullscreen) ol.steps li::before { width: 34px; height: 34px; font-size: 16px; }
-  body:not(.is-fullscreen) .panel { min-height: 300px; height: auto; padding: 16px 12px; }
-  body:not(.is-fullscreen) .panel-head { font-size: 14px; }
-  body:not(.is-fullscreen) .panel .pill { font-size: 12px; }
-  body:not(.is-fullscreen) .panel:has(.widget) { min-height: 470px; }
-  body:not(.is-fullscreen) .fig { min-height: 240px; height: 260px !important; flex: none; }
-  body:not(.is-fullscreen) .fig[style*="height: 0"] { height: 260px !important; }
-  body:not(.is-fullscreen) .dk-stage { min-height: 260px; }
-  body:not(.is-fullscreen) .dk-controls { gap: 8px; }
-  body:not(.is-fullscreen) .dk-controls button { min-height: 48px; padding: 8px 12px; font-size: 16px; }
-  body:not(.is-fullscreen) .dk-readout { height: auto; min-height: 96px; font-size: 15px; overflow: visible; display: block; }
-  body:not(.is-fullscreen) .card, body:not(.is-fullscreen) .mission { padding: 20px; }
-  body:not(.is-fullscreen) .card p, body:not(.is-fullscreen) .mission p { font-size: 18px; }
-  body:not(.is-fullscreen) .mission h3 { font-size: 24px; }
-  body:not(.is-fullscreen) :is(.remember,.rule,.formula,.idea,.frame,.story .standfirst,.story .follow-up,.story .ask) { font-size: 19px; padding: 14px; }
-  body:not(.is-fullscreen) .rule { grid-template-columns: 1fr; gap: 10px; }
-  body:not(.is-fullscreen) .equation, body:not(.is-fullscreen) .eq-block .eq { font-size: 28px; }
-  body:not(.is-fullscreen) .eq-block { padding: 18px; }
-  body:not(.is-fullscreen) .eq-block .eq-words, body:not(.is-fullscreen) .eq-block .eq-units { font-size: 16px; }
-  body:not(.is-fullscreen) .eq-block .flag { font-size: 12px; }
-  body:not(.is-fullscreen) .worked .wq { font-size: 19px; padding: 14px; }
-  body:not(.is-fullscreen) .worked .wq span { font-size: 12px; }
-  body:not(.is-fullscreen) .worked dl { grid-template-columns: 90px minmax(0,1fr); }
-  body:not(.is-fullscreen) .worked dt { font-size: 10px; padding: 12px 8px; }
-  body:not(.is-fullscreen) .worked dd { font-size: 18px; padding: 12px 8px; overflow-wrap: anywhere; }
-  body:not(.is-fullscreen) .worked mjx-container svg { max-width: 100%; }
-  body:not(.is-fullscreen) .table-scroll > table { min-width: 540px; }
-  body:not(.is-fullscreen) table.facts.big, body:not(.is-fullscreen) table.data { font-size: 18px; }
-  body:not(.is-fullscreen) .facts.big td { padding: 14px; }
-  body:not(.is-fullscreen) .facts.big th { padding: 14px; font-size: 13px; }
-  body:not(.is-fullscreen) .facts .icon-cell .fig { width: 32px; height: 32px !important; min-height: 0; }
-  body:not(.is-fullscreen) .mistake { grid-template-columns: 1fr; }
-  body:not(.is-fullscreen) .mistake p { font-size: 18px; }
-  body:not(.is-fullscreen) .mistake p + p { border-left: 0; border-top: 1px solid var(--card-border); }
-  body:not(.is-fullscreen) .q p, body:not(.is-fullscreen) .q .ans { font-size: 19px; }
-  body:not(.is-fullscreen) .q .n { font-size: 14px; min-width: 30px; height: 30px; }
-  body:not(.is-fullscreen) .term b { font-size: 26px; }
-  body:not(.is-fullscreen) .term span { font-size: 18px; }
-  body:not(.is-fullscreen) .stores .store b { font-size: 24px; }
-  body:not(.is-fullscreen) .store span, body:not(.is-fullscreen) .store i { font-size: 18px; }
-  body:not(.is-fullscreen) .tool .eq { font-size: 24px; }
-  body:not(.is-fullscreen) .tool p, body:not(.is-fullscreen) .tool .re { font-size: 16px; }
-  body:not(.is-fullscreen) .front { margin-top: 26px; }
-  body:not(.is-fullscreen) .masthead { flex-wrap: wrap; gap: 10px; padding-right: 0; }
-  body:not(.is-fullscreen) .masthead .paper-name { font-size: 26px; }
-  body:not(.is-fullscreen) .masthead .dateline, body:not(.is-fullscreen) .masthead .edition { font-size: 12px; }
-  body:not(.is-fullscreen) .news-photo figcaption { font-size: 16px; }
-  body:not(.is-fullscreen) .news-photo .credit { font-size: 12px; }
-  body:not(.is-fullscreen) .news-photo img { height: auto; max-height: none; }
-  body:not(.is-fullscreen) .machine { height: auto; display: flex; flex-direction: column; gap: 14px; }
-  body:not(.is-fullscreen) .plot-card { width: 100%; padding: 18px; }
-  body:not(.is-fullscreen) .case-card { padding: 20px; }
-  body:not(.is-fullscreen) .sticky, body:not(.is-fullscreen) .stamp { position: static; transform: none; }
-  body:not(.is-fullscreen) .sticky { font-size: 16px; }
-  body:not(.is-fullscreen) .route > div { font-size: 19px; }
-  body:not(.is-fullscreen) .route > div::after, body:not(.is-fullscreen) .chain .card::after { display: none; }
-  body:not(.is-fullscreen) .slide-foot { left: 18px; right: 18px; bottom: 18px; font-size: 10px; }
-  body:not(.is-fullscreen) .reveal-hint { font-size: 10px; }
-  body:not(.is-fullscreen) .unlocks { margin-top: 20px; }
-  body:not(.is-fullscreen) .unlocks span, body:not(.is-fullscreen) .unlocks a { font-size: 16px; padding: 8px 12px; }
-}
 
 /* Coloured teaching panels use soft fills; strokes and labels stay strong. */
 .mission { --accent: var(--year-colour); }
@@ -443,59 +358,16 @@ body.is-fullscreen .deck { border-radius: 0; }
 [data-theme="dark"] .wf .tag { fill: var(--formula); }
 [data-theme="dark"] .dk .dk-motor { fill: #4b3c20; }
 [data-theme="dark"] .cd .heater { fill: #512d25; }
-@media screen and (max-width: 600px) and (orientation: portrait) {
-  body:not(.is-fullscreen) .circuit-card { width: 100%; padding: 18px; }
-  body:not(.is-fullscreen) .grid-route { padding: 0; }
-  body:not(.is-fullscreen) .grid-text { font-size: 17px; }
-  body:not(.is-fullscreen) .grid-head strong { font-size: 16px; }
-  body:not(.is-fullscreen) .grid-pd { font-size: 13px; }
-}
 [data-theme="dark"] .cd [fill="#e3e8ee"] { fill: var(--card-bg); }
 .symbol-tile { border: 1px solid var(--card-border); border-radius: 16px; box-shadow: none; }
 .symbol-tile figcaption { font: 600 24px/1.2 var(--font-body); text-transform: none; letter-spacing: 0; }
-@media screen and (max-width: 600px) and (orientation: portrait) {
-  body:not(.is-fullscreen) .fig-html .symbol-grid { grid-template-columns: repeat(2,minmax(0,1fr)); gap: 12px; }
-  body:not(.is-fullscreen) .symbol-tile figcaption { font-size: 16px; }
-  body:not(.is-fullscreen) .dk-readout mjx-container { display: block !important; max-width: 100%; }
-  body:not(.is-fullscreen) .dk-readout mjx-container svg { max-width: 100%; height: auto; }
-}
 
 .machine .sticky.one, .machine .sticky.two { transform: none; box-shadow: none; }
 .component { border: 1px solid var(--card-border); border-radius: 16px; box-shadow: none; overflow: hidden; }
 .component figcaption { border-color: var(--card-border); }
 .component figcaption > b { font-family: var(--font-mono); font-weight: 600; letter-spacing: .02em; text-transform: none; }
 .photo img { border: 1px solid var(--card-border); border-radius: 16px; box-shadow: none; }
-@media screen and (max-width: 600px) and (orientation: portrait) {
-  body:not(.is-fullscreen) :is(.components,.photo-pair,.timeline,.story,.uses,.title-grid) { grid-template-columns: minmax(0,1fr) !important; grid-template-rows: auto; gap: 24px; height: auto; }
-  body:not(.is-fullscreen) .points { grid-template-columns: minmax(0,1fr) !important; }
-  body:not(.is-fullscreen) .components .component img { height: 220px; flex: none; }
-  body:not(.is-fullscreen) .component figcaption { font-size: 16px; padding: 14px; flex-wrap: wrap; }
-  body:not(.is-fullscreen) .component figcaption > b { font-size: 15px; }
-  body:not(.is-fullscreen) .plug-split .photo img { width: 100%; height: auto; }
-  body:not(.is-fullscreen) .photo figcaption { font-size: 18px; }
-  body:not(.is-fullscreen) .story-photos { flex-direction: column; }
-  body:not(.is-fullscreen) .story-photos figure { width: 100%; }
-  body:not(.is-fullscreen) .story-photos img { width: 100%; height: auto; max-height: 420px; object-fit: contain; }
-  body:not(.is-fullscreen) .story-photos figcaption { width: 100%; min-width: 0; font-size: 16px; }
-  body:not(.is-fullscreen) .story .points li { font-size: 20px; }
-  body:not(.is-fullscreen) .timeline::before { display: none; }
-  body:not(.is-fullscreen) .tl .fig { height: 240px !important; }
-  body:not(.is-fullscreen) .tl p { font-size: 18px; }
-  body:not(.is-fullscreen) .obs-row, body:not(.is-fullscreen) .obs-head { grid-template-columns: minmax(0,1fr) 24px minmax(0,1fr); gap: 8px; }
-  body:not(.is-fullscreen) .obs-head { font-size: 12px; }
-  body:not(.is-fullscreen) .obs-row > div { font-size: 17px; padding: 10px 8px; }
-  body:not(.is-fullscreen) .idea:has(.calc) { flex-direction: column !important; align-items: flex-start !important; gap: 16px !important; }
-  body:not(.is-fullscreen) .eq-block .eq { font-size: 28px !important; }
-  body:not(.is-fullscreen) .slide mjx-container { max-width: 100%; }
-  body:not(.is-fullscreen) .slide mjx-container svg { max-width: 100%; height: auto; }
-  body:not(.is-fullscreen) .chip { font-size: 14px; padding: 8px 12px; }
-}
 .not-examined { position: static; align-self: flex-start; margin: 12px 0 0; padding: 6px 10px; border: 1px solid var(--card-border); border-radius: 12px; background: var(--muted-bg); font-size: 18px; letter-spacing: .02em; }
-@media screen and (max-width: 600px) and (orientation: portrait) {
-  body:not(.is-fullscreen) .not-examined { font-size: 11px; }
-  body:not(.is-fullscreen) .eq-row { grid-template-columns: minmax(0,1fr); }
-  body:not(.is-fullscreen) .eq-row .idea { flex-wrap: wrap; }
-}
 .wf .band { fill: color-mix(in srgb, var(--cyan) 15%, var(--diagram-bg)); stroke: var(--cyan); stroke-width: 2.5; opacity: 1; }
 .orbit { stroke: var(--text-secondary); stroke-opacity: 1; stroke-width: 2.2; }
 
@@ -507,10 +379,6 @@ body.is-fullscreen .deck { border-radius: 0; }
 .symbol-grid .cd { stroke-width: 2.5; }
 .symbol-grid .cd .body { stroke-width: inherit; }
 .equation-inline { white-space: nowrap; }
-@media screen and (max-width: 600px) and (orientation: portrait) {
-  /* A phone column is narrower than the slide, so an unbreakable equation steps down to fit. */
-  body:not(.is-fullscreen) .equation-inline:not(:is(h1, h2, h3) *) { font-size: min(.85em, 4.3vw); }
-}
 .data tr.step:not(.shown), .data td.step:not(.shown), .data th.step:not(.shown) { opacity: 1; transform: none; }
 .data tr.step:not(.shown) > td > .cell-content,
 .data tr.step:not(.shown) > th > .cell-content,
@@ -525,12 +393,14 @@ body.is-fullscreen .deck { border-radius: 0; }
 .slide p.spec-ref, .slide .mission p.spec-ref { display: flex; flex-wrap: wrap; gap: 0 14px; margin: auto 0 0; padding-top: 10px; font: 500 14px/1.35 var(--font-mono); letter-spacing: .02em; color: var(--text-secondary); text-transform: none; }
 .slide p.spec-ref span { white-space: nowrap; }
 .slide .hero p.spec-ref, .slide .title-grid p.spec-ref { margin-top: 22px; padding-top: 0; font-size: 16px; }
-@media screen and (max-width: 600px) and (orientation: portrait) {
-  body:not(.is-fullscreen) .slide p.spec-ref { font-size: 12px; }
-}
 .eyebrow.course { flex-wrap: wrap; row-gap: 6px; }
-@media screen and (max-width: 600px) and (orientation: portrait) {
-  body:not(.is-fullscreen) .machine:has(> .stamp.one) { flex-flow: row wrap; justify-content: center; gap: 14px 8px; }
-  body:not(.is-fullscreen) .machine:has(> .stamp.one) > :not(.stamp) { order: -1; flex: 0 0 100%; }
-  body:not(.is-fullscreen) .machine .stamp { width: 92px; height: 92px; border-width: 5px; font-size: 12px; }
+
+/* Decks are landscape only: a portrait phone shows the whole 16:9 slide, scaled, and asks to turn the phone. */
+@media screen and (orientation: portrait) and (max-width: 600px) {
+  .stage::after { content: "↻  Turn your phone sideways"; position: absolute; left: 50%; bottom: 14px; z-index: 5; transform: translateX(-50%); width: max-content; max-width: calc(100% - 32px); padding: 8px 14px; border: 1px solid var(--card-border); border-radius: 999px; background: var(--card-bg); color: var(--text-secondary); font: 500 13px/1.3 var(--font-mono); text-align: center; pointer-events: none; }
+}
+/* A landscape phone gives the slide the full height: the navigation stacks in the left margin. */
+@media screen and (orientation: landscape) and (max-height: 500px) {
+  body:not(.is-fullscreen) .stage { bottom: var(--vv-bottom, 0px); }
+  body:not(.is-fullscreen) .controls { left: max(10px, env(safe-area-inset-left)); top: calc(50% + 30px); bottom: auto; transform: translateY(-50%); flex-direction: column; }
 }
