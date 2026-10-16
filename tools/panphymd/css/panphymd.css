@@ -124,25 +124,75 @@ a:visited {
 
 /* ---------------------------------------------------------------------- */
 /* Left Pane = PanPhyMD; Right Pane = Rendered Output                     */
-/* Each is 50% width on larger screens                                   */
+/* The divider adjusts the split on larger screens                       */
 /* ---------------------------------------------------------------------- */
 #inputPane,
 #outputPane {
-  flex: 1 1 50%;
+  flex: 1 1 0;
   padding: 0;
   box-sizing: border-box;
   background-color: var(--pane-background);
   display: flex;
   flex-direction: column;
   min-height: 0;
-  min-width: 240px;
+  min-width: 320px;
   border: none;
   position: relative;
   --present-zoom: 1;
 }
 
 #inputPane {
-  border-right: 1px solid var(--border-color);
+  flex-grow: var(--editor-share, 50);
+}
+
+#outputPane {
+  flex-grow: calc(100 - var(--editor-share, 50));
+}
+
+#paneDivider {
+  flex: 0 0 12px;
+  position: relative;
+  cursor: col-resize;
+  touch-action: none;
+  background: var(--background-color);
+  border-inline: 1px solid var(--border-color);
+  box-sizing: border-box;
+}
+
+#paneDivider::after {
+  content: '';
+  position: absolute;
+  width: 4px;
+  height: 48px;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  border-radius: 4px;
+  background: var(--text-muted);
+}
+
+#paneDivider:hover::after,
+#paneDivider:focus-visible::after,
+#editorContainer.is-resizing #paneDivider::after {
+  background: var(--brand-primary);
+}
+
+#paneDivider:focus-visible {
+  outline: 2px solid var(--brand-primary);
+  outline-offset: -2px;
+}
+
+#editorContainer.is-resizing,
+#editorContainer.is-resizing * {
+  cursor: col-resize !important;
+  user-select: none !important;
+  -webkit-user-select: none !important;
+}
+
+@media (pointer: coarse) {
+  #paneDivider {
+    flex-basis: 24px;
+  }
 }
 
 
@@ -690,7 +740,7 @@ textarea:focus {
 .buttonContainer.output-controls {
   width: 100%;
   justify-content: space-between;
-  flex-wrap: nowrap;
+  flex-wrap: wrap;
   padding: 0 12px;
 }
 
@@ -701,6 +751,7 @@ textarea:focus {
 
 .buttonContainer.output-controls .output-actions {
   display: flex;
+  flex-wrap: wrap;
   gap: 12px;
   justify-content: center;
   margin: 0 auto;
@@ -1293,6 +1344,10 @@ button:hover {
 
 /* 1) For narrow screens, show tab bar and switch panes */
 @media (max-width: 900px) {
+  #paneDivider {
+    display: none;
+  }
+
   .mobile-tab-bar {
     display: flex;
     align-items: center;

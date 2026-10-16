@@ -11,6 +11,7 @@ const STORAGE_KEYS = {
   SYNC_SCROLL: 'markdownSyncScroll',
   FONT_SIZE: 'markdownFontSize',
   PREVIEW_FONT: 'markdownPreviewFont',
+  PANE_SPLIT: 'markdownPaneSplit',
   SUPPRESS_CLEAR_WARNING: 'markdownSuppressClearWarning',
   SUPPRESS_CLEAR_HISTORY_WARNING: 'markdownSuppressClearHistoryWarning',
   SUPPRESS_OPEN_WARNING: 'markdownSuppressOpenWarning',
@@ -87,6 +88,15 @@ export function clearDraft() {
  */
 export function restoreDraft() {
   return safeGetStorageItem(STORAGE_KEYS.DRAFT);
+}
+
+export function loadPaneSplitPreference() {
+  const saved = Number(safeGetStorageItem(STORAGE_KEYS.PANE_SPLIT));
+  return Number.isFinite(saved) && saved > 0 && saved < 100 ? saved : 50;
+}
+
+export function savePaneSplitPreference(percentage) {
+  safeSetStorageItem(STORAGE_KEYS.PANE_SPLIT, String(percentage));
 }
 
 /**

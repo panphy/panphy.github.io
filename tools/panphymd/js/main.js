@@ -21,7 +21,9 @@ import {
   markContentExported,
   isDirty,
   savePreviewFontPreference,
-  loadPreviewFontPreference
+  loadPreviewFontPreference,
+  loadPaneSplitPreference,
+  savePaneSplitPreference
 } from './state.js';
 
 import {
@@ -1932,6 +1934,105 @@ window.addEventListener('offline', () => {
   updatePreviewFontOfflineState();
 });
 window.addEventListener('resize', debouncedSyncAnchorMapRebuild);
+
+// Keep the desktop split preference independent of temporary viewport limits.
+function initializePaneDivider() {
+  const container = document.getElementById('editorContainer');
+  const divider = document.getElementById('paneDivider');
+  const desktopQuery = window.matchMedia('(min-width: 901px)');
+  const MIN_PANE_WIDTH = 320;
+  let preferredSplit = loadPaneSplitPreference();
+  let activePointerId = null;
+  let grabOffset = 0;
+
+  function getLimits() {
+    const availableWidth = container.clientWidth - divider.offsetWidth;
+    const minimum = Math.min(50, Math.ceil(MIN_PANE_WIDTH / availableWidth * 100));
+    return { availableWidth, minimum, maximum: 100 - minimum };
+  }
+
+  function applySplit(percentage) {
+    if (!desktopQuery.matches) return;
+    const { minimum, maximum } = getLimits();
+    const split = Math.max(minimum, Math.min(maximum, percentage));
+    container.style.setProperty('--editor-share', split);
+    divider.setAttribute('aria-valuemin', minimum);
+    divider.setAttribute('aria-valuemax', maximum);
+    divider.setAttribute('aria-valuenow', Math.round(split));
+    divider.setAttribute('aria-valuetext', `${Math.round(split)}% editor, ${100 - Math.round(split)}% preview`);
+    debouncedSyncAnchorMapRebuild();
+    return split;
+  }
+
+  function saveSplit(percentage) {
+    if (!desktopQuery.matches) return;
+    preferredSplit = applySplit(percentage);
+    savePaneSplitPreference(preferredSplit);
+  }
+
+  function finishDrag() {
+    if (activePointerId === null) return;
+    const pointerId = activePointerId;
+    activePointerId = null;
+    container.classList.remove('is-resizing');
+    if (divider.hasPointerCapture(pointerId)) divider.releasePointerCapture(pointerId);
+    savePaneSplitPreference(preferredSplit);
+    debouncedSyncAnchorMapRebuild();
+  }
+
+  divider.addEventListener('pointerdown', event => {
+    if (!desktopQuery.matches || !event.isPrimary || event.button !== 0 || activePointerId !== null) return;
+    event.preventDefault();
+    divider.focus({ preventScroll: true });
+    const rect = divider.getBoundingClientRect();
+    grabOffset = event.clientX - rect.left;
+    activePointerId = event.pointerId;
+    divider.setPointerCapture(event.pointerId);
+    container.classList.add('is-resizing');
+  });
+
+  divider.addEventListener('pointermove', event => {
+    if (event.pointerId !== activePointerId) return;
+    if (!desktopQuery.matches) {
+      finishDrag();
+      return;
+    }
+    const { availableWidth } = getLimits();
+    const left = container.getBoundingClientRect().left;
+    preferredSplit = applySplit((event.clientX - left - grabOffset) / availableWidth * 100);
+  });
+  divider.addEventListener('pointerup', finishDrag);
+  divider.addEventListener('pointercancel', finishDrag);
+  divider.addEventListener('lostpointercapture', finishDrag);
+  window.addEventListener('blur', finishDrag);
+  divider.addEventListener('dblclick', () => saveSplit(50));
+  divider.addEventListener('keydown', event => {
+    const { minimum, maximum } = getLimits();
+    const current = Number(container.style.getPropertyValue('--editor-share')) || 50;
+    const step = event.shiftKey ? 5 : 1;
+    let next;
+    switch (event.key) {
+      case 'ArrowLeft': next = current - step; break;
+      case 'ArrowRight': next = current + step; break;
+      case 'Home': next = minimum; break;
+      case 'End': next = maximum; break;
+      case 'Enter': next = 50; break;
+      default: return;
+    }
+    event.preventDefault();
+    saveSplit(next);
+  });
+
+  // Pane resizing changes line wrapping without firing a window resize event.
+  new ResizeObserver(debouncedSyncAnchorMapRebuild).observe(inputPane);
+  new ResizeObserver(() => {
+    if (!desktopQuery.matches) finishDrag();
+    applySplit(preferredSplit);
+  }).observe(container);
+  applySplit(preferredSplit);
+}
+
+initializePaneDivider();
 
 
 function updatePresentButtonLabel() {
