@@ -520,3 +520,11 @@ body.is-fullscreen .deck { border-radius: 0; }
 @media print { .data .step:not(.shown) > .cell-content { opacity: 1 !important; } }
 .eco-house { display: block; width: 100%; height: auto; }
 .eco-house-frame { background: #f8f6f1; border-radius: 12px; padding: 12px; }
+
+/* AQA specification references on the map cards and part dividers. */
+.slide p.spec-ref, .slide .mission p.spec-ref { display: flex; flex-wrap: wrap; gap: 0 14px; margin: auto 0 0; padding-top: 10px; font: 500 14px/1.35 var(--font-mono); letter-spacing: .02em; color: var(--text-secondary); text-transform: none; }
+.slide p.spec-ref span { white-space: nowrap; }
+.slide .hero p.spec-ref, .slide .title-grid p.spec-ref { margin-top: 22px; padding-top: 0; font-size: 16px; }
+@media screen and (max-width: 600px) and (orientation: portrait) {
+  body:not(.is-fullscreen) .slide p.spec-ref { font-size: 12px; }
+}
