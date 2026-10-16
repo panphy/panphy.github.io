@@ -17,9 +17,12 @@
   const THUMBS_KEY = 'atoms-radiation-deck-thumbs-hidden';
   const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
 
+  // A landscape phone fills the screen with the slide, as when presenting.
+  const LANDSCAPE_PHONE = window.matchMedia('screen and (orientation: landscape) and (max-height: 500px)');
+
   function fit() {
     const box = stage.getBoundingClientRect();
-    const full = document.body.classList.contains('is-fullscreen');
+    const full = document.body.classList.contains('is-fullscreen') || LANDSCAPE_PHONE.matches;
     const pad = full ? 0 : 16;
     const scale = Math.min((box.width - pad * 2) / SLIDE_W, (box.height - pad * 2) / SLIDE_H);
     const left = (box.width - SLIDE_W * scale) / 2;
