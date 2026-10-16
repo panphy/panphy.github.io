@@ -528,3 +528,4 @@ body.is-fullscreen .deck { border-radius: 0; }
 @media screen and (max-width: 600px) and (orientation: portrait) {
   body:not(.is-fullscreen) .slide p.spec-ref { font-size: 12px; }
 }
+.eyebrow.course { flex-wrap: wrap; row-gap: 6px; }
