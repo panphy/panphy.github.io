@@ -180,3 +180,4 @@ mjx-container { line-height: 0; }
 /* One store per chart: every bar the same colour. */
 .dk.one-store .dk-bar { fill: var(--cyan); }
 .dk.one-store.elastic .dk-bar { fill: var(--alt); }
+.missions.nine .mission p.spec-ref { padding-top: 4px; font-size: 13px; }
