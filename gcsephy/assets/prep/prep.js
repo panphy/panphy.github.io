@@ -66,7 +66,7 @@
       <div class="donow"><div class="sec"><h2>Do Now</h2><span class="tag">Remember</span><span class="aside">From earlier lessons · 1 mark each</span></div>${doNow}</div>
       <div class="sec"><h2>Key ideas</h2><span class="tag">Lesson${p.lessons.includes("–") ? "s" : ""} ${p.lessons}</span><span class="aside">Show your working</span></div>
       ${rest}
-      <div class="run-foot"><span><b>${U.unit}</b> · Year ${U.year} Prep ${n}</span><span>${answers ? "Answer edition" : "Hand in on the due date"}</span></div>
+      <div class="run-foot"><span><b>${U.unit}</b> · Year ${U.year} Prep ${n} · © 2026 PanPhy Labs. All rights reserved.</span><span>${answers ? "Answer edition" : "Hand in on the due date"}</span></div>
     </section>`;
   }
 

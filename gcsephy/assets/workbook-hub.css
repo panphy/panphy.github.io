@@ -35,3 +35,4 @@ main a { color: var(--accent-ink); }
 a:focus-visible { outline: 3px solid var(--accent-ink); outline-offset: 4px; }
 header a:focus-visible { outline-color: var(--accent); }
 .icon { width: 1em; height: 1em; flex: none; vertical-align: -.14em; fill: none; stroke: currentColor; stroke-width: 2.6; stroke-linecap: round; stroke-linejoin: round; }
+.copyright { margin: 3rem 0 0; font-size: .85rem; opacity: .75; }

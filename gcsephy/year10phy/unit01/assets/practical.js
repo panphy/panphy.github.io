@@ -13,7 +13,7 @@
   const PANPHY_FOOTER = `
         <div class="panphy-footer-row">
           <a class="panphy-home-link" href="/" aria-label="Visit the PanPhy Labs landing page"><img src="/assets/favicon.png" width="30" height="30" alt=""></a>
-          <p>&copy; 2026 PanPhy Labs</p>
+          <p>&copy; 2026 PanPhy Labs. All rights reserved.</p>
           <p class="panphy-footer-links"><a href="mailto:panphylabs@icloud.com">Contact Me</a><span class="footer-sep">·</span><a href="https://buymeacoffee.com/panphy" target="_blank" rel="noopener noreferrer">Support My Projects</a></p>
         </div>`;
 

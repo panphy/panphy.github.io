@@ -25,7 +25,7 @@
 
   window.WORKBOOK = {
     title: "Work Like a Physicist - Year 9 Student Workbook",
-    footer: "Work Like a Physicist · Year 9 Workbook",
+    footer: "Work Like a Physicist · Year 9 Workbook · © 2026 PanPhy Labs. All rights reserved.",
     pages: [
       /* 1 */
       { cover: {

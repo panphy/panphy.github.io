@@ -23,7 +23,7 @@
 
   window.WORKBOOK = {
     title: `Work Like a Physicist - Year 9 Unit Review${answers ? " (Answers)" : ""}`,
-    footer: `Work Like a Physicist · Year 9 Unit review${answers ? " · Answers" : ""}`,
+    footer: `Work Like a Physicist · Year 9 Unit review${answers ? " · Answers" : ""} · © 2026 PanPhy Labs. All rights reserved.`,
     pages: [
       /* 1 */
       { cover: {

@@ -1,7 +1,7 @@
 @import url('/gcsephy/assets/fonts/year9-workbook-fonts.css');
 
 /* Answer key for the Year 9 workbook: flowing A4, one lesson per section. */
-@page { size: A4; margin: 16mm 15mm 18mm; @bottom-center { content: "Work Like a Physicist · Year 9 Workbook · Answers · " counter(page); font: 7.5pt Helvetica, Arial, sans-serif; color: #1d3557; } }
+@page { size: A4; margin: 16mm 15mm 18mm; @bottom-center { content: "Work Like a Physicist · Year 9 Workbook · Answers · © 2026 PanPhy Labs. All rights reserved. · " counter(page); font: 7.5pt Helvetica, Arial, sans-serif; color: #1d3557; } }
 :root { --navy: #1d3557; --blue: #2f6f9f; --tint: #eaf1f7; --rule: #c8cdd4; --ink: #1d2733; --muted: #6b7684; }
 * { box-sizing: border-box; }
 html { background: #d9dcdf; }

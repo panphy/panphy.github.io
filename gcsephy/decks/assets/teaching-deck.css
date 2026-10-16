@@ -407,3 +407,6 @@ body.is-fullscreen .deck { border-radius: 0; }
   body:not(.is-fullscreen) .notes-toggle :is(.notes-label, .notes-chevron) { display: none; }
   body:not(.is-fullscreen) .notes .notes-body { left: calc(max(6px, env(safe-area-inset-left)) + 58px); right: calc(max(6px, env(safe-area-inset-right)) + 58px); bottom: max(8px, env(safe-area-inset-bottom)); max-height: calc(100dvh - 16px - var(--standalone-top, 0px)); padding: 12px 18px 14px; }
 }
+
+/* Copyright line on the title slide */
+.slide-copyright { position: absolute; right: 84px; bottom: 26px; margin: 0; font: 600 16px var(--font-mono); letter-spacing: .06em; color: var(--text-secondary); }

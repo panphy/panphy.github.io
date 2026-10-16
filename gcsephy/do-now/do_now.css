@@ -339,3 +339,4 @@ sub, sup { font-size: .68em; line-height: 0; }
   .sheet-table thead { display: table-header-group; }
   .sheet-a { color: #000; }
 }
+.copyright { margin: 24px 0 0; font-size: 13px; color: var(--muted); }
