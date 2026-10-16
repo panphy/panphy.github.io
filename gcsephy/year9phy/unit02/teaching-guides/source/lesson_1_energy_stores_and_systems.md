@@ -25,7 +25,7 @@ By the end of the lesson, students should be able to:
 | Keyword | Student-friendly definition |
 |---|---|
 | Energy | What must be transferred to make something change; measured in joules (J) |
-| Energy store | Where energy is held: kinetic, gravitational potential, elastic potential, thermal, chemical, magnetic, electrostatic, nuclear |
+| Energy store | Where energy is held; the main stores are kinetic, gravitational potential, elastic potential, thermal and chemical |
 | Transfer | Energy moving from one store to another |
 | System | The object or group of objects we choose to study |
 | Closed system | A system that no energy enters or leaves; its total energy stays the same |
@@ -40,18 +40,19 @@ By the end of the lesson, students should be able to:
 | Elastic potential | an object is stretched or squashed | A drawn bow, a stretched spring |
 | Thermal | an object is hot (its particles move faster) | A cup of tea |
 | Chemical | of the chemical bonds in a substance | Food, fuel, a battery |
-| Magnetic | magnets attract or repel | Two fridge magnets held apart |
-| Electrostatic | charges attract or repel | A charged balloon near a wall |
-| Nuclear | of the forces holding nuclei together | Uranium fuel |
+
+These five are the stores GCSE questions use. Mention the magnetic (two fridge magnets held apart), electrostatic (a charged balloon near a wall) and nuclear (uranium fuel) stores so that students recognise the names, but do not drill them; nuclear fuel returns with energy resources in Year 10.
 
 ## The four ways energy is transferred
 
 | Pathway | What happens | Example |
 |---|---|---|
-| Mechanically | A force moves something (sound is carried this way too, by vibrations) | Pushing a trolley |
+| Mechanically | A force moves something | Pushing a trolley |
 | Electrically | A current flows | A battery lighting a lamp |
 | By heating | A hotter object warms a cooler one | A hob heating a pan |
-| By radiation | Light or infrared carries it | The Sun warming your face |
+| By waves | A wave carries it: light, infrared or sound | The Sun warming your face; a loudspeaker |
+
+"By waves" puts light, infrared, sound and water waves in one pathway, which leads into wave power and the Waves unit. Light and infrared are electromagnetic radiation, and exam questions may say "by radiation": tell students that for light and infrared the two names mean the same pathway.
 
 Key point:
 
@@ -72,7 +73,7 @@ Accept everyday language. Do not correct it yet; return to these answers at the 
 
 ## Main teaching: Stores, transfers and systems
 
-Introduce the eight stores with one familiar example each, then the four pathways. Use the table above.
+Introduce the five main stores with one familiar example each, name the other three, then the four pathways. Use the table above.
 
 Then introduce the system. The same event can be described differently depending on what you include:
 
@@ -88,7 +89,7 @@ Work through each case. Write the stores before and after, then the pathway.
 | Change | Before | After | Pathway |
 |---|---|---|---|
 | A ball thrown upwards | Kinetic | Gravitational potential | Mechanically (gravity slows it) |
-| A moving car hits a wall | Kinetic | Thermal (car, wall, surroundings) | Mechanically; some is carried away as sound, which ends in the thermal store of the surroundings |
+| A moving car hits a wall | Kinetic | Thermal (car, wall, surroundings) | Mechanically; some is carried away by sound waves, which ends in the thermal store of the surroundings |
 | A trolley pushed with a constant force | Chemical (in the pusher's muscles) | Kinetic (and thermal) | Mechanically |
 | A car braking | Kinetic | Thermal (brakes and surroundings) | Mechanically (friction) |
 | A kettle boiling water | (Energy arrives from the mains) | Thermal (water) | Electrically to the element, then by heating to the water |
@@ -113,9 +114,9 @@ Students annotate a six-frame cartoon (in the workbook) with the store that is f
 Four or five stations around the room. At each, students carry out the change and write the stores before and after.
 
 - Wind-up toy: elastic potential → kinetic
-- Dropping a ball onto the bench: gravitational potential → kinetic → thermal store of the ball, the bench and the surroundings (some carried by sound)
+- Dropping a ball onto the bench: gravitational potential → kinetic → thermal store of the ball, the bench and the surroundings (some carried by sound waves)
 - Rubbing hands: chemical → kinetic → thermal
-- Battery and lamp: chemical → (electrically) → (by radiation and by heating) → thermal store of the surroundings
+- Battery and lamp: chemical → (electrically) → (by waves and by heating) → thermal store of the surroundings
 - Squeezing a stress ball and letting go: chemical (muscles) → elastic potential → kinetic and thermal
 
 ## Check for understanding

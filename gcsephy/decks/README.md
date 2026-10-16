@@ -5,7 +5,7 @@ Four browser presentations, available by direct link from the GCSE hub:
 | Deck | Year | Slides | Accent |
 | --- | --- | ---: | --- |
 | `work-like-a-physicist/` | 9 | 57 | Light orange |
-| `energy-stores-and-transfers/` | 9 | 63 | Light orange |
+| `energy-stores-and-transfers/` | 9 | 64 | Light orange |
 | `electric-circuits/` | 10 | 62 | Lime |
 | `atoms-and-radiation/` | 11 | 56 | Light yellow |
 
