@@ -1,0 +1,11 @@
+# LDR illustration
+
+`ldr.jpg` is a generated educational redraw made with the built-in imagegen editor, using the real component's geometry rather than a previous generated image.
+
+Reference: [Sureweld ORP12 product photograph](https://www.sureweld.net/products/zcy580134-light-dependent-resistor-orp-12-specification-.html), [image](https://s3-eu-west-1.amazonaws.com/webshop/data/thumbs/94/9440d72224720c9a50fb2b50900698b7d80ddd92.jpg). The reference photograph is not included in this repository.
+
+The sensing face points upward, with straight leads attached to the underside, perpendicular to the disc. The camera looks down onto the face, giving the circular disc an elliptical outline. This asset is shared by the teaching deck and companion lesson.
+
+## Prompt
+
+Use case: scientific-educational. Reference image: real ORP12 light dependent resistor product photograph, use its PHYSICAL CONSTRUCTION as the source of truth. Create a fresh clean photorealistic educational product illustration of ONE LDR. Crucial geometry: round thin reddish-orange ceramic disc sits horizontally atop TWO long straight parallel metal pins, like a small tabletop on two legs. The photosensitive serpentine surface faces UP. The pin axes are perpendicular to the disc plane and connect to its flat UNDERSIDE, not to the rim. This must follow the reference geometry. Reorient the WHOLE reference object so its two pins point vertically down in the picture; camera above and in front looks down at the upward-facing sensing surface at around 35 degrees elevation. The circular top consequently appears as a horizontal ellipse, wider than tall. Show its thin front side wall and the two pins extending straight down beneath, both slightly occluded at their tops by the disc. Use real ORP12-like reddish-brown serpentine track on a pale gray sensing surface with two small contact dots as in the reference, warm orange-brown ceramic body. Do not make a vertical lollipop-shaped disc. No bent pin elbows. Entire object visible centered in portrait composition, disc width about 45 percent of image width, pin visible length about 1.5 times disc diameter. Off-white seamless studio background, soft shadow, restrained realistic lighting matching a classroom component catalogue. No labels, text, logo, board or other objects.
