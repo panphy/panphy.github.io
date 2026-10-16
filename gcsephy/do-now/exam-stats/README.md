@@ -8,7 +8,7 @@ Every slide is drawn from the CSV files below when the page loads, so updating t
 
 | File | Purpose |
 |---|---|
-| `index.html`, `deck.css`, `deck.js` | The deck. `deck.js` builds the slides, then loads the shared deck script |
+| `index.html`, `deck.css`, `deck.js` | The deck. `deck.js` builds the slides, then loads the shared deck script. Like the teaching decks it is landscape only: on a landscape phone the slide fills the screen, the navigation stacks in the left margin and the Physics/Trilogy switch in the right (`deck.css`) |
 | `marks.csv` | One row per question part of every paper counted |
 | `sections.csv` | Which unit and topic each specification section belongs to. A reference uses the longest `Section` it starts with |
 | `corrections.csv` | Parts where the mark scheme's reference is not used as printed. `Sections` replaces the part's sections for the deck; `Status` `Discounted` marks a question AQA discounted (it is still counted as printed, and the deck says so); `Reason` says why. `marks.csv` keeps what the mark scheme prints |

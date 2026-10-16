@@ -88,3 +88,17 @@
   .brand .brand-name { display: none; }
   .course-switch a { padding: 0 11px; }
 }
+
+/* A landscape phone gives the slide the whole screen, as the teaching decks do:
+   the top bar hides except the course switch, which stands in the right margin,
+   and the navigation stacks in the left margin. */
+@media screen and (orientation: landscape) and (max-height: 500px) {
+  body:not(.is-fullscreen) :is(.topbar, .top-actions) { display: contents; }
+  body:not(.is-fullscreen) :is(.brand, .top-actions > :not(.course-switch), .progress) { display: none; }
+  body:not(.is-fullscreen) .course-switch { position: fixed; z-index: 20; right: max(6px, env(safe-area-inset-right)); top: 50%; transform: translateY(-50%); flex-direction: column; border-radius: 14px; background: var(--navy); }
+  body:not(.is-fullscreen) .course-switch a { min-height: 40px; justify-content: center; padding: 0 10px; font-size: 12px; }
+  body:not(.is-fullscreen) .stage { top: var(--standalone-top); bottom: var(--vv-bottom, 0px); left: 0; }
+  body:not(.is-fullscreen) .controls { left: max(6px, env(safe-area-inset-left)); top: 50%; bottom: auto; transform: translateY(-50%); flex-direction: column; gap: 4px; padding: 4px; }
+  body:not(.is-fullscreen) .controls button { width: 40px; height: 40px; }
+  body:not(.is-fullscreen) .controls .counter { min-width: 0; font-size: 12px; line-height: 1.2; text-align: center; }
+}
