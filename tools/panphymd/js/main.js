@@ -1941,6 +1941,7 @@ function initializePaneDivider() {
   const divider = document.getElementById('paneDivider');
   const desktopQuery = window.matchMedia('(min-width: 901px)');
   const MIN_PANE_WIDTH = 320;
+  const CENTER_SNAP_DISTANCE = 16; // Pixels on either side of the 50/50 split.
   let preferredSplit = loadPaneSplitPreference();
   let activePointerId = null;
   let grabOffset = 0;
@@ -1999,7 +2000,9 @@ function initializePaneDivider() {
     }
     const { availableWidth } = getLimits();
     const left = container.getBoundingClientRect().left;
-    preferredSplit = applySplit((event.clientX - left - grabOffset) / availableWidth * 100);
+    const editorWidth = event.clientX - left - grabOffset;
+    const nearCenter = Math.abs(editorWidth - availableWidth / 2) <= CENTER_SNAP_DISTANCE;
+    preferredSplit = applySplit(nearCenter ? 50 : editorWidth / availableWidth * 100);
   });
   divider.addEventListener('pointerup', finishDrag);
   divider.addEventListener('pointercancel', finishDrag);
