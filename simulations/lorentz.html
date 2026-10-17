@@ -1124,6 +1124,7 @@
             // the view switch animates. Events and u are always stored in S.
             const VIEW_ANIMATION_MS = 600;
             const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
+            const coarsePointer = window.matchMedia("(pointer: coarse)");
             let viewFrame = "S";
             let viewRapidity = 0;
             let viewAnimation = null;
@@ -1720,6 +1721,23 @@
 
                 projectionPills.forEach(drawPillLabel);
 
+                // Projection lines need a selected, visible event: say so when there is none
+                const projectionHint = !projectionsToggle.checked || !events.length ? null
+                    : !eventsToggle.checked ? "Turn on Events to see projection lines"
+                    : !events.includes(selectedEvent) ? `${coarsePointer.matches ? "Tap" : "Click"} an event to see its projection lines`
+                    : null;
+                if (projectionHint) {
+                    drawPillLabel({
+                        text: projectionHint,
+                        x: 12,
+                        y: 12,
+                        background: getCssVar('--table-header-bg'),
+                        textColor: getCssVar('--text-main'),
+                        align: "left",
+                        baseline: "top"
+                    });
+                }
+
                 updateEventTable();
             }
 
@@ -2171,6 +2189,13 @@
 
             [restAxesToggle, gridToggle, eventsToggle, movingAxesToggle, movingGridToggle,
                 projectionsToggle, velocityToggle].forEach(toggle => toggle.addEventListener("change", draw));
+            // Turning projection lines on shows them straight away, on the first event
+            projectionsToggle.addEventListener("change", () => {
+                if (projectionsToggle.checked && events.length && !events.includes(selectedEvent)) {
+                    selectedEvent = events[0];
+                    draw();
+                }
+            });
             window.addEventListener("resize", syncControlPanelHeight);
 
             renderEventTable();
