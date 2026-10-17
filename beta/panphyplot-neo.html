@@ -141,9 +141,12 @@
 						<button type="button" class="neo-button neo-button-primary" id="sample-data-button">Try sample data</button>
 					</div>
 				</div>
-				<div id="residual-wrap" class="neo-residuals" hidden>
-					<div class="neo-residual-heading">Residuals</div>
-					<div id="residual-plot"></div>
+				<div id="residual-wrap" class="neo-residuals is-folded" hidden>
+					<button type="button" class="neo-residual-heading" id="residual-toggle" aria-expanded="false" aria-controls="residual-plot" title="Show or hide the residuals of the fit">
+						<svg class="neo-residual-chevron" viewBox="0 0 12 12" aria-hidden="true"><path d="M4 2.5 7.5 6 4 9.5"/></svg>
+						Residuals
+					</button>
+					<div id="residual-plot" hidden></div>
 				</div>
 			</section>
 

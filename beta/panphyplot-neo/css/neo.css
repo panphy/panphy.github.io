@@ -1055,6 +1055,42 @@ input[type="number"]:focus {
 	color: var(--ink-3);
 }
 
+/* The right edge of each heading resizes its column. */
+.neo-col-resize {
+	position: absolute;
+	top: 0;
+	right: -5px;
+	bottom: 0;
+	z-index: 3;
+	width: 10px;
+	cursor: col-resize;
+	touch-action: none;
+}
+
+.neo-col-resize::after {
+	content: '';
+	position: absolute;
+	top: 6px;
+	bottom: 6px;
+	left: 4px;
+	width: 2px;
+	border-radius: 2px;
+	background: transparent;
+	transition: background-color 0.15s ease;
+}
+
+.neo-col-resize:hover::after,
+.neo-is-resizing .neo-col-resize::after {
+	background: var(--accent);
+}
+
+@media (pointer: coarse) {
+	.neo-col-resize {
+		right: -9px;
+		width: 18px;
+	}
+}
+
 /* The column letter is the drag handle for moving a column. */
 .neo-col-grip {
 	display: inline-flex;
@@ -1208,7 +1244,8 @@ input[type="number"]:focus {
 .neo-col-formula {
 	display: block;
 	width: 100%;
-	max-width: 148px;
+	/* A long formula is cut short rather than widening its column. */
+	max-width: var(--formula-max, 148px);
 	min-height: 26px;
 	margin: 0 0 2px;
 	padding: 2px 6px;
@@ -1367,8 +1404,15 @@ input[type="number"]:focus {
 .neo-residuals {
 	height: clamp(120px, 19vh, 170px);
 	flex: none;
+	display: flex;
+	flex-direction: column;
 	border-top: 1px solid var(--line);
-	padding: 6px 4px 0;
+	padding: 2px 4px 0;
+}
+
+.neo-residuals.is-folded {
+	height: auto;
+	padding-bottom: 2px;
 }
 
 .neo-residuals[hidden] {
@@ -1376,17 +1420,57 @@ input[type="number"]:focus {
 }
 
 .neo-residual-heading {
-	padding: 0 12px;
+	display: inline-flex;
+	align-items: center;
+	gap: 6px;
+	align-self: flex-start;
+	min-height: 30px;
+	padding: 2px 10px 2px 8px;
+	border: none;
+	border-radius: 8px;
+	background: none;
 	font-family: var(--font-mono);
 	font-size: 0.68rem;
 	letter-spacing: 0.08em;
 	text-transform: uppercase;
 	color: var(--ink-3);
+	cursor: pointer;
+}
+
+.neo-residual-heading:hover {
+	background: var(--surface-3);
+	color: var(--ink);
+}
+
+.neo-residual-chevron {
+	width: 12px;
+	height: 12px;
+	fill: none;
+	stroke: currentColor;
+	stroke-width: 1.6;
+	stroke-linecap: round;
+	stroke-linejoin: round;
+	transition: transform 0.15s ease;
+}
+
+.neo-residual-heading[aria-expanded="true"] .neo-residual-chevron {
+	transform: rotate(90deg);
+}
+
+@media (pointer: coarse) {
+	.neo-residual-heading {
+		min-height: 44px;
+	}
 }
 
 #residual-plot {
+	flex: 1;
+	min-height: 0;
 	width: 100%;
-	height: calc(100% - 18px);
+}
+
+#residual-plot[hidden] {
+	display: none;
 }
 
 #plot .modebar,

@@ -504,6 +504,12 @@
 			return;
 		}
 		wrap.hidden = false;
+		// Folded by default: only the heading shows until it is opened.
+		const open = neoState.showResiduals === true;
+		wrap.classList.toggle('is-folded', !open);
+		document.getElementById('residual-toggle').setAttribute('aria-expanded', String(open));
+		document.getElementById('residual-plot').hidden = !open;
+		if (!open) return;
 		const themeSettings = getPlotThemeSettings();
 		const index = NeoModel.getSeries(target.sheet).filter(entry => entry.xCol).findIndex(entry => entry.id === target.series.id);
 		const color = themeSettings.datasetColors[Math.max(index, 0) % themeSettings.datasetColors.length];

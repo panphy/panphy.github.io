@@ -17,7 +17,7 @@ CSV import shows a preview in which every column's role is chosen; the suggested
 - `js/neo-plot.js`, `js/neo-ui.js`, `js/neo-dialogs.js`, `js/neo-main.js`: graph, table, the formula, mean and CSV dialogs, and start-up.
 - `js/neo-copy.js`: View Table (copy for a spreadsheet, as an image, Markdown or LaTeX) and copying the fitted equation as an image or LaTeX. Its clipboard and SVG-to-PNG helpers are copied from `tools/panphyplot/js/ui.js`.
 - `js/neo-tour.js`: the guided tour at `?tour=columns`, on practice data with saving switched off. Its card and spotlight engine is copied from `tools/panphyplot/js/tour.js` and uses `tools/panphyplot/css/tour.css`.
-- `js/neo-panes.js`: the draggable dividers between panes (from 1000px), on the PanPhyMD model. Widths are kept per layout under `panphyplot-neo-panes` in this browser.
+- `js/neo-panes.js`: the draggable dividers between panes (from 1000px), on the PanPhyMD model. They snap onto their starting positions within 16px, and widths are kept per layout under `panphyplot-neo-panes` in this browser. Column widths are saved with each column.
 - `manual.html`: the manual for this version.
 
 The page loads `fit-core.js`, `fit-worker.js`, math.js, `math_ref.html` and `tour.css` from `tools/panphyplot/`, so changes there also affect this version. Everything else is styled by `css/neo.css`: an app shell with a toolbar, data, graph and inspector panes, and a status bar. Its layout has three panes from 1280px, data beside a scrolling graph-and-cards column from 1000px (the tour's `TOUR_NARROW_WIDTH`), and one column below that.
