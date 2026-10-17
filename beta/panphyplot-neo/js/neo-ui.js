@@ -143,12 +143,32 @@ function renderStatus() {
 		if (sheet.columns.some(column => !NeoModel.isBlank(column.cells[row]))) rows++;
 	}
 	const saved = document.createElement('span');
-	saved.className = persistenceDisabled ? 'is-practice' : 'is-saved';
-	saved.textContent = persistenceDisabled ? '● Practice data, not saved' : '● Saved in this browser';
+	saved.className = persistenceDisabled || changedElsewhere ? 'is-practice' : 'is-saved';
+	saved.textContent = persistenceDisabled ? '● Practice data, not saved'
+		: changedElsewhere ? '● Not saving: changed in another tab'
+			: '● Saved in this browser';
 	status.replaceChildren(
 		`${getSheetDisplayName(neoState.activeSheet)} · ${series.length} ${series.length === 1 ? 'series' : 'series'} · ${rows} ${rows === 1 ? 'row' : 'rows'} · `,
 		saved
 	);
+}
+
+function onWorkspaceChangedElsewhere() {
+	const banner = document.getElementById('tab-conflict');
+	if (banner) banner.hidden = false;
+	renderStatus();
+}
+
+function resolveTabConflict(keep) {
+	if (!keep) {
+		window.location.reload();
+		return;
+	}
+	if (!window.confirm('Save this tab\'s work over the changes made in the other tab?')) return;
+	keepThisTabVersion();
+	document.getElementById('tab-conflict').hidden = true;
+	renderStatus();
+	showToast('This tab\'s version is saved. The other tab will offer to reload.');
 }
 
 // Fills an empty sheet (or a new one) with the pendulum readings the tour uses.
@@ -1069,6 +1089,8 @@ function initializeInterface() {
 
 	document.getElementById('add-row-button').addEventListener('click', addRow);
 	document.getElementById('sample-data-button').addEventListener('click', loadSampleData);
+	document.getElementById('tab-conflict-reload').addEventListener('click', () => resolveTabConflict(false));
+	document.getElementById('tab-conflict-keep').addEventListener('click', () => resolveTabConflict(true));
 	document.getElementById('equation-decimals-more').addEventListener('click', () => changeEquationDecimals(1));
 	document.getElementById('equation-decimals-fewer').addEventListener('click', () => changeEquationDecimals(-1));
 	document.getElementById('add-column-button').addEventListener('click', addColumn);
