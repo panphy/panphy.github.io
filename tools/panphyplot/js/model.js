@@ -1,4 +1,4 @@
-// PanPhyPlot (neo-beta) column model: sheets of columns with Origin-style roles.
+// PanPhyPlot column model: sheets of columns with Origin-style roles.
 // Pure functions only, so the same file runs in the browser and in node tests.
 (function(root) {
 	const ROLES = ['X', 'Y', 'xErr', 'yErr', 'none'];
@@ -345,6 +345,9 @@
 
 	function normalizeColumn(saved, fallbackId) {
 		const column = createColumn(typeof saved?.id === 'string' ? saved.id : fallbackId, saved || {}, 0);
+		// Keep existing labels intact, including longer headings imported from PanPhyPlotOG.
+		if (typeof saved?.name === 'string') column.name = saved.name;
+		if (typeof saved?.unit === 'string') column.unit = saved.unit;
 		const old = column.formula.match(OLD_HALF_SPREAD);
 		if (old) column.formula = `halfspread(${old[1].trim()})`;
 		return column;
@@ -358,6 +361,7 @@
 			nextId: Number.isInteger(saved.nextId) ? saved.nextId : 0,
 			activeSheet: 0,
 			latexMode: saved.latexMode === true,
+			originalImportDecision: ['accepted', 'declined'].includes(saved.originalImportDecision) ? saved.originalImportDecision : null,
 			sheets: [],
 			fits: saved.fits && typeof saved.fits === 'object' ? saved.fits : {},
 			curves: saved.curves && typeof saved.curves === 'object' ? saved.curves : {},
@@ -960,5 +964,5 @@
 	};
 
 	if (typeof module === 'object' && module.exports) module.exports = api;
-	else root.PanPhyNeoModel = api;
+	else root.PanPhyPlotModel = api;
 })(typeof globalThis === 'object' ? globalThis : this);

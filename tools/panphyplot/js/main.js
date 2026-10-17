@@ -1,178 +1,69 @@
-// App bootstrap
+// PanPhyPlot bootstrap.
+document.addEventListener('DOMContentLoaded', () => {
+	loadState(typeof getTourInitialState === 'function' ? getTourInitialState() : null);
+	if (typeof math !== 'undefined') plotState.sheets.forEach(sheet => PlotModel.recomputeFormulas(sheet, math));
 
-document.addEventListener("DOMContentLoaded", function() {
-	// During a guided tour the page runs on practice data and leaves the saved workspace unread.
-	const tourState = typeof getTourInitialState === 'function' ? getTourInitialState() : null;
-	const savedState = tourState ? migratePersistedState(tourState) : loadState();
-	const themeButton = document.getElementById('theme-button');
-
-	window.PanPhyThemeToggle.mount(themeButton);
+	window.PanPhyThemeToggle.mount(document.getElementById('theme-button'));
 	window.addEventListener('panphy:theme-change', () => {
-		lastPlotState.plot.data = null;
-		lastPlotState.plot.layout = null;
-		lastPlotState['popup-plot'].data = null;
-		lastPlotState['popup-plot'].layout = null;
-		updatePlotAndRenderLatex();
-		renderFitDiagnostics();
-		const popupContainer = document.getElementById('popup-container');
-		if (popupContainer && popupContainer.style.display === 'block') {
-			plotAllDatasets();
-		}
+		forceReplot();
+		plotGraph();
+		// Series colours differ between the themes' palettes.
+		renderTable();
+		refreshWorkspaceChrome();
+		if (document.getElementById('popup-container').style.display === 'block') plotAllSheets();
 	});
 
-	if (savedState) {
-		rawData = Array.isArray(savedState.rawData) && savedState.rawData.length ? savedState.rawData : [[]];
-		activeSet = Math.min(savedState.activeSet ?? 0, rawData.length - 1);
-		datasetHeaders = savedState.datasetHeaders || {};
-		datasetDraftRows = normalizeDatasetDraftRows(savedState.datasetDraftRows, rawData.length);
-		datasetTitles = normalizeDatasetTitles(savedState.datasetTitles, rawData.length);
-		combinedLabelsAuto = { title: true, xLabel: true, yLabel: true, ...savedState.combinedLabelsAuto };
-		datasetNames = typeof normalizeDatasetNamesState === 'function'
-			? normalizeDatasetNamesState(savedState.datasetNames, rawData.length)
-			: (savedState.datasetNames || {});
-		datasetToggles = savedState.datasetToggles || {};
-		datasetErrorTypes = savedState.datasetErrorTypes || {};
-		fittedCurves = typeof normalizeFittedCurvesState === 'function'
-			? normalizeFittedCurvesState(savedState.fittedCurves, rawData.length)
-			: (savedState.fittedCurves || {});
-		datasetFitResults = typeof normalizeDatasetFitResultsState === 'function'
-			? normalizeDatasetFitResultsState(savedState.datasetFitResults, rawData.length)
-			: (savedState.datasetFitResults || {});
-		customFitStates = typeof normalizeCustomFitStates === 'function'
-			? normalizeCustomFitStates(savedState.customFitStates, rawData.length)
-			: (savedState.customFitStates || {});
-		dataset1XValues = savedState.dataset1XValues || [];
-		latexMode = !!savedState.latexMode;
-		titleWasAuto = savedState.titleWasAuto ?? true;
-		loadActiveGraphTitle();
+	const latexToggle = document.getElementById('latex-mode-toggle');
+	latexToggle.checked = latexMode;
+	latexToggle.addEventListener('change', () => {
+		latexMode = latexToggle.checked;
+		plotState.latexMode = latexMode;
+		renderTable();
+		syncTitleInput();
+		plotGraph();
+		renderFitSeriesSelect();
+		refreshWorkspaceChrome();
+		scheduleSaveState();
+	});
 
-		rawData.forEach((dataset, index) => {
-			if (!Array.isArray(dataset)) rawData[index] = [];
-			if (!datasetHeaders[index]) datasetHeaders[index] = { x: 'x', y: 'y' };
-			if (!datasetToggles[index]) datasetToggles[index] = { x: false, y: false };
-			if (!datasetErrorTypes[index]) datasetErrorTypes[index] = { x: 'absolute', y: 'absolute' };
-			if (!customFitStates[index]) customFitStates[index] = { formula: '', initialValues: {} };
-		});
-	} else {
-		// Ensure base dataset structures exist.
-		if (!datasetHeaders[0]) datasetHeaders[0] = { x: 'x', y: 'y' };
-		if (!datasetToggles[0]) datasetToggles[0] = { x: false, y: false };
-		if (!datasetErrorTypes[0]) datasetErrorTypes[0] = { x: 'absolute', y: 'absolute' };
-		if (!customFitStates[0]) customFitStates[0] = { formula: '', initialValues: {} };
-
-		// Initialise a clean table with defaults.
-		clearRows(true);
-
-		// Persist initial headers.
-		datasetHeaders[0].x = document.getElementById('x-column-name').value || 'x';
-		datasetHeaders[0].y = document.getElementById('y-column-name').value || 'y';
-	}
-
-	// Fit UI initialisation.
+	initializeInterface();
+	initializeDialogs();
+	initializeCopying();
+	initializePaneDividers();
 	updateBasicFitEquation();
-	const initialAdvancedFitMethod = document.getElementById('advanced-fit-method').value;
 	changeAdvancedFitMethod();
-	setInitialParameters(initialAdvancedFitMethod);
+	setInitialParameters(document.getElementById('advanced-fit-method').value);
 	initializeCustomFitUI();
 
-	// Dataset tabs.
-	initializeDatasetTabsBar();
-
-	// Populate UI from saved state when available.
-	if (savedState) {
-		loadHeaders();
-		loadErrorTypes();
-		loadToggles();
-		populateTableFromActiveDataset();
-	}
+	renderSheetTabs();
+	renderTable();
+	renderFitSeriesSelect();
 	loadCustomFitUiForActiveDataset();
+	renderActiveFitResult();
+	refreshFitStaleness();
+	renderFitDiagnostics();
+	syncTitleInput(true);
 
-	if (datasetFitResults.hasOwnProperty(activeSet)) {
-		const result = datasetFitResults[activeSet];
-		renderFittingResult(result.equation, result.rSquared);
-	} else {
-		clearFittingResultDisplay();
-	}
-
-	// Combined plot inputs.
-	initCombinedPlotInputs();
-
-	const setupGlobalUncertaintyAutoApply = (axis) => {
-		const input = document.getElementById(`global-${axis}-uncertainty`);
-		if (!input) return;
-
-		const applyIfReady = () => {
-			if (input.value.trim() === '') return;
-			applyGlobalUncertainties(axis);
-		};
-
-		input.addEventListener('change', applyIfReady);
-		input.addEventListener('keydown', function(event) {
-			if (event.key === 'Enter') {
-				event.preventDefault();
-				applyIfReady();
-			}
-		});
+	// Plotly loads deferred; draw once it is available.
+	const drawWhenReady = () => {
+		if (typeof Plotly === 'undefined') {
+			setTimeout(drawWhenReady, 50);
+			return;
+		}
+		plotGraph();
+		refreshWorkspaceChrome();
+		// Panes change size without a window resize (stacking, the residual strip), so watch them.
+		if (typeof ResizeObserver === 'function') {
+			const resize = debounce(() => {
+				['plot', 'residual-plot', 'popup-plot'].forEach((id) => {
+					const element = document.getElementById(id);
+					if (element && element.data && element.offsetParent !== null) Plotly.Plots.resize(element);
+				});
+			}, 60);
+			const observer = new ResizeObserver(resize);
+			['plot', 'residual-wrap'].forEach(id => observer.observe(document.getElementById(id)));
+		}
 	};
-
-	setupGlobalUncertaintyAutoApply('x');
-	setupGlobalUncertaintyAutoApply('y');
-
-	if (savedState && savedState.combinedPlot) {
-		const combinedTitleInput = document.getElementById('combined-title');
-		const combinedXInput = document.getElementById('combined-x-label');
-		const combinedYInput = document.getElementById('combined-y-label');
-		if (combinedTitleInput && typeof savedState.combinedPlot.title === 'string') {
-			combinedTitleInput.value = savedState.combinedPlot.title;
-		}
-		if (combinedXInput && typeof savedState.combinedPlot.xLabel === 'string') {
-			combinedXInput.value = savedState.combinedPlot.xLabel;
-		}
-		if (combinedYInput && typeof savedState.combinedPlot.yLabel === 'string') {
-			combinedYInput.value = savedState.combinedPlot.yLabel;
-		}
-	}
-
-	const titleInput = document.getElementById('graph-title');
-	if (titleInput) {
-		if (savedState && typeof savedState.graphTitle === 'string') {
-			titleInput.value = savedState.graphTitle;
-		}
-		titleInput.addEventListener('input', function() {
-			titleWasAuto = false;
-			saveActiveGraphTitle();
-			updateCombinedPlotInputsToActive();
-			scheduleSaveState();
-		});
-	}
-
-	if (titleWasAuto) {
-		updateGraphTitle(true);
-	}
-
-	// LaTeX mode toggle.
-	const latexToggle = document.getElementById('latex-mode-toggle');
-	if (latexToggle) {
-		latexToggle.checked = latexMode;
-		latexToggle.addEventListener('change', function() {
-			latexMode = this.checked;
-			updatePlotAndRenderLatex();
-			// Re-render headers and uncertainty headings.
-			loadHeaders();
-			updateUncertaintyHeaders('x');
-			updateUncertaintyHeaders('y');
-			// Convert auto-title formatting if it has not been manually edited.
-			updateGraphTitle();
-			scheduleSaveState();
-		});
-	}
-
-	initializeDialogFocus();
-	initializeFitEquationCopyInteractions();
-	if (typeof initializeDataProcessing === 'function') {
-		initializeDataProcessing();
-	}
-
-	updatePlotAndRenderLatex();
-	scheduleSaveState();
+	drawWhenReady();
+	offerOriginalImport();
 });

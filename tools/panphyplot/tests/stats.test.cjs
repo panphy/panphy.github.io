@@ -1,7 +1,7 @@
-// Run with: node --test beta/panphyplot-neo/tests/stats.test.cjs
+// Run with: node --test tools/panphyplot/tests/stats.test.cjs
 const test = require('node:test');
 const assert = require('node:assert/strict');
-const stats = require('../js/neo-stats.js');
+const stats = require('../js/stats.js');
 
 const near = (actual, expected, tolerance = 1e-9) => assert.ok(Math.abs(actual - expected) <= tolerance * Math.max(1, Math.abs(expected)), `${actual} != ${expected}`);
 

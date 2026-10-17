@@ -8,9 +8,8 @@
 	<script src="/assets/theme.js"></script>
 	<meta name="apple-mobile-web-app-capable" content="yes">
 	<meta name="apple-mobile-web-app-status-bar-style" content="default">
-	<meta name="robots" content="noindex">
 	<link rel="stylesheet" href="/assets/standalone-top.css">
-	<title>PanPhyPlot (neo-beta) Manual</title>
+	<title>PanPhyPlot Manual</title>
 	<link rel="icon" type="image/png" href="/assets/favicon.png">
 	<script type="text/x-mathjax-config">
 		MathJax.Hub.Config({ tex2jax: { inlineMath: [['\\(', '\\)']], displayMath: [['\\[', '\\]']], processEscapes: true } });
@@ -180,20 +179,21 @@
 			.example { font-size: 0.75rem; }
 		}
 	</style>
+	<script src="/assets/sw-register.js" defer></script>
 </head>
 
 <body>
 	<div class="top">
-		<a href="/beta/panphyplot-neo.html">← Back to PanPhyPlot (neo-beta)</a>
+		<a href="/tools/panphyplot.html">← Back to PanPhyPlot</a>
 		<div class="theme-toggle">
 			<button id="theme-button" data-panphy-theme-toggle aria-label="Toggle Light/Dark Theme" title="Toggle between light and dark themes">☀️</button>
 		</div>
 	</div>
 
 	<main>
-		<h1>PanPhyPlot (neo-beta) Manual</h1>
+		<h1>PanPhyPlot Manual</h1>
 		<p class="lead">Graphs and fits for practical physics, built around columns: from repeat readings to a result with its uncertainty.</p>
-		<p>Prefer to learn by doing? <a href="/beta/panphyplot-neo.html?tour=columns">Take the guided tour</a>. It uses practice data and leaves your own work alone.</p>
+		<p>Prefer to learn by doing? <a href="/tools/panphyplot.html?tour=columns">Take the guided tour</a>. It uses practice data and leaves your own work alone.</p>
 
 		<nav class="contents" aria-label="Contents">
 			<strong>Contents</strong>
@@ -329,9 +329,10 @@
 		</ul>
 
 		<h2 id="saving">11. Saving and devices</h2>
-		<p>Your sheets are saved automatically in this browser on this device, separately from the original PanPhyPlot. They are not uploaded anywhere, and clearing the browser's site data removes them: export a CSV to keep a copy or to move to another device.</p>
+		<p>Your sheets are saved automatically in this browser on this device, separately from PanPhyPlotOG. They are not uploaded anywhere, and clearing the browser's site data removes them: export a CSV to keep a copy or to move to another device.</p>
 		<p>Every tab or window you open this page in shares the same sheets, so use a new <strong>sheet</strong>, not a new tab, for another experiment. If the work changes in another tab, this tab stops saving and asks whether to reload and see the other tab's version, or keep its own; nothing is overwritten without asking.</p>
-		<p>This version is designed for tablets and computers. On a phone it links to the original PanPhyPlot instead.</p>
+		<p>Saved work from the trial version is kept automatically. If original PanPhyPlot data is found, a one-time offer can append it as new sheets with names, units and uncertainties. Accepting or declining leaves the original saved work untouched in PanPhyPlotOG. Original fits remain there.</p>
+		<p>This version is designed for tablets and computers. On a phone it links to <a href="/misc/panphyplotog.html">PanPhyPlotOG</a> instead.</p>
 	</main>
 
 	<footer>

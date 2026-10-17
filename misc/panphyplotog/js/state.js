@@ -1,0 +1,409 @@
+// Shared state for PanPhyPlotOG
+let rawData = []; // Each element will be an array of data points
+let activeSet = 0; // Index of the current active dataset
+let datasetHeaders = {}; // Object to store headers per dataset, e.g. {0: {x: 'x', y: 'y'}, 1: {x: 'Time', y: 'Distance'}}
+let datasetNames = {}; // Optional custom names per dataset index, e.g. {0: 'Trial A', 1: 'Control'}
+let datasetToggles = {}; // Global object to hold fitted curves by dataset index.
+let datasetErrorTypes = {}; // stores the error type per axis per dataset, e.g. { 0: { x: 'absolute', y: 'absolute' }, 1: { x: 'percentage', y: 'percentage' } }
+let fittedCurves = {};
+let datasetFitResults = {}; // e.g. { 0: { equation: "...", rSquared: "..." }, 1: { ... } }
+let customFitStates = {}; // per-dataset custom fit drafts, e.g. { 0: { formula: 'A*x+c', initialValues: { A: '1', c: '0' } } }
+let dataset1XValues = [];
+let latexMode = false; // false by default: plain text mode
+let titleWasAuto = true; // track whether graph title should auto-update
+let datasetDraftRows = {}; // Preserve exact cell text, including incomplete and invalid rows.
+let datasetTitles = {};
+let combinedLabelsAuto = { title: true, xLabel: true, yLabel: true };
+const datasetIdentities = {};
+const datasetFitEpochs = {};
+let nextDatasetIdentity = 0;
+
+function parseNumericInput(value) {
+	const text = String(value ?? '').trim();
+	if (!/^[+-]?(?:\d+(?:\.\d*)?|\.\d+)(?:[eE][+-]?\d+)?$/.test(text)) return NaN;
+	const number = Number(text);
+	return Number.isFinite(number) ? number : NaN;
+}
+
+function getDatasetIdentity(index) {
+	if (!datasetIdentities[index]) datasetIdentities[index] = `dataset-${++nextDatasetIdentity}`;
+	return datasetIdentities[index];
+}
+
+function invalidatePendingFit(index = activeSet) {
+	datasetFitEpochs[index] = (datasetFitEpochs[index] || 0) + 1;
+}
+
+function getDatasetFitSignature(index) {
+	return JSON.stringify(getFiniteDatasetPoints(index).map(({ x, y }) => [x, y]));
+}
+
+function captureFitTarget(index = activeSet) {
+	invalidatePendingFit(index);
+	return { id: getDatasetIdentity(index), epoch: datasetFitEpochs[index], signature: getDatasetFitSignature(index) };
+}
+
+function resolveFitTarget(target) {
+	const index = rawData.findIndex((_, i) => datasetIdentities[i] === target.id);
+	return index >= 0 && datasetFitEpochs[index] === target.epoch
+		&& getDatasetFitSignature(index) === target.signature ? index : -1;
+}
+
+function saveActiveGraphTitle() {
+	const input = document.getElementById('graph-title');
+	if (input) datasetTitles[activeSet] = { text: input.value, automatic: titleWasAuto };
+}
+
+function loadActiveGraphTitle() {
+	const saved = datasetTitles[activeSet];
+	titleWasAuto = saved ? saved.automatic : true;
+	const input = document.getElementById('graph-title');
+	if (input) input.value = saved ? saved.text : '';
+}
+
+let lastPlotState = {
+	plot: { data: null, layout: null },
+	'popup-plot': { data: null, layout: null }
+};
+
+rawData.push([]);
+datasetHeaders[0] = { x: 'x', y: 'y' }; // At initialization, for dataset 0:
+datasetToggles[0] = { x: false, y: false };
+datasetErrorTypes[0] = { x: 'absolute', y: 'absolute' };
+
+let isSyncing = false;
+const STATE_SCHEMA_VERSION = 3;
+const STORAGE_KEY = 'panphyplot-state-v2';
+const LEGACY_STORAGE_KEYS = ['panphyplot-state-v1'];
+const DATASET_NAME_MAX_LENGTH = 20;
+
+function debounce(func, wait) {
+	let timeout;
+	return function(...args) {
+		const later = () => {
+			clearTimeout(timeout);
+			func.apply(this, args);
+		};
+		clearTimeout(timeout);
+		timeout = setTimeout(later, wait);
+	};
+}
+
+let saveTimeout;
+let lastSavedSerialized = null;
+// Set by the guided tour (tour.js), which runs on practice data and must never overwrite the saved workspace.
+let persistenceDisabled = false;
+// Set when another tab saves this workspace: this tab stops saving until the person chooses a version.
+let changedElsewhere = false;
+
+function getUiStateSnapshotFromDom() {
+	const graphTitleInput = document.getElementById('graph-title');
+	const combinedTitleInput = document.getElementById('combined-title');
+	const combinedXInput = document.getElementById('combined-x-label');
+	const combinedYInput = document.getElementById('combined-y-label');
+
+	return {
+		graphTitle: graphTitleInput ? graphTitleInput.value : '',
+		combinedPlot: {
+			title: combinedTitleInput ? combinedTitleInput.value : '',
+			xLabel: combinedXInput ? combinedXInput.value : '',
+			yLabel: combinedYInput ? combinedYInput.value : ''
+		}
+	};
+}
+
+function normalizePersistedUiState(uiState = {}) {
+	const graphTitle = typeof uiState.graphTitle === 'string' ? uiState.graphTitle : '';
+	const combinedPlotInput = uiState.combinedPlot && typeof uiState.combinedPlot === 'object'
+		? uiState.combinedPlot
+		: {};
+
+	return {
+		graphTitle,
+		combinedPlot: {
+			title: typeof combinedPlotInput.title === 'string' ? combinedPlotInput.title : '',
+			xLabel: typeof combinedPlotInput.xLabel === 'string' ? combinedPlotInput.xLabel : '',
+			yLabel: typeof combinedPlotInput.yLabel === 'string' ? combinedPlotInput.yLabel : ''
+		}
+	};
+}
+
+function buildCorePersistedState() {
+	return {
+		schemaVersion: STATE_SCHEMA_VERSION,
+		rawData,
+		activeSet,
+		datasetHeaders,
+		datasetNames,
+		datasetToggles,
+		datasetErrorTypes,
+		fittedCurves,
+		datasetFitResults,
+		customFitStates,
+		datasetDraftRows,
+		datasetTitles,
+		combinedLabelsAuto,
+		dataset1XValues,
+		latexMode,
+		titleWasAuto
+	};
+}
+
+function buildPersistedState(uiState = getUiStateSnapshotFromDom()) {
+	saveActiveGraphTitle();
+	return {
+		...buildCorePersistedState(),
+		...normalizePersistedUiState(uiState)
+	};
+}
+
+function migratePersistedState(savedState, sourceKey = STORAGE_KEY) {
+	if (!savedState || typeof savedState !== 'object') return null;
+	const migrated = { ...savedState };
+	const detectedVersion = Number.isInteger(migrated.schemaVersion)
+		? migrated.schemaVersion
+		: (sourceKey === 'panphyplot-state-v1' ? 1 : 1);
+
+	// v1 -> v2: introduce explicit schemaVersion and normalized UI slice.
+	if (detectedVersion < 2) {
+		const normalizedUiState = normalizePersistedUiState({
+			graphTitle: migrated.graphTitle,
+			combinedPlot: migrated.combinedPlot
+		});
+		migrated.graphTitle = normalizedUiState.graphTitle;
+		migrated.combinedPlot = normalizedUiState.combinedPlot;
+	}
+
+	if (!Array.isArray(migrated.rawData) || migrated.rawData.length === 0) {
+		migrated.rawData = [[]];
+	}
+	const maxActive = Math.max(0, migrated.rawData.length - 1);
+	const active = Number(migrated.activeSet);
+	migrated.activeSet = Number.isInteger(active) ? Math.min(Math.max(active, 0), maxActive) : 0;
+	if (detectedVersion < 3) {
+		migrated.datasetTitles = {
+			[migrated.activeSet]: { text: migrated.graphTitle || '', automatic: migrated.titleWasAuto !== false }
+		};
+		migrated.combinedLabelsAuto = Object.fromEntries(['title', 'xLabel', 'yLabel'].map(key =>
+			[key, !migrated.combinedPlot || typeof migrated.combinedPlot[key] !== 'string']));
+	}
+	migrated.schemaVersion = STATE_SCHEMA_VERSION;
+
+	return migrated;
+}
+
+function saveState() {
+	if (persistenceDisabled || changedElsewhere) return;
+	try {
+		const serialized = JSON.stringify(buildPersistedState());
+		// Skip the write (and its localStorage I/O) when nothing changed.
+		if (serialized === lastSavedSerialized) return;
+		localStorage.setItem(STORAGE_KEY, serialized);
+		lastSavedSerialized = serialized;
+		for (const legacyKey of LEGACY_STORAGE_KEYS) {
+			if (legacyKey !== STORAGE_KEY) {
+				localStorage.removeItem(legacyKey);
+			}
+		}
+	} catch (error) {
+		console.warn('Unable to save state:', error);
+	}
+}
+
+function scheduleSaveState(delay = 500) {
+	clearTimeout(saveTimeout);
+	saveTimeout = setTimeout(saveState, delay);
+}
+
+function flushSaveState() {
+	clearTimeout(saveTimeout);
+	saveState();
+}
+
+// Guarantee the latest state is persisted when the page is hidden or closed,
+// so the debounced autosave never loses recent edits.
+if (typeof window !== 'undefined') {
+	window.addEventListener('pagehide', flushSaveState);
+	window.addEventListener('visibilitychange', () => {
+		if (document.visibilityState === 'hidden') flushSaveState();
+	});
+	// Every tab shares one saved workspace, so a save from another tab would be overwritten by this
+	// tab's next autosave. Pause instead, and let the person reload or keep this tab's version.
+	window.addEventListener('storage', (event) => {
+		if (persistenceDisabled || (event.key !== STORAGE_KEY && event.key !== null)) return;
+		if (event.key !== null && event.newValue === lastSavedSerialized) return;
+		changedElsewhere = true;
+		clearTimeout(saveTimeout);
+		if (typeof onWorkspaceChangedElsewhere === 'function') onWorkspaceChangedElsewhere();
+	});
+}
+
+// Overwrites the other tab's save with this tab's work and resumes saving.
+function keepThisTabVersion() {
+	changedElsewhere = false;
+	lastSavedSerialized = null;
+	saveState();
+}
+
+function loadState() {
+	try {
+		const candidateKeys = [STORAGE_KEY, ...LEGACY_STORAGE_KEYS];
+		for (const key of candidateKeys) {
+			const saved = localStorage.getItem(key);
+			if (!saved) continue;
+
+			let parsed = null;
+			try {
+				parsed = JSON.parse(saved);
+			} catch (parseError) {
+				console.warn('Unable to parse saved state:', parseError);
+				continue;
+			}
+
+			const migrated = migratePersistedState(parsed, key);
+			if (!migrated) continue;
+
+			if (key !== STORAGE_KEY) {
+				localStorage.setItem(STORAGE_KEY, JSON.stringify(migrated));
+			}
+
+			return migrated;
+		}
+
+		return null;
+	} catch (error) {
+		console.warn('Unable to load state:', error);
+		return null;
+	}
+}
+
+function normalizeFittedCurvesState(savedCurves, datasetCount) {
+	const normalized = {};
+	if (!savedCurves || typeof savedCurves !== 'object') return normalized;
+
+	for (let index = 0; index < datasetCount; index++) {
+		const curve = savedCurves[index];
+		if (!curve || !Array.isArray(curve.x) || !Array.isArray(curve.y)) continue;
+
+		const maxLen = Math.min(curve.x.length, curve.y.length);
+		if (maxLen === 0) continue;
+
+		const x = [];
+		const y = [];
+		for (let i = 0; i < maxLen; i++) {
+			const xi = parseNumericInput(curve.x[i]);
+			const yi = parseNumericInput(curve.y[i]);
+			if (!Number.isFinite(xi) || !Number.isFinite(yi)) continue;
+			x.push(xi);
+			y.push(yi);
+		}
+
+		if (!x.length) continue;
+
+		normalized[index] = {
+			x,
+			y,
+			equation: typeof curve.equation === 'string' ? curve.equation : ''
+		};
+	}
+
+	return normalized;
+}
+
+function normalizeDatasetFitResultsState(savedResults, datasetCount) {
+	const normalized = {};
+	if (!savedResults || typeof savedResults !== 'object') return normalized;
+
+	for (let index = 0; index < datasetCount; index++) {
+		const result = savedResults[index];
+		if (!result || typeof result !== 'object') continue;
+
+		const equation = typeof result.equation === 'string' ? result.equation.trim() : '';
+		if (!equation) continue;
+
+		const rSquared = typeof result.rSquared === 'string'
+			? result.rSquared
+			: String(result.rSquared ?? '');
+		const residuals = Array.isArray(result.residuals)
+			? result.residuals.filter(point => point && Number.isFinite(point.x) && Number.isFinite(point.y)) : [];
+		normalized[index] = {
+			equation, rSquared, residuals,
+			stale: result.stale === true,
+			status: typeof result.status === 'string' ? result.status : 'Saved fit. Click Fit Curve to update it.',
+			rmse: Number.isFinite(result.rmse) ? result.rmse : null,
+			choice: result.choice && typeof result.choice === 'object' ? result.choice : null
+		};
+	}
+
+	return normalized;
+}
+
+function normalizeDatasetNamesState(savedNames, datasetCount) {
+	const normalized = {};
+	if (!savedNames || typeof savedNames !== 'object') return normalized;
+
+	for (let index = 0; index < datasetCount; index++) {
+		const rawName = savedNames[index];
+		if (typeof rawName !== 'string') continue;
+		const trimmed = rawName.trim();
+		if (!trimmed) continue;
+		normalized[index] = trimmed.slice(0, DATASET_NAME_MAX_LENGTH);
+	}
+
+	return normalized;
+}
+
+function normalizeDatasetDraftRows(saved, datasetCount) {
+	const normalized = {};
+	for (let index = 0; index < datasetCount; index++) {
+		if (!Array.isArray(saved?.[index])) continue;
+		normalized[index] = saved[index].map(row => Object.fromEntries(
+			['xValue', 'yValue', 'xErrorValue', 'yErrorValue'].map(key => [key, typeof row?.[key] === 'string' ? row[key] : ''])
+		));
+	}
+	return normalized;
+}
+
+function normalizeDatasetTitles(saved, datasetCount) {
+	const normalized = {};
+	for (let index = 0; index < datasetCount; index++) {
+		if (typeof saved?.[index]?.text !== 'string') continue;
+		normalized[index] = { text: saved[index].text, automatic: saved[index].automatic !== false };
+	}
+	return normalized;
+}
+
+function normalizeCustomFitStates(savedStates, datasetCount) {
+	const normalized = {};
+	if (!savedStates || typeof savedStates !== 'object') return normalized;
+
+	for (let index = 0; index < datasetCount; index++) {
+		const saved = savedStates[index];
+		if (!saved || typeof saved !== 'object') continue;
+
+		const formula = typeof saved.formula === 'string' ? saved.formula : '';
+		const initialValues = {};
+		if (saved.initialValues && typeof saved.initialValues === 'object') {
+			Object.keys(saved.initialValues).forEach((key) => {
+				const trimmedKey = String(key || '').trim();
+				if (!trimmedKey) return;
+				const rawValue = saved.initialValues[key];
+				const value = rawValue === undefined || rawValue === null ? '' : String(rawValue);
+				initialValues[trimmedKey] = value;
+			});
+		}
+
+		normalized[index] = { formula, initialValues };
+	}
+
+	return normalized;
+}
+
+function getDatasetPoints(index = activeSet) {
+	const dataset = rawData[index];
+	return Array.isArray(dataset) ? dataset : [];
+}
+
+function getFiniteDatasetPoints(index = activeSet) {
+	return getDatasetPoints(index).filter(point => Number.isFinite(point.x) && Number.isFinite(point.y));
+}

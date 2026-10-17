@@ -6,7 +6,7 @@ Browser-based physics tools, simulations, classroom utilities and games. Student
 
 ## Explore
 
-- **Tools:** [PanPhyMD](tools/panphymd.html) for Markdown editing, [PanPhyPlot](tools/panphyplot.html) for graph plotting and curve fitting, [Motion Tracker](tools/motion_tracker.html), [Sound Analyzer](tools/sound_analyzer.html), and [Tone Generator](tools/tone_generator.html).
+- **Tools:** [PanPhyMD](tools/panphymd.html) for Markdown editing, [PanPhyPlot](tools/panphyplot.html) for column-based data processing, graph plotting and curve fitting on tablets and computers, [Motion Tracker](tools/motion_tracker.html), [Sound Analyzer](tools/sound_analyzer.html), and [Tone Generator](tools/tone_generator.html).
 - **Simulations:** [Virtual Ripple Tank](simulations/ripple_tank.html), [Wave Superposition](simulations/superposition.html), [Standing Wave](simulations/standing_wave.html), [Collision Lab](simulations/collision.html), [States of Matter](simulations/states.html), [Atomic Models](simulations/atomic_models.html), [Nuclear Decay](simulations/nuclear_decay.html), [Fission and Fusion](simulations/fission_fusion.html), [Electric Motors](simulations/electric_motors.html), [Charges in Fields](simulations/charges_in_fields.html), [Life Cycle of a Star](simulations/star_life_cycle.html), and [Lorentz Transform](simulations/lorentz.html).
 - **Teacher utilities:** [Exam Timer](for_teachers/timer.html) and [Camera Visualizer](for_teachers/visualizer.html).
 - **Games and demos:** [Spellwave](fun/spellwave.html) and [ASCII Camera](fun/ascii_cam.html).
@@ -34,7 +34,7 @@ Pages under `fun/`, `beta/`, `misc/`, `gcsephy/` and `ibdpphy/` need internet ac
 | `tools/`, `simulations/`, `for_teachers/` | Published educational apps |
 | `fun/` | Network-only games and demos; Spellwave's text-logic tests run with `node --test fun/spellwave/tests/*.test.mjs` |
 | `beta/` | Trial apps, listed in `beta/index.html` |
-| `misc/` | Unlisted resources, inventoried in `misc/index.html` |
+| `misc/` | Unlisted resources, including the phone-compatible original [PanPhyPlotOG](misc/panphyplotog.html), inventoried in `misc/index.html` |
 | `gcsephy/` | GCSE Physics curriculum resources, course summaries and the Do Now starters, inventoried in `gcsephy/index.html` |
 | `ibdpphy/` | IB DP Physics teaching decks, inventoried in `ibdpphy/index.html` |
 | `.github/` | Repository automation: `workflows/checks.yml` runs `scripts/check.mjs` and the app tests on every pull request; `workflows/supabase-keepalive.yml` pings Supabase twice a week |

@@ -1,4 +1,4 @@
-// Run with: node --test tools/panphyplot/tests/regression.test.cjs
+// Run with: node --test misc/panphyplotog/tests/regression.test.cjs
 // No browser or npm dependencies are required for the model/solver regressions.
 const test = require('node:test');
 const assert = require('node:assert/strict');
@@ -254,7 +254,7 @@ test('CSV import takes uncertainties only from named columns and reports the res
 	// Repeat readings are never uncertainties.
 	assert.deepEqual(detect(['L','T1','T2','T3']),[null,null,'absolute','absolute','2,3']);
 	assert.deepEqual(detect(['L squared','T','T mean']),[null,null,'absolute','absolute','2']);
-	// PanPhyPlot's own export headers, including labels where one contains the other.
+	// PanPhyPlotOG's own export headers, including labels where one contains the other.
 	assert.deepEqual(detect(['Time','Distance','delta Time','delta Distance (%)']),[2,3,'absolute','percentage','']);
 	assert.deepEqual(detect(['t','t^2','delta t^2']),[null,2,'absolute','absolute','']);
 	assert.deepEqual(detect(['Length (m)','Period (s)','delta Length (m) (%)']),[2,null,'percentage','absolute','']);
