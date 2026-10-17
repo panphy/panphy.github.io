@@ -723,10 +723,80 @@ input[type="number"]:focus {
 		height: 100dvh;
 	}
 
+	/* The dividers set --data-fr, --rest-fr and --inspector-w (neo-panes.js). */
 	.neo-workspace {
-		grid-template-columns: minmax(380px, 1fr) minmax(440px, 1.35fr) 340px;
+		grid-template-columns: minmax(300px, var(--data-fr, 1fr)) 12px minmax(420px, var(--rest-fr, 1.35fr)) 12px var(--inspector-w, 340px);
 		grid-template-rows: minmax(0, 1fr);
+		column-gap: 0;
 	}
+}
+
+/* ---------- Pane dividers ---------- */
+
+/* A full-height strip between panes with a short grip, as in PanPhyMD. */
+.neo-divider {
+	display: none;
+	position: relative;
+	z-index: 2;
+	cursor: col-resize;
+	touch-action: none;
+	border-radius: 6px;
+}
+
+@media (min-width: 1000px) {
+	.neo-divider {
+		display: block;
+	}
+}
+
+.neo-divider::after {
+	content: '';
+	position: absolute;
+	top: 50%;
+	left: 50%;
+	width: 4px;
+	height: 44px;
+	border-radius: 4px;
+	background: var(--line-strong);
+	transform: translate(-50%, -50%);
+	transition: background-color 0.15s ease, height 0.15s ease;
+}
+
+.neo-divider:hover::after,
+.neo-divider:focus-visible::after,
+.neo-is-resizing .neo-divider:focus::after {
+	height: 72px;
+	background: var(--accent);
+}
+
+.neo-divider:focus-visible {
+	outline: none;
+}
+
+.neo-divider:focus-visible::after {
+	outline: 2px solid var(--accent);
+	outline-offset: 3px;
+}
+
+/* A wider invisible hit area for fingers and the pen. */
+@media (pointer: coarse) {
+	.neo-divider::before {
+		content: '';
+		position: absolute;
+		inset: 0 -8px;
+	}
+
+	.neo-divider::after {
+		width: 6px;
+		height: 56px;
+	}
+}
+
+.neo-is-resizing,
+.neo-is-resizing * {
+	cursor: col-resize !important;
+	user-select: none !important;
+	-webkit-user-select: none !important;
 }
 
 /* The graph and inspector share a wrapper that only matters on landscape tablets. */
@@ -743,8 +813,13 @@ input[type="number"]:focus {
 	}
 
 	.neo-workspace {
-		grid-template-columns: minmax(360px, 0.95fr) 1.05fr;
+		grid-template-columns: minmax(300px, var(--data-fr, 0.95fr)) 12px minmax(420px, var(--rest-fr, 1.05fr));
 		grid-template-rows: minmax(0, 1fr);
+		column-gap: 0;
+	}
+
+	#divider-inspector {
+		display: none;
 	}
 
 	.neo-right {
