@@ -825,7 +825,7 @@ function updateBasicFitEquation() {
 	} else if (fitMethod === 'Exponential') {
 		equation = 'y = A e^{b(x-x_0)} + c';
 	} else if (fitMethod === 'Power') {
-		equation = 'y = A (x-x_0)^{b} + c';
+		equation = 'y = A x^{b}';
 	}
 
 	const equationElement = document.getElementById('basic-fit-equation');
@@ -1191,6 +1191,116 @@ function exponentialFit_logLinear(raw) {
 }
 
 
+// ---------- Weighting and parameter uncertainties (neo-beta) ----------
+// Every fit hands its model and unweighted best parameters to finalizeParametricFit, which
+// refines them by least squares, weights by 1/σ² when asked (σ² = ΔY² + (f′(x)·ΔX)², the
+// effective variance, re-weighted as the fit settles) and takes each parameter's ± from the
+// Jacobian.
+
+function modelSlope(model, x) {
+	const step = Math.abs(x) * 1e-6 || 1e-6;
+	return (model(x + step) - model(x - step)) / (2 * step);
+}
+
+// Each point's σ for the current model, or null if any point has no usable uncertainty.
+function effectiveSigmas(data, model) {
+	if (!data.some(point => point.yError > 0 || point.xError > 0)) return null;
+	const sigmas = data.map((point) => {
+		const sy = point.yError > 0 ? point.yError : 0;
+		const sx = point.xError > 0 ? point.xError * modelSlope(model, point.x) : 0;
+		return Math.sqrt(sy * sy + sx * sx);
+	});
+	return sigmas.every(sigma => Number.isFinite(sigma) && sigma > 0) ? sigmas : null;
+}
+
+function numericJacobian(model, params, data) {
+	return data.map(({ x }) => params.map((value, index) => {
+		const step = Math.max(1e-7, Math.abs(value) * 1e-6);
+		const plus = params.slice();
+		const minus = params.slice();
+		plus[index] = value + step;
+		minus[index] = value - step;
+		const derivative = (model(plus, x) - model(minus, x)) / (2 * step);
+		return Number.isFinite(derivative) ? derivative : 0;
+	}));
+}
+
+function runLeastSquares(data, params, model, sigmas) {
+	const scale = index => (sigmas ? sigmas[index] : 1);
+	const residualFn = (p, pts) => pts.map((point, index) => {
+		const predicted = model(p, point.x);
+		return Number.isFinite(predicted) ? (predicted - point.y) / scale(index) : CUSTOM_FIT_PENALTY;
+	});
+	const jacobianFn = (p, pts) => numericJacobian(model, p, pts).map((row, index) => row.map(value => value / scale(index)));
+	const result = levenbergMarquardt(data, params, residualFn, jacobianFn, { maxIterations: 400, tolerance: 1e-12 });
+	return result && Array.isArray(result.params) && result.params.every(Number.isFinite) ? result : null;
+}
+
+// spec: { names, params, model(params, x), refine } — refine: false keeps closed-form parameters.
+function finalizeParametricFit(data, spec) {
+	let params = spec.params.slice();
+	let solver = null;
+	const modelAt = p => x => spec.model(p, x);
+	const sse = p => data.reduce((sum, point) => sum + (spec.model(p, point.x) - point.y) ** 2, 0);
+	if (spec.refine !== false) {
+		const refined = runLeastSquares(data, params, spec.model, null);
+		if (refined && sse(refined.params) <= sse(params)) {
+			params = refined.params;
+			solver = refined;
+		}
+	}
+	let weighted = false;
+	let note = '';
+	if (getWeightingRequested()) {
+		if (!effectiveSigmas(data, modelAt(params))) {
+			note = ' Not weighted: every point needs a ±ΔY or ±ΔX above zero.';
+		} else {
+			for (let pass = 0; pass < 5; pass++) {
+				const sigmas = effectiveSigmas(data, modelAt(params));
+				if (!sigmas) break;
+				const result = runLeastSquares(data, params, spec.model, sigmas);
+				if (!result) break;
+				const moved = result.params.some((value, index) => Math.abs(value - params[index]) > 1e-10 * Math.max(1, Math.abs(value)));
+				params = result.params;
+				solver = result;
+				weighted = true;
+				if (!moved) break;
+			}
+		}
+	}
+	const sigmas = effectiveSigmas(data, modelAt(params));
+	const residuals = data.map(point => point.y - spec.model(params, point.x));
+	const uncertainties = residuals.every(Number.isFinite)
+		? PanPhyNeoStats.parameterUncertainties(numericJacobian(spec.model, params, data), residuals, weighted ? sigmas : null)
+		: null;
+	return {
+		params,
+		solver,
+		weighted,
+		note,
+		chiSigmas: sigmas,
+		parameters: uncertainties && uncertainties.every(Number.isFinite)
+			? spec.names.map((name, index) => ({ name, value: params[index], uncertainty: uncertainties[index] }))
+			: null
+	};
+}
+
+function sampleCurve(data, fitFunction, count = 300) {
+	const { min, max } = minMaxFinite(data.map(point => point.x));
+	const xFit = Array.from({ length: count }, (_, i) => (max === min ? min : min + (i * (max - min)) / (count - 1)));
+	return { xFit, yFit: xFit.map(fitFunction) };
+}
+
+function fitExtras(final) {
+	return {
+		weighted: final.weighted,
+		parameters: final.parameters,
+		parameterCount: final.params.length,
+		chiSigmas: final.chiSigmas,
+		statusNote: final.note
+	};
+}
+
 function getFitChoice() {
 	const customTab = document.getElementById('CustomFit');
 	const advancedTab = document.getElementById('AdvancedFit');
@@ -1236,18 +1346,16 @@ function updateResults(equation, x, y, fitFunction, datasetIndex = activeFitKey,
 		parameters: null,
 		...extras
 	};
-	// χ²/ν needs every point's ±ΔY; it describes the fit whether or not the fit was weighted.
-	const sigmas = getFitSigmas(datasetIndex);
+	// χ²/ν needs every point's σ; it describes the fit whether or not the fit was weighted.
+	const sigmas = extras.chiSigmas || getFitSigmas(datasetIndex);
 	const parameterCount = Array.isArray(result.parameters) ? result.parameters.length : (extras.parameterCount || getChoiceParameterCount(choice));
 	if (sigmas && sigmas.length === x.length && finiteResiduals.length === x.length && parameterCount) {
 		result.chi2 = PanPhyNeoStats.chiSquared(residuals.map(point => point.y), sigmas);
 		result.dof = x.length - parameterCount;
 	}
-	if (getWeightingRequested() && !result.weighted) {
-		result.status += sigmas
-			? ' This fit method is unweighted; use Linear or Custom for a weighted fit.'
-			: ' Not weighted: every point needs a ±ΔY greater than zero.';
-	}
+	if (extras.statusNote) result.status += extras.statusNote;
+	delete result.chiSigmas;
+	delete result.statusNote;
 	datasetFitResults[datasetIndex] = result;
 	if (datasetIndex === activeFitKey) renderFittingResult(equation, result.rSquared);
 	scheduleSaveState();
@@ -1368,19 +1476,14 @@ async function fitCustomCurve() {
 			alert('Custom fit could not converge on this dataset.');
 			return;
 		}
-		// Weighting: refine the unweighted best fit, minimising Σ((y − f)/ΔY)².
-		const sigmas = getWeightingSigmas(fitTarget.key);
-		if (sigmas) {
-			const weight = rows => rows.map((row, i) => (Array.isArray(row) ? row.map(value => value / sigmas[i]) : row / sigmas[i]));
-			const refined = levenbergMarquardt(data, bestParams, (p, pts) => weight(residualFn(p, pts)), (p, pts) => weight(jacobianFn(p, pts)), { maxIterations: 350, tolerance: 1e-10 });
-			if (refined && Array.isArray(refined.params) && refined.params.every(Number.isFinite)) {
-				bestParams = refined.params;
-				solved = refined;
-			}
-		}
-		const residualsAtBest = residualFn(bestParams, data).map(value => -value);
-		const uncertainties = PanPhyNeoStats.parameterUncertainties(jacobianFn(bestParams, data), residualsAtBest, sigmas);
-		const parameters = uncertainties ? analysis.parameterNames.map((name, index) => ({ name, value: bestParams[index], uncertainty: uncertainties[index] })) : null;
+		// Weighting (with ΔX through the slope) and ± values, shared with every other fit.
+		const final = finalizeParametricFit(data, {
+			names: analysis.parameterNames,
+			params: bestParams,
+			model: (values, xInput) => evaluateCustomExpression(analysis.compiledExpression, analysis.parameterNames, values, xInput)
+		});
+		bestParams = final.params;
+		if (final.solver) solved = final.solver;
 		const targetDatasetIndex = resolveFitTarget(fitTarget);
 		if (targetDatasetIndex < 0) {
 			showToast('Fit discarded because its dataset changed or was removed.');
@@ -1402,8 +1505,7 @@ async function fitCustomCurve() {
 		const equation = buildCustomFitEquationLatex(analysis.parsedExpression, analysis.parameterNames, bestParams);
 
 		fittedCurves[targetDatasetIndex] = { x: xFit, y: yFit, equation };
-		updateResults(equation, xValues, yValues, fitFunction, targetDatasetIndex, solved, fitChoice,
-			{ weighted: !!sigmas, parameters, parameterCount: analysis.parameterNames.length });
+		updateResults(equation, xValues, yValues, fitFunction, targetDatasetIndex, solved, fitChoice, fitExtras(final));
 		if (targetDatasetIndex === activeFitKey) {
 			plotGraph(xFit, yFit);
 		}
@@ -1427,17 +1529,21 @@ async function fitCustomCurve() {
 
 function performLinearFit(x, y) {
 	try {
-		// Weighted by 1/ΔY² when requested and every point has a ±ΔY; otherwise ordinary least squares.
-		const sigmas = getWeightingSigmas(activeFitKey);
-		const line = PanPhyNeoStats.linearFit(x, y, sigmas);
+		const data = getFiniteDatasetPoints(activeFitKey);
+		const line = PanPhyNeoStats.linearFit(x, y);
 		if (!line) {
 			alert('A straight line needs at least two different x values.');
 			return;
 		}
-		const slope = line.m;
-		const intercept = line.c;
+		// The unweighted line is exact, so only a weighted fit refines it.
+		const final = finalizeParametricFit(data, {
+			names: ['m', 'c'],
+			params: [line.m, line.c],
+			model: ([m, c], xi) => m * xi + c,
+			refine: false
+		});
+		const [slope, intercept] = final.params;
 		const fitFunction = xi => slope * xi + intercept;
-
 		const { min: xMin, max: xMax } = minMaxFinite(x);
 		const xFit = [xMin, xMax];
 		const yFit = xFit.map(fitFunction);
@@ -1446,16 +1552,10 @@ function performLinearFit(x, y) {
 		if (intercept < 0) {
 			equation = `y = ${formatFitNumber(slope)}x - ${formatFitNumber(Math.abs(intercept))}`;
 		}
-
-		// Store the fitted curve for this dataset.
-		fittedCurves[activeFitKey] = { x: xFit, y: yFit, equation: equation };
-
-		const parameters = x.length > 2 || sigmas ? [
-			{ name: 'm', value: slope, uncertainty: line.uncertaintyM },
-			{ name: 'c', value: intercept, uncertainty: line.uncertaintyC }
-		] : null;
-		updateResults(equation, x, y, fitFunction, activeFitKey, null, { kind: 'basic', method: document.getElementById('fit-method').value },
-			{ weighted: !!sigmas, parameters, parameterCount: 2 });
+		fittedCurves[activeFitKey] = { x: xFit, y: yFit, equation };
+		const extras = fitExtras(final);
+		if (x.length <= 2 && !final.weighted) extras.parameters = null;
+		updateResults(equation, x, y, fitFunction, activeFitKey, null, { kind: 'basic', method: document.getElementById('fit-method').value }, extras);
 		plotGraph(xFit, yFit);
 	} catch (error) {
 		console.error('Error performing linear fit:', error);
@@ -1464,40 +1564,37 @@ function performLinearFit(x, y) {
 }
 
 
+// The polynomial is fitted in u = (x − mean)/spread, which keeps high powers well conditioned.
+function buildPolynomialEquation(coefficients, meanX, stdX) {
+	const degree = coefficients.length - 1;
+	let equation = 'y = ';
+	coefficients.forEach((c, i) => {
+		const power = degree - i;
+		if (c === 0) return;
+		const absC = formatFitNumber(Math.abs(c));
+		const sign = c >= 0 ? (i === 0 ? '' : ' + ') : (i === 0 ? '-' : ' - ');
+		const term = power === 0 ? `${absC}` : power === 1 ? `${absC}u` : `${absC}u^{${power}}`;
+		equation += `${sign}${term}`;
+	});
+	return `${equation},\\ u = \\frac{x - ${formatFitNumber(meanX)}}{${formatFitNumber(stdX)}}`;
+}
+
 function performPolynomialFit(x, y, degree) {
 	try {
+		const data = getFiniteDatasetPoints(activeFitKey);
 		const fit = polyfit(x, y, degree);
-		const { min: xMin, max: xMax } = minMaxFinite(x);
-		const xFit = Array.from({ length: 100 }, (_, i) => xMin + i * (xMax - xMin) / 99);
-		const yFit = xFit.map(xi => polyEval(fit, xi));
-
-		const fitFunction = xi => polyEval(fit, xi);
-
-		let equation = 'y = ';
-		fit.coefficients.forEach((c, i) => {
-			const power = degree - i;
-			if (c === 0) return;
-
-			const absC = formatFitNumber(Math.abs(c));
-			const sign = c >= 0 ? (i === 0 ? '' : ' + ') : (i === 0 ? '-' : ' - ');
-
-			let term = '';
-			if (power === 0) {
-				term = `${absC}`;
-			} else if (power === 1) {
-				term = `${absC}u`;
-			} else {
-				term = `${absC}u^{${power}}`;
-			}
-
-			equation += `${sign}${term}`;
+		const model = (coefficients, xi) => polyEval({ coefficients, meanX: fit.meanX, stdX: fit.stdX }, xi);
+		const final = finalizeParametricFit(data, {
+			names: fit.coefficients.map((_, i) => `a_{${degree - i}}`),
+			params: fit.coefficients,
+			model,
+			refine: false
 		});
-		equation += `,\\ u = \\frac{x - ${formatFitNumber(fit.meanX)}}{${formatFitNumber(fit.stdX)}}`;
-
-		// Store the fitted curve for this dataset.
-		fittedCurves[activeFitKey] = { x: xFit, y: yFit, equation: equation };
-
-		updateResults(equation, x, y, fitFunction, activeFitKey, null, { kind: 'basic', method: document.getElementById('fit-method').value });
+		const fitFunction = xi => model(final.params, xi);
+		const { xFit, yFit } = sampleCurve(data, fitFunction, 100);
+		const equation = buildPolynomialEquation(final.params, fit.meanX, fit.stdX);
+		fittedCurves[activeFitKey] = { x: xFit, y: yFit, equation };
+		updateResults(equation, x, y, fitFunction, activeFitKey, null, { kind: 'basic', method: document.getElementById('fit-method').value }, fitExtras(final));
 		plotGraph(xFit, yFit);
 	} catch (error) {
 		console.error('Error performing polynomial fit:', error);
@@ -1529,12 +1626,25 @@ function performExponentialFit() {
 			return;
 		}
 
-		// Store & render
-		fittedCurves[activeFitKey] = { x: best.xFit, y: best.yFit, equation: best.eq };
+		// A e^{b(x − x0)} + c is A e^{−b x0} e^{bx} + c: the same curve with one redundant parameter.
+		const { A: A0, b: b0, c: c0 } = best.params;
+		const startA = best.model === 'shifted' ? A0 * Math.exp(-b0 * best.params.x0) : A0;
 		const xAll = data.map(p => p.x);
 		const yAll = data.map(p => p.y);
-		updateResults(best.eq, xAll, yAll, best.fitFn, activeFitKey, best.solver, { kind: 'basic', method: 'Exponential' });
-		plotGraph(best.xFit, best.yFit);
+		if (!Number.isFinite(startA)) {
+			fittedCurves[activeFitKey] = { x: best.xFit, y: best.yFit, equation: best.eq };
+			updateResults(best.eq, xAll, yAll, best.fitFn, activeFitKey, best.solver, { kind: 'basic', method: 'Exponential' }, { parameterCount: 3 });
+			plotGraph(best.xFit, best.yFit);
+			return;
+		}
+		const model = ([A, b, c], xi) => A * Math.exp(b * xi) + c;
+		const final = finalizeParametricFit(data, { names: ['A', 'b', 'c'], params: [startA, b0, c0], model });
+		const fitFunction = xi => model(final.params, xi);
+		const { xFit, yFit } = sampleCurve(data, fitFunction, 100);
+		const equation = formatExpEquation(final.params[0], final.params[1], final.params[2], false);
+		fittedCurves[activeFitKey] = { x: xFit, y: yFit, equation };
+		updateResults(equation, xAll, yAll, fitFunction, activeFitKey, final.solver || best.solver, { kind: 'basic', method: 'Exponential' }, fitExtras(final));
+		plotGraph(xFit, yFit);
 
 	} catch (error) {
 		console.error('Error performing exponential fit:', error);
@@ -1543,142 +1653,38 @@ function performExponentialFit() {
 }
 
 
+// A power law y = A x^b: two parameters that are well determined, unlike A(x − x0)^b + c,
+// whose four trade off against each other. Offsets belong in a Custom fit.
 function performPowerFit() {
 	try {
-		// 1. Filter and validate input data
-		const validData = getFiniteDatasetPoints(activeFitKey);
-		if (validData.length < 4) {
-			alert("Power fit requires at least 4 data points.");
+		const data = getFiniteDatasetPoints(activeFitKey);
+		if (data.length < 3) {
+			alert('Power fit requires at least 3 data points.');
 			return;
 		}
-
-		const xValues = validData.map(p => p.x);
-		const yValues = validData.map(p => p.y);
-
-		// 2. Generate multiple initial guesses for x0 and c
-		//    We'll sample around (xMin - a bit, yMin - a bit) and also near medians.
-		const { min: xMin } = minMaxFinite(xValues);
-		const xMed = median(xValues);
-		const { min: yMin } = minMaxFinite(yValues);
-		const yMed = median(yValues);
-
-		const guessPairs = [
-			// Minimal offset guess
-			[xMin - 1e-3, yMin - 1e-3],
-			// Slightly bigger offset
-			[xMed - 0.01, yMed - 0.01],
-			// Another guess further
-			[xMin - 0.1, yMin - 0.1],
-		];
-
-		let bestParams = null;
-		let bestCost = Infinity;
-		let solver = null;
-
-		// 3. Try each (x0, c) guess
-		for (const [x0Guess, cGuess] of guessPairs) {
-			// 3a. Shift x0 or c if needed so that all (x - x0) > 0 and (y - c) > 0 for the log approach
-			let shiftedX0 = x0Guess;
-			let shiftedC = cGuess;
-
-			// Ensure (x - x0) > 0 for all x if we want to do an initial log transform
-			// (Avoid potentially huge while-loops for large domains.)
-			const { min: minX } = minMaxFinite(xValues);
-			if (!(minX - shiftedX0 > 0)) shiftedX0 = minX - 1e-6;
-			let z = xValues.map(x => x - shiftedX0);
-
-			// Ensure (y - c) > 0 for initial log transform
-			const { min: minY } = minMaxFinite(yValues);
-			if (!(minY - shiftedC > 0)) shiftedC = minY - 1e-6;
-			let w = yValues.map(y => y - shiftedC);
-
-			// 3b. Compute initial A, b via linear regression on log-log
-			const lnZ = z.map(zi => Math.log(zi));
-			const lnW = w.map(wi => Math.log(wi));
-			const { slope: bInitial, intercept: lnAInitial } = computeLinearFit(lnZ, lnW);
-			const AInitial = Math.exp(lnAInitial);
-
-			const initialParams = [AInitial, bInitial, shiftedX0, shiftedC];
-			if (initialParams.some(v => !Number.isFinite(v))) {
-				initialParams[0] = 1;
-				initialParams[1] = 1;
-				initialParams[2] = shiftedX0;
-				initialParams[3] = shiftedC;
-			}
-
-			// 3c. Run LM from this initial guess
-			const result = levenbergMarquardt(validData, initialParams, computeResiduals, computeJacobian);
-
-			// 3d. Check if it's the best so far
-			if (result.cost < bestCost) {
-				bestCost = result.cost;
-				bestParams = result.params;
-				solver = result;
-			}
-		}
-
-		// 4. Use the best parameters found
-		if (!bestParams) {
-			alert("Unable to find a suitable power-law fit.");
+		if (!data.every(point => point.x > 0)) {
+			alert('A power law y = A x^b needs every x above zero. For an offset, use a Custom fit such as A*(x - x0)^b.');
 			return;
 		}
-		const [A, b, x0, c] = bestParams;
-
-		// 5. Generate fitted curve
-		const { min: xMinFit, max: xMaxFit } = minMaxFinite(xValues);
-		const N = 100;
-		const xFit = Array.from({ length: N }, (_, i) => {
-			return xMinFit + (i * (xMaxFit - xMinFit)) / (N - 1);
-		});
-
-		// Build y-fit, but skip invalid points if (x - x0) is negative and b non-integer
-		const yFit = xFit.map(xi => {
-			const term = xi - x0;
-			try {
-				if (term <= 0 && !Number.isInteger(b)) {
-					// for non-integer b, (x - x0) <= 0 is invalid
-					return NaN;
-				}
-				return A * Math.pow(term, b) + c;
-			} catch {
-				return NaN;
-			}
-		});
-
-		// 6. Define a fit function for interactive queries
-		const fitFunction = xi => {
-			const term = xi - x0;
-			if (term <= 0 && !Number.isInteger(b)) return NaN;
-			return A * Math.pow(term, b) + c;
-		};
-
-		// 7. Construct the equation string
-		// 7.1. Determine sign for x0 and c
-		const x0Sign = (x0 >= 0) ?
-			` - ${formatFitNumber(x0)}` // Example: (x - 2.500)
-			:
-			` + ${formatFitNumber(Math.abs(x0))}`; // Example: (x + 0.004) if x0 is -0.004
-
-		const cSign = (c >= 0) ?
-			` + ${formatFitNumber(c)}` :
-			` - ${formatFitNumber(Math.abs(c))}`;
-
-		// 7.2. Construct the equation string
-		const equation = `y = ${formatFitNumber(A)}(x${x0Sign})^{${formatFitNumber(b)}}${cSign}`;
-
-		// 8. Store the fitted curve
-		fittedCurves[activeFitKey] = {
-			x: xFit,
-			y: yFit,
-			equation: equation
-		};
-
-		// 9. Update results and plot
-		updateResults(equation, xValues, yValues, fitFunction, activeFitKey, solver, { kind: 'basic', method: 'Power' });
+		const sign = data.filter(point => point.y < 0).length > data.length / 2 ? -1 : 1;
+		const logs = data.filter(point => sign * point.y > 0);
+		let start = [sign, 1];
+		if (logs.length >= 2) {
+			const { slope, intercept } = computeLinearFit(logs.map(point => Math.log(point.x)), logs.map(point => Math.log(sign * point.y)));
+			if (Number.isFinite(slope) && Number.isFinite(intercept)) start = [sign * Math.exp(intercept), slope];
+		}
+		const model = ([A, b], xi) => A * Math.pow(xi, b);
+		const final = finalizeParametricFit(data, { names: ['A', 'b'], params: start, model });
+		const [A, b] = final.params;
+		const fitFunction = xi => (xi > 0 ? model(final.params, xi) : NaN);
+		const { xFit, yFit } = sampleCurve(data, fitFunction, 100);
+		const equation = `y = ${formatFitNumber(A)}x^{${formatFitNumber(b)}}`;
+		fittedCurves[activeFitKey] = { x: xFit, y: yFit, equation };
+		updateResults(equation, data.map(p => p.x), data.map(p => p.y), fitFunction, activeFitKey, final.solver, { kind: 'basic', method: 'Power' }, fitExtras(final));
 		plotGraph(xFit, yFit);
 	} catch (error) {
-		console.error("Error performing power fit:", error);
-		alert("An error occurred during power fitting. Please check the console for details.");
+		console.error('Error performing power fit:', error);
+		alert('An error occurred during power fitting. Please check the console for details.');
 	}
 }
 
@@ -2014,23 +2020,20 @@ async function performSinusoidalFit() {
 			phi: Number(params.phi),
 			c: Number(params.c)
 		};
-		const fallbackX = buildFitDomainFromData(data, 300);
-		const curve = normalizeWorkerCurve(
-			result ? result.xFit : null,
-			result ? result.yFit : null,
-			fallbackX,
-			(xValue) => evaluateSinusoidal(normalizedParams, xValue)
-		);
-		const xFit = curve.xFit;
-		const yFit = curve.yFit;
-		const equation = typeof result.equation === 'string' && result.equation
-			? result.equation
-			: buildSinusoidalEquation(normalizedParams);
+		const keys = ['A', 'b', 'k', 'phi', 'c'];
+		const toObject = values => Object.fromEntries(keys.map((key, i) => [key, values[i]]));
+		const final = finalizeParametricFit(data, {
+			names: ['A', 'b', 'k', '\\phi', 'c'],
+			params: keys.map(key => normalizedParams[key]),
+			model: (values, xValue) => evaluateSinusoidal(toObject(values), xValue)
+		});
+		const finalParams = toObject(final.params);
+		const fitFunction = (xValue) => evaluateSinusoidal(finalParams, xValue);
+		const { xFit, yFit } = sampleCurve(data, fitFunction, 300);
+		const equation = buildSinusoidalEquation(finalParams);
 
 		fittedCurves[targetDatasetIndex] = { x: xFit, y: yFit, equation: equation };
-
-		const fitFunction = (xValue) => evaluateSinusoidal(normalizedParams, xValue);
-		updateResults(equation, data.map(p => p.x), data.map(p => p.y), fitFunction, targetDatasetIndex, result, fitChoice);
+		updateResults(equation, data.map(p => p.x), data.map(p => p.y), fitFunction, targetDatasetIndex, final.solver || result, fitChoice, fitExtras(final));
 		if (targetDatasetIndex === activeFitKey) {
 			plotGraph(xFit, yFit);
 		}
@@ -2101,23 +2104,22 @@ async function performGaussianFit() {
 			c: Number(params.c)
 		};
 
-		const fallbackX = buildFitDomainFromData(data, 300);
-		const curve = normalizeWorkerCurve(
-			result ? result.xFit : null,
-			result ? result.yFit : null,
-			fallbackX,
-			(xValue) => evaluateGaussian(normalizedParams, xValue)
-		);
-		const xFit = curve.xFit;
-		const yFit = curve.yFit;
-		const equation = typeof result.equation === 'string' && result.equation
-			? result.equation
-			: buildGaussianEquation(normalizedParams);
+		const keys = ['A', 'mu', 'sigma', 'c'];
+		const toObject = values => ({ ...Object.fromEntries(keys.map((key, i) => [key, values[i]])), sigma: Math.abs(values[2]) });
+		const final = finalizeParametricFit(data, {
+			names: ['A', '\\mu', '\\sigma', 'c'],
+			params: keys.map(key => normalizedParams[key]),
+			model: (values, xValue) => evaluateGaussian(toObject(values), xValue)
+		});
+		final.params[2] = Math.abs(final.params[2]);
+		if (final.parameters) final.parameters[2].value = final.params[2];
+		const finalParams = toObject(final.params);
+		const fitFunction = (xValue) => evaluateGaussian(finalParams, xValue);
+		const { xFit, yFit } = sampleCurve(data, fitFunction, 300);
+		const equation = buildGaussianEquation(finalParams);
 
 		fittedCurves[targetDatasetIndex] = { x: xFit, y: yFit, equation: equation };
-
-		const fitFunction = (xValue) => evaluateGaussian(normalizedParams, xValue);
-		updateResults(equation, data.map(p => p.x), data.map(p => p.y), fitFunction, targetDatasetIndex, result, fitChoice);
+		updateResults(equation, data.map(p => p.x), data.map(p => p.y), fitFunction, targetDatasetIndex, final.solver || result, fitChoice, fitExtras(final));
 		if (targetDatasetIndex === activeFitKey) {
 			plotGraph(xFit, yFit);
 		}

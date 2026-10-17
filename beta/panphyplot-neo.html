@@ -272,10 +272,10 @@
 						</div>
 					</div>
 
-						<label class="neo-switch neo-weight" title="Weights 1/ΔY² for Linear and Custom fits">
+						<label class="neo-switch neo-weight" title="Weights each point by 1/σ², using its ±ΔY and its ±ΔX through the slope">
 							<input type="checkbox" id="fit-weighted" role="switch">
 							<span class="neo-switch-track" aria-hidden="true"></span>
-							<span>Weight by ±ΔY <small>Linear and Custom</small></span>
+							<span>Weight by uncertainties <small>±ΔY, and ±ΔX through the slope</small></span>
 						</label>
 					</div>
 				</section>
@@ -303,7 +303,7 @@
 					<p id="r-squared-container" style="display: none;"></p>
 					<div id="fit-parameters" class="neo-fit-parameters" hidden></div>
 					<p id="fit-status" role="status">No fit calculated yet.</p>
-					<p class="fit-weighting-note" id="fit-weighting-note">Fits use unweighted least squares unless Weight by ±ΔY is on.</p>
+					<p class="fit-weighting-note" id="fit-weighting-note">Fits use unweighted least squares unless Weight by uncertainties is on.</p>
 				</section>
 			</aside>
 			</div>
