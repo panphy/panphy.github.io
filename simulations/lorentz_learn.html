@@ -580,9 +580,10 @@
     </p>
 
     <div class="tip-box">
-      <p><strong>Try it in the app:</strong> Place two events at the same $x'$ position (on the same moving-frame
-        worldline) and read off their $t$ and $t'$ coordinates. You will see that the time difference in the rest
-        frame is larger than in the moving frame by a factor of $\gamma$.</p>
+      <p><strong>Try it in the app:</strong> In the coordinates table, give two events the same $x'$ (so both
+        happen at one place in the moving frame) and different $t'$. Read off their $t$ coordinates: the time
+        difference in the rest frame is larger than $\Delta t'$ by a factor of $\gamma$, shown beside the
+        velocity.</p>
     </div>
 
     <h3>2. Length Contraction</h3>
@@ -699,29 +700,30 @@
     </p>
 
     <div class="tip-box">
-      <p><strong>Try it in the app:</strong> In the Velocity Transformation section, turn on "Show Velocity". The green line
-        shows velocity $u$ in the rest frame, and the orange line shows the transformed velocity $u'$ in the
-        moving frame. Adjust both $v$ and $u$ to see how the relativistic formula differs from simple subtraction.</p>
+      <p><strong>Try it in the app:</strong> In the Velocity Transformation section, turn on "Show Object's
+        Worldline". The green line is the worldline of one object, labelled with its velocity $u$ in $S$ and
+        $u'$ in $S'$. Switch the diagram to Frame $S'$: the same line now has slope $u'$. Adjust $v$ and $u$
+        to see how the relativistic formula differs from simple subtraction.</p>
     </div>
 
     <hr>
 
     <h2>Events on the Diagram</h2>
     <p>
-      An <strong>event</strong> is something that happens at a specific place and time&mdash;it has definite
-      coordinates $(x, t)$. On the Minkowski diagram, each event is marked with a rocket icon.
+      An <strong>event</strong> is something that happens at a specific place and time. On the Minkowski
+      diagram each event is a single dot. Both frames describe the same dot; they only disagree about its
+      coordinates, which you read off each frame's own axes.
     </p>
     <p>
-      In the app, each event is plotted twice:
+      As you change $v$, the dot stays where it is while the $S'$ axes tilt, so its $(x', t')$ reading changes.
+      The coordinates table beside the diagram lists both sets of coordinates and updates in real time.
     </p>
-    <ul>
-      <li>A <strong>solid rocket</strong> at $(x, t)$&mdash;its rest-frame coordinates (plotted on the $S$ grid).</li>
-      <li>A <strong>faded rocket</strong> at $(x', t')$&mdash;its moving-frame coordinates (also plotted on the $S$ grid
-        to show the numerical values from the Lorentz transformation).</li>
-    </ul>
+
+    <h3>Drawing the Diagram in Either Frame</h3>
     <p>
-      As you change $v$, the faded (moving-frame) rockets shift to show how the same physical event has
-      different coordinates in a different frame. The coordinates table below the diagram updates in real time.
+      Neither frame is special. The <em>Draw the Diagram in</em> switch redraws the same spacetime with the
+      $S'$ axes perpendicular instead. Now $S$ is the frame that moves, at $-v$, so its axes tilt the other way.
+      Every event moves to its $(x', t')$ position, but the light cone stays at 45&deg; in both drawings.
     </p>
 
     <h3>Reading Coordinates with Projection Lines</h3>
@@ -730,16 +732,16 @@
       draws dashed guide lines from the event showing how to read its coordinates in both frames:
     </p>
     <ul>
-      <li><strong style="color: #10b981;">Green dashed lines</strong> project vertically down to the $x$-axis
-        and horizontally across to the $t$-axis, giving the rest-frame coordinates $(x, t)$.</li>
-      <li><strong style="color: #3b82f6;">Blue dashed lines</strong> project <em>parallel to the primed axes</em>:
+      <li><strong>Green dashed lines</strong> run parallel to the $S$ axes to the $x$- and $t$-axes,
+        giving the rest-frame coordinates $(x, t)$.</li>
+      <li><strong>Blue dashed lines</strong> project <em>parallel to the primed axes</em>:
         one line runs parallel to $t'$ until it meets the $x'$-axis (giving the $x'$ reading), and another
         runs parallel to $x'$ until it meets the $t'$-axis (giving the $t'$ reading).</li>
     </ul>
     <p>
-      This is the standard technique for reading coordinates on a Minkowski diagram: in the rest frame
-      you project perpendicular to the axes, but in the moving frame you project <em>parallel</em> to
-      the primed axes&mdash;not perpendicular to them.
+      This is the standard technique for reading coordinates on a Minkowski diagram: you always project
+      <em>parallel</em> to the other axis of the same frame. For the frame drawn with perpendicular axes this
+      looks like an ordinary perpendicular projection; for the tilted frame it does not.
     </p>
 
     <div class="tip-box">
@@ -749,9 +751,9 @@
     </div>
 
     <div class="tip-box">
-      <p><strong>Try it in the app:</strong> Add two or more events, then slowly drag the velocity slider.
-        Watch how the faded (moving-frame) rockets shift. Events that were simultaneous may no longer be,
-        and time orderings can reverse for spacelike-separated events.</p>
+      <p><strong>Try it in the app:</strong> Add two or more events, switch the diagram to Frame $S'$, then
+        slowly change the velocity. Watch the events move in the $S'$ drawing. Events that were simultaneous
+        may no longer be, and time orderings can reverse for spacelike-separated events.</p>
     </div>
 
     <hr>
@@ -760,35 +762,43 @@
 
     <ul class="feature-list">
       <li>
-        <strong>Velocity Slider ($v$)</strong>
+        <strong>Draw the Diagram in</strong>
         <ul>
-          <li>Controls the velocity of frame $S'$ relative to $S$. The value is displayed with a $c$ suffix (e.g. $0.50c$).</li>
-          <li>Ranges from $-0.95c$ to $+0.95c$.</li>
+          <li>Frame $S$ draws the $S$ axes perpendicular and tilts the $S'$ axes.</li>
+          <li>Frame $S'$ draws the $S'$ axes perpendicular and tilts the $S$ axes the other way.</li>
+        </ul>
+      </li>
+      <li>
+        <strong>Velocity ($v$)</strong>
+        <ul>
+          <li>Controls the velocity of frame $S'$ relative to $S$, from $-0.95c$ to $+0.95c$.</li>
+          <li>Drag the slider, tap &minus; or + to step by $0.01c$ (hold to keep stepping), or type a value.</li>
+          <li>The Lorentz factor $\gamma$ is shown beside it.</li>
           <li>At $v = 0$, both frames are aligned and the primed axes overlap the unprimed axes.</li>
         </ul>
       </li>
       <li>
-        <strong>Rest Frame Grid / Moving Frame Grid</strong>
+        <strong>Axes and Grids</strong>
         <ul>
-          <li>Toggle the gridlines for each frame on or off.</li>
-          <li>In the Controls panel, row 1 contains rest-frame toggles and row 2 contains moving-frame toggles.</li>
-          <li>The rest frame grid is always perpendicular. The moving frame grid shears as $v$ increases.</li>
+          <li>Toggle the axes and gridlines of each frame on or off.</li>
+          <li>In the Controls panel, row 1 holds the frame $S$ axes and grid toggles and row 2 those of frame $S'$, beside the Events and Projection Lines toggles.</li>
+          <li>The grid of the frame the diagram is drawn in is square; the other frame's grid shears as $v$ increases.</li>
         </ul>
       </li>
       <li>
         <strong>Velocity Transformation</strong>
         <ul>
-          <li>Turn on "Show Velocity" to enable the velocity addition visualisation.</li>
-          <li>The green line represents an object moving at velocity $u$ in the rest frame.</li>
-          <li>The orange line represents the same object's velocity $u'$ in the moving frame.</li>
-          <li>The slider below controls $u$, displayed with a $c$ suffix (e.g. $0.30c$).</li>
+          <li>Turn on "Show Object's Worldline" to draw the worldline of an object moving at velocity $u$ in $S$.</li>
+          <li>Set $u$ with its slider, stepper or typed value. The velocity $u'$ of the same object in $S'$ is shown beside it and on the line.</li>
         </ul>
       </li>
       <li>
         <strong>Adding &amp; Selecting Events</strong>
         <ul>
           <li>Click "Add Event" to place a new event (labelled A, B, C, ...) at a random position.</li>
-          <li>Drag events to reposition them on the diagram.</li>
+          <li>Drag events to reposition them on the diagram. They snap to whole-number coordinates of the frame the diagram is drawn in.</li>
+          <li>Type any coordinate ($x$, $t$, $x'$ or $t'$) in the table to move an event exactly.</li>
+          <li>"Events" hides or shows all events.</li>
           <li>Click (or tap) an event to select it&mdash;a highlight ring appears and projection lines are drawn.</li>
           <li>Click the same event again, or click empty space, to deselect.</li>
           <li>Right-click (or long-press on mobile) an event to remove it.</li>
@@ -798,16 +808,16 @@
       <li>
         <strong>Projection Lines</strong>
         <ul>
-          <li>When an event is selected, dashed guide lines automatically show how to read coordinates.</li>
+          <li>When an event is selected, dashed guide lines show how to read its coordinates. "Projection Lines" turns them off.</li>
           <li>Projection values are shown in solid color pills so they remain visible over other visual elements.</li>
-          <li>Green lines project perpendicular to the rest-frame axes, labelled $(x, t)$.</li>
+          <li>Green lines project to the $S$ axes, labelled $(x, t)$.</li>
           <li>Blue lines project parallel to the primed axes, labelled $(x', t')$.</li>
         </ul>
       </li>
       <li>
         <strong>Set v = 0</strong>
         <ul>
-          <li>This button sits beside "Relative Velocity, v" and resets $v$ to zero so both frames coincide.</li>
+          <li>This button sits beside "Velocity of S′ relative to S, v" and resets $v$ to zero so both frames coincide.</li>
         </ul>
       </li>
       <li>
@@ -823,17 +833,17 @@
     <h2>Suggested Exercises</h2>
     <ol>
       <li>
-        <strong>Verify time dilation:</strong> Place two events at $(0,\,0)$ and $(0,\,3)$ (same $x$, different $t$).
+        <strong>Verify time dilation:</strong> Type two events into the table at $(0,\,0)$ and $(0,\,3)$ (same $x$, different $t$).
         The events are co-located in $S$, so the proper time is $\Delta t_0 = 3$.
         Set $v = 0.60\,c$ ($\gamma = 1/\sqrt{1 - 0.36} = 1.25$).
         Read off $\Delta t'$ from the app and confirm that it equals $\gamma\,\Delta t_0 = 1.25 \times 3 = 3.75$.
       </li>
       <li>
-        <strong>Explore simultaneity:</strong> Place events at $(-2,\,3)$ and $(2,\,3)$. They share the same $t$, so
+        <strong>Explore simultaneity:</strong> Type events at $(-2,\,3)$ and $(2,\,3)$. They share the same $t$, so
         they are simultaneous in $S$. Now increase $v$ and observe that $t'$ values diverge.
       </li>
       <li>
-        <strong>Velocity addition:</strong> Enable velocity transformation. Set $u = 0.80\,c$ and $v = 0.60\,c$.
+        <strong>Velocity addition:</strong> Turn on the object's worldline. Set $u = 0.80\,c$ and $v = 0.60\,c$.
         Calculate $u'$ by hand using the formula and verify it matches the value displayed.
       </li>
       <li>
