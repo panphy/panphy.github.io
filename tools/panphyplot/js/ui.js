@@ -1689,19 +1689,23 @@ function clearFittedCurve() {
 	function headerMentionsLabel(normalizedHeader, label) {
 		const normalizedLabel = normalizeCsvHeaderForMatch(label);
 		if (!normalizedHeader || !normalizedLabel) return false;
-		if (normalizedHeader.includes(normalizedLabel)) return true;
-
-		const labelTokens = normalizedLabel.split(' ').filter(Boolean);
-		if (labelTokens.length === 1) {
-			const tokenRegex = new RegExp(`\\b${escapeRegExp(labelTokens[0])}\\b`);
-			return tokenRegex.test(normalizedHeader);
-		}
-		return false;
+		// Whole words only, so a label "I" does not match the "i" in "uncertainty in V".
+		return new RegExp(`(?:^|[^a-z0-9])${escapeRegExp(normalizedLabel)}(?![a-z0-9])`).test(normalizedHeader);
 	}
 
 	function inferErrorAxisFromHeader(headerText, xHeaderLabel, yHeaderLabel) {
 		const normalizedHeader = normalizeCsvHeaderForMatch(headerText);
 		if (!normalizedHeader) return null;
+
+		// PanPhyPlot's own export writes "delta <label>" or "delta <label> (%)".
+		const exportedLabel = normalizedHeader.replace(/\s*\(%\)$/, '').match(/^delta (.+)$/);
+		if (exportedLabel) {
+			if (exportedLabel[1] === normalizeCsvHeaderForMatch(xHeaderLabel)) return 'x';
+			if (exportedLabel[1] === normalizeCsvHeaderForMatch(yHeaderLabel)) return 'y';
+		}
+
+		// Only a header that names an uncertainty counts; other columns (such as repeat readings) are ignored.
+		if (!/(?:\bdelta\b|±|\+\/-|\buncertaint|\berr(?:ors?)?\b|\bdx\b|\bdy\b)/.test(normalizedHeader)) return null;
 
 		const xMatch = headerMentionsLabel(normalizedHeader, xHeaderLabel)
 			|| /\b(?:delta x|x uncertainty|x error|dx)\b/.test(normalizedHeader);
@@ -1716,7 +1720,7 @@ function clearFittedCurve() {
 	function detectCsvErrorColumns(headers, xHeaderLabel, yHeaderLabel) {
 		let xErrorIndex = null;
 		let yErrorIndex = null;
-		const unmatchedErrorIndices = [];
+		const ignoredIndices = [];
 
 		for (let index = 2; index < headers.length; index++) {
 			const axis = inferErrorAxisFromHeader(headers[index], xHeaderLabel, yHeaderLabel);
@@ -1728,23 +1732,13 @@ function clearFittedCurve() {
 				yErrorIndex = index;
 				continue;
 			}
-			unmatchedErrorIndices.push(index);
+			ignoredIndices.push(index);
 		}
-
-		// Fallback for legacy/malformed headers: assign remaining columns in X->Y order.
-		unmatchedErrorIndices.forEach((index) => {
-			if (xErrorIndex === null) {
-				xErrorIndex = index;
-				return;
-			}
-			if (yErrorIndex === null) {
-				yErrorIndex = index;
-			}
-		});
 
 		return {
 			xErrorIndex,
 			yErrorIndex,
+			ignoredIndices,
 			xErrorType: xErrorIndex !== null ? inferErrorTypeFromHeader(headers[xErrorIndex]) : 'absolute',
 			yErrorType: yErrorIndex !== null ? inferErrorTypeFromHeader(headers[yErrorIndex]) : 'absolute'
 		};
@@ -1868,6 +1862,17 @@ function clearFittedCurve() {
 		toggleErrorColumn('y');
 		updateData();
 		setInitialParameters(getCurrentAdvancedFitMethod());
+
+		// Say which columns were left out, so repeat readings are never silently dropped or misused.
+		const ignoredNames = detectedErrors.ignoredIndices
+			.filter(index => headers[index] !== '' || dataRows.some(row => (parseCSVLine(row)[index] || '') !== ''))
+			.map(index => headers[index] !== '' ? `"${headers[index]}"` : `column ${index + 1}`);
+		if (ignoredNames.length) {
+			alert(`Only the first two columns, "${headers[0]}" (x) and "${headers[1]}" (y), were imported`
+				+ `${hasXError || hasYError ? ', with their uncertainties' : ''}.\n\n`
+				+ `Ignored: ${ignoredNames.join(', ')}.\n\n`
+				+ `To import an uncertainty column, name it "delta ${headers[0]}" or "delta ${headers[1]}".`);
+		}
 	}
 
 
