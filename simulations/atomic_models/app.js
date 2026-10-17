@@ -62,7 +62,7 @@ function updateFullscreen() {
   fullscreenButton.setAttribute('aria-label', expanded ? 'Exit fullscreen' : 'Enter fullscreen');
   fullscreenButton.title = expanded ? 'Exit fullscreen' : 'Enter fullscreen';
   fullscreenButton.querySelector('path').setAttribute('d', expanded
-    ? 'M9 4v5H4M20 9h-5V4M15 20v-5h5M4 15h5v5'
+    ? 'M20 4l-6 6M14 5.5V10h4.5M4 20l6-6M10 18.5V14H5.5'
     : 'M4 9V4h5M15 4h5v5M20 15v5h-5M9 20H4v-5');
   fullscreenButton.setAttribute('aria-pressed', String(expanded));
   fullscreenButton.focus({ preventScroll: true });

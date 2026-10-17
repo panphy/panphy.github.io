@@ -2,7 +2,7 @@
   const SELECTOR = '[data-panphy-fullscreen]';
 
   // Enter fullscreen: 4 outer corner L-shapes (corners of the frame)
-  // Exit fullscreen: 4 inner corner L-shapes (folded inward)
+  // Exit fullscreen: 2 diagonal arrows pointing inward
   const ICONS = {
     enter: `
       <svg class="panphy-fs-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
@@ -10,7 +10,7 @@
       </svg>`,
     exit: `
       <svg class="panphy-fs-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-        <path d="M9 4v5H4M20 9h-5V4M15 20v-5h5M4 15h5v5"/>
+        <path d="M20 4l-6 6M14 5.5V10h4.5M4 20l6-6M10 18.5V14H5.5"/>
       </svg>`
   };
 
