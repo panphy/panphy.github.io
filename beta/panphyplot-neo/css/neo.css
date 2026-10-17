@@ -221,6 +221,26 @@ code {
 	cursor: progress;
 }
 
+/* Fit Curve and Clear Fit lead with a small drawing: a curve through readings, and one struck out. */
+.neo-fit-icon {
+	width: 18px;
+	height: 18px;
+	stroke-width: 1.8;
+}
+
+.fit-button .neo-fit-icon circle {
+	fill: currentColor;
+	stroke: none;
+}
+
+.clear-fit-button .neo-fit-icon {
+	color: var(--ink-2);
+}
+
+.clear-fit-button:hover .neo-fit-icon {
+	color: var(--ink);
+}
+
 select,
 input[type="text"],
 input[type="number"] {
@@ -2540,6 +2560,14 @@ input[type="number"]:focus {
 	transform: translateX(-50%) translateY(14px);
 	transition: opacity 0.25s ease, transform 0.25s ease;
 	pointer-events: none;
+}
+
+/* A popover toast drops the browser's popover box styles and keeps the position above. */
+.toast-notification[popover] {
+	inset: auto auto calc(var(--statusbar-h) + 18px) 50%;
+	margin: 0;
+	border: 0;
+	overflow: visible;
 }
 
 .toast-notification.toast-visible {
