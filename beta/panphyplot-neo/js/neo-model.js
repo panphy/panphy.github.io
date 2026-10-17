@@ -249,6 +249,41 @@
 		return true;
 	}
 
+	// A rectangle of cells, rows r0..r1 and columns c0..c1 inclusive, in either order.
+	function normalizeRange(range) {
+		return {
+			r0: Math.min(range.r0, range.r1), r1: Math.max(range.r0, range.r1),
+			c0: Math.min(range.c0, range.c1), c1: Math.max(range.c0, range.c1)
+		};
+	}
+
+	// Tab-separated rows, as spreadsheets copy and paste them.
+	function getRangeText(sheet, range) {
+		const { r0, r1, c0, c1 } = normalizeRange(range);
+		const lines = [];
+		for (let row = r0; row <= r1; row++) {
+			const cells = [];
+			for (let col = c0; col <= c1; col++) cells.push(sheet.columns[col] ? String(sheet.columns[col].cells[row] ?? '') : '');
+			lines.push(cells.join('\t'));
+		}
+		return lines.join('\n');
+	}
+
+	// Sets every cell of a range to one value, skipping calculated columns. Returns how many it set.
+	function fillRange(sheet, range, value) {
+		const { r0, r1, c0, c1 } = normalizeRange(range);
+		let count = 0;
+		for (let col = c0; col <= c1; col++) {
+			const column = sheet.columns[col];
+			if (!column || isComputedColumn(column)) continue;
+			for (let row = r0; row <= r1 && row < sheet.rowCount; row++) {
+				column.cells[row] = value;
+				count++;
+			}
+		}
+		return count;
+	}
+
 	// Spreadsheets copy tab-separated rows; plain comma-separated text is accepted too.
 	function parsePastedText(text) {
 		const lines = String(text ?? '').replace(/\r\n?/g, '\n').replace(/\n+$/, '').split('\n');
@@ -895,6 +930,9 @@
 		removeColumn,
 		moveColumn,
 		moveColumnTo,
+		normalizeRange,
+		getRangeText,
+		fillRange,
 		parsePastedText,
 		splitHeader,
 		applyPaste,

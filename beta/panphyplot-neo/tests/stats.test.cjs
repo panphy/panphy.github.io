@@ -65,3 +65,28 @@ test('equation numbers round to the chosen decimal places, leaving powers alone'
 	assert.equal(round('y = 1.2e-5 e^{0.5x}', 1), 'y = 1.2\\times 10^{-5} e^{0.5x}');
 	assert.equal(round('y = 3.9733886x', 0), 'y = 4x');
 });
+
+test('the parameter covariance carries the uncertainties through a change of variable', () => {
+	// A quadratic fitted in u = (x - 3)/2 and turned back into x keeps the ± values of a fit in x.
+	const x = [1, 2, 3, 4, 5];
+	const y = [12, 13, 16, 21.2, 27.9];
+	const solve = rows => {
+		const normal = [0, 1, 2].map(i => [0, 1, 2].map(j => rows.reduce((s, r) => s + r[i] * r[j], 0)));
+		const rhs = [0, 1, 2].map(i => rows.reduce((s, r, k) => s + r[i] * y[k], 0));
+		return stats.invert(normal).map(row => row.reduce((s, v, j) => s + v * rhs[j], 0));
+	};
+	const xRows = x.map(v => [v * v, v, 1]);
+	const a = solve(xRows);
+	const residuals = x.map((v, k) => y[k] - (a[0] * v * v + a[1] * v + a[2]));
+	const direct = stats.parameterUncertainties(xRows, residuals);
+	const uRows = x.map(v => { const u = (v - 3) / 2; return [u * u, u, 1]; });
+	const covariance = stats.parameterCovariance(uRows, residuals);
+	// a2 = b2/4, a1 = (b1 - 3 b2)/2, a0 = 9 b2/4 - 3 b1/2 + b0
+	const transform = [[0.25, 0, 0], [-1.5, 0.5, 0], [2.25, -1.5, 1]];
+	transform.forEach((row, i) => {
+		let variance = 0;
+		row.forEach((ti, p) => row.forEach((tj, q) => { variance += ti * covariance[p][q] * tj; }));
+		near(Math.sqrt(variance), direct[i], 1e-9);
+	});
+	near(stats.parameterUncertainties(uRows, residuals)[0] ** 2, covariance[0][0], 1e-12);
+});

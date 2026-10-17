@@ -65,6 +65,13 @@
 	// Parameter uncertainties from the model's Jacobian at the best fit: (JᵀWJ)⁻¹ with weights 1/σ²,
 	// or (JᵀJ)⁻¹ scaled by the residual variance when the points carry no uncertainties.
 	function parameterUncertainties(jacobian, residuals, sigmas = null) {
+		const covariance = parameterCovariance(jacobian, residuals, sigmas);
+		return covariance ? covariance.map((row, i) => Math.sqrt(Math.max(row[i], 0))) : null;
+	}
+
+	// The full covariance matrix behind parameterUncertainties, for carrying the uncertainties
+	// through a change of parameters (such as a polynomial fitted in a shifted, scaled variable).
+	function parameterCovariance(jacobian, residuals, sigmas = null) {
 		const n = jacobian.length;
 		const p = n ? jacobian[0].length : 0;
 		if (!p || n <= p) return null;
@@ -77,7 +84,7 @@
 		const covariance = invert(normal);
 		if (!covariance) return null;
 		const scale = sigmas ? 1 : residuals.reduce((sum, r) => sum + r * r, 0) / (n - p);
-		return covariance.map((row, i) => Math.sqrt(Math.max(row[i] * scale, 0)));
+		return covariance.map(row => row.map(value => value * scale));
 	}
 
 	function trimZeros(text) {
@@ -131,7 +138,7 @@
 		});
 	}
 
-	const api = { formatFixedDecimals, roundEquationDecimals, linearFit, chiSquared, invert, parameterUncertainties, formatMeasurement, formatChiSquared };
+	const api = { formatFixedDecimals, roundEquationDecimals, linearFit, chiSquared, invert, parameterCovariance, parameterUncertainties, formatMeasurement, formatChiSquared };
 	if (typeof module === 'object' && module.exports) module.exports = api;
 	else root.PanPhyNeoStats = api;
 })(typeof globalThis === 'object' ? globalThis : this);
