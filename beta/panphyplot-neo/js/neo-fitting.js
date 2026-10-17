@@ -50,6 +50,7 @@ const buildCustomResidualFn = fromFitCore('buildCustomResidualFn');
 const buildCustomJacobianFn = fromFitCore('buildCustomJacobianFn');
 const solveCustomMultiStart = fromFitCore('solveCustomMultiStart');
 
+
 const debouncedRefreshCustomFitDefinition = debounce(() => {
 	refreshCustomFitDefinition({ preserveUserValues: true });
 }, 180);
@@ -825,7 +826,7 @@ function updateBasicFitEquation() {
 	} else if (fitMethod === 'Exponential') {
 		equation = 'y = A e^{b(x-x_0)} + c';
 	} else if (fitMethod === 'Power') {
-		equation = 'y = A x^{b}';
+		equation = 'y = A (x-x_0)^{b} + c';
 	}
 
 	const equationElement = document.getElementById('basic-fit-equation');
@@ -1653,120 +1654,121 @@ function performExponentialFit() {
 }
 
 
-// A power law y = A x^b: two parameters that are well determined, unlike A(x − x0)^b + c,
-// whose four trade off against each other. Offsets belong in a Custom fit.
+// A copy of PanPhyFitCore.solveShiftedPowerLaw (tools/panphyplot/js/fit-core.js). The beta keeps
+// its own because fit-core.js is cache-first under the site's service worker, while this file is
+// always fetched fresh: a visitor who has not accepted an update would otherwise get an older core.
+// y = A (x - x0)^b + c, the general power law. A and c trade off against x0 and b, so a
+// local search from a rough guess often stalls. For fixed x0 and b the model is linear in
+// A and c, which a least-squares line gives exactly: a scan over (x0, b) finds the right
+// valley, and Levenberg-Marquardt then polishes all four parameters from the best few.
+function evaluateShiftedPower(params, xValue) {
+	const t = xValue - params.x0;
+	if (!(t > 0) && !Number.isInteger(params.b)) return NaN;
+	return params.A * Math.pow(t, params.b) + params.c;
+}
+
+function profileShiftedPower(data, x0, b) {
+	let n = 0, sz = 0, szz = 0, sy = 0, szy = 0;
+	for (const { x, y } of data) {
+		const z = Math.pow(x - x0, b);
+		if (!Number.isFinite(z)) return null;
+		n++; sz += z; szz += z * z; sy += y; szy += z * y;
+	}
+	const det = n * szz - sz * sz;
+	if (!(Math.abs(det) > 1e-300 * Math.max(1, szz * n))) return null;
+	const A = (n * szy - sz * sy) / det;
+	const c = (sy - A * sz) / n;
+	let sse = 0;
+	for (const { x, y } of data) sse += (A * Math.pow(x - x0, b) + c - y) ** 2;
+	return Number.isFinite(sse) ? { A, b, x0, c, sse } : null;
+}
+
+function shiftedPowerResiduals([A, b, x0, c], points, penalty = CUSTOM_FIT_PENALTY) {
+	return points.map(({ x, y }) => {
+		const t = x - x0;
+		if (!(t > 0) && !Number.isInteger(b)) return penalty;
+		const predicted = A * Math.pow(t, b) + c;
+		return Number.isFinite(predicted) ? predicted - y : penalty;
+	});
+}
+
+function shiftedPowerJacobian([A, b, x0], points) {
+	return points.map(({ x }) => {
+		const t = x - x0;
+		if (!(t > 0)) return [0, 0, 0, 1];
+		const z = Math.pow(t, b);
+		return [z, A * z * Math.log(t), -A * b * Math.pow(t, b - 1), 1].map(value => (Number.isFinite(value) ? value : 0));
+	});
+}
+
+function solveShiftedPowerLaw(data, options = {}) {
+	const points = data.filter(point => Number.isFinite(point.x) && Number.isFinite(point.y));
+	if (points.length < 4) return null;
+	const { min: xMin, max: xMax } = minMaxFinite(points.map(point => point.x));
+	const span = (xMax - xMin) || Math.abs(xMin) || 1;
+	// x0 sits below the smallest x, so every (x - x0) is positive for any exponent.
+	const gaps = [1e-6, 1e-4, 1e-3, 3e-3, 0.01, 0.03, 0.1, 0.3, 1, 3, 10, 100].map(k => k * span);
+	if (xMin > 0) gaps.push(xMin);
+	const exponents = [-4, -3, -2, -1.5, -1, -0.75, -0.5, -1 / 3, -0.25, 0.25, 1 / 3, 0.5, 0.75, 0.9, 1.1, 1.25, 1.5, 2, 2.5, 3, 4];
+	const scanned = [];
+	for (const gap of gaps) {
+		for (const b of exponents) {
+			const fit = profileShiftedPower(points, xMin - gap, b);
+			if (fit) scanned.push(fit);
+		}
+	}
+	if (!scanned.length) return null;
+	scanned.sort((a, b) => a.sse - b.sse);
+	const maxIterations = Number.isFinite(options.maxIterations) ? options.maxIterations : 500;
+	let best = null;
+	for (const start of scanned.slice(0, 4)) {
+		const result = levenbergMarquardt(points, [start.A, start.b, start.x0, start.c],
+			shiftedPowerResiduals, shiftedPowerJacobian, { maxIterations, tolerance: 1e-12 });
+		if (result && Array.isArray(result.params) && result.params.every(Number.isFinite)
+			&& (!best || result.cost < best.cost)) best = result;
+	}
+	if (!best) {
+		const [start] = scanned;
+		return { params: start, converged: false, reason: 'no-solution', iterations: 0, cost: start.sse };
+	}
+	const [A, b, x0, c] = best.params;
+	return { params: { A, b, x0, c }, converged: best.converged, reason: best.reason, iterations: best.iterations, cost: best.cost };
+}
+
+
+// The general power law y = A (x - x0)^b + c. solveShiftedPowerLaw finds it (A and c
+// exact over a scan of x0 and b, then all four polished); the shared helper weights it and gives the ±.
 function performPowerFit() {
 	try {
 		const data = getFiniteDatasetPoints(activeFitKey);
-		if (data.length < 3) {
-			alert('Power fit requires at least 3 data points.');
+		if (data.length < 4) {
+			alert('Power fit requires at least 4 data points.');
 			return;
 		}
-		if (!data.every(point => point.x > 0)) {
-			alert('A power law y = A x^b needs every x above zero. For an offset, use a Custom fit such as A*(x - x0)^b.');
+		const solution = solveShiftedPowerLaw(data);
+		if (!solution) {
+			alert('Unable to find a suitable power-law fit.');
 			return;
 		}
-		const sign = data.filter(point => point.y < 0).length > data.length / 2 ? -1 : 1;
-		const logs = data.filter(point => sign * point.y > 0);
-		let start = [sign, 1];
-		if (logs.length >= 2) {
-			const { slope, intercept } = computeLinearFit(logs.map(point => Math.log(point.x)), logs.map(point => Math.log(sign * point.y)));
-			if (Number.isFinite(slope) && Number.isFinite(intercept)) start = [sign * Math.exp(intercept), slope];
-		}
-		const model = ([A, b], xi) => A * Math.pow(xi, b);
-		const final = finalizeParametricFit(data, { names: ['A', 'b'], params: start, model });
-		const [A, b] = final.params;
-		const fitFunction = xi => (xi > 0 ? model(final.params, xi) : NaN);
+		const model = ([A, b, x0, c], xi) => evaluateShiftedPower({ A, b, x0, c }, xi);
+		const final = finalizeParametricFit(data, {
+			names: ['A', 'b', 'x_0', 'c'],
+			params: [solution.params.A, solution.params.b, solution.params.x0, solution.params.c],
+			model
+		});
+		const [A, b, x0, c] = final.params;
+		const fitFunction = xi => model(final.params, xi);
 		const { xFit, yFit } = sampleCurve(data, fitFunction, 100);
-		const equation = `y = ${formatFitNumber(A)}x^{${formatFitNumber(b)}}`;
+		const x0Text = x0 >= 0 ? ` - ${formatFitNumber(x0)}` : ` + ${formatFitNumber(Math.abs(x0))}`;
+		const cText = c >= 0 ? ` + ${formatFitNumber(c)}` : ` - ${formatFitNumber(Math.abs(c))}`;
+		const equation = `y = ${formatFitNumber(A)}(x${x0Text})^{${formatFitNumber(b)}}${cText}`;
 		fittedCurves[activeFitKey] = { x: xFit, y: yFit, equation };
-		updateResults(equation, data.map(p => p.x), data.map(p => p.y), fitFunction, activeFitKey, final.solver, { kind: 'basic', method: 'Power' }, fitExtras(final));
+		updateResults(equation, data.map(p => p.x), data.map(p => p.y), fitFunction, activeFitKey, final.solver || solution, { kind: 'basic', method: 'Power' }, fitExtras(final));
 		plotGraph(xFit, yFit);
 	} catch (error) {
 		console.error('Error performing power fit:', error);
 		alert('An error occurred during power fitting. Please check the console for details.');
 	}
-}
-
-
-function computeResiduals(params, data) {
-	const [A, b, x0, c] = params;
-	return data.map(({ x, y }) => {
-		const term = x - x0;
-		if (term <= 0 && !Number.isInteger(b)) {
-			// For non-integer b, negative base is invalid -> large penalty
-			return 1e6;
-		}
-		let yPred;
-		try {
-			yPred = A * Math.pow(term, b) + c;
-			if (!Number.isFinite(yPred)) {
-				return 1e6;
-			}
-		} catch {
-			return 1e6;
-		}
-		return yPred - y;
-	});
-}
-
-
-function computeJacobian(params, data) {
-	const [A, b, x0, c] = params;
-	return data.map(({ x, y }) => {
-		const term = x - x0;
-		// Default partial derivatives
-		let dA = 0,
-			db = 0,
-			dx0 = 0,
-			dc = 0;
-
-		if (term <= 0 && !Number.isInteger(b)) {
-			// invalid region -> residual ~ 1e6 w.r.t. everything
-			// For continuity, let's set derivatives near zero (or 0.0)
-			return [0, 0, 0, 0];
-		}
-
-		// yPred = A * term^b + c
-		// residual = yPred - y
-		// => partial residual / partial param = partial yPred / partial param
-		// partial wrt A = term^b
-		// partial wrt b = A * term^b * ln(term)
-		// partial wrt x0 = -A * b * term^(b-1)
-		// partial wrt c = 1
-
-		try {
-			// term^b
-			const basePow = Math.pow(term, b);
-			const lnTerm = Math.log(term);
-
-			dA = basePow;
-			db = A * basePow * lnTerm;
-			dx0 = -A * b * Math.pow(term, b - 1);
-			dc = 1;
-
-			// If any are NaN or infinite, set to 0
-			if (!Number.isFinite(dA)) dA = 0;
-			if (!Number.isFinite(db)) db = 0;
-			if (!Number.isFinite(dx0)) dx0 = 0;
-		} catch {
-			// In case of domain errors
-			dA = db = dx0 = dc = 0;
-		}
-
-		return [dA, db, dx0, dc];
-	});
-}
-
-
-function median(arr) {
-	if (!arr.length) return NaN;
-	const sorted = [...arr].sort((a, b) => a - b);
-	const mid = Math.floor(sorted.length / 2);
-	if (sorted.length % 2 === 0) {
-		return 0.5 * (sorted[mid - 1] + sorted[mid]);
-	}
-	return sorted[mid];
 }
 
 

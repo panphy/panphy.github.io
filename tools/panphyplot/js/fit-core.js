@@ -527,6 +527,84 @@
 		return bestResult || { params: bestParams, cost: bestCost, converged: false, reason: 'no-solution', iterations: 0 };
 	}
 
+	// y = A (x - x0)^b + c, the general power law. A and c trade off against x0 and b, so a
+	// local search from a rough guess often stalls. For fixed x0 and b the model is linear in
+	// A and c, which a least-squares line gives exactly: a scan over (x0, b) finds the right
+	// valley, and Levenberg-Marquardt then polishes all four parameters from the best few.
+	function evaluateShiftedPower(params, xValue) {
+		const t = xValue - params.x0;
+		if (!(t > 0) && !Number.isInteger(params.b)) return NaN;
+		return params.A * Math.pow(t, params.b) + params.c;
+	}
+
+	function profileShiftedPower(data, x0, b) {
+		let n = 0, sz = 0, szz = 0, sy = 0, szy = 0;
+		for (const { x, y } of data) {
+			const z = Math.pow(x - x0, b);
+			if (!Number.isFinite(z)) return null;
+			n++; sz += z; szz += z * z; sy += y; szy += z * y;
+		}
+		const det = n * szz - sz * sz;
+		if (!(Math.abs(det) > 1e-300 * Math.max(1, szz * n))) return null;
+		const A = (n * szy - sz * sy) / det;
+		const c = (sy - A * sz) / n;
+		let sse = 0;
+		for (const { x, y } of data) sse += (A * Math.pow(x - x0, b) + c - y) ** 2;
+		return Number.isFinite(sse) ? { A, b, x0, c, sse } : null;
+	}
+
+	function shiftedPowerResiduals([A, b, x0, c], points, penalty = DEFAULT_PENALTY) {
+		return points.map(({ x, y }) => {
+			const t = x - x0;
+			if (!(t > 0) && !Number.isInteger(b)) return penalty;
+			const predicted = A * Math.pow(t, b) + c;
+			return Number.isFinite(predicted) ? predicted - y : penalty;
+		});
+	}
+
+	function shiftedPowerJacobian([A, b, x0], points) {
+		return points.map(({ x }) => {
+			const t = x - x0;
+			if (!(t > 0)) return [0, 0, 0, 1];
+			const z = Math.pow(t, b);
+			return [z, A * z * Math.log(t), -A * b * Math.pow(t, b - 1), 1].map(finiteOrZero);
+		});
+	}
+
+	function solveShiftedPowerLaw(data, options = {}) {
+		const points = data.filter(point => Number.isFinite(point.x) && Number.isFinite(point.y));
+		if (points.length < 4) return null;
+		const { min: xMin, max: xMax } = minMaxFinite(points.map(point => point.x));
+		const span = (xMax - xMin) || Math.abs(xMin) || 1;
+		// x0 sits below the smallest x, so every (x - x0) is positive for any exponent.
+		const gaps = [1e-6, 1e-4, 1e-3, 3e-3, 0.01, 0.03, 0.1, 0.3, 1, 3, 10, 100].map(k => k * span);
+		if (xMin > 0) gaps.push(xMin);
+		const exponents = [-4, -3, -2, -1.5, -1, -0.75, -0.5, -1 / 3, -0.25, 0.25, 1 / 3, 0.5, 0.75, 0.9, 1.1, 1.25, 1.5, 2, 2.5, 3, 4];
+		const scanned = [];
+		for (const gap of gaps) {
+			for (const b of exponents) {
+				const fit = profileShiftedPower(points, xMin - gap, b);
+				if (fit) scanned.push(fit);
+			}
+		}
+		if (!scanned.length) return null;
+		scanned.sort((a, b) => a.sse - b.sse);
+		const maxIterations = Number.isFinite(options.maxIterations) ? options.maxIterations : 500;
+		let best = null;
+		for (const start of scanned.slice(0, 4)) {
+			const result = levenbergMarquardt(points, [start.A, start.b, start.x0, start.c],
+				shiftedPowerResiduals, shiftedPowerJacobian, { maxIterations, tolerance: 1e-12 });
+			if (result && Array.isArray(result.params) && result.params.every(Number.isFinite)
+				&& (!best || result.cost < best.cost)) best = result;
+		}
+		if (!best) {
+			const [start] = scanned;
+			return { params: start, converged: false, reason: 'no-solution', iterations: 0, cost: start.sse };
+		}
+		const [A, b, x0, c] = best.params;
+		return { params: { A, b, x0, c }, converged: best.converged, reason: best.reason, iterations: best.iterations, cost: best.cost };
+	}
+
 	function finiteOrZero(value) {
 		return Number.isFinite(value) ? value : 0;
 	}
@@ -551,6 +629,8 @@
 		evaluateCustomExpression,
 		buildCustomResidualFn,
 		buildCustomJacobianFn,
-		solveCustomMultiStart
+		solveCustomMultiStart,
+		evaluateShiftedPower,
+		solveShiftedPowerLaw
 	});
 })(typeof globalThis !== 'undefined' ? globalThis : self);
