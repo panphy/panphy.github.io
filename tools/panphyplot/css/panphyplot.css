@@ -231,6 +231,70 @@ body {
 	position: relative;
 }
 
+/* Another tab changed the saved workspace */
+.tab-conflict {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	flex-wrap: wrap;
+	gap: 10px 16px;
+	margin: 12px 20px 0;
+	padding: 12px 16px;
+	color: #7a5f00;
+	background: rgba(241, 196, 15, 0.18);
+	border: 1px solid rgba(241, 196, 15, 0.4);
+	border-radius: 16px;
+	box-shadow: var(--soft-shadow);
+}
+
+.tab-conflict[hidden] {
+	display: none;
+}
+
+.tab-conflict p {
+	margin: 0;
+	font-size: 0.9rem;
+}
+
+.tab-conflict-actions {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 8px;
+}
+
+.tab-conflict-actions button {
+	flex: 0 0 auto;
+	min-height: 44px;
+	margin: 0;
+	font-weight: 600;
+}
+
+.tab-conflict-reload {
+	background-color: var(--btn-analyze);
+}
+
+.tab-conflict-reload:hover {
+	background-color: var(--btn-analyze-hover);
+}
+
+.tab-conflict-keep {
+	background-color: var(--btn-neutral);
+}
+
+.tab-conflict-keep:hover {
+	background-color: var(--btn-neutral-hover);
+}
+
+[data-theme="dark"] .tab-conflict {
+	color: #ffe9a8;
+	background: rgba(241, 196, 15, 0.22);
+	border-color: rgba(241, 196, 15, 0.45);
+}
+
+[data-theme="dark"] .tab-conflict-actions button {
+	color: #1a1a1a;
+}
+
 .latex-toggle-container {
 	position: absolute;
 	right: 20px;

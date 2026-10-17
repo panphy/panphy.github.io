@@ -36,7 +36,7 @@ function harness() {
 		createElement: () => element(), createDocumentFragment: () => element(), addEventListener() {}
 	}, setTimeout: callback => { timers.set(++nextTimer, callback); return nextTimer; }, clearTimeout: id => timers.delete(id),
 		localStorage: { getItem: key => saved.get(key) ?? null, setItem: (key, value) => saved.set(key, value), removeItem: key => saved.delete(key) },
-		updatePlotAndRenderLatex() {}, plotGraph() {}, safeTypeset() {}, alert: message => { context.alerts.push(message); }, alerts: [], showToast() {}, addEventListener() {}, confirm: () => true
+		updatePlotAndRenderLatex() {}, plotGraph() {}, safeTypeset() {}, alert: message => { context.alerts.push(message); }, alerts: [], showToast() {}, listeners: {}, addEventListener: (type, fn) => { (context.listeners[type] ||= []).push(fn); }, confirm: () => true
 	};
 	context.window = context;
 	vm.createContext(context);
@@ -278,4 +278,31 @@ test('processed data can replace the active dataset without restoring the old ta
 	assert.equal(h.run('rawData[0][0].x'),4);
 	assert.equal(h.run('rawData[0][0].y'),6);
 	assert.equal(h.run('datasetDraftRows[0]'),undefined);
+});
+test('a save from another tab pauses autosave until this tab keeps its version', () => {
+	const h = harness(); h.setRows([['1', '2']]);
+	h.run('debouncedUpdateData(); flushSaveState()');
+	const ownSave = h.saved.get('panphyplot-state-v2');
+	let banners = 0;
+	h.context.onWorkspaceChangedElsewhere = () => { banners++; };
+	const storage = event => h.context.listeners.storage.forEach(fn => fn(event));
+	storage({ key: 'panphyplot-state-v2', newValue: ownSave });
+	storage({ key: 'panphyplot-theme', newValue: 'dark' });
+	assert.equal(banners, 0);
+	h.saved.set('panphyplot-state-v2', 'other tab');
+	storage({ key: 'panphyplot-state-v2', newValue: 'other tab' });
+	assert.equal(banners, 1);
+	h.setRows([['1', '2'], ['3', '4']]);
+	h.run('debouncedUpdateData(); flushSaveState()');
+	assert.equal(h.saved.get('panphyplot-state-v2'), 'other tab');
+	h.run('resolveTabConflict(true)');
+	assert.equal(JSON.parse(h.saved.get('panphyplot-state-v2')).rawData[0].length, 2);
+});
+test('the tour ignores saves from other tabs', () => {
+	const h = harness();
+	let banners = 0;
+	h.context.onWorkspaceChangedElsewhere = () => { banners++; };
+	h.run('persistenceDisabled = true');
+	h.context.listeners.storage.forEach(fn => fn({ key: 'panphyplot-state-v2', newValue: 'other tab' }));
+	assert.equal(banners, 0);
 });

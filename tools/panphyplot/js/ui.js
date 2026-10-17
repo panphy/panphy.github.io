@@ -12,6 +12,23 @@ function showToast(message, duration = 3000) {
 	}, duration);
 }
 
+function onWorkspaceChangedElsewhere() {
+	const banner = document.getElementById('tab-conflict');
+	if (banner) banner.hidden = false;
+}
+
+function resolveTabConflict(keep) {
+	if (!keep) {
+		window.location.reload();
+		return;
+	}
+	if (!window.confirm('Save this tab\'s work over the changes made in the other tab?')) return;
+	keepThisTabVersion();
+	const banner = document.getElementById('tab-conflict');
+	if (banner) banner.hidden = true;
+	showToast('This tab\'s version is saved. The other tab will offer to reload.');
+}
+
 const debouncedUpdatePlotAndRenderLatex = debounce(updatePlotAndRenderLatex, 150);
 // Capture edits synchronously; only the expensive redraw waits.
 const debouncedUpdateData = () => updateData({ deferPlot: true });
