@@ -314,3 +314,47 @@ test('Clear keeps the columns; Reset returns to a blank x, y sheet', () => {
 	assert.deepEqual(sheet.hiddenSeries, []);
 	assert.equal(sheet.title.automatic, true);
 });
+
+test('a missing repeat reading is left out of the mean, not blanking the row', () => {
+	const sheet = namedSheet([
+		['X', ['0.2', '0.4', '0.6']], ['Y', ['0.90', '1.27', '']], ['Y', ['', '1.25', '']], ['Y', ['0.88', '1.28', '']],
+		['Y', [], { formula: 'mean(B, C, D)' }], ['yErr', [], { formula: 'halfspread(B, C, D)' }], ['Y', [], { formula: 'mean(B, C) + D' }]
+	]);
+	assert.equal(model.buildRepeatFormulas(sheet, sheet.columns.slice(1, 4)).halfSpread, 'halfspread(B, C, D)');
+	model.recomputeFormulas(sheet, math);
+	assert.deepEqual(sheet.columns[4].cells.slice(0, 3), ['0.89', '1.266666667', '']);
+	assert.deepEqual(sheet.columns[5].cells.slice(0, 3), ['0.01', '0.015', '']);
+	// D is used outside the mean, so a blank D still blanks the row.
+	sheet.columns[3].cells[0] = '';
+	model.recomputeFormulas(sheet, math);
+	assert.equal(sheet.columns[6].cells[0], '');
+	assert.equal(sheet.columns[4].cells[0], '0.9');
+	// One reading has no spread, so its half spread is blank rather than zero.
+	assert.equal(sheet.columns[5].cells[0], '');
+});
+
+test('formulas follow a renamed column, by name or by letter', () => {
+	const sheet = namedSheet([['X', ['2'], { name: 'L' }], ['Y', ['3'], { name: 'T' }], ['Y', [], { formula: 'T^2 / L' }]]);
+	let before = model.getFormulaSymbols(sheet);
+	sheet.columns[1].name = 'T1';
+	assert.equal(model.remapFormulaNames(sheet, before, math), true);
+	assert.equal(sheet.columns[2].formula, 'T1 ^ 2 / L');
+	model.recomputeFormulas(sheet, math);
+	assert.equal(sheet.columns[2].cells[0], '4.5');
+	// A name that is not one word falls back to the column letter.
+	before = model.getFormulaSymbols(sheet);
+	sheet.columns[1].name = 'T (s)';
+	model.remapFormulaNames(sheet, before, math);
+	assert.equal(sheet.columns[2].formula, 'B ^ 2 / L');
+	// Letters are left alone by renames.
+	before = model.getFormulaSymbols(sheet);
+	sheet.columns[0].name = 'length';
+	model.remapFormulaNames(sheet, before, math);
+	assert.equal(sheet.columns[2].formula, 'B ^ 2 / length');
+});
+
+test('a saved (max - min) / 2 half spread is upgraded to halfspread', () => {
+	const state = model.normalizeState({ sheets: [{ id: 's1', columns: [{ id: 'c1', role: 'yErr', formula: '(max(C, B, D) - min(C, B, D)) / 2', cells: [] }, { id: 'c2', formula: '(max(B) - min(C)) / 2', cells: [] }] }] });
+	assert.equal(state.sheets[0].columns[0].formula, 'halfspread(C, B, D)');
+	assert.equal(state.sheets[0].columns[1].formula, '(max(B) - min(C)) / 2');
+});

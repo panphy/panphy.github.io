@@ -300,8 +300,14 @@
 		return { cells: filled, headers: !!headers };
 	}
 
+	// Mean of Repeats once wrote its half spread as (max(...) - min(...)) / 2, which gives 0 for a
+	// single reading; halfspread(...) leaves that row blank instead.
+	const OLD_HALF_SPREAD = /^\s*\(\s*max\(([^()]*)\)\s*-\s*min\(\1\)\s*\)\s*\/\s*2\s*$/;
+
 	function normalizeColumn(saved, fallbackId) {
 		const column = createColumn(typeof saved?.id === 'string' ? saved.id : fallbackId, saved || {}, 0);
+		const old = column.formula.match(OLD_HALF_SPREAD);
+		if (old) column.formula = `halfspread(${old[1].trim()})`;
 		return column;
 	}
 
@@ -366,8 +372,40 @@
 	const FORMULA_FUNCTIONS = new Set([
 		'abs', 'sqrt', 'cbrt', 'exp', 'log', 'log10', 'log2', 'sin', 'cos', 'tan', 'asin', 'acos', 'atan', 'atan2',
 		'sinh', 'cosh', 'tanh', 'pow', 'square', 'cube', 'nthRoot', 'hypot', 'round', 'floor', 'ceil', 'sign',
-		'min', 'max', 'mean', 'median', 'sum', 'std'
+		'min', 'max', 'mean', 'median', 'sum', 'std', 'halfspread'
 	]);
+	// Over repeat readings, these use whichever readings a row has; a blank reading is left out.
+	const READING_AGGREGATES = new Set(['mean', 'median', 'min', 'max', 'halfspread']);
+
+	function presentValues(values) {
+		return values.flat(Infinity).filter(value => typeof value === 'number' && Number.isFinite(value));
+	}
+
+	const AGGREGATE_SCOPE = {
+		mean: (...values) => {
+			const present = presentValues(values);
+			return present.length ? present.reduce((sum, value) => sum + value, 0) / present.length : NaN;
+		},
+		median: (...values) => {
+			const present = presentValues(values).sort((a, b) => a - b);
+			if (!present.length) return NaN;
+			const middle = Math.floor(present.length / 2);
+			return present.length % 2 ? present[middle] : (present[middle - 1] + present[middle]) / 2;
+		},
+		min: (...values) => {
+			const present = presentValues(values);
+			return present.length ? Math.min(...present) : NaN;
+		},
+		max: (...values) => {
+			const present = presentValues(values);
+			return present.length ? Math.max(...present) : NaN;
+		},
+		// Half the spread between the largest and smallest readings; one reading has no spread.
+		halfspread: (...values) => {
+			const present = presentValues(values);
+			return present.length >= 2 ? (Math.max(...present) - Math.min(...present)) / 2 : NaN;
+		}
+	};
 	const FORMULA_FORBIDDEN_NODES = new Set(['AssignmentNode', 'FunctionAssignmentNode', 'BlockNode', 'AccessorNode', 'IndexNode', 'ObjectNode']);
 	const DELETED_COLUMN_SYMBOL = 'deletedColumn';
 	const IDENTIFIER_PATTERN = /^[A-Za-z_][A-Za-z0-9_]*$/;
@@ -417,8 +455,13 @@
 		}
 		const symbols = getFormulaSymbols(sheet);
 		const refs = new Map();
+		const required = new Set();
 		let problem = null;
 		node.traverse((child, path, parent) => {
+			if (child.isSymbolNode && path !== 'fn' && symbols.has(child.name)) {
+				const insideAggregate = parent && parent.isFunctionNode && READING_AGGREGATES.has(parent.fn && parent.fn.name);
+				if (!insideAggregate) required.add(child.name);
+			}
 			if (problem) return;
 			if (FORMULA_FORBIDDEN_NODES.has(child.type)) {
 				problem = 'Formulas cannot assign values or define functions.';
@@ -432,7 +475,8 @@
 			}
 		});
 		if (problem) return { ok: false, error: problem };
-		return { ok: true, formula, node, refs, compiled: node.compile() };
+		const optional = new Set([...refs.keys()].filter(symbol => !required.has(symbol)));
+		return { ok: true, formula, node, refs, optional, compiled: node.compile() };
 	}
 
 	// Computed values keep ten significant figures, which hides floating-point noise such as 2.4025000000000003.
@@ -440,12 +484,14 @@
 		return String(Number(value.toPrecision(10)));
 	}
 
+	// A blank or invalid input leaves the row blank, unless it only feeds a reading aggregate
+	// such as mean(B, C, D), which then uses the readings that are there.
 	function readFormulaScope(sheet, analysis, row) {
-		const scope = {};
+		const scope = { ...AGGREGATE_SCOPE };
 		for (const [symbol, id] of analysis.refs) {
 			const column = sheet.columns.find(entry => entry.id === id);
 			const value = parseNumber(column ? column.cells[row] : '');
-			if (!Number.isFinite(value)) return null;
+			if (!Number.isFinite(value) && !(analysis.optional && analysis.optional.has(symbol))) return null;
 			scope[symbol] = value;
 		}
 		return scope;
@@ -499,6 +545,7 @@
 			const errorColumn = uncertainties.get(id);
 			if (!errorColumn) continue;
 			const value = scope[symbol];
+			if (!Number.isFinite(value)) continue;
 			const error = toAbsoluteError(errorColumn.cells[row], value, errorColumn.errorType);
 			if (!(error > 0)) continue;
 			const step = Math.abs(value) * 1e-6 || 1e-6;
@@ -616,6 +663,43 @@
 		return { terms, missing: [...analysis.refs.keys()].filter(symbol => !uncertainties.has(analysis.refs.get(symbol))) };
 	}
 
+	// After a rename, a formula that used a column's old name is rewritten to its new name, or to
+	// its letter when the new name cannot be used as a symbol (blank, repeated or not one word).
+	function remapFormulaNames(sheet, previousSymbols, math) {
+		const current = getFormulaSymbols(sheet);
+		const nameFor = (id) => {
+			const index = sheet.columns.findIndex(column => column.id === id);
+			if (index < 0) return DELETED_COLUMN_SYMBOL;
+			const letter = columnLetter(index);
+			const alias = [...current.entries()].find(([symbol, target]) => target === id && symbol !== letter);
+			return alias ? alias[0] : letter;
+		};
+		let changed = false;
+		sheet.columns.filter(isFormulaColumn).forEach((column) => {
+			let node;
+			try {
+				node = math.parse(cleanFormulaText(column.formula));
+			} catch (error) {
+				return;
+			}
+			let rewritten = false;
+			const result = node.transform((child, path) => {
+				// Letters in use name columns by position, which a rename does not change.
+				const isLetter = letterIndex(child.name) >= 0 && letterIndex(child.name) < sheet.columns.length;
+				if (!child.isSymbolNode || path === 'fn' || isLetter) return child;
+				const id = previousSymbols.get(child.name);
+				if (id === undefined || current.get(child.name) === id) return child;
+				rewritten = true;
+				return new math.SymbolNode(nameFor(id));
+			});
+			if (rewritten) {
+				column.formula = result.toString();
+				changed = true;
+			}
+		});
+		return changed;
+	}
+
 	// Column letters in formulas follow their columns when columns move, appear or are deleted.
 	function remapFormulaLetters(sheet, previousIds, math) {
 		sheet.columns.filter(isFormulaColumn).forEach((column) => {
@@ -652,7 +736,7 @@
 		const refs = columns.map(column => columnLetter(sheet.columns.indexOf(column))).join(', ');
 		return {
 			mean: `mean(${refs})`,
-			halfSpread: `(max(${refs}) - min(${refs})) / 2`
+			halfSpread: `halfspread(${refs})`
 		};
 	}
 
@@ -820,6 +904,7 @@
 		analyzeFormula,
 		recomputeFormulas,
 		remapFormulaLetters,
+		remapFormulaNames,
 		getRepeatBaseName,
 		buildRepeatFormulas,
 		parseCsv,

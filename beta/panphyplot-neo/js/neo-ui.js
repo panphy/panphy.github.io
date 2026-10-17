@@ -321,7 +321,15 @@ function buildHeaderCell(sheet, column, index) {
 	name.placeholder = 'Name';
 	name.setAttribute('aria-label', `Name of column ${NeoModel.columnLetter(index)}`);
 	name.addEventListener('input', () => {
+		const previousSymbols = NeoModel.getFormulaSymbols(sheet);
 		column.name = name.value;
+		// Formulas that used the old name follow the column.
+		if (typeof math !== 'undefined' && NeoModel.remapFormulaNames(sheet, previousSymbols, math)) {
+			sheet.columns.filter(NeoModel.isFormulaColumn).forEach((entry) => {
+				const head = document.querySelector(`.neo-col-head[data-column-id="${entry.id}"]`);
+				if (head) renderFormulaLine(head, entry, sheet);
+			});
+		}
 		renderHeaderPreview(th, sheet, column);
 		renderFitSeriesSelect();
 		afterDataChange({ deferPlot: true });
@@ -481,8 +489,11 @@ function handleCellKeydown(event) {
 	const sheet = getActiveSheet();
 	const row = Number(input.dataset.row);
 	const columnIndex = sheet.columns.findIndex(column => column.id === input.dataset.columnId);
-	const atStart = input.selectionStart === 0 && input.selectionEnd === 0;
-	const atEnd = input.selectionStart === input.value.length && input.selectionEnd === input.value.length;
+	// A cell selects its whole value on entry, so typing replaces it; with the whole value selected,
+	// left and right move to the next cell at once, as in a spreadsheet.
+	const allSelected = input.value.length > 0 && input.selectionStart === 0 && input.selectionEnd === input.value.length;
+	const atStart = allSelected || (input.selectionStart === 0 && input.selectionEnd === 0);
+	const atEnd = allSelected || (input.selectionStart === input.value.length && input.selectionEnd === input.value.length);
 	let target = null;
 	switch (event.key) {
 		case 'Enter':
@@ -1053,11 +1064,11 @@ function renderFitParameters() {
 	box.hidden = !lines.length;
 	if (lines.length) safeTypeset(box);
 	if (note) {
-		note.textContent = !result ? 'Fits use unweighted least squares unless Weight the fit by ±ΔY is on.'
-			: result.weighted ? 'Weighted least squares: each point counts with weight 1/ΔY². The ± values assume the ΔY are standard uncertainties.'
+		note.textContent = !result ? 'Fits use unweighted least squares unless Weight by uncertainties is on.'
+			: result.weighted ? 'Weighted least squares: each point counts with weight 1/σ², where σ² = ΔY² + (slope × ΔX)². The ± values assume these are standard uncertainties.'
 				: Array.isArray(result.parameters)
 					? 'Unweighted least squares. The ± values come from the scatter of the points about the fit.'
-					: 'Unweighted least squares. ± values are given for Linear and Custom fits.';
+					: 'Unweighted least squares. This fit\'s parameters are too closely linked to give ± values.';
 	}
 }
 
@@ -1065,8 +1076,10 @@ function syncWeightingControl() {
 	const box = document.getElementById('fit-weighted');
 	if (!box) return;
 	box.checked = getWeightingRequested();
-	const sigmas = getFitSigmas(activeFitKey);
-	box.closest('label').title = sigmas ? '' : 'The chosen series needs a ±ΔY column with a value above zero in every plotted row.';
+	const points = getDatasetPoints(activeFitKey);
+	const usable = points.length && points.every(point => point.yError > 0 || point.xError > 0);
+	box.closest('label').title = usable ? 'Weights each point by 1/σ², using its ±ΔY and its ±ΔX through the slope'
+		: 'Every plotted point needs a ±ΔY or ±ΔX above zero to weight the fit.';
 }
 
 function renderFittingResult(equation, rSquaredDisplay) {

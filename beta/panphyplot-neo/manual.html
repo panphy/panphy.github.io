@@ -264,7 +264,7 @@
 			<li>Functions include <code>sqrt</code>, <code>exp</code>, <code>log</code> (natural log), <code>log10</code>, <code>sin</code>, <code>cos</code>, <code>tan</code> (in radians), <code>abs</code>, <code>mean</code>, <code>min</code> and <code>max</code>. Constants are <code>pi</code> and <code>e</code>.</li>
 			<li>A row where any input is blank or invalid stays blank.</li>
 		</ul>
-		<p>The dialog checks the formula as you type and shows the first row's result. Formulas that use column letters keep working when columns are moved or inserted. Renaming a column breaks a formula that uses its name: edit the formula to use the new name.</p>
+		<p>The dialog checks the formula as you type and shows the first row's result. Formulas that use column letters keep working when columns are moved or inserted. Renaming a column rewrites the formulas that use its name; if the new name is not a single word, they use the column's letter instead.</p>
 		<div class="note">Column letters take priority. In a sheet with five or more columns, <code>E</code> means column E, not Euler's number: use <code>e</code> for that.</div>
 
 		<h2 id="repeats">5. Repeat readings</h2>
@@ -273,7 +273,7 @@
 			<li>add a ±Δ column of <strong>half the spread between the largest and smallest readings</strong>, a common estimate of the uncertainty in a mean;</li>
 			<li>hide the repeat series, so the graph shows the mean.</li>
 		</ul>
-		<p>A row with a missing reading is left blank in the mean.</p>
+		<p>A row with a missing reading takes the mean of the readings it has, and its half spread needs at least two. The formulas are <code>mean(B, C, D)</code> and <code>halfspread(B, C, D)</code>; in any formula, <code>mean</code>, <code>median</code>, <code>min</code>, <code>max</code> and <code>halfspread</code> leave out a blank reading among their inputs.</p>
 
 		<h2 id="uncertainties">6. Uncertainties</h2>
 		<p>Uncertainties live in ±ΔX and ±ΔY columns, absolute or as a percentage of each value, and appear as error bars.</p>
@@ -299,21 +299,21 @@
 				<tr><th>Tab</th><th>Models</th></tr>
 			</thead>
 			<tbody>
-				<tr><td>Basic</td><td>Linear \(y = mx + c\), quadratic, cubic, exponential and power.</td></tr>
+				<tr><td>Basic</td><td>Linear \(y = mx + c\), quadratic, cubic, exponential \(y = A e^{bx} + c\) and power \(y = A x^{b}\) (every \(x\) above zero; for an offset, write a Custom fit such as <code>A*(x - x0)^b</code>).</td></tr>
 				<tr><td>Advanced</td><td>Sinusoidal and Gaussian, from starting values you can adjust.</td></tr>
 				<tr><td>Custom</td><td>Your own formula in \(x\), such as <code>A*exp(-k*x)+c</code> or <code>k*x</code>. Every other letter is a parameter to fit.</td></tr>
 			</tbody>
 		</table>
 		<h3>Weighted fits</h3>
-		<p>Turn on <strong>Weight by ±ΔY</strong> to let the more certain points count for more: each point has weight \(1/\Delta y^2\). Weighting applies to Linear and Custom fits, and needs a ±ΔY above zero for every point. For a weighted exponential or power law, write it as a Custom fit.</p>
+		<p>Turn on <strong>Weight by uncertainties</strong> to let the more certain points count for more. Each point has weight \(1/\sigma^2\), with \(\sigma^2 = \Delta y^2 + \left(f'(x)\,\Delta x\right)^2\): its ±ΔY, and its ±ΔX turned into a vertical uncertainty through the slope of the curve (the effective variance). The fit is re-weighted as the slope settles. Weighting works for every fit type and needs a ±ΔY or ±ΔX above zero for every point.</p>
 		<p>A fit becomes <em>Outdated</em>, drawn dashed, as soon as its data or ±ΔY change. Click <strong>Fit Curve</strong> again to update it.</p>
 
 		<h2 id="results">9. Reading a fit</h2>
 		<ul>
 			<li><strong>The equation</strong> of the fitted curve, to 2 decimal places at first. The two buttons under it, like a spreadsheet's increase and decrease decimal buttons, show from 0 to 8 places; a value that would round to zero switches to scientific form, such as \(2.30 \times 10^{-3}\). The fit itself keeps every digit. Tap the equation to copy it, as shown, as an image or as LaTeX.</li>
-			<li><strong>Parameters with uncertainties</strong> for Linear and Custom fits, such as \(m = 3.97 \pm 0.05\), with the uncertainty to two significant figures. A weighted fit treats each ±ΔY as a standard uncertainty. An unweighted fit estimates the uncertainty from how far the points scatter about the line.</li>
+			<li><strong>Parameters with uncertainties</strong> for every fit type, such as \(m = 3.97 \pm 0.05\), with the uncertainty to two significant figures. A weighted fit treats each σ as a standard uncertainty. An unweighted fit estimates the uncertainty from how far the points scatter about the curve. A polynomial's coefficients are those of \(u\), shown under its equation.</li>
 			<li><strong>\(R^2\)</strong>, near 1 when the points lie close to the curve.</li>
-			<li><strong>\(\chi^2/\nu\)</strong>, shown when every point has a ±ΔY. Here \(\chi^2 = \sum \left(\frac{y - f(x)}{\Delta y}\right)^2\), and \(\nu\) is the number of points minus the number of fitted parameters. Near 1, the points scatter about as much as their uncertainties suggest. Much more than 1, the uncertainties are too small or the model does not fit. Much less than 1, the uncertainties are generous.</li>
+			<li><strong>\(\chi^2/\nu\)</strong>, shown when every point has a ±ΔY or ±ΔX. Here \(\chi^2 = \sum \left(\frac{y - f(x)}{\sigma}\right)^2\), and \(\nu\) is the number of points minus the number of fitted parameters. Near 1, the points scatter about as much as their uncertainties suggest. Much more than 1, the uncertainties are too small or the model does not fit. Much less than 1, the uncertainties are generous.</li>
 			<li><strong>Residuals</strong>, plotted under the graph: the vertical distance of each point from the fit. A pattern in them, such as a curve, suggests the model is wrong.</li>
 		</ul>
 		<p>Example: for a pendulum, \(T^2 = \dfrac{4\pi^2}{g}L\), so a straight-line fit of \(T^2\) against \(L\) gives \(g = \dfrac{4\pi^2}{m}\), with \(\dfrac{\Delta g}{g} = \dfrac{\Delta m}{m}\).</p>

@@ -225,7 +225,7 @@ const TOUR_CHAPTERS = {
 				prepare: () => openTourSection('best-fit-content'),
 				body: 'Series to fit chooses which Y column the fit uses. Weighting by ±ΔY lets the more certain points count for more.',
 				action: {
-					instruction: 'Choose "T^2 against L", and turn on Weight by ±ΔY.',
+					instruction: 'Choose "T^2 against L", and turn on Weight by uncertainties.',
 					isDone: isTourFitSetUp,
 					perform: setUpTourFit
 				}
