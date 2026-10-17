@@ -169,6 +169,7 @@ h1 span { color: var(--brand-primary); }
 .viewer-panel {
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(330px, 400px);
+  grid-template-rows: auto 1fr;
   align-items: start;
   gap: 12px 16px;
   min-width: 0;
@@ -182,10 +183,9 @@ h1 span { color: var(--brand-primary); }
 
 .bench { grid-column: 1; display: flex; flex-direction: column; gap: 12px; min-width: 0; }
 .stage { display: flex; flex-direction: column; gap: 10px; min-width: 0; }
+.view-wrap { position: relative; display: flex; flex-direction: column; min-height: 0; }
 /* contain: size keeps the canvas pixel size from feeding back into the viewer height. */
 #viewer { position: relative; display: flex; flex-direction: column; flex: none; height: clamp(360px, calc(100vh - 300px), 620px); min-height: 0; contain: size; border-radius: 14px; background: var(--viewer-bg); touch-action: pan-y; overflow: hidden; }
-/* With the end view open, both it and the 3D view fit on one screen. */
-body.has-endview #viewer { height: clamp(320px, calc(100vh - 450px), 520px); }
 #viewer.is-hovering { cursor: pointer; }
 #viewer > canvas { display: block; width: 100%; height: 0; flex: 1; min-height: 0; align-self: stretch; }
 #load-status { position: absolute; inset: 30% 10%; margin: 0; text-align: center; color: var(--text-secondary); }
@@ -283,13 +283,19 @@ button:disabled { cursor: default; opacity: .55; }
 /* Room for three lines, so a longer message does not move the cards below. */
 .part-readout { margin: 0; min-height: calc(4.65em + 20px); padding: 10px 16px; border-top: 1px solid var(--card-border); background: var(--muted-bg); color: var(--text-main); font-size: .8rem; line-height: 1.55; }
 
-#measurements { padding: 0 14px 12px; border: 1px solid var(--card-border); border-radius: 12px; background: var(--card-bg); }
-#measurements:not([open]) { padding-bottom: 0; }
-#measurements summary { min-height: 48px; padding: 12px 0; cursor: pointer; font-size: .85rem; font-weight: 700; }
-#measurements summary:focus-visible, .study-controls input:focus-visible { outline: 3px solid var(--focus); outline-offset: 3px; }
-.stack { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr); gap: 12px; padding-top: 4px; }
+/* Info boxes: the graphs and the end view float over the 3D view and fold away to a tab, as the star sim's HR inset does. */
+.info-dock { position: absolute; inset: 40px 10px 10px; z-index: 3; display: flex; justify-content: space-between; align-items: flex-end; gap: 10px; pointer-events: none; }
+.info-box { display: flex; flex-direction: column; max-height: 100%; min-width: 0; pointer-events: auto; border: 1px solid var(--card-border); border-radius: 12px; background: var(--overlay-bg); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); box-shadow: 0 4px 14px -8px rgba(0, 0, 0, .35); }
+.info-box[hidden] { display: none; }
+.info-box summary { display: flex; align-items: center; gap: 8px; min-height: 44px; padding: 0 12px; cursor: pointer; font-family: var(--font-mono); font-size: .7rem; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; list-style: none; white-space: nowrap; }
+.info-box summary::-webkit-details-marker { display: none; }
+.info-box summary::before { content: ''; width: 6px; height: 6px; border: solid currentColor; border-width: 0 2px 2px 0; transform: rotate(-135deg); transition: transform .18s ease; }
+.info-box[open] summary::before { transform: translateY(-2px) rotate(45deg); }
+.info-box summary:focus-visible, .study-controls input:focus-visible { outline: 3px solid var(--focus); outline-offset: 3px; }
+.info-body { display: flex; flex-direction: column; gap: 8px; min-height: 0; overflow-y: auto; overscroll-behavior: contain; padding: 0 10px 10px; scrollbar-width: thin; }
+#measurements { width: clamp(230px, 36%, 300px); }
 
-.equation { padding: 8px 12px; border-radius: 12px; background: var(--overlay-bg); border: 1px solid var(--card-border); font-family: var(--font-mono); font-size: .78rem; line-height: 1.5; }
+.equation { font-family: var(--font-mono); font-size: .74rem; line-height: 1.5; }
 .equation .row { display: flex; justify-content: space-between; gap: 10px; }
 .equation .row span:first-child { color: var(--text-secondary); }
 .equation .formula { font-size: .9rem; font-weight: 600; margin-bottom: 2px; }
@@ -298,17 +304,13 @@ button:disabled { cursor: default; opacity: .55; }
 .equation .status { margin-top: 4px; font-size: .72rem; font-weight: 600; }
 .equation .status.good { color: var(--correct-border); }
 .equation .status.warn { color: var(--retry-border); }
-.graph { padding: 6px; border-radius: 12px; background: var(--overlay-bg); border: 1px solid var(--card-border); }
 .graph canvas { display: block; width: 100%; height: auto; aspect-ratio: 300 / 170; flex: none; min-height: 0; }
 
-/* A larger synchronised end view connects the brushes to the labelled coil sides. */
-.endview { display: grid; grid-template-columns: minmax(160px, 220px) minmax(0, 1fr); column-gap: 20px; align-items: center; padding: 12px 14px; border-radius: 12px; background: var(--card-bg); border: 1px solid var(--card-border); }
-.endview canvas { grid-column: 1; grid-row: 1 / span 3; display: block; width: 100%; height: auto; aspect-ratio: 1; }
-.endview p { grid-column: 2; margin: 2px 0 0; font-family: var(--font-mono); font-size: .8rem; line-height: 1.5; color: var(--text-secondary); }
-.endview[hidden] { display: none; }
-.endview p.endview-title { margin: 0 0 2px; font-weight: 600; letter-spacing: .06em; color: var(--text-main); }
-.endview .connection-key { grid-column: 2; font-family: var(--font-body); font-size: .76rem; margin-top: 8px; }
-.endview canvas { grid-row: 1 / span 4; }
+/* The end view connects the brushes to the labelled coil sides. */
+.endview { width: clamp(210px, 30%, 250px); }
+.endview canvas { display: block; width: min(100%, 170px); height: auto; aspect-ratio: 1; flex: none; align-self: center; }
+.endview p { margin: 0; font-family: var(--font-mono); font-size: .7rem; line-height: 1.45; color: var(--text-secondary); }
+.endview .connection-key { font-family: var(--font-body); font-size: .7rem; }
 .endview b { color: var(--text-main); font-weight: 600; }
 
 @container (min-width: 640px) {
@@ -328,14 +330,13 @@ button:disabled { cursor: default; opacity: .55; }
 }
 
 /* Stacked (narrow page or portrait fullscreen): one column. The 3D view stays pinned under the banner
-   while the end view, controls and readouts scroll beneath it, so the model is always in sight. */
+   while the controls and readouts scroll beneath it, so the model is always in sight. */
 .viewer-panel.is-stacked { display: flex; flex-direction: column; align-items: stretch; --pin-top: calc(var(--standalone-top, 0px) + 61px); }
 .is-stacked .bench, .is-stacked .stage { display: contents; }
-.is-stacked #viewer { position: sticky; top: var(--pin-top); z-index: 5; height: clamp(230px, 40vh, 420px); border-radius: 0 0 14px 14px; box-shadow: 0 6px 10px -8px rgba(0, 0, 0, .35); }
-body.has-endview .is-stacked #viewer { height: clamp(230px, 40vh, 420px); }
-.is-stacked #measurements { order: 5; }
+.is-stacked .view-wrap { position: sticky; top: var(--pin-top); z-index: 5; }
+.is-stacked #viewer { height: clamp(230px, 40vh, 420px); border-radius: 0 0 14px 14px; box-shadow: 0 6px 10px -8px rgba(0, 0, 0, .35); }
 
-/* Fullscreen: the 3D view fills the screen. Beside it the console scrolls on its own; the end view and graphs sit under the view. */
+/* Fullscreen: the 3D view fills the left-hand column without scrolling, and the console beside it scrolls on its own. */
 body.viewer-expanded { overflow: hidden; }
 .viewer-panel.is-fullscreen {
   position: fixed;
@@ -349,8 +350,8 @@ body.viewer-expanded { overflow: hidden; }
   padding: var(--fs-top) max(16px, env(safe-area-inset-right)) max(12px, env(safe-area-inset-bottom)) max(16px, env(safe-area-inset-left));
 }
 .viewer-panel.is-fullscreen:not(.is-stacked) { grid-template-columns: minmax(0, 1fr) clamp(320px, 30vw, 420px); grid-template-rows: auto minmax(0, 1fr); align-items: stretch; overflow: hidden; }
-.is-fullscreen:not(.is-stacked) .bench { min-height: 0; overflow-y: auto; overscroll-behavior: contain; scrollbar-width: thin; }
-.is-fullscreen:not(.is-stacked) .stage { flex: 1 0 max(300px, 64%); }
+.is-fullscreen:not(.is-stacked) .bench { min-height: 0; overflow: hidden; }
+.is-fullscreen:not(.is-stacked) .stage, .is-fullscreen:not(.is-stacked) .view-wrap { flex: 1 1 0; min-height: 0; }
 .is-fullscreen:not(.is-stacked) #viewer { flex: 1 1 0; height: auto; }
 .is-fullscreen:not(.is-stacked) .console { min-height: 0; overflow-y: auto; overscroll-behavior: contain; padding: 0 4px 4px; margin: 0 -4px; scrollbar-width: thin; }
 .viewer-panel.is-fullscreen.is-stacked { overflow-y: auto; overscroll-behavior: contain; padding-top: 0; --pin-top: calc(var(--fs-top) + 48px); }
@@ -403,18 +404,16 @@ footer { display: flex; justify-content: space-between; gap: 20px; border-top: 1
   .legend { gap: 4px; font-size: .7rem; }
   .gesture { display: none; }
   .deck { padding: 12px; }
-  .stack { grid-template-columns: minmax(0, 1fr); }
-  .endview { grid-template-columns: minmax(0, 1fr); }
-  .endview canvas { grid-column: 1; grid-row: 2; width: min(100%, 230px); justify-self: center; margin: 6px 0; }
-  .endview p, .endview .connection-key { grid-column: 1; }
-  .endview .endview-title { grid-row: 1; }
+  .info-dock { inset: 34px 8px 8px; gap: 8px; }
+  .info-box summary { padding: 0 10px; font-size: .62rem; }
+  .endview canvas { width: min(100%, 140px); }
   .part-readout { min-height: 72px; }
   .guide { padding: 20px; }
   .reality { gap: 12px; }
   footer { flex-direction: column; gap: 8px; }
 }
 @media (prefers-reduced-motion: reduce) {
-  .models button, .toolbar button { transition: none; }
+  .models button, .toolbar button, .info-box summary::before { transition: none; }
   .models button:hover { transform: none; }
 }
 
