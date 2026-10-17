@@ -218,6 +218,16 @@
 		return true;
 	}
 
+	// Moves a column so that it ends up at index (0 = first), as a drag and drop does.
+	function moveColumnTo(sheet, columnId, index) {
+		const from = sheet.columns.findIndex(column => column.id === columnId);
+		const to = Math.min(Math.max(index, 0), sheet.columns.length - 1);
+		if (from < 0 || from === to) return false;
+		const [column] = sheet.columns.splice(from, 1);
+		sheet.columns.splice(to, 0, column);
+		return true;
+	}
+
 	// Spreadsheets copy tab-separated rows; plain comma-separated text is accepted too.
 	function parsePastedText(text) {
 		const lines = String(text ?? '').replace(/\r\n?/g, '\n').replace(/\n+$/, '').split('\n');
@@ -774,6 +784,7 @@
 		insertColumn,
 		removeColumn,
 		moveColumn,
+		moveColumnTo,
 		parsePastedText,
 		splitHeader,
 		applyPaste,

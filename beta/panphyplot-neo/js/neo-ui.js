@@ -277,9 +277,13 @@ function buildHeaderCell(sheet, column, index) {
 
 	const top = document.createElement('div');
 	top.className = 'neo-col-top';
+	// The letter doubles as the drag handle for moving the column.
 	const letter = document.createElement('span');
-	letter.className = 'neo-col-letter';
+	letter.className = 'neo-col-letter neo-col-grip';
 	letter.textContent = NeoModel.columnLetter(index);
+	letter.title = 'Drag to move this column';
+	letter.setAttribute('aria-hidden', 'true');
+	letter.addEventListener('pointerdown', event => startColumnDrag(event, sheet, column, th));
 
 	const role = document.createElement('select');
 	role.className = 'neo-role-select';
@@ -627,6 +631,122 @@ function moveColumn(sheet, column, offset) {
 	afterDataChange({ structure: true });
 	const button = document.querySelector(`.neo-col-head[data-column-id="${column.id}"] .neo-col-menu-button`);
 	if (button) button.focus();
+}
+
+/* ---------- Dragging columns ---------- */
+
+let columnDrag = null;
+
+// Dragging a column's letter shows where it will land; letting go moves it there.
+function startColumnDrag(event, sheet, column, th) {
+	if (!event.isPrimary || event.button !== 0 || columnDrag) return;
+	event.preventDefault();
+	const grip = event.currentTarget;
+	grip.setPointerCapture(event.pointerId);
+	columnDrag = { sheet, column, th, grip, pointerId: event.pointerId, startX: event.clientX, active: false, target: null, scrollTimer: 0 };
+	grip.addEventListener('pointermove', moveColumnDrag);
+	grip.addEventListener('pointerup', endColumnDrag);
+	grip.addEventListener('pointercancel', cancelColumnDrag);
+	grip.addEventListener('lostpointercapture', cancelColumnDrag);
+}
+
+function getColumnHeads() {
+	return [...document.querySelectorAll('#neo-table-head .neo-col-head')];
+}
+
+// The gap the pointer is nearest to: 0 is before the first column, n after the last.
+function findDropGap(clientX) {
+	const heads = getColumnHeads();
+	for (let index = 0; index < heads.length; index++) {
+		const rect = heads[index].getBoundingClientRect();
+		if (clientX < rect.left + rect.width / 2) return index;
+	}
+	return heads.length;
+}
+
+function showDropIndicator(gap) {
+	const wrap = document.getElementById('neo-table-wrap');
+	let indicator = document.getElementById('neo-drop-indicator');
+	if (!indicator) {
+		indicator = document.createElement('div');
+		indicator.id = 'neo-drop-indicator';
+		indicator.className = 'neo-drop-indicator';
+		indicator.setAttribute('aria-hidden', 'true');
+		wrap.appendChild(indicator);
+	}
+	const heads = getColumnHeads();
+	const wrapRect = wrap.getBoundingClientRect();
+	const edge = gap < heads.length ? heads[gap].getBoundingClientRect().left : heads[heads.length - 1].getBoundingClientRect().right;
+	indicator.style.left = `${edge - wrapRect.left + wrap.scrollLeft - 2}px`;
+	indicator.style.top = `${wrap.scrollTop}px`;
+	indicator.style.height = `${wrap.clientHeight}px`;
+	indicator.hidden = false;
+}
+
+// Near either edge of the table, keep scrolling so far columns can be reached.
+function autoScrollTable(clientX) {
+	const wrap = document.getElementById('neo-table-wrap');
+	const rect = wrap.getBoundingClientRect();
+	const zone = 40;
+	const speed = clientX < rect.left + zone ? -12 : clientX > rect.right - zone ? 12 : 0;
+	clearInterval(columnDrag.scrollTimer);
+	if (!speed) return;
+	columnDrag.scrollTimer = setInterval(() => {
+		wrap.scrollLeft += speed;
+		if (columnDrag && columnDrag.active) {
+			columnDrag.target = findDropGap(columnDrag.lastX);
+			showDropIndicator(columnDrag.target);
+		}
+	}, 16);
+}
+
+function moveColumnDrag(event) {
+	if (!columnDrag || event.pointerId !== columnDrag.pointerId) return;
+	columnDrag.lastX = event.clientX;
+	if (!columnDrag.active) {
+		if (Math.abs(event.clientX - columnDrag.startX) < 6) return;
+		columnDrag.active = true;
+		columnDrag.th.classList.add('is-dragging');
+		document.body.classList.add('neo-is-dragging-column');
+	}
+	columnDrag.target = findDropGap(event.clientX);
+	showDropIndicator(columnDrag.target);
+	autoScrollTable(event.clientX);
+}
+
+function finishColumnDrag() {
+	if (!columnDrag) return null;
+	const drag = columnDrag;
+	columnDrag = null;
+	clearInterval(drag.scrollTimer);
+	['pointermove', 'pointerup', 'pointercancel', 'lostpointercapture'].forEach((type) => {
+		drag.grip.removeEventListener(type, type === 'pointermove' ? moveColumnDrag : type === 'pointerup' ? endColumnDrag : cancelColumnDrag);
+	});
+	if (drag.grip.hasPointerCapture(drag.pointerId)) drag.grip.releasePointerCapture(drag.pointerId);
+	drag.th.classList.remove('is-dragging');
+	document.body.classList.remove('neo-is-dragging-column');
+	const indicator = document.getElementById('neo-drop-indicator');
+	if (indicator) indicator.remove();
+	return drag;
+}
+
+function endColumnDrag(event) {
+	if (!columnDrag || event.pointerId !== columnDrag.pointerId) return;
+	const drag = finishColumnDrag();
+	if (!drag.active || drag.target === null) return;
+	const from = drag.sheet.columns.indexOf(drag.column);
+	// Dropping into the gap after itself, or before itself, leaves the column where it is.
+	const to = drag.target > from ? drag.target - 1 : drag.target;
+	if (to === from) return;
+	changeColumns(drag.sheet, () => NeoModel.moveColumnTo(drag.sheet, drag.column.id, to));
+	renderTable();
+	afterDataChange({ structure: true });
+	const button = document.querySelector(`.neo-col-head[data-column-id="${drag.column.id}"] .neo-col-menu-button`);
+	if (button) button.focus({ preventScroll: true });
+}
+
+function cancelColumnDrag() {
+	finishColumnDrag();
 }
 
 function insertColumnAfter(sheet, column) {
