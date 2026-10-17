@@ -1565,6 +1565,13 @@ function performPowerFit() {
 
 		// 9. Update results and plot
 		updateResults(equation, xValues, yValues, fitFunction, activeSet, solver, { kind: 'basic', method: 'Power' });
+		// Without convergence the cause is the data, not a starting guess (this fit has none to change):
+		// near b = 1, a straight line, or with few points, A, x0 and c trade off against each other.
+		if (solver && !solver.converged && datasetFitResults[activeSet]) {
+			datasetFitResults[activeSet].status = 'The four parameters are not pinned down by this data: many combinations of A, x₀ and c fit almost equally well. If theory fixes x₀ or c, a Custom fit such as A*x^b pins them; a straight line suits Linear.';
+			if (typeof renderFitDiagnostics === 'function') renderFitDiagnostics();
+			scheduleSaveState();
+		}
 		plotGraph(xFit, yFit);
 	} catch (error) {
 		console.error("Error performing power fit:", error);

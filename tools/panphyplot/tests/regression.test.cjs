@@ -208,6 +208,16 @@ test('the general power law y = A(x - x0)^b + c converges and recovers its param
 	assert.match(h.run('datasetFitResults[0].status'),/^Converged in \d+ iterations\.$/);
 	assert.ok(Number(h.run('datasetFitResults[0].rSquared'))>.9999);
 });
+test('a power-law fit the data cannot pin down says why, not to try other initial parameters', () => {
+	const h=harness();h.elements['fit-method'].value='Power';
+	// A straight line, as T² against L for a pendulum is: A, x0 and c trade off along a flat valley.
+	h.setRows([[1,3],[2,5],[3,7],[4,9],[5,11]]);h.context.fitCurve();
+	assert.deepEqual(h.context.alerts,[]);
+	const status=h.run('datasetFitResults[0].status');
+	assert.doesNotMatch(status,/initial parameters/);
+	assert.match(status,/not pinned down by this data/);
+	assert.ok(Number(h.run('datasetFitResults[0].rSquared'))>.9999);
+});
 test('sinusoidal and custom solvers preserve convergence metadata', () => {
 	const h=harness();
 	const sinusoidal = h.core.solveSinusoidal(Array.from({length:41},(_,i)=>({x:i/10,y:2*Math.sin(3*i/10-.2)+1})),{A:1.8,b:0,k:3,phi:0,c:1});

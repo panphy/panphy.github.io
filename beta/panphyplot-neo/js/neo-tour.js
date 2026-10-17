@@ -223,9 +223,9 @@ const TOUR_CHAPTERS = {
 				title: 'Choose what to fit',
 				target: '.neo-fit-series',
 				prepare: () => openTourSection('best-fit-content'),
-				body: 'Series to fit chooses which Y column the fit uses. Weighting by ±ΔY lets the more certain points count for more.',
+				body: 'Series to fit lists the series shown on the graph, so hiding T moved the fit to T². Weighting by the uncertainties lets the more certain points count for more.',
 				action: {
-					instruction: 'Choose "T^2 against L", and turn on Weight by uncertainties.',
+					instruction: 'Check that Series to fit shows "T^2 against L", and turn on Weight by uncertainties.',
 					isDone: isTourFitSetUp,
 					perform: setUpTourFit
 				}
