@@ -14,6 +14,8 @@ const fitEpochs = {};
 let saveTimeout = null;
 // Set by the guided tour (neo-tour.js), which runs on practice data and must never overwrite the saved workspace.
 let persistenceDisabled = false;
+// Set when another tab saves this workspace: this tab stops saving until the person chooses a version.
+let changedElsewhere = false;
 let lastSavedSerialized = null;
 
 function debounce(func, wait) {
@@ -129,7 +131,7 @@ function buildPersistedState() {
 }
 
 function saveState() {
-	if (persistenceDisabled) return;
+	if (persistenceDisabled || changedElsewhere) return;
 	try {
 		const serialized = JSON.stringify(buildPersistedState());
 		if (serialized === lastSavedSerialized) return;
@@ -166,6 +168,23 @@ function loadState(initialState = null) {
 	customFitStates = neoState.customFits;
 	pruneOrphanFits();
 	refreshActiveFitKey();
+}
+
+// Every tab shares one saved workspace, so a save from another tab would be overwritten by this
+// tab's next autosave. Pause instead, and let the person reload or keep this tab's version.
+window.addEventListener('storage', (event) => {
+	if (persistenceDisabled || (event.key !== STORAGE_KEY && event.key !== null)) return;
+	if (event.key !== null && event.newValue === lastSavedSerialized) return;
+	changedElsewhere = true;
+	clearTimeout(saveTimeout);
+	if (typeof onWorkspaceChangedElsewhere === 'function') onWorkspaceChangedElsewhere();
+});
+
+// Overwrites the other tab's save with this tab's work and resumes saving.
+function keepThisTabVersion() {
+	changedElsewhere = false;
+	lastSavedSerialized = null;
+	saveState();
 }
 
 window.addEventListener('pagehide', flushSaveState);

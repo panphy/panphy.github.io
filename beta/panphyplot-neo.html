@@ -91,6 +91,14 @@
 			<button type="button" class="neo-tool neo-tool-danger" id="clear-sheet-button" title="Clear every cell in this sheet"><svg class="neo-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4.5 7h15M9.5 7V4.5h5V7M6.5 7l1 13h9l1-13M10 10.5v6M14 10.5v6"/></svg><span>Clear</span></button>
 		</div>
 
+		<div class="neo-conflict" id="tab-conflict" role="alert" hidden>
+			<p><strong>This workspace was changed in another tab.</strong> This tab has stopped saving, so neither tab's work is lost.</p>
+			<div class="neo-conflict-actions">
+				<button type="button" class="neo-button neo-button-primary" id="tab-conflict-reload">Reload to see it</button>
+				<button type="button" class="neo-button" id="tab-conflict-keep" title="Save this tab's work over the other tab's">Keep this tab's version</button>
+			</div>
+		</div>
+
 		<main class="container neo-workspace">
 			<section class="input-section neo-pane neo-pane-data" id="data-pane" aria-labelledby="data-pane-title">
 				<div class="neo-pane-head">

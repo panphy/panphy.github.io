@@ -635,6 +635,37 @@ input[type="number"]:focus {
 	padding: 0 8px;
 }
 
+/* ---------- Another tab changed the workspace ---------- */
+
+.neo-conflict {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	flex-wrap: wrap;
+	gap: 10px 16px;
+	margin: 12px 12px 0;
+	padding: 12px 16px;
+	border: 1px solid color-mix(in srgb, var(--warn) 45%, transparent);
+	border-radius: var(--radius);
+	background: color-mix(in srgb, var(--warn) 10%, var(--surface));
+	box-shadow: var(--shadow-1);
+}
+
+.neo-conflict[hidden] {
+	display: none;
+}
+
+.neo-conflict p {
+	margin: 0;
+	font-size: 0.9rem;
+}
+
+.neo-conflict-actions {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 8px;
+}
+
 /* ---------- Workspace ---------- */
 
 .neo-workspace {

@@ -1,6 +1,6 @@
 # PanPhyPlot (neo-beta)
 
-A trial version of PanPhyPlot built around Origin-style columns, for tablet and desktop. The page is `beta/panphyplot-neo.html`; it has no service-worker registration or offline cache, and a screen narrower than 600px (or a short touch screen, such as a phone on its side) gets a link to the current PanPhyPlot instead. The current version in `tools/` is unchanged and keeps its own saved work; this one saves under `panphyplot-neo-state-v1`.
+A trial version of PanPhyPlot built around Origin-style columns, for tablet and desktop. The page is `beta/panphyplot-neo.html`; it has no service-worker registration or offline cache, and a screen narrower than 600px (or a short touch screen, such as a phone on its side) gets a link to the current PanPhyPlot instead. The current version in `tools/` is unchanged and keeps its own saved work; this one saves under `panphyplot-neo-state-v1`. All tabs share that workspace, so when another tab saves it (`storage` event), a tab stops autosaving and offers to reload or keep its own version.
 
 Each tab is a sheet of columns. A column's role is X, Y, ±ΔX or ±ΔY (absolute or %), or Ignore. Pairing follows Origin: a Y column plots against the nearest X column to its left, a ΔY column belongs to the nearest Y to its left and a ΔX column to the nearest X. Axis titles are built from names and units as `name / unit`.
 
