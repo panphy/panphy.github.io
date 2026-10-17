@@ -34,6 +34,69 @@ function showToast(message, duration = 3000) {
 	}, duration);
 }
 
+// LaTeX-mode labels (column headers, series names, the graph title) are typeset once per text:
+// the finished drawing is kept by its TeX source, so a rebuilt label with the same text reuses
+// it. While a name or unit is being typed, typesetting waits for a pause in the typing.
+const LABEL_TYPESET_DELAY = 250;
+const LABEL_CACHE_LIMIT = 300;
+const labelTypesetCache = new Map();
+let labelTypesetDelay = 0;
+
+function withLabelTypesetDelay(callback) {
+	labelTypesetDelay = LABEL_TYPESET_DELAY;
+	try {
+		callback();
+	} finally {
+		labelTypesetDelay = 0;
+	}
+}
+
+// Plain text for a label that may have been typeset, so a later typeset of the same TeX redraws it.
+function setPlainLabel(element, text) {
+	clearTimeout(element.labelTypesetTimer);
+	element.labelTypesetTimer = null;
+	delete element.dataset.texSource;
+	element.textContent = text;
+}
+
+// A placeholder is shown in a new label until its typesetting runs; a label that already shows
+// something keeps it until then.
+function typesetLabel(element, source, placeholder = null) {
+	if (element.dataset.texSource === source && !element.labelTypesetTimer) return;
+	clearTimeout(element.labelTypesetTimer);
+	element.labelTypesetTimer = null;
+	const isNew = element.dataset.texSource === undefined;
+	element.dataset.texSource = source;
+	const cached = labelTypesetCache.get(source);
+	if (cached) {
+		element.innerHTML = cached;
+		return;
+	}
+	// A label typeset straight away may still be on its way into the page (a header being built).
+	const run = (delayed) => {
+		element.labelTypesetTimer = null;
+		if ((delayed && !element.isConnected) || element.dataset.texSource !== source) return;
+		element.textContent = source;
+		if (typeof MathJax === 'undefined' || !MathJax.Hub || !MathJax.Hub.Queue) return;
+		MathJax.Hub.Queue(['Typeset', MathJax.Hub, element], () => {
+			if (element.dataset.texSource !== source || !element.querySelector('svg')) return;
+			// The copy leaves out MathJax's source script and ids, so it never clashes or is reprocessed.
+			const copy = element.cloneNode(true);
+			copy.querySelectorAll('script').forEach(node => node.remove());
+			copy.querySelectorAll('[id]').forEach(node => node.removeAttribute('id'));
+			labelTypesetCache.delete(source);
+			labelTypesetCache.set(source, copy.innerHTML);
+			if (labelTypesetCache.size > LABEL_CACHE_LIMIT) labelTypesetCache.delete(labelTypesetCache.keys().next().value);
+		});
+	};
+	if (!labelTypesetDelay) {
+		run(false);
+		return;
+	}
+	if (isNew && placeholder !== null) element.textContent = placeholder;
+	element.labelTypesetTimer = setTimeout(() => run(true), labelTypesetDelay);
+}
+
 // Cell edits reach the model on every keystroke, so the fitting code's flush has nothing to do.
 function updateData() {}
 
@@ -342,9 +405,11 @@ function buildHeaderCell(sheet, column, index) {
 				if (head) renderFormulaLine(head, entry, sheet);
 			});
 		}
-		renderHeaderPreview(th, sheet, column);
-		renderFitSeriesSelect();
-		afterDataChange({ deferPlot: true });
+		withLabelTypesetDelay(() => {
+			renderHeaderPreview(th, sheet, column);
+			renderFitSeriesSelect();
+			afterDataChange({ deferPlot: true });
+		});
 	});
 
 	const unit = document.createElement('input');
@@ -356,8 +421,10 @@ function buildHeaderCell(sheet, column, index) {
 	unit.setAttribute('aria-label', `Unit of column ${NeoModel.columnLetter(index)}`);
 	unit.addEventListener('input', () => {
 		column.unit = unit.value;
-		renderHeaderPreview(th, sheet, column);
-		afterDataChange({ deferPlot: true });
+		withLabelTypesetDelay(() => {
+			renderHeaderPreview(th, sheet, column);
+			afterDataChange({ deferPlot: true });
+		});
 	});
 
 	const preview = document.createElement('div');
@@ -386,11 +453,10 @@ function renderHeaderPreview(th, sheet, column) {
 	if (!preview) return;
 	preview.hidden = !latexMode;
 	if (!latexMode) {
-		preview.textContent = '';
+		setPlainLabel(preview, '');
 		return;
 	}
-	preview.textContent = `\\(${columnAxisText(sheet, column)}\\)`;
-	safeTypeset(preview);
+	typesetLabel(preview, `\\(${columnAxisText(sheet, column)}\\)`);
 }
 
 function buildDataCell(sheet, column, row) {
@@ -1148,8 +1214,7 @@ function renderTitleDisplay() {
 	}
 	if (renderedTitle === text) return;
 	renderedTitle = text;
-	display.textContent = `\\(${text}\\)`;
-	safeTypeset(display);
+	typesetLabel(display, `\\(${text}\\)`);
 }
 
 function editTitle() {
@@ -1187,11 +1252,10 @@ function describeSeriesTex(sheet, series) {
 // Writes a series description into an element, typeset when LaTeX mode is on.
 function setSeriesText(element, sheet, series, prefix = '') {
 	if (!latexMode) {
-		element.textContent = `${prefix}${describeSeries(sheet, series)}`;
+		setPlainLabel(element, `${prefix}${describeSeries(sheet, series)}`);
 		return;
 	}
-	element.textContent = `${prefix}\\(${describeSeriesTex(sheet, series)}\\)`;
-	safeTypeset(element);
+	typesetLabel(element, `${prefix}\\(${describeSeriesTex(sheet, series)}\\)`, `${prefix}${describeSeries(sheet, series)}`);
 }
 
 function renderFitSeriesSelect() {
@@ -1219,7 +1283,7 @@ function renderFitSeriesSelect() {
 	const target = resolveFitKey(activeFitKey);
 	if (label) {
 		if (target) setSeriesText(label, target.sheet, target.series, '· ');
-		else label.textContent = '';
+		else setPlainLabel(label, '');
 	}
 	syncWeightingControl();
 }
