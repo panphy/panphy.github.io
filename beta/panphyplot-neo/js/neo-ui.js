@@ -147,8 +147,10 @@ function renderStatus() {
 	saved.textContent = persistenceDisabled ? '● Practice data, not saved'
 		: changedElsewhere ? '● Not saving: changed in another tab'
 			: '● Saved in this browser';
+	const range = typeof getSelectedRange === 'function' ? getSelectedRange() : null;
+	const selected = range ? ` · ${range.r1 - range.r0 + 1} × ${range.c1 - range.c0 + 1} cells selected` : '';
 	status.replaceChildren(
-		`${getSheetDisplayName(neoState.activeSheet)} · ${series.length} ${series.length === 1 ? 'series' : 'series'} · ${rows} ${rows === 1 ? 'row' : 'rows'} · `,
+		`${getSheetDisplayName(neoState.activeSheet)} · ${series.length} ${series.length === 1 ? 'series' : 'series'} · ${rows} ${rows === 1 ? 'row' : 'rows'}${selected} · `,
 		saved
 	);
 }
@@ -450,6 +452,11 @@ function renderTable() {
 	}
 	body.replaceChildren(fragment);
 	updateValidationMessage();
+	if (cellSelection) {
+		const clamp = point => ({ row: Math.min(point.row, sheet.rowCount - 1), col: Math.min(point.col, sheet.columns.length - 1) });
+		cellSelection = { anchor: clamp(cellSelection.anchor), head: clamp(cellSelection.head) };
+		renderCellSelection();
+	}
 }
 
 function updateValidationMessage() {
@@ -487,6 +494,7 @@ function focusCell(row, columnIndex) {
 function handleCellInput(event) {
 	const input = event.target.closest('.neo-cell');
 	if (!input) return;
+	clearCellSelection();
 	const sheet = getActiveSheet();
 	const column = sheet.columns.find(entry => entry.id === input.dataset.columnId);
 	if (!column) return;
@@ -495,12 +503,142 @@ function handleCellInput(event) {
 	afterDataChange({ deferPlot: true });
 }
 
+/* ---------- Selecting a range of cells ---------- */
+
+// The anchor is where a selection started; the head is the cell it reaches. A selection of one
+// cell is no selection: that cell simply has the focus.
+let cellSelection = null;
+
+function cellPosition(input) {
+	const sheet = getActiveSheet();
+	return { row: Number(input.dataset.row), col: sheet.columns.findIndex(column => column.id === input.dataset.columnId) };
+}
+
+function getSelectedRange() {
+	if (!cellSelection) return null;
+	const { anchor, head } = cellSelection;
+	if (anchor.row === head.row && anchor.col === head.col) return null;
+	return NeoModel.normalizeRange({ r0: anchor.row, r1: head.row, c0: anchor.col, c1: head.col });
+}
+
+function renderCellSelection() {
+	const body = document.getElementById('neo-table-body');
+	if (!body) return;
+	body.querySelectorAll('td.is-selected').forEach((td) => {
+		td.classList.remove('is-selected', 'sel-top', 'sel-bottom', 'sel-left', 'sel-right');
+	});
+	const range = getSelectedRange();
+	if (range) {
+		const sheet = getActiveSheet();
+		for (let row = range.r0; row <= range.r1; row++) {
+			for (let col = range.c0; col <= range.c1; col++) {
+				const column = sheet.columns[col];
+				const input = column && body.querySelector(`.neo-cell[data-row="${row}"][data-column-id="${column.id}"]`);
+				if (!input) continue;
+				const td = input.parentElement;
+				td.classList.add('is-selected');
+				td.classList.toggle('sel-top', row === range.r0);
+				td.classList.toggle('sel-bottom', row === range.r1);
+				td.classList.toggle('sel-left', col === range.c0);
+				td.classList.toggle('sel-right', col === range.c1);
+			}
+		}
+	}
+	renderStatus();
+}
+
+function clearCellSelection() {
+	if (!cellSelection) return;
+	cellSelection = null;
+	renderCellSelection();
+}
+
+function setCellSelection(anchor, head) {
+	cellSelection = { anchor, head };
+	renderCellSelection();
+}
+
+// Dragging across cells with a mouse or pen selects a rectangle; Shift+click extends from the
+// cell that has the focus. On a touch screen a drag scrolls the table, so Shift+arrows select there.
+function handleCellPointerDown(event) {
+	const input = event.target.closest('.neo-cell');
+	if (!input || event.button !== 0 || event.pointerType === 'touch') return;
+	const start = cellPosition(input);
+	const focused = document.activeElement && document.activeElement.classList.contains('neo-cell') ? document.activeElement : null;
+	if (event.shiftKey && focused) {
+		event.preventDefault();
+		setCellSelection(cellSelection ? cellSelection.anchor : cellPosition(focused), start);
+		return;
+	}
+	cellSelection = { anchor: start, head: start };
+	renderCellSelection();
+	const move = (moveEvent) => {
+		const hit = document.elementFromPoint(moveEvent.clientX, moveEvent.clientY);
+		const cell = hit && hit.closest && hit.closest('#neo-table-body .neo-cell');
+		if (!cell || !cellSelection) return;
+		const head = cellPosition(cell);
+		if (head.row === cellSelection.head.row && head.col === cellSelection.head.col) return;
+		document.body.classList.add('neo-is-selecting');
+		if (window.getSelection) window.getSelection().removeAllRanges();
+		setCellSelection(cellSelection.anchor, head);
+	};
+	const up = () => {
+		document.removeEventListener('pointermove', move);
+		document.removeEventListener('pointerup', up);
+		document.body.classList.remove('neo-is-selecting');
+		// Keep the starting cell's value selected, so typing replaces it and copy takes the range.
+		if (getSelectedRange()) input.select();
+	};
+	document.addEventListener('pointermove', move);
+	document.addEventListener('pointerup', up);
+}
+
+function handleCellCopy(event, cut = false) {
+	const range = getSelectedRange();
+	if (!range || !event.clipboardData) return;
+	event.preventDefault();
+	const sheet = getActiveSheet();
+	event.clipboardData.setData('text/plain', NeoModel.getRangeText(sheet, range));
+	if (cut) clearSelectedCells(sheet, range);
+}
+
+function clearSelectedCells(sheet, range) {
+	const cleared = NeoModel.fillRange(sheet, range, '');
+	renderTable();
+	afterDataChange();
+	if (!cleared) showToast('Calculated columns are filled by their formulas and cannot be cleared.');
+}
+
 function handleCellKeydown(event) {
 	const input = event.target.closest('.neo-cell');
 	if (!input) return;
 	const sheet = getActiveSheet();
 	const row = Number(input.dataset.row);
 	const columnIndex = sheet.columns.findIndex(column => column.id === input.dataset.columnId);
+	const selectedRange = getSelectedRange();
+	// Shift+arrows grow the selection from this cell, as in a spreadsheet.
+	if (event.shiftKey && ['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(event.key)) {
+		event.preventDefault();
+		const anchor = cellSelection ? cellSelection.anchor : { row, col: columnIndex };
+		const head = cellSelection ? { ...cellSelection.head } : { row, col: columnIndex };
+		if (event.key === 'ArrowUp') head.row = Math.max(0, head.row - 1);
+		if (event.key === 'ArrowDown') head.row = Math.min(sheet.rowCount - 1, head.row + 1);
+		if (event.key === 'ArrowLeft') head.col = Math.max(0, head.col - 1);
+		if (event.key === 'ArrowRight') head.col = Math.min(sheet.columns.length - 1, head.col + 1);
+		setCellSelection(anchor, head);
+		return;
+	}
+	if (selectedRange && (event.key === 'Delete' || event.key === 'Backspace')) {
+		event.preventDefault();
+		clearSelectedCells(sheet, selectedRange);
+		return;
+	}
+	if (event.key === 'Escape' && selectedRange) {
+		event.preventDefault();
+		clearCellSelection();
+		return;
+	}
+	if (selectedRange && ['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'Enter', 'Tab'].includes(event.key)) clearCellSelection();
 	// A cell selects its whole value on entry, so typing replaces it; with the whole value selected,
 	// left and right move to the next cell at once, as in a spreadsheet.
 	const allSelected = input.value.length > 0 && input.selectionStart === 0 && input.selectionEnd === input.value.length;
@@ -534,12 +672,24 @@ function handleCellPaste(event) {
 	const input = event.target.closest('.neo-cell');
 	if (!input) return;
 	const text = event.clipboardData ? event.clipboardData.getData('text/plain') : '';
-	// A single value such as "1,250" stays in its cell (and shows as invalid) rather than splitting.
-	if (!/[\t\n]/.test(text.replace(/\n+$/, ''))) return;
-	event.preventDefault();
 	const sheet = getActiveSheet();
-	const row = Number(input.dataset.row);
-	const columnIndex = sheet.columns.findIndex(column => column.id === input.dataset.columnId);
+	const range = getSelectedRange();
+	const single = !/[\t\n]/.test(text.replace(/\n+$/, ''));
+	// One value pasted over a selected range fills every cell of it.
+	if (range && single) {
+		event.preventDefault();
+		const filled = NeoModel.fillRange(sheet, range, text.replace(/\n+$/, '').trim());
+		renderTable();
+		afterDataChange();
+		showToast(`Filled ${filled} ${filled === 1 ? 'cell' : 'cells'}.`);
+		return;
+	}
+	// A single value such as "1,250" stays in its cell (and shows as invalid) rather than splitting.
+	if (single) return;
+	event.preventDefault();
+	// A block lands at the top-left of the selection, or at this cell.
+	const row = range ? range.r0 : Number(input.dataset.row);
+	const columnIndex = range ? range.c0 : sheet.columns.findIndex(column => column.id === input.dataset.columnId);
 	const result = NeoModel.applyPaste(sheet, row, columnIndex, NeoModel.parsePastedText(text), () => createNewColumn());
 	renderTable();
 	afterDataChange({ structure: true });
@@ -928,6 +1078,7 @@ function startSheetRename(index, tab, label) {
 
 function switchSheet(index) {
 	closeMenu();
+	cellSelection = null;
 	neoState.activeSheet = index;
 	refreshActiveFitKey();
 	setInitialParameters(getCurrentAdvancedFitMethod());
@@ -1296,6 +1447,9 @@ function initializeInterface() {
 	body.addEventListener('input', handleCellInput);
 	body.addEventListener('keydown', handleCellKeydown);
 	body.addEventListener('paste', handleCellPaste);
+	body.addEventListener('pointerdown', handleCellPointerDown);
+	body.addEventListener('copy', event => handleCellCopy(event, false));
+	body.addEventListener('cut', event => handleCellCopy(event, true));
 	body.addEventListener('focusin', (event) => {
 		if (event.target.classList.contains('neo-cell')) event.target.select();
 	});

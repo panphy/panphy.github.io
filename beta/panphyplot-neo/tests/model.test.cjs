@@ -358,3 +358,13 @@ test('a saved (max - min) / 2 half spread is upgraded to halfspread', () => {
 	assert.equal(state.sheets[0].columns[0].formula, 'halfspread(C, B, D)');
 	assert.equal(state.sheets[0].columns[1].formula, '(max(B) - min(C)) / 2');
 });
+
+test('a selected range copies as tab-separated rows and fills around calculated columns', () => {
+	const sheet = namedSheet([['X', ['1', '2', '3']], ['Y', ['4', '5', '6']], ['Y', [], { formula: 'B * 2' }]]);
+	model.recomputeFormulas(sheet, math);
+	assert.equal(model.getRangeText(sheet, { r0: 1, r1: 0, c0: 2, c1: 0 }), '1\t4\t8\n2\t5\t10');
+	assert.equal(model.fillRange(sheet, { r0: 0, r1: 1, c0: 1, c1: 2 }, '9'), 2);
+	assert.deepEqual(sheet.columns[1].cells.slice(0, 3), ['9', '9', '6']);
+	assert.equal(model.fillRange(sheet, { r0: 2, r1: 2, c0: 0, c1: 1 }, ''), 2);
+	assert.deepEqual([sheet.columns[0].cells[2], sheet.columns[1].cells[2]], ['', '']);
+});

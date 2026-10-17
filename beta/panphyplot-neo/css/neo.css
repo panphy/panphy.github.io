@@ -1306,6 +1306,42 @@ input[type="number"]:focus {
 	cursor: default;
 }
 
+/* A selected range: a tint, and an accent outline round its edge. */
+.neo-table tbody td.is-selected,
+.neo-table tbody tr:nth-child(even) td.is-selected {
+	background: color-mix(in srgb, var(--accent) 13%, var(--surface));
+}
+
+.neo-table td.is-selected {
+	position: relative;
+}
+
+/* The outline is an overlay, so selecting never shifts the columns. */
+.neo-table td.is-selected::after {
+	content: '';
+	position: absolute;
+	inset: -1px 0 0 -1px;
+	border: 0 solid var(--accent);
+	pointer-events: none;
+	z-index: 1;
+}
+
+.neo-table td.sel-top::after { border-top-width: 2px; }
+.neo-table td.sel-bottom::after { border-bottom-width: 2px; }
+.neo-table td.sel-left::after { border-left-width: 2px; }
+.neo-table td.sel-right::after { border-right-width: 2px; }
+
+.neo-table td.is-selected .neo-cell:focus {
+	outline: none;
+}
+
+.neo-is-selecting,
+.neo-is-selecting * {
+	user-select: none !important;
+	-webkit-user-select: none !important;
+	cursor: cell !important;
+}
+
 .neo-add-col {
 	min-width: 54px;
 	vertical-align: middle !important;

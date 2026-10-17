@@ -1583,19 +1583,38 @@ function performLinearFit(x, y) {
 }
 
 
-// The polynomial is fitted in u = (x − mean)/spread, which keeps high powers well conditioned.
-function buildPolynomialEquation(coefficients, meanX, stdX) {
+// The polynomial is fitted in u = (x − mean)/spread, which keeps high powers well conditioned,
+// and reported in x. This matrix turns the u coefficients (highest power first) into x ones:
+// a_k = Σ_{p ≥ k} b_p C(p, k) (−mean)^{p−k} / spread^p.
+function polynomialToXMatrix(degree, meanX, stdX) {
+	const binomial = (n, k) => {
+		let value = 1;
+		for (let i = 1; i <= k; i++) value = (value * (n - k + i)) / i;
+		return value;
+	};
+	return Array.from({ length: degree + 1 }, (_, row) => {
+		const k = degree - row;
+		return Array.from({ length: degree + 1 }, (_, col) => {
+			const p = degree - col;
+			return p < k ? 0 : (binomial(p, k) * (-meanX) ** (p - k)) / stdX ** p;
+		});
+	});
+}
+
+function buildPolynomialEquation(coefficients) {
 	const degree = coefficients.length - 1;
 	let equation = 'y = ';
+	let first = true;
 	coefficients.forEach((c, i) => {
 		const power = degree - i;
 		if (c === 0) return;
 		const absC = formatFitNumber(Math.abs(c));
-		const sign = c >= 0 ? (i === 0 ? '' : ' + ') : (i === 0 ? '-' : ' - ');
-		const term = power === 0 ? `${absC}` : power === 1 ? `${absC}u` : `${absC}u^{${power}}`;
+		const sign = c >= 0 ? (first ? '' : ' + ') : (first ? '-' : ' - ');
+		const term = power === 0 ? `${absC}` : power === 1 ? `${absC}x` : `${absC}x^{${power}}`;
 		equation += `${sign}${term}`;
+		first = false;
 	});
-	return `${equation},\\ u = \\frac{x - ${formatFitNumber(meanX)}}{${formatFitNumber(stdX)}}`;
+	return first ? 'y = 0' : equation;
 }
 
 function performPolynomialFit(x, y, degree) {
@@ -1609,9 +1628,26 @@ function performPolynomialFit(x, y, degree) {
 			model,
 			refine: false
 		});
-		const fitFunction = xi => model(final.params, xi);
+		const uCoefficients = final.params;
+		const fitFunction = xi => model(uCoefficients, xi);
 		const { xFit, yFit } = sampleCurve(data, fitFunction, 100);
-		const equation = buildPolynomialEquation(final.params, fit.meanX, fit.stdX);
+		// Carry the coefficients and their covariance from u to x: a = T b, Cov(a) = T Cov(b) Tᵀ.
+		const transform = polynomialToXMatrix(degree, fit.meanX, fit.stdX);
+		const xCoefficients = transform.map(row => row.reduce((sum, value, col) => sum + value * uCoefficients[col], 0));
+		const residuals = data.map(point => point.y - fitFunction(point.x));
+		const covariance = residuals.every(Number.isFinite)
+			? PanPhyNeoStats.parameterCovariance(numericJacobian(model, uCoefficients, data), residuals, final.weighted ? final.chiSigmas : null)
+			: null;
+		const xUncertainties = covariance && transform.map(row => {
+			let variance = 0;
+			row.forEach((ti, i) => row.forEach((tj, j) => { variance += ti * covariance[i][j] * tj; }));
+			return Math.sqrt(Math.max(variance, 0));
+		});
+		final.params = xCoefficients;
+		final.parameters = xUncertainties && xUncertainties.every(Number.isFinite)
+			? xCoefficients.map((value, i) => ({ name: `a_{${degree - i}}`, value, uncertainty: xUncertainties[i] }))
+			: null;
+		const equation = buildPolynomialEquation(xCoefficients);
 		fittedCurves[activeFitKey] = { x: xFit, y: yFit, equation };
 		updateResults(equation, x, y, fitFunction, activeFitKey, null, { kind: 'basic', method: document.getElementById('fit-method').value }, fitExtras(final));
 		plotGraph(xFit, yFit);
