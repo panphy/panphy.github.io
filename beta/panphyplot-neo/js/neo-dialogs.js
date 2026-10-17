@@ -47,6 +47,7 @@ function openFormulaDialog(column = null) {
 	document.getElementById('formula-name').value = column ? column.name : '';
 	document.getElementById('formula-unit').value = column ? column.unit : '';
 	document.getElementById('formula-references').textContent = describeFormulaReferences(sheet);
+	document.getElementById('formula-propagate').checked = !!(column && getPropagatedColumn(column));
 	previewFormula();
 	openDialog('formula-dialog');
 	document.getElementById('formula-input').focus();
@@ -62,19 +63,58 @@ function previewFormula() {
 	}
 	// A copy, so the trial run never touches the real columns.
 	const draft = { ...sheet, columns: sheet.columns.map(column => ({ ...column, cells: column.cells.slice() })) };
-	const probe = NeoModel.createColumn('__probe__', { formula: text }, sheet.rowCount);
+	const role = formulaTarget ? formulaTarget.role : 'Y';
+	const probe = NeoModel.createColumn('__probe__', { formula: text, role }, sheet.rowCount);
 	const index = formulaTarget ? sheet.columns.indexOf(formulaTarget) : draft.columns.length;
 	draft.columns.splice(index, formulaTarget ? 1 : 0, probe);
+	const propagate = document.getElementById('formula-propagate').checked;
+	let delta = null;
+	if (propagate) {
+		const existing = formulaTarget ? draft.columns.findIndex(column => column.propagateFrom === formulaTarget.id) : -1;
+		delta = NeoModel.createColumn('__probe_delta__', { role: role === 'X' ? 'xErr' : 'yErr', propagateFrom: '__probe__' }, sheet.rowCount);
+		draft.columns.splice(existing >= 0 ? existing : index + 1, existing >= 0 ? 1 : 0, delta);
+	}
 	NeoModel.recomputeFormulas(draft, math);
+	renderPropagationWorking(propagate && !probe.formulaError ? NeoModel.describePropagation(draft, probe, math) : null);
 	if (probe.formulaError) {
 		setDialogMessage('formula-message', probe.formulaError);
 		return null;
 	}
 	const row = probe.cells.findIndex(value => value !== '');
+	const deltaText = delta && row >= 0 && delta.cells[row] ? ` ± ${delta.cells[row]}` : '';
 	setDialogMessage('formula-message', row < 0
 		? 'The formula is valid. Rows fill in once their inputs have numbers.'
-		: `Row ${row + 1} gives ${probe.cells[row]}.`, 'success');
+		: `Row ${row + 1} gives ${probe.cells[row]}${deltaText}.`, 'success');
 	return NeoModel.cleanFormulaText(text);
+}
+
+// The working: Δf = √Σ(∂f/∂x · Δx)², each partial derivative written out.
+function renderPropagationWorking(working) {
+	const box = document.getElementById('formula-working');
+	if (!working) {
+		box.hidden = true;
+		box.replaceChildren();
+		return;
+	}
+	const lines = [];
+	if (!working.terms.length) {
+		lines.push('None of the columns in this formula has a ±Δ column yet, so the uncertainty is blank. Give them ±ΔX or ±ΔY columns first.');
+	} else {
+		const sum = working.terms.map(term => `\\left(\\frac{\\partial f}{\\partial ${term.symbol}}\\,\\Delta ${term.symbol}\\right)^2`).join(' + ');
+		lines.push(`\\( \\Delta f = \\sqrt{${sum}} \\)`);
+		working.terms.forEach((term) => {
+			if (term.derivative) lines.push(`\\( \\dfrac{\\partial f}{\\partial ${term.symbol}} = ${term.derivative} \\)`);
+		});
+		if (working.missing.length) lines.push(`${working.missing.join(', ')} ${working.missing.length === 1 ? 'has' : 'have'} no ±Δ column, so ${working.missing.length === 1 ? 'it adds' : 'they add'} nothing.`);
+		if (working.terms.some(term => term.percentage)) lines.push('Percentage uncertainties are turned into absolute ones (Δx = % × |x| ÷ 100) before they are combined.');
+	}
+	box.replaceChildren(...lines.map((text) => {
+		const line = document.createElement('p');
+		line.textContent = text;
+		return line;
+	}));
+	box.hidden = false;
+	safeTypeset(box);
 }
 
 function applyFormula() {
@@ -95,6 +135,20 @@ function applyFormula() {
 	column.formula = formula;
 	column.name = (name || formula).slice(0, NeoModel.NAME_MAX_LENGTH);
 	column.unit = unit;
+	const delta = getPropagatedColumn(column, sheet);
+	const propagate = document.getElementById('formula-propagate').checked;
+	if (propagate && !delta) {
+		changeColumns(sheet, () => NeoModel.insertColumn(sheet, sheet.columns.indexOf(column) + 1, createNewColumn({
+			name: `Δ${column.name}`.slice(0, NeoModel.NAME_MAX_LENGTH),
+			unit,
+			role: column.role === 'X' ? 'xErr' : 'yErr',
+			propagateFrom: column.id
+		})));
+	} else if (!propagate && delta) {
+		changeColumns(sheet, () => NeoModel.removeColumn(sheet, delta.id));
+	} else if (delta) {
+		delta.unit = unit;
+	}
 	closeDialog('formula-dialog');
 	renderTable();
 	afterDataChange({ structure: true });
@@ -327,6 +381,7 @@ function initializeDialogs() {
 	});
 	document.getElementById('add-formula-button').addEventListener('click', () => openFormulaDialog(null));
 	document.getElementById('formula-input').addEventListener('input', debounce(previewFormula, 150));
+	document.getElementById('formula-propagate').addEventListener('change', previewFormula);
 	document.getElementById('formula-apply').addEventListener('click', applyFormula);
 	document.getElementById('formula-help').addEventListener('click', () => window.open(CUSTOM_FIT_HELP_URL, '_blank', 'noopener,noreferrer'));
 	['formula-input', 'formula-name', 'formula-unit'].forEach((id) => {

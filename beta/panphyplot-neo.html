@@ -113,6 +113,7 @@
 							<label for="fit-series-select">Fit series</label>
 							<select id="fit-series-select"></select>
 						</div>
+						<label class="neo-check neo-weight"><input type="checkbox" id="fit-weighted"> Weight the fit by ±ΔY (Linear and Custom fits)</label>
 						<div class="tabs">
 							<button class="tablink active" onclick="openTab(event, 'BasicFit')" title="Show basic best-fit options">Basic</button>
 							<button class="tablink" onclick="openTab(event, 'AdvancedFit')" title="Show advanced best-fit options">Advanced</button>
@@ -241,7 +242,8 @@
 					<h3>Fitting Result <span id="fit-series-label" class="neo-fit-series-label"></span></h3>
 					<p id="fit-equation" style="display: none;"></p>
 					<p id="r-squared-container" style="display: none;"></p>
-					<p class="fit-weighting-note">Fits use unweighted least squares. Uncertainty bars are shown for reference and do not affect the fit.</p>
+					<div id="fit-parameters" class="neo-fit-parameters" hidden></div>
+					<p class="fit-weighting-note" id="fit-weighting-note">Fits use unweighted least squares unless Weight the fit by ±ΔY is on.</p>
 					<p id="fit-status" role="status">No fit calculated yet.</p>
 				</div>
 
@@ -276,6 +278,8 @@
 					<input type="text" id="formula-unit" maxlength="40" autocomplete="off" placeholder="e.g. s^2">
 				</div>
 			</div>
+			<label class="neo-check"><input type="checkbox" id="formula-propagate"> Add a ±Δ column: the uncertainty carried through this formula</label>
+			<div id="formula-working" class="neo-formula-working" hidden></div>
 			<p id="formula-message" class="neo-dialog-message" role="status"></p>
 			<div class="neo-dialog-actions">
 				<button type="button" class="neo-dialog-cancel" data-close>Cancel</button>
@@ -352,6 +356,7 @@
 	<!--
 		PanPhyPlot (neo-beta) files:
 		- /beta/panphyplot-neo/js/neo-model.js (column model, pure)
+		- /beta/panphyplot-neo/js/neo-stats.js (weighted lines, parameter uncertainties, chi-squared)
 		- /beta/panphyplot-neo/js/neo-state.js (state, saving, fit keys)
 		- /beta/panphyplot-neo/js/neo-plot.js (Plotly rendering)
 		- /beta/panphyplot-neo/js/neo-fitting.js (copy of the PanPhyPlot fitting code)
@@ -361,6 +366,7 @@
 		The fit engine (fit-core.js, fit-worker.js) and math.js load from /tools/panphyplot/js/.
 	-->
 	<script src="/beta/panphyplot-neo/js/neo-model.js"></script>
+	<script src="/beta/panphyplot-neo/js/neo-stats.js"></script>
 	<script src="/beta/panphyplot-neo/js/neo-state.js"></script>
 	<script src="/beta/panphyplot-neo/js/neo-plot.js"></script>
 	<script src="/tools/panphyplot/js/fit-core.js"></script>

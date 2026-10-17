@@ -40,6 +40,7 @@
 			role: ROLES.includes(options.role) ? options.role : 'Y',
 			errorType: ERROR_TYPES.includes(options.errorType) ? options.errorType : 'absolute',
 			formula: typeof options.formula === 'string' ? options.formula : '',
+			propagateFrom: typeof options.propagateFrom === 'string' ? options.propagateFrom : '',
 			cells
 		};
 	}
@@ -285,7 +286,8 @@
 			sheets: [],
 			fits: saved.fits && typeof saved.fits === 'object' ? saved.fits : {},
 			curves: saved.curves && typeof saved.curves === 'object' ? saved.curves : {},
-			customFits: saved.customFits && typeof saved.customFits === 'object' ? saved.customFits : {}
+			customFits: saved.customFits && typeof saved.customFits === 'object' ? saved.customFits : {},
+			weightFits: saved.weightFits === true
 		};
 		const ids = createIdSource(state);
 		const seen = new Set();
@@ -405,63 +407,138 @@
 		return String(Number(value.toPrecision(10)));
 	}
 
-	function evaluateFormulaRow(sheet, analysis, row) {
+	function readFormulaScope(sheet, analysis, row) {
 		const scope = {};
 		for (const [symbol, id] of analysis.refs) {
 			const column = sheet.columns.find(entry => entry.id === id);
 			const value = parseNumber(column ? column.cells[row] : '');
-			if (!Number.isFinite(value)) return '';
+			if (!Number.isFinite(value)) return null;
 			scope[symbol] = value;
 		}
+		return scope;
+	}
+
+	function evaluateScope(analysis, scope) {
 		try {
 			const result = analysis.compiled.evaluate(scope);
-			return typeof result === 'number' && Number.isFinite(result) ? formatComputed(result) : '';
+			return typeof result === 'number' && Number.isFinite(result) ? result : NaN;
 		} catch (error) {
-			return '';
+			return NaN;
 		}
 	}
 
-	// Recalculates every formula column in dependency order. A row with a blank or invalid input stays blank.
+	function evaluateFormulaRow(sheet, analysis, row) {
+		const scope = readFormulaScope(sheet, analysis, row);
+		const result = scope ? evaluateScope(analysis, scope) : NaN;
+		return Number.isFinite(result) ? formatComputed(result) : '';
+	}
+
+	function isPropagatedColumn(column) {
+		return typeof column.propagateFrom === 'string' && column.propagateFrom !== '';
+	}
+
+	function isComputedColumn(column) {
+		return isFormulaColumn(column) || isPropagatedColumn(column);
+	}
+
+	// Each column's own uncertainty column, by the same pairing rule as the graph.
+	function getUncertaintyColumns(sheet) {
+		const map = new Map();
+		getSeries(sheet).forEach((series) => {
+			if (series.yErrCol) map.set(series.yCol.id, series.yErrCol);
+			if (series.xCol && series.xErrCol) map.set(series.xCol.id, series.xErrCol);
+		});
+		let currentX = null;
+		sheet.columns.forEach((column) => {
+			if (column.role === 'X') currentX = column;
+			else if (column.role === 'xErr' && currentX && !map.has(currentX.id)) map.set(currentX.id, column);
+		});
+		return map;
+	}
+
+	// First-order propagation: Δf = √Σ(∂f/∂xᵢ · Δxᵢ)², with each derivative taken numerically for this row.
+	function propagateRow(sheet, analysis, uncertainties, row) {
+		const scope = readFormulaScope(sheet, analysis, row);
+		if (!scope || !Number.isFinite(evaluateScope(analysis, scope))) return '';
+		let sum = 0;
+		let used = false;
+		for (const [symbol, id] of analysis.refs) {
+			const errorColumn = uncertainties.get(id);
+			if (!errorColumn) continue;
+			const value = scope[symbol];
+			const error = toAbsoluteError(errorColumn.cells[row], value, errorColumn.errorType);
+			if (!(error > 0)) continue;
+			const step = Math.abs(value) * 1e-6 || 1e-6;
+			const plus = evaluateScope(analysis, { ...scope, [symbol]: value + step });
+			const minus = evaluateScope(analysis, { ...scope, [symbol]: value - step });
+			if (!Number.isFinite(plus) || !Number.isFinite(minus)) return '';
+			sum += (((plus - minus) / (2 * step)) * error) ** 2;
+			used = true;
+		}
+		// Six significant figures: more would only show the numerical derivative's rounding noise.
+		return used ? String(Number(Math.sqrt(sum).toPrecision(6))) : '';
+	}
+
+	// Recalculates every formula and propagated-uncertainty column in dependency order.
+	// A row with a blank or invalid input stays blank.
 	function recomputeFormulas(sheet, math) {
-		const formulaColumns = sheet.columns.filter(isFormulaColumn);
-		if (!formulaColumns.length || !math) return false;
-		const analyses = new Map();
-		formulaColumns.forEach(column => analyses.set(column.id, analyzeFormula(sheet, column.formula, math)));
+		const computed = sheet.columns.filter(isComputedColumn);
+		if (!computed.length || !math) return false;
+		const uncertainties = getUncertaintyColumns(sheet);
+		const nodes = new Map();
+		computed.forEach((column) => {
+			if (isFormulaColumn(column)) {
+				const analysis = analyzeFormula(sheet, column.formula, math);
+				nodes.set(column.id, { analysis, error: analysis.ok ? '' : analysis.error, deps: analysis.ok ? [...analysis.refs.values()] : [] });
+				return;
+			}
+			const source = sheet.columns.find(entry => entry.id === column.propagateFrom);
+			if (!source || !isFormulaColumn(source)) {
+				nodes.set(column.id, { error: 'The formula column this uncertainty comes from has been deleted or no longer has a formula.', deps: [] });
+				return;
+			}
+			const analysis = analyzeFormula(sheet, source.formula, math);
+			const refs = analysis.ok ? [...analysis.refs.values()] : [];
+			nodes.set(column.id, {
+				analysis,
+				propagated: true,
+				error: '',
+				deps: [source.id, ...refs, ...refs.map(id => uncertainties.get(id)).filter(Boolean).map(entry => entry.id)]
+			});
+		});
 		const order = [];
 		const state = new Map();
 		const visit = (id, trail) => {
-			if (state.get(id) === 'done') return true;
+			if (state.get(id) === 'done') return;
+			const node = nodes.get(id);
 			if (state.get(id) === 'visiting') {
-				trail.forEach(entry => { if (analyses.get(entry)?.ok) analyses.set(entry, { ok: false, error: 'This formula depends on itself through other columns.' }); });
-				return false;
+				trail.slice(trail.indexOf(id)).forEach((entry) => {
+					const member = nodes.get(entry);
+					if (member && !member.error) member.error = trail.length === 2 && trail[0] === id
+						? 'A formula cannot use its own column.'
+						: 'This formula depends on itself through other columns.';
+				});
+				return;
 			}
-			const analysis = analyses.get(id);
-			if (!analysis) return true;
 			state.set(id, 'visiting');
-			if (analysis.ok) {
-				for (const refId of analysis.refs.values()) {
-					if (refId === id) {
-						analyses.set(id, { ok: false, error: 'A formula cannot use its own column.' });
-						break;
-					}
-					if (analyses.has(refId)) visit(refId, [...trail, id]);
-				}
-			}
+			node.deps.forEach((dep) => { if (nodes.has(dep)) visit(dep, [...trail, dep]); });
 			state.set(id, 'done');
 			order.push(id);
-			return true;
 		};
-		formulaColumns.forEach(column => visit(column.id, [column.id]));
+		computed.forEach(column => visit(column.id, [column.id]));
 		let changed = false;
 		order.forEach((id) => {
 			const column = sheet.columns.find(entry => entry.id === id);
-			const analysis = analyses.get(id);
-			const failedInput = analysis.ok && [...analysis.refs.values()].some(refId => analyses.has(refId) && !analyses.get(refId).ok);
-			const error = !analysis.ok ? analysis.error : (failedInput ? 'A column this formula uses has a problem.' : '');
+			const node = nodes.get(id);
+			let error = node.error;
+			if (!error && node.deps.some(dep => nodes.has(dep) && nodes.get(dep).error)) {
+				error = node.propagated ? 'The formula this uncertainty comes from has a problem.' : 'A column this formula uses has a problem.';
+			}
 			if (column.formulaError !== error) changed = true;
 			column.formulaError = error;
 			for (let row = 0; row < sheet.rowCount; row++) {
-				const value = error ? '' : evaluateFormulaRow(sheet, analysis, row);
+				let value = '';
+				if (!error) value = node.propagated ? propagateRow(sheet, node.analysis, uncertainties, row) : evaluateFormulaRow(sheet, node.analysis, row);
 				if (column.cells[row] !== value) {
 					column.cells[row] = value;
 					changed = true;
@@ -469,6 +546,26 @@
 			}
 		});
 		return changed;
+	}
+
+	// The symbolic working for the formula dialog: each ∂f/∂x that has an uncertainty, as TeX.
+	function describePropagation(sheet, column, math) {
+		const analysis = analyzeFormula(sheet, column.formula, math);
+		if (!analysis.ok) return null;
+		const uncertainties = getUncertaintyColumns(sheet);
+		const terms = [];
+		for (const [symbol, id] of analysis.refs) {
+			const errorColumn = uncertainties.get(id);
+			if (!errorColumn) continue;
+			let derivative = null;
+			try {
+				derivative = math.derivative(analysis.node, symbol).toTex();
+			} catch (error) {
+				derivative = null;
+			}
+			terms.push({ symbol, derivative, percentage: errorColumn.errorType === 'percentage' });
+		}
+		return { terms, missing: [...analysis.refs.keys()].filter(symbol => !uncertainties.has(analysis.refs.get(symbol))) };
 	}
 
 	// Column letters in formulas follow their columns when columns move, appear or are deleted.
@@ -660,6 +757,10 @@
 		normalizeState,
 		FORMULA_FUNCTIONS,
 		isFormulaColumn,
+		isPropagatedColumn,
+		isComputedColumn,
+		getUncertaintyColumns,
+		describePropagation,
 		cleanFormulaText,
 		getFormulaSymbols,
 		analyzeFormula,

@@ -62,8 +62,25 @@ function getFiniteDatasetPoints(key = activeFitKey) {
 	return getDatasetPoints(key);
 }
 
+// Every point's ±ΔY, or null if the series has no ΔY column or any point lacks a positive one.
+function getFitSigmas(key = activeFitKey) {
+	const target = resolveFitKey(key);
+	if (!target || !target.series.yErrCol) return null;
+	const sigmas = getDatasetPoints(key).map(point => point.yError);
+	return sigmas.length && sigmas.every(sigma => sigma > 0) ? sigmas : null;
+}
+
+function getWeightingRequested() {
+	return neoState.weightFits === true;
+}
+
+function getWeightingSigmas(key = activeFitKey) {
+	return getWeightingRequested() ? getFitSigmas(key) : null;
+}
+
 function getDatasetFitSignature(key) {
-	return JSON.stringify(getDatasetPoints(key).map(({ x, y }) => [x, y]));
+	// ΔY is included: a weighted fit and χ²/ν both depend on it.
+	return JSON.stringify(getDatasetPoints(key).map(({ x, y, yError }) => [x, y, yError]));
 }
 
 function invalidatePendingFit(key = activeFitKey) {

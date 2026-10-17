@@ -69,13 +69,13 @@ function afterDataChange(options = {}) {
 function recalculateFormulas(sheet = getActiveSheet()) {
 	if (typeof math === 'undefined') return;
 	if (!NeoModel.recomputeFormulas(sheet, math) || sheet !== getActiveSheet()) return;
-	sheet.columns.filter(NeoModel.isFormulaColumn).forEach((column) => {
+	sheet.columns.filter(NeoModel.isComputedColumn).forEach((column) => {
 		document.querySelectorAll(`#neo-table-body .neo-cell[data-column-id="${column.id}"]`).forEach((input) => {
 			const value = column.cells[Number(input.dataset.row)] || '';
 			if (input.value !== value) input.value = value;
 		});
 		const head = document.querySelector(`.neo-col-head[data-column-id="${column.id}"]`);
-		if (head) renderFormulaLine(head, column);
+		if (head) renderFormulaLine(head, column, sheet);
 	});
 }
 
@@ -87,9 +87,9 @@ function changeColumns(sheet, edit) {
 	return result;
 }
 
-function renderFormulaLine(th, column) {
+function renderFormulaLine(th, column, sheet = getActiveSheet()) {
 	let line = th.querySelector('.neo-col-formula');
-	if (!NeoModel.isFormulaColumn(column)) {
+	if (!NeoModel.isComputedColumn(column)) {
 		if (line) line.remove();
 		th.classList.remove('is-formula');
 		return;
@@ -99,13 +99,31 @@ function renderFormulaLine(th, column) {
 		line = document.createElement('button');
 		line.type = 'button';
 		line.className = 'neo-col-formula';
-		line.addEventListener('click', () => openFormulaDialog(column));
+		line.addEventListener('click', () => {
+			const source = getFormulaSource(column);
+			if (source) openFormulaDialog(source);
+			else showToast(column.formulaError || 'The formula this uncertainty came from has been deleted.');
+		});
 		th.querySelector('.neo-col-top').after(line);
 	}
+	const source = getFormulaSource(column);
+	const label = NeoModel.isPropagatedColumn(column)
+		? `Δ from ${source ? NeoModel.getColumnLabel(sheet, source) : '?'}`
+		: `ƒ ${column.formula}`;
 	line.classList.toggle('has-error', !!column.formulaError);
-	line.textContent = column.formulaError ? `ƒ ${column.formula} ⚠` : `ƒ ${column.formula}`;
+	line.textContent = column.formulaError ? `${label} ⚠` : label;
 	line.title = column.formulaError || 'Edit this formula';
-	line.setAttribute('aria-label', column.formulaError ? `Formula ${column.formula}: ${column.formulaError}` : `Edit formula ${column.formula}`);
+	line.setAttribute('aria-label', column.formulaError ? `${label}: ${column.formulaError}` : `Edit formula: ${label}`);
+}
+
+// A propagated ±Δ column is edited through the formula it comes from.
+function getFormulaSource(column, sheet = getActiveSheet()) {
+	if (!NeoModel.isPropagatedColumn(column)) return column;
+	return sheet.columns.find(entry => entry.id === column.propagateFrom) || null;
+}
+
+function getPropagatedColumn(column, sheet = getActiveSheet()) {
+	return sheet.columns.find(entry => entry.propagateFrom === column.id) || null;
 }
 
 /* ---------- Table ---------- */
@@ -180,7 +198,7 @@ function buildHeaderCell(sheet, column, index) {
 	preview.className = 'neo-col-preview';
 
 	th.append(top, name, unit, preview);
-	renderFormulaLine(th, column);
+	renderFormulaLine(th, column, sheet);
 	renderHeaderPreview(th, sheet, column);
 	return th;
 }
@@ -204,7 +222,7 @@ function buildDataCell(sheet, column, row) {
 	input.inputMode = 'decimal';
 	input.autocomplete = 'off';
 	input.className = 'neo-cell';
-	if (NeoModel.isFormulaColumn(column)) {
+	if (NeoModel.isComputedColumn(column)) {
 		input.readOnly = true;
 		input.classList.add('is-formula');
 	}
@@ -443,10 +461,12 @@ function openColumnMenu(opener, sheet, column) {
 		{ label: 'Move left', disabled: index === 0, action: () => moveColumn(sheet, column, -1) },
 		{ label: 'Move right', disabled: index === sheet.columns.length - 1, action: () => moveColumn(sheet, column, 1) },
 		{ label: 'Insert column to the right', action: () => insertColumnAfter(sheet, column) },
-		{ label: NeoModel.isFormulaColumn(column) ? 'Edit formula…' : 'Set formula…', action: () => openFormulaDialog(column) },
-		...(NeoModel.isFormulaColumn(column) ? [{ label: 'Remove formula, keep values', action: () => removeFormula(column) }] : []),
-		{ label: 'Fill with one value…', disabled: NeoModel.isFormulaColumn(column), action: () => fillColumn(sheet, column) },
-		{ label: 'Clear column', disabled: NeoModel.isFormulaColumn(column), action: () => clearColumn(sheet, column) },
+		...(NeoModel.isPropagatedColumn(column)
+			? [{ label: 'Edit its formula…', disabled: !getFormulaSource(column, sheet), action: () => openFormulaDialog(getFormulaSource(column, sheet)) }]
+			: [{ label: NeoModel.isFormulaColumn(column) ? 'Edit formula…' : 'Set formula…', action: () => openFormulaDialog(column) }]),
+		...(NeoModel.isComputedColumn(column) ? [{ label: 'Keep values, stop calculating', action: () => removeFormula(column) }] : []),
+		{ label: 'Fill with one value…', disabled: NeoModel.isComputedColumn(column), action: () => fillColumn(sheet, column) },
+		{ label: 'Clear column', disabled: NeoModel.isComputedColumn(column), action: () => clearColumn(sheet, column) },
 		{ label: `Delete column ${label}`, danger: true, disabled: sheet.columns.length === 1, action: () => deleteColumn(sheet, column) }
 	]);
 }
@@ -498,6 +518,7 @@ function clearColumn(sheet, column) {
 
 function removeFormula(column) {
 	column.formula = '';
+	column.propagateFrom = '';
 	column.formulaError = '';
 	renderTable();
 	afterDataChange();
@@ -663,6 +684,7 @@ function renderFitSeriesSelect() {
 	const label = document.getElementById('fit-series-label');
 	const target = resolveFitKey(activeFitKey);
 	if (label) label.textContent = target ? `· ${describeSeries(target.sheet, target.series)}` : '';
+	syncWeightingControl();
 }
 
 function handleFitSeriesChange(event) {
@@ -684,7 +706,45 @@ function clearFittingResultDisplay() {
 		element.style.display = 'none';
 		element.replaceChildren();
 	});
+	renderFitParameters();
 	renderFitDiagnostics();
+}
+
+// Fitted parameters as "value ± uncertainty", and χ²/ν when every point has a ±ΔY.
+function renderFitParameters() {
+	const box = document.getElementById('fit-parameters');
+	const note = document.getElementById('fit-weighting-note');
+	const result = datasetFitResults[activeFitKey];
+	const lines = [];
+	if (result && Array.isArray(result.parameters)) {
+		result.parameters.forEach(({ name, value, uncertainty }) => {
+			lines.push(`\\( ${name} = ${PanPhyNeoStats.formatMeasurement(value, uncertainty)} \\)`);
+		});
+	}
+	const chi = result ? PanPhyNeoStats.formatChiSquared(result.chi2, result.dof) : null;
+	if (chi) lines.push(`\\( \\chi^2/\\nu = ${chi} \\quad (\\nu = ${result.dof}) \\)`);
+	box.replaceChildren(...lines.map((text) => {
+		const line = document.createElement('p');
+		line.textContent = text;
+		return line;
+	}));
+	box.hidden = !lines.length;
+	if (lines.length) safeTypeset(box);
+	if (note) {
+		note.textContent = !result ? 'Fits use unweighted least squares unless Weight the fit by ±ΔY is on.'
+			: result.weighted ? 'Weighted least squares: each point counts with weight 1/ΔY². The ± values assume the ΔY are standard uncertainties.'
+				: Array.isArray(result.parameters)
+					? 'Unweighted least squares. The ± values come from the scatter of the points about the fit.'
+					: 'Unweighted least squares. ± values are given for Linear and Custom fits.';
+	}
+}
+
+function syncWeightingControl() {
+	const box = document.getElementById('fit-weighted');
+	if (!box) return;
+	box.checked = getWeightingRequested();
+	const sigmas = getFitSigmas(activeFitKey);
+	box.closest('label').title = sigmas ? '' : 'The chosen series needs a ±ΔY column with a value above zero in every plotted row.';
 }
 
 function renderFittingResult(equation, rSquaredDisplay) {
@@ -705,6 +765,7 @@ function renderFittingResult(equation, rSquaredDisplay) {
 	equationElement.style.display = 'block';
 	rSquaredElement.textContent = `\\( R^2 = ${rSquaredDisplay} \\)`;
 	rSquaredElement.style.display = 'block';
+	renderFitParameters();
 	renderFitDiagnostics();
 	safeTypeset(equationElement);
 	safeTypeset(rSquaredElement);
@@ -813,6 +874,10 @@ function initializeInterface() {
 	document.getElementById('add-column-button').addEventListener('click', addColumn);
 	document.getElementById('clear-sheet-button').addEventListener('click', clearSheet);
 	document.getElementById('fit-series-select').addEventListener('change', handleFitSeriesChange);
+	document.getElementById('fit-weighted').addEventListener('change', (event) => {
+		neoState.weightFits = event.target.checked;
+		scheduleSaveState();
+	});
 	document.getElementById('graph-title').addEventListener('input', handleTitleInput);
 	document.getElementById('fit-equation').addEventListener('click', copyFitEquation);
 	document.getElementById('plot-all-button').addEventListener('click', openPlotAll);
