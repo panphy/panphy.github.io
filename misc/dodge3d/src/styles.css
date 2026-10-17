@@ -439,6 +439,13 @@ a {
   opacity: 0.5;
 }
 
+.message-copyright {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.68rem;
+  opacity: 0.7;
+}
+
 .message-panel button {
   justify-self: start;
   min-width: 118px;
