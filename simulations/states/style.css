@@ -866,6 +866,13 @@ a:hover {
   line-height: 1.5;
 }
 
+.copyright-note {
+  margin: auto 0 0;
+  font-size: 0.72rem;
+  color: var(--text-secondary);
+  text-align: center;
+}
+
 kbd {
   display: inline-block;
   padding: 1px 5px;
