@@ -21,6 +21,8 @@ document.addEventListener('DOMContentLoaded', () => {
 		renderTable();
 		syncTitleInput();
 		plotGraph();
+		renderFitSeriesSelect();
+		refreshWorkspaceChrome();
 		scheduleSaveState();
 	});
 
