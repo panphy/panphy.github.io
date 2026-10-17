@@ -225,6 +225,26 @@ test('CSV download contains exponent-aware values and unchanged scientific uncer
 	await h.context.exportCSV('check');
 	assert.equal(csv,'Time,Distance,delta Time\n0.00123,2,1e-5\n');
 });
+test('CSV import takes uncertainties only from named columns and reports the rest', () => {
+	const h=harness();const detect=(headers)=>{const r=h.context.detectCsvErrorColumns(headers,headers[0],headers[1]);return [r.xErrorIndex,r.yErrorIndex,r.xErrorType,r.yErrorType,r.ignoredIndices.join()];};
+	// Repeat readings are never uncertainties.
+	assert.deepEqual(detect(['L','T1','T2','T3']),[null,null,'absolute','absolute','2,3']);
+	assert.deepEqual(detect(['L squared','T','T mean']),[null,null,'absolute','absolute','2']);
+	// PanPhyPlot's own export headers, including labels where one contains the other.
+	assert.deepEqual(detect(['Time','Distance','delta Time','delta Distance (%)']),[2,3,'absolute','percentage','']);
+	assert.deepEqual(detect(['t','t^2','delta t^2']),[null,2,'absolute','absolute','']);
+	assert.deepEqual(detect(['Length (m)','Period (s)','delta Length (m) (%)']),[2,null,'percentage','absolute','']);
+	// Hand-written uncertainty headers still match.
+	assert.deepEqual(detect(['V','I','ΔI','uncertainty in V']),[3,2,'absolute','absolute','']);
+	assert.deepEqual(detect(['x','y','dy','notes']),[null,2,'absolute','absolute','3']);
+	for (const name of ['renderLatex','toggleErrorColumn','updateData','setInitialParameters','updateGraphTitle']) h.context[name]=()=>{};
+	const csv=h.context.alerts;h.context.alerts.length=0;
+	h.context.parseCSV('L,T1,T2,T3\n0.1,0.63,0.64,0.62\n');
+	assert.equal(h.elements['toggle-x-error'].checked,false);assert.equal(h.elements['toggle-y-error'].checked,false);
+	assert.equal(csv.length,1);assert.match(csv[0],/"T2", "T3"/);
+	h.context.alerts.length=0;h.context.parseCSV('Time,Distance,delta Time\n1,2,0.1\n');
+	assert.equal(h.elements['toggle-x-error'].checked,true);assert.equal(h.context.alerts.length,0);
+});
 test('formatted table keeps a processed-column pipe inside one header', () => {
 	const h=harness();h.context.formatLabelForLatex=value=>value;h.setRows([['1','6']]);
 	h.elements['x-column-name'].value='x | 1/x';h.elements['y-column-name'].value='y';
