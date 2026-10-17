@@ -26,12 +26,12 @@
 	</script>
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-AMS-MML_SVG.js" defer></script>
 
-	<!-- The shared PanPhyPlot look; neo.css adds the column table and overrides. -->
-	<link rel="stylesheet" href="/tools/panphyplot/css/panphyplot.css">
-	<link rel="stylesheet" href="/tools/panphyplot/css/tour.css">
-	<link rel="stylesheet" href="/beta/panphyplot-neo/css/neo.css">
+	<link rel="stylesheet" href="/assets/fonts/fonts.css">
 	<link rel="stylesheet" href="/assets/theme-toggle.css">
 	<link rel="stylesheet" href="/assets/fullscreen-button.css">
+	<!-- The tour card and spotlight are shared with PanPhyPlot; neo.css styles everything else. -->
+	<link rel="stylesheet" href="/tools/panphyplot/css/tour.css">
+	<link rel="stylesheet" href="/beta/panphyplot-neo/css/neo.css">
 	<script src="/assets/theme-toggle.js"></script>
 	<script src="/assets/fullscreen-button.js"></script>
 </head>
@@ -46,220 +46,241 @@
 	</div>
 
 	<div class="neo-app">
-		<div class="banner">
-			<div class="banner-logo">
-				<a href="https://panphy.app/">
-					<img src="/assets/panphy.png" alt="PanPhy logo" />
-				</a>
-			</div>
-			<div class="banner-title">PanPhyPlot <span class="neo-badge">neo-beta</span></div>
-			<div class="banner-buttons">
-				<a href="/beta/panphyplot-neo/manual.html" class="banner-button" title="Open the PanPhyPlot (neo-beta) manual">Manual</a>
-				<a href="/beta/panphyplot-neo.html?tour=columns" class="banner-button tour-launch" title="Take a guided tour using practice data">Tour</a>
+		<header class="banner neo-appbar">
+			<a class="neo-brand" href="https://panphy.app/" title="PanPhy Labs">
+				<img src="/assets/panphy.png" alt="PanPhy logo" />
+				<span class="neo-wordmark">PanPhyPlot</span>
+				<span class="neo-badge">neo-beta</span>
+			</a>
+			<div class="dataset-tabs-bar neo-sheets" id="sheet-tabs" role="tablist" aria-label="Sheets"></div>
+			<div class="neo-appbar-actions">
+				<a href="/beta/panphyplot-neo.html?tour=columns" class="neo-tool neo-tool-quiet tour-launch" title="Take a guided tour using practice data"><svg class="neo-icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8.5"/><path d="m15.5 8.5-2 5-5 2 2-5z"/></svg><span>Tour</span></a>
+				<a href="/beta/panphyplot-neo/manual.html" class="neo-tool neo-tool-quiet" title="Open the PanPhyPlot (neo-beta) manual"><svg class="neo-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5.5c2.7-1.3 5.4-1.3 8 0v14c-2.6-1.3-5.3-1.3-8 0zM20 5.5c-2.7-1.3-5.4-1.3-8 0v14c2.6-1.3 5.3-1.3 8 0z"/></svg><span>Manual</span></a>
 				<div class="theme-toggle">
 					<button id="theme-button" data-panphy-theme-toggle aria-label="Toggle Light/Dark Theme"
 						title="Toggle between light and dark themes">☀️</button>
 				</div>
 				<button data-panphy-fullscreen aria-label="Enter fullscreen" title="Enter fullscreen"></button>
 			</div>
-		</div>
+		</header>
 
-		<div class="reminder">
-			<span>A Y column plots against the nearest X column to its left. Names and units accept LaTeX in LaTeX mode.</span>
-			<div class="latex-toggle-container">
-				<label class="switch">
-					<input type="checkbox" id="latex-mode-toggle">
-					<span class="slider"></span>
-				</label>
-				<span class="toggle-label">LaTeX mode</span>
+		<div class="neo-toolbar" role="toolbar" aria-label="Sheet tools">
+			<div class="neo-tool-group" role="group" aria-label="Data">
+				<span class="neo-tool-group-label" aria-hidden="true">Data</span>
+				<button type="button" class="neo-tool" id="add-row-button" title="Add a row to this sheet"><svg class="neo-icon" viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="4" width="17" height="6" rx="1.5"/><path d="M3.5 14.5h9M3.5 19h9M17.5 13.5v6M14.5 16.5h6"/></svg><span>Row</span></button>
+				<button type="button" class="neo-tool" id="add-column-button" title="Add a Y column at the right"><svg class="neo-icon" viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="3.5" width="6" height="17" rx="1.5"/><path d="M14.5 3.5v9M19 3.5v9M16.75 15v6M13.75 18h6"/></svg><span>Column</span></button>
+				<button type="button" class="neo-tool" id="add-formula-button" title="Add a column calculated from other columns, such as T^2"><svg class="neo-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M14.5 4.5c-2.3-.6-3.6.4-4 2.7L8.8 17c-.4 2.3-1.7 3.2-4 2.6M6.5 10.5h6.5M14 13l5 6M19 13l-5 6"/></svg><span>Formula</span></button>
+				<button type="button" class="neo-tool" id="mean-button" title="Add the mean of repeat readings, with an optional uncertainty"><svg class="neo-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 6.5h14M7 20l3.2-10.5M16.8 20l-3-10.5M8.6 15.3h6.6"/></svg><span>Mean of repeats</span></button>
 			</div>
+			<div class="neo-tool-group" role="group" aria-label="File">
+				<span class="neo-tool-group-label" aria-hidden="true">File</span>
+				<button type="button" class="neo-tool" id="import-csv-button" title="Import a CSV file and choose the role of each column"><svg class="neo-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3.5v11M7.5 10l4.5 4.5 4.5-4.5M4.5 15.5v3a2 2 0 0 0 2 2h11a2 2 0 0 0 2-2v-3"/></svg><span>Import</span></button>
+				<button type="button" class="neo-tool" id="export-csv-button" title="Export every column of this sheet as a CSV file"><svg class="neo-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 14.5v-11M7.5 8 12 3.5 16.5 8M4.5 15.5v3a2 2 0 0 0 2 2h11a2 2 0 0 0 2-2v-3"/></svg><span>Export</span></button>
+				<button type="button" class="neo-tool" id="view-table-button" title="View this sheet as a formatted table to copy"><svg class="neo-icon" viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="4.5" width="17" height="15" rx="2"/><path d="M3.5 9.5h17M3.5 14.5h17M9.5 9.5v10M15 9.5v10"/></svg><span>Table</span></button>
+			</div>
+			<div class="neo-tool-group" role="group" aria-label="View">
+				<span class="neo-tool-group-label" aria-hidden="true">View</span>
+				<button type="button" class="neo-tool" id="plot-all-button" title="Plot every series of every sheet together"><svg class="neo-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="m12 4 8.5 4.5L12 13 3.5 8.5z"/><path d="m3.5 12.5 8.5 4.5 8.5-4.5M3.5 16.5 12 21l8.5-4.5"/></svg><span>All sheets</span></button>
+				<label class="neo-switch" title="Typeset names, units and titles as LaTeX">
+					<input type="checkbox" id="latex-mode-toggle" role="switch">
+					<span class="neo-switch-track" aria-hidden="true"></span>
+					<span>LaTeX</span>
+				</label>
+			</div>
+			<div class="neo-tool-spacer"></div>
+			<button type="button" class="neo-tool neo-tool-danger" id="clear-sheet-button" title="Clear every cell in this sheet"><svg class="neo-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4.5 7h15M9.5 7V4.5h5V7M6.5 7l1 13h9l1-13M10 10.5v6M14 10.5v6"/></svg><span>Clear</span></button>
 		</div>
 
-		<div class="dataset-tabs-bar" id="sheet-tabs" role="tablist" aria-label="Sheets"></div>
-
-		<div class="container">
-			<div class="input-section">
-				<h2>Data</h2>
+		<main class="container neo-workspace">
+			<section class="input-section neo-pane neo-pane-data" aria-labelledby="data-pane-title">
+				<div class="neo-pane-head">
+					<h2 id="data-pane-title">Data</h2>
+					<p class="neo-pane-hint">Y plots against the nearest X to its left</p>
+				</div>
 				<div class="neo-table-wrap" id="neo-table-wrap">
 					<table class="neo-table" id="neo-table">
 						<thead id="neo-table-head"></thead>
 						<tbody id="neo-table-body"></tbody>
 					</table>
 				</div>
-				<p id="data-validation-message" class="validation-message" role="status"></p>
-				<p class="neo-hint">Tip: copy cells from a spreadsheet and paste them into the table. A first row of headings such as <code>L / m</code> becomes the column names and units.</p>
-
-				<div class="button-container">
-					<div class="button-row">
-						<button class="btn-add-row" type="button" id="add-row-button" title="Add a row to this sheet">Add Row</button>
-						<button class="btn-copy-x" type="button" id="add-column-button" title="Add a Y column at the right">Add Column</button>
-						<button class="btn-clear-all" type="button" id="clear-sheet-button" title="Clear every cell in this sheet">Clear Data</button>
-					</div>
-					<div class="button-row">
-						<button class="btn-export-md" type="button" id="add-formula-button" title="Add a column calculated from other columns, such as T^2">Formula Column</button>
-						<button class="btn-export-md" type="button" id="mean-button" title="Add the mean of repeat readings, with an optional uncertainty">Mean of Repeats</button>
-					</div>
-					<div class="button-row">
-						<button class="btn-import-csv" type="button" id="import-csv-button" title="Import a CSV file and choose each column's role">Import .csv</button>
-						<button class="btn-export-csv" type="button" id="export-csv-button" title="Export every column of this sheet as a CSV file">Export .csv</button>
-						<button class="btn-export-md" type="button" id="view-table-button" title="View this sheet as a formatted table to copy">View Table</button>
-					</div>
+				<div class="neo-pane-foot">
+					<p id="data-validation-message" class="validation-message" role="status"></p>
+					<p class="neo-hint">Paste a block from a spreadsheet into any cell. A heading row such as <code>L / m</code> becomes names and units.</p>
 				</div>
 				<input type="file" id="csv-file-input" accept=".csv,.txt,text/csv,text/plain" hidden>
+			</section>
 
-				<div class="fit-method-section">
-					<button class="section-toggle" type="button" aria-expanded="false" aria-controls="best-fit-content"
-						onclick="toggleSection('best-fit-content', this)" title="Show or hide best-fit line options">
-						Add Best Fit Line
-					</button>
-					<div id="best-fit-content" class="collapsible-content">
-						<div class="neo-fit-series">
-							<label for="fit-series-select">Fit series</label>
-							<select id="fit-series-select"></select>
-						</div>
-						<label class="neo-check neo-weight"><input type="checkbox" id="fit-weighted"> Weight the fit by ±ΔY (Linear and Custom fits)</label>
-						<div class="tabs">
-							<button class="tablink active" onclick="openTab(event, 'BasicFit')" title="Show basic best-fit options">Basic</button>
-							<button class="tablink" onclick="openTab(event, 'AdvancedFit')" title="Show advanced best-fit options">Advanced</button>
-							<button class="tablink" onclick="openTab(event, 'CustomFit')" title="Show custom best-fit options">Custom</button>
-						</div>
-
-						<div id="BasicFit" class="tab-content active">
-							<label for="fit-method">Fit Method:</label>
-							<select id="fit-method" onchange="updateBasicFitEquation()">
-								<option value="Linear">Linear</option>
-								<option value="Polynomial-2">Quadratic</option>
-								<option value="Polynomial-3">Cubic</option>
-								<option value="Exponential">Exponential</option>
-								<option value="Power">Power</option>
-							</select>
-							<div id="basic-fit-equation" class="general-equation">\( y = mx + c \)</div>
-							<div class="neo-fit-actions">
-								<button class="fit-button" onclick="fitCurve()" title="Fit a curve to the chosen series">Fit Curve</button>
-								<button class="clear-fit-button" onclick="clearFittedCurve()" title="Remove the fit on the chosen series">Clear Fit</button>
-							</div>
-						</div>
-
-						<div id="AdvancedFit" class="tab-content">
-							<label for="advanced-fit-method">Advanced Fit Method:</label>
-							<select id="advanced-fit-method" class="fit-method-select" onchange="changeAdvancedFitMethod()">
-								<option value="Sinusoidal">Sinusoidal</option>
-								<option value="Gaussian">Gaussian</option>
-							</select>
-							<div id="advanced-fit-general-equation" class="general-equation">\( y = A e^{bx} \sin(kx - \phi) + c \)</div>
-							<p class="table-prompt">Adjust the initial fitting parameters below.</p>
-
-							<div id="Sinusoidal-parameters" class="parameter-section active">
-								<div class="advanced-fit-top-row">
-									<div class="advanced-fit-item">
-										<label for="initial-A">A:</label>
-										<input type="number" id="initial-A" value="1" step="any" />
-									</div>
-									<button type="button" class="advanced-fit-reset-btn" onclick="resetAdvancedFitParameters('Sinusoidal')"
-										title="Reset sinusoidal initial parameters">Reset parameters</button>
-								</div>
-								<div class="advanced-fit-item">
-									<label for="initial-b">b:</label>
-									<input type="number" id="initial-b" value="0" step="any" />
-								</div>
-								<div class="advanced-fit-item">
-									<label for="initial-k">k:</label>
-									<input type="number" id="initial-k" value="1" step="any" />
-								</div>
-								<div class="advanced-fit-item">
-									<label for="initial-phi">φ:</label>
-									<input type="number" id="initial-phi" value="0" step="any" />
-								</div>
-								<div class="advanced-fit-item">
-									<label for="initial-c">c:</label>
-									<input type="number" id="initial-c" value="0" step="any" />
-								</div>
-							</div>
-
-							<div id="Gaussian-parameters" class="parameter-section">
-								<div class="advanced-fit-top-row">
-									<div class="advanced-fit-item">
-										<label for="initial-A-gaussian">A:</label>
-										<input type="number" id="initial-A-gaussian" value="1" step="any" />
-									</div>
-									<button type="button" class="advanced-fit-reset-btn" onclick="resetAdvancedFitParameters('Gaussian')"
-										title="Reset gaussian initial parameters">Reset parameters</button>
-								</div>
-								<div class="advanced-fit-item">
-									<label for="initial-mu">μ:</label>
-									<input type="number" id="initial-mu" value="0" step="any" />
-								</div>
-								<div class="advanced-fit-item">
-									<label for="initial-sigma">σ:</label>
-									<input type="number" id="initial-sigma" value="1" step="any" />
-								</div>
-								<div class="advanced-fit-item">
-									<label for="initial-c-gaussian">c:</label>
-									<input type="number" id="initial-c-gaussian" value="0" step="any" />
-								</div>
-							</div>
-
-							<div class="neo-fit-actions">
-								<button class="fit-button" onclick="fitAdvancedCurve()" title="Fit an advanced curve using the chosen parameters">Fit Curve</button>
-								<button class="clear-fit-button" onclick="clearFittedCurve()" title="Remove the fit on the chosen series">Clear Fit</button>
-							</div>
-						</div>
-
-						<div id="CustomFit" class="tab-content">
-							<div id="custom-fit-formula-panel" class="custom-fit-formula-panel">
-								<div class="custom-fit-formula-header">
-									<label id="custom-fit-formula-label" for="custom-fit-formula-input">Formula for y</label>
-									<button id="custom-fit-formula-help" type="button" title="Open quick math reference in a new tab">Help</button>
-								</div>
-								<input id="custom-fit-formula-input" type="text" placeholder="e.g. A*exp(-k*x)+c" autocomplete="off" />
-								<p class="custom-fit-formula-note">Use explicit multiplication, e.g. <code>2*x</code> and <code>A*x</code>.</p>
-								<div id="custom-fit-formula-message" aria-live="polite" style="display: none;"></div>
-							</div>
-							<div id="custom-fit-general-equation" class="general-equation">\( y = f(x, \theta) \)</div>
-							<div id="custom-fit-parameters-panel" class="custom-fit-parameters-panel">
-								<p class="table-prompt">Adjust the initial fitting parameters below.</p>
-								<p id="custom-fit-parameters-empty" class="custom-fit-parameters-empty">Enter a custom equation to detect parameters.</p>
-								<div id="custom-fit-parameters-list"></div>
-							</div>
-							<div class="neo-fit-actions">
-								<button class="fit-button" onclick="fitCustomCurve()" title="Fit a custom equation to the chosen series">Fit Curve</button>
-								<button class="clear-fit-button" onclick="clearFittedCurve()" title="Remove the fit on the chosen series">Clear Fit</button>
-							</div>
-						</div>
+			<div class="neo-right">
+			<section class="graph-section neo-pane neo-pane-graph" aria-label="Graph">
+				<div class="neo-pane-head neo-graph-head">
+					<label class="neo-visually-hidden" for="graph-title">Graph title</label>
+					<input type="text" id="graph-title" class="neo-title-input" placeholder="Untitled graph" autocomplete="off">
+				</div>
+				<div class="neo-plot-area">
+					<div id="plot"></div>
+					<div class="neo-empty" id="graph-empty" hidden>
+						<svg class="neo-empty-art" viewBox="0 0 120 80" aria-hidden="true">
+							<path class="neo-empty-axis" d="M14 8v60h96"/>
+							<path class="neo-empty-line" d="M18 62 104 16"/>
+							<circle cx="30" cy="54" r="3.5"/><circle cx="48" cy="47" r="3.5"/><circle cx="62" cy="36" r="3.5"/><circle cx="80" cy="30" r="3.5"/><circle cx="96" cy="19" r="3.5"/>
+						</svg>
+						<h3>Your graph appears here</h3>
+						<p>Type or paste readings into the table. Each Y column becomes a series.</p>
+						<button type="button" class="neo-button neo-button-primary" id="sample-data-button">Try sample data</button>
 					</div>
 				</div>
-			</div>
-
-			<div class="graph-section">
-				<h2>Graph</h2>
-				<div class="graph-title-container">
-					<label for="graph-title">Title:</label>
-					<input type="text" id="graph-title" placeholder="Enter graph title">
-				</div>
-				<div id="plot"></div>
-				<div id="residual-wrap" hidden>
-					<div class="neo-residual-heading">Residuals of the fit on the chosen series</div>
+				<div id="residual-wrap" class="neo-residuals" hidden>
+					<div class="neo-residual-heading">Residuals</div>
 					<div id="residual-plot"></div>
 				</div>
+			</section>
 
-				<div class="result">
-					<h3>Fitting Result <span id="fit-series-label" class="neo-fit-series-label"></span></h3>
+			<aside class="neo-pane neo-pane-inspector" aria-label="Fit and results">
+				<section class="neo-card" aria-labelledby="series-card-title">
+					<h2 class="neo-card-title" id="series-card-title">Series</h2>
+					<ul class="neo-series-list" id="series-list"></ul>
+				</section>
+
+				<section class="neo-card fit-method-section" aria-labelledby="fit-card-title">
+					<h2 class="neo-card-title" id="fit-card-title">Fit</h2>
+					<div id="best-fit-content" class="collapsible-content is-open">
+						<div class="neo-fit-series">
+							<label for="fit-series-select">Series to fit</label>
+							<select id="fit-series-select"></select>
+						</div>
+					<div class="tabs">
+						<button class="tablink active" onclick="openTab(event, 'BasicFit')" title="Show basic best-fit options">Basic</button>
+						<button class="tablink" onclick="openTab(event, 'AdvancedFit')" title="Show advanced best-fit options">Advanced</button>
+						<button class="tablink" onclick="openTab(event, 'CustomFit')" title="Show custom best-fit options">Custom</button>
+					</div>
+
+					<div id="BasicFit" class="tab-content active">
+						<label for="fit-method">Fit Method:</label>
+						<select id="fit-method" onchange="updateBasicFitEquation()">
+							<option value="Linear">Linear</option>
+							<option value="Polynomial-2">Quadratic</option>
+							<option value="Polynomial-3">Cubic</option>
+							<option value="Exponential">Exponential</option>
+							<option value="Power">Power</option>
+						</select>
+						<div id="basic-fit-equation" class="general-equation">\( y = mx + c \)</div>
+						<div class="neo-fit-actions">
+							<button class="fit-button" onclick="fitCurve()" title="Fit a curve to the chosen series">Fit Curve</button>
+							<button class="clear-fit-button" onclick="clearFittedCurve()" title="Remove the fit on the chosen series">Clear Fit</button>
+						</div>
+					</div>
+
+					<div id="AdvancedFit" class="tab-content">
+						<label for="advanced-fit-method">Advanced Fit Method:</label>
+						<select id="advanced-fit-method" class="fit-method-select" onchange="changeAdvancedFitMethod()">
+							<option value="Sinusoidal">Sinusoidal</option>
+							<option value="Gaussian">Gaussian</option>
+						</select>
+						<div id="advanced-fit-general-equation" class="general-equation">\( y = A e^{bx} \sin(kx - \phi) + c \)</div>
+						<p class="table-prompt">Adjust the initial fitting parameters below.</p>
+
+						<div id="Sinusoidal-parameters" class="parameter-section active">
+							<div class="advanced-fit-top-row">
+								<div class="advanced-fit-item">
+									<label for="initial-A">A:</label>
+									<input type="number" id="initial-A" value="1" step="any" />
+								</div>
+								<button type="button" class="advanced-fit-reset-btn" onclick="resetAdvancedFitParameters('Sinusoidal')"
+									title="Reset sinusoidal initial parameters">Reset parameters</button>
+							</div>
+							<div class="advanced-fit-item">
+								<label for="initial-b">b:</label>
+								<input type="number" id="initial-b" value="0" step="any" />
+							</div>
+							<div class="advanced-fit-item">
+								<label for="initial-k">k:</label>
+								<input type="number" id="initial-k" value="1" step="any" />
+							</div>
+							<div class="advanced-fit-item">
+								<label for="initial-phi">φ:</label>
+								<input type="number" id="initial-phi" value="0" step="any" />
+							</div>
+							<div class="advanced-fit-item">
+								<label for="initial-c">c:</label>
+								<input type="number" id="initial-c" value="0" step="any" />
+							</div>
+						</div>
+
+						<div id="Gaussian-parameters" class="parameter-section">
+							<div class="advanced-fit-top-row">
+								<div class="advanced-fit-item">
+									<label for="initial-A-gaussian">A:</label>
+									<input type="number" id="initial-A-gaussian" value="1" step="any" />
+								</div>
+								<button type="button" class="advanced-fit-reset-btn" onclick="resetAdvancedFitParameters('Gaussian')"
+									title="Reset gaussian initial parameters">Reset parameters</button>
+							</div>
+							<div class="advanced-fit-item">
+								<label for="initial-mu">μ:</label>
+								<input type="number" id="initial-mu" value="0" step="any" />
+							</div>
+							<div class="advanced-fit-item">
+								<label for="initial-sigma">σ:</label>
+								<input type="number" id="initial-sigma" value="1" step="any" />
+							</div>
+							<div class="advanced-fit-item">
+								<label for="initial-c-gaussian">c:</label>
+								<input type="number" id="initial-c-gaussian" value="0" step="any" />
+							</div>
+						</div>
+
+						<div class="neo-fit-actions">
+							<button class="fit-button" onclick="fitAdvancedCurve()" title="Fit an advanced curve using the chosen parameters">Fit Curve</button>
+							<button class="clear-fit-button" onclick="clearFittedCurve()" title="Remove the fit on the chosen series">Clear Fit</button>
+						</div>
+					</div>
+
+					<div id="CustomFit" class="tab-content">
+						<div id="custom-fit-formula-panel" class="custom-fit-formula-panel">
+							<div class="custom-fit-formula-header">
+								<label id="custom-fit-formula-label" for="custom-fit-formula-input">Formula for y</label>
+								<button id="custom-fit-formula-help" type="button" title="Open quick math reference in a new tab">Help</button>
+							</div>
+							<input id="custom-fit-formula-input" type="text" placeholder="e.g. A*exp(-k*x)+c" autocomplete="off" />
+							<p class="custom-fit-formula-note">Use explicit multiplication, e.g. <code>2*x</code> and <code>A*x</code>.</p>
+							<div id="custom-fit-formula-message" aria-live="polite" style="display: none;"></div>
+						</div>
+						<div id="custom-fit-general-equation" class="general-equation">\( y = f(x, \theta) \)</div>
+						<div id="custom-fit-parameters-panel" class="custom-fit-parameters-panel">
+							<p class="table-prompt">Adjust the initial fitting parameters below.</p>
+							<p id="custom-fit-parameters-empty" class="custom-fit-parameters-empty">Enter a custom equation to detect parameters.</p>
+							<div id="custom-fit-parameters-list"></div>
+						</div>
+						<div class="neo-fit-actions">
+							<button class="fit-button" onclick="fitCustomCurve()" title="Fit a custom equation to the chosen series">Fit Curve</button>
+							<button class="clear-fit-button" onclick="clearFittedCurve()" title="Remove the fit on the chosen series">Clear Fit</button>
+						</div>
+					</div>
+
+						<label class="neo-switch neo-weight" title="Weights 1/ΔY² for Linear and Custom fits">
+							<input type="checkbox" id="fit-weighted" role="switch">
+							<span class="neo-switch-track" aria-hidden="true"></span>
+							<span>Weight by ±ΔY <small>Linear and Custom</small></span>
+						</label>
+					</div>
+				</section>
+
+				<section class="neo-card result" aria-labelledby="result-card-title">
+					<h2 class="neo-card-title" id="result-card-title">Result <span id="fit-series-label" class="neo-fit-series-label"></span></h2>
 					<p id="fit-equation" style="display: none;"></p>
 					<p id="r-squared-container" style="display: none;"></p>
 					<div id="fit-parameters" class="neo-fit-parameters" hidden></div>
-					<p class="fit-weighting-note" id="fit-weighting-note">Fits use unweighted least squares unless Weight the fit by ±ΔY is on.</p>
 					<p id="fit-status" role="status">No fit calculated yet.</p>
-				</div>
-
-				<div class="plot-all-container">
-					<button class="plot-all-btn" type="button" id="plot-all-button" title="Plot every series of every sheet together">Plot ALL Sheets</button>
-				</div>
+					<p class="fit-weighting-note" id="fit-weighting-note">Fits use unweighted least squares unless Weight by ±ΔY is on.</p>
+				</section>
+			</aside>
 			</div>
-		</div>
+		</main>
 
-		<footer>
-			&copy; 2026 <a href="https://panphy.app/" target="_blank" rel="noopener noreferrer">PanPhy Labs</a>. All rights reserved. |
-			<a href="https://buymeacoffee.com/panphy" target="_blank" rel="noopener noreferrer">Support My Projects</a>
+		<footer class="neo-statusbar">
+			<span class="neo-status" id="neo-status" role="status"></span>
+			<span class="neo-statusbar-legal">&copy; 2026 <a href="https://panphy.app/" target="_blank" rel="noopener noreferrer">PanPhy Labs</a>. All rights reserved. ·
+			<a href="https://buymeacoffee.com/panphy" target="_blank" rel="noopener noreferrer">Support My Projects</a></span>
 		</footer>
 	</div>
 

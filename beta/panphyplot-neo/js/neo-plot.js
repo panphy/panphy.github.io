@@ -218,9 +218,11 @@
 					const filenameBase = sanitizeFilename(userInput, defaultFilename).replace(/\.png$/i, '');
 					const exportScale = getAdaptivePlotExportScale(gd);
 					try {
-						const dataUrl = await Plotly.toImage(gd, {
+						const dataUrl = await Plotly.toImage(getExportFigure(gd), {
 							format: 'png',
-							scale: exportScale
+							scale: exportScale,
+							width: gd._fullLayout.width,
+							height: gd._fullLayout.height
 						});
 						const imageBlob = await fetch(dataUrl).then(res => res.blob());
 						await saveBlobWithFallback(imageBlob, `${filenameBase}.png`, { title: 'Save plot image' });
@@ -333,6 +335,23 @@
 		return sheet.title.automatic ? getAutomaticTitle(sheet) : sheet.title.text;
 	}
 
+	// The pane header shows the title on screen; a saved image carries it inside the figure.
+	function getExportFigure(gd) {
+		const title = gd.dataset.exportTitle || '';
+		const layout = { ...gd.layout, paper_bgcolor: readToken('--surface', '#ffffff') };
+		if (title) {
+			layout.title = { text: title, font: { size: 16, family: layout.font && layout.font.family } };
+			layout.margin = { ...(layout.margin || {}), t: Math.max((layout.margin && layout.margin.t) || 0, 70) };
+		}
+		return { data: gd.data, layout };
+	}
+
+	function readToken(name, fallback) {
+		const value = getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+		return value || fallback;
+	}
+
+	// Colours follow the page's own tokens, so the graph sits on its pane in either theme.
 	function applyThemeLayout(layout, themeSettings) {
 		['xaxis', 'yaxis'].forEach((axis) => {
 			const theme = themeSettings.layout[axis];
@@ -341,17 +360,36 @@
 			title.font = { ...(layout[axis].title.font || {}), ...((theme.title && theme.title.font) || {}) };
 			layout[axis] = { ...layout[axis], ...theme, title };
 		});
-		['font', 'paper_bgcolor', 'plot_bgcolor'].forEach((key) => {
-			if (themeSettings.layout[key]) layout[key] = themeSettings.layout[key];
+		const ink = readToken('--ink', '#17181a');
+		const muted = readToken('--ink-2', '#55585e');
+		const line = readToken('--line', '#e6e1d7');
+		const strong = readToken('--line-strong', '#d3ccbe');
+		layout.paper_bgcolor = 'rgba(0,0,0,0)';
+		layout.plot_bgcolor = 'rgba(0,0,0,0)';
+		layout.font = { family: 'Manrope, system-ui, sans-serif', size: 12.5, color: muted };
+		['xaxis', 'yaxis'].forEach((axis) => {
+			layout[axis] = {
+				...layout[axis],
+				gridcolor: line,
+				zerolinecolor: strong,
+				linecolor: strong,
+				tickcolor: strong,
+				tickfont: { family: '"IBM Plex Mono", ui-monospace, monospace', size: 11, color: muted },
+				title: { ...layout[axis].title, font: { ...(layout[axis].title.font || {}), family: 'Manrope, system-ui, sans-serif', size: 13.5, color: ink } }
+			};
 		});
+		layout.legend = { ...(layout.legend || {}), font: { color: ink, size: 12.5 } };
+		layout.hoverlabel = { font: { family: '"IBM Plex Mono", ui-monospace, monospace' } };
+		layout.modebar = { bgcolor: 'rgba(0,0,0,0)', color: readToken('--ink-3', '#8a8c91'), activecolor: readToken('--accent', '#0f766e') };
 		return layout;
 	}
 
 	function buildLayout(titleText, xTitle, yTitle, options = {}) {
 		return {
-			title: { text: titleText ? processLabel(titleText) : '', font: { size: 16 } },
+			title: { text: options.showTitle && titleText ? processLabel(titleText) : '', font: { size: 16 } },
 			showlegend: options.showlegend !== false,
-			legend: { orientation: 'h', y: -0.2, x: 0, xanchor: 'left' },
+			// Above the plot, left of the toolbar, so it never meets the x-axis title.
+			legend: { orientation: 'h', x: 0, xanchor: 'left', y: 1.01, yanchor: 'bottom' },
 			xaxis: {
 				title: { text: processLabel(xTitle) },
 				showline: false, linewidth: 1, autorange: true, rangemode: 'tozero', zeroline: true, zerolinewidth: 2
@@ -360,7 +398,7 @@
 				title: { text: processLabel(yTitle), font: { size: 14 }, standoff: 25 },
 				automargin: true, showline: false, linewidth: 1, autorange: true, rangemode: 'tozero', zeroline: true, zerolinewidth: 2
 			},
-			margin: { t: titleText ? 90 : 40, b: options.showlegend === false ? 70 : 110, l: 85, r: 30 }
+			margin: { t: (options.showTitle && titleText ? 64 : 22) + (options.showlegend === false ? 12 : 30), b: 56, l: 76, r: 24 }
 		};
 	}
 
@@ -445,9 +483,13 @@
 		const series = NeoModel.getSeries(sheet).filter(entry => entry.xCol);
 		const data = series.flatMap((entry, index) => seriesTraces(sheet, entry, index, themeSettings));
 		const titles = getAxisTitles(sheet);
-		const layout = applyThemeLayout(buildLayout(getSheetTitle(sheet), titles.x || 'x', titles.y || 'y', { showlegend: series.length > 0 }), themeSettings);
+		const layout = applyThemeLayout(buildLayout(getSheetTitle(sheet), titles.x || 'x', titles.y || 'y', { showlegend: series.length > 1 }), themeSettings);
+		const element = document.getElementById('plot');
+		element.dataset.exportTitle = processLabel(getSheetTitle(sheet) || '');
 		reactIfChanged('plot', data, layout, createDownloadImageConfig(sheet.name || 'data_plot'));
 		bindLegendToggle('plot');
+		const empty = document.getElementById('graph-empty');
+		if (empty) empty.hidden = data.some(trace => trace.mode === 'markers' && trace.x.length);
 		plotResiduals();
 	}
 
@@ -507,7 +549,7 @@
 		if (inputs.title.dataset.edited !== 'true') inputs.title.value = '';
 		if (inputs.x.dataset.edited !== 'true') inputs.x.value = describe(xColumns);
 		if (inputs.y.dataset.edited !== 'true') inputs.y.value = describe(yColumns);
-		const layout = applyThemeLayout(buildLayout(inputs.title.value.trim(), inputs.x.value.trim(), inputs.y.value.trim()), themeSettings);
+		const layout = applyThemeLayout(buildLayout(inputs.title.value.trim(), inputs.x.value.trim(), inputs.y.value.trim(), { showTitle: true }), themeSettings);
 		reactIfChanged('popup-plot', data, layout, createDownloadImageConfig('combined_plot'));
 		bindLegendToggle('popup-plot');
 	}
@@ -520,7 +562,16 @@
 		};
 	}
 
+	// The plotted series of a sheet share the palette in order, so a Y column's colour is stable.
+	function getSeriesColor(sheet, seriesId) {
+		const index = NeoModel.getSeries(sheet).filter(entry => entry.xCol).findIndex(entry => entry.id === seriesId);
+		if (index < 0) return null;
+		const colors = getPlotThemeSettings().datasetColors;
+		return colors[index % colors.length];
+	}
+
 	Object.assign(window, {
+		getSeriesColor,
 		sanitizeFilename,
 		saveBlobWithFallback,
 		processLabel,
