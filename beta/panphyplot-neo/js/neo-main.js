@@ -1,6 +1,7 @@
 // PanPhyPlot (neo-beta) bootstrap.
 document.addEventListener('DOMContentLoaded', () => {
 	loadState();
+	if (typeof math !== 'undefined') neoState.sheets.forEach(sheet => NeoModel.recomputeFormulas(sheet, math));
 
 	window.PanPhyThemeToggle.mount(document.getElementById('theme-button'));
 	window.addEventListener('panphy:theme-change', () => {
@@ -21,6 +22,7 @@ document.addEventListener('DOMContentLoaded', () => {
 	});
 
 	initializeInterface();
+	initializeDialogs();
 	updateBasicFitEquation();
 	changeAdvancedFitMethod();
 	setInitialParameters(document.getElementById('advanced-fit-method').value);

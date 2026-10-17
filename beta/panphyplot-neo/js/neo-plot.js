@@ -521,6 +521,8 @@
 	}
 
 	Object.assign(window, {
+		sanitizeFilename,
+		saveBlobWithFallback,
 		processLabel,
 		formatLabelForLatex,
 		safeTypeset,

@@ -47,6 +47,7 @@ function createNewColumn(options = {}) {
 
 // Every change to the data runs through here: stale fits, validation, graph and saving.
 function afterDataChange(options = {}) {
+	recalculateFormulas();
 	if (options.structure) {
 		pruneOrphanFits();
 		refreshActiveFitKey();
@@ -60,6 +61,51 @@ function afterDataChange(options = {}) {
 	else plotGraph();
 	syncTitleInput();
 	scheduleSaveState();
+}
+
+/* ---------- Formulas ---------- */
+
+// Formula results are written into the model, then into their (read-only) cells without a re-render.
+function recalculateFormulas(sheet = getActiveSheet()) {
+	if (typeof math === 'undefined') return;
+	if (!NeoModel.recomputeFormulas(sheet, math) || sheet !== getActiveSheet()) return;
+	sheet.columns.filter(NeoModel.isFormulaColumn).forEach((column) => {
+		document.querySelectorAll(`#neo-table-body .neo-cell[data-column-id="${column.id}"]`).forEach((input) => {
+			const value = column.cells[Number(input.dataset.row)] || '';
+			if (input.value !== value) input.value = value;
+		});
+		const head = document.querySelector(`.neo-col-head[data-column-id="${column.id}"]`);
+		if (head) renderFormulaLine(head, column);
+	});
+}
+
+// Structural edits shift column letters, so formulas are rewritten to keep pointing at the same columns.
+function changeColumns(sheet, edit) {
+	const previousIds = sheet.columns.map(column => column.id);
+	const result = edit();
+	if (typeof math !== 'undefined') NeoModel.remapFormulaLetters(sheet, previousIds, math);
+	return result;
+}
+
+function renderFormulaLine(th, column) {
+	let line = th.querySelector('.neo-col-formula');
+	if (!NeoModel.isFormulaColumn(column)) {
+		if (line) line.remove();
+		th.classList.remove('is-formula');
+		return;
+	}
+	th.classList.add('is-formula');
+	if (!line) {
+		line = document.createElement('button');
+		line.type = 'button';
+		line.className = 'neo-col-formula';
+		line.addEventListener('click', () => openFormulaDialog(column));
+		th.querySelector('.neo-col-top').after(line);
+	}
+	line.classList.toggle('has-error', !!column.formulaError);
+	line.textContent = column.formulaError ? `ƒ ${column.formula} ⚠` : `ƒ ${column.formula}`;
+	line.title = column.formulaError || 'Edit this formula';
+	line.setAttribute('aria-label', column.formulaError ? `Formula ${column.formula}: ${column.formulaError}` : `Edit formula ${column.formula}`);
 }
 
 /* ---------- Table ---------- */
@@ -134,6 +180,7 @@ function buildHeaderCell(sheet, column, index) {
 	preview.className = 'neo-col-preview';
 
 	th.append(top, name, unit, preview);
+	renderFormulaLine(th, column);
 	renderHeaderPreview(th, sheet, column);
 	return th;
 }
@@ -157,6 +204,10 @@ function buildDataCell(sheet, column, row) {
 	input.inputMode = 'decimal';
 	input.autocomplete = 'off';
 	input.className = 'neo-cell';
+	if (NeoModel.isFormulaColumn(column)) {
+		input.readOnly = true;
+		input.classList.add('is-formula');
+	}
 	input.value = column.cells[row] || '';
 	input.dataset.row = String(row);
 	input.dataset.columnId = column.id;
@@ -392,8 +443,10 @@ function openColumnMenu(opener, sheet, column) {
 		{ label: 'Move left', disabled: index === 0, action: () => moveColumn(sheet, column, -1) },
 		{ label: 'Move right', disabled: index === sheet.columns.length - 1, action: () => moveColumn(sheet, column, 1) },
 		{ label: 'Insert column to the right', action: () => insertColumnAfter(sheet, column) },
-		{ label: 'Fill with one value…', action: () => fillColumn(sheet, column) },
-		{ label: 'Clear column', action: () => clearColumn(sheet, column) },
+		{ label: NeoModel.isFormulaColumn(column) ? 'Edit formula…' : 'Set formula…', action: () => openFormulaDialog(column) },
+		...(NeoModel.isFormulaColumn(column) ? [{ label: 'Remove formula, keep values', action: () => removeFormula(column) }] : []),
+		{ label: 'Fill with one value…', disabled: NeoModel.isFormulaColumn(column), action: () => fillColumn(sheet, column) },
+		{ label: 'Clear column', disabled: NeoModel.isFormulaColumn(column), action: () => clearColumn(sheet, column) },
 		{ label: `Delete column ${label}`, danger: true, disabled: sheet.columns.length === 1, action: () => deleteColumn(sheet, column) }
 	]);
 }
@@ -407,7 +460,7 @@ function openRowMenu(opener, sheet, row) {
 }
 
 function moveColumn(sheet, column, offset) {
-	if (!NeoModel.moveColumn(sheet, column.id, offset)) return;
+	if (!changeColumns(sheet, () => NeoModel.moveColumn(sheet, column.id, offset))) return;
 	renderTable();
 	afterDataChange({ structure: true });
 	const button = document.querySelector(`.neo-col-head[data-column-id="${column.id}"] .neo-col-menu-button`);
@@ -415,7 +468,7 @@ function moveColumn(sheet, column, offset) {
 }
 
 function insertColumnAfter(sheet, column) {
-	NeoModel.insertColumn(sheet, sheet.columns.indexOf(column) + 1, createNewColumn());
+	changeColumns(sheet, () => NeoModel.insertColumn(sheet, sheet.columns.indexOf(column) + 1, createNewColumn()));
 	renderTable();
 	afterDataChange({ structure: true });
 }
@@ -443,10 +496,17 @@ function clearColumn(sheet, column) {
 	afterDataChange();
 }
 
+function removeFormula(column) {
+	column.formula = '';
+	column.formulaError = '';
+	renderTable();
+	afterDataChange();
+}
+
 function deleteColumn(sheet, column) {
 	const hasData = column.cells.some(cell => !NeoModel.isBlank(cell));
 	if (hasData && !window.confirm(`Delete column ${NeoModel.getColumnLabel(sheet, column)} and its data?`)) return;
-	NeoModel.removeColumn(sheet, column.id);
+	changeColumns(sheet, () => NeoModel.removeColumn(sheet, column.id));
 	renderTable();
 	afterDataChange({ structure: true });
 }

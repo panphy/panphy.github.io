@@ -508,3 +508,254 @@
 .neo-equation:hover {
 	transform: none;
 }
+
+/* ---------- Formula columns ---------- */
+
+.neo-col-formula {
+	display: block;
+	width: 100%;
+	max-width: 148px;
+	min-height: 32px;
+	margin: 0 0 2px;
+	padding: 2px 6px;
+	border: 1px dashed var(--role-err);
+	border-radius: 6px;
+	background: none;
+	box-shadow: none;
+	color: var(--role-err);
+	font-family: var(--font-mono);
+	font-size: 0.75rem;
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	cursor: pointer;
+}
+
+.neo-col-formula:hover,
+.neo-col-formula:focus-visible {
+	background: var(--muted-bg);
+	transform: none;
+}
+
+.neo-col-formula.has-error {
+	border-color: var(--btn-danger);
+	color: var(--btn-danger);
+}
+
+.neo-table tbody td .neo-cell.is-formula {
+	background: repeating-linear-gradient(135deg, transparent 0 6px, rgba(126, 99, 153, 0.07) 6px 12px);
+	color: var(--text-secondary);
+	cursor: default;
+}
+
+/* ---------- Dialogs ---------- */
+
+.neo-dialog {
+	width: min(560px, calc(100vw - 32px));
+	max-height: calc(100dvh - 48px);
+	padding: 0;
+	border: 1px solid var(--card-border);
+	border-radius: 16px;
+	background: var(--card-bg);
+	color: var(--text-main);
+	box-shadow: 0 20px 50px rgba(0, 0, 0, 0.25);
+}
+
+.neo-dialog-wide {
+	width: min(860px, calc(100vw - 32px));
+}
+
+.neo-dialog::backdrop {
+	background: rgba(0, 0, 0, 0.45);
+}
+
+.neo-dialog-body {
+	display: flex;
+	flex-direction: column;
+	gap: 8px;
+	padding: 20px 22px;
+}
+
+.neo-dialog h2 {
+	margin: 0 0 4px;
+	font-family: var(--font-display);
+	font-weight: 400;
+	font-size: 1.3rem;
+}
+
+.neo-dialog label {
+	font-weight: 700;
+	font-size: 0.9rem;
+}
+
+.neo-dialog input[type="text"],
+.neo-dialog select:not(.neo-role-select) {
+	width: 100%;
+	min-height: 44px;
+	margin: 0;
+	padding: 8px 10px;
+	border: 1px solid var(--input-border);
+	border-radius: 8px;
+	background: var(--card-bg);
+	color: var(--text-main);
+	font: inherit;
+}
+
+#formula-input {
+	font-family: var(--font-mono);
+}
+
+.neo-dialog input[type="text"]:focus,
+.neo-dialog select:not(.neo-role-select):focus {
+	outline: 2px solid var(--input-focus);
+	border-color: var(--brand-primary);
+}
+
+.neo-dialog-note {
+	margin: 0;
+	font-size: 0.85rem;
+	line-height: 1.45;
+	color: var(--text-secondary);
+}
+
+.neo-dialog code {
+	font-family: var(--font-mono);
+	font-size: 0.8rem;
+}
+
+.neo-link-button {
+	display: inline;
+	min-height: 0;
+	margin: 0;
+	padding: 0;
+	border: none;
+	background: none;
+	box-shadow: none;
+	color: var(--brand-primary);
+	font: inherit;
+	text-decoration: underline;
+	cursor: pointer;
+}
+
+.neo-link-button:hover {
+	background: none;
+	transform: none;
+}
+
+.neo-dialog-pair {
+	display: grid;
+	grid-template-columns: 1fr 1fr;
+	gap: 10px;
+}
+
+.neo-dialog-pair > div {
+	display: flex;
+	flex-direction: column;
+	gap: 4px;
+}
+
+.neo-dialog-message {
+	min-height: 1.4em;
+	margin: 0;
+	font-size: 0.9rem;
+}
+
+.neo-dialog-message.is-error {
+	color: var(--btn-danger);
+}
+
+.neo-dialog-message.is-success {
+	color: var(--btn-create);
+}
+
+.neo-dialog-actions {
+	display: flex;
+	justify-content: flex-end;
+	gap: 8px;
+	margin-top: 4px;
+}
+
+.neo-dialog-actions button {
+	min-height: 44px;
+	min-width: 104px;
+	margin: 0;
+}
+
+.neo-dialog-cancel {
+	background: var(--btn-neutral);
+}
+
+.neo-dialog-cancel:hover {
+	background: var(--btn-neutral-hover);
+}
+
+.neo-dialog-confirm {
+	background: var(--btn-analyze);
+}
+
+.neo-dialog-confirm:hover {
+	background: var(--btn-analyze-hover);
+}
+
+[data-theme="dark"] .neo-dialog-confirm,
+[data-theme="dark"] .neo-dialog-cancel {
+	color: #1a1a1a;
+}
+
+.neo-checklist {
+	display: flex;
+	flex-direction: column;
+	gap: 2px;
+	margin: 0;
+	padding: 8px 12px;
+	border: 1px solid var(--border-color);
+	border-radius: 10px;
+	max-height: 40vh;
+	overflow-y: auto;
+}
+
+.neo-checklist legend {
+	padding: 0 4px;
+	font-size: 0.85rem;
+	font-weight: 700;
+}
+
+.neo-dialog .neo-check {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+	min-height: 44px;
+	font-weight: 500;
+	cursor: pointer;
+}
+
+.neo-check input {
+	width: 20px;
+	height: 20px;
+	flex: none;
+	accent-color: var(--btn-analyze);
+}
+
+.neo-csv-preview {
+	max-height: 40vh;
+}
+
+.neo-csv-name {
+	margin-top: 6px;
+	font-weight: 700;
+	text-align: center;
+}
+
+.neo-csv-unit {
+	font-size: 0.8rem;
+	color: var(--text-secondary);
+	text-align: center;
+}
+
+.neo-csv-cell {
+	padding: 8px 10px !important;
+	font-family: var(--font-mono);
+	font-size: 0.85rem;
+	text-align: center;
+	white-space: nowrap;
+}

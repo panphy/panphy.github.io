@@ -1,0 +1,350 @@
+// Formula, mean-of-repeats and CSV dialogs for PanPhyPlot (neo-beta).
+const CSV_PREVIEW_ROWS = 6;
+let dialogOpener = null;
+
+function openDialog(id) {
+	closeMenu();
+	const dialog = document.getElementById(id);
+	dialogOpener = document.activeElement;
+	if (typeof dialog.showModal === 'function') dialog.showModal();
+	else dialog.setAttribute('open', '');
+	return dialog;
+}
+
+function closeDialog(id) {
+	const dialog = document.getElementById(id);
+	if (typeof dialog.close === 'function') dialog.close();
+	else dialog.removeAttribute('open');
+}
+
+function setDialogMessage(id, text, type = 'error') {
+	const message = document.getElementById(id);
+	message.textContent = text;
+	message.className = `neo-dialog-message${text ? ` is-${type}` : ''}`;
+}
+
+/* ---------- Formula ---------- */
+
+let formulaTarget = null;
+
+function describeFormulaReferences(sheet) {
+	const names = [...NeoModel.getFormulaSymbols(sheet).entries()];
+	const byColumn = sheet.columns.map((column, index) => {
+		const alias = names.find(([symbol, id]) => id === column.id && symbol !== NeoModel.columnLetter(index));
+		return alias ? `${NeoModel.columnLetter(index)} or ${alias[0]}` : NeoModel.columnLetter(index);
+	});
+	return `Columns: ${byColumn.join(', ')}.`;
+}
+
+// formulaTarget is a column to edit, or null for a new column added on Apply.
+function openFormulaDialog(column = null) {
+	const sheet = getActiveSheet();
+	formulaTarget = column;
+	document.getElementById('formula-dialog-title').textContent = column
+		? `Formula for column ${NeoModel.columnLetter(sheet.columns.indexOf(column))}`
+		: 'New formula column';
+	document.getElementById('formula-input').value = column ? column.formula || '' : '';
+	document.getElementById('formula-name').value = column ? column.name : '';
+	document.getElementById('formula-unit').value = column ? column.unit : '';
+	document.getElementById('formula-references').textContent = describeFormulaReferences(sheet);
+	previewFormula();
+	openDialog('formula-dialog');
+	document.getElementById('formula-input').focus();
+}
+
+// A live check against the first row that has every input, so mistakes show before Apply.
+function previewFormula() {
+	const sheet = getActiveSheet();
+	const text = document.getElementById('formula-input').value;
+	if (!NeoModel.cleanFormulaText(text)) {
+		setDialogMessage('formula-message', '');
+		return null;
+	}
+	// A copy, so the trial run never touches the real columns.
+	const draft = { ...sheet, columns: sheet.columns.map(column => ({ ...column, cells: column.cells.slice() })) };
+	const probe = NeoModel.createColumn('__probe__', { formula: text }, sheet.rowCount);
+	const index = formulaTarget ? sheet.columns.indexOf(formulaTarget) : draft.columns.length;
+	draft.columns.splice(index, formulaTarget ? 1 : 0, probe);
+	NeoModel.recomputeFormulas(draft, math);
+	if (probe.formulaError) {
+		setDialogMessage('formula-message', probe.formulaError);
+		return null;
+	}
+	const row = probe.cells.findIndex(value => value !== '');
+	setDialogMessage('formula-message', row < 0
+		? 'The formula is valid. Rows fill in once their inputs have numbers.'
+		: `Row ${row + 1} gives ${probe.cells[row]}.`, 'success');
+	return NeoModel.cleanFormulaText(text);
+}
+
+function applyFormula() {
+	const formula = previewFormula();
+	if (!formula) {
+		if (!document.getElementById('formula-message').textContent) setDialogMessage('formula-message', 'Enter a formula, such as T^2 or 1/L.');
+		document.getElementById('formula-input').focus();
+		return;
+	}
+	const sheet = getActiveSheet();
+	const name = document.getElementById('formula-name').value.trim();
+	const unit = document.getElementById('formula-unit').value.trim();
+	let column = formulaTarget;
+	if (!column) {
+		column = createNewColumn();
+		NeoModel.insertColumn(sheet, sheet.columns.length, column);
+	}
+	column.formula = formula;
+	column.name = (name || formula).slice(0, NeoModel.NAME_MAX_LENGTH);
+	column.unit = unit;
+	closeDialog('formula-dialog');
+	renderTable();
+	afterDataChange({ structure: true });
+	if (!formulaTarget) {
+		const wrap = document.getElementById('neo-table-wrap');
+		if (wrap) wrap.scrollLeft = wrap.scrollWidth;
+	}
+}
+
+/* ---------- Mean of repeats ---------- */
+
+function openMeanDialog() {
+	const sheet = getActiveSheet();
+	const list = document.getElementById('mean-columns');
+	list.querySelectorAll('label').forEach(label => label.remove());
+	sheet.columns.forEach((column, index) => {
+		if (column.role === 'X') return;
+		const label = document.createElement('label');
+		label.className = 'neo-check';
+		const box = document.createElement('input');
+		box.type = 'checkbox';
+		box.value = column.id;
+		box.checked = column.role === 'Y' && !NeoModel.isFormulaColumn(column);
+		label.append(box, ` ${NeoModel.columnLetter(index)}: ${NeoModel.getColumnLabel(sheet, column)}`);
+		list.appendChild(label);
+	});
+	setDialogMessage('mean-message', '');
+	openDialog('mean-dialog');
+	const first = list.querySelector('input');
+	if (first) first.focus();
+}
+
+function applyMean() {
+	const sheet = getActiveSheet();
+	const ids = [...document.querySelectorAll('#mean-columns input:checked')].map(box => box.value);
+	const repeats = sheet.columns.filter(column => ids.includes(column.id));
+	if (repeats.length < 2) {
+		setDialogMessage('mean-message', 'Tick at least two columns of repeat readings.');
+		return;
+	}
+	const base = NeoModel.getRepeatBaseName(repeats.map(column => column.name));
+	const formulas = NeoModel.buildRepeatFormulas(sheet, repeats);
+	const unit = repeats[0].unit;
+	const at = Math.max(...repeats.map(column => sheet.columns.indexOf(column))) + 1;
+	changeColumns(sheet, () => {
+		const mean = createNewColumn({ name: base, unit, role: 'Y', formula: formulas.mean });
+		NeoModel.insertColumn(sheet, at, mean);
+		sheet.fitSeries = mean.id;
+		if (document.getElementById('mean-uncertainty').checked) {
+			NeoModel.insertColumn(sheet, at + 1, createNewColumn({ name: `Δ${base}`, unit, role: 'yErr', formula: formulas.halfSpread }));
+		}
+	});
+	// The repeats' letters were taken before any insertion, and every insertion is to their right.
+	if (document.getElementById('mean-hide').checked) {
+		repeats.forEach((column) => {
+			if (!sheet.hiddenSeries.includes(column.id)) sheet.hiddenSeries.push(column.id);
+		});
+	}
+	closeDialog('mean-dialog');
+	renderTable();
+	afterDataChange({ structure: true });
+	showToast(`Added the mean of ${repeats.length} columns as ${base}.`);
+}
+
+/* ---------- CSV import and export ---------- */
+
+let csvImport = null;
+
+function chooseCsvFile() {
+	const input = document.getElementById('csv-file-input');
+	input.value = '';
+	input.click();
+}
+
+function handleCsvFile(event) {
+	const file = event.target.files && event.target.files[0];
+	if (!file) return;
+	const reader = new FileReader();
+	reader.onload = () => {
+		const rows = NeoModel.parseCsv(String(reader.result || ''));
+		if (!rows.length) {
+			showToast('That file has no rows to import.');
+			return;
+		}
+		const baseName = file.name.replace(/\.(csv|txt)$/i, '').slice(0, NeoModel.SHEET_NAME_MAX_LENGTH);
+		csvImport = { rows, baseName, roles: [] };
+		openCsvDialog();
+	};
+	reader.onerror = () => showToast('The file could not be read.');
+	reader.readAsText(file);
+}
+
+function getCsvHeaders() {
+	return document.getElementById('csv-headers').checked ? csvImport.rows[0] : [];
+}
+
+function openCsvDialog() {
+	const { rows } = csvImport;
+	const width = Math.max(...rows.map(row => row.length));
+	const firstRowIsText = rows.length > 1 && rows[0].some(cell => cell !== '' && !Number.isFinite(NeoModel.parseNumber(cell)));
+	document.getElementById('csv-headers').checked = firstRowIsText;
+	const target = document.getElementById('csv-target');
+	const active = getActiveSheet();
+	const options = [
+		{ value: 'new', label: 'A new sheet' },
+		{ value: 'replace', label: `${getSheetDisplayName(neoState.activeSheet)} (replaces its data)` }
+	];
+	target.replaceChildren(...options.map((option) => {
+		const element = document.createElement('option');
+		element.value = option.value;
+		element.textContent = option.label;
+		return element;
+	}));
+	target.value = NeoModel.isSheetEmpty(active) ? 'replace' : 'new';
+	csvImport.width = width;
+	resetCsvRoles();
+	renderCsvPreview();
+	setDialogMessage('csv-message', '');
+	openDialog('csv-dialog');
+	document.getElementById('csv-apply').focus();
+}
+
+function resetCsvRoles() {
+	const headers = getCsvHeaders();
+	csvImport.roles = NeoModel.guessImportRoles(Array.from({ length: csvImport.width }, (_, index) => headers[index] || ''));
+}
+
+function renderCsvPreview() {
+	const table = document.getElementById('csv-preview');
+	const headers = getCsvHeaders();
+	const data = headers.length ? csvImport.rows.slice(1) : csvImport.rows;
+	const head = document.createElement('thead');
+	const headRow = document.createElement('tr');
+	for (let index = 0; index < csvImport.width; index++) {
+		const th = document.createElement('th');
+		th.className = `neo-col-head role-${csvImport.roles[index].role}`;
+		const select = document.createElement('select');
+		select.className = 'neo-role-select';
+		select.setAttribute('aria-label', `Role of imported column ${NeoModel.columnLetter(index)}`);
+		ROLE_OPTIONS.forEach((option) => {
+			const element = document.createElement('option');
+			element.value = option.value;
+			element.textContent = option.label;
+			select.appendChild(element);
+		});
+		select.value = getRoleOptionValue(csvImport.roles[index]);
+		select.addEventListener('change', () => {
+			const option = ROLE_OPTIONS.find(entry => entry.value === select.value);
+			csvImport.roles[index] = { role: option.role, errorType: option.errorType };
+			th.className = `neo-col-head role-${option.role}`;
+		});
+		const { name, unit } = NeoModel.splitHeader(headers[index] || '');
+		const title = document.createElement('div');
+		title.className = 'neo-csv-name';
+		title.textContent = name || NeoModel.columnLetter(index);
+		const unitLine = document.createElement('div');
+		unitLine.className = 'neo-csv-unit';
+		unitLine.textContent = unit || '—';
+		th.append(select, title, unitLine);
+		headRow.appendChild(th);
+	}
+	head.appendChild(headRow);
+	const body = document.createElement('tbody');
+	data.slice(0, CSV_PREVIEW_ROWS).forEach((row) => {
+		const tr = document.createElement('tr');
+		for (let index = 0; index < csvImport.width; index++) {
+			const td = document.createElement('td');
+			td.className = 'neo-csv-cell';
+			td.textContent = row[index] ?? '';
+			tr.appendChild(td);
+		}
+		body.appendChild(tr);
+	});
+	table.replaceChildren(head, body);
+	const more = data.length > CSV_PREVIEW_ROWS ? `, showing the first ${CSV_PREVIEW_ROWS}` : '';
+	document.getElementById('csv-summary').textContent = `${data.length} ${data.length === 1 ? 'row' : 'rows'} and ${csvImport.width} ${csvImport.width === 1 ? 'column' : 'columns'}${more}.`;
+}
+
+function applyCsvImport() {
+	if (!csvImport) return;
+	if (!csvImport.roles.some(entry => entry.role === 'X')) {
+		setDialogMessage('csv-message', 'Choose an X column: Y columns plot against the nearest X column to their left.');
+		return;
+	}
+	const replace = document.getElementById('csv-target').value === 'replace';
+	let sheet = getActiveSheet();
+	if (replace && !NeoModel.isSheetEmpty(sheet)
+		&& !window.confirm(`Replace all the data in "${getSheetDisplayName(neoState.activeSheet)}"?`)) return;
+	if (!replace) {
+		sheet = NeoModel.createSheet(NeoModel.createIdSource(neoState), csvImport.baseName);
+		neoState.sheets.push(sheet);
+	} else if (!sheet.name) {
+		sheet.name = csvImport.baseName;
+	}
+	NeoModel.importRows(sheet, csvImport.rows, { headers: document.getElementById('csv-headers').checked, roles: csvImport.roles }, NeoModel.createIdSource(neoState));
+	sheet.title = { text: '', automatic: true };
+	closeDialog('csv-dialog');
+	csvImport = null;
+	pruneOrphanFits();
+	switchSheet(neoState.sheets.indexOf(sheet));
+	afterDataChange({ structure: true });
+	showToast('CSV imported.');
+}
+
+async function exportCsv() {
+	const sheet = getActiveSheet();
+	if (NeoModel.isSheetEmpty(sheet)) {
+		showToast('This sheet has no data to export.');
+		return;
+	}
+	const fallback = getSheetDisplayName(neoState.activeSheet);
+	const answer = window.prompt('Filename for the CSV file:', fallback);
+	if (answer === null) return;
+	const filename = `${sanitizeFilename(answer, fallback).replace(/\.csv$/i, '')}.csv`;
+	const blob = new Blob([NeoModel.buildCsv(sheet)], { type: 'text/csv;charset=utf-8' });
+	await saveBlobWithFallback(blob, filename, { title: 'Save CSV file' });
+}
+
+function initializeDialogs() {
+	document.querySelectorAll('.neo-dialog').forEach((dialog) => {
+		dialog.querySelectorAll('[data-close]').forEach(button => button.addEventListener('click', () => closeDialog(dialog.id)));
+		dialog.addEventListener('close', () => {
+			if (dialogOpener && dialogOpener.isConnected) dialogOpener.focus();
+			dialogOpener = null;
+		});
+		// A tap on the backdrop (outside the dialog box) closes it.
+		dialog.addEventListener('click', (event) => {
+			if (event.target === dialog) closeDialog(dialog.id);
+		});
+	});
+	document.getElementById('add-formula-button').addEventListener('click', () => openFormulaDialog(null));
+	document.getElementById('formula-input').addEventListener('input', debounce(previewFormula, 150));
+	document.getElementById('formula-apply').addEventListener('click', applyFormula);
+	document.getElementById('formula-help').addEventListener('click', () => window.open(CUSTOM_FIT_HELP_URL, '_blank', 'noopener,noreferrer'));
+	['formula-input', 'formula-name', 'formula-unit'].forEach((id) => {
+		document.getElementById(id).addEventListener('keydown', (event) => {
+			if (event.key === 'Enter') {
+				event.preventDefault();
+				applyFormula();
+			}
+		});
+	});
+	document.getElementById('mean-button').addEventListener('click', openMeanDialog);
+	document.getElementById('mean-apply').addEventListener('click', applyMean);
+	document.getElementById('import-csv-button').addEventListener('click', chooseCsvFile);
+	document.getElementById('csv-file-input').addEventListener('change', handleCsvFile);
+	document.getElementById('csv-headers').addEventListener('change', () => {
+		resetCsvRoles();
+		renderCsvPreview();
+	});
+	document.getElementById('csv-apply').addEventListener('click', applyCsvImport);
+	document.getElementById('export-csv-button').addEventListener('click', exportCsv);
+}
