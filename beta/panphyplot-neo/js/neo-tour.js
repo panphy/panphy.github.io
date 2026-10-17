@@ -552,6 +552,8 @@ function buildTourCard() {
 
 function startTour() {
 	markTourSeen();
+	// The tour points at every section, so none stays maximized.
+	if (typeof setMaximizedPane === 'function') setMaximizedPane(null);
 	document.body.classList.add('tour-active');
 
 	const practiceBar = document.createElement('div');

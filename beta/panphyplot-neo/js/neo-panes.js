@@ -21,6 +21,45 @@ const PANE_SNAP_DISTANCE = 16;
 // The data pane's share of the space it splits with the graph, before any dragging.
 const PANE_DEFAULT_DATA_SHARE = { wide: 1 / 2.35, medium: 0.95 / 2 };
 
+// The data or graph section can fill the whole workspace, covering the other columns, until its
+// button (or Esc) puts it back. This lasts for the visit only.
+let maximizedPane = null;
+
+function setMaximizedPane(pane) {
+	const app = document.querySelector('.neo-app');
+	if (!app) return;
+	maximizedPane = pane === maximizedPane ? null : pane;
+	if (maximizedPane) app.dataset.maximized = maximizedPane;
+	else delete app.dataset.maximized;
+	document.querySelectorAll('[data-maximize]').forEach((button) => {
+		const name = button.dataset.maximize === 'data' ? 'data section' : 'graph section';
+		const isMax = button.dataset.maximize === maximizedPane;
+		const label = isMax ? `Restore the ${name}` : `Maximize the ${name}`;
+		button.setAttribute('aria-pressed', String(isMax));
+		button.setAttribute('aria-label', label);
+		button.title = isMax ? `${label} (Esc)` : label;
+	});
+}
+
+function initializeMaximizeButtons() {
+	document.querySelectorAll('[data-maximize]').forEach((button) => {
+		button.addEventListener('click', () => {
+			setMaximizedPane(button.dataset.maximize);
+			button.focus({ preventScroll: true });
+		});
+	});
+	// Esc restores, unless something else on the page (a menu, a selection, a dialog) used it.
+	document.addEventListener('keydown', (event) => {
+		if (event.key !== 'Escape' || !maximizedPane || event.defaultPrevented) return;
+		if (document.querySelector('dialog[open]')) return;
+		const menu = document.getElementById('neo-menu');
+		if (menu && !menu.hidden) return;
+		const popup = document.getElementById('popup-container');
+		if (popup && popup.style.display === 'block') return;
+		setMaximizedPane(maximizedPane);
+	});
+}
+
 function readPaneSizes() {
 	try {
 		const saved = JSON.parse(localStorage.getItem(PANES_STORAGE_KEY) || '{}');
@@ -39,6 +78,7 @@ function writePaneSizes(sizes) {
 }
 
 function initializePaneDividers() {
+	initializeMaximizeButtons();
 	const workspace = document.querySelector('.neo-workspace');
 	const dataPane = document.getElementById('data-pane');
 	const inspector = document.getElementById('inspector-pane');

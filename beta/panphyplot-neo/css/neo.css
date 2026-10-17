@@ -2541,6 +2541,75 @@ input[type="number"]:focus {
 	}
 }
 
+/* ---------- Maximized section ---------- */
+
+/* The data or graph section can cover the whole workspace (neo-panes.js); its button swaps
+   between the maximize and restore drawings. */
+.neo-pane-max {
+	align-self: center;
+	margin-left: auto;
+	padding: 6px;
+	min-width: 38px;
+	justify-content: center;
+}
+
+.neo-pane-max .neo-restore-icon,
+.neo-pane-max[aria-pressed="true"] .neo-max-icon {
+	display: none;
+}
+
+.neo-pane-max[aria-pressed="true"] .neo-restore-icon {
+	display: block;
+}
+
+.neo-pane-max[aria-pressed="true"] {
+	color: var(--accent);
+}
+
+@media (pointer: coarse) {
+	.neo-pane-max {
+		min-width: 44px;
+		min-height: 44px;
+	}
+}
+
+.neo-app[data-maximized] {
+	height: 100vh;
+	height: 100dvh;
+}
+
+.neo-app[data-maximized] .neo-workspace {
+	grid-template-columns: minmax(0, 1fr);
+	grid-template-rows: minmax(0, 1fr);
+}
+
+.neo-app[data-maximized] .neo-divider,
+.neo-app[data-maximized="data"] .neo-right,
+.neo-app[data-maximized="graph"] .neo-pane-data,
+.neo-app[data-maximized="graph"] .neo-pane-inspector {
+	display: none;
+}
+
+.neo-app[data-maximized="data"] .neo-table-wrap {
+	flex: 1;
+	max-height: none;
+}
+
+.neo-app[data-maximized="graph"] .neo-right {
+	display: flex;
+	flex-direction: column;
+	min-height: 0;
+	overflow: hidden;
+	margin: 0;
+	padding: 0;
+}
+
+.neo-app[data-maximized="graph"] .neo-pane-graph {
+	flex: 1;
+	height: auto;
+	min-height: 0;
+}
+
 /* ---------- Toast ---------- */
 
 .toast-notification {
