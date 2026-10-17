@@ -95,9 +95,16 @@ function updateFullscreen() {
 function isExpanded() {
   return document.fullscreenElement === viewerPanel || fallbackFullscreen;
 }
+// On a narrow screen the 3D view is short, so the info boxes fold away whenever the layout stacks, keeping the model in sight.
+function foldInfoBoxes() {
+  for (const id of ['measurements', 'endview']) $(id).open = false;
+}
+if (viewerPanel.classList.contains('is-stacked')) foldInfoBoxes();
 function updateLayout() {
   const expanded = isExpanded();
+  const wasStacked = viewerPanel.classList.contains('is-stacked');
   viewerPanel.classList.toggle('is-stacked', expanded ? window.innerHeight > window.innerWidth : window.innerWidth < 1000);
+  if (!wasStacked && viewerPanel.classList.contains('is-stacked')) foldInfoBoxes();
   // On the page a vertical swipe scrolls past the model; in fullscreen every drag turns it.
   renderer.domElement.style.touchAction = expanded ? 'none' : 'pan-y';
 }
@@ -1165,7 +1172,6 @@ function dcStuckReason() {
 function updateEndViewVisibility() {
   const show = state.mode === 'dc' && state.endView;
   $('endview').hidden = !show;
-  document.body.classList.toggle('has-endview', show);
   if (show) drawEndView();
 }
 function setText(id, html) {
@@ -1662,6 +1668,7 @@ $('step').addEventListener('click', () => {
   updateObservation();
 });
 $('measurements').addEventListener('toggle', () => { updateEquation(); drawGraph(); });
+$('endview').addEventListener('toggle', drawEndView);
 
 function updateObservation() {
   if (!sim) return;
