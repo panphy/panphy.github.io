@@ -194,6 +194,20 @@ test('basic polynomial, exponential and power fits produce finite diagnostics on
 		assert.ok(h.run('fittedCurves[0].y.every(Number.isFinite)'),method);
 	}
 });
+test('the general power law y = A(x - x0)^b + c converges and recovers its parameters', () => {
+	const h=harness();
+	const exact = h.core.solveShiftedPowerLaw(Array.from({length:12},(_,i)=>({x:i/2,y:2*(i/2+1)**1.5+1})));
+	assert.equal(exact.converged,true);
+	near(exact.params.A,2,1e-6);near(exact.params.b,1.5,1e-6);near(exact.params.x0,-1,1e-6);near(exact.params.c,1,1e-6);
+	const inverse = h.core.solveShiftedPowerLaw([1,1.5,2,3,4,5,6].map(x=>({x,y:3*x**-2+.5})));
+	near(inverse.params.b,-2,1e-6);near(inverse.params.c,.5,1e-6);
+	// Pendulum periods, T = 2π√(L/g) with rounding: the old multi-guess search stalled here.
+	h.elements['fit-method'].value='Power';
+	h.setRows([[.2,.9067],[.3,1.1],[.4,1.27],[.5,1.42],[.6,1.55],[.7,1.68],[.8,1.797],[.9,1.9]]);h.context.fitCurve();
+	assert.deepEqual(h.context.alerts,[]);
+	assert.match(h.run('datasetFitResults[0].status'),/^Converged in \d+ iterations\.$/);
+	assert.ok(Number(h.run('datasetFitResults[0].rSquared'))>.9999);
+});
 test('sinusoidal and custom solvers preserve convergence metadata', () => {
 	const h=harness();
 	const sinusoidal = h.core.solveSinusoidal(Array.from({length:41},(_,i)=>({x:i/10,y:2*Math.sin(3*i/10-.2)+1})),{A:1.8,b:0,k:3,phi:0,c:1});

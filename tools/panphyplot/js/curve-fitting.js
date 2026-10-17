@@ -48,6 +48,7 @@ const evaluateCustomExpression = fromFitCore('evaluateCustomExpression');
 const buildCustomResidualFn = fromFitCore('buildCustomResidualFn');
 const buildCustomJacobianFn = fromFitCore('buildCustomJacobianFn');
 const solveCustomMultiStart = fromFitCore('solveCustomMultiStart');
+const solveShiftedPowerLaw = fromFitCore('solveShiftedPowerLaw');
 
 const debouncedRefreshCustomFitDefinition = debounce(() => {
 	refreshCustomFitDefinition({ preserveUserValues: true });
@@ -1500,67 +1501,11 @@ function performPowerFit() {
 		const xValues = validData.map(p => p.x);
 		const yValues = validData.map(p => p.y);
 
-		// 2. Generate multiple initial guesses for x0 and c
-		//    We'll sample around (xMin - a bit, yMin - a bit) and also near medians.
-		const { min: xMin } = minMaxFinite(xValues);
-		const xMed = median(xValues);
-		const { min: yMin } = minMaxFinite(yValues);
-		const yMed = median(yValues);
-
-		const guessPairs = [
-			// Minimal offset guess
-			[xMin - 1e-3, yMin - 1e-3],
-			// Slightly bigger offset
-			[xMed - 0.01, yMed - 0.01],
-			// Another guess further
-			[xMin - 0.1, yMin - 0.1],
-		];
-
-		let bestParams = null;
-		let bestCost = Infinity;
-		let solver = null;
-
-		// 3. Try each (x0, c) guess
-		for (const [x0Guess, cGuess] of guessPairs) {
-			// 3a. Shift x0 or c if needed so that all (x - x0) > 0 and (y - c) > 0 for the log approach
-			let shiftedX0 = x0Guess;
-			let shiftedC = cGuess;
-
-			// Ensure (x - x0) > 0 for all x if we want to do an initial log transform
-			// (Avoid potentially huge while-loops for large domains.)
-			const { min: minX } = minMaxFinite(xValues);
-			if (!(minX - shiftedX0 > 0)) shiftedX0 = minX - 1e-6;
-			let z = xValues.map(x => x - shiftedX0);
-
-			// Ensure (y - c) > 0 for initial log transform
-			const { min: minY } = minMaxFinite(yValues);
-			if (!(minY - shiftedC > 0)) shiftedC = minY - 1e-6;
-			let w = yValues.map(y => y - shiftedC);
-
-			// 3b. Compute initial A, b via linear regression on log-log
-			const lnZ = z.map(zi => Math.log(zi));
-			const lnW = w.map(wi => Math.log(wi));
-			const { slope: bInitial, intercept: lnAInitial } = computeLinearFit(lnZ, lnW);
-			const AInitial = Math.exp(lnAInitial);
-
-			const initialParams = [AInitial, bInitial, shiftedX0, shiftedC];
-			if (initialParams.some(v => !Number.isFinite(v))) {
-				initialParams[0] = 1;
-				initialParams[1] = 1;
-				initialParams[2] = shiftedX0;
-				initialParams[3] = shiftedC;
-			}
-
-			// 3c. Run LM from this initial guess
-			const result = levenbergMarquardt(validData, initialParams, computeResiduals, computeJacobian);
-
-			// 3d. Check if it's the best so far
-			if (result.cost < bestCost) {
-				bestCost = result.cost;
-				bestParams = result.params;
-				solver = result;
-			}
-		}
+		// 2. Solve y = A (x - x0)^b + c: A and c are exact for each (x0, b) in a scan, then all
+		//    four parameters are polished together (PanPhyFitCore.solveShiftedPowerLaw).
+		const solution = solveShiftedPowerLaw(validData);
+		const solver = solution;
+		const bestParams = solution ? [solution.params.A, solution.params.b, solution.params.x0, solution.params.c] : null;
 
 		// 4. Use the best parameters found
 		if (!bestParams) {
@@ -1625,87 +1570,6 @@ function performPowerFit() {
 		console.error("Error performing power fit:", error);
 		alert("An error occurred during power fitting. Please check the console for details.");
 	}
-}
-
-
-function computeResiduals(params, data) {
-	const [A, b, x0, c] = params;
-	return data.map(({ x, y }) => {
-		const term = x - x0;
-		if (term <= 0 && !Number.isInteger(b)) {
-			// For non-integer b, negative base is invalid -> large penalty
-			return 1e6;
-		}
-		let yPred;
-		try {
-			yPred = A * Math.pow(term, b) + c;
-			if (!Number.isFinite(yPred)) {
-				return 1e6;
-			}
-		} catch {
-			return 1e6;
-		}
-		return yPred - y;
-	});
-}
-
-
-function computeJacobian(params, data) {
-	const [A, b, x0, c] = params;
-	return data.map(({ x, y }) => {
-		const term = x - x0;
-		// Default partial derivatives
-		let dA = 0,
-			db = 0,
-			dx0 = 0,
-			dc = 0;
-
-		if (term <= 0 && !Number.isInteger(b)) {
-			// invalid region -> residual ~ 1e6 w.r.t. everything
-			// For continuity, let's set derivatives near zero (or 0.0)
-			return [0, 0, 0, 0];
-		}
-
-		// yPred = A * term^b + c
-		// residual = yPred - y
-		// => partial residual / partial param = partial yPred / partial param
-		// partial wrt A = term^b
-		// partial wrt b = A * term^b * ln(term)
-		// partial wrt x0 = -A * b * term^(b-1)
-		// partial wrt c = 1
-
-		try {
-			// term^b
-			const basePow = Math.pow(term, b);
-			const lnTerm = Math.log(term);
-
-			dA = basePow;
-			db = A * basePow * lnTerm;
-			dx0 = -A * b * Math.pow(term, b - 1);
-			dc = 1;
-
-			// If any are NaN or infinite, set to 0
-			if (!Number.isFinite(dA)) dA = 0;
-			if (!Number.isFinite(db)) db = 0;
-			if (!Number.isFinite(dx0)) dx0 = 0;
-		} catch {
-			// In case of domain errors
-			dA = db = dx0 = dc = 0;
-		}
-
-		return [dA, db, dx0, dc];
-	});
-}
-
-
-function median(arr) {
-	if (!arr.length) return NaN;
-	const sorted = [...arr].sort((a, b) => a - b);
-	const mid = Math.floor(sorted.length / 2);
-	if (sorted.length % 2 === 0) {
-		return 0.5 * (sorted[mid - 1] + sorted[mid]);
-	}
-	return sorted[mid];
 }
 
 
