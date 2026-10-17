@@ -1245,9 +1245,13 @@ function finalizeParametricFit(data, spec) {
 	const sse = p => data.reduce((sum, point) => sum + (spec.model(p, point.x) - point.y) ** 2, 0);
 	if (spec.refine !== false) {
 		const refined = runLeastSquares(data, params, spec.model, null);
-		if (refined && sse(refined.params) <= sse(params)) {
+		const before = sse(params);
+		const after = refined ? sse(refined.params) : Infinity;
+		if (after <= before) {
 			params = refined.params;
-			solver = refined;
+			// A refinement that wanders along a flat valley without real gain does not overrule the
+			// method's own verdict (as with a power law fitted to a straight line).
+			if (refined.converged || before - after > 1e-6 * Math.max(before, Number.MIN_VALUE)) solver = refined;
 		}
 	}
 	let weighted = false;
@@ -1354,9 +1358,11 @@ function updateResults(equation, x, y, fitFunction, datasetIndex = activeFitKey,
 		result.chi2 = PanPhyNeoStats.chiSquared(residuals.map(point => point.y), sigmas);
 		result.dof = x.length - parameterCount;
 	}
+	if (extras.statusOverride) result.status = extras.statusOverride;
 	if (extras.statusNote) result.status += extras.statusNote;
 	delete result.chiSigmas;
 	delete result.statusNote;
+	delete result.statusOverride;
 	datasetFitResults[datasetIndex] = result;
 	if (datasetIndex === activeFitKey) renderFittingResult(equation, result.rSquared);
 	scheduleSaveState();
@@ -1763,7 +1769,14 @@ function performPowerFit() {
 		const cText = c >= 0 ? ` + ${formatFitNumber(c)}` : ` - ${formatFitNumber(Math.abs(c))}`;
 		const equation = `y = ${formatFitNumber(A)}(x${x0Text})^{${formatFitNumber(b)}}${cText}`;
 		fittedCurves[activeFitKey] = { x: xFit, y: yFit, equation };
-		updateResults(equation, data.map(p => p.x), data.map(p => p.y), fitFunction, activeFitKey, final.solver || solution, { kind: 'basic', method: 'Power' }, fitExtras(final));
+		const solver = final.solver || solution;
+		const extras = fitExtras(final);
+		// Without convergence here the cause is the data, not a starting guess: near b = 1 (a straight
+		// line) or with few points, A, x0 and c can trade off and many combinations fit almost equally.
+		if (!solver.converged) {
+			extras.statusOverride = 'The four parameters are not pinned down by this data: many combinations of A, x₀ and c fit almost equally well, as their ± values show. If theory fixes x₀ or c, a Custom fit such as A*x^b pins them; a straight line suits Linear.';
+		}
+		updateResults(equation, data.map(p => p.x), data.map(p => p.y), fitFunction, activeFitKey, solver, { kind: 'basic', method: 'Power' }, extras);
 		plotGraph(xFit, yFit);
 	} catch (error) {
 		console.error('Error performing power fit:', error);

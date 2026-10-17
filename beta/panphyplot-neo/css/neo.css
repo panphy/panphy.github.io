@@ -1967,6 +1967,39 @@ input[type="number"]:focus {
 	overflow-x: auto;
 }
 
+/* Fit quality: a separate group under the parameters. */
+.neo-fit-quality {
+	margin-top: 14px;
+	padding-top: 10px;
+	border-top: 1px solid var(--line-strong);
+}
+
+.neo-fit-quality[hidden] {
+	display: none;
+}
+
+.neo-fit-quality-label {
+	margin: 0 0 4px;
+	font-family: var(--font-mono);
+	font-weight: 600;
+	font-size: 0.64rem;
+	letter-spacing: 0.1em;
+	text-transform: uppercase;
+	color: var(--ink-3);
+}
+
+.neo-fit-quality #r-squared-container,
+#fit-quality-details p {
+	margin: 0;
+	padding: 4px 2px;
+	font-size: 0.9rem;
+	overflow-x: auto;
+}
+
+#fit-quality-details .neo-chi {
+	margin: 2px 0 6px;
+}
+
 .neo-chi {
 	display: inline-flex;
 	align-items: center;
