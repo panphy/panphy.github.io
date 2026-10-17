@@ -16,6 +16,10 @@ const PANE_LIMITS = {
 	inspectorDefault: 340
 };
 const PANE_KEY_STEP = 16;
+// Within this distance of its starting position, a dragged divider snaps back onto it.
+const PANE_SNAP_DISTANCE = 16;
+// The data pane's share of the space it splits with the graph, before any dragging.
+const PANE_DEFAULT_DATA_SHARE = { wide: 1 / 2.35, medium: 0.95 / 2 };
 
 function readPaneSizes() {
 	try {
@@ -104,12 +108,25 @@ function initializePaneDividers() {
 		apply();
 	}
 
-	function reset(which) {
+	function reset(which, persist = true) {
 		const layout = currentLayout();
 		if (!layout || !sizes[layout]) return;
 		delete sizes[layout][which];
 		apply();
-		writePaneSizes(sizes);
+		if (persist) writePaneSizes(sizes);
+	}
+
+	// Where each divider sits before it is dragged, for the current layout and window.
+	function defaultWidth(which) {
+		if (which === 'inspector') return PANE_LIMITS.inspectorDefault;
+		const layout = currentLayout();
+		return clampData(getShareableWidth() * (PANE_DEFAULT_DATA_SHARE[layout] || 0.5));
+	}
+
+	// A width near the starting position snaps onto it, which clears the saved width.
+	function saveOrSnap(which, width) {
+		if (Math.abs(width - defaultWidth(which)) <= PANE_SNAP_DISTANCE) reset(which, false);
+		else save(which, width);
 	}
 
 	function measure(which) {
@@ -148,7 +165,7 @@ function initializePaneDividers() {
 			}
 			// The data divider grows the data pane rightwards; the inspector divider grows it leftwards.
 			const delta = event.clientX - startX;
-			save(which, which === 'data' ? clampData(startWidth + delta) : clampInspector(startWidth - delta));
+			saveOrSnap(which, which === 'data' ? clampData(startWidth + delta) : clampInspector(startWidth - delta));
 		});
 		divider.addEventListener('pointerup', finish);
 		divider.addEventListener('pointercancel', finish);
@@ -173,7 +190,12 @@ function initializePaneDividers() {
 				default: return;
 			}
 			event.preventDefault();
-			save(which, clamp(next));
+			// Arrow steps that pass over the starting position stop on it, as dragging does.
+			const start = defaultWidth(which);
+			const target = clamp(next);
+			const crosses = (width - start) * (target - start) < 0;
+			if (crosses) reset(which, false);
+			else save(which, target);
 			writePaneSizes(sizes);
 		});
 	});

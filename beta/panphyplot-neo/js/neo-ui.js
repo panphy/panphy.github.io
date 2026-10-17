@@ -351,7 +351,19 @@ function buildHeaderCell(sheet, column, index) {
 	const preview = document.createElement('div');
 	preview.className = 'neo-col-preview';
 
-	th.append(top, name, unit, preview);
+	const resizer = document.createElement('div');
+	resizer.className = 'neo-col-resize';
+	resizer.title = 'Drag to change the column width; double-click for the default width';
+	resizer.setAttribute('aria-hidden', 'true');
+	resizer.addEventListener('pointerdown', event => startColumnResize(event, sheet, column, th));
+	resizer.addEventListener('dblclick', () => {
+		column.width = null;
+		applyColumnWidth(th, column);
+		scheduleSaveState();
+	});
+	applyColumnWidth(th, column);
+
+	th.append(top, name, unit, preview, resizer);
 	renderFormulaLine(th, column, sheet);
 	renderHeaderPreview(th, sheet, column);
 	return th;
@@ -647,6 +659,47 @@ function moveColumn(sheet, column, offset) {
 	afterDataChange({ structure: true });
 	const button = document.querySelector(`.neo-col-head[data-column-id="${column.id}"] .neo-col-menu-button`);
 	if (button) button.focus();
+}
+
+/* ---------- Column widths ---------- */
+
+function applyColumnWidth(th, column) {
+	const width = column.width ? `${column.width}px` : '';
+	th.style.width = width;
+	th.style.minWidth = width;
+	th.style.maxWidth = width;
+	if (column.width) th.style.setProperty('--formula-max', `${column.width - 14}px`);
+	else th.style.removeProperty('--formula-max');
+}
+
+// Dragging the right edge of a column's heading sets its width, as in a spreadsheet.
+function startColumnResize(event, sheet, column, th) {
+	if (!event.isPrimary || event.button !== 0) return;
+	event.preventDefault();
+	event.stopPropagation();
+	const handle = event.currentTarget;
+	const pointerId = event.pointerId;
+	const startX = event.clientX;
+	const startWidth = th.getBoundingClientRect().width;
+	handle.setPointerCapture(pointerId);
+	document.body.classList.add('neo-is-resizing');
+	const move = (moveEvent) => {
+		if (moveEvent.pointerId !== pointerId) return;
+		const width = Math.min(Math.max(startWidth + moveEvent.clientX - startX, NeoModel.COLUMN_WIDTH_MIN), NeoModel.COLUMN_WIDTH_MAX);
+		column.width = Math.round(width);
+		applyColumnWidth(th, column);
+	};
+	const end = () => {
+		handle.removeEventListener('pointermove', move);
+		handle.removeEventListener('pointerup', end);
+		handle.removeEventListener('pointercancel', end);
+		document.body.classList.remove('neo-is-resizing');
+		if (handle.hasPointerCapture(pointerId)) handle.releasePointerCapture(pointerId);
+		scheduleSaveState();
+	};
+	handle.addEventListener('pointermove', move);
+	handle.addEventListener('pointerup', end);
+	handle.addEventListener('pointercancel', end);
 }
 
 /* ---------- Dragging columns ---------- */
@@ -1227,6 +1280,12 @@ function initializeInterface() {
 
 	document.getElementById('add-row-button').addEventListener('click', addRow);
 	document.getElementById('sample-data-button').addEventListener('click', loadSampleData);
+	document.getElementById('residual-toggle').addEventListener('click', () => {
+		neoState.showResiduals = !neoState.showResiduals;
+		forceReplot();
+		plotResiduals();
+		scheduleSaveState();
+	});
 	document.getElementById('tab-conflict-reload').addEventListener('click', () => resolveTabConflict(false));
 	document.getElementById('tab-conflict-keep').addEventListener('click', () => resolveTabConflict(true));
 	document.getElementById('equation-decimals-more').addEventListener('click', () => changeEquationDecimals(1));

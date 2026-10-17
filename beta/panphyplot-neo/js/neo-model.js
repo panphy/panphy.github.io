@@ -4,6 +4,9 @@
 	const ROLES = ['X', 'Y', 'xErr', 'yErr', 'none'];
 	const ERROR_TYPES = ['absolute', 'percentage'];
 	const DEFAULT_ROWS = 10;
+	// Column widths in pixels; null means the default width.
+	const COLUMN_WIDTH_MIN = 72;
+	const COLUMN_WIDTH_MAX = 420;
 	// Decimal places of the displayed fitted equation.
 	const EQUATION_DECIMALS_DEFAULT = 2;
 	const EQUATION_DECIMALS_MAX = 8;
@@ -42,6 +45,7 @@
 			unit: typeof options.unit === 'string' ? options.unit.slice(0, NAME_MAX_LENGTH) : '',
 			role: ROLES.includes(options.role) ? options.role : 'Y',
 			errorType: ERROR_TYPES.includes(options.errorType) ? options.errorType : 'absolute',
+			width: Number.isFinite(options.width) ? Math.round(Math.min(Math.max(options.width, COLUMN_WIDTH_MIN), COLUMN_WIDTH_MAX)) : null,
 			formula: typeof options.formula === 'string' ? options.formula : '',
 			propagateFrom: typeof options.propagateFrom === 'string' ? options.propagateFrom : '',
 			cells
@@ -324,6 +328,7 @@
 			curves: saved.curves && typeof saved.curves === 'object' ? saved.curves : {},
 			customFits: saved.customFits && typeof saved.customFits === 'object' ? saved.customFits : {},
 			weightFits: saved.weightFits === true,
+			showResiduals: saved.showResiduals === true,
 			equationDecimals: Number.isInteger(saved.equationDecimals)
 				? Math.min(Math.max(saved.equationDecimals, 0), EQUATION_DECIMALS_MAX)
 				: EQUATION_DECIMALS_DEFAULT
@@ -861,6 +866,8 @@
 	const api = {
 		ROLES,
 		DEFAULT_ROWS,
+		COLUMN_WIDTH_MIN,
+		COLUMN_WIDTH_MAX,
 		EQUATION_DECIMALS_DEFAULT,
 		EQUATION_DECIMALS_MAX,
 		NAME_MAX_LENGTH,
