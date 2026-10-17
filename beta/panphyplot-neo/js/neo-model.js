@@ -4,6 +4,9 @@
 	const ROLES = ['X', 'Y', 'xErr', 'yErr', 'none'];
 	const ERROR_TYPES = ['absolute', 'percentage'];
 	const DEFAULT_ROWS = 10;
+	// Decimal places of the displayed fitted equation.
+	const EQUATION_DECIMALS_DEFAULT = 2;
+	const EQUATION_DECIMALS_MAX = 8;
 	const NAME_MAX_LENGTH = 40;
 	const SHEET_NAME_MAX_LENGTH = 20;
 	const NUMBER_PATTERN = /^[+-]?(?:\d+(?:\.\d*)?|\.\d+)(?:[eE][+-]?\d+)?$/;
@@ -72,7 +75,7 @@
 	}
 
 	function createState() {
-		const state = { version: 1, nextId: 0, activeSheet: 0, latexMode: false, sheets: [], fits: {}, curves: {}, customFits: {} };
+		const state = { version: 1, nextId: 0, activeSheet: 0, latexMode: false, equationDecimals: EQUATION_DECIMALS_DEFAULT, sheets: [], fits: {}, curves: {}, customFits: {} };
 		state.sheets.push(createSheet(createIdSource(state), ''));
 		return state;
 	}
@@ -287,7 +290,10 @@
 			fits: saved.fits && typeof saved.fits === 'object' ? saved.fits : {},
 			curves: saved.curves && typeof saved.curves === 'object' ? saved.curves : {},
 			customFits: saved.customFits && typeof saved.customFits === 'object' ? saved.customFits : {},
-			weightFits: saved.weightFits === true
+			weightFits: saved.weightFits === true,
+			equationDecimals: Number.isInteger(saved.equationDecimals)
+				? Math.min(Math.max(saved.equationDecimals, 0), EQUATION_DECIMALS_MAX)
+				: EQUATION_DECIMALS_DEFAULT
 		};
 		const ids = createIdSource(state);
 		const seen = new Set();
@@ -729,6 +735,8 @@
 	const api = {
 		ROLES,
 		DEFAULT_ROWS,
+		EQUATION_DECIMALS_DEFAULT,
+		EQUATION_DECIMALS_MAX,
 		NAME_MAX_LENGTH,
 		SHEET_NAME_MAX_LENGTH,
 		parseNumber,

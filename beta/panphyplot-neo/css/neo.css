@@ -1663,6 +1663,84 @@ input[type="number"]:focus {
 	border-color: var(--accent);
 }
 
+/* Increase and decrease decimal places, drawn like the spreadsheet buttons. */
+.neo-decimals {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	gap: 0;
+	width: max-content;
+	margin: -2px auto 12px;
+	padding: 2px;
+	border: 1px solid var(--line-strong);
+	border-radius: 999px;
+	background: var(--surface);
+}
+
+.neo-decimals[hidden] {
+	display: none;
+}
+
+.neo-decimals-button {
+	display: inline-grid;
+	place-items: center;
+	width: 44px;
+	height: 30px;
+	padding: 0;
+	border: none;
+	border-radius: 999px;
+	background: none;
+	color: var(--ink);
+	cursor: pointer;
+}
+
+.neo-decimals-button:hover:not(:disabled) {
+	background: var(--accent-soft);
+	color: var(--accent);
+}
+
+.neo-decimals-button:disabled {
+	opacity: 0.35;
+	cursor: default;
+}
+
+.neo-decimals-button svg {
+	width: 34px;
+	height: 24px;
+}
+
+.neo-decimals-button text {
+	fill: currentColor;
+	font-family: var(--font-mono);
+	font-size: 10.5px;
+	font-weight: 600;
+}
+
+.neo-decimals-arrow {
+	fill: none;
+	stroke: var(--accent);
+	stroke-width: 1.6;
+	stroke-linecap: round;
+	stroke-linejoin: round;
+}
+
+.neo-decimals-count {
+	min-width: 3.4em;
+	padding: 0 4px;
+	border-inline: 1px solid var(--line);
+	font-family: var(--font-mono);
+	font-size: 0.74rem;
+	text-align: center;
+	color: var(--ink-2);
+}
+
+@media (pointer: coarse) {
+	.neo-decimals-button {
+		width: 48px;
+		height: 40px;
+	}
+}
+
 #r-squared-container {
 	margin: 0 0 6px;
 	font-size: 0.9rem;
