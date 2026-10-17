@@ -158,6 +158,59 @@ function applyFormula() {
 	}
 }
 
+/* ---------- Fill with one value ---------- */
+
+let fillTarget = null;
+
+function openFillDialog(sheet, column) {
+	const target = NeoModel.getFillTarget(sheet, column);
+	fillTarget = { sheet, column, rows: target.rows, owner: target.owner };
+	const label = NeoModel.getColumnLabel(sheet, column);
+	const percent = (column.role === 'xErr' || column.role === 'yErr') && column.errorType === 'percentage';
+	document.getElementById('fill-dialog-title').textContent = column.name.trim() ? `Fill ${label}` : `Fill column ${label}`;
+	document.getElementById('fill-unit').textContent = percent ? '%' : (column.unit || '');
+	const count = target.rows.length;
+	const rowsText = `${count} ${count === 1 ? 'row' : 'rows'}`;
+	const summary = !count
+		? (target.owner
+			? `${NeoModel.getColumnLabel(sheet, target.owner)} has no readings yet, so there is nothing to fill.`
+			: 'This sheet has no data yet, so there is nothing to fill.')
+		: target.owner
+			? `Sets ${label} in the ${rowsText} that have a reading of ${NeoModel.getColumnLabel(sheet, target.owner)}. Rows without a reading stay empty.`
+			: `Sets ${label} in the ${rowsText} that have data.`;
+	document.getElementById('fill-summary').textContent = summary;
+	const input = document.getElementById('fill-value');
+	input.value = '';
+	input.disabled = !count;
+	document.getElementById('fill-apply').disabled = !count;
+	setDialogMessage('fill-message', '');
+	openDialog('fill-dialog');
+	(count ? input : document.querySelector('#fill-dialog [data-close]')).focus();
+}
+
+function applyFill() {
+	if (!fillTarget || !fillTarget.rows.length) return;
+	const { sheet, column, rows } = fillTarget;
+	const value = document.getElementById('fill-value').value.trim();
+	if (!Number.isFinite(NeoModel.parseNumber(value))) {
+		setDialogMessage('fill-message', 'Enter a number such as 0.05 or 2e-3.');
+		document.getElementById('fill-value').focus();
+		return;
+	}
+	if (NeoModel.isCellInvalid(column, value)) {
+		setDialogMessage('fill-message', column.errorType === 'percentage'
+			? 'A percentage uncertainty must be greater than zero.'
+			: 'An uncertainty cannot be negative.');
+		return;
+	}
+	rows.forEach((row) => { column.cells[row] = value; });
+	closeDialog('fill-dialog');
+	fillTarget = null;
+	renderTable();
+	afterDataChange();
+	showToast(`Filled ${rows.length} ${rows.length === 1 ? 'row' : 'rows'} of ${NeoModel.getColumnLabel(sheet, column)}.`);
+}
+
 /* ---------- Mean of repeats ---------- */
 
 function openMeanDialog() {
@@ -391,6 +444,13 @@ function initializeDialogs() {
 				applyFormula();
 			}
 		});
+	});
+	document.getElementById('fill-apply').addEventListener('click', applyFill);
+	document.getElementById('fill-value').addEventListener('keydown', (event) => {
+		if (event.key === 'Enter') {
+			event.preventDefault();
+			applyFill();
+		}
 	});
 	document.getElementById('mean-button').addEventListener('click', openMeanDialog);
 	document.getElementById('mean-apply').addEventListener('click', applyMean);

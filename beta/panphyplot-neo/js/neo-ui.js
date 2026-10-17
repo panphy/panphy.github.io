@@ -607,19 +607,9 @@ function insertColumnAfter(sheet, column) {
 	afterDataChange({ structure: true });
 }
 
-// The usual way to give every reading the same uncertainty, e.g. ±0.05 s.
+// The usual way to give every reading the same uncertainty, e.g. ±0.05 s (neo-dialogs.js).
 function fillColumn(sheet, column) {
-	const label = NeoModel.getColumnLabel(sheet, column);
-	const answer = window.prompt(`Value for every row of ${label}:`, '');
-	if (answer === null) return;
-	const value = answer.trim();
-	if (value && !Number.isFinite(NeoModel.parseNumber(value))) {
-		showToast('Enter a number such as 0.05 or 2e-3.');
-		return;
-	}
-	column.cells = column.cells.map(() => value);
-	renderTable();
-	afterDataChange();
+	openFillDialog(sheet, column);
 }
 
 function clearColumn(sheet, column) {
