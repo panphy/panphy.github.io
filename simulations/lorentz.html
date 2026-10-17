@@ -57,9 +57,8 @@
             --axis-moving: #3b82f6;
             --light-cone: #94a3b8;
             --event-rest: #10b981;
-            --event-moving: #f43f5e;
+            --event: #f43f5e;
             --velocity-line-u: #22c55e;
-            --velocity-line-u-prime: #f97316;
 
             --table-border: #E8E4DD;
             --table-header-bg: #F0ECE4;
@@ -106,9 +105,8 @@
             --axis-moving: #60a5fa;
             --light-cone: #64748b;
             --event-rest: #34d399;
-            --event-moving: #fb7185;
+            --event: #fb7185;
             --velocity-line-u: #4ade80;
-            --velocity-line-u-prime: #fb923c;
 
             --table-border: #3A3A36;
             --table-header-bg: #1E1E1C;
@@ -556,14 +554,128 @@
             border-top: 1px solid var(--context-menu-border);
         }
 
-        .valueBadge {
-            background: rgba(194, 65, 12, 0.12);
-            color: var(--brand-primary);
+        /* Frame switch */
+        .segmented {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 4px;
+            padding: 4px;
+            border-radius: 14px;
+            background: var(--table-header-bg);
+            border: 1px solid var(--card-border);
+        }
+
+        .segmented button {
+            background: transparent;
+            color: var(--text-main);
+            box-shadow: none;
+            border-radius: 10px;
+            padding: 8px 6px;
+        }
+
+        .segmented button:hover {
+            background: var(--context-menu-hover);
+            transform: none;
+        }
+
+        .segmented button[aria-pressed="true"] {
+            background: var(--btn-bg);
+            color: var(--btn-text);
+        }
+
+        /* Velocity steppers and readouts */
+        .value-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .stepper {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .stepper button {
+            width: 36px;
+            height: 36px;
+            padding: 0;
+            border-radius: 10px;
+            border: 1px solid var(--card-border);
+            background: var(--card-bg);
+            color: var(--text-main);
+            box-shadow: none;
+            font-size: 1.1rem;
+            line-height: 1;
+        }
+
+        .stepper button:hover {
+            background: var(--context-menu-hover);
+            border-color: var(--brand-primary);
+            transform: none;
+        }
+
+        .stepper input,
+        .coord-input {
+            font-family: var(--font-mono);
+            color: var(--text-main);
+            text-align: center;
+            -moz-appearance: textfield;
+            appearance: textfield;
+        }
+
+        .stepper input {
+            width: 70px;
+            height: 36px;
+            font-size: 0.9rem;
+            border: 1px solid var(--card-border);
+            border-radius: 10px;
+            background: var(--card-bg);
+        }
+
+        .stepper input::-webkit-outer-spin-button,
+        .stepper input::-webkit-inner-spin-button,
+        .coord-input::-webkit-outer-spin-button,
+        .coord-input::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+
+        .stepper input:focus-visible,
+        .coord-input:focus-visible {
+            outline: 2px solid var(--brand-primary);
+            outline-offset: 1px;
+        }
+
+        .unit {
+            font-family: var(--font-mono);
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            margin-left: 2px;
+        }
+
+        .readout {
+            font-family: var(--font-mono);
+            font-size: 0.85rem;
             font-weight: 600;
-            padding: 2px 10px;
+            color: var(--brand-primary);
+            background: rgba(194, 65, 12, 0.12);
+            padding: 4px 10px;
             border-radius: 999px;
-            font-size: 0.8rem;
-            width: fit-content;
+            white-space: nowrap;
+        }
+
+        @media (pointer: coarse) {
+            .stepper button {
+                width: 48px;
+                height: 48px;
+            }
+
+            .stepper input {
+                height: 48px;
+            }
         }
 
         button {
@@ -642,6 +754,46 @@
         #coordinates th {
             font-weight: 600;
             background: var(--table-header-bg);
+        }
+
+        #coordinates .frame-sp {
+            color: var(--axis-moving);
+        }
+
+        #coordinates td:has(.coord-input) {
+            padding: 2px;
+        }
+
+        #coordinates tr.selected td {
+            background: rgba(244, 63, 94, 0.08);
+        }
+
+        #coordinates .event-label {
+            font-weight: 700;
+        }
+
+        #coordinates .empty-row,
+        #coordinates .table-hint {
+            color: var(--text-secondary);
+            font-size: 0.78rem;
+        }
+
+        .coord-input {
+            width: 100%;
+            min-width: 0;
+            font-size: 0.78rem;
+            padding: 4px 2px;
+            border: 1px solid transparent;
+            border-radius: 6px;
+            background: transparent;
+        }
+
+        .coord-input:hover {
+            border-color: var(--card-border);
+        }
+
+        .coord-input.frame-sp {
+            color: var(--axis-moving);
         }
 
         /* Context Menu */
@@ -790,29 +942,33 @@
                     <div class="section-header">Controls</div>
                     <div class="controls-grid">
                         <label class="toggle-row">
-                            <span class="toggle-label">Rest Frame Grid</span>
+                            <span class="toggle-label">Frame S Axes</span>
+                            <input type="checkbox" class="toggle-input" id="restAxesToggle" checked>
+                            <span class="toggle-switch"></span>
+                        </label>
+                        <label class="toggle-row">
+                            <span class="toggle-label">Frame S Grid</span>
                             <input type="checkbox" class="toggle-input" id="gridToggle" checked>
                             <span class="toggle-switch"></span>
                         </label>
                         <label class="toggle-row">
-                            <span class="toggle-label">Rest Frame Events</span>
-                            <input type="checkbox" class="toggle-input" id="restEventsToggle" checked>
+                            <span class="toggle-label">Events</span>
+                            <input type="checkbox" class="toggle-input" id="eventsToggle" checked>
                             <span class="toggle-switch"></span>
                         </label>
-                        <div class="toggle-row-spacer" aria-hidden="true"></div>
                         <label class="toggle-row">
-                            <span class="toggle-label">Moving Frame Grid</span>
+                            <span class="toggle-label">Frame S′ Axes</span>
+                            <input type="checkbox" class="toggle-input" id="movingAxesToggle" checked>
+                            <span class="toggle-switch"></span>
+                        </label>
+                        <label class="toggle-row">
+                            <span class="toggle-label">Frame S′ Grid</span>
                             <input type="checkbox" class="toggle-input" id="movingGridToggle">
                             <span class="toggle-switch"></span>
                         </label>
                         <label class="toggle-row">
-                            <span class="toggle-label">Moving Frame Axes</span>
-                            <input type="checkbox" class="toggle-input" id="movingAxesToggle">
-                            <span class="toggle-switch"></span>
-                        </label>
-                        <label class="toggle-row">
-                            <span class="toggle-label">Moving Frame Events</span>
-                            <input type="checkbox" class="toggle-input" id="movingEventsToggle" checked>
+                            <span class="toggle-label">Projection Lines</span>
+                            <input type="checkbox" class="toggle-input" id="projectionsToggle" checked>
                             <span class="toggle-switch"></span>
                         </label>
                     </div>
@@ -820,16 +976,33 @@
             </div>
 
             <div id="controlsContainer">
+                <!-- Diagram frame -->
+                <div class="control-section">
+                    <div class="section-header">Draw the Diagram in</div>
+                    <div class="segmented" role="group" aria-label="Frame the diagram is drawn in">
+                        <button type="button" id="viewSBtn" aria-pressed="true">Frame S</button>
+                        <button type="button" id="viewSpBtn" aria-pressed="false">Frame S′</button>
+                    </div>
+                </div>
+
                 <!-- Velocity -->
                 <div class="control-section">
                     <div class="section-header">Velocity</div>
                     <div class="controlItem">
                         <div class="controlInline velocity-header-row">
-                            <label class="controlLabel" for="speedSlider">Relative Velocity, <strong>v</strong></label>
+                            <label class="controlLabel" for="speedSlider">Velocity of S′ relative to S, <strong>v</strong></label>
                             <button id="alignFramesBtn" class="inline-action-btn">Set v = 0</button>
                         </div>
                         <input type="range" id="speedSlider" min="-0.95" max="0.95" step="0.01" value="0">
-                        <span id="speedValue" class="valueBadge">0.00c</span>
+                        <div class="value-row">
+                            <div class="stepper">
+                                <button type="button" id="speedMinus" aria-label="Decrease v by 0.01c">−</button>
+                                <input type="number" id="speedInput" min="-0.95" max="0.95" step="0.01" value="0.00" aria-label="Velocity v as a fraction of c">
+                                <button type="button" id="speedPlus" aria-label="Increase v by 0.01c">+</button>
+                                <span class="unit">c</span>
+                            </div>
+                            <output id="gammaValue" class="readout">γ = 1.000</output>
+                        </div>
                     </div>
                 </div>
 
@@ -837,14 +1010,22 @@
                 <div class="control-section velocity-transform-section">
                     <div class="section-header">Velocity Transformation</div>
                     <label class="toggle-row">
-                        <span class="toggle-label">Show Velocity</span>
+                        <span class="toggle-label">Show Object's Worldline</span>
                         <input type="checkbox" class="toggle-input" id="velocityToggle">
                         <span class="toggle-switch"></span>
                     </label>
                     <div class="controlItem">
-                        <label class="controlLabel" for="velocitySlider">Vel. in Rest Frame, <strong>u</strong></label>
+                        <label class="controlLabel" for="velocitySlider">Object's Velocity in S, <strong>u</strong></label>
                         <input type="range" id="velocitySlider" min="-0.95" max="0.95" step="0.01" value="0.30">
-                        <span id="velocityValue" class="valueBadge">0.30c</span>
+                        <div class="value-row">
+                            <div class="stepper">
+                                <button type="button" id="velocityMinus" aria-label="Decrease u by 0.01c">−</button>
+                                <input type="number" id="velocityInput" min="-0.95" max="0.95" step="0.01" value="0.30" aria-label="Object's velocity u in frame S as a fraction of c">
+                                <button type="button" id="velocityPlus" aria-label="Increase u by 0.01c">+</button>
+                                <span class="unit">c</span>
+                            </div>
+                            <output id="uPrimeValue" class="readout">u′ = 0.30c</output>
+                        </div>
                     </div>
                 </div>
 
@@ -894,15 +1075,23 @@
             const ctx = canvas.getContext("2d");
 
             const speedSlider = document.getElementById("speedSlider");
-            const speedValueDisplay = document.getElementById("speedValue");
-            const gridToggle = document.getElementById("gridToggle");
-            const movingGridToggle = document.getElementById("movingGridToggle");
-            const movingAxesToggle = document.getElementById("movingAxesToggle");
-            const restEventsToggle = document.getElementById("restEventsToggle");
-            const movingEventsToggle = document.getElementById("movingEventsToggle");
-            const velocityToggle = document.getElementById("velocityToggle");
+            const speedInput = document.getElementById("speedInput");
+            const gammaValue = document.getElementById("gammaValue");
             const velocitySlider = document.getElementById("velocitySlider");
-            const velocityValueDisplay = document.getElementById("velocityValue");
+            const velocityInput = document.getElementById("velocityInput");
+            const uPrimeValue = document.getElementById("uPrimeValue");
+
+            const restAxesToggle = document.getElementById("restAxesToggle");
+            const gridToggle = document.getElementById("gridToggle");
+            const eventsToggle = document.getElementById("eventsToggle");
+            const movingAxesToggle = document.getElementById("movingAxesToggle");
+            const movingGridToggle = document.getElementById("movingGridToggle");
+            const projectionsToggle = document.getElementById("projectionsToggle");
+            const velocityToggle = document.getElementById("velocityToggle");
+            const viewButtons = {
+                S: document.getElementById("viewSBtn"),
+                Sp: document.getElementById("viewSpBtn")
+            };
 
             const addEventBtn = document.getElementById("addEventBtn");
             const removeAllEventsBtn = document.getElementById("removeAllEventsBtn");
@@ -931,11 +1120,26 @@
             const PAN_EDGE_MARGIN_UNITS = 0.5;
             const PAN_EDGE_MARGIN_PX = PAN_EDGE_MARGIN_UNITS * scale;
             const FRAME_ALIGNMENT_EPSILON = 1e-6;
+            const SPEED_LIMIT = 0.95;
+            const COORD_LIMIT = 99;
+            const COORDINATES_MIN_HEIGHT = 220;
 
-            const TOUCH_HIT_EXTRA = 25;
+            const EVENT_RADIUS = 7;
+            const MOUSE_HIT_RADIUS = EVENT_RADIUS + 6;
+            const TOUCH_HIT_RADIUS = EVENT_RADIUS + 25;
             const TOUCH_SELECT_RADIUS = 50;
 
             const SNAP_THRESHOLD = 0.1; // snap when within 0.1 units of an integer
+
+            // The diagram is drawn in a display frame moving at tanh(viewRapidity)
+            // relative to S: 0 for the S view, v for the S′ view, in between while
+            // the view switch animates. Events and u are always stored in S.
+            const VIEW_ANIMATION_MS = 600;
+            const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
+            let viewFrame = "S";
+            let viewRapidity = 0;
+            let viewAnimation = null;
+            let viewAnimationFrame = null;
 
             function snapToGrid(value) {
                 const rounded = Math.round(value);
@@ -954,12 +1158,46 @@
             let nextEventLabelCode = "A".charCodeAt(0);
             let availableLabels = [];
 
-            function isFramesAligned(v) {
-                return Math.abs(v) < FRAME_ALIGNMENT_EPSILON;
+            function getSpeed() {
+                return parseFloat(speedSlider.value);
             }
 
-            function getPrimeSuffix(v) {
-                return isFramesAligned(v) ? "" : "'";
+            function getObjectVelocity() {
+                return parseFloat(velocitySlider.value);
+            }
+
+            function gammaOf(w) {
+                return 1 / Math.sqrt(1 - w * w);
+            }
+
+            // Coordinates of an event in a frame moving at w relative to the frame of pt
+            function boost(pt, w) {
+                const gamma = gammaOf(w);
+                return {
+                    x: gamma * (pt.x - w * pt.t),
+                    t: gamma * (pt.t - w * pt.x)
+                };
+            }
+
+            // Velocity u (measured in S) as measured in a frame moving at w relative to S
+            function velocityInFrame(u, w) {
+                return (u - w) / (1 - u * w);
+            }
+
+            function viewVelocity() {
+                return Math.tanh(viewRapidity);
+            }
+
+            function toDisplay(pt) {
+                return boost(pt, viewVelocity());
+            }
+
+            function fromDisplay(pt) {
+                return boost(pt, -viewVelocity());
+            }
+
+            function isAligned(w) {
+                return Math.abs(w) < FRAME_ALIGNMENT_EPSILON;
             }
 
             function syncControlPanelHeight() {
@@ -969,8 +1207,11 @@
                 }
 
                 const leftPanelHeight = Math.round(diagramContainer.getBoundingClientRect().height);
+                // Keep room for the coordinates table header and a few rows
+                const tableTop = coordinatesDiv.getBoundingClientRect().top - controlsContainer.getBoundingClientRect().top;
+                const neededHeight = Math.ceil(tableTop + COORDINATES_MIN_HEIGHT);
                 if (leftPanelHeight > 0) {
-                    controlsContainer.style.height = `${leftPanelHeight}px`;
+                    controlsContainer.style.height = `${Math.max(leftPanelHeight, neededHeight)}px`;
                 }
             }
 
@@ -985,7 +1226,7 @@
                 }
             }
 
-            events.push({ label: getNextLabel(), x: 1, t: 2, radius: 8 });
+            events.push({ label: getNextLabel(), x: 1, t: 2 });
 
             function toCanvasCoords(x, t) {
                 return {
@@ -997,14 +1238,6 @@
                 return {
                     x: (cx - origin.x) / scale,
                     t: (origin.y - cy) / scale
-                };
-            }
-
-            function lorentzTransform(pt, v) {
-                const gamma = 1 / Math.sqrt(1 - v * v);
-                return {
-                    t: gamma * (pt.t - v * pt.x),
-                    x: gamma * (pt.x - v * pt.t)
                 };
             }
 
@@ -1036,210 +1269,151 @@
                 };
             }
 
-            function drawRestFrameGrid() {
+            // Clip the line through p with direction d (display coordinates) to the view
+            function clipLine(p, d) {
                 const { xMin, xMax, tMin, tMax } = getBoundingBox();
-
-                ctx.strokeStyle = getCssVar('--grid-rest');
-                ctx.lineWidth = 1;
-                ctx.setLineDash([5, 5]);
-
-                for (let x = Math.floor(xMin); x <= Math.ceil(xMax); x++) {
-                    let start = toCanvasCoords(x, tMin);
-                    let end = toCanvasCoords(x, tMax);
-                    ctx.beginPath();
-                    ctx.moveTo(start.x, start.y);
-                    ctx.lineTo(end.x, end.y);
-                    ctx.stroke();
+                let sMin = -Infinity;
+                let sMax = Infinity;
+                for (const [pc, dc, lo, hi] of [[p.x, d.x, xMin, xMax], [p.t, d.t, tMin, tMax]]) {
+                    if (Math.abs(dc) < 1e-12) {
+                        if (pc < lo || pc > hi) return null;
+                        continue;
+                    }
+                    let a = (lo - pc) / dc;
+                    let b = (hi - pc) / dc;
+                    if (a > b) [a, b] = [b, a];
+                    sMin = Math.max(sMin, a);
+                    sMax = Math.min(sMax, b);
                 }
-                for (let t = Math.floor(tMin); t <= Math.ceil(tMax); t++) {
-                    let start = toCanvasCoords(xMin, t);
-                    let end = toCanvasCoords(xMax, t);
-                    ctx.beginPath();
-                    ctx.moveTo(start.x, start.y);
-                    ctx.lineTo(end.x, end.y);
-                    ctx.stroke();
+                if (sMin > sMax) return null;
+                return [
+                    { x: p.x + sMin * d.x, t: p.t + sMin * d.t },
+                    { x: p.x + sMax * d.x, t: p.t + sMax * d.t }
+                ];
+            }
+
+            function strokeLine(p, d) {
+                const segment = clipLine(p, d);
+                if (!segment) return null;
+                const a = toCanvasCoords(segment[0].x, segment[0].t);
+                const b = toCanvasCoords(segment[1].x, segment[1].t);
+                ctx.beginPath();
+                ctx.moveTo(a.x, a.y);
+                ctx.lineTo(b.x, b.y);
+                ctx.stroke();
+                return segment;
+            }
+
+            // Range of whole-number coordinate values of a frame (moving at w relative
+            // to the display) that cross the visible box
+            function frameCoordinateRange(w, axis) {
+                const { xMin, xMax, tMin, tMax } = getBoundingBox();
+                const values = [[xMin, tMin], [xMin, tMax], [xMax, tMin], [xMax, tMax]].map(([x, t]) => {
+                    const p = boost({ x, t }, w);
+                    return axis === "x" ? p.x : p.t;
+                });
+                return [Math.ceil(Math.min(...values)), Math.floor(Math.max(...values))];
+            }
+
+            function drawFrameGrid(w, color, dash) {
+                const gamma = gammaOf(w);
+                ctx.strokeStyle = color;
+                ctx.lineWidth = 1;
+                ctx.setLineDash(dash);
+
+                // Lines of constant x_F = n, then of constant t_F = n
+                const [xLo, xHi] = frameCoordinateRange(w, "x");
+                for (let n = xLo; n <= xHi; n++) {
+                    strokeLine({ x: n / gamma, t: 0 }, { x: w, t: 1 });
+                }
+                const [tLo, tHi] = frameCoordinateRange(w, "t");
+                for (let n = tLo; n <= tHi; n++) {
+                    strokeLine({ x: 0, t: n / gamma }, { x: 1, t: w });
                 }
 
                 ctx.setLineDash([]);
             }
 
-            function drawRestFrameTickMarks() {
-                const { xMin, xMax, tMin, tMax } = getBoundingBox();
+            function drawFrameAxes(frame) {
+                const { w, axisColor, lineWidth, names, labelShift } = frame;
+                ctx.strokeStyle = axisColor;
+                ctx.lineWidth = lineWidth;
+                const tSegment = strokeLine({ x: 0, t: 0 }, { x: w, t: 1 });
+                const xSegment = strokeLine({ x: 0, t: 0 }, { x: 1, t: w });
 
-                ctx.fillStyle = getCssVar('--text-secondary');
-                ctx.font = "12px Arial";
-                ctx.textAlign = "center";
-                ctx.textBaseline = "top";
-                for (let x = Math.ceil(xMin); x <= Math.floor(xMax); x++) {
-                    if (x === 0) continue;
-                    let pos = toCanvasCoords(x, 0);
-                    ctx.fillText(x, pos.x, origin.y + 6);
-                }
-                ctx.textAlign = "right";
-                ctx.textBaseline = "middle";
-                for (let t = Math.ceil(tMin); t <= Math.floor(tMax); t++) {
-                    if (t === 0) continue;
-                    let pos = toCanvasCoords(0, t);
-                    ctx.fillText(t, origin.x - 8, pos.y);
-                }
-
+                ctx.fillStyle = axisColor;
+                ctx.font = "16px Arial";
                 ctx.textAlign = "start";
                 ctx.textBaseline = "alphabetic";
+                if (tSegment) {
+                    const end = tSegment[0].t > tSegment[1].t ? tSegment[0] : tSegment[1];
+                    const c = toCanvasCoords(end.x, end.t);
+                    ctx.fillText(names.t, c.x + 10 + labelShift, c.y + 20);
+                }
+                if (xSegment) {
+                    const end = xSegment[0].x > xSegment[1].x ? xSegment[0] : xSegment[1];
+                    const c = toCanvasCoords(end.x, end.t);
+                    ctx.fillText(names.x, c.x - 20, c.y - 10 - labelShift);
+                }
             }
 
-            function drawMovingFrameTickMarks(v) {
-                if (isFramesAligned(v)) return;
-
-                const gamma = 1 / Math.sqrt(1 - v * v);
+            function drawFrameTicks(frame) {
+                const { w, tickColor, tickFont, tickMarks } = frame;
+                const gamma = gammaOf(w);
                 const { xMin, xMax, tMin, tMax } = getBoundingBox();
-                const axisAngle = Math.atan(v);
+                const axisAngle = Math.atan(w);
                 const tickLen = 5;
+                const inView = p => p.x >= xMin - 0.5 && p.x <= xMax + 0.5 && p.t >= tMin - 0.5 && p.t <= tMax + 0.5;
 
-                ctx.fillStyle = getCssVar('--axis-moving');
-                ctx.strokeStyle = getCssVar('--axis-moving');
-                ctx.font = "11px Arial";
+                ctx.fillStyle = tickColor;
+                ctx.strokeStyle = tickColor;
+                ctx.font = tickFont;
                 ctx.lineWidth = 1.5;
 
-                // t'-axis ticks (x'=0, t'=n): rest frame coords (v*n*gamma, n*gamma)
-                for (let n = -10; n <= 10; n++) {
+                for (let n = -40; n <= 40; n++) {
                     if (n === 0) continue;
-                    const restX = v * n * gamma;
-                    const restT = n * gamma;
-                    if (restX < xMin - 0.5 || restX > xMax + 0.5 || restT < tMin - 0.5 || restT > tMax + 0.5) continue;
 
-                    const cp = toCanvasCoords(restX, restT);
-                    ctx.save();
-                    ctx.translate(cp.x, cp.y);
-                    ctx.rotate(-axisAngle);
-                    ctx.beginPath();
-                    ctx.moveTo(-tickLen, 0);
-                    ctx.lineTo(tickLen, 0);
-                    ctx.stroke();
-                    ctx.textAlign = "right";
-                    ctx.textBaseline = "middle";
-                    ctx.fillText(n, -tickLen - 3, 0);
-                    ctx.restore();
-                }
+                    // t_F axis tick (x_F = 0, t_F = n)
+                    const tTick = { x: w * n * gamma, t: n * gamma };
+                    if (inView(tTick)) {
+                        const cp = toCanvasCoords(tTick.x, tTick.t);
+                        ctx.save();
+                        ctx.translate(cp.x, cp.y);
+                        ctx.rotate(-axisAngle);
+                        if (tickMarks) {
+                            ctx.beginPath();
+                            ctx.moveTo(-tickLen, 0);
+                            ctx.lineTo(tickLen, 0);
+                            ctx.stroke();
+                        }
+                        ctx.textAlign = "right";
+                        ctx.textBaseline = "middle";
+                        ctx.fillText(n, -tickLen - 3, 0);
+                        ctx.restore();
+                    }
 
-                // x'-axis ticks (t'=0, x'=n): rest frame coords (n*gamma, v*n*gamma)
-                for (let n = -10; n <= 10; n++) {
-                    if (n === 0) continue;
-                    const restX = n * gamma;
-                    const restT = v * n * gamma;
-                    if (restX < xMin - 0.5 || restX > xMax + 0.5 || restT < tMin - 0.5 || restT > tMax + 0.5) continue;
-
-                    const cp = toCanvasCoords(restX, restT);
-                    ctx.save();
-                    ctx.translate(cp.x, cp.y);
-                    ctx.rotate(-axisAngle);
-                    ctx.beginPath();
-                    ctx.moveTo(0, -tickLen);
-                    ctx.lineTo(0, tickLen);
-                    ctx.stroke();
-                    ctx.textAlign = "center";
-                    ctx.textBaseline = "top";
-                    ctx.fillText(n, 0, tickLen + 2);
-                    ctx.restore();
+                    // x_F axis tick (t_F = 0, x_F = n)
+                    const xTick = { x: n * gamma, t: w * n * gamma };
+                    if (inView(xTick)) {
+                        const cp = toCanvasCoords(xTick.x, xTick.t);
+                        ctx.save();
+                        ctx.translate(cp.x, cp.y);
+                        ctx.rotate(-axisAngle);
+                        if (tickMarks) {
+                            ctx.beginPath();
+                            ctx.moveTo(0, -tickLen);
+                            ctx.lineTo(0, tickLen);
+                            ctx.stroke();
+                        }
+                        ctx.textAlign = "center";
+                        ctx.textBaseline = "top";
+                        ctx.fillText(n, 0, tickLen + 2);
+                        ctx.restore();
+                    }
                 }
 
                 ctx.textAlign = "start";
                 ctx.textBaseline = "alphabetic";
-            }
-
-            function drawMovingGridLines(v) {
-                const { xMin, xMax, tMin, tMax } = getBoundingBox();
-                const gamma = 1 / Math.sqrt(1 - v * v);
-
-                ctx.strokeStyle = getCssVar('--grid-moving');
-                ctx.lineWidth = 1;
-                ctx.setLineDash([2, 4]);
-
-                const nMin = -10, nMax = 10;
-                const steps = 200;
-
-                for (let n = nMin; n <= nMax; n++) {
-                    let cst = n / gamma;
-                    let linePoints = [];
-                    for (let i = 0; i <= steps; i++) {
-                        let ft = tMin + (i / steps) * (tMax - tMin);
-                        let fx = v * ft + cst;
-                        linePoints.push(toCanvasCoords(fx, ft));
-                    }
-                    ctx.beginPath();
-                    ctx.moveTo(linePoints[0].x, linePoints[0].y);
-                    for (let i = 1; i < linePoints.length; i++) {
-                        ctx.lineTo(linePoints[i].x, linePoints[i].y);
-                    }
-                    ctx.stroke();
-                }
-
-                for (let n = nMin; n <= nMax; n++) {
-                    let cst = n / gamma;
-                    let linePoints = [];
-                    for (let i = 0; i <= steps; i++) {
-                        let fx = xMin + (i / steps) * (xMax - xMin);
-                        let ft = v * fx + cst;
-                        linePoints.push(toCanvasCoords(fx, ft));
-                    }
-                    ctx.beginPath();
-                    ctx.moveTo(linePoints[0].x, linePoints[0].y);
-                    for (let i = 1; i < linePoints.length; i++) {
-                        ctx.lineTo(linePoints[i].x, linePoints[i].y);
-                    }
-                    ctx.stroke();
-                }
-
-                ctx.setLineDash([]);
-            }
-
-            function computeLineBoxEndpoints(m) {
-                const { xMin, xMax, tMin, tMax } = getBoundingBox();
-                let candidates = [];
-
-                let x_tMin = m * tMin;
-                if (x_tMin >= xMin && x_tMin <= xMax) {
-                    candidates.push({ x: x_tMin, t: tMin });
-                }
-                let x_tMax = m * tMax;
-                if (x_tMax >= xMin && x_tMax <= xMax) {
-                    candidates.push({ x: x_tMax, t: tMax });
-                }
-                if (Math.abs(m) > 1e-10) {
-                    let t_xMin = xMin / m;
-                    if (t_xMin >= tMin && t_xMin <= tMax) {
-                        candidates.push({ x: xMin, t: t_xMin });
-                    }
-                }
-                if (Math.abs(m) > 1e-10) {
-                    let t_xMax = xMax / m;
-                    if (t_xMax >= tMin && t_xMax <= tMax) {
-                        candidates.push({ x: xMax, t: t_xMax });
-                    }
-                }
-
-                if (candidates.length < 2) return [];
-
-                let maxDistSq = -1;
-                let bestPair = [candidates[0], candidates[0]];
-                for (let i = 0; i < candidates.length; i++) {
-                    for (let j = i + 1; j < candidates.length; j++) {
-                        let dx = candidates[j].x - candidates[i].x;
-                        let dt = candidates[j].t - candidates[i].t;
-                        let distSq = dx * dx + dt * dt;
-                        if (distSq > maxDistSq) {
-                            maxDistSq = distSq;
-                            bestPair = [candidates[i], candidates[j]];
-                        }
-                    }
-                }
-                return bestPair;
-            }
-
-            function interpolate(p0, p1, s) {
-                return {
-                    x: p0.x + s * (p1.x - p0.x),
-                    t: p0.t + s * (p1.t - p0.t)
-                };
             }
 
             function drawRoundedRect(x, y, width, height, radius) {
@@ -1328,340 +1502,371 @@
                 ctx.restore();
             }
 
-            function drawProjectionPills(pills) {
-                pills.forEach(drawPillLabel);
+            function drawWorldline(u) {
+                const uDisplay = velocityInFrame(u, viewVelocity());
+                const color = getCssVar('--velocity-line-u');
+                ctx.strokeStyle = color;
+                ctx.lineWidth = 2;
+                const segment = strokeLine({ x: 0, t: 0 }, { x: uDisplay, t: 1 });
+                if (!segment) return;
+
+                const [low, high] = segment[0].t < segment[1].t ? segment : [segment[1], segment[0]];
+                const s = 0.7;
+                const labelPoint = toCanvasCoords(low.x + s * (high.x - low.x), low.t + s * (high.t - low.t));
+                const uPrime = velocityInFrame(u, getSpeed());
+                drawPillLabel({
+                    text: `u = ${u.toFixed(2)}c  ·  u′ = ${uPrime.toFixed(2)}c`,
+                    x: labelPoint.x + 12,
+                    y: labelPoint.y,
+                    background: color,
+                    align: "left",
+                    baseline: "middle"
+                });
             }
 
-            function drawVelocityLines(u_line, relSpeed) {
-                const primeSuffix = getPrimeSuffix(relSpeed);
-                let endG = computeLineBoxEndpoints(u_line);
-                if (endG.length === 2) {
-                    let G0 = endG[0];
-                    let G1 = endG[1];
-                    if (G1.t < G0.t) [G0, G1] = [G1, G0];
+            // Guide lines from the selected event to the axes of one frame, drawn
+            // parallel to that frame's other axis
+            function drawFrameProjections(evtDisplay, frame, pills) {
+                const { w, projectionColor, names, coords, xPillAbove } = frame;
+                const cp = toCanvasCoords(evtDisplay.x, evtDisplay.t);
+                const k = 1 - w * w;
 
-                    ctx.strokeStyle = getCssVar('--velocity-line-u');
-                    ctx.lineWidth = 2;
-                    let c1 = toCanvasCoords(G0.x, G0.t);
-                    let c2 = toCanvasCoords(G1.x, G1.t);
-                    ctx.beginPath();
-                    ctx.moveTo(c1.x, c1.y);
-                    ctx.lineTo(c2.x, c2.y);
-                    ctx.stroke();
+                // Along (w, 1) to the x_F axis, t = w x
+                const s1 = (w * evtDisplay.x - evtDisplay.t) / k;
+                const hitX = toCanvasCoords(evtDisplay.x + w * s1, evtDisplay.t + s1);
+                // Along (1, w) to the t_F axis, x = w t
+                const s2 = (w * evtDisplay.t - evtDisplay.x) / k;
+                const hitT = toCanvasCoords(evtDisplay.x + s2, evtDisplay.t + w * s2);
 
-                    let Gpoint = interpolate(G0, G1, 0.67);
-                    let Gc = toCanvasCoords(Gpoint.x, Gpoint.t);
-                    ctx.fillStyle = getCssVar('--velocity-line-u');
-                    ctx.font = "14px Arial";
-                    ctx.fillText(`u = ${u_line.toFixed(2)}c`, Gc.x + 35, Gc.y - 15);
-                }
-
-                let u_eff = (u_line - relSpeed) / (1 - u_line * relSpeed);
-                let endO = computeLineBoxEndpoints(u_eff);
-                if (endO.length === 2) {
-                    let O0 = endO[0];
-                    let O1 = endO[1];
-                    if (O1.t < O0.t) [O0, O1] = [O1, O0];
-
-                    ctx.strokeStyle = getCssVar('--velocity-line-u-prime');
-                    ctx.lineWidth = 2;
-                    let c1o = toCanvasCoords(O0.x, O0.t);
-                    let c2o = toCanvasCoords(O1.x, O1.t);
-                    ctx.beginPath();
-                    ctx.moveTo(c1o.x, c1o.y);
-                    ctx.lineTo(c2o.x, c2o.y);
-                    ctx.stroke();
-
-                    let Opoint = interpolate(O0, O1, 0.79);
-                    let Oc = toCanvasCoords(Opoint.x, Opoint.t);
-                    ctx.fillStyle = getCssVar('--velocity-line-u-prime');
-                    ctx.font = "14px Arial";
-                    ctx.fillText(`u${primeSuffix} = ${u_eff.toFixed(2)}c`, Oc.x + 35, Oc.y - 15);
-                }
-            }
-
-            function drawProjections(evt, v, projectionPills) {
-                const cp = toCanvasCoords(evt.x, evt.t);
-                const pm = lorentzTransform(evt, v);
-                const primeSuffix = getPrimeSuffix(v);
-
-                // --- Rest frame: perpendicular projections from green dot to x and t axes ---
-                const restColor = getCssVar('--event-rest');
-                ctx.strokeStyle = restColor;
+                ctx.strokeStyle = projectionColor;
                 ctx.lineWidth = 1.5;
                 ctx.setLineDash([6, 4]);
-
-                const xAxisPt = toCanvasCoords(evt.x, 0);
-                ctx.beginPath();
-                ctx.moveTo(cp.x, cp.y);
-                ctx.lineTo(xAxisPt.x, xAxisPt.y);
-                ctx.stroke();
-
-                const tAxisPt = toCanvasCoords(0, evt.t);
-                ctx.beginPath();
-                ctx.moveTo(cp.x, cp.y);
-                ctx.lineTo(tAxisPt.x, tAxisPt.y);
-                ctx.stroke();
-
+                for (const hit of [hitX, hitT]) {
+                    ctx.beginPath();
+                    ctx.moveTo(cp.x, cp.y);
+                    ctx.lineTo(hit.x, hit.y);
+                    ctx.stroke();
+                }
                 ctx.setLineDash([]);
-                projectionPills.push({
-                    text: `x=${evt.x.toFixed(2)}`,
-                    x: xAxisPt.x,
-                    y: xAxisPt.y + 16,
-                    background: restColor,
-                    align: "center",
-                    baseline: "middle"
-                });
-                projectionPills.push({
-                    text: `t=${evt.t.toFixed(2)}`,
-                    x: tAxisPt.x - 14,
-                    y: tAxisPt.y,
-                    background: restColor,
-                    align: "right",
-                    baseline: "middle"
-                });
 
-                // --- Moving frame: project from green dot parallel to primed axes ---
-                if (!movingAxesToggle.checked || isFramesAligned(v)) {
+                // Put each pill on the side of its axis away from the event
+                let above = xPillAbove;
+                if (above && cp.y < hitX.y) above = false;
+                if (!above && cp.y > hitX.y) above = true;
+                const tPillRight = cp.x < hitT.x;
+                pills.push({
+                    text: `${names.x}=${coords.x.toFixed(2)}`,
+                    x: hitX.x,
+                    y: above ? hitX.y - 14 : hitX.y + 16,
+                    background: projectionColor,
+                    align: "center",
+                    baseline: above ? "bottom" : "middle"
+                });
+                pills.push({
+                    text: `${names.t}=${coords.t.toFixed(2)}`,
+                    x: tPillRight ? hitT.x + 14 : hitT.x - 14,
+                    y: hitT.y,
+                    background: projectionColor,
+                    align: tPillRight ? "left" : "right",
+                    baseline: "middle"
+                });
+            }
+
+            function drawLightCone() {
+                ctx.strokeStyle = getCssVar('--light-cone');
+                ctx.lineWidth = 1;
+                ctx.setLineDash([5, 5]);
+                strokeLine({ x: 0, t: 0 }, { x: 1, t: 1 });
+                strokeLine({ x: 0, t: 0 }, { x: 1, t: -1 });
+                ctx.setLineDash([]);
+            }
+
+            function drawEvent(p) {
+                const d = toDisplay(p);
+                const cp = toCanvasCoords(d.x, d.t);
+
+                if (p === selectedEvent) {
+                    ctx.strokeStyle = getCssVar('--event');
+                    ctx.lineWidth = 3;
+                    ctx.beginPath();
+                    ctx.arc(cp.x, cp.y, EVENT_RADIUS + 5, 0, 2 * Math.PI);
+                    ctx.stroke();
+                }
+
+                ctx.beginPath();
+                ctx.arc(cp.x, cp.y, EVENT_RADIUS, 0, 2 * Math.PI);
+                ctx.fillStyle = getCssVar('--event');
+                ctx.fill();
+                ctx.strokeStyle = getCssVar('--canvas-bg');
+                ctx.lineWidth = 2;
+                ctx.stroke();
+
+                ctx.fillStyle = getCssVar('--axis-rest');
+                ctx.font = "bold 14px Arial";
+                ctx.textAlign = "start";
+                ctx.textBaseline = "alphabetic";
+                ctx.fillText(p.label, cp.x + EVENT_RADIUS + 6, cp.y - EVENT_RADIUS - 4);
+            }
+
+            function updateViewRapidity(now) {
+                const target = viewFrame === "Sp" ? Math.atanh(getSpeed()) : 0;
+                if (!viewAnimation) {
+                    viewRapidity = target;
                     return;
                 }
+                const progress = Math.min(1, (now - viewAnimation.start) / VIEW_ANIMATION_MS);
+                const eased = progress < 0.5 ? 2 * progress * progress : 1 - Math.pow(-2 * progress + 2, 2) / 2;
+                viewRapidity = viewAnimation.from + (target - viewAnimation.from) * eased;
+                if (progress >= 1) {
+                    viewAnimation = null;
+                    viewRapidity = target;
+                }
+            }
 
-                const movColor = getCssVar('--axis-moving');
-                ctx.strokeStyle = movColor;
-                ctx.lineWidth = 1.5;
-                ctx.setLineDash([6, 4]);
+            function animateView() {
+                draw();
+                viewAnimationFrame = viewAnimation ? requestAnimationFrame(animateView) : null;
+            }
 
-                const invGammaSq = 1 - v * v;
-
-                // To read x': line parallel to t'-axis (direction (v,1)) from event to x'-axis (t = v*x)
-                const s1 = (v * evt.x - evt.t) / invGammaSq;
-                const hitXPrime = toCanvasCoords(evt.x + v * s1, evt.t + s1);
-                ctx.beginPath();
-                ctx.moveTo(cp.x, cp.y);
-                ctx.lineTo(hitXPrime.x, hitXPrime.y);
-                ctx.stroke();
-
-                // To read t': line parallel to x'-axis (direction (1,v)) from event to t'-axis (x = v*t)
-                const s2 = (v * evt.t - evt.x) / invGammaSq;
-                const hitTPrime = toCanvasCoords(evt.x + s2, evt.t + v * s2);
-                ctx.beginPath();
-                ctx.moveTo(cp.x, cp.y);
-                ctx.lineTo(hitTPrime.x, hitTPrime.y);
-                ctx.stroke();
-
-                ctx.setLineDash([]);
-                projectionPills.push({
-                    text: `x${primeSuffix}=${pm.x.toFixed(2)}`,
-                    x: hitXPrime.x,
-                    y: hitXPrime.y - 14,
-                    background: movColor,
-                    align: "center",
-                    baseline: "bottom"
+            function setViewFrame(frame) {
+                if (frame === viewFrame) return;
+                viewFrame = frame;
+                Object.entries(viewButtons).forEach(([key, button]) => {
+                    button.setAttribute("aria-pressed", String(key === frame));
                 });
-                projectionPills.push({
-                    text: `t${primeSuffix}=${pm.t.toFixed(2)}`,
-                    x: hitTPrime.x - 14,
-                    y: hitTPrime.y,
-                    background: movColor,
-                    align: "right",
-                    baseline: "middle"
-                });
+                if (reducedMotion.matches) {
+                    viewAnimation = null;
+                    draw();
+                    return;
+                }
+                viewAnimation = { from: viewRapidity, start: performance.now() };
+                if (viewAnimationFrame === null) {
+                    viewAnimationFrame = requestAnimationFrame(animateView);
+                }
             }
 
             window.addEventListener('panphy:theme-change', () => draw());
 
             function draw() {
-                const relSpeed = parseFloat(speedSlider.value);
-                const primeSuffix = getPrimeSuffix(relSpeed);
-                speedValueDisplay.textContent = relSpeed.toFixed(2) + 'c';
+                updateViewRapidity(performance.now());
 
-                const u_line = parseFloat(velocitySlider.value);
-                velocityValueDisplay.textContent = u_line.toFixed(2) + 'c';
+                const v = getSpeed();
+                const u = getObjectVelocity();
+                const displayV = viewVelocity();
+                gammaValue.textContent = `γ = ${gammaOf(v).toFixed(3)}`;
+                uPrimeValue.textContent = `u′ = ${velocityInFrame(u, v).toFixed(2)}c`;
 
                 ctx.clearRect(0, 0, canvas.width, canvas.height);
                 const projectionPills = [];
+                const framesAligned = isAligned(v);
 
-                if (gridToggle.checked) {
-                    drawRestFrameGrid();
-                }
+                // Both frames, described by their velocity relative to the display frame
+                const restFrame = {
+                    key: "S",
+                    w: velocityInFrame(0, displayV),
+                    axisColor: getCssVar('--axis-rest'),
+                    lineWidth: 2,
+                    gridColor: getCssVar('--grid-rest'),
+                    gridDash: [5, 5],
+                    tickColor: getCssVar('--text-secondary'),
+                    tickFont: "12px Arial",
+                    tickMarks: false,
+                    names: { x: "x", t: "t" },
+                    labelShift: 0,
+                    projectionColor: getCssVar('--event-rest'),
+                    xPillAbove: false,
+                    showAxes: restAxesToggle.checked,
+                    showGrid: gridToggle.checked
+                };
+                const movingFrame = {
+                    key: "Sp",
+                    w: velocityInFrame(v, displayV),
+                    axisColor: getCssVar('--axis-moving'),
+                    lineWidth: 1.5,
+                    gridColor: getCssVar('--grid-moving'),
+                    gridDash: [2, 4],
+                    tickColor: getCssVar('--axis-moving'),
+                    tickFont: "11px Arial",
+                    tickMarks: true,
+                    names: { x: "x′", t: "t′" },
+                    labelShift: framesAligned ? 16 : 0,
+                    projectionColor: getCssVar('--axis-moving'),
+                    xPillAbove: true,
+                    showAxes: movingAxesToggle.checked,
+                    showGrid: movingGridToggle.checked
+                };
+                // The frame the diagram is drawn in goes on top
+                const frames = viewFrame === "S" ? [movingFrame, restFrame] : [restFrame, movingFrame];
 
-                // Rest frame axes
-                ctx.strokeStyle = getCssVar('--axis-rest');
-                ctx.lineWidth = 2;
-                ctx.beginPath();
-                ctx.moveTo(0, origin.y);
-                ctx.lineTo(canvas.width, origin.y);
-                ctx.stroke();
+                frames.forEach(frame => {
+                    if (frame.showGrid) drawFrameGrid(frame.w, frame.gridColor, frame.gridDash);
+                });
 
-                ctx.beginPath();
-                ctx.moveTo(origin.x, 0);
-                ctx.lineTo(origin.x, canvas.height);
-                ctx.stroke();
-
-                ctx.fillStyle = getCssVar('--axis-rest');
-                ctx.font = "16px Arial";
-                ctx.fillText("x", canvas.width - 20, origin.y - 10);
-                ctx.fillText("t", origin.x + 10, 20);
-
-                drawRestFrameTickMarks();
-
-                if (movingGridToggle.checked) {
-                    drawMovingGridLines(relSpeed);
-                }
-
-                // Moving frame axes
-                const { xMin, xMax, tMin, tMax } = getBoundingBox();
-
-                if (movingAxesToggle.checked) {
-                    ctx.strokeStyle = getCssVar('--axis-moving');
-                    ctx.lineWidth = 1.5;
-
-                    let tA = toCanvasCoords(relSpeed * tMin, tMin);
-                    let tB = toCanvasCoords(relSpeed * tMax, tMax);
-                    ctx.beginPath();
-                    ctx.moveTo(tA.x, tA.y);
-                    ctx.lineTo(tB.x, tB.y);
-                    ctx.stroke();
-
-                    let xA = toCanvasCoords(xMin, relSpeed * xMin);
-                    let xB = toCanvasCoords(xMax, relSpeed * xMax);
-                    ctx.beginPath();
-                    ctx.moveTo(xA.x, xA.y);
-                    ctx.lineTo(xB.x, xB.y);
-                    ctx.stroke();
-
-                    ctx.fillStyle = getCssVar('--axis-moving');
-                    if (isFramesAligned(relSpeed)) {
-                        ctx.fillText(`t${primeSuffix}`, origin.x + 10, 20);
-                        ctx.fillText(`x${primeSuffix}`, canvas.width - 20, origin.y - 10);
-                    } else {
-                        ctx.fillText(`t${primeSuffix}`, tB.x + 10, tB.y + 20);
-                        ctx.fillText(`x${primeSuffix}`, xB.x - 30, xB.y - 5);
-                    }
-
-                    drawMovingFrameTickMarks(relSpeed);
-                }
+                frames.forEach(frame => {
+                    if (!frame.showAxes) return;
+                    drawFrameAxes(frame);
+                    // When the frames coincide, only the viewed frame's numbers are drawn
+                    if (frame.key === viewFrame || !framesAligned) drawFrameTicks(frame);
+                });
 
                 if (velocityToggle.checked) {
-                    drawVelocityLines(u_line, relSpeed);
+                    drawWorldline(u);
                 }
 
-                // Light cone
-                ctx.strokeStyle = getCssVar('--light-cone');
-                ctx.lineWidth = 1;
-                ctx.setLineDash([5, 5]);
-                let endPlus = computeLineBoxEndpoints(1);
-                let endMinus = computeLineBoxEndpoints(-1);
-                if (endPlus.length === 2) {
-                    let c1 = toCanvasCoords(endPlus[0].x, endPlus[0].t);
-                    let c2 = toCanvasCoords(endPlus[1].x, endPlus[1].t);
-                    ctx.beginPath();
-                    ctx.moveTo(c1.x, c1.y);
-                    ctx.lineTo(c2.x, c2.y);
-                    ctx.stroke();
-                }
-                if (endMinus.length === 2) {
-                    let c1 = toCanvasCoords(endMinus[0].x, endMinus[0].t);
-                    let c2 = toCanvasCoords(endMinus[1].x, endMinus[1].t);
-                    ctx.beginPath();
-                    ctx.moveTo(c1.x, c1.y);
-                    ctx.lineTo(c2.x, c2.y);
-                    ctx.stroke();
-                }
-                ctx.setLineDash([]);
+                drawLightCone();
 
-                // Projection lines for selected event (drawn before dots so dots appear on top)
-                if (selectedEvent && events.includes(selectedEvent)) {
-                    drawProjections(selectedEvent, relSpeed, projectionPills);
-                }
-
-                // Events – draw moving-frame (primed) rockets first, then rest-frame
-                // rockets on top so rest-frame is visible when frames overlap.
-                const emojiSize = p => p.radius * 3.2;
-
-                if (movingEventsToggle.checked) {
-                    events.forEach(p => {
-                        let pm = lorentzTransform(p, relSpeed);
-                        let cpm = toCanvasCoords(pm.x, pm.t);
-                        const size = emojiSize(p);
-                        ctx.save();
-                        ctx.globalAlpha = 0.5;
-                        ctx.font = size + 'px serif';
-                        ctx.textAlign = 'center';
-                        ctx.textBaseline = 'middle';
-                        ctx.fillText('\u{1F680}', cpm.x, cpm.y);
-                        ctx.restore();
-                        ctx.fillStyle = getCssVar('--event-moving');
-                        ctx.font = "14px Arial";
-                        ctx.textAlign = 'start';
-                        ctx.textBaseline = 'alphabetic';
-                        ctx.fillText(p.label + primeSuffix, cpm.x + p.radius + 10, cpm.y - p.radius - 10);
+                if (eventsToggle.checked && projectionsToggle.checked && selectedEvent && events.includes(selectedEvent)) {
+                    const evtDisplay = toDisplay(selectedEvent);
+                    restFrame.coords = selectedEvent;
+                    movingFrame.coords = boost(selectedEvent, v);
+                    frames.forEach(frame => {
+                        if (!frame.showAxes) return;
+                        if (frame.key !== viewFrame && framesAligned) return;
+                        drawFrameProjections(evtDisplay, frame, projectionPills);
                     });
                 }
 
-                if (restEventsToggle.checked) {
-                    events.forEach(p => {
-                        let cp = toCanvasCoords(p.x, p.t);
-                        const isSelected = (p === selectedEvent);
-                        const size = emojiSize(p);
-
-                        // Selected highlight ring
-                        if (isSelected) {
-                            ctx.strokeStyle = getCssVar('--event-rest');
-                            ctx.lineWidth = 3;
-                            ctx.beginPath();
-                            ctx.arc(cp.x, cp.y, p.radius + 5, 0, 2 * Math.PI);
-                            ctx.stroke();
-                        }
-
-                        ctx.font = size + 'px serif';
-                        ctx.textAlign = 'center';
-                        ctx.textBaseline = 'middle';
-                        ctx.fillText('\u{1F680}', cp.x, cp.y);
-
-                        ctx.fillStyle = getCssVar('--axis-rest');
-                        ctx.font = "14px Arial";
-                        ctx.textAlign = 'start';
-                        ctx.textBaseline = 'alphabetic';
-                        ctx.fillText(p.label, cp.x + p.radius + 10, cp.y - p.radius - 10);
-                    });
+                if (eventsToggle.checked) {
+                    events.forEach(drawEvent);
                 }
 
-                drawProjectionPills(projectionPills);
+                projectionPills.forEach(drawPillLabel);
 
-                let html = `
+                updateEventTable();
+            }
+
+            // Make draw globally accessible for theme toggle
+            window.draw = draw;
+
+            // ---- Event coordinates table ----
+
+            const COORD_FIELDS = [
+                { key: "x", name: "x", frame: "S" },
+                { key: "t", name: "t", frame: "S" },
+                { key: "xp", name: "x′", frame: "S′" },
+                { key: "tp", name: "t′", frame: "S′" }
+            ];
+
+            function formatCoord(value) {
+                const text = value.toFixed(2);
+                return text === "-0.00" ? "0.00" : text;
+            }
+
+            function eventCoordValue(p, key) {
+                if (key === "x" || key === "t") return p[key];
+                const primed = boost(p, getSpeed());
+                return key === "xp" ? primed.x : primed.t;
+            }
+
+            function renderEventTable() {
+                const rows = events.length
+                    ? events.map(p => `
+                        <tr data-label="${p.label}">
+                            <td class="event-label">${p.label}</td>
+                            ${COORD_FIELDS.map(f => `<td><input class="coord-input${f.frame === "S′" ? " frame-sp" : ""}" type="number" step="0.1" data-field="${f.key}" aria-label="${f.name} of event ${p.label} in frame ${f.frame}"></td>`).join("")}
+                        </tr>`).join("")
+                    : `<tr><td colspan="5" class="empty-row">No events. Use Add Event.</td></tr>`;
+
+                coordinatesDiv.innerHTML = `
                     <h3>Event Coordinates</h3>
                     <div class="coordinates-table-scroll">
                         <table>
                             <thead>
                                 <tr>
-                                    <th>Event</th>
-                                    <th>Rest (x,t)</th>
-                                    <th>Moving (x',t')</th>
+                                    <th rowspan="2">Event</th>
+                                    <th colspan="2">Frame S</th>
+                                    <th colspan="2" class="frame-sp">Frame S′</th>
+                                </tr>
+                                <tr>
+                                    <th>x</th>
+                                    <th>t</th>
+                                    <th class="frame-sp">x′</th>
+                                    <th class="frame-sp">t′</th>
                                 </tr>
                             </thead>
-                            <tbody>
-                `;
-                events.forEach(p => {
-                    let pm = lorentzTransform(p, relSpeed);
-                    html += `
-                        <tr>
-                            <td>${p.label}</td>
-                            <td>(${p.x.toFixed(2)}, ${p.t.toFixed(2)})</td>
-                            <td>(${pm.x.toFixed(2)}, ${pm.t.toFixed(2)})</td>
-                        </tr>
-                    `;
-                });
-                html += `
-                            </tbody>
+                            <tbody>${rows}</tbody>
                         </table>
                     </div>
+                    ${events.length ? `<p class="table-hint">Type a coordinate to move an event exactly.</p>` : ""}
                 `;
-                coordinatesDiv.innerHTML = html;
+                updateEventTable();
             }
 
-            // Make draw globally accessible for theme toggle
-            window.draw = draw;
+            function updateEventTable() {
+                coordinatesDiv.querySelectorAll("tr[data-label]").forEach(row => {
+                    const p = events.find(e => e.label === row.dataset.label);
+                    if (!p) return;
+                    row.classList.toggle("selected", p === selectedEvent);
+                    row.querySelectorAll(".coord-input").forEach(input => {
+                        if (input === document.activeElement) return;
+                        input.value = formatCoord(eventCoordValue(p, input.dataset.field));
+                    });
+                });
+            }
+
+            function eventForInput(input) {
+                const row = input.closest("tr[data-label]");
+                return row ? events.find(e => e.label === row.dataset.label) : null;
+            }
+
+            function setEventCoord(p, key, value) {
+                value = Math.max(-COORD_LIMIT, Math.min(COORD_LIMIT, value));
+                if (key === "x" || key === "t") {
+                    p[key] = value;
+                    return;
+                }
+                const v = getSpeed();
+                const primed = boost(p, v);
+                primed[key === "xp" ? "x" : "t"] = value;
+                const rest = boost(primed, -v);
+                p.x = rest.x;
+                p.t = rest.t;
+            }
+
+            coordinatesDiv.addEventListener("input", e => {
+                const input = e.target.closest(".coord-input");
+                if (!input) return;
+                const p = eventForInput(input);
+                const value = parseFloat(input.value);
+                if (!p || !Number.isFinite(value)) return;
+                setEventCoord(p, input.dataset.field, value);
+                draw();
+            });
+
+            coordinatesDiv.addEventListener("change", e => {
+                const input = e.target.closest(".coord-input");
+                const p = input && eventForInput(input);
+                if (!p) return;
+                input.value = formatCoord(eventCoordValue(p, input.dataset.field));
+            });
+
+            coordinatesDiv.addEventListener("focusin", e => {
+                const input = e.target.closest(".coord-input");
+                const p = input && eventForInput(input);
+                if (!p || p === selectedEvent) return;
+                selectedEvent = p;
+                draw();
+            });
+
+            // ---- Canvas interaction (in display coordinates) ----
+
+            function findEventAt(cx, cy, radius) {
+                if (!eventsToggle.checked) return null;
+                for (let i = events.length - 1; i >= 0; i--) {
+                    const d = toDisplay(events[i]);
+                    const cp = toCanvasCoords(d.x, d.t);
+                    if (Math.hypot(cx - cp.x, cy - cp.y) < radius) return events[i];
+                }
+                return null;
+            }
+
+            function moveEventToCanvasPoint(p, cx, cy) {
+                const display = toMinkowskiCoords(cx, cy);
+                // Snap to whole numbers of the frame the diagram is drawn in
+                const rest = fromDisplay({ x: snapToGrid(display.x), t: snapToGrid(display.t) });
+                p.x = rest.x;
+                p.t = rest.t;
+            }
 
             canvas.addEventListener("mousedown", e => {
                 if (e.button !== 0) return;
@@ -1670,18 +1875,8 @@
                 mouseDownPos.x = mx;
                 mouseDownPos.y = my;
 
-                let foundEvent = false;
-                for (let i = events.length - 1; i >= 0; i--) {
-                    const p = events[i];
-                    const cp = toCanvasCoords(p.x, p.t);
-                    if (Math.sqrt((mx - cp.x) ** 2 + (my - cp.y) ** 2) < p.radius + 5) {
-                        draggingEvent = p;
-                        foundEvent = true;
-                        break;
-                    }
-                }
-
-                if (!foundEvent) {
+                draggingEvent = findEventAt(mx, my, MOUSE_HIT_RADIUS);
+                if (!draggingEvent) {
                     draggingCanvas = true;
                     canvasDragStart.x = mx;
                     canvasDragStart.y = my;
@@ -1700,9 +1895,7 @@
                 }
 
                 if (draggingEvent) {
-                    const coords = toMinkowskiCoords(mx, my);
-                    draggingEvent.x = snapToGrid(coords.x);
-                    draggingEvent.t = snapToGrid(coords.t);
+                    moveEventToCanvasPoint(draggingEvent, mx, my);
                     draw();
                 } else if (draggingCanvas) {
                     const nextOrigin = {
@@ -1740,22 +1933,14 @@
                 mouseDownPos.x = tx;
                 mouseDownPos.y = ty;
 
-                let found = false;
-                for (let i = events.length - 1; i >= 0; i--) {
-                    const p = events[i];
-                    const cp = toCanvasCoords(p.x, p.t);
-                    if (Math.sqrt((tx - cp.x) ** 2 + (ty - cp.y) ** 2) < p.radius + TOUCH_HIT_EXTRA) {
-                        draggingEvent = p;
-                        found = true;
-                        longPressTimeout = setTimeout(() => {
-                            contextEvent = p;
-                            showContextMenu(touch.pageX, touch.pageY);
-                        }, 800);
-                        break;
-                    }
-                }
-
-                if (!found) {
+                draggingEvent = findEventAt(tx, ty, TOUCH_HIT_RADIUS);
+                if (draggingEvent) {
+                    const p = draggingEvent;
+                    longPressTimeout = setTimeout(() => {
+                        contextEvent = p;
+                        showContextMenu(touch.pageX, touch.pageY);
+                    }, 800);
+                } else {
                     draggingCanvas = true;
                     canvasDragStart.x = tx;
                     canvasDragStart.y = ty;
@@ -1781,9 +1966,7 @@
                 }
 
                 if (draggingEvent) {
-                    const coords = toMinkowskiCoords(tx, ty);
-                    draggingEvent.x = snapToGrid(coords.x);
-                    draggingEvent.t = snapToGrid(coords.t);
+                    moveEventToCanvasPoint(draggingEvent, tx, ty);
                     draw();
                 } else if (draggingCanvas) {
                     const nextOrigin = {
@@ -1802,22 +1985,9 @@
                     if (draggingEvent) {
                         selectedEvent = (selectedEvent === draggingEvent) ? null : draggingEvent;
                     } else {
-                        // Tap-to-select: find nearest event within threshold
-                        let nearest = null;
-                        let nearestDist = Infinity;
-                        for (let i = 0; i < events.length; i++) {
-                            const cp = toCanvasCoords(events[i].x, events[i].t);
-                            const dist = Math.sqrt((mouseDownPos.x - cp.x) ** 2 + (mouseDownPos.y - cp.y) ** 2);
-                            if (dist < nearestDist) {
-                                nearestDist = dist;
-                                nearest = events[i];
-                            }
-                        }
-                        if (nearest && nearestDist < TOUCH_SELECT_RADIUS) {
-                            selectedEvent = (selectedEvent === nearest) ? null : nearest;
-                        } else {
-                            selectedEvent = null;
-                        }
+                        // Tap-to-select: nearest event within threshold
+                        const nearest = findEventAt(mouseDownPos.x, mouseDownPos.y, TOUCH_SELECT_RADIUS);
+                        selectedEvent = (nearest && selectedEvent !== nearest) ? nearest : null;
                     }
                     draw();
                 }
@@ -1840,17 +2010,12 @@
             canvas.addEventListener("contextmenu", e => {
                 e.preventDefault();
                 const { x: mx, y: my } = clientToCanvas(e.clientX, e.clientY);
-
-                for (let i = events.length - 1; i >= 0; i--) {
-                    const p = events[i];
-                    const cp = toCanvasCoords(p.x, p.t);
-                    if (Math.sqrt((mx - cp.x) ** 2 + (my - cp.y) ** 2) < p.radius + 5) {
-                        contextEvent = p;
-                        showContextMenu(e.pageX, e.pageY);
-                        return;
-                    }
+                const p = findEventAt(mx, my, MOUSE_HIT_RADIUS);
+                if (p) {
+                    contextEvent = p;
+                    showContextMenu(e.pageX, e.pageY);
+                    return;
                 }
-
                 contextMenu.style.display = "none";
             });
 
@@ -1864,6 +2029,7 @@
                     }
                     contextEvent = null;
                     contextMenu.style.display = "none";
+                    renderEventTable();
                     draw();
                 }
             });
@@ -1880,6 +2046,8 @@
                 }
             });
 
+            // Random point in the visible part of the future light cone, in display
+            // coordinates (the light cone is the same in every frame)
             function getRandomVisibleFutureConeEvent() {
                 const { xMin, xMax, tMin, tMax } = getBoundingBox();
                 const EVENT_VIEW_PADDING = 0.15;
@@ -1924,19 +2092,20 @@
                     return;
                 }
 
-                const eventCoords = getRandomVisibleFutureConeEvent();
-                if (!eventCoords) {
+                const displayCoords = getRandomVisibleFutureConeEvent();
+                if (!displayCoords) {
                     alert("Current view does not intersect the future light cone. Pan the diagram and try again.");
                     return;
                 }
 
+                const rest = fromDisplay(displayCoords);
                 events.push({
                     label: getNextLabel(),
-                    x: eventCoords.x,
-                    t: eventCoords.t,
-                    radius: 8
+                    x: rest.x,
+                    t: rest.t
                 });
 
+                renderEventTable();
                 draw();
             });
 
@@ -1944,24 +2113,79 @@
                 events.forEach(p => availableLabels.push(p.label));
                 events = [];
                 selectedEvent = null;
+                renderEventTable();
                 draw();
             });
 
-            alignFramesBtn.addEventListener("click", () => {
-                speedSlider.value = 0;
-                draw();
-            });
+            // ---- Velocity inputs: slider, stepper and typed value kept in step ----
 
-            speedSlider.addEventListener("input", draw);
-            gridToggle.addEventListener("change", draw);
-            movingGridToggle.addEventListener("change", draw);
-            movingAxesToggle.addEventListener("change", draw);
-            restEventsToggle.addEventListener("change", draw);
-            movingEventsToggle.addEventListener("change", draw);
-            velocitySlider.addEventListener("input", draw);
-            velocityToggle.addEventListener("change", draw);
+            function roundSpeed(value) {
+                const rounded = Math.round(Math.max(-SPEED_LIMIT, Math.min(SPEED_LIMIT, value)) * 100) / 100;
+                return rounded === 0 ? 0 : rounded;
+            }
+
+            function bindStepper(minus, plus, change) {
+                for (const [button, direction] of [[minus, -1], [plus, 1]]) {
+                    let delay = null;
+                    let timer = null;
+                    const stop = () => {
+                        clearTimeout(delay);
+                        clearInterval(timer);
+                        delay = timer = null;
+                    };
+                    button.addEventListener("pointerdown", event => {
+                        event.preventDefault();
+                        change(direction);
+                        stop();
+                        delay = setTimeout(() => { timer = setInterval(() => change(direction), 90); }, 420);
+                    });
+                    for (const type of ["pointerup", "pointerleave", "pointercancel", "blur"]) button.addEventListener(type, stop);
+                    // Keyboard activation arrives as a click with no pointer
+                    button.addEventListener("click", event => { if (event.detail === 0) change(direction); });
+                }
+            }
+
+            function bindSpeedControl(slider, input, minus, plus) {
+                const set = value => {
+                    const rounded = roundSpeed(value);
+                    slider.value = rounded;
+                    input.value = rounded.toFixed(2);
+                    draw();
+                };
+                slider.addEventListener("input", () => {
+                    input.value = parseFloat(slider.value).toFixed(2);
+                    draw();
+                });
+                input.addEventListener("input", () => {
+                    const value = parseFloat(input.value);
+                    if (!Number.isFinite(value) || Math.abs(value) > SPEED_LIMIT) return;
+                    slider.value = roundSpeed(value);
+                    draw();
+                });
+                input.addEventListener("change", () => {
+                    const value = parseFloat(input.value);
+                    set(Number.isFinite(value) ? value : parseFloat(slider.value));
+                });
+                bindStepper(minus, plus, direction => set(parseFloat(slider.value) + direction * 0.01));
+                input.value = parseFloat(slider.value).toFixed(2);
+                return set;
+            }
+
+            const setSpeed = bindSpeedControl(speedSlider, speedInput,
+                document.getElementById("speedMinus"), document.getElementById("speedPlus"));
+            bindSpeedControl(velocitySlider, velocityInput,
+                document.getElementById("velocityMinus"), document.getElementById("velocityPlus"));
+
+            alignFramesBtn.addEventListener("click", () => setSpeed(0));
+
+            viewButtons.S.addEventListener("click", () => setViewFrame("S"));
+            viewButtons.Sp.addEventListener("click", () => setViewFrame("Sp"));
+
+            [restAxesToggle, gridToggle, eventsToggle, movingAxesToggle, movingGridToggle,
+                projectionsToggle, velocityToggle].forEach(toggle => toggle.addEventListener("change", draw));
             window.addEventListener("resize", syncControlPanelHeight);
 
+            renderEventTable();
             syncControlPanelHeight();
             draw();
         });
