@@ -92,7 +92,16 @@
 						<button class="btn-copy-x" type="button" id="add-column-button" title="Add a Y column at the right">Add Column</button>
 						<button class="btn-clear-all" type="button" id="clear-sheet-button" title="Clear every cell in this sheet">Clear Data</button>
 					</div>
+					<div class="button-row">
+						<button class="btn-export-md" type="button" id="add-formula-button" title="Add a column calculated from other columns, such as T^2">Formula Column</button>
+						<button class="btn-export-md" type="button" id="mean-button" title="Add the mean of repeat readings, with an optional uncertainty">Mean of Repeats</button>
+					</div>
+					<div class="button-row">
+						<button class="btn-import-csv" type="button" id="import-csv-button" title="Import a CSV file and choose each column's role">Import .csv</button>
+						<button class="btn-export-csv" type="button" id="export-csv-button" title="Export every column of this sheet as a CSV file">Export .csv</button>
+					</div>
 				</div>
+				<input type="file" id="csv-file-input" accept=".csv,.txt,text/csv,text/plain" hidden>
 
 				<div class="fit-method-section">
 					<button class="section-toggle" type="button" aria-expanded="false" aria-controls="best-fit-content"
@@ -250,6 +259,71 @@
 
 	<div id="neo-menu" class="neo-menu" role="menu" hidden></div>
 
+	<dialog id="formula-dialog" class="neo-dialog" aria-labelledby="formula-dialog-title">
+		<form method="dialog" class="neo-dialog-body">
+			<h2 id="formula-dialog-title">Formula column</h2>
+			<label for="formula-input">Formula</label>
+			<input type="text" id="formula-input" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="e.g. T^2 or 4*pi^2*L/T^2">
+			<p id="formula-references" class="neo-dialog-note"></p>
+			<p class="neo-dialog-note">Use <code>*</code> to multiply and <code>^</code> for powers. Functions include <code>sqrt</code>, <code>log</code> (natural), <code>log10</code>, <code>exp</code>, <code>sin</code> and <code>mean</code>. <button type="button" class="neo-link-button" id="formula-help">Maths reference</button></p>
+			<div class="neo-dialog-pair">
+				<div>
+					<label for="formula-name">Column name</label>
+					<input type="text" id="formula-name" maxlength="40" autocomplete="off" placeholder="e.g. T^2">
+				</div>
+				<div>
+					<label for="formula-unit">Unit</label>
+					<input type="text" id="formula-unit" maxlength="40" autocomplete="off" placeholder="e.g. s^2">
+				</div>
+			</div>
+			<p id="formula-message" class="neo-dialog-message" role="status"></p>
+			<div class="neo-dialog-actions">
+				<button type="button" class="neo-dialog-cancel" data-close>Cancel</button>
+				<button type="button" class="neo-dialog-confirm" id="formula-apply">Apply</button>
+			</div>
+		</form>
+	</dialog>
+
+	<dialog id="mean-dialog" class="neo-dialog" aria-labelledby="mean-dialog-title">
+		<form method="dialog" class="neo-dialog-body">
+			<h2 id="mean-dialog-title">Mean of repeats</h2>
+			<p class="neo-dialog-note">Tick the columns of repeat readings. A new formula column holds their mean, row by row; a row with a blank reading stays blank.</p>
+			<fieldset id="mean-columns" class="neo-checklist">
+				<legend>Repeat readings</legend>
+			</fieldset>
+			<label class="neo-check"><input type="checkbox" id="mean-uncertainty" checked> Add a ±Δ column: half the spread between the largest and smallest readings</label>
+			<label class="neo-check"><input type="checkbox" id="mean-hide" checked> Hide the repeat readings on the graph</label>
+			<p id="mean-message" class="neo-dialog-message" role="status"></p>
+			<div class="neo-dialog-actions">
+				<button type="button" class="neo-dialog-cancel" data-close>Cancel</button>
+				<button type="button" class="neo-dialog-confirm" id="mean-apply">Add Mean</button>
+			</div>
+		</form>
+	</dialog>
+
+	<dialog id="csv-dialog" class="neo-dialog neo-dialog-wide" aria-labelledby="csv-dialog-title">
+		<form method="dialog" class="neo-dialog-body">
+			<h2 id="csv-dialog-title">Import CSV</h2>
+			<p id="csv-summary" class="neo-dialog-note"></p>
+			<label class="neo-check"><input type="checkbox" id="csv-headers"> The first row holds column names (such as <code>L / m</code>)</label>
+			<p class="neo-dialog-note">Choose a role for each column. Nothing is guessed silently: check the suggestions before importing.</p>
+			<div class="neo-table-wrap neo-csv-preview">
+				<table class="neo-table" id="csv-preview"></table>
+			</div>
+			<div class="neo-dialog-pair">
+				<div>
+					<label for="csv-target">Import into</label>
+					<select id="csv-target"></select>
+				</div>
+			</div>
+			<p id="csv-message" class="neo-dialog-message" role="status"></p>
+			<div class="neo-dialog-actions">
+				<button type="button" class="neo-dialog-cancel" data-close>Cancel</button>
+				<button type="button" class="neo-dialog-confirm" id="csv-apply">Import</button>
+			</div>
+		</form>
+	</dialog>
+
 	<div id="popup-background" style="display: none;"></div>
 	<div id="popup-container" style="display: none;">
 		<div id="popup-content" role="dialog" aria-modal="true" aria-labelledby="popup-title">
@@ -282,6 +356,7 @@
 		- /beta/panphyplot-neo/js/neo-plot.js (Plotly rendering)
 		- /beta/panphyplot-neo/js/neo-fitting.js (copy of the PanPhyPlot fitting code)
 		- /beta/panphyplot-neo/js/neo-ui.js (table, sheets, menus)
+		- /beta/panphyplot-neo/js/neo-dialogs.js (formula, mean and CSV dialogs)
 		- /beta/panphyplot-neo/js/neo-main.js (bootstrap)
 		The fit engine (fit-core.js, fit-worker.js) and math.js load from /tools/panphyplot/js/.
 	-->
@@ -291,6 +366,7 @@
 	<script src="/tools/panphyplot/js/fit-core.js"></script>
 	<script src="/beta/panphyplot-neo/js/neo-fitting.js"></script>
 	<script src="/beta/panphyplot-neo/js/neo-ui.js"></script>
+	<script src="/beta/panphyplot-neo/js/neo-dialogs.js"></script>
 	<script src="/beta/panphyplot-neo/js/neo-main.js"></script>
 </body>
 

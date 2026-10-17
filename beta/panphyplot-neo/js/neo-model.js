@@ -39,6 +39,7 @@
 			unit: typeof options.unit === 'string' ? options.unit.slice(0, NAME_MAX_LENGTH) : '',
 			role: ROLES.includes(options.role) ? options.role : 'Y',
 			errorType: ERROR_TYPES.includes(options.errorType) ? options.errorType : 'absolute',
+			formula: typeof options.formula === 'string' ? options.formula : '',
 			cells
 		};
 	}
@@ -323,6 +324,311 @@
 		return state;
 	}
 
+	/* ---------- Formula columns ---------- */
+
+	// Column letters always mean their column, so a sixth column makes E a column, not Euler's number.
+	const FORMULA_CONSTANTS = new Set(['pi', 'e', 'tau', 'PI', 'E']);
+	const FORMULA_FUNCTIONS = new Set([
+		'abs', 'sqrt', 'cbrt', 'exp', 'log', 'log10', 'log2', 'sin', 'cos', 'tan', 'asin', 'acos', 'atan', 'atan2',
+		'sinh', 'cosh', 'tanh', 'pow', 'square', 'cube', 'nthRoot', 'hypot', 'round', 'floor', 'ceil', 'sign',
+		'min', 'max', 'mean', 'median', 'sum', 'std'
+	]);
+	const FORMULA_FORBIDDEN_NODES = new Set(['AssignmentNode', 'FunctionAssignmentNode', 'BlockNode', 'AccessorNode', 'IndexNode', 'ObjectNode']);
+	const DELETED_COLUMN_SYMBOL = 'deletedColumn';
+	const IDENTIFIER_PATTERN = /^[A-Za-z_][A-Za-z0-9_]*$/;
+
+	function letterIndex(letters) {
+		if (!/^[A-Z]+$/.test(letters)) return -1;
+		let index = 0;
+		for (const ch of letters) index = index * 26 + (ch.charCodeAt(0) - 64);
+		return index - 1;
+	}
+
+	function isFormulaColumn(column) {
+		return typeof column.formula === 'string' && column.formula.trim() !== '';
+	}
+
+	function cleanFormulaText(text) {
+		return String(text ?? '').trim().replace(/^=\s*/, '');
+	}
+
+	// Symbol -> column id: every column's letter, plus each name that is a valid, unambiguous identifier.
+	function getFormulaSymbols(sheet) {
+		const symbols = new Map();
+		sheet.columns.forEach((column, index) => symbols.set(columnLetter(index), column.id));
+		const counts = new Map();
+		sheet.columns.forEach((column) => {
+			const name = String(column.name || '').trim();
+			counts.set(name, (counts.get(name) || 0) + 1);
+		});
+		sheet.columns.forEach((column) => {
+			const name = String(column.name || '').trim();
+			if (!IDENTIFIER_PATTERN.test(name) || counts.get(name) > 1 || symbols.has(name)) return;
+			if (FORMULA_CONSTANTS.has(name) || FORMULA_FUNCTIONS.has(name) || name === DELETED_COLUMN_SYMBOL) return;
+			symbols.set(name, column.id);
+		});
+		return symbols;
+	}
+
+	// Parses a formula and lists the columns it reads, or explains in plain words why it cannot run.
+	function analyzeFormula(sheet, text, math) {
+		const formula = cleanFormulaText(text);
+		if (!formula) return { ok: false, error: 'Enter a formula, such as T^2 or 1/L.' };
+		let node;
+		try {
+			node = math.parse(formula);
+		} catch (error) {
+			return { ok: false, error: `Check the formula: ${error.message}` };
+		}
+		const symbols = getFormulaSymbols(sheet);
+		const refs = new Map();
+		let problem = null;
+		node.traverse((child, path, parent) => {
+			if (problem) return;
+			if (FORMULA_FORBIDDEN_NODES.has(child.type)) {
+				problem = 'Formulas cannot assign values or define functions.';
+			} else if (child.isFunctionNode) {
+				const name = child.fn && child.fn.name;
+				if (!FORMULA_FUNCTIONS.has(name)) problem = `${name || 'That'} is not an available function.`;
+			} else if (child.isSymbolNode && path !== 'fn') {
+				if (child.name === DELETED_COLUMN_SYMBOL) problem = 'This formula used a column that has been deleted.';
+				else if (symbols.has(child.name)) refs.set(child.name, symbols.get(child.name));
+				else if (!FORMULA_CONSTANTS.has(child.name)) problem = `${child.name} is not a column letter or column name in this sheet.`;
+			}
+		});
+		if (problem) return { ok: false, error: problem };
+		return { ok: true, formula, node, refs, compiled: node.compile() };
+	}
+
+	// Computed values keep ten significant figures, which hides floating-point noise such as 2.4025000000000003.
+	function formatComputed(value) {
+		return String(Number(value.toPrecision(10)));
+	}
+
+	function evaluateFormulaRow(sheet, analysis, row) {
+		const scope = {};
+		for (const [symbol, id] of analysis.refs) {
+			const column = sheet.columns.find(entry => entry.id === id);
+			const value = parseNumber(column ? column.cells[row] : '');
+			if (!Number.isFinite(value)) return '';
+			scope[symbol] = value;
+		}
+		try {
+			const result = analysis.compiled.evaluate(scope);
+			return typeof result === 'number' && Number.isFinite(result) ? formatComputed(result) : '';
+		} catch (error) {
+			return '';
+		}
+	}
+
+	// Recalculates every formula column in dependency order. A row with a blank or invalid input stays blank.
+	function recomputeFormulas(sheet, math) {
+		const formulaColumns = sheet.columns.filter(isFormulaColumn);
+		if (!formulaColumns.length || !math) return false;
+		const analyses = new Map();
+		formulaColumns.forEach(column => analyses.set(column.id, analyzeFormula(sheet, column.formula, math)));
+		const order = [];
+		const state = new Map();
+		const visit = (id, trail) => {
+			if (state.get(id) === 'done') return true;
+			if (state.get(id) === 'visiting') {
+				trail.forEach(entry => { if (analyses.get(entry)?.ok) analyses.set(entry, { ok: false, error: 'This formula depends on itself through other columns.' }); });
+				return false;
+			}
+			const analysis = analyses.get(id);
+			if (!analysis) return true;
+			state.set(id, 'visiting');
+			if (analysis.ok) {
+				for (const refId of analysis.refs.values()) {
+					if (refId === id) {
+						analyses.set(id, { ok: false, error: 'A formula cannot use its own column.' });
+						break;
+					}
+					if (analyses.has(refId)) visit(refId, [...trail, id]);
+				}
+			}
+			state.set(id, 'done');
+			order.push(id);
+			return true;
+		};
+		formulaColumns.forEach(column => visit(column.id, [column.id]));
+		let changed = false;
+		order.forEach((id) => {
+			const column = sheet.columns.find(entry => entry.id === id);
+			const analysis = analyses.get(id);
+			const failedInput = analysis.ok && [...analysis.refs.values()].some(refId => analyses.has(refId) && !analyses.get(refId).ok);
+			const error = !analysis.ok ? analysis.error : (failedInput ? 'A column this formula uses has a problem.' : '');
+			if (column.formulaError !== error) changed = true;
+			column.formulaError = error;
+			for (let row = 0; row < sheet.rowCount; row++) {
+				const value = error ? '' : evaluateFormulaRow(sheet, analysis, row);
+				if (column.cells[row] !== value) {
+					column.cells[row] = value;
+					changed = true;
+				}
+			}
+		});
+		return changed;
+	}
+
+	// Column letters in formulas follow their columns when columns move, appear or are deleted.
+	function remapFormulaLetters(sheet, previousIds, math) {
+		sheet.columns.filter(isFormulaColumn).forEach((column) => {
+			let node;
+			try {
+				node = math.parse(cleanFormulaText(column.formula));
+			} catch (error) {
+				return;
+			}
+			let rewritten = false;
+			const result = node.transform((child, path) => {
+				if (!child.isSymbolNode || path === 'fn') return child;
+				const oldIndex = letterIndex(child.name);
+				if (oldIndex < 0 || oldIndex >= previousIds.length) return child;
+				const newIndex = sheet.columns.findIndex(entry => entry.id === previousIds[oldIndex]);
+				const name = newIndex < 0 ? DELETED_COLUMN_SYMBOL : columnLetter(newIndex);
+				if (name === child.name) return child;
+				rewritten = true;
+				return new math.SymbolNode(name);
+			});
+			if (rewritten) column.formula = result.toString();
+		});
+	}
+
+	/* ---------- Mean of repeats ---------- */
+
+	// T1, T2, T3 share the name T; anything less tidy is called "mean".
+	function getRepeatBaseName(names) {
+		const bases = names.map(name => String(name || '').trim().replace(/[\s_-]*\d+$/, '').trim());
+		return bases.length && bases[0] && bases.every(base => base === bases[0]) ? bases[0] : 'mean';
+	}
+
+	function buildRepeatFormulas(sheet, columns) {
+		const refs = columns.map(column => columnLetter(sheet.columns.indexOf(column))).join(', ');
+		return {
+			mean: `mean(${refs})`,
+			halfSpread: `(max(${refs}) - min(${refs})) / 2`
+		};
+	}
+
+	/* ---------- CSV ---------- */
+
+	function detectDelimiter(line) {
+		const counts = { ',': 0, ';': 0, '\t': 0 };
+		let quoted = false;
+		for (const ch of line) {
+			if (ch === '"') quoted = !quoted;
+			else if (!quoted && ch in counts) counts[ch]++;
+		}
+		const best = Object.keys(counts).sort((a, b) => counts[b] - counts[a])[0];
+		return counts[best] ? best : ',';
+	}
+
+	function parseCsv(text) {
+		const source = String(text ?? '').replace(/^﻿/, '').replace(/\r\n?/g, '\n');
+		const firstLine = source.split('\n').find(line => line.trim() !== '') || '';
+		const delimiter = detectDelimiter(firstLine);
+		const rows = [];
+		let row = [];
+		let cell = '';
+		let quoted = false;
+		for (let i = 0; i < source.length; i++) {
+			const ch = source[i];
+			if (quoted) {
+				if (ch === '"' && source[i + 1] === '"') { cell += '"'; i++; }
+				else if (ch === '"') quoted = false;
+				else cell += ch;
+			} else if (ch === '"') {
+				quoted = true;
+			} else if (ch === delimiter) {
+				row.push(cell.trim());
+				cell = '';
+			} else if (ch === '\n') {
+				row.push(cell.trim());
+				rows.push(row);
+				row = [];
+				cell = '';
+			} else {
+				cell += ch;
+			}
+		}
+		if (cell !== '' || row.length) {
+			row.push(cell.trim());
+			rows.push(row);
+		}
+		return rows.filter(entry => entry.some(value => value !== ''));
+	}
+
+	function escapeCsvCell(value) {
+		const text = String(value ?? '');
+		return /[",\r\n]/.test(text) ? `"${text.replace(/"/g, '""')}"` : text;
+	}
+
+	// Headings read "name / unit", which import splits back into a name and a unit.
+	function buildCsv(sheet) {
+		let lastRow = -1;
+		sheet.columns.forEach((column) => {
+			column.cells.forEach((value, row) => { if (!isBlank(value) && row > lastRow) lastRow = row; });
+		});
+		const lines = [sheet.columns.map(column => escapeCsvCell(formatAxisLabel(getColumnLabel(sheet, column), column.unit)))];
+		for (let row = 0; row <= lastRow; row++) {
+			lines.push(sheet.columns.map(column => escapeCsvCell(column.cells[row] ?? '')));
+		}
+		return `${lines.map(line => (Array.isArray(line) ? line.join(',') : line)).join('\r\n')}\r\n`;
+	}
+
+	// A suggestion only: the import preview lets the student change every role.
+	function guessImportRole(header, index) {
+		const text = String(header || '').trim();
+		const errorType = /%|percent/i.test(text) ? 'percentage' : 'absolute';
+		if (/^(Δ|∆|±|delta\b)|uncertaint|\berr(or)?\b/i.test(text) || /^d[A-Z]/.test(text)) {
+			return { role: /^(Δ|∆|±|delta\s*)?x\b|\bx[\s_-]*(uncertaint|err)/i.test(text) ? 'xErr' : 'yErr', errorType };
+		}
+		return { role: index === 0 ? 'X' : 'Y', errorType: 'absolute' };
+	}
+
+	// "Δx" belongs to whichever column is called x (or x1, x2…): the X column gives ±ΔX, a Y column ±ΔY.
+	function guessImportRoles(headers) {
+		const roles = headers.map((header, index) => guessImportRole(header, index));
+		// Case matters: t (time) and T (period) are different quantities.
+		const baseOf = text => String(text || '').trim().replace(/[\s_-]*\d+$/, '');
+		const names = headers.map(header => splitHeader(header).name);
+		return roles.map((entry, index) => {
+			if (entry.role !== 'xErr' && entry.role !== 'yErr') return entry;
+			const quantity = baseOf(names[index]
+				.replace(/^(Δ|∆|±|delta\s*|d(?=[A-Z]))/i, '')
+				.replace(/\b(uncertainty|uncertainties|error|err)\b|\bin\b|%|\(.*\)/gi, ''));
+			if (!quantity) return entry;
+			const owner = roles.findIndex((other, otherIndex) => (other.role === 'X' || other.role === 'Y') && baseOf(names[otherIndex]) === quantity);
+			if (owner < 0) return entry;
+			return { ...entry, role: roles[owner].role === 'X' ? 'xErr' : 'yErr' };
+		});
+	}
+
+	// Replaces a sheet's columns with imported ones; roles[i] gives each column's { role, errorType }.
+	function importRows(sheet, rows, options, ids) {
+		const width = Math.max(0, ...rows.map(row => row.length));
+		const headers = options.headers ? rows[0] || [] : [];
+		const data = options.headers ? rows.slice(1) : rows;
+		const rowCount = Math.max(DEFAULT_ROWS, data.length + 1);
+		sheet.columns = Array.from({ length: width }, (_, index) => {
+			const { name, unit } = splitHeader(headers[index] || '');
+			const role = options.roles[index] || { role: 'Y', errorType: 'absolute' };
+			return createColumn(ids.next('c'), {
+				name: name || (index === 0 ? 'x' : ''),
+				unit,
+				role: role.role,
+				errorType: role.errorType,
+				cells: data.map(row => row[index] ?? '')
+			}, rowCount);
+		});
+		sheet.rowCount = rowCount;
+		setRowCount(sheet, rowCount);
+		sheet.fitSeries = null;
+		sheet.hiddenSeries = [];
+		return sheet;
+	}
+
 	const api = {
 		ROLES,
 		DEFAULT_ROWS,
@@ -351,7 +657,21 @@
 		parsePastedText,
 		splitHeader,
 		applyPaste,
-		normalizeState
+		normalizeState,
+		FORMULA_FUNCTIONS,
+		isFormulaColumn,
+		cleanFormulaText,
+		getFormulaSymbols,
+		analyzeFormula,
+		recomputeFormulas,
+		remapFormulaLetters,
+		getRepeatBaseName,
+		buildRepeatFormulas,
+		parseCsv,
+		buildCsv,
+		guessImportRole,
+		guessImportRoles,
+		importRows
 	};
 
 	if (typeof module === 'object' && module.exports) module.exports = api;

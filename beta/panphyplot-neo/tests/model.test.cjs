@@ -126,3 +126,98 @@ test('saved state is repaired rather than rejected', () => {
 	const fresh = ids.next('c');
 	assert.ok(!sheet.columns.some(column => column.id === fresh));
 });
+
+const math = require('../../../tools/panphyplot/js/vendor/math.min.js');
+
+function namedSheet(columns) {
+	const sheet = sheetWith(columns.map(([role, cells, extra]) => [role, cells, extra]));
+	return sheet;
+}
+
+test('formula columns use letters or names, keep ten significant figures and leave blank rows blank', () => {
+	const sheet = namedSheet([['X', ['0.2', '0.4', ''], { name: 'L' }], ['Y', ['1.55', '1.27', '1'], { name: 'T' }], ['Y', [], { formula: '=T^2' }], ['Y', [], { formula: 'A/B' }]]);
+	model.recomputeFormulas(sheet, math);
+	assert.deepEqual(sheet.columns[2].cells.slice(0, 3), ['2.4025', '1.6129', '1']);
+	assert.deepEqual(sheet.columns[3].cells.slice(0, 3), ['0.1290322581', '0.3149606299', '']);
+	assert.equal(sheet.columns[2].formulaError, '');
+});
+
+test('formulas can build on other formula columns in any order', () => {
+	const sheet = namedSheet([['X', ['2']], ['Y', [], { formula: 'C + 1' }], ['Y', [], { formula: 'A^2' }]]);
+	model.recomputeFormulas(sheet, math);
+	assert.equal(sheet.columns[1].cells[0], '5');
+});
+
+test('unknown names, unsafe syntax and loops are reported, not evaluated', () => {
+	const sheet = namedSheet([['X', ['2']], ['Y', [], { formula: 'q*2' }], ['Y', [], { formula: 'D' }], ['Y', [], { formula: 'C' }], ['Y', [], { formula: 'f(x) = x' }], ['Y', [], { formula: 'import(1)' }]]);
+	model.recomputeFormulas(sheet, math);
+	assert.match(sheet.columns[1].formulaError, /q is not a column/);
+	assert.match(sheet.columns[2].formulaError, /depends on itself/);
+	assert.match(sheet.columns[3].formulaError, /depends on itself/);
+	assert.ok(sheet.columns[4].formulaError);
+	assert.match(sheet.columns[5].formulaError, /not an available function/);
+	assert.equal(sheet.columns[1].cells[0], '');
+});
+
+test('a column letter wins over Euler\'s E, and pi still works', () => {
+	const sheet = namedSheet([['X', ['1']], ['Y', ['2']], ['Y', ['3']], ['Y', ['4']], ['Y', ['5']], ['Y', [], { formula: 'E + 0*pi' }]]);
+	model.recomputeFormulas(sheet, math);
+	assert.equal(sheet.columns[5].cells[0], '5');
+});
+
+test('letters in formulas follow columns that move or are deleted', () => {
+	const sheet = namedSheet([['X', ['1']], ['Y', ['2']], ['Y', [], { formula: 'B^2' }]]);
+	const before = sheet.columns.map(column => column.id);
+	model.moveColumn(sheet, sheet.columns[1].id, -1);
+	model.remapFormulaLetters(sheet, before, math);
+	assert.equal(sheet.columns[2].formula, 'A ^ 2');
+	model.recomputeFormulas(sheet, math);
+	assert.equal(sheet.columns[2].cells[0], '4');
+	const beforeDelete = sheet.columns.map(column => column.id);
+	model.removeColumn(sheet, sheet.columns[0].id);
+	model.remapFormulaLetters(sheet, beforeDelete, math);
+	model.recomputeFormulas(sheet, math);
+	assert.match(sheet.columns[1].formulaError, /deleted/);
+});
+
+test('mean of repeats and half the spread', () => {
+	const sheet = namedSheet([['X', ['0.2']], ['Y', ['0.90'], { name: 'T1' }], ['Y', ['0.92'], { name: 'T2' }], ['Y', ['0.89'], { name: 'T3' }]]);
+	const repeats = sheet.columns.slice(1);
+	assert.equal(model.getRepeatBaseName(repeats.map(column => column.name)), 'T');
+	assert.equal(model.getRepeatBaseName(['a', 'b']), 'mean');
+	const formulas = model.buildRepeatFormulas(sheet, repeats);
+	assert.equal(formulas.mean, 'mean(B, C, D)');
+	model.insertColumn(sheet, 4, model.createColumn('m', { formula: formulas.mean }, 0));
+	model.insertColumn(sheet, 5, model.createColumn('h', { role: 'yErr', formula: formulas.halfSpread }, 0));
+	model.recomputeFormulas(sheet, math);
+	assert.equal(sheet.columns[4].cells[0], '0.9033333333');
+	assert.equal(sheet.columns[5].cells[0], '0.015');
+});
+
+test('CSV parsing handles quotes, semicolons and a byte-order mark', () => {
+	assert.deepEqual(model.parseCsv('﻿"L / m","note, with comma"\r\n0.2,"say ""hi"""\n\n'), [['L / m', 'note, with comma'], ['0.2', 'say "hi"']]);
+	assert.deepEqual(model.parseCsv('a;b\n1,5;2'), [['a', 'b'], ['1,5', '2']]);
+});
+
+test('CSV export round-trips names, units and every column', () => {
+	const sheet = namedSheet([['X', ['0.2', '0.4', ''], { name: 'L', unit: 'm' }], ['Y', ['0.9', '', ''], { name: 'T, mean', unit: 's' }]]);
+	const csv = model.buildCsv(sheet);
+	assert.equal(csv, 'L / m,"T, mean / s"\r\n0.2,0.9\r\n0.4,\r\n');
+	const rows = model.parseCsv(csv);
+	const state = model.createState();
+	const target = model.importRows(state.sheets[0], rows, { headers: true, roles: rows[0].map(model.guessImportRole) }, model.createIdSource(state));
+	assert.deepEqual(target.columns.map(column => [column.name, column.unit, column.role]), [['L', 'm', 'X'], ['T, mean', 's', 'Y']]);
+	assert.deepEqual(target.columns[1].cells.slice(0, 2), ['0.9', '']);
+});
+
+test('import suggests uncertainty roles only from clear headings', () => {
+	const roles = ['t / s', 'x / m', 'Δx / m', 'uncertainty in y (%)', 'T2', 'dT', 'density'].map(model.guessImportRole);
+	assert.deepEqual(roles.map(entry => entry.role), ['X', 'Y', 'xErr', 'yErr', 'Y', 'yErr', 'Y']);
+	assert.equal(roles[3].errorType, 'percentage');
+});
+
+test('an uncertainty heading goes to the column it names', () => {
+	const roles = model.guessImportRoles(['t / s', 'x1 / m', 'x2 / m', 'Δx / m', 'Δt / s', 'T uncertainty (%)', 'T / s']);
+	assert.deepEqual(roles.map(entry => entry.role), ['X', 'Y', 'Y', 'yErr', 'xErr', 'yErr', 'Y']);
+	assert.equal(roles[5].errorType, 'percentage');
+});
