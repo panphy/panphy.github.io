@@ -219,9 +219,16 @@ body.viewer-expanded { overflow: hidden; }
 .legend i.bar { border-radius: 3px; height: 8px; width: 18px; }
 .gesture { position: static; order: -1; margin: 0 2px 4px; color: var(--text-secondary); }
 
-/* Live readouts: an equation card and a graph side by side above the 3D view, so they never cover a track. */
-.stack { position: relative; order: -2; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; margin: 0 0 8px; }
-.equation { padding: 8px 12px; border-radius: 12px; background: var(--overlay-bg); border: 1px solid var(--card-border); font-family: var(--font-mono); font-size: .78rem; line-height: 1.5; }
+/* Live readouts: an equation card and a graph side by side above the 3D view, so they never cover a track.
+   Each folds away to a tab, and both start folded so the 3D view gets the room. */
+.stack { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); align-items: start; gap: 8px; margin: 8px 0 0; }
+.info-box { min-width: 0; border: 1px solid var(--card-border); border-radius: 12px; background: var(--overlay-bg); }
+.info-box summary { display: flex; align-items: center; gap: 8px; min-height: 44px; padding: 0 12px; cursor: pointer; font-family: var(--font-mono); font-size: .7rem; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; list-style: none; }
+.info-box summary::-webkit-details-marker { display: none; }
+.info-box summary::before { content: ''; width: 6px; height: 6px; border: solid currentColor; border-width: 0 2px 2px 0; transform: rotate(-45deg); transition: transform .18s ease; }
+.info-box[open] summary::before { transform: translateY(-2px) rotate(45deg); }
+.info-box summary:focus-visible { outline: 3px solid var(--focus); outline-offset: 3px; }
+.equation { padding: 0 12px 10px; font-family: var(--font-mono); font-size: .78rem; line-height: 1.5; }
 .equation .row { display: flex; justify-content: space-between; gap: 10px; }
 .equation .row span:first-child { color: var(--text-secondary); }
 .equation .formula { font-size: .9rem; font-weight: 600; margin-bottom: 2px; }
@@ -230,7 +237,7 @@ body.viewer-expanded { overflow: hidden; }
 .equation .status { margin-top: 4px; font-size: .72rem; font-weight: 600; }
 .equation .status.good { color: var(--correct-border); }
 .equation .status.warn { color: var(--retry-border); }
-.graph { padding: 6px; border-radius: 12px; background: var(--overlay-bg); border: 1px solid var(--card-border); }
+.graph { padding: 0 6px 6px; }
 .graph canvas { display: block; width: 100%; height: 150px; flex: none; min-height: 0; }
 
 /* Room for three lines, so a longer message does not shrink the 3D view. */
@@ -323,8 +330,8 @@ footer { display: flex; justify-content: space-between; gap: 20px; border-top: 1
   .lab-strip { flex-direction: column; align-items: flex-start; gap: 0; }
   .viewer-panel { padding: 12px; }
   /* On phones the readouts stack in one column above the 3D view. */
-  #viewer { flex: none; height: 720px; min-height: 720px; }
-  .workspace.is-fullscreen #viewer { flex: 1 0 720px; min-height: 720px; }
+  #viewer { flex: none; height: 520px; min-height: 520px; }
+  .workspace.is-fullscreen #viewer { flex: 1 0 520px; min-height: 520px; }
   .viewer-heading { font-size: .68rem; }
   .gesture { display: none; }
   .stack { grid-template-columns: 1fr; gap: 6px; }
@@ -339,6 +346,6 @@ footer { display: flex; justify-content: space-between; gap: 20px; border-top: 1
   footer { flex-direction: column; gap: 8px; }
 }
 @media (prefers-reduced-motion: reduce) {
-  .models button, .toolbar button { transition: none; }
+  .models button, .toolbar button, .info-box summary::before { transition: none; }
   .models button:hover { transform: none; }
 }

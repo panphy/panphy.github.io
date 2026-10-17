@@ -926,6 +926,7 @@ const sci = (value, digits = 2) => {
 function row(label, value) {
   return `<div class="row"><span>${label}</span><span>${value}</span></div>`;
 }
+for (const id of ['equation-box', 'graph-box']) $(id).addEventListener('toggle', () => { updateEquation(); drawGraph(); });
 function updateEquation() {
   const box = $('equation');
   if (!lab) return;
