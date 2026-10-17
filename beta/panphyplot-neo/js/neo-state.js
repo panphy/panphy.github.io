@@ -12,6 +12,8 @@ let latexMode = false;
 const fitEpochs = {};
 
 let saveTimeout = null;
+// Set by the guided tour (neo-tour.js), which runs on practice data and must never overwrite the saved workspace.
+let persistenceDisabled = false;
 let lastSavedSerialized = null;
 
 function debounce(func, wait) {
@@ -127,6 +129,7 @@ function buildPersistedState() {
 }
 
 function saveState() {
+	if (persistenceDisabled) return;
 	try {
 		const serialized = JSON.stringify(buildPersistedState());
 		if (serialized === lastSavedSerialized) return;
@@ -147,11 +150,12 @@ function flushSaveState() {
 	saveState();
 }
 
-function loadState() {
-	let saved = null;
+// initialState (the tour's practice data) replaces the saved workspace, which is then left unread.
+function loadState(initialState = null) {
+	let saved = initialState;
 	try {
-		const text = localStorage.getItem(STORAGE_KEY);
-		saved = text ? JSON.parse(text) : null;
+		const text = initialState ? null : localStorage.getItem(STORAGE_KEY);
+		if (text) saved = JSON.parse(text);
 	} catch (error) {
 		console.warn('Unable to load saved state:', error);
 	}

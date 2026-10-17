@@ -28,6 +28,7 @@
 
 	<!-- The shared PanPhyPlot look; neo.css adds the column table and overrides. -->
 	<link rel="stylesheet" href="/tools/panphyplot/css/panphyplot.css">
+	<link rel="stylesheet" href="/tools/panphyplot/css/tour.css">
 	<link rel="stylesheet" href="/beta/panphyplot-neo/css/neo.css">
 	<link rel="stylesheet" href="/assets/theme-toggle.css">
 	<link rel="stylesheet" href="/assets/fullscreen-button.css">
@@ -53,6 +54,8 @@
 			</div>
 			<div class="banner-title">PanPhyPlot <span class="neo-badge">neo-beta</span></div>
 			<div class="banner-buttons">
+				<a href="/beta/panphyplot-neo/manual.html" class="banner-button" title="Open the PanPhyPlot (neo-beta) manual">Manual</a>
+				<a href="/beta/panphyplot-neo.html?tour=columns" class="banner-button tour-launch" title="Take a guided tour using practice data">Tour</a>
 				<div class="theme-toggle">
 					<button id="theme-button" data-panphy-theme-toggle aria-label="Toggle Light/Dark Theme"
 						title="Toggle between light and dark themes">☀️</button>
@@ -99,6 +102,7 @@
 					<div class="button-row">
 						<button class="btn-import-csv" type="button" id="import-csv-button" title="Import a CSV file and choose each column's role">Import .csv</button>
 						<button class="btn-export-csv" type="button" id="export-csv-button" title="Export every column of this sheet as a CSV file">Export .csv</button>
+						<button class="btn-export-md" type="button" id="view-table-button" title="View this sheet as a formatted table to copy">View Table</button>
 					</div>
 				</div>
 				<input type="file" id="csv-file-input" accept=".csv,.txt,text/csv,text/plain" hidden>
@@ -305,6 +309,23 @@
 		</form>
 	</dialog>
 
+	<dialog id="table-dialog" class="neo-dialog neo-dialog-wide" aria-labelledby="table-dialog-title">
+		<form method="dialog" class="neo-dialog-body">
+			<h2 id="table-dialog-title">View Table</h2>
+			<p class="neo-dialog-note">Each value is shown with its own ± uncertainty. Copy the table into a spreadsheet, a document or a report.</p>
+			<div class="neo-table-wrap neo-table-view-wrap">
+				<table class="neo-table neo-table-view" id="table-view"></table>
+			</div>
+			<div class="neo-dialog-actions neo-dialog-actions-wrap">
+				<button type="button" class="neo-dialog-confirm" id="table-copy-text">Copy for Spreadsheet</button>
+				<button type="button" class="neo-dialog-confirm" id="table-copy-image">Copy as Image</button>
+				<button type="button" class="neo-dialog-confirm" id="table-copy-markdown">Copy Markdown</button>
+				<button type="button" class="neo-dialog-confirm" id="table-copy-latex">Copy LaTeX</button>
+				<button type="button" class="neo-dialog-cancel" data-close>Close</button>
+			</div>
+		</form>
+	</dialog>
+
 	<dialog id="csv-dialog" class="neo-dialog neo-dialog-wide" aria-labelledby="csv-dialog-title">
 		<form method="dialog" class="neo-dialog-body">
 			<h2 id="csv-dialog-title">Import CSV</h2>
@@ -362,6 +383,8 @@
 		- /beta/panphyplot-neo/js/neo-fitting.js (copy of the PanPhyPlot fitting code)
 		- /beta/panphyplot-neo/js/neo-ui.js (table, sheets, menus)
 		- /beta/panphyplot-neo/js/neo-dialogs.js (formula, mean and CSV dialogs)
+		- /beta/panphyplot-neo/js/neo-copy.js (copying the equation, View Table)
+		- /beta/panphyplot-neo/js/neo-tour.js (guided tour on practice data)
 		- /beta/panphyplot-neo/js/neo-main.js (bootstrap)
 		The fit engine (fit-core.js, fit-worker.js) and math.js load from /tools/panphyplot/js/.
 	-->
@@ -373,7 +396,9 @@
 	<script src="/beta/panphyplot-neo/js/neo-fitting.js"></script>
 	<script src="/beta/panphyplot-neo/js/neo-ui.js"></script>
 	<script src="/beta/panphyplot-neo/js/neo-dialogs.js"></script>
+	<script src="/beta/panphyplot-neo/js/neo-copy.js"></script>
 	<script src="/beta/panphyplot-neo/js/neo-main.js"></script>
+	<script src="/beta/panphyplot-neo/js/neo-tour.js"></script>
 </body>
 
 </html>

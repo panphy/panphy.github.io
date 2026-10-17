@@ -758,7 +758,7 @@ function renderFittingResult(equation, rSquaredDisplay) {
 	const copyTarget = document.createElement('button');
 	copyTarget.type = 'button';
 	copyTarget.className = 'fit-equation-copy-target neo-equation';
-	copyTarget.title = 'Copy the equation as LaTeX';
+	copyTarget.title = 'Copy the equation as an image or LaTeX';
 	copyTarget.dataset.fitLatex = equation;
 	copyTarget.textContent = `\\(${equation}\\)`;
 	equationElement.replaceChildren(copyTarget);
@@ -769,17 +769,6 @@ function renderFittingResult(equation, rSquaredDisplay) {
 	renderFitDiagnostics();
 	safeTypeset(equationElement);
 	safeTypeset(rSquaredElement);
-}
-
-async function copyFitEquation(event) {
-	const target = event.target.closest('.neo-equation');
-	if (!target) return;
-	try {
-		await navigator.clipboard.writeText(target.dataset.fitLatex || '');
-		showToast('Equation copied as LaTeX.');
-	} catch (error) {
-		showToast('Copying is not available in this browser.');
-	}
 }
 
 function renderFitDiagnostics() {
@@ -879,7 +868,6 @@ function initializeInterface() {
 		scheduleSaveState();
 	});
 	document.getElementById('graph-title').addEventListener('input', handleTitleInput);
-	document.getElementById('fit-equation').addEventListener('click', copyFitEquation);
 	document.getElementById('plot-all-button').addEventListener('click', openPlotAll);
 	document.getElementById('popup-close').addEventListener('click', closePopup);
 	document.getElementById('popup-background').addEventListener('click', closePopup);
