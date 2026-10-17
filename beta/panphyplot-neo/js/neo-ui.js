@@ -542,14 +542,19 @@ function addColumn() {
 	if (wrap) wrap.scrollLeft = wrap.scrollWidth;
 }
 
+// The toolbar's Clear: a choice between emptying the cells and a blank sheet (neo-dialogs.js).
 function clearSheet() {
-	const sheet = getActiveSheet();
-	if (NeoModel.isSheetEmpty(sheet)) return;
-	if (!window.confirm(`Clear every cell in "${getSheetDisplayName(neoState.activeSheet)}"? Column names, units and roles stay.`)) return;
-	sheet.columns.forEach((column) => { column.cells = column.cells.map(() => ''); });
-	NeoModel.setRowCount(sheet, NeoModel.DEFAULT_ROWS);
-	renderTable();
-	afterDataChange();
+	openClearDialog();
+}
+
+// A cleared or reset sheet has nothing left to fit, so its fits and fit drafts go too.
+function dropSheetFits(sheet) {
+	const prefix = `${sheet.id}:`;
+	[datasetFitResults, fittedCurves, customFitStates].forEach((store) => {
+		Object.keys(store).forEach((key) => {
+			if (key.startsWith(prefix)) delete store[key];
+		});
+	});
 }
 
 /* ---------- Menus ---------- */

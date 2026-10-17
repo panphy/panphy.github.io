@@ -158,6 +158,44 @@ function applyFormula() {
 	}
 }
 
+/* ---------- Clear ---------- */
+
+function isBlankNewSheet(sheet) {
+	return NeoModel.isSheetEmpty(sheet) && sheet.columns.length === 2
+		&& sheet.columns[0].role === 'X' && sheet.columns[0].name === 'x' && !sheet.columns[0].unit
+		&& sheet.columns[1].role === 'Y' && sheet.columns[1].name === 'y' && !sheet.columns[1].unit;
+}
+
+function openClearDialog() {
+	const sheet = getActiveSheet();
+	const name = getSheetDisplayName(neoState.activeSheet);
+	if (isBlankNewSheet(sheet)) {
+		showToast(`"${name}" is already a blank sheet.`);
+		return;
+	}
+	document.getElementById('clear-dialog-title').textContent = `Clear "${name}"`;
+	const empty = NeoModel.isSheetEmpty(sheet);
+	const keep = document.getElementById('clear-keep-columns');
+	keep.disabled = empty;
+	document.getElementById('clear-keep-note').textContent = empty
+		? 'The cells are already empty.'
+		: 'Empties every cell and removes this sheet\'s fits. Column names, units, roles and formulas stay, ready for new readings.';
+	openDialog('clear-dialog');
+	(empty ? document.getElementById('clear-reset') : keep).focus();
+}
+
+function applyClear(reset) {
+	const sheet = getActiveSheet();
+	if (reset) NeoModel.resetSheet(sheet, NeoModel.createIdSource(neoState));
+	else NeoModel.clearSheetData(sheet);
+	dropSheetFits(sheet);
+	closeDialog('clear-dialog');
+	renderTable();
+	afterDataChange({ structure: true });
+	syncTitleInput(true);
+	showToast(reset ? 'The sheet is blank again: columns x and y.' : 'Data cleared. The columns are ready for new readings.');
+}
+
 /* ---------- Fill with one value ---------- */
 
 let fillTarget = null;
@@ -445,6 +483,8 @@ function initializeDialogs() {
 			}
 		});
 	});
+	document.getElementById('clear-keep-columns').addEventListener('click', () => applyClear(false));
+	document.getElementById('clear-reset').addEventListener('click', () => applyClear(true));
 	document.getElementById('fill-apply').addEventListener('click', applyFill);
 	document.getElementById('fill-value').addEventListener('keydown', (event) => {
 		if (event.key === 'Enter') {

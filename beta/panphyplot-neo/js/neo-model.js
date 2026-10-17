@@ -168,6 +168,23 @@
 		return cleanUnit ? `${cleanName}\\ /\\ \\mathrm{${formatUnitForLatex(cleanUnit)}}` : cleanName;
 	}
 
+	// Empties every cell but keeps the columns: names, units, roles and formulas.
+	function clearSheetData(sheet) {
+		sheet.columns.forEach((column) => { column.cells = column.cells.map(() => ''); });
+		setRowCount(sheet, DEFAULT_ROWS);
+	}
+
+	// Back to a new sheet's two columns, x (X) and y (Y), keeping only the sheet's id and name.
+	function resetSheet(sheet, ids) {
+		const fresh = createSheet(ids, sheet.name);
+		sheet.rowCount = fresh.rowCount;
+		sheet.columns = fresh.columns;
+		sheet.title = fresh.title;
+		sheet.fitSeries = null;
+		sheet.hiddenSeries = [];
+		return sheet;
+	}
+
 	function isSheetEmpty(sheet) {
 		return sheet.columns.every(column => column.cells.every(isBlank));
 	}
@@ -778,6 +795,8 @@
 		isCellInvalid,
 		formatAxisLabel,
 		isSheetEmpty,
+		clearSheetData,
+		resetSheet,
 		setRowCount,
 		insertRow,
 		removeRow,
