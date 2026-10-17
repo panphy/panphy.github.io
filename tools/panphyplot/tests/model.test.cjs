@@ -1,7 +1,7 @@
-// Run with: node --test beta/panphyplot-neo/tests/model.test.cjs
+// Run with: node --test tools/panphyplot/tests/model.test.cjs
 const test = require('node:test');
 const assert = require('node:assert/strict');
-const model = require('../js/neo-model.js');
+const model = require('../js/model.js');
 
 function sheetWith(columns) {
 	const state = model.createState();
@@ -127,7 +127,7 @@ test('saved state is repaired rather than rejected', () => {
 	assert.ok(!sheet.columns.some(column => column.id === fresh));
 });
 
-const math = require('../../../tools/panphyplot/js/vendor/math.min.js');
+const math = require('../js/vendor/math.min.js');
 
 function namedSheet(columns) {
 	const sheet = sheetWith(columns.map(([role, cells, extra]) => [role, cells, extra]));

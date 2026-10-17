@@ -1,49 +1,23 @@
-// Guided tour
+// Guided tour for PanPhyPlot
 //
-// A tour chapter runs at ?tour=<chapter> on practice data. Saving is switched off for
-// that whole page load, so the saved workspace is never read or written; leaving the
-// tour reloads the plain page, which brings that workspace back.
+// The tour runs at ?tour=columns on practice data. Saving is switched off for that whole
+// page load, so the saved workspace is never read or written; leaving the tour reloads the
+// plain page, which brings that workspace back. The card and spotlight engine is copied
+// from /misc/panphyplotog/js/tour.js and uses its tour.css.
 
-const TOUR_SEEN_KEY = 'panphyplot-tour-seen';
-// A phone screen cannot show a tour card beside the app, so the tour is not offered there.
-// Keep in step with the query that hides the Tour button in tour.css.
-const TOUR_PHONE_QUERY = '(max-width: 699px), (max-height: 499px)';
+const TOUR_SEEN_KEY = 'panphyplot-neo-tour-seen';
+// The app is not used on phones (see the phone message), so neither is its tour.
+const TOUR_PHONE_QUERY = '(max-width: 599px), (max-height: 500px) and (pointer: coarse)';
 // Matches the width below which the app stacks its two panels.
-const TOUR_NARROW_WIDTH = 900;
+const TOUR_NARROW_WIDTH = 1000;
 
-// Pendulum practical, T = 2π√(L/g). The linearised sample gives g from the gradient of
-// T² against L; the raw sample is the same experiment before any processing. The spring
-// sample is the first of two Hooke's law datasets; the student adds spring B.
-const TOUR_SAMPLES = {
-	linearised: {
-		name: 'Pendulum',
-		headers: { x: 'L / m', y: 'T² / s²' },
-		rows: [
-			['0.20', '0.82'], ['0.30', '1.19'], ['0.40', '1.63'], ['0.50', '2.00'],
-			['0.60', '2.44'], ['0.70', '2.80'], ['0.80', '3.25'], ['0.90', '3.61']
-		]
-	},
-	raw: {
-		name: 'Pendulum',
-		headers: { x: 'L / m', y: 'T / s' },
-		rows: [
-			['0.20', '0.906'], ['0.30', '1.091'], ['0.40', '1.277'], ['0.50', '1.414'],
-			['0.60', '1.562'], ['0.70', '1.673'], ['0.80', '1.803'], ['0.90', '1.900']
-		]
-	},
-	springs: {
-		name: 'Spring A',
-		headers: { x: 'F / N', y: 'e (A) / cm' },
-		rows: [['1.0', '1.0'], ['2.0', '2.1'], ['3.0', '2.9'], ['4.0', '4.1'], ['5.0', '5.0']]
-	}
-};
-const TOUR_SPRING_B = {
-	headers: { x: 'F / N', y: 'e (B) / cm' },
-	extensions: ['2.1', '3.9', '6.2', '8.0', '9.9']
-};
-const TOUR_COMBINED_Y_LABEL = 'Extension / cm';
-const TOUR_CUSTOM_FORMULA = '2*pi*sqrt(x/g)';
-const TOUR_PROCESSING_FORMULA = 'y^2';
+// A pendulum practical with three repeat readings of the period, T = 2π√(L/g).
+const TOUR_LENGTHS = ['0.20', '0.30', '0.40', '0.50', '0.60', '0.70', '0.80', '0.90'];
+const TOUR_REPEATS = [
+	['0.91', '1.09', '1.28', '1.41', '1.56', '1.67', '1.80', '1.90'],
+	['0.89', '1.11', '1.26', '1.43', '1.55', '1.69', '1.79', '1.91'],
+	['0.90', '1.10', '1.27', '1.42', '1.54', '1.68', '1.80', '1.89']
+];
 
 const tour = {
 	chapterId: null,
@@ -78,592 +52,212 @@ function openTourSection(sectionId) {
 	}
 }
 
-function isTourSectionOpen(sectionId) {
-	const section = document.getElementById(sectionId);
-	return !!section && section.classList.contains('is-open');
-}
-
 function showTourBasicFitTab() {
 	openTourSection('best-fit-content');
 	const basicTab = document.querySelector('.tablink[onclick*="BasicFit"]');
 	if (basicTab && !basicTab.classList.contains('active')) basicTab.click();
 }
 
-function hasCurrentTourFit() {
-	const result = datasetFitResults[activeSet];
-	return !!result && !result.stale;
+function tourSheet() {
+	return getActiveSheet();
 }
 
-function runTourLinearFit() {
+function findTourMean() {
+	return tourSheet().columns.find(column => /^mean\(/.test(column.formula || '')) || null;
+}
+
+function findTourSquare() {
+	return tourSheet().columns.find(column => PlotModel.cleanFormulaText(column.formula || '').replace(/\s/g, '') === 'T^2') || null;
+}
+
+function findTourHeader(column) {
+	return column ? document.querySelector(`.neo-col-head[data-column-id="${column.id}"]`) : null;
+}
+
+function addTourMean() {
+	if (findTourMean()) return;
+	openMeanDialog();
+	document.getElementById('mean-uncertainty').checked = true;
+	document.getElementById('mean-hide').checked = true;
+	applyMean();
+}
+
+function addTourSquare() {
+	if (findTourSquare()) return;
+	openFormulaDialog(null);
+	document.getElementById('formula-input').value = 'T^2';
+	document.getElementById('formula-name').value = 'T^2';
+	document.getElementById('formula-unit').value = 's^2';
+	document.getElementById('formula-propagate').checked = true;
+	applyFormula();
+}
+
+function hasTourSquareWithDelta() {
+	const square = findTourSquare();
+	return !!square && !!getPropagatedColumn(square);
+}
+
+function isTourMeanHidden() {
+	const mean = findTourMean();
+	return !!mean && tourSheet().hiddenSeries.includes(mean.id);
+}
+
+function hideTourMean() {
+	const mean = findTourMean();
+	if (!mean || isTourMeanHidden()) return;
+	tourSheet().hiddenSeries.push(mean.id);
+	onSeriesVisibilityChange(tourSheet());
+}
+
+function isTourFitSetUp() {
+	const square = findTourSquare();
+	return !!square && tourSheet().fitSeries === square.id && getWeightingRequested();
+}
+
+function setUpTourFit() {
+	const square = findTourSquare();
+	if (!square) return;
+	openTourSection('best-fit-content');
+	const select = document.getElementById('fit-series-select');
+	select.value = square.id;
+	select.dispatchEvent(new Event('change'));
+	const weighted = document.getElementById('fit-weighted');
+	weighted.checked = true;
+	weighted.dispatchEvent(new Event('change'));
+}
+
+function getTourFit() {
+	const square = findTourSquare();
+	const result = square ? datasetFitResults[makeFitKey(tourSheet(), square.id)] : null;
+	return result && !result.stale ? result : null;
+}
+
+function runTourFit() {
+	if (!isTourFitSetUp()) setUpTourFit();
 	showTourBasicFitTab();
-	const fitMethod = document.getElementById('fit-method');
-	if (fitMethod.value !== 'Linear') {
-		fitMethod.value = 'Linear';
-		updateBasicFitEquation();
-	}
+	document.getElementById('fit-method').value = 'Linear';
+	updateBasicFitEquation();
 	fitCurve();
 }
 
-function tourRowsHaveUncertainty(axis) {
-	const points = getFiniteDatasetPoints(activeSet);
-	return !!datasetToggles[activeSet]?.[axis] && points.length > 0
-		&& points.every(point => point[`${axis}ErrorRaw`] > 0);
-}
-
-function applyTourUncertainty(axis, errorType, value) {
-	openTourSection('uncertainties-content');
-	const typeSelect = document.getElementById(`${axis}-error-type`);
-	if (typeSelect.value !== errorType) {
-		typeSelect.value = errorType;
-		updateErrorType(axis);
-	}
-	document.getElementById(`global-${axis}-uncertainty`).value = value;
-	applyGlobalUncertainties(axis);
-}
-
+// g = 4π²/m, with Δg/g = Δm/m.
 function describeTourGravity() {
-	const curve = fittedCurves[activeSet];
-	// A linear fit stores just its two end points.
-	if (!curve || curve.x.length !== 2) return '';
-	const gradient = (curve.y[1] - curve.y[0]) / (curve.x[1] - curve.x[0]);
-	const gravity = 4 * Math.PI ** 2 / gradient;
-	if (!Number.isFinite(gravity) || gravity <= 0) return '';
-	return ` Here the gradient is 4π²/g, so this data gives g ≈ ${gravity.toFixed(1)} m/s².`;
-}
-
-function showTourCustomFitTab() {
-	openTourSection('best-fit-content');
-	const customTab = document.querySelector('.tablink[onclick*="CustomFit"]');
-	if (customTab && !customTab.classList.contains('active')) customTab.click();
-}
-
-function isTourCustomFitTabOpen() {
-	return isTourSectionOpen('best-fit-content') && document.getElementById('CustomFit').classList.contains('active');
-}
-
-// True once the formula box holds an equation whose only parameter is g.
-function hasTourCustomFormula() {
-	const inputs = document.querySelectorAll('#custom-fit-parameters-list .custom-fit-parameter-input');
-	return inputs.length === 1 && inputs[0].getAttribute('data-param') === 'g';
-}
-
-function enterTourCustomFormula() {
-	showTourCustomFitTab();
-	const formulaInput = document.getElementById('custom-fit-formula-input');
-	formulaInput.value = TOUR_CUSTOM_FORMULA;
-	formulaInput.dispatchEvent(new Event('input', { bubbles: true }));
-	formulaInput.dispatchEvent(new Event('change', { bubbles: true }));
-}
-
-function hasCurrentTourCustomFit() {
-	return hasCurrentTourFit() && datasetFitResults[activeSet].choice?.kind === 'custom';
-}
-
-function runTourCustomFit() {
-	if (!hasTourCustomFormula()) enterTourCustomFormula();
-	fitCustomCurve();
-}
-
-function describeTourCustomGravity() {
-	if (!hasCurrentTourCustomFit()) return '';
-	const gravity = parseNumericInput(customFitStates[activeSet]?.initialValues?.g);
-	if (!Number.isFinite(gravity) || gravity <= 0) return '';
-	return ` Here the fit gives g ≈ ${gravity.toFixed(1)} m/s² directly.`;
-}
-
-function isTourElementShown(id) {
-	const element = document.getElementById(id);
-	return !!element && element.getClientRects().length > 0;
-}
-
-// Copying the processed columns adds a dataset and switches to it.
-function hasTourProcessedDataset() {
-	return rawData.length > 1;
-}
-
-function hasTourProcessedColumn() {
-	return document.getElementById('data-processing-derived-list').children.length > 0;
-}
-
-function hasTourProcessedMapping() {
-	return document.getElementById('data-processing-output-y').value.startsWith('derived:');
-}
-
-// Reopening the popup clears its processed columns, so only open it when it is closed.
-function openTourProcessing() {
-	if (!hasTourProcessedDataset() && !isTourElementShown('data-processing-container')) openDataProcessingPopup();
-}
-
-function startTourProcessedColumn() {
-	openTourProcessing();
-	if (!hasTourProcessedColumn() && !isTourElementShown('data-processing-formula-panel')) {
-		document.getElementById('data-processing-process-y').click();
-	}
-}
-
-function createTourProcessedColumn() {
-	if (hasTourProcessedDataset()) return;
-	startTourProcessedColumn();
-	if (hasTourProcessedColumn()) return;
-	document.getElementById('data-processing-formula-input').value = TOUR_PROCESSING_FORMULA;
-	document.getElementById('data-processing-apply').click();
-}
-
-function mapTourProcessedColumn() {
-	if (hasTourProcessedDataset()) return;
-	createTourProcessedColumn();
-	const outputY = document.getElementById('data-processing-output-y');
-	const processed = Array.from(outputY.options).filter(option => option.value.startsWith('derived:')).pop();
-	if (processed) outputY.value = processed.value;
-}
-
-function copyTourProcessedData() {
-	if (hasTourProcessedDataset()) return;
-	mapTourProcessedColumn();
-	document.getElementById('data-processing-copy').click();
-}
-
-// The chapter's second dataset, spring B, is always the one after the sample.
-function hasTourSecondDataset() {
-	return rawData.length > 1;
-}
-
-function showTourSecondDataset() {
-	if (!hasTourSecondDataset()) copyXToNewDataset();
-	else if (activeSet !== 1) switchDataset(1);
-}
-
-function hasTourSecondData() {
-	return hasTourSecondDataset() && getFiniteDatasetPoints(1).length >= TOUR_SPRING_B.extensions.length;
-}
-
-function fillTourSecondData() {
-	showTourSecondDataset();
-	if (hasTourSecondData()) return;
-	const rows = Array.from(document.querySelectorAll('#data-table tbody tr'))
-		.filter(row => row.querySelector('.x-input').value.trim() !== '');
-	TOUR_SPRING_B.extensions.forEach((value, index) => {
-		if (rows[index]) rows[index].querySelector('.y-input').value = value;
-	});
-	updateData();
-}
-
-function hasTourSecondHeaders() {
-	const headers = datasetHeaders[1];
-	return hasTourSecondDataset() && !!headers && ['x', 'y'].every(axis => {
-		const label = String(headers[axis] || '').trim();
-		return label !== '' && label !== axis;
-	});
-}
-
-function nameTourSecondColumns() {
-	fillTourSecondData();
-	if (hasTourSecondHeaders()) return;
-	['x', 'y'].forEach(axis => {
-		document.getElementById(`${axis}-column-name`).value = TOUR_SPRING_B.headers[axis];
-		updateLabels(axis);
-	});
-}
-
-function hasTourSecondFit() {
-	return hasTourSecondDataset() && !!datasetFitResults[1] && !datasetFitResults[1].stale;
-}
-
-function fitTourSecondDataset() {
-	nameTourSecondColumns();
-	if (!hasTourSecondFit()) runTourLinearFit();
-}
-
-function openTourCombinedPlot() {
-	fitTourSecondDataset();
-	if (!isTourElementShown('popup-container')) plotAllDatasets();
-}
-
-function hasTourCombinedLabel() {
-	const label = document.getElementById('combined-y-label').value.trim();
-	return label !== '' && label !== String(datasetHeaders[activeSet]?.y || '').trim();
-}
-
-function setTourCombinedLabel() {
-	openTourCombinedPlot();
-	const labelInput = document.getElementById('combined-y-label');
-	labelInput.value = TOUR_COMBINED_Y_LABEL;
-	labelInput.dispatchEvent(new Event('input', { bubbles: true }));
+	const result = getTourFit();
+	const slope = result && Array.isArray(result.parameters) ? result.parameters.find(entry => entry.name === 'm') : null;
+	if (!slope || !(slope.value > 0)) return '';
+	const g = 4 * Math.PI * Math.PI / slope.value;
+	const dg = g * slope.uncertainty / slope.value;
+	const text = PanPhyPlotStats.formatMeasurement(g, dg).replace(' \\pm ', ' ± ');
+	return ` Here the gradient m is 4π²/g, so g = 4π²/m = ${text} m s⁻².`;
 }
 
 const TOUR_CHAPTERS = {
-	'first-fit': {
-		title: 'First fit',
-		next: 'uncertainties',
+	columns: {
+		title: 'Columns and fits',
 		steps: [
 			{
 				title: 'Welcome to PanPhyPlot',
-				body: 'This short tour fits a straight line to data from a pendulum experiment. It runs on practice data, so your own work is untouched.'
+				body: 'This tour takes a pendulum experiment from three repeat readings to a value of g with its uncertainty. It runs on practice data, so your own work is untouched.'
 			},
 			{
-				title: 'Enter your data',
-				target: '.table-container',
-				body: 'Each row is one measurement: the pendulum length L and the period squared T². Type into any cell, and click a column heading to rename it.'
+				title: 'Sheets',
+				target: '#sheet-tabs',
+				body: 'Each tab is a sheet: one experiment. Tap the open sheet\'s name to rename it, and + to add another.'
 			},
 			{
-				title: 'The graph follows the table',
+				title: 'Every column has a role',
+				target: '.neo-col-head .neo-role-select',
+				body: 'X, Y, ±ΔX, ±ΔY or Ignore. A Y column plots against the nearest X column to its left, so these three repeat readings of T all plot against L.'
+			},
+			{
+				title: 'Names and units',
+				target: '.neo-col-head',
+				body: 'Each column has a name and a unit, and the axis titles are built from them, such as L / m. Type or paste readings into the cells below.'
+			},
+			{
+				title: 'Three repeats, three series',
 				target: '#plot',
-				body: 'Points are plotted as you type, and the axis labels come from your column headings. The title above the graph can be edited.'
+				body: 'Each Y column is its own series on the graph. Tap a legend entry to hide or show a series.'
 			},
 			{
-				title: 'Open the fitting options',
-				target: '[aria-controls="best-fit-content"]',
-				body: 'Best-fit lines and curves live in a section that starts closed.',
+				title: 'Take the mean of the repeats',
+				target: '#mean-button',
+				body: 'Mean of Repeats adds the mean of the repeat columns, row by row, and a ±Δ column of half the spread between the largest and smallest readings.',
 				action: {
-					instruction: 'Click Add Best Fit Line.',
-					isDone: () => isTourSectionOpen('best-fit-content'),
-					perform: () => openTourSection('best-fit-content')
+					instruction: 'Click Mean of Repeats, keep all three columns ticked, then click Add Mean.',
+					isDone: () => !!findTourMean(),
+					perform: addTourMean
 				}
 			},
 			{
-				title: 'Choose a model',
-				target: '#BasicFit',
-				prepare: showTourBasicFitTab,
-				body: 'Theory says T² is proportional to L, so keep Linear. The other tabs offer sinusoidal and Gaussian curves, or a formula of your own.'
+				title: 'Formula columns',
+				target: () => findTourHeader(findTourMean()),
+				body: 'The mean is a formula column: ƒ mean(B, C, D). Its cells are shaded and calculate themselves, so they follow any change to the readings. The ΔT column beside it is its uncertainty.'
+			},
+			{
+				title: 'Linearise: plot T² against L',
+				target: '#add-formula-button',
+				body: 'T² = (4π²/g) L, so a graph of T² against L is a straight line. A formula column can calculate T², and carry the uncertainty in T through to T².',
+				action: {
+					instruction: 'Click Formula Column, type T^2, tick "Add a ±Δ column", then click Apply.',
+					isDone: hasTourSquareWithDelta,
+					perform: addTourSquare
+				}
+			},
+			{
+				title: 'The uncertainty, carried through',
+				target: () => findTourHeader(getPropagatedColumn(findTourSquare() || {})),
+				body: 'Δ(T²) = 2T·ΔT, worked out row by row. Open the T² formula to see the working: each partial derivative is written out.'
+			},
+			{
+				title: 'Hide the T series',
+				target: '#plot',
+				body: 'Mean of Repeats already hid the three repeats. Hide the mean T as well, so the graph shows only T² against L.',
+				action: {
+					instruction: 'Tap T in the Series card, or in the legend under the graph.',
+					isDone: isTourMeanHidden,
+					perform: hideTourMean
+				}
+			},
+			{
+				title: 'Choose what to fit',
+				target: '.neo-fit-series',
+				prepare: () => openTourSection('best-fit-content'),
+				body: 'Series to fit lists the series shown on the graph, so hiding T moved the fit to T². Weighting by the uncertainties lets the more certain points count for more.',
+				action: {
+					instruction: 'Check that Series to fit shows "T^2 against L", and turn on Weight by uncertainties.',
+					isDone: isTourFitSetUp,
+					perform: setUpTourFit
+				}
 			},
 			{
 				title: 'Fit the line',
 				target: '#BasicFit .fit-button',
 				prepare: showTourBasicFitTab,
-				body: 'PanPhyPlot finds the straight line that lies closest to all the points.',
+				body: 'Keep Linear: theory says T² is proportional to L.',
 				action: {
 					instruction: 'Click Fit Curve.',
-					isDone: hasCurrentTourFit,
-					perform: runTourLinearFit
+					isDone: () => !!getTourFit(),
+					perform: runTourFit
 				}
 			},
 			{
 				title: 'Read the result',
 				target: '.result',
 				prepare: () => {
-					if (!hasCurrentTourFit()) runTourLinearFit();
+					if (!getTourFit()) runTourFit();
 				},
-				body: () => 'The equation gives the gradient and intercept of the line, and an R² close to 1 means the points lie close to it.'
+				body: () => 'The gradient m and intercept c each come with an uncertainty. χ²/ν near 1 means the points scatter about as much as their ±ΔY suggest; much less than 1 means the uncertainties are generous.'
 					+ describeTourGravity()
 			},
 			{
-				title: 'Chapter complete',
-				body: 'You have plotted data and fitted a line to it. The next chapter adds uncertainties and error bars to the same data.'
-			}
-		]
-	},
-	uncertainties: {
-		title: 'Uncertainties',
-		next: 'custom-fit',
-		start: () => {
-			runTourLinearFit();
-			toggleSection('best-fit-content', document.querySelector('[aria-controls="best-fit-content"]'));
-		},
-		steps: [
-			{
-				title: 'Adding uncertainties',
-				body: 'Every measurement has an uncertainty. This chapter adds error bars to the pendulum data, which already has a best-fit line.'
-			},
-			{
-				title: 'Open the uncertainty controls',
-				target: '[aria-controls="uncertainties-content"]',
-				body: 'Uncertainties are optional, so their controls start closed.',
-				action: {
-					instruction: 'Click Add Uncertainties.',
-					isDone: () => isTourSectionOpen('uncertainties-content'),
-					perform: () => openTourSection('uncertainties-content')
-				}
-			},
-			{
-				title: 'An absolute uncertainty',
-				target: () => document.querySelectorAll('.uncertainty-card')[0],
-				prepare: () => openTourSection('uncertainties-content'),
-				body: 'The lengths were read from a ruler, good to about ±0.002 m. One value can be given to every row at once.',
-				action: {
-					instruction: 'Type 0.002 in the Δx box, then click Apply to All.',
-					isDone: () => tourRowsHaveUncertainty('x'),
-					perform: () => applyTourUncertainty('x', 'absolute', '0.002')
-				}
-			},
-			{
-				title: 'A percentage uncertainty',
-				target: () => document.querySelectorAll('.uncertainty-card')[1],
-				prepare: () => openTourSection('uncertainties-content'),
-				body: 'A percentage suits a quantity whose uncertainty grows with the reading. Give T² an uncertainty of 3%.',
-				action: {
-					instruction: 'Change the Δy type to Percentage (%), type 3, then click Apply to All.',
-					isDone: () => datasetErrorTypes[activeSet]?.y === 'percentage' && tourRowsHaveUncertainty('y'),
-					perform: () => applyTourUncertainty('y', 'percentage', '3')
-				}
-			},
-			{
-				title: 'Adjust single rows',
-				target: '.table-container',
-				body: 'The table now has a ± column for each quantity. Edit any cell there if one measurement was less certain than the rest.'
-			},
-			{
-				title: 'Read the error bars',
-				target: '#plot',
-				body: 'Each point now carries error bars. A good model passes through most of them; a point whose bars miss the line is worth measuring again.'
-			},
-			{
-				title: 'What the fit uses',
-				target: '.result',
-				body: 'PanPhyPlot fits use unweighted least squares. The error bars help you judge the fit, and they do not change the line.'
-			},
-			{
-				title: 'Chapter complete',
-				body: 'You can now plot data with error bars and judge a best-fit line against them. The next chapter fits an equation of your own to curved data.'
-			}
-		]
-	},
-	'custom-fit': {
-		title: 'Custom fit',
-		next: 'data-processing',
-		sample: 'raw',
-		steps: [
-			{
-				title: 'Fitting your own equation',
-				body: 'This is the pendulum data as it was measured: period T against length L. The points follow a curve, so a straight line will not do.'
-			},
-			{
-				title: 'Open the Custom tab',
-				target: '.tablink[onclick*="CustomFit"]',
-				prepare: () => openTourSection('best-fit-content'),
-				body: 'The Custom tab fits any equation you can write down.',
-				action: {
-					instruction: 'Click Custom.',
-					isDone: isTourCustomFitTabOpen,
-					perform: showTourCustomFitTab
-				}
-			},
-			{
-				title: 'Type the equation',
-				target: '#custom-fit-formula-panel',
-				prepare: showTourCustomFitTab,
-				body: 'Theory says T = 2π√(L/g). Use x for the length and write every multiplication with *. Any other letter becomes a parameter to fit.',
-				action: {
-					instruction: `Type ${TOUR_CUSTOM_FORMULA} in the formula box.`,
-					isDone: hasTourCustomFormula,
-					perform: enterTourCustomFormula
-				}
-			},
-			{
-				title: 'Starting values',
-				target: '#custom-fit-parameters-panel',
-				prepare: () => {
-					if (!hasTourCustomFormula()) enterTourCustomFormula();
-				},
-				body: 'PanPhyPlot found one parameter, g, and gave it a starting value. The fit improves on that value step by step, so a sensible start matters for harder equations.'
-			},
-			{
-				title: 'Fit the curve',
-				target: '#CustomFit .fit-button',
-				prepare: () => {
-					if (!hasTourCustomFormula()) enterTourCustomFormula();
-				},
-				body: 'PanPhyPlot adjusts g until the curve lies as close as possible to the points.',
-				action: {
-					instruction: 'Click Fit Curve.',
-					isDone: hasCurrentTourCustomFit,
-					perform: runTourCustomFit
-				}
-			},
-			{
-				title: 'Read the result',
-				target: '.result',
-				prepare: () => {
-					if (!hasCurrentTourCustomFit()) runTourCustomFit();
-				},
-				body: () => 'The equation now shows the fitted value of g, and the status line says whether the fit converged.'
-					+ describeTourCustomGravity()
-			},
-			{
-				title: 'Chapter complete',
-				body: 'You have fitted an equation of your own. The next chapter reaches the same answer another way, by turning the curve into a straight line.'
-			}
-		]
-	},
-	'data-processing': {
-		title: 'Data processing',
-		next: 'datasets',
-		sample: 'raw',
-		steps: [
-			{
-				title: 'Making a curve straight',
-				body: 'Since T = 2π√(L/g), a graph of T² against L is a straight line. Data Processing builds new columns such as T² from the ones you measured.'
-			},
-			{
-				title: 'Open Data Processing',
-				target: '.button-row-data-processing .section-toggle',
-				body: 'Processing happens in its own window.',
-				action: {
-					instruction: 'Click Data Processing.',
-					isDone: () => hasTourProcessedDataset() || isTourElementShown('data-processing-container'),
-					perform: openTourProcessing
-				}
-			},
-			{
-				title: 'Your source data',
-				target: '#data-processing-source-table-wrap',
-				prepare: openTourProcessing,
-				body: 'The window lists the valid rows of the current dataset. Nothing you do here changes those measurements.'
-			},
-			{
-				title: 'Start a new column',
-				target: '#data-processing-process-y',
-				prepare: openTourProcessing,
-				body: 'A processed column is made from the x or the y column. T is the y column here.',
-				action: {
-					instruction: 'Click Process y.',
-					isDone: () => hasTourProcessedDataset() || hasTourProcessedColumn()
-						|| isTourElementShown('data-processing-formula-panel'),
-					perform: startTourProcessedColumn
-				}
-			},
-			{
-				title: 'Write the formula',
-				target: () => document.getElementById(isTourElementShown('data-processing-formula-panel')
-					? 'data-processing-formula-panel' : 'data-processing-derived-list'),
-				prepare: startTourProcessedColumn,
-				body: 'The formula uses x and y for the two source columns. Squaring the period gives T².',
-				action: {
-					instruction: `Type ${TOUR_PROCESSING_FORMULA}, then click Apply.`,
-					isDone: () => hasTourProcessedDataset() || hasTourProcessedColumn(),
-					perform: createTourProcessedColumn
-				}
-			},
-			{
-				title: 'Choose what to plot',
-				target: '.data-processing-mapping-grid',
-				prepare: createTourProcessedColumn,
-				body: 'Pick which columns become the new x and y. Keep L for x, and plot the new T² column as y.',
-				action: {
-					instruction: 'Set New y column to the processed column.',
-					isDone: () => hasTourProcessedDataset() || hasTourProcessedMapping(),
-					perform: mapTourProcessedColumn
-				}
-			},
-			{
-				title: 'Copy to a new dataset',
-				target: '#data-processing-copy',
-				prepare: mapTourProcessedColumn,
-				body: 'The processed columns go into a separate dataset, so the original measurements stay as they were.',
-				action: {
-					instruction: 'Click Copy to Dataset.',
-					isDone: hasTourProcessedDataset,
-					perform: copyTourProcessedData
-				}
-			},
-			{
-				title: 'A straight-line graph',
-				target: '#plot',
-				prepare: copyTourProcessedData,
-				body: 'PanPhyPlot has switched to the new dataset: T² against L is a straight line, ready for a linear fit. Click the y column heading to give it a tidier name, such as T² / s².'
-			},
-			{
-				title: 'Chapter complete',
-				body: 'You can now fit your own equations and process data before plotting it. The last chapter compares two datasets on one graph.'
-			}
-		]
-	},
-	datasets: {
-		title: 'Multiple datasets',
-		sample: 'springs',
-		start: () => {
-			runTourLinearFit();
-			toggleSection('best-fit-content', document.querySelector('[aria-controls="best-fit-content"]'));
-		},
-		steps: [
-			{
-				title: 'Comparing two experiments',
-				body: 'Spring A has been stretched by five loads and fitted with a line. This chapter adds a second spring and compares the two on one graph.'
-			},
-			{
-				title: 'Dataset tabs',
-				target: '.dataset-tabs-bar',
-				body: 'Each tab is a separate dataset with its own table, graph and fit. The + button adds an empty one, and double-clicking a tab renames it.'
-			},
-			{
-				title: 'Reuse the x values',
-				target: '.btn-copy-x',
-				body: 'Spring B was tested with the same loads. Clone x starts a new dataset with the x column already filled in.',
-				action: {
-					instruction: 'Click Clone x.',
-					isDone: hasTourSecondDataset,
-					perform: showTourSecondDataset
-				}
-			},
-			{
-				title: 'Enter the second set',
-				target: '.table-container',
-				prepare: showTourSecondDataset,
-				body: 'The new dataset has the loads but no extensions yet.',
-				action: {
-					instruction: `Type the extensions in the y column: ${TOUR_SPRING_B.extensions.join(', ')}.`,
-					isDone: hasTourSecondData,
-					perform: fillTourSecondData
-				}
-			},
-			{
-				title: 'Name the columns',
-				target: '#data-table thead',
-				prepare: fillTourSecondData,
-				body: 'A combined graph labels each dataset by its y heading, so give every dataset a different one.',
-				action: {
-					instruction: `Change the headings to ${TOUR_SPRING_B.headers.x} and ${TOUR_SPRING_B.headers.y}.`,
-					isDone: hasTourSecondHeaders,
-					perform: nameTourSecondColumns
-				}
-			},
-			{
-				title: 'Fit this dataset too',
-				target: '#BasicFit .fit-button',
-				prepare: () => {
-					nameTourSecondColumns();
-					showTourBasicFitTab();
-				},
-				body: 'Each dataset keeps its own best-fit line. Fitting here leaves the line for spring A untouched.',
-				action: {
-					instruction: 'Click Fit Curve.',
-					isDone: hasTourSecondFit,
-					perform: fitTourSecondDataset
-				}
-			},
-			{
-				title: 'Plot everything together',
-				target: '.plot-all-btn',
-				prepare: fitTourSecondDataset,
-				body: 'So far each graph shows one dataset. A combined plot shows them all.',
-				action: {
-					instruction: 'Click Plot ALL Datasets.',
-					isDone: () => isTourElementShown('popup-container'),
-					perform: openTourCombinedPlot
-				}
-			},
-			{
-				title: 'Compare the springs',
-				target: '#popup-plot',
-				prepare: openTourCombinedPlot,
-				body: 'Both datasets and their lines share one pair of axes, each in its own colour. Spring B has the steeper line: it stretches more for the same load, so it is the softer spring.'
-			},
-			{
-				title: 'Label the combined graph',
-				target: '#combined-plot-controls',
-				prepare: openTourCombinedPlot,
-				body: 'The title and axis labels start from the current dataset. Here the y-axis should describe both springs.',
-				action: {
-					instruction: `Change the y-axis label to ${TOUR_COMBINED_Y_LABEL}.`,
-					isDone: hasTourCombinedLabel,
-					perform: setTourCombinedLabel
-				}
+				title: 'Share your work',
+				target: '#view-table-button',
+				body: 'View Table copies a formatted table with every value and its ± uncertainty. Export .csv saves every column; tap the fitted equation to copy it as an image or LaTeX.'
 			},
 			{
 				title: 'Tour complete',
-				prepare: () => {
-					if (isTourElementShown('popup-container')) closePopup();
-				},
-				body: 'That is the whole of PanPhyPlot: data, uncertainties, fits, processing and combined plots. The Manual has the details when you need them.'
+				body: 'That is PanPhyPlot: columns, formulas, uncertainties and weighted fits. The Manual has the details when you need them.'
 			}
 		]
 	}
@@ -672,7 +266,6 @@ const TOUR_CHAPTERS = {
 const isTourPhone = !!window.matchMedia && window.matchMedia(TOUR_PHONE_QUERY).matches;
 const requestedTourChapter = new URLSearchParams(window.location.search).get('tour');
 const isTourRequested = Object.prototype.hasOwnProperty.call(TOUR_CHAPTERS, requestedTourChapter);
-// On a phone a tour link opens the normal app, saved workspace and all.
 if (isTourRequested && !isTourPhone) {
 	tour.chapterId = requestedTourChapter;
 	persistenceDisabled = true;
@@ -681,25 +274,21 @@ if (isTourRequested && !isTourPhone) {
 // Offer the tour once, and only to someone with no saved workspace. Read before the
 // app's first autosave creates one.
 const shouldInviteToTour = !isTourRequested && !isTourPhone && !readTourStorage(TOUR_SEEN_KEY)
-	&& [STORAGE_KEY, ...LEGACY_STORAGE_KEYS].every(key => readTourStorage(key) === null);
+	&& readTourStorage(STORAGE_KEY) === null;
 
 function getTourInitialState() {
 	if (!tour.chapterId) return null;
-	const sample = TOUR_SAMPLES[TOUR_CHAPTERS[tour.chapterId].sample || 'linearised'];
+	const columns = [
+		{ id: 'c1', name: 'L', unit: 'm', role: 'X', cells: TOUR_LENGTHS },
+		...TOUR_REPEATS.map((cells, index) => ({ id: `c${index + 2}`, name: `T${index + 1}`, unit: 's', role: 'Y', cells }))
+	];
 	return {
-		schemaVersion: STATE_SCHEMA_VERSION,
-		rawData: [sample.rows.map(([x, y]) => ({ x: Number(x), y: Number(y), xErrorRaw: 0, yErrorRaw: 0 }))],
-		activeSet: 0,
-		datasetHeaders: { 0: { ...sample.headers } },
-		datasetNames: { 0: sample.name },
-		datasetToggles: { 0: { x: false, y: false } },
-		datasetErrorTypes: { 0: { x: 'absolute', y: 'absolute' } },
-		datasetDraftRows: {
-			0: sample.rows.map(([xValue, yValue]) => ({ xValue, yValue, xErrorValue: '', yErrorValue: '' }))
-		},
-		dataset1XValues: sample.rows.map(([x]) => Number(x)),
+		version: 1,
+		nextId: 10,
+		activeSheet: 0,
 		latexMode: false,
-		titleWasAuto: true
+		weightFits: false,
+		sheets: [{ id: 's9', name: 'Pendulum', rowCount: 10, columns, title: { text: '', automatic: true }, fitSeries: null, hiddenSeries: [] }]
 	};
 }
 
@@ -926,8 +515,7 @@ function layoutTour() {
 }
 
 function isTourBlockedByDialog() {
-	return Array.from(document.querySelectorAll('[aria-modal="true"]'))
-		.some(dialog => dialog.getClientRects().length > 0);
+	return !!document.querySelector('dialog[open]');
 }
 
 function buildTourCard() {
@@ -964,6 +552,8 @@ function buildTourCard() {
 
 function startTour() {
 	markTourSeen();
+	// The tour points at every section, so none stays maximized.
+	if (typeof setMaximizedPane === 'function') setMaximizedPane(null);
 	document.body.classList.add('tour-active');
 
 	const practiceBar = document.createElement('div');
@@ -973,18 +563,7 @@ function startTour() {
 	const practiceLabel = document.createElement('strong');
 	practiceLabel.textContent = 'Practice mode.';
 	practiceText.append(practiceLabel, ' Nothing here is saved. Your own work returns when you exit the tour.');
-	const chapterSelect = document.createElement('select');
-	chapterSelect.className = 'tour-chapter-select';
-	chapterSelect.setAttribute('aria-label', 'Tour chapter');
-	Object.entries(TOUR_CHAPTERS).forEach(([chapterId, chapter], index) => {
-		const option = document.createElement('option');
-		option.value = chapterId;
-		option.textContent = `${index + 1}. ${chapter.title}`;
-		chapterSelect.appendChild(option);
-	});
-	chapterSelect.value = tour.chapterId;
-	chapterSelect.addEventListener('change', () => window.location.assign(getTourUrl(chapterSelect.value)));
-	practiceBar.append(practiceText, chapterSelect, createTourButton('Exit tour', 'tour-button-plain', exitTour));
+	practiceBar.append(practiceText, createTourButton('Exit tour', 'tour-button-plain', exitTour));
 	const banner = document.querySelector('.banner');
 	if (banner) banner.insertAdjacentElement('afterend', practiceBar);
 
@@ -1013,9 +592,9 @@ function showTourInvite() {
 	const card = buildTourCard();
 	card.classList.add('tour-invite');
 	card.querySelector('.tour-eyebrow').textContent = 'Guided tour';
-	card.querySelector('.tour-title').textContent = 'New to PanPhyPlot?';
+	card.querySelector('.tour-title').textContent = 'New to this version?';
 	card.querySelector('.tour-body').textContent =
-		'Take a two-minute tour: plot some pendulum data and fit a line to it. It uses practice data, so nothing you enter is affected.';
+		'Take a short tour: from repeat readings to g with its uncertainty. It uses practice data, so nothing you enter is affected.';
 	card.querySelector('.tour-instruction').hidden = true;
 	card.querySelector('.tour-status').hidden = true;
 
@@ -1027,7 +606,7 @@ function showTourInvite() {
 		createTourButton('Not now', 'tour-button-plain', dismiss),
 		createTourButton('Start tour', 'tour-button-primary', () => {
 			markTourSeen();
-			window.location.assign(getTourUrl('first-fit'));
+			window.location.assign(getTourUrl('columns'));
 		})
 	);
 	document.body.appendChild(card);
@@ -1039,7 +618,6 @@ document.addEventListener('DOMContentLoaded', () => {
 		startTour();
 	} else if (isTourRequested) {
 		window.history.replaceState(null, '', window.location.pathname);
-		showToast('The guided tour needs a tablet or computer.', 5000);
 	} else if (shouldInviteToTour) {
 		showTourInvite();
 	}

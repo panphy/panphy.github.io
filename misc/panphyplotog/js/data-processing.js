@@ -1,7 +1,7 @@
-// Data Processing popup (PanPhyPlot MVP)
+// Data Processing popup (PanPhyPlotOG MVP)
 (function() {
 	const CREATE_NEW_TARGET_VALUE = '__create_new_dataset__';
-	const MATH_REFERENCE_URL = '/tools/panphyplot/math_ref.html';
+	const MATH_REFERENCE_URL = '/misc/panphyplotog/math_ref.html';
 	const IDENTIFIER_REGEX = /^[A-Za-z_][A-Za-z0-9_]*$/;
 	const FORBIDDEN_NODE_TYPES = new Set([
 		'AssignmentNode',

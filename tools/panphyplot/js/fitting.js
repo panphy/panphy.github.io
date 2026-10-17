@@ -1,4 +1,4 @@
-// Curve fitting for PanPhyPlot (neo-beta): a copy of /tools/panphyplot/js/curve-fitting.js that fits
+// Curve fitting for PanPhyPlot: a copy of /misc/panphyplotog/js/curve-fitting.js that fits
 // the chosen Y series, keyed by activeFitKey, and records the data each fit used.
 (function() {
 
@@ -1196,7 +1196,7 @@ function exponentialFit_logLinear(raw) {
 }
 
 
-// ---------- Weighting and parameter uncertainties (neo-beta) ----------
+// ---------- Weighting and parameter uncertainties ----------
 // Every fit hands its model and unweighted best parameters to finalizeParametricFit, which
 // refines them by least squares, weights by 1/σ² when asked (σ² = ΔY² + (f′(x)·ΔX)², the
 // effective variance, re-weighted as the fit settles) and takes each parameter's ± from the
@@ -1280,7 +1280,7 @@ function finalizeParametricFit(data, spec) {
 	const sigmas = effectiveSigmas(data, modelAt(params));
 	const residuals = data.map(point => point.y - spec.model(params, point.x));
 	const uncertainties = residuals.every(Number.isFinite)
-		? PanPhyNeoStats.parameterUncertainties(numericJacobian(spec.model, params, data), residuals, weighted ? sigmas : null)
+		? PanPhyPlotStats.parameterUncertainties(numericJacobian(spec.model, params, data), residuals, weighted ? sigmas : null)
 		: null;
 	return {
 		params,
@@ -1359,7 +1359,7 @@ function updateResults(equation, x, y, fitFunction, datasetIndex = activeFitKey,
 	const sigmas = extras.chiSigmas || getFitSigmas(datasetIndex);
 	const parameterCount = Array.isArray(result.parameters) ? result.parameters.length : (extras.parameterCount || getChoiceParameterCount(choice));
 	if (sigmas && sigmas.length === x.length && finiteResiduals.length === x.length && parameterCount) {
-		result.chi2 = PanPhyNeoStats.chiSquared(residuals.map(point => point.y), sigmas);
+		result.chi2 = PanPhyPlotStats.chiSquared(residuals.map(point => point.y), sigmas);
 		result.dof = x.length - parameterCount;
 	}
 	if (extras.statusOverride) result.status = extras.statusOverride;
@@ -1549,7 +1549,7 @@ async function fitCustomCurve() {
 function performLinearFit(x, y) {
 	try {
 		const data = getFiniteDatasetPoints(activeFitKey);
-		const line = PanPhyNeoStats.linearFit(x, y);
+		const line = PanPhyPlotStats.linearFit(x, y);
 		if (!line) {
 			alert('A straight line needs at least two different x values.');
 			return;
@@ -1636,7 +1636,7 @@ function performPolynomialFit(x, y, degree) {
 		const xCoefficients = transform.map(row => row.reduce((sum, value, col) => sum + value * uCoefficients[col], 0));
 		const residuals = data.map(point => point.y - fitFunction(point.x));
 		const covariance = residuals.every(Number.isFinite)
-			? PanPhyNeoStats.parameterCovariance(numericJacobian(model, uCoefficients, data), residuals, final.weighted ? final.chiSigmas : null)
+			? PanPhyPlotStats.parameterCovariance(numericJacobian(model, uCoefficients, data), residuals, final.weighted ? final.chiSigmas : null)
 			: null;
 		const xUncertainties = covariance && transform.map(row => {
 			let variance = 0;
@@ -1708,9 +1708,8 @@ function performExponentialFit() {
 }
 
 
-// A copy of PanPhyFitCore.solveShiftedPowerLaw (tools/panphyplot/js/fit-core.js). The beta keeps
-// its own because fit-core.js is cache-first under the site's service worker, while this file is
-// always fetched fresh: a visitor who has not accepted an update would otherwise get an older core.
+// Retained copy of PanPhyFitCore.solveShiftedPowerLaw. Keep the promoted app's
+// established power-law results identical; this solver predates the promotion.
 // y = A (x - x0)^b + c, the general power law. A and c trade off against x0 and b, so a
 // local search from a rough guess often stalls. For fixed x0 and b the model is linear in
 // A and c, which a least-squares line gives exactly: a scan over (x0, b) finds the right

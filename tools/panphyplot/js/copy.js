@@ -1,5 +1,5 @@
-// Copying from PanPhyPlot (neo-beta): the fitted equation as an image or LaTeX, and View Table.
-// The clipboard and SVG-to-PNG helpers are copied from /tools/panphyplot/js/ui.js.
+// Copying from PanPhyPlot: the fitted equation as an image or LaTeX, and View Table.
+// The clipboard and SVG-to-PNG helpers are copied from /misc/panphyplotog/js/ui.js.
 const FIT_EQUATION_PNG_BASE_SCALE = 4;
 const FIT_EQUATION_PNG_MAX_CANVAS_SIDE = 8192;
 const FIT_EQUATION_PNG_MAX_PIXELS = 16777216;
@@ -304,12 +304,12 @@ function prettifyPowers(text) {
 
 // Columns as a reader expects them: each value with its own ± uncertainty, and blank rows dropped.
 function buildTableView(sheet) {
-	const owners = NeoModel.getUncertaintyColumns(sheet);
+	const owners = PlotModel.getUncertaintyColumns(sheet);
 	const claimed = new Set([...owners.values()].map(column => column.id));
 	const columns = sheet.columns.filter(column => column.role !== 'none' && !claimed.has(column.id)).map(column => ({
 		column,
 		error: owners.get(column.id) || null,
-		name: NeoModel.getColumnLabel(sheet, column),
+		name: PlotModel.getColumnLabel(sheet, column),
 		unit: column.unit
 	}));
 	const rows = [];
@@ -319,12 +319,12 @@ function buildTableView(sheet) {
 			let delta = error ? String(error.cells[row] ?? '').trim() : '';
 			if (!value) return { value: '', delta: '' };
 			// Typed readings stay as entered; calculated ones are rounded for reading.
-			if (NeoModel.isComputedColumn(column)) {
-				const rounded = roundCalculated(NeoModel.parseNumber(value), error && error.errorType !== 'percentage' ? NeoModel.parseNumber(delta) : NaN);
+			if (PlotModel.isComputedColumn(column)) {
+				const rounded = roundCalculated(PlotModel.parseNumber(value), error && error.errorType !== 'percentage' ? PlotModel.parseNumber(delta) : NaN);
 				value = rounded.value;
 				if (rounded.delta) delta = rounded.delta;
-			} else if (delta && error && NeoModel.isComputedColumn(error) && error.errorType !== 'percentage') {
-				delta = String(Number(NeoModel.parseNumber(delta).toPrecision(2)));
+			} else if (delta && error && PlotModel.isComputedColumn(error) && error.errorType !== 'percentage') {
+				delta = String(Number(PlotModel.parseNumber(delta).toPrecision(2)));
 			}
 			return { value, delta: delta ? `${delta}${error.errorType === 'percentage' ? '%' : ''}` : '' };
 		});
@@ -345,7 +345,7 @@ function roundCalculated(value, uncertainty) {
 }
 
 function plainHeader(entry) {
-	return NeoModel.formatAxisLabel(prettifyPowers(entry.name), prettifyPowers(entry.unit));
+	return PlotModel.formatAxisLabel(prettifyPowers(entry.name), prettifyPowers(entry.unit));
 }
 
 function plainCell(cell) {
@@ -445,7 +445,7 @@ function openTableDialog() {
 		return;
 	}
 	tableViewCache = view;
-	document.getElementById('table-dialog-title').textContent = `View Table · ${getSheetDisplayName(neoState.activeSheet)}`;
+	document.getElementById('table-dialog-title').textContent = `View Table · ${getSheetDisplayName(plotState.activeSheet)}`;
 	const table = document.getElementById('table-view');
 	const headRow = document.createElement('tr');
 	view.columns.forEach((entry) => {

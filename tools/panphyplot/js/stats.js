@@ -1,4 +1,4 @@
-// Fit statistics for PanPhyPlot (neo-beta): weighted straight lines, parameter uncertainties
+// Fit statistics for PanPhyPlot: weighted straight lines, parameter uncertainties
 // and chi-squared. Pure functions, so the same file runs in the browser and in node tests.
 (function(root) {
 	// Least-squares straight line y = mx + c. With sigmas, each point has weight 1/σ²;
@@ -140,5 +140,5 @@
 
 	const api = { formatFixedDecimals, roundEquationDecimals, linearFit, chiSquared, invert, parameterCovariance, parameterUncertainties, formatMeasurement, formatChiSquared };
 	if (typeof module === 'object' && module.exports) module.exports = api;
-	else root.PanPhyNeoStats = api;
+	else root.PanPhyPlotStats = api;
 })(typeof globalThis === 'object' ? globalThis : this);

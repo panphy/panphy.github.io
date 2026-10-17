@@ -1,4 +1,4 @@
-// Draggable pane dividers for PanPhyPlot (neo-beta), on the PanPhyMD model: drag with any
+// Draggable pane dividers for PanPhyPlot, on the PanPhyMD model: drag with any
 // pointer, or focus a divider and use the arrow keys (Shift for bigger steps), Home and End;
 // Enter or a double-click resets. Widths are remembered per layout in this browser only.
 const PANES_STORAGE_KEY = 'panphyplot-neo-panes';

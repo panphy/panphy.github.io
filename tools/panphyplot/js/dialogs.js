@@ -1,4 +1,4 @@
-// Formula, mean-of-repeats and CSV dialogs for PanPhyPlot (neo-beta).
+// Formula, mean-of-repeats and CSV dialogs for PanPhyPlot.
 const CSV_PREVIEW_ROWS = 6;
 let dialogOpener = null;
 
@@ -28,10 +28,10 @@ function setDialogMessage(id, text, type = 'error') {
 let formulaTarget = null;
 
 function describeFormulaReferences(sheet) {
-	const names = [...NeoModel.getFormulaSymbols(sheet).entries()];
+	const names = [...PlotModel.getFormulaSymbols(sheet).entries()];
 	const byColumn = sheet.columns.map((column, index) => {
-		const alias = names.find(([symbol, id]) => id === column.id && symbol !== NeoModel.columnLetter(index));
-		return alias ? `${NeoModel.columnLetter(index)} or ${alias[0]}` : NeoModel.columnLetter(index);
+		const alias = names.find(([symbol, id]) => id === column.id && symbol !== PlotModel.columnLetter(index));
+		return alias ? `${PlotModel.columnLetter(index)} or ${alias[0]}` : PlotModel.columnLetter(index);
 	});
 	return `Columns: ${byColumn.join(', ')}.`;
 }
@@ -41,7 +41,7 @@ function openFormulaDialog(column = null) {
 	const sheet = getActiveSheet();
 	formulaTarget = column;
 	document.getElementById('formula-dialog-title').textContent = column
-		? `Formula for column ${NeoModel.columnLetter(sheet.columns.indexOf(column))}`
+		? `Formula for column ${PlotModel.columnLetter(sheet.columns.indexOf(column))}`
 		: 'New formula column';
 	document.getElementById('formula-input').value = column ? column.formula || '' : '';
 	document.getElementById('formula-name').value = column ? column.name : '';
@@ -57,25 +57,25 @@ function openFormulaDialog(column = null) {
 function previewFormula() {
 	const sheet = getActiveSheet();
 	const text = document.getElementById('formula-input').value;
-	if (!NeoModel.cleanFormulaText(text)) {
+	if (!PlotModel.cleanFormulaText(text)) {
 		setDialogMessage('formula-message', '');
 		return null;
 	}
 	// A copy, so the trial run never touches the real columns.
 	const draft = { ...sheet, columns: sheet.columns.map(column => ({ ...column, cells: column.cells.slice() })) };
 	const role = formulaTarget ? formulaTarget.role : 'Y';
-	const probe = NeoModel.createColumn('__probe__', { formula: text, role }, sheet.rowCount);
+	const probe = PlotModel.createColumn('__probe__', { formula: text, role }, sheet.rowCount);
 	const index = formulaTarget ? sheet.columns.indexOf(formulaTarget) : draft.columns.length;
 	draft.columns.splice(index, formulaTarget ? 1 : 0, probe);
 	const propagate = document.getElementById('formula-propagate').checked;
 	let delta = null;
 	if (propagate) {
 		const existing = formulaTarget ? draft.columns.findIndex(column => column.propagateFrom === formulaTarget.id) : -1;
-		delta = NeoModel.createColumn('__probe_delta__', { role: role === 'X' ? 'xErr' : 'yErr', propagateFrom: '__probe__' }, sheet.rowCount);
+		delta = PlotModel.createColumn('__probe_delta__', { role: role === 'X' ? 'xErr' : 'yErr', propagateFrom: '__probe__' }, sheet.rowCount);
 		draft.columns.splice(existing >= 0 ? existing : index + 1, existing >= 0 ? 1 : 0, delta);
 	}
-	NeoModel.recomputeFormulas(draft, math);
-	renderPropagationWorking(propagate && !probe.formulaError ? NeoModel.describePropagation(draft, probe, math) : null);
+	PlotModel.recomputeFormulas(draft, math);
+	renderPropagationWorking(propagate && !probe.formulaError ? PlotModel.describePropagation(draft, probe, math) : null);
 	if (probe.formulaError) {
 		setDialogMessage('formula-message', probe.formulaError);
 		return null;
@@ -85,7 +85,7 @@ function previewFormula() {
 	setDialogMessage('formula-message', row < 0
 		? 'The formula is valid. Rows fill in once their inputs have numbers.'
 		: `Row ${row + 1} gives ${probe.cells[row]}${deltaText}.`, 'success');
-	return NeoModel.cleanFormulaText(text);
+	return PlotModel.cleanFormulaText(text);
 }
 
 // The working: Δf = √Σ(∂f/∂x · Δx)², each partial derivative written out.
@@ -130,22 +130,22 @@ function applyFormula() {
 	let column = formulaTarget;
 	if (!column) {
 		column = createNewColumn();
-		NeoModel.insertColumn(sheet, sheet.columns.length, column);
+		PlotModel.insertColumn(sheet, sheet.columns.length, column);
 	}
 	column.formula = formula;
-	column.name = (name || formula).slice(0, NeoModel.NAME_MAX_LENGTH);
+	column.name = (name || formula).slice(0, PlotModel.NAME_MAX_LENGTH);
 	column.unit = unit;
 	const delta = getPropagatedColumn(column, sheet);
 	const propagate = document.getElementById('formula-propagate').checked;
 	if (propagate && !delta) {
-		changeColumns(sheet, () => NeoModel.insertColumn(sheet, sheet.columns.indexOf(column) + 1, createNewColumn({
-			name: `Δ${column.name}`.slice(0, NeoModel.NAME_MAX_LENGTH),
+		changeColumns(sheet, () => PlotModel.insertColumn(sheet, sheet.columns.indexOf(column) + 1, createNewColumn({
+			name: `Δ${column.name}`.slice(0, PlotModel.NAME_MAX_LENGTH),
 			unit,
 			role: column.role === 'X' ? 'xErr' : 'yErr',
 			propagateFrom: column.id
 		})));
 	} else if (!propagate && delta) {
-		changeColumns(sheet, () => NeoModel.removeColumn(sheet, delta.id));
+		changeColumns(sheet, () => PlotModel.removeColumn(sheet, delta.id));
 	} else if (delta) {
 		delta.unit = unit;
 	}
@@ -161,20 +161,20 @@ function applyFormula() {
 /* ---------- Clear ---------- */
 
 function isBlankNewSheet(sheet) {
-	return NeoModel.isSheetEmpty(sheet) && sheet.columns.length === 2
+	return PlotModel.isSheetEmpty(sheet) && sheet.columns.length === 2
 		&& sheet.columns[0].role === 'X' && sheet.columns[0].name === 'x' && !sheet.columns[0].unit
 		&& sheet.columns[1].role === 'Y' && sheet.columns[1].name === 'y' && !sheet.columns[1].unit;
 }
 
 function openClearDialog() {
 	const sheet = getActiveSheet();
-	const name = getSheetDisplayName(neoState.activeSheet);
+	const name = getSheetDisplayName(plotState.activeSheet);
 	if (isBlankNewSheet(sheet)) {
 		showToast(`"${name}" is already a blank sheet.`);
 		return;
 	}
 	document.getElementById('clear-dialog-title').textContent = `Clear "${name}"`;
-	const empty = NeoModel.isSheetEmpty(sheet);
+	const empty = PlotModel.isSheetEmpty(sheet);
 	const keep = document.getElementById('clear-keep-columns');
 	keep.disabled = empty;
 	document.getElementById('clear-keep-note').textContent = empty
@@ -186,8 +186,8 @@ function openClearDialog() {
 
 function applyClear(reset) {
 	const sheet = getActiveSheet();
-	if (reset) NeoModel.resetSheet(sheet, NeoModel.createIdSource(neoState));
-	else NeoModel.clearSheetData(sheet);
+	if (reset) PlotModel.resetSheet(sheet, PlotModel.createIdSource(plotState));
+	else PlotModel.clearSheetData(sheet);
 	dropSheetFits(sheet);
 	closeDialog('clear-dialog');
 	renderTable();
@@ -201,9 +201,9 @@ function applyClear(reset) {
 let fillTarget = null;
 
 function openFillDialog(sheet, column) {
-	const target = NeoModel.getFillTarget(sheet, column);
+	const target = PlotModel.getFillTarget(sheet, column);
 	fillTarget = { sheet, column, rows: target.rows, owner: target.owner };
-	const label = NeoModel.getColumnLabel(sheet, column);
+	const label = PlotModel.getColumnLabel(sheet, column);
 	const percent = (column.role === 'xErr' || column.role === 'yErr') && column.errorType === 'percentage';
 	document.getElementById('fill-dialog-title').textContent = column.name.trim() ? `Fill ${label}` : `Fill column ${label}`;
 	document.getElementById('fill-unit').textContent = percent ? '%' : (column.unit || '');
@@ -211,10 +211,10 @@ function openFillDialog(sheet, column) {
 	const rowsText = `${count} ${count === 1 ? 'row' : 'rows'}`;
 	const summary = !count
 		? (target.owner
-			? `${NeoModel.getColumnLabel(sheet, target.owner)} has no readings yet, so there is nothing to fill.`
+			? `${PlotModel.getColumnLabel(sheet, target.owner)} has no readings yet, so there is nothing to fill.`
 			: 'This sheet has no data yet, so there is nothing to fill.')
 		: target.owner
-			? `Sets ${label} in the ${rowsText} that have a reading of ${NeoModel.getColumnLabel(sheet, target.owner)}. Rows without a reading stay empty.`
+			? `Sets ${label} in the ${rowsText} that have a reading of ${PlotModel.getColumnLabel(sheet, target.owner)}. Rows without a reading stay empty.`
 			: `Sets ${label} in the ${rowsText} that have data.`;
 	document.getElementById('fill-summary').textContent = summary;
 	const input = document.getElementById('fill-value');
@@ -230,12 +230,12 @@ function applyFill() {
 	if (!fillTarget || !fillTarget.rows.length) return;
 	const { sheet, column, rows } = fillTarget;
 	const value = document.getElementById('fill-value').value.trim();
-	if (!Number.isFinite(NeoModel.parseNumber(value))) {
+	if (!Number.isFinite(PlotModel.parseNumber(value))) {
 		setDialogMessage('fill-message', 'Enter a number such as 0.05 or 2e-3.');
 		document.getElementById('fill-value').focus();
 		return;
 	}
-	if (NeoModel.isCellInvalid(column, value)) {
+	if (PlotModel.isCellInvalid(column, value)) {
 		setDialogMessage('fill-message', column.errorType === 'percentage'
 			? 'A percentage uncertainty must be greater than zero.'
 			: 'An uncertainty cannot be negative.');
@@ -246,7 +246,7 @@ function applyFill() {
 	fillTarget = null;
 	renderTable();
 	afterDataChange();
-	showToast(`Filled ${rows.length} ${rows.length === 1 ? 'row' : 'rows'} of ${NeoModel.getColumnLabel(sheet, column)}.`);
+	showToast(`Filled ${rows.length} ${rows.length === 1 ? 'row' : 'rows'} of ${PlotModel.getColumnLabel(sheet, column)}.`);
 }
 
 /* ---------- Mean of repeats ---------- */
@@ -262,8 +262,8 @@ function openMeanDialog() {
 		const box = document.createElement('input');
 		box.type = 'checkbox';
 		box.value = column.id;
-		box.checked = column.role === 'Y' && !NeoModel.isFormulaColumn(column);
-		label.append(box, ` ${NeoModel.columnLetter(index)}: ${NeoModel.getColumnLabel(sheet, column)}`);
+		box.checked = column.role === 'Y' && !PlotModel.isFormulaColumn(column);
+		label.append(box, ` ${PlotModel.columnLetter(index)}: ${PlotModel.getColumnLabel(sheet, column)}`);
 		list.appendChild(label);
 	});
 	setDialogMessage('mean-message', '');
@@ -280,16 +280,16 @@ function applyMean() {
 		setDialogMessage('mean-message', 'Tick at least two columns of repeat readings.');
 		return;
 	}
-	const base = NeoModel.getRepeatBaseName(repeats.map(column => column.name));
-	const formulas = NeoModel.buildRepeatFormulas(sheet, repeats);
+	const base = PlotModel.getRepeatBaseName(repeats.map(column => column.name));
+	const formulas = PlotModel.buildRepeatFormulas(sheet, repeats);
 	const unit = repeats[0].unit;
 	const at = Math.max(...repeats.map(column => sheet.columns.indexOf(column))) + 1;
 	changeColumns(sheet, () => {
 		const mean = createNewColumn({ name: base, unit, role: 'Y', formula: formulas.mean });
-		NeoModel.insertColumn(sheet, at, mean);
+		PlotModel.insertColumn(sheet, at, mean);
 		sheet.fitSeries = mean.id;
 		if (document.getElementById('mean-uncertainty').checked) {
-			NeoModel.insertColumn(sheet, at + 1, createNewColumn({ name: `Δ${base}`, unit, role: 'yErr', formula: formulas.halfSpread }));
+			PlotModel.insertColumn(sheet, at + 1, createNewColumn({ name: `Δ${base}`, unit, role: 'yErr', formula: formulas.halfSpread }));
 		}
 	});
 	// The repeats' letters were taken before any insertion, and every insertion is to their right.
@@ -319,12 +319,12 @@ function handleCsvFile(event) {
 	if (!file) return;
 	const reader = new FileReader();
 	reader.onload = () => {
-		const rows = NeoModel.parseCsv(String(reader.result || ''));
+		const rows = PlotModel.parseCsv(String(reader.result || ''));
 		if (!rows.length) {
 			showToast('That file has no rows to import.');
 			return;
 		}
-		const baseName = file.name.replace(/\.(csv|txt)$/i, '').slice(0, NeoModel.SHEET_NAME_MAX_LENGTH);
+		const baseName = file.name.replace(/\.(csv|txt)$/i, '').slice(0, PlotModel.SHEET_NAME_MAX_LENGTH);
 		csvImport = { rows, baseName, roles: [] };
 		openCsvDialog();
 	};
@@ -339,13 +339,13 @@ function getCsvHeaders() {
 function openCsvDialog() {
 	const { rows } = csvImport;
 	const width = Math.max(...rows.map(row => row.length));
-	const firstRowIsText = rows.length > 1 && rows[0].some(cell => cell !== '' && !Number.isFinite(NeoModel.parseNumber(cell)));
+	const firstRowIsText = rows.length > 1 && rows[0].some(cell => cell !== '' && !Number.isFinite(PlotModel.parseNumber(cell)));
 	document.getElementById('csv-headers').checked = firstRowIsText;
 	const target = document.getElementById('csv-target');
 	const active = getActiveSheet();
 	const options = [
 		{ value: 'new', label: 'A new sheet' },
-		{ value: 'replace', label: `${getSheetDisplayName(neoState.activeSheet)} (replaces its data)` }
+		{ value: 'replace', label: `${getSheetDisplayName(plotState.activeSheet)} (replaces its data)` }
 	];
 	target.replaceChildren(...options.map((option) => {
 		const element = document.createElement('option');
@@ -353,7 +353,7 @@ function openCsvDialog() {
 		element.textContent = option.label;
 		return element;
 	}));
-	target.value = NeoModel.isSheetEmpty(active) ? 'replace' : 'new';
+	target.value = PlotModel.isSheetEmpty(active) ? 'replace' : 'new';
 	csvImport.width = width;
 	resetCsvRoles();
 	renderCsvPreview();
@@ -364,7 +364,7 @@ function openCsvDialog() {
 
 function resetCsvRoles() {
 	const headers = getCsvHeaders();
-	csvImport.roles = NeoModel.guessImportRoles(Array.from({ length: csvImport.width }, (_, index) => headers[index] || ''));
+	csvImport.roles = PlotModel.guessImportRoles(Array.from({ length: csvImport.width }, (_, index) => headers[index] || ''));
 }
 
 function renderCsvPreview() {
@@ -378,7 +378,7 @@ function renderCsvPreview() {
 		th.className = `neo-col-head role-${csvImport.roles[index].role}`;
 		const select = document.createElement('select');
 		select.className = 'neo-role-select';
-		select.setAttribute('aria-label', `Role of imported column ${NeoModel.columnLetter(index)}`);
+		select.setAttribute('aria-label', `Role of imported column ${PlotModel.columnLetter(index)}`);
 		ROLE_OPTIONS.forEach((option) => {
 			const element = document.createElement('option');
 			element.value = option.value;
@@ -391,10 +391,10 @@ function renderCsvPreview() {
 			csvImport.roles[index] = { role: option.role, errorType: option.errorType };
 			th.className = `neo-col-head role-${option.role}`;
 		});
-		const { name, unit } = NeoModel.splitHeader(headers[index] || '');
+		const { name, unit } = PlotModel.splitHeader(headers[index] || '');
 		const title = document.createElement('div');
 		title.className = 'neo-csv-name';
-		title.textContent = name || NeoModel.columnLetter(index);
+		title.textContent = name || PlotModel.columnLetter(index);
 		const unitLine = document.createElement('div');
 		unitLine.className = 'neo-csv-unit';
 		unitLine.textContent = unit || '—';
@@ -426,35 +426,35 @@ function applyCsvImport() {
 	}
 	const replace = document.getElementById('csv-target').value === 'replace';
 	let sheet = getActiveSheet();
-	if (replace && !NeoModel.isSheetEmpty(sheet)
-		&& !window.confirm(`Replace all the data in "${getSheetDisplayName(neoState.activeSheet)}"?`)) return;
+	if (replace && !PlotModel.isSheetEmpty(sheet)
+		&& !window.confirm(`Replace all the data in "${getSheetDisplayName(plotState.activeSheet)}"?`)) return;
 	if (!replace) {
-		sheet = NeoModel.createSheet(NeoModel.createIdSource(neoState), csvImport.baseName);
-		neoState.sheets.push(sheet);
+		sheet = PlotModel.createSheet(PlotModel.createIdSource(plotState), csvImport.baseName);
+		plotState.sheets.push(sheet);
 	} else if (!sheet.name) {
 		sheet.name = csvImport.baseName;
 	}
-	NeoModel.importRows(sheet, csvImport.rows, { headers: document.getElementById('csv-headers').checked, roles: csvImport.roles }, NeoModel.createIdSource(neoState));
+	PlotModel.importRows(sheet, csvImport.rows, { headers: document.getElementById('csv-headers').checked, roles: csvImport.roles }, PlotModel.createIdSource(plotState));
 	sheet.title = { text: '', automatic: true };
 	closeDialog('csv-dialog');
 	csvImport = null;
 	pruneOrphanFits();
-	switchSheet(neoState.sheets.indexOf(sheet));
+	switchSheet(plotState.sheets.indexOf(sheet));
 	afterDataChange({ structure: true });
 	showToast('CSV imported.');
 }
 
 async function exportCsv() {
 	const sheet = getActiveSheet();
-	if (NeoModel.isSheetEmpty(sheet)) {
+	if (PlotModel.isSheetEmpty(sheet)) {
 		showToast('This sheet has no data to export.');
 		return;
 	}
-	const fallback = getSheetDisplayName(neoState.activeSheet);
+	const fallback = getSheetDisplayName(plotState.activeSheet);
 	const answer = window.prompt('Filename for the CSV file:', fallback);
 	if (answer === null) return;
 	const filename = `${sanitizeFilename(answer, fallback).replace(/\.csv$/i, '')}.csv`;
-	const blob = new Blob([NeoModel.buildCsv(sheet)], { type: 'text/csv;charset=utf-8' });
+	const blob = new Blob([PlotModel.buildCsv(sheet)], { type: 'text/csv;charset=utf-8' });
 	await saveBlobWithFallback(blob, filename, { title: 'Save CSV file' });
 }
 
@@ -467,7 +467,7 @@ function initializeDialogs() {
 		});
 		// A tap on the backdrop (outside the dialog box) closes it.
 		dialog.addEventListener('click', (event) => {
-			if (event.target === dialog) closeDialog(dialog.id);
+			if (event.target === dialog && dialog.id !== 'original-import-dialog') closeDialog(dialog.id);
 		});
 	});
 	document.getElementById('add-formula-button').addEventListener('click', () => openFormulaDialog(null));

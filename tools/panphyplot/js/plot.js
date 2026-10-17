@@ -1,5 +1,5 @@
-// Plotting for PanPhyPlot (neo-beta): every Y series of a sheet, its fits and residuals.
-// The theme palette and image export are copied from /tools/panphyplot/js/plotting.js.
+// Plotting for PanPhyPlot: every Y series of a sheet, its fits and residuals.
+// The theme palette and image export are copied from /misc/panphyplotog/js/plotting.js.
 (function() {
 
 	const PLOT_EXPORT_BASE_SCALE = 3;
@@ -328,10 +328,10 @@
 
 	// One axis label in the current mode, before the $...$ wrapping.
 	function columnAxisText(sheet, column) {
-		const name = NeoModel.getColumnLabel(sheet, column);
+		const name = PlotModel.getColumnLabel(sheet, column);
 		return latexMode
-			? NeoModel.formatAxisLabel(formatLabelForLatex(name), column.unit, true)
-			: NeoModel.formatAxisLabel(name, column.unit, false);
+			? PlotModel.formatAxisLabel(formatLabelForLatex(name), column.unit, true)
+			: PlotModel.formatAxisLabel(name, column.unit, false);
 	}
 
 	function joinLabels(labels) {
@@ -345,21 +345,21 @@
 		const units = new Set(unique.map(column => String(column.unit || '').trim()));
 		if (unique.length > 1 && units.size === 1) {
 			const names = unique.map(column => {
-				const name = NeoModel.getColumnLabel(sheet, column);
+				const name = PlotModel.getColumnLabel(sheet, column);
 				return latexMode ? formatLabelForLatex(name) : name;
 			});
-			return NeoModel.formatAxisLabel(joinLabels(names), unique[0].unit, latexMode);
+			return PlotModel.formatAxisLabel(joinLabels(names), unique[0].unit, latexMode);
 		}
 		return joinLabels(unique.map(column => columnAxisText(sheet, column)));
 	}
 
 	function getVisibleSeries(sheet) {
-		return NeoModel.getSeries(sheet).filter(series => series.xCol && !sheet.hiddenSeries.includes(series.id));
+		return PlotModel.getSeries(sheet).filter(series => series.xCol && !sheet.hiddenSeries.includes(series.id));
 	}
 
 	function getAxisTitles(sheet) {
 		const visible = getVisibleSeries(sheet);
-		const plotted = visible.length ? visible : NeoModel.getSeries(sheet).filter(series => series.xCol);
+		const plotted = visible.length ? visible : PlotModel.getSeries(sheet).filter(series => series.xCol);
 		return {
 			x: describeAxis(sheet, plotted.map(series => series.xCol)),
 			y: describeAxis(sheet, plotted.map(series => series.yCol))
@@ -370,7 +370,7 @@
 		const plotted = getVisibleSeries(sheet);
 		if (!plotted.length) return '';
 		const name = (column) => {
-			const label = NeoModel.getColumnLabel(sheet, column);
+			const label = PlotModel.getColumnLabel(sheet, column);
 			return latexMode ? formatLabelForLatex(label) : label;
 		};
 		const yNames = joinLabels(plotted.map(series => name(series.yCol)));
@@ -452,11 +452,11 @@
 	function seriesTraces(sheet, series, colorIndex, themeSettings, options = {}) {
 		const color = themeSettings.datasetColors[colorIndex % themeSettings.datasetColors.length];
 		const fitColor = themeSettings.fitColors[colorIndex % themeSettings.fitColors.length];
-		const points = NeoModel.getSeriesPoints(sheet, series);
+		const points = PlotModel.getSeriesPoints(sheet, series);
 		const hidden = sheet.hiddenSeries.includes(series.id);
 		const key = makeFitKey(sheet, series.id);
 		const prefix = options.prefix || '';
-		const yLabel = NeoModel.getColumnLabel(sheet, series.yCol);
+		const yLabel = PlotModel.getColumnLabel(sheet, series.yCol);
 		const name = processLabel(latexMode ? `${prefix ? `\\text{${prefix}} ` : ''}${formatLabelForLatex(yLabel)}` : `${prefix}${yLabel}`);
 		const traces = [{
 			x: points.map(point => point.x),
@@ -528,7 +528,7 @@
 		installPlotTexCache();
 		const sheet = getActiveSheet();
 		const themeSettings = getPlotThemeSettings();
-		const series = NeoModel.getSeries(sheet).filter(entry => entry.xCol);
+		const series = PlotModel.getSeries(sheet).filter(entry => entry.xCol);
 		const data = series.flatMap((entry, index) => seriesTraces(sheet, entry, index, themeSettings));
 		const titles = getAxisTitles(sheet);
 		const layout = applyThemeLayout(buildLayout(getSheetTitle(sheet), titles.x || 'x', titles.y || 'y', { showlegend: series.length > 1 }), themeSettings);
@@ -554,13 +554,13 @@
 		}
 		wrap.hidden = false;
 		// Folded by default: only the heading shows until it is opened.
-		const open = neoState.showResiduals === true;
+		const open = plotState.showResiduals === true;
 		wrap.classList.toggle('is-folded', !open);
 		document.getElementById('residual-toggle').setAttribute('aria-expanded', String(open));
 		document.getElementById('residual-plot').hidden = !open;
 		if (!open) return;
 		const themeSettings = getPlotThemeSettings();
-		const index = NeoModel.getSeries(target.sheet).filter(entry => entry.xCol).findIndex(entry => entry.id === target.series.id);
+		const index = PlotModel.getSeries(target.sheet).filter(entry => entry.xCol).findIndex(entry => entry.id === target.series.id);
 		const color = themeSettings.datasetColors[Math.max(index, 0) % themeSettings.datasetColors.length];
 		const yTitle = latexMode ? `\\text{residual } ${columnAxisText(target.sheet, target.series.yCol)}` : `residual ${columnAxisText(target.sheet, target.series.yCol)}`;
 		const layout = applyThemeLayout(buildLayout('', columnAxisText(target.sheet, target.series.xCol), yTitle, { showlegend: false }), themeSettings);
@@ -581,14 +581,14 @@
 	function plotAllSheets() {
 		installPlotTexCache();
 		const themeSettings = getPlotThemeSettings();
-		const multiple = neoState.sheets.length > 1;
+		const multiple = plotState.sheets.length > 1;
 		const data = [];
 		let colorIndex = 0;
 		const xColumns = [];
 		const yColumns = [];
-		neoState.sheets.forEach((sheet, sheetIndex) => {
+		plotState.sheets.forEach((sheet, sheetIndex) => {
 			// Empty series (such as a new sheet's blank columns) would only clutter the legend and labels.
-			NeoModel.getSeries(sheet).filter(entry => entry.xCol && NeoModel.getSeriesPoints(sheet, entry).length).forEach((entry) => {
+			PlotModel.getSeries(sheet).filter(entry => entry.xCol && PlotModel.getSeriesPoints(sheet, entry).length).forEach((entry) => {
 				const prefix = multiple ? `${getSheetDisplayName(sheetIndex)}: ` : '';
 				data.push(...seriesTraces(sheet, entry, colorIndex++, themeSettings, { prefix }));
 				if (!sheet.hiddenSeries.includes(entry.id)) {
@@ -620,7 +620,7 @@
 
 	// The plotted series of a sheet share the palette in order, so a Y column's colour is stable.
 	function getSeriesColor(sheet, seriesId) {
-		const index = NeoModel.getSeries(sheet).filter(entry => entry.xCol).findIndex(entry => entry.id === seriesId);
+		const index = PlotModel.getSeries(sheet).filter(entry => entry.xCol).findIndex(entry => entry.id === seriesId);
 		if (index < 0) return null;
 		const colors = getPlotThemeSettings().datasetColors;
 		return colors[index % colors.length];
