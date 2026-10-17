@@ -1096,26 +1096,39 @@ function renderFitParameters() {
 			lines.push(`\\( ${name} = ${PanPhyNeoStats.formatMeasurement(value, uncertainty)} \\)`);
 		});
 	}
-	const chi = result ? PanPhyNeoStats.formatChiSquared(result.chi2, result.dof) : null;
-	if (chi) lines.push(`\\( \\chi^2/\\nu = ${chi} \\quad (\\nu = ${result.dof}) \\)`);
-	const nodes = lines.map((text) => {
+	const toLine = (text) => {
 		const line = document.createElement('p');
 		line.textContent = text;
 		return line;
-	});
+	};
+	box.replaceChildren(...lines.map(toLine));
+	box.hidden = !lines.length;
+	if (lines.length) safeTypeset(box);
+
+	// Fit quality describes the whole fit, so it sits apart from the parameters: R² (set by
+	// renderFittingResult), then χ²/ν with its reading, then RMSE.
+	const quality = document.getElementById('fit-quality');
+	const details = document.getElementById('fit-quality-details');
+	const qualityLines = [];
+	const chi = result ? PanPhyNeoStats.formatChiSquared(result.chi2, result.dof) : null;
+	if (chi) qualityLines.push(`\\( \\chi^2/\\nu = ${chi} \\quad (\\nu = ${result.dof}) \\)`);
+	const nodes = qualityLines.map(toLine);
 	// A plain-language reading of χ²/ν; with few points it is only a rough guide.
 	if (chi) {
 		const ratio = result.chi2 / result.dof;
 		const chip = document.createElement('span');
 		chip.className = `neo-chi ${ratio > 2 ? 'is-high' : ratio < 0.5 ? 'is-low' : 'is-good'}`;
-		chip.textContent = ratio > 2 ? 'Scatter is larger than the ±ΔY'
-			: ratio < 0.5 ? 'The ±ΔY look generous'
-				: 'Scatter matches the ±ΔY';
+		chip.textContent = ratio > 2 ? 'Scatter is larger than the uncertainties'
+			: ratio < 0.5 ? 'The uncertainties look generous'
+				: 'Scatter matches the uncertainties';
 		nodes.push(chip);
 	}
-	box.replaceChildren(...nodes);
-	box.hidden = !lines.length;
-	if (lines.length) safeTypeset(box);
+	if (result && Number.isFinite(result.rmse)) {
+		nodes.push(toLine(`\\( \\mathrm{RMSE} = ${PanPhyFitCore.formatFitNumber(result.rmse)} \\)`));
+	}
+	details.replaceChildren(...nodes);
+	quality.hidden = !result;
+	if (nodes.length) safeTypeset(details);
 	if (note) {
 		note.textContent = !result ? 'Fits use unweighted least squares unless Weight by uncertainties is on.'
 			: result.weighted ? 'Weighted least squares: each point counts with weight 1/σ², where σ² = ΔY² + (slope × ΔX)². The ± values assume these are standard uncertainties.'
@@ -1192,10 +1205,9 @@ function renderFitDiagnostics() {
 	const status = document.getElementById('fit-status');
 	if (!status) return;
 	const result = datasetFitResults[activeFitKey];
-	const rmse = Number.isFinite(result?.rmse) ? ` RMSE: ${PanPhyFitCore.formatFitNumber(result.rmse, false)}.` : '';
 	status.textContent = !result ? 'No fit calculated yet.' : result.stale
 		? 'Data changed. Click Fit Curve to update the fit.'
-		: `${result.status || 'Fit calculated.'}${rmse}`;
+		: result.status || 'Fit calculated.';
 	status.classList.toggle('fit-outdated', !!result?.stale);
 }
 
