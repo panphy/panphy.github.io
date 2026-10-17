@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+
+<head>
+	<meta charset="UTF-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+	<meta name="theme-color" content="#F8F6F1">
+	<script src="/assets/theme.js"></script>
+	<meta name="apple-mobile-web-app-capable" content="yes">
+	<meta name="apple-mobile-web-app-status-bar-style" content="default">
+	<meta name="robots" content="noindex">
+	<link rel="stylesheet" href="/assets/standalone-top.css">
+
+	<title>PanPhyPlot (neo-beta)</title>
+	<link rel="icon" type="image/png" href="/assets/favicon.png">
+	<script src="https://cdn.plot.ly/plotly-basic-2.29.1.min.js" defer></script>
+	<script src="/tools/panphyplot/js/vendor/math.min.js" defer></script>
+	<script type="text/x-mathjax-config">
+		MathJax.Hub.Config({
+			tex2jax: {
+				inlineMath: [['$','$'], ['\\(','\\)']],
+				displayMath: [['$$','$$'], ['\\[','\\]']],
+				processEscapes: true
+			}
+		});
+	</script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-AMS-MML_SVG.js" defer></script>
+
+	<!-- The shared PanPhyPlot look; neo.css adds the column table and overrides. -->
+	<link rel="stylesheet" href="/tools/panphyplot/css/panphyplot.css">
+	<link rel="stylesheet" href="/beta/panphyplot-neo/css/neo.css">
+	<link rel="stylesheet" href="/assets/theme-toggle.css">
+	<link rel="stylesheet" href="/assets/fullscreen-button.css">
+	<script src="/assets/theme-toggle.js"></script>
+	<script src="/assets/fullscreen-button.js"></script>
+</head>
+
+<body>
+	<div class="phone-gate" role="alert">
+		<img src="/assets/panphy.png" alt="PanPhy logo" />
+		<h1>PanPhyPlot (neo-beta)</h1>
+		<p>This version needs a tablet or a computer: its table has room for many columns.</p>
+		<p><a href="/tools/panphyplot.html">Open PanPhyPlot</a>, which works on phones.</p>
+		<p class="phone-gate-copyright">&copy; 2026 PanPhy Labs. All rights reserved.</p>
+	</div>
+
+	<div class="neo-app">
+		<div class="banner">
+			<div class="banner-logo">
+				<a href="https://panphy.app/">
+					<img src="/assets/panphy.png" alt="PanPhy logo" />
+				</a>
+			</div>
+			<div class="banner-title">PanPhyPlot <span class="neo-badge">neo-beta</span></div>
+			<div class="banner-buttons">
+				<div class="theme-toggle">
+					<button id="theme-button" data-panphy-theme-toggle aria-label="Toggle Light/Dark Theme"
+						title="Toggle between light and dark themes">☀️</button>
+				</div>
+				<button data-panphy-fullscreen aria-label="Enter fullscreen" title="Enter fullscreen"></button>
+			</div>
+		</div>
+
+		<div class="reminder">
+			<span>A Y column plots against the nearest X column to its left. Names and units accept LaTeX in LaTeX mode.</span>
+			<div class="latex-toggle-container">
+				<label class="switch">
+					<input type="checkbox" id="latex-mode-toggle">
+					<span class="slider"></span>
+				</label>
+				<span class="toggle-label">LaTeX mode</span>
+			</div>
+		</div>
+
+		<div class="dataset-tabs-bar" id="sheet-tabs" role="tablist" aria-label="Sheets"></div>
+
+		<div class="container">
+			<div class="input-section">
+				<h2>Data</h2>
+				<div class="neo-table-wrap" id="neo-table-wrap">
+					<table class="neo-table" id="neo-table">
+						<thead id="neo-table-head"></thead>
+						<tbody id="neo-table-body"></tbody>
+					</table>
+				</div>
+				<p id="data-validation-message" class="validation-message" role="status"></p>
+				<p class="neo-hint">Tip: copy cells from a spreadsheet and paste them into the table. A first row of headings such as <code>L / m</code> becomes the column names and units.</p>
+
+				<div class="button-container">
+					<div class="button-row">
+						<button class="btn-add-row" type="button" id="add-row-button" title="Add a row to this sheet">Add Row</button>
+						<button class="btn-copy-x" type="button" id="add-column-button" title="Add a Y column at the right">Add Column</button>
+						<button class="btn-clear-all" type="button" id="clear-sheet-button" title="Clear every cell in this sheet">Clear Data</button>
+					</div>
+				</div>
+
+				<div class="fit-method-section">
+					<button class="section-toggle" type="button" aria-expanded="false" aria-controls="best-fit-content"
+						onclick="toggleSection('best-fit-content', this)" title="Show or hide best-fit line options">
+						Add Best Fit Line
+					</button>
+					<div id="best-fit-content" class="collapsible-content">
+						<div class="neo-fit-series">
+							<label for="fit-series-select">Fit series</label>
+							<select id="fit-series-select"></select>
+						</div>
+						<div class="tabs">
+							<button class="tablink active" onclick="openTab(event, 'BasicFit')" title="Show basic best-fit options">Basic</button>
+							<button class="tablink" onclick="openTab(event, 'AdvancedFit')" title="Show advanced best-fit options">Advanced</button>
+							<button class="tablink" onclick="openTab(event, 'CustomFit')" title="Show custom best-fit options">Custom</button>
+						</div>
+
+						<div id="BasicFit" class="tab-content active">
+							<label for="fit-method">Fit Method:</label>
+							<select id="fit-method" onchange="updateBasicFitEquation()">
+								<option value="Linear">Linear</option>
+								<option value="Polynomial-2">Quadratic</option>
+								<option value="Polynomial-3">Cubic</option>
+								<option value="Exponential">Exponential</option>
+								<option value="Power">Power</option>
+							</select>
+							<div id="basic-fit-equation" class="general-equation">\( y = mx + c \)</div>
+							<div class="neo-fit-actions">
+								<button class="fit-button" onclick="fitCurve()" title="Fit a curve to the chosen series">Fit Curve</button>
+								<button class="clear-fit-button" onclick="clearFittedCurve()" title="Remove the fit on the chosen series">Clear Fit</button>
+							</div>
+						</div>
+
+						<div id="AdvancedFit" class="tab-content">
+							<label for="advanced-fit-method">Advanced Fit Method:</label>
+							<select id="advanced-fit-method" class="fit-method-select" onchange="changeAdvancedFitMethod()">
+								<option value="Sinusoidal">Sinusoidal</option>
+								<option value="Gaussian">Gaussian</option>
+							</select>
+							<div id="advanced-fit-general-equation" class="general-equation">\( y = A e^{bx} \sin(kx - \phi) + c \)</div>
+							<p class="table-prompt">Adjust the initial fitting parameters below.</p>
+
+							<div id="Sinusoidal-parameters" class="parameter-section active">
+								<div class="advanced-fit-top-row">
+									<div class="advanced-fit-item">
+										<label for="initial-A">A:</label>
+										<input type="number" id="initial-A" value="1" step="any" />
+									</div>
+									<button type="button" class="advanced-fit-reset-btn" onclick="resetAdvancedFitParameters('Sinusoidal')"
+										title="Reset sinusoidal initial parameters">Reset parameters</button>
+								</div>
+								<div class="advanced-fit-item">
+									<label for="initial-b">b:</label>
+									<input type="number" id="initial-b" value="0" step="any" />
+								</div>
+								<div class="advanced-fit-item">
+									<label for="initial-k">k:</label>
+									<input type="number" id="initial-k" value="1" step="any" />
+								</div>
+								<div class="advanced-fit-item">
+									<label for="initial-phi">φ:</label>
+									<input type="number" id="initial-phi" value="0" step="any" />
+								</div>
+								<div class="advanced-fit-item">
+									<label for="initial-c">c:</label>
+									<input type="number" id="initial-c" value="0" step="any" />
+								</div>
+							</div>
+
+							<div id="Gaussian-parameters" class="parameter-section">
+								<div class="advanced-fit-top-row">
+									<div class="advanced-fit-item">
+										<label for="initial-A-gaussian">A:</label>
+										<input type="number" id="initial-A-gaussian" value="1" step="any" />
+									</div>
+									<button type="button" class="advanced-fit-reset-btn" onclick="resetAdvancedFitParameters('Gaussian')"
+										title="Reset gaussian initial parameters">Reset parameters</button>
+								</div>
+								<div class="advanced-fit-item">
+									<label for="initial-mu">μ:</label>
+									<input type="number" id="initial-mu" value="0" step="any" />
+								</div>
+								<div class="advanced-fit-item">
+									<label for="initial-sigma">σ:</label>
+									<input type="number" id="initial-sigma" value="1" step="any" />
+								</div>
+								<div class="advanced-fit-item">
+									<label for="initial-c-gaussian">c:</label>
+									<input type="number" id="initial-c-gaussian" value="0" step="any" />
+								</div>
+							</div>
+
+							<div class="neo-fit-actions">
+								<button class="fit-button" onclick="fitAdvancedCurve()" title="Fit an advanced curve using the chosen parameters">Fit Curve</button>
+								<button class="clear-fit-button" onclick="clearFittedCurve()" title="Remove the fit on the chosen series">Clear Fit</button>
+							</div>
+						</div>
+
+						<div id="CustomFit" class="tab-content">
+							<div id="custom-fit-formula-panel" class="custom-fit-formula-panel">
+								<div class="custom-fit-formula-header">
+									<label id="custom-fit-formula-label" for="custom-fit-formula-input">Formula for y</label>
+									<button id="custom-fit-formula-help" type="button" title="Open quick math reference in a new tab">Help</button>
+								</div>
+								<input id="custom-fit-formula-input" type="text" placeholder="e.g. A*exp(-k*x)+c" autocomplete="off" />
+								<p class="custom-fit-formula-note">Use explicit multiplication, e.g. <code>2*x</code> and <code>A*x</code>.</p>
+								<div id="custom-fit-formula-message" aria-live="polite" style="display: none;"></div>
+							</div>
+							<div id="custom-fit-general-equation" class="general-equation">\( y = f(x, \theta) \)</div>
+							<div id="custom-fit-parameters-panel" class="custom-fit-parameters-panel">
+								<p class="table-prompt">Adjust the initial fitting parameters below.</p>
+								<p id="custom-fit-parameters-empty" class="custom-fit-parameters-empty">Enter a custom equation to detect parameters.</p>
+								<div id="custom-fit-parameters-list"></div>
+							</div>
+							<div class="neo-fit-actions">
+								<button class="fit-button" onclick="fitCustomCurve()" title="Fit a custom equation to the chosen series">Fit Curve</button>
+								<button class="clear-fit-button" onclick="clearFittedCurve()" title="Remove the fit on the chosen series">Clear Fit</button>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+
+			<div class="graph-section">
+				<h2>Graph</h2>
+				<div class="graph-title-container">
+					<label for="graph-title">Title:</label>
+					<input type="text" id="graph-title" placeholder="Enter graph title">
+				</div>
+				<div id="plot"></div>
+				<div id="residual-wrap" hidden>
+					<div class="neo-residual-heading">Residuals of the fit on the chosen series</div>
+					<div id="residual-plot"></div>
+				</div>
+
+				<div class="result">
+					<h3>Fitting Result <span id="fit-series-label" class="neo-fit-series-label"></span></h3>
+					<p id="fit-equation" style="display: none;"></p>
+					<p id="r-squared-container" style="display: none;"></p>
+					<p class="fit-weighting-note">Fits use unweighted least squares. Uncertainty bars are shown for reference and do not affect the fit.</p>
+					<p id="fit-status" role="status">No fit calculated yet.</p>
+				</div>
+
+				<div class="plot-all-container">
+					<button class="plot-all-btn" type="button" id="plot-all-button" title="Plot every series of every sheet together">Plot ALL Sheets</button>
+				</div>
+			</div>
+		</div>
+
+		<footer>
+			&copy; 2026 <a href="https://panphy.app/" target="_blank" rel="noopener noreferrer">PanPhy Labs</a>. All rights reserved. |
+			<a href="https://buymeacoffee.com/panphy" target="_blank" rel="noopener noreferrer">Support My Projects</a>
+		</footer>
+	</div>
+
+	<div id="neo-menu" class="neo-menu" role="menu" hidden></div>
+
+	<div id="popup-background" style="display: none;"></div>
+	<div id="popup-container" style="display: none;">
+		<div id="popup-content" role="dialog" aria-modal="true" aria-labelledby="popup-title">
+			<button id="popup-close" type="button" title="Close the combined plot window">Close</button>
+			<div id="popup-title">Combined Plot of All Sheets</div>
+			<div id="popup-plot-container">
+				<div id="popup-plot"></div>
+			</div>
+			<div id="combined-plot-controls" class="combined-plot-controls">
+				<div class="control-row-horizontal">
+					<label for="combined-title">Title:</label>
+					<input type="text" id="combined-title" placeholder="Enter a new Title here" />
+				</div>
+				<div class="control-row-horizontal">
+					<label for="combined-x-label">x-axis Label:</label>
+					<input type="text" id="combined-x-label" placeholder="Enter a new x-axis label here" />
+				</div>
+				<div class="control-row-horizontal">
+					<label for="combined-y-label">y-axis Label:</label>
+					<input type="text" id="combined-y-label" placeholder="Enter a new y-axis label here" />
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<!--
+		PanPhyPlot (neo-beta) files:
+		- /beta/panphyplot-neo/js/neo-model.js (column model, pure)
+		- /beta/panphyplot-neo/js/neo-state.js (state, saving, fit keys)
+		- /beta/panphyplot-neo/js/neo-plot.js (Plotly rendering)
+		- /beta/panphyplot-neo/js/neo-fitting.js (copy of the PanPhyPlot fitting code)
+		- /beta/panphyplot-neo/js/neo-ui.js (table, sheets, menus)
+		- /beta/panphyplot-neo/js/neo-main.js (bootstrap)
+		The fit engine (fit-core.js, fit-worker.js) and math.js load from /tools/panphyplot/js/.
+	-->
+	<script src="/beta/panphyplot-neo/js/neo-model.js"></script>
+	<script src="/beta/panphyplot-neo/js/neo-state.js"></script>
+	<script src="/beta/panphyplot-neo/js/neo-plot.js"></script>
+	<script src="/tools/panphyplot/js/fit-core.js"></script>
+	<script src="/beta/panphyplot-neo/js/neo-fitting.js"></script>
+	<script src="/beta/panphyplot-neo/js/neo-ui.js"></script>
+	<script src="/beta/panphyplot-neo/js/neo-main.js"></script>
+</body>
+
+</html>

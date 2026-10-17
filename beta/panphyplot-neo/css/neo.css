@@ -1,0 +1,510 @@
+/* PanPhyPlot (neo-beta): the column table and the changes to the shared PanPhyPlot layout. */
+
+:root {
+	--role-x: #2D6FB0;
+	--role-y: #C2410C;
+	--role-err: #7E6399;
+	--role-none: #8A847E;
+	--cell-alt-bg: #F9F7F3;
+	--head-bg: #F3F0EA;
+}
+
+[data-theme="dark"] {
+	--role-x: #7CB5EC;
+	--role-y: #FB923C;
+	--role-err: #C4A8E0;
+	--role-none: #8A847E;
+	--cell-alt-bg: #1E1E1C;
+	--head-bg: #232321;
+}
+
+/* Phones: a polite pointer to the original PanPhyPlot instead of an unusable table. */
+.phone-gate {
+	display: none;
+}
+
+@media (max-width: 599px), (max-height: 500px) and (pointer: coarse) {
+	.phone-gate {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		justify-content: center;
+		gap: 4px;
+		min-height: 100vh;
+		min-height: 100dvh;
+		padding: calc(24px + var(--standalone-top, 0px)) 24px 24px;
+		text-align: center;
+		line-height: 1.5;
+	}
+
+	.phone-gate img {
+		width: 56px;
+		height: 56px;
+		border-radius: 12px;
+	}
+
+	.phone-gate h1 {
+		font-family: var(--font-display);
+		font-weight: 400;
+		margin: 8px 0;
+	}
+
+	.phone-gate p {
+		max-width: 28em;
+		margin: 4px 0;
+	}
+
+	.phone-gate a {
+		color: var(--brand-primary);
+		font-weight: 600;
+	}
+
+	.phone-gate-copyright {
+		margin-top: 24px !important;
+		font-size: 0.8rem;
+		color: var(--text-secondary);
+	}
+
+	.neo-app {
+		display: none;
+	}
+}
+
+.neo-badge {
+	font-family: var(--font-mono);
+	font-size: 0.7rem;
+	letter-spacing: 0.04em;
+	vertical-align: middle;
+	padding: 2px 8px;
+	border-radius: 999px;
+	background: var(--btn-analyze);
+	/* The banner title paints its text with a clipped gradient; the badge opts out. */
+	-webkit-background-clip: border-box;
+	background-clip: border-box;
+	-webkit-text-fill-color: #fff;
+	color: #fff;
+}
+
+[data-theme="dark"] .neo-badge {
+	-webkit-text-fill-color: #1a1a1a;
+	color: #1a1a1a;
+}
+
+/* The data panel gets room for several columns; the graph keeps the rest. */
+.neo-app .input-section {
+	flex: 1 1 460px;
+	max-width: 46%;
+}
+
+.neo-app .graph-section {
+	flex: 1 1 480px;
+}
+
+@media (max-width: 999px) {
+	.neo-app .container {
+		flex-direction: column;
+	}
+
+	.neo-app .input-section,
+	.neo-app .graph-section {
+		max-width: 100%;
+		flex: none;
+		height: auto;
+		min-height: 300px;
+		overflow: visible;
+	}
+}
+
+.dataset-tab .tab-label {
+	border: none;
+	background: none;
+	color: inherit;
+	font: inherit;
+	padding: 0;
+	min-height: 0;
+	box-shadow: none;
+	cursor: pointer;
+}
+
+.dataset-tab .tab-label:hover {
+	background: none;
+	transform: none;
+}
+
+/* ---------- Table ---------- */
+
+.neo-table-wrap {
+	overflow: auto;
+	max-height: 52vh;
+	border: 1px solid var(--border-color);
+	border-radius: 12px;
+	-webkit-overflow-scrolling: touch;
+}
+
+@media (max-width: 999px) {
+	.neo-table-wrap {
+		max-height: 60vh;
+	}
+}
+
+.neo-table {
+	border-collapse: separate;
+	border-spacing: 0;
+	min-width: 100%;
+	font-variant-numeric: tabular-nums;
+}
+
+.neo-table th,
+.neo-table td {
+	border-right: 1px solid var(--border-color);
+	border-bottom: 1px solid var(--border-color);
+	padding: 0;
+	background: var(--card-bg);
+}
+
+.neo-table tbody tr:nth-child(even) td {
+	background: var(--cell-alt-bg);
+}
+
+.neo-table thead th {
+	position: sticky;
+	top: 0;
+	z-index: 2;
+	background: var(--head-bg);
+	vertical-align: top;
+}
+
+.neo-row-head {
+	position: sticky;
+	left: 0;
+	z-index: 1;
+	width: 44px;
+	min-width: 44px;
+	background: var(--head-bg) !important;
+	text-align: center;
+}
+
+.neo-table thead .neo-corner {
+	z-index: 3;
+	font-family: var(--font-mono);
+	font-size: 0.75rem;
+	color: var(--text-secondary);
+	vertical-align: middle;
+}
+
+.neo-row-head button {
+	width: 100%;
+	min-height: 44px;
+	padding: 0;
+	border: none;
+	border-radius: 0;
+	background: none;
+	box-shadow: none;
+	color: var(--text-secondary);
+	font-family: var(--font-mono);
+	font-size: 0.75rem;
+	cursor: pointer;
+}
+
+.neo-row-head button:hover,
+.neo-row-head button:focus-visible {
+	background: var(--muted-bg);
+	color: var(--text-main);
+	transform: none;
+}
+
+.neo-col-head {
+	min-width: 112px;
+	width: 112px;
+	padding: 6px !important;
+	border-top: 3px solid var(--role-y);
+}
+
+.neo-col-head.role-X { border-top-color: var(--role-x); }
+.neo-col-head.role-xErr,
+.neo-col-head.role-yErr { border-top-color: var(--role-err); }
+.neo-col-head.role-none { border-top-color: var(--role-none); }
+
+.neo-col-top {
+	display: flex;
+	align-items: center;
+	gap: 4px;
+	margin-bottom: 4px;
+}
+
+.neo-col-letter {
+	font-family: var(--font-mono);
+	font-size: 0.75rem;
+	color: var(--text-secondary);
+	min-width: 1.2em;
+}
+
+.neo-role-select {
+	flex: 1;
+	min-width: 0;
+	min-height: 36px;
+	margin: 0;
+	padding: 2px 6px;
+	border-radius: 999px;
+	border: 1px solid var(--role-y);
+	color: var(--role-y);
+	background-color: var(--card-bg);
+	font-weight: 700;
+	font-size: 0.8rem;
+	text-align: center;
+}
+
+.role-X .neo-role-select { border-color: var(--role-x); color: var(--role-x); }
+.role-xErr .neo-role-select,
+.role-yErr .neo-role-select { border-color: var(--role-err); color: var(--role-err); }
+.role-none .neo-role-select { border-color: var(--role-none); color: var(--role-none); }
+
+.neo-col-menu-button {
+	min-width: 36px;
+	min-height: 36px;
+	padding: 0;
+	border: none;
+	background: none;
+	box-shadow: none;
+	color: var(--text-secondary);
+	font-size: 1.1rem;
+	line-height: 1;
+	cursor: pointer;
+}
+
+.neo-col-menu-button:hover,
+.neo-col-menu-button:focus-visible {
+	background: var(--muted-bg);
+	color: var(--text-main);
+	transform: none;
+}
+
+.neo-col-name,
+.neo-col-unit {
+	display: block;
+	width: 100%;
+	min-height: 32px;
+	margin: 2px 0 0;
+	padding: 3px 6px;
+	border: 1px solid transparent;
+	border-radius: 6px;
+	background: transparent;
+	color: var(--text-main);
+	text-align: center;
+	font: inherit;
+}
+
+.neo-col-name {
+	font-weight: 700;
+}
+
+.neo-col-unit {
+	font-size: 0.85rem;
+	color: var(--text-secondary);
+}
+
+.neo-col-name:hover,
+.neo-col-unit:hover {
+	border-color: var(--input-border);
+}
+
+.neo-col-name:focus,
+.neo-col-unit:focus {
+	outline: none;
+	border-color: var(--brand-primary);
+	background: var(--card-bg);
+}
+
+.neo-col-preview {
+	margin-top: 4px;
+	padding: 2px 4px;
+	border-radius: 6px;
+	font-size: 0.8rem;
+	color: var(--text-secondary);
+	background: var(--card-bg);
+	overflow-x: auto;
+}
+
+.neo-col-preview[hidden] {
+	display: none;
+}
+
+.neo-cell {
+	display: block;
+	width: 100%;
+	min-height: 44px;
+	padding: 4px 8px;
+	border: none;
+	background: transparent;
+	color: var(--text-main);
+	text-align: center;
+	font-family: var(--font-mono);
+	font-size: 0.9rem;
+}
+
+.neo-cell:focus {
+	outline: 2px solid var(--brand-primary);
+	outline-offset: -2px;
+	background: var(--card-bg);
+}
+
+.neo-cell.invalid-input {
+	background-color: rgba(255, 107, 107, 0.15);
+	outline: 2px solid #ff6b6b;
+	outline-offset: -2px;
+}
+
+.neo-add-col {
+	min-width: 52px;
+	vertical-align: middle !important;
+	text-align: center;
+	border-right: none !important;
+}
+
+.neo-add-col button {
+	width: 40px;
+	height: 40px;
+	padding: 0;
+	border-radius: 50%;
+	border: 1px dashed var(--btn-create);
+	background: none;
+	box-shadow: none;
+	color: var(--btn-create);
+	font-size: 1.3rem;
+	line-height: 1;
+	cursor: pointer;
+}
+
+.neo-add-col button:hover,
+.neo-add-col button:focus-visible {
+	background: rgba(45, 140, 95, 0.12);
+	transform: none;
+}
+
+.neo-table tbody td:last-child {
+	border-right: none;
+}
+
+.neo-hint {
+	margin: 8px 0 12px;
+	font-size: 0.85rem;
+	color: var(--text-secondary);
+	line-height: 1.45;
+}
+
+.neo-hint code {
+	font-family: var(--font-mono);
+	font-size: 0.8rem;
+}
+
+/* ---------- Menus ---------- */
+
+.neo-menu {
+	position: fixed;
+	z-index: 1000;
+	min-width: 220px;
+	padding: 6px;
+	border: 1px solid var(--card-border);
+	border-radius: 12px;
+	background: var(--card-bg);
+	box-shadow: 0 10px 30px rgba(0, 0, 0, 0.18);
+	display: flex;
+	flex-direction: column;
+}
+
+.neo-menu[hidden] {
+	display: none;
+}
+
+.neo-menu button {
+	min-height: 44px;
+	margin: 0;
+	padding: 8px 12px;
+	border: none;
+	border-radius: 8px;
+	background: none;
+	box-shadow: none;
+	color: var(--text-main);
+	text-align: left;
+	font: inherit;
+	font-size: 0.95rem;
+	cursor: pointer;
+}
+
+.neo-menu button:hover:not(:disabled),
+.neo-menu button:focus-visible {
+	background: var(--muted-bg);
+	transform: none;
+}
+
+.neo-menu button:disabled {
+	color: var(--text-secondary);
+	opacity: 0.5;
+	cursor: default;
+}
+
+.neo-menu button.is-danger:not(:disabled) {
+	color: var(--btn-danger);
+}
+
+/* ---------- Fitting and graph ---------- */
+
+.neo-fit-series {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+	margin-bottom: 12px;
+}
+
+.neo-fit-series label {
+	font-weight: 700;
+	white-space: nowrap;
+}
+
+.neo-fit-series select {
+	flex: 1;
+	min-width: 0;
+	margin: 0;
+}
+
+.neo-fit-actions {
+	display: flex;
+	gap: 6px;
+}
+
+.neo-fit-series-label {
+	font-family: var(--font-body);
+	font-size: 0.85rem;
+	font-weight: 500;
+	color: var(--text-secondary);
+}
+
+#residual-wrap[hidden] {
+	display: none;
+}
+
+.neo-residual-heading {
+	margin: 8px 0 0;
+	font-size: 0.85rem;
+	font-weight: 600;
+	color: var(--text-secondary);
+}
+
+#residual-plot {
+	width: 100%;
+	height: 200px;
+}
+
+.neo-equation {
+	border: none;
+	background: none;
+	box-shadow: none;
+	color: inherit;
+	font: inherit;
+	padding: 4px 8px;
+	cursor: copy;
+}
+
+.neo-equation:hover {
+	transform: none;
+}
