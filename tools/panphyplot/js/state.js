@@ -93,6 +93,8 @@ let saveTimeout;
 let lastSavedSerialized = null;
 // Set by the guided tour (tour.js), which runs on practice data and must never overwrite the saved workspace.
 let persistenceDisabled = false;
+// Set when another tab saves this workspace: this tab stops saving until the person chooses a version.
+let changedElsewhere = false;
 
 function getUiStateSnapshotFromDom() {
 	const graphTitleInput = document.getElementById('graph-title');
@@ -191,7 +193,7 @@ function migratePersistedState(savedState, sourceKey = STORAGE_KEY) {
 }
 
 function saveState() {
-	if (persistenceDisabled) return;
+	if (persistenceDisabled || changedElsewhere) return;
 	try {
 		const serialized = JSON.stringify(buildPersistedState());
 		// Skip the write (and its localStorage I/O) when nothing changed.
@@ -225,6 +227,22 @@ if (typeof window !== 'undefined') {
 	window.addEventListener('visibilitychange', () => {
 		if (document.visibilityState === 'hidden') flushSaveState();
 	});
+	// Every tab shares one saved workspace, so a save from another tab would be overwritten by this
+	// tab's next autosave. Pause instead, and let the person reload or keep this tab's version.
+	window.addEventListener('storage', (event) => {
+		if (persistenceDisabled || (event.key !== STORAGE_KEY && event.key !== null)) return;
+		if (event.key !== null && event.newValue === lastSavedSerialized) return;
+		changedElsewhere = true;
+		clearTimeout(saveTimeout);
+		if (typeof onWorkspaceChangedElsewhere === 'function') onWorkspaceChangedElsewhere();
+	});
+}
+
+// Overwrites the other tab's save with this tab's work and resumes saving.
+function keepThisTabVersion() {
+	changedElsewhere = false;
+	lastSavedSerialized = null;
+	saveState();
 }
 
 function loadState() {

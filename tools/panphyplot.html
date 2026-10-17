@@ -77,6 +77,15 @@
 		</div>
 	</div>
 
+	<div class="tab-conflict" id="tab-conflict" role="alert" hidden>
+		<p><strong>This workspace was changed in another tab.</strong> This tab has stopped saving, so neither tab's work is lost.</p>
+		<div class="tab-conflict-actions">
+			<button type="button" class="tab-conflict-reload" onclick="resolveTabConflict(false)">Reload to see it</button>
+			<button type="button" class="tab-conflict-keep" onclick="resolveTabConflict(true)"
+				title="Save this tab's work over the other tab's">Keep this tab's version</button>
+		</div>
+	</div>
+
 	<!-- Dataset Tabs Bar with "Add Dataset" button -->
 	<div class="dataset-tabs-bar">
 		<!-- Example initial tab -->
