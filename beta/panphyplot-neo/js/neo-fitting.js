@@ -781,6 +781,10 @@ function fitCurve() {
 	if (typeof updateData === 'function') {
 		updateData();
 	}
+	if (!activeFitKey) {
+		alert('Show a series on the graph to fit it: tap it in the Series card.');
+		return;
+	}
 	const filteredData = getFiniteDatasetPoints(activeFitKey);
 	const xValues = filteredData.map(point => point.x);
 	const yValues = filteredData.map(point => point.y);
@@ -1409,6 +1413,10 @@ async function fitAdvancedCurve() {
 	if (typeof updateData === 'function') {
 		updateData();
 	}
+	if (!activeFitKey) {
+		alert('Show a series on the graph to fit it: tap it in the Series card.');
+		return;
+	}
 	if (getDatasetPoints(activeFitKey).length < 4) { // Increased to 4 for more complex fits
 		alert('Please enter at least four data points for advanced fitting.');
 		return;
@@ -1427,6 +1435,10 @@ async function fitCustomCurve() {
 	try {
 		if (typeof updateData === 'function') {
 			updateData();
+		}
+		if (!activeFitKey) {
+			alert('Show a series on the graph to fit it: tap it in the Series card.');
+			return;
 		}
 		const fitTarget = captureFitTarget();
 		const fitChoice = { kind: 'custom', formula: document.getElementById('custom-fit-formula-input').value };

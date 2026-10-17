@@ -1037,17 +1037,19 @@ function renderFitSeriesSelect() {
 	const select = document.getElementById('fit-series-select');
 	const sheet = getActiveSheet();
 	if (!select || !sheet) return;
-	const series = NeoModel.getSeries(sheet);
+	// Only the series shown on the graph; one without data yet is listed but cannot be chosen.
+	const series = getFittableSeries(sheet);
 	select.replaceChildren(...series.map((entry) => {
 		const option = document.createElement('option');
 		option.value = entry.id;
-		option.textContent = describeSeries(sheet, entry);
-		option.disabled = !entry.xCol;
+		const empty = !NeoModel.getSeriesPoints(sheet, entry).length;
+		option.textContent = empty ? `${describeSeries(sheet, entry)} (no data yet)` : describeSeries(sheet, entry);
+		option.disabled = empty;
 		return option;
 	}));
 	if (!series.length) {
 		const option = document.createElement('option');
-		option.textContent = 'No Y column yet';
+		option.textContent = NeoModel.getSeries(sheet).length ? 'Show a series to fit it' : 'No Y column yet';
 		select.appendChild(option);
 	}
 	select.disabled = !series.length;
@@ -1230,6 +1232,14 @@ function clearFittedCurve() {
 }
 
 function onSeriesVisibilityChange() {
+	// Hiding the fitted series moves the fit to a visible one; its own fit is kept for when it returns.
+	const previousKey = activeFitKey;
+	refreshActiveFitKey();
+	renderFitSeriesSelect();
+	if (activeFitKey !== previousKey) {
+		loadCustomFitUiForActiveDataset();
+		renderActiveFitResult();
+	}
 	plotGraph();
 	syncTitleInput();
 	refreshWorkspaceChrome();

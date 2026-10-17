@@ -47,11 +47,20 @@ function resolveFitKey(key) {
 }
 
 // The Y series the fit panel works on: the sheet's chosen one if it still exists, else the first.
+// Only a series shown on the graph can be fitted. The chosen one stays while it is visible and has
+// data; otherwise the first visible series with data takes over, and with none visible there is no fit.
+function getFittableSeries(sheet) {
+	return NeoModel.getSeries(sheet).filter(entry => entry.xCol && !sheet.hiddenSeries.includes(entry.id));
+}
+
 function refreshActiveFitKey() {
 	const sheet = getActiveSheet();
-	const series = NeoModel.getSeries(sheet);
-	if (!series.some(entry => entry.id === sheet.fitSeries)) {
-		sheet.fitSeries = (series.find(entry => entry.xCol) || series[0] || {}).id || null;
+	const candidates = getFittableSeries(sheet);
+	const hasPoints = entry => NeoModel.getSeriesPoints(sheet, entry).length > 0;
+	const current = candidates.find(entry => entry.id === sheet.fitSeries);
+	const anyWithPoints = candidates.some(hasPoints);
+	if (!current || (!hasPoints(current) && anyWithPoints)) {
+		sheet.fitSeries = (candidates.find(hasPoints) || candidates[0] || {}).id || null;
 	}
 	activeFitKey = makeFitKey(sheet, sheet.fitSeries);
 	return activeFitKey;
