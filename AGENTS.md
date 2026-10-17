@@ -25,6 +25,8 @@ PanPhy Labs is a static GitHub Pages PWA for physics tools, simulations, classro
 
 Keep beta/misc inventories current when adding, moving, renaming, or removing entries. Supporting app files do not need separate entries.
 
+Promote an app out of `beta/` only when the user requests or approves that promotion; never promote one on your own initiative, even when it seems ready.
+
 For a new or promoted general published app:
 
 1. Place it in the appropriate directory and update its previous inventory if moved.
