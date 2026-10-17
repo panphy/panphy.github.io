@@ -759,3 +759,42 @@
 	text-align: center;
 	white-space: nowrap;
 }
+
+/* ---------- Uncertainties ---------- */
+
+.neo-weight {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+	min-height: 44px;
+	margin-bottom: 8px;
+	font-size: 0.9rem;
+	cursor: pointer;
+}
+
+.neo-weight input {
+	width: 20px;
+	height: 20px;
+	flex: none;
+	accent-color: var(--btn-analyze);
+}
+
+.neo-fit-parameters p {
+	margin: 4px 0;
+}
+
+.neo-formula-working {
+	padding: 8px 12px;
+	border-radius: 10px;
+	background: var(--muted-bg);
+	font-size: 0.9rem;
+	overflow-x: auto;
+}
+
+.neo-formula-working[hidden] {
+	display: none;
+}
+
+.neo-formula-working p {
+	margin: 4px 0;
+}

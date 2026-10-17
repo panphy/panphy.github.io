@@ -1203,7 +1203,17 @@ function getFitChoice() {
 	return { kind: 'basic', method: document.getElementById('fit-method').value };
 }
 
-function updateResults(equation, x, y, fitFunction, datasetIndex = activeFitKey, solver = null, choice = getFitChoice()) {
+// Free parameters for χ²/ν. Exponential and Power are left out: their fitted forms vary with the data.
+function getChoiceParameterCount(choice) {
+	const method = choice && choice.method;
+	if (method === 'Linear') return 2;
+	if (typeof method === 'string' && method.startsWith('Polynomial-')) return Number(method.split('-')[1]) + 1;
+	if (method === 'Sinusoidal') return 5;
+	if (method === 'Gaussian') return 4;
+	return 0;
+}
+
+function updateResults(equation, x, y, fitFunction, datasetIndex = activeFitKey, solver = null, choice = getFitChoice(), extras = {}) {
 	const residuals = x.map((value, i) => ({ x: value, y: y[i] - fitFunction(value) }));
 	const finiteResiduals = residuals.filter(point => Number.isFinite(point.y));
 	const rSquared = computeRSq(x, y, fitFunction);
@@ -1221,8 +1231,23 @@ function updateResults(equation, x, y, fitFunction, datasetIndex = activeFitKey,
 		status,
 		stale: false,
 		choice,
-		signature: getDatasetFitSignature(datasetIndex)
+		signature: getDatasetFitSignature(datasetIndex),
+		weighted: false,
+		parameters: null,
+		...extras
 	};
+	// χ²/ν needs every point's ±ΔY; it describes the fit whether or not the fit was weighted.
+	const sigmas = getFitSigmas(datasetIndex);
+	const parameterCount = Array.isArray(result.parameters) ? result.parameters.length : (extras.parameterCount || getChoiceParameterCount(choice));
+	if (sigmas && sigmas.length === x.length && finiteResiduals.length === x.length && parameterCount) {
+		result.chi2 = PanPhyNeoStats.chiSquared(residuals.map(point => point.y), sigmas);
+		result.dof = x.length - parameterCount;
+	}
+	if (getWeightingRequested() && !result.weighted) {
+		result.status += sigmas
+			? ' This fit method is unweighted; use Linear or Custom for a weighted fit.'
+			: ' Not weighted: every point needs a ±ΔY greater than zero.';
+	}
 	datasetFitResults[datasetIndex] = result;
 	if (datasetIndex === activeFitKey) renderFittingResult(equation, result.rSquared);
 	scheduleSaveState();
@@ -1338,11 +1363,24 @@ async function fitCustomCurve() {
 			endFitControlsBusy();
 		}
 
-		const bestParams = solved && Array.isArray(solved.params) ? solved.params : null;
+		let bestParams = solved && Array.isArray(solved.params) ? solved.params : null;
 		if (!bestParams || !Array.isArray(bestParams)) {
 			alert('Custom fit could not converge on this dataset.');
 			return;
 		}
+		// Weighting: refine the unweighted best fit, minimising Σ((y − f)/ΔY)².
+		const sigmas = getWeightingSigmas(fitTarget.key);
+		if (sigmas) {
+			const weight = rows => rows.map((row, i) => (Array.isArray(row) ? row.map(value => value / sigmas[i]) : row / sigmas[i]));
+			const refined = levenbergMarquardt(data, bestParams, (p, pts) => weight(residualFn(p, pts)), (p, pts) => weight(jacobianFn(p, pts)), { maxIterations: 350, tolerance: 1e-10 });
+			if (refined && Array.isArray(refined.params) && refined.params.every(Number.isFinite)) {
+				bestParams = refined.params;
+				solved = refined;
+			}
+		}
+		const residualsAtBest = residualFn(bestParams, data).map(value => -value);
+		const uncertainties = PanPhyNeoStats.parameterUncertainties(jacobianFn(bestParams, data), residualsAtBest, sigmas);
+		const parameters = uncertainties ? analysis.parameterNames.map((name, index) => ({ name, value: bestParams[index], uncertainty: uncertainties[index] })) : null;
 		const targetDatasetIndex = resolveFitTarget(fitTarget);
 		if (targetDatasetIndex < 0) {
 			showToast('Fit discarded because its dataset changed or was removed.');
@@ -1364,7 +1402,8 @@ async function fitCustomCurve() {
 		const equation = buildCustomFitEquationLatex(analysis.parsedExpression, analysis.parameterNames, bestParams);
 
 		fittedCurves[targetDatasetIndex] = { x: xFit, y: yFit, equation };
-		updateResults(equation, xValues, yValues, fitFunction, targetDatasetIndex, solved, fitChoice);
+		updateResults(equation, xValues, yValues, fitFunction, targetDatasetIndex, solved, fitChoice,
+			{ weighted: !!sigmas, parameters, parameterCount: analysis.parameterNames.length });
 		if (targetDatasetIndex === activeFitKey) {
 			plotGraph(xFit, yFit);
 		}
@@ -1388,7 +1427,16 @@ async function fitCustomCurve() {
 
 function performLinearFit(x, y) {
 	try {
-		const { slope, intercept, evaluate: fitFunction } = computeLinearFit(x, y);
+		// Weighted by 1/ΔY² when requested and every point has a ±ΔY; otherwise ordinary least squares.
+		const sigmas = getWeightingSigmas(activeFitKey);
+		const line = PanPhyNeoStats.linearFit(x, y, sigmas);
+		if (!line) {
+			alert('A straight line needs at least two different x values.');
+			return;
+		}
+		const slope = line.m;
+		const intercept = line.c;
+		const fitFunction = xi => slope * xi + intercept;
 
 		const { min: xMin, max: xMax } = minMaxFinite(x);
 		const xFit = [xMin, xMax];
@@ -1402,7 +1450,12 @@ function performLinearFit(x, y) {
 		// Store the fitted curve for this dataset.
 		fittedCurves[activeFitKey] = { x: xFit, y: yFit, equation: equation };
 
-		updateResults(equation, x, y, fitFunction, activeFitKey, null, { kind: 'basic', method: document.getElementById('fit-method').value });
+		const parameters = x.length > 2 || sigmas ? [
+			{ name: 'm', value: slope, uncertainty: line.uncertaintyM },
+			{ name: 'c', value: intercept, uncertainty: line.uncertaintyC }
+		] : null;
+		updateResults(equation, x, y, fitFunction, activeFitKey, null, { kind: 'basic', method: document.getElementById('fit-method').value },
+			{ weighted: !!sigmas, parameters, parameterCount: 2 });
 		plotGraph(xFit, yFit);
 	} catch (error) {
 		console.error('Error performing linear fit:', error);

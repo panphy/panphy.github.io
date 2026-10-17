@@ -221,3 +221,50 @@ test('an uncertainty heading goes to the column it names', () => {
 	assert.deepEqual(roles.map(entry => entry.role), ['X', 'Y', 'Y', 'yErr', 'xErr', 'yErr', 'Y']);
 	assert.equal(roles[5].errorType, 'percentage');
 });
+
+test('a formula cannot use its own column', () => {
+	const sheet = namedSheet([['X', ['1']], ['Y', [], { formula: 'B + 1' }]]);
+	model.recomputeFormulas(sheet, math);
+	assert.match(sheet.columns[1].formulaError, /its own column/);
+});
+
+test('uncertainties propagate through a formula: Δ(T²) = 2TΔT', () => {
+	const sheet = namedSheet([
+		['X', ['0.5', '1'], { name: 'L' }], ['Y', ['1.5', '2'], { name: 'T' }], ['yErr', ['0.01', '2'], { errorType: 'percentage' }],
+		['Y', [], { formula: 'T^2', name: 'T2' }], ['yErr', [], {}]
+	]);
+	sheet.columns[2].errorType = 'absolute';
+	sheet.columns[2].cells = ['0.01', '0.02'];
+	sheet.columns[4].propagateFrom = sheet.columns[3].id;
+	model.recomputeFormulas(sheet, math);
+	assert.deepEqual(sheet.columns[4].cells.slice(0, 2), ['0.03', '0.08']);
+	sheet.columns[2].errorType = 'percentage';
+	sheet.columns[2].cells = ['1', '1'];
+	model.recomputeFormulas(sheet, math);
+	assert.deepEqual(sheet.columns[4].cells.slice(0, 2), ['0.045', '0.08']);
+});
+
+test('independent uncertainties add in quadrature, and chained formulas carry them on', () => {
+	const sheet = namedSheet([
+		['X', ['3'], { name: 'x' }], ['xErr', ['0.3']], ['Y', ['4'], { name: 'y' }], ['yErr', ['0.4']],
+		['Y', [], { formula: 'x*y', name: 'p' }], ['yErr', []], ['Y', [], { formula: '2*p', name: 'q' }], ['yErr', []]
+	]);
+	sheet.columns[5].propagateFrom = sheet.columns[4].id;
+	sheet.columns[7].propagateFrom = sheet.columns[6].id;
+	model.recomputeFormulas(sheet, math);
+	// Δp = √((4·0.3)² + (3·0.4)²) = √2.88; Δq = 2Δp
+	assert.equal(sheet.columns[5].cells[0], String(Number(Math.sqrt(2.88).toPrecision(6))));
+	// Δq builds on the stored (rounded) Δp.
+	assert.equal(sheet.columns[7].cells[0], String(Number((2 * Number(sheet.columns[5].cells[0])).toPrecision(6))));
+	const working = model.describePropagation(sheet, sheet.columns[4], math);
+	assert.deepEqual(working.terms.map(term => term.symbol), ['x', 'y']);
+	assert.ok(working.terms.every(term => term.derivative));
+});
+
+test('a propagated column whose formula is removed reports it', () => {
+	const sheet = namedSheet([['X', ['1']], ['Y', [], { formula: 'A^2' }], ['yErr', []]]);
+	sheet.columns[2].propagateFrom = sheet.columns[1].id;
+	sheet.columns[1].formula = '';
+	model.recomputeFormulas(sheet, math);
+	assert.match(sheet.columns[2].formulaError, /no longer has a formula/);
+});
