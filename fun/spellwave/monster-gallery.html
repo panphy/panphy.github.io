@@ -40,6 +40,7 @@
     .swatch { width: 14px; height: 14px; border-radius: 4px; border: 1px solid rgba(0, 0, 0, 0.25); }
     .info button { padding: 3px 8px; font-size: 13px; }
     #error { padding: 16px; color: #a11; white-space: pre-wrap; }
+    footer { position: relative; z-index: 2; padding: 0 16px 24px; color: var(--muted); font-size: 13px; }
   </style>
 </head>
 <body>
@@ -57,6 +58,7 @@
     <small>Drag a monster to turn it. “Enlarge” gives a close view.</small>
   </header>
   <main id="main"><div id="error"></div></main>
+  <footer>&copy; 2026 PanPhy Labs. All rights reserved.</footer>
 
   <script type="module">
     import * as THREE from 'three';
