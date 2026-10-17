@@ -16,7 +16,17 @@ function showToast(message, duration = 3000) {
 	const toast = document.createElement('div');
 	toast.className = 'toast-notification';
 	toast.textContent = message;
-	document.body.appendChild(toast);
+	toast.setAttribute('role', 'status');
+	// An open dialog sits in the top layer and blurs the page behind it, so the toast must join that
+	// layer too: as a popover where supported, or inside the dialog itself otherwise.
+	const openDialog = document.querySelector('dialog[open]');
+	if (typeof toast.showPopover === 'function') {
+		toast.popover = 'manual';
+		document.body.appendChild(toast);
+		toast.showPopover();
+	} else {
+		(openDialog || document.body).appendChild(toast);
+	}
 	requestAnimationFrame(() => toast.classList.add('toast-visible'));
 	setTimeout(() => {
 		toast.classList.remove('toast-visible');
