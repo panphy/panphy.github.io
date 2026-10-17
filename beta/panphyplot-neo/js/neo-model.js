@@ -554,6 +554,21 @@
 		return changed;
 	}
 
+	// Rows that Fill with one value should set. An uncertainty column follows the readings of the
+	// column it belongs to (gaps included); any other column follows rows with data elsewhere.
+	function getFillTarget(sheet, column) {
+		const owner = [...getUncertaintyColumns(sheet).entries()].find(([, error]) => error === column);
+		const ownerColumn = owner ? sheet.columns.find(entry => entry.id === owner[0]) : null;
+		const rows = [];
+		for (let row = 0; row < sheet.rowCount; row++) {
+			const hasData = ownerColumn
+				? !isBlank(ownerColumn.cells[row])
+				: sheet.columns.some(entry => entry !== column && !isBlank(entry.cells[row]));
+			if (hasData) rows.push(row);
+		}
+		return { rows, owner: ownerColumn };
+	}
+
 	// The symbolic working for the formula dialog: each ∂f/∂x that has an uncertainty, as TeX.
 	function describePropagation(sheet, column, math) {
 		const analysis = analyzeFormula(sheet, column.formula, math);
@@ -768,6 +783,7 @@
 		isPropagatedColumn,
 		isComputedColumn,
 		getUncertaintyColumns,
+		getFillTarget,
 		describePropagation,
 		cleanFormulaText,
 		getFormulaSymbols,

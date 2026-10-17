@@ -336,6 +336,23 @@
 		</form>
 	</dialog>
 
+	<dialog id="fill-dialog" class="neo-dialog" aria-labelledby="fill-dialog-title">
+		<form method="dialog" class="neo-dialog-body">
+			<h2 id="fill-dialog-title">Fill column</h2>
+			<p id="fill-summary" class="neo-dialog-note"></p>
+			<label for="fill-value">Value</label>
+			<div class="neo-fill-row">
+				<input type="text" id="fill-value" inputmode="decimal" autocomplete="off" placeholder="e.g. 0.05">
+				<span id="fill-unit" class="neo-fill-unit"></span>
+			</div>
+			<p id="fill-message" class="neo-dialog-message" role="status"></p>
+			<div class="neo-dialog-actions">
+				<button type="button" class="neo-dialog-cancel" data-close>Cancel</button>
+				<button type="button" class="neo-dialog-confirm" id="fill-apply">Fill</button>
+			</div>
+		</form>
+	</dialog>
+
 	<dialog id="mean-dialog" class="neo-dialog" aria-labelledby="mean-dialog-title">
 		<form method="dialog" class="neo-dialog-body">
 			<h2 id="mean-dialog-title">Mean of repeats</h2>

@@ -203,7 +203,7 @@ code {
 
 .neo-button-primary,
 .fit-button,
-.neo-dialog-confirm {
+.neo-dialog-actions .neo-dialog-confirm {
 	border-color: transparent;
 	background: var(--accent);
 	color: var(--accent-ink);
@@ -212,7 +212,7 @@ code {
 
 .neo-button-primary:hover,
 .fit-button:hover:not(:disabled),
-.neo-dialog-confirm:hover {
+.neo-dialog-actions .neo-dialog-confirm:hover:not(:disabled) {
 	background: var(--accent-hover);
 }
 
@@ -1984,6 +1984,28 @@ input[type="number"]:focus {
 	display: flex;
 	flex-direction: column;
 	gap: 4px;
+}
+
+.neo-fill-row {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+}
+
+.neo-fill-row input {
+	flex: 1;
+	font-family: var(--font-mono);
+}
+
+.neo-fill-unit {
+	min-width: 2em;
+	font-family: var(--font-mono);
+	color: var(--ink-2);
+}
+
+.neo-dialog-confirm:disabled {
+	opacity: 0.5;
+	cursor: default;
 }
 
 .neo-dialog-message {

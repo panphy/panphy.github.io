@@ -268,3 +268,18 @@ test('a propagated column whose formula is removed reports it', () => {
 	model.recomputeFormulas(sheet, math);
 	assert.match(sheet.columns[2].formulaError, /no longer has a formula/);
 });
+
+test('Fill with one value follows the readings an uncertainty belongs to', () => {
+	const sheet = namedSheet([
+		['X', ['0.2', '0.4', '0.6', '0.8', '']], ['Y', ['0.9', '', '1.5', '1.8', ''], { name: 'T' }], ['yErr', ['', '', '', '', '']],
+		['Y', ['5', '6', '7', '8', '']], ['yErr', []], ['Y', ['', '', '', '', '']]
+	]);
+	const target = model.getFillTarget(sheet, sheet.columns[2]);
+	assert.equal(target.owner, sheet.columns[1]);
+	assert.deepEqual(target.rows, [0, 2, 3]);
+	assert.deepEqual(model.getFillTarget(sheet, sheet.columns[4]).rows, [0, 1, 2, 3]);
+	// A column that is not an uncertainty follows rows with data anywhere else.
+	const plain = model.getFillTarget(sheet, sheet.columns[5]);
+	assert.equal(plain.owner, null);
+	assert.deepEqual(plain.rows, [0, 1, 2, 3]);
+});
