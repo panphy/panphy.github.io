@@ -1,0 +1,535 @@
+// Plotting for PanPhyPlot (neo-beta): every Y series of a sheet, its fits and residuals.
+// The theme palette and image export are copied from /tools/panphyplot/js/plotting.js.
+(function() {
+
+	const PLOT_EXPORT_BASE_SCALE = 3;
+	const PLOT_EXPORT_MAX_CANVAS_SIDE = 8192;
+	const PLOT_EXPORT_MAX_PIXELS = 16777216;
+
+	function getPlotExportDimensions(gd) {
+		const rect = gd && typeof gd.getBoundingClientRect === 'function' ? gd.getBoundingClientRect() : null;
+		const layoutWidth = gd && gd._fullLayout ? Number(gd._fullLayout.width) : 0;
+		const layoutHeight = gd && gd._fullLayout ? Number(gd._fullLayout.height) : 0;
+		const rectWidth = rect ? Number(rect.width) : 0;
+		const rectHeight = rect ? Number(rect.height) : 0;
+		const clientWidth = gd ? Number(gd.clientWidth) : 0;
+		const clientHeight = gd ? Number(gd.clientHeight) : 0;
+
+		return {
+			width: Math.max(1, Math.ceil(layoutWidth || rectWidth || clientWidth || 1200)),
+			height: Math.max(1, Math.ceil(layoutHeight || rectHeight || clientHeight || 800))
+		};
+	}
+
+	function getAdaptivePlotExportScale(gd) {
+		const dims = getPlotExportDimensions(gd);
+		const safeWidth = Math.max(1, dims.width);
+		const safeHeight = Math.max(1, dims.height);
+		const dpr = Number.isFinite(window.devicePixelRatio) ? window.devicePixelRatio : 1;
+		const requestedScale = Math.max(PLOT_EXPORT_BASE_SCALE, Math.ceil(dpr * 2));
+		const maxScaleBySide = Math.min(
+			PLOT_EXPORT_MAX_CANVAS_SIDE / safeWidth,
+			PLOT_EXPORT_MAX_CANVAS_SIDE / safeHeight
+		);
+		const maxScaleByPixels = Math.sqrt(PLOT_EXPORT_MAX_PIXELS / (safeWidth * safeHeight));
+		return Math.max(1, Math.min(requestedScale, maxScaleBySide, maxScaleByPixels));
+	}
+
+	function getPlotThemeSettings() {
+		const theme = document.documentElement.getAttribute('data-theme') || 'light';
+		if (theme !== 'dark') {
+			// Light theme – Tableau-inspired palette with same-hue fit lines
+			return {
+				errorColor: '#5b5b5b',
+				fitColor: '#35a8ff',
+				// Data point colors: muted but distinct (Tableau 10 first six)
+				datasetColors: ['#4e79a7', '#e15759', '#59a14f', '#f28e2b', '#b07aa1', '#76b7b2'],
+				// Fit line colors: darker shade of corresponding data color
+				fitColors: ['#305f8a', '#b33436', '#3d7c36', '#c46e10', '#885b7b', '#4f9490'],
+				layout: {
+					xaxis: {
+						zerolinecolor: '#1f2937'
+					},
+					yaxis: {
+						zerolinecolor: '#1f2937'
+					}
+				}
+			};
+		}
+
+		// Dark theme – brighter versions of the same hue families
+		return {
+			errorColor: '#9aa0a6',
+			fitColor: '#00e5ff',
+			// Data point colors: bright, clear on dark background
+			datasetColors: ['#7cb5ec', '#f48183', '#8bcf86', '#f9b06a', '#d1a4c5', '#a2dad6'],
+			// Fit line colors: lighter tint of corresponding data color
+			fitColors: ['#b0d4f4', '#f8b0b2', '#bbe3b8', '#fcd4a3', '#e4c5dc', '#c9ece9'],
+			layout: {
+				paper_bgcolor: '#1A1A19',
+				plot_bgcolor: '#1A1A19',
+				font: { color: '#EDEBE8' },
+				xaxis: {
+					gridcolor: '#2A2A28',
+					zerolinecolor: '#8b98a7',
+					linecolor: '#3A3A36',
+					tickcolor: '#CDCAC4',
+					title: { font: { color: '#EDEBE8' } }
+				},
+				yaxis: {
+					gridcolor: '#2A2A28',
+					zerolinecolor: '#8b98a7',
+					linecolor: '#3A3A36',
+					tickcolor: '#CDCAC4',
+					title: { font: { color: '#EDEBE8' } }
+				}
+			}
+		};
+	}
+
+		function sanitizeFilename(filename, fallbackFilename) {
+			const trimmed = typeof filename === 'string' ? filename.trim() : '';
+			const candidate = trimmed || fallbackFilename;
+			const sanitized = candidate.replace(/[<>:"/\\|?*]/g, '_').trim();
+			return sanitized || fallbackFilename;
+		}
+
+		function isAppleMobileWebKitBrowser() {
+			const ua = navigator.userAgent || '';
+			const isiPadOSDesktopUA = navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1;
+			const isIOSDevice = /iPad|iPhone|iPod/.test(ua) || isiPadOSDesktopUA;
+			const isWebKit = /AppleWebKit/.test(ua) && !/CriOS|FxiOS|EdgiOS|OPiOS|OPR|SamsungBrowser/.test(ua);
+			return isIOSDevice && isWebKit;
+		}
+
+		async function saveBlobWithFallback(blob, filename, { title = 'Save file' } = {}) {
+			const safeFilename = sanitizeFilename(filename, 'download');
+			const safeType = blob?.type || 'application/octet-stream';
+			const canUseShareSheet = Boolean(navigator.share)
+				&& typeof navigator.canShare === 'function';
+
+			if (isAppleMobileWebKitBrowser() && canUseShareSheet) {
+				try {
+					const fileForShare = new File([blob], safeFilename, { type: safeType });
+					if (navigator.canShare({ files: [fileForShare] })) {
+						await navigator.share({
+							title,
+							files: [fileForShare]
+						});
+						return true;
+					}
+				} catch (error) {
+					if (error && error.name === 'AbortError') return false;
+					console.warn('Share sheet failed; falling back to direct download.', error);
+				}
+			}
+
+			const url = URL.createObjectURL(blob);
+			const link = document.createElement('a');
+			link.href = url;
+			link.download = safeFilename;
+			link.rel = 'noopener';
+			link.style.display = 'none';
+			document.body.appendChild(link);
+			link.click();
+			document.body.removeChild(link);
+			setTimeout(() => URL.revokeObjectURL(url), 60000);
+			return true;
+		}
+
+		function createDownloadImageConfig(defaultFilename) {
+			function isTraceVisible(trace) {
+				return trace && trace.visible !== false && trace.visible !== 'legendonly';
+			}
+
+			function isMarkerTrace(trace) {
+				return typeof trace?.mode === 'string' && trace.mode.includes('markers');
+			}
+
+			function computeFiniteBounds(values) {
+				let min = Infinity;
+				let max = -Infinity;
+				for (let index = 0; index < values.length; index++) {
+					const rawValue = values[index];
+					if (rawValue === null || rawValue === undefined || rawValue === '') continue;
+					const numeric = typeof rawValue === 'number' ? rawValue : Number(rawValue);
+					if (!Number.isFinite(numeric)) continue;
+					if (numeric < min) min = numeric;
+					if (numeric > max) max = numeric;
+				}
+				if (!Number.isFinite(min) || !Number.isFinite(max)) return null;
+				return { min, max };
+			}
+
+			function collectAxisValues(traces, axis, markerOnly) {
+				const values = [];
+				traces.forEach((trace) => {
+					if (!isTraceVisible(trace)) return;
+					if (markerOnly && !isMarkerTrace(trace)) return;
+					const axisValues = trace && Array.isArray(trace[axis]) ? trace[axis] : [];
+					axisValues.forEach((value) => values.push(value));
+				});
+				return values;
+			}
+
+			function expandRange(min, max) {
+				if (min === max) {
+					const delta = min === 0 ? 1 : Math.abs(min) * 0.05;
+					return [min - delta, max + delta];
+				}
+				const padding = (max - min) * 0.05;
+				return [min - padding, max + padding];
+			}
+
+			function applyTrueAutoScale(gd) {
+				const traces = Array.isArray(gd?.data) ? gd.data : [];
+				let xBounds = computeFiniteBounds(collectAxisValues(traces, 'x', true));
+				let yBounds = computeFiniteBounds(collectAxisValues(traces, 'y', true));
+
+				// Fall back to all visible traces when marker traces are unavailable.
+				if (!xBounds || !yBounds) {
+					xBounds = computeFiniteBounds(collectAxisValues(traces, 'x', false));
+					yBounds = computeFiniteBounds(collectAxisValues(traces, 'y', false));
+				}
+				if (!xBounds || !yBounds) return;
+
+				Plotly.relayout(gd, {
+					'xaxis.autorange': false,
+					'yaxis.autorange': false,
+					'xaxis.range': expandRange(xBounds.min, xBounds.max),
+					'yaxis.range': expandRange(yBounds.min, yBounds.max)
+				});
+			}
+
+			const autoScaleButton = {
+				name: 'Auto-scale axes to data',
+				icon: Plotly.Icons.autoscale,
+				click: function(gd) {
+					applyTrueAutoScale(gd);
+				}
+			};
+
+			const downloadImageButton = {
+				name: 'Download plot as png',
+				icon: Plotly.Icons.camera,
+				click: async function(gd) {
+					const userInput = window.prompt('Enter a filename for this plot image:', defaultFilename);
+					if (userInput === null) return;
+					const filenameBase = sanitizeFilename(userInput, defaultFilename).replace(/\.png$/i, '');
+					const exportScale = getAdaptivePlotExportScale(gd);
+					try {
+						const dataUrl = await Plotly.toImage(gd, {
+							format: 'png',
+							scale: exportScale
+						});
+						const imageBlob = await fetch(dataUrl).then(res => res.blob());
+						await saveBlobWithFallback(imageBlob, `${filenameBase}.png`, { title: 'Save plot image' });
+					} catch (error) {
+						console.warn('Custom image export failed; falling back to Plotly.downloadImage.', error);
+						Plotly.downloadImage(gd, {
+							format: 'png',
+							filename: filenameBase,
+							scale: exportScale
+						});
+					}
+				}
+			};
+
+			return {
+				responsive: true,
+				displayModeBar: true,
+				displaylogo: false,
+				modeBarButtons: [[
+					'pan2d',
+					'zoom2d',
+					'zoomIn2d',
+					'zoomOut2d',
+					autoScaleButton,
+					'resetScale2d',
+					downloadImageButton
+				]]
+			};
+		}
+
+	function processLabel(label) {
+		if (!label) return '';
+		return latexMode ? `$${label}$` : label;
+	}
+
+	function formatLabelForLatex(label) {
+		let out = '';
+		let depth = 0;
+		for (const ch of String(label || '')) {
+			if (ch === '{') depth++;
+			else if (ch === '}' && depth > 0) depth--;
+			out += ch === ' ' && depth === 0 ? '\\space ' : ch;
+		}
+		return out;
+	}
+
+	function safeTypeset(target) {
+		try {
+			if (typeof MathJax === 'undefined' || !MathJax.Hub || !MathJax.Hub.Queue) return;
+			const element = typeof target === 'string' ? document.querySelector(target) : target;
+			if (element) MathJax.Hub.Queue(['Typeset', MathJax.Hub, element]);
+		} catch (error) {
+			console.warn('MathJax typeset skipped:', error);
+		}
+	}
+
+	// One axis label in the current mode, before the $...$ wrapping.
+	function columnAxisText(sheet, column) {
+		const name = NeoModel.getColumnLabel(sheet, column);
+		return latexMode
+			? NeoModel.formatAxisLabel(formatLabelForLatex(name), column.unit, true)
+			: NeoModel.formatAxisLabel(name, column.unit, false);
+	}
+
+	function joinLabels(labels) {
+		return labels.join(latexMode ? ',\\ ' : ', ');
+	}
+
+	// Several Y columns that share a unit read "T1, T2 / s"; mixed units list each label in full.
+	function describeAxis(sheet, columns) {
+		const unique = columns.filter((column, index) => columns.indexOf(column) === index);
+		if (!unique.length) return '';
+		const units = new Set(unique.map(column => String(column.unit || '').trim()));
+		if (unique.length > 1 && units.size === 1) {
+			const names = unique.map(column => {
+				const name = NeoModel.getColumnLabel(sheet, column);
+				return latexMode ? formatLabelForLatex(name) : name;
+			});
+			return NeoModel.formatAxisLabel(joinLabels(names), unique[0].unit, latexMode);
+		}
+		return joinLabels(unique.map(column => columnAxisText(sheet, column)));
+	}
+
+	function getVisibleSeries(sheet) {
+		return NeoModel.getSeries(sheet).filter(series => series.xCol && !sheet.hiddenSeries.includes(series.id));
+	}
+
+	function getAxisTitles(sheet) {
+		const visible = getVisibleSeries(sheet);
+		const plotted = visible.length ? visible : NeoModel.getSeries(sheet).filter(series => series.xCol);
+		return {
+			x: describeAxis(sheet, plotted.map(series => series.xCol)),
+			y: describeAxis(sheet, plotted.map(series => series.yCol))
+		};
+	}
+
+	function getAutomaticTitle(sheet) {
+		const plotted = getVisibleSeries(sheet);
+		if (!plotted.length) return '';
+		const name = (column) => {
+			const label = NeoModel.getColumnLabel(sheet, column);
+			return latexMode ? formatLabelForLatex(label) : label;
+		};
+		const yNames = joinLabels(plotted.map(series => name(series.yCol)));
+		const xNames = joinLabels(plotted.map(series => series.xCol).filter((column, index, all) => all.indexOf(column) === index).map(name));
+		return latexMode ? `${yNames}\\space \\text{ vs }\\space ${xNames}` : `${yNames} vs ${xNames}`;
+	}
+
+	function getSheetTitle(sheet) {
+		return sheet.title.automatic ? getAutomaticTitle(sheet) : sheet.title.text;
+	}
+
+	function applyThemeLayout(layout, themeSettings) {
+		['xaxis', 'yaxis'].forEach((axis) => {
+			const theme = themeSettings.layout[axis];
+			if (!theme) return;
+			const title = { ...layout[axis].title, ...(theme.title || {}) };
+			title.font = { ...(layout[axis].title.font || {}), ...((theme.title && theme.title.font) || {}) };
+			layout[axis] = { ...layout[axis], ...theme, title };
+		});
+		['font', 'paper_bgcolor', 'plot_bgcolor'].forEach((key) => {
+			if (themeSettings.layout[key]) layout[key] = themeSettings.layout[key];
+		});
+		return layout;
+	}
+
+	function buildLayout(titleText, xTitle, yTitle, options = {}) {
+		return {
+			title: { text: titleText ? processLabel(titleText) : '', font: { size: 16 } },
+			showlegend: options.showlegend !== false,
+			legend: { orientation: 'h', y: -0.2, x: 0, xanchor: 'left' },
+			xaxis: {
+				title: { text: processLabel(xTitle) },
+				showline: false, linewidth: 1, autorange: true, rangemode: 'tozero', zeroline: true, zerolinewidth: 2
+			},
+			yaxis: {
+				title: { text: processLabel(yTitle), font: { size: 14 }, standoff: 25 },
+				automargin: true, showline: false, linewidth: 1, autorange: true, rangemode: 'tozero', zeroline: true, zerolinewidth: 2
+			},
+			margin: { t: titleText ? 90 : 40, b: options.showlegend === false ? 70 : 110, l: 85, r: 30 }
+		};
+	}
+
+	function seriesTraces(sheet, series, colorIndex, themeSettings, options = {}) {
+		const color = themeSettings.datasetColors[colorIndex % themeSettings.datasetColors.length];
+		const fitColor = themeSettings.fitColors[colorIndex % themeSettings.fitColors.length];
+		const points = NeoModel.getSeriesPoints(sheet, series);
+		const hidden = sheet.hiddenSeries.includes(series.id);
+		const key = makeFitKey(sheet, series.id);
+		const prefix = options.prefix || '';
+		const yLabel = NeoModel.getColumnLabel(sheet, series.yCol);
+		const name = processLabel(latexMode ? `${prefix ? `\\text{${prefix}} ` : ''}${formatLabelForLatex(yLabel)}` : `${prefix}${yLabel}`);
+		const traces = [{
+			x: points.map(point => point.x),
+			y: points.map(point => point.y),
+			mode: 'markers',
+			name,
+			meta: key,
+			legendgroup: key,
+			visible: hidden ? 'legendonly' : true,
+			marker: { color, symbol: 'circle', size: 7, line: { width: 0 } },
+			error_x: { type: 'data', array: points.map(point => point.xError), visible: !!series.xErrCol, color: themeSettings.errorColor, thickness: 0.8, width: 2 },
+			error_y: { type: 'data', array: points.map(point => point.yError), visible: !!series.yErrCol, color: themeSettings.errorColor, thickness: 0.8, width: 2 }
+		}];
+		const curve = fittedCurves[key];
+		if (curve && Array.isArray(curve.x)) {
+			const stale = !!datasetFitResults[key]?.stale;
+			traces.push({
+				x: curve.x,
+				y: curve.y,
+				mode: 'lines',
+				name: stale ? `Outdated fit: ${prefix}${yLabel}` : `Fit: ${prefix}${yLabel}`,
+				meta: key,
+				legendgroup: key,
+				showlegend: false,
+				visible: hidden ? 'legendonly' : true,
+				line: { color: fitColor, width: 2, dash: stale ? 'dash' : 'solid' }
+			});
+		}
+		return traces;
+	}
+
+	const lastPlotKeys = {};
+
+	function reactIfChanged(targetId, data, layout, config) {
+		const dataKey = JSON.stringify(data);
+		const layoutKey = JSON.stringify(layout);
+		const last = lastPlotKeys[targetId];
+		if (last && last.dataKey === dataKey && last.layoutKey === layoutKey) return false;
+		Plotly.react(targetId, data, layout, config);
+		lastPlotKeys[targetId] = { dataKey, layoutKey };
+		return true;
+	}
+
+	function forceReplot() {
+		Object.keys(lastPlotKeys).forEach(key => delete lastPlotKeys[key]);
+	}
+
+	// Tapping a legend entry hides or shows that series (and its fit) and remembers it per sheet.
+	function bindLegendToggle(targetId) {
+		const element = document.getElementById(targetId);
+		if (!element || element.dataset.legendBound === 'true' || typeof element.on !== 'function') return;
+		element.dataset.legendBound = 'true';
+		element.on('plotly_legendclick', (event) => {
+			const key = event?.data?.[event.curveNumber]?.meta;
+			const target = resolveFitKey(key);
+			if (!target) return false;
+			const hidden = target.sheet.hiddenSeries;
+			const index = hidden.indexOf(target.series.id);
+			if (index >= 0) hidden.splice(index, 1);
+			else hidden.push(target.series.id);
+			if (typeof onSeriesVisibilityChange === 'function') onSeriesVisibilityChange(target.sheet);
+			return false;
+		});
+		element.on('plotly_legenddoubleclick', () => false);
+	}
+
+	function plotGraph() {
+		if (typeof Plotly === 'undefined') return;
+		const sheet = getActiveSheet();
+		const themeSettings = getPlotThemeSettings();
+		const series = NeoModel.getSeries(sheet).filter(entry => entry.xCol);
+		const data = series.flatMap((entry, index) => seriesTraces(sheet, entry, index, themeSettings));
+		const titles = getAxisTitles(sheet);
+		const layout = applyThemeLayout(buildLayout(getSheetTitle(sheet), titles.x || 'x', titles.y || 'y', { showlegend: series.length > 0 }), themeSettings);
+		reactIfChanged('plot', data, layout, createDownloadImageConfig(sheet.name || 'data_plot'));
+		bindLegendToggle('plot');
+		plotResiduals();
+	}
+
+	// Residuals of the fit on the chosen series, drawn under the main graph.
+	function plotResiduals() {
+		const wrap = document.getElementById('residual-wrap');
+		const result = datasetFitResults[activeFitKey];
+		const target = resolveFitKey(activeFitKey);
+		const residuals = Array.isArray(result?.residuals) ? result.residuals : [];
+		if (!wrap || !target || !residuals.length) {
+			if (wrap) wrap.hidden = true;
+			return;
+		}
+		wrap.hidden = false;
+		const themeSettings = getPlotThemeSettings();
+		const index = NeoModel.getSeries(target.sheet).filter(entry => entry.xCol).findIndex(entry => entry.id === target.series.id);
+		const color = themeSettings.datasetColors[Math.max(index, 0) % themeSettings.datasetColors.length];
+		const yTitle = latexMode ? `\\text{residual } ${columnAxisText(target.sheet, target.series.yCol)}` : `residual ${columnAxisText(target.sheet, target.series.yCol)}`;
+		const layout = applyThemeLayout(buildLayout('', columnAxisText(target.sheet, target.series.xCol), yTitle, { showlegend: false }), themeSettings);
+		layout.margin = { t: 16, b: 60, l: 85, r: 30 };
+		layout.yaxis.rangemode = 'normal';
+		layout.yaxis.title.font = { ...(layout.yaxis.title.font || {}), size: 12 };
+		const data = [{
+			x: residuals.map(point => point.x),
+			y: residuals.map(point => point.y),
+			mode: 'markers',
+			name: 'Residuals',
+			marker: { color, size: 6 },
+			hovertemplate: '%{x}, %{y}<extra></extra>'
+		}];
+		reactIfChanged('residual-plot', data, layout, { responsive: true, displaylogo: false, displayModeBar: false });
+	}
+
+	function plotAllSheets() {
+		const themeSettings = getPlotThemeSettings();
+		const multiple = neoState.sheets.length > 1;
+		const data = [];
+		let colorIndex = 0;
+		const xColumns = [];
+		const yColumns = [];
+		neoState.sheets.forEach((sheet, sheetIndex) => {
+			// Empty series (such as a new sheet's blank columns) would only clutter the legend and labels.
+			NeoModel.getSeries(sheet).filter(entry => entry.xCol && NeoModel.getSeriesPoints(sheet, entry).length).forEach((entry) => {
+				const prefix = multiple ? `${getSheetDisplayName(sheetIndex)}: ` : '';
+				data.push(...seriesTraces(sheet, entry, colorIndex++, themeSettings, { prefix }));
+				if (!sheet.hiddenSeries.includes(entry.id)) {
+					xColumns.push({ sheet, column: entry.xCol });
+					yColumns.push({ sheet, column: entry.yCol });
+				}
+			});
+		});
+		const describe = (entries) => {
+			const labels = entries.map(({ sheet, column }) => columnAxisText(sheet, column));
+			return joinLabels(labels.filter((label, index) => labels.indexOf(label) === index));
+		};
+		const inputs = getCombinedInputs();
+		if (inputs.title.dataset.edited !== 'true') inputs.title.value = '';
+		if (inputs.x.dataset.edited !== 'true') inputs.x.value = describe(xColumns);
+		if (inputs.y.dataset.edited !== 'true') inputs.y.value = describe(yColumns);
+		const layout = applyThemeLayout(buildLayout(inputs.title.value.trim(), inputs.x.value.trim(), inputs.y.value.trim()), themeSettings);
+		reactIfChanged('popup-plot', data, layout, createDownloadImageConfig('combined_plot'));
+		bindLegendToggle('popup-plot');
+	}
+
+	function getCombinedInputs() {
+		return {
+			title: document.getElementById('combined-title'),
+			x: document.getElementById('combined-x-label'),
+			y: document.getElementById('combined-y-label')
+		};
+	}
+
+	Object.assign(window, {
+		processLabel,
+		formatLabelForLatex,
+		safeTypeset,
+		getAutomaticTitle,
+		getSheetTitle,
+		columnAxisText,
+		plotGraph,
+		plotResiduals,
+		plotAllSheets,
+		forceReplot
+	});
+})();
