@@ -294,3 +294,23 @@ test('a dragged column lands where it is dropped, and formula letters follow it'
 	assert.equal(sheet.columns[2].cells[0], '5');
 	assert.equal(model.moveColumnTo(sheet, sheet.columns[0].id, 0), false);
 });
+
+test('Clear keeps the columns; Reset returns to a blank x, y sheet', () => {
+	const state = model.createState();
+	const ids = model.createIdSource(state);
+	const sheet = namedSheet([['X', ['1', '2'], { name: 'L', unit: 'm' }], ['Y', ['3', '4'], { name: 'T' }], ['Y', [], { formula: 'B^2', name: 'T2' }]]);
+	sheet.name = 'Pendulum';
+	sheet.hiddenSeries = [sheet.columns[1].id];
+	model.setRowCount(sheet, 14);
+	model.clearSheetData(sheet);
+	assert.equal(sheet.rowCount, model.DEFAULT_ROWS);
+	assert.deepEqual(sheet.columns.map(column => [column.name, column.unit, column.formula]), [['L', 'm', ''], ['T', '', ''], ['T2', '', 'B^2']]);
+	assert.ok(sheet.columns.every(column => column.cells.every(model.isBlank)));
+	const id = sheet.id;
+	model.resetSheet(sheet, ids);
+	assert.equal(sheet.id, id);
+	assert.equal(sheet.name, 'Pendulum');
+	assert.deepEqual(sheet.columns.map(column => [column.name, column.role]), [['x', 'X'], ['y', 'Y']]);
+	assert.deepEqual(sheet.hiddenSeries, []);
+	assert.equal(sheet.title.automatic, true);
+});

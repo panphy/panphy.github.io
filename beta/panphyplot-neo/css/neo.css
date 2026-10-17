@@ -2107,6 +2107,55 @@ input[type="number"]:focus {
 	gap: 4px;
 }
 
+/* Large choice buttons, as in the Clear dialog. */
+.neo-choice {
+	display: flex;
+	flex-direction: column;
+	align-items: flex-start;
+	gap: 3px;
+	width: 100%;
+	padding: 12px 14px;
+	border: 1px solid var(--line-strong);
+	border-radius: 12px;
+	background: var(--surface);
+	color: var(--ink);
+	text-align: left;
+	cursor: pointer;
+	transition: border-color 0.15s ease, background-color 0.15s ease;
+}
+
+.neo-choice:hover:not(:disabled),
+.neo-choice:focus-visible {
+	border-color: var(--accent);
+	background: var(--accent-soft);
+}
+
+.neo-choice-danger:hover:not(:disabled),
+.neo-choice-danger:focus-visible {
+	border-color: var(--danger);
+	background: var(--danger-soft);
+}
+
+.neo-choice:disabled {
+	opacity: 0.5;
+	cursor: default;
+}
+
+.neo-choice-title {
+	font-weight: 700;
+	font-size: 0.95rem;
+}
+
+.neo-choice-danger .neo-choice-title {
+	color: var(--danger);
+}
+
+.neo-choice-note {
+	font-size: 0.84rem;
+	line-height: 1.45;
+	color: var(--ink-2);
+}
+
 .neo-fill-row {
 	display: flex;
 	align-items: center;
