@@ -51,3 +51,17 @@ test('measurements print the uncertainty to two significant figures', () => {
 	assert.equal(stats.formatChiSquared(4.5, 3), '1.5');
 	assert.equal(stats.formatChiSquared(4.5, 0), null);
 });
+
+test('equation numbers round to the chosen decimal places, leaving powers alone', () => {
+	const round = stats.roundEquationDecimals;
+	assert.equal(round('y = 3.9733886x + 0.02296165', 2), 'y = 3.97x + 0.02');
+	assert.equal(round('y = 3.9733886x + 0.02296165', 4), 'y = 3.9734x + 0.0230');
+	assert.equal(round('y = 3.9733886x - 0.0022', 2), 'y = 3.97x - 2.20\\times 10^{-3}');
+	assert.equal(round('y = 2\\cdot\\sqrt{ x}', 2), 'y = 2.00\\cdot\\sqrt{ x}');
+	assert.equal(round('y = 1.5u^{2} + 0.25u', 1), 'y = 1.5u^{2} + 0.3u');
+	assert.equal(round('y = 17.233099(x + 0.59843366)^{0.090728152} - 15.968354', 2), 'y = 17.23(x + 0.60)^{0.09} - 15.97');
+	assert.equal(round('y = 6.02214\\times 10^{23}x', 3), 'y = 6.022\\times 10^{23}x');
+	assert.equal(round('y = 4.5\\cdot10^{-7}x', 2), 'y = 4.50\\times 10^{-7}x');
+	assert.equal(round('y = 1.2e-5 e^{0.5x}', 1), 'y = 1.2\\times 10^{-5} e^{0.5x}');
+	assert.equal(round('y = 3.9733886x', 0), 'y = 4x');
+});

@@ -274,6 +274,23 @@
 				<section class="neo-card result" aria-labelledby="result-card-title">
 					<h2 class="neo-card-title" id="result-card-title">Result <span id="fit-series-label" class="neo-fit-series-label"></span></h2>
 					<p id="fit-equation" style="display: none;"></p>
+					<div class="neo-decimals" id="equation-decimals" role="group" aria-label="Decimal places of the equation" hidden>
+						<button type="button" class="neo-decimals-button" id="equation-decimals-more" title="Increase decimal places" aria-label="Increase decimal places">
+							<svg viewBox="0 0 40 28" aria-hidden="true">
+								<path class="neo-decimals-arrow" d="M3 7.5h9M3 7.5l3-3M3 7.5l3 3"/>
+								<text x="15" y="11">.0</text>
+								<text x="15" y="24">.00</text>
+							</svg>
+						</button>
+						<span class="neo-decimals-count" id="equation-decimals-count" aria-live="polite">2 dp</span>
+						<button type="button" class="neo-decimals-button" id="equation-decimals-fewer" title="Decrease decimal places" aria-label="Decrease decimal places">
+							<svg viewBox="0 0 40 28" aria-hidden="true">
+								<text x="15" y="11">.00</text>
+								<path class="neo-decimals-arrow" d="M3 20.5h9M12 20.5l-3-3M12 20.5l-3 3"/>
+								<text x="15" y="24">.0</text>
+							</svg>
+						</button>
+					</div>
 					<p id="r-squared-container" style="display: none;"></p>
 					<div id="fit-parameters" class="neo-fit-parameters" hidden></div>
 					<p id="fit-status" role="status">No fit calculated yet.</p>

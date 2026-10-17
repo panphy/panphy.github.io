@@ -104,7 +104,34 @@
 		return trimZeros((chi2 / dof).toPrecision(3));
 	}
 
-	const api = { linearFit, chiSquared, invert, parameterUncertainties, formatMeasurement, formatChiSquared };
+	// One number to a fixed number of decimal places. A value that would show as zero, or a very
+	// large one, keeps the same decimal places in scientific form, so 0.0023 at 2 dp reads 2.30 × 10⁻³.
+	function formatFixedDecimals(value, decimals) {
+		if (value === 0) return (0).toFixed(decimals);
+		const fixed = value.toFixed(decimals);
+		if (Math.abs(value) >= 1e6 || Number(fixed) === 0) {
+			const [mantissa, exponent] = value.toExponential(decimals).split('e');
+			return `${mantissa}\\times 10^{${Number(exponent)}}`;
+		}
+		return fixed;
+	}
+
+	// Rewrites every fitted number in an equation's TeX to the given decimal places. Whole-number
+	// powers and subscripts (x^{2}, 10^{-5}, a_{1}) are structure, not fitted values, and stay.
+	const EQUATION_NUMBER = /(\^\{?|_\{?)?(\d+(?:\.\d+)?)(?:\s*(?:\\times|\\cdot)\s*10\^\{(-?\d+)\}|e([+-]?\d+))?/g;
+
+	function roundEquationDecimals(latex, decimals) {
+		return String(latex || '').replace(EQUATION_NUMBER, (match, prefix, digits, texExponent, eExponent) => {
+			const exponent = texExponent ?? eExponent;
+			if (prefix && exponent === undefined && !digits.includes('.')) return match;
+			const value = Number(digits) * 10 ** (exponent === undefined ? 0 : Number(exponent));
+			if (!Number.isFinite(value)) return match;
+			const formatted = formatFixedDecimals(value, decimals);
+			return prefix ? `${prefix}${formatted}` : formatted;
+		});
+	}
+
+	const api = { formatFixedDecimals, roundEquationDecimals, linearFit, chiSquared, invert, parameterUncertainties, formatMeasurement, formatChiSquared };
 	if (typeof module === 'object' && module.exports) module.exports = api;
 	else root.PanPhyNeoStats = api;
 })(typeof globalThis === 'object' ? globalThis : this);

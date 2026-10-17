@@ -821,6 +821,7 @@ function clearFittingResultDisplay() {
 		element.style.display = 'none';
 		element.replaceChildren();
 	});
+	renderEquationDecimals(false);
 	renderFitParameters();
 	renderFitDiagnostics();
 }
@@ -881,14 +882,17 @@ function renderFittingResult(equation, rSquaredDisplay) {
 		clearFittingResultDisplay();
 		return;
 	}
+	// The fit keeps every digit; the display, and what is copied, uses the chosen decimal places.
+	const shown = PanPhyNeoStats.roundEquationDecimals(equation, neoState.equationDecimals);
 	const copyTarget = document.createElement('button');
 	copyTarget.type = 'button';
 	copyTarget.className = 'fit-equation-copy-target neo-equation';
 	copyTarget.title = 'Copy the equation as an image or LaTeX';
-	copyTarget.dataset.fitLatex = equation;
-	copyTarget.textContent = `\\(${equation}\\)`;
+	copyTarget.dataset.fitLatex = shown;
+	copyTarget.textContent = `\\(${shown}\\)`;
 	equationElement.replaceChildren(copyTarget);
 	equationElement.style.display = 'block';
+	renderEquationDecimals(true);
 	rSquaredElement.textContent = `\\( R^2 = ${rSquaredDisplay} \\)`;
 	rSquaredElement.style.display = 'block';
 	renderFitParameters();
@@ -901,6 +905,26 @@ function renderFittingResult(equation, rSquaredDisplay) {
 	renderFitDiagnostics();
 	safeTypeset(equationElement);
 	safeTypeset(rSquaredElement);
+}
+
+// The Excel-style pair under the equation: more or fewer decimal places, 0 to 8.
+function renderEquationDecimals(visible) {
+	const group = document.getElementById('equation-decimals');
+	if (!group) return;
+	group.hidden = !visible;
+	const places = neoState.equationDecimals;
+	document.getElementById('equation-decimals-count').textContent = `${places} dp`;
+	document.getElementById('equation-decimals-more').disabled = places >= NeoModel.EQUATION_DECIMALS_MAX;
+	document.getElementById('equation-decimals-fewer').disabled = places <= 0;
+}
+
+function changeEquationDecimals(step) {
+	const next = Math.min(Math.max(neoState.equationDecimals + step, 0), NeoModel.EQUATION_DECIMALS_MAX);
+	if (next === neoState.equationDecimals) return;
+	neoState.equationDecimals = next;
+	const result = datasetFitResults[activeFitKey];
+	if (result) renderFittingResult(result.equation, result.rSquared);
+	scheduleSaveState();
 }
 
 function renderFitDiagnostics() {
@@ -995,6 +1019,8 @@ function initializeInterface() {
 
 	document.getElementById('add-row-button').addEventListener('click', addRow);
 	document.getElementById('sample-data-button').addEventListener('click', loadSampleData);
+	document.getElementById('equation-decimals-more').addEventListener('click', () => changeEquationDecimals(1));
+	document.getElementById('equation-decimals-fewer').addEventListener('click', () => changeEquationDecimals(-1));
 	document.getElementById('add-column-button').addEventListener('click', addColumn);
 	document.getElementById('clear-sheet-button').addEventListener('click', clearSheet);
 	document.getElementById('fit-series-select').addEventListener('change', handleFitSeriesChange);
