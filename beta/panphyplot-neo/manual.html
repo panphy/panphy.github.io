@@ -213,7 +213,7 @@
 		</nav>
 
 		<h2 id="sheets">1. Sheets and columns</h2>
-		<p>Each tab along the top is a <strong>sheet</strong>: use one sheet for each experiment. Tap <kbd>+</kbd> to add a sheet, tap the open sheet's name to rename it, and tap <kbd>×</kbd> to remove it.</p>
+		<p>Each tab in the top bar is a <strong>sheet</strong>: use one sheet for each experiment. Tap <kbd>+</kbd> to add a sheet, tap the open sheet's name to rename it, and tap <kbd>×</kbd> to remove it. An empty sheet offers <strong>Try sample data</strong>: a pendulum experiment to explore.</p>
 		<p>A sheet is a table with as many columns as you need. Every column has a letter (A, B, C…), a <strong>name</strong> and a <strong>unit</strong>. Axis titles are built from them in the form <em>name / unit</em>, for example <code>L / m</code>.</p>
 		<p>The <kbd>⋯</kbd> button on a column heading moves, inserts, fills, clears or deletes the column, or gives it a formula. The row number on the left inserts or deletes a row.</p>
 
@@ -282,7 +282,7 @@
 		<h2 id="graph">7. The graph</h2>
 		<ul>
 			<li>Every Y series of the sheet is plotted, with error bars from its ±Δ columns.</li>
-			<li>Tap a legend entry to hide or show that series, and its fit.</li>
+			<li>The <strong>Series</strong> card on the right is the graph's colour key: tap a series there, or its legend entry, to hide or show it with its fit. Each Y column's heading carries the same colour.</li>
 			<li>The title follows the columns until you type your own; clear it to return to the automatic title.</li>
 			<li>The toolbar above the graph zooms, pans, rescales and downloads a PNG image.</li>
 			<li><strong>LaTeX mode</strong> typesets names, units and titles: a unit of <code>m s^{-1}</code> reads as m s⁻¹.</li>
@@ -290,7 +290,7 @@
 		</ul>
 
 		<h2 id="fitting">8. Fitting</h2>
-		<p>Open <strong>Add Best Fit Line</strong> and choose the <strong>Fit series</strong>: the Y column to fit. Each series keeps its own fit.</p>
+		<p>In the <strong>Fit</strong> card, choose the <strong>Series to fit</strong>: the Y column to fit. Each series keeps its own fit.</p>
 		<table>
 			<thead>
 				<tr><th>Tab</th><th>Models</th></tr>
@@ -302,7 +302,7 @@
 			</tbody>
 		</table>
 		<h3>Weighted fits</h3>
-		<p>Tick <strong>Weight the fit by ±ΔY</strong> to let the more certain points count for more: each point has weight \(1/\Delta y^2\). Weighting applies to Linear and Custom fits, and needs a ±ΔY above zero for every point. For a weighted exponential or power law, write it as a Custom fit.</p>
+		<p>Turn on <strong>Weight by ±ΔY</strong> to let the more certain points count for more: each point has weight \(1/\Delta y^2\). Weighting applies to Linear and Custom fits, and needs a ±ΔY above zero for every point. For a weighted exponential or power law, write it as a Custom fit.</p>
 		<p>A fit becomes <em>Outdated</em>, drawn dashed, as soon as its data or ±ΔY change. Click <strong>Fit Curve</strong> again to update it.</p>
 
 		<h2 id="results">9. Reading a fit</h2>

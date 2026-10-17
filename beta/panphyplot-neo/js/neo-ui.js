@@ -60,7 +60,110 @@ function afterDataChange(options = {}) {
 	if (options.deferPlot) debouncedPlot();
 	else plotGraph();
 	syncTitleInput();
+	refreshWorkspaceChrome();
 	scheduleSaveState();
+}
+
+/* ---------- Series list and status bar ---------- */
+
+function refreshWorkspaceChrome() {
+	renderSeriesList();
+	renderStatus();
+}
+
+// The inspector's Series card: the graph's colour key, with a tap to hide or show each series.
+function renderSeriesList() {
+	const list = document.getElementById('series-list');
+	const sheet = getActiveSheet();
+	if (!list || !sheet) return;
+	const series = NeoModel.getSeries(sheet);
+	if (!series.length) {
+		const empty = document.createElement('li');
+		empty.className = 'neo-series-empty';
+		empty.textContent = 'Set a column\'s role to Y to plot it.';
+		list.replaceChildren(empty);
+		return;
+	}
+	list.replaceChildren(...series.map((entry) => {
+		const item = document.createElement('li');
+		const button = document.createElement('button');
+		button.type = 'button';
+		button.className = 'neo-series-item';
+		const visible = !sheet.hiddenSeries.includes(entry.id);
+		button.setAttribute('aria-pressed', String(visible));
+		button.title = visible ? 'Hide this series on the graph' : 'Show this series on the graph';
+		const color = getSeriesColor(sheet, entry.id);
+		const swatch = document.createElement('span');
+		swatch.className = 'neo-series-swatch';
+		swatch.style.setProperty('--series-color', color || 'var(--line-strong)');
+		const name = document.createElement('span');
+		name.className = 'neo-series-name';
+		name.textContent = describeSeries(sheet, entry);
+		const meta = document.createElement('span');
+		meta.className = 'neo-series-meta';
+		const count = NeoModel.getSeriesPoints(sheet, entry).length;
+		meta.textContent = `${count} ${count === 1 ? 'pt' : 'pts'}`;
+		button.append(swatch, name);
+		const result = datasetFitResults[makeFitKey(sheet, entry.id)];
+		if (result) {
+			const badge = document.createElement('span');
+			badge.className = 'neo-series-fit';
+			badge.textContent = result.stale ? 'fit outdated' : 'fit';
+			button.appendChild(badge);
+		}
+		button.appendChild(meta);
+		button.disabled = !entry.xCol;
+		button.addEventListener('click', () => {
+			const hidden = sheet.hiddenSeries;
+			const index = hidden.indexOf(entry.id);
+			if (index >= 0) hidden.splice(index, 1);
+			else hidden.push(entry.id);
+			onSeriesVisibilityChange(sheet);
+		});
+		item.appendChild(button);
+		return item;
+	}));
+}
+
+function renderStatus() {
+	const status = document.getElementById('neo-status');
+	const sheet = getActiveSheet();
+	if (!status || !sheet) return;
+	const series = NeoModel.getSeries(sheet).filter(entry => entry.xCol);
+	let rows = 0;
+	for (let row = 0; row < sheet.rowCount; row++) {
+		if (sheet.columns.some(column => !NeoModel.isBlank(column.cells[row]))) rows++;
+	}
+	const saved = document.createElement('span');
+	saved.className = persistenceDisabled ? 'is-practice' : 'is-saved';
+	saved.textContent = persistenceDisabled ? '● Practice data, not saved' : '● Saved in this browser';
+	status.replaceChildren(
+		`${getSheetDisplayName(neoState.activeSheet)} · ${series.length} ${series.length === 1 ? 'series' : 'series'} · ${rows} ${rows === 1 ? 'row' : 'rows'} · `,
+		saved
+	);
+}
+
+// Fills an empty sheet (or a new one) with the pendulum readings the tour uses.
+function loadSampleData() {
+	let sheet = getActiveSheet();
+	if (!NeoModel.isSheetEmpty(sheet)) {
+		sheet = NeoModel.createSheet(NeoModel.createIdSource(neoState), 'Pendulum');
+		neoState.sheets.push(sheet);
+	} else if (!sheet.name) {
+		sheet.name = 'Pendulum';
+	}
+	const ids = NeoModel.createIdSource(neoState);
+	sheet.columns = [
+		NeoModel.createColumn(ids.next('c'), { name: 'L', unit: 'm', role: 'X', cells: TOUR_LENGTHS }, NeoModel.DEFAULT_ROWS),
+		...TOUR_REPEATS.map((cells, index) => NeoModel.createColumn(ids.next('c'), { name: `T${index + 1}`, unit: 's', role: 'Y', cells }, NeoModel.DEFAULT_ROWS))
+	];
+	NeoModel.setRowCount(sheet, NeoModel.DEFAULT_ROWS);
+	sheet.hiddenSeries = [];
+	sheet.fitSeries = null;
+	pruneOrphanFits();
+	switchSheet(neoState.sheets.indexOf(sheet));
+	afterDataChange({ structure: true });
+	showToast('Sample pendulum data loaded: three repeat readings of the period T.');
 }
 
 /* ---------- Formulas ---------- */
@@ -71,12 +174,20 @@ function recalculateFormulas(sheet = getActiveSheet()) {
 	if (!NeoModel.recomputeFormulas(sheet, math) || sheet !== getActiveSheet()) return;
 	sheet.columns.filter(NeoModel.isComputedColumn).forEach((column) => {
 		document.querySelectorAll(`#neo-table-body .neo-cell[data-column-id="${column.id}"]`).forEach((input) => {
-			const value = column.cells[Number(input.dataset.row)] || '';
+			const value = displayCellValue(column, column.cells[Number(input.dataset.row)]);
 			if (input.value !== value) input.value = value;
 		});
 		const head = document.querySelector(`.neo-col-head[data-column-id="${column.id}"]`);
 		if (head) renderFormulaLine(head, column, sheet);
 	});
+}
+
+// Calculated cells show six significant figures; the model keeps every digit for fits and exports.
+function displayCellValue(column, value) {
+	const text = value || '';
+	if (!text || !NeoModel.isComputedColumn(column)) return text;
+	const number = NeoModel.parseNumber(text);
+	return Number.isFinite(number) ? String(Number(number.toPrecision(6))) : text;
 }
 
 // Structural edits shift column letters, so formulas are rewritten to keep pointing at the same columns.
@@ -132,6 +243,9 @@ function buildHeaderCell(sheet, column, index) {
 	const th = document.createElement('th');
 	th.className = `neo-col-head role-${column.role}`;
 	th.dataset.columnId = column.id;
+	// A Y column's head wears its series colour from the graph.
+	const seriesColor = column.role === 'Y' ? getSeriesColor(sheet, column.id) : null;
+	if (seriesColor) th.style.setProperty('--series-color', seriesColor);
 
 	const top = document.createElement('div');
 	top.className = 'neo-col-top';
@@ -226,7 +340,7 @@ function buildDataCell(sheet, column, row) {
 		input.readOnly = true;
 		input.classList.add('is-formula');
 	}
-	input.value = column.cells[row] || '';
+	input.value = displayCellValue(column, column.cells[row]);
 	input.dataset.row = String(row);
 	input.dataset.columnId = column.id;
 	input.setAttribute('aria-label', `${NeoModel.getColumnLabel(sheet, column)}, row ${row + 1}`);
@@ -617,6 +731,7 @@ function switchSheet(index) {
 	renderActiveFitResult();
 	syncTitleInput(true);
 	plotGraph();
+	refreshWorkspaceChrome();
 	scheduleSaveState();
 }
 
@@ -723,11 +838,22 @@ function renderFitParameters() {
 	}
 	const chi = result ? PanPhyNeoStats.formatChiSquared(result.chi2, result.dof) : null;
 	if (chi) lines.push(`\\( \\chi^2/\\nu = ${chi} \\quad (\\nu = ${result.dof}) \\)`);
-	box.replaceChildren(...lines.map((text) => {
+	const nodes = lines.map((text) => {
 		const line = document.createElement('p');
 		line.textContent = text;
 		return line;
-	}));
+	});
+	// A plain-language reading of χ²/ν; with few points it is only a rough guide.
+	if (chi) {
+		const ratio = result.chi2 / result.dof;
+		const chip = document.createElement('span');
+		chip.className = `neo-chi ${ratio > 2 ? 'is-high' : ratio < 0.5 ? 'is-low' : 'is-good'}`;
+		chip.textContent = ratio > 2 ? 'Scatter is larger than the ±ΔY'
+			: ratio < 0.5 ? 'The ±ΔY look generous'
+				: 'Scatter matches the ±ΔY';
+		nodes.push(chip);
+	}
+	box.replaceChildren(...nodes);
 	box.hidden = !lines.length;
 	if (lines.length) safeTypeset(box);
 	if (note) {
@@ -766,6 +892,12 @@ function renderFittingResult(equation, rSquaredDisplay) {
 	rSquaredElement.textContent = `\\( R^2 = ${rSquaredDisplay} \\)`;
 	rSquaredElement.style.display = 'block';
 	renderFitParameters();
+	refreshWorkspaceChrome();
+	// After a Fit Curve click, bring the result into view in the inspector.
+	if (document.activeElement && document.activeElement.classList.contains('fit-button')) {
+		const card = document.querySelector('.neo-card.result');
+		if (card) card.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+	}
 	renderFitDiagnostics();
 	safeTypeset(equationElement);
 	safeTypeset(rSquaredElement);
@@ -796,12 +928,14 @@ function clearFittedCurve() {
 	delete fittedCurves[activeFitKey];
 	clearFittingResultDisplay();
 	plotGraph();
+	refreshWorkspaceChrome();
 	scheduleSaveState();
 }
 
 function onSeriesVisibilityChange() {
 	plotGraph();
 	syncTitleInput();
+	refreshWorkspaceChrome();
 	const popup = document.getElementById('popup-container');
 	if (popup && popup.style.display === 'block') plotAllSheets();
 	scheduleSaveState();
@@ -860,6 +994,7 @@ function initializeInterface() {
 	});
 
 	document.getElementById('add-row-button').addEventListener('click', addRow);
+	document.getElementById('sample-data-button').addEventListener('click', loadSampleData);
 	document.getElementById('add-column-button').addEventListener('click', addColumn);
 	document.getElementById('clear-sheet-button').addEventListener('click', clearSheet);
 	document.getElementById('fit-series-select').addEventListener('change', handleFitSeriesChange);

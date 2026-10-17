@@ -7,6 +7,9 @@ document.addEventListener('DOMContentLoaded', () => {
 	window.addEventListener('panphy:theme-change', () => {
 		forceReplot();
 		plotGraph();
+		// Series colours differ between the themes' palettes.
+		renderTable();
+		refreshWorkspaceChrome();
 		if (document.getElementById('popup-container').style.display === 'block') plotAllSheets();
 	});
 
@@ -45,6 +48,18 @@ document.addEventListener('DOMContentLoaded', () => {
 			return;
 		}
 		plotGraph();
+		refreshWorkspaceChrome();
+		// Panes change size without a window resize (stacking, the residual strip), so watch them.
+		if (typeof ResizeObserver === 'function') {
+			const resize = debounce(() => {
+				['plot', 'residual-plot', 'popup-plot'].forEach((id) => {
+					const element = document.getElementById(id);
+					if (element && element.data && element.offsetParent !== null) Plotly.Plots.resize(element);
+				});
+			}, 60);
+			const observer = new ResizeObserver(resize);
+			['plot', 'residual-wrap'].forEach(id => observer.observe(document.getElementById(id)));
+		}
 	};
 	drawWhenReady();
 });

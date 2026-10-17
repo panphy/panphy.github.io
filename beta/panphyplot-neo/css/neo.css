@@ -1,24 +1,309 @@
-/* PanPhyPlot (neo-beta): the column table and the changes to the shared PanPhyPlot layout. */
+/* PanPhyPlot (neo-beta): a workbench on graph paper.
+   One stylesheet for the whole app; tour.css (shared with PanPhyPlot) styles only the tour. */
+
+/* ---------- Tokens ---------- */
 
 :root {
-	--role-x: #2D6FB0;
-	--role-y: #C2410C;
+	color-scheme: light;
+	--font-body: 'Manrope', system-ui, sans-serif;
+	--font-display: 'DM Serif Display', Georgia, serif;
+	--font-mono: 'IBM Plex Mono', ui-monospace, monospace;
+
+	--paper: #F4F1EA;
+	--grid-minor: rgba(15, 118, 110, 0.055);
+	--grid-major: rgba(15, 118, 110, 0.11);
+	--surface: #FFFFFF;
+	--surface-2: #FAF8F4;
+	--surface-3: #F2EEE6;
+	--ink: #17181A;
+	--ink-2: #55585E;
+	--ink-3: #8A8C91;
+	--line: #E6E1D7;
+	--line-strong: #D3CCBE;
+	--accent: #0F766E;
+	--accent-hover: #0B5F59;
+	--accent-ink: #FFFFFF;
+	--accent-soft: rgba(15, 118, 110, 0.1);
+	--brand: #C2410C;
+	--brand-soft: rgba(194, 65, 12, 0.1);
+	--danger: #B42318;
+	--danger-soft: rgba(180, 35, 24, 0.08);
+	--warn: #B45309;
+	--good: #15803D;
+	--focus: rgba(15, 118, 110, 0.35);
+	--role-x: #1F2937;
 	--role-err: #7E6399;
-	--role-none: #8A847E;
-	--cell-alt-bg: #F9F7F3;
-	--head-bg: #F3F0EA;
+	--shadow-1: 0 1px 2px rgba(23, 24, 26, 0.05), 0 2px 8px rgba(23, 24, 26, 0.04);
+	--shadow-2: 0 12px 36px rgba(23, 24, 26, 0.16);
+	--radius: 14px;
+	--radius-sm: 9px;
+	--appbar-h: 56px;
+	--toolbar-h: 52px;
+	--statusbar-h: 30px;
+
+	/* Names read by tour.css and the shared theme and fullscreen buttons. */
+	--card-bg: var(--surface);
+	--card-border: var(--line);
+	--text-main: var(--ink);
+	--text-secondary: var(--ink-2);
+	--muted-bg: var(--surface-3);
+	--border-color: var(--line);
+	--input-border: var(--line-strong);
+	--input-focus: var(--focus);
+	--brand-primary: var(--brand);
+	--brand-secondary: #EA580C;
+	--brand-accent: var(--accent);
+	--btn-analyze: var(--accent);
+	--btn-analyze-hover: var(--accent-hover);
+	--btn-create: var(--good);
+	--btn-danger: var(--danger);
+	--btn-neutral: #6B6560;
+	--btn-neutral-hover: #5A534E;
 }
 
 [data-theme="dark"] {
-	--role-x: #7CB5EC;
-	--role-y: #FB923C;
+	color-scheme: dark;
+	--paper: #0D1012;
+	--grid-minor: rgba(94, 234, 212, 0.035);
+	--grid-major: rgba(94, 234, 212, 0.07);
+	--surface: #15191C;
+	--surface-2: #191E22;
+	--surface-3: #20262B;
+	--ink: #E8EBED;
+	--ink-2: #A5ACB3;
+	--ink-3: #737B83;
+	--line: #262D33;
+	--line-strong: #353D44;
+	--accent: #5EEAD4;
+	--accent-hover: #8FF3E3;
+	--accent-ink: #062521;
+	--accent-soft: rgba(94, 234, 212, 0.12);
+	--brand: #FB923C;
+	--brand-soft: rgba(251, 146, 60, 0.12);
+	--danger: #F97066;
+	--danger-soft: rgba(249, 112, 102, 0.1);
+	--warn: #FBBF24;
+	--good: #4ADE80;
+	--focus: rgba(94, 234, 212, 0.35);
+	--role-x: #E8EBED;
 	--role-err: #C4A8E0;
-	--role-none: #8A847E;
-	--cell-alt-bg: #1E1E1C;
-	--head-bg: #232321;
+	--shadow-1: 0 1px 2px rgba(0, 0, 0, 0.4), 0 2px 10px rgba(0, 0, 0, 0.25);
+	--shadow-2: 0 16px 44px rgba(0, 0, 0, 0.55);
+	--btn-neutral: #8A847E;
+	--btn-neutral-hover: #9C9690;
 }
 
-/* Phones: a polite pointer to the original PanPhyPlot instead of an unusable table. */
+/* ---------- Base ---------- */
+
+*,
+*::before,
+*::after {
+	box-sizing: border-box;
+}
+
+html,
+body {
+	margin: 0;
+	padding: 0;
+}
+
+/* Graph paper: a 6px minor and 30px major grid. */
+body {
+	font-family: var(--font-body);
+	font-size: 15px;
+	color: var(--ink);
+	background-color: var(--paper);
+	background-image:
+		linear-gradient(var(--grid-major) 1px, transparent 1px),
+		linear-gradient(90deg, var(--grid-major) 1px, transparent 1px),
+		linear-gradient(var(--grid-minor) 1px, transparent 1px),
+		linear-gradient(90deg, var(--grid-minor) 1px, transparent 1px);
+	background-size: 30px 30px, 30px 30px, 6px 6px, 6px 6px;
+	-webkit-font-smoothing: antialiased;
+}
+
+button,
+input,
+select,
+textarea {
+	font: inherit;
+	color: inherit;
+}
+
+a {
+	color: var(--accent);
+}
+
+:focus-visible {
+	outline: 2px solid var(--accent);
+	outline-offset: 2px;
+}
+
+.neo-visually-hidden {
+	position: absolute;
+	width: 1px;
+	height: 1px;
+	overflow: hidden;
+	clip: rect(0 0 0 0);
+	white-space: nowrap;
+}
+
+code {
+	font-family: var(--font-mono);
+	font-size: 0.85em;
+	padding: 1px 5px;
+	border-radius: 5px;
+	background: var(--surface-3);
+}
+
+.neo-icon {
+	width: 20px;
+	height: 20px;
+	flex: none;
+	fill: none;
+	stroke: currentColor;
+	stroke-width: 1.7;
+	stroke-linecap: round;
+	stroke-linejoin: round;
+}
+
+/* ---------- Buttons and controls ---------- */
+
+.neo-button,
+.fit-button,
+.clear-fit-button,
+.advanced-fit-reset-btn,
+#custom-fit-formula-help,
+.neo-dialog-actions button,
+#popup-close {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	gap: 6px;
+	min-height: 40px;
+	padding: 8px 16px;
+	border: 1px solid var(--line-strong);
+	border-radius: var(--radius-sm);
+	background: var(--surface);
+	color: var(--ink);
+	font-weight: 600;
+	font-size: 0.9rem;
+	cursor: pointer;
+	transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.neo-button:hover,
+.clear-fit-button:hover,
+.advanced-fit-reset-btn:hover,
+#custom-fit-formula-help:hover,
+.neo-dialog-cancel:hover,
+#popup-close:hover {
+	background: var(--surface-3);
+}
+
+.neo-button-primary,
+.fit-button,
+.neo-dialog-confirm {
+	border-color: transparent;
+	background: var(--accent);
+	color: var(--accent-ink);
+	box-shadow: 0 1px 0 rgba(0, 0, 0, 0.08);
+}
+
+.neo-button-primary:hover,
+.fit-button:hover:not(:disabled),
+.neo-dialog-confirm:hover {
+	background: var(--accent-hover);
+}
+
+.fit-button:disabled {
+	opacity: 0.6;
+	cursor: progress;
+}
+
+select,
+input[type="text"],
+input[type="number"] {
+	min-height: 40px;
+	padding: 7px 10px;
+	border: 1px solid var(--line-strong);
+	border-radius: var(--radius-sm);
+	background: var(--surface);
+	color: var(--ink);
+}
+
+select:focus,
+input[type="text"]:focus,
+input[type="number"]:focus {
+	outline: none;
+	border-color: var(--accent);
+	box-shadow: 0 0 0 3px var(--focus);
+}
+
+/* Switches: the LaTeX and weighting toggles. */
+.neo-switch {
+	display: inline-flex;
+	align-items: center;
+	gap: 9px;
+	min-height: 40px;
+	cursor: pointer;
+	font-weight: 600;
+	font-size: 0.88rem;
+	user-select: none;
+}
+
+.neo-switch input {
+	position: absolute;
+	opacity: 0;
+	width: 1px;
+	height: 1px;
+}
+
+.neo-switch-track {
+	position: relative;
+	width: 36px;
+	height: 21px;
+	flex: none;
+	border-radius: 999px;
+	background: var(--line-strong);
+	transition: background-color 0.18s ease;
+}
+
+.neo-switch-track::after {
+	content: '';
+	position: absolute;
+	top: 3px;
+	left: 3px;
+	width: 15px;
+	height: 15px;
+	border-radius: 50%;
+	background: #fff;
+	box-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+	transition: transform 0.18s ease;
+}
+
+.neo-switch input:checked + .neo-switch-track {
+	background: var(--accent);
+}
+
+.neo-switch input:checked + .neo-switch-track::after {
+	transform: translateX(15px);
+}
+
+.neo-switch input:focus-visible + .neo-switch-track {
+	outline: 2px solid var(--accent);
+	outline-offset: 2px;
+}
+
+.neo-switch small {
+	display: block;
+	font-weight: 500;
+	font-size: 0.75rem;
+	color: var(--ink-3);
+}
+
+/* ---------- Phone message ---------- */
+
 .phone-gate {
 	display: none;
 }
@@ -55,96 +340,510 @@
 	}
 
 	.phone-gate a {
-		color: var(--brand-primary);
-		font-weight: 600;
+		color: var(--brand);
+		font-weight: 700;
 	}
 
 	.phone-gate-copyright {
 		margin-top: 24px !important;
 		font-size: 0.8rem;
-		color: var(--text-secondary);
+		color: var(--ink-2);
 	}
 
 	.neo-app {
-		display: none;
+		display: none !important;
 	}
+}
+
+/* ---------- App shell ---------- */
+
+.neo-app {
+	display: flex;
+	flex-direction: column;
+	min-height: 100vh;
+	min-height: 100dvh;
+}
+
+.neo-appbar {
+	position: sticky;
+	top: 0;
+	z-index: 30;
+	display: flex;
+	align-items: center;
+	gap: 14px;
+	min-height: calc(var(--appbar-h) + var(--standalone-top, 0px));
+	padding: var(--standalone-top, 0px) 14px 0;
+	background: color-mix(in srgb, var(--surface) 86%, transparent);
+	backdrop-filter: saturate(1.4) blur(10px);
+	-webkit-backdrop-filter: saturate(1.4) blur(10px);
+	border-bottom: 1px solid var(--line);
+}
+
+.neo-brand {
+	display: inline-flex;
+	align-items: center;
+	gap: 9px;
+	flex: none;
+	color: var(--ink);
+	text-decoration: none;
+}
+
+.neo-brand img {
+	width: 30px;
+	height: 30px;
+	border-radius: 7px;
+}
+
+.neo-wordmark {
+	font-family: var(--font-display);
+	font-size: 1.32rem;
+	letter-spacing: -0.01em;
 }
 
 .neo-badge {
-	font-family: var(--font-mono);
-	font-size: 0.7rem;
-	letter-spacing: 0.04em;
-	vertical-align: middle;
-	padding: 2px 8px;
+	padding: 2px 7px;
 	border-radius: 999px;
-	background: var(--btn-analyze);
-	/* The banner title paints its text with a clipped gradient; the badge opts out. */
-	-webkit-background-clip: border-box;
-	background-clip: border-box;
-	-webkit-text-fill-color: #fff;
-	color: #fff;
+	border: 1px solid var(--accent);
+	color: var(--accent);
+	font-family: var(--font-mono);
+	font-size: 0.66rem;
+	letter-spacing: 0.06em;
+	text-transform: uppercase;
 }
 
-[data-theme="dark"] .neo-badge {
-	-webkit-text-fill-color: #1a1a1a;
-	color: #1a1a1a;
+.neo-appbar-actions {
+	display: flex;
+	align-items: center;
+	gap: 2px;
+	margin-left: auto;
+	flex: none;
 }
 
-/* The data panel gets room for several columns; the graph keeps the rest. */
-.neo-app .input-section {
-	flex: 1 1 460px;
-	max-width: 46%;
+/* Sheet tabs sit in the app bar, like documents in a workbook. */
+.neo-sheets {
+	display: flex;
+	align-items: center;
+	gap: 4px;
+	min-width: 0;
+	overflow-x: auto;
+	scrollbar-width: none;
+	padding: 6px 2px;
 }
 
-.neo-app .graph-section {
-	flex: 1 1 480px;
+.neo-sheets::-webkit-scrollbar {
+	display: none;
 }
 
-@media (max-width: 999px) {
-	.neo-app .container {
-		flex-direction: column;
-	}
+.dataset-tab {
+	display: inline-flex;
+	align-items: center;
+	flex: none;
+	height: 34px;
+	border-radius: 999px;
+	border: 1px solid transparent;
+	color: var(--ink-2);
+	transition: background-color 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+}
 
-	.neo-app .input-section,
-	.neo-app .graph-section {
-		max-width: 100%;
-		flex: none;
-		height: auto;
-		min-height: 300px;
-		overflow: visible;
-	}
+.dataset-tab:hover {
+	background: var(--surface-3);
+	color: var(--ink);
+}
+
+.dataset-tab.active {
+	background: var(--surface);
+	border-color: var(--line-strong);
+	color: var(--ink);
+	box-shadow: var(--shadow-1);
 }
 
 .dataset-tab .tab-label {
+	max-width: 160px;
+	height: 100%;
+	padding: 0 6px 0 14px;
 	border: none;
 	background: none;
 	color: inherit;
-	font: inherit;
-	padding: 0;
-	min-height: 0;
-	box-shadow: none;
+	font-weight: 600;
+	font-size: 0.86rem;
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
 	cursor: pointer;
 }
 
-.dataset-tab .tab-label:hover {
-	background: none;
-	transform: none;
+.dataset-tab .tab-label:only-child {
+	padding-right: 14px;
 }
 
-/* ---------- Table ---------- */
+.dataset-tab.active .tab-label::before {
+	content: '';
+	display: inline-block;
+	width: 7px;
+	height: 7px;
+	margin-right: 7px;
+	border-radius: 50%;
+	background: var(--accent);
+	vertical-align: 1px;
+}
+
+.dataset-tab .tab-close {
+	width: 26px;
+	height: 26px;
+	margin-right: 4px;
+	padding: 0;
+	border: none;
+	border-radius: 50%;
+	background: none;
+	color: var(--ink-3);
+	font-size: 1rem;
+	line-height: 1;
+	cursor: pointer;
+}
+
+.dataset-tab .tab-close:hover {
+	background: var(--danger-soft);
+	color: var(--danger);
+}
+
+.dataset-tab-name-input {
+	width: 150px;
+	height: 30px;
+	min-height: 0 !important;
+	margin: 0 4px;
+	padding: 2px 10px !important;
+	border-radius: 999px !important;
+	font-weight: 600;
+	font-size: 0.86rem;
+}
+
+.add-dataset-btn {
+	flex: none;
+	width: 34px;
+	height: 34px;
+	padding: 0;
+	border: 1px dashed var(--line-strong);
+	border-radius: 50%;
+	background: none;
+	color: var(--ink-2);
+	font-size: 1.15rem;
+	line-height: 1;
+	cursor: pointer;
+}
+
+.add-dataset-btn:hover {
+	border-style: solid;
+	border-color: var(--accent);
+	color: var(--accent);
+	background: var(--accent-soft);
+}
+
+/* ---------- Toolbar ---------- */
+
+.neo-toolbar {
+	position: sticky;
+	top: calc(var(--appbar-h) + var(--standalone-top, 0px));
+	z-index: 25;
+	display: flex;
+	align-items: center;
+	gap: 6px;
+	min-height: var(--toolbar-h);
+	padding: 6px 12px;
+	overflow-x: auto;
+	scrollbar-width: thin;
+	background: color-mix(in srgb, var(--surface-2) 92%, transparent);
+	backdrop-filter: blur(8px);
+	-webkit-backdrop-filter: blur(8px);
+	border-bottom: 1px solid var(--line);
+}
+
+.neo-tool-group {
+	display: flex;
+	align-items: center;
+	gap: 2px;
+	flex: none;
+	padding-right: 8px;
+	margin-right: 2px;
+	border-right: 1px solid var(--line);
+}
+
+.neo-tool-group-label {
+	padding: 0 6px 0 4px;
+	font-family: var(--font-mono);
+	font-size: 0.64rem;
+	letter-spacing: 0.08em;
+	text-transform: uppercase;
+	color: var(--ink-3);
+}
+
+.neo-tool {
+	display: inline-flex;
+	align-items: center;
+	gap: 7px;
+	flex: none;
+	min-height: 38px;
+	padding: 6px 11px;
+	border: 1px solid transparent;
+	border-radius: var(--radius-sm);
+	background: none;
+	color: var(--ink);
+	font-weight: 600;
+	font-size: 0.86rem;
+	text-decoration: none;
+	white-space: nowrap;
+	cursor: pointer;
+	transition: background-color 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+}
+
+.neo-tool:hover {
+	background: var(--surface-3);
+}
+
+.neo-tool:active {
+	background: var(--line);
+}
+
+.neo-tool .neo-icon {
+	color: var(--accent);
+}
+
+.neo-tool-quiet {
+	color: var(--ink-2);
+}
+
+.neo-tool-quiet .neo-icon {
+	color: inherit;
+}
+
+.neo-tool-danger {
+	color: var(--danger);
+}
+
+.neo-tool-danger .neo-icon {
+	color: var(--danger);
+}
+
+.neo-tool-danger:hover {
+	background: var(--danger-soft);
+}
+
+.neo-tool-spacer {
+	flex: 1;
+}
+
+.neo-toolbar .neo-switch {
+	padding: 0 8px;
+}
+
+/* ---------- Workspace ---------- */
+
+.neo-workspace {
+	flex: 1;
+	display: grid;
+	gap: 12px;
+	padding: 12px;
+	min-height: 0;
+}
+
+.neo-pane {
+	display: flex;
+	flex-direction: column;
+	min-width: 0;
+	min-height: 0;
+	background: var(--surface);
+	border: 1px solid var(--line);
+	border-radius: var(--radius);
+	box-shadow: var(--shadow-1);
+}
+
+.neo-pane-inspector {
+	background: none;
+	border: none;
+	box-shadow: none;
+	gap: 12px;
+	overflow-y: auto;
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.neo-menu,
+	.neo-dialog[open],
+	#popup-content {
+		animation: none !important;
+	}
+}
+
+.neo-pane-head {
+	display: flex;
+	align-items: baseline;
+	gap: 12px;
+	padding: 12px 16px 10px;
+	border-bottom: 1px solid var(--line);
+}
+
+.neo-pane-head h2 {
+	margin: 0;
+	font-family: var(--font-display);
+	font-weight: 400;
+	font-size: 1.25rem;
+}
+
+.neo-pane-hint {
+	margin: 0;
+	font-size: 0.8rem;
+	color: var(--ink-3);
+}
+
+.neo-pane-foot {
+	padding: 8px 16px 12px;
+	border-top: 1px solid var(--line);
+}
+
+.neo-hint {
+	margin: 0;
+	font-size: 0.8rem;
+	line-height: 1.45;
+	color: var(--ink-3);
+}
+
+.validation-message {
+	margin: 0 0 6px;
+	font-size: 0.82rem;
+	font-weight: 600;
+	color: var(--brand);
+}
+
+.validation-message:empty {
+	display: none;
+}
+
+/* Wide screens: data | graph | inspector, each filling the height and scrolling on its own. */
+@media (min-width: 1280px) {
+	.neo-app {
+		height: 100vh;
+		height: 100dvh;
+	}
+
+	.neo-workspace {
+		grid-template-columns: minmax(380px, 1fr) minmax(440px, 1.35fr) 340px;
+		grid-template-rows: minmax(0, 1fr);
+	}
+}
+
+/* The graph and inspector share a wrapper that only matters on landscape tablets. */
+.neo-right {
+	display: contents;
+}
+
+/* Landscape tablets: the data on the left; on the right one scrolling column holds the graph
+   at a usable height and the inspector cards below it. */
+@media (min-width: 1000px) and (max-width: 1279px) {
+	.neo-app {
+		height: 100vh;
+		height: 100dvh;
+	}
+
+	.neo-workspace {
+		grid-template-columns: minmax(360px, 0.95fr) 1.05fr;
+		grid-template-rows: minmax(0, 1fr);
+	}
+
+	.neo-right {
+		display: flex;
+		flex-direction: column;
+		gap: 12px;
+		min-height: 0;
+		overflow-y: auto;
+		overscroll-behavior: contain;
+		margin: -4px;
+		padding: 4px;
+	}
+
+	.neo-pane-graph {
+		flex: none;
+		height: max(420px, 64dvh);
+	}
+
+	.neo-pane-inspector {
+		flex: none;
+		display: grid;
+		grid-template-columns: repeat(2, minmax(0, 1fr));
+		align-items: start;
+		overflow: visible;
+	}
+
+	.neo-pane-inspector > .neo-card:first-child {
+		grid-column: 1 / -1;
+	}
+}
+
+/* Portrait tablets: one column, and the page scrolls. */
+@media (max-width: 999px) {
+	.neo-tool-group-label {
+		display: none;
+	}
+
+	/* Two rows of labelled tools rather than a toolbar that hides half its buttons off-screen. */
+	.neo-toolbar {
+		flex-wrap: wrap;
+		overflow: visible;
+		row-gap: 4px;
+	}
+
+	.neo-tool-spacer {
+		display: none;
+	}
+
+	.neo-tool {
+		padding: 6px 9px;
+	}
+
+	.neo-workspace {
+		grid-template-columns: 1fr;
+	}
+
+	.neo-table-wrap {
+		max-height: 58vh;
+	}
+
+	.neo-pane-graph {
+		height: 60vh;
+		min-height: 420px;
+	}
+
+	.neo-pane-inspector {
+		display: grid;
+		grid-template-columns: repeat(2, minmax(0, 1fr));
+		align-items: start;
+		overflow: visible;
+	}
+
+	.neo-pane-inspector > .neo-card:first-child {
+		grid-column: 1 / -1;
+	}
+}
+
+@media (max-width: 760px) {
+	.neo-pane-inspector {
+		grid-template-columns: minmax(0, 1fr);
+	}
+
+	.neo-appbar .neo-tool > span {
+		display: none;
+	}
+
+	.neo-wordmark {
+		font-size: 1.1rem;
+	}
+}
+
+/* ---------- Data grid ---------- */
 
 .neo-table-wrap {
+	flex: 1;
+	min-height: 0;
 	overflow: auto;
-	max-height: 52vh;
-	border: 1px solid var(--border-color);
-	border-radius: 12px;
 	-webkit-overflow-scrolling: touch;
-}
-
-@media (max-width: 999px) {
-	.neo-table-wrap {
-		max-height: 60vh;
-	}
+	overscroll-behavior: contain;
 }
 
 .neo-table {
@@ -156,21 +855,25 @@
 
 .neo-table th,
 .neo-table td {
-	border-right: 1px solid var(--border-color);
-	border-bottom: 1px solid var(--border-color);
 	padding: 0;
-	background: var(--card-bg);
+	border-right: 1px solid var(--line);
+	border-bottom: 1px solid var(--line);
+	background: var(--surface);
 }
 
 .neo-table tbody tr:nth-child(even) td {
-	background: var(--cell-alt-bg);
+	background: var(--surface-2);
+}
+
+.neo-table tbody tr:hover td {
+	background: color-mix(in srgb, var(--accent) 4%, var(--surface));
 }
 
 .neo-table thead th {
 	position: sticky;
 	top: 0;
 	z-index: 2;
-	background: var(--head-bg);
+	background: var(--surface-2);
 	vertical-align: top;
 }
 
@@ -178,150 +881,153 @@
 	position: sticky;
 	left: 0;
 	z-index: 1;
-	width: 44px;
-	min-width: 44px;
-	background: var(--head-bg) !important;
+	width: 42px;
+	min-width: 42px;
+	background: var(--surface-2) !important;
 	text-align: center;
 }
 
 .neo-table thead .neo-corner {
 	z-index: 3;
-	font-family: var(--font-mono);
-	font-size: 0.75rem;
-	color: var(--text-secondary);
 	vertical-align: middle;
+	font-family: var(--font-mono);
+	font-size: 0.7rem;
+	color: var(--ink-3);
 }
 
 .neo-row-head button {
 	width: 100%;
-	min-height: 44px;
+	min-height: 36px;
 	padding: 0;
 	border: none;
-	border-radius: 0;
 	background: none;
-	box-shadow: none;
-	color: var(--text-secondary);
+	color: var(--ink-3);
 	font-family: var(--font-mono);
-	font-size: 0.75rem;
+	font-size: 0.72rem;
 	cursor: pointer;
 }
 
-.neo-row-head button:hover,
-.neo-row-head button:focus-visible {
-	background: var(--muted-bg);
-	color: var(--text-main);
-	transform: none;
+.neo-row-head button:hover {
+	color: var(--ink);
+	background: var(--surface-3);
 }
 
+/* Each column head carries its series colour, so the table and the graph match. */
 .neo-col-head {
-	min-width: 112px;
-	width: 112px;
-	padding: 6px !important;
-	border-top: 3px solid var(--role-y);
+	--series-color: var(--brand);
+	position: relative;
+	min-width: 116px;
+	width: 116px;
+	padding: 7px 7px 6px !important;
+	box-shadow: inset 0 3px 0 var(--series-color);
 }
 
-.neo-col-head.role-X { border-top-color: var(--role-x); }
+.neo-col-head.role-X {
+	--series-color: var(--role-x);
+}
+
 .neo-col-head.role-xErr,
-.neo-col-head.role-yErr { border-top-color: var(--role-err); }
-.neo-col-head.role-none { border-top-color: var(--role-none); }
+.neo-col-head.role-yErr {
+	--series-color: var(--role-err);
+}
+
+.neo-col-head.role-none {
+	--series-color: var(--line-strong);
+}
 
 .neo-col-top {
 	display: flex;
 	align-items: center;
 	gap: 4px;
-	margin-bottom: 4px;
+	margin-bottom: 3px;
 }
 
 .neo-col-letter {
+	min-width: 1.3em;
 	font-family: var(--font-mono);
-	font-size: 0.75rem;
-	color: var(--text-secondary);
-	min-width: 1.2em;
+	font-size: 0.7rem;
+	color: var(--ink-3);
 }
 
 .neo-role-select {
 	flex: 1;
 	min-width: 0;
-	min-height: 36px;
+	min-height: 28px !important;
 	margin: 0;
-	padding: 2px 6px;
-	border-radius: 999px;
-	border: 1px solid var(--role-y);
-	color: var(--role-y);
-	background-color: var(--card-bg);
-	font-weight: 700;
-	font-size: 0.8rem;
+	padding: 1px 6px !important;
+	border-radius: 999px !important;
+	border: 1px solid color-mix(in srgb, var(--series-color) 55%, transparent) !important;
+	background: color-mix(in srgb, var(--series-color) 9%, var(--surface)) !important;
+	color: var(--ink) !important;
+	font-family: var(--font-mono);
+	font-weight: 600;
+	font-size: 0.74rem;
 	text-align: center;
+	cursor: pointer;
 }
 
-.role-X .neo-role-select { border-color: var(--role-x); color: var(--role-x); }
-.role-xErr .neo-role-select,
-.role-yErr .neo-role-select { border-color: var(--role-err); color: var(--role-err); }
-.role-none .neo-role-select { border-color: var(--role-none); color: var(--role-none); }
-
 .neo-col-menu-button {
-	min-width: 36px;
-	min-height: 36px;
+	width: 28px;
+	height: 28px;
+	flex: none;
 	padding: 0;
 	border: none;
+	border-radius: 7px;
 	background: none;
-	box-shadow: none;
-	color: var(--text-secondary);
-	font-size: 1.1rem;
+	color: var(--ink-3);
+	font-size: 1rem;
 	line-height: 1;
 	cursor: pointer;
 }
 
-.neo-col-menu-button:hover,
-.neo-col-menu-button:focus-visible {
-	background: var(--muted-bg);
-	color: var(--text-main);
-	transform: none;
+.neo-col-menu-button:hover {
+	background: var(--surface-3);
+	color: var(--ink);
 }
 
 .neo-col-name,
 .neo-col-unit {
 	display: block;
 	width: 100%;
-	min-height: 32px;
-	margin: 2px 0 0;
-	padding: 3px 6px;
-	border: 1px solid transparent;
-	border-radius: 6px;
-	background: transparent;
-	color: var(--text-main);
+	min-height: 28px !important;
+	margin: 0;
+	padding: 2px 6px !important;
+	border: 1px solid transparent !important;
+	border-radius: 6px !important;
+	background: transparent !important;
 	text-align: center;
-	font: inherit;
+	box-shadow: none !important;
 }
 
 .neo-col-name {
 	font-weight: 700;
+	font-size: 0.92rem;
 }
 
 .neo-col-unit {
-	font-size: 0.85rem;
-	color: var(--text-secondary);
+	font-family: var(--font-mono);
+	font-size: 0.78rem;
+	color: var(--ink-2) !important;
 }
 
 .neo-col-name:hover,
 .neo-col-unit:hover {
-	border-color: var(--input-border);
+	border-color: var(--line) !important;
 }
 
 .neo-col-name:focus,
 .neo-col-unit:focus {
-	outline: none;
-	border-color: var(--brand-primary);
-	background: var(--card-bg);
+	border-color: var(--accent) !important;
+	background: var(--surface) !important;
 }
 
 .neo-col-preview {
-	margin-top: 4px;
+	margin-top: 3px;
 	padding: 2px 4px;
 	border-radius: 6px;
-	font-size: 0.8rem;
-	color: var(--text-secondary);
-	background: var(--card-bg);
+	font-size: 0.78rem;
+	color: var(--ink-2);
+	background: var(--surface);
 	overflow-x: auto;
 }
 
@@ -329,72 +1035,665 @@
 	display: none;
 }
 
-.neo-cell {
+.neo-col-formula {
 	display: block;
 	width: 100%;
-	min-height: 44px;
-	padding: 4px 8px;
-	border: none;
-	background: transparent;
-	color: var(--text-main);
-	text-align: center;
+	max-width: 148px;
+	min-height: 26px;
+	margin: 0 0 2px;
+	padding: 2px 6px;
+	border: 1px dashed color-mix(in srgb, var(--role-err) 70%, transparent);
+	border-radius: 6px;
+	background: none;
+	color: var(--role-err);
 	font-family: var(--font-mono);
-	font-size: 0.9rem;
+	font-size: 0.72rem;
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	cursor: pointer;
 }
 
-.neo-cell:focus {
-	outline: 2px solid var(--brand-primary);
-	outline-offset: -2px;
-	background: var(--card-bg);
+.neo-col-formula:hover {
+	background: var(--surface-3);
 }
 
-.neo-cell.invalid-input {
-	background-color: rgba(255, 107, 107, 0.15);
-	outline: 2px solid #ff6b6b;
+.neo-col-formula.has-error {
+	border-color: var(--danger);
+	color: var(--danger);
+}
+
+.neo-table .neo-cell {
+	display: block;
+	width: 100%;
+	min-height: 36px;
+	padding: 4px 10px;
+	border: none;
+	border-radius: 0;
+	box-shadow: none;
+	background: transparent;
+	color: var(--ink);
+	text-align: right;
+	font-family: var(--font-mono);
+	font-size: 0.86rem;
+}
+
+.neo-table .neo-cell:focus {
+	box-shadow: none;
+	outline: 2px solid var(--accent);
 	outline-offset: -2px;
+	background: var(--surface);
+	position: relative;
+	z-index: 1;
+}
+
+.neo-table .neo-cell.invalid-input {
+	background-color: var(--danger-soft);
+	outline: 2px solid var(--danger);
+	outline-offset: -2px;
+}
+
+.neo-table tbody td .neo-cell.is-formula {
+	background: repeating-linear-gradient(135deg, transparent 0 6px, color-mix(in srgb, var(--role-err) 8%, transparent) 6px 12px);
+	color: var(--ink-2);
+	cursor: default;
 }
 
 .neo-add-col {
-	min-width: 52px;
+	min-width: 54px;
 	vertical-align: middle !important;
 	text-align: center;
 	border-right: none !important;
 }
 
 .neo-add-col button {
-	width: 40px;
-	height: 40px;
+	width: 34px;
+	height: 34px;
 	padding: 0;
 	border-radius: 50%;
-	border: 1px dashed var(--btn-create);
+	border: 1px dashed var(--line-strong);
 	background: none;
-	box-shadow: none;
-	color: var(--btn-create);
-	font-size: 1.3rem;
+	color: var(--ink-2);
+	font-size: 1.15rem;
 	line-height: 1;
 	cursor: pointer;
 }
 
-.neo-add-col button:hover,
-.neo-add-col button:focus-visible {
-	background: rgba(45, 140, 95, 0.12);
-	transform: none;
+.neo-add-col button:hover {
+	border-style: solid;
+	border-color: var(--accent);
+	color: var(--accent);
+	background: var(--accent-soft);
 }
 
 .neo-table tbody td:last-child {
 	border-right: none;
 }
 
-.neo-hint {
-	margin: 8px 0 12px;
-	font-size: 0.85rem;
-	color: var(--text-secondary);
-	line-height: 1.45;
+/* ---------- Graph pane ---------- */
+
+.neo-graph-head {
+	padding: 8px 12px;
 }
 
-.neo-hint code {
+.neo-title-input {
+	flex: 1;
+	min-width: 0;
+	min-height: 38px;
+	padding: 4px 8px !important;
+	border: 1px solid transparent !important;
+	background: transparent !important;
+	font-family: var(--font-display);
+	font-size: 1.25rem;
+	box-shadow: none !important;
+}
+
+.neo-title-input:hover {
+	border-color: var(--line) !important;
+}
+
+.neo-title-input:focus {
+	border-color: var(--accent) !important;
+	background: var(--surface) !important;
+}
+
+.neo-plot-area {
+	position: relative;
+	flex: 1;
+	min-height: 0;
+}
+
+#plot {
+	position: absolute;
+	inset: 0;
+}
+
+.neo-residuals {
+	height: clamp(120px, 19vh, 170px);
+	flex: none;
+	border-top: 1px solid var(--line);
+	padding: 6px 4px 0;
+}
+
+.neo-residuals[hidden] {
+	display: none;
+}
+
+.neo-residual-heading {
+	padding: 0 12px;
 	font-family: var(--font-mono);
+	font-size: 0.68rem;
+	letter-spacing: 0.08em;
+	text-transform: uppercase;
+	color: var(--ink-3);
+}
+
+#residual-plot {
+	width: 100%;
+	height: calc(100% - 18px);
+}
+
+#plot .modebar,
+#popup-plot .modebar {
+	padding: 4px 6px !important;
+	background: transparent !important;
+}
+
+#plot .modebar-btn,
+#popup-plot .modebar-btn {
+	width: 30px !important;
+	height: 30px !important;
+	padding: 4px !important;
+	border-radius: 8px;
+}
+
+/* The empty state shows until there is something to plot. */
+.neo-empty {
+	position: absolute;
+	inset: 0;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	gap: 6px;
+	padding: 24px;
+	text-align: center;
+	background: var(--surface);
+	border-radius: 0 0 var(--radius) var(--radius);
+}
+
+.neo-empty[hidden] {
+	display: none;
+}
+
+.neo-empty-art {
+	width: 160px;
+	height: 106px;
+	margin-bottom: 6px;
+	fill: var(--accent);
+}
+
+.neo-empty-axis {
+	fill: none;
+	stroke: var(--ink-3);
+	stroke-width: 1.5;
+}
+
+.neo-empty-line {
+	fill: none;
+	stroke: var(--brand);
+	stroke-width: 1.5;
+	stroke-dasharray: 4 4;
+}
+
+.neo-empty-art circle {
+	opacity: 0.85;
+}
+
+.neo-empty h3 {
+	margin: 0;
+	font-family: var(--font-display);
+	font-weight: 400;
+	font-size: 1.35rem;
+}
+
+.neo-empty p {
+	margin: 0 0 10px;
+	max-width: 30em;
+	color: var(--ink-2);
+	font-size: 0.9rem;
+}
+
+/* ---------- Inspector cards ---------- */
+
+.neo-card {
+	padding: 14px 16px 16px;
+	background: var(--surface);
+	border: 1px solid var(--line);
+	border-radius: var(--radius);
+	box-shadow: var(--shadow-1);
+}
+
+.neo-card-title {
+	margin: 0 0 10px;
+	font-family: var(--font-mono);
+	font-weight: 600;
+	font-size: 0.68rem;
+	letter-spacing: 0.1em;
+	text-transform: uppercase;
+	color: var(--ink-3);
+}
+
+.neo-fit-series-label {
+	font-family: var(--font-body);
+	text-transform: none;
+	letter-spacing: 0;
+	font-size: 0.78rem;
+	color: var(--ink-2);
+}
+
+/* Series: a colour key and show/hide control for each Y column. */
+.neo-series-list {
+	display: flex;
+	flex-direction: column;
+	gap: 2px;
+	margin: 0;
+	padding: 0;
+	list-style: none;
+}
+
+.neo-series-item {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+	width: 100%;
+	min-height: 32px;
+	padding: 4px 8px;
+	border: none;
+	border-radius: 8px;
+	background: none;
+	text-align: left;
+	cursor: pointer;
+}
+
+.neo-series-item:hover:not(:disabled) {
+	background: var(--surface-3);
+}
+
+.neo-series-item:disabled {
+	cursor: default;
+	opacity: 0.6;
+}
+
+.neo-series-swatch {
+	width: 14px;
+	height: 14px;
+	flex: none;
+	border-radius: 50%;
+	border: 2px solid var(--series-color);
+	background: var(--series-color);
+	transition: background-color 0.15s ease;
+}
+
+.neo-series-item[aria-pressed="false"] .neo-series-swatch {
+	background: transparent;
+}
+
+.neo-series-item[aria-pressed="false"] .neo-series-name {
+	color: var(--ink-3);
+	text-decoration: line-through;
+}
+
+.neo-series-name {
+	flex: 1;
+	min-width: 0;
+	font-weight: 600;
+	font-size: 0.88rem;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+.neo-series-meta {
+	flex: none;
+	font-family: var(--font-mono);
+	font-size: 0.72rem;
+	color: var(--ink-3);
+}
+
+.neo-series-fit {
+	flex: none;
+	padding: 1px 6px;
+	border-radius: 999px;
+	background: var(--accent-soft);
+	color: var(--accent);
+	font-family: var(--font-mono);
+	font-size: 0.66rem;
+	font-weight: 600;
+}
+
+.neo-series-empty {
+	padding: 6px 2px;
+	color: var(--ink-3);
+	font-size: 0.85rem;
+}
+
+/* Fit card */
+.neo-fit-series {
+	display: flex;
+	flex-direction: column;
+	gap: 5px;
+	margin-bottom: 12px;
+}
+
+.neo-fit-series label,
+#BasicFit > label,
+#AdvancedFit > label {
 	font-size: 0.8rem;
+	font-weight: 700;
+	color: var(--ink-2);
+}
+
+.neo-fit-series select,
+#fit-method,
+#advanced-fit-method {
+	width: 100%;
+}
+
+#BasicFit > label,
+#AdvancedFit > label {
+	display: block;
+	margin-bottom: 5px;
+}
+
+/* Basic, Advanced and Custom as a segmented control. */
+.tabs {
+	display: grid;
+	grid-template-columns: repeat(3, 1fr);
+	gap: 3px;
+	margin-bottom: 12px;
+	padding: 3px;
+	border-radius: 11px;
+	background: var(--surface-3);
+}
+
+.tablink {
+	min-height: 34px;
+	padding: 4px 6px;
+	border: none;
+	border-radius: 8px;
+	background: none;
+	color: var(--ink-2);
+	font-weight: 600;
+	font-size: 0.84rem;
+	cursor: pointer;
+}
+
+.tablink:hover {
+	color: var(--ink);
+}
+
+.tablink.active {
+	background: var(--surface);
+	color: var(--ink);
+	box-shadow: var(--shadow-1);
+}
+
+.tab-content,
+.parameter-section {
+	display: none;
+}
+
+.tab-content.active,
+.parameter-section.active {
+	display: block;
+}
+
+.collapsible-content {
+	display: block;
+}
+
+.general-equation {
+	margin: 10px 0;
+	padding: 10px;
+	border-radius: var(--radius-sm);
+	background: var(--surface-2);
+	border: 1px dashed var(--line-strong);
+	text-align: center;
+	overflow-x: auto;
+	font-size: 0.95rem;
+}
+
+.table-prompt {
+	margin: 6px 0;
+	font-size: 0.8rem;
+	color: var(--ink-3);
+}
+
+.advanced-fit-top-row {
+	display: flex;
+	align-items: flex-end;
+	justify-content: space-between;
+	gap: 8px;
+}
+
+.advanced-fit-item,
+.custom-fit-parameter-row {
+	display: grid;
+	grid-template-columns: 2.2em 1fr;
+	align-items: center;
+	gap: 8px;
+	margin: 6px 0;
+}
+
+.advanced-fit-item label,
+.custom-fit-parameter-row label {
+	font-family: var(--font-mono);
+	font-weight: 600;
+	font-size: 0.86rem;
+}
+
+.advanced-fit-item input,
+.custom-fit-parameter-row input {
+	width: 100%;
+	font-family: var(--font-mono);
+}
+
+.advanced-fit-reset-btn {
+	min-height: 36px;
+	padding: 6px 10px;
+	font-size: 0.78rem;
+}
+
+.custom-fit-formula-header {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	margin-bottom: 5px;
+}
+
+#custom-fit-formula-label {
+	font-size: 0.8rem;
+	font-weight: 700;
+	color: var(--ink-2);
+}
+
+#custom-fit-formula-help {
+	min-height: 30px;
+	padding: 3px 10px;
+	font-size: 0.78rem;
+}
+
+#custom-fit-formula-input {
+	width: 100%;
+	font-family: var(--font-mono);
+}
+
+.custom-fit-formula-note,
+.custom-fit-parameters-empty {
+	margin: 6px 0;
+	font-size: 0.78rem;
+	color: var(--ink-3);
+}
+
+#custom-fit-formula-message {
+	margin-top: 6px;
+	font-size: 0.82rem;
+}
+
+#custom-fit-formula-message.is-error { color: var(--danger); }
+#custom-fit-formula-message.is-warning { color: var(--warn); }
+#custom-fit-formula-message.is-success { color: var(--good); }
+
+.neo-fit-actions {
+	display: grid;
+	grid-template-columns: 1fr auto;
+	gap: 8px;
+	margin-top: 12px;
+}
+
+.fit-button {
+	min-height: 44px;
+	font-size: 0.95rem;
+}
+
+.neo-weight {
+	margin-top: 12px;
+	padding-top: 12px;
+	border-top: 1px solid var(--line);
+	width: 100%;
+}
+
+/* Result card */
+.result #fit-equation {
+	margin: 0 0 10px;
+	text-align: center;
+	overflow-x: auto;
+}
+
+.neo-equation {
+	display: block;
+	width: 100%;
+	padding: 12px 8px;
+	border: 1px solid var(--line);
+	border-radius: var(--radius-sm);
+	background: var(--surface-2);
+	color: inherit;
+	font-size: 1.05rem;
+	cursor: copy;
+	overflow-x: auto;
+}
+
+.neo-equation:hover {
+	border-color: var(--accent);
+}
+
+#r-squared-container {
+	margin: 0 0 6px;
+	font-size: 0.9rem;
+}
+
+.neo-fit-parameters {
+	margin: 0 0 8px;
+}
+
+.neo-fit-parameters[hidden] {
+	display: none;
+}
+
+.neo-fit-parameters p {
+	margin: 0;
+	padding: 6px 2px;
+	border-bottom: 1px solid var(--line);
+	font-size: 0.95rem;
+	overflow-x: auto;
+}
+
+.neo-chi {
+	display: inline-flex;
+	align-items: center;
+	gap: 6px;
+	margin-top: 8px;
+	padding: 3px 10px;
+	border-radius: 999px;
+	font-size: 0.78rem;
+	font-weight: 700;
+}
+
+.neo-chi::before {
+	content: '';
+	width: 7px;
+	height: 7px;
+	border-radius: 50%;
+	background: currentColor;
+}
+
+.neo-chi.is-good { color: var(--good); background: color-mix(in srgb, var(--good) 12%, transparent); }
+.neo-chi.is-low { color: var(--accent); background: var(--accent-soft); }
+.neo-chi.is-high { color: var(--warn); background: color-mix(in srgb, var(--warn) 12%, transparent); }
+
+#fit-status,
+.fit-weighting-note {
+	margin: 8px 0 0;
+	font-size: 0.8rem;
+	line-height: 1.5;
+	color: var(--ink-2);
+	overflow-wrap: anywhere;
+}
+
+.fit-weighting-note {
+	color: var(--ink-3);
+}
+
+.fit-outdated {
+	color: var(--brand) !important;
+	font-weight: 700;
+}
+
+/* ---------- Status bar ---------- */
+
+.neo-statusbar {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 12px;
+	min-height: var(--statusbar-h);
+	padding: 4px 14px calc(4px + env(safe-area-inset-bottom, 0px));
+	border-top: 1px solid var(--line);
+	background: var(--surface-2);
+	font-size: 0.76rem;
+	color: var(--ink-3);
+}
+
+.neo-status {
+	font-family: var(--font-mono);
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+
+.neo-status .is-saved {
+	color: var(--good);
+}
+
+.neo-status .is-practice {
+	color: var(--brand);
+}
+
+.neo-statusbar-legal {
+	white-space: nowrap;
+}
+
+.neo-statusbar a {
+	color: var(--ink-2);
+}
+
+@media (max-width: 760px) {
+	.neo-statusbar {
+		flex-direction: column;
+		align-items: flex-start;
+		gap: 2px;
+	}
 }
 
 /* ---------- Menus ---------- */
@@ -402,14 +1701,22 @@
 .neo-menu {
 	position: fixed;
 	z-index: 1000;
-	min-width: 220px;
-	padding: 6px;
-	border: 1px solid var(--card-border);
-	border-radius: 12px;
-	background: var(--card-bg);
-	box-shadow: 0 10px 30px rgba(0, 0, 0, 0.18);
 	display: flex;
 	flex-direction: column;
+	min-width: 220px;
+	padding: 6px;
+	border: 1px solid var(--line);
+	border-radius: 12px;
+	background: var(--surface);
+	box-shadow: var(--shadow-2);
+	animation: neo-pop 0.14s ease-out;
+}
+
+@keyframes neo-pop {
+	from {
+		opacity: 0;
+		transform: translateY(-4px) scale(0.98);
+	}
 }
 
 .neo-menu[hidden] {
@@ -417,135 +1724,28 @@
 }
 
 .neo-menu button {
-	min-height: 44px;
-	margin: 0;
+	min-height: 40px;
 	padding: 8px 12px;
 	border: none;
 	border-radius: 8px;
 	background: none;
-	box-shadow: none;
-	color: var(--text-main);
 	text-align: left;
-	font: inherit;
-	font-size: 0.95rem;
+	font-size: 0.9rem;
 	cursor: pointer;
 }
 
 .neo-menu button:hover:not(:disabled),
 .neo-menu button:focus-visible {
-	background: var(--muted-bg);
-	transform: none;
+	background: var(--surface-3);
 }
 
 .neo-menu button:disabled {
-	color: var(--text-secondary);
-	opacity: 0.5;
+	opacity: 0.45;
 	cursor: default;
 }
 
 .neo-menu button.is-danger:not(:disabled) {
-	color: var(--btn-danger);
-}
-
-/* ---------- Fitting and graph ---------- */
-
-.neo-fit-series {
-	display: flex;
-	align-items: center;
-	gap: 10px;
-	margin-bottom: 12px;
-}
-
-.neo-fit-series label {
-	font-weight: 700;
-	white-space: nowrap;
-}
-
-.neo-fit-series select {
-	flex: 1;
-	min-width: 0;
-	margin: 0;
-}
-
-.neo-fit-actions {
-	display: flex;
-	gap: 6px;
-}
-
-.neo-fit-series-label {
-	font-family: var(--font-body);
-	font-size: 0.85rem;
-	font-weight: 500;
-	color: var(--text-secondary);
-}
-
-#residual-wrap[hidden] {
-	display: none;
-}
-
-.neo-residual-heading {
-	margin: 8px 0 0;
-	font-size: 0.85rem;
-	font-weight: 600;
-	color: var(--text-secondary);
-}
-
-#residual-plot {
-	width: 100%;
-	height: 200px;
-}
-
-.neo-equation {
-	border: none;
-	background: none;
-	box-shadow: none;
-	color: inherit;
-	font: inherit;
-	padding: 4px 8px;
-	cursor: copy;
-}
-
-.neo-equation:hover {
-	transform: none;
-}
-
-/* ---------- Formula columns ---------- */
-
-.neo-col-formula {
-	display: block;
-	width: 100%;
-	max-width: 148px;
-	min-height: 32px;
-	margin: 0 0 2px;
-	padding: 2px 6px;
-	border: 1px dashed var(--role-err);
-	border-radius: 6px;
-	background: none;
-	box-shadow: none;
-	color: var(--role-err);
-	font-family: var(--font-mono);
-	font-size: 0.75rem;
-	white-space: nowrap;
-	overflow: hidden;
-	text-overflow: ellipsis;
-	cursor: pointer;
-}
-
-.neo-col-formula:hover,
-.neo-col-formula:focus-visible {
-	background: var(--muted-bg);
-	transform: none;
-}
-
-.neo-col-formula.has-error {
-	border-color: var(--btn-danger);
-	color: var(--btn-danger);
-}
-
-.neo-table tbody td .neo-cell.is-formula {
-	background: repeating-linear-gradient(135deg, transparent 0 6px, rgba(126, 99, 153, 0.07) 6px 12px);
-	color: var(--text-secondary);
-	cursor: default;
+	color: var(--danger);
 }
 
 /* ---------- Dialogs ---------- */
@@ -554,92 +1754,71 @@
 	width: min(560px, calc(100vw - 32px));
 	max-height: calc(100dvh - 48px);
 	padding: 0;
-	border: 1px solid var(--card-border);
-	border-radius: 16px;
-	background: var(--card-bg);
-	color: var(--text-main);
-	box-shadow: 0 20px 50px rgba(0, 0, 0, 0.25);
+	border: 1px solid var(--line);
+	border-radius: 18px;
+	background: var(--surface);
+	color: var(--ink);
+	box-shadow: var(--shadow-2);
+}
+
+.neo-dialog[open] {
+	animation: neo-pop 0.16s ease-out;
 }
 
 .neo-dialog-wide {
-	width: min(860px, calc(100vw - 32px));
+	width: min(880px, calc(100vw - 32px));
 }
 
 .neo-dialog::backdrop {
-	background: rgba(0, 0, 0, 0.45);
+	background: rgba(13, 16, 18, 0.45);
+	backdrop-filter: blur(2px);
 }
 
 .neo-dialog-body {
 	display: flex;
 	flex-direction: column;
-	gap: 8px;
-	padding: 20px 22px;
+	gap: 9px;
+	padding: 22px 24px;
 }
 
 .neo-dialog h2 {
-	margin: 0 0 4px;
+	margin: 0 0 2px;
 	font-family: var(--font-display);
 	font-weight: 400;
-	font-size: 1.3rem;
+	font-size: 1.45rem;
 }
 
 .neo-dialog label {
 	font-weight: 700;
-	font-size: 0.9rem;
+	font-size: 0.84rem;
+	color: var(--ink-2);
 }
 
 .neo-dialog input[type="text"],
 .neo-dialog select:not(.neo-role-select) {
 	width: 100%;
-	min-height: 44px;
-	margin: 0;
-	padding: 8px 10px;
-	border: 1px solid var(--input-border);
-	border-radius: 8px;
-	background: var(--card-bg);
-	color: var(--text-main);
-	font: inherit;
 }
 
 #formula-input {
 	font-family: var(--font-mono);
-}
-
-.neo-dialog input[type="text"]:focus,
-.neo-dialog select:not(.neo-role-select):focus {
-	outline: 2px solid var(--input-focus);
-	border-color: var(--brand-primary);
+	font-size: 1rem;
 }
 
 .neo-dialog-note {
 	margin: 0;
-	font-size: 0.85rem;
-	line-height: 1.45;
-	color: var(--text-secondary);
-}
-
-.neo-dialog code {
-	font-family: var(--font-mono);
-	font-size: 0.8rem;
+	font-size: 0.84rem;
+	line-height: 1.5;
+	color: var(--ink-2);
 }
 
 .neo-link-button {
 	display: inline;
-	min-height: 0;
-	margin: 0;
 	padding: 0;
 	border: none;
 	background: none;
-	box-shadow: none;
-	color: var(--brand-primary);
-	font: inherit;
+	color: var(--accent);
 	text-decoration: underline;
 	cursor: pointer;
-}
-
-.neo-link-button:hover {
-	background: none;
-	transform: none;
 }
 
 .neo-dialog-pair {
@@ -657,136 +1836,69 @@
 .neo-dialog-message {
 	min-height: 1.4em;
 	margin: 0;
-	font-size: 0.9rem;
+	font-size: 0.88rem;
 }
 
-.neo-dialog-message.is-error {
-	color: var(--btn-danger);
-}
-
-.neo-dialog-message.is-success {
-	color: var(--btn-create);
-}
+.neo-dialog-message.is-error { color: var(--danger); }
+.neo-dialog-message.is-success { color: var(--good); }
 
 .neo-dialog-actions {
 	display: flex;
 	justify-content: flex-end;
 	gap: 8px;
-	margin-top: 4px;
+	margin-top: 6px;
 }
 
 .neo-dialog-actions button {
-	min-height: 44px;
 	min-width: 104px;
-	margin: 0;
+	min-height: 42px;
 }
 
-.neo-dialog-cancel {
-	background: var(--btn-neutral);
-}
-
-.neo-dialog-cancel:hover {
-	background: var(--btn-neutral-hover);
-}
-
-.neo-dialog-confirm {
-	background: var(--btn-analyze);
-}
-
-.neo-dialog-confirm:hover {
-	background: var(--btn-analyze-hover);
-}
-
-[data-theme="dark"] .neo-dialog-confirm,
-[data-theme="dark"] .neo-dialog-cancel {
-	color: #1a1a1a;
+.neo-dialog-actions-wrap {
+	flex-wrap: wrap;
 }
 
 .neo-checklist {
 	display: flex;
 	flex-direction: column;
-	gap: 2px;
+	gap: 0;
 	margin: 0;
-	padding: 8px 12px;
-	border: 1px solid var(--border-color);
-	border-radius: 10px;
+	padding: 6px 12px;
+	border: 1px solid var(--line);
+	border-radius: 12px;
 	max-height: 40vh;
 	overflow-y: auto;
 }
 
 .neo-checklist legend {
 	padding: 0 4px;
-	font-size: 0.85rem;
+	font-size: 0.8rem;
 	font-weight: 700;
+	color: var(--ink-2);
 }
 
 .neo-dialog .neo-check {
 	display: flex;
 	align-items: center;
 	gap: 10px;
-	min-height: 44px;
+	min-height: 40px;
 	font-weight: 500;
+	color: var(--ink);
 	cursor: pointer;
 }
 
 .neo-check input {
-	width: 20px;
-	height: 20px;
+	width: 19px;
+	height: 19px;
 	flex: none;
-	accent-color: var(--btn-analyze);
-}
-
-.neo-csv-preview {
-	max-height: 40vh;
-}
-
-.neo-csv-name {
-	margin-top: 6px;
-	font-weight: 700;
-	text-align: center;
-}
-
-.neo-csv-unit {
-	font-size: 0.8rem;
-	color: var(--text-secondary);
-	text-align: center;
-}
-
-.neo-csv-cell {
-	padding: 8px 10px !important;
-	font-family: var(--font-mono);
-	font-size: 0.85rem;
-	text-align: center;
-	white-space: nowrap;
-}
-
-/* ---------- Uncertainties ---------- */
-
-.neo-weight {
-	display: flex;
-	align-items: center;
-	gap: 10px;
-	min-height: 44px;
-	margin-bottom: 8px;
-	font-size: 0.9rem;
-	cursor: pointer;
-}
-
-.neo-weight input {
-	width: 20px;
-	height: 20px;
-	flex: none;
-	accent-color: var(--btn-analyze);
-}
-
-.neo-fit-parameters p {
-	margin: 4px 0;
+	accent-color: var(--accent);
 }
 
 .neo-formula-working {
-	padding: 8px 12px;
-	border-radius: 10px;
-	background: var(--muted-bg);
+	padding: 10px 14px;
+	border-radius: 12px;
+	background: var(--surface-2);
+	border: 1px solid var(--line);
 	font-size: 0.9rem;
 	overflow-x: auto;
 }
@@ -799,28 +1911,178 @@
 	margin: 4px 0;
 }
 
-/* ---------- View Table ---------- */
-
+.neo-csv-preview,
 .neo-table-view-wrap {
-	max-height: 55vh;
+	max-height: 45vh;
+	border: 1px solid var(--line);
+	border-radius: 12px;
 }
 
-.neo-table-view th,
+.neo-csv-name {
+	margin-top: 6px;
+	font-weight: 700;
+	text-align: center;
+}
+
+.neo-csv-unit {
+	font-family: var(--font-mono);
+	font-size: 0.76rem;
+	color: var(--ink-2);
+	text-align: center;
+}
+
+.neo-csv-cell,
 .neo-table-view td {
-	padding: 8px 14px !important;
+	padding: 8px 12px !important;
+	font-family: var(--font-mono);
+	font-size: 0.85rem;
 	text-align: center;
 	white-space: nowrap;
 }
 
 .neo-table-view th {
+	padding: 9px 14px !important;
 	font-weight: 700;
+	text-align: center;
+	white-space: nowrap;
 }
 
-.neo-table-view td {
-	font-family: var(--font-mono);
-	font-size: 0.9rem;
+/* ---------- Plot ALL ---------- */
+
+#popup-background {
+	position: fixed;
+	inset: 0;
+	z-index: 900;
+	background: rgba(13, 16, 18, 0.45);
+	backdrop-filter: blur(2px);
 }
 
-.neo-dialog-actions-wrap {
-	flex-wrap: wrap;
+#popup-container {
+	position: fixed;
+	inset: 0;
+	z-index: 901;
+	padding: 16px;
+	pointer-events: none;
+}
+
+#popup-content {
+	position: relative;
+	width: min(1100px, 100%);
+	max-height: calc(100dvh - 32px);
+	margin: 0 auto;
+	overflow: auto;
+	padding: 20px 22px;
+	border: 1px solid var(--line);
+	border-radius: 18px;
+	background: var(--surface);
+	box-shadow: var(--shadow-2);
+	pointer-events: auto;
+	animation: neo-pop 0.16s ease-out;
+}
+
+#popup-title {
+	margin: 0 0 8px;
+	font-family: var(--font-display);
+	font-size: 1.45rem;
+}
+
+#popup-close {
+	position: absolute;
+	top: 16px;
+	right: 18px;
+	min-height: 36px;
+}
+
+#popup-plot {
+	width: 100%;
+	height: min(62vh, 620px);
+}
+
+.combined-plot-controls {
+	display: grid;
+	grid-template-columns: repeat(3, 1fr);
+	gap: 10px;
+	margin-top: 12px;
+}
+
+.control-row-horizontal {
+	display: flex;
+	flex-direction: column;
+	gap: 4px;
+}
+
+.control-row-horizontal label {
+	font-size: 0.8rem;
+	font-weight: 700;
+	color: var(--ink-2);
+}
+
+@media (max-width: 760px) {
+	.combined-plot-controls {
+		grid-template-columns: 1fr;
+	}
+}
+
+/* ---------- Toast ---------- */
+
+.toast-notification {
+	position: fixed;
+	bottom: calc(var(--statusbar-h) + 18px);
+	left: 50%;
+	z-index: 3000;
+	max-width: calc(100vw - 32px);
+	padding: 11px 20px;
+	border-radius: 12px;
+	background: var(--ink);
+	color: var(--surface);
+	font-size: 0.88rem;
+	font-weight: 600;
+	box-shadow: var(--shadow-2);
+	opacity: 0;
+	transform: translateX(-50%) translateY(14px);
+	transition: opacity 0.25s ease, transform 0.25s ease;
+	pointer-events: none;
+}
+
+.toast-notification.toast-visible {
+	opacity: 1;
+	transform: translateX(-50%) translateY(0);
+}
+
+/* ---------- Touch screens ---------- */
+
+@media (pointer: coarse) {
+	.neo-table .neo-cell,
+	.neo-row-head button {
+		min-height: 44px;
+	}
+
+	.neo-tool,
+	.tablink,
+	.neo-series-item,
+	.neo-menu button {
+		min-height: 44px;
+	}
+
+	.neo-role-select,
+	.neo-col-menu-button,
+	.neo-col-name,
+	.neo-col-unit {
+		min-height: 34px !important;
+	}
+
+	.neo-col-menu-button {
+		width: 34px;
+	}
+
+	select,
+	input[type="text"],
+	input[type="number"] {
+		min-height: 44px;
+	}
+
+	.fit-button,
+	.clear-fit-button {
+		min-height: 48px;
+	}
 }

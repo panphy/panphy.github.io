@@ -214,7 +214,7 @@ const TOUR_CHAPTERS = {
 				target: '#plot',
 				body: 'Mean of Repeats already hid the three repeats. Hide the mean T as well, so the graph shows only T² against L.',
 				action: {
-					instruction: 'Tap T in the legend under the graph.',
+					instruction: 'Tap T in the Series card, or in the legend under the graph.',
 					isDone: isTourMeanHidden,
 					perform: hideTourMean
 				}
@@ -223,9 +223,9 @@ const TOUR_CHAPTERS = {
 				title: 'Choose what to fit',
 				target: '.neo-fit-series',
 				prepare: () => openTourSection('best-fit-content'),
-				body: 'Fit series chooses which Y column the fit uses. Weighting by ±ΔY lets the more certain points count for more.',
+				body: 'Series to fit chooses which Y column the fit uses. Weighting by ±ΔY lets the more certain points count for more.',
 				action: {
-					instruction: 'Choose "T^2 against L", and tick Weight the fit by ±ΔY.',
+					instruction: 'Choose "T^2 against L", and turn on Weight by ±ΔY.',
 					isDone: isTourFitSetUp,
 					perform: setUpTourFit
 				}
