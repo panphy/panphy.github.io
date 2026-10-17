@@ -1055,6 +1055,70 @@ input[type="number"]:focus {
 	color: var(--ink-3);
 }
 
+/* The column letter is the drag handle for moving a column. */
+.neo-col-grip {
+	display: inline-flex;
+	align-items: center;
+	gap: 1px;
+	padding: 4px 3px;
+	margin: -4px 0;
+	border-radius: 6px;
+	cursor: grab;
+	touch-action: none;
+	user-select: none;
+	-webkit-user-select: none;
+}
+
+.neo-col-grip::before {
+	content: '⠿';
+	font-size: 0.8rem;
+	line-height: 1;
+	color: var(--ink-3);
+	opacity: 0.55;
+}
+
+.neo-col-grip:hover {
+	background: var(--surface-3);
+	color: var(--ink);
+}
+
+.neo-col-grip:hover::before {
+	opacity: 1;
+	color: var(--accent);
+}
+
+.neo-col-head.is-dragging {
+	opacity: 0.45;
+}
+
+.neo-is-dragging-column,
+.neo-is-dragging-column * {
+	cursor: grabbing !important;
+	user-select: none !important;
+	-webkit-user-select: none !important;
+}
+
+.neo-table-wrap {
+	position: relative;
+}
+
+.neo-drop-indicator {
+	position: absolute;
+	z-index: 5;
+	width: 4px;
+	border-radius: 2px;
+	background: var(--accent);
+	box-shadow: 0 0 0 3px var(--accent-soft);
+	pointer-events: none;
+}
+
+@media (pointer: coarse) {
+	.neo-col-grip {
+		padding: 8px 6px;
+		margin: -8px -2px;
+	}
+}
+
 .neo-role-select {
 	flex: 1;
 	min-width: 0;

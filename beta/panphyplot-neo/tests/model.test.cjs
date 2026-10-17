@@ -283,3 +283,14 @@ test('Fill with one value follows the readings an uncertainty belongs to', () =>
 	assert.equal(plain.owner, null);
 	assert.deepEqual(plain.rows, [0, 1, 2, 3]);
 });
+
+test('a dragged column lands where it is dropped, and formula letters follow it', () => {
+	const sheet = namedSheet([['X', ['1']], ['Y', ['2'], { name: 'a' }], ['Y', ['3'], { name: 'b' }], ['Y', [], { formula: 'B + C' }]]);
+	const before = sheet.columns.map(column => column.id);
+	assert.equal(model.moveColumnTo(sheet, sheet.columns[1].id, 3), true);
+	assert.deepEqual(sheet.columns.map(column => column.name || column.formula), ['', 'b', 'B + C', 'a']);
+	model.remapFormulaLetters(sheet, before, math);
+	model.recomputeFormulas(sheet, math);
+	assert.equal(sheet.columns[2].cells[0], '5');
+	assert.equal(model.moveColumnTo(sheet, sheet.columns[0].id, 0), false);
+});
