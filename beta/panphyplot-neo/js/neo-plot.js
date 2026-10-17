@@ -279,6 +279,53 @@
 		}
 	}
 
+	// Plotly typesets every graph label afresh on each redraw, in a hidden div named math-output-*.
+	// Finished output is kept by font size and TeX, so a redraw with unchanged labels typesets nothing.
+	const PLOT_TEX_CACHE_LIMIT = 300;
+	const plotTexCache = new Map();
+	let plotTexCacheInstalled = false;
+
+	function glyphsPresent(entry) {
+		return entry.glyphs.every(id => document.getElementById(id));
+	}
+
+	function installPlotTexCache() {
+		if (typeof MathJax === 'undefined' || !MathJax.Hub || typeof MathJax.Hub.Typeset !== 'function') return;
+		if (plotTexCacheInstalled) return;
+		plotTexCacheInstalled = true;
+		const original = MathJax.Hub.Typeset;
+		const cachedTypeset = function(element, callback) {
+			if (!element || element.nodeType !== 1 || !String(element.id).startsWith('math-output-')) {
+				return original.apply(this, arguments);
+			}
+			const key = `${element.style.fontSize}|${element.textContent}`;
+			const entry = plotTexCache.get(key);
+			if (entry && glyphsPresent(entry)) {
+				element.innerHTML = entry.html;
+				// Nothing returned, so Plotly's queue moves straight on to read the output.
+				if (typeof callback === 'function') callback();
+				return undefined;
+			}
+			return original.call(this, element, () => {
+				const output = element.querySelector('.MathJax_SVG');
+				if (output && output.querySelector('svg')) {
+					// The copy leaves out MathJax's source script and ids, so it never clashes or is reprocessed.
+					const copy = output.cloneNode(true);
+					copy.querySelectorAll('[id]').forEach(node => node.removeAttribute('id'));
+					copy.removeAttribute('id');
+					const glyphs = [...copy.querySelectorAll('use')]
+						.map(node => (node.getAttribute('href') || node.getAttribute('xlink:href') || '').replace(/^#/, ''))
+						.filter(Boolean);
+					plotTexCache.delete(key);
+					plotTexCache.set(key, { html: copy.outerHTML, glyphs: [...new Set(glyphs)] });
+					if (plotTexCache.size > PLOT_TEX_CACHE_LIMIT) plotTexCache.delete(plotTexCache.keys().next().value);
+				}
+				if (typeof callback === 'function') callback();
+			});
+		};
+		MathJax.Hub.Typeset = cachedTypeset;
+	}
+
 	// One axis label in the current mode, before the $...$ wrapping.
 	function columnAxisText(sheet, column) {
 		const name = NeoModel.getColumnLabel(sheet, column);
@@ -478,6 +525,7 @@
 
 	function plotGraph() {
 		if (typeof Plotly === 'undefined') return;
+		installPlotTexCache();
 		const sheet = getActiveSheet();
 		const themeSettings = getPlotThemeSettings();
 		const series = NeoModel.getSeries(sheet).filter(entry => entry.xCol);
@@ -495,6 +543,7 @@
 
 	// Residuals of the fit on the chosen series, drawn under the main graph.
 	function plotResiduals() {
+		installPlotTexCache();
 		const wrap = document.getElementById('residual-wrap');
 		const result = datasetFitResults[activeFitKey];
 		const target = resolveFitKey(activeFitKey);
@@ -530,6 +579,7 @@
 	}
 
 	function plotAllSheets() {
+		installPlotTexCache();
 		const themeSettings = getPlotThemeSettings();
 		const multiple = neoState.sheets.length > 1;
 		const data = [];
