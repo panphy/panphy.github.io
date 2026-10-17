@@ -15,7 +15,10 @@ CSV import shows a preview in which every column's role is chosen; the suggested
 - `js/neo-state.js`: saved state, and the globals the fitting code reads. Fits are keyed `<sheet id>:<Y column id>`.
 - `js/neo-fitting.js`: a copy of `tools/panphyplot/js/curve-fitting.js`. It renames `activeSet` to `activeFitKey`, records the data each fit used, changes the point check in `fitAdvancedCurve`, and adds weighting and parameter uncertainties to the Linear and Custom fits. Bring fixes to the original across by hand.
 - `js/neo-plot.js`, `js/neo-ui.js`, `js/neo-dialogs.js`, `js/neo-main.js`: graph, table, the formula, mean and CSV dialogs, and start-up.
+- `js/neo-copy.js`: View Table (copy for a spreadsheet, as an image, Markdown or LaTeX) and copying the fitted equation as an image or LaTeX. Its clipboard and SVG-to-PNG helpers are copied from `tools/panphyplot/js/ui.js`.
+- `js/neo-tour.js`: the guided tour at `?tour=columns`, on practice data with saving switched off. Its card and spotlight engine is copied from `tools/panphyplot/js/tour.js` and uses `tools/panphyplot/css/tour.css`.
+- `manual.html`: the manual for this version.
 
-The page loads `fit-core.js`, `fit-worker.js`, math.js, `math_ref.html` and `panphyplot.css` from `tools/panphyplot/`, so changes there also affect this version.
+The page loads `fit-core.js`, `fit-worker.js`, math.js, `math_ref.html`, `panphyplot.css` and `tour.css` from `tools/panphyplot/`, so changes there also affect this version.
 
 Run the tests with `node --test beta/panphyplot-neo/tests/`.

@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+	<meta name="theme-color" content="#F8F6F1">
+	<script src="/assets/theme.js"></script>
+	<meta name="apple-mobile-web-app-capable" content="yes">
+	<meta name="apple-mobile-web-app-status-bar-style" content="default">
+	<meta name="robots" content="noindex">
+	<link rel="stylesheet" href="/assets/standalone-top.css">
+	<title>PanPhyPlot (neo-beta) Manual</title>
+	<link rel="icon" type="image/png" href="/assets/favicon.png">
+	<script type="text/x-mathjax-config">
+		MathJax.Hub.Config({ tex2jax: { inlineMath: [['\\(', '\\)']], displayMath: [['\\[', '\\]']], processEscapes: true } });
+	</script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-AMS-MML_SVG.js" defer></script>
+	<link rel="stylesheet" href="/assets/theme-toggle.css">
+	<script src="/assets/theme-toggle.js"></script>
+	<style>
+		@import url('/assets/fonts/fonts.css');
+
+		:root {
+			color-scheme: light;
+			--font-body: 'Manrope', sans-serif;
+			--font-display: 'DM Serif Display', serif;
+			--font-mono: 'IBM Plex Mono', monospace;
+			--bg: #F8F6F1;
+			--bg-pattern: #EDE9E0;
+			--text: #1B1B1B;
+			--muted: #6B6560;
+			--brand: #C2410C;
+			--accent: #0F766E;
+			--card: #ffffff;
+			--border: #E8E4DD;
+			--code-bg: #F0ECE4;
+		}
+
+		[data-theme="dark"] {
+			color-scheme: dark;
+			--bg: #111110;
+			--bg-pattern: #1A1A18;
+			--text: #EDEBE8;
+			--muted: #9C9890;
+			--brand: #FB923C;
+			--accent: #5EEAD4;
+			--card: #1A1A19;
+			--border: #2A2A28;
+			--code-bg: #222220;
+		}
+
+		* { box-sizing: border-box; }
+
+		body {
+			margin: 0;
+			font-family: var(--font-body);
+			line-height: 1.6;
+			color: var(--text);
+			background-color: var(--bg);
+			background-image: radial-gradient(var(--bg-pattern) 1px, transparent 1px);
+			background-size: 30px 30px;
+		}
+
+		.top {
+			position: sticky;
+			top: var(--standalone-top, 0px);
+			z-index: 5;
+			display: flex;
+			align-items: center;
+			justify-content: space-between;
+			gap: 12px;
+			padding: 10px 20px;
+			background: var(--bg);
+			border-bottom: 1px solid var(--border);
+		}
+
+		.top a {
+			color: var(--brand);
+			font-weight: 700;
+			text-decoration: none;
+			min-height: 44px;
+			display: inline-flex;
+			align-items: center;
+		}
+
+		main {
+			max-width: 860px;
+			margin: 0 auto;
+			padding: 24px 20px 40px;
+		}
+
+		h1, h2, h3 {
+			font-family: var(--font-display);
+			font-weight: 400;
+			line-height: 1.25;
+		}
+
+		h1 { font-size: 2.1rem; margin: 8px 0 4px; }
+		h2 { font-size: 1.55rem; margin: 36px 0 8px; padding-top: 8px; border-top: 1px solid var(--border); }
+		h3 { font-size: 1.2rem; margin: 24px 0 6px; }
+
+		.lead { color: var(--muted); font-size: 1.05rem; margin-top: 0; }
+
+		nav.contents {
+			background: var(--card);
+			border: 1px solid var(--border);
+			border-radius: 14px;
+			padding: 12px 20px;
+			margin: 20px 0;
+		}
+
+		nav.contents ol { margin: 6px 0; padding-left: 1.2em; columns: 2; column-gap: 32px; }
+		nav.contents a { color: var(--accent); }
+
+		code, kbd {
+			font-family: var(--font-mono);
+			font-size: 0.88em;
+			background: var(--code-bg);
+			padding: 1px 6px;
+			border-radius: 6px;
+		}
+
+		table {
+			width: 100%;
+			border-collapse: collapse;
+			margin: 12px 0;
+			background: var(--card);
+			border-radius: 12px;
+			overflow: hidden;
+		}
+
+		th, td {
+			padding: 8px 12px;
+			border-bottom: 1px solid var(--border);
+			text-align: left;
+			vertical-align: top;
+		}
+
+		th { background: var(--code-bg); }
+
+		.note {
+			background: var(--card);
+			border-left: 4px solid var(--accent);
+			border-radius: 8px;
+			padding: 10px 14px;
+			margin: 14px 0;
+		}
+
+		.example {
+			display: grid;
+			grid-template-columns: repeat(5, minmax(0, 1fr));
+			gap: 6px;
+			margin: 12px 0;
+			font-family: var(--font-mono);
+			font-size: 0.85rem;
+			text-align: center;
+		}
+
+		.example span {
+			padding: 6px 4px;
+			border-radius: 8px;
+			background: var(--card);
+			border: 1px solid var(--border);
+		}
+
+		.example .role { font-weight: 700; color: var(--brand); }
+
+		footer {
+			text-align: center;
+			color: var(--muted);
+			font-size: 0.9rem;
+			padding: 20px;
+		}
+
+		footer a { color: var(--brand); }
+
+		@media (max-width: 640px) {
+			nav.contents ol { columns: 1; }
+			.example { font-size: 0.75rem; }
+		}
+	</style>
+</head>
+
+<body>
+	<div class="top">
+		<a href="/beta/panphyplot-neo.html">← Back to PanPhyPlot (neo-beta)</a>
+		<div class="theme-toggle">
+			<button id="theme-button" data-panphy-theme-toggle aria-label="Toggle Light/Dark Theme" title="Toggle between light and dark themes">☀️</button>
+		</div>
+	</div>
+
+	<main>
+		<h1>PanPhyPlot (neo-beta) Manual</h1>
+		<p class="lead">Graphs and fits for practical physics, built around columns: from repeat readings to a result with its uncertainty.</p>
+		<p>Prefer to learn by doing? <a href="/beta/panphyplot-neo.html?tour=columns">Take the guided tour</a>. It uses practice data and leaves your own work alone.</p>
+
+		<nav class="contents" aria-label="Contents">
+			<strong>Contents</strong>
+			<ol>
+				<li><a href="#sheets">Sheets and columns</a></li>
+				<li><a href="#roles">Column roles</a></li>
+				<li><a href="#entering">Entering data</a></li>
+				<li><a href="#formulas">Formula columns</a></li>
+				<li><a href="#repeats">Repeat readings</a></li>
+				<li><a href="#uncertainties">Uncertainties</a></li>
+				<li><a href="#graph">The graph</a></li>
+				<li><a href="#fitting">Fitting</a></li>
+				<li><a href="#results">Reading a fit</a></li>
+				<li><a href="#sharing">Sharing your work</a></li>
+				<li><a href="#saving">Saving and devices</a></li>
+			</ol>
+		</nav>
+
+		<h2 id="sheets">1. Sheets and columns</h2>
+		<p>Each tab along the top is a <strong>sheet</strong>: use one sheet for each experiment. Tap <kbd>+</kbd> to add a sheet, tap the open sheet's name to rename it, and tap <kbd>×</kbd> to remove it.</p>
+		<p>A sheet is a table with as many columns as you need. Every column has a letter (A, B, C…), a <strong>name</strong> and a <strong>unit</strong>. Axis titles are built from them in the form <em>name / unit</em>, for example <code>L / m</code>.</p>
+		<p>The <kbd>⋯</kbd> button on a column heading moves, inserts, fills, clears or deletes the column, or gives it a formula. The row number on the left inserts or deletes a row.</p>
+
+		<h2 id="roles">2. Column roles</h2>
+		<p>The coloured chip at the top of each column sets its role:</p>
+		<table>
+			<thead>
+				<tr><th>Role</th><th>Meaning</th></tr>
+			</thead>
+			<tbody>
+				<tr><td><strong>X</strong></td><td>Values for the horizontal axis.</td></tr>
+				<tr><td><strong>Y</strong></td><td>Values for the vertical axis. Each Y column is one series on the graph.</td></tr>
+				<tr><td><strong>±ΔX</strong>, <strong>±ΔX %</strong></td><td>The uncertainty in an X column, absolute or as a percentage.</td></tr>
+				<tr><td><strong>±ΔY</strong>, <strong>±ΔY %</strong></td><td>The uncertainty in a Y column, absolute or as a percentage.</td></tr>
+				<tr><td><strong>Ignore</strong></td><td>Kept in the table, but not plotted.</td></tr>
+			</tbody>
+		</table>
+		<p>Columns are paired by position, as in OriginPro:</p>
+		<ul>
+			<li>A <strong>Y</strong> column plots against the <strong>nearest X column to its left</strong>.</li>
+			<li>A <strong>±ΔY</strong> column belongs to the nearest Y column to its left.</li>
+			<li>A <strong>±ΔX</strong> column belongs to the nearest X column to its left.</li>
+		</ul>
+		<p>So this sheet gives two series, T1 and T2 against L, with error bars on T2 only:</p>
+		<div class="example" aria-label="Example layout: L is X, T1 is Y, T2 is Y, ΔT2 is ±ΔY">
+			<span class="role">X</span><span class="role">Y</span><span class="role">Y</span><span class="role">±ΔY</span><span class="role">—</span>
+			<span>L / m</span><span>T1 / s</span><span>T2 / s</span><span>ΔT2 / s</span><span></span>
+		</div>
+		<p>A second X column further right starts a new group: the Y columns after it plot against it. Use <strong>Move left</strong> and <strong>Move right</strong> in a column's <kbd>⋯</kbd> menu to change the pairing.</p>
+
+		<h2 id="entering">3. Entering data</h2>
+		<h3>Typing</h3>
+		<p>Tap a cell and type a number such as <code>1.25</code>, <code>-0.4</code> or <code>3e-5</code>. Arrow keys and <kbd>Enter</kbd> move between cells, and <kbd>Enter</kbd> on the last row adds a row. Commas and units in a cell are not numbers: the cell turns red, is kept, and is left out of the graph.</p>
+		<p>To give every reading the same uncertainty, such as ±0.05 s, add a ±ΔY column and use <strong>Fill with one value…</strong> from its <kbd>⋯</kbd> menu.</p>
+		<h3>Pasting from a spreadsheet</h3>
+		<p>Copy a block of cells in a spreadsheet, tap the cell where it should start and paste. Rows and columns are added as needed. If you paste into the top row and the first row of the block is text, such as <code>L / m</code> or <code>T (s)</code>, it becomes the column names and units.</p>
+		<h3>Importing a CSV file</h3>
+		<p><strong>Import .csv</strong> opens a preview of the file. Check the role chosen for each column and whether the first row holds names, then choose a new sheet or the current one. Roles are only suggested from clear headings: a column called <code>Δx</code> is suggested as the uncertainty of the column named <code>x</code>. Nothing is decided without the preview.</p>
+
+		<h2 id="formulas">4. Formula columns</h2>
+		<p><strong>Formula Column</strong> adds a column calculated from others, row by row; <strong>Set formula…</strong> in a column's <kbd>⋯</kbd> menu turns an existing column into one. Its cells are shaded, cannot be typed into, and follow any change to the data.</p>
+		<ul>
+			<li>Refer to a column by its letter (<code>B</code>) or by its name, if the name is a single word such as <code>T</code> or <code>T1</code>.</li>
+			<li>Use <code>*</code> to multiply and <code>^</code> for powers: <code>T^2</code>, <code>4*pi^2*L/T^2</code>, <code>1/sqrt(d)</code>. No leading <code>=</code> is needed.</li>
+			<li>Functions include <code>sqrt</code>, <code>exp</code>, <code>log</code> (natural log), <code>log10</code>, <code>sin</code>, <code>cos</code>, <code>tan</code> (in radians), <code>abs</code>, <code>mean</code>, <code>min</code> and <code>max</code>. Constants are <code>pi</code> and <code>e</code>.</li>
+			<li>A row where any input is blank or invalid stays blank.</li>
+		</ul>
+		<p>The dialog checks the formula as you type and shows the first row's result. Formulas that use column letters keep working when columns are moved or inserted. Renaming a column breaks a formula that uses its name: edit the formula to use the new name.</p>
+		<div class="note">Column letters take priority. In a sheet with five or more columns, <code>E</code> means column E, not Euler's number: use <code>e</code> for that.</div>
+
+		<h2 id="repeats">5. Repeat readings</h2>
+		<p>Put each set of repeats in its own Y column, such as T1, T2 and T3. <strong>Mean of Repeats</strong> then adds a formula column holding their mean, named after them (T). It can also:</p>
+		<ul>
+			<li>add a ±Δ column of <strong>half the spread between the largest and smallest readings</strong>, a common estimate of the uncertainty in a mean;</li>
+			<li>hide the repeat series, so the graph shows the mean.</li>
+		</ul>
+		<p>A row with a missing reading is left blank in the mean.</p>
+
+		<h2 id="uncertainties">6. Uncertainties</h2>
+		<p>Uncertainties live in ±ΔX and ±ΔY columns, absolute or as a percentage of each value, and appear as error bars.</p>
+		<h3>Carrying uncertainties through a formula</h3>
+		<p>Tick <strong>Add a ±Δ column</strong> in the formula dialog to add a column with the uncertainty of the formula's result. It uses each input's own ±Δ column, by the pairing rule above, and combines them:</p>
+		<p>\[ \Delta f = \sqrt{\left(\frac{\partial f}{\partial a}\,\Delta a\right)^2 + \left(\frac{\partial f}{\partial b}\,\Delta b\right)^2 + \cdots} \]</p>
+		<p>For \(f = T^2\), \(\dfrac{\partial f}{\partial T} = 2T\), so \(\Delta(T^2) = 2T\,\Delta T\). The dialog writes out each derivative for your formula. This assumes the uncertainties are small and independent; inputs without a ±Δ column add nothing. Percentage uncertainties are turned into absolute ones first.</p>
+
+		<h2 id="graph">7. The graph</h2>
+		<ul>
+			<li>Every Y series of the sheet is plotted, with error bars from its ±Δ columns.</li>
+			<li>Tap a legend entry to hide or show that series, and its fit.</li>
+			<li>The title follows the columns until you type your own; clear it to return to the automatic title.</li>
+			<li>The toolbar above the graph zooms, pans, rescales and downloads a PNG image.</li>
+			<li><strong>LaTeX mode</strong> typesets names, units and titles: a unit of <code>m s^{-1}</code> reads as m s⁻¹.</li>
+			<li><strong>Plot ALL Sheets</strong> draws every series of every sheet together, with labels you can edit.</li>
+		</ul>
+
+		<h2 id="fitting">8. Fitting</h2>
+		<p>Open <strong>Add Best Fit Line</strong> and choose the <strong>Fit series</strong>: the Y column to fit. Each series keeps its own fit.</p>
+		<table>
+			<thead>
+				<tr><th>Tab</th><th>Models</th></tr>
+			</thead>
+			<tbody>
+				<tr><td>Basic</td><td>Linear \(y = mx + c\), quadratic, cubic, exponential and power.</td></tr>
+				<tr><td>Advanced</td><td>Sinusoidal and Gaussian, from starting values you can adjust.</td></tr>
+				<tr><td>Custom</td><td>Your own formula in \(x\), such as <code>A*exp(-k*x)+c</code> or <code>k*x</code>. Every other letter is a parameter to fit.</td></tr>
+			</tbody>
+		</table>
+		<h3>Weighted fits</h3>
+		<p>Tick <strong>Weight the fit by ±ΔY</strong> to let the more certain points count for more: each point has weight \(1/\Delta y^2\). Weighting applies to Linear and Custom fits, and needs a ±ΔY above zero for every point. For a weighted exponential or power law, write it as a Custom fit.</p>
+		<p>A fit becomes <em>Outdated</em>, drawn dashed, as soon as its data or ±ΔY change. Click <strong>Fit Curve</strong> again to update it.</p>
+
+		<h2 id="results">9. Reading a fit</h2>
+		<ul>
+			<li><strong>The equation</strong> of the fitted curve. Tap it to copy it as an image or as LaTeX.</li>
+			<li><strong>Parameters with uncertainties</strong> for Linear and Custom fits, such as \(m = 3.97 \pm 0.05\), with the uncertainty to two significant figures. A weighted fit treats each ±ΔY as a standard uncertainty. An unweighted fit estimates the uncertainty from how far the points scatter about the line.</li>
+			<li><strong>\(R^2\)</strong>, near 1 when the points lie close to the curve.</li>
+			<li><strong>\(\chi^2/\nu\)</strong>, shown when every point has a ±ΔY. Here \(\chi^2 = \sum \left(\frac{y - f(x)}{\Delta y}\right)^2\), and \(\nu\) is the number of points minus the number of fitted parameters. Near 1, the points scatter about as much as their uncertainties suggest. Much more than 1, the uncertainties are too small or the model does not fit. Much less than 1, the uncertainties are generous.</li>
+			<li><strong>Residuals</strong>, plotted under the graph: the vertical distance of each point from the fit. A pattern in them, such as a curve, suggests the model is wrong.</li>
+		</ul>
+		<p>Example: for a pendulum, \(T^2 = \dfrac{4\pi^2}{g}L\), so a straight-line fit of \(T^2\) against \(L\) gives \(g = \dfrac{4\pi^2}{m}\), with \(\dfrac{\Delta g}{g} = \dfrac{\Delta m}{m}\).</p>
+
+		<h2 id="sharing">10. Sharing your work</h2>
+		<ul>
+			<li><strong>View Table</strong> shows the sheet with each value beside its own ± uncertainty, ready to copy for a spreadsheet, as an image, as Markdown or as LaTeX. Calculated values are rounded to the decimal place of their uncertainty; typed values appear as entered.</li>
+			<li><strong>Export .csv</strong> saves every column, including calculated ones, with headings such as <code>L / m</code> that Import .csv reads back. Formulas themselves are not saved in the file.</li>
+			<li>The camera button on the graph saves it as a PNG image.</li>
+		</ul>
+
+		<h2 id="saving">11. Saving and devices</h2>
+		<p>Your sheets are saved automatically in this browser on this device, separately from the original PanPhyPlot. They are not uploaded anywhere, and clearing the browser's site data removes them: export a CSV to keep a copy or to move to another device.</p>
+		<p>This version is designed for tablets and computers. On a phone it links to the original PanPhyPlot instead.</p>
+	</main>
+
+	<footer>
+		&copy; 2026 <a href="https://panphy.app/" target="_blank" rel="noopener noreferrer">PanPhy Labs</a>. All rights reserved.
+	</footer>
+
+	<script>
+		document.addEventListener('DOMContentLoaded', () => {
+			window.PanPhyThemeToggle.mount(document.getElementById('theme-button'));
+		});
+	</script>
+</body>
+
+</html>

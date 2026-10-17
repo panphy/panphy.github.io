@@ -798,3 +798,29 @@
 .neo-formula-working p {
 	margin: 4px 0;
 }
+
+/* ---------- View Table ---------- */
+
+.neo-table-view-wrap {
+	max-height: 55vh;
+}
+
+.neo-table-view th,
+.neo-table-view td {
+	padding: 8px 14px !important;
+	text-align: center;
+	white-space: nowrap;
+}
+
+.neo-table-view th {
+	font-weight: 700;
+}
+
+.neo-table-view td {
+	font-family: var(--font-mono);
+	font-size: 0.9rem;
+}
+
+.neo-dialog-actions-wrap {
+	flex-wrap: wrap;
+}
