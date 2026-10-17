@@ -27,6 +27,7 @@ document.addEventListener('DOMContentLoaded', () => {
 	initializeInterface();
 	initializeDialogs();
 	initializeCopying();
+	initializePaneDividers();
 	updateBasicFitEquation();
 	changeAdvancedFitMethod();
 	setInitialParameters(document.getElementById('advanced-fit-method').value);

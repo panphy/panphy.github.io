@@ -92,7 +92,7 @@
 		</div>
 
 		<main class="container neo-workspace">
-			<section class="input-section neo-pane neo-pane-data" aria-labelledby="data-pane-title">
+			<section class="input-section neo-pane neo-pane-data" id="data-pane" aria-labelledby="data-pane-title">
 				<div class="neo-pane-head">
 					<h2 id="data-pane-title">Data</h2>
 					<p class="neo-pane-hint">Y plots against the nearest X to its left</p>
@@ -110,6 +110,9 @@
 				<input type="file" id="csv-file-input" accept=".csv,.txt,text/csv,text/plain" hidden>
 			</section>
 
+			<div class="neo-divider" id="divider-data" role="separator" tabindex="0" aria-label="Data pane width"
+				aria-orientation="vertical" aria-controls="data-pane"
+				title="Drag to resize. Use arrow keys to adjust; double-click or press Enter to reset."></div>
 			<div class="neo-right">
 			<section class="graph-section neo-pane neo-pane-graph" aria-label="Graph">
 				<div class="neo-pane-head neo-graph-head">
@@ -135,7 +138,10 @@
 				</div>
 			</section>
 
-			<aside class="neo-pane neo-pane-inspector" aria-label="Fit and results">
+			<div class="neo-divider" id="divider-inspector" role="separator" tabindex="0" aria-label="Inspector width"
+				aria-orientation="vertical" aria-controls="inspector-pane"
+				title="Drag to resize. Use arrow keys to adjust; double-click or press Enter to reset."></div>
+			<aside class="neo-pane neo-pane-inspector" id="inspector-pane" aria-label="Fit and results">
 				<section class="neo-card" aria-labelledby="series-card-title">
 					<h2 class="neo-card-title" id="series-card-title">Series</h2>
 					<ul class="neo-series-list" id="series-list"></ul>
@@ -405,6 +411,7 @@
 		- /beta/panphyplot-neo/js/neo-ui.js (table, sheets, menus)
 		- /beta/panphyplot-neo/js/neo-dialogs.js (formula, mean and CSV dialogs)
 		- /beta/panphyplot-neo/js/neo-copy.js (copying the equation, View Table)
+		- /beta/panphyplot-neo/js/neo-panes.js (draggable pane dividers)
 		- /beta/panphyplot-neo/js/neo-tour.js (guided tour on practice data)
 		- /beta/panphyplot-neo/js/neo-main.js (bootstrap)
 		The fit engine (fit-core.js, fit-worker.js) and math.js load from /tools/panphyplot/js/.
@@ -418,6 +425,7 @@
 	<script src="/beta/panphyplot-neo/js/neo-ui.js"></script>
 	<script src="/beta/panphyplot-neo/js/neo-dialogs.js"></script>
 	<script src="/beta/panphyplot-neo/js/neo-copy.js"></script>
+	<script src="/beta/panphyplot-neo/js/neo-panes.js"></script>
 	<script src="/beta/panphyplot-neo/js/neo-main.js"></script>
 	<script src="/beta/panphyplot-neo/js/neo-tour.js"></script>
 </body>
