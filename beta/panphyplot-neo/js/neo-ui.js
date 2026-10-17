@@ -77,6 +77,13 @@ function renderSeriesList() {
 	const sheet = getActiveSheet();
 	if (!list || !sheet) return;
 	const series = NeoModel.getSeries(sheet);
+	// Typing in a cell refreshes this card on every keystroke; rebuild (and re-typeset) only on change.
+	const signature = JSON.stringify([latexMode, sheet.id, sheet.hiddenSeries, series.map(entry => [
+		describeSeries(sheet, entry), getSeriesColor(sheet, entry.id), NeoModel.getSeriesPoints(sheet, entry).length,
+		datasetFitResults[makeFitKey(sheet, entry.id)]?.stale ?? null
+	])]);
+	if (list.dataset.signature === signature) return;
+	list.dataset.signature = signature;
 	if (!series.length) {
 		const empty = document.createElement('li');
 		empty.className = 'neo-series-empty';
@@ -98,7 +105,8 @@ function renderSeriesList() {
 		swatch.style.setProperty('--series-color', color || 'var(--line-strong)');
 		const name = document.createElement('span');
 		name.className = 'neo-series-name';
-		name.textContent = describeSeries(sheet, entry);
+		setSeriesText(name, sheet, entry);
+		name.title = describeSeries(sheet, entry);
 		const meta = document.createElement('span');
 		meta.className = 'neo-series-meta';
 		const count = NeoModel.getSeriesPoints(sheet, entry).length;
@@ -750,6 +758,37 @@ function syncTitleInput(force = false) {
 		const text = getSheetTitle(sheet);
 		if (input.value !== text) input.value = text;
 	}
+	renderTitleDisplay();
+}
+
+// In LaTeX mode the header shows the title typeset; a tap swaps in the text field to edit it.
+let renderedTitle = null;
+
+function renderTitleDisplay() {
+	const input = document.getElementById('graph-title');
+	const display = document.getElementById('graph-title-display');
+	if (!input || !display) return;
+	const text = input.value.trim();
+	const typeset = latexMode && text !== '' && document.activeElement !== input;
+	input.hidden = typeset;
+	display.hidden = !typeset;
+	if (!typeset) {
+		renderedTitle = null;
+		return;
+	}
+	if (renderedTitle === text) return;
+	renderedTitle = text;
+	display.textContent = `\\(${text}\\)`;
+	safeTypeset(display);
+}
+
+function editTitle() {
+	const input = document.getElementById('graph-title');
+	const display = document.getElementById('graph-title-display');
+	display.hidden = true;
+	input.hidden = false;
+	input.focus();
+	input.select();
 }
 
 function handleTitleInput(event) {
@@ -765,6 +804,24 @@ function handleTitleInput(event) {
 function describeSeries(sheet, series) {
 	const y = NeoModel.getColumnLabel(sheet, series.yCol);
 	return series.xCol ? `${y} against ${NeoModel.getColumnLabel(sheet, series.xCol)}` : `${y} (needs an X column)`;
+}
+
+// The same description as TeX, for labels that MathJax typesets in LaTeX mode.
+function describeSeriesTex(sheet, series) {
+	const name = column => formatLabelForLatex(NeoModel.getColumnLabel(sheet, column));
+	return series.xCol
+		? `${name(series.yCol)}\\text{ against }${name(series.xCol)}`
+		: `${name(series.yCol)}\\text{ (needs an X column)}`;
+}
+
+// Writes a series description into an element, typeset when LaTeX mode is on.
+function setSeriesText(element, sheet, series, prefix = '') {
+	if (!latexMode) {
+		element.textContent = `${prefix}${describeSeries(sheet, series)}`;
+		return;
+	}
+	element.textContent = `${prefix}\\(${describeSeriesTex(sheet, series)}\\)`;
+	safeTypeset(element);
 }
 
 function renderFitSeriesSelect() {
@@ -788,7 +845,10 @@ function renderFitSeriesSelect() {
 	if (sheet.fitSeries) select.value = sheet.fitSeries;
 	const label = document.getElementById('fit-series-label');
 	const target = resolveFitKey(activeFitKey);
-	if (label) label.textContent = target ? `· ${describeSeries(target.sheet, target.series)}` : '';
+	if (label) {
+		if (target) setSeriesText(label, target.sheet, target.series, '· ');
+		else label.textContent = '';
+	}
 	syncWeightingControl();
 }
 
@@ -1019,6 +1079,11 @@ function initializeInterface() {
 		scheduleSaveState();
 	});
 	document.getElementById('graph-title').addEventListener('input', handleTitleInput);
+	document.getElementById('graph-title').addEventListener('blur', renderTitleDisplay);
+	document.getElementById('graph-title').addEventListener('keydown', (event) => {
+		if (event.key === 'Enter' || event.key === 'Escape') event.target.blur();
+	});
+	document.getElementById('graph-title-display').addEventListener('click', editTitle);
 	document.getElementById('plot-all-button').addEventListener('click', openPlotAll);
 	document.getElementById('popup-close').addEventListener('click', closePopup);
 	document.getElementById('popup-background').addEventListener('click', closePopup);

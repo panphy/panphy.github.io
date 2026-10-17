@@ -1232,6 +1232,32 @@ input[type="number"]:focus {
 	background: var(--surface) !important;
 }
 
+/* The typeset title in LaTeX mode; a tap turns it back into the text field. */
+.neo-title-display {
+	flex: 1;
+	min-width: 0;
+	min-height: 38px;
+	padding: 4px 8px;
+	border: 1px solid transparent;
+	border-radius: var(--radius-sm);
+	background: none;
+	color: var(--ink);
+	font-size: 1.15rem;
+	text-align: left;
+	overflow-x: auto;
+	white-space: nowrap;
+	cursor: text;
+}
+
+.neo-title-display:hover {
+	border-color: var(--line);
+}
+
+.neo-title-display[hidden],
+.neo-title-input[hidden] {
+	display: none;
+}
+
 .neo-plot-area {
 	position: relative;
 	flex: 1;
