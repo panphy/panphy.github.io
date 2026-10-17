@@ -499,27 +499,20 @@
             margin-bottom: 10px;
         }
 
+        /* Switch first, then its label, so each label sits beside its own switch */
         .controls-grid {
             display: grid;
-            grid-template-columns: repeat(3, minmax(180px, 220px));
-            gap: 6px 14px;
-            width: fit-content;
+            grid-template-columns: repeat(3, minmax(0, max-content));
+            gap: 6px 36px;
         }
 
         .controls-grid .toggle-row {
-            display: grid;
-            grid-template-columns: minmax(0, 1fr) auto;
-            align-items: center;
-            column-gap: 8px;
             justify-content: start;
+            gap: 10px;
         }
 
         .controls-grid .toggle-switch {
-            justify-self: start;
-        }
-
-        .controls-grid .toggle-row-spacer {
-            pointer-events: none;
+            order: -1;
         }
 
         .velocity-transform-section {
@@ -529,11 +522,6 @@
         @media (max-width: 560px) {
             .controls-grid {
                 grid-template-columns: 1fr;
-                width: 100%;
-            }
-
-            .controls-grid .toggle-row-spacer {
-                display: none;
             }
         }
 
