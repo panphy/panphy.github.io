@@ -56,11 +56,17 @@ const readout = $('particle-readout');
 // ---------- Fullscreen ----------
 const fullscreenButton = $('fullscreen');
 let fallbackFullscreen = false;
-// Match the published nuclear sims: wide fullscreen puts controls above the explanation.
+// The controls sit in their own column beside the 3D view. Wide fullscreen puts them above the
+// explanation; narrow fullscreen scrolls them with the view.
 function placeControls() {
-  const inSide = workspace.classList.contains('is-fullscreen') && wideQuery.matches;
-  if (inSide && sideControls.parentElement !== sideAside) sideAside.prepend(sideControls);
-  else if (!inSide && sideControls.parentElement !== viewerPanel) viewerPanel.append(sideControls);
+  const expanded = workspace.classList.contains('is-fullscreen');
+  if (expanded && wideQuery.matches) {
+    if (sideControls.parentElement !== sideAside) sideAside.prepend(sideControls);
+  } else if (expanded) {
+    if (sideControls.parentElement !== viewerPanel) viewerPanel.append(sideControls);
+  } else if (sideControls.nextElementSibling !== sideAside) {
+    workspace.insertBefore(sideControls, sideAside);
+  }
 }
 wideQuery.addEventListener('change', placeControls);
 function updateFullscreen() {
@@ -118,6 +124,11 @@ controls.minDistance = 2;
 controls.maxDistance = 80;
 controls.enableDamping = true;
 controls.saveState();
+// The wheel zooms only once the model has been clicked (or in fullscreen), so it never traps page scrolling.
+viewer.addEventListener('wheel', event => {
+  if (!(workspace.classList.contains('is-fullscreen') || event.ctrlKey || document.activeElement === viewer)) event.stopPropagation();
+}, { capture: true, passive: true });
+renderer.domElement.addEventListener('pointerdown', () => viewer.focus({ preventScroll: true }));
 const stage = new THREE.Group();
 scene.add(stage);
 
@@ -1254,17 +1265,17 @@ function setPlaying(playing) {
   $('motion-icon').setAttribute('d', state.playing ? 'M7 5h3v14H7zM14 5h3v14h-3z' : 'M8 5v14l11-7z');
 }
 $('motion').addEventListener('click', () => setPlaying(!state.playing));
+const FIRE_ICON = 'M5 12h12M12 6l6 6-6 6';
+const STOP_ICON = 'M7 7h10v10H7z';
 function updateFireButton() {
   const button = $('fire');
   const data = particleData();
   const name = `${article(data)} ${data.name.toLowerCase()}`;
-  if (state.mode === 'selector') {
-    button.textContent = state.beam ? 'Stop the beam' : 'Start the beam';
-    button.setAttribute('aria-pressed', String(state.beam));
-  } else {
-    button.textContent = state.mode === 'cyclotron' ? `Inject ${name}` : `Fire ${name}`;
-    button.setAttribute('aria-pressed', 'false');
-  }
+  const beamOn = state.mode === 'selector' && state.beam;
+  if (state.mode === 'selector') $('fire-label').textContent = state.beam ? 'Stop the beam' : 'Start the beam';
+  else $('fire-label').textContent = state.mode === 'cyclotron' ? `Inject ${name}` : `Fire ${name}`;
+  button.setAttribute('aria-pressed', String(beamOn));
+  $('fire-icon').setAttribute('d', beamOn ? STOP_ICON : FIRE_ICON);
 }
 $('fire').addEventListener('click', () => {
   if (!lab) return;
@@ -1381,12 +1392,12 @@ function buildControls() {
   const config = CONTROLS[state.mode];
   const particles = MODE_PARTICLES[state.mode];
   const chooser = document.createElement('div');
-  chooser.className = 'field';
+  chooser.className = 'field section';
   chooser.setAttribute('role', 'group');
   chooser.setAttribute('aria-labelledby', 'label-particle');
-  chooser.innerHTML = '<span id="label-particle">Particle</span>';
+  chooser.innerHTML = '<span class="section-title" id="label-particle">Particle</span>';
   const choices = document.createElement('div');
-  choices.className = 'choice-row';
+  choices.className = 'choice-row segmented';
   for (const key of particles) {
     const data = PARTICLES[key];
     const button = document.createElement('button');
@@ -1398,14 +1409,19 @@ function buildControls() {
   }
   chooser.appendChild(choices);
   container.appendChild(chooser);
+  const settings = document.createElement('div');
+  settings.className = 'section';
+  settings.innerHTML = '<span class="section-title">Settings</span>';
+  container.appendChild(settings);
   for (const key of config.steppers) {
     const spec = stepperSpec(key);
     const field = document.createElement('div');
-    field.className = 'field';
+    field.className = 'field setting';
+    field.dataset.setting = key;
     field.setAttribute('role', 'group');
     field.setAttribute('aria-labelledby', `label-${key}`);
-    field.innerHTML = `<span id="label-${key}">${spec.label}</span><div class="stepper"><button type="button" id="minus-${key}" aria-label="Decrease ${spec.aria.toLowerCase()}">−</button><input type="number" id="input-${key}" min="${spec.min}" max="${spec.max}" step="${spec.step}" inputmode="decimal" aria-label="${spec.aria}"><button type="button" id="plus-${key}" aria-label="Increase ${spec.aria.toLowerCase()}">+</button></div>`;
-    container.appendChild(field);
+    field.innerHTML = `<span class="setting-label" id="label-${key}">${spec.label}</span><div class="stepper"><button type="button" id="minus-${key}" aria-label="Decrease ${spec.aria.toLowerCase()}">−</button><input type="number" id="input-${key}" min="${spec.min}" max="${spec.max}" step="${spec.step}" inputmode="decimal" aria-label="${spec.aria}"><button type="button" id="plus-${key}" aria-label="Increase ${spec.aria.toLowerCase()}">+</button></div>`;
+    settings.appendChild(field);
     bindStepper($(`minus-${key}`), $(`plus-${key}`), direction => setValue(key, state.values[key] + direction * spec.step, { user: true }));
     $(`input-${key}`).addEventListener('change', event => setValue(key, Number(event.target.value), { user: true }));
     if (state.values[key] === undefined) state.values[key] = spec.value;
@@ -1413,15 +1429,16 @@ function buildControls() {
   }
   if (config.toggles.length) {
     const field = document.createElement('div');
-    field.className = 'field';
-    field.innerHTML = '<span>Try this</span>';
+    field.className = 'field section';
+    field.innerHTML = '<span class="section-title">Try this</span>';
     const rowElement = document.createElement('div');
-    rowElement.className = 'choice-row';
+    rowElement.className = 'switch-list';
     for (const [key, label] of config.toggles) {
       const button = document.createElement('button');
       button.type = 'button';
+      button.className = 'switch';
       button.dataset.toggle = key;
-      button.textContent = label;
+      button.innerHTML = `<span class="switch-label">${label}</span><span class="switch-track" aria-hidden="true"></span>`;
       button.setAttribute('aria-pressed', String(Boolean(state[key])));
       button.addEventListener('click', () => toggle(key, button));
       rowElement.appendChild(button);
@@ -1430,18 +1447,19 @@ function buildControls() {
     container.appendChild(field);
   }
   const show = document.createElement('div');
-  show.className = 'field';
+  show.className = 'field section';
   show.setAttribute('role', 'group');
   show.setAttribute('aria-labelledby', 'label-show');
-  show.innerHTML = '<span id="label-show">Show field lines</span>';
+  show.innerHTML = '<span class="section-title" id="label-show">Show field lines</span>';
   const showRow = document.createElement('div');
-  showRow.className = 'choice-row';
+  showRow.className = 'switch-list';
   for (const kind of MODE_FIELDS[state.mode]) {
     const { name, colour } = FIELD_KINDS[kind];
     const button = document.createElement('button');
     button.type = 'button';
+    button.className = 'switch';
     button.dataset.show = kind;
-    button.innerHTML = `<i class="chip" style="background:var(--${colour})">${kind}</i>${name} field`;
+    button.innerHTML = `<span class="switch-label"><i class="chip" style="background:var(--${colour})">${kind}</i>${name} field</span><span class="switch-track" aria-hidden="true"></span>`;
     button.addEventListener('click', () => showField(kind, !state[`show${kind}`]));
     showRow.appendChild(button);
   }
@@ -1471,6 +1489,7 @@ function showField(kind, shown) {
 }
 // Each particle needs its own ranges, so choosing one resets its settings to sensible values.
 function chooseParticle(key) {
+  const before = { ...state.values };
   state.particle[state.mode] = key;
   for (const stepper of CONTROLS[state.mode].steppers) {
     if (STEPPERS[stepper].from) state.values[stepper] = particleData()[STEPPERS[stepper].from].value;
@@ -1481,6 +1500,10 @@ function chooseParticle(key) {
     clearTracks();
   }
   buildControls();
+  // Briefly mark the settings that changed, so the reset is visible where it happened.
+  for (const stepper of CONTROLS[state.mode].steppers) {
+    if (before[stepper] !== state.values[stepper]) document.querySelector(`[data-setting=${stepper}]`)?.classList.add('is-changed');
+  }
   updateFireButton();
   const data = particleData();
   readout.textContent = `${data.name.toUpperCase()} · Charge ${data.q > 0 ? '+' : '−'}${sci(Math.abs(data.q))} C · Mass ${sci(data.m)} kg. The settings were reset to suit it.`;
@@ -1579,7 +1602,7 @@ function selectMode(mode, animate = true) {
   readout.textContent = DEFAULT_READOUT[mode];
   for (const [id, key] of Object.entries({ 'scene-title': 'title', 'mode-date': 'date', 'mode-heading': 'heading', 'mode-level': 'level', description: 'description', look: 'look', evidence: 'evidence', deeper: 'deeper' })) $(id).textContent = data[key];
   document.querySelectorAll('.models [data-mode]').forEach(button => button.setAttribute('aria-pressed', String(button.dataset.mode === mode)));
-  viewer.setAttribute('aria-label', `${data.title}. ${data.description} Drag or use arrow keys to rotate; scroll, pinch or plus and minus keys to zoom.`);
+  viewer.setAttribute('aria-label', `${data.title}. ${data.description} Drag or use arrow keys to rotate; click then scroll, pinch, or use plus and minus keys to zoom.`);
   $('graph-canvas').setAttribute('aria-label', GRAPH_LABELS[mode]);
   resetView();
 }

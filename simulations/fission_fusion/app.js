@@ -84,11 +84,17 @@ const readout = $('particle-readout');
 // ---------- Fullscreen ----------
 const fullscreenButton = $('fullscreen');
 let fallbackFullscreen = false;
-// In wide fullscreen the controls move to the top of the right-hand column, above the explanation.
+// The controls sit in their own column beside the 3D view. Wide fullscreen puts them above the
+// explanation; narrow fullscreen scrolls them with the view.
 function placeControls() {
-  const inSide = workspace.classList.contains('is-fullscreen') && wideQuery.matches;
-  if (inSide && sideControls.parentElement !== sideAside) sideAside.prepend(sideControls);
-  else if (!inSide && sideControls.parentElement !== viewerPanel) viewerPanel.append(sideControls);
+  const expanded = workspace.classList.contains('is-fullscreen');
+  if (expanded && wideQuery.matches) {
+    if (sideControls.parentElement !== sideAside) sideAside.prepend(sideControls);
+  } else if (expanded) {
+    if (sideControls.parentElement !== viewerPanel) viewerPanel.append(sideControls);
+  } else if (sideControls.nextElementSibling !== sideAside) {
+    workspace.insertBefore(sideControls, sideAside);
+  }
 }
 wideQuery.addEventListener('change', placeControls);
 function updateFullscreen() {
@@ -146,6 +152,11 @@ controls.minDistance = 0.9;
 controls.maxDistance = 40;
 controls.enableDamping = true;
 controls.saveState();
+// The wheel zooms only once the model has been clicked (or in fullscreen), so it never traps page scrolling.
+viewer.addEventListener('wheel', event => {
+  if (!(workspace.classList.contains('is-fullscreen') || event.ctrlKey || document.activeElement === viewer)) event.stopPropagation();
+}, { capture: true, passive: true });
+renderer.domElement.addEventListener('pointerdown', () => viewer.focus({ preventScroll: true }));
 const stage = new THREE.Group();
 scene.add(stage);
 
@@ -1888,7 +1899,7 @@ function selectMode(mode, animate = true) {
   document.querySelectorAll('.models [data-mode]').forEach(button => button.setAttribute('aria-pressed', String(button.dataset.mode === mode)));
   viewer.setAttribute('aria-label', mode === 'energy'
     ? `${data.title}. ${data.description}`
-    : `${data.title}. ${data.description} Drag or use arrow keys to rotate; scroll, pinch or plus and minus keys to zoom.`);
+    : `${data.title}. ${data.description} Drag or use arrow keys to rotate; click then scroll, pinch, or use plus and minus keys to zoom.`);
   resetView();
 }
 document.querySelectorAll('.models [data-mode]').forEach(button => button.addEventListener('click', () => {

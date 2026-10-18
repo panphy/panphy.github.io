@@ -211,11 +211,13 @@ body.viewer-expanded { overflow: hidden; }
   .workspace.is-fullscreen aside .live { background: var(--muted-bg); }
   .workspace.is-fullscreen aside .stages { grid-auto-flow: row; grid-template-columns: repeat(3, minmax(0, 1fr)); }
   .workspace.is-fullscreen aside .toolbar { justify-content: flex-start; }
+  .workspace.is-fullscreen aside #reset { margin-left: 0; }
   .workspace.is-fullscreen aside .side-controls p { color: var(--text-main); margin-bottom: 12px; }
 }
 
 /* Size containment keeps the canvas pixel size from feeding back into the viewer height. */
-#viewer { position: relative; display: flex; flex-direction: column; flex: 1; min-height: 540px; container-type: size; margin: 8px 0 12px; border-radius: 14px; touch-action: none; overflow: hidden; background: var(--space); color: var(--space-text); cursor: grab; }
+/* Short enough that the view, the timeline and the controls fit on one laptop or projector screen. */
+#viewer { position: relative; display: flex; flex-direction: column; flex: 1; min-height: clamp(340px, calc(100vh - 430px), 540px); container-type: size; margin: 8px 0 12px; border-radius: 14px; touch-action: none; overflow: hidden; background: var(--space); color: var(--space-text); cursor: grab; }
 #viewer:active { cursor: grabbing; }
 #viewer.is-hovering { cursor: pointer; }
 #viewer > canvas { display: block; width: 100%; height: 0; flex: 1; min-height: 0; align-self: stretch; }
@@ -265,25 +267,40 @@ body.viewer-expanded { overflow: hidden; }
 .stages button[aria-current=step] { border-color: var(--brand-primary); box-shadow: inset 0 0 0 1px var(--brand-primary); }
 .stages button.done > i { width: 100% !important; opacity: .45; }
 .scrub { padding: 0 2px; }
-.toolbar { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; }
+.toolbar { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-top: 4px; }
 .toolbar button {
+  display: inline-flex; align-items: center; justify-content: center; gap: 8px;
   min-height: 48px; padding: 8px 14px;
   border: 1px solid var(--input-border); border-radius: 12px; background: var(--card-bg);
   font-size: .85rem; font-weight: 700; transition: border-color .15s, background .15s;
 }
 .toolbar button:hover:not(:disabled) { border-color: var(--brand-accent); background: var(--muted-bg); }
-.toolbar button.primary { display: inline-flex; align-items: center; gap: 8px; min-width: 124px; justify-content: center; background: var(--text-main); color: var(--bg-color); border-color: var(--text-main); }
-.toolbar button.primary:hover { background: var(--text-main); border-color: var(--brand-accent); }
-.toolbar button.primary svg { width: 16px; height: 16px; fill: currentColor; }
-.toolbar button.experiment { border-color: color-mix(in srgb, var(--brand-primary), transparent 50%); color: var(--brand-primary); }
-.toolbar button.experiment[aria-pressed=true] { background: var(--brand-primary); color: var(--bg-color); border-color: var(--brand-primary); }
-.toolbar button.experiment.nudge:not([aria-pressed=true]):not(:disabled) { animation: nudge 1.6s ease-in-out infinite; }
-@keyframes nudge { 50% { box-shadow: 0 0 0 5px color-mix(in srgb, var(--brand-primary), transparent 75%); } }
+.toolbar svg { width: 18px; height: 18px; flex: none; fill: currentColor; }
+.toolbar svg .stroke { fill: none; stroke: currentColor; stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; }
+/* Play is the main action, so it is the one filled button. */
+.toolbar button.play { min-width: 128px; border: 0; background: var(--brand-primary); color: #fff; font-size: .95rem; font-weight: 800; box-shadow: 0 6px 16px color-mix(in srgb, var(--brand-primary), transparent 72%); }
+.toolbar button.play:hover { background: var(--brand-primary); filter: brightness(1.07); }
+[data-theme="dark"] .toolbar button.play { color: #1B1208; }
+.toolbar button.play[aria-pressed=true] { background: var(--text-main); color: var(--bg-color); box-shadow: none; }
+[data-reserve] { display: inline-grid; justify-items: center; align-content: center; }
+[data-reserve]::after { content: attr(data-reserve); height: 0; overflow: hidden; visibility: hidden; }
+.stage-nav { display: inline-flex; gap: 4px; }
 .speed { display: inline-flex; border: 1px solid var(--input-border); border-radius: 12px; overflow: hidden; background: var(--card-bg); }
 .speed button { border: 0; border-radius: 0; min-width: 48px; padding: 8px 10px; font-family: var(--font-mono); }
 .speed button + button { border-left: 1px solid var(--input-border); }
 .speed button[aria-pressed=true] { background: var(--brand-accent-strong); color: #fff; }
 [data-theme="dark"] .speed button[aria-pressed=true] { background: var(--brand-accent); color: #0B1F1D; }
+/* On/off settings look like switches, so their state is never confused with an action. */
+.toolbar button.switch { gap: 12px; padding: 6px 10px 6px 14px; }
+.switch-track { position: relative; flex: none; width: 44px; height: 26px; border-radius: 999px; background: var(--input-border); transition: background .15s; }
+.switch-track::after { content: ''; position: absolute; top: 3px; left: 3px; width: 20px; height: 20px; border-radius: 50%; background: #fff; box-shadow: 0 1px 3px rgba(0, 0, 0, .25); transition: transform .15s; }
+.switch[aria-pressed=true] .switch-track { background: var(--brand-accent-strong); }
+.switch[aria-pressed=true] .switch-track::after { transform: translateX(18px); }
+.switch.nudge:not([aria-pressed=true]):not(:disabled) { animation: nudge 1.6s ease-in-out infinite; }
+@keyframes nudge { 50% { box-shadow: 0 0 0 5px color-mix(in srgb, var(--brand-primary), transparent 75%); } }
+#reset { margin-left: auto; }
+.cutaway-note { margin: 6px 0 0; font-size: .76rem; color: var(--text-secondary); text-align: right; }
+button:disabled { cursor: default; opacity: .55; }
 
 /* Stage notes */
 aside { border-left: 1px solid var(--card-border); padding: 26px; background: var(--card-bg); min-width: 0; }
@@ -359,6 +376,13 @@ footer a { min-height: 48px; display: inline-flex; align-items: center; }
   .mass-row { grid-template-columns: 1fr; gap: 12px; }
   .viewer-panel { padding: 12px; }
   #viewer { flex: none; height: 560px; min-height: 560px; }
+  .toolbar { gap: 6px; }
+  .toolbar button { flex: 1 1 auto; padding: 8px 10px; white-space: nowrap; }
+  .stage-nav, .speed { flex: 1 1 auto; }
+  .stage-nav button { flex: 1 1 0; }
+  .speed button { flex: 1 1 0; }
+  #reset { margin-left: 0; }
+  .cutaway-note { text-align: left; }
   .scale, .gesture { display: none; }
   .readout { min-width: 0; width: 190px; font-size: .68rem; padding: 8px 10px; }
   .balance { width: 190px; }
@@ -376,7 +400,8 @@ footer a { min-height: 48px; display: inline-flex; align-items: center; }
   .fate-key { display: flex; }
 }
 @media (prefers-reduced-motion: reduce) {
-  .toolbar button.experiment.nudge { animation: none; }
+  .switch.nudge { animation: none; }
+  .toolbar button, .switch-track, .switch-track::after { transition: none; }
   aside.swap > :not(.side-controls) { animation: none; }
   #balance-fill, #balance-marker { transition: none; }
 }

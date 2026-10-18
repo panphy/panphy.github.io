@@ -1750,6 +1750,8 @@ $('home-view').addEventListener('click', resetModel);
 // Reset all: the same, with every experiment setting back to its starting value.
 $('reset').addEventListener('click', () => {
   restoreDefaults();
+  state.showFlow = false;
+  $('show-flow').checked = false;
   buildControls();
   resetModel();
 });
@@ -1815,28 +1817,34 @@ function buildControls() {
   const container = $('controls');
   container.replaceChildren();
   const config = CONTROLS[state.mode];
+  const settings = document.createElement('div');
+  settings.className = 'section';
+  settings.innerHTML = '<span class="section-title">Settings</span>';
+  container.appendChild(settings);
   for (const key of config.steppers) {
     const spec = STEPPERS[key];
     const field = document.createElement('div');
-    field.className = 'field';
+    field.className = 'field setting';
     field.setAttribute('role', 'group');
     field.setAttribute('aria-labelledby', `label-${key}`);
-    field.innerHTML = `<span id="label-${key}">${spec.label}</span><div class="stepper"><button type="button" id="minus-${key}" aria-label="Decrease ${spec.aria.toLowerCase()}">−</button><input type="number" id="input-${key}" min="${spec.min}" max="${spec.max}" step="any" inputmode="decimal" aria-label="${spec.aria}" title="Type any value from ${spec.min} to ${spec.max}"><button type="button" id="plus-${key}" aria-label="Increase ${spec.aria.toLowerCase()}">+</button></div>`;
-    container.appendChild(field);
+    field.innerHTML = `<span class="setting-label" id="label-${key}">${spec.label}</span><div class="stepper"><button type="button" id="minus-${key}" aria-label="Decrease ${spec.aria.toLowerCase()}">−</button><input type="number" id="input-${key}" min="${spec.min}" max="${spec.max}" step="any" inputmode="decimal" aria-label="${spec.aria}" title="Type any value from ${spec.min} to ${spec.max}"><button type="button" id="plus-${key}" aria-label="Increase ${spec.aria.toLowerCase()}">+</button></div>`;
+    settings.appendChild(field);
     bindStepper($(`minus-${key}`), $(`plus-${key}`), direction => stepValue(key, direction));
     $(`input-${key}`).addEventListener('change', event => setValue(key, event.target.value.trim() === '' ? NaN : Number(event.target.value)));
     setValue(key, state.values[key]);
   }
   if (config.toggles.length || config.actions.length) {
     const field = document.createElement('div');
-    field.className = 'field';
-    field.innerHTML = '<span>Try this</span>';
+    field.className = 'section';
+    field.innerHTML = '<span class="section-title">Try this</span>';
     const rowElement = document.createElement('div');
-    rowElement.className = 'choice-row';
+    rowElement.className = 'switch-list';
+    // On/off settings are switches, so their state is never confused with an action.
     for (const [key, label] of config.toggles) {
       const button = document.createElement('button');
       button.type = 'button';
-      button.textContent = label;
+      button.className = 'switch';
+      button.innerHTML = `<span class="switch-label">${label}</span><span class="switch-track" aria-hidden="true"></span>`;
       button.setAttribute('aria-pressed', String(Boolean(state[key])));
       button.addEventListener('click', () => toggle(key, button));
       rowElement.appendChild(button);

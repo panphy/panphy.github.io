@@ -208,11 +208,16 @@ h1 span { color: var(--brand-primary); }
 .console > * { flex-shrink: 0; }
 .deck, .readouts { background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 16px; }
 .deck { display: flex; flex-direction: column; gap: 14px; padding: 14px; }
-.deck > .experiment-controls, .deck > .study-controls, .deck > .reset-row { border-top: 1px solid var(--card-border); padding-top: 14px; }
-#action-hint { margin: 0; color: var(--text-secondary); font-size: .82rem; line-height: 1.5; }
+.deck > .experiment-controls, .deck > .section { border-top: 1px solid var(--card-border); padding-top: 14px; }
+#action-hint { margin: -4px 0 0; color: var(--text-secondary); font-size: .8rem; line-height: 1.45; text-align: center; }
 
+/* Playback bar under the 3D view */
 .toolbar { display: flex; flex-wrap: wrap; gap: 8px; }
-.toolbar button {
+.toolbar button, .speed {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
   min-height: 48px;
   padding: 8px 14px;
   border: 1px solid var(--input-border);
@@ -222,55 +227,90 @@ h1 span { color: var(--brand-primary); }
   font-weight: 700;
   transition: border-color .15s, background .15s;
 }
-.toolbar button { flex: 1 1 auto; }
 .toolbar button:hover { border-color: var(--brand-accent); background: var(--muted-bg); }
-/* Buttons whose label changes keep the width of their widest label, so the toolbar does not jump. */
+.toolbar svg { width: 18px; height: 18px; flex: none; fill: currentColor; }
+.toolbar svg .stroke { fill: none; stroke: currentColor; stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; }
+#motion { min-width: 150px; }
+#motion[aria-pressed=false] { border-color: var(--brand-accent-strong); color: var(--brand-accent-strong); }
+.speed { padding: 0 6px 0 12px; cursor: pointer; }
+.speed select { min-height: 40px; padding: 4px 8px; border: 0; border-radius: 8px; background: var(--muted-bg); color: var(--text-main); font: 600 .85rem var(--font-body); }
+.speed select:focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; }
+#home-view { margin-left: auto; }
+/* Labels that change keep the width of their widest label, so the bar does not jump. */
 .toolbar [data-reserve] { display: inline-grid; justify-items: center; align-content: center; }
 .toolbar [data-reserve]::after { content: attr(data-reserve); height: 0; overflow: hidden; visibility: hidden; }
-.toolbar [data-reserve][hidden] { display: none; }
-.toolbar button.primary { display: inline-flex; align-items: center; gap: 8px; min-width: 150px; justify-content: center; background: var(--text-main); color: var(--bg-color); border-color: var(--text-main); }
-.toolbar button.primary:hover { background: var(--text-main); border-color: var(--text-main); opacity: .9; }
-.toolbar button.primary svg { width: 16px; height: 16px; fill: currentColor; }
-.toolbar button.experiment { border-color: color-mix(in srgb, var(--brand-primary), transparent 50%); color: var(--brand-primary); }
-.toolbar button.experiment[aria-pressed=true] { background: var(--brand-primary); color: var(--bg-color); border-color: var(--brand-primary); }
-/* Pressed (filled) buttons keep their fill on hover, so the light label stays readable. */
-.toolbar button.experiment[aria-pressed=true]:hover, .choice-row button[aria-pressed=true]:hover:not(:disabled) { background: color-mix(in srgb, var(--brand-primary), #000 14%); border-color: color-mix(in srgb, var(--brand-primary), #000 14%); color: var(--bg-color); }
+/* The console beside the view is tall, so on screens wide enough for a one-row bar it stays pinned to the bottom of the screen while the view is in sight. */
+@media (min-width: 1200px) {
+  .viewer-panel:not(.is-stacked):not(.is-fullscreen) .playback { position: sticky; bottom: max(12px, env(safe-area-inset-bottom)); z-index: 4; margin: 0 -6px; padding: 6px; border-radius: 16px; background: color-mix(in srgb, var(--viewer-bg), transparent 8%); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); box-shadow: 0 6px 18px -10px rgba(0, 0, 0, .4); }
+}
+.playback-note { margin: -4px 0 0; font-size: .72rem; line-height: 1.45; color: var(--text-secondary); }
 button:disabled { cursor: default; opacity: .55; }
 
-/* Steppers and toggles */
-.experiment-controls { display: flex; flex-wrap: wrap; align-items: flex-end; gap: 12px; }
-.experiment-controls .field { display: flex; flex-direction: column; gap: 4px; flex: 1 1 150px; max-width: 250px; font-family: var(--font-mono); font-size: .72rem; font-weight: 600; letter-spacing: .06em; color: var(--text-secondary); }
-.experiment-controls .field:has(.choice-row) { flex-basis: 100%; max-width: none; }
-.stepper { display: flex; align-items: center; gap: 6px; width: 100%; }
-.stepper button, .choice-row button {
-  min-width: 48px; min-height: 48px; padding: 8px 14px;
+/* The main action first, then the settings, then what to show. */
+.fire {
+  display: flex; align-items: center; justify-content: center; gap: 10px;
+  width: 100%; min-height: 56px; padding: 10px 18px;
+  border: 0; border-radius: 14px;
+  background: var(--brand-primary); color: #fff;
+  font-size: 1.02rem; font-weight: 800;
+  box-shadow: 0 6px 16px color-mix(in srgb, var(--brand-primary), transparent 72%);
+  transition: filter .15s, transform .1s;
+  --fire-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2.4' stroke-linecap='round'%3E%3Cpath d='M12 3v8M7.5 6.5a7 7 0 1 0 9 0'/%3E%3C/svg%3E");
+}
+.fire::before { content: ''; flex: none; width: 20px; height: 20px; background: currentColor; -webkit-mask: var(--fire-icon) center / contain no-repeat; mask: var(--fire-icon) center / contain no-repeat; }
+.fire[aria-pressed=true] { background: var(--text-main); color: var(--bg-color); box-shadow: none; }
+[data-theme="dark"] .fire:not([aria-pressed=true]) { color: #1B1208; }
+.fire:hover { filter: brightness(1.07); }
+.fire:active { transform: translateY(1px); }
+.action {
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+  width: 100%; min-height: 48px; padding: 8px 14px;
+  border: 1px solid color-mix(in srgb, var(--brand-primary), transparent 50%); border-radius: 12px;
+  background: var(--card-bg); color: var(--brand-primary);
+  font-size: .9rem; font-weight: 700; touch-action: manipulation;
+}
+.action:hover:not(:disabled) { background: var(--muted-bg); }
+.action[hidden] { display: none; }
+
+.experiment-controls { display: flex; flex-direction: column; gap: 16px; }
+.section { display: flex; flex-direction: column; gap: 8px; }
+.section-title { font-family: var(--font-mono); font-size: .7rem; font-weight: 600; letter-spacing: .1em; text-transform: uppercase; color: var(--text-secondary); }
+/* Each setting is one row: its name on the left, exact stepping on the right. */
+.setting { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+.setting-label { font-size: .88rem; font-weight: 600; line-height: 1.3; }
+.stepper { display: inline-flex; align-items: center; gap: 4px; flex: none; }
+.stepper button {
+  min-width: 48px; min-height: 48px; padding: 8px 0;
   border: 1px solid var(--input-border); border-radius: 12px; background: var(--card-bg);
   font: 700 1.1rem var(--font-body); color: var(--text-main); touch-action: manipulation;
   user-select: none; -webkit-user-select: none; -webkit-touch-callout: none;
 }
-.stepper button { flex: none; padding: 8px 0; }
-.stepper button:hover:not(:disabled), .choice-row button:hover:not(:disabled) { border-color: var(--brand-accent); background: var(--muted-bg); }
+.stepper button:hover:not(:disabled) { border-color: var(--brand-accent); background: var(--muted-bg); }
 .stepper input {
-  flex: 1; width: 0; min-width: 44px; min-height: 48px; padding: 0 4px;
+  width: 78px; min-height: 48px; padding: 0 4px;
   border: 1px solid var(--input-border); border-radius: 12px; background: var(--card-bg);
   color: var(--text-main); text-align: center; font: 600 1rem var(--font-mono); letter-spacing: 0;
   -moz-appearance: textfield; appearance: textfield;
 }
 .stepper input::-webkit-outer-spin-button, .stepper input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
 .stepper input:focus-visible { outline: 3px solid var(--focus); outline-offset: 3px; }
-.choice-row { display: flex; flex-wrap: wrap; gap: 8px; }
-.choice-row button { font-size: .85rem; letter-spacing: 0; }
-.choice-row button[aria-pressed=true] { background: var(--brand-primary); border-color: var(--brand-primary); color: var(--bg-color); }
-.choice-row button.action { border-style: dashed; }
 
-.study-controls { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 14px; font-size: .8rem; }
-.study-controls label { display: inline-flex; align-items: center; gap: 8px; min-height: 48px; cursor: pointer; }
-.study-controls select { min-height: 48px; padding: 8px 12px; border: 1px solid var(--input-border); border-radius: 10px; color: var(--text-main); background: var(--card-bg); font: inherit; }
-.study-controls input { width: 18px; height: 18px; accent-color: var(--brand-accent-strong); }
-.playback-note { margin: -8px 0 0; font-size: .72rem; line-height: 1.45; color: var(--text-secondary); }
-.reset-row { display: flex; flex-wrap: wrap; gap: 8px; }
-.reset-row button { flex: 1 1 0; min-height: 48px; padding: 8px 12px; border: 1px solid var(--input-border); border-radius: 12px; background: var(--card-bg); font-size: .85rem; font-weight: 700; }
-.reset-row button:hover { border-color: var(--brand-accent); background: var(--muted-bg); }
+/* On/off settings look like switches, so their state is never confused with an action. */
+.switch-list { display: flex; flex-direction: column; gap: 6px; }
+.switch {
+  position: relative;
+  display: flex; align-items: center; justify-content: space-between; gap: 12px;
+  width: 100%; min-height: 48px; padding: 6px 10px 6px 14px;
+  border: 1px solid var(--input-border); border-radius: 12px; background: var(--card-bg);
+  font-size: .88rem; font-weight: 600; text-align: left; cursor: pointer; touch-action: manipulation;
+}
+.switch:hover { border-color: var(--brand-accent); }
+.switch-input { position: absolute; opacity: 0; width: 1px; height: 1px; }
+.switch:has(.switch-input:focus-visible) { outline: 3px solid var(--focus); outline-offset: 3px; }
+.switch-track { position: relative; flex: none; width: 44px; height: 26px; border-radius: 999px; background: var(--input-border); transition: background .15s; }
+.switch-track::after { content: ''; position: absolute; top: 3px; left: 3px; width: 20px; height: 20px; border-radius: 50%; background: #fff; box-shadow: 0 1px 3px rgba(0, 0, 0, .25); transition: transform .15s; }
+.switch[aria-pressed=true] .switch-track, .switch-input:checked + .switch-track { background: var(--brand-accent-strong); }
+.switch[aria-pressed=true] .switch-track::after, .switch-input:checked + .switch-track::after { transform: translateX(18px); }
 
 /* What the model is showing: one card, so the readouts read together. */
 .readouts { display: grid; grid-template-columns: minmax(0, 1fr); overflow: hidden; border-left: 3px solid var(--brand-accent-strong); }
@@ -323,14 +363,8 @@ button:disabled { cursor: default; opacity: .55; }
   .readouts:has(.turning-display[hidden]) .observation { grid-column: 1 / -1; }
   .part-readout { grid-column: 1 / -1; }
 }
-@container (max-width: 560px) {
-  .toolbar button { flex: 1 1 calc(50% - 4px); padding: 8px 10px; }
-  .toolbar button.primary { min-width: 0; }
-  .experiment-controls .field { flex: 1 1 calc(50% - 6px); max-width: calc(50% - 6px); }
-}
-
-@container (max-width: 380px) {
-  .experiment-controls .field { flex-basis: 100%; max-width: none; }
+@container (min-width: 600px) {
+  .experiment-controls { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px 24px; align-items: start; }
 }
 
 /* Stacked (narrow page or portrait fullscreen): one column. The 3D view stays pinned under the banner
@@ -412,12 +446,16 @@ footer { display: flex; justify-content: space-between; gap: 20px; border-top: 1
   .info-box summary { padding: 0 10px; font-size: .62rem; }
   .endview canvas { width: min(100%, 140px); }
   .part-readout { min-height: 72px; }
+  .toolbar { gap: 6px; }
+  .toolbar button, .speed { flex: 1 1 auto; gap: 6px; padding: 8px 10px; white-space: nowrap; font-size: .82rem; }
+  #motion { min-width: 0; }
+  #home-view { margin-left: 0; }
   .guide { padding: 20px; }
   .reality { gap: 12px; }
   footer { flex-direction: column; gap: 8px; }
 }
 @media (prefers-reduced-motion: reduce) {
-  .models button, .toolbar button, .info-box summary::before { transition: none; }
+  .models button, .toolbar button, .fire, .switch-track, .switch-track::after, .info-box summary::before { transition: none; }
   .models button:hover { transform: none; }
 }
 

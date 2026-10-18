@@ -74,26 +74,25 @@
               <span data-legend="current"><i style="background:var(--current)">I</i> Conventional current</span>
               <span data-legend="force"><i style="background:var(--force)">F</i> Force</span>
             </div>
+            <div class="toolbar playback" aria-label="Playback controls">
+              <button type="button" id="motion" aria-pressed="true"><svg viewBox="0 0 24 24" aria-hidden="true"><path id="motion-icon" d="M7 5h3v14H7zM14 5h3v14h-3z"/></svg><span id="motion-label" data-reserve="Pause motion">Pause motion</span></button>
+              <button type="button" id="step" title="Advance 0.10 model seconds, then pause"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 5v14l9-7zM16 5h3v14h-3z"/></svg><span>Step forward</span></button>
+              <label class="speed" for="playback" title="Playback changes viewing speed only; the readouts use model time.">Speed <select id="playback"><option value="0.15">Very slow</option><option value="0.35" selected>Slow</option><option value="1">Standard</option></select></label>
+              <button type="button" id="home-view" title="Stop the model and return to the starting view. Your settings are kept."><svg viewBox="0 0 24 24" aria-hidden="true"><path class="stroke" d="M6 4v16M18 6 9 12l9 6z"/></svg><span>Restart</span></button>
+              <button type="button" id="reset" title="Start this experiment again: every setting, the motion and the view go back to how they were on arrival."><svg viewBox="0 0 24 24" aria-hidden="true"><path class="stroke" d="M4 12a8 8 0 1 0 2.4-5.7M4 4v4h4"/></svg><span>Reset</span></button>
+            </div>
+            <p class="playback-note">Speed changes viewing speed only. Step forward advances up to 0.10 model seconds and pauses.</p>
           </div>
         </div>
         <div class="console">
           <div class="deck" aria-label="Experiment controls" role="group">
+            <button type="button" id="power" class="fire" aria-pressed="false">Switch on current</button>
+            <button type="button" id="spin" class="action" hidden>Give it a spin</button>
             <p id="action-hint"></p>
-            <div class="toolbar" aria-label="Run controls">
-              <button type="button" id="power" class="experiment" aria-pressed="false" data-reserve="Switch off current">Switch on current</button>
-              <button type="button" id="spin" class="experiment" data-reserve="Give it a spin" hidden>Give it a spin</button>
-              <button type="button" id="motion" class="primary" aria-pressed="true"><svg viewBox="0 0 24 24" aria-hidden="true"><path id="motion-icon" d="M7 5h3v14H7zM14 5h3v14h-3z"/></svg><span id="motion-label" data-reserve="Pause motion">Pause motion</span></button>
-              <button type="button" id="step" title="Advance 0.10 model seconds, then pause">Step forward</button>
-            </div>
             <div class="experiment-controls" id="controls"></div>
-            <div class="study-controls" aria-label="Animation and display">
-              <label for="playback" title="Playback changes viewing speed only; the readouts use model time.">Playback <select id="playback"><option value="0.15">Very slow</option><option value="0.35" selected>Slow</option><option value="1">Standard</option></select></label>
-              <label><input type="checkbox" id="show-flow"> Moving current markers</label>
-            </div>
-            <p class="playback-note">Playback changes viewing speed only. Step forward advances up to 0.10 model seconds and pauses.</p>
-            <div class="reset-row" aria-label="Reset">
-              <button type="button" id="home-view" title="Stop the model and return to the starting view. Your settings are kept.">Reset</button>
-              <button type="button" id="reset" title="Stop the model and restore every setting to its starting value.">Reset all</button>
+            <div class="section">
+              <span class="section-title">Show</span>
+              <label class="switch"><span class="switch-label">Moving current markers</span><input type="checkbox" id="show-flow" class="switch-input"><span class="switch-track" aria-hidden="true"></span></label>
             </div>
           </div>
           <div class="readouts">
