@@ -72,8 +72,8 @@
         ] },
         { t: "q", type: "Supported", p: "Complete each sentence. The choices are after each gap.", fill: [
           R`A ball is thrown upwards. Energy is transferred from the [[kinetic|kinetic / chemical]] store to the [[gravitational potential|gravitational potential / thermal]] store.`,
-          R`A moving car hits a wall. Energy is transferred from the [[kinetic|kinetic / elastic potential]] store of the car to the [[thermal|thermal / chemical]] store of the car, the wall and the surroundings.`,
-          R`A kettle boils water. Energy is transferred [[electrically|electrically / by waves]] to the [[thermal|thermal / kinetic]] store of the water.`,
+          R`A fireplace warms a person. Energy is transferred by infrared waves from the [[chemical|chemical / kinetic]] store of the fuel to the [[thermal|thermal / kinetic]] store of the person.`,
+          R`A child lands on a trampoline. Energy is transferred mechanically from the child's [[kinetic|kinetic / chemical]] store to the trampoline's [[elastic potential|elastic potential / thermal]] store.`,
         ] },
         { t: "q", type: "On your own", p: "A bungee jumper falls, and the cord stretches until the jumper stops at the bottom. Describe the energy transfers. Use the three steps.", lines: 3, a: "As the jumper falls, energy is transferred from the gravitational potential store of the jumper to the kinetic store. As the cord stretches, energy is transferred from the kinetic store to the elastic potential store of the cord." },
         { t: "q", say: ["Sam", "When the car stopped, its energy was used up."], p: "Explain what is wrong with what Sam says.", lines: 3, a: "Energy cannot be used up (destroyed). The energy in the car's kinetic store was transferred to the thermal store of the brakes and the surroundings." },
@@ -81,7 +81,7 @@
       exam: [
         { tip: "Name both stores and say which one empties and which one fills.", p: R`A student throws a ball straight up. Complete the sentence.`, marks: 2, fill: R`As the ball rises, energy is transferred from the [[kinetic|kinetic / chemical / thermal]] store of the ball to its [[gravitational potential|elastic potential / gravitational potential / nuclear]] store.` },
         { p: "What is the unit of energy? Tick <strong>one</strong> box.", marks: 1, mcq: { o: ["joule", "newton", "watt", "kilogram"], c: 0, cols: 4 } },
-        { p: "Describe the energy transfer when an electric kettle heats water.", marks: 2, lines: 2, a: "Energy is transferred electrically (1) to the thermal store of the water (1)." },
+        { p: "A child lands on a trampoline. Describe the energy transfer as the mat and springs stretch and the child slows down.", marks: 2, lines: 2, a: "Energy is transferred mechanically from the kinetic store of the child (1) to the elastic potential store of the trampoline (1)." },
       ],
       summary: ["Energy is measured in <strong>joules (J)</strong>. It is never made or destroyed.", "Main stores: kinetic, gravitational potential, elastic potential, thermal, chemical.", "Transfers: mechanically, electrically, by heating, by waves.", "In a closed system, the total energy stays the same."],
       recall: [["What is the unit of energy?", "Joule (J)."], ["Name four energy stores.", "Any four of: kinetic, gravitational potential, elastic potential, thermal, chemical."], ["Is light a store or a way of transferring energy?", "A way of transferring energy (by waves)."], ["What is a closed system?", "A system that no energy enters or leaves, so its total energy stays the same."]],

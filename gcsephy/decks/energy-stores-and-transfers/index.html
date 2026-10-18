@@ -194,28 +194,29 @@
         </aside>
       </section>
 
-      <section class="slide a-hi" data-title="The five changes">
-        <p class="eyebrow"><span class="num">01</span> The five AQA examples</p>
+      <section class="slide a-hi" data-title="Five changes">
+        <p class="eyebrow"><span class="num">01</span> Energy transfers</p>
         <h2>Five <em>changes</em></h2>
         <div class="table-wrap">
-          <table class="data five">
+          <table class="data five" style="table-layout: fixed;">
+            <colgroup><col style="width: 28%;"><col style="width: 26%;"><col style="width: 25%;"><col style="width: 21%;"></colgroup>
             <thead><tr><th>Change</th><th>Store that empties</th><th>How it is transferred</th><th>Store that fills</th></tr></thead>
             <tbody>
               <tr><th>Ball thrown upwards</th><td class="step">kinetic</td><td class="step">mechanically (gravity)</td><td class="step">gravitational potential</td></tr>
-              <tr><th>Moving car hits a wall</th><td class="step">kinetic</td><td class="step">mechanically (and by sound waves)</td><td class="step">thermal (car, wall, air)</td></tr>
+              <tr><th>A person warmed by a fireplace</th><td class="step">chemical (fuel)</td><td class="step">by waves (infrared)</td><td class="step">thermal (person)</td></tr>
               <tr><th>Trolley pushed by a steady force</th><td class="step">chemical (the pusher)</td><td class="step">mechanically</td><td class="step">kinetic (and thermal)</td></tr>
               <tr><th>Car braking</th><td class="step">kinetic</td><td class="step">mechanically (friction)</td><td class="step">thermal (brakes)</td></tr>
-              <tr><th>Kettle boiling water</th><td class="step">none: it comes from the mains</td><td class="step">electrically, then by heating</td><td class="step">thermal (water)</td></tr>
+              <tr><th>A child lands on a trampoline</th><td class="step">kinetic (child)</td><td class="step">mechanically</td><td class="step">elastic potential (trampoline)</td></tr>
             </tbody>
           </table>
         </div>
         <div class="slide-foot"><span class="reveal-hint">PRESS → TO REVEAL EACH ANSWER</span><span data-page></span></div>
         <aside class="revision-note" hidden>
           <div class="rn-main">
-            <h3 class="rn-head">The kettle is different</h3>
-            <p>Its energy does not come from a store inside the kettle: it arrives electrically from the mains. So we start the description at the transfer: "energy is transferred electrically to the element, then by heating to the thermal store of the water".</p>
-            <h3 class="rn-head">The crash makes sound too</h3>
-            <p>Sound is a transfer, not a store. The sound fades as the air it shakes warms up, so it also ends in the thermal store of the surroundings.</p>
+            <h3 class="rn-head">The fireplace example</h3>
+            <p>The fuel's chemical store decreases as it burns. The hot fire emits infrared waves, which transfer energy to the person and increase their thermal store. This example focuses on someone warmed by radiation from a distance; the fire also heats the surrounding air.</p>
+            <h3 class="rn-head">Landing on the trampoline</h3>
+            <p>Focus on the landing: the child slows down as the trampoline mat and springs stretch. Energy is transferred mechanically from the kinetic store of the child to the elastic potential store of the trampoline. During the fall before landing, energy transfers from the gravitational potential store to the kinetic store.</p>
           </div>
         </aside>
       </section>
@@ -776,6 +777,32 @@
             <p>With force on the y-axis, the gradient is \(\text{force} \div \text{extension}\), which is exactly \(k\). AQA exam questions almost always draw it this way, so you must be able to read both.</p>
             <h3 class="rn-head">Stiffer spring?</h3>
             <p>Steeper on graph 2 (more force per metre), shallower on graph 1 (less stretch per newton).</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="slide a-violet" data-title="Limit of proportionality">
+        <p class="eyebrow"><span class="num">04</span> When Hooke's law stops working</p>
+        <h2>The limit of <em>proportionality</em></h2>
+        <div class="split wide-fig">
+          <div class="col">
+            <ul class="points small">
+              <li>At first: a <b>straight line through the origin</b>. Double the force, double the extension</li>
+              <li class="step">The <b>limit of proportionality</b> is where the graph starts to curve</li>
+              <li class="step">Beyond it, force and extension are <b>no longer proportional</b></li>
+            </ul>
+            <div class="remember step">Use \(F = ke\) and \(E_e = \tfrac{1}{2}ke^2\) only <b>up to this limit</b>.</div>
+          </div>
+          <div class="panel"><div class="panel-head"><span>Force–extension graph</span><span class="pill">schematic</span></div><div class="fig" data-fig="springLimit"></div></div>
+        </div>
+        <div class="slide-foot"><span class="tag">Lesson 4: Stretching springs</span><span data-page></span></div>
+        <aside class="revision-note" hidden>
+          <div class="rn-main">
+            <h3 class="rn-head">Spot the end of the straight part</h3>
+            <p>The dashed line continues the original straight-line pattern. Past the marked point, the real graph departs from that pattern: equal increases in force no longer give equal increases in extension. The spring constant of the straight section no longer describes the whole graph.</p>
+            <h3 class="rn-head">Not the same as permanent stretching</h3>
+            <p>The limit of proportionality concerns the shape of the loading graph. The elastic limit concerns whether the spring returns to its original length when unloaded. A curved graph alone does not prove that the spring will stay stretched.</p>
+            <p>See <a href="https://www.aqa.org.uk/subjects/physics/gcse/physics-8463/specification/subject-content/forces" target="_blank" rel="noopener">AQA Physics 4.5.3</a> and Combined Science 6.5.3.</p>
           </div>
         </aside>
       </section>
@@ -1454,12 +1481,13 @@
         <h2>How efficient is a <em>bounce</em>?</h2>
         <div class="split">
           <div class="col">
-            <div class="formula"><span>Same mass, same \(g\)</span>\(\text{efficiency} = \dfrac{m\,g\,h_2}{m\,g\,h_1} = \dfrac{h_2}{h_1}\)</div>
-            <div class="worked">
-              <div class="wq"><span>Example results</span>Dropped from 1.00 m, mean bounce 0.65 m</div>
+            <div class="formula bounce-formula"><span>Same mass, same \(g\)</span>\(E_p = m\,g\,h\)</div>
+            <div class="worked bounce-worked">
+              <div class="wq"><span>Example results</span>A 0.10 kg ball: drop 1.00 m, mean bounce 0.65 m</div>
               <dl>
-                <div class="step"><dt>Equation</dt><dd>\(\text{efficiency} = \dfrac{h_2}{h_1}\)</dd></div>
-                <div class="step"><dt>Answer</dt><dd class="ans">\(\dfrac{0.65}{1.00} = 0.65\) (65%)</dd></div>
+                <div class="step"><dt>Input</dt><dd>\(E_{p1} = 0.10 \times 9.8 \times 1.00 = 0.98\,\mathrm{J}\)</dd></div>
+                <div class="step"><dt>Useful</dt><dd>\(E_{p2} = 0.10 \times 9.8 \times 0.65 = 0.637\,\mathrm{J}\)</dd></div>
+                <div class="step"><dt>Efficiency</dt><dd class="ans">\(\dfrac{E_{p2}}{E_{p1}} = \dfrac{0.637}{0.98} = 0.65\) (65%)</dd></div>
               </dl>
             </div>
           </div>
@@ -1468,8 +1496,9 @@
         <div class="slide-foot"><span class="tag">Lesson 9: Efficiency</span><span data-page></span></div>
         <aside class="revision-note" hidden>
           <div class="rn-main">
-            <h3 class="rn-head">Why the mass cancels</h3>
-            <p>Useful output and total input are both gravitational potential energies of the same ball, \(m\,g\,h_2\) and \(m\,g\,h_1\). Dividing one by the other, \(m\) and \(g\) cancel, leaving the ratio of heights.</p>
+            <h3 class="rn-head">Calculate the energies first</h3>
+            <p>Measure the ball's mass in kilograms. Use \(E_p = m\,g\,h\) twice: first at the release height for the input energy \(E_{p1}\), then at the mean rebound height for the useful output energy \(E_{p2}\). Use \(g = 9.8\) N/kg in both calculations.</p>
+            <p>Efficiency is useful output divided by input: \(\dfrac{E_{p2}}{E_{p1}}\). Keep the unrounded energies until the final step. Measure both heights from the bottom of the ball to the floor.</p>
             <h3 class="rn-head">Link to Unit 1</h3>
             <p>the best shock absorber gave the lowest bounce. A shock absorber is meant to be inefficient: it is designed to dissipate the energy.</p>
           </div>

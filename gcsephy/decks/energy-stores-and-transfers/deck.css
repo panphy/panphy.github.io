@@ -136,6 +136,9 @@ mjx-container { line-height: 0; }
 .worked dt { padding: 8px 16px; font-size: 22px; }
 .worked dd { padding: 8px 16px; font-size: 28px; }
 .col { gap: 18px; }
+.bounce-formula > span:first-child { margin-bottom: 22px; }
+.bounce-worked dl { grid-template-columns: 140px 1fr; }
+.bounce-worked dd { font-size: 26px; }
 .data.five td, .data.five th { font-size: 29px; padding: 14px 16px; }
 .stores { align-content: center; }
 .store { padding: 18px 20px; }

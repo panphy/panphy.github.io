@@ -211,11 +211,12 @@
       ],
       lab: { title: "Practical: how efficient is a bounce?", aside: "Filming the bounce against the ruler makes it much easier to read.", blocks: [
         { t: "split", cls: "narrow-fig", left: [
-          { t: "steps", items: ["Drop a ball from 1.00 m, measured from the bottom of the ball.", "Measure how high it bounces back (the bottom of the ball again).", "Do this three times and find the mean bounce height.", "Repeat with a different ball."] },
-          { t: "p", h: R`At the top of each bounce, the useful energy is all in the G.P.E. store. The mass and \(g\) are the same both times, so: \(\text{efficiency} = \dfrac{m\,g\,h_2}{m\,g\,h_1} = \dfrac{h_2}{h_1}\)` },
+          { t: "steps", items: ["Measure the mass in kg. Drop the ball from 1.00 m.", "Measure the height of the first bounce.", "Repeat three times and find the mean bounce height.", "Repeat with a different ball."] },
+          { t: "p", h: R`Measure both heights from the bottom of the ball. Use \(E_p = m\,g\,h\) with \(g = 9.8\) N/kg for each energy; then \(\text{efficiency} = \dfrac{E_{p2}}{E_{p1}}\). Round only at the end.` },
         ], right: [{ t: "fig", h: F.bounce() }] },
         { t: "lab", blocks: [
-          { t: "q", p: "Record your results.", table: { head: ["Ball", R`Drop height \(h_1\) / m`, "Bounce 1 / m", "Bounce 2 / m", "Bounce 3 / m", R`Mean \(h_2\) / m`, "Efficiency"], rows: [[null, "1.00", null, null, null, null, null], [null, "1.00", null, null, null, null, null]], ans: [["tennis", null, "0.66", "0.64", "0.65", "0.65", "0.65 (65%)"], ["rubber", null, "0.80", "0.78", "0.82", "0.80", "0.80 (80%)"]] } },
+          { t: "q", p: "Record your measurements.", table: { head: ["Ball", "Mass / kg", "Drop / m", "Bounce 1 / m", "Bounce 2 / m", "Bounce 3 / m", "Mean / m"], rows: [[null, null, "1.00", null, null, null, null], [null, null, "1.00", null, null, null, null]], ans: [["A", "0.10", null, "0.66", "0.64", "0.65", "0.65"], ["B", "0.10", null, "0.80", "0.78", "0.82", "0.80"]] } },
+          { t: "q", p: "Calculate the two energies, then divide useful output by input.", table: { head: ["Ball", R`Input \(E_{p1}\) / J`, R`Useful \(E_{p2}\) / J`, "Efficiency"], rows: [[null, null, null, null], [null, null, null, null]], ans: [["A", R`\(0.10 \times 9.8 \times 1.00 = 0.98\)`, R`\(0.10 \times 9.8 \times 0.65 = 0.637\)`, "0.65 (65%)"], ["B", R`\(0.10 \times 9.8 \times 1.00 = 0.98\)`, R`\(0.10 \times 9.8 \times 0.80 = 0.784\)`, "0.80 (80%)"]] } },
           { t: "q", p: "Where did the rest of the energy go?", lines: 2, a: "To the thermal store of the ball and the floor, and some was transferred by sound (ending in the thermal store of the surroundings)." },
         ] },
       ] },
