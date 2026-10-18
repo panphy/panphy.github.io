@@ -962,43 +962,131 @@ button:hover {
 }
 
 .present-btn {
-  min-height: 40px;
-  padding: 6px 14px;
-  font-size: 0.85rem;
-  background: color-mix(in srgb, var(--surface) 88%, transparent);
-  border-color: var(--line-strong);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-  box-shadow: var(--shadow-1);
-}
-
-.present-btn.laser-active {
-  box-shadow: 0 0 8px 2px rgba(34, 197, 94, 0.6);
-  border-color: #22c55e;
-}
-
-.font-size-selector {
   display: inline-flex;
   align-items: center;
-  gap: 8px;
-  min-height: 40px;
-  padding: 4px 12px;
-  border-radius: var(--radius-sm);
+  justify-content: center;
+  gap: 6px;
+  min-height: 44px;
+  padding: 0 12px;
+  border-color: var(--line-strong);
+  border-radius: 12px;
   background: color-mix(in srgb, var(--surface) 88%, transparent);
-  border: 1px solid var(--line-strong);
-  box-shadow: var(--shadow-1);
+  color: var(--ink);
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
-  font-size: 0.8rem;
+  box-shadow: var(--shadow-1);
+}
+
+.present-btn .md-icon {
+  width: 22px;
+  height: 22px;
+}
+
+/* Icon colours follow the toolbars: accent for zoom, green for the laser, red for exit. */
+.present-zoom-btn .md-icon {
+  color: var(--accent);
+}
+
+#presentLaserToggle {
+  color: var(--good);
+}
+
+#presentExitButton {
+  color: var(--danger);
+}
+
+#presentExitButton:hover {
+  background: var(--danger-soft);
+}
+
+/* Square icon buttons: laser, theme and exit. */
+.present-icon-btn {
+  width: 44px;
+  padding: 0;
+}
+
+.present-zoom-menu {
+  position: relative;
+  display: inline-flex;
+}
+
+.present-zoom-btn[aria-expanded="true"] {
+  background: var(--surface-3);
+}
+
+.present-zoom-value {
+  min-width: 3.2em;
+  font-family: var(--font-mono);
+  font-size: 0.82rem;
+  font-weight: 500;
+  text-align: left;
+}
+
+/* The controls sit at the top right, so the menu opens leftwards from the button's right edge. */
+.present-zoom-panel {
+  left: auto;
+  right: 0;
+  min-width: 120px;
+}
+
+.present-zoom-option {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  min-height: 40px;
+  padding: 8px 12px;
+  border: none;
+  border-radius: 8px;
+  background: none;
+  font-family: var(--font-mono);
+  font-size: 0.86rem;
+  font-weight: 500;
+  text-align: left;
+}
+
+.present-zoom-option:hover,
+.present-zoom-option:focus-visible {
+  background: var(--surface-3);
+}
+
+.present-zoom-option.active {
+  color: var(--accent);
   font-weight: 600;
 }
 
-.font-size-selector select {
-  border: none;
-  background: transparent;
-  font-size: 0.8rem;
-  cursor: pointer;
-  outline: none;
+.present-zoom-option.active::after {
+  content: '';
+  width: 6px;
+  height: 11px;
+  margin: -3px 2px 0 auto;
+  border: solid currentColor;
+  border-width: 0 2px 2px 0;
+  transform: rotate(45deg);
+}
+
+/* The shared theme button draws itself transparent; give it the same chip as its neighbours. */
+.present-controls #presentThemeToggle.panphy-theme-button {
+  border-color: var(--line-strong) !important;
+  background: color-mix(in srgb, var(--surface) 88%, transparent) !important;
+  box-shadow: var(--shadow-1) !important;
+}
+
+.present-controls #presentThemeToggle.panphy-theme-button:hover {
+  background: var(--surface-3) !important;
+}
+
+/* Laser on: the dot fills and the button glows in the laser's colour. */
+.present-laser-dot {
+  transition: fill 0.15s ease;
+}
+
+.present-btn.laser-active {
+  border-color: var(--laser-color);
+  box-shadow: 0 0 8px 2px rgba(var(--laser-color-rgb), 0.55);
+}
+
+.present-btn.laser-active .present-laser-dot {
+  fill: currentColor;
 }
 
 /* ---------------------------------------------------------------------- */

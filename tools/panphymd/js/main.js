@@ -81,7 +81,10 @@ const dirtyIndicator = document.getElementById('dirtyIndicator');
 const presentExitButton = document.getElementById('presentExitButton');
 const presentThemeToggle = document.getElementById('presentThemeToggle');
 const presentLaserToggle = document.getElementById('presentLaserToggle');
-const presentZoomSelect = document.getElementById('presentZoomSelect');
+const presentZoomMenu = document.getElementById('presentZoomMenu');
+const presentZoomButton = document.getElementById('presentZoomButton');
+const presentZoomPanel = document.getElementById('presentZoomPanel');
+const presentZoomValue = document.getElementById('presentZoomValue');
 const laserPointer = document.getElementById('laserPointer');
 const laserCanvas = document.getElementById('laserCanvas');
 const laserContext = laserCanvas ? laserCanvas.getContext('2d') : null;
@@ -1095,11 +1098,21 @@ function applyPresentZoom(value) {
     return;
   }
   outputPane.style.setProperty('--present-zoom', (zoomValue / 100).toString());
+  if (presentZoomValue) presentZoomValue.textContent = `${zoomValue}%`;
+  if (presentZoomButton) presentZoomButton.setAttribute('aria-label', `Zoom: ${zoomValue}%`);
+  if (presentZoomPanel) {
+    presentZoomPanel.querySelectorAll('.present-zoom-option').forEach(option => {
+      const isActive = Number(option.dataset.zoom) === zoomValue;
+      option.classList.toggle('active', isActive);
+      option.setAttribute('aria-pressed', String(isActive));
+    });
+  }
 }
 
-function initializePresentZoom() {
-  if (!presentZoomSelect) return;
-  applyPresentZoom(presentZoomSelect.value);
+function setPresentZoomPanelOpen(open) {
+  if (!presentZoomPanel || !presentZoomButton) return;
+  presentZoomPanel.hidden = !open;
+  presentZoomButton.setAttribute('aria-expanded', String(open));
 }
 
 // ---- Laser pointer ----
@@ -1228,6 +1241,7 @@ function enableLaser() {
     startLaserRendering();
   }
   presentLaserToggle.classList.add('laser-active');
+  presentLaserToggle.setAttribute('aria-pressed', 'true');
   document.documentElement.classList.add('laser-cursor-hidden');
   document.body.classList.add('laser-cursor-hidden');
   outputPane.classList.add('laser-cursor-hidden');
@@ -1245,6 +1259,7 @@ function disableLaser() {
   stopLaserRendering();
   laserTail.length = 0;
   presentLaserToggle.classList.remove('laser-active');
+  presentLaserToggle.setAttribute('aria-pressed', 'false');
   document.documentElement.classList.remove('laser-cursor-hidden');
   document.body.classList.remove('laser-cursor-hidden');
   outputPane.classList.remove('laser-cursor-hidden');
@@ -2053,6 +2068,8 @@ function updatePresentButtonLabel() {
   if (!presentButton) return;
 
   const isOutputFullscreen = isInFullscreen();
+  // Entering or leaving Present closes the zoom menu.
+  setPresentZoomPanelOpen(false);
   // Rename the label only, keeping the icon beside it.
   const presentLabel = presentButton.querySelector('span') || presentButton;
   presentLabel.textContent = isOutputFullscreen ? 'Exit Present' : 'Present';
@@ -2092,11 +2109,30 @@ presentThemeToggle.addEventListener('click', () => {
   updatePresentThemeIcon();
   updateMobileThemeToggle();
 });
-if (presentZoomSelect) {
-  presentZoomSelect.addEventListener('change', event => {
-    applyPresentZoom(event.target.value);
+if (presentZoomButton && presentZoomPanel) {
+  presentZoomButton.addEventListener('click', event => {
+    event.stopPropagation();
+    setPresentZoomPanelOpen(presentZoomPanel.hidden);
   });
-  initializePresentZoom();
+  presentZoomPanel.addEventListener('click', event => {
+    const option = event.target.closest('.present-zoom-option');
+    if (!option) return;
+    applyPresentZoom(option.dataset.zoom);
+    setPresentZoomPanelOpen(false);
+    presentZoomButton.focus({ preventScroll: true });
+  });
+  document.addEventListener('click', event => {
+    if (!presentZoomPanel.hidden && !presentZoomMenu.contains(event.target)) {
+      setPresentZoomPanelOpen(false);
+    }
+  });
+  document.addEventListener('keydown', event => {
+    if (event.key === 'Escape' && !presentZoomPanel.hidden) {
+      setPresentZoomPanelOpen(false);
+      presentZoomButton.focus({ preventScroll: true });
+    }
+  });
+  applyPresentZoom(100);
 }
 // ---------------------------------------------------------------------- //
 // Mobile tab bar — switch between Edit / Preview on narrow screens        //
