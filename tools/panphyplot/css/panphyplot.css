@@ -346,7 +346,7 @@ input[type="number"]:focus {
 	.phone-gate img {
 		width: 56px;
 		height: 56px;
-		border-radius: 12px;
+		border-radius: 12%;
 	}
 
 	.phone-gate h1 {
@@ -412,7 +412,7 @@ input[type="number"]:focus {
 .neo-brand img {
 	width: 30px;
 	height: 30px;
-	border-radius: 7px;
+	border-radius: 12%;
 }
 
 .neo-wordmark {
