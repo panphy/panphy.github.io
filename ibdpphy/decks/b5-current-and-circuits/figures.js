@@ -107,8 +107,10 @@ window.DeckFigures.add(P => {
       const cell = volts => branch(L, B, L, T, [{ kind: 'cell', at: 0.5, flip: true, label: volts, side: 1, gap: 70 }], on);
       let s = '';
       if (kind === 'series') {
+        const r1 = L + 0.3 * (R - L), r2 = L + 0.7 * (R - L);
         s = cell('V') + branch(L, T, R, T, [], on) + branch(R, T, R, B, [], on) + branch(R, B, L, B, [{ kind: 'resistor', at: 0.3, label: sub('R', '2'), side: 1 }, { kind: 'resistor', at: 0.7, label: sub('R', '1'), side: 1 }], on);
-        if (on) s += flow(420, T, 0, 'I', 0, -26) + pd(L + 110, B - 50, L + 320, B - 50, sub('V', '1'), L + 215, B - 68) + pd(R - 320, B - 50, R - 110, B - 50, sub('V', '2'), R - 215, B - 68) + text(420, 250, 'the same current in both', 'lbl');
+        // Each p.d. bracket spans only its own resistor, above the resistor's label.
+        if (on) s += flow(420, T, 0, 'I', 0, -26) + pd(r1 - 62, B - 100, r1 + 62, B - 100, sub('V', '1'), r1, B - 118) + pd(r2 - 62, B - 100, r2 + 62, B - 100, sub('V', '2'), r2, B - 118) + text(420, 230, 'the same current in both', 'lbl');
       } else if (kind === 'parallel') {
         s = cell('V') + branch(L, T, R, T, [], on) + branch(L, B, R, B, [], on) + branch(450, T, 450, B, [{ kind: 'resistor', at: 0.5, label: sub('R', '1'), side: 1, gap: 64 }], on) + branch(R, T, R, B, [{ kind: 'resistor', at: 0.5, label: sub('R', '2'), side: -1, gap: 64 }], on) + node(450, T) + node(450, B);
         if (on) s += flow(300, T, 0, 'I', 0, -26) + flow(450, T + 60, 90, sub('I', '1'), -40, 10) + flow(R, T + 60, 90, sub('I', '2'), -40, 10) + text(420, 460, 'the same p.d. across both', 'lbl');

@@ -181,8 +181,13 @@ window.DeckFigures.add(P => {
       [2, 4, 6, 8].forEach(b => { s += `<line x1="102" y1="${Y(b)}" x2="110" y2="${Y(b)}" class="axis"/>` + text(94, Y(b) + 9, b, 'lbl mono', 'end'); });
       s += text(440, 506, 'nucleon number A', 'lbl') + text(40, 236, 'binding energy per nucleon / MeV', 'lbl', 'middle', 'transform="rotate(-90 40 236)"');
       s += `<path d="${through(data.map(([a, b]) => [X(a), Y(b)]))}" class="curve draw" style="stroke:var(--brand-primary);stroke-width:4"/>` + data.map(([a, b]) => `<circle cx="${f(X(a))}" cy="${f(Y(b))}" r="5" style="fill:var(--brand-accent-strong)"/>`).join('');
-      s += `<line x1="${X(4) + 6}" y1="${Y(7.07) + 6}" x2="${X(22)}" y2="${Y(5)}" class="guide"/>` + text(X(24), Y(4.7), 'helium-4', 'lbl', 'start') + text(X(56), Y(8.79) - 18, 'iron-56', 'lbl strong') + text(X(235) - 4, Y(7.59) + 40, 'uranium-235', 'lbl', 'end') + text(X(2) + 16, Y(1.11) + 8, 'hydrogen-2', 'lbl', 'start');
-      if ('arrows' in el.dataset) s += arrow(X(22), Y(6.6), X(46), Y(8.1), 'brand-accent', 5) + text(X(70), Y(6.4), 'fusion', 'lbl strong', 'start') + arrow(X(226), Y(8.15), X(150), Y(8.9), 'brand-accent', 5) + text(X(200), Y(9.0), 'fission', 'lbl strong');
+      s += `<line x1="${X(4) + 6}" y1="${Y(7.07) + 6}" x2="${X(22)}" y2="${Y(7.4)}" class="guide"/>` + text(X(24), Y(7.1), 'helium-4', 'lbl', 'start') + text(X(56), Y(8.79) - 18, 'iron-56', 'lbl strong') + text(X(235) - 4, Y(7.59) + 40, 'uranium-235', 'lbl', 'end') + text(X(2) + 16, Y(1.11) + 8, 'hydrogen-2', 'lbl', 'start');
+      if ('arrows' in el.dataset) {
+        // Match the steep hydrogen-to-helium rise and the shallow heavy-nucleus slope.
+        // Offset the arrows from the data; keep the helium leader above the fusion arrow.
+        const fusionSlope = (4 - 2) / (7.07 - 1.11);
+        s += arrow(X(2.4) + 36, Y(2.2), X(2.4 + 4.5 * fusionSlope) + 36, Y(6.7), 'brand-accent', 5) + text(X(24), Y(4), 'fusion', 'lbl strong', 'start') + arrow(X(235), Y(7.59) - 22, X(174), Y(8.08) - 22, 'brand-accent', 5) + text(X(200), Y(9.0), 'fission', 'lbl strong');
+      }
       return svg('0 20 800 500', s, 'Graph of binding energy per nucleon against nucleon number. It rises steeply for light nuclei, with a sharp peak at helium-4, reaches a maximum of about 8.8 mega electronvolts near iron-56 and then falls slowly to about 7.6 for uranium');
     },
 
