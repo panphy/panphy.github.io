@@ -277,6 +277,17 @@
 						</div>
 					</div>
 
+						<div class="neo-fit-extend" role="group" aria-labelledby="fit-extend-title">
+							<span class="neo-fit-extend-title" id="fit-extend-title">Extend line</span>
+							<div class="neo-fit-extend-fields">
+								<label for="fit-extend-from">Back to x =</label>
+								<input type="number" id="fit-extend-from" step="any" title="Draw the fitted line back to this x. Leave blank to start at the data.">
+								<label for="fit-extend-to">Forward to x =</label>
+								<input type="number" id="fit-extend-to" step="any" title="Draw the fitted line forward to this x. Leave blank to stop at the data.">
+							</div>
+							<p class="neo-fit-extend-message" id="fit-extend-message" aria-live="polite" hidden></p>
+						</div>
+
 						<label class="neo-switch neo-weight" title="Weights each point by 1/σ², using its ±ΔY and its ±ΔX through the slope">
 							<input type="checkbox" id="fit-weighted" role="switch">
 							<span class="neo-switch-track" aria-hidden="true"></span>

@@ -15,7 +15,7 @@ CSV import shows a preview in which every column's role is chosen; the suggested
 - `js/model.js`: the column model and formula engine, pure and testable in node.
 - `js/stats.js`: weighted straight lines, parameter uncertainties and χ², also pure.
 - `js/legacy-import.js`: pure conversion of original datasets into sheets.
-- `js/state.js`: saved state, and the globals the fitting code reads. Fits are keyed `<sheet id>:<Y column id>`.
+- `js/state.js`: saved state, and the globals the fitting code reads. Fits are keyed `<sheet id>:<Y column id>`. How far each fit line extends beyond its data is saved in `extents`; the fit functions that redraw it are kept for the session only.
 - `js/fitting.js`: a copy of `misc/panphyplotog/js/curve-fitting.js`. It renames `activeSet` to `activeFitKey`, records the data each fit used, and passes every fit through `finalizeParametricFit`, which refines it, weights it by the effective variance σ² = ΔY² + (f′(x)·ΔX)² when asked, and gives each parameter its ± from the Jacobian. Its Power fit is the general y = A(x − x₀)ᵇ + c, found as in the original by a copy of `PanPhyFitCore.solveShiftedPowerLaw`, retained unchanged to preserve the established fitting results, and its Exponential reports y = A eᵇˣ + c. Bring fixes to the original across by hand.
 - `js/plot.js`, `js/ui.js`, `js/dialogs.js`, `js/main.js`: graph, table, the formula, mean and CSV dialogs, and start-up.
 - `js/copy.js`: View Table (copy for a spreadsheet, as an image, Markdown or LaTeX) and copying the fitted equation as an image or LaTeX. Its clipboard and SVG-to-PNG helpers are copied from `misc/panphyplotog/js/ui.js`.

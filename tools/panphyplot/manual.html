@@ -307,6 +307,8 @@
 				<tr><td>Custom</td><td>Your own formula in \(x\), such as <code>A*exp(-k*x)+c</code> or <code>k*x</code>. Every other letter is a parameter to fit.</td></tr>
 			</tbody>
 		</table>
+		<h3>Extending the line</h3>
+		<p>A fitted line is drawn across the data. To draw it further, type x values under <strong>Extend line</strong>: <strong>Back to x =</strong> before the first point, such as 0 to read an intercept, and <strong>Forward to x =</strong> beyond the last. Leave a box blank to stop at the data. Each series keeps its own extension through a new fit; <strong>Clear Fit</strong> removes it. After the page is reloaded, fit again before changing an extension.</p>
 		<h3>Weighted fits</h3>
 		<p>Turn on <strong>Weight by uncertainties</strong> to let the more certain points count for more. Each point has weight \(1/\sigma^2\), with \(\sigma^2 = \Delta y^2 + \left(f'(x)\,\Delta x\right)^2\): its ±ΔY, and its ±ΔX turned into a vertical uncertainty through the slope of the curve (the effective variance). The fit is re-weighted as the slope settles. Weighting works for every fit type and needs a ±ΔY or ±ΔX above zero for every point.</p>
 		<p>A fit becomes <em>Outdated</em>, drawn dashed, as soon as its data or ±ΔY change. Click <strong>Fit Curve</strong> again to update it.</p>

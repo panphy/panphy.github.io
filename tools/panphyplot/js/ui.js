@@ -799,7 +799,7 @@ function clearSheet() {
 // A cleared or reset sheet has nothing left to fit, so its fits and fit drafts go too.
 function dropSheetFits(sheet) {
 	const prefix = `${sheet.id}:`;
-	[datasetFitResults, fittedCurves, customFitStates].forEach((store) => {
+	[datasetFitResults, fittedCurves, customFitStates, fitExtents, fitFunctions].forEach((store) => {
 		Object.keys(store).forEach((key) => {
 			if (key.startsWith(prefix)) delete store[key];
 		});
@@ -1365,6 +1365,46 @@ function renderFitParameters() {
 	}
 }
 
+// The Extend line fields act on the chosen series' fit, so they wait until it has one.
+function syncFitExtendControl(message = '') {
+	const fromInput = document.getElementById('fit-extend-from');
+	const toInput = document.getElementById('fit-extend-to');
+	if (!fromInput || !toInput) return;
+	const curve = fittedCurves[activeFitKey];
+	const extent = fitExtents[activeFitKey] || {};
+	const range = curve && Array.isArray(curve.dataRange) ? curve.dataRange : null;
+	const shortNumber = value => String(Number(value.toPrecision(4)));
+	fromInput.disabled = toInput.disabled = !curve;
+	fromInput.value = Number.isFinite(extent.from) ? String(extent.from) : '';
+	toInput.value = Number.isFinite(extent.to) ? String(extent.to) : '';
+	fromInput.placeholder = range ? `${shortNumber(range[0])} (data)` : (curve ? 'start of data' : 'Fit first');
+	toInput.placeholder = range ? `${shortNumber(range[1])} (data)` : (curve ? 'end of data' : 'Fit first');
+	const note = document.getElementById('fit-extend-message');
+	note.textContent = message;
+	note.hidden = !message;
+}
+
+function handleFitExtendChange(event) {
+	const curve = fittedCurves[activeFitKey];
+	if (!curve) return syncFitExtendControl();
+	const isFrom = event.target.id === 'fit-extend-from';
+	const text = event.target.value.trim();
+	const value = text === '' ? null : Number(text);
+	const range = Array.isArray(curve.dataRange) ? curve.dataRange : null;
+	if (value !== null && !Number.isFinite(value)) return syncFitExtendControl('Enter a number, or leave the box blank.');
+	if (value !== null && range && (isFrom ? value > range[0] : value < range[1])) {
+		const limit = String(Number(range[isFrom ? 0 : 1].toPrecision(4)));
+		return syncFitExtendControl(isFrom ? `Back to x must be ${limit} or less.` : `Forward to x must be ${limit} or more.`);
+	}
+	const extent = { ...(fitExtents[activeFitKey] || {}), [isFrom ? 'from' : 'to']: value };
+	if (extent.from == null && extent.to == null) delete fitExtents[activeFitKey];
+	else fitExtents[activeFitKey] = extent;
+	const redrawn = applyFitExtent(activeFitKey);
+	syncFitExtendControl(redrawn ? '' : 'Fit again to draw the line over the new range.');
+	plotGraph();
+	scheduleSaveState();
+}
+
 function syncWeightingControl() {
 	const box = document.getElementById('fit-weighted');
 	if (!box) return;
@@ -1442,6 +1482,7 @@ function renderActiveFitResult() {
 	const result = datasetFitResults[activeFitKey];
 	if (result) renderFittingResult(result.equation, result.rSquared);
 	else clearFittingResultDisplay();
+	syncFitExtendControl();
 	plotResiduals();
 }
 
@@ -1450,7 +1491,10 @@ function clearFittedCurve() {
 	invalidatePendingFit(activeFitKey);
 	delete datasetFitResults[activeFitKey];
 	delete fittedCurves[activeFitKey];
+	delete fitExtents[activeFitKey];
+	delete fitFunctions[activeFitKey];
 	clearFittingResultDisplay();
+	syncFitExtendControl();
 	plotGraph();
 	refreshWorkspaceChrome();
 	scheduleSaveState();
@@ -1543,6 +1587,9 @@ function initializeInterface() {
 	document.getElementById('add-column-button').addEventListener('click', addColumn);
 	document.getElementById('clear-sheet-button').addEventListener('click', clearSheet);
 	document.getElementById('fit-series-select').addEventListener('change', handleFitSeriesChange);
+	['fit-extend-from', 'fit-extend-to'].forEach((id) => {
+		document.getElementById(id).addEventListener('change', handleFitExtendChange);
+	});
 	document.getElementById('fit-weighted').addEventListener('change', (event) => {
 		plotState.weightFits = event.target.checked;
 		scheduleSaveState();

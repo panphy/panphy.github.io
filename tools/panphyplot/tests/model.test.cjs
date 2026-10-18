@@ -127,6 +127,15 @@ test('saved state is repaired rather than rejected', () => {
 	assert.ok(!sheet.columns.some(column => column.id === fresh));
 });
 
+test('fit line extensions are kept, and a missing or malformed store becomes empty', () => {
+	const sheets = [{ id: 's1', columns: [{ id: 'c1', cells: [] }] }];
+	assert.deepEqual(model.createState().extents, {});
+	assert.deepEqual(model.normalizeState({ sheets }).extents, {});
+	assert.deepEqual(model.normalizeState({ sheets, extents: 'bad' }).extents, {});
+	const extents = { 's1:c1': { from: 0, to: null } };
+	assert.deepEqual(model.normalizeState({ sheets, extents }).extents, extents);
+});
+
 const math = require('../js/vendor/math.min.js');
 
 function namedSheet(columns) {
