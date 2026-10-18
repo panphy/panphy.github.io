@@ -1340,12 +1340,12 @@ viewer.addEventListener('keydown', event => {
 
 // ---------- Mode selection ----------
 const DEFAULT_READOUT = {
-  alpha: () => 'AMERICIUM-241 · 95 protons + 146 neutrons. Tap a particle, or press “Decay this nucleus”.',
-  beta: () => 'CARBON-14 · 6 protons + 8 neutrons. Too many neutrons makes it unstable. Press “Decay this nucleus”.',
-  gamma: () => 'TECHNETIUM-99m · 43 protons + 56 neutrons, with extra energy (an excited state). Press “Decay this nucleus”.',
+  alpha: () => 'AMERICIUM-241 · 95 protons + 146 neutrons. Press “Decay this nucleus”, then test which material stops alpha radiation. Tap a particle to find out what it is.',
+  beta: () => 'CARBON-14 · 6 protons + 8 neutrons: too many neutrons makes it unstable. Press “Decay this nucleus” and count the protons, then test penetration.',
+  gamma: () => 'TECHNETIUM-99m · 43 protons + 56 neutrons, with extra energy (an excited state). Press “Decay this nucleus”, compare the nucleon counts before and after, then test penetration.',
   halflife: () => {
     const isotope = ISOTOPES[$('isotope').value];
-    return `${isotope.name.toUpperCase()} · Half-life ${formatTime(isotope.halfLife)} ${isotope.unitName}. Press “Start decay” or “Run one half-life”.`;
+    return `${isotope.name.toUpperCase()} · Half-life ${formatTime(isotope.halfLife)} ${isotope.unitName}. Choose an isotope and sample size, then press “Run one half-life” to go one half-life at a time, or “Start decay”.`;
   }
 };
 const LEGEND = {
@@ -1385,7 +1385,6 @@ function selectMode(mode, animate = true) {
   $('experiments').hidden = halfLife;
   $('step-half').hidden = !halfLife;
   $('sample-controls').hidden = !halfLife;
-  $('action-hint').textContent = data.hint;
   readout.textContent = DEFAULT_READOUT[mode]();
   for (const [id, key] of Object.entries({ 'scene-title': 'title', 'mode-date': 'date', 'mode-heading': 'heading', description: 'description', look: 'look', evidence: 'evidence' })) $(id).textContent = data[key];
   document.querySelectorAll('.models [data-mode]').forEach(button => button.setAttribute('aria-pressed', String(button.dataset.mode === mode)));

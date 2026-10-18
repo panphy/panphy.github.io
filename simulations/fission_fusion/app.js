@@ -1839,10 +1839,10 @@ viewer.addEventListener('keydown', event => {
 
 // ---------- Mode selection ----------
 const DEFAULT_READOUT = {
-  fission: () => 'URANIUM-235 · 92 protons + 143 neutrons, and a slow neutron waiting on the left. Press “Fire a neutron”, or tap a nucleon.',
-  chain: () => 'A BLOCK OF FUEL · Red spheres are uranium-235, grey spheres are uranium-238. Press “Start chain reaction”, then add control rods.',
-  fusion: () => 'DEUTERIUM + TRITIUM · Two hydrogen nuclei, each with charge +1. Choose a temperature, then press “Collide the nuclei”.',
-  energy: () => 'Choose a reaction, or tap a nucleus on the curve to read its binding energy per nucleon.'
+  fission: () => 'URANIUM-235 · 92 protons + 143 neutrons, and a slow neutron waiting on the left. Press “Fire a neutron”, then tap a nucleon to see which nucleus it belongs to.',
+  chain: () => 'A BLOCK OF FUEL · Red spheres are uranium-235, grey spheres are uranium-238. Press “Start chain reaction”, then change the number of control rods and watch k in the graph panel.',
+  fusion: () => 'DEUTERIUM + TRITIUM · Two hydrogen nuclei, each with charge +1. Try 50 million °C and press “Collide the nuclei”, then step the temperature up by 10 until the nuclei fuse.',
+  energy: () => 'Switch between the two reactions and compare the last row of numbers, or tap a nucleus on the curve to read its binding energy per nucleon.'
 };
 const LEGEND = {
   fission: ['proton', 'neutron', 'gamma'],
@@ -1893,7 +1893,6 @@ function selectMode(mode, animate = true) {
   $('fire').hidden = mode === 'energy';
   $('motion').hidden = mode === 'energy';
   $('reset').hidden = mode === 'energy';
-  $('action-hint').textContent = data.hint;
   if (mode !== 'energy') readout.textContent = DEFAULT_READOUT[mode]();
   for (const [id, key] of Object.entries({ 'scene-title': 'title', 'mode-date': 'date', 'mode-heading': 'heading', description: 'description', look: 'look', evidence: 'evidence' })) $(id).textContent = data[key];
   document.querySelectorAll('.models [data-mode]').forEach(button => button.setAttribute('aria-pressed', String(button.dataset.mode === mode)));

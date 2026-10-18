@@ -806,6 +806,8 @@ const BEAM_RADIUS = 4; // Wider than the atom, so nearly all of the beam (about 
 const AIMED_INTERVAL = 8; // Seconds between the extra shots.
 const AIMED_RADIUS = 0.43; // About 40% of these come within the >90° bounce-back range.
 const TRAIL_SAMPLE = 1 / 60; // Seconds between trail points, whatever the display's frame rate.
+// While the beam runs, one message says both what is hidden and what to watch.
+const RUTHERFORD_BEAM = `${PARTICLES.farElectrons} Watch: most alpha particles pass straight through, but a few pass close to the nucleus and are deflected or bounce back.`;
 function startBeam() {
   stopBeam();
   beam = { alphas: [], history: [], backHistory: [], timer: 0, aimTimer: 1.5 };
@@ -813,17 +815,16 @@ function startBeam() {
   $('alpha').textContent = 'Stop the beam';
   $('alpha-legend').hidden = false;
   $('deflected-legend').hidden = state.model === 'plum';
-  $('action-hint').textContent = state.model === 'plum'
-    ? 'Spread-out positive charge only nudges the alpha particles: they all pass almost straight through.'
-    : 'Most alpha particles pass straight through. A few pass close to the nucleus and are deflected or bounce back.';
   if (!state.playing) setPlaying(true);
   flyTo({ direction: new THREE.Vector3(0, 0.3, 1), distance: THREE.MathUtils.clamp(fitDistance(7), 15, 24) });
-  readout.textContent = `${PARTICLES.alpha} They arrive from the left as a wide, parallel beam.`;
+  readout.textContent = state.model === 'plum'
+    ? 'ALPHA BEAM · The alpha particles arrive from the left as a wide, parallel beam. Spread-out positive charge only nudges them: they all pass almost straight through.'
+    : `${PARTICLES.alpha} They arrive from the left as a wide, parallel beam.`;
   if (state.model === 'rutherford') {
     select(null);
     spread.target = 1;
     $('electron-legend').hidden = true;
-    readout.textContent = PARTICLES.farElectrons;
+    readout.textContent = RUTHERFORD_BEAM;
   }
 }
 function stepSpread(delta) {
@@ -860,12 +861,11 @@ function stopBeam() {
   beam = null;
   spread.target = 0;
   $('electron-legend').hidden = state.model === 'cloud';
-  if (readout.textContent === PARTICLES.farElectrons) readout.textContent = DEFAULT_READOUT[state.model];
+  if (readout.textContent === RUTHERFORD_BEAM) readout.textContent = DEFAULT_READOUT[state.model];
   $('alpha').setAttribute('aria-pressed', 'false');
   $('alpha').textContent = 'Fire alpha particles';
   $('alpha-legend').hidden = true;
   $('deflected-legend').hidden = true;
-  $('action-hint').textContent = MODELS[state.model].hint;
 }
 function randomEntry(radius) {
   // Uniform over the beam's cross-section, as when the beam is far wider than an atom.
@@ -1146,14 +1146,19 @@ function resetScene() {
   selectModel(state.model, false);
 }
 $('reset').addEventListener('click', resetScene);
+// Each press moves on to the next orbital, 1s → 2s → 2p, so the shapes can be compared in turn.
+function inspectNextOrbital() {
+  const keys = Object.keys(ORBITALS);
+  state.orbitalIndex = (state.orbitalIndex + 1) % keys.length;
+  state.orbitalFocus = keys[state.orbitalIndex];
+  applyOpacity(1);
+  readout.textContent = ORBITALS[state.orbitalFocus];
+  flyTo({ direction: new THREE.Vector3(0.45, 0.7, 1), distance: [4.5, 9, 9][state.orbitalIndex] });
+}
+$('orbital').addEventListener('click', inspectNextOrbital);
 $('inspect').addEventListener('click', () => {
   if (state.model === 'cloud') {
-    const keys = Object.keys(ORBITALS);
-    state.orbitalIndex = (state.orbitalIndex + 1) % keys.length;
-    state.orbitalFocus = keys[state.orbitalIndex];
-    applyOpacity(1);
-    readout.textContent = ORBITALS[state.orbitalFocus];
-    flyTo({ direction: new THREE.Vector3(0.45, 0.7, 1), distance: [4.5, 9, 9][state.orbitalIndex] });
+    inspectNextOrbital();
     return;
   }
   // Bring the Rutherford electrons back into view before inspecting one.
@@ -1201,10 +1206,10 @@ viewer.addEventListener('keydown', event => {
 
 // ---------- Model selection ----------
 const DEFAULT_READOUT = {
-  plum: 'Tap a particle to discover its job.',
-  rutherford: 'Tap the nucleus or an electron to discover its job.',
-  bohr: 'CARBON-12 · 6 protons + 6 neutrons + 6 electrons',
-  cloud: 'CARBON · 6 electrons in the 1s, 2s and 2p orbitals. Tap the nucleus or inspect an orbital.'
+  plum: 'PLUM PUDDING · Tap a particle to discover its job. Then press “Fire alpha particles” and compare with the Rutherford model.',
+  rutherford: 'NUCLEAR MODEL · Tap the nucleus or an electron to discover its job. Fire alpha particles: most pass straight through, but a few bounce back.',
+  bohr: 'CARBON-12 · 6 protons + 6 neutrons + 6 electrons. Tap a proton or neutron, or excite an electron and watch the energy diagram.',
+  cloud: 'CARBON · 6 electrons in the 1s, 2s and 2p orbitals. Press “Inspect the next orbital” to compare their shapes in turn, or tap the nucleus.'
 };
 function selectModel(model, animate = true) {
   const previous = state.model;
@@ -1224,8 +1229,10 @@ function selectModel(model, animate = true) {
   $('energy-diagram').hidden = model !== 'bohr';
   $('alpha').hidden = !['plum', 'rutherford'].includes(model);
   $('excite').hidden = model !== 'bohr';
+  // The electron cloud's main action is stepping through the orbitals, so Inspect moves up to the main button.
+  $('orbital').hidden = model !== 'cloud';
+  $('inspect').hidden = model === 'cloud';
   $('inspect').textContent = model === 'cloud' ? 'Inspect an orbital' : 'Inspect an electron';
-  $('action-hint').textContent = data.hint;
   readout.textContent = DEFAULT_READOUT[model];
   for (const [id, key] of Object.entries({ 'scene-title': 'title', 'model-date': 'date', 'model-heading': 'heading', description: 'description', look: 'look', evidence: 'evidence' })) $(id).textContent = data[key];
   document.querySelectorAll('.models [data-model]').forEach(button => button.setAttribute('aria-pressed', String(button.dataset.model === model)));
