@@ -269,6 +269,59 @@ function loadSampleData() {
 	showToast('Sample pendulum data loaded: three repeat readings of the period T.');
 }
 
+// Data sent by another PanPhy app (Motion Tracker) in the link's hash, #import=<JSON>: a sheet name and
+// columns of { name, unit, role, cells, hidden }. The hash is cleared at once, so a reload does not import
+// it again. Anyone can make such a link, so text is reduced to plain characters and the message is fixed.
+let importedFromLink = false;
+
+function cleanLinkedText(value) {
+	return String(value ?? '').replace(/[\\<>{}$&"'`]/g, '').trim();
+}
+
+function importLinkedData() {
+	const match = window.location.hash.match(/^#import=(.+)$/s);
+	if (!match) return;
+	window.history.replaceState(null, '', window.location.pathname + window.location.search);
+	if (persistenceDisabled) return;
+	let payload;
+	try {
+		payload = JSON.parse(decodeURIComponent(match[1]));
+	} catch (error) {
+		showToast('The data in this link could not be read.');
+		return;
+	}
+	const columns = Array.isArray(payload?.columns) ? payload.columns.filter(column => column && Array.isArray(column.cells)) : [];
+	if (!columns.length) return;
+	const ids = PlotModel.createIdSource(plotState);
+	const baseName = cleanLinkedText(payload.name).slice(0, PlotModel.SHEET_NAME_MAX_LENGTH - 3) || 'Imported';
+	const taken = new Set(plotState.sheets.map(entry => entry.name));
+	let name = baseName;
+	for (let number = 2; taken.has(name); number++) name = `${baseName} ${number}`;
+	let sheet = getActiveSheet();
+	if (!PlotModel.isSheetEmpty(sheet)) {
+		sheet = PlotModel.createSheet(ids, name);
+		plotState.sheets.push(sheet);
+	} else {
+		sheet.name = name;
+	}
+	const rowCount = Math.max(PlotModel.DEFAULT_ROWS, ...columns.map(column => column.cells.length + 1));
+	sheet.columns = columns.map(column => PlotModel.createColumn(ids.next('c'), {
+		name: cleanLinkedText(column.name),
+		unit: cleanLinkedText(column.unit),
+		role: column.role,
+		cells: column.cells.map(value => (value === null || value === undefined ? '' : String(value)))
+	}, rowCount));
+	PlotModel.setRowCount(sheet, rowCount);
+	sheet.hiddenSeries = sheet.columns.filter((column, index) => column.role === 'Y' && columns[index].hidden === true).map(column => column.id);
+	sheet.fitSeries = null;
+	importedFromLink = true;
+	pruneOrphanFits();
+	switchSheet(plotState.sheets.indexOf(sheet));
+	afterDataChange({ structure: true });
+	const hiddenWithData = sheet.columns.some(column => sheet.hiddenSeries.includes(column.id) && column.cells.some(cell => cell !== ''));
+	showToast(hiddenWithData ? `Data imported into the sheet "${name}". Some series start hidden; show them in the Series list.` : `Data imported into the sheet "${name}".`, 6000);
+}
+
 /* ---------- Formulas ---------- */
 
 // Formula results are written into the model, then into their (read-only) cells without a re-render.

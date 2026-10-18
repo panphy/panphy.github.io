@@ -618,7 +618,7 @@ document.addEventListener('DOMContentLoaded', () => {
 		startTour();
 	} else if (isTourRequested) {
 		window.history.replaceState(null, '', window.location.pathname);
-	} else if (shouldInviteToTour) {
+	} else if (shouldInviteToTour && !importedFromLink) {
 		showTourInvite();
 	}
 });
