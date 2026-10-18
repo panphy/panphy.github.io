@@ -53,7 +53,7 @@
         doNow: [
           [352, "State the standard unit of spring constant.", "Newton per metre (N/m)"],
           [10, "Name the store of energy associated with changes in height.", "The gravitational potential energy store"],
-          [646, "An electric kettle is switched on. Describe the useful energy transfer.", "Energy is transferred electrically to the thermal energy store of the water."],
+          [356, "Name the energy store that increases when an elastic object is stretched or compressed.", "The elastic potential energy store"],
         ],
         questions: [
           { stem: R`A spring with spring constant 40 N/m is stretched by 0.10 m. Use \(E_e = \tfrac{1}{2}\,k\,e^2\)`,

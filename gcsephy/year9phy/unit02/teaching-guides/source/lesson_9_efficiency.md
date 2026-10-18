@@ -46,7 +46,7 @@ Also:
 
 ## Equipment and resources
 
-- Per group: two or three different balls, metre rule clamped vertically, a smartphone to film the bounce (optional)
+- Per group: two or three different balls, balance, metre rule clamped vertically, a smartphone to film the bounce (optional)
 - Sankey-diagram grid in the workbook; rulers, coloured pencils
 - Calculators
 
@@ -84,15 +84,18 @@ Key check: efficiency can never be greater than 1 (100%). If an answer is, the n
 
 ## Practical: How efficient is a bounce?
 
-1. Drop a ball from 1.00 m, measured from the bottom of the ball.
-2. Measure the height of the first bounce (filming against the metre rule helps). Repeat three times; find the mean.
-3. Repeat for other balls.
+1. Measure the ball's mass with a balance and convert to kilograms.
+2. Drop it from 1.00 m, measured from the bottom of the ball.
+3. Measure the height of the first bounce (filming against the metre rule helps). Repeat three times; find the mean.
+4. Repeat for other balls.
 
-At the top of each bounce, all the useful energy is in the gravitational potential store, and the mass and g are the same, so:
+Calculate the two gravitational potential energies separately using Eₚ = m g h and g = 9.8 N/kg. The initial energy is the input; the energy at the top of the rebound is the useful output. Then divide useful output by input. Keep unrounded energies until the final step.
 
-> efficiency = Eₚ after ÷ Eₚ before = m g h₂ ÷ m g h₁ = h₂ ÷ h₁
+Sample for a 0.10 kg ball, drop height 1.00 m and mean rebound height 0.65 m:
 
-Sample: drop height 1.00 m, mean bounce height 0.65 m, efficiency = 0.65 ÷ 1.00 = 0.65, or 65%.
+> Input Eₚ₁ = 0.10 × 9.8 × 1.00 = 0.98 J  
+> Useful output Eₚ₂ = 0.10 × 9.8 × 0.65 = 0.637 J  
+> efficiency = Eₚ₂ ÷ Eₚ₁ = 0.637 ÷ 0.98 = 0.65, or 65%
 
 Ask: where did the other 35% go? (Thermal store of the ball and floor; sound.) This links back to the shock absorbers of Unit 1, Lesson 3: a good shock absorber is an inefficient bounce.
 
@@ -138,5 +141,5 @@ Complete the Sankey diagram page. Stretch: a car engine is about 30% efficient. 
 1. Students put the numbers upside down. Check every answer is at most 1.
 2. Students forget to convert a percentage to a decimal before multiplying.
 3. Students give efficiency a unit (J or W). It has none.
-4. In the bounce practical, ask why the mass "cancels". Only stronger students will see it; the rest can use h₂ ÷ h₁ as given.
+4. In the bounce practical, calculate both energies explicitly. Do not introduce a shortcut using a ratio of heights; students practise Eₚ = m g h and then the standard efficiency equation.
 5. Week 5's second lesson is set aside for revision and catch-up before the test in week 6.

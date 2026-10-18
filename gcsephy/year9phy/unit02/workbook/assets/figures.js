@@ -87,7 +87,7 @@
       `<path class="ink s-hot" d="M128 ${bottom + 3}H198"/>` +
       `<rect class="ink sun-t" x="196" y="24" width="22" height="212"/>${ticks}` +
       t(222, 20, "metre rule", { a: "start", c: "sm" }) + t(150, bottom - 3, "pointer", { a: "start", c: "sm t-hot" }) +
-      t(90, bottom + 30, `${n} × 100 g`, { a: "end", c: "sm" }) + t(60, 70, "clamp", { a: "start", c: "sm" }));
+      t(120, bottom + 36 + n * 9, `${n} × 100 g`, { c: "sm" }) + t(60, 70, "clamp", { a: "start", c: "sm" }));
   }
   // Two forces stretch a spring: the clamp pulls up at the top, the load pulls down at the bottom.
   const twoForces = () => svg(220, 230, "Two forces on a stretched spring: the clamp pulls up at the top and the load pulls down at the bottom",
@@ -108,10 +108,10 @@
     const ax = px - L * Math.sin(a), ay = py + L * Math.cos(a), bx = px, by = py + L, cx = px + L * Math.sin(a);
     return svg(320, 220, "A pendulum released from rest at A swings through its lowest point B to C on the other side",
       `<path class="ink bold" d="M110 ${py}H210"/><path class="ink thin dash" d="M${px} ${py}L${ax.toFixed(1)} ${ay.toFixed(1)}M${px} ${py}L${cx.toFixed(1)} ${ay.toFixed(1)}"/>` +
-      `<path class="ink" d="M${px} ${py}V${by}"/><path class="ink thin dash" d="M${(ax - 30).toFixed(1)} ${ay.toFixed(1)}H${(cx + 30).toFixed(1)}M${(ax - 30).toFixed(1)} ${by + 11}H${(cx + 30).toFixed(1)}"/>` +
+      `<path class="ink" d="M${px} ${py}V${by}"/><path class="ink thin dash" d="M${(ax - 30).toFixed(1)} ${ay.toFixed(1)}H${(cx + 30).toFixed(1)}M${(ax - 30).toFixed(1)} ${by}H${(cx + 30).toFixed(1)}"/>` +
       `<circle class="ink sun-t" cx="${ax.toFixed(1)}" cy="${ay.toFixed(1)}" r="11"/><circle class="ink sun" cx="${bx}" cy="${by}" r="11"/><circle class="ink sun-t" cx="${cx.toFixed(1)}" cy="${ay.toFixed(1)}" r="11"/>` +
-      (labels ? t(ax - 18, ay - 10, "A", { c: "lg" }) + t(bx + 20, by + 6, "B", { c: "lg" }) + t(cx + 18, ay - 10, "C", { c: "lg" }) : "") +
-      dim(ax - 22, ay + 11, ax - 22, by + 11, "h", -1));
+      (labels ? t(ax - 18, ay - 10, "A", { c: "lg" }) + t(bx + 20, by + 24, "B", { c: "lg" }) + t(cx + 18, ay - 10, "C", { c: "lg" }) : "") +
+      dim(ax - 22, ay, ax - 22, by, "h", -1));
   }
 
   // An energy bar chart: one bar per store on a scale. values (or null) are drawn in the answer edition.

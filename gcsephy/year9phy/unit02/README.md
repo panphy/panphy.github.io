@@ -22,7 +22,7 @@ Weight (W = m g) is taught in Forces. Here g = 9.8 N/kg is "each kilogram is pul
 | 6 | Conservation of energy | 3 | Pendulum heights (no fast timing) |
 | 7 | Power | 4 | Stair climb, everyone uses 50 kg |
 | 8 | Wasted energy | 4 | Cooling cups; Eco House |
-| 9 | Efficiency | 5 | Bounce efficiency h₂ ÷ h₁ |
+| 9 | Efficiency | 5 | Bounce efficiency from input and rebound energies |
 
 The second lesson of week 5 is for revision and catch-up; the end-of-unit test is planned for week 6.
 
@@ -38,7 +38,7 @@ The student hub uses `/gcsephy/assets/workbook-hub.css`, shared by all four work
 | `workbook/` | Workbook source; see below |
 | `teaching-guides/` | Nine lesson-plan PDFs and their Markdown source; see its README |
 | `prep/` | One-page Prep (homework) sheets, one per week (Prep 5 follows Lesson 9), each out of 10, with answer editions: `content.js` (questions), `prep.html` (preview, `?n=2&answers`) and `pdf/`. The hub links the sheets, not the answer editions. See [`../../assets/prep/README.md`](../../assets/prep/README.md). Maths is LaTeX for MathJax, as in the workbook |
-| [`../../decks/energy-stores-and-transfers/`](../../decks/energy-stores-and-transfers/) | 64-slide teaching deck |
+| [`../../decks/energy-stores-and-transfers/`](../../decks/energy-stores-and-transfers/) | 65-slide teaching deck |
 
 ## Workbook source
 
@@ -58,6 +58,6 @@ To rebuild: serve the repository root (`python3 -m http.server 8000`), then run 
 
 ## Deck
 
-`index.html` in the deck folder holds the slides and revision notes; `figures.js` draws the figures (reusing the workbook's `figures.js`) and six interactive models: a half-pipe and a pendulum with live energy bars, a kinetic-energy explorer, a spring lab that plots both graphs, an elastic-energy explorer and two motors lifting the same load. The Eco House uses a labelled cutaway illustration in `images/eco-house-illustration.png`, including print and reduced motion; its generation prompt is recorded in `images/eco-house-illustration.md`. News slides use Wikimedia Commons photographs in `images/`, credited under each photo.
+`index.html` in the deck folder holds the slides and revision notes; `figures.js` draws the figures (reusing the workbook's `figures.js`) and interactive models: a half-pipe and a pendulum with live energy bars, a kinetic-energy explorer, a spring lab that plots both graphs, an elastic-energy explorer, two motors lifting the same load, a ball-drop efficiency practical and a conduction experiment. The bounce practical calculates the initial and rebound gravitational potential energies separately before dividing useful output by input. The Eco House uses a labelled cutaway illustration in `images/eco-house-illustration.png`, including print and reduced motion; its generation prompt is recorded in `images/eco-house-illustration.md`. News slides use Wikimedia Commons photographs in `images/`, credited under each photo.
 
 The teaching deck uses the shared calm GCSE style with a light-orange Year 9 accent and the GCSE section theme preference. See [`../../decks/README.md`](../../decks/README.md) for shared styling and controls.

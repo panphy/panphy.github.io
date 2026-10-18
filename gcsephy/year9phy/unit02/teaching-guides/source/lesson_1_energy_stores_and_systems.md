@@ -4,7 +4,7 @@
 Energy: Stores and Transfers
 
 ## Lesson focus
-Students learn to describe any change as energy moving between stores. They name the stores, the four ways energy is transferred, and what a system is, then describe the five changes the AQA specification names.
+Students learn to describe any change as energy moving between stores. They name the stores, the four ways energy is transferred, and what a system is, then describe five familiar changes.
 
 ## Why this lesson comes first
 Every later lesson calculates the energy in one store: kinetic, gravitational or elastic. Students need a reason to calculate it. Here, they learn that energy is never made or used up; it only moves. That is the idea the calculations in Lessons 2–6 test, and the idea that wasted energy and efficiency in Lessons 8–9 depend on.
@@ -18,7 +18,7 @@ By the end of the lesson, students should be able to:
 1. Name the energy stores and give an example of each.
 2. Name the four ways energy is transferred between stores.
 3. Explain what is meant by a system.
-4. Describe the changes in energy stores when a ball is thrown upwards, when a moving object hits an obstacle, when a force speeds an object up, when a vehicle slows down and when a kettle boils water.
+4. Describe the changes in energy stores when a ball is thrown upwards, when a fireplace warms a person, when a force speeds an object up, when a vehicle slows down and when a child lands on a trampoline.
 
 ## Key vocabulary
 
@@ -82,17 +82,21 @@ Then introduce the system. The same event can be described differently depending
 
 Students only need the idea: a system is whatever we choose to look at, and in a closed system the total energy stays the same.
 
-## Main teaching: The five changes in the specification
+## Main teaching: Five changes
 
 Work through each case. Write the stores before and after, then the pathway.
 
 | Change | Before | After | Pathway |
 |---|---|---|---|
 | A ball thrown upwards | Kinetic | Gravitational potential | Mechanically (gravity slows it) |
-| A moving car hits a wall | Kinetic | Thermal (car, wall, surroundings) | Mechanically; some is carried away by sound waves, which ends in the thermal store of the surroundings |
+| A fireplace warms a person | Chemical (fuel) | Thermal (person) | By waves (infrared) |
 | A trolley pushed with a constant force | Chemical (in the pusher's muscles) | Kinetic (and thermal) | Mechanically |
 | A car braking | Kinetic | Thermal (brakes and surroundings) | Mechanically (friction) |
-| A kettle boiling water | (Energy arrives from the mains) | Thermal (water) | Electrically to the element, then by heating to the water |
+| A child lands on a trampoline | Kinetic (child) | Elastic potential (trampoline) | Mechanically |
+
+For the fireplace, focus on someone warmed by radiation from a distance. Burning fuel heats the fire, which emits infrared waves. The fire also heats the surrounding air.
+
+For the trampoline, focus on the landing: the child slows down as the mat and springs stretch. During the fall before landing, energy transfers from the gravitational potential store to the kinetic store.
 
 Teach students to write it as a sentence:
 
@@ -138,7 +142,7 @@ The last sentence is a preview of Lesson 8.
 
 ## Possible prep
 
-For three activities at home (for example, boiling a kettle, riding a bike downhill, bouncing a ball), write which store empties, which fills and the pathway.
+For three activities at home (for example, stretching a rubber band, riding a bike downhill, bouncing a ball), write which store empties, which fills and the pathway.
 
 ## Teacher notes
 

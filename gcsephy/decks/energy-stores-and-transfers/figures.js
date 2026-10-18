@@ -10,9 +10,14 @@ window.DeckSvgTex = {
   'h = 1.5 m': '\\(h = 1.5\\) m',
   'h = 300 m': '\\(h = 300\\) m',
   'h = height of one step × number of steps': '\\(h =\\) height of one step \\(\\times\\) number of steps',
+  '1.00 m': '\\(1.00\\) m',
+  '0.65 m': '\\(0.65\\) m',
   'h1 = 1.00 m': '\\(h_1 = 1.00\\) m',
   'h2 = 0.65 m': '\\(h_2 = 0.65\\) m',
-  'G.P.E. gained = 2.0 × 9.8 × 1.5 = 29.4 J': 'G.P.E. gained \\(= 2.0 \\times 9.8 \\times 1.5 = 29.4\\) J'
+  'G.P.E. gained = 2.0 × 9.8 × 1.5 = 29.4 J': 'G.P.E. gained \\(= 2.0 \\times 9.8 \\times 1.5 = 29.4\\) J',
+  'springLimit|force F / N': 'force \\(F\\) / N',
+  'springLimit|extension e / m': 'extension \\(e\\) / m',
+  'springLimit|F = ke': '\\(F = k\\,e\\)'
 };
 (() => {
   const F = window.EnergyFigures;
@@ -352,8 +357,8 @@ window.DeckSvgTex = {
     host.innerHTML = `<div class="dk-stage"><svg class="dk" viewBox="0 0 720 470" role="img" aria-label="A ball dropped from 1.00 metre beside a metre rule falls straight down and bounces straight back up to 0.65 metres">
       <path class="dk-ink thick" d="M20 ${floor}H700"/><rect class="dk-ruler" x="296" y="${floor - m - 10}" width="34" height="${m + 10}"/>${ticks}${t(316, floor - m - 20, 'm', 'dk-tick')}
       <circle class="dk-ghost" cx="${bx}" cy="${yOf(h1)}" r="${r}"/>
-      <path class="dk-guide" d="M${bx - 40} ${floor - h1 * m}H296M376 ${floor - h1 * m}H560"/>${dimV(520, floor - h1 * m, floor, 'h<tspan dy="8" font-size="20">1</tspan><tspan dy="-8"> = 1.00 m</tspan>')}
-      <g class="dk-bounce-mark"><path class="dk-guide" d="M${bx - 40} ${floor - h2 * m}H296M376 ${floor - h2 * m}H460"/>${dimV(420, floor - h2 * m, floor, 'h<tspan dy="8" font-size="20">2</tspan><tspan dy="-8"> = 0.65 m</tspan>', -1)}</g>
+      <path class="dk-guide" d="M${bx - 40} ${floor - h1 * m}H296M376 ${floor - h1 * m}H640"/>${dimV(620, floor - h1 * m, floor, '1.00 m', -1)}
+      <g class="dk-bounce-mark"><path class="dk-guide" d="M${bx - 40} ${floor - h2 * m}H296M376 ${floor - h2 * m}H460"/>${dimV(420, floor - h2 * m, floor, '0.65 m')}</g>
       <circle class="dk-ball" cx="${bx}" cy="${yOf(h1)}" r="${r}"/>
     </svg></div>` + buttons([['go', 'Drop the ball'], ['reset', 'Reset']]) + '<p class="dk-readout" aria-live="polite">Released from rest at 1.00 m, measured from the bottom of the ball.</p>';
     const root = host.querySelector('svg'), ball = root.querySelector('.dk-ball'), mark = root.querySelector('.dk-bounce-mark'), out = host.querySelector('.dk-readout');
@@ -366,7 +371,7 @@ window.DeckSvgTex = {
       ball.setAttribute('cy', yOf(Math.max(0, hgt)).toFixed(1));
       const done = tt >= tFall + tRise;
       mark.style.visibility = done ? 'visible' : 'hidden';
-      out.innerHTML = done ? String.raw`Efficiency \(= \dfrac{h_2}{h_1} = \dfrac{0.65}{1.00} = 0.65\), or 65%` : 'Released from rest at 1.00 m, measured from the bottom of the ball.';
+      out.innerHTML = done ? String.raw`\(E_{p1} = 0.98\) J; \(E_{p2} = 0.637\) J. Efficiency: 65%.` : 'Released from rest at 1.00 m, measured from the bottom of the ball.';
       if (done) typeset(out);
     }
     host.querySelector('[data-act="go"]').addEventListener('click', () => {
@@ -429,6 +434,17 @@ window.DeckSvgTex = {
     const one = (gx, g1) => { const a = graphAxes(gx, 90, 300, 240, g1); let s = a.s + `<path class="dk-fit" d="M${a.fit[0]} ${a.fit[1]}L${a.fit[2]} ${a.fit[3]}"/>`; for (let i = 0; i <= 6; i++) { const [x, y] = a.pt(i); s += `<path class="dk-cross" d="M${x - 7} ${y - 7}l14 14m0 -14l-14 14"/>`; } return s + t(gx + 150, 30, g1 ? 'Graph 1' : 'Graph 2', 'dk-big'); };
     return `<svg class="dk" viewBox="0 0 900 420" role="img" aria-label="The same spring results on the same scales: graph 1, extension against force, has a shallow line; graph 2, force against extension, has a steep line">${one(110, true)}${one(560, false)}</svg>`;
   }
+  function springLimit() {
+    return `<svg class="dk" viewBox="0 0 780 490" role="img" aria-label="A force–extension graph is a straight line through the origin up to the marked limit of proportionality, then curves away from the straight-line continuation">
+      <path class="dk-axis" d="M110 65V400H740"/>
+      ${t(110, 38, 'force F / N', 'dk-big', 'start')}${t(738, 454, 'extension e / m', 'dk-big', 'end')}${t(92, 433, '0', 'dk-label', 'end')}
+      <path class="dk-guide" d="M400 180L590 36"/>
+      <path class="dk-fit" d="M110 400L400 180C470 127 560 110 710 90"/>
+      <circle class="dk-dot" cx="400" cy="180" r="9"/>
+      <path class="dk-guide" d="M412 188L458 236"/>
+      ${t(225, 230, 'F = ke', 'dk-big')}${t(525, 270, 'limit of', 'dk-big')}${t(525, 308, 'proportionality', 'dk-big')}
+    </svg>`;
+  }
   function hikeBig() {
     return `<svg class="dk" viewBox="0 0 780 400" role="img" aria-label="A hiker climbs from a car park 120 m above sea level to a summit 420 m above sea level: a height gain of 300 m">
       <rect class="dk-sea" x="10" y="360" width="760" height="22"/>${t(760, 348, 'sea level', 'dk-small', 'end')}
@@ -476,7 +492,8 @@ window.DeckSvgTex = {
     sankeyLamp: () => F.sankey({ blend: true, input: 100, useful: 10, wasted: 90, s: 1.6, useLabel: 'by light', wasteLabel: 'heating the room' }),
     sankeyLed: () => F.sankey({ blend: true, input: 100, useful: 40, wasted: 60, s: 1.6, useLabel: 'by light', wasteLabel: 'heating the room' }),
     sankeyLesson: () => F.sankey({ blend: true, input: 100, useful: 20, wasted: 80, s: 1.6, useLabel: 'by light', wasteLabel: 'heating the room' }),
-    twoGraphs, coolingChart, story: () => F.storyStrip(), coverArt: () => F.coverArt(),
+    twoGraphs, springLimit, coolingChart, story: () => F.storyStrip(),
+    coverArt: () => F.coverArt().replace('</svg>', `<g aria-label="The ball is moving to the right">${F.arrow(316, 166, 354, 166, '', 10)}</g></svg>`),
   };
   const WIDGETS = { ramp: h => swing(h, 'ramp'), pendulum: h => swing(h, 'pendulum'), kinetic, springLab, elastic, motors, lift, bounce, rods: rodsLab };
 

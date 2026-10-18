@@ -105,7 +105,7 @@ Sample answers with k = 25 N/m: 0.125 J and 0.50 J; no, it was beyond the limit 
 
 ## Activity 2: Calculation page
 
-Workbook page: straight substitution; extensions in cm and mm; two-step questions (F and e given, find k, then Eₑ); compressed springs (a car's suspension, a trampoline spring).
+Workbook page: straight substitution; extensions in cm and mm; two-step questions (F and e given, find k, then Eₑ); compressed springs (a car's suspension) and stretched springs (a trampoline).
 
 ## Activity 3: Elastic-band launcher (optional)
 
