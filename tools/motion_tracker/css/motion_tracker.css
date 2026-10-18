@@ -378,6 +378,23 @@ button:disabled {
   flex: 1;
 }
 
+/* Export CSV and Export to PanPhyPlot under one label, as in PanPhyPlot's toolbar. */
+.mt-export-group {
+  display: flex;
+  align-items: center;
+  flex: none;
+  gap: 2px;
+}
+
+.mt-tool-group-label {
+  padding: 0 4px;
+  font-family: var(--font-mono);
+  font-size: 0.64rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+}
+
 /* Segmented controls: Position / Velocity, x / y / Both, Graph / Points. */
 .mt-segmented {
   display: inline-flex;
@@ -535,13 +552,72 @@ button:disabled {
 /* ---------------------------------------------------------------------- */
 /* Workspace: the video pane and the graph pane                            */
 /* ---------------------------------------------------------------------- */
+/* The divider's 12px column is the gap between the panes. Dragging it sets --video-fr and --graph-fr. */
 #workspace {
   flex: 1;
   display: grid;
-  grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr);
-  gap: 12px;
+  grid-template-columns: minmax(0, var(--video-fr, 1.15fr)) 12px minmax(0, var(--graph-fr, 1fr));
+  gap: 12px 0;
   min-height: 0;
   margin: 12px;
+}
+
+.mt-divider {
+  position: relative;
+  z-index: 2;
+  cursor: col-resize;
+  touch-action: none;
+  border-radius: 6px;
+}
+
+.mt-divider::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 4px;
+  height: 44px;
+  border-radius: 4px;
+  background: var(--line-strong);
+  transform: translate(-50%, -50%);
+  transition: background-color 0.15s ease, height 0.15s ease;
+}
+
+.mt-divider:hover::after,
+.mt-divider:focus-visible::after,
+.mt-is-resizing .mt-divider:focus::after {
+  height: 72px;
+  background: var(--accent);
+}
+
+.mt-divider:focus-visible {
+  outline: none;
+}
+
+.mt-divider:focus-visible::after {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+}
+
+/* A wider invisible hit area for fingers and the pen. */
+@media (pointer: coarse) {
+  .mt-divider::before {
+    content: '';
+    position: absolute;
+    inset: 0 -8px;
+  }
+
+  .mt-divider::after {
+    width: 6px;
+    height: 56px;
+  }
+}
+
+.mt-is-resizing,
+.mt-is-resizing * {
+  cursor: col-resize !important;
+  user-select: none !important;
+  -webkit-user-select: none !important;
 }
 
 .mt-pane {
@@ -753,6 +829,13 @@ button:disabled {
   padding: 10px 20px;
   border-radius: 999px;
   font-size: 0.95rem;
+}
+
+.empty-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 8px;
 }
 
 .empty-drop {
@@ -1562,6 +1645,10 @@ body.modal-open {
     grid-template-columns: minmax(0, 1fr);
     margin: 8px;
     gap: 8px;
+  }
+
+  .mt-divider {
+    display: none;
   }
 
   .mt-appbar {
