@@ -61,6 +61,7 @@
 				<div class="mt-tool-group" role="group" aria-label="Marks">
 					<button type="button" id="undoPoint" class="mt-tool" disabled title="Undo the last change to the marks (Ctrl+Z)"><svg class="mt-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M8.5 5 4 9.5 8.5 14"/><path d="M4 9.5h10a5.5 5.5 0 0 1 0 11h-3"/></svg><span>Undo</span></button>
 					<button type="button" id="hideCrossesToggle" class="mt-tool" disabled aria-pressed="false" title="Hide or show the marks on the video (H)"><svg class="mt-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M2.5 12s3.5-6.5 9.5-6.5 9.5 6.5 9.5 6.5-3.5 6.5-9.5 6.5S2.5 12 2.5 12z"/><circle cx="12" cy="12" r="2.8"/></svg><span class="toggle-text">Hide Marks</span></button>
+					<button type="button" id="autoTrackToggle" class="mt-tool" disabled aria-pressed="false" title="Auto-track: click the object once, and it is marked in each frame until it is lost or the video ends"><svg class="mt-icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4.5"/><path d="M12 3.5v3M12 17.5v3M3.5 12h3M17.5 12h3"/></svg><span>Auto-track</span></button>
 				</div>
 				<div class="mt-tool-spacer"></div>
 				<div class="mt-menu-wrap">
@@ -79,6 +80,7 @@
 				<svg class="mt-icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8.5"/><path d="M12 11v5M12 7.8v.2"/></svg>
 				<div id="message" role="status" aria-live="polite"><p>Import a video to start.</p></div>
 				<button type="button" id="modeCancel" hidden>Cancel</button>
+				<button type="button" id="autoStop" hidden>Stop</button>
 			</div>
 
 			<div id="videoStage" class="video-stage">
@@ -264,7 +266,7 @@
 				<li><span><strong>Check the frame rate.</strong> It is detected for you. For slow motion, open the frame rate and give the rate it was filmed at.</span></li>
 				<li><span><strong>Scale:</strong> drag along the object of known length and type its length. Without a scale, positions are in pixels.</span></li>
 				<li><span><strong>Origin:</strong> click where x and y should be zero. Otherwise the origin is the bottom-left corner.</span></li>
-				<li><span><strong>Mark the object.</strong> Click its centre; the video moves on by the step, ready for the next mark. Clicking a frame that already has a mark replaces it.</span></li>
+				<li><span><strong>Mark the object.</strong> Click its centre; the video moves on by the step, ready for the next mark. Clicking a frame that already has a mark replaces it. With Auto-track on, click the object once and it is marked in each frame until it is lost, leaves the frame or the video ends; check the marks, click it to carry on, and Undo removes a whole run. It works best against a plain background.</span></li>
 				<li><span><strong>Read the results.</strong> Switch between position and velocity, edit marks in the Table, and export a CSV or send the data to PanPhyPlot. Velocity needs at least four marks.</span></li>
 			</ol>
 			<p class="guide-subhead">Keyboard</p>
@@ -407,6 +409,8 @@
 		const plotCompYButton = document.getElementById('plotCompY');
 		const plotCompXYButton = document.getElementById('plotCompXY');
 		const hideCrossesToggle = document.getElementById('hideCrossesToggle');
+		const autoTrackToggle = document.getElementById('autoTrackToggle');
+		const autoStopButton = document.getElementById('autoStop');
 		const chartCanvasContainer = document.getElementById('chartCanvasContainer');
 		const chartCopyActionButton = document.getElementById('chartCopyAction');
 		const graphEmpty = document.getElementById('graphEmpty');
@@ -533,6 +537,14 @@
 			const d = hiddenVideo.duration;
 			if (Number.isFinite(d) && d > 0) return d;
 			return 0;
+		}
+
+		// The index of the last frame. A clip of N frames ends at N / fps, which can read a hair over it
+		// (41 frames at 30 fps end at 1.366667 s, and containers round to the millisecond), so a tenth of a frame
+		// of tolerance keeps that from counting as another frame.
+		function lastFrameIndex() {
+			const end = getSeekableEnd();
+			return end > 0 ? Math.max(0, Math.ceil(end * playbackFrameRate - 0.1) - 1) : Infinity;
 		}
 
 		function isSafariBrowser() {
@@ -895,7 +907,7 @@
 
 		function disableControls(state) {
 			[previousFrameButton, nextFrameButton, playPauseButton, calibrateButton, setOriginButton, frameRateButton,
-				hideCrossesToggle, clearButton, saveProjectButton, loadProjectButton, frameStepSelect,
+				hideCrossesToggle, autoTrackToggle, clearButton, saveProjectButton, loadProjectButton, frameStepSelect,
 				plotPositionButton, plotVelocityButton, plotCompXButton, plotCompYButton, plotCompXYButton]
 				.forEach(control => { control.disabled = state; });
 			slider.disabled = state;
@@ -921,6 +933,333 @@
 			exportPanPhyPlotButton.disabled = !ready || count === 0;
 			undoPointButton.disabled = !ready || undoHistory.length === 0;
 		}
+
+		/* ===== Auto-tracking: matching ===== */
+		// Images are { data, width, height } with RGBA data, as ImageData has. Nothing here reads the page.
+		const TRACK_SEED_TOLERANCE = 90;  // colour distance from the clicked colour
+		const TRACK_STEP_TOLERANCE = 32;  // colour distance between neighbouring pixels
+		const TRACK_TEMPLATE_SAMPLES = 24; // template samples per side; larger patches are sampled with a stride
+
+		function colourAt(image, x, y) {
+			const i = (y * image.width + x) * 4;
+			return [image.data[i], image.data[i + 1], image.data[i + 2]];
+		}
+
+		function colourDistance(a, b) {
+			return Math.hypot(a[0] - b[0], a[1] - b[1], a[2] - b[2]);
+		}
+
+		// The region of similar colour around (x, y), grown pixel by pixel: its centroid and the radius of a
+		// disc of the same area. Null when it is a speck, or runs into the edge of the box (the background).
+		function findBlob(image, x, y, maxRadius) {
+			const { width, height } = image;
+			const sx = Math.round(x);
+			const sy = Math.round(y);
+			if (sx < 0 || sy < 0 || sx >= width || sy >= height) return null;
+			const seed = colourAt(image, sx, sy);
+			const left = Math.max(0, sx - maxRadius), right = Math.min(width - 1, sx + maxRadius);
+			const top = Math.max(0, sy - maxRadius), bottom = Math.min(height - 1, sy + maxRadius);
+			const boxWidth = right - left + 1;
+			const seen = new Uint8Array(boxWidth * (bottom - top + 1));
+			const stack = [[sx, sy]];
+			seen[(sy - top) * boxWidth + (sx - left)] = 1;
+			let count = 0, sumX = 0, sumY = 0;
+			while (stack.length) {
+				const [px, py] = stack.pop();
+				const here = colourAt(image, px, py);
+				count++; sumX += px; sumY += py;
+				if (px === left || px === right || py === top || py === bottom) {
+					// Reaching the box edge means the region is not a compact object, unless that edge is the frame's.
+					if ((px === left && left > 0) || (px === right && right < width - 1) || (py === top && top > 0) || (py === bottom && bottom < height - 1)) return null;
+				}
+				for (const [nx, ny] of [[px + 1, py], [px - 1, py], [px, py + 1], [px, py - 1]]) {
+					if (nx < left || nx > right || ny < top || ny > bottom) continue;
+					const k = (ny - top) * boxWidth + (nx - left);
+					if (seen[k]) continue;
+					const colour = colourAt(image, nx, ny);
+					if (colourDistance(colour, seed) > TRACK_SEED_TOLERANCE || colourDistance(colour, here) > TRACK_STEP_TOLERANCE) continue;
+					seen[k] = 1;
+					stack.push([nx, ny]);
+				}
+			}
+			if (count < 9) return null;
+			return { x: sumX / count, y: sumY / count, radius: Math.sqrt(count / Math.PI) };
+		}
+
+		// A square patch centred on the nearest pixel to (cx, cy), half pixels each side of it, as RGB samples
+		// taken every stride pixels. Null when the patch does not fit inside the image.
+		function cutTemplate(image, cx, cy, half) {
+			const x0 = Math.round(cx) - half, y0 = Math.round(cy) - half;
+			const size = 2 * half + 1;
+			if (x0 < 0 || y0 < 0 || x0 + size > image.width || y0 + size > image.height) return null;
+			const stride = Math.max(1, Math.ceil(size / TRACK_TEMPLATE_SAMPLES));
+			const offsets = [];
+			for (let dy = 0; dy < size; dy += stride) for (let dx = 0; dx < size; dx += stride) offsets.push([dx - half, dy - half]);
+			const values = new Float32Array(offsets.length * 3);
+			offsets.forEach(([dx, dy], n) => {
+				const i = ((y0 + half + dy) * image.width + (x0 + half + dx)) * 4;
+				values[3 * n] = image.data[i];
+				values[3 * n + 1] = image.data[i + 1];
+				values[3 * n + 2] = image.data[i + 2];
+			});
+			return { half, offsets, values };
+		}
+
+		// The average of two templates cut with the same half size.
+		function blendTemplates(a, b) {
+			const values = new Float32Array(a.values.length);
+			for (let i = 0; i < values.length; i++) values[i] = (a.values[i] + b.values[i]) / 2;
+			return { half: a.half, offsets: a.offsets, values };
+		}
+
+		// Zero-mean normalised cross-correlation (1 is a perfect match, 0 none) of the template centred on
+		// every pixel within radius of (cx, cy) where it fits. Returns the best centre, refined to a fraction
+		// of a pixel by fitting a parabola through the scores either side, or null if nothing fits. atEdge is
+		// true when the best centre is as close to the image edge as the template allows: the object may be
+		// partly out of the picture, and the true centre further out.
+		function matchTemplate(image, template, cx, cy, radius) {
+			const { half, offsets, values } = template;
+			const n = offsets.length;
+			const mean = [0, 0, 0];
+			for (let k = 0; k < n; k++) for (let c = 0; c < 3; c++) mean[c] += values[3 * k + c] / n;
+			const t = new Float32Array(3 * n);
+			let tNorm = 0;
+			for (let k = 0; k < n; k++) for (let c = 0; c < 3; c++) {
+				t[3 * k + c] = values[3 * k + c] - mean[c];
+				tNorm += t[3 * k + c] ** 2;
+			}
+			if (tNorm === 0) return null;
+			const { data, width, height } = image;
+			const xMin = Math.max(half, Math.round(cx - radius)), xMax = Math.min(width - 1 - half, Math.round(cx + radius));
+			const yMin = Math.max(half, Math.round(cy - radius)), yMax = Math.min(height - 1 - half, Math.round(cy + radius));
+			const edgeLimited = { left: xMin === half, right: xMax === width - 1 - half, top: yMin === half, bottom: yMax === height - 1 - half };
+			if (xMin > xMax || yMin > yMax) return null;
+			const columns = xMax - xMin + 1;
+			const scores = new Float32Array(columns * (yMax - yMin + 1)).fill(-1);
+			const pixelOffsets = new Int32Array(n);
+			for (let k = 0; k < n; k++) pixelOffsets[k] = (offsets[k][1] * width + offsets[k][0]) * 4;
+			let best = -Infinity, bestX = 0, bestY = 0;
+			for (let y = yMin; y <= yMax; y++) {
+				for (let x = xMin; x <= xMax; x++) {
+					const base = (y * width + x) * 4;
+					let cross = 0, sumR = 0, sumG = 0, sumB = 0, squares = 0;
+					for (let k = 0; k < n; k++) {
+						const i = base + pixelOffsets[k];
+						const r = data[i], g = data[i + 1], b = data[i + 2];
+						cross += r * t[3 * k] + g * t[3 * k + 1] + b * t[3 * k + 2];
+						sumR += r; sumG += g; sumB += b;
+						squares += r * r + g * g + b * b;
+					}
+					const variance = squares - (sumR * sumR + sumG * sumG + sumB * sumB) / n;
+					const score = variance > 0 ? cross / Math.sqrt(variance * tNorm) : 0;
+					scores[(y - yMin) * columns + (x - xMin)] = score;
+					if (score > best) { best = score; bestX = x; bestY = y; }
+				}
+			}
+			const at = (x, y) => (x < xMin || x > xMax || y < yMin || y > yMax) ? null : scores[(y - yMin) * columns + (x - xMin)];
+			const refine = (minus, plus) => {
+				if (minus === null || plus === null) return 0;
+				const curvature = minus - 2 * best + plus;
+				return curvature < 0 ? Math.max(-0.5, Math.min(0.5, (minus - plus) / (2 * curvature))) : 0;
+			};
+			return {
+				x: bestX + refine(at(bestX - 1, bestY), at(bestX + 1, bestY)),
+				y: bestY + refine(at(bestX, bestY - 1), at(bestX, bestY + 1)),
+				score: best,
+				atEdge: (edgeLimited.left && bestX === xMin) || (edgeLimited.right && bestX === xMax) || (edgeLimited.top && bestY === yMin) || (edgeLimited.bottom && bestY === yMax)
+			};
+		}
+
+		// Where the object should be next, from its last few positions a frame step apart: constant
+		// acceleration from three, constant velocity from two.
+		function predictPosition(track) {
+			const [a, b, c] = track.slice(-3).reverse();
+			if (c) return { x: 3 * a.x - 3 * b.x + c.x, y: 3 * a.y - 3 * b.y + c.y };
+			if (b) return { x: 2 * a.x - b.x, y: 2 * a.y - b.y };
+			return { x: a.x, y: a.y };
+		}
+
+		/* ===== Auto-tracking: runs ===== */
+		// In Auto-track mode a click on the object marks it, then each later frame (by the step) is marked
+		// where the object is found, until it is lost, leaves the frame, the video ends, or anything is
+		// pressed. Matching runs on a copy of the frame at most TRACK_WORK_SIDE pixels long, which keeps 4K
+		// clips fast; positions are refined to a fraction of a pixel. One Undo removes a whole run.
+		const TRACK_WORK_SIDE = 960;
+		const TRACK_MIN_SCORE = 0.6;
+		const TRACK_REPLOT_EVERY = 6;
+		let autoTrackOn = false;
+		let trackRun = null; // { token, count, box } while a run goes on
+		let trackRunCounter = 0;
+		const trackCanvas = document.createElement('canvas');
+		const trackCtx = trackCanvas.getContext('2d', { willReadFrequently: true });
+
+		// The current frame, scaled down, without the marks drawn on the frame canvas.
+		function grabTrackFrame() {
+			const scale = Math.min(1, TRACK_WORK_SIDE / Math.max(frameCanvas.width, frameCanvas.height));
+			const width = Math.max(1, Math.round(frameCanvas.width * scale));
+			const height = Math.max(1, Math.round(frameCanvas.height * scale));
+			if (trackCanvas.width !== width || trackCanvas.height !== height) {
+				trackCanvas.width = width;
+				trackCanvas.height = height;
+			}
+			trackCtx.drawImage(hiddenVideo, 0, 0, width, height);
+			return { image: trackCtx.getImageData(0, 0, width, height), scale: width / frameCanvas.width };
+		}
+
+		// Pixel centres line up when converting between the work copy and the video.
+		const toWork = (value, scale) => (value + 0.5) * scale - 0.5;
+		const fromWork = (value, scale) => (value + 0.5) / scale - 0.5;
+
+		// Resolves once the frame at index is decoded and shown: after the seek, and after the frame
+		// callback where the browser has one, so that the pixels read are never the previous frame's.
+		function seekToFrame(index) {
+			return new Promise((resolve) => {
+				let settled = false;
+				let callbackId = null;
+				const settle = () => {
+					if (settled) return;
+					settled = true;
+					clearTimeout(fallbackTimer);
+					hiddenVideo.removeEventListener('seeked', onSeeked);
+					if (callbackId !== null && typeof hiddenVideo.cancelVideoFrameCallback === 'function') hiddenVideo.cancelVideoFrameCallback(callbackId);
+					resolve();
+				};
+				const onSeeked = () => {
+					if (typeof hiddenVideo.requestVideoFrameCallback !== 'function') requestAnimationFrame(() => settle());
+					else setTimeout(settle, 200);
+				};
+				const fallbackTimer = setTimeout(settle, 1500);
+				if (typeof hiddenVideo.requestVideoFrameCallback === 'function') callbackId = hiddenVideo.requestVideoFrameCallback(() => settle());
+				hiddenVideo.addEventListener('seeked', onSeeked, { once: true });
+				hiddenVideo.currentTime = index / playbackFrameRate + 0.00001;
+			});
+		}
+
+		function setTrackMark(frameIndex, workX, workY, scale) {
+			const point = { x: fromWork(workX, scale), y: canvasYToCartesianY(fromWork(workY, scale)), playbackTime: frameIndex / playbackFrameRate };
+			frameData = frameData.filter(p => Math.round(p.playbackTime * playbackFrameRate) !== frameIndex);
+			frameData.push(point);
+			frameData.sort((a, b) => a.playbackTime - b.playbackTime);
+		}
+
+		function showTrackFrame() {
+			slider.value = hiddenVideo.currentTime.toString();
+			updateTimeDisplay(hiddenVideo.currentTime);
+			drawFrame();
+			drawOverlay();
+		}
+
+		async function startAutoTrack(canvasX, canvasY) {
+			const token = ++trackRunCounter;
+			pauseVideo();
+			let frame = currentFrameIndex();
+			let { image, scale } = grabTrackFrame();
+			const longSide = Math.max(image.width, image.height);
+			const clickX = toWork(canvasX, scale), clickY = toWork(canvasY, scale);
+			const blob = findBlob(image, clickX, clickY, Math.round(longSide * 0.12));
+			const centre = blob ? { x: blob.x, y: blob.y } : { x: clickX, y: clickY };
+			const radius = blob ? blob.radius : longSide * 0.02;
+			const half = Math.max(4, Math.min(Math.round(longSide * 0.1), Math.round(radius * 1.3)));
+			const original = cutTemplate(image, centre.x, centre.y, half);
+			if (!original) {
+				setMessage('That is too close to the edge of the video to track. Click the object in a frame where it is further in, or turn Auto-track off and mark it by hand.');
+				return;
+			}
+			rememberPoints();
+			setTrackMark(frame, centre.x, centre.y, scale);
+			markUnsavedChanges();
+			trackRun = { token, count: 1, box: { x: fromWork(centre.x, scale), y: fromWork(centre.y, scale), half: half / scale } };
+			messageBar.classList.add('is-mode');
+			autoStopButton.hidden = false;
+			setMessage('Auto-tracking... Press Stop, or any key, to stop.');
+			renderPointRows();
+			replotCurrentView();
+			showTrackFrame();
+
+			const track = [centre];
+			let latest = original;
+			const finalFrame = lastFrameIndex();
+			let reason = 'end';
+			while (true) {
+				frame += frameStep;
+				if (frame > finalFrame) break;
+				await seekToFrame(frame);
+				if (!trackRun || trackRun.token !== token) return;
+				({ image } = grabTrackFrame());
+				const predicted = predictPosition(track);
+				const previous = track[track.length - 1];
+				if (predicted.x < -half || predicted.y < -half || predicted.x > image.width + half || predicted.y > image.height + half) {
+					reason = 'left';
+					break;
+				}
+				const speed = track.length > 1 ? Math.hypot(previous.x - track[track.length - 2].x, previous.y - track[track.length - 2].y) : 0;
+				const searchRadius = Math.min(longSide * 0.25, track.length > 1 ? half * 1.5 + speed * 0.5 : Math.max(half * 3, longSide * 0.06));
+				const template = blendTemplates(original, latest);
+				let found = matchTemplate(image, template, predicted.x, predicted.y, searchRadius);
+				// A bounce or a jolt breaks the prediction: look again, wider, around the last position.
+				if (!found || found.score < TRACK_MIN_SCORE) {
+					const wider = matchTemplate(image, template, previous.x, previous.y, Math.min(longSide * 0.3, searchRadius * 2.5 + half));
+					if (wider && (!found || wider.score > found.score)) found = wider;
+				}
+				if (!found || found.score < TRACK_MIN_SCORE) {
+					reason = 'lost';
+					break;
+				}
+				if (found.atEdge) {
+					reason = 'left';
+					break;
+				}
+				setTrackMark(frame, found.x, found.y, scale);
+				track.push({ x: found.x, y: found.y });
+				latest = cutTemplate(image, found.x, found.y, half) || latest;
+				trackRun.count++;
+				trackRun.box = { x: fromWork(found.x, scale), y: fromWork(found.y, scale), half: half / scale };
+				showTrackFrame();
+				if (trackRun.count % TRACK_REPLOT_EVERY === 0) {
+					renderPointRows();
+					replotCurrentView();
+				}
+			}
+			finishAutoTrack(reason);
+		}
+
+		function finishAutoTrack(reason) {
+			if (!trackRun) return;
+			const { count } = trackRun;
+			trackRun = null;
+			messageBar.classList.remove('is-mode');
+			autoStopButton.hidden = true;
+			renderPointRows();
+			replotCurrentView();
+			updateStatusBar();
+			showTrackFrame();
+			const marked = `${count} frame${count === 1 ? '' : 's'}`;
+			const messages = {
+				end: `Auto-tracked ${marked}, to the end of the video. Undo removes the whole run.`,
+				left: `Auto-tracked ${marked}; the object then reached the edge of the picture. Undo removes the whole run.`,
+				lost: `Auto-tracked ${marked}, then lost the object in this frame. Click it to carry on from here, or Undo the run.`,
+				stopped: `Auto-tracking stopped after ${marked}. Click the object to carry on from this frame, or Undo the run.`
+			};
+			setMessage(messages[reason] || messages.stopped);
+		}
+
+		function stopAutoTrack() {
+			if (trackRun) finishAutoTrack('stopped');
+		}
+
+		autoStopButton.addEventListener('click', stopAutoTrack);
+		// Any other press stops a run first, then does what it would have done.
+		document.addEventListener('pointerdown', (event) => {
+			if (trackRun && !autoStopButton.contains(event.target)) stopAutoTrack();
+		}, true);
+
+		autoTrackToggle.addEventListener('click', () => {
+			autoTrackOn = !autoTrackOn;
+			autoTrackToggle.setAttribute('aria-pressed', String(autoTrackOn));
+			setMessage(autoTrackOn
+				? 'Auto-track is on. Click the object, and it will be marked in each frame until it is lost or the video ends. Marks already ahead of it are replaced.'
+				: 'Auto-track is off. Click the object in each frame to mark it.');
+		});
 
 		/* ===== Pane divider ===== */
 		// On the PanPhyPlot and PanPhyMD model: drag with any pointer, or focus the divider and use the
@@ -1162,6 +1501,7 @@
 
 		/* ===== RESET FUNCTION ===== */
 		function resetApp() {
+			stopAutoTrack();
 			cancelFpsDetection();
 			videoReady = false;
 			undoHistory = [];
@@ -1448,7 +1788,7 @@
 			let t = parseFloat(slider.value);
 			if (!Number.isFinite(t)) return;
 			t = Math.round(t * playbackFrameRate) / playbackFrameRate;
-			if (end > 0) t = Math.min(t, Math.max(0, (Math.ceil(end * playbackFrameRate) - 1) / playbackFrameRate));
+			if (end > 0) t = Math.min(t, lastFrameIndex() / playbackFrameRate);
 			t = Math.max(0, t) + 0.00001;
 			hiddenVideo.currentTime = t;
 			updateTimeDisplay(t);
@@ -1489,6 +1829,11 @@
 				const canvasX = (event.clientX - rect.left) * scaleX;
 				const canvasY = (event.clientY - rect.top) * scaleY;
 				const cartesianY = canvasYToCartesianY(canvasY);
+
+				if (autoTrackOn) {
+					startAutoTrack(canvasX, canvasY);
+					return;
+				}
 
 				// Store playbackTime so analysis time can be recalculated if FPS changes
 				rememberPoints();
@@ -1604,7 +1949,7 @@
 			const candidate = (currentFrameIndex() + direction) * dt;
 			let target = candidate;
 			if (end > 0) {
-				target = Math.max(0, Math.min(candidate, Math.max(0, (Math.ceil(end * playbackFrameRate) - 1) * dt)));
+				target = Math.max(0, Math.min(candidate, lastFrameIndex() * dt));
 			} else if (!Number.isFinite(candidate)) {
 				clean();
 				return;
@@ -2172,6 +2517,19 @@
 			// Dynamic scaling factors
 			const s = getVisualScale();
 			const originRadius = 5 * s;
+
+			// The patch being followed while auto-tracking runs.
+			if (trackRun && trackRun.box) {
+				const { x, y, half } = trackRun.box;
+				overlayCtx.save();
+				overlayCtx.lineWidth = 2 * s;
+				overlayCtx.strokeStyle = '#22d3ee';
+				overlayCtx.shadowColor = 'black';
+				overlayCtx.shadowBlur = 2;
+				overlayCtx.setLineDash([6 * s, 4 * s]);
+				overlayCtx.strokeRect(x - half, y - half, 2 * half, 2 * half);
+				overlayCtx.restore();
+			}
 			const axisColor = getCssVar('--overlay-axis') || 'white';
 
 			const ox = originSet ? originPoint.x : 0;
@@ -2415,6 +2773,11 @@
 
 		/* Keyboard shortcuts: arrows step, Space plays, H hides the marks, Ctrl+Z undoes */
 		document.addEventListener('keydown', (e) => {
+			if (trackRun && !['Shift', 'Control', 'Alt', 'Meta'].includes(e.key)) {
+				e.preventDefault();
+				stopAutoTrack();
+				return;
+			}
 			if (e.key === 'Escape') {
 				closeTouchGraphCopyActions();
 				closeMenus();

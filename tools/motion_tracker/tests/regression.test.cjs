@@ -59,3 +59,57 @@ test('insufficient velocity points produces empty velocity graph', () => {
     assert.equal(c.currentPlotMode,'vx'); assert.equal(c.positionChart.data.datasets[0].data.length,0);
     assert.equal(c.positionChart.options.scales.y.title.text,'Velocity (m/s)');
 });
+
+// Auto-tracking: a shaded, anti-aliased disc on a textured background, as an RGBA image.
+function discImage(width, height, cx, cy, radius) {
+    const data = new Uint8ClampedArray(width * height * 4);
+    for (let y = 0; y < height; y++) for (let x = 0; x < width; x++) {
+        let cover = 0;
+        for (let sy = 0; sy < 4; sy++) for (let sx = 0; sx < 4; sx++) {
+            if (Math.hypot(x + (sx + 0.5) / 4 - 0.5 - cx, y + (sy + 0.5) / 4 - 0.5 - cy) <= radius) cover++;
+        }
+        cover /= 16;
+        const shade = 1 - 0.4 * Math.hypot(x - cx + radius / 3, y - cy + radius / 3) / radius;
+        const background = [200 + 20 * Math.sin(x / 7), 196 + 15 * Math.cos(y / 5), 188];
+        const ball = [235 * shade, 90 * shade, 40 * shade];
+        const i = (y * width + x) * 4;
+        for (let c = 0; c < 3; c++) data[i + c] = background[c] * (1 - cover) + ball[c] * cover;
+        data[i + 3] = 255;
+    }
+    return { data, width, height };
+}
+function trackingCore() {
+    const c = context({ Math, Float32Array, Int32Array, Uint8Array });
+    vm.runInContext(extract('/* ===== Auto-tracking: matching ===== */', '/* ===== Auto-tracking: runs ===== */'), c);
+    return c;
+}
+test('auto-tracking finds the clicked object and its size', () => {
+    const c = trackingCore();
+    const blob = c.findBlob(discImage(120, 90, 50.3, 40.6, 9), 52, 42, 30);
+    assert.ok(Math.abs(blob.x - 50.3) < 0.5 && Math.abs(blob.y - 40.6) < 0.5);
+    assert.ok(Math.abs(blob.radius - 9) < 1.5);
+    assert.equal(c.findBlob(discImage(120, 90, 50, 40, 9), 5, 5, 20), null);
+});
+test('auto-tracking matches a moved object to a fraction of a pixel', () => {
+    const c = trackingCore();
+    const template = c.cutTemplate(discImage(160, 120, 60, 50, 10), 60, 50, 13);
+    const found = c.matchTemplate(discImage(160, 120, 71.4, 44.7, 10), template, 70, 46, 12);
+    assert.ok(Math.abs(found.x - 71.4) < 0.3, `x ${found.x}`);
+    assert.ok(Math.abs(found.y - 44.7) < 0.3, `y ${found.y}`);
+    assert.ok(found.score > 0.9);
+    const empty = discImage(160, 120, -100, -100, 10);
+    assert.ok(c.matchTemplate(empty, template, 70, 46, 12).score < 0.6);
+});
+test('auto-tracking predicts with constant acceleration', () => {
+    const c = trackingCore();
+    const track = [0, 1, 2].map(n => ({ x: 10 + 5 * n, y: 100 - 20 * n + 3 * n * n }));
+    const next = c.predictPosition(track);
+    assert.equal(next.x, 25);
+    assert.equal(next.y, 100 - 60 + 27);
+});
+test('auto-tracking flags a match held at the image edge', () => {
+    const c = trackingCore();
+    const template = c.cutTemplate(discImage(160, 120, 60, 50, 10), 60, 50, 13);
+    assert.equal(c.matchTemplate(discImage(160, 120, 80, 50, 10), template, 80, 50, 8).atEdge, false);
+    assert.equal(c.matchTemplate(discImage(160, 120, 150, 50, 10), template, 145, 50, 8).atEdge, true);
+});
