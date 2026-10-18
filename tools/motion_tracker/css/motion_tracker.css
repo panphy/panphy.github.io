@@ -724,7 +724,8 @@ button:disabled {
   color: var(--accent);
 }
 
-#modeCancel {
+#modeCancel,
+#autoStop {
   flex: none;
   min-height: 32px;
   padding: 4px 14px;
@@ -1756,7 +1757,8 @@ body.modal-open {
   .mt-tool,
   .mt-menu-item,
   .step-field select,
-  #modeCancel {
+  #modeCancel,
+  #autoStop {
     min-height: 48px;
   }
 
