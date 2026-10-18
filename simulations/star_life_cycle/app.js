@@ -1114,10 +1114,25 @@ const notes = $('notes');
 const fullscreenButton = $('fullscreen');
 const wideQuery = window.matchMedia('(min-width: 900px)');
 let fallbackFullscreen = false;
+// The mass panel sits above the workspace, out of sight in fullscreen, so fullscreen borrows its
+// stepper, outcome and example stars for the top of the controls and hands them back on exit.
+const fsMass = $('fs-mass');
+const massParts = [$('fate'), document.querySelector('.mass-entry'), $('presets')];
+const massHomes = massParts.map(part => ({ parent: part.parentElement, next: part.nextElementSibling }));
+function placeMass(expanded) {
+  if (expanded && fsMass.firstElementChild !== massParts[1]) {
+    fsMass.append(massParts[1], massParts[0], massParts[2]);
+  } else if (!expanded && massParts[1].parentElement === fsMass) {
+    massParts.forEach((part, i) => massHomes[i].parent.insertBefore(part, massHomes[i].next));
+  }
+  fsMass.hidden = !expanded;
+}
 function placeControls() {
-  const inSide = workspace.classList.contains('is-fullscreen') && wideQuery.matches;
+  const expanded = workspace.classList.contains('is-fullscreen');
+  const inSide = expanded && wideQuery.matches;
   if (inSide && sideControls.parentElement !== notes) notes.prepend(sideControls);
   else if (!inSide && sideControls.parentElement !== viewerPanel) viewerPanel.append(sideControls);
+  placeMass(expanded);
   liveDirty = true;
 }
 function updateFullscreen() {

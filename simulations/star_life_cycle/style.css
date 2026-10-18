@@ -254,6 +254,12 @@ body.viewer-expanded { overflow: hidden; }
 
 .live { margin: 0 0 12px; min-height: calc(3.1em + 20px); padding: 10px 14px; border-radius: 12px; border-left: 3px solid var(--brand-accent); background: var(--card-bg); font-size: .84rem; line-height: 1.55; }
 
+/* Fullscreen hides the mass panel, so its stepper, outcome and example stars move to the top of the controls. */
+.fs-mass { display: flex; flex-direction: column; gap: 10px; margin: 0 0 14px; padding-bottom: 14px; border-bottom: 1px solid var(--card-border); }
+.fs-mass .fate { flex: none; max-width: none; font-size: .84rem; }
+.fs-mass .presets { margin-top: 0; gap: 6px; }
+.fs-mass .presets button { padding: 4px 10px; font-size: .78rem; }
+
 /* Timeline */
 .stages { display: grid; grid-auto-flow: column; grid-auto-columns: minmax(0, 1fr); gap: 4px; margin: 0; padding: 0; list-style: none; }
 .stages button {
