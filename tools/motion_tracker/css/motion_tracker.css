@@ -296,7 +296,7 @@ button:disabled {
   gap: 6px;
   flex: none;
   min-height: 38px;
-  padding: 6px 9px;
+  padding: 6px 7px;
   border: 1px solid transparent;
   border-radius: var(--radius-sm);
   background: none;
@@ -317,6 +317,15 @@ button:disabled {
 
 .mt-tool .mt-icon {
   color: var(--accent);
+}
+
+/* The struck-through eye on Marks while the marks are hidden. */
+.mt-icon-slash {
+  display: none;
+}
+
+[aria-pressed="true"] > .mt-icon .mt-icon-slash {
+  display: inline;
 }
 
 .mt-tool-quiet {
@@ -556,7 +565,7 @@ button:disabled {
 #workspace {
   flex: 1;
   display: grid;
-  grid-template-columns: minmax(0, var(--video-fr, 1.15fr)) 12px minmax(0, var(--graph-fr, 1fr));
+  grid-template-columns: minmax(0, var(--video-fr, 1fr)) 12px minmax(0, var(--graph-fr, 1fr));
   gap: 12px 0;
   min-height: 0;
   margin: 12px;
