@@ -76,7 +76,7 @@
           <span class="scale mono">SIZES AND TIMES COMPRESSED</span>
           <button id="fullscreen" class="panphy-fullscreen-button" type="button" aria-controls="workspace" aria-pressed="false" aria-label="Enter fullscreen" title="Enter fullscreen"><svg class="panphy-fs-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M4 9V4h5M15 4h5v5M20 15v5h-5M9 20H4v-5"/></svg></button>
         </div>
-        <div id="viewer" tabindex="0" role="img" aria-label="Interactive 3D view of the star. Drag to rotate; scroll or pinch to zoom.">
+        <div id="viewer" tabindex="0" role="img" aria-label="Interactive 3D view of the star. Drag to rotate; click then scroll, or pinch, to zoom.">
           <p id="load-status" role="status">Loading the 3D model…</p>
           <dl class="readout overlay mono" id="readout" aria-label="Current values">
             <div><dt>Age</dt><dd id="r-age">—</dd></div>
@@ -99,7 +99,7 @@
             <canvas id="mini-hr-canvas" width="300" height="230" role="img" aria-label="Small Hertzsprung–Russell diagram showing where the star is now"></canvas>
             <figcaption id="mini-hr-caption" class="mono"></figcaption>
           </figure>
-          <p class="gesture overlay" aria-hidden="true">Drag to rotate · Pinch or scroll to zoom</p>
+          <p class="gesture overlay" aria-hidden="true">Drag to rotate · Click the model, then scroll to zoom</p>
         </div>
         <div class="side-controls" id="side-controls">
         <p class="live" id="live" role="status"></p>
@@ -108,17 +108,20 @@
           <input id="scrub" type="range" min="0" max="1" step="0.001" value="0" aria-label="Move through the star's life">
         </div>
         <div class="toolbar" aria-label="Playback and view controls">
-          <button type="button" id="play" class="primary" aria-pressed="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path id="play-icon" d="M8 5v14l11-7z"/></svg><span id="play-label">Play</span></button>
-          <button type="button" id="prev" aria-label="Previous stage">◀ Stage</button>
-          <button type="button" id="next" aria-label="Next stage">Stage ▶</button>
+          <button type="button" id="play" class="play" aria-pressed="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path id="play-icon" d="M8 5v14l11-7z"/></svg><span id="play-label" data-reserve="Pause">Play</span></button>
+          <div class="stage-nav" role="group" aria-label="Step through the stages">
+            <button type="button" id="prev" aria-label="Previous stage">◀ Stage</button>
+            <button type="button" id="next" aria-label="Next stage">Stage ▶</button>
+          </div>
           <div class="speed" role="group" aria-label="Playback speed">
             <button type="button" data-speed="0.5" aria-pressed="false">½×</button>
             <button type="button" data-speed="1" aria-pressed="true">1×</button>
             <button type="button" data-speed="2" aria-pressed="false">2×</button>
           </div>
-          <button type="button" id="cutaway" class="experiment" aria-pressed="false">Cutaway</button>
-          <button type="button" id="reset">Reset</button>
+          <button type="button" id="cutaway" class="switch" aria-pressed="false" aria-describedby="cutaway-note"><span class="switch-label">Cutaway</span><span class="switch-track" aria-hidden="true"></span></button>
+          <button type="button" id="reset" title="Start this star again: the first stage, normal speed and the starting view."><svg viewBox="0 0 24 24" aria-hidden="true"><path class="stroke" d="M4 12a8 8 0 1 0 2.4-5.7M4 4v4h4"/></svg><span>Reset</span></button>
         </div>
+        <p class="cutaway-note" id="cutaway-note" hidden>This stage has no layers inside to cut away.</p>
         </div>
       </div>
 

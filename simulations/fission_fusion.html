@@ -42,7 +42,7 @@
     <section class="workspace" id="workspace" aria-label="Nuclear fission and fusion explorer">
       <div class="viewer-panel" id="viewer-panel">
         <div class="viewer-heading"><span id="scene-title">NUCLEAR FISSION</span><span class="scale">NOT TO SCALE</span><button id="fullscreen" class="panphy-fullscreen-button" type="button" aria-controls="viewer-panel" aria-pressed="false" aria-label="Enter fullscreen" title="Enter fullscreen"><svg class="panphy-fs-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M4 9V4h5M15 4h5v5M20 15v5h-5M9 20H4v-5"/></svg></button></div>
-        <div id="viewer" tabindex="0" role="img" aria-label="Interactive 3D nucleus. Drag or use arrow keys to rotate; scroll, pinch or plus and minus keys to zoom.">
+        <div id="viewer" tabindex="0" role="img" aria-label="Interactive 3D nucleus. Drag or use arrow keys to rotate; click then scroll, pinch, or use plus and minus keys to zoom.">
           <p id="load-status" role="status">Loading the 3D model…</p>
           <div class="legend overlay" aria-label="Legend">
             <span data-legend="proton"><i class="proton">+</i> Proton</span>
@@ -53,7 +53,7 @@
             <span data-legend="u238"><i class="u238"></i> Uranium-238</span>
             <span data-legend="rod"><i class="rod"></i> Control rod</span>
           </div>
-          <p class="gesture overlay" aria-hidden="true">Drag to rotate · Pinch or scroll to zoom</p>
+          <p class="gesture overlay" aria-hidden="true">Drag to rotate · Click the model, then scroll to zoom</p>
           <div class="equation overlay" id="equation" aria-live="polite"></div>
           <div class="graph overlay" id="graph" hidden><canvas id="graph-canvas" aria-label="Graph" role="img"></canvas><p class="graph-stats mono" id="graph-stats"></p></div>
           <div class="bea" id="bea" hidden>
@@ -61,19 +61,23 @@
             <div class="bea-stats mono" id="bea-stats"></div>
           </div>
         </div>
-        <div class="side-controls" id="side-controls">
-          <p class="particle-readout mono" id="particle-readout" role="status">Tap a particle to discover its job.</p>
-          <div class="toolbar" aria-label="View controls">
-            <button type="button" id="motion" class="primary" aria-pressed="true"><svg viewBox="0 0 24 24" aria-hidden="true"><path id="motion-icon" d="M7 5h3v14H7zM14 5h3v14h-3z"/></svg><span id="motion-label" data-reserve="Continue motion">Pause motion</span></button>
-            <button type="button" id="reset" data-reserve="Reset">Reset</button>
-            <button type="button" id="fire" class="experiment" data-reserve="Fire 5 more neutrons">Fire a neutron</button>
-          </div>
-          <div class="sample-controls" id="controls-chain" hidden>
-            <div class="field" role="group" aria-labelledby="rods-label">
-              <span id="rods-label">Control rods</span>
-              <div class="stepper"><button type="button" id="rods-minus" aria-label="Remove one control rod">−</button><output id="rods-out" class="mono" aria-live="polite">0 of 6</output><button type="button" id="rods-plus" aria-label="Insert one control rod">+</button></div>
+        <div class="toolbar playback" aria-label="Playback controls">
+          <button type="button" id="motion" aria-pressed="true"><svg viewBox="0 0 24 24" aria-hidden="true"><path id="motion-icon" d="M7 5h3v14H7zM14 5h3v14h-3z"/></svg><span id="motion-label" data-reserve="Continue motion">Pause motion</span></button>
+          <button type="button" id="reset" title="Start this experiment again: every setting and the view go back to how they were on arrival."><svg viewBox="0 0 24 24" aria-hidden="true"><path class="stroke" d="M4 12a8 8 0 1 0 2.4-5.7M4 4v4h4"/></svg><span>Reset</span></button>
+        </div>
+      </div>
+      <div class="console" id="side-controls" role="group" aria-label="Experiment controls">
+        <button type="button" id="fire" class="fire">Fire a neutron</button>
+        <p id="action-hint"></p>
+        <p class="particle-readout" id="particle-readout" role="status">Tap a particle to discover its job.</p>
+        <div class="sample-controls" id="controls-chain" hidden>
+          <div class="section">
+            <span class="section-title">Settings</span>
+            <div class="field setting" role="group" aria-labelledby="rods-label">
+              <span class="setting-label" id="rods-label">Control rods</span>
+              <div class="stepper"><button type="button" id="rods-minus" aria-label="Remove one control rod">−</button><output id="rods-out" aria-live="polite">0 of 6</output><button type="button" id="rods-plus" aria-label="Insert one control rod">+</button></div>
             </div>
-            <label>Fuel
+            <label class="setting"><span class="setting-label">Fuel</span>
               <select id="enrichment">
                 <option value="1">100% uranium-235</option>
                 <option value="0.85" selected>85% uranium-235, 15% uranium-238</option>
@@ -81,29 +85,35 @@
               </select>
             </label>
           </div>
-          <div class="sample-controls" id="controls-fusion" hidden>
-            <div class="field" role="group" aria-labelledby="temp-label">
-              <span id="temp-label">Temperature (million °C)</span>
-              <div class="stepper"><button type="button" id="temp-minus" aria-label="Lower the temperature by 10 million degrees">−</button><input type="number" id="temp-input" class="mono" min="10" max="200" step="10" value="50" inputmode="numeric" aria-label="Temperature in millions of degrees Celsius"><button type="button" id="temp-plus" aria-label="Raise the temperature by 10 million degrees">+</button></div>
+        </div>
+        <div class="sample-controls" id="controls-fusion" hidden>
+          <div class="section">
+            <span class="section-title">Settings</span>
+            <div class="field setting" role="group" aria-labelledby="temp-label">
+              <span class="setting-label" id="temp-label">Temperature (million °C)</span>
+              <div class="stepper"><button type="button" id="temp-minus" aria-label="Lower the temperature by 10 million degrees">−</button><input type="number" id="temp-input" min="10" max="200" step="10" value="50" inputmode="numeric" aria-label="Temperature in millions of degrees Celsius"><button type="button" id="temp-plus" aria-label="Raise the temperature by 10 million degrees">+</button></div>
             </div>
           </div>
-          <div class="sample-controls" id="controls-energy" hidden>
-            <div class="field" role="group" aria-labelledby="reaction-label">
-              <span id="reaction-label">Reaction</span>
-              <div class="choice-row">
-                <button type="button" data-reaction="fission" aria-pressed="true">Fission of uranium</button>
-                <button type="button" data-reaction="fusion" aria-pressed="false">D–T fusion</button>
-              </div>
+        </div>
+        <div class="sample-controls" id="controls-energy" hidden>
+          <div class="section" role="group" aria-labelledby="reaction-label">
+            <span class="section-title" id="reaction-label">Reaction</span>
+            <div class="choice-row segmented">
+              <button type="button" data-reaction="fission" aria-pressed="true">Fission of uranium</button>
+              <button type="button" data-reaction="fusion" aria-pressed="false">D–T fusion</button>
             </div>
           </div>
-          <p id="action-hint"></p>
         </div>
       </div>
       <aside aria-live="polite">
+        <div class="guide-text">
         <p class="eyebrow" id="mode-date">FISSION · URANIUM-235</p><h2 id="mode-heading">A slow neutron splits a heavy nucleus in two.</h2>
         <p id="description"></p>
         <div class="idea"><h3><svg class="icon" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:1.15em;height:1.15em;vertical-align:-0.2em" aria-hidden="true" focusable="false"><circle cx="10.5" cy="10.5" r="6.5"/><path d="M15.3 15.3 21 21"/></svg> Your observation mission</h3><p id="look"></p></div>
+        </div>
+        <div class="guide-study">
         <h3>What does it mean?</h3><p id="evidence"></p>
+        </div>
       </aside>
     </section>
     <section class="reality"><span aria-hidden="true">↗</span><div><h2>A model is an explanation, not a photograph.</h2><p>Protons and neutrons are drawn as coloured balls packed together; real nucleons are not hard spheres, and colours and sizes are chosen to help you see the ideas. A nucleus is about 1/100 000 of an atom’s width. Every motion is slowed down enormously: real fission fragments leave at about 3% of the speed of light, and fission takes far less than a billionth of a second.</p><p>In the fission view every one of the 236 nucleons is drawn, and the numbers of protons and neutrons in the fragments are exact: 92 + 143 + 1 = 56 + 85 + 36 + 56 + 3. Real fission is random: uranium-236 can split in dozens of different ways, and this is just one of them. The energy of about 170 MeV is shared out as the kinetic energy of the fragments and neutrons, plus gamma rays and later radioactive decay of the fragments.</p><p>The chain reaction is a simplified model: neutrons fly in straight lines and are absorbed with fixed probabilities, and a real reactor also needs a moderator to slow the neutrons down. The fuel percentages are chosen to show the behaviour, not to match real reactor fuel or bombs. The fusion view uses a simple classical model of two repelling nuclei. In reality the barrier is about 0.4 MeV, far more than the average thermal energy at 100 million °C; fusion happens because the fastest nuclei reach the barrier and quantum tunnelling helps them through. Fusion in the Sun proceeds by a different route, starting from hydrogen-1, and each nucleus waits billions of years to react.</p></div></section>

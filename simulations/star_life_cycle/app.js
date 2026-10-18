@@ -52,6 +52,12 @@ viewer.prepend(renderer.domElement);
 const scene = new THREE.Scene();
 const camera = new THREE.PerspectiveCamera(BASE_FOV, 1, 0.1, 3000);
 camera.position.copy(CAMERA_HOME);
+// The wheel zooms only once the model has been clicked (or in fullscreen), so it never traps page scrolling.
+// Registered before the orbit controls, so it runs first.
+viewer.addEventListener('wheel', event => {
+  if (!(document.getElementById('workspace').classList.contains('is-fullscreen') || event.ctrlKey || document.activeElement === viewer)) event.stopImmediatePropagation();
+}, { capture: true, passive: true });
+viewer.addEventListener('pointerdown', () => viewer.focus({ preventScroll: true }), { capture: true });
 const controls = new OrbitControls(camera, viewer);
 controls.enableDamping = true;
 controls.enablePan = false;
@@ -822,6 +828,8 @@ function renderLayers(st) {
   lastLayers = layers;
   const cutaway = $('cutaway');
   cutaway.disabled = !layers;
+  // Say why the switch is unavailable rather than leaving it greyed out without a reason.
+  $('cutaway-note').hidden = Boolean(layers);
   cutaway.setAttribute('aria-pressed', String(state.cutaway && !!layers));
   cutaway.classList.toggle('nudge', st.stage.id === 'late' || (st.stage.id === 'sn' && st.p < SN_BREAKOUT));
   const names = layers ? layers.map(l => l.name).join('|') : 'none';
