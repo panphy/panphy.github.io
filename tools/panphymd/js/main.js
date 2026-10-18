@@ -967,10 +967,20 @@ function queueMathTypeset(isCurrent, hasMath) {
   return mathTypesetQueue;
 }
 
+const wordCount = document.getElementById('wordCount');
+
+function updateWordCount() {
+  if (!wordCount) return;
+  const text = markdownInput.value.trim();
+  const words = text ? text.split(/\s+/).length : 0;
+  wordCount.textContent = `${words} ${words === 1 ? 'word' : 'words'}`;
+}
+
 /**
  * Render the markdown content to the output pane
  */
 function renderContent() {
+  updateWordCount();
   const currentRenderCycle = ++renderCycleId;
   const inputText = markdownInput.value;
   if (!markedLib || typeof DOMPurify === 'undefined') {
@@ -1726,6 +1736,7 @@ markdownInput.addEventListener('input', () => {
       queuedInputRenderRafId = 0;
       const content = markdownInput.value;
       clearUntouchedSampleContentFlagIfEdited(content);
+      updateWordCount();
       if (shouldRenderPreviewDuringTyping()) {
         renderContent();
       }
@@ -2042,7 +2053,9 @@ function updatePresentButtonLabel() {
   if (!presentButton) return;
 
   const isOutputFullscreen = isInFullscreen();
-  presentButton.textContent = isOutputFullscreen ? 'Exit Present' : 'Present';
+  // Rename the label only, keeping the icon beside it.
+  const presentLabel = presentButton.querySelector('span') || presentButton;
+  presentLabel.textContent = isOutputFullscreen ? 'Exit Present' : 'Present';
   presentButton.setAttribute('title', isOutputFullscreen
     ? 'Exit fullscreen presentation mode'
     : 'Show rendered output in fullscreen');
