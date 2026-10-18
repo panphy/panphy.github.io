@@ -86,7 +86,10 @@
 					<svg class="empty-illustration" viewBox="0 0 120 84" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="6" y="8" width="108" height="68" rx="8" opacity=".35"/><path d="M18 64C38 20 70 14 102 40" stroke-dasharray="2 7" opacity=".7"/><circle cx="26" cy="49" r="4" fill="currentColor" stroke="none" opacity=".45"/><circle cx="44" cy="30" r="4" fill="currentColor" stroke="none" opacity=".65"/><circle cx="66" cy="22" r="4" fill="currentColor" stroke="none" opacity=".85"/><path d="M88 22v12M82 28h12"/></svg>
 					<h3 class="empty-title">Track an object in a video</h3>
 					<p class="empty-lead">Film side-on with the camera held still. Then mark the object frame by frame to get its position and velocity.</p>
-					<button type="button" id="emptyImport" class="btn-primary empty-import"><svg class="mt-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 15.5V4M7.5 8.5 12 4l4.5 4.5M4.5 15.5v3a2 2 0 0 0 2 2h11a2 2 0 0 0 2-2v-3"/></svg>Import Video</button>
+					<div class="empty-actions">
+						<button type="button" id="emptyImport" class="btn-primary empty-import"><svg class="mt-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 15.5V4M7.5 8.5 12 4l4.5 4.5M4.5 15.5v3a2 2 0 0 0 2 2h11a2 2 0 0 0 2-2v-3"/></svg>Import Video</button>
+						<button type="button" id="emptySample" class="empty-import" title="Open a short clip of a ball bouncing along a bench, with a metre rule for the scale"><svg class="mt-icon" viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="5.5" width="17" height="13" rx="2.5"/><path d="m10 9.2 5 2.8-5 2.8z"/></svg>Try a sample</button>
+					</div>
 					<p class="empty-drop">or drop a video file here</p>
 					<ol class="empty-steps">
 						<li><span><strong>Check the frame rate.</strong> It is detected for you; set it up for slow-motion clips.</span></li>
@@ -124,6 +127,9 @@
 			</div>
 		</section>
 
+		<div class="mt-divider" id="paneDivider" role="separator" tabindex="0" aria-orientation="vertical" aria-controls="videoPane graphPane" aria-label="Video pane width"
+			title="Drag to resize the panes; double-click to reset"></div>
+
 		<!-- Graph: position or velocity against time, and the table of marks. -->
 		<section id="graphPane" class="mt-pane" aria-labelledby="graphPaneTitle">
 			<div class="pane-head">
@@ -149,8 +155,11 @@
 				</div>
 				</div>
 				<div class="mt-tool-spacer"></div>
-				<button type="button" id="exportData" class="mt-tool" disabled title="Save positions and velocities as a CSV file for a spreadsheet"><svg class="mt-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3.5v11M7.5 10l4.5 4.5 4.5-4.5M4.5 15.5v3a2 2 0 0 0 2 2h11a2 2 0 0 0 2-2v-3"/></svg><span>Export CSV</span></button>
-				<button type="button" id="exportPanPhyPlot" class="mt-tool" disabled title="Open positions and smoothed velocities in PanPhyPlot, in a new tab, to plot and fit them"><svg class="mt-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M13.5 4.5h6v6M19.5 4.5l-8 8M17.5 13.5v4a2 2 0 0 1-2 2h-9a2 2 0 0 1-2-2v-9a2 2 0 0 1 2-2h4"/></svg><span>Export to PanPhyPlot</span></button>
+				<div class="mt-export-group" role="group" aria-label="Export">
+					<span class="mt-tool-group-label" aria-hidden="true">Export</span>
+					<button type="button" id="exportData" class="mt-tool" disabled aria-label="Export CSV" title="Save positions and velocities as a CSV file for a spreadsheet"><svg class="mt-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3.5v11M7.5 10l4.5 4.5 4.5-4.5M4.5 15.5v3a2 2 0 0 0 2 2h11a2 2 0 0 0 2-2v-3"/></svg><span>CSV</span></button>
+					<button type="button" id="exportPanPhyPlot" class="mt-tool" disabled aria-label="Export to PanPhyPlot" title="Open positions and smoothed velocities in PanPhyPlot, in a new tab, to plot and fit them"><svg class="mt-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M13.5 4.5h6v6M19.5 4.5l-8 8M17.5 13.5v4a2 2 0 0 1-2 2h-9a2 2 0 0 1-2-2v-9a2 2 0 0 1 2-2h4"/></svg><span>PanPhyPlot</span></button>
+				</div>
 			</div>
 			<div class="graph-body">
 				<div id="graphView" class="graph-view" role="tabpanel" aria-labelledby="showGraph">
@@ -251,7 +260,7 @@
 		<form method="dialog">
 			<h2 class="modal-title" id="guideTitle">How to track motion</h2>
 			<ol class="guide-steps">
-				<li><span><strong>Import a video.</strong> Film side-on with the camera held still, and include something of known length, such as a metre rule.</span></li>
+				<li><span><strong>Import a video.</strong> Film side-on with the camera held still, and include something of known length, such as a metre rule. To practise, choose Try a sample on the start screen.</span></li>
 				<li><span><strong>Check the frame rate.</strong> It is detected for you. For slow motion, open the frame rate and give the rate it was filmed at.</span></li>
 				<li><span><strong>Scale:</strong> drag along the object of known length and type its length. Without a scale, positions are in pixels.</span></li>
 				<li><span><strong>Origin:</strong> click where x and y should be zero. Otherwise the origin is the bottom-left corner.</span></li>
@@ -293,6 +302,7 @@
 		let hasUnsavedChanges = false;
 		let videoReady = false;
 		let videoFileInfo = null;
+		let sampleOpen = false; // The open video is the built-in sample
 		let undoHistory = [];
 		let cancelFpsDetection = () => {};
 		let playbackCallbackId = null;
@@ -370,6 +380,7 @@
 		const hiddenVideo = document.getElementById('hiddenVideo');
 		const openVideoButton = document.getElementById('openVideo');
 		const emptyImportButton = document.getElementById('emptyImport');
+		const emptySampleButton = document.getElementById('emptySample');
 		const videoUploadInput = document.getElementById('videoUploadInput');
 		const playPauseButton = document.getElementById('playPause');
 		const playPauseIcon = document.getElementById('playPauseIcon');
@@ -855,7 +866,9 @@
 			hiddenVideo.addEventListener('seeked', redrawOnSeek, { once: true });
 
 			if (videoReady && frameData.length === 0) {
-				setMessage(`Frame rate: ${fps} fps. Set the scale and origin if you need them, then click the object to mark it.`);
+				setMessage(sampleOpen
+					? `Sample: a ball bouncing along a bench at ${fps} fps. For the scale, drag along the yellow rule and enter 1 m; then click the ball in each frame.`
+					: `Frame rate: ${fps} fps. Set the scale and origin if you need them, then click the object to mark it.`);
 			}
 		}
 
@@ -908,6 +921,140 @@
 			exportPanPhyPlotButton.disabled = !ready || count === 0;
 			undoPointButton.disabled = !ready || undoHistory.length === 0;
 		}
+
+		/* ===== Pane divider ===== */
+		// On the PanPhyPlot and PanPhyMD model: drag with any pointer, or focus the divider and use the
+		// arrow keys (Shift for bigger steps), Home and End; Enter or a double-click resets. Near its
+		// starting position the divider snaps back onto it. The width is remembered in this browser only.
+		const PANES_STORAGE_KEY = 'motion-tracker-panes';
+		const PANE_WIDE_QUERY = '(min-width: 901px)';
+		// The playback bar (transport, slider, time and Step) needs this width on one row, with the pane border.
+		const PANE_VIDEO_MIN = 524;
+		const PANE_GRAPH_MIN = 360;
+		const PANE_DEFAULT_VIDEO_SHARE = 1.15 / 2.15;
+		const PANE_KEY_STEP = 16;
+		const PANE_SNAP_DISTANCE = 16;
+
+		function initializePaneDivider() {
+			const workspace = document.getElementById('workspace');
+			const videoPane = document.getElementById('videoPane');
+			const divider = document.getElementById('paneDivider');
+			const wideQuery = window.matchMedia(PANE_WIDE_QUERY);
+			// The video pane's share of the space both panes split, or null for the default.
+			let videoShare = null;
+			try {
+				const saved = JSON.parse(localStorage.getItem(PANES_STORAGE_KEY) || 'null');
+				if (saved && Number.isFinite(saved.videoShare) && saved.videoShare > 0 && saved.videoShare < 1) videoShare = saved.videoShare;
+			} catch (error) {
+				// Unreadable: start from the default.
+			}
+
+			const getShareableWidth = () => workspace.clientWidth - divider.offsetWidth;
+			const clampVideo = width => Math.round(Math.min(Math.max(width, PANE_VIDEO_MIN), getShareableWidth() - PANE_GRAPH_MIN));
+			const defaultWidth = () => clampVideo(getShareableWidth() * PANE_DEFAULT_VIDEO_SHARE);
+
+			function apply() {
+				workspace.style.removeProperty('--video-fr');
+				workspace.style.removeProperty('--graph-fr');
+				if (!wideQuery.matches) return;
+				const shareable = getShareableWidth();
+				if (videoShare !== null) {
+					const width = clampVideo(shareable * videoShare);
+					workspace.style.setProperty('--video-fr', `${width}fr`);
+					workspace.style.setProperty('--graph-fr', `${shareable - width}fr`);
+				}
+				const value = Math.round(videoPane.getBoundingClientRect().width);
+				divider.setAttribute('aria-valuemin', String(PANE_VIDEO_MIN));
+				divider.setAttribute('aria-valuemax', String(Math.round(shareable - PANE_GRAPH_MIN)));
+				divider.setAttribute('aria-valuenow', String(value));
+				divider.setAttribute('aria-valuetext', `Video pane ${value} pixels wide`);
+			}
+
+			function persist() {
+				try {
+					if (videoShare === null) localStorage.removeItem(PANES_STORAGE_KEY);
+					else localStorage.setItem(PANES_STORAGE_KEY, JSON.stringify({ videoShare }));
+				} catch (error) {
+					// A private window may refuse; the width then lasts for this visit only.
+				}
+			}
+
+			// When dragged, a width near the starting position snaps onto it, which clears the saved width.
+			function setVideoWidth(width, snap) {
+				const clamped = clampVideo(width);
+				videoShare = snap && Math.abs(clamped - defaultWidth()) <= PANE_SNAP_DISTANCE ? null : clamped / getShareableWidth();
+				apply();
+			}
+
+			function reset() {
+				videoShare = null;
+				apply();
+				persist();
+			}
+
+			let pointerId = null;
+			let startX = 0;
+			let startWidth = 0;
+			const finish = () => {
+				if (pointerId === null) return;
+				if (divider.hasPointerCapture(pointerId)) divider.releasePointerCapture(pointerId);
+				pointerId = null;
+				document.body.classList.remove('mt-is-resizing');
+				persist();
+			};
+			divider.addEventListener('pointerdown', (event) => {
+				if (!wideQuery.matches || !event.isPrimary || event.button !== 0 || pointerId !== null) return;
+				event.preventDefault();
+				divider.focus({ preventScroll: true });
+				pointerId = event.pointerId;
+				startX = event.clientX;
+				startWidth = videoPane.getBoundingClientRect().width;
+				divider.setPointerCapture(pointerId);
+				document.body.classList.add('mt-is-resizing');
+			});
+			divider.addEventListener('pointermove', (event) => {
+				if (event.pointerId !== pointerId) return;
+				setVideoWidth(startWidth + event.clientX - startX, true);
+			});
+			divider.addEventListener('pointerup', finish);
+			divider.addEventListener('pointercancel', finish);
+			divider.addEventListener('lostpointercapture', finish);
+			divider.addEventListener('dblclick', reset);
+			divider.addEventListener('keydown', (event) => {
+				if (!wideQuery.matches) return;
+				const width = Math.round(videoPane.getBoundingClientRect().width);
+				const step = event.shiftKey ? PANE_KEY_STEP * 4 : PANE_KEY_STEP;
+				const isArrow = event.key === 'ArrowLeft' || event.key === 'ArrowRight';
+				let next;
+				switch (event.key) {
+					case 'ArrowLeft': next = width - step; break;
+					case 'ArrowRight': next = width + step; break;
+					case 'Home': next = PANE_VIDEO_MIN; break;
+					case 'End': next = Infinity; break;
+					case 'Enter':
+						event.preventDefault();
+						reset();
+						return;
+					default: return;
+				}
+				event.preventDefault();
+				// Arrow steps that pass over the starting position stop on it, as dragging does.
+				const start = defaultWidth();
+				const target = clampVideo(next);
+				if (isArrow && (width - start) * (target - start) < 0) {
+					videoShare = null;
+					apply();
+				} else {
+					setVideoWidth(target, false);
+				}
+				persist();
+			});
+			window.addEventListener('blur', () => document.body.classList.remove('mt-is-resizing'));
+			wideQuery.addEventListener('change', apply);
+			window.addEventListener('resize', apply);
+			apply();
+		}
+		initializePaneDivider();
 
 		/* ===== Dialogs and menus ===== */
 		function openDialog(dialog) {
@@ -1126,6 +1273,7 @@
 			if (blobUrl) URL.revokeObjectURL(blobUrl);
 			resetApp();
 
+			sampleOpen = false;
 			videoFileInfo = { name: file.name, size: file.size };
 			videoName.textContent = file.name;
 			blobUrl = URL.createObjectURL(file);
@@ -1135,6 +1283,26 @@
 
 		openVideoButton.addEventListener('click', chooseVideoFile);
 		emptyImportButton.addEventListener('click', chooseVideoFile);
+
+		// A ball thrown along a bench and bouncing twice: 30 fps, 41 frames, rendered frame by frame from
+		// the projectile equations (g = 9.81 m/s², restitution 0.6), with a 1.00 m rule for the scale.
+		const SAMPLE_VIDEO_URL = '/tools/motion_tracker/sample-bouncing-ball.mp4';
+		emptySampleButton.addEventListener('click', async () => {
+			if (!confirmDataLoss(NEW_VIDEO_WARNING)) return;
+			emptySampleButton.disabled = true;
+			setMessage('Opening the sample video...');
+			try {
+				const response = await fetch(SAMPLE_VIDEO_URL);
+				if (!response.ok) throw new Error(response.statusText);
+				const blob = await response.blob();
+				openVideoFile(new File([blob], 'sample-bouncing-ball.mp4', { type: 'video/mp4' }));
+				sampleOpen = true;
+			} catch (error) {
+				setMessage('The sample video could not be loaded. Check the connection and try again.');
+			} finally {
+				emptySampleButton.disabled = false;
+			}
+		});
 
 		videoUploadInput.addEventListener('change', (e) => {
 			const file = e.target.files?.[0];

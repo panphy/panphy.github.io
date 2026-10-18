@@ -1,4 +1,4 @@
-const BUILD_ID = '2026-10-18T21:46:46Z';
+const BUILD_ID = '2026-10-18T22:04:05Z';
 const CACHE_PREFIX = 'panphy-labs';
 const PRECACHE_NAME = `${CACHE_PREFIX}-precache-${BUILD_ID}`;
 const RUNTIME_CACHE = `${CACHE_PREFIX}-runtime-${BUILD_ID}`;
@@ -111,6 +111,7 @@ const ASSETS_TO_CACHE = [
   'https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js',
   '/tools/motion_tracker.html',
   '/tools/motion_tracker/css/motion_tracker.css',
+  '/tools/motion_tracker/sample-bouncing-ball.mp4',
   'https://cdn.jsdelivr.net/npm/chart.js@4.5.1/dist/chart.umd.min.js',
   '/tools/sound_analyzer.html',
   '/tools/tone_generator.html',
