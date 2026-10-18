@@ -715,6 +715,7 @@ function resetView() {
     state.orbitalFocus = null;
     state.orbitalIndex = -1;
     applyOpacity(1);
+    updateOrbitalButton();
   }
 }
 
@@ -1146,7 +1147,13 @@ function resetScene() {
   selectModel(state.model, false);
 }
 $('reset').addEventListener('click', resetScene);
-// Each press moves on to the next orbital, 1s → 2s → 2p, so the shapes can be compared in turn.
+// Each press moves on through 1s → 2s → 2p and round again, so the shapes can be compared in turn.
+// The button names the orbital it will show, so it is right when it wraps back to 1s.
+function updateOrbitalButton() {
+  const keys = Object.keys(ORBITALS);
+  const next = keys[(state.orbitalIndex + 1) % keys.length];
+  $('orbital').textContent = `Inspect the ${next} orbital${next === '2p' ? 's' : ''}`;
+}
 function inspectNextOrbital() {
   const keys = Object.keys(ORBITALS);
   state.orbitalIndex = (state.orbitalIndex + 1) % keys.length;
@@ -1154,6 +1161,7 @@ function inspectNextOrbital() {
   applyOpacity(1);
   readout.textContent = ORBITALS[state.orbitalFocus];
   flyTo({ direction: new THREE.Vector3(0.45, 0.7, 1), distance: [4.5, 9, 9][state.orbitalIndex] });
+  updateOrbitalButton();
 }
 $('orbital').addEventListener('click', inspectNextOrbital);
 $('inspect').addEventListener('click', () => {
@@ -1209,7 +1217,7 @@ const DEFAULT_READOUT = {
   plum: 'PLUM PUDDING · Tap a particle to discover its job. Then press “Fire alpha particles” and compare with the Rutherford model.',
   rutherford: 'NUCLEAR MODEL · Tap the nucleus or an electron to discover its job. Fire alpha particles: most pass straight through, but a few bounce back.',
   bohr: 'CARBON-12 · 6 protons + 6 neutrons + 6 electrons. Tap a proton or neutron, or excite an electron and watch the energy diagram.',
-  cloud: 'CARBON · 6 electrons in the 1s, 2s and 2p orbitals. Press “Inspect the next orbital” to compare their shapes in turn, or tap the nucleus.'
+  cloud: 'CARBON · 6 electrons in the 1s, 2s and 2p orbitals. Press “Inspect the 1s orbital”, then keep pressing to compare the 2s and 2p shapes, or tap the nucleus.'
 };
 function selectModel(model, animate = true) {
   const previous = state.model;
@@ -1231,6 +1239,7 @@ function selectModel(model, animate = true) {
   $('excite').hidden = model !== 'bohr';
   // The electron cloud's main action is stepping through the orbitals, so Inspect moves up to the main button.
   $('orbital').hidden = model !== 'cloud';
+  updateOrbitalButton();
   $('inspect').hidden = model === 'cloud';
   $('inspect').textContent = model === 'cloud' ? 'Inspect an orbital' : 'Inspect an electron';
   readout.textContent = DEFAULT_READOUT[model];
