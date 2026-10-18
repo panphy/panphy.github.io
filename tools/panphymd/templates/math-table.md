@@ -1,4 +1,4 @@
-| Time / s | Temperature / $^\circ{C}$ | $\Delta T$ / $\pm$% |
+| Time / s | Temperature / $^\circ{C}$ | $\Delta T$ $\pm$% |
 |:---:|:---:|:---:|
 | 0 | 21 | 5 |
 | 10 | 33 | 5 |
