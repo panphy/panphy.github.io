@@ -161,7 +161,7 @@ function applyFormula() {
 /* ---------- Clear ---------- */
 
 function isBlankNewSheet(sheet) {
-	return PlotModel.isSheetEmpty(sheet) && sheet.columns.length === 2
+	return !String(sheet.name || '').trim() && PlotModel.isSheetEmpty(sheet) && sheet.columns.length === 2
 		&& sheet.columns[0].role === 'X' && sheet.columns[0].name === 'x' && !sheet.columns[0].unit
 		&& sheet.columns[1].role === 'Y' && sheet.columns[1].name === 'y' && !sheet.columns[1].unit;
 }
@@ -190,6 +190,7 @@ function applyClear(reset) {
 	else PlotModel.clearSheetData(sheet);
 	dropSheetFits(sheet);
 	closeDialog('clear-dialog');
+	if (reset) renderSheetTabs();
 	renderTable();
 	afterDataChange({ structure: true });
 	syncTitleInput(true);
