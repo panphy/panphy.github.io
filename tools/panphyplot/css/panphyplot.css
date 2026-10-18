@@ -1893,6 +1893,51 @@ input[type="number"]:focus {
 	font-size: 0.95rem;
 }
 
+/* Extend line: draws the fit back and forward beyond the data, to x values typed in. */
+.neo-fit-extend {
+	margin-top: 12px;
+	padding-top: 12px;
+	border-top: 1px solid var(--line);
+	width: 100%;
+}
+
+.neo-fit-extend-title {
+	display: block;
+	margin-bottom: 6px;
+	font-size: 0.8rem;
+	font-weight: 700;
+	color: var(--ink-2);
+}
+
+.neo-fit-extend-fields {
+	display: grid;
+	grid-template-columns: auto minmax(0, 1fr);
+	align-items: center;
+	gap: 6px 10px;
+}
+
+.neo-fit-extend-fields label {
+	font-size: 0.82rem;
+	color: var(--ink-2);
+	white-space: nowrap;
+}
+
+.neo-fit-extend-fields input {
+	width: 100%;
+	font-family: var(--font-mono);
+}
+
+.neo-fit-extend-fields input:disabled {
+	opacity: 0.55;
+	cursor: not-allowed;
+}
+
+.neo-fit-extend-message {
+	margin: 8px 0 0;
+	font-size: 0.78rem;
+	color: var(--warn);
+}
+
 .neo-weight {
 	margin-top: 12px;
 	padding-top: 12px;

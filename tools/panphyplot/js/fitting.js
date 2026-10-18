@@ -1333,6 +1333,14 @@ function getChoiceParameterCount(choice) {
 }
 
 function updateResults(equation, x, y, fitFunction, datasetIndex = activeFitKey, solver = null, choice = getFitChoice(), extras = {}) {
+	// Every fit arrives here with its line sampled across the data; extend it as asked.
+	const curve = fittedCurves[datasetIndex];
+	if (curve && Array.isArray(curve.x) && curve.x.length) {
+		curve.dataRange = [curve.x[0], curve.x[curve.x.length - 1]];
+		curve.samples = curve.x.length;
+		fitFunctions[datasetIndex] = fitFunction;
+		applyFitExtent(datasetIndex);
+	}
 	const residuals = x.map((value, i) => ({ x: value, y: y[i] - fitFunction(value) }));
 	const finiteResiduals = residuals.filter(point => Number.isFinite(point.y));
 	const rSquared = computeRSq(x, y, fitFunction);
@@ -1368,8 +1376,39 @@ function updateResults(equation, x, y, fitFunction, datasetIndex = activeFitKey,
 	delete result.statusNote;
 	delete result.statusOverride;
 	datasetFitResults[datasetIndex] = result;
-	if (datasetIndex === activeFitKey) renderFittingResult(equation, result.rSquared);
+	if (datasetIndex === activeFitKey) {
+		renderFittingResult(equation, result.rSquared);
+		syncFitExtendControl();
+	}
 	scheduleSaveState();
+}
+
+// Redraws a fit's line from the start of its data, or further back, to the end of its data, or
+// further forward. A curve keeps its density of samples; x values its model cannot evaluate,
+// such as those outside a custom formula's domain, are left as gaps.
+// Returns false when the fit's function is gone (after a reload), so the line cannot be redrawn.
+function applyFitExtent(key) {
+	const curve = fittedCurves[key];
+	const fitFunction = fitFunctions[key];
+	if (!curve || !Array.isArray(curve.dataRange) || typeof fitFunction !== 'function') return false;
+	const [low, high] = curve.dataRange;
+	const extent = fitExtents[key] || {};
+	const from = Number.isFinite(extent.from) ? Math.min(extent.from, low) : low;
+	const to = Number.isFinite(extent.to) ? Math.max(extent.to, high) : high;
+	const samples = curve.samples || curve.x.length;
+	let count = samples;
+	if (samples > 2 && high > low) count = Math.min(Math.max(Math.round(samples * (to - from) / (high - low)), samples), 3000);
+	const xFit = count <= 2 ? [from, to] : Array.from({ length: count }, (_, i) => from + (i * (to - from)) / (count - 1));
+	curve.x = xFit;
+	curve.y = xFit.map((value) => {
+		try {
+			const y = fitFunction(value);
+			return Number.isFinite(y) ? y : null;
+		} catch (error) {
+			return null;
+		}
+	});
+	return true;
 }
 
 function polyfit(x, y, degree) {
@@ -2203,6 +2242,7 @@ Object.assign(window, {
 	refreshCustomFitDefinition,
 	initializeCustomFitUI,
 	loadCustomFitUiForActiveDataset,
-	resetCustomFitParametersFromData
+	resetCustomFitParametersFromData,
+	applyFitExtent
 });
 })();

@@ -8,6 +8,10 @@ let activeFitKey = null;
 let fittedCurves = {};
 let datasetFitResults = {};
 let customFitStates = {};
+// How far each fit's line is drawn beyond its data: { from, to } in x, null for the data's end.
+let fitExtents = {};
+// Each fit's function, for redrawing its line over a new range. Kept for this session only.
+const fitFunctions = {};
 let latexMode = false;
 const fitEpochs = {};
 
@@ -128,7 +132,7 @@ function refreshFitStaleness() {
 
 // Drops fits whose sheet or Y column no longer exists.
 function pruneOrphanFits() {
-	[datasetFitResults, fittedCurves, customFitStates].forEach((store) => {
+	[datasetFitResults, fittedCurves, customFitStates, fitExtents, fitFunctions].forEach((store) => {
 		Object.keys(store).forEach((key) => {
 			if (!resolveFitKey(key)) delete store[key];
 		});
@@ -136,7 +140,7 @@ function pruneOrphanFits() {
 }
 
 function buildPersistedState() {
-	return { ...plotState, latexMode, fits: datasetFitResults, curves: fittedCurves, customFits: customFitStates };
+	return { ...plotState, latexMode, fits: datasetFitResults, curves: fittedCurves, customFits: customFitStates, extents: fitExtents };
 }
 
 function saveState() {
@@ -175,6 +179,7 @@ function loadState(initialState = null) {
 	datasetFitResults = plotState.fits;
 	fittedCurves = plotState.curves;
 	customFitStates = plotState.customFits;
+	fitExtents = plotState.extents;
 	pruneOrphanFits();
 	refreshActiveFitKey();
 }

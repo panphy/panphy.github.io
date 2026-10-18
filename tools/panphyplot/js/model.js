@@ -79,7 +79,7 @@
 	}
 
 	function createState() {
-		const state = { version: 1, nextId: 0, activeSheet: 0, latexMode: false, equationDecimals: EQUATION_DECIMALS_DEFAULT, sheets: [], fits: {}, curves: {}, customFits: {} };
+		const state = { version: 1, nextId: 0, activeSheet: 0, latexMode: false, equationDecimals: EQUATION_DECIMALS_DEFAULT, sheets: [], fits: {}, curves: {}, customFits: {}, extents: {} };
 		state.sheets.push(createSheet(createIdSource(state), ''));
 		return state;
 	}
@@ -366,6 +366,7 @@
 			fits: saved.fits && typeof saved.fits === 'object' ? saved.fits : {},
 			curves: saved.curves && typeof saved.curves === 'object' ? saved.curves : {},
 			customFits: saved.customFits && typeof saved.customFits === 'object' ? saved.customFits : {},
+			extents: saved.extents && typeof saved.extents === 'object' ? saved.extents : {},
 			weightFits: saved.weightFits === true,
 			showResiduals: saved.showResiduals === true,
 			equationDecimals: Number.isInteger(saved.equationDecimals)
