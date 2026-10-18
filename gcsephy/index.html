@@ -171,6 +171,7 @@
     footer { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px 24px; padding: 22px var(--gutter) calc(28px + env(safe-area-inset-bottom, 0px)); font: 500 .74rem/1.4 var(--mono); letter-spacing: .1em; text-transform: uppercase; color: var(--muted); }
     footer a { display: inline-flex; align-items: center; gap: 8px; min-height: 48px; color: var(--ink); font-weight: 600; }
     footer a:hover { text-decoration: underline; text-underline-offset: 4px; }
+    .footer-links { display: flex; flex-wrap: wrap; align-items: center; gap: 0 24px; }
 
     /* ---------- Load-in ---------- */
     @media (prefers-reduced-motion: no-preference) {
@@ -352,7 +353,10 @@
 
   <footer>
     <span>GCSE Physics · &copy; 2026 PanPhy Labs. All rights reserved.</span>
-    <a href="/"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M19 12H5M11 6l-6 6 6 6"/></svg> All PanPhy Labs apps</a>
+    <div class="footer-links">
+      <a href="https://buymeacoffee.com/panphy" target="_blank" rel="noopener noreferrer">Support My Projects</a>
+      <a href="/"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M19 12H5M11 6l-6 6 6 6"/></svg> All PanPhy Labs apps</a>
+    </div>
   </footer>
 </body>
 
