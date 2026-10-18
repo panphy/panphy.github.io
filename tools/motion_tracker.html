@@ -60,7 +60,7 @@
 				</div>
 				<div class="mt-tool-group" role="group" aria-label="Marks">
 					<button type="button" id="undoPoint" class="mt-tool" disabled title="Undo the last change to the marks (Ctrl+Z)"><svg class="mt-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M8.5 5 4 9.5 8.5 14"/><path d="M4 9.5h10a5.5 5.5 0 0 1 0 11h-3"/></svg><span>Undo</span></button>
-					<button type="button" id="hideCrossesToggle" class="mt-tool" disabled aria-pressed="false" title="Hide or show the marks on the video (H)"><svg class="mt-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M2.5 12s3.5-6.5 9.5-6.5 9.5 6.5 9.5 6.5-3.5 6.5-9.5 6.5S2.5 12 2.5 12z"/><circle cx="12" cy="12" r="2.8"/></svg><span class="toggle-text">Hide Marks</span></button>
+					<button type="button" id="hideCrossesToggle" class="mt-tool" disabled aria-pressed="false" aria-label="Hide marks" title="Hide or show the marks on the video (H)"><svg class="mt-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M2.5 12s3.5-6.5 9.5-6.5 9.5 6.5 9.5 6.5-3.5 6.5-9.5 6.5S2.5 12 2.5 12z"/><circle cx="12" cy="12" r="2.8"/><path class="mt-icon-slash" d="M4 4l16 16"/></svg><span>Marks</span></button>
 					<button type="button" id="autoTrackToggle" class="mt-tool" disabled aria-pressed="false" title="Auto-track: click the object once, and it is marked in each frame until it is lost or the video ends"><svg class="mt-icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4.5"/><path d="M12 3.5v3M12 17.5v3M3.5 12h3M17.5 12h3"/></svg><span>Auto-track</span></button>
 				</div>
 				<div class="mt-tool-spacer"></div>
@@ -1270,7 +1270,7 @@
 		// The playback bar (transport, slider, time and Step) needs this width on one row, with the pane border.
 		const PANE_VIDEO_MIN = 524;
 		const PANE_GRAPH_MIN = 360;
-		const PANE_DEFAULT_VIDEO_SHARE = 1.15 / 2.15;
+		const PANE_DEFAULT_VIDEO_SHARE = 0.5;
 		const PANE_KEY_STEP = 16;
 		const PANE_SNAP_DISTANCE = 16;
 
@@ -1551,7 +1551,7 @@
 			hidePickMode();
 			setMessage("Opening the video...");
 			hideCrossesToggle.setAttribute('aria-pressed', 'false');
-			hideCrossesToggle.querySelector('.toggle-text').textContent = 'Hide Marks';
+			hideCrossesToggle.setAttribute('aria-label', 'Hide marks');
 			resetGraphCopyStatus();
 			closeTouchGraphCopyActions();
 			specialRecordingCheckbox.checked = false;
@@ -2765,7 +2765,8 @@
 		function toggleCrossesVisibility() {
 			crossesVisible = !crossesVisible;
 			hideCrossesToggle.setAttribute('aria-pressed', String(!crossesVisible));
-			hideCrossesToggle.querySelector('.toggle-text').textContent = crossesVisible ? 'Hide Marks' : 'Show Marks';
+			// Pressed while the marks are hidden; the eye is then struck through.
+			hideCrossesToggle.setAttribute('aria-label', crossesVisible ? 'Hide marks' : 'Show marks');
 			drawFrame();
 		}
 
