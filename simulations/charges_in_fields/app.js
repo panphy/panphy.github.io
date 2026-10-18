@@ -1550,10 +1550,10 @@ viewer.addEventListener('keydown', event => {
 
 // ---------- Mode selection ----------
 const DEFAULT_READOUT = {
-  efield: 'PARALLEL PLATES · The top plate is positive, so the field points down. Choose a particle and press “Fire”, or tap a part.',
-  bfield: 'UNIFORM MAGNETIC FIELD · The arrows show the field: at 90° it points into the screen (away from you). Fire a particle from the source at the centre.',
-  selector: 'VELOCITY SELECTOR · An electric field (down) and a magnetic field (into the screen) between the same plates. Start the beam.',
-  cyclotron: 'CYCLOTRON · Two hollow dees between the poles of a magnet, with an alternating voltage across the gap. Inject a particle.'
+  efield: 'PARALLEL PLATES · The top plate is positive, so the field points down. Choose a particle and press “Fire”, then change one setting at a time and compare the tracks. Tap a part to find out what it does.',
+  bfield: 'UNIFORM MAGNETIC FIELD · At 90° the field points into the screen (away from you). Fire a particle from the source at the centre, then change the speed, the field or the particle. Set the field angle to 45° for a helix.',
+  selector: 'VELOCITY SELECTOR · An electric field (down) and a magnetic field (into the screen) between the same plates. Start the beam, then change the voltage or the field until a different colour passes.',
+  cyclotron: 'CYCLOTRON · Two hollow dees between the poles of a magnet, with an alternating voltage across the gap. Inject a particle, then compare a stronger field, a bigger gap voltage or a mistuned frequency.'
 };
 const LEGEND = {
   efield: ['efield', 'velocity', 'force'],
@@ -1598,7 +1598,6 @@ function selectMode(mode, animate = true) {
   buildControls();
   updateFireButton();
   document.querySelectorAll('[data-legend]').forEach(item => { item.hidden = !LEGEND[mode].includes(item.dataset.legend); });
-  $('action-hint').textContent = data.hint;
   readout.textContent = DEFAULT_READOUT[mode];
   for (const [id, key] of Object.entries({ 'scene-title': 'title', 'mode-date': 'date', 'mode-heading': 'heading', 'mode-level': 'level', description: 'description', look: 'look', evidence: 'evidence', deeper: 'deeper' })) $(id).textContent = data[key];
   document.querySelectorAll('.models [data-mode]').forEach(button => button.setAttribute('aria-pressed', String(button.dataset.mode === mode)));

@@ -11,7 +11,6 @@ export const MODELS = {
     description: 'Negative electrons are embedded in a spread of positive charge, like fruit in a pudding. There is no nucleus in this model.',
     look: 'Zoom inside the sphere. The blue electrons sit inside it, not on an outer shell, and can only vibrate about fixed places. The + marks show positive charge spread through the whole atom.',
     evidence: 'Some alpha particles bounced back in the gold-foil experiment. Spread-out positive charge could not explain these large deflections. Try “Fire alpha particles” to see what this model predicts.',
-    hint: 'Try “Fire alpha particles”, then compare with the Rutherford model.',
     positiveLabel: 'Positive charge (spread)'
   },
   rutherford: {
@@ -21,7 +20,6 @@ export const MODELS = {
     description: 'Positive charge and most of the mass are concentrated in a tiny central nucleus. Electrons are outside it. This model did not specify fixed electron energy levels.',
     look: 'Find the orange nucleus, then the blue electrons around it. The orbit lines show the paths used in this animation; Rutherford’s model did not specify them. The nucleus is hugely enlarged: a real one is about 1/100 000 of the atom’s width.',
     evidence: 'Most alpha particles passed straight through gold foil; a few turned sharply or bounced back. This supported a small, dense, positive nucleus. The nuclear model alone did not explain atoms’ discrete light spectra.',
-    hint: 'Fire alpha particles: most pass straight through, but a few bounce back.',
     positiveLabel: 'Nucleus (positive)'
   },
   bohr: {
@@ -31,7 +29,6 @@ export const MODELS = {
     description: 'Bohr added allowed energy levels around the nucleus. Our carbon-12 classroom adaptation has six protons, six neutrons and six electrons (2 in the first level, 4 in the second). Neutrons were discovered later, in 1932.',
     look: 'Follow the rings labelled n = 1 and n = 2. Each is an allowed energy level, not a solid track. Electrons in the outer level move more slowly. Press “Excite an electron” to watch a level change.',
     evidence: 'Bohr’s energy levels helped explain hydrogen’s line spectrum: electrons absorb or emit specific amounts of energy when changing levels. More complex atoms needed a later quantum model.',
-    hint: 'Tap a proton or neutron, or excite an electron and watch the energy diagram.',
     positiveLabel: 'Proton (positive)'
   },
   cloud: {
@@ -41,7 +38,6 @@ export const MODELS = {
     description: 'The modern quantum model keeps Bohr’s energy levels but drops fixed paths. It describes where an electron is likely to be found. Carbon’s six electrons fill the 1s, 2s and 2p orbitals.',
     look: 'Each dot marks a place where an electron could be found; denser regions are more likely. The flicker shows that the position is not fixed. Use “Inspect an orbital” to pick out each shape.',
     evidence: 'Bohr’s model worked for hydrogen but failed for atoms with more electrons. Quantum mechanics, which treats electrons as waves, predicted the spectra and chemistry of all atoms.',
-    hint: 'Inspect each orbital to compare the 1s, 2s and 2p shapes.',
     positiveLabel: 'Proton (positive)'
   }
 };

@@ -13,7 +13,6 @@ export const MODES = {
     look: 'Fire an electron, then a proton and an alpha particle. Which way does each bend, and why? Raise the voltage or bring the plates closer together and watch the spot on the screen move. Then fire a faster particle: does it bend more or less?',
     evidence: 'Look at the time-lapse dots: they stay evenly spaced across the screen but spread out more and more towards the plate. The horizontal velocity is constant and the vertical velocity grows steadily, as the graph shows. A faster particle spends less time between the plates, so it is deflected less.',
     deeper: 'Between the plates a = qV/(md), the time spent there is t = L/v and the sideways deflection is y = ½at² = qVL²/(2mdv²). The electric field does work on the particle, so its kinetic energy increases. This is how the beam in an old cathode-ray oscilloscope was steered.',
-    hint: 'Choose a particle and press “Fire”. Change one setting at a time and compare the tracks.'
   },
   bfield: {
     title: 'CHARGE IN A MAGNETIC FIELD',
@@ -24,7 +23,6 @@ export const MODES = {
     look: 'Fire a proton into the field (at 90° the field points into the screen). Watch the force arrow: it always points to the centre of the circle. Now try an electron: it circles the other way. Change the speed or the field and see how the radius changes. Then set the field angle to 45°: the field turns, and the path becomes a helix.',
     evidence: 'Faster particles make bigger circles, and stronger fields make smaller ones, because r = mv/(qB). The kinetic energy graph stays flat: a magnetic force does no work. Any velocity along the field is unaffected, which is why the particle spirals along the field lines: this traps charged particles in Earth’s magnetic field and makes the aurora.',
     deeper: 'Setting qvB = mv²/r gives r = mv/(qB). The time for one orbit, T = 2πm/(qB), does not depend on the speed: faster particles make bigger circles in the same time. This fact makes the cyclotron possible. For a helix only the perpendicular part of the velocity, v sin θ, sets the radius.',
-    hint: 'Fire a proton, then change the speed, the field or the particle. Set the field angle to 45° for a helix.'
   },
   selector: {
     title: 'VELOCITY SELECTOR',
@@ -35,7 +33,6 @@ export const MODES = {
     look: 'Start the beam: particles are coloured by speed, slow (blue) to fast (orange). Which colour passes through the slit? Change the voltage or the field and predict which speed will be selected. Try protons, then alpha particles: does the selected speed change?',
     evidence: 'The selected speed v = E/B does not depend on the charge or the mass, so every kind of particle with that speed passes. Velocity selectors are used at the start of mass spectrometers, so that every ion entering the magnetic field has the same speed.',
     deeper: 'Balance: qE = qvB, so v = E/B = V/(Bd). A particle that is a little too fast feels a larger magnetic force, so it curves towards the magnetic-force side; too slow and the electric force wins. The width of the slit sets how precise the selection is.',
-    hint: 'Start the beam, then change the voltage or the field until a different colour passes.'
   },
   cyclotron: {
     title: 'CYCLOTRON',
@@ -46,7 +43,6 @@ export const MODES = {
     look: 'Inject a proton and watch the spiral grow. The dees glow red (+) and blue (−) as the voltage alternates. Is every semicircle completed in the same time? Now switch off auto-tuning and change the frequency a little: the particle drifts out of step and stops gaining energy.',
     evidence: 'The time for half a turn, πm/(qB), does not depend on the speed, so a fixed-frequency voltage stays in step with the particle. Each crossing adds qV of kinetic energy, so a bigger gap voltage means fewer turns, but the final energy is set by the magnetic field and the radius of the dees.',
     deeper: 'The cyclotron frequency is f = qB/(2πm). At the edge, r = R, so v = qBR/m and the maximum kinetic energy is Eₖ = q²B²R²/(2m), whatever the gap voltage. At high speeds relativity makes the particle’s orbit period grow, so it falls out of step: synchrocyclotrons and synchrotrons solve this.',
-    hint: 'Inject a proton, then compare a stronger field, a bigger gap voltage, or a mistuned frequency.'
   }
 };
 

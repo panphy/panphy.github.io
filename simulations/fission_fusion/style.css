@@ -292,9 +292,8 @@ button:disabled { cursor: default; opacity: .55; }
 .view-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 8px; }
 .view-row button { min-height: 48px; padding: 8px 10px; border: 1px solid var(--input-border); border-radius: 12px; background: var(--card-bg); font-size: .85rem; font-weight: 700; }
 .view-row button:hover { border-color: var(--brand-accent); background: var(--muted-bg); }
-#action-hint { margin: -4px 0 0; color: var(--text-secondary); font-size: .8rem; line-height: 1.45; text-align: center; }
-/* Room for several lines, so a longer message does not push the settings around. */
-.particle-readout { margin: 0; min-height: calc(6.2em + 20px); padding: 10px 14px; border-radius: 12px; border-left: 3px solid var(--brand-accent); background: var(--muted-bg); color: var(--text-main); font: .78rem/1.55 var(--font-mono); }
+/* One message says what the model shows and what to try next. Room for five lines, so a longer message does not push the settings around. */
+.particle-readout { margin: 0; min-height: calc(7.75em + 20px); padding: 10px 14px; border-radius: 12px; border-left: 3px solid var(--brand-accent); background: var(--muted-bg); color: var(--text-main); font-size: .84rem; line-height: 1.55; }
 
 .sample-controls { display: flex; flex-direction: column; gap: 16px; }
 .sample-controls[hidden] { display: none; }

@@ -11,7 +11,6 @@ export const MODES = {
     description: 'Fission means splitting. When a uranium-235 nucleus absorbs a slow neutron it becomes uranium-236, which is unstable. It wobbles, stretches and splits into two smaller nuclei (here barium-141 and krypton-92) and releases 2 or 3 neutrons. The products have a little less mass than the uranium-236 nucleus; the missing mass has become about 170 MeV of energy, mostly the kinetic energy of the fragments.',
     look: 'Press “Fire a neutron”. Watch the neutron join the nucleus, the nucleus wobble and stretch, then split. Count the free neutrons that come out. Then read the equation: the top numbers and the bottom numbers both still add up.',
     evidence: 'The fission fragments fly apart and collide with the atoms around them, heating the fuel: this is the energy a nuclear power station uses. The new neutrons can split other nuclei, which is a chain reaction (next tab). Barium and krypton is only one of many ways uranium can split.',
-    hint: 'Fire a neutron, then click a nucleon to see which nucleus it belongs to.'
   },
   chain: {
     title: 'CHAIN REACTION',
@@ -20,7 +19,6 @@ export const MODES = {
     description: 'Each fission releases 2 or 3 neutrons. If, on average, more than one of them goes on to cause another fission, the reaction grows very fast: a chain reaction. Only uranium-235 splits. Uranium-238 (most of natural uranium) absorbs neutrons without splitting, and control rods absorb them too. Fuel nuclei are drawn as plain spheres here; each one splits as in the Fission tab.',
     look: 'Press “Start chain reaction” to fire a burst of neutrons at the block. Watch the fission rate in the graph, then push control rods in one at a time to hold the reaction steady. Try less enriched fuel and see the reaction die away.',
     evidence: 'In a reactor the control rods are set so that, on average, exactly 1 neutron from each fission causes another fission: steady power. In a bomb nothing absorbs the neutrons, and the number of fissions doubles many times in a fraction of a second. Neutrons that escape through the surface are lost, which is why a small lump of fuel cannot sustain a chain reaction.',
-    hint: 'Start the reaction, then change the number of control rods and watch k in the graph panel.'
   },
   fusion: {
     title: 'NUCLEAR FUSION',
@@ -29,7 +27,6 @@ export const MODES = {
     description: 'Fusion means joining. Two isotopes of hydrogen, deuterium (1 proton + 1 neutron) and tritium (1 proton + 2 neutrons), can fuse into helium-4 and a fast neutron, releasing 17.6 MeV. Both nuclei are positively charged, so they repel each other. They must move extremely fast, which means the gas must be extremely hot, to get close enough for the strong nuclear force to take over.',
     look: 'Choose a temperature and press “Collide the nuclei”. If it is too cool they slow down, stop and bounce back: watch the energy graph, where the kinetic energy runs out before the top of the barrier. Raise the temperature in steps until they fuse.',
     evidence: 'Stars are fusion reactors: gravity squeezes and heats their cores. On Earth, reactors such as tokamaks hold the very hot gas (a plasma) in magnetic fields, because no solid container could survive it. The fuel is plentiful and the helium product is not radioactive, but getting more energy out than is put in is still a huge engineering challenge.',
-    hint: 'Try 50 million °C first, then step the temperature up by 10 until the nuclei fuse.'
   },
   energy: {
     title: 'BINDING ENERGY',
@@ -38,7 +35,6 @@ export const MODES = {
     description: 'Binding energy per nucleon shows how tightly a nucleus is held together. The curve rises steeply for light nuclei, peaks near iron-56 and falls slowly for heavy nuclei. Moving up the curve means the nucleons end up more tightly bound, and the difference is released as energy. Heavy nuclei split to climb the curve from the right; light nuclei fuse to climb it from the left.',
     look: 'Choose a reaction and watch the arrows: where do the nuclei start and where do they end up? Compare the energy per reaction, per nucleon and per kilogram of fuel. Click a nucleus on the curve to read its binding energy.',
     evidence: 'Fusion climbs a much steeper part of the curve, so it releases more energy per nucleon: about 3.5 MeV per nucleon for deuterium–tritium fusion, against about 0.7 MeV per nucleon for uranium fission. That is roughly five times more energy per kilogram of fuel. Nuclei at the peak, near iron, cannot release energy by fission or by fusion.',
-    hint: 'Switch between the two reactions and compare the last row of numbers.'
   }
 };
 

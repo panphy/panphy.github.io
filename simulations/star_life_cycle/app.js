@@ -1092,9 +1092,10 @@ function resetCamera() {
   controls.target.set(0, 0, 0);
   controls.update();
 }
-// Reset is a full reset: stop, go back to the start and restore the default view.
+// Reset is a full reset: stop, go back to the Sun's first stage and restore the default view.
 $('reset').addEventListener('click', () => {
   setPlaying(false);
+  setMass(1);
   state.speed = 1;
   document.querySelectorAll('.speed button').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.speed === '1')));
   state.cutaway = false;
