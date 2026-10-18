@@ -193,7 +193,6 @@ code {
 }
 
 .neo-button:hover,
-.clear-fit-button:hover,
 .advanced-fit-reset-btn:hover,
 #custom-fit-formula-help:hover,
 .neo-dialog-cancel:hover,
@@ -233,12 +232,14 @@ code {
 	stroke: none;
 }
 
+/* Clear Fit takes the toolbar Clear button's danger colour. */
+.clear-fit-button,
 .clear-fit-button .neo-fit-icon {
-	color: var(--ink-2);
+	color: var(--danger);
 }
 
-.clear-fit-button:hover .neo-fit-icon {
-	color: var(--ink);
+.clear-fit-button:hover {
+	background: var(--danger-soft);
 }
 
 select,
