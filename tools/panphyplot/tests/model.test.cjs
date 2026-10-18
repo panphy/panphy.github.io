@@ -318,7 +318,7 @@ test('Clear keeps the columns; Reset returns to a blank x, y sheet', () => {
 	const id = sheet.id;
 	model.resetSheet(sheet, ids);
 	assert.equal(sheet.id, id);
-	assert.equal(sheet.name, 'Pendulum');
+	assert.equal(sheet.name, '');
 	assert.deepEqual(sheet.columns.map(column => [column.name, column.role]), [['x', 'X'], ['y', 'Y']]);
 	assert.deepEqual(sheet.hiddenSeries, []);
 	assert.equal(sheet.title.automatic, true);

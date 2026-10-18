@@ -178,9 +178,10 @@
 		setRowCount(sheet, DEFAULT_ROWS);
 	}
 
-	// Back to a new sheet's two columns, x (X) and y (Y), keeping only the sheet's id and name.
+	// Back to a new sheet: two columns, x (X) and y (Y), and no name. Only the sheet's id is kept.
 	function resetSheet(sheet, ids) {
-		const fresh = createSheet(ids, sheet.name);
+		const fresh = createSheet(ids, '');
+		sheet.name = fresh.name;
 		sheet.rowCount = fresh.rowCount;
 		sheet.columns = fresh.columns;
 		sheet.title = fresh.title;
