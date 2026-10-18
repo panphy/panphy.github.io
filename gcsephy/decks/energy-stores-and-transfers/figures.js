@@ -441,7 +441,7 @@ window.DeckSvgTex = {
       <path class="dk-guide" d="M400 180L590 36"/>
       <path class="dk-fit" d="M110 400L400 180C470 127 560 110 710 90"/>
       <circle class="dk-dot" cx="400" cy="180" r="9"/>
-      <path class="dk-guide" d="M412 188L458 236"/>
+      ${F.arrow(458, 236, 410, 188, 'thin', 8)}
       ${t(225, 230, 'F = ke', 'dk-big')}${t(525, 270, 'limit of', 'dk-big')}${t(525, 308, 'proportionality', 'dk-big')}
     </svg>`;
   }
@@ -493,7 +493,9 @@ window.DeckSvgTex = {
     sankeyLed: () => F.sankey({ blend: true, input: 100, useful: 40, wasted: 60, s: 1.6, useLabel: 'by light', wasteLabel: 'heating the room' }),
     sankeyLesson: () => F.sankey({ blend: true, input: 100, useful: 20, wasted: 80, s: 1.6, useLabel: 'by light', wasteLabel: 'heating the room' }),
     twoGraphs, springLimit, coolingChart, story: () => F.storyStrip(),
-    coverArt: () => F.coverArt().replace('</svg>', `<g aria-label="The ball is moving to the right">${F.arrow(316, 166, 354, 166, '', 10)}</g></svg>`),
+    coverArt: () => F.coverArt()
+      .replace('viewBox="0 0 600 200"', 'viewBox="0 0 600 220"')
+      .replace('</svg>', `<g aria-label="The ball is moving to the right">${F.arrow(281, 208, 319, 208, '', 10)}</g></svg>`),
   };
   const WIDGETS = { ramp: h => swing(h, 'ramp'), pendulum: h => swing(h, 'pendulum'), kinetic, springLab, elastic, motors, lift, bounce, rods: rodsLab };
 
