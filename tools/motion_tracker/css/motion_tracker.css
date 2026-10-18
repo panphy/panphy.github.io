@@ -46,9 +46,9 @@
   --radius-sm: 9px;
   --appbar-h: 56px;
 
-  /* Series colours: x is blue and y is pink in the graph, the legend dots and the table. */
-  --series-x: #2E9CFF;
-  --series-y: #E85BE1;
+  /* Series colours: PanPhyPlot's first two data colours (x blue, y red), so exported data looks the same there. */
+  --series-x: #4E79A7;
+  --series-y: #E15759;
 
   /* Read by the scripts for the graph and the video overlay, and by the shared
      theme and fullscreen buttons (--brand-primary, --brand-accent). */
@@ -93,8 +93,8 @@
   --shadow-1: 0 1px 2px rgba(0, 0, 0, 0.4), 0 2px 10px rgba(0, 0, 0, 0.25);
   --shadow-2: 0 16px 44px rgba(0, 0, 0, 0.55);
 
-  --series-x: #4AA8FF;
-  --series-y: #F07AEA;
+  --series-x: #7CB5EC;
+  --series-y: #F48183;
   --chart-grid: rgba(232, 235, 237, 0.1);
   --chart-axis: rgba(232, 235, 237, 0.7);
   --chart-text: rgba(232, 235, 237, 0.88);

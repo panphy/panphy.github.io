@@ -149,7 +149,8 @@
 				</div>
 				</div>
 				<div class="mt-tool-spacer"></div>
-				<button type="button" id="exportData" class="mt-tool" disabled title="Save positions and velocities as a CSV file for a spreadsheet or PanPhyPlot"><svg class="mt-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3.5v11M7.5 10l4.5 4.5 4.5-4.5M4.5 15.5v3a2 2 0 0 0 2 2h11a2 2 0 0 0 2-2v-3"/></svg><span>Export CSV</span></button>
+				<button type="button" id="exportData" class="mt-tool" disabled title="Save positions and velocities as a CSV file for a spreadsheet"><svg class="mt-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3.5v11M7.5 10l4.5 4.5 4.5-4.5M4.5 15.5v3a2 2 0 0 0 2 2h11a2 2 0 0 0 2-2v-3"/></svg><span>Export CSV</span></button>
+				<button type="button" id="exportPanPhyPlot" class="mt-tool" disabled title="Open positions and smoothed velocities in PanPhyPlot, in a new tab, to plot and fit them"><svg class="mt-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M13.5 4.5h6v6M19.5 4.5l-8 8M17.5 13.5v4a2 2 0 0 1-2 2h-9a2 2 0 0 1-2-2v-9a2 2 0 0 1 2-2h4"/></svg><span>Export to PanPhyPlot</span></button>
 			</div>
 			<div class="graph-body">
 				<div id="graphView" class="graph-view" role="tabpanel" aria-labelledby="showGraph">
@@ -255,7 +256,7 @@
 				<li><span><strong>Scale:</strong> drag along the object of known length and type its length. Without a scale, positions are in pixels.</span></li>
 				<li><span><strong>Origin:</strong> click where x and y should be zero. Otherwise the origin is the bottom-left corner.</span></li>
 				<li><span><strong>Mark the object.</strong> Click its centre; the video moves on by the step, ready for the next mark. Clicking a frame that already has a mark replaces it.</span></li>
-				<li><span><strong>Read the results.</strong> Switch between position and velocity, edit marks in the Table, and export a CSV. Velocity needs at least four marks.</span></li>
+				<li><span><strong>Read the results.</strong> Switch between position and velocity, edit marks in the Table, and export a CSV or send the data to PanPhyPlot. Velocity needs at least four marks.</span></li>
 			</ol>
 			<p class="guide-subhead">Keyboard</p>
 			<dl class="guide-keys">
@@ -278,7 +279,7 @@
 		let detectedFps = null;  // Auto-detected FPS from video
 		let isSpecialRecording = false;  // Whether user has slow-mo/time-lapse video
 		let fpsDetectionPending = false;  // Whether FPS detection is in progress
-		const dataPointColors = { x: '#2e9cff', y: '#e85be1', vx: '#2e9cff', vy: '#e85be1' };
+		const dataPointColors = { x: '#4e79a7', y: '#e15759', vx: '#4e79a7', vy: '#e15759' };
 		let frameData = [];
 		let isPlaying = false;
 		let positionChart = null;
@@ -341,8 +342,8 @@
 		}
 
 		function refreshSeriesColors() {
-			const x = getCssVar('--series-x') || '#2e9cff';
-			const y = getCssVar('--series-y') || '#e85be1';
+			const x = getCssVar('--series-x') || '#4e79a7';
+			const y = getCssVar('--series-y') || '#e15759';
 			Object.assign(dataPointColors, { x, y, vx: x, vy: y });
 		}
 
@@ -378,6 +379,7 @@
 		const calibrateButton = document.getElementById('calibrate');
 		const setOriginButton = document.getElementById('setOrigin');
 		const exportDataButton = document.getElementById('exportData');
+		const exportPanPhyPlotButton = document.getElementById('exportPanPhyPlot');
 		const clearButton = document.getElementById('clearButton');
 		const clearMenu = document.getElementById('clearMenu');
 		const clearDataPointsButton = document.getElementById('clearDataPoints');
@@ -903,6 +905,7 @@
 			clearCalibrationButton.disabled = !ready || !isCalibrated();
 			clearOriginButton.disabled = !ready || !originSet;
 			exportDataButton.disabled = !ready || count === 0;
+			exportPanPhyPlotButton.disabled = !ready || count === 0;
 			undoPointButton.disabled = !ready || undoHistory.length === 0;
 		}
 
@@ -1707,6 +1710,12 @@
 			setMessage(`Data exported as ${finalName}.`);
 		});
 		cancelExportButton.addEventListener("click", () => closeDialog(exportPrompt));
+		// Opens the tab straight from the click, with no dialog first, so that pop-up blockers allow it.
+		exportPanPhyPlotButton.addEventListener("click", () => {
+			if (frameData.length === 0) { setMessage("Mark the object first: there is no data to export yet."); return; }
+			const tab = window.open(getPanPhyPlotUrl(), '_blank');
+			setMessage(tab === null ? "The browser blocked the new tab. Allow pop-ups for this site, then try again." : "Data sent to PanPhyPlot in a new tab.");
+		});
 
 		function rememberPoints() {
 			undoHistory.push(frameData.map(p => ({ ...p })));
@@ -1855,6 +1864,11 @@
 			return { raw, smoothed };
 		}
 
+		// Positions measured from the origin, in the scale's unit; shared by the CSV and PanPhyPlot exports.
+		function getPositionData() {
+			return frameData.map(p => ({ time: getAnalysisTime(p.playbackTime), x: (p.x - (originSet ? originPoint.x : 0)) * scaleFactor, y: (p.y - (originSet ? originPoint.y : 0)) * scaleFactor }));
+		}
+
 		function downloadFile(filename, text, type) {
 			const url = URL.createObjectURL(new Blob([text], { type }));
 			const a = document.createElement('a');
@@ -1864,13 +1878,37 @@
 
 		function exportCSV(filename) {
 			const { raw, smoothed } = getVelocityData();
+			const positions = getPositionData();
 			const rows = [[ 'Position time (s)', `x (${scaleUnit})`, `y (${scaleUnit})`, 'Raw velocity time (s)', `Raw vx (${scaleUnit}/s)`, `Raw vy (${scaleUnit}/s)`, 'Smoothed velocity time (s)', `Smoothed vx (${scaleUnit}/s)`, `Smoothed vy (${scaleUnit}/s)` ]];
-			frameData.forEach((p, i) => {
-				rows.push([getAnalysisTime(p.playbackTime), (p.x - (originSet ? originPoint.x : 0)) * scaleFactor, (p.y - (originSet ? originPoint.y : 0)) * scaleFactor,
+			positions.forEach((p, i) => {
+				rows.push([p.time, p.x, p.y,
 					raw[i]?.time ?? '', raw[i]?.x ?? '', raw[i]?.y ?? '', smoothed[i]?.time ?? '', smoothed[i]?.x ?? '', smoothed[i]?.y ?? '']);
 			});
 			const escape = value => '"' + String(value).replaceAll('"', '""') + '"';
 			downloadFile(filename, rows.map(row => row.map(escape).join(',')).join('\n') + '\n', 'text/csv;charset=utf-8;');
+		}
+
+		// PanPhyPlot reads the data from the link's hash, which never reaches the server; it works even where
+		// the new tab has separate storage, as from a home-screen app. A Y column plots against the nearest X
+		// column to its left, so the velocities, at midpoint times, get their own time column. They are the
+		// smoothed values the graph shows, and start hidden so that the first graph is position-time.
+		function getPanPhyPlotUrl() {
+			const positions = getPositionData();
+			const { smoothed } = getVelocityData();
+			const value = number => Number(number.toPrecision(6));
+			const unit = scaleUnit === 'pixels' ? 'px' : scaleUnit;
+			const payload = {
+				name: 'Motion Tracker',
+				columns: [
+					{ name: 't', unit: 's', role: 'X', cells: positions.map(p => value(p.time)) },
+					{ name: 'x', unit, role: 'Y', cells: positions.map(p => value(p.x)) },
+					{ name: 'y', unit, role: 'Y', cells: positions.map(p => value(p.y)) },
+					{ name: 't', unit: 's', role: 'X', cells: smoothed.map(p => value(p.time)) },
+					{ name: 'vx', unit: `${unit}/s`, role: 'Y', hidden: true, cells: smoothed.map(p => value(p.x)) },
+					{ name: 'vy', unit: `${unit}/s`, role: 'Y', hidden: true, cells: smoothed.map(p => value(p.y)) }
+				]
+			};
+			return '/tools/panphyplot.html#import=' + encodeURIComponent(JSON.stringify(payload));
 		}
 
 		/* Drawing */

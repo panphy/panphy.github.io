@@ -65,5 +65,6 @@ document.addEventListener('DOMContentLoaded', () => {
 		}
 	};
 	drawWhenReady();
+	importLinkedData();
 	offerOriginalImport();
 });
