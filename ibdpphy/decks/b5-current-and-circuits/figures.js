@@ -90,13 +90,15 @@ window.DeckFigures.add(P => {
       return svg('30 10 1300 480', s, 'Fifteen circuit symbols: cell, battery, switch, resistor, variable resistor, potentiometer, thermistor, light-dependent resistor, lamp, heating element, ammeter, voltmeter, light-emitting diode, motor and earth');
     },
 
-    // Current against potential difference. data-kind: ohmic or lamp. Also drawn plain.
+    // Current against potential difference. data-kind: ohmic or lamp. Keep the axis labels
+    // in plain copies too, including the small comparison graphs on the Ohm's law slide.
     'b5-iv': el => {
       const on = labelled(el), lamp = el.dataset.kind === 'lamp', cx = 430, cy = 250;
       const curve = lamp ? sampled(t => { const v = -1 + 2 * t; return [cx + 300 * v, cy - 190 * Math.tanh(1.9 * v) / Math.tanh(1.9)]; }, 80) : `M${cx - 300},${cy + 190} L${cx + 300},${cy - 190}`;
       let s = arrow(90, cy, 800, cy, 'text-secondary', 2.5) + arrow(cx, 470, cx, 30, 'text-secondary', 2.5) + line(curve, 'brand-primary', 6);
-      if (on) s += text(cx + 16, 46, 'I', 'lbl display', 'start') + text(794, cy + 44, 'V', 'lbl display', 'end') + (lamp ? text(600, 120, 'hot filament:', 'lbl halo', 'start') + text(600, 154, 'higher resistance', 'lbl strong halo', 'start') : text(590, 200, 'straight, through', 'lbl halo', 'start') + text(590, 234, 'the origin', 'lbl strong halo', 'start'));
-      return svg(on ? '70 10 760 480' : '90 30 720 440', s, lamp ? 'A graph of current against potential difference for a filament lamp. It passes through the origin but curves over at larger potential differences in both directions: the current rises less and less steeply as the filament heats up' : 'A graph of current against potential difference for an ohmic conductor: a straight line through the origin, in both directions');
+      s += text(cx + 22, 64, 'I', 'lbl display', 'start', 'style="font-size:48px"') + text(794, cy + 60, 'V', 'lbl display', 'end', 'style="font-size:48px"');
+      if (on) s += lamp ? text(600, 120, 'hot filament:', 'lbl halo', 'start') + text(600, 154, 'higher resistance', 'lbl strong halo', 'start') : text(590, 200, 'straight, through', 'lbl halo', 'start') + text(590, 234, 'the origin', 'lbl strong halo', 'start');
+      return svg('70 10 760 480', s, lamp ? 'A graph of current against potential difference for a filament lamp. It passes through the origin but curves over at larger potential differences in both directions: the current rises less and less steeply as the filament heats up' : 'A graph of current against potential difference for an ohmic conductor: a straight line through the origin, in both directions');
     },
 
     // Resistors in series and in parallel. data-kind: series, parallel or combo (the worked example). Also drawn plain.

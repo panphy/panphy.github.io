@@ -96,9 +96,16 @@ window.DeckFigures.add(P => {
     // A gas released into the empty half of a box: its atoms never stop moving. Played with →.
     'b4-expand': () => {
       const frame = `<rect x="90" y="90" width="600" height="300" rx="8" style="fill:none;stroke:var(--text-secondary);stroke-width:5"/>`;
-      const box = gas(96, 96, 290, 288, 36, 5, { grow: 588 / 290, dur: 3, r: 9, tint: false });
-      const still = box.still + `<line x1="390" y1="90" x2="390" y2="390" class="guide"/>`;
-      const mover = box.mover + `<line x1="390" y1="92" x2="390" y2="388" style="stroke:var(--text-secondary);stroke-width:5">${anim('opacity', [1, 0], 0.4, once)}</line>` + PLAY;
+      const rand = seeded(5);
+      const atoms = Array.from({ length: 36 }, () => {
+        const x = 105 + rand() * 272, y = 105 + rand() * 270;
+        const vx = (65 + rand() * 85) * (rand() < 0.5 ? -1 : 1), vy = (45 + rand() * 75) * (rand() < 0.5 ? -1 : 1);
+        return `<circle cx="${f(x)}" cy="${f(y)}" r="9" data-x="${f(x)}" data-y="${f(y)}" data-vx="${f(vx)}" data-vy="${f(vy)}" style="fill:var(--brand-primary)"/>`;
+      }).join('');
+      const still = gas(96, 96, 588, 288, 36, 5, { r: 9, tint: false }).still + `<line x1="390" y1="90" x2="390" y2="390" class="guide"/>`;
+      // Free expansion changes the collision boundary instantly; stretching gas() would act
+      // like a moving piston. Keep each atom's position and velocity when the barrier goes.
+      const mover = `<g data-free-gas>${atoms}</g><line x1="390" y1="92" x2="390" y2="388" style="stroke:var(--text-secondary);stroke-width:5"><set attributeName="opacity" to="0" begin="indefinite" fill="freeze"/></line>` + PLAY;
       return svg('60 60 660 420', frame + twoState(still, mover) + text(390, 440, 'It never goes back by itself', 'lbl strong'), 'A box with a partition down the middle and all the gas molecules, always moving, in the left half. When the partition is removed the molecules spread out to fill the whole box, and they never gather in one half again by themselves');
     },
 
@@ -144,3 +151,36 @@ window.DeckFigures.add(P => {
     }
   };
 });
+
+// Move the free-expansion atoms in fixed coordinates. The deck replaces the figure when its
+// PLAY step is undone; use the saved starting coordinates because that copy's cx/cy may
+// already have moved. Print and reduced motion have no data-free-gas group to animate.
+(() => {
+  const states = new WeakMap();
+  function frame(now) {
+    requestAnimationFrame(frame);
+    document.querySelectorAll('#deck .slide.active [data-free-gas]').forEach(group => {
+      if (!states.has(group)) states.set(group, {
+        time: now,
+        atoms: [...group.querySelectorAll('circle')].map(node => ({
+          node, x: Number(node.dataset.x), y: Number(node.dataset.y),
+          vx: Number(node.dataset.vx), vy: Number(node.dataset.vy)
+        }))
+      });
+      const state = states.get(group), dt = Math.min((now - state.time) / 1000, 0.05);
+      state.time = now;
+      const right = group.closest('svg').querySelector('.step.play.shown') ? 675 : 377;
+      state.atoms.forEach(atom => {
+        atom.x += atom.vx * dt;
+        atom.y += atom.vy * dt;
+        if (atom.x < 105) { atom.x = 210 - atom.x; atom.vx = Math.abs(atom.vx); }
+        if (atom.x > right) { atom.x = 2 * right - atom.x; atom.vx = -Math.abs(atom.vx); }
+        if (atom.y < 105) { atom.y = 210 - atom.y; atom.vy = Math.abs(atom.vy); }
+        if (atom.y > 375) { atom.y = 750 - atom.y; atom.vy = -Math.abs(atom.vy); }
+        atom.node.setAttribute('cx', atom.x.toFixed(2));
+        atom.node.setAttribute('cy', atom.y.toFixed(2));
+      });
+    });
+  }
+  requestAnimationFrame(frame);
+})();
