@@ -13,7 +13,7 @@ test('FPS selects closest standard rate and cancels callbacks', () => {
     for (const rate of [24, 25, 29.97, 30, 59.94, 60, 120, 240]) {
         let callback, detected;
         const c = context({ hiddenVideo: { playbackRate: 1, requestVideoFrameCallback: fn => (callback = fn, 1), cancelVideoFrameCallback() {}, currentTime: 0, play: () => ({ then: () => ({ catch() {} }) }), pause() {} },
-            console: {log() {}}, cancelFpsDetection() {}, disableControls() {}, detectedFpsDisplay: {}, frameRateButton: {}, fpsDetectionPending: false, isPlaying: false,
+            console: {log() {}}, cancelFpsDetection() {}, disableControls() {}, detectedFpsDisplay: {}, fpsLabel: {}, fpsDetectionPending: false, isPlaying: false,
             setTimeout: () => 1, clearTimeout() {}, applyDetectedFps: fps => detected = fps });
         vm.runInContext(extract('function detectFrameRate()', 'function applyDetectedFps('), c);
         vm.runInContext('detectFrameRate()', c);
@@ -47,14 +47,14 @@ test('normal analysis time preserves precision; slow motion scales time', () => 
 });
 test('starting calibration cancels origin selection', () => {
     let click;
-    const c = context({calibrateButton:{addEventListener:(_type,fn)=>click=fn},originMode:true,hiddenVideo:{pause(){}},isPlaying:true,playPauseButton:{},document:{getElementById:()=>({style:{}})},overlayCanvas:{style:{}},frameCanvas:{style:{}}});
+    const c = context({calibrateButton:{addEventListener:(_type,fn)=>click=fn},originMode:true,calibrationMode:false,calibrationStart:null,calibrationEnd:null,pauseVideo(){},showPickMode(){},cancelPickMode(){},overlayCanvas:{style:{}}});
     vm.runInContext(extract("calibrateButton.addEventListener('click'",'function startCalibrationDraw('),c);
     click(); assert.equal(c.originMode,false); assert.equal(c.calibrationMode,true);
 });
 test('insufficient velocity points produces empty velocity graph', () => {
     const axis=()=>({title:{},grid:{},ticks:{}});
     const c=context({currentPlotMode:'pos',getVelocityData:()=>({smoothed:[]}),document:{getElementById:()=>({})},dataPointColors:{vx:'blue',vy:'red'},scaleUnit:'m',positionChart:{data:{datasets:[]},options:{scales:{x:axis(),y:axis()}},update(){}},applyThemeToChart(){},updateActivePlotButton(){}});
-    vm.runInContext(extract('function plotVelocity(mode)', 'plotXButton.addEventListener'),c);
+    vm.runInContext(extract('function plotVelocity(mode)', '/* Plot controls */'),c);
     vm.runInContext("plotVelocity('x')",c);
     assert.equal(c.currentPlotMode,'vx'); assert.equal(c.positionChart.data.datasets[0].data.length,0);
     assert.equal(c.positionChart.options.scales.y.title.text,'Velocity (m/s)');

@@ -4,1056 +4,272 @@
 <head>
 	<meta charset="UTF-8" />
 	<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-    <meta name="theme-color" content="#F8F6F1">
-    <script src="/assets/theme.js" data-legacy-dark="motion-tracker-dark" data-legacy-light="motion-tracker-light"></script>
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="default">
-    <link rel="stylesheet" href="/assets/standalone-top.css">
+	<meta name="theme-color" content="#F8F6F1">
+	<script src="/assets/theme.js" data-legacy-dark="motion-tracker-dark" data-legacy-light="motion-tracker-light"></script>
+	<meta name="apple-mobile-web-app-capable" content="yes">
+	<meta name="apple-mobile-web-app-status-bar-style" content="default">
+	<link rel="stylesheet" href="/assets/standalone-top.css">
 	<title>Motion Tracker</title>
 	<link rel="icon" type="image/png" href="/assets/favicon.png">
-    <script src="/assets/sw-register.js" defer></script>
-<script src="https://cdn.jsdelivr.net/npm/chart.js@4.5.1/dist/chart.umd.min.js"></script>
-	<style>
-		@import url('/assets/fonts/fonts.css');
-
-		:root {
-			color-scheme: light;
-			--font-sans: 'Manrope', sans-serif;
-			--font-display: 'DM Serif Display', serif;
-			--font-mono: 'IBM Plex Mono', monospace;
-
-			--bg-color: #F8F6F1;
-			--bg-pattern: #EDE9E0;
-			--text-main: #1B1B1B;
-			--text-muted: #6B6560;
-
-			--brand-primary: #C2410C;
-			--brand-secondary: #EA580C;
-			--brand-accent: #0D9488;
-
-			--surface: #ffffff;
-			--surface-muted: #F0ECE4;
-			--surface-strong: #1B1B1B;
-			--border-color: rgba(27, 27, 27, 0.10);
-			--shadow: 0 12px 30px rgba(0, 0, 0, 0.06);
-			--border-radius: 12px;
-
-			--primary: #C2410C;
-			--primary-hover: #A93B0B;
-			--danger: #B91C1C;
-			--warning: #F59E0B;
-			--success: #2D8C5F;
-
-			--nav-bg: rgba(248, 246, 241, 0.92);
-			--nav-border: #E8E4DD;
-
-			--chart-grid: rgba(27, 27, 27, 0.15);
-			--chart-axis: rgba(27, 27, 27, 0.85);
-			--chart-text: rgba(27, 27, 27, 0.9);
-			--overlay-axis: rgba(255, 255, 255, 0.9);
-			--overlay-shadow: rgba(0, 0, 0, 0.35);
-			--copy-hint-outline: #93c5fd;
-			--copy-hint-chip-bg: #e0f2fe;
-			--copy-hint-text: #1e3a8a;
-		}
-
-		[data-theme="dark"] {
-			color-scheme: dark;
-			--bg-color: #111110;
-			--bg-pattern: #1A1A18;
-			--text-main: #EDEBE8;
-			--text-muted: #9C9890;
-
-			--brand-primary: #FB923C;
-			--brand-secondary: #C2410C;
-			--brand-accent: #5EEAD4;
-
-			--surface: #1A1A19;
-			--surface-muted: #252523;
-			--surface-strong: #0D0D0C;
-			--border-color: rgba(255, 255, 255, 0.08);
-			--shadow: 0 18px 40px rgba(0, 0, 0, 0.35);
-
-			--primary: #FB923C;
-			--primary-hover: #F97316;
-			--danger: #EF4444;
-			--warning: #F59E0B;
-			--success: #34D399;
-
-			--nav-bg: rgba(17, 17, 16, 0.92);
-			--nav-border: rgba(255, 255, 255, 0.06);
-
-			--chart-grid: rgba(237, 235, 232, 0.14);
-			--chart-axis: rgba(237, 235, 232, 0.88);
-			--chart-text: rgba(237, 235, 232, 0.9);
-			--overlay-axis: rgba(255, 255, 255, 0.75);
-			--overlay-shadow: rgba(0, 0, 0, 0.7);
-			--copy-hint-outline: #7dd3fc;
-			--copy-hint-chip-bg: #e0f2fe;
-			--copy-hint-text: #1e3a8a;
-		}
-
-		* {
-			box-sizing: border-box;
-			transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease, transform 0.2s ease;
-		}
-
-		body {
-			font-family: var(--font-sans);
-			margin: 0;
-			background-color: var(--bg-color);
-			background-image: radial-gradient(var(--bg-pattern) 1px, transparent 1px);
-			background-size: 30px 30px;
-			color: var(--text-main);
-			line-height: 1.6;
-		}
-
-		/* --- Header --- */
-		header.banner {
-			display: flex;
-			align-items: center;
-			justify-content: space-between;
-			gap: 16px;
-			padding: 8px 20px;
-			margin: 16px auto 0;
-			width: min(1160px, calc(100% - 40px));
-			background: var(--nav-bg);
-			border: 1px solid var(--nav-border);
-			border-radius: 20px;
-			backdrop-filter: blur(12px);
-			-webkit-backdrop-filter: blur(12px);
-			box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
-		}
-
-		a {
-			color: var(--brand-primary);
-			text-decoration: none;
-		}
-
-		a:hover {
-			color: var(--brand-secondary);
-			text-decoration: underline;
-		}
-
-		a:visited {
-			color: var(--brand-primary);
-		}
-
-		.banner-logo {
-			display: flex;
-			align-items: center;
-			gap: 10px;
-		}
-
-		.banner-logo img {
-			height: 36px;
-			width: auto;
-			filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.1));
-		}
-
-		.banner-title {
-			font-family: var(--font-display);
-			font-size: 1.6rem;
-			font-weight: 800;
-			text-align: center;
-			flex: 1;
-			letter-spacing: -0.5px;
-			color: var(--brand-primary);
-		}
-
-		.banner-title.gradient-text {
-			background: linear-gradient(135deg, var(--brand-primary), var(--brand-accent));
-			-webkit-background-clip: text;
-			background-clip: text;
-			-webkit-text-fill-color: transparent;
-		}
-
-		.banner-actions {
-			display: flex;
-			align-items: center;
-			gap: 12px;
-		}
-
-		.theme-toggle button {
-			background: transparent;
-			border: none;
-			cursor: pointer;
-			font-size: 1.2rem;
-			padding: 0.5rem;
-			border-radius: 50%;
-			display: inline-flex;
-			align-items: center;
-			justify-content: center;
-			color: var(--text-main);
-			min-width: 42px;
-			min-height: 42px;
-			line-height: 1;
-			transition: transform 0.2s ease, background-color 0.2s ease;
-		}
-
-		.theme-toggle button:hover {
-			background-color: rgba(194, 65, 12, 0.15);
-			transform: rotate(15deg);
-		}
-
-		.toolbar-divider {
-			width: 1px;
-			height: 30px;
-			background: var(--border-color);
-			margin: 0 8px;
-		}
-
-		.frame-rate-button {
-			font-size: 0.8rem;
-			padding: 4px 8px;
-			background: var(--surface-muted);
-			color: var(--text-main);
-			border: 1px solid var(--border-color);
-		}
-
-		/* --- Main Toolbar (File & Data Ops) --- */
-		.toolbar {
-			display: flex;
-			gap: 8px;
-			padding: 16px;
-			max-width: 1200px;
-			margin: 0 auto;
-			flex-wrap: wrap;
-			justify-content: center;
-			align-items: center;
-			background: transparent;
-			border-radius: var(--border-radius);
-			box-shadow: none;
-			border: 1px solid transparent;
-			margin-top: 24px;
-		}
-
-		/* --- Buttons --- */
-		button {
-			padding: 8px 16px;
-			border-radius: var(--border-radius);
-			border: 1px solid transparent;
-			font-weight: 600;
-			cursor: pointer;
-			font-size: 0.9rem;
-			transition: all 0.2s;
-			background: var(--surface);
-			color: var(--text-main);
-			border-color: var(--border-color);
-			box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
-		}
-
-		button:hover:not(:disabled) {
-			transform: translateY(-1px);
-			box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-			filter: brightness(95%);
-		}
-
-		button:disabled {
-			opacity: 0.5;
-			cursor: not-allowed;
-			background: var(--surface-muted);
-			border-color: var(--border-color);
-			color: var(--text-muted);
-			box-shadow: none;
-			transform: none;
-		}
-
-		/* Button Variants */
-		.btn-primary {
-			background: var(--primary);
-			color: white;
-			border: none;
-		}
-
-		.btn-primary:hover:not(:disabled) {
-			background: var(--primary-hover);
-		}
-
-		.btn-danger {
-			color: var(--danger);
-			border-color: rgba(255, 107, 107, 0.3);
-			background: rgba(255, 107, 107, 0.12);
-		}
-
-		.btn-danger:hover:not(:disabled) {
-			background: rgba(255, 107, 107, 0.2);
-		}
-
-		.btn-tool {
-			color: var(--brand-primary);
-			border-color: rgba(194, 65, 12, 0.3);
-			background: rgba(194, 65, 12, 0.12);
-		}
-
-		.btn-tool:hover:not(:disabled) {
-			background: rgba(194, 65, 12, 0.2);
-		}
-
-		/* --- Plot Buttons (Pill) --- */
-		.plot-btn {
-			color: white;
-			border: none;
-			font-size: 0.78rem;
-			font-weight: 600;
-			padding: 5px 12px;
-			border-radius: 999px;
-			white-space: nowrap;
-		}
-
-		.plot-btn:hover:not(:disabled) {
-			filter: brightness(0.92);
-		}
-
-		.plot-btn.active {
-			box-shadow: inset 0 1px 3px rgba(0,0,0,0.3), 0 0 0 2px rgba(255,255,255,0.7);
-		}
-
-		[data-theme="dark"] .plot-btn.active {
-			box-shadow: inset 0 1px 3px rgba(0,0,0,0.4), 0 0 0 2px rgba(255,255,255,0.45);
-		}
-
-		/* Position plot buttons - same colors as velocity counterparts */
-		#plotX { background-color: #2e9cff; }
-		#plotY { background-color: #ff75f9; }
-		#plotXY { background: linear-gradient(135deg, #2e9cff, #ff75f9); }
-
-		/* Velocity plot buttons */
-		#plotVx { background-color: #2e9cff; }
-		#plotVy { background-color: #ff75f9; }
-		#plotVxVy { background: linear-gradient(135deg, #2e9cff, #ff75f9); }
-
-		/* Dark theme overrides for plot buttons */
-		[data-theme="dark"] #plotX { background-color: #2088e0; }
-		[data-theme="dark"] #plotY { background-color: #e055d8; }
-		[data-theme="dark"] #plotXY { background: linear-gradient(135deg, #2088e0, #e055d8); }
-		[data-theme="dark"] #plotVx { background-color: #2088e0; }
-		[data-theme="dark"] #plotVy { background-color: #e055d8; }
-		[data-theme="dark"] #plotVxVy { background: linear-gradient(135deg, #2088e0, #e055d8); }
-
-		/* Hide Crosses Toggle Button */
-		.hide-crosses-toggle {
-			display: flex;
-			align-items: center;
-			justify-content: center;
-			gap: 4px;
-			padding: 6px 10px;
-			min-width: 72px;
-			font-size: 0.85rem;
-			background: var(--surface-muted);
-			color: var(--text-muted);
-			border: 1px solid var(--border-color);
-			border-radius: 6px;
-			cursor: pointer;
-			transition: all 0.2s;
-			opacity: 0.8;
-		}
-
-		.hide-crosses-toggle:hover:not(:disabled) {
-			opacity: 1;
-			background: var(--surface);
-			color: var(--text-main);
-		}
-
-		.hide-crosses-toggle.crosses-hidden {
-			color: var(--warning);
-			border-color: rgba(253, 203, 110, 0.4);
-			background: rgba(253, 203, 110, 0.1);
-		}
-
-		.hide-crosses-toggle .toggle-text {
-			font-size: 0.8rem;
-		}
-
-		.hide-crosses-toggle .toggle-cross {
-			color: #ff4444;
-			font-weight: 700;
-			font-size: 1rem;
-			line-height: 1;
-		}
-
-		/* --- Layout Grid --- */
-		#analysisContainer {
-			display: grid;
-			grid-template-columns: 1fr 1fr;
-			gap: 20px;
-			max-width: 1200px;
-			margin: 0 auto;
-			padding: 0 20px 40px 20px;
-		}
-
-		/* --- Cards (Video & Plot) --- */
-		.card {
-            min-width: 0;
-			background: var(--surface);
-			border-radius: var(--border-radius);
-			box-shadow: var(--shadow);
-			padding: 15px;
-			display: flex;
-			flex-direction: column;
-			align-items: center;
-			border: 1px solid var(--border-color);
-		}
-
-		/* --- Video Section --- */
-		#videoWrapper {
-			position: relative;
-			width: 100%;
-			background: #000;
-			border-radius: 4px;
-			overflow: hidden;
-			margin-bottom: 15px;
-			/* Enforce aspect ratio or limits */
-			max-height: none;
-			display: flex;
-			justify-content: center;
-			align-items: center;
-			min-height: 0;
-		}
-
-		video,
-		canvas {
-			display: block;
-			max-width: 100%;
-			height: auto;
-		}
-
-		#hiddenVideo {
-			display: none;
-		}
-
-		#frameCanvas {
-            width: 100%;
-			display: none;
-		}
-
-		#overlayCanvas {
-			position: absolute;
-			top: 0;
-			left: 0;
-			background: transparent;
-			z-index: 2;
-			pointer-events: auto;
-			touch-action: none;
-		}
-
-		.crosshair {
-			position: absolute;
-			width: 20px;
-			height: 20px;
-			pointer-events: none;
-			z-index: 3;
-			display: none;
-		}
-
-		.crosshair::before,
-		.crosshair::after {
-			content: '';
-			position: absolute;
-			background: red;
-		}
-
-		.crosshair::before {
-			top: 50%;
-			left: 0;
-			width: 100%;
-			height: 1px;
-			transform: translateY(-50%);
-		}
-
-		.crosshair::after {
-			left: 50%;
-			top: 0;
-			width: 1px;
-			height: 100%;
-			transform: translateX(-50%);
-		}
-
-
-		#pointEditor { margin-bottom: 16px; width: 100%; min-width: 0; }
-        #pointEditor summary { cursor: pointer; padding: 12px 0; }
-        #pointEditor th, #pointEditor td { padding: 6px; text-align: left; }
-        #pointEditor input, #pointEditor button, .playback-controls button { min-height: 48px; }
-        .toolbar > div { flex-wrap: wrap; justify-content: center; }
-        /* Playback Controls (Under Video) */
-		.playback-controls {
-            flex-wrap: wrap;
-			display: flex;
-			align-items: center;
-			gap: 15px;
-			width: 100%;
-			background: transparent;
-			padding: 10px;
-			border-radius: var(--border-radius);
-			border: 1px solid transparent;
-			box-sizing: border-box;
-		}
-
-		#playPause {
-			min-width: 96px;
-			text-align: center;
-		}
-
-		#slider {
-            min-width: 100px;
-			flex-grow: 1;
-			cursor: pointer;
-			-webkit-appearance: none;
-			appearance: none;
-			background: transparent;
-			height: 22px;
-		}
-
-		#slider::-webkit-slider-runnable-track {
-			width: 100%;
-			height: 6px;
-			background: rgba(194, 65, 12, 0.3);
-			border-radius: 3px;
-			cursor: pointer;
-		}
-
-		#slider::-webkit-slider-thumb {
-			-webkit-appearance: none;
-			appearance: none;
-			width: 22px;
-			height: 22px;
-			background: var(--brand-primary);
-			border-radius: 50%;
-			cursor: pointer;
-			margin-top: -8px;
-			box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
-		}
-
-		#slider::-moz-range-track {
-			width: 100%;
-			height: 6px;
-			background: rgba(194, 65, 12, 0.3);
-			border-radius: 3px;
-			cursor: pointer;
-		}
-
-		#slider::-moz-range-thumb {
-			width: 22px;
-			height: 22px;
-			background: var(--brand-primary);
-			border-radius: 50%;
-			cursor: pointer;
-			border: none;
-			box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
-		}
-
-		#timeDisplay {
-			font-variant-numeric: tabular-nums;
-			font-size: 0.9rem;
-			color: var(--text-muted);
-			width: 80px;
-			text-align: right;
-		}
-
-			/* --- Chart Section --- */
-			#chartCanvasContainer {
-				width: 100%;
-				height: 400px;
-				position: relative;
-				background: var(--surface);
-				border-radius: var(--border-radius);
-				border: 1px solid var(--border-color);
-				padding: 10px;
-			}
-
-			#chartCanvasContainer.copy-ready {
-				cursor: pointer;
-				transition: box-shadow 0.15s ease, border-color 0.15s ease;
-			}
-
-			#chartCanvasContainer.copy-ready:hover,
-			#chartCanvasContainer.copy-ready:focus-visible {
-				box-shadow: 0 0 0 2px var(--copy-hint-outline);
-			}
-
-			#chartCanvasContainer.copy-ready::after {
-				content: "Copy image";
-				position: absolute;
-				top: -28px;
-				left: 50%;
-				transform: translateX(-50%);
-				background: var(--copy-hint-chip-bg);
-				color: var(--copy-hint-text);
-				padding: 4px 10px;
-				border-radius: 999px;
-				font-size: 11px;
-				font-family: var(--font-sans);
-				white-space: nowrap;
-				box-shadow: 0 2px 6px rgba(0, 0, 0, 0.12);
-				opacity: 0;
-				pointer-events: none;
-				transition: opacity 0.15s ease;
-				z-index: 10;
-			}
-
-			#chartCanvasContainer.copy-ready:hover::after,
-			#chartCanvasContainer.copy-ready:focus-visible::after {
-				opacity: 1;
-			}
-
-			#chartCanvasContainer.copy-ready.copied {
-				box-shadow: 0 0 0 2px #22c55e !important;
-			}
-
-			#chartCanvasContainer.copy-ready.copied::after {
-				content: "Copied!" !important;
-				background: #22c55e !important;
-				color: #ffffff !important;
-				opacity: 1 !important;
-			}
-
-			#chartCanvasContainer.copy-ready.copy-failed {
-				box-shadow: 0 0 0 2px #ef4444 !important;
-			}
-
-			#chartCanvasContainer.copy-ready.copy-failed::after {
-				content: "Copy failed" !important;
-				background: #ef4444 !important;
-				color: #ffffff !important;
-				opacity: 1 !important;
-			}
-
-			#chartCanvasContainer.copy-ready.copying::after {
-				content: "Copying..." !important;
-				opacity: 1 !important;
-			}
-
-			#chartCopyAction {
-				position: absolute;
-				top: 10px;
-				right: 10px;
-				z-index: 12;
-				border: 1px solid var(--copy-hint-outline);
-				background: var(--copy-hint-chip-bg);
-				color: var(--copy-hint-text);
-				padding: 6px 12px;
-				border-radius: 999px;
-				font-size: 12px;
-				font-family: var(--font-sans);
-				font-weight: 600;
-				box-shadow: 0 2px 6px rgba(0, 0, 0, 0.12);
-				opacity: 0;
-				transform: translateY(-4px);
-				pointer-events: none;
-				transition: opacity 0.15s ease, transform 0.15s ease;
-			}
-
-			#chartCopyAction[hidden] {
-				display: none;
-			}
-
-			#chartCanvasContainer.touch-copy-mode::after {
-				display: none;
-			}
-
-			#chartCanvasContainer.touch-copy-open {
-				box-shadow: 0 0 0 2px var(--copy-hint-outline);
-			}
-
-			#chartCanvasContainer.touch-copy-open #chartCopyAction {
-				opacity: 1;
-				transform: translateY(0);
-				pointer-events: auto;
-			}
-
-			#chartCanvasContainer.touch-copy-open.copying #chartCopyAction {
-				opacity: 0.85;
-				pointer-events: none;
-			}
-
-			#chartCanvasContainer.touch-copy-open.copied #chartCopyAction {
-				border-color: #22c55e;
-				background: #22c55e;
-				color: #ffffff;
-			}
-
-			#chartCanvasContainer.touch-copy-open.copy-failed #chartCopyAction {
-				border-color: #ef4444;
-				background: #ef4444;
-				color: #ffffff;
-			}
-
-			.chart-controls {
-				display: flex;
-				flex-direction: column;
-				gap: 8px;
-				margin-top: 12px;
-				max-width: 370px;
-				width: 100%;
-				align-self: center;
-				margin-left: auto;
-				margin-right: auto;
-			}
-
-		.chart-controls-row {
-			display: grid;
-			grid-template-columns: repeat(3, 1fr);
-			gap: 8px;
-		}
-
-		.chart-controls .plot-btn {
-			min-height: 28px;
-			display: inline-flex;
-			align-items: center;
-			justify-content: center;
-			width: 100%;
-			padding: 4px 6px;
-		}
-
-		.btn-export {
-			background: linear-gradient(135deg, var(--brand-accent), var(--brand-primary));
-			color: #ffffff;
-			border: none;
-			box-shadow: 0 6px 14px rgba(13, 148, 136, 0.2);
-		}
-
-		.btn-export:hover:not(:disabled) {
-			filter: brightness(0.95);
-		}
-
-		[data-theme="dark"] .btn-export {
-			color: #1B1B1B;
-			box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
-		}
-
-		/* --- Message Box --- */
-		#message {
-			background: rgba(13, 148, 136, 0.12);
-			color: var(--text-main);
-			padding: 10px 15px;
-			border-radius: var(--border-radius);
-			margin: 24px auto;
-			max-width: 1160px;
-			text-align: center;
-			border: 1px solid rgba(13, 148, 136, 0.3);
-		}
-
-		/* --- Responsive --- */
-		@media (max-width: 900px) {
-			#analysisContainer {
-				grid-template-columns: 1fr;
-			}
-		}
-
-		/* --- Dialogs --- */
-		#calibrationPrompt,
-		#exportPrompt,
-		#frameRatePrompt {
-			position: fixed;
-			top: 50%;
-			left: 50%;
-			transform: translate(-50%, -50%);
-			width: min(92vw, 560px);
-			max-width: 92vw;
-			box-sizing: border-box;
-			z-index: 9999;
-			padding: 24px;
-			border-radius: 10px;
-			border: 1px solid var(--border-color);
-			background: var(--surface);
-			box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
-			display: none;
-		}
-
-		#calibrationPrompt h2,
-		#exportPrompt h2,
-		#frameRatePrompt h2 {
-			margin: 0 0 8px 0;
-			font-size: 1.1rem;
-			color: var(--text-main);
-		}
-
-		#calibrationPrompt p,
-		#exportPrompt p,
-		#frameRatePrompt p {
-			margin: 0 0 15px 0;
-			color: var(--text-muted);
-		}
-
-		#calibrationPrompt form,
-		#exportPrompt form,
-		#frameRatePrompt form {
-			display: flex;
-			flex-direction: column;
-			gap: 12px;
-		}
-
-		.dialog-actions {
-			display: grid;
-			grid-template-columns: 1fr 1fr;
-			gap: 10px;
-		}
-
-		.frame-rate-field {
-			display: flex;
-			flex-direction: column;
-			gap: 6px;
-		}
-
-		.frame-rate-field label {
-			font-size: 0.9rem;
-			font-weight: 600;
-			color: var(--text-main);
-		}
-
-		.frame-rate-hint {
-			font-size: 0.82rem;
-			color: var(--text-muted);
-			margin: 0;
-		}
-
-		#calibrationPrompt input[type="number"],
-		#calibrationPrompt input[type="text"],
-		#exportPrompt input[type="text"],
-		#frameRatePrompt input[type="number"] {
-			width: 100%;
-			min-height: 38px;
-			padding: 8px 10px;
-			box-sizing: border-box;
-			border: 1px solid var(--border-color);
-			border-radius: 6px;
-			font-size: 0.95rem;
-			background: var(--surface-muted);
-			color: var(--text-main);
-		}
-
-		footer {
-			color: var(--text-muted);
-			font-size: 0.85rem;
-			margin-top: 40px;
-			padding-bottom: 20px;
-			text-align: center;
-		}
-
-		body.modal-open {
-			overflow: hidden;
-		}
-
-			@media (pointer: coarse) {
-				button,
-				input,
-				select,
-			.control-button,
-			.primary-button,
-			.secondary-button {
-				min-height: 44px;
-				touch-action: manipulation;
-			}
-
-			#slider {
-				height: 44px;
-				touch-action: manipulation;
-			}
-
-			#slider::-webkit-slider-runnable-track {
-				height: 6px;
-			}
-
-			#slider::-webkit-slider-thumb {
-				width: 28px;
-				height: 28px;
-				margin-top: -11px;
-			}
-
-			#slider::-moz-range-track {
-				height: 6px;
-			}
-
-				#slider::-moz-range-thumb {
-					width: 28px;
-					height: 28px;
-				}
-			}
-
-			@media (hover: none), (pointer: coarse) {
-				#chartCanvasContainer.copy-ready::after {
-					display: none;
-				}
-			}
-		</style>
-  <link rel="stylesheet" href="/assets/theme-toggle.css">
-  <link rel="stylesheet" href="/assets/fullscreen-button.css">
-  <script src="/assets/theme-toggle.js"></script>
-  <script src="/assets/fullscreen-button.js"></script>
+	<script src="/assets/sw-register.js" defer></script>
+	<script src="https://cdn.jsdelivr.net/npm/chart.js@4.5.1/dist/chart.umd.min.js"></script>
+	<link rel="stylesheet" href="motion_tracker/css/motion_tracker.css">
+	<link rel="stylesheet" href="/assets/theme-toggle.css">
+	<link rel="stylesheet" href="/assets/fullscreen-button.css">
+	<script src="/assets/theme-toggle.js"></script>
+	<script src="/assets/fullscreen-button.js"></script>
 </head>
 
 <body>
-	<header class="banner">
-		<div class="banner-logo">
-			<a href="https://panphy.app/">
-				<img src="/assets/panphy.png" alt="PanPhy logo">
-			</a>
-		</div>
-		<div class="banner-title">Motion Tracker</div>
-		<div class="banner-actions">
-			<div class="theme-toggle">
-				<button id="theme-button" data-panphy-theme-toggle aria-label="Toggle Light/Dark Theme" title="Toggle between light and dark themes">☀️</button>
+	<header class="mt-appbar">
+		<a class="mt-brand" href="https://panphy.app/" title="PanPhy Labs">
+			<img src="/assets/panphy.png" alt="PanPhy logo" />
+			<span class="mt-wordmark">Motion Tracker</span>
+		</a>
+		<div class="mt-appbar-actions">
+			<div class="mt-appbar-file" role="group" aria-label="File">
+				<button type="button" id="openVideo" class="mt-tool" title="Open a video file to analyse"><svg class="mt-icon" viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="5.5" width="12.5" height="13" rx="2"/><path d="m16 10.5 4.5-2.5v8l-4.5-2.5"/></svg><span class="keep-label">Import<span class="label-extra"> Video</span></span></button>
+				<div class="mt-menu-wrap">
+					<button type="button" id="projectButton" class="mt-tool" aria-expanded="false" aria-controls="projectMenu" title="Save your tracking to a file, or carry on from one"><svg class="mt-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M3.5 7v10.5a2 2 0 0 0 2 2h13a2 2 0 0 0 2-2V9.5a2 2 0 0 0-2-2H12l-2-2.5H5.5a2 2 0 0 0-2 2z"/></svg><span>Project</span><svg class="mt-caret" viewBox="0 0 12 12" aria-hidden="true"><path d="m3 4.5 3 3 3-3"/></svg></button>
+					<div id="projectMenu" class="mt-menu mt-menu-right" hidden>
+						<button type="button" id="saveProject" class="mt-menu-item" disabled>Save project<small>Marks, scale, origin and frame rate</small></button>
+						<button type="button" id="loadProject" class="mt-menu-item" disabled>Open project&hellip;<small>Import the same video first</small></button>
+					</div>
+				</div>
 			</div>
+			<button type="button" id="guideButton" class="mt-tool mt-tool-quiet" title="How to track an object, and keyboard shortcuts"><svg class="mt-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5.5c2.7-1.3 5.4-1.3 8 0v14c-2.6-1.3-5.3-1.3-8 0zM20 5.5c-2.7-1.3-5.4-1.3-8 0v14c2.6-1.3 5.3-1.3 8 0z"/></svg><span>Guide</span></button>
+			<button id="theme-button" data-panphy-theme-toggle class="theme-toggle-button" aria-label="Toggle Light/Dark Theme" title="Toggle between light and dark themes">&#9728;&#65039;</button>
 			<button data-panphy-fullscreen aria-label="Enter fullscreen" title="Enter fullscreen"></button>
 		</div>
 	</header>
 
-	<div class="toolbar">
-		<div style="display:flex; gap:10px;">
-			<button id="openVideo" class="btn-primary" title="Load a video file for motion analysis">Import Video</button>
-		</div>
-
-		<div class="toolbar-divider"></div>
-
-		<div style="display:flex; gap:10px;">
-			<button id="calibrate" class="btn-tool" disabled title="Set a known distance to calibrate pixel-to-real scale">Calibrate</button>
-			<button id="setOrigin" class="btn-tool" disabled title="Set the coordinate origin on the video">Set Origin</button>
-		</div>
-
-		<div class="toolbar-divider"></div>
-
-		<div style="display:flex; gap:10px;">
-			<button id="clearDataPoints" class="btn-danger" disabled title="Remove all tracked data points">Clear Data</button>
-			<button id="clearCalibration" class="btn-danger" disabled title="Remove the calibration setting">Clear Calib</button>
-			<button id="clearOrigin" class="btn-danger" disabled title="Reset the coordinate origin">Clear Origin</button>
-		</div>
-
-		<button id="saveProject" disabled>Save Project</button>
-        <button id="loadProject" disabled>Load Project</button>
-        <input type="file" id="projectUpload" accept=".json,application/json" hidden>
-        <input type="file" id="videoUploadInput" accept="video/*" style="display:none">
-	</div>
-
-	<div id="message" role="status" aria-live="polite">
-		<p>Import a video to start analysis.</p>
-	</div>
-
-	<div id="analysisContainer">
-
-		<div class="card">
-			<div
-				style="width:100%; display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
-				<h3 style="margin:0; font-size:1.1rem;">Video Source</h3>
-				<button id="frameRateButton" class="frame-rate-button" disabled title="Set the video frame rate for accurate timing">FPS: 30</button>
+	<main id="workspace">
+		<!-- Video: open a clip, set the scale and origin, then click the object frame by frame. -->
+		<section id="videoPane" class="mt-pane" aria-labelledby="videoPaneTitle">
+			<div class="pane-head">
+				<div class="pane-title">
+					<h2 class="pane-heading" id="videoPaneTitle">Video</h2>
+					<p class="pane-hint" id="videoName">No video open</p>
+				</div>
+			</div>
+			<div class="pane-toolbar" role="toolbar" aria-label="Video tools">
+				<div class="mt-tool-group" role="group" aria-label="Set up">
+					<button type="button" id="frameRateButton" class="mt-tool" disabled title="Check the frame rate, or set up a slow-motion recording"><svg class="mt-icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8.5"/><path d="M12 7v5l3.2 2"/></svg><span id="fpsLabel" class="mt-tool-mono">30 fps</span></button>
+					<button type="button" id="calibrate" class="mt-tool" disabled aria-pressed="false" title="Set the scale: drag along something of known length"><svg class="mt-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="m3.5 15.5 12-12 5 5-12 12z"/><path d="m7.5 11.5 2 2M10.5 8.5l2 2M13.5 5.5l2 2"/></svg><span>Scale</span></button>
+					<button type="button" id="setOrigin" class="mt-tool" disabled aria-pressed="false" title="Set the origin: click where x and y are zero"><svg class="mt-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 3.5v15.5h15.5"/><circle cx="5" cy="19" r="2.2"/><path d="m3 6 2-2.5L7 6M18 17l2.5 2-2.5 2"/></svg><span>Origin</span></button>
+				</div>
+				<div class="mt-tool-group" role="group" aria-label="Marks">
+					<button type="button" id="undoPoint" class="mt-tool" disabled title="Undo the last change to the marks (Ctrl+Z)"><svg class="mt-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M8.5 5 4 9.5 8.5 14"/><path d="M4 9.5h10a5.5 5.5 0 0 1 0 11h-3"/></svg><span>Undo</span></button>
+					<button type="button" id="hideCrossesToggle" class="mt-tool" disabled aria-pressed="false" title="Hide or show the marks on the video (H)"><svg class="mt-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M2.5 12s3.5-6.5 9.5-6.5 9.5 6.5 9.5 6.5-3.5 6.5-9.5 6.5S2.5 12 2.5 12z"/><circle cx="12" cy="12" r="2.8"/></svg><span class="toggle-text">Hide Marks</span></button>
+				</div>
+				<div class="mt-tool-spacer"></div>
+				<div class="mt-menu-wrap">
+					<button type="button" id="clearButton" class="mt-tool mt-tool-danger" disabled aria-expanded="false" aria-controls="clearMenu" title="Clear the marks, the scale or the origin"><svg class="mt-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4.5 7h15M9.5 7V4.5h5V7M6.5 7l1 13h9l1-13M10 10.5v6M14 10.5v6"/></svg><span>Clear</span><svg class="mt-caret" viewBox="0 0 12 12" aria-hidden="true"><path d="m3 4.5 3 3 3-3"/></svg></button>
+					<div id="clearMenu" class="mt-menu mt-menu-right" hidden>
+						<button type="button" id="clearDataPoints" class="mt-menu-item mt-menu-danger" disabled>Clear marks<small>Remove every mark</small></button>
+						<button type="button" id="clearCalibration" class="mt-menu-item" disabled>Clear scale<small>Measure in pixels again</small></button>
+						<button type="button" id="clearOrigin" class="mt-menu-item" disabled>Clear origin<small>Back to the bottom-left corner</small></button>
+					</div>
+				</div>
+				<input type="file" id="projectUpload" accept=".json,application/json" hidden>
+				<input type="file" id="videoUploadInput" accept="video/*" hidden>
 			</div>
 
-			<div id="videoWrapper">
-				<video id="hiddenVideo" playsinline webkit-playsinline muted preload="auto"
-					crossorigin="anonymous"></video>
-				<canvas id="frameCanvas" style="display:none"></canvas>
-				<canvas id="overlayCanvas"></canvas>
-				<div class="crosshair" id="crosshair"></div>
+			<div id="messageBar" class="mt-message">
+				<svg class="mt-icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8.5"/><path d="M12 11v5M12 7.8v.2"/></svg>
+				<div id="message" role="status" aria-live="polite"><p>Import a video to start.</p></div>
+				<button type="button" id="modeCancel" hidden>Cancel</button>
+			</div>
+
+			<div id="videoStage" class="video-stage">
+				<div id="emptyVideo" class="empty-state">
+					<svg class="empty-illustration" viewBox="0 0 120 84" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="6" y="8" width="108" height="68" rx="8" opacity=".35"/><path d="M18 64C38 20 70 14 102 40" stroke-dasharray="2 7" opacity=".7"/><circle cx="26" cy="49" r="4" fill="currentColor" stroke="none" opacity=".45"/><circle cx="44" cy="30" r="4" fill="currentColor" stroke="none" opacity=".65"/><circle cx="66" cy="22" r="4" fill="currentColor" stroke="none" opacity=".85"/><path d="M88 22v12M82 28h12"/></svg>
+					<h3 class="empty-title">Track an object in a video</h3>
+					<p class="empty-lead">Film side-on with the camera held still. Then mark the object frame by frame to get its position and velocity.</p>
+					<button type="button" id="emptyImport" class="btn-primary empty-import"><svg class="mt-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 15.5V4M7.5 8.5 12 4l4.5 4.5M4.5 15.5v3a2 2 0 0 0 2 2h11a2 2 0 0 0 2-2v-3"/></svg>Import Video</button>
+					<p class="empty-drop">or drop a video file here</p>
+					<ol class="empty-steps">
+						<li><span><strong>Check the frame rate.</strong> It is detected for you; set it up for slow-motion clips.</span></li>
+						<li><span><strong>Set the scale and origin.</strong> Drag along a known length, then click where x and y are zero.</span></li>
+						<li><span><strong>Click the object.</strong> Each click marks it and moves the video on, ready for the next mark.</span></li>
+					</ol>
+				</div>
+				<div id="videoWrapper" hidden>
+					<video id="hiddenVideo" playsinline webkit-playsinline muted preload="auto" crossorigin="anonymous"></video>
+					<canvas id="frameCanvas" aria-label="Video frame. Click the object to mark it."></canvas>
+					<canvas id="overlayCanvas" aria-hidden="true"></canvas>
+				</div>
 			</div>
 
 			<div class="playback-controls">
-				<button id="playPause" class="btn-primary" disabled title="Play or pause the video">Play</button>
-				<button id="previousFrame" disabled aria-label="Previous frame">◀ Frame</button>
-                <button id="nextFrame" disabled aria-label="Next frame">Frame ▶</button>
-                <input aria-label="Video time" type="range" id="slider" min="0" max="0" step="0.01" value="0" disabled>
-				<span id="timeDisplay">0:00.000</span>
-				<button id="hideCrossesToggle" class="hide-crosses-toggle" disabled title="Toggle crosses visibility (H)">
-					<span class="toggle-text">Hide</span>
-					<span class="toggle-cross">+</span>
-				</button>
-			</div>
-		</div>
-
-		<div class="card">
-			<div
-				style="width:100%; display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
-				<h3 style="margin:0; font-size:1.1rem;">Data Analysis</h3>
-				<button id="exportData" class="btn-export" disabled title="Export tracked data as a CSV file">Export .csv</button>
-			</div>
-
-				<details id="pointEditor"><summary>Tracked points</summary>
-                    <button id="undoPoint" disabled>Undo last point change</button>
-                    <p>Edit coordinates in video pixels. One point is stored per frame; clicking that frame again replaces it.</p>
-                    <div style="overflow-x:auto;max-height:260px"><table><thead><tr><th>Time (s)</th><th>x (px)</th><th>y (px)</th><th>Actions</th></tr></thead><tbody id="pointRows"></tbody></table></div>
-                </details>
-                <div id="chartCanvasContainer">
-					<canvas id="positionChart"></canvas>
-					<button id="chartCopyAction" type="button" hidden title="Copy the chart as an image to clipboard">Copy image</button>
+				<div class="transport">
+					<button type="button" id="previousFrame" class="transport-btn" disabled aria-label="Step back" title="Step back (&larr;)"><svg class="mt-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M6.5 5.5v13M18 6l-8 6 8 6z"/></svg></button>
+					<button type="button" id="playPause" class="transport-btn" disabled aria-label="Play" title="Play or pause (Space)"><svg class="mt-icon" viewBox="0 0 24 24" aria-hidden="true"><path id="playPauseIcon" d="M8 5.5v13l10.5-6.5z"/></svg></button>
+					<button type="button" id="nextFrame" class="transport-btn" disabled aria-label="Step forward" title="Step forward (&rarr;)"><svg class="mt-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M17.5 5.5v13M6 6l8 6-8 6z"/></svg></button>
 				</div>
-
-			<div class="chart-controls">
-				<div class="chart-controls-row">
-					<button id="plotX" class="plot-btn" disabled title="Plot horizontal position over time">Plot x vs t</button>
-					<button id="plotY" class="plot-btn" disabled title="Plot vertical position over time">Plot y vs t</button>
-					<button id="plotXY" class="plot-btn" disabled title="Plot both x and y positions over time">x(t) and y(t)</button>
+				<input aria-label="Video time" type="range" id="slider" min="0" max="0" step="0.01" value="0" disabled>
+				<div class="time-readout" aria-live="off">
+					<span id="timeDisplay">0.000 s</span>
+					<span id="frameDisplay">frame 0</span>
 				</div>
-				<div class="chart-controls-row">
-					<button id="plotVx" class="plot-btn" disabled title="Plot horizontal velocity over time">Plot vₓ vs t</button>
-					<button id="plotVy" class="plot-btn" disabled title="Plot vertical velocity over time">Plot vᵧ vs t</button>
-					<button id="plotVxVy" class="plot-btn" disabled title="Plot both velocity components over time">vₓ(t) and vᵧ(t)</button>
-				</div>
-			</div>
-		</div>
-	</div>
-
-	<div id="calibrationPrompt">
-		<h2>Calibration</h2>
-		<p>Enter the Length and its Unit:</p>
-		<form autocomplete="off">
-			<input type="number" id="actualLength" placeholder="Actual Length" min="0.0001" step="any"
-				autocomplete="off">
-			<input type="text" id="actualUnit" placeholder="Unit (e.g., meters, cm)" autocomplete="off">
-			<div class="dialog-actions">
-				<button type="button" id="confirmCalibration" class="btn-primary">Confirm</button>
-				<button type="button" id="cancelCalibration">Cancel</button>
-			</div>
-		</form>
-	</div>
-
-	<div id="exportPrompt">
-		<h2>Export Data</h2>
-		<p>Enter the desired filename for the exported data:</p>
-		<form autocomplete="off">
-			<input type="text" id="exportFilename" placeholder="Filename" value="motion_tracker_data"
-				autocomplete="off">
-			<div class="dialog-actions">
-				<button type="button" id="confirmExport" class="btn-primary">Export</button>
-				<button type="button" id="cancelExport">Cancel</button>
-			</div>
-		</form>
-	</div>
-
-	<div id="frameRatePrompt">
-		<h2>Frame Rate Settings</h2>
-		<form autocomplete="off">
-			<div class="frame-rate-field" id="detectedFpsSection">
-				<label for="userPlaybackFrameRate">Playback FPS</label>
-                <input id="userPlaybackFrameRate" type="number" min="0.001" step="any">
-                <p class="frame-rate-hint">Detection is an estimate. Correct it using your video's frame rate if needed.</p>
-				<div id="detectedFpsDisplay" style="padding: 8px 10px; background: var(--surface-muted); border-radius: 6px; font-weight: 600; color: var(--brand-primary);">
-					Detecting...
-				</div>
-				<p class="frame-rate-hint">Auto-detected from video. Used for frame stepping and time calculation.</p>
-			</div>
-			<div class="frame-rate-field" style="margin-top: 16px;">
-				<label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
-					<input type="checkbox" id="specialRecordingMode" style="width: 18px; height: 18px; cursor: pointer;" />
-					<span>Special recording (slow-motion / time-lapse)</span>
+				<label class="step-field" title="Frames to move for each step, and after each mark">Step
+					<select id="frameStep">
+						<option value="1" selected>1 frame</option>
+						<option value="2">2 frames</option>
+						<option value="3">3 frames</option>
+						<option value="5">5 frames</option>
+						<option value="10">10 frames</option>
+					</select>
 				</label>
-				<p class="frame-rate-hint">Enable if video was recorded at a different rate than playback (e.g., 240fps slow-mo played at 30fps).</p>
 			</div>
-			<div class="frame-rate-field" id="captureRateSection" style="display: none; margin-top: 12px;">
-				<label for="userCaptureFrameRate">Original capture FPS</label>
-				<input type="number" id="userCaptureFrameRate" value="240" min="1" step="any" autocomplete="off"
-					placeholder="e.g. 240 for slow motion" />
-				<p class="frame-rate-hint">The actual recording speed for accurate physics calculations.</p>
-			</div>
-			<div class="dialog-actions" style="margin-top: 16px;">
-				<button type="button" id="confirmFrameRate" class="btn-primary">Confirm</button>
-				<button type="button" id="cancelFrameRate">Cancel</button>
-			</div>
-		</form>
-	</div>
+		</section>
 
-	<footer>
-		&copy; 2026 <a href="https://panphy.app/" target="_blank" rel="noopener noreferrer">PanPhy Labs</a>. All rights reserved. |
-		<a href="https://buymeacoffee.com/panphy" target="_blank" rel="noopener noreferrer">Support My Projects</a>
+		<!-- Graph: position or velocity against time, and the table of marks. -->
+		<section id="graphPane" class="mt-pane" aria-labelledby="graphPaneTitle">
+			<div class="pane-head">
+				<div class="pane-title">
+					<h2 class="pane-heading" id="graphPaneTitle">Results</h2>
+					<p class="pane-hint" id="graphHint">Click the graph to copy it</p>
+				</div>
+				<div class="mt-segmented" role="tablist" aria-label="Results view">
+					<button type="button" id="showGraph" class="mt-segment" role="tab" aria-selected="true" aria-controls="graphView">Graph</button>
+					<button type="button" id="showPoints" class="mt-segment" role="tab" aria-selected="false" aria-controls="pointEditor">Table <span id="pointCount" class="segment-count">0</span></button>
+				</div>
+			</div>
+			<div class="pane-toolbar" role="toolbar" aria-label="Graph tools">
+				<div id="graphControls" class="graph-controls">
+				<div class="mt-segmented" role="group" aria-label="Quantity">
+					<button type="button" id="plotPosition" class="mt-segment" aria-pressed="true" title="Plot position against time">Position</button>
+					<button type="button" id="plotVelocity" class="mt-segment" aria-pressed="false" title="Plot velocity against time">Velocity</button>
+				</div>
+				<div class="mt-segmented" role="group" aria-label="Component">
+					<button type="button" id="plotCompX" class="mt-segment" aria-pressed="false" title="Horizontal component only"><span class="series-dot series-dot-x" aria-hidden="true"></span>x</button>
+					<button type="button" id="plotCompY" class="mt-segment" aria-pressed="false" title="Vertical component only"><span class="series-dot series-dot-y" aria-hidden="true"></span>y</button>
+					<button type="button" id="plotCompXY" class="mt-segment" aria-pressed="true" title="Both components">Both</button>
+				</div>
+				</div>
+				<div class="mt-tool-spacer"></div>
+				<button type="button" id="exportData" class="mt-tool" disabled title="Save positions and velocities as a CSV file for a spreadsheet or PanPhyPlot"><svg class="mt-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3.5v11M7.5 10l4.5 4.5 4.5-4.5M4.5 15.5v3a2 2 0 0 0 2 2h11a2 2 0 0 0 2-2v-3"/></svg><span>Export CSV</span></button>
+			</div>
+			<div class="graph-body">
+				<div id="graphView" class="graph-view" role="tabpanel" aria-labelledby="showGraph">
+					<div id="chartCanvasContainer">
+						<canvas id="positionChart"></canvas>
+						<button id="chartCopyAction" type="button" hidden title="Copy the graph as an image">Copy image</button>
+						<div id="graphEmpty" class="graph-empty">
+							<svg viewBox="0 0 84 64" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M10 6v48h68" opacity=".5"/><circle cx="22" cy="46" r="3" fill="currentColor" stroke="none" opacity=".5"/><circle cx="36" cy="36" r="3" fill="currentColor" stroke="none" opacity=".65"/><circle cx="50" cy="28" r="3" fill="currentColor" stroke="none" opacity=".8"/><circle cx="64" cy="16" r="3" fill="currentColor" stroke="none"/></svg>
+							<p class="graph-empty-title" id="graphEmptyTitle">Your graph appears here</p>
+							<p class="graph-empty-text" id="graphEmptyText">Import a video, then click the object to mark it.</p>
+						</div>
+					</div>
+				</div>
+				<div id="pointEditor" role="tabpanel" aria-labelledby="showPoints" hidden>
+					<p class="points-note" id="pointsNote">One mark per frame. Edit a value to move a mark; click a time to show that frame.</p>
+					<div class="points-scroll">
+						<table class="points-table">
+							<thead><tr><th scope="col">t (s)</th><th scope="col" id="pointXHead">x (px)</th><th scope="col" id="pointYHead">y (px)</th><th scope="col"><span hidden>Delete</span></th></tr></thead>
+							<tbody id="pointRows"></tbody>
+						</table>
+						<p id="pointsEmpty" class="points-empty">No marks yet. Click the object in the video to add one.</p>
+					</div>
+				</div>
+			</div>
+		</section>
+	</main>
+
+	<footer class="mt-statusbar">
+		<span class="mt-status"><span id="statusPoints">0 marks</span><span id="statusScale">scale: pixels</span><span id="statusOrigin">origin: bottom-left</span><span id="saveStatus" role="status"></span></span>
+		<span class="mt-statusbar-legal">&copy; 2026 <a href="https://panphy.app/" target="_blank" rel="noopener noreferrer">PanPhy Labs</a>. All rights reserved. &middot;
+		<a href="https://buymeacoffee.com/panphy" target="_blank" rel="noopener noreferrer">Support My Projects</a></span>
 	</footer>
 
+	<dialog id="calibrationPrompt" class="mt-dialog" aria-labelledby="calibrationTitle">
+		<form autocomplete="off" novalidate>
+			<h2 class="modal-title" id="calibrationTitle">Set the scale</h2>
+			<p class="modal-lead">How long is the line you drew, in real life?</p>
+			<div class="modal-row">
+				<div class="modal-field">
+					<label class="modal-field-label" for="actualLength">Length</label>
+					<input type="number" id="actualLength" class="modal-input" placeholder="e.g. 1.00" min="0" step="any" inputmode="decimal" required>
+				</div>
+				<div class="modal-field">
+					<label class="modal-field-label" for="actualUnit">Unit</label>
+					<input type="text" id="actualUnit" class="modal-input" list="unitOptions" value="m" placeholder="m" required>
+					<datalist id="unitOptions"><option value="m"></option><option value="cm"></option><option value="mm"></option><option value="km"></option></datalist>
+				</div>
+			</div>
+			<p class="modal-hint" id="calibrationPixels"></p>
+			<div class="modal-buttons">
+				<button type="button" id="cancelCalibration">Cancel</button>
+				<button type="submit" id="confirmCalibration" class="btn-primary">Set Scale</button>
+			</div>
+		</form>
+	</dialog>
+
+	<dialog id="exportPrompt" class="mt-dialog" aria-labelledby="exportTitle">
+		<form autocomplete="off" novalidate>
+			<h2 class="modal-title" id="exportTitle">Export CSV</h2>
+			<p class="modal-lead">Positions, velocities and smoothed velocities, with times, in one file.</p>
+			<div class="modal-field">
+				<label class="modal-field-label" for="exportFilename">File name</label>
+				<input type="text" id="exportFilename" class="modal-input" value="motion_tracker_data">
+			</div>
+			<div class="modal-buttons">
+				<button type="button" id="cancelExport">Cancel</button>
+				<button type="submit" id="confirmExport" class="btn-primary">Export</button>
+			</div>
+		</form>
+	</dialog>
+
+	<dialog id="frameRatePrompt" class="mt-dialog" aria-labelledby="frameRateTitle">
+		<form autocomplete="off" novalidate>
+			<h2 class="modal-title" id="frameRateTitle">Frame rate</h2>
+			<div class="modal-field" id="detectedFpsSection">
+				<label class="modal-field-label" for="userPlaybackFrameRate">Video frame rate</label>
+				<div class="modal-input-suffix"><input id="userPlaybackFrameRate" class="modal-input" type="number" min="0" step="any" inputmode="decimal" required><span>fps</span></div>
+				<span class="detected-chip">Detected: <span id="detectedFpsDisplay">detecting&hellip;</span></span>
+				<p class="modal-hint">Used to step frame by frame. Detection is an estimate, so correct it if you know your video's frame rate.</p>
+			</div>
+			<label class="modal-check">
+				<input type="checkbox" id="specialRecordingMode">
+				<span>Slow-motion or time-lapse recording<small>Filmed at a different rate from the one it plays at, such as 240 fps slow motion that plays at 30 fps.</small></span>
+			</label>
+			<div class="modal-field" id="captureRateSection" style="display: none;">
+				<label class="modal-field-label" for="userCaptureFrameRate">Frame rate when filmed</label>
+				<div class="modal-input-suffix"><input type="number" id="userCaptureFrameRate" class="modal-input" value="240" min="0" step="any" inputmode="decimal" placeholder="e.g. 240"><span>fps</span></div>
+				<p class="modal-hint">Times are worked out from this rate, so they are real times.</p>
+			</div>
+			<div class="modal-buttons">
+				<button type="button" id="cancelFrameRate">Cancel</button>
+				<button type="submit" id="confirmFrameRate" class="btn-primary">Apply</button>
+			</div>
+		</form>
+	</dialog>
+
+	<dialog id="guideDialog" class="mt-dialog guide-dialog" aria-labelledby="guideTitle">
+		<form method="dialog">
+			<h2 class="modal-title" id="guideTitle">How to track motion</h2>
+			<ol class="guide-steps">
+				<li><span><strong>Import a video.</strong> Film side-on with the camera held still, and include something of known length, such as a metre rule.</span></li>
+				<li><span><strong>Check the frame rate.</strong> It is detected for you. For slow motion, open the frame rate and give the rate it was filmed at.</span></li>
+				<li><span><strong>Scale:</strong> drag along the object of known length and type its length. Without a scale, positions are in pixels.</span></li>
+				<li><span><strong>Origin:</strong> click where x and y should be zero. Otherwise the origin is the bottom-left corner.</span></li>
+				<li><span><strong>Mark the object.</strong> Click its centre; the video moves on by the step, ready for the next mark. Clicking a frame that already has a mark replaces it.</span></li>
+				<li><span><strong>Read the results.</strong> Switch between position and velocity, edit marks in the Table, and export a CSV. Velocity needs at least four marks.</span></li>
+			</ol>
+			<p class="guide-subhead">Keyboard</p>
+			<dl class="guide-keys">
+				<dt><kbd>&larr;</kbd> <kbd>&rarr;</kbd></dt><dd>Step back or forward</dd>
+				<dt><kbd>Space</kbd></dt><dd>Play or pause</dd>
+				<dt><kbd>H</kbd></dt><dd>Hide or show the marks</dd>
+				<dt><kbd>Ctrl</kbd> <kbd>Z</kbd></dt><dd>Undo the last change to the marks</dd>
+				<dt><kbd>Esc</kbd></dt><dd>Stop setting the scale or origin</dd>
+			</dl>
+			<div class="modal-buttons">
+				<button type="submit" class="btn-primary">Got it</button>
+			</div>
+		</form>
+	</dialog>
 
 	<script>
 		/* ===== State ===== */
@@ -1062,49 +278,55 @@
 		let detectedFps = null;  // Auto-detected FPS from video
 		let isSpecialRecording = false;  // Whether user has slow-mo/time-lapse video
 		let fpsDetectionPending = false;  // Whether FPS detection is in progress
-			const dataPointColors = { x: '#2e9cff', y: '#ff75f9', vx: '#2e9cff', vy: '#ff75f9' };
-			let frameData = [];
-			let isPlaying = false;
-			let positionChart = null;
-			let skippingFrame = false;
-			let blobUrl = null;
-			let currentPlotMode = 'pos'; // Tracks 'x', 'y', 'pos', 'vx', 'vy', or 'vxy'
-			let crossesVisible = true; // Toggle for hiding crosses on video
-			let graphCopyInProgress = false;
-			let graphTouchCopyMode = false;
-			let graphCopyStatusResetTimeoutId = 0;
-			let hasUnsavedChanges = false;
-        let videoReady = false;
-        let videoFileInfo = null;
-        let undoHistory = [];
-        let cancelFpsDetection = () => {};
-        let playbackCallbackId = null;
+		const dataPointColors = { x: '#2e9cff', y: '#e85be1', vx: '#2e9cff', vy: '#e85be1' };
+		let frameData = [];
+		let isPlaying = false;
+		let positionChart = null;
+		let skippingFrame = false;
+		let blobUrl = null;
+		let currentPlotMode = 'pos'; // Tracks 'x', 'y', 'pos', 'vx', 'vy', or 'vxy'
+		let crossesVisible = true; // Toggle for hiding crosses on video
+		let graphCopyInProgress = false;
+		let graphTouchCopyMode = false;
+		let graphCopyStatusResetTimeoutId = 0;
+		let hasUnsavedChanges = false;
+		let videoReady = false;
+		let videoFileInfo = null;
+		let undoHistory = [];
+		let cancelFpsDetection = () => {};
+		let playbackCallbackId = null;
+		let frameStep = 1; // Frames moved by each step, and after each mark
 
-			const GRAPH_PNG_BASE_SCALE = 3;
-			const GRAPH_PNG_MAX_CANVAS_SIDE = 8192;
-			const GRAPH_PNG_MAX_PIXELS = 16_777_216; // 16 MP safety cap
-			const GRAPH_COPY_PADDING_PX = 8;
-			const GRAPH_COPY_SUCCESS_MS = 1500;
-			const GRAPH_COPY_FAIL_MS = 2000;
+		const GRAPH_PNG_BASE_SCALE = 3;
+		const GRAPH_PNG_MAX_CANVAS_SIDE = 8192;
+		const GRAPH_PNG_MAX_PIXELS = 16_777_216; // 16 MP safety cap
+		const GRAPH_COPY_PADDING_PX = 8;
+		const GRAPH_COPY_SUCCESS_MS = 1500;
+		const GRAPH_COPY_FAIL_MS = 2000;
 
 		let calibrationMode = false;
 		let calibrationStart = null;
 		let calibrationEnd = null;
+		let previousCalibration = null; // The line to put back if a new one is cancelled
 		let scaleFactor = 1;
 		let scaleUnit = "pixels";
 		let isDrawingCalibration = false;
 
 		let originMode = false;
-			let originSet = false;
-			let originPoint = { x: 0, y: 0 };
+		let originSet = false;
+		let originPoint = { x: 0, y: 0 };
+		let originGuide = null; // Pointer position while choosing the origin, in canvas pixels
+		let originPointerDown = false;
 
-			const baseResolutionWidth = 1280; // Reference width (720p)
-			const UNSAVED_EXIT_WARNING = "You have unsaved tracking data. If you leave or refresh, your progress will be lost.";
-			const CLEAR_DATA_WARNING = "This will clear your tracked data points and cannot be undone. Continue?";
-			const NEW_VIDEO_WARNING = "Loading a new video will clear your current analysis data. Continue?";
+		const UNSAVED_EXIT_WARNING = "You have unsaved tracking data. If you leave or refresh, your progress will be lost.";
+		const CLEAR_DATA_WARNING = "Clear all marks? You can undo this.";
+		const NEW_VIDEO_WARNING = "Loading a new video will clear your current analysis data. Continue?";
+		const PLAY_ICON = 'M8 5.5v13l10.5-6.5z';
+		const PAUSE_ICON = 'M7 5.5h3.5v13H7zM13.5 5.5H17v13h-3.5z';
 
 		/* ===== Theme ===== */
 		window.PanPhyThemeToggle.mount(document.getElementById('theme-button'));
+		if (window.Chart) Chart.defaults.font.family = "'Manrope', system-ui, sans-serif";
 
 		function getCssVar(name) {
 			return getComputedStyle(document.documentElement).getPropertyValue(name).trim();
@@ -1116,6 +338,12 @@
 				axisColor: getCssVar('--chart-axis'),
 				textColor: getCssVar('--chart-text')
 			};
+		}
+
+		function refreshSeriesColors() {
+			const x = getCssVar('--series-x') || '#2e9cff';
+			const y = getCssVar('--series-y') || '#e85be1';
+			Object.assign(dataPointColors, { x, y, vx: x, vy: y });
 		}
 
 		function applyThemeToChart() {
@@ -1132,33 +360,63 @@
 		}
 
 		window.addEventListener('panphy:theme-change', () => {
-			applyThemeToChart();
+			refreshSeriesColors();
+			if (positionChart) replotCurrentView();
 			drawOverlay();
 		});
 
 		/* ===== DOM ===== */
 		const hiddenVideo = document.getElementById('hiddenVideo');
 		const openVideoButton = document.getElementById('openVideo');
+		const emptyImportButton = document.getElementById('emptyImport');
 		const videoUploadInput = document.getElementById('videoUploadInput');
 		const playPauseButton = document.getElementById('playPause');
+		const playPauseIcon = document.getElementById('playPauseIcon');
+		const previousFrameButton = document.getElementById('previousFrame');
+		const nextFrameButton = document.getElementById('nextFrame');
+		const frameStepSelect = document.getElementById('frameStep');
 		const calibrateButton = document.getElementById('calibrate');
 		const setOriginButton = document.getElementById('setOrigin');
-			const exportDataButton = document.getElementById('exportData');
-			const clearDataPointsButton = document.getElementById('clearDataPoints');
-			const clearCalibrationButton = document.getElementById('clearCalibration');
-			const clearOriginButton = document.getElementById('clearOrigin');
-			const plotXButton = document.getElementById('plotX');
-			const plotYButton = document.getElementById('plotY');
-			const plotXYButton = document.getElementById('plotXY');
-			const plotVxButton = document.getElementById('plotVx');
-			const plotVyButton = document.getElementById('plotVy');
-			const plotVxVyButton = document.getElementById('plotVxVy');
-			const hideCrossesToggle = document.getElementById('hideCrossesToggle');
-			const chartCanvasContainer = document.getElementById('chartCanvasContainer');
-			const chartCopyActionButton = document.getElementById('chartCopyAction');
+		const exportDataButton = document.getElementById('exportData');
+		const clearButton = document.getElementById('clearButton');
+		const clearMenu = document.getElementById('clearMenu');
+		const clearDataPointsButton = document.getElementById('clearDataPoints');
+		const clearCalibrationButton = document.getElementById('clearCalibration');
+		const clearOriginButton = document.getElementById('clearOrigin');
+		const projectButton = document.getElementById('projectButton');
+		const projectMenu = document.getElementById('projectMenu');
+		const saveProjectButton = document.getElementById('saveProject');
+		const loadProjectButton = document.getElementById('loadProject');
+		const undoPointButton = document.getElementById('undoPoint');
+		const plotPositionButton = document.getElementById('plotPosition');
+		const plotVelocityButton = document.getElementById('plotVelocity');
+		const plotCompXButton = document.getElementById('plotCompX');
+		const plotCompYButton = document.getElementById('plotCompY');
+		const plotCompXYButton = document.getElementById('plotCompXY');
+		const hideCrossesToggle = document.getElementById('hideCrossesToggle');
+		const chartCanvasContainer = document.getElementById('chartCanvasContainer');
+		const chartCopyActionButton = document.getElementById('chartCopyAction');
+		const graphEmpty = document.getElementById('graphEmpty');
+		const graphHint = document.getElementById('graphHint');
+		const graphControls = document.getElementById('graphControls');
+		const graphView = document.getElementById('graphView');
+		const pointEditor = document.getElementById('pointEditor');
+		const showGraphTab = document.getElementById('showGraph');
+		const showPointsTab = document.getElementById('showPoints');
+		const messageBar = document.getElementById('messageBar');
+		const messageEl = document.getElementById('message');
+		const modeCancelButton = document.getElementById('modeCancel');
+		const videoStage = document.getElementById('videoStage');
+		const videoWrapper = document.getElementById('videoWrapper');
+		const emptyVideo = document.getElementById('emptyVideo');
+		const videoName = document.getElementById('videoName');
+		const fpsLabel = document.getElementById('fpsLabel');
+		const saveStatus = document.getElementById('saveStatus');
+		const guideDialog = document.getElementById('guideDialog');
 
 		const slider = document.getElementById('slider');
 		const timeDisplay = document.getElementById('timeDisplay');
+		const frameDisplay = document.getElementById('frameDisplay');
 		const frameCanvas = document.getElementById('frameCanvas');
 		const overlayCanvas = document.getElementById('overlayCanvas');
 		const ctx = frameCanvas.getContext('2d');
@@ -1167,33 +425,45 @@
 		const calibrationPrompt = document.getElementById('calibrationPrompt');
 		const actualLengthInput = document.getElementById('actualLength');
 		const actualUnitInput = document.getElementById('actualUnit');
-		const confirmCalibrationButton = document.getElementById('confirmCalibration');
 		const cancelCalibrationButton = document.getElementById('cancelCalibration');
 
 		const exportPrompt = document.getElementById('exportPrompt');
 		const exportFilenameInput = document.getElementById('exportFilename');
-			const confirmExportButton = document.getElementById('confirmExport');
-			const cancelExportButton = document.getElementById('cancelExport');
+		const cancelExportButton = document.getElementById('cancelExport');
 
-			const frameRatePrompt = document.getElementById('frameRatePrompt');
-			const userCaptureFrameRateInput = document.getElementById('userCaptureFrameRate');
-			const confirmFrameRateButton = document.getElementById('confirmFrameRate');
-			const cancelFrameRateButton = document.getElementById('cancelFrameRate');
-			const frameRateButton = document.getElementById('frameRateButton');
-			const specialRecordingCheckbox = document.getElementById('specialRecordingMode');
-			const captureRateSection = document.getElementById('captureRateSection');
-			const detectedFpsDisplay = document.getElementById('detectedFpsDisplay');
-			const positionChartCanvas = document.getElementById('positionChart');
+		const frameRatePrompt = document.getElementById('frameRatePrompt');
+		const userPlaybackFrameRateInput = document.getElementById('userPlaybackFrameRate');
+		const userCaptureFrameRateInput = document.getElementById('userCaptureFrameRate');
+		const cancelFrameRateButton = document.getElementById('cancelFrameRate');
+		const frameRateButton = document.getElementById('frameRateButton');
+		const specialRecordingCheckbox = document.getElementById('specialRecordingMode');
+		const captureRateSection = document.getElementById('captureRateSection');
+		const detectedFpsDisplay = document.getElementById('detectedFpsDisplay');
+		const positionChartCanvas = document.getElementById('positionChart');
 
 		function canvasYToCartesianY(y) { return frameCanvas.height - y; }
 
 		function cartesianYToCanvasY(y) { return frameCanvas.height - y; }
 
-		function formatTime(t) {
-			const m = Math.floor(t / 60),
-				s = Math.floor(t % 60),
-				ms = Math.floor((t - Math.floor(t)) * 1000);
-			return `${m}:${s.toString().padStart(2, "0")}.${ms.toString().padStart(3, "0")}`;
+		function setMessage(text) {
+			messageEl.textContent = text;
+		}
+
+		function formatNumber(value, digits = 4) {
+			if (!Number.isFinite(value)) return '';
+			return String(Number(value.toPrecision(digits)));
+		}
+
+		function unitLabel() {
+			return scaleUnit === 'pixels' ? 'px' : scaleUnit;
+		}
+
+		function isCalibrated() {
+			return scaleFactor !== 1 || scaleUnit !== 'pixels';
+		}
+
+		function currentFrameIndex() {
+			return Math.floor(hiddenVideo.currentTime * playbackFrameRate + 1e-4);
 		}
 
 		function getAnalysisTime(playbackTime) {
@@ -1201,226 +471,231 @@
 			return playbackTime * playbackFrameRate / captureFrameRate;
 		}
 
-			function updateTimeDisplay(playbackTime) {
-				timeDisplay.textContent = formatTime(getAnalysisTime(playbackTime));
-			}
-
-			function markUnsavedChanges() {
-				hasUnsavedChanges = true;
-			}
-
-			function clearUnsavedChanges() {
-				hasUnsavedChanges = false;
-			}
-
-			function hasDataLossRisk() {
-				return frameData.length > 0
-					|| originSet
-					|| scaleFactor !== 1
-					|| scaleUnit !== "pixels";
-			}
-
-			function confirmDataLoss(message) {
-				if (!hasDataLossRisk()) return true;
-				return window.confirm(message);
-			}
-
-			function confirmVideoImportReplace() {
-				const hasLoadedVideo = Boolean(blobUrl);
-				if (!hasLoadedVideo && !hasDataLossRisk()) return true;
-				return window.confirm(NEW_VIDEO_WARNING);
-			}
-
-			// Scale helper
-			function getVisualScale() {
-			if (!frameCanvas.width) return 1;
-			return Math.max(0.5, frameCanvas.width / baseResolutionWidth);
+		function updateTimeDisplay(playbackTime) {
+			timeDisplay.textContent = `${getAnalysisTime(playbackTime).toFixed(3)} s`;
+			const total = Math.max(1, Math.round(getSeekableEnd() * playbackFrameRate));
+			const frame = Math.min(total, Math.floor(playbackTime * playbackFrameRate + 1e-4) + 1);
+			frameDisplay.textContent = videoReady ? `frame ${frame} / ${total}` : 'frame 0';
+			highlightCurrentRow();
 		}
 
-			/* Seekable helpers */
-			function getSeekableEnd() {
-				const s = hiddenVideo.seekable;
-				if (s && s.length > 0) return s.end(s.length - 1);
-				const d = hiddenVideo.duration;
-				if (Number.isFinite(d) && d > 0) return d;
-				return 0;
+		function markUnsavedChanges() {
+			hasUnsavedChanges = true;
+			updateSaveStatus();
+		}
+
+		function clearUnsavedChanges() {
+			hasUnsavedChanges = false;
+			updateSaveStatus();
+		}
+
+		function updateSaveStatus() {
+			saveStatus.textContent = hasUnsavedChanges ? 'unsaved changes' : '';
+			saveStatus.classList.toggle('is-dirty', hasUnsavedChanges);
+		}
+
+		function hasDataLossRisk() {
+			return frameData.length > 0
+				|| originSet
+				|| scaleFactor !== 1
+				|| scaleUnit !== "pixels";
+		}
+
+		function confirmDataLoss(message) {
+			if (!hasDataLossRisk()) return true;
+			return window.confirm(message);
+		}
+
+		// Marks and labels keep the same size on screen whatever the video's resolution.
+		function getVisualScale() {
+			const shownWidth = frameCanvas.getBoundingClientRect().width;
+			if (!frameCanvas.width || !shownWidth) return 1;
+			return frameCanvas.width / shownWidth;
+		}
+
+		/* Seekable helpers */
+		function getSeekableEnd() {
+			const s = hiddenVideo.seekable;
+			if (s && s.length > 0) return s.end(s.length - 1);
+			const d = hiddenVideo.duration;
+			if (Number.isFinite(d) && d > 0) return d;
+			return 0;
+		}
+
+		function isSafariBrowser() {
+			const ua = navigator.userAgent;
+			return /Safari/.test(ua) && !/Chrome|Chromium|CriOS|Edg/.test(ua);
+		}
+
+		function isTouchCopyMode() {
+			const hasCoarsePointer = typeof window.matchMedia === 'function'
+				&& window.matchMedia('(hover: none), (pointer: coarse)').matches;
+			const hasTouchPoints = Number.isFinite(navigator.maxTouchPoints) && navigator.maxTouchPoints > 0;
+			return hasCoarsePointer || hasTouchPoints;
+		}
+
+		function canWriteClipboardItems() {
+			return typeof ClipboardItem !== 'undefined'
+				&& Boolean(navigator.clipboard)
+				&& typeof navigator.clipboard.write === 'function';
+		}
+
+		function openTouchGraphCopyActions() {
+			if (!graphTouchCopyMode || !chartCanvasContainer || !chartCopyActionButton || chartCopyActionButton.hidden) return;
+			chartCanvasContainer.classList.add('touch-copy-open');
+		}
+
+		function closeTouchGraphCopyActions() {
+			if (!chartCanvasContainer) return;
+			chartCanvasContainer.classList.remove('touch-copy-open');
+		}
+
+		function setGraphCopyActionLabel(label, disabled = false) {
+			if (!chartCopyActionButton) return;
+			chartCopyActionButton.textContent = label;
+			chartCopyActionButton.disabled = disabled;
+		}
+
+		function resetGraphCopyStatus() {
+			if (graphCopyStatusResetTimeoutId) {
+				clearTimeout(graphCopyStatusResetTimeoutId);
+				graphCopyStatusResetTimeoutId = 0;
+			}
+			if (!chartCanvasContainer) return;
+			chartCanvasContainer.classList.remove('copied', 'copy-failed', 'copying');
+			setGraphCopyActionLabel('Copy image', false);
+		}
+
+		function scheduleGraphCopyStatusReset(delayMs) {
+			if (graphCopyStatusResetTimeoutId) {
+				clearTimeout(graphCopyStatusResetTimeoutId);
+			}
+			graphCopyStatusResetTimeoutId = window.setTimeout(() => {
+				graphCopyStatusResetTimeoutId = 0;
+				resetGraphCopyStatus();
+			}, delayMs);
+		}
+
+		function getGraphRasterScale(widthPx, heightPx) {
+			const safeWidth = Math.max(1, widthPx);
+			const safeHeight = Math.max(1, heightPx);
+			const dpr = Number.isFinite(window.devicePixelRatio) ? window.devicePixelRatio : 1;
+			const requestedScale = Math.max(GRAPH_PNG_BASE_SCALE, Math.ceil(dpr * 2));
+			const maxScaleBySide = Math.min(
+				GRAPH_PNG_MAX_CANVAS_SIDE / safeWidth,
+				GRAPH_PNG_MAX_CANVAS_SIDE / safeHeight
+			);
+			const maxScaleByPixels = Math.sqrt(GRAPH_PNG_MAX_PIXELS / (safeWidth * safeHeight));
+			return Math.max(1, Math.min(requestedScale, maxScaleBySide, maxScaleByPixels));
+		}
+
+		async function rasterizeGraphToPngBlob() {
+			if (!positionChartCanvas || !chartCanvasContainer) return null;
+
+			const rect = positionChartCanvas.getBoundingClientRect();
+			const widthPx = rect.width > 0 ? rect.width : Math.max(1, positionChartCanvas.width);
+			const heightPx = rect.height > 0 ? rect.height : Math.max(1, positionChartCanvas.height);
+			if (widthPx <= 1 || heightPx <= 1) return null;
+
+			const scale = getGraphRasterScale(widthPx, heightPx);
+			const paddingPx = Math.max(1, Math.round(GRAPH_COPY_PADDING_PX * scale));
+			const outWidth = Math.ceil(widthPx * scale) + (paddingPx * 2);
+			const outHeight = Math.ceil(heightPx * scale) + (paddingPx * 2);
+
+			const exportCanvas = document.createElement('canvas');
+			exportCanvas.width = outWidth;
+			exportCanvas.height = outHeight;
+			const exportCtx = exportCanvas.getContext('2d');
+			if (!exportCtx) return null;
+
+			// The graph sits on the pane's surface colour, so the copy does too.
+			exportCtx.fillStyle = getCssVar('--surface') || '#ffffff';
+			exportCtx.fillRect(0, 0, outWidth, outHeight);
+			exportCtx.imageSmoothingEnabled = true;
+			exportCtx.imageSmoothingQuality = 'high';
+			exportCtx.drawImage(
+				positionChartCanvas,
+				paddingPx,
+				paddingPx,
+				outWidth - (paddingPx * 2),
+				outHeight - (paddingPx * 2)
+			);
+
+			return new Promise(resolve => {
+				exportCanvas.toBlob(blob => resolve(blob || null), 'image/png');
+			});
+		}
+
+		function showGraphCopyFeedback() {
+			if (!chartCanvasContainer) return;
+			chartCanvasContainer.classList.remove('copy-failed');
+			chartCanvasContainer.classList.add('copied');
+			if (graphTouchCopyMode) {
+				setGraphCopyActionLabel('Copied!', false);
+			}
+			scheduleGraphCopyStatusReset(GRAPH_COPY_SUCCESS_MS);
+		}
+
+		function showGraphCopyFailedFeedback() {
+			if (!chartCanvasContainer) return;
+			chartCanvasContainer.classList.remove('copied');
+			chartCanvasContainer.classList.add('copy-failed');
+			if (graphTouchCopyMode) {
+				setGraphCopyActionLabel('Copy failed', false);
+			}
+			scheduleGraphCopyStatusReset(GRAPH_COPY_FAIL_MS);
+		}
+
+		async function copyGraphImageToClipboard() {
+			if (!chartCanvasContainer || !positionChartCanvas || graphCopyInProgress) return false;
+			if (!canWriteClipboardItems()) {
+				showGraphCopyFailedFeedback();
+				setMessage("Image clipboard copy is not supported by this browser.");
+				return false;
+			}
+			if (graphCopyStatusResetTimeoutId) {
+				clearTimeout(graphCopyStatusResetTimeoutId);
+				graphCopyStatusResetTimeoutId = 0;
 			}
 
-			function isSafariBrowser() {
-				const ua = navigator.userAgent;
-				return /Safari/.test(ua) && !/Chrome|Chromium|CriOS|Edg/.test(ua);
+			graphCopyInProgress = true;
+			chartCanvasContainer.classList.remove('copied', 'copy-failed');
+			chartCanvasContainer.classList.add('copying');
+			if (graphTouchCopyMode) {
+				setGraphCopyActionLabel('Copying...', true);
 			}
 
-			function isTouchCopyMode() {
-				const hasCoarsePointer = typeof window.matchMedia === 'function'
-					&& window.matchMedia('(hover: none), (pointer: coarse)').matches;
-				const hasTouchPoints = Number.isFinite(navigator.maxTouchPoints) && navigator.maxTouchPoints > 0;
-				return hasCoarsePointer || hasTouchPoints;
-			}
+			const pngPromise = rasterizeGraphToPngBlob().then(blob => {
+				if (!blob) throw new Error('Graph PNG rasterization failed');
+				return blob;
+			});
 
-			function canWriteClipboardItems() {
-				return typeof ClipboardItem !== 'undefined'
-					&& Boolean(navigator.clipboard)
-					&& typeof navigator.clipboard.write === 'function';
-			}
-
-			function openTouchGraphCopyActions() {
-				if (!graphTouchCopyMode || !chartCanvasContainer || !chartCopyActionButton || chartCopyActionButton.hidden) return;
-				chartCanvasContainer.classList.add('touch-copy-open');
-			}
-
-			function closeTouchGraphCopyActions() {
-				if (!chartCanvasContainer) return;
-				chartCanvasContainer.classList.remove('touch-copy-open');
-			}
-
-			function setGraphCopyActionLabel(label, disabled = false) {
-				if (!chartCopyActionButton) return;
-				chartCopyActionButton.textContent = label;
-				chartCopyActionButton.disabled = disabled;
-			}
-
-			function resetGraphCopyStatus() {
-				if (graphCopyStatusResetTimeoutId) {
-					clearTimeout(graphCopyStatusResetTimeoutId);
-					graphCopyStatusResetTimeoutId = 0;
+			try {
+				if (isSafariBrowser()) {
+					const item = new ClipboardItem({ 'image/png': pngPromise });
+					await navigator.clipboard.write([item]);
+				} else {
+					const blob = await pngPromise;
+					await navigator.clipboard.write([new ClipboardItem({ 'image/png': blob })]);
 				}
-				if (!chartCanvasContainer) return;
-				chartCanvasContainer.classList.remove('copied', 'copy-failed', 'copying');
-				setGraphCopyActionLabel('Copy image', false);
-			}
-
-			function scheduleGraphCopyStatusReset(delayMs) {
-				if (graphCopyStatusResetTimeoutId) {
-					clearTimeout(graphCopyStatusResetTimeoutId);
-				}
-				graphCopyStatusResetTimeoutId = window.setTimeout(() => {
-					graphCopyStatusResetTimeoutId = 0;
-					resetGraphCopyStatus();
-				}, delayMs);
-			}
-
-			function getGraphRasterScale(widthPx, heightPx) {
-				const safeWidth = Math.max(1, widthPx);
-				const safeHeight = Math.max(1, heightPx);
-				const dpr = Number.isFinite(window.devicePixelRatio) ? window.devicePixelRatio : 1;
-				const requestedScale = Math.max(GRAPH_PNG_BASE_SCALE, Math.ceil(dpr * 2));
-				const maxScaleBySide = Math.min(
-					GRAPH_PNG_MAX_CANVAS_SIDE / safeWidth,
-					GRAPH_PNG_MAX_CANVAS_SIDE / safeHeight
-				);
-				const maxScaleByPixels = Math.sqrt(GRAPH_PNG_MAX_PIXELS / (safeWidth * safeHeight));
-				return Math.max(1, Math.min(requestedScale, maxScaleBySide, maxScaleByPixels));
-			}
-
-			async function rasterizeGraphToPngBlob() {
-				if (!positionChartCanvas || !chartCanvasContainer) return null;
-
-				const rect = positionChartCanvas.getBoundingClientRect();
-				const widthPx = rect.width > 0 ? rect.width : Math.max(1, positionChartCanvas.width);
-				const heightPx = rect.height > 0 ? rect.height : Math.max(1, positionChartCanvas.height);
-				if (widthPx <= 1 || heightPx <= 1) return null;
-
-				const scale = getGraphRasterScale(widthPx, heightPx);
-				const paddingPx = Math.max(1, Math.round(GRAPH_COPY_PADDING_PX * scale));
-				const outWidth = Math.ceil(widthPx * scale) + (paddingPx * 2);
-				const outHeight = Math.ceil(heightPx * scale) + (paddingPx * 2);
-
-				const exportCanvas = document.createElement('canvas');
-				exportCanvas.width = outWidth;
-				exportCanvas.height = outHeight;
-				const exportCtx = exportCanvas.getContext('2d');
-				if (!exportCtx) return null;
-
-				const containerStyles = getComputedStyle(chartCanvasContainer);
-				const backgroundColor = containerStyles.backgroundColor || getCssVar('--surface') || '#ffffff';
-				exportCtx.fillStyle = backgroundColor;
-				exportCtx.fillRect(0, 0, outWidth, outHeight);
-				exportCtx.imageSmoothingEnabled = true;
-				exportCtx.imageSmoothingQuality = 'high';
-				exportCtx.drawImage(
-					positionChartCanvas,
-					paddingPx,
-					paddingPx,
-					outWidth - (paddingPx * 2),
-					outHeight - (paddingPx * 2)
-				);
-
-				return new Promise(resolve => {
-					exportCanvas.toBlob(blob => resolve(blob || null), 'image/png');
-				});
-			}
-
-			function showGraphCopyFeedback() {
-				if (!chartCanvasContainer) return;
-				chartCanvasContainer.classList.remove('copy-failed');
-				chartCanvasContainer.classList.add('copied');
-				if (graphTouchCopyMode) {
-					setGraphCopyActionLabel('Copied!', false);
-				}
-				scheduleGraphCopyStatusReset(GRAPH_COPY_SUCCESS_MS);
-			}
-
-			function showGraphCopyFailedFeedback() {
-				if (!chartCanvasContainer) return;
-				chartCanvasContainer.classList.remove('copied');
-				chartCanvasContainer.classList.add('copy-failed');
-				if (graphTouchCopyMode) {
-					setGraphCopyActionLabel('Copy failed', false);
-				}
-				scheduleGraphCopyStatusReset(GRAPH_COPY_FAIL_MS);
-			}
-
-			async function copyGraphImageToClipboard() {
-				if (!chartCanvasContainer || !positionChartCanvas || graphCopyInProgress) return false;
-				if (!canWriteClipboardItems()) {
-					showGraphCopyFailedFeedback();
-					document.getElementById('message').innerHTML = "<p>Image clipboard copy is not supported by this browser.</p>";
-					return false;
-				}
-				if (graphCopyStatusResetTimeoutId) {
-					clearTimeout(graphCopyStatusResetTimeoutId);
-					graphCopyStatusResetTimeoutId = 0;
-				}
-
-				graphCopyInProgress = true;
-				chartCanvasContainer.classList.remove('copied', 'copy-failed');
-				chartCanvasContainer.classList.add('copying');
-				if (graphTouchCopyMode) {
-					setGraphCopyActionLabel('Copying...', true);
-				}
-
-				const pngPromise = rasterizeGraphToPngBlob().then(blob => {
-					if (!blob) throw new Error('Graph PNG rasterization failed');
-					return blob;
-				});
-
-				try {
-					if (isSafariBrowser()) {
-						const item = new ClipboardItem({ 'image/png': pngPromise });
-						await navigator.clipboard.write([item]);
-					} else {
-						const blob = await pngPromise;
-						await navigator.clipboard.write([new ClipboardItem({ 'image/png': blob })]);
-					}
-					showGraphCopyFeedback();
-					return true;
-				} catch (err) {
-					console.error('Failed to copy graph image:', err);
-					showGraphCopyFailedFeedback();
-					return false;
-				} finally {
-					graphCopyInProgress = false;
-					chartCanvasContainer.classList.remove('copying');
-					if (graphTouchCopyMode && !chartCanvasContainer.classList.contains('copied') && !chartCanvasContainer.classList.contains('copy-failed')) {
-						setGraphCopyActionLabel('Copy image', false);
-					}
+				showGraphCopyFeedback();
+				return true;
+			} catch (err) {
+				console.error('Failed to copy graph image:', err);
+				showGraphCopyFailedFeedback();
+				return false;
+			} finally {
+				graphCopyInProgress = false;
+				chartCanvasContainer.classList.remove('copying');
+				if (graphTouchCopyMode && !chartCanvasContainer.classList.contains('copied') && !chartCanvasContainer.classList.contains('copy-failed')) {
+					setGraphCopyActionLabel('Copy image', false);
 				}
 			}
+		}
 
 		/* ===== Auto FPS Detection ===== */
 		function detectFrameRate() {
-            cancelFpsDetection();
+			cancelFpsDetection();
 			if (typeof hiddenVideo.requestVideoFrameCallback !== 'function') {
 				// Browser doesn't support requestVideoFrameCallback, use fallback
 				console.log('requestVideoFrameCallback not supported, using fallback FPS');
@@ -1429,25 +704,25 @@
 			}
 
 			fpsDetectionPending = true;
-            disableControls(true);
-			detectedFpsDisplay.textContent = 'Detecting...';
-			frameRateButton.textContent = 'FPS: ...';
+			disableControls(true);
+			detectedFpsDisplay.textContent = 'detecting...';
+			fpsLabel.textContent = '... fps';
 
 			const frameTimes = [];
 			const maxSamples = 10;
 			let lastMediaTime = null;
 			let callbackId = null;
 			let timeoutId = null;
-            let sampleTimeoutId = null;
-            let active = true;
-            const originalPlaybackRate = hiddenVideo.playbackRate;
-            hiddenVideo.playbackRate = 0.25;
+			let sampleTimeoutId = null;
+			let active = true;
+			const originalPlaybackRate = hiddenVideo.playbackRate;
+			hiddenVideo.playbackRate = 0.25;
 
 			const cleanup = () => {
-                active = false;
-                hiddenVideo.playbackRate = originalPlaybackRate;
+				active = false;
+				hiddenVideo.playbackRate = originalPlaybackRate;
 				fpsDetectionPending = false;
-                clearTimeout(sampleTimeoutId);
+				clearTimeout(sampleTimeoutId);
 				if (callbackId !== null && typeof hiddenVideo.cancelVideoFrameCallback === 'function') {
 					hiddenVideo.cancelVideoFrameCallback(callbackId);
 				}
@@ -1458,7 +733,7 @@
 
 			cancelFpsDetection = cleanup;
 
-            const calculateFps = () => {
+			const calculateFps = () => {
 				cleanup();
 
 				if (frameTimes.length < 2) {
@@ -1488,8 +763,8 @@
 
 				// Round to common frame rates for cleaner display
 				const commonRates = [15, 24, 25, 29.97, 30, 48, 50, 59.94, 60, 120, 240];
-                const nearest = commonRates.reduce((best, rate) => Math.abs(fps - rate) < Math.abs(fps - best) ? rate : best);
-                const roundedFps = Math.abs(fps - nearest) < 1 ? nearest : fps;
+				const nearest = commonRates.reduce((best, rate) => Math.abs(fps - rate) < Math.abs(fps - best) ? rate : best);
+				const roundedFps = Math.abs(fps - nearest) < 1 ? nearest : fps;
 
 				console.log(`Detected FPS: ${fps.toFixed(2)}, rounded to: ${roundedFps}`);
 				applyDetectedFps(roundedFps);
@@ -1515,7 +790,6 @@
 			};
 
 			// Start detection by playing briefly
-			const wasPlaying = isPlaying;
 			const startTime = hiddenVideo.currentTime;
 
 			// Set timeout for detection (max 2 seconds)
@@ -1531,7 +805,7 @@
 			// Play video to get frames
 			hiddenVideo.play().then(() => {
 				if (!active) return;
-                // Wait for enough samples, then stop
+				// Wait for enough samples, then stop
 				sampleTimeoutId = setTimeout(() => {
 					if (fpsDetectionPending && frameTimes.length >= 3) {
 						hiddenVideo.pause();
@@ -1541,7 +815,7 @@
 				}, 500);
 			}).catch(() => {
 				if (!active) return;
-                // Autoplay blocked, use fallback
+				// Autoplay blocked, use fallback
 				cleanup();
 				console.log('Autoplay blocked, using fallback FPS');
 				applyDetectedFps(30);
@@ -1550,7 +824,6 @@
 
 		function applyDetectedFps(fps) {
 			detectedFps = fps;
-            disableControls(!videoReady);
 			playbackFrameRate = fps;
 
 			// If not in special recording mode, capture rate = playback rate
@@ -1561,14 +834,13 @@
 			// Update UI
 			detectedFpsDisplay.textContent = `${fps} fps`;
 			updateFpsButtonText();
+			disableControls(!videoReady);
 
 			// Update slider step size
-			slider.step = Math.max(1 / playbackFrameRate / 2, 0.001).toString();
+			slider.step = getSliderStep();
 
 			// Reset video to frame 0 and ensure it's paused for manual playback
-			hiddenVideo.pause();
-			isPlaying = false;
-			playPauseButton.textContent = "Play";
+			pauseVideo();
 			hiddenVideo.currentTime = 0;
 			slider.value = "0";
 			updateTimeDisplay(0);
@@ -1579,14 +851,20 @@
 				drawOverlay();
 			};
 			hiddenVideo.addEventListener('seeked', redrawOnSeek, { once: true });
+
+			if (videoReady && frameData.length === 0) {
+				setMessage(`Frame rate: ${fps} fps. Set the scale and origin if you need them, then click the object to mark it.`);
+			}
 		}
 
 		function updateFpsButtonText() {
-			if (isSpecialRecording) {
-				frameRateButton.textContent = `FPS: ${playbackFrameRate}/${captureFrameRate}`;
-			} else {
-				frameRateButton.textContent = `FPS: ${playbackFrameRate}`;
-			}
+			fpsLabel.textContent = isSpecialRecording
+				? `${formatNumber(captureFrameRate, 6)} fps slow-mo`
+				: `${formatNumber(playbackFrameRate, 6)} fps`;
+		}
+
+		function getSliderStep() {
+			return Math.max(1 / playbackFrameRate / 2, 0.001).toString();
 		}
 
 		function updateSliderDomain() {
@@ -1595,48 +873,162 @@
 				const currentMax = parseFloat(slider.max) || 0;
 				if (end > currentMax - 1e-3) {
 					slider.max = end.toString();
-					slider.disabled = false;
+					slider.disabled = !videoReady || fpsDetectionPending;
 				}
 			}
 		}
 
 		function disableControls(state) {
-            ['previousFrame', 'nextFrame', 'saveProject', 'loadProject'].forEach(id => document.getElementById(id).disabled = state);
-			playPauseButton.disabled = state;
-			calibrateButton.disabled = state;
-			setOriginButton.disabled = state;
-			plotXButton.disabled = state;
-			plotYButton.disabled = state;
-			plotXYButton.disabled = state;
-			plotVxButton.disabled = state;
-			plotVyButton.disabled = state;
-			plotVxVyButton.disabled = state;
-			clearDataPointsButton.disabled = state;
-			clearCalibrationButton.disabled = state;
-			clearOriginButton.disabled = state;
-			exportDataButton.disabled = state;
-			frameRateButton.disabled = state;
+			[previousFrameButton, nextFrameButton, playPauseButton, calibrateButton, setOriginButton, frameRateButton,
+				hideCrossesToggle, clearButton, saveProjectButton, loadProjectButton, frameStepSelect,
+				plotPositionButton, plotVelocityButton, plotCompXButton, plotCompYButton, plotCompXYButton]
+				.forEach(control => { control.disabled = state; });
 			slider.disabled = state;
-			hideCrossesToggle.disabled = state;
+			updateStatusBar();
+		}
+
+		// The status bar, the Table count and the tools that need something to act on.
+		function updateStatusBar() {
+			const count = frameData.length;
+			const ready = videoReady && !fpsDetectionPending;
+			document.getElementById('statusPoints').textContent = `${count} mark${count === 1 ? '' : 's'}`;
+			document.getElementById('pointCount').textContent = String(count);
+			document.getElementById('statusScale').textContent = isCalibrated()
+				? `scale: 1 px = ${formatNumber(scaleFactor)} ${scaleUnit}`
+				: 'scale: pixels';
+			document.getElementById('statusOrigin').textContent = originSet
+				? `origin: (${Math.round(originPoint.x)}, ${Math.round(originPoint.y)}) px`
+				: 'origin: bottom-left';
+			clearDataPointsButton.disabled = !ready || count === 0;
+			clearCalibrationButton.disabled = !ready || !isCalibrated();
+			clearOriginButton.disabled = !ready || !originSet;
+			exportDataButton.disabled = !ready || count === 0;
+			undoPointButton.disabled = !ready || undoHistory.length === 0;
+		}
+
+		/* ===== Dialogs and menus ===== */
+		function openDialog(dialog) {
+			closeMenus();
+			dialog.querySelectorAll('input').forEach(input => input.setCustomValidity(''));
+			if (!dialog.open) dialog.showModal();
+			dialog.scrollTop = 0; // Focus may land on a button at the bottom of a tall dialog
+		}
+
+		function closeDialog(dialog) {
+			if (dialog.open) dialog.close();
+		}
+
+		function closeAllDialogs() {
+			document.querySelectorAll('dialog[open]').forEach(dialog => dialog.close());
+		}
+
+		// Shows a message on a field and keeps the dialog open.
+		function rejectField(input, text) {
+			input.setCustomValidity(text);
+			input.reportValidity();
+			input.addEventListener('input', () => input.setCustomValidity(''), { once: true });
+		}
+
+		const MENUS = [[projectButton, projectMenu], [clearButton, clearMenu]];
+
+		function closeMenus() {
+			MENUS.forEach(([button, menu]) => {
+				menu.hidden = true;
+				button.setAttribute('aria-expanded', 'false');
+			});
+		}
+
+		MENUS.forEach(([button, menu]) => {
+			button.addEventListener('click', (event) => {
+				event.stopPropagation();
+				const opening = menu.hidden;
+				closeMenus();
+				if (!opening) return;
+				menu.hidden = false;
+				button.setAttribute('aria-expanded', 'true');
+				menu.querySelector('button:not(:disabled)')?.focus();
+			});
+			menu.addEventListener('click', (event) => {
+				if (event.target.closest('button')) closeMenus();
+			});
+		});
+
+		document.addEventListener('click', (event) => {
+			if (!event.target.closest('.mt-menu-wrap')) closeMenus();
+		});
+
+		document.getElementById('guideButton').addEventListener('click', () => openDialog(guideDialog));
+
+		/* ===== Pick modes: drawing the scale line, choosing the origin ===== */
+		function showPickMode(text) {
+			messageBar.classList.add('is-mode');
+			modeCancelButton.hidden = false;
+			setMessage(text);
+			calibrateButton.setAttribute('aria-pressed', String(calibrationMode));
+			setOriginButton.setAttribute('aria-pressed', String(originMode));
+		}
+
+		function hidePickMode() {
+			messageBar.classList.remove('is-mode');
+			modeCancelButton.hidden = true;
+			calibrateButton.setAttribute('aria-pressed', 'false');
+			setOriginButton.setAttribute('aria-pressed', 'false');
+		}
+
+		function restorePreviousCalibration() {
+			if (!previousCalibration) return;
+			calibrationStart = previousCalibration.start;
+			calibrationEnd = previousCalibration.end;
+			previousCalibration = null;
+		}
+
+		function cancelPickMode() {
+			if (!calibrationMode && !originMode) return;
+			const wasCalibrating = calibrationMode;
+			if (calibrationMode) restorePreviousCalibration();
+			calibrationMode = false;
+			isDrawingCalibration = false;
+			originMode = false;
+			originGuide = null;
+			originPointerDown = false;
+			overlayCanvas.style.pointerEvents = "none";
+			hidePickMode();
+			drawOverlay();
+			setMessage(wasCalibrating ? 'Scale unchanged.' : 'Origin unchanged.');
+		}
+
+		modeCancelButton.addEventListener('click', cancelPickMode);
+
+		function pauseVideo() {
+			if (!hiddenVideo.paused) hiddenVideo.pause();
+			isPlaying = false;
+			setPlayIcon(false);
+		}
+
+		function setPlayIcon(playing) {
+			playPauseIcon.setAttribute('d', playing ? PAUSE_ICON : PLAY_ICON);
+			playPauseButton.setAttribute('aria-label', playing ? 'Pause' : 'Play');
 		}
 
 		/* ===== RESET FUNCTION ===== */
-			function resetApp() {
-                cancelFpsDetection();
-                videoReady = false;
-                undoHistory = [];
-				// 1. Clear data
-				frameData = [];
-				clearUnsavedChanges();
-				calibrationMode = false;
-				originMode = false;
+		function resetApp() {
+			cancelFpsDetection();
+			videoReady = false;
+			undoHistory = [];
+			// 1. Clear data
+			frameData = [];
+			clearUnsavedChanges();
+			calibrationMode = false;
+			originMode = false;
 			isDrawingCalibration = false;
 			skippingFrame = false;
 			isPlaying = false;
 			crossesVisible = true;
+			originGuide = null;
+			originPointerDown = false;
+			previousCalibration = null;
 
-			renderPointRows();
-            // 2. Reset FPS detection state
+			// 2. Reset FPS detection state
 			detectedFps = null;
 			isSpecialRecording = false;
 			fpsDetectionPending = false;
@@ -1660,86 +1052,147 @@
 			// 5. Clear Canvases
 			ctx.clearRect(0, 0, frameCanvas.width, frameCanvas.height);
 			overlayCtx.clearRect(0, 0, overlayCanvas.width, overlayCanvas.height);
+			videoWrapper.hidden = true;
+			emptyVideo.hidden = false;
 
 			// 6. Reset UI elements
-			playPauseButton.textContent = "Play";
-			frameCanvas.style.cursor = "default";
-			document.getElementById('crosshair').style.display = "none";
+			setPlayIcon(false);
 			overlayCanvas.style.pointerEvents = "none";
-			document.getElementById('message').innerHTML = "<p>Opening new video...</p>";
-			hideCrossesToggle.classList.remove('crosses-hidden');
-			hideCrossesToggle.querySelector('.toggle-text').textContent = 'Hide';
+			hidePickMode();
+			setMessage("Opening the video...");
+			hideCrossesToggle.setAttribute('aria-pressed', 'false');
+			hideCrossesToggle.querySelector('.toggle-text').textContent = 'Hide Marks';
 			resetGraphCopyStatus();
 			closeTouchGraphCopyActions();
 			specialRecordingCheckbox.checked = false;
 			captureRateSection.style.display = 'none';
-			detectedFpsDisplay.textContent = 'Detecting...';
-			frameRateButton.textContent = 'FPS: 30';
+			detectedFpsDisplay.textContent = 'detecting...';
+			updateFpsButtonText();
+			renderPointRows();
 
 			// 7. Hide any open prompts
-			calibrationPrompt.style.display = 'none';
-			exportPrompt.style.display = 'none';
-			frameRatePrompt.style.display = 'none';
+			closeAllDialogs();
+			closeMenus();
 
 			// 8. Disable controls until loaded
 			disableControls(true);
+			updateActivePlotButton();
 		}
 
-			/* Init */
-			document.addEventListener('DOMContentLoaded', () => {
-				disableControls(true);
-				updateFpsButtonText();
-				document.getElementById('analysisContainer').style.display = "none"; // Hide grid until loaded
-				frameCanvas.style.display = "none";
-				chartCanvasContainer.classList.add('copy-ready');
+		/* Init */
+		disableControls(true);
+		updateFpsButtonText();
+		refreshSeriesColors();
+		chartCanvasContainer.classList.add('copy-ready');
 
-				graphTouchCopyMode = isTouchCopyMode();
-				chartCanvasContainer.classList.toggle('touch-copy-mode', graphTouchCopyMode);
-				if (graphTouchCopyMode) {
-					chartCanvasContainer.removeAttribute('tabindex');
-					chartCanvasContainer.setAttribute('role', 'group');
-					chartCanvasContainer.setAttribute('aria-label', 'Graph copy actions');
-					chartCopyActionButton.hidden = false;
-				} else {
-					chartCanvasContainer.tabIndex = 0;
-					chartCanvasContainer.setAttribute('role', 'button');
-					chartCanvasContainer.setAttribute('aria-label', 'Copy graph image');
-					chartCopyActionButton.hidden = true;
-				}
-				setGraphCopyActionLabel('Copy image', false);
+		graphTouchCopyMode = isTouchCopyMode();
+		chartCanvasContainer.classList.toggle('touch-copy-mode', graphTouchCopyMode);
+		if (graphTouchCopyMode) {
+			chartCanvasContainer.removeAttribute('tabindex');
+			chartCanvasContainer.setAttribute('role', 'group');
+			chartCanvasContainer.setAttribute('aria-label', 'Graph copy actions');
+			chartCopyActionButton.hidden = false;
+			graphHint.textContent = 'Tap the graph to copy it';
+		} else {
+			chartCanvasContainer.tabIndex = 0;
+			chartCanvasContainer.setAttribute('role', 'button');
+			chartCanvasContainer.setAttribute('aria-label', 'Copy graph image');
+			chartCopyActionButton.hidden = true;
+		}
+		setGraphCopyActionLabel('Copy image', false);
 
-				// Toggle capture rate section visibility based on checkbox
-				specialRecordingCheckbox.addEventListener('change', () => {
-					captureRateSection.style.display = specialRecordingCheckbox.checked ? 'block' : 'none';
-				});
-			});
-
-			/* Import video */
-		openVideoButton.addEventListener('click', () => {
-			if (!confirmVideoImportReplace()) return;
-			videoUploadInput.click();
+		// Toggle capture rate section visibility based on checkbox
+		specialRecordingCheckbox.addEventListener('change', () => {
+			userCaptureFrameRateInput.setCustomValidity('');
+			captureRateSection.style.display = specialRecordingCheckbox.checked ? 'flex' : 'none';
 		});
 
-			videoUploadInput.addEventListener('change', (e) => {
-				const file = e.target.files?.[0];
-				if (!file) return; // User cancelled
+		/* Import video: the buttons, or a file dropped on the video area */
+		function chooseVideoFile() {
+			if (!confirmDataLoss(NEW_VIDEO_WARNING)) return;
+			videoUploadInput.click();
+		}
 
-				// Perform full reset before loading new file
-				if (blobUrl) URL.revokeObjectURL(blobUrl);
+		function openVideoFile(file) {
+			if (!file) return;
+			if (!/^video\//.test(file.type) && !/\.(mp4|m4v|mov|webm|ogv|ogg|mkv|avi)$/i.test(file.name)) {
+				setMessage(`${file.name} is not a video file.`);
+				return;
+			}
+			// Perform full reset before loading new file
+			if (blobUrl) URL.revokeObjectURL(blobUrl);
 			resetApp();
 
 			videoFileInfo = { name: file.name, size: file.size };
-            blobUrl = URL.createObjectURL(file);
+			videoName.textContent = file.name;
+			blobUrl = URL.createObjectURL(file);
 			hiddenVideo.src = blobUrl;
 			hiddenVideo.load();
+		}
+
+		openVideoButton.addEventListener('click', chooseVideoFile);
+		emptyImportButton.addEventListener('click', chooseVideoFile);
+
+		videoUploadInput.addEventListener('change', (e) => {
+			const file = e.target.files?.[0];
 			e.target.value = '';
+			openVideoFile(file); // Nothing happens if the user cancelled
 		});
+
+		videoStage.addEventListener('dragover', (event) => {
+			if (!event.dataTransfer || ![...event.dataTransfer.types].includes('Files')) return;
+			event.preventDefault();
+			event.dataTransfer.dropEffect = 'copy';
+			videoStage.classList.add('is-dragover');
+		});
+		videoStage.addEventListener('dragleave', (event) => {
+			if (!videoStage.contains(event.relatedTarget)) videoStage.classList.remove('is-dragover');
+		});
+		videoStage.addEventListener('drop', (event) => {
+			event.preventDefault();
+			videoStage.classList.remove('is-dragover');
+			const file = event.dataTransfer?.files?.[0];
+			if (!file || !confirmDataLoss(NEW_VIDEO_WARNING)) return;
+			openVideoFile(file);
+		});
+
+		// A file dropped beside the stage would otherwise open in the tab and replace the app.
+		document.addEventListener('dragover', (event) => event.preventDefault());
+		document.addEventListener('drop', (event) => event.preventDefault());
+
+		/* Fit the video to the stage, keeping its shape. Stacked panes cap the height
+		   so that a portrait clip still leaves the playback bar on screen. */
+		function fitVideoStage() {
+			if (videoWrapper.hidden || !frameCanvas.width || !frameCanvas.height) return;
+			const style = getComputedStyle(videoStage);
+			const availableWidth = videoStage.clientWidth - parseFloat(style.paddingLeft) - parseFloat(style.paddingRight);
+			const availableHeight = window.matchMedia('(max-width: 900px)').matches
+				? window.innerHeight * 0.5
+				: videoStage.clientHeight - parseFloat(style.paddingTop) - parseFloat(style.paddingBottom);
+			const aspect = frameCanvas.width / frameCanvas.height;
+			let width = Math.max(0, availableWidth);
+			let height = width / aspect;
+			if (height > availableHeight) {
+				height = Math.max(0, availableHeight);
+				width = height * aspect;
+			}
+			videoWrapper.style.width = `${Math.floor(width)}px`;
+			videoWrapper.style.height = `${Math.floor(height)}px`;
+		}
+
+		if (typeof ResizeObserver === 'function') {
+			new ResizeObserver(() => {
+				fitVideoStage();
+				drawFrame();
+				drawOverlay();
+			}).observe(videoStage);
+		}
 
 		/* Metadata */
 		hiddenVideo.addEventListener('loadedmetadata', () => {
 			slider.min = "0";
 			slider.max = "0";
-			slider.step = Math.max(1 / playbackFrameRate / 2, 0.001).toString();
+			slider.step = getSliderStep();
 			slider.value = "0";
 			hiddenVideo.currentTime = 0;
 			updateSliderDomain();
@@ -1750,45 +1203,46 @@
 		hiddenVideo.addEventListener('canplaythrough', updateSliderDomain);
 
 		hiddenVideo.addEventListener('error', () => {
-            cancelFpsDetection();
-            videoReady = false;
-            disableControls(true);
-            document.getElementById('message').textContent = 'This video could not be opened. Try a supported MP4 or WebM file.';
-        });
-        hiddenVideo.addEventListener('play', () => {
-            const paint = () => {
-                if (hiddenVideo.paused || hiddenVideo.ended) return;
-                drawFrame();
-                playbackCallbackId = hiddenVideo.requestVideoFrameCallback(paint);
-            };
-            if (hiddenVideo.requestVideoFrameCallback) {
-                if (playbackCallbackId !== null) hiddenVideo.cancelVideoFrameCallback(playbackCallbackId);
-                playbackCallbackId = hiddenVideo.requestVideoFrameCallback(paint);
-            }
-        });
-        /* First frame ready */
+			if (!hiddenVideo.getAttribute('src')) return;
+			cancelFpsDetection();
+			videoReady = false;
+			disableControls(true);
+			videoWrapper.hidden = true;
+			emptyVideo.hidden = false;
+			videoName.textContent = 'No video open';
+			setMessage('This video could not be opened. Try an MP4 or WebM file.');
+		});
+		hiddenVideo.addEventListener('play', () => {
+			if (!fpsDetectionPending) setPlayIcon(true);
+			const paint = () => {
+				if (hiddenVideo.paused || hiddenVideo.ended) return;
+				drawFrame();
+				playbackCallbackId = hiddenVideo.requestVideoFrameCallback(paint);
+			};
+			if (hiddenVideo.requestVideoFrameCallback) {
+				if (playbackCallbackId !== null) hiddenVideo.cancelVideoFrameCallback(playbackCallbackId);
+				playbackCallbackId = hiddenVideo.requestVideoFrameCallback(paint);
+			}
+		});
+		hiddenVideo.addEventListener('pause', () => setPlayIcon(false));
+
+		/* First frame ready */
 		hiddenVideo.addEventListener('loadeddata', () => {
 			videoReady = true;
-            frameCanvas.width = hiddenVideo.videoWidth || 1280;
+			frameCanvas.width = hiddenVideo.videoWidth || 1280;
 			frameCanvas.height = hiddenVideo.videoHeight || 720;
-			frameCanvas.style.display = "block";
-			document.getElementById('analysisContainer').style.display = "grid"; // Show grid
+			emptyVideo.hidden = true;
+			videoWrapper.hidden = false;
+			fitVideoStage();
 			disableControls(false);
 			drawFrame();
 			resizeOverlay();
 			drawOverlay();
 			plotPosition();
+			setMessage('Detecting the frame rate...');
 
 			// Trigger automatic FPS detection
 			detectFrameRate();
-
-			if (frameData.length === 0) {
-				document.getElementById('message').innerHTML =
-					"<ul style='text-align:left;padding-left:20px; margin:0;'>" +
-					"<li>Frame rate is estimated automatically. Check FPS settings, especially for slow-motion or time-lapse recordings.</li>" +
-					"<li>Click the video to record a data point.</li>" +
-					"</ul>";
-			}
 		});
 
 		/* Playback sync */
@@ -1812,47 +1266,48 @@
 		// Reset play button if video ends naturally
 		hiddenVideo.addEventListener('ended', () => {
 			isPlaying = false;
-			playPauseButton.textContent = "Play";
+			setPlayIcon(false);
 		});
 
 		/* Scrubbing */
 		function scrubToSlider() {
-			if (!hiddenVideo.paused) {
-				hiddenVideo.pause();
-				isPlaying = false;
-				playPauseButton.textContent = "Play";
-			}
+			if (!hiddenVideo.paused) pauseVideo();
 			if (!videoReady || fpsDetectionPending || skippingFrame) return;
-            const end = getSeekableEnd();
+			const end = getSeekableEnd();
 			let t = parseFloat(slider.value);
 			if (!Number.isFinite(t)) return;
-            t = Math.round(t * playbackFrameRate) / playbackFrameRate;
-            if (end > 0) t = Math.min(t, Math.max(0, (Math.ceil(end * playbackFrameRate) - 1) / playbackFrameRate));
-            t = Math.max(0, t) + 0.00001;
+			t = Math.round(t * playbackFrameRate) / playbackFrameRate;
+			if (end > 0) t = Math.min(t, Math.max(0, (Math.ceil(end * playbackFrameRate) - 1) / playbackFrameRate));
+			t = Math.max(0, t) + 0.00001;
 			hiddenVideo.currentTime = t;
 			updateTimeDisplay(t);
 		}
 		slider.addEventListener('input', scrubToSlider);
 		slider.addEventListener('change', scrubToSlider);
 
+		// Shows the frame at a stored playback time, as the points table does.
+		function seekToPlaybackTime(playbackTime) {
+			if (!videoReady || fpsDetectionPending || skippingFrame) return;
+			pauseVideo();
+			hiddenVideo.currentTime = playbackTime + 0.00001;
+		}
+
 		/* Play/Pause */
-		playPauseButton.addEventListener('click', async () => {
+		async function togglePlay() {
 			if (!hiddenVideo.paused) {
-				hiddenVideo.pause();
-				playPauseButton.textContent = "Play";
-			} else {
-				try {
-					await hiddenVideo.play();
-					isPlaying = true;
-					playPauseButton.textContent = "Pause";
-				} catch {
-					isPlaying = false;
-					playPauseButton.textContent = "Play";
-				}
+				pauseVideo();
 				return;
 			}
-			isPlaying = false;
-		});
+			try {
+				await hiddenVideo.play();
+				isPlaying = true;
+				setPlayIcon(true);
+			} catch {
+				isPlaying = false;
+				setPlayIcon(false);
+			}
+		}
+		playPauseButton.addEventListener('click', togglePlay);
 
 		/* Click to add point and step */
 		frameCanvas.addEventListener('click', (event) => {
@@ -1864,125 +1319,89 @@
 				const canvasY = (event.clientY - rect.top) * scaleY;
 				const cartesianY = canvasYToCartesianY(canvasY);
 
-					// Store playbackTime so analysis time can be recalculated if FPS changes
-					rememberPoints();
-                    const frameIndex = Math.floor(hiddenVideo.currentTime * playbackFrameRate + 1e-4);
-                    const point = { x: canvasX, y: cartesianY, playbackTime: frameIndex / playbackFrameRate };
-                    frameData = frameData.filter(p => Math.round(p.playbackTime * playbackFrameRate) !== frameIndex);
-                    frameData.push(point);
-                    frameData.sort((a, b) => a.playbackTime - b.playbackTime);
-                    renderPointRows();
-					markUnsavedChanges();
+				// Store playbackTime so analysis time can be recalculated if FPS changes
+				rememberPoints();
+				const frameIndex = currentFrameIndex();
+				const point = { x: canvasX, y: cartesianY, playbackTime: frameIndex / playbackFrameRate };
+				frameData = frameData.filter(p => Math.round(p.playbackTime * playbackFrameRate) !== frameIndex);
+				frameData.push(point);
+				frameData.sort((a, b) => a.playbackTime - b.playbackTime);
+				renderPointRows();
+				markUnsavedChanges();
 
 				// Update the specific plot user is viewing
 				replotCurrentView();
 
-				stepOneFrame();
+				stepOneFrame(frameStep);
 			}
 		});
 
-			function finalizeOriginSelection(canvasX, canvasY) {
-				const cartesianY = canvasYToCartesianY(canvasY);
-				originPoint = { x: canvasX, y: cartesianY };
-				originSet = true;
-				markUnsavedChanges();
-				originMode = false;
-			frameCanvas.style.cursor = "default";
-			document.getElementById('crosshair').style.display = "none";
+		function finalizeOriginSelection(canvasX, canvasY) {
+			const cartesianY = canvasYToCartesianY(canvasY);
+			originPoint = { x: canvasX, y: cartesianY };
+			originSet = true;
+			markUnsavedChanges();
+			originMode = false;
+			originGuide = null;
+			originPointerDown = false;
 			overlayCanvas.style.pointerEvents = "none";
+			hidePickMode();
 			drawOverlay();
 			replotCurrentView();
-			document.getElementById('message').innerHTML = "<p>Origin set. Data will now be plotted relative to the chosen origin.</p>";
+			renderPointRows();
+			setMessage("Origin set. Positions are now measured from it.");
 		}
-
-		/* Origin selection on overlay */
-		overlayCanvas.addEventListener('click', (event) => {
-			if (originMode && !calibrationMode) {
-				const rect = overlayCanvas.getBoundingClientRect();
-				const scaleX = overlayCanvas.width / rect.width;
-				const scaleY = overlayCanvas.height / rect.height;
-				finalizeOriginSelection(
-					(event.clientX - rect.left) * scaleX,
-					(event.clientY - rect.top) * scaleY
-				);
-			}
-		});
-		overlayCanvas.addEventListener('touchstart', (event) => {
-			if (!originMode || calibrationMode || event.touches.length !== 1) return;
-			event.preventDefault();
-			const touch = event.touches[0];
-			const rect = overlayCanvas.getBoundingClientRect();
-			const scaleX = overlayCanvas.width / rect.width;
-			const scaleY = overlayCanvas.height / rect.height;
-			finalizeOriginSelection(
-				(touch.clientX - rect.left) * scaleX,
-				(touch.clientY - rect.top) * scaleY
-			);
-		}, { passive: false });
-		overlayCanvas.addEventListener('touchend', (event) => {
-			if (originMode && !calibrationMode) {
-				event.preventDefault();
-			}
-		}, { passive: false });
 
 		/* Frame rate dialog */
 		frameRateButton.addEventListener('click', () => {
-			document.getElementById('userPlaybackFrameRate').value = playbackFrameRate;
-            // Set up dialog state
+			userPlaybackFrameRateInput.value = playbackFrameRate;
+			// Set up dialog state
 			specialRecordingCheckbox.checked = isSpecialRecording;
-			captureRateSection.style.display = isSpecialRecording ? 'block' : 'none';
+			captureRateSection.style.display = isSpecialRecording ? 'flex' : 'none';
 			userCaptureFrameRateInput.value = isSpecialRecording ? captureFrameRate : 240;
-			detectedFpsDisplay.textContent = detectedFps ? `${detectedFps} fps` : 'Not detected';
-			frameRatePrompt.style.display = "block";
+			detectedFpsDisplay.textContent = detectedFps ? `${detectedFps} fps` : 'not detected';
+			openDialog(frameRatePrompt);
 		});
-		confirmFrameRateButton.addEventListener('click', () => {
-			const rate = Number(document.getElementById('userPlaybackFrameRate').value);
-            const capture = Number(userCaptureFrameRateInput.value);
-            if (!Number.isFinite(rate) || rate <= 0 || (specialRecordingCheckbox.checked && (!Number.isFinite(capture) || capture <= 0))) {
-                alert('Enter positive, finite frame rates.'); return;
-            }
-            playbackFrameRate = rate;
-            markUnsavedChanges();
-            isSpecialRecording = specialRecordingCheckbox.checked;
-
-            if (isSpecialRecording) {
-				const captureValue = parseFloat(userCaptureFrameRateInput.value);
-				if (Number.isFinite(captureValue) && captureValue > 0) {
-					captureFrameRate = captureValue;
-				}
-			} else {
-				// Normal mode: capture rate = playback rate
-				captureFrameRate = playbackFrameRate;
+		frameRatePrompt.querySelector('form').addEventListener('submit', (event) => {
+			event.preventDefault();
+			const rate = Number(userPlaybackFrameRateInput.value);
+			const capture = Number(userCaptureFrameRateInput.value);
+			if (!Number.isFinite(rate) || rate <= 0) {
+				rejectField(userPlaybackFrameRateInput, 'Enter a frame rate greater than zero.');
+				return;
 			}
+			if (specialRecordingCheckbox.checked && (!Number.isFinite(capture) || capture <= 0)) {
+				rejectField(userCaptureFrameRateInput, 'Enter a frame rate greater than zero.');
+				return;
+			}
+			playbackFrameRate = rate;
+			isSpecialRecording = specialRecordingCheckbox.checked;
+			// Normal mode: capture rate = playback rate
+			captureFrameRate = isSpecialRecording ? capture : playbackFrameRate;
+			markUnsavedChanges();
 
-			frameRatePrompt.style.display = "none";
-            renderPointRows();
+			closeDialog(frameRatePrompt);
+			renderPointRows();
 			updateFpsButtonText();
-			slider.step = Math.max(1 / playbackFrameRate / 2, 0.001).toString();
+			slider.step = getSliderStep();
 			updateTimeDisplay(hiddenVideo.currentTime);
 
-			// Re-plot if we have data (times are recalculated automatically from playbackTime)
-			if (frameData.length > 0) {
-				replotCurrentView();
-			}
+			// Re-plot (times are recalculated automatically from playbackTime)
+			replotCurrentView();
 
-			document.getElementById('message').innerHTML = isSpecialRecording
-				? `<p>Special recording mode enabled. Analysis time = frame × (1/${captureFrameRate}s)</p>`
-				: `<p>Standard recording mode. Analysis time = frame × (1/${playbackFrameRate}s)</p>`;
+			setMessage(isSpecialRecording
+				? `Slow-motion recording: times use the filming rate, ${formatNumber(captureFrameRate, 6)} fps.`
+				: `Frame rate set to ${formatNumber(playbackFrameRate, 6)} fps.`);
 		});
-		cancelFrameRateButton.addEventListener('click', () => { frameRatePrompt.style.display = "none"; });
+		cancelFrameRateButton.addEventListener('click', () => closeDialog(frameRatePrompt));
 
 		/* ===== Robust frame stepping ===== */
 		function stepOneFrame(direction = 1) {
-            if (!videoReady || fpsDetectionPending || hiddenVideo.seeking || skippingFrame) return;
+			if (!videoReady || fpsDetectionPending || hiddenVideo.seeking || skippingFrame) return;
 			skippingFrame = true;
 
 			// Always pause first
-			if (!hiddenVideo.paused) {
-				hiddenVideo.pause();
-				isPlaying = false;
-				playPauseButton.textContent = "Play";
-			}
+			if (!hiddenVideo.paused) pauseVideo();
 
 			const finish = () => {
 				skippingFrame = false;
@@ -1994,7 +1413,7 @@
 			};
 
 			let fallbackTimer;
-            let finished = false;
+			let finished = false;
 			let frameCallbackId = null;
 			const clean = () => {
 				if (finished) return;
@@ -2008,10 +1427,10 @@
 			};
 			const onSeeked = () => clean();
 
-			// Time-based seek for deterministic 1-frame stepping
+			// Time-based seek for deterministic frame stepping
 			const dt = 1 / playbackFrameRate;
 			const end = getSeekableEnd();
-			const candidate = (Math.floor(hiddenVideo.currentTime * playbackFrameRate + 1e-4) + direction) * dt;
+			const candidate = (currentFrameIndex() + direction) * dt;
 			let target = candidate;
 			if (end > 0) {
 				target = Math.max(0, Math.min(candidate, Math.max(0, (Math.ceil(end * playbackFrameRate) - 1) * dt)));
@@ -2033,14 +1452,52 @@
 			}
 		}
 
-			/* ===== Plotting ===== */
+		frameStepSelect.addEventListener('change', () => {
+			frameStep = Math.max(1, Number(frameStepSelect.value) || 1);
+		});
+
+		/* ===== Plotting ===== */
+
+		function isVelocityMode() {
+			return currentPlotMode.startsWith('v');
+		}
+
+		function currentComponent() {
+			if (currentPlotMode === 'x' || currentPlotMode === 'vx') return 'x';
+			if (currentPlotMode === 'y' || currentPlotMode === 'vy') return 'y';
+			return 'xy';
+		}
 
 		function updateActivePlotButton() {
-			const buttons = [plotXButton, plotYButton, plotXYButton, plotVxButton, plotVyButton, plotVxVyButton];
-			const modeMap = { 'x': plotXButton, 'y': plotYButton, 'pos': plotXYButton, 'vx': plotVxButton, 'vy': plotVyButton, 'vxy': plotVxVyButton };
-			buttons.forEach(b => b.classList.remove('active'));
-			const active = modeMap[currentPlotMode];
-			if (active) active.classList.add('active');
+			const velocity = isVelocityMode();
+			const component = currentComponent();
+			plotPositionButton.setAttribute('aria-pressed', String(!velocity));
+			plotVelocityButton.setAttribute('aria-pressed', String(velocity));
+			plotCompXButton.setAttribute('aria-pressed', String(component === 'x'));
+			plotCompYButton.setAttribute('aria-pressed', String(component === 'y'));
+			plotCompXYButton.setAttribute('aria-pressed', String(component === 'xy'));
+			updateGraphEmpty();
+		}
+
+		// Covers the graph with a note while there is nothing to plot.
+		function updateGraphEmpty() {
+			const velocity = isVelocityMode();
+			const count = velocity ? getVelocityData().smoothed.length : frameData.length;
+			const hasData = videoReady && count > 0;
+			graphEmpty.hidden = hasData;
+			chartCanvasContainer.classList.toggle('has-data', hasData);
+			if (!hasData) closeTouchGraphCopyActions();
+			let title = 'Your graph appears here';
+			let text = 'Import a video, then click the object to mark it.';
+			if (videoReady && velocity && frameData.length > 0) {
+				title = 'Velocity needs more marks';
+				text = `Mark at least four frames to plot smoothed velocity. You have ${frameData.length}.`;
+			} else if (videoReady) {
+				title = 'No marks yet';
+				text = 'Click the object in the video to mark its position.';
+			}
+			document.getElementById('graphEmptyTitle').textContent = title;
+			document.getElementById('graphEmptyText').textContent = text;
 		}
 
 		function replotCurrentView() {
@@ -2078,6 +1535,7 @@
 					options: {
 						responsive: true,
 						maintainAspectRatio: false,
+						animation: { duration: 200 },
 						scales: {
 							x: {
 								type: "linear",
@@ -2112,13 +1570,11 @@
 
 			const axes = mode === 'xy' ? ['x', 'y'] : [mode];
 			const datasets = [];
+			const samples = getVelocityData().smoothed;
+			const times = samples.map(p => p.time);
 
 			for (const axis of axes) {
-                const samples = getVelocityData().smoothed;
-                const smoothed = samples.map(p => p[axis]);
-                const times = samples.map(p => p.time);
-                if (!samples.length) document.getElementById('message').textContent = 'Add at least four points at distinct times for smoothed velocity.';
-
+				const smoothed = samples.map(p => p[axis]);
 				datasets.push({
 					label: axis === "x" ? "x-velocity" : "y-velocity",
 					data: times.map((t, i) => ({ x: t, y: smoothed[i] })),
@@ -2137,232 +1593,285 @@
 			updateActivePlotButton();
 		}
 
-			plotXButton.addEventListener("click", () => plotPosition("x"));
-			plotYButton.addEventListener("click", () => plotPosition("y"));
-			plotXYButton.addEventListener("click", () => plotPosition("xy"));
-			plotVxButton.addEventListener("click", () => plotVelocity("x"));
-			plotVyButton.addEventListener("click", () => plotVelocity("y"));
-			plotVxVyButton.addEventListener("click", () => plotVelocity("xy"));
+		/* Plot controls */
+		plotPositionButton.addEventListener("click", () => plotPosition(currentComponent()));
+		plotVelocityButton.addEventListener("click", () => plotVelocity(currentComponent()));
+		[[plotCompXButton, 'x'], [plotCompYButton, 'y'], [plotCompXYButton, 'xy']].forEach(([button, component]) => {
+			button.addEventListener("click", () => (isVelocityMode() ? plotVelocity : plotPosition)(component));
+		});
 
-			chartCanvasContainer.addEventListener('click', (event) => {
-				if (graphTouchCopyMode) {
-					if (chartCopyActionButton && chartCopyActionButton.contains(event.target)) {
-						return;
-					}
-					openTouchGraphCopyActions();
+		function setResultsView(view) {
+			const points = view === 'points';
+			graphView.hidden = points;
+			pointEditor.hidden = !points;
+			graphControls.hidden = points;
+			showGraphTab.setAttribute('aria-selected', String(!points));
+			showPointsTab.setAttribute('aria-selected', String(points));
+			graphHint.textContent = points
+				? 'Positions from the origin, in the scale units'
+				: (graphTouchCopyMode ? 'Tap the graph to copy it' : 'Click the graph to copy it');
+			if (points) highlightCurrentRow(true);
+		}
+		showGraphTab.addEventListener('click', () => setResultsView('graph'));
+		showPointsTab.addEventListener('click', () => setResultsView('points'));
+
+		chartCanvasContainer.addEventListener('click', (event) => {
+			if (!chartCanvasContainer.classList.contains('has-data')) return;
+			if (graphTouchCopyMode) {
+				if (chartCopyActionButton && chartCopyActionButton.contains(event.target)) {
 					return;
 				}
-				void copyGraphImageToClipboard();
-			});
-
-			chartCopyActionButton.addEventListener('click', (event) => {
-				event.preventDefault();
-				event.stopPropagation();
-				void copyGraphImageToClipboard();
-			});
-
-			chartCanvasContainer.addEventListener('keydown', (event) => {
-				if (event.key !== 'Enter' && event.key !== ' ') return;
-				event.preventDefault();
-				if (graphTouchCopyMode) {
-					openTouchGraphCopyActions();
-					return;
-				}
-				void copyGraphImageToClipboard();
-			});
-
-			document.addEventListener('click', (event) => {
-				if (!graphTouchCopyMode) return;
-				if (!chartCanvasContainer.classList.contains('touch-copy-open')) return;
-				if (chartCanvasContainer.contains(event.target)) return;
-				closeTouchGraphCopyActions();
-			});
-
-			/* Clear / Export */
-			clearDataPointsButton.addEventListener("click", () => {
-				if (frameData.length > 0 && !window.confirm(CLEAR_DATA_WARNING)) {
-					return;
-				}
-
-				rememberPoints();
-                frameData = [];
-                markUnsavedChanges();
-                renderPointRows();
-				if (positionChart) {
-					positionChart.data.datasets.forEach(d => d.data = []);
-					positionChart.update();
+				openTouchGraphCopyActions();
+				return;
 			}
+			void copyGraphImageToClipboard();
+		});
+
+		chartCopyActionButton.addEventListener('click', (event) => {
+			event.preventDefault();
+			event.stopPropagation();
+			void copyGraphImageToClipboard();
+		});
+
+		chartCanvasContainer.addEventListener('keydown', (event) => {
+			if (event.key !== 'Enter' && event.key !== ' ') return;
+			if (!chartCanvasContainer.classList.contains('has-data')) return;
+			event.preventDefault();
+			event.stopPropagation();
+			if (graphTouchCopyMode) {
+				openTouchGraphCopyActions();
+				return;
+			}
+			void copyGraphImageToClipboard();
+		});
+
+		document.addEventListener('click', (event) => {
+			if (!graphTouchCopyMode) return;
+			if (!chartCanvasContainer.classList.contains('touch-copy-open')) return;
+			if (chartCanvasContainer.contains(event.target)) return;
+			closeTouchGraphCopyActions();
+		});
+
+		/* Clear / Export */
+		clearDataPointsButton.addEventListener("click", () => {
+			if (frameData.length > 0 && !window.confirm(CLEAR_DATA_WARNING)) {
+				return;
+			}
+
+			rememberPoints();
+			frameData = [];
+			markUnsavedChanges();
+			renderPointRows();
+			replotCurrentView();
 			drawFrame();
 			drawOverlay();
-			document.getElementById('message').innerHTML = "<p>Data points cleared.</p>";
+			setMessage("Marks cleared. Undo brings them back.");
 		});
-			clearCalibrationButton.addEventListener("click", () => {
-				scaleFactor = 1;
-				scaleUnit = "pixels";
-				calibrationStart = null;
-				calibrationEnd = null;
-				markUnsavedChanges();
-				drawOverlay();
-				drawFrame();
+		clearCalibrationButton.addEventListener("click", () => {
+			scaleFactor = 1;
+			scaleUnit = "pixels";
+			calibrationStart = null;
+			calibrationEnd = null;
+			markUnsavedChanges();
+			drawOverlay();
+			drawFrame();
+			renderPointRows();
 			if (positionChart) {
 				replotCurrentView();
 			}
-			document.getElementById('message').innerHTML = "<p>Calibration cleared. Positions are now in pixel units.</p>";
+			setMessage("Scale cleared. Positions are now in pixels.");
 		});
-			clearOriginButton.addEventListener("click", () => {
-				originSet = false;
-				originPoint = { x: 0, y: 0 };
-				markUnsavedChanges();
-				drawOverlay();
-				replotCurrentView();
-			document.getElementById('message').innerHTML = "<p>Origin cleared. Default origin is used.</p>";
+		clearOriginButton.addEventListener("click", () => {
+			originSet = false;
+			originPoint = { x: 0, y: 0 };
+			markUnsavedChanges();
+			drawOverlay();
+			replotCurrentView();
+			renderPointRows();
+			setMessage("Origin cleared. Positions are measured from the bottom-left corner.");
 		});
 		exportDataButton.addEventListener("click", () => {
-			if (frameData.length === 0) { alert("No data to export."); return; }
+			if (frameData.length === 0) { setMessage("Mark the object first: there is no data to export yet."); return; }
 			exportFilenameInput.value = "motion_tracker_data";
-			exportPrompt.style.display = "block";
+			openDialog(exportPrompt);
+			exportFilenameInput.select();
 		});
-			confirmExportButton.addEventListener("click", () => {
-				const desired = exportFilenameInput.value.trim();
-				if (!desired) { alert("Please enter a valid filename."); return; }
-				const sanitized = desired.replace(/[^a-zA-Z0-9-_.]/g, "_");
-				const finalName = sanitized.toLowerCase().endsWith(".csv") ? sanitized : sanitized + ".csv";
-				exportCSV(finalName);
-				exportPrompt.style.display = "none";
-				document.getElementById('message').innerHTML = `<p>Data exported as ${finalName}.</p>`;
+		exportPrompt.querySelector('form').addEventListener("submit", (event) => {
+			event.preventDefault();
+			const desired = exportFilenameInput.value.trim();
+			if (!desired) { rejectField(exportFilenameInput, "Enter a file name."); return; }
+			const sanitized = desired.replace(/[^a-zA-Z0-9-_.]/g, "_");
+			const finalName = sanitized.toLowerCase().endsWith(".csv") ? sanitized : sanitized + ".csv";
+			exportCSV(finalName);
+			closeDialog(exportPrompt);
+			setMessage(`Data exported as ${finalName}.`);
+		});
+		cancelExportButton.addEventListener("click", () => closeDialog(exportPrompt));
+
+		function rememberPoints() {
+			undoHistory.push(frameData.map(p => ({ ...p })));
+			if (undoHistory.length > 100) undoHistory.shift();
+		}
+		function refreshPoints() {
+			markUnsavedChanges(); renderPointRows(); replotCurrentView(); drawFrame();
+		}
+		function undoPoint() {
+			if (!undoHistory.length || !videoReady) return;
+			frameData = undoHistory.pop();
+			refreshPoints();
+			setMessage(undoHistory.length ? 'Undone. Undo again to go further back.' : 'Undone.');
+		}
+
+		// The table shows positions as the graph does: from the origin, in the scale units.
+		function renderPointRows() {
+			const rows = document.getElementById('pointRows');
+			rows.replaceChildren();
+			const unit = unitLabel();
+			document.getElementById('pointXHead').textContent = `x (${unit})`;
+			document.getElementById('pointYHead').textContent = `y (${unit})`;
+			document.getElementById('pointsEmpty').hidden = frameData.length > 0;
+			frameData.forEach((point, index) => {
+				const row = document.createElement('tr');
+				row.dataset.frame = String(Math.round(point.playbackTime * playbackFrameRate));
+				const time = document.createElement('td');
+				const timeButton = document.createElement('button');
+				timeButton.type = 'button';
+				timeButton.className = 'point-time';
+				timeButton.textContent = getAnalysisTime(point.playbackTime).toFixed(4);
+				timeButton.title = 'Show this frame';
+				timeButton.addEventListener('click', () => seekToPlaybackTime(point.playbackTime));
+				time.append(timeButton);
+				row.append(time);
+				for (const axis of ['x', 'y']) {
+					const origin = originSet ? originPoint[axis] : 0;
+					const cell = document.createElement('td');
+					const input = document.createElement('input');
+					input.type = 'number'; input.step = 'any'; input.inputMode = 'decimal';
+					input.value = formatNumber((point[axis] - origin) * scaleFactor, 6);
+					input.setAttribute('aria-label', `Mark ${index + 1} ${axis} in ${unit}`);
+					input.addEventListener('change', () => {
+						const value = Number(input.value);
+						if (input.value.trim() === '' || !Number.isFinite(value)) {
+							input.value = formatNumber((point[axis] - origin) * scaleFactor, 6);
+							return;
+						}
+						rememberPoints(); point[axis] = value / scaleFactor + origin; refreshPoints();
+					});
+					cell.append(input); row.append(cell);
+				}
+				const actions = document.createElement('td');
+				const remove = document.createElement('button');
+				remove.type = 'button';
+				remove.className = 'point-delete';
+				remove.innerHTML = '<svg class="mt-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4.5 7h15M9.5 7V4.5h5V7M6.5 7l1 13h9l1-13"/></svg>';
+				remove.title = 'Delete this mark';
+				remove.setAttribute('aria-label', `Delete mark ${index + 1}`);
+				remove.addEventListener('click', () => { rememberPoints(); frameData.splice(index, 1); refreshPoints(); });
+				actions.append(remove); row.append(actions); rows.append(row);
 			});
-		cancelExportButton.addEventListener("click", () => {
-			exportPrompt.style.display = "none";
-			document.getElementById('message').innerHTML = "<p>Export cancelled.</p>";
+			highlightCurrentRow();
+			updateStatusBar();
+		}
+
+		function highlightCurrentRow(scroll = false) {
+			const frame = String(currentFrameIndex());
+			document.querySelectorAll('#pointRows tr').forEach(row => {
+				const current = videoReady && row.dataset.frame === frame;
+				row.classList.toggle('is-current', current);
+				if (current && scroll && !pointEditor.hidden) row.scrollIntoView({ block: 'nearest' });
+			});
+		}
+
+		undoPointButton.addEventListener('click', undoPoint);
+		previousFrameButton.addEventListener('click', () => stepOneFrame(-frameStep));
+		nextFrameButton.addEventListener('click', () => stepOneFrame(frameStep));
+		saveProjectButton.addEventListener('click', () => {
+			const project = { format: 'panphy-motion-tracker', version: 1,
+				video: { ...videoFileInfo, width: frameCanvas.width, height: frameCanvas.height, duration: hiddenVideo.duration },
+				frameData, playbackFrameRate, captureFrameRate, isSpecialRecording,
+				scaleFactor, scaleUnit, originSet, originPoint, calibrationStart, calibrationEnd };
+			downloadFile('motion-tracker-project.json', JSON.stringify(project, null, 2), 'application/json');
+			clearUnsavedChanges();
+			setMessage('Project saved. To carry on later, import the same video, then open this project file.');
+		});
+		loadProjectButton.addEventListener('click', () => document.getElementById('projectUpload').click());
+		document.getElementById('projectUpload').addEventListener('change', async event => {
+			const file = event.target.files?.[0]; event.target.value = '';
+			if (!file) return;
+			const activeVideo = blobUrl;
+			try {
+				const project = JSON.parse(await file.text());
+				const positive = value => Number.isFinite(value) && value > 0;
+				const point = value => value && Number.isFinite(value.x) && Number.isFinite(value.y);
+				if (project.format !== 'panphy-motion-tracker' || project.version !== 1 ||
+					!Array.isArray(project.frameData) || !positive(project.playbackFrameRate) || !positive(project.captureFrameRate) ||
+					!positive(project.scaleFactor) || typeof project.scaleUnit !== 'string' || !project.scaleUnit.trim() ||
+					typeof project.originSet !== 'boolean' || typeof project.isSpecialRecording !== 'boolean' || !point(project.originPoint) ||
+					![project.calibrationStart, project.calibrationEnd].every(p => p === null || point(p)) ||
+					!project.frameData.every(p => point(p) && Number.isFinite(p.playbackTime) && p.playbackTime >= 0 && p.playbackTime < hiddenVideo.duration)) {
+					throw new Error('That file is not a Motion Tracker project.');
+				}
+				const video = project.video;
+				if (!videoReady || fpsDetectionPending || activeVideo !== blobUrl || !video || video.name !== videoFileInfo.name || video.size !== videoFileInfo.size ||
+					video.width !== frameCanvas.width || video.height !== frameCanvas.height || Math.abs(video.duration - hiddenVideo.duration) > 0.001) {
+					throw new Error(`This project belongs to ${video?.name || 'another video'}. Import that video, wait for the frame rate, then open the project again.`);
+				}
+				if (hasUnsavedChanges && !confirm('Replace your current analysis with this project?')) return;
+				pauseVideo();
+				cancelPickMode();
+				playbackFrameRate = project.playbackFrameRate;
+				captureFrameRate = project.isSpecialRecording ? project.captureFrameRate : project.playbackFrameRate;
+				isSpecialRecording = project.isSpecialRecording;
+				const unique = new Map();
+				project.frameData.forEach(p => unique.set(Math.round(p.playbackTime * playbackFrameRate), { x: p.x, y: p.y, playbackTime: p.playbackTime }));
+				frameData = [...unique.values()].sort((a, b) => a.playbackTime - b.playbackTime);
+				scaleFactor = project.scaleFactor; scaleUnit = project.scaleUnit;
+				originSet = project.originSet; originPoint = project.originPoint;
+				calibrationStart = project.calibrationStart; calibrationEnd = project.calibrationEnd;
+				calibrationMode = originMode = isDrawingCalibration = false;
+				previousCalibration = null;
+				overlayCanvas.style.pointerEvents = 'none';
+				undoHistory = []; clearUnsavedChanges(); renderPointRows();
+				updateFpsButtonText(); updateTimeDisplay(hiddenVideo.currentTime);
+				slider.step = getSliderStep();
+				drawFrame(); drawOverlay(); replotCurrentView();
+				setMessage(`Project opened: ${frameData.length} mark${frameData.length === 1 ? '' : 's'}.`);
+			} catch (error) { setMessage(error.message); }
 		});
 
-        function rememberPoints() {
-            undoHistory.push(frameData.map(p => ({ ...p })));
-            if (undoHistory.length > 100) undoHistory.shift();
-        }
-        function refreshPoints() {
-            markUnsavedChanges(); renderPointRows(); replotCurrentView(); drawFrame();
-        }
-        function renderPointRows() {
-            const rows = document.getElementById('pointRows');
-            rows.replaceChildren();
-            document.getElementById('undoPoint').disabled = undoHistory.length === 0;
-            frameData.forEach((point, index) => {
-                const row = document.createElement('tr');
-                const time = document.createElement('td');
-                time.textContent = getAnalysisTime(point.playbackTime).toFixed(4);
-                row.append(time);
-                for (const axis of ['x', 'y']) {
-                    const cell = document.createElement('td');
-                    const input = document.createElement('input');
-                    input.type = 'number'; input.step = 'any'; input.value = point[axis];
-                    input.setAttribute('aria-label', `Point ${index + 1} ${axis} in pixels`);
-                    input.style.width = '100px';
-                    input.addEventListener('change', () => {
-                        if (input.value.trim() === '' || !Number.isFinite(Number(input.value))) { input.value = point[axis]; return; }
-                        rememberPoints(); point[axis] = Number(input.value); refreshPoints();
-                    });
-                    cell.append(input); row.append(cell);
-                }
-                const actions = document.createElement('td');
-                const remove = document.createElement('button');
-                remove.textContent = 'Delete'; remove.setAttribute('aria-label', `Delete point ${index + 1}`);
-                remove.addEventListener('click', () => { rememberPoints(); frameData.splice(index, 1); refreshPoints(); });
-                actions.append(remove); row.append(actions); rows.append(row);
-            });
-        }
-        document.getElementById('undoPoint').addEventListener('click', () => {
-            if (!undoHistory.length) return;
-            frameData = undoHistory.pop(); refreshPoints();
-        });
-        document.getElementById('previousFrame').addEventListener('click', () => stepOneFrame(-1));
-        document.getElementById('nextFrame').addEventListener('click', () => stepOneFrame(1));
-        document.getElementById('saveProject').addEventListener('click', () => {
-            const project = { format: 'panphy-motion-tracker', version: 1,
-                video: { ...videoFileInfo, width: frameCanvas.width, height: frameCanvas.height, duration: hiddenVideo.duration },
-                frameData, playbackFrameRate, captureFrameRate, isSpecialRecording,
-                scaleFactor, scaleUnit, originSet, originPoint, calibrationStart, calibrationEnd };
-            downloadFile('motion-tracker-project.json', JSON.stringify(project, null, 2), 'application/json');
-            clearUnsavedChanges();
-            document.getElementById('message').textContent = 'Project saved. To resume, import the same video, then load this project file.';
-        });
-        document.getElementById('loadProject').addEventListener('click', () => document.getElementById('projectUpload').click());
-        document.getElementById('projectUpload').addEventListener('change', async event => {
-            const file = event.target.files?.[0]; event.target.value = '';
-            if (!file) return;
-            const activeVideo = blobUrl;
-            try {
-                const project = JSON.parse(await file.text());
-                const positive = value => Number.isFinite(value) && value > 0;
-                const point = value => value && Number.isFinite(value.x) && Number.isFinite(value.y);
-                if (project.format !== 'panphy-motion-tracker' || project.version !== 1 ||
-                    !Array.isArray(project.frameData) || !positive(project.playbackFrameRate) || !positive(project.captureFrameRate) ||
-                    !positive(project.scaleFactor) || typeof project.scaleUnit !== 'string' || !project.scaleUnit.trim() ||
-                    typeof project.originSet !== 'boolean' || typeof project.isSpecialRecording !== 'boolean' || !point(project.originPoint) ||
-                    ![project.calibrationStart, project.calibrationEnd].every(p => p === null || point(p)) ||
-                    !project.frameData.every(p => point(p) && Number.isFinite(p.playbackTime) && p.playbackTime >= 0 && p.playbackTime < hiddenVideo.duration)) {
-                    throw new Error('Invalid motion tracker project.');
-                }
-                const video = project.video;
-                if (!videoReady || fpsDetectionPending || activeVideo !== blobUrl || !video || video.name !== videoFileInfo.name || video.size !== videoFileInfo.size ||
-                    video.width !== frameCanvas.width || video.height !== frameCanvas.height || Math.abs(video.duration - hiddenVideo.duration) > 0.001) {
-                    throw new Error('Import the same video used by this project, wait for FPS detection, then load the project again.');
-                }
-                if (hasUnsavedChanges && !confirm('Replace your current analysis with this project?')) return;
-                hiddenVideo.pause(); isPlaying = false; playPauseButton.textContent = 'Play';
-                playbackFrameRate = project.playbackFrameRate;
-                captureFrameRate = project.isSpecialRecording ? project.captureFrameRate : project.playbackFrameRate;
-                isSpecialRecording = project.isSpecialRecording;
-                const unique = new Map();
-                project.frameData.forEach(p => unique.set(Math.round(p.playbackTime * playbackFrameRate), { x: p.x, y: p.y, playbackTime: p.playbackTime }));
-                frameData = [...unique.values()].sort((a, b) => a.playbackTime - b.playbackTime);
-                scaleFactor = project.scaleFactor; scaleUnit = project.scaleUnit;
-                originSet = project.originSet; originPoint = project.originPoint;
-                calibrationStart = project.calibrationStart; calibrationEnd = project.calibrationEnd;
-                calibrationMode = originMode = isDrawingCalibration = false;
-                overlayCanvas.style.pointerEvents = 'none';
-                document.getElementById('crosshair').style.display = 'none';
-                undoHistory = []; clearUnsavedChanges(); renderPointRows();
-                updateFpsButtonText(); updateTimeDisplay(hiddenVideo.currentTime);
-                slider.step = String(1 / playbackFrameRate);
-                drawFrame(); drawOverlay(); replotCurrentView();
-                document.getElementById('message').textContent = 'Project restored.';
-            } catch (error) { document.getElementById('message').textContent = error.message; }
-        });
+		function getVelocityData() {
+			const raw = [];
+			for (let i = 1; i < frameData.length; i++) {
+				const a = frameData[i - 1], b = frameData[i];
+				const t1 = getAnalysisTime(a.playbackTime), t2 = getAnalysisTime(b.playbackTime);
+				if (t2 <= t1) continue;
+				raw.push({ time: (t1 + t2) / 2, x: (b.x - a.x) * scaleFactor / (t2 - t1), y: (b.y - a.y) * scaleFactor / (t2 - t1) });
+			}
+			const smoothed = raw.slice(2).map((p, i) => ({
+				time: (raw[i].time + raw[i + 1].time + p.time) / 3,
+				x: (raw[i].x + raw[i + 1].x + p.x) / 3,
+				y: (raw[i].y + raw[i + 1].y + p.y) / 3
+			}));
+			return { raw, smoothed };
+		}
 
-        function getVelocityData() {
-            const raw = [];
-            for (let i = 1; i < frameData.length; i++) {
-                const a = frameData[i - 1], b = frameData[i];
-                const t1 = getAnalysisTime(a.playbackTime), t2 = getAnalysisTime(b.playbackTime);
-                if (t2 <= t1) continue;
-                raw.push({ time: (t1 + t2) / 2, x: (b.x - a.x) * scaleFactor / (t2 - t1), y: (b.y - a.y) * scaleFactor / (t2 - t1) });
-            }
-            const smoothed = raw.slice(2).map((p, i) => ({
-                time: (raw[i].time + raw[i + 1].time + p.time) / 3,
-                x: (raw[i].x + raw[i + 1].x + p.x) / 3,
-                y: (raw[i].y + raw[i + 1].y + p.y) / 3
-            }));
-            return { raw, smoothed };
-        }
+		function downloadFile(filename, text, type) {
+			const url = URL.createObjectURL(new Blob([text], { type }));
+			const a = document.createElement('a');
+			a.href = url; a.download = filename; a.click();
+			setTimeout(() => URL.revokeObjectURL(url), 1000);
+		}
 
-        function downloadFile(filename, text, type) {
-            const url = URL.createObjectURL(new Blob([text], { type }));
-            const a = document.createElement('a');
-            a.href = url; a.download = filename; a.click();
-            setTimeout(() => URL.revokeObjectURL(url), 1000);
-        }
-
-        function exportCSV(filename) {
-            const { raw, smoothed } = getVelocityData();
-            const rows = [[ 'Position time (s)', `x (${scaleUnit})`, `y (${scaleUnit})`, 'Raw velocity time (s)', `Raw vx (${scaleUnit}/s)`, `Raw vy (${scaleUnit}/s)`, 'Smoothed velocity time (s)', `Smoothed vx (${scaleUnit}/s)`, `Smoothed vy (${scaleUnit}/s)` ]];
-            frameData.forEach((p, i) => {
-                rows.push([getAnalysisTime(p.playbackTime), (p.x - (originSet ? originPoint.x : 0)) * scaleFactor, (p.y - (originSet ? originPoint.y : 0)) * scaleFactor,
-                    raw[i]?.time ?? '', raw[i]?.x ?? '', raw[i]?.y ?? '', smoothed[i]?.time ?? '', smoothed[i]?.x ?? '', smoothed[i]?.y ?? '']);
-            });
-            const escape = value => '"' + String(value).replaceAll('"', '""') + '"';
-            downloadFile(filename, rows.map(row => row.map(escape).join(',')).join('\n') + '\n', 'text/csv;charset=utf-8;');
-        }
+		function exportCSV(filename) {
+			const { raw, smoothed } = getVelocityData();
+			const rows = [[ 'Position time (s)', `x (${scaleUnit})`, `y (${scaleUnit})`, 'Raw velocity time (s)', `Raw vx (${scaleUnit}/s)`, `Raw vy (${scaleUnit}/s)`, 'Smoothed velocity time (s)', `Smoothed vx (${scaleUnit}/s)`, `Smoothed vy (${scaleUnit}/s)` ]];
+			frameData.forEach((p, i) => {
+				rows.push([getAnalysisTime(p.playbackTime), (p.x - (originSet ? originPoint.x : 0)) * scaleFactor, (p.y - (originSet ? originPoint.y : 0)) * scaleFactor,
+					raw[i]?.time ?? '', raw[i]?.x ?? '', raw[i]?.y ?? '', smoothed[i]?.time ?? '', smoothed[i]?.x ?? '', smoothed[i]?.y ?? '']);
+			});
+			const escape = value => '"' + String(value).replaceAll('"', '""') + '"';
+			downloadFile(filename, rows.map(row => row.map(escape).join(',')).join('\n') + '\n', 'text/csv;charset=utf-8;');
+		}
 
 		/* Drawing */
 		function resizeOverlay() {
@@ -2371,25 +1880,26 @@
 		}
 
 		function drawFrame() {
-            if (!videoReady || hiddenVideo.readyState < 2) return;
+			if (!videoReady || hiddenVideo.readyState < 2) return;
 			ctx.clearRect(0, 0, frameCanvas.width, frameCanvas.height);
 			ctx.drawImage(hiddenVideo, 0, 0, frameCanvas.width, frameCanvas.height);
 
 			// Only draw data points if crosses are visible
 			if (crossesVisible) {
 				const s = getVisualScale();
+				const frame = currentFrameIndex();
 				frameData.forEach((p) => {
-					const x = p.x,
-						y = cartesianYToCanvasY(p.y);
-					drawDataPoint(x, y, s);
+					const current = Math.round(p.playbackTime * playbackFrameRate) === frame;
+					drawDataPoint(p.x, cartesianYToCanvasY(p.y), s, current);
 				});
 			}
 		}
 
-		function drawDataPoint(x, y, s = 1) {
-			const circleRadius = 5 * s;
-			const crossSize = 10 * s;
-			const lineWidth = Math.max(1, 2 * s);
+		// A red cross; the mark on the frame being shown also gets a white ring.
+		function drawDataPoint(x, y, s = 1, current = false) {
+			const circleRadius = 4 * s;
+			const crossSize = 8 * s;
+			const lineWidth = Math.max(1, 1.6 * s);
 
 			ctx.fillStyle = 'rgba(255,0,0,.3)';
 			ctx.beginPath();
@@ -2404,43 +1914,79 @@
 			ctx.moveTo(x, y - crossSize);
 			ctx.lineTo(x, y + crossSize);
 			ctx.stroke();
+
+			if (current) {
+				ctx.strokeStyle = 'white';
+				ctx.lineWidth = Math.max(1, 2 * s);
+				ctx.beginPath();
+				ctx.arc(x, y, crossSize + 3 * s, 0, 2 * Math.PI);
+				ctx.stroke();
+			}
+		}
+
+		function drawAxes(originCanvasX, originCanvasY, s, color) {
+			overlayCtx.save();
+			overlayCtx.lineWidth = 1.5 * s;
+			overlayCtx.shadowColor = getCssVar('--overlay-shadow') || 'black';
+			overlayCtx.shadowBlur = 3 * s;
+			overlayCtx.strokeStyle = color;
+			overlayCtx.beginPath();
+			overlayCtx.moveTo(0, originCanvasY);
+			overlayCtx.lineTo(overlayCanvas.width, originCanvasY);
+			overlayCtx.moveTo(originCanvasX, 0);
+			overlayCtx.lineTo(originCanvasX, overlayCanvas.height);
+			overlayCtx.stroke();
+			overlayCtx.restore();
+		}
+
+		function drawOverlayLabel(text, x, y, s) {
+			overlayCtx.save();
+			overlayCtx.font = `600 ${12 * s}px Manrope, system-ui, sans-serif`;
+			const width = overlayCtx.measureText(text).width + 12 * s;
+			const height = 20 * s;
+			const left = Math.min(Math.max(x - width / 2, 2 * s), overlayCanvas.width - width - 2 * s);
+			const top = Math.min(Math.max(y - height - 8 * s, 2 * s), overlayCanvas.height - height - 2 * s);
+			overlayCtx.fillStyle = 'rgba(0, 0, 0, 0.7)';
+			overlayCtx.beginPath();
+			if (overlayCtx.roundRect) overlayCtx.roundRect(left, top, width, height, height / 2);
+			else overlayCtx.rect(left, top, width, height);
+			overlayCtx.fill();
+			overlayCtx.fillStyle = 'white';
+			overlayCtx.textAlign = 'center';
+			overlayCtx.textBaseline = 'middle';
+			overlayCtx.fillText(text, left + width / 2, top + height / 2);
+			overlayCtx.restore();
 		}
 
 		function drawOverlay() {
 			resizeOverlay();
 			overlayCtx.clearRect(0, 0, overlayCanvas.width, overlayCanvas.height);
+			if (!videoReady) return;
 
 			// Dynamic scaling factors
 			const s = getVisualScale();
-			const axisWidth = 2 * s;
-			const originRadius = 6 * s;
+			const originRadius = 5 * s;
 			const axisColor = getCssVar('--overlay-axis') || 'white';
-			const shadowColor = getCssVar('--overlay-shadow') || 'black';
 
 			const ox = originSet ? originPoint.x : 0;
 			const oy = originSet ? originPoint.y : 0;
 			const originCanvasX = ox;
 			const originCanvasY = cartesianYToCanvasY(oy);
 
-			overlayCtx.save();
-			overlayCtx.lineWidth = axisWidth;
-			overlayCtx.shadowColor = shadowColor;
-			overlayCtx.shadowBlur = 2;
-			overlayCtx.strokeStyle = axisColor;
-			overlayCtx.beginPath();
-			overlayCtx.moveTo(0, originCanvasY);
-			overlayCtx.lineTo(overlayCanvas.width, originCanvasY);
-			overlayCtx.stroke();
-			overlayCtx.beginPath();
-			overlayCtx.moveTo(originCanvasX, 0);
-			overlayCtx.lineTo(originCanvasX, overlayCanvas.height);
-			overlayCtx.stroke();
-			overlayCtx.restore();
-
-			overlayCtx.fillStyle = "cyan";
-			overlayCtx.beginPath();
-			overlayCtx.arc(originCanvasX, originCanvasY, originRadius, 0, 2 * Math.PI);
-			overlayCtx.fill();
+			// While choosing the origin, the axes follow the pointer.
+			if (originMode && originGuide) {
+				drawAxes(originGuide.x, originGuide.y, s, '#22d3ee');
+				overlayCtx.fillStyle = "#22d3ee";
+				overlayCtx.beginPath();
+				overlayCtx.arc(originGuide.x, originGuide.y, originRadius, 0, 2 * Math.PI);
+				overlayCtx.fill();
+			} else {
+				drawAxes(originCanvasX, originCanvasY, s, axisColor);
+				overlayCtx.fillStyle = "cyan";
+				overlayCtx.beginPath();
+				overlayCtx.arc(originCanvasX, originCanvasY, originRadius, 0, 2 * Math.PI);
+				overlayCtx.fill();
+			}
 
 			if (calibrationStart && calibrationEnd) {
 				overlayCtx.save();
@@ -2454,26 +2000,42 @@
 				overlayCtx.lineTo(calibrationEnd.x, calibrationEnd.y);
 				overlayCtx.stroke();
 				overlayCtx.setLineDash([]);
+				// End ticks across the line
+				const length = Math.hypot(calibrationEnd.x - calibrationStart.x, calibrationEnd.y - calibrationStart.y);
+				if (length > 0) {
+					const nx = -(calibrationEnd.y - calibrationStart.y) / length * 6 * s;
+					const ny = (calibrationEnd.x - calibrationStart.x) / length * 6 * s;
+					overlayCtx.beginPath();
+					[calibrationStart, calibrationEnd].forEach(p => {
+						overlayCtx.moveTo(p.x - nx, p.y - ny);
+						overlayCtx.lineTo(p.x + nx, p.y + ny);
+					});
+					overlayCtx.stroke();
+				}
 				overlayCtx.restore();
+				if (length > 0 && isCalibrated() && !calibrationMode) {
+					drawOverlayLabel(`${formatNumber(length * scaleFactor)} ${scaleUnit}`,
+						(calibrationStart.x + calibrationEnd.x) / 2, Math.min(calibrationStart.y, calibrationEnd.y), s);
+				}
 			}
 		}
 		window.addEventListener('resize', () => {
+			fitVideoStage();
 			drawOverlay();
 			drawFrame();
 		});
 
 		/* Calibration */
 		calibrateButton.addEventListener('click', () => {
-            originMode = false;
-            hiddenVideo.pause(); isPlaying = false; playPauseButton.textContent = 'Play';
-			document.getElementById('crosshair').style.display = "none";
-			overlayCanvas.style.pointerEvents = "auto";
+			if (calibrationMode) { cancelPickMode(); return; }
+			originMode = false;
+			originGuide = null;
+			pauseVideo();
+			previousCalibration = { start: calibrationStart, end: calibrationEnd };
 			calibrationMode = true;
 			isDrawingCalibration = false;
-			calibrationStart = null;
-			calibrationEnd = null;
-			frameCanvas.style.cursor = "crosshair";
-			document.getElementById('message').innerHTML = "<p>Drag on the video to draw a line with a known length.</p>";
+			overlayCanvas.style.pointerEvents = "auto";
+			showPickMode("Drag along something of known length, such as a metre rule.");
 		});
 
 		function startCalibrationDraw(x, y) {
@@ -2492,132 +2054,197 @@
 		function endCalibrationDraw() {
 			if (!isDrawingCalibration) return;
 			isDrawingCalibration = false;
+			const pxLen = Math.hypot(calibrationEnd.x - calibrationStart.x, calibrationEnd.y - calibrationStart.y);
+			// A tap rather than a drag: keep waiting for a line.
+			if (pxLen < 4 * getVisualScale()) {
+				calibrationStart = previousCalibration ? previousCalibration.start : null;
+				calibrationEnd = previousCalibration ? previousCalibration.end : null;
+				drawOverlay();
+				setMessage("Drag from one end of the known length to the other.");
+				return;
+			}
 			calibrationMode = false;
 			overlayCanvas.style.pointerEvents = "none";
-			frameCanvas.style.cursor = "default";
-			document.getElementById('message').innerHTML = "<p>Calibration line drawn. Enter actual length and unit.</p>";
-			calibrationPrompt.style.display = "block";
+			hidePickMode();
+			setMessage("Enter the real length of the line.");
+			document.getElementById('calibrationPixels').textContent = `The line is ${formatNumber(pxLen)} pixels long.`;
+			actualLengthInput.value = '';
+			actualUnitInput.value = isCalibrated() ? scaleUnit : 'm';
+			openDialog(calibrationPrompt);
+			actualLengthInput.focus();
 		}
-		overlayCanvas.addEventListener('mousedown', (e) => {
-			if (!calibrationMode) return;
+
+		function overlayPoint(event) {
 			const r = overlayCanvas.getBoundingClientRect();
-			startCalibrationDraw((e.clientX - r.left) * (overlayCanvas.width / r.width), (e.clientY - r.top) * (overlayCanvas.height / r.height));
-		});
-		overlayCanvas.addEventListener('mousemove', (e) => {
-			if (!calibrationMode || !isDrawingCalibration) return;
-			const r = overlayCanvas.getBoundingClientRect();
-			updateCalibrationDraw((e.clientX - r.left) * (overlayCanvas.width / r.width), (e.clientY - r.top) * (overlayCanvas.height / r.height));
-		});
-		window.addEventListener('mouseup', () => { if (calibrationMode) endCalibrationDraw(); });
-		overlayCanvas.addEventListener('touchstart', (e) => {
-			if (!calibrationMode || e.touches.length !== 1) return;
-			e.preventDefault();
-			const t = e.touches[0],
-				r = overlayCanvas.getBoundingClientRect();
-			startCalibrationDraw((t.clientX - r.left) * (overlayCanvas.width / r.width), (t.clientY - r.top) * (overlayCanvas.height / r.height));
-		}, { passive: false });
-		overlayCanvas.addEventListener('touchmove', (e) => {
-			if (!calibrationMode || !isDrawingCalibration || e.touches.length !== 1) return;
-			e.preventDefault();
-			const t = e.touches[0],
-				r = overlayCanvas.getBoundingClientRect();
-			updateCalibrationDraw((t.clientX - r.left) * (overlayCanvas.width / r.width), (t.clientY - r.top) * (overlayCanvas.height / r.height));
-		}, { passive: false });
-		overlayCanvas.addEventListener('touchend', (e) => {
+			return {
+				x: (event.clientX - r.left) * (overlayCanvas.width / r.width),
+				y: (event.clientY - r.top) * (overlayCanvas.height / r.height)
+			};
+		}
+
+		// Pointer events cover the mouse, touch and the pen. The origin is set when the
+		// pointer is released, so a finger can slide to the right spot first.
+		overlayCanvas.addEventListener('pointerdown', (event) => {
+			if (!calibrationMode && !originMode) return;
+			if (event.button !== undefined && event.button > 0) return;
+			event.preventDefault();
+			overlayCanvas.setPointerCapture?.(event.pointerId);
+			const p = overlayPoint(event);
 			if (calibrationMode) {
-				e.preventDefault();
-				endCalibrationDraw();
+				startCalibrationDraw(p.x, p.y);
+			} else {
+				originPointerDown = true;
+				originGuide = p;
+				drawOverlay();
 			}
-		}, { passive: false });
-			confirmCalibrationButton.addEventListener('click', () => {
-				const actualLength = parseFloat(actualLengthInput.value);
-				const actualUnit = actualUnitInput.value.trim();
-				if (!Number.isFinite(actualLength) || actualLength <= 0 || !actualUnit) { alert("Enter a positive length and a unit."); return; }
-			if (!calibrationStart || !calibrationEnd) { alert('Draw a calibration line first.'); return; }
-            const dx = calibrationEnd.x - calibrationStart.x,
+		});
+		overlayCanvas.addEventListener('pointermove', (event) => {
+			const p = overlayPoint(event);
+			if (calibrationMode && isDrawingCalibration) {
+				updateCalibrationDraw(p.x, p.y);
+			} else if (originMode) {
+				originGuide = p;
+				drawOverlay();
+			}
+		});
+		overlayCanvas.addEventListener('pointerup', (event) => {
+			if (calibrationMode) {
+				endCalibrationDraw();
+			} else if (originMode && originPointerDown) {
+				const p = overlayPoint(event);
+				finalizeOriginSelection(p.x, p.y);
+			}
+		});
+		overlayCanvas.addEventListener('pointercancel', () => {
+			if (calibrationMode && isDrawingCalibration) {
+				isDrawingCalibration = false;
+				calibrationStart = previousCalibration ? previousCalibration.start : null;
+				calibrationEnd = previousCalibration ? previousCalibration.end : null;
+			}
+			originPointerDown = false;
+			drawOverlay();
+		});
+		overlayCanvas.addEventListener('pointerleave', () => {
+			if (originMode && !originPointerDown) {
+				originGuide = null;
+				drawOverlay();
+			}
+		});
+
+		calibrationPrompt.querySelector('form').addEventListener('submit', (event) => {
+			event.preventDefault();
+			const actualLength = parseFloat(actualLengthInput.value);
+			const actualUnit = actualUnitInput.value.trim();
+			if (!Number.isFinite(actualLength) || actualLength <= 0) { rejectField(actualLengthInput, "Enter a length greater than zero."); return; }
+			if (!actualUnit) { rejectField(actualUnitInput, "Enter a unit, such as m or cm."); return; }
+			if (!calibrationStart || !calibrationEnd) { closeDialog(calibrationPrompt); setMessage('Draw a scale line first.'); return; }
+			const dx = calibrationEnd.x - calibrationStart.x,
 				dy = calibrationEnd.y - calibrationStart.y;
 			const pxLen = Math.hypot(dx, dy);
-			if (pxLen === 0) { alert("Calibration line length cannot be zero."); return; }
-				scaleFactor = actualLength / pxLen;
-				scaleUnit = actualUnit;
-				markUnsavedChanges();
-				calibrationPrompt.style.display = "none";
-				drawOverlay();
-				drawFrame();
-			replotCurrentView();
-			document.getElementById('message').textContent = `Calibration successful: 1 pixel = ${scaleFactor.toFixed(4)} ${scaleUnit}`;
-		});
-		cancelCalibrationButton.addEventListener('click', () => {
-			calibrationPrompt.style.display = "none";
-			calibrationMode = false;
-			isDrawingCalibration = false;
-			calibrationStart = null;
-			calibrationEnd = null;
+			if (pxLen === 0) { closeDialog(calibrationPrompt); setMessage("The scale line has no length. Draw it again."); return; }
+			scaleFactor = actualLength / pxLen;
+			scaleUnit = actualUnit;
+			previousCalibration = null;
+			markUnsavedChanges();
+			closeDialog(calibrationPrompt);
 			drawOverlay();
 			drawFrame();
-			document.getElementById('message').innerHTML = "<p>Calibration cancelled.</p>";
+			renderPointRows();
+			replotCurrentView();
+			setMessage(`Scale set: 1 pixel = ${formatNumber(scaleFactor)} ${scaleUnit}.`);
+		});
+		cancelCalibrationButton.addEventListener('click', () => {
+			closeDialog(calibrationPrompt);
+			calibrationMode = false;
+			isDrawingCalibration = false;
+			restorePreviousCalibration();
+			drawOverlay();
+			drawFrame();
+			setMessage("Scale unchanged.");
+		});
+		// Esc in a dialog runs its Cancel button.
+		[[calibrationPrompt, cancelCalibrationButton], [exportPrompt, cancelExportButton], [frameRatePrompt, cancelFrameRateButton]].forEach(([dialog, cancel]) => {
+			dialog.addEventListener('cancel', (event) => {
+				event.preventDefault();
+				cancel.click();
+			});
 		});
 
 		/* Origin button */
 		setOriginButton.addEventListener('click', () => {
-            hiddenVideo.pause(); isPlaying = false; playPauseButton.textContent = 'Play';
-			calibrationMode = false;
-			isDrawingCalibration = false;
+			if (originMode) { cancelPickMode(); return; }
+			if (calibrationMode) {
+				restorePreviousCalibration();
+				calibrationMode = false;
+				isDrawingCalibration = false;
+			}
+			pauseVideo();
 			originMode = true;
+			originGuide = null;
 			overlayCanvas.style.pointerEvents = "auto";
-			frameCanvas.style.cursor = "crosshair";
-			document.getElementById('crosshair').style.display = "block";
-			document.getElementById('message').innerHTML = "<p>Click on the video to set the new origin.</p>";
+			drawOverlay();
+			showPickMode("Click where x and y should be zero. On a touch screen, slide to the spot and let go.");
 		});
 
-			/* Cleanup + Unsaved warning */
-			window.addEventListener('beforeunload', (event) => {
-				if (hasUnsavedChanges) {
-					event.preventDefault();
-					event.returnValue = UNSAVED_EXIT_WARNING;
-				}
-			});
-			window.addEventListener('unload', () => {
-				if (blobUrl) URL.revokeObjectURL(blobUrl);
-			});
+		/* Cleanup + Unsaved warning */
+		window.addEventListener('beforeunload', (event) => {
+			if (hasUnsavedChanges) {
+				event.preventDefault();
+				event.returnValue = UNSAVED_EXIT_WARNING;
+			}
+		});
+		window.addEventListener('pagehide', (event) => {
+			if (!event.persisted && blobUrl) URL.revokeObjectURL(blobUrl);
+		});
 
 		/* ===== Hide Crosses Toggle ===== */
 		function toggleCrossesVisibility() {
 			crossesVisible = !crossesVisible;
-			if (crossesVisible) {
-				hideCrossesToggle.classList.remove('crosses-hidden');
-				hideCrossesToggle.querySelector('.toggle-text').textContent = 'Hide';
-			} else {
-				hideCrossesToggle.classList.add('crosses-hidden');
-				hideCrossesToggle.querySelector('.toggle-text').textContent = 'Show';
-			}
+			hideCrossesToggle.setAttribute('aria-pressed', String(!crossesVisible));
+			hideCrossesToggle.querySelector('.toggle-text').textContent = crossesVisible ? 'Hide Marks' : 'Show Marks';
 			drawFrame();
 		}
 
 		hideCrossesToggle.addEventListener('click', toggleCrossesVisibility);
 
-			/* Keyboard shortcut: H to toggle crosses */
-			document.addEventListener('keydown', (e) => {
-				if (e.key === 'Escape') {
-					closeTouchGraphCopyActions();
-				}
+		/* Keyboard shortcuts: arrows step, Space plays, H hides the marks, Ctrl+Z undoes */
+		document.addEventListener('keydown', (e) => {
+			if (e.key === 'Escape') {
+				closeTouchGraphCopyActions();
+				closeMenus();
+				if (calibrationMode || originMode) cancelPickMode();
+			}
 
-				// Ignore if typing in input fields or if video not loaded
-				if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
-				if (hideCrossesToggle.disabled) return;
+			// Ignore if a dialog is open, if typing in a field, or if no video is ready
+			if (document.querySelector('dialog[open]')) return;
+			const tag = e.target.tagName;
+			if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT' || e.target.isContentEditable) return;
+			if (!videoReady || fpsDetectionPending) return;
+
+			if ((e.ctrlKey || e.metaKey) && !e.shiftKey && !e.altKey && e.key.toLowerCase() === 'z') {
+				e.preventDefault();
+				undoPoint();
+				return;
+			}
+			if (e.ctrlKey || e.metaKey || e.altKey) return;
 
 			if (e.key === 'h' || e.key === 'H') {
 				e.preventDefault();
 				toggleCrossesVisibility();
+			} else if (e.key === 'ArrowRight') {
+				e.preventDefault();
+				stepOneFrame(frameStep);
+			} else if (e.key === 'ArrowLeft') {
+				e.preventDefault();
+				stepOneFrame(-frameStep);
+			} else if (e.key === ' ' && tag !== 'BUTTON' && tag !== 'A') {
+				e.preventDefault();
+				togglePlay();
 			}
 		});
-	</script>
-	<script>
-		// Gradient text: skip on Brave iOS where background-clip:text is broken
-		(function() {
-			if (/iP(hone|ad|od)/.test(navigator.userAgent) && navigator.brave) return;
-			document.querySelectorAll('.banner-title').forEach(function(el) { el.classList.add('gradient-text'); });
-		})();
+
+		renderPointRows();
+		updateActivePlotButton();
 	</script>
 </body>
 
