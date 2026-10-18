@@ -177,7 +177,8 @@ body.viewer-expanded { overflow: hidden; }
 }
 
 /* contain: size keeps the canvas pixel size from feeding back into the viewer height. */
-#viewer { position: relative; display: flex; flex-direction: column; flex: 1; min-height: 460px; contain: size; margin: 8px 0 12px; border-radius: 14px; touch-action: none; overflow: hidden; }
+/* The 3D view grows with the screen, so it fills most of a laptop or projector screen when the sim is scrolled into view. */
+#viewer { position: relative; display: flex; flex-direction: column; flex: 1; min-height: clamp(460px, calc(100vh - 240px), 820px); contain: size; margin: 8px 0 12px; border-radius: 14px; touch-action: none; overflow: hidden; }
 #viewer.is-hovering { cursor: pointer; }
 canvas { display: block; width: 100%; height: 0; flex: 1; min-height: 0; align-self: stretch; }
 #load-status { position: absolute; inset: 30% 10%; margin: 0; text-align: center; color: var(--text-secondary); }
