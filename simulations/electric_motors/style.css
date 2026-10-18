@@ -189,7 +189,7 @@ h1 span { color: var(--brand-primary); }
 /* Beside the console on the page, the 3D view grows to fill the whole left-hand column. */
 .viewer-panel:not(.is-stacked):not(.is-fullscreen) .bench { align-self: stretch; }
 .viewer-panel:not(.is-stacked):not(.is-fullscreen) :is(.stage, .view-wrap) { flex: 1 0 auto; }
-.viewer-panel:not(.is-stacked):not(.is-fullscreen) #viewer { flex: 1 0 auto; height: auto; min-height: clamp(360px, calc(100vh - 300px), 620px); }
+.viewer-panel:not(.is-stacked):not(.is-fullscreen) #viewer { flex: 1 0 auto; height: auto; min-height: clamp(460px, calc(100vh - 200px), 820px); }
 #viewer.is-hovering { cursor: pointer; }
 #viewer > canvas { display: block; width: 100%; height: 0; flex: 1; min-height: 0; align-self: stretch; }
 #load-status { position: absolute; inset: 30% 10%; margin: 0; text-align: center; color: var(--text-secondary); }
