@@ -804,6 +804,14 @@ export function updateDirtyIndicator(indicator, dirty) {
   if (!indicator) return;
   indicator.classList.toggle('visible', dirty);
   indicator.title = dirty ? 'Unsaved changes' : '';
+
+  // The status bar repeats the dot in words.
+  const saveStatus = document.getElementById('saveStatus');
+  if (!saveStatus) return;
+  const input = document.getElementById('markdownInput');
+  const hasContent = Boolean(input && input.value.trim());
+  saveStatus.textContent = dirty ? 'Unsaved changes' : (hasContent ? 'No unsaved changes' : '');
+  saveStatus.classList.toggle('is-dirty', dirty);
 }
 
 // ------------------------------------------------------------------ //

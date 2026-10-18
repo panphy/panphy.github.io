@@ -64,136 +64,99 @@
 </head>
 
 <body>
-  <!-- Mobile tab bar (visible only on narrow screens) -->
-  <div id="mobileTabBar" class="mobile-tab-bar no-print">
-    <a href="https://panphy.app/" class="mobile-tab-bar-logo">
+  <header class="md-appbar no-print">
+    <a class="md-brand" href="https://panphy.app/" title="PanPhy Labs">
       <img src="/assets/panphy.png" alt="PanPhy logo" />
+      <span class="md-wordmark">PanPhyMD</span>
     </a>
-    <div class="mobile-tab-bar-tabs">
-      <button class="mobile-tab active" data-pane="input">Edit</button>
-      <button class="mobile-tab" data-pane="output">Preview</button>
+    <!-- Narrow screens show one pane at a time; these tabs switch between them. -->
+    <div id="mobileTabBar" class="md-view-switch" role="group" aria-label="Pane">
+      <button type="button" class="mobile-tab active" data-pane="input">Edit</button>
+      <button type="button" class="mobile-tab" data-pane="output">Preview</button>
     </div>
-    <button id="mobileThemeToggle" data-panphy-theme-toggle class="theme-toggle-button" aria-label="Toggle theme">&#9728;&#65039;</button>
-    <button data-panphy-fullscreen aria-label="Enter fullscreen" title="Enter fullscreen"></button>
-  </div>
+    <div class="md-appbar-actions">
+      <button type="button" id="loadSampleButton" class="md-tool md-tool-quiet" title="Open a sample document showing Markdown and LaTeX syntax"><svg class="md-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5.5c2.7-1.3 5.4-1.3 8 0v14c-2.6-1.3-5.3-1.3-8 0zM20 5.5c-2.7-1.3-5.4-1.3-8 0v14c2.6-1.3 5.3-1.3 8 0z"/></svg><span>Guide</span></button>
+      <button id="themeToggleButton" data-panphy-theme-toggle class="theme-toggle-button" aria-label="Switch to Dark Mode"
+        title="Switch to Dark Mode">&#9728;&#65039;</button>
+      <button data-panphy-fullscreen aria-label="Enter fullscreen" title="Enter fullscreen"></button>
+    </div>
+  </header>
 
-  <!--
-      The main container with two panes:
-      - Left = PanPhyMD
-      - Right = Rendered Output
-  -->
-  <div id="editorContainer">
-    <!-- ============================================= -->
-    <!-- =========== PanPhyMD Pane =================== -->
-    <!-- ============================================= -->
-    <div id="inputPane">
-      <!--
-          New 3-column heading container:
-          1) Logo on the left
-          2) "PanPhyMD" in the center
-          3) placeholder on the right
-      -->
-      <div class="pane-heading-container">
-        <!-- Logo Container (Left) -->
-        <div class="logo-container">
-          <!-- Link the logo to PanPhy website -->
-          <a href="https://panphy.app/">
-            <img src="/assets/panphy.png" alt="PanPhy logo" />
-          </a>
-        </div>
-
-        <!-- The heading in the Center -->
-        <h2 class="pane-heading">PanPhyMD</h2>
-
-        <!-- Placeholder on the Right (keeps grid layout consistent) -->
-        <div class="heading-placeholder"></div>
+  <!-- Two panes: the Markdown editor on the left, the rendered preview on the right. -->
+  <main id="editorContainer">
+    <section id="inputPane" aria-labelledby="inputPaneTitle">
+      <div class="pane-head no-print">
+        <h2 class="pane-heading" id="inputPaneTitle">Markdown</h2>
+        <p class="pane-hint">Put maths between <code>$&hellip;$</code> or <code>$$&hellip;$$</code></p>
       </div>
-
-      <!-- Buttons and the markdown input textarea below -->
-      <div class="buttonContainer floating-toolbar">
-        <button id="loadFileButton" title="Open a Markdown file from your device">Open .md</button>
-        <span class="save-wrapper">
-          <button id="saveMDButton" title="Save the current document as a Markdown file">Save .md</button>
-          <span id="dirtyIndicator" class="dirty-indicator" aria-hidden="true"></span>
-        </span>
-        <button id="clearButton" title="Clear the editor contents">Clear</button>
-        <button id="historyButton" title="Browse saved snapshots">History</button>
-        <div class="insert-menu" id="insertMenu">
-          <button id="insertButton" aria-expanded="false" aria-controls="insertPanel" title="Insert math, table, or image">Insert</button>
-          <div id="insertPanel" class="insert-panel" hidden>
-            <button class="insert-action-btn" data-action="image" title="Insert an image from a URL">Image</button>
-            <button class="insert-action-btn" data-action="table" title="Insert a Markdown table">Table</button>
-            <button class="insert-action-btn" data-action="pagebreak" title="Insert a page break for printing">Page Break</button>
-            <div class="insert-math-group" id="insertMathGroup">
-              <div class="insert-panel-item insert-has-submenu">
-                <span>Math</span>
-                <span class="insert-chevron" aria-hidden="true">&#8250;</span>
-              </div>
-              <div class="insert-submenu">
-                <button class="insert-action-btn" data-template="basic" title="Insert basic math notation examples">Basic</button>
-                <button class="insert-action-btn" data-template="calculus" title="Insert calculus notation examples">Advanced</button>
-                <button class="insert-action-btn" data-template="matrices" title="Insert matrix notation examples">Matrices</button>
+      <div class="pane-toolbar no-print" role="toolbar" aria-label="Document tools">
+        <div class="md-tool-group" role="group" aria-label="File">
+          <button type="button" id="loadFileButton" class="md-tool" title="Open a Markdown file from your device"><svg class="md-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M3.5 7v10.5a2 2 0 0 0 2 2h13a2 2 0 0 0 2-2V9.5a2 2 0 0 0-2-2H12l-2-2.5H5.5a2 2 0 0 0-2 2z"/></svg><span>Open</span></button>
+          <span class="save-wrapper">
+            <button type="button" id="saveMDButton" class="md-tool" title="Save the current document as a Markdown file"><svg class="md-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3.5v11M7.5 10l4.5 4.5 4.5-4.5M4.5 15.5v3a2 2 0 0 0 2 2h11a2 2 0 0 0 2-2v-3"/></svg><span>Save</span></button>
+            <span id="dirtyIndicator" class="dirty-indicator" aria-hidden="true"></span>
+          </span>
+          <button type="button" id="historyButton" class="md-tool" title="Browse saved snapshots"><svg class="md-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4.5 12a7.5 7.5 0 1 0 2.2-5.3"/><path d="M4.5 4v3.5H8"/><path d="M12 8v4.5l3 1.8"/></svg><span>History</span></button>
+        </div>
+        <div class="md-tool-group" role="group" aria-label="Edit">
+          <div class="insert-menu" id="insertMenu">
+            <button type="button" id="insertButton" class="md-tool" aria-expanded="false" aria-controls="insertPanel" title="Insert maths, a table, an image or a page break"><svg class="md-icon" viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="4" width="16" height="16" rx="3"/><path d="M12 8.5v7M8.5 12h7"/></svg><span>Insert</span><svg class="md-caret" viewBox="0 0 12 12" aria-hidden="true"><path d="m3 4.5 3 3 3-3"/></svg></button>
+            <div id="insertPanel" class="insert-panel md-menu" hidden>
+              <button class="insert-action-btn" data-action="image" title="Insert an image from a URL">Image</button>
+              <button class="insert-action-btn" data-action="table" title="Insert a Markdown table">Table</button>
+              <button class="insert-action-btn" data-action="pagebreak" title="Insert a page break for printing">Page Break</button>
+              <div class="insert-math-group" id="insertMathGroup">
+                <div class="insert-panel-item insert-has-submenu">
+                  <span>Math</span>
+                  <span class="insert-chevron" aria-hidden="true">&#8250;</span>
+                </div>
+                <div class="insert-submenu md-menu">
+                  <button class="insert-action-btn" data-template="basic" title="Insert basic math notation examples">Basic</button>
+                  <button class="insert-action-btn" data-template="calculus" title="Insert calculus notation examples">Advanced</button>
+                  <button class="insert-action-btn" data-template="matrices" title="Insert matrix notation examples">Matrices</button>
+                </div>
               </div>
             </div>
           </div>
-        </div>
-        <div class="font-menu" id="fontMenu">
-          <button id="fontButton" aria-expanded="false" aria-controls="fontPanel" title="Change editor font size">Font Size</button>
-          <div id="fontPanel" class="font-panel" hidden>
-            <button class="font-option-btn" data-size="14px">Small</button>
-            <button class="font-option-btn" data-size="16px">Medium</button>
-            <button class="font-option-btn" data-size="18px">Large</button>
-            <button class="font-option-btn" data-size="20px">XL</button>
+          <div class="font-menu" id="fontMenu">
+            <button type="button" id="fontButton" class="md-tool" aria-expanded="false" aria-controls="fontPanel" title="Change the size of the text in the editor and preview"><svg class="md-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M3.5 6.5h10M8.5 6.5V19M14.5 11.5h6M17.5 11.5V19"/></svg><span>Text Size</span><svg class="md-caret" viewBox="0 0 12 12" aria-hidden="true"><path d="m3 4.5 3 3 3-3"/></svg></button>
+            <div id="fontPanel" class="font-panel md-menu" hidden>
+              <button class="font-option-btn" data-size="14px">Small</button>
+              <button class="font-option-btn" data-size="16px">Medium</button>
+              <button class="font-option-btn" data-size="18px">Large</button>
+              <button class="font-option-btn" data-size="20px">XL</button>
+            </div>
           </div>
         </div>
+        <div class="md-tool-spacer"></div>
+        <button type="button" id="clearButton" class="md-tool md-tool-danger" title="Clear the editor contents"><svg class="md-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4.5 7h15M9.5 7V4.5h5V7M6.5 7l1 13h9l1-13M10 10.5v6M14 10.5v6"/></svg><span>Clear</span></button>
       </div>
-      <textarea id="markdownInput" placeholder="Type your Markdown and LaTeX here..."></textarea>
-    </div>
+      <textarea id="markdownInput" placeholder="Type your Markdown and LaTeX here..." aria-label="Markdown and LaTeX source"></textarea>
+    </section>
 
-    <!-- ============================================= -->
-    <!-- ========== Rendered Output Pane ============= -->
-    <!-- ============================================= -->
     <div id="paneDivider" class="no-print" role="separator" tabindex="0"
       aria-label="Editor width" aria-orientation="vertical" aria-controls="inputPane outputPane"
       aria-valuemin="0" aria-valuemax="100" aria-valuenow="50"
       title="Drag to resize. Use arrow keys to adjust; double-click or press Enter to reset."></div>
-    <div id="outputPane" class="mobile-hidden">
-      <!--
-          New 3-column heading container:
-          1) placeholder on the left
-          2) "Rendered Output" in the center
-          3) theme toggle on the right
-      -->
-      <div class="pane-heading-container">
-        <!-- Placeholder on the Left -->
-        <div class="heading-placeholder"></div>
 
-        <!-- The heading in the Center -->
-        <h2 class="pane-heading">Preview</h2>
-
-        <!-- Theme toggle and fullscreen buttons on the Right -->
-        <div class="theme-toggle-wrapper">
-          <button id="themeToggleButton" data-panphy-theme-toggle class="theme-toggle-button no-print" aria-label="Switch to Dark Mode"
-            title="Switch to Dark Mode">
-            &#9728;&#65039;
-          </button>
-          <button data-panphy-fullscreen class="no-print" aria-label="Enter fullscreen" title="Enter fullscreen"></button>
-        </div>
+    <section id="outputPane" class="mobile-hidden" aria-labelledby="outputPaneTitle">
+      <div class="pane-head no-print">
+        <h2 class="pane-heading" id="outputPaneTitle">Preview</h2>
+        <p class="pane-hint">Click an equation or table to copy it</p>
       </div>
-
-      <!-- Buttons and rendered output below -->
-      <div class="buttonContainer floating-toolbar output-controls no-print">
-        <div class="output-actions">
-          <button id="printButton" title="Prints in light mode">Print to PDF</button>
-          <button id="exportHTMLButton" title="Exports in current theme">Export as HTML</button>
-          <button id="presentButton" title="Show rendered output in fullscreen">Present</button>
-          <button id="loadSampleButton" title="Sample document showing basic Markdown and LaTeX syntax.">Learn</button>
+      <div class="pane-toolbar no-print" role="toolbar" aria-label="Preview tools">
+        <div class="md-tool-group" role="group" aria-label="Share">
+          <button type="button" id="printButton" class="md-tool" title="Print or save as PDF (always in light mode)"><svg class="md-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 9V4h10v5"/><path d="M7 16.5H5.5a2 2 0 0 1-2-2V11a2 2 0 0 1 2-2h13a2 2 0 0 1 2 2v3.5a2 2 0 0 1-2 2H17"/><path d="M7 13.5h10V20H7z"/></svg><span>Print / PDF</span></button>
+          <button type="button" id="exportHTMLButton" class="md-tool" title="Export as an HTML page, in the current theme"><svg class="md-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="m8.5 8-4 4 4 4M15.5 8l4 4-4 4M13.5 5.5l-3 13"/></svg><span>Export HTML</span></button>
+          <button type="button" id="presentButton" class="md-tool" title="Show the preview full screen"><svg class="md-icon" viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="4.5" width="17" height="11.5" rx="2"/><path d="M12 16v3.5M8 19.5h8"/><path d="m10.5 7.8 4 2.45-4 2.45z"/></svg><span>Present</span></button>
+        </div>
+        <div class="md-tool-group" role="group" aria-label="View">
           <div class="preview-font-menu" id="previewFontMenu">
             <div class="preview-font-btn-wrapper" id="previewFontBtnWrapper">
-              <button id="previewFontButton" aria-expanded="false" aria-controls="previewFontPanel" title="Change preview font">Font</button>
+              <button type="button" id="previewFontButton" class="md-tool" aria-expanded="false" aria-controls="previewFontPanel" title="Change the typeface of the preview"><svg class="md-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M3.5 18.5 8 6l4.5 12.5M5.2 14h5.6"/><circle cx="17.2" cy="15.6" r="2.9"/><path d="M20.1 12.5v6"/></svg><span>Font</span><svg class="md-caret" viewBox="0 0 12 12" aria-hidden="true"><path d="m3 4.5 3 3 3-3"/></svg></button>
               <span class="preview-font-offline-tooltip" role="tooltip">Font selection is available online only</span>
             </div>
-            <div id="previewFontPanel" class="preview-font-panel" hidden>
+            <div id="previewFontPanel" class="preview-font-panel md-menu" hidden>
               <button class="preview-font-option-btn" data-font-key="Manrope">Default</button>
               <button class="preview-font-option-btn" data-font-key="Inter">Inter</button>
               <button class="preview-font-option-btn" data-font-key="Lora">Lora</button>
@@ -202,13 +165,12 @@
             </div>
           </div>
         </div>
-        <div class="output-toggles">
-          <label class="scroll-sync-toggle" for="syncScrollToggle">
-            <input type="checkbox" id="syncScrollToggle" />
-            <span class="toggle-slider" aria-hidden="true"></span>
-            <span class="toggle-label">Sync Scroll</span>
-          </label>
-        </div>
+        <div class="md-tool-spacer"></div>
+        <label class="md-switch" for="syncScrollToggle" title="Scroll the editor and preview together">
+          <input type="checkbox" id="syncScrollToggle" role="switch" />
+          <span class="md-switch-track" aria-hidden="true"></span>
+          <span>Sync Scroll</span>
+        </label>
       </div>
       <div id="renderedOutput" class="mathjax-ignore"></div>
       <div id="presentControls" class="present-controls">
@@ -230,12 +192,13 @@
       </div>
       <canvas id="laserCanvas" class="laser-canvas"></canvas>
       <div id="laserPointer" class="laser-pointer"></div>
-    </div>
-  </div>
+    </section>
+  </main>
 
-  <footer>
-    &copy; 2026 <a href="https://panphy.app/" target="_blank" rel="noopener noreferrer">PanPhy Labs</a>. All rights reserved. |
-    <a href="https://buymeacoffee.com/panphy" target="_blank" rel="noopener noreferrer">Support My Projects</a>
+  <footer class="md-statusbar">
+    <span class="md-status"><span id="wordCount"></span><span id="saveStatus" role="status"></span></span>
+    <span class="md-statusbar-legal">&copy; 2026 <a href="https://panphy.app/" target="_blank" rel="noopener noreferrer">PanPhy Labs</a>. All rights reserved. &middot;
+    <a href="https://buymeacoffee.com/panphy" target="_blank" rel="noopener noreferrer">Support My Projects</a></span>
   </footer>
 
   <!-- Main Application Script (ES Module) -->
