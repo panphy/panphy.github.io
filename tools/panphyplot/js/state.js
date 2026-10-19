@@ -181,6 +181,7 @@ function loadState(initialState = null) {
 	customFitStates = plotState.customFits;
 	fitExtents = plotState.extents;
 	pruneOrphanFits();
+	if (typeof restoreProjectFitFunctions === 'function') restoreProjectFitFunctions();
 	refreshActiveFitKey();
 }
 

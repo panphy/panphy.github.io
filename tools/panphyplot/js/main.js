@@ -57,6 +57,7 @@ document.addEventListener('DOMContentLoaded', () => {
 	initializeInterface();
 	initializeDialogs();
 	initializeCopying();
+	initializeProjects();
 	initializePaneDividers();
 	updateBasicFitEquation();
 	changeAdvancedFitMethod();

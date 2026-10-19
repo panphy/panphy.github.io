@@ -2788,3 +2788,15 @@ input[type="number"]:focus {
 .neo-symbol-preview { min-height: 32px; display: grid; place-items: center; overflow-x: auto; }
 .neo-symbol-error { color: var(--danger); }
 .neo-symbol-error:empty { display: none; }
+
+@media (min-width: 1000px) and (max-width: 1399px) {
+	.neo-toolbar { gap: 2px; padding-inline: 8px; }
+	.neo-toolbar .neo-tool { padding-inline: 5px; gap: 4px; font-size: 0.8rem; }
+	.neo-tool-group { padding-right: 4px; margin-right: 0; }
+	.neo-tool-group-label { padding-inline: 3px; }
+	.neo-toolbar .neo-switch { margin-inline: 2px; }
+}
+
+@media (min-width: 1000px) and (max-width: 1199px) {
+	.neo-tool-group-label { display: none; }
+}

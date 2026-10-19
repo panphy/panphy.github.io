@@ -257,7 +257,7 @@
 		<h3>Selecting, copying and clearing cells</h3>
 		<p>Drag across cells with a mouse or pen to select a block, or hold <kbd>Shift</kbd> and click, or use <kbd>Shift</kbd> with the arrow keys. The status bar shows how many cells are selected. Copy (<kbd>Ctrl</kbd>/<kbd>⌘</kbd> <kbd>C</kbd>) puts the block on the clipboard as rows and columns that paste straight into a spreadsheet; cut (<kbd>Ctrl</kbd>/<kbd>⌘</kbd> <kbd>X</kbd>) also empties it. Pasting a block starts at the top-left cell of the selection; pasting one value fills every selected cell. <kbd>Delete</kbd> or <kbd>Backspace</kbd> empties the selection and <kbd>Esc</kbd> cancels it. Formula columns are copied but never overwritten. On a touchscreen, dragging scrolls the table, so select with <kbd>Shift</kbd> on a keyboard or paste into one cell.</p>
 		<h3>Importing a CSV file</h3>
-		<p><strong>Import .csv</strong> opens a preview of the file. Check the role chosen for each column and whether the first row holds names, then choose a new sheet or the current one. Roles are only suggested from clear headings: a column called <code>Δx</code> is suggested as the uncertainty of the column named <code>x</code>. Nothing is decided without the preview.</p>
+		<p><strong>Import</strong> opens a preview of the file. Check the role chosen for each column and whether the first row holds names, then choose a new sheet or the current one. Roles are only suggested from clear headings: a column called <code>Δx</code> is suggested as the uncertainty of the column named <code>x</code>. Nothing is decided without the preview.</p>
 		<p><strong>From Motion Tracker</strong>, Export to PanPhyPlot opens PanPhyPlot in a new tab with the data in a new sheet: <code>t</code>, <code>x</code> and <code>y</code>, then a second <code>t</code> column with the smoothed velocities <code>vx</code> and <code>vy</code>, which belong to the times midway between marks. The velocities start hidden; show them in the Series list.</p>
 
 		<h2 id="formulas">4. Formula columns</h2>
@@ -272,7 +272,7 @@
 		<div class="note">Column letters take priority. In a sheet with five or more columns, <code>E</code> means column E, not Euler's number: use <code>e</code> for that.</div>
 
 		<h2 id="repeats">5. Repeat readings</h2>
-		<p>Put each set of repeats in its own Y column, such as T1, T2 and T3. <strong>Mean of Repeats</strong> then adds a formula column holding their mean, named after them (T). It can also:</p>
+		<p>Put each set of repeats in its own Y column, such as T1, T2 and T3. <strong>Mean</strong> opens Mean of Repeats and then adds a formula column holding their mean, named after them (T). It can also:</p>
 		<ul>
 			<li>add a ±Δ column of <strong>half the spread between the largest and smallest readings</strong>, a common estimate of the uncertainty in a mean;</li>
 			<li>hide the repeat series, so the graph shows the mean.</li>
@@ -309,7 +309,7 @@
 			</tbody>
 		</table>
 		<h3>Extending the line</h3>
-		<p>A fitted line is drawn across the data. To draw it further, type x values under <strong>Extend line</strong>: <strong>Back to x =</strong> before the first point, such as 0 to read an intercept, and <strong>Forward to x =</strong> beyond the last. Leave a box blank to stop at the data. Each series keeps its own extension through a new fit; <strong>Clear Fit</strong> removes it. After the page is reloaded, fit again before changing an extension.</p>
+		<p>A fitted line is drawn across the data. To draw it further, type x values under <strong>Extend line</strong>: <strong>Back to x =</strong> before the first point, such as 0 to read an intercept, and <strong>Forward to x =</strong> beyond the last. Leave a box blank to stop at the data. Each series keeps its own extension through a new fit; <strong>Clear Fit</strong> removes it. Fit models are saved with the project and restored on reopening or reloading. Older saved fits without a recoverable model need fitting again before changing an extension.</p>
 		<h3>Weighted fits</h3>
 		<p>Turn on <strong>Weight by uncertainties</strong> to let the more certain points count for more. Each point has weight \(1/\sigma^2\), with \(\sigma^2 = \Delta y^2 + \left(f'(x)\,\Delta x\right)^2\): its ±ΔY, and its ±ΔX turned into a vertical uncertainty through the slope of the curve (the effective variance). The fit is re-weighted as the slope settles. Weighting works for every fit type and needs a ±ΔY or ±ΔX above zero for every point.</p>
 		<p>A fit becomes <em>Outdated</em>, drawn dashed, as soon as its data or ±ΔY change. Click <strong>Fit Curve</strong> again to update it.</p>
@@ -328,12 +328,15 @@
 		<h2 id="sharing">10. Sharing your work</h2>
 		<ul>
 			<li><strong>View Table</strong> shows the sheet with each value beside its own ± uncertainty, ready to copy for a spreadsheet, as an image, as Markdown or as LaTeX. Calculated values are rounded to the decimal place of their uncertainty; typed values appear as entered.</li>
-			<li><strong>Export .csv</strong> saves every column, including calculated ones, with headings such as <code>L / m</code> that Import .csv reads back. Formulas themselves are not saved in the file.</li>
+			<li><strong>Export</strong> saves every column, including calculated ones, with headings such as <code>L / m</code> that Import .csv reads back. Formulas themselves are not saved in the file.</li>
 			<li>The camera button on the graph saves it as a PNG image.</li>
 		</ul>
 
 		<h2 id="saving">11. Saving and devices</h2>
-		<p>Your sheets are saved automatically in this browser on this device, separately from PanPhyPlotOG. They are not uploaded anywhere, and clearing the browser's site data removes them: export a CSV to keep a copy or to move to another device.</p>
+		<p>Your sheets are saved automatically in this browser on this device, separately from PanPhyPlotOG. They are not uploaded anywhere, and clearing the browser's site data removes them: use <strong>File → Save</strong> to keep a complete project file or move your work to another device.</p>
+		<p><strong>Save</strong> downloads a <code>.ppplot</code> project containing every sheet, data and formulas, graph titles and zoom ranges, hidden series, fit results and uncertainties, custom fit formulas and bounds, equation symbols, decimal places, line extensions and current fit controls. The graphs are rebuilt from these settings when you reopen the file.</p>
+		<p><strong>Open</strong> selects a project file and checks it before asking to replace all current sheets. Cancel to keep your current work, or save it first. A malformed or unsupported file leaves the current project intact. You can open files on another device and continue editing; new fits can be extended immediately. Browser theme and pane widths stay with the device.</p>
+		<p><strong>Import</strong> and <strong>Export</strong> continue to handle CSV data for an individual sheet; CSV does not preserve formulas or fitted results.</p>
 		<p>Every tab or window you open this page in shares the same sheets, so use a new <strong>sheet</strong>, not a new tab, for another experiment. If the work changes in another tab, this tab stops saving and asks whether to reload and see the other tab's version, or keep its own; nothing is overwritten without asking.</p>
 		<p>Saved work from the trial version is kept automatically. If original PanPhyPlot data is found, a one-time offer can append it as new sheets with names, units and uncertainties. Accepting or declining leaves the original saved work untouched in PanPhyPlotOG. Original fits remain there.</p>
 		<p>PanPhyPlot works best on a laptop or tablet. On a small screen, choose <strong>Continue</strong> to use the workspace or <strong>Not now</strong> to return to the homepage.</p>

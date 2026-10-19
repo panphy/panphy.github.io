@@ -184,7 +184,7 @@ const TOUR_CHAPTERS = {
 				target: '#mean-button',
 				body: 'Mean of Repeats adds the mean of the repeat columns, row by row, and a ±Δ column of half the spread between the largest and smallest readings.',
 				action: {
-					instruction: 'Click Mean of Repeats, keep all three columns ticked, then click Add Mean.',
+					instruction: 'Click Mean, keep all three columns ticked, then click Add Mean.',
 					isDone: () => !!findTourMean(),
 					perform: addTourMean
 				}
@@ -253,7 +253,7 @@ const TOUR_CHAPTERS = {
 			{
 				title: 'Share your work',
 				target: '#view-table-button',
-				body: 'View Table copies a formatted table with every value and its ± uncertainty. Export .csv saves every column; tap the fitted equation to copy it as an image or LaTeX.'
+				body: 'View Table copies a formatted table with every value and its ± uncertainty. Save keeps the complete project as a .ppplot file; Open resumes it. Export saves this sheet as CSV; tap the fitted equation to copy it as an image or LaTeX.'
 			},
 			{
 				title: 'Tour complete',

@@ -1335,7 +1335,7 @@ async function fitCustomCurve() {
 		const yFit = xFit.map(fitFunction);
 		const equation = buildCustomFitEquationLatex(analysis.parsedExpression, analysis.parameterNames, bestParams);
 
-		fittedCurves[targetDatasetIndex] = { x: xFit, y: yFit, equation };
+		fittedCurves[targetDatasetIndex] = { x: xFit, y: yFit, equation, model: { kind: 'custom', formula: analysis.normalizedFormula, names: analysis.parameterNames, params: bestParams.slice() } };
 		updateResults(equation, xValues, yValues, fitFunction, targetDatasetIndex, solved, fitChoice, fitExtras(final));
 		if (targetDatasetIndex === activeFitKey) {
 			plotGraph(xFit, yFit);
@@ -1383,7 +1383,7 @@ function performLinearFit(x, y) {
 		if (intercept < 0) {
 			equation = `y = ${formatFitNumber(slope)}x - ${formatFitNumber(Math.abs(intercept))}`;
 		}
-		fittedCurves[activeFitKey] = { x: xFit, y: yFit, equation };
+		fittedCurves[activeFitKey] = { x: xFit, y: yFit, equation, model: { kind: 'linear', params: [slope, intercept] } };
 		const extras = fitExtras(final);
 		if (x.length <= 2 && !final.weighted) extras.parameters = null;
 		updateResults(equation, x, y, fitFunction, activeFitKey, null, { kind: 'basic', method: document.getElementById('fit-method').value }, extras);
@@ -1460,7 +1460,7 @@ function performPolynomialFit(x, y, degree) {
 			? xCoefficients.map((value, i) => ({ name: `a_{${degree - i}}`, value, uncertainty: xUncertainties[i] }))
 			: null;
 		const equation = buildPolynomialEquation(xCoefficients);
-		fittedCurves[activeFitKey] = { x: xFit, y: yFit, equation };
+		fittedCurves[activeFitKey] = { x: xFit, y: yFit, equation, model: { kind: 'polynomial', params: uCoefficients.slice(), mean: fit.meanX, spread: fit.stdX } };
 		updateResults(equation, x, y, fitFunction, activeFitKey, null, { kind: 'basic', method: document.getElementById('fit-method').value }, fitExtras(final));
 		plotGraph(xFit, yFit);
 	} catch (error) {
@@ -1484,7 +1484,7 @@ function performExponentialFit() {
 		const xFit = buildFitDomainFromData(data, 100), yFit = xFit.map(fitFunction);
 		// A is the amplitude at the fixed reference x shown in the equation.
 		const equation = formatExpEquation(params[0], params[1], params[2], true, xRef);
-		fittedCurves[activeFitKey] = { x: xFit, y: yFit, equation };
+		fittedCurves[activeFitKey] = { x: xFit, y: yFit, equation, model: { kind: 'exponential', params: params.slice(), reference: xRef } };
 		updateResults(equation, data.map(p => p.x), data.map(p => p.y), fitFunction, activeFitKey, final.solver || solution, { kind: 'basic', method: 'Exponential' }, fitExtras(final));
 		plotGraph(xFit, yFit);
 	} catch (error) {
@@ -1525,7 +1525,7 @@ function performPowerFit() {
 		const x0Text = x0 >= 0 ? ` - ${formatFitNumber(x0)}` : ` + ${formatFitNumber(Math.abs(x0))}`;
 		const cText = c >= 0 ? ` + ${formatFitNumber(c)}` : ` - ${formatFitNumber(Math.abs(c))}`;
 		const equation = `y = ${formatFitNumber(A)}(x${x0Text})^{${formatFitNumber(b)}}${cText}`;
-		fittedCurves[activeFitKey] = { x: xFit, y: yFit, equation };
+		fittedCurves[activeFitKey] = { x: xFit, y: yFit, equation, model: { kind: 'power', params: final.params.slice() } };
 		const solver = final.solver || solution;
 		const extras = fitExtras(final);
 		// Only diagnose parameter ambiguity when the solver has evidence for it.
@@ -1658,7 +1658,7 @@ async function performSinusoidalFit() {
 		const { xFit, yFit } = sampleCurve(data, fitFunction, 300);
 		const equation = buildSinusoidalEquation(finalParams);
 
-		fittedCurves[targetDatasetIndex] = { x: xFit, y: yFit, equation: equation };
+		fittedCurves[targetDatasetIndex] = { x: xFit, y: yFit, equation, model: { kind: 'sinusoidal', params: final.params.slice() } };
 		updateResults(equation, data.map(p => p.x), data.map(p => p.y), fitFunction, targetDatasetIndex, final.solver || result, fitChoice, fitExtras(final));
 		if (targetDatasetIndex === activeFitKey) {
 			plotGraph(xFit, yFit);
@@ -1747,7 +1747,7 @@ async function performGaussianFit() {
 		const { xFit, yFit } = sampleCurve(data, fitFunction, 300);
 		const equation = buildGaussianEquation(finalParams);
 
-		fittedCurves[targetDatasetIndex] = { x: xFit, y: yFit, equation: equation };
+		fittedCurves[targetDatasetIndex] = { x: xFit, y: yFit, equation, model: { kind: 'gaussian', params: final.params.slice() } };
 		updateResults(equation, data.map(p => p.x), data.map(p => p.y), fitFunction, targetDatasetIndex, final.solver || result, fitChoice, fitExtras(final));
 		if (targetDatasetIndex === activeFitKey) {
 			plotGraph(xFit, yFit);
