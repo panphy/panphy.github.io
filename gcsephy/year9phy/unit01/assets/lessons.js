@@ -12,8 +12,9 @@ window.LESSONS = [
     unlocks: ["precision vs accuracy", "uncertainty from repeats", "random & systematic error"],
     keyRule: "Uncertainty = (maximum − minimum) ÷ 2",
     revision: {
-      pageStart: 4,
-      pageRange: "4–8",
+      workbookPart: 1,
+      pageStart: 3,
+      pageRange: "3–13",
       summary:
         "Measurements are evidence only when you can explain their spread, their limits and the errors that may have shifted them.",
       sections: [
@@ -127,8 +128,9 @@ window.LESSONS = [
     unlocks: ["independent variables", "continuous vs categoric", "line graph or bar chart"],
     keyRule: "Continuous independent variable → line graph. Categoric independent variable → bar chart.",
     revision: {
-      pageStart: 9,
-      pageRange: "9–11",
+      workbookPart: 1,
+      pageStart: 14,
+      pageRange: "14–21",
       summary:
         "A fair investigation changes one thing, measures one thing and keeps every other important factor as constant as possible.",
       sections: [
@@ -238,8 +240,9 @@ window.LESSONS = [
     unlocks: ["three trials and a mean", "results tables", "bar chart quality"],
     keyRule: "The best shock absorber gives the lowest mean bounce height.",
     revision: {
-      pageStart: 12,
-      pageRange: "12–15",
+      workbookPart: 2,
+      pageStart: 3,
+      pageRange: "3–11",
       summary:
         "The drop test turns a categoric comparison into trustworthy evidence by controlling the drop, repeating each material and plotting the mean.",
       sections: [
@@ -350,8 +353,9 @@ window.LESSONS = [
     unlocks: ["continuous data", "axes, units & scales", "accurate plotting"],
     keyRule: "Independent variable on x. Dependent variable on y. Units on both.",
     revision: {
-      pageStart: 16,
-      pageRange: "16–19",
+      workbookPart: 2,
+      pageStart: 12,
+      pageRange: "12–20",
       summary:
         "A line graph makes a pattern visible when the independent variable is continuous, but only if the table, scale and plotting are accurate.",
       sections: [
@@ -463,8 +467,9 @@ window.LESSONS = [
     unlocks: ["best-fit lines", "anomalous result decisions", "evidence-led conclusions"],
     keyRule: "Check or repeat an anomalous result before deciding what to do with it.",
     revision: {
-      pageStart: 20,
-      pageRange: "20–24",
+      workbookPart: 2,
+      pageStart: 21,
+      pageRange: "21–29",
       summary:
         "Experimental data is rarely perfect. A best-fit line shows the overall pattern, while an honest scientist investigates points that do not fit.",
       sections: [
@@ -578,8 +583,9 @@ window.LESSONS = [
     unlocks: ["independent planning", "table design", "evaluation"],
     keyRule: "Change one variable, measure one variable, control everything else you reasonably can.",
     revision: {
-      pageStart: 25,
-      pageRange: "25–29",
+      workbookPart: 3,
+      pageStart: 3,
+      pageRange: "3–10",
       summary:
         "The paper-helicopter challenge combines the whole process: plan a fair test, collect repeated data, graph it, conclude and evaluate independently.",
       sections: [
@@ -691,8 +697,9 @@ window.LESSONS = [
     unlocks: ["testable questions", "team investigation", "defensible conclusions"],
     keyRule: "A strong question is specific, measurable and written: ‘How does X affect Y?’",
     revision: {
-      pageStart: 30,
-      pageRange: "30–38",
+      workbookPart: 3,
+      pageStart: 11,
+      pageRange: "11–23",
       summary:
         "A complete investigation produces evidence that survives planning checks, honest data collection, graphing, evaluation and questions from other people.",
       sections: [
