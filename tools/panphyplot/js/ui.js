@@ -538,6 +538,71 @@ function markCellValidity(input, column) {
 	input.setAttribute('aria-invalid', String(invalid));
 }
 
+const TABLE_VIRTUAL_THRESHOLD = 200;
+let tableWindow = null;
+let tableScrollFrame = 0;
+
+function renderTableRows(requestedRow = null) {
+	const sheet = getActiveSheet();
+	const wrap = document.getElementById('neo-table-wrap');
+	const body = document.getElementById('neo-table-body');
+	if (!wrap || !body) return;
+	const virtual = sheet.rowCount > TABLE_VIRTUAL_THRESHOLD;
+	const rowHeight = window.matchMedia('(pointer: coarse)').matches ? 45 : 37;
+	let first = 0, last = sheet.rowCount;
+	if (virtual) {
+		const count = Math.max(80, Math.ceil(wrap.clientHeight / rowHeight) + 40);
+		first = Math.max(0, Math.floor(wrap.scrollTop / rowHeight) - 20);
+		if (requestedRow !== null && (requestedRow < first || requestedRow >= first + count)) {
+			first = Math.max(0, requestedRow - 20);
+			wrap.scrollTop = requestedRow * rowHeight;
+		}
+		first = Math.min(first, Math.max(0, sheet.rowCount - count));
+		last = Math.min(sheet.rowCount, first + count);
+	}
+	if (tableWindow?.sheet === sheet && tableWindow.first === first && tableWindow.last === last && tableWindow.rowHeight === rowHeight) return;
+	const focused = document.activeElement;
+	const savedFocus = focused?.classList.contains('neo-cell') && body.contains(focused)
+		? { row: Number(focused.dataset.row), column: focused.dataset.columnId, start: focused.selectionStart, end: focused.selectionEnd } : null;
+	const fragment = document.createDocumentFragment();
+	const spacer = rows => {
+		if (!rows) return;
+		const tr = document.createElement('tr'), td = document.createElement('td');
+		tr.className = 'neo-table-spacer'; tr.setAttribute('aria-hidden', 'true');
+		td.colSpan = sheet.columns.length + 2;
+		td.style.height = `${rows * rowHeight}px`; tr.appendChild(td); fragment.appendChild(tr);
+	};
+	spacer(first);
+	for (let row = first; row < last; row++) {
+		const tr = document.createElement('tr');
+		tr.setAttribute('aria-rowindex', String(row + 2));
+		const rowHead = document.createElement('th');
+		rowHead.className = 'neo-row-head';
+		const rowButton = document.createElement('button');
+		rowButton.type = 'button';
+		rowButton.textContent = String(row + 1);
+		rowButton.setAttribute('aria-label', `Row ${row + 1} options`);
+		rowButton.setAttribute('aria-haspopup', 'menu');
+		rowButton.addEventListener('click', () => openRowMenu(rowButton, sheet, row));
+		rowHead.appendChild(rowButton); tr.appendChild(rowHead);
+		sheet.columns.forEach(column => tr.appendChild(buildDataCell(sheet, column, row)));
+		tr.appendChild(document.createElement('td')); fragment.appendChild(tr);
+	}
+	spacer(sheet.rowCount - last);
+	body.replaceChildren(fragment);
+	tableWindow = { sheet, first, last, rowHeight };
+	if (savedFocus && savedFocus.row >= first && savedFocus.row < last) {
+		const input = body.querySelector(`.neo-cell[data-row="${savedFocus.row}"][data-column-id="${savedFocus.column}"]`);
+		if (input) { input.focus({ preventScroll: true }); input.setSelectionRange(savedFocus.start, savedFocus.end); }
+	}
+	if (cellSelection) renderCellSelection();
+}
+
+function scheduleTableRows() {
+	if (tableScrollFrame) return;
+	tableScrollFrame = requestAnimationFrame(() => { tableScrollFrame = 0; renderTableRows(); });
+}
+
 function renderTable() {
 	const sheet = getActiveSheet();
 	const head = document.getElementById('neo-table-head');
@@ -562,24 +627,11 @@ function renderTable() {
 	headRow.appendChild(addCell);
 	head.replaceChildren(headRow);
 
-	const fragment = document.createDocumentFragment();
-	for (let row = 0; row < sheet.rowCount; row++) {
-		const tr = document.createElement('tr');
-		const rowHead = document.createElement('th');
-		rowHead.className = 'neo-row-head';
-		const rowButton = document.createElement('button');
-		rowButton.type = 'button';
-		rowButton.textContent = String(row + 1);
-		rowButton.setAttribute('aria-label', `Row ${row + 1} options`);
-		rowButton.setAttribute('aria-haspopup', 'menu');
-		rowButton.addEventListener('click', () => openRowMenu(rowButton, sheet, row));
-		rowHead.appendChild(rowButton);
-		tr.appendChild(rowHead);
-		sheet.columns.forEach(column => tr.appendChild(buildDataCell(sheet, column, row)));
-		tr.appendChild(document.createElement('td'));
-		fragment.appendChild(tr);
-	}
-	body.replaceChildren(fragment);
+	const table = body.closest('table');
+	table.classList.toggle('is-virtual', sheet.rowCount > TABLE_VIRTUAL_THRESHOLD);
+	table.setAttribute('aria-rowcount', String(sheet.rowCount + 1));
+	tableWindow = null;
+	renderTableRows();
 	updateValidationMessage();
 	if (cellSelection) {
 		const clamp = point => ({ row: Math.min(point.row, sheet.rowCount - 1), col: Math.min(point.col, sheet.columns.length - 1) });
@@ -613,6 +665,7 @@ function focusCell(row, columnIndex) {
 	const sheet = getActiveSheet();
 	const column = sheet.columns[columnIndex];
 	if (!column) return;
+	renderTableRows(row);
 	const input = document.querySelector(`#neo-table-body .neo-cell[data-row="${row}"][data-column-id="${column.id}"]`);
 	if (input) {
 		input.focus();
@@ -659,19 +712,17 @@ function renderCellSelection() {
 	const range = getSelectedRange();
 	if (range) {
 		const sheet = getActiveSheet();
-		for (let row = range.r0; row <= range.r1; row++) {
-			for (let col = range.c0; col <= range.c1; col++) {
-				const column = sheet.columns[col];
-				const input = column && body.querySelector(`.neo-cell[data-row="${row}"][data-column-id="${column.id}"]`);
-				if (!input) continue;
-				const td = input.parentElement;
-				td.classList.add('is-selected');
-				td.classList.toggle('sel-top', row === range.r0);
-				td.classList.toggle('sel-bottom', row === range.r1);
-				td.classList.toggle('sel-left', col === range.c0);
-				td.classList.toggle('sel-right', col === range.c1);
-			}
-		}
+		const columns = new Map(sheet.columns.map((column, index) => [column.id, index]));
+		body.querySelectorAll('.neo-cell').forEach(input => {
+			const row = Number(input.dataset.row), col = columns.get(input.dataset.columnId);
+			if (row < range.r0 || row > range.r1 || col < range.c0 || col > range.c1) return;
+			const td = input.parentElement;
+			td.classList.add('is-selected');
+			td.classList.toggle('sel-top', row === range.r0);
+			td.classList.toggle('sel-bottom', row === range.r1);
+			td.classList.toggle('sel-left', col === range.c0);
+			td.classList.toggle('sel-right', col === range.c1);
+		});
 	}
 	renderStatus();
 }
@@ -783,6 +834,13 @@ function handleCellKeydown(event) {
 			}
 			target = [row + 1, columnIndex];
 			break;
+		case 'Tab': {
+			if (sheet.rowCount <= TABLE_VIRTUAL_THRESHOLD) return;
+			const next = row * sheet.columns.length + columnIndex + (event.shiftKey ? -1 : 1);
+			if (next < 0 || next >= sheet.rowCount * sheet.columns.length) return;
+			target = [Math.floor(next / sheet.columns.length), (next + sheet.columns.length) % sheet.columns.length];
+			break;
+		}
 		case 'ArrowDown': target = [row + 1, columnIndex]; break;
 		case 'ArrowUp': target = [row - 1, columnIndex]; break;
 		case 'ArrowRight': if (atEnd) target = [row, columnIndex + 1]; break;
@@ -1210,7 +1268,7 @@ function switchSheet(index) {
 	cellSelection = null;
 	plotState.activeSheet = index;
 	refreshActiveFitKey();
-	setInitialParameters(getCurrentAdvancedFitMethod());
+	setInitialParameters(getCurrentAdvancedFitMethod(), { onlyIfVisible: true });
 	renderSheetTabs();
 	renderTable();
 	renderFitSeriesSelect();
@@ -1345,7 +1403,7 @@ function handleFitSeriesChange(event) {
 	const sheet = getActiveSheet();
 	sheet.fitSeries = event.target.value;
 	refreshActiveFitKey();
-	setInitialParameters(getCurrentAdvancedFitMethod());
+	setInitialParameters(getCurrentAdvancedFitMethod(), { onlyIfVisible: true });
 	renderFitSeriesSelect();
 	loadCustomFitUiForActiveDataset();
 	renderActiveFitResult();
@@ -1833,5 +1891,7 @@ function initializeInterface() {
 		if (next) next.focus();
 	});
 	window.addEventListener('resize', closeMenu);
+	window.addEventListener('resize', scheduleTableRows);
 	document.getElementById('neo-table-wrap').addEventListener('scroll', closeMenu);
+	document.getElementById('neo-table-wrap').addEventListener('scroll', scheduleTableRows);
 }

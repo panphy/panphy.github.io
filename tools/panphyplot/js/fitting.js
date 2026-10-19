@@ -879,7 +879,7 @@ function changeAdvancedFitMethod() {
 	});
 
 	updateAdvancedFitEquation(selectedMethod);
-	setInitialParameters(selectedMethod);
+	setInitialParameters(selectedMethod, { onlyIfVisible: true });
 }
 
 
@@ -924,16 +924,50 @@ function resetAdvancedFitParameters(method = getCurrentAdvancedFitMethod()) {
 	setInitialParameters(method);
 }
 
-function setInitialParameters(method) {
+// Large automatic guesses use the same worker as fitting. Ignore replies after
+// switching series, editing data or entering a manual parameter while they run.
+let initialGuessSequence = 0;
+let initialGuessCache = null;
+let pendingInitialGuess = null;
+function setInitialParameters(method, { onlyIfVisible = false } = {}) {
+	if (onlyIfVisible && !document.getElementById('AdvancedFit')?.classList.contains('active')) return;
 	const data = getFiniteDatasetPoints(activeFitKey);
-	const guess = method === 'Gaussian' ? fitCore.estimateGaussian(data) : method === 'Sinusoidal' ? fitCore.estimateSinusoidal(data) : null;
-	if (!guess) return;
+	const estimate = () => method === 'Gaussian' ? fitCore.estimateGaussian(data) : method === 'Sinusoidal' ? fitCore.estimateSinusoidal(data) : null;
 	const ids = method === 'Gaussian'
 		? { A: 'initial-A-gaussian', mu: 'initial-mu', sigma: 'initial-sigma', c: 'initial-c-gaussian' }
 		: { A: 'initial-A', b: 'initial-b', k: 'initial-k', phi: 'initial-phi', c: 'initial-c' };
-	Object.entries(ids).forEach(([key, id]) => {
-		if (Number.isFinite(guess[key])) document.getElementById(id).value = guess[key].toPrecision(10);
-	});
+	const apply = guess => {
+		if (!guess) return;
+		Object.entries(ids).forEach(([key, id]) => {
+			if (Number.isFinite(guess[key])) document.getElementById(id).value = guess[key].toPrecision(10);
+		});
+	};
+	const key = JSON.stringify([activeFitKey, method, data.map(p => [p.x, p.y])]);
+	if (pendingInitialGuess?.key === key) return pendingInitialGuess.promise;
+	const sequence = ++initialGuessSequence;
+	if (initialGuessCache?.key === key) { apply(initialGuessCache.guess); return; }
+	if (data.length < 128) {
+		const guess = estimate(); initialGuessCache = { key, guess }; apply(guess); return;
+	}
+	const fitKey = activeFitKey;
+	const previous = Object.values(ids).map(id => document.getElementById(id).value);
+	beginFitControlsBusy();
+	const promise = (async () => {
+		try {
+			const guess = await runWorkerFitWithFallback('estimate', { data, method }, estimate);
+			if (sequence !== initialGuessSequence || activeFitKey !== fitKey || getCurrentAdvancedFitMethod() !== method) return;
+			if (JSON.stringify([activeFitKey, method, getFiniteDatasetPoints(activeFitKey).map(p => [p.x, p.y])]) !== key) return;
+			if (Object.values(ids).some((id, i) => document.getElementById(id).value !== previous[i])) return;
+			initialGuessCache = { key, guess }; apply(guess);
+		} catch (error) {
+			console.warn('Unable to estimate initial parameters:', error);
+		} finally {
+			if (pendingInitialGuess?.sequence === sequence) pendingInitialGuess = null;
+			endFitControlsBusy();
+		}
+	})();
+	pendingInitialGuess = { key, sequence, promise };
+	return promise;
 }
 
 function getCurrentAdvancedFitMethod() {
@@ -1655,7 +1689,9 @@ async function performSinusoidalFit() {
 		});
 		const finalParams = toObject(final.params);
 		const fitFunction = (xValue) => evaluateSinusoidal(finalParams, xValue);
-		const { xFit, yFit } = sampleCurve(data, fitFunction, 300);
+		const { min, max } = minMaxFinite(data.map(p => p.x));
+		const cycles = finalParams.k * (max - min) / (2 * Math.PI);
+		const { xFit, yFit } = sampleCurve(data, fitFunction, Math.min(3000, Math.max(300, Math.ceil(16 * cycles))));
 		const equation = buildSinusoidalEquation(finalParams);
 
 		fittedCurves[targetDatasetIndex] = { x: xFit, y: yFit, equation, model: { kind: 'sinusoidal', params: final.params.slice() } };

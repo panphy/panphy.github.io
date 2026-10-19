@@ -440,8 +440,9 @@ function applyCsvImport() {
 	closeDialog('csv-dialog');
 	csvImport = null;
 	pruneOrphanFits();
+	// CSV columns contain values, not formulas. Switching renders and saves them;
+	// a second data-change pass would rebuild the inspector and plot again.
 	switchSheet(plotState.sheets.indexOf(sheet));
-	afterDataChange({ structure: true });
 	showToast('CSV imported.');
 }
 

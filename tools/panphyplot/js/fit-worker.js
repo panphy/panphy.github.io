@@ -43,7 +43,12 @@ async function handleFitRequest(event) {
 
 	try {
 		let result = null;
-		if (task === 'sinusoidal') {
+		if (task === 'estimate') {
+			const data = sanitizeDataPoints(payload.data);
+			if (payload.method === 'Sinusoidal') result = fitCore.estimateSinusoidal(data);
+			else if (payload.method === 'Gaussian') result = fitCore.estimateGaussian(data);
+			else throw new Error('Unknown initial-guess method.');
+		} else if (task === 'sinusoidal') {
 			result = solveSinusoidalFit(payload);
 		} else if (task === 'gaussian') {
 			result = solveGaussianFit(payload);

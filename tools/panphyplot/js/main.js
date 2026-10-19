@@ -61,7 +61,6 @@ document.addEventListener('DOMContentLoaded', () => {
 	initializePaneDividers();
 	updateBasicFitEquation();
 	changeAdvancedFitMethod();
-	setInitialParameters(document.getElementById('advanced-fit-method').value);
 	initializeCustomFitUI();
 
 	renderSheetTabs();
