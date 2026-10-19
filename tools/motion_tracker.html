@@ -309,6 +309,7 @@
 		let undoHistory = [];
 		let cancelFpsDetection = () => {};
 		let playbackCallbackId = null;
+		let startingFrame = null; // Decoded before FPS sampling plays the video
 		let frameStep = 1; // Frames moved by each step, and after each mark
 
 		const GRAPH_PNG_BASE_SCALE = 3;
@@ -1514,6 +1515,7 @@
 			stopAutoTrack();
 			cancelFpsDetection();
 			videoReady = false;
+			startingFrame = null;
 			undoHistory = [];
 			// 1. Clear data
 			frameData = [];
@@ -1752,6 +1754,10 @@
 			videoReady = true;
 			frameCanvas.width = hiddenVideo.videoWidth || 1280;
 			frameCanvas.height = hiddenVideo.videoHeight || 720;
+			startingFrame = document.createElement('canvas');
+			startingFrame.width = frameCanvas.width;
+			startingFrame.height = frameCanvas.height;
+			startingFrame.getContext('2d').drawImage(hiddenVideo, 0, 0);
 			emptyVideo.hidden = true;
 			videoWrapper.hidden = false;
 			fitVideoStage();
@@ -2464,7 +2470,11 @@
 		function drawFrame() {
 			if (!videoReady || hiddenVideo.readyState < 2) return;
 			ctx.clearRect(0, 0, frameCanvas.width, frameCanvas.height);
-			ctx.drawImage(hiddenVideo, 0, 0, frameCanvas.width, frameCanvas.height);
+			// Some browsers retain the sampling frame's pixels after seeking to zero.
+			// Use the first decoded frame there, including the tiny frame-step seek offset.
+			const source = startingFrame && hiddenVideo.currentTime < 0.00002
+				? startingFrame : hiddenVideo;
+			ctx.drawImage(source, 0, 0, frameCanvas.width, frameCanvas.height);
 
 			// Only draw data points if crosses are visible
 			if (crossesVisible) {

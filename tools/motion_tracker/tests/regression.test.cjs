@@ -184,3 +184,26 @@ test('clear video respects cancellation and releases the video before starting o
         }
     }
 });
+
+test('rewinding redraws original pixels even if the video still exposes the detection frame', () => {
+    const firstFrame = {pixels: 'first decoded frame'};
+    const video = {readyState: 2, currentTime: 0, pixels: 'last FPS sampling frame'};
+    let painted;
+    const c = context({videoReady: true, hiddenVideo: video, startingFrame: firstFrame,
+        frameCanvas: {width: 1280, height: 720}, crossesVisible: false,
+        ctx: {clearRect() {}, drawImage: source => painted = source.pixels}});
+    vm.runInContext(extract('function drawFrame()', '// A red cross;'), c);
+    c.drawFrame();
+    assert.equal(painted, 'first decoded frame');
+    video.currentTime = 0.00001; // Frame-step and slider seeks land just inside the frame.
+    c.drawFrame();
+    assert.equal(painted, 'first decoded frame');
+    video.currentTime = 1 / 30;
+    video.pixels = 'second frame';
+    c.drawFrame();
+    assert.equal(painted, 'second frame');
+    c.startingFrame = null;
+    video.currentTime = 0;
+    c.drawFrame();
+    assert.equal(painted, 'second frame'); // No stale snapshot after reset.
+});
