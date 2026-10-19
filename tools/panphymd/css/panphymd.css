@@ -1899,8 +1899,12 @@ mjx-container.copy-failed::after {
   color: var(--copy-hint-text);
 }
 
+/* The global button:hover would swap in a pale background and leave the
+   chip's light-on-accent text unreadable, so keep the chip colours. */
 .table-copy-action-btn:hover {
-  filter: brightness(0.98);
+  border-color: var(--accent-hover);
+  background: var(--accent-hover);
+  color: var(--accent-ink);
 }
 
 .table-copy-action-btn:focus-visible {
