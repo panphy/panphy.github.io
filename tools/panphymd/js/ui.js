@@ -268,9 +268,8 @@ function normalizeDropboxImageUrl(parsedUrl) {
   if (!isLikelyFileShare) return parsedUrl;
 
   const normalized = new URL(parsedUrl.href);
-  normalized.hostname = 'dl.dropboxusercontent.com';
   normalized.searchParams.delete('dl');
-  normalized.searchParams.delete('raw');
+  normalized.searchParams.set('raw', '1');
   return normalized;
 }
 
@@ -303,7 +302,10 @@ function normalizeGoogleDriveImageUrl(parsedUrl) {
   const fileId = extractGoogleDriveFileId(parsedUrl);
   if (!fileId) return parsedUrl;
 
-  return new URL(`https://lh3.googleusercontent.com/d/${encodeURIComponent(fileId)}`);
+  const normalized = new URL(`https://lh3.googleusercontent.com/d/${encodeURIComponent(fileId)}`);
+  const resourceKey = parsedUrl.searchParams.get('resourcekey');
+  if (resourceKey) normalized.searchParams.set('resourcekey', resourceKey);
+  return normalized;
 }
 
 function normalizeImageUrl(parsedUrl) {
@@ -352,6 +354,40 @@ function normalizeAndValidateImageUrl(value) {
   }
 
   return { value: normalizeCloudImageUrl(parsedUrl.href) };
+}
+
+// Use an image request rather than fetch: image hosts need not allow CORS.
+export function checkImageLoads(url, timeoutMs = 15000) {
+  return new Promise((resolve) => {
+    const image = new Image();
+    const finish = (loaded) => {
+      clearTimeout(timer);
+      image.onload = null;
+      image.onerror = null;
+      if (!loaded) image.removeAttribute('src');
+      resolve(loaded);
+    };
+    const timer = setTimeout(() => finish(false), timeoutMs);
+    image.onload = () => finish(image.naturalWidth > 0);
+    image.onerror = () => finish(false);
+    image.src = url;
+  });
+}
+
+export function readLocalImage(file) {
+  if (!file || !file.type.startsWith('image/')) {
+    return Promise.reject(new Error('Choose an image file, such as PNG, JPEG, GIF, WebP or SVG.'));
+  }
+  if (file.size > 5 * 1024 * 1024) {
+    return Promise.reject(new Error('Choose an image smaller than 5 MB. Resize larger images before inserting them.'));
+  }
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(reader.result);
+    reader.onerror = () => reject(new Error('The image could not be read. Please choose it again.'));
+    reader.onabort = () => reject(new Error('Reading the image was cancelled.'));
+    reader.readAsDataURL(file);
+  });
 }
 
 const IMAGE_FILE_EXTENSIONS = new Set([
@@ -452,7 +488,7 @@ export function showImageModal() {
     const tooltip = document.createElement('span');
     tooltip.className = 'image-modal-tooltip';
     tooltip.textContent =
-      'You can paste Google Drive or Dropbox share links — they\u2019ll be converted to direct image URLs automatically.';
+      'Paste a direct image URL or a Google Drive or Dropbox file link. Cloud files must be shared with anyone who has the link. Google Drive embedding may still be restricted.';
 
     helpBtn.appendChild(tooltip);
     titleRow.appendChild(titleEl);
@@ -470,6 +506,23 @@ export function showImageModal() {
     urlInput.placeholder = 'https://example.com/image.png';
     urlInput.autocomplete = 'off';
     urlInput.spellcheck = false;
+
+    const fileLabel = document.createElement('label');
+    fileLabel.className = 'modal-field-label';
+    fileLabel.htmlFor = 'imageFileInput';
+    fileLabel.textContent = 'Or choose an image from your device';
+
+    const fileInput = document.createElement('input');
+    fileInput.id = 'imageFileInput';
+    fileInput.type = 'file';
+    fileInput.accept = 'image/*';
+    fileInput.className = 'modal-input';
+    fileInput.setAttribute('aria-describedby', 'imageFileHelp');
+
+    const fileHelp = document.createElement('p');
+    fileHelp.id = 'imageFileHelp';
+    fileHelp.className = 'image-file-help';
+    fileHelp.textContent = 'Up to 5 MB. Images stay on your device and are embedded in the saved document, making the file larger.';
 
     const alignLabel = document.createElement('span');
     alignLabel.className = 'modal-field-label';
@@ -551,6 +604,9 @@ export function showImageModal() {
     content.appendChild(titleRow);
     content.appendChild(urlLabel);
     content.appendChild(urlInput);
+    content.appendChild(fileLabel);
+    content.appendChild(fileInput);
+    content.appendChild(fileHelp);
     content.appendChild(alignLabel);
     content.appendChild(alignGroup);
     content.appendChild(widthHeader);
@@ -587,39 +643,71 @@ export function showImageModal() {
       resolve(result);
     };
 
+    let isCheckingImage = false;
     const submitModal = async () => {
-      const urlValidation = normalizeAndValidateImageUrl(urlInput.value);
-      if (!urlValidation.value) {
-        setError(urlValidation.error);
-        urlInput.focus();
-        return;
-      }
-
-      const nonImageWarning = getLikelyNonImageWarning(urlInput.value, urlValidation.value);
-      if (nonImageWarning) {
-        const shouldInsert = await showConfirmationModal(
-          `${nonImageWarning} Insert anyway?`,
-          { allowSuppress: false }
-        );
-        if (!shouldInsert) {
+      if (closed || isCheckingImage) return;
+      isCheckingImage = true;
+      insertBtn.disabled = true;
+      insertBtn.textContent = 'Checking…';
+      // Freeze the submitted URL while its asynchronous load check runs.
+      urlInput.disabled = true;
+      fileInput.disabled = true;
+      try {
+        const localFile = fileInput.files[0];
+        const urlValidation = localFile
+          ? { value: await readLocalImage(localFile) }
+          : normalizeAndValidateImageUrl(urlInput.value);
+        if (!urlValidation.value) {
+          setError(urlValidation.error);
           urlInput.focus();
           return;
         }
+
+        const nonImageWarning = localFile ? '' : getLikelyNonImageWarning(urlInput.value, urlValidation.value);
+        if (nonImageWarning) {
+          const shouldInsert = await showConfirmationModal(
+            `${nonImageWarning} Insert anyway?`,
+            { allowSuppress: false }
+          );
+          if (!shouldInsert) {
+            urlInput.focus();
+            return;
+          }
+        }
+
+        if (closed) return;
+        const imageLoaded = await checkImageLoads(urlValidation.value);
+        if (closed) return;
+        if (!imageLoaded) {
+          setError(localFile
+            ? 'This file could not be displayed as an image. Try saving it as PNG or JPEG and choosing it again.'
+            : 'The image could not be loaded. Check your connection and make sure this is an image file shared with anyone who has the link, without sign-in or a password. Google Drive may block embedding even when its preview opens; try a local image, a public Dropbox link or a direct image URL.');
+          return;
+        }
+
+        const alignInput = alignGroup.querySelector('input[name="imageAlign"]:checked');
+        const selectedAlign = alignInput ? alignInput.value : 'center';
+        const selectedWidth = Number.parseInt(widthInput.value, 10);
+        const normalizedWidth = Number.isFinite(selectedWidth)
+          ? Math.min(100, Math.max(5, selectedWidth))
+          : 60;
+
+        setError('');
+        closeModal({
+          url: urlValidation.value,
+          align: selectedAlign,
+          width: normalizedWidth
+        });
+      } catch (error) {
+        if (!closed) setError(error.message || 'The image could not be inserted. Please try again.');
+      } finally {
+        isCheckingImage = false;
+        insertBtn.disabled = false;
+        insertBtn.textContent = 'Insert';
+        urlInput.disabled = false;
+        fileInput.disabled = false;
+        if (!closed) (fileInput.files.length ? fileInput : urlInput).focus();
       }
-
-      const alignInput = alignGroup.querySelector('input[name="imageAlign"]:checked');
-      const selectedAlign = alignInput ? alignInput.value : 'center';
-      const selectedWidth = Number.parseInt(widthInput.value, 10);
-      const normalizedWidth = Number.isFinite(selectedWidth)
-        ? Math.min(100, Math.max(5, selectedWidth))
-        : 60;
-
-      setError('');
-      closeModal({
-        url: urlValidation.value,
-        align: selectedAlign,
-        width: normalizedWidth
-      });
     };
 
     const onKeyDown = (event) => {
@@ -630,13 +718,19 @@ export function showImageModal() {
         closeModal(null);
         return;
       }
-      if (event.key === 'Enter' && event.target !== cancelBtn) {
+      if (event.key === 'Enter' && event.target !== cancelBtn && event.target !== fileInput && event.target !== helpBtn) {
         event.preventDefault();
         submitModal();
       }
     };
 
     urlInput.addEventListener('input', () => {
+      fileInput.value = '';
+      setError('');
+    });
+
+    fileInput.addEventListener('change', () => {
+      if (fileInput.files.length) urlInput.value = '';
       setError('');
     });
 
