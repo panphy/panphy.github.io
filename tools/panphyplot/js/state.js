@@ -220,7 +220,7 @@ function commitOriginalImport(original, accepted) {
 }
 
 function offerOriginalImport() {
-	if (persistenceDisabled || plotState.originalImportDecision || document.querySelector('.phone-gate').offsetParent !== null) return;
+	if (persistenceDisabled || plotState.originalImportDecision || document.getElementById('small-screen-warning')?.open) return;
 	let original;
 	try {
 		original = JSON.parse(localStorage.getItem('panphyplot-state-v2'));

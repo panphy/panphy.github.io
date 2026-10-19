@@ -92,17 +92,24 @@
 	}
 
 	// "value ± uncertainty" with the uncertainty to two significant figures and the value to the
-	// same decimal place, as TeX. Very large or small numbers share one power of ten.
-	function formatMeasurement(value, uncertainty) {
+	// same decimal place, as TeX. An explicit decimal setting instead follows the equation's
+	// formatting, keeping tiny nonzero values and uncertainties in scientific notation.
+	function formatMeasurement(value, uncertainty, decimals = null) {
 		if (!Number.isFinite(value)) return '\\text{undefined}';
+		if (Number.isInteger(decimals) && decimals >= 0 && decimals <= 8) {
+			const shownValue = formatFixedDecimals(value, decimals);
+			return Number.isFinite(uncertainty) && uncertainty >= 0
+				? `${shownValue} \\pm ${formatFixedDecimals(uncertainty, decimals)}`
+				: shownValue;
+		}
 		if (!(uncertainty > 0) || !Number.isFinite(uncertainty)) return String(Number(value.toPrecision(6)));
 		const exponent = Math.floor(Math.log10(Math.max(Math.abs(value), uncertainty)));
 		const useScientific = exponent >= 5 || exponent <= -4;
 		const shift = useScientific ? exponent : 0;
 		const v = value / 10 ** shift;
 		const u = uncertainty / 10 ** shift;
-		const decimals = Math.max(0, 1 - Math.floor(Math.log10(u)));
-		const pair = `${v.toFixed(decimals)} \\pm ${u.toFixed(decimals)}`;
+		const uncertaintyDecimals = Math.max(0, 1 - Math.floor(Math.log10(u)));
+		const pair = `${v.toFixed(uncertaintyDecimals)} \\pm ${u.toFixed(uncertaintyDecimals)}`;
 		return useScientific ? `(${pair}) \\times 10^{${shift}}` : pair;
 	}
 

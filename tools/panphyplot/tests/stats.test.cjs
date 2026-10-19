@@ -90,3 +90,14 @@ test('the parameter covariance carries the uncertainties through a change of var
 	});
 	near(stats.parameterUncertainties(uRows, residuals)[0] ** 2, covariance[0][0], 1e-12);
 });
+
+
+test('fit parameter readouts follow the equation decimal setting without hiding tiny uncertainties', () => {
+	assert.equal(stats.formatMeasurement(0.5000000414, 9.9e-10, 2), '0.50 \\pm 9.90\\times 10^{-10}');
+	assert.equal(stats.formatMeasurement(0.5999999834, 4.3e-10, 3), '0.600 \\pm 4.300\\times 10^{-10}');
+	assert.equal(stats.formatMeasurement(-6.97e-13, 1e-8, 2), '-6.97\\times 10^{-13} \\pm 1.00\\times 10^{-8}');
+	assert.equal(stats.formatMeasurement(9.8123, 0.31, 0), '10 \\pm 3\\times 10^{-1}');
+	assert.equal(stats.formatMeasurement(2.00345, 0.0123, 4), '2.0034 \\pm 0.0123');
+	assert.equal(stats.formatMeasurement(0, 0, 2), '0.00 \\pm 0.00');
+	assert.equal(stats.formatMeasurement(2.00345, NaN, 2), '2.00');
+});
