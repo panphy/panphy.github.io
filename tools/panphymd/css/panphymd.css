@@ -2030,6 +2030,19 @@ mjx-container.copy-failed::after {
 
 .image-modal {
   width: min(92vw, 430px);
+  max-height: calc(100dvh - 32px);
+  overflow-y: auto;
+}
+
+.image-file-help {
+  margin: -8px 0 16px;
+  color: var(--text-muted);
+  font-size: 0.8rem;
+  line-height: 1.45;
+}
+
+#imageFileInput {
+  min-height: 48px;
 }
 
 .image-modal-header {
