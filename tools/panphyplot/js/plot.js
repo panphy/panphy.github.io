@@ -528,6 +528,29 @@
 		element.on('plotly_legenddoubleclick', () => false);
 	}
 
+	// Remember user zoom/pan per sheet so project files rebuild the same graph view.
+	function bindGraphView(element) {
+		if (element.dataset.viewBound === 'true' || typeof element.on !== 'function') return;
+		element.dataset.viewBound = 'true';
+		element.on('plotly_relayout', changes => {
+			const sheet = plotState.sheets.find(entry => entry.id === element.dataset.viewSheet);
+			if (!sheet) return;
+			sheet.graphView ||= {};
+			let changed = false;
+			['xaxis', 'yaxis'].forEach(axis => {
+				if (!Object.keys(changes).some(key => key.startsWith(`${axis}.`))) return;
+				if (changes[`${axis}.autorange`] === true) delete sheet.graphView[axis];
+				else {
+					const range = element.layout?.[axis]?.range;
+					if (!Array.isArray(range) || range.length !== 2 || !range.every(Number.isFinite)) return;
+					sheet.graphView[axis] = range.slice();
+				}
+				changed = true;
+			});
+			if (changed) scheduleSaveState();
+		});
+	}
+
 	function plotGraph() {
 		if (typeof Plotly === 'undefined') return;
 		installPlotTexCache();
@@ -538,9 +561,15 @@
 		const titles = getAxisTitles(sheet);
 		const layout = applyThemeLayout(buildLayout(getSheetTitle(sheet), titles.x || 'x', titles.y || 'y', { showlegend: series.length > 1 }), themeSettings);
 		const element = document.getElementById('plot');
+		Object.entries(PlotModel.normalizeGraphView(sheet.graphView)).forEach(([axis, range]) => {
+			layout[axis].autorange = false;
+			layout[axis].range = range;
+		});
+		element.dataset.viewSheet = sheet.id;
 		element.dataset.exportTitle = processLabel(getSheetTitle(sheet) || '');
 		reactIfChanged('plot', data, layout, createDownloadImageConfig(sheet.name || 'data_plot'));
 		bindLegendToggle('plot');
+		bindGraphView(element);
 		const empty = document.getElementById('graph-empty');
 		if (empty) empty.hidden = data.some(trace => trace.mode === 'markers' && trace.x.length);
 		plotResiduals();

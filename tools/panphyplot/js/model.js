@@ -90,6 +90,7 @@
 			],
 			title: { text: '', automatic: true },
 			fitSeries: null,
+			graphView: {},
 			hiddenSeries: []
 		};
 	}
@@ -380,6 +381,15 @@
 		return column;
 	}
 
+	function normalizeGraphView(view) {
+		const clean = {};
+		['xaxis', 'yaxis'].forEach(axis => {
+			const range = view?.[axis];
+			if (Array.isArray(range) && range.length === 2 && range.every(Number.isFinite) && range[0] !== range[1]) clean[axis] = range.slice();
+		});
+		return clean;
+	}
+
 	// Repairs anything malformed in saved state so a bad save never stops the app loading.
 	function normalizeState(saved) {
 		if (!saved || typeof saved !== 'object' || !Array.isArray(saved.sheets) || !saved.sheets.length) return createState();
@@ -424,6 +434,7 @@
 					automatic: savedSheet.title?.automatic !== false
 				},
 				fitSeries: typeof savedSheet.fitSeries === 'string' ? savedSheet.fitSeries : null,
+				graphView: normalizeGraphView(savedSheet.graphView),
 				hiddenSeries: Array.isArray(savedSheet.hiddenSeries) ? savedSheet.hiddenSeries.filter(id => typeof id === 'string') : []
 			};
 			setRowCount(sheet, sheet.rowCount);
@@ -972,6 +983,7 @@
 		splitHeader,
 		applyPaste,
 		normalizeState,
+		normalizeGraphView,
 		FORMULA_FUNCTIONS,
 		isFormulaColumn,
 		isPropagatedColumn,
