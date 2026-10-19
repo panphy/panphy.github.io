@@ -182,7 +182,7 @@ const TOUR_CHAPTERS = {
 			{
 				title: 'Take the mean of the repeats',
 				target: '#mean-button',
-				body: 'Mean of Repeats adds the mean of the repeat columns, row by row, and a ±Δ column of half the spread between the largest and smallest readings.',
+				body: 'Mean adds the mean of the repeat columns, row by row, and a ±Δ column of half the spread between the largest and smallest readings.',
 				action: {
 					instruction: 'Click Mean, keep all three columns ticked, then click Add Mean.',
 					isDone: () => !!findTourMean(),
@@ -199,7 +199,7 @@ const TOUR_CHAPTERS = {
 				target: '#add-formula-button',
 				body: 'T² = (4π²/g) L, so a graph of T² against L is a straight line. A formula column can calculate T², and carry the uncertainty in T through to T².',
 				action: {
-					instruction: 'Click Formula Column, type T^2, tick "Add a ±Δ column", then click Apply.',
+					instruction: 'Click Formula in the Data section, type T^2, tick "Add a ±Δ column", then click Apply.',
 					isDone: hasTourSquareWithDelta,
 					perform: addTourSquare
 				}
@@ -212,7 +212,7 @@ const TOUR_CHAPTERS = {
 			{
 				title: 'Hide the T series',
 				target: '#plot',
-				body: 'Mean of Repeats already hid the three repeats. Hide the mean T as well, so the graph shows only T² against L.',
+				body: 'Mean already hid the three repeats. Hide the mean T as well, so the graph shows only T² against L.',
 				action: {
 					instruction: 'Tap T in the Series card, or in the legend under the graph.',
 					isDone: isTourMeanHidden,
@@ -251,9 +251,19 @@ const TOUR_CHAPTERS = {
 					+ describeTourGravity()
 			},
 			{
+				title: 'Choose equation symbols',
+				target: '#equation-symbols',
+				body: 'In Result, expand Equation symbols to choose Vertical and Horizontal notation, such as T_1 and L_1. These symbols change only the fitted equation; column names and axis titles stay as entered.'
+			},
+			{
 				title: 'Share your work',
 				target: '#view-table-button',
-				body: 'View Table copies a formatted table with every value and its ± uncertainty. Save keeps the complete project as a .ppplot file; Open resumes it. Export saves this sheet as CSV; tap the fitted equation to copy it as an image or LaTeX.'
+				body: 'Table in the View section opens a formatted table with every value and its ± uncertainty. Copy it for a spreadsheet or report. Export in the File section saves this sheet as CSV; tap the fitted equation to copy it as an image or LaTeX.'
+			},
+			{
+				title: 'Save and resume',
+				target: '#save-project-button',
+				body: 'File → Save downloads a .ppplot project with all sheets, formulas, graph settings and fit results. File → Open resumes it, including on another device. CSV contains values only. Practice data is never autosaved; finishing this tour brings back your own work.'
 			},
 			{
 				title: 'Tour complete',
@@ -592,7 +602,7 @@ function showTourInvite() {
 	const card = buildTourCard();
 	card.classList.add('tour-invite');
 	card.querySelector('.tour-eyebrow').textContent = 'Guided tour';
-	card.querySelector('.tour-title').textContent = 'New to this version?';
+	card.querySelector('.tour-title').textContent = 'New to PanPhyPlot?';
 	card.querySelector('.tour-body').textContent =
 		'Take a short tour: from repeat readings to g with its uncertainty. It uses practice data, so nothing you enter is affected.';
 	card.querySelector('.tour-instruction').hidden = true;

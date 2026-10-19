@@ -36,13 +36,13 @@ function harness() {
 		createElement: () => element(), createDocumentFragment: () => element(), addEventListener() {}
 	}, setTimeout: callback => { timers.set(++nextTimer, callback); return nextTimer; }, clearTimeout: id => timers.delete(id),
 		localStorage: { getItem: key => saved.get(key) ?? null, setItem: (key, value) => saved.set(key, value), removeItem: key => saved.delete(key) },
-		updatePlotAndRenderLatex() {}, plotGraph() {}, safeTypeset() {}, alert: message => { context.alerts.push(message); }, alerts: [], showToast() {}, listeners: {}, addEventListener: (type, fn) => { (context.listeners[type] ||= []).push(fn); }, confirm: () => true
+		updatePlot() {}, plotGraph() {}, safeTypeset() {}, alert: message => { context.alerts.push(message); }, alerts: [], showToast() {}, listeners: {}, addEventListener: (type, fn) => { (context.listeners[type] ||= []).push(fn); }, confirm: () => true
 	};
 	context.window = context;
 	vm.createContext(context);
 	const run = code => vm.runInContext(code, context);
 	run(fs.readFileSync(path.join(sourceDir, 'vendor/math.min.js'), 'utf8'));
-	for (const name of ['state', 'fit-core', 'curve-fitting', 'ui']) run(fs.readFileSync(path.join(sourceDir, `${name}.js`), 'utf8'));
+	for (const name of ['state', 'display', 'fit-core', 'curve-fitting', 'ui']) run(fs.readFileSync(path.join(sourceDir, `${name}.js`), 'utf8'));
 	context.renderFittingResult = () => {};
 	context.clearFittingResultDisplay = () => {};
 	context.showToast = () => {};
@@ -66,7 +66,7 @@ test('input events immediately preserve incomplete rows, invalid text and traili
 	const { setRows, run, saved, context: c } = harness();
 	setRows([['', '12'], ['1,234', '5'], ['1.00', '2.00', '0.010']]);
 	run('debouncedUpdateData(); flushSaveState()');
-	const state = JSON.parse(saved.get('panphyplot-state-v2'));
+	const state = JSON.parse(saved.get('panphyplotog-intro-state-v1'));
 	assert.equal(state.datasetDraftRows[0][0].yValue, '12');
 	assert.equal(state.datasetDraftRows[0][1].xValue, '1,234');
 	assert.equal(state.datasetDraftRows[0][2].xErrorValue, '0.010');
@@ -74,15 +74,7 @@ test('input events immediately preserve incomplete rows, invalid text and traili
 	assert.equal(state.rawData[0][0].x, 1);
 	assert.equal(c.isDatasetEmpty(0), false);
 });
-test('switching datasets captures the old table before changing activeSet', () => {
-	const h = harness(); h.setRows([['1', '99']]);
-	h.run('rawData = [[{x:1,y:2}], [{x:3,y:4}]]');
-	for (const name of ['updateDatasetTabsBar','loadHeaders','loadErrorTypes','loadToggles','loadCustomFitUiForActiveDataset','updateLabels','updateCombinedPlotInputsToActive']) h.context[name] = () => {};
-	h.context.populateTableFromActiveDataset = () => h.setRows([['3', '4']]);
-	h.context.switchDataset(1);
-	assert.equal(h.run('rawData[0][0].y'), 99);
-	assert.equal(h.run('rawData[1][0].y'), 4);
-});
+
 test('new data marks existing fit stale without deleting its equation', () => {
 	const h = harness(); h.setRows([['0','0'],['1','1']]); h.context.fitCurve();
 	assert.equal(h.run('datasetFitResults[0].stale'), false);
@@ -90,27 +82,8 @@ test('new data marks existing fit stale without deleting its equation', () => {
 	assert.equal(h.run('datasetFitResults[0].stale'), true);
 	assert.equal(h.run('datasetFitResults[0].equation'), 'y = 1x + 0');
 });
-test('stable fit targets survive unrelated deletion, but reject edits, clear and removal', () => {
-	const h = harness();
-	h.run('rawData=[[{x:0,y:1}], [{x:2,y:3}]]; const target=captureFitTarget(1); rawData.splice(0,1); reindexDatasets(0)');
-	assert.equal(h.run('resolveFitTarget(target)'), 0);
-	h.run('invalidatePendingFit(0)'); assert.equal(h.run('resolveFitTarget(target)'), -1);
-	h.run('const second=captureFitTarget(0); rawData[0][0].y=7'); assert.equal(h.run('resolveFitTarget(second)'), -1);
-	h.run('const third=captureFitTarget(0); rawData.splice(0,1); reindexDatasets(0); rawData.push([{x:2,y:7}])'); assert.equal(h.run('resolveFitTarget(third)'), -1);
-});
-test('delayed Gaussian worker result cannot overwrite a replacement dataset', async () => {
-	const h = harness(); h.setRows([['0','1'],['1','2'],['2','1'],['3','0']]);
-	h.run('rawData.push([{x:10,y:100}])');
-	let release;
-	h.context.Worker = class {
-		addEventListener(name, callback) { if (name === 'message') this.receive = callback; }
-		postMessage(message) { release = () => this.receive({data: {id:message.id, ok:true, result:{params:{A:1,mu:1,sigma:1,c:1},xFit:[0,1],yFit:[1,2],equation:'old fit',converged:true,iterations:3}}}); }
-	};
-	const pending = h.context.fitAdvancedCurve();
-	h.run('rawData.splice(0,1); reindexDatasets(0)'); release(); await pending;
-	assert.equal(h.run('fittedCurves[0]'), undefined);
-	assert.equal(h.run('rawData[0][0].y'), 100);
-});
+
+
 test('linear fits and R squared are independent of small measurement units', () => {
 	const { core } = harness();
 	for (const scale of [1, 1e-9, 1e-100]) {
@@ -121,7 +94,7 @@ test('linear fits and R squared are independent of small measurement units', () 
 	assert.throws(()=>core.computeLinearFit([2,2],[1,2]), /distinct/);
 	assert.equal(core.computeRSq([0,1], [0,1e-9], () => 0), -1);
 });
-test('small coefficients stay nonzero in built-in and custom equation formatting', () => {
+test('small coefficients stay nonzero in basic equations and the numerical core', () => {
 	const h=harness();h.setRows([['0','0'],['1','0.00001']]);h.context.fitCurve();
 	assert.doesNotMatch(h.run('datasetFitResults[0].equation'), /0\.000x/);
 	near(h.run('fittedCurves[0].y[1]'),1e-5);
@@ -137,38 +110,9 @@ test('absolute uncertainty exports respect exponents and trailing zero precision
 	assert.equal(c.formatDataForExport('1.2345','0.010',true,'absolute',1.2345,1.2345,.010),'1.234');
 	assert.doesNotThrow(()=>c.formatFixedPrecision(1e-150,155));
 });
-test('processing skips invalid results instead of fabricating zeros', () => {
-	const h=harness();
-	let source=fs.readFileSync(path.join(sourceDir,'data-processing.js'),'utf8');
-	source=source.replace(/\}\)\(\);\s*$/, 'window.processingTest = { state, evaluateFormula, handleCopyToDataset }; })();');
-	h.run(source);
-	const process=h.context.processingTest;
-	process.state.sourceRows=[{x:0,y:5},{x:1,y:6}];
-	const evaluated=h.run("processingTest.evaluateFormula(math.compile('1/x'),[])");
-	assert.equal(evaluated.invalidCount,1);
-	process.state.derivedColumns=[{id:'one',name:'reciprocal',values:evaluated.values}];
-	h.elements['data-processing-output-x']=element('derived:one');
-	h.elements['data-processing-output-y']=element('source:y');
-	h.elements['data-processing-target']=element('__create_new_dataset__');
-	h.context.switchDataset=()=>{};h.context.updateDatasetTabsBar=()=>{};
-	process.handleCopyToDataset();
-	assert.equal(h.run('rawData[1].length'),1);
-	assert.equal(h.run('rawData[1][0].x'),1);
-	assert.equal(h.run('rawData[1][0].y'),6);
-});
-test('per-dataset titles preserve intentionally empty titles and combined label overrides', () => {
-	const h=harness();h.elements['graph-title'].value='Trial A';h.run('titleWasAuto=false; saveActiveGraphTitle(); activeSet=1');
-	h.elements['graph-title'].value='';h.run('saveActiveGraphTitle(); activeSet=0; loadActiveGraphTitle()');
-	assert.equal(h.elements['graph-title'].value,'Trial A');
-	h.run('activeSet=1; loadActiveGraphTitle()');assert.equal(h.elements['graph-title'].value,'');assert.equal(h.run('titleWasAuto'),false);
-	h.elements['combined-title'].value='All trials';h.run('combinedLabelsAuto.title=false');h.context.updateCombinedPlotInputsToActive();
-	assert.equal(h.elements['combined-title'].value,'All trials');
-});
-test('v2 migration keeps the current title and saved combined settings', () => {
-	const { context:c }=harness();
-	const result=c.migratePersistedState({schemaVersion:2,rawData:[[],[]],activeSet:1,graphTitle:'Saved',titleWasAuto:false,combinedPlot:{title:'Together',xLabel:'t',yLabel:'s'}});
-	assert.equal(result.schemaVersion,3);assert.equal(result.datasetTitles[1].text,'Saved');assert.equal(result.datasetTitles[1].automatic,false);assert.equal(result.combinedLabelsAuto.title,false);
-});
+
+
+
 test('solver diagnostics distinguish convergence from an exhausted iteration budget', () => {
 	const {core}=harness();const data=[{x:0,y:2},{x:1,y:2}];const residual=(p,data)=>data.map(row=>p[0]-row.y);const jac=()=>[[1],[1]];
 	const exhausted=core.levenbergMarquardt(data,[0],residual,jac,{maxIterations:1});assert.equal(exhausted.converged,false);assert.equal(exhausted.reason,'iteration-limit');
@@ -269,64 +213,101 @@ test('CSV import takes uncertainties only from named columns and reports the res
 	h.context.alerts.length=0;h.context.parseCSV('Time,Distance,delta Time\n1,2,0.1\n');
 	assert.equal(h.elements['toggle-x-error'].checked,true);assert.equal(h.context.alerts.length,0);
 });
-test('formatted table keeps a processed-column pipe inside one header', () => {
+test('plain formatted table preserves a pipe inside a heading', () => {
 	const h=harness();h.context.formatLabelForLatex=value=>value;h.setRows([['1','6']]);
 	h.elements['x-column-name'].value='x | 1/x';h.elements['y-column-name'].value='y';
 	const markdown=h.context.exportPlainText();
 	assert.equal(h.context.parseMarkdownTableLine(markdown.split('\n')[0]).length,2);
-	assert.equal(h.context.parseMarkdownTableLine(markdown.split('\n')[0])[0],'$x | 1/x$');
+	assert.equal(h.context.parseMarkdownTableLine(markdown.split('\n')[0])[0],'x | 1/x');
 });
-test('loading another dataset keeps its own custom fit parameter values', () => {
-	const h=harness();
-	h.elements['custom-fit-formula-input']=element('A*x');
-	const outgoingInput=element('99');outgoingInput.setAttribute('data-param','A');
-	h.elements['custom-fit-parameters-list']=element();
-	h.elements['custom-fit-parameters-list'].querySelectorAll=()=>[outgoingInput];
-	h.run("customFitStates={0:{formula:'A*x',initialValues:{A:'99'}},1:{formula:'A*x',initialValues:{A:'2'}}}; activeSet=1");
-	h.context.loadCustomFitUiForActiveDataset();
-	assert.equal(Number(h.run('customFitStates[1].initialValues.A')),2);
-	assert.equal(h.run('customFitStates[0].initialValues.A'),'99');
-});
-test('processed data can replace the active dataset without restoring the old table', () => {
-	const h=harness();h.setRows([['2','6']]);h.context.updateData();
-	let source=fs.readFileSync(path.join(sourceDir,'data-processing.js'),'utf8');
-	source=source.replace(/\}\)\(\);\s*$/, 'window.processingTest = { state, handleCopyToDataset }; })();');h.run(source);
-	const process=h.context.processingTest;
-	process.state.sourceRows=[{x:2,y:6}];
-	process.state.derivedColumns=[{id:'one',name:'double',values:[4]}];
-	h.elements['data-processing-output-x']=element('derived:one');
-	h.elements['data-processing-output-y']=element('source:y');
-	h.elements['data-processing-target']=element('dataset:0');
-	h.context.switchDataset=(index,capture=true)=>{if(capture)h.context.updateData();};
-	process.handleCopyToDataset();
-	assert.equal(h.run('rawData[0][0].x'),4);
-	assert.equal(h.run('rawData[0][0].y'),6);
-	assert.equal(h.run('datasetDraftRows[0]'),undefined);
-});
+
+
 test('a save from another tab pauses autosave until this tab keeps its version', () => {
 	const h = harness(); h.setRows([['1', '2']]);
 	h.run('debouncedUpdateData(); flushSaveState()');
-	const ownSave = h.saved.get('panphyplot-state-v2');
+	const ownSave = h.saved.get('panphyplotog-intro-state-v1');
 	let banners = 0;
 	h.context.onWorkspaceChangedElsewhere = () => { banners++; };
 	const storage = event => h.context.listeners.storage.forEach(fn => fn(event));
-	storage({ key: 'panphyplot-state-v2', newValue: ownSave });
+	storage({ key: 'panphyplotog-intro-state-v1', newValue: ownSave });
 	storage({ key: 'panphyplot-theme', newValue: 'dark' });
 	assert.equal(banners, 0);
-	h.saved.set('panphyplot-state-v2', 'other tab');
-	storage({ key: 'panphyplot-state-v2', newValue: 'other tab' });
+	h.saved.set('panphyplotog-intro-state-v1', 'other tab');
+	storage({ key: 'panphyplotog-intro-state-v1', newValue: 'other tab' });
 	assert.equal(banners, 1);
 	h.setRows([['1', '2'], ['3', '4']]);
 	h.run('debouncedUpdateData(); flushSaveState()');
-	assert.equal(h.saved.get('panphyplot-state-v2'), 'other tab');
+	assert.equal(h.saved.get('panphyplotog-intro-state-v1'), 'other tab');
 	h.run('resolveTabConflict(true)');
-	assert.equal(JSON.parse(h.saved.get('panphyplot-state-v2')).rawData[0].length, 2);
+	assert.equal(JSON.parse(h.saved.get('panphyplotog-intro-state-v1')).rawData[0].length, 2);
 });
 test('the tour ignores saves from other tabs', () => {
 	const h = harness();
 	let banners = 0;
 	h.context.onWorkspaceChangedElsewhere = () => { banners++; };
 	h.run('persistenceDisabled = true');
-	h.context.listeners.storage.forEach(fn => fn({ key: 'panphyplot-state-v2', newValue: 'other tab' }));
+	h.context.listeners.storage.forEach(fn => fn({ key: 'panphyplotog-intro-state-v1', newValue: 'other tab' }));
 	assert.equal(banners, 0);
+});
+
+test('intro migration copies only the active dataset while preserving every original save', () => {
+    const h=harness();
+    const original={schemaVersion:3,activeSet:1,rawData:[[{x:1,y:2}],[{x:3,y:4}],[{x:5,y:6}]],
+        datasetHeaders:{1:{x:'Time / s',y:'Distance / m'}},datasetToggles:{1:{x:true,y:false}},
+        datasetErrorTypes:{1:{x:'percentage',y:'absolute'}},
+        datasetDraftRows:{1:[{xValue:'3.00',yValue:'4.0',xErrorValue:'2',yErrorValue:''},{xValue:'1e',yValue:'',xErrorValue:'',yErrorValue:''}]},
+        datasetTitles:{1:{text:'Trial B',automatic:false}},
+        datasetFitResults:{1:{equation:'y = 2x',choice:{kind:'basic',method:'Linear'},rSquared:'1',residuals:[]}},
+        fittedCurves:{1:{x:[0,3],y:[0,6]}}};
+    const source=JSON.stringify(original);
+    h.saved.set('panphyplot-state-v2',source);
+    h.saved.set('panphyplot-state-v1','older original');
+    h.saved.set('panphyplot-neo-state-v1','full app');
+    const copied=h.context.loadState();
+    assert.equal(copied.rawData.length,1);assert.equal(copied.activeSet,0);
+    assert.equal(copied.rawData[0][0].x,3);
+    assert.equal(copied.datasetDraftRows[0][0].xValue,'3.00');
+    assert.equal(copied.datasetDraftRows[0][1].xValue,'1e');
+    assert.equal(copied.datasetHeaders[0].x,'Time / s');
+    assert.equal(copied.datasetErrorTypes[0].x,'percentage');
+    assert.equal(copied.datasetTitles[0].text,'Trial B');
+    assert.equal(copied.datasetFitResults[0].equation,'y = 2x');
+    h.setRows([['10','20']]);h.run('updateData(); flushSaveState()');
+    assert.equal(JSON.parse(h.saved.get('panphyplotog-intro-state-v1')).rawData.length,1);
+    assert.equal(h.saved.get('panphyplot-state-v2'),source);
+    assert.equal(h.saved.get('panphyplot-state-v1'),'older original');
+    assert.equal(h.saved.get('panphyplot-neo-state-v1'),'full app');
+    assert.equal(h.context.loadState().rawData[0][0].x,10);
+});
+
+test('unsupported old fit types remain in original storage rather than appearing in the intro', () => {
+    const h=harness();
+    for(const kind of ['advanced','custom']) {
+        const original={rawData:[[{x:1,y:2}]],datasetFitResults:{0:{equation:'old fit',choice:{kind}}},fittedCurves:{0:{x:[1,2],y:[2,4]}}};
+        const source=JSON.stringify(original);h.saved.set('panphyplot-state-v2',source);
+        const copied=h.context.loadState();
+        assert.equal(Object.keys(copied.fittedCurves).length,0);
+        assert.equal(Object.keys(copied.datasetFitResults).length,0);
+        assert.equal(copied.rawData[0][0].y,2);
+        assert.equal(h.saved.get('panphyplot-state-v2'),source);
+    }
+});
+
+test('labels and table cells are literal text while basic-fit notation remains readable', () => {
+    const {context:c}=harness();
+    assert.equal(c.processLabel('$x^2$'),'$x^2$');
+    assert.equal(c.processLabel('<img src=x>'),'&lt;img src=x&gt;');
+    assert.equal(c.formatEquationText('y = 2\\times 10^{-9}x^{2}'),'y = 2× 10⁻⁹x²');
+    const clean=c.buildCleanTableFromMarkdown('| $x^2$ | <img src=x> |\n|---|---|\n| 1 | 2 |\n');
+    assert.match(clean.html,/\$x\^2\$/);
+    assert.doesNotMatch(clean.html,/<img/);
+    assert.match(clean.text,/<img src=x>/);
+});
+
+test('changes to original/full-app storage do not pause the intro autosave', () => {
+    const h=harness();let notices=0;h.context.onWorkspaceChangedElsewhere=()=>notices++;
+    for(const key of ['panphyplot-state-v2','panphyplot-neo-state-v1']) h.context.listeners.storage.forEach(fn=>fn({key,newValue:'changed'}));
+    assert.equal(notices,0);
+    h.setRows([['1','2']]);h.run('updateData(); flushSaveState()');
+    assert.equal(JSON.parse(h.saved.get('panphyplotog-intro-state-v1')).rawData[0][0].y,2);
 });

@@ -4,22 +4,10 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#F8F6F1">
   <script src="/assets/theme.js" data-legacy-dark="panphy-dark" data-legacy-light="panphy-light"></script>
   <title>PanPhyPlotOG Manual</title>
   <link rel="icon" type="image/png" href="/assets/favicon.png">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" id="hljs-light">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github-dark.min.css" id="hljs-dark" disabled>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js" defer></script>
-  <script type="text/x-mathjax-config">
-    MathJax.Hub.Config({
-      tex2jax: {
-        inlineMath: [['$', '$'], ['\\(', '\\)']],
-        displayMath: [['$$', '$$'], ['\\[', '\\]']],
-        processEscapes: true
-      }
-    });
-  </script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-AMS-MML_SVG.js" defer></script>
   <style>
     @import url('/assets/fonts/fonts.css');
 
@@ -500,422 +488,36 @@
     </div>
   </div>
 
-  <div class="content">
-    <h1>User Manual</h1>
-
-    <h2>Introduction</h2>
-    <p>
-      This application is developed with pre-university physics students in mind. It provides a simple tool for plotting
-      graphs with error bars and determining the best fit line for their data. It is particularly designed for students
-      with minimal experience using spreadsheet software such as Microsoft Excel or Google Sheets.
-    </p>
-    <p>
-      While this app serves as a helpful introduction, it is neither a substitute for sophisticated spreadsheet software
-      nor a replacement for professional data analysis tools. Students are strongly encouraged to learn and master basic
-      spreadsheet skills. Additionally, they are invited to explore advanced software, such as
-      <a href="https://www.originlab.com/origin" target="_blank" rel="noopener noreferrer">OriginPro</a> for professional
-      use or free alternatives like
-      <a href="https://labplot.org/" target="_blank" rel="noopener noreferrer">LabPlot</a>, to further enhance their data
-      analysis capabilities.
-    </p>
-
-    <hr>
-
-    <h2>Features</h2>
-    <p>
-      This app allows you to input data, visualize it through interactive graphs, and perform various curve fitting
-      analyses to model your data.
-    </p>
-
-    <ul class="feature-list">
-      <li>
-        <strong>Data Input</strong>
-        <ul>
-          <li>Enter your data points manually in the table.</li>
-          <li><strong>Datasets:</strong> Create and manage multiple datasets using the <code>+</code> tab. You can
-            rename a dataset tab (double-click on desktop, long-press on touch/pen). Each dataset retains its own
-            data, exact cell text, uncertainty settings, graph title, and fitting results.</li>
-          <li><strong>Add Row:</strong> Click the "Add Row" button to add an individual data row.</li>
-          <li><strong>Clear Data:</strong> Remove all data from the active dataset. A confirmation dialog appears when
-            the dataset already contains data. You can tick "Don't ask again" to skip the confirmation in future.</li>
-          <li><strong>Clone x:</strong> Use the "Clone x" button to create a new dataset and copy all x-values from the
-            current dataset into it. This feature simplifies workflows when comparing multiple datasets.</li>
-        </ul>
-      </li>
-      <li>
-        <strong>Data Processing</strong>
-        <ul>
-          <li>Open the Data Processing popup to create transformed columns from the active dataset.</li>
-          <li>Use formulas with <code>x</code>, <code>y</code>, and valid header identifiers (for example
-            <code>=1/x</code>, <code>x^2</code>, <code>log(y)</code>).</li>
-          <li>Map processed output to a target dataset and copy only valid rows.</li>
-        </ul>
-      </li>
-      <li>
-        <strong>Data Import/Export</strong>
-        <ul>
-          <li>Import data from a <code>.csv</code> file.</li>
-          <li>Export your data to <code>.csv</code> format.</li>
-          <li><strong>View Table:</strong> Opens a popup showing a formatted table preview with rendered LaTeX.
-            Hover (desktop) or tap (touch devices) the table to open copy actions:
-            <code>Copy image</code> or <code>Copy raw Markdown</code>.</li>
-        </ul>
-      </li>
-      <li>
-        <strong>Curve Fitting</strong>
-        <ul>
-          <li>Perform basic fits such as Linear, Quadratic, Cubic, Exponential, and Power.</li>
-          <li>Access advanced fitting models such as Sinusoidal and Gaussian.</li>
-          <li>Use Custom Fit with math.js syntax for user-defined equations.</li>
-          <li>Custom Fit auto-detects up to 5 parameters and auto-fills initial guesses from data.</li>
-          <li>Adjust and reset initial parameters for advanced fitting methods.</li>
-          <li>View fitting equations and R² values.</li>
-          <li><strong>Copy fitted equations:</strong> In the Fitting Result panel, hover (desktop) or tap (touch
-            devices) the fitted equation to open copy actions:
-            <code>Copy image</code> or <code>Copy raw LaTeX</code> (wrapped in <code>$...$</code>) for reports,
-            notes, and further analysis.</li>
-          <li>Each dataset maintains its own fitting result until a new fit is performed.</li>
-          <li><strong>Model equations:</strong>
-            <ul>
-              <li>Linear: $y = mx + c$</li>
-              <li>Quadratic/Cubic: $y = a_n x^n + a_{n-1} x^{n-1} + \ldots + a_0$</li>
-              <li>Exponential: $y = A e^{b(x - x_0)} + c$</li>
-              <li>Power: $y = A(x - x_0)^b + c$</li>
-              <li>Sinusoidal: $y = A e^{bx} \sin(kx - \phi) + c$</li>
-              <li>Gaussian: $y = A e^{-\frac{(x - \mu)^2}{2\sigma^2}} + c$</li>
-              <li>Custom: $y = f(x,\theta)$ where $\theta$ are auto-detected parameters (max 5)</li>
-            </ul>
-          </li>
-        </ul>
-      </li>
-      <li>
-        <strong>Graph Visualization</strong>
-        <ul>
-          <li>Interactive plots powered by Plotly.js.</li>
-          <li><strong>Toolbar controls:</strong> Pan, Zoom, Zoom In, Zoom Out, Auto-scale, Reset axes, and Download plot.</li>
-          <li><strong>Auto-scale vs Reset axes:</strong> Auto-scale fits both axes to the visible data values. Reset axes
-            restores Plotly's default reset behavior for the current plot.</li>
-          <li>Customize the graph title and axis labels.</li>
-          <li><strong>LaTeX Mode:</strong> A toggle allows you to activate or deactivate LaTeX rendering for all
-            headings, labels, and titles.</li>
-          <li><strong>Plot All Datasets:</strong> Visualize all datasets simultaneously in a combined plot popup.</li>
-        </ul>
-      </li>
-      <li>
-        <strong>Theme Toggle</strong>
-        <ul>
-          <li>Switch between light and dark themes using the theme toggle button in the banner.</li>
-          <li>Your theme preference is saved and persists across sessions.</li>
-        </ul>
-      </li>
-      <li>
-        <strong>Auto-Save</strong>
-        <ul>
-          <li>Your data, settings, and fitted curves are automatically saved to your browser's local storage.</li>
-          <li>Every tab or window you open PanPhyPlotOG in shares the same saved work. If the work changes in another tab, this tab stops saving and asks whether to reload and see the other tab's version, or keep its own; nothing is overwritten without asking.</li>
-          <li>When you return to the app, your previous session is restored automatically.</li>
-        </ul>
-      </li>
-    </ul>
-
-    <hr>
-
-    <h2>Getting Started</h2>
-
-    <p>New to PanPhyPlotOG? Click <strong>Tour</strong> in the banner for a guided walkthrough. It has five short
-      chapters: <a href="/misc/panphyplotog.html?tour=first-fit">First fit</a>,
-      <a href="/misc/panphyplotog.html?tour=uncertainties">Uncertainties</a>,
-      <a href="/misc/panphyplotog.html?tour=custom-fit">Custom fit</a>,
-      <a href="/misc/panphyplotog.html?tour=data-processing">Data processing</a> and
-      <a href="/misc/panphyplotog.html?tour=datasets">Multiple datasets</a>. The tour runs on practice data:
-      nothing in it is saved, and your own work returns when you exit. Teachers can share any of these links to send a
-      class straight into a chapter. The tour needs a tablet or computer screen; on a phone the Tour button is hidden
-      and these links open the app as normal.</p>
-
-    <h3>1. Entering Data</h3>
-    <p>Edits are captured immediately. Incomplete rows, invalid entries, and trailing zeros are preserved when you
-      switch datasets or reload. Only valid numeric points are used in calculations. Use decimal numbers or scientific
-      notation such as <code>-1.25</code> and <code>1e-5</code>; commas, units, and other text are flagged as invalid.</p>
-    <ul>
-      <li><strong>Adding Data Points:</strong> Click the "Add Row" button to add a new data row. Enter your
-        <code>x</code> and <code>y</code> values in the respective input fields.</li>
-      <li><strong>Removing Data Points:</strong> Click the "Clear Data" button to remove all data in the active
-        dataset. A confirmation dialog appears only when the dataset is not empty.</li>
-      <li><strong>Cloning x-values:</strong> In the active dataset view, click the "Clone x" button to create a new
-        dataset and copy the current dataset's x-values into it.</li>
-      <li><strong>Adding a New Dataset:</strong> Click the <code>+</code> tab ("Add a new dataset") to create a new dataset. Each dataset is
-        stored independently and maintains its own header values, uncertainty settings, and fitting results.</li>
-      <li><strong>Renaming a Dataset:</strong> Double-click a dataset tab label on desktop, or long-press it on touch/pen devices.</li>
-      <li><strong>Removing a Dataset:</strong> Click the × button on a dataset tab to remove that dataset. A confirmation is shown when the dataset is not empty. You must keep at least one dataset.</li>
-      <li><strong>Keyboard Navigation:</strong> Use the arrow keys to navigate between cells in the data table. Press
-        Enter to move to the cell below. Left/right arrows edit within a number and move cells at its edges.
-        On a dataset tab, use Left/Right or Home/End to switch, F2 to rename, and Delete to request removal.
-        Dialogs keep Tab focus inside and Escape closes them, returning focus to the opening control.</li>
-    </ul>
-
-    <h3>2. Managing Uncertainties</h3>
-    <ul>
-      <li><strong>Toggling Uncertainties:</strong> Check the <strong>Δx</strong> or <strong>Δy</strong> checkboxes to
-        enable uncertainties for the respective axis.</li>
-      <li><strong>Selecting Uncertainty Type:</strong> Choose between <strong>absolute</strong> or
-        <strong>percentage</strong> uncertainties from the dropdown menus.</li>
-      <li><strong>Entering Uncertainties:</strong> Enter the uncertainty values in the input fields that appear once
-        uncertainties are enabled.</li>
-      <li><strong>Applying Global Uncertainties:</strong> Enter a value in a "Value for all rows" field and press Enter or leave the field to apply it to complete rows.
-        Absolute uncertainties must be non-negative; percentage uncertainties must be greater than zero.</li>
-    </ul>
-
-    <h3>3. Importing and Exporting Data</h3>
-    <ul>
-      <li><strong>Importing from CSV:</strong> Click the "Import .csv" button and select a CSV file from your device.
-        If the active dataset already has data, a confirmation dialog appears before import. Ensure that the CSV file
-        has at least two columns for <code>x</code> and <code>y</code>. Additional columns can represent uncertainties.</li>
-      <li><strong>Export .csv:</strong> Click the "Export .csv" button to download your data in CSV format.</li>
-      <li>
-        <strong>View Table:</strong> Click the "View Table" button to open a popup with your data displayed as a
-        formatted table.
-        <ul>
-          <li>LaTeX expressions in headers and values are rendered as proper mathematical notation.</li>
-          <li><strong>Copy Actions:</strong> Hover (desktop) or tap (touch devices) the table to open
-            <strong>Copy image</strong> and <strong>Copy raw Markdown</strong>.</li>
-          <li><strong>Copy image:</strong> Copies the rendered table as an image for pasting into Word, Google Docs,
-            or slides.</li>
-          <li><strong>Copy raw Markdown:</strong> Copies the raw Markdown table source, suitable for documentation or
-            use in the Markdown Editor.</li>
-        </ul>
-      </li>
-    </ul>
-
-    <div class="note-box">
-      <p><strong>Note:</strong> Uncertainties (absolute or percentage) play a crucial role in determining how data is
-        formatted in exported <code>.csv</code> output and copied raw Markdown tables.</p>
-      <p><strong>1. Absolute Uncertainties:</strong> The number of decimal places in the exported values matches the
-        precision of the absolute uncertainty. For example, if the uncertainty is <code>±0.05</code>, the corresponding
-        data value will be exported with two decimal places (e.g., <code>5.25 ± 0.05</code>).</p>
-      <p><strong>2. Percentage Uncertainties:</strong> The precision of exported values is determined using a
-        logarithmic formula that scales smoothly with the uncertainty magnitude:</p>
-      <ul>
-        <li>~100% uncertainty: 1 significant figure</li>
-        <li>~10% uncertainty: 2 significant figures</li>
-        <li>~1% uncertainty: 3 significant figures</li>
-        <li>~0.1% uncertainty: 4 significant figures</li>
-      </ul>
-      <p>This approach ensures that each order of magnitude improvement in precision adds one meaningful digit to the
-        reported value.</p>
-    </div>
-
-    <h3>4. Data Processing</h3>
-    <ul>
-      <li><strong>Open Data Processing:</strong> Click the "Data Processing" button in the Data section (marked with an
-        arrow to indicate it opens a popup).</li>
-      <li><strong>Source scope:</strong> The popup reads valid rows from the active dataset where both <code>x</code>
-        and <code>y</code> are finite numbers. The source section title shows the active dataset name.</li>
-      <li><strong>Source table:</strong> The source table is scrollable and shows roughly seven rows at a time.</li>
-      <li><strong>Create processed columns:</strong> Use <code>Process x</code> or <code>Process y</code>, then enter a
-        math.js expression such as <code>=1/x</code>, <code>1/V</code>, <code>x^2</code>, <code>log(y)</code>, or
-        <code>sqrt(abs(y))</code>.</li>
-      <li><strong>Process button labels:</strong> Buttons show axis-first labels (for example <code>Process x (time)</code>)
-        when custom headers are used, to reduce ambiguity.</li>
-      <li><strong>Apply/Cancel flow:</strong> Pressing Process first adds a pending column preview. Click
-        <strong>Apply</strong> (or press Enter in the formula box) to compute and keep it. Click <strong>Cancel</strong>
-        to remove the pending column.</li>
-      <li><strong>Variables:</strong> <code>x</code>, <code>y</code>, and valid header identifiers are available in
-        formulas.</li>
-      <li><strong>Formula validation:</strong> Formula warnings/errors (for example unknown variables) appear inside the
-        formula panel.</li>
-      <li><strong>Map output:</strong> Choose <strong>New x column</strong> and <strong>New y column</strong> from
-        source or processed columns, choose a <strong>Target dataset</strong>, then click <strong>Copy to Dataset</strong>.
-        The popup closes automatically and navigates to the target dataset.</li>
-      <li><strong>Row filtering:</strong> Any row producing invalid/non-finite mapped values is skipped during copy.</li>
-      <li><strong>Limitations (MVP):</strong> Uncertainties are not included in this processing step. Copied target data
-        writes only <code>x,y</code> and resets target uncertainty settings and stored fit artifacts.</li>
-    </ul>
-
-    <h3>5. Performing Curve Fitting</h3>
-    <p>All fits use <strong>unweighted least squares</strong>: uncertainty bars are displayed for reference and do not
-      influence the fit. Displayed coefficients use up to eight significant figures, with scientific notation for small
-      or large values. Calculations use the full precision of the fitted parameters.</p>
-    <p>The fitting result reports convergence for iterative fits and the root mean square error (RMSE). Convergence
-      means the solver met a numerical stopping criterion; it does not establish that the model is physically appropriate
-      or the best possible solution. If convergence is not confirmed, try different initial parameters.</p>
-    <p>If you edit measurements, the previous fit is marked <strong>outdated</strong> and its curve becomes dashed.
-      Click <strong>Fit Curve</strong> in the fitting controls to update the equation and R² for the new data.
-      Background results are discarded if their dataset changes, is cleared, or is removed.</p>
-    <ul>
-      <li>
-        <strong>Basic Fit:</strong>
-        <ul>
-          <li>Navigate to the "Basic" tab.</li>
-          <li>Select a fitting method (Linear, Quadratic, Cubic, Exponential, Power) from the dropdown.</li>
-          <li>Click the "Fit Curve" button to perform the fitting.</li>
-          <li>The fitting equation and R² value will be displayed below the graph for the active dataset.</li>
-          <li>Hover the fitted equation (desktop) or tap it (touch devices) to open copy options. Use
-            <strong>Copy image</strong> to paste a visual equation, or <strong>Copy raw LaTeX</strong> to copy
-            <code>$...$</code> for reuse in LaTeX-based tools.</li>
-          <li>Click the "Clear Fit" button to remove the fitted curve.</li>
-        </ul>
-      </li>
-      <li>
-        <strong>Advanced Fit:</strong>
-        <ul>
-          <li>Navigate to the "Advanced" tab.</li>
-          <li>Select an advanced fitting method (Sinusoidal, Gaussian) from the dropdown.</li>
-          <li>Initial parameters are estimated from the dataset. Gaussian starts account for signed peaks and a baseline. Sinusoidal fits need at least five points and search up to the sampling limit for evenly spaced data; larger manual frequencies extend the search but may be aliased. Adjust the initial parameters if
-            needed, or use <strong>Reset parameters</strong>.</li>
-          <li>Click the "Fit Curve" button to perform the fitting.</li>
-          <li>The fitting equation and R² value will be displayed below the graph for the active dataset.</li>
-          <li>You can copy the displayed fitted equation using the same equation menu
-            (<strong>Copy image</strong> / <strong>Copy raw LaTeX</strong>).</li>
-          <li>Click the "Clear Fit" button to remove the fitted curve.</li>
-        </ul>
-      </li>
-      <li>
-        <strong>Custom Fit:</strong>
-        <ul>
-          <li>Navigate to the "Custom" tab.</li>
-          <li>Enter a custom equation for <code>y</code> using math.js syntax (for example:
-            <code>A*exp(-k*x)+c</code> or <code>a*x^2+b*x+d</code>).</li>
-          <li>Use the <strong>Help</strong> button for quick math syntax reference.</li>
-          <li>Parameters are detected automatically from symbols that are not <code>x</code>,
-            math constants, or math functions.</li>
-          <li>Up to 5 parameters are supported for Custom Fit.</li>
-          <li>Initial parameter values are auto-filled from the dataset. You can edit them manually or click
-            <strong>Auto guesses</strong> to regenerate guesses. Optional <strong>Min</strong> and <strong>Max</strong> fields constrain each parameter; blank fields are unbounded. Formulas linear in their parameters are solved directly.</li>
-          <li>Click the "Fit Curve" button to perform the fit.</li>
-          <li>The fitted equation and R² value are shown in the Fitting Result panel and support
-            <strong>Copy image</strong> / <strong>Copy raw LaTeX</strong>.</li>
-          <li>Click the "Clear Fit" button to remove the fitted curve.</li>
-        </ul>
-      </li>
-    </ul>
-
-    <h3>6. Visualizing All Datasets</h3>
-    <p>Each dataset keeps its own graph title, including an intentionally empty title. Custom titles and axis labels
-      in the combined plot are retained across dataset switches and reloads.</p>
-    <ul>
-      <li>
-        <strong>Plot All Datasets:</strong> Click the "Plot All Datasets" button to open a popup displaying a combined
-        plot of all datasets.
-        <ul>
-          <li>All datasets are plotted together.</li>
-          <li>Each dataset's fitted curve is drawn in a different color.</li>
-          <li>The popup displays input boxes for the graph title and axis labels. By default, these values are taken
-            from the active dataset but can be edited.</li>
-          <li>Changes to the title or labels update the combined plot accordingly.</li>
-        </ul>
-      </li>
-    </ul>
-
-    <h3>7. LaTeX Mode</h3>
-    <ul>
-      <li>
-        <strong>LaTeX Toggle:</strong> A LaTeX mode toggle is located at the top of the app.
-        <ul>
-          <li><strong>Default Behavior:</strong> When LaTeX mode is off (the default), all headings, axis labels, and
-            titles are displayed as plain text.</li>
-          <li><strong>Activating LaTeX Mode:</strong> Toggle the switch to on to have your text rendered using LaTeX
-            formatting (e.g., for complex mathematical expressions). This makes your graphs and labels appear more
-            professional.</li>
-          <li>This setting affects the entire app, including the combined plot view.</li>
-        </ul>
-      </li>
-    </ul>
-
-    <h3>8. Theme Toggle</h3>
-    <ul>
-      <li>
-        <strong>Light/Dark Mode:</strong> Click the theme toggle button (sun/moon icon) in the top-right corner of the
-        banner to switch between light and dark themes.
-        <ul>
-          <li>The dark theme is optimized for low-light environments and reduces eye strain.</li>
-          <li>Your theme preference is automatically saved and will persist across browser sessions.</li>
-          <li>Graphs and plots automatically adjust their colors to match the selected theme.</li>
-        </ul>
-      </li>
-    </ul>
-
-    <hr>
-
-    <h2>Tips and Best Practices</h2>
-    <ul class="tips-list">
-      <li><strong>Data Quality:</strong> Ensure that your data points are accurate and representative of the phenomenon
-        you are modeling.</li>
-      <li><strong>Choosing Initial Parameters:</strong> For advanced fitting methods, selecting appropriate initial
-        parameters can significantly impact the convergence and accuracy of the fit. For Custom Fit, start from the
-        auto-filled values and adjust them if convergence is poor.</li>
-      <li><strong>Uncertainties:</strong> Use uncertainties to account for measurement errors or variability in your
-        data. Choose between absolute and percentage uncertainties based on your data's nature.</li>
-      <li><strong>LaTeX Formatting:</strong> Enable LaTeX mode when you need high-quality mathematical expressions.
-        Otherwise, keep it off for improved performance.</li>
-      <li><strong>Auto-Save:</strong> Your work is automatically saved to your browser's local storage. You can safely
-        close the browser and return later to continue where you left off.</li>
-      <li><strong>Keyboard Shortcuts:</strong> Use arrow keys to quickly navigate between cells in the data table, and
-        press Enter to move down to the next row.</li>
-    </ul>
-
-    <hr>
-
-    <h2>Troubleshooting</h2>
-    <ul>
-      <li><strong>Fitting Did Not Converge:</strong> If a fitting method fails to converge, try adjusting the initial
-        parameters or selecting a different fitting model.</li>
-      <li><strong>Custom Fit Formula Errors:</strong> Verify math.js syntax, keep multiplication explicit (for example
-        <code>2*x</code>), and ensure the equation uses only <code>x</code> plus parameter symbols on the right-hand
-        side.</li>
-      <li><strong>Custom Fit Parameter Limit:</strong> If more than 5 parameters are detected, simplify the equation
-        before fitting.</li>
-      <li><strong>Import Errors:</strong> Ensure that your CSV file is properly formatted with headers and consistent
-        columns.</li>
-      <li><strong>LaTeX Rendering Issues:</strong> Verify that your LaTeX syntax is correct. If you experience delays,
-        consider leaving LaTeX mode off.</li>
-      <li>
-        <strong>Combined Plot Issues:</strong>
-        <ul>
-          <li>If the combined plot title or axis labels do not match the active dataset, ensure that you switch datasets
-            and that the combined plot controls are updated accordingly.</li>
-          <li>If fitted curves or error bars do not appear as expected, double-check that each dataset's fitting and
-            uncertainty settings are stored and restored properly.</li>
-        </ul>
-      </li>
-    </ul>
-
-    <hr>
-
-    <p style="text-align: center; font-size: 1.1rem; color: var(--brand-primary); font-weight: 600;">
-      Happy plotting!
-    </p>
-  </div>
+  <main class="content">
+    <h1>Getting started</h1>
+    <p>PanPhyPlotOG is an introduction to plotting experimental measurements. Work with one x-y dataset, add uncertainty bars, and fit a basic model. Start with the steps below, or <a href="/misc/panphyplotog.html?tour=first-fit">take the guided tour</a> using practice data.</p>
+    <h2>Enter measurements</h2>
+    <p>Type x and y readings into the table. Use <strong>Add Row</strong> for more measurements. Tab, Enter and the arrow keys move between cells. Edit the column headings to include names and units, such as Time / s and Distance / m. Headings and the graph title are plain text.</p>
+    <p>The graph updates as you type. Incomplete and invalid entries stay in the table and are saved, but a fit uses only rows with valid x and y values. <strong>Clear Data</strong> resets the table after confirmation.</p>
+    <h2>Add uncertainty bars</h2>
+    <p><strong>Uncertainty</strong> starts open. Enable Δx or Δy, then choose Absolute or Percentage (%). Type individual uncertainties in the table, or enter a global value and choose <strong>Apply to All</strong>. Absolute uncertainties must be zero or positive; percentage uncertainties must be positive. Error bars show these uncertainties; they do not weight the fit.</p>
+    <h2>Choose a basic fit</h2>
+    <p><strong>Best Fit</strong> starts open. Choose Linear, Quadratic, Cubic, Exponential or Power and press <strong>Fit Curve</strong>. Linear needs at least two points with distinct x values; quadratic needs three, cubic four, exponential three and the shifted power model four.</p>
+    <p>The result shows the fitted equation, R² and a fit-status message. A high R² alone does not establish that a physical model is suitable. Changing measurements marks an existing fit as outdated: fit again to update it. <strong>Clear Fit</strong> removes the fitted line.</p>
+    <p>Copy the equation as ordinary text or as an image. The equation uses x and y for the horizontal and vertical variables, regardless of the column headings. Very small fitted coefficients use scientific notation. Polynomial results may use a centred, scaled variable u; its definition is included with the equation.</p>
+    <h2>Import, export and copy</h2>
+    <p><strong>Import .csv</strong> replaces the current dataset after confirmation. The first two columns supply x and y; named uncertainty columns, such as delta Time or delta Distance (%), are recognised. Other columns are reported as ignored.</p>
+    <p><strong>Export .csv</strong> downloads the current measurements and enabled uncertainties. <strong>View Table</strong> provides a formatted table to copy into a report or spreadsheet, as an image, or as plain Markdown. The graph camera button downloads a PNG.</p>
+    <h2>Saving your work</h2>
+    <p>This introductory app saves one dataset automatically in this browser. It uses separate storage from PanPhyPlot. Export a CSV to keep a portable copy or transfer the current readings to the full app.</p>
+    <p>On first use, an original PanPhyPlot save can supply its previously active dataset, headings, drafts, uncertainties, title and basic fit. The complete original save, including other datasets and fit results, stays untouched. PanPhyPlot can import the original datasets, but not their fits. The simplified app never overwrites or deletes it.</p>
+    <p>Two open PanPhyPlotOG tabs share the introductory save. A tab pauses autosave if another tab changes it, and offers to reload or keep its own version.</p>
+    <h2>Need advanced features?</h2>
+    <p>Check out <a href="/tools/panphyplot.html">PanPhyPlot</a> for multiple sheets and series, formula columns, means of repeats, uncertainty propagation, weighted fits, advanced and custom models, LaTeX labels and complete <code>.ppplot</code> project files. Export your readings here with <strong>Export .csv</strong>, then use <strong>File → Import</strong> in PanPhyPlot. CSV transfers measurements and uncertainties; fit results and graph settings are not transferred.</p>
+    <h2>Guided practice</h2>
+    <p>The <strong>Tour</strong> button offers <a href="/misc/panphyplotog.html?tour=first-fit">First fit</a> and <a href="/misc/panphyplotog.html?tour=uncertainties">Uncertainties</a> chapters on tablets and computers. Practice uses its own sample data without changing your saved measurements.</p>
+  </main>
 
   <footer>
     &copy; 2026 <a href="https://panphy.app/" target="_blank" rel="noopener noreferrer">PanPhy Labs</a>. All rights reserved. |
     <a href="https://buymeacoffee.com/panphy" target="_blank" rel="noopener noreferrer">Support My Projects</a>
   </footer>
 
-  <script>
-    window.PanPhyThemeToggle.mount(document.getElementById('theme-button'));
-    const hljsLight = document.getElementById('hljs-light');
-    const hljsDark = document.getElementById('hljs-dark');
-
-    function updateHighlightTheme() {
-      const dark = window.PanPhyTheme.get() === 'dark';
-      hljsLight.disabled = dark;
-      hljsDark.disabled = !dark;
-    }
-    updateHighlightTheme();
-    window.addEventListener('panphy:theme-change', updateHighlightTheme);
-
-    // Initialize highlight.js
-    window.addEventListener('DOMContentLoaded', () => {
-      hljs.highlightAll();
-    });
-  </script>
-  <script>
-    // Gradient text: skip on Brave iOS where background-clip:text is broken
-    (function() {
-      if (/iP(hone|ad|od)/.test(navigator.userAgent) && navigator.brave) return;
-      document.querySelectorAll('.banner-title, h1').forEach(function(el) { el.classList.add('gradient-text'); });
-    })();
-  </script>
+  <script>window.PanPhyThemeToggle.mount(document.getElementById('theme-button'));</script>
 </body>
-
 </html>
