@@ -2290,10 +2290,6 @@ mjx-container.copy-failed::after {
   margin-bottom: 16px;
 }
 
-.history-modal.history-modal-single .history-list {
-  padding-bottom: 30px;
-}
-
 .history-touch-hint {
   margin: 0 0 10px 0;
   font-size: 0.82rem;
@@ -2323,10 +2319,11 @@ mjx-container.copy-failed::after {
 
 .history-item::before {
   content: "Click to restore";
-  position: absolute;
-  bottom: calc(100% + 8px);
-  left: 50%;
-  transform: translateX(-50%);
+  /* Reserve a hint row inside the scrollable card, including while hidden. */
+  position: static;
+  order: 1;
+  align-self: center;
+  flex: none;
   background: var(--copy-hint-chip-bg);
   color: var(--copy-hint-text);
   padding: 4px 10px;
@@ -2355,11 +2352,6 @@ mjx-container.copy-failed::after {
 .history-item:hover::before,
 .history-item:focus-visible::before {
   opacity: 1;
-}
-
-.history-item:first-child::before {
-  bottom: auto;
-  top: calc(100% + 8px);
 }
 
 .history-item:hover::after,
