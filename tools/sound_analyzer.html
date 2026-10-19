@@ -13,315 +13,95 @@
   <link rel="icon" type="image/png" href="/assets/favicon.png">
     <script src="/assets/sw-register.js" defer></script>
 <style>
-    @import url('/assets/fonts/fonts.css');
 
+    @import url('/assets/fonts/fonts.css');
     :root {
       color-scheme: light;
-      --font-sans: 'Manrope', sans-serif;
-      --font-display: 'DM Serif Display', serif;
+      --font-sans: 'Manrope', system-ui, sans-serif;
+      --font-display: 'DM Serif Display', Georgia, serif;
       --font-mono: 'IBM Plex Mono', monospace;
-
-      /* Light Theme */
-      --bg-color: #F8F6F1;
-      --bg-pattern: #EDE9E0;
-      --text-main: #1B1B1B;
-      --text-secondary: #6B6560;
-
-      --brand-primary: #C2410C;
-      --brand-secondary: #EA580C;
-      --brand-accent: #0D9488;
-
-      --card-bg: #ffffff;
-      --card-border: #E8E4DD;
-      --card-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
-
-      --canvas-bg: #ffffff;
-      --canvas-baseline: #D8D3CB;
-
-      --slider-track: #E8E4DD;
-      --slider-thumb: #C2410C;
-
-      --select-bg: #ffffff;
-      --select-border: #E8E4DD;
-
-      --header-bg: rgba(248, 246, 241, 0.92);
-      --header-border: rgba(194, 65, 12, 0.1);
-
-      --nav-bg: rgba(248, 246, 241, 0.92);
-      --nav-border: #E8E4DD;
-
-      /* Sound analyzer specific */
-      --axis-color: #1B1B1B;
-      --grid-color: #9C9890;
-      --wave-line: #16a34a;
-      --marker-color: #f97316;
-      --tooltip-bg: rgba(248, 246, 241, 0.95);
-      --tooltip-text: #1B1B1B;
+      --bg-color: #F4F1EA; --surface: #FFFFFF; --surface-alt: #FAF8F4;
+      --text-main: #17181A; --text-secondary: #55585E;
+      --border: #E6E1D7; --brand-primary: #C2410C; --brand-secondary: #EA580C;
+      --brand-accent: #0F766E; --accent-ink: #FFFFFF;
+      --grid-minor: rgba(15,118,110,.055); --grid-major: rgba(15,118,110,.11);
+      --danger: #B42318; --shadow: 0 1px 2px rgba(23,24,26,.05), 0 2px 8px rgba(23,24,26,.04);
+      --canvas-bg: var(--surface); --card-bg: var(--surface); --card-border: var(--border);
+      --card-shadow: var(--shadow); --canvas-baseline: var(--border);
+      --slider-track: var(--border); --slider-thumb: var(--brand-accent);
+      --select-bg: var(--surface-alt); --select-border: var(--border);
+      --btn-primary: var(--brand-accent); --btn-primary-hover: #0B5F59; --btn-text: var(--accent-ink);
+      --axis-color: var(--text-main); --grid-color: var(--text-main); --wave-line: #0F766E;
+      --marker-color: #C2410C; --tooltip-bg: var(--surface); --tooltip-text: var(--text-main);
+      --channel-line: #4E79A7; --channel-line-paused: #71869A;
+      --combined-line: #C2410C; --combined-line-paused: #A67B68;
+      --axis-line: var(--border); --paused-overlay: rgba(255,255,255,.5);
     }
-
     [data-theme="dark"] {
       color-scheme: dark;
-      --bg-color: #111110;
-      --bg-pattern: #1A1A18;
-      --text-main: #EDEBE8;
-      --text-secondary: #9C9890;
-
-      --brand-primary: #FB923C;
-      --brand-secondary: #C2410C;
-      --brand-accent: #5EEAD4;
-
-      --card-bg: #1A1A19;
-      --card-border: #2A2A28;
-      --card-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
-
-      --canvas-bg: #1A1A19;
-      --canvas-baseline: #3D3D3A;
-
-      --slider-track: #3D3D3A;
-      --slider-thumb: #FB923C;
-
-      --select-bg: #2A2A28;
-      --select-border: #3D3D3A;
-
-      --header-bg: rgba(17, 17, 16, 0.95);
-      --header-border: rgba(251, 146, 60, 0.1);
-
-      --nav-bg: rgba(17, 17, 16, 0.92);
-      --nav-border: rgba(255, 255, 255, 0.06);
-
-      /* Sound analyzer specific */
-      --axis-color: #EDEBE8;
-      --grid-color: #EDEBE8;
-      --wave-line: #98c616;
-      --marker-color: #ff5f1f;
-      --tooltip-bg: rgba(17, 17, 16, 0.9);
-      --tooltip-text: #EDEBE8;
+      --bg-color: #0D1012; --surface: #15191C; --surface-alt: #191E22;
+      --text-main: #E8EBED; --text-secondary: #A5ACB3; --border: #262D33;
+      --brand-primary: #FB923C; --brand-secondary: #FB923C; --brand-accent: #5EEAD4;
+      --accent-ink: #062521; --btn-primary-hover: #8FF3E3;
+      --grid-minor: rgba(94,234,212,.035); --grid-major: rgba(94,234,212,.07);
+      --danger: #F97066; --shadow: 0 1px 3px rgba(0,0,0,.3);
+      --wave-line: #5EEAD4; --marker-color: #FB923C;
+      --channel-line: #7CB5EC; --channel-line-paused: #69849F;
+      --combined-line: #FB923C; --combined-line-paused: #AE8161;
+      --paused-overlay: rgba(13,16,18,.42);
     }
-
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-      transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
-    }
-
-    .offline-font {
-      --font-sans: 'Manrope', sans-serif;
-      --font-display: 'DM Serif Display', serif;
-      --font-mono: 'IBM Plex Mono', monospace;
-    }
-
+    *, *::before, *::after { box-sizing: border-box; }
+    html, body { margin: 0; padding: 0; min-height: 100%; }
     body {
-      font-family: var(--font-sans);
-      background-color: var(--bg-color);
-      background-image: radial-gradient(var(--bg-pattern) 1px, transparent 1px);
-      background-size: 30px 30px;
-      color: var(--text-main);
-      min-height: 100vh;
-      padding: 0;
+      font-family: var(--font-sans); color: var(--text-main); background-color: var(--bg-color);
+      background-image: linear-gradient(var(--grid-major) 1px,transparent 1px),linear-gradient(90deg,var(--grid-major) 1px,transparent 1px),linear-gradient(var(--grid-minor) 1px,transparent 1px),linear-gradient(90deg,var(--grid-minor) 1px,transparent 1px);
+      background-size: 30px 30px,30px 30px,6px 6px,6px 6px;
     }
-
-    a {
-      color: var(--brand-accent);
-      text-decoration: none;
+    a { color: var(--brand-primary); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    button, input, select { font: inherit; }
+    button, select { min-height: 48px; }
+    button { cursor: pointer; }
+    :focus-visible { outline: 2px solid var(--brand-accent); outline-offset: 3px; }
+    .audio-appbar {
+      flex: none;
+      display: flex; align-items: center; gap: 12px; min-height: 64px;
+      padding: 6px 20px; padding-top: calc(6px + var(--standalone-top, 0px));
+      background: var(--surface); border-bottom: 1px solid var(--border);
     }
-
-    a:hover {
-      text-decoration: underline;
-    }
-
-    /* Compact Header */
-    header.banner {
+    .audio-brand { display: flex; align-items: center; gap: 10px; color: var(--text-main); }
+    .audio-brand img { width: 32px; height: 32px; object-fit: contain; }
+    .audio-brand h1 { margin: 0; font: 400 1.5rem var(--font-display); letter-spacing: -.5px; }
+    .audio-brand:hover { text-decoration: none; }
+    .app-label { font: 500 .65rem var(--font-mono); text-transform: uppercase; letter-spacing: .1em; color: var(--text-secondary); border-left: 1px solid var(--border); padding-left: 14px; }
+    .button-icon { width: 18px; height: 18px; flex: 0 0 18px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; pointer-events: none; }
+    .btn, .btn-primary, .btn-secondary, .spectrum-reset { display: inline-flex; align-items: center; justify-content: center; gap: 8px; }
+    .banner-actions { margin-left: auto; display: flex; align-items: center; gap: 8px; }
+    .audio-statusbar {
+      flex: none;
       display: flex;
       align-items: center;
       justify-content: space-between;
-      gap: 16px;
-      padding: 8px 20px;
-      margin: 16px auto 0;
-      width: calc(100% - 40px);
-      max-width: 1160px;
-      background: var(--nav-bg);
-      border: 1px solid var(--nav-border);
-      border-radius: 20px;
-      backdrop-filter: blur(12px);
-      -webkit-backdrop-filter: blur(12px);
-      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
-    }
-
-    .banner-logo {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
-
-    .banner-logo img {
-      height: 36px;
-      width: auto;
-      filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.1));
-    }
-
-    .banner-title {
-      font-family: var(--font-display);
-      font-size: 1.6rem;
-      font-weight: 800;
-      text-align: center;
-      flex: 1;
-      letter-spacing: -0.5px;
-      color: var(--brand-primary);
-    }
-
-    .banner-title.gradient-text {
-      background: linear-gradient(135deg, var(--brand-primary), var(--brand-accent));
-      -webkit-background-clip: text;
-      background-clip: text;
-      -webkit-text-fill-color: transparent;
-    }
-
-    .banner-actions {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-    }
-
-    .theme-toggle button {
-      background: transparent;
-      border: none;
-      cursor: pointer;
-      font-size: 1.2rem;
-      padding: 0.5rem;
-      border-radius: 50%;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      color: var(--text-main);
-      min-width: 42px;
-      min-height: 42px;
-      line-height: 1;
-      transition: transform 0.2s ease, background-color 0.2s ease;
-    }
-
-    .theme-toggle button:hover {
-      background-color: rgba(194, 65, 12, 0.15);
-      transform: rotate(15deg);
-    }
-
-    /* Main Content */
-    .main-content {
-      padding: 20px;
-      max-width: 1200px;
-      margin: 0 auto;
-    }
-
-    /* Info Bar */
-    .info-bar {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 10px;
-      margin-bottom: 16px;
       flex-wrap: wrap;
-    }
-
-    .info-card {
-      width: 240px;
-      background: var(--card-bg);
-      border: 1px solid var(--card-border);
-      border-radius: 999px;
-      padding: 6px 16px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 8px;
-      overflow: hidden;
-    }
-
-    .info-card span {
-      font-size: 0.7rem;
-      font-weight: 600;
+      gap: 6px 16px;
+      min-height: 30px;
+      padding: 4px 14px calc(4px + env(safe-area-inset-bottom, 0px));
+      border-top: 1px solid var(--border);
+      background: var(--surface-alt);
       color: var(--text-secondary);
-      text-transform: uppercase;
-      letter-spacing: 0.08em;
-      white-space: nowrap;
-      flex-shrink: 0;
+      font-size: .72rem;
     }
-
-    .info-card strong {
-      font-family: var(--font-mono);
-      font-size: 0.82rem;
-      font-weight: 600;
-      font-variant-numeric: tabular-nums;
-      white-space: nowrap;
-      text-align: right;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      color: var(--brand-primary);
+    .audio-status { font-family: var(--font-mono); font-size: .68rem; }
+    .audio-statusbar a { color: inherit; }
+    .audio-statusbar-legal { margin-left: auto; }
+    @media (max-width: 800px) {
+      .audio-statusbar-legal { margin-left: 0; line-height: 1.6; }
     }
-
-    /* Card Panels */
-    .simulation-area {
-      position: relative;
-      background: var(--card-bg);
-      border-radius: 16px;
-      box-shadow: var(--card-shadow);
-      border: 1px solid var(--card-border);
-      overflow: hidden;
-      margin-bottom: 16px;
+    @media (max-width: 600px) {
+      .audio-appbar { padding-inline: 12px; gap: 8px; }
+      .audio-brand h1 { font-size: 1.15rem; }
+      .app-label { display: none; }
     }
-
-    .panel-header {
-      padding: 12px 16px;
-      font-size: 0.7rem;
-      font-weight: 600;
-      text-transform: uppercase;
-      letter-spacing: 0.08em;
-      color: var(--text-secondary);
-      border-bottom: 1px solid var(--card-border);
-    }
-
-    .panel-body {
-      padding: 16px;
-      position: relative;
-    }
-
-    /* Collapsible Spectrum Panel */
-    details.simulation-area summary {
-      list-style: none;
-      cursor: pointer;
-      padding: 12px 16px;
-      font-size: 0.7rem;
-      font-weight: 600;
-      text-transform: uppercase;
-      letter-spacing: 0.08em;
-      color: var(--text-secondary);
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 8px;
-    }
-
-    details.simulation-area summary::-webkit-details-marker {
-      display: none;
-    }
-
-    details.simulation-area summary::after {
-      content: "\25BE";
-      font-size: 1rem;
-      color: var(--text-secondary);
-      transition: transform 0.2s ease;
-    }
-
-    details.simulation-area[open] summary::after {
-      transform: rotate(180deg);
-    }
-
-    details.simulation-area[open] summary {
-      border-bottom: 1px solid var(--card-border);
-    }
-
-    details.simulation-area:not([open]) summary {
-      border-bottom: none;
-    }
-
     /* Canvas Styling */
     canvas {
       display: block;
@@ -361,6 +141,7 @@
     }
 
     .spectrum-reset.is-hidden {
+      visibility: hidden;
       opacity: 0;
       pointer-events: none;
     }
@@ -661,108 +442,45 @@
       font-size: 0.72rem;
     }
 
-    /* Footer */
-    footer {
-      text-align: center;
-      padding: 20px;
-      color: var(--text-secondary);
-      font-size: 0.9rem;
+    body { height: 100dvh; min-height: 0; overflow: hidden; display: flex; flex-direction: column; }
+    .main-content { flex: 1; min-height: 0; grid-template-rows: minmax(0, 1fr); width: 100%; max-width: 1920px; margin: 0 auto; padding: 16px; display: grid; grid-template-columns: minmax(0,1fr) 304px; gap: 16px; align-items: stretch; }
+    .plots { min-height: 0; min-width: 0; display: grid; grid-template-rows: auto minmax(0, 1fr); gap: 16px; }
+    .simulation-area, .controls-panel { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; box-shadow: var(--shadow); overflow: hidden; }
+    .panel-header, .simulation-area summary { padding: 12px 16px; font: 400 1.15rem var(--font-display); border-bottom: 1px solid var(--border); }
+    .simulation-area summary { cursor: pointer; }
+    .panel-body { padding: 12px; }
+    .info-bar { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding: 12px; border-bottom: 1px solid var(--border); }
+    .info-card { min-width: 0; }
+    .info-card span { display: block; font-size: .6rem; text-transform: uppercase; letter-spacing: .07em; color: var(--text-secondary); margin-bottom: 6px; }
+    .info-card strong { font: 500 .9rem var(--font-mono); white-space: nowrap; }
+    .controls-panel { display: flex; flex-direction: column; margin: 0; overflow-y: auto; }
+    .controls-panel > * { flex-shrink: 0; }
+    .control-section { padding: 12px; }
+    .control-section + .control-section { border: 0; border-top: 1px solid var(--border); }
+    .section-title { margin: 0 0 8px; font-size: .65rem; letter-spacing: .1em; text-transform: uppercase; color: var(--text-secondary); }
+    #visualizer { height: clamp(120px, 23vh, 320px); }
+    #waveform-panel { min-height: 0; display: flex; flex-direction: column; }
+    #waveform-container { flex: 1; min-height: 0; display: flex; flex-direction: column; }
+    .waveform-stage { flex: 1; position: relative; min-height: 0; }
+    #waveform { position: absolute; inset: 0; width: 100%; height: 100%; min-height: 0; touch-action: none; }
+    .btn-primary, .btn-secondary { min-height: 48px; border-radius: 9px; box-shadow: none; }
+    .btn-primary { background: var(--brand-accent); color: var(--accent-ink); }
+    .hint-text { margin: auto 0 0; padding: 14px; font-size: .7rem; opacity: 1; }
+    input[type="range"] { min-height: 40px; }
+    input[type="range"]:focus-visible { outline: 2px solid var(--brand-accent); }
+    .plot-hint { margin: 0; padding: 0 16px 12px; font-size: .7rem; color: var(--text-secondary); }
+    .grid-legend { margin-top: 8px; }
+    .slider-control { margin-bottom: 12px; }
+    @media (max-width: 800px) {
+      body { height: auto; min-height: 100dvh; overflow: auto; }
+      .main-content { flex: none; grid-template-rows: auto; grid-template-columns: 1fr; padding: 10px; gap: 10px; }
+      .plots { gap: 10px; }
+      #visualizer { height: 230px; } .waveform-stage { flex: none; height: 290px; min-height: 0; }
+      .controls-panel { overflow: visible; display: grid; grid-template-columns: 1fr 1fr; }
+      .info-bar, .controls-panel .hint-text { grid-column: 1 / -1; }
+      .control-section { border-top: 1px solid var(--border); }
     }
-
-    footer a {
-      color: var(--brand-primary);
-      text-decoration: none;
-      font-weight: 600;
-    }
-
-    footer a:hover {
-      text-decoration: underline;
-    }
-
-    /* Responsive */
-    @media (max-width: 900px) {
-      .controls-panel {
-        grid-template-columns: 1fr;
-      }
-
-      .control-section + .control-section {
-        border-left: none;
-        border-top: 1px solid var(--card-border);
-      }
-
-      header.banner {
-        flex-direction: column;
-        text-align: center;
-      }
-
-      .banner-actions {
-        width: 100%;
-        justify-content: center;
-      }
-
-      .banner-title {
-        font-size: 1.2rem;
-      }
-    }
-
-    @media (max-width: 600px) {
-      header.banner {
-        padding: 8px 12px;
-      }
-
-      .banner-logo img {
-        height: 28px;
-      }
-
-      .banner-title {
-        font-size: 1rem;
-      }
-
-      .main-content {
-        padding: 12px;
-      }
-
-      .controls-panel {
-        margin-top: 12px;
-      }
-
-      .control-section {
-        padding: 16px;
-      }
-    }
-
-    @media (pointer: coarse) {
-      button,
-      select,
-      .theme-toggle {
-        min-height: 44px;
-        touch-action: manipulation;
-      }
-
-      input[type="range"] {
-        padding: 19px 0;
-        touch-action: manipulation;
-      }
-
-      input[type="range"]::-webkit-slider-runnable-track {
-        height: 6px;
-      }
-
-      input[type="range"]::-webkit-slider-thumb {
-        width: 28px;
-        height: 28px;
-        margin-top: -11px;
-      }
-
-      input[type="range"]::-moz-range-thumb {
-        width: 28px;
-        height: 28px;
-      }
-
-      canvas {
-        touch-action: none;
-      }
-    }
+    @media (max-width: 480px) { .controls-panel { display: block; } }
   </style>
   <link rel="stylesheet" href="/assets/theme-toggle.css">
   <link rel="stylesheet" href="/assets/fullscreen-button.css">
@@ -771,24 +489,44 @@
 </head>
 
 <body>
-  <header class="banner">
-    <div class="banner-logo">
-      <a href="https://panphy.app/">
-        <img src="/assets/panphy.png" alt="PanPhy logo" />
-      </a>
-    </div>
-
-    <div class="banner-title">Sound Analyzer</div>
-
+  <header class="audio-appbar">
+    <a class="audio-brand" href="/" title="PanPhy Labs home"><img src="/assets/panphy.png" alt="PanPhy logo"><h1>Sound Analyzer</h1></a>
+    <span class="app-label">Audio workbench</span>
     <div class="banner-actions">
-      <div class="theme-toggle">
-        <button id="theme-button" data-panphy-theme-toggle aria-label="Toggle Light/Dark Theme" title="Toggle between light and dark themes">&#9728;&#65039;</button>
-      </div>
+      <button id="theme-button" data-panphy-theme-toggle aria-label="Toggle Light/Dark Theme" title="Toggle between light and dark themes"></button>
       <button data-panphy-fullscreen aria-label="Enter fullscreen" title="Enter fullscreen"></button>
     </div>
   </header>
 
-  <div class="main-content">
+  <main class="main-content">
+    <div class="plots">
+    <!-- Spectrum Panel (collapsible) -->
+    <details class="simulation-area" id="spectrum-panel" open>
+      <summary>Spectrum</summary>
+      <div id="visualizer-container" class="panel-body">
+        <button id="resetZoomBtn" class="spectrum-reset is-hidden" type="button"><svg class="button-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M4 10a8 8 0 1 1 1 7M4 4v6h6"/></svg><span>Reset zoom</span></button>
+        <canvas id="visualizer" width="800" height="200"></canvas>
+        <div id="tooltip"></div>
+      </div>
+    <p class="plot-hint">Drag across the spectrum to zoom into a frequency range.</p>
+    </details>
+
+    <!-- Oscilloscope Panel -->
+    <section class="simulation-area" id="waveform-panel">
+      <div class="panel-header">Oscilloscope</div>
+      <div id="waveform-container" class="panel-body">
+        <div class="waveform-stage"><canvas id="waveform" width="800" height="200"></canvas></div>
+        <div class="grid-legend">
+          <span class="grid-legend-item"><span class="grid-legend-icon">&harr;</span> 1 div = <span id="gridTimeDiv">--</span></span>
+          <span class="grid-legend-item"><span class="grid-legend-icon">&varr;</span> 1 div = <span id="gridAmpDiv">-- /div</span></span>
+        </div>
+      </div>
+      <p class="plot-hint">Pause, then drag the markers to measure a time interval.</p>
+    </section>
+
+    </div>
+    <!-- Controls Panel -->
+    <aside class="controls-panel" aria-label="Analyzer controls">
     <!-- Info Cards -->
     <div class="info-bar">
       <div id="peak-frequency" class="info-card">
@@ -801,30 +539,7 @@
       </div>
     </div>
 
-    <!-- Spectrum Panel (collapsible) -->
-    <details class="simulation-area" id="spectrum-panel" open>
-      <summary>Spectrum</summary>
-      <div id="visualizer-container" class="panel-body">
-        <button id="resetZoomBtn" class="spectrum-reset is-hidden" type="button">Reset zoom</button>
-        <canvas id="visualizer" width="800" height="200"></canvas>
-        <div id="tooltip"></div>
-      </div>
-    </details>
 
-    <!-- Oscilloscope Panel -->
-    <section class="simulation-area" id="waveform-panel">
-      <div class="panel-header">Oscilloscope</div>
-      <div id="waveform-container" class="panel-body">
-        <canvas id="waveform" width="800" height="200"></canvas>
-        <div class="grid-legend">
-          <span class="grid-legend-item"><span class="grid-legend-icon">&harr;</span> 1 div = <span id="gridTimeDiv">--</span></span>
-          <span class="grid-legend-item"><span class="grid-legend-icon">&varr;</span> 1 div = <span id="gridAmpDiv">-- /div</span></span>
-        </div>
-      </div>
-    </section>
-
-    <!-- Controls Panel -->
-    <div class="controls-panel">
       <!-- Column 1: Sliders -->
       <div class="control-section">
         <h3 class="section-title">Scale</h3>
@@ -840,7 +555,7 @@
             <label for="xScale">Time Scale</label>
             <span class="slider-value" id="xScaleValue">1×</span>
           </div>
-          <input type="range" id="xScale" min="0.5" max="10" step="0.1" value="1" aria-label="Time Scale">
+          <input type="range" id="xScale" min="1" max="10" step="0.1" value="1" aria-label="Time Scale">
         </div>
       </div>
 
@@ -859,28 +574,22 @@
       <div class="control-section">
         <h3 class="section-title">Actions</h3>
         <div class="button-group">
-          <button id="toggleBtn" class="btn-primary">Start</button>
-          <button id="exportSpectrumBtn" class="btn-secondary" disabled>Export Spectrum (.csv)</button>
-          <button id="exportWaveformBtn" class="btn-secondary" disabled>Export Waveform (.csv)</button>
+          <button id="toggleBtn" class="btn-primary"><svg class="button-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="m9 5 11 7-11 7Z"/></svg><span>Start</span></button>
+          <button id="exportSpectrumBtn" class="btn-secondary" disabled><svg class="button-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 3v12m-5-5 5 5 5-5M5 16v4h14v-4"/></svg><span>Export Spectrum (.csv)</span></button>
+          <button id="exportWaveformBtn" class="btn-secondary" disabled><svg class="button-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 3v12m-5-5 5 5 5-5M5 16v4h14v-4"/></svg><span>Export Waveform (.csv)</span></button>
         </div>
       </div>
-    </div>
+    <p class="hint-text"><kbd>Space</kbd> start / pause</p>
+    </aside>
+  </main>
 
-    <p class="hint-text"><kbd>Space</kbd> to start / pause</p>
-  </div>
-
-  <footer>
-    &copy; 2026 <a href="/">PanPhy Labs</a>. All rights reserved. |
-    <a href="https://buymeacoffee.com/panphy" target="_blank" rel="noopener noreferrer">Support My Projects</a>
+  <footer class="audio-statusbar">
+    <span class="audio-status">Microphone input · CSV snapshots</span>
+    <span class="audio-statusbar-legal">&copy; 2026 <a href="/">PanPhy Labs</a>. All rights reserved. &middot;
+    <a href="https://buymeacoffee.com/panphy" target="_blank" rel="noopener noreferrer">Support My Projects</a></span>
   </footer>
 
-  <script>
-    // Gradient text: skip on Brave iOS where background-clip:text is broken
-    (function() {
-      if (/iP(hone|ad|od)/.test(navigator.userAgent) && navigator.brave) return;
-      document.querySelectorAll('.banner-title').forEach(function(el) { el.classList.add('gradient-text'); });
-    })();
-  </script>
+
   <script>
     // Theme Toggle
     window.PanPhyThemeToggle.mount(document.getElementById('theme-button'));
@@ -893,9 +602,19 @@
     window.addEventListener('offline', updateOfflineFontState);
     updateOfflineFontState();
   </script>
-</body>
-
 <script>
+
+  // Decorative icons retain visible text labels for accessible button names.
+  const AUDIO_BUTTON_ICONS = {
+    play: '<path d="m9 5 11 7-11 7Z"/>',
+    pause: '<path d="M8 5v14M16 5v14"/>',
+    loading: '<path d="M12 4a8 8 0 1 1-8 8"/>'
+  };
+  function setAudioButton(button, label, icon) {
+    button.innerHTML = '<svg class="button-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">' +
+      AUDIO_BUTTON_ICONS[icon] + '</svg><span>' + label + '</span>';
+  }
+
   /* ADJUSTABLE GRID SETTINGS */
   const SQUARE_GRID_SPACING = 45;
   const SQUARE_GRID_ALPHA = 0.1;
@@ -1067,12 +786,12 @@
       navigator.mediaDevices.addEventListener('devicechange', onDeviceChange);
     }
 
-    // Attempt to reduce startup friction by requesting mic access on load.
-    // Some browsers still require a user gesture; failures are silent here.
-    await startSpectrum({ showErrorAlert: false });
   });
 
   window.addEventListener('resize', setupCanvasResolution);
+  const canvasObserver = new ResizeObserver(setupCanvasResolution);
+  canvasObserver.observe(freqCanvas);
+  canvasObserver.observe(waveCanvas);
 
   window.addEventListener('pageshow', async (event) => {
     if (event.persisted) {
@@ -1099,10 +818,8 @@
   function handleGlobalSpaceShortcut(event) {
     if (event.code !== 'Space' || event.repeat) return;
 
-    // Intercept Space globally in capture phase so no focused control
-    // (e.g. an input-source <select>) can consume it first.
+    if (event.target.closest('input, select, textarea, button, a, summary, [contenteditable]')) return;
     event.preventDefault();
-    event.stopPropagation(); // prevent the event reaching the focused element
     toggleRunPause(); // Space counts as a user gesture
   }
 
@@ -1251,7 +968,8 @@
     const { showErrorAlert = true } = options;
     isStarting = true;
     toggleBtn.disabled = true;
-    toggleBtn.textContent = 'Starting\u2026';
+    setAudioButton(toggleBtn, 'Starting\u2026', 'loading');
+    inputDeviceSelect.disabled = true;
 
     try {
       if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
@@ -1296,7 +1014,7 @@
       }
 
       isRunning = true;
-      toggleBtn.textContent = 'Pause';
+      setAudioButton(toggleBtn, 'Pause', 'pause');
       exportSpectrumBtn.disabled = true;
       exportWaveformBtn.disabled = true;
     } catch (err) {
@@ -1308,7 +1026,8 @@
     } finally {
       isStarting = false;
       toggleBtn.disabled = false;
-      if (!isRunning) toggleBtn.textContent = 'Start';
+      inputDeviceSelect.disabled = false;
+      if (!isRunning) setAudioButton(toggleBtn, 'Start', 'play');
     }
   }
 
@@ -1339,7 +1058,7 @@
     isRunning = false;
     isStarting = false;
 
-    toggleBtn.textContent = 'Start';
+    setAudioButton(toggleBtn, 'Start', 'play');
     exportSpectrumBtn.disabled = true;
     exportWaveformBtn.disabled = true;
     peakFreqDisplay.textContent = '-- Hz';
@@ -1359,6 +1078,7 @@
   }
 
   async function toggleRunPause() {
+    if (isStarting) return;
     if (isRunning) {
       pauseSpectrum();
     } else if (analyzer && source && microphoneStream) {
@@ -1368,7 +1088,7 @@
         return;
       }
       isRunning = true;
-      toggleBtn.textContent = 'Pause';
+      setAudioButton(toggleBtn, 'Pause', 'pause');
       exportSpectrumBtn.disabled = true;
       exportWaveformBtn.disabled = true;
     } else {
@@ -1379,7 +1099,7 @@
 
   function pauseSpectrum() {
     isRunning = false;
-    toggleBtn.textContent = 'Resume';
+    setAudioButton(toggleBtn, 'Resume', 'play');
     exportSpectrumBtn.disabled = false;
     exportWaveformBtn.disabled = false;
 
@@ -1532,7 +1252,7 @@
       }
     }
     const peakFreq = indexToFrequency(peakIndex);
-    peakFreqDisplay.textContent = `${peakFreq.toFixed(1)} Hz`;
+    peakFreqDisplay.textContent = peakValue > 0 ? `${peakFreq.toFixed(1)} Hz` : '-- Hz';
 
     const { startIndex, endIndex, startFreq, endFreq } = getFrequencyZoomRange();
 
@@ -1575,10 +1295,7 @@
     waveCtx.strokeStyle = waveLine;
     waveCtx.beginPath();
 
-    const totalSamples = timeDomainData.length;
-    let windowSize = totalSamples / waveTimeScale;
-    if (windowSize > totalSamples) windowSize = totalSamples;
-    windowSize = Math.max(2, Math.floor(windowSize));
+    const windowSize = getWaveWindowSize();
 
     const sliceWidth = waveCanvasSize.width / (windowSize - 1);
     const frameWaveGain = isRunning ? getAdaptiveWaveGain(timeDomainData) : adaptiveWaveGain;
@@ -1637,10 +1354,7 @@
 
     const dispW = waveCanvasSize.width;
 
-    const totalSamples = timeDomainData ? timeDomainData.length : fftSize;
-    let windowSize = totalSamples / waveTimeScale;
-    if (windowSize > totalSamples) windowSize = totalSamples;
-    windowSize = Math.max(1, Math.floor(windowSize));
+    const windowSize = getWaveWindowSize();
 
     const numVertLines = Math.floor(dispW / SQUARE_GRID_SPACING);
     for (let i = 0; i <= numVertLines; i++) {
@@ -1673,6 +1387,11 @@
     waveCtx.restore();
   }
 
+  function getWaveWindowSize() {
+    const totalSamples = timeDomainData ? timeDomainData.length : fftSize;
+    return Math.max(2, Math.min(totalSamples, Math.floor(totalSamples / waveTimeScale)));
+  }
+
   function updateGridLegend(displayWaveGain) {
     const dispW = waveCanvasSize.width;
     const dispH = waveCanvasSize.height;
@@ -1680,12 +1399,9 @@
 
     // Time per division
     const sr = sampleRate || 44100;
-    const totalSamples = timeDomainData ? timeDomainData.length : fftSize;
-    let windowSize = totalSamples / waveTimeScale;
-    if (windowSize > totalSamples) windowSize = totalSamples;
-    windowSize = Math.max(1, Math.floor(windowSize));
+    const windowSize = getWaveWindowSize();
 
-    const totalTimeSec = windowSize / sr;
+    const totalTimeSec = (windowSize - 1) / sr;
     const timePerDivSec = (SQUARE_GRID_SPACING / dispW) * totalTimeSec;
     const timePerDivMs = timePerDivSec * 1000;
 
@@ -1735,12 +1451,9 @@
   }
 
   function updateTimeDeltaDisplay(markerX1, markerX2) {
-    const totalSamples = timeDomainData ? timeDomainData.length : fftSize;
-    let windowSize = totalSamples / waveTimeScale;
-    if (windowSize > totalSamples) windowSize = totalSamples;
-    windowSize = Math.max(1, Math.floor(windowSize));
+    const windowSize = getWaveWindowSize();
 
-    const totalTimeSec = windowSize / (sampleRate || 44100);
+    const totalTimeSec = (windowSize - 1) / (sampleRate || 44100);
     const deltaMs = Math.abs(markerX2 - markerX1) / waveCanvasSize.width * totalTimeSec * 1000;
 
     timeDeltaDisplay.textContent = `${deltaMs.toFixed(2)} ms`;
@@ -1939,4 +1652,5 @@
   }
 </script>
 
+</body>
 </html>
