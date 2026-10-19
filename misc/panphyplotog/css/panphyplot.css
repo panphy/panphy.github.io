@@ -2921,3 +2921,14 @@ footer a:visited {
 .fit-weighting-note,
 #fit-status { white-space: normal; overflow-wrap: anywhere; }
 .result .fit-weighting-note { white-space: normal; overflow-wrap: anywhere; }
+
+/* Optional custom-fit bounds sit below the initial value. */
+.custom-fit-parameter-row {
+	display: grid;
+	grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+	flex: 1;
+	min-width: 0;
+}
+.custom-fit-parameter-row label { grid-column: 1; }
+.custom-fit-parameter-row input { min-width: 0; width: 100%; max-width: none; }
+.custom-fit-parameter-row .custom-fit-bound { min-height: 48px; font-size: 0.8rem; }

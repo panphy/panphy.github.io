@@ -393,7 +393,12 @@ function normalizeCustomFitStates(savedStates, datasetCount) {
 			});
 		}
 
-		normalized[index] = { formula, initialValues };
+		const bounds = {};
+		for (const name of Object.keys(initialValues)) {
+			const savedBound = saved.bounds?.[name];
+			if (savedBound && typeof savedBound === 'object') bounds[name] = { min: String(savedBound.min ?? ''), max: String(savedBound.max ?? '') };
+		}
+		normalized[index] = { formula, initialValues, bounds };
 	}
 
 	return normalized;

@@ -4,7 +4,7 @@
 const CUSTOM_FIT_MAX_PARAMETERS = 5;
 const CUSTOM_FIT_SAMPLE_POINTS = 300;
 const CUSTOM_FIT_PENALTY = 1e6;
-const CUSTOM_FIT_MULTI_START_LIMIT = 24;
+const CUSTOM_FIT_MULTI_START_LIMIT = 48;
 const CUSTOM_FIT_HELP_URL = '/misc/panphyplotog/math_ref.html';
 const FIT_WORKER_URL = '/misc/panphyplotog/js/fit-worker.js';
 const FIT_WORKER_TIMEOUT_MS = 30000;
@@ -357,8 +357,8 @@ function getCustomFitDataStats() {
 	const yValues = points.map((point) => point.y);
 	const { min: xMin, max: xMax } = minMaxFinite(xValues);
 	const { min: yMin, max: yMax } = minMaxFinite(yValues);
-	const xSpan = Math.max(Math.abs(xMax - xMin), 1e-9);
-	const ySpan = Math.max(Math.abs(yMax - yMin), 1e-9);
+	const xSpan = (Math.abs(xMax - xMin) || 1);
+	const ySpan = (Math.abs(yMax - yMin) || Math.abs(yMin) || 1);
 	const xMean = xValues.reduce((sum, value) => sum + value, 0) / xValues.length;
 	const yMean = yValues.reduce((sum, value) => sum + value, 0) / yValues.length;
 	let slope = 1;
@@ -387,18 +387,33 @@ function getCustomFitDataStats() {
 	};
 }
 
-function getCustomFitGuessByName(parameterName, stats) {
+function getCustomFitGuessByName(parameterName, stats, expression = null) {
 	const key = String(parameterName || '').trim().toLowerCase();
-	if (!key) return 1;
-
+	if (/^(x0|mu|center)$/.test(key)) return stats.xMean;
+	if (/^(phi|phase)$/.test(key)) return 0;
+	let role = '';
+	// Inspect how the parameter enters exp/sin/cos, so an arbitrary name in
+	// exp(-x/q) gets an x-scale, while exp(q*x) gets an inverse x-scale.
+	if (expression) expression.traverse(node => {
+		if (!node.isFunctionNode || !['exp', 'sin', 'cos'].includes(node.fn?.name)) return;
+		const argument = node.args[0];
+		if (!argument) return;
+		let hasX = false, hasParameter = false, denominator = false;
+		argument.traverse(child => {
+			if (child.isSymbolNode && child.name === 'x') hasX = true;
+			if (child.isSymbolNode && child.name === parameterName) hasParameter = true;
+			if (child.isOperatorNode && child.op === '/') child.args[1].traverse(term => {
+				if (term.isSymbolNode && term.name === parameterName) denominator = true;
+			});
+		});
+		if (hasX && hasParameter) role = denominator ? 'span' : node.fn.name === 'exp' ? 'rate' : 'frequency';
+	});
+	if (role === 'span' || /^(tau|sigma|w|width)$/.test(key)) return stats.xSpan / 4;
+	if (role === 'rate' || /^(rate|decay)$/.test(key)) return -1 / stats.xSpan;
+	if (role === 'frequency' || /^(k|omega|freq|frequency)$/.test(key)) return 2 * Math.PI / stats.xSpan;
 	if (/^(a|amp|amplitude)$/.test(key)) return stats.ySpan / 2;
 	if (/^(c|offset|intercept|b0)$/.test(key)) return stats.yMean;
 	if (/^(m|slope)$/.test(key)) return stats.slope;
-	if (/^(x0|mu|center)$/.test(key)) return stats.xMean;
-	if (/^(sigma|w|width)$/.test(key)) return stats.xSpan / 4;
-	if (/^(k|omega|freq|frequency)$/.test(key)) return (2 * Math.PI) / stats.xSpan;
-	if (/^(n|p|pow|exponent)$/.test(key)) return 1;
-
 	return 1;
 }
 
@@ -410,6 +425,7 @@ function formatCustomFitInputValue(value) {
 
 function syncCustomFitInputsToState() {
 	const state = ensureCustomFitState(activeSet);
+	state.bounds ||= {};
 	const { parameterList } = getCustomFitUiElements();
 	if (!parameterList) return;
 
@@ -454,21 +470,31 @@ function renderCustomFitParameterInputs(parameterNames, valuesMap) {
 
 		row.appendChild(label);
 		row.appendChild(input);
+		const state = ensureCustomFitState(activeSet);
+		for (const side of ['min', 'max']) {
+			const bound = document.createElement('input');
+			bound.type = 'number'; bound.step = 'any'; bound.placeholder = side === 'min' ? 'Min' : 'Max';
+			bound.className = 'custom-fit-bound';
+			bound.setAttribute('aria-label', `${name} ${side === 'min' ? 'minimum' : 'maximum'} (optional)`);
+			bound.value = state.bounds?.[name]?.[side] ?? '';
+			bound.addEventListener('input', () => {
+				state.bounds ||= {}; state.bounds[name] ||= {};
+				state.bounds[name][side] = bound.value;
+				scheduleSaveState();
+			});
+			row.appendChild(bound);
+		}
+
 
 		if (index === 0) {
-			const topRow = document.createElement('div');
-			topRow.className = 'advanced-fit-top-row';
-			topRow.appendChild(row);
-
 			const resetButton = document.createElement('button');
 			resetButton.type = 'button';
 			resetButton.className = 'advanced-fit-reset-btn';
-			resetButton.textContent = 'Reset parameter';
+			resetButton.textContent = 'Auto guesses';
 			resetButton.title = 'Recalculate initial parameter values from current data';
 			resetButton.addEventListener('click', resetCustomFitParametersFromData);
-			topRow.appendChild(resetButton);
-
-			fragment.appendChild(topRow);
+			fragment.appendChild(resetButton);
+			fragment.appendChild(row);
 			return;
 		}
 
@@ -580,7 +606,7 @@ function refreshCustomFitDefinition(options = {}) {
 	const stats = getCustomFitDataStats();
 	const nextInitialValues = {};
 	extraction.parameterNames.forEach((name) => {
-		const autoGuess = getCustomFitGuessByName(name, stats);
+		const autoGuess = getCustomFitGuessByName(name, stats, parsedExpression);
 		if (preserveUserValues) {
 			const current = parseNumericInput(state.initialValues[name]);
 			if (Number.isFinite(current)) {
@@ -610,7 +636,8 @@ function refreshCustomFitDefinition(options = {}) {
 		compiledExpression,
 		normalizedFormula,
 		parameterNames: extraction.parameterNames,
-		initialValues: { ...state.initialValues }
+		initialValues: { ...state.initialValues },
+		bounds: state.bounds || {}
 	};
 }
 
@@ -696,84 +723,52 @@ function buildCustomFitEquationLatex(parsedExpression, parameterNames, parameter
 	}
 }
 
-function buildCustomFitInitialCandidates(baseParams) {
-	const seed = baseParams.map((value) => Number(value));
-	const limit = CUSTOM_FIT_MULTI_START_LIMIT;
-	const seen = new Set();
-	const candidates = [];
+// Only take the direct path when symbolic derivatives prove the formula is
+// affine in all fitted parameters. Nonlinear/custom domain cases retain LM.
+function solveLinearCustomFit(data, analysis, bounds) {
+	try {
+		const names = analysis.parameterNames;
+		const derivatives = names.map(name => math.derivative(analysis.parsedExpression, name));
+		let affine = true;
+		// Discontinuous functions can have a constant symbolic derivative without
+		// being affine (for example A + floor(A)); never use that shortcut for them.
+		analysis.parsedExpression.traverse(node => {
+			if (!node.isFunctionNode && !node.isConditionalNode && !node.isRelationalNode) return;
+			node.traverse(child => { if (child.isSymbolNode && names.includes(child.name)) affine = false; });
+		});
+		derivatives.forEach(node => node.traverse(child => {
+			if (child.isSymbolNode && names.includes(child.name)) affine = false;
+		}));
+		if (!affine) return null;
+		const compiled = derivatives.map(node => node.compile());
+		const zero = names.map(() => 0);
+		const rows = data.map(point => compiled.map(node => Number(node.evaluate({ x: point.x }))));
+		const values = data.map(point => point.y - evaluateCustomExpression(analysis.compiledExpression, names, zero, point.x));
+		const fit = fitCore.linearLeastSquares(rows, values);
+		if (!fit || fit.coefficients.some((value, i) => (bounds[i]?.min != null && value < bounds[i].min) || (bounds[i]?.max != null && value > bounds[i].max))) return null;
+		return { params: fit.coefficients, cost: fit.cost, converged: true, reason: 'linear-least-squares', iterations: 0 };
+	} catch { return null; }
+}
 
-	const addCandidate = (candidate) => {
-		if (!Array.isArray(candidate) || candidate.length !== seed.length) return;
-		if (candidate.some((value) => !Number.isFinite(value))) return;
-		const key = candidate.map((value) => Number(value).toPrecision(12)).join('|');
-		if (seen.has(key)) return;
-		seen.add(key);
-		candidates.push(candidate);
+function buildCustomFitInitialCandidates(baseParams, automatic = baseParams, bounds = []) {
+	const candidates = [], seen = new Set();
+	const add = values => {
+		const p = values.map((value, i) => Math.min(bounds[i]?.max ?? Infinity, Math.max(bounds[i]?.min ?? -Infinity, value)));
+		const key = p.map(value => value.toPrecision(12)).join('|');
+		if (p.every(Number.isFinite) && !seen.has(key)) { seen.add(key); candidates.push(p); }
 	};
-
-	const getStep = (value) => {
-		const magnitude = Math.max(Math.abs(value), 1);
-		return Math.max(1e-6, magnitude * 0.25);
-	};
-
-	const steps = seed.map(getStep);
-	addCandidate(seed.slice());
-
-	// Single-parameter perturbations around the seed.
-	for (let index = 0; index < seed.length && candidates.length < limit; index++) {
-		const base = seed[index];
-		const step = steps[index];
-
-		const plus = seed.slice();
-		plus[index] = base + step;
-		addCandidate(plus);
-		if (candidates.length >= limit) break;
-
-		const minus = seed.slice();
-		minus[index] = base - step;
-		addCandidate(minus);
-		if (candidates.length >= limit) break;
-
-		const flip = seed.slice();
-		flip[index] = Math.abs(base) > step * 0.5 ? -base : step;
-		addCandidate(flip);
-	}
-
-	// Pairwise perturbations help when parameters are correlated.
-	for (let i = 0; i < seed.length && candidates.length < limit; i++) {
-		for (let j = i + 1; j < seed.length && candidates.length < limit; j++) {
-			const pair1 = seed.slice();
-			pair1[i] = seed[i] + steps[i];
-			pair1[j] = seed[j] - steps[j];
-			addCandidate(pair1);
-			if (candidates.length >= limit) break;
-
-			const pair2 = seed.slice();
-			pair2[i] = seed[i] - steps[i];
-			pair2[j] = seed[j] + steps[j];
-			addCandidate(pair2);
+	add(baseParams.slice()); add(automatic.slice());
+	// Cover orders of magnitude, including sign changes; retain both the supplied
+	// vector and a newly computed automatic vector after data or unit changes.
+	for (let i = 0; i < baseParams.length; i++) {
+		for (const factor of [0.01, 0.1, 0.5, 2, 10, 100, -1]) {
+			const p = automatic.slice();
+			p[i] = (automatic[i] || Math.abs(baseParams[i]) || 1) * factor;
+			add(p);
 		}
 	}
-
-	// Global scaling catches cases where all parameters start too small/large.
-	if (candidates.length < limit) {
-		const halfScale = seed.map((value, index) => value === 0 ? steps[index] : value * 0.5);
-		addCandidate(halfScale);
-	}
-	if (candidates.length < limit) {
-		const doubleScale = seed.map((value, index) => value === 0 ? -steps[index] : value * 2);
-		addCandidate(doubleScale);
-	}
-
-	// Final broad nudges if we still have room.
-	if (candidates.length < limit) {
-		addCandidate(seed.map((value, index) => value + steps[index]));
-	}
-	if (candidates.length < limit) {
-		addCandidate(seed.map((value, index) => value - steps[index]));
-	}
-
-	return candidates.slice(0, limit);
+	for (const factor of [0.1, 10, -1]) add(automatic.map(value => value * factor));
+	return candidates.slice(0, CUSTOM_FIT_MULTI_START_LIMIT);
 }
 
 function fitCurve() {
@@ -870,53 +865,6 @@ function updateAdvancedFitEquation(selectedMethod) {
 }
 
 
-function calculateFWHM(x, y, maxY) {
-	const halfMax = maxY / 2;
-	let left = null,
-		right = null;
-
-	// Sort data by x (use only finite x and y)
-	const sortedData = getFiniteDatasetPoints(activeSet)
-		.sort((a, b) => a.x - b.x);
-
-	if (sortedData.length < 2) {
-		return 1; // fallback
-	}
-
-	// Find left crossing
-	for (let i = 1; i < sortedData.length; i++) {
-		if (sortedData[i - 1].y < halfMax && sortedData[i].y >= halfMax) {
-			const x1 = sortedData[i - 1].x;
-			const y1 = sortedData[i - 1].y;
-			const x2 = sortedData[i].x;
-			const y2 = sortedData[i].y;
-			left = x1 + (halfMax - y1) * (x2 - x1) / (y2 - y1);
-			break;
-		}
-	}
-
-	// Find right crossing (falling edge: above half-max on the left, below on the right)
-	for (let i = sortedData.length - 1; i > 0; i--) {
-		if (sortedData[i - 1].y >= halfMax && sortedData[i].y < halfMax) {
-			const x1 = sortedData[i - 1].x;
-			const y1 = sortedData[i - 1].y;
-			const x2 = sortedData[i].x;
-			const y2 = sortedData[i].y;
-			right = x1 + (halfMax - y1) * (x2 - x1) / (y2 - y1);
-			break;
-		}
-	}
-
-	if (left !== null && right !== null && right > left) {
-		return right - left;
-	} else {
-		const xs = sortedData.map(p => p.x);
-		const { min: minX, max: maxX } = minMaxFinite(xs);
-		return (maxX - minX) / 4;
-	}
-}
-
-
 function applyDefaultAdvancedFitParameters(method) {
 	if (method === 'Gaussian') {
 		document.getElementById('initial-A-gaussian').value = '1';
@@ -943,69 +891,16 @@ function resetAdvancedFitParameters(method = getCurrentAdvancedFitMethod()) {
 }
 
 function setInitialParameters(method) {
-	if (!method) return;
-	if (getDatasetPoints(activeSet).length === 0) return;
-
-	// Use only finite points (avoid null/blank cells corrupting guesses)
-	const pts = getFiniteDatasetPoints(activeSet);
-	if (pts.length < 4) return;
-
-	const x = pts.map(p => p.x);
-	const y = pts.map(p => p.y);
-
-	const meanX = x.reduce((sum, val) => sum + val, 0) / x.length;
-	const meanY = y.reduce((sum, val) => sum + val, 0) / y.length;
-
-	const { min: minY, max: maxY } = minMaxFinite(y);
-
-	// For Gaussian
-	const FWHM = calculateFWHM(x, y, maxY);
-
-	if (method === 'Gaussian') {
-		document.getElementById('initial-A-gaussian').value = maxY.toPrecision(8);
-		document.getElementById('initial-mu').value = meanX.toPrecision(8);
-		document.getElementById('initial-sigma').value = (FWHM / (2 * Math.sqrt(2 * Math.log(2))) || 1).toPrecision(8);
-		document.getElementById('initial-c-gaussian').value = '0';
-		return;
-	}
-
-	if (method === 'Sinusoidal') {
-		// Heuristic guesses that work well for ordinary (non-damped) sinusoids:
-		//   y ≈ A * sin(kx - phi) + c   (with b ≈ 0)
-		// Note: Our model includes exp(bx); setting b=0 is the safe default.
-		const Aguess = (maxY - minY) / 2;
-		const cguess = meanY;
-		const bguess = 0;
-
-		let kguess = estimateKFromData();
-		if (kguess === null || !isFinite(kguess) || kguess <= 0) {
-			const { min: xLo, max: xHi } = minMaxFinite(x);
-			const span = xHi - xLo;
-			// fallback: assume ~1 cycle across the span
-			kguess = span > 0 ? (2 * Math.PI) / span : 1;
-		}
-
-		// Compute initial phase from the Fourier component at estimated k
-		// For y - c = A*sin(kx - phi), projecting onto sin(kx) and cos(kx):
-		//   sumSin ∝ A*cos(phi), sumCos ∝ -A*sin(phi)
-		//   => phi = atan2(-sumCos, sumSin)
-		let sumSin = 0, sumCos = 0;
-		for (let i = 0; i < x.length; i++) {
-			const val = y[i] - cguess;
-			sumSin += val * Math.sin(kguess * x[i]);
-			sumCos += val * Math.cos(kguess * x[i]);
-		}
-		let phiguess = Math.atan2(-sumCos, sumSin);
-		if (!isFinite(phiguess)) phiguess = 0;
-
-		document.getElementById('initial-A').value = (isFinite(Aguess) && Aguess !== 0 ? Aguess : 1).toPrecision(8);
-		document.getElementById('initial-b').value = bguess.toPrecision(8);
-		document.getElementById('initial-k').value = kguess.toPrecision(8);
-		document.getElementById('initial-phi').value = phiguess.toPrecision(8);
-		document.getElementById('initial-c').value = cguess.toPrecision(8);
-	}
+	const data = getFiniteDatasetPoints(activeSet);
+	const guess = method === 'Gaussian' ? fitCore.estimateGaussian(data) : method === 'Sinusoidal' ? fitCore.estimateSinusoidal(data) : null;
+	if (!guess) return;
+	const ids = method === 'Gaussian'
+		? { A: 'initial-A-gaussian', mu: 'initial-mu', sigma: 'initial-sigma', c: 'initial-c-gaussian' }
+		: { A: 'initial-A', b: 'initial-b', k: 'initial-k', phi: 'initial-phi', c: 'initial-c' };
+	Object.entries(ids).forEach(([key, id]) => {
+		if (Number.isFinite(guess[key])) document.getElementById(id).value = guess[key].toPrecision(10);
+	});
 }
-
 
 function getCurrentAdvancedFitMethod() {
 	return document.getElementById('advanced-fit-method').value;
@@ -1028,167 +923,7 @@ function formatExpEquation(A, b, c, useShift = false, x0 = 0) {
 }
 
 
-function exponentialFit_cAbx(raw) {
-	const data = raw.filter(p => Number.isFinite(p.x) && Number.isFinite(p.y));
-	if (data.length < 3) return null;
-	const x = data.map(p => p.x);
-	const y = data.map(p => p.y);
-	const { min: yMin, max: yMax } = minMaxFinite(y);
-	const yRange = (yMax - yMin) || 1;
 
-	// Residuals and Jacobian for model: y = c + A * exp(b * x)
-	// params = [A, b, c]
-	function fitResiduals([A, b, c], pts) {
-		return pts.map(({ x, y }) => (c + A * Math.exp(b * x)) - y);
-	}
-
-	function fitJacobian([A, b, c], pts) {
-		return pts.map(({ x }) => {
-			const e = Math.exp(b * x);
-			return [e, A * x * e, 1];
-		});
-	}
-
-	// Multi-start: try several c candidates covering decay and inverted cases.
-	// For y = c + A*exp(bx), the asymptote c is where y flattens out —
-	// near min(y) for standard decay/growth, near max(y) for inverted (A<0).
-	const cCandidates = [
-		yMin - 0.1 * yRange,
-		yMin,
-		(yMin + yMax) / 2,
-		yMax,
-		yMax + 0.1 * yRange,
-	];
-
-	let bestParams = null;
-	let bestCost = Infinity;
-	let solver = null;
-
-	for (const c0 of cCandidates) {
-		// Estimate A0, b0 via log-linearization of y - c0
-		const z = y.map(v => v - c0);
-		const posCount = z.filter(v => v > 1e-12).length;
-		const negCount = z.filter(v => v < -1e-12).length;
-		const signZ = posCount >= negCount ? 1 : -1;
-
-		const X = [], L = [];
-		for (let i = 0; i < z.length; i++) {
-			if (signZ * z[i] > 1e-12) {
-				X.push(x[i]);
-				L.push(Math.log(signZ * z[i]));
-			}
-		}
-		let A0 = signZ, b0 = 0;
-		if (X.length >= 2) {
-			const { slope, intercept } = computeLinearFit(X, L);
-			b0 = slope;
-			A0 = signZ * Math.exp(intercept);
-		}
-
-		const result = levenbergMarquardt(
-			data, [A0, b0, c0],
-			fitResiduals, fitJacobian,
-			{ maxIterations: 200 }
-		);
-
-		if (result.cost < bestCost) {
-			bestCost = result.cost;
-			bestParams = result.params;
-			solver = result;
-		}
-	}
-
-	if (!bestParams) return null;
-
-	const [A, b, c] = bestParams;
-	const { min: xMin, max: xMax } = minMaxFinite(x);
-	const xFit = Array.from({ length: 100 }, (_, i) => xMin + i * (xMax - xMin) / 99);
-	const fitFn = xi => c + A * Math.exp(b * xi);
-	const yFit = xFit.map(fitFn);
-	const r2 = computeRSq(x, y, fitFn);
-	const eq = formatExpEquation(A, b, c, false);
-	return { ok: true, model: 'cAbx', r2, params: { A, b, c }, xFit, yFit, fitFn, eq, solver };
-}
-
-
-function exponentialFit_logLinear(raw) {
-	const data = raw.filter(p => Number.isFinite(p.x) && Number.isFinite(p.y));
-	if (data.length < 3) return null;
-	const x = data.map(p => p.x);
-	const y = data.map(p => p.y);
-
-	const { min: yMin, max: yMax } = minMaxFinite(y);
-	const yRange = (yMax - yMin) || 1;
-	const { min: xMin, max: xMax } = minMaxFinite(x);
-
-	// Grid-search over c and x0 candidates for the best log-linear initial guess.
-	// c is now a free parameter: try values below, at, and slightly above yMin.
-	const cCandidates = [
-		yMin - 0.5 * yRange,
-		yMin - 0.1 * yRange,
-		yMin,
-		yMin + 0.1 * yRange,
-	];
-
-	const x0Steps = 50;
-	const x0Cands = Array.from({ length: x0Steps }, (_, i) => xMin + i * (xMax - xMin) / (x0Steps - 1));
-
-	let best = { sse: Infinity, A: 1, b: 0, x0: 0, c: 0 };
-
-	for (const c of cCandidates) {
-		for (const x0 of x0Cands) {
-			const X = [], L = [];
-			for (let i = 0; i < y.length; i++) {
-				const val = y[i] - c;
-				if (val > 1e-12) {
-					X.push(x[i] - x0);
-					L.push(Math.log(val));
-				}
-			}
-			if (X.length < 2) continue;
-
-			const { slope: b, intercept: lnA } = computeLinearFit(X, L);
-			const A = Math.exp(lnA);
-
-			// Rank by data-space SSE (not log-space MSE) to avoid bias
-			let sse = 0;
-			for (let i = 0; i < x.length; i++) {
-				const pred = A * Math.exp(b * (x[i] - x0)) + c;
-				const r = y[i] - pred;
-				sse += r * r;
-			}
-			if (sse < best.sse) best = { sse, A, b, x0, c };
-		}
-	}
-
-	if (!isFinite(best.sse)) return null;
-
-	// Refine the best log-linear guess with LM on all 4 parameters [A, b, x0, c]
-	function fitResiduals([A, b, x0, c], pts) {
-		return pts.map(({ x, y }) => (A * Math.exp(b * (x - x0)) + c) - y);
-	}
-
-	function fitJacobian([A, b, x0, c], pts) {
-		return pts.map(({ x }) => {
-			const e = Math.exp(b * (x - x0));
-			return [e, A * (x - x0) * e, -A * b * e, 1];
-		});
-	}
-
-	const solver = levenbergMarquardt(
-		data, [best.A, best.b, best.x0, best.c],
-		fitResiduals, fitJacobian,
-		{ maxIterations: 200 }
-	);
-
-	const [A, b, x0, c] = solver.params;
-	const fitFn = xi => A * Math.exp(b * (xi - x0)) + c;
-	const xFit = Array.from({ length: 100 }, (_, i) => xMin + i * (xMax - xMin) / 99);
-	const yFit = xFit.map(fitFn);
-	const r2 = computeRSq(x, y, fitFn);
-	const eq = formatExpEquation(A, b, c, true, x0);
-	return { ok: true, model: 'shifted', r2, params: { A, b, x0, c }, xFit, yFit, fitFn, eq, solver };
-}
 
 
 function getFitChoice() {
@@ -1314,24 +1049,34 @@ async function fitCustomCurve() {
 			initialParams.push(numericValue);
 		}
 
-		const starts = buildCustomFitInitialCandidates(initialParams);
+		const bounds = analysis.parameterNames.map(name => {
+			const saved = analysis.bounds[name] || {};
+			return Object.fromEntries(['min', 'max'].filter(side => String(saved[side] ?? '').trim() !== '').map(side => [side, Number(saved[side])]));
+		});
+		if (bounds.some(bound => Object.values(bound).some(value => !Number.isFinite(value)) || (bound.min != null && bound.max != null && bound.min >= bound.max))) {
+			alert('Parameter bounds must be finite, with minimum below maximum.'); return;
+		}
+		const stats = getCustomFitDataStats();
+		const automatic = analysis.parameterNames.map(name => getCustomFitGuessByName(name, stats, analysis.parsedExpression));
+		const scales = automatic.map(value => Math.abs(value) || 1);
+		const starts = buildCustomFitInitialCandidates(initialParams, automatic, bounds);
 		const residualFn = buildCustomResidualFn(analysis.compiledExpression, analysis.parameterNames, CUSTOM_FIT_PENALTY);
 		const jacobianFn = buildCustomJacobianFn(analysis.compiledExpression, analysis.parameterNames);
 
-		let solved = null;
+		let solved = solveLinearCustomFit(data, analysis, bounds);
 		beginFitControlsBusy();
 		try {
-			solved = await runWorkerFitWithFallback(
+			if (!solved) solved = await runWorkerFitWithFallback(
 				'custom',
 				{
 					data,
 					formula: analysis.normalizedFormula,
 					parameterNames: analysis.parameterNames,
-					starts,
+					starts, scales, bounds,
 					maxIterations: 350,
 					tolerance: 1e-10
 				},
-				() => solveCustomMultiStart(data, starts, residualFn, jacobianFn, { maxIterations: 350, tolerance: 1e-10 })
+				() => solveCustomMultiStart(data, starts, residualFn, jacobianFn, { maxIterations: 350, tolerance: 1e-10, scales, bounds })
 			);
 		} finally {
 			endFitControlsBusy();
@@ -1455,39 +1200,26 @@ function performPolynomialFit(x, y, degree) {
 function performExponentialFit() {
 	try {
 		const data = getFiniteDatasetPoints(activeSet);
-		if (data.length < 3) {
-			alert('Exponential fit requires at least three valid data points.');
-			return;
-		}
-
-		// Try both
-		const cand1 = exponentialFit_cAbx(data);
-		const cand2 = exponentialFit_logLinear(data);
-
-		// choose by R², fallback gracefully
-		let best = null;
-		const rankedRSq = (candidate) => Number.isFinite(candidate?.r2) ? candidate.r2 : -Infinity;
-		if (cand1 && cand2) best = (rankedRSq(cand1) >= rankedRSq(cand2)) ? cand1 : cand2;
-		else best = cand1 || cand2;
-
-		if (!best) {
-			alert('Exponential fit could not converge on this dataset.');
-			return;
-		}
-
-		// Store & render
-		fittedCurves[activeSet] = { x: best.xFit, y: best.yFit, equation: best.eq };
-		const xAll = data.map(p => p.x);
-		const yAll = data.map(p => p.y);
-		updateResults(best.eq, xAll, yAll, best.fitFn, activeSet, best.solver, { kind: 'basic', method: 'Exponential' });
-		plotGraph(best.xFit, best.yFit);
-
+		if (data.length < 3) { alert('Exponential fit requires at least three valid data points.'); return; }
+		const solution = fitCore.solveExponential(data);
+		if (!solution) { alert('Unable to find a finite exponential fit.'); return; }
+		const { A, b, c, xRef } = solution.params;
+		const model = ([amplitude, rate, baseline], x) => amplitude * Math.exp(rate * (x - xRef)) + baseline;
+		const params = [A, b, c];
+		const fitFunction = x => model(params, x);
+		const xFit = buildFitDomainFromData(data, 100), yFit = xFit.map(fitFunction);
+		// Prefer the familiar unshifted equation when it can represent the same curve.
+		const unshiftedA = params[0] * Math.exp(-params[1] * xRef);
+		const canUnshift = Number.isFinite(unshiftedA) && unshiftedA !== 0 && data.every(p => Number.isFinite(unshiftedA * Math.exp(params[1] * p.x)));
+		const equation = canUnshift ? formatExpEquation(unshiftedA, params[1], params[2]) : formatExpEquation(params[0], params[1], params[2], true, xRef);
+		fittedCurves[activeSet] = { x: xFit, y: yFit, equation };
+		updateResults(equation, data.map(p => p.x), data.map(p => p.y), fitFunction, activeSet, solution, { kind: 'basic', method: 'Exponential' });
+		plotGraph(xFit, yFit);
 	} catch (error) {
 		console.error('Error performing exponential fit:', error);
 		alert('An error occurred during exponential fitting. Please check the console for details.');
 	}
 }
-
 
 function performPowerFit() {
 	try {
@@ -1565,9 +1297,8 @@ function performPowerFit() {
 
 		// 9. Update results and plot
 		updateResults(equation, xValues, yValues, fitFunction, activeSet, solver, { kind: 'basic', method: 'Power' });
-		// Without convergence the cause is the data, not a starting guess (this fit has none to change):
-		// near b = 1, a straight line, or with few points, A, x0 and c trade off against each other.
-		if (solver && !solver.converged && datasetFitResults[activeSet]) {
+		// An exactly straight dataset cannot identify four shifted-power parameters.
+		if (solver?.ambiguous && datasetFitResults[activeSet]) {
 			datasetFitResults[activeSet].status = 'The four parameters are not pinned down by this data: many combinations of A, x₀ and c fit almost equally well. If theory fixes x₀ or c, a Custom fit such as A*x^b pins them; a straight line suits Linear.';
 			if (typeof renderFitDiagnostics === 'function') renderFitDiagnostics();
 			scheduleSaveState();
@@ -1581,156 +1312,8 @@ function performPowerFit() {
 
 
 function estimateKFromData() {
-	if (getDatasetPoints(activeSet).length < 4) {
-		console.warn("Not enough data points to estimate k.");
-		return null;
-	}
-
-	// === 1. Sort & detrend ===
-	// Filter out entries with non-finite x or y (e.g. null y from blank cells)
-	const sortedData = getFiniteDatasetPoints(activeSet)
-		.sort((a, b) => a.x - b.x);
-	if (sortedData.length < 4) {
-		console.warn("Not enough valid data points to estimate k.");
-		return null;
-	}
-	const x = sortedData.map(p => p.x);
-	const y = sortedData.map(p => p.y);
-
-	const N = x.length;
-	const xMin = x[0];
-	const xMax = x[N - 1];
-	const dataSpan = xMax - xMin;
-	if (dataSpan <= 0) {
-		console.warn("Degenerate or invalid X range.");
-		return null;
-	}
-
-	// Mean of y for detrending
-	const meanY = y.reduce((acc, val) => acc + val, 0) / N;
-	const yDetrended = y.map(val => val - meanY);
-
-	// We'll also need an approximate sampling step to gauge a "Nyquist" limit
-	//   (roughly valid if data is close to uniform in x).
-	const avgDx = dataSpan / (N - 1);
-	// A naive Nyquist frequency ~ π / avgDx
-	const nyquist = Math.PI / avgDx;
-
-	// === 2. Optional: Peak-detection for rough kGuess ===
-	let peaks = [];
-	for (let i = 1; i < N - 1; i++) {
-		if (y[i] > y[i - 1] && y[i] > y[i + 1]) {
-			peaks.push(x[i]);
-		}
-	}
-	let kGuess = null;
-	if (peaks.length >= 2) {
-		const intervals = [];
-		for (let i = 1; i < peaks.length; i++) {
-			intervals.push(peaks[i] - peaks[i - 1]);
-		}
-		const avgPeriod = intervals.reduce((a, b) => a + b, 0) / intervals.length;
-		kGuess = (2 * Math.PI) / avgPeriod;
-	}
-
-	// === 3. Define an initial log-spaced frequency range ===
-	// We'll define a broad range, but not infinite.
-	// Lower bound: say 2π / (5 * dataSpan) => up to ~5 cycles across the entire domain
-	// or 1e-3 if that is bigger, just to avoid going too close to zero.
-	const minCandidate = Math.max(1e-3, (2 * Math.PI) / (5 * dataSpan));
-
-	// Upper bound: let's pick something around 5 × the naive Nyquist as a default
-	// (i.e. 5 × π / avgDx), but not less than, say, 10 if the data is extremely well-sampled.
-	let maxCandidate = Math.max(10, nyquist * 5);
-
-	// If we do have a kGuess, ensure that we include it by possibly expanding the range:
-	if (kGuess && Number.isFinite(kGuess) && kGuess > 0) {
-		if (kGuess < minCandidate) {
-			// expand downward
-			minCandidate <= 1e-7 ?
-				(minCandidate = 1e-7) :
-				(minCandidate = Math.max(1e-7, kGuess / 5));
-		}
-		if (kGuess > maxCandidate) {
-			maxCandidate = kGuess * 5;
-		}
-	}
-
-	// === 4. Coarse search in log space ===
-	// We'll sample frequencies log-spaced from minCandidate to maxCandidate
-	const numLogSamples = 200; // ~200 log steps
-	const logMin = Math.log(minCandidate);
-	const logMax = Math.log(maxCandidate);
-
-	let bestCoarseOmega = 0;
-	let bestCoarseScore = -Infinity;
-
-	for (let i = 0; i < numLogSamples; i++) {
-		// Log spacing
-		const frac = i / (numLogSamples - 1);
-		const omega = Math.exp(logMin + frac * (logMax - logMin));
-
-		let sumSin = 0;
-		let sumCos = 0;
-		for (let j = 0; j < N; j++) {
-			const val = yDetrended[j];
-			const phase = omega * x[j];
-			sumSin += val * Math.sin(phase);
-			sumCos += val * Math.cos(phase);
-		}
-		const score = sumSin * sumSin + sumCos * sumCos;
-		if (score > bestCoarseScore) {
-			bestCoarseScore = score;
-			bestCoarseOmega = omega;
-		}
-	}
-
-	// === 5. Fine local linear search around bestCoarseOmega ===
-	// We'll do ± 30% in linear space (adjust as desired)
-	const fineFactor = 0.3;
-	const fineMin = Math.max(minCandidate, bestCoarseOmega * (1 - fineFactor));
-	const fineMax = Math.min(maxCandidate, bestCoarseOmega * (1 + fineFactor));
-
-	let bestFineOmega = bestCoarseOmega;
-	let bestFineScore = bestCoarseScore;
-
-	if (fineMax <= fineMin) {
-		console.warn(
-			`Fine search range is degenerate => [${fineMin}, ${fineMax}]. Returning coarse result.`
-		);
-		return bestCoarseOmega;
-	}
-
-	const numFine = 3000; // ~3k linear steps
-	const step = (fineMax - fineMin) / (numFine - 1);
-
-	for (let i = 0; i < numFine; i++) {
-		const omega = fineMin + i * step;
-		let sumSin = 0;
-		let sumCos = 0;
-		for (let j = 0; j < N; j++) {
-			const val = yDetrended[j];
-			const phase = omega * x[j];
-			sumSin += val * Math.sin(phase);
-			sumCos += val * Math.cos(phase);
-		}
-		const score = sumSin * sumSin + sumCos * sumCos;
-		if (score > bestFineScore) {
-			bestFineScore = score;
-			bestFineOmega = omega;
-		}
-	}
-
-	// === 6. Final sanity check vs. Nyquist? ===
-	if (bestFineOmega > 2 * nyquist) {
-		console.warn(
-			`Warning: best freq = ${bestFineOmega.toFixed(4)} is > 2 × Nyquist (~${(2 * nyquist).toFixed(4)}). Data may be under-sampled.`
-		);
-	}
-
-	return bestFineOmega;
+	return fitCore.estimateSinusoidal(getFiniteDatasetPoints(activeSet))?.k ?? null;
 }
-
 
 function normalizeWorkerCurve(rawX, rawY, fallbackX, evaluator) {
 	if (!Array.isArray(rawX) || !Array.isArray(rawY) || rawX.length !== rawY.length || rawX.length === 0) {
@@ -1785,8 +1368,8 @@ async function performSinusoidalFit() {
 		}
 
 		const data = getFiniteDatasetPoints(activeSet);
-		if (data.length < 4) {
-			alert('Sinusoidal fit requires at least four valid data points.');
+		if (data.length < 5) {
+			alert('Sinusoidal fit requires at least five valid data points.');
 			return;
 		}
 		const fitTarget = captureFitTarget();
