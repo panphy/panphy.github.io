@@ -2741,3 +2741,38 @@ input[type="number"]:focus {
 	.neo-status { max-width: 100%; }
 	.neo-statusbar-legal { white-space: normal; }
 }
+
+/* Top-layer fit-quality help stays readable outside the scrolling results pane. */
+.neo-fit-quality-row { display: flex; align-items: center; gap: 6px; }
+.neo-fit-quality-value { min-width: 0; overflow-x: auto; }
+.neo-fit-help {
+	flex: none;
+	width: 32px;
+	min-height: 32px;
+	padding: 0;
+	margin-left: auto;
+	border: 1px solid var(--line-strong);
+	border-radius: 50%;
+	background: var(--surface-2);
+	color: var(--ink-2);
+	font: 600 0.8rem var(--font-body);
+	cursor: help;
+}
+.neo-fit-tooltip {
+	position: fixed;
+	inset: auto;
+	margin: 0;
+	width: min(290px, calc(100vw - 24px));
+	padding: 12px 14px;
+	border: 1px solid var(--line-strong);
+	border-radius: 10px;
+	background: var(--surface);
+	color: var(--ink);
+	box-shadow: var(--shadow-2);
+	font: 0.8rem/1.5 var(--font-body);
+	text-align: left;
+	white-space: normal;
+}
+@media (pointer: coarse) {
+	.neo-fit-help { width: 48px; min-height: 48px; }
+}
