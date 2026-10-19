@@ -2496,3 +2496,25 @@ mjx-container.copy-failed::after {
     display: block !important;
   }
 }
+
+/* Compact image references keep the source readable without external files. */
+.embedded-image-notice:not([hidden]) {
+  flex: none;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 4px 12px;
+  padding: 4px 16px;
+  color: var(--text-muted);
+  font-size: 0.8rem;
+  border-bottom: 1px solid var(--border-color);
+}
+.embedded-image-notice button {
+  min-height: 48px;
+  font: inherit;
+  color: var(--accent);
+  background: transparent;
+  border: 0;
+  cursor: pointer;
+}

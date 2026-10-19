@@ -1,4 +1,4 @@
-const BUILD_ID = '2026-10-19T20:29:46Z';
+const BUILD_ID = '2026-10-19T20:50:17Z';
 const CACHE_PREFIX = 'panphy-labs';
 const PRECACHE_NAME = `${CACHE_PREFIX}-precache-${BUILD_ID}`;
 const RUNTIME_CACHE = `${CACHE_PREFIX}-runtime-${BUILD_ID}`;
@@ -61,6 +61,7 @@ const ASSETS_TO_CACHE = [
   '/tools/panphymd/js/copy.js',
   '/tools/panphymd/js/ui.js',
   '/tools/panphymd/js/main.js',
+  '/tools/panphymd/js/embedded-images.js',
   '/tools/panphymd/sample_doc.md',
   '/tools/panphymd/templates/math-basic.md',
   '/tools/panphymd/templates/math-calculus.md',

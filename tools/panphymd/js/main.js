@@ -55,8 +55,16 @@ import {
   normalizeCloudImageUrl
 } from './ui.js';
 
+import { createEmbeddedImageEditor } from './embedded-images.js';
+
 // DOM element references
 const markdownInput = document.getElementById('markdownInput');
+const sourceEditor = createEmbeddedImageEditor(
+  markdownInput,
+  document.getElementById('embeddedImageNotice'),
+  document.getElementById('imageDataToggle'),
+  () => buildSyncAnchorMap(markdownInput.value, renderCycleId)
+);
 const inputPane = document.getElementById('inputPane');
 const outputPane = document.getElementById('outputPane');
 const renderedOutput = document.getElementById('renderedOutput');
@@ -295,6 +303,7 @@ function normalizeSyncAnchorPairs(anchorPairs) {
 }
 
 function buildSyncAnchorMap(content, cycleId = renderCycleId) {
+  content = markdownInput.value; // Measure the collapsed view, not the embedded bytes.
   if (!state.isSyncScrollEnabled) {
     clearSyncAnchorMap();
     return;
@@ -543,7 +552,7 @@ const RESTORE_UNDO_TIMEOUT_MS = 7000;
 let restoreUndoTimeoutId = 0;
 let restoreUndoToast = null;
 
-function isUntouchedSampleContent(content = markdownInput.value) {
+function isUntouchedSampleContent(content = sourceEditor.value) {
   return untouchedSampleContent !== null && content === untouchedSampleContent;
 }
 
@@ -556,7 +565,7 @@ function clearUntouchedSampleContent() {
   setUntouchedSampleContent(null);
 }
 
-function clearUntouchedSampleContentFlagIfEdited(content = markdownInput.value) {
+function clearUntouchedSampleContentFlagIfEdited(content = sourceEditor.value) {
   if (untouchedSampleContent !== null && content !== untouchedSampleContent) {
     clearUntouchedSampleContent();
   }
@@ -601,8 +610,8 @@ function showRestoreUndoToast(previousContent) {
   undoBtn.className = 'history-undo-toast-btn';
   undoBtn.textContent = 'Undo';
   undoBtn.addEventListener('click', () => {
-    saveSnapshotIfNeeded(markdownInput.value);
-    markdownInput.value = previousContent;
+    saveSnapshotIfNeeded(sourceEditor.value);
+    sourceEditor.value = previousContent;
     clearUntouchedSampleContent();
     renderAndPersistDraft();
     dismissRestoreUndoToast();
@@ -629,7 +638,7 @@ function setSampleLoadingState(isLoading) {
 }
 
 function renderAndPersistDraft() {
-  const content = markdownInput.value;
+  const content = sourceEditor.value;
   clearUntouchedSampleContentFlagIfEdited(content);
   renderContent();
   if (!isUntouchedSampleContent(content)) {
@@ -639,7 +648,7 @@ function renderAndPersistDraft() {
 }
 
 function persistDraftAndDirtyState() {
-  const content = markdownInput.value;
+  const content = sourceEditor.value;
   clearUntouchedSampleContentFlagIfEdited(content);
   if (!isUntouchedSampleContent(content)) {
     saveDraft(content);
@@ -656,7 +665,7 @@ async function loadSampleDocument() {
     return;
   }
 
-  if (markdownInput.value.trim() !== '') {
+  if (sourceEditor.value.trim() !== '') {
     const confirmed = await showConfirmationModal(
       'This will open a sample document and replace your current content. Any unsaved changes will be lost.',
       { isSuppressed: isSampleWarningSuppressed, saveSuppressed: saveSampleWarningSuppressed }
@@ -664,7 +673,7 @@ async function loadSampleDocument() {
     if (!confirmed) return;
   }
 
-  const contentBeforeLoad = markdownInput.value;
+  const contentBeforeLoad = sourceEditor.value;
   saveSnapshotIfNeeded(contentBeforeLoad);
 
   const requestId = ++sampleLoadRequestId;
@@ -679,16 +688,16 @@ async function loadSampleDocument() {
     const data = await response.text();
     if (requestId !== sampleLoadRequestId) return;
 
-    if (markdownInput.value !== contentBeforeLoad) {
+    if (sourceEditor.value !== contentBeforeLoad) {
       const confirmed = await showConfirmationModal(
         'The sample finished loading, but your content changed while it was loading. Replace your current content with the sample?',
         { isSuppressed: isSampleWarningSuppressed, saveSuppressed: saveSampleWarningSuppressed }
       );
       if (!confirmed) return;
-      saveSnapshotIfNeeded(markdownInput.value);
+      saveSnapshotIfNeeded(sourceEditor.value);
     }
 
-    markdownInput.value = data;
+    sourceEditor.value = data;
     saveDraft(data);
     setUntouchedSampleContent(data);
     markContentExported(data);
@@ -848,7 +857,7 @@ function insertTextAtCursor(textToInsert, { insertAtCursorOnBlankLine = false } 
   const caretPosition = Number.isInteger(markdownInput.selectionStart)
     ? markdownInput.selectionStart
     : inputValue.length;
-  const normalizedText = String(textToInsert || '').replace(/^\n+/, '');
+  const normalizedText = sourceEditor.displayText(String(textToInsert || '').replace(/^\n+/, ''));
 
   if (!normalizedText) return;
 
@@ -868,6 +877,7 @@ function insertTextAtCursor(textToInsert, { insertAtCursorOnBlankLine = false } 
   }
 
   markdownInput.value = `${inputValue.slice(0, insertionPoint)}${insertionText}${inputValue.slice(insertionPoint)}`;
+  sourceEditor.compactInput();
 
   const cursorPosition = insertionPoint + insertionText.length;
   markdownInput.focus();
@@ -974,7 +984,7 @@ const wordCount = document.getElementById('wordCount');
 
 function updateWordCount() {
   if (!wordCount) return;
-  const text = markdownInput.value.trim();
+  const text = sourceEditor.value.trim();
   const words = text ? text.split(/\s+/).length : 0;
   wordCount.textContent = `${words} ${words === 1 ? 'word' : 'words'}`;
 }
@@ -985,7 +995,7 @@ function updateWordCount() {
 function renderContent() {
   updateWordCount();
   const currentRenderCycle = ++renderCycleId;
-  const inputText = markdownInput.value;
+  const inputText = sourceEditor.value;
   if (!markedLib || typeof DOMPurify === 'undefined') {
     clearSyncAnchorMap();
     renderedOutput.innerHTML = `
@@ -1627,7 +1637,7 @@ async function exportHTML() {
  * Save the markdown content to a file
  */
 async function saveMarkdown() {
-  const content = markdownInput.value;
+  const content = sourceEditor.value;
 
   if (CAN_SAVE_WITH_FSA) {
     try {
@@ -1672,7 +1682,7 @@ async function saveMarkdown() {
  */
 async function loadMarkdownFile() {
   dismissRestoreUndoToast();
-  if (markdownInput.value.trim() !== '') {
+  if (sourceEditor.value.trim() !== '') {
     const confirmed = await showConfirmationModal(
       'Opening a file will replace your current content. Any unsaved changes will be lost.',
       { isSuppressed: isOpenWarningSuppressed, saveSuppressed: saveOpenWarningSuppressed }
@@ -1689,12 +1699,12 @@ async function loadMarkdownFile() {
         }]
       });
       const file = await fileHandle.getFile();
-      saveSnapshotIfNeeded(markdownInput.value);
-      markdownInput.value = await file.text();
+      saveSnapshotIfNeeded(sourceEditor.value);
+      sourceEditor.value = await file.text();
       clearUntouchedSampleContent();
-      markContentExported(markdownInput.value);
+      markContentExported(sourceEditor.value);
       renderContent();
-      saveDraft(markdownInput.value);
+      saveDraft(sourceEditor.value);
       updateDirtyIndicator(dirtyIndicator, false);
       return;
     } catch (err) {
@@ -1709,14 +1719,14 @@ async function loadMarkdownFile() {
   input.onchange = e => {
     const file = e.target.files[0];
     if (file) {
-      saveSnapshotIfNeeded(markdownInput.value);
+      saveSnapshotIfNeeded(sourceEditor.value);
       const reader = new FileReader();
       reader.onload = event => {
-        markdownInput.value = event.target.result;
+        sourceEditor.value = event.target.result;
         clearUntouchedSampleContent();
-        markContentExported(markdownInput.value);
+        markContentExported(sourceEditor.value);
         renderContent();
-        saveDraft(markdownInput.value);
+        saveDraft(sourceEditor.value);
         updateDirtyIndicator(dirtyIndicator, false);
       };
       reader.readAsText(file);
@@ -1741,15 +1751,16 @@ const debouncedPersistDraft = debounce(() => {
   persistDraftAndDirtyState();
 }, 200);
 const debouncedSyncAnchorMapRebuild = debounce(() => {
-  scheduleSyncAnchorMapRebuild(markdownInput.value, renderCycleId);
+  scheduleSyncAnchorMapRebuild(sourceEditor.value, renderCycleId);
 }, SYNC_ANCHOR_REBUILD_DELAY_MS);
 
 markdownInput.addEventListener('input', () => {
+  sourceEditor.compactInput();
   dismissRestoreUndoToast();
   if (!queuedInputRenderRafId) {
     queuedInputRenderRafId = requestAnimationFrame(() => {
       queuedInputRenderRafId = 0;
-      const content = markdownInput.value;
+      const content = sourceEditor.value;
       clearUntouchedSampleContentFlagIfEdited(content);
       updateWordCount();
       if (shouldRenderPreviewDuringTyping()) {
@@ -1876,15 +1887,15 @@ document.addEventListener('click', event => {
 
 clearButton.addEventListener('click', async () => {
   dismissRestoreUndoToast();
-  if (markdownInput.value.trim() === '') {
+  if (sourceEditor.value.trim() === '') {
     return;
   }
   const confirmed = await showConfirmationModal(
     'This will clear all your current content. Any unsaved changes will be lost.'
   );
   if (!confirmed) return;
-  saveSnapshotIfNeeded(markdownInput.value);
-  markdownInput.value = '';
+  saveSnapshotIfNeeded(sourceEditor.value);
+  sourceEditor.value = '';
   clearUntouchedSampleContent();
   markContentExported('');
   clearDraft();
@@ -1900,7 +1911,7 @@ if (historyButton) {
     const restored = await showHistoryModal(snapshots);
     if (restored === null) return;
 
-    const currentContent = markdownInput.value;
+    const currentContent = sourceEditor.value;
     if (restored === currentContent) return;
 
     if (currentContent.trim() !== '') {
@@ -1912,7 +1923,7 @@ if (historyButton) {
       saveSnapshotIfNeeded(currentContent);
     }
 
-    markdownInput.value = restored;
+    sourceEditor.value = restored;
     clearUntouchedSampleContent();
     renderAndPersistDraft();
     showRestoreUndoToast(currentContent);
@@ -1929,7 +1940,7 @@ syncScrollToggle.addEventListener('change', event => {
   saveSyncScrollPreference(enabled);
   if (enabled) {
     clearPendingSyncAnchorRebuild();
-    buildSyncAnchorMap(markdownInput.value, renderCycleId);
+    buildSyncAnchorMap(sourceEditor.value, renderCycleId);
     syncInputToOutput();
   } else {
     clearPendingSyncAnchorRebuild();
@@ -2230,7 +2241,7 @@ if (laserCanvas && laserContext) {
 // Restore draft and render
 const savedDraft = restoreDraft();
 if (savedDraft !== null) {
-  markdownInput.value = savedDraft;
+  sourceEditor.value = savedDraft;
   if (loadUntouchedSampleDraftFlag()) {
     setUntouchedSampleContent(savedDraft);
     markContentExported(savedDraft);
@@ -2243,14 +2254,14 @@ if (savedDraft !== null) {
 renderContent();
 
 // Dirty-state indicator on load (never exported yet, so show if non-empty)
-updateDirtyIndicator(dirtyIndicator, isDirty(markdownInput.value));
+updateDirtyIndicator(dirtyIndicator, isDirty(sourceEditor.value));
 
 // ---------------------------------------------------------------------- //
 // Auto-save snapshots every 5 minutes                                     //
 // ---------------------------------------------------------------------- //
 const SNAPSHOT_INTERVAL_MS = 5 * 60 * 1000;
 setInterval(() => {
-  saveSnapshotIfNeeded(markdownInput.value);
+  saveSnapshotIfNeeded(sourceEditor.value);
 }, SNAPSHOT_INTERVAL_MS);
 
 // Persist immediately when the page is hidden or unloaded: the debounced
@@ -2258,7 +2269,7 @@ setInterval(() => {
 // beforeunload entirely.
 function flushDraftAndSnapshot() {
   persistDraftAndDirtyState();
-  saveSnapshotIfNeeded(markdownInput.value);
+  saveSnapshotIfNeeded(sourceEditor.value);
 }
 
 window.addEventListener('pagehide', flushDraftAndSnapshot);
@@ -2274,7 +2285,7 @@ window.addEventListener('beforeunload', (e) => {
   flushDraftAndSnapshot();
 
   // Warn if there are unsaved changes
-  if (isDirty(markdownInput.value)) {
+  if (isDirty(sourceEditor.value)) {
     e.preventDefault();
     e.returnValue = '';
   }
