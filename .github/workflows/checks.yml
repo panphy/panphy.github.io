@@ -30,6 +30,7 @@ jobs:
         run: |
           node --test \
             assets/tests/theme.test.cjs \
+            tools/sound_analyzer/tests/regression.test.cjs \
             tools/panphyplot/tests/*.test.cjs \
             misc/panphyplotog/tests/regression.test.cjs \
             tools/motion_tracker/tests/regression.test.cjs \
