@@ -1,6 +1,6 @@
 # PanPhyMD - Markdown & LaTeX Editor
 
-Welcome!
+Welcome! 🎉
 
 This lightweight app helps you write clean notes and reports with **Markdown**, and type proper **maths and Greek letters** with **LaTeX**. It is made for students and teachers of physics, but works for any subject.
 
@@ -26,8 +26,8 @@ Switch between **Edit** (the text you type) and **Preview** (what you get), or s
 
 - We can make a **bold** word, an *italic* word (or an _italic_ one) and ~~strike through~~ a word.
 - Lists can go inside lists:
-    1. Item One
-    2. Item Two  
+    1. Item One ✔️
+    2. Item Two ✔️  
         - Sub-item A
         - Sub-item B
 
@@ -49,15 +49,15 @@ for i in range(5):
 
 | Name | Age | Profession |
 |:---|:---:|---:|
-| Eddard | 35 | Lord |
-| Albus | 115 | Wizard |
-| Tony | 38 | Inventor |
+| Eddard | 35 | Lord 🐺 |
+| Albus | 115 | Wizard 🧙‍♂️|
+| Tony | 38 | Inventor 🤖 |
 
 > (*Did you notice how the text alignments are done? Look at the `:---:` line.*)
 
 **1.5 Links**
 
-- **Inline link:** I can insert a [link](https://www.youtube.com) that takes you to the land of endless dog videos.
+- **Inline link:** I can insert a [link](https://www.youtube.com) that takes you to the land of endless dog videos. 🐶
 - **Reference links:**
   - *"[Markdown][1] is a lightweight markup language for creating formatted text using a plain-text editor."*
   - *"[LaTeX][2] is widely used in academia for the communication and publication of scientific documents and technical note-taking in many fields, owing partially to its support for complex mathematical notation."*
@@ -68,7 +68,7 @@ for i in range(5):
 
 **2.1 The basics: how to type maths**
 
-> *The golden rule: wrap your maths in **dollar signs**. That's the magic!*
+> *The golden rule: wrap your maths in **dollar signs**. That's the magic! ✨*
 
 | You type | You get |
 |:---|:---|
@@ -82,7 +82,7 @@ $$ F = ma $$
 - Special symbols start with a **backslash `\`** and are **case-sensitive**: `\delta` gives $\delta$ but `\Delta` gives $\Delta$. (*Yes, capital letters matter!*)
 - **Spaces are ignored** inside maths, so add your own with `\,` (thin), `\;` (medium) or `\quad` (wide): $a\,b$, $a\;b$, $a\quad b$.
 - **Braces `{ }` group things together.** Anything longer than one character needs them (more in 2.3).
-- Need a real dollar sign? Type `\$`. For example: it costs \$5 and \$10.
+- Need a real dollar sign? Type `\$`. For example: it costs \$5 and \$10. 💰
 
 **2.2 Greek letters**
 
@@ -116,7 +116,7 @@ Type a backslash and the **name** of the letter. For a capital letter, **capital
 | omega | $\omega$ | `\omega` | $\Omega$ | `\Omega` |
 
 > *Plot twist...*
->> - Some capital Greek letters look exactly like English capitals (Alpha is just $A$), so they have **no command**. Just type the English letter!
+>> - Some capital Greek letters look exactly like English capitals (Alpha is just $A$), so they have **no command**. Just type the English letter! 🤷
 >> - A few letters have two shapes: `\epsilon` gives $\epsilon$ but `\varepsilon` gives $\varepsilon$ (the one used for $\varepsilon_0$), and `\phi` gives $\phi$ but `\varphi` gives $\varphi$. Likewise `\theta` $\theta$ and `\vartheta` $\vartheta$, `\rho` $\rho$ and `\varrho` $\varrho$.
 >> - Physics favourites: $\theta$ angle, $\lambda$ wavelength, $\mu$ micro / friction, $\omega$ angular speed, $\rho$ density, $\sigma$ Stefan–Boltzmann constant / stress, $\tau$ torque / time constant, $\Delta$ change in, $\Omega$ ohm.
 
@@ -128,7 +128,7 @@ Type a backslash and the **name** of the letter. For a capital letter, **capital
 | `$x^2$` | $x^2$ | `^` raises (superscript) |
 | `$x_1$` | $x_1$ | `_` lowers (subscript) |
 | `$x^{10}$` | $x^{10}$ | **braces** for more than one character |
-| `$x^10$` | $x^10$ | without braces only the `1` is raised |
+| `$x^10$` | $x^10$ | ❌ without braces only the `1` is raised |
 | `$v_{0x}$` | $v_{0x}$ | subscript with more than one character |
 | `$x_i^2$` | $x_i^2$ | both together |
 | `$\frac{a}{b}$` | $\frac{a}{b}$ | fraction: top, then bottom |
@@ -138,7 +138,7 @@ Type a backslash and the **name** of the letter. For a capital letter, **capital
 
 **2.4 Physics examples**
 
-> *Your formula sheet, but prettier. Copy, tweak, and make them your own!*
+> *Your formula sheet, but prettier. Copy, tweak, and make them your own!* 📝
 
 **Mechanics**
 
@@ -192,7 +192,7 @@ $$ \vec{r} = 5\hat{i} + 8\hat{j} \qquad\qquad |\vec{r}| = \sqrt{5^2 + 8^2} $$
 
 **2.6 Chemical and nuclear equations**
 
-> *Chemistry? Physics? Why not both!*
+> *Chemistry? Physics? Why not both!* ⚗️
 
 **Chemical equations:** put the whole formula in `\mathrm{ }` to keep the letters upright.
 
@@ -216,10 +216,10 @@ Beta-plus decay (a proton becomes a neutron, plus a positron and a neutrino):
 
 $$ {}^{22}_{11}\mathrm{Na} \longrightarrow {}^{22}_{10}\mathrm{Ne} + {}^{\;\;0}_{+1}\mathrm{e} + \nu_e $$
 
-> (*Quick check: the **top numbers** (nucleon number) add up to the same total on both sides, and so do the **bottom numbers** (charge). If they don't, something is off!*)
+> (*Quick check: the **top numbers** (nucleon number) add up to the same total on both sides, and so do the **bottom numbers** (charge). If they don't, something is off!* ☢️)
 
 **2.7 Symbols cheat-sheet**
-> *In case you need more symbols... bookmark this one!*
+> *In case you need more symbols... bookmark this one!* 🔖
 
 **Relations and operators**
 
@@ -254,7 +254,7 @@ $$ \lim_{\Delta x \to 0} \frac{f(x + \Delta x) - f(x)}{\Delta x} $$
 
 | <small>More about limits</small> |
 | :--- |
-| <small>Type <code>\lim\limits_{\Delta x \to 0}</code> to place the limit underneath the word in an inline sentence, as in $\lim\limits_{\Delta x \to 0} f(x)$. If you type <code>\lim_{\Delta x \to 0}</code> inline, the limit is squashed to the side instead: $\lim_{\Delta x \to 0} f(x)$. In a displayed equation, both give the nice version. (*What's the logic!?*)</small> |
+| <small>Type <code>\lim\limits_{\Delta x \to 0}</code> to place the limit underneath the word in an inline sentence, as in $\lim\limits_{\Delta x \to 0} f(x)$. If you type <code>\lim_{\Delta x \to 0}</code> inline, the limit is squashed to the side instead: $\lim_{\Delta x \to 0} f(x)$. In a displayed equation, both give the nice version. (*What's the logic!?* 😑)</small> |
 
 **Bracket size.** `\left(` and `\right)` make the brackets grow to fit what is inside. (*Size does matter... sometimes.*)
 
@@ -304,7 +304,7 @@ $$
 $$
 
 **2.9 University-level examples**
-> *Feeling brave? Here is a sneak peek of what's coming at university...*
+> *Feeling brave? Here is a sneak peek of what's coming at university...* 🎓
 
 **Vector calculus and electromagnetism: Maxwell's equations**
 
@@ -338,7 +338,7 @@ $$ P(E) \propto e^{-E/k_\mathrm{B}T} \qquad\qquad f(x) = \frac{1}{\sigma\sqrt{2\
 $$ f(x) = \frac{a_0}{2} + \sum_{n=1}^{\infty} \left[ a_n\cos(nx) + b_n\sin(nx) \right] $$
 
 **2.10 Common mistakes**
-> *Oops! These slip-ups happen to everyone. Can you spot the difference?*
+> *Oops! These slip-ups happen to everyone. Can you spot the difference?* 🙈
 
 | You typed | You get | Better | You get |
 |:---|:---|:---|:---|
@@ -351,7 +351,7 @@ $$ f(x) = \frac{a_0}{2} + \sum_{n=1}^{\infty} \left[ a_n\cos(nx) + b_n\sin(nx) \
 | `$\mu m$` | $\mu m$ | `$\mu\mathrm{m}$` | $\mu\mathrm{m}$ |
 | `$H2O$` | $H2O$ | `$\mathrm{H_2O}$` | $\mathrm{H_2O}$ |
 
-> Forgot a closing `$`? Then your maths shows up as plain text. Forgot a closing `}`? Every `{` needs its partner! (*Brackets are lonely.*)
+> Forgot a closing `$`? Then your maths shows up as plain text. Forgot a closing `}`? Every `{` needs its partner! (*Brackets are lonely.* 😅)
 
 ---
 
@@ -362,7 +362,7 @@ $$ f(x) = \frac{a_0}{2} + \sum_{n=1}^{\infty} \left[ a_n\cos(nx) + b_n\sin(nx) \
 
 > <code> \<div class="page-break"\>\<\/div\> </code>
 
-> (Don't worry! It does nothing in the HTML this app exports!)
+> (Don't worry! It does nothing in the HTML this app exports! 😉)
 
 <div class="page-break"></div>
 
@@ -382,7 +382,7 @@ $$ f(x) = \frac{a_0}{2} + \sum_{n=1}^{\infty} \left[ a_n\cos(nx) + b_n\sin(nx) \
 
 ---
 
-**And there you have it!**
+**And there you have it! 🏆**
 
 A brief tour through **Markdown**, **LaTeX**, and **HTML**. Happy writing and editing! May your documents be ever stylish!
 
