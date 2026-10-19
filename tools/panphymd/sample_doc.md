@@ -2,9 +2,9 @@
 
 Welcome! 🎉
 
-This lightweight, user-friendly app helps you create simple yet beautiful documents with ease.
+This lightweight app helps you write clean notes and reports with **Markdown**, and type proper **maths and Greek letters** with **LaTeX**. It is made for students and teachers of physics, but works for any subject.
 
-With integrated LaTeX support, you can effortlessly include professional-looking math equations and symbols, making it an ideal tool for students and educators. Its clean and intuitive interface lets you concentrate on your writing without distractions.
+Switch between **Edit** (the text you type) and **Preview** (what you get), or see both side by side on a wide screen. Every example below can be copied and changed.
 
 <br/>
 
@@ -13,30 +13,29 @@ With integrated LaTeX support, you can effortlessly include professional-looking
 # This document is a demo of...
 
 1. a bit of **Markdown**,  
-2. a tiny little bit of **LaTeX**, and  
+2. a lot of **LaTeX** (maths, Greek letters, units, physics, chemistry and more), and  
 3. a few **HTML** tags.
 
 ---
 
 ## 1. Markdown
 
-**1.1 Headings**
+**1.1 Headings, bold and italics**
 > # This is a HUGE Heading!
 > ### This is not as huge...
 
-**1.2 Lists**
-- We can make a list in a list in a list...
+- We can make a **bold** word, an *italic* word (or an _italic_ one) and ~~strike through~~ a word.
+- Lists can go inside lists:
     1. Item One ✔️
     2. Item Two ✔️  
-        - We can **bold** the text.  
-        - We can ~~strikethrough~~ it.  
-- We can *italicize* it. (This _italicizes_ it too!)
+        - Sub-item A
+        - Sub-item B
 
-**1.3 Blockquotes**
+**1.2 Blockquotes**
 > This is a quotation, but it can also be used to indent a text block.
 >> And this is a quotation within a quotation. *Because why not?*
 
-**1.4 Code Blocks**
+**1.3 Code Blocks**
 
 ~~~python
 # Type your code here.
@@ -46,7 +45,7 @@ for i in range(5):
     i = i * 2  # Doubling the fun!
 ~~~
 
-**1.5 Tables**
+**1.4 Tables**
 
 | Name | Age | Profession |
 |:---|:---:|---:|
@@ -54,77 +53,218 @@ for i in range(5):
 | Albus | 115 | Wizard 🧙‍♂️|
 | Tony | 38 | Inventor 🤖 |
 
-> (*Did you notice how the text alignments are done?*)
+> (*Did you notice how the text alignments are done? Look at the `:---:` line.*)
 
-**1.6 Links**
+**1.5 Links**
 
-- 1.6.1 **Inline Link:**  
-> I can insert a [link](https://www.youtube.com) that takes you to the land of endless dog videos. 🐶
-
-- 1.6.2 **Reference Links:**
+- **Inline link:** I can insert a [link](https://www.youtube.com) that takes you to the land of endless dog videos. 🐶
+- **Reference links:**
   - *"[Markdown][1] is a lightweight markup language for creating formatted text using a plain-text editor."*
-
   - *"[LaTeX][2] is widely used in academia for the communication and publication of scientific documents and technical note-taking in many fields, owing partially to its support for complex mathematical notation."*
 
 ---
 
 ## 2. LaTeX
 
-**2.1 Greek Letters**
-> *In case you need more symbols...*
+### 2.1 The basics: how to type maths
 
->> $\alpha \beta \gamma$
+Put maths between **dollar signs**:
 
->> if you need some space between them: $\Lambda \space \theta \space \Omega \space \Delta$
+| You type | You get |
+|:---|:---|
+| `$F = ma$` | $F = ma$ |
+| `$$ F = ma $$` | (centred on its own line, see below) |
 
->> if you want even more space: $\mu \quad \nu \quad \tau \quad \epsilon \quad \psi \quad \rho$
+$$ F = ma $$
 
-**2.2 Math Expressions**
+- **One `$` on each side** keeps the maths **inline**, in the middle of a sentence: Newton's Second Law states that $F=ma$.
+- **Two `$$` on each side** makes a **displayed** equation on its own line. Use it for important or tall equations.
+- Special symbols start with a **backslash `\`** and are **case-sensitive**: `\delta` gives $\delta$ but `\Delta` gives $\Delta$.
+- **Spaces are ignored** inside maths. Add space yourself with `\,` (thin), `\;` (medium) or `\quad` (wide): $a\,b$, $a\;b$, $a\quad b$.
+- **Braces `{ }` group things together.** Anything that is more than one character long needs them (see 2.3).
+- To write a real dollar sign, type `\$`. For example: it costs \$5 and \$10.
 
-- 2.2.1 **Inline Examples:**
-> - Newton's Second Law states that $F=ma$. 
-> - Absolute zero is $-273 ^\circ{C}$ 🥶.  
+### 2.2 Greek letters
 
-- 2.2.2 **Displayed Examples:**
+Type a backslash and the **name** of the letter. For a capital letter, **capitalise the first letter** of the name.
 
-$$ \frac{1}{x} $$
+| Name | Lower case | Code | Capital | Code |
+|:---|:---:|:---|:---:|:---|
+| alpha | $\alpha$ | `\alpha` | $A$ | `A` |
+| beta | $\beta$ | `\beta` | $B$ | `B` |
+| gamma | $\gamma$ | `\gamma` | $\Gamma$ | `\Gamma` |
+| delta | $\delta$ | `\delta` | $\Delta$ | `\Delta` |
+| epsilon | $\varepsilon$ | `\varepsilon` | $E$ | `E` |
+| zeta | $\zeta$ | `\zeta` | $Z$ | `Z` |
+| eta | $\eta$ | `\eta` | $H$ | `H` |
+| theta | $\theta$ | `\theta` | $\Theta$ | `\Theta` |
+| kappa | $\kappa$ | `\kappa` | $K$ | `K` |
+| lambda | $\lambda$ | `\lambda` | $\Lambda$ | `\Lambda` |
+| mu | $\mu$ | `\mu` | $M$ | `M` |
+| nu | $\nu$ | `\nu` | $N$ | `N` |
+| xi | $\xi$ | `\xi` | $\Xi$ | `\Xi` |
+| pi | $\pi$ | `\pi` | $\Pi$ | `\Pi` |
+| rho | $\rho$ | `\rho` | $P$ | `P` |
+| sigma | $\sigma$ | `\sigma` | $\Sigma$ | `\Sigma` |
+| tau | $\tau$ | `\tau` | $T$ | `T` |
+| upsilon | $\upsilon$ | `\upsilon` | $\Upsilon$ | `\Upsilon` |
+| phi | $\varphi$ | `\varphi` | $\Phi$ | `\Phi` |
+| chi | $\chi$ | `\chi` | $X$ | `X` |
+| psi | $\psi$ | `\psi` | $\Psi$ | `\Psi` |
+| omega | $\omega$ | `\omega` | $\Omega$ | `\Omega` |
 
-$$ \boxed{M_\odot^2} $$
+> **Good to know**
+> - Some capital Greek letters look exactly like English capitals (Alpha is just $A$), so they have **no command**: type the English letter.
+> - A few letters have two shapes: `\epsilon` gives $\epsilon$ but `\varepsilon` gives $\varepsilon$ (the one used for $\varepsilon_0$), and `\phi` gives $\phi$ but `\varphi` gives $\varphi$. Likewise `\theta` $\theta$ and `\vartheta` $\vartheta$, `\rho` $\rho$ and `\varrho` $\varrho$.
+> - Physics favourites: $\theta$ angle, $\lambda$ wavelength, $\mu$ micro / friction, $\omega$ angular speed, $\rho$ density, $\sigma$ stefan constant / stress, $\tau$ torque / time constant, $\Delta$ change in, $\Omega$ ohm.
 
-$$ x = \frac{-b \pm \sqrt{b^2 - 4ac}}{2a} $$
+### 2.3 Powers, subscripts, fractions and roots
 
-$$ \int_{t=-\infty}^{\infty} \ln \frac{1}{t} dt $$
+| You type | You get | Note |
+|:---|:---|:---|
+| `$x^2$` | $x^2$ | `^` raises (superscript) |
+| `$x_1$` | $x_1$ | `_` lowers (subscript) |
+| `$x^{10}$` | $x^{10}$ | **braces** for more than one character |
+| `$x^10$` | $x^10$ | ❌ without braces only the `1` is raised |
+| `$v_{0x}$` | $v_{0x}$ | subscript with more than one character |
+| `$x_i^2$` | $x_i^2$ | both together |
+| `$\frac{a}{b}$` | $\frac{a}{b}$ | fraction: top, then bottom |
+| `$\sqrt{x}$` | $\sqrt{x}$ | square root |
+| `$\sqrt[3]{x}$` | $\sqrt[3]{x}$ | cube root |
+| `$e^{-t/\tau}$` | $e^{-t/\tau}$ | brace content can be anything |
 
-$$ \ddot{x} = \frac{d \dot{x}}{dt} = \frac{d^2x}{dt^2} $$
+### 2.4 Physics examples
 
-$$ \left. \frac{\partial{y}}{\partial{t}} \right|_{t=5} $$
+Try changing these to your own formulae.
 
-$$ \nabla \cdot \vec{D} = \left| \nabla \times \vec{A} \right| = 0 $$
+**Mechanics**
 
-$$ {\lim_{\Delta x \to 0}} \frac{f(x + \Delta x) - f(x)}{\Delta x} $$
+$$ v = u + at $$
 
-| <small>More about $\lim\limits_{\Delta x \to 0}$</small> |
+$$ v^2 - u^2 = 2as $$
+
+$$ s = ut + \frac{1}{2}at^2 $$
+
+$$ E_\mathrm{k} = \frac{1}{2}mv^2 \qquad\qquad E_\mathrm{p} = mgh \qquad\qquad W = Fs\cos\theta $$
+
+$$ F = G\frac{Mm}{r^2} $$
+
+**Waves, electricity and light**
+
+$$ v = f\lambda \qquad\qquad T = \frac{1}{f} \qquad\qquad n = \frac{\sin\theta_1}{\sin\theta_2} $$
+
+$$ V = IR \qquad\qquad P = IV = I^2R = \frac{V^2}{R} $$
+
+$$ F = \frac{1}{4\pi\varepsilon_0}\frac{Q_1Q_2}{r^2} $$
+
+**Modern physics**
+
+$$ E = mc^2 \qquad\qquad E = hf \qquad\qquad \lambda = \frac{h}{p} $$
+
+**Vectors and change**
+
+- A vector gets an arrow: $\vec{F}$, $\vec{v}$, $\vec{a}$. A unit vector gets a hat: $\hat{i}$, $\hat{j}$, $\hat{k}$.
+- A *change in* a quantity uses a capital delta: $\Delta x$, $\Delta t$, so $v = \dfrac{\Delta x}{\Delta t}$.
+
+$$ \vec{r} = 5\hat{i} + 8\hat{j} \qquad\qquad |\vec{r}| = \sqrt{5^2 + 8^2} $$
+
+> **Tip:** Inline fractions are squashed, as in $\frac{\Delta x}{\Delta t}$. Use `\dfrac` instead of `\frac` for a full-size fraction in a sentence: $\dfrac{\Delta x}{\Delta t}$.
+
+### 2.5 Units and numbers
+
+Units and labels are **not variables**, so they should be **upright** (not italic). Wrap them in `\mathrm{ }`, and use `\,` for the thin space before a unit.
+
+| You type | You get |
+|:---|:---|
+| `$v = 3.0 \times 10^{8}\,\mathrm{m\,s^{-1}}$` | $v = 3.0 \times 10^{8}\,\mathrm{m\,s^{-1}}$ |
+| `$g = 9.81\,\mathrm{m\,s^{-2}}$` | $g = 9.81\,\mathrm{m\,s^{-2}}$ |
+| `$R = 4.7\,\mathrm{k\Omega}$` | $R = 4.7\,\mathrm{k\Omega}$ |
+| `$\mu = 1.2\,\mu\mathrm{m}$` | $\mu = 1.2\,\mu\mathrm{m}$ |
+| `$T = -273\,^\circ\mathrm{C}$` | $T = -273\,^\circ\mathrm{C}$ |
+| `$\theta = 30^\circ$` | $\theta = 30^\circ$ |
+| `$E_\mathrm{k}$` and `$E_k$` | $E_\mathrm{k}$ and $E_k$ |
+| `$\pm 0.5\%$` | $\pm 0.5\%$ |
+
+> Use `\times` for "times", not the letter x: `5 \times 10^3` gives $5 \times 10^3$. Use `\text{ words }` for ordinary words inside maths: $v = 5 \text{ when } t = 2$.
+
+### 2.6 Chemical and nuclear equations
+
+**Chemical equations:** put the whole formula in `\mathrm{ }` so that the letters are upright.
+
+$$ \mathrm{Na^+_{(aq)} + Cl^-_{(aq)} \longrightarrow NaCl_{(s)}} $$
+
+$$ \mathrm{CH_4 + 2O_2 \longrightarrow CO_2 + 2H_2O} $$
+
+**Nuclear equations:** put `{}` in front, then the mass number as a superscript `^` and the proton number as a subscript `_`, then the symbol in `\mathrm{ }`.
+
+- `{}^{14}_{6}\mathrm{C}` gives ${}^{14}_{6}\mathrm{C}$
+
+Alpha decay:
+
+$$ {}^{238}_{92}\mathrm{U} \longrightarrow {}^{234}_{90}\mathrm{Th} + {}^{4}_{2}\mathrm{He} $$
+
+Beta-minus decay (a neutron becomes a proton, plus an electron and an antineutrino, written with `\bar{\nu}_e`):
+
+$$ {}^{14}_{6}\mathrm{C} \longrightarrow {}^{14}_{7}\mathrm{N} + {}^{\;\;0}_{-1}\mathrm{e} + \bar{\nu}_e $$
+
+Beta-plus decay (a proton becomes a neutron, plus a positron and a neutrino):
+
+$$ {}^{22}_{11}\mathrm{Na} \longrightarrow {}^{22}_{10}\mathrm{Ne} + {}^{\;\;0}_{+1}\mathrm{e} + \nu_e $$
+
+> Check your work: the **top numbers** (nucleon number) add up to the same total on both sides, and so do the **bottom numbers** (charge).
+
+### 2.7 Symbols cheat-sheet
+
+**Relations and operators**
+
+| Symbol | Code | Symbol | Code | Symbol | Code |
+|:---:|:---|:---:|:---|:---:|:---|
+| $\ne$ | `\ne` | $\approx$ | `\approx` | $\propto$ | `\propto` |
+| $\le$ | `\le` | $\ge$ | `\ge` | $\sim$ | `\sim` |
+| $\ll$ | `\ll` | $\gg$ | `\gg` | $\pm$ | `\pm` |
+| $\times$ | `\times` | $\div$ | `\div` | $\cdot$ | `\cdot` |
+| $\therefore$ | `\therefore` | $\because$ | `\because` | $\infty$ | `\infty` |
+
+**Arrows, calculus and others**
+
+| Symbol | Code | Symbol | Code | Symbol | Code |
+|:---:|:---|:---:|:---|:---:|:---|
+| $\to$ | `\to` | $\Rightarrow$ | `\Rightarrow` | $\Leftrightarrow$ | `\Leftrightarrow` |
+| $\rightleftharpoons$ | `\rightleftharpoons` | $\sum$ | `\sum` | $\prod$ | `\prod` |
+| $\int$ | `\int` | $\oint$ | `\oint` | $\partial$ | `\partial` |
+| $\nabla$ | `\nabla` | $\hbar$ | `\hbar` | $\odot$ | `\odot` |
+| $\bar{x}$ | `\bar{x}` | $\hat{x}$ | `\hat{x}` | $\dot{x}$ | `\dot{x}` |
+| $\ddot{x}$ | `\ddot{x}` | $\vec{x}$ | `\vec{x}` | $x^{\prime}$ | `x^{\prime}` |
+
+### 2.8 Going further: calculus, brackets, matrices and alignment
+
+**Calculus**
+
+$$ \frac{dy}{dx} \qquad \frac{d^2x}{dt^2} \qquad \left. \frac{\partial y}{\partial t} \right|_{t=5} $$
+
+$$ \int_{0}^{\infty} e^{-ax}\,dx = \frac{1}{a} $$
+
+$$ \lim_{\Delta x \to 0} \frac{f(x + \Delta x) - f(x)}{\Delta x} $$
+
+| <small>More about limits</small> |
 | :--- |
-| <small>You need to type <code>\lim\limits_{\Delta x \to 0}</code> for the correct inline version of $ \lim\limits_{\Delta x \to 0} $. If you type <code>\lim_{\Delta x \to 0}</code> inline, you will get $\lim_{\Delta x \to 0}$ instead. (*What's the logic!?* 😑)</small> |
+| <small>Type <code>\lim\limits_{\Delta x \to 0}</code> to place the limit underneath the word in an inline sentence, as in $\lim\limits_{\Delta x \to 0} f(x)$. If you type <code>\lim_{\Delta x \to 0}</code> inline, the limit is squashed to the side instead: $\lim_{\Delta x \to 0} f(x)$. In a displayed equation, both give the nice version.</small> |
 
-- 2.2.3 **Some more math symbols:**
+**Bracket size.** `\left(` and `\right)` make the brackets grow to fit what is inside.
+
+$$ \left( \frac{1}{\sqrt[n]{2}} \right) \quad \text{vs} \quad ( \frac{1}{\sqrt[n]{2}} ) $$
+
+**Equation alignment.** Use `aligned`, put `&` where lines should line up, and `\\` to start a new line.
+
 $$
-\begin{array}{|l|l|c|r|r|}
-\hline
-x^{\prime} & \bar{x} & \hat{x} & \ge & \le \\
-\gg & \ll & \ngtr & \nless & \ne \\
-\sim & \simeq & \approx & \propto & \because \\
-\therefore & \odot & \otimes & \cdot & \times \\
-\div & \infty & \Leftrightarrow & \Longleftrightarrow & \Rightarrow \\
-\leftarrow & \rightarrow & \to & \leftrightharpoons & \hbar \\
-\triangle & \sum & \prod & \int & \oint \\
-\hline
-\end{array}
+\begin{aligned}
+ax^2 + bx + c &= 0 \\
+x &= \frac{-b \pm \sqrt{b^2 - 4ac}}{2a}
+\end{aligned}
 $$
 
-> This also shows a LaTeX way to create a table. Note the code <code>{|l|l|c|r|r|}</code>, which appears immediately after <code>\begin{array}</code>. Each of the letters in <code>{|l|l|c|r|r|}</code> represents a column and indicates how the entries in that column should be aligned (left, left, center, right, right).
+**Matrices**
 
-- 2.2.4 **Matrices**
 $$
 \begin{pmatrix}
 a & b & c \\
@@ -143,22 +283,67 @@ A_{31} & A_{32} & A_{33} \\
 \end{bmatrix}
 $$
 
-- 2.2.5 **Equation Alignment**
+**A table in LaTeX.** The `{|l|l|c|r|}` after `\begin{array}` sets the alignment of each column (left, left, centre, right) and the `|` draws the lines.
+
+$$
+\begin{array}{|l|l|c|r|}
+\hline
+\text{Quantity} & \text{Symbol} & \text{Value} & \text{Unit} \\
+\hline
+\text{Speed of light} & c & 3.00 \times 10^{8} & \mathrm{m\,s^{-1}} \\
+\text{Planck constant} & h & 6.63 \times 10^{-34} & \mathrm{J\,s} \\
+\text{Elementary charge} & e & 1.60 \times 10^{-19} & \mathrm{C} \\
+\hline
+\end{array}
+$$
+
+### 2.9 University-level examples
+
+**Vector calculus and electromagnetism: Maxwell's equations**
+
 $$
 \begin{aligned}
-\because ax^2 + b^2 + c &= 0 \\
-\therefore x &= \frac{-b \pm \sqrt{b^2 - 4ac}}{2a}
+\nabla \cdot \vec{E} &= \frac{\rho}{\varepsilon_0} &
+\nabla \cdot \vec{B} &= 0 \\
+\nabla \times \vec{E} &= -\frac{\partial \vec{B}}{\partial t} &
+\nabla \times \vec{B} &= \mu_0 \vec{J} + \mu_0\varepsilon_0 \frac{\partial \vec{E}}{\partial t}
 \end{aligned}
 $$
 
-- 2.2.6 **Bracket Size**
-$$ \left( \frac{1}{\sqrt[n]{2}} \right) \space \text{vs} \space ( \frac{1}{\sqrt[n]{2}} ) $$
-> (*Size does matter... sometimes.*)
+$$ \oint_C \vec{B} \cdot d\vec{l} = \mu_0 I_{\text{enc}} $$
 
-**2.3 Chemical Equations**
-$$
-{Na_{(aq)}}^+ + {Cl_{(aq)}}^- \longrightarrow NaCl_{(s)}
-$$
+**Quantum mechanics**
+
+$$ i\hbar \frac{\partial}{\partial t}\Psi(x,t) = \hat{H}\Psi(x,t) $$
+
+$$ \langle \psi | \phi \rangle = \int_{-\infty}^{\infty} \psi^*(x)\,\phi(x)\,dx \qquad\qquad \Delta x\,\Delta p \ge \frac{\hbar}{2} $$
+
+**Relativity**
+
+$$ \gamma = \frac{1}{\sqrt{1 - \dfrac{v^2}{c^2}}} \qquad\qquad t' = \gamma\left(t - \frac{vx}{c^2}\right) $$
+
+**Statistical physics and probability**
+
+$$ P(E) \propto e^{-E/k_\mathrm{B}T} \qquad\qquad f(x) = \frac{1}{\sigma\sqrt{2\pi}}\,e^{-\frac{(x-\mu)^2}{2\sigma^2}} $$
+
+**Series and sums**
+
+$$ f(x) = \frac{a_0}{2} + \sum_{n=1}^{\infty} \left[ a_n\cos(nx) + b_n\sin(nx) \right] $$
+
+### 2.10 Common mistakes
+
+| You typed | You get | Better | You get |
+|:---|:---|:---|:---|
+| `$sin x$` | $sin x$ | `$\sin x$` | $\sin x$ |
+| `$x^10$` | $x^10$ | `$x^{10}$` | $x^{10}$ |
+| `$v_max$` | $v_max$ | `$v_\mathrm{max}$` | $v_\mathrm{max}$ |
+| `$5 x 10^3$` | $5 x 10^3$ | `$5 \times 10^3$` | $5 \times 10^3$ |
+| `$3 m/s$` | $3 m/s$ | `$3\,\mathrm{m\,s^{-1}}$` | $3\,\mathrm{m\,s^{-1}}$ |
+| `$Delta x$` | $Delta x$ | `$\Delta x$` | $\Delta x$ |
+| `$\mu m$` | $\mu m$ | `$\mu\mathrm{m}$` | $\mu\mathrm{m}$ |
+| `$H2O$` | $H2O$ | `$\mathrm{H_2O}$` | $\mathrm{H_2O}$ |
+
+> Forgot a closing `$`? Then your maths shows up as plain text. Forgot a closing `}`? Check that every `{` has its partner.
 
 ---
 
@@ -195,4 +380,3 @@ A brief tour through **Markdown**, **LaTeX**, and **HTML**. Happy writing and ed
 
 [1]: https://en.wikipedia.org/wiki/Markdown "Markdown"  
 [2]: https://en.wikipedia.org/wiki/LaTeX "LaTeX"
-    
