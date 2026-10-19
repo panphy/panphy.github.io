@@ -1,6 +1,7 @@
 /* Renders the Energy: Stores and Transfers student workbook from window.UNIT (assets/content.js).
    workbook.html is the student booklet; workbook.html?answers is the answer edition, with the
-   same page numbers. workbook.html?review prints the Unit review booklet (add &answers). Maths is LaTeX between \( and \), typeset by MathJax before printing.
+   same page numbers. workbook.html?part=1 (2, 3) prints one part of the booklet, with its own cover,
+   key words, tracker, quick answers and toolkit; the PDFs are printed in parts. workbook.html?review prints the Unit review booklet (add &answers). Maths is LaTeX between \( and \), typeset by MathJax before printing.
    Print with Chrome: A4, default margins, no headers or footers. */
 (function () {
   "use strict";
@@ -11,13 +12,22 @@
   const answers = params.has("answers");
   const REVIEW = params.has("review");
   const pad = (n) => String(n).padStart(2, "0");
+  // The booklet is printed in three parts of three lessons each.
+  const PARTS = [[1, 3], [4, 6], [7, 9]];
+  const partNo = REVIEW ? 0 : Number(params.get("part")) || 0;
+  const [firstL, lastL] = PARTS[partNo - 1] || [1, U.lessons.length];
+  const inPart = (n) => n >= firstL && n <= lastL;
+  const LESSONS = U.lessons.filter((l) => inPart(l.n));
+  const EQUATIONS = U.equations.filter((e) => e.lesson <= lastL);
+  // Practicals are the measured labs; "Activity" and "Your own" labs are not counted.
+  const isPractical = (l) => l.lab && !/^(Activity|Your own)/.test(l.lab.title);
   if (answers) document.body.classList.add("answers");
 
-  const footer = `Energy: Stores and Transfers, Year 9 ${REVIEW ? "Unit review" : "workbook"}${answers ? " (ANSWERS)" : ""}`;
+  const footer = `Energy: Stores and Transfers, Year 9 ${REVIEW ? "Unit review" : "workbook"}${partNo ? ` Part ${partNo}` : ""}${answers ? " (ANSWERS)" : ""}`;
   const pageStyle = document.createElement("style");
   pageStyle.textContent = `@page { @bottom-left { content: "${footer} · © 2026 PanPhy Labs. All rights reserved."; } } @page cover { @bottom-left { content: none; } }`;
   document.head.appendChild(pageStyle);
-  document.title = `Energy - Stores and Transfers - Year 9 ${REVIEW ? "Unit Review" : "Workbook"}${answers ? " (Answers)" : ""}`;
+  document.title = `Energy - Stores and Transfers - Year 9 ${REVIEW ? "Unit Review" : "Workbook"}${partNo ? ` - Part ${partNo}` : ""}${answers ? " (Answers)" : ""}`;
 
   // ---------- small helpers ----------
   const ans = (html) => (html ? `<span class="ans">${html}</span>` : "");
@@ -258,9 +268,12 @@
     const middle = REVIEW
       ? `<div class="cover-part"><b>Unit review</b><span>After Lesson ${U.lessons.length}</span></div>
       <p class="lede">Mixed exam-style questions from the whole unit, a fix-it log and the equation toolkit.</p>`
-      : `<p class="lede">Where energy is stored, how it moves, how fast it moves and how much of it is useful: nine lessons, from your first energy store to confident exam answers.</p>
+      : partNo
+        ? `<div class="cover-part"><b>Part ${partNo} of ${PARTS.length}</b><span>Lessons ${firstL}–${lastL}: ${LESSONS.map((l) => l.title.replace(/^The /, "the ")).join(", ").replace(/^t/, "T")}</span></div>
+      <div class="cover-stats"><div><b>${LESSONS.length}</b>lessons</div><div><b>${LESSONS.filter(isPractical).length}</b>practical${LESSONS.filter(isPractical).length === 1 ? "" : "s"}</div><div><b>${U.equations.filter((e) => inPart(e.lesson)).length}</b>new equations</div></div>`
+        : `<p class="lede">Where energy is stored, how it moves, how fast it moves and how much of it is useful: nine lessons, from your first energy store to confident exam answers.</p>
       <div class="cover-stats"><div><b>9</b>lessons</div><div><b>6</b>practicals</div><div><b>8</b>equations</div></div>`;
-    return `<section class="cover"><div class="eyebrow">Year 9 Physics, AQA GCSE, Unit 2${REVIEW ? ", Unit review" : ""}</div>
+    return `<section class="cover"><div class="eyebrow">Year 9 Physics, AQA GCSE, Unit 2${REVIEW ? ", Unit review" : partNo ? `, Part ${partNo}` : ""}</div>
       <h1>Energy<br><em>Stores and<br>Transfers</em></h1>
       ${middle}
       ${answers ? '<div class="edition">Answer edition for teachers and self-marking</div>' : ""}
@@ -279,26 +292,27 @@
       ["exam", "Exam corner", "AQA-style questions with a tip on how the marks are given."],
       ["revise", "Revise it", "Summary, cover-and-answer questions and an “I can” check to colour in."],
     ];
-    const rows = U.lessons.map((l) => `<tr><td>${pad(l.n)}</td><td><strong>${l.title}</strong><br><span class="map-line">${l.mapLine}</span></td><td>${l.week}</td></tr>`).join("");
+    // A part lists only its own lessons, so the page fits on one sheet.
+    const rows = LESSONS.map((l) => `<tr><td>${pad(l.n)}</td><td><strong>${l.title}</strong><br><span class="map-line">${l.mapLine}</span></td><td>${l.week}</td></tr>`).join("");
     return `<section class="new-page" style="break-before:auto">
       <div class="eyebrow">Start here</div><h2 class="page-title">How this booklet works</h2>
       <p class="page-intro">Energy is never made and never destroyed: it only moves from one store to another. This booklet shows you how to follow it, and how to calculate it. Keep the booklet: it is your classwork book <em>and</em> your revision guide.</p>
       <div class="legend">${items.map(([k, name, text]) => `<div>${icon(k)}<div><b>${name}</b><p>${text}</p></div></div>`).join("")}</div>
       <div class="key">${marks(`<strong>Two kinds of question to know.</strong> When a sentence has a gap, the choices are printed straight after it, like this: Energy is measured in [[joules|joules / newtons / watts]]. When you see a box of choices, <strong>draw a ring around</strong> the correct one, as AQA exam papers ask. The unit of energy is {{the watt|the joule*|the newton}}.`)}</div>
-      <h4 class="sub">The route through the unit</h4>
+      <h4 class="sub">The route through ${partNo ? "this part" : "the unit"}</h4>
       <table class="route"><thead><tr><th>#</th><th>Lesson</th><th>Week</th></tr></thead><tbody>${rows}</tbody></table>
-      <p class="page-intro" style="margin-top:3mm">The <strong>equation toolkit</strong> on the last page has every equation in the unit, with formula triangles to help you rearrange.</p>
+      <p class="page-intro" style="margin-top:3mm">${partNo ? `This booklet is Part ${partNo} of ${PARTS.length}: Lessons ${firstL}–${lastL}. ` : ""}The <strong>equation toolkit</strong> on the last page has every equation ${partNo && lastL < U.lessons.length ? "you have met so far" : "in the unit"}, with formula triangles to help you rearrange.</p>
     </section>`;
   }
 
   function glossary() {
     return `<section class="new-page"><div class="eyebrow">Reference</div><h2 class="page-title">Key words</h2>
       <p class="page-intro">Learn the meaning and the spelling. In exams, precise words earn marks: say “transferred to the thermal store of the surroundings”, never “lost”.</p>
-      <div class="glossary">${U.glossary.map(([k, v, n]) => `<p><strong>${k}</strong> <span class="g-lesson">L${n}</span>: ${v}</p>`).join("")}</div></section>`;
+      <div class="glossary">${U.glossary.filter(([, , n]) => inPart(n)).map(([k, v, n]) => `<p><strong>${k}</strong> <span class="g-lesson">L${n}</span>: ${v}</p>`).join("")}</div></section>`;
   }
 
   function tracker() {
-    const rows = U.lessons.map((l) => `<tr class="lesson-row"><td colspan="2">${pad(l.n)}: ${l.title}</td></tr>` +
+    const rows = LESSONS.map((l) => `<tr class="lesson-row"><td colspan="2">${pad(l.n)}: ${l.title}</td></tr>` +
       l.cando.map((c) => `<tr><td>${c}</td><td class="rag-cell"><span class="rag"><i></i><i></i><i></i></span></td></tr>`).join("")).join("");
     return `<section class="new-page"><div class="eyebrow">Finish</div><h2 class="page-title">Progress tracker</h2>
       <p class="page-intro">Colour one circle for each statement: <strong>red</strong> = not yet, <strong>amber</strong> = getting there, <strong>green</strong> = I can do this without help. Revisit your reds first.</p>
@@ -309,7 +323,7 @@
     const list = (arr) => `<ol>${arr.map(([, a]) => `<li>${a}</li>`).join("")}</ol>`;
     return `<section class="new-page"><div class="eyebrow">Check yourself</div><h2 class="page-title">Quick answers</h2>
       <p class="page-intro">Answers to the “Do now” and “Cover the page” questions, so you can check yourself when revising. Answers to the longer questions are in your teacher's answer edition.</p>
-      <div class="quick-answers">${U.lessons.map((l) => `<div><b>Lesson ${l.n}: ${l.title}</b>
+      <div class="quick-answers">${LESSONS.map((l) => `<div><b>Lesson ${l.n}: ${l.title}</b>
         <h4>Do now</h4>${list(l.doNow)}<h4>Cover the page</h4>${list(l.recall)}</div>`).join("")}</div></section>`;
   }
 
@@ -328,24 +342,24 @@
   }
 
   function toolkit() {
-    const tools = U.equations.map((e) => `<div class="tool${e.tri ? " has-tri" : ""}"><div class="eq">${e.eq}</div><span class="lesson-tag">Lesson ${e.lesson}</span><div class="words">${e.words}</div><div class="units">${e.units}</div><div class="recall-cover">${e.re}</div>${e.tri ? `<div class="tool-tri">${triangleSvg(e.tri, "24mm")}</div>` : ""}</div>`).join("");
+    const tools = EQUATIONS.map((e) => `<div class="tool${e.tri ? " has-tri" : ""}"><div class="eq">${e.eq}</div><span class="lesson-tag">Lesson ${e.lesson}</span><div class="words">${e.words}</div><div class="units">${e.units}</div><div class="recall-cover">${e.re}</div>${e.tri ? `<div class="tool-tri">${triangleSvg(e.tri, "24mm")}</div>` : ""}</div>`).join("");
     return `<section class="new-page toolkit-page"><div class="eyebrow">Reference</div><h2 class="page-title">Equation toolkit</h2>
-      <p class="page-intro">Every equation in the unit. AQA prints all of them on the equation sheet in the exam, but you still need to know what each symbol means, its unit, and how to use it. Use \\(g = 9.8\\ \\text{N/kg}\\).</p>
+      <p class="page-intro">Every equation ${partNo && lastL < U.lessons.length ? `from Lessons 1–${lastL}` : "in the unit"}. AQA prints all of them on the equation sheet in the exam, but you still need to know what each symbol means, its unit, and how to use it. Use \\(g = 9.8\\ \\text{N/kg}\\).</p>
       <div class="tri-how"><div class="tri-steps"><p><b>1</b> Cover the quantity you want to find.</p><p><b>2</b> What is left side by side? <strong>Multiply</strong>.</p><p><b>3</b> One above the other? <strong>Divide</strong> the top by the bottom.</p></div>
-      <p class="tri-note">Example: to find \\(h\\) from \\(E_p = m\\,g\\,h\\), cover \\(h\\). \\(E_p\\) is above \\(m\\) and \\(g\\), so \\(h = \\dfrac{E_p}{m\\,g}\\). Kinetic and elastic potential energy have no triangle: in this unit you only use them to calculate the energy.</p></div>
+      <p class="tri-note">Example: to find \\(h\\) from \\(E_p = m\\,g\\,h\\), cover \\(h\\). \\(E_p\\) is above \\(m\\) and \\(g\\), so \\(h = \\dfrac{E_p}{m\\,g}\\). ${lastL >= 5 ? "Kinetic and elastic potential energy have no triangle: in this unit you only use them" : "Kinetic energy has no triangle: in this unit you only use it"} to calculate the energy.</p></div>
       <div class="toolkit">${tools}</div>
-      <div class="method-steps"><div><b>1</b>Write what you know. Convert first: g → kg, cm → m, kJ → J, min → s, % → decimal.</div><div><b>2</b>Write the equation in symbols.</div><div><b>3</b>Rearrange if you need to, then substitute the numbers.</div><div><b>4</b>Give the answer with a unit. Ask: is it sensible?</div></div>
+      <div class="method-steps"><div><b>1</b>Write what you know. Convert first: g → kg, cm → m, kJ → J${lastL >= 7 ? ", min → s" : ""}${lastL >= 9 ? ", % → decimal" : ""}.</div><div><b>2</b>Write the equation in symbols.</div><div><b>3</b>Rearrange if you need to, then substitute the numbers.</div><div><b>4</b>Give the answer with a unit. Ask: is it sensible?</div></div>
     </section>`;
   }
 
   const book = document.createElement("main");
   book.className = "book";
-  const here = REVIEW ? "review" : "";
+  const here = REVIEW ? "review" : partNo ? `part=${partNo}` : "";
   const link = (q, a) => `?${[q, a ? "answers" : ""].filter(Boolean).join("&")}`;
-  const bar = `<div class="screen-bar">Print preview. <a href="${link(REVIEW ? "" : "review", answers)}">${REVIEW ? "Workbook" : "Unit review"}</a>. <a href="${link(here, !answers)}">${answers ? "Student edition" : "Answer edition"}</a>. Print with Chrome, A4, headers and footers off</div>`;
+  const bar = `<div class="screen-bar">Print preview. <a href="${link(REVIEW ? "" : "review", answers)}">${REVIEW ? "Workbook" : "Unit review"}</a>. <a href="${link(here, !answers)}">${answers ? "Student edition" : "Answer edition"}</a>. ${PARTS.map((_, i) => ` <a href="${link(`part=${i + 1}`, answers)}">Part ${i + 1}</a>.`).join("")} Print with Chrome, A4, headers and footers off</div>`;
   book.innerHTML = bar + (REVIEW
     ? cover() + review() + toolkit()
-    : cover() + howTo() + U.lessons.map(lesson).join("") + glossary() + tracker() + quickAnswers() + toolkit());
+    : cover() + howTo() + LESSONS.map(lesson).join("") + glossary() + tracker() + quickAnswers() + toolkit());
   document.body.appendChild(book);
 
   // Typeset the maths, then tell the PDF build the page is ready. Offline, the LaTeX source stays.

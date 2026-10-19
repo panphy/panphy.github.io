@@ -42,6 +42,7 @@ strong { font-weight: 700; }
 .cover-foot { margin-top: auto; padding-top: 8mm; }
 .cover-circuit { width: 150mm; margin: 0 0 10mm; }
 .cover-circuit svg { width: 100%; display: block; }
+.cover-circuit .ef { --ef-ink: #fff; }
 .cover .edition { align-self: flex-start; margin-top: 6mm; padding: 1.8mm 4mm; border: 2px solid var(--copper); color: var(--copper); font: 900 11pt/1 Arial, sans-serif; letter-spacing: .12em; text-transform: uppercase; }
 .cover-fields { display: grid; grid-template-columns: 1fr 1fr; gap: 6mm 10mm; padding: 6mm 8mm; border: 2px solid var(--spark); background: #eef3f9; }
 .cover-fields div { font: 900 9pt/1 Arial, sans-serif; letter-spacing: .15em; text-transform: uppercase; color: var(--navy); }
@@ -454,10 +455,11 @@ td.blank-cell { height: 10mm; vertical-align: top; }
 .eq-card.stack .words, .eq-card.stack .units, .eq-card.stack .re { grid-column: 1; }
 .eq-card.stack .tri-mini { grid-column: 2; grid-row: 2 / span 3; }
 .opts { white-space: normal; }
-.lab-card { break-inside: auto; }
+/* Practical and Exam corner cards move whole to the next page rather than split. A card taller
+   than a page still breaks between questions, and each piece keeps its own closed border. */
+.lab-card, .exam-card { break-inside: avoid; -webkit-box-decoration-break: clone; box-decoration-break: clone; }
 .lab-card > .question, .lab-card > .keep { break-inside: avoid; }
-/* Exam corner: the heading sits inside the card, and the card can break between questions. */
-.exam-card { break-inside: auto; margin-top: 4mm; }
+.exam-card { margin-top: 4mm; }
 .exam-card .sec { margin-top: 0; }
 /* The toolkit is the last page and must fit on one sheet, so it prints at normal size. */
 .book:not(.guide) > section.toolkit-page { zoom: 1; }

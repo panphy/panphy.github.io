@@ -112,6 +112,8 @@
         { t: "lab", title: "Two graphs of the same results", blocks: [
           { t: "q", p: R`<strong>Graph 1: extension against force.</strong> The independent variable goes on the x-axis, so the x-axis shows {{force*|extension}}. Plot the points and draw a best-fit line. This graph answers our question: how does the extension change as the force increases?`, graph: { w: 140, h: 70, x: [0.5, 2], y: [5, 1], xLabel: "force / N", yLabel: "extension / cm", points: SPRING.map(([f, , e]) => [f, Number(e)]), fit: [[0, 0], [6.4, 25.6]] } },
           { t: "q", p: "<strong>Graph 2: force against extension.</strong> Swap the axes, so the dependent variable is now on the x-axis. We draw it this way because its gradient is the spring constant. Convert the extensions to metres first. Plot the points and draw a best-fit line.", graph: { w: 150, h: 80, x: [0.02, 1], y: [1, 1], xLabel: "extension / m", yLabel: "force / N", points: SPRING.map(([f, , e]) => [Number(e) / 100, f]), fit: [[0, 0], [0.26, 6.5]] } },
+        ] },
+        { t: "lab", title: "What the two graphs tell you", blocks: [
           { t: "q", p: R`Use graph 2 to find the spring constant. On graph 2, \(k\) is the gradient: \(k = \dfrac{\text{change in force}}{\text{change in extension}}\).`, frame: frame3, frameA: [R`\(k = \dfrac{\Delta F}{\Delta e}\)`, R`\(k = \dfrac{6.0}{0.240}\)`, "25 N/m (sample)"] },
           { t: "q", p: "Both graphs show the same results. Complete the table to explain the difference.", after: [{ t: "compare", head: ["", "y-axis", "x-axis", "The gradient tells you"], rows: [
             ["Graph 1", "extension", "force", { opts: "how stretchy the spring is / how stiff the spring is", a: "how stretchy the spring is (extension per newton)" }],

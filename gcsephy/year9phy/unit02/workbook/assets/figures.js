@@ -99,7 +99,7 @@
     '<path class="ink bold" d="M30 20H270"/>' + coil(90, 20, 110, 8) + coil(200, 20, 180, 8) +
     '<rect class="ink soft" x="186" y="180" width="28" height="18"/>' +
     '<path class="ink thin dash" d="M100 110H240"/>' +
-    dim(56, 20, 56, 110, "original", -1) + dim(250, 110, 250, 180, "extension", 1) +
+    dim(56, 20, 56, 110, "", -1) + t(48, 62, "original", { a: "end" }) + t(48, 77, "length", { a: "end" }) + dim(250, 110, 250, 180, "extension", 1) +
     t(90, 236, "no load", { c: "sm" }) + t(200, 236, "with a load", { c: "sm" }));
 
   // ---------- Lesson 6: pendulum ----------
@@ -138,7 +138,7 @@
     for (let i = 0; i < 8; i += 1) { y -= 18; d += `V${y}`; x += 26; d += `H${x}`; }
     return svg(320, 220, "A student walks up a flight of stairs; the vertical height of the flight is marked h",
       `<path class="ink soft" d="${d}V200Z"/><path class="ink" d="M10 200H300"/>` + person(46, 182, 0.9) + person(238, 56, 0.9) +
-      arrow(70, 150, 200, 70, "dash") + dim(280, 200, 280, 56, "h", -1) + t(150, 216, "height of one step × number of steps", { c: "sm muted" }));
+      '<path class="ink thin dash" d="M228 56H288"/>' + dim(280, 200, 280, 56, "h", -1) + t(150, 216, "height of one step × number of steps", { c: "sm muted" }));
   };
 
   // ---------- Lesson 8: cooling cups and the eco house ----------
@@ -184,11 +184,11 @@
     let arrows = inp + use + waste;
     if (blend) {
       const id = `sankey-blend-${++sankeyId}`;
-      const gradient = (name, colour) => `<linearGradient id="${id}-${name}" gradientUnits="userSpaceOnUse" x1="${x0}" x2="${xs + 80}"><stop stop-color="var(--year-colour)"/><stop offset="1" stop-color="${colour}"/></linearGradient>`;
+      const gradient = (name, colour) => `<linearGradient id="${id}-${name}" gradientUnits="userSpaceOnUse" x1="${x0}" x2="${xs + 80}"><stop stop-color="var(--year-colour, #f6cea8)"/><stop offset="1" stop-color="${colour}"/></linearGradient>`;
       const usefulPath = `M${x0} ${y0}H${xe}L${xe + head} ${y0 + U / 2}L${xe} ${y0 + U}H${x0}Z`;
       const wastePath = `M${x0} ${y0 + U}H${xs}A${R} ${R} 0 0 1 ${xs + R} ${yc}V${yEnd}H${xs + R + 6}L${xs + (r + R) / 2} ${yEnd + head}L${xs + r - 6} ${yEnd}H${xs + r}V${yc}A${r} ${r} 0 0 0 ${xs} ${y0 + H}H${x0}Z`;
       const outline = `M${x0} ${y0}H${xe}L${xe + head} ${y0 + U / 2}L${xe} ${y0 + U}H${xs}A${R} ${R} 0 0 1 ${xs + R} ${yc}V${yEnd}H${xs + R + 6}L${xs + (r + R) / 2} ${yEnd + head}L${xs + r - 6} ${yEnd}H${xs + r}V${yc}A${r} ${r} 0 0 0 ${xs} ${y0 + H}H${x0}Z`;
-      arrows = `<defs>${gradient('useful', 'var(--cyan)')}${gradient('waste', 'var(--hot)')}</defs><path fill="url(#${id}-useful)" d="${usefulPath}"/><path fill="url(#${id}-waste)" d="${wastePath}"/><path class="ink" fill="none" d="${outline}"/>`;
+      arrows = `<defs>${gradient('useful', 'var(--cyan, #3fd0e8)')}${gradient('waste', 'var(--hot, #ff8a4c)')}</defs><path fill="url(#${id}-useful)" d="${usefulPath}"/><path fill="url(#${id}-waste)" d="${wastePath}"/><path class="ink" fill="none" d="${outline}"/>`;
     }
     return svg(560, yEnd + head + 34, `Sankey diagram: ${input} ${unit} in, ${useful} ${unit} useful, ${wasted} ${unit} wasted`,
       arrows +
@@ -202,7 +202,9 @@
     '<path d="M20 30C120 30 180 180 300 180S480 30 580 30" fill="none" stroke="#fff" stroke-width="5"/>' +
     '<path d="M20 30C120 30 180 180 300 180S480 30 580 30V196H20Z" fill="rgba(255,255,255,.08)"/>' +
     '<circle cx="40" cy="22" r="10" fill="#ffd23f"/><circle cx="300" cy="170" r="10" fill="#3fd0e8"/><circle cx="560" cy="22" r="10" fill="#ffd23f"/>' +
-    '<g font-family="Arial Black, Arial" font-weight="900" font-size="15" fill="#fff"><text x="62" y="20">G.P.E.</text><text x="300" y="150" text-anchor="middle">KINETIC</text><text x="538" y="20" text-anchor="end">G.P.E.</text></g>');
+    '<g font-family="Arial Black, Arial" font-weight="900" font-size="15" fill="#fff"><text x="62" y="20">G.P.E.</text><text x="300" y="124" text-anchor="middle">KINETIC</text><text x="538" y="20" text-anchor="end">G.P.E.</text></g>' +
+    // The motion arrow sits just above the ball, clear of the track, with the label lifted above it.
+    `<g aria-label="The ball is moving to the right">${arrow(280, 145, 326, 145, "", 10)}</g>`);
 
   window.EnergyFigures = { svg, t, arrow, dim, person, bike, storyStrip, shelf, hike, coil, springRig, twoForces, extension, pendulum, barChart, stairs, cups, house, bounce, sankey, coverArt };
 })();
