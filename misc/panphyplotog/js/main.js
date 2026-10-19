@@ -17,7 +17,6 @@ document.addEventListener('DOMContentLoaded', () => {
         dataset1XValues = saved.dataset1XValues;
         fittedCurves = normalizeFittedCurvesState(saved.fittedCurves, 1);
         datasetFitResults = normalizeDatasetFitResultsState(saved.datasetFitResults, 1);
-        document.getElementById('legacy-data-note').hidden = !saved.migratedFromLegacy;
         loadActiveGraphTitle();
         loadHeaders();
         loadErrorTypes();
