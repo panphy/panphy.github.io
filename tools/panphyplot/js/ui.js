@@ -1365,6 +1365,84 @@ function clearFittingResultDisplay() {
 	renderFitDiagnostics();
 }
 
+const FIT_QUALITY_HELP = {
+	rSquared: {
+		label: 'R squared',
+		text: 'How much variation in y the fit explains. Closer to 1 is better, but a high value alone does not prove the model is right.'
+	},
+	rmse: {
+		label: 'RMSE',
+		text: 'Root mean square error: typical vertical distance from points to the curve, in y units. Smaller is better relative to your data scale; there is no universal cutoff.'
+	},
+	chiSquared: {
+		label: 'reduced chi-squared',
+		text: 'Scatter relative to measurement uncertainties. Around 1 is expected; much higher suggests a poor model or underestimated uncertainties, much lower suggests generous uncertainties. ν = points − fitted parameters; interpret cautiously for small ν.'
+	}
+};
+
+function setFitQualityLine(line, latex, helpKey) {
+	line.classList.add('neo-fit-quality-row');
+	const value = document.createElement('span');
+	value.className = 'neo-fit-quality-value';
+	value.textContent = latex;
+	const help = FIT_QUALITY_HELP[helpKey];
+	const button = document.createElement('button');
+	button.type = 'button';
+	button.className = 'neo-fit-help';
+	button.textContent = '?';
+	button.setAttribute('aria-label', `About ${help.label}`);
+	button.setAttribute('aria-describedby', `fit-help-${helpKey}`);
+	const tooltip = document.createElement('span');
+	tooltip.id = `fit-help-${helpKey}`;
+	tooltip.className = 'neo-fit-tooltip';
+	tooltip.setAttribute('role', 'tooltip');
+	tooltip.setAttribute('popover', 'auto');
+	tooltip.textContent = help.text;
+	let pinned = false;
+	let pressedPinned = null;
+	let hideTimer;
+	const show = () => {
+		clearTimeout(hideTimer);
+		if (!tooltip.isConnected) return;
+		tooltip.showPopover();
+		const anchor = button.getBoundingClientRect();
+		const rect = tooltip.getBoundingClientRect();
+		const left = Math.max(12, Math.min(anchor.right - rect.width, window.innerWidth - rect.width - 12));
+		const top = anchor.bottom + rect.height + 8 <= window.innerHeight - 12
+			? anchor.bottom + 8 : Math.max(12, anchor.top - rect.height - 8);
+		tooltip.style.left = `${left}px`;
+		tooltip.style.top = `${top}px`;
+	};
+	const hide = () => {
+		if (tooltip.isConnected && tooltip.matches(':popover-open')) tooltip.hidePopover();
+		pinned = false;
+	};
+	const leave = () => {
+		hideTimer = setTimeout(() => {
+			if (!pinned && document.activeElement !== button) hide();
+		}, 120);
+	};
+	button.addEventListener('pointerenter', event => { if (event.pointerType === 'mouse') show(); });
+	button.addEventListener('pointerleave', leave);
+	button.addEventListener('focus', show);
+	button.addEventListener('blur', () => { if (!pinned) hide(); });
+	// Auto popovers dismiss before click when their trigger is tapped again.
+	button.addEventListener('pointerdown', () => { pressedPinned = pinned; });
+	button.addEventListener('click', () => {
+		pinned = !(pressedPinned ?? pinned);
+		pressedPinned = null;
+		if (pinned) show(); else hide();
+	});
+	tooltip.addEventListener('pointerenter', () => clearTimeout(hideTimer));
+	tooltip.addEventListener('pointerleave', leave);
+	tooltip.addEventListener('toggle', () => { if (!tooltip.matches(':popover-open')) pinned = false; });
+	line.replaceChildren(value, button, tooltip);
+}
+
+function closeFitQualityHelp() {
+	document.querySelectorAll('.neo-fit-tooltip:popover-open').forEach(tooltip => tooltip.hidePopover());
+}
+
 // Fitted parameters as "value ± uncertainty", and χ²/ν when every point has a ±ΔY.
 function renderFitParameters() {
 	const box = document.getElementById('fit-parameters');
@@ -1389,10 +1467,13 @@ function renderFitParameters() {
 	// renderFittingResult), then χ²/ν with its reading, then RMSE.
 	const quality = document.getElementById('fit-quality');
 	const details = document.getElementById('fit-quality-details');
-	const qualityLines = [];
 	const chi = result ? PanPhyPlotStats.formatChiSquared(result.chi2, result.dof) : null;
-	if (chi) qualityLines.push(`\\( \\chi^2/\\nu = ${chi} \\quad (\\nu = ${result.dof}) \\)`);
-	const nodes = qualityLines.map(toLine);
+	const nodes = [];
+	if (chi) {
+		const line = document.createElement('p');
+		setFitQualityLine(line, `\\( \\chi^2/\\nu = ${chi} \\quad (\\nu = ${result.dof}) \\)`, 'chiSquared');
+		nodes.push(line);
+	}
 	// A plain-language reading of χ²/ν; with few points it is only a rough guide.
 	if (chi) {
 		const ratio = result.chi2 / result.dof;
@@ -1404,7 +1485,9 @@ function renderFitParameters() {
 		nodes.push(chip);
 	}
 	if (result && Number.isFinite(result.rmse)) {
-		nodes.push(toLine(`\\( \\mathrm{RMSE} = ${PanPhyFitCore.formatFitNumber(result.rmse)} \\)`));
+		const line = document.createElement('p');
+		setFitQualityLine(line, `\\( \\mathrm{RMSE} = ${PanPhyFitCore.formatFitNumber(result.rmse)} \\)`, 'rmse');
+		nodes.push(line);
 	}
 	details.replaceChildren(...nodes);
 	quality.hidden = !result;
@@ -1487,8 +1570,8 @@ function renderFittingResult(equation, rSquaredDisplay) {
 	equationElement.replaceChildren(copyTarget);
 	equationElement.style.display = 'block';
 	renderEquationDecimals(true);
-	rSquaredElement.textContent = `\\( R^2 = ${rSquaredDisplay} \\)`;
-	rSquaredElement.style.display = 'block';
+	setFitQualityLine(rSquaredElement, `\\( R^2 = ${rSquaredDisplay} \\)`, 'rSquared');
+	rSquaredElement.style.display = 'flex';
 	renderFitParameters();
 	refreshWorkspaceChrome();
 	// After a Fit Curve click, bring the result into view in the inspector.
@@ -1614,6 +1697,9 @@ function closePopup() {
 }
 
 function initializeInterface() {
+	// Top-layer tooltips stay clear of scrolling pane edges; dismiss on layout changes.
+	document.addEventListener('scroll', closeFitQualityHelp, true);
+	window.addEventListener('resize', closeFitQualityHelp);
 	const body = document.getElementById('neo-table-body');
 	body.addEventListener('input', handleCellInput);
 	body.addEventListener('keydown', handleCellKeydown);
