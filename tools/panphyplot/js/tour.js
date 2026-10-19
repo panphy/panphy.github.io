@@ -6,7 +6,7 @@
 // from /misc/panphyplotog/js/tour.js and uses its tour.css.
 
 const TOUR_SEEN_KEY = 'panphyplot-neo-tour-seen';
-// The app is not used on phones (see the phone message), so neither is its tour.
+// The guided tour needs a larger screen, even when the user continues into the app on a phone.
 const TOUR_PHONE_QUERY = '(max-width: 599px), (max-height: 500px) and (pointer: coarse)';
 // Matches the width below which the app stacks its two panels.
 const TOUR_NARROW_WIDTH = 1000;

@@ -1,3 +1,31 @@
+// Small-screen users can choose to continue in this app. The choice lasts for this visit.
+function initializeSmallScreenWarning() {
+	const screenQuery = window.matchMedia('(max-width: 599px), (max-height: 500px) and (pointer: coarse)');
+	const dialog = document.getElementById('small-screen-warning');
+	let accepted = false;
+	const showWarning = () => {
+		if (screenQuery.matches && !accepted && !dialog.open) dialog.showModal();
+	};
+	document.getElementById('small-screen-continue').addEventListener('click', () => {
+		accepted = true;
+		dialog.close();
+		offerOriginalImport();
+	});
+	const decline = () => window.location.assign('/');
+	document.getElementById('small-screen-decline').addEventListener('click', decline);
+	dialog.addEventListener('cancel', (event) => {
+		event.preventDefault();
+		decline();
+	});
+	screenQuery.addEventListener('change', () => {
+		if (!screenQuery.matches && dialog.open) {
+			dialog.close();
+			offerOriginalImport();
+		} else showWarning();
+	});
+	showWarning();
+}
+
 // PanPhyPlot bootstrap.
 document.addEventListener('DOMContentLoaded', () => {
 	loadState(typeof getTourInitialState === 'function' ? getTourInitialState() : null);
@@ -66,5 +94,6 @@ document.addEventListener('DOMContentLoaded', () => {
 	};
 	drawWhenReady();
 	importLinkedData();
+	initializeSmallScreenWarning();
 	offerOriginalImport();
 });

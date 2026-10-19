@@ -37,13 +37,17 @@
 </head>
 
 <body>
-	<div class="phone-gate" role="alert">
-		<img src="/assets/panphy.png" alt="PanPhy logo" />
-		<h1>PanPhyPlot</h1>
-		<p>This version needs a tablet or a computer: its table has room for many columns.</p>
-		<p><a href="/misc/panphyplotog.html">Open PanPhyPlotOG</a>, which works on phones.</p>
-		<p class="phone-gate-copyright">&copy; 2026 PanPhy Labs. All rights reserved.</p>
-	</div>
+	<dialog id="small-screen-warning" class="neo-dialog" aria-labelledby="small-screen-title" aria-describedby="small-screen-description">
+		<div class="neo-dialog-body">
+			<h2 id="small-screen-title">Best on a laptop or tablet</h2>
+			<p id="small-screen-description">PanPhyPlot works best on a laptop or tablet. On a small screen, the table and graph may be harder to use. Would you like to continue?</p>
+			<div class="neo-dialog-actions">
+				<button type="button" class="neo-dialog-cancel" id="small-screen-decline">Not now</button>
+				<button type="button" class="neo-dialog-confirm" id="small-screen-continue">Continue</button>
+			</div>
+			<p class="neo-dialog-note">&copy; 2026 PanPhy Labs. All rights reserved.</p>
+		</div>
+	</dialog>
 
 	<div class="neo-app">
 		<header class="banner neo-appbar">

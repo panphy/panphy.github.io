@@ -323,59 +323,6 @@ input[type="number"]:focus {
 	color: var(--ink-3);
 }
 
-/* ---------- Phone message ---------- */
-
-.phone-gate {
-	display: none;
-}
-
-@media (max-width: 599px), (max-height: 500px) and (pointer: coarse) {
-	.phone-gate {
-		display: flex;
-		flex-direction: column;
-		align-items: center;
-		justify-content: center;
-		gap: 4px;
-		min-height: 100vh;
-		min-height: 100dvh;
-		padding: calc(24px + var(--standalone-top, 0px)) 24px 24px;
-		text-align: center;
-		line-height: 1.5;
-	}
-
-	.phone-gate img {
-		width: 56px;
-		height: 56px;
-		border-radius: 12%;
-	}
-
-	.phone-gate h1 {
-		font-family: var(--font-display);
-		font-weight: 400;
-		margin: 8px 0;
-	}
-
-	.phone-gate p {
-		max-width: 28em;
-		margin: 4px 0;
-	}
-
-	.phone-gate a {
-		color: var(--brand);
-		font-weight: 700;
-	}
-
-	.phone-gate-copyright {
-		margin-top: 24px !important;
-		font-size: 0.8rem;
-		color: var(--ink-2);
-	}
-
-	.neo-app {
-		display: none !important;
-	}
-}
-
 /* ---------- App shell ---------- */
 
 .neo-app {
@@ -766,6 +713,23 @@ input[type="number"]:focus {
 
 .validation-message:empty {
 	display: none;
+}
+
+/* Keep out-of-flow math/plot content inside the viewport-sized app.
+   Results and tour scrolling belong to the panes, not the outer page. */
+@media (min-width: 1000px) {
+	html,
+	body {
+		height: 100%;
+		overflow: hidden;
+		overflow: clip;
+	}
+
+	.neo-app {
+		position: relative;
+		overflow: hidden;
+		overflow: clip;
+	}
 }
 
 /* Wide screens: data | graph | inspector, each filling the height and scrolling on its own. */
@@ -2767,3 +2731,13 @@ input[type="number"]:focus {
 .custom-fit-bounds-header { font-size: 0.75rem; color: var(--ink-3); }
 .custom-fit-bound-name { font: 600 0.86rem var(--font-mono); }
 .custom-fit-bound { font: 0.8rem var(--font-mono); }
+
+/* Small screens can opt into the workspace; keep all toolbar controls reachable. */
+@media (max-width: 599px) {
+	.neo-appbar { position: static; flex-wrap: wrap; gap: 8px; }
+	.neo-sheets { order: 3; flex: 1 0 100%; }
+	.neo-toolbar { position: static; }
+	.neo-tool-group { flex-wrap: wrap; max-width: 100%; }
+	.neo-status { max-width: 100%; }
+	.neo-statusbar-legal { white-space: normal; }
+}

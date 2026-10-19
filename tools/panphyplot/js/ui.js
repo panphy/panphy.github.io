@@ -1373,7 +1373,7 @@ function renderFitParameters() {
 	const lines = [];
 	if (result && Array.isArray(result.parameters)) {
 		result.parameters.forEach(({ name, value, uncertainty }) => {
-			lines.push(`\\( ${name} = ${PanPhyPlotStats.formatMeasurement(value, uncertainty)} \\)`);
+			lines.push(`\\( ${name} = ${PanPhyPlotStats.formatMeasurement(value, uncertainty, plotState.equationDecimals)} \\)`);
 		});
 	}
 	const toLine = (text) => {
