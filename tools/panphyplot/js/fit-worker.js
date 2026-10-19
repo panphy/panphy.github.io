@@ -76,8 +76,8 @@ function sanitizeDataPoints(rawData) {
 
 function solveSinusoidalFit(payload) {
 	const data = sanitizeDataPoints(payload.data);
-	if (data.length < 4) {
-		throw new Error('Sinusoidal fit needs at least four valid points.');
+	if (data.length < 5) {
+		throw new Error('Sinusoidal fit needs at least five valid points.');
 	}
 
 	const initial = payload.initial || {};
@@ -216,7 +216,7 @@ async function solveCustomFit(payload) {
 	const jacobianFn = buildCustomJacobianFn(compiledExpression, parameterNames);
 
 	const result = solveCustomMultiStart(
-		data, starts, residualFn, jacobianFn, { maxIterations, tolerance }
+		data, starts, residualFn, jacobianFn, { maxIterations, tolerance, scales: payload.scales, bounds: payload.bounds }
 	);
 
 	if (!result.params || !Array.isArray(result.params)) {

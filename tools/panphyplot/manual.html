@@ -303,9 +303,9 @@
 				<tr><th>Tab</th><th>Models</th></tr>
 			</thead>
 			<tbody>
-				<tr><td>Basic</td><td>Linear \(y = mx + c\), quadratic, cubic, exponential \(y = A e^{bx} + c\) and the general power law \(y = A(x - x_0)^{b} + c\). Its four parameters are found reliably, but with few points they can trade off against each other, so their ± values may be large; if theory says \(x_0 = 0\) and \(c = 0\), a Custom fit <code>A*x^b</code> pins them.</td></tr>
-				<tr><td>Advanced</td><td>Sinusoidal and Gaussian, from starting values you can adjust.</td></tr>
-				<tr><td>Custom</td><td>Your own formula in \(x\), such as <code>A*exp(-k*x)+c</code> or <code>k*x</code>. Every other letter is a parameter to fit.</td></tr>
+				<tr><td>Basic</td><td>Linear \(y = mx + c\), quadratic, cubic, exponential \(y = A e^{b(x-x_{\rm ref})} + c\), where \(x_{\rm ref}\) is fixed at the middle of the measured x-range and the general power law \(y = A(x - x_0)^{b} + c\). Its four parameters are found by an automatic search; with few points they can trade off against each other, so their ± values may be large; if theory says \(x_0 = 0\) and \(c = 0\), a Custom fit <code>A*x^b</code> pins them.</td></tr>
+				<tr><td>Advanced</td><td>Sinusoidal and Gaussian, with automatic starting values you can adjust. Gaussian fits support peaks and dips above a baseline. Sinusoidal fits need at least five points; automatic frequency searches stay within the sampling limit for evenly spaced data. A larger manual frequency extends the search, but sampled data may not distinguish aliases.</td></tr>
+				<tr><td>Custom</td><td>Your own formula in \(x\), such as <code>A*exp(-k*x)+c</code> or <code>k*x</code>. Every other letter is a parameter to fit. Use <strong>Auto guesses</strong> to recalculate starting values. Optional <strong>Min</strong> and <strong>Max</strong> fields constrain each parameter; leave them blank for no bound. Formulas linear in their parameters are solved directly.</td></tr>
 			</tbody>
 		</table>
 		<h3>Extending the line</h3>

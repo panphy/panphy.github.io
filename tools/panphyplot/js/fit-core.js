@@ -126,6 +126,8 @@
 		const tolerance = Number.isFinite(options.tolerance) ? options.tolerance : 1e-8;
 		const penalty = Number.isFinite(options.penalty) ? options.penalty : DEFAULT_PENALTY;
 
+		const isValid = options.isValidParams || (p => p.every(Number.isFinite));
+		if (!isValid(initialParams)) return { params: initialParams.slice(), cost: Infinity, converged: false, reason: 'invalid-start', iterations: 0 };
 		let params = initialParams.slice();
 		let lambda = Number.isFinite(options.initialLambda) ? options.initialLambda : 1e-3;
 		const nu = 2;
@@ -205,13 +207,18 @@
 			const jtj = multiply(jTranspose, jacobian);
 			const jtr = multiplyMatrixVector(jTranspose, residuals);
 
-			const gradientSmall = jtr.every((value, i) => Math.abs(value) <= tolerance * Math.sqrt(Math.abs(jtj[i][i])) * Math.sqrt(cost));
+			const projectedGradient = options.projectGradient ? options.projectGradient(params, jtr) : jtr;
+			const gradientSmall = projectedGradient.every((value, i) => Math.abs(value) <= tolerance * Math.sqrt(Math.abs(jtj[i][i])) * Math.sqrt(cost));
 			if (gradientSmall) return finish(true, 'stationary');
 
 			const n = jtj.length;
 			const damped = new Array(n).fill(null).map(() => new Array(n).fill(0));
 			for (let i = 0; i < n; i++) {
 				for (let j = 0; j < n; j++) {
+					if (projectedGradient[i] !== jtr[i] || projectedGradient[j] !== jtr[j]) {
+						damped[i][j] = i === j ? 1 : 0;
+						continue;
+					}
 					damped[i][j] = jtj[i][j];
 					if (i === j) {
 						const diag = Math.abs(damped[i][j]) > 0 ? Math.abs(damped[i][j]) : 1;
@@ -222,7 +229,7 @@
 
 			let delta = null;
 			try {
-				const negJtr = jtr.map((value) => -value);
+				const negJtr = projectedGradient.map((value) => -value);
 				delta = solve(damped, negJtr);
 			} catch {
 				lambda *= nu;
@@ -233,7 +240,9 @@
 				continue;
 			}
 
-			const nextParams = params.map((value, index) => value + delta[index]);
+			const proposed = params.map((value, index) => value + delta[index]);
+			const nextParams = options.projectParams ? options.projectParams(proposed) : proposed;
+			if (!isValid(nextParams)) { lambda *= nu; if (lambda > 1e20) return finish(false, 'boundary'); continue; }
 			const nextResiduals = safeResiduals(nextParams);
 			const nextCost = costFromResiduals(nextResiduals);
 			if (nextCost < cost) {
@@ -308,159 +317,12 @@
 		return A * Math.exp(b * xValue) * Math.sin(k * xValue - phi) + c;
 	}
 
-	// Solve y = A e^{bx} sin(kx - phi) + c with a small multi-start over k.
-	// Returns { params, xFit, yFit, equation } or null if it cannot converge.
-	function solveSinusoidal(data, initial, options = {}) {
-		const A0 = Number(initial.A);
-		const b0 = Number(initial.b);
-		const k0 = Number(initial.k);
-		const phi0 = Number(initial.phi);
-		const c0 = Number(initial.c);
-		const penalty = Number.isFinite(options.penalty) ? options.penalty : DEFAULT_PENALTY;
-		const maxIterations = Number.isFinite(options.maxIterations) ? options.maxIterations : 300;
-		const tolerance = Number.isFinite(options.tolerance) ? options.tolerance : 1e-10;
-		const sampleCount = Number.isFinite(options.sampleCount) ? options.sampleCount : 300;
-
-		function residualFn(params, pts) {
-			const [A, b, k, phi, c] = params;
-			return pts.map(({ x, y }) => {
-				try {
-					const yPred = A * Math.exp(b * x) * Math.sin(k * x - phi) + c;
-					if (!Number.isFinite(yPred)) return penalty;
-					return yPred - y;
-				} catch {
-					return penalty;
-				}
-			});
-		}
-
-		function jacobianFn(params, pts) {
-			const [A, b, k, phi] = params;
-			return pts.map(({ x }) => {
-				try {
-					const expTerm = Math.exp(b * x);
-					const angle = k * x - phi;
-					const sinTerm = Math.sin(angle);
-					const cosTerm = Math.cos(angle);
-					return [
-						finiteOrZero(expTerm * sinTerm),
-						finiteOrZero(A * x * expTerm * sinTerm),
-						finiteOrZero(A * expTerm * x * cosTerm),
-						finiteOrZero(-A * expTerm * cosTerm),
-						1
-					];
-				} catch {
-					return [0, 0, 0, 0, 0];
-				}
-			});
-		}
-
-		const kCandidates = [...new Set(
-			[k0, k0 * 0.667, k0 * 1.5, k0 * 2.0].filter((value) => Number.isFinite(value) && value > 0)
-		)];
-
-		let best = null;
-		let bestCost = Infinity;
-		for (let index = 0; index < kCandidates.length; index++) {
-			const kCandidate = kCandidates[index];
-			let sumSin = 0;
-			let sumCos = 0;
-			for (let pointIndex = 0; pointIndex < data.length; pointIndex++) {
-				const val = data[pointIndex].y - c0;
-				sumSin += val * Math.sin(kCandidate * data[pointIndex].x);
-				sumCos += val * Math.cos(kCandidate * data[pointIndex].x);
-			}
-			let phiCandidate = Math.atan2(-sumCos, sumSin);
-			if (!Number.isFinite(phiCandidate)) phiCandidate = phi0;
-			const start = [A0, b0, kCandidate, phiCandidate, c0];
-			const result = levenbergMarquardt(data, start, residualFn, jacobianFn, { maxIterations, tolerance });
-			if (Number.isFinite(result.cost) && result.cost < bestCost) {
-				best = result;
-				bestCost = result.cost;
-			}
-		}
-
-		if (!best || !Array.isArray(best.params) || best.params.length !== 5) return null;
-		const params = {
-			A: Number(best.params[0]),
-			b: Number(best.params[1]),
-			k: Number(best.params[2]),
-			phi: Number(best.params[3]),
-			c: Number(best.params[4])
-		};
-		const xFit = buildFitDomainFromData(data, sampleCount);
-		const yFit = xFit.map((xValue) => evaluateSinusoidal(params, xValue));
-		return { params, xFit, yFit, equation: buildSinusoidalEquation(params), converged: best.converged, reason: best.reason, iterations: best.iterations };
-	}
-
 	function evaluateGaussian(params, xValue) {
 		const A = Number(params.A);
 		const mu = Number(params.mu);
 		const sigma = Number(params.sigma);
 		const c = Number(params.c);
 		return A * Math.exp(-((xValue - mu) ** 2) / (2 * sigma * sigma)) + c;
-	}
-
-	// Solve y = A e^{-(x-mu)^2 / (2 sigma^2)} + c.
-	// Returns { params, xFit, yFit, equation } or null if it cannot converge.
-	function solveGaussian(data, initial, options = {}) {
-		const A0 = Number(initial.A);
-		const mu0 = Number(initial.mu);
-		let sigma0 = Number(initial.sigma);
-		const c0 = Number(initial.c);
-		if (sigma0 === 0) sigma0 = 1e-6;
-		if (sigma0 < 0) sigma0 = Math.abs(sigma0);
-		const penalty = Number.isFinite(options.penalty) ? options.penalty : DEFAULT_PENALTY;
-		const maxIterations = Number.isFinite(options.maxIterations) ? options.maxIterations : 300;
-		const tolerance = Number.isFinite(options.tolerance) ? options.tolerance : 1e-10;
-		const sampleCount = Number.isFinite(options.sampleCount) ? options.sampleCount : 300;
-
-		function residualFn(params, pts) {
-			const [A, mu, sigma, c] = params;
-			if (!Number.isFinite(sigma) || sigma <= 0) return new Array(pts.length).fill(penalty);
-			const sigmaSq = sigma * sigma;
-			return pts.map(({ x, y }) => {
-				try {
-					const d = x - mu;
-					const yPred = A * Math.exp(-(d * d) / (2 * sigmaSq)) + c;
-					if (!Number.isFinite(yPred)) return penalty;
-					return yPred - y;
-				} catch {
-					return penalty;
-				}
-			});
-		}
-
-		function jacobianFn(params, pts) {
-			const [A, mu, sigma] = params;
-			if (!Number.isFinite(sigma) || sigma <= 0) return pts.map(() => [0, 0, 0, 0]);
-			const sigmaSq = sigma * sigma;
-			const sigmaCubed = sigmaSq * sigma;
-			return pts.map(({ x }) => {
-				try {
-					const d = x - mu;
-					const e = Math.exp(-(d * d) / (2 * sigmaSq));
-					return [
-						finiteOrZero(e),
-						finiteOrZero(A * e * (d / sigmaSq)),
-						finiteOrZero(A * e * ((d * d) / sigmaCubed)),
-						1
-					];
-				} catch {
-					return [0, 0, 0, 0];
-				}
-			});
-		}
-
-		const result = levenbergMarquardt(data, [A0, mu0, sigma0, c0], residualFn, jacobianFn, { maxIterations, tolerance });
-		if (!result || !Array.isArray(result.params) || result.params.length !== 4) return null;
-		let [A, mu, sigma, c] = result.params;
-		// Finite fallback when the solver returns a degenerate sigma.
-		if (!Number.isFinite(sigma) || sigma <= 0) sigma = Math.max(1e-6, Math.abs(sigma0));
-		const params = { A: Number(A), mu: Number(mu), sigma: Number(sigma), c: Number(c) };
-		const xFit = buildFitDomainFromData(data, sampleCount);
-		const yFit = xFit.map((xValue) => evaluateGaussian(params, xValue));
-		return { params, xFit, yFit, equation: buildGaussianEquation(params), converged: result.converged, reason: result.reason, iterations: result.iterations };
 	}
 
 	// ---- Shared custom-formula fitting helpers ----
@@ -482,7 +344,7 @@
 	function buildCustomResidualFn(compiledExpression, parameterNames, penalty = DEFAULT_PENALTY) {
 		return (params, points) => points.map(({ x, y }) => {
 			const yPred = evaluateCustomExpression(compiledExpression, parameterNames, params, x);
-			if (!Number.isFinite(yPred)) return penalty;
+			if (!Number.isFinite(yPred)) return NaN;
 			return yPred - y;
 		});
 	}
@@ -508,101 +370,311 @@
 		});
 	}
 
-	// Run Levenberg-Marquardt from each start, keeping the lowest-cost result.
-	function solveCustomMultiStart(data, starts, residualFn, jacobianFn, options = {}) {
-		const maxIterations = Number.isFinite(options.maxIterations) ? options.maxIterations : 350;
-		const tolerance = Number.isFinite(options.tolerance) ? options.tolerance : 1e-10;
-		let bestParams = null;
-		let bestCost = Infinity;
-		let bestResult = null;
-		for (let index = 0; index < starts.length; index++) {
-			const result = levenbergMarquardt(data, starts[index], residualFn, jacobianFn, { maxIterations, tolerance });
-			if (!Number.isFinite(result.cost)) continue;
-			if (result.cost < bestCost) {
-				bestCost = result.cost;
-				bestParams = result.params;
-				bestResult = result;
-			}
-		}
-		return bestResult || { params: bestParams, cost: bestCost, converged: false, reason: 'no-solution', iterations: 0 };
+	// Scale the optimization coordinates, not just the finite differences. Bounds
+	// reject a step before evaluating a model outside its physical domain.
+	function solveScaledLeastSquares(data, initial, residualFn, options = {}) {
+		const scales = initial.map((value, i) => Math.abs(options.scales?.[i]) || Math.abs(value) || 1);
+		const bounds = options.bounds || initial.map(() => ({}));
+		const unpack = u => u.map((value, i) => initial[i] + value * scales[i]);
+		const valid = p => p.every((value, i) => Number.isFinite(value) && (bounds[i]?.min == null || value >= bounds[i].min) && (bounds[i]?.max == null || value <= bounds[i].max)) && (!options.isValidParams || options.isValidParams(p));
+		const first = valid(initial) ? residualFn(initial, data) : null;
+		if (!first || first.length !== data.length || first.some(v => !Number.isFinite(v))) return null;
+		const scale = Math.max(maxAbs(first), maxAbs(data.map(p => p.y))) || 1;
+		const residual = u => residualFn(unpack(u), data).map(value => value / scale);
+		const canEvaluate = u => valid(unpack(u)) && residual(u).every(Number.isFinite);
+		const jacobian = u => {
+			const base = residual(u);
+			const cols = u.map((value, j) => {
+				const h = 1e-5 * Math.max(1, Math.abs(value));
+				const plus = u.slice(), minus = u.slice(); plus[j] += h; minus[j] -= h;
+				const fp = canEvaluate(plus) ? residual(plus) : null, fm = canEvaluate(minus) ? residual(minus) : null;
+				return base.map((v, i) => fp && fm ? (fp[i] - fm[i]) / (2 * h) : fp ? (fp[i] - v) / h : fm ? (v - fm[i]) / h : 0);
+			});
+			return data.map((_, i) => cols.map(col => col[i]));
+		};
+		const normalizedData = data.map(p => ({ x: p.x, y: p.y / scale }));
+		const result = levenbergMarquardt(normalizedData, initial.map(() => 0), residual, jacobian,
+			{ ...options, isValidParams: canEvaluate,
+				projectParams: u => u.map((value, i) => Math.min(bounds[i]?.max == null ? Infinity : (bounds[i].max - initial[i]) / scales[i], Math.max(bounds[i]?.min == null ? -Infinity : (bounds[i].min - initial[i]) / scales[i], value))),
+				projectGradient: (u, gradient) => gradient.map((value, i) => {
+					const p = unpack(u)[i], bound = bounds[i] || {};
+					return (bound.min != null && p <= bound.min && value > 0) || (bound.max != null && p >= bound.max && value < 0) ? 0 : value;
+				})
+			});
+		return { ...result, params: unpack(result.params), cost: result.cost * scale * scale };
 	}
 
-	// y = A (x - x0)^b + c, the general power law. A and c trade off against x0 and b, so a
-	// local search from a rough guess often stalls. For fixed x0 and b the model is linear in
-	// A and c, which a least-squares line gives exactly: a scan over (x0, b) finds the right
-	// valley, and Levenberg-Marquardt then polishes all four parameters from the best few.
+	function solveCustomMultiStart(data, starts, residualFn, jacobianFn, options = {}) {
+		let best = null;
+		for (const start of starts) {
+			const result = solveScaledLeastSquares(data, start, residualFn, { maxIterations: 350, tolerance: 1e-10, ...options });
+			if (result && Number.isFinite(result.cost) && (!best || result.cost < best.cost)) best = result;
+		}
+		return best || { params: null, cost: Infinity, converged: false, reason: 'invalid-starts', iterations: 0 };
+	}
+
+	// Work in dimensionless x and y; changing measurement units must not change a fit.
+	function scaledData(data) {
+		const points = data.filter(p => Number.isFinite(p.x) && Number.isFinite(p.y));
+		const { min: origin, max } = minMaxFinite(points.map(p => p.x));
+		const span = max - origin;
+		if (points.length < 2 || !(span > 0) || !Number.isFinite(span)) return null;
+		const offset = points.reduce((sum, p) => sum + p.y / points.length, 0);
+		const scale = maxAbs(points.map(p => p.y - offset)) || Math.abs(offset) || 1;
+		return { origin, span, offset, scale, points: points.map(p => ({ x: (p.x - origin) / span, y: (p.y - offset) / scale })) };
+	}
+
+	// Column-scaled, twice-orthogonalized QR. Avoid normal equations and their squared
+	// condition number when estimating the linear coefficients of a nonlinear model.
+	function linearLeastSquares(rows, values) {
+		if (!rows.length || rows.length !== values.length || !rows[0].length) return null;
+		const n = rows.length, m = rows[0].length;
+		if (n < m || rows.some(row => row.length !== m || row.some(v => !Number.isFinite(v))) || values.some(v => !Number.isFinite(v))) return null;
+		const scales = Array.from({ length: m }, (_, j) => maxAbs(rows.map(row => row[j])));
+		if (scales.some(s => !(s > 0))) return null;
+		const q = [], r = Array.from({ length: m }, () => Array(m).fill(0));
+		for (let j = 0; j < m; j++) {
+			const v = rows.map(row => row[j] / scales[j]);
+			for (let pass = 0; pass < 2; pass++) {
+				for (let k = 0; k < j; k++) {
+					const dot = v.reduce((sum, value, i) => sum + value * q[k][i], 0);
+					r[k][j] += dot;
+					for (let i = 0; i < n; i++) v[i] -= dot * q[k][i];
+				}
+			}
+			r[j][j] = Math.sqrt(v.reduce((sum, value) => sum + value * value, 0));
+			if (!(r[j][j] > 1e-12 * Math.sqrt(n))) return null;
+			q.push(v.map(value => value / r[j][j]));
+		}
+		const coefficients = q.map(col => col.reduce((sum, value, i) => sum + value * values[i], 0));
+		for (let j = m - 1; j >= 0; j--) {
+			for (let k = j + 1; k < m; k++) coefficients[j] -= r[j][k] * coefficients[k];
+			coefficients[j] /= r[j][j];
+		}
+		for (let j = 0; j < m; j++) coefficients[j] /= scales[j];
+		const residuals = rows.map((row, i) => row.reduce((sum, value, j) => sum + value * coefficients[j], 0) - values[i]);
+		const cost = residuals.reduce((sum, value) => sum + value * value, 0);
+		return Number.isFinite(cost) ? { coefficients, residuals, cost } : null;
+	}
+
+	function profileModel(points, basis) {
+		return linearLeastSquares(points.map(p => basis(p.x)), points.map(p => p.y));
+	}
+
+	// Variable projection: solve linear coefficients exactly at every nonlinear step.
+	function refineProfile(points, starts, profile, valid, options = {}) {
+		let best = null;
+		for (const start of starts) {
+			if (!valid(start) || !profile(start)) continue;
+			const residual = p => profile(p)?.residuals || points.map(() => NaN);
+			const jacobian = p => {
+				const base = residual(p);
+				const columns = p.map((value, j) => {
+					const step = 1e-5 * Math.max(1, Math.abs(value));
+					const plus = p.slice(), minus = p.slice();
+					plus[j] += step; minus[j] -= step;
+					const fp = valid(plus) ? profile(plus)?.residuals : null;
+					const fm = valid(minus) ? profile(minus)?.residuals : null;
+					return base.map((v, i) => fp && fm ? (fp[i] - fm[i]) / (2 * step) : fp ? (fp[i] - v) / step : fm ? (v - fm[i]) / step : 0);
+				});
+				return points.map((_, i) => columns.map(col => col[i]));
+			};
+			const result = levenbergMarquardt(points, start, residual, jacobian, {
+				maxIterations: options.maxIterations || 250, tolerance: options.tolerance || 1e-12,
+				isValidParams: p => valid(p) && profile(p) !== null
+			});
+			const fitted = profile(result.params);
+			if (fitted && (!best || fitted.cost < best.cost)) best = { ...result, ...fitted };
+		}
+		return best;
+	}
+
+	function distinctStarts(candidates, limit, distance) {
+		const selected = [];
+		candidates.sort((a, b) => a.cost - b.cost);
+		for (const candidate of candidates) {
+			if (selected.every(other => distance(candidate.params, other.params))) selected.push(candidate);
+			if (selected.length >= limit) break;
+		}
+		return selected.map(candidate => candidate.params);
+	}
+
+	function sinusoidalSearch(data) {
+		const scaled = scaledData(data);
+		if (!scaled || scaled.points.length < 5) return null;
+		const xs = [...new Set(scaled.points.map(p => p.x))].sort((a, b) => a - b);
+		const gaps = xs.slice(1).map((x, i) => x - xs[i]).sort((a, b) => a - b);
+		if (!gaps.length) return null;
+		// Exact Nyquist limit for a uniform grid; a documented median-spacing search
+		// limit for irregular samples (there is no unique irregular-grid Nyquist).
+		const maxOmega = Math.PI / gaps[Math.floor(gaps.length / 2)];
+		const profile = ([omega, damping]) => profileModel(scaled.points, x => {
+			const e = Math.exp(damping * (x - 0.5));
+			return [1, e * Math.sin(omega * x), e * Math.cos(omega * x)];
+		});
+		const candidates = [];
+		const count = Math.min(6000, Math.max(80, Math.ceil(maxOmega / (Math.PI / 4))));
+		for (const damping of [0, -2, 2, -8, 8]) {
+			for (let i = 0; i <= count; i++) {
+				const omega = 0.1 + (maxOmega * (1 - 1e-8) - 0.1) * i / count;
+				const fit = profile([omega, damping]);
+				if (fit) candidates.push({ params: [omega, damping], cost: fit.cost });
+			}
+		}
+		return { scaled, profile, maxOmega, starts: distinctStarts(candidates, 12, (a, b) => Math.abs(a[0] - b[0]) > Math.PI / 2 || Math.abs(a[1] - b[1]) > 3) };
+	}
+
+	function sinusoidalParameters(scaled, nonlinear, coefficients) {
+		const [omega, damping] = nonlinear;
+		const [offset, sine, cosine] = coefficients;
+		const b = damping / scaled.span, k = omega / scaled.span;
+		return { A: scaled.scale * Math.hypot(sine, cosine) * Math.exp(-damping / 2 - b * scaled.origin), b, k,
+			phi: Math.atan2(-cosine, sine) + k * scaled.origin, c: scaled.offset + scaled.scale * offset };
+	}
+
+	function estimateSinusoidal(data) {
+		const search = sinusoidalSearch(data);
+		if (!search || !search.starts.length) return null;
+		const start = search.starts[0];
+		return sinusoidalParameters(search.scaled, start, search.profile(start).coefficients);
+	}
+
+	function estimateGaussian(data) {
+		const scaled = scaledData(data);
+		if (!scaled || scaled.points.length < 4) return null;
+		const sorted = scaled.points.slice().sort((a, b) => a.x - b.x);
+		const edgeCount = Math.max(1, Math.ceil(sorted.length / 10));
+		const edges = [...sorted.slice(0, edgeCount), ...sorted.slice(-edgeCount)].map(p => p.y).sort((a, b) => a - b);
+		const baseline = edges[Math.floor(edges.length / 2)];
+		const peak = sorted.reduce((best, p) => Math.abs(p.y - baseline) > Math.abs(best.y - baseline) ? p : best);
+		const sign = peak.y >= baseline ? 1 : -1;
+		const half = Math.abs(peak.y - baseline) / 2;
+		const peakIndex = sorted.indexOf(peak);
+		const crossing = (from, direction) => {
+			for (let i = from; i + direction >= 0 && i + direction < sorted.length; i += direction) {
+				const p = sorted[i], q = sorted[i + direction];
+				const a = sign * (p.y - baseline), b = sign * (q.y - baseline);
+				if (a >= half && b < half) return p.x + (q.x - p.x) * (half - a) / (b - a);
+			}
+			return null;
+		};
+		const left = crossing(peakIndex, -1), right = crossing(peakIndex, 1);
+		const width = left !== null && right !== null ? (right - left) / Math.sqrt(8 * Math.log(2)) : 0.1;
+		return { A: scaled.scale * (peak.y - baseline), mu: scaled.origin + scaled.span * peak.x,
+			sigma: scaled.span * Math.max(width, 1e-6), c: scaled.offset + scaled.scale * baseline };
+	}
+
+	function solveSinusoidal(data, initial = {}, options = {}) {
+		const search = sinusoidalSearch(data);
+		if (!search) return null;
+		const { scaled, profile, starts } = search;
+		const manualOmega = Number(initial.k) * scaled.span;
+		const maxOmega = manualOmega > search.maxOmega * (1 + 1e-6) ? manualOmega * 1.25 : search.maxOmega;
+		const valid = ([omega, damping]) => omega > 0 && omega <= maxOmega && Math.abs(damping) < 100;
+		if (Number.isFinite(manualOmega) && Number.isFinite(initial.b)) starts.unshift([manualOmega, initial.b * scaled.span]);
+		let best = refineProfile(scaled.points, starts, profile, valid, options);
+		if (!best) return null;
+		let params = sinusoidalParameters(scaled, best.params, best.coefficients);
+		// Keep the user's complete vector as a candidate, including phase. Projected
+		// starts normally improve it, but an exact supplied solution must not be lost.
+		if (['A', 'b', 'k', 'phi', 'c'].every(key => Number.isFinite(initial[key])) && initial.k > 0) {
+			const cost = data.reduce((sum, p) => sum + ((evaluateSinusoidal(initial, p.x) - p.y) / scaled.scale) ** 2, 0);
+			if (Number.isFinite(cost) && cost < best.cost) {
+				params = { ...initial };
+				best = { ...best, cost, converged: cost < 1e-24, reason: cost < 1e-24 ? 'residual-at-roundoff' : 'user-start', iterations: 0 };
+			}
+		}
+		if (Object.values(params).some(value => !Number.isFinite(value))) return null;
+		// Trigonometric evaluation loses absolute phase precision as k*span grows.
+		// A residual at that floating-point floor is a solved fit, even if LM stalls.
+		const phaseRoundoff = 32 * Number.EPSILON * (1 + Math.abs(params.k * scaled.span));
+		if (best.cost <= data.length * phaseRoundoff ** 2) best = { ...best, converged: true, reason: 'residual-at-roundoff' };
+		const xFit = buildFitDomainFromData(data, options.sampleCount || 300);
+		return { params, xFit, yFit: xFit.map(x => evaluateSinusoidal(params, x)), equation: buildSinusoidalEquation(params),
+			converged: best.converged, reason: best.reason, iterations: best.iterations };
+	}
+
+	function solveGaussian(data, initial = {}, options = {}) {
+		const scaled = scaledData(data), guess = estimateGaussian(data);
+		if (!scaled || !guess) return null;
+		const profile = ([mu, logSigma]) => profileModel(scaled.points, x => [1, Math.exp(-0.5 * ((x - mu) / Math.exp(logSigma)) ** 2)]);
+		const candidates = [];
+		const centres = [guess.mu, initial.mu].filter(Number.isFinite).map(mu => (mu - scaled.origin) / scaled.span);
+		centres.push(...Array.from({ length: 9 }, (_, i) => i / 8));
+		const widths = [guess.sigma / scaled.span, Math.abs(initial.sigma) / scaled.span, 0.02, 0.05, 0.1, 0.25, 0.5, 1].filter(w => Number.isFinite(w) && w > 0);
+		for (const mu of centres) for (const width of widths) {
+			const params = [mu, Math.log(width)], fit = profile(params);
+			if (fit) candidates.push({ params, cost: fit.cost });
+		}
+		const starts = distinctStarts(candidates, 8, (a, b) => Math.abs(a[0] - b[0]) > 0.05 || Math.abs(a[1] - b[1]) > 0.5);
+		const best = refineProfile(scaled.points, starts, profile, ([mu, logSigma]) => Number.isFinite(mu) && logSigma > -30 && logSigma < 20, options);
+		if (!best) return null;
+		const params = { A: scaled.scale * best.coefficients[1], mu: scaled.origin + scaled.span * best.params[0],
+			sigma: scaled.span * Math.exp(best.params[1]), c: scaled.offset + scaled.scale * best.coefficients[0] };
+		const xFit = buildFitDomainFromData(data, options.sampleCount || 300);
+		return { params, xFit, yFit: xFit.map(x => evaluateGaussian(params, x)), equation: buildGaussianEquation(params),
+			converged: best.converged, reason: best.reason, iterations: best.iterations };
+	}
+
+	// xRef is fixed from the data, never a fourth fitted parameter.
+	function solveExponential(data, options = {}) {
+		const scaled = scaledData(data);
+		if (!scaled || scaled.points.length < 3) return null;
+		const profile = ([rate]) => profileModel(scaled.points, x => [1, Math.exp(rate * (x - 0.5))]);
+		const candidates = [];
+		for (const sign of [-1, 1]) for (const rate of [0.001, 0.01, 0.1, 0.3, 1, 2, 4, 8, 16, 32, 64]) {
+			const params = [sign * rate], fit = profile(params);
+			if (fit) candidates.push({ params, cost: fit.cost });
+		}
+		const starts = distinctStarts(candidates, 8, (a, b) => Math.abs(a[0] - b[0]) > 0.1);
+		const best = refineProfile(scaled.points, starts, profile, ([rate]) => Math.abs(rate) > 1e-10 && Math.abs(rate) < 500, options);
+		if (!best) return null;
+		return { params: { A: scaled.scale * best.coefficients[1], b: best.params[0] / scaled.span,
+			c: scaled.offset + scaled.scale * best.coefficients[0], xRef: scaled.origin + scaled.span / 2 },
+			converged: best.converged, reason: best.reason, iterations: best.iterations };
+	}
+
 	function evaluateShiftedPower(params, xValue) {
 		const t = xValue - params.x0;
 		if (!(t > 0) && !Number.isInteger(params.b)) return NaN;
 		return params.A * Math.pow(t, params.b) + params.c;
 	}
 
-	function profileShiftedPower(data, x0, b) {
-		let n = 0, sz = 0, szz = 0, sy = 0, szy = 0;
-		for (const { x, y } of data) {
-			const z = Math.pow(x - x0, b);
-			if (!Number.isFinite(z)) return null;
-			n++; sz += z; szz += z * z; sy += y; szy += z * y;
-		}
-		const det = n * szz - sz * sz;
-		if (!(Math.abs(det) > 1e-300 * Math.max(1, szz * n))) return null;
-		const A = (n * szy - sz * sy) / det;
-		const c = (sy - A * sz) / n;
-		let sse = 0;
-		for (const { x, y } of data) sse += (A * Math.pow(x - x0, b) + c - y) ** 2;
-		return Number.isFinite(sse) ? { A, b, x0, c, sse } : null;
-	}
-
-	function shiftedPowerResiduals([A, b, x0, c], points, penalty = DEFAULT_PENALTY) {
-		return points.map(({ x, y }) => {
-			const t = x - x0;
-			if (!(t > 0) && !Number.isInteger(b)) return penalty;
-			const predicted = A * Math.pow(t, b) + c;
-			return Number.isFinite(predicted) ? predicted - y : penalty;
-		});
-	}
-
-	function shiftedPowerJacobian([A, b, x0], points) {
-		return points.map(({ x }) => {
-			const t = x - x0;
-			if (!(t > 0)) return [0, 0, 0, 1];
-			const z = Math.pow(t, b);
-			return [z, A * z * Math.log(t), -A * b * Math.pow(t, b - 1), 1].map(finiteOrZero);
-		});
-	}
-
 	function solveShiftedPowerLaw(data, options = {}) {
-		const points = data.filter(point => Number.isFinite(point.x) && Number.isFinite(point.y));
-		if (points.length < 4) return null;
-		const { min: xMin, max: xMax } = minMaxFinite(points.map(point => point.x));
-		const span = (xMax - xMin) || Math.abs(xMin) || 1;
-		// x0 sits below the smallest x, so every (x - x0) is positive for any exponent.
-		const gaps = [1e-6, 1e-4, 1e-3, 3e-3, 0.01, 0.03, 0.1, 0.3, 1, 3, 10, 100].map(k => k * span);
-		if (xMin > 0) gaps.push(xMin);
-		const exponents = [-4, -3, -2, -1.5, -1, -0.75, -0.5, -1 / 3, -0.25, 0.25, 1 / 3, 0.5, 0.75, 0.9, 1.1, 1.25, 1.5, 2, 2.5, 3, 4];
-		const scanned = [];
-		for (const gap of gaps) {
-			for (const b of exponents) {
-				const fit = profileShiftedPower(points, xMin - gap, b);
-				if (fit) scanned.push(fit);
-			}
+		const scaled = scaledData(data);
+		if (!scaled || scaled.points.length < 4) return null;
+		// gap = exp(logGap) guarantees x0 < min(x) throughout optimization.
+		// Divide the basis by its maximum before solving to avoid huge powers.
+		const profile = ([logGap, exponent]) => {
+			const gap = Math.exp(logGap);
+			const shift = exponent * Math.log(exponent >= 0 ? 1 + gap : gap);
+			return profileModel(scaled.points, x => [1, Math.exp(exponent * Math.log(x + gap) - shift)]);
+		};
+		const valid = ([logGap, exponent]) => logGap > -32 && logGap < 32 && Math.abs(exponent) > 1e-7 && Math.abs(exponent) < 100;
+		const candidates = [];
+		const gaps = [1e-6, 1e-4, 0.001, 0.01, 0.1, 0.3, 1, 3, 10, 100, 1000, 10000];
+		if (scaled.origin > 0) gaps.push(scaled.origin / scaled.span);
+		const exponents = [-16, -8, -4, -3, -2, -1, -0.5, -0.25, 0.25, 0.5, 0.75, 0.9, 1.1, 1.5, 2, 3, 4, 8, 16];
+		for (const gap of gaps) for (const exponent of exponents) {
+			const params = [Math.log(gap), exponent], fit = profile(params);
+			if (fit) candidates.push({ params, cost: fit.cost });
 		}
-		if (!scanned.length) return null;
-		scanned.sort((a, b) => a.sse - b.sse);
-		const maxIterations = Number.isFinite(options.maxIterations) ? options.maxIterations : 500;
-		let best = null;
-		for (const start of scanned.slice(0, 4)) {
-			const result = levenbergMarquardt(points, [start.A, start.b, start.x0, start.c],
-				shiftedPowerResiduals, shiftedPowerJacobian, { maxIterations, tolerance: 1e-12 });
-			if (result && Array.isArray(result.params) && result.params.every(Number.isFinite)
-				&& (!best || result.cost < best.cost)) best = result;
-		}
-		if (!best) {
-			const [start] = scanned;
-			return { params: start, converged: false, reason: 'no-solution', iterations: 0, cost: start.sse };
-		}
-		const [A, b, x0, c] = best.params;
-		return { params: { A, b, x0, c }, converged: best.converged, reason: best.reason, iterations: best.iterations, cost: best.cost };
+		const starts = distinctStarts(candidates, 12, (a, b) => Math.abs(a[0] - b[0]) > 0.5 || Math.abs(a[1] - b[1]) > 0.25);
+		const best = refineProfile(scaled.points, starts, profile, valid, { maxIterations: 500, ...options });
+		if (!best) return null;
+		const [logGap, b] = best.params, gap = Math.exp(logGap);
+		const shift = b * Math.log(b >= 0 ? 1 + gap : gap);
+		const params = { A: scaled.scale * best.coefficients[1] * Math.exp(-shift - b * Math.log(scaled.span)), b,
+			x0: scaled.origin - scaled.span * gap, c: scaled.offset + scaled.scale * best.coefficients[0] };
+		if (Object.values(params).some(value => !Number.isFinite(value)) || data.some(p => !Number.isFinite(evaluateShiftedPower(params, p.x)))) return null;
+		const line = profileModel(scaled.points, x => [1, x]);
+		const ambiguous = !!line && line.cost < 1e-20;
+		return { params, converged: best.converged && !ambiguous, reason: ambiguous ? 'unidentifiable' : best.reason,
+			ambiguous, iterations: best.iterations, cost: best.cost * scaled.scale ** 2 };
+	}
+
+	function maxAbs(values) {
+		return values.reduce((largest, value) => Math.max(largest, Math.abs(value)), 0);
 	}
 
 	function finiteOrZero(value) {
@@ -610,6 +682,11 @@
 	}
 
 	globalScope.PanPhyFitCore = Object.freeze({
+		estimateGaussian,
+		estimateSinusoidal,
+		solveExponential,
+		linearLeastSquares,
+		solveScaledLeastSquares,
 		formatFitNumber,
 		computeLinearFit,
 		computeRSq,

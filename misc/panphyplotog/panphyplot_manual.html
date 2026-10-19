@@ -760,7 +760,7 @@
         <ul>
           <li>Navigate to the "Advanced" tab.</li>
           <li>Select an advanced fitting method (Sinusoidal, Gaussian) from the dropdown.</li>
-          <li>Some initial parameters are calculated based on the imported dataset. Adjust the initial parameters if
+          <li>Initial parameters are estimated from the dataset. Gaussian starts account for signed peaks and a baseline. Sinusoidal fits need at least five points and search up to the sampling limit for evenly spaced data; larger manual frequencies extend the search but may be aliased. Adjust the initial parameters if
             needed, or use <strong>Reset parameters</strong>.</li>
           <li>Click the "Fit Curve" button to perform the fitting.</li>
           <li>The fitting equation and R² value will be displayed below the graph for the active dataset.</li>
@@ -780,7 +780,7 @@
             math constants, or math functions.</li>
           <li>Up to 5 parameters are supported for Custom Fit.</li>
           <li>Initial parameter values are auto-filled from the dataset. You can edit them manually or click
-            <strong>Reset parameter</strong> to regenerate guesses.</li>
+            <strong>Auto guesses</strong> to regenerate guesses. Optional <strong>Min</strong> and <strong>Max</strong> fields constrain each parameter; blank fields are unbounded. Formulas linear in their parameters are solved directly.</li>
           <li>Click the "Fit Curve" button to perform the fit.</li>
           <li>The fitted equation and R² value are shown in the Fitting Result panel and support
             <strong>Copy image</strong> / <strong>Copy raw LaTeX</strong>.</li>
