@@ -1270,6 +1270,17 @@ input[type="number"]:focus {
 	font-size: 0.86rem;
 }
 
+/* Large sheets keep only the visible rows and a small buffer in the DOM. */
+.neo-table.is-virtual { --neo-row-height: 37px; }
+.neo-table.is-virtual tbody tr:not(.neo-table-spacer) { height: var(--neo-row-height); }
+.neo-table.is-virtual .neo-cell,
+.neo-table.is-virtual tbody .neo-row-head button {
+	height: calc(var(--neo-row-height) - 1px);
+	min-height: 0;
+}
+.neo-table .neo-table-spacer td { padding: 0; border: 0; background: transparent; }
+@media (pointer: coarse) { .neo-table.is-virtual { --neo-row-height: 45px; } }
+
 .neo-table .neo-cell:focus {
 	box-shadow: none;
 	outline: 2px solid var(--accent);

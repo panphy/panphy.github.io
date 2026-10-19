@@ -499,6 +499,116 @@
 		return selected.map(candidate => candidate.params);
 	}
 
+	// An FFT locates promising frequencies on a near-uniform grid without scanning every
+	// frequency against every measurement. It only supplies starts: scoring and
+	// refinement below still use all original points, including their damping.
+	function uniformFrequencyStarts(points, xs, maxOmega) {
+		if (points.length < 128 || xs.length !== points.length) return null;
+		const step = 1 / (xs.length - 1);
+		// Sound Analyzer rounds exported times; allow sub-sample timestamp
+		// rounding here, but score and refine using their actual x coordinates.
+		if (xs.some((x, i) => Math.abs(x - i * step) > step * 0.45)) return null;
+		let size = 1;
+		while (size < points.length * 4) size *= 2;
+		const real = new Float64Array(size), imaginary = new Float64Array(size);
+		const sorted = points.slice().sort((a, b) => a.x - b.x);
+		for (let i = 0; i < sorted.length; i++) real[i] = sorted[i].y;
+		for (let i = 1, j = 0; i < size; i++) {
+			let bit = size >> 1;
+			for (; j & bit; bit >>= 1) j ^= bit;
+			j ^= bit;
+			if (i < j) [real[i], real[j]] = [real[j], real[i]];
+		}
+		for (let length = 2; length <= size; length *= 2) {
+			const angle = -2 * Math.PI / length;
+			const wr = Math.cos(angle), wi = Math.sin(angle);
+			for (let offset = 0; offset < size; offset += length) {
+				let ur = 1, ui = 0;
+				for (let j = 0; j < length / 2; j++) {
+					const a = offset + j, b = a + length / 2;
+					const vr = real[b] * ur - imaginary[b] * ui, vi = real[b] * ui + imaginary[b] * ur;
+					real[b] = real[a] - vr; imaginary[b] = imaginary[a] - vi;
+					real[a] += vr; imaginary[a] += vi;
+					const next = ur * wr - ui * wi;
+					ui = ur * wi + ui * wr; ur = next;
+				}
+			}
+		}
+		const powers = Array.from({ length: size / 2 + 1 }, (_, i) => real[i] ** 2 + imaginary[i] ** 2);
+		const peaks = [];
+		for (let i = 1; i < powers.length; i++) {
+			if (powers[i] >= powers[i - 1] && (i === powers.length - 1 || powers[i] >= powers[i + 1])) peaks.push(i);
+		}
+		peaks.sort((a, b) => powers[b] - powers[a]);
+		const spacing = 2 * Math.PI / (size * step);
+		const frequencies = new Set();
+		const add = omega => { if (omega > 0 && omega <= maxOmega) frequencies.add(omega); };
+		// Include the low-frequency region where a partial cycle and damping can
+		// resemble a trend, as well as spectral peaks and the sampling limit.
+		for (let omega = 0.1; omega <= 8 * Math.PI; omega += Math.PI / 4) add(omega);
+		for (const peak of peaks.slice(0, 16)) for (const delta of [-1, -0.5, 0, 0.5, 1]) {
+			const omega = (peak + delta) * spacing;
+			add(omega);
+			// Rounded timestamps can put the median-spacing limit above the
+			// nominal uniform-grid Nyquist; test the reflected candidate too.
+			add(2 * Math.PI / step - omega);
+		}
+		add(maxOmega * (1 - 1e-8));
+		return [...frequencies];
+	}
+
+	// QR for the three sinusoidal basis columns, without allocating a row matrix
+	// at every frequency. Reorthogonalization preserves accuracy near degeneracy.
+	function sinusoidalProfile(points) {
+		const n = points.length, sine = new Float64Array(n), cosine = new Float64Array(n);
+		const meanY = points.reduce((sum, p) => sum + p.y / n, 0);
+		const cache = new Map();
+		return ([omega, damping]) => {
+			const key = `${omega},${damping}`;
+			if (cache.has(key)) return cache.get(key);
+			let meanS = 0, meanC = 0, scaleS = 0, scaleC = 0;
+			for (let i = 0; i < n; i++) {
+				const x = points[i].x, envelope = Math.exp(damping * (x - 0.5));
+				sine[i] = envelope * Math.sin(omega * x); cosine[i] = envelope * Math.cos(omega * x);
+				meanS += sine[i] / n; meanC += cosine[i] / n;
+				scaleS = Math.max(scaleS, Math.abs(sine[i])); scaleC = Math.max(scaleC, Math.abs(cosine[i]));
+			}
+			let normS = 0;
+			for (let i = 0; i < n; i++) {
+				sine[i] -= meanS; cosine[i] -= meanC; normS += sine[i] * sine[i];
+			}
+			normS = Math.sqrt(normS);
+			if (!(normS > 1e-12 * Math.sqrt(n) * scaleS)) return null;
+			for (let i = 0; i < n; i++) sine[i] /= normS;
+			let cross = 0;
+			for (let pass = 0; pass < 2; pass++) {
+				let constant = 0, projection = 0;
+				for (let i = 0; i < n; i++) { constant += cosine[i] / n; projection += sine[i] * cosine[i]; }
+				cross += projection;
+				for (let i = 0; i < n; i++) cosine[i] -= constant + projection * sine[i];
+			}
+			let normC = 0, ys = 0, yc = 0;
+			for (let i = 0; i < n; i++) normC += cosine[i] * cosine[i];
+			normC = Math.sqrt(normC);
+			if (!(normC > 1e-12 * Math.sqrt(n) * scaleC)) return null;
+			for (let i = 0; i < n; i++) {
+				cosine[i] /= normC; ys += sine[i] * (points[i].y - meanY); yc += cosine[i] * (points[i].y - meanY);
+			}
+			const c = yc / normC, b = (ys - cross * c) / normS;
+			const coefficients = [meanY - meanS * b - meanC * c, b, c];
+			const residuals = new Array(n);
+			let cost = 0;
+			for (let i = 0; i < n; i++) {
+				residuals[i] = meanY + ys * sine[i] + yc * cosine[i] - points[i].y;
+				cost += residuals[i] * residuals[i];
+			}
+			const result = Number.isFinite(cost) ? { coefficients, residuals, cost } : null;
+			if (cache.size >= 32) cache.delete(cache.keys().next().value);
+			cache.set(key, result);
+			return result;
+		};
+	}
+
 	function sinusoidalSearch(data) {
 		const scaled = scaledData(data);
 		if (!scaled || scaled.points.length < 5) return null;
@@ -508,15 +618,13 @@
 		// Exact Nyquist limit for a uniform grid; a documented median-spacing search
 		// limit for irregular samples (there is no unique irregular-grid Nyquist).
 		const maxOmega = Math.PI / gaps[Math.floor(gaps.length / 2)];
-		const profile = ([omega, damping]) => profileModel(scaled.points, x => {
-			const e = Math.exp(damping * (x - 0.5));
-			return [1, e * Math.sin(omega * x), e * Math.cos(omega * x)];
-		});
+		const profile = sinusoidalProfile(scaled.points);
 		const candidates = [];
 		const count = Math.min(6000, Math.max(80, Math.ceil(maxOmega / (Math.PI / 4))));
+		const frequencies = uniformFrequencyStarts(scaled.points, xs, maxOmega)
+			|| Array.from({ length: count + 1 }, (_, i) => 0.1 + (maxOmega * (1 - 1e-8) - 0.1) * i / count);
 		for (const damping of [0, -2, 2, -8, 8]) {
-			for (let i = 0; i <= count; i++) {
-				const omega = 0.1 + (maxOmega * (1 - 1e-8) - 0.1) * i / count;
+			for (const omega of frequencies) {
 				const fit = profile([omega, damping]);
 				if (fit) candidates.push({ params: [omega, damping], cost: fit.cost });
 			}

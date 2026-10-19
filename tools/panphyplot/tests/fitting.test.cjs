@@ -153,3 +153,75 @@ test('worker custom fitting carries parameter scales and bounds across the messa
 	} } });
 	assert.equal(response.ok, true); near(response.result.params[1] / 0.001, 1);
 });
+
+test('audio-sized frequency initialization avoids a full frequency-by-point grid and retains rounded timestamps', () => {
+	let sineCalls = 0;
+	const measuredMath = Object.create(Math);
+	measuredMath.sin = x => { sineCalls++; return Math.sin(x); };
+	const context = { Math: measuredMath };
+	vm.createContext(context);
+	vm.runInContext(fs.readFileSync(path.join(js, 'fit-core.js'), 'utf8'), context);
+	const audioCore = context.PanPhyFitCore;
+	for (const rate of [44100, 48000]) {
+		const data = Array.from({length:2028}, (_, i) => ({
+			x: Number((1000*i/rate).toFixed(2)),
+			y: 0.4*Math.sin(2*Math.PI*440*i/rate-0.2)+0.02
+		}));
+		sineCalls = 0;
+		const guess = audioCore.estimateSinusoidal(data);
+		assert.ok(sineCalls < data.length * 1000, `exhaustive search: ${sineCalls} sine evaluations`);
+		const fit = audioCore.solveSinusoidal(data, guess);
+		near(fit.params.k, 2*Math.PI*440/1000, 1e-4);
+		near(fit.params.A, 0.4, 1e-3);
+		assert.ok(data.reduce((s,p)=>s+(audioCore.evaluateSinusoidal(fit.params,p.x)-p.y)**2,0)/data.length < 0.00001);
+	}
+	// The FFT only supplies starts; the actual irregular coordinates still decide the fit.
+	const truth = {A:2,b:-0.2,k:93,phi:0.4,c:1};
+	const irregular = Array.from({length:256},(_,i)=>{const x=i/100+0.003*Math.sin(i);return {x,y:audioCore.evaluateSinusoidal(truth,x)};}).reverse();
+	const fit = audioCore.solveSinusoidal(irregular, audioCore.estimateSinusoidal(irregular));
+	near(fit.params.k,truth.k); near(fit.params.b,truth.b);
+	predictions(irregular,x=>audioCore.evaluateSinusoidal(fit.params,x));
+});
+
+test('large automatic guesses use the worker, reuse unchanged results and ignore stale replies', async () => {
+	const local = harness(), c = local.context;
+	const requests = [];
+	c.setTimeout = setTimeout; c.clearTimeout = clearTimeout;
+	c.document.querySelectorAll = () => [];
+	c.Worker = class {
+		addEventListener(name, fn) { if(name==='message') this.receive=fn; }
+		postMessage(message) { requests.push({message,reply:guess=>this.receive({data:{id:message.id,ok:true,result:guess}})}); }
+	};
+	local.elements['advanced-fit-method'] = {value:'Sinusoidal'};
+	const data=points(128,0,5,x=>Math.sin(3*x)); local.setData(data);
+	const guess={A:2,b:0,k:3,phi:0,c:1};
+	let pending=c.setInitialParameters('Sinusoidal');
+	assert.equal(requests[0].message.task,'estimate');
+	assert.equal(requests[0].message.payload.data.length,128);
+	requests[0].reply(guess); await pending;
+	near(+local.elements['initial-k'].value,3);
+	c.setInitialParameters('Sinusoidal'); assert.equal(requests.length,1);
+	for (const mutation of ['manual','data','series']) {
+		c.activeFitKey=mutation; local.setData(data.map(p=>({...p})));
+		pending=c.setInitialParameters('Sinusoidal');
+		const previous=local.elements['initial-k'].value;
+		if(mutation==='manual') local.elements['initial-k'].value='99';
+		if(mutation==='data') local.setData(data.map(p=>({...p,y:p.y+1})));
+		if(mutation==='series') c.activeFitKey='different';
+		requests.at(-1).reply({...guess,k:77}); await pending;
+		assert.equal(local.elements['initial-k'].value,mutation==='manual'?'99':previous);
+	}
+	local.elements.AdvancedFit={classList:{contains:()=>false}};
+	const count=requests.length;
+	c.setInitialParameters('Sinusoidal',{onlyIfVisible:true}); assert.equal(requests.length,count);
+});
+
+test('FFT starts preserve low cycles, damping, units and frequencies near Nyquist', () => {
+	for (const [omega, damping] of [[0.5,-2],[780,0],[50,8],[60,-8]]) {
+		const truth={A:-2,b:damping,k:omega,phi:0.4,c:3};
+		const data=points(256,0,1,x=>core.evaluateSinusoidal(truth,x));
+		const fit=core.solveSinusoidal(data,core.estimateSinusoidal(data));
+		predictions(data,x=>core.evaluateSinusoidal(fit.params,x),1e-6);
+		near(fit.params.k,omega,1e-5);
+	}
+});
