@@ -1554,7 +1554,6 @@ footer a:visited {
 /* Introductory app: one dataset, plain labels and directly accessible copy actions. */
 .intro-note { flex-wrap: wrap; gap: 8px 20px; }
 .intro-note a { color: var(--brand-primary); font-weight: 600; }
-.intro-legacy-note { margin: 0 16px 16px; padding: 12px; border: 1px solid var(--border-color); border-radius: 8px; }
 .intro-copy-actions { display: flex; flex-wrap: wrap; gap: 8px; margin: 8px 0; }
 .intro-copy-actions[hidden] { display: none; }
 .intro-copy-actions button { min-height: 44px; padding: 8px 12px; border: 1px solid var(--border-color); border-radius: 8px; background: var(--card-bg); color: var(--text-main); cursor: pointer; }
