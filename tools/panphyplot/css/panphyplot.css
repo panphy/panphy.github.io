@@ -2728,13 +2728,42 @@ input[type="number"]:focus {
 	}
 }
 
-/* Optional custom-fit bounds sit below the initial value. */
-.custom-fit-parameter-row {
-	display: grid;
-	grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-	flex: 1;
-	min-width: 0;
+/* Initial guesses stay compact; optional bounds expand into their own labelled grid. */
+.custom-fit-initial-header {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 8px;
+	margin: 10px 0 6px;
+	font-size: 0.8rem;
+	font-weight: 700;
+	color: var(--ink-2);
 }
-.custom-fit-parameter-row label { grid-column: 1; }
-.custom-fit-parameter-row input { min-width: 0; width: 100%; max-width: none; }
-.custom-fit-parameter-row .custom-fit-bound { min-height: 48px; font-size: 0.8rem; }
+.custom-fit-parameter-row { grid-template-columns: minmax(2.5em, 25%) minmax(0, 1fr); }
+.custom-fit-parameter-row label,
+.custom-fit-bound-name { overflow-wrap: anywhere; }
+.custom-fit-parameter-row input,
+.custom-fit-bounds-row input { min-width: 0; width: 100%; max-width: none; min-height: 48px; }
+.custom-fit-bounds {
+	margin: 12px 0;
+	border-top: 1px solid var(--line);
+	border-bottom: 1px solid var(--line);
+}
+.custom-fit-bounds summary {
+	padding: 14px 0;
+	min-height: 48px;
+	cursor: pointer;
+	font-size: 0.8rem;
+	font-weight: 600;
+	color: var(--ink-2);
+}
+.custom-fit-bounds-row {
+	display: grid;
+	grid-template-columns: 2.5em minmax(0, 1fr) minmax(0, 1fr);
+	gap: 8px;
+	align-items: center;
+	margin-bottom: 8px;
+}
+.custom-fit-bounds-header { font-size: 0.75rem; color: var(--ink-3); }
+.custom-fit-bound-name { font: 600 0.86rem var(--font-mono); }
+.custom-fit-bound { font: 0.8rem var(--font-mono); }

@@ -51,9 +51,15 @@ const buildCustomJacobianFn = fromFitCore('buildCustomJacobianFn');
 const solveCustomMultiStart = fromFitCore('solveCustomMultiStart');
 
 
-const debouncedRefreshCustomFitDefinition = debounce(() => {
-	refreshCustomFitDefinition({ preserveUserValues: true });
-}, 180);
+function refreshCustomFitFormulaIfChanged() {
+	const { formulaInput } = getCustomFitUiElements();
+	if (formulaInput && (formulaInput.dataset.renderedFormula !== formulaInput.value
+		|| formulaInput.dataset.renderedFitKey !== activeFitKey)) {
+		refreshCustomFitDefinition({ preserveUserValues: true });
+	}
+}
+
+const debouncedRefreshCustomFitDefinition = debounce(refreshCustomFitFormulaIfChanged, 180);
 let fitWorkerInstance = null;
 let fitWorkerRequestCounter = 0;
 const fitWorkerPendingRequests = new Map();
@@ -421,7 +427,7 @@ function getCustomFitGuessByName(parameterName, stats, expression = null) {
 function formatCustomFitInputValue(value) {
 	const numeric = Number(value);
 	if (!Number.isFinite(numeric)) return '';
-	return numeric.toPrecision(8);
+	return Number(numeric.toPrecision(8)).toString();
 }
 
 function syncCustomFitInputsToState() {
@@ -442,6 +448,8 @@ function renderCustomFitParameterInputs(parameterNames, valuesMap) {
 	const { parameterList, parameterEmpty } = getCustomFitUiElements();
 	if (!parameterList || !parameterEmpty) return;
 
+	const previousBounds = parameterList.querySelector('.custom-fit-bounds');
+	const wasOpen = previousBounds?.dataset.fitKey === activeFitKey && previousBounds.open;
 	parameterList.innerHTML = '';
 	if (!Array.isArray(parameterNames) || parameterNames.length === 0) {
 		parameterEmpty.style.display = 'block';
@@ -449,32 +457,67 @@ function renderCustomFitParameterInputs(parameterNames, valuesMap) {
 	}
 
 	parameterEmpty.style.display = 'none';
-	const fragment = document.createDocumentFragment();
+	const state = ensureCustomFitState(activeFitKey);
+	const header = document.createElement('div');
+	header.className = 'custom-fit-initial-header';
+	const heading = document.createElement('span');
+	heading.textContent = 'Initial guess';
+	const resetButton = document.createElement('button');
+	resetButton.type = 'button';
+	resetButton.className = 'advanced-fit-reset-btn';
+	resetButton.textContent = 'Auto guesses';
+	resetButton.title = 'Recalculate initial parameter values from current data';
+	resetButton.addEventListener('click', resetCustomFitParametersFromData);
+	header.append(heading, resetButton);
+	parameterList.appendChild(header);
 
-	parameterNames.forEach((name, index) => {
+	const bounds = document.createElement('details');
+	bounds.className = 'custom-fit-bounds';
+	bounds.dataset.fitKey = activeFitKey;
+	bounds.open = wasOpen || parameterNames.some(name =>
+		['min', 'max'].some(side => (state.bounds?.[name]?.[side] ?? '') !== ''));
+	const summary = document.createElement('summary');
+	summary.textContent = 'Parameter bounds (optional)';
+	bounds.appendChild(summary);
+	const boundsHeader = document.createElement('div');
+	boundsHeader.className = 'custom-fit-bounds-row custom-fit-bounds-header';
+	for (const text of ['', 'Min', 'Max']) {
+		const cell = document.createElement('span');
+		cell.textContent = text;
+		boundsHeader.appendChild(cell);
+	}
+	bounds.appendChild(boundsHeader);
+
+	parameterNames.forEach(name => {
 		const row = document.createElement('div');
-		row.className = 'advanced-fit-item custom-fit-parameter-row';
-
+		row.className = 'custom-fit-parameter-row';
 		const label = document.createElement('label');
-		label.textContent = `${name}:`;
+		label.textContent = name;
 		label.setAttribute('for', `custom-fit-param-${name}`);
-
 		const input = document.createElement('input');
 		input.type = 'number';
 		input.step = 'any';
 		input.id = `custom-fit-param-${name}`;
 		input.className = 'custom-fit-parameter-input';
 		input.setAttribute('data-param', name);
+		input.setAttribute('aria-label', `${name} initial guess`);
 		input.value = formatCustomFitInputValue(valuesMap[name]);
 		input.addEventListener('input', handleCustomFitParameterInput);
 		input.addEventListener('change', handleCustomFitParameterInput);
+		row.append(label, input);
+		parameterList.appendChild(row);
 
-		row.appendChild(label);
-		row.appendChild(input);
-		const state = ensureCustomFitState(activeFitKey);
+		const boundRow = document.createElement('div');
+		boundRow.className = 'custom-fit-bounds-row';
+		const boundName = document.createElement('span');
+		boundName.className = 'custom-fit-bound-name';
+		boundName.textContent = name;
+		boundRow.appendChild(boundName);
 		for (const side of ['min', 'max']) {
 			const bound = document.createElement('input');
-			bound.type = 'number'; bound.step = 'any'; bound.placeholder = side === 'min' ? 'Min' : 'Max';
+			bound.type = 'number';
+			bound.step = 'any';
+			bound.placeholder = '—';
 			bound.className = 'custom-fit-bound';
 			bound.setAttribute('aria-label', `${name} ${side === 'min' ? 'minimum' : 'maximum'} (optional)`);
 			bound.value = state.bounds?.[name]?.[side] ?? '';
@@ -483,26 +526,11 @@ function renderCustomFitParameterInputs(parameterNames, valuesMap) {
 				state.bounds[name][side] = bound.value;
 				scheduleSaveState();
 			});
-			row.appendChild(bound);
+			boundRow.appendChild(bound);
 		}
-
-
-		if (index === 0) {
-			const resetButton = document.createElement('button');
-			resetButton.type = 'button';
-			resetButton.className = 'advanced-fit-reset-btn';
-			resetButton.textContent = 'Auto guesses';
-			resetButton.title = 'Recalculate initial parameter values from current data';
-			resetButton.addEventListener('click', resetCustomFitParametersFromData);
-			fragment.appendChild(resetButton);
-			fragment.appendChild(row);
-			return;
-		}
-
-		fragment.appendChild(row);
+		bounds.appendChild(boundRow);
 	});
-
-	parameterList.appendChild(fragment);
+	parameterList.appendChild(bounds);
 }
 
 function refreshCustomFitDefinition(options = {}) {
@@ -519,6 +547,9 @@ function refreshCustomFitDefinition(options = {}) {
 	const state = ensureCustomFitState(activeFitKey);
 	const rawFormula = String(elements.formulaInput.value || '');
 	state.formula = rawFormula;
+	// Avoid replacing focused parameter controls when an unchanged formula loses focus.
+	elements.formulaInput.dataset.renderedFormula = rawFormula;
+	elements.formulaInput.dataset.renderedFitKey = activeFitKey;
 
 	const normalizedFormula = sanitizeCustomFitFormulaText(rawFormula);
 	if (!normalizedFormula) {
@@ -652,9 +683,7 @@ function initializeCustomFitUI() {
 		scheduleSaveState();
 		debouncedRefreshCustomFitDefinition();
 	});
-	elements.formulaInput.addEventListener('change', () => {
-		refreshCustomFitDefinition({ preserveUserValues: true });
-	});
+	elements.formulaInput.addEventListener('change', refreshCustomFitFormulaIfChanged);
 
 	if (elements.formulaHelpButton) {
 		elements.formulaHelpButton.addEventListener('click', openCustomFitHelp);

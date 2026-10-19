@@ -424,7 +424,11 @@
 			};
 		});
 		layout.legend = { ...(layout.legend || {}), font: { color: ink, size: 12.5 } };
-		layout.hoverlabel = { font: { family: '"IBM Plex Mono", ui-monospace, monospace' } };
+		layout.hoverlabel = {
+			bgcolor: readToken('--surface', '#ffffff'),
+			bordercolor: muted,
+			font: { family: '"IBM Plex Mono", ui-monospace, monospace', color: ink }
+		};
 		layout.modebar = { bgcolor: 'rgba(0,0,0,0)', color: readToken('--ink-3', '#8a8c91'), activecolor: readToken('--accent', '#0f766e') };
 		return layout;
 	}
@@ -463,6 +467,7 @@
 			name,
 			meta: key,
 			legendgroup: key,
+			hovertemplate: '%{fullData.name}<br>(%{x}, %{y})<extra></extra>',
 			visible: hidden ? 'legendonly' : true,
 			marker: { color, symbol: 'circle', size: 7, line: { color: readToken('--surface', '#ffffff'), width: 1.5 } },
 			error_x: { type: 'data', array: points.map(point => point.xError), visible: !!series.xErrCol, color: themeSettings.errorColor, thickness: 0.8, width: 2 },
@@ -480,6 +485,7 @@
 				meta: key,
 				legendgroup: key,
 				showlegend: false,
+				hovertemplate: '%{fullData.name}<br>(%{x}, %{y})<extra></extra>',
 				visible: hidden ? 'legendonly' : true,
 				line: { color: fitColor, width: 2, dash: stale ? 'dash' : 'solid' }
 			});
