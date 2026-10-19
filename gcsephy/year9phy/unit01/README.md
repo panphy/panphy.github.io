@@ -17,10 +17,10 @@ Producing evidence that convinces people who were not there. Over eight lessons 
 | File | What it is | What to do with it |
 |---|---|---|
 | [`../../decks/work-like-a-physicist/index.html`](../../decks/work-like-a-physicist/index.html) | 57-slide HTML teaching deck covering all eight lessons | Present in a browser; advance to reveal answers and teaching points. A compact Note pill at the lower right opens student notes above navigation (N), without resizing the slide |
-| `Work Like a Physicist - Year 9 Student Workbook.pdf` | 40-page A4 student workbook, one per student for the whole unit | Print double-sided. Students keep the same workbook for all eight lessons |
-| `Work Like a Physicist - Year 9 Student Workbook (Answers).pdf` | Answer key for the workbook, by lesson, task and workbook page; linked from the companion site's Resources section | Mark with it, or let students self-check. Practical tasks give sample data |
-| `Work Like a Physicist - Year 9 Unit Review.pdf`, `… (Answers).pdf` | 7-page unit review after Lesson 8: 40 marks of mixed AQA-style questions, a fix-it log and the toolkit page; the answer edition has the same pages with a mark scheme | Set after Lesson 8, in class or at home. Edit `workbook/assets/review.js`, then run `sh build-review-pdf.sh` in `workbook/` |
-| `workbook/` | Editable source of the student workbook and its answers (HTML, CSS, JavaScript) | Edit `workbook/assets/content.js` (or `answers.js` for the answers), then run `sh build-pdf.sh` (or `sh build-answers-pdf.sh`). See `workbook/README.md` |
+| `Work Like a Physicist - Year 9 Student Workbook - Part 1 - Lessons 1-2.pdf`, `Part 2 - Lessons 3-5`, `Part 3 - Lessons 6-8` | The A4 student workbook in three booklets (25, 34 and 28 pages). Each part has its own cover, How this booklet works, its lessons with diagrams for revision, key words, a progress tracker, quick answers and the Physicist's toolkit on the last page | Print double-sided; hand out each part as you reach it |
+| `… (Answers).pdf` | Each part with answers filled in, so page numbers match; practical tasks show sample results from the deck | Mark with it, or let students self-check |
+| `Work Like a Physicist - Year 9 Unit Review.pdf`, `… (Answers).pdf` | 9-page unit review after Lesson 8, in the workbook's design: 40 marks of mixed AQA-style questions, a fix-it log and the toolkit; the answer edition has the same pages with a mark scheme | Set after Lesson 8, in class or at home |
+| `workbook/` | Editable source of the workbook parts, the Unit review and their answer editions (HTML, CSS, JavaScript) | Edit `workbook/assets/lessons-*.js` or `review.js`, then run `sh build-pdfs.sh`. See `workbook/README.md` |
 | `prep/` | Four one-page Prep (homework) sheets, one per two lessons, each out of 10, with answer editions (`pdf/`); the workbook hub links the sheets, not the answer editions | Set after Lessons 2, 4, 6 and 8. Edit `prep/content.js`, then rebuild; see [`../../assets/prep/README.md`](../../assets/prep/README.md) |
 | `teaching-guides/` | The seven lesson-plan PDFs (`Lesson 1 …` to `Lessons 7-8 …`) and their editable source | Read the PDFs before teaching; they are the detail behind each lesson. Edit `teaching-guides/source/*.md`, then run `sh build-pdf.sh`. See `teaching-guides/README.md` |
 | `index.html`, `lesson/` and `assets/` | Static online student companion | Open `index.html`, or visit this folder's published web address |
@@ -30,7 +30,7 @@ Producing evidence that convinces people who were not there. Over eight lessons 
 
 - `teaching-guides/source/*.md` are the editable masters of the lesson plans; rebuild the PDFs with `teaching-guides/build-pdf.sh` and keep the two in step.
 - The teaching deck source is `../../decks/work-like-a-physicist/`; its shared calm style uses the light-orange Year 9 accent. See [`../../decks/README.md`](../../decks/README.md) for styling and controls.
-- `workbook/assets/content.js` is the workbook source (rebuilt from the published PDF after the original was lost); re-export with `workbook/build-pdf.sh` and keep the PDF in step.
+- `workbook/assets/lessons-a.js`, `lessons-b.js` and `lessons-c.js` are the workbook source; rebuild the PDFs with `workbook/build-pdfs.sh`.
 - `index.html`, `lesson/` and `assets/` are the static companion site; `source/` archives the original Sites/React version.
 
 Lesson plans give objectives, vocabulary, activities, answers and teacher notes. The deck gives slides and reveal steps. The workbook is where students write, and every task assumes they have it. The companion site is an optional extra; the unit works without it.
@@ -44,7 +44,7 @@ Lesson plans give objectives, vocabulary, activities, answers and teacher notes.
 | 1 | Can this data be trusted? | Uncertainty, precision, accuracy, resolution, random and systematic error | Short: repeat one measurement three times |
 | 2 | What are you actually changing? | Independent, dependent and control variables; continuous vs categoric; graph choice | Optional demo |
 | 3 | The drop test | Categoric data, repeats, means, bar charts | Shock absorber — ball dropped onto different materials |
-| 4 | Higher ramp, further flight? | Continuous data, scales, plotting a line graph | Ramp — trolley distance against ramp height |
+| 4 | Higher ramp, further travel? | Continuous data, scales, plotting a line graph | Ramp — trolley distance against ramp height |
 | 5 | The point that does not fit | Best-fit lines, anomalous results, graph quality, conclusions | None — analysis of Lesson 4 data |
 | 6 | Solo flight | The whole process, unaided. Light-touch assessment | Paper helicopter |
 | 7–8 | Your investigation | Student-designed investigation, in pairs or threes | Their choice, from a pooled equipment set |
@@ -59,10 +59,10 @@ The shape is deliberate: **Lessons 1–2 build the language, 3–5 build the tec
 
 A student revision hub for use alongside the workbook, after an absence, or before the end-of-unit test:
 
-- a page per lesson with workbook-matched notes, key vocabulary and a link to the relevant workbook pages
+- a page per lesson with workbook-matched notes, key vocabulary and a link to the lesson's workbook part and pages
 - 40 questions: four in each of seven missions, plus 12 AQA-style Exam Zone questions worth 50 marks with fresh contexts
 - a hint and full worked answer for every question, hidden behind a click, and a typing area so students attempt first
-- links to the printable workbook and its answers PDF
+- links to the printable workbook parts and their answers
 
 Answers are visible by design; to set questions as unseen homework, copy the prompts rather than sharing the link. The site is static and lives under `gcsephy/`, which is network-only. It remains available by direct link; the GCSE landing page links the teaching deck and separate [`workbook/`](workbook/) hub instead.
 
@@ -150,7 +150,7 @@ A working-scientifically unit with no new physics; the practicals are vehicles f
 
 ## The student workbook
 
-One per student for all eight lessons. Page 3, *The Physicist's Toolkit*, holds every rule, formula and checklist. Each lesson follows The Case → Your Mission → numbered Tasks → Checkpoint, with printed grid paper for graphs and a glossary, "write this instead of that" table and progress tracker at the back.
+Three parts, one per stage of the unit: Lessons 1–2 (the language), 3–5 (technique on structured practicals) and 6–8 (on your own). Each lesson follows Do now → Learn it → Practical → Try it → Exam corner → Revise it, with diagrams students can revise from, printed graph paper, and the options printed beside every gap. Each part ends with key words, “phrases that pick up marks”, a progress tracker, quick answers and the Physicist's toolkit, which holds every rule, calculation and checklist.
 
 ---
 

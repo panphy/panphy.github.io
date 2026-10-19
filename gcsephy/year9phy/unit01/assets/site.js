@@ -23,7 +23,9 @@
 
   const skills = lesson.unlocks.map((skill) => `<span>${icon("check")} ${skill}</span>`).join("");
   const revision = lesson.revision;
-  const workbookHref = `../../Work Like a Physicist - Year 9 Student Workbook.pdf#page=${revision.pageStart}`;
+  // The workbook is printed in three parts: Lessons 1-2, 3-5 and 6-8.
+  const PART_FILES = { 1: "Part 1 - Lessons 1-2", 2: "Part 2 - Lessons 3-5", 3: "Part 3 - Lessons 6-8" };
+  const workbookHref = `../../Work Like a Physicist - Year 9 Student Workbook - ${PART_FILES[revision.workbookPart]}.pdf#page=${revision.pageStart}`;
   const revisionCards = revision.sections.map((section, sectionIndex) => {
     const paragraphs = section.paragraphs.map((paragraph) => `<p>${paragraph}</p>`).join("");
     const points = section.points?.length
@@ -98,14 +100,14 @@
         <a href="#revision"><span>01</span><strong>Revision notes</strong></a>
         <a href="#practice"><span>02</span><strong>Practice questions</strong></a>
         <a href="../../exam-zone/"><span>03</span><strong>Exam Zone</strong></a>
-        <a href="${workbookHref}" target="_blank" rel="noopener"><span>PDF</span><strong>Workbook pp. ${revision.pageRange}</strong></a>
+        <a href="${workbookHref}" target="_blank" rel="noopener"><span>PDF</span><strong>Workbook Part ${revision.workbookPart}, pp. ${revision.pageRange}</strong></a>
       </nav>
       <section class="revision-section" id="revision">
         <div class="revision-intro">
           <p class="eyebrow dark">Workbook-matched revision</p>
           <h2>Learn it.<br>Use it.</h2>
           <p>${revision.summary}</p>
-          <a class="workbook-link" href="${workbookHref}" target="_blank" rel="noopener">Open workbook pages ${revision.pageRange} <span aria-hidden="true">${icon("up-right")}</span></a>
+          <a class="workbook-link" href="${workbookHref}" target="_blank" rel="noopener">Open workbook Part ${revision.workbookPart}, pages ${revision.pageRange} <span aria-hidden="true">${icon("up-right")}</span></a>
           <div class="revision-route" aria-label="Three ways to use these notes">
             <p><strong>Lesson companion</strong><br>Read the matching card as you complete each workbook task.</p>
             <p><strong>Revision hub</strong><br>Cover the notes and explain each heading from memory.</p>

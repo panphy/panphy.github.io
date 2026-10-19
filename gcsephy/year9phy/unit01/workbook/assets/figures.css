@@ -1,0 +1,33 @@
+/* Line drawings for the Year 9 Energy workbook and deck (assets/figures.js).
+   Colours come from custom properties so the deck can restyle them. */
+.ef { display: block; width: 100%; height: auto; overflow: visible;
+  --ef-ink: #0a1326; --ef-paper: #fff; --ef-soft: #eef1f4; --ef-mid: #b9c1ca;
+  --ef-hot: #d9480f; --ef-hot-t: #ffe1cf; --ef-cool: #1479a8; --ef-cool-t: #d8eefa;
+  --ef-sun: #ffd23f; --ef-sun-t: #fff3c4; --ef-leaf: #4f8a10; --ef-leaf-t: #e4f4cc; }
+.ef .ink { stroke: var(--ef-ink); fill: none; stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round; }
+.ef .thin { stroke-width: 1.4; }
+.ef .bold { stroke-width: 3.4; }
+.ef .dash { stroke-dasharray: 5 4; }
+.ef .paper { fill: var(--ef-paper); }
+.ef .soft { fill: var(--ef-soft); }
+.ef .mid { fill: var(--ef-mid); }
+.ef .solid { fill: var(--ef-ink); stroke: none; }
+.ef .hot { fill: var(--ef-hot); stroke: none; }
+.ef .hot-t { fill: var(--ef-hot-t); }
+.ef .cool { fill: var(--ef-cool); stroke: none; }
+.ef .cool-t { fill: var(--ef-cool-t); }
+.ef .sun { fill: var(--ef-sun); }
+.ef .sun-t { fill: var(--ef-sun-t); }
+.ef .leaf-t { fill: var(--ef-leaf-t); }
+.ef .s-hot { stroke: var(--ef-hot); }
+.ef .s-cool { stroke: var(--ef-cool); }
+.ef text { fill: var(--ef-ink); stroke: none; font: 700 13px/1 Arial, Helvetica, sans-serif; }
+.ef text.sm { font-size: 11px; font-weight: 600; }
+.ef text.lg { font-size: 16px; font-weight: 900; }
+.ef text.muted { fill: #4b5563; }
+.ef text.t-hot { fill: var(--ef-hot); }
+.ef text.t-cool { fill: var(--ef-cool); }
+.ef .grid { stroke: #d6dbe0; stroke-width: 1; fill: none; }
+.ef .grid-major { stroke: #99a3ad; stroke-width: 1; fill: none; }
+.ef .s-leaf { stroke: var(--ef-leaf); }
+.faulty-graph { display: block; width: 100%; height: auto; }
