@@ -1361,6 +1361,7 @@ function clearFittingResultDisplay() {
 		element.replaceChildren();
 	});
 	renderEquationDecimals(false);
+	renderEquationSymbols(false);
 	renderFitParameters();
 	renderFitDiagnostics();
 }
@@ -1551,7 +1552,60 @@ function syncWeightingControl() {
 		: 'Every plotted point needs a ±ΔY or ±ΔX above zero to weight the fit.';
 }
 
-function renderFittingResult(equation, rSquaredDisplay) {
+function getActiveFitSymbols() {
+	const series = resolveFitKey(activeFitKey)?.series;
+	return {
+		x: PlotModel.getFitSymbol(series?.xCol, 'x'),
+		y: PlotModel.getFitSymbol(series?.yCol, 'y')
+	};
+}
+
+function renderEquationSymbols(visible) {
+	const details = document.getElementById('equation-symbols');
+	details.hidden = !visible;
+	const series = resolveFitKey(activeFitKey)?.series;
+	const symbols = getActiveFitSymbols();
+	['x', 'y'].forEach(axis => {
+		const input = document.getElementById(`fit-symbol-${axis}`);
+		input.value = series?.[`${axis}Col`]?.fitSymbol || '';
+		input.placeholder = PlotModel.getFitSymbol({ name: series?.[`${axis}Col`]?.name }, axis);
+		input.removeAttribute('aria-invalid');
+		const preview = document.getElementById(`fit-symbol-${axis}-preview`);
+		typesetLabel(preview, `\\(${symbols[axis]}\\)`);
+	});
+	document.getElementById('fit-symbol-error').textContent = '';
+}
+
+function handleFitSymbolInput() {
+	const series = resolveFitKey(activeFitKey)?.series;
+	if (!series?.xCol) return;
+	const inputs = ['x', 'y'].map(axis => document.getElementById(`fit-symbol-${axis}`));
+	const values = inputs.map(input => input.value.trim());
+	let valid = true;
+	inputs.forEach((input, index) => {
+		const accepted = !values[index] || PlotModel.isFitSymbol(values[index]);
+		input.setAttribute('aria-invalid', String(!accepted));
+		valid = valid && accepted;
+	});
+	const effective = values.map((value, index) => value || inputs[index].placeholder);
+	const same = valid && effective[0].replace(/[{}\s]/g, '') === effective[1].replace(/[{}\s]/g, '');
+	document.getElementById('fit-symbol-error').textContent = !valid
+		? 'Use a letter or Greek symbol, with optional subscripts or powers, e.g. R_1 or \\theta. The equation keeps its last valid symbols.'
+		: same ? 'Choose different horizontal and vertical symbols. The equation keeps its last valid symbols.' : '';
+	if (!valid || same) return;
+	series.xCol.fitSymbol = values[0];
+	series.yCol.fitSymbol = values[1];
+	// Keep the input drafts and focus while redrawing the result and previews.
+	const result = datasetFitResults[activeFitKey];
+	if (result) renderFittingResult(result.equation, result.rSquared, false);
+	inputs.forEach((input, index) => {
+		const preview = document.getElementById(`${input.id}-preview`);
+		typesetLabel(preview, `\\(${effective[index]}\\)`);
+	});
+	scheduleSaveState();
+}
+
+function renderFittingResult(equation, rSquaredDisplay, syncSymbols = true) {
 	const equationElement = document.getElementById('fit-equation');
 	const rSquaredElement = document.getElementById('r-squared-container');
 	if (!equationElement || !rSquaredElement) return;
@@ -1560,7 +1614,8 @@ function renderFittingResult(equation, rSquaredDisplay) {
 		return;
 	}
 	// The fit keeps every digit; the display, and what is copied, uses the chosen decimal places.
-	const shown = PanPhyPlotStats.roundEquationDecimals(equation, plotState.equationDecimals);
+	const symbols = getActiveFitSymbols();
+	const shown = PlotModel.formatFitSymbols(PanPhyPlotStats.roundEquationDecimals(equation, plotState.equationDecimals), symbols.x, symbols.y);
 	const copyTarget = document.createElement('button');
 	copyTarget.type = 'button';
 	copyTarget.className = 'fit-equation-copy-target neo-equation';
@@ -1570,6 +1625,7 @@ function renderFittingResult(equation, rSquaredDisplay) {
 	equationElement.replaceChildren(copyTarget);
 	equationElement.style.display = 'block';
 	renderEquationDecimals(true);
+	if (syncSymbols) renderEquationSymbols(true);
 	setFitQualityLine(rSquaredElement, `\\( R^2 = ${rSquaredDisplay} \\)`, 'rSquared');
 	rSquaredElement.style.display = 'flex';
 	renderFitParameters();
@@ -1721,6 +1777,7 @@ function initializeInterface() {
 	});
 	document.getElementById('tab-conflict-reload').addEventListener('click', () => resolveTabConflict(false));
 	document.getElementById('tab-conflict-keep').addEventListener('click', () => resolveTabConflict(true));
+	['x', 'y'].forEach(axis => document.getElementById(`fit-symbol-${axis}`).addEventListener('input', handleFitSymbolInput));
 	document.getElementById('equation-decimals-more').addEventListener('click', () => changeEquationDecimals(1));
 	document.getElementById('equation-decimals-fewer').addEventListener('click', () => changeEquationDecimals(-1));
 	document.getElementById('add-column-button').addEventListener('click', addColumn);

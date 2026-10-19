@@ -2776,3 +2776,15 @@ input[type="number"]:focus {
 @media (pointer: coarse) {
 	.neo-fit-help { width: 48px; min-height: 48px; }
 }
+
+/* Optional fit notation lives in the result card, away from the column headings. */
+.neo-equation-symbols { margin: 0 0 16px; font-size: 0.8rem; }
+.neo-equation-symbols summary { cursor: pointer; min-height: 48px; padding: 14px 0; color: var(--ink-2); }
+.neo-equation-symbols p { line-height: 1.5; }
+.neo-symbol-fields { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+.neo-symbol-fields label { display: grid; gap: 6px; min-width: 0; }
+.neo-symbol-fields input { width: 100%; min-width: 0; min-height: 48px; font-family: 'IBM Plex Mono', monospace; }
+.neo-symbol-fields input[aria-invalid="true"] { border-color: var(--danger); }
+.neo-symbol-preview { min-height: 32px; display: grid; place-items: center; overflow-x: auto; }
+.neo-symbol-error { color: var(--danger); }
+.neo-symbol-error:empty { display: none; }
