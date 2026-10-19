@@ -65,11 +65,12 @@
 				</div>
 				<div class="mt-tool-spacer"></div>
 				<div class="mt-menu-wrap">
-					<button type="button" id="clearButton" class="mt-tool mt-tool-danger" disabled aria-expanded="false" aria-controls="clearMenu" title="Clear the marks, the scale or the origin"><svg class="mt-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4.5 7h15M9.5 7V4.5h5V7M6.5 7l1 13h9l1-13M10 10.5v6M14 10.5v6"/></svg><span>Clear</span><svg class="mt-caret" viewBox="0 0 12 12" aria-hidden="true"><path d="m3 4.5 3 3 3-3"/></svg></button>
+					<button type="button" id="clearButton" class="mt-tool mt-tool-danger" disabled aria-expanded="false" aria-controls="clearMenu" title="Clear marks, scale, origin or video"><svg class="mt-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4.5 7h15M9.5 7V4.5h5V7M6.5 7l1 13h9l1-13M10 10.5v6M14 10.5v6"/></svg><span>Clear</span><svg class="mt-caret" viewBox="0 0 12 12" aria-hidden="true"><path d="m3 4.5 3 3 3-3"/></svg></button>
 					<div id="clearMenu" class="mt-menu mt-menu-right" hidden>
 						<button type="button" id="clearDataPoints" class="mt-menu-item mt-menu-danger" disabled>Clear marks<small>Remove every mark</small></button>
 						<button type="button" id="clearCalibration" class="mt-menu-item" disabled>Clear scale<small>Measure in pixels again</small></button>
 						<button type="button" id="clearOrigin" class="mt-menu-item" disabled>Clear origin<small>Back to the bottom-left corner</small></button>
+						<button type="button" id="clearVideo" class="mt-menu-item mt-menu-danger" disabled>Clear video<small>Remove the video and analysis to start over</small></button>
 					</div>
 				</div>
 				<input type="file" id="projectUpload" accept=".json,application/json" hidden>
@@ -398,6 +399,7 @@
 		const clearDataPointsButton = document.getElementById('clearDataPoints');
 		const clearCalibrationButton = document.getElementById('clearCalibration');
 		const clearOriginButton = document.getElementById('clearOrigin');
+		const clearVideoButton = document.getElementById('clearVideo');
 		const projectButton = document.getElementById('projectButton');
 		const projectMenu = document.getElementById('projectMenu');
 		const saveProjectButton = document.getElementById('saveProject');
@@ -814,13 +816,8 @@
 				callbackId = hiddenVideo.requestVideoFrameCallback(onFrame);
 			};
 
-			// Start detection by playing briefly
-			const startTime = hiddenVideo.currentTime;
-
 			// Set timeout for detection (max 2 seconds)
 			timeoutId = setTimeout(() => {
-				hiddenVideo.pause();
-				hiddenVideo.currentTime = startTime;
 				calculateFps();
 			}, 2000);
 
@@ -833,8 +830,6 @@
 				// Wait for enough samples, then stop
 				sampleTimeoutId = setTimeout(() => {
 					if (fpsDetectionPending && frameTimes.length >= 3) {
-						hiddenVideo.pause();
-						hiddenVideo.currentTime = startTime;
 						calculateFps();
 					}
 				}, 500);
@@ -859,23 +854,37 @@
 			// Update UI
 			detectedFpsDisplay.textContent = `${fps} fps`;
 			updateFpsButtonText();
-			disableControls(!videoReady);
-
-			// Update slider step size
 			slider.step = getSliderStep();
 
-			// Reset video to frame 0 and ensure it's paused for manual playback
+			// Keep tracking disabled until the decoded starting frame is ready.
+			fpsDetectionPending = true;
+			disableControls(true);
 			pauseVideo();
-			hiddenVideo.currentTime = 0;
-			slider.value = "0";
-			updateTimeDisplay(0);
-
-			// Redraw frame after seeking completes
-			const redrawOnSeek = () => {
+			if (playbackCallbackId !== null) {
+				hiddenVideo.cancelVideoFrameCallback(playbackCallbackId);
+				playbackCallbackId = null;
+			}
+			const finishRewind = () => {
+				hiddenVideo.removeEventListener('seeked', finishRewind);
+				cancelFpsDetection = () => {};
+				fpsDetectionPending = false;
+				slider.value = "0";
+				updateTimeDisplay(0);
 				drawFrame();
 				drawOverlay();
+				disableControls(!videoReady);
 			};
-			hiddenVideo.addEventListener('seeked', redrawOnSeek, { once: true });
+			cancelFpsDetection = () => {
+				hiddenVideo.removeEventListener('seeked', finishRewind);
+				fpsDetectionPending = false;
+			};
+			if (hiddenVideo.currentTime === 0 && !hiddenVideo.seeking) {
+				finishRewind();
+			} else {
+				// Subscribe before seeking; all detection outcomes use this same rewind.
+				hiddenVideo.addEventListener('seeked', finishRewind, { once: true });
+				hiddenVideo.currentTime = 0;
+			}
 
 			if (videoReady && frameData.length === 0) {
 				setMessage(sampleOpen
@@ -929,6 +938,7 @@
 			clearDataPointsButton.disabled = !ready || count === 0;
 			clearCalibrationButton.disabled = !ready || !isCalibrated();
 			clearOriginButton.disabled = !ready || !originSet;
+			clearVideoButton.disabled = !ready;
 			exportDataButton.disabled = !ready || count === 0;
 			exportPanPhyPlotButton.disabled = !ready || count === 0;
 			undoPointButton.disabled = !ready || undoHistory.length === 0;
@@ -2169,6 +2179,27 @@
 		});
 
 		/* Clear / Export */
+		clearVideoButton.addEventListener('click', () => {
+			if (!confirmDataLoss('Clear the video and all analysis data to start over?')) return;
+			resetApp();
+			pauseVideo();
+			if (playbackCallbackId !== null) {
+				hiddenVideo.cancelVideoFrameCallback(playbackCallbackId);
+				playbackCallbackId = null;
+			}
+			hiddenVideo.removeAttribute('src');
+			hiddenVideo.load();
+			if (blobUrl) URL.revokeObjectURL(blobUrl);
+			blobUrl = null;
+			videoFileInfo = null;
+			sampleOpen = false;
+			videoUploadInput.value = '';
+			videoName.textContent = 'No video open';
+			slider.min = slider.max = slider.value = '0';
+			updateTimeDisplay(0);
+			setMessage('Video cleared. Import a video or try the sample to start again.');
+			openVideoButton.focus();
+		});
 		clearDataPointsButton.addEventListener("click", () => {
 			if (frameData.length > 0 && !window.confirm(CLEAR_DATA_WARNING)) {
 				return;
