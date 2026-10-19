@@ -259,23 +259,11 @@
 
 
 
-	function updatePlotAndRenderLatex() {
-		if (isSyncing) return;
-		isSyncing = true;
-
-		// Replot the graph.
-		plotGraph();
-
-		// Retrieve current column names.
-		const xColumnName = document.getElementById('x-column-name').value || 'x';
-		const yColumnName = document.getElementById('y-column-name').value || 'y';
-
-		// Update the axis label elements according to current mode.
-		renderLatex('#x-column-latex', xColumnName);
-		renderLatex('#y-column-latex', yColumnName);
-
-		isSyncing = false;
-	}
+	function updatePlot() {
+        if (isSyncing) return;
+        isSyncing = true;
+        try { plotGraph(); } finally { isSyncing = false; }
+    }
 
 
 	function plotGraph(fittedX = null, fittedY = null) {
@@ -441,191 +429,10 @@
 	}
 
 
-	function plotAllDatasets() {
-		if (typeof updateData === 'function') {
-			updateData();
-		}
-		const traces = [];
-		const themeSettings = getPlotThemeSettings();
-
-		// Get theme-specific colors for datasets and fitted curves.
-		const datasetColors = themeSettings.datasetColors;
-		const fitColors = themeSettings.fitColors;
-
-		// Helper: get the per-dataset y label (raw), with a sensible fallback.
-		function getDatasetYLabelRaw(i) {
-			const raw = (datasetHeaders[i] && datasetHeaders[i].y != null) ? String(datasetHeaders[i].y).trim() : '';
-			return raw !== '' ? raw : `Dataset ${i + 1}`;
-		}
-
-		// Helper: build fit legend label that also supports LaTeX mode.
-		function getFitLegendName(i, yRaw) {
-			if (!latexMode) return `Fit: ${yRaw}`;
-			// Put "Fit:" in text mode, then the y label in math mode (still inside the same $...$).
-			return '$\\text{Fit: }' + formatLabelForLatex(yRaw) + '$';
-		}
-
-		// Build traces for each dataset.
-		rawData.forEach((dataset, index) => {
-			const valid = getFiniteDatasetPoints(index);
-			const xVals = valid.map(point => point.x);
-			const yVals = valid.map(point => point.y);
-
-			// Convert uncertainties.
-			const xErrorsRaw = valid.map(point => point.xErrorRaw || 0);
-			const yErrorsRaw = valid.map(point => point.yErrorRaw || 0);
-			const errorTypes = datasetErrorTypes[index] || { x: 'absolute', y: 'absolute' };
-
-			const xErrorsConverted = xVals.map((xVal, i) =>
-				errorTypes.x === 'percentage' ?
-					(Math.abs(xErrorsRaw[i] || 0) / 100) * Math.abs(xVal || 0) :
-					(xErrorsRaw[i] || 0)
-			);
-			const yErrorsConverted = yVals.map((yVal, i) =>
-				errorTypes.y === 'percentage' ?
-					(Math.abs(yErrorsRaw[i] || 0) / 100) * Math.abs(yVal || 0) :
-					(yErrorsRaw[i] || 0)
-			);
-			const toggles = datasetToggles[index] || { x: false, y: false };
-
-			// Legend label for this dataset should be its y label (supports LaTeX).
-			const yLabelRaw = getDatasetYLabelRaw(index);
-			const legendName = processLabel(yLabelRaw);
-
-			// Marker trace.
-			traces.push({
-				x: xVals,
-				y: yVals,
-				mode: 'markers',
-				name: legendName,
-				marker: {
-					size: 6.5,
-					color: datasetColors[index % datasetColors.length]
-				},
-				error_x: {
-					type: 'data',
-					array: xErrorsConverted,
-					visible: !!toggles.x,
-					color: datasetColors[index % datasetColors.length],
-					thickness: 0.8,
-					width: 2
-				},
-				error_y: {
-					type: 'data',
-					array: yErrorsConverted,
-					visible: !!toggles.y,
-					color: datasetColors[index % datasetColors.length],
-					thickness: 0.8,
-					width: 2
-				}
-			});
-
-			// Fitted curve trace, if available.
-			if (fittedCurves.hasOwnProperty(index)) {
-				const fitColor = fitColors[index % fitColors.length];
-				const fitName = datasetFitResults[index]?.stale ? `Outdated fit: ${yLabelRaw}` : latexMode ? getFitLegendName(index, yLabelRaw) : `Fit: ${yLabelRaw}`;
-
-				traces.push({
-					x: fittedCurves[index].x,
-					y: fittedCurves[index].y,
-					mode: 'lines',
-					name: fitName,
-					line: { color: fitColor, dash: datasetFitResults[index]?.stale ? 'dash' : 'solid' }
-				});
-			}
-		});
-
-		// Retrieve and process input for combined plot title and axis labels.
-		const titleInput = document.getElementById('combined-title');
-		const xLabelInput = document.getElementById('combined-x-label');
-		const yLabelInput = document.getElementById('combined-y-label');
-
-		const rawTitle = titleInput ? titleInput.value.trim() : '';
-		const rawXLabel = xLabelInput ? xLabelInput.value.trim() : '';
-		const rawYLabel = yLabelInput ? yLabelInput.value.trim() : '';
-
-		const processedTitle = rawTitle === '' ? '' : processLabel(rawTitle);
-		const processedXLabel = rawXLabel === '' ? '' : processLabel(rawXLabel);
-		const processedYLabel = rawYLabel === '' ? '' : processLabel(rawYLabel);
-
-		// Build the layout using the processed labels.
-		const layout = {
-			title: { text: processedTitle, font: { size: 16 } },
-			xaxis: {
-				title: { text: processedXLabel },
-				showline: false,
-				linewidth: 1,
-				autorange: true,
-				rangemode: 'tozero',
-				zeroline: true,
-				zerolinewidth: 2
-			},
-			yaxis: {
-				title: { text: processedYLabel, standoff: 25 },
-				showline: false,
-				linewidth: 1,
-				autorange: true,
-				rangemode: 'tozero',
-				zeroline: true,
-				zerolinewidth: 2
-			},
-			margin: { t: rawTitle === '' ? 50 : 100, b: 70, l: 140, r: 0 }
-		};
-		if (themeSettings.layout.xaxis) {
-			const themeX = themeSettings.layout.xaxis;
-			const themeXTitle = themeX.title;
-			layout.xaxis = { ...layout.xaxis, ...themeX, title: { ...layout.xaxis.title } };
-			if (themeXTitle) {
-				layout.xaxis.title = {
-					...layout.xaxis.title,
-					...themeXTitle,
-					font: { ...(layout.xaxis.title.font || {}), ...(themeXTitle.font || {}) }
-				};
-			}
-		}
-		if (themeSettings.layout.yaxis) {
-			const themeY = themeSettings.layout.yaxis;
-			const themeYTitle = themeY.title;
-			layout.yaxis = { ...layout.yaxis, ...themeY, title: { ...layout.yaxis.title } };
-			if (themeYTitle) {
-				layout.yaxis.title = {
-					...layout.yaxis.title,
-					...themeYTitle,
-					font: { ...(layout.yaxis.title.font || {}), ...(themeYTitle.font || {}) }
-				};
-			}
-		}
-		if (themeSettings.layout.font) {
-			layout.font = themeSettings.layout.font;
-		}
-		if (themeSettings.layout.paper_bgcolor) {
-			layout.paper_bgcolor = themeSettings.layout.paper_bgcolor;
-		}
-		if (themeSettings.layout.plot_bgcolor) {
-			layout.plot_bgcolor = themeSettings.layout.plot_bgcolor;
-		}
-
-		const dataKey = JSON.stringify(traces);
-		const layoutKey = JSON.stringify(layout);
-		if (isPlotStateEqual('popup-plot', dataKey, layoutKey)) {
-			showPopup();
-			return;
-		}
-
-		Plotly.newPlot('popup-plot', traces, layout, createDownloadImageConfig('combined_plot'));
-
-		lastPlotState['popup-plot'].data = traces;
-		lastPlotState['popup-plot'].layout = layout;
-		lastPlotState['popup-plot'].dataKey = dataKey;
-		lastPlotState['popup-plot'].layoutKey = layoutKey;
-
-		showPopup();
-	}
-
 	Object.assign(window, {
 		sanitizeFilename,
-		updatePlotAndRenderLatex,
-		plotGraph,
-		plotAllDatasets
+		saveBlobWithFallback,
+		updatePlot,
+		plotGraph
 	});
 })();

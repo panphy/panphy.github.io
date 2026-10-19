@@ -34,7 +34,7 @@ Pages under `fun/`, `beta/`, `misc/`, `gcsephy/` and `ibdpphy/` need internet ac
 | `tools/`, `simulations/`, `for_teachers/` | Published educational apps |
 | `fun/` | Network-only games and demos; Spellwave's text-logic tests run with `node --test fun/spellwave/tests/*.test.mjs` |
 | `beta/` | Trial apps, listed in `beta/index.html` |
-| `misc/` | Unlisted resources, including the phone-compatible original [PanPhyPlotOG](misc/panphyplotog.html), inventoried in `misc/index.html` |
+| `misc/` | Unlisted resources, including the phone-compatible introductory [PanPhyPlotOG](misc/panphyplotog.html), inventoried in `misc/index.html` |
 | `gcsephy/` | GCSE Physics curriculum resources, course summaries and the Do Now starters, inventoried in `gcsephy/index.html` |
 | `ibdpphy/` | IB DP Physics teaching decks, inventoried in `ibdpphy/index.html` |
 | `.github/` | Repository automation: `workflows/checks.yml` runs `scripts/check.mjs` and the app tests (including Sound Analyzer timing and keyboard regressions) on every pull request; `workflows/supabase-keepalive.yml` pings Supabase twice a week |

@@ -1,33 +1,30 @@
-// Shared state for PanPhyPlotOG
-let rawData = []; // Each element will be an array of data points
-let activeSet = 0; // Index of the current active dataset
-let datasetHeaders = {}; // Object to store headers per dataset, e.g. {0: {x: 'x', y: 'y'}, 1: {x: 'Time', y: 'Distance'}}
-let datasetNames = {}; // Optional custom names per dataset index, e.g. {0: 'Trial A', 1: 'Control'}
-let datasetToggles = {}; // Global object to hold fitted curves by dataset index.
-let datasetErrorTypes = {}; // stores the error type per axis per dataset, e.g. { 0: { x: 'absolute', y: 'absolute' }, 1: { x: 'percentage', y: 'percentage' } }
+// Local state for the introductory single-dataset app. Original multi-dataset saves are read-only.
+let rawData = [[]];
+const activeSet = 0;
+let datasetHeaders = {0: {x:'x',y:'y'}};
+let datasetToggles = {0: {x:false,y:false}};
+let datasetErrorTypes = {0: {x:'absolute',y:'absolute'}};
 let fittedCurves = {};
-let datasetFitResults = {}; // e.g. { 0: { equation: "...", rSquared: "..." }, 1: { ... } }
-let customFitStates = {}; // per-dataset custom fit drafts, e.g. { 0: { formula: 'A*x+c', initialValues: { A: '1', c: '0' } } }
-let dataset1XValues = [];
-let latexMode = false; // false by default: plain text mode
-let titleWasAuto = true; // track whether graph title should auto-update
-let datasetDraftRows = {}; // Preserve exact cell text, including incomplete and invalid rows.
+let datasetFitResults = {};
+let datasetDraftRows = {};
 let datasetTitles = {};
-let combinedLabelsAuto = { title: true, xLabel: true, yLabel: true };
-const datasetIdentities = {};
+let dataset1XValues = [];
+let titleWasAuto = true;
+let isSyncing = false;
 const datasetFitEpochs = {};
-let nextDatasetIdentity = 0;
-
+const lastPlotState = {plot: {data:null,layout:null}};
+const STATE_SCHEMA_VERSION = 1;
+const STORAGE_KEY = 'panphyplotog-intro-state-v1';
+const LEGACY_STORAGE_KEYS = ['panphyplot-state-v2','panphyplot-state-v1'];
+let saveTimeout;
+let lastSavedSerialized = null;
+let persistenceDisabled = false;
+let changedElsewhere = false;
 function parseNumericInput(value) {
 	const text = String(value ?? '').trim();
 	if (!/^[+-]?(?:\d+(?:\.\d*)?|\.\d+)(?:[eE][+-]?\d+)?$/.test(text)) return NaN;
 	const number = Number(text);
 	return Number.isFinite(number) ? number : NaN;
-}
-
-function getDatasetIdentity(index) {
-	if (!datasetIdentities[index]) datasetIdentities[index] = `dataset-${++nextDatasetIdentity}`;
-	return datasetIdentities[index];
 }
 
 function invalidatePendingFit(index = activeSet) {
@@ -36,17 +33,6 @@ function invalidatePendingFit(index = activeSet) {
 
 function getDatasetFitSignature(index) {
 	return JSON.stringify(getFiniteDatasetPoints(index).map(({ x, y }) => [x, y]));
-}
-
-function captureFitTarget(index = activeSet) {
-	invalidatePendingFit(index);
-	return { id: getDatasetIdentity(index), epoch: datasetFitEpochs[index], signature: getDatasetFitSignature(index) };
-}
-
-function resolveFitTarget(target) {
-	const index = rawData.findIndex((_, i) => datasetIdentities[i] === target.id);
-	return index >= 0 && datasetFitEpochs[index] === target.epoch
-		&& getDatasetFitSignature(index) === target.signature ? index : -1;
 }
 
 function saveActiveGraphTitle() {
@@ -61,22 +47,6 @@ function loadActiveGraphTitle() {
 	if (input) input.value = saved ? saved.text : '';
 }
 
-let lastPlotState = {
-	plot: { data: null, layout: null },
-	'popup-plot': { data: null, layout: null }
-};
-
-rawData.push([]);
-datasetHeaders[0] = { x: 'x', y: 'y' }; // At initialization, for dataset 0:
-datasetToggles[0] = { x: false, y: false };
-datasetErrorTypes[0] = { x: 'absolute', y: 'absolute' };
-
-let isSyncing = false;
-const STATE_SCHEMA_VERSION = 3;
-const STORAGE_KEY = 'panphyplot-state-v2';
-const LEGACY_STORAGE_KEYS = ['panphyplot-state-v1'];
-const DATASET_NAME_MAX_LENGTH = 20;
-
 function debounce(func, wait) {
 	let timeout;
 	return function(...args) {
@@ -89,127 +59,6 @@ function debounce(func, wait) {
 	};
 }
 
-let saveTimeout;
-let lastSavedSerialized = null;
-// Set by the guided tour (tour.js), which runs on practice data and must never overwrite the saved workspace.
-let persistenceDisabled = false;
-// Set when another tab saves this workspace: this tab stops saving until the person chooses a version.
-let changedElsewhere = false;
-
-function getUiStateSnapshotFromDom() {
-	const graphTitleInput = document.getElementById('graph-title');
-	const combinedTitleInput = document.getElementById('combined-title');
-	const combinedXInput = document.getElementById('combined-x-label');
-	const combinedYInput = document.getElementById('combined-y-label');
-
-	return {
-		graphTitle: graphTitleInput ? graphTitleInput.value : '',
-		combinedPlot: {
-			title: combinedTitleInput ? combinedTitleInput.value : '',
-			xLabel: combinedXInput ? combinedXInput.value : '',
-			yLabel: combinedYInput ? combinedYInput.value : ''
-		}
-	};
-}
-
-function normalizePersistedUiState(uiState = {}) {
-	const graphTitle = typeof uiState.graphTitle === 'string' ? uiState.graphTitle : '';
-	const combinedPlotInput = uiState.combinedPlot && typeof uiState.combinedPlot === 'object'
-		? uiState.combinedPlot
-		: {};
-
-	return {
-		graphTitle,
-		combinedPlot: {
-			title: typeof combinedPlotInput.title === 'string' ? combinedPlotInput.title : '',
-			xLabel: typeof combinedPlotInput.xLabel === 'string' ? combinedPlotInput.xLabel : '',
-			yLabel: typeof combinedPlotInput.yLabel === 'string' ? combinedPlotInput.yLabel : ''
-		}
-	};
-}
-
-function buildCorePersistedState() {
-	return {
-		schemaVersion: STATE_SCHEMA_VERSION,
-		rawData,
-		activeSet,
-		datasetHeaders,
-		datasetNames,
-		datasetToggles,
-		datasetErrorTypes,
-		fittedCurves,
-		datasetFitResults,
-		customFitStates,
-		datasetDraftRows,
-		datasetTitles,
-		combinedLabelsAuto,
-		dataset1XValues,
-		latexMode,
-		titleWasAuto
-	};
-}
-
-function buildPersistedState(uiState = getUiStateSnapshotFromDom()) {
-	saveActiveGraphTitle();
-	return {
-		...buildCorePersistedState(),
-		...normalizePersistedUiState(uiState)
-	};
-}
-
-function migratePersistedState(savedState, sourceKey = STORAGE_KEY) {
-	if (!savedState || typeof savedState !== 'object') return null;
-	const migrated = { ...savedState };
-	const detectedVersion = Number.isInteger(migrated.schemaVersion)
-		? migrated.schemaVersion
-		: (sourceKey === 'panphyplot-state-v1' ? 1 : 1);
-
-	// v1 -> v2: introduce explicit schemaVersion and normalized UI slice.
-	if (detectedVersion < 2) {
-		const normalizedUiState = normalizePersistedUiState({
-			graphTitle: migrated.graphTitle,
-			combinedPlot: migrated.combinedPlot
-		});
-		migrated.graphTitle = normalizedUiState.graphTitle;
-		migrated.combinedPlot = normalizedUiState.combinedPlot;
-	}
-
-	if (!Array.isArray(migrated.rawData) || migrated.rawData.length === 0) {
-		migrated.rawData = [[]];
-	}
-	const maxActive = Math.max(0, migrated.rawData.length - 1);
-	const active = Number(migrated.activeSet);
-	migrated.activeSet = Number.isInteger(active) ? Math.min(Math.max(active, 0), maxActive) : 0;
-	if (detectedVersion < 3) {
-		migrated.datasetTitles = {
-			[migrated.activeSet]: { text: migrated.graphTitle || '', automatic: migrated.titleWasAuto !== false }
-		};
-		migrated.combinedLabelsAuto = Object.fromEntries(['title', 'xLabel', 'yLabel'].map(key =>
-			[key, !migrated.combinedPlot || typeof migrated.combinedPlot[key] !== 'string']));
-	}
-	migrated.schemaVersion = STATE_SCHEMA_VERSION;
-
-	return migrated;
-}
-
-function saveState() {
-	if (persistenceDisabled || changedElsewhere) return;
-	try {
-		const serialized = JSON.stringify(buildPersistedState());
-		// Skip the write (and its localStorage I/O) when nothing changed.
-		if (serialized === lastSavedSerialized) return;
-		localStorage.setItem(STORAGE_KEY, serialized);
-		lastSavedSerialized = serialized;
-		for (const legacyKey of LEGACY_STORAGE_KEYS) {
-			if (legacyKey !== STORAGE_KEY) {
-				localStorage.removeItem(legacyKey);
-			}
-		}
-	} catch (error) {
-		console.warn('Unable to save state:', error);
-	}
-}
-
 function scheduleSaveState(delay = 500) {
 	clearTimeout(saveTimeout);
 	saveTimeout = setTimeout(saveState, delay);
@@ -220,61 +69,10 @@ function flushSaveState() {
 	saveState();
 }
 
-// Guarantee the latest state is persisted when the page is hidden or closed,
-// so the debounced autosave never loses recent edits.
-if (typeof window !== 'undefined') {
-	window.addEventListener('pagehide', flushSaveState);
-	window.addEventListener('visibilitychange', () => {
-		if (document.visibilityState === 'hidden') flushSaveState();
-	});
-	// Every tab shares one saved workspace, so a save from another tab would be overwritten by this
-	// tab's next autosave. Pause instead, and let the person reload or keep this tab's version.
-	window.addEventListener('storage', (event) => {
-		if (persistenceDisabled || (event.key !== STORAGE_KEY && event.key !== null)) return;
-		if (event.key !== null && event.newValue === lastSavedSerialized) return;
-		changedElsewhere = true;
-		clearTimeout(saveTimeout);
-		if (typeof onWorkspaceChangedElsewhere === 'function') onWorkspaceChangedElsewhere();
-	});
-}
-
-// Overwrites the other tab's save with this tab's work and resumes saving.
 function keepThisTabVersion() {
 	changedElsewhere = false;
 	lastSavedSerialized = null;
 	saveState();
-}
-
-function loadState() {
-	try {
-		const candidateKeys = [STORAGE_KEY, ...LEGACY_STORAGE_KEYS];
-		for (const key of candidateKeys) {
-			const saved = localStorage.getItem(key);
-			if (!saved) continue;
-
-			let parsed = null;
-			try {
-				parsed = JSON.parse(saved);
-			} catch (parseError) {
-				console.warn('Unable to parse saved state:', parseError);
-				continue;
-			}
-
-			const migrated = migratePersistedState(parsed, key);
-			if (!migrated) continue;
-
-			if (key !== STORAGE_KEY) {
-				localStorage.setItem(STORAGE_KEY, JSON.stringify(migrated));
-			}
-
-			return migrated;
-		}
-
-		return null;
-	} catch (error) {
-		console.warn('Unable to load state:', error);
-		return null;
-	}
 }
 
 function normalizeFittedCurvesState(savedCurves, datasetCount) {
@@ -338,21 +136,6 @@ function normalizeDatasetFitResultsState(savedResults, datasetCount) {
 	return normalized;
 }
 
-function normalizeDatasetNamesState(savedNames, datasetCount) {
-	const normalized = {};
-	if (!savedNames || typeof savedNames !== 'object') return normalized;
-
-	for (let index = 0; index < datasetCount; index++) {
-		const rawName = savedNames[index];
-		if (typeof rawName !== 'string') continue;
-		const trimmed = rawName.trim();
-		if (!trimmed) continue;
-		normalized[index] = trimmed.slice(0, DATASET_NAME_MAX_LENGTH);
-	}
-
-	return normalized;
-}
-
 function normalizeDatasetDraftRows(saved, datasetCount) {
 	const normalized = {};
 	for (let index = 0; index < datasetCount; index++) {
@@ -373,37 +156,6 @@ function normalizeDatasetTitles(saved, datasetCount) {
 	return normalized;
 }
 
-function normalizeCustomFitStates(savedStates, datasetCount) {
-	const normalized = {};
-	if (!savedStates || typeof savedStates !== 'object') return normalized;
-
-	for (let index = 0; index < datasetCount; index++) {
-		const saved = savedStates[index];
-		if (!saved || typeof saved !== 'object') continue;
-
-		const formula = typeof saved.formula === 'string' ? saved.formula : '';
-		const initialValues = {};
-		if (saved.initialValues && typeof saved.initialValues === 'object') {
-			Object.keys(saved.initialValues).forEach((key) => {
-				const trimmedKey = String(key || '').trim();
-				if (!trimmedKey) return;
-				const rawValue = saved.initialValues[key];
-				const value = rawValue === undefined || rawValue === null ? '' : String(rawValue);
-				initialValues[trimmedKey] = value;
-			});
-		}
-
-		const bounds = {};
-		for (const name of Object.keys(initialValues)) {
-			const savedBound = saved.bounds?.[name];
-			if (savedBound && typeof savedBound === 'object') bounds[name] = { min: String(savedBound.min ?? ''), max: String(savedBound.max ?? '') };
-		}
-		normalized[index] = { formula, initialValues, bounds };
-	}
-
-	return normalized;
-}
-
 function getDatasetPoints(index = activeSet) {
 	const dataset = rawData[index];
 	return Array.isArray(dataset) ? dataset : [];
@@ -412,3 +164,63 @@ function getDatasetPoints(index = activeSet) {
 function getFiniteDatasetPoints(index = activeSet) {
 	return getDatasetPoints(index).filter(point => Number.isFinite(point.x) && Number.isFinite(point.y));
 }
+function buildPersistedState() {
+    saveActiveGraphTitle();
+    return {schemaVersion:STATE_SCHEMA_VERSION, rawData:[rawData[0]], activeSet:0,
+        datasetHeaders, datasetToggles, datasetErrorTypes, fittedCurves, datasetFitResults,
+        datasetDraftRows, datasetTitles, dataset1XValues, titleWasAuto,
+        graphTitle:document.getElementById('graph-title')?.value || ''};
+}
+
+function migratePersistedState(saved, sourceKey = STORAGE_KEY) {
+    if (!saved || typeof saved !== 'object' || !Array.isArray(saved.rawData) || !saved.rawData.length) return null;
+    const active = Number(saved.activeSet);
+    const index = Number.isInteger(active) && active >= 0 && active < saved.rawData.length ? active : 0;
+    const pick = (name, fallback) => ({0:saved[name]?.[index] ?? fallback});
+    const headers = pick('datasetHeaders', {x:'x',y:'y'});
+    const title = saved.datasetTitles?.[index] || {text:saved.graphTitle || '',automatic:saved.titleWasAuto !== false};
+    const result = saved.datasetFitResults?.[index];
+    const basic = result && result.choice?.kind === 'basic';
+    return {schemaVersion:STATE_SCHEMA_VERSION, activeSet:0,
+        rawData:[Array.isArray(saved.rawData[index]) ? saved.rawData[index] : []],
+        datasetHeaders:headers, datasetToggles:pick('datasetToggles',{x:false,y:false}),
+        datasetErrorTypes:pick('datasetErrorTypes',{x:'absolute',y:'absolute'}),
+        datasetDraftRows:Array.isArray(saved.datasetDraftRows?.[index]) ? pick('datasetDraftRows',[]) : {},
+        datasetTitles:{0:title}, titleWasAuto:title.automatic !== false, graphTitle:title.text,
+        dataset1XValues:index === 0 && Array.isArray(saved.dataset1XValues) ? saved.dataset1XValues : [],
+        fittedCurves:basic && saved.fittedCurves?.[index] ? pick('fittedCurves',{}) : {},
+        datasetFitResults:basic ? {0:{...result,equation:formatEquationText(result.equation)}} : {},
+        migratedFromLegacy:sourceKey !== STORAGE_KEY};
+}
+
+function saveState() {
+    if (persistenceDisabled || changedElsewhere) return;
+    try {
+        const serialized = JSON.stringify(buildPersistedState());
+        if (serialized === lastSavedSerialized) return;
+        localStorage.setItem(STORAGE_KEY, serialized);
+        lastSavedSerialized = serialized;
+    } catch (error) { console.warn('Unable to save state:', error); }
+}
+
+function loadState() {
+    for (const key of [STORAGE_KEY, ...LEGACY_STORAGE_KEYS]) {
+        try {
+            const saved = localStorage.getItem(key);
+            if (!saved) continue;
+            const migrated = migratePersistedState(JSON.parse(saved), key);
+            if (migrated) return migrated;
+        } catch (error) { console.warn('Unable to read saved state:', error); }
+    }
+    return null;
+}
+
+window.addEventListener('pagehide', flushSaveState);
+window.addEventListener('visibilitychange', () => { if(document.visibilityState === 'hidden') flushSaveState(); });
+window.addEventListener('storage', event => {
+    if(persistenceDisabled || (event.key !== STORAGE_KEY && event.key !== null)) return;
+    if(event.key !== null && event.newValue === lastSavedSerialized) return;
+    changedElsewhere = true;
+    clearTimeout(saveTimeout);
+    if(typeof onWorkspaceChangedElsewhere === 'function') onWorkspaceChangedElsewhere();
+});

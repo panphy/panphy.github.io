@@ -261,7 +261,7 @@
 		<p><strong>From Motion Tracker</strong>, Export to PanPhyPlot opens PanPhyPlot in a new tab with the data in a new sheet: <code>t</code>, <code>x</code> and <code>y</code>, then a second <code>t</code> column with the smoothed velocities <code>vx</code> and <code>vy</code>, which belong to the times midway between marks. The velocities start hidden; show them in the Series list.</p>
 
 		<h2 id="formulas">4. Formula columns</h2>
-		<p><strong>Formula Column</strong> adds a column calculated from others, row by row; <strong>Set formula…</strong> in a column's <kbd>⋯</kbd> menu turns an existing column into one. Its cells are shaded, cannot be typed into, and follow any change to the data.</p>
+		<p><strong>Data → Formula</strong> adds a column calculated from others, row by row; <strong>Set formula…</strong> in a column's <kbd>⋯</kbd> menu turns an existing column into one. Its cells are shaded, cannot be typed into, and follow any change to the data.</p>
 		<ul>
 			<li>Refer to a column by its letter (<code>B</code>) or by its name, if the name is a single word such as <code>T</code> or <code>T1</code>.</li>
 			<li>Use <code>*</code> to multiply and <code>^</code> for powers: <code>T^2</code>, <code>4*pi^2*L/T^2</code>, <code>1/sqrt(d)</code>. No leading <code>=</code> is needed.</li>
@@ -293,7 +293,7 @@
 			<li>The title follows the columns until you type your own; clear it to return to the automatic title.</li>
 			<li>The toolbar above the graph zooms, pans, rescales and downloads a PNG image.</li>
 			<li><strong>LaTeX mode</strong> typesets names, units and titles: a unit of <code>m s^{-1}</code> reads as m s⁻¹. The title above the graph shows typeset; tap it to edit the LaTeX, and press <kbd>Enter</kbd> to see it typeset again.</li>
-			<li><strong>Plot ALL Sheets</strong> draws every series of every sheet together, with labels you can edit.</li>
+			<li><strong>View → All sheets</strong> draws every series of every sheet together, with labels you can edit.</li>
 		</ul>
 
 		<h2 id="fitting">8. Fitting</h2>
@@ -327,18 +327,18 @@
 
 		<h2 id="sharing">10. Sharing your work</h2>
 		<ul>
-			<li><strong>View Table</strong> shows the sheet with each value beside its own ± uncertainty, ready to copy for a spreadsheet, as an image, as Markdown or as LaTeX. Calculated values are rounded to the decimal place of their uncertainty; typed values appear as entered.</li>
-			<li><strong>Export</strong> saves every column, including calculated ones, with headings such as <code>L / m</code> that Import .csv reads back. Formulas themselves are not saved in the file.</li>
+			<li><strong>View → Table</strong> shows the sheet with each value beside its own ± uncertainty, ready to copy for a spreadsheet, as an image, as Markdown or as LaTeX. Calculated values are rounded to the decimal place of their uncertainty; typed values appear as entered.</li>
+			<li><strong>Export</strong> saves every column, including calculated ones, with headings such as <code>L / m</code> that Import reads back. Formulas themselves are not saved in the file.</li>
 			<li>The camera button on the graph saves it as a PNG image.</li>
 		</ul>
 
 		<h2 id="saving">11. Saving and devices</h2>
-		<p>Your sheets are saved automatically in this browser on this device, separately from PanPhyPlotOG. They are not uploaded anywhere, and clearing the browser's site data removes them: use <strong>File → Save</strong> to keep a complete project file or move your work to another device.</p>
+		<p>Your sheets are saved automatically in this browser on this device. They are not uploaded anywhere, and clearing the browser's site data removes them: use <strong>File → Save</strong> to keep a complete project file or move your work to another device.</p>
 		<p><strong>Save</strong> downloads a <code>.ppplot</code> project containing every sheet, data and formulas, graph titles and zoom ranges, hidden series, fit results and uncertainties, custom fit formulas and bounds, equation symbols, decimal places, line extensions and current fit controls. The graphs are rebuilt from these settings when you reopen the file.</p>
 		<p><strong>Open</strong> selects a project file and checks it before asking to replace all current sheets. Cancel to keep your current work, or save it first. A malformed or unsupported file leaves the current project intact. You can open files on another device and continue editing; new fits can be extended immediately. Browser theme and pane widths stay with the device.</p>
 		<p><strong>Import</strong> and <strong>Export</strong> continue to handle CSV data for an individual sheet; CSV does not preserve formulas or fitted results.</p>
 		<p>Every tab or window you open this page in shares the same sheets, so use a new <strong>sheet</strong>, not a new tab, for another experiment. If the work changes in another tab, this tab stops saving and asks whether to reload and see the other tab's version, or keep its own; nothing is overwritten without asking.</p>
-		<p>Saved work from the trial version is kept automatically. If original PanPhyPlot data is found, a one-time offer can append it as new sheets with names, units and uncertainties. Accepting or declining leaves the original saved work untouched in PanPhyPlotOG. Original fits remain there.</p>
+		<p>If data from an earlier version is found in this browser, a one-time offer can add it as new sheets with names, units and uncertainties. Fits are not imported. Accepting or declining leaves the earlier save untouched.</p>
 		<p>PanPhyPlot works best on a laptop or tablet. On a small screen, choose <strong>Continue</strong> to use the workspace or <strong>Not now</strong> to return to the homepage.</p>
 	</main>
 
