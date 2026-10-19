@@ -1,5 +1,5 @@
 // Plotting for PanPhyPlot: every Y series of a sheet, its fits and residuals.
-// The theme palette and image export are copied from /misc/panphyplotog/js/plotting.js.
+// Image export is adapted from /misc/panphyplotog/js/plotting.js.
 (function() {
 
 	const PLOT_EXPORT_BASE_SCALE = 3;
@@ -38,14 +38,13 @@
 	function getPlotThemeSettings() {
 		const theme = document.documentElement.getAttribute('data-theme') || 'light';
 		if (theme !== 'dark') {
-			// Light theme – Tableau-inspired palette with same-hue fit lines
+			// Light theme – distinct data colours with contrasting fit hues
 			return {
 				errorColor: '#5b5b5b',
-				fitColor: '#35a8ff',
 				// Data point colors: muted but distinct (Tableau 10 first six)
 				datasetColors: ['#4e79a7', '#e15759', '#59a14f', '#f28e2b', '#b07aa1', '#76b7b2'],
-				// Fit line colors: darker shade of corresponding data color
-				fitColors: ['#305f8a', '#b33436', '#3d7c36', '#c46e10', '#885b7b', '#4f9490'],
+				// Fit hues differ from their corresponding points, rather than just changing brightness
+				fitColors: ['#b45309', '#1d4ed8', '#9333a8', '#0e7490', '#3f6212', '#be123c'],
 				layout: {
 					xaxis: {
 						zerolinecolor: '#1f2937'
@@ -57,14 +56,13 @@
 			};
 		}
 
-		// Dark theme – brighter versions of the same hue families
+		// Dark theme – brighter points and contrasting fit hues
 		return {
 			errorColor: '#9aa0a6',
-			fitColor: '#00e5ff',
 			// Data point colors: bright, clear on dark background
 			datasetColors: ['#7cb5ec', '#f48183', '#8bcf86', '#f9b06a', '#d1a4c5', '#a2dad6'],
-			// Fit line colors: lighter tint of corresponding data color
-			fitColors: ['#b0d4f4', '#f8b0b2', '#bbe3b8', '#fcd4a3', '#e4c5dc', '#c9ece9'],
+			// Preserve the contrasting fit hue families on the dark surface
+			fitColors: ['#ffc078', '#80cfff', '#e5adff', '#82ded5', '#d1e884', '#ff9db8'],
 			layout: {
 				paper_bgcolor: '#1A1A19',
 				plot_bgcolor: '#1A1A19',
@@ -466,14 +464,15 @@
 			meta: key,
 			legendgroup: key,
 			visible: hidden ? 'legendonly' : true,
-			marker: { color, symbol: 'circle', size: 7, line: { width: 0 } },
+			marker: { color, symbol: 'circle', size: 7, line: { color: readToken('--surface', '#ffffff'), width: 1.5 } },
 			error_x: { type: 'data', array: points.map(point => point.xError), visible: !!series.xErrCol, color: themeSettings.errorColor, thickness: 0.8, width: 2 },
 			error_y: { type: 'data', array: points.map(point => point.yError), visible: !!series.yErrCol, color: themeSettings.errorColor, thickness: 0.8, width: 2 }
 		}];
 		const curve = fittedCurves[key];
 		if (curve && Array.isArray(curve.x)) {
 			const stale = !!datasetFitResults[key]?.stale;
-			traces.push({
+			// Draw the fit first so points and their outlines stay visible at intersections.
+			traces.unshift({
 				x: curve.x,
 				y: curve.y,
 				mode: 'lines',
