@@ -36,6 +36,31 @@
 		return letters;
 	}
 
+	// A deliberately small TeX grammar: symbols, not arbitrary expressions or macros.
+	function isFitSymbol(value) {
+		if (typeof value !== 'string' || value.length > 64) return false;
+		const greek = '\\\\(?:alpha|beta|gamma|delta|epsilon|varepsilon|zeta|eta|theta|vartheta|iota|kappa|lambda|mu|nu|xi|pi|varpi|rho|varrho|sigma|varsigma|tau|upsilon|phi|varphi|chi|psi|omega|Gamma|Delta|Theta|Lambda|Xi|Pi|Sigma|Upsilon|Phi|Psi|Omega)';
+		const base = `(?:[a-zA-Z]|${greek})`;
+		const index = '(?:[a-zA-Z0-9]|\\{(?:[a-zA-Z0-9]+|\\\\mathrm\\{[a-zA-Z0-9]+\\})\\})';
+		return new RegExp(`^(?:\\\\Delta\\s*)?${base}(?:_${index}(?:\\^${index})?|\\^${index}(?:_${index})?)?$`).test(value.trim());
+	}
+
+	function getFitSymbol(column, fallback) {
+		if (column?.fitSymbol && isFitSymbol(column.fitSymbol)) return column.fitSymbol;
+		const name = String(column?.name || '').trim();
+		return /^[a-zA-Z]$/.test(name) ? name : fallback;
+	}
+
+	function formatFitSymbols(equation, horizontal, vertical) {
+		// Replace once: inserted symbols must never be visited by a second replacement.
+		// Commands such as \\exp, \\xi and \\times, and text labels, stay intact.
+		return equation.replace(/\\(?:text|mathrm|operatorname)\{[^{}]*\}|\\[a-zA-Z]+|[xy]/g, (token, offset) => {
+			if (token === 'y' && offset === 0) return vertical === 'y' ? 'y' : `{${vertical}}`;
+			if (token === 'x') return horizontal === 'x' ? 'x' : horizontal.includes('^') ? `\\left(${horizontal}\\right)` : `{${horizontal}}`;
+			return token;
+		});
+	}
+
 	function createColumn(id, options = {}, rowCount = DEFAULT_ROWS) {
 		const cells = Array.isArray(options.cells) ? options.cells.map(cell => String(cell ?? '')) : [];
 		while (cells.length < rowCount) cells.push('');
@@ -43,6 +68,7 @@
 			id,
 			name: typeof options.name === 'string' ? options.name.slice(0, NAME_MAX_LENGTH) : '',
 			unit: typeof options.unit === 'string' ? options.unit.slice(0, NAME_MAX_LENGTH) : '',
+			fitSymbol: isFitSymbol(options.fitSymbol) ? options.fitSymbol.trim() : '',
 			role: ROLES.includes(options.role) ? options.role : 'Y',
 			errorType: ERROR_TYPES.includes(options.errorType) ? options.errorType : 'absolute',
 			width: Number.isFinite(options.width) ? Math.round(Math.min(Math.max(options.width, COLUMN_WIDTH_MIN), COLUMN_WIDTH_MAX)) : null,
@@ -916,6 +942,9 @@
 		parseNumber,
 		isBlank,
 		columnLetter,
+		isFitSymbol,
+		getFitSymbol,
+		formatFitSymbols,
 		createColumn,
 		createSheet,
 		createIdSource,

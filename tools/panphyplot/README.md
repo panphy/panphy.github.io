@@ -10,6 +10,8 @@ A formula column (such as `T^2` or `mean(B, C, D)`) is recalculated from its she
 
 Weight by uncertainties weights every fit type by 1/σ², with σ² = ΔY² + (f′(x)·ΔX)², re-weighted as the fit settles. Every fit reports its parameters as value ± uncertainty using the equation’s selected decimal places (scientific notation preserves small nonzero values). Uncertainties come from the covariance matrix: with weights, σ is taken as a standard uncertainty; without, the uncertainty comes from the scatter. χ²/ν is shown when every point has a ±ΔY or ±ΔX. In formulas, `mean`, `median`, `min`, `max` and `halfspread` leave out blank readings among their inputs, and renaming a column rewrites the formulas that use its name.
 
+The Result card’s collapsible Equation symbols fields set display-only notation for the paired columns, independently of their names and units. Symbols persist with each column; blank fields use a one-letter column name or fall back to x/y. Simple LaTeX supports Greek letters, subscripts and powers, with live previews and validation. The copied equation uses the same notation. Custom fit formulas still use `x`.
+
 CSV import shows a preview in which every column's role is chosen; the suggested roles come only from clear headings. CSV export writes `name / unit` headings, which import reads back. Motion Tracker's Export to PanPhyPlot opens `panphyplot.html#import=<JSON>`; `importLinkedData` in `js/ui.js` puts the columns (names, units, roles, hidden series) into an empty or new sheet and clears the hash. The data travels in the link, not in storage, so it also reaches a tab with separate storage.
 
 - `js/model.js`: the column model and formula engine, pure and testable in node.
