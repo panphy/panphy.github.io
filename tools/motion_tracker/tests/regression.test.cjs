@@ -113,3 +113,74 @@ test('auto-tracking flags a match held at the image edge', () => {
     assert.equal(c.matchTemplate(discImage(160, 120, 80, 50, 10), template, 80, 50, 8).atEdge, false);
     assert.equal(c.matchTemplate(discImage(160, 120, 150, 50, 10), template, 145, 50, 8).atEdge, true);
 });
+
+test('FPS completion waits for the starting frame before enabling tracking', () => {
+    for (const startTime of [0, 0.4, 2]) {
+        let seeked, drawn = 0, cancelled = 0, disabled;
+        const video = {currentTime: startTime, seeking: false,
+            addEventListener: (_type, fn) => seeked = fn,
+            removeEventListener: (_type, fn) => { if (seeked === fn) seeked = null; },
+            cancelVideoFrameCallback: () => cancelled++};
+        const c = context({hiddenVideo: video, playbackCallbackId: 42, fpsDetectionPending: false,
+            detectedFps: null, playbackFrameRate: 30, captureFrameRate: 30, isSpecialRecording: false,
+            detectedFpsDisplay: {}, updateFpsButtonText() {}, slider: {}, getSliderStep: () => 1 / 30,
+            pauseVideo: () => video.paused = true, updateTimeDisplay: t => { assert.equal(t, 0); },
+            drawFrame: () => { assert.equal(video.currentTime, 0); drawn++; }, drawOverlay() {},
+            disableControls: value => disabled = value, videoReady: true, frameData: [], sampleOpen: false,
+            setMessage() {}, cancelFpsDetection() {}});
+        vm.runInContext(extract('function applyDetectedFps(', 'function updateFpsButtonText('), c);
+        c.applyDetectedFps(30);
+        assert.equal(video.paused, true);
+        assert.equal(cancelled, 1);
+        assert.equal(video.currentTime, 0);
+        if (startTime > 0) {
+            assert.equal(disabled, true);
+            assert.equal(drawn, 0);
+            seeked();
+        }
+        assert.equal(drawn, 1);
+        assert.equal(disabled, false);
+        assert.equal(c.fpsDetectionPending, false);
+        assert.equal(c.slider.value, '0');
+    }
+});
+
+test('cancelling a pending rewind removes its stale callback', () => {
+    let seeked;
+    const c = context({hiddenVideo: {currentTime: 1, addEventListener: (_type, fn) => seeked = fn,
+            removeEventListener: () => seeked = null}, playbackCallbackId: null,
+        detectedFpsDisplay: {}, updateFpsButtonText() {}, slider: {}, getSliderStep: () => .1,
+        pauseVideo() {}, disableControls() {}, videoReady: true, frameData: [1],
+        isSpecialRecording: false, cancelFpsDetection() {}});
+    vm.runInContext(extract('function applyDetectedFps(', 'function updateFpsButtonText('), c);
+    c.applyDetectedFps(30);
+    assert.equal(typeof seeked, 'function');
+    c.cancelFpsDetection();
+    assert.equal(seeked, null);
+    assert.equal(c.fpsDetectionPending, false);
+});
+
+test('clear video respects cancellation and releases the video before starting over', () => {
+    for (const approved of [false, true]) {
+        let click, reset = 0, unloaded = 0, revoked;
+        const c = context({clearVideoButton: {addEventListener: (_type, fn) => click = fn},
+            confirmDataLoss: () => approved, resetApp: () => reset++, pauseVideo() {},
+            playbackCallbackId: null, hiddenVideo: {removeAttribute: name => assert.equal(name, 'src'), load: () => unloaded++},
+            URL: {revokeObjectURL: url => revoked = url}, blobUrl: 'blob:old', videoFileInfo: {name: 'old.mp4'},
+            sampleOpen: true, videoUploadInput: {value: 'old.mp4'}, videoName: {}, slider: {},
+            updateTimeDisplay() {}, setMessage() {}, openVideoButton: {focus() {}}});
+        vm.runInContext(extract("clearVideoButton.addEventListener('click'", 'clearDataPointsButton.addEventListener('), c);
+        click();
+        assert.equal(reset, Number(approved));
+        assert.equal(unloaded, Number(approved));
+        if (approved) {
+            assert.equal(revoked, 'blob:old');
+            assert.equal(c.blobUrl, null);
+            assert.equal(c.videoFileInfo, null);
+            assert.equal(c.sampleOpen, false);
+            assert.equal(c.videoUploadInput.value, '');
+            assert.equal(c.slider.value, '0');
+            assert.equal(c.videoName.textContent, 'No video open');
+        }
+    }
+});
