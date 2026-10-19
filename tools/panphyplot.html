@@ -261,13 +261,12 @@
 								<label id="custom-fit-formula-label" for="custom-fit-formula-input">Formula for y</label>
 								<button id="custom-fit-formula-help" type="button" title="Open quick math reference in a new tab">Help</button>
 							</div>
-							<input id="custom-fit-formula-input" type="text" placeholder="e.g. A*exp(-k*x)+c" autocomplete="off" />
-							<p class="custom-fit-formula-note">Use explicit multiplication, e.g. <code>2*x</code> and <code>A*x</code>.</p>
+							<input id="custom-fit-formula-input" aria-describedby="custom-fit-formula-note" type="text" placeholder="e.g. A*exp(-k*x)+c" autocomplete="off" />
+							<p id="custom-fit-formula-note" class="custom-fit-formula-note">Up to 5 fit parameters. Use explicit multiplication, e.g. <code>2*x</code> and <code>A*x</code>.</p>
 							<div id="custom-fit-formula-message" aria-live="polite" style="display: none;"></div>
 						</div>
 						<div id="custom-fit-general-equation" class="general-equation">\( y = f(x, \theta) \)</div>
 						<div id="custom-fit-parameters-panel" class="custom-fit-parameters-panel">
-							<p class="table-prompt">Automatic guesses are ready. Min and Max are optional parameter bounds.</p>
 							<p id="custom-fit-parameters-empty" class="custom-fit-parameters-empty">Enter a custom equation to detect parameters.</p>
 							<div id="custom-fit-parameters-list"></div>
 						</div>
