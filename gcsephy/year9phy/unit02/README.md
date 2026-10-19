@@ -2,7 +2,7 @@
 
 **Year 9 Physics · AQA GCSE energy · nine lessons**
 
-A student workbook and a Unit review (each with an answer edition), a teaching deck and nine lesson plans. There is no companion website; [`index.html`](index.html) is a short page linking the workbook, the Unit review, their answers, the deck and the five Preps. The lesson plans are not linked there.
+A student workbook in three parts and a Unit review (each with an answer edition), a teaching deck and nine lesson plans. There is no companion website; [`index.html`](index.html) is a short page linking the workbook, the Unit review, their answers, the deck and the five Preps. The lesson plans are not linked there.
 
 ## Scope
 
@@ -32,8 +32,8 @@ The student hub uses `/gcsephy/assets/workbook-hub.css`, shared by all four work
 
 | Path | What it is |
 |---|---|
-| `Energy - Year 9 Student Workbook.pdf` | 66-page A4 booklet, one per student: nine lessons, key words, progress tracker, quick answers and the equation toolkit with formula triangles on the last page |
-| `Energy - Year 9 Student Workbook (Answers).pdf` | The same pages with answers filled in, so page numbers match |
+| `Energy - Year 9 Student Workbook - Part 1 - Lessons 1-3.pdf`, `Part 2 - Lessons 4-6`, `Part 3 - Lessons 7-9` | The A4 student workbook in three booklets (25, 28 and 26 pages), one set per student. Each part has its own cover, How this booklet works, its lessons, key words, progress tracker and quick answers for those lessons, and the equation toolkit with formula triangles for every equation so far on the last page |
+| `… (Answers).pdf` | Each part with answers filled in, so page numbers match |
 | `Energy - Year 9 Unit Review.pdf`, `… (Answers).pdf` | 7-page unit review after Lesson 9: 40 marks of mixed AQA-style questions, a fix-it log and the equation toolkit; the answer edition has the same pages |
 | `workbook/` | Workbook source; see below |
 | `teaching-guides/` | Nine lesson-plan PDFs and their Markdown source; see its README |
@@ -44,17 +44,17 @@ The student hub uses `/gcsephy/assets/workbook-hub.css`, shared by all four work
 
 | File | Use |
 |---|---|
-| `workbook/workbook.html` | Print preview; `?answers` for the answer edition, `?review` (with or without `&answers`) for the Unit review |
+| `workbook/workbook.html` | Print preview; `?part=1` (2, 3) for one part as printed (with no part, the whole booklet), `&answers` for the answer edition, `?review` for the Unit review. The parts are `PARTS` in `workbook.js` and `build-pdfs.sh` |
 | `workbook/assets/lessons-a.js`, `lessons-b.js`, `lessons-c.js` | Lessons 1–2, 3–5 and 6–9: all the words and questions |
 | `workbook/assets/content.js` | Joins the lessons and holds the equation toolkit and key words |
 | `workbook/assets/review.js` | The Unit review questions (`window.UNIT.review`), in the Exam corner format; `t: "part"` gives an unnumbered part |
 | `workbook/assets/workbook.js`, `workbook.css` | Renderer and print styles, adapted from the Year 10 workbook |
 | `workbook/assets/figures.js`, `figures.css` | Line drawings, shared with the deck |
-| `workbook/build-pdfs.sh` | Rebuilds the workbook, the Unit review and their answer editions with headless Chrome (`ONLY_REVIEW=1` for the review only) |
+| `workbook/build-pdfs.sh` | Rebuilds the three workbook parts, the Unit review and their answer editions with headless Chrome (`ONLY_PART=2` for one part, `ONLY_REVIEW=1` for the review only) |
 
 Maths is LaTeX between `\(` and `\)`, typeset by MathJax from a CDN, so previews and builds need a network connection; text is written as `String.raw` templates so backslashes survive. In sentences, `[[answer|a / b / c]]` prints a blank followed by its options and `{{a|b*|c}}` prints an AQA-style ring box with `*` on the answer: every gap shows its choices. Content examined only in GCSE Physics (8463), not Combined Science: Trilogy, carries `<span class="triple-tag">Triple only</span>` (the cooling cups practical). The workbook marks no Higher-tier content: both courses are taught at Higher. Every page after the cover prints 1.2× larger, as in Year 10; the toolkit prints at normal size so it fits on the last page.
 
-To rebuild: serve the repository root (`python3 -m http.server 8000`), then run `sh build-pdfs.sh` in `workbook/`. Check that both PDFs have the same page count and that the toolkit is still one page.
+To rebuild: serve the repository root (`python3 -m http.server 8000`), then run `sh build-pdfs.sh` in `workbook/`. Check that each part and its answer edition have the same page count and that the toolkit is still one page. Practical and Exam corner cards print whole (`break-inside: avoid`), moving to the next page rather than splitting; keep each card shorter than a page, splitting a long practical into two cards as in Lesson 4.
 
 ## Deck
 

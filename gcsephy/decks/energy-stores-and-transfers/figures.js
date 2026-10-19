@@ -493,10 +493,7 @@ window.DeckSvgTex = {
     sankeyLed: () => F.sankey({ blend: true, input: 100, useful: 40, wasted: 60, s: 1.6, useLabel: 'by light', wasteLabel: 'heating the room' }),
     sankeyLesson: () => F.sankey({ blend: true, input: 100, useful: 20, wasted: 80, s: 1.6, useLabel: 'by light', wasteLabel: 'heating the room' }),
     twoGraphs, springLimit, coolingChart, story: () => F.storyStrip(),
-    // The motion arrow sits just above the ball, clear of the track, with the label lifted above it.
-    coverArt: () => F.coverArt()
-      .replace('<text x="300" y="150"', '<text x="300" y="124"')
-      .replace('</svg>', `<g aria-label="The ball is moving to the right">${F.arrow(280, 145, 326, 145, '', 10)}</g></svg>`),
+    coverArt: () => F.coverArt(),
   };
   const WIDGETS = { ramp: h => swing(h, 'ramp'), pendulum: h => swing(h, 'pendulum'), kinetic, springLab, elastic, motors, lift, bounce, rods: rodsLab };
 
