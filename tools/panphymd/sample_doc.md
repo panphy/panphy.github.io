@@ -66,9 +66,9 @@ for i in range(5):
 
 ## 2. LaTeX
 
-### 2.1 The basics: how to type maths
+**2.1 The basics: how to type maths**
 
-Put maths between **dollar signs**:
+> *The golden rule: wrap your maths in **dollar signs**. That's the magic! ✨*
 
 | You type | You get |
 |:---|:---|
@@ -77,14 +77,16 @@ Put maths between **dollar signs**:
 
 $$ F = ma $$
 
-- **One `$` on each side** keeps the maths **inline**, in the middle of a sentence: Newton's Second Law states that $F=ma$.
-- **Two `$$` on each side** makes a **displayed** equation on its own line. Use it for important or tall equations.
-- Special symbols start with a **backslash `\`** and are **case-sensitive**: `\delta` gives $\delta$ but `\Delta` gives $\Delta$.
-- **Spaces are ignored** inside maths. Add space yourself with `\,` (thin), `\;` (medium) or `\quad` (wide): $a\,b$, $a\;b$, $a\quad b$.
-- **Braces `{ }` group things together.** Anything that is more than one character long needs them (see 2.3).
-- To write a real dollar sign, type `\$`. For example: it costs \$5 and \$10.
+- **One `$` on each side** keeps the maths **inline**, right in the middle of a sentence: Newton's Second Law states that $F=ma$.
+- **Two `$$` on each side** makes a **displayed** equation on its own line. Perfect for the important (or tall) ones.
+- Special symbols start with a **backslash `\`** and are **case-sensitive**: `\delta` gives $\delta$ but `\Delta` gives $\Delta$. (*Yes, capital letters matter!*)
+- **Spaces are ignored** inside maths, so add your own with `\,` (thin), `\;` (medium) or `\quad` (wide): $a\,b$, $a\;b$, $a\quad b$.
+- **Braces `{ }` group things together.** Anything longer than one character needs them (more in 2.3).
+- Need a real dollar sign? Type `\$`. For example: it costs \$5 and \$10. 💰
 
-### 2.2 Greek letters
+**2.2 Greek letters**
+
+> *Time to meet the whole Greek alphabet. Physicists use these all the time!*
 
 Type a backslash and the **name** of the letter. For a capital letter, **capitalise the first letter** of the name.
 
@@ -113,12 +115,13 @@ Type a backslash and the **name** of the letter. For a capital letter, **capital
 | psi | $\psi$ | `\psi` | $\Psi$ | `\Psi` |
 | omega | $\omega$ | `\omega` | $\Omega$ | `\Omega` |
 
-> **Good to know**
-> - Some capital Greek letters look exactly like English capitals (Alpha is just $A$), so they have **no command**: type the English letter.
-> - A few letters have two shapes: `\epsilon` gives $\epsilon$ but `\varepsilon` gives $\varepsilon$ (the one used for $\varepsilon_0$), and `\phi` gives $\phi$ but `\varphi` gives $\varphi$. Likewise `\theta` $\theta$ and `\vartheta` $\vartheta$, `\rho` $\rho$ and `\varrho` $\varrho$.
-> - Physics favourites: $\theta$ angle, $\lambda$ wavelength, $\mu$ micro / friction, $\omega$ angular speed, $\rho$ density, $\sigma$ stefan constant / stress, $\tau$ torque / time constant, $\Delta$ change in, $\Omega$ ohm.
+> *Plot twist...*
+>> - Some capital Greek letters look exactly like English capitals (Alpha is just $A$), so they have **no command**. Just type the English letter! 🤷
+>> - A few letters have two shapes: `\epsilon` gives $\epsilon$ but `\varepsilon` gives $\varepsilon$ (the one used for $\varepsilon_0$), and `\phi` gives $\phi$ but `\varphi` gives $\varphi$. Likewise `\theta` $\theta$ and `\vartheta` $\vartheta$, `\rho` $\rho$ and `\varrho` $\varrho$.
+>> - Physics favourites: $\theta$ angle, $\lambda$ wavelength, $\mu$ micro / friction, $\omega$ angular speed, $\rho$ density, $\sigma$ Stefan–Boltzmann constant / stress, $\tau$ torque / time constant, $\Delta$ change in, $\Omega$ ohm.
 
-### 2.3 Powers, subscripts, fractions and roots
+**2.3 Powers, subscripts, fractions and roots**
+> *The bread and butter of physics equations. Watch out for the braces!*
 
 | You type | You get | Note |
 |:---|:---|:---|
@@ -133,9 +136,9 @@ Type a backslash and the **name** of the letter. For a capital letter, **capital
 | `$\sqrt[3]{x}$` | $\sqrt[3]{x}$ | cube root |
 | `$e^{-t/\tau}$` | $e^{-t/\tau}$ | brace content can be anything |
 
-### 2.4 Physics examples
+**2.4 Physics examples**
 
-Try changing these to your own formulae.
+> *Your formula sheet, but prettier. Copy, tweak, and make them your own!* 📝
 
 **Mechanics**
 
@@ -168,11 +171,11 @@ $$ E = mc^2 \qquad\qquad E = hf \qquad\qquad \lambda = \frac{h}{p} $$
 
 $$ \vec{r} = 5\hat{i} + 8\hat{j} \qquad\qquad |\vec{r}| = \sqrt{5^2 + 8^2} $$
 
-> **Tip:** Inline fractions are squashed, as in $\frac{\Delta x}{\Delta t}$. Use `\dfrac` instead of `\frac` for a full-size fraction in a sentence: $\dfrac{\Delta x}{\Delta t}$.
+> Inline fractions get squashed, like this: $\frac{\Delta x}{\Delta t}$. Use `\dfrac` instead of `\frac` for a full-size fraction in a sentence: $\dfrac{\Delta x}{\Delta t}$. (*Much better!*)
 
-### 2.5 Units and numbers
+**2.5 Units and numbers**
 
-Units and labels are **not variables**, so they should be **upright** (not italic). Wrap them in `\mathrm{ }`, and use `\,` for the thin space before a unit.
+> *Units are not variables, so they stand up straight! Wrap them in `\mathrm{ }` to keep them upright, and add a thin space `\,` before the unit.*
 
 | You type | You get |
 |:---|:---|
@@ -185,11 +188,13 @@ Units and labels are **not variables**, so they should be **upright** (not itali
 | `$E_\mathrm{k}$` and `$E_k$` | $E_\mathrm{k}$ and $E_k$ |
 | `$\pm 0.5\%$` | $\pm 0.5\%$ |
 
-> Use `\times` for "times", not the letter x: `5 \times 10^3` gives $5 \times 10^3$. Use `\text{ words }` for ordinary words inside maths: $v = 5 \text{ when } t = 2$.
+> Use `\times` for "times", not the letter x: `5 \times 10^3` gives $5 \times 10^3$. And use `\text{ words }` for ordinary words inside maths: $v = 5 \text{ when } t = 2$. (*Yes, you can write words in maths!*)
 
-### 2.6 Chemical and nuclear equations
+**2.6 Chemical and nuclear equations**
 
-**Chemical equations:** put the whole formula in `\mathrm{ }` so that the letters are upright.
+> *Chemistry? Physics? Why not both!* ⚗️
+
+**Chemical equations:** put the whole formula in `\mathrm{ }` to keep the letters upright.
 
 $$ \mathrm{Na^+_{(aq)} + Cl^-_{(aq)} \longrightarrow NaCl_{(s)}} $$
 
@@ -211,9 +216,10 @@ Beta-plus decay (a proton becomes a neutron, plus a positron and a neutrino):
 
 $$ {}^{22}_{11}\mathrm{Na} \longrightarrow {}^{22}_{10}\mathrm{Ne} + {}^{\;\;0}_{+1}\mathrm{e} + \nu_e $$
 
-> Check your work: the **top numbers** (nucleon number) add up to the same total on both sides, and so do the **bottom numbers** (charge).
+> (*Quick check: the **top numbers** (nucleon number) add up to the same total on both sides, and so do the **bottom numbers** (charge). If they don't, something is off!* ☢️)
 
-### 2.7 Symbols cheat-sheet
+**2.7 Symbols cheat-sheet**
+> *In case you need more symbols... bookmark this one!* 🔖
 
 **Relations and operators**
 
@@ -236,7 +242,7 @@ $$ {}^{22}_{11}\mathrm{Na} \longrightarrow {}^{22}_{10}\mathrm{Ne} + {}^{\;\;0}_
 | $\bar{x}$ | `\bar{x}` | $\hat{x}$ | `\hat{x}` | $\dot{x}$ | `\dot{x}` |
 | $\ddot{x}$ | `\ddot{x}` | $\vec{x}$ | `\vec{x}` | $x^{\prime}$ | `x^{\prime}` |
 
-### 2.8 Going further: calculus, brackets, matrices and alignment
+**2.8 Going further: calculus, brackets, matrices and alignment**
 
 **Calculus**
 
@@ -248,9 +254,9 @@ $$ \lim_{\Delta x \to 0} \frac{f(x + \Delta x) - f(x)}{\Delta x} $$
 
 | <small>More about limits</small> |
 | :--- |
-| <small>Type <code>\lim\limits_{\Delta x \to 0}</code> to place the limit underneath the word in an inline sentence, as in $\lim\limits_{\Delta x \to 0} f(x)$. If you type <code>\lim_{\Delta x \to 0}</code> inline, the limit is squashed to the side instead: $\lim_{\Delta x \to 0} f(x)$. In a displayed equation, both give the nice version.</small> |
+| <small>Type <code>\lim\limits_{\Delta x \to 0}</code> to place the limit underneath the word in an inline sentence, as in $\lim\limits_{\Delta x \to 0} f(x)$. If you type <code>\lim_{\Delta x \to 0}</code> inline, the limit is squashed to the side instead: $\lim_{\Delta x \to 0} f(x)$. In a displayed equation, both give the nice version. (*What's the logic!?* 😑)</small> |
 
-**Bracket size.** `\left(` and `\right)` make the brackets grow to fit what is inside.
+**Bracket size.** `\left(` and `\right)` make the brackets grow to fit what is inside. (*Size does matter... sometimes.*)
 
 $$ \left( \frac{1}{\sqrt[n]{2}} \right) \quad \text{vs} \quad ( \frac{1}{\sqrt[n]{2}} ) $$
 
@@ -297,7 +303,8 @@ $$
 \end{array}
 $$
 
-### 2.9 University-level examples
+**2.9 University-level examples**
+> *Feeling brave? Here is a sneak peek of what's coming at university...* 🎓
 
 **Vector calculus and electromagnetism: Maxwell's equations**
 
@@ -330,7 +337,8 @@ $$ P(E) \propto e^{-E/k_\mathrm{B}T} \qquad\qquad f(x) = \frac{1}{\sigma\sqrt{2\
 
 $$ f(x) = \frac{a_0}{2} + \sum_{n=1}^{\infty} \left[ a_n\cos(nx) + b_n\sin(nx) \right] $$
 
-### 2.10 Common mistakes
+**2.10 Common mistakes**
+> *Oops! These slip-ups happen to everyone. Can you spot the difference?* 🙈
 
 | You typed | You get | Better | You get |
 |:---|:---|:---|:---|
@@ -343,7 +351,7 @@ $$ f(x) = \frac{a_0}{2} + \sum_{n=1}^{\infty} \left[ a_n\cos(nx) + b_n\sin(nx) \
 | `$\mu m$` | $\mu m$ | `$\mu\mathrm{m}$` | $\mu\mathrm{m}$ |
 | `$H2O$` | $H2O$ | `$\mathrm{H_2O}$` | $\mathrm{H_2O}$ |
 
-> Forgot a closing `$`? Then your maths shows up as plain text. Forgot a closing `}`? Check that every `{` has its partner.
+> Forgot a closing `$`? Then your maths shows up as plain text. Forgot a closing `}`? Every `{` needs its partner! (*Brackets are lonely.* 😅)
 
 ---
 
