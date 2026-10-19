@@ -21,7 +21,7 @@
       --font-display: 'DM Serif Display', Georgia, serif;
       --font-mono: 'IBM Plex Mono', monospace;
       --bg-color: #F4F1EA; --surface: #FFFFFF; --surface-alt: #FAF8F4;
-      --text-main: #17181A; --text-secondary: #55585E;
+      --text-main: #17181A; --text-secondary: #55585E; --status-text: #8A8C91;
       --border: #E6E1D7; --brand-primary: #C2410C; --brand-secondary: #EA580C;
       --brand-accent: #0F766E; --accent-ink: #FFFFFF;
       --grid-minor: rgba(15,118,110,.055); --grid-major: rgba(15,118,110,.11);
@@ -40,7 +40,7 @@
     [data-theme="dark"] {
       color-scheme: dark;
       --bg-color: #0D1012; --surface: #15191C; --surface-alt: #191E22;
-      --text-main: #E8EBED; --text-secondary: #A5ACB3; --border: #262D33;
+      --text-main: #E8EBED; --text-secondary: #A5ACB3; --status-text: #737B83; --border: #262D33;
       --brand-primary: #FB923C; --brand-secondary: #FB923C; --brand-accent: #5EEAD4;
       --accent-ink: #062521; --btn-primary-hover: #8FF3E3;
       --grid-minor: rgba(94,234,212,.035); --grid-major: rgba(94,234,212,.07);
@@ -73,7 +73,6 @@
     .audio-brand img { width: 32px; height: 32px; object-fit: contain; }
     .audio-brand h1 { margin: 0; font: 400 1.5rem var(--font-display); letter-spacing: -.5px; }
     .audio-brand:hover { text-decoration: none; }
-    .app-label { font: 500 .65rem var(--font-mono); text-transform: uppercase; letter-spacing: .1em; color: var(--text-secondary); border-left: 1px solid var(--border); padding-left: 14px; }
     .button-icon { width: 18px; height: 18px; flex: 0 0 18px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; pointer-events: none; }
     .btn, .btn-primary, .btn-secondary, .spectrum-reset { display: inline-flex; align-items: center; justify-content: center; gap: 8px; }
     .banner-actions { margin-left: auto; display: flex; align-items: center; gap: 8px; }
@@ -88,19 +87,20 @@
       padding: 4px 14px calc(4px + env(safe-area-inset-bottom, 0px));
       border-top: 1px solid var(--border);
       background: var(--surface-alt);
-      color: var(--text-secondary);
-      font-size: .72rem;
+      font-size: .76rem;
+      font-weight: 400;
+      line-height: 1.5;
+      -webkit-font-smoothing: antialiased;
+      color: var(--status-text);
     }
-    .audio-status { font-family: var(--font-mono); font-size: .68rem; }
-    .audio-statusbar a { color: inherit; }
-    .audio-statusbar-legal { margin-left: auto; }
+    .audio-statusbar a { color: var(--text-secondary); font-weight: 400; }
+    .audio-statusbar-legal { margin-left: auto; white-space: nowrap; }
     @media (max-width: 800px) {
-      .audio-statusbar-legal { margin-left: 0; line-height: 1.6; }
+      .audio-statusbar-legal { white-space: normal; text-align: right; line-height: 1.6; }
     }
     @media (max-width: 600px) {
       .audio-appbar { padding-inline: 12px; gap: 8px; }
       .audio-brand h1 { font-size: 1.15rem; }
-      .app-label { display: none; }
     }
     /* Canvas Styling */
     canvas {
@@ -491,7 +491,6 @@
 <body>
   <header class="audio-appbar">
     <a class="audio-brand" href="/" title="PanPhy Labs home"><img src="/assets/panphy.png" alt="PanPhy logo"><h1>Sound Analyzer</h1></a>
-    <span class="app-label">Audio workbench</span>
     <div class="banner-actions">
       <button id="theme-button" data-panphy-theme-toggle aria-label="Toggle Light/Dark Theme" title="Toggle between light and dark themes"></button>
       <button data-panphy-fullscreen aria-label="Enter fullscreen" title="Enter fullscreen"></button>
@@ -584,7 +583,6 @@
   </main>
 
   <footer class="audio-statusbar">
-    <span class="audio-status">Microphone input · CSV snapshots</span>
     <span class="audio-statusbar-legal">&copy; 2026 <a href="/">PanPhy Labs</a>. All rights reserved. &middot;
     <a href="https://buymeacoffee.com/panphy" target="_blank" rel="noopener noreferrer">Support My Projects</a></span>
   </footer>
