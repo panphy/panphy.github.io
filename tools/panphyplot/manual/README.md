@@ -1,6 +1,6 @@
 # Manual screenshots
 
-Nine light/dark PNG pairs illustrate the six-step walkthrough and expandable reference in `../manual.html`. `manual.css` styles the guide; `manual.js` manages Contents, direct links into closed reference topics, theme-aware image zoom and focus restoration. Capture the real app using **Try sample data** on an empty sheet in an isolated browser session. Do not capture personal datasets or temporary notifications.
+Nine light/dark PNG pairs illustrate the six-step walkthrough and expandable reference in `../manual.html`. `manual.css` imports the app’s `../css/theme.css` tokens and styles the guide as a graph-paper workbench; `manual.js` manages Contents, direct links into closed reference topics, theme-aware image zoom and focus restoration. Capture the real app using **Try sample data** on an empty sheet in an isolated browser session. Do not capture personal datasets or temporary notifications.
 
 Follow the manual's six-step pendulum example: add the mean and half-spread uncertainty for T1–T3, calculate `T^2` with propagated uncertainty, hide T, and fit T² against L with a weighted straight line. Capture the workspace, Mean, Formula, calculated columns, Fit, Result, graph with residuals, View Table and Clear. Keep both themes at the same state and dimensions. Use the app's pane controls to frame the table and fit cards clearly; capture dialogs and cards closely enough to read.
 
