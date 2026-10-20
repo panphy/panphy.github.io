@@ -17,224 +17,335 @@
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-AMS-MML_SVG.js" defer></script>
 	<link rel="stylesheet" href="/assets/theme-toggle.css">
 	<script src="/assets/theme-toggle.js"></script>
-	<style>
-		@import url('/assets/fonts/fonts.css');
-
-		:root {
-			color-scheme: light;
-			--font-body: 'Manrope', sans-serif;
-			--font-display: 'DM Serif Display', serif;
-			--font-mono: 'IBM Plex Mono', monospace;
-			--bg: #F8F6F1;
-			--bg-pattern: #EDE9E0;
-			--text: #1B1B1B;
-			--muted: #6B6560;
-			--brand: #C2410C;
-			--accent: #0F766E;
-			--card: #ffffff;
-			--border: #E8E4DD;
-			--code-bg: #F0ECE4;
-		}
-
-		[data-theme="dark"] {
-			color-scheme: dark;
-			--bg: #111110;
-			--bg-pattern: #1A1A18;
-			--text: #EDEBE8;
-			--muted: #9C9890;
-			--brand: #FB923C;
-			--accent: #5EEAD4;
-			--card: #1A1A19;
-			--border: #2A2A28;
-			--code-bg: #222220;
-		}
-
-		* { box-sizing: border-box; }
-
-		body {
-			margin: 0;
-			font-family: var(--font-body);
-			line-height: 1.6;
-			color: var(--text);
-			background-color: var(--bg);
-			background-image: radial-gradient(var(--bg-pattern) 1px, transparent 1px);
-			background-size: 30px 30px;
-		}
-
-		.top {
-			position: sticky;
-			top: var(--standalone-top, 0px);
-			z-index: 5;
-			display: flex;
-			align-items: center;
-			justify-content: space-between;
-			gap: 12px;
-			padding: 10px 20px;
-			background: var(--bg);
-			border-bottom: 1px solid var(--border);
-		}
-
-		.top a {
-			color: var(--brand);
-			font-weight: 700;
-			text-decoration: none;
-			min-height: 44px;
-			display: inline-flex;
-			align-items: center;
-		}
-
-		main {
-			max-width: 860px;
-			margin: 0 auto;
-			padding: 24px 20px 40px;
-		}
-
-		h1, h2, h3 {
-			font-family: var(--font-display);
-			font-weight: 400;
-			line-height: 1.25;
-		}
-
-		h1 { font-size: 2.1rem; margin: 8px 0 4px; }
-		h2 { font-size: 1.55rem; margin: 36px 0 8px; padding-top: 8px; border-top: 1px solid var(--border); }
-		h3 { font-size: 1.2rem; margin: 24px 0 6px; }
-
-		.lead { color: var(--muted); font-size: 1.05rem; margin-top: 0; }
-
-		nav.contents {
-			background: var(--card);
-			border: 1px solid var(--border);
-			border-radius: 14px;
-			padding: 12px 20px;
-			margin: 20px 0;
-		}
-
-		nav.contents ol { margin: 6px 0; padding-left: 1.2em; columns: 2; column-gap: 32px; }
-		nav.contents a { color: var(--accent); }
-
-		code, kbd {
-			font-family: var(--font-mono);
-			font-size: 0.88em;
-			background: var(--code-bg);
-			padding: 1px 6px;
-			border-radius: 6px;
-		}
-
-		table {
-			width: 100%;
-			border-collapse: collapse;
-			margin: 12px 0;
-			background: var(--card);
-			border-radius: 12px;
-			overflow: hidden;
-		}
-
-		th, td {
-			padding: 8px 12px;
-			border-bottom: 1px solid var(--border);
-			text-align: left;
-			vertical-align: top;
-		}
-
-		th { background: var(--code-bg); }
-
-		.note {
-			background: var(--card);
-			border-left: 4px solid var(--accent);
-			border-radius: 8px;
-			padding: 10px 14px;
-			margin: 14px 0;
-		}
-
-		.example {
-			display: grid;
-			grid-template-columns: repeat(5, minmax(0, 1fr));
-			gap: 6px;
-			margin: 12px 0;
-			font-family: var(--font-mono);
-			font-size: 0.85rem;
-			text-align: center;
-		}
-
-		.example span {
-			padding: 6px 4px;
-			border-radius: 8px;
-			background: var(--card);
-			border: 1px solid var(--border);
-		}
-
-		.example .role { font-weight: 700; color: var(--brand); }
-
-		footer {
-			text-align: center;
-			color: var(--muted);
-			font-size: 0.9rem;
-			padding: 20px;
-		}
-
-		footer a { color: var(--brand); }
-
-		@media (max-width: 640px) {
-			nav.contents ol { columns: 1; }
-			.example { font-size: 0.75rem; }
-		}
-	</style>
+	<link rel="stylesheet" href="/tools/panphyplot/manual/manual.css">
+	<script src="/tools/panphyplot/manual/manual.js" defer></script>
 	<script src="/assets/sw-register.js" defer></script>
 </head>
 
 <body>
 	<div class="top">
-		<a href="/tools/panphyplot.html">← Back to PanPhyPlot</a>
-		<div class="theme-toggle">
-			<button id="theme-button" data-panphy-theme-toggle aria-label="Toggle Light/Dark Theme" title="Toggle between light and dark themes">☀️</button>
+		<a href="/tools/panphyplot.html" class="back-link">← PanPhyPlot</a>
+		<div class="top-actions">
+			<button type="button" id="contents-button" aria-haspopup="dialog" aria-controls="contents-dialog">Contents</button>
+			<div class="theme-toggle"><button id="theme-button" data-panphy-theme-toggle aria-label="Toggle Light/Dark Theme" title="Toggle between light and dark themes">☀️</button></div>
 		</div>
 	</div>
-
 	<main>
-		<h1>PanPhyPlot Manual</h1>
-		<p class="lead">Graphs and fits for practical physics, built around columns: from repeat readings to a result with its uncertainty.</p>
-		<p>Prefer to learn by doing? <a href="/tools/panphyplot.html?tour=columns">Take the guided tour</a>. It uses practice data and leaves your own work alone.</p>
+		<header class="manual-intro">
+			<p class="eyebrow">PanPhyPlot · User guide</p>
+			<h1>From readings to a fitted graph</h1>
+			<p class="lead">Follow one pendulum experiment from repeat readings to a result you can save and share.</p>
+			<div class="intro-actions"><a class="primary-link" href="#step-sample">Start the walkthrough</a><a href="#reference">Browse the reference</a></div>
+			<p class="screen-note">Prefer to learn inside the app? <a href="/tools/panphyplot.html?tour=columns">Take the guided tour</a> using practice data.</p>
+		</header>
+		<section aria-labelledby="walkthrough">
+			<span id="quick-start" class="anchor-alias" aria-hidden="true"></span>
+			<h2 id="walkthrough" tabindex="-1">Your first graph</h2>
+			<p class="section-intro">Work through these six steps in order. Screenshots match your theme; select one to enlarge it here.</p>
+			<nav class="step-index" aria-label="Walkthrough steps"><a href="#step-sample"><span>1</span>Load the sample data</a><a href="#step-mean"><span>2</span>Combine the repeat readings</a><a href="#step-formula"><span>3</span>Calculate the period squared</a><a href="#step-fit"><span>4</span>Fit a straight line</a><a href="#step-result"><span>5</span>Read the result</a><a href="#step-save"><span>6</span>Save or copy your work</a></nav>
+<section class="walkthrough-step" aria-labelledby="step-sample">
+    <p class="eyebrow">Step 1 of 6</p>
+<h3 id="step-sample" tabindex="-1">Load the sample data</h3>
+    <div class="step-layout">
+<div class="step-instructions">
+<ol class="actions">
+<li><a href="/tools/panphyplot.html" target="_blank" rel="noopener">Open PanPhyPlot in a new tab</a>, so you can keep this guide beside it.</li>
+<li>On an empty sheet, choose <strong>Try sample data</strong>. If you already have readings, use <strong>+</strong> to add an empty sheet first.</li>
+<li>Find <strong>Data</strong>, the graph, and the <strong>Series</strong> and <strong>Fit</strong> cards. On narrower screens the cards sit below the graph.</li>
+</ol>
+<div class="checkpoint"><strong>What you should see</strong>
+<p>The Pendulum sheet contains length L and three period readings, T1, T2 and T3. Three coloured series appear on the graph.</p>
+</div>
+</div>
+<figure class="screenshot">
+			<a class="screenshot-link screenshot-light" href="/tools/panphyplot/manual/workspace-light.png" target="_blank" rel="noopener" aria-label="Enlarge workspace screenshot">
+				<img src="/tools/panphyplot/manual/workspace-light.png" width="1680" height="980" loading="lazy" decoding="async" alt="PanPhyPlot with pendulum readings in Data, a graph of period against length, and the Series, Fit and Result cards.">
+				<span class="screenshot-open">Enlarge screenshot <span aria-hidden="true">↗</span></span>
+			</a>
+			<a class="screenshot-link screenshot-dark" href="/tools/panphyplot/manual/workspace-dark.png" target="_blank" rel="noopener" aria-label="Enlarge workspace screenshot">
+				<img src="/tools/panphyplot/manual/workspace-dark.png" width="1680" height="980" loading="lazy" decoding="async" alt="PanPhyPlot with pendulum readings in Data, a graph of period against length, and the Series, Fit and Result cards.">
+				<span class="screenshot-open">Enlarge screenshot <span aria-hidden="true">↗</span></span>
+			</a>
+			<figcaption><strong>The workspace.</strong> Readings, graph and fitting controls. Enlarge the image to inspect a control.</figcaption>
+		</figure>
+</div>
+<nav class="step-nav" aria-label="Step 1 navigation"><a href="#walkthrough">← All steps</a><a href="#step-mean">Next: Combine the repeat readings →</a></nav>
+</section>
+<section class="walkthrough-step" aria-labelledby="step-mean">
+    <p class="eyebrow">Step 2 of 6</p>
+<h3 id="step-mean" tabindex="-1">Combine the repeat readings</h3>
+    <div class="step-layout">
+<div class="step-instructions">
+<ol class="actions">
+<li>Choose <strong>Mean</strong> in the toolbar.</li>
+<li>Keep <strong>T1</strong>, <strong>T2</strong> and <strong>T3</strong> selected.</li>
+<li>Keep both options ticked: add the half-spread uncertainty and hide the repeat readings.</li>
+<li>Choose <strong>Add Mean</strong>.</li>
+</ol>
+<div class="checkpoint"><strong>What you should see</strong>
+<p>Two columns appear: T, the mean period, and ΔT, its uncertainty. The graph now shows the mean; the three original series are hidden.</p>
+</div>
+</div>
+<figure class="screenshot">
+			<a class="screenshot-link screenshot-light" href="/tools/panphyplot/manual/mean-light.png" target="_blank" rel="noopener" aria-label="Enlarge mean screenshot">
+				<img src="/tools/panphyplot/manual/mean-light.png" width="560" height="474" loading="lazy" decoding="async" alt="Mean of repeats dialog with T1, T2 and T3 selected, half-spread uncertainty enabled, and Hide the repeat readings on the graph enabled.">
+				<span class="screenshot-open">Enlarge screenshot <span aria-hidden="true">↗</span></span>
+			</a>
+			<a class="screenshot-link screenshot-dark" href="/tools/panphyplot/manual/mean-dark.png" target="_blank" rel="noopener" aria-label="Enlarge mean screenshot">
+				<img src="/tools/panphyplot/manual/mean-dark.png" width="560" height="474" loading="lazy" decoding="async" alt="Mean of repeats dialog with T1, T2 and T3 selected, half-spread uncertainty enabled, and Hide the repeat readings on the graph enabled.">
+				<span class="screenshot-open">Enlarge screenshot <span aria-hidden="true">↗</span></span>
+			</a>
+			<figcaption><strong>Mean of repeats.</strong> Select all three readings and keep both options enabled.</figcaption>
+		</figure>
+</div>
+<nav class="step-nav" aria-label="Step 2 navigation"><a href="#step-sample">← Previous step</a><a href="#step-formula">Next: Calculate the period squared →</a></nav>
+</section>
+<section class="walkthrough-step" aria-labelledby="step-formula">
+    <p class="eyebrow">Step 3 of 6</p>
+<h3 id="step-formula" tabindex="-1">Calculate the period squared</h3>
+    <div class="step-layout">
+<div class="step-instructions">
+<ol class="actions">
+<li>Choose <strong>Formula</strong> in the toolbar.</li>
+<li>Enter <code>T^2</code> as the formula and column name, and <code>s^2</code> as the unit.</li>
+<li>Tick <strong>Add a ±Δ column</strong>.</li>
+<li>Check the first-row preview, then choose <strong>Apply</strong>.</li>
+</ol>
+<div class="checkpoint"><strong>What you should see</strong>
+<p>T² and its uncertainty are added. The first row gives 0.810 ± 0.018 s². The new cells are calculated automatically.</p>
+</div>
+</div>
+<figure class="screenshot">
+			<a class="screenshot-link screenshot-light" href="/tools/panphyplot/manual/formula-light.png" target="_blank" rel="noopener" aria-label="Enlarge formula screenshot">
+				<img src="/tools/panphyplot/manual/formula-light.png" width="560" height="574" loading="lazy" decoding="async" alt="Formula dialog with T^2, column name T^2, unit s^2, uncertainty propagation enabled, and a first-row preview of 0.81 plus or minus 0.018.">
+				<span class="screenshot-open">Enlarge screenshot <span aria-hidden="true">↗</span></span>
+			</a>
+			<a class="screenshot-link screenshot-dark" href="/tools/panphyplot/manual/formula-dark.png" target="_blank" rel="noopener" aria-label="Enlarge formula screenshot">
+				<img src="/tools/panphyplot/manual/formula-dark.png" width="560" height="574" loading="lazy" decoding="async" alt="Formula dialog with T^2, column name T^2, unit s^2, uncertainty propagation enabled, and a first-row preview of 0.81 plus or minus 0.018.">
+				<span class="screenshot-open">Enlarge screenshot <span aria-hidden="true">↗</span></span>
+			</a>
+			<figcaption><strong>Formula column.</strong> The preview checks the value and its propagated uncertainty before you apply it.</figcaption>
+		</figure>
+</div>
+<details class="extra">
+<summary>Check the four calculated columns</summary>
+<div class="extra-body">
+<p>You should now have these four columns after the original readings. Formula cells are shaded and follow any changes to your data.</p>
+<table class="column-check">
+<thead>
+<tr>
+<th>Column</th>
+<th>Contains</th>
+<th>First row</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>T</td>
+<td>Mean period</td>
+<td>0.900 s</td>
+</tr>
+<tr>
+<td>ΔT</td>
+<td>Half-spread uncertainty</td>
+<td>0.010 s</td>
+</tr>
+<tr>
+<td>T²</td>
+<td>Period squared</td>
+<td>0.810 s²</td>
+</tr>
+<tr>
+<td>ΔT²</td>
+<td>Propagated uncertainty</td>
+<td>0.018 s²</td>
+</tr>
+</tbody>
+</table>
+<figure class="screenshot">
+			<a class="screenshot-link screenshot-light" href="/tools/panphyplot/manual/columns-light.png" target="_blank" rel="noopener" aria-label="Enlarge columns screenshot">
+				<img src="/tools/panphyplot/manual/columns-light.png" width="1414" height="499" loading="lazy" decoding="async" alt="Processed pendulum table showing L, T1, T2, T3, mean T, uncertainty ΔT, T^2 and uncertainty ΔT^2, with X, Y and ±ΔY roles.">
+				<span class="screenshot-open">Enlarge screenshot <span aria-hidden="true">↗</span></span>
+			</a>
+			<a class="screenshot-link screenshot-dark" href="/tools/panphyplot/manual/columns-dark.png" target="_blank" rel="noopener" aria-label="Enlarge columns screenshot">
+				<img src="/tools/panphyplot/manual/columns-dark.png" width="1414" height="499" loading="lazy" decoding="async" alt="Processed pendulum table showing L, T1, T2, T3, mean T, uncertainty ΔT, T^2 and uncertainty ΔT^2, with X, Y and ±ΔY roles.">
+				<span class="screenshot-open">Enlarge screenshot <span aria-hidden="true">↗</span></span>
+			</a>
+			<figcaption><strong>The completed sheet.</strong> Enlarge this image and choose <strong>Actual size</strong> to inspect individual readings.</figcaption>
+		</figure>
+<p>Want to use another expression? See <a href="#formulas">formula syntax</a> and <a href="#uncertainties">uncertainty propagation</a>.</p>
+</div>
+</details>
+<nav class="step-nav" aria-label="Step 3 navigation"><a href="#step-mean">← Previous step</a><a href="#step-fit">Next: Fit a straight line →</a></nav>
+</section>
+<section class="walkthrough-step" aria-labelledby="step-fit">
+    <p class="eyebrow">Step 4 of 6</p>
+<h3 id="step-fit" tabindex="-1">Fit a straight line</h3>
+    <div class="step-layout">
+<div class="step-instructions">
+<ol class="actions">
+<li>In <strong>Series</strong>, click the <strong>T against L</strong> row to hide the mean period. Leave <strong>T^2 against L</strong> visible.</li>
+<li>In <strong>Fit</strong>, select <strong>T^2 against L</strong>.</li>
+<li>Choose <strong>Basic → Linear</strong>.</li>
+<li>Turn on <strong>Weight by uncertainties</strong>.</li>
+<li>Choose <strong>Fit Curve</strong>.</li>
+</ol>
+<div class="checkpoint"><strong>What you should see</strong>
+<p>A straight line appears on the T² against L graph, and the Result card shows the fitted equation and parameters.</p>
+</div>
+</div>
+<figure class="screenshot">
+			<a class="screenshot-link screenshot-light" href="/tools/panphyplot/manual/fit-light.png" target="_blank" rel="noopener" aria-label="Enlarge fit screenshot">
+				<img src="/tools/panphyplot/manual/fit-light.png" width="520" height="552" loading="lazy" decoding="async" alt="Fit card with T^2 against L selected, Basic tab, Linear model, Fit Curve button, and Weight by uncertainties switched on.">
+				<span class="screenshot-open">Enlarge screenshot <span aria-hidden="true">↗</span></span>
+			</a>
+			<a class="screenshot-link screenshot-dark" href="/tools/panphyplot/manual/fit-dark.png" target="_blank" rel="noopener" aria-label="Enlarge fit screenshot">
+				<img src="/tools/panphyplot/manual/fit-dark.png" width="520" height="552" loading="lazy" decoding="async" alt="Fit card with T^2 against L selected, Basic tab, Linear model, Fit Curve button, and Weight by uncertainties switched on.">
+				<span class="screenshot-open">Enlarge screenshot <span aria-hidden="true">↗</span></span>
+			</a>
+			<figcaption><strong>Fit setup.</strong> The squared period is selected, with a linear model and uncertainty weighting.</figcaption>
+		</figure>
+</div>
+<nav class="step-nav" aria-label="Step 4 navigation"><a href="#step-formula">← Previous step</a><a href="#step-result">Next: Read the result →</a></nav>
+</section>
+<section class="walkthrough-step" aria-labelledby="step-result">
+    <p class="eyebrow">Step 5 of 6</p>
+<h3 id="step-result" tabindex="-1">Read the result</h3>
+    <div class="step-layout">
+<div class="step-instructions">
+<ol class="actions">
+<li>Find the <strong>Result</strong> card.</li>
+<li>Read <strong>m</strong>, the slope, and <strong>c</strong>, the intercept, with their ± uncertainties.</li>
+<li>Use the decimal buttons below the equation to change its displayed precision.</li>
+<li>Tap a <strong>?</strong> beside a fit-quality measure for an explanation.</li>
+</ol>
+<div class="checkpoint"><strong>What you should see</strong>
+<p>For this sample, m is about 4.02 ± 0.04 and R² is close to 1. The points lie close to the line. The low χ²/ν also flags that the uncertainty estimates are generous.</p>
+</div>
+</div>
+<figure class="screenshot">
+			<a class="screenshot-link screenshot-light" href="/tools/panphyplot/manual/result-light.png" target="_blank" rel="noopener" aria-label="Enlarge result screenshot">
+				<img src="/tools/panphyplot/manual/result-light.png" width="520" height="568" loading="lazy" decoding="async" alt="Result card showing a fitted linear equation, slope and intercept with uncertainties, R squared, chi squared per degree of freedom and RMSE.">
+				<span class="screenshot-open">Enlarge screenshot <span aria-hidden="true">↗</span></span>
+			</a>
+			<a class="screenshot-link screenshot-dark" href="/tools/panphyplot/manual/result-dark.png" target="_blank" rel="noopener" aria-label="Enlarge result screenshot">
+				<img src="/tools/panphyplot/manual/result-dark.png" width="520" height="568" loading="lazy" decoding="async" alt="Result card showing a fitted linear equation, slope and intercept with uncertainties, R squared, chi squared per degree of freedom and RMSE.">
+				<span class="screenshot-open">Enlarge screenshot <span aria-hidden="true">↗</span></span>
+			</a>
+			<figcaption><strong>Result card.</strong> Equation, parameters with uncertainties, and fit-quality measures.</figcaption>
+		</figure>
+</div>
+<details class="extra">
+<summary>Check the graph and residuals</summary>
+<div class="extra-body">
+<p>Expand <strong>Residuals</strong> below the graph. These are the differences between the measurements and the fitted line. Look for scatter around zero; a curved pattern suggests trying another model.</p>
+<figure class="screenshot">
+			<a class="screenshot-link screenshot-light" href="/tools/panphyplot/manual/graph-light.png" target="_blank" rel="noopener" aria-label="Enlarge graph screenshot">
+				<img src="/tools/panphyplot/manual/graph-light.png" width="956" height="601" loading="lazy" decoding="async" alt="Graph of T squared against L with a fitted straight line, error bars, and an expanded residual plot below.">
+				<span class="screenshot-open">Enlarge screenshot <span aria-hidden="true">↗</span></span>
+			</a>
+			<a class="screenshot-link screenshot-dark" href="/tools/panphyplot/manual/graph-dark.png" target="_blank" rel="noopener" aria-label="Enlarge graph screenshot">
+				<img src="/tools/panphyplot/manual/graph-dark.png" width="956" height="601" loading="lazy" decoding="async" alt="Graph of T squared against L with a fitted straight line, error bars, and an expanded residual plot below.">
+				<span class="screenshot-open">Enlarge screenshot <span aria-hidden="true">↗</span></span>
+			</a>
+			<figcaption><strong>The fitted graph and residuals.</strong> The sample points sit close to the line; the residuals show their small differences from it.</figcaption>
+		</figure>
+<p>See <a href="#results">Reading a fit</a> for the meaning of the parameters and quality measures, and how the pendulum slope gives g.</p>
+</div>
+</details>
+<nav class="step-nav" aria-label="Step 5 navigation"><a href="#step-fit">← Previous step</a><a href="#step-save">Next: Save or copy your work →</a></nav>
+</section>
+<section class="walkthrough-step" aria-labelledby="step-save">
+    <p class="eyebrow">Step 6 of 6</p>
+<h3 id="step-save" tabindex="-1">Save or copy your work</h3>
+    <div class="step-layout">
+<div class="step-instructions">
+<ol class="actions">
+<li>Choose <strong>Save</strong> in the toolbar to download an editable <code>.ppplot</code> project.</li>
+<li>To copy the readings into a report, choose <strong>Table</strong>, then select <strong>Copy for Spreadsheet</strong> or <strong>Copy as Image</strong>.</li>
+<li>For a graph image, use the camera button on the graph.</li>
+</ol>
+<div class="checkpoint"><strong>What you should see</strong>
+<p>The .ppplot file preserves your data, formulas and fits. You can use Open to continue on another device; copied tables and graph images are ready for a report.</p>
+</div>
+</div>
+<figure class="screenshot">
+			<a class="screenshot-link screenshot-light" href="/tools/panphyplot/manual/table-light.png" target="_blank" rel="noopener" aria-label="Enlarge table screenshot">
+				<img src="/tools/panphyplot/manual/table-light.png" width="880" height="498" loading="lazy" decoding="async" alt="View Table dialog with the pendulum readings and calculated values alongside their uncertainties, plus Copy for Spreadsheet, Copy as Image, Copy Markdown and Copy LaTeX buttons.">
+				<span class="screenshot-open">Enlarge screenshot <span aria-hidden="true">↗</span></span>
+			</a>
+			<a class="screenshot-link screenshot-dark" href="/tools/panphyplot/manual/table-dark.png" target="_blank" rel="noopener" aria-label="Enlarge table screenshot">
+				<img src="/tools/panphyplot/manual/table-dark.png" width="880" height="498" loading="lazy" decoding="async" alt="View Table dialog with the pendulum readings and calculated values alongside their uncertainties, plus Copy for Spreadsheet, Copy as Image, Copy Markdown and Copy LaTeX buttons.">
+				<span class="screenshot-open">Enlarge screenshot <span aria-hidden="true">↗</span></span>
+			</a>
+			<figcaption><strong>View Table.</strong> Values are paired with their uncertainties, with several copy formats.</figcaption>
+		</figure>
+</div>
+<nav class="step-nav" aria-label="Step 6 navigation"><a href="#step-result">← Previous step</a><a href="#reference">Explore the reference →</a></nav>
+</section>
+</section>
+<section class="reference" aria-labelledby="reference">
+<h2 id="reference" tabindex="-1">Reference</h2>
+<p>Open a topic when you need more detail. These sections cover other workflows, shortcuts and the physics behind the results.</p>
+<details class="reference-item" id="sheets">
+<summary>Sheets and columns</summary>
+<div class="reference-body">
+<p>Each tab in the top bar is a <strong>sheet</strong>: use one sheet for each experiment. Tap <kbd>+</kbd> to add a sheet, tap the open sheet's name to rename it, and tap <kbd>×</kbd> to remove it. An empty sheet offers <strong>Try sample data</strong>: a pendulum experiment to explore.</p>
 
-		<nav class="contents" aria-label="Contents">
-			<strong>Contents</strong>
-			<ol>
-				<li><a href="#sheets">Sheets and columns</a></li>
-				<li><a href="#roles">Column roles</a></li>
-				<li><a href="#entering">Entering data</a></li>
-				<li><a href="#formulas">Formula columns</a></li>
-				<li><a href="#repeats">Repeat readings</a></li>
-				<li><a href="#uncertainties">Uncertainties</a></li>
-				<li><a href="#graph">The graph</a></li>
-				<li><a href="#fitting">Fitting</a></li>
-				<li><a href="#results">Reading a fit</a></li>
-				<li><a href="#sharing">Sharing your work</a></li>
-				<li><a href="#saving">Saving and devices</a></li>
-			</ol>
-		</nav>
 
-		<h2 id="sheets">1. Sheets and columns</h2>
-		<p>Each tab in the top bar is a <strong>sheet</strong>: use one sheet for each experiment. Tap <kbd>+</kbd> to add a sheet, tap the open sheet's name to rename it, and tap <kbd>×</kbd> to remove it. An empty sheet offers <strong>Try sample data</strong>: a pendulum experiment to explore.</p>
 		<p>A sheet is a table with as many columns as you need. Every column has a letter (A, B, C…), a <strong>name</strong> and a <strong>unit</strong>. Axis titles are built from them in the form <em>name / unit</em>, for example <code>L / m</code>.</p>
 		<p>On a computer or a landscape tablet, drag the thin handle between two panes to make one wider; near its starting position it snaps back onto it. With the handle selected, the arrow keys also resize it, and a double-click or <kbd>Enter</kbd> resets it. To widen a column of the table, drag the right edge of its heading; double-click the edge for the default width.</p>
 		<p>The <svg class="manual-inline-icon" viewBox="0 0 24 24" width="16" height="16" aria-hidden="true" style="vertical-align:-3px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg> button at the top right of the Data or graph section maximizes it, covering the other columns. The same button, now pointing inwards, or <kbd>Esc</kbd> puts it back.</p>
 		<p>The <kbd>⋯</kbd> button on a column heading moves, inserts, fills, clears or deletes the column, or gives it a formula. The row number on the left inserts or deletes a row.</p>
 
 		<p><strong>Clear</strong>, at the right of the toolbar, offers two choices. <strong>Clear data, keep columns</strong> empties every cell and removes the sheet's fits, but keeps the names, units, roles and formulas, ready for a repeat of the experiment. <strong>Reset to a blank sheet</strong> goes back to a new sheet: two columns, x and y, and no name, so its tab shows its default name, such as Sheet 2.</p>
-
-		<h2 id="roles">2. Column roles</h2>
-		<p>The coloured chip at the top of each column sets its role:</p>
-		<table>
+<figure class="screenshot">
+			<a class="screenshot-link screenshot-light" href="/tools/panphyplot/manual/clear-light.png" target="_blank" rel="noopener" aria-label="Enlarge clear screenshot">
+				<img src="/tools/panphyplot/manual/clear-light.png" width="560" height="364" loading="lazy" decoding="async" alt="Clear dialog offering Clear data, keep columns and Reset to a blank sheet, with a Cancel button.">
+				<span class="screenshot-open">Enlarge screenshot <span aria-hidden="true">↗</span></span>
+			</a>
+			<a class="screenshot-link screenshot-dark" href="/tools/panphyplot/manual/clear-dark.png" target="_blank" rel="noopener" aria-label="Enlarge clear screenshot">
+				<img src="/tools/panphyplot/manual/clear-dark.png" width="560" height="364" loading="lazy" decoding="async" alt="Clear dialog offering Clear data, keep columns and Reset to a blank sheet, with a Cancel button.">
+				<span class="screenshot-open">Enlarge screenshot <span aria-hidden="true">↗</span></span>
+			</a>
+			<figcaption><strong>Clearing or starting again.</strong> Keep the columns for another run, or reset to a blank x–y sheet. Both choices remove this sheet’s fits and reset the advanced starting parameters.</figcaption>
+		</figure>
+</div>
+</details>
+<details class="reference-item" id="roles">
+<summary>Column roles</summary>
+<div class="reference-body">
+<p>The coloured chip at the top of each column sets its role:</p>
+		<div class="reference-table" tabindex="0" role="region" aria-label="Reference table"><table>
 			<thead>
-				<tr><th>Role</th><th>Meaning</th></tr>
+				<tr>
+<th>Role</th>
+<th>Meaning</th>
+</tr>
 			</thead>
 			<tbody>
-				<tr><td><strong>X</strong></td><td>Values for the horizontal axis.</td></tr>
-				<tr><td><strong>Y</strong></td><td>Values for the vertical axis. Each Y column is one series on the graph.</td></tr>
-				<tr><td><strong>±ΔX</strong>, <strong>±ΔX %</strong></td><td>The uncertainty in an X column, absolute or as a percentage.</td></tr>
-				<tr><td><strong>±ΔY</strong>, <strong>±ΔY %</strong></td><td>The uncertainty in a Y column, absolute or as a percentage.</td></tr>
-				<tr><td><strong>Ignore</strong></td><td>Kept in the table, but not plotted.</td></tr>
+				<tr>
+<td><strong>X</strong></td>
+<td>Values for the horizontal axis.</td>
+</tr>
+				<tr>
+<td><strong>Y</strong></td>
+<td>Values for the vertical axis. Each Y column is one series on the graph.</td>
+</tr>
+				<tr>
+<td><strong>±ΔX</strong>, <strong>±ΔX %</strong></td>
+<td>The uncertainty in an X column, absolute or as a percentage.</td>
+</tr>
+				<tr>
+<td><strong>±ΔY</strong>, <strong>±ΔY %</strong></td>
+<td>The uncertainty in a Y column, absolute or as a percentage.</td>
+</tr>
+				<tr>
+<td><strong>Ignore</strong></td>
+<td>Kept in the table, but not plotted.</td>
+</tr>
 			</tbody>
-		</table>
+		</table></div>
 		<p>Columns are paired by position, as in OriginPro:</p>
 		<ul>
 			<li>A <strong>Y</strong> column plots against the <strong>nearest X column to its left</strong>.</li>
@@ -247,9 +358,12 @@
 			<span>L / m</span><span>T1 / s</span><span>T2 / s</span><span>ΔT2 / s</span><span></span>
 		</div>
 		<p>A second X column further right starts a new group: the Y columns after it plot against it. To change the pairing, drag a column by its letter (<kbd>⠿ B</kbd>) and drop it where the line shows; the table scrolls if you drag to its edge. <strong>Move left</strong> and <strong>Move right</strong> in a column's <kbd>⋯</kbd> menu do the same one step at a time. Formulas that use column letters follow the columns they refer to.</p>
-
-		<h2 id="entering">3. Entering data</h2>
-		<h3>Typing</h3>
+</div>
+</details>
+<details class="reference-item" id="entering">
+<summary>Entering data</summary>
+<div class="reference-body">
+<h3>Typing</h3>
 		<p>Tap a cell and type a number such as <code>1.25</code>, <code>-0.4</code> or <code>3e-5</code>. Arrow keys and <kbd>Enter</kbd> move between cells, and <kbd>Enter</kbd> on the last row adds a row. Commas and units in a cell are not numbers: the cell turns red, is kept, and is left out of the graph.</p>
 		<p>To give every reading the same uncertainty, such as ±0.05 s, add a ±ΔY column and use <strong>Fill with one value…</strong> from its <kbd>⋯</kbd> menu. It fills only the rows that have a reading in the column the uncertainty belongs to, and says how many before it does; rows without a reading stay empty. If you add readings later, fill the column again. For a column that is not an uncertainty, it fills the rows that have any data.</p>
 		<h3>Pasting from a spreadsheet</h3>
@@ -259,9 +373,23 @@
 		<h3>Importing a CSV file</h3>
 		<p><strong>Import</strong> opens a preview of the file. Check the role chosen for each column and whether the first row holds names, then choose a new sheet or the current one. Roles are only suggested from clear headings: a column called <code>Δx</code> is suggested as the uncertainty of the column named <code>x</code>. Nothing is decided without the preview.</p>
 		<p><strong>From Motion Tracker</strong>, Export to PanPhyPlot opens PanPhyPlot in a new tab with the data in a new sheet: <code>t</code>, <code>x</code> and <code>y</code>, then a second <code>t</code> column with the smoothed velocities <code>vx</code> and <code>vy</code>, which belong to the times midway between marks. The velocities start hidden; show them in the Series list.</p>
-
-		<h2 id="formulas">4. Formula columns</h2>
-		<p><strong>Data → Formula</strong> adds a column calculated from others, row by row; <strong>Set formula…</strong> in a column's <kbd>⋯</kbd> menu turns an existing column into one. Its cells are shaded, cannot be typed into, and follow any change to the data.</p>
+</div>
+</details>
+<details class="reference-item" id="repeats">
+<summary>Repeat readings</summary>
+<div class="reference-body">
+<p>Put each set of repeats in its own Y column, such as T1, T2 and T3. <strong>Mean</strong> opens Mean of Repeats and then adds a formula column holding their mean, named after them (T). It can also:</p>
+		<ul>
+			<li>add a ±Δ column of <strong>half the spread between the largest and smallest readings</strong>, a common estimate of the uncertainty in a mean;</li>
+			<li>hide the repeat series, so the graph shows the mean.</li>
+		</ul>
+		<p>A row with a missing reading takes the mean of the readings it has, and its half spread needs at least two. The formulas are <code>mean(B, C, D)</code> and <code>halfspread(B, C, D)</code>; in any formula, <code>mean</code>, <code>median</code>, <code>min</code>, <code>max</code> and <code>halfspread</code> leave out a blank reading among their inputs.</p>
+</div>
+</details>
+<details class="reference-item" id="formulas">
+<summary>Formula columns</summary>
+<div class="reference-body">
+<p><strong>Data → Formula</strong> adds a column calculated from others, row by row; <strong>Set formula…</strong> in a column's <kbd>⋯</kbd> menu turns an existing column into one. Its cells are shaded, cannot be typed into, and follow any change to the data.</p>
 		<ul>
 			<li>Refer to a column by its letter (<code>B</code>) or by its name, if the name is a single word such as <code>T</code> or <code>T1</code>.</li>
 			<li>Use <code>*</code> to multiply and <code>^</code> for powers: <code>T^2</code>, <code>4*pi^2*L/T^2</code>, <code>1/sqrt(d)</code>. No leading <code>=</code> is needed.</li>
@@ -269,25 +397,25 @@
 			<li>A row where any input is blank or invalid stays blank.</li>
 		</ul>
 		<p>The dialog checks the formula as you type and shows the first row's result. Formulas that use column letters keep working when columns are moved or inserted. Renaming a column rewrites the formulas that use its name; if the new name is not a single word, they use the column's letter instead.</p>
+
+
 		<div class="note">Column letters take priority. In a sheet with five or more columns, <code>E</code> means column E, not Euler's number: use <code>e</code> for that.</div>
-
-		<h2 id="repeats">5. Repeat readings</h2>
-		<p>Put each set of repeats in its own Y column, such as T1, T2 and T3. <strong>Mean</strong> opens Mean of Repeats and then adds a formula column holding their mean, named after them (T). It can also:</p>
-		<ul>
-			<li>add a ±Δ column of <strong>half the spread between the largest and smallest readings</strong>, a common estimate of the uncertainty in a mean;</li>
-			<li>hide the repeat series, so the graph shows the mean.</li>
-		</ul>
-		<p>A row with a missing reading takes the mean of the readings it has, and its half spread needs at least two. The formulas are <code>mean(B, C, D)</code> and <code>halfspread(B, C, D)</code>; in any formula, <code>mean</code>, <code>median</code>, <code>min</code>, <code>max</code> and <code>halfspread</code> leave out a blank reading among their inputs.</p>
-
-		<h2 id="uncertainties">6. Uncertainties</h2>
-		<p>Uncertainties live in ±ΔX and ±ΔY columns, absolute or as a percentage of each value, and appear as error bars.</p>
+</div>
+</details>
+<details class="reference-item" id="uncertainties">
+<summary>Uncertainties</summary>
+<div class="reference-body">
+<p>Uncertainties live in ±ΔX and ±ΔY columns, absolute or as a percentage of each value, and appear as error bars.</p>
 		<h3>Carrying uncertainties through a formula</h3>
 		<p>Tick <strong>Add a ±Δ column</strong> in the formula dialog to add a column with the uncertainty of the formula's result. It uses each input's own ±Δ column, by the pairing rule above, and combines them:</p>
-		<p>\[ \Delta f = \sqrt{\left(\frac{\partial f}{\partial a}\,\Delta a\right)^2 + \left(\frac{\partial f}{\partial b}\,\Delta b\right)^2 + \cdots} \]</p>
+		<div class="math-scroll" tabindex="0" role="region" aria-label="Uncertainty propagation equation">\[ \Delta f = \sqrt{\left(\frac{\partial f}{\partial a}\,\Delta a\right)^2 + \left(\frac{\partial f}{\partial b}\,\Delta b\right)^2 + \cdots} \]</div>
 		<p>For \(f = T^2\), \(\dfrac{\partial f}{\partial T} = 2T\), so \(\Delta(T^2) = 2T\,\Delta T\). The dialog writes out each derivative for your formula. This assumes the uncertainties are small and independent; inputs without a ±Δ column add nothing. Percentage uncertainties are turned into absolute ones first.</p>
-
-		<h2 id="graph">7. The graph</h2>
-		<ul>
+</div>
+</details>
+<details class="reference-item" id="graph">
+<summary>The graph</summary>
+<div class="reference-body">
+<ul>
 			<li>Every Y series of the sheet is plotted, with error bars from its ±Δ columns.</li>
 			<li>The <strong>Series</strong> card on the right is the graph's colour key: tap a series there, or its legend entry, to hide or show it with its fit. Each Y column's heading carries the same colour.</li>
 			<li>The title follows the columns until you type your own; clear it to return to the automatic title.</li>
@@ -295,27 +423,47 @@
 			<li><strong>LaTeX mode</strong> typesets names, units and titles: a unit of <code>m s^{-1}</code> reads as m s⁻¹. The title above the graph shows typeset; tap it to edit the LaTeX, and press <kbd>Enter</kbd> to see it typeset again.</li>
 			<li><strong>View → All sheets</strong> draws every series of every sheet together, with labels you can edit.</li>
 		</ul>
-
-		<h2 id="fitting">8. Fitting</h2>
-		<p>In the <strong>Fit</strong> card, choose the <strong>Series to fit</strong>: the Y column to fit. It lists only the series shown on the graph; hiding the one being fitted moves the choice to a visible one, and a series with no data yet cannot be chosen. Each series keeps its own fit, so a hidden series's fit returns when it is shown again.</p>
-		<table>
+</div>
+</details>
+<details class="reference-item" id="fitting">
+<summary>Fitting</summary>
+<div class="reference-body">
+<p>In the <strong>Fit</strong> card, choose the <strong>Series to fit</strong>: the Y column to fit. It lists only the series shown on the graph; hiding the one being fitted moves the choice to a visible one, and a series with no data yet cannot be chosen. Each series keeps its own fit, so a hidden series's fit returns when it is shown again.</p>
+		<div class="reference-table" tabindex="0" role="region" aria-label="Reference table"><table>
 			<thead>
-				<tr><th>Tab</th><th>Models</th></tr>
+				<tr>
+<th>Tab</th>
+<th>Models</th>
+</tr>
 			</thead>
 			<tbody>
-				<tr><td>Basic</td><td>Linear \(y = mx + c\), quadratic, cubic, exponential \(y = A e^{b(x-x_{\rm ref})} + c\), where \(x_{\rm ref}\) is fixed at the middle of the measured x-range and the general power law \(y = A(x - x_0)^{b} + c\). Its four parameters are found by an automatic search; with few points they can trade off against each other, so their ± values may be large; if theory says \(x_0 = 0\) and \(c = 0\), a Custom fit <code>A*x^b</code> pins them.</td></tr>
-				<tr><td>Advanced</td><td>Sinusoidal and Gaussian, with automatic starting values you can adjust. Gaussian fits support peaks and dips above a baseline. Sinusoidal fits need at least five points; automatic frequency searches stay within the sampling limit for evenly spaced data. A larger manual frequency extends the search, but sampled data may not distinguish aliases.</td></tr>
-				<tr><td>Custom</td><td>Your own formula in \(x\), such as <code>A*exp(-k*x)+c</code> or <code>k*x</code>. Supports up to <strong>5 fit parameters</strong>. Other symbols are parameters to fit. Use <strong>Auto guesses</strong> to recalculate starting values. Expand <strong>Parameter bounds (optional)</strong> to set <strong>Min</strong> and <strong>Max</strong> for each parameter; leave them blank for no bound. Formulas linear in their parameters are solved directly.</td></tr>
+				<tr>
+<td>Basic</td>
+<td>Linear \(y = mx + c\), quadratic, cubic, exponential \(y = A e^{b(x-x_{\rm ref})} + c\), where \(x_{\rm ref}\) is fixed at the middle of the measured x-range and the general power law \(y = A(x - x_0)^{b} + c\). Its four parameters are found by an automatic search; with few points they can trade off against each other, so their ± values may be large; if theory says \(x_0 = 0\) and \(c = 0\), a Custom fit <code>A*x^b</code> pins them.</td>
+</tr>
+				<tr>
+<td>Advanced</td>
+<td>Sinusoidal and Gaussian, with automatic starting values you can adjust. Gaussian fits support peaks and dips above a baseline. Sinusoidal fits need at least five points; automatic frequency searches stay within the sampling limit for evenly spaced data. A larger manual frequency extends the search, but sampled data may not distinguish aliases.</td>
+</tr>
+				<tr>
+<td>Custom</td>
+<td>Your own formula in \(x\), such as <code>A*exp(-k*x)+c</code> or <code>k*x</code>. Supports up to <strong>5 fit parameters</strong>. Other symbols are parameters to fit. Use <strong>Auto guesses</strong> to recalculate starting values. Expand <strong>Parameter bounds (optional)</strong> to set <strong>Min</strong> and <strong>Max</strong> for each parameter; leave them blank for no bound. Formulas linear in their parameters are solved directly.</td>
+</tr>
 			</tbody>
-		</table>
+		</table></div>
+
+
 		<h3>Extending the line</h3>
 		<p>A fitted line is drawn across the data. To draw it further, type x values under <strong>Extend line</strong>: <strong>Back to x =</strong> before the first point, such as 0 to read an intercept, and <strong>Forward to x =</strong> beyond the last. Leave a box blank to stop at the data. Each series keeps its own extension through a new fit; <strong>Clear Fit</strong> removes it. Fit models are saved with the project and restored on reopening or reloading. Older saved fits without a recoverable model need fitting again before changing an extension.</p>
 		<h3>Weighted fits</h3>
 		<p>Turn on <strong>Weight by uncertainties</strong> to let the more certain points count for more. Each point has weight \(1/\sigma^2\), with \(\sigma^2 = \Delta y^2 + \left(f'(x)\,\Delta x\right)^2\): its ±ΔY, and its ±ΔX turned into a vertical uncertainty through the slope of the curve (the effective variance). The fit is re-weighted as the slope settles. Weighting works for every fit type and needs a ±ΔY or ±ΔX above zero for every point.</p>
 		<p>A fit becomes <em>Outdated</em>, drawn dashed, as soon as its data or ±ΔY change. Click <strong>Fit Curve</strong> again to update it.</p>
-
-		<h2 id="results">9. Reading a fit</h2>
-		<ul>
+</div>
+</details>
+<details class="reference-item" id="results">
+<summary>Reading a fit</summary>
+<div class="reference-body">
+<ul>
 			<li><strong>The equation</strong> of the fitted curve, to 2 decimal places at first. The two buttons under it, like a spreadsheet's increase and decrease decimal buttons, show from 0 to 8 places; a value that would round to zero switches to scientific form, such as \(2.30 \times 10^{-3}\). The fit itself keeps every digit. Tap the equation to copy it, as shown, as an image or as LaTeX.</li>
 			<li><strong>Equation symbols</strong>: expand this control in the Result card to choose Vertical and Horizontal symbols without changing column headings or axis labels. Enter simple LaTeX such as <code>t_1</code>, <code>R_{out}</code>, <code>\theta</code> or <code>\Delta T</code>; each field has a live preview. Leave a field blank to use a single-letter column name, or fall back to x and y. Symbols are saved with their columns and included when copying the equation. Invalid or identical symbols keep the last valid notation. Custom fit formulas still use <code>x</code>.</li>
 			<li><strong>Parameters with uncertainties</strong> for every fit type, such as \(m = 3.97 \pm 0.05\), using the same decimal-place setting as the equation. Small nonzero values and uncertainties use scientific notation when they would otherwise round to zero. A weighted fit treats each σ as a standard uncertainty. An unweighted fit estimates the uncertainty from how far the points scatter about the curve. A quadratic or cubic is fitted internally in a shifted, scaled variable to keep it accurate, then reported in \(x\), with its ± values carried across.</li>
@@ -323,34 +471,75 @@
 			<li><strong>\(\chi^2/\nu\)</strong>, shown when every point has a ±ΔY or ±ΔX. Here \(\chi^2 = \sum \left(\frac{y - f(x)}{\sigma}\right)^2\), and \(\nu\) is the number of points minus the number of fitted parameters. Near 1, the points scatter about as much as their uncertainties suggest. Much more than 1, the uncertainties are too small or the model does not fit. Much less than 1, the uncertainties are generous.</li>
 			<li><strong>Residuals</strong>: tap <strong>Residuals</strong> under the graph to show them, and tap again to fold them away. Each is the vertical distance of a point from the fit; a pattern in them, such as a curve, suggests the model is wrong.</li>
 		</ul>
-		<p>Example: for a pendulum, \(T^2 = \dfrac{4\pi^2}{g}L\), so a straight-line fit of \(T^2\) against \(L\) gives \(g = \dfrac{4\pi^2}{m}\), with \(\dfrac{\Delta g}{g} = \dfrac{\Delta m}{m}\).</p>
 
-		<h2 id="sharing">10. Sharing your work</h2>
-		<ul>
+
+		<p>Example: for a pendulum, \(T^2 = \dfrac{4\pi^2}{g}L\), so a straight-line fit of \(T^2\) against \(L\) gives \(g = \dfrac{4\pi^2}{m}\), with \(\dfrac{\Delta g}{g} = \dfrac{\Delta m}{m}\).</p>
+</div>
+</details>
+<details class="reference-item" id="sharing">
+<summary>Sharing your work</summary>
+<div class="reference-body">
+<ul>
 			<li><strong>View → Table</strong> shows the sheet with each value beside its own ± uncertainty, ready to copy for a spreadsheet, as an image, as Markdown or as LaTeX. Calculated values are rounded to the decimal place of their uncertainty; typed values appear as entered.</li>
 			<li><strong>Export</strong> saves every column, including calculated ones, with headings such as <code>L / m</code> that Import reads back. Formulas themselves are not saved in the file.</li>
 			<li>The camera button on the graph saves it as a PNG image.</li>
 		</ul>
-
-		<h2 id="saving">11. Saving and devices</h2>
-		<p>Your sheets are saved automatically in this browser on this device. They are not uploaded anywhere, and clearing the browser's site data removes them: use <strong>File → Save</strong> to keep a complete project file or move your work to another device.</p>
+</div>
+</details>
+<details class="reference-item" id="saving">
+<summary>Saving and devices</summary>
+<div class="reference-body">
+<p>Your sheets are saved automatically in this browser on this device. They are not uploaded anywhere, and clearing the browser's site data removes them: use <strong>File → Save</strong> to keep a complete project file or move your work to another device.</p>
 		<p><strong>Save</strong> downloads a <code>.ppplot</code> project containing every sheet, data and formulas, graph titles and zoom ranges, hidden series, fit results and uncertainties, custom fit formulas and bounds, equation symbols, decimal places, line extensions and current fit controls. The graphs are rebuilt from these settings when you reopen the file.</p>
 		<p><strong>Open</strong> selects a project file and checks it before asking to replace all current sheets. Cancel to keep your current work, or save it first. A malformed or unsupported file leaves the current project intact. You can open files on another device and continue editing; new fits can be extended immediately. Browser theme and pane widths stay with the device.</p>
 		<p><strong>Import</strong> and <strong>Export</strong> continue to handle CSV data for an individual sheet; CSV does not preserve formulas or fitted results.</p>
 		<p>Every tab or window you open this page in shares the same sheets, so use a new <strong>sheet</strong>, not a new tab, for another experiment. If the work changes in another tab, this tab stops saving and asks whether to reload and see the other tab's version, or keep its own; nothing is overwritten without asking.</p>
 		<p>If data from an earlier version is found in this browser, a one-time offer can add it as new sheets with names, units and uncertainties. Fits are not imported. Accepting or declining leaves the earlier save untouched.</p>
 		<p>PanPhyPlot works best on a laptop or tablet. On a small screen, choose <strong>Continue</strong> to use the workspace or <strong>Not now</strong> to return to the homepage.</p>
-	</main>
-
-	<footer>
+</div>
+</details>
+</section>
+</main>
+<footer>
 		&copy; 2026 <a href="https://panphy.app/" target="_blank" rel="noopener noreferrer">PanPhy Labs</a>. All rights reserved.
 	</footer>
-
-	<script>
-		document.addEventListener('DOMContentLoaded', () => {
-			window.PanPhyThemeToggle.mount(document.getElementById('theme-button'));
-		});
-	</script>
+<dialog id="contents-dialog" class="contents-dialog" aria-labelledby="contents-title">
+<div class="dialog-head">
+<h2 id="contents-title">Contents</h2>
+<button type="button" data-close-dialog="contents-dialog" aria-label="Close contents">Close</button></div>
+<nav aria-label="Manual contents">
+<h3>Walkthrough</h3>
+<ol>
+<li><a href="#step-sample">Load the sample data</a></li>
+<li><a href="#step-mean">Combine the repeat readings</a></li>
+<li><a href="#step-formula">Calculate the period squared</a></li>
+<li><a href="#step-fit">Fit a straight line</a></li>
+<li><a href="#step-result">Read the result</a></li>
+<li><a href="#step-save">Save or copy your work</a></li>
+</ol>
+<h3>Reference</h3>
+<ul>
+<li><a href="#sheets">Sheets and columns</a></li>
+<li><a href="#roles">Column roles</a></li>
+<li><a href="#entering">Entering data</a></li>
+<li><a href="#repeats">Repeat readings</a></li>
+<li><a href="#formulas">Formula columns</a></li>
+<li><a href="#uncertainties">Uncertainties</a></li>
+<li><a href="#graph">The graph</a></li>
+<li><a href="#fitting">Fitting</a></li>
+<li><a href="#results">Reading a fit</a></li>
+<li><a href="#sharing">Sharing your work</a></li>
+<li><a href="#saving">Saving and devices</a></li>
+</ul>
+</nav>
+</dialog>
+<dialog id="image-dialog" class="image-dialog" aria-labelledby="image-title">
+<div class="dialog-head">
+<h2 id="image-title">Screenshot</h2>
+<button type="button" data-close-dialog="image-dialog" aria-label="Close screenshot">Close</button></div>
+<div class="zoom-controls" role="group" aria-label="Screenshot zoom"><button type="button" id="zoom-out" aria-label="Zoom out">−</button><output id="zoom-level" aria-label="Zoom level">100%</output><button type="button" id="zoom-in" aria-label="Zoom in">+</button><button type="button" id="zoom-fit">Fit to screen</button><button type="button" id="zoom-actual">Actual size</button></div>
+<p class="zoom-hint">Scroll or swipe to inspect the image. Use Actual size to read small labels.</p>
+<div id="image-scroll" class="image-scroll" tabindex="0" role="region" aria-label="Enlarged screenshot. Use arrow keys to scroll."><img id="image-full" alt=""></div>
+</dialog>
 </body>
-
 </html>
