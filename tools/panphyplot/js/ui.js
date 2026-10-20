@@ -910,6 +910,9 @@ function clearSheet() {
 // A cleared or reset sheet has nothing left to fit, so its fits and fit drafts go too.
 function dropSheetFits(sheet) {
 	const prefix = `${sheet.id}:`;
+	Object.keys(fitEpochs).forEach((key) => {
+		if (key.startsWith(prefix)) invalidatePendingFit(key);
+	});
 	[datasetFitResults, fittedCurves, customFitStates, fitExtents, fitFunctions].forEach((store) => {
 		Object.keys(store).forEach((key) => {
 			if (key.startsWith(prefix)) delete store[key];

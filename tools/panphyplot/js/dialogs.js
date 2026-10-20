@@ -189,6 +189,7 @@ function applyClear(reset) {
 	if (reset) PlotModel.resetSheet(sheet, PlotModel.createIdSource(plotState));
 	else PlotModel.clearSheetData(sheet);
 	dropSheetFits(sheet);
+	clearAdvancedFitParameters();
 	closeDialog('clear-dialog');
 	if (reset) renderSheetTabs();
 	renderTable();

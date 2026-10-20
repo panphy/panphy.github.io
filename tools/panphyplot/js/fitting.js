@@ -929,6 +929,15 @@ function resetAdvancedFitParameters(method = getCurrentAdvancedFitMethod()) {
 let initialGuessSequence = 0;
 let initialGuessCache = null;
 let pendingInitialGuess = null;
+function clearAdvancedFitParameters() {
+	// Clear both tabs, including hidden fields and any automatic guess still in flight.
+	initialGuessSequence += 1;
+	initialGuessCache = null;
+	pendingInitialGuess = null;
+	applyDefaultAdvancedFitParameters('Sinusoidal');
+	applyDefaultAdvancedFitParameters('Gaussian');
+}
+
 function setInitialParameters(method, { onlyIfVisible = false } = {}) {
 	if (onlyIfVisible && !document.getElementById('AdvancedFit')?.classList.contains('active')) return;
 	const data = getFiniteDatasetPoints(activeFitKey);
@@ -1799,6 +1808,7 @@ Object.assign(window, {
 	updateBasicFitEquation,
 	changeAdvancedFitMethod,
 	resetAdvancedFitParameters,
+	clearAdvancedFitParameters,
 	setInitialParameters,
 	getCurrentAdvancedFitMethod,
 	fitAdvancedCurve,
