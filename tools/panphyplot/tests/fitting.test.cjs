@@ -216,6 +216,36 @@ test('large automatic guesses use the worker, reuse unchanged results and ignore
 	c.setInitialParameters('Sinusoidal',{onlyIfVisible:true}); assert.equal(requests.length,count);
 });
 
+test('clearing advanced parameters resets both methods and discards pending and cached guesses', async () => {
+	const local = harness(), c = local.context;
+	const requests = [];
+	c.setTimeout = setTimeout; c.clearTimeout = clearTimeout;
+	c.document.querySelectorAll = () => [];
+	c.Worker = class {
+		addEventListener(name, fn) { if (name === 'message') this.receive = fn; }
+		postMessage(message) { requests.push(guess => this.receive({ data: { id: message.id, ok: true, result: guess } })); }
+	};
+	local.elements['advanced-fit-method'] = { value: 'Sinusoidal' };
+	const defaults = { A: '1', b: '0', k: '1', phi: '0', c: '0', 'A-gaussian': '1', mu: '0', sigma: '1', 'c-gaussian': '0' };
+	Object.keys(defaults).forEach(key => { local.elements[`initial-${key}`] = { value: '42' }; });
+	local.setData(points(128, 0, 5, x => Math.sin(3 * x)));
+	const pending = c.setInitialParameters('Sinusoidal');
+	c.clearAdvancedFitParameters();
+	requests[0]({ A: 9, b: 0, k: 3, phi: 0, c: 1 });
+	await pending;
+	Object.entries(defaults).forEach(([key, value]) => assert.equal(local.elements[`initial-${key}`].value, value));
+	let next = c.setInitialParameters('Sinusoidal');
+	assert.equal(requests.length, 2);
+	requests[1]({ A: 9, b: 0, k: 3, phi: 0, c: 1 });
+	await next;
+	c.clearAdvancedFitParameters();
+	next = c.setInitialParameters('Sinusoidal');
+	assert.equal(requests.length, 3, 'the old guess is no longer cached');
+	requests[2]({ A: 2, b: 0, k: 4, phi: 0, c: 0 });
+	await next;
+	assert.equal(+local.elements['initial-k'].value, 4);
+});
+
 test('FFT starts preserve low cycles, damping, units and frequencies near Nyquist', () => {
 	for (const [omega, damping] of [[0.5,-2],[780,0],[50,8],[60,-8]]) {
 		const truth={A:-2,b:damping,k:omega,phi:0.4,c:3};
