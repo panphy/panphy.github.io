@@ -88,6 +88,7 @@ function initializePaneDividers() {
 	};
 	if (!workspace || !dataPane || !dividers.data) return;
 	const sizes = readPaneSizes();
+	initializeResidualDivider(sizes);
 
 	function currentLayout() {
 		return Object.keys(PANE_LAYOUTS).find(name => window.matchMedia(PANE_LAYOUTS[name].query).matches) || null;
@@ -245,5 +246,92 @@ function initializePaneDividers() {
 		window.matchMedia(query).addEventListener('change', apply);
 	});
 	window.addEventListener('resize', debounce(apply, 80));
+	apply();
+}
+
+// Vertical split within the graph pane. Store it beside the existing pane widths.
+function initializeResidualDivider(sizes) {
+	const divider = document.getElementById('divider-residual');
+	const wrap = document.getElementById('residual-wrap');
+	const graph = document.querySelector('.neo-pane-graph');
+	if (!divider || !wrap || !graph) return;
+	const minHeight = 260;
+	const defaultHeight = 280;
+	const savedHeight = sizes.residualHeight;
+	let height = Number.isFinite(savedHeight) ? savedHeight : defaultHeight;
+	let pointerId = null;
+	let startY = 0;
+	let startHeight = 0;
+
+	function maxHeight() {
+		const heading = graph.querySelector('.neo-graph-head').offsetHeight;
+		return Math.max(minHeight, graph.clientHeight - heading - 180);
+	}
+
+	function apply() {
+		const value = Math.round(Math.max(minHeight, Math.min(height, maxHeight())));
+		wrap.style.setProperty('--residual-height', `${value}px`);
+		divider.setAttribute('aria-valuemin', String(minHeight));
+		divider.setAttribute('aria-valuemax', String(maxHeight()));
+		divider.setAttribute('aria-valuenow', String(value));
+		divider.setAttribute('aria-valuetext', `Residual plot ${value} pixels high`);
+	}
+
+	function save() {
+		sizes.residualHeight = height;
+		writePaneSizes(sizes);
+	}
+
+	function setHeight(value) {
+		height = Math.max(minHeight, Math.min(value, maxHeight()));
+		apply();
+	}
+
+	function reset() {
+		height = defaultHeight;
+		apply();
+		save();
+	}
+
+	function finish() {
+		if (pointerId === null) return;
+		const id = pointerId;
+		pointerId = null;
+		if (divider.hasPointerCapture(id)) divider.releasePointerCapture(id);
+		document.body.classList.remove('neo-is-resizing-residual');
+		save();
+	}
+
+	divider.addEventListener('pointerdown', event => {
+		if (!event.isPrimary || event.button !== 0 || pointerId !== null) return;
+		event.preventDefault();
+		divider.focus({ preventScroll: true });
+		pointerId = event.pointerId;
+		startY = event.clientY;
+		startHeight = wrap.getBoundingClientRect().height;
+		divider.setPointerCapture(pointerId);
+		document.body.classList.add('neo-is-resizing-residual');
+	});
+	divider.addEventListener('pointermove', event => {
+		if (event.pointerId === pointerId) setHeight(startHeight + startY - event.clientY);
+	});
+	['pointerup', 'pointercancel', 'lostpointercapture'].forEach(type => divider.addEventListener(type, finish));
+	window.addEventListener('blur', finish);
+	divider.addEventListener('dblclick', reset);
+	divider.addEventListener('keydown', event => {
+		const value = Number(divider.getAttribute('aria-valuenow'));
+		const step = event.shiftKey ? 64 : 16;
+		switch (event.key) {
+			case 'ArrowUp': setHeight(value + step); break;
+			case 'ArrowDown': setHeight(value - step); break;
+			case 'Home': setHeight(maxHeight()); break;
+			case 'End': setHeight(minHeight); break;
+			case 'Enter': reset(); break;
+			default: return;
+		}
+		event.preventDefault();
+		save();
+	});
+	new ResizeObserver(apply).observe(graph);
 	apply();
 }
