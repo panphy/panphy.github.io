@@ -1891,7 +1891,6 @@ body.modal-open {
 
 #frameRateHint {
   flex: none;
-  min-height: 48px;
   max-width: 160px;
   white-space: normal;
   text-align: left;
@@ -1943,6 +1942,7 @@ body.modal-open {
   color: var(--accent);
 }
 
+#frameRateHint,
 #deleteSelected {
   flex: none;
   min-height: 26px;
@@ -1977,6 +1977,7 @@ body.modal-open {
     min-height: 61px;
   }
 
+  #frameRateHint,
   #deleteSelected {
     min-height: 48px;
   }
