@@ -1945,7 +1945,8 @@ body.modal-open {
 
 #deleteSelected {
   flex: none;
-  min-height: 48px;
+  min-height: 26px;
+  padding-block: 2px;
 }
 
 @media (max-width: 600px) {
@@ -1972,6 +1973,14 @@ body.modal-open {
 }
 
 @media (pointer: coarse) {
+  .mt-message {
+    min-height: 61px;
+  }
+
+  #deleteSelected {
+    min-height: 48px;
+  }
+
   .video-toolbar .mt-tool-icon {
     width: 48px;
     min-height: 48px;
