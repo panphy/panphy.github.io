@@ -1718,15 +1718,43 @@ mjx-container:hover::after {
   opacity: 1;
 }
 
+/* Copy status lives outside the preview's clipping and stacking context. */
+.copy-notice {
+  position: fixed;
+  bottom: calc(24px + env(safe-area-inset-bottom, 0px));
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 1200;
+  max-width: calc(100vw - 32px);
+  box-sizing: border-box;
+  padding: 10px 18px;
+  border: 1px solid var(--copy-ok);
+  border-radius: 999px;
+  background: var(--pane-background);
+  color: var(--copy-ok);
+  font: 600 14px var(--font-sans);
+  text-align: center;
+  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.2);
+  visibility: hidden;
+  pointer-events: none;
+}
+
+.copy-notice.visible {
+  visibility: visible;
+}
+
+.copy-notice-failed {
+  border-color: var(--copy-fail);
+  color: var(--copy-fail);
+}
+
 /* Copy feedback animation */
 mjx-container.copied {
   box-shadow: 0 0 0 2px var(--copy-ok) !important;
 }
 
 mjx-container.copied::after {
-  content: "Copied!" !important;
-  background: var(--copy-ok) !important;
-  opacity: 1 !important;
+  content: none;
 }
 
 mjx-container.copy-failed {
@@ -1734,9 +1762,7 @@ mjx-container.copy-failed {
 }
 
 mjx-container.copy-failed::after {
-  content: "Copy failed" !important;
-  background: var(--copy-fail) !important;
-  opacity: 1 !important;
+  content: none;
 }
 
 /* Table click-to-copy */
@@ -1755,9 +1781,7 @@ mjx-container.copy-failed::after {
 }
 
 #renderedOutput table.copied::before {
-  content: "Copied!" !important;
-  background: var(--copy-ok) !important;
-  opacity: 1 !important;
+  content: none;
 }
 
 #renderedOutput table.table-copy-actions-open {
@@ -1785,9 +1809,7 @@ mjx-container.copy-failed::after {
 }
 
 #renderedOutput table.copy-failed::before {
-  content: "Copy failed" !important;
-  background: var(--copy-fail) !important;
-  opacity: 1 !important;
+  content: none;
 }
 
 /* ---------------------------------------------------------------------- */

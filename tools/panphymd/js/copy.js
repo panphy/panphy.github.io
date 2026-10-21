@@ -25,6 +25,7 @@ let touchCopyTableButton = null;
 let touchCopyImageButton = null;
 let touchCopyWarning = null;
 const tableMathDetectionCache = new WeakMap();
+let copyNoticeTimer = 0;
 
 function getEquationRasterScale(widthPx, heightPx) {
   const safeWidth = Math.max(1, widthPx);
@@ -1161,10 +1162,25 @@ export async function copyTableToClipboard(table) {
 }
 
 /**
- * Show copy feedback animation on an element.
- * @param {Element} element - The element to show feedback on
+ * Announce the result independently of the copied element's layout.
+ * @param {boolean} success - Whether the clipboard write succeeded
  */
+function showCopyNotice(success) {
+  // Keep feedback outside the scrolling preview: its overflow clips tooltips,
+  // and math tables deliberately suppress their hover tooltip altogether.
+  const notice = document.getElementById('copyNotice');
+  clearTimeout(copyNoticeTimer);
+  notice.textContent = success ? 'Copied!' : 'Copy failed';
+  notice.classList.toggle('copy-notice-failed', !success);
+  notice.classList.add('visible');
+  copyNoticeTimer = setTimeout(() => {
+    notice.classList.remove('visible');
+    notice.textContent = '';
+  }, success ? 2000 : 3000);
+}
+
 function showCopyFeedback(element) {
+  showCopyNotice(true);
   clearTimeout(element._copyTimer);
   element.classList.add('copied');
   element.classList.remove('copy-failed');
@@ -1178,6 +1194,7 @@ function showCopyFeedback(element) {
  * @param {Element} element - The element to show feedback on
  */
 function showCopyFailedFeedback(element) {
+  showCopyNotice(false);
   clearTimeout(element._copyTimer);
   element.classList.add('copy-failed');
   element.classList.remove('copied');
