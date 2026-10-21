@@ -123,7 +123,7 @@ test('FPS completion waits for the starting frame before enabling tracking', () 
             cancelVideoFrameCallback: () => cancelled++};
         const c = context({hiddenVideo: video, playbackCallbackId: 42, fpsDetectionPending: false,
             detectedFps: null, playbackFrameRate: 30, captureFrameRate: 30, isSpecialRecording: false,
-            detectedFpsDisplay: {}, updateFpsButtonText() {}, slider: {}, getSliderStep: () => 1 / 30,
+            frameRateHintButton: {hidden: true}, detectedFpsDisplay: {}, updateFpsButtonText() {}, slider: {}, getSliderStep: () => 1 / 30,
             pauseVideo: () => video.paused = true, updateTimeDisplay: t => { assert.equal(t, 0); },
             drawFrame: () => { assert.equal(video.currentTime, 0); drawn++; }, drawOverlay() {},
             disableControls: value => disabled = value, videoReady: true, frameData: [], sampleOpen: false,
@@ -149,7 +149,7 @@ test('cancelling a pending rewind removes its stale callback', () => {
     let seeked;
     const c = context({hiddenVideo: {currentTime: 1, addEventListener: (_type, fn) => seeked = fn,
             removeEventListener: () => seeked = null}, playbackCallbackId: null,
-        detectedFpsDisplay: {}, updateFpsButtonText() {}, slider: {}, getSliderStep: () => .1,
+        frameRateHintButton: {hidden: true}, detectedFpsDisplay: {}, updateFpsButtonText() {}, slider: {}, getSliderStep: () => .1,
         pauseVideo() {}, disableControls() {}, videoReady: true, frameData: [1],
         isSpecialRecording: false, cancelFpsDetection() {}});
     vm.runInContext(extract('function applyDetectedFps(', 'function updateFpsButtonText('), c);
@@ -206,4 +206,108 @@ test('rewinding redraws original pixels even if the video still exposes the dete
     video.currentTime = 0;
     c.drawFrame();
     assert.equal(painted, 'second frame'); // No stale snapshot after reset.
+});
+
+function editingContext(points = []) {
+    const c = context({frameData: structuredClone(points), undoHistory: [], redoHistory: [],
+        videoReady: true, fpsDetectionPending: false, trackRun: null, selectedMarkTime: null,
+        markUnsavedChanges() {}, renderPointRows() {}, replotCurrentView() {}, drawFrame() {}, setMessage() {}});
+    vm.runInContext(extract('function rememberPoints()', 'function setSelectMarksMode('), c);
+    vm.runInContext(extract('function deleteMark(', "selectMarksButton.addEventListener('click'"), c);
+    return c;
+}
+test('deleting one auto-tracked mark, undoing the deletion and run, then redoing both preserves data', () => {
+    const original = {x: 5, y: 10, playbackTime: 0};
+    const c = editingContext([original]);
+    c.rememberPoints(); // One snapshot before an entire auto-track run, including replaced marks.
+    c.frameData = [0, 1, 2].map(t => ({x: t * 20, y: 30, playbackTime: t}));
+    const run = JSON.stringify(c.frameData);
+    c.deleteMark(1);
+    assert.deepEqual(Array.from(c.frameData, p => p.playbackTime), [0, 2]);
+    c.undoPoint();
+    assert.equal(JSON.stringify(c.frameData), run);
+    c.undoPoint();
+    assert.equal(JSON.stringify(c.frameData), JSON.stringify([original]));
+    c.redoPoint();
+    assert.equal(JSON.stringify(c.frameData), run);
+    c.redoPoint();
+    assert.deepEqual(Array.from(c.frameData, p => p.playbackTime), [0, 2]);
+});
+test('new edits clear redo and history snapshots do not share mutable point objects', () => {
+    const c = editingContext([{x: 1, y: 2, playbackTime: 0}]);
+    c.rememberPoints();
+    c.frameData[0].x = 99;
+    c.undoPoint();
+    assert.equal(c.frameData[0].x, 1);
+    c.rememberPoints();
+    c.frameData[0].y = 50;
+    c.redoPoint();
+    assert.equal(c.frameData[0].x, 1);
+    assert.equal(c.redoHistory.length, 0);
+    for (let i = 0; i < 110; i++) c.rememberPoints();
+    assert.equal(c.undoHistory.length, 100);
+});
+test('history and deletion cannot modify an active auto-track run or pending video', () => {
+    for (const blocked of [{trackRun: {}}, {fpsDetectionPending: true}, {videoReady: false}]) {
+        const c = editingContext([{x: 1, y: 2, playbackTime: 0}]);
+        c.rememberPoints();
+        c.frameData.push({x: 3, y: 4, playbackTime: 1});
+        c.undoPoint();
+        Object.assign(c, blocked);
+        c.redoPoint();
+        c.undoPoint();
+        c.deleteMark(0);
+        assert.equal(c.frameData.length, 1);
+        assert.equal(c.redoHistory.length, 1);
+    }
+});
+test('mark selection uses a bounded hit area and resolves overlaps to the current frame', () => {
+    const c = context({frameData: [
+        {x: 10, y: 20, playbackTime: 0},
+        {x: 10, y: 20, playbackTime: 1},
+        {x: 40, y: 50, playbackTime: 2}], playbackFrameRate: 30, currentFrameIndex: () => 30});
+    vm.runInContext(extract('function findMarkAt(', 'function selectMark('), c);
+    assert.equal(c.findMarkAt(10, 20, 12).playbackTime, 1);
+    assert.equal(c.findMarkAt(42, 50, 12).playbackTime, 2);
+    assert.equal(c.findMarkAt(100, 100, 12), null);
+});
+
+test('history and deletion shortcuts work outside fields and leave typing shortcuts alone', () => {
+    let keydown, action;
+    const c = context({document: {addEventListener: (_type, callback) => keydown = callback, querySelector: () => null},
+        trackRun: null, videoReady: true, fpsDetectionPending: false, selectedMarkTime: 1,
+        undoPoint: () => action = 'undo', redoPoint: () => action = 'redo', deleteMark: time => action = time,
+        selectMarksMode: false});
+    vm.runInContext(extract("document.addEventListener('keydown', (e) =>", '\n\t\trenderPointRows();\n\t\tupdateActivePlotButton();'), c);
+    for (const [key, modifiers, expected] of [
+        ['z', {ctrlKey: true}, 'undo'], ['z', {metaKey: true}, 'undo'],
+        ['Z', {ctrlKey: true, shiftKey: true}, 'redo'], ['z', {metaKey: true, shiftKey: true}, 'redo'],
+        ['y', {ctrlKey: true}, 'redo'], ['Delete', {}, 1], ['Backspace', {}, 1]]) {
+        for (const tagName of ['BUTTON', 'INPUT', 'TEXTAREA', 'SELECT']) {
+            action = null;
+            let prevented = false;
+            keydown({key, ...modifiers, target: {tagName}, preventDefault: () => prevented = true});
+            assert.equal(action, tagName === 'BUTTON' ? expected : null);
+            assert.equal(prevented, tagName === 'BUTTON');
+        }
+    }
+});
+
+test('import reminder offers filming-rate settings for user clips, without treating samples as slow motion', () => {
+    for (const sampleOpen of [false, true]) {
+        const c = context({hiddenVideo: {currentTime: 0, seeking: false, removeEventListener() {}},
+            playbackCallbackId: null, detectedFpsDisplay: {}, updateFpsButtonText() {},
+            frameRateHintButton: {hidden: true}, messageEl: {}, slider: {}, getSliderStep: () => 1 / 30,
+            pauseVideo() {}, updateTimeDisplay() {}, drawFrame() {}, drawOverlay() {}, disableControls() {},
+            videoReady: true, frameData: [], sampleOpen, isSpecialRecording: false, cancelFpsDetection() {}});
+        vm.runInContext(extract('function setMessage(', 'function formatNumber('), c);
+        vm.runInContext(extract('function applyDetectedFps(', 'function updateFpsButtonText('), c);
+        c.applyDetectedFps(30);
+        assert.equal(c.frameRateHintButton.hidden, sampleOpen);
+        assert.equal(c.captureFrameRate, 30);
+        assert.equal(c.isSpecialRecording, false);
+        if (!sampleOpen) assert.match(c.messageEl.textContent, /playback: 30 fps.*original filming rate/);
+        c.setMessage('Scale set.');
+        assert.equal(c.frameRateHintButton.hidden, true);
+    }
 });
