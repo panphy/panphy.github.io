@@ -1,416 +1,65 @@
 <!DOCTYPE html>
 <html lang="en" data-theme="light">
-
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="theme-color" content="#F4F1EA">
   <script src="/assets/theme.js" data-legacy-dark="panphy-dark" data-legacy-light="panphy-light"></script>
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
   <title>PanPhyPlot Math Reference</title>
   <link rel="icon" type="image/png" href="/assets/favicon.png">
-  <script src="/assets/sw-register.js" defer></script>
-  <style>
-    @import url('/assets/fonts/fonts.css');
-
-    :root {
-      color-scheme: light;
-      --font-body: 'Manrope', sans-serif;
-      --font-display: 'DM Serif Display', serif;
-      --font-mono: 'IBM Plex Mono', monospace;
-      --bg-color: #F8F6F1;
-      --bg-pattern: #EDE9E0;
-      --text-main: #1B1B1B;
-      --text-secondary: #6B6560;
-      --brand-primary: #C2410C;
-      --brand-accent: #0D9488;
-      --card-bg: #ffffff;
-      --card-border: #E8E4DD;
-      --card-shadow: 0 4px 16px rgba(0, 0, 0, 0.05);
-      --soft-shadow: 0 4px 14px rgba(0, 0, 0, 0.04);
-      --muted-bg: #F0ECE4;
-      --border-color: #E8E4DD;
-      --code-bg: #F5F2EC;
-      --code-border: #E8E4DD;
-      --table-header-bg: #F5F2EC;
-      --table-border: #D8D3CB;
-      --nav-bg: rgba(248, 246, 241, 0.92);
-      --nav-border: #E8E4DD;
-      --link-color: #C2410C;
-      --note-bg: #FEF7ED;
-      --note-border: #FB923C;
-    }
-
-    [data-theme="dark"] {
-      color-scheme: dark;
-      --bg-color: #111110;
-      --bg-pattern: #1A1A18;
-      --text-main: #EDEBE8;
-      --text-secondary: #9C9890;
-      --brand-primary: #FB923C;
-      --brand-accent: #5EEAD4;
-      --card-bg: #1A1A19;
-      --card-border: #2A2A28;
-      --card-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
-      --soft-shadow: 0 4px 14px rgba(0, 0, 0, 0.3);
-      --muted-bg: #222220;
-      --border-color: #2A2A28;
-      --code-bg: #1A1A18;
-      --code-border: #2A2A28;
-      --table-header-bg: #222220;
-      --table-border: #2A2A28;
-      --nav-bg: rgba(17, 17, 16, 0.9);
-      --nav-border: rgba(255, 255, 255, 0.06);
-      --link-color: #FB923C;
-      --note-bg: #1A1816;
-      --note-border: #FB923C;
-    }
-
-    * {
-      box-sizing: border-box;
-    }
-
-    html,
-    body {
-      margin: 0;
-      padding: 0;
-      font-family: var(--font-body);
-      background-color: var(--bg-color);
-      background-image: radial-gradient(var(--bg-pattern) 1px, transparent 1px);
-      background-size: 30px 30px;
-      color: var(--text-main);
-      line-height: 1.7;
-    }
-
-    .banner {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      background-color: var(--nav-bg);
-      color: var(--text-main);
-      padding: 6px 20px;
-      position: sticky;
-      top: 0;
-      z-index: 10;
-      backdrop-filter: blur(10px);
-      border-bottom: 1px solid var(--nav-border);
-      box-shadow: var(--soft-shadow);
-    }
-
-    .banner-logo {
-      display: flex;
-      align-items: center;
-    }
-
-    .banner-logo a {
-      display: flex;
-      align-items: center;
-      line-height: 0;
-    }
-
-    .banner-logo img {
-      display: block;
-      max-height: 38px;
-      margin-right: 8px;
-    }
-
-    .banner-title {
-      flex: 1;
-      text-align: center;
-      font-size: 1.45rem;
-      font-family: var(--font-display);
-      letter-spacing: -0.4px;
-      color: var(--brand-primary);
-    }
-
-    .banner-title.gradient-text {
-      background: linear-gradient(135deg, var(--brand-primary), var(--brand-accent));
-      -webkit-background-clip: text;
-      background-clip: text;
-      -webkit-text-fill-color: transparent;
-    }
-
-    .banner-buttons {
-      display: flex;
-      justify-content: flex-end;
-      gap: 10px;
-      align-items: center;
-    }
-
-    .banner-button {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      text-align: center;
-      background: var(--muted-bg);
-      border: 1px solid var(--border-color);
-      color: var(--text-main);
-      text-decoration: none;
-      cursor: pointer;
-      font-size: 0.9rem;
-      padding: 6px 14px;
-      border-radius: 999px;
-      transition: background-color 0.2s ease, transform 0.2s ease, border-color 0.2s ease;
-    }
-
-    .banner-button:hover {
-      background: #ffffff;
-      transform: translateY(-1px);
-      border-color: var(--brand-primary);
-      text-decoration: none;
-    }
-
-    [data-theme="dark"] .banner-button:hover {
-      background: #2a303a;
-    }
-
-    .theme-toggle button {
-      background: transparent;
-      border: none;
-      cursor: pointer;
-      font-size: 1.1rem;
-      padding: 6px;
-      border-radius: 50%;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      color: var(--text-main);
-      box-shadow: none;
-      transition: background-color 0.2s ease, transform 0.2s ease;
-    }
-
-    .theme-toggle button:hover {
-      background-color: rgba(128, 128, 128, 0.2);
-      transform: rotate(12deg);
-    }
-
-    .content {
-      max-width: 920px;
-      margin: 0 auto;
-      padding: 40px 24px 60px;
-    }
-
-    h1 {
-      font-family: var(--font-display);
-      font-size: 2.25rem;
-      font-weight: 800;
-      margin: 0 0 1rem 0;
-      letter-spacing: -0.8px;
-      color: var(--brand-primary);
-    }
-
-    h1.gradient-text {
-      background: linear-gradient(135deg, var(--brand-primary), var(--brand-accent));
-      -webkit-background-clip: text;
-      background-clip: text;
-      -webkit-text-fill-color: transparent;
-    }
-
-    h2 {
-      font-family: var(--font-display);
-      font-size: 1.6rem;
-      font-weight: 700;
-      margin: 2.2rem 0 0.9rem 0;
-      color: var(--text-main);
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
-
-    h2::before {
-      content: '';
-      display: block;
-      width: 6px;
-      height: 26px;
-      background: linear-gradient(to bottom, var(--brand-primary), var(--brand-accent));
-      border-radius: 3px;
-    }
-
-    h3 {
-      font-family: var(--font-display);
-      font-size: 1.15rem;
-      margin: 1.4rem 0 0.55rem 0;
-    }
-
-    p {
-      margin: 0 0 1rem 0;
-      color: var(--text-main);
-    }
-
-    ul {
-      margin: 0 0 1rem 0;
-      padding-left: 1.4rem;
-    }
-
-    li {
-      margin-bottom: 0.45rem;
-    }
-
-    code {
-      font-family: var(--font-mono);
-      background-color: var(--code-bg);
-      border: 1px solid var(--code-border);
-      padding: 0.14em 0.4em;
-      border-radius: 6px;
-      font-size: 0.9em;
-      color: var(--text-main);
-    }
-
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      margin: 1rem 0 1.35rem;
-      border-radius: 10px;
-      overflow: hidden;
-      border: 1px solid var(--table-border);
-    }
-
-    th,
-    td {
-      padding: 11px 14px;
-      text-align: left;
-      border-bottom: 1px solid var(--table-border);
-      vertical-align: top;
-    }
-
-    th {
-      background-color: var(--table-header-bg);
-      font-weight: 600;
-    }
-
-    td {
-      background-color: var(--card-bg);
-    }
-
-    tr:last-child td {
-      border-bottom: none;
-    }
-
-    .note-box {
-      background-color: var(--note-bg);
-      border-left: 4px solid var(--note-border);
-      border-radius: 0 10px 10px 0;
-      padding: 14px 18px;
-      margin: 1.2rem 0;
-    }
-
-    .note-box p {
-      margin: 0.35rem 0;
-    }
-
-    .quick-card {
-      background-color: var(--card-bg);
-      border: 1px solid var(--card-border);
-      border-radius: 12px;
-      padding: 18px;
-      box-shadow: var(--soft-shadow);
-      margin-top: 1rem;
-    }
-
-    .quick-card h3 {
-      margin-top: 0;
-    }
-
-    hr {
-      border: none;
-      height: 1px;
-      background: linear-gradient(to right, transparent, var(--border-color), transparent);
-      margin: 2.5rem 0;
-    }
-
-    footer {
-      text-align: center;
-      padding: 24px;
-      background: var(--card-bg);
-      border-top: 1px solid var(--border-color);
-      color: var(--text-secondary);
-      font-size: 0.9rem;
-    }
-
-    footer a {
-      color: var(--brand-primary);
-      text-decoration: none;
-    }
-
-    footer a:hover {
-      text-decoration: underline;
-    }
-
-    @media (max-width: 768px) {
-      .content {
-        padding: 24px 16px 40px;
-      }
-
-      h1 {
-        font-size: 1.95rem;
-      }
-
-      h2 {
-        font-size: 1.4rem;
-      }
-
-      .banner-title {
-        font-size: 1.1rem;
-      }
-
-      table {
-        font-size: 0.9rem;
-      }
-
-      th,
-      td {
-        padding: 9px 11px;
-      }
-    }
-
-    @media (pointer: coarse) {
-      .banner-button,
-      .theme-toggle button {
-        min-height: 44px;
-        touch-action: manipulation;
-      }
-    }
-  </style>
+  <link rel="stylesheet" href="/assets/standalone-top.css">
   <link rel="stylesheet" href="/assets/theme-toggle.css">
   <script src="/assets/theme-toggle.js"></script>
+  <link rel="stylesheet" href="/tools/panphyplot/css/math-reference.css">
+  <script src="/assets/sw-register.js" defer></script>
 </head>
-
 <body>
-  <div class="banner">
-    <div class="banner-logo">
-      <a href="https://panphy.app/">
-        <img src="/assets/panphy.png" alt="PanPhy logo" />
-      </a>
+  <a class="skip-link" href="#reference">Skip to reference</a>
+  <header class="top">
+    <div class="reference-brand"><a href="/tools/panphyplot.html" class="back-link" aria-label="Back to PanPhyPlot"><img src="/assets/panphy.png" alt="" width="30" height="30"><span>PanPhyPlot</span></a><span class="reference-badge">Math reference</span></div>
+    <div class="top-actions">
+      <a href="/tools/panphyplot/manual.html">Manual</a>
+      <div class="theme-toggle"><button id="theme-button" data-panphy-theme-toggle aria-label="Toggle Light/Dark Theme" title="Toggle between light and dark themes">☀️</button></div>
     </div>
+  </header>
+  <main id="reference" tabindex="-1">
+    <header class="intro">
+      <p class="eyebrow">PanPhyPlot · Formula guide</p>
+      <h1>A little maths for your data</h1>
+      <p class="lead">Find the syntax you need for a formula column, from a simple square to the mean of repeat readings.</p>
+      <p class="intro-note">Working on a fit? <a href="#custom-fits">See custom fit syntax</a>.</p>
+    </header>
+    <div class="reference-layout">
+      <nav class="topic-nav" aria-label="Math reference topics">
+        <p class="eyebrow">On this page</p>
+        <a href="#quick-start">Getting started</a>
+        <a href="#operators">Operators</a>
+        <a href="#functions">Functions</a>
+        <a href="#constants">Constants</a>
+        <a href="#recipes">Formula ideas</a>
+        <a href="#custom-fits">Custom fits</a>
+      </nav>
+      <div class="reference-sections">
+        <section class="panel" aria-labelledby="quick-start">
+          <p class="eyebrow">Start here</p>
+          <h2 id="quick-start" tabindex="-1">Write your first formula</h2>
+          <ol class="steps">
+            <li>Choose <strong>Data → Formula</strong> in the app’s toolbar.</li>
+            <li>Use a column letter, such as <code>B^2</code>, or a unique column name, such as <code>T^2</code>. No leading <code>=</code> is needed.</li>
+            <li>Check the result preview, give the new column a name and unit, then choose <strong>Apply</strong>.</li>
+          </ol>
+          <div class="note"><strong>Reading the examples</strong><p><code>A</code> and <code>B</code> below mean column A and column B in the same row. Replace them with the letters or names in your own sheet. Formula columns update when the source data changes.</p></div>
+          <p class="related">Need a worked example? <a href="/tools/panphyplot/manual.html#step-formula">Calculate the period squared in the manual →</a></p>
+        </section>
+        <section class="panel" aria-labelledby="operators">
+          <p class="eyebrow">Build an expression</p>
+          <h2 id="operators" tabindex="-1">Operators</h2>
+          <p>Write multiplication explicitly with <code>*</code>, and use parentheses to control the order of calculation.</p>
 
-    <div class="banner-title">PanPhyPlot Math Reference</div>
-
-    <div class="banner-buttons">
-      <a href="/tools/panphyplot.html" class="banner-button" title="Open PanPhyPlot">Open App</a>
-      <a href="/tools/panphyplot/manual.html" class="banner-button" title="Open PanPhyPlot manual">Manual</a>
-      <div class="theme-toggle">
-        <button id="theme-button" data-panphy-theme-toggle aria-label="Toggle Light/Dark Theme" title="Toggle between light and dark themes">☀️</button>
-      </div>
-    </div>
-  </div>
-
-  <div class="content">
-    <h1>Quick Math.js Reference</h1>
-    <p>
-      This page is a practical cheat-sheet for formulas used in PanPhyPlot Data Processing. It is aimed at
-      pre-university students, so it focuses on common operators and functions you are most likely to use.
-    </p>
-
-    <div class="quick-card">
-      <h3>Quick Start (In Data Processing)</h3>
-      <ul>
-        <li>Use variables <code>x</code> and <code>y</code> in formulas.</li>
-        <li>You can also use valid custom header names as variables.</li>
-        <li>Type formulas like <code>=1/x</code>, <code>x^2</code>, <code>log(y)</code>, then press Enter or click Apply.</li>
-        <li>Use lowercase constants: <code>pi</code> and <code>e</code>.</li>
-      </ul>
-    </div>
-
-    <h2>Operators</h2>
-    <table>
+<table>
+<caption>Arithmetic operators and examples</caption>
       <thead>
         <tr>
           <th>Operator</th>
@@ -422,44 +71,48 @@
         <tr>
           <td><code>+</code></td>
           <td>Add</td>
-          <td><code>x + y</code></td>
+          <td><code>A + B</code></td>
         </tr>
         <tr>
           <td><code>-</code></td>
           <td>Subtract / negative sign</td>
-          <td><code>x - y</code>, <code>-x</code></td>
+          <td><code>A - B</code>, <code>-A</code></td>
         </tr>
         <tr>
           <td><code>*</code></td>
           <td>Multiply</td>
-          <td><code>2*x</code></td>
+          <td><code>2*A</code></td>
         </tr>
         <tr>
           <td><code>/</code></td>
           <td>Divide</td>
-          <td><code>y/x</code></td>
+          <td><code>B/A</code></td>
         </tr>
         <tr>
           <td><code>^</code></td>
           <td>Power</td>
-          <td><code>x^2</code>, <code>y^0.5</code></td>
+          <td><code>A^2</code>, <code>B^0.5</code></td>
         </tr>
         <tr>
           <td><code>%</code></td>
           <td>Remainder (mod)</td>
-          <td><code>x % 2</code></td>
+          <td><code>A % 2</code></td>
         </tr>
         <tr>
           <td><code>( )</code></td>
           <td>Group parts of an expression</td>
-          <td><code>(x + y)/2</code></td>
+          <td><code>(A + B)/2</code></td>
         </tr>
       </tbody>
     </table>
-
-    <h2>Common Functions</h2>
-    <h3>Trig (angles in radians)</h3>
-    <table>
+</section>
+<section class="panel" aria-labelledby="functions">
+<p class="eyebrow">Transform a reading</p>
+<h2 id="functions" tabindex="-1">Functions</h2>
+<p>Put the input inside parentheses: <code>sqrt(B)</code> takes the square root of each value in column B.</p>
+<h3>Trigonometry</h3><p class="table-note">Angles are in radians. For degrees, convert first: <code>sin(A*pi/180)</code>.</p>
+<table>
+<caption>Trigonometric functions</caption>
       <thead>
         <tr>
           <th>Function</th>
@@ -469,30 +122,30 @@
       </thead>
       <tbody>
         <tr>
-          <td><code>sin(x)</code></td>
+          <td><code>sin(A)</code></td>
           <td>Sine</td>
-          <td><code>sin(x)</code></td>
+          <td><code>sin(A)</code></td>
         </tr>
         <tr>
-          <td><code>cos(x)</code></td>
+          <td><code>cos(A)</code></td>
           <td>Cosine</td>
-          <td><code>cos(x)</code></td>
+          <td><code>cos(A)</code></td>
         </tr>
         <tr>
-          <td><code>tan(x)</code></td>
+          <td><code>tan(A)</code></td>
           <td>Tangent</td>
-          <td><code>tan(x)</code></td>
+          <td><code>tan(A)</code></td>
         </tr>
         <tr>
-          <td><code>asin(x)</code>, <code>acos(x)</code>, <code>atan(x)</code></td>
+          <td><code>asin(A)</code>, <code>acos(A)</code>, <code>atan(A)</code></td>
           <td>Inverse trig</td>
-          <td><code>atan(y/x)</code></td>
+          <td><code>atan(B/A)</code></td>
         </tr>
       </tbody>
     </table>
-
-    <h3>Powers, Roots, and Absolute Value</h3>
-    <table>
+<h3>Powers, roots and absolute value</h3>
+<table>
+<caption>Roots and absolute value</caption>
       <thead>
         <tr>
           <th>Function</th>
@@ -502,25 +155,25 @@
       </thead>
       <tbody>
         <tr>
-          <td><code>sqrt(x)</code></td>
+          <td><code>sqrt(A)</code></td>
           <td>Square root</td>
-          <td><code>sqrt(x)</code></td>
+          <td><code>sqrt(A)</code></td>
         </tr>
         <tr>
-          <td><code>cbrt(x)</code></td>
+          <td><code>cbrt(A)</code></td>
           <td>Cube root</td>
-          <td><code>cbrt(y)</code></td>
+          <td><code>cbrt(B)</code></td>
         </tr>
         <tr>
-          <td><code>abs(x)</code></td>
+          <td><code>abs(A)</code></td>
           <td>Absolute value</td>
-          <td><code>abs(y)</code></td>
+          <td><code>abs(B)</code></td>
         </tr>
       </tbody>
     </table>
-
-    <h3>Logs and Exponentials</h3>
-    <table>
+<h3>Logs and exponentials</h3><p class="table-note">Logarithms need a positive input. A real square root needs a non-negative input.</p>
+<table>
+<caption>Logarithms and exponentials</caption>
       <thead>
         <tr>
           <th>Function</th>
@@ -530,25 +183,25 @@
       </thead>
       <tbody>
         <tr>
-          <td><code>log(x)</code></td>
+          <td><code>log(A)</code></td>
           <td>Natural log (base <code>e</code>)</td>
-          <td><code>log(y)</code></td>
+          <td><code>log(B)</code></td>
         </tr>
         <tr>
-          <td><code>log10(x)</code></td>
+          <td><code>log10(A)</code></td>
           <td>Base-10 log</td>
-          <td><code>log10(y)</code></td>
+          <td><code>log10(B)</code></td>
         </tr>
         <tr>
-          <td><code>exp(x)</code></td>
-          <td><code>e^x</code></td>
-          <td><code>exp(x)</code></td>
+          <td><code>exp(A)</code></td>
+          <td><code>e^A</code></td>
+          <td><code>exp(A)</code></td>
         </tr>
       </tbody>
     </table>
-
-    <h3>Rounding</h3>
-    <table>
+<h3>Rounding</h3>
+<table>
+<caption>Rounding functions</caption>
       <thead>
         <tr>
           <th>Function</th>
@@ -558,25 +211,35 @@
       </thead>
       <tbody>
         <tr>
-          <td><code>round(x)</code></td>
+          <td><code>round(A)</code></td>
           <td>Round to nearest integer</td>
           <td><code>round(3.6)</code> gives <code>4</code></td>
         </tr>
         <tr>
-          <td><code>floor(x)</code></td>
+          <td><code>floor(A)</code></td>
           <td>Round down</td>
           <td><code>floor(3.9)</code> gives <code>3</code></td>
         </tr>
         <tr>
-          <td><code>ceil(x)</code></td>
+          <td><code>ceil(A)</code></td>
           <td>Round up</td>
           <td><code>ceil(3.1)</code> gives <code>4</code></td>
         </tr>
       </tbody>
     </table>
 
-    <h2>Constants</h2>
-    <table>
+<h3>Repeat readings</h3>
+<table><caption>Functions for readings in the same row</caption><thead><tr><th>Function</th><th>Meaning</th><th>Example</th></tr></thead><tbody>
+<tr><td><code>mean</code></td><td>Arithmetic mean</td><td><code>mean(B, C, D)</code></td></tr>
+<tr><td><code>median</code></td><td>Middle reading</td><td><code>median(B, C, D)</code></td></tr>
+<tr><td><code>min</code>, <code>max</code></td><td>Smallest or largest reading</td><td><code>max(B, C, D)</code></td></tr>
+<tr><td><code>halfspread</code></td><td>Half the range (at least two readings)</td><td><code>halfspread(B, C, D)</code></td></tr>
+</tbody></table>
+<p class="table-note">These five functions leave out blank readings among their inputs. Other expressions stay blank when a required input is missing or invalid.</p>
+</section>
+<section class="panel" aria-labelledby="constants"><p class="eyebrow">Values you can use</p><h2 id="constants" tabindex="-1">Constants</h2>
+<table>
+<caption>Mathematical constants</caption>
       <thead>
         <tr>
           <th>Constant</th>
@@ -588,65 +251,43 @@
         <tr>
           <td><code>pi</code></td>
           <td>3.14159...</td>
-          <td><code>2*pi*x</code></td>
+          <td><code>2*pi*A</code></td>
         </tr>
         <tr>
           <td><code>e</code></td>
           <td>2.71828...</td>
-          <td><code>e^x</code> or <code>exp(x)</code></td>
+          <td><code>e^A</code> or <code>exp(A)</code></td>
         </tr>
         <tr>
           <td><code>tau</code></td>
           <td>6.28318... (<code>2*pi</code>)</td>
-          <td><code>tau*x</code></td>
-        </tr>
-        <tr>
-          <td><code>Infinity</code></td>
-          <td>Very large positive value marker</td>
-          <td>Usually not needed in school-level transformations</td>
+          <td><code>tau*A</code></td>
         </tr>
       </tbody>
     </table>
 
-    <div class="note-box">
-      <p><strong>Tip:</strong> Math.js is case-sensitive.</p>
-      <p>Use <code>pi</code> and <code>e</code> in lowercase. Typing <code>PI</code> or <code>E</code> may be treated as unknown variables.</p>
-    </div>
-
-    <h2>Useful Formula Ideas</h2>
-    <ul>
-      <li><code>=1/x</code> : reciprocal transform</li>
-      <li><code>=x^2</code> : square the x-data</li>
-      <li><code>=sqrt(y)</code> : square-root transform of y</li>
-      <li><code>=log(y)</code> : natural log transform</li>
-      <li><code>=sin(2*pi*x)</code> : sinusoidal model input</li>
-      <li><code>=(x+y)/2</code> : average of x and y</li>
-      <li><code>=abs(y)</code> : convert y to magnitude only</li>
-    </ul>
-
-    <hr>
-
-    <p>
-      This is a quick reference, not the full Math.js documentation.
-      If a formula gives an unknown-variable warning, check spelling and capitalization first.
-    </p>
-  </div>
-
-  <footer>
-    &copy; 2026 <a href="https://panphy.app/" target="_blank" rel="noopener noreferrer">PanPhy Labs</a>. All rights reserved. |
-    <a href="https://buymeacoffee.com/panphy" target="_blank" rel="noopener noreferrer">Support My Projects</a>
-  </footer>
-
-  <script>
-    window.PanPhyThemeToggle.mount(document.getElementById('theme-button'));
-  </script>
-  <script>
-    // Gradient text: skip on Brave iOS where background-clip:text may fail.
-    (function() {
-      if (/iP(hone|ad|od)/.test(navigator.userAgent) && navigator.brave) return;
-      document.querySelectorAll('.banner-title, h1').forEach(function(el) { el.classList.add('gradient-text'); });
-    })();
-  </script>
+<div class="note"><strong>Case matters</strong><p>Use lowercase <code>pi</code> and <code>e</code>. Column letters take priority: <code>E</code> refers to column E when it exists, so use <code>e</code> or <code>exp(A)</code> for Euler’s number.</p></div>
+</section>
+<section class="panel" aria-labelledby="recipes"><p class="eyebrow">Try it on your sheet</p><h2 id="recipes" tabindex="-1">Formula ideas</h2>
+<p>Use these expressions in <strong>Data → Formula</strong>, replacing the column letters as needed.</p>
+<dl class="recipes">
+<div><dt>Reciprocal</dt><dd><code>1/A</code><span>A must not be zero.</span></dd></div>
+<div><dt>Square</dt><dd><code>A^2</code><span>Useful for a period-squared graph.</span></dd></div>
+<div><dt>Square root</dt><dd><code>sqrt(B)</code><span>Use non-negative values.</span></dd></div>
+<div><dt>Natural log</dt><dd><code>log(B)</code><span>Use positive values.</span></dd></div>
+<div><dt>Mean of repeats</dt><dd><code>mean(B, C, D)</code><span>Combine readings from the same row.</span></dd></div>
+<div><dt>Magnitude</dt><dd><code>abs(B)</code><span>Remove the sign of a reading.</span></dd></div>
+<div><dt>Sine wave</dt><dd><code>sin(2*pi*A)</code><span>One cycle per unit of A.</span></dd></div>
+<div><dt>Average two columns</dt><dd><code>(A+B)/2</code><span>Both readings must be present.</span></dd></div>
+</dl></section>
+<section class="panel" aria-labelledby="custom-fits"><p class="eyebrow">In the fit inspector</p><h2 id="custom-fits" tabindex="-1">Custom fit syntax</h2>
+<p>A custom fit uses <code>x</code> for the independent variable and parameter names such as <code>a</code> and <code>b</code>. For a straight line, enter <code>a*x+b</code>. The operators, trig, roots, logs and rounding syntax above work here too.</p>
+<p><a href="/tools/panphyplot/manual.html#fitting">See fit types and custom formulas in the manual →</a></p>
+<div class="note"><strong>Formula not working?</strong><p>Check spelling and capitalization, column names and parentheses. Use <code>*</code> for multiplication. A formula column needs a finite real result; division by zero or an out-of-range input leaves the result blank.</p></div>
+</section>
+<p class="reference-end">A quick reference to the Math.js syntax used by PanPhyPlot.</p>
+</div></div></main>
+<footer>&copy; 2026 <a href="https://panphy.app/" target="_blank" rel="noopener noreferrer">PanPhy Labs</a>. All rights reserved. <span aria-hidden="true">·</span> <a href="https://buymeacoffee.com/panphy" target="_blank" rel="noopener noreferrer">Support My Projects</a></footer>
+<script>window.PanPhyThemeToggle.mount(document.getElementById('theme-button'));</script>
 </body>
-
 </html>
