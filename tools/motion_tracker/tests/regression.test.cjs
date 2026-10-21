@@ -306,7 +306,7 @@ test('import reminder offers filming-rate settings for user clips, without treat
         assert.equal(c.frameRateHintButton.hidden, sampleOpen);
         assert.equal(c.captureFrameRate, 30);
         assert.equal(c.isSpecialRecording, false);
-        if (!sampleOpen) assert.match(c.messageEl.textContent, /playback: 30 fps.*original filming rate/);
+        if (!sampleOpen) assert.match(c.messageEl.textContent, /Playback: 30 fps\. Slow-mo or time-lapse\?/);
         c.setMessage('Scale set.');
         assert.equal(c.frameRateHintButton.hidden, true);
     }
