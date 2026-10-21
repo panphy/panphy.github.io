@@ -479,7 +479,7 @@ button:disabled {
 }
 
 /* ---------------------------------------------------------------------- */
-/* Menus: Setup and More                                                  */
+/* Menus: Setup and Clear                                                 */
 /* ---------------------------------------------------------------------- */
 .mt-menu-wrap {
   position: relative;
@@ -1885,10 +1885,6 @@ body.modal-open {
   color: var(--ink);
 }
 
-.video-toolbar .mt-tool .mt-icon {
-  color: inherit;
-}
-
 #setupMenu .mt-menu-item {
   display: flex;
   align-items: center;
@@ -1925,7 +1921,11 @@ body.modal-open {
 
   .video-toolbar .mt-history-tools {
     order: 1;
-    flex-basis: 100%;
+    flex-grow: 1;
     justify-content: flex-end;
+  }
+
+  .video-toolbar .mt-clear-tools {
+    order: 1;
   }
 }
