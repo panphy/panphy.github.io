@@ -1822,3 +1822,61 @@ body.modal-open {
     touch-action: manipulation;
   }
 }
+
+/* Compact history and deletion tools retain the same hit area as labelled tools. */
+.mt-tool.mt-tool-icon {
+  width: 48px;
+  min-height: 48px;
+  padding: 8px;
+  justify-content: center;
+}
+
+#frameCanvas.is-selecting {
+  cursor: pointer;
+}
+
+.points-table tr.is-selected td {
+  background: var(--accent-soft);
+}
+
+.points-table tr.is-selected td:first-child {
+  box-shadow: inset 3px 0 var(--accent);
+}
+
+/* Two stable rows keep setup/history separate from tracking and correction. */
+.pane-toolbar .mt-mark-tools {
+  order: 1;
+  flex-basis: 100%;
+  border-right: none;
+  padding-right: 0;
+}
+
+@media (max-width: 480px) {
+  #calibrate,
+  #setOrigin {
+    min-width: 48px;
+    justify-content: center;
+  }
+
+  #calibrate > span,
+  #setOrigin > span,
+  #clearButton > span,
+  #clearButton > .mt-caret {
+    display: none;
+  }
+
+  #clearButton {
+    width: 48px;
+    min-height: 48px;
+    justify-content: center;
+    padding: 8px;
+  }
+}
+
+#frameRateHint {
+  flex: none;
+  min-height: 48px;
+  max-width: 160px;
+  white-space: normal;
+  text-align: left;
+}

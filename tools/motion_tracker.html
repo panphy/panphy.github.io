@@ -55,23 +55,28 @@
 			<div class="pane-toolbar" role="toolbar" aria-label="Video tools">
 				<div class="mt-tool-group" role="group" aria-label="Set up">
 					<button type="button" id="frameRateButton" class="mt-tool" disabled title="Check the frame rate, or set up a slow-motion recording"><svg class="mt-icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8.5"/><path d="M12 7v5l3.2 2"/></svg><span id="fpsLabel" class="mt-tool-mono">30 fps</span></button>
-					<button type="button" id="calibrate" class="mt-tool" disabled aria-pressed="false" title="Set the scale: drag along something of known length"><svg class="mt-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="m3.5 15.5 12-12 5 5-12 12z"/><path d="m7.5 11.5 2 2M10.5 8.5l2 2M13.5 5.5l2 2"/></svg><span>Scale</span></button>
-					<button type="button" id="setOrigin" class="mt-tool" disabled aria-pressed="false" title="Set the origin: click where x and y are zero"><svg class="mt-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 3.5v15.5h15.5"/><circle cx="5" cy="19" r="2.2"/><path d="m3 6 2-2.5L7 6M18 17l2.5 2-2.5 2"/></svg><span>Origin</span></button>
+					<button type="button" id="calibrate" aria-label="Scale" class="mt-tool" disabled aria-pressed="false" title="Set the scale: drag along something of known length"><svg class="mt-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="m3.5 15.5 12-12 5 5-12 12z"/><path d="m7.5 11.5 2 2M10.5 8.5l2 2M13.5 5.5l2 2"/></svg><span>Scale</span></button>
+					<button type="button" id="setOrigin" aria-label="Origin" class="mt-tool" disabled aria-pressed="false" title="Set the origin: click where x and y are zero"><svg class="mt-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 3.5v15.5h15.5"/><circle cx="5" cy="19" r="2.2"/><path d="m3 6 2-2.5L7 6M18 17l2.5 2-2.5 2"/></svg><span>Origin</span></button>
 				</div>
-				<div class="mt-tool-group" role="group" aria-label="Marks">
-					<button type="button" id="undoPoint" class="mt-tool" disabled title="Undo the last change to the marks (Ctrl+Z)"><svg class="mt-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M8.5 5 4 9.5 8.5 14"/><path d="M4 9.5h10a5.5 5.5 0 0 1 0 11h-3"/></svg><span>Undo</span></button>
-					<button type="button" id="hideCrossesToggle" class="mt-tool" disabled aria-pressed="false" aria-label="Hide marks" title="Hide or show the marks on the video (H)"><svg class="mt-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M2.5 12s3.5-6.5 9.5-6.5 9.5 6.5 9.5 6.5-3.5 6.5-9.5 6.5S2.5 12 2.5 12z"/><circle cx="12" cy="12" r="2.8"/><path class="mt-icon-slash" d="M4 4l16 16"/></svg><span>Marks</span></button>
-					<button type="button" id="autoTrackToggle" class="mt-tool" disabled aria-pressed="false" title="Auto-track: click the object once, and it is marked in each frame until it is lost or the video ends"><svg class="mt-icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4.5"/><path d="M12 3.5v3M12 17.5v3M3.5 12h3M17.5 12h3"/></svg><span>Auto-track</span></button>
+				<div class="mt-tool-group" role="group" aria-label="History">
+					<button type="button" id="undoPoint" class="mt-tool mt-tool-icon" disabled aria-label="Undo" title="Undo the last change to the marks (Ctrl/Cmd+Z)"><svg class="mt-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M8.5 5 4 9.5 8.5 14"/><path d="M4 9.5h10a5.5 5.5 0 0 1 0 11h-3"/></svg></button>
+					<button type="button" id="redoPoint" class="mt-tool mt-tool-icon" disabled aria-label="Redo" title="Redo the last change to the marks (Ctrl/Cmd+Shift+Z or Ctrl+Y)"><svg class="mt-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="m15.5 5 4.5 4.5-4.5 4.5"/><path d="M20 9.5H10a5.5 5.5 0 0 0 0 11h3"/></svg></button>
 				</div>
 				<div class="mt-tool-spacer"></div>
 				<div class="mt-menu-wrap">
-					<button type="button" id="clearButton" class="mt-tool mt-tool-danger" disabled aria-expanded="false" aria-controls="clearMenu" title="Clear marks, scale, origin or video"><svg class="mt-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4.5 7h15M9.5 7V4.5h5V7M6.5 7l1 13h9l1-13M10 10.5v6M14 10.5v6"/></svg><span>Clear</span><svg class="mt-caret" viewBox="0 0 12 12" aria-hidden="true"><path d="m3 4.5 3 3 3-3"/></svg></button>
+					<button type="button" id="clearButton" aria-label="Clear" class="mt-tool mt-tool-danger" disabled aria-expanded="false" aria-controls="clearMenu" title="Clear marks, scale, origin or video"><svg class="mt-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4.5 7h15M9.5 7V4.5h5V7M6.5 7l1 13h9l1-13M10 10.5v6M14 10.5v6"/></svg><span>Clear</span><svg class="mt-caret" viewBox="0 0 12 12" aria-hidden="true"><path d="m3 4.5 3 3 3-3"/></svg></button>
 					<div id="clearMenu" class="mt-menu mt-menu-right" hidden>
 						<button type="button" id="clearDataPoints" class="mt-menu-item mt-menu-danger" disabled>Clear marks<small>Remove every mark</small></button>
 						<button type="button" id="clearCalibration" class="mt-menu-item" disabled>Clear scale<small>Measure in pixels again</small></button>
 						<button type="button" id="clearOrigin" class="mt-menu-item" disabled>Clear origin<small>Back to the bottom-left corner</small></button>
 						<button type="button" id="clearVideo" class="mt-menu-item mt-menu-danger" disabled>Clear video<small>Remove the video and analysis to start over</small></button>
 					</div>
+				</div>
+				<div class="mt-tool-group mt-mark-tools" role="group" aria-label="Marks">
+					<button type="button" id="autoTrackToggle" class="mt-tool" disabled aria-pressed="false" title="Auto-track: click the object once, and it is marked in each frame until it is lost or the video ends"><svg class="mt-icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4.5"/><path d="M12 3.5v3M12 17.5v3M3.5 12h3M17.5 12h3"/></svg><span>Auto-track</span></button>
+					<button type="button" id="selectMarks" class="mt-tool" disabled aria-pressed="false" title="Select a mark on the video to inspect or delete it"><svg class="mt-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="m5 3 14 9-7 1-3 7z"/></svg><span>Select</span></button>
+					<button type="button" id="deleteSelected" class="mt-tool mt-tool-icon mt-tool-danger" disabled aria-label="Delete selected mark" title="Delete selected mark (Delete or Backspace)"><svg class="mt-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4.5 7h15M9.5 7V4.5h5V7M6.5 7l1 13h9l1-13M10 10.5v6M14 10.5v6"/></svg></button>
+					<button type="button" id="hideCrossesToggle" class="mt-tool" disabled aria-pressed="false" aria-label="Hide marks" title="Hide or show the marks on the video (H)"><svg class="mt-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M2.5 12s3.5-6.5 9.5-6.5 9.5 6.5 9.5 6.5-3.5 6.5-9.5 6.5S2.5 12 2.5 12z"/><circle cx="12" cy="12" r="2.8"/><path class="mt-icon-slash" d="M4 4l16 16"/></svg><span>Marks</span></button>
 				</div>
 				<input type="file" id="projectUpload" accept=".json,application/json" hidden>
 				<input type="file" id="videoUploadInput" accept="video/*" hidden>
@@ -80,6 +85,7 @@
 			<div id="messageBar" class="mt-message">
 				<svg class="mt-icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8.5"/><path d="M12 11v5M12 7.8v.2"/></svg>
 				<div id="message" role="status" aria-live="polite"><p>Import a video to start.</p></div>
+				<button type="button" id="frameRateHint" class="mt-tool" hidden disabled title="Set the original filming rate for slow-motion or time-lapse recordings"><svg class="mt-icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8.5"/><path d="M12 7v5l3.2 2"/></svg><span>Set filming rate</span></button>
 				<button type="button" id="modeCancel" hidden>Cancel</button>
 				<button type="button" id="autoStop" hidden>Stop</button>
 			</div>
@@ -177,7 +183,7 @@
 					</div>
 				</div>
 				<div id="pointEditor" role="tabpanel" aria-labelledby="showPoints" hidden>
-					<p class="points-note" id="pointsNote">One mark per frame. Edit a value to move a mark; click a time to show that frame.</p>
+					<p class="points-note" id="pointsNote">One mark per frame. Edit a value to move a mark; click a time to select it and show that frame. Delete removes only that mark.</p>
 					<div class="points-scroll">
 						<table class="points-table">
 							<thead><tr><th scope="col">t (s)</th><th scope="col" id="pointXHead">x (px)</th><th scope="col" id="pointYHead">y (px)</th><th scope="col"><span hidden>Delete</span></th></tr></thead>
@@ -241,7 +247,7 @@
 				<label class="modal-field-label" for="userPlaybackFrameRate">Video frame rate</label>
 				<div class="modal-input-suffix"><input id="userPlaybackFrameRate" class="modal-input" type="number" min="0" step="any" inputmode="decimal" required><span>fps</span></div>
 				<span class="detected-chip">Detected: <span id="detectedFpsDisplay">detecting&hellip;</span></span>
-				<p class="modal-hint">Used to step frame by frame. Detection is an estimate, so correct it if you know your video's frame rate.</p>
+				<p class="modal-hint">This estimates the playback frame rate, not the original filming rate. Correct it if you know the video's frame rate.</p>
 			</div>
 			<label class="modal-check">
 				<input type="checkbox" id="specialRecordingMode">
@@ -250,7 +256,7 @@
 			<div class="modal-field" id="captureRateSection" style="display: none;">
 				<label class="modal-field-label" for="userCaptureFrameRate">Frame rate when filmed</label>
 				<div class="modal-input-suffix"><input type="number" id="userCaptureFrameRate" class="modal-input" value="240" min="0" step="any" inputmode="decimal" placeholder="e.g. 240"><span>fps</span></div>
-				<p class="modal-hint">Times are worked out from this rate, so they are real times.</p>
+				<p class="modal-hint">Use the camera’s original recording rate, such as 240 fps. This gives real elapsed times and velocities; the app cannot detect this rate automatically.</p>
 			</div>
 			<div class="modal-buttons">
 				<button type="button" id="cancelFrameRate">Cancel</button>
@@ -268,6 +274,7 @@
 				<li><span><strong>Scale:</strong> drag along the object of known length and type its length. Without a scale, positions are in pixels.</span></li>
 				<li><span><strong>Origin:</strong> click where x and y should be zero. Otherwise the origin is the bottom-left corner.</span></li>
 				<li><span><strong>Mark the object.</strong> Click its centre; the video moves on by the step, ready for the next mark. Clicking a frame that already has a mark replaces it. With Auto-track on, click the object once and it is marked in each frame until it is lost, leaves the frame or the video ends; check the marks, click it to carry on, and Undo removes a whole run. It works best against a plain background.</span></li>
+				<li><span><strong>Correct a mark.</strong> Turn on Select, click a cross in the video, then Delete to remove just that mark. For overlapping crosses, select its time in the Table or use its row’s delete button. Undo and Redo step through changes.</span></li>
 				<li><span><strong>Read the results.</strong> Switch between position and velocity, edit marks in the Table, and export a CSV or send the data to PanPhyPlot. Velocity needs at least four marks.</span></li>
 			</ol>
 			<p class="guide-subhead">Keyboard</p>
@@ -275,8 +282,10 @@
 				<dt><kbd>&larr;</kbd> <kbd>&rarr;</kbd></dt><dd>Step back or forward</dd>
 				<dt><kbd>Space</kbd></dt><dd>Play or pause</dd>
 				<dt><kbd>H</kbd></dt><dd>Hide or show the marks</dd>
-				<dt><kbd>Ctrl</kbd> <kbd>Z</kbd></dt><dd>Undo the last change to the marks</dd>
-				<dt><kbd>Esc</kbd></dt><dd>Stop setting the scale or origin</dd>
+				<dt><kbd>Ctrl</kbd> <kbd>Z</kbd></dt><dd>Undo a change (Cmd+Z on Mac)</dd>
+				<dt><kbd>Ctrl</kbd> <kbd>Shift</kbd> <kbd>Z</kbd> / <kbd>Ctrl</kbd> <kbd>Y</kbd></dt><dd>Redo a change (Cmd+Shift+Z on Mac)</dd>
+				<dt><kbd>Delete</kbd> / <kbd>Backspace</kbd></dt><dd>Delete the selected mark</dd>
+				<dt><kbd>Esc</kbd></dt><dd>Exit selection or stop setting the scale or origin</dd>
 			</dl>
 			<div class="modal-buttons">
 				<button type="submit" class="btn-primary">Got it</button>
@@ -307,6 +316,9 @@
 		let videoFileInfo = null;
 		let sampleOpen = false; // The open video is the built-in sample
 		let undoHistory = [];
+		let redoHistory = [];
+		let selectMarksMode = false;
+		let selectedMarkTime = null;
 		let cancelFpsDetection = () => {};
 		let playbackCallbackId = null;
 		let startingFrame = null; // Decoded before FPS sampling plays the video
@@ -406,6 +418,9 @@
 		const saveProjectButton = document.getElementById('saveProject');
 		const loadProjectButton = document.getElementById('loadProject');
 		const undoPointButton = document.getElementById('undoPoint');
+		const redoPointButton = document.getElementById('redoPoint');
+		const selectMarksButton = document.getElementById('selectMarks');
+		const deleteSelectedButton = document.getElementById('deleteSelected');
 		const plotPositionButton = document.getElementById('plotPosition');
 		const plotVelocityButton = document.getElementById('plotVelocity');
 		const plotCompXButton = document.getElementById('plotCompX');
@@ -456,6 +471,7 @@
 		const userCaptureFrameRateInput = document.getElementById('userCaptureFrameRate');
 		const cancelFrameRateButton = document.getElementById('cancelFrameRate');
 		const frameRateButton = document.getElementById('frameRateButton');
+		const frameRateHintButton = document.getElementById('frameRateHint');
 		const specialRecordingCheckbox = document.getElementById('specialRecordingMode');
 		const captureRateSection = document.getElementById('captureRateSection');
 		const detectedFpsDisplay = document.getElementById('detectedFpsDisplay');
@@ -467,6 +483,7 @@
 
 		function setMessage(text) {
 			messageEl.textContent = text;
+			frameRateHintButton.hidden = true;
 		}
 
 		function formatNumber(value, digits = 4) {
@@ -890,7 +907,8 @@
 			if (videoReady && frameData.length === 0) {
 				setMessage(sampleOpen
 					? `Sample: a ball bouncing along a bench at ${fps} fps. For the scale, drag along the yellow rule and enter 1 m; then click the ball in each frame.`
-					: `Frame rate: ${fps} fps. Set the scale and origin if you need them, then click the object to mark it.`);
+					: `Video playback: ${fps} fps. For slow motion or time-lapse, set the original filming rate before tracking.`);
+				frameRateHintButton.hidden = sampleOpen;
 			}
 		}
 
@@ -916,7 +934,7 @@
 		}
 
 		function disableControls(state) {
-			[previousFrameButton, nextFrameButton, playPauseButton, calibrateButton, setOriginButton, frameRateButton,
+			[previousFrameButton, nextFrameButton, playPauseButton, calibrateButton, setOriginButton, frameRateButton, frameRateHintButton,
 				hideCrossesToggle, autoTrackToggle, clearButton, saveProjectButton, loadProjectButton, frameStepSelect,
 				plotPositionButton, plotVelocityButton, plotCompXButton, plotCompYButton, plotCompXYButton]
 				.forEach(control => { control.disabled = state; });
@@ -942,7 +960,13 @@
 			clearVideoButton.disabled = !ready;
 			exportDataButton.disabled = !ready || count === 0;
 			exportPanPhyPlotButton.disabled = !ready || count === 0;
-			undoPointButton.disabled = !ready || undoHistory.length === 0;
+			undoPointButton.disabled = !ready || !!trackRun || undoHistory.length === 0;
+			redoPointButton.disabled = !ready || !!trackRun || redoHistory.length === 0;
+			selectMarksButton.disabled = !ready || !!trackRun || (count === 0 && !selectMarksMode);
+			deleteSelectedButton.disabled = !ready || !!trackRun || selectedMarkTime === null;
+			document.querySelectorAll('#pointRows input, #pointRows button').forEach(control => {
+				control.disabled = !ready || !!trackRun;
+			});
 		}
 
 		/* ===== Auto-tracking: matching ===== */
@@ -1265,6 +1289,7 @@
 		}, true);
 
 		autoTrackToggle.addEventListener('click', () => {
+			setSelectMarksMode(false);
 			autoTrackOn = !autoTrackOn;
 			autoTrackToggle.setAttribute('aria-pressed', String(autoTrackOn));
 			setMessage(autoTrackOn
@@ -1461,6 +1486,7 @@
 
 		/* ===== Pick modes: drawing the scale line, choosing the origin ===== */
 		function showPickMode(text) {
+			setSelectMarksMode(false);
 			messageBar.classList.add('is-mode');
 			modeCancelButton.hidden = false;
 			setMessage(text);
@@ -1517,6 +1543,8 @@
 			videoReady = false;
 			startingFrame = null;
 			undoHistory = [];
+			redoHistory = [];
+			setSelectMarksMode(false);
 			// 1. Clear data
 			frameData = [];
 			clearUnsavedChanges();
@@ -1846,11 +1874,17 @@
 				const canvasY = (event.clientY - rect.top) * scaleY;
 				const cartesianY = canvasYToCartesianY(canvasY);
 
+				if (selectMarksMode) {
+					selectMark(findMarkAt(canvasX, cartesianY, (event.pointerType === 'touch' ? 24 : 12) * getVisualScale()));
+					return;
+				}
+
 				if (autoTrackOn) {
 					startAutoTrack(canvasX, canvasY);
 					return;
 				}
 
+				frameRateHintButton.hidden = true;
 				// Store playbackTime so analysis time can be recalculated if FPS changes
 				rememberPoints();
 				const frameIndex = currentFrameIndex();
@@ -1885,6 +1919,7 @@
 		}
 
 		/* Frame rate dialog */
+		frameRateHintButton.addEventListener('click', () => frameRateButton.click());
 		frameRateButton.addEventListener('click', () => {
 			userPlaybackFrameRateInput.value = playbackFrameRate;
 			// Set up dialog state
@@ -2268,6 +2303,7 @@
 		});
 
 		function rememberPoints() {
+			redoHistory = [];
 			undoHistory.push(frameData.map(p => ({ ...p })));
 			if (undoHistory.length > 100) undoHistory.shift();
 		}
@@ -2275,14 +2311,88 @@
 			markUnsavedChanges(); renderPointRows(); replotCurrentView(); drawFrame();
 		}
 		function undoPoint() {
-			if (!undoHistory.length || !videoReady) return;
+			if (!undoHistory.length || !videoReady || fpsDetectionPending || trackRun) return;
+			redoHistory.push(frameData.map(p => ({ ...p })));
 			frameData = undoHistory.pop();
 			refreshPoints();
-			setMessage(undoHistory.length ? 'Undone. Undo again to go further back.' : 'Undone.');
+			setMessage('Undone. Redo brings this change back.');
 		}
+
+		function redoPoint() {
+			if (!redoHistory.length || !videoReady || fpsDetectionPending || trackRun) return;
+			undoHistory.push(frameData.map(p => ({ ...p })));
+			frameData = redoHistory.pop();
+			refreshPoints();
+			setMessage('Redone.');
+		}
+
+		function setSelectMarksMode(enabled) {
+			selectMarksMode = enabled;
+			selectedMarkTime = null;
+			selectMarksButton.setAttribute('aria-pressed', String(enabled));
+			frameCanvas.classList.toggle('is-selecting', enabled);
+			frameCanvas.setAttribute('aria-label', enabled ? 'Video frame. Click a cross to select a mark.' : 'Video frame. Click the object to mark it.');
+			if (enabled) {
+				pauseVideo();
+				cancelPickMode();
+				crossesVisible = true;
+				hideCrossesToggle.setAttribute('aria-pressed', 'false');
+				hideCrossesToggle.setAttribute('aria-label', 'Hide marks');
+			}
+			highlightCurrentRow();
+			updateStatusBar();
+			drawFrame();
+		}
+
+		// Distances are in canvas pixels; ties favour the frame being shown.
+		function findMarkAt(x, y, radius) {
+			let nearest = null;
+			let distance = radius;
+			const frame = currentFrameIndex();
+			for (const point of frameData) {
+				const nextDistance = Math.hypot(point.x - x, point.y - y);
+				if (nextDistance < distance || (nextDistance === distance && Math.round(point.playbackTime * playbackFrameRate) === frame)) {
+					nearest = point;
+					distance = nextDistance;
+				}
+			}
+			return nearest;
+		}
+
+		function selectMark(point) {
+			if (!videoReady || fpsDetectionPending || skippingFrame || trackRun) return;
+			if (point && !crossesVisible) toggleCrossesVisibility();
+			selectedMarkTime = point ? point.playbackTime : null;
+			if (point) seekToPlaybackTime(point.playbackTime);
+			highlightCurrentRow(true);
+			updateStatusBar();
+			drawFrame();
+			setMessage(point
+				? `Selected mark at ${getAnalysisTime(point.playbackTime).toFixed(4)} s. Delete removes just this mark.`
+				: 'No mark here. Click a cross to select it, or use the Table for overlapping marks.');
+		}
+
+		function deleteMark(playbackTime) {
+			if (!videoReady || fpsDetectionPending || trackRun) return;
+			const index = frameData.findIndex(point => point.playbackTime === playbackTime);
+			if (index < 0) return;
+			rememberPoints();
+			frameData.splice(index, 1);
+			refreshPoints();
+			setMessage('Mark deleted. Undo brings it back.');
+		}
+
+		selectMarksButton.addEventListener('click', () => {
+			setSelectMarksMode(!selectMarksMode);
+			setMessage(selectMarksMode
+				? 'Select a cross, then Delete. Use the Table for overlapping marks; turn Select off to resume tracking.'
+				: (autoTrackOn ? 'Auto-track is on. Click the object to track it.' : 'Click the object in each frame to mark it.'));
+		});
+		deleteSelectedButton.addEventListener('click', () => deleteMark(selectedMarkTime));
 
 		// The table shows positions as the graph does: from the origin, in the scale units.
 		function renderPointRows() {
+			if (!frameData.some(point => point.playbackTime === selectedMarkTime)) selectedMarkTime = null;
 			const rows = document.getElementById('pointRows');
 			rows.replaceChildren();
 			const unit = unitLabel();
@@ -2292,13 +2402,14 @@
 			frameData.forEach((point, index) => {
 				const row = document.createElement('tr');
 				row.dataset.frame = String(Math.round(point.playbackTime * playbackFrameRate));
+				row.dataset.time = String(point.playbackTime);
 				const time = document.createElement('td');
 				const timeButton = document.createElement('button');
 				timeButton.type = 'button';
 				timeButton.className = 'point-time';
 				timeButton.textContent = getAnalysisTime(point.playbackTime).toFixed(4);
 				timeButton.title = 'Show this frame';
-				timeButton.addEventListener('click', () => seekToPlaybackTime(point.playbackTime));
+				timeButton.addEventListener('click', () => selectMark(point));
 				time.append(timeButton);
 				row.append(time);
 				for (const axis of ['x', 'y']) {
@@ -2309,6 +2420,7 @@
 					input.value = formatNumber((point[axis] - origin) * scaleFactor, 6);
 					input.setAttribute('aria-label', `Mark ${index + 1} ${axis} in ${unit}`);
 					input.addEventListener('change', () => {
+						if (trackRun || fpsDetectionPending || !videoReady) return;
 						const value = Number(input.value);
 						if (input.value.trim() === '' || !Number.isFinite(value)) {
 							input.value = formatNumber((point[axis] - origin) * scaleFactor, 6);
@@ -2325,7 +2437,7 @@
 				remove.innerHTML = '<svg class="mt-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4.5 7h15M9.5 7V4.5h5V7M6.5 7l1 13h9l1-13"/></svg>';
 				remove.title = 'Delete this mark';
 				remove.setAttribute('aria-label', `Delete mark ${index + 1}`);
-				remove.addEventListener('click', () => { rememberPoints(); frameData.splice(index, 1); refreshPoints(); });
+				remove.addEventListener('click', () => deleteMark(point.playbackTime));
 				actions.append(remove); row.append(actions); rows.append(row);
 			});
 			highlightCurrentRow();
@@ -2337,11 +2449,14 @@
 			document.querySelectorAll('#pointRows tr').forEach(row => {
 				const current = videoReady && row.dataset.frame === frame;
 				row.classList.toggle('is-current', current);
-				if (current && scroll && !pointEditor.hidden) row.scrollIntoView({ block: 'nearest' });
+				const selected = selectedMarkTime !== null && Number(row.dataset.time) === selectedMarkTime;
+				row.classList.toggle('is-selected', selected);
+				if (scroll && !pointEditor.hidden && (selectedMarkTime !== null ? selected : current)) row.scrollIntoView({ block: 'nearest' });
 			});
 		}
 
 		undoPointButton.addEventListener('click', undoPoint);
+		redoPointButton.addEventListener('click', redoPoint);
 		previousFrameButton.addEventListener('click', () => stepOneFrame(-frameStep));
 		nextFrameButton.addEventListener('click', () => stepOneFrame(frameStep));
 		saveProjectButton.addEventListener('click', () => {
@@ -2390,7 +2505,7 @@
 				calibrationMode = originMode = isDrawingCalibration = false;
 				previousCalibration = null;
 				overlayCanvas.style.pointerEvents = 'none';
-				undoHistory = []; clearUnsavedChanges(); renderPointRows();
+				undoHistory = []; redoHistory = []; setSelectMarksMode(false); clearUnsavedChanges(); renderPointRows();
 				updateFpsButtonText(); updateTimeDisplay(hiddenVideo.currentTime);
 				slider.step = getSliderStep();
 				drawFrame(); drawOverlay(); replotCurrentView();
@@ -2482,13 +2597,13 @@
 				const frame = currentFrameIndex();
 				frameData.forEach((p) => {
 					const current = Math.round(p.playbackTime * playbackFrameRate) === frame;
-					drawDataPoint(p.x, cartesianYToCanvasY(p.y), s, current);
+					drawDataPoint(p.x, cartesianYToCanvasY(p.y), s, current, p.playbackTime === selectedMarkTime);
 				});
 			}
 		}
 
-		// A red cross; the mark on the frame being shown also gets a white ring.
-		function drawDataPoint(x, y, s = 1, current = false) {
+		// A red cross; a white ring marks the current frame, a larger cyan ring marks selection.
+		function drawDataPoint(x, y, s = 1, current = false, selected = false) {
 			const circleRadius = 4 * s;
 			const crossSize = 8 * s;
 			const lineWidth = Math.max(1, 1.6 * s);
@@ -2507,11 +2622,11 @@
 			ctx.lineTo(x, y + crossSize);
 			ctx.stroke();
 
-			if (current) {
-				ctx.strokeStyle = 'white';
+			if (current || selected) {
+				ctx.strokeStyle = selected ? '#00e5ff' : 'white';
 				ctx.lineWidth = Math.max(1, 2 * s);
 				ctx.beginPath();
-				ctx.arc(x, y, crossSize + 3 * s, 0, 2 * Math.PI);
+				ctx.arc(x, y, crossSize + (selected ? 6 : 3) * s, 0, 2 * Math.PI);
 				ctx.stroke();
 			}
 		}
@@ -2804,6 +2919,7 @@
 
 		/* ===== Hide Crosses Toggle ===== */
 		function toggleCrossesVisibility() {
+			if (selectMarksMode || selectedMarkTime !== null) setSelectMarksMode(false);
 			crossesVisible = !crossesVisible;
 			hideCrossesToggle.setAttribute('aria-pressed', String(!crossesVisible));
 			// Pressed while the marks are hidden; the eye is then struck through.
@@ -2813,7 +2929,7 @@
 
 		hideCrossesToggle.addEventListener('click', toggleCrossesVisibility);
 
-		/* Keyboard shortcuts: arrows step, Space plays, H hides the marks, Ctrl+Z undoes */
+		/* Keyboard shortcuts: transport, mark visibility, history and selected-mark deletion. */
 		document.addEventListener('keydown', (e) => {
 			if (trackRun && !['Shift', 'Control', 'Alt', 'Meta'].includes(e.key)) {
 				e.preventDefault();
@@ -2824,6 +2940,10 @@
 				closeTouchGraphCopyActions();
 				closeMenus();
 				if (calibrationMode || originMode) cancelPickMode();
+				if (selectMarksMode || selectedMarkTime !== null) {
+					setSelectMarksMode(false);
+					setMessage('Selection cleared.');
+				}
 			}
 
 			// Ignore if a dialog is open, if typing in a field, or if no video is ready
@@ -2837,7 +2957,17 @@
 				undoPoint();
 				return;
 			}
+			if (!e.altKey && (((e.ctrlKey || e.metaKey) && e.shiftKey && e.key.toLowerCase() === 'z') || (e.ctrlKey && !e.metaKey && !e.shiftKey && e.key.toLowerCase() === 'y'))) {
+				e.preventDefault();
+				redoPoint();
+				return;
+			}
 			if (e.ctrlKey || e.metaKey || e.altKey) return;
+			if ((e.key === 'Delete' || e.key === 'Backspace') && selectedMarkTime !== null) {
+				e.preventDefault();
+				deleteMark(selectedMarkTime);
+				return;
+			}
 
 			if (e.key === 'h' || e.key === 'H') {
 				e.preventDefault();
