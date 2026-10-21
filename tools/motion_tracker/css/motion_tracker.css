@@ -1335,7 +1335,7 @@ button:disabled {
   border: none;
   border-radius: 8px;
   background: none;
-  color: var(--ink-3);
+  color: var(--danger);
 }
 
 .point-delete:hover:not(:disabled) {
@@ -1849,40 +1849,33 @@ body.modal-open {
   text-align: left;
 }
 
-/* A quiet mode strip leaves setup and occasional actions in menus. */
+/* Match the graph pane’s compact segmented controls. */
 .video-toolbar {
   gap: 4px;
 }
 
-.video-toolbar > .mt-menu-wrap > .mt-tool,
-.mt-mode {
-  min-height: 48px;
+.video-toolbar .mt-tool-icon {
+  width: 38px;
+  min-height: 38px;
 }
 
-.mt-tracking-modes,
 .mt-history-tools {
   display: flex;
   align-items: center;
   flex: none;
 }
 
-.mt-tracking-modes {
-  padding: 2px;
-  border-radius: var(--radius-sm);
-  background: var(--surface-3);
+.mt-tracking-modes .mt-segment {
+  padding-inline: 8px;
 }
 
-.mt-mode {
-  padding: 6px;
-  color: var(--ink-2);
+.mt-tracking-modes .mt-icon,
+.mt-message .mt-tool .mt-icon {
+  color: var(--accent);
 }
 
-.mt-mode[aria-pressed="true"],
-.mt-mode[aria-pressed="true"]:hover,
-.mt-mode[aria-pressed="true"]:active {
-  background: var(--surface);
-  border-color: transparent;
-  color: var(--ink);
+#deleteSelected .mt-icon {
+  color: var(--danger);
 }
 
 #setupMenu .mt-menu-item {
@@ -1927,5 +1920,12 @@ body.modal-open {
 
   .video-toolbar .mt-clear-tools {
     order: 1;
+  }
+}
+
+@media (pointer: coarse) {
+  .video-toolbar .mt-tool-icon {
+    width: 48px;
+    min-height: 48px;
   }
 }
