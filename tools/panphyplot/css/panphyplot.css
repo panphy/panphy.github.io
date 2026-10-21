@@ -1344,7 +1344,8 @@ input[type="number"]:focus {
 }
 
 .neo-residuals {
-	height: clamp(120px, 19vh, 170px);
+	height: var(--residual-height, 280px);
+	min-height: 260px;
 	flex: none;
 	display: flex;
 	flex-direction: column;
@@ -1354,11 +1355,72 @@ input[type="number"]:focus {
 
 .neo-residuals.is-folded {
 	height: auto;
+	min-height: 0;
 	padding-bottom: 2px;
 }
 
 .neo-residuals[hidden] {
 	display: none;
+}
+
+/* Keep both plots usable on short screens; the graph pane can scroll if needed. */
+.neo-pane-graph:has(.neo-residuals:not([hidden]):not(.is-folded)) {
+	overflow-y: auto;
+}
+
+.neo-pane-graph:has(.neo-residuals:not([hidden]):not(.is-folded)) .neo-plot-area {
+	min-height: 180px;
+}
+
+@media (max-width: 1279px) {
+	.neo-pane-graph:has(.neo-residuals:not([hidden]):not(.is-folded)) {
+		min-height: 620px;
+	}
+}
+
+.neo-residual-divider {
+	position: relative;
+	flex: 0 0 16px;
+	cursor: row-resize;
+	touch-action: none;
+	border-radius: 6px;
+}
+
+.neo-residual-divider::after {
+	content: '';
+	position: absolute;
+	top: 50%;
+	left: 50%;
+	width: 48px;
+	height: 4px;
+	border-radius: 4px;
+	background: var(--line-strong);
+	transform: translate(-50%, -50%);
+}
+
+.neo-residual-divider:hover::after,
+.neo-residual-divider:focus-visible::after {
+	background: var(--accent);
+}
+
+.neo-residual-divider:focus-visible {
+	outline: 2px solid var(--accent);
+	outline-offset: -2px;
+}
+
+.neo-residuals.is-folded .neo-residual-divider {
+	display: none;
+}
+
+.neo-is-resizing-residual,
+.neo-is-resizing-residual * {
+	cursor: row-resize !important;
+	user-select: none !important;
+	-webkit-user-select: none !important;
+}
+
+@media (pointer: coarse) {
+	.neo-residual-divider { flex-basis: 28px; }
 }
 
 .neo-residual-heading {
@@ -1367,6 +1429,7 @@ input[type="number"]:focus {
 	gap: 6px;
 	align-self: flex-start;
 	min-height: 30px;
+	flex-shrink: 0;
 	padding: 2px 10px 2px 8px;
 	border: none;
 	border-radius: 8px;
