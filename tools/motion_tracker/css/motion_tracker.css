@@ -665,6 +665,29 @@ button:disabled {
   border-bottom: 1px solid var(--line);
 }
 
+.pane-head .mt-segmented {
+  padding: 2px;
+}
+
+.pane-head .mt-segment {
+  min-height: 28px;
+  padding-block: 2px;
+}
+
+@media (pointer: coarse) {
+  #graphPane > .pane-head {
+    padding-block: 0;
+  }
+
+  .pane-head .mt-segmented {
+    padding: 0;
+  }
+
+  .pane-head .mt-segment {
+    min-height: 48px;
+  }
+}
+
 .pane-title {
   display: flex;
   align-items: baseline;
