@@ -480,7 +480,11 @@ async function rasterizeTableWithHtml2Canvas(table) {
       backgroundColor: '#ffffff',
       scale,
       useCORS: true,
-      logging: false
+      logging: false,
+      // html2canvas clones the entire document before rendering its target.
+      // Retain the head (styles/fonts) and sandbox, but skip the rest of the
+      // body so unrelated equations and images do not slow down a table copy.
+      ignoreElements: element => element.parentElement === document.body && element !== sandbox
     });
 
     return await new Promise(resolve => {
@@ -583,6 +587,7 @@ async function runTableCopyAction(action) {
 
   let success = false;
   if (action === 'image') {
+    showCopyNotice('copying');
     success = await copyTableAsImageToClipboard(targetTable);
   } else {
     success = await copyTableToClipboard(targetTable);
@@ -791,8 +796,10 @@ async function runTouchCopyAction(action) {
 
   let success = false;
   if (targetType === 'equation') {
+    showCopyNotice('copying');
     success = await copyEquationToClipboard(target);
   } else if (action === 'image') {
+    showCopyNotice('copying');
     success = await copyTableAsImageToClipboard(target);
   } else {
     success = await copyTableToClipboard(target);
@@ -1163,24 +1170,25 @@ export async function copyTableToClipboard(table) {
 
 /**
  * Announce the result independently of the copied element's layout.
- * @param {boolean} success - Whether the clipboard write succeeded
+ * @param {'copying'|'success'|'failed'} status - The clipboard operation state
  */
-function showCopyNotice(success) {
+function showCopyNotice(status) {
   // Keep feedback outside the scrolling preview: its overflow clips tooltips,
   // and math tables deliberately suppress their hover tooltip altogether.
   const notice = document.getElementById('copyNotice');
   clearTimeout(copyNoticeTimer);
-  notice.textContent = success ? 'Copied!' : 'Copy failed';
-  notice.classList.toggle('copy-notice-failed', !success);
+  notice.textContent = status === 'copying' ? 'Copying image…' : status === 'success' ? 'Copied!' : 'Copy failed';
+  notice.classList.toggle('copy-notice-failed', status === 'failed');
   notice.classList.add('visible');
+  if (status === 'copying') return;
   copyNoticeTimer = setTimeout(() => {
     notice.classList.remove('visible');
     notice.textContent = '';
-  }, success ? 2000 : 3000);
+  }, status === 'success' ? 2000 : 3000);
 }
 
 function showCopyFeedback(element) {
-  showCopyNotice(true);
+  showCopyNotice('success');
   clearTimeout(element._copyTimer);
   element.classList.add('copied');
   element.classList.remove('copy-failed');
@@ -1194,7 +1202,7 @@ function showCopyFeedback(element) {
  * @param {Element} element - The element to show feedback on
  */
 function showCopyFailedFeedback(element) {
-  showCopyNotice(false);
+  showCopyNotice('failed');
   clearTimeout(element._copyTimer);
   element.classList.add('copy-failed');
   element.classList.remove('copied');
@@ -1260,6 +1268,7 @@ export function handleCopyClick(event) {
       return true;
     }
 
+    showCopyNotice('copying');
     copyEquationToClipboard(mjxContainer).then(success => {
       if (success) {
         showCopyFeedback(mjxContainer);
