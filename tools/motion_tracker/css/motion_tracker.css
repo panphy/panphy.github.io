@@ -277,7 +277,7 @@ button:disabled {
   flex: none;
 }
 
-/* Import Video and Project, set off from Guide and the theme buttons. */
+/* Import Video, set off from Guide and the theme buttons. */
 .mt-appbar-file {
   display: flex;
   align-items: center;
@@ -479,7 +479,7 @@ button:disabled {
 }
 
 /* ---------------------------------------------------------------------- */
-/* Menus: Project and Clear                                                */
+/* Menus: Setup and More                                                  */
 /* ---------------------------------------------------------------------- */
 .mt-menu-wrap {
   position: relative;
@@ -1384,9 +1384,7 @@ button:disabled {
   white-space: nowrap;
 }
 
-#saveStatus.is-dirty {
-  color: var(--brand);
-}
+
 
 .mt-statusbar-legal {
   white-space: nowrap;
@@ -1843,40 +1841,91 @@ body.modal-open {
   box-shadow: inset 3px 0 var(--accent);
 }
 
-/* Two stable rows keep setup/history separate from tracking and correction. */
-.pane-toolbar .mt-mark-tools {
-  order: 1;
-  flex-basis: 100%;
-  border-right: none;
-  padding-right: 0;
-}
-
-@media (max-width: 480px) {
-  #calibrate,
-  #setOrigin {
-    min-width: 48px;
-    justify-content: center;
-  }
-
-  #calibrate > span,
-  #setOrigin > span,
-  #clearButton > span,
-  #clearButton > .mt-caret {
-    display: none;
-  }
-
-  #clearButton {
-    width: 48px;
-    min-height: 48px;
-    justify-content: center;
-    padding: 8px;
-  }
-}
-
 #frameRateHint {
   flex: none;
   min-height: 48px;
   max-width: 160px;
   white-space: normal;
   text-align: left;
+}
+
+/* A quiet mode strip leaves setup and occasional actions in menus. */
+.video-toolbar {
+  gap: 4px;
+}
+
+.video-toolbar > .mt-menu-wrap > .mt-tool,
+.mt-mode {
+  min-height: 48px;
+}
+
+.mt-tracking-modes,
+.mt-history-tools {
+  display: flex;
+  align-items: center;
+  flex: none;
+}
+
+.mt-tracking-modes {
+  padding: 2px;
+  border-radius: var(--radius-sm);
+  background: var(--surface-3);
+}
+
+.mt-mode {
+  padding: 6px;
+  color: var(--ink-2);
+}
+
+.mt-mode[aria-pressed="true"],
+.mt-mode[aria-pressed="true"]:hover,
+.mt-mode[aria-pressed="true"]:active {
+  background: var(--surface);
+  border-color: transparent;
+  color: var(--ink);
+}
+
+.video-toolbar .mt-tool .mt-icon {
+  color: inherit;
+}
+
+#setupMenu .mt-menu-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 48px;
+}
+
+#setupMenu .mt-menu-item[aria-pressed="true"] {
+  background: var(--accent-soft);
+}
+
+#setupMenu .mt-menu-item > .mt-icon {
+  width: 18px;
+  height: 18px;
+  color: var(--accent);
+}
+
+#deleteSelected {
+  flex: none;
+  min-height: 48px;
+}
+
+@media (max-width: 600px) {
+  .video-toolbar #setupButton {
+    width: 48px;
+    padding: 8px;
+    justify-content: center;
+  }
+
+  #setupButton > span,
+  #setupButton > .mt-caret {
+    display: none;
+  }
+
+  .video-toolbar .mt-history-tools {
+    order: 1;
+    flex-basis: 100%;
+    justify-content: flex-end;
+  }
 }
