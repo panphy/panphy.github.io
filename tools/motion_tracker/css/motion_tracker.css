@@ -917,6 +917,31 @@ button:disabled {
   color: var(--ink);
 }
 
+@media (min-width: 901px) and (max-height: 850px) {
+  .empty-state {
+    max-width: 520px;
+    gap: 8px;
+    padding-block: 0;
+  }
+
+  .empty-illustration {
+    width: 90px;
+    height: 56px;
+  }
+
+  .empty-steps {
+    gap: 6px;
+    margin-top: 8px;
+    padding-top: 10px;
+  }
+}
+
+@media (min-width: 901px) and (max-height: 760px) {
+  .empty-illustration {
+    display: none;
+  }
+}
+
 /* ---------------------------------------------------------------------- */
 /* Playback bar                                                            */
 /* ---------------------------------------------------------------------- */
