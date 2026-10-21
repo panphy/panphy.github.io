@@ -174,7 +174,7 @@
 						<div id="graphEmpty" class="graph-empty">
 							<svg viewBox="0 0 84 64" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M10 6v48h68" opacity=".5"/><circle cx="22" cy="46" r="3" fill="currentColor" stroke="none" opacity=".5"/><circle cx="36" cy="36" r="3" fill="currentColor" stroke="none" opacity=".65"/><circle cx="50" cy="28" r="3" fill="currentColor" stroke="none" opacity=".8"/><circle cx="64" cy="16" r="3" fill="currentColor" stroke="none"/></svg>
 							<p class="graph-empty-title" id="graphEmptyTitle">Your graph appears here</p>
-							<p class="graph-empty-text" id="graphEmptyText">Import a video, then click the object to mark it.</p>
+							<p class="graph-empty-text" id="graphEmptyText">Import a video, then click the object.</p>
 						</div>
 					</div>
 				</div>
@@ -2037,7 +2037,7 @@
 			chartCanvasContainer.classList.toggle('has-data', hasData);
 			if (!hasData) closeTouchGraphCopyActions();
 			let title = 'Your graph appears here';
-			let text = 'Import a video, then click the object to mark it.';
+			let text = 'Import a video, then click the object.';
 			if (videoReady && velocity && frameData.length > 0) {
 				title = 'Velocity needs more marks';
 				text = `Mark at least four frames to plot smoothed velocity. You have ${frameData.length}.`;
