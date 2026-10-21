@@ -311,12 +311,17 @@ test('Clear keeps the columns; Reset returns to a blank x, y sheet', () => {
 	sheet.name = 'Pendulum';
 	sheet.hiddenSeries = [sheet.columns[1].id];
 	model.setRowCount(sheet, 14);
+	const zoomedView = { xaxis: [1, 2], yaxis: [3, 4] };
+	sheet.graphView = structuredClone(zoomedView);
 	model.clearSheetData(sheet);
+	assert.deepEqual(sheet.graphView, {});
 	assert.equal(sheet.rowCount, model.DEFAULT_ROWS);
 	assert.deepEqual(sheet.columns.map(column => [column.name, column.unit, column.formula]), [['L', 'm', ''], ['T', '', ''], ['T2', '', 'B^2']]);
 	assert.ok(sheet.columns.every(column => column.cells.every(model.isBlank)));
 	const id = sheet.id;
+	sheet.graphView = structuredClone(zoomedView);
 	model.resetSheet(sheet, ids);
+	assert.deepEqual(sheet.graphView, {});
 	assert.equal(sheet.id, id);
 	assert.equal(sheet.name, '');
 	assert.deepEqual(sheet.columns.map(column => [column.name, column.role]), [['x', 'X'], ['y', 'Y']]);

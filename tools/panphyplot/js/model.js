@@ -203,6 +203,7 @@
 	function clearSheetData(sheet) {
 		sheet.columns.forEach((column) => { column.cells = column.cells.map(() => ''); });
 		setRowCount(sheet, DEFAULT_ROWS);
+		sheet.graphView = {};
 	}
 
 	// Back to a new sheet: two columns, x (X) and y (Y), and no name. Only the sheet's id is kept.
@@ -214,6 +215,7 @@
 		sheet.title = fresh.title;
 		sheet.fitSeries = null;
 		sheet.hiddenSeries = [];
+		sheet.graphView = fresh.graphView;
 		return sheet;
 	}
 

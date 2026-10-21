@@ -8,7 +8,7 @@ File → Save downloads a complete `.ppplot` project (versioned JSON): all sheet
 
 Each tab is a sheet of columns. A column's role is X, Y, ±ΔX or ±ΔY (absolute or %), or Ignore. Pairing follows Origin: a Y column plots against the nearest X column to its left, a ΔY column belongs to the nearest Y to its left and a ΔX column to the nearest X. Axis titles are built from names and units as `name / unit`.
 
-Both Clear choices remove the active sheet's fits and custom fit drafts, cancel pending fits, and reset the Sinusoidal and Gaussian starting parameters, including hidden fields. Other sheets' saved fits stay intact.
+Both Clear choices remove the active sheet's fits and custom fit drafts, cancel pending fits, reset its zoom and axis ranges to automatic scaling including zero, and reset the Sinusoidal and Gaussian starting parameters, including hidden fields. Other sheets' saved fits stay intact.
 
 A formula column (such as `T^2` or `mean(B, C, D)`) is recalculated from its sheet whenever the data changes. Formulas refer to columns by letter, or by name when the name is a valid, unique identifier, and letters are rewritten when columns move or are deleted. A row with a blank or invalid input stays blank. Mean of Repeats adds such a column, plus an optional ±Δ column of half the spread between the largest and smallest readings. A formula column can also have a ±Δ column that carries the uncertainties through: Δf = √Σ(∂f/∂x · Δx)², using each input's own ±Δ column (by the pairing rule), with the derivatives taken numerically and shown symbolically in the formula dialog.
 
