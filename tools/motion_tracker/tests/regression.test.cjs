@@ -24,9 +24,9 @@ test('FPS selects closest standard rate and cancels callbacks', () => {
     }
 });
 test('velocity graph and CSV share full precision values and midpoint times', () => {
-    let output;
+    let output, exported = false;
     const c = context({frameData: [0,1,2,3,4].map(t => ({x:t*t, y:0, playbackTime:t})), getAnalysisTime:t=>t, scaleFactor:0.123456789, scaleUnit:'m,"test"', originSet:false,
-        downloadFile: (_name, text) => output = text });
+        downloadFile: (_name, text) => output = text, clearUnsavedChanges: () => exported = true });
     vm.runInContext(extract('function getVelocityData()', 'function downloadFile('), c);
     vm.runInContext(extract('function exportCSV(', '/* Drawing */'), c);
     const result = vm.runInContext('getVelocityData()', c);
@@ -37,6 +37,7 @@ test('velocity graph and CSV share full precision values and midpoint times', ()
     assert.ok(output.includes('0.123456789'));
     assert.ok(output.includes('m,""test""'));
     assert.ok(output.includes('Smoothed velocity time'));
+    assert.equal(exported, true);
 });
 test('normal analysis time preserves precision; slow motion scales time', () => {
     const c=context({playbackFrameRate:30,captureFrameRate:30});
@@ -166,7 +167,7 @@ test('clear video respects cancellation and releases the video before starting o
         const c = context({clearVideoButton: {addEventListener: (_type, fn) => click = fn},
             confirmDataLoss: () => approved, resetApp: () => reset++, pauseVideo() {},
             playbackCallbackId: null, hiddenVideo: {removeAttribute: name => assert.equal(name, 'src'), load: () => unloaded++},
-            URL: {revokeObjectURL: url => revoked = url}, blobUrl: 'blob:old', videoFileInfo: {name: 'old.mp4'},
+            URL: {revokeObjectURL: url => revoked = url}, blobUrl: 'blob:old',
             sampleOpen: true, videoUploadInput: {value: 'old.mp4'}, videoName: {}, slider: {},
             updateTimeDisplay() {}, setMessage() {}, openVideoButton: {focus() {}}});
         vm.runInContext(extract("clearVideoButton.addEventListener('click'", 'clearDataPointsButton.addEventListener('), c);
@@ -176,7 +177,6 @@ test('clear video respects cancellation and releases the video before starting o
         if (approved) {
             assert.equal(revoked, 'blob:old');
             assert.equal(c.blobUrl, null);
-            assert.equal(c.videoFileInfo, null);
             assert.equal(c.sampleOpen, false);
             assert.equal(c.videoUploadInput.value, '');
             assert.equal(c.slider.value, '0');
@@ -310,4 +310,48 @@ test('import reminder offers filming-rate settings for user clips, without treat
         c.setMessage('Scale set.');
         assert.equal(c.frameRateHintButton.hidden, true);
     }
+});
+
+test('Manual, Auto and Edit remain mutually exclusive, including repeated mode choices', () => {
+    const button = () => ({attributes: {}, setAttribute(name, value) { this.attributes[name] = value; }});
+    const c = context({autoTrackOn: false, selectMarksMode: false, selectedMarkTime: 1,
+        manualModeButton: button(), autoTrackToggle: button(), selectMarksButton: button(),
+        hideCrossesToggle: button(), frameCanvas: {classList: {toggle() {}}, setAttribute() {}},
+        stopAutoTrack() {}, cancelPickMode() {}, pauseVideo() {}, highlightCurrentRow() {},
+        updateStatusBar() {}, drawFrame() {}, setMessage() {}});
+    vm.runInContext(extract('function setSelectMarksMode(', '// Distances are in canvas pixels;'), c);
+    vm.runInContext(extract('function setTrackingMode(', "selectMarksButton.addEventListener('click'"), c);
+    for (const mode of ['auto', 'edit', 'auto', 'auto', 'manual', 'edit', 'manual']) {
+        c.setTrackingMode(mode);
+        const pressed = [c.manualModeButton, c.autoTrackToggle, c.selectMarksButton]
+            .map(control => control.attributes['aria-pressed']);
+        assert.deepEqual(pressed, ['manual', 'auto', 'edit'].map(value => String(value === mode)));
+        assert.equal(c.autoTrackOn, mode === 'auto');
+        assert.equal(c.selectMarksMode, mode === 'edit');
+        assert.equal(c.selectedMarkTime, null);
+    }
+});
+
+test('Delete appears only for a selected mark and stays unavailable during tracking', () => {
+    const control = () => ({});
+    const c = context({frameData: [{playbackTime: 1}], videoReady: true, fpsDetectionPending: false,
+        trackRun: null, selectedMarkTime: null, undoHistory: [], redoHistory: [],
+        document: {getElementById: control, querySelectorAll: () => []}, isCalibrated: () => false,
+        originSet: false, clearDataPointsButton: control(), clearCalibrationButton: control(),
+        clearOriginButton: control(), clearVideoButton: control(), exportDataButton: control(),
+        exportPanPhyPlotButton: control(), undoPointButton: control(), redoPointButton: control(),
+        selectMarksButton: control(), deleteSelectedButton: control()});
+    vm.runInContext(extract('function updateStatusBar()', '/* ===== Auto-tracking: matching ===== */'), c);
+    c.updateStatusBar();
+    assert.equal(c.deleteSelectedButton.hidden, true);
+    c.selectedMarkTime = 1;
+    c.updateStatusBar();
+    assert.equal(c.deleteSelectedButton.hidden, false);
+    assert.equal(c.deleteSelectedButton.disabled, false);
+    c.trackRun = {};
+    c.updateStatusBar();
+    assert.equal(c.deleteSelectedButton.disabled, true);
+    c.selectedMarkTime = null;
+    c.updateStatusBar();
+    assert.equal(c.deleteSelectedButton.hidden, true);
 });
