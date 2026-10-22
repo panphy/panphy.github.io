@@ -87,10 +87,21 @@ function openFormulaDialog(column = null) {
 	document.getElementById('formula-name').value = column ? column.name : '';
 	document.getElementById('formula-unit').value = column ? column.unit : '';
 	renderFormulaChips(sheet);
+	renderFormulaLhs();
 	document.getElementById('formula-propagate').checked = !!(column && getPropagatedColumn(column));
 	previewFormula();
 	openDialog('formula-dialog');
 	document.getElementById('formula-input').focus();
+}
+
+// The left side of "name = formula": the Column name as typed, or the column's letter until it has one.
+function renderFormulaLhs() {
+	const sheet = getActiveSheet();
+	const index = formulaTarget ? sheet.columns.indexOf(formulaTarget) : sheet.columns.length;
+	const name = document.getElementById('formula-name').value.trim();
+	const lhs = document.getElementById('formula-lhs');
+	lhs.textContent = name || PlotModel.columnLetter(index);
+	lhs.title = name ? `Column ${PlotModel.columnLetter(index)}, ${name}` : `Column ${PlotModel.columnLetter(index)}`;
 }
 
 // "Reads: T2 = column C, L = column B", so a name such as T2 is seen as one column, not T × 2.
@@ -552,6 +563,7 @@ function initializeDialogs() {
 		const chip = event.target.closest('.neo-formula-chip');
 		if (chip) insertFormulaSymbol(chip.dataset.symbol);
 	});
+	document.getElementById('formula-name').addEventListener('input', renderFormulaLhs);
 	document.getElementById('formula-propagate').addEventListener('change', previewFormula);
 	document.getElementById('formula-apply').addEventListener('click', applyFormula);
 	document.getElementById('formula-help').addEventListener('click', () => window.open(CUSTOM_FIT_HELP_URL, '_blank', 'noopener,noreferrer'));

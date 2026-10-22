@@ -2245,6 +2245,37 @@ input[type="number"]:focus {
 	font-size: 1rem;
 }
 
+/* "T^2 = [formula]": the new column's name and a fixed equals sign before the formula box. */
+.neo-formula-equation {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+}
+
+.neo-formula-equation #formula-input {
+	flex: 1;
+	min-width: 0;
+}
+
+.neo-formula-lhs {
+	overflow: hidden;
+	flex: 0 1 auto;
+	max-width: 40%;
+	font-family: var(--font-mono);
+	font-size: 1rem;
+	font-weight: 600;
+	color: var(--ink);
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+.neo-formula-equals {
+	flex: none;
+	font-family: var(--font-mono);
+	font-size: 1.05rem;
+	color: var(--ink-2);
+}
+
 .neo-dialog-note {
 	margin: 0;
 	font-size: 0.84rem;

@@ -358,7 +358,11 @@
 		<form method="dialog" class="neo-dialog-body">
 			<h2 id="formula-dialog-title">Formula column</h2>
 			<label for="formula-input">Formula</label>
-			<input type="text" id="formula-input" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="e.g. T^2 or 4*pi^2*L/T^2" aria-describedby="formula-reads">
+			<div class="neo-formula-equation">
+				<span id="formula-lhs" class="neo-formula-lhs" aria-hidden="true"></span>
+				<span class="neo-formula-equals" aria-hidden="true">=</span>
+				<input type="text" id="formula-input" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="e.g. T^2 or 4*pi^2*L/T^2" aria-describedby="formula-reads">
+			</div>
 			<p id="formula-reads" class="neo-dialog-note neo-formula-reads" aria-live="polite" hidden></p>
 			<p id="formula-columns-label" class="neo-dialog-note">Columns: choose one to add it to the formula.</p>
 			<div id="formula-references" class="neo-formula-chips" role="group" aria-labelledby="formula-columns-label"></div>
