@@ -1,478 +1,154 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="light">
 
 <head>
 	<meta charset="utf-8" />
 	<meta name="viewport" content="width=device-width,initial-scale=1, viewport-fit=cover" />
-    <meta name="theme-color" content="#111110">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="default">
-    <link rel="stylesheet" href="/assets/standalone-top.css">
+	<meta name="theme-color" content="#F8F6F1">
+	<script src="/assets/theme.js"></script>
+	<meta name="apple-mobile-web-app-capable" content="yes">
+	<meta name="apple-mobile-web-app-status-bar-style" content="default">
+	<link rel="stylesheet" href="/assets/standalone-top.css">
 	<title>Camera Visualizer</title>
 	<link rel="icon" type="image/png" href="/assets/favicon.png">
-    <script src="/assets/sw-register.js" defer></script>
-<style>
+	<script src="/assets/sw-register.js" defer></script>
+	<link rel="stylesheet" href="/assets/theme-toggle.css">
+	<script src="/assets/theme-toggle.js"></script>
+	<style>
 		@import url('/assets/fonts/fonts.css');
 
+		/* Camera Visualizer: an app bar, the camera view, and a toolbar strip below it.
+		   In full screen the toolbar floats over the picture. The view itself stays
+		   black in both themes so the camera image keeps its true colours. */
+
 		:root {
-			--font-sans: 'Manrope', sans-serif;
-			--font-display: 'DM Serif Display', serif;
-			--font-mono: 'IBM Plex Mono', monospace;
-			--bg-color: #111110;
-			--bg-pattern: #1A1A18;
-			--standalone-top-bg: #111110;
-			--text-main: #EDEBE8;
-			--text-secondary: #9C9890;
-			--brand-primary: #FB923C;
-			--brand-secondary: #C2410C;
-			--brand-accent: #5EEAD4;
-			--nav-bg: rgba(17, 17, 16, 0.92);
-			--nav-border: rgba(255, 255, 255, 0.06);
-			--panel: #1A1A19;
-			--panel-border: #2A2A28;
-			--panel-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
-			--text: var(--text-main);
-			--muted: #9C9890;
-			--accent: var(--brand-primary);
-			--danger: #ff5d5d;
-			--good: #00d27a;
-			--warn: #ffb020;
-			--ring: rgba(255, 255, 255, .08);
-			--tool-active-bg: linear-gradient(135deg, var(--brand-primary), var(--brand-secondary));
-			--tool-hover-bg: rgba(251, 146, 60, 0.15)
+			color-scheme: light;
+			--font-sans: 'Manrope', system-ui, sans-serif;
+			--font-display: 'DM Serif Display', Georgia, serif;
+			--font-mono: 'IBM Plex Mono', ui-monospace, monospace;
+
+			--paper: #F4F1EA;
+			--grid-minor: rgba(15, 118, 110, 0.055);
+			--grid-major: rgba(15, 118, 110, 0.11);
+			--surface: #FFFFFF;
+			--surface-2: #FAF8F4;
+			--surface-3: #F2EEE6;
+			--ink: #17181A;
+			--ink-2: #55585E;
+			--ink-3: #8A8C91;
+			--line: #E6E1D7;
+			--line-strong: #D3CCBE;
+			--accent: #0F766E;
+			--accent-hover: #0B5F59;
+			--accent-ink: #FFFFFF;
+			--accent-soft: rgba(15, 118, 110, 0.1);
+			--brand: #C2410C;
+			--danger: #B42318;
+			--danger-soft: rgba(180, 35, 24, 0.08);
+			--good: #15803D;
+			--warn: #B45309;
+			--focus: rgba(15, 118, 110, 0.35);
+			--shadow-1: 0 1px 2px rgba(23, 24, 26, 0.05), 0 2px 8px rgba(23, 24, 26, 0.04);
+			--shadow-2: 0 12px 36px rgba(23, 24, 26, 0.16);
+			--radius: 14px;
+			--radius-sm: 10px;
+			--appbar-h: 56px;
+			--hit: 44px;
+
+			/* Read by the shared theme button. */
+			--brand-primary: var(--brand);
+			--brand-accent: var(--accent);
 		}
 
-		* {
+		[data-theme="dark"] {
+			color-scheme: dark;
+			--paper: #0D1012;
+			--grid-minor: rgba(94, 234, 212, 0.035);
+			--grid-major: rgba(94, 234, 212, 0.07);
+			--surface: #15191C;
+			--surface-2: #191E22;
+			--surface-3: #20262B;
+			--ink: #E8EBED;
+			--ink-2: #A5ACB3;
+			--ink-3: #737B83;
+			--line: #262D33;
+			--line-strong: #353D44;
+			--accent: #5EEAD4;
+			--accent-hover: #8FF3E3;
+			--accent-ink: #062521;
+			--accent-soft: rgba(94, 234, 212, 0.12);
+			--brand: #FB923C;
+			--danger: #F97066;
+			--danger-soft: rgba(249, 112, 102, 0.1);
+			--good: #4ADE80;
+			--warn: #FBBF24;
+			--focus: rgba(94, 234, 212, 0.35);
+			--shadow-1: 0 1px 2px rgba(0, 0, 0, 0.4), 0 2px 10px rgba(0, 0, 0, 0.25);
+			--shadow-2: 0 16px 44px rgba(0, 0, 0, 0.55);
+		}
+
+		@media (pointer: coarse) {
+			:root {
+				--hit: 48px;
+			}
+		}
+
+		*,
+		*::before,
+		*::after {
 			box-sizing: border-box;
-			transition: background-color .2s ease, color .2s ease, border-color .2s ease, transform .15s ease, box-shadow .2s ease
 		}
 
 		html,
 		body {
-			height: 100%
+			height: 100%;
+			margin: 0;
 		}
 
 		body {
-			margin: 0;
 			min-height: 100svh;
-			padding-bottom: env(safe-area-inset-bottom);
-			background-color: var(--bg-color);
-			background-image: radial-gradient(var(--bg-pattern) 1px, transparent 1px);
-			background-size: 30px 30px;
-			color: var(--text);
-			font-family: var(--font-sans);
 			display: flex;
 			flex-direction: column;
+			padding-bottom: env(safe-area-inset-bottom);
+			font-family: var(--font-sans);
+			font-size: 15px;
+			line-height: 1.45;
+			color: var(--ink);
+			background-color: var(--paper);
+			background-image:
+				linear-gradient(var(--grid-major) 1px, transparent 1px),
+				linear-gradient(90deg, var(--grid-major) 1px, transparent 1px),
+				linear-gradient(var(--grid-minor) 1px, transparent 1px),
+				linear-gradient(90deg, var(--grid-minor) 1px, transparent 1px);
+			background-size: 30px 30px, 30px 30px, 6px 6px, 6px 6px;
+			-webkit-font-smoothing: antialiased;
 			-webkit-user-select: none;
-			user-select: none
+			user-select: none;
 		}
 
 		.offline-font {
-			--font-sans: 'Manrope', sans-serif;
-			--font-display: 'DM Serif Display', serif;
-			--font-mono: 'IBM Plex Mono', monospace;
+			--font-sans: 'Manrope', system-ui, sans-serif;
+			--font-display: 'DM Serif Display', Georgia, serif;
+			--font-mono: 'IBM Plex Mono', ui-monospace, monospace;
 		}
 
-		/* Top bar */
-		.topbar {
-			background: var(--nav-bg);
-			color: var(--text);
-			border-bottom: 1px solid var(--nav-border);
-			backdrop-filter: blur(12px);
-			-webkit-backdrop-filter: blur(12px)
-		}
-
-		.topbar .bar {
-			position: relative;
-			display: flex;
-			align-items: center;
-			justify-content: center;
-			padding: 8px 14px
-		}
-
-		.topbar .brand {
-			position: absolute;
-			left: 10px;
-			display: inline-flex;
-			align-items: center;
-			gap: .35rem;
-			text-decoration: none;
-			color: var(--text-main)
-		}
-
-		.topbar .brand img {
-			height: 22px;
-			width: auto;
-			display: block
-		}
-
-		.topbar .title {
-			font-family: var(--font-display);
-			font-size: 17px;
-			font-weight: 700;
-			color: var(--brand-primary);
-		}
-
-		.topbar .title.gradient-text {
-			background: linear-gradient(135deg, var(--brand-primary), var(--brand-accent));
-			-webkit-background-clip: text;
-			background-clip: text;
-			-webkit-text-fill-color: transparent;
-		}
-
-		/* Controls toggle button */
-		#controlsToggle {
-			position: absolute;
-			top: .55rem;
-			left: .55rem;
-			z-index: 6;
-			display: flex;
-			align-items: center;
-			gap: .35rem;
-			padding: .45rem .8rem;
-			background: rgba(22, 24, 29, 0.75);
-			border: 1px solid rgba(255, 255, 255, .1);
-			border-radius: .6rem;
-			color: var(--text-main);
-			font-weight: 600;
-			font-size: .85rem;
-			font-family: inherit;
-			cursor: pointer;
-			backdrop-filter: blur(12px);
-			-webkit-backdrop-filter: blur(12px);
-			box-shadow: 0 4px 16px rgba(0, 0, 0, .3);
-			-webkit-appearance: none;
-			appearance: none
-		}
-
-		#controlsToggle:hover {
-			background: rgba(30, 33, 41, 0.85);
-			transform: translateY(-1px)
-		}
-
-		#controlsToggle:active {
-			transform: translateY(0)
-		}
-
-		/* Controls panel */
-		.controls-panel {
-			position: absolute;
-			top: .55rem;
-			left: .55rem;
-			z-index: 6;
-			display: none;
-			flex-direction: column;
-			gap: 0;
-			max-width: calc(100% - 3.1rem);
-			max-height: calc(100% - 1.1rem);
-			overflow-y: auto;
-			background: rgba(15, 16, 20, 0.82);
-			border: 1px solid rgba(255, 255, 255, .08);
-			border-radius: .8rem;
-			padding: .6rem .7rem;
-			backdrop-filter: blur(20px);
-			-webkit-backdrop-filter: blur(20px);
-			box-shadow: 0 8px 32px rgba(0, 0, 0, .45)
-		}
-
-		.controls-panel.open {
-			display: flex
-		}
-
-		#controlsClose {
-			position: absolute;
-			top: .4rem;
-			right: .4rem;
-			width: 26px;
-			height: 26px;
-			display: flex;
-			align-items: center;
-			justify-content: center;
-			padding: 0;
-			background: transparent;
-			border: 1px solid transparent;
-			border-radius: .35rem;
-			color: var(--text-secondary);
-			font-size: .85rem;
-			cursor: pointer;
-			-webkit-appearance: none;
-			appearance: none
-		}
-
-		#controlsClose:hover {
-			background: rgba(255, 255, 255, .08);
-			color: var(--text-main)
-		}
-
-		/* Panel sections */
-		.cp-section {
-			display: flex;
-			flex-direction: column;
-			gap: .35rem;
-			padding: .3rem 0
-		}
-
-		.cp-label {
-			font-size: .68rem;
-			font-weight: 600;
-			text-transform: uppercase;
-			letter-spacing: .06em;
-			color: var(--text-secondary);
-			padding: 0 .1rem
-		}
-
-		.cp-sublabel {
-			font-size: .72rem;
-			font-weight: 500;
-			color: var(--muted);
-			white-space: nowrap
-		}
-
-		.cp-row {
-			display: flex;
-			align-items: center;
-			gap: .4rem;
-			flex-wrap: wrap
-		}
-
-		.cp-divider {
-			height: 1px;
-			background: rgba(255, 255, 255, .06);
-			margin: .1rem 0
-		}
-
-		.cp-sep {
-			width: 1px;
-			height: 20px;
-			background: rgba(255, 255, 255, .08);
-			margin: 0 .1rem;
-			flex-shrink: 0
-		}
-
-		/* Contextual tool options */
-		.cp-tool-options {
-			min-height: 0
-		}
-
-		.cp-tool-opt {
-			display: none;
-			align-items: center;
-			gap: .4rem;
-			flex-wrap: wrap
-		}
-
-		.cp-tool-opt.visible {
-			display: flex
-		}
-
-		/* Tools row: equal buttons, full width, extra bottom spacing */
-		.cp-row-tools {
-			gap: .35rem;
-			flex-wrap: nowrap;
-			margin-bottom: .3rem
-		}
-
-		/* View row: zoom slider fills remaining space */
-		.cp-row-view {
-			flex-wrap: nowrap
-		}
-
-		.cp-row-view #zoomSlider {
-			flex: 1;
-			min-width: 0
-		}
-
-		.cp-row-view #mirrorBtn,
-		.cp-row-view #fitBtn {
-			flex: 0 0 auto;
-			min-width: 68px
-		}
-
-		/* Actions row: equal buttons, full width */
-		.cp-row-actions {
-			flex-wrap: nowrap
-		}
-
-		.cp-row-actions > button {
-			flex: 1
-		}
-
+		button,
+		input,
 		select,
-		button {
-			-webkit-appearance: none;
-			-moz-appearance: none;
-			appearance: none;
-			background: #1A1A19;
-			color: var(--text);
-			border: 1px solid var(--panel-border);
-			border-radius: .45rem;
-			padding: .28rem .48rem;
-			font-size: .85rem;
-			outline: none;
-			font-weight: 500;
-			font-family: inherit;
-			line-height: 1.2;
-			box-sizing: border-box
+		textarea {
+			font: inherit;
+			color: inherit;
 		}
 
-		select {
-			background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%239C9890' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
-			background-repeat: no-repeat;
-			background-position: right 8px center;
-			padding-right: 26px
+		:focus-visible {
+			outline: 2px solid var(--accent);
+			outline-offset: 2px;
 		}
 
-		button {
-			cursor: pointer;
-			display: inline-flex;
-			align-items: center;
-			justify-content: center;
-			gap: .35rem;
-			min-height: 32px
-		}
-
-		button:hover:not(:disabled) {
-			transform: translateY(-1px);
-			background: var(--tool-hover-bg)
-		}
-
-		button:active:not(:disabled) {
-			transform: translateY(0)
-		}
-
-		button:disabled {
-			opacity: .45;
-			cursor: not-allowed;
-			transform: none
-		}
-
-		.btn-icon {
-			font-size: 1rem;
-			line-height: 1;
-			display: inline-flex;
-			align-items: center;
-			justify-content: center;
-		}
-
-		.btn-icon svg {
-			display: block;
-		}
-
-		.btn-text {
-			font-size: .8rem
-		}
-
-		.primary {
-			background: var(--tool-active-bg);
-			border-color: rgba(255, 255, 255, .2);
-			color: #fff;
-			box-shadow: 0 2px 8px rgba(251, 146, 60, 0.35)
-		}
-
-		.primary:hover:not(:disabled) {
-			background: var(--tool-active-bg);
-			box-shadow: 0 4px 12px rgba(251, 146, 60, 0.5)
-		}
-
-		.danger {
-			background: var(--danger);
-			border-color: rgba(255, 255, 255, .2);
-			color: #fff
-		}
-
-		.muted {
-			background: #1A1A19;
-			color: #9C9890
-		}
-
-		.tool-btn {
-			min-width: 38px;
-			position: relative;
-			flex: 1
-		}
-
-		.tool-btn.active {
-			outline: 2px solid var(--brand-accent);
-			outline-offset: 1px;
-			background: #1A1A19
-		}
-
-		#mirrorBtn.active {
-			outline: 2px solid var(--brand-accent);
-			outline-offset: 1px;
-			background: #1A1A19
-		}
-
+		[hidden],
 		.hidden {
-			display: none !important
+			display: none !important;
 		}
-
-		/* Color picker button */
-		.color-btn {
-			width: 32px;
-			height: 32px;
-			border-radius: .45rem;
-			border: 2px solid rgba(255, 255, 255, .2);
-			cursor: pointer;
-			position: relative;
-			overflow: hidden;
-			padding: 0
-		}
-
-		.color-btn:hover {
-			border-color: rgba(255, 255, 255, .4);
-			transform: scale(1.05)
-		}
-
-		.color-btn input[type="color"] {
-			position: absolute;
-			width: 150%;
-			height: 150%;
-			top: -25%;
-			left: -25%;
-			cursor: pointer;
-			border: none;
-			padding: 0
-		}
-
-		/* Color label button - combines label and color picker */
-		.color-label-btn {
-			display: inline-flex;
-			align-items: center;
-			justify-content: center;
-			gap: .35rem;
-			padding: .28rem .6rem;
-			border-radius: .45rem;
-			border: 2px solid rgba(255, 255, 255, .2);
-			cursor: pointer;
-			position: relative;
-			overflow: hidden;
-			font-size: .72rem;
-			font-weight: 600;
-			text-transform: uppercase;
-			letter-spacing: .04em;
-			white-space: nowrap;
-			min-height: 32px;
-			transition: border-color .2s ease, transform .15s ease
-		}
-
-		.color-label-btn:hover {
-			border-color: rgba(255, 255, 255, .4);
-			transform: scale(1.02)
-		}
-
-		.color-label-btn input[type="color"] {
-			position: absolute;
-			width: 150%;
-			height: 150%;
-			top: -25%;
-			left: -25%;
-			cursor: pointer;
-			border: none;
-			padding: 0;
-			opacity: 0
-		}
-
 
 		.srOnly {
 			position: absolute !important;
@@ -487,792 +163,1144 @@
 			white-space: nowrap;
 		}
 
-		.status {
+		/* ---------- Plain buttons (dialogs, settings) ---------- */
+		button {
+			-webkit-appearance: none;
+			appearance: none;
+			display: inline-flex;
+			align-items: center;
+			justify-content: center;
+			gap: 7px;
+			min-height: var(--hit);
+			margin: 0;
+			padding: 0 14px;
+			font-size: .88rem;
+			font-weight: 600;
+			line-height: 1.2;
+			cursor: pointer;
+			background: var(--surface);
+			color: var(--ink);
+			border: 1px solid var(--line-strong);
+			border-radius: var(--radius-sm);
+			touch-action: manipulation;
+			transition: background-color .15s ease, border-color .15s ease, color .15s ease;
+		}
+
+		button:hover:not(:disabled) {
+			background: var(--surface-3);
+		}
+
+		button:disabled {
+			opacity: .4;
+			cursor: not-allowed;
+		}
+
+		.btn-primary {
+			background: var(--accent);
+			color: var(--accent-ink);
+			border-color: transparent;
+		}
+
+		.btn-primary:hover:not(:disabled) {
+			background: var(--accent-hover);
+		}
+
+
+		.cv-icon {
+			width: 22px;
+			height: 22px;
+			flex: none;
+			fill: none;
+			stroke: currentColor;
+			stroke-width: 1.8;
+			stroke-linecap: round;
+			stroke-linejoin: round;
+		}
+
+		.cv-icon .fill {
+			fill: currentColor;
+			stroke: none;
+		}
+
+		select {
+			-webkit-appearance: none;
+			appearance: none;
+			min-height: var(--hit);
+			min-width: 0;
+			padding: 0 34px 0 12px;
+			font-size: .88rem;
+			font-weight: 500;
+			background-color: var(--surface);
+			background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='none' stroke='%238A8C91' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round' d='M2.5 4.5 6 8l3.5-3.5'/%3E%3C/svg%3E");
+			background-repeat: no-repeat;
+			background-position: right 12px center;
+			border: 1px solid var(--line-strong);
+			border-radius: var(--radius-sm);
+			cursor: pointer;
+		}
+
+		/* ---------- App bar ---------- */
+		.cv-appbar {
+			position: sticky;
+			top: 0;
+			z-index: 30;
+			flex: none;
 			display: flex;
 			align-items: center;
-			gap: .35rem
+			gap: 14px;
+			min-height: calc(var(--appbar-h) + var(--standalone-top, 0px));
+			padding: var(--standalone-top, 0px) 14px 0;
+			background: color-mix(in srgb, var(--surface) 86%, transparent);
+			backdrop-filter: saturate(1.4) blur(10px);
+			-webkit-backdrop-filter: saturate(1.4) blur(10px);
+			border-bottom: 1px solid var(--line);
 		}
 
-		.light {
-			width: 10px;
-			height: 10px;
-			border-radius: 50%;
-			border: 2px solid rgba(255, 255, 255, .15)
+		.cv-brand {
+			display: inline-flex;
+			align-items: center;
+			gap: 9px;
+			min-width: 0;
 		}
 
-		.live {
-			background: var(--good);
-			box-shadow: 0 0 6px rgba(0, 210, 122, .5)
+		.cv-brand > a {
+			display: inline-flex;
 		}
 
-		.paused {
-			background: var(--warn);
-			box-shadow: 0 0 6px rgba(255, 176, 32, .5)
+		.cv-brand img {
+			width: 30px;
+			height: 30px;
+			border-radius: 12%;
 		}
 
-		.statusText {
-			min-width: 48px;
-			color: #EDEBE8;
-			font-size: .8rem;
-			font-weight: 500
+		.cv-wordmark {
+			font-family: var(--font-display);
+			font-size: 1.32rem;
+			letter-spacing: -0.01em;
+			white-space: nowrap;
+			overflow: hidden;
+			text-overflow: ellipsis;
 		}
 
-		.switch {
+		.cv-appbar-actions {
+			display: flex;
+			align-items: center;
+			gap: 2px;
+			margin-left: auto;
+		}
+
+		body.pseudoFullscreen .cv-appbar {
+			display: none;
+		}
+
+		/* ---------- Stage: the camera view and the toolbar ---------- */
+		#stage {
 			position: relative;
-			width: 44px;
-			height: 24px;
-			display: inline-block
+			flex: 1;
+			min-height: 60vh;
+			display: flex;
+			flex-direction: column;
+			margin: 12px 12px 0;
+			background: var(--surface);
+			border: 1px solid var(--line);
+			border-radius: var(--radius);
+			overflow: hidden;
+			box-shadow: var(--shadow-1);
 		}
 
-		.switch input {
-			display: none
+		#view {
+			position: relative;
+			flex: 1;
+			min-height: 0;
+			overflow: hidden;
+			background: #000;
 		}
 
-		.slider {
+		#stage.is-fullscreen {
+			margin: 0;
+			border: 0;
+			border-radius: 0;
+			background: #000;
+		}
+
+		body.pseudoFullscreen #stage {
+			position: fixed;
+			inset: 0;
+			z-index: 1000;
+			width: 100vw;
+			height: 100svh;
+			min-height: 0;
+		}
+
+		#stage:fullscreen {
+			width: 100vw;
+			height: 100vh;
+			min-height: 0;
+		}
+
+		#stage:-webkit-full-screen {
+			width: 100vw;
+			height: 100vh;
+			min-height: 0;
+		}
+
+		video,
+		#view canvas {
+			position: absolute;
+			left: 0;
+			top: 0;
+			width: 100%;
+			height: 100%;
+			touch-action: none;
+		}
+
+		video {
+			object-fit: contain;
+			object-position: center center;
+			background: #000;
+		}
+
+		/* Hide native WebKit media controls (the iPad full-screen pause icon). */
+		video::-webkit-media-controls,
+		video::-webkit-media-controls-enclosure,
+		video::-webkit-media-controls-panel,
+		video::-webkit-media-controls-start-playback-button {
+			display: none !important;
+		}
+
+		.cursor-draw {
+			cursor: crosshair !important;
+		}
+
+		.cursor-eraser {
+			cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%23ff5d5d' stroke-width='2'%3E%3Cpath d='M20 20H7L3 16a1 1 0 0 1 0-1.4l10-10a1 1 0 0 1 1.4 0l7 7a1 1 0 0 1 0 1.4L16 19'/%3E%3Cpath d='M6.5 13.5L11 9'/%3E%3C/svg%3E") 12 12, crosshair !important;
+		}
+
+		.cursor-text {
+			cursor: text !important;
+		}
+
+		/* Live / Paused / REC badge over the picture: always light on dark. */
+		#hud {
+			position: absolute;
+			top: 10px;
+			left: 10px;
+			z-index: 5;
+			display: flex;
+			align-items: center;
+			gap: 7px;
+			padding: 4px 10px;
+			font-family: var(--font-mono);
+			font-size: .74rem;
+			font-weight: 500;
+			letter-spacing: .04em;
+			text-transform: uppercase;
+			color: #F2F2F0;
+			background: rgba(0, 0, 0, .55);
+			border: 1px solid rgba(255, 255, 255, .14);
+			border-radius: 999px;
+			backdrop-filter: blur(6px);
+			-webkit-backdrop-filter: blur(6px);
+			pointer-events: none;
+		}
+
+		body.pseudoFullscreen #hud {
+			top: calc(10px + var(--standalone-top, 0px));
+		}
+
+		#statusDot {
+			width: 8px;
+			height: 8px;
+			border-radius: 50%;
+			background: #4ADE80;
+			box-shadow: 0 0 6px rgba(74, 222, 128, .6);
+		}
+
+		.pausedVideo #statusDot {
+			background: #FBBF24;
+			box-shadow: 0 0 6px rgba(251, 191, 36, .6);
+		}
+
+		#recordIndicator {
+			display: none;
+			align-items: center;
+			gap: 5px;
+			color: #FFB4B4;
+		}
+
+		#hud.recording #recordIndicator {
+			display: inline-flex;
+		}
+
+		#recordDot {
+			width: 7px;
+			height: 7px;
+			border-radius: 50%;
+			background: #FF4D4D;
+			box-shadow: 0 0 6px rgba(255, 77, 77, .7);
+			animation: recordPulse 1s ease-in-out infinite;
+		}
+
+		@keyframes recordPulse {
+			0%, 100% { opacity: 1; }
+			50% { opacity: .35; }
+		}
+
+		/* ---------- Start screen and camera messages ---------- */
+		#startScreen {
 			position: absolute;
 			inset: 0;
-			cursor: pointer;
-			background: #252523;
-			border-radius: 999px;
-			border: 1px solid rgba(255, 255, 255, .12);
-			transition: .2s
+			z-index: 8;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			padding: 20px;
+			background: var(--paper);
+			background-image:
+				linear-gradient(var(--grid-major) 1px, transparent 1px),
+				linear-gradient(90deg, var(--grid-major) 1px, transparent 1px),
+				linear-gradient(var(--grid-minor) 1px, transparent 1px),
+				linear-gradient(90deg, var(--grid-minor) 1px, transparent 1px);
+			background-size: 30px 30px, 30px 30px, 6px 6px, 6px 6px;
+			overflow-y: auto;
 		}
 
-		.slider:before {
-			content: "";
-			position: absolute;
-			height: 18px;
-			width: 18px;
-			left: 2px;
-			top: 2px;
-			background: #fff;
+		.cv-start-card {
+			width: min(460px, 100%);
+			margin: auto;
+			padding: 26px 24px 22px;
+			text-align: center;
+			background: var(--surface);
+			border: 1px solid var(--line);
+			border-radius: var(--radius);
+			box-shadow: var(--shadow-2);
+		}
+
+		.cv-start-badge {
+			display: inline-grid;
+			place-items: center;
+			width: 56px;
+			height: 56px;
+			margin-bottom: 10px;
+			border-radius: 16px;
+			color: var(--accent);
+			background: var(--accent-soft);
+		}
+
+		.cv-start-badge .cv-icon {
+			width: 30px;
+			height: 30px;
+		}
+
+		#startScreen[data-state="blocked"] .cv-start-badge,
+		#startScreen[data-state="nocamera"] .cv-start-badge,
+		#startScreen[data-state="busy"] .cv-start-badge,
+		#startScreen[data-state="lost"] .cv-start-badge,
+		#startScreen[data-state="unsupported"] .cv-start-badge,
+		#startScreen[data-state="error"] .cv-start-badge {
+			color: var(--danger);
+			background: var(--danger-soft);
+		}
+
+		#startTitle {
+			margin: 0 0 6px;
+			font-family: var(--font-display);
+			font-size: 1.6rem;
+			font-weight: 400;
+			line-height: 1.15;
+		}
+
+		#startText {
+			margin: 0 auto 18px;
+			max-width: 36ch;
+			color: var(--ink-2);
+		}
+
+		#startBtn {
+			min-width: 180px;
+			min-height: 48px;
+			font-size: .95rem;
+		}
+
+		.cv-spinner {
+			display: none;
+			width: 28px;
+			height: 28px;
+			margin: 0 auto 4px;
+			border: 3px solid var(--line-strong);
+			border-top-color: var(--accent);
 			border-radius: 50%;
-			transition: .2s;
-			box-shadow: 0 2px 4px rgba(0, 0, 0, .2)
+			animation: spin .8s linear infinite;
 		}
 
-		input:checked+.slider {
-			background: var(--brand-secondary)
+		#startScreen[data-state="starting"] .cv-spinner {
+			display: block;
 		}
 
-		input:checked+.slider:before {
-			transform: translateX(20px)
+		@keyframes spin {
+			to { transform: rotate(360deg); }
+		}
+
+		.cv-start-tips {
+			display: grid;
+			gap: 6px;
+			margin: 20px 0 0;
+			padding: 16px 0 0;
+			list-style: none;
+			text-align: left;
+			font-size: .84rem;
+			color: var(--ink-2);
+			border-top: 1px solid var(--line);
+		}
+
+		kbd {
+			display: inline-block;
+			min-width: 1.7em;
+			padding: 1px 6px;
+			font-family: var(--font-mono);
+			font-size: .76rem;
+			text-align: center;
+			color: var(--ink);
+			background: var(--surface-3);
+			border: 1px solid var(--line-strong);
+			border-bottom-width: 2px;
+			border-radius: 6px;
+		}
+
+		/* ---------- Toolbar ---------- */
+		.cv-bar {
+			position: relative;
+			z-index: 12;
+			flex: none;
+			display: flex;
+			flex-wrap: wrap;
+			align-items: center;
+			justify-content: center;
+			gap: 8px;
+			padding: 8px;
+			background: var(--surface-2);
+			border-top: 1px solid var(--line);
+		}
+
+		/* In full screen the toolbar floats over the bottom of the picture. */
+		#stage.is-fullscreen .cv-bar {
+			position: absolute;
+			left: 50%;
+			bottom: calc(12px + env(safe-area-inset-bottom));
+			width: max-content;
+			max-width: calc(100% - 24px);
+			transform: translateX(-50%);
+			padding: 0;
+			background: none;
+			border: 0;
+		}
+
+		.cv-dock,
+		.cv-options {
+			display: flex;
+			flex-wrap: wrap;
+			align-items: center;
+			justify-content: center;
+			gap: 2px;
+			padding: 4px;
+			background: color-mix(in srgb, var(--surface) 94%, transparent);
+			border: 1px solid var(--line);
+			border-radius: calc(var(--radius-sm) + 5px);
+			box-shadow: var(--shadow-1);
+			backdrop-filter: saturate(1.4) blur(12px);
+			-webkit-backdrop-filter: saturate(1.4) blur(12px);
+		}
+
+		#stage.is-fullscreen .cv-dock,
+		#stage.is-fullscreen .cv-options {
+			box-shadow: var(--shadow-2);
+		}
+
+		.cv-group {
+			display: flex;
+			align-items: center;
+			gap: 2px;
+		}
+
+		.cv-sep {
+			width: 1px;
+			height: 26px;
+			margin: 0 4px;
+			background: var(--line);
+			flex: none;
+		}
+
+		.cv-tool {
+			position: relative;
+			min-width: var(--hit);
+			min-height: var(--hit);
+			padding: 0 10px;
+			background: none;
+			border: 1px solid transparent;
+			color: var(--ink);
+		}
+
+		.cv-tool:hover:not(:disabled) {
+			background: var(--surface-3);
+		}
+
+		.cv-tool:active:not(:disabled) {
+			background: var(--line);
+		}
+
+		.cv-tool[aria-pressed="true"],
+		.cv-tool[aria-expanded="true"] {
+			color: var(--accent);
+			background: var(--accent-soft);
+			border-color: color-mix(in srgb, var(--accent) 35%, transparent);
+		}
+
+		.cv-tool.btn-danger {
+			color: var(--danger);
+		}
+
+		.cv-tool.btn-danger:hover:not(:disabled) {
+			background: var(--danger-soft);
+		}
+
+		.cv-tool.is-recording {
+			color: #fff;
+			background: var(--danger);
+			border-color: transparent;
+		}
+
+		.cv-tool.is-recording:hover:not(:disabled) {
+			background: color-mix(in srgb, var(--danger) 85%, #000);
+		}
+
+		.cv-tool .cv-label {
+			font-size: .84rem;
+		}
+
+		#zoomOutBtn,
+		#zoomInBtn {
+			padding: 0;
+		}
+
+		#zoomVal {
+			min-width: 62px;
+			padding: 0 6px;
+			font-family: var(--font-mono);
+			font-size: .84rem;
+			font-weight: 500;
+		}
+
+		/* Tool options: colour, sizes, undo and clear for the chosen tool. */
+		.cp-tool-opt {
+			display: none;
+			align-items: center;
+			gap: 2px;
+		}
+
+		.cp-tool-opt.visible {
+			display: flex;
+		}
+
+		.color-btn {
+			position: relative;
+			display: inline-flex;
+			align-items: center;
+			justify-content: center;
+			cursor: pointer;
+			width: var(--hit);
+			height: var(--hit);
+			padding: 0;
+			border: 1px solid transparent;
+			border-radius: var(--radius-sm);
+			background: none;
+		}
+
+		.color-btn .swatch {
+			width: 26px;
+			height: 26px;
+			border-radius: 50%;
+			background: var(--swatch, #ff3b3b);
+			box-shadow: inset 0 0 0 2px rgba(255, 255, 255, .55), 0 0 0 1px var(--line-strong);
+			pointer-events: none;
+		}
+
+		.color-btn input[type="color"] {
+			position: absolute;
+			inset: 0;
+			width: 100%;
+			height: 100%;
+			padding: 0;
+			border: 0;
+			opacity: 0;
+			cursor: pointer;
 		}
 
 		.sizePicker {
 			display: flex;
 			align-items: center;
-			gap: .25rem
+			gap: 2px;
 		}
 
 		.dotBtn {
 			--dot: 8px;
 			--dot-color: #fff;
-			display: inline-flex;
-			align-items: center;
-			justify-content: center;
-			width: 26px;
-			height: 26px;
-			border: 1px solid var(--panel-border);
-			border-radius: .4rem;
-			background: #1A1A19;
-			cursor: pointer;
-			transition: all .15s ease
-		}
-
-		.dotBtn:hover {
-			background: var(--tool-hover-bg);
-			transform: scale(1.05)
+			width: var(--hit);
+			min-width: var(--hit);
+			padding: 0;
+			background: none;
+			border: 1px solid transparent;
 		}
 
 		.dotBtn .dot {
 			display: block;
 			width: var(--dot);
 			height: var(--dot);
-			aspect-ratio: 1/1;
 			border-radius: 50%;
 			background: var(--dot-color);
-			transition: transform .15s ease
+			box-shadow: 0 0 0 1px var(--line-strong);
 		}
 
 		.dotBtn.active {
-			outline: 2px solid var(--brand-accent);
-			outline-offset: 1px
+			background: var(--accent-soft);
+			border-color: color-mix(in srgb, var(--accent) 35%, transparent);
 		}
 
-		.dotBtn.active .dot {
-			transform: scale(1.15)
+		/* Settings pop-over above the toolbar. */
+		#settingsPanel {
+			position: absolute;
+			right: 8px;
+			bottom: calc(100% + 8px);
+			z-index: 20;
+			width: min(340px, calc(100vw - 32px));
+			max-height: min(70vh, 520px);
+			overflow-y: auto;
+			padding: 14px;
+			background: var(--surface);
+			border: 1px solid var(--line);
+			border-radius: var(--radius);
+			box-shadow: var(--shadow-2);
+		}
+
+		#stage.is-fullscreen #settingsPanel {
+			right: 0;
+		}
+
+		.cv-field + .cv-field {
+			margin-top: 14px;
+			padding-top: 14px;
+			border-top: 1px solid var(--line);
+		}
+
+		.cv-field-label {
+			display: block;
+			margin-bottom: 8px;
+			font-family: var(--font-mono);
+			font-size: .68rem;
+			letter-spacing: .08em;
+			text-transform: uppercase;
+			color: var(--ink-3);
+		}
+
+		.cv-row {
+			display: flex;
+			align-items: center;
+			gap: 8px;
+		}
+
+		.cv-row > select {
+			flex: 1;
+		}
+
+		.cv-row > .cv-icon-btn {
+			flex: none;
+			width: var(--hit);
+			padding: 0;
+		}
+
+		.cv-segmented {
+			display: grid;
+			grid-template-columns: 1fr 1fr;
+			gap: 4px;
+			padding: 3px;
+			background: var(--surface-3);
+			border-radius: var(--radius-sm);
+		}
+
+		.cv-segmented button {
+			min-height: calc(var(--hit) - 6px);
+			background: none;
+			border-color: transparent;
+			color: var(--ink-2);
+		}
+
+		.cv-segmented button[aria-pressed="true"] {
+			background: var(--surface);
+			color: var(--ink);
+			border-color: var(--line);
+			box-shadow: var(--shadow-1);
+		}
+
+		.cv-toggle-row {
+			display: grid;
+			grid-template-columns: 1fr;
+			gap: 8px;
+		}
+
+		#mirrorBtn {
+			justify-content: flex-start;
+		}
+
+		#mirrorBtn[aria-pressed="true"] {
+			color: var(--accent);
+			background: var(--accent-soft);
+			border-color: color-mix(in srgb, var(--accent) 35%, transparent);
 		}
 
 		#zoomSlider {
-			height: 22px;
-			vertical-align: middle;
-			accent-color: var(--brand-primary)
-		}
-
-		#zoomVal {
-			display: inline-block;
-			min-width: 2.8ch;
-			text-align: right;
-			color: #EDEBE8;
-			font-size: .82rem;
-			font-weight: 600
-		}
-
-		#stage {
-			position: relative;
 			flex: 1;
-			min-height: 50vh;
-			margin: .4rem .6rem calc(.5rem + env(safe-area-inset-bottom));
-			border: 1px solid var(--panel-border);
-			border-radius: 14px;
-			overflow: hidden;
-			background: #000;
-			box-shadow: 0 8px 32px rgba(0, 0, 0, .4)
-		}
-
-		body.pseudoFullscreen #stage {
-			position: fixed;
-			inset: 0;
+			min-width: 0;
+			height: var(--hit);
 			margin: 0;
-			width: 100vw;
-			height: 100svh;
-			min-height: 0;
-			z-index: 1000;
-			border: 0;
-			border-radius: 0
+			accent-color: var(--accent);
 		}
 
-		#stage:fullscreen {
-			margin: 0;
-			width: 100vw;
-			height: 100vh;
-			min-height: 0;
-			border: 0;
-			border-radius: 0;
-			background: #000
+		#zoomSliderVal {
+			min-width: 52px;
+			font-family: var(--font-mono);
+			font-size: .84rem;
+			text-align: right;
 		}
 
-		#stage:-webkit-full-screen {
-			margin: 0;
-			width: 100vw;
-			height: 100vh;
-			min-height: 0;
-			border: 0;
-			border-radius: 0;
-			background: #000
-		}
-
-		body.pseudoFullscreen .topbar {
-			display: none
-		}
-
-		video,
-		canvas {
-			position: absolute;
-			left: 0;
-			top: 0;
+		#defaultsBtn {
 			width: 100%;
-			height: 100%;
-			touch-action: none
 		}
 
-		video {
-			object-fit: contain;
-			background: #000;
-			object-position: center center
-		}
-
-		/* Hide native WebKit media controls overlay (iPad fullscreen pause icon) */
-		video::-webkit-media-controls {
-			display: none !important
-		}
-		video::-webkit-media-controls-enclosure {
-			display: none !important
-		}
-		video::-webkit-media-controls-panel {
-			display: none !important
-		}
-		video::-webkit-media-controls-start-playback-button {
-			display: none !important
-		}
-
-		#hud {
-			position: absolute;
-			right: .5rem;
-			bottom: .5rem;
+		.cv-hint {
+			margin: 8px 0 0;
 			font-size: .78rem;
-			color: #EDEBE8;
-			background: rgba(0, 0, 0, .55);
-			padding: .25rem .5rem;
-			border-radius: .4rem;
-			border: 1px solid rgba(255, 255, 255, .1);
-			backdrop-filter: blur(4px);
-			display: flex;
-			align-items: center;
-			gap: .4rem
+			color: var(--ink-3);
 		}
 
-		#fullscreenBtn {
+		/* Button that brings the hidden toolbar back. */
+		#showDockBtn {
 			position: absolute;
-			top: .55rem;
-			right: .55rem;
-			z-index: 5;
-			display: inline-flex;
-			align-items: center;
-			justify-content: center;
-			width: 38px;
-			height: 34px;
+			right: 12px;
+			bottom: calc(12px + env(safe-area-inset-bottom));
+			z-index: 12;
+			width: 48px;
+			height: 48px;
 			padding: 0;
-			background: rgba(20, 22, 28, .7);
-			border: 1px solid rgba(255, 255, 255, .15);
-			border-radius: .55rem;
-			color: #f0f4ff;
-			font-size: 1.1rem;
-			box-shadow: 0 6px 16px rgba(0, 0, 0, .35);
+			border-radius: 50%;
+			color: #F2F2F0;
+			background: rgba(0, 0, 0, .55);
+			border: 1px solid rgba(255, 255, 255, .2);
 			backdrop-filter: blur(8px);
-			-webkit-backdrop-filter: blur(8px)
+			-webkit-backdrop-filter: blur(8px);
 		}
 
-		#fullscreenBtn:hover {
-			transform: translateY(-1px);
-			background: rgba(28, 30, 38, .8)
+		#showDockBtn:hover {
+			background: rgba(0, 0, 0, .7);
 		}
 
-		#fullscreenBtn:active {
-			transform: translateY(0)
+		/* Hover labels with the keyboard shortcut (mouse only). */
+		[data-tooltip]::after {
+			content: attr(data-tooltip);
+			position: absolute;
+			bottom: calc(100% + 8px);
+			left: 50%;
+			z-index: 40;
+			transform: translateX(-50%);
+			padding: 4px 8px;
+			font-size: .74rem;
+			font-weight: 600;
+			white-space: nowrap;
+			color: var(--surface);
+			background: var(--ink);
+			border-radius: 6px;
+			pointer-events: none;
+			opacity: 0;
+			transition: opacity .12s ease;
 		}
 
-		#statusDot {
-			display: inline-block;
-			width: .5rem;
-			height: .5rem;
-			border-radius: 50%;
-			background: var(--good)
+		@media (hover: hover) and (pointer: fine) {
+			[data-tooltip]:not([aria-expanded="true"]):hover::after {
+				opacity: 1;
+				transition-delay: .35s;
+			}
 		}
 
-		.pausedVideo #statusDot {
-			background: var(--warn)
-		}
-
-		#recordIndicator {
-			display: none;
-			align-items: center;
-			gap: .2rem;
-			font-size: .7rem;
-			letter-spacing: .04em;
-			color: #ffb0b0
-		}
-
-		#hud.recording #recordIndicator {
-			display: inline-flex
-		}
-
-		#recordDot {
-			width: .4rem;
-			height: .4rem;
-			border-radius: 50%;
-			background: #ff4d4d;
-			box-shadow: 0 0 6px rgba(255, 77, 77, .7);
-			animation: recordPulse 1s ease-in-out infinite
-		}
-
-		@keyframes recordPulse {
-			0%, 100% { opacity: 1; }
-			50% { opacity: .4; }
-		}
-
+		/* ---------- Text box, toast and save dialog ---------- */
 		#textOverlay {
 			position: absolute;
+			z-index: 15;
 			display: none;
-			z-index: 20;
-			background: rgba(20, 22, 28, .9);
-			border: 1px solid rgba(162, 155, 254, .4);
-			border-radius: .6rem;
-			padding: .5rem;
-			box-shadow: 0 8px 24px rgba(0, 0, 0, .4);
-			backdrop-filter: blur(8px)
+			padding: 10px;
+			background: var(--surface);
+			border: 1px solid var(--line);
+			border-radius: var(--radius-sm);
+			box-shadow: var(--shadow-2);
 		}
 
 		#textOverlay textarea {
-			width: 260px;
+			display: block;
+			width: 280px;
 			max-width: 65vw;
-			min-height: 80px;
-			background: rgba(0, 0, 0, .3);
-			color: #fff;
-			border: 1px solid rgba(255, 255, 255, .15);
-			border-radius: .4rem;
-			padding: .4rem;
+			min-height: 84px;
+			padding: 8px;
 			font-size: 15px;
+			color: var(--ink);
+			background: var(--surface-2);
+			border: 1px solid var(--line-strong);
+			border-radius: 8px;
 			outline: none;
 			resize: vertical;
 			-webkit-user-select: text;
-			user-select: text
+			user-select: text;
 		}
 
 		#textOverlay textarea:focus {
-			border-color: var(--brand-primary)
+			border-color: var(--accent);
 		}
 
-		#textActions {
-			display: flex;
-			gap: .4rem;
-			justify-content: flex-end;
-			margin-top: .4rem
-		}
-
-		/* Filename popup */
-		#filenameOverlay {
-			position: fixed;
-			top: 0;
-			left: 0;
-			right: 0;
-			bottom: 0;
-			width: 100vw;
-			height: 100vh;
-			background: rgba(0, 0, 0, .6);
-			display: none;
-			align-items: center;
-			justify-content: center;
-			z-index: 9999;
-			backdrop-filter: blur(4px);
-			-webkit-backdrop-filter: blur(4px)
-		}
-
-		#filenameOverlay.show {
-			display: flex !important
-		}
-
-		#filenameDialog {
-			background: var(--panel);
-			border: 1px solid var(--panel-border);
-			border-radius: .8rem;
-			padding: 1rem;
-			box-shadow: 0 12px 40px rgba(0, 0, 0, .5);
-			min-width: 300px;
-			max-width: 90vw
-		}
-
-		#filenameDialog h3 {
-			margin: 0 0 .75rem;
-			font-size: 1rem;
-			font-weight: 600;
-			color: var(--text-main)
-		}
-
-		#filenameDialog input[type="text"] {
-			width: 100%;
-			background: rgba(0, 0, 0, .3);
-			color: #fff;
-			border: 1px solid rgba(255, 255, 255, .15);
-			border-radius: .4rem;
-			padding: .5rem .6rem;
-			font-size: .9rem;
-			outline: none;
-			font-family: inherit;
-			-webkit-user-select: text;
-			user-select: text
-		}
-
-		#filenameDialog input[type="text"]:focus {
-			border-color: var(--brand-primary)
-		}
-
-		#filenameDialog .file-ext {
-			font-size: .8rem;
-			color: var(--text-secondary);
-			margin-top: .3rem
-		}
-
+		#textActions,
 		#filenameActions {
 			display: flex;
-			gap: .4rem;
 			justify-content: flex-end;
-			margin-top: .75rem
+			gap: 8px;
+			margin-top: 10px;
 		}
 
 		#toast {
-			position: fixed;
+			position: absolute;
+			top: 12px;
 			left: 50%;
-			transform: translateX(-50%) translateY(10px);
-			bottom: calc(12px + env(safe-area-inset-bottom));
-			background: rgba(30, 33, 41, .95);
-			color: #fff;
-			padding: .5rem .8rem;
-			border-radius: .5rem;
-			border: 1px solid rgba(255, 255, 255, .1);
-			font-size: .85rem;
-			font-weight: 500;
+			z-index: 60;
+			max-width: calc(100% - 24px);
+			padding: 8px 14px;
+			font-size: .86rem;
+			font-weight: 600;
+			color: var(--surface);
+			background: var(--ink);
+			border-radius: 999px;
+			box-shadow: var(--shadow-2);
 			opacity: 0;
+			transform: translate(-50%, -8px);
+			transition: opacity .2s ease, transform .2s ease;
 			pointer-events: none;
-			transition: opacity .25s, transform .25s;
-			box-shadow: 0 8px 24px rgba(0, 0, 0, .4);
-			backdrop-filter: blur(8px)
+		}
+
+		body.pseudoFullscreen #toast {
+			top: calc(12px + var(--standalone-top, 0px));
 		}
 
 		#toast.show {
 			opacity: 1;
-			transform: translateX(-50%) translateY(0)
+			transform: translate(-50%, 0);
 		}
 
+		#filenameOverlay {
+			position: absolute;
+			inset: 0;
+			z-index: 70;
+			display: none;
+			align-items: center;
+			justify-content: center;
+			padding: 16px;
+			background: rgba(0, 0, 0, .5);
+			backdrop-filter: blur(4px);
+			-webkit-backdrop-filter: blur(4px);
+		}
+
+		#filenameOverlay.show {
+			display: flex;
+		}
+
+		#filenameDialog {
+			width: min(380px, 100%);
+			padding: 18px;
+			background: var(--surface);
+			border: 1px solid var(--line);
+			border-radius: var(--radius);
+			box-shadow: var(--shadow-2);
+		}
+
+		#filenameDialog h3 {
+			margin: 0 0 12px;
+			font-family: var(--font-display);
+			font-size: 1.3rem;
+			font-weight: 400;
+		}
+
+		#filenameDialog input[type="text"] {
+			width: 100%;
+			min-height: var(--hit);
+			padding: 0 12px;
+			font-size: .95rem;
+			color: var(--ink);
+			background: var(--surface-2);
+			border: 1px solid var(--line-strong);
+			border-radius: var(--radius-sm);
+			outline: none;
+			-webkit-user-select: text;
+			user-select: text;
+		}
+
+		#filenameDialog input[type="text"]:focus {
+			border-color: var(--accent);
+		}
+
+		#filenameDialog .file-ext {
+			margin-top: 6px;
+			font-family: var(--font-mono);
+			font-size: .8rem;
+			color: var(--ink-3);
+		}
+
+		/* ---------- Footer ---------- */
 		footer {
-			position: static;
-			font-size: 14px;
+			padding: 10px 12px;
+			font-size: .84rem;
 			text-align: center;
-			padding: 8px;
-			background: transparent;
-			color: #555;
-			margin: 4px 0;
-			width: 100%
+			color: var(--ink-3);
 		}
 
 		footer a {
-			color: #ff5f1f;
-			text-decoration: none
+			color: var(--brand);
+			text-decoration: none;
 		}
 
 		footer a:hover {
-			text-decoration: underline
+			text-decoration: underline;
 		}
 
-		.helperText {
-			font-size: 11px;
-			color: #b45309;
-			margin-top: 4px;
-			display: none
-		}
-
-		.helperText.visible {
-			display: block
-		}
-
-		/* Tool active cursor states */
-		.cursor-draw {
-			cursor: crosshair !important
-		}
-
-		.cursor-eraser {
-			cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%23ff5d5d' stroke-width='2'%3E%3Cpath d='M20 20H7L3 16a1 1 0 0 1 0-1.4l10-10a1 1 0 0 1 1.4 0l7 7a1 1 0 0 1 0 1.4L16 19'/%3E%3Cpath d='M6.5 13.5L11 9'/%3E%3C/svg%3E") 12 12, crosshair !important
-		}
-
-		.cursor-text {
-			cursor: text !important
-		}
-
-		/* Tooltip for shortcuts */
-		[data-tooltip] {
-			position: relative
-		}
-
-		[data-tooltip]:hover::after {
-			content: attr(data-tooltip);
-			position: absolute;
-			bottom: calc(100% + 6px);
-			left: 50%;
-			transform: translateX(-50%);
-			padding: .3rem .5rem;
-			background: rgba(0, 0, 0, .9);
-			color: #fff;
-			font-size: .7rem;
-			white-space: nowrap;
-			border-radius: .3rem;
-			pointer-events: none;
-			z-index: 100
-		}
-
-		@media (pointer: coarse) {
-			button,
-			input,
-			select,
-			.toolbar-btn,
-			.tool-button {
-				min-height: 44px;
-				height: 44px;
-				touch-action: manipulation;
-			}
-
-			select {
-				height: 44px;
-				padding-top: 0;
-				padding-bottom: 0;
-				line-height: 42px;
-			}
-
-			button {
-				height: 44px;
-				padding-top: 0;
-				padding-bottom: 0;
-			}
-
-			.color-btn {
-				width: 44px;
-				height: 44px;
-			}
-
-			.color-label-btn {
-				min-height: 44px;
-				padding: .35rem .75rem;
-			}
-
-			.dotBtn {
-				width: 36px;
-				height: 36px;
-			}
-
-			canvas {
-				touch-action: none;
-			}
-
-			[data-tooltip]:hover::after {
-				display: none
+		@media (max-width: 900px) {
+			.cv-tool .cv-label {
+				display: none;
 			}
 		}
 
 		@media (max-width: 600px) {
-			.btn-text {
-				display: none
+			#stage {
+				margin: 8px 8px 0;
 			}
 
-			.tool-btn {
-				min-width: 36px
+			.cv-sep {
+				display: none;
+			}
+		}
+
+		@media (prefers-reduced-motion: reduce) {
+			#recordDot,
+			.cv-spinner {
+				animation-duration: 3s;
 			}
 
-			.controls-panel {
-				max-width: calc(100% - 1.5rem)
+			#toast {
+				transition: none;
 			}
 		}
 	</style>
 </head>
 
 <body>
-	<!-- Topbar -->
-	<div class="topbar">
-		<div class="bar">
-			<a class="brand" href="https://panphy.app" aria-label="panphy home">
-				<img src="/assets/panphy.png" alt="panphy logo" />
-			</a>
-			<div class="title">Camera Visualizer</div>
+	<header class="cv-appbar">
+		<div class="cv-brand">
+			<a href="https://panphy.app/" aria-label="PanPhy Labs home" title="PanPhy Labs home"><img src="/assets/panphy.png" alt="PanPhy logo" /></a>
+			<span class="cv-wordmark">Camera Visualizer</span>
 		</div>
-	</div>
+		<div class="cv-appbar-actions">
+			<button id="theme-button" data-panphy-theme-toggle class="theme-toggle-button" aria-label="Toggle Light/Dark Theme" title="Toggle between light and dark themes">&#9728;&#65039;</button>
+		</div>
+	</header>
 
-	<!-- Stage -->
 	<main id="stage">
-		<button id="controlsToggle" type="button" aria-label="Open controls">Controls</button>
+		<div id="view">
+			<video id="video" playsinline autoplay muted disablepictureinpicture disableremoteplayback x-webkit-airplay="deny"></video>
+			<canvas id="freezeCanvas" class="hidden"></canvas>
+			<canvas id="drawCanvas"></canvas>
+			<canvas id="laserCanvas"></canvas>
 
-		<div class="controls-panel" id="controlsPanel">
-			<button id="controlsClose" type="button" aria-label="Close controls">
-				<svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
-					<line x1="18" y1="6" x2="6" y2="18"></line>
-					<line x1="6" y1="6" x2="18" y2="18"></line>
-				</svg>
+			<div id="hud" hidden>
+				<span id="statusDot"></span>
+				<span id="hudText">Live</span>
+				<span id="recordIndicator"><span id="recordDot"></span>Rec</span>
+			</div>
+
+			<!-- Start screen; also explains why the camera could not start. -->
+			<div id="startScreen" class="stage-ui" data-state="idle">
+				<div class="cv-start-card" role="status" aria-live="polite">
+					<div class="cv-start-badge" aria-hidden="true">
+						<svg class="cv-icon" viewBox="0 0 24 24"><path d="M3 8.5A2.5 2.5 0 0 1 5.5 6h1.8l1.4-2h6.6l1.4 2h1.8A2.5 2.5 0 0 1 21 8.5v9a2.5 2.5 0 0 1-2.5 2.5h-13A2.5 2.5 0 0 1 3 17.5z"/><circle cx="12" cy="13" r="3.6"/></svg>
+					</div>
+					<h2 id="startTitle">Show your camera on the big screen</h2>
+					<p id="startText">Point a phone, tablet or document camera at your work, then point, draw and snap over the live picture.</p>
+					<div class="cv-spinner" aria-hidden="true"></div>
+					<button id="startBtn" type="button" class="btn-primary">Start camera</button>
+					<ul class="cv-start-tips" id="startTips">
+						<li><span><kbd>L</kbd> Laser &nbsp;<kbd>D</kbd> Draw &nbsp;<kbd>E</kbd> Erase &nbsp;<kbd>T</kbd> Text</span></li>
+						<li><span><kbd>Space</kbd> freezes the picture so you can draw on a still frame</span></li>
+						<li><span><kbd>F</kbd> full screen &nbsp;<kbd>H</kbd> hides the toolbar &nbsp;<kbd>+</kbd> <kbd>&minus;</kbd> zoom</span></li>
+					</ul>
+				</div>
+			</div>
+
+			<!-- Text box for the Text tool -->
+			<div id="textOverlay" class="stage-ui">
+				<textarea id="textInput" placeholder="Type your note…" aria-label="Text annotation"></textarea>
+				<div id="textActions">
+					<button id="textCancel" type="button">Cancel</button>
+					<button id="textAdd" type="button" class="btn-primary">Add text</button>
+				</div>
+			</div>
+
+			<button id="showDockBtn" class="stage-ui" type="button" aria-label="Show toolbar (H)" title="Show toolbar (H)" hidden>
+				<svg class="cv-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h10M18 7h2M4 17h4M12 17h8"/><circle cx="16" cy="7" r="2"/><circle cx="10" cy="17" r="2"/></svg>
 			</button>
+		</div>
 
-			<!-- Source section -->
-			<div class="cp-section">
-				<span class="cp-label">Source</span>
-				<div class="cp-row">
-					<select id="cameraSelect"></select>
-					<button id="refreshBtn" data-tooltip="Refresh camera list">
-						<span class="btn-icon">
-							<svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
-								<path d="M23 4v6h-6"></path>
-								<path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path>
-							</svg>
-						</span>
+		<!-- Toolbar -->
+		<div class="cv-bar stage-ui" id="toolbar">
+			<div class="cv-dock" id="dock" role="toolbar" aria-label="Camera tools">
+				<div class="cv-group">
+					<button id="freezeBtn" class="cv-tool" type="button" aria-pressed="false" aria-label="Freeze picture (Space)" data-tooltip="Freeze (Space)" disabled>
+						<svg class="cv-icon icon-pause" viewBox="0 0 24 24" aria-hidden="true"><rect x="6.5" y="5" width="3.6" height="14" rx="1"/><rect x="13.9" y="5" width="3.6" height="14" rx="1"/></svg>
+						<svg class="cv-icon icon-play" viewBox="0 0 24 24" aria-hidden="true" style="display:none"><path d="M7.5 5.2v13.6a.8.8 0 0 0 1.2.7l10.6-6.8a.8.8 0 0 0 0-1.4L8.7 4.5a.8.8 0 0 0-1.2.7z"/></svg>
+						<span class="cv-label" id="freezeLabel">Freeze</span>
 					</button>
-					<span class="cp-sep"></span>
-					<label class="switch">
-						<input id="liveToggle" type="checkbox" checked />
-						<span class="slider"></span>
+				</div>
+				<span class="cv-sep"></span>
+				<div class="cv-group" role="group" aria-label="Pointer tools">
+					<button id="laserBtn" class="cv-tool" type="button" aria-pressed="true" aria-label="Laser pointer (L)" data-tooltip="Laser (L)">
+						<svg class="cv-icon" viewBox="0 0 24 24" aria-hidden="true"><circle class="fill" cx="12" cy="12" r="3"/><path d="M12 2.5v3.5M12 18v3.5M2.5 12H6M18 12h3.5M5.3 5.3l2.4 2.4M16.3 16.3l2.4 2.4M5.3 18.7l2.4-2.4M16.3 7.7l2.4-2.4"/></svg>
+					</button>
+					<button id="annotationBtn" class="cv-tool" type="button" aria-pressed="false" aria-label="Draw (D)" data-tooltip="Draw (D)">
+						<svg class="cv-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20h9M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/></svg>
+					</button>
+					<button id="eraserBtn" class="cv-tool" type="button" aria-pressed="false" aria-label="Eraser (E)" data-tooltip="Erase (E)">
+						<svg class="cv-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="m7 21-4.3-4.3c-1-1-1-2.5 0-3.4l9.6-9.6c1-1 2.5-1 3.4 0l5.6 5.6c1 1 1 2.5 0 3.4L13 21"/><path d="M22 21H7M5 11l9 9"/></svg>
+					</button>
+					<button id="textBtn" class="cv-tool" type="button" aria-pressed="false" aria-label="Add text (T)" data-tooltip="Text (T)">
+						<svg class="cv-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 6.5V5h14v1.5M12 5v14M9 19h6"/></svg>
+					</button>
+				</div>
+				<span class="cv-sep"></span>
+				<div class="cv-group" role="group" aria-label="Zoom">
+					<button id="zoomOutBtn" class="cv-tool" type="button" aria-label="Zoom out (−)" data-tooltip="Zoom out (−)">
+						<svg class="cv-icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6.5"/><path d="m20 20-4.2-4.2M8 11h6"/></svg>
+					</button>
+					<button id="zoomVal" class="cv-tool" type="button" aria-label="Zoom 1×. Reset zoom (0)" data-tooltip="Reset zoom (0)">1×</button>
+					<button id="zoomInBtn" class="cv-tool" type="button" aria-label="Zoom in (+)" data-tooltip="Zoom in (+)">
+						<svg class="cv-icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6.5"/><path d="m20 20-4.2-4.2M8 11h6M11 8v6"/></svg>
+					</button>
+				</div>
+				<span class="cv-sep"></span>
+				<div class="cv-group" role="group" aria-label="Capture">
+					<button id="screenshotBtn" class="cv-tool" type="button" aria-label="Save a snapshot (S)" data-tooltip="Snapshot (S)" disabled>
+						<svg class="cv-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 8.5A2.5 2.5 0 0 1 5.5 6h1.8l1.4-2h6.6l1.4 2h1.8A2.5 2.5 0 0 1 21 8.5v9a2.5 2.5 0 0 1-2.5 2.5h-13A2.5 2.5 0 0 1 3 17.5z"/><circle cx="12" cy="13" r="3.6"/></svg>
+						<span class="cv-label">Snapshot</span>
+					</button>
+					<button id="recordBtn" class="cv-tool" type="button" aria-label="Start recording (R)" data-tooltip="Record (R)" disabled>
+						<svg class="cv-icon record-icon" viewBox="0 0 24 24" aria-hidden="true"><circle class="fill" cx="12" cy="12" r="6" style="fill:#E5484D"/></svg>
+						<svg class="cv-icon stop-icon" viewBox="0 0 24 24" aria-hidden="true" style="display:none"><rect class="fill" x="6.5" y="6.5" width="11" height="11" rx="2"/></svg>
+						<span class="cv-label" id="recordLabel">Record</span>
+					</button>
+				</div>
+				<span class="cv-sep"></span>
+				<div class="cv-group">
+					<button id="settingsBtn" class="cv-tool" type="button" aria-expanded="false" aria-controls="settingsPanel" aria-label="Camera and view settings" data-tooltip="Settings">
+						<svg class="cv-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h10M18 7h2M4 17h4M12 17h8"/><circle cx="16" cy="7" r="2"/><circle cx="10" cy="17" r="2"/></svg>
+					</button>
+					<button id="fullscreenBtn" class="cv-tool" type="button" aria-label="Enter full screen (F)" data-tooltip="Full screen (F)">
+						<svg class="cv-icon enter-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9V4h5M15 4h5v5M20 15v5h-5M9 20H4v-5"/></svg>
+						<svg class="cv-icon exit-icon" viewBox="0 0 24 24" aria-hidden="true" style="display:none"><path d="M20 4l-6 6M14 5.5V10h4.5M4 20l6-6M10 18.5V14H5.5"/></svg>
+					</button>
+					<button id="hideDockBtn" class="cv-tool" type="button" aria-label="Hide toolbar (H)" data-tooltip="Hide toolbar (H)">
+						<svg class="cv-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>
+					</button>
+				</div>
+			</div>
+
+			<!-- Options for the chosen tool -->
+			<div class="cv-options" id="toolOptions" role="group" aria-label="Tool options">
+				<div id="pointerGroup" class="cp-tool-opt">
+					<label class="color-btn cv-tool" id="pointerColorBtn" data-tooltip="Laser colour">
+						<span class="swatch"></span>
+						<input id="pointerColorInput" type="color" value="#ff3b3b" aria-label="Laser colour" />
 					</label>
-					<div class="status">
-						<span id="statusLight" class="light live"></span>
-						<span id="statusLabel" class="statusText">Live</span>
-					</div>
+					<div id="pointerSizes" class="sizePicker" role="group" aria-label="Laser size"></div>
 				</div>
-				<div id="cameraHelper" class="helperText" aria-live="polite"></div>
-			</div>
-
-			<div class="cp-divider"></div>
-
-			<!-- View section -->
-			<div class="cp-section">
-				<span class="cp-label">View</span>
-				<div class="cp-row cp-row-view">
-					<span class="cp-sublabel">Zoom</span>
-					<input id="zoomSlider" type="range" min="1" max="3" step="0.1" value="1" aria-label="Zoom level">
-					<span id="zoomVal">1.0×</span>
-					<span class="cp-sep"></span>
-					<button id="mirrorBtn" data-tooltip="Mirror view">
-						<span class="btn-icon">
-							<svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
-								<line x1="20" y1="8" x2="4" y2="8"></line>
-								<polyline points="8 4 4 8 8 12"></polyline>
-								<line x1="4" y1="16" x2="20" y2="16"></line>
-								<polyline points="16 12 20 16 16 20"></polyline>
-							</svg>
-						</span>
-						<span class="btn-text">Mirror</span>
+				<div id="annotGroup" class="cp-tool-opt">
+					<label class="color-btn cv-tool" id="annotColorBtn" data-tooltip="Pen colour">
+						<span class="swatch"></span>
+						<input id="annotColorInput" type="color" value="#33d17a" aria-label="Pen colour" />
+					</label>
+					<div id="annotSizes" class="sizePicker" role="group" aria-label="Pen size"></div>
+					<span class="cv-sep"></span>
+					<button id="undoBtn" class="cv-tool" type="button" aria-label="Undo (Ctrl or ⌘ Z)" data-tooltip="Undo (⌘Z)" disabled>
+						<svg class="cv-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 14 4 9l5-5"/><path d="M4 9h10.5a5.5 5.5 0 0 1 0 11H11"/></svg>
 					</button>
-					<button id="fitBtn" data-tooltip="Toggle fit/fill mode">
-						<span class="btn-icon">
-							<svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
-								<path d="M3 9V5a2 2 0 0 1 2-2h4M15 3h4a2 2 0 0 1 2 2v4M9 21H5a2 2 0 0 1-2-2v-4M21 15v4a2 2 0 0 1-2 2h-4"></path>
-							</svg>
-						</span>
-						<span class="btn-text">Fit</span>
+					<button id="clearBtn" class="cv-tool btn-danger" type="button" aria-label="Clear all drawings" data-tooltip="Clear all" disabled>
+						<svg class="cv-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M10 11v6M14 11v6M5.5 7l1 12a2 2 0 0 0 2 1.8h7a2 2 0 0 0 2-1.8l1-12M9 7V4.5h6V7"/></svg>
 					</button>
 				</div>
 			</div>
 
-			<div class="cp-divider"></div>
-
-			<!-- Tools section -->
-			<div class="cp-section">
-				<span class="cp-label">Tools</span>
-				<div class="cp-row cp-row-tools">
-					<button id="laserBtn" class="tool-btn" data-tooltip="Laser pointer (L)">
-						<span class="btn-icon">
-							<svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
-								<circle cx="12" cy="12" r="3" fill="currentColor"></circle>
-								<path d="M12 2v4M12 18v4M2 12h4M18 12h4M5 5l3 3M16 16l3 3M5 19l3-3M16 8l3-3"></path>
-							</svg>
-						</span>
-						<span class="btn-text">Laser</span>
-					</button>
-					<button id="annotationBtn" class="tool-btn" data-tooltip="Draw (D)">
-						<span class="btn-icon">
-							<svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
-								<path d="M12 20h9M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path>
-							</svg>
-						</span>
-						<span class="btn-text">Draw</span>
-					</button>
-					<button id="eraserBtn" class="tool-btn" data-tooltip="Eraser (E)">
-						<span class="btn-icon">
-							<svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
-								<path d="m7 21-4.3-4.3c-1-1-1-2.5 0-3.4l9.6-9.6c1-1 2.5-1 3.4 0l5.6 5.6c1 1 1 2.5 0 3.4L13 21"></path>
-								<path d="M22 21H7M5 11h9"></path>
-							</svg>
-						</span>
-						<span class="btn-text">Erase</span>
-					</button>
-					<button id="textBtn" class="tool-btn" data-tooltip="Add text (T)">
-						<span class="btn-icon">T</span>
-						<span class="btn-text">Text</span>
-					</button>
-				</div>
-				<!-- Contextual tool options -->
-				<div class="cp-row cp-tool-options" id="toolOptions">
-					<div id="pointerGroup" class="cp-tool-opt">
-						<button class="color-label-btn" id="pointerColorBtn" title="Click to change laser color">
-							<span class="color-label-text">Color</span>
-							<input id="pointerColorInput" type="color" value="#ff3b3b" />
-						</button>
-						<div id="pointerSizes" class="sizePicker" aria-label="Pointer size"></div>
-					</div>
-					<div id="annotGroup" class="cp-tool-opt">
-						<button class="color-label-btn" id="annotColorBtn" title="Click to change annotation color">
-							<span class="color-label-text">Color</span>
-							<input id="annotColorInput" type="color" value="#33d17a" />
-						</button>
-						<div id="annotSizes" class="sizePicker" aria-label="Annotation size"></div>
-						<span class="cp-sep"></span>
-						<button id="undoBtn" class="muted" data-tooltip="Undo last" disabled>
-							<span class="btn-text">Undo</span>
-						</button>
-						<button id="clearBtn" class="danger" data-tooltip="Clear all">
-							<span class="btn-icon">
-								<svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
-									<line x1="18" y1="6" x2="6" y2="18"></line>
-									<line x1="6" y1="6" x2="18" y2="18"></line>
-								</svg>
-							</span>
-							<span class="btn-text">Clear</span>
+			<!-- Settings pop-over -->
+			<div id="settingsPanel" role="dialog" aria-label="Camera and view settings" hidden>
+				<div class="cv-field">
+					<label class="cv-field-label" for="cameraSelect">Camera</label>
+					<div class="cv-row">
+						<select id="cameraSelect"></select>
+						<button id="refreshBtn" class="cv-icon-btn" type="button" aria-label="Reconnect camera and refresh the list" title="Reconnect camera and refresh the list">
+							<svg class="cv-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 5v5h-5"/><path d="M19.4 14.5A7.5 7.5 0 1 1 18 7.2L20 10"/></svg>
 						</button>
 					</div>
 				</div>
-			</div>
-
-			<div class="cp-divider"></div>
-
-			<!-- Actions row -->
-			<div class="cp-section">
-				<div class="cp-row cp-row-actions">
-					<button id="screenshotBtn" data-tooltip="Take snapshot">
-						<span class="btn-icon">
-							<svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
-								<path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path>
-								<circle cx="12" cy="13" r="4"></circle>
-							</svg>
-						</span>
-						<span class="btn-text">Snapshot</span>
+				<div class="cv-field">
+					<span class="cv-field-label" id="fitLabel">Picture</span>
+					<div class="cv-segmented" role="group" aria-labelledby="fitLabel">
+						<button id="fitContainBtn" type="button" aria-pressed="true">Fit whole picture</button>
+						<button id="fitCoverBtn" type="button" aria-pressed="false">Fill the screen</button>
+					</div>
+					<div class="cv-toggle-row" style="margin-top:8px">
+						<button id="mirrorBtn" type="button" aria-pressed="false">
+							<svg class="cv-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v18" stroke-dasharray="2 2.5"/><path d="M9 7 4 17h5zM15 7l5 10h-5z"/></svg>
+							<span>Mirror the picture</span>
+						</button>
+					</div>
+				</div>
+				<div class="cv-field">
+					<label class="cv-field-label" for="zoomSlider">Zoom</label>
+					<div class="cv-row">
+						<input id="zoomSlider" type="range" min="1" max="3" step="0.05" value="1">
+						<span id="zoomSliderVal">1×</span>
+					</div>
+				</div>
+				<div class="cv-field">
+					<button id="defaultsBtn" type="button">
+						<svg class="cv-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5v5h5"/><path d="M4.6 14.5A7.5 7.5 0 1 0 6 7.2L4 10"/></svg>
+						<span>Reset settings</span>
 					</button>
-					<button id="recordBtn" data-tooltip="Start recording">
-						<span class="btn-icon">
-							<svg class="record-icon" viewBox="0 0 24 24" width="14" height="14" fill="currentColor" style="display: inline-block;">
-								<circle cx="12" cy="12" r="6"></circle>
-							</svg>
-							<svg class="stop-icon" viewBox="0 0 24 24" width="14" height="14" fill="currentColor" style="display: none;">
-								<rect x="6" y="6" width="12" height="12" rx="2"></rect>
-							</svg>
-						</span>
-						<span class="btn-text">Record</span>
-					</button>
-					<button id="defaultsBtn" class="muted" data-tooltip="Reset to default settings">
-						<span class="btn-text">Reset</span>
-					</button>
+					<p class="cv-hint">Restores colours, sizes, zoom, mirror and fit. Drawings stay.</p>
 				</div>
 			</div>
 		</div>
-		<button id="fullscreenBtn" type="button" aria-label="Enter full screen" title="Enter full screen">
-			<svg class="enter-icon" viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
-				<polyline points="15 3 21 3 21 9"></polyline>
-				<polyline points="9 21 3 21 3 15"></polyline>
-				<line x1="21" y1="3" x2="14" y2="10"></line>
-				<line x1="3" y1="21" x2="10" y2="14"></line>
-			</svg>
-			<svg class="exit-icon" viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" style="display: none;">
-				<polyline points="4 14 10 14 10 20"></polyline>
-				<polyline points="20 10 14 10 14 4"></polyline>
-				<line x1="14" y1="10" x2="21" y2="3"></line>
-				<line x1="10" y1="14" x2="3" y2="21"></line>
-			</svg>
-		</button>
-		<video id="video" playsinline autoplay muted disablepictureinpicture disableremoteplayback x-webkit-airplay="deny"></video>
-		<canvas id="freezeCanvas" class="hidden"></canvas>
-		<canvas id="drawCanvas"></canvas>
-		<canvas id="laserCanvas"></canvas>
-		<div id="hud">
-			<span id="statusDot"></span>
-			<span id="hudText">Live</span>
-			<span id="recordIndicator"><span id="recordDot"></span>REC</span>
-		</div>
 
-		<!-- Text overlay -->
-		<div id="textOverlay">
-			<textarea id="textInput" placeholder="Type your note..." aria-label="Text annotation"></textarea>
-			<div id="textActions">
-				<button id="textCancel" class="muted">Cancel</button>
-				<button id="textAdd" class="primary">Add Text</button>
+		<div id="toast" role="status" aria-live="polite"></div>
+
+		<!-- Save dialog -->
+		<div id="filenameOverlay" class="stage-ui">
+			<div id="filenameDialog" role="dialog" aria-modal="true" aria-labelledby="filenameTitle">
+				<h3 id="filenameTitle">Save File</h3>
+				<input type="text" id="filenameInput" placeholder="Enter filename" aria-label="Filename">
+				<div class="file-ext" id="filenameExt">.png</div>
+				<div id="filenameActions">
+					<button id="filenameCancel" type="button">Cancel</button>
+					<button id="filenameSave" type="button" class="btn-primary">Save</button>
+				</div>
 			</div>
 		</div>
 	</main>
-
-	<div id="toast" role="status" aria-live="polite"></div>
-
-	<!-- Filename popup -->
-	<div id="filenameOverlay">
-		<div id="filenameDialog">
-			<h3 id="filenameTitle">Save File</h3>
-			<input type="text" id="filenameInput" placeholder="Enter filename" aria-label="Filename">
-			<div class="file-ext" id="filenameExt">.png</div>
-			<div id="filenameActions">
-				<button id="filenameCancel" class="muted">Cancel</button>
-				<button id="filenameSave" class="primary">Save</button>
-			</div>
-		</div>
-	</div>
 
 	<script>
 		(() => {
@@ -1285,33 +1313,41 @@
 			const ctxDraw = drawCanvas.getContext('2d');
 			const ctxLaser = laserCanvas.getContext('2d');
 
-			const controlsToggle = document.getElementById('controlsToggle');
-			const controlsPanel = document.getElementById('controlsPanel');
-			const controlsClose = document.getElementById('controlsClose');
+			const toolbar = document.getElementById('toolbar');
+			const settingsBtn = document.getElementById('settingsBtn');
+			const settingsPanel = document.getElementById('settingsPanel');
+			const hideDockBtn = document.getElementById('hideDockBtn');
+			const showDockBtn = document.getElementById('showDockBtn');
+
+			const startScreen = document.getElementById('startScreen');
+			const startTitle = document.getElementById('startTitle');
+			const startText = document.getElementById('startText');
+			const startBtn = document.getElementById('startBtn');
+			const startTips = document.getElementById('startTips');
 
 			const cameraSelect = document.getElementById('cameraSelect');
-			const cameraHelper = document.getElementById('cameraHelper');
 			const refreshBtn = document.getElementById('refreshBtn');
-			const liveToggle = document.getElementById('liveToggle');
+			const freezeBtn = document.getElementById('freezeBtn');
+			const freezeLabel = document.getElementById('freezeLabel');
 
 			const laserBtn = document.getElementById('laserBtn');
 			const annotationBtn = document.getElementById('annotationBtn');
 			const eraserBtn = document.getElementById('eraserBtn');
 			const textBtn = document.getElementById('textBtn');
 
-			const statusLight = document.getElementById('statusLight');
-			const statusLabel = document.getElementById('statusLabel');
-
 			const undoBtn = document.getElementById('undoBtn');
 			const clearBtn = document.getElementById('clearBtn');
 			const screenshotBtn = document.getElementById('screenshotBtn');
 			const recordBtn = document.getElementById('recordBtn');
+			const recordLabel = document.getElementById('recordLabel');
 			const mirrorBtn = document.getElementById('mirrorBtn');
-			const fitBtn = document.getElementById('fitBtn');
+			const fitContainBtn = document.getElementById('fitContainBtn');
+			const fitCoverBtn = document.getElementById('fitCoverBtn');
 			const defaultsBtn = document.getElementById('defaultsBtn');
 			const hud = document.getElementById('hud');
 			const hudText = document.getElementById('hudText');
 			const stage = document.getElementById('stage');
+			const view = document.getElementById('view');
 			const fullscreenBtn = document.getElementById('fullscreenBtn');
 			const toast = document.getElementById('toast');
 
@@ -1345,7 +1381,10 @@
 
 			/* Zoom controls */
 			const zoomSlider = document.getElementById('zoomSlider');
+			const zoomSliderVal = document.getElementById('zoomSliderVal');
 			const zoomVal = document.getElementById('zoomVal');
+			const zoomInBtn = document.getElementById('zoomInBtn');
+			const zoomOutBtn = document.getElementById('zoomOutBtn');
 
 			/* ===== Persistence ===== */
 			function saveStr(k, v) { try { localStorage.setItem(k, v == null ? '' : String(v)); } catch (e) {} }
@@ -1488,10 +1527,16 @@
 
 			function updateFullscreenUI() {
 				const active = isFullscreen();
+				stage.classList.toggle('is-fullscreen', active);
 				fullscreenBtn.querySelector('.enter-icon').style.display = active ? 'none' : 'block';
 				fullscreenBtn.querySelector('.exit-icon').style.display = active ? 'block' : 'none';
-				fullscreenBtn.setAttribute('aria-label', active ? 'Exit full screen' : 'Enter full screen');
-				fullscreenBtn.setAttribute('title', active ? 'Exit full screen' : 'Enter full screen');
+				fullscreenBtn.setAttribute('aria-label', active ? 'Exit full screen (F)' : 'Enter full screen (F)');
+				fullscreenBtn.setAttribute('data-tooltip', active ? 'Exit full screen (F)' : 'Full screen (F)');
+			}
+
+			async function toggleFullscreen() {
+				if (isFullscreen()) await exitFullscreen();
+				else await enterFullscreen();
 			}
 
 			async function enterFullscreen() {
@@ -1524,14 +1569,7 @@
 				updateFullscreenUI();
 			}
 
-			fullscreenBtn.addEventListener('click', async () => {
-				if (isFullscreen()) {
-					await exitFullscreen();
-					return;
-				}
-
-				await enterFullscreen();
-			});
+			fullscreenBtn.addEventListener('click', toggleFullscreen);
 
 			document.addEventListener('keydown', (e) => {
 				if (e.key === 'Escape' && pseudoFullscreenActive) {
@@ -1546,17 +1584,26 @@
 
 			updateFullscreenUI();
 
-			/* ===== Controls panel open/close ===== */
-			function openControls() {
-				controlsPanel.classList.add('open');
-				controlsToggle.style.display = 'none';
+			/* ===== Settings pop-over and toolbar visibility ===== */
+			function setSettingsOpen(open) {
+				settingsPanel.hidden = !open;
+				settingsBtn.setAttribute('aria-expanded', String(open));
 			}
-			function closeControls() {
-				controlsPanel.classList.remove('open');
-				controlsToggle.style.display = '';
+			settingsBtn.addEventListener('click', () => setSettingsOpen(settingsPanel.hidden));
+			document.addEventListener('pointerdown', e => {
+				if (settingsPanel.hidden) return;
+				if (e.target.closest('#settingsPanel') || e.target.closest('#settingsBtn')) return;
+				setSettingsOpen(false);
+			});
+
+			function setToolbarVisible(visible) {
+				toolbar.hidden = !visible;
+				showDockBtn.hidden = visible;
+				if (!visible) setSettingsOpen(false);
+				(visible ? hideDockBtn : showDockBtn).focus({ preventScroll: true });
 			}
-			controlsToggle.addEventListener('click', openControls);
-			controlsClose.addEventListener('click', closeControls);
+			hideDockBtn.addEventListener('click', () => setToolbarVisible(false));
+			showDockBtn.addEventListener('click', () => setToolbarVisible(true));
 
 			/* ===== Contextual tool options ===== */
 			function updateToolOptions() {
@@ -1618,37 +1665,53 @@
 				if (e.target === filenameOverlay) hideFilenamePopup();
 			});
 
+			/* ===== Camera state: the start screen explains anything but a running camera ===== */
 			let permissionBlocked = false;
-			function setCameraHelper(message) {
-				cameraHelper.textContent = message || '';
-				cameraHelper.classList.toggle('visible', !!message);
+			let cameraState = 'idle';
+			const CAMERA_MESSAGES = {
+				idle: ['Show your camera on the big screen', 'Point a phone, tablet or document camera at your work, then point, draw and snap over the live picture.', 'Start camera'],
+				starting: ['Starting the camera…', 'If your browser asks, allow camera access.', ''],
+				blocked: ['Camera access is blocked', 'Allow camera access for this site in your browser’s settings, then try again.', 'Try again'],
+				nocamera: ['No camera found', 'Connect a camera, then try again.', 'Try again'],
+				busy: ['The camera is busy', 'Another app or tab may be using it. Close that, then try again.', 'Try again'],
+				lost: ['The camera stopped', 'It may have been unplugged or switched off.', 'Try again'],
+				unsupported: ['This browser can’t use a camera', 'Open this page over https in an up-to-date browser such as Safari, Chrome, Edge or Firefox.', ''],
+				error: ['The camera didn’t start', 'Something went wrong while starting it. Please try again.', 'Try again']
+			};
+
+			function cameraErrorState(err) {
+				const name = err && err.name;
+				if (name === 'NotAllowedError' || name === 'SecurityError') return 'blocked';
+				if (name === 'NotFoundError' || name === 'OverconstrainedError' || name === 'DevicesNotFoundError') return 'nocamera';
+				if (name === 'NotReadableError' || name === 'TrackStartError' || name === 'AbortError') return 'busy';
+				return 'error';
 			}
 
-			function getContrastTextColor(hexColor) {
-				// Calculate relative luminance and return black or white for best contrast
-				const hex = hexColor.replace('#', '');
-				const r = parseInt(hex.substr(0, 2), 16) / 255;
-				const g = parseInt(hex.substr(2, 2), 16) / 255;
-				const b = parseInt(hex.substr(4, 2), 16) / 255;
-				// Apply sRGB gamma correction
-				const rLin = r <= 0.03928 ? r / 12.92 : Math.pow((r + 0.055) / 1.055, 2.4);
-				const gLin = g <= 0.03928 ? g / 12.92 : Math.pow((g + 0.055) / 1.055, 2.4);
-				const bLin = b <= 0.03928 ? b / 12.92 : Math.pow((b + 0.055) / 1.055, 2.4);
-				const luminance = 0.2126 * rLin + 0.7152 * gLin + 0.0722 * bLin;
-				return luminance > 0.179 ? '#000000' : '#ffffff';
+			function setCameraState(state) {
+				cameraState = state;
+				const ready = state === 'live';
+				const copy = CAMERA_MESSAGES[state] || CAMERA_MESSAGES.error;
+				startScreen.hidden = ready;
+				startScreen.dataset.state = state;
+				startTitle.textContent = copy[0];
+				startText.textContent = copy[1];
+				startBtn.textContent = copy[2];
+				startBtn.hidden = !copy[2];
+				startTips.hidden = state !== 'idle';
+				hud.hidden = !ready;
+				freezeBtn.disabled = !ready;
+				screenshotBtn.disabled = !ready;
+				recordBtn.disabled = !ready && !recording;
 			}
+
+			startBtn.addEventListener('click', () => connectCamera());
 
 			function updateColorBtn(btn, color) {
-				btn.style.background = color;
-				const textColor = getContrastTextColor(color);
-				const textEl = btn.querySelector('.color-label-text');
-				if (textEl) {
-					textEl.style.color = textColor;
-				}
+				btn.style.setProperty('--swatch', color);
 			}
 
 			function resizeCanvases() {
-				const r = stage.getBoundingClientRect();
+				const r = view.getBoundingClientRect();
 				[freezeCanvas, drawCanvas, laserCanvas, composite].forEach(c => {
 					c.width = Math.floor(r.width);
 					c.height = Math.floor(r.height);
@@ -1659,33 +1722,35 @@
 			}
 
 			/* UI sync */
-			function syncToggleUI() { liveToggle.checked = !isPaused; }
-
 			function updateStatusUI() {
 				stage.classList.toggle('pausedVideo', isPaused);
 				hudText.textContent = isPaused ? 'Paused' : 'Live';
-				statusLabel.textContent = isPaused ? 'Paused' : 'Live';
-				statusLight.className = 'light ' + (isPaused ? 'paused' : 'live');
-				syncToggleUI();
+				freezeBtn.setAttribute('aria-pressed', String(isPaused));
+				freezeBtn.setAttribute('aria-label', isPaused ? 'Go live (Space)' : 'Freeze picture (Space)');
+				freezeBtn.setAttribute('data-tooltip', isPaused ? 'Go live (Space)' : 'Freeze (Space)');
+				freezeBtn.querySelector('.icon-pause').style.display = isPaused ? 'none' : '';
+				freezeBtn.querySelector('.icon-play').style.display = isPaused ? '' : 'none';
+				freezeLabel.textContent = isPaused ? 'Go live' : 'Freeze';
 			}
 
 			function updateUndoState() {
 				undoBtn.disabled = objects.length === 0;
+				clearBtn.disabled = objects.length === 0;
 			}
 
 			function updateMirrorButton() {
-				mirrorBtn.classList.toggle('active', isMirrored);
+				mirrorBtn.setAttribute('aria-pressed', String(isMirrored));
 			}
 
 			/* Update cursor based on active tool */
 			function updateCursor() {
-				stage.classList.remove('cursor-draw', 'cursor-eraser', 'cursor-text');
+				view.classList.remove('cursor-draw', 'cursor-eraser', 'cursor-text');
 				if (eraserOn) {
-					stage.classList.add('cursor-eraser');
+					view.classList.add('cursor-eraser');
 				} else if (textModeOn) {
-					stage.classList.add('cursor-text');
+					view.classList.add('cursor-text');
 				} else if (annotationOn) {
-					stage.classList.add('cursor-draw');
+					view.classList.add('cursor-draw');
 				}
 			}
 
@@ -1741,11 +1806,13 @@
 					updateStatusUI();
 					return;
 				}
-				const val = cameraSelect.value || '';
-				if (val && val.indexOf('facing:') !== 0) {
-					await startCamera({ deviceId: { exact: val } });
-				} else {
-					await startCamera({ facingMode: facingPref });
+				try {
+					if (!(await startCamera(currentConstraint()))) return;
+				} catch (err) {
+					// Keep the frozen frame and drawings on screen; just say why live failed.
+					const copy = CAMERA_MESSAGES[cameraErrorState(err)];
+					showToast(copy[0], 3200);
+					return;
 				}
 				hasFrozen = false;
 				freezeCanvas.classList.add('hidden');
@@ -1765,11 +1832,20 @@
 			}
 
 			/* Camera */
+			function currentConstraint() {
+				const val = cameraSelect.value || '';
+				if (val && val.indexOf('facing:') !== 0) return { deviceId: { exact: val } };
+				return { facingMode: facingPref };
+			}
+
+			/* Resolves true once a stream is playing, false if another start is already
+			   under way; throws the browser's error if the camera cannot start. */
 			async function startCamera(constraint) {
-				if (switching) return;
+				if (switching) return false;
 				switching = true;
 				try {
 					if (stream) { stream.getTracks().forEach(t => t.stop()); }
+					stream = null;
 					const base = { width: { ideal: 1280 }, height: { ideal: 720 } };
 					const attempts = [constraint || {}, { facingMode: facingPref }, {}];
 					let lastError = null;
@@ -1780,24 +1856,48 @@
 							video.srcObject = stream;
 							await video.play();
 							permissionBlocked = false;
-							setCameraHelper('');
 							lastError = null;
 							break;
 						} catch (err) {
 							lastError = err;
 							if (err && (err.name === 'NotAllowedError' || err.name === 'SecurityError')) {
 								permissionBlocked = true;
-								setCameraHelper('Camera access is blocked. Allow permission to see cameras.');
-								showToast('Camera permission blocked');
 								break;
 							}
 						}
 					}
 					if (lastError) throw lastError;
+					const track = stream && stream.getVideoTracks()[0];
+					if (track) {
+						track.addEventListener('ended', () => {
+							// Fires when the camera is unplugged or revoked, not when we stop it.
+							if (stream && stream.getVideoTracks()[0] === track && !isPaused) setCameraState('lost');
+						});
+					}
+					return true;
 				} finally {
 					await enumerate();
 					resizeCanvases();
 					switching = false;
+				}
+			}
+
+			/* Start (or restart) the camera and show the outcome on the start screen. */
+			async function connectCamera(constraint) {
+				if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+					setCameraState('unsupported');
+					return false;
+				}
+				if (cameraState !== 'live') setCameraState('starting');
+				try {
+					if (!(await startCamera(constraint || currentConstraint()))) return false;
+					saveStr('cameraStarted', 'true');
+					setCameraState('live');
+					return true;
+				} catch (err) {
+					console.error(err);
+					setCameraState(cameraErrorState(err));
+					return false;
 				}
 			}
 
@@ -1867,21 +1967,17 @@
 			const onCameraChange = debounced(async function() {
 				const val = cameraSelect.value || '';
 				if (val.indexOf('facing:') === 0) {
-					const facing = val.split(':')[1] || facingPref;
-					facingPref = facing;
-					saveStr('lastFacing', facing);
+					facingPref = val.split(':')[1] || facingPref;
 					saveStr('lastDeviceId', '');
-					await startCamera({ facingMode: facing });
 				} else {
 					saveStr('lastDeviceId', val);
-					await startCamera({ deviceId: { exact: val } });
 					const opt = [].slice.call(cameraSelect.options).find(o => o.value === val);
-					if (opt && opt.dataset && opt.dataset.facing) {
-						facingPref = opt.dataset.facing;
-						saveStr('lastFacing', facingPref);
-					}
+					if (opt && opt.dataset && opt.dataset.facing) facingPref = opt.dataset.facing;
 				}
-				if (isPaused && hasFrozen) drawFreezeFromFrozen();
+				saveStr('lastFacing', facingPref);
+				// While frozen, keep the still frame; the new camera starts on Go live.
+				if (isPaused) return;
+				await connectCamera();
 			}, 250);
 
 			cameraSelect.addEventListener('change', onCameraChange);
@@ -1889,20 +1985,12 @@
 
 			refreshBtn.addEventListener('click', async function() {
 				if (switching) return;
-				try {
-					try { if (stream) stream.getTracks().forEach(t => t.stop()); } catch (e) {}
-					await enumerate();
-					const val = cameraSelect.value || '';
-					if (val && val.indexOf('facing:') !== 0) {
-						saveStr('lastDeviceId', val);
-						await startCamera({ deviceId: { exact: val } });
-					} else {
-						await startCamera({ facingMode: facingPref });
-					}
-				} catch (e) {
-					console.error(e);
-					if (!permissionBlocked) showToast('Refresh failed');
+				await enumerate();
+				if (isPaused) {
+					showToast('Camera list refreshed');
+					return;
 				}
+				if (await connectCamera()) showToast('Camera reconnected');
 			});
 
 			/* ===== Coordinate helpers (zoom-aware positions) ===== */
@@ -2186,7 +2274,7 @@
 			let pendingTextXY = null;
 
 			function showTextOverlayAt(clientX, clientY) {
-				const rect = stage.getBoundingClientRect();
+				const rect = view.getBoundingClientRect();
 				textOverlay.style.display = 'block';
 				const padding = 8;
 				const overlayWidth = textOverlay.offsetWidth;
@@ -2224,22 +2312,10 @@
 			}
 
 			function syncToolButtons() {
-				// Remove active state from all tool buttons
+				const active = eraserOn ? eraserBtn : textModeOn ? textBtn : annotationOn ? annotationBtn : laserBtn;
 				[laserBtn, annotationBtn, eraserBtn, textBtn].forEach(btn => {
-					btn.classList.remove('active');
+					btn.setAttribute('aria-pressed', String(btn === active));
 				});
-
-				// Set active state (border indicator)
-				if (eraserOn) {
-					eraserBtn.classList.add('active');
-				} else if (textModeOn) {
-					textBtn.classList.add('active');
-				} else if (annotationOn) {
-					annotationBtn.classList.add('active');
-				} else {
-					// Laser mode (default)
-					laserBtn.classList.add('active');
-				}
 			}
 
 			function setLaserMode(showFeedback) {
@@ -2254,7 +2330,8 @@
 			}
 
 			function toggleAnnotation(showFeedback) {
-				annotationOn = !annotationOn;
+				// From Erase or Text, Draw switches to drawing rather than toggling off.
+				annotationOn = (eraserOn || textModeOn) ? true : !annotationOn;
 				eraserOn = false;
 				textModeOn = false;
 				hideTextOverlay();
@@ -2289,19 +2366,20 @@
 			}
 
 			/* Wiring */
-			liveToggle.addEventListener('change', () => setPaused(!liveToggle.checked));
+			freezeBtn.addEventListener('click', () => setPaused(!isPaused));
 
 			laserBtn.addEventListener('click', () => setLaserMode(true));
 			annotationBtn.addEventListener('click', () => toggleAnnotation(true));
 			eraserBtn.addEventListener('click', () => toggleEraser(true));
 			textBtn.addEventListener('click', () => toggleTextMode(true));
 
-			undoBtn.addEventListener('click', () => {
+			function undoLast() {
 				if (!objects.length) return;
 				objects.pop();
 				renderAnnotations();
 				showToast('Undone');
-			});
+			}
+			undoBtn.addEventListener('click', undoLast);
 
 			clearBtn.addEventListener('click', () => {
 				if (!objects.length) return;
@@ -2377,13 +2455,13 @@
 			});
 
 			function updateFitButton() {
-				const isCover = fitMode === 'cover';
-				fitBtn.querySelector('.btn-text').textContent = isCover ? 'Fill' : 'Fit';
-				fitBtn.setAttribute('title', isCover ? 'Crop to fill (Fill)' : 'Show full view (Fit)');
+				fitContainBtn.setAttribute('aria-pressed', String(fitMode !== 'cover'));
+				fitCoverBtn.setAttribute('aria-pressed', String(fitMode === 'cover'));
 			}
 
-			fitBtn.addEventListener('click', () => {
-				fitMode = (fitMode === 'cover') ? 'contain' : 'cover';
+			function setFitMode(mode) {
+				if (mode === fitMode) return;
+				fitMode = mode;
 				saveStr('fitMode', fitMode);
 				updateFitButton();
 				applyFitMode();
@@ -2391,8 +2469,10 @@
 					captureFrozenFromVideo();
 					drawFreezeFromFrozen();
 				}
-				showToast(fitMode === 'cover' ? 'Fill mode' : 'Fit mode');
-			});
+				showToast(fitMode === 'cover' ? 'Filling the screen' : 'Showing the whole picture');
+			}
+			fitContainBtn.addEventListener('click', () => setFitMode('contain'));
+			fitCoverBtn.addEventListener('click', () => setFitMode('cover'));
 
 			/* Default settings */
 			const DEFAULTS = {
@@ -2453,45 +2533,95 @@
 
 			defaultsBtn.addEventListener('click', resetToDefaults);
 
+			const ZOOM_MIN = 1, ZOOM_MAX = 3, ZOOM_STEP = 0.25;
+
+			function formatZoom(z) {
+				return String(Math.round(z * 100) / 100) + '×';
+			}
+
 			function setZoom(v) {
-				zoomLevel = Math.max(1, Math.min(3, v || 1));
+				zoomLevel = Math.max(ZOOM_MIN, Math.min(ZOOM_MAX, Math.round((v || 1) * 100) / 100));
 				saveNum('zoomLevel', zoomLevel);
 				zoomSlider.value = String(zoomLevel);
-				zoomVal.textContent = zoomLevel.toFixed(1) + '×';
+				zoomSliderVal.textContent = formatZoom(zoomLevel);
+				zoomVal.textContent = formatZoom(zoomLevel);
+				zoomVal.setAttribute('aria-label', 'Zoom ' + formatZoom(zoomLevel) + '. Reset zoom (0)');
+				zoomOutBtn.disabled = zoomLevel <= ZOOM_MIN;
+				zoomInBtn.disabled = zoomLevel >= ZOOM_MAX;
 				applyTransforms();
 				renderAnnotations();
 			}
+
+			/* The buttons step to the next quarter, so 1.3× goes to 1.5× or 1.25×. */
+			function stepZoom(direction) {
+				const q = zoomLevel / ZOOM_STEP;
+				const next = direction > 0 ? Math.floor(q + 1e-6) + 1 : Math.ceil(q - 1e-6) - 1;
+				setZoom(next * ZOOM_STEP);
+			}
 			zoomSlider.addEventListener('input', e => setZoom(parseFloat(e.target.value)));
+			zoomInBtn.addEventListener('click', () => stepZoom(1));
+			zoomOutBtn.addEventListener('click', () => stepZoom(-1));
+			zoomVal.addEventListener('click', () => setZoom(1));
 
 			/* Keyboard shortcuts */
-			document.addEventListener('keydown', async e => {
-				if (document.activeElement === textInput) return;
+			function isTypingTarget(el) {
+				return !!(el && el.closest && el.closest('input, textarea, select, [contenteditable="true"]'));
+			}
 
-				if (e.code === 'Space') {
-					e.preventDefault();
-					await setPaused(!isPaused);
-					showToast(isPaused ? 'Paused' : 'Live');
+			document.addEventListener('keydown', async e => {
+				if (e.key === 'Escape') {
+					if (overlayVisible) {
+						e.preventDefault();
+						hideTextOverlay();
+					} else if (!settingsPanel.hidden) {
+						e.preventDefault();
+						setSettingsOpen(false);
+						settingsBtn.focus();
+					}
 					return;
 				}
+				if (overlayVisible || filenameOverlay.classList.contains('show')) return;
+				if (isTypingTarget(e.target) && e.target.type !== 'range') return;
 
-				if (e.key === 'Escape' && overlayVisible) {
+				if ((e.metaKey || e.ctrlKey) && !e.altKey && !e.shiftKey && e.key.toLowerCase() === 'z') {
 					e.preventDefault();
-					hideTextOverlay();
+					undoLast();
+					return;
+				}
+				if (e.metaKey || e.ctrlKey || e.altKey) return;
+
+				const key = e.key.length === 1 ? e.key.toLowerCase() : e.key;
+				switch (key) {
+					case ' ':
+						// Space always freezes, even when a toolbar button has focus (Enter presses buttons).
+						e.preventDefault();
+						if (cameraState === 'live') await setPaused(!isPaused);
+						return;
+					case 'l': e.preventDefault(); setLaserMode(true); return;
+					case 'd': e.preventDefault(); if (!annotationOn || eraserOn || textModeOn) toggleAnnotation(true); return; // never toggles Draw off
+					case 'e': e.preventDefault(); if (!eraserOn) toggleEraser(true); return;
+					case 't': e.preventDefault(); if (!textModeOn) toggleTextMode(true); return;
+					case 'f': e.preventDefault(); toggleFullscreen(); return;
+					case 'h': e.preventDefault(); setToolbarVisible(toolbar.hidden); return;
+					case 's': e.preventDefault(); if (!screenshotBtn.disabled) screenshotBtn.click(); return;
+					case 'r': e.preventDefault(); if (!recordBtn.disabled) recordBtn.click(); return;
+					case '+': case '=': e.preventDefault(); stepZoom(1); return;
+					case '-': case '_': e.preventDefault(); stepZoom(-1); return;
+					case '0': e.preventDefault(); setZoom(1); return;
 				}
 			});
 
 			/* Stage events */
-			const target = stage;
+			const target = view;
 
 			function touchGuard(e) {
-				if (overlayVisible && e.target.closest('#textOverlay')) return;
-				if (e.target.closest('.controls-panel') || e.target.closest('#controlsToggle') || e.target.closest('#fullscreenBtn')) return;
+				if (e.target.closest('.stage-ui')) return;
 				e.preventDefault();
 			}
 			['touchstart', 'touchmove', 'touchend', 'touchcancel'].forEach(ev => target.addEventListener(ev, touchGuard, { passive: false }));
 
 			function isStageControlTarget(e) {
-				return !!(e.target.closest('.controls-panel') || e.target.closest('#controlsToggle') || e.target.closest('#fullscreenBtn') || e.target.closest('#textOverlay'));
+				return !!e.target.closest('.stage-ui');
 			}
 
 			function shouldBlockTextSelection(eventTarget) {
@@ -2710,8 +2840,10 @@
 					recording = true;
 					recordBtn.querySelector('.record-icon').style.display = 'none';
 					recordBtn.querySelector('.stop-icon').style.display = 'inline-block';
-					recordBtn.querySelector('.btn-text').textContent = 'Stop';
-					recordBtn.classList.add('danger');
+					recordLabel.textContent = 'Stop';
+					recordBtn.classList.add('is-recording');
+					recordBtn.setAttribute('aria-label', 'Stop recording (R)');
+					recordBtn.setAttribute('data-tooltip', 'Stop recording (R)');
 					hud.classList.add('recording');
 					drawCompositeFrame();
 					showToast('Recording started');
@@ -2720,35 +2852,37 @@
 					try { mediaRecorder.stop(); } catch (e) {}
 					recordBtn.querySelector('.record-icon').style.display = 'inline-block';
 					recordBtn.querySelector('.stop-icon').style.display = 'none';
-					recordBtn.querySelector('.btn-text').textContent = 'Record';
-					recordBtn.classList.remove('danger');
+					recordLabel.textContent = 'Record';
+					recordBtn.classList.remove('is-recording');
+					recordBtn.setAttribute('aria-label', 'Start recording (R)');
+					recordBtn.setAttribute('data-tooltip', 'Record (R)');
+					recordBtn.disabled = cameraState !== 'live';
 					hud.classList.remove('recording');
 				}
 			});
 
 			/* Init */
 			const ro = new ResizeObserver(() => resizeCanvases());
-			ro.observe(stage);
+			ro.observe(view);
 			window.addEventListener('orientationchange', () => setTimeout(resizeCanvases, 200));
 			requestAnimationFrame(renderLaser);
 
+			/* Start straight away when the camera is already allowed or has been used here
+			   before, so a returning teacher goes straight to the picture; on a first visit
+			   wait for the Start button, so the permission prompt has some context. */
+			async function cameraPermission() {
+				try {
+					if (navigator.permissions && navigator.permissions.query) {
+						return (await navigator.permissions.query({ name: 'camera' })).state;
+					}
+				} catch (e) {}
+				return 'unknown';
+			}
+
 			(async function init() {
-				if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-					showToast('getUserMedia not supported');
-					return;
-				}
-				await enumerate();
+				window.PanPhyThemeToggle.mount(document.getElementById('theme-button'));
 
-				let chosen = '';
-				if (lastDeviceId && [].some.call(cameraSelect.options, o => o.value === lastDeviceId)) {
-					chosen = lastDeviceId;
-				}
-				if (chosen) await startCamera({ deviceId: { exact: chosen } });
-				else await startCamera({ facingMode: facingPref });
-
-				isPaused = false;
-				updateStatusUI();
-
+				// Build the controls first, so they work whatever happens to the camera.
 				buildSizePicker(sizeUI.pointer, SIZESET, () => pointerColor, pointerSize, (sz) => {
 					pointerSize = sz;
 					saveNum('pointerSize', sz);
@@ -2769,7 +2903,23 @@
 				setZoom(zoomLevel);
 				applyFitMode();
 				updateFitButton();
+				updateStatusUI();
 				resizeCanvases();
+
+				if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+					setCameraState('unsupported');
+					return;
+				}
+				setCameraState('idle');
+				await enumerate();
+				const permission = await cameraPermission();
+				if (permission === 'denied') {
+					permissionBlocked = true;
+					setCameraState('blocked');
+				} else if (permission === 'granted' || loadStr('cameraStarted', '') === 'true') {
+					const chosen = lastDeviceId && [].some.call(cameraSelect.options, o => o.value === lastDeviceId) ? lastDeviceId : '';
+					await connectCamera(chosen ? { deviceId: { exact: chosen } } : { facingMode: facingPref });
+				}
 			})();
 		})();
 	</script>
@@ -2787,13 +2937,6 @@
 		&copy; 2026 <a href="https://panphy.app/" target="_blank" rel="noopener noreferrer">PanPhy Labs</a>. All rights reserved. |
 		<a href="https://buymeacoffee.com/panphy" target="_blank" rel="noopener noreferrer">Support My Projects</a>
 	</footer>
-	<script>
-		// Gradient text: skip on Brave iOS where background-clip:text is broken
-		(function() {
-			if (/iP(hone|ad|od)/.test(navigator.userAgent) && navigator.brave) return;
-			document.querySelectorAll('.topbar .title').forEach(function(el) { el.classList.add('gradient-text'); });
-		})();
-	</script>
 </body>
 
 </html>
