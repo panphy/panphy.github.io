@@ -451,6 +451,19 @@ body.ball-fullscreen-lock {
     z-index: 2;
 }
 
+/* Trails sit under the balls (DOM order within z-index 1); arrows sit over them. */
+.overlay-layer {
+    pointer-events: none;
+}
+
+#trailCanvas {
+    z-index: 1;
+}
+
+#arrowCanvas {
+    z-index: 2;
+}
+
 /* ---------- Start card ---------- */
 .cl-start {
     position: absolute;

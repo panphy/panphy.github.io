@@ -42,6 +42,8 @@ const ui = {
     video: document.getElementById('camera'),
     canvas: document.getElementById('renderCanvas'),
     tipCanvas: document.getElementById('tipCanvas'),
+    trailCanvas: document.getElementById('trailCanvas'),
+    arrowCanvas: document.getElementById('arrowCanvas'),
     physicsDetails: document.getElementById('physicsDetails'),
     hud: document.querySelector('.hud'),
     selectionOverlay: document.getElementById('selectionOverlay'),
@@ -635,20 +637,6 @@ function syncStartCard() {
     ui.startCard.hidden = !visible;
 }
 
-// --- Velocity arrows follow the theme, but stay white over the camera picture ---
-
-function getArrowColor() {
-    const dark = document.documentElement.getAttribute('data-theme') === 'dark';
-    return (dark || state.running) ? 0xffffff : 0x17181a;
-}
-
-function refreshArrowColors() {
-    const color = getArrowColor();
-    for (const sphere of spheres) {
-        sphere.arrow.setColor(color);
-    }
-}
-
 function setStatus(message, isError = false) {
     state.statusMessage = message;
     state.statusIsError = isError;
@@ -976,7 +964,7 @@ function updateStartButtonState() {
     ui.startBtn.querySelector('.icon-camera').style.display = isRunning ? 'none' : '';
     ui.startBtn.querySelector('.icon-camera-off').style.display = isRunning ? '' : 'none';
     ui.startBtn.classList.toggle('is-stop', isRunning);
-    refreshArrowColors();
+    drawMotionOverlays();
 }
 
 function resizeStage() {
@@ -994,6 +982,7 @@ function resizeStage() {
     state.stageHeight = rect.height;
     state.tipsDirty = true;
 
+    resizeOverlayCanvases(rect.width, rect.height);
     ui.tipCanvas.width = Math.max(1, Math.round(rect.width));
     ui.tipCanvas.height = Math.max(1, Math.round(rect.height));
     if (tipCtx) {
@@ -1079,42 +1068,14 @@ function createSphere(colorHex) {
     group.add(mesh, wire);
 
     const trailPositions = new Float32Array(TRAIL_LENGTH * 3);
-    const trailGeometry = new THREE.BufferGeometry();
-    trailGeometry.setAttribute('position', new THREE.BufferAttribute(trailPositions, 3));
-    trailGeometry.setDrawRange(0, 0);
-    const trailMaterial = new THREE.LineBasicMaterial({
-        color: colorHex,
-        transparent: true,
-        opacity: 0.7
-    });
-    const trail = new THREE.Line(trailGeometry, trailMaterial);
-    trail.frustumCulled = false;
-    trail.visible = false;
-
-    const arrow = new THREE.ArrowHelper(
-        new THREE.Vector3(1, 0, 0),
-        new THREE.Vector3(0, 0, PLANE_Z),
-        0.3,
-        getArrowColor(),
-        0.08,
-        0.06
-    );
-    for (const part of [arrow.line, arrow.cone]) {
-        part.material.depthTest = false;
-        part.material.transparent = true;
-        part.renderOrder = 10;
-    }
-    arrow.visible = false;
 
     return {
         id: nextSphereId++,
         colorHex,
         group,
         material,
-        trail,
         trailPositions,
         trailCount: 0,
-        arrow,
         position: new THREE.Vector3(0, 0, PLANE_Z),
         spawnPosition: new THREE.Vector3(0, 0, PLANE_Z),
         // Launch velocity in screen convention: +x is right, +y is up.
@@ -1174,7 +1135,7 @@ function placeSphere(sphere, x, y) {
 
 function createAndAddSphere() {
     const sphere = createSphere(pickSphereColor());
-    scene.add(sphere.group, sphere.trail, sphere.arrow);
+    scene.add(sphere.group);
     spheres.push(sphere);
     return sphere;
 }
@@ -1358,7 +1319,6 @@ function applyPreset(name) {
 
 function clearTrail(sphere) {
     sphere.trailCount = 0;
-    sphere.trail.geometry.setDrawRange(0, 0);
 }
 
 function clearAllTrails() {
@@ -1391,29 +1351,184 @@ function updateTrail(sphere) {
     positions[index + 1] = y;
     positions[index + 2] = PLANE_Z;
     sphere.trailCount += 1;
-    sphere.trail.geometry.attributes.position.needsUpdate = true;
-    sphere.trail.geometry.setDrawRange(0, sphere.trailCount);
 }
 
-const arrowDirection = new THREE.Vector3();
-
 function updateOverlays(advanced) {
-    for (const sphere of spheres) {
-        sphere.trail.visible = state.showTrails;
-        if (state.showTrails && advanced) {
+    if (state.showTrails && advanced) {
+        for (const sphere of spheres) {
             updateTrail(sphere);
         }
+    }
+    drawMotionOverlays();
+}
 
-        const speed = Math.hypot(sphere.velocity.x, sphere.velocity.y);
-        const showArrow = state.showArrows && speed >= ARROW_MIN_SPEED;
-        sphere.arrow.visible = showArrow;
-        if (showArrow) {
-            arrowDirection.set(sphere.velocity.x / speed, sphere.velocity.y / speed, 0);
-            sphere.arrow.position.set(sphere.position.x, sphere.position.y, PLANE_Z);
-            sphere.arrow.setDirection(arrowDirection);
-            const length = Math.min(ARROW_MAX_LENGTH, SPHERE_RADIUS + (speed * ARROW_SECONDS));
-            sphere.arrow.setLength(length, 0.08, 0.06);
-        }
+// --- Trails and velocity arrows, drawn on 2D canvases so they can be thick and smooth. ---
+// The trail canvas sits under the balls and the arrow canvas over them. Both share the
+// WebGL canvas's mirroring, so world points project onto them exactly as the balls do.
+
+const overlayProjection = new THREE.Vector3();
+const overlayCtx = {
+    trail: ui.trailCanvas.getContext('2d'),
+    arrow: ui.arrowCanvas.getContext('2d')
+};
+let overlayPixelRatio = 1;
+
+function resizeOverlayCanvases(width, height) {
+    overlayPixelRatio = Math.min(window.devicePixelRatio || 1, 2);
+    for (const canvas of [ui.trailCanvas, ui.arrowCanvas]) {
+        canvas.width = Math.max(1, Math.round(width * overlayPixelRatio));
+        canvas.height = Math.max(1, Math.round(height * overlayPixelRatio));
+    }
+}
+
+function projectToOverlay(x, y, out) {
+    overlayProjection.set(x, y, PLANE_Z).project(camera3d);
+    out.x = (overlayProjection.x * 0.5 + 0.5) * state.stageWidth;
+    out.y = (-overlayProjection.y * 0.5 + 0.5) * state.stageHeight;
+    return out;
+}
+
+// Light theme with the camera off: deepen the ball colours so they stand out on white.
+// Over the camera or in dark mode: keep them bright, with a dark edge for contrast.
+function getOverlayStyle() {
+    const dark = document.documentElement.getAttribute('data-theme') === 'dark';
+    const onLight = !dark && !state.running;
+    return {
+        onLight,
+        edge: onLight ? 'rgba(255, 255, 255, 0.95)' : 'rgba(8, 12, 16, 0.7)',
+        shadow: onLight ? 'rgba(23, 24, 26, 0.18)' : 'rgba(0, 0, 0, 0.45)'
+    };
+}
+
+function overlayColor(colorHex, onLight, alpha = 1) {
+    let r = (colorHex >> 16) & 0xff;
+    let g = (colorHex >> 8) & 0xff;
+    let b = colorHex & 0xff;
+    if (onLight) {
+        r = Math.round(r * 0.82);
+        g = Math.round(g * 0.82);
+        b = Math.round(b * 0.82);
+    }
+    return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+}
+
+const overlayPointA = { x: 0, y: 0 };
+const overlayPointB = { x: 0, y: 0 };
+
+function drawTrail(ctx, sphere, ballRadiusPx, style) {
+    const count = sphere.trailCount;
+    if (count < 2) {
+        return;
+    }
+    const positions = sphere.trailPositions;
+    const maxWidth = Math.max(4, Math.min(16, ballRadiusPx * 0.34));
+    ctx.lineCap = 'round';
+    ctx.lineJoin = 'round';
+
+    // A soft glow along the whole path first.
+    ctx.beginPath();
+    for (let i = 0; i < count; i++) {
+        projectToOverlay(positions[i * 3], positions[(i * 3) + 1], overlayPointA);
+        if (i === 0) ctx.moveTo(overlayPointA.x, overlayPointA.y);
+        else ctx.lineTo(overlayPointA.x, overlayPointA.y);
+    }
+    ctx.strokeStyle = overlayColor(sphere.colorHex, style.onLight, style.onLight ? 0.14 : 0.22);
+    ctx.lineWidth = maxWidth * 2.4;
+    ctx.stroke();
+
+    // Then a ribbon that tapers and fades towards its oldest end. Flat segment ends, so
+    // neighbouring translucent segments don't overlap into beads.
+    ctx.lineCap = 'butt';
+    projectToOverlay(positions[0], positions[1], overlayPointA);
+    for (let i = 1; i < count; i++) {
+        projectToOverlay(positions[i * 3], positions[(i * 3) + 1], overlayPointB);
+        const t = i / (count - 1);
+        ctx.beginPath();
+        ctx.moveTo(overlayPointA.x, overlayPointA.y);
+        ctx.lineTo(overlayPointB.x, overlayPointB.y);
+        ctx.strokeStyle = overlayColor(sphere.colorHex, style.onLight, 0.15 + (0.85 * t * t));
+        ctx.lineWidth = maxWidth * (0.3 + (0.7 * t));
+        ctx.stroke();
+        overlayPointA.x = overlayPointB.x;
+        overlayPointA.y = overlayPointB.y;
+    }
+}
+
+function drawVelocityArrow(ctx, sphere, ballRadiusPx, style) {
+    const speed = Math.hypot(sphere.velocity.x, sphere.velocity.y);
+    if (speed < ARROW_MIN_SPEED) {
+        return;
+    }
+    const length = Math.min(ARROW_MAX_LENGTH, SPHERE_RADIUS + (speed * ARROW_SECONDS));
+    const ux = sphere.velocity.x / speed;
+    const uy = sphere.velocity.y / speed;
+    projectToOverlay(sphere.position.x, sphere.position.y, overlayPointA);
+    projectToOverlay(sphere.position.x + (ux * length), sphere.position.y + (uy * length), overlayPointB);
+
+    const dx = overlayPointB.x - overlayPointA.x;
+    const dy = overlayPointB.y - overlayPointA.y;
+    const lengthPx = Math.hypot(dx, dy);
+    if (lengthPx < 2) {
+        return;
+    }
+    const shaft = Math.max(4, Math.min(12, ballRadiusPx * 0.2));
+    const headLength = Math.min(lengthPx * 0.55, Math.max(14, ballRadiusPx * 0.7));
+    const headHalf = Math.max(shaft * 1.5, headLength * 0.58);
+
+    ctx.save();
+    ctx.translate(overlayPointA.x, overlayPointA.y);
+    ctx.rotate(Math.atan2(dy, dx));
+    ctx.beginPath();
+    ctx.moveTo(0, -shaft / 2);
+    ctx.lineTo(lengthPx - headLength, -shaft / 2);
+    ctx.lineTo(lengthPx - headLength, -headHalf);
+    ctx.lineTo(lengthPx, 0);
+    ctx.lineTo(lengthPx - headLength, headHalf);
+    ctx.lineTo(lengthPx - headLength, shaft / 2);
+    ctx.lineTo(0, shaft / 2);
+    ctx.closePath();
+    ctx.lineJoin = 'round';
+    ctx.shadowColor = style.shadow;
+    ctx.shadowBlur = shaft * 1.2;
+    ctx.shadowOffsetY = 1;
+    ctx.strokeStyle = style.edge;
+    ctx.lineWidth = Math.max(2.5, shaft * 0.55);
+    ctx.stroke();
+    ctx.shadowColor = 'transparent';
+    ctx.fillStyle = overlayColor(sphere.colorHex, style.onLight);
+    ctx.fill();
+    // A small dot marks the ball's centre, where the arrow starts.
+    ctx.beginPath();
+    ctx.arc(0, 0, shaft * 0.75, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.lineWidth = Math.max(1.5, shaft * 0.3);
+    ctx.stroke();
+    ctx.restore();
+}
+
+function drawMotionOverlays() {
+    const trailCtx = overlayCtx.trail;
+    const arrowCtx = overlayCtx.arrow;
+    if (!trailCtx || !arrowCtx) {
+        return;
+    }
+    const ratio = overlayPixelRatio;
+    for (const ctx of [trailCtx, arrowCtx]) {
+        ctx.setTransform(1, 0, 0, 1, 0, 0);
+        ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+        ctx.setTransform(ratio, 0, 0, ratio, 0, 0);
+    }
+    if ((!state.showTrails && !state.showArrows) || spheres.length === 0 || !state.stageWidth) {
+        return;
+    }
+    // Ball radius on screen, so line widths scale with the view.
+    projectToOverlay(0, 0, overlayPointA);
+    projectToOverlay(SPHERE_RADIUS, 0, overlayPointB);
+    const ballRadiusPx = Math.abs(overlayPointB.x - overlayPointA.x);
+    const style = getOverlayStyle();
+    for (const sphere of spheres) {
+        if (state.showTrails) drawTrail(trailCtx, sphere, ballRadiusPx, style);
+        if (state.showArrows) drawVelocityArrow(arrowCtx, sphere, ballRadiusPx, style);
     }
 }
 
@@ -3370,11 +3485,8 @@ function handleSelectionOverlayKeydown(event) {
 
 function disposeSphere(sphere) {
     clearGripReferencesToSphere(sphere);
-    scene.remove(sphere.group, sphere.trail, sphere.arrow);
+    scene.remove(sphere.group);
     sphere.material.dispose();
-    sphere.trail.geometry.dispose();
-    sphere.trail.material.dispose();
-    sphere.arrow.dispose();
     if (state.lastCollision && (state.lastCollision.a === sphere || state.lastCollision.b === sphere)) {
         state.lastCollision = null;
     }
@@ -3861,7 +3973,7 @@ document.addEventListener('pointerdown', (event) => {
         setPresetsMenuOpen(false);
     }
 });
-window.addEventListener('panphy:theme-change', refreshArrowColors);
+window.addEventListener('panphy:theme-change', drawMotionOverlays);
 if (window.PanPhyThemeToggle) {
     window.PanPhyThemeToggle.mount(document.getElementById('theme-button'));
 }
