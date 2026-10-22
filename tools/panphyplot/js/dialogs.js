@@ -27,13 +27,55 @@ function setDialogMessage(id, text, type = 'error') {
 
 let formulaTarget = null;
 
-function describeFormulaReferences(sheet) {
+// One chip per column, showing its letter, name and unit; a tap types its symbol into the formula.
+// The column being edited, and its ±Δ column, are left out because a formula cannot read itself.
+function renderFormulaChips(sheet) {
 	const names = [...PlotModel.getFormulaSymbols(sheet).entries()];
-	const byColumn = sheet.columns.map((column, index) => {
-		const alias = names.find(([symbol, id]) => id === column.id && symbol !== PlotModel.columnLetter(index));
-		return alias ? `${PlotModel.columnLetter(index)} or ${alias[0]}` : PlotModel.columnLetter(index);
+	const excluded = new Set();
+	if (formulaTarget) {
+		excluded.add(formulaTarget.id);
+		const delta = getPropagatedColumn(formulaTarget, sheet);
+		if (delta) excluded.add(delta.id);
+	}
+	const chips = [];
+	sheet.columns.forEach((column, index) => {
+		if (excluded.has(column.id)) return;
+		const letter = PlotModel.columnLetter(index);
+		const alias = names.find(([symbol, id]) => id === column.id && symbol !== letter);
+		const symbol = alias ? alias[0] : letter;
+		const name = String(column.name || '').trim();
+		const unit = String(column.unit || '').trim();
+		const chip = document.createElement('button');
+		chip.type = 'button';
+		chip.className = 'neo-formula-chip';
+		chip.dataset.symbol = symbol;
+		const parts = [['neo-formula-chip-letter', letter]];
+		if (name && name !== letter) parts.push(['neo-formula-chip-name', name]);
+		if (unit) parts.push(['neo-formula-chip-unit', `(${unit})`]);
+		parts.forEach(([className, text]) => {
+			const span = document.createElement('span');
+			span.className = className;
+			span.textContent = text;
+			chip.append(span);
+		});
+		const description = `column ${letter}${name && name !== letter ? `, ${name}` : ''}${unit ? `, in ${unit}` : ''}`;
+		chip.title = `Insert ${symbol} (${description})`;
+		chip.setAttribute('aria-label', `Insert ${symbol}: ${description}`);
+		chips.push(chip);
 	});
-	return `Columns: ${byColumn.join(', ')}.`;
+	document.getElementById('formula-references').replaceChildren(...chips);
+	document.getElementById('formula-columns-label').textContent = chips.length
+		? 'Columns: choose one to add it to the formula.'
+		: 'No other columns to use yet.';
+}
+
+function insertFormulaSymbol(symbol) {
+	const input = document.getElementById('formula-input');
+	const start = input.selectionStart ?? input.value.length;
+	const end = input.selectionEnd ?? input.value.length;
+	input.setRangeText(symbol, start, end, 'end');
+	input.focus();
+	input.dispatchEvent(new Event('input', { bubbles: true }));
 }
 
 // formulaTarget is a column to edit, or null for a new column added on Apply.
@@ -46,7 +88,7 @@ function openFormulaDialog(column = null) {
 	document.getElementById('formula-input').value = column ? column.formula || '' : '';
 	document.getElementById('formula-name').value = column ? column.name : '';
 	document.getElementById('formula-unit').value = column ? column.unit : '';
-	document.getElementById('formula-references').textContent = describeFormulaReferences(sheet);
+	renderFormulaChips(sheet);
 	document.getElementById('formula-propagate').checked = !!(column && getPropagatedColumn(column));
 	previewFormula();
 	openDialog('formula-dialog');
@@ -475,6 +517,15 @@ function initializeDialogs() {
 	});
 	document.getElementById('add-formula-button').addEventListener('click', () => openFormulaDialog(null));
 	document.getElementById('formula-input').addEventListener('input', debounce(previewFormula, 150));
+	const formulaChips = document.getElementById('formula-references');
+	// Keep focus (and a phone's keyboard) in the formula box while a chip is pressed.
+	formulaChips.addEventListener('mousedown', (event) => {
+		if (event.target.closest('.neo-formula-chip')) event.preventDefault();
+	});
+	formulaChips.addEventListener('click', (event) => {
+		const chip = event.target.closest('.neo-formula-chip');
+		if (chip) insertFormulaSymbol(chip.dataset.symbol);
+	});
 	document.getElementById('formula-propagate').addEventListener('change', previewFormula);
 	document.getElementById('formula-apply').addEventListener('click', applyFormula);
 	document.getElementById('formula-help').addEventListener('click', () => window.open(CUSTOM_FIT_HELP_URL, '_blank', 'noopener,noreferrer'));

@@ -2252,6 +2252,70 @@ input[type="number"]:focus {
 	color: var(--ink-2);
 }
 
+/* Formula dialog: one chip per column, so the table never has to be checked behind the dialog. */
+.neo-formula-chips {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 6px;
+	max-height: 9.5rem;
+	overflow-y: auto;
+}
+
+.neo-formula-chips:empty {
+	display: none;
+}
+
+.neo-formula-chip {
+	display: inline-flex;
+	align-items: baseline;
+	gap: 6px;
+	max-width: 100%;
+	min-height: 36px;
+	padding: 6px 11px;
+	border: 1px solid var(--line-strong);
+	border-radius: 999px;
+	background: var(--surface-2);
+	color: var(--ink);
+	font: inherit;
+	font-size: 0.86rem;
+	line-height: 1.2;
+	cursor: pointer;
+	transition: border-color 0.15s ease, background-color 0.15s ease;
+}
+
+.neo-formula-chip:hover,
+.neo-formula-chip:focus-visible {
+	border-color: var(--accent);
+	background: var(--accent-soft);
+}
+
+.neo-formula-chip-letter {
+	font-family: var(--font-mono);
+	font-size: 0.78rem;
+	font-weight: 600;
+	color: var(--accent);
+}
+
+.neo-formula-chip-name {
+	overflow: hidden;
+	max-width: 14ch;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+	font-weight: 600;
+}
+
+.neo-formula-chip-unit {
+	color: var(--ink-3);
+	white-space: nowrap;
+}
+
+@media (pointer: coarse) {
+	.neo-formula-chip {
+		min-height: 44px;
+		padding: 8px 13px;
+	}
+}
+
 .neo-link-button {
 	display: inline;
 	padding: 0;
