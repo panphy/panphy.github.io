@@ -451,13 +451,9 @@ body.ball-fullscreen-lock {
     z-index: 2;
 }
 
-/* Trails sit under the balls (DOM order within z-index 1); arrows sit over them. */
+/* Velocity arrows are drawn over the balls. */
 .overlay-layer {
     pointer-events: none;
-}
-
-#trailCanvas {
-    z-index: 1;
 }
 
 #arrowCanvas {
