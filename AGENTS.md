@@ -61,7 +61,7 @@ In `ibdpphy/` decks, typeset all mathematics with MathJax as LaTeX between `\(` 
 - Teaching decks in `gcsephy/` and `ibdpphy/` are landscape only. A portrait phone shows the whole 16:9 slide, scaled,; a landscape phone hides the banner and fills the screen with the slide, with slim navigation and Note controls in the side margins. Do not build, adjust or check portrait or phone-specific slide layouts: design and verify new slides at 16:9 only. The Note panel stays readable on any screen.
 - Physical quantities need precise entry or stepping. Pair sliders with numeric readouts or entry fields.
 - Every new page, app, deck or printed resource, in any section, shows "© 2026 PanPhy Labs. All rights reserved." (`&copy;` in HTML), because visitors often open a page directly rather than from a catalogue. Put it in the footer, keeping any existing links. Full-viewport apps put it inside an existing panel, start screen or dialog, so that no layout gains height. Decks put it on the title slide with the `slide-copyright` class, and printed workbooks and sheets put it in the running page footer.
-- Beta, `gcsephy/` and `ibdpphy/` pages are exempt from the general visual style; the collision simulation retains its dark camera-based design.
+- Beta, `gcsephy/` and `ibdpphy/` pages are exempt from the general visual style.
 - For flex-based Three.js canvases, use `renderer.setSize(w, h, false)` with CSS `height: 0; flex: 1; min-height: 0` to avoid sizing feedback loops.
 
 ## Documentation
