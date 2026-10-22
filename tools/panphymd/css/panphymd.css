@@ -244,6 +244,10 @@ button:hover {
   text-decoration: none;
 }
 
+.md-brand > a {
+  display: inline-flex;
+}
+
 .md-brand img {
   width: 30px;
   height: 30px;
