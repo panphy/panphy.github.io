@@ -4,68 +4,115 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <meta name="theme-color" content="#F8F6F1">
-    <script src="/assets/theme.js" data-legacy-dark="tone-generator-dark" data-legacy-light="tone-generator-light"></script>
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="default">
-    <link rel="stylesheet" href="/assets/standalone-top.css">
+  <meta name="theme-color" content="#F8F6F1">
+  <script src="/assets/theme.js" data-legacy-dark="tone-generator-dark" data-legacy-light="tone-generator-light"></script>
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <link rel="stylesheet" href="/assets/standalone-top.css">
   <title>Two-Channel Tone Generator</title>
   <link rel="icon" type="image/png" href="/assets/favicon.png">
   <script src="/assets/sw-register.js" defer></script>
   <style>
-
     @import url('/assets/fonts/fonts.css');
+
+    /* Tone Generator: an app bar, the combined output with master controls on the
+       left, and up to two channel cards on the right. On laptop screens and larger
+       everything fits the window without scrolling; narrow screens stack and scroll. */
+
     :root {
       color-scheme: light;
       --font-sans: 'Manrope', system-ui, sans-serif;
       --font-display: 'DM Serif Display', Georgia, serif;
-      --font-mono: 'IBM Plex Mono', monospace;
-      --bg-color: #F4F1EA; --surface: #FFFFFF; --surface-alt: #FAF8F4;
-      --text-main: #17181A; --text-secondary: #55585E; --status-text: #8A8C91;
-      --border: #E6E1D7; --brand-primary: #C2410C; --brand-secondary: #EA580C;
-      --brand-accent: #0F766E; --accent-ink: #FFFFFF;
-      --grid-minor: rgba(15,118,110,.055); --grid-major: rgba(15,118,110,.11);
-      --danger: #B42318; --shadow: 0 1px 2px rgba(23,24,26,.05), 0 2px 8px rgba(23,24,26,.04);
-      --canvas-bg: var(--surface); --card-bg: var(--surface); --card-border: var(--border);
-      --card-shadow: var(--shadow); --canvas-baseline: var(--border);
-      --slider-track: var(--border); --slider-thumb: var(--brand-accent);
-      --select-bg: var(--surface-alt); --select-border: var(--border);
-      --btn-primary: var(--brand-accent); --btn-primary-hover: #0B5F59; --btn-text: var(--accent-ink);
-      --axis-color: var(--text-main); --grid-color: var(--text-main); --wave-line: #0F766E;
-      --marker-color: #C2410C; --tooltip-bg: var(--surface); --tooltip-text: var(--text-main);
-      --channel-line: #4E79A7; --channel-line-paused: #71869A;
-      --combined-line: #C2410C; --combined-line-paused: #A67B68;
-      --axis-line: var(--border); --paused-overlay: rgba(255,255,255,.5);
+      --font-mono: 'IBM Plex Mono', ui-monospace, monospace;
+      --bg-color: #F4F1EA;
+      --surface: #FFFFFF;
+      --surface-alt: #FAF8F4;
+      --surface-3: #F2EEE6;
+      --text-main: #17181A;
+      --text-secondary: #55585E;
+      --text-muted: #8A8C91;
+      --border: #E6E1D7;
+      --border-strong: #D3CCBE;
+      --brand-primary: #C2410C;
+      --brand-accent: #0F766E;
+      --accent-hover: #0B5F59;
+      --accent-ink: #FFFFFF;
+      --accent-soft: rgba(15, 118, 110, 0.1);
+      --warm-soft: rgba(194, 65, 12, 0.1);
+      --danger: #B42318;
+      --danger-soft: rgba(180, 35, 24, 0.08);
+      --grid-minor: rgba(15, 118, 110, .055);
+      --grid-major: rgba(15, 118, 110, .11);
+      --shadow: 0 1px 2px rgba(23, 24, 26, .05), 0 2px 8px rgba(23, 24, 26, .04);
+      --canvas-bg: #FFFFFF;
+      --axis-line: #E6E1D7;
+      --ch1-line: #2F6FA8;
+      --ch2-line: #8E4FA0;
+      --combined-line: #C2410C;
+      --radius: 14px;
+      --radius-sm: 10px;
+      --hit: 44px;
     }
+
     [data-theme="dark"] {
       color-scheme: dark;
-      --bg-color: #0D1012; --surface: #15191C; --surface-alt: #191E22;
-      --text-main: #E8EBED; --text-secondary: #A5ACB3; --status-text: #737B83; --border: #262D33;
-      --brand-primary: #FB923C; --brand-secondary: #FB923C; --brand-accent: #5EEAD4;
-      --accent-ink: #062521; --btn-primary-hover: #8FF3E3;
-      --grid-minor: rgba(94,234,212,.035); --grid-major: rgba(94,234,212,.07);
-      --danger: #F97066; --shadow: 0 1px 3px rgba(0,0,0,.3);
-      --wave-line: #5EEAD4; --marker-color: #FB923C;
-      --channel-line: #7CB5EC; --channel-line-paused: #69849F;
-      --combined-line: #FB923C; --combined-line-paused: #AE8161;
-      --paused-overlay: rgba(13,16,18,.42);
+      --bg-color: #0D1012;
+      --surface: #15191C;
+      --surface-alt: #191E22;
+      --surface-3: #20262B;
+      --text-main: #E8EBED;
+      --text-secondary: #A5ACB3;
+      --text-muted: #737B83;
+      --border: #262D33;
+      --border-strong: #353D44;
+      --brand-primary: #FB923C;
+      --brand-accent: #5EEAD4;
+      --accent-hover: #8FF3E3;
+      --accent-ink: #062521;
+      --accent-soft: rgba(94, 234, 212, 0.12);
+      --warm-soft: rgba(251, 146, 60, 0.12);
+      --danger: #F97066;
+      --danger-soft: rgba(249, 112, 102, 0.1);
+      --grid-minor: rgba(94, 234, 212, .035);
+      --grid-major: rgba(94, 234, 212, .07);
+      --shadow: 0 1px 2px rgba(0, 0, 0, .4), 0 2px 10px rgba(0, 0, 0, .25);
+      --canvas-bg: #101417;
+      --axis-line: #2C343A;
+      --ch1-line: #7CB5EC;
+      --ch2-line: #D4A6E0;
+      --combined-line: #FB923C;
     }
+
+    @media (pointer: coarse) {
+      :root { --hit: 48px; }
+    }
+
     *, *::before, *::after { box-sizing: border-box; }
-    html, body { margin: 0; padding: 0; min-height: 100%; }
+    [hidden] { display: none !important; }
+    html, body { margin: 0; padding: 0; }
     body {
-      font-family: var(--font-sans); color: var(--text-main); background-color: var(--bg-color);
-      background-image: linear-gradient(var(--grid-major) 1px,transparent 1px),linear-gradient(90deg,var(--grid-major) 1px,transparent 1px),linear-gradient(var(--grid-minor) 1px,transparent 1px),linear-gradient(90deg,var(--grid-minor) 1px,transparent 1px);
-      background-size: 30px 30px,30px 30px,6px 6px,6px 6px;
+      font-family: var(--font-sans);
+      color: var(--text-main);
+      background-color: var(--bg-color);
+      background-image: linear-gradient(var(--grid-major) 1px, transparent 1px), linear-gradient(90deg, var(--grid-major) 1px, transparent 1px), linear-gradient(var(--grid-minor) 1px, transparent 1px), linear-gradient(90deg, var(--grid-minor) 1px, transparent 1px);
+      background-size: 30px 30px, 30px 30px, 6px 6px, 6px 6px;
     }
     a { color: var(--brand-primary); text-decoration: none; }
     a:hover { text-decoration: underline; }
-    button, input, select { font: inherit; }
-    button, select { min-height: 48px; }
+    button, input, select, output { font: inherit; }
     button { cursor: pointer; }
-    :focus-visible { outline: 2px solid var(--brand-accent); outline-offset: 3px; }
+    :focus-visible { outline: 2px solid var(--brand-accent); outline-offset: 2px; }
+    .visually-hidden {
+      position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+      overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0;
+    }
+
+    /* ---------- Shell ---------- */
+    #app { display: flex; flex-direction: column; height: 100dvh; min-height: 600px; }
+
     .audio-appbar {
       flex: none;
-      display: flex; align-items: center; gap: 12px; min-height: 64px;
+      display: flex; align-items: center; gap: 12px; min-height: 56px;
       padding: 6px 20px; padding-top: calc(6px + var(--standalone-top, 0px));
       background: var(--surface); border-bottom: 1px solid var(--border);
     }
@@ -73,600 +120,251 @@
     .audio-brand > a { display: inline-flex; }
     .audio-brand img { width: 32px; height: 32px; object-fit: contain; }
     .audio-brand h1 { margin: 0; font: 400 1.5rem var(--font-display); letter-spacing: -.5px; }
-    .audio-brand:hover { text-decoration: none; }
-    .button-icon { width: 18px; height: 18px; flex: 0 0 18px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; pointer-events: none; }
-    .btn, .btn-primary, .btn-secondary, .spectrum-reset { display: inline-flex; align-items: center; justify-content: center; gap: 8px; }
     .banner-actions { margin-left: auto; display: flex; align-items: center; gap: 8px; }
+    .banner-actions button { min-height: var(--hit); }
+
+    #workspace {
+      flex: 1; min-height: 0; width: 100%; max-width: 1920px; margin: 0 auto;
+      padding: 12px;
+      display: grid; grid-template-columns: minmax(0, 1.12fr) minmax(400px, 1fr);
+      gap: 12px;
+    }
+
+    .panel {
+      min-width: 0; min-height: 0;
+      display: flex; flex-direction: column; gap: 10px;
+      padding: 12px;
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: var(--radius); box-shadow: var(--shadow);
+    }
+
     .audio-statusbar {
       flex: none;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      flex-wrap: wrap;
-      gap: 6px 16px;
-      min-height: 30px;
+      display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap;
+      gap: 6px 16px; min-height: 30px;
       padding: 4px 14px calc(4px + env(safe-area-inset-bottom, 0px));
-      border-top: 1px solid var(--border);
-      background: var(--surface-alt);
-      font-size: .76rem;
-      font-weight: 400;
-      line-height: 1.5;
+      border-top: 1px solid var(--border); background: var(--surface-alt);
+      font-size: .76rem; line-height: 1.5; color: var(--text-muted);
       -webkit-font-smoothing: antialiased;
-      color: var(--status-text);
     }
-    .audio-statusbar a { color: var(--text-secondary); font-weight: 400; }
+    .audio-statusbar a { color: var(--text-secondary); }
+    #transportHint { font-family: var(--font-mono); }
     .audio-statusbar-legal { margin-left: auto; white-space: nowrap; }
-    @media (max-width: 800px) {
-      .audio-statusbar-legal { white-space: normal; text-align: right; line-height: 1.6; }
+
+    /* ---------- Buttons ---------- */
+    .button-icon {
+      width: 18px; height: 18px; flex: 0 0 18px;
+      fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round;
+      pointer-events: none;
     }
+    .button-icon .fill { fill: currentColor; stroke: none; }
+
+    .tool {
+      display: inline-flex; align-items: center; justify-content: center; gap: 7px;
+      min-width: var(--hit); min-height: var(--hit); padding: 0 12px;
+      font-size: .86rem; font-weight: 600; color: var(--text-main);
+      background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-sm);
+      transition: background-color .15s ease, border-color .15s ease, color .15s ease;
+    }
+    .tool:hover:not(:disabled) { background: var(--surface-3); border-color: var(--border-strong); }
+    .tool:active:not(:disabled) { background: var(--border); }
+    .tool:disabled { cursor: not-allowed; opacity: .5; }
+    .tool-icon { padding: 0; width: var(--hit); }
+    .tool-danger { color: var(--text-secondary); }
+    .tool-danger:hover:not(:disabled) { color: var(--danger); background: var(--danger-soft); border-color: color-mix(in srgb, var(--danger) 30%, transparent); }
+
+    .play-main {
+      display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+      min-height: var(--hit); min-width: 112px; padding: 0 18px;
+      font-size: .92rem; font-weight: 700;
+      color: var(--accent-ink); background: var(--brand-accent);
+      border: 1px solid transparent; border-radius: 999px;
+      box-shadow: 0 1px 2px rgba(0, 0, 0, .12);
+      transition: background-color .15s ease;
+    }
+    .play-main:hover:not(:disabled) { background: var(--accent-hover); }
+    .play-main:disabled { cursor: not-allowed; opacity: .5; }
+    .play-main.is-playing { color: var(--text-main); background: var(--surface-3); border-color: var(--border-strong); box-shadow: none; }
+    .play-main.is-playing:hover { background: var(--border); }
+
+    /* Status pill with a dot. */
+    .state-chip {
+      display: inline-flex; align-items: center; gap: 6px;
+      min-height: 24px; padding: 0 9px; border-radius: 999px;
+      font-size: .72rem; font-weight: 700; letter-spacing: .02em; white-space: nowrap;
+      color: var(--text-secondary); background: var(--surface-3);
+      user-select: none;
+    }
+    .state-chip::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: currentColor; opacity: .7; }
+    .state-chip.playing { color: var(--brand-accent); background: var(--accent-soft); }
+    .state-chip.playing::before { opacity: 1; box-shadow: 0 0 0 3px color-mix(in srgb, var(--brand-accent) 25%, transparent); }
+    .state-chip.ready { color: var(--brand-primary); background: var(--warm-soft); }
+
+    /* Segmented switch (radio group). */
+    .seg {
+      display: inline-flex; padding: 3px; gap: 2px;
+      background: var(--surface-3); border-radius: var(--radius-sm);
+    }
+    .seg label { position: relative; display: inline-flex; }
+    .seg input { position: absolute; inset: 0; opacity: 0; margin: 0; cursor: pointer; }
+    .seg span {
+      display: inline-flex; align-items: center; min-height: calc(var(--hit) - 6px); padding: 0 10px;
+      border-radius: 8px; font-size: .8rem; font-weight: 600; color: var(--text-secondary); white-space: nowrap;
+    }
+    .seg input:checked + span { color: var(--text-main); background: var(--surface); box-shadow: var(--shadow); }
+    .seg input:focus-visible + span { outline: 2px solid var(--brand-accent); outline-offset: 1px; }
+
+    /* ---------- Sliders ---------- */
+    input[type="range"] {
+      width: 100%; min-width: 0; height: 32px; margin: 0;
+      background: transparent; cursor: pointer;
+      -webkit-appearance: none; appearance: none;
+    }
+    input[type="range"]:disabled { cursor: not-allowed; opacity: .5; }
+    input[type="range"]::-webkit-slider-runnable-track { height: 4px; border-radius: 4px; background: var(--border-strong); }
+    input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none; appearance: none;
+      width: 18px; height: 18px; margin-top: -7px; border-radius: 50%;
+      background: var(--surface); border: 2px solid var(--brand-accent);
+      box-shadow: 0 1px 3px rgba(0, 0, 0, .25);
+    }
+    input[type="range"]::-moz-range-track { height: 4px; border-radius: 4px; background: var(--border-strong); }
+    input[type="range"]::-moz-range-thumb {
+      width: 14px; height: 14px; border-radius: 50%;
+      background: var(--surface); border: 2px solid var(--brand-accent);
+      box-shadow: 0 1px 3px rgba(0, 0, 0, .25);
+    }
+    input[type="range"]:focus-visible { outline: 2px solid var(--brand-accent); outline-offset: 2px; border-radius: 4px; }
+    @media (pointer: coarse) {
+      input[type="range"] { height: var(--hit); }
+      input[type="range"]::-webkit-slider-thumb { width: 24px; height: 24px; margin-top: -10px; }
+      .readout-btn { min-height: var(--hit); }
+    }
+
+    .readout {
+      font-family: var(--font-mono); font-size: .78rem; color: var(--text-main);
+      white-space: nowrap; text-align: right;
+    }
+    .readout-btn {
+      min-height: 32px; padding: 0 6px; text-align: center;
+      background: var(--surface); border: 1px solid var(--border); border-radius: 8px;
+    }
+    .readout-btn:hover:not(:disabled) { border-color: var(--brand-accent); }
+    .readout-btn:disabled { cursor: not-allowed; opacity: .6; }
+
+    /* ---------- Combined output ---------- */
+    .panel-head { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+    .panel-head h2 { margin: 0; font: 400 1.2rem var(--font-display); letter-spacing: -.01em; }
+    .head-text { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+    .head-meta { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+    #activeSummary { margin: 0; font-size: .78rem; font-weight: 600; color: var(--text-secondary); }
+
+    #combinedCanvasWrap {
+      position: relative; flex: 1; min-height: 160px;
+      border: 1px solid var(--border); border-radius: var(--radius-sm); overflow: hidden;
+      background: var(--canvas-bg);
+    }
+    #combinedCanvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+    .plot-note { margin: -2px 0 0; font-size: .74rem; line-height: 1.4; color: var(--text-muted); }
+
+    .master-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; }
+    .control-block {
+      min-width: 0; padding: 8px 10px 4px;
+      background: var(--surface-alt); border: 1px solid var(--border); border-radius: var(--radius-sm);
+    }
+    .control-header { display: flex; justify-content: space-between; align-items: baseline; gap: 6px; }
+    .control-header label {
+      font-size: .68rem; font-weight: 700; letter-spacing: .05em; text-transform: uppercase;
+      color: var(--text-secondary); white-space: nowrap;
+    }
+
+    /* ---------- Channels ---------- */
+    /* Scrolls only on very short screens; laptops fit without it. */
+    #channelsList { flex: 1; min-height: 0; display: flex; flex-direction: column; gap: 10px; overflow-y: auto; }
+
+    .channel-card {
+      flex: 1 0 auto;
+      display: flex; flex-direction: column; gap: 8px;
+      padding: 10px 12px 12px;
+      background: var(--surface-alt); border: 1px solid var(--border); border-radius: var(--radius);
+      transition: border-color .2s ease;
+    }
+    .channel-card[data-state="playing"] { border-color: color-mix(in srgb, var(--brand-accent) 55%, var(--border)); }
+
+    .ch-head { display: flex; align-items: center; gap: 8px; min-height: var(--hit); }
+    .ch-swatch { width: 10px; height: 10px; flex: none; border-radius: 3px; background: var(--ch1-line); }
+    .channel-card[data-index="1"] .ch-swatch { background: var(--ch2-line); }
+    .ch-title { margin: 0; font-size: .98rem; font-weight: 700; white-space: nowrap; }
+    .ch-actions { margin-left: auto; display: inline-flex; gap: 6px; }
+
+    .ch-row { display: grid; align-items: center; gap: 8px; }
+    .ch-freq { grid-template-columns: 4.6rem auto auto minmax(0, 1fr); }
+    .ch-mix { grid-template-columns: 4.6rem minmax(0, 1fr) 3rem auto minmax(0, 1fr) 4.6rem; }
+    .ch-mix [data-role="pan-label"] { padding-left: 8px; }
+    .row-label { font-size: .79rem; font-weight: 600; color: var(--text-secondary); white-space: nowrap; }
+    .unit { font-size: .79rem; color: var(--text-muted); }
+
+    .stepper { display: inline-grid; grid-template-columns: var(--hit) 5.2rem var(--hit); gap: 4px; }
+    .step-btn {
+      min-height: var(--hit); padding: 0;
+      font-size: 1.15rem; font-weight: 700; color: var(--text-main);
+      background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-sm);
+      touch-action: manipulation; -webkit-user-select: none; user-select: none;
+    }
+    .step-btn:hover:not(:disabled) { background: var(--surface-3); border-color: var(--border-strong); }
+    .step-input {
+      min-width: 0; min-height: var(--hit); padding: 0 4px; text-align: center;
+      font-family: var(--font-mono); font-size: .92rem; color: var(--text-main);
+      background: var(--surface); border: 1px solid var(--border-strong); border-radius: var(--radius-sm);
+      -moz-appearance: textfield; appearance: textfield;
+    }
+    .step-input::-webkit-outer-spin-button, .step-input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+
+    .ch-plot {
+      position: relative; flex: 1; min-height: 56px;
+      border: 1px solid var(--border); border-radius: var(--radius-sm); overflow: hidden;
+      background: var(--canvas-bg);
+    }
+    .channel-canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+
+    #addChannelSlot {
+      flex: 1 1 0; min-height: 0;
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      border: 1.5px dashed var(--border-strong); border-radius: var(--radius);
+    }
+    #emptyState { margin: 0; padding: 12px; text-align: center; font-size: .86rem; font-weight: 600; color: var(--text-secondary); }
+
+    /* Narrower desktops: icon-only channel buttons keep each card header on one line. */
+    @media (max-width: 1240px) {
+      .ch-actions .tool:not(.tool-icon) span { display: none; }
+      .ch-actions .tool:not(.tool-icon) { width: var(--hit); padding: 0; }
+      .master-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    }
+
+    /* Tablets and phones: stack the panels and let the page scroll. */
+    @media (max-width: 950px) {
+      #app { height: auto; min-height: 100dvh; }
+      #workspace { flex: none; grid-template-columns: 1fr; padding: 10px; gap: 10px; }
+      #combinedCanvasWrap { flex: none; height: 240px; }
+      #channelsList { flex: none; }
+      .channel-card { flex: none; }
+      .ch-plot { flex: none; height: 110px; }
+      #addChannelSlot { flex: none; min-height: 110px; }
+      .ch-actions .tool:not(.tool-icon) span { display: inline; }
+      .ch-actions .tool:not(.tool-icon) { width: auto; padding: 0 12px; }
+    }
+
     @media (max-width: 600px) {
       .audio-appbar { padding-inline: 12px; gap: 8px; }
       .audio-brand h1 { font-size: 1.15rem; }
-    }
-    .transport-header {
-      display: flex;
-      justify-content: space-between;
-      gap: 0.7rem;
-      align-items: flex-start;
-      margin-bottom: 0.65rem;
-    }
-
-    .eyebrow {
-      margin: 0;
-      font-size: 0.74rem;
-      font-weight: 700;
-      letter-spacing: 0.11em;
-      text-transform: uppercase;
-      color: var(--text-secondary);
-    }
-
-    .transport-meta {
-      margin-top: 0.32rem;
-      display: flex;
-      align-items: center;
-      gap: 0.6rem;
-      flex-wrap: wrap;
-    }
-
-    #activeSummary {
-      margin: 0;
-      font-size: 0.82rem;
-      color: var(--text-secondary);
-      font-weight: 600;
-    }
-
-    #combinedCanvas {
-      display: block;
-      width: 100%;
-      height: 100%;
-      max-height: 100%;
-      min-height: 0;
-      background: transparent;
-      border: 0;
-    }
-
-    #transportHint {
-      margin: 0.5rem 0 0;
-      font-size: 0.75rem;
-      color: var(--text-secondary);
-      font-family: var(--font-mono);
-    }
-
-    .status-chip {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      min-height: 28px;
-      padding: 0 0.65rem;
-      border-radius: 999px;
-      font-size: 0.74rem;
-      font-weight: 700;
-      letter-spacing: 0.02em;
-      border: 1px solid transparent;
-      user-select: none;
-    }
-
-    .channel-card .status-chip {
-      min-width: 72px;
-      text-align: center;
-    }
-
-    .status-chip.playing {
-      background: rgba(14, 165, 233, 0.15);
-      border-color: rgba(14, 165, 233, 0.28);
-      color: #0075b1;
-    }
-
-    [data-theme="dark"] .status-chip.playing {
-      color: #9ddfff;
-    }
-
-    .status-chip.armed {
-      background: rgba(249, 115, 22, 0.14);
-      border-color: rgba(249, 115, 22, 0.3);
-      color: #b45309;
-    }
-
-    [data-theme="dark"] .status-chip.armed {
-      color: #ffc58f;
-    }
-
-    .status-chip.paused {
-      background: rgba(127, 138, 162, 0.14);
-      border-color: rgba(127, 138, 162, 0.3);
-      color: #63708a;
-    }
-
-    [data-theme="dark"] .status-chip.paused {
-      color: #b4bfd6;
-    }
-
-    .btn {
-      border: 1px solid transparent;
-      border-radius: 12px;
-      min-height: 46px;
-      padding: 0.55rem 0.95rem;
-      font-size: 0.9rem;
-      font-weight: 700;
-      letter-spacing: 0.01em;
-      cursor: pointer;
-      transition: transform 0.16s ease, filter 0.16s ease, border-color 0.16s ease;
-      white-space: normal;
-      overflow-wrap: anywhere;
-      line-height: 1.2;
-      text-align: center;
-    }
-
-    .btn:focus-visible {
-      outline: 2px solid var(--brand-primary);
-      outline-offset: 2px;
-    }
-
-    .btn:hover {
-      transform: translateY(-1px);
-      filter: brightness(1.02);
-    }
-
-    .btn:disabled {
-      cursor: not-allowed;
-      opacity: 0.55;
-      transform: none;
-      filter: none;
-    }
-
-    .btn-primary {
-      background: var(--btn-primary);
-      color: var(--btn-text);
-      min-width: 128px;
-    }
-
-    #toggleCombinedBtn {
-      width: 128px;
-      flex: 0 0 128px;
-    }
-
-    .btn-primary:hover {
-      background: var(--btn-primary-hover);
-    }
-
-    .btn-secondary {
-      background: var(--surface-alt);
-      color: var(--text-main);
-      border-color: var(--border);
-    }
-
-    .btn-danger {
-      background: rgba(185, 28, 28, 0.11);
-      color: var(--danger);
-      border-color: rgba(185, 28, 28, 0.24);
-    }
-
-    .btn-small {
-      min-height: 40px;
-      padding: 0.45rem 0.7rem;
-      border-radius: 10px;
-      font-size: 0.82rem;
-    }
-
-    #controlsCard {
-      display: flex;
-      flex-direction: column;
-      gap: 0.9rem;
-    }
-
-    .control-grid {
-      display: grid;
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-      gap: 0.8rem;
-    }
-
-    .control-block {
-      background: var(--surface-alt);
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      padding: 0.7rem;
-      display: flex;
-      flex-direction: column;
-      gap: 0.45rem;
-    }
-
-    .control-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: baseline;
-      gap: 0.4rem;
-    }
-
-    .control-header label {
-      font-size: 0.79rem;
-      font-weight: 700;
-      color: var(--text-secondary);
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-    }
-
-    .control-header span {
-      font-family: var(--font-mono);
-      font-size: 0.78rem;
-      color: var(--text-main);
-    }
-
-    input[type="range"] {
-      width: 100%;
-      height: 32px;
-      background: transparent;
-      cursor: pointer;
-      margin: 0;
-      -webkit-appearance: none;
-      appearance: none;
-    }
-
-    input[type="range"]:focus-visible {
-      outline: none;
-    }
-
-    input[type="range"]::-webkit-slider-runnable-track {
-      height: 6px;
-      border-radius: 5px;
-      background: var(--slider-track);
-    }
-
-    input[type="range"]::-webkit-slider-thumb {
-      -webkit-appearance: none;
-      appearance: none;
-      width: 18px;
-      height: 18px;
-      margin-top: -6px;
-      border-radius: 50%;
-      border: none;
-      background: var(--slider-thumb);
-      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
-    }
-
-    input[type="range"]::-moz-range-track {
-      height: 6px;
-      border-radius: 5px;
-      background: var(--slider-track);
-    }
-
-    input[type="range"]::-moz-range-thumb {
-      width: 18px;
-      height: 18px;
-      border-radius: 50%;
-      border: none;
-      background: var(--slider-thumb);
-      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
-    }
-
-    #channelsPanel {
-      display: flex;
-      flex-direction: column;
-      padding: 0.95rem;
-      overflow: hidden;
-    }
-
-    .channels-header {
-      margin-bottom: 0.6rem;
-    }
-
-    .channels-header h2 {
-      margin: 0;
-      font-family: var(--font-display);
-      font-size: 1.06rem;
-      letter-spacing: -0.01em;
-    }
-
-    .channels-header p {
-      margin: 0.2rem 0 0;
-      color: var(--text-secondary);
-      font-size: 0.86rem;
-    }
-
-    #channelsList {
-      min-height: 0;
-      flex: 1;
-      overflow-y: auto;
-      overflow-x: hidden;
-      display: flex;
-      flex-direction: column;
-      gap: 0.7rem;
-      padding-right: 0.4rem;
-    }
-
-    #addChannelSlot {
-      min-height: 0;
-      border: 1px dashed var(--border);
-      border-radius: 12px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      background: rgba(255, 255, 255, 0.32);
-    }
-
-    [data-theme="dark"] #addChannelSlot {
-      background: rgba(9, 12, 18, 0.35);
-    }
-
-    #addChannelSlot .btn {
-      width: min(220px, 100%);
-    }
-
-    .channel-card {
-      background: var(--surface-alt);
-      border: 1px solid var(--border);
-      border-radius: 14px;
-      padding: 0.62rem;
-      display: grid;
-      gap: 0.48rem;
-      transition: border-color 0.2s ease, box-shadow 0.2s ease;
-    }
-
-    .channel-card[data-state="playing"] {
-      border-color: rgba(14, 165, 233, 0.45);
-      box-shadow: 0 0 0 1px rgba(14, 165, 233, 0.16);
-    }
-
-    .channel-card[data-state="armed"] {
-      border-color: rgba(249, 115, 22, 0.42);
-      box-shadow: 0 0 0 1px rgba(249, 115, 22, 0.15);
-    }
-
-    .channel-header {
-      display: flex;
-      justify-content: space-between;
-      gap: 0.6rem;
-      flex-wrap: wrap;
-      align-items: center;
-    }
-
-    .channel-title-wrap {
-      display: inline-flex;
-      align-items: center;
-      gap: 0.5rem;
-      min-height: 34px;
-      flex-wrap: wrap;
-    }
-
-    .channel-title {
-      white-space: nowrap;
-      margin: 0;
-      font-size: 0.98rem;
-    }
-
-    .phase-toggle-inline {
-      display: inline-flex;
-      align-items: center;
-      gap: 0.4rem;
-      margin-left: 0.25rem;
-    }
-
-    .phase-toggle-switch {
-      position: relative;
-      display: inline-block;
-      width: 42px;
-      height: 20px;
-      flex: 0 0 auto;
-    }
-
-    .phase-toggle-switch input {
-      opacity: 0;
-      width: 0;
-      height: 0;
-      margin: 0;
-    }
-
-    .phase-toggle-slider {
-      position: absolute;
-      cursor: pointer;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      background-color: #D8D3CB;
-      transition: 0.3s ease;
-      border-radius: 20px;
-    }
-
-    [data-theme="dark"] .phase-toggle-slider {
-      background-color: #3D3D3A;
-    }
-
-    .phase-toggle-slider:before {
-      position: absolute;
-      content: "";
-      height: 16px;
-      width: 16px;
-      left: 2px;
-      bottom: 2px;
-      background-color: #fff;
-      transition: 0.3s ease;
-      border-radius: 50%;
-      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-    }
-
-    .phase-toggle-switch input:checked + .phase-toggle-slider {
-      background-color: var(--brand-accent);
-    }
-
-    [data-theme="dark"] .phase-toggle-switch input:checked + .phase-toggle-slider {
-      background-color: #5EEAD4;
-    }
-
-    .phase-toggle-switch input:checked + .phase-toggle-slider:before {
-      transform: translateX(22px);
-    }
-
-    .phase-toggle-switch input:disabled + .phase-toggle-slider {
-      cursor: not-allowed;
-      opacity: 0.65;
-    }
-
-    .phase-toggle-text {
-      min-width: 70px;
-      font-size: 0.76rem;
-      color: var(--text-secondary);
-      font-family: var(--font-mono);
-      font-weight: 600;
-      user-select: none;
-    }
-
-    .channel-actions {
-      display: inline-flex;
-      gap: 0.45rem;
-      flex-wrap: wrap;
-    }
-
-    .channel-actions .btn {
-      min-width: 0;
-    }
-
-    .frequency-row {
-      display: grid;
-      grid-template-columns: auto 88px minmax(0, 1fr);
-      align-items: center;
-      gap: 0.5rem;
-    }
-
-    .freq-label {
-      font-size: 0.79rem;
-      color: var(--text-secondary);
-      font-weight: 600;
-      white-space: nowrap;
-    }
-
-    .freq-number {
-      width: 88px;
-      min-height: 36px;
-      border-radius: 10px;
-      border: 1px solid var(--border);
-      background: var(--canvas-bg);
-      color: var(--text-main);
-      font-family: var(--font-mono);
-      font-size: 0.86rem;
-      padding: 0.35rem 0.5rem;
-    }
-
-    .freq-number:focus-visible {
-      outline: 2px solid var(--brand-primary);
-      outline-offset: 2px;
-    }
-
-    .channel-wave-row {
-      display: grid;
-      grid-template-columns: 36px minmax(0, 1fr);
-      align-items: stretch;
-      gap: 0.45rem;
-      height: 100%;
-      min-height: 0;
-    }
-
-    .channel-volume-slider {
-      width: 100% !important;
-      height: 100% !important;
-      min-height: 0;
-      margin: 0;
-      writing-mode: vertical-lr;
-      direction: rtl;
-      -webkit-appearance: slider-vertical;
-      appearance: slider-vertical;
-      cursor: pointer;
-    }
-
-    .channel-volume-slider:focus-visible {
-      outline: 2px solid var(--brand-primary);
-      outline-offset: 2px;
-    }
-
-    .channel-canvas {
-      width: 100%;
-      height: 108px;
-      display: block;
-      background: var(--canvas-bg);
-      border-radius: 10px;
-      border: 1px solid var(--border);
-    }
-
-    #emptyState {
-      border: 1px dashed var(--border);
-      border-radius: 12px;
-      color: var(--text-secondary);
-      background: rgba(255, 255, 255, 0.36);
-      text-align: center;
-      padding: 1rem;
-      font-size: 0.89rem;
-      font-weight: 600;
-    }
-
-    [data-theme="dark"] #emptyState {
-      background: rgba(9, 12, 18, 0.4);
-    }
-
-
-    body { height: 100dvh; min-height: 0; overflow: hidden; }
-    #app { height: 100%; min-height: 0; display: flex; flex-direction: column; }
-    #workspace { flex: 1; min-height: 0; grid-template-rows: minmax(0, 1fr); width: 100%; max-width: 1920px; margin: auto; padding: 16px; display: grid; grid-template-columns: minmax(0,1.1fr) minmax(380px,1fr); gap: 16px; align-items: stretch; }
-    #transportPanel { min-height: 0; display: flex; flex-direction: column; gap: 16px; min-width: 0; }
-    .card, .panel { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; box-shadow: var(--shadow); padding: 16px; }
-    #combinedCard { flex: 1; min-height: 0; display: flex; flex-direction: column; }
-    #combinedCanvasWrap { flex: 1; min-height: 0; position: relative; border: 1px solid var(--border); border-radius: 9px; overflow: hidden; }
-    #combinedCanvas { position: absolute; inset: 0; width: 100%; height: 100%; }
-    #controlsCard { margin: 0; flex: none; }
-    .control-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-    .btn, .btn-small, .freq-number { min-height: 48px; border-radius: 9px; }
-    .btn-primary { background: var(--brand-accent); color: var(--accent-ink); }
-    #channelsList[data-channel-count] { display: flex; overflow-y: auto; overflow-x: hidden; gap: 12px; padding: 0; }
-    #channelsList[data-channel-count] .channel-card { height: auto; flex: 1; min-height: 230px; grid-template-rows: auto auto minmax(110px,1fr); overflow: visible; }
-    #channelsList[data-channel-count] #addChannelSlot { min-height: 110px; flex: 1; }
-    #channelsList[data-channel-count] .channel-canvas { height: 100%; min-height: 0; position: absolute; inset: 0; }
-    .channel-wave-row { height: auto; min-height: 130px; }
-    .channel-plot { position: relative; min-width: 0; min-height: 130px; }
-    #channelsPanel { overflow: hidden; min-width: 0; min-height: 0; }
-    .channel-card[data-state="playing"] { border-color: var(--brand-accent); box-shadow: none; }
-    .channels-header { padding-bottom: 12px; border-bottom: 1px solid var(--border); }
-    .channels-header h2 { font-size: 1.15rem; font-weight: 400; }
-    .channels-header p { font-size: .75rem; line-height: 1.6; }
-    .eyebrow { font: 400 1.15rem var(--font-display); letter-spacing: 0; text-transform: none; color: var(--text-main); }
-    .control-header label { font-size: .65rem; }
-    input[type="range"]:focus-visible { outline: 2px solid var(--brand-accent); outline-offset: 2px; }
-    .channel-amplitude { white-space: nowrap; font: 500 .7rem var(--font-mono); color: var(--text-secondary); }
-    .phase-toggle-switch:focus-within { outline: 2px solid var(--brand-accent); outline-offset: 3px; }
-    @media (max-width: 950px) {
-      body { height: auto; min-height: 100dvh; overflow: auto; }
-      #app { height: auto; min-height: 100dvh; }
-      #workspace { flex: none; grid-template-rows: auto; }
-      #channelsList[data-channel-count] { overflow: visible; }
-      #workspace { grid-template-columns: 1fr; padding: 10px; gap: 10px; }
-      #transportPanel { gap: 10px; }
-      #combinedCanvasWrap { min-height: 260px; }
-    }
-    @media (max-width: 480px) {
-      .control-grid { grid-template-columns: 1fr; }
-      .channel-header { flex-wrap: wrap; }
-      .channel-actions { width: 100%; } .channel-actions .btn { flex: 1; }
-      .frequency-row { grid-template-columns: auto 80px minmax(0,1fr); }
-      .freq-number { width: 80px; }
-      .transport-meta { gap: 5px; }
-      #toggleCombinedBtn { width: 88px; min-width: 88px; flex-basis: 88px; }
+      .ch-head { flex-wrap: wrap; }
+      .ch-mix { grid-template-columns: 4.6rem minmax(0, 1fr) 4.6rem; }
+      .ch-mix [data-role="pan-label"] { padding-left: 0; }
+      .ch-freq { grid-template-columns: 4.6rem auto minmax(0, 1fr); }
+      .ch-freq .unit { display: none; }
+      .stepper { grid-template-columns: var(--hit) 4.6rem var(--hit); }
+      .ch-freq input[type="range"] { grid-column: 1 / -1; }
+      .audio-statusbar-legal { white-space: normal; text-align: right; }
     }
   </style>
   <link rel="stylesheet" href="/assets/theme-toggle.css">
@@ -677,156 +375,160 @@
 
 <body>
   <div id="app">
-  <header class="audio-appbar">
-    <div class="audio-brand"><a href="/" aria-label="PanPhy Labs home" title="PanPhy Labs home"><img src="/assets/panphy.png" alt="PanPhy logo"></a><h1>Tone Generator</h1></div>
-    <div class="banner-actions">
-      <button id="theme-button" data-panphy-theme-toggle aria-label="Toggle Light/Dark Theme" title="Toggle between light and dark themes"></button>
-      <button data-panphy-fullscreen aria-label="Enter fullscreen" title="Enter fullscreen"></button>
-    </div>
-  </header>
+    <header class="audio-appbar">
+      <div class="audio-brand"><a href="/" aria-label="PanPhy Labs home" title="PanPhy Labs home"><img src="/assets/panphy.png" alt="PanPhy logo"></a><h1>Tone Generator</h1></div>
+      <div class="banner-actions">
+        <button id="theme-button" data-panphy-theme-toggle aria-label="Toggle Light/Dark Theme" title="Toggle between light and dark themes"></button>
+        <button data-panphy-fullscreen aria-label="Enter fullscreen" title="Enter fullscreen"></button>
+      </div>
+    </header>
 
     <main id="workspace">
-      <section id="transportPanel">
-        <div class="card" id="combinedCard">
-          <div class="transport-header">
-            <div>
-              <p class="eyebrow">Combined Output</p>
-              <div class="transport-meta">
-                <span id="combinedStateChip" class="status-chip paused">Paused</span>
-                <p id="activeSummary">0 active / 0 channels</p>
-              </div>
+      <section id="outputPanel" class="panel" aria-labelledby="outputTitle">
+        <div class="panel-head">
+          <button id="toggleCombinedBtn" class="play-main" type="button" disabled><svg class="button-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path class="fill" d="M7.5 5.2v13.6a.8.8 0 0 0 1.2.7l10.6-6.8a.8.8 0 0 0 0-1.4L8.7 4.5a.8.8 0 0 0-1.2.7z"/></svg><span>Play</span></button>
+          <div class="head-text">
+            <h2 id="outputTitle">Combined Output</h2>
+            <div class="head-meta">
+              <span id="combinedStateChip" class="state-chip">Paused</span>
+              <p id="activeSummary">0 of 0 channels on</p>
             </div>
-            <button id="toggleCombinedBtn" class="btn btn-primary" disabled><svg class="button-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="m9 5 11 7-11 7Z"/></svg><span>Play</span></button>
           </div>
-          <div id="combinedCanvasWrap">
-            <canvas id="combinedCanvas"></canvas>
-          </div>
-          <p id="transportHint">Space key toggles combined play/pause.</p>
         </div>
-
-        <div class="card" id="controlsCard">
-          <div class="control-grid">
-            <div class="control-block">
-              <div class="control-header">
-                <label for="volumeSlider">Volume</label>
-                <span id="volumeValue">100%</span>
-              </div>
-              <input type="range" id="volumeSlider" min="0" max="1" step="0.01" value="1">
+        <div id="combinedCanvasWrap">
+          <canvas id="combinedCanvas" role="img" aria-label="Combined waveform of the channels that are on"></canvas>
+        </div>
+        <p class="plot-note">Channels added together, as heard midway between the speakers; panned channels differ at each speaker.</p>
+        <div class="master-grid">
+          <div class="control-block">
+            <div class="control-header">
+              <label for="volumeSlider">Volume</label>
+              <output id="volumeValue" class="readout" for="volumeSlider">100%</output>
             </div>
-
-            <div class="control-block">
-              <div class="control-header">
-                <label for="panningSlider">L/R Pan</label>
-                <span id="panningValue">0.00</span>
-              </div>
-              <input type="range" id="panningSlider" min="-1" max="1" step="0.01" value="0">
-            </div>
-
-            <div class="control-block">
-              <div class="control-header">
-                <label for="timeScaleSlider">Animation Speed</label>
-                <span id="timeScaleValue">1.000x</span>
-              </div>
-              <input type="range" id="timeScaleSlider" min="-3" max="1" step="0.01" value="0">
-            </div>
-
-            <div class="control-block">
-              <div class="control-header">
-                <label for="zoomScaleSlider">Wave Zoom</label>
-                <span id="zoomScaleValue">1.00x</span>
-              </div>
-              <input type="range" id="zoomScaleSlider" min="0.01" max="50" step="0.01" value="1">
-            </div>
+            <input type="range" id="volumeSlider" min="0" max="1" step="0.01" value="1">
           </div>
-
+          <div class="control-block">
+            <div class="control-header">
+              <label for="panningSlider">Master Pan</label>
+              <output id="panningValue" class="readout" for="panningSlider">Center</output>
+            </div>
+            <input type="range" id="panningSlider" min="-1" max="1" step="0.05" value="0" title="Pans the whole mix. Double-click to center.">
+          </div>
+          <div class="control-block">
+            <div class="control-header">
+              <label for="timeScaleSlider">Animation Speed</label>
+              <output id="timeScaleValue" class="readout" for="timeScaleSlider">1&times;</output>
+            </div>
+            <input type="range" id="timeScaleSlider" min="-3" max="1" step="0.01" value="0" title="Slows the drawing down; the sound is unchanged. Double-click for real time.">
+          </div>
+          <div class="control-block">
+            <div class="control-header">
+              <label for="zoomScaleSlider">Time Shown</label>
+              <output id="zoomScaleValue" class="readout" for="zoomScaleSlider">10 ms</output>
+            </div>
+            <input type="range" id="zoomScaleSlider" min="-2" max="1.7" step="0.01" value="0" title="Time across the width of each plot. Double-click for 10 ms.">
+          </div>
         </div>
       </section>
 
-      <section id="channelsPanel" class="panel">
-        <div class="channels-header">
-          <h2>Channel Mixer</h2>
-          <p>Use up to two channels. Channel 2 can be switched in-phase or anti-phase relative to Channel 1.</p>
-        </div>
+      <section id="channelsPanel" class="panel" aria-label="Channels">
         <div id="channelsList">
           <div id="addChannelSlot">
-            <button id="addChannelBtn" class="btn btn-primary"><svg class="button-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 5v14M5 12h14"/></svg><span>Add Channel</span></button>
+            <button id="addChannelBtn" class="tool" type="button"><svg class="button-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 5v14M5 12h14"/></svg><span>Add Channel</span></button>
           </div>
         </div>
       </section>
     </main>
 
     <footer class="audio-statusbar">
-    <span class="audio-statusbar-legal">&copy; 2026 <a href="https://panphy.app/" target="_blank" rel="noopener noreferrer">PanPhy Labs</a>. All rights reserved. &middot;
-      <a href="https://buymeacoffee.com/panphy" target="_blank" rel="noopener noreferrer">Support My Projects</a></span>
-  </footer>
+      <span id="transportHint">Space: play / pause</span>
+      <span class="audio-statusbar-legal">&copy; 2026 <a href="https://panphy.app/" target="_blank" rel="noopener noreferrer">PanPhy Labs</a>. All rights reserved. &middot;
+        <a href="https://buymeacoffee.com/panphy" target="_blank" rel="noopener noreferrer">Support My Projects</a></span>
+    </footer>
   </div>
 
-
+  <template id="channelTemplate">
+    <article class="channel-card" data-state="paused">
+      <div class="ch-head">
+        <span class="ch-swatch" aria-hidden="true"></span>
+        <h3 class="ch-title" data-role="title">Channel</h3>
+        <span class="state-chip" data-role="state">Paused</span>
+        <div class="seg" role="radiogroup" data-role="phase">
+          <label><input type="radio" value="in" checked><span>In phase</span></label>
+          <label><input type="radio" value="anti"><span>Anti-phase</span></label>
+        </div>
+        <div class="ch-actions">
+          <button type="button" class="tool" data-role="toggle"></button>
+          <button type="button" class="tool tool-icon tool-danger" data-role="remove"><svg class="button-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13M10 10v7M14 10v7"/></svg></button>
+        </div>
+      </div>
+      <div class="ch-row ch-freq">
+        <label class="row-label" data-role="freq-label">Frequency</label>
+        <div class="stepper">
+          <button type="button" class="step-btn" data-role="freq-down">&minus;</button>
+          <input type="number" class="step-input" data-role="freq-number" inputmode="numeric" step="1">
+          <button type="button" class="step-btn" data-role="freq-up">+</button>
+        </div>
+        <span class="unit">Hz</span>
+        <input type="range" data-role="freq-slider" min="0" max="1000" step="1" title="Logarithmic scale. Use the &minus; and + buttons or type for exact values.">
+      </div>
+      <div class="ch-row ch-mix">
+        <label class="row-label" data-role="level-label">Level</label>
+        <input type="range" data-role="level" min="0" max="100" step="1">
+        <output class="readout" data-role="level-value">100%</output>
+        <label class="row-label" data-role="pan-label">Pan</label>
+        <input type="range" data-role="pan" min="-1" max="1" step="0.05" title="Left to right. Double-click to center.">
+        <button type="button" class="readout readout-btn" data-role="pan-value" title="Center this channel">Center</button>
+      </div>
+      <div class="ch-plot"><canvas class="channel-canvas" data-role="canvas"></canvas></div>
+    </article>
+  </template>
 
   <script>
     (function () {
-    const addChannelBtn = document.getElementById('addChannelBtn');
-    const addChannelSlot = document.getElementById('addChannelSlot');
-    const channelsList = document.getElementById('channelsList');
+    const $ = (id) => document.getElementById(id);
+    const addChannelBtn = $('addChannelBtn');
+    const addChannelSlot = $('addChannelSlot');
+    const channelsList = $('channelsList');
+    const channelTemplate = $('channelTemplate');
 
-    const combinedCanvas = document.getElementById('combinedCanvas');
+    const combinedCanvas = $('combinedCanvas');
     const combinedCtx = combinedCanvas.getContext('2d');
-    const toggleCombinedBtn = document.getElementById('toggleCombinedBtn');
-    const combinedStateChip = document.getElementById('combinedStateChip');
-    const activeSummary = document.getElementById('activeSummary');
+    const toggleCombinedBtn = $('toggleCombinedBtn');
+    const combinedStateChip = $('combinedStateChip');
+    const activeSummary = $('activeSummary');
 
-    const volumeSlider = document.getElementById('volumeSlider');
-    const volumeValue = document.getElementById('volumeValue');
+    const volumeSlider = $('volumeSlider');
+    const volumeValue = $('volumeValue');
+    const panningSlider = $('panningSlider');
+    const panningValue = $('panningValue');
+    const timeScaleSlider = $('timeScaleSlider');
+    const timeScaleValue = $('timeScaleValue');
+    const zoomScaleSlider = $('zoomScaleSlider');
+    const zoomScaleValue = $('zoomScaleValue');
+    const transportHint = $('transportHint');
 
-    const panningSlider = document.getElementById('panningSlider');
-    const panningValue = document.getElementById('panningValue');
-
-    const timeScaleSlider = document.getElementById('timeScaleSlider');
-    const timeScaleValue = document.getElementById('timeScaleValue');
-
-    const zoomScaleSlider = document.getElementById('zoomScaleSlider');
-    const zoomScaleValue = document.getElementById('zoomScaleValue');
-    const transportHint = document.getElementById('transportHint');
-
-    const DEFAULT_TRANSPORT_HINT = 'Space key toggles combined play/pause.';
+    const DEFAULT_TRANSPORT_HINT = 'Space: play / pause';
     const AUDIO_BLOCKED_HINT = 'Tap or click to enable audio, then try again.';
     const AUDIO_UNAVAILABLE_HINT = 'Audio output is unavailable in this browser.';
 
-
-    // Decorative icons retain visible text labels for accessible button names.
-    const AUDIO_BUTTON_ICONS = {
-      play: '<path d="m9 5 11 7-11 7Z"/>',
-      pause: '<path d="M8 5v14M16 5v14"/>',
-      remove: '<path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13M10 10v7M14 10v7"/>'
+    // Decorative icons; each button keeps a text label or aria-label for its name.
+    const ICONS = {
+      play: '<path class="fill" d="M7.5 5.2v13.6a.8.8 0 0 0 1.2.7l10.6-6.8a.8.8 0 0 0 0-1.4L8.7 4.5a.8.8 0 0 0-1.2.7z"/>',
+      pause: '<rect class="fill" x="6.5" y="5" width="3.6" height="14" rx="1"/><rect class="fill" x="13.9" y="5" width="3.6" height="14" rx="1"/>'
     };
-    function setAudioButton(button, label, icon) {
+    function setIconButton(button, label, icon) {
       button.innerHTML = '<svg class="button-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">' +
-        AUDIO_BUTTON_ICONS[icon] + '</svg><span>' + label + '</span>';
+        ICONS[icon] + '</svg><span>' + label + '</span>';
     }
 
     function setAudioUnavailableState(message) {
-      if (transportHint) {
-        transportHint.textContent = message || AUDIO_UNAVAILABLE_HINT;
-      }
-      if (combinedStateChip) {
-        combinedStateChip.className = 'status-chip paused';
-        combinedStateChip.textContent = 'Unavailable';
-      }
-      if (activeSummary) {
-        activeSummary.textContent = 'Audio unavailable';
-      }
-      [
-        addChannelBtn,
-        toggleCombinedBtn,
-        volumeSlider,
-        panningSlider,
-        timeScaleSlider,
-        zoomScaleSlider
-      ].forEach((control) => {
-        if (control) {
-          control.disabled = true;
-        }
-      });
+      transportHint.textContent = message || AUDIO_UNAVAILABLE_HINT;
+      combinedStateChip.className = 'state-chip';
+      combinedStateChip.textContent = 'Unavailable';
+      activeSummary.textContent = 'Audio unavailable';
+      [addChannelBtn, toggleCombinedBtn, volumeSlider, panningSlider, timeScaleSlider, zoomScaleSlider]
+        .forEach((control) => { control.disabled = true; });
     }
 
     const AudioContextClass = window.AudioContext || window.webkitAudioContext;
@@ -848,12 +550,10 @@
       return;
     }
 
+    // Graph: oscillator -> voice gain -> channel gain -> channel panner -> bus
+    //        -> volume -> combined (play/pause) -> master panner -> speakers.
     const channelBus = audioCtx.createGain();
-    channelBus.gain.value = 1;
-
     const volumeGain = audioCtx.createGain();
-    volumeGain.gain.value = 1;
-
     const combinedGain = audioCtx.createGain();
     combinedGain.gain.value = 0;
 
@@ -874,12 +574,8 @@
       stereoPanner.connect(audioCtx.destination);
     } else {
       combinedGain.connect(audioCtx.destination);
-      if (panningSlider) {
-        panningSlider.disabled = true;
-      }
-      if (panningValue) {
-        panningValue.textContent = 'N/A';
-      }
+      panningSlider.disabled = true;
+      panningValue.textContent = 'N/A';
     }
 
     const MIN_FREQUENCY_HZ = 15;
@@ -887,43 +583,77 @@
       MIN_FREQUENCY_HZ,
       Math.min(23000, Math.floor(audioCtx.sampleRate / 2) - 1)
     );
+    const LOG_FREQ_MIN = Math.log(MIN_FREQUENCY_HZ);
+    const LOG_FREQ_MAX = Math.log(MAX_FREQUENCY_HZ);
+    const FREQ_SLIDER_STEPS = 1000;
     const MAX_CHANNELS = 2;
+    const BASE_WINDOW = 0.01;
+    const CROSSFADE_S = 0.015;
+    const INTERACTIVE_TAGS = new Set(['INPUT', 'TEXTAREA', 'SELECT', 'BUTTON', 'OUTPUT']);
+    const PHASE_MODE_IN = 'in';
+    const PHASE_MODE_ANTI = 'anti';
+    const STEPPER_HOLD_DELAY_MS = 400;
+    const STEPPER_REPEAT_START_MS = 140;
+    const STEPPER_REPEAT_MIN_MS = 35;
 
     const channels = [];
     let nextChannelId = 1;
     let combinedPlaying = false;
-    let timeScale = Math.pow(10, parseFloat(timeScaleSlider.value));
-    let zoomScale = parseFloat(zoomScaleSlider.value);
+    let timeScale = 1;
+    let zoomScale = 1;
+    let masterPan = 0;
     let lastFrameTime = null;
-
-    const BASE_WINDOW = 0.01;
-    const INTERACTIVE_TAGS = new Set(['INPUT', 'TEXTAREA', 'SELECT', 'BUTTON']);
-    const PHASE_MODE_IN = 'in';
-    const PHASE_MODE_ANTI = 'anti';
-
+    let needsDraw = true;
     let audioPrimed = false;
 
-    function stopAndDisconnectOscillator(oscillator, stopTime = audioCtx.currentTime) {
-      if (!oscillator) return;
-      try {
-        oscillator.stop(stopTime);
-      } catch (_) {
-        // Ignore already-stopped oscillator errors.
-      }
-      try {
-        oscillator.disconnect();
-      } catch (_) {
-        // Ignore disconnect errors if already disconnected.
-      }
+    function clamp(value, min, max) {
+      return Math.min(max, Math.max(min, value));
     }
 
-    function createChannelOscillator(channel, startTime) {
-      const oscillator = audioCtx.createOscillator();
-      oscillator.type = 'sine';
-      oscillator.frequency.setValueAtTime(channel.frequency, startTime);
-      oscillator.connect(channel.gainNode);
-      oscillator.start(startTime);
-      return oscillator;
+    function requestRedraw() {
+      needsDraw = true;
+    }
+
+    // ---------- Audio helpers ----------
+
+    // Short linear ramps avoid clicks. Each ramp is recorded, so the next one starts
+    // from the exact level at that moment. (Relying on cancelAndHoldAtTime alone fails
+    // when nothing is scheduled after it: the new ramp then starts from the previous
+    // event, possibly seconds earlier, and the level jumps.)
+    const rampRecords = new WeakMap();
+
+    function scheduledValue(param, time) {
+      const record = rampRecords.get(param);
+      if (!record) return param.value;
+      if (time >= record.t1) return record.to;
+      if (time <= record.t0) return record.from;
+      return record.from + (record.to - record.from) * (time - record.t0) / (record.t1 - record.t0);
+    }
+
+    function rampParam(param, targetValue, duration = 0.012, startTime = audioCtx.currentTime) {
+      const from = scheduledValue(param, startTime);
+      const record = rampRecords.get(param);
+      const insideRamp = record && record.t0 < startTime && startTime < record.t1;
+      // Hold keeps a ramp that is still running when startTime falls inside it; the
+      // explicit value then anchors the new ramp in every case. Without hold, the cut
+      // ramp is redrawn up to startTime.
+      if (typeof param.cancelAndHoldAtTime === 'function') {
+        param.cancelAndHoldAtTime(startTime);
+        param.setValueAtTime(from, startTime);
+      } else {
+        param.cancelScheduledValues(startTime);
+        if (insideRamp) {
+          param.linearRampToValueAtTime(from, startTime);
+        } else {
+          param.setValueAtTime(from, startTime);
+        }
+      }
+      param.linearRampToValueAtTime(targetValue, startTime + duration);
+      rampRecords.set(param, { from, to: targetValue, t0: startTime, t1: startTime + duration });
+    }
+
+    function setGain(node, targetValue) {
+      rampParam(node.gain, targetValue);
     }
 
     function primeAudioContext() {
@@ -936,151 +666,137 @@
         source.stop(audioCtx.currentTime + 0.001);
         audioPrimed = true;
       } catch (_) {
-        // If priming fails, keep going and let normal playback path handle it.
+        // If priming fails, the normal playback path still runs.
       }
     }
 
-    function getPhaseOffsetForMode(mode) {
-      return mode === PHASE_MODE_ANTI ? Math.PI : 0;
+    // A voice is one oscillator with its own fade gain, so a channel can swap
+    // oscillators with a short crossfade instead of a click.
+    function createVoice(channel, startTime, fadeIn) {
+      const oscillator = audioCtx.createOscillator();
+      oscillator.type = 'sine';
+      oscillator.frequency.setValueAtTime(channel.frequency, startTime);
+      const fade = audioCtx.createGain();
+      fade.gain.value = fadeIn ? 0 : 1;
+      if (fadeIn) {
+        rampParam(fade.gain, 1, CROSSFADE_S, startTime);
+      }
+      oscillator.connect(fade);
+      fade.connect(channel.gainNode);
+      oscillator.start(startTime);
+      return { oscillator, fade };
+    }
+
+    function retireVoice(voice, startTime) {
+      if (!voice) return;
+      rampParam(voice.fade.gain, 0, CROSSFADE_S, startTime);
+      voice.oscillator.onended = () => {
+        try {
+          voice.oscillator.disconnect();
+          voice.fade.disconnect();
+        } catch (_) {
+          // Already disconnected.
+        }
+      };
+      try {
+        voice.oscillator.stop(startTime + CROSSFADE_S + 0.005);
+      } catch (_) {
+        // Already stopped.
+      }
+    }
+
+    // Restart every channel's oscillator at the same instant, so channels set to the
+    // same frequency are exactly in (or anti-) phase. Each swap is a crossfade, and the
+    // plots restart at phase zero with the sound.
+    function resyncRunningOscillators() {
+      if (audioCtx.state !== 'running' || channels.length === 0) return;
+      const startAt = audioCtx.currentTime + 0.01;
+      channels.forEach((channel) => {
+        const oldVoice = channel.voice;
+        channel.voice = createVoice(channel, startAt, Boolean(oldVoice));
+        retireVoice(oldVoice, startAt);
+        channel.waveTime = 0;
+      });
+      requestRedraw();
     }
 
     function getChannelAmplitude(channel) {
       if (!channel) return 1;
-      const rawAmplitude = Number.isFinite(channel.amplitude) ? channel.amplitude : 1;
-      return clamp(rawAmplitude, 0, 1);
+      return clamp(Number.isFinite(channel.amplitude) ? channel.amplitude : 1, 0, 1);
     }
 
-    // Anti-phase cancellation: each channel runs its own Web Audio OscillatorNode.
-    // Both oscillators feed into the shared channelBus summing node via separate
-    // gain nodes. Anti-phase inverts the gain to -1, so the Web Audio mixer
-    // performs real destructive interference (digital, not acoustic). When ch1 and
-    // ch2 share the same frequency and amplitude, the summed signal is zero —
-    // genuine signal cancellation inside the audio graph, not a pre-calculated
-    // combined waveform.
+    // Anti-phase inverts the channel gain to -1, so the Web Audio mixer performs real
+    // destructive interference: equal tones in anti-phase on the same speaker sum to zero.
     function getChannelOutputGain(channel) {
       if (!channel || !channel.isPlaying) return 0;
-      const phasePolarity = channel.phaseMode === PHASE_MODE_ANTI ? -1 : 1;
-      return phasePolarity * getChannelAmplitude(channel);
+      const polarity = channel.phaseMode === PHASE_MODE_ANTI ? -1 : 1;
+      return polarity * getChannelAmplitude(channel);
     }
 
     function setChannelOutputGain(channel) {
-      if (!channel || !channel.gainNode) return;
-      setGain(channel.gainNode, getChannelOutputGain(channel));
-    }
-
-    function updateChannelPhaseToggle(channel, isReference) {
-      if (!channel || !channel.phaseToggle || !channel.phaseToggleText || !channel.phaseToggleInline) return;
-
-      const isSecondChannel = channels[1] === channel;
-      channel.phaseToggleInline.style.display = isSecondChannel ? 'inline-flex' : 'none';
-
-      if (!isSecondChannel) {
-        channel.phaseToggle.checked = false;
-        channel.phaseToggle.disabled = true;
-        channel.phaseToggle.title = isReference
-          ? 'Reference channel (fixed in-phase)'
-          : 'Phase toggle is only available for Channel 2';
-        channel.phaseToggleText.textContent = 'in-phase';
-        return;
+      if (channel && channel.gainNode) {
+        setGain(channel.gainNode, getChannelOutputGain(channel));
       }
-
-      const isAntiPhase = channel.phaseMode === PHASE_MODE_ANTI;
-      channel.phaseToggle.checked = isAntiPhase;
-      channel.phaseToggle.disabled = false;
-      channel.phaseToggle.title = 'Toggle in-phase / anti-phase relative to Channel 1';
-      channel.phaseToggleText.textContent = isAntiPhase ? 'anti-phase' : 'in-phase';
     }
 
-    function resyncRunningOscillators() {
-      if (audioCtx.state !== 'running' || channels.length === 0) return;
+    function formatPan(pan) {
+      if (Math.abs(pan) < 0.001) return 'Center';
+      return (pan < 0 ? 'L ' : 'R ') + Math.round(Math.abs(pan) * 100) + '%';
+    }
 
-      const now = audioCtx.currentTime;
-      const startAt = now + 0.012;
-      const oldOscillators = channels.map((channel) => channel.oscillator || null);
+    function snapPan(rawPan) {
+      const pan = Number.isFinite(rawPan) ? rawPan : 0;
+      return clamp(Math.round(pan * 20) / 20, -1, 1);
+    }
 
+    // Equal-power gains of a StereoPannerNode fed a mono signal.
+    function monoPanGains(pan) {
+      const x = (pan + 1) / 2;
+      return [Math.cos(x * Math.PI / 2), Math.sin(x * Math.PI / 2)];
+    }
+
+    // A StereoPannerNode fed a stereo signal moves one side into the other.
+    function stereoPanGains(left, right, pan) {
+      if (pan <= 0) {
+        const x = pan + 1;
+        return [left + right * Math.cos(x * Math.PI / 2), right * Math.sin(x * Math.PI / 2)];
+      }
+      return [left * Math.cos(pan * Math.PI / 2), right + left * Math.sin(pan * Math.PI / 2)];
+    }
+
+    // How much of a channel reaches each speaker after its own pan and the master pan.
+    function getChannelSpeakerGains(channel) {
+      if (!channel.panner) {
+        return stereoPanner ? monoPanGains(masterPan) : [1, 1];
+      }
+      const [left, right] = monoPanGains(channel.pan);
+      return stereoPanner ? stereoPanGains(left, right, masterPan) : [left, right];
+    }
+
+    // Two tones can line up and add, so keep the worst-case peak at each
+    // speaker at or below 1 (full scale), allowing for every pan setting.
+    function updateChannelBusNormalization() {
+      let peakLeft = 0;
+      let peakRight = 0;
       channels.forEach((channel) => {
-        channel.oscillator = createChannelOscillator(channel, startAt);
+        if (!channel.isPlaying) return;
+        const amplitude = getChannelAmplitude(channel);
+        const [left, right] = getChannelSpeakerGains(channel);
+        peakLeft += amplitude * Math.abs(left);
+        peakRight += amplitude * Math.abs(right);
       });
-
-      channels.forEach((channel) => {
-        const targetGain = getChannelOutputGain(channel);
-        try {
-          channel.gainNode.gain.cancelScheduledValues(now);
-          channel.gainNode.gain.setValueAtTime(channel.gainNode.gain.value, now);
-          channel.gainNode.gain.setValueAtTime(channel.gainNode.gain.value, startAt);
-          channel.gainNode.gain.linearRampToValueAtTime(targetGain, startAt + 0.008);
-        } catch (_) {
-          channel.gainNode.gain.setValueAtTime(targetGain, now);
-        }
-      });
-
-      oldOscillators.forEach((oscillator) => {
-        stopAndDisconnectOscillator(oscillator, startAt);
-      });
-    }
-
-    function syncPhaseModesToReference(options = {}) {
-      if (channels.length === 0) return;
-      const shouldResyncAudio = options.resyncAudio !== false;
-
-      const referenceChannel = channels[0];
-      referenceChannel.phaseMode = PHASE_MODE_IN;
-      referenceChannel.phaseOffsetRad = 0;
-      updateChannelPhaseToggle(referenceChannel, true);
-      setChannelOutputGain(referenceChannel);
-
-      for (let i = 1; i < channels.length; i += 1) {
-        const channel = channels[i];
-        channel.phaseMode = channel.phaseMode === PHASE_MODE_ANTI ? PHASE_MODE_ANTI : PHASE_MODE_IN;
-        channel.phaseOffsetRad = getPhaseOffsetForMode(channel.phaseMode);
-        updateChannelPhaseToggle(channel, false);
-        setChannelOutputGain(channel);
-      }
-
-      if (shouldResyncAudio) {
-        resyncRunningOscillators();
-      }
-    }
-
-    function setChannelPhaseModeRelativeToReference(channel, mode) {
-      if (!channel) return;
-      const referenceChannel = channels[0] || null;
-      if (!referenceChannel || channel === referenceChannel) {
-        channel.phaseMode = PHASE_MODE_IN;
-        channel.phaseOffsetRad = 0;
-        updateChannelPhaseToggle(channel, true);
-        setChannelOutputGain(channel);
-        return;
-      }
-
-      channel.phaseMode = mode === PHASE_MODE_ANTI ? PHASE_MODE_ANTI : PHASE_MODE_IN;
-      channel.phaseOffsetRad = getPhaseOffsetForMode(channel.phaseMode);
-      updateChannelPhaseToggle(channel, false);
-      setChannelOutputGain(channel);
-      resyncRunningOscillators();
-    }
-
-    function setAudioBlockedHint() {
-      if (transportHint) {
-        transportHint.textContent = AUDIO_BLOCKED_HINT;
-      }
-    }
-
-    function setAudioReadyHint() {
-      if (transportHint) {
-        transportHint.textContent = DEFAULT_TRANSPORT_HINT;
-      }
+      const peak = Math.max(peakLeft, peakRight);
+      setGain(channelBus, peak > 1 ? 1 / peak : 1);
     }
 
     async function ensureAudioContext() {
       if (audioCtx.state === 'running') {
         primeAudioContext();
-        if (channels.some((channel) => !channel.oscillator)) {
+        if (channels.some((channel) => !channel.voice)) {
           syncPhaseModesToReference();
         }
         return true;
       }
-
       try {
         await audioCtx.resume();
       } catch (_) {
@@ -1090,7 +806,7 @@
         try {
           await audioCtx.resume();
         } catch (_) {
-          // Ignore and report blocked state below.
+          // Reported as blocked below.
         }
       }
       const running = audioCtx.state === 'running';
@@ -1101,324 +817,225 @@
       return running;
     }
 
-    function setGain(node, targetValue) {
-      const now = audioCtx.currentTime;
-      let heldCurrentValue = false;
-      if (typeof node.gain.cancelAndHoldAtTime === 'function') {
-        try {
-          node.gain.cancelAndHoldAtTime(now);
-          heldCurrentValue = true;
-        } catch (_) {
-          heldCurrentValue = false;
+    function setAudioBlockedHint() {
+      transportHint.textContent = AUDIO_BLOCKED_HINT;
+    }
+
+    function setAudioReadyHint() {
+      transportHint.textContent = DEFAULT_TRANSPORT_HINT;
+    }
+
+    // ---------- Phase ----------
+
+    function getPhaseOffsetForMode(mode) {
+      return mode === PHASE_MODE_ANTI ? Math.PI : 0;
+    }
+
+    function updateChannelPhaseToggle(channel) {
+      const isSecondChannel = channels[1] === channel;
+      channel.phaseGroup.hidden = !isSecondChannel;
+      channel.phaseInputs.forEach((input) => {
+        input.checked = input.value === channel.phaseMode;
+      });
+    }
+
+    function syncPhaseModesToReference(options = {}) {
+      if (channels.length === 0) return;
+      channels.forEach((channel, index) => {
+        if (index === 0) {
+          channel.phaseMode = PHASE_MODE_IN;
+        } else if (channel.phaseMode !== PHASE_MODE_ANTI) {
+          channel.phaseMode = PHASE_MODE_IN;
         }
+        channel.phaseOffsetRad = getPhaseOffsetForMode(channel.phaseMode);
+        updateChannelPhaseToggle(channel);
+        setChannelOutputGain(channel);
+      });
+      if (options.resyncAudio !== false) {
+        resyncRunningOscillators();
       }
-      if (!heldCurrentValue) {
-        const currentValue = node.gain.value;
-        node.gain.cancelScheduledValues(now);
-        node.gain.setValueAtTime(currentValue, now);
+      requestRedraw();
+    }
+
+    function setChannelPhaseMode(channel, mode) {
+      if (!channel) return;
+      channel.phaseMode = channel !== channels[0] && mode === PHASE_MODE_ANTI ? PHASE_MODE_ANTI : PHASE_MODE_IN;
+      syncPhaseModesToReference();
+    }
+
+    // ---------- Channel values ----------
+
+    function freqToSlider(frequency) {
+      return Math.round((Math.log(frequency) - LOG_FREQ_MIN) / (LOG_FREQ_MAX - LOG_FREQ_MIN) * FREQ_SLIDER_STEPS);
+    }
+
+    function sliderToFreq(value) {
+      return Math.exp(LOG_FREQ_MIN + (value / FREQ_SLIDER_STEPS) * (LOG_FREQ_MAX - LOG_FREQ_MIN));
+    }
+
+    // options.fromSlider leaves the slider where the pointer put it (log steps are finer
+    // than 1 Hz at low frequencies); options.skipResync is for drags and held steppers.
+    function applyFrequency(channel, rawFrequency, options = {}) {
+      const frequency = Math.round(clamp(Number.isFinite(rawFrequency) ? rawFrequency : channel.frequency, MIN_FREQUENCY_HZ, MAX_FREQUENCY_HZ));
+      channel.frequency = frequency;
+      if (channel.voice) {
+        channel.voice.oscillator.frequency.setValueAtTime(frequency, audioCtx.currentTime);
       }
-      try {
-        node.gain.linearRampToValueAtTime(targetValue, now + 0.012);
-      } catch (_) {
-        node.gain.setValueAtTime(targetValue, now);
+      if (!options.fromSlider) {
+        channel.freqSlider.value = String(freqToSlider(frequency));
       }
-    }
-
-    function clamp(value, min, max) {
-      return Math.min(max, Math.max(min, value));
-    }
-
-    function getCssVar(name) {
-      return getComputedStyle(document.documentElement).getPropertyValue(name).trim();
-    }
-
-    let cachedThemeColors = null;
-
-    function refreshCachedThemeColors() {
-      cachedThemeColors = {
-        canvasBg: getCssVar('--canvas-bg'),
-        axisLine: getCssVar('--axis-line'),
-        textMuted: getCssVar('--text-secondary'),
-        pausedOverlay: getCssVar('--paused-overlay'),
-        channelLine: getCssVar('--channel-line'),
-        channelLinePaused: getCssVar('--channel-line-paused'),
-        combinedLine: getCssVar('--combined-line'),
-        combinedLinePaused: getCssVar('--combined-line-paused')
-      };
-    }
-
-    function getThemeColors() {
-      if (!cachedThemeColors) refreshCachedThemeColors();
-      return cachedThemeColors;
-    }
-
-    new MutationObserver(() => {
-      refreshCachedThemeColors();
-    }).observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
-
-    function updateControlReadouts() {
-      const volumePercent = Math.round(parseFloat(volumeSlider.value) * 100);
-      volumeValue.textContent = `${volumePercent}%`;
-
-      if (stereoPanner) {
-        const pan = parseFloat(panningSlider.value);
-        panningValue.textContent = pan.toFixed(2);
-      } else {
-        panningValue.textContent = 'N/A';
-      }
-
-      timeScaleValue.textContent = `${timeScale.toFixed(3)}x`;
-      zoomScaleValue.textContent = `${zoomScale.toFixed(2)}x`;
-    }
-
-    function drawCenterAxis(ctx, width, height, color) {
-      ctx.strokeStyle = color;
-      ctx.lineWidth = 1;
-      ctx.setLineDash([4, 4]);
-      ctx.beginPath();
-      ctx.moveTo(0, height / 2);
-      ctx.lineTo(width, height / 2);
-      ctx.stroke();
-      ctx.setLineDash([]);
-    }
-
-    function drawWavePath(ctx, width, height, frequency, waveTime, timeWindow, phaseOffset, amplitude, color) {
-      ctx.beginPath();
-      ctx.lineWidth = 2;
-      ctx.strokeStyle = color;
-
-      for (let x = 0; x < width; x += 1) {
-        const fraction = x / (width - 1 || 1);
-        const t = waveTime - fraction * timeWindow;
-        const sample = Math.sin(2 * Math.PI * frequency * t + phaseOffset) * amplitude;
-        const y = (sample * 0.5 + 0.5) * height;
-        if (x === 0) {
-          ctx.moveTo(x, y);
-        } else {
-          ctx.lineTo(x, y);
-        }
-      }
-
-      ctx.stroke();
-    }
-
-    function drawChannelWave(channel, colors) {
-      const ctx = channel.ctx;
-      const canvas = channel.canvas;
-      const width = canvas._cssWidth || canvas.width;
-      const height = canvas._cssHeight || canvas.height;
-
-      applyCanvasDpr(ctx);
-      ctx.fillStyle = colors.canvasBg;
-      ctx.fillRect(0, 0, width, height);
-      drawCenterAxis(ctx, width, height, colors.axisLine);
-
-      const timeWindow = BASE_WINDOW * zoomScale;
-      const animated = combinedPlaying && channel.isPlaying;
-      drawWavePath(
-        ctx,
-        width,
-        height,
-        channel.frequency,
-        channel.waveTime,
-        timeWindow,
-        channel.phaseOffsetRad || 0,
-        getChannelAmplitude(channel),
-        animated ? colors.channelLine : colors.channelLinePaused
-      );
-
-      if (!animated) {
-        ctx.fillStyle = colors.pausedOverlay;
-        ctx.fillRect(0, 0, width, height);
-        ctx.fillStyle = colors.textMuted;
-        ctx.font = '12px "IBM Plex Mono", monospace';
-        ctx.textAlign = 'right';
-        ctx.fillText(channel.isPlaying ? 'Armed' : 'Paused', width - 10, 16);
+      channel.freqNumber.value = String(frequency);
+      requestRedraw();
+      if (!options.skipResync) {
+        resyncRunningOscillators();
       }
     }
 
-    function drawCombinedWave(colors) {
-      const width = combinedCanvas._cssWidth || combinedCanvas.width;
-      const height = combinedCanvas._cssHeight || combinedCanvas.height;
+    function stepFrequency(channel, direction, size, options) {
+      const current = channel.frequency;
+      const next = direction > 0
+        ? Math.floor(current / size) * size + size
+        : Math.ceil(current / size) * size - size;
+      applyFrequency(channel, next, options);
+    }
 
-      applyCanvasDpr(combinedCtx);
-      combinedCtx.fillStyle = colors.canvasBg;
-      combinedCtx.fillRect(0, 0, width, height);
-      drawCenterAxis(combinedCtx, width, height, colors.axisLine);
+    function applyAmplitudePercent(channel, rawPercent) {
+      const percent = clamp(Number.isFinite(rawPercent) ? Math.round(rawPercent) : 100, 0, 100);
+      channel.amplitude = percent / 100;
+      channel.levelSlider.value = String(percent);
+      channel.levelValue.textContent = percent + '%';
+      setChannelOutputGain(channel);
+      updateChannelBusNormalization();
+      requestRedraw();
+    }
 
-      const activeChannels = channels.filter((channel) => channel.isPlaying);
-      if (activeChannels.length === 0) {
-        combinedCtx.fillStyle = colors.textMuted;
-        combinedCtx.textAlign = 'center';
-        combinedCtx.font = '13px "IBM Plex Mono", monospace';
-        combinedCtx.fillText('No active channels', width / 2, height / 2 - 8);
-        combinedCtx.fillText('Press Play on a channel to add it to the mix', width / 2, height / 2 + 14);
+    function updateChannelPanUi(channel) {
+      if (!channel.panner) {
+        channel.panValueBtn.textContent = 'N/A';
         return;
       }
+      channel.panSlider.value = String(channel.pan);
+      channel.panValueBtn.textContent = formatPan(channel.pan);
+      channel.panValueBtn.setAttribute('aria-label', `${channel.name} pan ${formatPan(channel.pan)}. Press to center.`);
+    }
 
-      const timeWindow = BASE_WINDOW * zoomScale;
-      combinedCtx.beginPath();
-      combinedCtx.lineWidth = 2.25;
-      combinedCtx.strokeStyle = combinedPlaying ? colors.combinedLine : colors.combinedLinePaused;
+    function applyChannelPan(channel, rawPan) {
+      if (!channel || !channel.panner) return;
+      channel.pan = snapPan(rawPan);
+      rampParam(channel.panner.pan, channel.pan);
+      updateChannelPanUi(channel);
+      updateChannelBusNormalization();
+    }
 
-      const peakAmplitude = activeChannels.reduce((total, channel) => {
-        return total + getChannelAmplitude(channel);
-      }, 0);
-      const ampScale = Math.max(1, peakAmplitude);
+    function applyMasterPan(rawPan) {
+      if (!stereoPanner) return;
+      masterPan = snapPan(rawPan);
+      panningSlider.value = String(masterPan);
+      rampParam(stereoPanner.pan, masterPan);
+      updateControlReadouts();
+      updateChannelBusNormalization();
+    }
 
-      for (let x = 0; x < width; x += 1) {
-        const fraction = x / (width - 1 || 1);
-        let sampleSum = 0;
+    // ---------- Readouts and state ----------
 
-        for (const channel of activeChannels) {
-          const t = channel.waveTime - fraction * timeWindow;
-          const amplitude = getChannelAmplitude(channel);
-          sampleSum += amplitude * Math.sin(2 * Math.PI * channel.frequency * t + (channel.phaseOffsetRad || 0));
-        }
+    function formatSpeed(value) {
+      if (Math.abs(value - 1) < 0.005) return '1×';
+      return (value >= 1 ? value.toFixed(2) : String(Number(value.toPrecision(2)))) + '×';
+    }
 
-        const y = (sampleSum / ampScale * 0.5 + 0.5) * height;
+    function formatWindow(seconds) {
+      const ms = seconds * 1000;
+      if (ms < 1) return ms.toFixed(2) + ' ms';
+      if (ms < 10) return ms.toFixed(1) + ' ms';
+      return Math.round(ms) + ' ms';
+    }
 
-        if (x === 0) {
-          combinedCtx.moveTo(x, y);
-        } else {
-          combinedCtx.lineTo(x, y);
-        }
-      }
-
-      combinedCtx.stroke();
-
-      if (!combinedPlaying) {
-        combinedCtx.fillStyle = colors.pausedOverlay;
-        combinedCtx.fillRect(0, 0, width, height);
-        combinedCtx.fillStyle = colors.textMuted;
-        combinedCtx.textAlign = 'right';
-        combinedCtx.font = '12px "IBM Plex Mono", monospace';
-        combinedCtx.fillText('Combined paused', width - 10, 18);
-      }
+    function updateControlReadouts() {
+      volumeValue.textContent = Math.round(parseFloat(volumeSlider.value) * 100) + '%';
+      panningValue.textContent = stereoPanner ? formatPan(masterPan) : 'N/A';
+      timeScaleValue.textContent = formatSpeed(timeScale);
+      zoomScaleValue.textContent = formatWindow(BASE_WINDOW * zoomScale);
+      requestRedraw();
     }
 
     function refreshChannelTitles() {
       channels.forEach((channel, index) => {
-        channel.title.textContent = `Channel ${index + 1}`;
+        const name = `Channel ${index + 1}`;
+        channel.name = name;
+        channel.card.dataset.index = String(index);
+        channel.title.textContent = name;
+        channel.freqSlider.setAttribute('aria-label', `${name} frequency`);
+        channel.freqNumber.setAttribute('aria-label', `${name} frequency in hertz`);
+        channel.freqDown.setAttribute('aria-label', `Lower ${name} frequency`);
+        channel.freqUp.setAttribute('aria-label', `Raise ${name} frequency`);
+        channel.levelSlider.setAttribute('aria-label', `${name} level`);
+        channel.panSlider.setAttribute('aria-label', `${name} pan`);
+        channel.phaseGroup.setAttribute('aria-label', `${name} phase relative to Channel 1`);
+        channel.removeBtn.setAttribute('aria-label', `Remove ${name}`);
+        channel.removeBtn.title = `Remove ${name}`;
+        updateChannelPanUi(channel);
+        syncChannelUi(channel);
       });
     }
 
     function syncChannelUi(channel) {
-      let visualState = 'paused';
+      let state = 'paused';
       let label = 'Paused';
-
       if (channel.isPlaying && combinedPlaying) {
-        visualState = 'playing';
+        state = 'playing';
         label = 'Playing';
       } else if (channel.isPlaying) {
-        visualState = 'armed';
-        label = 'Armed';
+        state = 'ready';
+        label = 'Ready';
       }
+      channel.card.dataset.state = state;
+      channel.stateChip.className = 'state-chip ' + state;
+      channel.stateChip.textContent = label;
+      channel.stateChip.title = state === 'ready' ? 'On, waiting for Combined Output to play' : '';
 
-      channel.card.dataset.state = visualState;
-      channel.statusChip.className = `status-chip ${visualState}`;
-      channel.statusChip.textContent = label;
-
-      setAudioButton(channel.toggleBtn, channel.isPlaying ? 'Pause' : 'Play', channel.isPlaying ? 'pause' : 'play');
-      channel.toggleBtn.setAttribute('aria-pressed', channel.isPlaying ? 'true' : 'false');
+      setIconButton(channel.toggleBtn, channel.isPlaying ? 'Pause' : 'Play', channel.isPlaying ? 'pause' : 'play');
+      channel.toggleBtn.setAttribute('aria-label', `${channel.isPlaying ? 'Pause' : 'Play'} ${channel.name || 'channel'}`);
+      requestRedraw();
     }
 
     function syncCombinedUi() {
-      if (combinedPlaying) {
-        combinedStateChip.className = 'status-chip playing';
-        combinedStateChip.textContent = 'Playing';
-        setAudioButton(toggleCombinedBtn, 'Pause', 'pause');
-      } else {
-        combinedStateChip.className = 'status-chip paused';
-        combinedStateChip.textContent = 'Paused';
-        setAudioButton(toggleCombinedBtn, 'Play', 'play');
-      }
-
       if (channels.length === 0) {
-        combinedStateChip.className = 'status-chip paused';
-        combinedStateChip.textContent = 'No Channels';
-        toggleCombinedBtn.disabled = true;
+        combinedStateChip.className = 'state-chip';
+        combinedStateChip.textContent = 'No channels';
+      } else if (combinedPlaying) {
+        combinedStateChip.className = 'state-chip playing';
+        combinedStateChip.textContent = 'Playing';
+      } else {
+        combinedStateChip.className = 'state-chip';
+        combinedStateChip.textContent = 'Paused';
       }
-    }
-
-    function updateChannelBusNormalization(activeChannels = channels.filter((channel) => channel.isPlaying)) {
-      const summedPower = activeChannels.reduce((totalPower, channel) => {
-        const amplitude = getChannelAmplitude(channel);
-        return totalPower + amplitude * amplitude;
-      }, 0);
-      const normalizedBusGain = summedPower > 1 ? 1 / Math.sqrt(summedPower) : 1;
-      setGain(channelBus, normalizedBusGain);
+      setIconButton(toggleCombinedBtn, combinedPlaying ? 'Pause' : 'Play', combinedPlaying ? 'pause' : 'play');
+      toggleCombinedBtn.classList.toggle('is-playing', combinedPlaying);
+      toggleCombinedBtn.disabled = channels.length === 0;
+      requestRedraw();
     }
 
     function refreshSummary() {
-      const activeChannels = channels.filter((channel) => channel.isPlaying);
-      const activeCount = activeChannels.length;
-      activeSummary.textContent = `${activeCount} active / ${channels.length} channels`;
-      channelsList.dataset.channelCount = String(channels.length);
-
-      updateChannelBusNormalization(activeChannels);
+      const activeCount = channels.filter((channel) => channel.isPlaying).length;
+      activeSummary.textContent = `${activeCount} of ${channels.length} channel${channels.length === 1 ? '' : 's'} on`;
+      updateChannelBusNormalization();
 
       const reachedMaxChannels = channels.length >= MAX_CHANNELS;
       addChannelBtn.disabled = reachedMaxChannels;
-      addChannelBtn.title = reachedMaxChannels
-        ? `Maximum ${MAX_CHANNELS} channels reached`
-        : 'Add Channel';
-      if (addChannelSlot) {
-        addChannelSlot.style.display = reachedMaxChannels ? 'none' : 'flex';
-      }
+      addChannelSlot.hidden = reachedMaxChannels;
+      addChannelBtn.querySelector('span').textContent = channels.length === 0 ? 'Add Channel' : `Add Channel ${channels.length + 1}`;
 
       if (channels.length === 0 && combinedPlaying) {
         combinedPlaying = false;
         setGain(combinedGain, 0);
       }
-
-      toggleCombinedBtn.disabled = channels.length === 0;
       syncCombinedUi();
-
-      requestAnimationFrame(() => {
-        resizeCanvas(combinedCanvas);
-        channels.forEach((channel) => {
-          resizeCanvas(channel.canvas);
-        });
-      });
+      requestAnimationFrame(resizeAllCanvases);
     }
 
-    function applyFrequency(channel, rawFrequency, options = {}) {
-      const frequency = Math.round(clamp(rawFrequency, MIN_FREQUENCY_HZ, MAX_FREQUENCY_HZ));
-      channel.frequency = frequency;
-      if (channel.oscillator) {
-        channel.oscillator.frequency.setValueAtTime(frequency, audioCtx.currentTime);
-      }
-      channel.freqSlider.value = String(frequency);
-      channel.freqNumber.value = String(frequency);
+    // ---------- Channels ----------
 
-      if (options.skipResync) return;
-
-      if (channels[0] === channel) {
-        syncPhaseModesToReference();
-      } else {
-        setChannelPhaseModeRelativeToReference(channel, channel.phaseMode);
-      }
-    }
-
-    function applyAmplitudePercent(channel, rawPercent) {
-      if (!channel) return;
-      const percent = clamp(Number.isFinite(rawPercent) ? rawPercent : 100, 0, 100);
-      channel.amplitude = percent / 100;
-      channel.amplitudeReadout.textContent = 'Level ' + Math.round(percent) + '%';
-      if (channel.volumeSlider) {
-        channel.volumeSlider.value = String(Math.round(percent));
-      }
-      setChannelOutputGain(channel);
-      updateChannelBusNormalization();
-    }
-
-    async function toggleChannel(channelId) {
-      const channel = channels.find((item) => item.id === channelId);
-      if (!channel) {
-        return;
-      }
-
+    async function toggleChannel(channel) {
       const ready = await ensureAudioContext();
       if (!ready) {
         setAudioBlockedHint();
@@ -1434,46 +1051,82 @@
       refreshSummary();
     }
 
-    function removeChannel(channelId) {
-      const index = channels.findIndex((item) => item.id === channelId);
-      if (index === -1) {
-        return;
-      }
+    function removeChannel(channel) {
+      const index = channels.indexOf(channel);
+      if (index === -1) return;
+      channels.splice(index, 1);
 
-      const [channel] = channels.splice(index, 1);
-      stopAndDisconnectOscillator(channel.oscillator);
-      channel.gainNode.disconnect();
+      // Fade out before disconnecting, so removing a sounding channel does not click.
+      setGain(channel.gainNode, 0);
+      const voice = channel.voice;
+      channel.voice = null;
+      retireVoice(voice, audioCtx.currentTime + 0.015);
+      setTimeout(() => {
+        try {
+          channel.gainNode.disconnect();
+          if (channel.panner) channel.panner.disconnect();
+        } catch (_) {
+          // Already disconnected.
+        }
+      }, 80);
+
       canvasObserver.unobserve(channel.canvas);
       channel.card.remove();
 
       refreshChannelTitles();
       syncPhaseModesToReference();
       refreshSummary();
-
       if (channels.length === 0) {
         renderEmptyState();
       }
     }
 
     function renderEmptyState() {
-      if (document.getElementById('emptyState')) {
-        return;
-      }
-      const empty = document.createElement('div');
+      if ($('emptyState')) return;
+      const empty = document.createElement('p');
       empty.id = 'emptyState';
       empty.textContent = 'No channels yet. Add a channel to begin mixing.';
-      if (addChannelSlot && addChannelSlot.parentNode === channelsList) {
-        channelsList.insertBefore(empty, addChannelSlot);
-      } else {
-        channelsList.appendChild(empty);
-      }
+      addChannelSlot.prepend(empty);
     }
 
     function clearEmptyState() {
-      const empty = document.getElementById('emptyState');
-      if (empty) {
-        empty.remove();
-      }
+      const empty = $('emptyState');
+      if (empty) empty.remove();
+    }
+
+    function bindFrequencyStepper(channel, button, direction) {
+      let holdTimer = 0;
+      let repeatDelay = STEPPER_REPEAT_START_MS;
+      let repeats = 0;
+      let holding = false;
+      const stepSize = () => (repeats > 40 ? 100 : repeats > 12 ? 10 : 1);
+      const repeat = () => {
+        repeats += 1;
+        stepFrequency(channel, direction, stepSize(), { skipResync: true });
+        repeatDelay = Math.max(STEPPER_REPEAT_MIN_MS, repeatDelay * 0.85);
+        holdTimer = setTimeout(repeat, repeatDelay);
+      };
+      const stopHold = () => {
+        if (!holding) return;
+        holding = false;
+        clearTimeout(holdTimer);
+        resyncRunningOscillators();
+      };
+      button.addEventListener('pointerdown', (event) => {
+        if (button.disabled || (event.pointerType === 'mouse' && event.button !== 0)) return;
+        event.preventDefault();
+        holding = true;
+        repeats = 0;
+        repeatDelay = STEPPER_REPEAT_START_MS;
+        stepFrequency(channel, direction, 1, { skipResync: true });
+        clearTimeout(holdTimer);
+        holdTimer = setTimeout(repeat, STEPPER_HOLD_DELAY_MS);
+      });
+      ['pointerup', 'pointerleave', 'pointercancel'].forEach((type) => button.addEventListener(type, stopHold));
+      button.addEventListener('click', (event) => {
+        // Keyboard activation reports detail 0; pointer presses were handled on pointerdown.
+        if (event.detail === 0) stepFrequency(channel, direction, 1);
+      });
     }
 
     function addChannel(options = {}) {
@@ -1481,229 +1134,127 @@
         refreshSummary();
         return false;
       }
-
       clearEmptyState();
 
-      const now = audioCtx.currentTime;
-      const referenceChannel = channels[0] || null;
-      const initialFrequency = Number.isFinite(options.frequency) ? options.frequency : 440;
-      const initialAmplitude = Number.isFinite(options.amplitude) ? clamp(options.amplitude, 0, 1) : 1;
-      const initialPhaseMode = PHASE_MODE_IN;
-      const initialPhaseOffset = getPhaseOffsetForMode(initialPhaseMode);
       const channel = {
         id: nextChannelId,
-        frequency: Math.round(clamp(initialFrequency, MIN_FREQUENCY_HZ, MAX_FREQUENCY_HZ)),
-        amplitude: initialAmplitude,
+        name: 'Channel',
+        frequency: Math.round(clamp(Number.isFinite(options.frequency) ? options.frequency : 440, MIN_FREQUENCY_HZ, MAX_FREQUENCY_HZ)),
+        amplitude: Number.isFinite(options.amplitude) ? clamp(options.amplitude, 0, 1) : 1,
         isPlaying: options.isPlaying === undefined ? true : Boolean(options.isPlaying),
-        waveTime: referenceChannel ? referenceChannel.waveTime : 0,
-        phaseMode: initialPhaseMode,
-        phaseOffsetRad: initialPhaseOffset,
-        oscillator: null
+        waveTime: channels[0] ? channels[0].waveTime : 0,
+        phaseMode: PHASE_MODE_IN,
+        phaseOffsetRad: 0,
+        pan: snapPan(options.pan),
+        voice: null
       };
       nextChannelId += 1;
 
-      const gainNode = audioCtx.createGain();
-      gainNode.gain.setValueAtTime(0, now);
-      gainNode.connect(channelBus);
-      channel.gainNode = gainNode;
-
-      const card = document.createElement('article');
-      card.className = 'channel-card';
-      card.dataset.state = 'paused';
-
-      const header = document.createElement('div');
-      header.className = 'channel-header';
-
-      const titleWrap = document.createElement('div');
-      titleWrap.className = 'channel-title-wrap';
-
-      const title = document.createElement('h3');
-      title.className = 'channel-title';
-      title.textContent = 'Channel';
-
-      const statusChip = document.createElement('span');
-      statusChip.className = 'status-chip paused';
-      statusChip.textContent = 'Paused';
-
-      const phaseToggleInline = document.createElement('div');
-      phaseToggleInline.className = 'phase-toggle-inline';
-
-      const phaseToggleSwitch = document.createElement('label');
-      phaseToggleSwitch.className = 'phase-toggle-switch';
-
-      const phaseToggle = document.createElement('input');
-      phaseToggle.type = 'checkbox';
-
-      const phaseToggleSlider = document.createElement('span');
-      phaseToggleSlider.className = 'phase-toggle-slider';
-
-      phaseToggleSwitch.appendChild(phaseToggle);
-      phaseToggleSwitch.appendChild(phaseToggleSlider);
-
-      const phaseToggleText = document.createElement('span');
-      phaseToggleText.className = 'phase-toggle-text';
-      phaseToggleText.textContent = 'in-phase';
-
-      phaseToggleInline.appendChild(phaseToggleSwitch);
-      phaseToggleInline.appendChild(phaseToggleText);
-
-      titleWrap.appendChild(title);
-      titleWrap.appendChild(statusChip);
-      titleWrap.appendChild(phaseToggleInline);
-
-      const actions = document.createElement('div');
-      actions.className = 'channel-actions';
-
-      const toggleBtn = document.createElement('button');
-      toggleBtn.className = 'btn btn-secondary btn-small';
-      setAudioButton(toggleBtn, 'Play', 'play');
-
-      const removeBtn = document.createElement('button');
-      removeBtn.className = 'btn btn-danger btn-small';
-      setAudioButton(removeBtn, 'Remove', 'remove');
-
-      actions.appendChild(toggleBtn);
-      actions.appendChild(removeBtn);
-
-      header.appendChild(titleWrap);
-      header.appendChild(actions);
-
-      const frequencyRow = document.createElement('div');
-      frequencyRow.className = 'frequency-row';
-
-      const freqNumberId = 'freq-number-' + channel.id;
-
-      const freqLabel = document.createElement('label');
-      freqLabel.className = 'freq-label';
-      freqLabel.textContent = 'Frequency';
-      freqLabel.htmlFor = freqNumberId;
-
-      const freqSlider = document.createElement('input');
-      freqSlider.type = 'range';
-      freqSlider.min = String(MIN_FREQUENCY_HZ);
-      freqSlider.max = String(MAX_FREQUENCY_HZ);
-      freqSlider.step = '1';
-      freqSlider.value = String(channel.frequency);
-      freqSlider.setAttribute('aria-label', 'Channel frequency');
-
-      const freqNumber = document.createElement('input');
-      freqNumber.className = 'freq-number';
-      freqNumber.id = freqNumberId;
-      freqNumber.type = 'number';
-      freqNumber.min = String(MIN_FREQUENCY_HZ);
-      freqNumber.max = String(MAX_FREQUENCY_HZ);
-      freqNumber.step = '1';
-      freqNumber.value = String(channel.frequency);
-      freqNumber.setAttribute('aria-label', 'Channel frequency in Hz');
-
-      const canvas = document.createElement('canvas');
-      canvas.className = 'channel-canvas';
-      const ctx = canvas.getContext('2d');
-
-      const waveRow = document.createElement('div');
-      waveRow.className = 'channel-wave-row';
-
-      const channelVolumeSlider = document.createElement('input');
-      channelVolumeSlider.className = 'channel-volume-slider';
-      channelVolumeSlider.type = 'range';
-      channelVolumeSlider.min = '0';
-      channelVolumeSlider.max = '100';
-      channelVolumeSlider.step = '1';
-      channelVolumeSlider.value = String(Math.round(channel.amplitude * 100));
-      channelVolumeSlider.title = 'Channel volume (0% to 100%)';
-      channelVolumeSlider.setAttribute('aria-label', 'Channel volume');
-      channelVolumeSlider.setAttribute('aria-orientation', 'vertical');
-
-      waveRow.appendChild(channelVolumeSlider);
-      const channelPlot = document.createElement('div');
-      channelPlot.className = 'channel-plot';
-      channelPlot.appendChild(canvas);
-      waveRow.appendChild(channelPlot);
-
-      frequencyRow.appendChild(freqLabel);
-      frequencyRow.appendChild(freqNumber);
-      frequencyRow.appendChild(freqSlider);
-      const amplitudeReadout = document.createElement('span');
-      amplitudeReadout.className = 'channel-amplitude';
-      amplitudeReadout.textContent = 'Level ' + Math.round(channel.amplitude * 100) + '%';
-      channel.amplitudeReadout = amplitudeReadout;
-      titleWrap.appendChild(amplitudeReadout);
-
-      card.appendChild(header);
-      card.appendChild(frequencyRow);
-      card.appendChild(waveRow);
-
-      if (addChannelSlot && addChannelSlot.parentNode === channelsList) {
-        channelsList.insertBefore(card, addChannelSlot);
+      channel.gainNode = audioCtx.createGain();
+      channel.gainNode.gain.value = 0;
+      let panner = null;
+      if (supportsStereoPanner) {
+        try {
+          panner = audioCtx.createStereoPanner();
+          panner.pan.value = channel.pan;
+        } catch (_) {
+          panner = null;
+        }
+      }
+      if (panner) {
+        channel.gainNode.connect(panner);
+        panner.connect(channelBus);
       } else {
-        channelsList.appendChild(card);
+        channel.gainNode.connect(channelBus);
+      }
+      channel.panner = panner;
+
+      const card = channelTemplate.content.firstElementChild.cloneNode(true);
+      const part = (role) => card.querySelector(`[data-role="${role}"]`);
+      Object.assign(channel, {
+        card,
+        title: part('title'),
+        stateChip: part('state'),
+        phaseGroup: part('phase'),
+        toggleBtn: part('toggle'),
+        removeBtn: part('remove'),
+        freqSlider: part('freq-slider'),
+        freqNumber: part('freq-number'),
+        freqDown: part('freq-down'),
+        freqUp: part('freq-up'),
+        levelSlider: part('level'),
+        levelValue: part('level-value'),
+        panSlider: part('pan'),
+        panValueBtn: part('pan-value'),
+        canvas: part('canvas')
+      });
+      channel.ctx = channel.canvas.getContext('2d');
+      channel.phaseInputs = Array.from(channel.phaseGroup.querySelectorAll('input'));
+      channel.phaseInputs.forEach((input) => { input.name = 'phase-' + channel.id; });
+
+      const ids = { 'freq-number': 'freq-number-', level: 'level-', pan: 'pan-' };
+      Object.keys(ids).forEach((role) => { part(role).id = ids[role] + channel.id; });
+      part('freq-label').htmlFor = 'freq-number-' + channel.id;
+      part('level-label').htmlFor = 'level-' + channel.id;
+      part('pan-label').htmlFor = 'pan-' + channel.id;
+      channel.levelValue.htmlFor = 'level-' + channel.id;
+
+      channel.freqNumber.min = String(MIN_FREQUENCY_HZ);
+      channel.freqNumber.max = String(MAX_FREQUENCY_HZ);
+      channel.freqNumber.value = String(channel.frequency);
+      channel.freqSlider.value = String(freqToSlider(channel.frequency));
+      channel.levelSlider.value = String(Math.round(channel.amplitude * 100));
+      channel.levelValue.textContent = Math.round(channel.amplitude * 100) + '%';
+      channel.panSlider.value = String(channel.pan);
+      if (!panner) {
+        channel.panSlider.disabled = true;
+        channel.panValueBtn.disabled = true;
+        channel.panValueBtn.title = 'Panning is not supported in this browser';
       }
 
-      channel.card = card;
-      channel.title = title;
-      channel.statusChip = statusChip;
-      channel.toggleBtn = toggleBtn;
-      channel.freqSlider = freqSlider;
-      channel.freqNumber = freqNumber;
-      channel.phaseToggleInline = phaseToggleInline;
-      channel.phaseToggle = phaseToggle;
-      channel.phaseToggleText = phaseToggleText;
-      channel.volumeSlider = channelVolumeSlider;
-      channel.canvas = canvas;
-      canvasObserver.observe(canvas);
-      channel.ctx = ctx;
+      channelsList.insertBefore(card, addChannelSlot);
+      canvasObserver.observe(channel.canvas);
 
-      freqSlider.addEventListener('input', () => {
-        applyFrequency(channel, parseFloat(freqSlider.value), { skipResync: true });
+      channel.freqSlider.addEventListener('input', () => {
+        applyFrequency(channel, sliderToFreq(parseFloat(channel.freqSlider.value)), { fromSlider: true, skipResync: true });
       });
+      channel.freqSlider.addEventListener('change', () => {
+        applyFrequency(channel, channel.frequency, { fromSlider: true });
+      });
+      channel.freqNumber.addEventListener('change', () => {
+        applyFrequency(channel, parseFloat(channel.freqNumber.value));
+      });
+      channel.freqNumber.addEventListener('keydown', (event) => {
+        if (event.key === 'Enter') channel.freqNumber.blur();
+      });
+      bindFrequencyStepper(channel, channel.freqDown, -1);
+      bindFrequencyStepper(channel, channel.freqUp, 1);
 
-      freqSlider.addEventListener('change', () => {
-        applyFrequency(channel, parseFloat(freqSlider.value));
+      channel.levelSlider.addEventListener('input', () => {
+        applyAmplitudePercent(channel, parseFloat(channel.levelSlider.value));
       });
-
-      freqNumber.addEventListener('change', () => {
-        const raw = parseFloat(freqNumber.value);
-        applyFrequency(channel, Number.isFinite(raw) ? raw : channel.frequency);
+      channel.panSlider.addEventListener('input', () => {
+        applyChannelPan(channel, parseFloat(channel.panSlider.value));
       });
-
-      channelVolumeSlider.addEventListener('input', () => {
-        applyAmplitudePercent(channel, parseFloat(channelVolumeSlider.value));
+      channel.panSlider.addEventListener('dblclick', () => applyChannelPan(channel, 0));
+      channel.panValueBtn.addEventListener('click', () => applyChannelPan(channel, 0));
+      channel.phaseInputs.forEach((input) => {
+        input.addEventListener('change', () => {
+          if (input.checked) setChannelPhaseMode(channel, input.value);
+        });
       });
-
-      channelVolumeSlider.addEventListener('change', () => {
-        applyAmplitudePercent(channel, parseFloat(channelVolumeSlider.value));
-      });
-
-      phaseToggle.addEventListener('change', () => {
-        setChannelPhaseModeRelativeToReference(
-          channel,
-          phaseToggle.checked ? PHASE_MODE_ANTI : PHASE_MODE_IN
-        );
-      });
-
-      toggleBtn.addEventListener('click', () => {
-        toggleChannel(channel.id);
-      });
-
-      removeBtn.addEventListener('click', () => {
-        removeChannel(channel.id);
-      });
+      channel.toggleBtn.addEventListener('click', () => toggleChannel(channel));
+      channel.removeBtn.addEventListener('click', () => removeChannel(channel));
 
       channels.push(channel);
-
-      resizeCanvas(canvas);
       refreshChannelTitles();
       syncPhaseModesToReference();
-      syncChannelUi(channel);
       refreshSummary();
       return true;
     }
 
     async function toggleCombined() {
-      if (channels.length === 0) {
-        return;
-      }
-
+      if (channels.length === 0) return;
       if (!combinedPlaying) {
         const ready = await ensureAudioContext();
         if (!ready) {
@@ -1716,45 +1267,186 @@
           resyncRunningOscillators();
         }
       }
-
       combinedPlaying = !combinedPlaying;
       setGain(combinedGain, combinedPlaying ? 1 : 0);
       syncCombinedUi();
-      channels.forEach((channel) => {
-        syncChannelUi(channel);
-      });
+      channels.forEach(syncChannelUi);
+    }
+
+    // ---------- Drawing ----------
+
+    function getCssVar(name) {
+      return getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+    }
+
+    let cachedThemeColors = null;
+    function getThemeColors() {
+      if (!cachedThemeColors) {
+        cachedThemeColors = {
+          canvasBg: getCssVar('--canvas-bg'),
+          axisLine: getCssVar('--axis-line'),
+          textMuted: getCssVar('--text-muted'),
+          channelLines: [getCssVar('--ch1-line'), getCssVar('--ch2-line')],
+          combinedLine: getCssVar('--combined-line')
+        };
+      }
+      return cachedThemeColors;
+    }
+
+    new MutationObserver(() => {
+      cachedThemeColors = null;
+      requestRedraw();
+    }).observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
+    window.addEventListener('panphy:theme-change', () => {
+      cachedThemeColors = null;
+      requestRedraw();
+    });
+
+    function prepareCanvas(ctx, canvas, colors) {
+      const dpr = window.devicePixelRatio || 1;
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      const width = canvas._cssWidth || 1;
+      const height = canvas._cssHeight || 1;
+      ctx.fillStyle = colors.canvasBg;
+      ctx.fillRect(0, 0, width, height);
+      ctx.strokeStyle = colors.axisLine;
+      ctx.lineWidth = 1;
+      ctx.setLineDash([4, 4]);
+      ctx.beginPath();
+      ctx.moveTo(0, height / 2);
+      ctx.lineTo(width, height / 2);
+      ctx.stroke();
+      ctx.setLineDash([]);
+      return { width, height };
+    }
+
+    // Draws a signal across the plot; sampleAt(fraction) gives values in [-scale, scale].
+    // One sample per pixel would show a false (aliased) wave at high frequencies, so the
+    // line is sampled about 24 times per cycle. Once a pixel column holds two or more
+    // whole cycles, each column is drawn from its minimum to its maximum instead,
+    // which is the true envelope.
+    function plotSignal(ctx, width, height, sampleAt, cyclesAcross, scale, color, dimmed) {
+      const columns = Math.max(2, Math.round(width));
+      const cyclesPerColumn = cyclesAcross / columns;
+      const middle = height / 2;
+      const amplitude = middle * 0.88;
+      const toY = (value) => middle - (value / scale) * amplitude;
+
+      ctx.save();
+      ctx.globalAlpha = dimmed ? 0.45 : 1;
+      ctx.strokeStyle = color;
+      ctx.lineJoin = 'round';
+      ctx.beginPath();
+      if (cyclesPerColumn < 2) {
+        const points = Math.max(columns, Math.ceil(cyclesAcross * 24));
+        ctx.lineWidth = cyclesPerColumn < 0.25 ? 2 : 1.25;
+        for (let i = 0; i <= points; i += 1) {
+          const fraction = i / points;
+          const y = toY(sampleAt(fraction));
+          if (i === 0) ctx.moveTo(0, y); else ctx.lineTo(fraction * width, y);
+        }
+      } else {
+        const subSamples = Math.min(96, Math.ceil(cyclesPerColumn * 6) + 2);
+        ctx.lineWidth = 1.25;
+        for (let x = 0; x < columns; x += 1) {
+          let low = Infinity;
+          let high = -Infinity;
+          for (let k = 0; k < subSamples; k += 1) {
+            const value = sampleAt((x + k / (subSamples - 1)) / columns);
+            if (value < low) low = value;
+            if (value > high) high = value;
+          }
+          ctx.moveTo(x + 0.5, toY(high));
+          ctx.lineTo(x + 0.5, toY(low));
+        }
+      }
+      ctx.stroke();
+      ctx.restore();
+    }
+
+    function drawLabel(ctx, text, x, y, align, colors) {
+      ctx.font = '11px "IBM Plex Mono", monospace';
+      ctx.textAlign = align;
+      const textWidth = ctx.measureText(text).width;
+      const left = align === 'right' ? x - textWidth : x;
+      ctx.fillStyle = colors.canvasBg;
+      ctx.fillRect(left - 5, y - 12, textWidth + 10, 17);
+      ctx.fillStyle = colors.textMuted;
+      ctx.fillText(text, x, y);
+    }
+
+    function drawChannelWave(channel, index, colors) {
+      const { width, height } = prepareCanvas(channel.ctx, channel.canvas, colors);
+      const timeWindow = BASE_WINDOW * zoomScale;
+      const omega = 2 * Math.PI * channel.frequency;
+      const amplitude = getChannelAmplitude(channel);
+      const phase = channel.phaseOffsetRad || 0;
+      const animated = combinedPlaying && channel.isPlaying;
+      plotSignal(
+        channel.ctx, width, height,
+        (fraction) => amplitude * Math.sin(omega * (channel.waveTime - fraction * timeWindow) + phase),
+        channel.frequency * timeWindow, 1,
+        colors.channelLines[index] || colors.channelLines[0],
+        !animated
+      );
+    }
+
+    function drawCombinedWave(colors) {
+      const { width, height } = prepareCanvas(combinedCtx, combinedCanvas, colors);
+      const activeChannels = channels.filter((channel) => channel.isPlaying);
+      if (activeChannels.length === 0) {
+        combinedCtx.fillStyle = colors.textMuted;
+        combinedCtx.textAlign = 'center';
+        combinedCtx.font = '13px "IBM Plex Mono", monospace';
+        combinedCtx.fillText('No channels on', width / 2, height / 2 - 10);
+        combinedCtx.fillText('Press Play on a channel to add it to the mix', width / 2, height / 2 + 14);
+        return;
+      }
+      const timeWindow = BASE_WINDOW * zoomScale;
+      const terms = activeChannels.map((channel) => ({
+        amplitude: getChannelAmplitude(channel),
+        omega: 2 * Math.PI * channel.frequency,
+        phase: channel.phaseOffsetRad || 0,
+        waveTime: channel.waveTime
+      }));
+      const scale = Math.max(1, terms.reduce((total, term) => total + term.amplitude, 0));
+      const maxFrequency = Math.max(...activeChannels.map((channel) => channel.frequency));
+      plotSignal(
+        combinedCtx, width, height,
+        (fraction) => {
+          let sum = 0;
+          for (const term of terms) {
+            sum += term.amplitude * Math.sin(term.omega * (term.waveTime - fraction * timeWindow) + term.phase);
+          }
+          return sum;
+        },
+        maxFrequency * timeWindow, scale, colors.combinedLine, !combinedPlaying
+      );
+      drawLabel(combinedCtx, formatWindow(timeWindow) + ' across', width - 10, height - 10, 'right', colors);
     }
 
     function draw(timestamp) {
       requestAnimationFrame(draw);
-
-      if (lastFrameTime === null) {
-        lastFrameTime = timestamp;
-        return;
-      }
-
-      const deltaSeconds = Math.min((timestamp - lastFrameTime) / 1000, 0.1);
+      const deltaSeconds = lastFrameTime === null ? 0 : Math.min((timestamp - lastFrameTime) / 1000, 0.1);
       lastFrameTime = timestamp;
 
-      if (combinedPlaying) {
+      const animating = combinedPlaying && channels.some((channel) => channel.isPlaying);
+      if (animating) {
         const step = deltaSeconds * timeScale;
         channels.forEach((channel) => {
-          if (channel.isPlaying) {
-            channel.waveTime += step;
-            // Wrap to prevent floating-point precision loss after extended use.
-            // 1e5 / freq keeps the value small while preserving phase continuity.
-            const wrapAt = 1e5 / Math.max(1, channel.frequency);
-            if (channel.waveTime > wrapAt) {
-              channel.waveTime -= wrapAt;
-            }
-          }
+          if (!channel.isPlaying) return;
+          channel.waveTime += step;
+          // Wrap by a whole number of cycles to keep precision without a phase jump.
+          const wrapAt = 1e5 / Math.max(1, channel.frequency);
+          if (channel.waveTime > wrapAt) channel.waveTime -= wrapAt;
         });
       }
+      // Redraw only while animating or after a change, to save battery.
+      if (!animating && !needsDraw) return;
+      needsDraw = false;
 
       const colors = getThemeColors();
-      channels.forEach((channel) => {
-        drawChannelWave(channel, colors);
-      });
+      channels.forEach((channel, index) => drawChannelWave(channel, index, colors));
       drawCombinedWave(colors);
     }
 
@@ -1763,29 +1455,25 @@
       const dpr = window.devicePixelRatio || 1;
       const width = Math.max(1, Math.floor(rect.width * dpr));
       const height = Math.max(1, Math.floor(rect.height * dpr));
-
       if (canvas.width !== width || canvas.height !== height) {
         canvas.width = width;
         canvas.height = height;
       }
       canvas._cssWidth = width / dpr;
       canvas._cssHeight = height / dpr;
+      requestRedraw();
     }
 
-    function applyCanvasDpr(ctx) {
-      const dpr = window.devicePixelRatio || 1;
-      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    function resizeAllCanvases() {
+      resizeCanvas(combinedCanvas);
+      channels.forEach((channel) => resizeCanvas(channel.canvas));
     }
 
-    function debounce(fn, waitMs) {
-      let timeoutId;
-      return (...args) => {
-        clearTimeout(timeoutId);
-        timeoutId = setTimeout(() => {
-          fn(...args);
-        }, waitMs);
-      };
-    }
+    const canvasObserver = new ResizeObserver((entries) => {
+      entries.forEach(({ target }) => resizeCanvas(target));
+    });
+
+    // ---------- Controls ----------
 
     addChannelBtn.addEventListener('click', async () => {
       const ready = await ensureAudioContext();
@@ -1797,64 +1485,43 @@
       addChannel({ frequency: 440, isPlaying: true });
     });
 
-    toggleCombinedBtn.addEventListener('click', async () => {
-      await toggleCombined();
+    toggleCombinedBtn.addEventListener('click', () => {
+      toggleCombined();
     });
 
     volumeSlider.addEventListener('input', () => {
-      const volume = parseFloat(volumeSlider.value);
-      setGain(volumeGain, volume);
+      setGain(volumeGain, parseFloat(volumeSlider.value));
       updateControlReadouts();
     });
 
-    panningSlider.addEventListener('input', () => {
-      if (!stereoPanner) {
-        panningSlider.value = '0';
-        updateControlReadouts();
-        return;
-      }
-      let pan = parseFloat(panningSlider.value);
-      if (Math.abs(pan) < 0.05) {
-        pan = 0;
-        panningSlider.value = '0';
-      }
-      stereoPanner.pan.setValueAtTime(pan, audioCtx.currentTime);
-      updateControlReadouts();
-    });
+    panningSlider.addEventListener('input', () => applyMasterPan(parseFloat(panningSlider.value)));
+    panningSlider.addEventListener('dblclick', () => applyMasterPan(0));
 
-    timeScaleSlider.addEventListener('input', () => {
-      const sliderValue = parseFloat(timeScaleSlider.value);
+    function applyTimeScale(sliderValue) {
+      timeScaleSlider.value = String(sliderValue);
       timeScale = Math.pow(10, sliderValue);
       updateControlReadouts();
-    });
+    }
+    timeScaleSlider.addEventListener('input', () => applyTimeScale(parseFloat(timeScaleSlider.value)));
+    timeScaleSlider.addEventListener('dblclick', () => applyTimeScale(0));
 
-    zoomScaleSlider.addEventListener('input', () => {
-      zoomScale = parseFloat(zoomScaleSlider.value);
+    function applyZoom(sliderValue) {
+      zoomScaleSlider.value = String(sliderValue);
+      zoomScale = Math.min(50, Math.pow(10, sliderValue));
       updateControlReadouts();
-    });
+    }
+    zoomScaleSlider.addEventListener('input', () => applyZoom(parseFloat(zoomScaleSlider.value)));
+    zoomScaleSlider.addEventListener('dblclick', () => applyZoom(0));
 
     document.addEventListener('keydown', (event) => {
-      if (event.code !== 'Space' || event.repeat) {
-        return;
-      }
-      const targetTag = event.target && event.target.tagName ? event.target.tagName.toUpperCase() : '';
-      if (INTERACTIVE_TAGS.has(targetTag) || event.target.closest('a, summary, [contenteditable]')) {
-        return;
-      }
+      if (event.code !== 'Space' || event.repeat) return;
+      const target = event.target;
+      const tag = target && target.tagName ? target.tagName.toUpperCase() : '';
+      if (INTERACTIVE_TAGS.has(tag) || (target.closest && target.closest('a, summary, label, [contenteditable]'))) return;
       event.preventDefault();
       toggleCombined();
     });
 
-    window.addEventListener('resize', debounce(() => {
-      resizeCanvas(combinedCanvas);
-      channels.forEach((channel) => {
-        resizeCanvas(channel.canvas);
-      });
-    }, 180));
-
-    const canvasObserver = new ResizeObserver((entries) => {
-      entries.forEach(({ target }) => resizeCanvas(target));
-    });
     canvasObserver.observe(combinedCanvas);
     resizeCanvas(combinedCanvas);
     updateControlReadouts();
