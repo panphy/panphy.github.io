@@ -290,40 +290,19 @@ const MEDIAPIPE_SOURCES = [
 
 const CAMERA_PREFERENCE_STORAGE_KEY = 'panphy-collision-preferred-camera';
 
-// Returning visitors who have used the camera here before get it started straight away;
-// a first visit waits for Start camera, so the permission prompt has some context.
-const CAMERA_USED_STORAGE_KEY = 'collisionCameraUsed';
-
-function saveCameraUsed() {
-    try {
-        localStorage.setItem(CAMERA_USED_STORAGE_KEY, 'true');
-    } catch (error) {
-        // Ignore storage access issues.
-    }
-}
-
-async function autoStartCamera() {
-    let permission = 'unknown';
+// The camera never starts by itself: it waits for Start camera. If the browser has already
+// blocked it, say so on the start card straight away.
+async function showBlockedCameraOnLoad() {
     try {
         if (navigator.permissions && navigator.permissions.query) {
-            permission = (await navigator.permissions.query({ name: 'camera' })).state;
+            const status = await navigator.permissions.query({ name: 'camera' });
+            if (status.state === 'denied') {
+                setCameraCardState('blocked');
+                setStatus('Camera access is blocked. Allow it in your browser’s settings, then press Start camera.');
+            }
         }
     } catch (error) {
         // Some browsers cannot query camera permission.
-    }
-    if (permission === 'denied') {
-        setCameraCardState('blocked');
-        setStatus('Camera access is blocked. Allow it in your browser’s settings, then press Start camera.');
-        return;
-    }
-    let usedBefore = false;
-    try {
-        usedBefore = localStorage.getItem(CAMERA_USED_STORAGE_KEY) === 'true';
-    } catch (error) {
-        // Ignore storage access issues.
-    }
-    if (permission === 'granted' || usedBefore) {
-        await startCameraAndTracking();
     }
 }
 
@@ -3744,7 +3723,6 @@ async function startCameraAndTracking() {
     ui.startBtn.disabled = false;
     ui.startCardBtn.disabled = false;
     setCameraCardState('idle');
-    saveCameraUsed();
     updateStartButtonState();
     if (document.hidden) {
         setStreamTracksEnabled(false);
@@ -4003,4 +3981,4 @@ resizeStage();
 setStatus('Camera is off.');
 syncStartCard();
 requestAnimationFrame(step);
-autoStartCamera();
+showBlockedCameraOnLoad();
