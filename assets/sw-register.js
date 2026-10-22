@@ -142,12 +142,15 @@
       .panphy-update p { margin: 0; flex: 1; }
       .panphy-update button { box-sizing: border-box; flex: none; width: auto; min-height: 48px; margin: 0; border-radius: 12px; box-shadow: none;
         font: inherit; letter-spacing: normal; text-transform: none; transform: none; cursor: pointer; }
-      .panphy-update .panphy-update-action { padding: 0 18px; border: 2px solid #C2410C; background: #C2410C; color: #fff; font-weight: 800; white-space: nowrap; }
+      /* Outrank page-wide button:hover:not(:disabled) rules so the label stays readable. */
+      .panphy-update button.panphy-update-action { padding: 0 18px; border: 2px solid #C2410C; background: #C2410C; color: #fff; font-weight: 800; white-space: nowrap; }
+      .panphy-update button.panphy-update-action:hover:not(:disabled) { border-color: #9A3412; background: #9A3412; color: #fff; }
       .panphy-update .panphy-update-action:disabled { opacity: .75; cursor: progress; }
       .panphy-update .panphy-update-close { min-width: 48px; padding: 0; border: 0; background: transparent; color: inherit; font-size: 26px; font-weight: 700; line-height: 1; }
       .panphy-update button:focus-visible { outline: 3px solid #0D9488; outline-offset: 2px; }
       :root[data-theme="dark"] .panphy-update { border-color: #F8F6F1; background: #1F1D1A; color: #F8F6F1; box-shadow: 0 10px 28px rgba(0, 0, 0, .6); }
-      :root[data-theme="dark"] .panphy-update .panphy-update-action { border-color: #EA580C; background: #EA580C; }
+      :root[data-theme="dark"] .panphy-update button.panphy-update-action { border-color: #EA580C; background: #EA580C; color: #1B1B1B; }
+      :root[data-theme="dark"] .panphy-update button.panphy-update-action:hover:not(:disabled) { border-color: #F97316; background: #F97316; color: #1B1B1B; }
       @keyframes panphy-update-in { from { opacity: 0; transform: translate(-50%, 12px); } }
       @media (prefers-reduced-motion: reduce) { .panphy-update { animation: none; } }
       @media print { .panphy-update { display: none !important; } }`;
