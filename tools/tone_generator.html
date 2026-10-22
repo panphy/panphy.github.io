@@ -70,6 +70,7 @@
       background: var(--surface); border-bottom: 1px solid var(--border);
     }
     .audio-brand { display: flex; align-items: center; gap: 10px; color: var(--text-main); }
+    .audio-brand > a { display: inline-flex; }
     .audio-brand img { width: 32px; height: 32px; object-fit: contain; }
     .audio-brand h1 { margin: 0; font: 400 1.5rem var(--font-display); letter-spacing: -.5px; }
     .audio-brand:hover { text-decoration: none; }
@@ -677,7 +678,7 @@
 <body>
   <div id="app">
   <header class="audio-appbar">
-    <a class="audio-brand" href="/" title="PanPhy Labs home"><img src="/assets/panphy.png" alt="PanPhy logo"><h1>Tone Generator</h1></a>
+    <div class="audio-brand"><a href="/" aria-label="PanPhy Labs home" title="PanPhy Labs home"><img src="/assets/panphy.png" alt="PanPhy logo"></a><h1>Tone Generator</h1></div>
     <div class="banner-actions">
       <button id="theme-button" data-panphy-theme-toggle aria-label="Toggle Light/Dark Theme" title="Toggle between light and dark themes"></button>
       <button data-panphy-fullscreen aria-label="Enter fullscreen" title="Enter fullscreen"></button>

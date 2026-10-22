@@ -266,6 +266,10 @@ input[type="number"]:focus {
 	text-decoration: none;
 }
 
+.neo-brand > a {
+  display: inline-flex;
+}
+
 .neo-brand img {
 	width: 30px;
 	height: 30px;

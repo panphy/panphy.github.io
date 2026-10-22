@@ -256,6 +256,10 @@ button:disabled {
   text-decoration: none;
 }
 
+.mt-brand > a {
+  display: inline-flex;
+}
+
 .mt-brand img {
   width: 30px;
   height: 30px;
