@@ -105,11 +105,11 @@ function renderFormulaLhs() {
 }
 
 // "Reads: T2 = column C, L = column B", so a name such as T2 is seen as one column, not T × 2.
+// The line keeps its height when empty, so the dialog does not jump as it comes and goes.
 function renderFormulaReads(sheet, text) {
 	const box = document.getElementById('formula-reads');
 	const analysis = PlotModel.cleanFormulaText(text) ? PlotModel.analyzeFormula(sheet, text, math) : null;
 	if (!analysis || !analysis.ok || !analysis.refs.size) {
-		box.hidden = true;
 		box.replaceChildren();
 		return;
 	}
@@ -128,7 +128,6 @@ function renderFormulaReads(sheet, text) {
 			: ` = column ${letter}`);
 	});
 	box.replaceChildren(...parts);
-	box.hidden = false;
 }
 
 // A live check against the first row that has every input, so mistakes show before Apply.
