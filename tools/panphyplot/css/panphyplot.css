@@ -2253,6 +2253,12 @@ input[type="number"]:focus {
 }
 
 /* Formula dialog: one chip per column, so the table never has to be checked behind the dialog. */
+.neo-formula-reads-symbol {
+	font-family: var(--font-mono);
+	font-weight: 600;
+	color: var(--ink);
+}
+
 .neo-formula-chips {
 	display: flex;
 	flex-wrap: wrap;
@@ -2302,11 +2308,6 @@ input[type="number"]:focus {
 	text-overflow: ellipsis;
 	white-space: nowrap;
 	font-weight: 600;
-}
-
-.neo-formula-chip-unit {
-	color: var(--ink-3);
-	white-space: nowrap;
 }
 
 @media (pointer: coarse) {

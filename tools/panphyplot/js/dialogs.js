@@ -27,7 +27,7 @@ function setDialogMessage(id, text, type = 'error') {
 
 let formulaTarget = null;
 
-// One chip per column, showing its letter, name and unit; a tap types its symbol into the formula.
+// One chip per column, showing its letter and name; a tap types its symbol into the formula.
 // The column being edited, and its ±Δ column, are left out because a formula cannot read itself.
 function renderFormulaChips(sheet) {
 	const names = [...PlotModel.getFormulaSymbols(sheet).entries()];
@@ -44,21 +44,19 @@ function renderFormulaChips(sheet) {
 		const alias = names.find(([symbol, id]) => id === column.id && symbol !== letter);
 		const symbol = alias ? alias[0] : letter;
 		const name = String(column.name || '').trim();
-		const unit = String(column.unit || '').trim();
 		const chip = document.createElement('button');
 		chip.type = 'button';
 		chip.className = 'neo-formula-chip';
 		chip.dataset.symbol = symbol;
 		const parts = [['neo-formula-chip-letter', letter]];
 		if (name && name !== letter) parts.push(['neo-formula-chip-name', name]);
-		if (unit) parts.push(['neo-formula-chip-unit', `(${unit})`]);
 		parts.forEach(([className, text]) => {
 			const span = document.createElement('span');
 			span.className = className;
 			span.textContent = text;
 			chip.append(span);
 		});
-		const description = `column ${letter}${name && name !== letter ? `, ${name}` : ''}${unit ? `, in ${unit}` : ''}`;
+		const description = `column ${letter}${name && name !== letter ? `, ${name}` : ''}`;
 		chip.title = `Insert ${symbol} (${description})`;
 		chip.setAttribute('aria-label', `Insert ${symbol}: ${description}`);
 		chips.push(chip);
@@ -95,10 +93,38 @@ function openFormulaDialog(column = null) {
 	document.getElementById('formula-input').focus();
 }
 
+// "Reads: T2 = column C, L = column B", so a name such as T2 is seen as one column, not T × 2.
+function renderFormulaReads(sheet, text) {
+	const box = document.getElementById('formula-reads');
+	const analysis = PlotModel.cleanFormulaText(text) ? PlotModel.analyzeFormula(sheet, text, math) : null;
+	if (!analysis || !analysis.ok || !analysis.refs.size) {
+		box.hidden = true;
+		box.replaceChildren();
+		return;
+	}
+	const parts = ['Reads: '];
+	[...analysis.refs].forEach(([symbol, id], position) => {
+		const index = sheet.columns.findIndex(column => column.id === id);
+		if (index < 0) return;
+		const letter = PlotModel.columnLetter(index);
+		const name = String(sheet.columns[index].name || '').trim();
+		const term = document.createElement('strong');
+		term.className = 'neo-formula-reads-symbol';
+		term.textContent = symbol;
+		if (position) parts.push(', ');
+		parts.push(term, symbol === letter
+			? ` = column ${letter}${name && name !== letter ? ` (${name})` : ''}`
+			: ` = column ${letter}`);
+	});
+	box.replaceChildren(...parts);
+	box.hidden = false;
+}
+
 // A live check against the first row that has every input, so mistakes show before Apply.
 function previewFormula() {
 	const sheet = getActiveSheet();
 	const text = document.getElementById('formula-input').value;
+	renderFormulaReads(sheet, text);
 	if (!PlotModel.cleanFormulaText(text)) {
 		setDialogMessage('formula-message', '');
 		return null;
