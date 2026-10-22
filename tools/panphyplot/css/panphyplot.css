@@ -2284,6 +2284,10 @@ input[type="number"]:focus {
 }
 
 /* Formula dialog: one chip per column, so the table never has to be checked behind the dialog. */
+.neo-formula-reads {
+	min-height: 1.5em;
+}
+
 .neo-formula-reads-symbol {
 	font-family: var(--font-mono);
 	font-weight: 600;
