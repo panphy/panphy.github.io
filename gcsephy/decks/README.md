@@ -25,4 +25,4 @@ All four decks use `/assets/theme.js` with `data-theme-scope="gcsephy"`, so thei
 
 `assets/companion-deck.css` and `companion-deck.js` provide the Year 9/10 layouts and navigation. Year 11 retains its own `deck.css` and `deck.js`; its history slides have a distinct background to mark non-exam enrichment. `assets/deck-notes.js` and `deck-notes.css` provide the Note panel (N). `assets/model3d.js` supports the 3D models and refreshes their colours and thumbnails when the theme changes.
 
-The decks are network-only and load `/gcsephy/sw-register.js` for freshness notifications. They are outside the root catalogue and offline cache. The approved design sample remains in [`../../beta/gcse-deck-sample/`](../../beta/gcse-deck-sample/).
+The decks are network-only and load `/gcsephy/sw-register.js` for freshness notifications. They are outside the root catalogue and offline cache.
