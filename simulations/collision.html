@@ -1,28 +1,32 @@
 <!DOCTYPE html>
-<html lang="en" data-theme="dark">
+<html lang="en" data-theme="light">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <meta name="theme-color" content="#111110">
+    <meta name="theme-color" content="#F8F6F1">
+    <script src="/assets/theme.js"></script>
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <link rel="stylesheet" href="/assets/standalone-top.css">
     <title>Collision Lab</title>
     <link rel="icon" type="image/png" href="/assets/favicon.png">
     <script src="/assets/sw-register.js" defer></script>
+    <link rel="stylesheet" href="/assets/theme-toggle.css">
+    <script src="/assets/theme-toggle.js"></script>
     <link rel="stylesheet" href="/simulations/collision/styles.css">
 </head>
 
 <body>
-    <div class="topbar">
-        <div class="bar">
-            <a class="brand" href="/" aria-label="PanPhy home">
-                <img src="/assets/panphy.png" alt="panphy logo">
-            </a>
-            <div class="title gradient-text">Collision Lab</div>
+    <header class="cl-appbar">
+        <div class="cl-brand">
+            <a href="https://panphy.app/" aria-label="PanPhy Labs home" title="PanPhy Labs home"><img src="/assets/panphy.png" alt="PanPhy logo"></a>
+            <span class="cl-wordmark">Collision Lab</span>
         </div>
-    </div>
+        <div class="cl-appbar-actions">
+            <button id="theme-button" data-panphy-theme-toggle class="theme-toggle-button" aria-label="Toggle Light/Dark Theme" title="Toggle between light and dark themes">&#9728;&#65039;</button>
+        </div>
+    </header>
 
     <!--
       Collision solver note (for future maintenance):
@@ -37,162 +41,245 @@
         can accumulate faster, which can look like temporary sticking or jitter under high collision frequency.
     -->
     <main class="app">
-        <div class="instruction-message" role="note">
-            <p>Use your hand to push, flick or grab the balls, or open Controls to try a preset collision.</p>
-        </div>
-        <section id="stage" class="stage panel">
-            <button id="controlsToggle" type="button" aria-label="Open controls">Controls</button>
-            <div class="controls-panel" id="controlsPanel" aria-label="Simulation controls">
-                <button id="controlsClose" type="button" aria-label="Close controls">&#x2715;</button>
-                <div class="cp-section">
-                    <span class="cp-label">Setup</span>
-                    <div class="controls-main">
-                        <button id="startBtn" type="button">Start Camera</button>
-                        <label for="cameraSelect" class="control-block">
-                            <span class="control-label">Camera</span>
-                            <select id="cameraSelect" disabled>
-                                <option value="">Default</option>
-                            </select>
-                        </label>
-                        <button id="addBtn" type="button">Add Ball</button>
-                        <button id="resetBtn" type="button" disabled>Reset Ball(s)</button>
-                    </div>
-                    <p class="control-help">Reset returns all balls to their start positions at rest.</p>
-                </div>
-                <div class="cp-divider"></div>
-                <div class="cp-section">
-                    <span class="cp-label">Presets</span>
-                    <div class="preset-grid">
-                        <button type="button" class="preset-btn" data-preset="elasticEqual">Elastic, equal masses</button>
-                        <button type="button" class="preset-btn" data-preset="heavyLight">Heavy hits light</button>
-                        <button type="button" class="preset-btn" data-preset="perfectlyInelastic">Perfectly
-                            inelastic</button>
-                        <button type="button" class="preset-btn" data-preset="cradle">Newton's cradle</button>
-                    </div>
-                </div>
-                <div class="cp-divider"></div>
-                <div class="cp-section">
-                    <span class="cp-label">Display</span>
-                    <div class="physics-toggle-row">
-                        <label class="toggle-block">
-                            <span class="control-label">Data</span>
-                            <span class="switch">
-                                <input type="checkbox" id="dataToggle" aria-label="Show momentum and energy data">
-                                <span class="switch-slider"></span>
-                            </span>
-                        </label>
-                        <label class="toggle-block">
-                            <span class="control-label">Trails</span>
-                            <span class="switch">
-                                <input type="checkbox" id="trailsToggle" aria-label="Show motion trails">
-                                <span class="switch-slider"></span>
-                            </span>
-                        </label>
-                        <label class="toggle-block">
-                            <span class="control-label">Velocity arrows</span>
-                            <span class="switch">
-                                <input type="checkbox" id="arrowsToggle" aria-label="Show velocity arrows">
-                                <span class="switch-slider"></span>
-                            </span>
-                        </label>
+        <p class="cl-hint" role="note">Use your hand to push, flick or grab the balls, or pick a preset collision.</p>
+
+        <section id="stage" class="stage" aria-label="Collision Lab">
+            <div class="cl-main">
+                <div class="cl-viewport">
+                    <div id="view" class="cl-view">
+                        <video id="camera" class="media-layer" autoplay playsinline muted></video>
+                        <canvas id="renderCanvas" class="media-layer"></canvas>
+                        <canvas id="tipCanvas" class="media-layer"></canvas>
+
+                        <div id="dataPanel" class="data-panel mono" aria-live="off" hidden></div>
+
+                        <!-- Shown while there are no balls and the camera is off; explains camera problems. -->
+                        <div id="startCard" class="cl-start" data-state="idle">
+                            <div class="cl-start-card" role="status" aria-live="polite">
+                                <h2 id="startTitle">Push balls with your hand</h2>
+                                <p id="startText">Start the camera and wave a hand at the balls, or set up a collision without a camera.</p>
+                                <div class="cl-spinner" aria-hidden="true"></div>
+                                <div class="cl-start-actions">
+                                    <button id="startCardBtn" type="button" class="btn-primary">
+                                        <svg class="cl-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 8.5A2.5 2.5 0 0 1 5.5 6h1.8l1.4-2h6.6l1.4 2h1.8A2.5 2.5 0 0 1 21 8.5v9a2.5 2.5 0 0 1-2.5 2.5h-13A2.5 2.5 0 0 1 3 17.5z"/><circle cx="12" cy="13" r="3.6"/></svg>
+                                        <span id="startCardLabel">Start camera</span>
+                                    </button>
+                                    <button id="addCardBtn" type="button">
+                                        <svg class="cl-icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8.5"/><path d="M12 8v8M8 12h8"/></svg>
+                                        <span>Add a ball</span>
+                                    </button>
+                                </div>
+                                <div class="cl-start-presets">
+                                    <span class="cl-field-label">Or try a preset</span>
+                                    <div class="cl-chip-row">
+                                        <button type="button" class="cl-chip" data-preset="elasticEqual">Elastic, equal masses</button>
+                                        <button type="button" class="cl-chip" data-preset="heavyLight">Heavy hits light</button>
+                                        <button type="button" class="cl-chip" data-preset="perfectlyInelastic">Perfectly inelastic</button>
+                                        <button type="button" class="cl-chip" data-preset="cradle">Newton's cradle</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div id="selectionOverlay" class="selection-overlay" role="dialog" aria-modal="true"
+                            aria-label="Ball selection" style="display: none;">
+                            <p class="selection-overlay-title">Ball selected</p>
+                            <div class="selection-overlay-actions">
+                                <button id="removeTargetBtn" class="btn-danger" type="button">Remove ball</button>
+                                <button id="cancelTargetBtn" class="btn-cancel" type="button">Cancel</button>
+                            </div>
+                        </div>
                     </div>
                 </div>
-                <div class="cp-divider"></div>
-                <div class="cp-section">
-                    <span class="cp-label">Physics</span>
-                    <details id="physicsDetails" class="physics-controls">
-                        <summary>
-                            <span class="physics-summary-copy">Physics Settings</span>
-                            <span class="summary-caret" aria-hidden="true">▼</span>
-                        </summary>
-                        <div class="physics-controls-inner">
-                            <div class="physics-toggle-row">
-                                <label class="toggle-block">
-                                    <span class="control-label">Walls</span>
-                                    <span class="switch">
-                                        <input type="checkbox" id="wallsToggle" aria-label="Toggle walls" checked>
-                                        <span class="switch-slider"></span>
+
+                <!-- Settings drawer: beside the view on wide screens, a sheet on narrow ones. -->
+                <aside class="cl-drawer" id="controlsPanel" aria-label="Settings" hidden>
+                    <div class="cl-drawer-head">
+                        <h2>Settings</h2>
+                        <button id="controlsClose" class="cl-tool" type="button" aria-label="Close settings" title="Close settings">
+                            <svg class="cl-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg>
+                        </button>
+                    </div>
+                    <div class="cl-drawer-body">
+                        <details id="ballControlsSection" class="ball-controls" aria-live="polite" open>
+                            <summary class="ball-controls-summary">
+                                <span class="ball-controls-head">
+                                    <span class="cp-label">Ball settings</span>
+                                    <span id="ballControlsCount" class="value-badge">0 / 3</span>
+                                </span>
+                                <span class="summary-caret" aria-hidden="true">
+                                    <svg class="cl-icon" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg>
+                                </span>
+                            </summary>
+                            <div class="ball-controls-body">
+                                <p class="control-help">Set each ball's mass and launch velocity, then launch it from its
+                                    start position. Positive velocity points right (or up).</p>
+                                <div id="ballControlsList" class="ball-controls-list"></div>
+                            </div>
+                        </details>
+
+                        <details id="physicsDetails" class="physics-controls">
+                            <summary>
+                                <span class="cp-label">Physics</span>
+                                <span class="summary-caret" aria-hidden="true">
+                                    <svg class="cl-icon" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg>
+                                </span>
+                            </summary>
+                            <div class="physics-controls-inner">
+                                <div class="physics-toggle-row">
+                                    <label class="toggle-block">
+                                        <span class="switch">
+                                            <input type="checkbox" id="wallsToggle" aria-label="Toggle walls" checked>
+                                            <span class="switch-slider"></span>
+                                        </span>
+                                        <span class="control-label">Walls</span>
+                                    </label>
+                                    <label class="toggle-block">
+                                        <span class="switch">
+                                            <input type="checkbox" id="oneDToggle" aria-label="Toggle 1D mode">
+                                            <span class="switch-slider"></span>
+                                        </span>
+                                        <span class="control-label">1D mode</span>
+                                    </label>
+                                </div>
+                                <div id="physicsStepperGrid" class="physics-slider-grid"></div>
+                                <p class="control-help">e is the coefficient of restitution: 1 is elastic, 0 is perfectly
+                                    inelastic.</p>
+                                <p id="gravityHelp" class="control-help" hidden>Gravity is off in 1D mode because the balls
+                                    move horizontally only.</p>
+                            </div>
+                        </details>
+
+                        <details class="physics-controls" open>
+                            <summary>
+                                <span class="cp-label">Camera</span>
+                                <span class="summary-caret" aria-hidden="true">
+                                    <svg class="cl-icon" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg>
+                                </span>
+                            </summary>
+                            <div class="physics-controls-inner">
+                                <label for="cameraSelect" class="control-block">
+                                    <span class="control-label">Camera</span>
+                                    <select id="cameraSelect" disabled>
+                                        <option value="">Default</option>
+                                    </select>
+                                </label>
+                                <label for="sensitivityRange" class="control-block">
+                                    <span class="control-label-row">
+                                        <span class="control-label">Hand sensitivity</span>
+                                        <span id="sensitivityValue" class="value-badge">1.0x</span>
                                     </span>
+                                    <input id="sensitivityRange" type="range" min="0.6" max="2.0" step="0.1"
+                                        value="1.0">
                                 </label>
                                 <label class="toggle-block">
-                                    <span class="control-label">1D mode</span>
                                     <span class="switch">
-                                        <input type="checkbox" id="oneDToggle" aria-label="Toggle 1D mode">
+                                        <input type="checkbox" id="trackingToggle" aria-label="Show tracking info">
                                         <span class="switch-slider"></span>
                                     </span>
+                                    <span class="control-label">Show tracking info (frame rate, hands, contacts)</span>
                                 </label>
                             </div>
-                            <div id="physicsStepperGrid" class="physics-slider-grid"></div>
-                            <p class="control-help">e is the coefficient of restitution: 1 is elastic, 0 is perfectly
-                                inelastic.</p>
-                            <p id="gravityHelp" class="control-help" hidden>Gravity is off in 1D mode because the balls
-                                move horizontally only.</p>
-                            <label for="sensitivityRange" class="control-block">
-                                <span class="control-label-row">
-                                    <span class="control-label">Hand sensitivity</span>
-                                    <span id="sensitivityValue" class="value-badge">1.0x</span>
-                                </span>
-                                <input id="sensitivityRange" type="range" min="0.6" max="2.0" step="0.1"
-                                    value="1.0">
-                            </label>
-                        </div>
-                    </details>
-                    <details id="ballControlsSection" class="ball-controls" aria-live="polite" open>
-                        <summary class="ball-controls-summary">
-                            <span class="ball-controls-head">
-                                <span class="cp-label">Ball Settings</span>
-                                <span id="ballControlsCount" class="value-badge">0 / 3</span>
-                            </span>
-                            <span class="summary-caret" aria-hidden="true">▼</span>
-                        </summary>
-                        <div class="ball-controls-body">
-                            <p class="control-help">Set each ball's mass and launch velocity, then launch it from its
-                                start position. Positive velocity points right (or up).</p>
-                            <div id="ballControlsList" class="ball-controls-list"></div>
-                        </div>
-                    </details>
-                </div>
+                        </details>
+                    </div>
+                </aside>
             </div>
-            <div class="playback-bar" role="group" aria-label="Playback">
-                <button id="pauseBtn" type="button" class="stage-btn" aria-label="Pause" title="Pause">&#x23F8;&#xFE0E;</button>
-                <button id="stepBtn" type="button" class="stage-btn" aria-label="Step forward one frame"
-                    title="Step forward one frame" disabled>&#x23ED;&#xFE0E;</button>
-                <label class="speed-select">
-                    <span class="visually-hidden">Playback speed</span>
-                    <select id="speedSelect" aria-label="Playback speed">
-                        <option value="1">1&times;</option>
-                        <option value="0.5">0.5&times;</option>
-                        <option value="0.25">0.25&times;</option>
-                        <option value="0.1">0.1&times;</option>
-                    </select>
-                </label>
-            </div>
-            <div id="dataPanel" class="data-panel mono" aria-live="off" hidden></div>
-            <button id="fullscreenBtn" type="button" aria-label="Enter full screen"
-                title="Enter full screen">&#x26F6;</button>
-            <video id="camera" class="media-layer" autoplay playsinline muted></video>
-            <canvas id="renderCanvas" class="media-layer"></canvas>
-            <canvas id="tipCanvas" class="media-layer"></canvas>
 
-            <div id="selectionOverlay" class="selection-overlay" role="dialog" aria-modal="true"
-                aria-label="Ball selection" style="display: none;">
-                <p class="selection-overlay-title">Ball Selected</p>
-                <div class="selection-overlay-actions">
-                    <button id="removeTargetBtn" class="btn-danger" type="button">Remove Ball</button>
-                    <button id="cancelTargetBtn" class="btn-cancel" type="button">Cancel</button>
+            <!-- Toolbar: below the view, floating over it in full screen. -->
+            <div class="cl-bar" id="toolbar">
+                <div class="cl-dock" role="toolbar" aria-label="Collision Lab tools">
+                    <div class="cl-group">
+                        <button id="startBtn" class="cl-tool" type="button" aria-label="Start camera" data-tooltip="Start camera">
+                            <svg class="cl-icon icon-camera" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 8.5A2.5 2.5 0 0 1 5.5 6h1.8l1.4-2h6.6l1.4 2h1.8A2.5 2.5 0 0 1 21 8.5v9a2.5 2.5 0 0 1-2.5 2.5h-13A2.5 2.5 0 0 1 3 17.5z"/><circle cx="12" cy="13" r="3.6"/></svg>
+                            <svg class="cl-icon icon-camera-off" viewBox="0 0 24 24" aria-hidden="true" style="display:none"><path d="M3 3l18 18M9.2 4h5.6l1.4 2h2.3A2.5 2.5 0 0 1 21 8.5v8.3M18.5 20h-13A2.5 2.5 0 0 1 3 17.5v-9A2.5 2.5 0 0 1 5.4 6M9.6 10.6a3.6 3.6 0 0 0 4.8 4.8"/></svg>
+                            <span class="cl-label" id="startLabel">Start camera</span>
+                        </button>
+                    </div>
+                    <span class="cl-sep"></span>
+                    <div class="cl-group" role="group" aria-label="Balls">
+                        <button id="addBtn" class="cl-tool" type="button" aria-label="Add ball" data-tooltip="Add ball">
+                            <svg class="cl-icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8.5"/><path d="M12 8v8M8 12h8"/></svg>
+                            <span class="cl-label">Add ball</span>
+                        </button>
+                        <button id="resetBtn" class="cl-tool" type="button" aria-label="Reset balls to their start positions" data-tooltip="Reset balls to their start positions" disabled>
+                            <svg class="cl-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5v5h5"/><path d="M4.6 14.5A7.5 7.5 0 1 0 6 7.2L4 10"/></svg>
+                            <span class="cl-label">Reset balls</span>
+                        </button>
+                        <div class="cl-menu-wrap">
+                            <button id="presetsBtn" class="cl-tool" type="button" aria-haspopup="true" aria-expanded="false" aria-controls="presetsMenu" aria-label="Presets" data-tooltip="Presets">
+                                <svg class="cl-icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="6.5" cy="12" r="3"/><circle cx="17.5" cy="12" r="3"/><path d="M10 12h4M2.5 6.5h5M16.5 6.5h5"/></svg>
+                                <span class="cl-label">Presets</span>
+                                <svg class="cl-caret" viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>
+                            </button>
+                            <div id="presetsMenu" class="cl-menu" role="menu" aria-label="Preset collisions" hidden>
+                                <button type="button" role="menuitem" data-preset="elasticEqual">Elastic, equal masses</button>
+                                <button type="button" role="menuitem" data-preset="heavyLight">Heavy hits light</button>
+                                <button type="button" role="menuitem" data-preset="perfectlyInelastic">Perfectly inelastic</button>
+                                <button type="button" role="menuitem" data-preset="cradle">Newton's cradle</button>
+                            </div>
+                        </div>
+                    </div>
+                    <span class="cl-sep"></span>
+                    <div class="cl-group" role="group" aria-label="Display">
+                        <label class="cl-tool cl-check" data-tooltip="Momentum and energy data">
+                            <input type="checkbox" id="dataToggle" class="visually-hidden" aria-label="Show momentum and energy data">
+                            <svg class="cl-icon" viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="4.5" width="17" height="15" rx="2"/><path d="M3.5 9.5h17M9.5 9.5v10"/></svg>
+                            <span class="cl-label">Data</span>
+                        </label>
+                        <label class="cl-tool cl-check" data-tooltip="Motion trails">
+                            <input type="checkbox" id="trailsToggle" class="visually-hidden" aria-label="Show motion trails">
+                            <svg class="cl-icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="18" cy="7" r="3"/><path d="M15 8.5c-3 1.5-5 3-6.5 5.5M7.5 15.8 6.4 18M4.8 20.4 4 21.5" stroke-dasharray="2 2.6"/></svg>
+                            <span class="cl-label">Trails</span>
+                        </label>
+                        <label class="cl-tool cl-check" data-tooltip="Velocity arrows">
+                            <input type="checkbox" id="arrowsToggle" class="visually-hidden" aria-label="Show velocity arrows">
+                            <svg class="cl-icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="6.5" cy="12" r="3"/><path d="M10 12h10M16.5 8.5 20 12l-3.5 3.5"/></svg>
+                            <span class="cl-label">Arrows</span>
+                        </label>
+                    </div>
+                    <span class="cl-sep"></span>
+                    <div class="cl-group" role="group" aria-label="Playback">
+                        <button id="pauseBtn" type="button" class="cl-tool stage-btn" aria-label="Pause" data-tooltip="Pause">
+                            <svg class="cl-icon icon-pause" viewBox="0 0 24 24" aria-hidden="true"><rect class="fill" x="6.5" y="5" width="3.6" height="14" rx="1"/><rect class="fill" x="13.9" y="5" width="3.6" height="14" rx="1"/></svg>
+                            <svg class="cl-icon icon-play" viewBox="0 0 24 24" aria-hidden="true" style="display:none"><path class="fill" d="M7.5 5.2v13.6a.8.8 0 0 0 1.2.7l10.6-6.8a.8.8 0 0 0 0-1.4L8.7 4.5a.8.8 0 0 0-1.2.7z"/></svg>
+                        </button>
+                        <button id="stepBtn" type="button" class="cl-tool stage-btn" aria-label="Step forward one frame" data-tooltip="Step one frame" disabled>
+                            <svg class="cl-icon" viewBox="0 0 24 24" aria-hidden="true"><path class="fill" d="M5.5 6.2v11.6a.8.8 0 0 0 1.2.7l8.6-5.8a.8.8 0 0 0 0-1.4L6.7 5.5a.8.8 0 0 0-1.2.7z"/><rect class="fill" x="16.5" y="5.5" width="2.6" height="13" rx="1"/></svg>
+                        </button>
+                        <label class="speed-select" data-tooltip="Playback speed">
+                            <span class="visually-hidden">Playback speed</span>
+                            <select id="speedSelect" aria-label="Playback speed">
+                                <option value="1">1&times;</option>
+                                <option value="0.5">0.5&times;</option>
+                                <option value="0.25">0.25&times;</option>
+                                <option value="0.1">0.1&times;</option>
+                            </select>
+                        </label>
+                    </div>
+                    <span class="cl-sep"></span>
+                    <div class="cl-group">
+                        <button id="controlsToggle" class="cl-tool" type="button" aria-expanded="false" aria-controls="controlsPanel" aria-label="Ball, physics and camera settings" data-tooltip="Settings">
+                            <svg class="cl-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h10M18 7h2M4 17h4M12 17h8"/><circle cx="16" cy="7" r="2"/><circle cx="10" cy="17" r="2"/></svg>
+                            <span class="cl-label">Settings</span>
+                        </button>
+                        <button id="fullscreenBtn" class="cl-tool" type="button" aria-label="Enter full screen" data-tooltip="Full screen">
+                            <svg class="cl-icon enter-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9V4h5M15 4h5v5M20 15v5h-5M9 20H4v-5"/></svg>
+                            <svg class="cl-icon exit-icon" viewBox="0 0 24 24" aria-hidden="true" style="display:none"><path d="M20 4l-6 6M14 5.5V10h4.5M4 20l6-6M10 18.5V14H5.5"/></svg>
+                        </button>
+                    </div>
                 </div>
             </div>
         </section>
+
         <div id="dataPanelDock" class="data-panel-dock"></div>
 
         <div class="hud">
-            <div id="statusMetrics" class="pill mono">Camera is off. | FPS: -- | Hands: 0 | Tips: 0 | Contacts: 0 |
-                Balls: 0</div>
+            <div id="statusMetrics" class="cl-status" role="status">Camera is off.</div>
         </div>
     </main>
 
     <footer>
-        &copy; 2026 <a href="/">PanPhy Labs</a>. All rights reserved. |
+        &copy; 2026 <a href="https://panphy.app/">PanPhy Labs</a>. All rights reserved. |
         <a href="https://buymeacoffee.com/panphy" target="_blank" rel="noopener noreferrer">Support My Projects</a>
     </footer>
     <script type="module" src="/simulations/collision/app.js"></script>

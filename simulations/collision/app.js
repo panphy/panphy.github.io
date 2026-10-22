@@ -28,6 +28,17 @@ const ui = {
     ballControlsCount: document.getElementById('ballControlsCount'),
     ballControlsList: document.getElementById('ballControlsList'),
     stage: document.getElementById('stage'),
+    view: document.getElementById('view'),
+    startLabel: document.getElementById('startLabel'),
+    startCard: document.getElementById('startCard'),
+    startTitle: document.getElementById('startTitle'),
+    startText: document.getElementById('startText'),
+    startCardBtn: document.getElementById('startCardBtn'),
+    startCardLabel: document.getElementById('startCardLabel'),
+    addCardBtn: document.getElementById('addCardBtn'),
+    presetsBtn: document.getElementById('presetsBtn'),
+    presetsMenu: document.getElementById('presetsMenu'),
+    trackingToggle: document.getElementById('trackingToggle'),
     video: document.getElementById('camera'),
     canvas: document.getElementById('renderCanvas'),
     tipCanvas: document.getElementById('tipCanvas'),
@@ -58,18 +69,30 @@ function trapFocus(event) {
     }
 }
 
+// The settings drawer sits beside the view on wide screens and is a sheet on narrow ones.
+const DRAWER_SHEET_QUERY = window.matchMedia('(max-width: 900px)');
+
 function openControls() {
-    ui.controlsPanel.classList.add('open');
-    ui.controlsToggle.style.display = 'none';
+    ui.controlsPanel.hidden = false;
+    ui.stage.classList.add('drawer-open');
+    ui.controlsToggle.setAttribute('aria-expanded', 'true');
     ui.controlsPanel.addEventListener('keydown', handleControlsPanelKeydown);
-    ui.controlsClose.focus();
+    ui.controlsClose.focus({ preventScroll: true });
+    scheduleResizeStage();
 }
 
 function closeControls() {
-    ui.controlsPanel.classList.remove('open');
-    ui.controlsToggle.style.display = '';
+    ui.controlsPanel.hidden = true;
+    ui.stage.classList.remove('drawer-open');
+    ui.controlsToggle.setAttribute('aria-expanded', 'false');
     ui.controlsPanel.removeEventListener('keydown', handleControlsPanelKeydown);
-    ui.controlsToggle.focus();
+    ui.controlsToggle.focus({ preventScroll: true });
+    scheduleResizeStage();
+}
+
+function toggleControls() {
+    if (ui.controlsPanel.hidden) openControls();
+    else closeControls();
 }
 
 function handleControlsPanelKeydown(event) {
@@ -77,7 +100,8 @@ function handleControlsPanelKeydown(event) {
         closeControls();
         return;
     }
-    if (event.key === 'Tab') {
+    // Trap focus only while the drawer covers the page as a sheet.
+    if (event.key === 'Tab' && DRAWER_SHEET_QUERY.matches) {
         trapFocus(event);
     }
 }
@@ -131,7 +155,7 @@ const DATA_PANEL_DOCK_QUERY = window.matchMedia('(max-width: 640px)');
 
 function placeDataPanel() {
     const docked = DATA_PANEL_DOCK_QUERY.matches && !isFullscreenActive();
-    const parent = docked ? ui.dataPanelDock : ui.stage;
+    const parent = docked ? ui.dataPanelDock : ui.view;
     if (ui.dataPanel.parentElement !== parent) {
         parent.appendChild(ui.dataPanel);
     }
@@ -146,9 +170,11 @@ function syncDataPanelDock() {
 function updateFullscreenUI() {
     placeDataPanel();
     const active = isFullscreenActive();
-    ui.fullscreenBtn.innerHTML = active ? '&#x2716;' : '&#x26F6;';
+    ui.stage.classList.toggle('is-fullscreen', active);
+    ui.fullscreenBtn.querySelector('.enter-icon').style.display = active ? 'none' : '';
+    ui.fullscreenBtn.querySelector('.exit-icon').style.display = active ? '' : 'none';
     ui.fullscreenBtn.setAttribute('aria-label', active ? 'Exit full screen' : 'Enter full screen');
-    ui.fullscreenBtn.setAttribute('title', active ? 'Exit full screen' : 'Enter full screen');
+    ui.fullscreenBtn.setAttribute('data-tooltip', active ? 'Exit full screen' : 'Full screen');
     scheduleResizeStage();
 }
 
@@ -194,6 +220,7 @@ if (window.innerWidth >= 900) {
 }
 
 const state = {
+    showTracking: false,
     running: false,
     lastFrameTime: 0,
     fps: 0,
@@ -262,6 +289,43 @@ const MEDIAPIPE_SOURCES = [
 ];
 
 const CAMERA_PREFERENCE_STORAGE_KEY = 'panphy-collision-preferred-camera';
+
+// Returning visitors who have used the camera here before get it started straight away;
+// a first visit waits for Start camera, so the permission prompt has some context.
+const CAMERA_USED_STORAGE_KEY = 'collisionCameraUsed';
+
+function saveCameraUsed() {
+    try {
+        localStorage.setItem(CAMERA_USED_STORAGE_KEY, 'true');
+    } catch (error) {
+        // Ignore storage access issues.
+    }
+}
+
+async function autoStartCamera() {
+    let permission = 'unknown';
+    try {
+        if (navigator.permissions && navigator.permissions.query) {
+            permission = (await navigator.permissions.query({ name: 'camera' })).state;
+        }
+    } catch (error) {
+        // Some browsers cannot query camera permission.
+    }
+    if (permission === 'denied') {
+        setCameraCardState('blocked');
+        setStatus('Camera access is blocked. Allow it in your browser’s settings, then press Start camera.');
+        return;
+    }
+    let usedBefore = false;
+    try {
+        usedBefore = localStorage.getItem(CAMERA_USED_STORAGE_KEY) === 'true';
+    } catch (error) {
+        // Ignore storage access issues.
+    }
+    if (permission === 'granted' || usedBefore) {
+        await startCameraAndTracking();
+    }
+}
 
 function loadPreferredCameraId() {
     try {
@@ -525,15 +589,85 @@ const tipHistory = new Map();
 const activeContacts = new Set();
 const handGripStates = new Map();
 
+// The status line shows the latest message; tracking numbers are optional (Settings > Camera).
 function renderHudInfo(force = false) {
-    const fpsText = state.running ? state.fps.toFixed(0) : '--';
-    const nextText =
-        `${state.statusMessage} | FPS: ${fpsText} | Hands: ${state.handsCount} | Tips: ${state.tipCount} | Contacts: ${state.contactsCount} | Balls: ${spheres.length}`;
+    let nextText = state.statusMessage;
+    if (state.showTracking) {
+        const fpsText = state.running ? state.fps.toFixed(0) : '--';
+        nextText += ` | FPS: ${fpsText} | Hands: ${state.handsCount} | Tips: ${state.tipCount} | Contacts: ${state.contactsCount} | Balls: ${spheres.length}`;
+    }
     if (!force && state.lastHudText === nextText) {
         return;
     }
     state.lastHudText = nextText;
     ui.statusMetrics.textContent = nextText;
+    ui.statusMetrics.classList.toggle('is-tracking', state.showTracking);
+}
+
+// --- Start card: shown while there are no balls and the camera is off ---
+
+const START_CARD_COPY = {
+    idle: ['Push balls with your hand', 'Start the camera and wave a hand at the balls, or set up a collision without a camera.', 'Start camera'],
+    starting: ['Starting the camera…', 'If your browser asks, allow camera access. Hand tracking takes a moment to load.', ''],
+    blocked: ['Camera access is blocked', 'Allow camera access for this site in your browser’s settings and try again, or use the balls without a camera.', 'Try again'],
+    nocamera: ['No camera found', 'Connect a camera and try again, or use the balls without a camera.', 'Try again'],
+    busy: ['The camera is busy', 'Another app or tab may be using it. Close that and try again, or use the balls without a camera.', 'Try again'],
+    tracker: ['Hand tracking didn’t load', 'Check the internet connection and try again, or use the balls without a camera.', 'Try again'],
+    unsupported: ['This browser can’t use a camera', 'Open this page over https in an up-to-date browser to use your hands. The balls still work without a camera.', ''],
+    error: ['The camera didn’t start', 'Try again, or use the balls without a camera.', 'Try again']
+};
+let startCardVisible = null;
+
+function setCameraCardState(cardState) {
+    const copy = START_CARD_COPY[cardState] || START_CARD_COPY.error;
+    ui.startCard.dataset.state = cardState;
+    ui.startTitle.textContent = copy[0];
+    ui.startText.textContent = copy[1];
+    if (copy[2]) {
+        ui.startCardLabel.textContent = copy[2];
+    }
+}
+
+function cameraErrorCardState(name) {
+    if (name === 'NotAllowedError' || name === 'PermissionDeniedError' || name === 'SecurityError') return 'blocked';
+    if (name === 'NotFoundError' || name === 'OverconstrainedError' || name === 'DevicesNotFoundError') return 'nocamera';
+    if (name === 'NotReadableError' || name === 'TrackStartError' || name === 'AbortError') return 'busy';
+    return 'error';
+}
+
+// On phones the view grows to fit the start card, so hide it and re-measure the view
+// before placing balls; otherwise they would be laid out for the wrong shape.
+function hideStartCardNow() {
+    if (ui.startCard.hidden) {
+        return;
+    }
+    ui.startCard.hidden = true;
+    startCardVisible = false;
+    resizeStage();
+}
+
+// Called every frame; only touches the DOM when visibility changes.
+function syncStartCard() {
+    const visible = !state.running && spheres.length === 0;
+    if (visible === startCardVisible) {
+        return;
+    }
+    startCardVisible = visible;
+    ui.startCard.hidden = !visible;
+}
+
+// --- Velocity arrows follow the theme, but stay white over the camera picture ---
+
+function getArrowColor() {
+    const dark = document.documentElement.getAttribute('data-theme') === 'dark';
+    return (dark || state.running) ? 0xffffff : 0x17181a;
+}
+
+function refreshArrowColors() {
+    const color = getArrowColor();
+    for (const sphere of spheres) {
+        sphere.arrow.setColor(color);
+    }
 }
 
 function setStatus(message, isError = false) {
@@ -856,13 +990,18 @@ function updateAddBtnState() {
 
 function updateStartButtonState() {
     const isRunning = state.running;
-    ui.startBtn.textContent = isRunning ? 'Stop Camera' : 'Start Camera';
-    ui.startBtn.setAttribute('aria-label', isRunning ? 'Stop camera' : 'Start camera');
+    const label = isRunning ? 'Stop camera' : 'Start camera';
+    ui.startLabel.textContent = label;
+    ui.startBtn.setAttribute('aria-label', label);
+    ui.startBtn.setAttribute('data-tooltip', label);
+    ui.startBtn.querySelector('.icon-camera').style.display = isRunning ? 'none' : '';
+    ui.startBtn.querySelector('.icon-camera-off').style.display = isRunning ? '' : 'none';
     ui.startBtn.classList.toggle('is-stop', isRunning);
+    refreshArrowColors();
 }
 
 function resizeStage() {
-    const rect = ui.stage.getBoundingClientRect();
+    const rect = ui.view.getBoundingClientRect();
     if (!rect.width || !rect.height) {
         return;
     }
@@ -977,7 +1116,7 @@ function createSphere(colorHex) {
         new THREE.Vector3(1, 0, 0),
         new THREE.Vector3(0, 0, PLANE_Z),
         0.3,
-        0xffffff,
+        getArrowColor(),
         0.08,
         0.06
     );
@@ -1062,6 +1201,7 @@ function createAndAddSphere() {
 }
 
 function addSphere() {
+    hideStartCardNow();
     if (spheres.length >= getMaxAllowedSpheres()) {
         return;
     }
@@ -1195,6 +1335,7 @@ function applyPreset(name) {
     if (!preset) {
         return;
     }
+    hideStartCardNow();
     removeAllSpheres();
 
     state.oneD = true;
@@ -2817,6 +2958,7 @@ function detectHands(now) {
 // The loop always runs so presets and launched balls work without the camera.
 function step(now) {
     requestAnimationFrame(step);
+    syncStartCard();
 
     if (document.hidden) {
         state.lastFrameTime = 0;
@@ -3024,9 +3166,10 @@ function renderDataPanel(force = false) {
 function setPaused(paused) {
     state.paused = paused;
     state.pendingStep = false;
-    ui.pauseBtn.innerHTML = paused ? '&#x25B6;&#xFE0E;' : '&#x23F8;&#xFE0E;';
+    ui.pauseBtn.querySelector('.icon-pause').style.display = paused ? 'none' : '';
+    ui.pauseBtn.querySelector('.icon-play').style.display = paused ? '' : 'none';
     ui.pauseBtn.setAttribute('aria-label', paused ? 'Play' : 'Pause');
-    ui.pauseBtn.setAttribute('title', paused ? 'Play' : 'Pause');
+    ui.pauseBtn.setAttribute('data-tooltip', paused ? 'Play' : 'Pause');
     ui.stepBtn.disabled = !paused;
     ui.stage.classList.toggle('is-paused', paused);
     if (paused) {
@@ -3491,16 +3634,20 @@ async function startCameraAndTracking() {
     }
 
     if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+        setCameraCardState('unsupported');
         setStatus('getUserMedia is not available in this browser.', true);
         return;
     }
 
     if (!window.isSecureContext && !isLocalLoopbackHost()) {
+        setCameraCardState('unsupported');
         setStatus(`Camera access requires HTTPS or localhost. Current URL: ${window.location.origin}`, true);
         return;
     }
 
     ui.startBtn.disabled = true;
+    ui.startCardBtn.disabled = true;
+    setCameraCardState('starting');
     setStatus('Requesting camera permission...');
 
     try {
@@ -3552,13 +3699,15 @@ async function startCameraAndTracking() {
             state.stream = null;
         }
         ui.startBtn.disabled = false;
+        ui.startCardBtn.disabled = false;
         updateStartButtonState();
         const name = error && error.name ? error.name : 'Error';
         const message = error && error.message ? error.message : String(error);
         console.error('Camera/tracking startup failed:', error);
+        setCameraCardState(cameraErrorCardState(name));
 
         if (name === 'NotAllowedError' || name === 'PermissionDeniedError') {
-            setStatus('Camera access required. Click "Start Camera" to allow.');
+            setStatus('Camera access is blocked. Allow it in your browser’s settings, then press Start camera.');
         } else {
             setStatus(`Could not access camera (${name}): ${message}`, true);
         }
@@ -3571,11 +3720,13 @@ async function startCameraAndTracking() {
         state.handLandmarker = await createHandLandmarker();
     } catch (error) {
         ui.startBtn.disabled = false;
+        ui.startCardBtn.disabled = false;
         updateStartButtonState();
         const name = error && error.name ? error.name : 'Error';
         const message = error && error.message ? error.message : String(error);
         console.error('Hand tracker load failed:', error);
-        setStatus(`Camera started, but hand tracker failed (${name}): ${message}. Click Start Camera to retry.`, true);
+        setCameraCardState('tracker');
+        setStatus(`Camera started, but hand tracker failed (${name}): ${message}. Press Start camera to retry.`, true);
         return;
     }
 
@@ -3591,6 +3742,9 @@ async function startCameraAndTracking() {
     }
     updateAddBtnState();
     ui.startBtn.disabled = false;
+    ui.startCardBtn.disabled = false;
+    setCameraCardState('idle');
+    saveCameraUsed();
     updateStartButtonState();
     if (document.hidden) {
         setStreamTracksEnabled(false);
@@ -3687,7 +3841,52 @@ ui.arrowsToggle.addEventListener('change', () => {
     state.showArrows = ui.arrowsToggle.checked;
     updateOverlays(false);
 });
-ui.controlsToggle.addEventListener('click', openControls);
+ui.controlsToggle.addEventListener('click', toggleControls);
+ui.startCardBtn.addEventListener('click', startCameraAndTracking);
+ui.addCardBtn.addEventListener('click', addSphere);
+ui.trackingToggle.addEventListener('change', () => {
+    state.showTracking = ui.trackingToggle.checked;
+    renderHudInfo(true);
+});
+
+function setPresetsMenuOpen(open) {
+    ui.presetsMenu.hidden = !open;
+    ui.presetsBtn.setAttribute('aria-expanded', String(open));
+    if (open) {
+        const first = ui.presetsMenu.querySelector('button');
+        if (first) first.focus({ preventScroll: true });
+    }
+}
+ui.presetsBtn.addEventListener('click', () => setPresetsMenuOpen(ui.presetsMenu.hidden));
+ui.presetsMenu.addEventListener('click', (event) => {
+    if (event.target.closest('[data-preset]')) {
+        setPresetsMenuOpen(false);
+        ui.presetsBtn.focus({ preventScroll: true });
+    }
+});
+ui.presetsMenu.addEventListener('keydown', (event) => {
+    const items = [...ui.presetsMenu.querySelectorAll('button')];
+    const index = items.indexOf(document.activeElement);
+    if (event.key === 'Escape') {
+        event.preventDefault();
+        setPresetsMenuOpen(false);
+        ui.presetsBtn.focus();
+    } else if (event.key === 'ArrowDown' || event.key === 'ArrowUp') {
+        event.preventDefault();
+        const next = (index + (event.key === 'ArrowDown' ? 1 : items.length - 1)) % items.length;
+        items[next].focus();
+    }
+});
+document.addEventListener('pointerdown', (event) => {
+    const inMenu = event.target instanceof Element && event.target.closest('.cl-menu-wrap');
+    if (!ui.presetsMenu.hidden && !inMenu) {
+        setPresetsMenuOpen(false);
+    }
+});
+window.addEventListener('panphy:theme-change', refreshArrowColors);
+if (window.PanPhyThemeToggle) {
+    window.PanPhyThemeToggle.mount(document.getElementById('theme-button'));
+}
 ui.controlsClose.addEventListener('click', closeControls);
 ui.fullscreenBtn.addEventListener('click', toggleFullscreen);
 
@@ -3699,7 +3898,6 @@ ui.video.addEventListener('resize', () => {
     state.tipsDirty = true;
 });
 
-ui.hud.classList.remove('hidden');
 
 ui.cameraSelect.addEventListener('change', () => {
     if (state.running && ui.cameraSelect.value) {
@@ -3761,7 +3959,7 @@ if (typeof DATA_PANEL_DOCK_QUERY.addEventListener === 'function') {
 document.addEventListener('webkitfullscreenchange', updateFullscreenUI);
 document.addEventListener('visibilitychange', handleVisibilityChange);
 if ('ResizeObserver' in window) {
-    new ResizeObserver(scheduleResizeStage).observe(ui.stage);
+    new ResizeObserver(scheduleResizeStage).observe(ui.view);
 }
 
 ui.canvas.addEventListener('webglcontextlost', (event) => {
@@ -3803,5 +4001,6 @@ renderHudInfo();
 updateFullscreenUI();
 resizeStage();
 setStatus('Camera is off.');
+syncStartCard();
 requestAnimationFrame(step);
-startCameraAndTracking();
+autoStartCamera();
