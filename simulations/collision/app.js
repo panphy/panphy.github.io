@@ -2801,42 +2801,77 @@ function getSweptCollisionNormal2D(a, b, diameter) {
     };
 }
 
-// Collisions found during the current substep, keyed by pair, for the data panel.
-const substepCollisions = new Map();
+// Collisions found during the current substep, for the data panel. Balls joined by impulses in
+// the same substep (such as a Newton's cradle chain) form one event, so the event's momentum
+// before and after balances even when three balls take part.
+const substepCollision = {
+    before: new Map(),
+    parent: new Map(),
+    pinned: new Set(),
+    logged: new Map(),
+    order: 0
+};
 
-function recordCollisionImpulse(a, b, pairRestitution, beforeVelocities) {
-    const key = `${a.id}-${b.id}`;
-    let event = substepCollisions.get(key);
-    if (!event) {
-        event = {
-            a,
-            b,
-            massA: clampSphereMass(a.mass),
-            massB: clampSphereMass(b.mass),
-            restitution: pairRestitution,
-            before: beforeVelocities,
-            after: null
-        };
-        substepCollisions.set(key, event);
+function beginSubstepCollisions() {
+    substepCollision.before.clear();
+    substepCollision.parent.clear();
+    substepCollision.pinned.clear();
+    substepCollision.logged.clear();
+    substepCollision.order = 0;
+    for (const sphere of spheres) {
+        substepCollision.before.set(sphere, { x: sphere.velocity.x, y: sphere.velocity.y });
     }
-    event.after = {
-        ax: a.velocity.x,
-        ay: a.velocity.y,
-        bx: b.velocity.x,
-        by: b.velocity.y
-    };
 }
 
-function finishSubstepCollisions() {
-    if (substepCollisions.size === 0) {
-        return;
+function findCollisionRoot(sphere) {
+    let root = sphere;
+    while (substepCollision.parent.has(root) && substepCollision.parent.get(root) !== root) {
+        root = substepCollision.parent.get(root);
     }
-    let latest = null;
-    for (const event of substepCollisions.values()) {
-        latest = event;
+    substepCollision.parent.set(sphere, root);
+    return root;
+}
+
+function recordCollisionImpulse(a, b, involvesPinned, isSignificant) {
+    const rootA = findCollisionRoot(a);
+    const rootB = findCollisionRoot(b);
+    if (rootA !== rootB) {
+        substepCollision.parent.set(rootB, rootA);
+        if (substepCollision.pinned.has(rootB)) {
+            substepCollision.pinned.add(rootA);
+        }
+        if (substepCollision.logged.has(rootB)) {
+            substepCollision.logged.set(rootA, Math.max(substepCollision.logged.get(rootA) ?? -1, substepCollision.logged.get(rootB)));
+        }
     }
-    state.lastCollision = latest;
-    substepCollisions.clear();
+    if (involvesPinned) {
+        substepCollision.pinned.add(rootA);
+    }
+    if (isSignificant) {
+        substepCollision.logged.set(rootA, substepCollision.order++);
+    }
+}
+
+function finishSubstepCollisions(restitution) {
+    let latestRoot = null;
+    let latestOrder = -1;
+    for (const [root, order] of substepCollision.logged) {
+        if (findCollisionRoot(root) === root && !substepCollision.pinned.has(root) && order > latestOrder) {
+            latestRoot = root;
+            latestOrder = order;
+        }
+    }
+    if (latestRoot) {
+        const balls = spheres
+            .filter((sphere) => substepCollision.parent.has(sphere) && findCollisionRoot(sphere) === latestRoot)
+            .map((sphere) => ({
+                sphere,
+                mass: clampSphereMass(sphere.mass),
+                before: substepCollision.before.get(sphere),
+                after: { x: sphere.velocity.x, y: sphere.velocity.y }
+            }));
+        state.lastCollision = { balls, restitution };
+    }
 }
 
 function resolveSphereCollisions(applyVelocity = true) {
@@ -2956,10 +2991,7 @@ function resolveSphereCollisions(applyVelocity = true) {
             }
 
             const pairRestitution = clampRestitution(state.ballRestitution);
-            const shouldLog = !aPinned && !bPinned && -relVelN >= COLLISION_LOG_MIN_SPEED;
-            const beforeVelocities = shouldLog
-                ? { ax: a.velocity.x, ay: a.velocity.y, bx: b.velocity.x, by: b.velocity.y }
-                : null;
+            const isSignificant = -relVelN >= COLLISION_LOG_MIN_SPEED;
             const impulse = (-(1 + pairRestitution) * relVelN) / velInvMassSum;
             a.velocity.x -= impulse * nx * velInvMassA;
             b.velocity.x += impulse * nx * velInvMassB;
@@ -2967,9 +2999,7 @@ function resolveSphereCollisions(applyVelocity = true) {
                 a.velocity.y -= impulse * ny * velInvMassA;
                 b.velocity.y += impulse * ny * velInvMassB;
             }
-            if (shouldLog || substepCollisions.has(`${a.id}-${b.id}`)) {
-                recordCollisionImpulse(a, b, pairRestitution, beforeVelocities);
-            }
+            recordCollisionImpulse(a, b, aPinned || bPinned, isSignificant);
         }
     }
 }
@@ -3033,6 +3063,7 @@ function updatePhysics(dt, profile) {
         }
 
         // Iterative velocity solver improves simultaneous-contact chains.
+        beginSubstepCollisions();
         for (let iter = 0; iter < velocityIterations; iter++) {
             resolveSphereCollisions(true);
             for (const sphere of spheres) {
@@ -3041,7 +3072,7 @@ function updatePhysics(dt, profile) {
                 }
             }
         }
-        finishSubstepCollisions();
+        finishSubstepCollisions(clampRestitution(state.ballRestitution));
         if (state.oneD && state.boundaryMode === 'walls') {
             stabilizeOneDWallPacking();
         }
@@ -3253,17 +3284,17 @@ function buildBallTableHtml() {
 function buildCollisionHtml(event) {
     const xSign = screenXSign();
     const is2D = !state.oneD;
-    const momentum = (v) => ({
-        x: ((event.massA * v.ax) + (event.massB * v.bx)) * xSign,
-        y: (event.massA * v.ay) + (event.massB * v.by)
-    });
-    const kineticEnergy = (v) => 0.5 * ((event.massA * ((v.ax ** 2) + (v.ay ** 2))) +
-        (event.massB * ((v.bx ** 2) + (v.by ** 2))));
-    const pBefore = momentum(event.before);
-    const pAfter = momentum(event.after);
-    const keBefore = kineticEnergy(event.before);
-    const keAfter = kineticEnergy(event.after);
-    const keChange = keBefore > 1e-9 ? ((keAfter - keBefore) / keBefore) * 100 : 0;
+    const totals = (key) => event.balls.reduce((sum, ball) => {
+        const v = ball[key];
+        sum.x += ball.mass * v.x * xSign;
+        sum.y += ball.mass * v.y;
+        sum.ke += 0.5 * ball.mass * ((v.x * v.x) + (v.y * v.y));
+        return sum;
+    }, { x: 0, y: 0, ke: 0 });
+    const before = totals('before');
+    const after = totals('after');
+    const keChange = before.ke > 1e-9 ? ((after.ke - before.ke) / before.ke) * 100 : 0;
+    const ballNames = event.balls.map((ball) => getBallLabel(ball.sphere)).join(' &harr; ');
 
     let html = dataCell('', 'data-head data-label');
     html += is2D
@@ -3271,12 +3302,12 @@ function buildCollisionHtml(event) {
         : dataCell('p <em>kg&middot;m/s</em>', 'data-head');
     html += dataCell(is2D ? 'KE' : 'KE <em>J</em>', 'data-head');
     html += DATA_RULE;
-    html += dataCell('Before', 'data-label') + vectorCells(pBefore.x, pBefore.y) + dataCell(keBefore.toFixed(2));
-    html += dataCell('After', 'data-label') + vectorCells(pAfter.x, pAfter.y) + dataCell(keAfter.toFixed(2));
+    html += dataCell('Before', 'data-label') + vectorCells(before.x, before.y) + dataCell(before.ke.toFixed(2));
+    html += dataCell('After', 'data-label') + vectorCells(after.x, after.y) + dataCell(after.ke.toFixed(2));
 
     return `
         <div class="data-collision">
-            <div class="data-title">Last collision <span>${getBallLabel(event.a)} &harr; ${getBallLabel(event.b)}</span></div>
+            <div class="data-title">Last collision <span>${ballNames}</span></div>
             <div class="data-grid data-collision-grid ${is2D ? 'is-2d' : 'is-1d'}">${html}</div>
             <div class="data-verdict">${describeRestitution(event.restitution)}<span>KE change ${formatPercentChange(keChange)}</span></div>
         </div>`;
@@ -3537,7 +3568,7 @@ function disposeSphere(sphere) {
     sphere.material.dispose();
     sphere.trailMesh.geometry.dispose();
     sphere.trailMesh.material.dispose();
-    if (state.lastCollision && (state.lastCollision.a === sphere || state.lastCollision.b === sphere)) {
+    if (state.lastCollision && state.lastCollision.balls.some((ball) => ball.sphere === sphere)) {
         state.lastCollision = null;
     }
 }
