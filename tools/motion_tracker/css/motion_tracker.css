@@ -509,6 +509,11 @@ button:disabled {
   right: 0;
 }
 
+/* Keep the right-aligned menu inside the pane when Clear wraps to a new row. */
+.mt-clear-tools {
+  margin-left: auto;
+}
+
 @keyframes mt-pop {
   from {
     opacity: 0;
