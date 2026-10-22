@@ -42,7 +42,6 @@ const ui = {
     video: document.getElementById('camera'),
     canvas: document.getElementById('renderCanvas'),
     tipCanvas: document.getElementById('tipCanvas'),
-    trailCanvas: document.getElementById('trailCanvas'),
     arrowCanvas: document.getElementById('arrowCanvas'),
     physicsDetails: document.getElementById('physicsDetails'),
     hud: document.querySelector('.hud'),
@@ -1068,6 +1067,7 @@ function createSphere(colorHex) {
     group.add(mesh, wire);
 
     const trailPositions = new Float32Array(TRAIL_LENGTH * 3);
+    const trailMesh = createTrailRibbon();
 
     return {
         id: nextSphereId++,
@@ -1075,6 +1075,7 @@ function createSphere(colorHex) {
         group,
         material,
         trailPositions,
+        trailMesh,
         trailCount: 0,
         position: new THREE.Vector3(0, 0, PLANE_Z),
         spawnPosition: new THREE.Vector3(0, 0, PLANE_Z),
@@ -1135,7 +1136,7 @@ function placeSphere(sphere, x, y) {
 
 function createAndAddSphere() {
     const sphere = createSphere(pickSphereColor());
-    scene.add(sphere.group);
+    scene.add(sphere.group, sphere.trailMesh);
     spheres.push(sphere);
     return sphere;
 }
@@ -1362,23 +1363,130 @@ function updateOverlays(advanced) {
     drawMotionOverlays();
 }
 
-// --- Trails and velocity arrows, drawn on 2D canvases so they can be thick and smooth. ---
-// The trail canvas sits under the balls and the arrow canvas over them. Both share the
-// WebGL canvas's mirroring, so world points project onto them exactly as the balls do.
+// --- Trails: a three.js ribbon under each ball ---
+// A triangle mesh blends colour and transparency smoothly from vertex to vertex, so the trail
+// can taper, shift colour and fade without the seams that short 2D strokes leave. Each trail
+// point gets four vertices across the ribbon: transparent outer edges and an opaque core, which
+// gives the ribbon soft, feathered edges.
+
+const RIBBON_ACROSS = [-1, -0.55, 0.55, 1];
+const RIBBON_EDGE_ALPHA = [0, 1, 1, 0];
+const RIBBON_MAX_HALF_WIDTH = SPHERE_RADIUS * 0.32;
+const RIBBON_HEAD_ALPHA = 0.85;
+
+const ribbonIndex = (() => {
+    const quadsAcross = RIBBON_ACROSS.length - 1;
+    const indices = new Uint16Array((TRAIL_LENGTH - 1) * quadsAcross * 6);
+    let n = 0;
+    for (let i = 0; i < TRAIL_LENGTH - 1; i++) {
+        for (let k = 0; k < quadsAcross; k++) {
+            const a = (i * RIBBON_ACROSS.length) + k;
+            const b = a + 1;
+            const c = a + RIBBON_ACROSS.length;
+            const d = c + 1;
+            indices.set([a, c, b, b, c, d], n);
+            n += 6;
+        }
+    }
+    return new THREE.BufferAttribute(indices, 1);
+})();
+
+function createTrailRibbon() {
+    const vertexCount = TRAIL_LENGTH * RIBBON_ACROSS.length;
+    const geometry = new THREE.BufferGeometry();
+    geometry.setAttribute('position', new THREE.BufferAttribute(new Float32Array(vertexCount * 3), 3));
+    // Four components per colour, so each vertex carries its own transparency.
+    geometry.setAttribute('color', new THREE.BufferAttribute(new Float32Array(vertexCount * 4), 4));
+    geometry.setIndex(ribbonIndex);
+    geometry.setDrawRange(0, 0);
+    const material = new THREE.MeshBasicMaterial({
+        vertexColors: true,
+        transparent: true,
+        depthWrite: false,
+        side: THREE.DoubleSide
+    });
+    const mesh = new THREE.Mesh(geometry, material);
+    mesh.frustumCulled = false;
+    // Just behind the balls, and drawn before them.
+    mesh.position.z = -0.02;
+    mesh.renderOrder = -1;
+    mesh.visible = false;
+    return mesh;
+}
+
+const ribbonHead = new THREE.Color();
+const ribbonTail = new THREE.Color();
+const ribbonWhite = new THREE.Color(0xffffff);
+
+function isOnLightBackground() {
+    return document.documentElement.getAttribute('data-theme') !== 'dark' && !state.running;
+}
+
+function updateTrailRibbon(sphere, onLight) {
+    const mesh = sphere.trailMesh;
+    const count = sphere.trailCount;
+    mesh.visible = state.showTrails && count >= 2;
+    if (!mesh.visible) {
+        mesh.geometry.setDrawRange(0, 0);
+        return;
+    }
+    // The ball's own colour at the head, easing to a lighter tint towards the tail. On a
+    // light background the colour is deepened a little so the trail keeps its contrast.
+    ribbonHead.setHex(sphere.colorHex);
+    if (onLight) {
+        ribbonHead.multiplyScalar(0.72);
+    }
+    ribbonTail.copy(ribbonHead).lerp(ribbonWhite, onLight ? 0.35 : 0.6);
+
+    const points = sphere.trailPositions;
+    const positions = mesh.geometry.attributes.position.array;
+    const colors = mesh.geometry.attributes.color.array;
+    const across = RIBBON_ACROSS.length;
+    for (let i = 0; i < count; i++) {
+        // Direction of travel from the neighbouring points, and the sideways normal to it.
+        const prev = Math.max(0, i - 1) * 3;
+        const next = Math.min(count - 1, i + 1) * 3;
+        let tx = points[next] - points[prev];
+        let ty = points[next + 1] - points[prev + 1];
+        const len = Math.hypot(tx, ty) || 1;
+        tx /= len;
+        ty /= len;
+        const t = i / (count - 1); // 0 at the oldest point, 1 at the ball
+        const halfWidth = RIBBON_MAX_HALF_WIDTH * (0.15 + (0.85 * Math.pow(t, 0.7)));
+        const alpha = RIBBON_HEAD_ALPHA * t * t * (3 - (2 * t)); // smoothstep fade
+        const r = ribbonTail.r + ((ribbonHead.r - ribbonTail.r) * t);
+        const g = ribbonTail.g + ((ribbonHead.g - ribbonTail.g) * t);
+        const b = ribbonTail.b + ((ribbonHead.b - ribbonTail.b) * t);
+        const x = points[i * 3];
+        const y = points[(i * 3) + 1];
+        for (let k = 0; k < across; k++) {
+            const v = (i * across) + k;
+            const offset = RIBBON_ACROSS[k] * halfWidth;
+            positions[v * 3] = x - (ty * offset);
+            positions[(v * 3) + 1] = y + (tx * offset);
+            positions[(v * 3) + 2] = PLANE_Z;
+            colors[v * 4] = r;
+            colors[(v * 4) + 1] = g;
+            colors[(v * 4) + 2] = b;
+            colors[(v * 4) + 3] = alpha * RIBBON_EDGE_ALPHA[k];
+        }
+    }
+    mesh.geometry.attributes.position.needsUpdate = true;
+    mesh.geometry.attributes.color.needsUpdate = true;
+    mesh.geometry.setDrawRange(0, (count - 1) * (across - 1) * 6);
+}
+
+// --- Velocity arrows: drawn on a 2D canvas over the balls ---
+// It shares the WebGL canvas's mirroring, so world points project onto it as the balls do.
 
 const overlayProjection = new THREE.Vector3();
-const overlayCtx = {
-    trail: ui.trailCanvas.getContext('2d'),
-    arrow: ui.arrowCanvas.getContext('2d')
-};
+const arrowCtx = ui.arrowCanvas.getContext('2d');
 let overlayPixelRatio = 1;
 
 function resizeOverlayCanvases(width, height) {
     overlayPixelRatio = Math.min(window.devicePixelRatio || 1, 2);
-    for (const canvas of [ui.trailCanvas, ui.arrowCanvas]) {
-        canvas.width = Math.max(1, Math.round(width * overlayPixelRatio));
-        canvas.height = Math.max(1, Math.round(height * overlayPixelRatio));
-    }
+    ui.arrowCanvas.width = Math.max(1, Math.round(width * overlayPixelRatio));
+    ui.arrowCanvas.height = Math.max(1, Math.round(height * overlayPixelRatio));
 }
 
 function projectToOverlay(x, y, out) {
@@ -1388,73 +1496,14 @@ function projectToOverlay(x, y, out) {
     return out;
 }
 
-// Light theme with the camera off: deepen the ball colours so they stand out on white.
-// Over the camera or in dark mode: keep them bright, with a dark edge for contrast.
-function getOverlayStyle() {
-    const dark = document.documentElement.getAttribute('data-theme') === 'dark';
-    const onLight = !dark && !state.running;
-    return {
-        onLight,
-        edge: onLight ? 'rgba(255, 255, 255, 0.95)' : 'rgba(8, 12, 16, 0.7)',
-        shadow: onLight ? 'rgba(23, 24, 26, 0.18)' : 'rgba(0, 0, 0, 0.45)'
-    };
-}
-
-function overlayColor(colorHex, onLight, alpha = 1) {
-    let r = (colorHex >> 16) & 0xff;
-    let g = (colorHex >> 8) & 0xff;
-    let b = colorHex & 0xff;
-    if (onLight) {
-        r = Math.round(r * 0.82);
-        g = Math.round(g * 0.82);
-        b = Math.round(b * 0.82);
-    }
-    return `rgba(${r}, ${g}, ${b}, ${alpha})`;
-}
-
 const overlayPointA = { x: 0, y: 0 };
 const overlayPointB = { x: 0, y: 0 };
+const ARROW_FILL = '#111214';
+const ARROW_EDGE = 'rgba(255, 255, 255, 0.92)';
 
-function drawTrail(ctx, sphere, ballRadiusPx, style) {
-    const count = sphere.trailCount;
-    if (count < 2) {
-        return;
-    }
-    const positions = sphere.trailPositions;
-    const maxWidth = Math.max(4, Math.min(16, ballRadiusPx * 0.34));
-    ctx.lineCap = 'round';
-    ctx.lineJoin = 'round';
-
-    // A soft glow along the whole path first.
-    ctx.beginPath();
-    for (let i = 0; i < count; i++) {
-        projectToOverlay(positions[i * 3], positions[(i * 3) + 1], overlayPointA);
-        if (i === 0) ctx.moveTo(overlayPointA.x, overlayPointA.y);
-        else ctx.lineTo(overlayPointA.x, overlayPointA.y);
-    }
-    ctx.strokeStyle = overlayColor(sphere.colorHex, style.onLight, style.onLight ? 0.14 : 0.22);
-    ctx.lineWidth = maxWidth * 2.4;
-    ctx.stroke();
-
-    // Then a ribbon that tapers and fades towards its oldest end. Flat segment ends, so
-    // neighbouring translucent segments don't overlap into beads.
-    ctx.lineCap = 'butt';
-    projectToOverlay(positions[0], positions[1], overlayPointA);
-    for (let i = 1; i < count; i++) {
-        projectToOverlay(positions[i * 3], positions[(i * 3) + 1], overlayPointB);
-        const t = i / (count - 1);
-        ctx.beginPath();
-        ctx.moveTo(overlayPointA.x, overlayPointA.y);
-        ctx.lineTo(overlayPointB.x, overlayPointB.y);
-        ctx.strokeStyle = overlayColor(sphere.colorHex, style.onLight, 0.15 + (0.85 * t * t));
-        ctx.lineWidth = maxWidth * (0.3 + (0.7 * t));
-        ctx.stroke();
-        overlayPointA.x = overlayPointB.x;
-        overlayPointA.y = overlayPointB.y;
-    }
-}
-
-function drawVelocityArrow(ctx, sphere, ballRadiusPx, style) {
+// An arrow in the ball's colour from a solid black dot at the ball's centre. The thin white
+// edge keeps it visible on dark backgrounds and over the camera picture.
+function drawVelocityArrow(ctx, sphere, ballRadiusPx) {
     const speed = Math.hypot(sphere.velocity.x, sphere.velocity.y);
     if (speed < ARROW_MIN_SPEED) {
         return;
@@ -1471,9 +1520,10 @@ function drawVelocityArrow(ctx, sphere, ballRadiusPx, style) {
     if (lengthPx < 2) {
         return;
     }
-    const shaft = Math.max(4, Math.min(12, ballRadiusPx * 0.2));
-    const headLength = Math.min(lengthPx * 0.55, Math.max(14, ballRadiusPx * 0.7));
-    const headHalf = Math.max(shaft * 1.5, headLength * 0.58);
+    const shaft = Math.max(3.5, Math.min(10, ballRadiusPx * 0.16));
+    const headLength = Math.min(lengthPx * 0.55, Math.max(14, ballRadiusPx * 0.62));
+    const headHalf = Math.max(shaft * 1.6, headLength * 0.5);
+    const dotRadius = shaft * 1.05;
 
     ctx.save();
     ctx.translate(overlayPointA.x, overlayPointA.y);
@@ -1488,18 +1538,19 @@ function drawVelocityArrow(ctx, sphere, ballRadiusPx, style) {
     ctx.lineTo(0, shaft / 2);
     ctx.closePath();
     ctx.lineJoin = 'round';
-    ctx.shadowColor = style.shadow;
-    ctx.shadowBlur = shaft * 1.2;
+    ctx.shadowColor = 'rgba(0, 0, 0, 0.3)';
+    ctx.shadowBlur = shaft;
     ctx.shadowOffsetY = 1;
-    ctx.strokeStyle = style.edge;
-    ctx.lineWidth = Math.max(2.5, shaft * 0.55);
+    ctx.strokeStyle = ARROW_EDGE;
+    ctx.lineWidth = Math.max(2, shaft * 0.45);
     ctx.stroke();
     ctx.shadowColor = 'transparent';
-    ctx.fillStyle = overlayColor(sphere.colorHex, style.onLight);
+    ctx.fillStyle = toCssHexColor(sphere.colorHex);
     ctx.fill();
-    // A small dot marks the ball's centre, where the arrow starts.
+    // Solid black dot at the ball's centre, where the arrow starts.
     ctx.beginPath();
-    ctx.arc(0, 0, shaft * 0.75, 0, Math.PI * 2);
+    ctx.arc(0, 0, dotRadius, 0, Math.PI * 2);
+    ctx.fillStyle = ARROW_FILL;
     ctx.fill();
     ctx.lineWidth = Math.max(1.5, shaft * 0.3);
     ctx.stroke();
@@ -1507,28 +1558,25 @@ function drawVelocityArrow(ctx, sphere, ballRadiusPx, style) {
 }
 
 function drawMotionOverlays() {
-    const trailCtx = overlayCtx.trail;
-    const arrowCtx = overlayCtx.arrow;
-    if (!trailCtx || !arrowCtx) {
+    const onLight = isOnLightBackground();
+    for (const sphere of spheres) {
+        updateTrailRibbon(sphere, onLight);
+    }
+    if (!arrowCtx) {
         return;
     }
-    const ratio = overlayPixelRatio;
-    for (const ctx of [trailCtx, arrowCtx]) {
-        ctx.setTransform(1, 0, 0, 1, 0, 0);
-        ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
-        ctx.setTransform(ratio, 0, 0, ratio, 0, 0);
-    }
-    if ((!state.showTrails && !state.showArrows) || spheres.length === 0 || !state.stageWidth) {
+    arrowCtx.setTransform(1, 0, 0, 1, 0, 0);
+    arrowCtx.clearRect(0, 0, ui.arrowCanvas.width, ui.arrowCanvas.height);
+    if (!state.showArrows || spheres.length === 0 || !state.stageWidth) {
         return;
     }
-    // Ball radius on screen, so line widths scale with the view.
+    arrowCtx.setTransform(overlayPixelRatio, 0, 0, overlayPixelRatio, 0, 0);
+    // Ball radius on screen, so the arrow scales with the view.
     projectToOverlay(0, 0, overlayPointA);
     projectToOverlay(SPHERE_RADIUS, 0, overlayPointB);
     const ballRadiusPx = Math.abs(overlayPointB.x - overlayPointA.x);
-    const style = getOverlayStyle();
     for (const sphere of spheres) {
-        if (state.showTrails) drawTrail(trailCtx, sphere, ballRadiusPx, style);
-        if (state.showArrows) drawVelocityArrow(arrowCtx, sphere, ballRadiusPx, style);
+        drawVelocityArrow(arrowCtx, sphere, ballRadiusPx);
     }
 }
 
@@ -3485,8 +3533,10 @@ function handleSelectionOverlayKeydown(event) {
 
 function disposeSphere(sphere) {
     clearGripReferencesToSphere(sphere);
-    scene.remove(sphere.group);
+    scene.remove(sphere.group, sphere.trailMesh);
     sphere.material.dispose();
+    sphere.trailMesh.geometry.dispose();
+    sphere.trailMesh.material.dispose();
     if (state.lastCollision && (state.lastCollision.a === sphere || state.lastCollision.b === sphere)) {
         state.lastCollision = null;
     }
