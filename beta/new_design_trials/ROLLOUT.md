@@ -45,8 +45,8 @@ Nothing looks different.
 
 | App | Status | PR | Notes |
 | --- | --- | --- | --- |
-| PanPhyPlot (`tools/panphyplot.html`, `manual.html`, `math_ref.html`) | done | PR_LINK | `theme.css` keeps only app tokens; the sandbox overrides are at the end of `panphyplot.css`, the tour title in `tour.css`. The manual and math reference load `design.css`, with Unbounded headings resized and a spectrum line under the top bar. `plot.js` reads `--font-body` and `--font-mono`. No live changes since `4911e187`. The manual screenshots still show the old design; recapture them as `tools/panphyplot/manual/README.md` describes. |
-| Ripple Tank (`simulations/ripple_tank.html`) | done | PR_LINK | Promoted the sandbox copy (no live changes since `4911e187`). Added a phone rule: Unbounded title 0.9rem and menu heading 1.2rem at 640px and below. |
+| PanPhyPlot (`tools/panphyplot.html`, `manual.html`, `math_ref.html`) | done | [#1251](https://github.com/panphy/panphy.github.io/pull/1251) | `theme.css` keeps only app tokens; the sandbox overrides are at the end of `panphyplot.css`, the tour title in `tour.css`. The manual and math reference load `design.css`, with Unbounded headings resized and a spectrum line under the top bar. `plot.js` reads `--font-body` and `--font-mono`. No live changes since `4911e187`. The manual screenshots still show the old design; recapture them as `tools/panphyplot/manual/README.md` describes. |
+| Ripple Tank (`simulations/ripple_tank.html`) | done | [#1251](https://github.com/panphy/panphy.github.io/pull/1251) | Promoted the sandbox copy (no live changes since `4911e187`). Added a phone rule: Unbounded title 0.9rem and menu heading 1.2rem at 640px and below. |
 
 ## Phase 2: Tools
 
