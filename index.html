@@ -592,12 +592,25 @@
             height: 14px;
             margin-bottom: 1.4rem;
             border-radius: 2px;
+            /* Linear wavelength scale: 380–780 nm, violet to red. NIST air
+               wavelengths: 383.54, 388.90, 397.01, 410.17, 434.05, 486.13,
+               656.28 nm. Position (%) = (wavelength - 380) / 4.
+               https://physics.nist.gov/PhysRefData/Handbook/Tables/hydrogentable2.htm
+               Line widths are enlarged for visibility; colours approximate
+               spectral hues in sRGB, with dimmer edges of the visible range. */
             background:
-                linear-gradient(90deg, transparent calc(9.4% - 1px), #000 calc(9.4% - 1px) calc(9.4% + 1px), transparent calc(9.4% + 1px)),
-                linear-gradient(90deg, transparent calc(16.9% - 1px), #000 calc(16.9% - 1px) calc(16.9% + 1px), transparent calc(16.9% + 1px)),
-                linear-gradient(90deg, transparent calc(33.1% - 1.5px), #000 calc(33.1% - 1.5px) calc(33.1% + 1.5px), transparent calc(33.1% + 1.5px)),
-                linear-gradient(90deg, transparent calc(86.3% - 2px), #000 calc(86.3% - 2px) calc(86.3% + 2px), transparent calc(86.3% + 2px)),
-                var(--spectrum);
+                linear-gradient(90deg, transparent calc(0.885% - 0.5px), #000 calc(0.885% - 0.5px) calc(0.885% + 0.5px), transparent calc(0.885% + 0.5px)),
+                linear-gradient(90deg, transparent calc(2.225% - 0.5px), #000 calc(2.225% - 0.5px) calc(2.225% + 0.5px), transparent calc(2.225% + 0.5px)),
+                linear-gradient(90deg, transparent calc(4.2525% - 0.5px), #000 calc(4.2525% - 0.5px) calc(4.2525% + 0.5px), transparent calc(4.2525% + 0.5px)),
+                linear-gradient(90deg, transparent calc(7.5425% - 1px), #000 calc(7.5425% - 1px) calc(7.5425% + 1px), transparent calc(7.5425% + 1px)),
+                linear-gradient(90deg, transparent calc(13.5125% - 1px), #000 calc(13.5125% - 1px) calc(13.5125% + 1px), transparent calc(13.5125% + 1px)),
+                linear-gradient(90deg, transparent calc(26.5325% - 1.5px), #000 calc(26.5325% - 1.5px) calc(26.5325% + 1.5px), transparent calc(26.5325% + 1.5px)),
+                linear-gradient(90deg, transparent calc(69.07% - 2px), #000 calc(69.07% - 2px) calc(69.07% + 2px), transparent calc(69.07% + 2px)),
+                linear-gradient(90deg,
+                    #610061 0%, #8300b5 5%, #6a00ff 10%, #0000ff 15%,
+                    #007bff 20%, #00d5ff 25%, #00ffff 27.5%, #00ff00 32.5%,
+                    #81ff00 40%, #c3ff00 45%, #ffff00 50%, #ffbe00 55%,
+                    #ff7700 60%, #ff0000 66.25% 80%, #b50000 90%, #610000 100%);
             box-shadow: 0 10px 30px -12px rgba(59, 91, 255, 0.5);
         }
 
