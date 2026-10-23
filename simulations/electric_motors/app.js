@@ -54,8 +54,10 @@ const AC_BOX = { w: 2.0, h: 1.18 };
 const ROD = { gain: 90, damping: 1.6, maxSpeed: 4.5 };
 const DC = { inertia: 0.012, linear: 0.002, drag: 6e-4, friction: 0.002 };
 // The AC coil is driven only by the force on its current: nothing else pulls it towards the synchronous speed.
-// Its rotor is heavy enough that, from rest, the alternating force only shakes it.
-const AC = { inertia: 0.06, linear: 0.008, drag: 1e-4, friction: 0.001 };
+// Friction is low enough that, at 2 A or more, it keeps in step up to at least 1.2 Hz; at 1 A it drops out above about 0.85 Hz.
+const AC = { inertia: 0.02, linear: 0.003, drag: 1e-4, friction: 0.001 };
+// A new supply frequency is reached gradually, in Hz per model second, slowly enough for a coil in step to follow it.
+const FREQUENCY_GLIDE = 0.1;
 // Switching on the AC supply brings the coil up to the synchronous speed over this many model seconds,
 // as a starter would: this simple synchronous motor cannot start itself.
 const SPIN_RAMP = 0.3;
@@ -795,7 +797,7 @@ function buildCoil(kind) {
     rotor.add(label);
     return label;
   });
-  sim = { kind, currentArrows, sideLabels, group, rotor, coilGroup, ringParts, brushes, wires, markers, forces, supply, scope: supply.userData.scope, fieldLines: null, theta: 0.5, omega: 0, phase: 0, time: 0, supplyPhase: 0, spin: null, trace: [], history: [], current: 0, torque: 0 };
+  sim = { kind, currentArrows, sideLabels, group, rotor, coilGroup, ringParts, brushes, wires, markers, forces, supply, scope: supply.userData.scope, fieldLines: null, theta: 0.5, omega: 0, phase: 0, time: 0, supplyPhase: 0, supplyFrequency: state.values.frequency, spin: null, trace: [], history: [], current: 0, torque: 0 };
   buildCoilField();
   buildCoilWinding();
   buildRings();
@@ -950,7 +952,7 @@ function coilConstant() {
 }
 // The angle by which a coil running in step lags the supply: the mean turning effect ½BANI₀ sin(lag) balances friction and air resistance.
 function lockLag() {
-  const synchronous = 2 * Math.PI * state.values.frequency;
+  const synchronous = 2 * Math.PI * sim.supplyFrequency;
   const load = AC.linear * synchronous + AC.drag * synchronous * synchronous + AC.friction;
   return Math.asin(Math.min(1, load / Math.max(1e-9, coilConstant() * state.values.peak / 2)));
 }
@@ -964,7 +966,11 @@ function stepCoil(delta) {
   for (let i = 0; i < steps; i++) {
     elapsed += dt;
     const before = Math.cos(sim.theta);
-    const synchronous = 2 * Math.PI * state.values.frequency;
+    if (sim.kind === 'ac') {
+      const gap = state.values.frequency - sim.supplyFrequency;
+      sim.supplyFrequency += state.powered ? THREE.MathUtils.clamp(gap, -FREQUENCY_GLIDE * dt, FREQUENCY_GLIDE * dt) : gap;
+    }
+    const synchronous = 2 * Math.PI * sim.supplyFrequency;
     if (sim.kind === 'ac' && state.powered) sim.supplyPhase += synchronous * dt;
     const current = coilCurrent();
     // T = BANI cos θ, with the forces on the two long sides making a couple about the axle.
@@ -1102,7 +1108,7 @@ function coilInStep() {
   const history = sim.history;
   if (!state.powered || sim.spin || history.length < 2) return false;
   const span = history[history.length - 1][0] - history[0][0];
-  if (span < 2 || Math.abs(coilSpeed()) < 0.5 * state.values.frequency) return false;
+  if (span < 2 || Math.abs(coilSpeed()) < 0.5 * sim.supplyFrequency) return false;
   let low = Infinity;
   let high = -Infinity;
   for (const entry of history) {
@@ -1154,7 +1160,9 @@ function updateEquation() {
     if (sim.kind === 'dc') html += row('+ brush touches', `half-ring ${halfLabel(halfOnPlus())}`);
     if (sim.kind === 'ac') {
       const inStep = coilInStep();
-      html += row('Supply frequency', `${valueText('frequency')} Hz`);
+      // While the supply glides to a new setting, show where it has reached.
+      const gliding = Math.abs(sim.supplyFrequency - state.values.frequency) > 1e-6;
+      html += row('Supply frequency', gliding ? `${fmt(sim.supplyFrequency, 2)} → ${valueText('frequency')} Hz` : `${valueText('frequency')} Hz`);
       html += `<div class="status ${inStep ? 'good' : 'warn'}">${acStatus(inStep, speed)}</div>`;
     } else if (state.powered && sim.omega === 0 && Math.abs(sim.torque) <= DC.friction) {
       html += `<div class="status warn">${dcStuckReason()}</div>`;
@@ -1168,7 +1176,8 @@ function acStatus(inStep, speed) {
   if (!state.powered) return 'Supply off.';
   if (sim.spin) return 'Starting: bringing the coil up to speed…';
   if (inStep) return '✓ In step: one turn per cycle.';
-  if (speed > 0.25 * state.values.frequency) return Math.abs(speed - state.values.frequency) < 0.1 * state.values.frequency ? 'Turning with the supply. Settling…' : 'Out of step with the supply: slowing down.';
+  const f = sim.supplyFrequency;
+  if (speed > 0.25 * f) return Math.abs(speed - f) < 0.1 * f ? 'Turning with the supply. Settling…' : 'Out of step with the supply: slowing down.';
   return 'Out of step: it only shakes. Raise the current or lower the frequency, then switch the supply off and on to start it again.';
 }
 // Why a switched-on DC motor is not moving.
@@ -1676,7 +1685,8 @@ function pushOffDeadSpot() {
 // The AC coil is brought up to the synchronous speed, finishing at the lag it needs to stay in step.
 // The supply was off, so its phase can be chosen to suit the coil's present angle and speed.
 function startAc() {
-  const synchronous = 2 * Math.PI * state.values.frequency;
+  sim.supplyFrequency = state.values.frequency;
+  const synchronous = 2 * Math.PI * sim.supplyFrequency;
   sim.supplyPhase = lockLag() - sim.theta - (synchronous + sim.omega) * SPIN_RAMP / 2;
   sim.spin = { t: 0, from: sim.omega };
   sim.history = [];
@@ -1991,7 +2001,7 @@ document.querySelectorAll('.models [data-mode]').forEach(button => button.addEve
 
 // ---------- Theme ----------
 // Rebuild the scene (new colours or fonts) without disturbing the running model.
-const MOTION_KEYS = ['x', 'v', 'phase', 'theta', 'omega', 'time', 'supplyPhase', 'spin', 'heldVertical', 'trace', 'history', 'current', 'torque'];
+const MOTION_KEYS = ['x', 'v', 'phase', 'theta', 'omega', 'time', 'supplyPhase', 'supplyFrequency', 'spin', 'heldVertical', 'trace', 'history', 'current', 'torque'];
 function rebuildScene() {
   const motion = sim && Object.fromEntries(MOTION_KEYS.filter(key => key in sim).map(key => [key, sim[key]]));
   const kind = sim?.kind;
