@@ -458,6 +458,9 @@
   </template>
 
   <script>
+    // Theme toggle: the shared script only syncs the icon, so the page wires the click.
+    window.PanPhyThemeToggle.mount(document.getElementById('theme-button'));
+
     (function () {
     const $ = (id) => document.getElementById(id);
     const addChannelBtn = $('addChannelBtn');
