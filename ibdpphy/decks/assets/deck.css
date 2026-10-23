@@ -1,4 +1,8 @@
 @import url('/assets/fonts/fonts.css');
+/* Figtree: deck body text, open and light enough to read across a classroom. It has no Greek,
+   so Manrope stays next in --font-body and supplies those letters. */
+@font-face { font-family: 'Figtree'; font-style: normal; font-weight: 300 900; font-display: swap; src: url(/assets/fonts/figtree-normal-300-900-latin-ext.woff2) format('woff2'); unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C4, U+2113, U+2C60-2C7F, U+A720-A7FF; }
+@font-face { font-family: 'Figtree'; font-style: normal; font-weight: 300 900; font-display: swap; src: url(/assets/fonts/figtree-normal-300-900-latin.woff2) format('woff2'); unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD; }
 
 /* Shared styles for the IB DP Physics decks (adapted from gcsephy/decks/atoms-and-radiation).
    Particle colours match simulations/atomic_models and simulations/nuclear_decay; the deck's
@@ -7,13 +11,13 @@
    kept for additional higher level content. */
 :root {
   color-scheme: light;
-  --font-body: 'Manrope', system-ui, sans-serif;
+  --font-body: 'Figtree', 'Manrope', system-ui, sans-serif;
   --font-display: 'DM Serif Display', Georgia, serif;
   --font-mono: 'IBM Plex Mono', ui-monospace, monospace;
   --bg-color: #F8F6F1;
   --bg-pattern: #EDE9E0;
   --text-main: #1B1B1B;
-  --text-secondary: #5F5954;
+  --text-secondary: #4A4540;
   --brand-primary: #2B7A70;
   --brand-accent: #E8A66C;
   --brand-accent-strong: #2C4654;
@@ -61,7 +65,7 @@
   --bg-color: #111110;
   --bg-pattern: #1A1A18;
   --text-main: #EDEBE8;
-  --text-secondary: #A8A49C;
+  --text-secondary: #C0BCB4;
   --brand-primary: #7CC8BB;
   --brand-accent: #E8A66C;
   --brand-accent-strong: #E2C678;
@@ -313,14 +317,14 @@ body.is-window-fullscreen .stage { top: var(--standalone-top); bottom: calc(env(
   bottom: 28px;
   display: flex;
   justify-content: space-between;
-  font: 600 15px var(--font-mono);
+  font: 600 18px var(--font-mono);
   letter-spacing: .1em;
   color: var(--text-secondary);
   opacity: .8;
 }
 
 /* Typography */
-.eyebrow { margin: 0; font: 600 23px var(--font-mono); letter-spacing: .14em; color: var(--brand-primary); text-transform: uppercase; }
+.eyebrow { margin: 0; font: 700 24px var(--font-body); letter-spacing: .08em; color: var(--brand-primary); text-transform: uppercase; }
 h1, h2, h3 { font-family: var(--font-display); font-weight: 400; margin: 0; }
 h1 { font-size: 118px; line-height: 1; letter-spacing: -.02em; margin-top: 18px; }
 h1 span, h2 span { color: var(--brand-primary); }
@@ -421,16 +425,20 @@ mjx-container .gamma { fill: var(--photon); stroke: var(--photon); }
   background: var(--viewer-bg);
   box-shadow: var(--card-shadow);
 }
-.panel-head { display: flex; align-items: center; gap: 12px; font: 600 22px var(--font-mono); letter-spacing: .08em; }
+.panel-head { display: flex; align-items: center; gap: 12px; font: 700 24px var(--font-body); letter-spacing: .03em; }
 .panel-head span:first-child { margin-right: auto; }
-.pill { color: var(--text-secondary); font-size: 19px; border: 1px solid var(--input-border); border-radius: 999px; padding: 4px 12px; }
+/* Each heading item stays on one line; when they do not fit, the hint drops to a second row. */
+.panel-head { flex-wrap: wrap; row-gap: 6px; }
+.panel-head > span { white-space: nowrap; }
+.panel-head > span:last-child:not(:first-child) { margin-left: auto; }
+.pill { color: var(--text-secondary); font-size: 24px; border: 1px solid var(--input-border); border-radius: 999px; padding: 4px 12px; letter-spacing: .02em; }
 .fig { position: relative; flex: 1; min-height: 0; }
 .fig svg { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
 /* Maths typeset in the labels of a 3D model keeps MathJax's own size and sits in the line. */
 .fig .model3d mjx-container svg { position: static; inset: auto; width: auto; height: auto; display: inline-block; }
 .panel .fig { margin: 8px 0; }
 .legend { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; }
-.legend > span { display: inline-flex; align-items: center; gap: 8px; padding: 4px 14px 4px 5px; border-radius: 999px; background: var(--card-bg); border: 1px solid var(--card-border); font-size: 22px; }
+.legend > span { display: inline-flex; align-items: center; gap: 8px; padding: 4px 14px 4px 5px; border-radius: 999px; background: var(--card-bg); border: 1px solid var(--card-border); font-size: 24px; }
 .legend i { font-style: normal; display: inline-grid; place-items: center; border-radius: 50%; width: 30px; height: 30px; font-size: 20px; font-weight: 800; color: #fff; }
 .legend .proton { background: var(--proton); }
 .legend .neutron { background: var(--neutron); }
@@ -454,13 +462,13 @@ mjx-container .gamma { fill: var(--photon); stroke: var(--photon); }
    reaches the screen edges when the screen is not 16:9. */
 body.is-fullscreen { transition: background-color .35s ease; }
 body.is-fullscreen:has(#deck .slide.history.active) { background-color: color-mix(in srgb, var(--brand-primary) 9%, var(--bg-color)); background-image: radial-gradient(color-mix(in srgb, var(--brand-primary) 16%, var(--bg-pattern)) 1px, transparent 1px); }
-.not-examined { position: absolute; top: 62px; right: 88px; margin: 0; padding: 5px 14px; border: 1px solid color-mix(in srgb, var(--brand-primary) 35%, transparent); border-radius: 999px; font: 600 15px var(--font-mono); letter-spacing: .1em; text-transform: uppercase; color: var(--text-secondary); }
+.not-examined { position: absolute; top: 56px; right: 88px; margin: 0; padding: 3px 14px; border: 1px solid color-mix(in srgb, var(--brand-primary) 35%, transparent); border-radius: 999px; font: 700 20px var(--font-body); letter-spacing: .05em; text-transform: uppercase; color: var(--text-secondary); }
 
 /* Story slides: photographs of the scientists and their apparatus (images/) beside a short
    account. Photos sit to the left of the text, or in a row above it with .band. The
    credits line under the story links each photo to its source. */
 /* On an HL slide the label sits below the "HL only" flag. */
-.slide.hl .not-examined { top: 78px; }
+.slide.hl .not-examined { right: 292px; } /* beside the HL flag */
 .story { flex: 1; min-height: 0; display: grid; grid-template-columns: auto 1fr; gap: 50px; align-items: center; }
 .story.band { grid-template-columns: 1fr; gap: 30px; align-content: center; }
 .story-photos { display: flex; align-items: flex-start; gap: 20px; }
@@ -489,14 +497,14 @@ body.is-fullscreen:has(#deck .slide.history.active) { background-color: color-mi
 .cards.calc .card { min-height: 440px; }
 .cards.calc h3 { font-size: 38px; }
 .card { padding: 26px 28px; border: 1px solid var(--card-border); border-radius: 22px; background: var(--card-bg); box-shadow: var(--card-shadow); }
-.card .eyebrow { font-size: 22px; }
+.card .eyebrow { font-size: 24px; }
 .card h3 { margin: 8px 0 10px; }
 .card p { margin: 0; font-size: 28px; color: var(--text-secondary); line-height: 1.35; }
 
 table.facts { width: 100%; border-collapse: separate; border-spacing: 0; font-size: 28px; background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 22px; overflow: hidden; box-shadow: var(--card-shadow); }
 .facts th, .facts td { padding: 18px 22px; text-align: left; border-bottom: 1px solid var(--card-border); vertical-align: middle; }
 .facts tr:last-child td { border-bottom: 0; }
-.facts thead th { background: var(--muted-bg); font: 600 22px var(--font-mono); letter-spacing: .1em; text-transform: uppercase; color: var(--text-secondary); }
+.facts thead th { background: var(--muted-bg); font: 700 24px var(--font-body); letter-spacing: .06em; text-transform: uppercase; color: var(--text-secondary); }
 .facts td:first-child { font-weight: 800; }
 .facts .icon-cell { display: flex; align-items: center; gap: 16px; }
 .facts .icon-cell .fig { flex: none; width: 52px; height: 52px; }
@@ -531,7 +539,7 @@ table.facts.compare { table-layout: fixed; font-size: 30px; }
 .title-grid .lead { margin-top: 30px; border-left: 4px solid var(--card-border); padding-left: 26px; }
 .title-grid .fig { height: 700px; }
 .chips { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 40px; }
-.chip { padding: 10px 20px; border-radius: 999px; border: 1px solid var(--card-border); background: var(--card-bg); font: 600 22px var(--font-mono); letter-spacing: .06em; }
+.chip { padding: 10px 20px; border-radius: 999px; border: 1px solid var(--card-border); background: var(--card-bg); font: 700 24px var(--font-body); letter-spacing: .02em; }
 .chip.on { background: var(--brand-accent-strong); border-color: var(--brand-accent-strong); color: #fff; }
 [data-theme="dark"] .chip.on { background: var(--brand-accent); border-color: var(--brand-accent); color: #0B1F1D; }
 .chip.hl { background: var(--hl); border-color: var(--hl); color: var(--hl-ink); }
@@ -556,7 +564,7 @@ table.facts.compare { table-layout: fixed; font-size: 30px; }
 .obs-row > div:first-child { border-left: 4px solid var(--alpha); }
 .obs-row > div:last-child { border-left: 4px solid var(--brand-accent); }
 .obs-row .to { font-size: 30px; color: var(--text-secondary); text-align: center; }
-.obs-head { display: grid; grid-template-columns: 1fr 36px 1fr; gap: 12px; font: 600 22px var(--font-mono); letter-spacing: .12em; color: var(--text-secondary); }
+.obs-head { display: grid; grid-template-columns: 1fr 36px 1fr; gap: 12px; font: 700 24px var(--font-body); letter-spacing: .06em; color: var(--text-secondary); }
 .obs-head span:last-child { grid-column: 3; }
 
 /* Quiz */
@@ -565,12 +573,12 @@ table.facts.compare { table-layout: fixed; font-size: 30px; }
 .q { display: flex; flex-direction: column; gap: 10px; padding: 17px 26px; border: 1px solid var(--card-border); border-radius: 20px; background: var(--card-bg); box-shadow: var(--card-shadow); }
 .q p { margin: 0; font-size: 29px; font-weight: 700; line-height: 1.3; }
 .eqline { display: inline-flex; align-items: center; gap: 10px; }
-.q .n { display: inline-block; margin-right: 10px; font: 600 22px var(--font-mono); color: var(--brand-primary); }
+.q .n { display: inline-block; margin-right: 10px; font: 600 24px var(--font-mono); color: var(--brand-primary); }
 .q .ans { margin-top: auto; padding: 10px 16px; border-radius: 12px; background: #E9F0E2; color: #33502A; border: 1px solid #7C9A69; font-size: 27px; font-weight: 700; }
 [data-theme="dark"] .q .ans { background: #1F2A1B; color: #CFE2C2; border-color: #96B083; }
 .step { transition: opacity .3s ease, transform .3s ease; }
 .step:not(.shown) { opacity: 0; transform: translateY(8px); }
-.reveal-hint { font: 600 22px var(--font-mono); letter-spacing: .08em; color: var(--text-secondary); }
+.reveal-hint { font: 700 24px var(--font-body); letter-spacing: .05em; color: var(--text-secondary); }
 
 /* Summary */
 /* Bottom margin keeps the last row of cards clear of the slide footer. */
