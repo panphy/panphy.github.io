@@ -3440,3 +3440,69 @@ body.is-running:not(.is-paused) .sw-leaderboard {
   background: rgba(251, 245, 228, 0.5);
   box-shadow: 0 4px 12px rgba(74, 52, 28, 0.14);
 }
+
+/* Boss options: the answer line has one fixed-width slot (no letter count), and
+   the options sit below it. Options that match the typed letters so far all
+   highlight the same way; a wrong option is struck out. */
+
+.word-tag .answer-slot {
+  display: inline-block;
+  min-width: 7ch;
+  min-height: 1.1em;
+  padding: 0 4px;
+  border-bottom: 2px solid currentColor;
+  vertical-align: baseline;
+}
+
+.word-tag .boss-choices {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 5px;
+  margin-top: 2px;
+}
+
+.word-tag .boss-choice {
+  padding: 4px 8px;
+  border: 1px solid rgba(110, 78, 40, 0.4);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.7);
+  color: var(--ink);
+  font-family: var(--font-mono);
+  font-size: 0.82rem;
+  font-weight: 700;
+  line-height: 1.15;
+  white-space: nowrap;
+}
+
+.word-tag .boss-choice.is-matching {
+  border-color: var(--aqua);
+  background: #fff;
+  box-shadow: 0 0 0 1px rgba(21, 122, 112, 0.35);
+}
+
+.word-tag .boss-choice.is-struck {
+  border-style: dashed;
+  background: transparent;
+  color: rgba(61, 43, 28, 0.42);
+  text-decoration: line-through;
+  text-decoration-color: var(--danger);
+  text-decoration-thickness: 2px;
+}
+
+.word-tag.is-boss.is-wrong {
+  animation: boss-wrong-shake 420ms ease;
+  border-color: var(--danger);
+}
+
+@keyframes boss-wrong-shake {
+  0%, 100% { translate: 0 0; }
+  20% { translate: -6px 0; }
+  40% { translate: 5px 0; }
+  60% { translate: -4px 0; }
+  80% { translate: 2px 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .word-tag.is-boss.is-wrong { animation: none; }
+}
