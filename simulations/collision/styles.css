@@ -1,79 +1,31 @@
-@import url('/assets/fonts/fonts.css');
-
 /* Collision Lab: an app bar, a 16:10 view (camera, balls and hand overlay) with a settings
    drawer beside it, and a toolbar below. In full screen the view fills the screen and the
    toolbar floats over it. Light and dark themes follow the shared PanPhy preference. */
 
 :root {
-    color-scheme: light;
-    --font-ui: 'Manrope', system-ui, sans-serif;
-    --font-display: 'DM Serif Display', Georgia, serif;
-    --font-mono: 'IBM Plex Mono', ui-monospace, monospace;
+    --font-ui: var(--font-body);
 
-    --paper: #F4F1EA;
-    --grid-minor: rgba(15, 118, 110, 0.055);
-    --grid-major: rgba(15, 118, 110, 0.11);
-    --surface: #FFFFFF;
-    --surface-2: #FAF8F4;
-    --surface-3: #F2EEE6;
-    --ink: #17181A;
-    --ink-2: #55585E;
-    --ink-3: #8A8C91;
-    --line: #E6E1D7;
-    --line-strong: #D3CCBE;
-    --accent: #0F766E;
-    --accent-hover: #0B5F59;
-    --accent-ink: #FFFFFF;
-    --accent-soft: rgba(15, 118, 110, 0.1);
-    --brand: #C2410C;
-    --brand-soft: rgba(194, 65, 12, 0.1);
-    --danger: #B42318;
-    --danger-soft: rgba(180, 35, 24, 0.08);
-    --shadow-1: 0 1px 2px rgba(23, 24, 26, 0.05), 0 2px 8px rgba(23, 24, 26, 0.04);
-    --shadow-2: 0 12px 36px rgba(23, 24, 26, 0.16);
-    --radius: 14px;
-    --radius-sm: 10px;
+    --paper: var(--bg);
+    --grid-minor: rgba(28, 40, 90, 0.035);
+    --grid-major: rgba(28, 40, 90, 0.075);
     --appbar-h: 56px;
     --hit: 44px;
 
     /* The view behind the balls when the camera is off. */
-    --view-bg: #FFFFFF;
-    --view-grid: rgba(15, 118, 110, 0.07);
-    --overlay-bg: color-mix(in srgb, var(--surface) 90%, transparent);
+    --view-bg: var(--surface);
+    --view-grid: rgba(28, 40, 90, 0.06);
+    --overlay-bg: var(--surface);
 
     /* Read by the shared theme button. */
-    --brand-primary: var(--brand);
-    --brand-accent: var(--accent);
-    --text-main: var(--ink);
+    --brand-primary: var(--accent);
     --text-muted: var(--ink-2);
 }
 
 [data-theme="dark"] {
-    color-scheme: dark;
-    --paper: #0D1012;
-    --grid-minor: rgba(94, 234, 212, 0.035);
-    --grid-major: rgba(94, 234, 212, 0.07);
-    --surface: #15191C;
-    --surface-2: #191E22;
-    --surface-3: #20262B;
-    --ink: #E8EBED;
-    --ink-2: #A5ACB3;
-    --ink-3: #737B83;
-    --line: #262D33;
-    --line-strong: #353D44;
-    --accent: #5EEAD4;
-    --accent-hover: #8FF3E3;
-    --accent-ink: #062521;
-    --accent-soft: rgba(94, 234, 212, 0.12);
-    --brand: #FB923C;
-    --brand-soft: rgba(251, 146, 60, 0.12);
-    --danger: #F97066;
-    --danger-soft: rgba(249, 112, 102, 0.1);
-    --shadow-1: 0 1px 2px rgba(0, 0, 0, 0.4), 0 2px 10px rgba(0, 0, 0, 0.25);
-    --shadow-2: 0 16px 44px rgba(0, 0, 0, 0.55);
+    --grid-minor: rgba(150, 175, 255, 0.03);
+    --grid-major: rgba(150, 175, 255, 0.065);
 
-    --view-bg: #101417;
-    --view-grid: rgba(94, 234, 212, 0.05);
+    --view-grid: rgba(150, 175, 255, 0.05);
 }
 
 @media (pointer: coarse) {
@@ -263,10 +215,21 @@ select {
     gap: 14px;
     min-height: calc(var(--appbar-h) + var(--standalone-top, 0px));
     padding: var(--standalone-top, 0px) 14px 0;
-    background: color-mix(in srgb, var(--surface) 86%, transparent);
-    backdrop-filter: saturate(1.4) blur(10px);
-    -webkit-backdrop-filter: saturate(1.4) blur(10px);
+    background: var(--surface);
     border-bottom: 1px solid var(--line);
+}
+
+/* One thin spectrum line under the app bar marks the app as PanPhy. */
+.cl-appbar::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: -1px;
+    height: 2px;
+    background: var(--spectrum);
+    opacity: 0.85;
+    pointer-events: none;
 }
 
 .cl-brand {
@@ -288,8 +251,9 @@ select {
 
 .cl-wordmark {
     font-family: var(--font-display);
-    font-size: 1.32rem;
-    letter-spacing: -0.01em;
+    font-size: 1.02rem;
+    font-weight: 600;
+    letter-spacing: -0.03em;
     white-space: nowrap;
 }
 
@@ -486,8 +450,9 @@ body.ball-fullscreen-lock {
 .cl-start h2 {
     margin: 0 0 6px;
     font-family: var(--font-display);
-    font-size: 1.55rem;
-    font-weight: 400;
+    font-size: 1.15rem;
+    font-weight: 500;
+    letter-spacing: -0.02em;
     line-height: 1.15;
 }
 
@@ -596,12 +561,10 @@ body.ball-fullscreen-lock {
     justify-content: center;
     gap: 2px;
     padding: 4px;
-    background: color-mix(in srgb, var(--surface) 94%, transparent);
+    background: var(--surface);
     border: 1px solid var(--line);
     border-radius: calc(var(--radius-sm) + 5px);
     box-shadow: var(--shadow-1);
-    backdrop-filter: saturate(1.4) blur(12px);
-    -webkit-backdrop-filter: saturate(1.4) blur(12px);
 }
 
 .stage.is-fullscreen .cl-dock {
@@ -792,8 +755,9 @@ body.ball-fullscreen-lock {
 .cl-drawer-head h2 {
     margin: 0;
     font-family: var(--font-display);
-    font-size: 1.25rem;
-    font-weight: 400;
+    font-size: 0.98rem;
+    font-weight: 500;
+    letter-spacing: -0.02em;
 }
 
 .cl-drawer-body {
@@ -1124,8 +1088,6 @@ details[open] > summary .summary-caret {
     border: 1px solid var(--line);
     border-radius: var(--radius-sm);
     box-shadow: var(--shadow-1);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
     pointer-events: none;
 }
 
@@ -1310,8 +1272,9 @@ details[open] > summary .summary-caret {
     margin: 0;
     padding: 6px 14px;
     font-family: var(--font-display);
-    font-size: 1.35rem;
-    font-weight: 400;
+    font-size: 1.05rem;
+    font-weight: 500;
+    letter-spacing: -0.02em;
     background: var(--surface);
     border-radius: var(--radius-sm);
     box-shadow: var(--shadow-1);
@@ -1439,7 +1402,7 @@ footer a:hover {
     }
 
     .cl-start h2 {
-        font-size: 1.3rem;
+        font-size: 1rem;
     }
 
     .stage.is-fullscreen .cl-main {

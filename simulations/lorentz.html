@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <meta name="theme-color" content="#F8F6F1">
+    <meta name="theme-color" content="#F5F6FA">
     <script src="/assets/theme.js" data-legacy-dark="lorentz-dark" data-legacy-light="lorentz-light"></script>
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
@@ -12,44 +12,42 @@
     <title>Lorentz Transformation – Interactive Minkowski Diagram</title>
     <link rel="icon" type="image/png" href="/assets/favicon.png">
     <script src="/assets/sw-register.js" defer></script>
+    <link rel="stylesheet" href="/assets/fonts/fonts.css">
+    <link rel="stylesheet" href="/assets/design.css">
 <style>
-        @import url('/assets/fonts/fonts.css');
 
         :root {
-            color-scheme: light;
-            --font-body: 'Manrope', sans-serif;
-            --font-display: 'DM Serif Display', serif;
-            --font-mono: 'IBM Plex Mono', monospace;
+            /* Colours and fonts come from the shared design system (/assets/design.css);
+               these names keep the rest of this stylesheet unchanged. Colours that carry
+               meaning in the diagram stay as they were. */
+            --bg-color: var(--bg);
+            --bg-pattern: var(--bg-grid);
+            --text-main: var(--ink);
+            --text-secondary: var(--ink-2);
 
-            /* Light Theme */
-            --bg-color: #F8F6F1;
-            --bg-pattern: #EDE9E0;
-            --text-main: #1B1B1B;
-            --text-secondary: #6B6560;
+            --brand-primary: var(--accent);
+            --brand-secondary: var(--accent-hover);
+            --brand-accent: var(--accent);
 
-            --brand-primary: #C2410C;
-            --brand-secondary: #EA580C;
-            --brand-accent: #0D9488;
+            --card-bg: var(--surface);
+            --card-border: var(--line);
+            --card-shadow: var(--shadow-1);
 
-            --card-bg: #ffffff;
-            --card-border: #E8E4DD;
-            --card-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+            --canvas-bg: var(--surface);
+            --canvas-border: var(--line);
 
-            --canvas-bg: #ffffff;
-            --canvas-border: #E8E4DD;
+            --btn-bg: var(--accent);
+            --btn-text: var(--accent-ink);
+            --btn-hover: var(--accent-hover);
 
-            --btn-bg: #C2410C;
-            --btn-text: #ffffff;
-            --btn-hover: #A93A0A;
+            --slider-track: var(--line-strong);
+            --slider-thumb: var(--accent);
 
-            --slider-track: #E8E4DD;
-            --slider-thumb: #C2410C;
+            --header-bg: var(--surface);
+            --header-border: var(--line);
 
-            --header-bg: rgba(248, 246, 241, 0.92);
-            --header-border: rgba(194, 65, 12, 0.1);
-
-            --nav-bg: rgba(248, 246, 241, 0.92);
-            --nav-border: #E8E4DD;
+            --nav-bg: var(--surface);
+            --nav-border: var(--line);
 
             --grid-rest: #e2e8f0;
             --grid-moving: #a29bfe;
@@ -60,45 +58,15 @@
             --event: #f43f5e;
             --velocity-line-u: #22c55e;
 
-            --table-border: #E8E4DD;
-            --table-header-bg: #F0ECE4;
+            --table-border: var(--line);
+            --table-header-bg: var(--surface-3);
 
-            --context-menu-bg: #ffffff;
-            --context-menu-border: #E8E4DD;
-            --context-menu-hover: #F0ECE4;
+            --context-menu-bg: var(--surface);
+            --context-menu-border: var(--line);
+            --context-menu-hover: var(--surface-3);
         }
 
         [data-theme="dark"] {
-            color-scheme: dark;
-            --bg-color: #111110;
-            --bg-pattern: #1A1A18;
-            --text-main: #EDEBE8;
-            --text-secondary: #9C9890;
-
-            --brand-primary: #E8734A;
-            --brand-secondary: #F4845F;
-            --brand-accent: #2DD4BF;
-
-            --card-bg: #1E1E1C;
-            --card-border: #2E2E2A;
-            --card-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
-
-            --canvas-bg: #1A1A18;
-            --canvas-border: #2E2E2A;
-
-            --btn-bg: #C2410C;
-            --btn-text: #ffffff;
-            --btn-hover: #E8734A;
-
-            --slider-track: #3A3A36;
-            --slider-thumb: #E8734A;
-
-            --header-bg: rgba(17, 17, 16, 0.92);
-            --header-border: rgba(232, 115, 74, 0.1);
-
-            --nav-bg: rgba(17, 17, 16, 0.92);
-            --nav-border: #2E2E2A;
-
             --grid-rest: #374151;
             --grid-moving: #7c3aed;
             --axis-rest: #dfe6e9;
@@ -108,12 +76,6 @@
             --event: #fb7185;
             --velocity-line-u: #4ade80;
 
-            --table-border: #3A3A36;
-            --table-header-bg: #1E1E1C;
-
-            --context-menu-bg: #1E1E1C;
-            --context-menu-border: #3A3A36;
-            --context-menu-hover: #2E2E2A;
         }
 
         * {
@@ -124,8 +86,8 @@
         }
 
         .offline-font {
-            --font-body: 'Manrope', sans-serif;
-            --font-display: 'DM Serif Display', serif;
+            --font-body: 'Figtree', sans-serif;
+            --font-display: 'Unbounded', sans-serif;
             --font-mono: 'IBM Plex Mono', monospace;
         }
 
@@ -141,6 +103,7 @@
 
         /* Compact Header */
         header.banner {
+            position: relative;
             display: flex;
             align-items: center;
             justify-content: space-between;
@@ -152,9 +115,21 @@
             background: var(--nav-bg);
             border: 1px solid var(--nav-border);
             border-radius: 20px;
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
             box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Apps keep a plain title; one thin spectrum line under the banner marks the app as PanPhy. */
+        header.banner::after {
+            content: '';
+            position: absolute;
+            left: 20px;
+            right: 20px;
+            bottom: -1px;
+            height: 2px;
+            border-radius: 2px;
+            background: var(--spectrum);
+            opacity: 0.85;
+            pointer-events: none;
         }
 
         .banner-logo {
@@ -171,19 +146,18 @@
 
         .banner-title {
             font-family: var(--font-display);
-            font-size: 1.6rem;
-            font-weight: 400;
+            font-size: 1.15rem;
+            font-weight: 600;
             text-align: center;
             flex: 1;
-            letter-spacing: -0.5px;
-            color: var(--brand-primary);
+            letter-spacing: -0.03em;
+            color: var(--ink);
         }
 
         .banner-title.gradient-text {
-            background: linear-gradient(135deg, var(--brand-primary), var(--brand-accent));
-            -webkit-background-clip: text;
-            background-clip: text;
-            -webkit-text-fill-color: transparent;
+            color: var(--ink);
+            background: none;
+            -webkit-text-fill-color: currentColor;
         }
 
         .banner-actions {
@@ -238,7 +212,7 @@
         }
 
         .theme-toggle button:hover {
-            background-color: rgba(194, 65, 12, 0.12);
+            background-color: var(--accent-soft);
             transform: rotate(15deg);
         }
 
@@ -649,7 +623,7 @@
             font-size: 0.85rem;
             font-weight: 600;
             color: var(--brand-primary);
-            background: rgba(194, 65, 12, 0.12);
+            background: var(--accent-soft);
             padding: 4px 10px;
             border-radius: 999px;
             white-space: nowrap;
@@ -676,7 +650,7 @@
             font-size: 0.95rem;
             cursor: pointer;
             font-weight: 600;
-            box-shadow: 0 4px 12px rgba(194, 65, 12, 0.2);
+            box-shadow: 0 4px 12px var(--accent-soft);
             transition: background-color 0.2s, transform 0.2s;
         }
 
@@ -833,7 +807,7 @@
             }
 
             .banner-title {
-                font-size: 1.2rem;
+                font-size: 1rem;
             }
         }
 
@@ -847,7 +821,7 @@
             }
 
             .banner-title {
-                font-size: 1rem;
+                font-size: 0.9rem;
             }
 
             .main-content {
@@ -1057,6 +1031,10 @@
         function getCssVar(name) {
             return getComputedStyle(document.documentElement).getPropertyValue(name).trim();
         }
+
+        // Canvas labels use the page fonts: the body face for names, the mono face for tick values.
+        const CANVAS_FONT = getCssVar('--font-body') || 'Figtree, system-ui, sans-serif';
+        const CANVAS_MONO = getCssVar('--font-mono') || '"IBM Plex Mono", monospace';
 
         window.addEventListener("load", function () {
             const canvas = document.getElementById("minkowskiCanvas");
@@ -1331,7 +1309,7 @@
                 const xSegment = strokeLine({ x: 0, t: 0 }, { x: 1, t: w });
 
                 ctx.fillStyle = axisColor;
-                ctx.font = "16px Arial";
+                ctx.font = `16px ${CANVAS_FONT}`;
                 ctx.textAlign = "start";
                 ctx.textBaseline = "alphabetic";
                 if (tSegment) {
@@ -1453,7 +1431,7 @@
             }
 
             function drawPillLabel({ text, x, y, background, textColor = null, align = "center", baseline = "middle" }) {
-                const font = "bold 12px Arial";
+                const font = `bold 12px ${CANVAS_FONT}`;
                 const padX = 8;
                 const padY = 4;
                 const margin = 4;
@@ -1591,7 +1569,7 @@
                 ctx.stroke();
 
                 ctx.fillStyle = getCssVar('--axis-rest');
-                ctx.font = "bold 14px Arial";
+                ctx.font = `bold 14px ${CANVAS_FONT}`;
                 ctx.textAlign = "start";
                 ctx.textBaseline = "alphabetic";
                 ctx.fillText(p.label, cp.x + EVENT_RADIUS + 6, cp.y - EVENT_RADIUS - 4);
@@ -1635,6 +1613,8 @@
             }
 
             window.addEventListener('panphy:theme-change', () => draw());
+            // Redraw once the page fonts have loaded, so canvas labels use them.
+            if (document.fonts) document.fonts.ready.then(() => draw());
 
             function draw() {
                 updateViewRapidity(performance.now());
@@ -1658,7 +1638,7 @@
                     gridColor: getCssVar('--grid-rest'),
                     gridDash: [5, 5],
                     tickColor: getCssVar('--text-secondary'),
-                    tickFont: "12px Arial",
+                    tickFont: `12px ${CANVAS_MONO}`,
                     tickMarks: false,
                     names: { x: "x", t: "t" },
                     labelShift: 0,
@@ -1675,7 +1655,7 @@
                     gridColor: getCssVar('--grid-moving'),
                     gridDash: [2, 4],
                     tickColor: getCssVar('--axis-moving'),
-                    tickFont: "11px Arial",
+                    tickFont: `11px ${CANVAS_MONO}`,
                     tickMarks: true,
                     names: { x: "x′", t: "t′" },
                     labelShift: framesAligned ? 16 : 0,

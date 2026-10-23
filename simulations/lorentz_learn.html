@@ -4,7 +4,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-  <meta name="theme-color" content="#F8F6F1">
+  <meta name="theme-color" content="#F5F6FA">
   <script src="/assets/theme.js" data-legacy-dark="lorentz-dark" data-legacy-light="lorentz-light"></script>
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
@@ -22,62 +22,36 @@
     });
   </script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-AMS-MML_SVG.js" defer></script>
+  <link rel="stylesheet" href="/assets/fonts/fonts.css">
+  <link rel="stylesheet" href="/assets/design.css">
   <style>
-    @import url('/assets/fonts/fonts.css');
 
     :root {
-      color-scheme: light;
-      --font-body: 'Manrope', sans-serif;
-      --font-display: 'DM Serif Display', serif;
-      --font-mono: 'IBM Plex Mono', monospace;
-      --bg-color: #F8F6F1;
-      --bg-pattern: #EDE9E0;
-      --text-main: #1B1B1B;
-      --text-secondary: #6B6560;
-      --brand-primary: #C2410C;
-      --brand-secondary: #EA580C;
-      --brand-accent: #0D9488;
-      --card-bg: #ffffff;
-      --card-border: #E8E4DD;
-      --card-shadow: 0 12px 30px rgba(0, 0, 0, 0.08);
-      --soft-shadow: 0 8px 20px rgba(0, 0, 0, 0.06);
-      --muted-bg: #F0ECE4;
-      --border-color: #E8E4DD;
-      --table-header-bg: #F0ECE4;
-      --table-border: #D8D3CB;
-      --nav-bg: rgba(248, 246, 241, 0.92);
-      --nav-border: #E8E4DD;
-      --link-color: #C2410C;
-      --note-bg: #FFF7ED;
-      --note-border: #C2410C;
-      --tip-bg: #F0FDF4;
-      --tip-border: #0D9488;
+      --bg-color: var(--bg);
+      --bg-pattern: var(--bg-grid);
+      --text-main: var(--ink);
+      --text-secondary: var(--ink-2);
+      --brand-primary: var(--accent);
+      --brand-secondary: var(--accent-hover);
+      --brand-accent: var(--accent);
+      --card-bg: var(--surface);
+      --card-border: var(--line);
+      --card-shadow: var(--shadow-1);
+      --soft-shadow: var(--shadow-1);
+      --muted-bg: var(--surface-3);
+      --border-color: var(--line);
+      --table-header-bg: var(--surface-3);
+      --table-border: var(--line);
+      --nav-bg: var(--surface);
+      --nav-border: var(--line);
+      --link-color: var(--accent);
+      --note-bg: var(--brand-soft);
+      --note-border: var(--brand);
+      --tip-bg: var(--accent-soft);
+      --tip-border: var(--good);
     }
 
     [data-theme="dark"] {
-      color-scheme: dark;
-      --bg-color: #111110;
-      --bg-pattern: #1A1A18;
-      --text-main: #EDEBE8;
-      --text-secondary: #9C9890;
-      --brand-primary: #E8734A;
-      --brand-secondary: #F4845F;
-      --brand-accent: #2DD4BF;
-      --card-bg: #1E1E1C;
-      --card-border: #2E2E2A;
-      --card-shadow: 0 12px 30px rgba(0, 0, 0, 0.35);
-      --soft-shadow: 0 8px 20px rgba(0, 0, 0, 0.35);
-      --muted-bg: #262622;
-      --border-color: #2E2E2A;
-      --table-header-bg: #262622;
-      --table-border: #3A3A36;
-      --nav-bg: rgba(17, 17, 16, 0.92);
-      --nav-border: #2E2E2A;
-      --link-color: #E8734A;
-      --note-bg: #261A10;
-      --note-border: #E8734A;
-      --tip-bg: #0D2620;
-      --tip-border: #2DD4BF;
     }
 
     * {
@@ -109,9 +83,21 @@
       position: sticky;
       top: var(--standalone-top);
       z-index: 10;
-      backdrop-filter: blur(10px);
       border-bottom: 1px solid var(--nav-border);
       box-shadow: var(--soft-shadow);
+    }
+
+    /* Apps keep a plain title; one thin spectrum line under the banner marks the app as PanPhy. */
+    .banner::after {
+      content: '';
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: -1px;
+      height: 2px;
+      background: var(--spectrum);
+      opacity: 0.85;
+      pointer-events: none;
     }
 
     .banner-logo {
@@ -134,18 +120,17 @@
     .banner-title {
       flex: 1;
       text-align: center;
-      font-size: 1.5rem;
+      font-size: 1.15rem;
       font-family: var(--font-display);
-      font-weight: 400;
-      letter-spacing: -0.5px;
-      color: var(--brand-primary);
+      font-weight: 600;
+      letter-spacing: -0.03em;
+      color: var(--ink);
     }
 
     .banner-title.gradient-text {
-      background: linear-gradient(135deg, var(--brand-primary), var(--brand-accent));
-      -webkit-background-clip: text;
-      background-clip: text;
-      -webkit-text-fill-color: transparent;
+      color: var(--ink);
+      background: none;
+      -webkit-text-fill-color: currentColor;
     }
 
     .banner-buttons {
@@ -173,14 +158,14 @@
     }
 
     .banner-button:hover {
-      background: #ffffff;
+      background: var(--surface);
       transform: translateY(-1px);
       border-color: var(--brand-primary);
       text-decoration: none;
     }
 
     [data-theme="dark"] .banner-button:hover {
-      background: #262622;
+      background: var(--surface-2);
     }
 
     .theme-toggle button {
@@ -199,7 +184,7 @@
     }
 
     .theme-toggle button:hover {
-      background-color: rgba(194, 65, 12, 0.12);
+      background-color: var(--accent-soft);
       transform: rotate(15deg);
     }
 
@@ -213,24 +198,26 @@
     /* Typography */
     h1 {
       font-family: var(--font-display);
-      font-size: 2.5rem;
-      font-weight: 400;
+      font-size: 1.75rem;
+      font-weight: 600;
+      line-height: 1.25;
       margin: 0 0 1.5rem 0;
-      letter-spacing: -1px;
-      color: var(--brand-primary);
+      letter-spacing: -0.03em;
+      color: var(--ink);
     }
 
+    /* The page title stays plain: spectrum-coloured title text is for the homepage only. */
     h1.gradient-text {
-      background: linear-gradient(135deg, var(--brand-primary), var(--brand-accent));
-      -webkit-background-clip: text;
-      background-clip: text;
-      -webkit-text-fill-color: transparent;
+      color: var(--ink);
+      background: none;
+      -webkit-text-fill-color: currentColor;
     }
 
     h2 {
       font-family: var(--font-display);
-      font-size: 1.75rem;
-      font-weight: 700;
+      font-size: 1.22rem;
+      font-weight: 600;
+      letter-spacing: -0.02em;
       margin: 2.5rem 0 1rem 0;
       color: var(--text-main);
       display: flex;
@@ -250,8 +237,9 @@
 
     h3 {
       font-family: var(--font-display);
-      font-size: 1.25rem;
+      font-size: 1rem;
       font-weight: 600;
+      letter-spacing: -0.02em;
       margin: 2rem 0 0.75rem 0;
       color: var(--text-main);
     }
@@ -423,15 +411,24 @@
       }
 
       h1 {
-        font-size: 2rem;
+        font-size: 1.4rem;
       }
 
       h2 {
-        font-size: 1.5rem;
+        font-size: 1.1rem;
       }
 
       .banner-title {
-        font-size: 1.2rem;
+        font-size: 0.95rem;
+      }
+
+      /* Unbounded is wide: keep the title from pushing the buttons off a phone screen. */
+      @media (max-width: 480px) {
+        .banner-title {
+          min-width: 0;
+          font-size: 0.78rem;
+          line-height: 1.25;
+        }
       }
 
       table {
