@@ -397,7 +397,7 @@ function tableAsPng(view) {
 	const scale = Math.max(2, Math.ceil(window.devicePixelRatio || 1));
 	const canvas = document.createElement('canvas');
 	const context = canvas.getContext('2d');
-	const headerFont = '600 15px Manrope, Arial, sans-serif';
+	const headerFont = '600 15px Figtree, Arial, sans-serif';
 	const bodyFont = '14px "IBM Plex Mono", Menlo, monospace';
 	const padX = 14;
 	const rowHeight = 30;

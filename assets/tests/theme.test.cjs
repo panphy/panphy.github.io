@@ -49,7 +49,7 @@ test('first visit follows the device; explicit light overrides a dark device and
   assert.equal(first.api.get(), 'dark');
   first.api.toggle();
   assert.equal(values.get('panphy-theme'), 'light');
-  assert.equal(first.chrome(), '#F8F6F1');
+  assert.equal(first.chrome(), '#F5F6FA');
   assert.equal(openPage({ values, darkDevice: true }).api.get(), 'light');
 });
 
@@ -76,7 +76,7 @@ test('open tabs update chrome and emit refresh events without echoing changes', 
   first.api.set('dark');
   second.storageEvent('panphy-theme', values.get('panphy-theme'));
   assert.equal(second.api.get(), 'dark');
-  assert.equal(second.chrome(), '#111110');
+  assert.equal(second.chrome(), '#07080C');
   assert.equal(second.events.at(-1).detail.theme, 'dark');
   second.storageEvent('panphy-theme', 'dark');
   assert.equal(second.events.length, 1);
@@ -136,4 +136,12 @@ test('a scoped section ignores the old site-wide preferences and follows the dev
   const own = new Map([['old-deck-dark', '1']]);
   assert.equal(openPage({ values: own, legacy: { themeScope: 'gcsephy', legacyDark: 'old-deck-dark' } }).api.get(), 'dark');
   assert.equal(own.get('panphy-theme-gcsephy'), 'dark');
+});
+
+test('scoped sections keep their own browser chrome colours', () => {
+  const page = openPage({ legacy: { themeScope: 'gcsephy' } });
+  page.api.set('dark');
+  assert.equal(page.chrome(), '#111110');
+  page.api.set('light');
+  assert.equal(page.chrome(), '#F8F6F1');
 });

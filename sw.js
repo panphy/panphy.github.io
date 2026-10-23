@@ -1,4 +1,4 @@
-const BUILD_ID = '2026-10-23T17:56:04Z';
+const BUILD_ID = '2026-10-23T18:37:42Z';
 const CACHE_PREFIX = 'panphy-labs';
 const PRECACHE_NAME = `${CACHE_PREFIX}-precache-${BUILD_ID}`;
 const RUNTIME_CACHE = `${CACHE_PREFIX}-runtime-${BUILD_ID}`;
@@ -25,10 +25,6 @@ const ASSETS_TO_CACHE = [
   '/assets/standalone-top.css',
   '/assets/design.css',
   '/assets/fonts/fonts.css',
-  '/assets/fonts/dm-serif-display-italic-400-latin-ext.woff2',
-  '/assets/fonts/dm-serif-display-italic-400-latin.woff2',
-  '/assets/fonts/dm-serif-display-normal-400-latin-ext.woff2',
-  '/assets/fonts/dm-serif-display-normal-400-latin.woff2',
   '/assets/fonts/figtree-normal-300-900-latin-ext.woff2',
   '/assets/fonts/figtree-normal-300-900-latin.woff2',
   '/assets/fonts/ibm-plex-mono-normal-400-cyrillic-ext.woff2',
