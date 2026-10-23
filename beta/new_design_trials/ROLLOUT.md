@@ -27,6 +27,7 @@ This file tracks the move of every app on the homepage to the Spectrum design in
 - **Fonts stay cached.** Keep the Manrope and DM Serif Display fonts in `ASSETS_TO_CACHE` and `OFFLINE_COMMON_ASSETS` until no app uses them, which is Phase 5 at the earliest. The gcsephy and ibdpphy decks load Figtree from `/assets/fonts/` with their own `@font-face` rules.
 - **Two homepage lists.** The sandbox homepage (`index.html` here) keeps its own copy of `OFFLINE_COMMON_ASSETS` and `OFFLINE_CARD_REQUIREMENTS`. Keep it in step with the live `index.html` until Phase 5 replaces the homepage with it.
 - **No clipping on cards.** Never use `overflow: hidden` to clip decorations on cards inside scrolling or flex columns.
+- **Phone titles.** Unbounded is wide, so check app titles at 375px and add a phone font-size rule after the Spectrum rules if they wrap more than before.
 - **Meaningful colors stay.** Leave colors that carry meaning and 3D scene colors alone, unless they clash in dark mode.
 
 ## Phase 0: Foundation
@@ -44,8 +45,8 @@ Nothing looks different.
 
 | App | Status | PR | Notes |
 | --- | --- | --- | --- |
-| PanPhyPlot (`tools/panphyplot.html`, `manual.html`, `math_ref.html`) | todo | | Follow the README promotion checklist. Replace `theme.css`, fold `design-overrides.css` into `panphyplot.css` and `tour.css`. The manual and math reference share `theme.css`, so they need `design.css` too. Make `js/plot.js` read the font tokens instead of hard-coding Manrope and IBM Plex Mono. Carry over live changes made since `4911e187`. Run `node --test tools/panphyplot/tests/*.test.cjs misc/panphyplotog/tests/regression.test.cjs`. |
-| Ripple Tank (`simulations/ripple_tank.html`) | todo | | Single-file app; the sandbox page is a full copy. Diff the live page against `4911e187` and carry changes over. Restore `sw-register.js`, the live links and the title; remove `noindex`. |
+| PanPhyPlot (`tools/panphyplot.html`, `manual.html`, `math_ref.html`) | done | [#1251](https://github.com/panphy/panphy.github.io/pull/1251) | `theme.css` keeps only app tokens; the sandbox overrides are at the end of `panphyplot.css`, the tour title in `tour.css`. The manual and math reference load `design.css`, with Unbounded headings resized and a spectrum line under the top bar. `plot.js` reads `--font-body` and `--font-mono`. No live changes since `4911e187`. The manual screenshots still show the old design; recapture them as `tools/panphyplot/manual/README.md` describes. |
+| Ripple Tank (`simulations/ripple_tank.html`) | done | [#1251](https://github.com/panphy/panphy.github.io/pull/1251) | Promoted the sandbox copy (no live changes since `4911e187`). Added a phone rule: Unbounded title 0.9rem and menu heading 1.2rem at 640px and below. |
 
 ## Phase 2: Tools
 
@@ -93,6 +94,6 @@ These apps share one layout (`app.js`, `content.js`, `style.css` in a folder nam
 | Item | Status | PR | Notes |
 | --- | --- | --- | --- |
 | Homepage (`index.html`) | todo | | Replace with the sandbox homepage. Point its links back to live paths, restore `sw-register.js`, remove `noindex` and the trial title. Carry over live homepage changes and offline-list edits made since the sandbox copy. |
-| Shared assets | todo | | Check `theme-toggle.css` and `fullscreen-button.css` against the design. Drop Manrope and DM Serif from the caches and `fonts.css` only if no page still uses them. |
+| Shared assets | todo | | Check `theme-toggle.css` and `fullscreen-button.css` against the design. `assets/theme.js` still sets `theme-color` to the old cream and dark values (`#F8F6F1`, `#111110`) at runtime; switch them to the Spectrum `--bg` values (`#F5F6FA`, `#07080C`) once every app is migrated, since it is a shared file. Drop Manrope and DM Serif from the caches and `fonts.css` only if no page still uses them. |
 | READMEs and project rules | todo | | Update the affected READMEs. Remove the `ROLLOUT.md` pointer from `CLAUDE.md` and `AGENTS.md`. |
 | Remove the sandbox | todo | | Delete `beta/new_design_trials/` and its `beta/index.html` entry. Mark every line here done first; the finished tracker stays in git history, or ask the owner whether to keep it elsewhere. |

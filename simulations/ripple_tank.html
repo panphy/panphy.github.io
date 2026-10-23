@@ -4,7 +4,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-  <meta name="theme-color" content="#F8F6F1">
+  <meta name="theme-color" content="#F5F6FA">
   <script src="/assets/theme.js" data-legacy-dark="ripple-tank-dark" data-legacy-light="ripple-tank-light"></script>
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
@@ -12,81 +12,51 @@
   <title>Virtual Ripple Tank</title>
   <script src="/assets/sw-register.js" defer></script>
   <link rel="icon" type="image/png" href="/assets/favicon.png">
+  <link rel="stylesheet" href="/assets/fonts/fonts.css">
+  <link rel="stylesheet" href="/assets/design.css">
   <style>
-    @import url('/assets/fonts/fonts.css');
 
+    /* Colours, fonts and shadows come from the shared design system (design.css);
+       these names keep the rest of this stylesheet unchanged. */
     :root {
-      color-scheme: light;
-      --font-body: 'Manrope', sans-serif;
-      --font-display: 'DM Serif Display', serif;
-      --font-mono: 'IBM Plex Mono', monospace;
+      --bg-color: var(--bg);
+      --bg-pattern: var(--bg-grid);
+      --text-main: var(--ink);
+      --text-secondary: var(--ink-2);
 
-      --bg-color: #F8F6F1;
-      --bg-pattern: #EDE9E0;
-      --text-main: #1B1B1B;
-      --text-secondary: #6B6560;
+      --brand-primary: var(--accent);
+      --brand-secondary: var(--accent-hover);
+      --brand-accent: #0E9F9A;
 
-      --brand-primary: #C2410C;
-      --brand-secondary: #EA580C;
-      --brand-accent: #0D9488;
+      --surface-alt: var(--surface-2);
+      --border: var(--line);
+      --shadow: var(--shadow-1);
 
-      --surface: #ffffff;
-      --surface-alt: #F0ECE4;
-      --border: #E8E4DD;
-      --shadow: 0 16px 40px rgba(0, 0, 0, 0.08);
+      --btn-primary: var(--accent);
+      --btn-primary-hover: var(--accent-hover);
+      --btn-text: var(--accent-ink);
 
-      --btn-primary: #C2410C;
-      --btn-primary-hover: #A93A0A;
-      --btn-text: #ffffff;
+      --nav-bg: color-mix(in srgb, var(--surface) 90%, transparent);
+      --nav-border: var(--line);
 
-      --nav-bg: rgba(248, 246, 241, 0.92);
-      --nav-border: #E8E4DD;
-
-      --slider-track: #E8E4DD;
-      --slider-thumb: #C2410C;
-      --toggle-hover: rgba(194, 65, 12, 0.12);
+      --slider-track: var(--line-strong);
+      --slider-thumb: var(--accent);
+      --toggle-hover: var(--accent-soft);
 
       --source1-color: #00b8b5;
       --source2-color: #7c6df0;
       --source1-light: rgba(0, 206, 201, 0.12);
       --source2-light: rgba(108, 92, 231, 0.12);
 
-      --scene-bg: #EDE9E0;
+      --scene-bg: var(--bg);
     }
 
     [data-theme="dark"] {
-      color-scheme: dark;
-      --bg-color: #111110;
-      --bg-pattern: #1A1A18;
-      --text-main: #EDEBE8;
-      --text-secondary: #9C9890;
-
-      --brand-primary: #E8734A;
-      --brand-secondary: #F4845F;
-      --brand-accent: #2DD4BF;
-
-      --surface: #1E1E1C;
-      --surface-alt: #1A1A18;
-      --border: #2E2E2A;
-      --shadow: 0 20px 45px rgba(0, 0, 0, 0.35);
-
-      --btn-primary: #C2410C;
-      --btn-primary-hover: #A93A0A;
-      --btn-text: #ffffff;
-
-      --nav-bg: rgba(17, 17, 16, 0.92);
-      --nav-border: #2E2E2A;
-
-      --slider-track: #3A3A36;
-      --slider-thumb: #E8734A;
-      --toggle-hover: rgba(232, 115, 74, 0.15);
-
+      --brand-accent: #3FD6CF;
       --source1-color: #56d4d0;
       --source2-color: #b4acfe;
       --source1-light: rgba(129, 236, 236, 0.12);
       --source2-light: rgba(162, 155, 254, 0.12);
-
-      --scene-bg: #111110;
     }
 
     * {
@@ -985,6 +955,110 @@
 
       .mode-option {
         min-height: 124px;
+      }
+    }
+    /* ─── Spectrum design ─── */
+    .banner-title {
+      font-family: var(--font-display);
+      font-size: 1.15rem;
+      font-weight: 600;
+      letter-spacing: -0.03em;
+    }
+
+    /* Apps keep a plain title; the spectrum is a thin line under the banner instead. */
+    .banner-title.gradient-text {
+      color: var(--ink);
+      background: none;
+      -webkit-text-fill-color: currentColor;
+    }
+
+    #titleBanner {
+      position: relative;
+    }
+
+    #titleBanner::after {
+      content: '';
+      position: absolute;
+      left: 20px;
+      right: 20px;
+      bottom: -1px;
+      height: 2px;
+      border-radius: 2px;
+      background: var(--spectrum);
+      opacity: 0.85;
+      pointer-events: none;
+    }
+
+    .controls-header h2 {
+      font-weight: 600;
+      font-size: 0.92rem;
+      letter-spacing: -0.02em;
+    }
+
+    .mode-menu {
+      background: linear-gradient(135deg, var(--accent-soft), color-mix(in srgb, var(--brand-accent) 10%, transparent)), var(--surface);
+      box-shadow: var(--shadow-2);
+    }
+
+    .mode-menu::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background: var(--spectrum);
+    }
+
+    .mode-menu h3 {
+      font-size: 1.45rem;
+      font-weight: 600;
+      letter-spacing: -0.03em;
+    }
+
+    .mode-option,
+    [data-theme="dark"] .mode-option {
+      background: var(--surface);
+      border-color: var(--line);
+      box-shadow: var(--shadow-1);
+    }
+
+    .mode-icon {
+      background: var(--accent-soft);
+    }
+
+    .mode-option.refraction .mode-icon {
+      background: color-mix(in srgb, var(--brand-accent) 14%, transparent);
+    }
+
+    [data-theme="dark"] .toggle-slider {
+      background-color: var(--line-strong);
+    }
+
+    .toggle-switch input:checked + .toggle-slider,
+    [data-theme="dark"] .toggle-switch input:checked + .toggle-slider {
+      background-color: var(--accent);
+    }
+
+    .source-card[data-source="1"] .toggle-switch input:checked + .toggle-slider,
+    [data-theme="dark"] .source-card[data-source="1"] .toggle-switch input:checked + .toggle-slider {
+      background-color: var(--source1-color);
+    }
+
+    .source-card[data-source="2"] .toggle-switch input:checked + .toggle-slider,
+    [data-theme="dark"] .source-card[data-source="2"] .toggle-switch input:checked + .toggle-slider {
+      background-color: var(--source2-color);
+    }
+
+    /* Unbounded is wide: keep the title and menu heading compact on phones. */
+    @media (max-width: 640px) {
+      .banner-title {
+        font-size: 0.9rem;
+        line-height: 1.2;
+      }
+
+      .mode-menu h3 {
+        font-size: 1.2rem;
       }
     }
   </style>
