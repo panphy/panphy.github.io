@@ -62,10 +62,10 @@ Nothing looks different.
 
 | App | Status | PR | Notes |
 | --- | --- | --- | --- |
-| Superposition (`simulations/superposition.html`) | done | PR_LINK | Same banner layout as the Ripple Tank: tokens mapped, solid banner, plain Unbounded title, spectrum line. Wave colours unchanged. |
-| Standing Wave (`simulations/standing_wave.html`) | done | PR_LINK | As Superposition. String and gold node colours unchanged. |
-| Collision Lab (`simulations/collision.html`) | done | PR_LINK | Tokens mapped as in PanPhyMD. App bar, toolbar dock and data panel are solid over the live view; the ball-selection scrim keeps its light blur, like modal backdrops. The red-orange walls outline keeps its meaning. A 9px horizontal overflow at 375px is pre-existing on `main`. |
-| Lorentz (`simulations/lorentz.html`, `lorentz_learn.html`) | done | PR_LINK | Both pages share the `lorentz` update group. Diagram colours unchanged; canvas labels now use `--font-body` and ticks `--font-mono` (was Arial), redrawn once fonts load. Learn page: sticky banner made solid, headings resized, plain h1, and a phone rule so the title no longer pushes the buttons off screen. |
+| Superposition (`simulations/superposition.html`) | done | [#1253](https://github.com/panphy/panphy.github.io/pull/1253) | Same banner layout as the Ripple Tank: tokens mapped, solid banner, plain Unbounded title, spectrum line. Wave colours unchanged. |
+| Standing Wave (`simulations/standing_wave.html`) | done | [#1253](https://github.com/panphy/panphy.github.io/pull/1253) | As Superposition. String and gold node colours unchanged. |
+| Collision Lab (`simulations/collision.html`) | done | [#1253](https://github.com/panphy/panphy.github.io/pull/1253) | Tokens mapped as in PanPhyMD. App bar, toolbar dock and data panel are solid over the live view; the ball-selection scrim keeps its light blur, like modal backdrops. The red-orange walls outline keeps its meaning. A 9px horizontal overflow at 375px is pre-existing on `main`. |
+| Lorentz (`simulations/lorentz.html`, `lorentz_learn.html`) | done | [#1253](https://github.com/panphy/panphy.github.io/pull/1253) | Both pages share the `lorentz` update group. Diagram colours unchanged; canvas labels now use `--font-body` and ticks `--font-mono` (was Arial), redrawn once fonts load. Learn page: sticky banner made solid, headings resized, plain h1, and a phone rule so the title no longer pushes the buttons off screen. |
 
 ## Phase 3b: The remaining simulations
 
