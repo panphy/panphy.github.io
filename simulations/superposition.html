@@ -552,6 +552,103 @@
             }
         }
 
+        .visibility-toggles {
+            margin-top: 8px;
+        }
+
+        /* Laptop and desktop: fit the whole app in the window. The canvas takes the
+           height left over by the controls, up to its usual 2.5:1 shape. */
+        @media (min-width: 901px) {
+            body {
+                display: flex;
+                flex-direction: column;
+                min-height: 100vh;
+                min-height: 100dvh;
+            }
+
+            header.banner {
+                flex-shrink: 0;
+                margin-top: 10px;
+                padding: 6px 20px;
+            }
+
+            .banner-logo img {
+                height: 32px;
+            }
+
+            .main-content {
+                flex: 1 1 0;
+                display: flex;
+                flex-direction: column;
+                justify-content: center;
+                width: 100%;
+                padding: 12px 20px 0;
+            }
+
+            .simulation-area {
+                flex: 1 1 0;
+                display: flex;
+                flex-direction: column;
+                min-height: 220px;
+                max-height: calc((min(100vw, 1200px) - 66px) / 2.5 + 26px);
+                padding: 12px;
+            }
+
+            canvas {
+                flex: 1 1 0;
+                height: 0;
+                min-height: 0;
+            }
+
+            .play-pause-btn {
+                bottom: 20px;
+                right: 20px;
+            }
+
+            .controls-panel {
+                flex-shrink: 0;
+                margin-top: 12px;
+            }
+
+            .control-section {
+                padding: 12px 18px;
+            }
+
+            .section-title {
+                margin-bottom: 10px;
+            }
+
+            .slider-control {
+                margin-bottom: 10px;
+            }
+
+            .slider-header {
+                margin-bottom: 4px;
+            }
+
+            .visibility-toggles {
+                display: flex;
+                flex-wrap: wrap;
+                gap: 8px 18px;
+                margin-top: 12px;
+            }
+
+            .visibility-row {
+                gap: 8px;
+                margin-bottom: 0;
+            }
+
+            .hint-text {
+                margin-top: 8px;
+            }
+
+            footer {
+                flex-shrink: 0;
+                padding: 8px 20px 10px;
+                font-size: 0.82rem;
+            }
+        }
+
         @media (pointer: coarse) {
             button:not(.play-pause-btn),
             .theme-toggle {
@@ -690,7 +787,7 @@
                     </div>
                     <input type="range" id="timeMotion" min="0.01" max="2" step="0.01" value="1" aria-label="Motion Speed">
                 </div>
-                <div style="margin-top: 8px;">
+                <div class="visibility-toggles">
                     <div class="visibility-row">
                         <span class="visibility-label">
                             <span class="vis-dot blue"></span>
@@ -873,25 +970,44 @@
             }
         });
 
-        // Canvas setup (aspect-ratio driven like standing_wave)
+        // Canvas setup. On laptops and desktops the stylesheet gives the canvas the
+        // height left in the window; on narrow screens it keeps a 2.5:1 shape.
+        const fitLayoutQuery = window.matchMedia('(min-width: 901px)');
+        const MAX_COMBINED_AMPLITUDE = parseFloat(amplitude1Slider.max) + parseFloat(amplitude2Slider.max);
+        let verticalScale = 1;
+
         function resizeCanvas() {
             const aspectRatio = 2.5;
             const width = canvas.clientWidth;
-            const height = width / aspectRatio;
+            let height;
+            if (fitLayoutQuery.matches) {
+                canvas.style.height = '';
+                height = canvas.clientHeight;
+            } else {
+                height = width / aspectRatio;
+                canvas.style.height = `${height}px`;
+            }
             const dpr = window.devicePixelRatio || 1;
             canvasWidth = width;
             canvasHeight = height;
-            canvas.style.height = `${height}px`;
+            // Shrink the waves, never clip them, when the canvas is too short for
+            // both amplitudes at their maximum.
+            verticalScale = Math.min(1, Math.max(0, height / 2 - 6) / MAX_COMBINED_AMPLITUDE);
             canvas.width = Math.round(width * dpr);
             canvas.height = Math.round(height * dpr);
             ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
         }
 
-        resizeCanvas();
-        window.addEventListener('resize', () => {
+        function handleCanvasResize() {
             resizeCanvas();
             drawWaves();
-        });
+        }
+
+        resizeCanvas();
+        if (window.ResizeObserver) {
+            new ResizeObserver(handleCanvasResize).observe(canvas);
+        }
+        window.addEventListener('resize', handleCanvasResize);
 
         function getBaselineColor() {
             return getComputedStyle(document.documentElement).getPropertyValue('--canvas-baseline').trim() || '#cbd5e1';
@@ -931,7 +1047,7 @@
                 for (let x = 0; x <= canvasWidth; x++) {
                     const xVirtual = x / timeZoom;
                     const wave1Val = evaluateWave(amplitude1, omega1, speed1, xVirtual, t);
-                    const canvasY = baseline - wave1Val;
+                    const canvasY = baseline - wave1Val * verticalScale;
                     if (x === 0) ctx.moveTo(x, canvasY);
                     else ctx.lineTo(x, canvasY);
                 }
@@ -945,7 +1061,7 @@
                 for (let x = 0; x <= canvasWidth; x++) {
                     const xVirtual = x / timeZoom;
                     const wave2Val = evaluateWave(amplitude2, omega2, speed2, xVirtual, t);
-                    const canvasY = baseline - wave2Val;
+                    const canvasY = baseline - wave2Val * verticalScale;
                     if (x === 0) ctx.moveTo(x, canvasY);
                     else ctx.lineTo(x, canvasY);
                 }
@@ -961,7 +1077,7 @@
                     const wave1Val = evaluateWave(amplitude1, omega1, speed1, xVirtual, t);
                     const wave2Val = evaluateWave(amplitude2, omega2, speed2, xVirtual, t);
                     const sumVal = wave1Val + wave2Val;
-                    const canvasY = baseline - sumVal;
+                    const canvasY = baseline - sumVal * verticalScale;
                     if (x === 0) ctx.moveTo(x, canvasY);
                     else ctx.lineTo(x, canvasY);
                 }

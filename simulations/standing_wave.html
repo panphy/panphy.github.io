@@ -662,6 +662,110 @@
             }
         }
 
+        /* Laptop and desktop: fit the whole app in the window. The canvas takes the
+           height left over by the controls, up to its usual 2:1 shape. */
+        @media (min-width: 901px) {
+            body {
+                display: flex;
+                flex-direction: column;
+                min-height: 100vh;
+                min-height: 100dvh;
+            }
+
+            header.banner {
+                flex-shrink: 0;
+                margin-top: 10px;
+                padding: 6px 20px;
+            }
+
+            .banner-logo img {
+                height: 32px;
+            }
+
+            .main-content {
+                flex: 1 1 0;
+                display: flex;
+                flex-direction: column;
+                justify-content: center;
+                width: 100%;
+                padding: 12px 20px 0;
+            }
+
+            .simulation-area {
+                flex: 1 1 0;
+                display: flex;
+                flex-direction: column;
+                min-height: 220px;
+                max-height: calc((min(100vw, 1200px) - 66px) / 2 + 26px);
+                padding: 12px;
+            }
+
+            canvas {
+                flex: 1 1 0;
+                height: 0;
+                min-height: 0;
+            }
+
+            .play-pause-btn {
+                bottom: 20px;
+                right: 20px;
+            }
+
+            .controls-panel {
+                flex-shrink: 0;
+                margin-top: 12px;
+            }
+
+            .control-section {
+                padding: 12px 18px;
+            }
+
+            .section-title,
+            .section-title-row {
+                margin-bottom: 10px;
+            }
+
+            .boundary-group {
+                margin-bottom: 10px;
+            }
+
+            .boundary-group > label,
+            .particle-header {
+                margin-bottom: 4px;
+            }
+
+            .toggle-btn {
+                padding: 6px 12px;
+            }
+
+            .slider-control,
+            .particle-control {
+                margin-bottom: 10px;
+            }
+
+            .slider-header {
+                margin-bottom: 4px;
+            }
+
+            .info-row {
+                margin-top: 6px;
+            }
+
+            .info-badge {
+                padding: 2px 10px;
+            }
+
+            .hint-text {
+                margin-top: 8px;
+            }
+
+            footer {
+                flex-shrink: 0;
+                padding: 8px 20px 10px;
+                font-size: 0.82rem;
+            }
+        }
+
         @media (pointer: coarse) {
             button:not(.toggle-btn):not(.play-pause-btn),
             .theme-toggle {
@@ -1075,18 +1179,30 @@
         let canvasWidth = 0;
         let canvasHeight = 0;
 
+        // On laptops and desktops the stylesheet gives the canvas the height left
+        // in the window; on narrow screens it keeps a 2:1 shape.
+        const fitLayoutQuery = window.matchMedia('(min-width: 901px)');
+
         function resizeCanvas() {
             const aspectRatio = 2;
             const width = canvas.clientWidth;
-            const height = width / aspectRatio;
+            let height;
+            if (fitLayoutQuery.matches) {
+                canvas.style.height = '';
+                height = canvas.clientHeight;
+            } else {
+                height = width / aspectRatio;
+                canvas.style.height = `${height}px`;
+            }
             const dpr = window.devicePixelRatio || 1;
             canvasWidth = width;
             canvasHeight = height;
-            canvas.style.height = `${height}px`;
             canvas.width = Math.round(width * dpr);
             canvas.height = Math.round(height * dpr);
             ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
             updateWaveCache();
+            // Resizing clears the canvas, so draw it again even while paused.
+            needsRedraw = true;
         }
 
         function updateWaveCache() {
@@ -1118,8 +1234,8 @@
             return getComputedStyle(document.documentElement).getPropertyValue('--canvas-equilibrium').trim() || '#cbd5e1';
         }
 
-        let themeNeedsRedraw = false;
-        window.addEventListener('panphy:theme-change', () => { themeNeedsRedraw = true; });
+        let needsRedraw = false;
+        window.addEventListener('panphy:theme-change', () => { needsRedraw = true; });
 
         function draw(timestamp) {
             if (!lastTimestamp) {
@@ -1128,8 +1244,8 @@
             const deltaTime = (timestamp - lastTimestamp) / 1000;
             lastTimestamp = timestamp;
 
-            if (!isPaused || themeNeedsRedraw) {
-                themeNeedsRedraw = false;
+            if (!isPaused || needsRedraw) {
+                needsRedraw = false;
                 ctx.clearRect(0, 0, canvasWidth, canvasHeight);
                 const desiredFraction = 0.8;
                 const amplitudeScale = (canvasHeight / 2 * desiredFraction) / 10;
@@ -1195,6 +1311,9 @@
             updateNodeAntinodeDisplay();
             updateAmplitudes();
             requestAnimationFrame(draw);
+            if (window.ResizeObserver) {
+                new ResizeObserver(resizeCanvas).observe(canvas);
+            }
         });
 
         window.addEventListener("resize", () => {
