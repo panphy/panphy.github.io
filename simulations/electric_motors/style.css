@@ -32,8 +32,9 @@
   --steel: #8E99A4;
   --carbon: #4A5360;
   --neutral: #657481;
-  --half-a: #7C3AED;
-  --half-b: #65A30D;
+  /* Supply polarity in the DC motor: the + and − brushes, their leads, and the half-ring each one touches. */
+  --plus: #EAB308;
+  --minus: #475569;
   --correct-border: #3F7A55;
   --retry-border: #9E6B27;
 }
@@ -50,8 +51,8 @@
   --steel: #9AA5B0;
   --carbon: #5B6573;
   --neutral: #8C9AA6;
-  --half-a: #A78BFA;
-  --half-b: #A3E635;
+  --plus: #FACC15;
+  --minus: #94A3B8;
   --correct-border: #4ADE80;
   --retry-border: #F0A64A;
 }
@@ -336,7 +337,9 @@ button:disabled { cursor: default; opacity: .55; }
 .equation .formula { font-size: .9rem; font-weight: 600; margin-bottom: 2px; }
 .equation .sub { color: var(--text-secondary); font-size: .72rem; }
 .equation b { font-weight: 600; color: var(--brand-primary); }
-.equation .status { margin-top: 4px; font-size: .72rem; font-weight: 600; }
+.equation .status { margin-top: 4px; font-size: .72rem; font-weight: 600; line-height: 1.5; }
+/* The AC status changes as the coil settles; two lines are kept for it so the box never changes height. */
+body[data-mode="ac"] .equation .status { min-height: 3em; }
 .equation .status.good { color: var(--correct-border); }
 .equation .status.warn { color: var(--retry-border); }
 .graph canvas { display: block; width: 100%; height: auto; aspect-ratio: 300 / 170; flex: none; min-height: 0; }

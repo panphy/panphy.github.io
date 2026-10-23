@@ -56,9 +56,10 @@ const DC = { inertia: 0.012, linear: 0.002, drag: 6e-4, friction: 0.002 };
 // The AC coil is driven only by the force on its current: nothing else pulls it towards the synchronous speed.
 // Its rotor is heavy enough that, from rest, the alternating force only shakes it.
 const AC = { inertia: 0.06, linear: 0.008, drag: 1e-4, friction: 0.001 };
-// "Give it a spin" brings the coil up to the synchronous speed over this many model seconds.
+// Switching on the AC supply brings the coil up to the synchronous speed over this many model seconds,
+// as a starter would: this simple synchronous motor cannot start itself.
 const SPIN_RAMP = 0.3;
-// A nudge off the DC motor's dead spot, in rad/s.
+// The push that carries the DC coil off its dead spot when the split ring is turned back on, in rad/s.
 const NUDGE = 2;
 // Force arrows: scene units per newton, up to a display limit, so doubling the force doubles the arrow.
 const FORCE_ARROW = { scale: 0.6, limit: 2.4 };
@@ -173,7 +174,7 @@ let selected = null;
 function readPalette() {
   const styles = getComputedStyle(document.documentElement);
   const css = name => styles.getPropertyValue(name).trim();
-  const names = ['north', 'south', 'field', 'current', 'force', 'copper', 'steel', 'carbon', 'neutral', 'half-a', 'half-b'];
+  const names = ['north', 'south', 'field', 'current', 'force', 'copper', 'steel', 'carbon', 'neutral', 'plus', 'minus'];
   const result = { dark: document.documentElement.getAttribute('data-theme') === 'dark', css: {} };
   for (const name of names) {
     result[name] = new THREE.Color(css(`--${name}`));
@@ -215,12 +216,13 @@ function labelSprite(text, color, size = 0.5) {
   sprite.raycast = () => {};
   return sprite;
 }
-// The letter identifies the same coil end; the sign identifies its supply connection.
+// The letter identifies the same coil end; the sign and border colour identify its supply connection.
 // Reuse three textures so a half-turn never allocates a new canvas or GPU texture.
-function connectionBadge(letter, color) {
+function connectionBadge(letter) {
+  const borders = { '+': palette.css.plus, '−': palette.css.minus, '': palette.css['text-secondary'] };
   const maps = ['+', '−', ''].map(sign => canvasTexture(256, 128, (ctx, w, h) => {
     ctx.fillStyle = palette.css['bg-color'];
-    ctx.strokeStyle = color;
+    ctx.strokeStyle = borders[sign];
     ctx.lineWidth = 8;
     ctx.beginPath();
     ctx.roundRect(5, 5, w - 10, h - 10, 28);
@@ -382,7 +384,6 @@ function placeMarkers(markers, paths, phase, visible, spacing = 0.32) {
 function ease(k) {
   return k < 0.5 ? 2 * k * k : 1 - (-2 * k + 2) ** 2 / 2;
 }
-const wrap = angle => Math.atan2(Math.sin(angle), Math.cos(angle));
 
 // ---------- Persistent helpers ----------
 const floorShadow = new THREE.Mesh(new THREE.PlaneGeometry(9, 7), new THREE.MeshBasicMaterial({ map: shadowTexture, transparent: true, depthWrite: false }));
@@ -788,7 +789,7 @@ function buildCoil(kind) {
   });
   const sideLabels = ['A', 'B'].map((letter, i) => {
     const label = kind === 'dc'
-      ? connectionBadge(letter, palette.css[i ? 'half-b' : 'half-a'])
+      ? connectionBadge(letter)
       : labelSprite(letter, palette.css['text-main'], 0.32);
     label.position.set((i ? -1 : 1) * 1.42, 0, 1.25);
     rotor.add(label);
@@ -820,10 +821,9 @@ function buildCoilWinding() {
   pickables = pickables.filter(mesh => mesh.userData.part !== 'coil');
   const loops = Math.max(1, Math.round(coilTurns() / 10));
   const mat = material(palette.copper, { metalness: 0.6, roughness: 0.3 });
-  // In the DC motor the leads take the colour of the half-ring (or slip ring) they are joined to: A purple, B green.
   const split = sim.kind === 'dc' && state.commutator;
   const ringZ = split ? [RING_Z, RING_Z] : [RING_Z - 0.2, RING_Z + 0.2];
-  const leadMats = sim.kind === 'dc' ? [material(palette['half-a'], { metalness: 0.4, roughness: 0.35 }), material(palette['half-b'], { metalness: 0.4, roughness: 0.35 })] : [mat, mat];
+  const leadMats = [mat, mat];
   for (let i = 0; i < loops; i++) {
     const offset = (i - (loops - 1) / 2) * 0.05;
     const r = COIL_R + Math.abs(offset) * 0.3;
@@ -875,16 +875,19 @@ function buildRings() {
   const copper = material(palette.copper, { metalness: 0.7, roughness: 0.25 });
   const split = sim.kind === 'dc' && state.commutator;
   const ringZ = split ? [RING_Z, RING_Z] : [RING_Z - 0.2, RING_Z + 0.2];
+  // In the DC motor each ring or half-ring is copper tinted with the colour of the brush it touches (see tintRings).
+  sim.rings = {};
   if (split) {
     // Each half is centred on one side of the coil; the gaps line up with the coil's plane turned by 90°.
     // Half A (centred on +x at θ = 0) is joined to coil side A; half B to side B.
     const gap = 0.16;
-    for (const [start, key] of [[gap, 'half-a'], [Math.PI + gap, 'half-b']]) {
+    for (const [start, key] of [[gap, 'A'], [Math.PI + gap, 'B']]) {
       const geometry = new THREE.CylinderGeometry(RING_R, RING_R, 0.42, 32, 1, false, start, Math.PI - 2 * gap);
       geometry.rotateX(Math.PI / 2);
-      const half = part(new THREE.Mesh(geometry, material(palette[key], { metalness: 0.45, roughness: 0.3 })), 'commutator');
+      const half = part(new THREE.Mesh(geometry, material(palette.copper, { metalness: 0.45, roughness: 0.3 })), 'commutator');
       half.position.z = RING_Z;
       sim.ringParts.add(half);
+      sim.rings[key] = half;
     }
     const insulator = new THREE.Mesh(new THREE.CylinderGeometry(RING_R - 0.04, RING_R - 0.04, 0.4, 24), material(palette.carbon, { roughness: 0.8 }));
     insulator.rotation.x = Math.PI / 2;
@@ -892,16 +895,19 @@ function buildRings() {
     sim.ringParts.add(insulator);
   } else {
     ringZ.forEach((z, k) => {
-      const ringMat = sim.kind === 'dc' ? material(palette[k ? 'half-b' : 'half-a'], { metalness: 0.45, roughness: 0.3 }) : copper;
+      const ringMat = sim.kind === 'dc' ? material(palette.copper, { metalness: 0.45, roughness: 0.3 }) : copper;
       const ring = part(new THREE.Mesh(new THREE.CylinderGeometry(RING_R, RING_R, 0.2, 32), ringMat), 'sliprings');
       ring.rotation.x = Math.PI / 2;
       ring.position.z = z;
       sim.ringParts.add(ring);
+      if (sim.kind === 'dc') sim.rings[k ? 'B' : 'A'] = ring;
     });
   }
-  const brushMat = material(palette.carbon, { roughness: 0.85 });
-  const wireMat = material(palette.carbon, { roughness: 0.6 });
   for (const [side, z] of [[1, ringZ[0]], [-1, ringZ[1]]]) {
+    // DC: the + brush and its lead in the + colour, the − brush and its lead in the − colour. AC has no fixed polarity.
+    const polarity = sim.kind === 'dc' ? (side * (state.reverse ? -1 : 1) > 0 ? palette.plus : palette.minus) : null;
+    const brushMat = material(polarity || palette.carbon, { roughness: 0.85 });
+    const wireMat = material(polarity || palette.carbon, { roughness: 0.6 });
     const brush = part(new THREE.Mesh(new THREE.BoxGeometry(0.26, 0.2, 0.18), brushMat), 'brush');
     brush.position.set(side * (RING_R + 0.13), 0, z);
     sim.brushes.add(brush);
@@ -917,6 +923,17 @@ function buildRings() {
     ], 0.03, wireMat, 60));
   }
   if (sim.kind === 'dc') sim.supply.rotation.y = state.reverse ? Math.PI : 0;
+  tintRings();
+}
+// Copper tinted towards the colour of the brush it touches, so the + colour stays on the + side while the halves turn
+// and jumps from one half to the other at each swap.
+const RING_TINT = 0.75;
+function ringColour(half) {
+  return palette.copper.clone().lerp(halfOnPlus() === half ? palette.plus : palette.minus, RING_TINT);
+}
+function tintRings() {
+  if (sim?.kind !== 'dc') return;
+  for (const [half, mesh] of Object.entries(sim.rings)) mesh.material.color.copy(ringColour(half));
 }
 // Signed current through the coil, in amps. Positive means along side 1 away from the rings.
 function coilCurrent() {
@@ -952,14 +969,8 @@ function stepCoil(delta) {
     const current = coilCurrent();
     // T = BANI cos θ, with the forces on the two long sides making a couple about the axle.
     const torque = -coilConstant() * current * Math.cos(sim.theta);
-    if (sim.spin?.stage === 'wait') {
-      // Start the spin when it will finish with the coil lagging the supply by the angle it needs to stay in step.
-      const ahead = wrap(sim.theta + sim.supplyPhase + (synchronous + sim.omega) * SPIN_RAMP / 2 - lockLag());
-      if (!state.powered || (sim.spin.ahead < 0 && ahead >= 0 && ahead < 1)) sim.spin = { stage: 'ramp', t: 0, from: sim.omega };
-      else sim.spin.ahead = ahead;
-    }
-    if (sim.spin?.stage === 'ramp') {
-      // The spin itself: the coil is turned by hand, steadily faster, up to the synchronous speed.
+    if (sim.spin) {
+      // The start-up: the coil is turned steadily faster, up to the synchronous speed.
       sim.spin.t += dt;
       sim.omega = sim.spin.from + (-synchronous - sim.spin.from) * Math.min(1, sim.spin.t / SPIN_RAMP);
       if (sim.spin.t >= SPIN_RAMP) sim.spin = null;
@@ -988,9 +999,11 @@ function stepCoil(delta) {
   sim.current = coilCurrent();
   sim.torque = -coilConstant() * sim.current * Math.cos(sim.theta);
   sim.time += elapsed;
+  if (Math.abs(sim.omega) > 0.3) sim.heldVertical = false;
   // The supply emf is in phase with the current here, so the scope plots it on the same fixed scale.
   if (sim.scope) advanceScope(sim.scope, elapsed, sim.current / STEPPERS.peak.max);
   sim.rotor.rotation.z = sim.theta;
+  tintRings();
   if (sim.kind === 'dc') {
     sim.sideLabels.forEach((badge, i) => {
       const positive = halfOnPlus() === (i ? 'B' : 'A');
@@ -1067,7 +1080,7 @@ function rightSide() {
   return { side, into };
 }
 function halfLabel(half) {
-  return `<b style="color:var(--half-${half.toLowerCase()})">${half}</b>`;
+  return `<b>${half}</b>`;
 }
 function pauseAtSwap() {
   setPlaying(false);
@@ -1153,18 +1166,17 @@ function updateEquation() {
 
 function acStatus(inStep, speed) {
   if (!state.powered) return 'Supply off.';
-  if (sim.spin?.stage === 'wait') return 'Waiting for the right moment in the cycle…';
-  if (sim.spin) return 'Spinning the coil up to speed…';
+  if (sim.spin) return 'Starting: bringing the coil up to speed…';
   if (inStep) return '✓ In step: one turn per cycle.';
   if (speed > 0.25 * state.values.frequency) return Math.abs(speed - state.values.frequency) < 0.1 * state.values.frequency ? 'Turning with the supply. Settling…' : 'Out of step with the supply: slowing down.';
-  return 'Shaking, not turning.';
+  return 'Out of step: it only shakes. Raise the current or lower the frequency, then switch the supply off and on to start it again.';
 }
 // Why a switched-on DC motor is not moving.
 function dcStuckReason() {
   if (state.values.current === 0) return 'Current set to 0 A: no force on the coil.';
   const vertical = Math.abs(Math.cos(sim.theta)) < 0.1;
   if (!state.commutator) return 'No commutator: the coil has settled near vertical, where the turning effect is zero.';
-  if (vertical) return 'Dead spot: the coil is vertical, so the forces act through the axle. Nudge the coil to start it.';
+  if (vertical) return 'Dead spot: the coil is vertical, so the forces act through the axle and it cannot start. Press “Restart” to begin again.';
   return 'Stuck: the turning effect is too small to beat friction.';
 }
 
@@ -1240,40 +1252,36 @@ function drawEndView() {
   ctx.lineWidth = ringWidth;
   if (state.commutator) {
     const halfSpan = Math.PI / 2 - 0.16;
-    for (const [key, centre] of [['half-a', sim.theta], ['half-b', sim.theta + Math.PI]]) {
-      ctx.strokeStyle = c[key];
+    for (const [half, centre] of [['A', sim.theta], ['B', sim.theta + Math.PI]]) {
+      ctx.strokeStyle = `#${ringColour(half).getHexString()}`;
       ctx.beginPath();
       ctx.arc(cx, cy, ringR, -(centre + halfSpan), -(centre - halfSpan));
       ctx.stroke();
     }
   } else {
     // The two slip rings sit one behind the other; draw them as two circles.
-    ctx.strokeStyle = c['half-a'];
+    ctx.strokeStyle = `#${ringColour('A').getHexString()}`;
     ctx.beginPath();
     ctx.arc(cx, cy, ringR, 0, Math.PI * 2);
     ctx.stroke();
-    ctx.strokeStyle = c['half-b'];
+    ctx.strokeStyle = `#${ringColour('B').getHexString()}`;
     ctx.lineWidth = ringWidth * 0.6;
     ctx.beginPath();
     ctx.arc(cx, cy, ringR * 0.45, 0, Math.PI * 2);
     ctx.stroke();
   }
 
-  // Brushes: the + brush is on the right unless the current is reversed. Each is outlined in the colour of the half it touches.
-  const rightHalf = !state.commutator || ux >= 0 ? 'A' : 'B';
+  // Brushes: the + brush is on the right unless the current is reversed, each in its polarity colour.
   const brushW = w * 0.07;
   const brushH = w * 0.07;
   for (const side of [1, -1]) {
     const x = cx + side * (ringR + ringWidth / 2 + brushW / 2);
-    const touching = side > 0 ? rightHalf : (rightHalf === 'A' ? 'B' : 'A');
-    ctx.fillStyle = c.carbon;
+    const plus = side * (state.reverse ? -1 : 1) > 0;
+    ctx.fillStyle = plus ? c.plus : c.minus;
     ctx.fillRect(x - brushW / 2, cy - brushH / 2, brushW, brushH);
-    ctx.strokeStyle = c[`half-${touching.toLowerCase()}`];
-    ctx.lineWidth = 2;
-    ctx.strokeRect(x - brushW / 2, cy - brushH / 2, brushW, brushH);
     ctx.fillStyle = c['text-main'];
     ctx.font = `700 13px ${font}`;
-    ctx.fillText(side * (state.reverse ? -1 : 1) > 0 ? '+' : '−', x, cy - brushH / 2 - 8);
+    ctx.fillText(plus ? '+' : '−', x, cy - brushH / 2 - 8);
   }
 
   // Horizontal moment arms collapse to zero when the force lines pass through the axle.
@@ -1298,11 +1306,11 @@ function drawEndView() {
   const sideR = w * 0.055;
   for (const side of sides) {
     const into = side.sign * sim.current > 0;
-    ctx.fillStyle = c[`half-${side.half.toLowerCase()}`];
+    ctx.fillStyle = c.copper;
     ctx.beginPath();
     ctx.arc(side.x, side.y, sideR, 0, Math.PI * 2);
     ctx.fill();
-    // Light symbols on the darker light-theme colours, dark ones on the bright dark-theme colours.
+    // Light symbols on the darker light-theme copper, dark ones on the brighter dark-theme copper.
     const ink = palette.dark ? c['bg-color'] : '#fff';
     ctx.strokeStyle = ink;
     ctx.fillStyle = ink;
@@ -1321,7 +1329,7 @@ function drawEndView() {
       ctx.fill();
     }
     // Letter on the outside of the coil.
-    ctx.fillStyle = c[`half-${side.half.toLowerCase()}`];
+    ctx.fillStyle = c['text-main'];
     ctx.font = `700 11px ${font}`;
     const lx = side.sign * ux;
     const ly = side.sign * uy;
@@ -1638,12 +1646,14 @@ $('motion').addEventListener('click', () => setPlaying(!state.playing));
 $('playback').addEventListener('change', event => { state.playback = Number(event.target.value); });
 $('show-flow').addEventListener('change', event => { state.showFlow = event.target.checked; stepSim(0); });
 // Hold the coil still at the nearest vertical position, where the forces have no turning effect.
+// DC only: it shows the dead spot, where a motor at rest cannot start.
 function turnCoilVertical() {
-  if (!sim || !['dc', 'ac'].includes(sim.kind)) return;
+  if (!sim || sim.kind !== 'dc') return;
   setPlaying(false);
   sim.theta = Math.PI / 2 + Math.round((sim.theta - Math.PI / 2) / Math.PI) * Math.PI;
   sim.omega = 0;
-  sim.spin = null;
+  // Left at the dead spot on purpose, so switching on does not push it off.
+  sim.heldVertical = true;
   sim.history = [];
   sim.trace = [];
   stepSim(0);
@@ -1651,7 +1661,25 @@ function turnCoilVertical() {
   drawEndView();
   drawGraph();
   updateObservation();
-  readout.textContent = `VERTICAL COIL · The coil is held still at vertical. The force lines pass through the axle, so their perpendicular distance from it is zero: the forces can still act, but they produce no turning effect. ${sim.kind === 'dc' ? 'Press “Play motion”: a motor at rest here cannot start until you nudge it.' : 'Press “Play motion” to carry on.'}`;
+  readout.textContent = `VERTICAL COIL · The coil is held still at vertical. The force lines pass through the axle, so their perpendicular distance from it is zero: the forces can still act, but they produce no turning effect. Switch the motor on and press “Play motion”: a motor at rest here cannot start. Press “Restart” to begin again from an angle where it can.`;
+}
+// A DC coil at rest at vertical with the split ring on: switched on, it gets no turning effect and cannot start.
+function atDeadSpot() {
+  return sim?.kind === 'dc' && state.commutator && state.values.current > 0 && Math.abs(sim.omega) < 0.3
+    && Math.abs(coilConstant() * state.values.current * Math.cos(sim.theta)) <= DC.friction * 1.5;
+}
+// A small push in the direction the motor runs, off the dead spot where the plain rings left the coil.
+function pushOffDeadSpot() {
+  sim.omega += (state.reverse ? 1 : -1) * NUDGE;
+  sim.heldVertical = false;
+}
+// The AC coil is brought up to the synchronous speed, finishing at the lag it needs to stay in step.
+// The supply was off, so its phase can be chosen to suit the coil's present angle and speed.
+function startAc() {
+  const synchronous = 2 * Math.PI * state.values.frequency;
+  sim.supplyPhase = lockLag() - sim.theta - (synchronous + sim.omega) * SPIN_RAMP / 2;
+  sim.spin = { t: 0, from: sim.omega };
+  sim.history = [];
 }
 const ACTIONS = { vertical: turnCoilVertical };
 $('step').addEventListener('click', () => {
@@ -1678,9 +1706,11 @@ function updateObservation() {
     title = !on ? 'No current → no force' : size < 1e-8 ? 'Parallel to the field → no force' : 'Current + magnetic field → force';
     text = !on ? 'The magnetic field is still present. Switch on the current to see the orange current arrow and pink force arrow.' : size < 1e-8 ? 'Current flows along the field. Turn the wire across the field to produce a force.' : `The pink arrow points ${force.x > 0 ? 'along' : 'back along'} the rails. Reverse either current or field and the force reverses too.`;
   } else {
-    const flowing = Math.abs(sim.current) > 0.05;
-    title = !state.powered ? 'Trace the two sides of the coil' : !flowing ? 'No current → no magnetic force' : sim.kind === 'dc' && state.commutator ? 'Opposite currents → opposite forces' : 'Follow the current, then the forces';
-    text = !state.powered && sim.kind === 'ac' ? 'A and B identify the coil sides. Orange arrows show current; pink arrows show force. Switch on the AC supply to explore current reversal.' : state.powered && !flowing ? (sim.kind === 'dc' ? 'The current is set to 0 A, so there is no magnetic force on the coil.' : 'At zero current there is no magnetic force on the coil. A moving coil can coast through this instant.') : !state.powered ? 'Purple A and green B identify the same coil ends throughout. Switch on to see + / − badges for their supply connections. Orange arrows show current; pink arrows show force.' : sim.kind === 'dc' && state.commutator ? `Side A: current ${sim.current > 0 ? 'away from' : 'towards'} the rings; force ${sim.current > 0 ? 'down' : 'up'}. At each half turn the current reverses. Use “Pause at each swap” to catch it.` : sim.kind === 'ac' ? 'The supply reverses the current and forces. Slip rings keep each coil end connected to the same brush. Give it a spin to explore synchronisation.' : 'Without the split ring, current stays the same way round the coil. After vertical, the turning effect reverses and pulls the coil back.';
+    // Chosen from the settings, never from the current at this instant: an alternating current passes through zero
+    // twice a cycle, and a message that flickered there would resize the panel and make the view jump.
+    const flowing = sim.kind === 'ac' || state.values.current > 0;
+    title =!state.powered ? 'Trace the two sides of the coil' : !flowing ? 'No current → no magnetic force' : sim.kind === 'dc' && state.commutator ? 'Opposite currents → opposite forces' : 'Follow the current, then the forces';
+    text = !state.powered && sim.kind === 'ac' ? 'A and B identify the coil sides. Orange arrows show current; pink arrows show force. Switch on the AC supply to explore current reversal.' : state.powered && !flowing ? (sim.kind === 'dc' ? 'The current is set to 0 A, so there is no magnetic force on the coil.' : 'At zero current there is no magnetic force on the coil. A moving coil can coast through this instant.') : !state.powered ? 'A and B identify the same coil ends throughout. Each half-ring takes the colour of the brush it touches: yellow for +, grey for −. Orange arrows show current; pink arrows show force.' : sim.kind === 'dc' && state.commutator ? `Side A: current ${sim.current > 0 ? 'away from' : 'towards'} the rings; force ${sim.current > 0 ? 'down' : 'up'}. At each half turn the current reverses. Use “Pause at each swap” to catch it.` : sim.kind === 'ac' ? 'The supply reverses the current and forces. Slip rings keep each coil end connected to the same brush. In step, the current reverses at the same point in every turn, so the coil keeps turning one way.' : 'Without the split ring, current stays the same way round the coil. After vertical, the turning effect reverses and pulls the coil back.';
   }
   updateTurningDisplay();
   setText('observation-title', title);
@@ -1705,34 +1735,18 @@ $('power').addEventListener('click', () => {
     sim.spin = null;
     sim.history = [];
   }
+  if (state.powered && sim?.kind === 'ac') startAc();
+  const pushed = state.powered && atDeadSpot() && !sim.heldVertical;
+  if (pushed) pushOffDeadSpot();
   updatePowerButton();
   if (!state.playing && state.powered && !reducedMotion) setPlaying(true);
-  readout.textContent = POWER_MESSAGES[state.mode](state.powered);
+  readout.textContent = POWER_MESSAGES[state.mode](state.powered) + (pushed ? ' The coil was resting at vertical, where it cannot start, so it was given a small push.' : '');
 });
 const POWER_MESSAGES = {
   force: on => on ? 'CURRENT ON · The rod is pushed along the rails. Use Fleming’s left-hand rule on the three arrows: Field, Current, Motion.' : 'CURRENT OFF · No current, so no force. The rod rolls to a stop.',
   dc: on => on ? (state.commutator ? 'MOTOR ON · Watch the force arrows: up on one side, down on the other. The split ring reverses the current every half turn.' : 'MOTOR ON, NO COMMUTATOR · The current never reverses, so the coil turns until it is vertical and then gets pulled back.') : 'MOTOR OFF · No current, so no forces. The coil coasts to a stop.',
-  ac: on => on ? 'SUPPLY ON · The current reverses every half cycle. On a coil at rest the forces keep reversing, so it only shakes. Try “Give it a spin”.' : 'SUPPLY OFF · The coil coasts to a stop.',
+  ac: on => on ? 'SUPPLY ON · The coil is brought up to speed and runs in step with the supply: one turn per cycle. The current reverses every half cycle, at the same point in every turn, so the coil keeps turning one way.' : 'SUPPLY OFF · The coil coasts to a stop.',
 };
-const SPIN_LABELS = { dc: 'Nudge the coil', ac: 'Give it a spin' };
-$('spin').addEventListener('click', () => {
-  if (!sim || sim.kind === 'force') return;
-  if (!state.playing) setPlaying(true);
-  if (sim.kind === 'dc') {
-    // A push in the direction the motor runs.
-    sim.omega += (state.reverse ? 1 : -1) * NUDGE;
-    readout.textContent = state.powered
-      ? 'NUDGE · A small push by hand. If the coil was stuck at vertical, this carries it off the dead spot so the forces can turn it.'
-      : 'NUDGE · A small push by hand. With the motor off there is no force to keep the coil turning, so friction stops it.';
-    return;
-  }
-  // The spin waits for the point in the supply cycle from which the coil will end up in step.
-  sim.spin = state.powered ? { stage: 'wait', ahead: 0 } : { stage: 'ramp', t: 0, from: sim.omega };
-  sim.history = [];
-  readout.textContent = state.powered
-    ? 'SPIN · The coil is spun up to the supply’s speed and let go at the right moment in the cycle. If the current is big enough to keep it going, it locks in step: one turn per cycle.'
-    : 'SPIN · With the supply off, there is nothing to keep it turning. Switch on the supply, then spin it.';
-});
 // Reset: stop the model and go back to the starting position, view and readout, keeping the settings.
 function resetModel() {
   state.powered = false;
@@ -1888,8 +1902,14 @@ function toggle(key, button) {
     sim.current = coilCurrent();
     sim.torque = -coilConstant() * sim.current * Math.cos(sim.theta);
   }
+  // Plain rings leave a running motor's coil resting at vertical, its dead spot; turning the split ring back on pushes it off.
+  const pushed = key === 'commutator' && state.powered && atDeadSpot();
+  if (pushed) {
+    pushOffDeadSpot();
+    if (!state.playing && !reducedMotion) setPlaying(true);
+  }
   if (key === 'endView') updateEndViewVisibility();
-  readout.textContent = TOGGLE_MESSAGES[key]();
+  readout.textContent = TOGGLE_MESSAGES[key]() + (pushed ? ' The coil was resting at vertical, where it cannot start, so it was given a small push.' : '');
   drawGraph();
   updateEquation();
 }
@@ -1917,7 +1937,7 @@ viewer.addEventListener('keydown', event => {
 const DEFAULT_READOUT = {
   force: 'A COPPER ROD ON RAILS · The rod sits in the field between a north pole (top) and a south pole (bottom). Press “Switch on current”, or tap a part.',
   dc: 'DC MOTOR · A coil on an axle between two poles, fed through a split-ring commutator and two carbon brushes. Press “Switch on motor”, or tap a part.',
-  ac: 'AC MOTOR · The same coil in a stronger field, but with two slip rings and an alternating supply. Switch on the supply, then try “Give it a spin”.',
+  ac: 'AC MOTOR · The same coil in a stronger field, but with two slip rings and an alternating supply. Switch on the supply and watch the coil run in step with it.',
 };
 const LEGEND = {
   force: ['north', 'south', 'field', 'current', 'force'],
@@ -1950,8 +1970,6 @@ function selectMode(mode, animate = true) {
   buildMode(animate && previous !== mode);
   buildControls();
   document.querySelectorAll('[data-legend]').forEach(item => { item.hidden = !LEGEND[mode].includes(item.dataset.legend); });
-  $('spin').hidden = mode === 'force';
-  if (SPIN_LABELS[mode]) $('spin').textContent = $('spin').dataset.reserve = SPIN_LABELS[mode];
   updateEndViewVisibility();
   $('action-hint').textContent = data.hint;
   readout.textContent = DEFAULT_READOUT[mode];
@@ -1973,7 +1991,7 @@ document.querySelectorAll('.models [data-mode]').forEach(button => button.addEve
 
 // ---------- Theme ----------
 // Rebuild the scene (new colours or fonts) without disturbing the running model.
-const MOTION_KEYS = ['x', 'v', 'phase', 'theta', 'omega', 'time', 'supplyPhase', 'spin', 'trace', 'history', 'current', 'torque'];
+const MOTION_KEYS = ['x', 'v', 'phase', 'theta', 'omega', 'time', 'supplyPhase', 'spin', 'heldVertical', 'trace', 'history', 'current', 'torque'];
 function rebuildScene() {
   const motion = sim && Object.fromEntries(MOTION_KEYS.filter(key => key in sim).map(key => [key, sim[key]]));
   const kind = sim?.kind;
