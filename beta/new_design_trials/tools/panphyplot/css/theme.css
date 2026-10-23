@@ -1,0 +1,43 @@
+/* PanPhyPlot app and manual theme tokens for the Spectrum design.
+   Fonts, colours, radii and shadows come from the shared design system
+   (/assets/design.css after promotion), which must load first; this file
+   only adds what is particular to PanPhyPlot. On promotion it replaces
+   tools/panphyplot/css/theme.css. */
+
+:root {
+	/* Graph paper in the cool ink of the new design. */
+	--paper: var(--bg);
+	--grid-minor: rgba(28, 40, 90, 0.035);
+	--grid-major: rgba(28, 40, 90, 0.075);
+
+	/* Series roles. */
+	--role-x: var(--ink);
+	--role-err: #7B4FD6;
+
+	--appbar-h: 56px;
+	--toolbar-h: 52px;
+	--statusbar-h: 30px;
+
+	/* Names read by tour.css and the shared theme and fullscreen buttons. */
+	--muted-bg: var(--surface-3);
+	--border-color: var(--line);
+	--input-border: var(--line-strong);
+	--input-focus: var(--focus);
+	--brand-primary: var(--accent);
+	--brand-secondary: var(--brand);
+	--brand-accent: var(--accent);
+	--btn-analyze: var(--accent);
+	--btn-analyze-hover: var(--accent-hover);
+	--btn-create: var(--good);
+	--btn-danger: var(--danger);
+	--btn-neutral: #5E6475;
+	--btn-neutral-hover: #4B5060;
+}
+
+[data-theme="dark"] {
+	--grid-minor: rgba(150, 175, 255, 0.03);
+	--grid-major: rgba(150, 175, 255, 0.065);
+	--role-err: #B9A0F5;
+	--btn-neutral: #8A90A2;
+	--btn-neutral-hover: #A0A6B6;
+}
