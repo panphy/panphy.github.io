@@ -61,3 +61,4 @@ These caps and timings are starting points for playtesting, especially waves 5â€
 - An easy keyword must be 11 letters or fewer, or wave 1 would never use it. `tests/difficulty.test.mjs` fails if one is longer, and also checks that every capped wave still has a healthy pool.
 - A long keyword needs no special handling: the caps keep it out of normal encounters automatically; bosses ask for one bounded word, or two short ones.
 - After adding a medium or hard keyword or an equation, check which word its boss hides; if the rule picks a word the clue is not about, set `ask`. The clue must not contain the hidden word (`tests/prompt-utils.test.mjs` checks this).
+- `src/boss-options.js` holds draft multiple-choice options for every boss (the game does not use them yet). A new medium or hard keyword or equation needs an entry: the answer and three wrong options that fit the same gap but not the clue. `tests/boss-options.test.mjs` checks the rules it can.
