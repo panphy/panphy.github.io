@@ -11,11 +11,10 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <link rel="stylesheet" href="/assets/standalone-top.css">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Unbounded:wght@400;600;800&family=Figtree:wght@400;500;600;700&family=Azeret+Mono:wght@500;600&display=swap">
+    <link rel="stylesheet" href="/assets/fonts/fonts.css">
+    <link rel="stylesheet" href="/beta/new_design_trials/assets/design.css">
     <script>document.documentElement.classList.add('js');</script>
-    <title>Spectrum Trial | PanPhy Labs</title>
+    <title>PanPhy Labs · Design Trial</title>
     <meta name="description"
         content="PanPhy Labs is a portfolio of physics tools, simulations, and interactive mini apps.">
     <meta property="og:title" content="PanPhy Labs">
@@ -440,55 +439,42 @@
         /* ========================================
            Trial design
            ======================================== */
-        /* Spectrum: light split through a prism; glass panels with spectral edges, bento catalogue */
+        /* Spectrum homepage. Fonts, colours and the spectrum come from design.css;
+           these names are the homepage's own, mapped onto the shared tokens. */
         :root {
-            color-scheme: light;
-            --font-sans: 'Figtree', system-ui, sans-serif;
-            --font-display: 'Unbounded', 'Figtree', sans-serif;
-            --font-mono: 'Azeret Mono', ui-monospace, monospace;
+            --font-sans: var(--font-body);
 
-            --bg-color: #F5F6FA;
-            --text-main: #0B0D14;
-            --text-secondary: #4F5568;
-            --brand-primary: #DB3F27;
-            --brand-accent: #1C64D8;
+            --bg-color: var(--bg);
+            --text-main: var(--ink);
+            --text-secondary: var(--ink-2);
+            --brand-primary: var(--brand);
+            --brand-accent: var(--accent);
+            --card-solid: var(--surface);
+            --focus-ring: var(--accent);
+            --status-check: var(--accent);
+            --status-ready: var(--good);
+            --status-warning: var(--warn);
+
+            /* Glass is kept on the homepage only: nothing live moves behind its cards. */
             --card-bg: rgba(255, 255, 255, 0.78);
-            --card-solid: #FFFFFF;
             --card-border: rgba(11, 13, 20, 0.1);
-            --art-bg: #EEF0F6;
+            --art-bg: var(--surface-3);
             --nav-bg: rgba(255, 255, 255, 0.72);
             --scope-grid: rgba(11, 13, 20, 0.07);
-            --focus-ring: #1C64D8;
-            --status-check: #1C64D8;
-            --status-ready: #0F7B4F;
-            --status-warning: #B25A06;
             --grid-gap: 1.1rem;
             --canvas-grid: rgba(28, 40, 90, 0.07);
             --canvas-node: rgba(28, 40, 90, 0.16);
-            --glow: 0 30px 70px -30px rgba(28, 40, 90, 0.35);
-            --spectrum: linear-gradient(90deg, #7B2FF7 0%, #3B5BFF 16%, #14B8E6 32%, #1BC77A 48%, #E8D41A 64%, #FF8A1F 80%, #F0263A 100%);
+            --glow: var(--shadow-2);
         }
 
         [data-theme="dark"] {
-            color-scheme: dark;
-            --bg-color: #07080C;
-            --text-main: #F1F3F9;
-            --text-secondary: #A2A8BA;
-            --brand-primary: #FF6A4D;
-            --brand-accent: #54A6FF;
             --card-bg: rgba(20, 23, 33, 0.72);
-            --card-solid: #12141C;
             --card-border: rgba(241, 243, 249, 0.09);
             --art-bg: #0D0F16;
             --nav-bg: rgba(12, 14, 20, 0.7);
             --scope-grid: rgba(241, 243, 249, 0.07);
-            --focus-ring: #54A6FF;
-            --status-check: #8fb2ff;
-            --status-ready: #4fdb98;
-            --status-warning: #ffb45a;
             --canvas-grid: rgba(150, 175, 255, 0.07);
             --canvas-node: rgba(150, 175, 255, 0.18);
-            --glow: 0 30px 80px -30px rgba(84, 166, 255, 0.35);
         }
 
         body { font-size: 1.02rem; }
@@ -1130,7 +1116,7 @@
                     <p>A simple Markdown editor with LaTeX support.</p>
                 </div>
             </a>
-            <a class="card" href="/tools/panphyplot.html" data-topic="data">
+            <a class="card" href="/beta/new_design_trials/tools/panphyplot.html" data-topic="data">
                 <div class="card-art" aria-hidden="true">
                     <svg viewBox="0 0 360 168" focusable="false">
                         <path class="a-ink" d="M52 24v116h270" stroke-width="2"/>
@@ -1222,7 +1208,7 @@
         </div>
         <div class="grid-wrap">
         <div class="grid">
-            <a class="card" href="/simulations/ripple_tank.html" data-topic="waves">
+            <a class="card" href="/beta/new_design_trials/simulations/ripple_tank.html" data-topic="waves">
                 <div class="card-art" aria-hidden="true">
                     <svg viewBox="0 0 360 168" focusable="false">
                         <g class="a-acc" stroke-width="1.6" opacity="0.85"><circle cx="140" cy="150" r="22"/><circle cx="140" cy="150" r="44"/><circle cx="140" cy="150" r="66"/><circle cx="140" cy="150" r="88"/><circle cx="140" cy="150" r="110"/><circle cx="140" cy="150" r="132"/><circle cx="140" cy="150" r="154"/><circle cx="140" cy="150" r="176"/><circle cx="140" cy="150" r="198"/><circle cx="220" cy="150" r="22"/><circle cx="220" cy="150" r="44"/><circle cx="220" cy="150" r="66"/><circle cx="220" cy="150" r="88"/><circle cx="220" cy="150" r="110"/><circle cx="220" cy="150" r="132"/><circle cx="220" cy="150" r="154"/><circle cx="220" cy="150" r="176"/><circle cx="220" cy="150" r="198"/></g>
