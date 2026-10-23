@@ -6,7 +6,7 @@ This file tracks the move of every app on the homepage to the Spectrum design in
 
 - **One phase at a time.** Ask the owner before starting each phase.
 - **One branch and PR per phase.** Follow the finalize workflow in `CLAUDE.md`, and update this file in the same PR.
-- **Status:** `todo`, `in progress` or `done`. Add the PR link when a line is done.
+- **Status:** `todo`, `in progress`, `done`, or `not reworked` (the owner chose to keep the app's own design). Add the PR link when a line is done.
 - **Adopting the design:** see `CLAUDE.md` (Code and interface conventions) and the pilots described in [`README.md`](README.md):
   - load `/assets/fonts/fonts.css`, then `/assets/design.css`, before the app's CSS;
   - map existing variable names onto the shared tokens;
@@ -86,10 +86,10 @@ These apps share one layout (`app.js`, `content.js`, `style.css` in a folder nam
 
 | App | Status | PR | Notes |
 | --- | --- | --- | --- |
-| Timer (`for_teachers/timer.html`) | todo | | Single-file app. |
-| Visualizer (`for_teachers/visualizer.html`) | todo | | Single-file app. |
-| Spellwave (`fun/spellwave.html`) | todo | | Network-only: no `sw-register.js` and no caching. Source in `fun/spellwave/src/`; tests run in CI. |
-| ASCII Cam (`fun/ascii_cam.html`) | todo | | Network-only: no `sw-register.js` and no caching. |
+| Timer (`for_teachers/timer.html`) | done | PR_LINK | Dark only (fixed `data-theme="dark"`, no theme toggle), so it takes the dark tokens. The main card's top stripe is the one spectrum line; the clock readout is in IBM Plex Mono. Button and overtime colours unchanged. Adding a light mode would be a separate change. |
+| Visualizer (`for_teachers/visualizer.html`) | done | PR_LINK | Tokens mapped as in PanPhyMD. Solid app bar and toolbar; the HUD and show-dock pills over the camera no longer blur. The camera view stays black in both themes. |
+| Spellwave (`fun/spellwave.html`) | not reworked | — | Owner decision (2026-10-23): keep its own game design. Leave it out of the rollout. |
+| ASCII Cam (`fun/ascii_cam.html`) | done | PR_LINK | Dark only; now `data-theme="dark"`. Google Fonts replaced by the self-hosted fonts. Plain title with a short spectrum line under it. Still network-only: no `sw-register.js`, no caching. |
 
 ## Phase 5: Homepage and cleanup
 

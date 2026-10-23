@@ -4,7 +4,7 @@
 <head>
 	<meta charset="utf-8" />
 	<meta name="viewport" content="width=device-width,initial-scale=1, viewport-fit=cover" />
-	<meta name="theme-color" content="#F8F6F1">
+	<meta name="theme-color" content="#F5F6FA">
 	<script src="/assets/theme.js"></script>
 	<meta name="apple-mobile-web-app-capable" content="yes">
 	<meta name="apple-mobile-web-app-status-bar-style" content="default">
@@ -12,79 +12,31 @@
 	<title>Camera Visualizer</title>
 	<link rel="icon" type="image/png" href="/assets/favicon.png">
 	<script src="/assets/sw-register.js" defer></script>
+	<link rel="stylesheet" href="/assets/fonts/fonts.css">
+	<link rel="stylesheet" href="/assets/design.css">
 	<link rel="stylesheet" href="/assets/theme-toggle.css">
 	<script src="/assets/theme-toggle.js"></script>
 	<style>
-		@import url('/assets/fonts/fonts.css');
-
 		/* Camera Visualizer: an app bar, the camera view, and a toolbar strip below it.
 		   In full screen the toolbar floats over the picture. The view itself stays
 		   black in both themes so the camera image keeps its true colours. */
 
 		:root {
-			color-scheme: light;
-			--font-sans: 'Manrope', system-ui, sans-serif;
-			--font-display: 'DM Serif Display', Georgia, serif;
-			--font-mono: 'IBM Plex Mono', ui-monospace, monospace;
+			--font-sans: var(--font-body);
 
-			--paper: #F4F1EA;
-			--grid-minor: rgba(15, 118, 110, 0.055);
-			--grid-major: rgba(15, 118, 110, 0.11);
-			--surface: #FFFFFF;
-			--surface-2: #FAF8F4;
-			--surface-3: #F2EEE6;
-			--ink: #17181A;
-			--ink-2: #55585E;
-			--ink-3: #8A8C91;
-			--line: #E6E1D7;
-			--line-strong: #D3CCBE;
-			--accent: #0F766E;
-			--accent-hover: #0B5F59;
-			--accent-ink: #FFFFFF;
-			--accent-soft: rgba(15, 118, 110, 0.1);
-			--brand: #C2410C;
-			--danger: #B42318;
-			--danger-soft: rgba(180, 35, 24, 0.08);
-			--good: #15803D;
-			--warn: #B45309;
-			--focus: rgba(15, 118, 110, 0.35);
-			--shadow-1: 0 1px 2px rgba(23, 24, 26, 0.05), 0 2px 8px rgba(23, 24, 26, 0.04);
-			--shadow-2: 0 12px 36px rgba(23, 24, 26, 0.16);
-			--radius: 14px;
-			--radius-sm: 10px;
+			--paper: var(--bg);
+			--grid-minor: rgba(28, 40, 90, 0.035);
+			--grid-major: rgba(28, 40, 90, 0.075);
 			--appbar-h: 56px;
 			--hit: 44px;
 
 			/* Read by the shared theme button. */
-			--brand-primary: var(--brand);
-			--brand-accent: var(--accent);
+			--brand-primary: var(--accent);
 		}
 
 		[data-theme="dark"] {
-			color-scheme: dark;
-			--paper: #0D1012;
-			--grid-minor: rgba(94, 234, 212, 0.035);
-			--grid-major: rgba(94, 234, 212, 0.07);
-			--surface: #15191C;
-			--surface-2: #191E22;
-			--surface-3: #20262B;
-			--ink: #E8EBED;
-			--ink-2: #A5ACB3;
-			--ink-3: #737B83;
-			--line: #262D33;
-			--line-strong: #353D44;
-			--accent: #5EEAD4;
-			--accent-hover: #8FF3E3;
-			--accent-ink: #062521;
-			--accent-soft: rgba(94, 234, 212, 0.12);
-			--brand: #FB923C;
-			--danger: #F97066;
-			--danger-soft: rgba(249, 112, 102, 0.1);
-			--good: #4ADE80;
-			--warn: #FBBF24;
-			--focus: rgba(94, 234, 212, 0.35);
-			--shadow-1: 0 1px 2px rgba(0, 0, 0, 0.4), 0 2px 10px rgba(0, 0, 0, 0.25);
-			--shadow-2: 0 16px 44px rgba(0, 0, 0, 0.55);
+			--grid-minor: rgba(150, 175, 255, 0.03);
+			--grid-major: rgba(150, 175, 255, 0.065);
 		}
 
 		@media (pointer: coarse) {
@@ -127,8 +79,8 @@
 		}
 
 		.offline-font {
-			--font-sans: 'Manrope', system-ui, sans-serif;
-			--font-display: 'DM Serif Display', Georgia, serif;
+			--font-sans: 'Figtree', system-ui, sans-serif;
+			--font-display: 'Unbounded', system-ui, sans-serif;
 			--font-mono: 'IBM Plex Mono', ui-monospace, monospace;
 		}
 
@@ -205,7 +157,6 @@
 			background: var(--accent-hover);
 		}
 
-
 		.cv-icon {
 			width: 22px;
 			height: 22px;
@@ -250,10 +201,21 @@
 			gap: 14px;
 			min-height: calc(var(--appbar-h) + var(--standalone-top, 0px));
 			padding: var(--standalone-top, 0px) 14px 0;
-			background: color-mix(in srgb, var(--surface) 86%, transparent);
-			backdrop-filter: saturate(1.4) blur(10px);
-			-webkit-backdrop-filter: saturate(1.4) blur(10px);
+			background: var(--surface);
 			border-bottom: 1px solid var(--line);
+		}
+
+		/* One thin spectrum line under the app bar marks the app as PanPhy. */
+		.cv-appbar::after {
+			content: '';
+			position: absolute;
+			left: 0;
+			right: 0;
+			bottom: -1px;
+			height: 2px;
+			background: var(--spectrum);
+			opacity: 0.85;
+			pointer-events: none;
 		}
 
 		.cv-brand {
@@ -275,8 +237,9 @@
 
 		.cv-wordmark {
 			font-family: var(--font-display);
-			font-size: 1.32rem;
-			letter-spacing: -0.01em;
+			font-size: 1.02rem;
+			font-weight: 600;
+			letter-spacing: -0.03em;
 			white-space: nowrap;
 			overflow: hidden;
 			text-overflow: ellipsis;
@@ -396,11 +359,9 @@
 			letter-spacing: .04em;
 			text-transform: uppercase;
 			color: #F2F2F0;
-			background: rgba(0, 0, 0, .55);
+			background: rgba(0, 0, 0, .72);
 			border: 1px solid rgba(255, 255, 255, .14);
 			border-radius: 999px;
-			backdrop-filter: blur(6px);
-			-webkit-backdrop-filter: blur(6px);
 			pointer-events: none;
 		}
 
@@ -505,8 +466,9 @@
 		#startTitle {
 			margin: 0 0 6px;
 			font-family: var(--font-display);
-			font-size: 1.6rem;
-			font-weight: 400;
+			font-size: 1.15rem;
+			font-weight: 500;
+			letter-spacing: -0.02em;
 			line-height: 1.15;
 		}
 
@@ -603,12 +565,10 @@
 			justify-content: center;
 			gap: 2px;
 			padding: 4px;
-			background: color-mix(in srgb, var(--surface) 94%, transparent);
+			background: var(--surface);
 			border: 1px solid var(--line);
 			border-radius: calc(var(--radius-sm) + 5px);
 			box-shadow: var(--shadow-1);
-			backdrop-filter: saturate(1.4) blur(12px);
-			-webkit-backdrop-filter: saturate(1.4) blur(12px);
 		}
 
 		#stage.is-fullscreen .cv-dock,
@@ -892,10 +852,8 @@
 			padding: 0;
 			border-radius: 50%;
 			color: #F2F2F0;
-			background: rgba(0, 0, 0, .55);
+			background: rgba(0, 0, 0, .72);
 			border: 1px solid rgba(255, 255, 255, .2);
-			backdrop-filter: blur(8px);
-			-webkit-backdrop-filter: blur(8px);
 		}
 
 		#showDockBtn:hover {
@@ -1027,8 +985,9 @@
 		#filenameDialog h3 {
 			margin: 0 0 12px;
 			font-family: var(--font-display);
-			font-size: 1.3rem;
-			font-weight: 400;
+			font-size: 1.02rem;
+			font-weight: 500;
+			letter-spacing: -0.02em;
 		}
 
 		#filenameDialog input[type="text"] {
