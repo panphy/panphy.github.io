@@ -235,7 +235,7 @@
             <h3 class="rn-head">It is the rate that matters</h3>
             <p>A huge flux that stays constant induces nothing. A small flux that changes quickly can induce a large emf. Pushing a magnet into a coil in 0.1 s gives ten times the emf of pushing it in over 1 s, although the change of flux is the same.</p>
             <h3 class="rn-head">One law, three situations</h3>
-            <p>\(\Phi = BA \cos \theta\) has three factors, and changing any of them changes the flux. The rest of this deck works through the three cards on the slide one by one. In every case the method is the same: find the change in flux, divide by the time taken and multiply by the number of turns.</p>
+            <p>\(\Phi = BA \cos \theta\) has three factors, and changing any of them changes the flux. The rest of this deck works through the three cards on the slide one by one. In every case use \(\Delta\Phi = \Phi_\mathrm{f} - \Phi_\mathrm{i}\), keeping the same positive area normal. The signed emf is \(-N\frac{\Delta\Phi}{\Delta t}\); its magnitude is \(N\frac{|\Delta\Phi|}{\Delta t}\).</p>
           </div>
           <div class="rn-side">
             <p class="tip">Check the unit: \(\frac{\mathrm{Wb}}{\mathrm{s}} = \frac{\mathrm{T} \,\mathrm{m}^{2}}{\mathrm{s}} = \mathrm{V}\). One weber of flux change in one second induces one volt in one turn.</p>
@@ -252,13 +252,13 @@
             <span class="say">\(B\) rises from 0.10 T to 0.50 T in 0.020 s</span>
             <span>\(\Delta \Phi = A \Delta B\)</span>
             <span class="step">\(\Delta \Phi = 4.0 \times 10^{-4} \times 0.40 = 1.6 \times 10^{-4} \,\mathrm{Wb}\)</span>
-            <span class="step">\(\varepsilon = N \dfrac{\Delta \Phi}{\Delta t} = \dfrac{200 \times 1.6 \times 10^{-4}}{0.020}\)</span>
-            <span class="step">\(\varepsilon = \class{res}{1.6 \,\mathrm{V}}\)</span>
+            <span class="step">\(\varepsilon = -N \dfrac{\Delta \Phi}{\Delta t} = -\dfrac{200 \times 1.6 \times 10^{-4}}{0.020}\)</span>
+            <span class="step">\(\varepsilon = \class{res}{-1.6 \,\mathrm{V}}\)</span>
           </div>
           <div class="stack">
             <ul class="points small">
               <li>Only the <b>change</b> in \(B\) matters: 0.40 T</li>
-              <li class="step">For the size of the emf, leave out the minus sign</li>
+              <li class="step">\(\Delta\Phi = \Phi_\mathrm{f} - \Phi_\mathrm{i}\); emf magnitude \(|\varepsilon| = 1.6 \,\mathrm{V}\)</li>
               <li class="step">If \(B\) then stays at 0.50 T, the emf is <b>zero</b></li>
             </ul>
           </div>
@@ -267,7 +267,7 @@
         <aside class="revision-note" hidden>
           <div class="rn-main">
             <h3 class="rn-head">What you could change</h3>
-            <p>Double the number of turns and the emf doubles. Make the same change of field in half the time and the emf doubles. Use a coil of twice the area and it doubles again. Each of these is a factor in \(N \frac{\Delta \Phi}{\Delta t}\).</p>
+            <p>Double the number of turns and the emf doubles. Make the same change of field in half the time and the emf doubles. Use a coil of twice the area and it doubles again. Each scales the magnitude \(N\frac{|\Delta\Phi|}{\Delta t}\). The negative emf here is relative to the loop direction associated with the chosen positive flux.</p>
             <h3 class="rn-head">Where the field might come from</h3>
             <p>A common arrangement is a small “search” coil inside a solenoid. When the current in the solenoid changes, so does the field inside it, and an emf appears in the small coil even though nothing moves. This is the principle of the transformer: a changing current in one coil induces an emf in another.</p>
           </div>
@@ -400,8 +400,8 @@
             <div class="work">
               <span class="say">In a time \(\Delta t\) the rod moves \(v \Delta t\)</span>
               <span>\(\Delta \Phi = B \Delta A = B L v \Delta t\)</span>
-              <span class="step">\(\varepsilon = \dfrac{\Delta \Phi}{\Delta t}\)</span>
-              <span class="step">\(\varepsilon = BvL\)</span>
+              <span class="step">\(|\varepsilon| = \dfrac{|\Delta \Phi|}{\Delta t}\)</span>
+              <span class="step">\(|\varepsilon| = BvL\)</span>
             </div>
             <div class="idea step">Field, velocity and rod all at <b>right angles</b>.</div>
           </div>

@@ -368,7 +368,7 @@
             <p>A kilogram of lead contains far fewer atoms than a kilogram of aluminium, because each lead atom is nearly eight times heavier. Each atom takes about the same energy to speed up, so the substance with fewer atoms per kilogram needs less energy per kilogram.</p>
           </div>
           <div class="rn-side">
-            <p class="tip">\(\Delta T\) is a difference, so °C and K give the same answer here. Do not add 273.</p>
+            <p class="tip">\(\Delta T = T_\mathrm{f} - T_\mathrm{i}\): positive for heating, negative for cooling. \(Q\) is positive into the body and negative out. Temperature differences are the same in °C and K; do not add 273.</p>
             <p class="more">“Specific” means “per unit mass”. The heat capacity of a whole object, \(mc\), is in J K⁻¹.</p>
           </div>
         </aside>
@@ -445,9 +445,9 @@
           <div class="work">
             <span class="say">0.20 kg of copper at 100 °C goes into 0.50 kg of water at 20 °C</span>
             <span class="say">\(c_\mathrm{Cu} = 390\) · \(c_\mathrm{w} = 4200 \,\mathrm{J} \,\mathrm{kg}^{-1} \,\mathrm{K}^{-1}\) · final temperature \(T\)</span>
-            <span>Energy lost by copper = energy gained by water</span>
-            <span class="step">\(m_\mathrm{Cu} c_\mathrm{Cu} (100 - T) = m_\mathrm{w} c_\mathrm{w} (T - 20)\)</span>
-            <span class="step">\(78 (100 - T) = 2100 (T - 20)\)</span>
+            <span>\(\Delta E_\mathrm{total} = \Delta U_\mathrm{Cu} + \Delta U_\mathrm{w} = 0\)</span>
+            <span class="step">\(m_\mathrm{Cu} c_\mathrm{Cu} (T - 100) + m_\mathrm{w} c_\mathrm{w} (T - 20) = 0\)</span>
+            <span class="step">\(78 (T - 100) + 2100 (T - 20) = 0\)</span>
           </div>
           <div class="work step">
             <span>\(7800 + 42\,000 = 2178\,T\)</span>
@@ -461,7 +461,7 @@
             <h3 class="rn-head">Why so close to 20 °C</h3>
             <p>Compare the two heat capacities, \(mc\). For the copper it is 78 J K⁻¹; for the water it is 2100 J K⁻¹, twenty-seven times as much. Every joule that leaves the copper cools it twenty-seven times as much as it warms the water. The copper falls 77 K while the water rises 3 K.</p>
             <h3 class="rn-head">Setting it up</h3>
-            <p>Write each temperature change as a positive number: the hot body falls from its starting temperature to \(T\), the cold one rises from its starting temperature to \(T\). Then “energy lost = energy gained” has no minus signs to go wrong.</p>
+            <p>Take the copper and water together as an isolated system: no energy passes to the cup or surroundings, so \(\Delta E_\mathrm{total} = 0\). Every change is final minus initial: \(\Delta T_\mathrm{Cu} = T - 100 < 0\), while \(\Delta T_\mathrm{w} = T - 20 > 0\). With no work or phase change, each internal-energy change is \(\Delta U = mc\Delta T\). Add the signed changes and set their sum to zero.</p>
           </div>
           <div class="rn-side">
             <p class="tip">Check that the answer lies between the two starting temperatures, and nearer to that of the body with the larger \(mc\).</p>
@@ -530,7 +530,7 @@
           </div>
           <div class="rn-side">
             <p class="trap">Putting a temperature change into \(Q = mL\). There is none: the whole point is that the temperature stays constant.</p>
-            <p class="more">“Latent” means hidden: the energy goes in without showing on a thermometer.</p>
+            <p class="more">\(L\) is positive. For melting or vaporization, \(Q = +mL\); for freezing or condensation, \(Q = -mL\). “Latent” means hidden: energy is transferred without a temperature change.</p>
           </div>
         </aside>
       </section>
@@ -703,11 +703,11 @@
         <h2>The rate of conduction<span>.</span></h2>
         <div class="split even">
           <div class="stack">
-            <div class="equation"><span>\(\dfrac{\Delta Q}{\Delta t} = kA \dfrac{\Delta T}{\Delta x}\)</span></div>
+            <div class="equation"><span>\(\dfrac{\Delta Q}{\Delta t} = -kA \dfrac{\Delta T}{\Delta x}\)</span></div>
             <ul class="points small">
               <li>\(k\): the <b>thermal conductivity</b> of the material, in \(\mathrm{W} \,\mathrm{m}^{-1} \,\mathrm{K}^{-1}\)</li>
               <li class="step">\(A\): the cross-sectional area the energy passes through</li>
-              <li class="step frac">\(\dfrac{\Delta T}{\Delta x}\): the <b>temperature gradient</b></li>
+              <li class="step frac">\(\dfrac{\Delta T}{\Delta x}\): the <b>signed temperature gradient</b></li>
             </ul>
           </div>
           <table class="facts step">
@@ -727,7 +727,7 @@
             <h3 class="rn-head">Each factor makes sense</h3>
             <p>Twice the area gives twice as many paths for the energy, so twice the rate. Twice the temperature difference pushes energy through twice as fast. Twice the thickness halves the rate: the same temperature difference is spread over twice the distance, so the gradient is half as steep.</p>
             <h3 class="rn-head">The sign</h3>
-            <p>The data booklet writes the equation with the sizes of the quantities. Energy always goes down the temperature gradient, from the hotter face to the colder one.</p>
+            <p>The data booklet (version 1.2, B.1, page 8) includes the minus sign. Choose a positive \(x\)-direction and use \(\Delta T = T_{2} - T_{1}\) with \(\Delta x = x_{2} - x_{1}\). The minus sign makes the energy flow opposite to the temperature gradient, from hot to cold. A positive \(\frac{\Delta Q}{\Delta t}\) means transfer in the positive \(x\)-direction.</p>
             <h3 class="rn-head">The same shape as Ohm’s law</h3>
             <p>A temperature difference drives a flow of energy through a material, just as a potential difference drives a flow of charge through a resistor. A thick layer with a low \(k\) is a large “thermal resistance”. B.5 uses the same idea for electric current.</p>
           </div>
@@ -743,9 +743,9 @@
         <div class="split even">
           <div class="work">
             <span class="say">Glass: area 1.5 m² · thickness 4.0 mm · \(k = 0.80 \,\mathrm{W} \,\mathrm{m}^{-1} \,\mathrm{K}^{-1}\)</span>
-            <span class="say">Its two faces are at 12 °C and 7.0 °C</span>
-            <span>\(\dfrac{\Delta Q}{\Delta t} = kA \dfrac{\Delta T}{\Delta x}\)</span>
-            <span class="step">\(\dfrac{\Delta Q}{\Delta t} = 0.80 \times 1.5 \times \dfrac{12 - 7.0}{4.0 \times 10^{-3}}\)</span>
+            <span class="say">Positive \(x\): from the 12 °C face to the 7.0 °C face</span>
+            <span>\(\dfrac{\Delta Q}{\Delta t} = -kA \dfrac{\Delta T}{\Delta x}\)</span>
+            <span class="step">\(\dfrac{\Delta Q}{\Delta t} = -0.80 \times 1.5 \times \dfrac{7.0 - 12}{4.0 \times 10^{-3}}\)</span>
             <span class="step">\(\dfrac{\Delta Q}{\Delta t} = \class{res}{1.5 \times 10^{3} \,\mathrm{W}}\)</span>
           </div>
           <div class="stack">
@@ -760,7 +760,7 @@
         <aside class="revision-note" hidden>
           <div class="rn-main">
             <h3 class="rn-head">The temperatures are those of the glass</h3>
-            <p>The room might be at 20 °C and the air outside at 0 °C, but the glass faces are at 12 °C and 7 °C. A thin layer of nearly still air clings to each side of the pane and, being a poor conductor, takes most of the 20 K difference. The equation needs the temperature difference across the material itself.</p>
+            <p>The room might be at 20 °C and the air outside at 0 °C, but the glass faces are at 12 °C and 7 °C. A thin layer of nearly still air clings to each side of the pane and, being a poor conductor, takes most of the 20 K difference. The equation needs the temperature difference across the material itself. Along positive \(x\), \(\Delta T = 7.0 - 12 = -5.0 \,\mathrm{K}\), so the transfer rate is positive outwards. The room’s energy change in one hour is \(-5.4 \times 10^{6} \,\mathrm{J}\); the surroundings gain the same amount.</p>
             <h3 class="rn-head">Why double glazing works</h3>
             <p>A 16 mm gap of still air has one thirtieth the thermal conductivity of glass and is four times as thick as the pane, so for the same temperature difference it transfers less than one hundredth as much energy per second. The gap must be narrow enough that the air inside cannot set up a convection current.</p>
           </div>
@@ -1062,7 +1062,7 @@
           <div class="card"><p class="eyebrow">Temperature</p><h3>\(\bar{E}_\mathrm{k} = \frac{3}{2} k_\mathrm{B} T\)</h3><p>In kelvin: \(T = \theta + 273\)<br>Internal energy = kinetic + potential</p></div>
           <div class="card step"><p class="eyebrow">Heating</p><h3>\(Q = mc \Delta T\)</h3><p>The temperature changes<br>The kinetic energy changes</p></div>
           <div class="card step"><p class="eyebrow">Changing phase</p><h3>\(Q = mL\)</h3><p>The temperature is constant<br>The potential energy changes</p></div>
-          <div class="card step"><p class="eyebrow">Conduction</p><h3>\(\frac{\Delta Q}{\Delta t} = kA \frac{\Delta T}{\Delta x}\)</h3><p>Convection: a fluid moves because its density changes</p></div>
+          <div class="card step"><p class="eyebrow">Conduction</p><h3>\(\frac{\Delta Q}{\Delta t} = -kA \frac{\Delta T}{\Delta x}\)</h3><p>Convection: a fluid moves because its density changes</p></div>
           <div class="card step"><p class="eyebrow">Black-body radiation</p><h3>\(L = \sigma A T^{4}\)</h3><p>Apparent brightness \(b = \frac{L}{4 \pi d^{2}}\)</p></div>
           <div class="card step"><p class="eyebrow">Wien’s law</p><h3>\(\lambda_\mathrm{max} T = 2.9 \times 10^{-3}\) m K</h3><p>Hotter: a shorter peak wavelength</p></div>
         </div>

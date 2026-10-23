@@ -339,8 +339,8 @@
           </div>
           <div class="work step">
             <span class="say">A 1200 kg car at \(20 \,\mathrm{m} \,\mathrm{s}^{-1}\) · braking force 6000 N</span>
-            <span>Work done by the brakes = kinetic energy lost</span>
-            <span class="step">\(F s = \dfrac{1}{2} m u^{2}\) &nbsp;so&nbsp; \(s = \dfrac{m u^{2}}{2F}\)</span>
+            <span>\(W_\mathrm{brakes} = \Delta E_\mathrm{k} = E_{\mathrm{k,f}} - E_{\mathrm{k,i}}\)</span>
+            <span class="step">\(-F s = 0 - \dfrac{1}{2} m u^{2}\) &nbsp;so&nbsp; \(s = \dfrac{m u^{2}}{2F}\)</span>
             <span class="step">\(s = \dfrac{1200 \times 20^{2}}{2 \times 6000} = \class{res}{40 \,\mathrm{m}}\)</span>
           </div>
         </div>
@@ -348,7 +348,7 @@
         <aside class="revision-note" hidden>
           <div class="rn-main">
             <h3 class="rn-head">The same answer the long way</h3>
-            <p>With Newton’s second law: \(a = \frac{6000}{1200} = 5.0 \,\mathrm{m} \,\mathrm{s}^{-2}\), then \(v^{2} - u^{2} = 2as\) gives \(s = \frac{20^{2}}{2 \times 5.0} = 40 \,\mathrm{m}\). The energy method reaches it in one step, and it still works when the force is not constant, where the equations of motion do not.</p>
+            <p>With Newton’s second law, take the direction of motion as positive: \(a = \frac{-6000}{1200} = -5.0 \,\mathrm{m} \,\mathrm{s}^{-2}\), then \(v^{2} - u^{2} = 2as\) gives \(s = \frac{0 - 20^{2}}{2 \times (-5.0)} = 40 \,\mathrm{m}\). The energy method reaches it in one step, and it still works when the force is not constant, where the equations of motion do not.</p>
             <h3 class="rn-head">Why braking distance goes as speed squared</h3>
             <p>From \(s = \frac{m u^{2}}{2F}\): at 40 m s⁻¹ the same car needs 160 m. Where the energy goes: the brake discs get hot. The brakes have done −240 kJ of work on the car, and 240 kJ of thermal energy has appeared.</p>
           </div>
@@ -381,7 +381,7 @@
             <h3 class="rn-head">Why the route does not matter</h3>
             <p>Lifted straight up, the block needs a force \(mg\) over a distance \(\Delta h\): work \(mg \Delta h\). On a smooth ramp at angle \(\theta\), the force needed is smaller, \(mg \sin \theta\), but the distance along the ramp is longer, \(\frac{\Delta h}{\sin \theta}\). Multiply them and \(\sin \theta\) cancels: \(mg \Delta h\) again. A ramp trades force for distance; it does not save energy.</p>
             <h3 class="rn-head">Why only changes</h3>
-            <p>The equation gives a change in potential energy, not an amount. You may choose any level as zero, the floor or the bench or the ground outside, because only differences in height affect the motion. Choose the lowest point in the problem and every value is positive.</p>
+            <p>The equation gives a change in potential energy, not an amount. You may choose any level as zero, the floor or the bench or the ground outside, because only differences in height affect the motion. Choose any convenient zero, but always use \(\Delta h = h_\mathrm{f} - h_\mathrm{i}\). A fall gives \(\Delta h < 0\) and \(\Delta E_\mathrm{p} < 0\), whatever zero you choose.</p>
           </div>
           <div class="rn-side">
             <p class="more">Far from the surface \(g\) is not constant, and \(E_\mathrm{p} = -\frac{G M m}{r}\) must be used: D.1, higher level.</p>
@@ -430,7 +430,7 @@
               <span class="say">\(k = 200 \,\mathrm{N} \,\mathrm{m}^{-1}\) · \(\Delta x = 0.15 \,\mathrm{m}\) · ball 0.050 kg</span>
               <span>\(E_\mathrm{H} = \dfrac{1}{2} k (\Delta x)^{2}\)</span>
               <span>\(E_\mathrm{H} = \dfrac{1}{2} \times 200 \times 0.15^{2} = \class{res}{2.25 \,\mathrm{J}}\)</span>
-              <span class="step">\(\dfrac{1}{2} m v^{2} = E_\mathrm{H}\) &nbsp;so&nbsp; \(v = \sqrt{\dfrac{2 E_\mathrm{H}}{m}}\)</span>
+              <span class="step">\(\Delta E_\mathrm{k} + \Delta E_\mathrm{H} = \dfrac{1}{2} m v^{2} - E_{\mathrm{H,i}} = 0\)</span>
               <span class="step">\(v = \sqrt{\dfrac{2 \times 2.25}{0.050}} = \class{res}{9.5 \,\mathrm{m} \,\mathrm{s}^{-1}}\)</span>
             </div>
           </div>
@@ -510,16 +510,16 @@
         <div class="split even">
           <div class="work">
             <span class="say">From rest at the top · no resistive forces</span>
-            <span>Potential energy lost = kinetic energy gained</span>
-            <span class="step">\(mg \Delta h = \dfrac{1}{2} m v^{2}\)</span>
-            <span class="step">\(v = \sqrt{2 g \Delta h} = \sqrt{2 \times 9.8 \times 20}\)</span>
+            <span>\(\Delta E_\mathrm{k} + \Delta E_\mathrm{p} = 0\)</span>
+            <span class="step">\(\dfrac{1}{2} m v^{2} + mg \Delta h = 0,\quad \Delta h = -20 \,\mathrm{m}\)</span>
+            <span class="step">\(v = \sqrt{-2 g \Delta h} = \sqrt{-2 \times 9.8 \times (-20)}\)</span>
             <span class="step">\(v = \class{res}{20 \,\mathrm{m} \,\mathrm{s}^{-1}}\)</span>
           </div>
           <div class="stack">
             <ul class="points small">
               <li>The mass <b>cancels</b>: every car reaches the same speed</li>
               <li class="step">The <b>shape</b> of the track does not matter</li>
-              <li class="step">If it starts at \(5.0 \,\mathrm{m} \,\mathrm{s}^{-1}\): \(v = \sqrt{u^{2} + 2 g \Delta h} = 20.4 \,\mathrm{m} \,\mathrm{s}^{-1}\)</li>
+              <li class="step">If it starts at \(5.0 \,\mathrm{m} \,\mathrm{s}^{-1}\): \(v = \sqrt{u^{2} - 2 g \Delta h} = 20.4 \,\mathrm{m} \,\mathrm{s}^{-1}\)</li>
             </ul>
           </div>
         </div>
@@ -527,9 +527,9 @@
         <aside class="revision-note" hidden>
           <div class="rn-main">
             <h3 class="rn-head">A method for every problem of this kind</h3>
-            <p>Pick two moments, a start and an end. Write the total mechanical energy at each: kinetic, gravitational and elastic. Set them equal. Cross out anything that is zero or the same on both sides. What is left is usually one line of algebra.</p>
+            <p>Choose the system and two moments, initial and final. With no transfer to the surroundings, write \(\Delta E_\mathrm{total} = 0\). For this frictionless track, \(\Delta E_\mathrm{k} + \Delta E_\mathrm{p} = 0\). Every change is final minus initial: the kinetic-energy change is positive and the potential-energy change is negative. Substitute with those signs before rearranging.</p>
             <h3 class="rn-head">Why starting at 5.0 m s⁻¹ adds so little</h3>
-            <p>Energies add, not speeds. The starting kinetic energy, proportional to \(5.0^{2} = 25\), is small beside the \(2 g \Delta h = 392\) gained in the fall. The final speed is \(\sqrt{25 + 392} = 20.4\), barely more than before.</p>
+            <p>Energies add, not speeds. The starting kinetic energy, proportional to \(5.0^{2} = 25\), is small beside the \(-2 g \Delta h = 392\) gained in the fall. The final speed is \(\sqrt{25 + 392} = 20.4\), barely more than before.</p>
           </div>
           <div class="rn-side">
             <p class="trap">Using the equations of motion along a curved track. The acceleration is not constant there. Energy is the right tool.</p>
@@ -547,12 +547,12 @@
               <li class="step">Change in mechanical energy = work done by the <b>non-conservative</b> forces</li>
               <li class="step">The “lost” energy becomes <b>thermal</b> energy</li>
             </ul>
-            <div class="idea step">Total energy is still conserved.</div>
+            <div class="idea step">\(\Delta E_\mathrm{total} = 0\), including thermal energy.</div>
           </div>
           <div class="work step">
             <span class="say">A 70 kg skier descends 30 m, from rest, and arrives at \(18 \,\mathrm{m} \,\mathrm{s}^{-1}\)</span>
-            <span>\(W = \Delta E = \dfrac{1}{2} m v^{2} - mg \Delta h\)</span>
-            <span class="step">\(W = \dfrac{1}{2} \times 70 \times 18^{2} - 70 \times 9.8 \times 30\)</span>
+            <span>\(W = \Delta E_\mathrm{mech} = \dfrac{1}{2} m v^{2} + mg \Delta h\)</span>
+            <span class="step">\(W = \dfrac{1}{2} \times 70 \times 18^{2} + 70 \times 9.8 \times (-30)\)</span>
             <span class="step">\(W = 11\,340 - 20\,580 = \class{res}{-9.2 \times 10^{3} \,\mathrm{J}}\)</span>
           </div>
         </div>
@@ -560,7 +560,7 @@
         <aside class="revision-note" hidden>
           <div class="rn-main">
             <h3 class="rn-head">Reading the answer</h3>
-            <p>The skier started with 20 580 J of potential energy and finished with 11 340 J of kinetic energy. The difference, 9240 J, is the work done against friction and air resistance. It is negative because those forces act against the motion and take mechanical energy away.</p>
+            <p>The skier started with 20 580 J of potential energy and finished with 11 340 J of kinetic energy. With \(\Delta h = -30 \,\mathrm{m}\), the change in mechanical energy is \(-9240 \,\mathrm{J}\), the work done by friction and air resistance. Including the thermal-energy rise gives \(\Delta E_\mathrm{total} = \Delta E_\mathrm{mech} + \Delta U_\mathrm{thermal} = 0\).</p>
             <h3 class="rn-head">Finding the force</h3>
             <p>If the slope is 120 m long, the average resistive force is \(\frac{9240}{120} = 77 \,\mathrm{N}\). Work done by friction depends on the length of the path, unlike the work done by gravity, which depends only on the height. That difference is what “non-conservative” means.</p>
           </div>

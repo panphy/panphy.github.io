@@ -6,6 +6,20 @@ window.DeckFigures.add(P => {
   const { svg, arrow, text, sub, box, dot, surface, axes, plot, shade, both, through, sampled, labelled, spring, track, anim, twoState, PLAY, f } = P;
   const bar = (x, y, w, h, colour, extra = '') => `<rect x="${x}" y="${f(y)}" width="${w}" height="${f(h)}" rx="6" style="fill:var(--${colour})">${extra}</rect>`;
 
+  // Keep the definitions outside the figures so the slide thumbnails use the same gradients.
+  document.body.insertAdjacentHTML('afterbegin', `<svg class="svg-defs" aria-hidden="true" focusable="false"><defs>
+    <linearGradient id="a3-sankey-useful" gradientUnits="userSpaceOnUse" x1="80" y1="158" x2="620" y2="158">
+      <stop offset="0" style="stop-color:var(--bar-slate)"/>
+      <stop offset=".18" style="stop-color:var(--bar-slate)"/>
+      <stop offset="1" style="stop-color:var(--brand-primary)"/>
+    </linearGradient>
+    <linearGradient id="a3-sankey-wasted" gradientUnits="userSpaceOnUse" x1="80" y1="218" x2="560" y2="218">
+      <stop offset="0" style="stop-color:var(--bar-slate)"/>
+      <stop offset=".18" style="stop-color:var(--bar-slate)"/>
+      <stop offset="1" style="stop-color:var(--brand-accent)"/>
+    </linearGradient>
+  </defs></svg>`);
+
   // The roller-coaster track: height above the lowest point, in pixels, at horizontal position x.
   const TRACK = { x0: 60, x1: 620, base: 420, top: 300 };
   const trackY = x => { const t = (x - TRACK.x0) / (TRACK.x1 - TRACK.x0); return TRACK.base - TRACK.top * (0.5 + 0.5 * Math.cos(t * Math.PI * 3)) * (1 - 0.45 * t); };
@@ -94,9 +108,10 @@ window.DeckFigures.add(P => {
     // A Sankey diagram for a petrol engine: the width of each arrow shows the energy. Also drawn small, with data-plain.
     'a3-sankey': el => {
       const on = labelled(el);
-      let s = `<path d="M80,140 H430 V260 H80 Z" style="fill:var(--brand-accent-strong);opacity:.75"/>`;
-      s += `<path d="M430,140 H660 L700,158 L660,176 H430 Z" style="fill:var(--brand-primary)"/>`;
-      s += `<path d="M430,176 H470 C540,176 564,220 564,300 V380 L606,380 L522,430 L438,380 L480,380 V300 C480,268 470,260 430,260 Z" style="fill:var(--brand-accent)"/>`;
+      // As in the Year 9 Energy deck, both output streams begin at the input edge,
+      // blending from one source colour before they separate into useful and wasted energy.
+      let s = `<path d="M80,140 H660 L700,158 L660,176 H80 Z" fill="url(#a3-sankey-useful)"/>`;
+      s += `<path d="M80,176 H470 C540,176 564,220 564,300 V380 L606,380 L522,430 L438,380 L480,380 V300 C480,268 470,260 430,260 H80 Z" fill="url(#a3-sankey-wasted)"/>`;
       if (on) s += text(250, 210, '100 J in', 'lbl strong', 'middle', 'style="fill:#fff"') + text(250, 120, 'chemical energy of the fuel', 'lbl') + text(720, 150, '30 J useful', 'lbl strong', 'start') + text(720, 184, 'kinetic energy', 'lbl', 'start') + text(626, 330, '70 J wasted', 'lbl strong', 'start') + text(626, 364, 'thermal energy', 'lbl', 'start');
       return svg(on ? '60 90 880 360' : '60 110 660 340', s, 'Sankey diagram for a petrol engine. An arrow 100 units wide, the chemical energy input, splits into a narrow arrow of 30 units going straight on, the useful kinetic energy, and a wide arrow of 70 units turning downwards, the wasted thermal energy');
     }

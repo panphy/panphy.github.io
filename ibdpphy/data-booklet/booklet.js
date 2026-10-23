@@ -29,7 +29,7 @@
       '\\Delta y': 'absolute uncertainty in y', '\\Delta a': 'absolute uncertainty in a', '\\Delta b': 'absolute uncertainty in b', '\\Delta c': 'absolute uncertainty in c'
     },
     eqs: [
-      { label: 'Adding or subtracting: if \\(y=a\\pm b\\)', tex: '\\Delta y=\\Delta a+\\Delta b', note: 'Add the absolute uncertainties.' },
+      { label: 'Adding or subtracting: if \\(y=a\\pm b\\)', tex: '\\Delta y=\\Delta a+\\Delta b', note: 'Add the absolute uncertainties. Here Δ denotes a non-negative uncertainty, not final minus initial.' },
       { label: 'Multiplying or dividing: if \\(y=\\dfrac{ab}{c}\\)', tex: '\\dfrac{\\Delta y}{y}=\\dfrac{\\Delta a}{a}+\\dfrac{\\Delta b}{b}+\\dfrac{\\Delta c}{c}', note: 'Add the fractional uncertainties.' },
       { label: 'Raising to a power: if \\(y=a^{n}\\)', tex: '\\dfrac{\\Delta y}{y}=\\left|n\\dfrac{\\Delta a}{a}\\right|', note: 'Multiply the fractional uncertainty by the power.' }
     ]

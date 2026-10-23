@@ -43,8 +43,8 @@
           syms: {
             W: 'work done by the force (J)', F: 'force (N)', s: 'displacement (m)', '\\theta': 'angle between the force and the displacement',
             'E_\\mathrm{k}': 'kinetic energy (J)', m: 'mass (kg)', v: 'speed (m s⁻¹)', p: 'momentum (kg m s⁻¹)',
-            '\\Delta E_\\mathrm{p}': 'change in gravitational potential energy, near the Earth’s surface (J)', g: 'gravitational field strength (N kg⁻¹)', '\\Delta h': 'change in height (m)',
-            'E_\\mathrm{H}': 'elastic potential energy stored in a spring (J)', k: 'spring constant (N m⁻¹)', '\\Delta x': 'extension or compression (m)',
+            '\\Delta E_\\mathrm{p}': 'signed change in gravitational potential energy: final minus initial, near the Earth’s surface (J)', g: 'gravitational field strength (N kg⁻¹)', '\\Delta h': 'final height minus initial height; negative for a fall (m)',
+            'E_\\mathrm{H}': 'elastic potential energy stored in a spring (J)', k: 'spring constant (N m⁻¹)', '\\Delta x': 'signed displacement from the spring’s natural length; squared in the energy equation (m)',
             P: 'power (W)', '\\Delta W': 'work done (J)', '\\Delta t': 'time taken (s)', '\\eta': 'efficiency (no unit; often given as a percentage)'
           },
           eqs: ['W=Fs\\cos\\theta', 'E_\\mathrm{k}=\\tfrac{1}{2}mv^{2}=\\dfrac{p^{2}}{2m}', '\\Delta E_\\mathrm{p}=mg\\Delta h', 'E_\\mathrm{H}=\\tfrac{1}{2}k\\Delta x^{2}', 'P=\\dfrac{\\Delta W}{\\Delta t}=Fv', '\\eta=\\dfrac{\\text{useful work out}}{\\text{total work in}}', '\\eta=\\dfrac{\\text{useful power out}}{\\text{total power in}}']
@@ -83,14 +83,14 @@
           id: 'B.1', title: 'Thermal energy transfers', level: SL,
           syms: {
             '\\rho': 'density (kg m⁻³)', m: 'mass (kg)', V: 'volume (m³)', '\\bar{E}_\\mathrm{k}': 'average kinetic energy of one particle (J)', 'k_\\mathrm{B}': 'Boltzmann constant', T: 'absolute temperature (K)',
-            Q: 'thermal energy transferred (J)', c: 'specific heat capacity (J kg⁻¹ K⁻¹)', '\\Delta T': 'temperature change, or temperature difference across the material (K)',
-            '\\dfrac{\\Delta Q}{\\Delta t}': 'rate of thermal energy transfer by conduction (W)', k: 'thermal conductivity of the material (W m⁻¹ K⁻¹)', A: 'area: cross-section for conduction, or surface area of the radiating body (m²)', '\\Delta x': 'thickness of the material (m)',
+            Q: 'signed thermal energy transferred to the body: positive into it, negative out (J)', c: 'specific heat capacity (J kg⁻¹ K⁻¹)', '\\Delta T': 'signed temperature change: final minus initial (K)',
+            '\\dfrac{\\Delta Q}{\\Delta t}': 'signed rate of thermal energy transfer along the chosen positive x-direction (W)', k: 'thermal conductivity of the material (W m⁻¹ K⁻¹)', A: 'area: cross-section for conduction, or surface area of the radiating body (m²)', '\\Delta x': 'spatial separation x₂ − x₁, using the same ordered points as the temperature difference (m)',
             '\\sigma': 'Stefan–Boltzmann constant', b: 'apparent brightness: power received per unit area (W m⁻²)', d: 'distance from the source (m)', '\\lambda_\\mathrm{max}': 'wavelength at which the black body emits most strongly (m)'
           },
           eqs: [
             '\\rho=\\dfrac{m}{V}', '\\bar{E}_\\mathrm{k}=\\tfrac{3}{2}k_\\mathrm{B}T', 'Q=mc\\Delta T',
-            { tex: 'Q=mL', syms: { L: 'specific latent heat of fusion or vaporization (J kg⁻¹)' } },
-            '\\dfrac{\\Delta Q}{\\Delta t}=-kA\\dfrac{\\Delta T}{\\Delta x}',
+            { tex: '|Q|=mL', syms: { L: 'specific latent heat of fusion or vaporization: a positive magnitude (J kg⁻¹)' }, note: 'The booklet gives the magnitude mL. Signed heat is \\(Q=+mL\\) for melting or vaporization and \\(Q=-mL\\) for freezing or condensation.' },
+            { tex: '\\dfrac{\\Delta Q}{\\Delta t}=-kA\\dfrac{\\Delta T}{\\Delta x}', syms: { '\\Delta T': 'spatial temperature difference T₂ − T₁, in the same direction as x₂ − x₁ (K)' }, note: 'Use \\(\\Delta T=T_{2}-T_{1}\\) and \\(\\Delta x=x_{2}-x_{1}\\). The minus sign makes energy flow from hot to cold, opposite to the temperature gradient.' },
             { tex: 'L=\\sigma AT^{4}', syms: { L: 'luminosity: total power radiated by the body (W)' } },
             { tex: 'b=\\dfrac{L}{4\\pi d^{2}}', syms: { L: 'luminosity of the source (W)' } },
             '\\lambda_\\mathrm{max}T=2.9\\times10^{-3}\\,\\mathrm{m\\,K}'
@@ -112,9 +112,9 @@
         {
           id: 'B.4', title: 'Thermodynamics', level: HL,
           syms: {
-            Q: 'thermal energy supplied to the system (J)', '\\Delta U': 'change in internal energy of the system (J)', W: 'work done by the system (J)', P: 'pressure (Pa)', '\\Delta V': 'change in volume (m³)', V: 'volume (m³)',
-            n: 'amount of gas (mol)', R: 'gas constant', N: 'number of molecules', 'k_\\mathrm{B}': 'Boltzmann constant', '\\Delta T': 'temperature change (K)',
-            '\\Delta S': 'change in entropy (J K⁻¹)', '\\Delta Q': 'thermal energy transferred (J)', T: 'absolute temperature at which the transfer happens (K)', S: 'entropy (J K⁻¹)', '\\Omega': 'number of possible microstates of the system',
+            Q: 'signed heat: positive into the system, negative out (J)', '\\Delta U': 'internal energy final minus initial (J)', W: 'signed work done by the system: positive for expansion, negative for compression (J)', P: 'pressure (Pa)', '\\Delta V': 'final volume minus initial volume: positive for expansion, negative for compression (m³)', V: 'volume (m³)',
+            n: 'amount of gas (mol)', R: 'gas constant', N: 'number of molecules', 'k_\\mathrm{B}': 'Boltzmann constant', '\\Delta T': 'final temperature minus initial temperature (K)',
+            '\\Delta S': 'final entropy minus initial entropy (J K⁻¹)', '\\Delta Q': 'signed thermal energy transferred to the system: positive into it, negative out (J)', T: 'absolute temperature at which the transfer happens (K)', S: 'entropy (J K⁻¹)', '\\Omega': 'number of possible microstates of the system',
             '\\eta': 'efficiency of the heat engine (no unit)', '\\eta_\\mathrm{Carnot}': 'the greatest efficiency possible between two reservoirs', 'T_\\mathrm{c}': 'temperature of the cold reservoir (K)', 'T_\\mathrm{h}': 'temperature of the hot reservoir (K)'
           },
           eqs: ['Q=\\Delta U+W', 'W=P\\Delta V', '\\Delta U=\\tfrac{3}{2}nR\\Delta T=\\tfrac{3}{2}Nk_\\mathrm{B}\\Delta T', '\\Delta S=\\dfrac{\\Delta Q}{T}', 'S=k_\\mathrm{B}\\ln\\Omega', { tex: 'PV^{\\frac{5}{3}}=\\text{constant}', note: 'Adiabatic change of a monatomic ideal gas.' }, '\\eta=\\dfrac{\\text{useful work}}{\\text{input energy}}', '\\eta_\\mathrm{Carnot}=1-\\dfrac{T_\\mathrm{c}}{T_\\mathrm{h}}']
@@ -165,8 +165,8 @@
         },
         {
           id: 'C.5', title: 'Doppler effect', level: SL,
-          syms: { '\\Delta f': 'change in frequency (Hz)', f: 'frequency emitted by the source (Hz)', '\\Delta\\lambda': 'change in wavelength (m)', '\\lambda': 'wavelength emitted by the source (m)', v: 'relative speed of source and observer, much smaller than c (m s⁻¹)', c: 'speed of light in a vacuum' },
-          eqs: [{ label: 'Light', tex: '\\dfrac{\\Delta f}{f}=\\dfrac{\\Delta\\lambda}{\\lambda}\\approx\\dfrac{v}{c}' }]
+          syms: { '\\Delta f': 'observed frequency minus emitted frequency: negative for recession (Hz)', f: 'frequency emitted by the source (Hz)', '\\Delta\\lambda': 'observed wavelength minus emitted wavelength: positive for recession (m)', '\\lambda': 'wavelength emitted by the source (m)', v: 'relative speed of source and observer, much smaller than c (m s⁻¹)', c: 'speed of light in a vacuum' },
+          eqs: [{ label: 'Light: magnitudes', tex: '\\dfrac{|\\Delta f|}{f}\\approx\\dfrac{|\\Delta\\lambda|}{\\lambda}\\approx\\dfrac{v}{c}', note: 'The booklet writes the shifts as magnitudes; bars make that explicit here. Signed shifts are observed minus emitted, with \\(\\frac{\\Delta f}{f}\\approx-\\frac{\\Delta\\lambda}{\\lambda}\\).' }]
         },
         {
           id: 'C.1', title: 'Simple harmonic motion', level: HL,
@@ -204,25 +204,25 @@
         },
         {
           id: 'D.1', title: 'Gravitational fields', level: HL,
-          syms: { 'E_\\mathrm{p}': 'gravitational potential energy of the two bodies: zero at infinite separation (J)', G: 'gravitational constant', 'm_{1}': 'mass of the first body (kg)', 'm_{2}': 'mass of the second body (kg)', r: 'distance from the centre of the mass (m)', 'V_\\mathrm{g}': 'gravitational potential: work done per unit mass from infinity (J kg⁻¹)', M: 'mass that produces the field (kg)', g: 'gravitational field strength (N kg⁻¹)', '\\Delta V_\\mathrm{g}': 'change in gravitational potential (J kg⁻¹)', '\\Delta r': 'change in distance (m)', W: 'work done in moving the mass (J)', m: 'mass being moved (kg)', 'v_\\mathrm{esc}': 'escape speed (m s⁻¹)', 'v_\\mathrm{orbital}': 'speed of a body in a circular orbit of radius r (m s⁻¹)' },
+          syms: { 'E_\\mathrm{p}': 'gravitational potential energy of the two bodies: zero at infinite separation (J)', G: 'gravitational constant', 'm_{1}': 'mass of the first body (kg)', 'm_{2}': 'mass of the second body (kg)', r: 'distance from the centre of the mass (m)', 'V_\\mathrm{g}': 'gravitational potential: work done per unit mass from infinity (J kg⁻¹)', M: 'mass that produces the field (kg)', g: 'gravitational field strength (N kg⁻¹)', '\\Delta V_\\mathrm{g}': 'final gravitational potential minus initial gravitational potential (J kg⁻¹)', '\\Delta r': 'change in distance (m)', W: 'external work in moving the mass without changing its kinetic energy; equals the signed potential-energy change (J)', m: 'mass being moved (kg)', 'v_\\mathrm{esc}': 'escape speed (m s⁻¹)', 'v_\\mathrm{orbital}': 'speed of a body in a circular orbit of radius r (m s⁻¹)' },
           eqs: ['E_\\mathrm{p}=-G\\dfrac{m_{1}m_{2}}{r}', 'V_\\mathrm{g}=-G\\dfrac{M}{r}', 'g=-\\dfrac{\\Delta V_\\mathrm{g}}{\\Delta r}', 'W=m\\Delta V_\\mathrm{g}', 'v_\\mathrm{esc}=\\sqrt{\\dfrac{2GM}{r}}', 'v_\\mathrm{orbital}=\\sqrt{\\dfrac{GM}{r}}']
         },
         {
           id: 'D.2', title: 'Electric and magnetic fields', level: HL,
-          syms: { 'E_\\mathrm{p}': 'electric potential energy of the two charges: zero at infinite separation (J)', k: 'Coulomb constant', 'q_{1}': 'first charge (C)', 'q_{2}': 'second charge (C)', r: 'distance from the charge (m)', 'V_\\mathrm{e}': 'electric potential: work done per unit charge from infinity (V)', Q: 'charge that produces the field (C)', E: 'electric field strength (V m⁻¹)', '\\Delta V_\\mathrm{e}': 'change in electric potential (V)', '\\Delta r': 'change in distance (m)', W: 'work done in moving the charge (J)', q: 'charge being moved (C)' },
+          syms: { 'E_\\mathrm{p}': 'electric potential energy of the two charges: zero at infinite separation (J)', k: 'Coulomb constant', 'q_{1}': 'first charge (C)', 'q_{2}': 'second charge (C)', r: 'distance from the charge (m)', 'V_\\mathrm{e}': 'electric potential: work done per unit charge from infinity (V)', Q: 'charge that produces the field (C)', E: 'electric field strength (V m⁻¹)', '\\Delta V_\\mathrm{e}': 'final electric potential minus initial electric potential (V)', '\\Delta r': 'change in distance (m)', W: 'external work in moving the charge without changing its kinetic energy; equals the signed potential-energy change (J)', q: 'charge being moved (C)' },
           eqs: ['E_\\mathrm{p}=k\\dfrac{q_{1}q_{2}}{r}', 'V_\\mathrm{e}=\\dfrac{kQ}{r}', 'E=-\\dfrac{\\Delta V_\\mathrm{e}}{\\Delta r}', 'W=q\\Delta V_\\mathrm{e}']
         },
         {
           id: 'D.4', title: 'Induction', level: HL,
-          syms: { '\\Phi': 'magnetic flux (Wb)', B: 'magnetic field strength (T)', A: 'area of the loop (m²)', '\\theta': 'angle between the field and the normal to the loop', '\\varepsilon': 'induced emf (V)', N: 'number of turns on the coil', '\\Delta\\Phi': 'change in magnetic flux through one turn (Wb)', '\\Delta t': 'time taken for the change (s)', v: 'speed of the conductor, at right angles to the field (m s⁻¹)', L: 'length of the conductor in the field (m)' },
-          eqs: ['\\Phi=BA\\cos\\theta', { label: 'Faraday’s law', tex: '\\varepsilon=-N\\dfrac{\\Delta\\Phi}{\\Delta t}' }, { label: 'Straight conductor moving across a field', tex: '\\varepsilon=BvL' }]
+          syms: { '\\Phi': 'magnetic flux (Wb)', B: 'magnetic field strength (T)', A: 'area of the loop (m²)', '\\theta': 'angle between the field and the normal to the loop', '\\varepsilon': 'induced emf (V)', N: 'number of turns on the coil', '\\Delta\\Phi': 'final flux minus initial flux through one turn, with the same chosen positive area normal (Wb)', '\\Delta t': 'time taken for the change (s)', v: 'speed of the conductor, at right angles to the field (m s⁻¹)', L: 'length of the conductor in the field (m)' },
+          eqs: ['\\Phi=BA\\cos\\theta', { label: 'Faraday’s law', tex: '\\varepsilon=-N\\dfrac{\\Delta\\Phi}{\\Delta t}' }, { label: 'Straight conductor moving across a field: magnitude', tex: '|\\varepsilon|=BvL', note: 'The booklet gives the magnitude BvL. Determine polarity from the chosen direction and Lenz’s law.' }]
         }
       ]
     },
     {
       letter: 'E', title: 'Nuclear and quantum physics', topics: [
-        { id: 'E.1', title: 'Structure of the atom', level: SL, syms: { E: 'energy of the photon (J)', h: 'Planck constant', f: 'frequency of the photon (Hz)' }, eqs: ['E=hf'] },
-        { id: 'E.3', title: 'Radioactive decay', level: SL, syms: { E: 'energy equivalent to the mass (J)', m: 'mass: in nuclear reactions, the mass defect (kg)', c: 'speed of light in a vacuum' }, eqs: ['E=mc^{2}'] },
+        { id: 'E.1', title: 'Structure of the atom', level: SL, syms: { E: 'energy of the photon (J)', h: 'Planck constant', f: 'frequency of the photon (Hz)' }, eqs: [{ tex: 'E=hf', note: 'Photon energy is positive. For emission, \\(\\Delta E_\\mathrm{atom}=E_\\mathrm{f}-E_\\mathrm{i}=-hf\\); for absorption, \\(\\Delta E_\\mathrm{atom}=+hf\\). Include the photon in the system to conserve total energy.' }] },
+        { id: 'E.3', title: 'Radioactive decay', level: SL, syms: { E: 'energy equivalent to the mass (J)', m: 'rest mass, or a positive mass-defect magnitude when finding binding or released energy (kg)', c: 'speed of light in a vacuum' }, eqs: [{ tex: 'E=mc^{2}', note: 'For a reaction, \\(\\Delta m=m_\\mathrm{products}-m_\\mathrm{reactants}\\) and \\(\\Delta E_\\mathrm{rest}=\\Delta m c^{2}\\). Released energy is \\(E_\\mathrm{released}=-\\Delta m c^{2}\\). A mass defect is a positive magnitude, not the signed mass change.' }] },
         { id: 'E.5', title: 'Fusion and stars', level: SL, syms: { d: 'distance to the star, in parsecs', p: 'parallax angle of the star, in arc-seconds' }, eqs: ['d\\,\\text{(parsec)}=\\dfrac{1}{p\\,\\text{(arc-second)}}'] },
         {
           id: 'E.1', title: 'Structure of the atom', level: HL,
