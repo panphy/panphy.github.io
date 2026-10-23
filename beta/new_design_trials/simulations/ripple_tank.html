@@ -965,12 +965,28 @@
       letter-spacing: -0.03em;
     }
 
+    /* Apps keep a plain title; the spectrum is a thin line under the banner instead. */
     .banner-title.gradient-text {
-      justify-self: center;
-      width: fit-content;
+      color: var(--ink);
+      background: none;
+      -webkit-text-fill-color: currentColor;
+    }
+
+    #titleBanner {
+      position: relative;
+    }
+
+    #titleBanner::after {
+      content: '';
+      position: absolute;
+      left: 20px;
+      right: 20px;
+      bottom: -1px;
+      height: 2px;
+      border-radius: 2px;
       background: var(--spectrum);
-      -webkit-background-clip: text;
-      background-clip: text;
+      opacity: 0.85;
+      pointer-events: none;
     }
 
     .controls-header h2 {

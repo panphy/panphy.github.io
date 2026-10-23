@@ -26,7 +26,9 @@ The pages so far read only the tokens; the `ds-` component classes in `design.cs
 
 - **Fonts:** Figtree for reading, Unbounded only for page and app titles, IBM Plex Mono for numbers and readouts.
 - **Colors:** blue `--accent` for interaction and red-orange `--brand` for PanPhy itself.
-- **Spectrum:** `--spectrum` is decoration only (a thin line, one title). Never use it to encode data.
+- **Spectrum:** `--spectrum` is decoration only. Never use it to encode data.
+  - **Apps:** a plain title in the display face, with one thin spectrum line under the app bar or banner.
+  - **Homepage:** the only place with spectrum-colored title text.
 - **Panels:** apps use solid panels. Glass blur is kept for the homepage only, where nothing live moves behind it.
 - **Theme:** light and dark follow the shared `panphy-theme` preference, through `/assets/theme.js`, as everywhere else.
 
