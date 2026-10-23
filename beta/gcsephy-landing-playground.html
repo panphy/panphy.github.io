@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="robots" content="noindex, nofollow">
+  <meta name="description" content="AQA GCSE Physics (8463) and Combined Science: Trilogy (8464) resources from PanPhy Labs: course summaries, teaching decks, workbook hubs, Do Now lesson starters and AO1 revision resources.">
+  <meta name="theme-color" content="#FFF4E2">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <title>GCSE Playground Trial | PanPhy Labs</title>
+  <link rel="icon" type="image/png" href="/assets/favicon.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="/assets/apple-touch-icon.png">
+  <link rel="stylesheet" href="/assets/standalone-top.css">
+  <link rel="stylesheet" href="/assets/fonts/fonts.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Nunito+Sans:opsz,wght@6..12,400;6..12,600;6..12,800&display=swap">
+  <style>
+    /* Playground trial of the GCSE Physics hub: toy-box shapes, ink outlines and hard shadows.
+       Each card still wears the colours of the resource it opens, so the index stays a map of the folder. */
+    :root {
+      color-scheme: light;
+      --paper: #FFF4E2;
+      --ink: #262140;
+      --muted: #5A5470;
+      --sun: #FFC83D;
+      --mint: #3CCFAE;
+      --sky: #8DB6FF;
+      --tomato: #FF6B4A;
+      --display: 'Fredoka', 'Nunito Sans', system-ui, sans-serif;
+      --body: 'Nunito Sans', system-ui, sans-serif;
+      --gutter: clamp(16px, 5vw, 72px);
+      --pop: 6px 6px 0 var(--ink);
+      --pop-big: 10px 10px 0 var(--ink);
+      --bounce: cubic-bezier(.34, 1.56, .64, 1);
+      --standalone-top-bg: #FFF4E2;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; }
+    html { scroll-behavior: smooth; -webkit-text-size-adjust: 100%; }
+    body {
+      margin: 0;
+      overflow-x: hidden;
+      background-color: var(--paper);
+      background-image: radial-gradient(rgba(38, 33, 64, .13) 1.4px, transparent 1.8px);
+      background-size: 26px 26px;
+      color: var(--ink);
+      font: 16px/1.55 var(--body);
+    }
+    a { color: inherit; text-decoration: none; -webkit-tap-highlight-color: transparent; }
+    a:focus-visible { outline: 3px solid #5B94FF; outline-offset: 5px; }
+    .icon { width: 1em; height: 1em; flex: none; fill: none; stroke: currentColor; stroke-width: 2.8; stroke-linecap: round; stroke-linejoin: round; }
+
+    /* ---------- Top bar: a chunky toy-box strip ---------- */
+    .topbar {
+      display: flex; align-items: center; justify-content: space-between; gap: 16px;
+      margin: calc(14px + var(--standalone-top, 0px)) var(--gutter) 0;
+      padding: 8px 10px 8px 8px;
+      background: #fff; border: 3px solid var(--ink); border-radius: 999px; box-shadow: 4px 4px 0 var(--ink);
+      animation: drop .6s var(--bounce) .1s both;
+    }
+    .brand { display: inline-flex; align-items: center; gap: 12px; min-height: 48px; padding-right: 10px; font: 600 1.15rem/1 var(--display); }
+    .brand img { display: block; width: 44px; height: 44px; border: 3px solid var(--ink); border-radius: 50%; transform: rotate(-8deg); transition: transform .3s var(--bounce); }
+    .brand:hover img { transform: rotate(8deg) scale(1.08); }
+    .spec { padding: 6px 16px; background: var(--sun); border: 2px solid var(--ink); border-radius: 999px; font: 600 .78rem/1.25 var(--display); text-align: right; }
+
+    /* ---------- Hero ---------- */
+    .hero {
+      position: relative; isolation: isolate;
+      display: grid; grid-template-columns: minmax(0, 1.15fr) minmax(260px, .85fr); gap: clamp(28px, 6vw, 90px); align-items: center;
+      padding: clamp(48px, 7vw, 96px) var(--gutter) clamp(56px, 7vw, 96px);
+    }
+    .hero::before, .hero::after {
+      content: ""; position: absolute; z-index: -1;
+      border: 3px solid var(--ink); border-radius: 50%;
+      animation: bob 6s ease-in-out infinite;
+    }
+    .hero::before { top: 28px; left: 46%; width: 70px; height: 70px; background: var(--sun); }
+    .hero::after { bottom: 34px; left: calc(var(--gutter) - 26px); width: 44px; height: 44px; background: var(--mint); animation-delay: -3s; }
+
+    .eyebrow { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; margin: 0 0 22px; font: 600 1rem/1.3 var(--display); }
+    .eyebrow span { padding: 5px 14px; background: var(--ink); color: var(--paper); border-radius: 999px; transform: rotate(-3deg); }
+    h1 { margin: 0; font: 700 clamp(64px, 10vw, 150px)/.88 var(--display); letter-spacing: -.02em; }
+    h1 i {
+      font-style: normal; color: var(--tomato);
+      text-decoration: underline wavy var(--sun) .08em; text-underline-offset: .14em; text-decoration-skip-ink: none;
+    }
+    h1 b {
+      display: inline-block; width: .32em; height: .32em; margin-left: .06em;
+      overflow: hidden; color: transparent; vertical-align: baseline;
+      background: var(--mint); border: .045em solid var(--ink); border-radius: 50%;
+      animation: bounce 2.4s var(--bounce) 1s infinite;
+    }
+    .lead { max-width: 34rem; margin: clamp(26px, 3vw, 40px) 0 0; font-size: clamp(17px, 1.7vw, 21px); font-weight: 600; line-height: 1.55; }
+
+    /* Jump tiles: stickers in the colours of each section */
+    .jump { list-style: none; margin: 0; padding: 0; display: grid; gap: 14px; }
+    .jump a {
+      display: flex; align-items: center; justify-content: space-between; gap: 14px;
+      min-height: 72px; padding: 14px 18px;
+      border: 3px solid var(--ink); border-radius: 22px;
+      background: var(--j-bg); color: var(--j-fg); box-shadow: 5px 5px 0 var(--ink);
+      font: 700 1.25rem/1 var(--display);
+      transform: rotate(var(--tilt, 0deg));
+      transition: transform .25s var(--bounce), box-shadow .2s ease;
+    }
+    .jump a span { display: grid; gap: 6px; }
+    .jump a small { font: 600 .82rem/1.3 var(--body); opacity: .9; }
+    .jump a .icon { width: 34px; height: 34px; padding: 6px; background: #fff; color: var(--ink); border: 2px solid var(--ink); border-radius: 50%; }
+    .jump a:hover { transform: translate(-2px, -3px) rotate(calc(var(--tilt, 0deg) * -1.5)); box-shadow: 8px 8px 0 var(--ink); }
+    .jump a:active { transform: translate(3px, 3px); box-shadow: 0 0 0 var(--ink); }
+    .jump li:nth-child(1) { --j-bg: #1f2160; --j-fg: #7fd3ff; --tilt: -1.2deg; }
+    .jump li:nth-child(2) { --j-bg: #0c3a3f; --j-fg: #ffc145; --tilt: .9deg; }
+    .jump li:nth-child(3) { --j-bg: #f7a25c; --j-fg: #16130f; --tilt: -.6deg; }
+    .jump li:nth-child(4) { --j-bg: #b4d84e; --j-fg: #16130f; --tilt: 1.1deg; }
+    .jump li:nth-child(5) { --j-bg: #f7d23e; --j-fg: #16130f; --tilt: -.8deg; }
+
+    /* ---------- Sections ---------- */
+    .band {
+      display: grid; grid-template-columns: clamp(150px, 19vw, 250px) minmax(0, 1fr); gap: clamp(24px, 4vw, 60px);
+      margin: 0 var(--gutter) clamp(28px, 4vw, 44px);
+      padding: clamp(28px, 4vw, 52px);
+      background: #fff; border: 3px solid var(--ink); border-radius: 36px; box-shadow: var(--pop);
+      scroll-margin-top: calc(var(--standalone-top, 0px) + 16px);
+    }
+    #course { background: #E3ECFF; }
+    #starters { background: #D3F3EA; }
+    #year9 { background: #FDE6D2; }
+    #year10 { background: #EAF4CF; }
+    #year11 { background: #FBF1C8; }
+
+    .rail { position: sticky; top: calc(var(--standalone-top, 0px) + 24px); align-self: start; }
+    .rail p { display: inline-block; margin: 0 0 14px; padding: 4px 12px; background: #fff; border: 2px solid var(--ink); border-radius: 999px; font: 600 .85rem/1.3 var(--display); transform: rotate(-3deg); }
+
+    /* The year numbers sit in big round stickers; the word labels in fat pills. */
+    .rail h2 {
+      display: grid; place-items: center;
+      width: clamp(120px, 14vw, 180px); aspect-ratio: 1; margin: 0;
+      background: var(--r-bg, var(--sun)); color: var(--ink);
+      border: 4px solid var(--ink); border-radius: 50%; box-shadow: 6px 6px 0 var(--ink);
+      font: 700 clamp(64px, 8vw, 104px)/1 var(--display); letter-spacing: -.03em;
+      transform: rotate(-7deg);
+      transition: transform .3s var(--bounce);
+    }
+    .band:hover .rail h2 { transform: rotate(5deg) scale(1.04); }
+    .rail h2.word { width: auto; aspect-ratio: auto; padding: .12em .45em .18em; border-radius: 999px; font-size: clamp(44px, 5vw, 72px); }
+    #course .rail h2 { --r-bg: var(--sky); }
+    #starters .rail h2 { --r-bg: var(--mint); }
+    #year9 .rail h2 { --r-bg: #f7a25c; }
+    #year10 .rail h2 { --r-bg: #b4d84e; }
+    #year11 .rail h2 { --r-bg: #f7d23e; }
+
+    .cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 290px), 1fr)); gap: 28px 28px; align-content: start; }
+
+    .unit { display: flex; flex-direction: column; gap: 16px; min-width: 0; }
+    .unit .card { flex: 1; }
+    .workbook-link {
+      display: flex; align-items: center; justify-content: space-between; gap: 12px;
+      min-height: 52px; padding: 12px 18px;
+      border: 3px solid var(--ink); border-radius: 999px;
+      background: var(--year-colour, #fff); color: #16130f; box-shadow: 4px 4px 0 var(--ink);
+      font: 600 1.05rem/1 var(--display);
+      transition: transform .2s var(--bounce), box-shadow .2s ease;
+    }
+    .workbook-link .icon { width: 30px; height: 30px; padding: 5px; background: #fff; border: 2px solid var(--ink); border-radius: 50%; }
+    .workbook-link:hover { transform: translate(-2px, -2px) rotate(-1deg); box-shadow: 6px 6px 0 var(--ink); }
+    .workbook-link:active { transform: translate(3px, 3px); box-shadow: 0 0 0 var(--ink); }
+
+    /* ---------- Cards: chunky tiles that wobble and squash, in each resource's colours ---------- */
+    .card {
+      --tilt: -.8deg;
+      position: relative; isolation: isolate; overflow: hidden;
+      display: flex; flex-direction: column; min-height: 228px; padding: 22px 22px 18px;
+      border: 3px solid var(--ink); border-radius: 26px;
+      background-color: var(--c-bg); color: var(--c-fg); box-shadow: var(--pop);
+      transform: rotate(var(--tilt));
+      transition: transform .25s var(--bounce), box-shadow .2s ease;
+    }
+    .cards > :nth-child(2n) .card, .cards > .card:nth-child(2n) { --tilt: .9deg; }
+    .cards > :nth-child(3n) .card, .cards > .card:nth-child(3n) { --tilt: -.4deg; }
+    .card:hover, .card:focus-visible { transform: translate(-3px, -4px) rotate(calc(var(--tilt) * -1.5)); box-shadow: var(--pop-big); }
+    .card:active { transform: translate(4px, 4px) rotate(0deg); box-shadow: 0 0 0 var(--ink); }
+    .card::before { content: ""; position: absolute; inset: 0; z-index: -1; background-image: var(--c-texture, none); background-size: var(--c-texture-size, 58px 58px); }
+
+    .kind {
+      align-self: flex-start; padding: 4px 12px;
+      background: var(--c-accent); color: var(--c-on-accent, var(--ink));
+      border: 2px solid var(--ink); border-radius: 999px;
+      font: 600 .82rem/1.2 var(--display);
+    }
+    .title { margin: 16px 0 10px; font: 700 clamp(1.6rem, 2.4vw, 2rem)/1.02 var(--display); letter-spacing: -.01em; }
+    .desc { color: var(--c-sub); font-size: .98rem; font-weight: 600; line-height: 1.5; }
+    .foot { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-top: auto; padding-top: 18px; }
+    .meta { font: 600 .85rem/1.3 var(--display); color: var(--c-sub); }
+    .go {
+      display: grid; place-items: center; width: 46px; height: 46px; flex: none;
+      background: var(--c-accent); color: var(--ink);
+      border: 3px solid var(--ink); border-radius: 50%; box-shadow: 2px 2px 0 var(--ink);
+      font-size: 20px; transition: transform .3s var(--bounce);
+    }
+    .card:hover .go { transform: rotate(-45deg) scale(1.1); }
+
+    /* Teaching decks: filled with the year colour, as in the decks themselves */
+    .t-y9 { --year-colour: #f6cea8; --year-strong: #f7a25c; --year-ink: #80501e; }
+    .t-y10 { --year-colour: #d8eaa1; --year-strong: #b4d84e; --year-ink: #49651f; }
+    .t-y11 { --year-colour: #f6e7a5; --year-strong: #f7d23e; --year-ink: #78601b; }
+    .card.deck-card {
+      --c-bg: var(--year-strong); --c-fg: #16130f; --c-sub: #2e2820; --c-accent: #fffdf7; --c-on-accent: #16130f;
+      --c-texture: radial-gradient(rgba(22, 19, 15, .13) 1.5px, transparent 1.5px); --c-texture-size: 22px 22px;
+    }
+    .deck-card .year {
+      position: absolute; top: 14px; right: 16px;
+      padding: 4px 12px; background: var(--ink); color: #fff;
+      border-radius: 999px; font: 600 .8rem/1.2 var(--display);
+      transform: rotate(4deg);
+    }
+    .deck-card .kind { margin-right: 92px; }
+
+    /* Do Now: teal board, marigold and pink */
+    .t-dn { --c-bg: #0c3a3f; --c-fg: #fff; --c-sub: #dcebe9; --c-accent: #ffc145; --c-texture: linear-gradient(rgba(140, 214, 204, .13) 1px, transparent 1px), linear-gradient(90deg, rgba(140, 214, 204, .13) 1px, transparent 1px); }
+    /* Course summaries: indigo and sky for 8463; plum and mint for 8464 */
+    .t-cs63 { --c-bg: #1f2160; --c-fg: #fff; --c-sub: #dfe2ff; --c-accent: #7fd3ff; --c-texture: linear-gradient(rgba(150, 170, 255, .14) 1px, transparent 1px), linear-gradient(90deg, rgba(150, 170, 255, .14) 1px, transparent 1px); }
+    .t-cs64 { --c-bg: #4b1840; --c-fg: #fff; --c-sub: #f3dcec; --c-accent: #86e8bd; --c-texture: linear-gradient(rgba(255, 170, 225, .13) 1px, transparent 1px), linear-gradient(90deg, rgba(255, 170, 225, .13) 1px, transparent 1px); }
+    .t-dn-sheet { --c-bg: #fffdf7; --c-fg: #0b2a2e; --c-sub: #4f6163; --c-accent: #ff8fa3; }
+
+    /* ---------- Footer under a scalloped edge ---------- */
+    footer {
+      position: relative;
+      display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px 24px;
+      margin-top: 60px;
+      padding: 34px var(--gutter) calc(30px + env(safe-area-inset-bottom, 0px));
+      background: var(--ink); color: #FFF4E2;
+      font: 600 .9rem/1.4 var(--display);
+    }
+    footer::before {
+      content: ""; position: absolute; top: -18px; left: 0; right: 0; height: 20px;
+      background: radial-gradient(circle at 20px 20px, var(--ink) 19px, transparent 20px) 0 0 / 40px 20px repeat-x;
+    }
+    footer a { display: inline-flex; align-items: center; gap: 8px; min-height: 48px; color: var(--sun); }
+    footer a:hover { text-decoration: underline wavy; text-underline-offset: 5px; }
+    .footer-links { display: flex; flex-wrap: wrap; align-items: center; gap: 0 24px; }
+
+    /* ---------- Load-in ---------- */
+    @media (prefers-reduced-motion: no-preference) {
+      .hero > *, .jump li, .band { animation: pop .7s var(--bounce) both; }
+      .jump li:nth-child(1) { animation-delay: .1s; }
+      .jump li:nth-child(2) { animation-delay: .16s; }
+      .jump li:nth-child(3) { animation-delay: .22s; }
+      .jump li:nth-child(4) { animation-delay: .28s; }
+      .jump li:nth-child(5) { animation-delay: .34s; }
+      .band { animation-delay: .3s; }
+    }
+    @keyframes pop { from { opacity: 0; transform: translateY(18px) scale(.94); } }
+    @keyframes drop { from { opacity: 0; transform: translateY(-16px); } }
+    @keyframes bob { 50% { transform: translateY(-14px) rotate(12deg); } }
+    @keyframes bounce { 0%, 60%, 100% { transform: none; } 30% { transform: translateY(-.18em); } }
+    @media (prefers-reduced-motion: reduce) {
+      html { scroll-behavior: auto; }
+      *, *::before, *::after { animation: none !important; transition: none !important; }
+    }
+
+    /* ---------- Narrow screens ---------- */
+    @media (max-width: 860px) {
+      .hero { grid-template-columns: 1fr; align-items: start; }
+      .hero::before { left: auto; right: 8%; }
+      .jump { grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); }
+      .band { grid-template-columns: 1fr; gap: 26px; border-radius: 28px; }
+      .rail { position: static; display: flex; align-items: center; gap: 16px; }
+      .rail p { order: 2; margin: 0; }
+      .rail h2 { width: 96px; font-size: 56px; }
+      .rail h2.word { width: auto; font-size: 44px; }
+    }
+    @media (max-width: 480px) {
+      .spec { display: none; }
+      .band { padding: 22px 18px; }
+      .card { min-height: 0; box-shadow: 5px 5px 0 var(--ink); }
+      h1 { font-size: 18vw; }
+    }
+  </style>
+</head>
+
+<body id="top">
+  <header class="topbar">
+    <a class="brand" href="/" aria-label="PanPhy Labs home"><img src="/assets/panphy.png" alt="PanPhy Labs" width="48" height="48"><span>PanPhy Labs</span></a>
+    <span class="spec">AQA GCSE Physics 8463<br>Combined Science: Trilogy 8464</span>
+  </header>
+
+  <main>
+    <section class="hero">
+      <div>
+        <p class="eyebrow"><span>Years 9 to 11</span> Unit by unit</p>
+        <h1>GCSE<br><i>Physics</i><b>.</b></h1>
+        <p class="lead">Course summaries, teaching decks, workbooks, lesson starters and AO1 revision resources for AQA GCSE Physics (8463) and Combined Science: Trilogy (8464). Each one keeps its own colours here, so you will know it when you get there.</p>
+      </div>
+      <nav aria-label="Sections on this page">
+        <ul class="jump">
+          <li><a href="#course"><span>Spec<small>Course summaries</small></span><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M6 13l6 6 6-6"/></svg></a></li>
+          <li><a href="#starters"><span>AO1<small>Starters &amp; revision</small></span><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M6 13l6 6 6-6"/></svg></a></li>
+          <li><a href="#year9"><span>Year 9<small>Decks &amp; workbooks</small></span><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M6 13l6 6 6-6"/></svg></a></li>
+          <li><a href="#year10"><span>Year 10<small>Decks &amp; workbooks</small></span><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M6 13l6 6 6-6"/></svg></a></li>
+          <li><a href="#year11"><span>Year 11<small>Decks &amp; workbooks</small></span><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M6 13l6 6 6-6"/></svg></a></li>
+        </ul>
+      </nav>
+    </section>
+
+    <section class="band" id="course" aria-labelledby="course-title">
+      <div class="rail">
+        <p>Course summaries</p>
+        <h2 class="word" id="course-title" aria-label="Course summaries">Spec</h2>
+      </div>
+      <div class="cards">
+        <a class="card t-cs63" href="/gcsephy/course-summary/physics-8463/">
+          <span class="kind">Course summary</span>
+          <strong class="title">Physics 8463</strong>
+          <span class="desc">The two exam papers and every topic of the separate science, with Higher tier and physics-only content marked.</span>
+          <span class="foot"><span class="meta">Exams · content · practicals</span><span class="go" aria-hidden="true"><svg class="icon" viewBox="0 0 24 24" focusable="false"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span></span>
+        </a>
+        <a class="card t-cs64" href="/gcsephy/course-summary/combined-8464/">
+          <span class="kind">Course summary</span>
+          <strong class="title">Combined 8464</strong>
+          <span class="desc">The physics of Combined Science: its exam papers, how the double grade is awarded, and every physics topic.</span>
+          <span class="foot"><span class="meta">Exams · grades · content</span><span class="go" aria-hidden="true"><svg class="icon" viewBox="0 0 24 24" focusable="false"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span></span>
+        </a>
+      </div>
+    </section>
+    <section class="band" id="starters" aria-labelledby="starters-title">
+      <div class="rail">
+        <p>Lesson starters and revision</p>
+        <h2 class="word" id="starters-title" aria-label="Lesson starters and revision">AO1</h2>
+      </div>
+      <div class="cards">
+        <a class="card t-dn" href="/gcsephy/do-now/">
+          <span class="kind">Lesson starters</span>
+          <strong class="title">Do Now starters</strong>
+          <span class="desc">AO1 lesson starters, worksheets and revision flashcards by topic.</span>
+          <span class="foot"><span class="meta">Board · worksheet · flashcards</span><span class="go" aria-hidden="true"><svg class="icon" viewBox="0 0 24 24" focusable="false"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span></span>
+        </a>
+        <a class="card t-dn-sheet" href="/gcsephy/do-now/revision/">
+          <span class="kind">Printable PDFs</span>
+          <strong class="title">AO1 revision sheets</strong>
+          <span class="desc">Printable question-and-answer sheet per topic, and a method sheet per required practical.</span>
+          <span class="foot"><span class="meta">By topic · by practical</span><span class="go" aria-hidden="true"><svg class="icon" viewBox="0 0 24 24" focusable="false"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span></span>
+        </a>
+        <a class="card t-dn" href="/gcsephy/do-now/exam-stats/">
+          <span class="kind">Slide deck</span>
+          <strong class="title">Exam statistics</strong>
+          <span class="desc">Which topics and facts earned recall marks in the AQA Higher papers since 2020.</span>
+          <span class="foot"><span class="meta">By unit · by topic · by year</span><span class="go" aria-hidden="true"><svg class="icon" viewBox="0 0 24 24" focusable="false"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span></span>
+        </a>
+      </div>
+    </section>
+
+    <section class="band" id="year9" aria-labelledby="year9-title">
+      <div class="rail">
+        <p>Year</p>
+        <h2 id="year9-title" aria-label="Year 9">9</h2>
+      </div>
+      <div class="cards">
+        <div class="unit t-y9">
+          <a class="card deck-card t-y9" href="/gcsephy/decks/work-like-a-physicist/">
+            <span class="year">Year 9</span>
+            <span class="kind">Slide deck</span>
+            <strong class="title">Work Like a Physicist</strong>
+            <span class="desc">Uncertainty, errors, variables, graphs and investigations.</span>
+            <span class="foot"><span class="meta">Present fullscreen</span><span class="go" aria-hidden="true"><svg class="icon" viewBox="0 0 24 24" focusable="false"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span></span>
+          </a>
+          <a class="workbook-link" href="/gcsephy/year9phy/unit01/workbook/" aria-label="Work Like a Physicist Unit Workbook">Unit Workbook <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+        </div>
+        <div class="unit t-y9">
+          <a class="card deck-card t-y9" href="/gcsephy/decks/energy-stores-and-transfers/">
+            <span class="year">Year 9</span>
+            <span class="kind">Slide deck</span>
+            <strong class="title">Energy: Stores and Transfers</strong>
+            <span class="desc">Stores, kinetic, gravitational and elastic energy, springs, power and efficiency.</span>
+            <span class="foot"><span class="meta">Present fullscreen</span><span class="go" aria-hidden="true"><svg class="icon" viewBox="0 0 24 24" focusable="false"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span></span>
+          </a>
+          <a class="workbook-link" href="/gcsephy/year9phy/unit02/" aria-label="Energy: Stores and Transfers Unit Workbook">Unit Workbook <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+        </div>
+      </div>
+    </section>
+
+    <section class="band" id="year10" aria-labelledby="year10-title">
+      <div class="rail">
+        <p>Year</p>
+        <h2 id="year10-title" aria-label="Year 10">10</h2>
+      </div>
+      <div class="cards">
+        <div class="unit t-y10">
+          <a class="card deck-card t-y10" href="/gcsephy/decks/electric-circuits/">
+            <span class="year">Year 10</span>
+            <span class="kind">Slide deck</span>
+            <strong class="title">Electric Circuits</strong>
+            <span class="desc">Current, p.d., resistance, I–V, power and mains safety; static electricity (triple).</span>
+            <span class="foot"><span class="meta">Present fullscreen</span><span class="go" aria-hidden="true"><svg class="icon" viewBox="0 0 24 24" focusable="false"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span></span>
+          </a>
+          <a class="workbook-link" href="/gcsephy/year10phy/unit01/workbook/" aria-label="Electric Circuits Unit Workbook">Unit Workbook <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+        </div>
+      </div>
+    </section>
+
+    <section class="band" id="year11" aria-labelledby="year11-title">
+      <div class="rail">
+        <p>Year</p>
+        <h2 id="year11-title" aria-label="Year 11">11</h2>
+      </div>
+      <div class="cards">
+        <div class="unit t-y11">
+          <a class="card deck-card t-y11" href="/gcsephy/decks/atoms-and-radiation/">
+            <span class="year">Year 11</span>
+            <span class="kind">Slide deck</span>
+            <strong class="title">Atoms and Nuclear Radiation</strong>
+            <span class="desc">Atomic models, alpha, beta, gamma and half-life; fission and fusion (triple).</span>
+            <span class="foot"><span class="meta">Present fullscreen</span><span class="go" aria-hidden="true"><svg class="icon" viewBox="0 0 24 24" focusable="false"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span></span>
+          </a>
+          <a class="workbook-link" href="/gcsephy/year11phy/unit01/" aria-label="Atoms and Nuclear Radiation Unit Workbook">Unit Workbook <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+        </div>
+      </div>
+    </section>
+
+    <!-- Add an entry whenever a page, unit or standalone resource is added under gcsephy/. -->
+    <!-- Remove or update the entry when a page is renamed or deleted. -->
+  </main>
+
+  <footer>
+    <span>GCSE Physics · &copy; 2026 PanPhy Labs. All rights reserved.</span>
+    <div class="footer-links">
+      <a href="https://buymeacoffee.com/panphy" target="_blank" rel="noopener noreferrer">Support My Projects</a>
+      <a href="/"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M19 12H5M11 6l-6 6 6 6"/></svg> All PanPhy Labs apps</a>
+    </div>
+  </footer>
+</body>
+
+</html>
