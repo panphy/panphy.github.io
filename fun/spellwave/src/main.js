@@ -2,15 +2,15 @@ import * as THREE from 'three';
 import { createSpellwaveAudio } from './audio.js';
 import { createSeasonalEffects } from './seasonal-effects.js';
 import { createPotionSystem } from './potions.js';
-import { ALL_WORDS, EASY_WORDS, HARD_WORDS, MEDIUM_WORDS, EQUATION_WORDS } from './question-bank.js?v=20261024-boss-flags';
+import { ALL_WORDS, EASY_WORDS, HARD_WORDS, MEDIUM_WORDS, EQUATION_WORDS } from './question-bank.js?v=20261024-choice-bosses';
 import { createEndingFX } from './ending-fx.js';
 import { createLeaderboard } from './leaderboard.js';
 import { createEnemyMesh, createMimicChestMesh } from './enemy-meshes.js';
-import { hardBossShare, normalPromptLengthCap, bossWordLengthCap, previewLengthCap, withinLength, hardGuestCount } from './difficulty.js?v=20261024-boss-flags';
+import { hardBossShare, normalPromptLengthCap, bossWordLengthCap, previewLengthCap, withinLength, hardGuestCount } from './difficulty.js?v=20261024-choice-bosses';
 import { createLowPolyTerrain, createLowPolyTree, createLowPolyRock, createLowPolyCloud } from './lowpoly.js';
 import { createVisuals, GLOW_GAIN, MOON_GLOW_GAIN } from './visuals.js';
-import { pickTarget, getInputCharacters, isMathOperatorInput, buildSearchPrompt, buildAltSearchPrompts, escapeHtml, wrapSups, promptIndexForProgress } from './prompt-utils.js?v=20261024-boss-flags';
-import { getBossChoice, choiceKeys, keysClash, choiceTypingLength, shuffledOptions, buildChoiceSegments } from './boss-choices.js?v=20261024-boss-flags';
+import { pickTarget, getInputCharacters, isMathOperatorInput, buildSearchPrompt, buildAltSearchPrompts, escapeHtml, wrapSups, promptIndexForProgress } from './prompt-utils.js?v=20261024-choice-bosses';
+import { getBossChoice, choiceKeys, keysClash, choiceTypingLength, shuffledOptions, buildChoiceSegments } from './boss-choices.js?v=20261024-choice-bosses';
 
 const canvas = document.getElementById('gameCanvas');
 const labelsLayer = document.getElementById('labelsLayer');
@@ -2087,6 +2087,8 @@ function updateLabels() {
   const safeBounds = getLabelSafeBounds(height);
   const hudGrid = document.querySelector('.hud-grid');
   const hudBottom = hudGrid ? hudGrid.getBoundingClientRect().bottom : 0;
+  const leaderboardRect = document.querySelector('.sw-leaderboard')?.getBoundingClientRect();
+  const leaderboardBottom = leaderboardRect && leaderboardRect.width > 0 ? leaderboardRect.bottom : 0;
   const labelItems = [];
 
   for (const enemy of enemies) {
@@ -2145,17 +2147,20 @@ function updateLabels() {
     const maxY = safeBounds.bottom;
 
     let targetX, targetY;
+    let labelMinY = minY;
     if (enemy.isBoss) {
       // Place label in the scenery area outside the road boundaries (±5.8 world units),
       // using lane to decide left/right so boss bodies stay fully visible.
-      const useRight = enemy.lane >= 0;
+      const useRight = enemy.labelSide ? enemy.labelSide === 'right' : enemy.lane >= 0;
       const rawX = useRight
         ? item.rightRoadEdgeX + BOSS_LABEL_GAP + labelWidth / 2
         : item.leftRoadEdgeX - BOSS_LABEL_GAP - labelWidth / 2;
       targetX = THREE.MathUtils.clamp(rawX, LABEL_SAFE_MARGIN + labelWidth / 2, width - LABEL_SAFE_MARGIN - labelWidth / 2);
-      // Left-side labels must clear the hud-grid (Score/Best/Life/Wave readouts)
-      const leftMinY = useRight ? minY : Math.max(minY, hudBottom + LABEL_SAFE_MARGIN + labelHeight);
-      targetY = THREE.MathUtils.clamp(item.bossMidScreenY + labelHeight / 2, leftMinY, maxY);
+      // Left-side labels clear the hud-grid (Score/Best/Life/Wave readouts),
+      // right-side labels the Hall of Wizards, unless that would push them off screen.
+      const panelBottom = useRight ? leaderboardBottom : hudBottom;
+      labelMinY = Math.min(maxY, Math.max(minY, panelBottom + LABEL_SAFE_MARGIN + labelHeight));
+      targetY = THREE.MathUtils.clamp(item.bossMidScreenY + labelHeight / 2, labelMinY, maxY);
     } else {
       targetX = THREE.MathUtils.clamp(item.x, LABEL_SAFE_MARGIN + labelWidth / 2, width - LABEL_SAFE_MARGIN - labelWidth / 2);
       targetY = THREE.MathUtils.clamp(item.y, minY, maxY);
@@ -2172,7 +2177,7 @@ function updateLabels() {
       ...item,
       x: enemy.labelX,
       y: enemy.labelY,
-      minY,
+      minY: labelMinY,
       maxY,
       width: labelWidth,
       height: labelHeight,
@@ -4285,6 +4290,12 @@ function spawnBoss() {
   const profile = currentDifficulty();
   const isClimaxBoss = isFinalWave() && (bossesSpawned >= 7);
   const enemy = spawnEnemy({ isBoss: true, wordData, bossType, lane, delay: 0, startZ: profile.revealZ, isClimaxBoss });
+  // A middle-lane boss puts its label on the side with fewer boss labels.
+  if (lane === 0) {
+    const liveBosses = enemies.filter(other => other.isBoss && other !== enemy && !other.dying);
+    const rightCount = liveBosses.filter(other => (other.labelSide || (other.lane >= 0 ? 'right' : 'left')) === 'right').length;
+    enemy.labelSide = rightCount > liveBosses.length - rightCount ? 'left' : 'right';
+  }
   // Use the actual answer and movement speed for a consistent entrance.
   enemy.spawnZ = profile.revealZ - getEnemySpeed(enemy) * 8;
   enemy.group.position.z = enemy.spawnZ;

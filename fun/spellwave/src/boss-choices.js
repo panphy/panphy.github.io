@@ -1,7 +1,7 @@
 // boss-choices.js — multiple-choice boss questions. Pure functions: no DOM, no
 // game state. The options themselves are in boss-options.js.
-import { BOSS_OPTIONS } from './boss-options.js?v=20261024-boss-flags';
-import { buildSearchPrompt, buildAltSearchPrompts } from './prompt-utils.js?v=20261024-boss-flags';
+import { BOSS_OPTIONS } from './boss-options.js?v=20261024-choice-bosses';
+import { buildSearchPrompt, buildAltSearchPrompts } from './prompt-utils.js?v=20261024-choice-bosses';
 
 const SUPERSCRIPTS = /[⁰¹²³⁴⁵⁶⁷⁸⁹]+/g;
 

@@ -3441,6 +3441,12 @@ body.is-running:not(.is-paused) .sw-leaderboard {
   box-shadow: 0 4px 12px rgba(74, 52, 28, 0.14);
 }
 
+/* A boss label keeps its natural width (up to its max-width) even beside the
+   screen edge, so its options and equation do not wrap into a tall column. */
+.word-tag.is-boss {
+  width: max-content;
+}
+
 /* Boss options: the answer line has one fixed-width slot (no letter count), and
    the options sit below it. Options that match the typed letters so far all
    highlight the same way; a wrong option is struck out. */
