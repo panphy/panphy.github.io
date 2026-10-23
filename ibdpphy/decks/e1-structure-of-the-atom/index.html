@@ -583,10 +583,10 @@
           </div>
           <div class="work">
             <span class="say">Find the wavelength of the photon emitted</span>
-            <span>\(\Delta E = E_{3} - E_{2}\)</span>
-            <span>&nbsp; \(= (-1.51) - (-3.40) = \class{res}{1.89 \,\mathrm{eV}}\)</span>
-            <span class="step">&nbsp; \(= 1.89 \times 1.60 \times 10^{-19} = \class{res}{3.02 \times 10^{-19} \,\mathrm{J}}\)</span>
-            <span class="step">\(f = \dfrac{\Delta E}{h} = \dfrac{3.02 \times 10^{-19}}{6.63 \times 10^{-34}}\)</span>
+            <span>\(\Delta E_\mathrm{atom} = E_{2} - E_{3}\)</span>
+            <span>&nbsp; \(= (-3.40) - (-1.51) = \class{res}{-1.89 \,\mathrm{eV}}\)</span>
+            <span class="step">\(E_\gamma = -\Delta E_\mathrm{atom} = \class{res}{3.02 \times 10^{-19} \,\mathrm{J}}\)</span>
+            <span class="step">\(f = \dfrac{E_\gamma}{h} = \dfrac{3.02 \times 10^{-19}}{6.63 \times 10^{-34}}\)</span>
             <span class="step">&nbsp; \(= \class{res}{4.56 \times 10^{14} \,\mathrm{Hz}}\)</span>
             <span class="step">\(\lambda = \dfrac{c}{f} = \class{res}{6.58 \times 10^{-7} \,\mathrm{m}}\) (red)</span>
           </div>
@@ -595,12 +595,12 @@
         <aside class="revision-note" hidden>
           <div class="rn-main">
             <h3 class="rn-head">The method never changes</h3>
-            <p>Subtract the two level energies, convert eV to J, use \(E = hf\), then \(c = f\lambda\) if a wavelength is wanted.</p>
+            <p>Use \(\Delta E_\mathrm{atom} = E_\mathrm{f} - E_\mathrm{i}\). For emission this is negative. Conservation gives \(\Delta E_\mathrm{total} = \Delta E_\mathrm{atom} + E_\gamma = 0\), so the photon has positive energy \(E_\gamma = -\Delta E_\mathrm{atom} = hf\). Convert eV to J before using \(h\), then use \(c = f\lambda\).</p>
             <h3 class="rn-head">Does it match?</h3>
             <p>Hydrogen’s red line is measured at 656 nm. We got 658 nm because the level energies were rounded to three significant figures. A subtraction of two rounded numbers loses precision.</p>
           </div>
           <div class="rn-side">
-            <p class="tip">A quicker route: the data booklet gives \(hc = 1.24 \times 10^{-6} \,\mathrm{eV} \,\mathrm{m}\), so \(\lambda = \frac{hc}{\Delta E} = \frac{1.24 \times 10^{-6}}{1.89} = 6.56 \times 10^{-7} \,\mathrm{m}\) with the energy left in eV.</p>
+            <p class="tip">A quicker route: the data booklet gives \(hc = 1.24 \times 10^{-6} \,\mathrm{eV} \,\mathrm{m}\), so \(\lambda = \frac{hc}{E_\gamma} = \frac{1.24 \times 10^{-6}}{1.89} = 6.56 \times 10^{-7} \,\mathrm{m}\) with the energy left in eV.</p>
             <p class="trap">Using one level energy instead of the difference between two.</p>
           </div>
         </aside>
@@ -999,7 +999,7 @@
             <h3 class="rn-head">Using the formula</h3>
             <p>\(n = 2\): \(\frac{-13.6}{4} = -3.40 \,\mathrm{eV}\). \(n = 3\): \(\frac{-13.6}{9} = -1.51 \,\mathrm{eV}\). \(n = 4\): \(\frac{-13.6}{16} = -0.85 \,\mathrm{eV}\). As \(n\) → ∞ the energy → 0 and the electron is free.</p>
             <h3 class="rn-head">A transition, the quick way</h3>
-            <p>For 4 → 2: \(\Delta E = -0.85 - (-3.40) = 2.55 \,\mathrm{eV}\). With \(hc = 1.24 \times 10^{-6} \,\mathrm{eV} \,\mathrm{m}, \lambda = \frac{1.24 \times 10^{-6}}{2.55} = 4.86 \times 10^{-7} \,\mathrm{m}\): hydrogen’s blue-green line at 486 nm.</p>
+            <p>For \(4 \to 2\): \(\Delta E_\mathrm{atom} = -3.40 - (-0.85) = -2.55 \,\mathrm{eV}\), so \(E_\gamma = -\Delta E_\mathrm{atom} = 2.55 \,\mathrm{eV}\). With \(hc = 1.24 \times 10^{-6} \,\mathrm{eV} \,\mathrm{m}, \lambda = \frac{1.24 \times 10^{-6}}{2.55} = 4.86 \times 10^{-7} \,\mathrm{m}\): hydrogen’s blue-green line at 486 nm.</p>
             <h3 class="rn-head">Why it mattered</h3>
             <p>One formula with one constant reproduced every line of hydrogen then measured, and predicted further infrared lines that were found afterwards.</p>
           </div>
@@ -1094,7 +1094,7 @@
           <div class="term"><b>Proton number</b><span>\(Z\): fixes the element</span></div>
           <div class="term"><b>Energy level</b><span>An allowed energy of the atom</span><span>Discrete</span></div>
           <div class="term"><b>Photon</b><span>Packet of light energy</span><span>\(E = hf\)</span></div>
-          <div class="term"><b>Transition</b><span>Jump between levels</span><span>\(hf = \Delta E\)</span></div>
+          <div class="term"><b>Transition</b><span>Jump between levels</span><span>\(E_\gamma = hf = |\Delta E_\mathrm{atom}|\)</span></div>
           <div class="term"><b>Emission spectrum</b><span>Bright lines from a hot gas</span></div>
           <div class="term"><b>Absorption spectrum</b><span>Dark lines on a continuous spectrum</span></div>
           <div class="term hl"><b>Nuclear radius</b><span>\(R = R_{0}A^{1/3}\)</span><span>Density the same for all</span></div>

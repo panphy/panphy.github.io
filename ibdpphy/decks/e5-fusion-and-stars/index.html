@@ -171,15 +171,15 @@
             <span class="say">\({}^{4}\mathrm{He}\) 4.002602 · n 1.008665</span>
             <span>Before: \(2.014102 + 3.016049 = 5.030151\)</span>
             <span class="step">After: \(4.002602 + 1.008665 = 5.011267\)</span>
-            <span class="step">\(\Delta m = 0.018884 \,\mathrm{u}\)</span>
-            <span class="step">\(E = 0.018884 \times 931.5 = \class{res}{17.6 \,\mathrm{MeV}}\)</span>
+            <span class="step">\(\Delta m = 5.011267 - 5.030151 = -0.018884 \,\mathrm{u}\)</span>
+            <span class="step">\(E_\mathrm{released} = -(-0.018884) \times 931.5 = \class{res}{17.6 \,\mathrm{MeV}}\)</span>
           </div>
           <div class="work step">
             <span class="say">In the Sun, overall: 4 \({}^{1}\mathrm{H}\) → \({}^{4}\mathrm{He}\)</span>
             <span class="say">\({}^{1}\mathrm{H}\) 1.007825 u</span>
-            <span>\(\Delta m = 4 \times 1.007825 - 4.002602\)</span>
-            <span class="step">\(\Delta m = 0.028698 \,\mathrm{u}\)</span>
-            <span class="step">\(E = 0.028698 \times 931.5 = \class{res}{26.7 \,\mathrm{MeV}}\)</span>
+            <span>\(\Delta m = 4.002602 - 4 \times 1.007825\)</span>
+            <span class="step">\(\Delta m = -0.028698 \,\mathrm{u}\)</span>
+            <span class="step">\(E_\mathrm{released} = -(-0.028698) \times 931.5 = \class{res}{26.7 \,\mathrm{MeV}}\)</span>
           </div>
         </div>
         <div class="slide-foot"><span>E.5 FUSION AND STARS · SL + HL</span><span data-page></span></div>
@@ -188,7 +188,7 @@
             <h3 class="rn-head">The fraction of mass that disappears</h3>
             <p>For hydrogen turning into helium, 0.0287 u vanishes out of 4.0313 u: 0.71%. Seven parts in a thousand of the mass of the hydrogen is converted to energy. In fission the figure is less than one part in a thousand. That fraction, 0.007, is the number that decides how long a star can shine.</p>
             <h3 class="rn-head">Method</h3>
-            <p>It is exactly the mass-defect calculation of E.3 and E.4: add up the masses on each side, subtract, and multiply the difference in u by 931.5 to get MeV. Keep all the decimal places until the subtraction is done.</p>
+            <p>It is exactly the mass-defect calculation of E.3 and E.4: add up the masses on each side and use \(\Delta m = m_\mathrm{final} - m_\mathrm{initial}\). The rest-energy change is \(\Delta E_\mathrm{rest} = \Delta m c^{2}\). The released energy is \(E_\mathrm{released} = -\Delta m c^{2}\), so multiply the negative of the signed mass change in u by 931.5 to get MeV. Including the released energy, \(\Delta E_\mathrm{total} = 0\). Keep all the decimal places until the subtraction is done.</p>
           </div>
           <div class="rn-side">
             <p class="tip">The masses used are those of neutral atoms, which include electrons. For deuterium and tritium the electrons balance on the two sides. For four hydrogen atoms becoming one helium atom they do not: two electrons are left over, and they annihilate with the two positrons the chain produces. That energy is part of the 26.7 MeV.</p>
@@ -257,10 +257,10 @@
         <div class="split even">
           <div class="work">
             <span class="say">\(L_{\odot} = 3.85 \times 10^{26} \,\mathrm{W}\)</span>
-            <span class="say">Mass converted to energy each second</span>
-            <span>\(E = mc^{2}\) &nbsp;so&nbsp; \(\dfrac{\Delta m}{\Delta t} = \dfrac{L}{c^{2}}\)</span>
-            <span class="step">\(= \dfrac{3.85 \times 10^{26}}{(3.00 \times 10^{8})^{2}}\)</span>
-            <span class="step">\(= \class{res}{4.3 \times 10^{9} \,\mathrm{kg} \,\mathrm{s}^{-1}}\)</span>
+            <span class="say">Signed rate of change of the Sun’s mass</span>
+            <span>\(\dfrac{\Delta m}{\Delta t} = -\dfrac{L}{c^{2}}\)</span>
+            <span class="step">\(= -\dfrac{3.85 \times 10^{26}}{(3.00 \times 10^{8})^{2}}\)</span>
+            <span class="step">\(= \class{res}{-4.3 \times 10^{9} \,\mathrm{kg} \,\mathrm{s}^{-1}}\)</span>
           </div>
           <div class="work step">
             <span class="say">Mass \(2.0 \times 10^{30}\) kg · 10% of it fuses</span>
@@ -771,7 +771,7 @@
         <p class="eyebrow">Summary</p>
         <h2>Fusion and stars on one slide<span>.</span></h2>
         <div class="cards fill" style="grid-template-columns: 1fr 1fr 1fr; align-content: center;">
-          <div class="card"><p class="eyebrow">Fusion</p><h3>Light nuclei join</h3><p>\(E = \Delta m \, c^{2}\)<br>Needs high temperature and high density</p></div>
+          <div class="card"><p class="eyebrow">Fusion</p><h3>Light nuclei join</h3><p>\(E_\mathrm{released} = -\Delta m \, c^{2}\)<br>Needs high temperature and high density</p></div>
           <div class="card step"><p class="eyebrow">A stable star</p><h3>Gravity = pressure</h3><p>Inward gravity against outward radiation pressure</p></div>
           <div class="card step"><p class="eyebrow">Mass decides</p><h3>Heavier: brighter, shorter</h3><p>White dwarf, or supernova and neutron star or black hole</p></div>
           <div class="card step"><p class="eyebrow">HR diagram</p><h3>\(L\) up, \(T\) falling to the right</h3><p>Main sequence, red giants, supergiants, white dwarfs, instability strip</p></div>

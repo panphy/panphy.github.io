@@ -208,9 +208,9 @@
           <div class="work step">
             <span class="say">Helium-4 nucleus: \(4.001506 \,\mathrm{u}\)</span>
             <span class="say">Proton \(1.007276 \,\mathrm{u}\) · neutron \(1.008665 \,\mathrm{u}\)</span>
-            <span>\(\Delta m = 2 m_\mathrm{p} + 2 m_\mathrm{n} - m_\mathrm{He}\)</span>
-            <span class="step">\(\Delta m = 4.031882 - 4.001506 = 0.030376 \,\mathrm{u}\)</span>
-            <span class="step">\(E = 0.030376 \times 931.5 = \class{res}{28.3 \,\mathrm{MeV}}\)</span>
+            <span>\(\Delta m = m_\mathrm{He} - (2 m_\mathrm{p} + 2 m_\mathrm{n})\)</span>
+            <span class="step">\(\Delta m = 4.001506 - 4.031882 = -0.030376 \,\mathrm{u}\)</span>
+            <span class="step">\(E_\mathrm{b} = -\Delta m\,c^{2} = -(-0.030376) \times 931.5 = \class{res}{28.3 \,\mathrm{MeV}}\)</span>
             <span class="step">Per nucleon: \(\dfrac{28.3}{4} = \class{res}{7.07 \,\mathrm{MeV}}\)</span>
           </div>
         </div>
@@ -218,7 +218,7 @@
         <aside class="revision-note" hidden>
           <div class="rn-main">
             <h3 class="rn-head">Binding energy is not energy the nucleus has</h3>
-            <p>The name is misleading. It is energy the nucleus has <b>lost</b>: the amount you would have to put back in to pull every nucleon free. A nucleus with a large binding energy sits deep in an energy well and is hard to break up. Think of it as a debt, not as savings.</p>
+            <p>For formation from separate nucleons, \(\Delta m = m_\mathrm{final} - m_\mathrm{initial} < 0\). The mass defect is the positive magnitude \(-\Delta m\), and the positive binding energy is \(E_\mathrm{b} = -\Delta m c^{2}\). It is energy the nucleus has <b>lost</b>: the amount you would have to put back in to pull every nucleon free. A nucleus with a large binding energy sits deep in an energy well and is hard to break up. Think of it as a debt, not as savings.</p>
             <h3 class="rn-head">Why divide by the number of nucleons</h3>
             <p>A big nucleus has a large total binding energy simply because it has many nucleons. To compare how firmly each nucleon is held in different nuclei, divide by \(A\). The higher the binding energy per nucleon, the more stable the nucleus.</p>
           </div>
@@ -268,15 +268,15 @@
           <div class="work">
             <div class="eqline">\({}^{226}_{88}\mathrm{Ra}\) <span class="op">→</span> \({}^{222}_{86}\mathrm{Rn}\) <span class="op">+</span> \(\class{alpha}{{}^{4}_{2}\mathrm{He}}\)</div>
             <span class="say">Masses: \(226.025410 \,\mathrm{u}\) → \(222.017578 \,\mathrm{u}\) + \(4.002603 \,\mathrm{u}\)</span>
-            <span>\(\Delta m = m_\mathrm{before} - m_\mathrm{after}\)</span>
-            <span class="step">\(\Delta m = 226.025410 - 226.020181 = 0.005229 \,\mathrm{u}\)</span>
-            <span class="step">\(E = 0.005229 \times 931.5 = \class{res}{4.87 \,\mathrm{MeV}}\)</span>
+            <span>\(\Delta m = m_\mathrm{after} - m_\mathrm{before}\)</span>
+            <span class="step">\(\Delta m = 226.020181 - 226.025410 = -0.005229 \,\mathrm{u}\)</span>
+            <span class="step">\(E_\mathrm{released} = -\Delta m\,c^{2} = -(-0.005229) \times 931.5 = \class{res}{4.87 \,\mathrm{MeV}}\)</span>
           </div>
           <div class="stack">
             <ul class="points small">
               <li>The products have <b>less mass</b>: energy is released</li>
               <li class="step">It appears as <b>kinetic energy</b>, mostly of the alpha particle</li>
-              <li class="step">In joules: \(4.87 \times 10^{6} \times 1.60 \times 10^{-19} = 7.8 \times 10^{-13} \,\mathrm{J}\)</li>
+              <li class="step">Released energy: \(7.8 \times 10^{-13} \,\mathrm{J}\)</li>
             </ul>
           </div>
         </div>
@@ -286,7 +286,7 @@
             <h3 class="rn-head">Why the alpha particle takes most of the energy</h3>
             <p>The radium nucleus is at rest, so the total momentum afterwards must be zero: the alpha particle and the radon nucleus fly apart with equal and opposite momenta (A.2). Kinetic energy is \(\frac{p^{2}}{2m}\), so for the same momentum the lighter particle has more of it. The alpha particle, with 4 of the 226 mass units, carries \(\frac{222}{226}\) of the energy: 4.78 MeV.</p>
             <h3 class="rn-head">A decay can only happen if mass is lost</h3>
-            <p>If the products would have more mass than the original nucleus, the decay cannot happen by itself, because it would need energy from nowhere. This test tells you which decays are possible.</p>
+            <p>If the products would have more mass than the original nucleus, the decay cannot happen by itself, because it would need energy from nowhere. This test tells you which decays are possible. The rest-energy change is \(\Delta E_\mathrm{rest} = \Delta m c^{2} < 0\); the products gain kinetic energy, so \(\Delta E_\mathrm{rest} + \Delta E_\mathrm{k} = 0\).</p>
           </div>
           <div class="rn-side">
             <p class="tip">These are masses of whole atoms, electrons included. The 88 electrons on the left balance the 86 + 2 on the right, so they cancel.</p>
