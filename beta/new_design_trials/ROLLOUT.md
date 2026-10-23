@@ -35,10 +35,10 @@ Nothing looks different.
 
 | Item | Status | PR | Notes |
 | --- | --- | --- | --- |
-| Move `design.css` to `/assets/`; Unbounded fonts and OFL to `/assets/fonts/` | done | this PR | Figtree was already in `/assets/fonts/` (byte-identical, added for the decks), so the sandbox copies were removed. |
-| Cache `design.css`, Figtree and Unbounded; add them to the homepage common offline assets | done | this PR | Both the live and the sandbox homepage lists. The OFL `.txt` files are not cached, as before. |
-| Spectrum house style in `CLAUDE.md` and `AGENTS.md` | done | this PR | Replaces the PanPhyPlot-style rule. It names this file for unmigrated apps, so update that line in Phase 5. |
-| Sandbox pages load `/assets/design.css` | done | this PR | Homepage, PanPhyPlot and Ripple Tank trials. |
+| Move `design.css` to `/assets/`; Unbounded fonts and OFL to `/assets/fonts/` | done | [#1250](https://github.com/panphy/panphy.github.io/pull/1250) | Figtree was already in `/assets/fonts/` (byte-identical, added for the decks), so the sandbox copies were removed. |
+| Cache `design.css`, Figtree and Unbounded; add them to the homepage common offline assets | done | [#1250](https://github.com/panphy/panphy.github.io/pull/1250) | Both the live and the sandbox homepage lists. The OFL `.txt` files are not cached, as before. |
+| Spectrum house style in `CLAUDE.md` and `AGENTS.md` | done | [#1250](https://github.com/panphy/panphy.github.io/pull/1250) | Replaces the PanPhyPlot-style rule. It names this file for unmigrated apps, so update that line in Phase 5. |
+| Sandbox pages load `/assets/design.css` | done | [#1250](https://github.com/panphy/panphy.github.io/pull/1250) | Homepage, PanPhyPlot and Ripple Tank trials. |
 
 ## Phase 1: Pilots
 
