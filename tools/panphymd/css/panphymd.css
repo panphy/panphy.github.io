@@ -1135,6 +1135,11 @@ textarea:focus {
   z-index: 0;
 }
 
+/* Line the first line up with the editor's first line. */
+#renderedOutput > :first-child {
+  margin-top: 0;
+}
+
 #renderedOutput a {
   color: var(--brand);
 }
