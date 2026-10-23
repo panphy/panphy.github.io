@@ -166,7 +166,7 @@ function readPalette() {
     deflected: color('--alpha-deflected'),
     photon: color('--photon'),
     line: color('--text-secondary'),
-    accent: color('--brand-accent'),
+    accent: color('--scene-accent'),
     primary: color('--brand-primary')
   };
 }
@@ -217,7 +217,7 @@ function symbolTexture(background, symbol) {
     ctx.fillStyle = `#${background.getHexString()}`;
     ctx.fillRect(0, 0, w, h);
     ctx.fillStyle = 'rgba(255,255,255,0.92)';
-    ctx.font = '700 54px Manrope, system-ui, sans-serif';
+    ctx.font = '700 54px Figtree, system-ui, sans-serif';
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
     for (const x of [32, 96, 160, 224]) ctx.fillText(symbol, x, h / 2 + 2);

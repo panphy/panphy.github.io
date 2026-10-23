@@ -151,7 +151,7 @@ function readPalette() {
     result.css[key] = css(`--${name}`);
   }
   for (const name of ['text-main', 'card-border', 'brand-primary', 'correct-border', 'font-mono']) result.css[name] = css(`--${name}`);
-  result.accent = new THREE.Color(css('--brand-accent'));
+  result.accent = new THREE.Color(css('--scene-accent'));
   return result;
 }
 
@@ -185,7 +185,7 @@ const shadowTexture = canvasTexture(128, 128, (ctx, w) => {
 function faceLabel(text, color, size = 0.6) {
   const texture = canvasTexture(256, 128, (ctx, w, h) => {
     ctx.fillStyle = color;
-    ctx.font = '700 92px Manrope, system-ui, sans-serif';
+    ctx.font = '700 92px Figtree, system-ui, sans-serif';
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
     ctx.fillText(text, w / 2, h / 2 + 6);
@@ -200,7 +200,7 @@ function signTexture(symbol, background) {
     ctx.fillStyle = `#${background.getHexString()}`;
     ctx.fillRect(0, 0, w, h);
     ctx.fillStyle = 'rgba(255,255,255,0.9)';
-    ctx.font = '700 46px Manrope, system-ui, sans-serif';
+    ctx.font = '700 46px Figtree, system-ui, sans-serif';
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
     for (let x = 32; x < w; x += 64) ctx.fillText(symbol, x, h / 2 + 2);
@@ -724,7 +724,7 @@ function drawScope(scope) {
   ctx.shadowBlur = 0;
   // Panel lettering.
   ctx.fillStyle = '#D7DCE1';
-  ctx.font = '700 30px Manrope, system-ui, sans-serif';
+  ctx.font = '700 30px Figtree, system-ui, sans-serif';
   ctx.textBaseline = 'middle';
   ctx.textAlign = 'left';
   ctx.fillText('~ AC SUPPLY', x + 4, height - 32);

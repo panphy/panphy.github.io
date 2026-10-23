@@ -335,7 +335,7 @@ function isDark() {
 
 function applyTheme() {
   const dark = isDark();
-  scene.background = new THREE.Color(dark ? 0x151513 : 0xEFEBE3);
+  scene.background = new THREE.Color(dark ? 0x151821 : 0xEEF0F6); // Spectrum surfaces, as the other viewers
   containerMat.color.setHex(dark ? 0x6B665E : 0x9C958B);
   floorMat.color.setHex(dark ? 0x9C9890 : 0x6B6560);
   lidPlateMat.color.setHex(dark ? 0x8A857C : 0xA8A097);

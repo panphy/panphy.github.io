@@ -179,8 +179,8 @@ function readPalette() {
     result[name] = new THREE.Color(css(`--${name}`));
     result.css[name] = css(`--${name}`);
   }
-  for (const name of ['bg-color', 'text-main', 'text-secondary', 'card-border', 'brand-primary', 'brand-accent-strong', 'correct-border', 'font-mono']) result.css[name] = css(`--${name}`);
-  result.accent = new THREE.Color(css('--brand-accent'));
+  for (const name of ['bg-color', 'text-main', 'text-secondary', 'card-border', 'brand-primary', 'scene-accent-strong', 'correct-border', 'font-mono']) result.css[name] = css(`--${name}`);
+  result.accent = new THREE.Color(css('--scene-accent'));
   return result;
 }
 
@@ -205,7 +205,7 @@ const shadowTexture = canvasTexture(128, 128, (ctx, w) => {
 function labelSprite(text, color, size = 0.5) {
   const texture = canvasTexture(128, 128, (ctx, w, h) => {
     ctx.fillStyle = color;
-    ctx.font = '700 92px Manrope, system-ui, sans-serif';
+    ctx.font = '700 92px Figtree, system-ui, sans-serif';
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
     ctx.fillText(text, w / 2, h / 2 + 4);
@@ -227,7 +227,7 @@ function connectionBadge(letter, color) {
     ctx.fill();
     ctx.stroke();
     ctx.fillStyle = palette.css['text-main'];
-    ctx.font = '700 80px Manrope, system-ui, sans-serif';
+    ctx.font = '700 80px Figtree, system-ui, sans-serif';
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
     ctx.fillText(sign ? `${letter} ${sign}` : letter, w / 2, h / 2 + 3);
@@ -243,7 +243,7 @@ function connectionBadge(letter, color) {
 function faceLabel(text, color, size = 0.6) {
   const texture = canvasTexture(128, 128, (ctx, w, h) => {
     ctx.fillStyle = color;
-    ctx.font = '700 96px Manrope, system-ui, sans-serif';
+    ctx.font = '700 96px Figtree, system-ui, sans-serif';
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
     ctx.fillText(text, w / 2, h / 2 + 6);
@@ -579,7 +579,7 @@ function drawScope(scope) {
   ctx.shadowBlur = 0;
   // Panel lettering.
   ctx.fillStyle = '#D7DCE1';
-  ctx.font = '700 30px Manrope, system-ui, sans-serif';
+  ctx.font = '700 30px Figtree, system-ui, sans-serif';
   ctx.textBaseline = 'middle';
   ctx.textAlign = 'left';
   ctx.fillText('~ AC SUPPLY', x + 4, height - 32);

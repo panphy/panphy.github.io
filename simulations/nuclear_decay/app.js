@@ -159,7 +159,7 @@ function readPalette() {
     aluminium: color('--aluminium'),
     lead: color('--lead'),
     line: color('--text-secondary'),
-    accent: color('--brand-accent'),
+    accent: color('--scene-accent'),
     tray: color('--card-border'),
     css: {
       text: css('--text-main'),
@@ -205,7 +205,7 @@ function symbolTexture(background, symbol) {
     ctx.fillStyle = `#${background.getHexString()}`;
     ctx.fillRect(0, 0, w, h);
     ctx.fillStyle = 'rgba(255,255,255,0.92)';
-    ctx.font = '700 54px Manrope, system-ui, sans-serif';
+    ctx.font = '700 54px Figtree, system-ui, sans-serif';
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
     for (const x of [32, 96, 160, 224]) ctx.fillText(symbol, x, h / 2 + 2);
