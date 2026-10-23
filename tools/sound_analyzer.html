@@ -4,7 +4,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <meta name="theme-color" content="#F8F6F1">
+    <meta name="theme-color" content="#F5F6FA">
     <script src="/assets/theme.js" data-legacy-dark="sound-analyzer-dark" data-legacy-light="sound-analyzer-light"></script>
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
@@ -12,25 +12,26 @@
   <title>Sound Analyzer</title>
   <link rel="icon" type="image/png" href="/assets/favicon.png">
     <script src="/assets/sw-register.js" defer></script>
+    <link rel="stylesheet" href="/assets/fonts/fonts.css">
+    <link rel="stylesheet" href="/assets/design.css">
 <style>
 
-    @import url('/assets/fonts/fonts.css');
+    /* Colours and fonts come from the shared design system (/assets/design.css);
+       these names keep the rest of this stylesheet unchanged. Line and marker
+       colours carry meaning and stay as they were. */
     :root {
-      color-scheme: light;
-      --font-sans: 'Manrope', system-ui, sans-serif;
-      --font-display: 'DM Serif Display', Georgia, serif;
-      --font-mono: 'IBM Plex Mono', monospace;
-      --bg-color: #F4F1EA; --surface: #FFFFFF; --surface-alt: #FAF8F4;
-      --text-main: #17181A; --text-secondary: #55585E; --status-text: #8A8C91;
-      --border: #E6E1D7; --brand-primary: #C2410C; --brand-secondary: #EA580C;
-      --brand-accent: #0F766E; --accent-ink: #FFFFFF;
-      --grid-minor: rgba(15,118,110,.055); --grid-major: rgba(15,118,110,.11);
-      --danger: #B42318; --shadow: 0 1px 2px rgba(23,24,26,.05), 0 2px 8px rgba(23,24,26,.04);
+      --font-sans: var(--font-body);
+      --bg-color: var(--bg); --surface-alt: var(--surface-2);
+      --text-main: var(--ink); --text-secondary: var(--ink-2); --status-text: var(--ink-3);
+      --border: var(--line); --brand-primary: var(--accent); --brand-secondary: var(--accent-hover);
+      --brand-accent: var(--accent);
+      --grid-minor: rgba(28,40,90,.035); --grid-major: rgba(28,40,90,.075);
+      --shadow: var(--shadow-1);
       --canvas-bg: var(--surface); --card-bg: var(--surface); --card-border: var(--border);
       --card-shadow: var(--shadow); --canvas-baseline: var(--border);
       --slider-track: var(--border); --slider-thumb: var(--brand-accent);
       --select-bg: var(--surface-alt); --select-border: var(--border);
-      --btn-primary: var(--brand-accent); --btn-primary-hover: #0B5F59; --btn-text: var(--accent-ink);
+      --btn-primary: var(--accent); --btn-primary-hover: var(--accent-hover); --btn-text: var(--accent-ink);
       --axis-color: var(--text-main); --grid-color: var(--text-main); --wave-line: #0F766E;
       --marker-color: #C2410C; --tooltip-bg: var(--surface); --tooltip-text: var(--text-main);
       --channel-line: #4E79A7; --channel-line-paused: #71869A;
@@ -38,17 +39,11 @@
       --axis-line: var(--border); --paused-overlay: rgba(255,255,255,.5);
     }
     [data-theme="dark"] {
-      color-scheme: dark;
-      --bg-color: #0D1012; --surface: #15191C; --surface-alt: #191E22;
-      --text-main: #E8EBED; --text-secondary: #A5ACB3; --status-text: #737B83; --border: #262D33;
-      --brand-primary: #FB923C; --brand-secondary: #FB923C; --brand-accent: #5EEAD4;
-      --accent-ink: #062521; --btn-primary-hover: #8FF3E3;
-      --grid-minor: rgba(94,234,212,.035); --grid-major: rgba(94,234,212,.07);
-      --danger: #F97066; --shadow: 0 1px 3px rgba(0,0,0,.3);
+      --grid-minor: rgba(150,175,255,.03); --grid-major: rgba(150,175,255,.065);
       --wave-line: #5EEAD4; --marker-color: #FB923C;
       --channel-line: #7CB5EC; --channel-line-paused: #69849F;
       --combined-line: #FB923C; --combined-line-paused: #AE8161;
-      --paused-overlay: rgba(13,16,18,.42);
+      --paused-overlay: rgba(7,8,12,.42);
     }
     *, *::before, *::after { box-sizing: border-box; }
     html, body { margin: 0; padding: 0; min-height: 100%; }
@@ -72,7 +67,10 @@
     .audio-brand { display: flex; align-items: center; gap: 10px; color: var(--text-main); }
     .audio-brand > a { display: inline-flex; }
     .audio-brand img { width: 32px; height: 32px; object-fit: contain; }
-    .audio-brand h1 { margin: 0; font: 400 1.5rem var(--font-display); letter-spacing: -.5px; }
+    .audio-brand h1 { margin: 0; font: 600 1.02rem var(--font-display); letter-spacing: -.03em; }
+    .audio-appbar { position: relative; }
+    /* One thin spectrum line under the app bar marks the app as PanPhy. */
+    .audio-appbar::after { content: ''; position: absolute; left: 0; right: 0; bottom: -1px; height: 2px; background: var(--spectrum); opacity: .85; pointer-events: none; }
     .audio-brand:hover { text-decoration: none; }
     .button-icon { width: 18px; height: 18px; flex: 0 0 18px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; pointer-events: none; }
     .btn, .btn-primary, .btn-secondary, .spectrum-reset { display: inline-flex; align-items: center; justify-content: center; gap: 8px; }
@@ -101,7 +99,7 @@
     }
     @media (max-width: 600px) {
       .audio-appbar { padding-inline: 12px; gap: 8px; }
-      .audio-brand h1 { font-size: 1.15rem; }
+      .audio-brand h1 { font-size: .9rem; }
     }
     /* Canvas Styling */
     canvas {
@@ -292,7 +290,7 @@
     .device-select:focus {
       outline: none;
       border-color: var(--brand-primary);
-      box-shadow: 0 0 0 3px rgba(194, 65, 12, 0.15);
+      box-shadow: 0 0 0 3px var(--focus);
     }
 
     .device-select:hover {
@@ -447,7 +445,7 @@
     .main-content { flex: 1; min-height: 0; grid-template-rows: minmax(0, 1fr); width: 100%; max-width: 1920px; margin: 0 auto; padding: 16px; display: grid; grid-template-columns: minmax(0,1fr) 304px; gap: 16px; align-items: stretch; }
     .plots { min-height: 0; min-width: 0; display: grid; grid-template-rows: auto minmax(0, 1fr); gap: 16px; }
     .simulation-area, .controls-panel { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; box-shadow: var(--shadow); overflow: hidden; }
-    .panel-header, .simulation-area summary { padding: 12px 16px; font: 400 1.15rem var(--font-display); border-bottom: 1px solid var(--border); }
+    .panel-header, .simulation-area summary { padding: 12px 16px; font: 500 .95rem var(--font-display); letter-spacing: -.02em; border-bottom: 1px solid var(--border); }
     .simulation-area summary { cursor: pointer; }
     .panel-body { padding: 12px; }
     .info-bar { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding: 12px; border-bottom: 1px solid var(--border); }
@@ -1319,7 +1317,7 @@
     if (!sampleRate || !analyzer) return;
 
     ctx.fillStyle = getCssVar('--axis-color');
-    ctx.font = '12px sans-serif';
+    ctx.font = '12px "IBM Plex Mono", monospace';
 
     const numTicks = 5;
     const minFreq = startFreq ?? 0;

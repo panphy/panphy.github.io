@@ -2,8 +2,6 @@
    The shell (app bar, panes, toolbars, menus, status bar) comes first; the rendered
    document, print, copy hints and dialogs follow. */
 
-@import url('/assets/fonts/fonts.css');
-
 *,
 *::before,
 *::after {
@@ -14,38 +12,14 @@
 /* Tokens                                                                  */
 /* ---------------------------------------------------------------------- */
 :root {
-  color-scheme: light;
-  --font-sans: 'Manrope', system-ui, sans-serif;
-  --font-display: 'DM Serif Display', Georgia, serif;
-  --font-mono: 'IBM Plex Mono', ui-monospace, monospace;
+  --brand-primary: var(--accent);
+  --font-sans: var(--font-body);
   --preview-font-family: 'Manrope', sans-serif;
   --base-font-size: 16px;
 
-  --paper: #F4F1EA;
-  --grid-minor: rgba(15, 118, 110, 0.055);
-  --grid-major: rgba(15, 118, 110, 0.11);
-  --surface: #FFFFFF;
-  --surface-2: #FAF8F4;
-  --surface-3: #F2EEE6;
-  --ink: #17181A;
-  --ink-2: #55585E;
-  --ink-3: #8A8C91;
-  --line: #E6E1D7;
-  --line-strong: #D3CCBE;
-  --accent: #0F766E;
-  --accent-hover: #0B5F59;
-  --accent-ink: #FFFFFF;
-  --accent-soft: rgba(15, 118, 110, 0.1);
-  --brand: #C2410C;
-  --brand-soft: rgba(194, 65, 12, 0.1);
-  --danger: #B42318;
-  --danger-soft: rgba(180, 35, 24, 0.08);
-  --good: #15803D;
-  --focus: rgba(15, 118, 110, 0.35);
-  --shadow-1: 0 1px 2px rgba(23, 24, 26, 0.05), 0 2px 8px rgba(23, 24, 26, 0.04);
-  --shadow-2: 0 12px 36px rgba(23, 24, 26, 0.16);
-  --radius: 14px;
-  --radius-sm: 9px;
+  --paper: var(--bg);
+  --grid-minor: rgba(28, 40, 90, 0.035);
+  --grid-major: rgba(28, 40, 90, 0.075);
   --appbar-h: 56px;
 
   /* Names used by the document, dialog and copy-hint rules below, and by the
@@ -53,57 +27,29 @@
   --background-color: var(--paper);
   --text-color: var(--ink);
   --text-muted: var(--ink-2);
-  --brand-primary: var(--brand);
-  --brand-accent: var(--accent);
   --pane-background: var(--surface);
   --button-background: var(--surface-3);
   --button-color: var(--ink);
   --border-color: var(--line);
-  --code-background: #F2EEE6;
+  --code-background: var(--surface-3);
   --table-border-color: rgba(23, 24, 26, 0.3);
-  --table-header-background: #F5F2EC;
+  --table-header-background: var(--surface-2);
   --shadow-soft: var(--shadow-1);
   --copy-hint-outline: var(--accent);
   --copy-hint-chip-bg: var(--accent);
   --copy-hint-text: var(--accent-ink);
-  --copy-ok: #15803D;
-  --copy-fail: #B42318;
+  --copy-ok: var(--good);
+  --copy-fail: var(--danger);
   --laser-color: #22c55e;
   --laser-color-rgb: 34, 197, 94;
 }
 
 [data-theme="dark"] {
-  color-scheme: dark;
-  --paper: #0D1012;
-  --grid-minor: rgba(94, 234, 212, 0.035);
-  --grid-major: rgba(94, 234, 212, 0.07);
-  --surface: #15191C;
-  --surface-2: #191E22;
-  --surface-3: #20262B;
-  --ink: #E8EBED;
-  --ink-2: #A5ACB3;
-  --ink-3: #737B83;
-  --line: #262D33;
-  --line-strong: #353D44;
-  --accent: #5EEAD4;
-  --accent-hover: #8FF3E3;
-  --accent-ink: #062521;
-  --accent-soft: rgba(94, 234, 212, 0.12);
-  --brand: #FB923C;
-  --brand-soft: rgba(251, 146, 60, 0.12);
-  --danger: #F97066;
-  --danger-soft: rgba(249, 112, 102, 0.1);
-  --good: #4ADE80;
-  --focus: rgba(94, 234, 212, 0.35);
-  --shadow-1: 0 1px 2px rgba(0, 0, 0, 0.4), 0 2px 10px rgba(0, 0, 0, 0.25);
-  --shadow-2: 0 16px 44px rgba(0, 0, 0, 0.55);
+  --grid-minor: rgba(150, 175, 255, 0.03);
+  --grid-major: rgba(150, 175, 255, 0.065);
 
-  --code-background: #20262B;
   --code-text-color: #f8f8f2;
   --table-border-color: rgba(255, 255, 255, 0.18);
-  --table-header-background: #1C2226;
-  --copy-ok: #4ADE80;
-  --copy-fail: #F97066;
 }
 
 /* ---------------------------------------------------------------------- */
@@ -225,10 +171,21 @@ button:hover {
   gap: 14px;
   min-height: calc(var(--appbar-h) + var(--standalone-top, 0px));
   padding: var(--standalone-top, 0px) 14px 0;
-  background: color-mix(in srgb, var(--surface) 86%, transparent);
-  backdrop-filter: saturate(1.4) blur(10px);
-  -webkit-backdrop-filter: saturate(1.4) blur(10px);
+  background: var(--surface);
   border-bottom: 1px solid var(--line);
+}
+
+/* One thin spectrum line under the app bar marks the app as PanPhy. */
+.md-appbar::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -1px;
+  height: 2px;
+  background: var(--spectrum);
+  opacity: 0.85;
+  pointer-events: none;
 }
 
 .md-brand {
@@ -256,8 +213,9 @@ button:hover {
 
 .md-wordmark {
   font-family: var(--font-display);
-  font-size: 1.32rem;
-  letter-spacing: -0.01em;
+  font-size: 1.02rem;
+  font-weight: 600;
+  letter-spacing: -0.03em;
 }
 
 .md-appbar-actions {
@@ -693,8 +651,9 @@ button:hover {
 .pane-heading {
   margin: 0;
   font-family: var(--font-display);
-  font-weight: 400;
-  font-size: 1.25rem;
+  font-weight: 500;
+  font-size: 0.98rem;
+  letter-spacing: -0.02em;
   white-space: nowrap;
 }
 
@@ -974,10 +933,8 @@ button:hover {
   padding: 0 12px;
   border-color: var(--line-strong);
   border-radius: 12px;
-  background: color-mix(in srgb, var(--surface) 88%, transparent);
+  background: var(--surface);
   color: var(--ink);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
   box-shadow: var(--shadow-1);
 }
 
@@ -1352,8 +1309,8 @@ td[align="right"] {
     --pane-background: #ffffff !important;
     --surface: #ffffff !important;
     --ink: #000000 !important;
-    --brand: #C2410C !important;
-    --accent: #0F766E !important;
+    --brand: #DB3F27 !important;
+    --accent: #1C64D8 !important;
     --button-background: #f0f0f0 !important;
     --button-color: #000000 !important;
     --border-color: #ccc !important;
@@ -1369,8 +1326,8 @@ td[align="right"] {
     --pane-background: #ffffff !important;
     --surface: #ffffff !important;
     --ink: #000000 !important;
-    --brand: #C2410C !important;
-    --accent: #0F766E !important;
+    --brand: #DB3F27 !important;
+    --accent: #1C64D8 !important;
     --button-background: #f0f0f0 !important;
     --button-color: #000000 !important;
     --border-color: #ccc !important;
@@ -1646,7 +1603,7 @@ td[align="right"] {
 }
 
 .offline-font {
-  --font-sans: 'Manrope', 'Segoe UI', system-ui, -apple-system, sans-serif;
+  --font-sans: 'Figtree', 'Segoe UI', system-ui, -apple-system, sans-serif;
 }
 
 /* Click-to-copy for equations */
@@ -2022,8 +1979,9 @@ mjx-container.copy-failed::after {
 .modal-title {
   margin: 0 0 14px 0;
   font-family: var(--font-display);
-  font-size: 1.45rem;
-  font-weight: 400;
+  font-size: 1.15rem;
+  font-weight: 500;
+  letter-spacing: -0.02em;
   color: var(--ink);
 }
 

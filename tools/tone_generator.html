@@ -4,7 +4,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-  <meta name="theme-color" content="#F8F6F1">
+  <meta name="theme-color" content="#F5F6FA">
   <script src="/assets/theme.js" data-legacy-dark="tone-generator-dark" data-legacy-light="tone-generator-light"></script>
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
@@ -12,72 +12,42 @@
   <title>Two-Channel Tone Generator</title>
   <link rel="icon" type="image/png" href="/assets/favicon.png">
   <script src="/assets/sw-register.js" defer></script>
+  <link rel="stylesheet" href="/assets/fonts/fonts.css">
+  <link rel="stylesheet" href="/assets/design.css">
   <style>
-    @import url('/assets/fonts/fonts.css');
-
     /* Tone Generator: an app bar, the combined output with master controls on the
        left, and up to two channel cards on the right. On laptop screens and larger
        everything fits the window without scrolling; narrow screens stack and scroll. */
 
+    /* Colours and fonts come from the shared design system (/assets/design.css);
+       these names keep the rest of this stylesheet unchanged. Channel and
+       combined line colours carry meaning and stay as they were. */
     :root {
-      color-scheme: light;
-      --font-sans: 'Manrope', system-ui, sans-serif;
-      --font-display: 'DM Serif Display', Georgia, serif;
-      --font-mono: 'IBM Plex Mono', ui-monospace, monospace;
-      --bg-color: #F4F1EA;
-      --surface: #FFFFFF;
-      --surface-alt: #FAF8F4;
-      --surface-3: #F2EEE6;
-      --text-main: #17181A;
-      --text-secondary: #55585E;
-      --text-muted: #8A8C91;
-      --border: #E6E1D7;
-      --border-strong: #D3CCBE;
-      --brand-primary: #C2410C;
-      --brand-accent: #0F766E;
-      --accent-hover: #0B5F59;
-      --accent-ink: #FFFFFF;
-      --accent-soft: rgba(15, 118, 110, 0.1);
-      --warm-soft: rgba(194, 65, 12, 0.1);
-      --danger: #B42318;
-      --danger-soft: rgba(180, 35, 24, 0.08);
-      --grid-minor: rgba(15, 118, 110, .055);
-      --grid-major: rgba(15, 118, 110, .11);
-      --shadow: 0 1px 2px rgba(23, 24, 26, .05), 0 2px 8px rgba(23, 24, 26, .04);
-      --canvas-bg: #FFFFFF;
-      --axis-line: #E6E1D7;
+      --font-sans: var(--font-body);
+      --bg-color: var(--bg);
+      --surface-alt: var(--surface-2);
+      --text-main: var(--ink);
+      --text-secondary: var(--ink-2);
+      --text-muted: var(--ink-3);
+      --border: var(--line);
+      --border-strong: var(--line-strong);
+      --brand-primary: var(--accent);
+      --brand-accent: var(--accent);
+      --warm-soft: var(--accent-soft);
+      --grid-minor: rgba(28, 40, 90, .035);
+      --grid-major: rgba(28, 40, 90, .075);
+      --shadow: var(--shadow-1);
+      --canvas-bg: var(--surface);
+      --axis-line: var(--line);
       --ch1-line: #2F6FA8;
       --ch2-line: #8E4FA0;
       --combined-line: #C2410C;
-      --radius: 14px;
-      --radius-sm: 10px;
       --hit: 44px;
     }
 
     [data-theme="dark"] {
-      color-scheme: dark;
-      --bg-color: #0D1012;
-      --surface: #15191C;
-      --surface-alt: #191E22;
-      --surface-3: #20262B;
-      --text-main: #E8EBED;
-      --text-secondary: #A5ACB3;
-      --text-muted: #737B83;
-      --border: #262D33;
-      --border-strong: #353D44;
-      --brand-primary: #FB923C;
-      --brand-accent: #5EEAD4;
-      --accent-hover: #8FF3E3;
-      --accent-ink: #062521;
-      --accent-soft: rgba(94, 234, 212, 0.12);
-      --warm-soft: rgba(251, 146, 60, 0.12);
-      --danger: #F97066;
-      --danger-soft: rgba(249, 112, 102, 0.1);
-      --grid-minor: rgba(94, 234, 212, .035);
-      --grid-major: rgba(94, 234, 212, .07);
-      --shadow: 0 1px 2px rgba(0, 0, 0, .4), 0 2px 10px rgba(0, 0, 0, .25);
-      --canvas-bg: #101417;
-      --axis-line: #2C343A;
+      --grid-minor: rgba(150, 175, 255, .03);
+      --grid-major: rgba(150, 175, 255, .065);
       --ch1-line: #7CB5EC;
       --ch2-line: #D4A6E0;
       --combined-line: #FB923C;
@@ -119,7 +89,10 @@
     .audio-brand { display: flex; align-items: center; gap: 10px; color: var(--text-main); }
     .audio-brand > a { display: inline-flex; }
     .audio-brand img { width: 32px; height: 32px; object-fit: contain; }
-    .audio-brand h1 { margin: 0; font: 400 1.5rem var(--font-display); letter-spacing: -.5px; }
+    .audio-brand h1 { margin: 0; font: 600 1.02rem var(--font-display); letter-spacing: -.03em; }
+    .audio-appbar { position: relative; }
+    /* One thin spectrum line under the app bar marks the app as PanPhy. */
+    .audio-appbar::after { content: ''; position: absolute; left: 0; right: 0; bottom: -1px; height: 2px; background: var(--spectrum); opacity: .85; pointer-events: none; }
     .banner-actions { margin-left: auto; display: flex; align-items: center; gap: 8px; }
     .banner-actions button { min-height: var(--hit); }
 
@@ -254,7 +227,7 @@
 
     /* ---------- Combined output ---------- */
     .panel-head { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
-    .panel-head h2 { margin: 0; font: 400 1.2rem var(--font-display); letter-spacing: -.01em; }
+    .panel-head h2 { margin: 0; font: 500 .98rem var(--font-display); letter-spacing: -.02em; }
     .head-text { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
     .head-meta { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
     #activeSummary { margin: 0; font-size: .78rem; font-weight: 600; color: var(--text-secondary); }
@@ -356,7 +329,7 @@
 
     @media (max-width: 600px) {
       .audio-appbar { padding-inline: 12px; gap: 8px; }
-      .audio-brand h1 { font-size: 1.15rem; }
+      .audio-brand h1 { font-size: .9rem; }
       .ch-head { flex-wrap: wrap; }
       .ch-mix { grid-template-columns: 4.6rem minmax(0, 1fr) 4.6rem; }
       .ch-mix [data-role="pan-label"] { padding-left: 0; }
