@@ -113,7 +113,7 @@ button, summary { font: inherit; }
 .panphy-footer-row p { margin: 0; }
 .panphy-home-link { width: 34px; height: 34px; display: grid; place-items: center; border-radius: 7px; opacity: .72; transition: opacity .2s, transform .2s; }
 .panphy-home-link:hover { opacity: 1; transform: translateY(-2px); }
-.panphy-home-link img { width: 30px; height: 30px; display: block; border-radius: 12%; }
+.panphy-home-link img { width: 30px; height: 30px; display: block; }
 .panphy-footer-links a { color: var(--cyan); font-weight: 800; }
 .panphy-footer-links a:hover { text-decoration: underline; }
 .footer-sep { display: inline-block; margin: 0 8px; color: rgba(255,255,255,.28); }

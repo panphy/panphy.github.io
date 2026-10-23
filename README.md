@@ -39,6 +39,8 @@ Pages under `fun/`, `beta/`, `misc/`, `gcsephy/` and `ibdpphy/` need internet ac
 | `ibdpphy/` | IB DP Physics teaching decks, inventoried in `ibdpphy/index.html` |
 | `.github/` | Repository automation: `workflows/checks.yml` runs `scripts/check.mjs` and the app tests (including Sound Analyzer timing and keyboard regressions) on every pull request; `workflows/supabase-keepalive.yml` pings Supabase twice a week |
 
+The shared logo is `assets/panphy.png`; display the full square without CSS corner rounding or cropping. The favicon uses the same artwork, while the Apple touch icon and dedicated maskable PWA icon include padding to protect the logo from system icon masks.
+
 ## Licence
 
 Copyright © 2026 PanPhy Labs. All rights reserved. The source is public to read but is not open source: copying, adapting or republishing the code or content needs written permission. Third-party libraries, fonts and credited images keep their own licences. See [`LICENSE`](LICENSE).
