@@ -20,7 +20,7 @@ Two hubs hold the author's course resources: teaching decks, workbooks, revision
 
 ## Offline use
 
-Most published tools and simulations work offline once cached: visit online first and check the homepage's **Offline Ready** indicator. Updates appear through an update prompt, shown only in apps whose own or shared files changed. Shared fonts in `assets/fonts/` are precached (about 336 KB).
+Most published tools and simulations work offline once cached: visit online first and check the homepage's **Offline Ready** indicator. Updates appear through an update prompt, shown only in apps whose own or shared files changed. Shared fonts in `assets/fonts/` are precached (about 535 KB).
 
 Pages under `fun/`, `beta/`, `misc/`, `gcsephy/` and `ibdpphy/` need internet access, as do Supabase features such as leaderboards. `gcsephy/` registers its own small worker (`gcsephy/sw.js`), which stores nothing and only revalidates requests so edits appear on the next load; a page that is already open offers a Reload banner when its files or its question bank change. `ibdpphy/` has a copy of the same worker for its own scope.
 
