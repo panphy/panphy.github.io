@@ -54,7 +54,7 @@ In `ibdpphy/` decks, typeset all mathematics with MathJax as LaTeX between `\(` 
 ## Code and interface conventions
 
 - Use camelCase for variables/functions, UPPER_SNAKE_CASE for constants, and a shared state object where useful.
-- General published apps use the Spectrum house style in `/assets/design.css`. Load `/assets/fonts/fonts.css`, then `/assets/design.css`, before the app's own CSS, and map the app's existing variables onto its tokens rather than rewriting every rule. Apps not yet migrated from the older Manrope and DM Serif style are tracked in `beta/new_design_trials/ROLLOUT.md`.
+- General published apps use the Spectrum house style in `/assets/design.css`. Load `/assets/fonts/fonts.css`, then `/assets/design.css`, before the app's own CSS, and map the app's existing variables onto its tokens rather than rewriting every rule. Spellwave (`fun/spellwave.html`) keeps its own game design.
   - Fonts: Figtree for body text, Unbounded for page and app titles only (it needs smaller sizes than a serif display face), IBM Plex Mono for numbers and readouts.
   - The `--spectrum` gradient is decoration only and never encodes data. Leave colors that carry meaning (series, waves, sources, charges, particle types) and 3D scene colors unchanged, unless they clash in dark mode.
   - Apps use solid panels and never blur over live content; glass blur is for the homepage only.

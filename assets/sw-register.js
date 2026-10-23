@@ -133,24 +133,26 @@
 
     updateBannerStyle = document.createElement('style');
     updateBannerStyle.textContent = `
+      /* Spectrum colours, written out because the banner also appears on pages without design.css. */
       .panphy-update { position: fixed; left: 50%; bottom: max(16px, env(safe-area-inset-bottom)); transform: translateX(-50%);
         z-index: 2147483000; box-sizing: border-box; display: flex; align-items: center; gap: 10px;
         width: max-content; max-width: min(440px, calc(100vw - 32px));
-        padding: 10px 10px 10px 18px; border: 2px solid #1B1B1B; border-radius: 16px; background: #FFFDF8; color: #1B1B1B;
-        box-shadow: 0 10px 28px rgba(0, 0, 0, .28); font: 600 15px/1.35 'Manrope', system-ui, -apple-system, "Segoe UI", sans-serif;
+        padding: 10px 10px 10px 18px; border: 1px solid #CDD2DE; border-radius: 16px; background: #FFFFFF; color: #0B0D14;
+        box-shadow: 0 24px 60px -18px rgba(28, 40, 90, .35); font: 600 15px/1.35 'Figtree', system-ui, -apple-system, "Segoe UI", sans-serif;
         animation: panphy-update-in .28s ease-out; }
       .panphy-update p { margin: 0; flex: 1; }
       .panphy-update button { box-sizing: border-box; flex: none; width: auto; min-height: 48px; margin: 0; border-radius: 12px; box-shadow: none;
         font: inherit; letter-spacing: normal; text-transform: none; transform: none; cursor: pointer; }
       /* Outrank page-wide button:hover:not(:disabled) rules so the label stays readable. */
-      .panphy-update button.panphy-update-action { padding: 0 18px; border: 2px solid #C2410C; background: #C2410C; color: #fff; font-weight: 800; white-space: nowrap; }
-      .panphy-update button.panphy-update-action:hover:not(:disabled) { border-color: #9A3412; background: #9A3412; color: #fff; }
+      .panphy-update button.panphy-update-action { padding: 0 18px; border: 2px solid #1C64D8; background: #1C64D8; color: #fff; font-weight: 700; white-space: nowrap; }
+      .panphy-update button.panphy-update-action:hover:not(:disabled) { border-color: #1550B3; background: #1550B3; color: #fff; }
       .panphy-update .panphy-update-action:disabled { opacity: .75; cursor: progress; }
       .panphy-update .panphy-update-close { min-width: 48px; padding: 0; border: 0; background: transparent; color: inherit; font-size: 26px; font-weight: 700; line-height: 1; }
-      .panphy-update button:focus-visible { outline: 3px solid #0D9488; outline-offset: 2px; }
-      :root[data-theme="dark"] .panphy-update { border-color: #F8F6F1; background: #1F1D1A; color: #F8F6F1; box-shadow: 0 10px 28px rgba(0, 0, 0, .6); }
-      :root[data-theme="dark"] .panphy-update button.panphy-update-action { border-color: #EA580C; background: #EA580C; color: #1B1B1B; }
-      :root[data-theme="dark"] .panphy-update button.panphy-update-action:hover:not(:disabled) { border-color: #F97316; background: #F97316; color: #1B1B1B; }
+      .panphy-update button:focus-visible { outline: 3px solid rgba(28, 100, 216, .38); outline-offset: 2px; }
+      :root[data-theme="dark"] .panphy-update { border-color: #333A4C; background: #151821; color: #F1F3F9; box-shadow: 0 24px 70px -20px rgba(0, 0, 0, .7); }
+      :root[data-theme="dark"] .panphy-update button.panphy-update-action { border-color: #54A6FF; background: #54A6FF; color: #04101F; }
+      :root[data-theme="dark"] .panphy-update button.panphy-update-action:hover:not(:disabled) { border-color: #82BEFF; background: #82BEFF; color: #04101F; }
+      :root[data-theme="dark"] .panphy-update button:focus-visible { outline-color: rgba(84, 166, 255, .42); }
       @keyframes panphy-update-in { from { opacity: 0; transform: translate(-50%, 12px); } }
       @media (prefers-reduced-motion: reduce) { .panphy-update { animation: none; } }
       @media print { .panphy-update { display: none !important; } }`;
