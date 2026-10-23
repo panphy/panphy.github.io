@@ -1,4 +1,4 @@
-const BUILD_ID = '2026-10-22T22:58:32Z';
+const BUILD_ID = '2026-10-23T16:52:32Z';
 const CACHE_PREFIX = 'panphy-labs';
 const PRECACHE_NAME = `${CACHE_PREFIX}-precache-${BUILD_ID}`;
 const RUNTIME_CACHE = `${CACHE_PREFIX}-runtime-${BUILD_ID}`;
@@ -23,11 +23,14 @@ const ASSETS_TO_CACHE = [
   '/assets/fullscreen-button.css',
   '/assets/fullscreen-button.js',
   '/assets/standalone-top.css',
+  '/assets/design.css',
   '/assets/fonts/fonts.css',
   '/assets/fonts/dm-serif-display-italic-400-latin-ext.woff2',
   '/assets/fonts/dm-serif-display-italic-400-latin.woff2',
   '/assets/fonts/dm-serif-display-normal-400-latin-ext.woff2',
   '/assets/fonts/dm-serif-display-normal-400-latin.woff2',
+  '/assets/fonts/figtree-normal-300-900-latin-ext.woff2',
+  '/assets/fonts/figtree-normal-300-900-latin.woff2',
   '/assets/fonts/ibm-plex-mono-normal-400-cyrillic-ext.woff2',
   '/assets/fonts/ibm-plex-mono-normal-400-cyrillic.woff2',
   '/assets/fonts/ibm-plex-mono-normal-400-latin-ext.woff2',
@@ -49,6 +52,8 @@ const ASSETS_TO_CACHE = [
   '/assets/fonts/manrope-normal-400-800-latin-ext.woff2',
   '/assets/fonts/manrope-normal-400-800-latin.woff2',
   '/assets/fonts/manrope-normal-400-800-vietnamese.woff2',
+  '/assets/fonts/unbounded-normal-200-900-latin-ext.woff2',
+  '/assets/fonts/unbounded-normal-200-900-latin.woff2',
   '/manifest.json',
 
   // Tools
