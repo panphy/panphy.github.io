@@ -1,5 +1,5 @@
-// boss-options.js — multiple-choice options for boss questions. Draft: the game
-// does not load this file yet.
+// boss-options.js — multiple-choice options for boss questions (see
+// boss-choices.js for how the game uses them).
 //
 // Each entry is keyed by its term in question-bank.js (or the word equation).
 // - answer: the word or words the boss hides and the player types. It may be the
@@ -7,7 +7,6 @@
 //   line is blanked, so a repeated word is typed once.
 // - wrong: three wrong options, best two first. Waves 1–4 show the first two;
 //   from wave 5 all three.
-// - flag: why a teacher should check this set (removed once decided).
 //
 // Option rules (checked in tests/boss-options.test.mjs where a test can):
 // each wrong option is a real term that fits the same gap but not the clue; none is

@@ -1,6 +1,6 @@
 // difficulty.js — how long a keyword may be on each wave. The reasoning and the
 // full progression table are in fun/spellwave/README.md; keep the two in step.
-import { buildSearchPrompt } from './prompt-utils.js?v=20261024-boss-flags';
+import { buildSearchPrompt } from './prompt-utils.js?v=20261024-choice-bosses';
 
 // Longest prompt, in typed characters, that a normal monster, healer or chest may
 // ask on waves 1, 2, 3… Late waves keep the final cap.
@@ -55,16 +55,7 @@ export function hardGuestCount(wave, random = Math.random) {
   return range[0] + Math.floor(random() * (range[1] - range[0] + 1));
 }
 
-// Letters of a boss's hidden word shown as a hint on waves 1, 2, 3… Late waves
-// keep the final count. One letter cues recall and, with the blanks, shows the
-// length; the early waves give two while players learn the format.
-export const BOSS_HINT_LETTERS = [2, 2, 1];
-
-export function bossHintLetters(wave) {
-  return BOSS_HINT_LETTERS[wave - 1] ?? BOSS_HINT_LETTERS.at(-1);
-}
-
-// Limit the actual answer, independently of the full vocabulary or equation.
+// Longest boss option, in typed letters: the answer or any wrong option.
 export function bossAnswerLengthCap(wave) {
   return wave <= EARLY_BOSS_WAVES ? 14 : 16;
 }
