@@ -28,6 +28,7 @@ This file tracks the move of every app on the homepage to the Spectrum design in
 - **Two homepage lists.** The sandbox homepage (`index.html` here) keeps its own copy of `OFFLINE_COMMON_ASSETS` and `OFFLINE_CARD_REQUIREMENTS`. Keep it in step with the live `index.html` until Phase 5 replaces the homepage with it.
 - **No clipping on cards.** Never use `overflow: hidden` to clip decorations on cards inside scrolling or flex columns.
 - **Phone titles.** Unbounded is wide, so check app titles at 375px and add a phone font-size rule after the Spectrum rules if they wrap more than before.
+- **Checking update prompts.** A test origin's old cache can be refreshed with new files, which hides changes in the browser's version maps. Compare the per-app versions of `main` and the branch from the files instead, using the hashing in `computeAppVersions` (`sw.js`).
 - **Meaningful colors stay.** Leave colors that carry meaning and 3D scene colors alone, unless they clash in dark mode.
 
 ## Phase 0: Foundation
@@ -52,10 +53,10 @@ Nothing looks different.
 
 | App | Status | PR | Notes |
 | --- | --- | --- | --- |
-| PanPhyMD (`tools/panphymd.html`) | todo | | CSS in `tools/panphymd/css/`; has local tests in `tools/panphymd/tests/`. |
-| Motion Tracker (`tools/motion_tracker.html`) | todo | | CSS in `tools/motion_tracker/css/`; tests run in CI. |
-| Sound Analyzer (`tools/sound_analyzer.html`) | todo | | Has local tests in `tools/sound_analyzer/tests/`. Keep spectrum/plot colors that encode data. |
-| Tone Generator (`tools/tone_generator.html`) | todo | | Single-file app. |
+| PanPhyMD (`tools/panphymd.html`) | done | PR_LINK | Tokens mapped as in PanPhyPlot; app bar and Present buttons are solid (no blur); `.offline-font` now falls back to Figtree, not Manrope; print colours updated. The document's own "Default" preview and export font stays Manrope: it is content, not UI, so changing it is the owner's call. |
+| Motion Tracker (`tools/motion_tracker.html`) | done | PR_LINK | Tokens mapped as in PanPhyPlot; solid app bar. Chart.js and the video-overlay labels read `--font-body`. Series colours unchanged. |
+| Sound Analyzer (`tools/sound_analyzer.html`) | done | PR_LINK | Inline tokens mapped onto the shared ones; wave, marker and channel line colours unchanged. Frequency-axis labels now in IBM Plex Mono. |
+| Tone Generator (`tools/tone_generator.html`) | done | PR_LINK | Inline tokens mapped onto the shared ones; channel and combined line colours unchanged. Still fits a 1280×720 window without scrolling. |
 
 ## Phase 3a: Wave and mechanics simulations
 
@@ -94,6 +95,6 @@ These apps share one layout (`app.js`, `content.js`, `style.css` in a folder nam
 | Item | Status | PR | Notes |
 | --- | --- | --- | --- |
 | Homepage (`index.html`) | todo | | Replace with the sandbox homepage. Point its links back to live paths, restore `sw-register.js`, remove `noindex` and the trial title. Carry over live homepage changes and offline-list edits made since the sandbox copy. |
-| Shared assets | todo | | Check `theme-toggle.css` and `fullscreen-button.css` against the design. `assets/theme.js` still sets `theme-color` to the old cream and dark values (`#F8F6F1`, `#111110`) at runtime; switch them to the Spectrum `--bg` values (`#F5F6FA`, `#07080C`) once every app is migrated, since it is a shared file. Drop Manrope and DM Serif from the caches and `fonts.css` only if no page still uses them. |
+| Shared assets | todo | | Check `theme-toggle.css` and `fullscreen-button.css` against the design. The update banner from `assets/sw-register.js` still uses the old orange button. `assets/theme.js` still sets `theme-color` to the old cream and dark values (`#F8F6F1`, `#111110`) at runtime; switch them to the Spectrum `--bg` values (`#F5F6FA`, `#07080C`) once every app is migrated, since it is a shared file. Drop Manrope and DM Serif from the caches and `fonts.css` only if no page still uses them. |
 | READMEs and project rules | todo | | Update the affected READMEs. Remove the `ROLLOUT.md` pointer from `CLAUDE.md` and `AGENTS.md`. |
 | Remove the sandbox | todo | | Delete `beta/new_design_trials/` and its `beta/index.html` entry. Mark every line here done first; the finished tracker stays in git history, or ask the owner whether to keep it elsewhere. |

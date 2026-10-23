@@ -2,8 +2,6 @@
    The shell (app bar, panes, toolbars, menus, status bar) comes first; the video stage,
    playback bar, graph, points table and dialogs follow. */
 
-@import url('/assets/fonts/fonts.css');
-
 *,
 *::before,
 *::after {
@@ -14,36 +12,12 @@
 /* Tokens                                                                  */
 /* ---------------------------------------------------------------------- */
 :root {
-  color-scheme: light;
-  --font-sans: 'Manrope', system-ui, sans-serif;
-  --font-display: 'DM Serif Display', Georgia, serif;
-  --font-mono: 'IBM Plex Mono', ui-monospace, monospace;
+  --brand-primary: var(--accent);
+  --font-sans: var(--font-body);
 
-  --paper: #F4F1EA;
-  --grid-minor: rgba(15, 118, 110, 0.055);
-  --grid-major: rgba(15, 118, 110, 0.11);
-  --surface: #FFFFFF;
-  --surface-2: #FAF8F4;
-  --surface-3: #F2EEE6;
-  --ink: #17181A;
-  --ink-2: #55585E;
-  --ink-3: #8A8C91;
-  --line: #E6E1D7;
-  --line-strong: #D3CCBE;
-  --accent: #0F766E;
-  --accent-hover: #0B5F59;
-  --accent-ink: #FFFFFF;
-  --accent-soft: rgba(15, 118, 110, 0.1);
-  --brand: #C2410C;
-  --brand-soft: rgba(194, 65, 12, 0.1);
-  --danger: #B42318;
-  --danger-soft: rgba(180, 35, 24, 0.08);
-  --good: #15803D;
-  --focus: rgba(15, 118, 110, 0.35);
-  --shadow-1: 0 1px 2px rgba(23, 24, 26, 0.05), 0 2px 8px rgba(23, 24, 26, 0.04);
-  --shadow-2: 0 12px 36px rgba(23, 24, 26, 0.16);
-  --radius: 14px;
-  --radius-sm: 9px;
+  --paper: var(--bg);
+  --grid-minor: rgba(28, 40, 90, 0.035);
+  --grid-major: rgba(28, 40, 90, 0.075);
   --appbar-h: 56px;
 
   /* Series colours: PanPhyPlot's first two data colours (x blue, y red), so exported data looks the same there. */
@@ -57,41 +31,17 @@
   --chart-text: rgba(23, 24, 26, 0.85);
   --overlay-axis: rgba(255, 255, 255, 0.9);
   --overlay-shadow: rgba(0, 0, 0, 0.45);
-  --brand-primary: var(--brand);
-  --brand-accent: var(--accent);
   --text-muted: var(--ink-2);
   --copy-hint-outline: var(--accent);
   --copy-hint-chip-bg: var(--accent);
   --copy-hint-text: var(--accent-ink);
-  --copy-ok: #15803D;
-  --copy-fail: #B42318;
+  --copy-ok: var(--good);
+  --copy-fail: var(--danger);
 }
 
 [data-theme="dark"] {
-  color-scheme: dark;
-  --paper: #0D1012;
-  --grid-minor: rgba(94, 234, 212, 0.035);
-  --grid-major: rgba(94, 234, 212, 0.07);
-  --surface: #15191C;
-  --surface-2: #191E22;
-  --surface-3: #20262B;
-  --ink: #E8EBED;
-  --ink-2: #A5ACB3;
-  --ink-3: #737B83;
-  --line: #262D33;
-  --line-strong: #353D44;
-  --accent: #5EEAD4;
-  --accent-hover: #8FF3E3;
-  --accent-ink: #062521;
-  --accent-soft: rgba(94, 234, 212, 0.12);
-  --brand: #FB923C;
-  --brand-soft: rgba(251, 146, 60, 0.12);
-  --danger: #F97066;
-  --danger-soft: rgba(249, 112, 102, 0.1);
-  --good: #4ADE80;
-  --focus: rgba(94, 234, 212, 0.35);
-  --shadow-1: 0 1px 2px rgba(0, 0, 0, 0.4), 0 2px 10px rgba(0, 0, 0, 0.25);
-  --shadow-2: 0 16px 44px rgba(0, 0, 0, 0.55);
+  --grid-minor: rgba(150, 175, 255, 0.03);
+  --grid-major: rgba(150, 175, 255, 0.065);
 
   --series-x: #7CB5EC;
   --series-y: #F48183;
@@ -100,8 +50,6 @@
   --chart-text: rgba(232, 235, 237, 0.88);
   --overlay-axis: rgba(255, 255, 255, 0.8);
   --overlay-shadow: rgba(0, 0, 0, 0.7);
-  --copy-ok: #4ADE80;
-  --copy-fail: #F97066;
 }
 
 /* ---------------------------------------------------------------------- */
@@ -236,10 +184,21 @@ button:disabled {
   gap: 14px;
   min-height: calc(var(--appbar-h) + var(--standalone-top, 0px));
   padding: var(--standalone-top, 0px) 14px 0;
-  background: color-mix(in srgb, var(--surface) 86%, transparent);
-  backdrop-filter: saturate(1.4) blur(10px);
-  -webkit-backdrop-filter: saturate(1.4) blur(10px);
+  background: var(--surface);
   border-bottom: 1px solid var(--line);
+}
+
+/* One thin spectrum line under the app bar marks the app as PanPhy. */
+.mt-appbar::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -1px;
+  height: 2px;
+  background: var(--spectrum);
+  opacity: 0.85;
+  pointer-events: none;
 }
 
 .mt-brand {
@@ -268,8 +227,9 @@ button:disabled {
 
 .mt-wordmark {
   font-family: var(--font-display);
-  font-size: 1.32rem;
-  letter-spacing: -0.01em;
+  font-size: 1.02rem;
+  font-weight: 600;
+  letter-spacing: -0.03em;
   white-space: nowrap;
 }
 
@@ -708,8 +668,9 @@ button:disabled {
 .pane-heading {
   margin: 0;
   font-family: var(--font-display);
-  font-weight: 400;
-  font-size: 1.25rem;
+  font-weight: 500;
+  font-size: 0.98rem;
+  letter-spacing: -0.02em;
   white-space: nowrap;
 }
 
@@ -851,8 +812,9 @@ button:disabled {
 .empty-title {
   margin: 0;
   font-family: var(--font-display);
-  font-weight: 400;
-  font-size: 1.55rem;
+  font-weight: 500;
+  font-size: 1.12rem;
+  letter-spacing: -0.02em;
   line-height: 1.2;
 }
 
@@ -1158,8 +1120,9 @@ button:disabled {
 .graph-empty-title {
   margin: 0;
   font-family: var(--font-display);
-  font-weight: 400;
-  font-size: 1.3rem;
+  font-weight: 500;
+  font-size: 0.98rem;
+  letter-spacing: -0.02em;
 }
 
 .graph-empty-text {
@@ -1441,8 +1404,6 @@ button:disabled {
   white-space: nowrap;
 }
 
-
-
 .mt-statusbar-legal {
   white-space: nowrap;
 }
@@ -1485,8 +1446,9 @@ button:disabled {
 .modal-title {
   margin: 0;
   font-family: var(--font-display);
-  font-size: 1.45rem;
-  font-weight: 400;
+  font-size: 1.15rem;
+  font-weight: 500;
+  letter-spacing: -0.02em;
 }
 
 .modal-lead {
