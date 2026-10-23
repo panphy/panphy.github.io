@@ -409,9 +409,11 @@
 		const muted = readToken('--ink-2', '#55585e');
 		const line = readToken('--line', '#e6e1d7');
 		const strong = readToken('--line-strong', '#d3ccbe');
+		const bodyFont = readToken('--font-body', 'Figtree, system-ui, sans-serif');
+		const monoFont = readToken('--font-mono', '"IBM Plex Mono", ui-monospace, monospace');
 		layout.paper_bgcolor = 'rgba(0,0,0,0)';
 		layout.plot_bgcolor = 'rgba(0,0,0,0)';
-		layout.font = { family: 'Manrope, system-ui, sans-serif', size: 12.5, color: muted };
+		layout.font = { family: bodyFont, size: 12.5, color: muted };
 		['xaxis', 'yaxis'].forEach((axis) => {
 			layout[axis] = {
 				...layout[axis],
@@ -419,15 +421,15 @@
 				zerolinecolor: strong,
 				linecolor: strong,
 				tickcolor: strong,
-				tickfont: { family: '"IBM Plex Mono", ui-monospace, monospace', size: 11, color: muted },
-				title: { ...layout[axis].title, font: { ...(layout[axis].title.font || {}), family: 'Manrope, system-ui, sans-serif', size: 13.5, color: ink } }
+				tickfont: { family: monoFont, size: 11, color: muted },
+				title: { ...layout[axis].title, font: { ...(layout[axis].title.font || {}), family: bodyFont, size: 13.5, color: ink } }
 			};
 		});
 		layout.legend = { ...(layout.legend || {}), font: { color: ink, size: 12.5 } };
 		layout.hoverlabel = {
 			bgcolor: readToken('--surface', '#ffffff'),
 			bordercolor: muted,
-			font: { family: '"IBM Plex Mono", ui-monospace, monospace', color: ink }
+			font: { family: monoFont, color: ink }
 		};
 		layout.modebar = { bgcolor: 'rgba(0,0,0,0)', color: readToken('--ink-3', '#8a8c91'), activecolor: readToken('--accent', '#0f766e') };
 		return layout;
