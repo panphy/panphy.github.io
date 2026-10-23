@@ -83,7 +83,7 @@ sub, sup { line-height: 0; }
 .brand a { display: inline-flex; align-items: center; min-height: 48px; color: inherit; text-decoration: none; }
 .brand-logo { flex: none; justify-content: center; min-width: 48px; margin-left: -8px; }
 .brand-name { min-width: 0; padding-right: 8px; }
-.brand img { width: 32px; height: 32px; border-radius: 12%; flex: none; }
+.brand img { width: 32px; height: 32px; flex: none; }
 .brand span { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .top-actions { display: flex; align-items: center; gap: 8px; flex: none; }
 .nav-pill { display: inline-flex; align-items: center; gap: 8px; min-height: 44px; padding: 0 15px; border: 1px solid rgba(255, 255, 255, .35); border-radius: 999px; background: none; color: #fff; font-size: 13px; font-weight: 800; text-decoration: none; }

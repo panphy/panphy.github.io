@@ -273,7 +273,6 @@ input[type="number"]:focus {
 .neo-brand img {
 	width: 30px;
 	height: 30px;
-	border-radius: 12%;
 }
 
 .neo-wordmark {
@@ -2907,10 +2906,6 @@ input[type="number"]:focus {
 	background: var(--spectrum);
 	opacity: 0.85;
 	pointer-events: none;
-}
-
-.neo-brand img {
-	border-radius: 9px;
 }
 
 /* Unbounded is wide, so display headings are set smaller and heavier than the old serif. */
