@@ -1,74 +1,50 @@
-@import url('/assets/fonts/fonts.css');
-
 :root {
-  color-scheme: light;
-  --font-body: 'Manrope', sans-serif;
-  --font-display: 'DM Serif Display', serif;
-  --font-mono: 'IBM Plex Mono', monospace;
+  /* Colours and fonts come from the shared design system (/assets/design.css);
+     these names keep the rest of this stylesheet unchanged. Scene, particle and
+     field colours carry meaning and stay as they were. */
+  --brand-accent: var(--accent);
+  --brand-accent-strong: var(--accent-hover);
 
-  --bg-color: #F8F6F1;
-  --bg-pattern: #EDE9E0;
-  --text-main: #1B1B1B;
-  --text-secondary: #6B6560;
+  --bg-color: var(--bg);
+  --bg-pattern: var(--bg-grid);
+  --text-main: var(--ink);
+  --text-secondary: var(--ink-2);
 
-  --brand-primary: #C2410C;
-  --brand-accent: #0D9488;
+  --brand-primary: var(--accent);
+  --scene-accent: #0D9488;
 
-  --surface: #ffffff;
-  --surface-alt: #F0ECE4;
-  --border: #E8E4DD;
-  --shadow: 0 16px 40px rgba(0, 0, 0, 0.08);
+  --surface-alt: var(--surface-2);
+  --border: var(--line);
+  --shadow: var(--shadow-1);
 
-  --btn-primary: #C2410C;
-  --btn-primary-hover: #A93A0A;
-  --btn-text: #ffffff;
+  --btn-primary: var(--accent);
+  --btn-primary-hover: var(--accent-hover);
+  --btn-text: var(--accent-ink);
 
-  --nav-bg: rgba(248, 246, 241, 0.92);
-  --nav-border: #E8E4DD;
+  --nav-bg: var(--surface);
+  --nav-border: var(--line);
 
-  --slider-track: #E8E4DD;
-  --toggle-hover: rgba(194, 65, 12, 0.12);
-  --brand-soft: rgba(194, 65, 12, 0.1);
-  --brand-line: rgba(194, 65, 12, 0.35);
+  --slider-track: var(--line-strong);
+  --toggle-hover: var(--accent-soft);
+  --brand-soft: var(--accent-soft);
+  --brand-line: color-mix(in srgb, var(--accent) 35%, transparent);
 
   /* Phase colours, shared by the badge, thermometer and preset swatches. */
   --phase-solid: #0D9488;
   --phase-liquid: #D97706;
   --phase-gas: #DB2777;
 
-  --thermo-glass: rgba(255, 255, 255, 0.92);
-  --thermo-track: #F0ECE4;
+  --thermo-glass: var(--surface);
+  --thermo-track: var(--surface-3);
 }
 
 [data-theme="dark"] {
-  color-scheme: dark;
-  --bg-color: #111110;
-  --bg-pattern: #1A1A18;
-  --text-main: #EDEBE8;
-  --text-secondary: #9C9890;
-
-  --brand-primary: #E8734A;
-  --brand-accent: #2DD4BF;
-
-  --surface: #1E1E1C;
-  --surface-alt: #1A1A18;
-  --border: #2E2E2A;
-  --shadow: 0 20px 45px rgba(0, 0, 0, 0.35);
-
-  --nav-bg: rgba(17, 17, 16, 0.92);
-  --nav-border: #2E2E2A;
-
-  --slider-track: #3A3A36;
-  --toggle-hover: rgba(232, 115, 74, 0.15);
-  --brand-soft: rgba(232, 115, 74, 0.12);
-  --brand-line: rgba(232, 115, 74, 0.4);
+  --scene-accent: #2DD4BF;
 
   --phase-solid: #2DD4BF;
   --phase-liquid: #F59E0B;
   --phase-gas: #F472B6;
 
-  --thermo-glass: rgba(30, 30, 28, 0.94);
-  --thermo-track: #2A2A27;
 }
 
 * {
@@ -110,6 +86,7 @@ a:hover {
 
 /* Title Banner */
 #titleBanner {
+  position: relative;
   display: grid;
   grid-template-columns: auto 1fr auto;
   align-items: center;
@@ -121,8 +98,6 @@ a:hover {
   border: 1px solid var(--nav-border);
   border-radius: 20px;
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
   min-height: 58px;
   padding: 8px 20px;
   z-index: 10;
@@ -139,17 +114,30 @@ a:hover {
   margin: 0;
   text-align: center;
   font-family: var(--font-display);
-  font-size: 1.6rem;
-  font-weight: 400;
-  letter-spacing: -0.5px;
-  color: var(--brand-primary);
+  font-size: 1.15rem;
+  font-weight: 600;
+  letter-spacing: -0.03em;
+  color: var(--ink);
 }
 
+/* Apps keep a plain title; the spectrum is a thin line under the banner instead. */
 .banner-title.gradient-text {
-  background: linear-gradient(135deg, var(--brand-primary), var(--brand-accent));
-  -webkit-background-clip: text;
-  background-clip: text;
-  -webkit-text-fill-color: transparent;
+  color: var(--ink);
+  background: none;
+  -webkit-text-fill-color: currentColor;
+}
+
+#titleBanner::after {
+  content: '';
+  position: absolute;
+  left: 20px;
+  right: 20px;
+  bottom: -1px;
+  height: 2px;
+  border-radius: 2px;
+  background: var(--spectrum);
+  opacity: 0.85;
+  pointer-events: none;
 }
 
 .banner-actions {
@@ -231,8 +219,6 @@ a:hover {
   color: var(--text-secondary);
   font-family: var(--font-mono);
   background: var(--nav-bg);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
   padding: 4px 12px;
   border-radius: 999px;
   border: 1px solid var(--nav-border);
@@ -253,8 +239,6 @@ a:hover {
   border-radius: 999px;
   background: var(--nav-bg);
   border: 1px solid var(--nav-border);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
   font-weight: 800;
   font-size: 0.9rem;
   pointer-events: none;
@@ -419,8 +403,6 @@ a:hover {
   font-family: var(--font-mono);
   color: var(--text-main);
   background: var(--nav-bg);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
   padding: 2px 8px;
   border-radius: 999px;
   border: 1px solid var(--nav-border);
@@ -446,9 +428,9 @@ a:hover {
 .controls-header h2 {
   margin: 0;
   font-family: var(--font-display);
-  font-size: 1.2rem;
-  font-weight: 400;
-  letter-spacing: -0.01em;
+  font-size: 0.92rem;
+  font-weight: 600;
+  letter-spacing: -0.02em;
 }
 
 .control-card {
@@ -956,7 +938,8 @@ kbd {
   }
 
   .banner-title {
-    font-size: 1.2rem;
+    font-size: 0.9rem;
+    line-height: 1.2;
   }
 
   .sim-thermometer-overlay {

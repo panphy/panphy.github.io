@@ -29,6 +29,7 @@ This file tracks the move of every app on the homepage to the Spectrum design in
 - **No clipping on cards.** Never use `overflow: hidden` to clip decorations on cards inside scrolling or flex columns.
 - **Phone titles.** Unbounded is wide, so check app titles at 375px and add a phone font-size rule after the Spectrum rules if they wrap more than before.
 - **Checking update prompts.** A test origin's old cache can be refreshed with new files, which hides changes in the browser's version maps. Compare the per-app versions of `main` and the branch from the files instead, using the hashing in `computeAppVersions` (`sw.js`).
+- **3D label fonts.** The Phase 3b sims draw label textures at load; if Figtree is not loaded yet they use the fallback font until the next theme change. This race existed with Manrope; rebuilding on `document.fonts.ready` would reset running sims, so it was left.
 - **Meaningful colors stay.** Leave colors that carry meaning and 3D scene colors alone, unless they clash in dark mode.
 
 ## Phase 0: Foundation
@@ -73,13 +74,13 @@ These apps share one layout (`app.js`, `content.js`, `style.css` in a folder nam
 
 | App | Status | PR | Notes |
 | --- | --- | --- | --- |
-| States of Matter (`simulations/states.html`) | todo | | Also has `physics.js`. Particle colors carry meaning. |
-| Electric Motors (`simulations/electric_motors.html`) | todo | | |
-| Charges in Fields (`simulations/charges_in_fields.html`) | todo | | Charge colors carry meaning. |
-| Atomic Models (`simulations/atomic_models.html`) | todo | | Particle colors carry meaning. |
-| Nuclear Decay (`simulations/nuclear_decay.html`) | todo | | Particle colors carry meaning. |
-| Fission and Fusion (`simulations/fission_fusion.html`) | todo | | Particle colors carry meaning. |
-| Star Life Cycle (`simulations/star_life_cycle.html`) | todo | | Also has `physics.js`. Star colors carry meaning. |
+| States of Matter (`simulations/states.html`) | done | PR_LINK | Ripple Tank banner pattern. Panels over the viewer solid; 3D scene background moved from warm beige to the cool Spectrum surfaces (`app.js`). Phase colours unchanged. |
+| Electric Motors (`simulations/electric_motors.html`) | done | PR_LINK | Tokens mapped; `--brand-accent(-strong)` now blue for controls, with the old teal kept as `--scene-accent(-strong)` for the scene. Solid sticky banner, plain Unbounded title, spectrum line; headings resized; no blur over the viewer. Label textures in Figtree. |
+| Charges in Fields (`simulations/charges_in_fields.html`) | done | PR_LINK | Tokens mapped; `--brand-accent(-strong)` now blue for controls, with the old teal kept as `--scene-accent(-strong)` for the scene. Solid sticky banner, plain Unbounded title, spectrum line; headings resized; no blur over the viewer. Label textures in Figtree. |
+| Atomic Models (`simulations/atomic_models.html`) | done | PR_LINK | Tokens mapped; `--brand-accent(-strong)` now blue for controls, with the old teal kept as `--scene-accent(-strong)` for the scene. Solid sticky banner, plain Unbounded title, spectrum line; headings resized; no blur over the viewer. Label textures in Figtree. |
+| Nuclear Decay (`simulations/nuclear_decay.html`) | done | PR_LINK | Tokens mapped; `--brand-accent(-strong)` now blue for controls, with the old teal kept as `--scene-accent(-strong)` for the scene. Solid sticky banner, plain Unbounded title, spectrum line; headings resized; no blur over the viewer. Label textures in Figtree. |
+| Fission and Fusion (`simulations/fission_fusion.html`) | done | PR_LINK | Tokens mapped; `--brand-accent(-strong)` now blue for controls, with the old teal kept as `--scene-accent(-strong)` for the scene. Solid sticky banner, plain Unbounded title, spectrum line; headings resized; no blur over the viewer. Label textures in Figtree. |
+| Star Life Cycle (`simulations/star_life_cycle.html`) | done | PR_LINK | Tokens mapped; `--brand-accent(-strong)` now blue for controls, with the old teal kept as `--scene-accent(-strong)` for the scene. Solid sticky banner, plain Unbounded title, spectrum line; headings resized; no blur over the viewer. Space panels stay dark in both themes, now opaque (0.94) instead of blurred. |
 
 ## Phase 4: For Teachers and Fun
 

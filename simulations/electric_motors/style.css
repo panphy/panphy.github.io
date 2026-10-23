@@ -1,28 +1,27 @@
-@import url('/assets/fonts/fonts.css');
-
 :root {
-  color-scheme: light;
-  --font-body: 'Manrope', system-ui, sans-serif;
-  --font-display: 'DM Serif Display', Georgia, serif;
-  --font-mono: 'IBM Plex Mono', ui-monospace, monospace;
-  --bg-color: #F8F6F1;
-  --bg-pattern: #EDE9E0;
-  --text-main: #1B1B1B;
-  --text-secondary: #5F5954;
-  --brand-primary: #C2410C;
-  --brand-accent: #0D9488;
-  --brand-accent-strong: #0F766E;
-  --card-bg: #ffffff;
-  --card-border: #E8E4DD;
-  --card-shadow: 0 4px 16px rgba(0, 0, 0, 0.05);
-  --soft-shadow: 0 4px 14px rgba(0, 0, 0, 0.04);
-  --muted-bg: #F3F0EA;
-  --input-border: #D8D3CB;
-  --nav-bg: rgba(248, 246, 241, 0.92);
-  --nav-border: #E8E4DD;
-  --viewer-bg: #F1EEE7;
-  --overlay-bg: rgba(255, 255, 255, 0.84);
-  --focus: #0F766E;
+  /* Colours and fonts come from the shared design system (/assets/design.css);
+     these names keep the rest of this stylesheet unchanged. Scene, particle and
+     field colours carry meaning and stay as they were. */
+  --brand-accent: var(--accent);
+  --brand-accent-strong: var(--accent-hover);
+  --bg-color: var(--bg);
+  --bg-pattern: var(--bg-grid);
+  --text-main: var(--ink);
+  --text-secondary: var(--ink-2);
+  --brand-primary: var(--accent);
+  --scene-accent: #0D9488;
+  --scene-accent-strong: #0F766E;
+  --card-bg: var(--surface);
+  --card-border: var(--line);
+  --card-shadow: var(--shadow-1);
+  --soft-shadow: var(--shadow-1);
+  --muted-bg: var(--surface-3);
+  --input-border: var(--line-strong);
+  --nav-bg: var(--surface);
+  --nav-border: var(--line);
+  --viewer-bg: var(--surface-3);
+  --overlay-bg: var(--surface);
+  --focus: var(--accent);
   /* Physics colours shared by the 3D scene, legend and graphs. */
   --north: #D45132;
   --south: #1675BB;
@@ -40,25 +39,8 @@
 }
 
 [data-theme="dark"] {
-  color-scheme: dark;
-  --bg-color: #111110;
-  --bg-pattern: #1A1A18;
-  --text-main: #EDEBE8;
-  --text-secondary: #A8A49C;
-  --brand-primary: #FB923C;
-  --brand-accent: #5EEAD4;
-  --brand-accent-strong: #2DD4BF;
-  --card-bg: #1A1A19;
-  --card-border: #2A2A28;
-  --card-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
-  --soft-shadow: 0 4px 14px rgba(0, 0, 0, 0.3);
-  --muted-bg: #222220;
-  --input-border: #3A3A36;
-  --nav-bg: rgba(17, 17, 16, 0.9);
-  --nav-border: rgba(255, 255, 255, 0.06);
-  --viewer-bg: #141413;
-  --overlay-bg: rgba(26, 26, 25, 0.84);
-  --focus: #5EEAD4;
+  --scene-accent: #5EEAD4;
+  --scene-accent-strong: #2DD4BF;
   --north: #EF6A48;
   --south: #4BA3E3;
   --field: #2DD4BF;
@@ -103,20 +85,29 @@ button:focus-visible, a:focus-visible, #viewer:focus-visible, select:focus-visib
   background: var(--nav-bg);
   border-bottom: 1px solid var(--nav-border);
   box-shadow: var(--soft-shadow);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
+}
+
+/* Apps keep a plain title; one thin spectrum line under the banner marks the app as PanPhy. */
+.banner::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -1px;
+  height: 2px;
+  background: var(--spectrum);
+  opacity: 0.85;
+  pointer-events: none;
 }
 .banner-logo { justify-self: start; display: flex; align-items: center; min-height: 48px; line-height: 0; }
 .banner-logo img { display: block; width: 38px; height: 38px; object-fit: contain; }
 .banner-title {
   justify-self: center;
   font-family: var(--font-display);
-  font-size: 1.5rem;
-  letter-spacing: -0.5px;
-  background: linear-gradient(135deg, var(--brand-primary), var(--brand-accent));
-  -webkit-background-clip: text;
-  background-clip: text;
-  -webkit-text-fill-color: transparent;
+  font-size: 1.15rem;
+  font-weight: 600;
+  letter-spacing: -0.03em;
+  color: var(--ink);
 }
 .banner-actions { justify-self: end; display: flex; gap: 8px; align-items: center; }
 #theme-button { --panphy-theme-button-size: 48px; }
@@ -126,8 +117,8 @@ main, footer { width: calc(100% - 48px); max-width: 1320px; margin: auto; }
 .intro { display: flex; align-items: center; justify-content: space-between; gap: 24px; padding: 20px 0 16px; }
 .intro p { margin: 0; }
 .intro > p { color: var(--text-secondary); font-size: .92rem; border-left: 3px solid var(--card-border); padding-left: 18px; }
-h1, h2 { font-family: var(--font-display); font-weight: 400; }
-h1 { font-size: clamp(1.9rem, 3.2vw, 2.8rem); letter-spacing: -.02em; line-height: 1.05; margin: 6px 0 0; }
+h1, h2 { font-family: var(--font-display); font-weight: 600; letter-spacing: -0.02em; }
+h1 { font-size: clamp(1.4rem, 2.3vw, 2rem); letter-spacing: -.03em; line-height: 1.1; margin: 6px 0 0; }
 h1 span { color: var(--brand-primary); }
 
 /* Mode chooser */
@@ -150,8 +141,8 @@ h1 span { color: var(--brand-primary); }
 .models strong { font-size: 1.15rem; line-height: 1.25; }
 .models small { color: var(--text-secondary); font-size: .85rem; }
 .models button:hover { border-color: var(--brand-accent); transform: translateY(-1px); }
-.models button[aria-pressed=true] { border-color: var(--brand-accent-strong); background: var(--brand-accent-strong); color: #fff; }
-[data-theme="dark"] .models button[aria-pressed=true] { background: var(--brand-accent); border-color: var(--brand-accent); color: #0B1F1D; }
+.models button[aria-pressed=true] { border-color: var(--brand-accent-strong); background: var(--brand-accent-strong); color: var(--accent-ink); }
+[data-theme="dark"] .models button[aria-pressed=true] { background: var(--brand-accent); border-color: var(--brand-accent); color: var(--accent-ink); }
 .models button[aria-pressed=true] > span, .models button[aria-pressed=true] small { color: inherit; opacity: .85; }
 
 .lab-strip { display: flex; justify-content: space-between; align-items: center; gap: 16px; margin-bottom: 8px; color: var(--text-secondary); font-size: .8rem; }
@@ -241,7 +232,7 @@ h1 span { color: var(--brand-primary); }
 .toolbar [data-reserve]::after { content: attr(data-reserve); height: 0; overflow: hidden; visibility: hidden; }
 /* The console beside the view is tall, so on screens wide enough for a one-row bar it stays pinned to the bottom of the screen while the view is in sight. */
 @media (min-width: 1200px) {
-  .viewer-panel:not(.is-stacked):not(.is-fullscreen) .playback { position: sticky; bottom: max(12px, env(safe-area-inset-bottom)); z-index: 4; margin: 0 -6px; padding: 6px; border-radius: 16px; background: color-mix(in srgb, var(--viewer-bg), transparent 8%); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); box-shadow: 0 6px 18px -10px rgba(0, 0, 0, .4); }
+  .viewer-panel:not(.is-stacked):not(.is-fullscreen) .playback { position: sticky; bottom: max(12px, env(safe-area-inset-bottom)); z-index: 4; margin: 0 -6px; padding: 6px; border-radius: 16px; background: var(--viewer-bg); box-shadow: 0 6px 18px -10px rgba(0, 0, 0, .4); }
 }
 .playback-note { margin: -4px 0 0; font-size: .72rem; line-height: 1.45; color: var(--text-secondary); }
 button:disabled { cursor: default; opacity: .55; }
@@ -329,7 +320,7 @@ button:disabled { cursor: default; opacity: .55; }
 
 /* Info boxes: the graphs and the end view float over the 3D view and fold away to a tab, as the star sim's HR inset does. */
 .info-dock { position: absolute; inset: 40px 10px 10px; z-index: 3; display: flex; justify-content: space-between; align-items: flex-end; gap: 10px; pointer-events: none; }
-.info-box { display: flex; flex-direction: column; max-height: 100%; min-width: 0; pointer-events: auto; border: 1px solid var(--card-border); border-radius: 12px; background: var(--overlay-bg); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); box-shadow: 0 4px 14px -8px rgba(0, 0, 0, .35); }
+.info-box { display: flex; flex-direction: column; max-height: 100%; min-width: 0; pointer-events: auto; border: 1px solid var(--card-border); border-radius: 12px; background: var(--overlay-bg); box-shadow: 0 4px 14px -8px rgba(0, 0, 0, .35); }
 .info-box[hidden] { display: none; }
 .info-box summary { display: flex; align-items: center; gap: 8px; min-height: 44px; padding: 0 12px; cursor: pointer; font-family: var(--font-mono); font-size: .7rem; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; list-style: none; white-space: nowrap; }
 .info-box summary::-webkit-details-marker { display: none; }
@@ -399,7 +390,7 @@ body.viewer-expanded { overflow: hidden; }
 
 /* Guide: what the model shows. */
 .guide { display: grid; grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr); gap: 8px 40px; margin-top: 20px; padding: 26px; border: 1px solid var(--card-border); border-radius: 20px; background: var(--card-bg); box-shadow: var(--card-shadow); }
-.guide h2 { font-size: 1.9rem; line-height: 1.15; margin: 10px 0 14px; }
+.guide h2 { font-size: 1.35rem; line-height: 1.15; margin: 10px 0 14px; }
 .guide p { color: var(--text-secondary); font-size: .92rem; margin: 8px 0 20px; }
 h3 { font-size: .88rem; margin: 0; }
 .icon { width: 1.15em; height: 1.15em; vertical-align: -0.2em; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
@@ -413,7 +404,7 @@ h3 { font-size: .88rem; margin: 0; }
 
 .reality { display: flex; gap: 24px; padding: 28px 0; max-width: 1030px; }
 .reality > span { font-size: 2rem; color: var(--brand-primary); }
-.reality h2 { font-size: 1.3rem; margin: 0 0 8px; }
+.reality h2 { font-size: 1rem; margin: 0 0 8px; }
 .reality p { color: var(--text-secondary); font-size: .9rem; margin: 6px 0; }
 footer { display: flex; justify-content: space-between; gap: 20px; border-top: 1px solid var(--card-border); padding: 22px 0 max(30px, env(safe-area-inset-bottom)); color: var(--text-secondary); font-size: .78rem; }
 .no-script { padding: 24px; }
@@ -427,7 +418,7 @@ footer { display: flex; justify-content: space-between; gap: 20px; border-top: 1
 @media (max-width: 760px) {
   main, footer { width: calc(100% - 28px); }
   .banner { padding-left: max(12px, env(safe-area-inset-left)); padding-right: max(12px, env(safe-area-inset-right)); }
-  .banner-title { font-size: 1.25rem; }
+  .banner-title { font-size: 0.95rem; }
   .intro { display: block; padding: 16px 0 14px; }
   .intro > p { margin-top: 12px; font-size: .88rem; }
   .models { gap: 6px; }
