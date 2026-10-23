@@ -14,7 +14,7 @@
 :root {
   --brand-primary: var(--accent);
   --font-sans: var(--font-body);
-  --preview-font-family: 'Manrope', sans-serif;
+  --preview-font-family: 'Figtree', sans-serif;
   --base-font-size: 16px;
 
   --paper: var(--bg);
@@ -1384,7 +1384,7 @@ td[align="right"] {
     font-size: var(--print-font-size, 11pt) !important;
     height: auto !important;
     overflow: visible !important;
-    font-family: var(--preview-font-family, 'Manrope', 'Segoe UI', system-ui, -apple-system, sans-serif) !important;
+    font-family: var(--preview-font-family, 'Figtree', 'Segoe UI', system-ui, -apple-system, sans-serif) !important;
     line-height: 1.6 !important;
   }
 

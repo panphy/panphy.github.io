@@ -1,4 +1,4 @@
-const BUILD_ID = '2026-10-23T18:37:42Z';
+const BUILD_ID = '2026-10-23T18:48:42Z';
 const CACHE_PREFIX = 'panphy-labs';
 const PRECACHE_NAME = `${CACHE_PREFIX}-precache-${BUILD_ID}`;
 const RUNTIME_CACHE = `${CACHE_PREFIX}-runtime-${BUILD_ID}`;
@@ -42,12 +42,6 @@ const ASSETS_TO_CACHE = [
   '/assets/fonts/ibm-plex-mono-normal-600-latin-ext.woff2',
   '/assets/fonts/ibm-plex-mono-normal-600-latin.woff2',
   '/assets/fonts/ibm-plex-mono-normal-600-vietnamese.woff2',
-  '/assets/fonts/manrope-normal-400-800-cyrillic-ext.woff2',
-  '/assets/fonts/manrope-normal-400-800-cyrillic.woff2',
-  '/assets/fonts/manrope-normal-400-800-greek.woff2',
-  '/assets/fonts/manrope-normal-400-800-latin-ext.woff2',
-  '/assets/fonts/manrope-normal-400-800-latin.woff2',
-  '/assets/fonts/manrope-normal-400-800-vietnamese.woff2',
   '/assets/fonts/unbounded-normal-200-900-latin-ext.woff2',
   '/assets/fonts/unbounded-normal-200-900-latin.woff2',
   '/manifest.json',

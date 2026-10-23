@@ -1,23 +1,27 @@
 <!DOCTYPE html>
-<html lang="en" data-theme="dark">
+<html lang="en" data-theme="light">
 
 <head>
 	<meta charset="UTF-8" />
 	<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-    <meta name="theme-color" content="#07080C">
+    <meta name="theme-color" content="#F5F6FA">
+    <script src="/assets/theme.js"></script>
     <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <link rel="stylesheet" href="/assets/standalone-top.css">
 	<title>Live ASCII Camera with 8-bit Color</title>
 	<link rel="icon" type="image/png" href="/assets/favicon.png">
 	<link rel="stylesheet" href="/assets/fonts/fonts.css">
 	<link rel="stylesheet" href="/assets/design.css">
+	<link rel="stylesheet" href="/assets/theme-toggle.css">
+	<script src="/assets/theme-toggle.js"></script>
 <style>
-		/* ASCII Cam is dark only. Colours and fonts come from the shared design system
-		   (/assets/design.css, dark tokens); these names keep the rest of this stylesheet unchanged. */
+		/* Colours and fonts come from the shared design system (/assets/design.css);
+		   these names keep the rest of this stylesheet unchanged. */
 		:root {
 			--font-sans: var(--font-body);
 			--bg-color: var(--bg);
-			--bg-pattern: rgba(150, 175, 255, 0.08);
+			--bg-pattern: rgba(28, 40, 90, 0.09);
 			--text-main: var(--ink);
 			--text-secondary: var(--ink-2);
 			--brand-primary: var(--accent);
@@ -25,7 +29,12 @@
 			--brand-accent: var(--accent);
 			--card-bg: var(--surface);
 			--card-border: var(--line);
-			--card-shadow: 0 10px 30px rgba(0,0,0,0.3);
+			--card-shadow: 0 10px 30px rgba(28, 40, 90, 0.12);
+		}
+
+		[data-theme="dark"] {
+			--bg-pattern: rgba(150, 175, 255, 0.08);
+			--card-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
 		}
 
 		* {
@@ -91,14 +100,21 @@
 
 		.logo-container {
 			position: fixed;
-			top: 16px;
+			top: calc(16px + var(--standalone-top, 0px));
 			left: 16px;
 			z-index: 100;
 		}
 
 		.logo-container img {
 			max-height: 40px;
-			filter: drop-shadow(0 4px 10px rgba(0, 0, 0, 0.5));
+			filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.25));
+		}
+
+		#theme-button {
+			position: fixed;
+			top: calc(12px + var(--standalone-top, 0px));
+			right: 16px;
+			z-index: 100;
 		}
 
 		#controls {
@@ -290,11 +306,12 @@
 		}
 
 		/* ASCII display area */
+		/* The art stays on a dark ground in both themes so the camera colours read true. */
 		#ascii-frame {
 			margin-top: 0.5rem;
 			padding: 0.25rem;
 			border-radius: 12px;
-			background: var(--card-bg);
+			background: #0B0D14;
 			border: 1px solid var(--card-border);
 			box-shadow: var(--card-shadow);
 			max-width: 95vw;
@@ -517,6 +534,8 @@
 			<img src="/assets/panphy.png" alt="PanPhy logo">
 		</a>
 	</div>
+
+	<button id="theme-button" type="button" data-panphy-theme-toggle aria-label="Toggle light/dark theme" title="Toggle between light and dark themes"></button>
 
 	<div class="header">
 		<h1>ASCII Camera</h1>
@@ -937,6 +956,10 @@
 			// After permission, ensure device labels are populated
 			await populateCameras(preferred);
 		})();
+	</script>
+	<script>
+		// Theme toggle: the shared script only syncs the icon, so the page wires the click.
+		window.PanPhyThemeToggle.mount(document.getElementById('theme-button'));
 	</script>
 	<script>
 		// Gradient text: skip on Brave iOS where background-clip:text is broken
