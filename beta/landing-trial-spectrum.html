@@ -1,0 +1,2831 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+
+<head>
+    <link rel="manifest" href="/manifest.json">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="theme-color" content="#F6F7FB">
+    <meta name="robots" content="noindex">
+    <script src="/assets/theme.js" data-legacy-dark="panphy-dark" data-legacy-light="panphy-light"></script>
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <link rel="stylesheet" href="/assets/standalone-top.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Unbounded:wght@400;600;800&family=Figtree:wght@400;500;600;700&family=Azeret+Mono:wght@500;600&display=swap">
+    <script>document.documentElement.classList.add('js');</script>
+    <title>Spectrum Trial | PanPhy Labs</title>
+    <meta name="description"
+        content="PanPhy Labs is a portfolio of physics tools, simulations, and interactive mini apps.">
+    <meta property="og:title" content="PanPhy Labs">
+    <meta property="og:description"
+        content="PanPhy Labs is a portfolio of physics tools, simulations, and interactive mini apps.">
+    <meta name="twitter:title" content="PanPhy Labs">
+    <meta name="twitter:description"
+        content="PanPhy Labs is a portfolio of physics tools, simulations, and interactive mini apps.">
+
+    <link rel="icon" type="image/png" href="/assets/favicon.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="/assets/apple-touch-icon.png">
+
+    <style>
+        @import url('/assets/fonts/fonts.css');
+
+        /* ========================================
+           Shared behaviour (same in every trial): states the page scripts toggle
+           ======================================== */
+        * { box-sizing: border-box; }
+
+        html { scroll-behavior: smooth; }
+
+        body {
+            margin: 0;
+            padding: 0;
+            overflow-x: hidden;
+            font-family: var(--font-sans);
+            color: var(--text-main);
+            background-color: var(--bg-color);
+            line-height: 1.6;
+            transition: background-color 0.4s ease, color 0.4s ease;
+        }
+
+        .sr-only {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            padding: 0;
+            margin: -1px;
+            overflow: hidden;
+            clip: rect(0, 0, 0, 0);
+            white-space: nowrap;
+            border: 0;
+        }
+
+        .offline-font {
+            --font-sans: 'Manrope', sans-serif;
+            --font-display: 'DM Serif Display', serif;
+            --font-mono: 'IBM Plex Mono', monospace;
+        }
+
+        .skip-link {
+            position: fixed;
+            top: calc(8px + var(--standalone-top));
+            left: 8px;
+            z-index: 2000;
+            padding: 0.7rem 1rem;
+            color: var(--bg-color);
+            background: var(--text-main);
+            font-weight: 700;
+            font-size: 0.85rem;
+            text-decoration: none;
+            transform: translateY(-200%);
+        }
+
+        .skip-link:focus { transform: none; }
+
+        main { display: block; scroll-margin-top: 92px; }
+        main:focus { outline: none; }
+
+        .spacetime-bg {
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            z-index: 0;
+            overflow: hidden;
+        }
+
+        .spacetime-bg canvas { display: block; }
+
+        header, main, .section, footer { position: relative; z-index: 1; }
+
+        nav a, .card, .theme-toggle button, .filter-button { touch-action: manipulation; }
+
+        nav a:focus-visible,
+        .theme-toggle button:focus-visible,
+        [data-panphy-fullscreen]:focus-visible,
+        .filter-button:focus-visible,
+        .back-to-top:focus-visible,
+        footer a:focus-visible,
+        .card:focus-visible,
+        .scope:focus-visible {
+            outline: 3px solid var(--focus-ring);
+            outline-offset: 3px;
+        }
+
+        .theme-toggle button {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 44px;
+            min-height: 44px;
+            padding: 0.4rem;
+            color: inherit;
+            background: transparent;
+            border: 0;
+            cursor: pointer;
+            line-height: 1;
+        }
+
+        /* Topic chips (the row scrolls sideways on phones, so its column must be allowed to shrink) */
+        .catalogue-copy,
+        .catalogue-tools { min-width: 0; }
+
+        .filter-row {
+            display: flex;
+            gap: 0.45rem;
+            padding: 6px;
+            margin: -6px -6px 0;
+            overflow-x: auto;
+            scrollbar-width: none;
+        }
+
+        .filter-row::-webkit-scrollbar { display: none; }
+
+        .filter-row.has-more {
+            -webkit-mask-image: linear-gradient(to right, #000 calc(100% - 36px), transparent);
+            mask-image: linear-gradient(to right, #000 calc(100% - 36px), transparent);
+        }
+
+        @media (min-width: 481px) {
+            .filter-row { flex-wrap: wrap; overflow: visible; }
+            .filter-row.has-more { -webkit-mask-image: none; mask-image: none; }
+        }
+
+        .filter-button {
+            min-height: 36px;
+            cursor: pointer;
+            white-space: nowrap;
+        }
+
+        .offline-status[hidden],
+        .card-offline-pill[hidden],
+        .section[hidden],
+        .card[hidden] { display: none !important; }
+
+        .offline-status[data-state="ready"] { color: var(--status-ready); }
+
+        /* Offline badge on each card */
+        .card-offline-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.35rem;
+            color: var(--text-secondary);
+            white-space: nowrap;
+        }
+
+        .card-offline-pill::before {
+            content: '';
+            width: 0.4rem;
+            height: 0.4rem;
+            border-radius: 50%;
+            background: var(--status-check);
+        }
+
+        .card-offline-pill[data-state="ready"] { color: var(--status-ready); }
+        .card-offline-pill[data-state="ready"]::before { background: var(--status-ready); }
+        .card-offline-pill[data-state="warning"] { color: var(--status-warning); }
+        .card-offline-pill[data-state="warning"]::before { background: var(--status-warning); }
+
+        /* Cards fade in as they scroll into view */
+        .card {
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            color: var(--text-main);
+            text-decoration: none;
+            transition: opacity 0.45s ease-out, transform 0.45s ease-out,
+                        border-color 0.3s ease, box-shadow 0.3s ease, background-color 0.4s ease;
+        }
+
+        .js .card { opacity: 0; transform: translateY(16px); }
+        .js .card.revealed { opacity: 1; transform: none; }
+
+        .card:nth-child(2) { transition-delay: 0.04s, 0.04s, 0s, 0s, 0s; }
+        .card:nth-child(3) { transition-delay: 0.08s, 0.08s, 0s, 0s, 0s; }
+        .card:nth-child(4) { transition-delay: 0.12s, 0.12s, 0s, 0s, 0s; }
+        .card:nth-child(5) { transition-delay: 0.16s, 0.16s, 0s, 0s, 0s; }
+        .card:nth-child(6) { transition-delay: 0.2s, 0.2s, 0s, 0s, 0s; }
+
+        /* Sideways scroller for sections with more than two rows of cards */
+        .grid-wrap { position: relative; }
+
+        .grid.is-scroller {
+            --scroller-pad: 14px;
+            --scroller-peek: 30px;
+            --fade-left: 0px;
+            --fade-right: 0px;
+            grid-template-columns: none;
+            grid-template-rows: repeat(2, auto);
+            grid-auto-flow: column;
+            grid-auto-columns: calc((100% - 4 * var(--grid-gap) - 2 * var(--scroller-peek)) / 3);
+            padding: var(--scroller-pad) var(--scroller-pad) 30px;
+            margin: calc(-1 * var(--scroller-pad)) calc(-1 * var(--scroller-pad)) -30px;
+            overflow-x: auto;
+            overscroll-behavior-x: contain;
+            scroll-snap-type: x proximity;
+            scroll-padding-inline: calc(var(--scroller-pad) + var(--scroller-peek) + var(--grid-gap)) var(--scroller-pad);
+            scrollbar-width: none;
+            -webkit-mask-image: linear-gradient(to right, transparent, #000 var(--fade-left), #000 calc(100% - var(--fade-right)), transparent);
+            mask-image: linear-gradient(to right, transparent, #000 var(--fade-left), #000 calc(100% - var(--fade-right)), transparent);
+        }
+
+        .grid.is-scroller::-webkit-scrollbar { display: none; }
+        .grid.is-scroller > .card { scroll-snap-align: start; }
+        .grid-wrap.has-more-left > .grid { --fade-left: 48px; }
+        .grid-wrap.has-more-right > .grid { --fade-right: 48px; }
+
+        .scroller-button {
+            position: absolute;
+            top: 50%;
+            z-index: 2;
+            display: none;
+            place-items: center;
+            width: 48px;
+            height: 48px;
+            margin-top: -24px;
+            padding: 0;
+            color: var(--text-main);
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            cursor: pointer;
+        }
+
+        .scroller-button svg {
+            width: 20px;
+            height: 20px;
+            fill: none;
+            stroke: currentColor;
+            stroke-width: 2.4;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+        }
+
+        .scroller-prev { left: -10px; }
+        .scroller-next { right: -10px; }
+
+        @media (hover: hover) and (pointer: fine) {
+            .grid-wrap.has-more-left > .scroller-prev,
+            .grid-wrap.has-more-right > .scroller-next { display: grid; }
+        }
+
+        @media (max-width: 1000px) {
+            .grid.is-scroller {
+                grid-auto-columns: calc((100% - 3 * var(--grid-gap) - 2 * var(--scroller-peek)) / 2);
+            }
+        }
+
+        @media (max-width: 600px) {
+            .grid.is-scroller {
+                grid-auto-columns: calc(100% - 2 * var(--grid-gap) - 2 * var(--scroller-peek));
+                scroll-padding-inline-start: calc(var(--scroller-pad) + var(--scroller-peek) + var(--grid-gap));
+            }
+        }
+
+        /* Hero showcase panel: drawing classes used by the scene script */
+        .scope {
+            position: relative;
+            display: block;
+            color: var(--text-main);
+            text-decoration: none;
+            container: scope / inline-size;
+        }
+
+        .scope-head,
+        .scope-foot {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 0.5rem 1rem;
+        }
+
+        .scope-scale { white-space: nowrap; }
+
+        .scope svg { display: block; width: 100%; height: auto; fill: none; }
+        .scope-grid { stroke: var(--scope-grid); }
+        .scope-axis { stroke: var(--text-secondary); stroke-dasharray: 4 5; }
+        .scope-wave { stroke-linecap: round; stroke-linejoin: round; }
+        .scope-wave-1 { stroke: var(--brand-primary); stroke-width: 2; opacity: 0.8; }
+        .scope-wave-2 { stroke: var(--brand-accent); stroke-width: 2; opacity: 0.8; }
+        .scope-wave-sum { stroke: var(--scope-ink, var(--text-main)); stroke-width: 4; }
+
+        .scope-readouts {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.4rem 1.3rem;
+        }
+
+        .scope-readouts i {
+            display: inline-block;
+            width: 14px;
+            height: 3px;
+            margin-right: 0.4rem;
+            vertical-align: middle;
+        }
+
+        .scope-key-1 { background: var(--brand-primary); }
+        .scope-key-2 { background: var(--brand-accent); }
+        .scope-key-sum { background: var(--scope-ink, var(--text-main)); }
+        .scope-fill-1 { fill: var(--brand-primary); }
+        .scope-fill-2 { fill: var(--brand-accent); }
+        .scope-fill-ink { fill: var(--scope-ink, var(--text-main)); }
+        .scope-fill-paper { fill: var(--scope-bg, var(--card-bg)); }
+        .scope-mute { stroke: var(--text-secondary); }
+
+        .scope-label {
+            fill: var(--text-secondary);
+            stroke: none;
+            font-family: var(--font-mono);
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        .scope-label.scope-fill-paper { fill: var(--scope-bg, var(--card-bg)); }
+
+        /* A narrow panel keeps one fixed arrangement so that the page does not jump between scenes. */
+        @container scope (max-width: 460px) {
+            .scope-head { flex-direction: column; flex-wrap: nowrap; align-items: flex-start; }
+            .scope-readouts { display: grid; grid-template-columns: repeat(2, max-content); white-space: nowrap; }
+        }
+
+        .scope-swap { transition: opacity 0.35s ease; }
+        .scope.is-switching .scope-swap { opacity: 0; }
+
+        /* Card artwork: one small drawing of what each app does */
+        .card-art svg {
+            display: block;
+            width: 100%;
+            height: auto;
+            fill: none;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+        }
+
+        .a-ink { stroke: var(--art-ink, var(--text-main)); }
+        .a-pri { stroke: var(--brand-primary); }
+        .a-acc { stroke: var(--brand-accent); }
+        .a-mut { stroke: var(--text-secondary); }
+        .a-ink-f { fill: var(--art-ink, var(--text-main)); }
+        .a-pri-f { fill: var(--brand-primary); }
+        .a-acc-f { fill: var(--brand-accent); }
+        .a-mut-f { fill: var(--text-secondary); }
+        .a-pri-soft { fill: color-mix(in srgb, var(--brand-primary) 24%, var(--art-bg, var(--card-bg))); }
+        .a-acc-soft { fill: color-mix(in srgb, var(--brand-accent) 28%, var(--art-bg, var(--card-bg))); }
+        .a-paper { fill: var(--art-bg, var(--card-bg)); }
+
+        .card-art text { stroke: none; font-family: var(--font-mono); font-weight: 600; }
+        .a-t { fill: var(--text-secondary); font-size: 11px; }
+        .a-ts { fill: var(--art-ink, var(--text-main)); font-size: 12px; }
+        .a-clock { fill: var(--art-ink, var(--text-main)); font-size: 40px; }
+        .a-word { font-size: 30px; }
+        .a-ascii { font-size: 13px; }
+
+        .card-art .a-serif,
+        .card-art .a-math {
+            fill: var(--art-ink, var(--text-main));
+            font-family: var(--font-display);
+            font-weight: 400;
+        }
+
+        .a-serif { font-size: 21px; }
+        .a-math { font-size: 19px; font-style: italic; }
+
+        /* Back-to-top button */
+        .back-to-top {
+            position: fixed;
+            right: calc(10px + env(safe-area-inset-right, 0px));
+            bottom: calc(10px + env(safe-area-inset-bottom, 0px));
+            z-index: 900;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 48px;
+            height: 48px;
+            padding: 0;
+            cursor: pointer;
+            touch-action: manipulation;
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(8px);
+            transition: opacity 0.25s ease, transform 0.25s ease, visibility 0.25s;
+        }
+
+        .back-to-top.visible { opacity: 1; visibility: visible; transform: none; }
+
+        .back-to-top svg {
+            width: 22px;
+            height: 22px;
+            fill: none;
+            stroke: currentColor;
+            stroke-width: 2;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+        }
+
+        footer a { color: inherit; }
+
+        @media (pointer: coarse) {
+            nav a, .theme-toggle button, .filter-button { min-height: 44px; }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            html { scroll-behavior: auto; }
+            *, *::before, *::after {
+                animation-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: 0.01ms !important;
+            }
+            .js .card, .card:hover, .js .card.revealed:hover { opacity: 1; transform: none; }
+        }
+
+        /* ========================================
+           Trial design
+           ======================================== */
+        /* Spectrum: light split through a prism; glass panels with spectral edges, bento catalogue */
+        :root {
+            color-scheme: light;
+            --font-sans: 'Figtree', system-ui, sans-serif;
+            --font-display: 'Unbounded', 'Figtree', sans-serif;
+            --font-mono: 'Azeret Mono', ui-monospace, monospace;
+
+            --bg-color: #F5F6FA;
+            --text-main: #0B0D14;
+            --text-secondary: #4F5568;
+            --brand-primary: #DB3F27;
+            --brand-accent: #1C64D8;
+            --card-bg: rgba(255, 255, 255, 0.78);
+            --card-solid: #FFFFFF;
+            --card-border: rgba(11, 13, 20, 0.1);
+            --art-bg: #EEF0F6;
+            --nav-bg: rgba(255, 255, 255, 0.72);
+            --scope-grid: rgba(11, 13, 20, 0.07);
+            --focus-ring: #1C64D8;
+            --status-check: #1C64D8;
+            --status-ready: #0F7B4F;
+            --status-warning: #B25A06;
+            --grid-gap: 1.1rem;
+            --canvas-grid: rgba(28, 40, 90, 0.07);
+            --canvas-node: rgba(28, 40, 90, 0.16);
+            --glow: 0 30px 70px -30px rgba(28, 40, 90, 0.35);
+            --spectrum: linear-gradient(90deg, #7B2FF7 0%, #3B5BFF 16%, #14B8E6 32%, #1BC77A 48%, #E8D41A 64%, #FF8A1F 80%, #F0263A 100%);
+        }
+
+        [data-theme="dark"] {
+            color-scheme: dark;
+            --bg-color: #07080C;
+            --text-main: #F1F3F9;
+            --text-secondary: #A2A8BA;
+            --brand-primary: #FF6A4D;
+            --brand-accent: #54A6FF;
+            --card-bg: rgba(20, 23, 33, 0.72);
+            --card-solid: #12141C;
+            --card-border: rgba(241, 243, 249, 0.09);
+            --art-bg: #0D0F16;
+            --nav-bg: rgba(12, 14, 20, 0.7);
+            --scope-grid: rgba(241, 243, 249, 0.07);
+            --focus-ring: #54A6FF;
+            --status-check: #8fb2ff;
+            --status-ready: #4fdb98;
+            --status-warning: #ffb45a;
+            --canvas-grid: rgba(150, 175, 255, 0.07);
+            --canvas-node: rgba(150, 175, 255, 0.18);
+            --glow: 0 30px 80px -30px rgba(84, 166, 255, 0.35);
+        }
+
+        body { font-size: 1.02rem; }
+
+        /* Glass navigation with a spectral underline */
+        nav {
+            position: fixed;
+            top: calc(14px + max(env(safe-area-inset-top, 0px), var(--standalone-top)));
+            left: 50%;
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            gap: 0.1rem;
+            width: max-content;
+            max-width: calc(100% - 24px);
+            padding: 0.35rem 0.5rem;
+            background: var(--nav-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 16px;
+            backdrop-filter: blur(18px) saturate(1.4);
+            -webkit-backdrop-filter: blur(18px) saturate(1.4);
+            transform: translateX(-50%);
+            animation: specDrop 0.7s ease-out 0.2s both;
+        }
+
+        nav::after {
+            content: '';
+            position: absolute;
+            left: 18px;
+            right: 18px;
+            bottom: -1px;
+            height: 1px;
+            background: var(--spectrum);
+            opacity: 0.8;
+        }
+
+        nav a {
+            display: inline-flex;
+            align-items: center;
+            padding: 0.55rem 0.9rem;
+            color: var(--text-secondary);
+            border-radius: 10px;
+            font-family: var(--font-mono);
+            font-size: 0.74rem;
+            font-weight: 600;
+            letter-spacing: 0.08em;
+            text-decoration: none;
+            text-transform: uppercase;
+            transition: color 0.2s ease, background-color 0.2s ease;
+        }
+
+        nav a:hover { color: var(--text-main); background: color-mix(in srgb, var(--text-main) 6%, transparent); }
+        .theme-toggle { display: flex; }
+
+        /* Hero */
+        .hero {
+            display: grid;
+            grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+            gap: clamp(2rem, 5vw, 4.5rem);
+            align-items: center;
+            max-width: 1220px;
+            margin: 0 auto;
+            padding: 8.5rem 1.5rem 4.5rem;
+        }
+
+        .hero-copy > * { animation: specRise 0.9s cubic-bezier(0.2, 0.8, 0.2, 1) both; }
+        .hero-copy > :nth-child(2) { animation-delay: 0.08s; }
+        .hero-copy > :nth-child(3) { animation-delay: 0.16s; }
+        .hero-copy > :nth-child(4) { animation-delay: 0.24s; }
+
+        .hero-brand { display: flex; align-items: center; gap: 0.8rem; margin-bottom: 1.6rem; }
+        .logo { height: 48px; width: auto; border-radius: 10px; }
+
+        .hero-eyebrow {
+            color: var(--text-secondary);
+            font-family: var(--font-mono);
+            font-size: 0.74rem;
+            font-weight: 600;
+            letter-spacing: 0.14em;
+            text-transform: uppercase;
+        }
+
+        .hero h1 {
+            margin: 0;
+            font-family: var(--font-display);
+            font-size: clamp(3.4rem, 8.4vw, 6.6rem);
+            font-weight: 800;
+            line-height: 0.95;
+            letter-spacing: -0.04em;
+        }
+
+        .hero h1 em {
+            display: block;
+            font-style: normal;
+            font-weight: 400;
+            background: var(--spectrum);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+
+        /* Under the title: the visible spectrum with the hydrogen Balmer absorption lines */
+        .hero-tagline {
+            max-width: 28ch;
+            margin: 2.6rem 0 0;
+            font-size: clamp(1.1rem, 1.9vw, 1.35rem);
+            font-weight: 500;
+            line-height: 1.45;
+        }
+
+        .hero-tagline::before {
+            content: '';
+            display: block;
+            width: min(420px, 100%);
+            height: 14px;
+            margin-bottom: 1.4rem;
+            border-radius: 2px;
+            background:
+                linear-gradient(90deg, transparent calc(9.4% - 1px), #000 calc(9.4% - 1px) calc(9.4% + 1px), transparent calc(9.4% + 1px)),
+                linear-gradient(90deg, transparent calc(16.9% - 1px), #000 calc(16.9% - 1px) calc(16.9% + 1px), transparent calc(16.9% + 1px)),
+                linear-gradient(90deg, transparent calc(33.1% - 1.5px), #000 calc(33.1% - 1.5px) calc(33.1% + 1.5px), transparent calc(33.1% + 1.5px)),
+                linear-gradient(90deg, transparent calc(86.3% - 2px), #000 calc(86.3% - 2px) calc(86.3% + 2px), transparent calc(86.3% + 2px)),
+                var(--spectrum);
+            box-shadow: 0 10px 30px -12px rgba(59, 91, 255, 0.5);
+        }
+
+        .hero-facts {
+            display: flex;
+            gap: 2.4rem;
+            margin: 2.2rem 0 0;
+            padding: 0;
+            list-style: none;
+        }
+
+        .hero-facts strong { display: block; font-family: var(--font-display); font-size: 2.2rem; font-weight: 600; line-height: 1.1; }
+
+        .hero-facts span {
+            color: var(--text-secondary);
+            font-family: var(--font-mono);
+            font-size: 0.7rem;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+        }
+
+        /* Showcase: a glass instrument panel with a spectral rim */
+        .scope {
+            --scope-bg: var(--card-solid);
+            padding: 1px;
+            background: var(--spectrum);
+            border-radius: 22px;
+            box-shadow: var(--glow);
+            animation: specRise 1s cubic-bezier(0.2, 0.8, 0.2, 1) 0.3s both;
+            transition: transform 0.3s ease;
+        }
+
+        .scope > * { background: var(--card-solid); }
+        .scope:hover { transform: translateY(-4px); }
+
+        .scope-head,
+        .scope-foot {
+            padding: 0.85rem 1.2rem;
+            font-family: var(--font-mono);
+            font-size: 0.72rem;
+            font-weight: 600;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+        }
+
+        .scope-head { border-radius: 21px 21px 0 0; border-bottom: 1px solid var(--card-border); }
+        .scope-foot { border-radius: 0 0 21px 21px; border-top: 1px solid var(--card-border); }
+        .scope-scale { color: var(--text-secondary); font-weight: 500; letter-spacing: 0.02em; text-transform: none; }
+        .scope-readouts { font-size: 0.8rem; letter-spacing: 0.02em; text-transform: none; }
+        .scope-readouts i { border-radius: 2px; }
+
+        .scope-note {
+            position: absolute;
+            top: -15px;
+            right: 24px;
+            padding: 0.35rem 0.8rem;
+            color: var(--text-main);
+            background: var(--card-solid);
+            border: 1px solid var(--card-border);
+            border-radius: 999px;
+            box-shadow: var(--glow);
+            font-family: var(--font-mono);
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        /* Catalogue */
+        .catalogue-intro { max-width: 1220px; margin: 0 auto 4rem; padding: 0 1.5rem; }
+
+        .catalogue-bar {
+            display: grid;
+            grid-template-columns: minmax(0, 0.85fr) minmax(320px, 1.15fr);
+            gap: 2rem;
+            align-items: center;
+            padding: 1.5rem 1.6rem;
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 22px;
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+        }
+
+        .catalogue-kicker,
+        .section-eyebrow {
+            display: block;
+            color: var(--text-secondary);
+            font-family: var(--font-mono);
+            font-size: 0.7rem;
+            font-weight: 600;
+            letter-spacing: 0.14em;
+            text-transform: uppercase;
+        }
+
+        .catalogue-copy h2 { margin: 0.35rem 0 0.2rem; font-family: var(--font-display); font-size: 1.6rem; font-weight: 600; letter-spacing: -0.02em; }
+        .catalogue-copy p { margin: 0; color: var(--text-secondary); }
+
+        .filter-button {
+            padding: 0.45rem 0.85rem;
+            color: var(--text-secondary);
+            background: transparent;
+            border: 1px solid var(--card-border);
+            border-radius: 999px;
+            font: 600 0.7rem var(--font-mono);
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
+            transition: color 0.2s ease, border-color 0.2s ease, background-color 0.2s ease;
+        }
+
+        .filter-button:hover { color: var(--text-main); border-color: color-mix(in srgb, var(--text-main) 35%, transparent); }
+
+        .filter-button[aria-pressed="true"] {
+            color: var(--text-main);
+            border-color: transparent;
+            background: linear-gradient(var(--card-solid), var(--card-solid)) padding-box, var(--spectrum) border-box;
+        }
+
+        .offline-status { margin: 0.8rem 0 0; color: var(--text-secondary); font-family: var(--font-mono); font-size: 0.72rem; }
+
+        /* Sections */
+        .section { max-width: 1220px; margin: 0 auto 5.5rem; padding: 0 1.5rem; scroll-margin-top: 96px; }
+
+        .section-heading {
+            display: grid;
+            grid-template-columns: minmax(0, 1fr) minmax(260px, 420px);
+            gap: 1rem 2rem;
+            align-items: end;
+            margin-bottom: 1.8rem;
+            padding-bottom: 1.2rem;
+            border-bottom: 1px solid var(--card-border);
+            position: relative;
+        }
+
+        .section-heading::after {
+            content: '';
+            position: absolute;
+            left: 0;
+            bottom: -1px;
+            width: 120px;
+            height: 2px;
+            background: var(--spectrum);
+        }
+
+        .section-title-block { display: grid; grid-template-columns: auto 1fr; column-gap: 1rem; align-items: end; }
+
+        .section-num {
+            grid-row: 1 / span 2;
+            color: var(--text-secondary);
+            font-family: var(--font-mono);
+            font-size: 0.8rem;
+            font-weight: 600;
+            align-self: start;
+            padding-top: 0.2rem;
+        }
+
+        .section-num::before { content: 'λ.'; }
+
+        .section h2 {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: baseline;
+            gap: 0.3rem 0.9rem;
+            margin: 0.2rem 0 0;
+            font-family: var(--font-display);
+            font-size: clamp(2rem, 4.6vw, 3.1rem);
+            font-weight: 600;
+            line-height: 1;
+            letter-spacing: -0.03em;
+        }
+
+        .section h2 .section-label {
+            color: var(--text-secondary);
+            font-family: var(--font-mono);
+            font-size: 0.68rem;
+            font-weight: 500;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+        }
+
+        .section-summary { display: flex; align-items: flex-end; justify-content: flex-end; gap: 1rem; }
+        .section-summary p { margin: 0; color: var(--text-secondary); font-size: 0.95rem; }
+
+        .section-count {
+            flex: none;
+            padding: 0.3rem 0.65rem;
+            border: 1px solid var(--card-border);
+            border-radius: 999px;
+            font-family: var(--font-mono);
+            font-size: 0.7rem;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+
+        /* Bento catalogue: every card is shown; the first in each section is a wide feature */
+        .grid,
+        .grid.is-scroller {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            grid-template-rows: none;
+            grid-auto-flow: row dense;
+            gap: var(--grid-gap);
+            padding: 0;
+            margin: 0;
+            overflow: visible;
+            -webkit-mask-image: none;
+            mask-image: none;
+        }
+
+        .scroller-button { display: none !important; }
+
+        .card {
+            overflow: hidden;
+            background: linear-gradient(var(--card-bg), var(--card-bg)) padding-box,
+                        linear-gradient(var(--card-border), var(--card-border)) border-box;
+            border: 1px solid transparent;
+            border-radius: 20px;
+            backdrop-filter: blur(14px);
+            -webkit-backdrop-filter: blur(14px);
+        }
+
+        .card:hover {
+            background: linear-gradient(var(--card-solid), var(--card-solid)) padding-box, var(--spectrum) border-box;
+            box-shadow: var(--glow);
+            transform: translateY(-4px);
+        }
+
+        .js .card.revealed:hover { transform: translateY(-4px); }
+
+        .card-art { margin: 8px 8px 0; overflow: hidden; background: var(--art-bg); border-radius: 14px; }
+
+        .grid > .card:nth-child(1 of :not([hidden])) {
+            grid-column: span 2;
+            display: grid;
+            grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr);
+            grid-template-rows: auto 1fr;
+        }
+
+        .grid > .card:nth-child(1 of :not([hidden])) .card-art {
+            grid-row: 1 / span 2;
+            display: grid;
+            align-items: center;
+            margin: 8px;
+        }
+
+        .grid > .card:nth-child(1 of :not([hidden])) .card-meta { align-self: end; margin-top: 1.6rem; }
+        .grid > .card:nth-child(1 of :not([hidden])) h3 { font-size: 1.75rem; }
+
+        .card-meta { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 0.4rem 0.7rem; margin: 1rem 1.2rem 0; }
+
+        .card-type,
+        .card-offline-pill {
+            font-family: var(--font-mono);
+            font-size: 0.66rem;
+            font-weight: 600;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+        }
+
+        .card-type { color: var(--text-secondary); }
+        .card-body { margin: 0.45rem 1.2rem 1.3rem; }
+        .card h3 { margin: 0 0 0.4rem; font-family: var(--font-display); font-size: 1.2rem; font-weight: 600; line-height: 1.2; letter-spacing: -0.02em; }
+        .card p { margin: 0; color: var(--text-secondary); font-size: 0.95rem; line-height: 1.55; }
+        .card-note { display: block; margin-top: 0.6rem; color: var(--brand-accent); font-family: var(--font-mono); font-size: 0.7rem; }
+
+        /* About */
+        .about-panel {
+            position: relative;
+            display: grid;
+            grid-template-columns: minmax(220px, 0.8fr) minmax(0, 1.2fr);
+            gap: 3rem;
+            padding: 2.6rem;
+            overflow: hidden;
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 24px;
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+        }
+
+        .about-panel::before {
+            content: '';
+            position: absolute;
+            top: -40%;
+            right: -10%;
+            width: 60%;
+            height: 120%;
+            background: var(--spectrum);
+            filter: blur(90px);
+            opacity: 0.16;
+            pointer-events: none;
+        }
+
+        .about-panel > * { position: relative; }
+        .about-panel h2 { display: block; margin: 0.4rem 0 1rem; }
+        .about-lead { margin: 0; font-size: 1.3rem; font-weight: 500; line-height: 1.45; }
+        .about-copy p { margin: 0 0 1.1rem; color: var(--text-secondary); line-height: 1.75; }
+        .about-copy p:last-child { margin-bottom: 0; }
+        #about strong { color: var(--text-main); }
+        .about-points { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-top: 1.5rem; }
+
+        .about-point {
+            padding: 0.4rem 0.75rem;
+            color: var(--text-secondary);
+            border: 1px solid var(--card-border);
+            border-radius: 999px;
+            font-family: var(--font-mono);
+            font-size: 0.66rem;
+            font-weight: 600;
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
+        }
+
+        .back-to-top {
+            color: var(--text-main);
+            background: var(--nav-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 14px;
+            backdrop-filter: blur(14px);
+            -webkit-backdrop-filter: blur(14px);
+        }
+
+        footer {
+            padding: 3rem 1.5rem;
+            color: var(--text-secondary);
+            font-size: 0.86rem;
+            text-align: center;
+        }
+
+        footer::before {
+            content: '';
+            display: block;
+            width: min(240px, 60%);
+            height: 2px;
+            margin: 0 auto 2rem;
+            background: var(--spectrum);
+            border-radius: 2px;
+        }
+
+        footer p { margin: 0.35rem 0; }
+        footer a { color: var(--text-main); font-weight: 600; text-decoration: none; }
+        footer a:hover { color: var(--brand-accent); }
+        .footer-sep { margin: 0 0.45rem; opacity: 0.5; }
+
+        @keyframes specRise { from { opacity: 0; transform: translateY(16px); filter: blur(6px); } to { opacity: 1; transform: none; filter: none; } }
+        @keyframes specDrop { from { opacity: 0; transform: translateX(-50%) translateY(-12px); } to { opacity: 1; transform: translateX(-50%); } }
+
+        @media (max-width: 1000px) {
+            .grid, .grid.is-scroller { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+            .section-heading { grid-template-columns: 1fr; }
+            .section-summary { justify-content: space-between; align-items: center; }
+        }
+
+        @media (max-width: 900px) {
+            .hero { grid-template-columns: 1fr; gap: 3rem; padding-top: 7rem; }
+            .catalogue-bar { grid-template-columns: 1fr; gap: 1rem; }
+        }
+
+        @media (max-width: 768px) {
+            .about-panel { grid-template-columns: 1fr; gap: 1.5rem; padding: 1.8rem 1.4rem; }
+            .catalogue-copy p { display: none; }
+            .grid > .card:nth-child(1 of :not([hidden])) { display: flex; }
+            .grid > .card:nth-child(1 of :not([hidden])) .card-art { display: block; margin: 8px 8px 0; }
+            .grid > .card:nth-child(1 of :not([hidden])) .card-meta { align-self: auto; margin-top: 1rem; }
+        }
+
+        @media (max-width: 600px) {
+            nav {
+                display: grid;
+                grid-template-columns: repeat(5, minmax(max-content, 1fr)) auto auto;
+                width: calc(100vw - 16px);
+                max-width: none;
+                padding: 0.25rem;
+            }
+            nav a { justify-content: center; padding: 0.4rem 0.2rem; font-size: 0.62rem; letter-spacing: 0.02em; }
+            .grid, .grid.is-scroller { grid-template-columns: 1fr; }
+            .grid > .card:nth-child(1 of :not([hidden])) { grid-column: auto; }
+            .hero-facts { gap: 1.6rem; }
+        }
+
+        @media (max-width: 480px) {
+            .hero, .catalogue-intro, .section { padding-right: 1rem; padding-left: 1rem; }
+            .catalogue-bar { padding: 1.1rem; }
+            .scope-head, .scope-foot { flex-wrap: wrap; padding: 0.7rem 0.9rem; }
+        }
+    </style>
+  <link rel="stylesheet" href="/assets/theme-toggle.css">
+  <link rel="stylesheet" href="/assets/fullscreen-button.css">
+  <script src="/assets/theme-toggle.js"></script>
+  <script src="/assets/fullscreen-button.js"></script>
+</head>
+
+<body>
+    <a class="skip-link" href="#main">Skip to apps</a>
+    <div class="spacetime-bg" aria-hidden="true">
+        <canvas id="spacetime-canvas"></canvas>
+    </div>
+
+    <nav aria-label="Sections">
+        <a href="#tools">Tools</a>
+        <a href="#simulations">Sims</a>
+        <a href="#for_teachers">Teachers</a>
+        <a href="#fun">Fun</a>
+        <a href="#about">About</a>
+        <div class="theme-toggle">
+            <button id="theme-button" data-panphy-theme-toggle aria-label="Switch to dark theme" title="Switch to dark theme">
+                <svg class="panphy-theme-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                    <circle cx="12" cy="12" r="4"></circle>
+                    <path d="M12 2.8v2.4M12 18.8v2.4M4.2 4.2l1.7 1.7M18.1 18.1l1.7 1.7M2.8 12h2.4M18.8 12h2.4M4.2 19.8l1.7-1.7M18.1 5.9l1.7-1.7"></path>
+                </svg>
+            </button>
+        </div>
+        <button data-panphy-fullscreen aria-label="Enter fullscreen" title="Enter fullscreen">
+            <svg class="panphy-fs-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                <path d="M4 9V4h5M15 4h5v5M20 15v5h-5M9 20H4v-5"></path>
+            </svg>
+        </button>
+    </nav>
+
+    <header class="hero">
+        <div class="hero-copy">
+            <div class="hero-brand">
+                <img src="/assets/panphy.png" alt="" class="logo" onerror="this.style.display='none'">
+                <span class="hero-eyebrow">Physics in the browser</span>
+            </div>
+            <h1>PanPhy <em>Labs</em></h1>
+            <p class="hero-tagline">Physics apps, tools, sims, and some random stuff.</p>
+            <ul class="hero-facts">
+                <li><strong id="fact-apps">21</strong><span>apps</span></li>
+                <li><strong id="fact-offline">19</strong><span>work offline</span></li>
+                <li><strong>0</strong><span>installs</span></li>
+            </ul>
+        </div>
+        <a class="scope" id="scope" href="/simulations/superposition.html" aria-label="Open the Wave Superposition simulation">
+            <span class="scope-note scope-swap" id="scope-note" aria-hidden="true">y = y₁ + y₂</span>
+            <span class="scope-head">
+                <span class="scope-swap" id="scope-title">Wave Superposition</span>
+                <span class="scope-scale scope-swap" id="scope-scale">0.2 s/div · ×0.1 speed</span>
+            </span>
+            <svg id="scope-trace" viewBox="0 0 520 300" aria-hidden="true" focusable="false">
+                <g class="scope-grid"><path d="M52 0v300"/><path d="M104 0v300"/><path d="M156 0v300"/><path d="M208 0v300"/><path d="M260 0v300"/><path d="M312 0v300"/><path d="M364 0v300"/><path d="M416 0v300"/><path d="M468 0v300"/><path d="M0 50h520"/><path d="M0 100h520"/><path d="M0 150h520"/><path d="M0 200h520"/><path d="M0 250h520"/></g>
+                <g class="scope-swap" id="scope-scene"></g>
+            </svg>
+            <span class="scope-foot">
+                <span class="scope-readouts scope-swap" id="scope-readouts">
+                    <span><i class="scope-key-1"></i>f₁ = 2.0 Hz</span>
+                    <span><i class="scope-key-2"></i>f₂ = 2.3 Hz</span>
+                    <span><i class="scope-key-sum"></i>beat = 0.3 Hz</span>
+                </span>
+            </span>
+        </a>
+    </header>
+
+    <main id="main" tabindex="-1">
+    <section class="catalogue-intro" aria-labelledby="catalogue-title">
+        <div class="catalogue-bar">
+            <div class="catalogue-copy">
+                <span class="catalogue-kicker">Explore the collection</span>
+                <h2 id="catalogue-title">Find the right physics app.</h2>
+                <p>Browse the collection by topic.</p>
+            </div>
+            <div class="catalogue-tools">
+                <div class="filter-row" role="group" aria-label="Filter apps by topic">
+                    <button class="filter-button" type="button" data-topic-filter="all" aria-pressed="true">Any topic</button>
+                    <button class="filter-button" type="button" data-topic-filter="waves" aria-pressed="false">Waves</button>
+                    <button class="filter-button" type="button" data-topic-filter="sound" aria-pressed="false">Sound</button>
+                    <button class="filter-button" type="button" data-topic-filter="mechanics" aria-pressed="false">Mechanics</button>
+                    <button class="filter-button" type="button" data-topic-filter="matter" aria-pressed="false">Matter</button>
+                    <button class="filter-button" type="button" data-topic-filter="electromagnetism" aria-pressed="false">Electromagnetism</button>
+                    <button class="filter-button" type="button" data-topic-filter="atomic" aria-pressed="false">Atomic &amp; nuclear</button>
+                    <button class="filter-button" type="button" data-topic-filter="space" aria-pressed="false">Space</button>
+                    <button class="filter-button" type="button" data-topic-filter="relativity" aria-pressed="false">Relativity</button>
+                    <button class="filter-button" type="button" data-topic-filter="data" aria-pressed="false">Data &amp; video</button>
+                </div>
+                <p class="offline-status" id="offline-status" hidden></p>
+                <span class="sr-only" id="results-status" aria-live="polite">21 apps shown.</span>
+            </div>
+        </div>
+    </section>
+
+    <section class="section app-section" id="tools" data-section="01" data-category="tools">
+        <div class="section-heading">
+            <div class="section-title-block">
+                <span class="section-num" aria-hidden="true">01</span>
+                <span class="section-eyebrow">Build &amp; analyse</span>
+                <h2>Tools <span class="section-label">Explore</span></h2>
+            </div>
+            <div class="section-summary">
+                <p>Practical browser-based tools for writing, measuring, plotting, and investigating.</p>
+                <span class="section-count">5 apps</span>
+            </div>
+        </div>
+        <div class="grid-wrap">
+        <div class="grid">
+            <a class="card" href="/tools/panphymd.html">
+                <div class="card-art" aria-hidden="true">
+                    <svg viewBox="0 0 360 168" focusable="false">
+                        <text class="a-t" x="28" y="52">## Energy</text>
+                        <text class="a-t" x="28" y="80">$E_k = \frac{1}{2}mv^2$</text>
+                        <text class="a-t" x="28" y="108">- mass in kg</text>
+                        <text class="a-t" x="28" y="128">- speed in m/s</text>
+                        <path class="a-pri" d="M196 84h22m-7-7 7 7-7 7" stroke-width="2.5"/>
+                        <text class="a-serif" x="234" y="58">Energy</text>
+                        <text class="a-math" x="234" y="98">E</text>
+                        <text class="a-ts" x="247" y="103">k</text>
+                        <text class="a-math" x="259" y="98">= ½ mv²</text>
+                        <circle class="a-ink-f" cx="238" cy="120" r="2.5"/>
+                        <path class="a-mut" d="M248 120h68" stroke-width="3"/>
+                        <circle class="a-ink-f" cx="238" cy="138" r="2.5"/>
+                        <path class="a-mut" d="M248 138h84" stroke-width="3"/>
+                    </svg>
+                </div>
+                <div class="card-meta">
+                    <span class="card-type">Editor</span>
+                </div>
+                <div class="card-body">
+                    <h3>PanPhyMD</h3>
+                    <p>A simple Markdown editor with LaTeX support.</p>
+                </div>
+            </a>
+            <a class="card" href="/tools/panphyplot.html" data-topic="data">
+                <div class="card-art" aria-hidden="true">
+                    <svg viewBox="0 0 360 168" focusable="false">
+                        <path class="a-ink" d="M52 24v116h270" stroke-width="2"/>
+                        <path class="a-pri" d="M60 132 312 38" stroke-width="3"/>
+                        <path class="a-ink" stroke-width="1.5" d="M90 108v22m-5-22h10m-10 22h10M132 96v20m-5-20h10m-10 20h10M174 72v24m-5-24h10m-10 24h10M216 64v20m-5-20h10m-10 20h10M258 42v24m-5-24h10m-10 24h10M298 34v18m-5-18h10m-10 18h10"/>
+                        <g class="a-ink-f"><circle cx="90" cy="119" r="4.5"/><circle cx="132" cy="106" r="4.5"/><circle cx="174" cy="84" r="4.5"/><circle cx="216" cy="74" r="4.5"/><circle cx="258" cy="54" r="4.5"/><circle cx="298" cy="43" r="4.5"/></g>
+                        <text class="a-ts" x="186" y="128">y = 2.04x + 0.31</text>
+                    </svg>
+                </div>
+                <div class="card-meta">
+                    <span class="card-type">Data analysis</span>
+                </div>
+                <div class="card-body">
+                    <h3>PanPhyPlot</h3>
+                    <p>Process data, plot graphs, add uncertainties, and run best-fit analysis.</p>
+                </div>
+            </a>
+            <a class="card" href="/tools/motion_tracker.html" data-topic="data mechanics">
+                <div class="card-art" aria-hidden="true">
+                    <svg viewBox="0 0 360 168" focusable="false">
+                        <path class="a-ink" d="M28 142h304" stroke-width="2"/>
+                        <path class="a-acc" d="M48 136Q170 -62 292 136" stroke-width="2" stroke-dasharray="3 6"/>
+                        <g class="a-ink-f"><circle cx="48" cy="136" r="5" opacity="0.25"/><circle cx="82" cy="87" r="5" opacity="0.4"/><circle cx="117" cy="54" r="5" opacity="0.55"/><circle cx="152" cy="38" r="5" opacity="0.7"/><circle cx="187" cy="38" r="5" opacity="0.85"/></g>
+                        <circle class="a-acc-f" cx="222" cy="54" r="7"/>
+                        <g class="a-ink" stroke-width="2"><rect x="206" y="38" width="32" height="32" rx="4"/><path d="M222 28v8M222 72v8M196 54h8M240 54h8"/></g>
+                        <text class="a-ts" x="250" y="46">frame 6</text>
+                        <text class="a-t" x="250" y="62">v = 3.2 m/s</text>
+                    </svg>
+                </div>
+                <div class="card-meta">
+                    <span class="card-type">Video analysis</span>
+                </div>
+                <div class="card-body">
+                    <h3>Motion Tracker</h3>
+                    <p>Step through video frames, track objects, and extract motion data.</p>
+                </div>
+            </a>
+            <a class="card" href="/tools/sound_analyzer.html" data-topic="sound waves">
+                <div class="card-art" aria-hidden="true">
+                    <svg viewBox="0 0 360 168" focusable="false">
+                        <path class="a-ink" d="M28 140h304" stroke-width="2"/>
+                        <rect class="a-ink-f" x="36" y="128" width="9" height="10" rx="2"/><rect class="a-ink-f" x="51" y="122" width="9" height="16" rx="2"/><rect class="a-ink-f" x="66" y="114" width="9" height="24" rx="2"/><rect class="a-ink-f" x="81" y="104" width="9" height="34" rx="2"/><rect class="a-ink-f" x="96" y="86" width="9" height="52" rx="2"/><rect class="a-pri-f" x="111" y="42" width="9" height="96" rx="2"/><rect class="a-ink-f" x="126" y="80" width="9" height="58" rx="2"/><rect class="a-ink-f" x="141" y="102" width="9" height="36" rx="2"/><rect class="a-ink-f" x="156" y="112" width="9" height="26" rx="2"/><rect class="a-ink-f" x="171" y="116" width="9" height="22" rx="2"/><rect class="a-ink-f" x="186" y="98" width="9" height="40" rx="2"/><rect class="a-ink-f" x="201" y="108" width="9" height="30" rx="2"/><rect class="a-ink-f" x="216" y="120" width="9" height="18" rx="2"/><rect class="a-ink-f" x="231" y="124" width="9" height="14" rx="2"/><rect class="a-ink-f" x="246" y="116" width="9" height="22" rx="2"/><rect class="a-ink-f" x="261" y="122" width="9" height="16" rx="2"/><rect class="a-ink-f" x="276" y="128" width="9" height="10" rx="2"/><rect class="a-ink-f" x="291" y="130" width="9" height="8" rx="2"/><rect class="a-ink-f" x="306" y="132" width="9" height="6" rx="2"/><rect class="a-ink-f" x="321" y="133" width="9" height="5" rx="2"/>
+                        <text class="a-ts" x="130" y="48">440 Hz</text>
+                    </svg>
+                </div>
+                <div class="card-meta">
+                    <span class="card-type">Audio analysis</span>
+                </div>
+                <div class="card-body">
+                    <h3>Sound Analyzer</h3>
+                    <p>Visualize live audio as a frequency spectrum and waveform.</p>
+                    <span class="card-note">Uses microphone</span>
+                </div>
+            </a>
+            <a class="card" href="/tools/tone_generator.html" data-topic="sound waves">
+                <div class="card-art" aria-hidden="true">
+                    <svg viewBox="0 0 360 168" focusable="false">
+                        <text class="a-ts" x="24" y="52">CH 1</text>
+                        <text class="a-t" x="24" y="68">440 Hz</text>
+                        <text class="a-ts" x="24" y="112">CH 2</text>
+                        <text class="a-t" x="24" y="128">660 Hz</text>
+                        <path class="a-pri" stroke-width="2.5" d="M96 56.0L100 45.0L104 36.9L108 34.0L112 36.9L116 45.0L120 56.0L124 67.0L128 75.1L132 78.0L136 75.1L140 67.0L144 56.0L148 45.0L152 36.9L156 34.0L160 36.9L164 45.0L168 56.0L172 67.0L176 75.1L180 78.0L184 75.1L188 67.0L192 56.0L196 45.0L200 36.9L204 34.0L208 36.9L212 45.0L216 56.0L220 67.0L224 75.1L228 78.0L232 75.1L236 67.0L240 56.0L244 45.0L248 36.9L252 34.0L256 36.9L260 45.0L264 56.0L268 67.0L272 75.1L276 78.0L280 75.1L284 67.0L288 56.0L292 45.0L296 36.9L300 34.0L304 36.9L308 45.0L312 56.0L316 67.0L320 75.1L324 78.0L328 75.1L332 67.0L336 56.0"/>
+                        <path class="a-acc" stroke-width="2.5" d="M96 116.0L100 106.1L104 102.0L108 106.1L112 116.0L116 125.9L120 130.0L124 125.9L128 116.0L132 106.1L136 102.0L140 106.1L144 116.0L148 125.9L152 130.0L156 125.9L160 116.0L164 106.1L168 102.0L172 106.1L176 116.0L180 125.9L184 130.0L188 125.9L192 116.0L196 106.1L200 102.0L204 106.1L208 116.0L212 125.9L216 130.0L220 125.9L224 116.0L228 106.1L232 102.0L236 106.1L240 116.0L244 125.9L248 130.0L252 125.9L256 116.0L260 106.1L264 102.0L268 106.1L272 116.0L276 125.9L280 130.0L284 125.9L288 116.0L292 106.1L296 102.0L300 106.1L304 116.0L308 125.9L312 130.0L316 125.9L320 116.0L324 106.1L328 102.0L332 106.1L336 116.0"/>
+                    </svg>
+                </div>
+                <div class="card-meta">
+                    <span class="card-type">Audio tool</span>
+                </div>
+                <div class="card-body">
+                    <h3>Tone Generator</h3>
+                    <p>Mix two sine-wave channels with precise frequency and level controls.</p>
+                </div>
+            </a>
+        </div>
+        </div>
+    </section>
+
+    <section class="section app-section" id="simulations" data-section="02" data-category="simulations">
+        <div class="section-heading">
+            <div class="section-title-block">
+                <span class="section-num" aria-hidden="true">02</span>
+                <span class="section-eyebrow">See physics move</span>
+                <h2>Simulations <span class="section-label">Interact</span></h2>
+            </div>
+            <div class="section-summary">
+                <p>Interactive models for exploring waves, mechanics, matter, electromagnetism, nuclear physics, space, and relativity.</p>
+                <span class="section-count">12 apps</span>
+            </div>
+        </div>
+        <div class="grid-wrap">
+        <div class="grid">
+            <a class="card" href="/simulations/ripple_tank.html" data-topic="waves">
+                <div class="card-art" aria-hidden="true">
+                    <svg viewBox="0 0 360 168" focusable="false">
+                        <g class="a-acc" stroke-width="1.6" opacity="0.85"><circle cx="140" cy="150" r="22"/><circle cx="140" cy="150" r="44"/><circle cx="140" cy="150" r="66"/><circle cx="140" cy="150" r="88"/><circle cx="140" cy="150" r="110"/><circle cx="140" cy="150" r="132"/><circle cx="140" cy="150" r="154"/><circle cx="140" cy="150" r="176"/><circle cx="140" cy="150" r="198"/><circle cx="220" cy="150" r="22"/><circle cx="220" cy="150" r="44"/><circle cx="220" cy="150" r="66"/><circle cx="220" cy="150" r="88"/><circle cx="220" cy="150" r="110"/><circle cx="220" cy="150" r="132"/><circle cx="220" cy="150" r="154"/><circle cx="220" cy="150" r="176"/><circle cx="220" cy="150" r="198"/></g>
+                        <circle class="a-pri-f" cx="140" cy="150" r="6"/>
+                        <circle class="a-pri-f" cx="220" cy="150" r="6"/>
+                    </svg>
+                </div>
+                <div class="card-meta">
+                    <span class="card-type">Wave lab</span>
+                </div>
+                <div class="card-body">
+                    <h3>Virtual Ripple Tank</h3>
+                    <p>Explore wave interference and refraction in a 3D ripple tank.</p>
+                </div>
+            </a>
+            <a class="card" href="/simulations/superposition.html" data-topic="waves">
+                <div class="card-art" aria-hidden="true">
+                    <svg viewBox="0 0 360 168" focusable="false">
+                        <path class="a-mut" d="M24 84h312" stroke-dasharray="4 5"/>
+                        <path class="a-pri" stroke-width="1.8" opacity="0.8" d="M24 84.0L28 78.6L32 73.8L36 70.0L40 67.7L44 67.0L48 68.1L52 70.8L56 74.9L60 79.9L64 85.4L68 90.7L72 95.3L76 98.7L80 100.7L84 100.9L88 99.4L92 96.3L96 91.9L100 86.7L104 81.3L108 76.1L112 71.7L116 68.6L120 67.1L124 67.3L128 69.3L132 72.7L136 77.3L140 82.6L144 88.1L148 93.1L152 97.2L156 99.9L160 101.0L164 100.3L168 98.0L172 94.2L176 89.4L180 84.0L184 78.6L188 73.8L192 70.0L196 67.7L200 67.0L204 68.1L208 70.8L212 74.9L216 79.9L220 85.4L224 90.7L228 95.3L232 98.7L236 100.7L240 100.9L244 99.4L248 96.3L252 91.9L256 86.7L260 81.3L264 76.1L268 71.7L272 68.6L276 67.1L280 67.3L284 69.3L288 72.7L292 77.3L296 82.6L300 88.1L304 93.1L308 97.2L312 99.9L316 101.0L320 100.3L324 98.0L328 94.2L332 89.4L336 84.0"/>
+                        <path class="a-acc" stroke-width="1.8" opacity="0.8" d="M24 84.0L28 77.8L32 72.5L36 68.8L40 67.1L44 67.7L48 70.5L52 75.1L56 81.0L60 87.3L64 93.1L68 97.7L72 100.4L76 100.9L80 99.1L84 95.3L88 89.9L92 83.7L96 77.6L100 72.3L104 68.6L108 67.0L112 67.7L116 70.7L120 75.4L124 81.3L128 87.5L132 93.3L136 97.8L140 100.5L144 100.9L148 99.0L152 95.1L156 89.6L160 83.5L164 77.3L168 72.1L172 68.5L176 67.0L180 67.8L184 70.8L188 75.6L192 81.5L196 87.8L200 93.5L204 98.0L208 100.5L212 100.8L216 98.9L220 94.9L224 89.4L228 83.2L232 77.1L236 71.9L240 68.4L244 67.0L248 67.9L252 71.0L256 75.9L260 81.8L264 88.1L268 93.8L272 98.1L276 100.6L280 100.8L284 98.7L288 94.6L292 89.1L296 82.9L300 76.8L304 71.7L308 68.3L312 67.0L316 68.0L320 71.2L324 76.1L328 82.1L332 88.3L336 94.0"/>
+                        <path class="a-ink" stroke-width="3.5" d="M24 84.0L28 72.5L32 62.3L36 54.8L40 50.7L44 50.7L48 54.6L52 62.0L56 71.9L60 83.2L64 94.5L68 104.3L72 111.7L76 115.6L80 115.8L84 112.1L88 105.3L92 96.0L96 85.5L100 75.0L104 65.9L108 59.1L112 55.5L116 55.3L120 58.5L124 64.6L128 72.8L132 82.0L136 91.2L140 99.1L144 104.9L148 108.1L152 108.2L156 105.5L160 100.4L164 93.7L168 86.1L172 78.7L176 72.4L180 67.8L184 65.4L188 65.4L192 67.6L196 71.5L200 76.6L204 82.1L208 87.4L212 91.8L216 94.8L220 96.2L224 96.0L228 94.5L232 91.8L236 88.6L240 85.3L244 82.4L248 80.2L252 78.9L256 78.6L260 79.1L264 80.2L268 81.5L272 82.8L276 83.7L280 84.1L284 84.0L288 83.4L292 82.5L296 81.5L300 80.9L304 80.8L308 81.5L312 82.9L316 85.0L320 87.5L324 90.1L328 92.3L332 93.7L336 94.0"/>
+                    </svg>
+                </div>
+                <div class="card-meta">
+                    <span class="card-type">Wave lab</span>
+                </div>
+                <div class="card-body">
+                    <h3>Wave Superposition</h3>
+                    <p>Combine waves and see how amplitude, phase, and interference interact.</p>
+                </div>
+            </a>
+            <a class="card" href="/simulations/standing_wave.html" data-topic="waves">
+                <div class="card-art" aria-hidden="true">
+                    <svg viewBox="0 0 360 168" focusable="false">
+                        <path class="a-ink" d="M40 44v80M320 44v80" stroke-width="3"/>
+                        <path class="a-mut" stroke-width="2" stroke-dasharray="4 5" d="M40 84.0L44 88.8L48 93.6L52 98.1L56 102.5L60 106.4L64 110.0L68 113.1L72 115.7L76 117.7L80 119.1L84 119.9L88 120.0L92 119.4L96 118.2L100 116.4L104 114.0L108 111.1L112 107.7L116 103.8L120 99.6L124 95.1L128 90.4L132 85.6L136 80.8L140 76.0L144 71.4L148 66.9L152 62.8L156 59.1L160 55.9L164 53.1L168 50.9L172 49.3L176 48.3L180 48.0L184 48.3L188 49.3L192 50.9L196 53.1L200 55.9L204 59.1L208 62.8L212 66.9L216 71.4L220 76.0L224 80.8L228 85.6L232 90.4L236 95.1L240 99.6L244 103.8L248 107.7L252 111.1L256 114.0L260 116.4L264 118.2L268 119.4L272 120.0L276 119.9L280 119.1L284 117.7L288 115.7L292 113.1L296 110.0L300 106.4L304 102.5L308 98.1L312 93.6L316 88.8L320 84.0"/>
+                        <path class="a-ink" stroke-width="3.5" d="M40 84.0L44 79.2L48 74.4L52 69.9L56 65.5L60 61.6L64 58.0L68 54.9L72 52.3L76 50.3L80 48.9L84 48.1L88 48.0L92 48.6L96 49.8L100 51.6L104 54.0L108 56.9L112 60.3L116 64.2L120 68.4L124 72.9L128 77.6L132 82.4L136 87.2L140 92.0L144 96.6L148 101.1L152 105.2L156 108.9L160 112.1L164 114.9L168 117.1L172 118.7L176 119.7L180 120.0L184 119.7L188 118.7L192 117.1L196 114.9L200 112.1L204 108.9L208 105.2L212 101.1L216 96.6L220 92.0L224 87.2L228 82.4L232 77.6L236 72.9L240 68.4L244 64.2L248 60.3L252 56.9L256 54.0L260 51.6L264 49.8L268 48.6L272 48.0L276 48.1L280 48.9L284 50.3L288 52.3L292 54.9L296 58.0L300 61.6L304 65.5L308 69.9L312 74.4L316 79.2L320 84.0"/>
+                        <g class="a-pri-f"><circle cx="40" cy="84" r="5"/><circle cx="133.3" cy="84" r="5"/><circle cx="226.7" cy="84" r="5"/><circle cx="320" cy="84" r="5"/></g>
+                        <text class="a-ts" x="180" y="152" text-anchor="middle">n = 3</text>
+                    </svg>
+                </div>
+                <div class="card-meta">
+                    <span class="card-type">Wave lab</span>
+                </div>
+                <div class="card-body">
+                    <h3>Standing Wave</h3>
+                    <p>Visualize standing waves with different boundary conditions.</p>
+                </div>
+            </a>
+            <a class="card" href="/simulations/collision.html" data-topic="mechanics">
+                <div class="card-art" aria-hidden="true">
+                    <svg viewBox="0 0 360 168" focusable="false">
+                        <path class="a-ink" d="M30 130h300" stroke-width="2"/>
+                        <circle class="a-pri-f" cx="110" cy="100" r="28"/>
+                        <circle class="a-acc-f" cx="250" cy="108" r="20"/>
+                        <path class="a-ink" stroke-width="2.5" d="M148 100h42m-9-8 9 8-9 8M222 108h-22m8-7-8 7 8 7"/>
+                        <text class="a-ts" x="110" y="58" text-anchor="middle">2.0 kg</text>
+                        <text class="a-ts" x="250" y="74" text-anchor="middle">1.0 kg</text>
+                    </svg>
+                </div>
+                <div class="card-meta">
+                    <span class="card-type">Mechanics</span>
+                </div>
+                <div class="card-body">
+                    <h3>Collision Lab</h3>
+                    <p>Experiment with collision physics using interactive, real-time motion.</p>
+                    <span class="card-note">Uses camera</span>
+                </div>
+            </a>
+            <a class="card" href="/simulations/states.html" data-topic="matter">
+                <div class="card-art" aria-hidden="true">
+                    <svg viewBox="0 0 360 168" focusable="false">
+                        <g class="a-ink" stroke-width="2"><rect x="28" y="28" width="88" height="98" rx="4"/><rect x="136" y="28" width="88" height="98" rx="4"/><rect x="244" y="28" width="88" height="98" rx="4"/></g>
+                        <g class="a-acc-f"><circle cx="45" cy="117" r="9"/><circle cx="63" cy="117" r="9"/><circle cx="81" cy="117" r="9"/><circle cx="99" cy="117" r="9"/><circle cx="45" cy="99" r="9"/><circle cx="63" cy="99" r="9"/><circle cx="81" cy="99" r="9"/><circle cx="99" cy="99" r="9"/><circle cx="45" cy="81" r="9"/><circle cx="63" cy="81" r="9"/><circle cx="81" cy="81" r="9"/><circle cx="99" cy="81" r="9"/><circle cx="147" cy="117" r="9"/><circle cx="166" cy="116" r="9"/><circle cx="185" cy="117" r="9"/><circle cx="204" cy="116" r="9"/><circle cx="156" cy="100" r="9"/><circle cx="176" cy="99" r="9"/><circle cx="195" cy="100" r="9"/><circle cx="214" cy="100" r="9"/><circle cx="166" cy="83" r="9"/><circle cx="188" cy="82" r="9"/><circle cx="206" cy="83" r="9"/><circle cx="262" cy="48" r="9"/><circle cx="310" cy="60" r="9"/><circle cx="280" cy="96" r="9"/><circle cx="316" cy="112" r="9"/></g>
+                        <text class="a-t" x="72" y="150" text-anchor="middle">solid</text>
+                        <text class="a-t" x="180" y="150" text-anchor="middle">liquid</text>
+                        <text class="a-t" x="288" y="150" text-anchor="middle">gas</text>
+                    </svg>
+                </div>
+                <div class="card-meta">
+                    <span class="card-type">Particle model</span>
+                </div>
+                <div class="card-body">
+                    <h3>States of Matter</h3>
+                    <p>Watch a 3D particle model melt, boil and freeze between solid, liquid and gas.</p>
+                </div>
+            </a>
+            <a class="card" href="/simulations/electric_motors.html" data-topic="electromagnetism">
+                <div class="card-art" aria-hidden="true">
+                    <svg viewBox="0 0 360 168" focusable="false">
+                        <rect class="a-ink a-pri-soft" x="40" y="40" width="46" height="88" rx="6" stroke-width="2"/>
+                        <rect class="a-ink a-acc-soft" x="274" y="40" width="46" height="88" rx="6" stroke-width="2"/>
+                        <text class="a-serif" x="63" y="91" text-anchor="middle">N</text>
+                        <text class="a-serif" x="297" y="91" text-anchor="middle">S</text>
+                        <path class="a-mut" stroke-width="1.6" stroke-dasharray="3 6" d="M94 56h172M94 84h172M94 112h172"/>
+                        <path class="a-mut" stroke-width="1.6" d="M112 84h136"/>
+                        <path class="a-acc" stroke-width="3" d="M138 106 198 62h24l-60 44z"/>
+                        <path class="a-ink" stroke-width="2.5" d="M150 82V46m-7 7 7-7 7 7M210 86v36m-7-7 7 7 7-7"/>
+                        <text class="a-ts" x="180" y="152" text-anchor="middle">F = BIL</text>
+                    </svg>
+                </div>
+                <div class="card-meta">
+                    <span class="card-type">Electromagnetism</span>
+                </div>
+                <div class="card-body">
+                    <h3>Electric Motors</h3>
+                    <p>See the motor effect, then run a DC motor and an AC motor in 3D.</p>
+                </div>
+            </a>
+            <a class="card" href="/simulations/charges_in_fields.html" data-topic="electromagnetism">
+                <div class="card-art" aria-hidden="true">
+                    <svg viewBox="0 0 360 168" focusable="false">
+                        <rect class="a-ink a-pri-soft" x="64" y="34" width="150" height="10" rx="3" stroke-width="2"/>
+                        <rect class="a-ink a-acc-soft" x="64" y="118" width="150" height="10" rx="3" stroke-width="2"/>
+                        <text class="a-ts" x="46" y="44">+</text>
+                        <text class="a-ts" x="46" y="128">−</text>
+                        <path class="a-mut" stroke-width="1.6" d="M94 52v56m-4-6 4 6 4-6M139 52v56m-4-6 4 6 4-6M184 52v56m-4-6 4 6 4-6"/>
+                        <path class="a-mut" stroke-width="1.6" stroke-dasharray="3 6" d="M22 86h42"/>
+                        <path class="a-acc" stroke-width="2.5" d="M64 86Q150 86 222 56"/>
+                        <circle class="a-acc-f" cx="222" cy="56" r="5"/>
+                        <circle class="a-pri" cx="296" cy="82" r="34" stroke-width="2.5"/>
+                        <circle class="a-pri-f" cx="296" cy="48" r="5"/>
+                        <g class="a-mut" stroke-width="1.6"><path d="M282 70l8 8m0-8-8 8M302 70l8 8m0-8-8 8M282 90l8 8m0-8-8 8M302 90l8 8m0-8-8 8"/></g>
+                        <text class="a-t" x="139" y="154" text-anchor="middle">E field</text>
+                        <text class="a-t" x="296" y="154" text-anchor="middle">B field</text>
+                    </svg>
+                </div>
+                <div class="card-meta">
+                    <span class="card-type">Electromagnetism</span>
+                </div>
+                <div class="card-body">
+                    <h3>Charges in Fields</h3>
+                    <p>Steer charged particles through electric and magnetic fields in 3D.</p>
+                </div>
+            </a>
+            <a class="card" href="/simulations/atomic_models.html" data-topic="atomic">
+                <div class="card-art" aria-hidden="true">
+                    <svg viewBox="0 0 360 168" focusable="false">
+                        <circle class="a-pri a-pri-soft" cx="96" cy="84" r="44" stroke-width="2"/>
+                        <g class="a-acc-f"><circle cx="80" cy="68" r="5"/><circle cx="114" cy="80" r="5"/><circle cx="90" cy="106" r="5"/></g>
+                        <path class="a-ink" stroke-width="2.5" d="M156 84h30m-8-8 8 8-8 8"/>
+                        <g class="a-mut" stroke-width="1.6"><circle cx="262" cy="84" r="26"/><circle cx="262" cy="84" r="48"/></g>
+                        <g class="a-mut-f"><circle cx="262" cy="84" r="4.5"/><circle cx="266.5" cy="91.8" r="4.5"/><circle cx="253" cy="84" r="4.5"/><circle cx="266.5" cy="76.2" r="4.5"/></g>
+                        <g class="a-pri-f"><circle cx="271" cy="84" r="4.5"/><circle cx="257.5" cy="91.8" r="4.5"/><circle cx="257.5" cy="76.2" r="4.5"/></g>
+                        <g class="a-acc-f"><circle cx="236" cy="84" r="5"/><circle cx="288" cy="84" r="5"/><circle cx="295.9" cy="50.1" r="5"/></g>
+                    </svg>
+                </div>
+                <div class="card-meta">
+                    <span class="card-type">Atomic physics</span>
+                </div>
+                <div class="card-body">
+                    <h3>Atomic Models</h3>
+                    <p>Explore four atomic models in 3D and see how our picture of the atom changed.</p>
+                </div>
+            </a>
+            <a class="card" href="/simulations/nuclear_decay.html" data-topic="atomic">
+                <div class="card-art" aria-hidden="true">
+                    <svg viewBox="0 0 360 168" focusable="false">
+                        <circle class="a-ink a-pri-soft" cx="84" cy="84" r="34" stroke-width="2"/>
+                        <path class="a-mut" stroke-width="1.6" stroke-dasharray="3 6" d="M124 68 228 44M126 84h122"/>
+                        <g class="a-pri-f"><circle cx="243" cy="33" r="7"/><circle cx="257" cy="47" r="7"/></g>
+                        <g class="a-mut-f"><circle cx="257" cy="33" r="7"/><circle cx="243" cy="47" r="7"/></g>
+                        <circle class="a-acc-f" cx="256" cy="84" r="4.5"/>
+                        <g transform="translate(124 102) rotate(13)"><path class="a-ink" stroke-width="2" d="M0 0.0L2 -4.2L4 -6.0L6 -4.2L8 -0.0L10 4.2L12 6.0L14 4.2L16 0.0L18 -4.2L20 -6.0L22 -4.2L24 -0.0L26 4.2L28 6.0L30 4.2L32 0.0L34 -4.2L36 -6.0L38 -4.2L40 -0.0L42 4.2L44 6.0L46 4.2L48 0.0L50 -4.2L52 -6.0L54 -4.2L56 -0.0L58 4.2L60 6.0L62 4.2L64 0.0L66 -4.2L68 -6.0L70 -4.2L72 -0.0L74 4.2L76 6.0L78 4.2L80 0.0L82 -4.2L84 -6.0L86 -4.2L88 -0.0L90 4.2L92 6.0L94 4.2L96 0.0L98 -4.2L100 -6.0L102 -4.2L104 0.0L106 4.2L108 6.0L110 4.2L112 0.0L114 -4.2L116 -6.0L118 -4.2L120 -0.0L122 4.2L124 6.0L126 4.2L128 0.0"/></g>
+                        <text class="a-math" x="282" y="46">α</text>
+                        <text class="a-math" x="282" y="90">β</text>
+                        <text class="a-math" x="282" y="138">γ</text>
+                    </svg>
+                </div>
+                <div class="card-meta">
+                    <span class="card-type">Nuclear physics</span>
+                </div>
+                <div class="card-body">
+                    <h3>Nuclear Decay</h3>
+                    <p>Watch alpha, beta and gamma decay in 3D, balance equations and measure half-life.</p>
+                </div>
+            </a>
+            <a class="card" href="/simulations/fission_fusion.html" data-topic="atomic">
+                <div class="card-art" aria-hidden="true">
+                    <svg viewBox="0 0 360 168" focusable="false">
+                        <path class="a-mut" d="M184 22v112" stroke-dasharray="3 6"/>
+                        <circle class="a-mut-f" cx="18" cy="84" r="6"/>
+                        <path class="a-ink" stroke-width="2" d="M28 84h12m-5-5 5 5-5 5M100 84h12m-5-5 5 5-5 5"/>
+                        <circle class="a-ink a-pri-soft" cx="70" cy="84" r="26" stroke-width="2"/>
+                        <circle class="a-ink a-pri-soft" cx="134" cy="64" r="16" stroke-width="2"/>
+                        <circle class="a-ink a-pri-soft" cx="136" cy="108" r="14" stroke-width="2"/>
+                        <path class="a-mut" stroke-width="1.6" d="M150 50l8-5M156 86h8M150 122l7 5"/>
+                        <g class="a-mut-f"><circle cx="166" cy="40" r="6"/><circle cx="172" cy="86" r="6"/><circle cx="164" cy="132" r="6"/></g>
+                        <g class="a-pri-f"><circle cx="206" cy="56" r="6"/><circle cx="212" cy="105.6" r="6"/><circle cx="286" cy="80" r="6"/><circle cx="298" cy="92" r="6"/></g>
+                        <g class="a-mut-f"><circle cx="218" cy="56" r="6"/><circle cx="206" cy="116" r="6"/><circle cx="218" cy="116" r="6"/><circle cx="298" cy="80" r="6"/><circle cx="286" cy="92" r="6"/><circle cx="334" cy="54" r="6"/></g>
+                        <path class="a-ink" stroke-width="2" d="M236 86h26m-7-7 7 7-7 7"/>
+                        <path class="a-mut" stroke-width="1.6" d="M312 72l12-10"/>
+                        <text class="a-t" x="92" y="158" text-anchor="middle">fission</text>
+                        <text class="a-t" x="272" y="158" text-anchor="middle">fusion</text>
+                    </svg>
+                </div>
+                <div class="card-meta">
+                    <span class="card-type">Nuclear physics</span>
+                </div>
+                <div class="card-body">
+                    <h3>Fission and Fusion</h3>
+                    <p>Split uranium, run a chain reaction and fuse hydrogen in 3D.</p>
+                </div>
+            </a>
+            <a class="card" href="/simulations/star_life_cycle.html" data-topic="space">
+                <div class="card-art" aria-hidden="true">
+                    <svg viewBox="0 0 360 168" focusable="false">
+                        <g class="a-mut-f"><circle cx="34" cy="70" r="2.5"/><circle cx="46" cy="58" r="2"/><circle cx="58" cy="72" r="2.5"/><circle cx="42" cy="84" r="2"/><circle cx="56" cy="92" r="2.5"/><circle cx="68" cy="60" r="2"/><circle cx="30" cy="94" r="2"/><circle cx="70" cy="84" r="2"/><circle cx="50" cy="104" r="2"/></g>
+                        <circle class="a-ink a-pri-soft" cx="118" cy="80" r="13" stroke-width="2"/>
+                        <circle class="a-ink a-pri-f" cx="212" cy="80" r="38" stroke-width="2"/>
+                        <circle class="a-mut" cx="310" cy="80" r="20" stroke-width="1.6" stroke-dasharray="3 6"/>
+                        <circle class="a-ink a-paper" cx="310" cy="80" r="6" stroke-width="2"/>
+                        <path class="a-ink" stroke-width="2" d="M82 80h14m-5-5 5 5-5 5M140 80h24m-5-5 5 5-5 5M258 80h24m-5-5 5 5-5 5"/>
+                        <text class="a-t" x="50" y="146" text-anchor="middle">nebula</text>
+                        <text class="a-t" x="118" y="146" text-anchor="middle">star</text>
+                        <text class="a-t" x="212" y="146" text-anchor="middle">red giant</text>
+                        <text class="a-t" x="310" y="146" text-anchor="middle">white dwarf</text>
+                    </svg>
+                </div>
+                <div class="card-meta">
+                    <span class="card-type">Astrophysics</span>
+                </div>
+                <div class="card-body">
+                    <h3>Life Cycle of a Star</h3>
+                    <p>Choose a star's mass and follow its whole life in 3D, from nebula to its final state.</p>
+                </div>
+            </a>
+            <a class="card" href="/simulations/lorentz.html" data-topic="relativity">
+                <div class="card-art" aria-hidden="true">
+                    <svg viewBox="0 0 360 168" focusable="false">
+                        <path class="a-pri" stroke-width="1.8" stroke-dasharray="4 6" d="M110 142 230 22"/>
+                        <path class="a-ink" stroke-width="2" d="M110 22v120h200"/>
+                        <path class="a-acc" stroke-width="2.5" d="M182 22 110 142 290 34"/>
+                        <text class="a-t" x="88" y="32">ct</text>
+                        <text class="a-t" x="318" y="146">x</text>
+                        <text class="a-ts" x="190" y="32">ct′</text>
+                        <text class="a-ts" x="298" y="38">x′</text>
+                        <text class="a-t" x="232" y="108">v = 0.6c</text>
+                        <text class="a-ts" x="232" y="126">γ = 1.25</text>
+                    </svg>
+                </div>
+                <div class="card-meta">
+                    <span class="card-type">Relativity</span>
+                </div>
+                <div class="card-body">
+                    <h3>Lorentz Transform</h3>
+                    <p>Learn how spacetime transforms between inertial frames.</p>
+                </div>
+            </a>
+        </div>
+        </div>
+    </section>
+
+    <section class="section app-section" id="for_teachers" data-section="03" data-category="for_teachers">
+        <div class="section-heading">
+            <div class="section-title-block">
+                <span class="section-num" aria-hidden="true">03</span>
+                <span class="section-eyebrow">Made for the classroom</span>
+                <h2>For Teachers <span class="section-label">Utility</span></h2>
+            </div>
+            <div class="section-summary">
+                <p>Simple utilities designed for lessons, demonstrations, and assessments.</p>
+                <span class="section-count">2 apps</span>
+            </div>
+        </div>
+        <div class="grid-wrap">
+        <div class="grid">
+            <a class="card" href="/for_teachers/timer.html">
+                <div class="card-art" aria-hidden="true">
+                    <svg viewBox="0 0 360 168" focusable="false">
+                        <text class="a-clock" x="180" y="80" text-anchor="middle">0:45:00</text>
+                        <rect class="a-mut-f" x="60" y="100" width="192" height="10" rx="5" opacity="0.3"/>
+                        <rect class="a-ink-f" x="60" y="100" width="96" height="10" rx="5"/>
+                        <rect class="a-pri-f" x="254" y="100" width="46" height="10" rx="5"/>
+                        <text class="a-t" x="60" y="134">1 h 30 min</text>
+                        <text class="a-ts" x="300" y="134" text-anchor="end">+25% extra time</text>
+                    </svg>
+                </div>
+                <div class="card-meta">
+                    <span class="card-type">Assessment</span>
+                </div>
+                <div class="card-body">
+                    <h3>Exam Timer</h3>
+                    <p>Manage exam times with an automatic extra-time timer.</p>
+                </div>
+            </a>
+            <a class="card" href="/for_teachers/visualizer.html">
+                <div class="card-art" aria-hidden="true">
+                    <svg viewBox="0 0 360 168" focusable="false">
+                        <path class="a-ink" stroke-width="2.5" d="M60 46V26h20M280 26h20v20M300 122v20h-20M80 142H60v-20"/>
+                        <g transform="rotate(-4 180 84)">
+                        <rect class="a-ink a-paper" x="112" y="38" width="136" height="92" rx="3" stroke-width="2"/>
+                        <path class="a-mut" stroke-width="3" d="M128 60h72M128 78h100M128 96h58M128 114h86"/>
+                        <path class="a-pri" stroke-width="2.5" d="M120 79c4-14 110-16 116-2s-112 18-116 2z"/>
+                        </g>
+                        <circle class="a-pri-f" cx="286" cy="40" r="4"/>
+                    </svg>
+                </div>
+                <div class="card-meta">
+                    <span class="card-type">Classroom</span>
+                </div>
+                <div class="card-body">
+                    <h3>Camera Visualizer</h3>
+                    <p>Project your device camera to the big screen, then snap and sketch.</p>
+                    <span class="card-note">Uses camera</span>
+                </div>
+            </a>
+        </div>
+        </div>
+    </section>
+
+    <section class="section app-section" id="fun" data-section="04" data-category="fun">
+        <div class="section-heading">
+            <div class="section-title-block">
+                <span class="section-num" aria-hidden="true">04</span>
+                <span class="section-eyebrow">Experiments &amp; play</span>
+                <h2>For Fun <span class="section-label">Play</span></h2>
+            </div>
+            <div class="section-summary">
+                <p>Playful side projects where physics, cameras, and code get a little strange.</p>
+                <span class="section-count">2 apps</span>
+            </div>
+        </div>
+        <div class="grid-wrap">
+        <div class="grid">
+            <a class="card" href="/fun/spellwave.html">
+                <div class="card-art" aria-hidden="true">
+                    <svg viewBox="0 0 360 168" focusable="false">
+                        <text class="a-word a-pri-f" x="30" y="96">QUA</text>
+                        <path class="a-ink" stroke-width="2.5" d="M92 66v38"/>
+                        <text class="a-word a-mut-f" x="100" y="96">RK</text>
+                        <path class="a-pri" stroke-width="3" d="M162 92l26-16-8 16 28-14-9 16 30-12"/>
+                        <path class="a-ink" stroke-width="2.5" d="M276 62l-8-16M316 62l8-16"/>
+                        <circle class="a-ink a-acc-soft" cx="296" cy="90" r="32" stroke-width="2.5"/>
+                        <circle class="a-ink-f" cx="285" cy="82" r="4.5"/>
+                        <circle class="a-ink-f" cx="307" cy="82" r="4.5"/>
+                        <path class="a-ink" stroke-width="2.5" d="M280 102l5.5-6 5.5 6 5.5-6 5.5 6 5.5-6 5.5 6"/>
+                    </svg>
+                </div>
+                <div class="card-meta">
+                    <span class="card-type">Typing game</span>
+                </div>
+                <div class="card-body">
+                    <h3>Spellwave</h3>
+                    <p>Type to cast spells and beat the monsters.</p>
+                </div>
+            </a>
+            <a class="card" href="/fun/ascii_cam.html">
+                <div class="card-art" aria-hidden="true">
+                    <svg viewBox="0 0 360 168" focusable="false">
+                        <text class="a-ascii a-acc-f" x="180" y="40" text-anchor="middle">.:=+*##*+=:.</text>
+                        <text class="a-ascii a-acc-f" x="180" y="59" text-anchor="middle">.-+*#%@@@@%#*+-.</text>
+                        <text class="a-ascii a-pri-f" x="180" y="78" text-anchor="middle">:=*#%@@@@@@@@%#*=:</text>
+                        <text class="a-ascii a-pri-f" x="180" y="97" text-anchor="middle">:=*#%@@@@@@@@%#*=:</text>
+                        <text class="a-ascii a-acc-f" x="180" y="116" text-anchor="middle">.-+*#%@@@@%#*+-.</text>
+                        <text class="a-ascii a-acc-f" x="180" y="135" text-anchor="middle">.:=+*##*+=:.</text>
+                    </svg>
+                </div>
+                <div class="card-meta">
+                    <span class="card-type">Creative camera</span>
+                </div>
+                <div class="card-body">
+                    <h3>ASCII Camera</h3>
+                    <p>See yourself in 8-bit colour ASCII characters.</p>
+                    <span class="card-note">Uses camera</span>
+                </div>
+            </a>
+        </div>
+        </div>
+    </section>
+
+    <section class="section" id="about" data-section="05">
+        <div class="about-panel">
+            <div>
+                <span class="section-eyebrow">Why PanPhy</span>
+                <h2>About</h2>
+                <p class="about-lead">Small, useful physics apps that run wherever a browser does.</p>
+                <div class="about-points" aria-label="PanPhy principles">
+                    <span class="about-point">Browser based</span>
+                    <span class="about-point">Classroom friendly</span>
+                    <span class="about-point">Offline ready</span>
+                </div>
+            </div>
+            <div class="about-copy">
+                <p>Welcome to <strong>PanPhy Labs</strong>. These tools, simulations, and games are built with AI and designed to be interactive and educational. There are many great physics tools online, but not all of them fit my lessons. On school-managed devices, students and teachers often don't have the admin rights to install software, so I build my own web apps that are simple, run in any browser, and need no installation.</p>
+                <p>The aim is simple: build tools I’m proud to use in my own classroom and happy to recommend to others.</p>
+                <p>Most apps are offline-friendly after the first visit. Look for the <strong>Offline ready</strong> badge on each card. Games and features that rely on external services still require an internet connection.</p>
+            </div>
+        </div>
+    </section>
+    </main>
+
+    <button class="back-to-top" id="back-to-top" type="button" aria-label="Back to top">
+        <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 19V5M5 12l7-7 7 7"/></svg>
+    </button>
+
+    <footer>
+        <p>&copy; 2026 PanPhy Labs. All rights reserved.</p>
+        <p>
+            <a href="mailto:panphylabs@icloud.com">Contact Me</a>
+            <span class="footer-sep">·</span>
+            <a href="mailto:panphylabs@icloud.com?subject=PanPhy%20Labs%20feedback">Feedback / Report a Bug</a>
+            <span class="footer-sep">·</span>
+            <a href="https://buymeacoffee.com/panphy" target="_blank" rel="noopener noreferrer">Support My Projects</a>
+        </p>
+    </footer>
+
+    <script>
+        // Topic filtering (state mirrored in the URL: ?topic=)
+        (function () {
+            var topicButtons = Array.from(document.querySelectorAll('.filter-button[data-topic-filter]'));
+            var filterRows = Array.from(document.querySelectorAll('.filter-row'));
+            var appSections = Array.from(document.querySelectorAll('.app-section'));
+            var resultsStatus = document.getElementById('results-status');
+            var activeTopic = 'all';
+
+            if (!appSections.length) return;
+
+            var appsFact = document.getElementById('fact-apps');
+            if (appsFact) appsFact.textContent = document.querySelectorAll('.app-section .card').length;
+
+            // Give each card a concise accessible name and description.
+            document.querySelectorAll('.card').forEach(function (card, index) {
+                var title = card.querySelector('h3');
+                var desc = card.querySelector('.card-body p');
+                if (title) {
+                    title.id = 'card-title-' + index;
+                    card.setAttribute('aria-labelledby', title.id);
+                }
+                if (desc) {
+                    desc.id = 'card-desc-' + index;
+                    card.setAttribute('aria-describedby', desc.id);
+                }
+            });
+
+            function cardMatchesTopic(card) {
+                if (activeTopic === 'all') return true;
+                return (card.dataset.topic || '').split(' ').indexOf(activeTopic) !== -1;
+            }
+
+            function updateButtons() {
+                topicButtons.forEach(function (button) {
+                    button.setAttribute('aria-pressed', String(button.dataset.topicFilter === activeTopic));
+                });
+            }
+
+            function syncUrl() {
+                try {
+                    var qs = activeTopic !== 'all' ? '?topic=' + encodeURIComponent(activeTopic) : '';
+                    history.replaceState(null, '', location.pathname + qs + location.hash);
+                } catch (error) {
+                    // URL sync is a convenience only.
+                }
+            }
+
+            function applyFilters() {
+                var visibleTotal = 0;
+
+                appSections.forEach(function (section) {
+                    var visibleInSection = 0;
+
+                    section.querySelectorAll('.card').forEach(function (card) {
+                        var matches = cardMatchesTopic(card);
+                        card.hidden = !matches;
+                        if (matches) {
+                            visibleInSection += 1;
+                            visibleTotal += 1;
+                            if (activeTopic !== 'all') {
+                                card.classList.add('revealed');
+                            }
+                        }
+                    });
+
+                    section.hidden = visibleInSection === 0;
+                    var count = section.querySelector('.section-count');
+                    if (count) {
+                        count.textContent = visibleInSection + (visibleInSection === 1 ? ' app' : ' apps');
+                    }
+                });
+
+                resultsStatus.textContent = visibleTotal + (visibleTotal === 1 ? ' app shown.' : ' apps shown.');
+                updateScrollers(true);
+                syncUrl();
+            }
+
+            // A section with more than two rows of visible cards becomes a
+            // two-row sideways scroller; its edges fade while more cards lie beyond them.
+            var grids = appSections.map(function (section) { return section.querySelector('.grid'); });
+            var reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+
+            function columnsPerView() {
+                if (window.matchMedia('(max-width: 600px)').matches) return 1;
+                return window.matchMedia('(max-width: 1000px)').matches ? 2 : 3;
+            }
+
+            function updateScrollerFade(grid) {
+                var scrolling = grid.classList.contains('is-scroller');
+                var remaining = grid.scrollWidth - grid.clientWidth - grid.scrollLeft;
+                grid.parentNode.classList.toggle('has-more-left', scrolling && grid.scrollLeft > 4);
+                grid.parentNode.classList.toggle('has-more-right', scrolling && remaining > 4);
+            }
+
+            function updateScrollers(reset) {
+                var columns = columnsPerView();
+                grids.forEach(function (grid) {
+                    var visible = grid.querySelectorAll('.card:not([hidden])').length;
+                    grid.classList.toggle('is-scroller', visible > columns * 2);
+                    if (reset) grid.scrollLeft = 0;
+                    updateScrollerFade(grid);
+                });
+            }
+
+            grids.forEach(function (grid) {
+                [-1, 1].forEach(function (direction) {
+                    var button = document.createElement('button');
+                    button.type = 'button';
+                    button.className = 'scroller-button ' + (direction < 0 ? 'scroller-prev' : 'scroller-next');
+                    // Keyboard users reach every card by tabbing, which scrolls it into view.
+                    button.tabIndex = -1;
+                    button.setAttribute('aria-hidden', 'true');
+                    button.innerHTML = '<svg viewBox="0 0 24 24" focusable="false"><path d="' +
+                        (direction < 0 ? 'M15 5l-7 7 7 7' : 'M9 5l7 7-7 7') + '"/></svg>';
+                    button.addEventListener('click', function () {
+                        // Move by one screenful of whole columns.
+                        var cards = grid.querySelectorAll('.card:not([hidden])');
+                        var pitch = cards.length > 2 ? cards[2].offsetLeft - cards[0].offsetLeft : grid.clientWidth;
+                        grid.scrollBy({
+                            left: direction * pitch * columnsPerView(),
+                            behavior: reducedMotion.matches ? 'auto' : 'smooth'
+                        });
+                    });
+                    grid.parentNode.appendChild(button);
+                });
+                grid.addEventListener('scroll', function () { updateScrollerFade(grid); }, { passive: true });
+            });
+            window.addEventListener('resize', function () { updateScrollers(false); });
+            window.addEventListener('load', function () { updateScrollers(false); });
+            updateScrollers(false);
+
+            function setTopic(topic) {
+                activeTopic = topic;
+                updateButtons();
+                applyFilters();
+            }
+
+            topicButtons.forEach(function (button) {
+                button.addEventListener('click', function () {
+                    setTopic(button.dataset.topicFilter);
+                });
+            });
+
+            // Jumping to a section from the nav always shows every app.
+            document.querySelectorAll('nav a[href^="#"]').forEach(function (link) {
+                link.addEventListener('click', function () {
+                    var targetId = link.getAttribute('href').slice(1);
+                    if (appSections.some(function (section) { return section.id === targetId; })) {
+                        setTopic('all');
+                    }
+                });
+            });
+
+            // Fade the right edge of a chip row while more chips are off-screen.
+            function updateRowFade(row) {
+                row.classList.toggle('has-more', row.scrollWidth - row.clientWidth - row.scrollLeft > 4);
+            }
+            filterRows.forEach(function (row) {
+                row.addEventListener('scroll', function () { updateRowFade(row); }, { passive: true });
+                updateRowFade(row);
+            });
+            window.addEventListener('resize', function () { filterRows.forEach(updateRowFade); });
+            window.addEventListener('load', function () { filterRows.forEach(updateRowFade); });
+
+            // Restore a shared link such as /?topic=waves
+            try {
+                var topic = new URLSearchParams(location.search).get('topic');
+                var valid = topicButtons.some(function (b) { return b.dataset.topicFilter === topic; });
+                if (valid && topic !== 'all') setTopic(topic);
+            } catch (error) {
+                // Ignore malformed query strings.
+            }
+        })();
+
+        // Back-to-top button
+        (function () {
+            var button = document.getElementById('back-to-top');
+            if (!button) return;
+            var reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+            var lastY = window.scrollY;
+            var hideTimer = 0;
+            // Appear while scrolling up (and fade after a pause) so it rarely covers content.
+            function update() {
+                var y = window.scrollY;
+                var farDown = y > window.innerHeight * 1.2;
+                if (!farDown) {
+                    button.classList.remove('visible');
+                } else if (y < lastY) {
+                    button.classList.add('visible');
+                    clearTimeout(hideTimer);
+                    hideTimer = setTimeout(function () { button.classList.remove('visible'); }, 2500);
+                } else if (y > lastY) {
+                    button.classList.remove('visible');
+                }
+                lastY = y;
+            }
+            window.addEventListener('scroll', update, { passive: true });
+            button.addEventListener('click', function () {
+                window.scrollTo({ top: 0, behavior: reduced ? 'auto' : 'smooth' });
+            });
+            update();
+        })();
+
+        // Hide the fullscreen button where the browser cannot fullscreen a page (e.g. iPhone)
+        (function () {
+            var root = document.documentElement;
+            if (root.requestFullscreen || root.webkitRequestFullscreen) return;
+            document.querySelectorAll('[data-panphy-fullscreen]').forEach(function (button) {
+                button.style.setProperty('display', 'none', 'important');
+            });
+        })();
+    </script>
+
+    <script>
+        // Spacetime Grid Warp Animation
+        (function () {
+            var canvas = document.getElementById('spacetime-canvas');
+            if (!canvas) return;
+            var ctx = canvas.getContext('2d');
+            var dpr = window.devicePixelRatio || 1;
+            var w, h, cols, rows;
+            var spacing = 40;
+            var time = 0;
+
+            var mouseX = 0;
+            var mouseY = 0;
+            var activeX = 0;
+            var activeY = 0;
+            var strength = 120;
+            var massRadius = 180;
+            var hasPointerInteraction = false;
+
+            var reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+            var running = false;
+            var lastFrameTime = 0;
+            var coarsePointer = window.matchMedia('(pointer: coarse)').matches;
+            var frameInterval = coarsePointer ? 1000 / 30 : 1000 / 60;
+            var idleThreshold = 0.5;
+
+            function wake() {
+                if (!running) {
+                    running = true;
+                    lastFrameTime = performance.now();
+                    requestAnimationFrame(loop);
+                }
+            }
+
+            function clamp(value, min, max) {
+                return Math.max(min, Math.min(max, value));
+            }
+
+            function getInitialAnchor() {
+                var heading = document.querySelector('header h1');
+                if (!heading) {
+                    return {
+                        x: w * 0.66,
+                        y: h * 0.28
+                    };
+                }
+
+                var rect = heading.getBoundingClientRect();
+                return {
+                    x: clamp(rect.right + Math.max(48, rect.width * 0.18), 80, w - 80),
+                    y: clamp(rect.top + rect.height * 0.58, 80, h - 80)
+                };
+            }
+
+            function setPointerTarget(x, y) {
+                mouseX = x;
+                mouseY = y;
+                wake();
+            }
+
+            function handlePointerInput(x, y) {
+                if (reducedMotion) return;
+                if (!hasPointerInteraction) {
+                    hasPointerInteraction = true;
+                }
+                setPointerTarget(x, y);
+            }
+
+            document.addEventListener('mousemove', function (e) {
+                handlePointerInput(e.clientX, e.clientY);
+            });
+            document.addEventListener('touchmove', function (e) {
+                // Scrolling with a finger should not keep the grid animating.
+                if (coarsePointer) return;
+                handlePointerInput(e.touches[0].clientX, e.touches[0].clientY);
+            }, { passive: true });
+            document.addEventListener('touchstart', function (e) {
+                handlePointerInput(e.touches[0].clientX, e.touches[0].clientY);
+            }, { passive: true });
+
+            function resize() {
+                w = window.innerWidth;
+                h = window.innerHeight;
+                canvas.width = w * dpr;
+                canvas.height = h * dpr;
+                canvas.style.width = w + 'px';
+                canvas.style.height = h + 'px';
+                ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+                cols = Math.ceil(w / spacing) + 2;
+                rows = Math.ceil(h / spacing) + 2;
+                if (!hasPointerInteraction) {
+                    var anchor = getInitialAnchor();
+                    mouseX = anchor.x;
+                    mouseY = anchor.y;
+                    activeX = anchor.x;
+                    activeY = anchor.y;
+                }
+                if (reducedMotion) {
+                    draw();
+                } else {
+                    wake();
+                }
+            }
+
+            function getGridColor() {
+                return getComputedStyle(document.documentElement).getPropertyValue('--canvas-grid').trim() || 'rgba(0, 0, 0, 0.06)';
+            }
+
+            function getNodeColor() {
+                return getComputedStyle(document.documentElement).getPropertyValue('--canvas-node').trim() || 'rgba(0, 0, 0, 0.12)';
+            }
+
+            function warp(gx, gy, t) {
+                var distX = gx - activeX;
+                var distY = gy - activeY;
+                var dist = Math.sqrt(distX * distX + distY * distY);
+                if (dist < 1) dist = 1;
+                var falloff = Math.exp(-(dist * dist) / (massRadius * massRadius));
+                var ripple = Math.sin(dist * 0.04 - t * 1.5) * 0.3;
+                var pull = (strength * falloff * (1 + ripple)) / (dist + 50);
+                return {
+                    x: gx - distX * pull,
+                    y: gy - distY * pull
+                };
+            }
+
+            function draw() {
+                time += 0.008;
+                ctx.clearRect(0, 0, w, h);
+
+                activeX += (mouseX - activeX) * 0.012;
+                activeY += (mouseY - activeY) * 0.012;
+
+                var lineColor = getGridColor();
+                var nodeColor = getNodeColor();
+
+                var grid = [];
+                for (var r = 0; r <= rows; r++) {
+                    grid[r] = [];
+                    for (var c = 0; c <= cols; c++) {
+                        var gx = c * spacing;
+                        var gy = r * spacing;
+                        grid[r][c] = warp(gx, gy, time);
+                    }
+                }
+
+                ctx.strokeStyle = lineColor;
+                ctx.lineWidth = 0.8;
+                ctx.beginPath();
+
+                for (var r = 0; r <= rows; r++) {
+                    var p = grid[r][0];
+                    ctx.moveTo(p.x, p.y);
+                    for (var c = 1; c <= cols; c++) {
+                        p = grid[r][c];
+                        ctx.lineTo(p.x, p.y);
+                    }
+                }
+
+                for (var c = 0; c <= cols; c++) {
+                    var p = grid[0][c];
+                    ctx.moveTo(p.x, p.y);
+                    for (var r = 1; r <= rows; r++) {
+                        p = grid[r][c];
+                        ctx.lineTo(p.x, p.y);
+                    }
+                }
+
+                ctx.stroke();
+
+                ctx.fillStyle = nodeColor;
+                for (var r = 0; r <= rows; r++) {
+                    for (var c = 0; c <= cols; c++) {
+                        var p = grid[r][c];
+                        var origX = c * spacing;
+                        var origY = r * spacing;
+                        var distortion = Math.sqrt(
+                            (p.x - origX) * (p.x - origX) +
+                            (p.y - origY) * (p.y - origY)
+                        );
+                        if (distortion > 2) {
+                            var radius = Math.min(2.5, 0.8 + distortion * 0.08);
+                            ctx.beginPath();
+                            ctx.arc(p.x, p.y, radius, 0, Math.PI * 2);
+                            ctx.fill();
+                        }
+                    }
+                }
+            }
+
+            function loop(now) {
+                if (!running) return;
+
+                if (now - lastFrameTime < frameInterval) {
+                    requestAnimationFrame(loop);
+                    return;
+                }
+                lastFrameTime = now;
+
+                draw();
+
+                var dx = mouseX - activeX;
+                var dy = mouseY - activeY;
+                if (dx * dx + dy * dy < idleThreshold * idleThreshold) {
+                    draw();
+                    running = false;
+                    return;
+                }
+
+                requestAnimationFrame(loop);
+            }
+
+            resize();
+            window.addEventListener('resize', resize);
+            window.addEventListener('pageshow', function () {
+                requestAnimationFrame(resize);
+            });
+            document.addEventListener('visibilitychange', function () {
+                if (document.visibilityState === 'visible') {
+                    requestAnimationFrame(resize);
+                }
+            });
+            draw();
+        })();
+    </script>
+    <script>
+        // Theme Toggle Functionality
+        window.PanPhyThemeToggle.mount(document.getElementById('theme-button'));
+
+        const OFFLINE_CARD_REQUIREMENTS = {
+            '/tools/panphymd.html': [
+                '/tools/panphymd.html',
+                '/tools/panphymd/css/panphymd.css',
+                '/tools/panphymd/js/main.js',
+                'https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js',
+                'https://cdn.jsdelivr.net/npm/marked@4.3.0/marked.min.js',
+                'https://cdn.jsdelivr.net/npm/dompurify@3.4.16/dist/purify.min.js',
+                'https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js',
+                'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js'
+            ],
+            '/tools/panphyplot.html': [
+                '/tools/panphyplot.html',
+                '/tools/panphyplot/css/panphyplot.css',
+                '/tools/panphyplot/css/theme.css',
+                '/tools/panphyplot/css/math-reference.css',
+                '/tools/panphyplot/css/tour.css',
+                '/tools/panphyplot/js/copy.js',
+                '/tools/panphyplot/js/dialogs.js',
+                '/tools/panphyplot/js/fit-core.js',
+                '/tools/panphyplot/js/fit-worker.js',
+                '/tools/panphyplot/js/fitting.js',
+                '/tools/panphyplot/js/main.js',
+                '/tools/panphyplot/js/legacy-import.js',
+                '/tools/panphyplot/js/model.js',
+                '/tools/panphyplot/js/panes.js',
+                '/tools/panphyplot/js/plot.js',
+                '/tools/panphyplot/js/project.js',
+                '/tools/panphyplot/js/state.js',
+                '/tools/panphyplot/js/stats.js',
+                '/tools/panphyplot/js/tour.js',
+                '/tools/panphyplot/js/ui.js',
+                '/tools/panphyplot/js/vendor/math.min.js',
+                '/tools/panphyplot/manual.html',
+                '/tools/panphyplot/manual/manual.css',
+                '/tools/panphyplot/manual/manual.js',
+                '/tools/panphyplot/manual/clear-dark.png',
+                '/tools/panphyplot/manual/clear-light.png',
+                '/tools/panphyplot/manual/columns-dark.png',
+                '/tools/panphyplot/manual/columns-light.png',
+                '/tools/panphyplot/manual/fit-dark.png',
+                '/tools/panphyplot/manual/fit-light.png',
+                '/tools/panphyplot/manual/formula-dark.png',
+                '/tools/panphyplot/manual/formula-light.png',
+                '/tools/panphyplot/manual/graph-dark.png',
+                '/tools/panphyplot/manual/graph-light.png',
+                '/tools/panphyplot/manual/mean-dark.png',
+                '/tools/panphyplot/manual/mean-light.png',
+                '/tools/panphyplot/manual/result-dark.png',
+                '/tools/panphyplot/manual/result-light.png',
+                '/tools/panphyplot/manual/table-dark.png',
+                '/tools/panphyplot/manual/table-light.png',
+                '/tools/panphyplot/manual/workspace-dark.png',
+                '/tools/panphyplot/manual/workspace-light.png',
+                '/tools/panphyplot/math_ref.html',
+                'https://cdn.plot.ly/plotly-basic-2.29.1.min.js',
+                'https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-AMS-MML_SVG.js',
+                'https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/config/TeX-AMS-MML_SVG.js?V=2.7.5',
+                'https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/jax/output/SVG/jax.js?V=2.7.5',
+                'https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/jax/output/SVG/fonts/TeX/fontdata.js?V=2.7.5',
+                'https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/jax/output/SVG/fonts/TeX/Main/Regular/GreekAndCoptic.js?V=2.7.5',
+                'https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/jax/output/SVG/fonts/TeX/Size2/Regular/Main.js?V=2.7.5',
+                'https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/jax/output/SVG/fonts/TeX/Size1/Regular/Main.js?V=2.7.5',
+                'https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/jax/output/SVG/fonts/TeX/Size4/Regular/Main.js?V=2.7.5',
+                'https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/jax/output/SVG/fonts/TeX/AMS/Regular/Main.js?V=2.7.5',
+                'https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/jax/output/SVG/fonts/TeX/AMS/Regular/GeneralPunctuation.js?V=2.7.5',
+                'https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/jax/output/SVG/fonts/TeX/Size3/Regular/Main.js?V=2.7.5',
+                'https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/jax/output/SVG/fonts/TeX/Main/Regular/BasicLatin.js?V=2.7.5'
+            ],
+            '/tools/motion_tracker.html': [
+                '/tools/motion_tracker.html',
+                '/tools/motion_tracker/css/motion_tracker.css',
+                'https://cdn.jsdelivr.net/npm/chart.js@4.5.1/dist/chart.umd.min.js'
+            ],
+            '/tools/sound_analyzer.html': ['/tools/sound_analyzer.html'],
+            '/tools/tone_generator.html': ['/tools/tone_generator.html'],
+            '/simulations/atomic_models.html': [
+                '/simulations/atomic_models.html',
+                '/assets/fullscreen-button.css',
+                '/simulations/atomic_models/style.css',
+                '/simulations/atomic_models/app.js',
+                '/simulations/atomic_models/content.js',
+                '/assets/theme-toggle.css',
+                '/assets/theme-toggle.js',
+                '/assets/panphy.png',
+                'https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js',
+                'https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/controls/OrbitControls.js'
+            ],
+            '/simulations/electric_motors.html': [
+                '/simulations/electric_motors.html',
+                '/assets/fullscreen-button.css',
+                '/simulations/electric_motors/style.css',
+                '/simulations/electric_motors/app.js',
+                '/simulations/electric_motors/content.js',
+                '/assets/theme-toggle.css',
+                '/assets/theme-toggle.js',
+                '/assets/panphy.png',
+                'https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js',
+                'https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/controls/OrbitControls.js'
+            ],
+            '/simulations/charges_in_fields.html': [
+                '/simulations/charges_in_fields.html',
+                '/assets/fullscreen-button.css',
+                '/simulations/charges_in_fields/style.css',
+                '/simulations/charges_in_fields/app.js',
+                '/simulations/charges_in_fields/content.js',
+                '/assets/theme-toggle.css',
+                '/assets/theme-toggle.js',
+                '/assets/panphy.png',
+                'https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js',
+                'https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/controls/OrbitControls.js'
+            ],
+            '/simulations/star_life_cycle.html': [
+                '/simulations/star_life_cycle.html',
+                '/assets/fullscreen-button.css',
+                '/simulations/star_life_cycle/style.css',
+                '/simulations/star_life_cycle/app.js',
+                '/simulations/star_life_cycle/content.js',
+                '/simulations/star_life_cycle/physics.js',
+                '/assets/theme-toggle.css',
+                '/assets/theme-toggle.js',
+                '/assets/panphy.png',
+                'https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js',
+                'https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/controls/OrbitControls.js'
+            ],
+            '/simulations/nuclear_decay.html': [
+                '/simulations/nuclear_decay.html',
+                '/assets/fullscreen-button.css',
+                '/simulations/nuclear_decay/style.css',
+                '/simulations/nuclear_decay/app.js',
+                '/simulations/nuclear_decay/content.js',
+                '/assets/theme-toggle.css',
+                '/assets/theme-toggle.js',
+                '/assets/panphy.png',
+                'https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js',
+                'https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/controls/OrbitControls.js'
+            ],
+            '/simulations/fission_fusion.html': [
+                '/simulations/fission_fusion.html',
+                '/assets/fullscreen-button.css',
+                '/simulations/fission_fusion/style.css',
+                '/simulations/fission_fusion/app.js',
+                '/simulations/fission_fusion/content.js',
+                '/assets/theme-toggle.css',
+                '/assets/theme-toggle.js',
+                '/assets/panphy.png',
+                'https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js',
+                'https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/controls/OrbitControls.js'
+            ],
+            '/simulations/superposition.html': ['/simulations/superposition.html'],
+            '/simulations/standing_wave.html': ['/simulations/standing_wave.html'],
+            '/simulations/lorentz.html': ['/simulations/lorentz.html'],
+            '/simulations/ripple_tank.html': [
+                '/simulations/ripple_tank.html',
+                'https://cdn.jsdelivr.net/npm/three@0.161.0/build/three.module.js',
+                'https://cdn.jsdelivr.net/npm/three@0.161.0/examples/jsm/controls/OrbitControls.js'
+            ],
+            '/simulations/collision.html': [
+                '/simulations/collision.html',
+                '/simulations/collision/styles.css',
+                '/simulations/collision/app.js',
+                'https://cdn.jsdelivr.net/npm/three@0.161.0/build/three.module.js',
+                '/simulations/collision/collision_assets/models/hand_landmarker.task',
+                '/simulations/collision/collision_assets/mediapipe/tasks-vision-0.10.32/vision_bundle.mjs',
+                '/simulations/collision/collision_assets/mediapipe/tasks-vision-0.10.32/wasm/vision_wasm_internal.js',
+                '/simulations/collision/collision_assets/mediapipe/tasks-vision-0.10.32/wasm/vision_wasm_internal.wasm',
+                '/simulations/collision/collision_assets/mediapipe/tasks-vision-0.10.32/wasm/vision_wasm_nosimd_internal.js',
+                '/simulations/collision/collision_assets/mediapipe/tasks-vision-0.10.32/wasm/vision_wasm_nosimd_internal.wasm'
+            ],
+            '/simulations/states.html': [
+                '/simulations/states.html',
+                '/simulations/states/style.css',
+                '/simulations/states/app.js',
+                '/simulations/states/physics.js',
+                'https://cdn.jsdelivr.net/npm/three@0.161.0/build/three.module.js',
+                'https://cdn.jsdelivr.net/npm/three@0.161.0/examples/jsm/controls/OrbitControls.js'
+            ],
+            '/for_teachers/timer.html': [
+                '/for_teachers/timer.html'
+            ],
+            '/for_teachers/visualizer.html': ['/for_teachers/visualizer.html']
+        };
+        const OFFLINE_COMMON_ASSETS = [
+            '/assets/fonts/fonts.css',
+            '/assets/fonts/dm-serif-display-italic-400-latin-ext.woff2',
+            '/assets/fonts/dm-serif-display-italic-400-latin.woff2',
+            '/assets/fonts/dm-serif-display-normal-400-latin-ext.woff2',
+            '/assets/fonts/dm-serif-display-normal-400-latin.woff2',
+            '/assets/fonts/ibm-plex-mono-normal-400-cyrillic-ext.woff2',
+            '/assets/fonts/ibm-plex-mono-normal-400-cyrillic.woff2',
+            '/assets/fonts/ibm-plex-mono-normal-400-latin-ext.woff2',
+            '/assets/fonts/ibm-plex-mono-normal-400-latin.woff2',
+            '/assets/fonts/ibm-plex-mono-normal-400-vietnamese.woff2',
+            '/assets/fonts/ibm-plex-mono-normal-500-cyrillic-ext.woff2',
+            '/assets/fonts/ibm-plex-mono-normal-500-cyrillic.woff2',
+            '/assets/fonts/ibm-plex-mono-normal-500-latin-ext.woff2',
+            '/assets/fonts/ibm-plex-mono-normal-500-latin.woff2',
+            '/assets/fonts/ibm-plex-mono-normal-500-vietnamese.woff2',
+            '/assets/fonts/ibm-plex-mono-normal-600-cyrillic-ext.woff2',
+            '/assets/fonts/ibm-plex-mono-normal-600-cyrillic.woff2',
+            '/assets/fonts/ibm-plex-mono-normal-600-latin-ext.woff2',
+            '/assets/fonts/ibm-plex-mono-normal-600-latin.woff2',
+            '/assets/fonts/ibm-plex-mono-normal-600-vietnamese.woff2',
+            '/assets/fonts/manrope-normal-400-800-cyrillic-ext.woff2',
+            '/assets/fonts/manrope-normal-400-800-cyrillic.woff2',
+            '/assets/fonts/manrope-normal-400-800-greek.woff2',
+            '/assets/fonts/manrope-normal-400-800-latin-ext.woff2',
+            '/assets/fonts/manrope-normal-400-800-latin.woff2',
+            '/assets/fonts/manrope-normal-400-800-vietnamese.woff2',
+            '/assets/theme.js',
+            '/assets/theme-toggle.css',
+            '/assets/theme-toggle.js',
+            '/assets/standalone-top.css'
+        ];
+        const OFFLINE_APP_PATHS = Object.keys(OFFLINE_CARD_REQUIREMENTS);
+        const OFFLINE_REQUIRED_ASSETS = [...new Set(
+            [
+                ...OFFLINE_COMMON_ASSETS,
+                ...OFFLINE_APP_PATHS.flatMap((path) => OFFLINE_CARD_REQUIREMENTS[path])
+            ]
+        )];
+        const offlineCardPills = new Map();
+        const OFFLINE_REPAIR_RETRY_MS = 60 * 1000;
+
+        const OFFLINE_POLL_MS = 3000;
+        const OFFLINE_POLL_MAX = 40;
+        const offlineStatus = document.getElementById('offline-status');
+        const offlineFact = document.getElementById('fact-offline');
+        if (offlineFact) offlineFact.textContent = OFFLINE_APP_PATHS.length;
+        let offlinePollCount = 0;
+        let offlineReadyPollId = 0;
+        let offlineReadinessUpdateInFlight = false;
+        let lastOfflineRepairAttempt = 0;
+
+        function setCardOfflineState(pill, state, label) {
+            if (!pill) return;
+            pill.dataset.state = state;
+            pill.textContent = label;
+            pill.hidden = state === 'checking';
+        }
+
+        function normalizeCardPath(hrefValue) {
+            try {
+                const url = new URL(hrefValue, window.location.origin);
+                if (url.origin !== window.location.origin) return null;
+                return url.pathname;
+            } catch (error) {
+                return null;
+            }
+        }
+
+        function initOfflineCardPills() {
+            const cardLinks = document.querySelectorAll('a.card[href], .card a[href]');
+            cardLinks.forEach((link) => {
+                const cardPath = normalizeCardPath(link.getAttribute('href'));
+                if (!cardPath || !OFFLINE_CARD_REQUIREMENTS[cardPath]) return;
+
+                const card = link.matches('.card') ? link : link.closest('.card');
+                if (!card || offlineCardPills.has(cardPath)) return;
+
+                const pill = document.createElement('span');
+                pill.className = 'card-offline-pill';
+                setCardOfflineState(pill, 'checking', '');
+                const meta = card.querySelector('.card-meta');
+                if (meta) {
+                    meta.append(pill);
+                } else {
+                    card.prepend(pill);
+                }
+                offlineCardPills.set(cardPath, pill);
+            });
+        }
+
+        async function getAssetCacheMap(assets) {
+            const cacheMap = new Map();
+            if (!('caches' in window)) {
+                return cacheMap;
+            }
+
+            const checks = await Promise.all(
+                assets.map(async (asset) => {
+                    try {
+                        const absoluteUrl = new URL(asset, window.location.origin).href;
+                        const match = await caches.match(absoluteUrl, { ignoreVary: true });
+                        return [asset, Boolean(match)];
+                    } catch (error) {
+                        return [asset, false];
+                    }
+                })
+            );
+
+            checks.forEach(([asset, isCached]) => {
+                cacheMap.set(asset, isCached);
+            });
+            return cacheMap;
+        }
+
+        function updateOfflineCardPills(cacheMap) {
+            let readyApps = 0;
+
+            OFFLINE_APP_PATHS.forEach((path) => {
+                const requirements = [...OFFLINE_COMMON_ASSETS, ...OFFLINE_CARD_REQUIREMENTS[path]];
+                const ready = requirements.every((asset) => cacheMap.get(asset));
+                if (ready) {
+                    readyApps += 1;
+                }
+
+                const pill = offlineCardPills.get(path);
+                if (!pill) return;
+
+                if (ready) {
+                    setCardOfflineState(pill, 'ready', 'Offline ready');
+                    return;
+                }
+                setCardOfflineState(pill, 'checking', '');
+            });
+
+            updateOfflineStatus(readyApps, OFFLINE_APP_PATHS.length);
+
+            return {
+                readyApps,
+                totalApps: OFFLINE_APP_PATHS.length
+            };
+        }
+
+        function updateOfflineStatus(readyApps, totalApps) {
+            if (!offlineStatus) return;
+            offlineStatus.hidden = false;
+            if (readyApps === totalApps) {
+                offlineStatus.dataset.state = 'ready';
+                offlineStatus.textContent = '\u2713 All ' + totalApps + ' offline-capable apps are saved on this device.';
+            } else {
+                offlineStatus.dataset.state = 'saving';
+                offlineStatus.textContent = 'Saving apps for offline use: ' + readyApps + ' of ' + totalApps + ' ready.';
+            }
+        }
+
+        function requestOfflineCacheRepair() {
+            const worker = navigator.serviceWorker.controller;
+            const now = Date.now();
+            if (!worker || now - lastOfflineRepairAttempt < OFFLINE_REPAIR_RETRY_MS) {
+                return Promise.resolve(false);
+            }
+
+            lastOfflineRepairAttempt = now;
+            return new Promise((resolve) => {
+                const channel = new MessageChannel();
+                const timeoutId = window.setTimeout(() => resolve(false), 15000);
+                channel.port1.onmessage = () => {
+                    window.clearTimeout(timeoutId);
+                    resolve(true);
+                };
+                worker.postMessage({ type: 'REPAIR_PRECACHE' }, [channel.port2]);
+            });
+        }
+
+        async function updateOfflineReadiness() {
+            if (offlineReadinessUpdateInFlight) return;
+            offlineReadinessUpdateInFlight = true;
+
+            try {
+                if (!('serviceWorker' in navigator) || !('caches' in window)) {
+                    offlineCardPills.forEach((pill) => {
+                        setCardOfflineState(pill, 'checking', '');
+                    });
+                    if (offlineReadyPollId) {
+                        clearInterval(offlineReadyPollId);
+                        offlineReadyPollId = 0;
+                    }
+                    return;
+                }
+
+                let cacheMap = await getAssetCacheMap(OFFLINE_REQUIRED_ASSETS);
+                let summary = updateOfflineCardPills(cacheMap);
+
+                if (summary.readyApps === summary.totalApps) {
+                    if (offlineReadyPollId) {
+                        clearInterval(offlineReadyPollId);
+                        offlineReadyPollId = 0;
+                    }
+                    return;
+                }
+
+                if (!navigator.onLine) {
+                    return;
+                }
+
+                const repairCompleted = await requestOfflineCacheRepair();
+                if (repairCompleted) {
+                    cacheMap = await getAssetCacheMap(OFFLINE_REQUIRED_ASSETS);
+                    summary = updateOfflineCardPills(cacheMap);
+                    if (summary.readyApps === summary.totalApps && offlineReadyPollId) {
+                        clearInterval(offlineReadyPollId);
+                        offlineReadyPollId = 0;
+                    }
+                }
+
+            } catch (error) {
+                offlineCardPills.forEach((pill) => {
+                    if (pill.dataset.state !== 'ready') {
+                        setCardOfflineState(pill, 'checking', '');
+                    }
+                });
+            } finally {
+                offlineReadinessUpdateInFlight = false;
+            }
+        }
+
+        function startOfflineReadinessMonitor() {
+            initOfflineCardPills();
+            updateOfflineReadiness();
+            if (!offlineReadyPollId) {
+                offlineReadyPollId = setInterval(function () {
+                    offlinePollCount += 1;
+                    // Stop polling if an asset never caches; online/visibility events still re-check.
+                    if (offlinePollCount > OFFLINE_POLL_MAX) {
+                        clearInterval(offlineReadyPollId);
+                        offlineReadyPollId = 0;
+                        return;
+                    }
+                    updateOfflineReadiness();
+                }, OFFLINE_POLL_MS);
+            }
+            window.addEventListener('online', updateOfflineReadiness);
+            window.addEventListener('offline', updateOfflineReadiness);
+            document.addEventListener('visibilitychange', () => {
+                if (document.visibilityState === 'visible') {
+                    updateOfflineReadiness();
+                }
+            });
+        }
+
+        startOfflineReadinessMonitor();
+    </script>
+    <script>
+        // Hero showcase: a short animated scene from one app at a time. It starts on a random
+        // scene and moves on when that scene's time is up, except while the panel is hovered or focused.
+        (function () {
+            var scope = document.getElementById('scope');
+            var svg = document.getElementById('scope-trace');
+            var host = document.getElementById('scope-scene');
+            var title = document.getElementById('scope-title');
+            var scale = document.getElementById('scope-scale');
+            var note = document.getElementById('scope-note');
+            var readouts = document.getElementById('scope-readouts');
+            if (!scope || !svg || !host || !title || !scale || !note || !readouts) return;
+
+            var NS = 'http://www.w3.org/2000/svg';
+            var WIDTH = 520;
+            var SWAP_MS = 350;
+            // Redraw at about 30 frames a second: these scenes move slowly, and it halves the work.
+            var FRAME_MS = 1000 / 30;
+
+            function make(name, attrs, parent, text) {
+                var node = document.createElementNS(NS, name);
+                for (var key in attrs) node.setAttribute(key, attrs[key]);
+                if (text !== undefined) node.textContent = text;
+                (parent || host).appendChild(node);
+                return node;
+            }
+
+            // A straight arrow from (x1, y1) to (x2, y2) with an open head.
+            function arrow(x1, y1, x2, y2, head) {
+                var angle = Math.atan2(y2 - y1, x2 - x1);
+                var d = 'M' + x1.toFixed(1) + ' ' + y1.toFixed(1) + 'L' + x2.toFixed(1) + ' ' + y2.toFixed(1);
+                [-0.5, 0.5].forEach(function (side) {
+                    d += 'M' + x2.toFixed(1) + ' ' + y2.toFixed(1) + 'L' +
+                        (x2 - head * Math.cos(angle + side)).toFixed(1) + ' ' + (y2 - head * Math.sin(angle + side)).toFixed(1);
+                });
+                return d;
+            }
+
+            var SCENES = [
+                {
+                    // Waves of 2.0 Hz and 2.3 Hz over a 2 s window, drifting at one tenth speed.
+                    title: 'Wave Superposition',
+                    href: '/simulations/superposition.html',
+                    label: 'Open the Wave Superposition simulation',
+                    scale: '0.2 s/div · ×0.1 speed',
+                    note: 'y = y₁ + y₂',
+                    readouts: [['1', 'f₁ = 2.0 Hz'], ['2', 'f₂ = 2.3 Hz'], ['sum', 'beat = 0.3 Hz']],
+                    still: 14,
+                    seconds: 8.4,
+                    build: function () {
+                        make('path', { 'class': 'scope-axis', d: 'M0 150h520' });
+                        var wave1 = make('path', { 'class': 'scope-wave scope-wave-1' });
+                        var wave2 = make('path', { 'class': 'scope-wave scope-wave-2' });
+                        var waveSum = make('path', { 'class': 'scope-wave scope-wave-sum' });
+                        return function (seconds) {
+                            var start = (seconds + 14) * 0.1;
+                            var d1 = '';
+                            var d2 = '';
+                            var dSum = '';
+                            for (var x = 0; x <= WIDTH; x += 4) {
+                                var t = (x / WIDTH) * 2 - start;
+                                var y1 = 44 * Math.sin(2 * Math.PI * 2.0 * t);
+                                var y2 = 44 * Math.sin(2 * Math.PI * 2.3 * t);
+                                var cmd = x === 0 ? 'M' : 'L';
+                                d1 += cmd + x + ' ' + (150 - y1).toFixed(1);
+                                d2 += cmd + x + ' ' + (150 - y2).toFixed(1);
+                                dSum += cmd + x + ' ' + (150 - y1 - y2).toFixed(1);
+                            }
+                            wave1.setAttribute('d', d1);
+                            wave2.setAttribute('d', d2);
+                            waveSum.setAttribute('d', dSum);
+                        };
+                    }
+                },
+                {
+                    // 400 nuclei with a 20 s half-life: 10 s per division across, 100 nuclei per division up.
+                    title: 'Nuclear Decay',
+                    href: '/simulations/nuclear_decay.html',
+                    label: 'Open the Nuclear Decay simulation',
+                    scale: '10 s/div · 100 nuclei/div',
+                    note: 'N = N₀e⁻λᵗ',
+                    readouts: [['sum', 'N₀ = 400'], ['1', 'T½ = 20 s'], ['2', 'counts']],
+                    still: 9,
+                    seconds: 7.4,
+                    build: function () {
+                        var SCATTER = [0.6, -0.9, 0.3, 1.1, -0.4, -1.2, 0.8, 0.1, -0.7, 1.0, -0.2, 0.5, -1.0, 0.4, 0.9, -0.5, 0.2, -0.8, 0.7, -0.3];
+                        function yOf(n) { return 250 - 0.5 * n; }
+                        function nAt(x) { return 400 * Math.pow(2, -x / 104); }
+                        make('path', { 'class': 'scope-axis', d: 'M0 250h520' });
+                        var guides = [1, 2, 3].map(function (k) {
+                            var x = 104 * k;
+                            var y = yOf(400 / Math.pow(2, k));
+                            var group = make('g', {});
+                            make('path', { 'class': 'scope-wave scope-wave-1', 'stroke-dasharray': '5 6', d: 'M0 ' + y + 'H' + x + 'V250' }, group);
+                            make('text', { 'class': 'scope-label', x: x, y: 270, 'text-anchor': 'middle' }, group, (k === 1 ? '' : k) + 'T½');
+                            return { x: x, group: group };
+                        });
+                        var dots = SCATTER.map(function (z, i) {
+                            var x = 13 + 26 * i;
+                            var n = nAt(x);
+                            return { x: x, node: make('circle', { 'class': 'scope-fill-2', cx: x, cy: yOf(n + z * Math.sqrt(n)).toFixed(1), r: 4.5 }) };
+                        });
+                        var curve = make('path', { 'class': 'scope-wave scope-wave-sum' });
+                        return function (seconds) {
+                            // Draw for 5.6 s, hold, then fade and start again.
+                            var t = seconds % 7.7;
+                            var pen = Math.min(WIDTH, (t / 5.6) * WIDTH);
+                            var d = '';
+                            for (var x = 0; x <= pen; x += 4) d += (x === 0 ? 'M' : 'L') + x + ' ' + yOf(nAt(x)).toFixed(1);
+                            curve.setAttribute('d', d || 'M0 50');
+                            dots.forEach(function (dot) { dot.node.setAttribute('opacity', dot.x <= pen ? 1 : 0); });
+                            guides.forEach(function (guide) { guide.group.setAttribute('opacity', guide.x <= pen ? 1 : 0); });
+                            host.setAttribute('opacity', Math.min(1, (7.7 - t) / 0.6).toFixed(2));
+                        };
+                    }
+                },
+                {
+                    // A proton at 400 km/s in 100 mT: r = mv/(qB) = 4.2 cm, turning anticlockwise
+                    // when the field points into the page.
+                    title: 'Charges in Fields',
+                    href: '/simulations/charges_in_fields.html',
+                    label: 'Open the Charges in Fields simulation',
+                    scale: 'proton · B = 100 mT into page',
+                    note: 'r = mv/qB',
+                    readouts: [['2', 'v = 400 km/s'], ['sum', 'F = qvB'], ['1', 'r = 4.2 cm']],
+                    still: 0.6,
+                    seconds: 8.4,
+                    build: function () {
+                        var CX = 260;
+                        var CY = 150;
+                        var R = 92;
+                        var marks = '';
+                        for (var x = 26; x < WIDTH; x += 52) {
+                            for (var y = 25; y < 300; y += 50) marks += 'M' + (x - 5) + ' ' + (y - 5) + 'l10 10m0 -10l-10 10';
+                        }
+                        make('path', { 'class': 'scope-mute', 'stroke-width': 1.5, opacity: 0.55, d: marks });
+                        make('circle', { 'class': 'scope-mute', 'stroke-dasharray': '4 6', cx: CX, cy: CY, r: R });
+                        var trail = make('path', { 'class': 'scope-wave scope-wave-1', 'stroke-width': 3 });
+                        var force = make('path', { 'class': 'scope-wave scope-wave-sum', 'stroke-width': 3 });
+                        var velocity = make('path', { 'class': 'scope-wave scope-wave-2', 'stroke-width': 3, opacity: 1 });
+                        var proton = make('circle', { 'class': 'scope-fill-1', r: 9 });
+                        return function (seconds) {
+                            var angle = 2 * Math.PI * seconds / 4.2;
+                            var px = CX + R * Math.cos(angle);
+                            var py = CY - R * Math.sin(angle);
+                            var d = '';
+                            for (var i = 0; i <= 30; i += 1) {
+                                var a = angle - 2.4 + 2.4 * i / 30;
+                                d += (i === 0 ? 'M' : 'L') + (CX + R * Math.cos(a)).toFixed(1) + ' ' + (CY - R * Math.sin(a)).toFixed(1);
+                            }
+                            trail.setAttribute('d', d);
+                            velocity.setAttribute('d', arrow(px, py, px - 62 * Math.sin(angle), py - 62 * Math.cos(angle), 11));
+                            force.setAttribute('d', arrow(px, py, px - 50 * Math.cos(angle), py + 50 * Math.sin(angle), 11));
+                            proton.setAttribute('cx', px.toFixed(1));
+                            proton.setAttribute('cy', py.toFixed(1));
+                        };
+                    }
+                },
+                {
+                    // Elastic collision: 2.0 kg at 1.5 m/s meets 1.0 kg at rest; they leave at 0.5 m/s and 2.0 m/s.
+                    title: 'Collision Lab',
+                    href: '/simulations/collision.html',
+                    label: 'Open the Collision Lab simulation',
+                    scale: 'elastic collision',
+                    note: 'Σp = const',
+                    readouts: [['1', '2.0 kg'], ['2', '1.0 kg'], ['sum', 'p = 3.0 kg m/s']],
+                    still: 1.9,
+                    seconds: 7.5,
+                    build: function () {
+                        var PX_PER_M = 60;
+                        make('path', { 'class': 'scope-wave scope-wave-sum', 'stroke-width': 2, d: 'M0 214h520' });
+                        function cart(width, fill, mass) {
+                            var group = make('g', {});
+                            make('rect', { 'class': fill, x: 0, y: 160, width: width, height: 40, rx: 7 }, group);
+                            make('circle', { 'class': 'scope-fill-ink', cx: 18, cy: 204, r: 9 }, group);
+                            make('circle', { 'class': 'scope-fill-ink', cx: width - 18, cy: 204, r: 9 }, group);
+                            make('text', { 'class': 'scope-label scope-fill-paper', x: width / 2, y: 185, 'text-anchor': 'middle' }, group, mass);
+                            var shaft = make('path', { 'class': 'scope-wave scope-wave-sum', 'stroke-width': 3 }, group);
+                            var speed = make('text', { 'class': 'scope-label', x: width / 2, y: 118, 'text-anchor': 'middle' }, group);
+                            return { group: group, width: width, shaft: shaft, speed: speed };
+                        }
+                        var heavy = cart(96, 'scope-fill-1', '2.0 kg');
+                        var light = cart(64, 'scope-fill-2', '1.0 kg');
+                        function place(item, left, v) {
+                            item.group.setAttribute('transform', 'translate(' + left.toFixed(1) + ' 0)');
+                            var mid = item.width / 2;
+                            var half = v * 20;
+                            item.shaft.setAttribute('d', v ? arrow(mid - half, 138, mid + half, 138, 10) : '');
+                            item.speed.textContent = v ? v.toFixed(1) + ' m/s' : 'at rest';
+                        }
+                        return function (seconds) {
+                            // One run-through lasts 7.6 s and covers 2.8 model seconds either side of the collision.
+                            var loop = seconds % 7.6;
+                            var t = loop * (5.6 / 7.6) - 2.8;
+                            place(heavy, 260 - heavy.width + (t < 0 ? 1.5 : 0.5) * PX_PER_M * t, t < 0 ? 1.5 : 0.5);
+                            place(light, 260 + (t < 0 ? 0 : 2.0) * PX_PER_M * t, t < 0 ? 0 : 2.0);
+                            host.setAttribute('opacity', Math.min(1, loop / 0.4, (7.6 - loop) / 0.4).toFixed(2));
+                        };
+                    }
+                }
+            ];
+
+            var reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+            var current = Math.floor(Math.random() * SCENES.length);
+            var draw = null;
+            var elapsed = 0;
+            var lastFrame = 0;
+            var switching = false;
+
+            function show(index) {
+                var scene = SCENES[index];
+                current = index;
+                host.replaceChildren();
+                host.removeAttribute('opacity');
+                title.textContent = scene.title;
+                scale.textContent = scene.scale;
+                note.textContent = scene.note;
+                scope.href = scene.href;
+                scope.setAttribute('aria-label', scene.label);
+                readouts.replaceChildren();
+                scene.readouts.forEach(function (item) {
+                    var span = document.createElement('span');
+                    var key = document.createElement('i');
+                    key.className = 'scope-key-' + item[0];
+                    span.appendChild(key);
+                    span.appendChild(document.createTextNode(item[1]));
+                    readouts.appendChild(span);
+                });
+                draw = scene.build();
+                draw(reduced ? scene.still : 0);
+                elapsed = 0;
+            }
+
+            show(current);
+            if (reduced) return;
+
+            function next() {
+                switching = true;
+                scope.classList.add('is-switching');
+                setTimeout(function () {
+                    show((current + 1) % SCENES.length);
+                    scope.classList.remove('is-switching');
+                    switching = false;
+                }, SWAP_MS);
+            }
+
+            var inView = true;
+            var frameId = 0;
+
+            function frame(now) {
+                frameId = 0;
+                if (!inView || document.hidden) {
+                    lastFrame = 0;
+                    return;
+                }
+                frameId = requestAnimationFrame(frame);
+                // Allow a few milliseconds of slack so that a 60 Hz screen draws every second frame.
+                if (lastFrame && now - lastFrame < FRAME_MS - 4) return;
+                var delta = lastFrame ? Math.min((now - lastFrame) / 1000, 0.1) : 0;
+                lastFrame = now;
+                elapsed += delta;
+                if (!switching) {
+                    draw(elapsed);
+                    // Stay on a scene the reader is pointing at or has focused, so the link under them does not change.
+                    if (elapsed >= SCENES[current].seconds && !scope.matches(':hover, :focus')) next();
+                }
+            }
+
+            function resume() {
+                if (!frameId && inView && !document.hidden) {
+                    frameId = requestAnimationFrame(frame);
+                }
+            }
+
+            if ('IntersectionObserver' in window) {
+                new IntersectionObserver(function (entries) {
+                    inView = entries[entries.length - 1].isIntersecting;
+                    resume();
+                }).observe(svg);
+            }
+            document.addEventListener('visibilitychange', resume);
+            resume();
+        })();
+    </script>
+    <script>
+        function updateOfflineFontState() {
+            document.documentElement.classList.toggle('offline-font', !navigator.onLine);
+        }
+
+        window.addEventListener('online', updateOfflineFontState);
+        window.addEventListener('offline', updateOfflineFontState);
+        updateOfflineFontState();
+    </script>
+    <script>
+        // Card scroll reveal with IntersectionObserver
+        (function () {
+            var cards = document.querySelectorAll('.card');
+            if (!cards.length) return;
+
+            var prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+            if (prefersReduced || !('IntersectionObserver' in window)) {
+                cards.forEach(function (c) { c.classList.add('revealed'); });
+                return;
+            }
+
+            var observer = new IntersectionObserver(function (entries) {
+                entries.forEach(function (entry) {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('revealed');
+                        observer.unobserve(entry.target);
+                    }
+                });
+            }, { threshold: 0.01, rootMargin: '0px 0px -30px 0px' });
+
+            cards.forEach(function (c) { observer.observe(c); });
+        })();
+    </script>
+</body>
+
+</html>
