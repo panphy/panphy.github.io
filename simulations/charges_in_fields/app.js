@@ -143,7 +143,7 @@ let selected = null;
 function readPalette() {
   const styles = getComputedStyle(document.documentElement);
   const css = name => styles.getPropertyValue(name).trim();
-  const names = ['positive', 'negative', 'alpha', 'field', 'e-field', 'force', 'force-b', 'velocity', 'copper', 'steel', 'carbon', 'north', 'south', 'current', 'text-secondary'];
+  const names = ['positive', 'negative', 'alpha', 'field', 'e-field', 'force', 'velocity', 'copper', 'steel', 'carbon', 'gun', 'gun-tip', 'north', 'south', 'current', 'text-secondary'];
   const result = { dark: document.documentElement.getAttribute('data-theme') === 'dark', css: {} };
   for (const name of names) {
     const key = name.replace(/-(\w)/g, (_, c) => c.toUpperCase());
@@ -489,10 +489,7 @@ function newLab(kind) {
   stage.add(group);
   const velocity = makeArrow(palette.velocity, 0.045);
   const force = makeArrow(palette.force, 0.045);
-  // The selector shows the electric and magnetic forces separately, in two force colours.
-  const electric = makeArrow(palette.force, 0.045);
-  const magnetic = makeArrow(palette.forceB, 0.045);
-  for (const arrow of [velocity, force, electric, magnetic]) {
+  for (const arrow of [velocity, force]) {
     arrow.visible = false;
     group.add(arrow);
   }
@@ -501,7 +498,7 @@ function newLab(kind) {
   fieldGroups.E.visible = state.showE;
   fieldGroups.B.visible = state.showB;
   group.add(fieldGroups.E, fieldGroups.B);
-  lab = { kind, group, tracks, fieldGroups, tracers: [], arrows: { velocity, force, electric, magnetic }, spots: [], time: 0, spawnClock: 0, emitted: new Array(HISTOGRAM_BINS).fill(0), passed: new Array(HISTOGRAM_BINS).fill(0) };
+  lab = { kind, group, tracks, fieldGroups, tracers: [], arrows: { velocity, force }, spots: [], time: 0, spawnClock: 0, emitted: new Array(HISTOGRAM_BINS).fill(0), passed: new Array(HISTOGRAM_BINS).fill(0) };
   return group;
 }
 function plates(group, halfGap, length, { swap = false } = {}) {
@@ -563,13 +560,16 @@ function bFieldLines(xs, ys, zFront, zBack, sign = 1, options = {}) {
     }
   }
 }
-function source(group, position) {
-  const gun = part(new THREE.Mesh(new THREE.CylinderGeometry(0.3, 0.38, 1.2, 24), material(palette.carbon, { metalness: 0.4 })), 'gun');
+// A particle gun pointing along +x, with particles leaving its nozzle at `position`. It is light in dark mode and glows a
+// little, so it stands out against the dark background and the field region.
+function source(group, position, size = 1) {
+  const glowing = palette.dark ? { emissive: palette.gun, emissiveIntensity: 0.25 } : {};
+  const gun = part(new THREE.Mesh(new THREE.CylinderGeometry(0.3 * size, 0.38 * size, 1.2 * size, 24), material(palette.gun, { metalness: palette.dark ? 0.2 : 0.4, ...glowing })), 'gun');
   gun.rotation.z = -Math.PI / 2;
-  gun.position.copy(position).add(new THREE.Vector3(-0.6, 0, 0));
-  const nozzle = new THREE.Mesh(new THREE.CylinderGeometry(0.12, 0.12, 0.3, 16), material(palette.steel, { metalness: 0.7 }));
+  gun.position.copy(position).add(new THREE.Vector3(-0.6 * size, 0, 0));
+  const nozzle = new THREE.Mesh(new THREE.CylinderGeometry(0.12 * size, 0.12 * size, 0.3 * size, 16), material(palette.gunTip, { metalness: palette.dark ? 0.3 : 0.7, ...glowing }));
   nozzle.rotation.z = -Math.PI / 2;
-  nozzle.position.copy(position).add(new THREE.Vector3(0.05, 0, 0));
+  nozzle.position.copy(position).add(new THREE.Vector3(0.05 * size, 0, 0));
   group.add(gun, nozzle);
 }
 
@@ -603,10 +603,7 @@ function buildBField() {
   const ticks = [-6.75, -2.25, 2.25, 6.75];
   // Long lines seen almost end-on need bigger arrowheads to show which way the field points.
   bFieldLines(ticks, ticks, zMax, zMin, state.reverseB ? -1 : 1, { heads: 3, headScale: 1.5 });
-  const gun = part(new THREE.Mesh(new THREE.CylinderGeometry(0.16, 0.2, 0.7, 20), material(palette.carbon, { metalness: 0.4 })), 'gun');
-  gun.rotation.z = -Math.PI / 2;
-  gun.position.set(-0.45, 0, B_SOURCE_Z);
-  group.add(gun);
+  source(group, new THREE.Vector3(0, 0, B_SOURCE_Z), 0.65);
   // A newly built field starts at the chosen angle.
   bAngle = state.values.angle ?? 90;
   applyBTilt();
@@ -813,7 +810,7 @@ function fireTracer(mode = state.mode) {
     // The source always fires along +x; the angle control turns the field instead.
     const vel = new THREE.Vector3(speed, 0, 0);
     const period = 2 * Math.PI * data.m / (Math.abs(data.q) * state.values.field / 1000);
-    while (lab.tracers.length >= 4) removeTracer(lab.tracers[0]);
+    // Every track stays until Clear tracks or Reset.
     return makeTracer({ key, pos: new THREE.Vector3(0, 0, B_SOURCE_Z / SCALE.bfield), vel, colour, realPerDisplay: DISPLAY_DISTANCE.bfield / speed, maxStep: Math.min(0.0004 / speed, period / 300), trailSize: 9000, dotInterval: 0.15 });
   }
   if (mode === 'selector') {
@@ -900,26 +897,19 @@ function addSpot(tracer) {
 }
 
 // ---------- Arrows on the newest particle ----------
+// The velocity selector shows only the beam: its particles are coloured by speed instead.
 const arrowOrigin = new THREE.Vector3();
 const forceVector = new THREE.Vector3();
 function updateArrows() {
-  const { velocity, force, electric, magnetic } = lab.arrows;
-  for (const arrow of [velocity, force, electric, magnetic]) arrow.visible = false;
+  const { velocity, force } = lab.arrows;
+  velocity.visible = force.visible = false;
+  if (state.mode === 'selector') return;
   const tracer = [...lab.tracers].reverse().find(t => t.alive);
   if (!tracer) return;
   arrowOrigin.copy(tracer.pos).multiplyScalar(tracer.scale);
   fields(tracer.pos, tracer.t);
   const size = state.mode === 'cyclotron' ? 1.1 : 1.3;
   if (tracer.vel.lengthSq() > 1) setArrow(velocity, arrowOrigin, tracer.vel, size);
-  if (state.mode === 'selector') {
-    // Electric force qE and magnetic force qv × B, drawn to the same scale.
-    const fe = E.clone().multiplyScalar(tracer.q);
-    const fb = new THREE.Vector3().crossVectors(tracer.vel, B).multiplyScalar(tracer.q);
-    const scale = Math.max(fe.length(), fb.length()) || 1;
-    setArrow(electric, arrowOrigin, fe, 1.3 * fe.length() / scale);
-    setArrow(magnetic, arrowOrigin, fb, 1.3 * fb.length() / scale);
-    return;
-  }
   forceVector.crossVectors(tracer.vel, B).add(E).multiplyScalar(tracer.q);
   if (forceVector.lengthSq() > 0) setArrow(force, arrowOrigin, forceVector, size * 0.85);
 }
@@ -1494,8 +1484,9 @@ function chooseParticle(key) {
   for (const stepper of CONTROLS[state.mode].steppers) {
     if (STEPPERS[stepper].from) state.values[stepper] = particleData()[STEPPERS[stepper].from].value;
   }
-  // Old tracks would feel the new particle's field settings, so start afresh (the E-field tab keeps them to compare).
-  if (state.mode !== 'efield') {
+  // Old tracks would feel the new particle's field settings, so start afresh (the E-field and
+  // magnetic field tabs keep them to compare until Clear tracks or Reset).
+  if (state.mode !== 'efield' && state.mode !== 'bfield') {
     state.beam = false;
     clearTracks();
   }
@@ -1524,9 +1515,10 @@ function toggle(key, button) {
   updateEquation();
   drawGraph();
 }
-// Rebuild the apparatus but keep finished tracks, which no longer match the new settings, cleared.
+// Rebuild the apparatus. The magnetic field tab keeps its tracks until Clear tracks or Reset; elsewhere
+// the old tracks no longer match the new settings, so they are cleared.
 function rebuild() {
-  buildMode(false);
+  buildMode(false, { keepTracks: true });
 }
 
 viewer.addEventListener('keydown', event => {
@@ -1558,7 +1550,7 @@ const DEFAULT_READOUT = {
 const LEGEND = {
   efield: ['efield', 'velocity', 'force'],
   bfield: ['bfield', 'velocity', 'force'],
-  selector: ['efield', 'bfield', 'velocity', 'forceE', 'forceB', 'speed'],
+  selector: ['efield', 'bfield', 'speed'],
   cyclotron: ['efield', 'bfield', 'velocity', 'force']
 };
 const GRAPH_LABELS = {
@@ -1567,12 +1559,15 @@ const GRAPH_LABELS = {
   selector: 'Histogram of the speeds emitted and the speeds that pass through the slit',
   cyclotron: 'Graph of kinetic energy against time, with the maximum energy'
 };
-function buildMode(animate) {
+function buildMode(animate, { keepTracks = false } = {}) {
+  const kept = keepTracks && state.mode === 'bfield' && lab?.kind === 'bfield' ? { tracks: lab.tracks, tracers: lab.tracers } : null;
+  kept?.tracks.removeFromParent();
   clearStage();
   if (state.mode === 'efield') buildEField();
   else if (state.mode === 'bfield') buildBField();
   else if (state.mode === 'selector') buildSelector();
   else buildCyclotron();
+  if (kept) restoreTracks(kept);
   const shadow = { efield: [-4.2, 26, 1], bfield: [-10, 26, 2], selector: [-3, 22, 1], cyclotron: [-1.55, 14, 0] }[state.mode];
   floorShadow.position.set(state.mode === 'efield' ? 2 : 0, shadow[0], 0);
   floorShadow.scale.set(shadow[1], shadow[1] * 0.6, 1);
@@ -1582,6 +1577,28 @@ function buildMode(animate) {
   updateFireButton();
   updateEquation();
   drawGraph();
+}
+// Put kept tracks into the new apparatus, recoloured for the current theme.
+function restoreTracks({ tracks, tracers }) {
+  lab.tracks.removeFromParent();
+  lab.tracks = tracks;
+  lab.tracers = tracers;
+  lab.group.add(tracks);
+  for (const tracer of tracers) {
+    const colour = particleColour(tracer.key);
+    tracer.mesh.material.color.copy(colour);
+    tracer.mesh.material.emissive.copy(colour);
+    const halo = tracer.mesh.children[0]?.material;
+    if (halo) {
+      halo.color.copy(colour);
+      halo.opacity = palette.dark ? 0.7 : 0.4;
+      halo.blending = palette.dark ? THREE.AdditiveBlending : THREE.NormalBlending;
+      halo.needsUpdate = true;
+    }
+    tracer.line.material.color.copy(colour);
+    tracer.dotMesh?.material.color.copy(colour);
+    pickables.push(tracer.mesh);
+  }
 }
 function selectMode(mode, animate = true) {
   const previous = state.mode;
@@ -1613,7 +1630,7 @@ document.querySelectorAll('.models [data-mode]').forEach(button => button.addEve
 window.addEventListener('panphy:theme-change', () => {
   palette = readPalette();
   state.beam = false;
-  buildMode(false);
+  buildMode(false, { keepTracks: true });
 });
 document.fonts?.ready.then(() => {
   // Redraw the canvas labels once the fonts have loaded.

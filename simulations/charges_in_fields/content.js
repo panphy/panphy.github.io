@@ -109,7 +109,7 @@ export const PARTS = {
   bfieldOut: 'MAGNETIC FIELD · Uniform in the shaded region, along the arrows. Reversed: at 90° the field lines now point out of the screen, towards you.',
   bfieldUp: 'MAGNETIC FIELD · Uniform and vertical through both dees. The field lines run up from the N pole to the S pole.',
   particle: 'PARTICLE · Tap Fire again to send another. The arrows show its velocity (blue) and the force on it (magenta).',
-  particleSelector: 'PARTICLE · The arrows show its velocity (blue), the electric force qE (magenta) and the magnetic force qvB (pink).',
+  particleSelector: 'PARTICLE · Its colour shows its speed, from slow (blue) to fast (orange).',
   screen: 'FLUORESCENT SCREEN · Glows where a particle lands, marking how far the beam was deflected.',
   gun: 'PARTICLE SOURCE · Sends particles out at a chosen speed. For electrons this would be an electron gun.',
   slit: 'SLIT · Only particles that travel in a straight line through the fields get through.',
