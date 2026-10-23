@@ -86,10 +86,10 @@ These apps share one layout (`app.js`, `content.js`, `style.css` in a folder nam
 
 | App | Status | PR | Notes |
 | --- | --- | --- | --- |
-| Timer (`for_teachers/timer.html`) | done | PR_LINK | Dark only (fixed `data-theme="dark"`, no theme toggle), so it takes the dark tokens. The main card's top stripe is the one spectrum line; the clock readout is in IBM Plex Mono. Button and overtime colours unchanged. Adding a light mode would be a separate change. |
-| Visualizer (`for_teachers/visualizer.html`) | done | PR_LINK | Tokens mapped as in PanPhyMD. Solid app bar and toolbar; the HUD and show-dock pills over the camera no longer blur. The camera view stays black in both themes. |
+| Timer (`for_teachers/timer.html`) | done | [#1256](https://github.com/panphy/panphy.github.io/pull/1256) | Dark only (fixed `data-theme="dark"`, no theme toggle), so it takes the dark tokens. The main card's top stripe is the one spectrum line; the clock readout is in IBM Plex Mono. Button and overtime colours unchanged. Adding a light mode would be a separate change. |
+| Visualizer (`for_teachers/visualizer.html`) | done | [#1256](https://github.com/panphy/panphy.github.io/pull/1256) | Tokens mapped as in PanPhyMD. Solid app bar and toolbar; the HUD and show-dock pills over the camera no longer blur. The camera view stays black in both themes. |
 | Spellwave (`fun/spellwave.html`) | not reworked | — | Owner decision (2026-10-23): keep its own game design. Leave it out of the rollout. |
-| ASCII Cam (`fun/ascii_cam.html`) | done | PR_LINK | Dark only; now `data-theme="dark"`. Google Fonts replaced by the self-hosted fonts. Plain title with a short spectrum line under it. Still network-only: no `sw-register.js`, no caching. |
+| ASCII Cam (`fun/ascii_cam.html`) | done | [#1256](https://github.com/panphy/panphy.github.io/pull/1256) | Dark only; now `data-theme="dark"`. Google Fonts replaced by the self-hosted fonts. Plain title with a short spectrum line under it. Still network-only: no `sw-register.js`, no caching. |
 
 ## Phase 5: Homepage and cleanup
 
