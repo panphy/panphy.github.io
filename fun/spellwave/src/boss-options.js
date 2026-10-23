@@ -7,7 +7,7 @@
 //   line is blanked, so a repeated word is typed once.
 // - wrong: three wrong options, best two first. Waves 1–4 show the first two;
 //   from wave 5 all three.
-// - flag: why a teacher should check this set.
+// - flag: why a teacher should check this set (removed once decided).
 //
 // Option rules (checked in tests/boss-options.test.mjs where a test can):
 // each wrong option is a real term that fits the same gap but not the clue; none is
@@ -37,7 +37,7 @@ export const BOSS_OPTIONS = {
   'charge flow': { answer: 'charge', wrong: ['energy', 'heat', 'power'] },
   'power rating': { answer: 'rating', wrong: ['station', 'supply', 'socket'] },
   'ohmic conductor': { answer: 'ohmic conductor', wrong: ['diode', 'LED', 'insulator'] },
-  'filament lamp': { answer: 'filament lamp', wrong: ['LED', 'thermistor', 'diode'], flag: 'The clue says "a bulb", which only the lamp and the LED are; a clue such as "A component whose resistance…" would make the other options work.' },
+  'filament lamp': { answer: 'filament lamp', wrong: ['LED', 'thermistor', 'diode'] },
   'thermistor': { answer: 'thermistor', wrong: ['LDR', 'diode', 'variable resistor'] },
   'diode': { answer: 'diode', wrong: ['resistor', 'fuse', 'thermistor'] },
   'conductor': { answer: 'conductor', wrong: ['insulator', 'lubricant', 'moderator'] },
@@ -55,7 +55,7 @@ export const BOSS_OPTIONS = {
   'evaporation': { answer: 'evaporation', wrong: ['condensation', 'sublimation', 'melting'] },
   'condensation': { answer: 'condensation', wrong: ['evaporation', 'sublimation', 'freezing'] },
   'sublimation': { answer: 'sublimation', wrong: ['evaporation', 'condensation', 'melting'] },
-  'melting point': { answer: 'melting', wrong: ['boiling', 'sublimation', 'dew'], flag: 'Freezing point is left out because it is the same temperature. "Dew point" (third option) is not on the AQA specification.' },
+  'melting point': { answer: 'melting', wrong: ['boiling', 'sublimation', 'critical'] },
   'boiling point': { answer: 'boiling', wrong: ['melting', 'freezing', 'sublimation'] },
   'latent heat': { answer: 'latent', wrong: ['specific', 'radiant', 'body'] },
   'internal energy': { answer: 'internal', wrong: ['chemical', 'nuclear', 'elastic'] },
@@ -63,14 +63,14 @@ export const BOSS_OPTIONS = {
   'gas pressure': { answer: 'pressure', wrong: ['volume', 'temperature', 'density'] },
 
   // ── Medium: atomic and nuclear ──
-  'atomic number': { answer: 'atomic', wrong: ['mass', 'neutron', 'nucleon'], flag: '"Nucleon number" is a real name for the mass number, so it is wrong here, but AQA does not use it; replace it if students would not recognise it.' },
+  'atomic number': { answer: 'atomic', wrong: ['mass', 'neutron', 'isotope'] },
   'mass number': { answer: 'mass', wrong: ['atomic', 'electron', 'isotope'] },
   'energy level': { answer: 'level', wrong: ['store', 'transfer', 'source'] },
   'nuclear model': { answer: 'nuclear', wrong: ['plum pudding', 'particle', 'wave'] },
   'alpha scattering': { answer: 'alpha', wrong: ['beta', 'gamma', 'neutron'] },
   'alpha particle': { answer: 'alpha', wrong: ['beta', 'gamma', 'cosmic'] },
   'beta particle': { answer: 'beta', wrong: ['alpha', 'gamma', 'cosmic'] },
-  'half life': { answer: 'half life', wrong: ['period', 'activity', 'radiation dose'], flag: 'The clue asks for a time, and only "period" is one; the others are ruled out by type.' },
+  'half life': { answer: 'half life', wrong: ['period', 'activity', 'radiation dose'] },
   'activity': { answer: 'activity', wrong: ['count rate', 'half life', 'radiation dose'] },
   'radioactive decay': { answer: 'radioactive decay', wrong: ['irradiation', 'contamination', 'nuclear fusion'] },
   'random': { answer: 'random', wrong: ['constant', 'uniform', 'gradual'] },
@@ -103,9 +103,9 @@ export const BOSS_OPTIONS = {
   'extension': { answer: 'extension', wrong: ['compression', 'amplitude', 'wavelength'] },
   'spring constant': { answer: 'spring', wrong: ['gravitational', 'decay', 'gas'] },
   "Hooke's law": { answer: "Hooke's", wrong: ["Ohm's", "Newton's", "Boyle's"] },
-  'stopping distance': { answer: 'stopping distance', wrong: ['braking distance', 'thinking distance', 'displacement'], flag: 'The clue begins "Thinking plus braking", which rules out the two best options. A clue such as "How far a car travels from seeing a hazard until it stops" would fix it. "Displacement" could be argued for a car braking in a straight line; it is the only other distance term.' },
+  'stopping distance': { answer: 'stopping distance', wrong: ['braking distance', 'thinking distance', 'displacement'] },
   'reaction time': { answer: 'reaction', wrong: ['stopping', 'braking', 'collision'] },
-  'crumple zone': { answer: 'crumple zone', wrong: ['brake pads', 'roll cage', 'spoiler'], flag: 'Seat belts and air bags also lengthen a collision, so they are left out on purpose; check the three that remain are clearly wrong.' },
+  'crumple zone': { answer: 'crumple zone', wrong: ['brake pads', 'roll cage', 'spoiler'] },
 
   // ── Medium: waves ──
   'frequency': { answer: 'frequency', wrong: ['period', 'wave speed', 'amplitude'] },
@@ -124,7 +124,7 @@ export const BOSS_OPTIONS = {
   'diffraction': { answer: 'diffraction', wrong: ['refraction', 'dispersion', 'reflection'] },
   'dispersion': { answer: 'dispersion', wrong: ['diffraction', 'reflection', 'absorption'] },
   'ultrasound': { answer: 'ultrasound', wrong: ['infrasound', 'echo', 'audible sound'] },
-  'echo sounding': { answer: 'echo sounding', wrong: ['radar', 'X ray imaging', 'seismometer'], flag: 'Radar also uses reflected pulses; it is wrong because it uses radio waves or microwaves and does not measure water depth. Sonar and ultrasound are left out because both could be defended.' },
+  'echo sounding': { answer: 'echo sounding', wrong: ['radar', 'X ray imaging', 'seismometer'] },
   'seismic waves': { answer: 'seismic', wrong: ['radio', 'light', 'water'] },
 
   // ── Medium: light ──
@@ -134,7 +134,7 @@ export const BOSS_OPTIONS = {
   'reflected ray': { answer: 'reflected', wrong: ['incident', 'refracted', 'emergent'] },
   'convex lens': { answer: 'convex', wrong: ['concave', 'diverging', 'plane'] },
   'concave lens': { answer: 'concave', wrong: ['convex', 'converging', 'plane'] },
-  'principal focus': { answer: 'principal focus', wrong: ['optical centre', 'focal length', 'normal'], flag: 'The clue asks for a point, and only "optical centre" is one. "Focal point" is left out because it means the same.' },
+  'principal focus': { answer: 'principal focus', wrong: ['optical centre', 'focal length', 'normal'] },
   'focal length': { answer: 'focal length', wrong: ['image distance', 'object distance', 'wavelength'] },
   'real image': { answer: 'real', wrong: ['virtual', 'mirror', 'upright'] },
   'virtual image': { answer: 'virtual', wrong: ['real', 'inverted', 'focused'] },
@@ -144,15 +144,13 @@ export const BOSS_OPTIONS = {
   'colour filter': { answer: 'colour filter', wrong: ['prism', 'mirror', 'convex lens'] },
 
   // ── Medium: magnetism ──
-  'magnetic field': { answer: 'magnetic', wrong: ['electric', 'gravitational', 'nuclear'], flag: 'A charged object also has weight in a gravitational field, and iron also has weight; fine at GCSE, but a strong student could argue the gravitational option.' },
+  'magnetic field': { answer: 'magnetic', wrong: ['electric', 'gravitational', 'nuclear'] },
   'induced magnet': { answer: 'induced', wrong: ['permanent', 'bar', 'horseshoe'] },
   'solenoid': { answer: 'solenoid', wrong: ['commutator', 'filament', 'iron core'] },
   'electromagnet': { answer: 'electromagnet', wrong: ['bar magnet', 'compass', 'permanent magnet'] },
   'iron core': { answer: 'iron', wrong: ['copper', 'plastic', 'aluminium'] },
   'motor effect': { answer: 'motor', wrong: ['generator', 'heating', 'chemical'] },
   'electric motor': { answer: 'electric motor', wrong: ['generator', 'dynamo', 'transformer'] },
-  'alternator': { answer: 'alternator', wrong: ['dynamo', 'transformer', 'commutator'], flag: 'AQA defines a dynamo as giving direct current, which the clue matches, but bicycle "dynamos" really give alternating current, so a student could argue. Kept because it is the distinction AQA tests.' },
-  'dynamo': { answer: 'dynamo', wrong: ['alternator', 'transformer', 'electric motor'], flag: 'As alternator: the AQA distinction is kept, though bicycle "dynamos" really give alternating current.' },
   'loudspeaker': { answer: 'loudspeaker', wrong: ['microphone', 'generator', 'transformer'] },
   'microphone': { answer: 'microphone', wrong: ['loudspeaker', 'electric motor', 'transformer'] },
   'primary coil': { answer: 'primary', wrong: ['secondary', 'output', 'induced'] },
@@ -182,7 +180,7 @@ export const BOSS_OPTIONS = {
 
   // ── Hard: electricity ──
   'static electricity': { answer: 'static', wrong: ['mains', 'current', 'renewable'] },
-  'electric field': { answer: 'electric', wrong: ['magnetic', 'gravitational', 'nuclear'], flag: 'A charged object has weight in a gravitational field, and a moving charge feels a force in a magnetic field; the second reviewer agreed. A clue such as "A region around a charge where another charge experiences a force" would fix it.' },
+  'electric field': { answer: 'electric', wrong: ['magnetic', 'gravitational', 'nuclear'] },
   'series circuit': { answer: 'series', wrong: ['parallel', 'short', 'ring'] },
   'parallel circuit': { answer: 'parallel', wrong: ['series', 'short', 'open'] },
   'variable resistor': { answer: 'variable', wrong: ['fixed', 'light dependent', 'ohmic'] },
@@ -193,26 +191,26 @@ export const BOSS_OPTIONS = {
   // ── Hard: nuclear ──
   'plum pudding model': { answer: 'plum pudding', wrong: ['nuclear', 'Bohr', 'particle'] },
   'Geiger Muller tube': { answer: 'Geiger Muller tube', wrong: ['cloud chamber', 'photographic film', 'voltmeter'] },
-  'nuclear fission': { answer: 'fission', wrong: ['fusion', 'reactor', 'model'], flag: 'Reactor and model are not processes, so they are ruled out by type. "Decay" would fit, but alpha decay also leaves a smaller nucleus, so it could be argued.' },
+  'nuclear fission': { answer: 'nuclear fission', wrong: ['nuclear fusion', 'irradiation', 'ionisation'] },
   'nuclear fusion': { answer: 'fusion', wrong: ['fission', 'decay', 'radiation'] },
   'chain reaction': { answer: 'chain', wrong: ['fusion', 'chemical', 'normal'] },
   'control rods': { answer: 'control', wrong: ['fuel', 'moderator', 'cooling'] },
   'moderator': { answer: 'moderator', wrong: ['control rods', 'coolant', 'shielding'] },
-  'background radiation': { answer: 'background', wrong: ['ultraviolet', 'laser', 'radar'], flag: 'Weak options: alpha and gamma were dropped because rocks emit both, and infrared, microwave, ionising and nuclear radiation could all be argued as "always present".' },
+  'background radiation': { answer: 'background', wrong: ['ultraviolet', 'laser', 'radar'] },
 
   // ── Hard: forces and motion ──
-  "Newton's first law": { answer: 'first', wrong: ['second', 'third', 'fourth'], flag: '"Fourth" is filler: there are only three laws. Keep it, or show two options on every wave.' },
-  "Newton's second law": { answer: 'second', wrong: ['first', 'third', 'fourth'], flag: '"Fourth" is filler: there are only three laws. Keep it, or show two options on every wave.' },
-  "Newton's third law": { answer: 'third', wrong: ['first', 'second', 'fourth'], flag: '"Fourth" is filler: there are only three laws. Keep it, or show two options on every wave.' },
+  "Newton's first law": { answer: 'first', wrong: ['second', 'third', 'fourth'] },
+  "Newton's second law": { answer: 'second', wrong: ['first', 'third', 'fourth'] },
+  "Newton's third law": { answer: 'third', wrong: ['first', 'second', 'fourth'] },
   'normal contact force': { answer: 'normal', wrong: ['frictional', 'applied', 'resultant'] },
-  'gravitational field strength': { answer: 'gravitational', wrong: ['magnetic', 'electric', 'radio'], flag: 'The third option ("radio") is weak; magnetic and electric are the real confusions.' },
+  'gravitational field strength': { answer: 'gravitational', wrong: ['magnetic', 'electric', 'radio'] },
   'terminal velocity': { answer: 'terminal', wrong: ['initial', 'average', 'escape'] },
   'uniform acceleration': { answer: 'uniform', wrong: ['average', 'maximum', 'initial'] },
   'distance time graph': { answer: 'distance', wrong: ['velocity', 'acceleration', 'force'] },
   'velocity time graph': { answer: 'velocity', wrong: ['displacement', 'force', 'momentum'] },
-  'inertial mass': { answer: 'inertial', wrong: ['gravitational', 'atomic', 'total'], flag: '"Gravitational mass" is not on the AQA specification; it is the natural opposite, but may confuse.' },
+  'inertial mass': { answer: 'inertial', wrong: ['relative', 'atomic', 'total'] },
   'conservation of momentum': { answer: 'conservation', wrong: ['change', 'loss', 'rate'] },
-  'centre of mass': { answer: 'centre of mass', wrong: ['pivot', 'principal focus', 'optical centre'], flag: 'The clue asks for a point, and nothing else fits "___ of mass"; these are other points from forces and optics. "Centre of gravity" is left out because it means the same.' },
+  'centre of mass': { answer: 'centre of mass', wrong: ['pivot', 'principal focus', 'optical centre'] },
   'principle of moments': { answer: 'principle', wrong: ['conservation', 'centre', 'sum'] },
   'limit of proportionality': { answer: 'proportionality', wrong: ['extension', 'stiffness', 'equilibrium'] },
   'elastic deformation': { answer: 'elastic', wrong: ['inelastic', 'plastic', 'permanent'] },
@@ -225,14 +223,14 @@ export const BOSS_OPTIONS = {
   'wave equation': { answer: 'wave', wrong: ['energy', 'momentum', 'lens'] },
   'angle of incidence': { answer: 'incidence', wrong: ['refraction', 'reflection', 'elevation'] },
   'angle of refraction': { answer: 'refraction', wrong: ['incidence', 'reflection', 'elevation'] },
-  'critical angle': { answer: 'critical', wrong: ['right', 'reflex', 'obtuse'], flag: 'Weak options: only geometry angles fit "___ angle". The alternative, "angle of refraction" and "angle of reflection", is over the 16-letter answer limit.' },
+  'critical angle': { answer: 'critical', wrong: ['right', 'reflex', 'obtuse'] },
   'total internal reflection': { answer: 'internal', wrong: ['external', 'diffuse', 'specular'] },
-  'specular reflection': { answer: 'specular', wrong: ['diffuse', 'scattered', 'random'], flag: '"Random" (third option) is filler; "partial" and "total internal" were dropped because both happen at smooth surfaces.' },
+  'specular reflection': { answer: 'specular', wrong: ['diffuse', 'scattered', 'random'] },
   'diffuse reflection': { answer: 'diffuse', wrong: ['specular', 'mirror', 'total internal'] },
   'electromagnetic wave': { answer: 'electromagnetic', wrong: ['sound', 'water', 'seismic'] },
   'electromagnetic spectrum': { answer: 'electromagnetic', wrong: ['visible', 'emission', 'sound'] },
   'radio waves': { answer: 'radio waves', wrong: ['gamma rays', 'microwaves', 'infrared'] },
-  'microwaves': { answer: 'microwaves', wrong: ['radio waves', 'infrared', 'ultraviolet'], flag: 'Radio waves are also used for communication; satellites and heating food together point to microwaves, but check you are happy with it.' },
+  'microwaves': { answer: 'microwaves', wrong: ['radio waves', 'infrared', 'ultraviolet'] },
   'infrared': { answer: 'infrared', wrong: ['ultraviolet', 'radio waves', 'X rays'] },
   'visible light': { answer: 'visible', wrong: ['ultraviolet', 'infrared', 'black'] },
   'ultraviolet': { answer: 'ultraviolet', wrong: ['infrared', 'gamma rays', 'microwaves'] },
@@ -243,26 +241,26 @@ export const BOSS_OPTIONS = {
   // ── Hard: magnetism and induction ──
   'permanent magnet': { answer: 'permanent', wrong: ['induced', 'temporary', 'soft'] },
   'magnetic flux density': { answer: 'magnetic', wrong: ['electric', 'gravitational', 'radiant'] },
-  "Fleming's left hand rule": { answer: 'left', wrong: ['right', 'first', 'second'], flag: 'Only "right" is a real distractor. The others are filler, or the set could stay at two options on every wave.' },
+  "Fleming's left hand rule": { answer: 'left', wrong: ['right', 'first', 'second'] },
   'split ring commutator': { answer: 'split ring', wrong: ['slip ring', 'iron ring', 'brush'] },
   'generator effect': { answer: 'generator', wrong: ['motor', 'heating', 'greenhouse'] },
   'electromagnetic induction': { answer: 'induction', wrong: ['radiation', 'spectrum', 'wave'] },
   'induced potential difference': { answer: 'induced', wrong: ['applied', 'mains', 'primary'] },
   'transformer': { answer: 'transformer', wrong: ['generator', 'dynamo', 'commutator'] },
-  'step up transformer': { answer: 'up', wrong: ['down', 'over', 'out'], flag: 'A two-letter answer, and only "down" is a real distractor. The alternative is to keep hiding "transformer" with other devices as options, but then the clue about turns is not tested.' },
-  'step down transformer': { answer: 'down', wrong: ['up', 'over', 'out'], flag: 'As step up: only "up" is a real distractor.' },
+  'step up transformer': { answer: 'up', wrong: ['down', 'over', 'out'] },
+  'step down transformer': { answer: 'down', wrong: ['up', 'over', 'out'] },
 
   // ── Hard: space ──
   'artificial satellite': { answer: 'artificial', wrong: ['natural', 'planetary', 'solar'] },
   'main sequence': { answer: 'main sequence', wrong: ['protostar', 'white dwarf', 'black hole'] },
-  'red giant': { answer: 'giant', wrong: ['supergiant', 'dwarf', 'shift'], flag: '"Shift" is filler: it is not a star stage. Only supergiant and dwarf fit "red ___".' },
-  'red supergiant': { answer: 'supergiant', wrong: ['giant', 'dwarf', 'shift'], flag: 'As red giant: "shift" is filler.' },
+  'red giant': { answer: 'giant', wrong: ['supergiant', 'dwarf', 'shift'] },
+  'red supergiant': { answer: 'supergiant', wrong: ['giant', 'dwarf', 'shift'] },
   'white dwarf': { answer: 'white', wrong: ['black', 'red', 'brown'] },
   'black dwarf': { answer: 'black', wrong: ['white', 'red', 'blue'] },
   'supernova': { answer: 'supernova', wrong: ['big bang', 'solar flare', 'chain reaction'] },
-  'neutron star': { answer: 'neutron star', wrong: ['white dwarf', 'red giant', 'protostar'], flag: 'Black hole is left out because it is also left behind after a supernova.' },
+  'neutron star': { answer: 'neutron star', wrong: ['white dwarf', 'red giant', 'protostar'] },
   'black hole': { answer: 'hole', wrong: ['dwarf', 'body', 'matter'] },
-  'big bang': { answer: 'big bang', wrong: ['steady state', 'static universe', 'plum pudding'], flag: 'Steady state and static universe are real rival theories but not named in the AQA specification.' },
+  'big bang': { answer: 'big bang', wrong: ['steady state', 'static universe', 'plum pudding'] },
   'cosmic microwave background radiation': { answer: 'microwave', wrong: ['infrared', 'gamma', 'ultraviolet'] },
 
   // ── Equations: forces and motion ──
@@ -290,7 +288,7 @@ export const BOSS_OPTIONS = {
   // ── Equations: materials and pressure ──
   'density = mass / volume': { answer: 'volume', wrong: ['area', 'weight', 'height'] },
   'pressure = force / area': { answer: 'pressure', wrong: ['momentum', 'power', 'density'] },
-  'pressure = height × density × gravitational field strength': { answer: 'gravitational', wrong: ['magnetic', 'electric', 'radio'], flag: 'As gravitational field strength: the third option ("radio") is weak.' },
+  'pressure = height × density × gravitational field strength': { answer: 'gravitational', wrong: ['magnetic', 'electric', 'radio'] },
   'pressure × volume = constant': { answer: 'volume', wrong: ['temperature', 'density', 'area'] },
 
   // ── Equations: thermal ──
@@ -300,7 +298,7 @@ export const BOSS_OPTIONS = {
   // ── Equations: waves and light ──
   'wave speed = frequency × wavelength': { answer: 'wavelength', wrong: ['amplitude', 'period', 'time'] },
   'period = 1 / frequency': { answer: 'period', wrong: ['wavelength', 'amplitude', 'speed'] },
-  'magnification = image height / object height': { answer: 'object', wrong: ['lens', 'focal', 'mirror'], flag: 'Weak options: nothing else fits "___ height" in a lens equation. The alternative is to hide "magnification" and offer other quantities.' },
+  'magnification = image height / object height': { answer: 'object', wrong: ['lens', 'focal', 'mirror'] },
 
   // ── Equations: electricity ──
   'charge flow = current × time': { answer: 'charge', wrong: ['energy', 'power', 'heat'] },
@@ -311,6 +309,7 @@ export const BOSS_OPTIONS = {
 
   // ── Equations: magnetism and induction ──
   'force = magnetic flux density × current × length': { answer: 'magnetic', wrong: ['electric', 'gravitational', 'radiant'] },
-  'primary potential difference / secondary potential difference = primary turns / secondary turns': { answer: 'turns', wrong: ['current', 'power', 'charge'], flag: 'Both "turns" are blanked and typed once; the game needs to support that. "Current" is wrong because the currents go the other way up.' },
-  'primary potential difference × primary current = secondary potential difference × secondary current': { answer: 'current', wrong: ['turns', 'resistance', 'charge'], flag: 'Both "current" are blanked and typed once; the game needs to support that.' },
+  // The two transformer equations repeat their answer: every blank is filled by one typed word.
+  'primary potential difference / secondary potential difference = primary turns / secondary turns': { answer: 'turns', wrong: ['current', 'power', 'charge'] },
+  'primary potential difference × primary current = secondary potential difference × secondary current': { answer: 'current', wrong: ['turns', 'resistance', 'charge'] },
 };

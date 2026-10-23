@@ -271,3 +271,24 @@ test('the finale can spawn more than two bosses without defeating earlier ones',
   assert.equal(context.enemies.length, 4);
   assert.equal(context.finalWaveQueueIndex, 4);
 });
+
+test('terms marked noBoss are never chosen as bosses', () => {
+  const source = readFileSync(new URL('../src/main.js', import.meta.url), 'utf8');
+  const start = source.indexOf('function chooseBossPool()');
+  const end = source.indexOf('function choosePrompt()');
+  const context = vm.createContext({
+    MEDIUM_WORDS, HARD_WORDS, waveSet: 1, Math,
+    withinLength: (entries) => entries, bossWordLengthCap: () => Infinity,
+    hardBossShare: wave => (wave >= 5 ? 0.7 : null),
+  });
+  vm.runInContext(source.slice(start, end), context);
+  const noBoss = [...MEDIUM_WORDS, ...HARD_WORDS].filter(entry => entry.noBoss);
+  assert.ok(noBoss.length > 0);
+  for (const wave of [1, 3, 5, 9]) {
+    context.waveSet = wave;
+    for (let draw = 0; draw < 20; draw += 1) {
+      const pool = vm.runInContext('chooseBossPool()', context);
+      assert.ok(pool.every(entry => !entry.noBoss), `wave ${wave}`);
+    }
+  }
+});

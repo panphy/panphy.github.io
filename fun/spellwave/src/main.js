@@ -2,14 +2,14 @@ import * as THREE from 'three';
 import { createSpellwaveAudio } from './audio.js';
 import { createSeasonalEffects } from './seasonal-effects.js';
 import { createPotionSystem } from './potions.js';
-import { ALL_WORDS, EASY_WORDS, HARD_WORDS, MEDIUM_WORDS, EQUATION_WORDS } from './question-bank.js?v=20261012-hard-lean';
+import { ALL_WORDS, EASY_WORDS, HARD_WORDS, MEDIUM_WORDS, EQUATION_WORDS } from './question-bank.js?v=20261024-boss-flags';
 import { createEndingFX } from './ending-fx.js';
 import { createLeaderboard } from './leaderboard.js';
 import { createEnemyMesh, createMimicChestMesh } from './enemy-meshes.js';
-import { bossHintLetters, hardBossShare, normalPromptLengthCap, bossAnswerLengthCap, bossWordLengthCap, previewLengthCap, withinLength, hardGuestCount } from './difficulty.js?v=20261012-hard-lean';
+import { bossHintLetters, hardBossShare, normalPromptLengthCap, bossAnswerLengthCap, bossWordLengthCap, previewLengthCap, withinLength, hardGuestCount } from './difficulty.js?v=20261024-boss-flags';
 import { createLowPolyTerrain, createLowPolyTree, createLowPolyRock, createLowPolyCloud } from './lowpoly.js';
 import { createVisuals, GLOW_GAIN, MOON_GLOW_GAIN } from './visuals.js';
-import { pickTarget, getInputCharacters, isMathOperatorInput, buildSearchPrompt, buildAltSearchPrompts, buildHintMask, escapeHtml, wrapSups, buildBossHintPart, createBossQuestionBuilder, promptIndexForProgress } from './prompt-utils.js?v=20261012-hard-lean';
+import { pickTarget, getInputCharacters, isMathOperatorInput, buildSearchPrompt, buildAltSearchPrompts, buildHintMask, escapeHtml, wrapSups, buildBossHintPart, createBossQuestionBuilder, promptIndexForProgress } from './prompt-utils.js?v=20261024-boss-flags';
 
 const buildBossQuestion = createBossQuestionBuilder(ALL_WORDS, EQUATION_WORDS);
 
@@ -3660,11 +3660,13 @@ function chooseEquationWord(otherBosses = []) {
 }
 
 // The list one vocabulary boss is drawn from; late waves favour the hard list.
+// Entries marked noBoss still appear as monsters but never as bosses.
 function chooseBossPool() {
-  if (waveSet < 3) return withinLength(MEDIUM_WORDS, bossWordLengthCap(waveSet));
+  const canBeBoss = entry => !entry.noBoss;
+  if (waveSet < 3) return withinLength(MEDIUM_WORDS, bossWordLengthCap(waveSet)).filter(canBeBoss);
   const hardShare = hardBossShare(waveSet);
-  if (hardShare === null) return [...MEDIUM_WORDS, ...HARD_WORDS];
-  return Math.random() < hardShare ? HARD_WORDS : MEDIUM_WORDS;
+  if (hardShare === null) return [...MEDIUM_WORDS, ...HARD_WORDS].filter(canBeBoss);
+  return (Math.random() < hardShare ? HARD_WORDS : MEDIUM_WORDS).filter(canBeBoss);
 }
 
 function choosePrompt() {
