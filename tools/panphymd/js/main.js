@@ -103,7 +103,7 @@ const previewFontBtnWrapper = document.getElementById('previewFontBtnWrapper');
 
 // Available preview fonts (loaded dynamically from Google Fonts when selected)
 const PREVIEW_FONTS = [
-  { key: 'Manrope', label: 'Default', fontFamily: "'Manrope', sans-serif", googleFontsParam: null },
+  { key: 'Figtree', label: 'Default', fontFamily: "'Figtree', sans-serif", googleFontsParam: null },
   { key: 'Inter', label: 'Inter', fontFamily: "'Inter', sans-serif", googleFontsParam: 'Inter:wght@400;500;600;700' },
   { key: 'Lora', label: 'Lora', fontFamily: "'Lora', serif", googleFontsParam: 'Lora:ital,wght@0,400;0,500;0,600;0,700;1,400' },
   { key: 'Merriweather', label: 'Merriweather', fontFamily: "'Merriweather', serif", googleFontsParam: 'Merriweather:ital,wght@0,400;0,700;1,400' },
@@ -1421,7 +1421,7 @@ async function exportHTML() {
   doc.title = exportTitle;
 
   const exportFont = currentPreviewFont || PREVIEW_FONTS[0];
-  const exportFontParam = exportFont.googleFontsParam || 'Manrope:wght@400;500;600;700;800';
+  const exportFontParam = exportFont.googleFontsParam || 'Figtree:wght@400;500;600;700;800';
   const exportFontImport = `https://fonts.googleapis.com/css2?family=${exportFontParam}&family=JetBrains+Mono:wght@400;600&display=swap`;
 
   const style = document.createElement('style');

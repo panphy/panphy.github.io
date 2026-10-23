@@ -1,28 +1,31 @@
 <!DOCTYPE html>
-<html lang="en" data-theme="dark">
+<html lang="en" data-theme="light">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <meta name="theme-color" content="#07080C">
+    <meta name="theme-color" content="#F5F6FA">
+    <script src="/assets/theme.js"></script>
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <link rel="stylesheet" href="/assets/standalone-top.css">
     <title>Timer</title>
     <link rel="icon" type="image/png" href="/assets/favicon.png">
     <link rel="stylesheet" href="/assets/fullscreen-button.css">
+    <link rel="stylesheet" href="/assets/theme-toggle.css">
+    <script src="/assets/theme-toggle.js"></script>
     <script src="/assets/fullscreen-button.js" defer></script>
     <script src="/assets/sw-register.js" defer></script>
     <link rel="stylesheet" href="/assets/fonts/fonts.css">
     <link rel="stylesheet" href="/assets/design.css">
 <style>
-        /* The Timer is dark only. Colours and fonts come from the shared design system
-           (/assets/design.css, dark tokens); these names keep the rest of this stylesheet
-           unchanged. Button and overtime colours carry meaning and stay as they were. */
+        /* Colours and fonts come from the shared design system (/assets/design.css);
+           these names keep the rest of this stylesheet unchanged. Button and overtime
+           colours carry meaning and stay as they were. */
         :root {
             --font-sans: var(--font-body);
             --bg-color: var(--bg);
-            --bg-pattern: rgba(150, 175, 255, 0.08);
+            --bg-pattern: rgba(28, 40, 90, 0.09);
             --text-main: var(--ink);
             --text-secondary: var(--ink-2);
             --brand-primary: var(--accent);
@@ -30,9 +33,15 @@
             --brand-accent: var(--accent);
             --card-bg: var(--surface);
             --card-border: var(--line);
+            --card-shadow: 0 18px 40px rgba(28, 40, 90, 0.12);
+            --card-hover-shadow: 0 20px 40px rgba(28, 100, 216, 0.18);
+            --btn-text: var(--ink);
+        }
+
+        [data-theme="dark"] {
+            --bg-pattern: rgba(150, 175, 255, 0.08);
             --card-shadow: 0 18px 40px rgba(0, 0, 0, 0.4);
             --card-hover-shadow: 0 20px 40px rgba(84, 166, 255, 0.22);
-            --btn-text: var(--ink);
         }
 
         *,
@@ -74,7 +83,7 @@
 
         .logo-container img {
             max-height: 36px;
-            filter: drop-shadow(0 6px 12px rgba(0, 0, 0, 0.5));
+            filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.25));
         }
 
         .app-container {
@@ -178,7 +187,7 @@
             background: var(--surface-2);
             color: var(--text-main);
             text-align: center;
-            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.35);
+            box-shadow: var(--shadow-1);
         }
 
         input {
@@ -544,13 +553,25 @@
             z-index: 1000;
         }
 
+        /* Theme button, beside the fullscreen button; hidden in fullscreen with the logo. */
+        #theme-button {
+            position: fixed;
+            top: calc(8px + var(--standalone-top));
+            right: 68px;
+            z-index: 1000;
+        }
+
+        .fullscreen-active #theme-button {
+            display: none !important;
+        }
+
         /* Styling for fullscreen button in fullscreen mode */
         .fullscreen-active .fullscreen-toggle {
             display: inline-grid !important;
             background: var(--surface) !important;
-            border: 1px solid rgba(255, 255, 255, 0.15) !important;
+            border: 1px solid var(--line) !important;
             border-radius: 12px;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5) !important;
+            box-shadow: var(--shadow-1) !important;
         }
 
         .fullscreen-active .fullscreen-toggle:hover {
@@ -678,7 +699,7 @@
 
             .fullscreen-active .end-time-row + .end-time-row {
                 margin-top: 0.5rem;
-                border-top: 1px solid rgba(255, 255, 255, 0.05);
+                border-top: 1px solid var(--line);
                 padding-top: 0.5rem;
             }
 
@@ -1083,6 +1104,7 @@
         </a>
     </div>
 
+    <button id="theme-button" type="button" data-panphy-theme-toggle aria-label="Toggle light/dark theme" title="Toggle between light and dark themes"></button>
     <button id="fullscreenBtn" class="fullscreen-toggle" data-panphy-fullscreen aria-label="Enter fullscreen" title="Enter fullscreen"></button>
 
     <div class="app-container">
@@ -1148,6 +1170,9 @@
         </p>
     </footer>
     <script>
+        // Theme toggle: the shared script only syncs the icon, so the page wires the click.
+        window.PanPhyThemeToggle.mount(document.getElementById('theme-button'));
+
         /* ------------ Constants ------------ */
         const STORAGE_KEY = 'panphy_timer_state';
         const TICK_INTERVAL = 100; // More frequent updates for accuracy

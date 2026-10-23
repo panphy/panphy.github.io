@@ -61,8 +61,8 @@
         }
 
         .offline-font {
-            --font-sans: 'Manrope', sans-serif;
-            --font-display: 'DM Serif Display', serif;
+            --font-sans: 'Figtree', sans-serif;
+            --font-display: 'Unbounded', sans-serif;
             --font-mono: 'IBM Plex Mono', monospace;
         }
 
@@ -827,23 +827,6 @@
 
         .card-art { margin: 8px 8px 0; overflow: hidden; background: var(--art-bg); border-radius: 14px; }
 
-        .grid > .card:nth-child(1 of :not([hidden])) {
-            grid-column: span 2;
-            display: grid;
-            grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr);
-            grid-template-rows: auto 1fr;
-        }
-
-        .grid > .card:nth-child(1 of :not([hidden])) .card-art {
-            grid-row: 1 / span 2;
-            display: grid;
-            align-items: center;
-            margin: 8px;
-        }
-
-        .grid > .card:nth-child(1 of :not([hidden])) .card-meta { align-self: end; margin-top: 1.6rem; }
-        .grid > .card:nth-child(1 of :not([hidden])) h3 { font-size: 1.75rem; }
-
         .card-meta { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 0.4rem 0.7rem; margin: 1rem 1.2rem 0; }
 
         .card-type,
@@ -972,7 +955,6 @@
             }
             nav a { justify-content: center; padding: 0.4rem 0.2rem; font-size: 0.62rem; letter-spacing: 0.02em; }
             .grid, .grid.is-scroller { grid-template-columns: 1fr; }
-            .grid > .card:nth-child(1 of :not([hidden])) { grid-column: auto; }
             .hero-facts { gap: 1.6rem; }
         }
 
@@ -2262,12 +2244,6 @@
             '/assets/fonts/ibm-plex-mono-normal-600-latin-ext.woff2',
             '/assets/fonts/ibm-plex-mono-normal-600-latin.woff2',
             '/assets/fonts/ibm-plex-mono-normal-600-vietnamese.woff2',
-            '/assets/fonts/manrope-normal-400-800-cyrillic-ext.woff2',
-            '/assets/fonts/manrope-normal-400-800-cyrillic.woff2',
-            '/assets/fonts/manrope-normal-400-800-greek.woff2',
-            '/assets/fonts/manrope-normal-400-800-latin-ext.woff2',
-            '/assets/fonts/manrope-normal-400-800-latin.woff2',
-            '/assets/fonts/manrope-normal-400-800-vietnamese.woff2',
             '/assets/fonts/unbounded-normal-200-900-latin-ext.woff2',
             '/assets/fonts/unbounded-normal-200-900-latin.woff2',
             '/assets/theme.js',
