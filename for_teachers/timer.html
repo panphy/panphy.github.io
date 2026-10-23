@@ -21,7 +21,7 @@
 <style>
         /* Colours and fonts come from the shared design system (/assets/design.css);
            these names keep the rest of this stylesheet unchanged. Button and overtime
-           colours carry meaning and stay as they were. */
+           colours carry meaning; each button pairs its fill with a readable label. */
         :root {
             --font-sans: var(--font-body);
             --bg-color: var(--bg);
@@ -35,7 +35,6 @@
             --card-border: var(--line);
             --card-shadow: 0 18px 40px rgba(28, 40, 90, 0.12);
             --card-hover-shadow: 0 20px 40px rgba(28, 100, 216, 0.18);
-            --btn-text: var(--ink);
         }
 
         [data-theme="dark"] {
@@ -48,7 +47,9 @@
         *::before,
         *::after {
             box-sizing: border-box;
-            transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease, transform 0.2s ease;
+            /* Theme colours switch together: inherited colour transitions can
+               restart on descendants and briefly hide the countdown. */
+            transition: transform 0.2s ease;
         }
 
         body {
@@ -322,8 +323,10 @@
             border: none;
             border-radius: 12px;
             cursor: pointer;
-            transition: background .3s, transform .2s;
-            color: var(--btn-text);
+            transition: transform .2s;
+            color: var(--ink);
+            font-family: inherit;
+            gap: 0.45em;
             font-weight: 600;
             display: flex;
             align-items: center;
@@ -336,31 +339,58 @@
             transform: translateY(-3px);
         }
 
-        button:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-            transform: none;
-        }
-
         .btn-set {
             background: var(--brand-primary);
+            color: var(--accent-ink);
         }
 
         .btn-reset {
             background: #d63031;
+            color: #FFFFFF;
         }
 
         .btn-start {
             background: #00b894;
+            color: #0B0D14;
         }
 
         .btn-pause {
             background: #0984e3;
+            color: #0B0D14;
         }
 
         .btn-clear {
             background: #2d3436;
+            color: #FFFFFF;
         }
+
+        button:disabled {
+            opacity: 1;
+            background: var(--surface-3);
+            color: var(--ink-2);
+            border: 1px solid var(--line-strong);
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        button:focus-visible {
+            outline: 3px solid var(--accent);
+            outline-offset: 4px;
+        }
+
+        .button-icon {
+            width: 1.2em;
+            height: 1.2em;
+            flex: 0 0 auto;
+            fill: none;
+            stroke: currentColor;
+            stroke-width: 2;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+        }
+
+        .btn-start .icon-pause, .btn-pause .icon-play,
+        .btn-set .icon-reset, .btn-reset .icon-set { display: none; }
 
         .time-preview {
             opacity: 0.35;
@@ -1098,6 +1128,17 @@
 </head>
 
 <body>
+    <svg aria-hidden="true" width="0" height="0" style="position:absolute">
+        <defs>
+            <symbol id="icon-play" viewBox="0 0 24 24"><path d="m8 4 12 8-12 8Z"/></symbol>
+            <symbol id="icon-pause" viewBox="0 0 24 24"><path d="M8 5v14M16 5v14"/></symbol>
+            <symbol id="icon-set" viewBox="0 0 24 24"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l3 2M9 2h6M12 2v3"/></symbol>
+            <symbol id="icon-reset" viewBox="0 0 24 24"><path d="M3 10a9 9 0 1 1 1 8M3 4v6h6"/></symbol>
+            <symbol id="icon-clear" viewBox="0 0 24 24"><path d="M3 6h18M9 6V3h6v3M5 6l1 15h12l1-15M10 10v7M14 10v7"/></symbol>
+            <symbol id="icon-cancel" viewBox="0 0 24 24"><path d="m6 6 12 12M18 6 6 18"/></symbol>
+            <symbol id="icon-confirm" viewBox="0 0 24 24"><path d="m4 12 5 5L20 6"/></symbol>
+        </defs>
+    </svg>
     <div class="logo-container">
         <a href="https://panphy.app/">
             <img src="/assets/panphy.png" alt="logo">
@@ -1147,9 +1188,20 @@
             </aside>
             <div class="control-container">
                 <div class="control-area">
-                    <button id="toggleBtn" class="btn-start">Start</button>
-                    <button id="setResetBtn" class="btn-set">Set&nbsp;Time</button>
-                    <button id="clearBtn" class="btn-clear">Clear<br>Timer</button>
+                    <button id="toggleBtn" class="btn-start">
+                        <svg class="button-icon icon-play" aria-hidden="true" focusable="false"><use href="#icon-play"/></svg>
+                        <svg class="button-icon icon-pause" aria-hidden="true" focusable="false"><use href="#icon-pause"/></svg>
+                        <span class="button-label">Start</span>
+                    </button>
+                    <button id="setResetBtn" class="btn-set">
+                        <svg class="button-icon icon-set" aria-hidden="true" focusable="false"><use href="#icon-set"/></svg>
+                        <svg class="button-icon icon-reset" aria-hidden="true" focusable="false"><use href="#icon-reset"/></svg>
+                        <span class="button-label">Set Time</span>
+                    </button>
+                    <button id="clearBtn" class="btn-clear">
+                        <svg class="button-icon icon-clear" aria-hidden="true" focusable="false"><use href="#icon-clear"/></svg>
+                        <span class="button-label">Clear Timer</span>
+                    </button>
                 </div>
             </div>
         </div>
@@ -1158,8 +1210,14 @@
         <div class="confirm-card">
             <p id="confirmMessage">Are you sure?</p>
             <div class="confirm-actions">
-                <button id="confirmCancelBtn" class="btn-clear">Cancel</button>
-                <button id="confirmYesBtn" class="btn-reset">Yes</button>
+                <button id="confirmCancelBtn" class="btn-clear">
+                    <svg class="button-icon icon-cancel" aria-hidden="true" focusable="false"><use href="#icon-cancel"/></svg>
+                    <span class="button-label">Cancel</span>
+                </button>
+                <button id="confirmYesBtn" class="btn-reset">
+                    <svg class="button-icon icon-confirm" aria-hidden="true" focusable="false"><use href="#icon-confirm"/></svg>
+                    <span class="button-label">Yes</span>
+                </button>
             </div>
         </div>
     </div>
@@ -1417,21 +1475,23 @@
         };
 
         const restoreButtonStates = (state) => {
-            if (state.setResetState === 'reset') {
+            if (initTotal > 0) {
                 setResetBtn.dataset.state = 'reset';
-                setResetBtn.textContent = 'Reset Timer';
+                setResetBtn.querySelector('.button-label').textContent = 'Reset Timer';
                 setResetBtn.classList.remove('btn-set');
                 setResetBtn.classList.add('btn-reset');
             }
 
-            if (state.toggleState === 'pause') {
+            // Stored button labels can lag behind the timer action that saved them.
+            // Restore the action and its icon from the timer's actual running state.
+            if (state.startTimestamp && !state.paused) {
                 toggleBtn.dataset.state = 'pause';
-                toggleBtn.textContent = 'Pause';
+                toggleBtn.querySelector('.button-label').textContent = 'Pause';
                 toggleBtn.classList.remove('btn-start');
                 toggleBtn.classList.add('btn-pause');
-            } else if (state.toggleState === 'resume') {
+            } else if (state.startTimestamp && state.paused) {
                 toggleBtn.dataset.state = 'resume';
-                toggleBtn.textContent = 'Resume';
+                toggleBtn.querySelector('.button-label').textContent = 'Resume';
                 toggleBtn.classList.remove('btn-pause');
                 toggleBtn.classList.add('btn-start');
             }
@@ -1544,7 +1604,7 @@
 
             // Return toggle button to initial START state
             toggleBtn.dataset.state = 'start';
-            toggleBtn.textContent = 'Start';
+            toggleBtn.querySelector('.button-label').textContent = 'Start';
             toggleBtn.classList.remove('btn-pause');
             toggleBtn.classList.add('btn-start');
             toggleBtn.disabled = initTotal === 0;
@@ -1588,12 +1648,12 @@
 
             // Reset button states
             setResetBtn.dataset.state = 'set';
-            setResetBtn.textContent = 'Set Time';
+            setResetBtn.querySelector('.button-label').textContent = 'Set Time';
             setResetBtn.classList.remove('btn-reset');
             setResetBtn.classList.add('btn-set');
 
             toggleBtn.dataset.state = 'start';
-            toggleBtn.textContent = 'Start';
+            toggleBtn.querySelector('.button-label').textContent = 'Start';
             toggleBtn.classList.remove('btn-pause');
             toggleBtn.classList.add('btn-start');
             toggleBtn.disabled = true;
@@ -1604,7 +1664,7 @@
 
         const resetToggleButton = () => {
             toggleBtn.dataset.state = 'start';
-            toggleBtn.textContent = 'Start';
+            toggleBtn.querySelector('.button-label').textContent = 'Start';
             toggleBtn.classList.remove('btn-pause');
             toggleBtn.classList.add('btn-start');
         };
@@ -1765,7 +1825,7 @@
                 setTimer();
                 if (initTotal > 0) {
                     setResetBtn.dataset.state = 'reset';
-                    setResetBtn.textContent = 'Reset Timer';
+                    setResetBtn.querySelector('.button-label').textContent = 'Reset Timer';
                     setResetBtn.classList.remove('btn-set');
                     setResetBtn.classList.add('btn-reset');
                 }
@@ -1788,7 +1848,7 @@
                 case 'start':
                     if (startTimer()) {
                         toggleBtn.dataset.state = 'pause';
-                        toggleBtn.textContent = 'Pause';
+                        toggleBtn.querySelector('.button-label').textContent = 'Pause';
                         toggleBtn.classList.remove('btn-start');
                         toggleBtn.classList.add('btn-pause');
                     }
@@ -1796,14 +1856,14 @@
                 case 'pause':
                     pauseTimer();
                     toggleBtn.dataset.state = 'resume';
-                    toggleBtn.textContent = 'Resume';
+                    toggleBtn.querySelector('.button-label').textContent = 'Resume';
                     toggleBtn.classList.remove('btn-pause');
                     toggleBtn.classList.add('btn-start');
                     break;
                 case 'resume':
                     if (resumeTimer()) {
                         toggleBtn.dataset.state = 'pause';
-                        toggleBtn.textContent = 'Pause';
+                        toggleBtn.querySelector('.button-label').textContent = 'Pause';
                         toggleBtn.classList.remove('btn-start');
                         toggleBtn.classList.add('btn-pause');
                     }
