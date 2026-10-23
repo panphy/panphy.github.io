@@ -1678,7 +1678,7 @@ async function saveMarkdown() {
 }
 
 /**
- * Load a markdown file from the user's computer
+ * Load a Markdown or plain text file from the user's computer
  */
 async function loadMarkdownFile() {
   dismissRestoreUndoToast();
@@ -1694,8 +1694,8 @@ async function loadMarkdownFile() {
     try {
       const [fileHandle] = await window.showOpenFilePicker({
         types: [{
-          description: 'Markdown',
-          accept: { 'text/markdown': ['.md'] }
+          description: 'Markdown and plain text',
+          accept: { 'text/markdown': ['.md'], 'text/plain': ['.txt'] }
         }]
       });
       const file = await fileHandle.getFile();
@@ -1715,7 +1715,7 @@ async function loadMarkdownFile() {
 
   const input = document.createElement('input');
   input.type = 'file';
-  input.accept = '.md,text/markdown';
+  input.accept = '.md,.txt,text/markdown,text/plain';
   input.onchange = e => {
     const file = e.target.files[0];
     if (file) {
