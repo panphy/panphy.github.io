@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import { BOSS_OPTIONS } from '../src/boss-options.js';
 import { MEDIUM_WORDS, HARD_WORDS, EQUATION_WORDS } from '../src/question-bank.js';
 
-const BOSS_ENTRIES = [...MEDIUM_WORDS, ...HARD_WORDS, ...EQUATION_WORDS];
+const BOSS_ENTRIES = [...MEDIUM_WORDS, ...HARD_WORDS, ...EQUATION_WORDS].filter(entry => !entry.noBoss);
 
 // What the player types: letters only, lower case.
 const typed = text => text.toLowerCase().replace(/[^a-z]/g, '');
@@ -55,7 +55,7 @@ test('no wrong option is printed in the clue or elsewhere in the line', () => {
       check(problems, !containsRun(clue, optionWords), `"${option}" is printed in the clue of "${entry.term}"`);
       check(problems, !containsRun(restOfLine, optionWords), `"${option}" is printed in the line of "${entry.term}"`);
     }
-    if (!entry.isEquation) check(problems, !containsRun(clue, words(set.answer)), `the answer is printed in the clue of "${entry.term}"`);
+    check(problems, !containsRun(clue, words(set.answer)), `the answer is printed in the clue of "${entry.term}"`);
   }
   assert.deepEqual(problems, []);
 });

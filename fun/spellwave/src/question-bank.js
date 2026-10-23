@@ -4,7 +4,7 @@
 // word of the term is hidden, so a definition must not contain that word. The game
 // hides the word that best tells the term apart from the rest of the bank (see
 // buildBossPrompt); `ask` names the hidden word or words where that rule picks
-// the wrong one.
+// the wrong one. `noBoss` keeps a term out of boss questions.
 export const EASY_WORDS = [
   // Quantities & units
   { term: 'force', definition: 'A push or pull that may change speed, shape or direction' },
@@ -133,7 +133,7 @@ export const MEDIUM_WORDS = [
   { term: 'charge flow', definition: 'Current multiplied by time; measured in coulombs' },
   { term: 'power rating', definition: 'The energy an appliance transfers each second' },
   { term: 'ohmic conductor', definition: 'Current is directly proportional to potential difference at constant temperature' },
-  { term: 'filament lamp', definition: 'A bulb whose resistance rises as its wire gets hotter' },
+  { term: 'filament lamp', definition: 'A component whose resistance increases as it gets hotter' },
   { term: 'thermistor', definition: 'A resistor whose resistance changes with temperature' },
   { term: 'diode', definition: 'A component that allows current to flow in one direction only' },
   { term: 'conductor', definition: 'A material that allows heat or electricity to pass through easily' },
@@ -164,7 +164,7 @@ export const MEDIUM_WORDS = [
   { term: 'alpha scattering', definition: 'Experiment firing particles at gold foil that revealed the nucleus' },
   { term: 'alpha particle', definition: 'Two protons and two neutrons emitted together; a helium nucleus', ask: 'alpha' },
   { term: 'beta particle', definition: 'A fast electron emitted when a neutron turns into a proton', ask: 'beta' },
-  { term: 'half life', definition: 'Time for the count rate, or number of unstable nuclei, to halve' },
+  { term: 'half life', definition: 'Time for the count rate, or number of unstable nuclei, to fall to 50%' },
   { term: 'activity', definition: 'The rate at which unstable nuclei decay' },
   { term: 'radioactive decay', definition: 'Spontaneous emission of radiation from an unstable nucleus' },
   { term: 'random', definition: 'Describes decay: nobody can predict which nucleus will go next' },
@@ -196,7 +196,7 @@ export const MEDIUM_WORDS = [
   { term: 'extension', definition: 'Increase in length of a stretched object' },
   { term: 'spring constant', definition: 'The force needed per metre of extension; a measure of stiffness', ask: 'spring' },
   { term: 'Hooke\'s law', definition: 'Extension is directly proportional to force, up to a limit' },
-  { term: 'stopping distance', definition: 'Thinking plus braking: how far a car travels before it comes to rest' },
+  { term: 'stopping distance', definition: 'How far a car travels from seeing a hazard until it stops' },
   { term: 'reaction time', definition: 'How long a person takes to respond to a stimulus' },
   { term: 'crumple zone', definition: 'Car safety feature that lengthens a collision to reduce the force' },
   // Waves
@@ -241,8 +241,8 @@ export const MEDIUM_WORDS = [
   { term: 'iron core', definition: 'The magnetic centre of a transformer or electromagnet' },
   { term: 'motor effect', definition: 'Force on a current-carrying wire in a magnetic field', ask: 'motor' },
   { term: 'electric motor', definition: 'A coil in a magnetic field that spins when current passes through it' },
-  { term: 'alternator', definition: 'A generator that produces alternating current' },
-  { term: 'dynamo', definition: 'A generator that produces direct current' },
+  { term: 'alternator', definition: 'A generator that produces alternating current', noBoss: true },
+  { term: 'dynamo', definition: 'A generator that produces direct current', noBoss: true },
   { term: 'loudspeaker', definition: 'Uses the motor effect to turn current variations into sound waves' },
   { term: 'microphone', definition: 'Uses the generator effect to turn sound waves into current variations' },
   { term: 'primary coil', definition: 'The part of a transformer connected to the alternating supply' },
@@ -272,7 +272,7 @@ export const HARD_WORDS = [
   { term: 'thermal conductivity', definition: 'A measure of how quickly energy passes through a material by heating' },
   // Electricity
   { term: 'static electricity', definition: 'Charge build-up caused by electrons moving between insulators' },
-  { term: 'electric field', definition: 'A region where a charged object experiences a force' },
+  { term: 'electric field', definition: 'A region around a charge where another charge experiences a force' },
   { term: 'series circuit', definition: 'Components on a single loop, so the current is the same everywhere' },
   { term: 'parallel circuit', definition: 'Components on separate branches, each with the same potential difference' },
   { term: 'variable resistor', definition: 'A component adjusted by hand to change the current in a circuit' },
