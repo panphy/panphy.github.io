@@ -21,7 +21,7 @@ window.DeckSvgTex = {
   const txt = (x, y, s, cls = '', anchor = 'middle') => `<text x="${x}" y="${y}" class="${cls}" text-anchor="${anchor}">${s}</text>`;
   const head = (x, y, a, cls = 'flow') => `<g transform="translate(${x} ${y}) rotate(${a})"><path class="${cls}" d="M7 0 L-5 -6 L-5 6 Z"/></g>`;
   const f = n => Math.round(n * 10) / 10;
-  // Mission 9 (static electricity) pictures are drawn larger than the circuits, with Manrope
+  // Mission 9 (static electricity) pictures are drawn larger than the circuits, with body-font
   // labels (.sx), so they read from the back of the room. A charged ball has a soft highlight:
   // sign 1 is positive (orange, +), −1 negative (blue, −), 0 uncharged (grey).
   const sxt = (x, y, s, cls = '', anchor = 'middle') => `<text x="${x}" y="${y}" class="sx ${cls}" text-anchor="${anchor}">${s}</text>`;

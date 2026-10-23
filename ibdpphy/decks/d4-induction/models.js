@@ -121,7 +121,7 @@ function kit(THREE, scene) {
       g.fillStyle = css(letter === 'N' ? '--proton' : '--electron');
       g.fillRect(0, 0, canvas.width, canvas.height);
       g.fillStyle = '#fff';
-      g.font = `800 ${Math.round(size * 0.6)}px Manrope, system-ui, sans-serif`;
+      g.font = `800 ${Math.round(size * 0.6)}px Figtree, Manrope, system-ui, sans-serif`;
       g.textAlign = 'center';
       g.textBaseline = 'middle';
       g.fillText(letter, canvas.width / 2, canvas.height / 2 + size * 0.04);
@@ -444,7 +444,7 @@ model3d('tube', ({ THREE, scene, css, label: plain, fig }) => {
 
   label('plastic tube', [LEFT, HEIGHT + 0.42, 0]);
   label('copper tube', [RIGHT, HEIGHT + 0.42, 0]);
-  const words = [label('falls freely', [LEFT, -0.55, 0]), label('falls slowly, at a steady speed', [RIGHT + 0.3, -0.55, 0])];
+  const words = [label('falls freely', [LEFT - 0.35, -0.55, 0]), label('falls slowly,<br>at a steady speed', [RIGHT + 0.5, -0.6, 0])];
   const currentLabel = label('induced<br>currents', [RIGHT + 1.15, 2, 0]);
 
   let dropAt = null, last = -1;

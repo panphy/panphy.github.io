@@ -10,7 +10,9 @@
 // Without MathJax (offline) the plain labels stay.
 window.MathJax = {
   tex: { inlineMath: [['\\(', '\\)']], displayMath: [['\\[', '\\]']] },
-  svg: { fontCache: 'none' },
+  // MathJax sizes maths to the x-height of the text around it. Figtree's is shorter than Manrope's,
+  // which these decks used before, so scale up to keep the maths at its earlier size.
+  svg: { fontCache: 'none', scale: 1.09 },
   // Diagrams are handled by DeckMath.labels(), never by the page scan.
   options: { enableMenu: false, skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code', 'annotation', 'annotation-xml', 'svg'] }
 };

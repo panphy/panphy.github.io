@@ -40,7 +40,7 @@
 .cd .inner { stroke-width: 2.5; }
 .cd .heater { fill: #fdebe1; stroke-width: 2.5; }
 .cd .spark { fill: var(--hi); stroke: var(--ink); stroke-width: 1.5; }
-/* Static electricity (Mission 9): drawn larger than the circuits, with Manrope labels. */
+/* Static electricity (Mission 9): drawn larger than the circuits, with body-font labels. */
 .cd text.sx { font: 700 30px/1 var(--font-body, Arial, sans-serif); fill: var(--ink); }
 .cd text.sx.strong { font-weight: 800; }
 .cd text.sx.neg { fill: var(--cyan); }

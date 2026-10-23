@@ -3,7 +3,7 @@
 /* Palette matches simulations/atomic_models and simulations/nuclear_decay. */
 :root {
   color-scheme: light;
-  --font-body: 'Manrope', system-ui, sans-serif;
+  --font-body: 'Figtree', 'Manrope', system-ui, sans-serif;
   --font-display: 'DM Serif Display', Georgia, serif;
   --font-mono: 'IBM Plex Mono', ui-monospace, monospace;
   --bg-color: #F8F6F1;
