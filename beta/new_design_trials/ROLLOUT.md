@@ -53,10 +53,10 @@ Nothing looks different.
 
 | App | Status | PR | Notes |
 | --- | --- | --- | --- |
-| PanPhyMD (`tools/panphymd.html`) | done | PR_LINK | Tokens mapped as in PanPhyPlot; app bar and Present buttons are solid (no blur); `.offline-font` now falls back to Figtree, not Manrope; print colours updated. The document's own "Default" preview and export font stays Manrope: it is content, not UI, so changing it is the owner's call. |
-| Motion Tracker (`tools/motion_tracker.html`) | done | PR_LINK | Tokens mapped as in PanPhyPlot; solid app bar. Chart.js and the video-overlay labels read `--font-body`. Series colours unchanged. |
-| Sound Analyzer (`tools/sound_analyzer.html`) | done | PR_LINK | Inline tokens mapped onto the shared ones; wave, marker and channel line colours unchanged. Frequency-axis labels now in IBM Plex Mono. |
-| Tone Generator (`tools/tone_generator.html`) | done | PR_LINK | Inline tokens mapped onto the shared ones; channel and combined line colours unchanged. Still fits a 1280×720 window without scrolling. |
+| PanPhyMD (`tools/panphymd.html`) | done | [#1252](https://github.com/panphy/panphy.github.io/pull/1252) | Tokens mapped as in PanPhyPlot; app bar and Present buttons are solid (no blur); `.offline-font` now falls back to Figtree, not Manrope; print colours updated. The document's own "Default" preview and export font stays Manrope: it is content, not UI, so changing it is the owner's call. |
+| Motion Tracker (`tools/motion_tracker.html`) | done | [#1252](https://github.com/panphy/panphy.github.io/pull/1252) | Tokens mapped as in PanPhyPlot; solid app bar. Chart.js and the video-overlay labels read `--font-body`. Series colours unchanged. |
+| Sound Analyzer (`tools/sound_analyzer.html`) | done | [#1252](https://github.com/panphy/panphy.github.io/pull/1252) | Inline tokens mapped onto the shared ones; wave, marker and channel line colours unchanged. Frequency-axis labels now in IBM Plex Mono. |
+| Tone Generator (`tools/tone_generator.html`) | done | [#1252](https://github.com/panphy/panphy.github.io/pull/1252) | Inline tokens mapped onto the shared ones; channel and combined line colours unchanged. Still fits a 1280×720 window without scrolling. |
 
 ## Phase 3a: Wave and mechanics simulations
 
