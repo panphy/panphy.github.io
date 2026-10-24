@@ -13,25 +13,7 @@
   <link rel="icon" type="image/png" href="/assets/favicon.png">
   <link rel="apple-touch-icon" href="/assets/apple-touch-icon.png">
   <script src="/assets/sw-register.js" defer></script>
-  <script>
-    // Maths is typeset by charges_in_fields/math.js, never by a page scan. SVG paths are inline.
-    window.MathJax = {
-      tex: { inlineMath: [['\\(', '\\)']] },
-      svg: { fontCache: 'none' },
-      options: { enableMenu: false },
-      startup: {
-        typeset: false,
-        ready() {
-          window.MathJax.startup.defaultReady();
-          window.MathJax.startup.promise.then(() => {
-            document.documentElement.dataset.math = 'ready';
-            document.dispatchEvent(new Event('panphy:math-ready'));
-          });
-        }
-      }
-    };
-  </script>
-  <script src="https://cdn.jsdelivr.net/npm/mathjax@3.2.2/es5/tex-svg-full.js" defer onerror="document.documentElement.dataset.math = 'failed'"></script>
+  <script src="/assets/math.js"></script>
   <link rel="stylesheet" href="/assets/fonts/fonts.css">
   <link rel="stylesheet" href="/assets/design.css">
   <link rel="stylesheet" href="charges_in_fields/style.css">
@@ -106,7 +88,6 @@
   </main>
   <footer><span>Charges in fields · &copy; 2026 PanPhy Labs. All rights reserved.</span><a href="/">More PanPhy Labs apps</a></footer>
   <noscript><p class="no-script">Enable JavaScript to explore the 3D models. The descriptions remain available above.</p></noscript>
-  <script type="module" src="charges_in_fields/math.js"></script>
   <script type="module">import('./charges_in_fields/app.js').catch(error => { console.error(error); document.getElementById('load-status').hidden = false; document.getElementById('load-status').textContent = 'The 3D viewer could not load. Check your internet connection and reload. You can still read the explanation on this page.'; });</script>
 </body>
 </html>

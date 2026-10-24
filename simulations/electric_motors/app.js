@@ -1,6 +1,7 @@
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { MODES, MODE_ORDER, PARTS, STEPPERS, CONTROLS } from './content.js';
+const { setMath, mathHtml, onMathReady } = window.PanPhyMath;
 
 const $ = id => document.getElementById(id);
 const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -1131,7 +1132,7 @@ function pauseAtSwap() {
   state.swapPaused = true;
   const { side, into } = rightSide();
   const other = side === 'A' ? 'B' : 'A';
-  readout.textContent = `SWAP · The coil has just passed vertical, where the forces point through the axle and give no turning effect; its momentum carried it on. Now half-ring ${halfOnPlus()} touches the + brush, so the current in the coil has reversed. Side ${side} has just moved over to the right: it now carries current ${into ? 'in (⊗)' : 'out (⊙)'} and is pushed ${into ? 'down' : 'up'}, just as side ${other} was. So the coil keeps turning the same way. Press “Play motion” to carry on.`;
+  setMath(readout, `SWAP · The coil has just passed vertical, where the forces point through the axle and give no turning effect; its momentum carried it on. Now half-ring ${halfOnPlus()} touches the + brush, so the current in the coil has reversed. Side ${side} has just moved over to the right: it now carries current ${into ? 'in (⊗)' : 'out (⊙)'} and is pushed ${into ? 'down' : 'up'}, just as side ${other} was. So the coil keeps turning the same way. Press “Play motion” to carry on.`);
 }
 // Average turning rate over the last few seconds, in revolutions per second.
 function coilSpeed() {
@@ -1172,12 +1173,13 @@ const fmt = (value, digits = 2) => {
 function row(label, value) {
   return `<div class="row"><span>${label}</span><span>${value}</span></div>`;
 }
+onMathReady(() => updateEquation());
 function updateEquation() {
   const box = $('equation');
   if (!sim) return;
   if (sim.kind === 'force') {
     const { theta, size, on } = forceVectors();
-    box.innerHTML = `<div class="formula">F = B I L sin θ</div>`
+    box.innerHTML = `<div class="formula">${mathHtml(String.raw`\(F = BIL\sin\theta\)`, 'F = B I L sin θ')}</div>`
       + `<div class="sub">= ${valueText('field')} T × ${on ? valueText('current') : '0.0'} A × ${fmt(ROD_LENGTH, 3)} m × sin ${valueText('angle')}°</div>`
       + row('Force on rod', `<b>${fmt(size, 3)} N</b>`)
       + row('Direction', on && size > 1e-6 ? (forceVectors().force.x > 0 ? 'to the right →' : '← to the left') : '—')
@@ -1188,12 +1190,12 @@ function updateEquation() {
   if (sim.kind === 'dc' || sim.kind === 'ac') {
     const planeAngle = Math.round(THREE.MathUtils.radToDeg(Math.acos(Math.abs(Math.cos(sim.theta)))));
     const speed = Math.abs(coilSpeed());
-    let html = sim.kind === 'ac' ? `<div class="formula">I = I₀ sin(2πft)</div>` : `<div class="formula">T = B A N I cos θ</div>`;
-    html += `<div class="sub">B = ${sim.kind === 'ac' ? fmt(AC_FIELD) : valueText('field')} T · A = 20 cm² · N = ${coilTurns()}</div>`;
-    html += row('Current I', `${fmt(sim.current, sim.kind === 'ac' ? 1 : valueText('current').split('.')[1].length)} A`);
+    let html = sim.kind === 'ac' ? `<div class="formula">${mathHtml(String.raw`\(I = I_0\sin(2\pi ft)\)`, 'I = I₀ sin(2πft)')}</div>` : `<div class="formula">${mathHtml(String.raw`\(T = BANI\cos\theta\)`, 'T = B A N I cos θ')}</div>`;
+    html += `<div class="sub">${mathHtml(String.raw`\(B\)`, 'B')} = ${sim.kind === 'ac' ? fmt(AC_FIELD) : valueText('field')} T · ${mathHtml(String.raw`\(A\)`, 'A')} = 20 cm² · ${mathHtml(String.raw`\(N\)`, 'N')} = ${coilTurns()}</div>`;
+    html += row(mathHtml(String.raw`Current \(I\)`, 'Current I'), `${fmt(sim.current, sim.kind === 'ac' ? 1 : valueText('current').split('.')[1].length)} A`);
     html += row('Force on each side', `${fmt(Math.abs(coilSideForce()), 2)} N`);
-    html += row('Coil to field θ', `${planeAngle}°`);
-    html += row('Torque T', `<b>${fmt(Math.abs(sim.torque), 3)} N m</b>`);
+    html += row(mathHtml(String.raw`Coil to field \(\theta\)`, 'Coil to field θ'), `${planeAngle}°`);
+    html += row(mathHtml(String.raw`Torque \(T\)`, 'Torque T'), `<b>${fmt(Math.abs(sim.torque), 3)} N m</b>`);
     html += row('Speed (slowed)', `${fmt(speed, 2)} rev/s`);
     if (sim.kind === 'dc') html += row('+ brush touches', `half-ring ${halfLabel(halfOnPlus())}`);
     if (sim.kind === 'ac') {
@@ -1658,7 +1660,7 @@ function select(mesh) {
   selected = null;
   if (!mesh) return;
   const key = mesh.userData.part;
-  readout.textContent = describe(key);
+  setMath(readout, describe(key));
   // Arrows and coil windings already glow, so only plain parts get a highlight.
   if (mesh.material?.emissive && !['force', 'current'].includes(key)) {
     mesh.userData.savedEmissive = mesh.material.emissive.clone();
@@ -1714,7 +1716,7 @@ function turnCoilVertical() {
   drawEndView();
   drawGraph();
   updateObservation();
-  readout.textContent = `VERTICAL COIL · The coil is held still at vertical. The force lines pass through the axle, so their perpendicular distance from it is zero: the forces can still act, but they produce no turning effect. Switch the motor on and press “Play motion”: a motor at rest here cannot start. Press “Restart” to begin again from an angle where it can.`;
+  setMath(readout, `VERTICAL COIL · The coil is held still at vertical. The force lines pass through the axle, so their perpendicular distance from it is zero: the forces can still act, but they produce no turning effect. Switch the motor on and press “Play motion”: a motor at rest here cannot start. Press “Restart” to begin again from an angle where it can.`);
 }
 // A DC coil at rest at vertical with the split ring on: switched on, it gets no turning effect and cannot start.
 function atDeadSpot() {
@@ -1794,7 +1796,7 @@ $('power').addEventListener('click', () => {
   if (pushed) pushOffDeadSpot();
   updatePowerButton();
   if (!state.playing && state.powered && !reducedMotion) setPlaying(true);
-  readout.textContent = POWER_MESSAGES[state.mode](state.powered) + (pushed ? ' The coil was resting at vertical, where it cannot start, so it was given a small push.' : '');
+  setMath(readout, POWER_MESSAGES[state.mode](state.powered) + (pushed ? ' The coil was resting at vertical, where it cannot start, so it was given a small push.' : ''));
 });
 const POWER_MESSAGES = {
   force: on => on ? 'CURRENT ON · The rod is pushed along the rails. Use Fleming’s left-hand rule on the three arrows: Field, Current, Motion.' : 'CURRENT OFF · No current, so no force. The rod rolls to a stop.',
@@ -1808,7 +1810,7 @@ function resetModel() {
   buildMode(false);
   resetView(true);
   updateObservation();
-  readout.textContent = DEFAULT_READOUT[state.mode];
+  setMath(readout, DEFAULT_READOUT[state.mode]);
 }
 function restoreDefaults() {
   Object.assign(state, TOGGLE_DEFAULTS);
@@ -1895,8 +1897,9 @@ function buildControls() {
     field.className = 'field setting';
     field.setAttribute('role', 'group');
     field.setAttribute('aria-labelledby', `label-${key}`);
-    field.innerHTML = `<span class="setting-label" id="label-${key}">${spec.label}</span><div class="stepper"><button type="button" id="minus-${key}" aria-label="Decrease ${spec.aria.toLowerCase()}">−</button><input type="number" id="input-${key}" min="${spec.min}" max="${spec.max}" step="any" inputmode="decimal" aria-label="${spec.aria}" title="Type any value from ${spec.min} to ${spec.max}"><button type="button" id="plus-${key}" aria-label="Increase ${spec.aria.toLowerCase()}">+</button></div>`;
+    field.innerHTML = `<span class="setting-label" id="label-${key}"></span><div class="stepper"><button type="button" id="minus-${key}" aria-label="Decrease ${spec.aria.toLowerCase()}">−</button><input type="number" id="input-${key}" min="${spec.min}" max="${spec.max}" step="any" inputmode="decimal" aria-label="${spec.aria}" title="Type any value from ${spec.min} to ${spec.max}"><button type="button" id="plus-${key}" aria-label="Increase ${spec.aria.toLowerCase()}">+</button></div>`;
     settings.appendChild(field);
+    setMath($(`label-${key}`), spec.label);
     bindStepper($(`minus-${key}`), $(`plus-${key}`), direction => stepValue(key, direction));
     $(`input-${key}`).addEventListener('change', event => setValue(key, event.target.value.trim() === '' ? NaN : Number(event.target.value)));
     setValue(key, state.values[key]);
@@ -1963,7 +1966,7 @@ function toggle(key, button) {
     if (!state.playing && !reducedMotion) setPlaying(true);
   }
   if (key === 'endView') updateEndViewVisibility();
-  readout.textContent = TOGGLE_MESSAGES[key]() + (pushed ? ' The coil was resting at vertical, where it cannot start, so it was given a small push.' : '');
+  setMath(readout, TOGGLE_MESSAGES[key]() + (pushed ? ' The coil was resting at vertical, where it cannot start, so it was given a small push.' : ''));
   drawGraph();
   updateEquation();
 }
@@ -2026,10 +2029,10 @@ function selectMode(mode, animate = true) {
   document.querySelectorAll('[data-legend]').forEach(item => { item.hidden = !LEGEND[mode].includes(item.dataset.legend); });
   updateEndViewVisibility();
   $('action-hint').textContent = data.hint;
-  readout.textContent = DEFAULT_READOUT[mode];
-  for (const [id, key] of Object.entries({ 'scene-title': 'title', 'mode-date': 'date', 'mode-heading': 'heading', 'mode-level': 'level', description: 'description', look: 'look', evidence: 'evidence', deeper: 'deeper' })) $(id).textContent = data[key];
+  setMath(readout, DEFAULT_READOUT[mode]);
+  for (const [id, key] of Object.entries({ 'scene-title': 'title', 'mode-date': 'date', 'mode-heading': 'heading', 'mode-level': 'level', description: 'description', look: 'look', evidence: 'evidence', deeper: 'deeper' })) setMath($(id), data[key]);
   document.querySelectorAll('.models [data-mode]').forEach(button => button.setAttribute('aria-pressed', String(button.dataset.mode === mode)));
-  viewer.setAttribute('aria-label', `${data.title}. ${data.description} Drag or use arrow keys to rotate; pinch or plus and minus keys to zoom.`);
+  viewer.setAttribute('aria-label', `${data.title}. ${data.heading} Drag or use arrow keys to rotate; pinch or plus and minus keys to zoom.`);
   $('graph-canvas').setAttribute('aria-label', GRAPH_LABELS[mode]);
   updateObservation();
   resetView();

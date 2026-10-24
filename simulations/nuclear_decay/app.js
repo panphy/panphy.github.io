@@ -1,6 +1,7 @@
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { MODES, MODE_ORDER, ISOTOPES, PARTICLES } from './content.js';
+const { setMath, mathHtml, onMathReady } = window.PanPhyMath;
 
 const $ = id => document.getElementById(id);
 const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -491,11 +492,17 @@ function countKinds() {
 }
 
 // ---------- Nuclear equation ----------
+// Typeset once MathJax is ready; until then the numbers are stacked in HTML.
 function nuclideHTML({ A, Z, symbol }, className = '') {
+  if (PanPhyMath.ready()) return `<span class="nuclide ${className}">${PanPhyMath.mathHtml(`\\(${PanPhyMath.nuclideTex({ A, Z, symbol })}\\)`)}</span>`;
   const z = Z < 0 ? `−${-Z}` : Z;
   return `<span class="nuclide ${className}"><span class="nums"><span>${A}</span><span>${z}</span></span>${symbol}</span>`;
 }
+const sign = (tex, plain) => `<span>${PanPhyMath.mathHtml(tex, plain)}</span>`;
+let equationDone = null; // null until the equation is first shown
+onMathReady(() => { if (equationDone !== null) renderEquation(equationDone); });
 function renderEquation(done) {
+  equationDone = done;
   const data = MODES[state.mode];
   const box = $('equation');
   if (!data.parent || test) {
@@ -506,15 +513,18 @@ function renderEquation(done) {
   const kind = { alpha: 'alpha', beta: 'electron', gamma: 'gamma' }[state.mode];
   const left = nuclideHTML(data.parent);
   if (!done) {
-    box.innerHTML = `<div class="eq">${left}<span>→</span><span class="nuclide unknown">?</span></div><div class="check">Decay the nucleus to complete the equation</div>`;
+    box.innerHTML = `<div class="eq">${left}${sign('\\(\\rightarrow\\)', '→')}<span class="nuclide unknown">?</span></div><div class="check">Decay the nucleus to complete the equation</div>`;
     box.setAttribute('aria-label', `Nuclear equation: ${data.parent.name} decays to an unknown product.`);
     return;
   }
   const mass = parseInt(data.parent.A, 10);
   const { daughter, emitted } = data;
   const z = value => (value < 0 ? `(−${-value})` : value);
-  box.innerHTML = `<div class="eq">${left}<span>→</span>${nuclideHTML(daughter)}<span>+</span>${nuclideHTML(emitted, kind)}</div>`
-    + `<div class="check">Top: ${mass} = ${daughter.A} + ${emitted.A} <b>✓</b> · Bottom: ${data.parent.Z} = ${daughter.Z} + ${z(emitted.Z)} <b>✓</b></div>`;
+  const zTex = value => (value < 0 ? `(-${-value})` : value);
+  const check = `Top: \\(${mass} = ${daughter.A} + ${emitted.A}\\) <b>✓</b> · Bottom: \\(${data.parent.Z} = ${daughter.Z} + ${zTex(emitted.Z)}\\) <b>✓</b>`;
+  const plainCheck = `Top: ${mass} = ${daughter.A} + ${emitted.A} <b>✓</b> · Bottom: ${data.parent.Z} = ${daughter.Z} + ${z(emitted.Z)} <b>✓</b>`;
+  box.innerHTML = `<div class="eq">${left}${sign('\\(\\rightarrow\\)', '→')}${nuclideHTML(daughter)}${sign('\\(+\\)', '+')}${nuclideHTML(emitted, kind)}</div>`
+    + `<div class="check">${PanPhyMath.mathMarkup(check, plainCheck)}</div>`;
   box.setAttribute('aria-label', `Nuclear equation: ${data.parent.name} decays to ${daughter.name} plus a ${emitted.label}. Mass numbers: ${mass} equals ${daughter.A} plus ${emitted.A}. Atomic numbers: ${data.parent.Z} equals ${daughter.Z} plus ${emitted.Z}.`);
 }
 
@@ -576,7 +586,7 @@ function startDecay() {
   decay = { phase: 'prepare', t: 0, direction, mode: state.mode };
   if (state.mode === 'alpha') prepareAlpha();
   if (state.mode === 'beta') prepareBeta();
-  if (state.mode === 'gamma') readout.textContent = 'EXCITED NUCLEUS · The extra energy is about to leave as a gamma ray…';
+  if (state.mode === 'gamma') setMath(readout, 'EXCITED NUCLEUS · The extra energy is about to leave as a gamma ray…');
   updateDecayButton();
 }
 function prepareAlpha() {
@@ -598,7 +608,7 @@ function prepareAlpha() {
   decay.center = center;
   decay.traveled = 0;
   decay.speed = 0;
-  readout.textContent = 'ALPHA DECAY · Two protons and two neutrons group together and are pushed out of the nucleus…';
+  setMath(readout, 'ALPHA DECAY · Two protons and two neutrons group together and are pushed out of the nucleus…');
 }
 function prepareBeta() {
   const local = toLocal(decay.direction);
@@ -608,7 +618,7 @@ function prepareBeta() {
   neutron.mesh.add(spark);
   decay.neutron = neutron;
   decay.spark = spark;
-  readout.textContent = 'BETA DECAY · One neutron in the nucleus is about to change…';
+  setMath(readout, 'BETA DECAY · One neutron in the nucleus is about to change…');
 }
 function stepDecay(delta) {
   if (!decay || decay.phase === 'done') return;
@@ -679,7 +689,7 @@ function stepBeta() {
     d.spark.material.opacity = 0.8 * k;
     if (d.t >= BETA_GLOW_TIME) {
       d.phase = 'change';
-      readout.textContent = 'BETA DECAY · The neutron changes into a proton, and a fast electron is created and shoots out…';
+      setMath(readout, 'BETA DECAY · The neutron changes into a proton, and a fast electron is created and shoots out…');
       d.t = 0;
       // A new proton appears where the neutron was while the neutron fades.
       const proton = new THREE.Mesh(nucleus.geometry, nucleus.materials.proton.clone());
@@ -790,7 +800,7 @@ function finishDecay() {
     beta: `${data.daughter.name.toUpperCase()} · ${protons} protons + ${neutrons} neutrons. A neutron became a proton, so the element changed but the mass number did not.`,
     gamma: `${data.daughter.name.toUpperCase()} · Still ${protons} protons + ${neutrons} neutrons. Only energy left, as a gamma ray.`
   }[state.mode];
-  readout.textContent = summary;
+  setMath(readout, summary);
   updateDecayButton();
 }
 function updateDecayButton() {
@@ -831,7 +841,7 @@ function startTest() {
   renderEquation(false);
   updateDecayButton();
   updateTestStats();
-  readout.textContent = `PENETRATION TEST · ${MODES[state.mode].parent.name} is used as a source. Each marker stands for radiation from a large sample. Watch where each type is stopped.`;
+  setMath(readout, `PENETRATION TEST · ${MODES[state.mode].parent.name} is used as a source. Each marker stands for radiation from a large sample. Watch where each type is stopped.`);
   const end = slabs[2].end;
   const mid = (end - radius) / 2;
   flyTo({ direction: new THREE.Vector3(0.12, 0.38, 1), distance: fitDistance((end + radius) / 2 + 0.5), target: new THREE.Vector3(mid, 0, 0) });
@@ -840,7 +850,7 @@ function stopTest() {
   if (!test) return;
   buildMode(false);
   resetView();
-  readout.textContent = DEFAULT_READOUT[state.mode]();
+  setMath(readout, DEFAULT_READOUT[state.mode]());
 }
 function spawnTestParticle() {
   const kind = state.mode;
@@ -1027,7 +1037,7 @@ function decayInSample(index) {
 function setSampleRunning(running, stopAt = null) {
   if (!sample) return;
   if (running && sample.t >= MAX_HALF_LIVES - 1e-9) {
-    readout.textContent = `The graph is full after ${MAX_HALF_LIVES} half-lives. Press “Reset” to start again.`;
+    setMath(readout, `The graph is full after ${MAX_HALF_LIVES} half-lives. Press “Reset” to start again.`);
     return;
   }
   sample.running = running;
@@ -1039,9 +1049,9 @@ function sampleStopped(limit) {
   const halfLives = Math.round(limit * 100) / 100;
   const expected = sample.size / 2 ** limit;
   if (Math.abs(limit - Math.round(limit)) < 1e-6) {
-    readout.textContent = `AFTER ${Math.round(limit)} HALF-LI${Math.round(limit) === 1 ? 'FE' : 'VES'} (${formatTime(limit * sample.isotope.halfLife)} ${sample.isotope.unitName}) · ${sample.remaining} of ${sample.size} remain undecayed. Expected about ${formatCount(expected)}.`;
+    setMath(readout, `AFTER ${Math.round(limit)} HALF-LI${Math.round(limit) === 1 ? 'FE' : 'VES'} (${formatTime(limit * sample.isotope.halfLife)} ${sample.isotope.unitName}) · ${sample.remaining} of ${sample.size} remain undecayed. Expected about ${formatCount(expected)}.`);
   } else {
-    readout.textContent = `${halfLives} half-lives · ${sample.remaining} remain undecayed.`;
+    setMath(readout, `${halfLives} half-lives · ${sample.remaining} remain undecayed.`);
   }
   if (limit >= MAX_HALF_LIVES) readout.textContent += ' The graph is full: reset the sample to run it again.';
 }
@@ -1209,7 +1219,7 @@ function select(object, text) {
     halo.scale.setScalar(radius * 1.55 + 0.04);
     object.add(halo);
   }
-  if (text) readout.textContent = text;
+  if (text) setMath(readout, text);
 }
 function describe(kind) {
   if ((kind === 'proton' || kind === 'neutron') && nucleus) {
@@ -1291,13 +1301,13 @@ function resetScene() {
   state.playing = !reducedMotion;
   buildMode(false);
   resetView();
-  readout.textContent = DEFAULT_READOUT[state.mode]();
+  setMath(readout, DEFAULT_READOUT[state.mode]());
 }
 $('reset').addEventListener('click', resetScene);
 $('decay').addEventListener('click', () => {
   if (decay?.phase === 'done') {
     buildMode(false);
-    readout.textContent = DEFAULT_READOUT[state.mode]();
+    setMath(readout, DEFAULT_READOUT[state.mode]());
   } else {
     startDecay();
   }
@@ -1310,13 +1320,13 @@ $('step-half').addEventListener('click', () => {
     setSampleRunning(true);
     return;
   }
-  readout.textContent = `PREDICT FIRST · ${sample.remaining} undecayed now. About ${formatCount(sample.remaining / 2)} should remain after one more half-life.`;
+  setMath(readout, `PREDICT FIRST · ${sample.remaining} undecayed now. About ${formatCount(sample.remaining / 2)} should remain after one more half-life.`);
   setSampleRunning(true, next);
 });
 for (const id of ['isotope', 'sample-size']) {
   $(id).addEventListener('change', () => {
     buildMode(false);
-    readout.textContent = DEFAULT_READOUT.halflife();
+    setMath(readout, DEFAULT_READOUT.halflife());
   });
 }
 viewer.addEventListener('keydown', event => {
@@ -1385,10 +1395,10 @@ function selectMode(mode, animate = true) {
   $('experiments').hidden = halfLife;
   $('step-half').hidden = !halfLife;
   $('sample-controls').hidden = !halfLife;
-  readout.textContent = DEFAULT_READOUT[mode]();
-  for (const [id, key] of Object.entries({ 'scene-title': 'title', 'mode-date': 'date', 'mode-heading': 'heading', description: 'description', look: 'look', evidence: 'evidence' })) $(id).textContent = data[key];
+  setMath(readout, DEFAULT_READOUT[mode]());
+  for (const [id, key] of Object.entries({ 'scene-title': 'title', 'mode-date': 'date', 'mode-heading': 'heading', description: 'description', look: 'look', evidence: 'evidence' })) setMath($(id), data[key]);
   document.querySelectorAll('.models [data-mode]').forEach(button => button.setAttribute('aria-pressed', String(button.dataset.mode === mode)));
-  viewer.setAttribute('aria-label', `${data.title}. ${data.description} Drag or use arrow keys to rotate; click then scroll, pinch, or use plus and minus keys to zoom.`);
+  viewer.setAttribute('aria-label', `${data.title}. ${data.heading} Drag or use arrow keys to rotate; click then scroll, pinch, or use plus and minus keys to zoom.`);
   resetView();
 }
 document.querySelectorAll('.models [data-mode]').forEach(button => button.addEventListener('click', () => {
@@ -1414,7 +1424,7 @@ window.addEventListener('panphy:theme-change', () => {
   const wasDone = decay?.phase === 'done';
   buildMode(false);
   if (hadTest) startTest();
-  else readout.textContent = wasDone ? 'The theme changed, so the nucleus was reset. Decay it again to see the change.' : DEFAULT_READOUT[state.mode]();
+  else setMath(readout, wasDone ? 'The theme changed, so the nucleus was reset. Decay it again to see the change.' : DEFAULT_READOUT[state.mode]());
 });
 document.fonts?.ready.then(() => {
   // Redraw canvas labels once the mono font has loaded.

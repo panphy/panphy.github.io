@@ -1,4 +1,4 @@
-const BUILD_ID = '2026-10-24T11:13:13Z';
+const BUILD_ID = '2026-10-24T11:40:12Z';
 const CACHE_PREFIX = 'panphy-labs';
 const PRECACHE_NAME = `${CACHE_PREFIX}-precache-${BUILD_ID}`;
 const RUNTIME_CACHE = `${CACHE_PREFIX}-runtime-${BUILD_ID}`;
@@ -23,6 +23,7 @@ const ASSETS_TO_CACHE = [
   '/assets/theme-toggle.js',
   '/assets/fullscreen-button.css',
   '/assets/fullscreen-button.js',
+  '/assets/math.js',
   '/assets/standalone-top.css',
   '/assets/design.css',
   '/assets/fonts/fonts.css',
@@ -145,7 +146,6 @@ const ASSETS_TO_CACHE = [
   '/simulations/charges_in_fields/style.css',
   '/simulations/charges_in_fields/app.js',
   '/simulations/charges_in_fields/content.js',
-  '/simulations/charges_in_fields/math.js',
   '/simulations/star_life_cycle.html',
   '/simulations/star_life_cycle/style.css',
   '/simulations/star_life_cycle/app.js',

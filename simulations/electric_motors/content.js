@@ -6,13 +6,13 @@ export const MODE_ORDER = ['force', 'dc', 'ac'];
 export const MODES = {
   force: {
     title: 'THE MOTOR EFFECT',
-    date: 'F = BIL · A WIRE IN A MAGNETIC FIELD',
+    date: '\\(F = BIL\\) · A WIRE IN A MAGNETIC FIELD',
     level: 'GCSE · A LEVEL · IB DP',
     heading: 'A current in a magnetic field feels a force.',
     description: 'A copper rod rests on two metal rails between the poles of a strong magnet. When a current flows through the rod, the magnetic field of the current and the field of the magnet push on each other, so the rod is pushed along the rails. This is the motor effect. The force is biggest when the wire is at 90° to the field, and zero when the wire is parallel to it.',
     look: 'Press “Switch on current” and watch which way the rod rolls. Reverse the current, then flip the magnet: each one reverses the force. Now step the angle down to 0° and watch the force in the graph shrink to nothing. Make the field stronger and the field lines crowd closer together.',
-    evidence: 'Use Fleming’s left-hand rule: First finger = Field (N to S), seCond finger = Current (+ to −), thuMb = Motion (force). The three arrows on the rod show the same thing. The size of the force is F = BIL when the wire is at 90° to the field, where B is the magnetic flux density in tesla.',
-    deeper: 'For any angle θ between the wire and the field, F = BIL sin θ. Only the component of B at right angles to the wire matters. In vector form F = IL × B, which is why the force is always at right angles to both the current and the field.',
+    evidence: 'Use Fleming’s left-hand rule: First finger = Field (N to S), seCond finger = Current (+ to −), thuMb = Motion (force). The three arrows on the rod show the same thing. The size of the force is \\(F = BIL\\) when the wire is at 90° to the field, where \\(B\\) is the magnetic flux density in tesla.',
+    deeper: 'For any angle \\(\\theta\\) between the wire and the field, \\(F = BIL\\sin\\theta\\). Only the component of \\(B\\) at right angles to the wire matters. In vector form \\(\\boldsymbol{F} = I\\boldsymbol{L} \\times \\boldsymbol{B}\\), which is why the force is always at right angles to both the current and the field.',
     hint: 'Switch the current on, then change one thing at a time: current, field, angle or direction.'
   },
   dc: {
@@ -23,7 +23,7 @@ export const MODES = {
     description: 'A coil of wire sits between two magnetic poles. Current flows one way along one side of the coil and the opposite way along the other side, so the two sides are pushed in opposite directions: up on one side, down on the other. This pair of forces makes a turning effect (a moment) that spins the coil. Every half turn, the split-ring commutator swaps the connections, so the current in the coil reverses and the coil keeps turning the same way.',
     look: 'Switch the motor on and watch the end view. Half-ring A is joined to coil side A, and half-ring B to side B. Each half takes the color of the brush it touches: yellow for +, gray for −, so you can see the + color jump from one half to the other. Turn on “Pause at each swap” to stop the motor just as the halves change brushes. Compare the side on the right before and after each swap. Then switch to plain rings (no commutator): the coil rocks to a stop instead of spinning. Finally, press “Turn coil to vertical”, then switch on: from that dead spot the motor cannot start, because the forces point through the axle. Press “Restart” to begin again.',
     evidence: 'Each half-ring touches the + brush for half a turn, then the − brush for the next half. So whichever side of the coil is on the right always gets current in the same direction and is always pushed the same way. That keeps the turning effect in one direction. The swap happens when the coil is vertical: there the forces point straight through the axle and have no turning effect, and the coil’s momentum carries it past. The turning effect is greatest when the plane of the coil is parallel to the field. More current, more turns or a stronger magnet make the motor turn faster.',
-    deeper: 'The torque on a coil of N turns and area A is T = BANI cos θ, where θ is the angle between the plane of the coil and the field. The spinning coil also acts as a generator: it produces a back emf that opposes the supply. A motor draws a large current when it starts and a smaller one at full speed.',
+    deeper: 'The torque on a coil of \\(N\\) turns and area \\(A\\) is \\(T = BANI\\cos\\theta\\), where \\(\\theta\\) is the angle between the plane of the coil and the field. The spinning coil also acts as a generator: it produces a back emf that opposes the supply. A motor draws a large current when it starts and a smaller one at full speed.',
     hint: 'Switch the motor on, then change the turns, current or field and compare the speed.'
   },
   ac: {
@@ -34,7 +34,7 @@ export const MODES = {
     description: 'An alternating current changes direction many times a second. If it reverses at just the right moments, the coil keeps turning without a commutator. The coil is connected through two complete slip rings, so each end of the coil always touches the same brush. This kind of AC motor turns exactly once for every cycle of the supply: it runs in step (synchronous) with the supply.',
     look: 'Switch on the supply and watch the coil come up to speed and run in step: one turn for every cycle on the supply’s screen. Watch the orange current arrows reverse at the same point in every turn. Then raise the frequency one step at a time and see how far it can keep up. Then turn the peak current down to 1 A and raise the frequency again: with too little turning effect to beat friction, it drops out of step. Switch the supply off and on to start it again.',
     evidence: 'Once in step, the current reverses once every half turn, at the same point in each turn. So the turning effect acts one way on average, which is the job the split ring did in the DC motor. With little friction to beat, the reversals come soon after the coil lies along the field, and the coil is pushed forwards and backwards almost equally. The harder the motor has to work, the further the coil lags behind the supply and the nearer the reversals move to vertical, where the split ring made them. That is the most turning effect it can give. This simple motor cannot start itself, so here switching on brings the coil up to speed for you, as a starter would. It stays in step only while the current gives enough turning effect to beat friction and air resistance, which grow with speed. If the frequency rises too far, or the current is too small, it drops out of step and slows to a stop.',
-    deeper: 'With I = I₀ sin(2πft), the torque is T = BANI₀ sin(2πft) cos θ. It only averages to a steady turning effect when the coil turns at the supply frequency f, so the motor’s speed is fixed by the supply, not by the load. A bigger load makes the coil lag further behind the supply; beyond the greatest turning effect, ½BANI₀, it drops out of step. Mains at 50 Hz would turn a two-pole synchronous motor at 3000 revolutions per minute.',
+    deeper: 'With \\(I = I_0\\sin(2\\pi ft)\\), the torque is \\(T = BANI_0\\sin(2\\pi ft)\\cos\\theta\\). It only averages to a steady turning effect when the coil turns at the supply frequency \\(f\\), so the motor’s speed is fixed by the supply, not by the load. A bigger load makes the coil lag further behind the supply; beyond the greatest turning effect, \\(\\dfrac{1}{2}BANI_0\\), it drops out of step. Mains at 50 Hz would turn a two-pole synchronous motor at 3000 revolutions per minute.',
     hint: 'Switch the supply on, then step the frequency or peak current up or down. If it drops out of step, switch it off and on again.'
   },
 };
@@ -44,8 +44,8 @@ export const PARTS = {
   north: 'NORTH POLE · One end of the magnet. Field lines leave a north pole and go towards a south pole. Every magnet has a north and a south pole: cut one in half and each piece still has both.',
   south: 'SOUTH POLE · The other end of the same magnet. Field lines enter a south pole. Between flat, close poles the field is nearly uniform, so the lines are parallel and evenly spaced.',
   magnet: 'MAGNET · One magnet, bent so its two ends face each other across the gap. The colors mark its ends: north (red) and south (blue). The middle is not a pole. There is no such thing as a magnet with only one pole.',
-  field: 'MAGNETIC FIELD · The arrows point from north to south. The closer the lines, the stronger the field (the bigger the flux density B). Change B and count the lines.',
-  rod: 'COPPER ROD · A conductor carrying a current across a magnetic field feels a force, F = BIL sin θ. Copper is used because it is a good conductor and is not magnetic.',
+  field: 'MAGNETIC FIELD · The arrows point from north to south. The closer the lines, the stronger the field (the bigger the flux density \\(B\\)). Change B and count the lines.',
+  rod: 'COPPER ROD · A conductor carrying a current across a magnetic field feels a force, \\(F = BIL\\sin\\theta\\). Copper is used because it is a good conductor and is not magnetic.',
   supply: 'DC SUPPLY · Drives a current one way round the circuit. Conventional current flows from + to −.',
   rails: 'RAILS · Carry current to the rod, which can roll along them. The rails are outside the strong field region, so the force on them is tiny.',
   coil: 'COIL · Many turns of insulated copper wire. Each turn feels the same pair of forces, so more turns give a bigger turning effect.',
@@ -61,12 +61,12 @@ export const PARTS = {
 // Steppers for each mode. Values are in the units in the label. The buttons move in whole steps;
 // a typed value is kept to `precision` decimal places.
 export const STEPPERS = {
-  current: { label: 'Current I (A)', min: 0, max: 5, step: 0.5, value: 2, decimals: 1, precision: 2, aria: 'Current in amps' },
-  field: { label: 'Field B (T)', min: 0.05, max: 0.5, step: 0.05, value: 0.2, decimals: 2, precision: 3, aria: 'Magnetic flux density in tesla' },
-  angle: { label: 'Angle θ to field (°)', min: 0, max: 90, step: 15, value: 90, decimals: 0, precision: 1, aria: 'Angle between the wire and the field in degrees' },
-  turns: { label: 'Turns N', min: 10, max: 100, step: 10, value: 50, decimals: 0, precision: 0, aria: 'Number of turns on the coil' },
-  peak: { label: 'Peak current I₀ (A)', min: 0.5, max: 5, step: 0.5, value: 3, decimals: 1, precision: 2, aria: 'Peak current in amps' },
-  frequency: { label: 'Frequency f (Hz, slowed)', min: 0.5, max: 1.5, step: 0.1, value: 0.6, decimals: 1, precision: 2, aria: 'Supply frequency in hertz, slowed down' },
+  current: { label: 'Current \\(I\\) (A)', min: 0, max: 5, step: 0.5, value: 2, decimals: 1, precision: 2, aria: 'Current in amps' },
+  field: { label: 'Field \\(B\\) (T)', min: 0.05, max: 0.5, step: 0.05, value: 0.2, decimals: 2, precision: 3, aria: 'Magnetic flux density in tesla' },
+  angle: { label: 'Angle \\(\\theta\\) to field (°)', min: 0, max: 90, step: 15, value: 90, decimals: 0, precision: 1, aria: 'Angle between the wire and the field in degrees' },
+  turns: { label: 'Turns \\(N\\)', min: 10, max: 100, step: 10, value: 50, decimals: 0, precision: 0, aria: 'Number of turns on the coil' },
+  peak: { label: 'Peak current \\(I_0\\) (A)', min: 0.5, max: 5, step: 0.5, value: 3, decimals: 1, precision: 2, aria: 'Peak current in amps' },
+  frequency: { label: 'Frequency \\(f\\) (Hz, slowed)', min: 0.5, max: 1.5, step: 0.1, value: 0.6, decimals: 1, precision: 2, aria: 'Supply frequency in hertz, slowed down' },
 };
 
 export const CONTROLS = {

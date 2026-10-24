@@ -12,6 +12,7 @@
     <title>Lorentz Transformation – Interactive Minkowski Diagram</title>
     <link rel="icon" type="image/png" href="/assets/favicon.png">
     <script src="/assets/sw-register.js" defer></script>
+    <script src="/assets/math.js"></script>
     <link rel="stylesheet" href="/assets/fonts/fonts.css">
     <link rel="stylesheet" href="/assets/design.css">
 <style>
@@ -952,8 +953,8 @@
                     <div class="section-header">Velocity</div>
                     <div class="controlItem">
                         <div class="controlInline velocity-header-row">
-                            <label class="controlLabel" for="speedSlider">Velocity of S′ relative to S, <strong>v</strong></label>
-                            <button id="alignFramesBtn" class="inline-action-btn">Set v = 0</button>
+                            <label class="controlLabel" for="speedSlider">Velocity of S′ relative to S, <strong data-math-static>\(v\)</strong></label>
+                            <button id="alignFramesBtn" class="inline-action-btn" data-math-static>Set \(v = 0\)</button>
                         </div>
                         <input type="range" id="speedSlider" min="-0.95" max="0.95" step="0.01" value="0">
                         <div class="value-row">
@@ -977,7 +978,7 @@
                         <span class="toggle-switch"></span>
                     </label>
                     <div class="controlItem">
-                        <label class="controlLabel" for="velocitySlider">Object's Velocity in S, <strong>u</strong></label>
+                        <label class="controlLabel" for="velocitySlider">Object's Velocity in S, <strong data-math-static>\(u\)</strong></label>
                         <input type="range" id="velocitySlider" min="-0.95" max="0.95" step="0.01" value="0.30">
                         <div class="value-row">
                             <div class="stepper">
@@ -1616,14 +1617,23 @@
             // Redraw once the page fonts have loaded, so canvas labels use them.
             if (document.fonts) document.fonts.ready.then(() => draw());
 
+            let shownReadouts = '';
+            PanPhyMath.onMathReady(() => draw());
             function draw() {
                 updateViewRapidity(performance.now());
 
                 const v = getSpeed();
                 const u = getObjectVelocity();
                 const displayV = viewVelocity();
-                gammaValue.textContent = `γ = ${gammaOf(v).toFixed(3)}`;
-                uPrimeValue.textContent = `u′ = ${velocityInFrame(u, v).toFixed(2)}c`;
+                // Readout labels are typeset math; values stay plain. Rebuilt only when they change.
+                const gammaText = gammaOf(v).toFixed(3);
+                const uPrimeText = velocityInFrame(u, v).toFixed(2).replace('-', '−');
+                const readoutKey = `${gammaText}|${uPrimeText}|${PanPhyMath.ready()}`;
+                if (readoutKey !== shownReadouts) {
+                    shownReadouts = readoutKey;
+                    gammaValue.innerHTML = `${PanPhyMath.mathHtml('\\(\\gamma\\)', 'γ')} = ${gammaText}`;
+                    uPrimeValue.innerHTML = `${PanPhyMath.mathHtml("\\(u'\\)", 'u′')} = ${uPrimeText}c`;
+                }
 
                 ctx.clearRect(0, 0, canvas.width, canvas.height);
                 const projectionPills = [];

@@ -1,6 +1,6 @@
 // Text content for the charges in fields explorer: mode descriptions, particle data,
 // control settings and part readouts. Kept separate from the scene code.
-// Maths is LaTeX between \( and \), typeset by math.js; String.raw keeps the backslashes.
+// Math is LaTeX between \( and \), typeset by /assets/math.js; String.raw keeps the backslashes.
 const R = String.raw;
 
 export const MODE_ORDER = ['efield', 'bfield', 'selector', 'cyclotron'];

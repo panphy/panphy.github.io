@@ -802,9 +802,9 @@ function renderStageNotes(st) {
   $('stage-eyebrow').textContent = `STAGE ${stage.index + 1} OF ${count} · ${last ? 'THE END STATE' : stage.id === 'sn' ? 'SECONDS, THEN MONTHS' : fmt.years(stage.years).toUpperCase()}`;
   $('stage-name').textContent = stageName(stage);
   $('stage-tagline').textContent = notes.tagline;
-  $('stage-body').innerHTML = notes.body(c);
-  $('stage-look').textContent = notes.look(c);
-  $('stage-deeper').innerHTML = notes.deeper(c);
+  PanPhyMath.setMathHtml($('stage-body'), notes.body(c));
+  PanPhyMath.setMath($('stage-look'), notes.look(c));
+  PanPhyMath.setMathHtml($('stage-deeper'), notes.deeper(c));
   $('scene-title').textContent = stageName(stage).toUpperCase();
   const key = `${state.mass}|${stage.id}`;
   if (key !== notesKey) {

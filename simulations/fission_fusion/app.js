@@ -1,6 +1,7 @@
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { MODES, MODE_ORDER, PARTICLES, NUCLIDES, CURVE, REACTIONS } from './content.js';
+const { setMath, mathHtml, onMathReady } = window.PanPhyMath;
 
 const $ = id => document.getElementById(id);
 const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -430,30 +431,36 @@ function shuffledKinds(protons, neutrons, seed) {
 }
 
 // ---------- Nuclear equation ----------
-function nuclideHTML({ A, Z, symbol }, className = '') {
-  return `<span class="nuclide ${className}"><span class="nums"><span>${A}</span><span>${Z}</span></span>${symbol}</span>`;
+// Typeset once MathJax is ready; until then the numbers are stacked in HTML.
+function nuclideHTML({ A, Z, symbol, coef }, className = '') {
+  if (PanPhyMath.ready()) return `<span class="nuclide ${className}">${PanPhyMath.mathHtml(`\\(${coef ? `${coef}\\,` : ''}${PanPhyMath.nuclideTex({ A, Z, symbol })}\\)`)}</span>`;
+  return (coef ? `<span class="coef">${coef}</span>` : '') + `<span class="nuclide ${className}"><span class="nums"><span>${A}</span><span>${Z}</span></span>${symbol}</span>`;
 }
+const sign = (tex, plain) => `<span>${PanPhyMath.mathHtml(tex, plain)}</span>`;
 const NEUTRON = { A: 1, Z: 0, symbol: 'n' };
 const EQUATIONS = {
   fission: {
     parts: [{ A: 235, Z: 92, symbol: 'U' }, NEUTRON],
     products: [{ A: 141, Z: 56, symbol: 'Ba' }, { A: 92, Z: 36, symbol: 'Kr' }, { coef: 3, ...NEUTRON }],
-    check: 'Top: 235 + 1 = 141 + 92 + 3 <b>✓</b> · Bottom: 92 + 0 = 56 + 36 + 0 <b>✓</b>',
+    check: 'Top: \\(235 + 1 = 141 + 92 + 3\\) <b>✓</b> · Bottom: \\(92 + 0 = 56 + 36 + 0\\) <b>✓</b>',
     label: 'Nuclear equation: uranium-235 plus a neutron gives barium-141, krypton-92 and 3 neutrons. Mass numbers: 235 plus 1 equals 141 plus 92 plus 3. Atomic numbers: 92 plus 0 equals 56 plus 36 plus 0.',
     unknown: 'Nuclear equation: uranium-235 plus a neutron gives unknown products.'
   },
   fusion: {
     parts: [{ A: 2, Z: 1, symbol: 'H' }, { A: 3, Z: 1, symbol: 'H' }],
     products: [{ A: 4, Z: 2, symbol: 'He' }, NEUTRON],
-    check: 'Top: 2 + 3 = 4 + 1 <b>✓</b> · Bottom: 1 + 1 = 2 + 0 <b>✓</b>',
+    check: 'Top: \\(2 + 3 = 4 + 1\\) <b>✓</b> · Bottom: \\(1 + 1 = 2 + 0\\) <b>✓</b>',
     label: 'Nuclear equation: hydrogen-2 plus hydrogen-3 gives helium-4 plus a neutron. Mass numbers: 2 plus 3 equals 4 plus 1. Atomic numbers: 1 plus 1 equals 2 plus 0.',
     unknown: 'Nuclear equation: hydrogen-2 plus hydrogen-3 gives an unknown product.'
   }
 };
 function termsHTML(terms) {
-  return terms.map(term => (term.coef ? `<span class="coef">${term.coef}</span>` : '') + nuclideHTML(term, term.symbol === 'n' ? 'neutron' : '')).join('<span>+</span>');
+  return terms.map(term => nuclideHTML(term, term.symbol === 'n' ? 'neutron' : '')).join(sign('\\(+\\)', '+'));
 }
+let equationDone = null; // null until the equation is first shown
+onMathReady(() => { if (equationDone !== null) renderEquation(equationDone); });
 function renderEquation(done) {
+  equationDone = done;
   const data = EQUATIONS[state.mode];
   const box = $('equation');
   if (!data) {
@@ -463,11 +470,11 @@ function renderEquation(done) {
   box.hidden = false;
   const left = termsHTML(data.parts);
   if (!done) {
-    box.innerHTML = `<div class="eq">${left}<span>→</span><span class="nuclide unknown">?</span></div><div class="check">${state.mode === 'fission' ? 'Split the nucleus' : 'Fuse the nuclei'} to complete the equation</div>`;
+    box.innerHTML = `<div class="eq">${left}${sign('\\(\\rightarrow\\)', '→')}<span class="nuclide unknown">?</span></div><div class="check">${state.mode === 'fission' ? 'Split the nucleus' : 'Fuse the nuclei'} to complete the equation</div>`;
     box.setAttribute('aria-label', data.unknown);
     return;
   }
-  box.innerHTML = `<div class="eq">${left}<span>→</span>${termsHTML(data.products)}</div><div class="check">${data.check}</div>`;
+  box.innerHTML = `<div class="eq">${left}${sign('\\(\\rightarrow\\)', '→')}${termsHTML(data.products)}</div><div class="check">${PanPhyMath.mathMarkup(data.check, data.check.replace(/\\\(|\\\)/g, ''))}</div>`;
   box.setAttribute('aria-label', data.label);
 }
 
@@ -633,7 +640,7 @@ function startFission() {
   if (!state.playing) setPlaying(true);
   select(null);
   decay = { phase: 'approach', t: 0 };
-  readout.textContent = 'SLOW NEUTRON · A neutron has no charge, so it is not repelled by the nucleus and can be absorbed.';
+  setMath(readout, 'SLOW NEUTRON · A neutron has no charge, so it is not repelled by the nucleus and can be absorbed.');
   updateFireButton();
 }
 function stepDecay(delta) {
@@ -657,7 +664,7 @@ function stepApproach(delta) {
   setLabel('U-236*');
   decay.phase = 'wobble';
   decay.t = 0;
-  readout.textContent = 'URANIUM-236 · The extra neutron makes the nucleus unstable. It wobbles like a drop of liquid. (* means excited.)';
+  setMath(readout, 'URANIUM-236 · The extra neutron makes the nucleus unstable. It wobbles like a drop of liquid. (* means excited.)');
 }
 function stepWobble() {
   const t = Math.min(decay.t, FISSION.wobbleTime);
@@ -668,7 +675,7 @@ function stepWobble() {
     decay.phase = 'stretch';
     decay.t -= FISSION.wobbleTime;
     decay.startStretch = nucleus.deform.stretch;
-    readout.textContent = 'STRETCHING · The nucleus elongates and a waist forms. The repulsion between its protons now beats the strong force holding it together.';
+    setMath(readout, 'STRETCHING · The nucleus elongates and a waist forms. The repulsion between its protons now beats the strong force holding it together.');
   }
 }
 function stepStretch() {
@@ -738,7 +745,7 @@ function splitNucleus() {
   decay.phase = 'separate';
   decay.t = 0;
   renderEquation(true);
-  readout.textContent = 'FISSION · Two smaller nuclei (barium-141 and krypton-92), 3 free neutrons and gamma rays. About 170 MeV of energy is released, mostly as movement of the fragments.';
+  setMath(readout, 'FISSION · Two smaller nuclei (barium-141 and krypton-92), 3 free neutrons and gamma rays. About 170 MeV of energy is released, mostly as movement of the fragments.');
 }
 function stepSeparate(delta) {
   const pack = ease(Math.min(1, decay.t / FISSION.packTime));
@@ -753,7 +760,7 @@ function stepSeparate(delta) {
   if (decay.phase === 'separate' && decay.t >= FISSION.separateTime) {
     decay.phase = 'done';
     updateFireButton();
-    readout.textContent = 'DONE · The fragments slow down as they crash into nearby atoms and heat them. That heat is what a nuclear power station uses. Tap a nucleon to see which nucleus it is in.';
+    setMath(readout, 'DONE · The fragments slow down as they crash into nearby atoms and heat them. That heat is what a nuclear power station uses. Tap a nucleon to see which nucleus it is in.');
   }
 }
 
@@ -874,7 +881,7 @@ function fireBurst() {
   const targets = [];
   c.states.forEach((value, i) => { if (value === 0) targets.push(i); });
   if (!targets.length) {
-    readout.textContent = 'There is no unsplit uranium-235 left. Reset to load fresh fuel.';
+    setMath(readout, 'There is no unsplit uranium-235 left. Reset to load fresh fuel.');
     return;
   }
   // Fire along +x at randomly chosen uranium-235 nuclei, spaced out so they arrive one after another.
@@ -887,7 +894,7 @@ function fireBurst() {
   c.started = true;
   c.over = false;
   updateFireButton();
-  readout.textContent = 'NEUTRON SOURCE · 5 neutrons enter the block from the left. Each one that hits uranium-235 causes a fission.';
+  setMath(readout, 'NEUTRON SOURCE · 5 neutrons enter the block from the left. Each one that hits uranium-235 causes a fission.');
 }
 function fissionAt(index, x, y, z, gen) {
   const c = chain;
@@ -983,9 +990,9 @@ function stepChain(delta) {
     if (c.count === 0 && c.started) {
       c.over = true;
       updateFireButton();
-      readout.textContent = c.fissions >= c.fissile
+      setMath(readout, c.fissions >= c.fissile
         ? `ALL FUEL SPENT · Every uranium-235 nucleus (${c.fissions}) has split.`
-        : `REACTION STOPPED · No neutrons are left, so no more fissions. ${c.fissions} of ${c.fissile} uranium-235 nuclei split. Fire more neutrons, or reset.`;
+        : `REACTION STOPPED · No neutrons are left, so no more fissions. ${c.fissions} of ${c.fissile} uranium-235 nuclei split. Fire more neutrons, or reset.`);
     }
   }
   // Draw the neutrons.
@@ -1126,7 +1133,7 @@ function startFusion() {
   f.phase = 'approach';
   f.closest = f.d;
   const willFuse = f.energy >= 1;
-  readout.textContent = `${currentTemperature()} MILLION °C · The two positive nuclei are pushed together. ${willFuse ? 'They have enough energy to reach the top of the barrier.' : 'Watch whether their energy is enough…'}`;
+  setMath(readout, `${currentTemperature()} MILLION °C · The two positive nuclei are pushed together. ${willFuse ? 'They have enough energy to reach the top of the barrier.' : 'Watch whether their energy is enough…'}`);
   updateFireButton();
   updateFusionControls();
 }
@@ -1153,7 +1160,7 @@ function stepFusion(delta) {
         }
         if (f.v >= 0) {
           f.phase = 'rebound';
-          readout.textContent = `REBOUND · The nuclei stopped ${f.closest.toFixed(1)} apart, before the strong force could act, and were pushed away again. The temperature was too low. Try a higher one.`;
+          setMath(readout, `REBOUND · The nuclei stopped ${f.closest.toFixed(1)} apart, before the strong force could act, and were pushed away again. The temperature was too low. Try a higher one.`);
         }
       }
       if (f.phase === 'rebound' && f.d >= FUSION.startSeparation) {
@@ -1213,7 +1220,7 @@ function startMerge() {
   nT2.target = f.axis.clone().multiplyScalar(lift);
   f.ejected = nT2;
   f.helium.userData.radius = 0.5;
-  readout.textContent = 'FUSING · The nuclei touch and the strong nuclear force pulls all five nucleons into one nucleus…';
+  setMath(readout, 'FUSING · The nuclei touch and the strong nuclear force pulls all five nucleons into one nucleus…');
 }
 function stepMerge(delta) {
   const f = fusion;
@@ -1250,7 +1257,7 @@ function release() {
   f.phase = 'released';
   f.t = 0;
   renderEquation(true);
-  readout.textContent = 'FUSION · Helium-4 and a fast neutron. 17.6 MeV is released: the light neutron carries 14.1 MeV and the heavier helium nucleus 3.5 MeV, in opposite directions.';
+  setMath(readout, 'FUSION · Helium-4 and a fast neutron. 17.6 MeV is released: the light neutron carries 14.1 MeV and the heavier helium nucleus 3.5 MeV, in opposite directions.');
 }
 function stepReleased(delta) {
   const f = fusion;
@@ -1394,12 +1401,15 @@ function sci(value) {
   const sup = String(exponent).replace(/[0-9]/g, d => '⁰¹²³⁴⁵⁶⁷⁸⁹'[d]).replace('-', '⁻');
   return `${digits} × 10${sup}`;
 }
+let bindingStatsShown = false;
+onMathReady(() => { if (bindingStatsShown) updateBindingStats(); });
 function updateBindingStats() {
+  bindingStatsShown = true;
   const key = binding.reaction;
   const reaction = REACTIONS[key];
   const n = reactionNumbers(key);
   const names = list => list.map(name => NUCLIDES[name].name).join(' + ');
-  $('bea-stats').innerHTML = `<div><span>${reaction.title}</span><b>${reaction.equation}</b></div>`
+  $('bea-stats').innerHTML = `<div><span>${reaction.title}</span><b>${mathHtml(reaction.tex, reaction.equation)}</b></div>`
     + `<div><span>Total binding energy before → after</span><b>${n.before.toFixed(0)} → ${n.after.toFixed(0)} MeV</b></div>`
     + `<div><span>Energy released per reaction</span><b class="big">${n.released.toFixed(1)} MeV</b></div>`
     + `<div><span>Per nucleon (${names(reaction.from)})</span><b>${n.perNucleon.toFixed(2)} MeV</b></div>`
@@ -1413,9 +1423,9 @@ function selectReaction(key) {
   updateBindingStats();
   const n = reactionNumbers(key);
   const other = reactionNumbers(key === 'fission' ? 'fusion' : 'fission');
-  readout.textContent = key === 'fission'
+  setMath(readout, key === 'fission'
     ? `FISSION · U-236 splits into two nuclei that sit higher on the curve. ${n.released.toFixed(0)} MeV is released, only ${n.perNucleon.toFixed(2)} MeV per nucleon.`
-    : `FUSION · The nuclei jump up the steep left side of the curve. ${n.released.toFixed(1)} MeV is released, ${n.perNucleon.toFixed(1)} MeV per nucleon: ${(n.perNucleon / other.perNucleon).toFixed(0)} times more per nucleon than fission.`;
+    : `FUSION · The nuclei jump up the steep left side of the curve. ${n.released.toFixed(1)} MeV is released, ${n.perNucleon.toFixed(1)} MeV per nucleon: ${(n.perNucleon / other.perNucleon).toFixed(0)} times more per nucleon than fission.`);
   drawBinding();
 }
 function drawBinding() {
@@ -1556,7 +1566,7 @@ canvasHit($('bea-canvas'), (x, y) => {
   if (!best) return;
   const { marker } = best.hit;
   binding.marked = marker.name;
-  readout.textContent = `${marker.name.toUpperCase()} · Binding energy per nucleon ${marker.y.toFixed(2)} MeV, so about ${(marker.y * marker.A).toFixed(0)} MeV holds its ${marker.A} nucleons together.${marker.name === 'Fe-56' ? ' This is the most tightly bound region: no energy can be released from it by fission or fusion.' : ''}`;
+  setMath(readout, `${marker.name.toUpperCase()} · Binding energy per nucleon ${marker.y.toFixed(2)} MeV, so about ${(marker.y * marker.A).toFixed(0)} MeV holds its ${marker.A} nucleons together.${marker.name === 'Fe-56' ? ' This is the most tightly bound region: no energy can be released from it by fission or fusion.' : ''}`);
   drawBinding();
 });
 function canvasHit(canvas, handler) {
@@ -1650,7 +1660,7 @@ function select(object, text) {
     halo.scale.setScalar(radius * 1.55 + 0.04);
     object.add(halo);
   }
-  if (text) readout.textContent = text;
+  if (text) setMath(readout, text);
 }
 function describe(item) {
   const kind = item.kind;
@@ -1736,14 +1746,14 @@ function resetScene() {
   buildMode(false);
   if (state.mode === 'fusion') setTemperature(currentTemperature());
   resetView();
-  readout.textContent = DEFAULT_READOUT[state.mode]();
+  setMath(readout, DEFAULT_READOUT[state.mode]());
 }
 $('reset').addEventListener('click', resetScene);
 $('fire').addEventListener('click', () => {
   if (state.mode === 'fission') {
     if (decay?.phase === 'done') {
       buildMode(false);
-      readout.textContent = DEFAULT_READOUT.fission();
+      setMath(readout, DEFAULT_READOUT.fission());
     } else {
       startFission();
     }
@@ -1752,7 +1762,7 @@ $('fire').addEventListener('click', () => {
   } else if (state.mode === 'fusion') {
     if (fusion?.phase === 'done') {
       buildMode(false);
-      readout.textContent = DEFAULT_READOUT.fusion();
+      setMath(readout, DEFAULT_READOUT.fusion());
     } else {
       startFusion();
     }
@@ -1775,7 +1785,7 @@ function updateFireButton() {
 }
 $('enrichment').addEventListener('change', () => {
   buildMode(false);
-  readout.textContent = DEFAULT_READOUT.chain();
+  setMath(readout, DEFAULT_READOUT.chain());
 });
 document.querySelectorAll('[data-reaction]').forEach(button => button.addEventListener('click', () => selectReaction(button.dataset.reaction)));
 
@@ -1803,7 +1813,7 @@ function bindStepper(minus, plus, change) {
 }
 bindStepper($('rods-minus'), $('rods-plus'), direction => {
   setRods(rodCount + direction);
-  if (chain) readout.textContent = `${rodCount} CONTROL ROD${rodCount === 1 ? '' : 'S'} · ${rodCount ? 'Rods absorb neutrons, so fewer cause fission.' : 'No rods: nothing absorbs neutrons except uranium-238 and the edge of the block.'}`;
+  if (chain) setMath(readout, `${rodCount} CONTROL ROD${rodCount === 1 ? '' : 'S'} · ${rodCount ? 'Rods absorb neutrons, so fewer cause fission.' : 'No rods: nothing absorbs neutrons except uranium-238 and the edge of the block.'}`);
 });
 function setTemperature(value) {
   $('temp-input').value = THREE.MathUtils.clamp(Math.round(value), FUSION.minTemp, FUSION.maxTemp);
@@ -1893,12 +1903,12 @@ function selectMode(mode, animate = true) {
   $('fire').hidden = mode === 'energy';
   $('motion').hidden = mode === 'energy';
   $('reset').hidden = mode === 'energy';
-  if (mode !== 'energy') readout.textContent = DEFAULT_READOUT[mode]();
-  for (const [id, key] of Object.entries({ 'scene-title': 'title', 'mode-date': 'date', 'mode-heading': 'heading', description: 'description', look: 'look', evidence: 'evidence' })) $(id).textContent = data[key];
+  if (mode !== 'energy') setMath(readout, DEFAULT_READOUT[mode]());
+  for (const [id, key] of Object.entries({ 'scene-title': 'title', 'mode-date': 'date', 'mode-heading': 'heading', description: 'description', look: 'look', evidence: 'evidence' })) setMath($(id), data[key]);
   document.querySelectorAll('.models [data-mode]').forEach(button => button.setAttribute('aria-pressed', String(button.dataset.mode === mode)));
   viewer.setAttribute('aria-label', mode === 'energy'
     ? `${data.title}. ${data.description}`
-    : `${data.title}. ${data.description} Drag or use arrow keys to rotate; click then scroll, pinch, or use plus and minus keys to zoom.`);
+    : `${data.title}. ${data.heading} Drag or use arrow keys to rotate; click then scroll, pinch, or use plus and minus keys to zoom.`);
   resetView();
 }
 document.querySelectorAll('.models [data-mode]').forEach(button => button.addEventListener('click', () => {
@@ -1914,7 +1924,7 @@ window.addEventListener('panphy:theme-change', () => {
     return;
   }
   buildMode(false);
-  readout.textContent = `The theme changed, so the scene was reset. ${DEFAULT_READOUT[state.mode]()}`;
+  setMath(readout, `The theme changed, so the scene was reset. ${DEFAULT_READOUT[state.mode]()}`);
 });
 document.fonts?.ready.then(() => {
   // Redraw canvas labels once the mono font has loaded.
