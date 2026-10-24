@@ -1,4 +1,4 @@
-const BUILD_ID = '2026-10-24T10:16:25Z';
+const BUILD_ID = '2026-10-24T10:24:53Z';
 const CACHE_PREFIX = 'panphy-labs';
 const PRECACHE_NAME = `${CACHE_PREFIX}-precache-${BUILD_ID}`;
 const RUNTIME_CACHE = `${CACHE_PREFIX}-runtime-${BUILD_ID}`;
@@ -107,24 +107,12 @@ const ASSETS_TO_CACHE = [
   '/tools/panphyplot/manual/workspace-light.png',
   '/tools/panphyplot/math_ref.html',
   'https://cdn.plot.ly/plotly-basic-2.29.1.min.js',
-  'https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-AMS-MML_SVG.js',
-  'https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/config/TeX-AMS-MML_SVG.js?V=2.7.5',
-  'https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/jax/output/SVG/jax.js?V=2.7.5',
-  'https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/jax/output/SVG/fonts/TeX/fontdata.js?V=2.7.5',
-  'https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/jax/output/SVG/fonts/TeX/Main/Regular/GreekAndCoptic.js?V=2.7.5',
-  'https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/jax/output/SVG/fonts/TeX/Size2/Regular/Main.js?V=2.7.5',
-  'https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/jax/output/SVG/fonts/TeX/Size1/Regular/Main.js?V=2.7.5',
-  'https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/jax/output/SVG/fonts/TeX/Size4/Regular/Main.js?V=2.7.5',
-  'https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/jax/output/SVG/fonts/TeX/AMS/Regular/Main.js?V=2.7.5',
-  'https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/jax/output/SVG/fonts/TeX/AMS/Regular/GeneralPunctuation.js?V=2.7.5',
-  'https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/jax/output/SVG/fonts/TeX/Size3/Regular/Main.js?V=2.7.5',
-  'https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/jax/output/SVG/fonts/TeX/Main/Regular/BasicLatin.js?V=2.7.5',
   'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js',
   'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/default.min.css',
   'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/monokai.min.css',
   'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css',
   'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github-dark.min.css',
-  'https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js',
+  'https://cdn.jsdelivr.net/npm/mathjax@3.2.2/es5/tex-svg-full.js',
   'https://cdn.jsdelivr.net/npm/marked@4.3.0/marked.min.js',
   'https://cdn.jsdelivr.net/npm/dompurify@2.3.4/dist/purify.min.js',
   'https://cdn.jsdelivr.net/npm/dompurify@3.4.16/dist/purify.min.js',

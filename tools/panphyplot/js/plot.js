@@ -267,14 +267,22 @@
 		return out;
 	}
 
+	// Typesetting runs one element at a time, after MathJax has started.
+	let typesetChain = Promise.resolve();
+
 	function safeTypeset(target) {
-		try {
-			if (typeof MathJax === 'undefined' || !MathJax.Hub || !MathJax.Hub.Queue) return;
-			const element = typeof target === 'string' ? document.querySelector(target) : target;
-			if (element) MathJax.Hub.Queue(['Typeset', MathJax.Hub, element]);
-		} catch (error) {
-			console.warn('MathJax typeset skipped:', error);
-		}
+		const element = typeof target === 'string' ? document.querySelector(target) : target;
+		if (!element || typeof MathJax === 'undefined' || !MathJax.startup?.promise) return Promise.resolve();
+		typesetChain = typesetChain
+			.then(() => MathJax.startup.promise)
+			.then(() => {
+				if (!element.isConnected) return undefined;
+				// Forget earlier output (much of it already replaced) so MathJax's list does not grow.
+				MathJax.typesetClear();
+				return MathJax.typesetPromise([element]);
+			})
+			.catch(error => console.warn('MathJax typeset skipped:', error));
+		return typesetChain;
 	}
 
 	// Plotly typesets every graph label afresh on each redraw, in a hidden div named math-output-*.
@@ -283,45 +291,44 @@
 	const plotTexCache = new Map();
 	let plotTexCacheInstalled = false;
 
-	function glyphsPresent(entry) {
-		return entry.glyphs.every(id => document.getElementById(id));
-	}
-
+	// Needs the single startup set up in panphyplot.html; otherwise Plotly's restarts replace the wrapper.
 	function installPlotTexCache() {
-		if (typeof MathJax === 'undefined' || !MathJax.Hub || typeof MathJax.Hub.Typeset !== 'function') return;
 		if (plotTexCacheInstalled) return;
+		if (typeof MathJax === 'undefined' || !MathJax.startup?.restartDisabled || typeof MathJax.typeset !== 'function') return;
 		plotTexCacheInstalled = true;
-		const original = MathJax.Hub.Typeset;
-		const cachedTypeset = function(element, callback) {
+		const original = MathJax.typeset;
+		MathJax.typeset = function(elements) {
+			const element = Array.isArray(elements) && elements.length === 1 ? elements[0] : null;
 			if (!element || element.nodeType !== 1 || !String(element.id).startsWith('math-output-')) {
 				return original.apply(this, arguments);
 			}
 			const key = `${element.style.fontSize}|${element.textContent}`;
-			const entry = plotTexCache.get(key);
-			if (entry && glyphsPresent(entry)) {
-				element.innerHTML = entry.html;
-				// Nothing returned, so Plotly's queue moves straight on to read the output.
-				if (typeof callback === 'function') callback();
+			const cached = plotTexCache.get(key);
+			if (cached) {
+				element.innerHTML = cached;
 				return undefined;
 			}
-			return original.call(this, element, () => {
-				const output = element.querySelector('.MathJax_SVG');
-				if (output && output.querySelector('svg')) {
-					// The copy leaves out MathJax's source script and ids, so it never clashes or is reprocessed.
-					const copy = output.cloneNode(true);
-					copy.querySelectorAll('[id]').forEach(node => node.removeAttribute('id'));
-					copy.removeAttribute('id');
-					const glyphs = [...copy.querySelectorAll('use')]
-						.map(node => (node.getAttribute('href') || node.getAttribute('xlink:href') || '').replace(/^#/, ''))
-						.filter(Boolean);
-					plotTexCache.delete(key);
-					plotTexCache.set(key, { html: copy.outerHTML, glyphs: [...new Set(glyphs)] });
-					if (plotTexCache.size > PLOT_TEX_CACHE_LIMIT) plotTexCache.delete(plotTexCache.keys().next().value);
-				}
-				if (typeof callback === 'function') callback();
-			});
+			let result;
+			try {
+				result = original.call(this, [element]);
+			} catch (error) {
+				// A label that needs a file loaded first (\require) shows as plain text, then redraws once it is ready.
+				if (error?.retry) error.retry.then(() => { forceReplot(); plotGraph(); }).catch(() => {});
+				else console.warn('MathJax typeset skipped:', error);
+				return undefined;
+			}
+			const output = element.querySelector('mjx-container');
+			if (output && output.querySelector('svg')) {
+				const copy = output.cloneNode(true);
+				copy.querySelectorAll('[id]').forEach(node => node.removeAttribute('id'));
+				plotTexCache.delete(key);
+				plotTexCache.set(key, copy.outerHTML);
+				if (plotTexCache.size > PLOT_TEX_CACHE_LIMIT) plotTexCache.delete(plotTexCache.keys().next().value);
+			}
+			// Plotly removes the div once it has read the output.
+			MathJax.typesetClear([element]);
+			return result;
 		};
-		MathJax.Hub.Typeset = cachedTypeset;
 	}
 
 	// One axis label in the current mode, before the $...$ wrapping.

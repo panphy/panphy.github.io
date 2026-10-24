@@ -105,7 +105,7 @@ function getFitEquationRasterScale(widthPx, heightPx) {
 
 function prepareFitEquationSvgForCopy(target) {
 	if (!target) return null;
-	const svg = target.querySelector('.MathJax_SVG svg, svg');
+	const svg = target.querySelector('mjx-container svg, svg');
 	if (!svg) return null;
 
 	const clone = selfContainSvg(svg);

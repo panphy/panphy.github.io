@@ -14,16 +14,31 @@
 	<link rel="icon" type="image/png" href="/assets/favicon.png">
 	<script src="https://cdn.plot.ly/plotly-basic-2.29.1.min.js" defer></script>
 	<script src="/tools/panphyplot/js/vendor/math.min.js" defer></script>
-	<script type="text/x-mathjax-config">
-		MathJax.Hub.Config({
-			tex2jax: {
+	<script>
+		// Plotly typesets LaTeX graph labels with these delimiters and restarts MathJax for every label.
+		// One startup is kept instead, so that plot.js can reuse finished labels; paths are drawn inline
+		// (no shared glyphs), so copied labels, equations and exported graphs stay complete.
+		window.MathJax = {
+			tex: {
 				inlineMath: [['$','$'], ['\\(','\\)']],
 				displayMath: [['$$','$$'], ['\\[','\\]']],
-				processEscapes: true
+				// The full build has every TeX package, so labels never wait for a download (or fail offline);
+				// textmacros is left out so that \text{...} reads names and units literally, as before.
+				packages: { '[-]': ['textmacros'] }
+			},
+			svg: { fontCache: 'none' },
+			startup: {
+				ready() {
+					const startup = window.MathJax.startup;
+					startup.defaultReady();
+					startup.defaultReady = () => {};
+					startup.restartDisabled = true;
+				}
 			}
-		});
+		};
 	</script>
-	<script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-AMS-MML_SVG.js" defer></script>
+	<!-- Without MathJax, Plotly falls back to plain labels only when MathJax is undefined. -->
+	<script src="https://cdn.jsdelivr.net/npm/mathjax@3.2.2/es5/tex-svg-full.js" defer onerror="window.MathJax = undefined"></script>
 
 	<link rel="stylesheet" href="/assets/fonts/fonts.css">
 	<link rel="stylesheet" href="/assets/design.css">
