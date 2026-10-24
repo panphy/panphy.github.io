@@ -2,15 +2,15 @@ import * as THREE from 'three';
 import { createSpellwaveAudio } from './audio.js';
 import { createSeasonalEffects } from './seasonal-effects.js';
 import { createPotionSystem } from './potions.js';
-import { ALL_WORDS, EASY_WORDS, HARD_WORDS, MEDIUM_WORDS, EQUATION_WORDS } from './question-bank.js?v=20261024-boss-pace';
+import { ALL_WORDS, EASY_WORDS, HARD_WORDS, MEDIUM_WORDS, EQUATION_WORDS } from './question-bank.js?v=20261024-card-reveal';
 import { createEndingFX } from './ending-fx.js';
 import { createLeaderboard } from './leaderboard.js';
 import { createEnemyMesh, createMimicChestMesh } from './enemy-meshes.js';
-import { bossSpeedMultiplier, hardBossShare, normalPromptLengthCap, bossWordLengthCap, previewLengthCap, withinLength, hardGuestCount } from './difficulty.js?v=20261024-boss-pace';
+import { bossSpeedMultiplier, hardBossShare, normalPromptLengthCap, bossWordLengthCap, previewLengthCap, withinLength, hardGuestCount } from './difficulty.js?v=20261024-card-reveal';
 import { createLowPolyTerrain, createLowPolyTree, createLowPolyRock, createLowPolyCloud } from './lowpoly.js';
 import { createVisuals, GLOW_GAIN, MOON_GLOW_GAIN } from './visuals.js';
-import { pickTarget, getInputCharacters, isMathOperatorInput, buildSearchPrompt, buildAltSearchPrompts, escapeHtml, wrapSups, promptIndexForProgress } from './prompt-utils.js?v=20261024-boss-pace';
-import { getBossChoice, choiceKeys, keysClash, choiceTypingLength, shuffledOptions, buildChoiceSegments } from './boss-choices.js?v=20261024-boss-pace';
+import { pickTarget, getInputCharacters, isMathOperatorInput, buildSearchPrompt, buildAltSearchPrompts, escapeHtml, wrapSups, promptIndexForProgress } from './prompt-utils.js?v=20261024-card-reveal';
+import { getBossChoice, choiceKeys, keysClash, choiceTypingLength, shuffledOptions, buildChoiceSegments } from './boss-choices.js?v=20261024-card-reveal';
 
 const canvas = document.getElementById('gameCanvas');
 const labelsLayer = document.getElementById('labelsLayer');
@@ -2111,7 +2111,8 @@ function updateLabels() {
 
     const isVisible = isEnemyTargetable(enemy) && reusableVector.z > -1 && reusableVector.z < 1;
     enemy.label.classList.toggle('is-hidden', !isVisible);
-    enemy.label.classList.toggle('is-revealing', enemy.revealFlash > 0);
+    // Boss questions are already visible during the walk-in; popping them again would flash.
+    enemy.label.classList.toggle('is-revealing', !enemy.isBoss && enemy.revealFlash > 0);
     if (!isVisible) continue;
 
     const x = (reusableVector.x * 0.5 + 0.5) * width;
