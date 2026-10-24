@@ -2,7 +2,7 @@
 
 A typing defence game for AQA GCSE Physics vocabulary. The page is `fun/spellwave.html`; the code is in `src/`. It is network-only (no offline cache), needs no build step, and loads Three.js and two post-processing add-ons from jsDelivr through the import map in the HTML.
 
-The page versions its stylesheet, entry module, word bank, difficulty module, prompt utilities, visuals module and boss modules (`boss-choices.js`, `boss-options.js`) with a shared `?v=` value. Bump that value together when changing these files so a new page cannot load incompatible browser-cached code (GitHub Pages caches assets for ten minutes). Filenames remain stable; this is independent of the root service worker.
+The page versions its stylesheet, entry module, word bank, difficulty module, prompt utilities, visuals module, audio module, potion system, leaderboard, victory cinematic and boss modules (`boss-choices.js`, `boss-options.js`) with a shared `?v=` value. Bump that value together when changing these files so a new page cannot load incompatible browser-cached code (GitHub Pages caches assets for ten minutes). Filenames remain stable; this is independent of the root service worker.
 
 Run the tests with `node --test fun/spellwave/tests/*.test.mjs`.
 
@@ -22,6 +22,8 @@ Everything is low-poly: simple solids with flat shading, so every facet shows, i
 - The sound follows the same idea (`src/audio.js`). Music uses mallet, plucked and music-box voices built from sine partials, with soft percussion; boss music keeps a harder kick, snare and bass on purpose. Every sound effect is built from the same five pieces — `knock`, `mallet`, `bell`, `rustle` and `drum` — so new ones should be too.
 - The interface is cream paper cards with brown ink. The colours are the variables at the top of `src/styles.css`, and the "Paper theme" block at the end of that file overrides the older dark-panel rules above it.
 - The final wave has its own palette (`FINAL_WAVE_PALETTE`) and its own scenery, the moons and drifting rocks built by `createFinalWaveScenery`.
+- The victory ending is a 40-second Three.js film in `src/ending-cinematic.js`, built from the same low-poly pieces: the defeated words fly into the wands, a wave of light turns the night into spring, and lanterns spell the game's name at sunrise. Its music is the victory score in `src/audio.js`. Both follow the cue times in `ENDING_TIMELINE` (a 90 bpm bar grid), so change them together. Every shot is computed from the film's clock, which follows the audio clock when sound is on; the cinematic's `seek(seconds)` jumps to any moment when tuning a shot.
+- The first time a player ever loots a potion, the game pauses once on a guide card that shows how to cast it (its arrow key, number key or a tap) and invites them to try each kind to find out what it does; they can cast it straight away or keep it. The guide is remembered in localStorage (`panphySpellwaveLootGuideSeenV1`); clear that key to see it again.
 - A monster must not carry its own light. Use a glow anchor (`createGlowAnchor` in `src/enemy-meshes.js`), which borrows from a fixed pool; adding real lights makes every shader recompile and stalls the game.
 
 ## Leaderboard
@@ -31,6 +33,7 @@ The "Hall of Wizards" is a top-five score list stored in Supabase; all of its co
 - Scores are read from the `spellwave_leaderboard` table and written only through the `submit_spellwave_score` function. The table, the function and the score-range check live in the Supabase project, not in this repository.
 - `MAX_SCORE` in `src/leaderboard.js` must match the server's range check. Raise both together if a scoring change makes a legitimate run exceed it, or high scores will be rejected.
 - A run that used a cheat (god mode, the potion cheat or the final-wave skip) is never submitted.
+- Until five real scores exist, `PLACEHOLDER_SCORES` fill the empty places on screen. They never affect who qualifies, and every real score is always shown. A full ten-wave run scores about 25,000, so they sit at partial-run levels.
 - The page loads the Supabase client from jsDelivr and falls back to plain REST calls if it never loads. The last list fetched is kept in localStorage and shown while the live one loads; the status reads "Offline" when the fetch fails.
 - `.github/workflows/supabase-keepalive.yml` queries the table twice a week so that the free-tier project is not paused. It carries a copy of the public anon key, so update it there too if the key or project changes.
 

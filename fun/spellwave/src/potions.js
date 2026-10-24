@@ -548,7 +548,9 @@ export function createPotionSystem({
     deactivateShield,
     blockLeak,
     blockBossHit,
-    triggerShieldHitVisual
+    triggerShieldHitVisual,
+    getPotions: () => [...potions],
+    getPotionIcon: (type) => POTION_SVGS[type] || ''
   };
 }
 

@@ -1,16 +1,16 @@
 import * as THREE from 'three';
-import { createSpellwaveAudio } from './audio.js';
+import { createSpellwaveAudio } from './audio.js?v=20261024-finale';
 import { createSeasonalEffects } from './seasonal-effects.js';
-import { createPotionSystem } from './potions.js';
-import { ALL_WORDS, EASY_WORDS, HARD_WORDS, MEDIUM_WORDS, EQUATION_WORDS } from './question-bank.js?v=20261024-card-reveal';
-import { createEndingFX } from './ending-fx.js';
-import { createLeaderboard } from './leaderboard.js';
+import { createPotionSystem } from './potions.js?v=20261024-finale';
+import { ALL_WORDS, EASY_WORDS, HARD_WORDS, MEDIUM_WORDS, EQUATION_WORDS } from './question-bank.js?v=20261024-finale';
+import { createEndingCinematic, wordArrivalTimes } from './ending-cinematic.js?v=20261024-finale';
+import { createLeaderboard } from './leaderboard.js?v=20261024-finale';
 import { createEnemyMesh, createMimicChestMesh } from './enemy-meshes.js';
-import { bossSpeedMultiplier, hardBossShare, normalPromptLengthCap, bossWordLengthCap, previewLengthCap, withinLength, hardGuestCount } from './difficulty.js?v=20261024-card-reveal';
+import { bossSpeedMultiplier, hardBossShare, normalPromptLengthCap, bossWordLengthCap, previewLengthCap, withinLength, hardGuestCount } from './difficulty.js?v=20261024-finale';
 import { createLowPolyTerrain, createLowPolyTree, createLowPolyRock, createLowPolyCloud } from './lowpoly.js';
-import { createVisuals, GLOW_GAIN, MOON_GLOW_GAIN } from './visuals.js?v=20261024-battery';
-import { pickTarget, getInputCharacters, isMathOperatorInput, buildSearchPrompt, buildAltSearchPrompts, escapeHtml, wrapSups, promptIndexForProgress } from './prompt-utils.js?v=20261024-card-reveal';
-import { getBossChoice, choiceKeys, keysClash, choiceTypingLength, shuffledOptions, buildChoiceSegments } from './boss-choices.js?v=20261024-card-reveal';
+import { createVisuals, GLOW_GAIN, MOON_GLOW_GAIN } from './visuals.js?v=20261024-finale';
+import { pickTarget, getInputCharacters, isMathOperatorInput, buildSearchPrompt, buildAltSearchPrompts, escapeHtml, wrapSups, promptIndexForProgress } from './prompt-utils.js?v=20261024-finale';
+import { getBossChoice, choiceKeys, keysClash, choiceTypingLength, shuffledOptions, buildChoiceSegments } from './boss-choices.js?v=20261024-finale';
 
 const canvas = document.getElementById('gameCanvas');
 const labelsLayer = document.getElementById('labelsLayer');
@@ -44,13 +44,18 @@ const runGlossary = document.getElementById('runGlossary');
 const bossBanner = document.getElementById('bossBanner');
 const potionBar = document.getElementById('potionBar');
 const potionSlots = document.querySelectorAll('.potion-slot');
+const lootGuide = document.getElementById('lootGuide');
+const lootGuideIcon = document.getElementById('lootGuideIcon');
+const lootGuideHow = document.getElementById('lootGuideHow');
+const lootGuideCast = document.getElementById('lootGuideCast');
+const lootGuideLater = document.getElementById('lootGuideLater');
 const gameEnding = document.getElementById('gameEnding');
 const endingFlash = document.getElementById('endingFlash');
-const endingContent = document.getElementById('endingContent');
+const endingCaption = document.getElementById('endingCaption');
 const endingCanvasEl = document.getElementById('endingCanvas');
 const endingReplay = document.getElementById('endingReplay');
 const endingSkip = document.getElementById('endingSkip');
-let endingFX = null;
+let endingCinematic = null;
 const endScore = document.getElementById('endScore');
 const endAccuracy = document.getElementById('endAccuracy');
 const endStreak = document.getElementById('endStreak');
@@ -560,6 +565,9 @@ const {
   playBossWarningSound,
   playWaveClearSound,
   playVictoryFinaleSound,
+  playVictoryScore,
+  stopVictoryScore,
+  getAudioTime,
   playGameOverSound,
   playGodModeOnSound,
   playGodModeOffSound,
@@ -741,7 +749,7 @@ if (endingReplay) {
 if (endingSkip) {
   endingSkip.addEventListener('click', () => {
     const finalStats = getEndingStats();
-    showEndingStatsScreen(finalStats);
+    showEndingStatsScreen(finalStats, { skipped: true });
   });
 }
 
@@ -887,6 +895,7 @@ function startGame() {
   bossShotHits = 0;
   bossesDefeated = 0;
   encounteredTerms = [];
+  pendingLootGuide = null;
   typedBuffer = '';
   activeTarget = null;
   spawnTimer = 1.25;
@@ -925,6 +934,7 @@ function pauseGame() {
 
 function resumeGame() {
   if (mode !== 'paused') return;
+  hideLootGuide();
   playStartSound();
   mode = 'running';
   resumeChainLightningTimers();
@@ -1060,6 +1070,16 @@ function handleKeyDown(event) {
   if (event.key === 'Escape' && mode === 'paused') {
     event.preventDefault();
     resumeGame();
+    return;
+  }
+
+  // While the loot guide is open, the new potion's own key casts it.
+  if (lootGuideSlot !== -1 && mode === 'paused') {
+    const keys = SLOT_KEYS[lootGuideSlot];
+    if (event.key === keys.arrow || event.key === String(lootGuideSlot + 1)) {
+      event.preventDefault();
+      castGuidedPotion();
+    }
     return;
   }
 
@@ -1479,6 +1499,17 @@ function animate(frameTime) {
 
   const delta = lastFrameTime ? Math.min((frameTime - lastFrameTime) / 1000, MAX_DELTA) : 0;
   lastFrameTime = frameTime;
+
+  if (mode === 'running' && pendingLootGuide) {
+    pendingLootGuide.delay -= delta;
+    if (pendingLootGuide.delay <= 0) {
+      showLootGuide();
+      if (mode !== 'running') {
+        rafId = null;
+        return;
+      }
+    }
+  }
 
   potionsSystem.update(delta);
 
@@ -4383,14 +4414,15 @@ function startWaveCleared() {
 
 let endingStartTime = 0;
 let endingTimers = [];
-let victorySoundPlayed = false;
 let endingLeaderboardOffered = false;
+// The defeated words that fly into the wands in the victory cinematic.
+const ENDING_WORD_COUNT = 10;
+const ENDING_WORD_MAX_LENGTH = 18;
 
 function startEndingSequence() {
   mode = 'ending';
-  victorySoundPlayed = false;
   endingLeaderboardOffered = false;
-  startMusicLoop(false);
+  stopMusicLoop(0.4);
   document.body.classList.remove('is-running');
   document.body.classList.remove('final-wave-active');
   setPauseButtonState(true, true);
@@ -4407,61 +4439,66 @@ function startEndingSequence() {
   if (!gameEnding) return;
   clearEndingTimers();
   gameEnding.hidden = false;
-  gameEnding.className = 'game-ending phase-arrival';
-
-  // Create (or reset) the canvas FX engine
-  if (endingFX) { endingFX.reset(); }
-  else { endingFX = createEndingFX(endingCanvasEl); }
+  gameEnding.className = 'game-ending phase-cinematic';
 
   const finalStats = getEndingStats();
   setEndingStats(finalStats, false);
 
-  // Cinematic steps:
-  // 1. Flash + detonation burst at 120ms
-  queueEndingStep(() => {
-    gameEnding.className = 'game-ending phase-arrival phase-flash';
-    endingFX.setPhase('detonation');
-  }, 120);
+  if (!endingCinematic) endingCinematic = createEndingCinematic(endingCanvasEl, { flashEl: endingFlash, captionEl: endingCaption });
+  if (!endingCinematic.available) {
+    showEndingStatsScreen(finalStats, { skipped: true });
+    return;
+  }
 
-  // 2. Nebula fades in at 2200ms; blue introductory text appears
-  queueEndingStep(() => {
-    gameEnding.className = 'game-ending phase-arrival phase-nebula';
-    endingFX.setPhase('nebula');
-  }, 2200);
-
-  // 3. Spellwave logo flies away at 5700ms; sparkle burst; victory chords
-  queueEndingStep(() => {
-    gameEnding.className = 'game-ending phase-arrival phase-nebula phase-title-fly';
-    endingFX.setPhase('titlefly');
-    if (!victorySoundPlayed) {
-      playVictoryFinaleSound();
-      victorySoundPlayed = true;
-    }
-  }, 5700);
-
-  // 4. Star Wars crawl at 9700ms (20s duration)
-  queueEndingStep(() => {
-    gameEnding.className = 'game-ending phase-arrival phase-nebula phase-crawl';
-    endingFX.setPhase('crawl');
-  }, 9700);
-
-  // 5. Final stats card at 29700ms (20s crawl ends)
-  queueEndingStep(() => {
-    showEndingStatsScreen(finalStats);
-  }, 29700);
+  // The score and the picture share one clock: the audio clock when sound is on.
+  const terms = chooseEndingWords();
+  const arrivals = wordArrivalTimes(terms.length);
+  const audioStart = playVictoryScore({ arrivals });
+  endingCinematic.play({
+    terms,
+    arrivals,
+    batterySaver,
+    audioStart,
+    getAudioTime,
+    onComplete: () => showEndingStatsScreen(finalStats),
+  });
 }
 
-function showEndingStatsScreen(finalStats) {
+// Up to ten words the player defeated this run, topped up from the word bank on a short run.
+function chooseEndingWords() {
+  const fits = (term) => term && term.length <= ENDING_WORD_MAX_LENGTH;
+  const shuffle = (entries) => {
+    const order = [...entries];
+    for (let i = order.length - 1; i > 0; i -= 1) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [order[i], order[j]] = [order[j], order[i]];
+    }
+    return order;
+  };
+  const defeated = shuffle(encounteredTerms.filter(entry => entry.defeated && !entry.isEquation && fits(entry.term)).map(entry => entry.term));
+  const words = [...new Set(defeated)].slice(0, ENDING_WORD_COUNT);
+  for (const entry of shuffle(EASY_WORDS)) {
+    if (words.length >= Math.min(6, ENDING_WORD_COUNT)) break;
+    if (fits(entry.term) && !words.includes(entry.term)) words.push(entry.term);
+  }
+  return words;
+}
+
+function showEndingStatsScreen(finalStats, { skipped = false } = {}) {
   clearEndingTimers();
   if (gameEnding) {
-    gameEnding.className = 'game-ending phase-arrival phase-nebula phase-stats phase-replay';
+    gameEnding.className = 'game-ending phase-stats phase-replay';
   }
-  endingFX?.setPhase('stats');
   setEndingStats(finalStats, true);
-  if (!victorySoundPlayed) {
+  if (skipped) {
+    endingCinematic?.skipToEnd();
+    stopVictoryScore(0.5);
     playVictoryFinaleSound();
-    victorySoundPlayed = true;
   }
+  // The quiet loop takes over once the last chord has rung.
+  queueEndingStep(() => {
+    if (mode === 'ending') startMusicLoop(true);
+  }, skipped ? 2800 : 3600);
   if (!endingLeaderboardOffered) {
     endingLeaderboardOffered = true;
     submitRunToLeaderboard();
@@ -4534,7 +4571,8 @@ function dismissEndingSequence() {
   clearEndingTimers();
   gameEnding.hidden = true;
   gameEnding.className = 'game-ending';
-  if (endingFX) { endingFX.reset(); }
+  endingCinematic?.stop();
+  stopVictoryScore(0.2);
 }
 
 function activateFinalWaveCheat() {
@@ -4696,11 +4734,95 @@ function spawnMagicAcquiredBurst(addedType) {
   el.addEventListener('animationend', () => el.remove(), { once: true });
 }
 
+// ── First-loot guide ──
+// The first time a player ever loots a potion, the game pauses once to show how
+// to cast magic and invites them to find out what each kind does by trying it.
+const LOOT_GUIDE_KEY = 'panphySpellwaveLootGuideSeenV1';
+const LOOT_GUIDE_DELAY = 0.8;
+const SLOT_KEYS = [
+  { arrow: 'ArrowLeft', symbol: '\u2190' },
+  { arrow: 'ArrowUp', symbol: '\u2191' },
+  { arrow: 'ArrowRight', symbol: '\u2192' },
+  { arrow: 'ArrowDown', symbol: '\u2193' },
+];
+let pendingLootGuide = null;
+let lootGuideSlot = -1;
+
+function hasSeenLootGuide() {
+  try { return localStorage.getItem(LOOT_GUIDE_KEY) === '1'; } catch { return false; }
+}
+
+function markLootGuideSeen() {
+  try { localStorage.setItem(LOOT_GUIDE_KEY, '1'); } catch {}
+}
+
+function queueLootGuide(type, slot) {
+  if (!lootGuide || slot < 0 || pendingLootGuide || hasSeenLootGuide()) return;
+  pendingLootGuide = { type, slot, delay: LOOT_GUIDE_DELAY };
+}
+
+function showLootGuide() {
+  const { type, slot } = pendingLootGuide;
+  pendingLootGuide = null;
+  // Skip it if the potion was already used or the run is no longer in play.
+  if (mode !== 'running' || potionsSystem.getPotions()[slot] !== type) return;
+  markLootGuideSeen();
+
+  const key = SLOT_KEYS[slot];
+  lootGuideIcon.innerHTML = potionsSystem.getPotionIcon(type);
+  lootGuideHow.innerHTML = `To cast it, press <kbd>${key.symbol}</kbd> or <kbd>${slot + 1}</kbd>, or tap it in your potion tray. Each slot has its own arrow and number key.`;
+  lootGuideCast.textContent = `Cast it now (${key.symbol})`;
+
+  mode = 'paused';
+  lootGuideSlot = slot;
+  stopMusicLoop();
+  cancelFrame();
+  suspendChainLightningTimers();
+  playChestOpenSound();
+  document.body.classList.add('is-paused', 'loot-guide-open');
+  potionSlots[slot]?.classList.add('is-guided');
+  setPauseButtonState(false, false);
+  lootGuide.hidden = false;
+  lootGuideCast.focus({ preventScroll: true });
+  updatePhaseDisplay();
+}
+
+function hideLootGuide() {
+  if (lootGuideSlot === -1) return;
+  potionSlots[lootGuideSlot]?.classList.remove('is-guided');
+  lootGuideSlot = -1;
+  lootGuide.hidden = true;
+  document.body.classList.remove('loot-guide-open');
+}
+
+function castGuidedPotion() {
+  const slot = lootGuideSlot;
+  if (slot === -1) return;
+  resumeGame();
+  potionsSystem.activatePotionSlot(slot);
+}
+
+if (lootGuideCast) {
+  lootGuideCast.addEventListener('click', () => {
+    resumeAudio();
+    castGuidedPotion();
+  });
+}
+
+if (lootGuideLater) {
+  lootGuideLater.addEventListener('click', () => {
+    resumeAudio();
+    resumeGame();
+  });
+}
+
 function awardMimicLoot(enemy) {
   const types = ['time_freeze', 'chain_lightning', 'shockwave', 'shield'];
   const type = types[Math.floor(Math.random() * types.length)];
+  const slot = potionsSystem.getPotions().indexOf(null);
   const success = potionsSystem.addPotion(type);
   mimicsLooted += 1;
+  if (success) queueLootGuide(type, slot);
 
   if (!enemy.label.classList.contains('is-hidden')) {
     const left = parseFloat(enemy.label.style.left);
@@ -5146,6 +5268,10 @@ potionSlots.forEach((slot, index) => {
   slot.addEventListener('pointerdown', (event) => {
     event.preventDefault();
     resumeAudio();
+    if (lootGuideSlot !== -1) {
+      if (index === lootGuideSlot) castGuidedPotion();
+      return;
+    }
     potionsSystem.activatePotionSlot(index);
   });
 });

@@ -18,6 +18,19 @@ const MUSIC_FILTER_LOW_LIFE = 3400;
 const MUSIC_FILTER_FROZEN = 420;
 const FROZEN_TEMPO_STRETCH = 1.4;
 const LANE_PAN_WIDTH = 0.7;
+// The victory score: 90 bpm, the same bar grid as ending-cinematic.js.
+const SCORE_BEAT = 60 / 90;
+const SCORE_GAIN = 0.95;
+const SCORE_REVERB_SEND = 0.28;
+const SCORE_SCHEDULE_AHEAD = 0.5;
+const NOTE_OFFSETS = { C: -9, D: -7, E: -5, F: -4, G: -2, A: 0, B: 2 };
+
+// 'F#5' → 739.99 Hz (A4 = 440 Hz).
+function noteFrequency(name) {
+  const match = /^([A-G])(#|b)?(\d)$/.exec(name);
+  const semitones = NOTE_OFFSETS[match[1]] + (match[2] === '#' ? 1 : match[2] === 'b' ? -1 : 0) + (Number(match[3]) - 4) * 12;
+  return 440 * Math.pow(2, semitones / 12);
+}
 const MUSIC_SEASONS = [
   {
     name: 'spring',
@@ -179,35 +192,44 @@ const FINAL_WAVE_MUSIC = {
     1174.66, 987.77, 783.99, 659.25,
   ],
 };
+// Under the results card: a slow, quiet reprise of the victory score's theme in D major.
 const ENDING_MUSIC = {
   name: 'ending',
-  baseStep: 0.24,
-  minStep: 0.19,
+  baseStep: 1 / 3,
+  minStep: 1 / 3,
   melodyType: 'sine',
   bassType: 'sine',
   accentType: 'triangle',
-  melodyGain: 0.018,
-  bassGain: 0.020,
+  melodyGain: 0.016,
+  bassGain: 0.018,
   hatGain: 0.002,
   drumGain: 0.004,
   drumFilter: 1200,
   melody: [
-    587.33, null, null, 698.46, null, 880.00, null, null,
-    783.99, null, 698.46, null, 587.33, null, null, null,
-    659.25, null, null, 783.99, null, 987.77, null, null,
-    880.00, null, 783.99, null, 698.46, null, 587.33, null,
+    440.00, null, 587.33, 659.25, 739.99, null, null, null,
+    null, null, null, null, 659.25, null, 587.33, null,
+    659.25, null, 554.37, null, 587.33, 659.25, null, null,
+    440.00, null, null, null, null, null, null, null,
+    493.88, null, 587.33, 659.25, 739.99, null, 880.00, null,
+    null, null, null, null, 739.99, null, 659.25, null,
+    783.99, null, 739.99, null, 659.25, null, 587.33, null,
+    null, null, null, null, null, null, null, null,
   ],
   bass: [
-    73.42, null, null, null, null, null, null, null,
-    87.31, null, null, null, null, null, null, null,
-    65.41, null, null, null, null, null, null, null,
-    58.27, null, null, null, null, null, null, null,
+    146.83, null, null, null, null, null, null, null,
+    146.83, null, null, null, null, null, null, null,
+    110.00, null, null, null, null, null, null, null,
+    110.00, null, null, null, null, null, null, null,
+    123.47, null, null, null, null, null, null, null,
+    123.47, null, null, null, null, null, null, null,
+    98.00, null, null, null, null, null, null, null,
+    98.00, null, null, null, null, null, null, null,
   ],
   padChords: [
-    [73.42, 146.83, 220.00, 293.66],
-    [87.31, 174.61, 261.63, 349.23],
-    [65.41, 130.81, 196.00, 293.66],
-    [58.27, 116.54, 174.61, 261.63],
+    [73.42, 146.83, 220.00, 369.99],
+    [55.00, 110.00, 164.81, 277.18],
+    [61.74, 123.47, 185.00, 293.66],
+    [49.00, 98.00, 146.83, 246.94],
   ],
 };
 
@@ -314,6 +336,13 @@ export function createSpellwaveAudio({
   let activeMusicProfile = null;
   let previousMusicProfile = null;
   let musicTransitionStart = 0;
+  let reverbNode = null;
+  let scoreBus = null;
+  let scoreTimer = null;
+  let scoreEvents = [];
+  let scoreIndex = 0;
+  let scoreStart = 0;
+  let victoryScoreActive = false;
 
   function updateAudioButton() {
     audioButton.classList.toggle('is-muted', !audioEnabled);
@@ -376,6 +405,7 @@ export function createSpellwaveAudio({
     sfxBus.connect(masterGain);
 
     const reverb = context.createConvolver();
+    reverbNode = reverb;
     reverb.buffer = createReverbImpulse(context, 1.7);
     const musicSend = context.createGain();
     const sfxSend = context.createGain();
@@ -715,6 +745,8 @@ export function createSpellwaveAudio({
   }
 
   function isMusicActiveMode() {
+    // The victory score replaces the music loop until its last note is scheduled.
+    if (victoryScoreActive) return false;
     const mode = getMode();
     return mode === 'running' || mode === 'wave_cleared' || mode === 'gameover' || mode === 'ending';
   }
@@ -1265,55 +1297,386 @@ export function createSpellwaveAudio({
     rustle(0.14, 0.014, { delay: 0.3, filterFrequency: 5200 });
   }
 
-  function playVictoryFinaleSound() {
-    const context = resumeAudio();
-    if (!context || !masterGain) return;
-    const now = context.currentTime;
+  // ── Victory score ──────────────────────────────────────────────────────
+  // A 40-second cue scored to the victory cinematic (ending-cinematic.js), on the
+  // same 90 bpm bar grid: the night in D minor, words chiming into the wands, the
+  // wave of light in D major on bar 4, the sunrise theme, one bell per letter of
+  // the name on bars 10–11, and the full chord as the name completes on bar 12.
+  // It runs on its own bus so Skip and Replay can fade it out.
 
-    // D-major triumph: foundation → build → swell → soaring peak → bell tail
-    const chords = [
-      // Foundation — low, warm, gentle arrival
-      { delay: 0.0,  notes: [73.42, 110.0, 146.83, 220.0], dur: 4.0, gainBase: 0.028, type: 'sine' },
-      // Build — rising harmony
-      { delay: 1.4,  notes: [146.83, 185.0, 220.0, 293.66], dur: 3.8, gainBase: 0.024, type: 'sine' },
-      { delay: 2.8,  notes: [196.0, 293.66, 369.99, 440.0], dur: 3.5, gainBase: 0.022, type: 'sine' },
-      // Swell — full mid-range
-      { delay: 4.4,  notes: [220.0, 293.66, 440.0, 587.33, 659.25], dur: 4.4, gainBase: 0.020, type: 'sine' },
-      // Soaring peak — upper harmonics, triumphant
-      { delay: 6.2,  notes: [293.66, 440.0, 587.33, 739.99, 880.0], dur: 5.0, gainBase: 0.018, type: 'sine' },
-      // Resolution — warm landing
-      { delay: 9.0,  notes: [146.83, 220.0, 293.66, 440.0, 587.33], dur: 5.5, gainBase: 0.022, type: 'sine' },
-    ];
+  function scoreTone(frequency, start, duration, gain, options = {}) {
+    scheduleTone(frequency, duration, start, { type: 'sine', attack: 0.004, ...options, gain }, scoreBus);
+  }
 
-    chords.forEach(({ delay, notes, dur, gainBase, type }) => {
-      notes.forEach((freq, i) => {
-        const isLow = i < 2;
-        scheduleTone(freq, dur, now + delay, {
-          gain: gainBase * (isLow ? 1.0 : 0.72),
-          type: isLow ? type : 'triangle',
-          attack: 0.22 + delay * 0.012,
-          detune: i % 2 === 0 ? -5 : 6,
-        }, masterGain);
+  function scoreMallet(frequency, start, duration, gain, pan = 0) {
+    scoreTone(frequency, start, duration, gain, { attack: 0.002, pan });
+    scoreTone(frequency * 4, start, duration * 0.2, gain * 0.26, { attack: 0.001, pan });
+    scoreTone(frequency * 2, start, duration * 0.4, gain * 0.14, { type: 'triangle', attack: 0.002, pan });
+  }
+
+  function scoreBell(frequency, start, duration, gain, pan = 0) {
+    scoreTone(frequency, start, duration, gain, { attack: 0.002, pan });
+    scoreTone(frequency * 2.76, start, duration * 0.55, gain * 0.3, { attack: 0.001, pan });
+    scoreTone(frequency * 5.4, start, duration * 0.25, gain * 0.14, { attack: 0.001, pan });
+  }
+
+  function scoreMusicBox(frequency, start, gain, pan = 0) {
+    scoreTone(frequency, start, 1.1, gain * 1.2, { attack: 0.002, pan });
+    scoreTone(frequency * 3, start, 0.35, gain * 0.2, { attack: 0.001, pan: -pan });
+    scoreTone(frequency * 5.4, start, 0.1, gain * 0.1, { attack: 0.001, pan });
+  }
+
+  // A held chord: soft sine and triangle voices with a slow swell and release.
+  function scorePad(frequencies, start, duration, gain, { attack = 0.6, release = 1.2, cutoff = 1800 } = {}) {
+    const context = audioContext;
+    if (!context || !scoreBus) return;
+    const filter = context.createBiquadFilter();
+    filter.type = 'lowpass';
+    filter.frequency.value = cutoff;
+    filter.Q.value = 0.3;
+    const envelope = context.createGain();
+    envelope.gain.setValueAtTime(0.0001, start);
+    envelope.gain.linearRampToValueAtTime(gain, start + attack);
+    envelope.gain.setValueAtTime(gain, start + Math.max(attack, duration - release));
+    envelope.gain.linearRampToValueAtTime(0.0001, start + duration);
+    filter.connect(envelope);
+    envelope.connect(scoreBus);
+    frequencies.forEach((frequency, index) => {
+      for (const [type, detune, level] of [['sine', -5, 1], ['triangle', 6, 0.45]]) {
+        const oscillator = context.createOscillator();
+        const voice = context.createGain();
+        oscillator.type = type;
+        oscillator.frequency.value = frequency;
+        oscillator.detune.value = detune + (index % 2 === 0 ? -3 : 3);
+        voice.gain.value = level;
+        oscillator.connect(voice);
+        voice.connect(filter);
+        oscillator.start(start);
+        oscillator.stop(start + duration + 0.05);
+      }
+    });
+  }
+
+  function scoreDrum(frequency, start, duration, gain) {
+    scoreTone(frequency, start, duration, gain, { endFrequency: frequency * 0.45, attack: 0.003 });
+    scheduleNoise(Math.min(0.12, duration), start, { gain: gain * 0.45, filterType: 'lowpass', filterFrequency: 320 }, scoreBus);
+  }
+
+  function scoreBoom(start, gain) {
+    scheduleNoise(1.6, start, { gain, filterType: 'lowpass', filterFrequency: 700, q: 0.4 }, scoreBus);
+  }
+
+  function scoreCymbal(start, duration, gain) {
+    scheduleNoise(duration, start, { gain, filterType: 'highpass', filterFrequency: 5200, q: 0.3 }, scoreBus);
+  }
+
+  // Rising air: filtered noise that grows louder and brighter, then stops dead.
+  function scoreSwell(start, duration, gain, fromFrequency, toFrequency) {
+    const context = audioContext;
+    if (!context || !scoreBus) return;
+    const buffer = context.createBuffer(1, Math.floor(context.sampleRate * duration), context.sampleRate);
+    const data = buffer.getChannelData(0);
+    for (let index = 0; index < data.length; index += 1) data[index] = Math.random() * 2 - 1;
+    const source = context.createBufferSource();
+    const filter = context.createBiquadFilter();
+    const envelope = context.createGain();
+    source.buffer = buffer;
+    filter.type = 'bandpass';
+    filter.Q.value = 0.9;
+    filter.frequency.setValueAtTime(fromFrequency, start);
+    filter.frequency.exponentialRampToValueAtTime(toFrequency, start + duration);
+    envelope.gain.setValueAtTime(0.0001, start);
+    envelope.gain.exponentialRampToValueAtTime(gain, start + duration - 0.03);
+    envelope.gain.linearRampToValueAtTime(0.0001, start + duration);
+    source.connect(filter);
+    filter.connect(envelope);
+    envelope.connect(scoreBus);
+    source.start(start);
+    source.stop(start + duration + 0.02);
+  }
+
+  function scoreBass(frequency, start, duration, gain) {
+    scoreTone(frequency, start, duration, gain, { attack: 0.01 });
+    scoreTone(frequency * 2, start, duration * 0.5, gain * 0.3, { type: 'triangle', attack: 0.006 });
+  }
+
+  function scoreKick(start, gain) {
+    scoreTone(108, start, 0.22, gain, { endFrequency: 50, attack: 0.003 });
+  }
+
+  function scoreSnare(start, gain) {
+    scheduleNoise(0.09, start, { gain, filterType: 'bandpass', filterFrequency: 1900, q: 0.7 }, scoreBus);
+  }
+
+  function scoreWoodblock(start, gain, pan = 0) {
+    scoreTone(880, start, 0.07, gain, { attack: 0.001, pan });
+    scoreTone(1320, start, 0.045, gain * 0.5, { attack: 0.001, pan });
+  }
+
+  function scoreShaker(start, gain) {
+    scheduleNoise(0.05, start, { gain, filterType: 'highpass', filterFrequency: 7000, q: 0.4 }, scoreBus);
+  }
+
+  // A firework over the name: a soft thump, a crackle of sparks and a bell.
+  function scoreFirework(start, pan) {
+    scoreDrum(98, start, 0.6, 0.08);
+    for (let index = 0; index < 7; index += 1) {
+      scoreTone(1800 + Math.random() * 2600, start + 0.12 + Math.random() * 0.55, 0.04, 0.011, {
+        attack: 0.001, pan: Math.max(-1, Math.min(1, pan + Math.random() * 0.5 - 0.25)),
+      });
+    }
+    scoreBell(noteFrequency('A6'), start + 0.05, 1.3, 0.012, pan);
+  }
+
+  function buildVictoryScore(arrivals) {
+    const N = noteFrequency;
+    const B = SCORE_BEAT;
+    const BAR = 4 * B;
+    const E = B / 2;
+    const events = [];
+    const at = (time, play) => events.push({ time, play });
+    const chord = (names) => names.map(N);
+
+    // Bars 0–1: the silent night. A low drone, frozen bells, D minor then B flat.
+    at(0, (T) => scorePad(chord(['D2', 'A2']), T, 10.9, 0.03, { attack: 3, release: 1.0, cutoff: 900 }));
+    at(0, (T) => scorePad(chord(['D3', 'F3', 'A3']), T, BAR + 0.3, 0.011, { attack: 1.4, release: 1, cutoff: 1400 }));
+    at(BAR, (T) => scorePad(chord(['A#2', 'D3', 'F3']), T, BAR + 0.3, 0.011, { attack: 1.2, release: 1, cutoff: 1400 }));
+    at(0, (T) => scoreSwell(T, 5.2, 0.005, 3000, 4600));
+    [[0.667, 'A5'], [1.667, 'F5'], [2.333, 'D6'], [3.333, 'C6'], [4.0, 'A5'], [4.667, 'E5']].forEach(([time, name], index) => {
+      at(time, (T) => scoreBell(N(name), T, 2.4, 0.018, index % 2 === 0 ? -0.4 : 0.4));
+    });
+
+    // Bars 2–3: the words gather. A music-box arpeggio climbs to the dominant,
+    // each word chimes as it lands, and the air rises into the release.
+    at(2 * BAR, (T) => scorePad(chord(['G2', 'A#2', 'D3', 'G3']), T, BAR + 0.3, 0.011, { attack: 0.9, release: 0.6, cutoff: 1600 }));
+    at(3 * BAR, (T) => scorePad(chord(['A2', 'C#3', 'E3', 'A3']), T, BAR - 0.05, 0.013, { attack: 0.8, release: 0.25, cutoff: 2000 }));
+    const minorArp = chord(['G4', 'A#4', 'D5', 'G5', 'A#5', 'D6', 'A#5', 'G5', 'D5', 'A#4']);
+    const dominantArp = chord(['A4', 'C#5', 'E5', 'A5', 'C#6', 'E6', 'C#6', 'A5', 'E5', 'C#5']);
+    for (let step = 0; ; step += 1) {
+      const time = 2 * BAR + step * (B / 4);
+      if (time >= 4 * BAR - 0.16) break;
+      const progress = (time - 2 * BAR) / (2 * BAR);
+      const notes = time < 3 * BAR ? minorArp : dominantArp;
+      at(time, (T) => scoreMusicBox(notes[step % notes.length], T, 0.006 + 0.012 * progress, Math.sin(step * 0.7) * 0.5));
+    }
+    const arrivalNotes = ['E5', 'F#5', 'G5', 'A5', 'B5', 'C#6', 'D6', 'E6', 'F#6', 'G6', 'A6', 'B6'];
+    arrivals.slice(0, arrivalNotes.length).forEach((time, index) => {
+      at(time, (T) => scoreBell(N(arrivalNotes[index]), T, 1.4, 0.026 - index * 0.0008, index % 2 === 0 ? -0.35 : 0.35));
+    });
+    at(7.0, (T) => scoreSwell(T, 4 * BAR - 7.05, 0.028, 350, 7500));
+    [[3 * BAR, 0.05], [3 * BAR + B, 0.06], [3 * BAR + 2 * B, 0.07], [3 * BAR + 3 * B, 0.08], [3 * BAR + 3 * B + E, 0.09]].forEach(([time, gain]) => {
+      at(time, (T) => scoreDrum(N('D2'), T, 0.35, gain));
+    });
+
+    // Bar 4: the wave of light.
+    at(4 * BAR, (T) => {
+      scoreDrum(N('D1'), T, 2.4, 0.2);
+      scoreDrum(N('D2'), T, 1.4, 0.14);
+      scoreBoom(T, 0.06);
+      scoreCymbal(T, 3.8, 0.045);
+      ['D6', 'F#6', 'A6', 'D7'].forEach((name, index) => scoreBell(N(name), T + index * 0.035, 2.2, 0.026, (index - 1.5) * 0.3));
+      scorePad(chord(['D2', 'A2', 'D3', 'F#3', 'A3', 'D4']), T, 2.9, 0.012, { attack: 0.04, release: 1.2, cutoff: 3200 });
+    });
+
+    // Bars 4–9: the theme, as spring and the sunrise spread.
+    const chords = {
+      D: { pad: ['D3', 'F#3', 'A3', 'D4'], root: 'D2', fifth: 'A2', high: ['F#4', 'A4', 'D5'] },
+      A: { pad: ['A2', 'E3', 'A3', 'C#4'], root: 'A1', fifth: 'E2', high: ['E4', 'A4', 'C#5'] },
+      Bm: { pad: ['B2', 'F#3', 'B3', 'D4'], root: 'B1', fifth: 'F#2', high: ['F#4', 'B4', 'D5'] },
+      G: { pad: ['G2', 'D3', 'G3', 'B3'], root: 'G1', fifth: 'D2', high: ['G4', 'B4', 'D5'] },
+    };
+    const themeMelody = {
+      4: [[0, 'A4', 0.5], [2, 'D5', 0.4], [3, 'E5', 0.4], [4, 'F#5', 1.3]],
+      5: [[0, 'E5', 0.5], [2, 'C#5', 0.4], [3, 'D5', 0.4], [4, 'E5', 0.6], [6, 'A4', 0.8]],
+      6: [[0, 'B4', 0.5], [2, 'D5', 0.4], [3, 'E5', 0.4], [4, 'F#5', 0.5], [6, 'A5', 0.8]],
+      7: [[0, 'G5', 0.9], [2, 'F#5', 0.5], [4, 'E5', 0.5], [6, 'D5', 0.8]],
+      8: [[0, 'F#5', 0.5], [2, 'A5', 0.5], [4, 'D6', 1.8]],
+      9: [[0, 'C#6', 0.6], [2, 'B5', 0.5], [4, 'A5', 0.6], [6, 'E5', 0.8]],
+    };
+    ['D', 'A', 'Bm', 'G', 'D', 'A'].forEach((name, offset) => {
+      const bar = 4 + offset;
+      const start = bar * BAR;
+      const harmony = chords[name];
+      at(start, (T) => scorePad(chord(harmony.pad), T, BAR + 0.4, bar === 4 ? 0.008 : 0.01, { attack: bar === 4 ? 0.3 : 0.5, release: 0.6, cutoff: 2200 }));
+      at(start, (T) => scoreBass(N(harmony.root), T, 1.3, 0.045));
+      at(start + 2 * B, (T) => scoreBass(N(harmony.fifth), T, 1.2, 0.035));
+      if (bar >= 5) at(start, (T) => scoreKick(T, 0.05));
+      at(start + 2 * B, (T) => scoreKick(T, 0.05));
+      if (bar >= 5) {
+        at(start + 1.5 * B, (T) => scoreWoodblock(T, 0.01, -0.3));
+        at(start + 3.5 * B, (T) => scoreWoodblock(T, 0.01, 0.3));
+      }
+      if (bar >= 6) {
+        for (let slot = 0; slot < 8; slot += 1) {
+          at(start + slot * E, (T) => scoreShaker(T, slot % 2 === 1 ? 0.004 : 0.0025));
+          const tone = N(harmony.high[slot % 3]) * 2;
+          at(start + slot * E, (T) => scoreMusicBox(tone, T, 0.005, slot % 2 === 0 ? -0.45 : 0.45));
+        }
+        at(start, (T) => scorePad(chord(harmony.high), T, BAR + 0.5, 0.006, { attack: 1.0, release: 0.8, cutoff: 3000 }));
+      }
+      themeMelody[bar].forEach(([slot, note, ring]) => {
+        at(start + slot * E, (T) => {
+          scoreMallet(N(note), T, ring, 0.042, 0.1);
+          if (bar >= 8) scoreMusicBox(N(note) * 2, T, 0.01, -0.2);
+        });
       });
     });
 
-    // Shimmer breath — filtered noise across the whole sequence
-    scheduleNoise(5.2, now + 0.3,  { gain: 0.016, filterType: 'highpass', filterFrequency: 2800, q: 0.4 }, masterGain);
-    scheduleNoise(4.0, now + 6.5,  { gain: 0.013, filterType: 'highpass', filterFrequency: 3200, q: 0.4 }, masterGain);
-
-    // Bell tail — crystalline high tones that slowly appear after the peak
-    const bells = [
-      [1174.66, 2.2, 8.2,  0.018],
-      [1318.51, 2.6, 9.0,  0.015],
-      [1760.0,  2.8, 9.8,  0.012],
-      [1174.66, 3.2, 11.0, 0.014],
-      [2093.0,  2.4, 12.2, 0.009],
-      [1318.51, 3.0, 13.5, 0.010],
-      [880.0,   3.8, 14.8, 0.014],
-    ];
-    bells.forEach(([freq, dur, delay, gain]) => {
-      scheduleTone(freq, dur, now + delay, { gain, type: 'sine', attack: 0.06, detune: 3 }, masterGain);
+    // Bars 10–11: the name assembles, one bell per letter, over a rising roll.
+    at(10 * BAR, (T) => scorePad(chord(['G2', 'D3', 'G3', 'B3', 'D4']), T, BAR + 0.3, 0.011, { attack: 0.4, release: 0.4, cutoff: 2400 }));
+    at(11 * BAR, (T) => scorePad(chord(['A2', 'E3', 'A3', 'C#4', 'E4']), T, BAR, 0.013, { attack: 0.4, release: 0.15, cutoff: 2800 }));
+    at(10 * BAR, (T) => scoreDrum(N('G1'), T, 1.2, 0.12));
+    at(11 * BAR, (T) => scoreDrum(N('A1'), T, 1.2, 0.12));
+    at(10 * BAR, (T) => scoreBass(N('G1'), T, 1.3, 0.045));
+    at(10 * BAR + 2 * B, (T) => scoreBass(N('D2'), T, 1.2, 0.035));
+    for (let beat = 0; beat < 4; beat += 1) at(10 * BAR + beat * B, (T) => scoreKick(T, 0.045));
+    for (let slot = 0; slot < 8; slot += 1) {
+      at(11 * BAR + slot * E, (T) => scoreBass(N('A1'), T, E * 0.9, 0.02 + slot * 0.004));
+    }
+    ['D5', 'E5', 'F#5', 'G5', 'A5', 'B5', 'C#6', 'D6'].forEach((name, index) => {
+      at(10 * BAR + index * B, (T) => {
+        scoreBell(N(name), T, 1.6, 0.03, (index - 3.5) / 6);
+        scoreMallet(N(name), T, 0.5, 0.018, (index - 3.5) / 6);
+      });
     });
+    for (let step = 0; ; step += 1) {
+      const time = 11 * BAR + step * (B / 4);
+      if (time >= 12 * BAR - 0.05) break;
+      const progress = step / 16;
+      at(time, (T) => scoreSnare(T, 0.003 + 0.025 * progress));
+    }
+    at(10 * BAR + 3 * B, (T) => scoreSwell(T, BAR + B - 0.03, 0.03, 500, 9000));
+
+    // Bar 12: the name is complete.
+    at(12 * BAR, (T) => {
+      scoreDrum(N('D1'), T, 2.8, 0.22);
+      scoreDrum(N('D2'), T, 1.4, 0.15);
+      scoreBoom(T, 0.06);
+      scoreCymbal(T, 5, 0.055);
+      scorePad(chord(['D2', 'A2', 'D3', 'F#3', 'A3', 'D4', 'F#4']), T, BAR + 0.3, 0.012, { attack: 0.03, release: 0.6, cutoff: 3600 });
+      scoreBell(N('D6'), T, 2.6, 0.03, -0.2);
+      scoreBell(N('A6'), T, 2.6, 0.022, 0.2);
+      scoreBell(N('F#6'), T + 0.05, 2.2, 0.02, 0);
+    });
+    const finaleMelody = {
+      12: [[0, 'F#5', 0.6], [2, 'A5', 0.6], [4, 'D6', 2.2]],
+      13: [[0, 'E6', 0.6], [2, 'D6', 0.5], [3, 'C#6', 0.4], [4, 'B5', 0.9], [6, 'A5', 0.8]],
+    };
+    [12, 13].forEach((bar) => {
+      const start = bar * BAR;
+      finaleMelody[bar].forEach(([slot, note, ring]) => {
+        at(start + slot * E, (T) => {
+          scoreMallet(N(note), T, ring, 0.05, 0.1);
+          scoreMusicBox(N(note) * 2, T, 0.012, -0.2);
+        });
+      });
+      at(start, (T) => scoreKick(T, 0.05));
+      at(start + 2 * B, (T) => scoreKick(T, 0.05));
+      at(start + 1.5 * B, (T) => scoreWoodblock(T, 0.01, -0.3));
+      at(start + 3.5 * B, (T) => scoreWoodblock(T, 0.01, 0.3));
+      for (let slot = 0; slot < 8; slot += 1) at(start + slot * E, (T) => scoreShaker(T, slot % 2 === 1 ? 0.004 : 0.0025));
+    });
+    at(12 * BAR, (T) => scoreBass(N('D2'), T, 2, 0.05));
+    at(12 * BAR + 2 * B, (T) => scoreBass(N('A1'), T, 1.2, 0.04));
+    at(13 * BAR, (T) => scorePad(chord(['B2', 'F#3', 'B3', 'D4']), T, 2 * B + 0.3, 0.011, { attack: 0.2, release: 0.4, cutoff: 2400 }));
+    at(13 * BAR + 2 * B, (T) => scorePad(chord(['G2', 'D3', 'G3', 'B3']), T, 2 * B + 0.3, 0.011, { attack: 0.2, release: 0.4, cutoff: 2400 }));
+    at(13 * BAR, (T) => scoreBass(N('B1'), T, 1.2, 0.045));
+    at(13 * BAR + 2 * B, (T) => scoreBass(N('G1'), T, 1.2, 0.045));
+    [[12 * BAR + 2 * B, -0.5], [12 * BAR + 4 * B, 0.5], [12 * BAR + 6 * B, 0]].forEach(([time, pan]) => {
+      at(time, (T) => scoreFirework(T, pan));
+    });
+
+    // Bar 14: home. The last chord rings on under the results card.
+    at(14 * BAR, (T) => {
+      scorePad(chord(['D2', 'A2', 'D3', 'F#3', 'A3', 'D4', 'A4']), T, 7, 0.012, { attack: 0.3, release: 3.5, cutoff: 2800 });
+      scoreBass(N('D2'), T, 5, 0.05);
+      scoreDrum(N('D1'), T, 2.5, 0.12);
+      scoreCymbal(T, 4, 0.022);
+      scoreMallet(N('D6'), T, 3, 0.05, 0);
+      scoreBell(N('D6'), T, 3.5, 0.022, 0);
+      [['F#6', 0.5], ['A6', 1.0], ['D7', 1.6], ['A6', 2.4], ['F#6', 3.3], ['D6', 4.4]].forEach(([name, delay], index) => {
+        scoreMusicBox(N(name), T + delay, 0.011 - index * 0.0012, index % 2 === 0 ? -0.4 : 0.4);
+      });
+    });
+
+    return events.sort((a, b) => a.time - b.time);
+  }
+
+  // Starts the score and returns its start on the audio clock, so the picture can follow it.
+  function playVictoryScore({ arrivals = [] } = {}) {
+    stopVictoryScore(0);
+    const context = resumeAudio();
+    if (!context || !masterGain) return null;
+    stopMusicLoop(0.3);
+    scoreBus = context.createGain();
+    scoreBus.gain.value = SCORE_GAIN;
+    scoreBus.connect(masterGain);
+    if (reverbNode) {
+      const send = context.createGain();
+      send.gain.value = SCORE_REVERB_SEND;
+      scoreBus.connect(send);
+      send.connect(reverbNode);
+    }
+    scoreEvents = buildVictoryScore(arrivals);
+    scoreIndex = 0;
+    scoreStart = context.currentTime + 0.12;
+    victoryScoreActive = true;
+    scoreTimer = window.setInterval(scheduleScore, MUSIC_TIMER_INTERVAL);
+    scheduleScore();
+    return scoreStart;
+  }
+
+  function scheduleScore() {
+    if (!audioContext || !scoreBus) return;
+    const horizon = audioContext.currentTime + SCORE_SCHEDULE_AHEAD;
+    while (scoreIndex < scoreEvents.length && scoreStart + scoreEvents[scoreIndex].time < horizon) {
+      const event = scoreEvents[scoreIndex];
+      scoreIndex += 1;
+      event.play(scoreStart + event.time);
+    }
+    if (scoreIndex >= scoreEvents.length) {
+      window.clearInterval(scoreTimer);
+      scoreTimer = null;
+      victoryScoreActive = false;
+    }
+  }
+
+  function stopVictoryScore(fade = 0.3) {
+    if (scoreTimer) window.clearInterval(scoreTimer);
+    scoreTimer = null;
+    scoreEvents = [];
+    scoreIndex = 0;
+    victoryScoreActive = false;
+    if (scoreBus && audioContext) {
+      const bus = scoreBus;
+      const now = audioContext.currentTime;
+      const length = Math.max(0.02, fade);
+      bus.gain.cancelScheduledValues(now);
+      bus.gain.setValueAtTime(bus.gain.value, now);
+      bus.gain.linearRampToValueAtTime(0.0001, now + length);
+      window.setTimeout(() => bus.disconnect(), (length + 0.1) * 1000);
+    }
+    scoreBus = null;
+  }
+
+  function getAudioTime() {
+    return audioContext ? audioContext.currentTime : null;
+  }
+
+  // A short resolution in the score's key, for when the cinematic is skipped.
+  function playVictoryFinaleSound() {
+    const context = resumeAudio();
+    if (!context || !masterGain) return;
+    const start = context.currentTime + 0.05;
+    ['D2', 'A2', 'D3', 'F#3', 'A3', 'D4'].forEach((name, index) => {
+      scheduleTone(noteFrequency(name), 3.6, start, {
+        gain: index < 2 ? 0.03 : 0.018, type: index < 2 ? 'sine' : 'triangle', attack: 0.05, detune: index % 2 === 0 ? -4 : 5,
+      }, sfxBus);
+    });
+    ['D5', 'F#5', 'A5', 'D6'].forEach((name, index) => {
+      bell(noteFrequency(name), 1.6, 0.028, { delay: 0.05 + index * 0.11, pan: (index - 1.5) * 0.25 });
+    });
+    drum(noteFrequency('D2'), 0.9, 0.1);
   }
 
   function playGameOverSound() {
@@ -1365,6 +1728,9 @@ export function createSpellwaveAudio({
     playBossWarningSound,
     playWaveClearSound,
     playVictoryFinaleSound,
+    playVictoryScore,
+    stopVictoryScore,
+    getAudioTime,
     playGameOverSound,
     playGodModeOnSound,
     playGodModeOffSound,
