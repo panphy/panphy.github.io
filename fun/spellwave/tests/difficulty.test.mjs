@@ -3,7 +3,7 @@ import { readFileSync } from 'node:fs';
 import assert from 'node:assert/strict';
 import {
   NORMAL_PROMPT_LENGTH_CAPS, EARLY_BOSS_WAVES, HARD_GUEST_COUNTS,
-  typedLength, bossAnswerLengthCap, normalPromptLengthCap, bossWordLengthCap, previewLengthCap, withinLength, hardGuestCount,
+  bossSpeedMultiplier, typedLength, bossAnswerLengthCap, normalPromptLengthCap, bossWordLengthCap, previewLengthCap, withinLength, hardGuestCount,
 } from '../src/difficulty.js';
 import { EASY_WORDS, MEDIUM_WORDS, HARD_WORDS } from '../src/question-bank.js';
 
@@ -24,6 +24,17 @@ test('minion caps increase gently and stay capped in late waves', () => {
   for (let wave = 1; wave <= 10; wave += 1) {
     assert.equal(previewLengthCap(wave), normalPromptLengthCap(wave));
   }
+});
+
+test('boss walking pressure increases gently from wave 1 through the finale', () => {
+  assert.equal(bossSpeedMultiplier(1), 1.05);
+  assert.equal(bossSpeedMultiplier(10), 1.23);
+  for (let wave = 2; wave <= 10; wave += 1) {
+    const increase = bossSpeedMultiplier(wave) - bossSpeedMultiplier(wave - 1);
+    assert.ok(increase > 0 && increase < 0.021, `wave ${wave} stays a small step`);
+  }
+  assert.equal(bossSpeedMultiplier(0), bossSpeedMultiplier(1));
+  assert.equal(bossSpeedMultiplier(11), bossSpeedMultiplier(10));
 });
 
 // Wave 1 draws only from the easy list, so an over-long easy keyword would be silently dropped.

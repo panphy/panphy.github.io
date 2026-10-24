@@ -1,6 +1,6 @@
 // difficulty.js — how long a keyword may be on each wave. The reasoning and the
 // full progression table are in fun/spellwave/README.md; keep the two in step.
-import { buildSearchPrompt } from './prompt-utils.js?v=20261024-british-ui';
+import { buildSearchPrompt } from './prompt-utils.js?v=20261024-boss-pace';
 
 // Longest prompt, in typed characters, that a normal monster, healer or chest may
 // ask on waves 1, 2, 3… Late waves keep the final cap.
@@ -58,4 +58,9 @@ export function hardGuestCount(wave, random = Math.random) {
 // Longest boss option, in typed letters: the answer or any wrong option.
 export function bossAnswerLengthCap(wave) {
   return wave <= EARLY_BOSS_WAVES ? 14 : 16;
+}
+
+// Bosses gain a little walking pressure each wave, up to the wave 10 finale.
+export function bossSpeedMultiplier(wave) {
+  return 1.05 + Math.min(9, Math.max(0, wave - 1)) * 0.02;
 }
