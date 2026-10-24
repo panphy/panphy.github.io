@@ -607,7 +607,7 @@ body.ball-fullscreen-lock {
 }
 
 .cl-tool:active:not(:disabled) {
-    background: var(--line);
+    background: var(--surface-3);
 }
 
 .cl-tool[aria-expanded="true"],

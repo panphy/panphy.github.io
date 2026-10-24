@@ -283,7 +283,7 @@ button:hover {
 }
 
 .md-tool:active {
-  background: var(--line);
+  background: var(--surface-3);
 }
 
 .md-tool .md-icon {

@@ -113,7 +113,7 @@ button, summary { font: inherit; }
 .resource-card:hover { transform: translate(-4px, -4px); box-shadow: 8px 8px 0 var(--cyan); }
 .resource-type { display: inline-flex; align-self: flex-start; padding: 6px 9px; border: 2px solid var(--ink); font-size: 10px; font-weight: 900; letter-spacing: .12em; text-transform: uppercase; }
 .resource-card h3 { margin: 28px 0 12px; font: 900 clamp(25px, 3vw, 40px)/1 "Arial Black", "Archivo Black", Arial, sans-serif; letter-spacing: -.045em; text-transform: uppercase; }
-.resource-card p { max-width: 660px; margin: 0; color: var(--muted); line-height: 1.5; }
+.resource-card p { max-width: 660px; margin: 0; color: var(--ink); line-height: 1.5; }
 .resource-card .card-footer { width: 100%; }
 .resource-list { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; margin-top: 18px; }
 .resource-link { display: flex; justify-content: space-between; gap: 18px; align-items: center; min-height: 64px; padding: 13px 16px; border: 2px solid var(--ink); background: white; font-weight: 800; line-height: 1.25; }
@@ -232,7 +232,9 @@ button, summary { font: inherit; }
 .checkpoint h2 { font-size: clamp(35px,5vw,62px); max-width: 870px; }.checkpoint > div:last-child > p:last-child { color: #d0d9e8; font-size: 18px; }
 .lesson-pagination { display: grid; grid-template-columns: 1fr 1fr; }
 .lesson-pagination a { min-height: 170px; padding: 38px clamp(22px, 6vw, 90px); display: flex; flex-direction: column; gap: 10px; border-right: 1px solid var(--line); background: #fffdf8; }
-.lesson-pagination a:hover { background: var(--accent); }.lesson-pagination .next-link { text-align: right; align-items: flex-end; }
+.lesson-pagination a:hover { background: var(--accent); }
+.lesson-pagination a:hover span { color: var(--ink); }
+.lesson-pagination .next-link { text-align: right; align-items: flex-end; }
 .lesson-pagination span { text-transform: uppercase; font-size: 11px; letter-spacing: .12em; font-weight: 900; color: var(--muted); }
 .lesson-pagination strong { font: 900 clamp(24px,3vw,40px)/1 "Arial Black", "Archivo Black", Arial, sans-serif; text-transform: uppercase; }
 

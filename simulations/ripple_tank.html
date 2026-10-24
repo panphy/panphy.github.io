@@ -27,6 +27,8 @@
       --brand-primary: var(--accent);
       --brand-secondary: var(--accent-hover);
       --brand-accent: #0E9F9A;
+      --refraction-ink: #087570;
+      --refraction-button-ink: #04101F;
 
       --surface-alt: var(--surface-2);
       --border: var(--line);
@@ -53,6 +55,7 @@
 
     [data-theme="dark"] {
       --brand-accent: #3FD6CF;
+      --refraction-ink: #3FD6CF;
       --source1-color: #56d4d0;
       --source2-color: #b4acfe;
       --source1-light: rgba(129, 236, 236, 0.12);
@@ -600,7 +603,7 @@
 
     .btn.active {
       background: var(--brand-accent);
-      color: #ffffff;
+      color: var(--refraction-button-ink);
       border-color: transparent;
     }
 
@@ -747,7 +750,7 @@
 
     .mode-option.refraction .mode-icon {
       background: rgba(13, 148, 136, 0.14);
-      color: var(--brand-accent);
+      color: var(--refraction-ink);
     }
 
     .mode-copy {
@@ -778,7 +781,7 @@
     }
 
     .mode-option.refraction .mode-cta {
-      color: var(--brand-accent);
+      color: var(--refraction-ink);
     }
 
     .sim-actions {

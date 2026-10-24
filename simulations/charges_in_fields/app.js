@@ -1392,7 +1392,7 @@ function buildControls() {
     const data = PARTICLES[key];
     const button = document.createElement('button');
     button.type = 'button';
-    button.innerHTML = `<i class="chip" style="background:var(--${data.color})">${data.symbol}</i>${data.name}`;
+    button.innerHTML = `<i class="chip" style="background:var(--${data.color});color:var(--${data.color}-ink)">${data.symbol}</i>${data.name}`;
     button.setAttribute('aria-pressed', String(state.particle[state.mode] === key));
     button.addEventListener('click', () => chooseParticle(key));
     choices.appendChild(button);
@@ -1449,7 +1449,7 @@ function buildControls() {
     button.type = 'button';
     button.className = 'switch';
     button.dataset.show = kind;
-    button.innerHTML = `<span class="switch-label"><i class="chip" style="background:var(--${color})">${kind}</i>${name} field</span><span class="switch-track" aria-hidden="true"></span>`;
+    button.innerHTML = `<span class="switch-label"><i class="chip" style="background:var(--${color});color:var(--${color}-ink)">${kind}</i>${name} field</span><span class="switch-track" aria-hidden="true"></span>`;
     button.addEventListener('click', () => showField(kind, !state[`show${kind}`]));
     showRow.appendChild(button);
   }

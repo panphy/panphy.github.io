@@ -263,7 +263,7 @@ button:disabled { cursor: default; opacity: .55; }
   background: var(--card-bg); color: var(--brand-primary);
   font-size: .9rem; font-weight: 700; touch-action: manipulation;
 }
-.action:hover:not(:disabled) { background: var(--muted-bg); }
+.action:hover:not(:disabled):not([aria-pressed=true]) { background: var(--muted-bg); }
 .action[hidden] { display: none; }
 
 .experiment-controls { display: flex; flex-direction: column; gap: 16px; }

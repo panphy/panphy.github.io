@@ -271,7 +271,7 @@ body.viewer-expanded { overflow: hidden; }
   border: 1px solid var(--input-border); border-radius: 12px; background: var(--card-bg);
   font-size: .85rem; font-weight: 700; transition: border-color .15s, background .15s;
 }
-.toolbar button:hover:not(:disabled) { border-color: var(--brand-accent); background: var(--muted-bg); }
+.toolbar button:hover:not(:disabled):not([aria-pressed=true]):not(.play) { border-color: var(--brand-accent); background: var(--muted-bg); }
 .toolbar svg { width: 18px; height: 18px; flex: none; fill: currentColor; }
 .toolbar svg .stroke { fill: none; stroke: currentColor; stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; }
 /* Play is the main action, so it is the one filled button. */

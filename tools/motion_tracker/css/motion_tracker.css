@@ -275,7 +275,7 @@ button:disabled {
 }
 
 .mt-tool:active:not(:disabled) {
-  background: var(--line);
+  background: var(--surface-3);
 }
 
 .mt-tool .mt-icon {
@@ -503,7 +503,7 @@ button:disabled {
 .mt-menu-item small {
   font-weight: 500;
   font-size: 0.76rem;
-  color: var(--ink-3);
+  color: var(--ink-2);
 }
 
 .mt-menu-item:hover:not(:disabled),

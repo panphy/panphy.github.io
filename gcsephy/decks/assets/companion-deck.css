@@ -118,6 +118,7 @@ sub, sup { line-height: 0; }
 .nav-pill.icon-only { width: 44px; padding: 0; justify-content: center; }
 .nav-pill .pane { fill: currentColor; stroke: none; opacity: 0; }
 .nav-pill[aria-pressed="true"] { background: rgba(255, 255, 255, .12); }
+.nav-pill[aria-pressed="true"]:hover { background: #fff; color: var(--navy); }
 .nav-pill[aria-pressed="true"] .pane { opacity: .45; }
 .thumbs {
   position: fixed;

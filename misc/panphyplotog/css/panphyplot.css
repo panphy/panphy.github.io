@@ -28,7 +28,7 @@
 	--nav-border: #E8E4DD;
 
 	/* Semantic button colors - Light theme */
-	--btn-create: #2D8C5F;
+	--btn-create: #278154;
 	--btn-create-hover: #24764F;
 	--btn-analyze: #0F766E;
 	--btn-analyze-hover: #0B6460;
@@ -38,7 +38,7 @@
 	--btn-import-hover: #9A4608;
 	--btn-danger: #B91C1C;
 	--btn-danger-hover: #991B1B;
-	--btn-utility: #0E8A7F;
+	--btn-utility: #0C8076;
 	--btn-utility-hover: #0C766C;
 	--btn-neutral: #6B6560;
 	--btn-neutral-hover: #5A534E;
@@ -188,7 +188,7 @@ body {
 	background-color: rgba(15, 118, 110, 0.1);
 	transform: translateY(-1px);
 	border-color: var(--btn-analyze);
-	color: var(--btn-analyze);
+	color: var(--btn-analyze-hover);
 }
 
 [data-theme="dark"] .banner-button:hover {
