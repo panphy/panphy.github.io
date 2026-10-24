@@ -1,6 +1,7 @@
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { MODES, MODE_ORDER, PARTICLES, MODE_PARTICLES, STEPPERS, CONTROLS, PARTS } from './content.js';
+import { setMath, mathHtml, onMathReady } from './math.js';
 
 const $ = id => document.getElementById(id);
 const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -866,14 +867,14 @@ function onFinish(tracer, outcome) {
     if (outcome === 'screen') {
       const y = tracer.pos.y * 100;
       addSpot(tracer);
-      readout.textContent = `${tracer.data.name.toUpperCase()} · Landed ${Math.abs(y).toFixed(2)} cm ${y >= 0 ? 'above' : 'below'} the center of the screen. ${tracer.q < 0 ? 'Negative charges are pulled towards the positive plate.' : 'Positive charges are pushed towards the negative plate.'}`;
+      setMath(readout, `${tracer.data.name.toUpperCase()} · Landed ${Math.abs(y).toFixed(2)} cm ${y >= 0 ? 'above' : 'below'} the center of the screen. ${tracer.q < 0 ? 'Negative charges are pulled towards the positive plate.' : 'Positive charges are pushed towards the negative plate.'}`);
     } else if (outcome === 'top' || outcome === 'bottom') {
       const plusOnTop = !state.swap;
       const hitPlus = (outcome === 'top') === plusOnTop;
-      readout.textContent = `${tracer.data.name.toUpperCase()} · Hit the ${hitPlus ? 'positive' : 'negative'} plate: the deflection was too big. Try a lower voltage, wider plates or a faster particle.`;
+      setMath(readout, `${tracer.data.name.toUpperCase()} · Hit the ${hitPlus ? 'positive' : 'negative'} plate: the deflection was too big. Try a lower voltage, wider plates or a faster particle.`);
     }
   } else if (state.mode === 'bfield' && outcome === 'left') {
-    readout.textContent = `${tracer.data.name.toUpperCase()} · Left the field region. ${state.values.angle < 90 ? 'Its velocity along the field carried it away in a helix.' : 'Its circle was too big to fit inside the field.'}`;
+    setMath(readout, `${tracer.data.name.toUpperCase()} · Left the field region. ${state.values.angle < 90 ? 'Its velocity along the field carried it away in a helix.' : 'Its circle was too big to fit inside the field.'}`);
   } else if (state.mode === 'selector') {
     if (outcome === 'passed') {
       lab.passed[tracer.bin] += 1;
@@ -881,9 +882,9 @@ function onFinish(tracer, outcome) {
     }
   } else if (state.mode === 'cyclotron') {
     const energy = 0.5 * tracer.m * tracer.vel.lengthSq() / 1.602177e-13;
-    readout.textContent = outcome === 'out'
+    setMath(readout, outcome === 'out'
       ? `${tracer.data.name.toUpperCase()} OUT · It left the edge of the dees with ${energy.toFixed(2)} MeV after ${Math.floor(lab.crossings / 2)} turns. Inject another, or change the field or gap voltage.`
-      : `OUT OF STEP · After a minute the ${name} is still inside with only ${energy.toFixed(2)} MeV. Tune the oscillator to the cyclotron frequency.`;
+      : `OUT OF STEP · After a minute the ${name} is still inside with only ${energy.toFixed(2)} MeV. Tune the oscillator to the cyclotron frequency.`);
     updateFireButton();
   }
 }
@@ -927,6 +928,7 @@ const sci = (value, digits = 2) => {
 function row(label, value) {
   return `<div class="row"><span>${label}</span><span>${value}</span></div>`;
 }
+onMathReady(() => updateEquation());
 for (const id of ['equation-box', 'graph-box']) $(id).addEventListener('toggle', () => { updateEquation(); drawGraph(); });
 function updateEquation() {
   const box = $('equation');
@@ -942,33 +944,33 @@ function updateEquation() {
     const speed = v.speed * data.speed.unit;
     const time = PLATE_LENGTH / speed;
     const deflection = 0.5 * accel * time * time;
-    html = `<div class="formula">E = V/d · F = qE · a = F/m</div>`
-      + row('Field E', `${sci(field)} V/m`)
-      + row('Force F', `${sci(q * field)} N`)
-      + row('Acceleration a', `${sci(accel)} m/s²`)
+    html = `<div class="formula">${mathHtml(String.raw`\(E = \dfrac{V}{d}\) · \(F = qE\) · \(a = \dfrac{F}{m}\)`, 'E = V/d · F = qE · a = F/m')}</div>`
+      + row(mathHtml(String.raw`Field \(E\)`, 'Field E'), `${sci(field)} V/m`)
+      + row(mathHtml(String.raw`Force \(F\)`, 'Force F'), `${sci(q * field)} N`)
+      + row(mathHtml(String.raw`Acceleration \(a\)`, 'Acceleration a'), `${sci(accel)} m/s²`)
       + row('Time between plates', `${sci(time)} s`)
-      + row('Deflection ½at²', deflection < d / 2 ? `<b>${(deflection * 100).toFixed(2)} cm</b>` : `<b>hits the plate</b>`);
+      + row(mathHtml(String.raw`Deflection \(\dfrac{1}{2}at^2\)`, 'Deflection ½at²'), deflection < d / 2 ? `<b>${(deflection * 100).toFixed(2)} cm</b>` : `<b>hits the plate</b>`);
   } else if (state.mode === 'bfield') {
     const field = v.field / 1000;
     const speed = v.speed * data.speed.unit;
     const angle = THREE.MathUtils.degToRad(v.angle);
     const radius = data.m * speed * Math.sin(angle) / (q * field);
     const period = 2 * Math.PI * data.m / (q * field);
-    html = `<div class="formula">r = mv/(qB) · T = 2πm/(qB)</div>`
-      + row('Force qvB sin θ', `${sci(q * speed * field * Math.sin(angle))} N`)
-      + row('Radius r', `<b>${(radius * 100).toFixed(2)} cm</b>`)
-      + row('Period T', `${sci(period)} s`)
-      + row('Frequency f', `${sci(1 / period)} Hz`)
-      + (v.angle < 90 ? row('Pitch v cos θ × T', `${(speed * Math.cos(angle) * period * 100).toFixed(1)} cm`) : '');
+    html = `<div class="formula">${mathHtml(String.raw`\(r = \dfrac{mv}{qB}\) · \(T = \dfrac{2\pi m}{qB}\)`, 'r = mv/(qB) · T = 2πm/(qB)')}</div>`
+      + row(mathHtml(String.raw`Force \(qvB\sin\theta\)`, 'Force qvB sin θ'), `${sci(q * speed * field * Math.sin(angle))} N`)
+      + row(mathHtml(String.raw`Radius \(r\)`, 'Radius r'), `<b>${(radius * 100).toFixed(2)} cm</b>`)
+      + row(mathHtml(String.raw`Period \(T\)`, 'Period T'), `${sci(period)} s`)
+      + row(mathHtml(String.raw`Frequency \(f\)`, 'Frequency f'), `${sci(1 / period)} Hz`)
+      + (v.angle < 90 ? row(mathHtml(String.raw`Pitch \(v\cos\theta \times T\)`, 'Pitch v cos θ × T'), `${(speed * Math.cos(angle) * period * 100).toFixed(1)} cm`) : '');
   } else if (state.mode === 'selector') {
     const field = v.selectorVoltage / SELECTOR_GAP;
     const flux = v.selectorField / 1000;
     const selected = field / flux;
     const passed = lab.passed.reduce((a, b) => a + b, 0);
     const emitted = lab.emitted.reduce((a, b) => a + b, 0);
-    html = `<div class="formula">qE = qvB  ⇒  v = E/B</div>`
-      + row('E = V/d', `${sci(field)} V/m`)
-      + row('B', `${sci(flux)} T`)
+    html = `<div class="formula">${mathHtml(String.raw`\(qE = qvB \;\Rightarrow\; v = \dfrac{E}{B}\)`, 'qE = qvB  ⇒  v = E/B')}</div>`
+      + row(mathHtml(String.raw`\(E = \dfrac{V}{d}\)`, 'E = V/d'), `${sci(field)} V/m`)
+      + row(mathHtml(String.raw`\(B\)`, 'B'), `${sci(flux)} T`)
       + row('Selected speed', `<b>${sci(selected)} m/s</b>`)
       + row('Through the slit', `${passed} of ${emitted}`);
     const reference = selectorReference(state.particle.selector);
@@ -981,12 +983,12 @@ function updateEquation() {
     const radius = tracer ? Math.hypot(tracer.pos.x, tracer.pos.z) : 0;
     const maxEnergy = (q * v.cycField * DEE_RADIUS) ** 2 / (2 * data.m) / 1.602177e-13;
     const tuned = Math.abs(v.frequency * 1e6 - fc) / fc < 0.002;
-    html = `<div class="formula">f = qB/2πm · Eₖ = q²B²R²/2m</div>`
-      + row('Cyclotron f', `${(fc / 1e6).toFixed(2)} MHz`)
-      + row('Oscillator f', `${v.frequency.toFixed(2)} MHz`)
+    html = `<div class="formula">${mathHtml(String.raw`\(f = \dfrac{qB}{2\pi m}\) · \(E_{\mathrm{k}} = \dfrac{q^2B^2R^2}{2m}\)`, 'f = qB/2πm · Eₖ = q²B²R²/2m')}</div>`
+      + row(mathHtml(String.raw`Cyclotron \(f\)`, 'Cyclotron f'), `${(fc / 1e6).toFixed(2)} MHz`)
+      + row(mathHtml(String.raw`Oscillator \(f\)`, 'Oscillator f'), `${v.frequency.toFixed(2)} MHz`)
       + row('Kinetic energy', `<b>${energy.toFixed(2)} MeV</b>`)
       + row('Radius · turns', `${(radius * 100).toFixed(1)} cm · ${Math.floor(lab.crossings / 2)}`)
-      + row('Maximum Eₖ (R = 50 cm)', `${maxEnergy.toFixed(2)} MeV`)
+      + row(mathHtml(String.raw`Maximum \(E_{\mathrm{k}}\) (\(R = 50\) cm)`, 'Maximum Eₖ (R = 50 cm)'), `${maxEnergy.toFixed(2)} MeV`)
       + `<div class="status ${tuned ? 'good' : 'warn'}">${tuned ? '✓ Tuned: in step with the particle.' : 'Not tuned: the particle will drift out of step.'}</div>`;
   }
   box.innerHTML = html;
@@ -1216,7 +1218,7 @@ function select(mesh) {
   selected = null;
   if (!mesh) return;
   const key = mesh.userData.part;
-  readout.textContent = describe(key);
+  setMath(readout, describe(key));
   const mat = Array.isArray(mesh.material) ? null : mesh.material;
   if (mat?.emissive && !['particle', 'efield', 'bfield', 'dee', 'pole'].includes(key)) {
     mesh.userData.savedEmissive = mat.emissive.clone();
@@ -1274,16 +1276,16 @@ $('fire').addEventListener('click', () => {
     state.beam = !state.beam;
     lab.spawnClock = 1;
     updateFireButton();
-    readout.textContent = state.beam
+    setMath(readout, state.beam
       ? 'BEAM ON · Particles leave the source with a spread of speeds, colored from slow (blue) to fast (orange). Watch which ones reach the detector.'
-      : 'BEAM OFF · The histogram keeps the count. Change E or B, then start the beam again.';
+      : 'BEAM OFF · The histogram keeps the count. Change E or B, then start the beam again.');
     return;
   }
   fireTracer();
   const data = particleData();
-  readout.textContent = state.mode === 'cyclotron'
+  setMath(readout, state.mode === 'cyclotron'
     ? `${data.name.toUpperCase()} INJECTED · It starts at rest in the gap. Each time it crosses the gap it gains up to ${state.values.gap * Math.abs(data.q / 1.602177e-19)} keV.`
-    : `${data.name.toUpperCase()} FIRED · The blue arrow is its velocity and the magenta arrow is the force on it. The dots mark equal time intervals.`;
+    : `${data.name.toUpperCase()} FIRED · The blue arrow is its velocity and the magenta arrow is the force on it. The dots mark equal time intervals.`);
 });
 function clearTracks() {
   if (!lab) return;
@@ -1297,7 +1299,7 @@ function clearTracks() {
 }
 $('clear').addEventListener('click', () => {
   clearTracks();
-  readout.textContent = 'TRACKS CLEARED · Ready for the next particle.';
+  setMath(readout, 'TRACKS CLEARED · Ready for the next particle.');
 });
 // Reset is a full reset of this tab: tracks cleared, every control back to its starting value,
 // motion resumed and the starting view and readout restored.
@@ -1362,11 +1364,11 @@ function onValueChange(key, user, changed) {
   if (key === 'angle') {
     if (user && changed && lab.kind === 'bfield') {
       const angle = state.values.angle;
-      readout.textContent = angle === 90
+      setMath(readout, angle === 90
         ? 'FIELD AT 90° · The field is at right angles to the velocity, so the path is a circle.'
         : angle === 0
           ? 'FIELD AT 0° · The field is parallel to the velocity, so there is no magnetic force and the path is straight.'
-          : `FIELD AT ${angle}° · The field now makes ${angle}° with the velocity. The part of the velocity along the field is unchanged, so the path is a helix.`;
+          : `FIELD AT ${angle}° · The field now makes ${angle}° with the velocity. The part of the velocity along the field is unchanged, so the path is a helix.`);
     }
   }
   updateEquation();
@@ -1410,8 +1412,9 @@ function buildControls() {
     field.dataset.setting = key;
     field.setAttribute('role', 'group');
     field.setAttribute('aria-labelledby', `label-${key}`);
-    field.innerHTML = `<span class="setting-label" id="label-${key}">${spec.label}</span><div class="stepper"><button type="button" id="minus-${key}" aria-label="Decrease ${spec.aria.toLowerCase()}">−</button><input type="number" id="input-${key}" min="${spec.min}" max="${spec.max}" step="${spec.step}" inputmode="decimal" aria-label="${spec.aria}"><button type="button" id="plus-${key}" aria-label="Increase ${spec.aria.toLowerCase()}">+</button></div>`;
+    field.innerHTML = `<span class="setting-label" id="label-${key}"></span><div class="stepper"><button type="button" id="minus-${key}" aria-label="Decrease ${spec.aria.toLowerCase()}">−</button><input type="number" id="input-${key}" min="${spec.min}" max="${spec.max}" step="${spec.step}" inputmode="decimal" aria-label="${spec.aria}"><button type="button" id="plus-${key}" aria-label="Increase ${spec.aria.toLowerCase()}">+</button></div>`;
     settings.appendChild(field);
+    setMath($(`label-${key}`), spec.label);
     bindStepper($(`minus-${key}`), $(`plus-${key}`), direction => setValue(key, state.values[key] + direction * spec.step, { user: true }));
     $(`input-${key}`).addEventListener('change', event => setValue(key, Number(event.target.value), { user: true }));
     if (state.values[key] === undefined) state.values[key] = spec.value;
@@ -1473,9 +1476,9 @@ function showField(kind, shown) {
   if (lab) lab.fieldGroups[kind].visible = shown;
   updateFieldToggles();
   const name = FIELD_KINDS[kind].name.toUpperCase();
-  readout.textContent = shown
+  setMath(readout, shown
     ? `${name} FIELD SHOWN · The lines show the direction of the field.`
-    : `${name} FIELD HIDDEN · Only the drawing is hidden: the field still acts on the particles.`;
+    : `${name} FIELD HIDDEN · Only the drawing is hidden: the field still acts on the particles.`);
 }
 // Each particle needs its own ranges, so choosing one resets its settings to sensible values.
 function chooseParticle(key) {
@@ -1506,13 +1509,13 @@ function chooseParticle(key) {
   }
   updateFireButton();
   const data = particleData();
-  readout.textContent = `${data.name.toUpperCase()} · Charge ${data.q > 0 ? '+' : '−'}${sci(Math.abs(data.q))} C · Mass ${sci(data.m)} kg. The settings were reset to suit it.${state.mode === 'bfield' ? ' Previous paths are kept for comparison; fire to start the new particle.' : ''}`;
+  setMath(readout, `${data.name.toUpperCase()} · Charge ${data.q > 0 ? '+' : '−'}${sci(Math.abs(data.q))} C · Mass ${sci(data.m)} kg. The settings were reset to suit it.${state.mode === 'bfield' ? ' Previous paths are kept for comparison; fire to start the new particle.' : ''}`);
 }
 const TOGGLE_MESSAGES = {
   swap: () => 'POLARITY SWAPPED · The field now points the other way, so every particle bends the other way.',
   reverseB: () => 'FIELD REVERSED · The magnetic force reverses, so the particle circles the other way round.',
   autotune: () => state.autotune
-    ? 'AUTO-TUNE ON · The oscillator frequency follows f = qB/(2πm).'
+    ? String.raw`AUTO-TUNE ON · The oscillator frequency follows \(f = \dfrac{qB}{2\pi m}\).`
     : 'AUTO-TUNE OFF · Step the frequency away from the cyclotron frequency and inject a particle.'
 };
 function toggle(key, button) {
@@ -1520,7 +1523,7 @@ function toggle(key, button) {
   button.setAttribute('aria-pressed', String(state[key]));
   if (key === 'swap' || key === 'reverseB') rebuild();
   if (key === 'autotune' && state.autotune) tune();
-  readout.textContent = TOGGLE_MESSAGES[key]();
+  setMath(readout, TOGGLE_MESSAGES[key]());
   updateEquation();
   drawGraph();
 }
@@ -1624,10 +1627,10 @@ function selectMode(mode, animate = true) {
   buildControls();
   updateFireButton();
   document.querySelectorAll('[data-legend]').forEach(item => { item.hidden = !LEGEND[mode].includes(item.dataset.legend); });
-  readout.textContent = DEFAULT_READOUT[mode];
-  for (const [id, key] of Object.entries({ 'scene-title': 'title', 'mode-date': 'date', 'mode-heading': 'heading', 'mode-level': 'level', description: 'description', look: 'look', evidence: 'evidence', deeper: 'deeper' })) $(id).textContent = data[key];
+  setMath(readout, DEFAULT_READOUT[mode]);
+  for (const [id, key] of Object.entries({ 'scene-title': 'title', 'mode-date': 'date', 'mode-heading': 'heading', 'mode-level': 'level', description: 'description', look: 'look', evidence: 'evidence', deeper: 'deeper' })) setMath($(id), data[key]);
   document.querySelectorAll('.models [data-mode]').forEach(button => button.setAttribute('aria-pressed', String(button.dataset.mode === mode)));
-  viewer.setAttribute('aria-label', `${data.title}. ${data.description} Drag or use arrow keys to rotate; click then scroll, pinch, or use plus and minus keys to zoom.`);
+  viewer.setAttribute('aria-label', `${data.title}. ${data.heading} Drag or use arrow keys to rotate; click then scroll, pinch, or use plus and minus keys to zoom.`);
   $('graph-canvas').setAttribute('aria-label', GRAPH_LABELS[mode]);
   resetView();
 }

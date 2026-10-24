@@ -13,6 +13,25 @@
   <link rel="icon" type="image/png" href="/assets/favicon.png">
   <link rel="apple-touch-icon" href="/assets/apple-touch-icon.png">
   <script src="/assets/sw-register.js" defer></script>
+  <script>
+    // Maths is typeset by charges_in_fields/math.js, never by a page scan. SVG paths are inline.
+    window.MathJax = {
+      tex: { inlineMath: [['\\(', '\\)']] },
+      svg: { fontCache: 'none' },
+      options: { enableMenu: false },
+      startup: {
+        typeset: false,
+        ready() {
+          window.MathJax.startup.defaultReady();
+          window.MathJax.startup.promise.then(() => {
+            document.documentElement.dataset.math = 'ready';
+            document.dispatchEvent(new Event('panphy:math-ready'));
+          });
+        }
+      }
+    };
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3.2.2/es5/tex-svg-full.js" defer onerror="document.documentElement.dataset.math = 'failed'"></script>
   <link rel="stylesheet" href="/assets/fonts/fonts.css">
   <link rel="stylesheet" href="/assets/design.css">
   <link rel="stylesheet" href="charges_in_fields/style.css">
@@ -35,7 +54,7 @@
     <nav class="models" aria-label="Choose an experiment">
       <button type="button" data-mode="efield" aria-pressed="true"><span>01 / E-FIELD</span><strong>Electric field</strong><small>Parabola between plates</small></button>
       <button type="button" data-mode="bfield" aria-pressed="false"><span>02 / B-FIELD</span><strong>Magnetic field</strong><small>Circles and helices</small></button>
-      <button type="button" data-mode="selector" aria-pressed="false"><span>03 / E × B</span><strong>Velocity selector</strong><small>Crossed fields</small></button>
+      <button type="button" data-mode="selector" aria-pressed="false"><span data-math-static>03 / \(E \times B\)</span><strong>Velocity selector</strong><small>Crossed fields</small></button>
       <button type="button" data-mode="cyclotron" aria-pressed="false"><span>04 / ACCELERATE</span><strong>Cyclotron</strong><small>A particle accelerator</small></button>
     </nav>
     <div class="lab-strip">
@@ -83,10 +102,11 @@
         </div>
       </aside>
     </section>
-    <section class="reality"><span aria-hidden="true">↗</span><div><h2>A model is an explanation, not a photograph.</h2><p>Every track is calculated step by step from the force qE + qv × B using real charges, masses, voltages and fields, so the shapes and sizes are right. The plates, fields and tracks are drawn to scale in centimeters (the cyclotron in tens of centimeters), but the particles are drawn enormously larger than they really are.</p><p>The motion is slowed down billions of times: an electron crosses these plates in a few nanoseconds. Each track is replayed at a speed that makes it easy to follow, so different particles are not shown at their true relative speeds. Gravity is ignored because it is far too weak to matter, and so are the forces between particles in the beam.</p><p>The fields are perfectly uniform inside the plates or the shaded region and zero outside; real fields spread out at the edges. The cyclotron is non-relativistic, its dees have no deflector to steer the beam out, and the particle starts from rest at the center.</p></div></section>
+    <section class="reality"><span aria-hidden="true">↗</span><div><h2>A model is an explanation, not a photograph.</h2><p data-math-static>Every track is calculated step by step from the force \(q\boldsymbol{E} + q\boldsymbol{v} \times \boldsymbol{B}\) using real charges, masses, voltages and fields, so the shapes and sizes are right. The plates, fields and tracks are drawn to scale in centimeters (the cyclotron in tens of centimeters), but the particles are drawn enormously larger than they really are.</p><p>The motion is slowed down billions of times: an electron crosses these plates in a few nanoseconds. Each track is replayed at a speed that makes it easy to follow, so different particles are not shown at their true relative speeds. Gravity is ignored because it is far too weak to matter, and so are the forces between particles in the beam.</p><p>The fields are perfectly uniform inside the plates or the shaded region and zero outside; real fields spread out at the edges. The cyclotron is non-relativistic, its dees have no deflector to steer the beam out, and the particle starts from rest at the center.</p></div></section>
   </main>
   <footer><span>Charges in fields · &copy; 2026 PanPhy Labs. All rights reserved.</span><a href="/">More PanPhy Labs apps</a></footer>
   <noscript><p class="no-script">Enable JavaScript to explore the 3D models. The descriptions remain available above.</p></noscript>
+  <script type="module" src="charges_in_fields/math.js"></script>
   <script type="module">import('./charges_in_fields/app.js').catch(error => { console.error(error); document.getElementById('load-status').hidden = false; document.getElementById('load-status').textContent = 'The 3D viewer could not load. Check your internet connection and reload. You can still read the explanation on this page.'; });</script>
 </body>
 </html>
