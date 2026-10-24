@@ -15,15 +15,14 @@ const MIN_SCORE = 1;
 // Matches the server check (spellwave_score_range); the highest legitimate run is ~67.6k.
 const MAX_SCORE = 70000;
 const HIGHLIGHT_MS = 6000;
-// Shown only to fill empty places until enough real scores exist. They never
-// count towards qualifying, and every real score is always listed. A full
-// ten-wave run scores about 25,000, so these sit at partial-run levels.
+// Obvious placeholders that fill empty places until enough real scores exist.
+// They never count towards qualifying, and every real score is always listed.
 const PLACEHOLDER_SCORES = [
-  { initials: 'NWT', score: 21860 },
-  { initials: 'CRI', score: 17340 },
-  { initials: 'FDY', score: 12950 },
-  { initials: 'TSL', score: 8420 },
-  { initials: 'BHR', score: 4780 },
+  { initials: 'AAA', score: 20000 },
+  { initials: 'BBB', score: 18000 },
+  { initials: 'CCC', score: 16000 },
+  { initials: 'DDD', score: 14000 },
+  { initials: 'EEE', score: 12000 },
 ];
 
 export function createLeaderboard({ formatScore, onModalClose = () => {} }) {
