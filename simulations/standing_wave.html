@@ -442,7 +442,7 @@
         }
 
         .particle-controls-content.hidden {
-            opacity: 0.9;
+            opacity: 0.4;
             pointer-events: none;
         }
 
@@ -908,7 +908,7 @@
                             <span class="particle-amp">Amp: <strong id="redParticleAmplitude">0.00</strong></span>
                         </div>
                         <div class="slider-with-value">
-                            <input type="range" id="positionSlider" min="0" max="1" step="0.01" value="0.5" aria-label="Red Particle Position">
+                            <input type="range" id="positionSlider" disabled min="0" max="1" step="0.01" value="0.5" aria-label="Red Particle Position">
                             <span class="slider-readout" id="positionValue">0.50</span>
                         </div>
                     </div>
@@ -919,7 +919,7 @@
                             <span class="particle-amp">Amp: <strong id="greenParticleAmplitude">0.00</strong></span>
                         </div>
                         <div class="slider-with-value">
-                            <input type="range" id="greenPositionSlider" min="0" max="1" step="0.01" value="0.8" aria-label="Green Particle Position">
+                            <input type="range" id="greenPositionSlider" disabled min="0" max="1" step="0.01" value="0.8" aria-label="Green Particle Position">
                             <span class="slider-readout" id="greenPositionValue">0.80</span>
                         </div>
                     </div>
@@ -1002,6 +1002,8 @@
         showParticlesToggle.addEventListener('change', () => {
             showParticles = showParticlesToggle.checked;
             particleControlsContent.classList.toggle('hidden', !showParticles);
+            positionSlider.disabled = !showParticles;
+            greenPositionSlider.disabled = !showParticles;
         });
 
         let isPaused = false;
