@@ -71,17 +71,17 @@
     });
   });
 
-  function setScale(nextScale, keepCentre = true) {
-    const centreX = (scrollArea.scrollLeft + scrollArea.clientWidth / 2) / scale;
-    const centreY = (scrollArea.scrollTop + scrollArea.clientHeight / 2) / scale;
+  function setScale(nextScale, keepCenter = true) {
+    const centerX = (scrollArea.scrollLeft + scrollArea.clientWidth / 2) / scale;
+    const centerY = (scrollArea.scrollTop + scrollArea.clientHeight / 2) / scale;
     scale = Math.min(3, Math.max(0.1, nextScale));
     image.style.width = `${imageWidth * scale}px`;
     zoomLevel.value = `${Math.round(scale * 100)}%`;
     document.getElementById('zoom-out').disabled = scale <= 0.1;
     document.getElementById('zoom-in').disabled = scale >= 3;
-    if (keepCentre) {
-      scrollArea.scrollLeft = centreX * scale - scrollArea.clientWidth / 2;
-      scrollArea.scrollTop = centreY * scale - scrollArea.clientHeight / 2;
+    if (keepCenter) {
+      scrollArea.scrollLeft = centerX * scale - scrollArea.clientWidth / 2;
+      scrollArea.scrollTop = centerY * scale - scrollArea.clientHeight / 2;
     } else {
       scrollArea.scrollTo(0, 0);
     }

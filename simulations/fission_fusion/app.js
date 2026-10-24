@@ -61,7 +61,7 @@ const ROD_SITES = [[0.5, 0.5], [-0.5, -0.5], [0.5, -0.5], [-0.5, 0.5], [1.5, -1.
 // Fusion: two repelling nuclei in a classical model. Energy is in units of the barrier height.
 const FUSION = {
   startSeparation: 7,
-  contact: 1.3, // centre-to-centre distance at which the strong force takes over
+  contact: 1.3, // center-to-center distance at which the strong force takes over
   mu: 0.1, // scaled reduced mass, sets the on-screen speed
   criticalTemp: 100, // million °C at which the nuclei just reach contact
   massD: 2,
@@ -182,7 +182,7 @@ function readPalette() {
     photon: color('--photon'),
     fuel: color('--undecayed'),
     spent: color('--decayed'),
-    u238: color('--aluminium'),
+    u238: color('--aluminum'),
     rod: color('--lead'),
     line: color('--text-secondary'),
     accent: color('--scene-accent'),
@@ -308,8 +308,8 @@ function makeWave(color, opacity = 0.95) {
   line.userData.radius = 0.35;
   return line;
 }
-function drawWave(line, centre, direction, time, length = 1.1) {
-  const view = camera.position.clone().sub(centre).normalize();
+function drawWave(line, center, direction, time, length = 1.1) {
+  const view = camera.position.clone().sub(center).normalize();
   const side = new THREE.Vector3().crossVectors(direction, view);
   if (side.lengthSq() < 1e-4) side.set(0, 1, 0);
   side.normalize();
@@ -317,7 +317,7 @@ function drawWave(line, centre, direction, time, length = 1.1) {
     const s = (i / (WAVE_POINTS - 1) - 0.5) * length;
     const envelope = Math.cos(Math.PI * s / length) ** 2;
     const wave = 0.12 * envelope * Math.sin(s / length * Math.PI * 12 - time * 18);
-    wavePoints[i].set(centre.x + direction.x * s + side.x * wave, centre.y + direction.y * s + side.y * wave, centre.z + direction.z * s + side.z * wave);
+    wavePoints[i].set(center.x + direction.x * s + side.x * wave, center.y + direction.y * s + side.y * wave, center.z + direction.z * s + side.z * wave);
   }
   setWaveRibbon(line.geometry, wavePoints, view);
 }
@@ -396,7 +396,7 @@ function clearStage() {
 }
 
 // ---------- Packing ----------
-// Closest-packed (FCC) lattice sites nearest the centre, lightly jittered, so nucleons touch as in a real nucleus.
+// Closest-packed (FCC) lattice sites nearest the center, lightly jittered, so nucleons touch as in a real nucleus.
 function packNucleus(count, seed, radius) {
   const rand = random(seed);
   const edge = radius * 2 * 0.97 * Math.SQRT2;
@@ -415,9 +415,9 @@ function packNucleus(count, seed, radius) {
   }
   sites.sort((p, q) => p.key - q.key);
   const points = sites.slice(0, count).map(({ point }) => point.add(new THREE.Vector3(rand() - 0.5, rand() - 0.5, rand() - 0.5).multiplyScalar(0.025)));
-  const centre = points.reduce((sum, point) => sum.add(point), new THREE.Vector3()).divideScalar(points.length);
+  const center = points.reduce((sum, point) => sum.add(point), new THREE.Vector3()).divideScalar(points.length);
   const turn = new THREE.Euler(rand() * 6, rand() * 6, rand() * 6);
-  return points.map(point => point.sub(centre).applyEuler(turn));
+  return points.map(point => point.sub(center).applyEuler(turn));
 }
 function shuffledKinds(protons, neutrons, seed) {
   const kinds = [...Array(protons).fill('proton'), ...Array(neutrons).fill('neutron')];
@@ -495,7 +495,7 @@ function stepFlyers(delta) {
     if (flyer.update(delta) === false) removeFlyer(flyer);
   }
 }
-// Moves an object outward and fades it once it has travelled `range`.
+// Moves an object outward and fades it once it has traveled `range`.
 function straightFlight(object, { direction, speed, range, getPosition = () => object.position, move = step => object.position.addScaledVector(direction, step), onFrame }) {
   const start = getPosition().clone();
   let fading = 0;
@@ -692,12 +692,12 @@ function splitNucleus() {
   nucleus.label.visible = false;
   for (const key of ['ba', 'kr']) {
     const list = groups[key];
-    const centre = list.reduce((sum, n) => sum.add(n.current), new THREE.Vector3()).divideScalar(list.length);
+    const center = list.reduce((sum, n) => sum.add(n.current), new THREE.Vector3()).divideScalar(list.length);
     const g = new THREE.Group();
-    g.position.copy(centre);
+    g.position.copy(center);
     stage.add(g);
     for (const n of list) {
-      n.local0 = n.current.clone().sub(centre);
+      n.local0 = n.current.clone().sub(center);
       g.add(n.mesh);
       n.mesh.position.copy(n.local0);
     }
@@ -730,10 +730,10 @@ function splitNucleus() {
   flash(new THREE.Vector3(0, 0, 0), 7);
   const gammaDirections = [new THREE.Vector3(0.85, 0.25, 0.45).normalize(), new THREE.Vector3(-0.8, 0.2, 0.5).normalize()];
   for (const direction of gammaDirections) {
-    const centre = new THREE.Vector3();
+    const center = new THREE.Vector3();
     const line = makeWave(palette.photon);
-    line.userData.centre = centre;
-    addFlyer(line, straightFlight(line, { direction, speed: FISSION.gammaSpeed, range: 6, getPosition: () => centre, move: step => centre.addScaledVector(direction, step), onFrame: () => drawWave(line, centre, direction, state.time) }), 'gamma');
+    line.userData.center = center;
+    addFlyer(line, straightFlight(line, { direction, speed: FISSION.gammaSpeed, range: 6, getPosition: () => center, move: step => center.addScaledVector(direction, step), onFrame: () => drawWave(line, center, direction, state.time) }), 'gamma');
   }
   decay.phase = 'separate';
   decay.t = 0;
@@ -1680,8 +1680,8 @@ function pick(clientX, clientY) {
   const pixelsPerUnit = rect.height / 2 / Math.tan(THREE.MathUtils.degToRad(camera.fov / 2));
   let best = null;
   for (const item of pickables) {
-    const centre = item.object.userData.centre;
-    if (centre) worldPosition.copy(centre).applyMatrix4(stage.matrixWorld);
+    const center = item.object.userData.center;
+    if (center) worldPosition.copy(center).applyMatrix4(stage.matrixWorld);
     else item.object.getWorldPosition(worldPosition);
     item.object.getWorldScale(worldScale);
     projected.copy(worldPosition).project(camera);
@@ -1840,7 +1840,7 @@ viewer.addEventListener('keydown', event => {
 // ---------- Mode selection ----------
 const DEFAULT_READOUT = {
   fission: () => 'URANIUM-235 · 92 protons + 143 neutrons, and a slow neutron waiting on the left. Press “Fire a neutron”, then tap a nucleon to see which nucleus it belongs to.',
-  chain: () => 'A BLOCK OF FUEL · Red spheres are uranium-235, grey spheres are uranium-238. Press “Start chain reaction”, then change the number of control rods and watch k in the graph panel.',
+  chain: () => 'A BLOCK OF FUEL · Red spheres are uranium-235, gray spheres are uranium-238. Press “Start chain reaction”, then change the number of control rods and watch k in the graph panel.',
   fusion: () => 'DEUTERIUM + TRITIUM · Two hydrogen nuclei, each with charge +1. Try 50 million °C and press “Collide the nuclei”, then step the temperature up by 10 until the nuclei fuse.',
   energy: () => 'Switch between the two reactions and compare the last row of numbers, or tap a nucleus on the curve to read its binding energy per nucleon.'
 };

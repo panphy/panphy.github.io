@@ -1,7 +1,7 @@
 :root {
-  /* Colours and fonts come from the shared design system (/assets/design.css);
+  /* Colors and fonts come from the shared design system (/assets/design.css);
      these names keep the rest of this stylesheet unchanged. Scene, particle and
-     field colours carry meaning and stay as they were. */
+     field colors carry meaning and stay as they were. */
   --brand-accent: var(--accent);
   --brand-accent-strong: var(--accent-hover);
   --bg-color: var(--bg);
@@ -120,8 +120,8 @@ h3 { font-size: .88rem; margin: 0; }
   box-shadow: var(--card-shadow);
 }
 .mass-head { display: flex; align-items: flex-end; justify-content: space-between; gap: 24px; flex-wrap: wrap; }
-.fate { flex: 1 1 320px; max-width: 560px; margin: 0; padding: 10px 16px; border-left: 3px solid var(--fate-colour, var(--brand-accent)); border-radius: 0 12px 12px 0; background: var(--muted-bg); font-size: .92rem; line-height: 1.5; }
-.fate b { color: var(--fate-colour, var(--brand-accent-strong)); }
+.fate { flex: 1 1 320px; max-width: 560px; margin: 0; padding: 10px 16px; border-left: 3px solid var(--fate-color, var(--brand-accent)); border-radius: 0 12px 12px 0; background: var(--muted-bg); font-size: .92rem; line-height: 1.5; }
+.fate b { color: var(--fate-color, var(--brand-accent-strong)); }
 .mass-row { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 28px; align-items: start; margin-top: 20px; }
 .mass-entry label { display: block; margin-bottom: 4px; font-family: var(--font-mono); font-size: .72rem; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: var(--text-secondary); }
 .mass-entry small { display: block; margin-top: 4px; color: var(--text-secondary); font-size: .76rem; }

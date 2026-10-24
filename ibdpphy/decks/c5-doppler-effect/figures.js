@@ -10,10 +10,10 @@
 // The model behind each moving figure, by name, for the redraw at the end of this file.
 const MODELS = {};
 window.DeckFigures.add(P => {
-  const { svg, arrow, text, labelled, twoState, PLAY, f, TAU } = P;
+  const { svg, arrow, text, labeled, twoState, PLAY, f, TAU } = P;
   const ease = s => (s <= 0 ? 0 : s >= 1 ? 1 : s * s * (3 - 2 * s));
   const ring = (cx, cy, r, op) => `<circle cx="${f(cx)}" cy="${cy}" r="${f(r)}" style="fill:none;stroke:var(--brand-primary);stroke-width:3.5;opacity:${f(op * 100) / 100}"/>`;
-  const dot = (x, y, r, colour, op = 1) => `<circle cx="${f(x)}" cy="${f(y)}" r="${r}" style="fill:var(--${colour});opacity:${f(op * 100) / 100}"/>`;
+  const dot = (x, y, r, color, op = 1) => `<circle cx="${f(x)}" cy="${f(y)}" r="${r}" style="fill:var(--${color});opacity:${f(op * 100) / 100}"/>`;
   // An observer, with a glow round the head that flashes (flash 0 to 1) as each wavefront arrives.
   const person = (x, y, op = 1, flash = 0) => `<g style="opacity:${f(op * 100) / 100}">${flash > 0.02 ? `<circle cx="${f(x)}" cy="${y - 34}" r="30" style="fill:var(--brand-accent);opacity:${f(flash * 55) / 100}"/>` : ''}<circle cx="${f(x)}" cy="${y - 34}" r="13" style="fill:var(--brand-accent)"/><path d="M${f(x)},${y - 20} V${y + 16} M${f(x - 16)},${y - 6} H${f(x + 16)} M${f(x)},${y + 16} L${f(x - 12)},${y + 44} M${f(x)},${y + 16} L${f(x + 12)},${y + 44}" style="fill:none;stroke:var(--brand-accent);stroke-width:5;stroke-linecap:round"/></g>`;
   // How long ago the last wavefront arrived, from the number of waves received so far (phase)
@@ -22,13 +22,13 @@ window.DeckFigures.add(P => {
   // What an observer hears over the last `span` seconds, newest on the right: one cycle for each
   // wavefront received. phase(τ) is the number of wavefronts received by time τ (null: none yet),
   // or [phase, loudness from 0 to 1] for a wave that dies away and starts again.
-  function trace(x, y, w, h, t, span, phase, colour = 'brand-primary') {
+  function trace(x, y, w, h, t, span, phase, color = 'brand-primary') {
     const n = 180, pts = [];
     for (let i = 0; i <= n; i++) {
       const v = phase(t - span + span * i / n), [p, amp] = v === null ? [0, 0] : Array.isArray(v) ? v : [v, 1];
       pts.push(`${f(x + 12 + (w - 24) * i / n)},${f(y + h / 2 - amp * (h / 2 - 12) * Math.cos(TAU * p))}`);
     }
-    return `<rect x="${x}" y="${y}" width="${w}" height="${h}" rx="14" style="fill:var(--viewer-bg);stroke:var(--card-border);stroke-width:2"/><polyline points="${pts.join(' ')}" style="fill:none;stroke:var(--${colour});stroke-width:3.5;stroke-linejoin:round"/>`;
+    return `<rect x="${x}" y="${y}" width="${w}" height="${h}" rx="14" style="fill:var(--viewer-bg);stroke:var(--card-border);stroke-width:2"/><polyline points="${pts.join(' ')}" style="fill:none;stroke:var(--${color});stroke-width:3.5;stroke-linejoin:round"/>`;
   }
   // Opacity of a wavefront of radius r. Plain copies (no labels) fade out sooner, before the edge of the picture.
   const fadeOf = (r, on) => (on ? 1 - 0.6 * Math.min(1, r / 650) : Math.max(0, 1 - r / 350) ** 0.7);
@@ -64,7 +64,7 @@ window.DeckFigures.add(P => {
 
   // A source at rest, and two observers: one standing still, one walking towards the source at
   // half the wave speed. The walker meets 1.5 times as many wavefronts each second.
-  // The walker's path in the labelled figure and, shorter, in the plain copy. Each loop is a
+  // The walker's path in the labeled figure and, shorter, in the plain copy. Each loop is a
   // whole number of periods T, so the wavefronts look the same every time the walker starts.
   const OBS = { c: 100, T: 0.5, xs: 300, y: 170, still: 90, u: 50 }, WALK = { x0: 860, walk: 7.5, LOOP: 8 }, PLAIN_WALK = { x0: 610, walk: 4, LOOP: 5 };
   const walkerAt = (tau, { x0, walk, LOOP }) => { const tl = ((tau % LOOP) + LOOP) % LOOP; return tl < walk ? { x: x0 - OBS.u * tl, op: ease(tl / 0.4) * (1 - ease((tl - walk + 0.5) / 0.5)), moving: true } : { x: x0, op: 0, moving: false }; };
@@ -111,7 +111,7 @@ window.DeckFigures.add(P => {
   }
   function radarAt(t, on, still) {
     const { c, T, xr, out, back } = RAD;
-    const arc = (x, yc, dir, colour, op) => `<path d="M${f(x - dir * 9)},${yc - 22} Q${f(x + dir * 9)},${yc} ${f(x - dir * 9)},${yc + 22}" style="fill:none;stroke:var(--${colour});stroke-width:4;stroke-linecap:round;opacity:${f(op * 100) / 100}"/>`;
+    const arc = (x, yc, dir, color, op) => `<path d="M${f(x - dir * 9)},${yc - 22} Q${f(x + dir * 9)},${yc} ${f(x - dir * 9)},${yc + 22}" style="fill:none;stroke:var(--${color});stroke-width:4;stroke-linecap:round;opacity:${f(op * 100) / 100}"/>`;
     const car = carAt(t), cx = car.x;
     let s = `<rect x="70" y="200" width="78" height="132" rx="12" style="fill:var(--brand-accent-strong)"/><path d="M148,214 L${xr - 6},204 V328 L148,318 Z" style="fill:var(--brand-accent-strong)"/>`;
     s += `<g style="opacity:${f(car.op * 100) / 100}"><path d="M${cx + 46},228 L${cx + 74},184 H${cx + 168} L${cx + 196},228 Z" style="fill:color-mix(in srgb, var(--brand-accent) 30%, var(--viewer-bg));stroke:var(--brand-accent);stroke-width:3;stroke-linejoin:round"/><rect x="${f(cx)}" y="222" width="230" height="84" rx="26" style="fill:color-mix(in srgb, var(--brand-accent) 55%, var(--viewer-bg));stroke:var(--brand-accent);stroke-width:3"/><circle cx="${f(cx + 56)}" cy="310" r="25" style="fill:var(--text-main)"/><circle cx="${f(cx + 176)}" cy="310" r="25" style="fill:var(--text-main)"/>${arrow(cx + 150, 160, cx + 70, 160, 'brand-accent', 5)}</g>`;
@@ -125,7 +125,7 @@ window.DeckFigures.add(P => {
     if (!on) return s;
     // Waves received back by τ: count the returns, sharing each interval evenly between two of
     // them. Between one car and the next nothing comes back: the wave dies away after the last
-    // return and grows again before the next, carried on at the rate of its neighbours.
+    // return and grows again before the next, carried on at the rate of its neighbors.
     times.sort((p, q) => p - q);
     const heardBack = tau => {
       const i = times.findIndex(tb => tb > tau);
@@ -162,16 +162,16 @@ window.DeckFigures.add(P => {
   return {
     // Also the title picture and part 1 picture (data-plain: the wavefronts alone).
     'c5-source': el => {
-      const on = labelled(el), y = SRC.y;
+      const on = labeled(el), y = SRC.y;
       const view = on ? [0, 0, 900, 380] : [150, -70, 600, 520];
       let s = clipped(...view, live('c5-source', sourceAt, on, 3, 2.5));
       if (on) s += text(SRC.behind, y + 90, 'behind:', 'lbl halo') + text(SRC.behind, y + 124, 'longer λ, lower f', 'lbl strong halo') + text(SRC.ahead, y + 90, 'ahead:', 'lbl halo') + text(SRC.ahead, y + 124, 'shorter λ, higher f', 'lbl strong halo');
-      return svg(view.join(' '), s, 'A source of waves moving to the right at half the wave speed. Each wavefront is a circle centred on the place, marked with a dot, where the source was when it was emitted, so the wavefronts are crowded together ahead of the source and spread out behind it. The observer ahead is reached by wavefronts more often, at a higher frequency, than the observer behind');
+      return svg(view.join(' '), s, 'A source of waves moving to the right at half the wave speed. Each wavefront is a circle centered on the place, marked with a dot, where the source was when it was emitted, so the wavefronts are crowded together ahead of the source and spread out behind it. The observer ahead is reached by wavefronts more often, at a higher frequency, than the observer behind');
     },
 
     // Also the part 3 picture and the lesson map, with data-plain: the wavefronts alone.
     'c5-observer': el => {
-      const on = labelled(el), y = OBS.y;
+      const on = labeled(el), y = OBS.y;
       const view = on ? [0, 0, 900, 450] : [-60, -190, 720, 720];
       let s = clipped(...view, live('c5-observer', observerAt, on, on ? 13.4 : 11.5, 10));
       if (on) s += text(OBS.xs, y + 62, 'source at rest', 'lbl halo') + text(20, 302, 'standing still', 'lbl halo', 'start') + text(560, 302, 'walking towards the source', 'lbl halo', 'start') + text(20, 432, 'frequency heard: f', 'lbl strong', 'start') + text(560, 432, 'frequency heard: 1.5 f', 'lbl strong', 'start');
@@ -182,7 +182,7 @@ window.DeckFigures.add(P => {
     // The same spectral lines in the laboratory and from a receding galaxy. data-play: the lines
     // move on a press of →, not in a loop.
     'c5-lines': el => {
-      const on = labelled(el);
+      const on = labeled(el);
       let s = live('c5-lines', linesAt, on, 0, 0, 'play' in el.dataset) + text(X0, 94, 'hydrogen in the laboratory', 'lbl strong', 'start') + text(X0, 284, 'the same lines from a galaxy moving away', 'lbl strong', 'start');
       s += text(X0, 232, 'violet', 'lbl small', 'start') + text(X0 + W, 232, 'red', 'lbl small', 'end');
       if (on) s += text(460, 492, 'every λ grows by the same fraction', 'lbl small');
@@ -191,7 +191,7 @@ window.DeckFigures.add(P => {
 
     // Radar measuring speed: waves out and back from a moving car.
     'c5-radar': el => {
-      const on = labelled(el);
+      const on = labeled(el);
       let s = clipped(40, 140, 880, 380, live('c5-radar', radarAt, on, 6.2, 5));
       s += text(109, 362, 'radar', 'lbl') + text(300, 214, 'sent out', 'lbl halo a', 'start') + text(300, 344, 'reflected back', 'lbl halo', 'start', 'style="fill:var(--proton)"');
       if (on) s += text(60, 394, 'sent: frequency f', 'lbl strong', 'start') + text(500, 394, 'received: higher frequency', 'lbl strong', 'start') + text(860, 510, 'speed of the car much exaggerated', 'lbl small', 'end');

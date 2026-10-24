@@ -3,8 +3,8 @@
 // force arrow starts where the force acts. Kinetic energy is apricot, potential energy teal and
 // the total slate. Nothing here is terracotta: A.3 has no additional higher level content.
 window.DeckFigures.add(P => {
-  const { svg, arrow, text, sub, box, dot, surface, axes, plot, shade, both, through, sampled, labelled, spring, track, anim, twoState, PLAY, f } = P;
-  const bar = (x, y, w, h, colour, extra = '') => `<rect x="${x}" y="${f(y)}" width="${w}" height="${f(h)}" rx="6" style="fill:var(--${colour})">${extra}</rect>`;
+  const { svg, arrow, text, sub, box, dot, surface, axes, plot, shade, both, through, sampled, labeled, spring, track, anim, twoState, PLAY, f } = P;
+  const bar = (x, y, w, h, color, extra = '') => `<rect x="${x}" y="${f(y)}" width="${w}" height="${f(h)}" rx="6" style="fill:var(--${color})">${extra}</rect>`;
 
   // Keep the definitions outside the figures so the slide thumbnails use the same gradients.
   document.body.insertAdjacentHTML('afterbegin', `<svg class="svg-defs" aria-hidden="true" focusable="false"><defs>
@@ -38,7 +38,7 @@ window.DeckFigures.add(P => {
   return {
     // Work done by a force at an angle to the displacement. Also drawn small, with data-plain.
     'a3-work': el => {
-      const on = labelled(el);
+      const on = labeled(el);
       let s = surface(60, 360, 760, 360) + box(250, 310, 150, 96) + `<line x1="325" y1="300" x2="560" y2="300" class="guide"/>`;
       s += arrow(325, 300, 533, 180, 'brand-primary', 6) + arrow(325, 300, 533, 300, 'brand-primary', 4, 'stroke-dasharray="10 7"') + `<line x1="539" y1="180" x2="539" y2="300" class="guide"/>` + dot(325, 300, 6);
       s += arrow(180, 420, 600, 420, 'brand-accent', 5);
@@ -48,7 +48,7 @@ window.DeckFigures.add(P => {
 
     // The area under a force–displacement graph is the work done: data-kind="spring" for a spring.
     'a3-fs-graph': el => {
-      const on = labelled(el), isSpring = el.dataset.kind === 'spring';
+      const on = labeled(el), isSpring = el.dataset.kind === 'spring';
       let s = '';
       if (isSpring) {
         s = shade('M110,400 L620,120 V400 Z', 'brand-primary', 0.22) + axes(110, 400, 760, 40, '', on ? 'force' : '') + plot('M110,400 L620,120') + `<path d="M110,120 H620 V400" class="guide"/>`;
@@ -72,7 +72,7 @@ window.DeckFigures.add(P => {
 
     // A cart on a frictionless track, with its kinetic and potential energy. Also the title picture, with data-plain.
     'a3-coaster': el => {
-      const on = labelled(el), H = 260, base = 420;
+      const on = labeled(el), H = 260, base = 420;
       const rail = `<path d="${sampled(t => { const x = TRACK.x0 + (TRACK.x1 - TRACK.x0) * t; return [x, trackY(x) + 16]; }, 120)}" style="fill:none;stroke:var(--text-secondary);stroke-width:6;stroke-linecap:round"/><line x1="40" y1="${base + 16}" x2="640" y2="${base + 16}" class="guide"/>`;
       const cart = `<circle r="16" style="fill:color-mix(in srgb, var(--brand-accent-strong) 30%, var(--viewer-bg));stroke:var(--brand-accent-strong);stroke-width:4"/>`;
       const at = RIDE[Math.round(RIDE.length * 0.36)];
@@ -87,7 +87,7 @@ window.DeckFigures.add(P => {
 
     // A compressed spring launching a ball: the spring, drawn horizontally.
     'a3-launcher': () => {
-      // The spring lies along the line through the ball's centre and touches it. Played once on a press: the
+      // The spring lies along the line through the ball's center and touches it. Played once on a press: the
       // spring pushes the ball out to the natural length (a quarter of an oscillation), then the ball leaves at v.
       const wall = 96, cy = 298, r = 30, L0 = 192, Ln = 350, n = 80, hold = 0.3, tq = 1.2, w = Math.PI / (2 * tq), vx = (Ln - L0) * w, T = hold + tq + (800 - wall - Ln - r) / vx;
       const coil = L => spring(0, 0, L, 9, 28).match(/d="([^"]+)"/)[1];
@@ -107,9 +107,9 @@ window.DeckFigures.add(P => {
 
     // A Sankey diagram for a petrol engine: the width of each arrow shows the energy. Also drawn small, with data-plain.
     'a3-sankey': el => {
-      const on = labelled(el);
+      const on = labeled(el);
       // As in the Year 9 Energy deck, both output streams begin at the input edge,
-      // blending from one source colour before they separate into useful and wasted energy.
+      // blending from one source color before they separate into useful and wasted energy.
       let s = `<path d="M80,140 H660 L700,158 L660,176 H80 Z" fill="url(#a3-sankey-useful)"/>`;
       s += `<path d="M80,176 H470 C540,176 564,220 564,300 V380 L606,380 L522,430 L438,380 L480,380 V300 C480,268 470,260 430,260 H80 Z" fill="url(#a3-sankey-wasted)"/>`;
       if (on) s += text(250, 210, '100 J in', 'lbl strong', 'middle', 'style="fill:#fff"') + text(250, 120, 'chemical energy of the fuel', 'lbl') + text(720, 150, '30 J useful', 'lbl strong', 'start') + text(720, 184, 'kinetic energy', 'lbl', 'start') + text(626, 330, '70 J wasted', 'lbl strong', 'start') + text(626, 364, 'thermal energy', 'lbl', 'start');

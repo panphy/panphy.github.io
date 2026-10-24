@@ -136,7 +136,7 @@ export function updateOfflineFontState() {
  * Show the filename modal for export
  * @param {string} defaultFilename - The default filename to show
  * @param {string} title - The modal title
- * @returns {Promise<string|null>} The entered filename or null if cancelled
+ * @returns {Promise<string|null>} The entered filename or null if canceled
  */
 export function showFilenameModal(defaultFilename, title = 'Enter file name') {
   return new Promise((resolve) => {
@@ -385,7 +385,7 @@ export function readLocalImage(file) {
     const reader = new FileReader();
     reader.onload = () => resolve(reader.result);
     reader.onerror = () => reject(new Error('The image could not be read. Please choose it again.'));
-    reader.onabort = () => reject(new Error('Reading the image was cancelled.'));
+    reader.onabort = () => reject(new Error('Reading the image was canceled.'));
     reader.readAsDataURL(file);
   });
 }
@@ -766,7 +766,7 @@ export function showImageModal() {
  * @param {Function} [options.isSuppressed] - Returns true if the warning is suppressed
  * @param {Function} [options.saveSuppressed] - Saves the suppression preference
  * @param {boolean} [options.allowSuppress] - Whether users can suppress this warning
- * @returns {Promise<boolean>} True if the user confirmed, false if cancelled
+ * @returns {Promise<boolean>} True if the user confirmed, false if canceled
  */
 export function showConfirmationModal(
   message,
@@ -933,7 +933,7 @@ const HISTORY_PREVIEW_CHAR_LIMIT = 2000;
 
 /**
  * Show a modal listing snapshot history. Returns the chosen snapshot's
- * content, or null if the user cancelled.
+ * content, or null if the user canceled.
  * @param {Array} snapshots - Array of { timestamp, content }
  * @returns {Promise<string|null>}
  */

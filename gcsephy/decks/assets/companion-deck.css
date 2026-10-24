@@ -282,7 +282,7 @@ ol.steps li::before { content: counter(s); position: absolute; left: 0; top: 0; 
 .split.top { align-items: start; }
 .split > .panel { align-self: stretch; height: auto; }
 .stack { flex: 1; min-height: 0; display: flex; flex-direction: column; gap: 24px; }
-.stack.center { justify-content: center; gap: 34px; }
+.stack.centre { justify-content: center; gap: 34px; }
 .col { display: flex; flex-direction: column; gap: 24px; min-height: 0; }
 .fill { flex: 1; min-height: 0; }
 .row { display: grid; gap: 24px; }

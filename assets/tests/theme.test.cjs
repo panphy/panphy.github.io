@@ -138,7 +138,7 @@ test('a scoped section ignores the old site-wide preferences and follows the dev
   assert.equal(own.get('panphy-theme-gcsephy'), 'dark');
 });
 
-test('scoped sections keep their own browser chrome colours', () => {
+test('scoped sections keep their own browser chrome colors', () => {
   const page = openPage({ legacy: { themeScope: 'gcsephy' } });
   page.api.set('dark');
   assert.equal(page.chrome(), '#111110');

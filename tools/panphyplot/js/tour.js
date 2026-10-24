@@ -195,7 +195,7 @@ const TOUR_CHAPTERS = {
 				body: 'The mean is a formula column: ƒ mean(B, C, D). Its cells are shaded and calculate themselves, so they follow any change to the readings. The ΔT column beside it is its uncertainty.'
 			},
 			{
-				title: 'Linearise: plot T² against L',
+				title: 'Linearize: plot T² against L',
 				target: '#add-formula-button',
 				body: 'T² = (4π²/g) L, so a graph of T² against L is a straight line. A formula column can calculate T², and carry the uncertainty in T through to T².',
 				action: {
@@ -465,7 +465,7 @@ function layoutTour() {
 		setTourBox(tour.spotlight, left, top, Math.max(right - left, 0), Math.max(bottom - top, 0));
 		tour.spotlight.classList.remove('tour-spotlight-empty');
 	} else {
-		// No target: a zero-size spotlight dims the whole page behind a centred card.
+		// No target: a zero-size spotlight dims the whole page behind a centered card.
 		setTourBox(tour.spotlight, viewportWidth / 2, viewportHeight / 2, 0, 0);
 		tour.spotlight.classList.add('tour-spotlight-empty');
 	}
@@ -495,7 +495,7 @@ function layoutTour() {
 
 	if (rect) {
 		// Small controls sit in the data panel: put the card beside the whole panel so it
-		// does not cover the neighbouring controls.
+		// does not cover the neighboring controls.
 		const panel = target.closest('.input-section');
 		const panelRect = panel ? panel.getBoundingClientRect() : null;
 		const fitsRightOf = box => box.right + gap + cardWidth <= viewportWidth - margin;
@@ -622,7 +622,7 @@ function showTourInvite() {
 	document.body.appendChild(card);
 }
 
-// Registered after main.js, so the app has finished initialising when this runs.
+// Registered after main.js, so the app has finished initializing when this runs.
 document.addEventListener('DOMContentLoaded', () => {
 	if (tour.chapterId) {
 		startTour();

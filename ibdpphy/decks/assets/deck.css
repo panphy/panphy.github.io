@@ -5,8 +5,8 @@
 @font-face { font-family: 'Figtree'; font-style: normal; font-weight: 300 900; font-display: swap; src: url(/assets/fonts/figtree-normal-300-900-latin.woff2) format('woff2'); unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD; }
 
 /* Shared styles for the IB DP Physics decks (adapted from gcsephy/decks/atoms-and-radiation).
-   Particle colours match simulations/atomic_models and simulations/nuclear_decay; the deck's
-   own colours come from one palette (slate #2C4654, teal #4F9C8F, sage #96B083, sand #E2C678,
+   Particle colors match simulations/atomic_models and simulations/nuclear_decay; the deck's
+   own colors come from one palette (slate #2C4654, teal #4F9C8F, sage #96B083, sand #E2C678,
    apricot #E8A66C, terracotta #D87759), deepened where text needs the contrast. Terracotta is
    kept for additional higher level content. */
 :root {
@@ -48,7 +48,7 @@
   --undecayed: #D45132;
   --decayed: #9DB4B0;
   --paper: #EFE6CF;
-  --aluminium: #AEB9C4;
+  --aluminum: #AEB9C4;
   --lead: #4A5360;
   --gold: #C9A227;
   --solid: #9A948C;
@@ -88,7 +88,7 @@
   --undecayed: #EF6A48;
   --decayed: #3F5A57;
   --paper: #D9CFB4;
-  --aluminium: #8E9AA6;
+  --aluminum: #8E9AA6;
   --lead: #5B6573;
   --gold: #E0B84A;
   --solid: #8A857D;
@@ -240,7 +240,7 @@ body.is-fullscreen .stage { left: 0; }
 .progress { position: fixed; left: 0; right: 0; bottom: var(--vv-bottom, 0px); z-index: 21; height: 4px; }
 .progress span { display: block; height: 100%; width: 0; background: linear-gradient(90deg, #2C4654, #4F9C8F, #96B083, #E2C678, #E8A66C, #D87759); transition: width .3s ease; }
 
-/* Revision-note pane colours (layout in ../assets/deck-notes.css). */
+/* Revision-note pane colors (layout in ../assets/deck-notes.css). */
 .notes {
   --rn-ink: var(--text-main);
   --rn-muted: var(--text-secondary);
@@ -434,7 +434,7 @@ mjx-container .gamma { fill: var(--photon); stroke: var(--photon); }
 .pill { color: var(--text-secondary); font-size: 24px; border: 1px solid var(--input-border); border-radius: 999px; padding: 4px 12px; letter-spacing: .02em; }
 .fig { position: relative; flex: 1; min-height: 0; }
 .fig svg { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
-/* Maths typeset in the labels of a 3D model keeps MathJax's own size and sits in the line. */
+/* Math typeset in the labels of a 3D model keeps MathJax's own size and sits in the line. */
 .fig .model3d mjx-container svg { position: static; inset: auto; width: auto; height: auto; display: inline-block; }
 .panel .fig { margin: 8px 0; }
 .legend { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; }
@@ -458,7 +458,7 @@ mjx-container .gamma { fill: var(--photon); stroke: var(--photon); }
 /* History slides are background stories, not assessed content: a tint of the deck's
    teal sets them apart, and a small label says so. */
 .slide.history { background-color: color-mix(in srgb, var(--brand-primary) 9%, var(--bg-color)); background-image: radial-gradient(color-mix(in srgb, var(--brand-primary) 16%, var(--bg-pattern)) 1.5px, transparent 1.5px); background-size: 36px 36px; }
-/* Presenting fullscreen, the page around the slide takes the same tint, so the colour
+/* Presenting fullscreen, the page around the slide takes the same tint, so the color
    reaches the screen edges when the screen is not 16:9. */
 body.is-fullscreen { transition: background-color .35s ease; }
 body.is-fullscreen:has(#deck .slide.history.active) { background-color: color-mix(in srgb, var(--brand-primary) 9%, var(--bg-color)); background-image: radial-gradient(color-mix(in srgb, var(--brand-primary) 16%, var(--bg-pattern)) 1px, transparent 1px); }
@@ -521,7 +521,7 @@ table.facts.compare { table-layout: fixed; font-size: 30px; }
 
 /* Keeps a nuclide and its trailing punctuation together. */
 .glue { display: inline-flex; align-items: center; }
-/* Rows holding nuclides: centre text, arrows and symbols on one line. */
+/* Rows holding nuclides: center text, arrows and symbols on one line. */
 .eqrow { display: flex; align-items: center; flex-wrap: wrap; gap: 0 .35em; }
 .equation { display: flex; align-items: center; justify-content: center; gap: 18px; padding: 18px 24px; border: 1px solid var(--card-border); border-radius: 20px; background: var(--card-bg); box-shadow: var(--card-shadow); font: 600 44px var(--font-mono); }
 .equation .op { color: var(--text-secondary); font-weight: 400; }
@@ -643,7 +643,7 @@ h2:has(+ .terms) { margin-bottom: 24px; }
 /* Where the moving streams play, the particles and waves drawn in place step aside. */
 @media screen and (prefers-reduced-motion: no-preference) { #deck .still { display: none; } }
 /* A figure drawn in three dimensions (D.3's hand) replaces its flat picture on screen even with reduced motion. */
-@media screen { #deck .fig:has(.hand3d, .discs3d, .model3d) .still { display: none; } }
+@media screen { #deck .fig:has(.hand3d, .disks3d, .model3d) .still { display: none; } }
 @keyframes pulse { 50% { transform: scale(1.08); opacity: .75; } }
 /* A sphere falling through a fluid (A.2): position and speed at steps of the fall, for a speed
    that rises as 1 − e^(−t/τ) with τ = 0.9 s over a 5 s fall. */

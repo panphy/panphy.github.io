@@ -2,7 +2,7 @@
 // ../assets/figures.js. Magnetic field lines and symbols are slate, velocities and currents
 // apricot, forces teal; flux curves are teal and emf curves terracotta.
 window.DeckFigures.add(P => {
-  const { svg, arrow, fline, text, sub, axes, both, through, sampled, labelled, spring, track, anim, spin, twoState, PLAY, f, TAU } = P;
+  const { svg, arrow, fline, text, sub, axes, both, through, sampled, labeled, spring, track, anim, spin, twoState, PLAY, f, TAU } = P;
   const cross = (x, y, s = 9) => `<path d="M${x - s},${y - s} l${2 * s},${2 * s} m0,${-2 * s} l${-2 * s},${2 * s}" style="stroke:var(--brand-accent-strong);stroke-width:3;stroke-linecap:round;opacity:.5"/>`;
   const fieldGrid = (x0, y0, nx, ny, step) => Array.from({ length: nx * ny }, (_, i) => cross(x0 + (i % nx) * step, y0 + Math.floor(i / nx) * step)).join('');
   // A bar magnet with its north pole at the end given by `north` ('left', 'right', 'up' or 'down').
@@ -17,12 +17,12 @@ window.DeckFigures.add(P => {
   const meter = (x, y, needle) => `<circle cx="${x}" cy="${y}" r="46" style="fill:var(--card-bg);stroke:var(--text-secondary);stroke-width:3"/><path d="M${x - 30},${y - 8} A32,32 0 0 1 ${x + 30},${y - 8}" class="guide"/>${needle}<circle cx="${x}" cy="${y + 14}" r="5" style="fill:var(--text-main)"/>`;
   const pointer = (x, y) => `<line x1="${x}" y1="${y + 14}" x2="${x}" y2="${y - 26}" style="stroke:var(--hl);stroke-width:4;stroke-linecap:round"/>`;
   const wave = (x0, x1, y0, amp, cycles, phase = 0, n = 120) => sampled(t => [x0 + (x1 - x0) * t, y0 - amp * Math.sin(phase + t * cycles * TAU)], n);
-  const line = (d, colour, width = 5) => `<path d="${d}" style="fill:none;stroke:var(--${colour});stroke-width:${width};stroke-linecap:round;stroke-linejoin:round"/>`;
+  const line = (d, color, width = 5) => `<path d="${d}" style="fill:none;stroke:var(--${color});stroke-width:${width};stroke-linecap:round;stroke-linejoin:round"/>`;
 
   return {
     // A magnet moved in and out of a coil joined to a sensitive meter. Also the title picture, with data-plain.
     'd4-magnet-coil': el => {
-      const on = labelled(el), steps = 48, shift = i => 70 * Math.sin(i / steps * TAU), turn = i => 34 * Math.cos(i / steps * TAU);
+      const on = labeled(el), steps = 48, shift = i => 70 * Math.sin(i / steps * TAU), turn = i => 34 * Math.cos(i / steps * TAU);
       let s = coil(470, 640, 220, 7) + `<path d="M470,290 V400 H544 M640,290 V400 H636" style="fill:none;stroke:var(--brand-accent);stroke-width:4"/>`;
       if (on) s += text(555, 120, 'coil', 'lbl') + text(590, 480, 'meter', 'lbl') + text(250, 320, 'moving magnet', 'lbl');
       const bar = magnet(150, 185, 220, 70, 'right');
@@ -62,7 +62,7 @@ window.DeckFigures.add(P => {
 
     // A magnet dropped through a plastic tube and through a copper tube. Played with →.
     'd4-tube': () => {
-      const tube = (x, colour, label) => `<rect x="${x - 44}" y="80" width="88" height="380" style="fill:color-mix(in srgb, var(--${colour}) 22%, var(--viewer-bg));stroke:var(--${colour});stroke-width:4"/>` + text(x, 56, label, 'lbl strong');
+      const tube = (x, color, label) => `<rect x="${x - 44}" y="80" width="88" height="380" style="fill:color-mix(in srgb, var(--${color}) 22%, var(--viewer-bg));stroke:var(--${color});stroke-width:4"/>` + text(x, 56, label, 'lbl strong');
       const drop = magnet(-22, -34, 44, 68, 'up');
       let s = tube(230, 'neutron', 'plastic tube') + tube(570, 'brand-accent', 'copper tube');
       s += [180, 250, 320, 390].map(y => `<ellipse cx="570" cy="${y}" rx="44" ry="10" style="fill:none;stroke:var(--hl);stroke-width:3;opacity:.7"/>`).join('') + text(640, 280, 'induced', 'lbl', 'start') + text(640, 314, 'currents', 'lbl', 'start');
@@ -75,7 +75,7 @@ window.DeckFigures.add(P => {
 
     // A rod sliding along two rails in a field into the page: the area of the circuit grows.
     'd4-rod': el => {
-      const on = labelled(el);
+      const on = labeled(el);
       const rails = `<path d="M150,150 H740 M150,370 H740 M150,150 V225 M150,295 V370" style="fill:none;stroke:var(--text-secondary);stroke-width:5"/><rect x="132" y="225" width="36" height="70" rx="6" style="fill:var(--card-bg);stroke:var(--text-secondary);stroke-width:3"/>`;
       const rod = x => `<rect x="${x - 8}" y="130" width="16" height="260" rx="6" style="fill:var(--brand-accent)"/>`;
       const area = (x, extra = '') => `<rect x="152" y="152" width="${x - 152}" height="216" style="fill:var(--brand-primary);opacity:.18">${extra}</rect>`;
@@ -119,7 +119,7 @@ window.DeckFigures.add(P => {
 
     // A coil turning in a uniform field, seen end on, with the emf it produces. Also drawn small, with data-plain.
     'd4-generator': el => {
-      const on = labelled(el), T = 4, n = 72, cx = 230, cy = 250;
+      const on = labeled(el), T = 4, n = 72, cx = 230, cy = 250;
       let s = `<rect x="20" y="150" width="60" height="200" rx="6" style="fill:var(--proton)"/><rect x="380" y="150" width="60" height="200" rx="6" style="fill:var(--electron)"/>` + text(50, 262, 'N', 'lbl display', 'middle', 'style="fill:#fff"') + text(410, 262, 'S', 'lbl display', 'middle', 'style="fill:#fff"');
       s += [180, 250, 320].map(y => fline(80, y, 380, y, 'brand-accent-strong', 3, 0.2, 'opacity=".5"')).join('');
       const blade = `<line x1="${cx}" y1="${cy - 96}" x2="${cx}" y2="${cy + 96}" style="stroke:var(--brand-accent);stroke-width:9;stroke-linecap:round"/><circle cx="${cx}" cy="${cy - 96}" r="13" style="fill:var(--brand-accent)"/><circle cx="${cx}" cy="${cy + 96}" r="13" style="fill:var(--brand-accent)"/>` + arrow(cx, cy, cx + 80, cy, 'hl', 4);

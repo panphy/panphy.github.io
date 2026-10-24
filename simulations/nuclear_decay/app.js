@@ -23,7 +23,7 @@ const DECAY_ZOOM_OUT = 1.35;
 // Penetration test: typical classroom absorbers (thicknesses are illustrative).
 const ABSORBERS = [
   { key: 'paper', label: 'Paper', gap: 1.0, thickness: 0.03 },
-  { key: 'aluminium', label: 'Aluminium', gap: 1.0, thickness: 0.14 },
+  { key: 'aluminum', label: 'Aluminum', gap: 1.0, thickness: 0.14 },
   { key: 'lead', label: 'Lead', gap: 1.1, thickness: 0.55 }
 ];
 // Alpha, beta and gamma share one pace: a build-up of about a second, then the radiation leaves at the same
@@ -156,7 +156,7 @@ function readPalette() {
     undecayed: color('--undecayed'),
     decayed: color('--decayed'),
     paper: color('--paper'),
-    aluminium: color('--aluminium'),
+    aluminum: color('--aluminum'),
     lead: color('--lead'),
     line: color('--text-secondary'),
     accent: color('--scene-accent'),
@@ -285,8 +285,8 @@ function makeWave(color, opacity = 0.95) {
   line.userData.radius = 0.35;
   return line;
 }
-function drawWave(line, centre, direction, time, length = 1.1) {
-  const view = camera.position.clone().sub(centre).normalize();
+function drawWave(line, center, direction, time, length = 1.1) {
+  const view = camera.position.clone().sub(center).normalize();
   const side = new THREE.Vector3().crossVectors(direction, view);
   if (side.lengthSq() < 1e-4) side.set(0, 1, 0);
   side.normalize();
@@ -294,7 +294,7 @@ function drawWave(line, centre, direction, time, length = 1.1) {
     const s = (i / (WAVE_POINTS - 1) - 0.5) * length;
     const envelope = Math.cos(Math.PI * s / length) ** 2;
     const wave = 0.12 * envelope * Math.sin(s / length * Math.PI * 12 - time * 18);
-    wavePoints[i].set(centre.x + direction.x * s + side.x * wave, centre.y + direction.y * s + side.y * wave, centre.z + direction.z * s + side.z * wave);
+    wavePoints[i].set(center.x + direction.x * s + side.x * wave, center.y + direction.y * s + side.y * wave, center.z + direction.z * s + side.z * wave);
   }
   setWaveRibbon(line.geometry, wavePoints, view);
 }
@@ -391,7 +391,7 @@ function packNucleus(count, seed) {
       points.forEach(point => point.multiplyScalar(0.985));
     }
   } else {
-    // Large nuclei: the closest-packed (FCC) lattice sites nearest the centre, lightly jittered.
+    // Large nuclei: the closest-packed (FCC) lattice sites nearest the center, lightly jittered.
     const edge = NUCLEON_RADIUS * 2 * 0.97 * Math.SQRT2;
     const n = Math.ceil(Math.cbrt(count / 4)) + 2;
     const basis = [[0, 0, 0], [0.5, 0.5, 0], [0.5, 0, 0.5], [0, 0.5, 0.5]];
@@ -409,9 +409,9 @@ function packNucleus(count, seed) {
     sites.sort((p, q) => p.key - q.key);
     points = sites.slice(0, count).map(({ point }) => point.add(new THREE.Vector3(rand() - 0.5, rand() - 0.5, rand() - 0.5).multiplyScalar(0.025)));
   }
-  const centre = points.reduce((sum, point) => sum.add(point), new THREE.Vector3()).divideScalar(points.length);
+  const center = points.reduce((sum, point) => sum.add(point), new THREE.Vector3()).divideScalar(points.length);
   const turn = new THREE.Euler(rand() * 6, rand() * 6, rand() * 6);
-  return points.map(point => point.sub(centre).applyEuler(turn));
+  return points.map(point => point.sub(center).applyEuler(turn));
 }
 function shuffledKinds(protons, neutrons, seed) {
   const kinds = [...Array(protons).fill('proton'), ...Array(neutrons).fill('neutron')];
@@ -542,7 +542,7 @@ function stepFlyers(delta) {
     if (flyer.update(delta) === false) removeFlyer(flyer);
   }
 }
-// Moves an object outward and fades it once it has travelled `range`.
+// Moves an object outward and fades it once it has traveled `range`.
 function straightFlight(object, { direction, speed, range, getPosition = () => object.position, move = step => object.position.addScaledVector(direction, step), onFrame }) {
   const start = getPosition().clone();
   let fading = 0;
@@ -586,7 +586,7 @@ function prepareAlpha() {
   const chosen = [...ranked.filter(n => n.kind === 'proton').slice(0, 2), ...ranked.filter(n => n.kind === 'neutron').slice(0, 2)];
   nucleus.nucleons = nucleus.nucleons.filter(n => !chosen.includes(n));
   // The cluster forms at the surface while it is already being pushed out.
-  const centre = decay.direction.clone().multiplyScalar(nucleus.radius - NUCLEON_RADIUS);
+  const center = decay.direction.clone().multiplyScalar(nucleus.radius - NUCLEON_RADIUS);
   const tetra = [[1, 1, 1], [1, -1, -1], [-1, 1, -1], [-1, -1, 1]].map(v => new THREE.Vector3(...v).normalize().multiplyScalar(NUCLEON_RADIUS * 1.2));
   decay.alpha = chosen.map((nucleon, i) => {
     nucleon.mesh.material = nucleon.mesh.material.clone();
@@ -595,8 +595,8 @@ function prepareAlpha() {
     pickables = pickables.filter(item => item !== nucleon.pick);
     return { mesh: nucleon.mesh, from: nucleon.mesh.position.clone(), offset: tetra[i] };
   });
-  decay.centre = centre;
-  decay.travelled = 0;
+  decay.center = center;
+  decay.traveled = 0;
   decay.speed = 0;
   readout.textContent = 'ALPHA DECAY · Two protons and two neutrons group together and are pushed out of the nucleus…';
 }
@@ -619,17 +619,17 @@ function stepDecay(delta) {
 }
 function advanceAlpha(d, delta) {
   d.speed = Math.min(ALPHA_MAX_SPEED, d.speed + ALPHA_ACCELERATION * delta);
-  d.travelled += d.speed * delta;
+  d.traveled += d.speed * delta;
   // Momentum conservation: the daughter recoils 4/237 as far the other way.
-  nucleus.group.position.copy(d.direction).multiplyScalar(-d.travelled * 4 / MODES.alpha.daughter.A);
+  nucleus.group.position.copy(d.direction).multiplyScalar(-d.traveled * 4 / MODES.alpha.daughter.A);
 }
 function stepAlpha(delta) {
   const d = decay;
   if (d.phase === 'prepare') {
-    // The nucleons close in on a centre that is already accelerating out of the nucleus.
+    // The nucleons close in on a center that is already accelerating out of the nucleus.
     advanceAlpha(d, delta);
     const u = Math.min(1, d.t / ALPHA_GATHER_TIME);
-    const moving = d.centre.clone().addScaledVector(d.direction, d.travelled);
+    const moving = d.center.clone().addScaledVector(d.direction, d.traveled);
     const k = ease(u);
     for (const part of d.alpha) part.mesh.position.lerpVectors(part.from, moving.clone().add(part.offset), k);
     if (u >= 1) {
@@ -649,7 +649,7 @@ function stepAlpha(delta) {
         onFrame: delta => {
           if (handedOver) advanceAlpha(d, delta);
           handedOver = true;
-          group.position.copy(d.centre).addScaledVector(d.direction, d.travelled);
+          group.position.copy(d.center).addScaledVector(d.direction, d.traveled);
           group.rotation.x += delta * 1.5;
           group.rotation.y += delta * 2;
         }
@@ -755,18 +755,18 @@ function stepGamma() {
       d.t = 0;
       nucleus.excited = false;
       const wave = makeWave(palette.photon);
-      const centre = d.direction.clone().multiplyScalar(nucleus.radius + 0.5);
+      const center = d.direction.clone().multiplyScalar(nucleus.radius + 0.5);
       let time = 0;
       addFlyer(wave, straightFlight(wave, {
         direction: d.direction,
         speed: emissionSpeed('gamma'),
         range: 8,
-        getPosition: () => centre,
-        move: step => centre.addScaledVector(d.direction, step),
+        getPosition: () => center,
+        move: step => center.addScaledVector(d.direction, step),
         onFrame: delta => {
           time += delta;
-          drawWave(wave, centre, d.direction, time);
-          wave.userData.centre = centre;
+          drawWave(wave, center, d.direction, time);
+          wave.userData.center = center;
         }
       }), 'gamma');
       d.wave = wave;
@@ -796,7 +796,7 @@ function finishDecay() {
 function updateDecayButton() {
   const button = $('decay');
   const decaying = Boolean(decay && decay.phase !== 'done');
-  // A greyed-out button says why, so nobody is left wondering whether it is broken.
+  // A grayed-out button says why, so nobody is left wondering whether it is broken.
   button.textContent = decay?.phase === 'done' ? 'Reset nucleus' : decaying ? 'Decaying…' : test ? 'Stop the test to decay' : 'Decay this nucleus';
   button.disabled = decaying || Boolean(test);
 }
@@ -824,7 +824,7 @@ function startTest() {
     return slabInfo;
   });
   stage.add(group);
-  test = { group, slabs, timer: 0, counts: { emitted: 0, paper: 0, aluminium: 0, lead: 0 } };
+  test = { group, slabs, timer: 0, counts: { emitted: 0, paper: 0, aluminum: 0, lead: 0 } };
   $('penetration').setAttribute('aria-pressed', 'true');
   $('penetration').textContent = 'Stop the test';
   $('beam-stats').hidden = false;
@@ -844,12 +844,12 @@ function stopTest() {
 }
 function spawnTestParticle() {
   const kind = state.mode;
-  const [paper, aluminium, lead] = test.slabs;
+  const [paper, aluminum, lead] = test.slabs;
   const origin = new THREE.Vector3(nucleus.radius * 0.95, (Math.random() - 0.5) * 0.5, (Math.random() - 0.5) * 0.5);
   const direction = new THREE.Vector3(1, (Math.random() - 0.5) * 0.1, (Math.random() - 0.5) * 0.1).normalize();
   let stopX;
   if (kind === 'alpha') stopX = paper.start - 0.02;
-  else if (kind === 'beta') stopX = aluminium.start + Math.random() * (aluminium.end - aluminium.start);
+  else if (kind === 'beta') stopX = aluminum.start + Math.random() * (aluminum.end - aluminum.start);
   else stopX = Math.random() < GAMMA_THROUGH_LEAD ? Infinity : lead.start + Math.random() * (lead.end - lead.start);
   const passed = new Set();
   let object;
@@ -900,7 +900,7 @@ function spawnTestParticle() {
     }
     return true;
   }, kind === 'beta' ? 'electron' : kind);
-  if (kind === 'gamma') object.userData.centre = position;
+  if (kind === 'gamma') object.userData.center = position;
 }
 function stepTest(delta) {
   if (!test) return;
@@ -911,8 +911,8 @@ function stepTest(delta) {
   }
 }
 function updateTestStats() {
-  const { emitted, paper, aluminium, lead } = test.counts;
-  $('beam-stats').innerHTML = `Emitted <b>${emitted}</b><br>Through paper <b>${paper}</b><br>Through aluminium <b>${aluminium}</b><br>Through lead <b>${lead}</b>`;
+  const { emitted, paper, aluminum, lead } = test.counts;
+  $('beam-stats').innerHTML = `Emitted <b>${emitted}</b><br>Through paper <b>${paper}</b><br>Through aluminum <b>${aluminum}</b><br>Through lead <b>${lead}</b>`;
 }
 
 // ---------- Half-life sample ----------
@@ -966,7 +966,7 @@ function buildSample() {
   updateSampleStats();
   drawGraph();
 }
-function recolourSample() {
+function recolorSample() {
   const matrixColor = new THREE.Color();
   for (let i = 0; i < sample.size; i++) sample.mesh.setColorAt(i, matrixColor.copy(sample.alive[i] ? palette.undecayed : palette.decayed));
   sample.mesh.instanceColor.needsUpdate = true;
@@ -1230,8 +1230,8 @@ function pick(clientX, clientY) {
   const pixelsPerUnit = rect.height / 2 / Math.tan(THREE.MathUtils.degToRad(camera.fov / 2));
   let best = null;
   for (const item of pickables) {
-    const centre = item.object.userData.centre;
-    if (centre) worldPosition.copy(centre).applyMatrix4(stage.matrixWorld);
+    const center = item.object.userData.center;
+    if (center) worldPosition.copy(center).applyMatrix4(stage.matrixWorld);
     else item.object.getWorldPosition(worldPosition);
     item.object.getWorldScale(worldScale);
     projected.copy(worldPosition).project(camera);
@@ -1254,7 +1254,7 @@ renderer.domElement.addEventListener('pointerup', event => {
   pointerStart = null;
   const item = pick(event.clientX, event.clientY);
   if (!item) return;
-  select(['paper', 'aluminium', 'lead'].includes(item.kind) ? null : item.object, describe(item.kind));
+  select(['paper', 'aluminum', 'lead'].includes(item.kind) ? null : item.object, describe(item.kind));
 });
 renderer.domElement.addEventListener('pointermove', event => {
   if (event.pointerType !== 'mouse' || event.buttons) return;
@@ -1406,7 +1406,7 @@ window.addEventListener('panphy:theme-change', () => {
   palette = readPalette();
   applyThemeToPersistent();
   if (sample) {
-    recolourSample();
+    recolorSample();
     drawGraph();
     return;
   }

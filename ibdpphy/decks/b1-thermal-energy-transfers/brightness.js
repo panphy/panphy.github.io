@@ -71,7 +71,7 @@ model3d('brightness', ({ THREE, scene, css, label, caption }) => {
     look: [0.7, -0.1, 0],
     view: { turn: 0.7, lift: 0.32, far: 11.6 },
     sway: 0.1,
-    alt: 'A small source at the centre of two spheres, of radius d and 2d. Its power spreads over the whole of each sphere. The same cone from the source lights a patch of area A on the inner sphere and a patch of area 4A, four times as large and a quarter as bright, on the outer sphere',
+    alt: 'A small source at the center of two spheres, of radius d and 2d. Its power spreads over the whole of each sphere. The same cone from the source lights a patch of area A on the inner sphere and a patch of area 4A, four times as large and a quarter as bright, on the outer sphere',
     still: WAVE * 0.3,
     paint() {
       const sand = css('--sand'), accent = new THREE.Color(css('--brand-accent')), primary = css('--brand-primary'), ink = css('--text-secondary');

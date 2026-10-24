@@ -13,7 +13,7 @@ Browser-based physics tools, simulations, classroom utilities and games. Student
 
 ## Curriculum hubs
 
-Two hubs hold the author's course resources: teaching decks, workbooks, revision material and lesson starters. They are public but sit outside the homepage catalogue, reached by direct link. Teachers and students are welcome to use them in lessons and study; see [Licence](#licence) for reuse.
+Two hubs hold the author's course resources: teaching decks, workbooks, revision material and lesson starters. They are public but sit outside the homepage catalog, reached by direct link. Teachers and students are welcome to use them in lessons and study; see [License](#license) for reuse.
 
 - **[GCSE Physics](https://panphy.app/gcsephy/):** course summaries of AQA Physics 8463 and the physics in Combined Science: Trilogy 8464, AO1 starters and revision resources, then teaching decks and workbook hubs for Years 9 to 11. Each unit folder, `gcsephy/course-summary/` and `gcsephy/do-now/` has its own README; [teaching deck styles and controls](gcsephy/decks/README.md) are documented separately.
 - **[IB DP Physics](https://panphy.app/ibdpphy/):** the IB Diploma Programme Physics course (first assessment 2025). See the [folder overview](ibdpphy/README.md).
@@ -28,7 +28,7 @@ Pages under `fun/`, `beta/`, `misc/`, `gcsephy/` and `ibdpphy/` need internet ac
 
 | Path | Contents |
 | --- | --- |
-| `index.html` | General app catalogue with topic filters (cards use `data-topic`) and offline readiness indicators |
+| `index.html` | General app catalog with topic filters (cards use `data-topic`) and offline readiness indicators |
 | `sw.js`, `manifest.json` | Caching, updates, and PWA configuration |
 | `assets/` | The shared Spectrum design system (`design.css`), shared controls, icons, locally hosted fonts, and service-worker registration |
 | `tools/`, `simulations/`, `for_teachers/` | Published educational apps |
@@ -41,9 +41,9 @@ Pages under `fun/`, `beta/`, `misc/`, `gcsephy/` and `ibdpphy/` need internet ac
 
 The shared logo is `assets/panphy.png`; display the full square without CSS corner rounding or cropping. The favicon uses the same artwork, while the Apple touch icon and dedicated maskable PWA icon include padding to protect the logo from system icon masks.
 
-## Licence
+## License
 
-Copyright © 2026 PanPhy Labs. All rights reserved. The source is public to read but is not open source: copying, adapting or republishing the code or content needs written permission. Third-party libraries, fonts and credited images keep their own licences. See [`LICENSE`](LICENSE).
+Copyright © 2026 PanPhy Labs. All rights reserved. The source is public to read but is not open source: copying, adapting or republishing the code or content needs written permission. Third-party libraries, fonts and credited images keep their own licenses. See [`LICENSE`](LICENSE).
 
 ## Contact
 

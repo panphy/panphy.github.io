@@ -3,7 +3,7 @@
 // 256 Lennard-Jones particles in a container with a fixed square floor and a
 // movable piston lid. A constant outside pressure pushes the lid down, so the
 // sample is held at constant pressure: the lid rests on a solid or liquid, and
-// rises when the liquid boils and the vapour needs room. Weak gravity keeps
+// rises when the liquid boils and the vapor needs room. Weak gravity keeps
 // the condensed sample on the floor. Everything is in reduced LJ units
 // (sigma = epsilon = mass = 1); the page converts temperature to kelvin with a
 // single proportional factor.
@@ -44,7 +44,7 @@ const SNAPSHOT_INTERVAL = 0.5;
 const SNAPSHOT_COUNT = 9; // window = 8 intervals = 4 time units
 const MOBILE_DISPLACEMENT_SQ = 0.7 * 0.7;
 
-// Horizontal centre-of-mass drift and spin about the vertical axis are removed.
+// Horizontal center-of-mass drift and spin about the vertical axis are removed.
 const DOF = 3 * N - 3;
 
 export function createSim() {
@@ -362,10 +362,10 @@ function capSpeeds(sim) {
   }
 }
 
-// Count close neighbours for every particle. Optionally
+// Count close neighbors for every particle. Optionally
 // writes bond line segments (pairs of endpoints) into bondBuffer and returns
 // how many bonds were written.
-export function analyseStructure(sim, bondBuffer) {
+export function analyzeStructure(sim, bondBuffer) {
   const coordination = sim.coordination;
   const pos = sim.pos;
   coordination.fill(0);
@@ -386,7 +386,7 @@ export function analyseStructure(sim, bondBuffer) {
     }
   });
 
-  // A particle deep inside a crystal has 12 touching neighbours; in a liquid
+  // A particle deep inside a crystal has 12 touching neighbors; in a liquid
   // the count drops to about 7-9 and a gas particle has at most one.
   let crystalLike = 0;
   let isolated = 0;

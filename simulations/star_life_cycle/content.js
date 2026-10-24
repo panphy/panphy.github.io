@@ -66,16 +66,16 @@ const mass = m => `${m < 10 ? m.toFixed(2) : m.toFixed(1)} M☉`;
 export const fmt = { sig, sci, years, temp, lum, radius, mass };
 
 export function spectral(T) {
-  if (T >= 30000) return { cls: 'O', colour: 'blue' };
-  if (T >= 10000) return { cls: 'B', colour: 'blue-white' };
-  if (T >= 7500) return { cls: 'A', colour: 'white' };
-  if (T >= 6000) return { cls: 'F', colour: 'yellow-white' };
-  if (T >= 5200) return { cls: 'G', colour: 'yellow' };
-  if (T >= 3700) return { cls: 'K', colour: 'orange' };
-  return { cls: 'M', colour: 'orange-red' };
+  if (T >= 30000) return { cls: 'O', color: 'blue' };
+  if (T >= 10000) return { cls: 'B', color: 'blue-white' };
+  if (T >= 7500) return { cls: 'A', color: 'white' };
+  if (T >= 6000) return { cls: 'F', color: 'yellow-white' };
+  if (T >= 5200) return { cls: 'G', color: 'yellow' };
+  if (T >= 3700) return { cls: 'K', color: 'orange' };
+  return { cls: 'M', color: 'orange-red' };
 }
 
-// One colour per element, shared by every cutaway and its key.
+// One color per element, shared by every cutaway and its key.
 export const ELEMENT = {
   H: '#F59E42', He: '#2DD4BF', C: '#A78BFA', Ne: '#F472B6', O: '#60A5FA', Si: '#FDE68A', Fe: '#9AA3AF', n: '#E2E8F0', q: '#C4B5FD'
 };
@@ -123,12 +123,12 @@ export const STAGES = {
     body: c => `
       <p>A nebula is a giant cloud of gas and dust: about three quarters hydrogen and one quarter helium by mass, with a sprinkling of dust. It is very cold, about 10 K (−263 °C), so its particles move slowly and the gas pressure is low.</p>
       <p>In the densest clumps, <b>gravity</b> pulls the particles together more strongly than the gas pressure can push them apart. A clump of ${mass(c.M)} begins to collapse. As it falls inward, gravitational potential energy is transferred to kinetic energy, so the gas heats up.</p>
-      <p>The clump was turning very slowly. As it shrinks it has to spin faster, like an ice skater pulling in their arms, and it flattens into a spinning disc with a hot, dense centre.</p>`,
-    look: c => `The clump starts about ${sig(2 * c.life.cloudRadius / AU_IN_RSUN, 2)} AU across. Neptune's orbit is only 60 AU across. Watch the particles speed up and the disc form as the clump shrinks.`,
+      <p>The clump was turning very slowly. As it shrinks it has to spin faster, like an ice skater pulling in their arms, and it flattens into a spinning disk with a hot, dense center.</p>`,
+    look: c => `The clump starts about ${sig(2 * c.life.cloudRadius / AU_IN_RSUN, 2)} AU across. Neptune's orbit is only 60 AU across. Watch the particles speed up and the disk form as the clump shrinks.`,
     deeper: c => `
       <p><b>Jeans mass.</b> A clump collapses when its mass is greater than M<sub>J</sub> ∝ T<sup>3/2</sup> ρ<sup>−1/2</sup>. Cold and dense is what matters.</p>
       <p><b>Free-fall time.</b> t<sub>ff</sub> = √(3π / 32Gρ). For 10⁴ hydrogen molecules per cm³ this is ${years(c.life.freeFallYears)}. It depends only on density, not on the mass of the clump.</p>
-      <p>While the cloud is transparent to infrared, the heat escapes as fast as it is released and the gas stays near 10 K. Once the centre is dense enough to trap that radiation, it heats up fast and a protostar is born.</p>
+      <p>While the cloud is transparent to infrared, the heat escapes as fast as it is released and the gas stays near 10 K. Once the center is dense enough to trap that radiation, it heats up fast and a protostar is born.</p>
       <p><b>Angular momentum</b> L = Iω is conserved. As the moment of inertia I falls, ω rises.</p>`
   },
 
@@ -137,10 +137,10 @@ export const STAGES = {
     tagline: 'A hot ball of gas, heated by gravity alone. There is no fusion yet.',
     balance: () => ({ v: -0.35, text: 'Gravity just ahead: slow contraction' }),
     body: c => `
-      <p>The centre is now dense enough to trap heat. It glows at about ${temp(c.stage.keys[0].T)}, but the energy comes from <b>gravitational collapse</b>, not from fusion.</p>
-      <p>Gas keeps spiralling inward through the disc. Some of it is thrown out along the spin axis in two narrow <b>jets</b>. Planets may form from what is left of the disc.</p>
+      <p>The center is now dense enough to trap heat. It glows at about ${temp(c.stage.keys[0].T)}, but the energy comes from <b>gravitational collapse</b>, not from fusion.</p>
+      <p>Gas keeps spiraling inward through the disk. Some of it is thrown out along the spin axis in two narrow <b>jets</b>. Planets may form from what is left of the disk.</p>
       <p>The protostar keeps shrinking, and its core keeps getting hotter. When the core reaches about <b>10 million K</b>, hydrogen nuclei move fast enough to overcome their electrostatic repulsion and fuse. For this star that takes ${years(c.stage.years)}.</p>`,
-    look: () => 'Watch the jets, then the disc clearing as the star shrinks. In the cutaway the whole interior is churning: a protostar is convective all the way through. Follow the dot on the HR diagram as it heads for the main sequence.',
+    look: () => 'Watch the jets, then the disk clearing as the star shrinks. In the cutaway the whole interior is churning: a protostar is convective all the way through. Follow the dot on the HR diagram as it heads for the main sequence.',
     deeper: c => `
       <p><b>Virial theorem.</b> Half of the gravitational potential energy released heats the gas. The other half is radiated away, which is why the protostar shines.</p>
       <p><b>Kelvin–Helmholtz time.</b> t ≈ GM² / RL, about ${years(c.life.kelvinHelmholtzYears)} here. Massive protostars are far more luminous, so they contract much faster.</p>
@@ -169,7 +169,7 @@ export const STAGES = {
       return `
       <p>In the core, hydrogen nuclei fuse to make helium. About 0.7% of the mass is transferred to energy (E = mc²).</p>
       <p>The hot gas pushes outward. Gravity pulls inward. The two are <b>balanced</b>, so the star stays the same size. ${life}</p>
-      <p>This star is a ${s.colour} class ${s.cls} star: surface ${temp(c.ms.T)}, ${lum(c.ms.L)}. ${compare}</p>`;
+      <p>This star is a ${s.color} class ${s.cls} star: surface ${temp(c.ms.T)}, ${lum(c.ms.L)}. ${compare}</p>`;
     },
     look: c => (c.M >= 1.3
       ? 'The surface is smooth: energy leaves this star by radiation, not by boiling. Open the cutaway to see the churning core. On the HR diagram the dot barely moves for millions of years.'
@@ -296,10 +296,10 @@ export const STAGES = {
       <p>The star has pushed off its outer layers at about 20 km/s. There is no explosion: the core is only ${mass(c.life.remnant)}, well below the 1.4 M☉ needed for a collapse.</p>
       <p>The bare core is tiny and extremely hot, over 100 000 K. Its ultraviolet light makes the shell of gas glow: green-blue from oxygen and red from hydrogen.</p>
       <p>The shell fades in about 20 000 years as it spreads out. Its carbon, nitrogen and oxygen mix into space and end up in new stars and planets.</p>
-      <p class="note">It has nothing to do with planets. Through early telescopes these shells looked like the discs of planets.</p>`,
+      <p class="note">It has nothing to do with planets. Through early telescopes these shells looked like the disks of planets.</p>`,
     look: () => 'Watch the central star shrink and turn from red to blue-white as its last layers lift off. On the HR diagram it races to the left, then drops.',
     deeper: () => `
-      <p>The colours are emission lines: doubly ionised oxygen [O III] at 500.7 nm and hydrogen Hα at 656.3 nm.</p>
+      <p>The colors are emission lines: doubly ionized oxygen [O III] at 500.7 nm and hydrogen Hα at 656.3 nm.</p>
       <p>The core crosses the HR diagram at nearly constant luminosity. As its last thin envelope shrinks, R falls and T rises with L = 4πR²σT⁴ fixed. Then the burning shells go out and it fades.</p>`,
     layers: () => [
       { name: 'Carbon–oxygen core', el: 'C', kind: 'degenerate', r: 0.86, info: 'The dead core of the star, about the size of the Earth and held up by electron degeneracy pressure.' },
@@ -320,16 +320,16 @@ export const STAGES = {
       <p>There is no fusion. It shines only because it is hot, so it cools: from white, through yellow and red, until it is a cold, dark <b>black dwarf</b>.</p>
       <p>That takes far longer than the present age of the universe. No black dwarfs exist yet.</p>`;
     },
-    look: c => `Scrub through this stage to watch the colour change as it cools. On the HR diagram it slides down a line of constant radius.${c.life.stages.some(s => s.id === 'pn') ? ' The planetary nebula fades away around it.' : ''}`,
+    look: c => `Scrub through this stage to watch the color change as it cools. On the HR diagram it slides down a line of constant radius.${c.life.stages.some(s => s.id === 'pn') ? ' The planetary nebula fades away around it.' : ''}`,
     deeper: c => `
       <p><b>Electron degeneracy pressure.</b> The Pauli exclusion principle stops electrons sharing a quantum state. Squeezed together, they are forced into high-momentum states and push back, whatever the temperature. So a white dwarf does not shrink as it cools.</p>
       <p><b>More massive means smaller:</b> R ∝ M<sup>−1/3</sup>.</p>
       <p><b>Chandrasekhar limit.</b> Above ${CHANDRASEKHAR_MASS} M☉ the electrons would have to move at the speed of light and the pressure fails. A white dwarf pushed over the limit by gas from a companion star explodes as a Type Ia supernova. This one is ${mass(c.life.remnant)}.</p>
-      <p>As it cools, the interior freezes from the centre outward into a crystal lattice.</p>`,
+      <p>As it cools, the interior freezes from the center outward into a crystal lattice.</p>`,
     layers: c => {
       const helium = c.M < HELIUM_IGNITION_MASS;
       return [
-        { name: helium ? 'Helium interior' : 'Carbon–oxygen interior', el: helium ? 'He' : 'C', kind: 'degenerate', r: 0.93, info: 'Nuclei packed about a million times more densely than water, in a sea of degenerate electrons. As it cools it slowly crystallises.' },
+        { name: helium ? 'Helium interior' : 'Carbon–oxygen interior', el: helium ? 'He' : 'C', kind: 'degenerate', r: 0.93, info: 'Nuclei packed about a million times more densely than water, in a sea of degenerate electrons. As it cools it slowly crystallizes.' },
         ...(helium ? [] : [{ name: 'Helium layer', el: 'He', kind: 'inert', r: 0.98, info: 'A thin layer of helium floating on the denser interior.' }]),
         { name: 'Hydrogen atmosphere', el: 'H', kind: 'inert', r: 1, info: 'A very thin skin of the lightest element. Gravity here is about 100 000 times stronger than on Earth, so elements separate by weight.' }
       ];
@@ -404,7 +404,7 @@ export const STAGES = {
     },
     body: c => `
       <p>The iron core reaches about 1.4 M☉ and electron pressure can no longer hold it up. It collapses from the size of the Earth to about 30 km across in a quarter of a second. Protons and electrons are crushed together to make <b>neutrons</b>.</p>
-      <p>When the centre is as dense as an atomic nucleus it suddenly stiffens. The infalling material bounces off it, sending a <b>shock wave</b> outward that blows the rest of the star into space.</p>
+      <p>When the center is as dense as an atomic nucleus it suddenly stiffens. The infalling material bounces off it, sending a <b>shock wave</b> outward that blows the rest of the star into space.</p>
       <p>For weeks the supernova can outshine a whole galaxy. Elements heavier than iron are made in the explosion and scattered through space, where they end up in new stars, planets and people.</p>
       ${c.life.fate === 'blackHole' ? '<p>In a star this massive, so much material falls back on to the core that it cannot survive as a neutron star. In some cases the explosion fails and the star simply vanishes.</p>' : ''}`,
     look: () => 'Open the cutaway before you press play: watch the core fall in and the shock travel outward before anything shows at the surface. Then watch the brightness readout.',
@@ -424,7 +424,7 @@ export const STAGES = {
         kind: p < SN_COLLAPSE_END ? 'inert' : 'degenerate',
         info: p < SN_COLLAPSE_END
           ? 'Electron degeneracy pressure has failed. The core is in free fall, and its protons and electrons are merging into neutrons.'
-          : 'The centre has been crushed to the density of an atomic nucleus and has stopped collapsing. Everything still falling in bounces off it.'
+          : 'The center has been crushed to the density of an atomic nucleus and has stopped collapsing. Everything still falling in bounces off it.'
       };
       return layers;
     }
@@ -448,8 +448,8 @@ export const STAGES = {
     layers: () => [
       { name: 'Inner core', el: 'q', kind: 'degenerate', r: 0.45, info: 'Several times denser than an atomic nucleus. Nobody knows what matter does here: it may dissolve into a soup of quarks.' },
       { name: 'Outer core', el: 'n', kind: 'radiative', r: 0.88, info: 'A liquid of neutrons with a few protons and electrons. It flows with no friction at all (a superfluid).' },
-      { name: 'Crust', el: 'Fe', kind: 'inert', r: 0.98, info: 'About a kilometre of iron-like nuclei in a rigid lattice, far stronger than steel. When it cracks, the star "quakes".' },
-      { name: 'Atmosphere', el: 'H', kind: 'inert', r: 1, info: 'A layer of hot plasma only a few centimetres deep, held down by gravity 100 billion times stronger than on Earth.' }
+      { name: 'Crust', el: 'Fe', kind: 'inert', r: 0.98, info: 'About a kilometer of iron-like nuclei in a rigid lattice, far stronger than steel. When it cracks, the star "quakes".' },
+      { name: 'Atmosphere', el: 'H', kind: 'inert', r: 1, info: 'A layer of hot plasma only a few centimeters deep, held down by gravity 100 billion times stronger than on Earth.' }
     ]
   },
 
@@ -461,7 +461,7 @@ export const STAGES = {
       <p>The collapsed core is ${mass(c.life.remnant)}, too massive for neutrons to hold it up. Nothing known can stop the collapse.</p>
       <p>Around it is the <b>event horizon</b>, ${sig(2 * schwarzschildKm(c.life.remnant), 2)} km across. Inside it the escape speed is greater than the speed of light, so nothing that crosses it can come back out.</p>
       <p>A black hole on its own gives out no light. We detect black holes by their gravity: stars orbiting something invisible, X-rays from gas heated as it falls in, gravitational waves when two of them merge, and the bending of light from whatever is behind them.</p>`,
-    look: () => 'Drag to move around the black hole and watch the background stars. Their light is bent as it passes, so they smear into arcs and a ring. The dark disc is the hole\'s "shadow", about 2.6 times wider than the event horizon, because light that passes too close is captured.',
+    look: () => 'Drag to move around the black hole and watch the background stars. Their light is bent as it passes, so they smear into arcs and a ring. The dark disk is the hole\'s "shadow", about 2.6 times wider than the event horizon, because light that passes too close is captured.',
     deeper: c => `
       <p><b>Schwarzschild radius.</b> r<sub>s</sub> = 2GM / c² = 2.95 km for each solar mass: ${sig(schwarzschildKm(c.life.remnant), 3)} km here.</p>
       <p><b>Bending of light.</b> A ray passing at distance b is deflected by α = 4GM / c²b. Light can orbit at 1.5 r<sub>s</sub> (the photon sphere).</p>

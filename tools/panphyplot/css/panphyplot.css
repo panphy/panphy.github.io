@@ -142,7 +142,7 @@ code {
 	stroke: none;
 }
 
-/* Clear Fit takes the toolbar Clear button's danger colour. */
+/* Clear Fit takes the toolbar Clear button's danger color. */
 .clear-fit-button,
 .clear-fit-button .neo-fit-icon {
 	color: var(--danger);
@@ -786,7 +786,7 @@ input[type="number"]:focus {
 		display: none;
 	}
 
-	/* Two rows of labelled tools rather than a toolbar that hides half its buttons off-screen. */
+	/* Two rows of labeled tools rather than a toolbar that hides half its buttons off-screen. */
 	.neo-toolbar {
 		flex-wrap: wrap;
 		overflow: visible;
@@ -916,7 +916,7 @@ input[type="number"]:focus {
 	background: var(--surface-3);
 }
 
-/* Each column head carries its series colour, so the table and the graph match. */
+/* Each column head carries its series color, so the table and the graph match. */
 .neo-col-head {
 	--series-color: var(--brand);
 	position: relative;
@@ -1580,7 +1580,7 @@ input[type="number"]:focus {
 	color: var(--ink-2);
 }
 
-/* Series: a colour key and show/hide control for each Y column. */
+/* Series: a color key and show/hide control for each Y column. */
 .neo-series-list {
 	display: flex;
 	flex-direction: column;
@@ -2779,7 +2779,7 @@ input[type="number"]:focus {
 	}
 }
 
-/* Initial guesses stay compact; optional bounds expand into their own labelled grid. */
+/* Initial guesses stay compact; optional bounds expand into their own labeled grid. */
 .custom-fit-initial-header {
 	display: flex;
 	align-items: center;

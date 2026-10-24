@@ -1,23 +1,23 @@
 // Diagrams for the A.5 Galilean and special relativity deck (higher level only), added to the
 // shared set in ../assets/figures.js. The frame S (the platform, the Earth) is slate and teal;
-// the frame S′ that moves relative to it is terracotta, the colour of this higher level topic;
+// the frame S′ that moves relative to it is terracotta, the color of this higher level topic;
 // light is apricot. On space–time diagrams the time axis is ct and light travels at 45°.
 window.DeckFigures.add(P => {
-  const { svg, arrow, text, sub, both, through, sampled, labelled, track, anim, twoState, f, TAU } = P;
-  const line = (d, colour, width = 5, extra = '') => `<path d="${d}" style="fill:none;stroke:var(--${colour});stroke-width:${width};stroke-linecap:round;stroke-linejoin:round" ${extra}/>`;
+  const { svg, arrow, text, sub, both, through, sampled, labeled, track, anim, twoState, f, TAU } = P;
+  const line = (d, color, width = 5, extra = '') => `<path d="${d}" style="fill:none;stroke:var(--${color});stroke-width:${width};stroke-linecap:round;stroke-linejoin:round" ${extra}/>`;
   const at = (x, y, body) => `<g transform="translate(${f(x)} ${f(y)})">${body}</g>`;
-  const car = (w, h, colour = 'hl') => `<rect x="${-w / 2}" y="${-h}" width="${w}" height="${h}" rx="10" style="fill:color-mix(in srgb, var(--${colour}) 16%, var(--viewer-bg));stroke:var(--${colour});stroke-width:3"/><circle cx="${-w / 2 + 34}" cy="6" r="13" style="fill:var(--text-secondary)"/><circle cx="${w / 2 - 34}" cy="6" r="13" style="fill:var(--text-secondary)"/>`;
+  const car = (w, h, color = 'hl') => `<rect x="${-w / 2}" y="${-h}" width="${w}" height="${h}" rx="10" style="fill:color-mix(in srgb, var(--${color}) 16%, var(--viewer-bg));stroke:var(--${color});stroke-width:3"/><circle cx="${-w / 2 + 34}" cy="6" r="13" style="fill:var(--text-secondary)"/><circle cx="${w / 2 - 34}" cy="6" r="13" style="fill:var(--text-secondary)"/>`;
   const flash = (x, y, r = 11) => `<circle cx="${x}" cy="${y}" r="${r}" style="fill:var(--brand-accent)"/>`;
   // Space–time diagram geometry: origin at (OX, OY), one unit is U pixels, x to the right and ct upwards.
   const OX = 150, OY = 440, U = 76, SX = x => OX + U * x, SY = t => OY - U * t;
   const stAxes = (on, n = 5) => arrow(OX, OY, OX, SY(n) - 10, 'text-secondary', 3) + arrow(OX, OY, SX(n + 0.3), OY, 'text-secondary', 3) + (on ? text(OX - 14, SY(n) + 6, 'ct', 'lbl display italic', 'end') + text(SX(n + 0.3), OY + 40, 'x', 'lbl display italic', 'end') : '');
   const lightLine = (n = 4.9) => line(`M${OX},${OY} L${SX(n)},${SY(n)}`, 'brand-accent', 3, 'stroke-dasharray="10 8"');
-  const event = (x, t, name, dx = 14, dy = -12, colour = 'text-main') => `<circle cx="${f(SX(x))}" cy="${f(SY(t))}" r="9" style="fill:var(--${colour})"/>` + (name ? text(f(SX(x)) + dx, f(SY(t)) + dy, name, 'lbl strong halo', dx < 0 ? 'end' : 'start') : '');
+  const event = (x, t, name, dx = 14, dy = -12, color = 'text-main') => `<circle cx="${f(SX(x))}" cy="${f(SY(t))}" r="9" style="fill:var(--${color})"/>` + (name ? text(f(SX(x)) + dx, f(SY(t)) + dy, name, 'lbl strong halo', dx < 0 ? 'end' : 'start') : '');
 
   return {
     // Two reference frames: the platform S and a carriage S′ moving past it. Also drawn plain.
     'a5-frames': el => {
-      const on = labelled(el), gy = 400, T = 6;
+      const on = labeled(el), gy = 400, T = 6;
       let s = `<line x1="40" y1="${gy + 20}" x2="860" y2="${gy + 20}" class="tick" style="stroke-width:5"/>` + arrow(90, gy + 20, 90, 110, 'brand-primary', 3) + arrow(90, gy + 20, 300, gy + 20, 'brand-primary', 3);
       if (on) s += text(74, 120, 'y', 'lbl display italic', 'end') + text(300, gy + 60, 'x', 'lbl display italic', 'end') + text(100, 90, 'frame S: the platform', 'lbl strong', 'start', 'style="fill:var(--brand-primary)"');
       const moving = car(280, 150) + arrow(-140, 0, -140, -220, 'hl', 3) + arrow(-140, 0, 60, 0, 'hl', 3) + flash(60, -90) + (on ? text(-156, -212, 'y′', 'lbl display italic', 'end') + text(56, 40, 'x′', 'lbl display italic', 'end') + text(40, -82, 'event', 'lbl halo', 'end') + arrow(150, -180, 230, -180, 'brand-accent', 5) + text(190, -196, 'v', 'lbl display italic') + text(-130, -250, 'frame S′: the carriage', 'lbl strong', 'start', 'style="fill:var(--hl-text)"') : '');
@@ -45,12 +45,12 @@ window.DeckFigures.add(P => {
         const mover = `<g>${track([[x0, y], [x0 + shift(end), y], [x0 + shift(end), y]], T, { extra: `keyTimes="0;${k(end)};1"` })}${body}</g>` + `<g>${track([[x0, y - 55], [x0 - c * tL, y - 55], [x0 - c * tL, y - 55]], T, { extra: `keyTimes="0;${k(tL)};1"` })}${flash(0, 0)}</g><g>${track([[x0, y - 55], [x0 + c * tR, y - 55], [x0 + c * tR, y - 55]], T, { extra: `keyTimes="0;${k(tR)};1"` })}${flash(0, 0)}</g>` + hit(x0 - c * tL, tL) + hit(x0 + c * tR, tR);
         return twoState(still, mover) + `<line x1="60" y1="${y + 20}" x2="820" y2="${y + 20}" class="tick"/>` + text(70, y - 130, title, 'lbl strong', 'start');
       };
-      return svg('40 20 800 500', row(200, false, 'in the carriage frame: both ends at the same time') + row(450, true, 'in the platform frame: the back end first'), 'A lamp at the centre of a railway carriage sends a flash towards each end. In the frame of the carriage the two flashes reach the ends at the same time. In the frame of the platform the carriage is moving: the back wall moves to meet its flash and the front wall moves away from its flash, so the flash reaches the back first. Events that are simultaneous in one frame are not simultaneous in the other');
+      return svg('40 20 800 500', row(200, false, 'in the carriage frame: both ends at the same time') + row(450, true, 'in the platform frame: the back end first'), 'A lamp at the center of a railway carriage sends a flash towards each end. In the frame of the carriage the two flashes reach the ends at the same time. In the frame of the platform the carriage is moving: the back wall moves to meet its flash and the front wall moves away from its flash, so the flash reaches the back first. Events that are simultaneous in one frame are not simultaneous in the other');
     },
 
     // A light clock at rest and the same clock moving: the moving light has further to go.
     'a5-light-clock': el => {
-      const on = labelled(el), h = 160, top = 150, bot = top + h, T0 = 1, g = 1.25, c = 2 * h / T0, v = 0.6 * c, K = 1.2, xs = 120, xm = 300;
+      const on = labeled(el), h = 160, top = 150, bot = top + h, T0 = 1, g = 1.25, c = 2 * h / T0, v = 0.6 * c, K = 1.2, xs = 120, xm = 300;
       const mirrors = `<line x1="-44" y1="${top}" x2="44" y2="${top}" style="stroke:var(--text-main);stroke-width:7;stroke-linecap:round"/><line x1="-44" y1="${bot}" x2="44" y2="${bot}" style="stroke:var(--text-main);stroke-width:7;stroke-linecap:round"/>`;
       // Each loop is two ticks of its own clock, so both pulses move at c and the moving clock takes γ times as long.
       const rest = [[xs, bot], [xs, top], [xs, bot], [xs, top], [xs, bot]], Tr = 2 * T0 * K, Tm = 2 * g * T0 * K;
@@ -69,12 +69,12 @@ window.DeckFigures.add(P => {
       const muon = (x, y) => `<circle cx="${x}" cy="${y}" r="13" style="fill:var(--hl)"/>` + text(x, y + 8, 'μ', 'lbl strong', 'middle', 'style="fill:#fff;font-size:22px"');
       let s = ground(230, 440) + mountain(230, 440, 300) + muon(310, 140) + arrow(310, 162, 310, 260, 'hl', 5) + both(380, 140, 380, 440) + text(396, 280, '1920 m', 'lbl mono', 'start') + text(396, 314, 'takes 6.4 μs', 'lbl mono', 'start') + text(230, 80, 'Earth frame', 'lbl strong') + text(230, 492, 'the muon’s clock runs slow:', 'lbl') + text(230, 526, 'it lives 22 μs', 'lbl strong');
       s += ground(680, 440) + mountain(680, 440, 30) + muon(760, 396) + arrow(680, 396, 680, 330, 'brand-accent', 5) + both(830, 410, 830, 440) + text(846, 420, '192 m', 'lbl mono', 'start') + text(846, 454, '0.64 μs', 'lbl mono', 'start') + text(680, 80, 'muon frame', 'lbl strong', 'middle', 'style="fill:var(--hl-text)"') + text(680, 492, 'the mountain is contracted:', 'lbl') + text(680, 526, 'it lives 2.2 μs', 'lbl strong') + `<line x1="480" y1="60" x2="480" y2="540" class="divider"/>`;
-      return svg('40 40 940 510', s, 'Muons travelling down from the height of a mountain top to sea level at 0.995 c, seen in two frames. In the Earth frame the distance is 1920 metres and takes 6.4 microseconds, but the muon’s lifetime is stretched from 2.2 to 22 microseconds, so most survive. In the muon’s frame its lifetime is 2.2 microseconds, but the mountain is contracted to 192 metres and passes in 0.64 microseconds. Both frames agree that most muons reach the ground');
+      return svg('40 40 940 510', s, 'Muons traveling down from the height of a mountain top to sea level at 0.995 c, seen in two frames. In the Earth frame the distance is 1920 meters and takes 6.4 microseconds, but the muon’s lifetime is stretched from 2.2 to 22 microseconds, so most survive. In the muon’s frame its lifetime is 2.2 microseconds, but the mountain is contracted to 192 meters and passes in 0.64 microseconds. Both frames agree that most muons reach the ground');
     },
 
     // Space–time diagrams. data-kind: basic, angle, axes, simultaneity or scale. Also drawn plain.
     'a5-st': el => {
-      const on = labelled(el), kind = el.dataset.kind || 'basic', b = 0.6;
+      const on = labeled(el), kind = el.dataset.kind || 'basic', b = 0.6;
       let s = stAxes(on) + lightLine();
       if (on && kind !== 'scale') s += text(SX(4.9) + 8, SY(4.9) + 4, 'light', 'lbl small', 'start', 'style="fill:var(--brand-accent)"');
       if (kind === 'basic') {

@@ -42,7 +42,7 @@ By the end of the lesson, students should be able to:
 Per group:
 
 - Marble, tennis ball, or small bouncy ball
-- Meter ruler
+- Metre ruler
 - Clamp stand, if available
 - Tray or box lid
 - Different materials, for example sponge, cardboard, cloth, bubble wrap, rubber mat

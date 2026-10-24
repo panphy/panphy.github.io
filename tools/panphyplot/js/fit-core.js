@@ -707,10 +707,10 @@
 		if (!scaled || !guess) return null;
 		const profile = ([mu, logSigma]) => profileModel(scaled.points, x => [1, Math.exp(-0.5 * ((x - mu) / Math.exp(logSigma)) ** 2)]);
 		const candidates = [];
-		const centres = [guess.mu, initial.mu].filter(Number.isFinite).map(mu => (mu - scaled.origin) / scaled.span);
-		centres.push(...Array.from({ length: 9 }, (_, i) => i / 8));
+		const centers = [guess.mu, initial.mu].filter(Number.isFinite).map(mu => (mu - scaled.origin) / scaled.span);
+		centers.push(...Array.from({ length: 9 }, (_, i) => i / 8));
 		const widths = [guess.sigma / scaled.span, Math.abs(initial.sigma) / scaled.span, 0.02, 0.05, 0.1, 0.25, 0.5, 1].filter(w => Number.isFinite(w) && w > 0);
-		for (const mu of centres) for (const width of widths) {
+		for (const mu of centers) for (const width of widths) {
 			const params = [mu, Math.log(width)], fit = profile(params);
 			if (fit) candidates.push({ params, cost: fit.cost });
 		}

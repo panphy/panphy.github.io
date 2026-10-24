@@ -63,7 +63,7 @@ Introduce continuous and categoric data.
 | Type of data | Meaning | Example | Best graph |
 |---|---|---|---|
 | Continuous data | Numerical data that can take many values | Length, time, temperature, mass | Line graph |
-| Categoric data | Data in groups or names | Material type, color, brand | Bar chart |
+| Categoric data | Data in groups or names | Material type, colour, brand | Bar chart |
 
 Key rule:
 
@@ -134,4 +134,4 @@ Students classify 10 investigation questions as requiring either a line graph or
 
 Common misconception:
 
-Students may think that any numerical dependent variable means they should use a line graph. Emphasize that the graph choice depends mainly on the independent variable.
+Students may think that any numerical dependent variable means they should use a line graph. Emphasise that the graph choice depends mainly on the independent variable.

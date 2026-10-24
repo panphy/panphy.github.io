@@ -101,6 +101,6 @@ test('local image read errors and cancellation produce useful messages', async (
     const api = readerHarness();
     const result = api.readLocalImage({ type: 'image/jpeg', size: 1 });
     api.reader()[event]();
-    await assert.rejects(result, /could not be read|cancelled/);
+    await assert.rejects(result, /could not be read|canceled/);
   }
 });

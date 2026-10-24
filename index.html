@@ -31,7 +31,7 @@
         @import url('/assets/fonts/fonts.css');
 
         /* ========================================
-           Shared behaviour: states the page scripts toggle
+           Shared behavior: states the page scripts toggle
            ======================================== */
         * { box-sizing: border-box; }
 
@@ -126,8 +126,8 @@
         }
 
         /* Topic chips (the row scrolls sideways on phones, so its column must be allowed to shrink) */
-        .catalogue-copy,
-        .catalogue-tools { min-width: 0; }
+        .catalog-copy,
+        .catalog-tools { min-width: 0; }
 
         .filter-row {
             display: flex;
@@ -439,7 +439,7 @@
         /* ========================================
            Spectrum design
            ======================================== */
-        /* Spectrum homepage. Fonts, colours and the spectrum come from design.css;
+        /* Spectrum homepage. Fonts, colors and the spectrum come from design.css;
            these names are the homepage's own, mapped onto the shared tokens. */
         :root {
             --font-sans: var(--font-body);
@@ -596,7 +596,7 @@
                wavelengths: 383.54, 388.90, 397.01, 410.17, 434.05, 486.13,
                656.28 nm. Position (%) = (wavelength - 380) / 4.
                https://physics.nist.gov/PhysRefData/Handbook/Tables/hydrogentable2.htm
-               Line widths are enlarged for visibility; colours approximate
+               Line widths are enlarged for visibility; colors approximate
                spectral hues in sRGB, with dimmer edges of the visible range. */
             background:
                 linear-gradient(90deg, transparent calc(0.885% - 0.5px), #000 calc(0.885% - 0.5px) calc(0.885% + 0.5px), transparent calc(0.885% + 0.5px)),
@@ -677,10 +677,10 @@
             font-weight: 600;
         }
 
-        /* Catalogue */
-        .catalogue-intro { max-width: 1220px; margin: 0 auto 4rem; padding: 0 1.5rem; }
+        /* Catalog */
+        .catalog-intro { max-width: 1220px; margin: 0 auto 4rem; padding: 0 1.5rem; }
 
-        .catalogue-bar {
+        .catalog-bar {
             display: grid;
             grid-template-columns: minmax(0, 0.85fr) minmax(320px, 1.15fr);
             gap: 2rem;
@@ -693,7 +693,7 @@
             -webkit-backdrop-filter: blur(16px);
         }
 
-        .catalogue-kicker,
+        .catalog-kicker,
         .section-eyebrow {
             display: block;
             color: var(--text-secondary);
@@ -704,8 +704,8 @@
             text-transform: uppercase;
         }
 
-        .catalogue-copy h2 { margin: 0.35rem 0 0.2rem; font-family: var(--font-display); font-size: 1.6rem; font-weight: 600; letter-spacing: -0.02em; }
-        .catalogue-copy p { margin: 0; color: var(--text-secondary); }
+        .catalog-copy h2 { margin: 0.35rem 0 0.2rem; font-family: var(--font-display); font-size: 1.6rem; font-weight: 600; letter-spacing: -0.02em; }
+        .catalog-copy p { margin: 0; color: var(--text-secondary); }
 
         .filter-button {
             padding: 0.45rem 0.85rem;
@@ -803,7 +803,7 @@
             white-space: nowrap;
         }
 
-        /* Bento catalogue: every card is shown; the first in each section is a wide feature */
+        /* Bento catalog: every card is shown; the first in each section is a wide feature */
         .grid,
         .grid.is-scroller {
             display: grid;
@@ -947,12 +947,12 @@
 
         @media (max-width: 900px) {
             .hero { grid-template-columns: 1fr; gap: 3rem; padding-top: 7rem; }
-            .catalogue-bar { grid-template-columns: 1fr; gap: 1rem; }
+            .catalog-bar { grid-template-columns: 1fr; gap: 1rem; }
         }
 
         @media (max-width: 768px) {
             .about-panel { grid-template-columns: 1fr; gap: 1.5rem; padding: 1.8rem 1.4rem; }
-            .catalogue-copy p { display: none; }
+            .catalog-copy p { display: none; }
             .grid > .card:nth-child(1 of :not([hidden])) { display: flex; }
             .grid > .card:nth-child(1 of :not([hidden])) .card-art { display: block; margin: 8px 8px 0; }
             .grid > .card:nth-child(1 of :not([hidden])) .card-meta { align-self: auto; margin-top: 1rem; }
@@ -972,8 +972,8 @@
         }
 
         @media (max-width: 480px) {
-            .hero, .catalogue-intro, .section { padding-right: 1rem; padding-left: 1rem; }
-            .catalogue-bar { padding: 1.1rem; }
+            .hero, .catalog-intro, .section { padding-right: 1rem; padding-left: 1rem; }
+            .catalog-bar { padding: 1.1rem; }
             .scope-head, .scope-foot { flex-wrap: wrap; padding: 0.7rem 0.9rem; }
         }
     </style>
@@ -1045,14 +1045,14 @@
     </header>
 
     <main id="main" tabindex="-1">
-    <section class="catalogue-intro" aria-labelledby="catalogue-title">
-        <div class="catalogue-bar">
-            <div class="catalogue-copy">
-                <span class="catalogue-kicker">Explore the collection</span>
-                <h2 id="catalogue-title">Find the right physics app.</h2>
+    <section class="catalog-intro" aria-labelledby="catalog-title">
+        <div class="catalog-bar">
+            <div class="catalog-copy">
+                <span class="catalog-kicker">Explore the collection</span>
+                <h2 id="catalog-title">Find the right physics app.</h2>
                 <p>Browse the collection by topic.</p>
             </div>
-            <div class="catalogue-tools">
+            <div class="catalog-tools">
                 <div class="filter-row" role="group" aria-label="Filter apps by topic">
                     <button class="filter-button" type="button" data-topic-filter="all" aria-pressed="true">Any topic</button>
                     <button class="filter-button" type="button" data-topic-filter="waves" aria-pressed="false">Waves</button>
@@ -1076,7 +1076,7 @@
         <div class="section-heading">
             <div class="section-title-block">
                 <span class="section-num" aria-hidden="true">01</span>
-                <span class="section-eyebrow">Build &amp; analyse</span>
+                <span class="section-eyebrow">Build &amp; analyze</span>
                 <h2>Tools <span class="section-label">Explore</span></h2>
             </div>
             <div class="section-summary">
@@ -1569,7 +1569,7 @@
                 </div>
                 <div class="card-body">
                     <h3>ASCII Camera</h3>
-                    <p>See yourself in 8-bit colour ASCII characters.</p>
+                    <p>See yourself in 8-bit color ASCII characters.</p>
                     <span class="card-note">Uses camera</span>
                 </div>
             </a>
@@ -2603,7 +2603,7 @@
                     }
                 },
                 {
-                    // A proton at 400 km/s in 100 mT: r = mv/(qB) = 4.2 cm, turning anticlockwise
+                    // A proton at 400 km/s in 100 mT: r = mv/(qB) = 4.2 cm, turning counterclockwise
                     // when the field points into the page.
                     title: 'Charges in Fields',
                     href: '/simulations/charges_in_fields.html',

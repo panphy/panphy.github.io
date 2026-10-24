@@ -25,7 +25,7 @@ You may not, without prior written permission from PanPhy Labs:
 Forking this repository on GitHub, as GitHub's Terms of Service allow,
 grants no further rights.
 
-Third-party material keeps its own licence and is not covered by this
+Third-party material keeps its own license and is not covered by this
 notice. This includes open-source libraries loaded from CDNs or bundled
 in the repository (such as tools/panphyplot/js/vendor/math.min.js), the
 fonts in assets/fonts/ and gcsephy/assets/fonts/ (see the *-OFL.txt

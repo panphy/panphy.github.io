@@ -1291,7 +1291,7 @@ function toggleLaser() {
  *
  * Must be synchronous so that window.print() runs inside the original
  * user-gesture context (Safari/iOS block it otherwise).  The @media print
- * CSS already forces light-mode colours, and the beforeprint / afterprint
+ * CSS already forces light-mode colors, and the beforeprint / afterprint
  * handlers swap the highlight.js stylesheet, so we only need to call
  * window.print() here.
  */
@@ -1661,7 +1661,7 @@ async function saveMarkdown() {
       updateDirtyIndicator(dirtyIndicator, false);
       return;
     } catch (err) {
-      if (err.name === 'AbortError') return; // user cancelled
+      if (err.name === 'AbortError') return; // user canceled
       console.error('Save with File System Access API failed; using download fallback.', err);
     }
   }

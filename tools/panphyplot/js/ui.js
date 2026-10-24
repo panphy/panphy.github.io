@@ -144,7 +144,7 @@ function refreshWorkspaceChrome() {
 	renderStatus();
 }
 
-// The inspector's Series card: the graph's colour key, with a tap to hide or show each series.
+// The inspector's Series card: the graph's color key, with a tap to hide or show each series.
 function renderSeriesList() {
 	const list = document.getElementById('series-list');
 	const sheet = getActiveSheet();
@@ -399,7 +399,7 @@ function buildHeaderCell(sheet, column, index) {
 	const th = document.createElement('th');
 	th.className = `neo-col-head role-${column.role}`;
 	th.dataset.columnId = column.id;
-	// A Y column's head wears its series colour from the graph.
+	// A Y column's head wears its series color from the graph.
 	const seriesColor = column.role === 'Y' ? getSeriesColor(sheet, column.id) : null;
 	if (seriesColor) th.style.setProperty('--series-color', seriesColor);
 

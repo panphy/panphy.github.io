@@ -1,7 +1,7 @@
 :root {
-  /* Colours and fonts come from the shared design system (/assets/design.css);
+  /* Colors and fonts come from the shared design system (/assets/design.css);
      these names keep the rest of this stylesheet unchanged. Scene, particle and
-     field colours carry meaning and stay as they were. */
+     field colors carry meaning and stay as they were. */
   --brand-accent: var(--accent);
   --brand-accent-strong: var(--accent-hover);
   --bg-color: var(--bg);

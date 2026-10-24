@@ -3,7 +3,7 @@
 // slate; a positive particle is red and an electron blue. Nothing here is terracotta: D.3 has no
 // additional higher level content.
 window.DeckFigures.add(P => {
-  const { svg, ball, arrow, fline, text, sub, both, through, sampled, labelled, track, anim, spin, twoState, PLAY, f } = P;
+  const { svg, ball, arrow, fline, text, sub, both, through, sampled, labeled, track, anim, spin, twoState, PLAY, f } = P;
   const positive = (x, y, r = 18) => ball(x, y, r, 'proton');
   const electron = (x, y, r = 16) => ball(x, y, r, 'electron');
   // A magnetic field at right angles to the page: crosses for into the page, dots for out of it.
@@ -19,7 +19,7 @@ window.DeckFigures.add(P => {
   return {
     // An electron accelerated from rest between two plates. Played with →.
     'd3-accelerate': el => {
-      const on = labelled(el);
+      const on = labeled(el);
       let s = plate(170, 110, 16, 300, 'electron') + plate(600, 110, 16, 120, 'proton') + plate(600, 290, 16, 120, 'proton');
       s += [150, 205, 315, 370].map(y => fline(600, y, 186, y, 'brand-primary', 2.5, 0.5, 'opacity=".45"')).join('') + `<line x1="200" y1="260" x2="780" y2="260" class="guide"/>`;
       if (on) s += text(178, 90, '−', 'lbl display') + text(608, 90, '+', 'lbl display') + text(390, 470, 'potential difference V', 'lbl mono') + both(196, 440, 592, 440) + text(700, 232, 'v', 'lbl display') + text(390, 136, 'field E', 'lbl', 'middle', 'style="fill:var(--brand-primary)"');
@@ -62,11 +62,11 @@ window.DeckFigures.add(P => {
 
     // A positive particle circling in a uniform field into the page. Also the title picture, with data-plain.
     'd3-circle': el => {
-      const on = labelled(el), cx = 400, cy = 270, r = 150;
+      const on = labeled(el), cx = 400, cy = 270, r = 150;
       let s = fieldGrid(140, 80, 8, 6, 76, false, true) + `<circle cx="${cx}" cy="${cy}" r="${r}" class="guide accent" style="stroke-width:3"/>`;
       const body = arrow(cx, cy - r + 22, cx, cy - r + 110, 'brand-primary', 5) + arrow(cx - 24, cy - r, cx - 130, cy - r, 'brand-accent', 5) + positive(cx, cy - r);
-      if (on) s += text(cx, cy + 62, 'F is always', 'lbl halo') + text(cx, cy + 96, 'towards the centre', 'lbl halo') + both(cx + 6, cy, cx + r - 4, cy) + text(cx + 78, cy - 14, 'r', 'lbl display halo');
-      return svg('100 50 620 450', s + twoState(body, `<g>${spin(cx, cy, 5, { turns: -1 })}${body}</g>`), 'A positive particle moving in a circle in a uniform magnetic field that points into the page. The magnetic force is always at right angles to the velocity and points to the centre of the circle, so the speed stays constant');
+      if (on) s += text(cx, cy + 62, 'F is always', 'lbl halo') + text(cx, cy + 96, 'towards the center', 'lbl halo') + both(cx + 6, cy, cx + r - 4, cy) + text(cx + 78, cy - 14, 'r', 'lbl display halo');
+      return svg('100 50 620 450', s + twoState(body, `<g>${spin(cx, cy, 5, { turns: -1 })}${body}</g>`), 'A positive particle moving in a circle in a uniform magnetic field that points into the page. The magnetic force is always at right angles to the velocity and points to the center of the circle, so the speed stays constant');
     },
 
     // A fine beam tube: electrons from a gun are bent into a circle by a field out of the page.
@@ -105,7 +105,7 @@ window.DeckFigures.add(P => {
 
     // A wire carrying current out of the page between the poles of a magnet. Also drawn small, with data-plain.
     'd3-wire-force': el => {
-      const on = labelled(el);
+      const on = labeled(el);
       let s = `<rect x="80" y="150" width="150" height="220" rx="8" style="fill:var(--proton)"/><rect x="570" y="150" width="150" height="220" rx="8" style="fill:var(--electron)"/>` + text(155, 274, 'N', 'lbl display', 'middle', 'style="fill:#fff"') + text(645, 274, 'S', 'lbl display', 'middle', 'style="fill:#fff"');
       s += [190, 260, 330].map(y => fline(230, y, 570, y, 'brand-accent-strong', 3, 0.3, 'opacity=".6"')).join('') + arrow(400, 238, 400, 96, 'brand-primary', 6) + wireEnd(400, 260, true, 22);
       if (on) s += text(424, 116, 'F', 'lbl display', 'start') + text(400, 420, 'current I out of the page', 'lbl') + text(310, 176, 'B', 'lbl display');

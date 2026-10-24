@@ -1,6 +1,6 @@
 // Three-dimensional models for the D.4 deck, each drawn over a flat figure by ../assets/model3d.js,
 // which also turns, zooms and photographs them for the thumbnails. The flat pictures stay for print,
-// reduced motion and a failed load. Colours follow figures.js: field lines and their symbols slate,
+// reduced motion and a failed load. Colors follow figures.js: field lines and their symbols slate,
 // velocities and wires apricot, forces teal, induced currents and emf terracotta, N red and S blue.
 //   data-magnet-coil  slide 5   a magnet moved in and out of a coil, with a meter
 //   data-flux         slide 6   a loop turned in a uniform field, threaded by its field lines
@@ -12,7 +12,7 @@
 import { model3d } from '../assets/model3d.js';
 
 const TAU = Math.PI * 2;
-// Labels sit over field lines and wires: a soft halo in the panel's colour keeps them legible.
+// Labels sit over field lines and wires: a soft halo in the panel's color keeps them legible.
 const HALO = '0 0 3px var(--viewer-bg), 0 0 6px var(--viewer-bg), 0 0 10px var(--viewer-bg)';
 const haloed = label => (html, at) => { const el = label(html, at); el.style.textShadow = HALO; return el; };
 const ease = u => (1 - Math.cos(Math.PI * Math.min(1, Math.max(0, u)))) / 2;
@@ -105,7 +105,7 @@ function kit(THREE, scene) {
     });
     return { group, set };
   };
-  // A block of a magnet with its letter on every face; paint() colours it from the theme.
+  // A block of a magnet with its letter on every face; paint() colors it from the theme.
   const pole = (letter, w, h, d) => {
     const faces = [[d, h], [d, h], [w, d], [w, d], [w, h], [w, h]].map(([a, b]) => {
       const canvas = document.createElement('canvas');
@@ -142,8 +142,8 @@ function kit(THREE, scene) {
     group.userData.paint = css => halves.forEach(block => block.userData.paint(css));
     return group;
   };
-  const colour = (material, css, name, mix) => { material.color.set(css(name)); if (mix) material.color.lerp(new THREE.Color(css(mix[0])), mix[1]); if (material.emissive) material.emissive.copy(material.color).multiplyScalar(0.12); };
-  return { V, mat, over, bar, wire, arrow, head, fieldLine, helix, coilCurrent, magnet, pole, colour };
+  const color = (material, css, name, mix) => { material.color.set(css(name)); if (mix) material.color.lerp(new THREE.Color(css(mix[0])), mix[1]); if (material.emissive) material.emissive.copy(material.color).multiplyScalar(0.12); };
+  return { V, mat, over, bar, wire, arrow, head, fieldLine, helix, coilCurrent, magnet, pole, color };
 }
 
 // ---------------------------------------------------------------------------------------------
@@ -151,7 +151,7 @@ function kit(THREE, scene) {
 // of the magnet: largest in the middle of its swing, zero where it stops at each end.
 model3d('magnet-coil', ({ THREE, scene, css, label: plain }) => {
   const k = kit(THREE, scene), { V } = k, label = haloed(plain);
-  const T = 4, TURNS = 8, R = 0.55, X0 = 0, LENGTH = 1.8, CENTRE = -1.45, SWING = 0.75;
+  const T = 4, TURNS = 8, R = 0.55, X0 = 0, LENGTH = 1.8, CENTER = -1.45, SWING = 0.75;
   const MX = 0.9, MY = -1.8, MZ = 0.25;
   const wireMaterial = k.mat({ roughness: 0.45, metalness: 0.2 });
   scene.add(k.helix(X0, LENGTH, R, TURNS, 0.045, wireMaterial).mesh);
@@ -182,7 +182,7 @@ model3d('magnet-coil', ({ THREE, scene, css, label: plain }) => {
 
   label('coil', [X0 + LENGTH / 2, R + 0.4, 0]);
   label('meter', [MX + 1.1, MY, MZ]);
-  const magnetLabel = label('moving magnet', [CENTRE, -0.6, 0]);
+  const magnetLabel = label('moving magnet', [CENTER, -0.6, 0]);
 
   return {
     look: [-0.25, -0.45, 0],
@@ -191,16 +191,16 @@ model3d('magnet-coil', ({ THREE, scene, css, label: plain }) => {
     still: 0.25,
     paint() {
       bar.userData.paint(css);
-      k.colour(wireMaterial, css, '--brand-accent');
-      k.colour(velocityMaterial, css, '--brand-accent');
-      k.colour(caseMaterial, css, '--neutron');
+      k.color(wireMaterial, css, '--brand-accent');
+      k.color(velocityMaterial, css, '--brand-accent');
+      k.color(caseMaterial, css, '--neutron');
       faceMaterial.color.set(css('--card-bg'));
       needleMaterial.color.set(css('--hl'));
       scaleMaterial.color.set(css('--text-secondary'));
     },
     tick(t) {
       const phase = (t / T) * TAU, speed = Math.cos(phase);
-      bar.position.x = CENTRE + SWING * Math.sin(phase);
+      bar.position.x = CENTER + SWING * Math.sin(phase);
       magnetLabel.anchor.x = bar.position.x;
       velocity.set(V(bar.position.x - 0.35 * Math.sign(speed), 0.42, 0), V(0.75 * speed, 0, 0));
       needle.rotation.z = -0.62 * speed;
@@ -272,11 +272,11 @@ model3d('flux', ({ THREE, scene, css, label: plain, caption }) => {
     alt: 'A circular loop in a uniform magnetic field whose field lines run from left to right. The loop tips back so that its normal is first along the field, then at 60 degrees to it, then at right angles. The field lines that pass through the loop are drawn darker: all of them when the loop faces the field, half as many at 60 degrees and none when the loop lies along the field',
     still: 5,
     paint() {
-      k.colour(strong, css, '--brand-accent-strong');
-      k.colour(weak, css, '--brand-accent-strong');
-      k.colour(loopMaterial, css, '--brand-primary');
+      k.color(strong, css, '--brand-accent-strong');
+      k.color(weak, css, '--brand-accent-strong');
+      k.color(loopMaterial, css, '--brand-primary');
       fillMaterial.color.set(css('--brand-primary'));
-      k.colour(normalMaterial, css, '--hl');
+      k.color(normalMaterial, css, '--hl');
       arcMaterial.color.set(css('--text-secondary'));
     },
     tick(t) {
@@ -308,11 +308,11 @@ model3d('flux', ({ THREE, scene, css, label: plain, caption }) => {
 // ---------------------------------------------------------------------------------------------
 // Slide 13: Lenz's law. The north pole of a magnet is pushed towards a coil, rests, is pulled away
 // and rests. The arrowheads on the front of each turn show the induced current, the arrow inside
-// the coil its field, and the coil's near end is labelled with the pole it becomes.
+// the coil its field, and the coil's near end is labeled with the pole it becomes.
 model3d('lenz', ({ THREE, scene, css, label: plain, caption }) => {
   const k = kit(THREE, scene), { V } = k, label = haloed(plain);
   const TURNS = 7, R = 0.55, X0 = 0, LENGTH = 1.6;
-  const FAR = -2.75, NEAR = -1.1, CYCLE = 6.4;     // magnet centre positions; seconds per cycle
+  const FAR = -2.75, NEAR = -1.1, CYCLE = 6.4;     // magnet center positions; seconds per cycle
   // Push in for 1.8 s, rest 1.4 s, pull out 1.8 s, rest 1.4 s.
   const state = t => {
     const s = ((t % CYCLE) + CYCLE) % CYCLE;
@@ -354,11 +354,11 @@ model3d('lenz', ({ THREE, scene, css, label: plain, caption }) => {
     still: 0.9,
     paint() {
       bar.userData.paint(css);
-      k.colour(wireMaterial, css, '--brand-accent', ['--text-secondary', 0.25]);
-      k.colour(currentMaterial, css, '--hl');
-      k.colour(fieldMaterial, css, '--brand-accent-strong');
-      k.colour(velocityMaterial, css, '--brand-accent');
-      k.colour(forceMaterial, css, '--brand-primary');
+      k.color(wireMaterial, css, '--brand-accent', ['--text-secondary', 0.25]);
+      k.color(currentMaterial, css, '--hl');
+      k.color(fieldMaterial, css, '--brand-accent-strong');
+      k.color(velocityMaterial, css, '--brand-accent');
+      k.color(forceMaterial, css, '--brand-primary');
     },
     tick(t) {
       const { x, v } = state(t), strength = Math.abs(v), sense = -Math.sign(v);
@@ -429,7 +429,7 @@ model3d('tube', ({ THREE, scene, css, label: plain, fig }) => {
     const ring = new THREE.Mesh(new THREE.TorusGeometry(RADIUS + 0.02, 0.035, 5, 24), ringMaterial);
     ring.rotation.x = Math.PI / 2;
     group.add(ring);
-    // Field up (+y): seen from above the current is anticlockwise, which is +x at the front (+z).
+    // Field up (+y): seen from above the current is counterclockwise, which is +x at the front (+z).
     const sense = side; // below: field down; above: field up
     [[V(0, 0, RADIUS + 0.02), V(sense, 0, 0)], [V(0, 0, -RADIUS - 0.02), V(-sense, 0, 0)], [V(RADIUS + 0.02, 0, 0), V(0, 0, -sense)], [V(-RADIUS - 0.02, 0, 0), V(0, 0, sense)]].forEach(([at, dir]) => group.add(k.head(at, dir, 0.08, ringMaterial)));
     group.position.x = RIGHT;
@@ -459,7 +459,7 @@ model3d('tube', ({ THREE, scene, css, label: plain, fig }) => {
     ringMaterial.opacity = Math.min(1, speed * 1.2);
     currentLabel.anchor.y = copper;
     currentLabel.style.opacity = speed > 0.05 ? 1 : 0;
-    // Forces once the magnets are let go, from each centre of mass: the weight, and in the copper
+    // Forces once the magnets are let go, from each center of mass: the weight, and in the copper
     // the upward magnetic force, growing to equal it.
     const falling = s !== null;
     weights[0].set(V(LEFT, plastic, 0), V(0, falling && plastic > BOTTOM ? -0.75 : 0, 0));
@@ -476,13 +476,13 @@ model3d('tube', ({ THREE, scene, css, label: plain, fig }) => {
     still: 1,
     paint() {
       magnets.forEach(m => m.userData.paint(css));
-      k.colour(baseMaterial, css, '--neutron', ['--card-bg', 0.55]);
+      k.color(baseMaterial, css, '--neutron', ['--card-bg', 0.55]);
       plasticMaterial.color.set(css('--neutron'));
       copperMaterial.color.set(css('--brand-accent'));
-      k.colour(plasticRim, css, '--neutron');
-      k.colour(copperRim, css, '--brand-accent');
-      k.colour(ringMaterial, css, '--hl');
-      k.colour(weightMaterial, css, '--brand-primary');
+      k.color(plasticRim, css, '--neutron');
+      k.color(copperRim, css, '--brand-accent');
+      k.color(ringMaterial, css, '--hl');
+      k.color(weightMaterial, css, '--brand-primary');
     },
     tick(t, still) {
       if (still) { place(1.6); return; }
@@ -500,7 +500,7 @@ model3d('tube', ({ THREE, scene, css, label: plain, fig }) => {
 
 // ---------------------------------------------------------------------------------------------
 // Slide 15: a rod sliding at speed v along two rails in a vertical field. Field, velocity and rod
-// are at right angles. Seen from above, the induced current is anticlockwise: along the rod towards
+// are at right angles. Seen from above, the induced current is counterclockwise: along the rod towards
 // the far rail, round through the resistor and back along the near rail.
 model3d('rod', ({ THREE, scene, css, label: plain }) => {
   const k = kit(THREE, scene), { V } = k, label = haloed(plain);
@@ -544,16 +544,16 @@ model3d('rod', ({ THREE, scene, css, label: plain }) => {
   return {
     look: [0, -0.1, 0],
     view: { turn: -0.3, lift: 0.78, far: 9.4 },
-    alt: 'A metal rod of length L slides at speed v along two horizontal rails joined at one end by a resistor R. The magnetic field B points vertically downwards. Field, velocity and rod are all at right angles. As the rod moves, the shaded area of the circuit grows and the flux through it increases; the induced current I flows along the rod towards the far rail, anticlockwise round the circuit seen from above',
+    alt: 'A metal rod of length L slides at speed v along two horizontal rails joined at one end by a resistor R. The magnetic field B points vertically downwards. Field, velocity and rod are all at right angles. As the rod moves, the shaded area of the circuit grows and the flux through it increases; the induced current I flows along the rod towards the far rail, counterclockwise round the circuit seen from above',
     still: 1.6,
     paint() {
-      k.colour(railMaterial, css, '--text-secondary');
-      k.colour(resistorMaterial, css, '--neutron', ['--card-bg', 0.3]);
+      k.color(railMaterial, css, '--text-secondary');
+      k.color(resistorMaterial, css, '--neutron', ['--card-bg', 0.3]);
       areaMaterial.color.set(css('--brand-primary'));
-      k.colour(rodMaterial, css, '--brand-accent');
-      k.colour(lineMaterial, css, '--brand-accent-strong');
-      k.colour(velocityMaterial, css, '--brand-accent');
-      k.colour(currentMaterial, css, '--hl');
+      k.color(rodMaterial, css, '--brand-accent');
+      k.color(lineMaterial, css, '--brand-accent-strong');
+      k.color(velocityMaterial, css, '--brand-accent');
+      k.color(currentMaterial, css, '--hl');
       guideMaterial.color.set(css('--text-secondary'));
     },
     tick(t) {
@@ -577,10 +577,10 @@ model3d('rod', ({ THREE, scene, css, label: plain }) => {
 // down again and released.
 model3d('spring', ({ THREE, scene, css, label: plain, holder }) => {
   const k = kit(THREE, scene), { V } = k, label = haloed(plain);
-  const TOP = 3.3, REST = 1.65, AMPLITUDE = 0.55, HALF = 0.45;   // the magnet's centre at rest; half its length
+  const TOP = 3.3, REST = 1.65, AMPLITUDE = 0.55, HALF = 0.45;   // the magnet's center at rest; half its length
   const PERIOD = 1.8, DAMPING = 0.2, RUN = 9, PULL = 1.4, CYCLE = RUN + PULL;
   const OMEGA = TAU / PERIOD;
-  // Height of the magnet's centre and its velocity (in units of Aω), s seconds after release.
+  // Height of the magnet's center and its velocity (in units of Aω), s seconds after release.
   const height = s => REST - AMPLITUDE * Math.exp(-DAMPING * s) * Math.cos(OMEGA * s);
   const speed = s => Math.exp(-DAMPING * s) * (DAMPING / OMEGA * Math.cos(OMEGA * s) + Math.sin(OMEGA * s));
 
@@ -632,10 +632,10 @@ model3d('spring', ({ THREE, scene, css, label: plain, holder }) => {
     still: PULL + 6.2,
     paint() {
       bar.userData.paint(css);
-      k.colour(supportMaterial, css, '--text-secondary');
-      k.colour(springMaterial, css, '--text-secondary', ['--text-main', 0.3]);
-      k.colour(wireMaterial, css, '--brand-accent');
-      k.colour(resistorMaterial, css, '--neutron', ['--card-bg', 0.3]);
+      k.color(supportMaterial, css, '--text-secondary');
+      k.color(springMaterial, css, '--text-secondary', ['--text-main', 0.3]);
+      k.color(wireMaterial, css, '--brand-accent');
+      k.color(resistorMaterial, css, '--neutron', ['--card-bg', 0.3]);
     },
     tick(t) {
       // Each cycle: the magnet is drawn down from rest, then released at s = 0.
@@ -711,11 +711,11 @@ model3d('generator', ({ THREE, scene, css, label: plain, holder }) => {
     still: 50 / 360 * T,
     paint() {
       poles.forEach(p => p.userData.paint(css));
-      k.colour(lineMaterial, css, '--brand-accent-strong');
-      k.colour(coilMaterial, css, '--brand-accent');
-      k.colour(normalMaterial, css, '--hl');
-      k.colour(velocityMaterial, css, '--brand-accent', ['--text-main', 0.2]);
-      k.colour(axleMaterial, css, '--text-secondary');
+      k.color(lineMaterial, css, '--brand-accent-strong');
+      k.color(coilMaterial, css, '--brand-accent');
+      k.color(normalMaterial, css, '--hl');
+      k.color(velocityMaterial, css, '--brand-accent', ['--text-main', 0.2]);
+      k.color(axleMaterial, css, '--text-secondary');
     },
     tick(t) {
       const u = (((t % T) + T) % T) / T, theta = u * TAU;
