@@ -1,6 +1,6 @@
 # Motion Tracker
 
-Manual and automatic video analysis at `tools/motion_tracker.html`. Serve the repository with `python3 -m http.server 8000`; no build step is needed. The HTML owns the interface markup, `css/motion_tracker.css` owns the layout, and `js/main.js` starts native ES modules.
+Manual and automatic video analysis at `tools/motion_tracker.html`. Auto is the default on startup and when loading or clearing a video; Manual and Edit remain available. Serve the repository with `python3 -m http.server 8000`; no build step is needed. The HTML owns the interface markup, `css/motion_tracker.css` owns the layout, and `js/main.js` starts native ES modules.
 
 - `state.js`: shared mutable analysis and interaction state. Marks retain video playback times so changing the filming rate recalculates analysis times.
 - `dom.js`: DOM elements and canvas contexts.

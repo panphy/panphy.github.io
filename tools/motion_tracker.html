@@ -41,7 +41,7 @@
 	</header>
 
 	<main id="workspace">
-		<!-- Video: open a clip, set the scale and origin, then click the object frame by frame. -->
+		<!-- Video: open a clip, set the scale and origin, then click the object to track it automatically. -->
 		<section id="videoPane" class="mt-pane" aria-labelledby="videoPaneTitle">
 			<div class="pane-head">
 				<div class="pane-title">
@@ -59,8 +59,8 @@
 					</div>
 				</div>
 				<div class="mt-segmented mt-tracking-modes" role="group" aria-label="Tracking mode">
-					<button type="button" id="manualMode" class="mt-segment" disabled aria-pressed="true" title="Manual: mark the object one frame at a time"><svg class="mt-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="m5 16 11-11 3 3-11 11-4 1zM14 7l3 3"/></svg><span>Manual</span></button>
-					<button type="button" id="autoTrackToggle" class="mt-segment" disabled aria-pressed="false" title="Auto-track: click the object once, and it is marked in each frame until it is lost or the video ends"><svg class="mt-icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4.5"/><path d="M12 3.5v3M12 17.5v3M3.5 12h3M17.5 12h3"/></svg><span>Auto</span></button>
+					<button type="button" id="manualMode" class="mt-segment" disabled aria-pressed="false" title="Manual: mark the object one frame at a time"><svg class="mt-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="m5 16 11-11 3 3-11 11-4 1zM14 7l3 3"/></svg><span>Manual</span></button>
+					<button type="button" id="autoTrackToggle" class="mt-segment" disabled aria-pressed="true" title="Auto-track: click the object once, and it is marked in each frame until it is lost or the video ends"><svg class="mt-icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4.5"/><path d="M12 3.5v3M12 17.5v3M3.5 12h3M17.5 12h3"/></svg><span>Auto</span></button>
 					<button type="button" id="selectMarks" class="mt-segment" disabled aria-pressed="false" title="Select a mark on the video to inspect or delete it"><svg class="mt-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="m5 3 14 9-7 1-3 7z"/></svg><span>Edit</span></button>
 				</div>
 				<div class="mt-tool-spacer"></div>
@@ -103,7 +103,7 @@
 					<ol class="empty-steps">
 						<li><span><strong>Check the frame rate.</strong> It is detected for you; set it up for slow-motion clips.</span></li>
 						<li><span><strong>Set the scale and origin.</strong> Drag along a known length, then click where x and y are zero.</span></li>
-						<li><span><strong>Click the object.</strong> Each click marks it and moves the video on, ready for the next mark.</span></li>
+						<li><span><strong>Click the object.</strong> Auto tracks it across frames. Choose Manual to mark one frame at a time.</span></li>
 					</ol>
 				</div>
 				<div id="videoWrapper" hidden>
@@ -273,7 +273,7 @@
 				<li><span><strong>Check the frame rate.</strong> It is detected for you. For slow motion, open Setup → Frame rate and give the rate it was filmed at.</span></li>
 				<li><span><strong>Scale:</strong> drag along the object of known length and type its length. Without a scale, positions are in pixels.</span></li>
 				<li><span><strong>Origin:</strong> click where x and y should be zero. Otherwise the origin is the bottom-left corner.</span></li>
-				<li><span><strong>Mark the object.</strong> Click its center; the video moves on by the step, ready for the next mark. Clicking a frame that already has a mark replaces it. In Auto mode, click the object once and it is marked in each frame until it is lost, leaves the frame or the video ends; check the marks, click it to carry on, and Undo removes a whole run. It works best against a plain background.</span></li>
+				<li><span><strong>Mark the object.</strong> Auto is selected by default. Click the object once and it is marked in each frame until it is lost, leaves the frame or the video ends; check the marks, click it to carry on, and Undo removes a whole run. It works best against a plain background. Choose Manual to mark one frame at a time; each click moves the video on by the step. Clicking a frame that already has a mark replaces it.</span></li>
 				<li><span><strong>Correct a mark.</strong> Choose Edit, click a cross in the video, then Delete to remove just that mark. For overlapping crosses, select its time in the Table or use its row’s delete button. Undo and Redo step through changes.</span></li>
 				<li><span><strong>Read the results.</strong> Switch between position and velocity, edit marks in the Table, and export a CSV or send the data to PanPhyPlot. Velocity needs at least four marks.</span></li>
 			</ol>
