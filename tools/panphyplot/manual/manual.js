@@ -65,11 +65,6 @@
   });
   window.addEventListener('hashchange', revealHashTarget);
   if (location.hash) revealHashTarget();
-  document.querySelectorAll('details').forEach(details => {
-    details.addEventListener('toggle', () => {
-      if (details.open && window.MathJax?.Hub) window.MathJax.Hub.Queue(['Typeset', window.MathJax.Hub, details]);
-    });
-  });
 
   function setScale(nextScale, keepCenter = true) {
     const centerX = (scrollArea.scrollLeft + scrollArea.clientWidth / 2) / scale;

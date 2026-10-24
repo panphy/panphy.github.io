@@ -126,7 +126,7 @@ th { background: var(--surface-3); font-weight: 600; }
 .example span { padding: 6px 4px; border-radius: 5px; background: var(--surface); border: 1px solid var(--line); }
 .example .role { font-weight: 600; color: var(--accent); }
 .math-scroll, .reference-table { max-width: 100%; overflow-x: auto; overscroll-behavior-x: contain; }
-.math-scroll .MathJax_SVG_Display { text-align: left !important; }
+.math-scroll mjx-container[display="true"] { text-align: left !important; }
 footer { border-top: 1px solid var(--line); background: var(--surface-2); color: var(--ink-2); font-family: var(--font-mono); font-size: 0.72rem; text-align: center; padding: 16px 20px; }
 footer a { color: var(--ink-2); }
 .dialog-open { overflow: hidden; }

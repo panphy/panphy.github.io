@@ -77,12 +77,9 @@ function typesetLabel(element, source, placeholder = null) {
 		element.labelTypesetTimer = null;
 		if ((delayed && !element.isConnected) || element.dataset.texSource !== source) return;
 		element.textContent = source;
-		if (typeof MathJax === 'undefined' || !MathJax.Hub || !MathJax.Hub.Queue) return;
-		MathJax.Hub.Queue(['Typeset', MathJax.Hub, element], () => {
+		safeTypeset(element).then(() => {
 			if (element.dataset.texSource !== source || !element.querySelector('svg')) return;
-			// The copy leaves out MathJax's source script and ids, so it never clashes or is reprocessed.
 			const copy = element.cloneNode(true);
-			copy.querySelectorAll('script').forEach(node => node.remove());
 			copy.querySelectorAll('[id]').forEach(node => node.removeAttribute('id'));
 			labelTypesetCache.delete(source);
 			labelTypesetCache.set(source, copy.innerHTML);

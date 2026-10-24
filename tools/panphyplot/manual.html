@@ -11,10 +11,10 @@
 	<link rel="stylesheet" href="/assets/standalone-top.css">
 	<title>PanPhyPlot Manual</title>
 	<link rel="icon" type="image/png" href="/assets/favicon.png">
-	<script type="text/x-mathjax-config">
-		MathJax.Hub.Config({ tex2jax: { inlineMath: [['\\(', '\\)']], displayMath: [['\\[', '\\]']], processEscapes: true } });
+	<script>
+		window.MathJax = { tex: { inlineMath: [['\\(', '\\)']], displayMath: [['\\[', '\\]']] }, svg: { fontCache: 'none' } };
 	</script>
-	<script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-AMS-MML_SVG.js" defer></script>
+	<script src="https://cdn.jsdelivr.net/npm/mathjax@3.2.2/es5/tex-svg-full.js" defer></script>
 	<link rel="stylesheet" href="/assets/theme-toggle.css">
 	<script src="/assets/theme-toggle.js"></script>
 	<link rel="stylesheet" href="/assets/fonts/fonts.css">
