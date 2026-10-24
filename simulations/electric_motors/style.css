@@ -238,14 +238,14 @@ h1 span { color: var(--brand-primary); }
   .viewer-panel:not(.is-stacked):not(.is-fullscreen) .playback { position: sticky; bottom: max(12px, env(safe-area-inset-bottom)); z-index: 4; margin: 0 -6px; padding: 6px; border-radius: 16px; background: var(--viewer-bg); box-shadow: 0 6px 18px -10px rgba(0, 0, 0, .4); }
 }
 .playback-note { margin: -4px 0 0; font-size: .72rem; line-height: 1.45; color: var(--text-secondary); }
-button:disabled { cursor: default; opacity: .55; }
+button:disabled { cursor: default; opacity: 0.9; }
 
 /* The main action first, then the settings, then what to show. */
 .fire {
   display: flex; align-items: center; justify-content: center; gap: 10px;
   width: 100%; min-height: 56px; padding: 10px 18px;
   border: 0; border-radius: 14px;
-  background: var(--brand-primary); color: #fff;
+  background: var(--brand-primary); color: var(--accent-ink);
   font-size: 1.02rem; font-weight: 800;
   box-shadow: 0 6px 16px color-mix(in srgb, var(--brand-primary), transparent 72%);
   transition: filter .15s, transform .1s;
@@ -253,7 +253,6 @@ button:disabled { cursor: default; opacity: .55; }
 }
 .fire::before { content: ''; flex: none; width: 20px; height: 20px; background: currentColor; -webkit-mask: var(--fire-icon) center / contain no-repeat; mask: var(--fire-icon) center / contain no-repeat; }
 .fire[aria-pressed=true] { background: var(--text-main); color: var(--bg-color); box-shadow: none; }
-[data-theme="dark"] .fire:not([aria-pressed=true]) { color: #1B1208; }
 .fire:hover { filter: brightness(1.07); }
 .fire:active { transform: translateY(1px); }
 .action {
