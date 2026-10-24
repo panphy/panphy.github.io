@@ -12,7 +12,9 @@ export const MOON_GLOW_GAIN = 1.2;
 export const QUALITY_LEVELS = ['basic', 'medium', 'high'];
 
 const EXPOSURE = 1.12;
-const MAX_PIXEL_RATIO = { basic: 1.5, medium: 1.5, high: 2 };
+// Above 1.5 the low-poly scene looks the same but costs much more power; page
+// text and labels are drawn by the browser and stay sharp regardless.
+const MAX_PIXEL_RATIO = { basic: 1.5, medium: 1.5, high: 1.5 };
 const SLOW_FRAME_MS = 1000 / 42;
 const QUALITY_WINDOW_MS = 2500;
 const QUALITY_WARMUP_MS = 3000;
@@ -577,7 +579,7 @@ export function createVisuals({ renderer, scene, camera, available, onQualityCha
     // The composer tone-maps in its last pass, so the renderer must not do it as well.
     renderer.toneMapping = usesComposer() ? THREE.NoToneMapping : THREE.ACESFilmicToneMapping;
     if (aoPass) aoPass.enabled = quality === 'high';
-    if (composer) composer.multisampling = Math.min(quality === 'high' ? 4 : 2, maxSamples);
+    if (composer) composer.multisampling = Math.min(2, maxSamples);
     motes.points.visible = !saver;
     effects.setSparkScale(saver ? 0.5 : quality === 'medium' ? 0.8 : 1);
     setSize(width, height);

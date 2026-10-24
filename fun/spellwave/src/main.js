@@ -8,7 +8,7 @@ import { createLeaderboard } from './leaderboard.js';
 import { createEnemyMesh, createMimicChestMesh } from './enemy-meshes.js';
 import { bossSpeedMultiplier, hardBossShare, normalPromptLengthCap, bossWordLengthCap, previewLengthCap, withinLength, hardGuestCount } from './difficulty.js?v=20261024-card-reveal';
 import { createLowPolyTerrain, createLowPolyTree, createLowPolyRock, createLowPolyCloud } from './lowpoly.js';
-import { createVisuals, GLOW_GAIN, MOON_GLOW_GAIN } from './visuals.js';
+import { createVisuals, GLOW_GAIN, MOON_GLOW_GAIN } from './visuals.js?v=20261024-battery';
 import { pickTarget, getInputCharacters, isMathOperatorInput, buildSearchPrompt, buildAltSearchPrompts, escapeHtml, wrapSups, promptIndexForProgress } from './prompt-utils.js?v=20261024-card-reveal';
 import { getBossChoice, choiceKeys, keysClash, choiceTypingLength, shuffledOptions, buildChoiceSegments } from './boss-choices.js?v=20261024-card-reveal';
 
@@ -61,6 +61,9 @@ const endTime = document.getElementById('endTime');
 const STORAGE_KEY = 'panphySpellwaveBestV1';
 const AUDIO_STORAGE_KEY = 'panphySpellwaveAudioV1';
 const MAX_DELTA = 0.06;
+// Play is drawn at no more than about 60 frames a second, so a 120 Hz screen
+// does half the work. The slack lets a 60 Hz screen's slightly early frames through.
+const MIN_FRAME_MS = 1000 / 60 - 3;
 const IDLE_FRAME_INTERVAL = 100; // ~10 fps when not actively playing
 const WALL_Z = 4.6;
 const SPAWN_Z = -48;
@@ -1469,6 +1472,11 @@ function animate(frameTime) {
     return;
   }
 
+  if (mode === 'running' && lastFrameTime && frameTime - lastFrameTime < MIN_FRAME_MS) {
+    rafId = requestAnimationFrame(animate);
+    return;
+  }
+
   const delta = lastFrameTime ? Math.min((frameTime - lastFrameTime) / 1000, MAX_DELTA) : 0;
   lastFrameTime = frameTime;
 
@@ -2097,10 +2105,7 @@ function updateLabels() {
   const width = window.innerWidth;
   const height = window.innerHeight;
   const safeBounds = getLabelSafeBounds(height);
-  const hudGrid = document.querySelector('.hud-grid');
-  const hudBottom = hudGrid ? hudGrid.getBoundingClientRect().bottom : 0;
-  const leaderboardRect = document.querySelector('.sw-leaderboard')?.getBoundingClientRect();
-  const leaderboardBottom = leaderboardRect && leaderboardRect.width > 0 ? leaderboardRect.bottom : 0;
+  const { hudBottom, leaderboardBottom } = getPanelBottoms();
   const labelItems = [];
 
   for (const enemy of enemies) {
@@ -2215,6 +2220,21 @@ function updateLabels() {
     enemy.label.classList.toggle('is-critical', enemy.group.position.z > 1);
     enemy.label.classList.toggle('is-stunned', !!(enemy.stunTimer && enemy.stunTimer > 0));
   }
+}
+
+// Where the score panel and the Hall of Wizards end, measured a few times a
+// second rather than every frame, since reading layout every frame costs power.
+const panelBottomsCache = { at: -Infinity, hudBottom: 0, leaderboardBottom: 0 };
+function getPanelBottoms() {
+  const now = performance.now();
+  if (now - panelBottomsCache.at > 400) {
+    const hudRect = document.querySelector('.hud-grid')?.getBoundingClientRect();
+    const leaderboardRect = document.querySelector('.sw-leaderboard')?.getBoundingClientRect();
+    panelBottomsCache.hudBottom = hudRect ? hudRect.bottom : 0;
+    panelBottomsCache.leaderboardBottom = leaderboardRect && leaderboardRect.width > 0 ? leaderboardRect.bottom : 0;
+    panelBottomsCache.at = now;
+  }
+  return panelBottomsCache;
 }
 
 function resolveLabelStacks(items) {
