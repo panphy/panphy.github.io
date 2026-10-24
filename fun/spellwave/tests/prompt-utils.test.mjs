@@ -3,10 +3,11 @@ import { readFileSync } from 'node:fs';
 import vm from 'node:vm';
 import assert from 'node:assert/strict';
 import {
-  pickTarget, buildSearchPrompt, buildAltSearchPrompts, buildTwoWordLimit,
-  getInputCharacters, isMathOperatorInput, promptIndexForProgress, buildBossPrompt, createBossQuestionBuilder, buildBossHintPart,
+  pickTarget, buildSearchPrompt, buildAltSearchPrompts,
+  getInputCharacters, isMathOperatorInput, promptIndexForProgress,
 } from '../src/prompt-utils.js';
-import { ALL_WORDS, EQUATION_WORDS, MEDIUM_WORDS, HARD_WORDS } from '../src/question-bank.js';
+import { ALL_WORDS, EQUATION_WORDS, MEDIUM_WORDS, HARD_WORDS, EASY_WORDS } from '../src/question-bank.js';
+import { getBossChoice, choiceKeys, keysClash } from '../src/boss-choices.js';
 
 const enemy = (searchPrompt, z, matched = searchPrompt) => ({
   searchPrompt, _matchedSearchPrompt: matched, group: { position: { z } },
@@ -57,101 +58,52 @@ test('every question-bank term is typeable and unique', () => {
   }
 });
 
-test('equation bosses always produce a hidden-word limit', () => {
-  for (const { term } of EQUATION_WORDS) {
-    const limit = buildTwoWordLimit(term, { alwaysLimit: true, multiplicationAlias: true, maxHiddenWords: 2 });
-    assert.ok(limit && limit.searchPrompt.length > 0, term);
-  }
-});
+const mainSource = readFileSync(new URL('../src/main.js', import.meta.url), 'utf8');
+const mainSlice = (from, to) => mainSource.slice(mainSource.indexOf(from), mainSource.indexOf(to));
 
-const buildBossQuestion = createBossQuestionBuilder(ALL_WORDS, EQUATION_WORDS);
-const hiddenWords = prompt => prompt.parts.filter(part => part.isHidden).map(part => buildSearchPrompt(part.answerText));
-
-test('no boss clue prints the word it asks for', () => {
-  for (const entry of [...MEDIUM_WORDS, ...HARD_WORDS, ...EQUATION_WORDS]) {
-    const clueWords = new Set(entry.definition.toLowerCase().split(/[^a-z]+/));
-    for (const cap of [14, 16]) {
-      const repeated = hiddenWords(buildBossQuestion(entry, cap)).filter(word => clueWords.has(word));
-      assert.deepEqual(repeated, [], `"${entry.term}" is given away by its clue`);
-    }
-  }
-});
-
-test('every boss has a bounded content-word answer', () => {
-  for (const entry of [...MEDIUM_WORDS, ...HARD_WORDS, ...EQUATION_WORDS]) {
-    for (const cap of [14, 16]) {
-      const prompt = buildBossQuestion(entry, cap);
-      assert.ok(prompt, entry.term);
-      assert.ok(hiddenWords(prompt).length >= 1, entry.term);
-      assert.ok(prompt.searchPrompt.length > 0 && prompt.searchPrompt.length <= cap, entry.term);
-      assert.equal(prompt.parts.map(part => part.text).join(''), entry.term);
-      assert.ok(prompt.altSearchPrompts.every(answer => answer.length <= cap), entry.term);
-    }
-  }
-});
-
-test('every ask names words of its own term and is used when it fits', () => {
-  for (const entry of [...MEDIUM_WORDS, ...HARD_WORDS, ...EQUATION_WORDS].filter(item => item.ask)) {
-    assert.deepEqual(hiddenWords(buildBossQuestion(entry, 16)), entry.ask.split(' ').map(word => buildSearchPrompt(word)), entry.term);
-  }
-});
-
-test('bosses hide the word that tells a term apart from the rest of the bank', () => {
-  const answer = term => buildBossQuestion([...MEDIUM_WORDS, ...HARD_WORDS].find(entry => entry.term === term), 16).searchPrompt;
-  assert.equal(answer('Newton\'s first law'), 'first');
-  assert.equal(answer('series circuit'), 'series');
-  assert.equal(answer('nuclear fusion'), 'fusion');
-  assert.equal(answer('non renewable'), 'nonrenewable');
-  assert.equal(answer('limit of proportionality'), 'proportionality');
-});
-
-test('equation bosses skip repeated and filler words and preserve exponents', () => {
-  const equation = clue => buildBossQuestion(EQUATION_WORDS.find(entry => entry.definition === clue), 16);
-  assert.equal(equation('s = vt').searchPrompt, 'speed');
-  assert.equal(equation('Vp / Vs = np / ns').searchPrompt, 'turnsturns');
-  assert.equal(buildBossPrompt('kinetic energy = 0.5 × mass × speed²', { multiplicationAlias: true }).searchPrompt, 'kinetic');
-  const squared = buildBossPrompt('speed² = time', { multiplicationAlias: true });
-  assert.equal(squared.searchPrompt, 'speed');
-  assert.equal(squared.parts.find(part => part.isHidden).exponentText, '²');
-});
-
-
-test('every hidden boss word shows a blank', () => {
-  for (const entry of [...MEDIUM_WORDS, ...HARD_WORDS, ...EQUATION_WORDS]) {
-    for (const cap of [14, 16]) {
-      for (const part of buildBossQuestion(entry, cap).parts.filter(item => item.isHidden)) {
-        assert.match(buildBossHintPart(part.answerText, { leadingTypeableCount: 3 }), /_/, entry.term);
-      }
-    }
-  }
-  assert.equal(buildBossHintPart('non', { leadingTypeableCount: 3 }), 'no_');
-  assert.equal(buildBossHintPart('Newton\'s', { leadingTypeableCount: 3 }), 'New___\'_');
-});
-
-test('bosses chosen for one wave never share an answer', () => {
-  const source = readFileSync(new URL('../src/main.js', import.meta.url), 'utf8');
-  const slice = (from, to) => source.slice(source.indexOf(from), source.indexOf(to));
+// The boss-choosing code from main.js, run against the real word bank.
+function createBossChoiceContext(extra = {}) {
   const context = vm.createContext({
-    MEDIUM_WORDS, HARD_WORDS, EQUATION_WORDS, buildBossQuestion, BOSSES_PER_WAVE: 3, waveSet: 1,
-    bossAnswerLengthCap: wave => (wave <= 2 ? 14 : 16),
+    MEDIUM_WORDS, HARD_WORDS, EQUATION_WORDS, EASY_WORDS, BOSSES_PER_WAVE: 3, waveSet: 1, Math,
+    getBossChoice, choiceKeys, keysClash, buildSearchPrompt,
     hardBossShare: wave => (wave >= 5 ? 0.7 : null),
     bossWordLengthCap: wave => (wave <= 2 ? 14 : Infinity),
+    normalPromptLengthCap: () => 14,
     withinLength: (entries, cap) => entries.filter(entry => buildSearchPrompt(entry.term).length <= cap),
+    enemies: [], bossWordsThisSet: [],
+    ...extra,
   });
-  vm.runInContext(slice('function chooseBossWordsForWave()', 'function chooseBossPool()')
-    + slice('function chooseBossPool()', 'function choosePrompt()'), context);
+  vm.runInContext(mainSlice('function chooseBossWordsForWave()', 'function chooseBossPool()')
+    + mainSlice('function chooseBossPool()', 'function choosePrompt()')
+    + mainSlice('function chooseMedicPrompt()', 'function refreshWaveBossOrder(')
+    + mainSlice('function chooseMimicPrompt()', 'function getMimicCountForWave(')
+    + mainSlice('function chooseBossWord()', 'function startWaveCleared()')
+    + mainSlice('function enemyTypeableKeys(enemy)', 'function isWrongChoiceKey('), context);
+  return context;
+}
+
+// What a live boss offers to the typing code.
+function liveBoss(entry, wave) {
+  const choice = getBossChoice(entry, wave);
+  return { prompt: entry.term, dying: false, isBoss: true, choiceOptions: [choice.answer, ...choice.wrong] };
+}
+
+test('no option of one boss in a wave starts an option of another', () => {
+  const context = createBossChoiceContext();
   const vocabulary = Array(10).fill(0);
   const hard = Array(10).fill(0);
   for (context.waveSet = 1; context.waveSet <= 9; context.waveSet += 1) {
-    for (let run = 0; run < 300; run += 1) {
+    for (let run = 0; run < 400; run += 1) {
       const bosses = vm.runInContext('chooseBossWordsForWave()', context);
-      const answers = vm.runInContext('bosses => bosses.map(bossAnswer)', context)(bosses);
-      assert.equal(answers.length, 3);
+      assert.equal(bosses.length, 3);
+      assert.equal(bosses.filter(boss => boss.isEquation).length, 1);
+      assert.ok(bosses.every(boss => !boss.noBoss));
       vocabulary[context.waveSet] += 2;
       hard[context.waveSet] += bosses.filter(boss => HARD_WORDS.includes(boss)).length;
-      for (const a of answers) {
-        assert.equal(answers.filter(b => a.startsWith(b) || b.startsWith(a)).length, 1, answers.join(', '));
-      }
+      const keys = bosses.map(boss => choiceKeys(getBossChoice(boss, context.waveSet)));
+      keys.forEach((own, i) => keys.forEach((other, j) => {
+        if (i !== j) assert.ok(!keysClash(own, other), `${bosses[i].term} / ${bosses[j].term}`);
+      }));
     }
   }
   // Hard bosses: none on waves 1–2, the minority on 3–4, the majority from wave 5.
@@ -161,11 +113,33 @@ test('bosses chosen for one wave never share an answer', () => {
   for (let wave = 5; wave <= 9; wave += 1) assert.ok(share(wave) > 0.6 && share(wave) < 0.8, `wave ${wave}: ${share(wave)}`);
 });
 
+test('finale bosses, healers and chests never clash with the options on screen', () => {
+  const context = createBossChoiceContext({ waveSet: 10 });
+  for (let run = 0; run < 300; run += 1) {
+    context.enemies = [];
+    context.bossWordsThisSet = [];
+    for (let spawn = 0; spawn < 10; spawn += 1) {
+      // Up to four bosses alive at once, plus a healer or chest at times.
+      while (context.enemies.filter(enemy => enemy.isBoss).length >= 4) context.enemies.splice(Math.floor(Math.random() * context.enemies.length), 1);
+      const live = vm.runInContext('liveAnswers()', context);
+      const entry = vm.runInContext('chooseBossWord()', context);
+      const boss = liveBoss(entry, 10);
+      const keys = boss.choiceOptions.flatMap(option => option.keys);
+      assert.ok(!keysClash(keys, live), `${entry.term} clashes on screen`);
+      context.bossWordsThisSet.push(entry);
+      context.enemies.push(boss);
+      const helper = vm.runInContext(Math.random() < 0.5 ? 'chooseMedicPrompt()' : 'chooseMimicPrompt()', context);
+      const bossKeysNow = vm.runInContext('liveAnswers(enemy => enemy.isBoss)', context);
+      assert.ok(!keysClash([buildSearchPrompt(helper.term)], bossKeysNow), `${helper.term} clashes with a boss option`);
+    }
+  }
+});
 
-function createTypingHarness() {
+
+function createTypingHarness(prompts = ['force', 'mass']) {
   const source = readFileSync(new URL('../src/main.js', import.meta.url), 'utf8');
   const inputCode = source.slice(source.indexOf('function enterCharacter(character)'), source.indexOf('// Simple FNV-1a'));
-  const targets = ['force', 'mass'].map(prompt => {
+  const targets = prompts.map(prompt => {
     const target = enemy(prompt, -20);
     target.type = { eye: 0 };
     target.group.scale = { y: 1 };
@@ -177,10 +151,15 @@ function createTypingHarness() {
     checkCheatCode() {}, playTypeSound() {}, updateTypedDisplay() {},
     reusableVector: { y: 0, copy() {} }, fx: { burst() {} },
     hasActiveEquationPrefix: () => false,
+    wrongPicks: 0,
   });
-  context.findMatches = prefix => targets.filter(target => {
-    target._matchedSearchPrompt = target.searchPrompt;
-    return target.searchPrompt.startsWith(prefix);
+  context.isWrongChoiceKey = (target, key) => !!target.wrongKeys?.includes(key);
+  context.pickWrongChoice = () => { context.wrongPicks += 1; context.typedBuffer = ''; context.activeTarget = null; };
+  context.findMatches = prefix => targets.filter((target) => {
+    const keys = [target.searchPrompt, ...(target.wrongKeys || [])];
+    const match = keys.find(key => key === prefix) || keys.find(key => key.startsWith(prefix));
+    target._matchedSearchPrompt = match;
+    return !!match;
   });
   context.chooseTarget = matches => pickTarget(matches, context.typedBuffer);
   context.registerMistake = () => { context.mistakes += 1; context.streak = 0; };
@@ -211,6 +190,19 @@ test('typing another prompt switches targets immediately and discards old progre
   for (const letter of 'ass') context.enterCharacter(letter);
   assert.equal(context.kills, 1);
   assert.equal(context.typedAttempts, 4);
+});
+
+
+test('finishing a wrong boss option strikes it instead of defeating the boss', () => {
+  const { context, targets } = createTypingHarness(['fission']);
+  targets[0].wrongKeys = ['fusion', 'irradiation'];
+  context.typedBuffer = '';
+  context.activeTarget = null;
+  for (const letter of 'fusion') context.enterCharacter(letter);
+  assert.equal(context.wrongPicks, 1);
+  assert.equal(context.kills, 0);
+  for (const letter of 'fission') context.enterCharacter(letter);
+  assert.equal(context.kills, 1);
 });
 
 
@@ -270,4 +262,25 @@ test('the finale can spawn more than two bosses without defeating earlier ones',
   assert.equal(context.bossesSpawned, 4);
   assert.equal(context.enemies.length, 4);
   assert.equal(context.finalWaveQueueIndex, 4);
+});
+
+test('terms marked noBoss are never chosen as bosses', () => {
+  const source = readFileSync(new URL('../src/main.js', import.meta.url), 'utf8');
+  const start = source.indexOf('function chooseBossPool()');
+  const end = source.indexOf('function choosePrompt()');
+  const context = vm.createContext({
+    MEDIUM_WORDS, HARD_WORDS, waveSet: 1, Math,
+    withinLength: (entries) => entries, bossWordLengthCap: () => Infinity,
+    hardBossShare: wave => (wave >= 5 ? 0.7 : null),
+  });
+  vm.runInContext(source.slice(start, end), context);
+  const noBoss = [...MEDIUM_WORDS, ...HARD_WORDS].filter(entry => entry.noBoss);
+  assert.ok(noBoss.length > 0);
+  for (const wave of [1, 3, 5, 9]) {
+    context.waveSet = wave;
+    for (let draw = 0; draw < 20; draw += 1) {
+      const pool = vm.runInContext('chooseBossPool()', context);
+      assert.ok(pool.every(entry => !entry.noBoss), `wave ${wave}`);
+    }
+  }
 });

@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import { BOSS_OPTIONS } from '../src/boss-options.js';
 import { MEDIUM_WORDS, HARD_WORDS, EQUATION_WORDS } from '../src/question-bank.js';
 
-const BOSS_ENTRIES = [...MEDIUM_WORDS, ...HARD_WORDS, ...EQUATION_WORDS];
+const BOSS_ENTRIES = [...MEDIUM_WORDS, ...HARD_WORDS, ...EQUATION_WORDS].filter(entry => !entry.noBoss);
 
 // What the player types: letters only, lower case.
 const typed = text => text.toLowerCase().replace(/[^a-z]/g, '');
@@ -55,7 +55,7 @@ test('no wrong option is printed in the clue or elsewhere in the line', () => {
       check(problems, !containsRun(clue, optionWords), `"${option}" is printed in the clue of "${entry.term}"`);
       check(problems, !containsRun(restOfLine, optionWords), `"${option}" is printed in the line of "${entry.term}"`);
     }
-    if (!entry.isEquation) check(problems, !containsRun(clue, words(set.answer)), `the answer is printed in the clue of "${entry.term}"`);
+    check(problems, !containsRun(clue, words(set.answer)), `the answer is printed in the clue of "${entry.term}"`);
   }
   assert.deepEqual(problems, []);
 });
@@ -84,4 +84,29 @@ test('options fit the boss answer-length limits of the waves they can appear on'
     }
   }
   assert.deepEqual(problems, []);
+});
+
+test('a boss shows two wrong options on waves 1–4 and three from wave 5', async () => {
+  const { getBossChoice } = await import('../src/boss-choices.js');
+  for (const { entry } of sets) {
+    for (const wave of [1, 4]) assert.equal(getBossChoice(entry, wave).wrong.length, 2, entry.term);
+    for (const wave of [5, 10]) assert.equal(getBossChoice(entry, wave).wrong.length, 3, entry.term);
+  }
+});
+
+test('every boss line hides its answer in one slot per place it appears', async () => {
+  const { buildChoiceSegments } = await import('../src/boss-choices.js');
+  const problems = [];
+  for (const { entry, set } of sets) {
+    const segments = buildChoiceSegments(entry.term, set.answer);
+    const shownWords = words(segments.filter(segment => segment.type === 'text').map(segment => segment.text).join(' '));
+    const answerWords = words(set.answer);
+    check(problems, segments.some(segment => segment.type === 'slot'), `no slot in "${entry.term}"`);
+    check(problems, answerWords.length > 1 || !shownWords.includes(answerWords[0]), `answer still shown in "${entry.term}"`);
+  }
+  assert.deepEqual(problems, []);
+  const turns = buildChoiceSegments('primary potential difference / secondary potential difference = primary turns / secondary turns', 'turns');
+  assert.equal(turns.filter(segment => segment.type === 'slot').length, 2);
+  const whole = buildChoiceSegments('nuclear fission', 'nuclear fission');
+  assert.deepEqual(whole, [{ type: 'slot', exponent: '' }]);
 });
