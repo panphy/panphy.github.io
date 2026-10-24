@@ -149,6 +149,8 @@ Notes on those decks:
 
 Constants are the values in the 2025 data booklet (checked 12 October 2026): `h` = 6.63 × 10⁻³⁴ J s, `hc` = 1.24 × 10⁻⁶ eV m, `k` = 8.99 × 10⁹ N m² C⁻², `e` = 1.60 × 10⁻¹⁹ C, `u` = 1.661 × 10⁻²⁷ kg, electron mass 9.11 × 10⁻³¹ kg and Fermi radius `R₀` = 1.20 × 10⁻¹⁵ m. Worked examples carry rounded values forward exactly as shown on the slide, so recheck every line of an example after changing one number.
 
+Keep a typeset quantity and its following plain-text unit together in `<span class="equation-inline">`, including in revision notes, so the unit cannot wrap away from the value.
+
 Slides are drawn on a 1600 × 900 frame and must be readable from the back of a classroom. Keep anything a student has to read at 22 px or more on that frame: body text is 26 to 35 px, and the given-data line of a worked example (`.say`), table and panel headings and photo captions are 22 to 24 px. Diagram labels (`.lbl` 28 px, `.lbl.mono` 26 px, `.lbl.small` 24 px in `deck.css`) are scaled with their diagram, so a wide `viewBox` in a narrow panel shrinks them: check a new diagram on its slide, and trim the `viewBox` or move labels inward if they come out under 22 px. Only the footer, photo credits and the “not assessed” tag are smaller on purpose.
 
 After adding or removing slides, update the slide counts here and on the hub cards.
