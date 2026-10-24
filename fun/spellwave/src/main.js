@@ -1,17 +1,17 @@
 import * as THREE from 'three';
-import { createSpellwaveAudio } from './audio.js?v=20261024-word-decks';
+import { createSpellwaveAudio } from './audio.js?v=20261025-harder-bosses';
 import { createSeasonalEffects } from './seasonal-effects.js';
-import { createPotionSystem } from './potions.js?v=20261024-word-decks';
-import { ALL_WORDS, EASY_WORDS, HARD_WORDS, MEDIUM_WORDS, EQUATION_WORDS } from './question-bank.js?v=20261024-word-decks';
-import { createEndingCinematic, wordArrivalTimes } from './ending-cinematic.js?v=20261024-word-decks';
-import { createLeaderboard } from './leaderboard.js?v=20261024-word-decks';
+import { createPotionSystem } from './potions.js?v=20261025-harder-bosses';
+import { ALL_WORDS, EASY_WORDS, HARD_WORDS, MEDIUM_WORDS, EQUATION_WORDS } from './question-bank.js?v=20261025-harder-bosses';
+import { createEndingCinematic, wordArrivalTimes } from './ending-cinematic.js?v=20261025-harder-bosses';
+import { createLeaderboard } from './leaderboard.js?v=20261025-harder-bosses';
 import { createEnemyMesh, createMimicChestMesh } from './enemy-meshes.js';
-import { bossSpeedMultiplier, hardBossShare, normalPromptLengthCap, bossWordLengthCap, previewLengthCap, withinLength, hardGuestCount } from './difficulty.js?v=20261024-word-decks';
+import { bossSpeedMultiplier, bossRockTier, BOSS_FIRST_ROCK_DELAY, hardBossShare, normalPromptLengthCap, bossWordLengthCap, previewLengthCap, withinLength, hardGuestCount } from './difficulty.js?v=20261025-harder-bosses';
 import { createLowPolyTerrain, createLowPolyTree, createLowPolyRock, createLowPolyCloud } from './lowpoly.js';
-import { createVisuals, GLOW_GAIN, MOON_GLOW_GAIN } from './visuals.js?v=20261024-word-decks';
-import { pickTarget, getInputCharacters, isMathOperatorInput, buildSearchPrompt, buildAltSearchPrompts, escapeHtml, wrapSups, promptIndexForProgress } from './prompt-utils.js?v=20261024-word-decks';
-import { createWordDeck } from './word-decks.js?v=20261024-word-decks';
-import { getBossChoice, choiceKeys, keysClash, choiceTypingLength, shuffledOptions, buildChoiceSegments } from './boss-choices.js?v=20261024-word-decks';
+import { createVisuals, GLOW_GAIN, MOON_GLOW_GAIN } from './visuals.js?v=20261025-harder-bosses';
+import { pickTarget, getInputCharacters, isMathOperatorInput, buildSearchPrompt, buildAltSearchPrompts, escapeHtml, wrapSups, promptIndexForProgress } from './prompt-utils.js?v=20261025-harder-bosses';
+import { createWordDeck } from './word-decks.js?v=20261025-harder-bosses';
+import { getBossChoice, choiceKeys, keysClash, choiceTypingLength, shuffledOptions, buildChoiceSegments } from './boss-choices.js?v=20261025-harder-bosses';
 
 // Monster, healer and chest words, and boss questions, are drawn from decks so they
 // do not repeat until a pool runs out; last run's words come after fresh ones.
@@ -104,12 +104,8 @@ const MINION_DAMAGE = 2;
 // A boss that reaches the wall costs three hearts; a wrong option, half a heart.
 const BOSS_CONTACT_DAMAGE = 6;
 const WRONG_CHOICE_DAMAGE = 1;
-const BOSS_SHOTS_PER_DAMAGE = 2;
 const BOSS_SHOT_DAMAGE = 1;
-// Tuned so rocks alone take slightly longer to kill a full-health player than a
-// boss takes to walk from reveal to the wall — a boss leak must stay reachable.
-const BOSS_FIRST_SHOT_DELAY = 3.4;
-const BOSS_SHOT_INTERVAL = 6.0;
+// Rock timing and damage by wave are in bossRockTier (difficulty.js).
 const BOSS_ROCK_FLIGHT_TIME = 1.45;
 const BOSS_ROCK_ARC_HEIGHT = 2.3;
 const MAX_CONCURRENT_BOSS_PROJECTILES = 2;
@@ -1450,7 +1446,7 @@ function bossProjectileHitPlayer(enemy) {
   bossShotHits += 1;
   playBossImpactSound();
 
-  if (bossShotHits % BOSS_SHOTS_PER_DAMAGE === 0) {
+  if (bossShotHits % bossRockTier(waveSet).hitsPerUnit === 0) {
     let wasBlocked = false;
     if (!godMode && potionsSystem.isShieldActive()) {
       wasBlocked = potionsSystem.blockBossHit();
@@ -1755,7 +1751,7 @@ function updateEnemies(delta, seconds) {
         const canShoot = enemy.isClimaxBoss || (activeRocksCount < MAX_CONCURRENT_BOSS_PROJECTILES && timeSinceLastShot >= MIN_PROJECTILE_SPACING);
         if (canShoot) {
           bossShootPlayer(enemy);
-          enemy.shotTimer = BOSS_SHOT_INTERVAL + Math.random() * 0.65;
+          enemy.shotTimer = bossRockTier(waveSet).interval + Math.random() * 0.65;
           if (!enemy.isClimaxBoss) {
             lastBossShotTime = seconds;
           }
@@ -2161,7 +2157,7 @@ function updateLabels() {
     reusableVector.y += 3.2 * enemy.type.scale * (enemy.isClimaxBoss ? 1.5 : 1.0);
     reusableVector.project(camera);
 
-    const isVisible = isEnemyTargetable(enemy) && reusableVector.z > -1 && reusableVector.z < 1;
+    const isVisible = isLabelShown(enemy) && reusableVector.z > -1 && reusableVector.z < 1;
     enemy.label.classList.toggle('is-hidden', !isVisible);
     // Boss questions are already visible during the walk-in; popping them again would flash.
     enemy.label.classList.toggle('is-revealing', !enemy.isBoss && enemy.revealFlash > 0);
@@ -2753,7 +2749,7 @@ function spawnEnemy(options = {}) {
     revealFlash: 0,
     speed: isBoss ? type.speed : isMedic ? type.speed + Math.random() * 0.18 : isMimic ? type.speed + Math.random() * 0.25 : type.speed + Math.random() * 0.35,
     damage: isBoss ? BOSS_CONTACT_DAMAGE : isMedic ? 0 : MINION_DAMAGE,
-    shotTimer: isBoss ? BOSS_FIRST_SHOT_DELAY + Math.random() * 0.7 : 0,
+    shotTimer: isBoss ? BOSS_FIRST_ROCK_DELAY + Math.random() * 0.5 : 0,
     baseY: spawnBaseY,
     age: 0,
     wobbleAmount: isBoss ? 0.05 : 0.08 + Math.random() * 0.2,
@@ -3544,10 +3540,14 @@ function chooseTarget(matches) {
   return pickTarget(matches, typedBuffer);
 }
 
-// A boss shows its question, and can be answered, from the start of its walk-in,
-// so the player reads while it is still far away. It throws nothing until revealed.
 function isEnemyTargetable(enemy) {
-  return (enemy.revealed || enemy.isBoss) && enemy.group.position.z < WALL_Z && !enemy.dying;
+  return enemy.revealed && enemy.group.position.z < WALL_Z && !enemy.dying;
+}
+
+// A boss shows its question from the start of its walk-in, so the player can read
+// while it is still far away, but it can only be answered once it arrives.
+function isLabelShown(enemy) {
+  return isEnemyTargetable(enemy) || (enemy.isBoss && !enemy.dying && enemy.group.position.z < WALL_Z);
 }
 
 function getEquationQuantities(equationTerm) {
@@ -4378,7 +4378,8 @@ function spawnBoss() {
   enemy.spawnZ = profile.revealZ - getEnemySpeed(enemy) * 8;
   enemy.group.position.z = enemy.spawnZ;
   enemy.revealed = false;
-  enemy.shotTimer = 4 + (enemy.bossTypingLength || enemy.searchPrompt.length) * 0.25;
+  // The first rock comes soon after the boss arrives; it throws nothing while walking in.
+  enemy.shotTimer = BOSS_FIRST_ROCK_DELAY + Math.random() * 0.5;
 }
 
 function chooseBossWord() {

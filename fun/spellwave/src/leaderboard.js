@@ -6,10 +6,10 @@ const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBh
 const TABLE = 'spellwave_leaderboard';
 const SUBMIT_RPC = 'submit_spellwave_score';
 const SCORE_FIELD = 'score';
-// V2 started with the multiple-choice bosses, when the board was reset; the V1
-// list is from the old rules and is removed on load.
-const CACHE_KEY = 'spellwaveLeaderboardCacheV2';
-const OLD_CACHE_KEYS = ['spellwaveLeaderboardCacheV1'];
+// Bumped whenever the board is reset after a gameplay change; lists saved under
+// older keys are from old rules and are removed on load.
+const CACHE_KEY = 'spellwaveLeaderboardCacheV3';
+const OLD_CACHE_KEYS = ['spellwaveLeaderboardCacheV1', 'spellwaveLeaderboardCacheV2'];
 const BOARD_SIZE = 5;
 const MIN_SCORE = 1;
 // Matches the server check (spellwave_score_range); the highest legitimate run is ~67.6k.
