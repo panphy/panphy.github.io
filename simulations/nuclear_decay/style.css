@@ -278,7 +278,7 @@ button:disabled { cursor: default; opacity: .55; }
   background: var(--card-bg); color: var(--brand-primary);
   font-size: .9rem; font-weight: 700;
 }
-.action:hover:not(:disabled) { background: var(--muted-bg); }
+.action:hover:not(:disabled):not([aria-pressed=true]) { background: var(--muted-bg); }
 .action[aria-pressed=true] { background: var(--brand-primary); border-color: var(--brand-primary); color: var(--bg-color); }
 .action[hidden] { display: none; }
 .view-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 8px; }

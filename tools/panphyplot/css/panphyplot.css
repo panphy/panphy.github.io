@@ -481,7 +481,7 @@ input[type="number"]:focus {
 }
 
 .neo-tool:active {
-	background: var(--line);
+	background: var(--surface-3);
 }
 
 .neo-tool .neo-icon {
@@ -1441,7 +1441,7 @@ input[type="number"]:focus {
 	font-size: 0.68rem;
 	letter-spacing: 0.08em;
 	text-transform: uppercase;
-	color: var(--ink-3);
+	color: var(--ink-2);
 	cursor: pointer;
 }
 
@@ -1628,7 +1628,7 @@ input[type="number"]:focus {
 }
 
 .neo-series-item[aria-pressed="false"] .neo-series-name {
-	color: var(--ink-3);
+	color: var(--ink-2);
 	text-decoration: line-through;
 }
 
