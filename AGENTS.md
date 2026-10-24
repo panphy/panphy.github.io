@@ -4,7 +4,7 @@ PanPhy Labs is a static GitHub Pages PWA for physics tools, simulations, classro
 
 ## Working rules
 
-- Use American English spelling when building new things or making changes anywhere in this repository, including documentation, unless the user explicitly requests otherwise. Everything under `gcsephy/` uses British English spelling. Spellwave (`fun/spellwave.html` and `fun/spellwave/`) is exempt from the American English rule; leave its spelling unchanged unless explicitly requested.
+- Use American English spelling when building new things or making changes anywhere in this repository, including documentation, unless the user explicitly requests otherwise. Everything under `gcsephy/` uses British English spelling. Spellwave (`fun/spellwave.html` and `fun/spellwave/`) uses British English in its UI and accepts both British and American spellings as answers.
 - Edit HTML, CSS, and vanilla JavaScript directly; the served site must need no framework, bundler, or build step. Local development dependencies stay ignored and optional.
 - Keep each app independently accessible through an HTML entry point. Split supporting CSS/JS when useful and use stable, unhashed filenames. Follow existing CDN or local-library patterns without adding a build pipeline.
 - Keep `AGENTS.md` and `CLAUDE.md` tracked and equivalent; update both when project rules change.

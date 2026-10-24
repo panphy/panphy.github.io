@@ -43,6 +43,34 @@ test('British/American spelling alternatives', () => {
   assert.deepEqual(buildAltSearchPrompts('distance travelled'), ['distancetraveled']);
 });
 
+test('spelling alternatives work in either direction and combine across a phrase', () => {
+  for (const [british, american] of [
+    ['colour filter', 'color filter'],
+    ['centre of mass', 'center of mass'],
+    ['ionising radiation', 'ionizing radiation'],
+    ['vaporisation', 'vaporization'],
+    ['travelling', 'traveling'],
+    ['millimetres', 'millimeters'],
+    ['litres', 'liters'],
+    ['aluminium', 'aluminum'],
+    ['sulphur', 'sulfur'],
+  ]) {
+    assert.ok(buildAltSearchPrompts(british).includes(buildSearchPrompt(american)), british);
+    assert.ok(buildAltSearchPrompts(american).includes(buildSearchPrompt(british)), american);
+  }
+  assert.deepEqual(new Set(buildAltSearchPrompts('colour colour centre')), new Set([
+    'colourcolourcenter', 'colourcolorcentre', 'colourcolorcenter',
+    'colorcolourcentre', 'colorcolourcenter', 'colorcolorcentre', 'colorcolorcenter',
+  ]));
+  assert.ok(buildAltSearchPrompts('colour = metre × litre', { multiplicationAlias: true }).includes('color=meterxliter'));
+});
+
+test('spelling alternatives preserve measuring instruments and other unrelated words', () => {
+  for (const word of ['ammeter', 'voltmeter', 'seismometer', 'thermometer', 'parameters', 'centripetal']) {
+    assert.deepEqual(buildAltSearchPrompts(word), [], word);
+  }
+});
+
 test('promptIndexForProgress maps typed count onto the displayed text', () => {
   assert.equal(promptIndexForProgress('a b', 2), 3);
 });
@@ -140,31 +168,28 @@ function createTypingHarness(prompts = ['force', 'mass']) {
   const source = readFileSync(new URL('../src/main.js', import.meta.url), 'utf8');
   const inputCode = source.slice(source.indexOf('function enterCharacter(character)'), source.indexOf('// Simple FNV-1a'));
   const targets = prompts.map(prompt => {
-    const target = enemy(prompt, -20);
+    const isEquation = prompt.includes('=');
+    const promptOptions = { multiplicationAlias: isEquation };
+    const target = enemy(buildSearchPrompt(prompt, promptOptions), -20);
+    target.altSearchPrompts = buildAltSearchPrompts(prompt, promptOptions);
+    target.isEquation = isEquation;
+    target.revealed = true;
     target.type = { eye: 0 };
     target.group.scale = { y: 1 };
     return target;
   });
   const context = vm.createContext({
     typedBuffer: 'for', activeTarget: targets[0], typedAttempts: 0, mistakes: 0, kills: 0, streak: 3,
+    enemies: targets, WALL_Z: 0,
     getInputCharacters, pickTarget, isMathOperatorInput,
     checkCheatCode() {}, playTypeSound() {}, updateTypedDisplay() {},
     reusableVector: { y: 0, copy() {} }, fx: { burst() {} },
-    hasActiveEquationPrefix: () => false,
     wrongPicks: 0,
   });
-  context.isWrongChoiceKey = (target, key) => !!target.wrongKeys?.includes(key);
   context.pickWrongChoice = () => { context.wrongPicks += 1; context.typedBuffer = ''; context.activeTarget = null; };
-  context.findMatches = prefix => targets.filter((target) => {
-    const keys = [target.searchPrompt, ...(target.wrongKeys || [])];
-    const match = keys.find(key => key === prefix) || keys.find(key => key.startsWith(prefix));
-    target._matchedSearchPrompt = match;
-    return !!match;
-  });
-  context.chooseTarget = matches => pickTarget(matches, context.typedBuffer);
   context.registerMistake = () => { context.mistakes += 1; context.streak = 0; };
   context.defeatEnemy = () => { context.kills += 1; context.typedBuffer = ''; context.activeTarget = null; };
-  vm.runInContext(inputCode, context);
+  vm.runInContext(mainSlice('function findMatches(', 'function getEquationQuantities(') + inputCode, context);
   return { context, targets };
 }
 
@@ -195,7 +220,10 @@ test('typing another prompt switches targets immediately and discards old progre
 
 test('finishing a wrong boss option strikes it instead of defeating the boss', () => {
   const { context, targets } = createTypingHarness(['fission']);
-  targets[0].wrongKeys = ['fusion', 'irradiation'];
+  targets[0].choiceOptions = [
+    { keys: ['fission'], isAnswer: true },
+    { keys: ['fusion', 'irradiation'], isAnswer: false },
+  ];
   context.typedBuffer = '';
   context.activeTarget = null;
   for (const letter of 'fusion') context.enterCharacter(letter);
@@ -203,6 +231,40 @@ test('finishing a wrong boss option strikes it instead of defeating the boss', (
   assert.equal(context.kills, 0);
   for (const letter of 'fission') context.enterCharacter(letter);
   assert.equal(context.kills, 1);
+});
+
+test('typing either spelling defeats normal enemies and equations without a mistake', () => {
+  for (const { term, isEquation } of [...ALL_WORDS, ...EQUATION_WORDS]) {
+    const options = { multiplicationAlias: !!isEquation };
+    const alternatives = buildAltSearchPrompts(term, options);
+    if (!alternatives.length) continue;
+    for (const key of [buildSearchPrompt(term, options), ...alternatives]) {
+      const { context } = createTypingHarness([term]);
+      context.typedBuffer = '';
+      for (const letter of key) context.enterCharacter(letter);
+      assert.equal(context.kills, 1, `${term}: ${key}`);
+      assert.equal(context.mistakes, 0, `${term}: ${key}`);
+    }
+  }
+});
+
+test('both spellings keep boss answers correct and wrong boss options wrong', () => {
+  for (const entry of [...MEDIUM_WORDS, ...HARD_WORDS, ...EQUATION_WORDS]) {
+    const choice = getBossChoice(entry, 10);
+    if (!choice) continue;
+    for (const option of [choice.answer, ...choice.wrong]) {
+      if (option.keys.length < 2) continue;
+      for (const key of option.keys) {
+        const { context, targets } = createTypingHarness([entry.term]);
+        targets[0].choiceOptions = [choice.answer, ...choice.wrong];
+        context.typedBuffer = '';
+        for (const letter of key) context.enterCharacter(letter);
+        assert.equal(context.kills, option.isAnswer ? 1 : 0, `${entry.term}: ${key}`);
+        assert.equal(context.wrongPicks, option.isAnswer ? 0 : 1, `${entry.term}: ${key}`);
+        assert.equal(context.mistakes, 0, `${entry.term}: ${key}`);
+      }
+    }
+  }
 });
 
 

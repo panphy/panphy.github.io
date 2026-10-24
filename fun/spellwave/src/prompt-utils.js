@@ -2,26 +2,57 @@
 
 const SPELLING_ALTS = [
   ['colour', 'color'],
+  ['colours', 'colors'],
+  ['coloured', 'colored'],
+  ['colouring', 'coloring'],
   ['centre', 'center'],
-  ['metre', 'meter'],
-  ['litre', 'liter'],
+  ['centres', 'centers'],
+  ['centred', 'centered'],
+  ['centring', 'centering'],
+  ...['', 'kilo', 'centi', 'milli', 'micro', 'nano', 'pico', 'femto'].flatMap(prefix => [
+    [`${prefix}metre`, `${prefix}meter`],
+    [`${prefix}metres`, `${prefix}meters`],
+  ]),
+  ...['', 'milli', 'micro', 'centi', 'deci', 'kilo'].flatMap(prefix => [
+    [`${prefix}litre`, `${prefix}liter`],
+    [`${prefix}litres`, `${prefix}liters`],
+  ]),
   ['fibre', 'fiber'],
+  ['fibres', 'fibers'],
   ['ionise', 'ionize'],
+  ['ionised', 'ionized'],
   ['ionising', 'ionizing'],
   ['ionisation', 'ionization'],
   ['magnetise', 'magnetize'],
+  ['magnetised', 'magnetized'],
+  ['magnetising', 'magnetizing'],
   ['analyse', 'analyze'],
+  ['analysed', 'analyzed'],
+  ['analysing', 'analyzing'],
   ['polarise', 'polarize'],
+  ['polarised', 'polarized'],
+  ['polarising', 'polarizing'],
   ['polarisation', 'polarization'],
   ['magnetisation', 'magnetization'],
   ['neutralise', 'neutralize'],
-  ['vapourise', 'vaporize'],
+  ['neutralised', 'neutralized'],
+  ['neutralising', 'neutralizing'],
+  ['neutralisation', 'neutralization'],
+  ['vapourise', 'vaporise', 'vaporize'],
   ['vaporisation', 'vaporization'],
   ['travelled', 'traveled'],
+  ['travelling', 'traveling'],
+  ['modelled', 'modeled'],
+  ['modelling', 'modeling'],
+  ['behaviour', 'behavior'],
+  ['defence', 'defense'],
   ['aluminium', 'aluminum'],
   ['sulphur', 'sulfur'],
   ['grey', 'gray'],
 ];
+
+// Match complete words: a measuring device such as "ammeter" keeps its spelling.
+const SPELLING_VARIANTS = new Map(SPELLING_ALTS.flatMap(group => group.map(word => [word, group])));
 
 const SUPERSCRIPT_MAP = { '⁰': '0', '¹': '1', '²': '2', '³': '3', '⁴': '4', '⁵': '5', '⁶': '6', '⁷': '7', '⁸': '8', '⁹': '9' };
 const MATH_OPERATOR_INPUTS = new Set(['*', '+', '-', '=', '/', '×', 'x', 'X']);
@@ -57,16 +88,14 @@ function buildSearchPrompt(term, options = {}) {
 
 function buildAltSearchPrompts(term, options = {}) {
   const canonical = buildSearchPrompt(term, options);
-  const lower = term.toLowerCase();
-  const alts = new Set();
-  for (const [a, b] of SPELLING_ALTS) {
-    for (const [from, to] of [[a, b], [b, a]]) {
-      if (lower.includes(from)) {
-        const alt = buildSearchPrompt(lower.replace(from, to), options);
-        if (alt !== canonical) alts.add(alt);
-      }
-    }
+  let variants = [''];
+  // Build every combination, including repeated words and mixed UK/US spellings.
+  for (const token of term.toLowerCase().split(/([a-z]+)/)) {
+    const spellings = SPELLING_VARIANTS.get(token) || [token];
+    variants = variants.flatMap(prefix => spellings.map(spelling => prefix + spelling));
   }
+  const alts = new Set(variants.map(variant => buildSearchPrompt(variant, options)));
+  alts.delete(canonical);
   return [...alts];
 }
 
