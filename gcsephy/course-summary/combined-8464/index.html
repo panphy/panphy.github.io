@@ -15,6 +15,19 @@
   <link rel="stylesheet" href="../summary.css">
   <style>:root { --standalone-top-bg: #33102c; }</style>
   <script src="/gcsephy/sw-register.js" defer></script>
+  <script>
+    // Equations are LaTeX between \( and \), typeset by MathJax as SVG. Equation chips stay hidden
+    // until then; if MathJax does not arrive, their LaTeX shows.
+    document.documentElement.classList.add('math-loading');
+    setTimeout(() => document.documentElement.classList.remove('math-loading'), 4000);
+    window.MathJax = {
+      tex: { inlineMath: [['\\(', '\\)']] },
+      svg: { fontCache: 'none' },
+      options: { enableMenu: false },
+      startup: { pageReady: () => MathJax.startup.defaultPageReady().then(() => document.documentElement.classList.remove('math-loading')) }
+    };
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3.2.2/es5/tex-svg-full.js" defer onerror="document.documentElement.classList.remove('math-loading')"></script>
 </head>
 <body class="c-8464">
   <header class="topbar">
@@ -75,7 +88,7 @@
         </div>
         <div class="fact">
           <h3>Equations sheet</h3>
-          <p>Every physics paper comes with the AQA Physics Equations Sheet, so the equations below need not be memorised; the one exception is R<sub>total</sub> = R₁ + R₂. (<a href="https://www.aqa.org.uk/news/gcse-maths-sciences-formulae-equation-sheets-2027-28">AQA notice</a>)</p>
+          <p>Every physics paper comes with the AQA Physics Equations Sheet, so the equations below need not be memorised; the one exception is \(R_{\mathrm{total}} = R_1 + R_2\). (<a href="https://www.aqa.org.uk/news/gcse-maths-sciences-formulae-equation-sheets-2027-28">AQA notice</a>)</p>
         </div>
       </div>
     </section>
@@ -132,7 +145,7 @@
               <li>Specific heat capacity: the energy to raise 1 kg by 1 °C.</li>
               <li>Power as the rate of transferring energy or doing work; 1 W is 1 J/s.</li>
             </ul>
-            <ul class="eqs"><li>Eₖ = ½mv²</li><li>Eₑ = ½ke²</li><li>Eₚ = mgh</li><li>ΔE = mcΔθ</li><li>P = E ÷ t</li><li>P = W ÷ t</li></ul>
+            <ul class="eqs"><li>\(E_{\mathrm{k}} = \tfrac{1}{2}mv^2\)</li><li>\(E_{\mathrm{e}} = \tfrac{1}{2}ke^2\)</li><li>\(E_{\mathrm{p}} = mgh\)</li><li>\(\Delta E = mc\Delta\theta\)</li><li>\(P = \dfrac{E}{t}\)</li><li>\(P = \dfrac{W}{t}\)</li></ul>
             <p class="rp">Required practical 14 · specific heat capacity</p>
           </article>
           <article class="topic">
@@ -144,7 +157,7 @@
               <li>Efficiency as a decimal or a percentage.</li>
               <li><span class="tag">HT</span> Ways to make an energy transfer more efficient.</li>
             </ul>
-            <ul class="eqs"><li>efficiency = useful output energy ÷ total input energy</li><li>efficiency = useful power output ÷ total power input</li></ul>
+            <ul class="eqs"><li>\(\text{efficiency} = \dfrac{\text{useful output energy}}{\text{total input energy}}\)</li><li>\(\text{efficiency} = \dfrac{\text{useful power output}}{\text{total power input}}\)</li></ul>
           </article>
           <article class="topic">
             <h4><span class="code">6.1.3</span>National and global energy resources</h4>
@@ -170,7 +183,7 @@
               <li>Ohmic conductors at constant temperature; non-constant resistance of filament lamps, diodes, thermistors and LDRs, and their uses (thermostats, lights that switch on at dusk).</li>
               <li>Measuring resistance with an ammeter and voltmeter; reading I–V graphs.</li>
             </ul>
-            <ul class="eqs"><li>Q = It</li><li>V = IR</li></ul>
+            <ul class="eqs"><li>\(Q = It\)</li><li>\(V = IR\)</li></ul>
             <p class="rp">Required practicals 15 · resistance, and 16 · I–V characteristics</p>
           </article>
           <article class="topic">
@@ -181,7 +194,7 @@
               <li>Explain why adding resistors in series raises the total and in parallel lowers it.</li>
               <li>Calculations in series circuits; the total of two resistors in parallel is not calculated.</li>
             </ul>
-            <ul class="eqs"><li>R<sub>total</sub> = R₁ + R₂ (not on the sheet)</li></ul>
+            <ul class="eqs"><li>\(R_{\mathrm{total}} = R_1 + R_2\) (not on the sheet)</li></ul>
           </article>
           <article class="topic">
             <h4><span class="code">6.2.3</span>Domestic uses and safety</h4>
@@ -199,7 +212,7 @@
               <li>The National Grid: step-up transformers for transmission, step-down for homes, and why this is efficient. How a transformer is built is not needed.</li>
               <li><span class="tag">HT</span> Use the transformer power equation from the equations sheet.</li>
             </ul>
-            <ul class="eqs"><li>P = VI</li><li>P = I²R</li><li>E = Pt</li><li>E = QV</li><li>V<sub>p</sub>I<sub>p</sub> = V<sub>s</sub>I<sub>s</sub> <span class="tag">HT</span></li></ul>
+            <ul class="eqs"><li>\(P = VI\)</li><li>\(P = I^2R\)</li><li>\(E = Pt\)</li><li>\(E = QV\)</li><li>\(V_{\mathrm{p}}I_{\mathrm{p}} = V_{\mathrm{s}}I_{\mathrm{s}}\) <span class="tag">HT</span></li></ul>
           </article>
         </div>
       </div>
@@ -213,7 +226,7 @@
               <li>Particle diagrams of solids, liquids and gases, and how they explain differences in density.</li>
               <li>Melting, freezing, boiling, evaporating, condensing and subliming conserve mass; they are physical changes, reversed to get the original material back.</li>
             </ul>
-            <ul class="eqs"><li>ρ = m ÷ V</li></ul>
+            <ul class="eqs"><li>\(\rho = \dfrac{m}{V}\)</li></ul>
             <p class="rp">Required practical 17 · density</p>
           </article>
           <article class="topic">
@@ -224,7 +237,7 @@
               <li>Specific latent heat of fusion and of vaporisation: energy for a change of state with no change in temperature.</li>
               <li>Heating and cooling graphs; telling specific heat capacity and latent heat apart.</li>
             </ul>
-            <ul class="eqs"><li>ΔE = mcΔθ</li><li>E = mL</li></ul>
+            <ul class="eqs"><li>\(\Delta E = mc\Delta\theta\)</li><li>\(E = mL\)</li></ul>
           </article>
           <article class="topic">
             <h4><span class="code">6.3.3</span>Particle model and pressure</h4>
@@ -242,7 +255,7 @@
           <article class="topic">
             <h4><span class="code">6.4.1</span>Atoms and isotopes</h4>
             <ul>
-              <li>Atom radius about 1 × 10⁻¹⁰ m; nucleus under 1/10 000 of that but holding almost all the mass.</li>
+              <li>Atom radius about \(1 \times 10^{-10}\) m; nucleus under \(\dfrac{1}{10\,000}\) of that but holding almost all the mass.</li>
               <li>Electrons in energy levels move up by absorbing and down by emitting electromagnetic radiation.</li>
               <li>Atomic number, mass number, isotopes and positive ions.</li>
               <li>How the model changed: solid spheres, plum pudding, the nuclear model from alpha scattering, Bohr’s orbits, protons, Chadwick’s neutron.</li>
@@ -273,7 +286,7 @@
               <li>The resultant of forces along a line.</li>
               <li><span class="tag">HT</span> Free body diagrams; resolving a force into two components; scale vector diagrams for resultants and equilibrium.</li>
             </ul>
-            <ul class="eqs"><li>W = mg</li></ul>
+            <ul class="eqs"><li>\(W = mg\)</li></ul>
           </article>
           <article class="topic">
             <h4><span class="code">6.5.2</span>Work done and energy transfer</h4>
@@ -281,7 +294,7 @@
               <li>A force does work when it moves an object; 1 J = 1 N m.</li>
               <li>Work against friction raises the temperature.</li>
             </ul>
-            <ul class="eqs"><li>W = Fs</li></ul>
+            <ul class="eqs"><li>\(W = Fs\)</li></ul>
           </article>
           <article class="topic">
             <h4><span class="code">6.5.3</span>Forces and elasticity</h4>
@@ -290,7 +303,7 @@
               <li>Extension is proportional to force up to the limit of proportionality; linear and non-linear graphs.</li>
               <li>Work done on a spring is stored as elastic potential energy.</li>
             </ul>
-            <ul class="eqs"><li>F = ke</li><li>Eₑ = ½ke²</li></ul>
+            <ul class="eqs"><li>\(F = ke\)</li><li>\(E_{\mathrm{e}} = \tfrac{1}{2}ke^2\)</li></ul>
             <p class="rp">Required practical 18 · force and extension</p>
           </article>
           <article class="topic">
@@ -301,23 +314,23 @@
               <li><span class="tag">HT</span> Circular motion has constant speed but changing velocity; tangents to curved distance–time graphs; distance from the area under a velocity–time graph.</li>
               <li>Free fall at about 9.8 m/s²; an object falling through a fluid reaches terminal velocity.</li>
             </ul>
-            <ul class="eqs"><li>s = vt</li><li>a = Δv ÷ t</li><li>v² − u² = 2as</li></ul>
+            <ul class="eqs"><li>\(s = vt\)</li><li>\(a = \dfrac{\Delta v}{t}\)</li><li>\(v^2 - u^2 = 2as\)</li></ul>
           </article>
           <article class="topic">
             <h4><span class="code">6.5.4.2</span>Newton’s laws</h4>
             <ul>
               <li>First law: velocity changes only if there is a resultant force. <span class="tag">HT</span> Inertia.</li>
-              <li>Second law: acceleration is proportional to resultant force and inversely proportional to mass. <span class="tag">HT</span> Inertial mass as force ÷ acceleration.</li>
+              <li>Second law: acceleration is proportional to resultant force and inversely proportional to mass. <span class="tag">HT</span> Inertial mass as \(\dfrac{\text{force}}{\text{acceleration}}\).</li>
               <li>Estimating speeds, accelerations and forces for road vehicles.</li>
               <li>Third law: interacting objects exert equal and opposite forces.</li>
             </ul>
-            <ul class="eqs"><li>F = ma</li></ul>
+            <ul class="eqs"><li>\(F = ma\)</li></ul>
             <p class="rp">Required practical 19 · force, mass and acceleration</p>
           </article>
           <article class="topic">
             <h4><span class="code">6.5.4.3</span>Forces and braking</h4>
             <ul>
-              <li>Stopping distance = thinking distance + braking distance; faster means further for a given braking force.</li>
+              <li>\(\text{stopping distance} = \text{thinking distance} + \text{braking distance}\); faster means further for a given braking force.</li>
               <li>Reaction times of 0.2 to 0.9 s, lengthened by tiredness, drugs, alcohol and distractions; measuring them.</li>
               <li>Road, weather, brakes and tyres affect braking distance; brakes do work that heats them; dangers of large decelerations.</li>
               <li>Estimate how emergency stopping distance changes over typical speeds.</li>
@@ -330,7 +343,7 @@
               <li>Momentum as mass × velocity.</li>
               <li>Momentum is conserved in a closed system; describe and explain examples such as collisions.</li>
             </ul>
-            <ul class="eqs"><li>p = mv</li></ul>
+            <ul class="eqs"><li>\(p = mv\)</li></ul>
           </article>
         </div>
       </div>
@@ -344,7 +357,7 @@
               <li>Transverse and longitudinal waves (compressions and rarefactions); the wave moves, not the medium.</li>
               <li>Amplitude, wavelength, frequency and period; measuring the speed of sound and of ripples.</li>
             </ul>
-            <ul class="eqs"><li>T = 1 ÷ f</li><li>v = fλ</li></ul>
+            <ul class="eqs"><li>\(T = \dfrac{1}{f}\)</li><li>\(v = f\lambda\)</li></ul>
             <p class="rp">Required practical 20 · waves in a ripple tank and a solid</p>
           </article>
           <article class="topic">
@@ -378,7 +391,7 @@
               <li>The field around a wire and a solenoid; an iron core makes an electromagnet.</li>
               <li><span class="tag">HT</span> Fleming’s left-hand rule; the force on a wire; how a coil turns in a motor.</li>
             </ul>
-            <ul class="eqs"><li>F = BIl <span class="tag">HT</span></li></ul>
+            <ul class="eqs"><li>\(F = BIl\) <span class="tag">HT</span></li></ul>
           </article>
         </div>
       </div>
@@ -417,7 +430,7 @@
           <ul class="list">
             <li>Decimals, standard form, ratios, fractions, percentages and estimates.</li>
             <li>Significant figures, means, charts, correlation and orders of magnitude.</li>
-            <li>The symbols =, &lt;, &gt;, ∝ and ~; rearranging and substituting into equations.</li>
+            <li>The symbols \(=\), \(&lt;\), \(&gt;\), \(\propto\) and \(\sim\); rearranging and substituting into equations.</li>
             <li>Plotting graphs, gradient and intercept, tangents to curves, and area under a graph.</li>
             <li>Angles, 2D and 3D shapes, areas and volumes.</li>
           </ul>
