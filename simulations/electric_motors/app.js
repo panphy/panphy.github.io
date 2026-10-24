@@ -176,7 +176,7 @@ let selected = null;
 function readPalette() {
   const styles = getComputedStyle(document.documentElement);
   const css = name => styles.getPropertyValue(name).trim();
-  const names = ['north', 'south', 'field', 'current', 'force', 'copper', 'steel', 'carbon', 'neutral', 'plus', 'minus'];
+  const names = ['north', 'south', 'field', 'current', 'current-marker', 'force', 'copper', 'steel', 'carbon', 'neutral', 'plus', 'minus'];
   const result = { dark: document.documentElement.getAttribute('data-theme') === 'dark', css: {} };
   for (const name of names) {
     result[name] = new THREE.Color(css(`--${name}`));
@@ -643,7 +643,7 @@ function buildForce() {
   group.add(tube([new THREE.Vector3(-3.1, 0, RAIL_Z), new THREE.Vector3(-3.5, 0, RAIL_Z), new THREE.Vector3(-3.5, 0, 0.75)], 0.035, wireMat, 20));
   group.add(tube([new THREE.Vector3(-3.1, 0, -RAIL_Z), new THREE.Vector3(-3.5, 0, -RAIL_Z), new THREE.Vector3(-3.5, 0, -0.75)], 0.035, wireMat, 20));
 
-  const markers = currentMarkers(40, palette.current);
+  const markers = currentMarkers(40, palette['current-marker']);
   group.add(markers);
   const triad = {
     field: makeArrow(palette.field, 0.035),
@@ -724,7 +724,7 @@ function stepForce(delta) {
   placeMarkers(sim.markers, [forcePath()], sim.phase, on && state.showFlow, 0.7);
   setMarkerGlow(sim.markers, Math.min(1, state.values.current / 3));
   const origin = new THREE.Vector3(sim.x, 0.24, 0);
-  setArrow(sim.triad.field, origin, field, 0.75);
+  setArrow(sim.triad.field, origin, field, on ? 0.75 : 0);
   setArrow(sim.triad.current, origin, current, on ? 0.75 : 0);
   setArrow(sim.triad.force, origin, force.lengthSq() ? new THREE.Vector3(Math.sign(force.x), 0, 0) : force, on && size > 0 ? Math.min(ROD_ARROW.limit, size * ROD_ARROW.scale) : 0);
 }
@@ -773,9 +773,11 @@ function buildCoil(kind) {
   const supply = battery(new THREE.Vector3(0, kind === 'ac' ? BASE_Y + AC_BOX.h / 2 : SUPPLY_Y, SUPPLY_Z), kind === 'ac' ? 'ac' : 'dc');
   group.add(supply);
 
-  // Optional sparse flow cues supplement the stationary direction arrows.
-  const markers = currentMarkers(16, palette.current);
-  rotor.add(markers);
+  // Coil markers turn with the rotor; lead markers stay still so AC reversal is
+  // readable even while the coil spins. Their speed is a direction cue only.
+  const markers = motorCurrentMarkers();
+  rotor.add(markers.coil);
+  group.add(markers.leads);
   const forces = [makeArrow(palette.force, 0.05), makeArrow(palette.force, 0.05)];
   for (const arrow of forces) {
     arrow.traverse(child => { child.userData.part = 'force'; });
@@ -797,7 +799,7 @@ function buildCoil(kind) {
     rotor.add(label);
     return label;
   });
-  sim = { kind, currentArrows, sideLabels, group, rotor, coilGroup, ringParts, brushes, wires, markers, forces, supply, scope: supply.userData.scope, fieldLines: null, theta: 0.5, omega: 0, phase: 0, time: 0, supplyPhase: 0, supplyFrequency: state.values.frequency, spin: null, trace: [], history: [], current: 0, torque: 0 };
+  sim = { kind, currentArrows, sideLabels, group, rotor, coilGroup, ringParts, brushes, wires, markers, forces, supply, scope: supply.userData.scope, fieldLines: null, theta: 0.5, omega: 0, phase: 0, leadPhase: 0, time: 0, supplyPhase: 0, supplyFrequency: state.values.frequency, spin: null, trace: [], history: [], current: 0, torque: 0 };
   buildCoilField();
   buildCoilWinding();
   buildRings();
@@ -853,18 +855,51 @@ function buildCoilWinding() {
     coilGroup.add(part(winding, 'coil'));
   }
 }
-// The path along the first turn drawn in buildCoilWinding, so every bead is a round ball centered on that wire.
-function coilMarkerPath() {
-  const loops = Math.max(1, Math.round(coilTurns() / 10));
-  const scale = new THREE.Vector3().setScalar(0.044);
-  const offset = -(loops - 1) / 2 * 0.05;
-  const r = COIL_R + Math.abs(offset) * 0.3;
-  return [
-    new THREE.Vector3(r, offset, COIL_HALF),
-    new THREE.Vector3(r, offset, -COIL_HALF),
-    new THREE.Vector3(-r, offset, -COIL_HALF),
-    new THREE.Vector3(-r, offset, COIL_HALF)
-  ].map(point => ({ point, scale }));
+// Sparse, elongated arrowheads stay legible against the copper winding.
+function motorCurrentMarkers() {
+  const coil = new THREE.Group();
+  const leads = new THREE.Group();
+  const headGeometry = new THREE.ConeGeometry(0.11, 0.26, 12);
+  const tailGeometry = new THREE.CylinderGeometry(0.045, 0.045, 0.22, 8);
+  const headMaterial = new THREE.MeshBasicMaterial({ color: palette['current-marker'] });
+  const tailMaterial = headMaterial;
+  for (const group of [coil, leads]) {
+    for (let i = 0; i < 4; i++) {
+      const arrow = new THREE.Group();
+      const head = new THREE.Mesh(headGeometry, headMaterial);
+      const tail = new THREE.Mesh(tailGeometry, tailMaterial);
+      head.position.y = 0.08;
+      tail.position.y = -0.12;
+      arrow.add(head, tail);
+      group.add(arrow);
+    }
+  }
+  return { coil, leads };
+}
+function updateMotorMarkers() {
+  const { coil, leads } = sim.markers;
+  const flowing = Math.abs(sim.current) > 0.05;
+  coil.visible = leads.visible = state.showFlow && flowing;
+  if (!coil.visible) return;
+  const sign = Math.sign(sim.current);
+  const leadSign = sim.kind === 'ac' ? sign : state.reverse ? -1 : 1;
+  const offset = -(Math.max(1, Math.round(coilTurns() / 10)) - 1) * 0.025;
+  const radius = COIL_R + Math.abs(offset) * 0.3;
+  // Two markers on each long side, separated enough to follow one as it moves.
+  const wrap = (phase, length) => ((phase % length) + length) % length;
+  for (let i = 0; i < 4; i++) {
+    const side = i < 2 ? 1 : -1;
+    const coilDirection = -side * sign;
+    const coilPosition = wrap(sim.phase + (i % 2) * COIL_HALF, 2 * COIL_HALF);
+    const arrow = coil.children[i];
+    arrow.position.set(side * radius, offset, side * (COIL_HALF - coilPosition));
+    arrow.quaternion.setFromUnitVectors(UP, new THREE.Vector3(0, 0, coilDirection));
+    const leadPosition = wrap(sim.leadPhase + (i % 2) * -SUPPLY_Y / 2, -SUPPLY_Y);
+    const lead = leads.children[i];
+    lead.position.set(side * 1.35, side > 0 ? SUPPLY_Y + leadPosition : -leadPosition,
+      RING_Z + (sim.kind === 'ac' || !state.commutator ? -side * 0.2 : 0));
+    lead.quaternion.setFromUnitVectors(UP, new THREE.Vector3(0, side * leadSign, 0));
+  }
 }
 function buildRings() {
   for (const groupName of ['ringParts', 'brushes', 'wires']) {
@@ -973,6 +1008,11 @@ function stepCoil(delta) {
     const synchronous = 2 * Math.PI * sim.supplyFrequency;
     if (sim.kind === 'ac' && state.powered) sim.supplyPhase += synchronous * dt;
     const current = coilCurrent();
+    // AC travel slows continuously to zero, then retraces its path. Scaling with
+    // frequency keeps the back-and-forth stroke visible at every supply setting.
+    const flowSpeed = sim.kind === 'ac' ? 10 * sim.supplyFrequency * current / state.values.peak : 4 * Math.sign(current);
+    sim.phase += flowSpeed * dt;
+    sim.leadPhase += (sim.kind === 'dc' ? Math.abs(flowSpeed) * (state.reverse ? -1 : 1) : flowSpeed) * dt;
     // T = BANI cos θ, with the forces on the two long sides making a couple about the axle.
     const torque = -coilConstant() * current * Math.cos(sim.theta);
     if (sim.spin) {
@@ -1022,14 +1062,12 @@ function stepCoil(delta) {
   if (delta > 0) sim.trace.push([sim.time, sim.current, sim.torque]);
   while (sim.trace.length && sim.time - sim.trace[0][0] > 8) sim.trace.shift();
 
-  sim.phase += elapsed * (0.25 + Math.abs(sim.current) * 0.2) * Math.sign(sim.current);
-  placeMarkers(sim.markers, [coilMarkerPath()], sim.phase, state.showFlow && Math.abs(sim.current) > 0.05, 0.85);
+  updateMotorMarkers();
   sim.currentArrows.forEach((arrow, i) => {
     const side = i ? -1 : 1;
     const direction = -side * Math.sign(sim.current);
     setArrow(arrow, new THREE.Vector3(side * (COIL_R + 0.23), 0, -direction * 0.675), new THREE.Vector3(0, 0, direction), Math.abs(sim.current) > 0.05 ? 1.35 : 0);
   });
-  setMarkerGlow(sim.markers, Math.min(1, Math.abs(sim.current) / 3));
 
   // Force on each long side: F = NBIL, vertical, opposite on the two sides.
   const sideForce = coilSideForce();
@@ -1578,7 +1616,13 @@ controls.addEventListener('start', () => {
 });
 function fitDistance({ w, h }) {
   const tan = Math.tan(THREE.MathUtils.degToRad(camera.fov / 2));
-  return Math.max(h / tan, w / (tan * camera.aspect));
+  // The DC controls make the desktop viewer taller than the AC viewer. Fit both
+  // coils to the same reference height so extra canvas space does not magnify one.
+  const height = renderer.domElement.clientHeight;
+  const referenceHeight = state.mode !== 'force' && !viewerPanel.classList.contains('is-stacked') && !isExpanded()
+    ? Math.min(height, parseFloat(getComputedStyle(viewer).minHeight) || height)
+    : height;
+  return Math.max(h / tan * (height / referenceHeight || 1), w / (tan * camera.aspect));
 }
 function resetView(animate = false) {
   userMoved = false;
@@ -2001,7 +2045,7 @@ document.querySelectorAll('.models [data-mode]').forEach(button => button.addEve
 
 // ---------- Theme ----------
 // Rebuild the scene (new colors or fonts) without disturbing the running model.
-const MOTION_KEYS = ['x', 'v', 'phase', 'theta', 'omega', 'time', 'supplyPhase', 'supplyFrequency', 'spin', 'heldVertical', 'trace', 'history', 'current', 'torque'];
+const MOTION_KEYS = ['x', 'v', 'phase', 'leadPhase', 'theta', 'omega', 'time', 'supplyPhase', 'supplyFrequency', 'spin', 'heldVertical', 'trace', 'history', 'current', 'torque'];
 function rebuildScene() {
   const motion = sim && Object.fromEntries(MOTION_KEYS.filter(key => key in sim).map(key => [key, sim[key]]));
   const kind = sim?.kind;

@@ -55,7 +55,7 @@ export const PARTS = {
   brush: 'BRUSH · A carbon block that presses on the rotating ring to carry current in and out. Carbon conducts and slides smoothly.',
   ac: 'AC SUPPLY · The current changes direction twice every cycle. Its screen works like an oscilloscope (CRO), plotting the supply emf against time: a higher frequency fits more cycles on the screen, and a bigger peak makes a taller wave. In the UK, mains electricity has a frequency of 50 Hz.',
   force: 'FORCE · At right angles to both the current and the field (Fleming’s left-hand rule).',
-  current: 'CURRENT · Orange arrows show conventional current direction, from + to − through the external circuit. Optional moving markers show direction, not the speed of individual charges.'
+  current: 'CURRENT · Orange arrows show conventional current direction, from + to − through the external circuit. Optional cyan moving markers show direction, not the speed of individual charges. In the motors, follow the moving arrowheads: the coil current reverses at each DC commutator swap, while AC moves back and forth in both the coil and supply leads.'
 };
 
 // Steppers for each mode. Values are in the units in the label. The buttons move in whole steps;
