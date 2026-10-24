@@ -6,6 +6,10 @@ The page versions its stylesheet, entry module, word bank, difficulty module, pr
 
 Run the tests with `node --test fun/spellwave/tests/*.test.mjs`.
 
+## Spelling
+
+The UI, displayed terms, definitions and boss options use British English. Typed answers accept both British and American spellings, including mixed spellings within a phrase. `src/prompt-utils.js` lists the recognised variants and matches whole words, so measuring instruments such as `ammeter` never acquire invalid alternatives such as `ammetre`. These variants also apply to boss options and the checks that prevent typing targets from clashing.
+
 ## Art style
 
 Everything is low-poly: simple solids with flat shading, so every facet shows, in warm paper-like colours.
