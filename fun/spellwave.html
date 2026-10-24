@@ -13,7 +13,7 @@
   <link rel="icon" type="image/png" href="../assets/favicon.png">
   <link rel="stylesheet" href="../assets/standalone-top.css">
   <style>:root { --standalone-top-bg: #efe3c4; }</style>
-  <link rel="stylesheet" href="./spellwave/src/styles.css?v=20261024-card-reveal">
+  <link rel="stylesheet" href="./spellwave/src/styles.css?v=20261024-finale">
   <script
     id="supabaseScript"
     src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"
@@ -191,6 +191,18 @@ Just don't let the bosses through!</p>
       <p class="message-copyright">&copy; 2026 PanPhy Labs. All rights reserved.</p>
     </section>
 
+    <section class="loot-guide" id="lootGuide" role="dialog" aria-modal="true" aria-labelledby="lootGuideTitle" aria-describedby="lootGuideCopy" hidden>
+      <p class="loot-guide-kicker">Game paused</p>
+      <div class="loot-guide-icon" id="lootGuideIcon" aria-hidden="true"></div>
+      <h2 id="lootGuideTitle">You found magic!</h2>
+      <p class="loot-guide-copy" id="lootGuideCopy">Chests drop magic into your potion tray. There are four kinds, and each one does something different. Try them all to find out what they do!</p>
+      <p class="loot-guide-how" id="lootGuideHow"></p>
+      <div class="loot-guide-actions">
+        <button id="lootGuideCast" type="button">Cast it now</button>
+        <button id="lootGuideLater" class="is-secondary" type="button">Save it for later</button>
+      </div>
+    </section>
+
     <input
       class="keyboard-input"
       id="keyboardInput"
@@ -202,34 +214,11 @@ Just don't let the bosses through!</p>
       aria-label="Typing input">
 
     <div id="gameEnding" class="game-ending" aria-live="polite" hidden>
-      <div class="ending-flash" id="endingFlash"></div>
       <canvas id="endingCanvas" class="ending-canvas" aria-hidden="true"></canvas>
-      <div class="ending-horizon" aria-hidden="true"></div>
-      <div class="ending-constellation" aria-hidden="true">
-        <span class="star s1"></span>
-        <span class="star s2"></span>
-        <span class="star s3"></span>
-        <span class="star s4"></span>
-        <span class="star s5"></span>
-        <span class="star s6"></span>
-      </div>
-      <div class="ending-intro-text" id="endingIntroText">A new peace is restored to the physics cosmos...</div>
-      <div class="ending-logo" id="endingLogo">SPELLWAVE</div>
-      <div class="ending-crawl-container" id="endingCrawlContainer">
-        <div class="ending-crawl-content">
-          <p class="crawl-episode">EPISODE X</p>
-          <h3 class="crawl-title">A NEW PEACE RESTORED</h3>
-          <p>The chaotic waves of entropy have collapsed. For ten gruelling battles, the typing wizard stood firm against the corruption of the physical realms, reciting equations of power and vocabulary of precision.</p>
-          <p>With the final bosses defeated and banishment complete, the broken fields of physics have settled into harmony. Light returns to the stars. The cosmic order has been re-established, and peace reigns once more across the galaxy.</p>
-          <p>Every formula you recalled and every spell you cast has ascended, crystallising into stars that will guide future apprentices through the dark void...</p>
-        </div>
-      </div>
+      <div class="ending-flash" id="endingFlash" aria-hidden="true"></div>
+      <div class="ending-letterbox" aria-hidden="true"></div>
+      <p class="ending-caption" id="endingCaption"></p>
       <div class="ending-content" id="endingContent">
-        <div class="ending-sigil" aria-hidden="true">
-          <span></span>
-          <span></span>
-          <span></span>
-        </div>
         <p class="ending-kicker">The final wave collapses</p>
         <h2 class="ending-title" id="endingTitle">PHYSICS MASTERED</h2>
         <div class="ending-stats" id="endingStats">
@@ -246,7 +235,7 @@ Just don't let the bosses through!</p>
     </div>
   </div>
 
-  <script type="module" src="./spellwave/src/main.js?v=20261024-card-reveal"></script>
+  <script type="module" src="./spellwave/src/main.js?v=20261024-finale"></script>
 </body>
 
 </html>

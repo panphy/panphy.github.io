@@ -15,6 +15,16 @@ const MIN_SCORE = 1;
 // Matches the server check (spellwave_score_range); the highest legitimate run is ~67.6k.
 const MAX_SCORE = 70000;
 const HIGHLIGHT_MS = 6000;
+// Shown only to fill empty places until enough real scores exist. They never
+// count towards qualifying, and every real score is always listed. A full
+// ten-wave run scores about 25,000, so these sit at partial-run levels.
+const PLACEHOLDER_SCORES = [
+  { initials: 'NWT', score: 21860 },
+  { initials: 'CRI', score: 17340 },
+  { initials: 'FDY', score: 12950 },
+  { initials: 'TSL', score: 8420 },
+  { initials: 'BHR', score: 4780 },
+];
 
 export function createLeaderboard({ formatScore, onModalClose = () => {} }) {
   const supabaseScript = document.getElementById('supabaseScript');
@@ -188,7 +198,7 @@ export function createLeaderboard({ formatScore, onModalClose = () => {} }) {
       } catch (restErr) {
         console.error('Leaderboard fetch failed:', restErr);
         setStatus('Offline');
-        if (topScores.length === 0) renderLoading();
+        if (topScores.length === 0) renderTopScores();
       }
     }
   }
@@ -218,17 +228,16 @@ export function createLeaderboard({ formatScore, onModalClose = () => {} }) {
     }
   }
 
+  // Real scores, topped up to a full board with the highest placeholders.
+  function withPlaceholders(entries) {
+    const fill = PLACEHOLDER_SCORES.slice(0, Math.max(0, BOARD_SIZE - entries.length));
+    return [...entries, ...fill].sort((a, b) => b.score - a.score);
+  }
+
   function renderTopScores() {
     if (!scoreList) return;
     scoreList.innerHTML = '';
-    if (topScores.length === 0) {
-      const li = document.createElement('li');
-      li.className = 'sw-loading';
-      li.textContent = 'No scores yet';
-      scoreList.appendChild(li);
-      return;
-    }
-    topScores.forEach((entry) => {
+    withPlaceholders(topScores).forEach((entry) => {
       const li = document.createElement('li');
       if (isRecentSubmission(entry)) li.classList.add('sw-highlight');
       const initialsSpan = document.createElement('span');
