@@ -1,6 +1,6 @@
 // difficulty.js — how long a keyword may be on each wave. The reasoning and the
 // full progression table are in fun/spellwave/README.md; keep the two in step.
-import { buildSearchPrompt } from './prompt-utils.js?v=20261024-word-decks';
+import { buildSearchPrompt } from './prompt-utils.js?v=20261025-harder-bosses';
 
 // Longest prompt, in typed characters, that a normal monster, healer or chest may
 // ask on waves 1, 2, 3… Late waves keep the final cap.
@@ -63,4 +63,18 @@ export function bossAnswerLengthCap(wave) {
 // Bosses gain a little walking pressure each wave, up to the wave 10 finale.
 export function bossSpeedMultiplier(wave) {
   return 1.05 + Math.min(9, Math.max(0, wave - 1)) * 0.02;
+}
+
+// Boss rocks. A boss throws its first rock soon after it arrives, then one every
+// `interval` seconds; `hitsPerUnit` rocks cost one life unit (half a heart).
+// Waves 1–3 stay gentle for learners; from wave 4 slow answers hurt.
+export const BOSS_FIRST_ROCK_DELAY = 1.5;
+export const BOSS_ROCK_TIERS = [
+  { fromWave: 1, interval: 6.0, hitsPerUnit: 2 },
+  { fromWave: 4, interval: 4.5, hitsPerUnit: 1 },
+  { fromWave: 7, interval: 3.5, hitsPerUnit: 1 },
+];
+
+export function bossRockTier(wave) {
+  return [...BOSS_ROCK_TIERS].reverse().find(tier => wave >= tier.fromWave) || BOSS_ROCK_TIERS[0];
 }

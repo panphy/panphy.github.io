@@ -94,3 +94,11 @@ test('startup dependencies share the page release version to avoid mixed cached 
   assert.ok(difficulty.includes(`from './prompt-utils.js?v=${version}'`));
 });
 
+
+test('boss rocks are gentle on waves 1–3 and get faster and harder later', async () => {
+  const { bossRockTier, BOSS_FIRST_ROCK_DELAY } = await import('../src/difficulty.js');
+  assert.ok(BOSS_FIRST_ROCK_DELAY <= 2);
+  for (const wave of [1, 2, 3]) assert.deepEqual([bossRockTier(wave).interval, bossRockTier(wave).hitsPerUnit], [6, 2]);
+  for (const wave of [4, 5, 6]) assert.deepEqual([bossRockTier(wave).interval, bossRockTier(wave).hitsPerUnit], [4.5, 1]);
+  for (const wave of [7, 8, 9, 10]) assert.deepEqual([bossRockTier(wave).interval, bossRockTier(wave).hitsPerUnit], [3.5, 1]);
+});

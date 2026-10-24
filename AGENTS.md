@@ -8,6 +8,7 @@ PanPhy Labs is a static GitHub Pages PWA for physics tools, simulations, classro
 - Edit HTML, CSS, and vanilla JavaScript directly; the served site must need no framework, bundler, or build step. Local development dependencies stay ignored and optional.
 - Keep each app independently accessible through an HTML entry point. Split supporting CSS/JS when useful and use stable, unhashed filenames. Follow existing CDN or local-library patterns without adding a build pipeline.
 - Keep `AGENTS.md` and `CLAUDE.md` tracked and equivalent; update both when project rules change.
+- After any change to Spellwave gameplay (speed, timing, damage, rock frequency, scoring, waves, the question bank or boss options), reset the Spellwave leaderboard once the change is live, following the steps in `fun/spellwave/README.md`, so old scores never compete with new rules.
 - Preserve unrelated user changes and existing functionality. UI changes and file removals should serve the requested task; ask before destructive changes outside that scope.
 - Keep tool state (such as `.agents/` and `.claude/`) local and ignored. Put scratch files outside the repository where practical, and clean up temporary files you created.
 - `main` is production and auto-deploys to GitHub Pages. Use `codex/` or `claude/` feature branches and pull requests for merges to `main`.
