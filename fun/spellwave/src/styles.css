@@ -3501,6 +3501,11 @@ body.is-running:not(.is-paused) .sw-leaderboard {
   border-color: var(--danger);
 }
 
+/* A boss still walking in shows its question a little faded. */
+.word-tag.is-boss.is-entering {
+  opacity: 0.82;
+}
+
 @keyframes boss-wrong-shake {
   0%, 100% { translate: 0 0; }
   20% { translate: -6px 0; }

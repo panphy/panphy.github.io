@@ -268,13 +268,13 @@ test('both spellings keep boss answers correct and wrong boss options wrong', ()
 });
 
 
-function createBossPacingHarness() {
+function createBossPacingHarness(waveSet = 4) {
   const source = readFileSync(new URL('../src/main.js', import.meta.url), 'utf8');
   const start = source.indexOf('        if (bossesSpawned < BOSSES_PER_WAVE)');
   const end = source.lastIndexOf('\n      }', source.indexOf('\n    updateEnemies(currentDelta'));
   assert.ok(start >= 0 && end > start);
   const context = vm.createContext({
-    BOSSES_PER_WAVE: 3,
+    BOSSES_PER_WAVE: 3, ONE_BOSS_AT_A_TIME_WAVES: 3, waveSet,
     bossesSpawned: 0, bossSpawnTimer: 1, currentDelta: 0,
     waveClearDelayTimer: 0, clears: 0, enemies: [],
     currentDifficulty: () => ({ bossSpawnGap: 2.8 }),
@@ -305,6 +305,20 @@ test('all three bosses can overlap on the 2.8-second timer without a kill', () =
   tick(0.1);
   tick(1.3);
   assert.equal(context.clears, 1);
+});
+
+test('on waves 1–3 each boss waits until the one before it is gone', () => {
+  const { context, tick } = createBossPacingHarness(1);
+  tick(1);
+  assert.equal(context.bossesSpawned, 1);
+  tick(10);
+  tick(10);
+  assert.equal(context.bossesSpawned, 1);
+  context.enemies[0].dying = true;
+  tick(2.7);
+  assert.equal(context.bossesSpawned, 1);
+  tick(0.11);
+  assert.equal(context.bossesSpawned, 2);
 });
 
 test('the finale can spawn more than two bosses without defeating earlier ones', () => {
