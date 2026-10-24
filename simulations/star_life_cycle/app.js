@@ -333,14 +333,32 @@ faces[2].rotation.x = Math.PI / 2;
 starGroup.add(...faces);
 
 function radialTexture(stops) {
-  const canvas = document.createElement('canvas');
-  canvas.width = canvas.height = 256;
-  const g = canvas.getContext('2d');
-  const gradient = g.createRadialGradient(128, 128, 0, 128, 128, 128);
-  stops.forEach(([at, alpha]) => gradient.addColorStop(at, `rgba(255,255,255,${alpha})`));
-  g.fillStyle = gradient;
-  g.fillRect(0, 0, 256, 256);
-  return new THREE.CanvasTexture(canvas);
+  // Build RGBA directly: Safari can add fingerprinting noise when a 2D canvas is
+  // uploaded to WebGL, turning an otherwise smooth halo into coloured speckles.
+  const size = 256;
+  const data = new Uint8Array(size * size * 4);
+  for (let y = 0; y < size; y += 1) {
+    for (let x = 0; x < size; x += 1) {
+      const r = Math.hypot(x + 0.5 - size / 2, y + 0.5 - size / 2) / (size / 2);
+      let alpha = stops[stops.length - 1][1];
+      for (let i = 1; i < stops.length; i += 1) {
+        if (r > stops[i][0]) continue;
+        const [from, a] = stops[i - 1];
+        const [to, b] = stops[i];
+        alpha = lerp(a, b, clamp((r - from) / (to - from)));
+        break;
+      }
+      const offset = (y * size + x) * 4;
+      data[offset] = data[offset + 1] = data[offset + 2] = 255;
+      data[offset + 3] = Math.round(alpha * 255);
+    }
+  }
+  const texture = new THREE.DataTexture(data, size, size, THREE.RGBAFormat);
+  texture.magFilter = THREE.LinearFilter;
+  texture.minFilter = THREE.LinearMipmapLinearFilter;
+  texture.generateMipmaps = true;
+  texture.needsUpdate = true;
+  return texture;
 }
 const makeSprite = stops => {
   const sprite = new THREE.Sprite(new THREE.SpriteMaterial({ map: radialTexture(stops), blending: THREE.AdditiveBlending, depthWrite: false, depthTest: false, transparent: true, opacity: 0 }));
