@@ -128,7 +128,7 @@ button:hover:not(:disabled) {
 }
 
 button:disabled {
-  opacity: 0.45;
+  opacity: 0.9;
   cursor: not-allowed;
 }
 
@@ -316,7 +316,7 @@ button:disabled {
 }
 
 .mt-tool:disabled {
-  opacity: 0.45;
+  opacity: 0.9;
   cursor: not-allowed;
 }
 

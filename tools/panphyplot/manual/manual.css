@@ -33,7 +33,7 @@ button {
   background: var(--surface);
 }
 button:hover { background: var(--surface-3); }
-button:disabled { opacity: 0.45; cursor: default; }
+button:disabled { opacity: 0.9; cursor: default; }
 .top {
   position: sticky;
   top: var(--standalone-top, 0px);

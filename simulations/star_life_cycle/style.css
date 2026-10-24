@@ -140,7 +140,7 @@ h3 { font-size: .88rem; margin: 0; }
 }
 .stepper input::-webkit-outer-spin-button, .stepper input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
 .stepper .unit { font-weight: 600; color: var(--text-secondary); margin-right: 4px; }
-button:disabled { cursor: default; opacity: .5; }
+button:disabled { cursor: default; opacity: 0.9; }
 
 .mass-scale { position: relative; padding-top: 2px; }
 input[type=range] { -webkit-appearance: none; appearance: none; display: block; width: 100%; height: 48px; margin: 0; background: transparent; cursor: pointer; touch-action: pan-y; }
@@ -275,9 +275,8 @@ body.viewer-expanded { overflow: hidden; }
 .toolbar svg { width: 18px; height: 18px; flex: none; fill: currentColor; }
 .toolbar svg .stroke { fill: none; stroke: currentColor; stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; }
 /* Play is the main action, so it is the one filled button. */
-.toolbar button.play { min-width: 128px; border: 0; background: var(--brand-primary); color: #fff; font-size: .95rem; font-weight: 800; box-shadow: 0 6px 16px color-mix(in srgb, var(--brand-primary), transparent 72%); }
+.toolbar button.play { min-width: 128px; border: 0; background: var(--brand-primary); color: var(--accent-ink); font-size: .95rem; font-weight: 800; box-shadow: 0 6px 16px color-mix(in srgb, var(--brand-primary), transparent 72%); }
 .toolbar button.play:hover { background: var(--brand-primary); filter: brightness(1.07); }
-[data-theme="dark"] .toolbar button.play { color: #1B1208; }
 .toolbar button.play[aria-pressed=true] { background: var(--text-main); color: var(--bg-color); box-shadow: none; }
 [data-reserve] { display: inline-grid; justify-items: center; align-content: center; }
 [data-reserve]::after { content: attr(data-reserve); height: 0; overflow: hidden; visibility: hidden; }
@@ -297,7 +296,7 @@ body.viewer-expanded { overflow: hidden; }
 @keyframes nudge { 50% { box-shadow: 0 0 0 5px color-mix(in srgb, var(--brand-primary), transparent 75%); } }
 #reset { margin-left: auto; }
 .cutaway-note { margin: 6px 0 0; font-size: .76rem; color: var(--text-secondary); text-align: right; }
-button:disabled { cursor: default; opacity: .55; }
+button:disabled { cursor: default; opacity: 0.9; }
 
 /* Stage notes */
 aside { border-left: 1px solid var(--card-border); padding: 26px; background: var(--card-bg); min-width: 0; }

@@ -126,7 +126,7 @@ code {
 }
 
 .fit-button:disabled {
-	opacity: 0.6;
+	opacity: 0.9;
 	cursor: progress;
 }
 
@@ -1610,7 +1610,7 @@ input[type="number"]:focus {
 
 .neo-series-item:disabled {
 	cursor: default;
-	opacity: 0.6;
+	opacity: 0.9;
 }
 
 .neo-series-swatch {
@@ -1880,7 +1880,7 @@ input[type="number"]:focus {
 }
 
 .neo-fit-extend-fields input:disabled {
-	opacity: 0.55;
+	opacity: 0.9;
 	cursor: not-allowed;
 }
 
@@ -1958,7 +1958,7 @@ input[type="number"]:focus {
 }
 
 .neo-decimals-button:disabled {
-	opacity: 0.35;
+	opacity: 0.9;
 	cursor: default;
 }
 
@@ -2184,7 +2184,7 @@ input[type="number"]:focus {
 }
 
 .neo-menu button:disabled {
-	opacity: 0.45;
+	opacity: 0.9;
 	cursor: default;
 }
 
@@ -2407,7 +2407,7 @@ input[type="number"]:focus {
 }
 
 .neo-choice:disabled {
-	opacity: 0.5;
+	opacity: 0.9;
 	cursor: default;
 }
 
@@ -2444,7 +2444,7 @@ input[type="number"]:focus {
 }
 
 .neo-dialog-confirm:disabled {
-	opacity: 0.5;
+	opacity: 0.9;
 	cursor: default;
 }
 

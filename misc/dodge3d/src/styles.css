@@ -3,7 +3,7 @@
 :root {
   --bg: #090807;
   --ink: #dcd5c8;
-  --muted: #5a5248;
+  --muted: #958b7d;
   --accent: #b88a24;
   --accent-bright: #d0a030;
   --panel: #0e0c0a;
@@ -152,7 +152,7 @@ a {
 }
 
 .hud-button.is-muted {
-  color: #5f4033;
+  color: #b9907d;
   border-color: #5f4033;
 }
 
@@ -436,14 +436,14 @@ a {
   font-family: var(--font-mono);
   font-size: 0.62rem;
   font-weight: 500;
-  opacity: 0.5;
+  opacity: 1;
 }
 
 .message-copyright {
   margin: 0;
   color: var(--muted);
   font-size: 0.68rem;
-  opacity: 0.7;
+  opacity: 1;
 }
 
 .message-panel button {
@@ -587,7 +587,9 @@ body.is-running .message-panel {
 
 .initials-card button:disabled {
   cursor: progress;
-  opacity: 0.58;
+  background: var(--panel);
+  color: var(--muted);
+  opacity: 1;
   transform: none;
 }
 

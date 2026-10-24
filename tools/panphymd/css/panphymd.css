@@ -308,7 +308,7 @@ button:hover {
 }
 
 .md-tool:disabled {
-  opacity: 0.45;
+  opacity: 0.9;
   cursor: not-allowed;
 }
 
@@ -2360,7 +2360,7 @@ mjx-container.copy-failed::after {
 }
 
 .history-restore-btn:disabled {
-  opacity: 0.6;
+  opacity: 0.9;
   cursor: not-allowed;
 }
 

@@ -249,7 +249,7 @@ body.viewer-expanded { overflow: hidden; }
 /* Labels that change keep the width of their widest label, so the bar does not jump. */
 [data-reserve] { display: inline-grid; justify-items: center; align-content: center; }
 [data-reserve]::after { content: attr(data-reserve); height: 0; overflow: hidden; visibility: hidden; }
-button:disabled { cursor: default; opacity: .55; }
+button:disabled { cursor: default; opacity: 0.9; }
 
 /* Control column: the main action first, then what it shows, then the settings. */
 .console { grid-area: console; display: flex; flex-direction: column; gap: 12px; min-width: 0; padding: 20px; border-left: 1px solid var(--card-border); background: var(--card-bg); }
@@ -257,7 +257,7 @@ button:disabled { cursor: default; opacity: .55; }
   display: flex; align-items: center; justify-content: center; gap: 10px;
   width: 100%; min-height: 56px; padding: 10px 18px;
   border: 0; border-radius: 14px;
-  background: var(--brand-primary); color: #fff;
+  background: var(--brand-primary); color: var(--accent-ink);
   font-size: 1.02rem; font-weight: 800;
   box-shadow: 0 6px 16px color-mix(in srgb, var(--brand-primary), transparent 72%);
   transition: filter .15s, transform .1s;
@@ -266,7 +266,6 @@ button:disabled { cursor: default; opacity: .55; }
 .fire { --fire-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M5 12h12M12 6l6 6-6 6'/%3E%3C/svg%3E"); }
 .fire[aria-pressed=true] { --fire-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M7 7h10v10H7z'/%3E%3C/svg%3E"); background: var(--text-main); color: var(--bg-color); box-shadow: none; }
 .fire[hidden] { display: none; }
-[data-theme="dark"] .fire:not([aria-pressed=true]) { color: #1B1208; }
 .fire:hover:not(:disabled) { filter: brightness(1.07); }
 .fire:active:not(:disabled) { transform: translateY(1px); }
 .fire:disabled { opacity: 1; background: var(--muted-bg); color: var(--text-secondary); box-shadow: none; }
