@@ -1,4 +1,4 @@
-const BUILD_ID = '2026-10-24T12:42:14Z';
+const BUILD_ID = '2026-10-24T21:27:00Z';
 const CACHE_PREFIX = 'panphy-labs';
 const PRECACHE_NAME = `${CACHE_PREFIX}-precache-${BUILD_ID}`;
 const RUNTIME_CACHE = `${CACHE_PREFIX}-runtime-${BUILD_ID}`;
@@ -120,6 +120,21 @@ const ASSETS_TO_CACHE = [
   'https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js',
   '/tools/motion_tracker.html',
   '/tools/motion_tracker/css/motion_tracker.css',
+  '/tools/motion_tracker/js/analysis.js',
+  '/tools/motion_tracker/js/copy.js',
+  '/tools/motion_tracker/js/dom.js',
+  '/tools/motion_tracker/js/export.js',
+  '/tools/motion_tracker/js/main.js',
+  '/tools/motion_tracker/js/overlay.js',
+  '/tools/motion_tracker/js/panes.js',
+  '/tools/motion_tracker/js/plot.js',
+  '/tools/motion_tracker/js/points.js',
+  '/tools/motion_tracker/js/state.js',
+  '/tools/motion_tracker/js/theme.js',
+  '/tools/motion_tracker/js/tracking-core.js',
+  '/tools/motion_tracker/js/tracking.js',
+  '/tools/motion_tracker/js/ui.js',
+  '/tools/motion_tracker/js/video.js',
   '/tools/motion_tracker/sample-bouncing-ball.mp4',
   'https://cdn.jsdelivr.net/npm/chart.js@4.5.1/dist/chart.umd.min.js',
   '/tools/sound_analyzer.html',
