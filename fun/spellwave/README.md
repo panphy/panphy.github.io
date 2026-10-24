@@ -33,7 +33,7 @@ The "Hall of Wizards" is a top-five score list stored in Supabase; all of its co
 - Scores are read from the `spellwave_leaderboard` table and written only through the `submit_spellwave_score` function. The table, the function and the score-range check live in the Supabase project, not in this repository.
 - `MAX_SCORE` in `src/leaderboard.js` must match the server's range check. Raise both together if a scoring change makes a legitimate run exceed it, or high scores will be rejected.
 - A run that used a cheat (god mode, the potion cheat or the final-wave skip) is never submitted.
-- Until five real scores exist, `PLACEHOLDER_SCORES` fill the empty places on screen. They never affect who qualifies, and every real score is always shown. A full ten-wave run scores about 25,000, so they sit at partial-run levels.
+- Until five real scores exist, `PLACEHOLDER_SCORES` fill the empty places on screen. They never affect who qualifies, and every real score is always shown. They are obvious fillers (AAA 20,000 down to EEE 12,000) so nobody mistakes them for real records.
 - The page loads the Supabase client from jsDelivr and falls back to plain REST calls if it never loads. The last list fetched is kept in localStorage and shown while the live one loads; the status reads "Offline" when the fetch fails.
 - `.github/workflows/supabase-keepalive.yml` queries the table twice a week so that the free-tier project is not paused. It carries a copy of the public anon key, so update it there too if the key or project changes.
 
