@@ -2,7 +2,7 @@
 
 A typing defence game for AQA GCSE Physics vocabulary. The page is `fun/spellwave.html`; the code is in `src/`. It is network-only (no offline cache), needs no build step, and loads Three.js and two post-processing add-ons from jsDelivr through the import map in the HTML.
 
-The page versions its stylesheet, entry module, word bank, difficulty module, prompt utilities and boss modules (`boss-choices.js`, `boss-options.js`) with a shared `?v=` value. Bump that value together when changing these files so a new page cannot load incompatible browser-cached code (GitHub Pages caches assets for ten minutes). Filenames remain stable; this is independent of the root service worker.
+The page versions its stylesheet, entry module, word bank, difficulty module, prompt utilities, visuals module and boss modules (`boss-choices.js`, `boss-options.js`) with a shared `?v=` value. Bump that value together when changing these files so a new page cannot load incompatible browser-cached code (GitHub Pages caches assets for ten minutes). Filenames remain stable; this is independent of the root service worker.
 
 Run the tests with `node --test fun/spellwave/tests/*.test.mjs`.
 
@@ -18,6 +18,7 @@ Everything is low-poly: simple solids with flat shading, so every facet shows, i
 - `src/lowpoly-creatures.js` builds every monster and boss from solids on pivots. Each builder also returns an `animate(seconds, enemy)` function that moves those pivots (legs, wings, jaws, tails).
 - `monster-gallery.html` is a development page, not linked from the site, that shows every monster and boss with its animation under each season's lighting. Serve the repository and open `/fun/spellwave/monster-gallery.html` to review a model after changing it. The gallery shows each boss at its listed scale; the game draws bosses `BOSS_SIZE` (1.35) times bigger so they dominate boss waves, and places each boss card beyond the boss's measured width; it has no bloom, so glowing parts look flatter than in the game.
 - Season colours are the `SEASON_PALETTES` in `src/main.js`. Keep light levels modest: anything brighter than 1.0 in the rendered frame blooms, so over-lit ground turns the whole scene hazy.
+- Power use: play is capped at about 60 frames a second (`MIN_FRAME_MS`), the 3D scene renders at no more than 1.5× pixel density with 2× multisampling (`src/visuals.js`), and menus and pauses drop to 10 frames a second. Battery Saver goes further by turning off post-processing and shadows.
 - The sound follows the same idea (`src/audio.js`). Music uses mallet, plucked and music-box voices built from sine partials, with soft percussion; boss music keeps a harder kick, snare and bass on purpose. Every sound effect is built from the same five pieces — `knock`, `mallet`, `bell`, `rustle` and `drum` — so new ones should be too.
 - The interface is cream paper cards with brown ink. The colours are the variables at the top of `src/styles.css`, and the "Paper theme" block at the end of that file overrides the older dark-panel rules above it.
 - The final wave has its own palette (`FINAL_WAVE_PALETTE`) and its own scenery, the moons and drifting rocks built by `createFinalWaveScenery`.
