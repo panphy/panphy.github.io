@@ -125,6 +125,8 @@ tr.other td { color: var(--muted); }
 .topic li::marker { color: var(--board); }
 .eqs { display: flex; flex-wrap: wrap; gap: 6px; margin: 10px 0 0; padding: 0; list-style: none; }
 .eqs li { padding: 3px 9px; border-radius: 6px; background: var(--tint); font: 600 13.5px/1.4 var(--mono); }
+.math-loading .eqs { visibility: hidden; }
+mjx-container[jax="SVG"] { line-height: 0; }
 .rp { display: block; margin-top: 10px; padding: 6px 10px; border-left: 4px solid var(--pop); background: #fff5f2; font-size: 14px; font-weight: 700; }
 body.c-8464 .rp { background: #f1f3ff; }
 
