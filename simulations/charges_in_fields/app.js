@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { MODES, MODE_ORDER, PARTICLES, MODE_PARTICLES, STEPPERS, CONTROLS, PARTS } from './content.js';
-import { setMath, mathHtml, onMathReady } from './math.js';
+const { setMath, mathHtml, onMathReady } = window.PanPhyMath;
 
 const $ = id => document.getElementById(id);
 const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;

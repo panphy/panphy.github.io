@@ -402,8 +402,3 @@ footer { display: flex; justify-content: space-between; gap: 20px; border-top: 1
   .setting.is-changed { animation: none; }
   .models button:hover { transform: none; }
 }
-
-/* Typeset maths (math.js). Text waiting for MathJax stays hidden; if MathJax fails, its LaTeX shows. */
-mjx-container[jax="SVG"] { line-height: 0; }
-.math-pending { visibility: hidden; }
-[data-math="failed"] .math-pending { visibility: visible; }

@@ -74,6 +74,7 @@ export const REACTIONS = {
     from: ['U236'],
     to: ['Ba141', 'Kr92'],
     equation: 'U-235 + n → U-236 → Ba-141 + Kr-92 + 3n',
+    tex: String.raw`\({}^{235}_{92}\mathrm{U} + {}^{1}_{0}\mathrm{n} \rightarrow {}^{236}_{92}\mathrm{U} \rightarrow {}^{141}_{56}\mathrm{Ba} + {}^{92}_{36}\mathrm{Kr} + 3\,{}^{1}_{0}\mathrm{n}\)`,
     fuelMass: 235.04
   },
   fusion: {
@@ -82,6 +83,7 @@ export const REACTIONS = {
     from: ['H2', 'H3'],
     to: ['He4'],
     equation: 'H-2 + H-3 → He-4 + n',
+    tex: String.raw`\({}^{2}_{1}\mathrm{H} + {}^{3}_{1}\mathrm{H} \rightarrow {}^{4}_{2}\mathrm{He} + {}^{1}_{0}\mathrm{n}\)`,
     fuelMass: 5.030
   }
 };

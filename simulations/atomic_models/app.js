@@ -1,6 +1,7 @@
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { MODELS, MODEL_ORDER, PARTICLES, ORBITALS } from './content.js';
+const { setMath, mathHtml, onMathReady } = window.PanPhyMath;
 
 const $ = id => document.getElementById(id);
 const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -727,7 +728,7 @@ function select(object, text) {
     halo.scale.setScalar(radius * 1.55 + 0.04);
     object.add(halo);
   }
-  if (text) readout.textContent = text;
+  if (text) setMath(readout, text);
 }
 function describe(kind) {
   switch (kind) {
@@ -818,14 +819,14 @@ function startBeam() {
   $('deflected-legend').hidden = state.model === 'plum';
   if (!state.playing) setPlaying(true);
   flyTo({ direction: new THREE.Vector3(0, 0.3, 1), distance: THREE.MathUtils.clamp(fitDistance(7), 15, 24) });
-  readout.textContent = state.model === 'plum'
+  setMath(readout, state.model === 'plum'
     ? 'ALPHA BEAM · The alpha particles arrive from the left as a wide, parallel beam. Spread-out positive charge only nudges them: they all pass almost straight through.'
-    : `${PARTICLES.alpha} They arrive from the left as a wide, parallel beam.`;
+    : `${PARTICLES.alpha} They arrive from the left as a wide, parallel beam.`);
   if (state.model === 'rutherford') {
     select(null);
     spread.target = 1;
     $('electron-legend').hidden = true;
-    readout.textContent = RUTHERFORD_BEAM;
+    setMath(readout, RUTHERFORD_BEAM);
   }
 }
 function stepSpread(delta) {
@@ -862,7 +863,7 @@ function stopBeam() {
   beam = null;
   spread.target = 0;
   $('electron-legend').hidden = state.model === 'cloud';
-  if (readout.textContent === RUTHERFORD_BEAM) readout.textContent = DEFAULT_READOUT[state.model];
+  if (readout.textContent === RUTHERFORD_BEAM) setMath(readout, DEFAULT_READOUT[state.model]);
   $('alpha').setAttribute('aria-pressed', 'false');
   $('alpha').textContent = 'Fire alpha particles';
   $('alpha-legend').hidden = true;
@@ -1085,7 +1086,7 @@ function startExcite() {
 }
 function enterExcitePhase() {
   const name = EXCITE_PHASES[excite.phase][0];
-  readout.textContent = EXCITE_TEXT[name];
+  setMath(readout, EXCITE_TEXT[name]);
   const diagram = { in: [[2, 4, 0], null], up: [[2, 3, 1], 'up'], stay: [[2, 3, 1], null], down: [[2, 3, 1], 'down'], out: [[2, 4, 0], null] };
   renderEnergyDiagram(...diagram[name]);
   if (name === 'out') excite.out = { from: excite.electron.mesh.position.clone(), direction: excite.electron.mesh.position.clone().normalize().add(new THREE.Vector3(0, 0, 0.6)).normalize() };
@@ -1159,7 +1160,7 @@ function inspectNextOrbital() {
   state.orbitalIndex = (state.orbitalIndex + 1) % keys.length;
   state.orbitalFocus = keys[state.orbitalIndex];
   applyOpacity(1);
-  readout.textContent = ORBITALS[state.orbitalFocus];
+  setMath(readout, ORBITALS[state.orbitalFocus]);
   flyTo({ direction: new THREE.Vector3(0.45, 0.7, 1), distance: [4.5, 9, 9][state.orbitalIndex] });
   updateOrbitalButton();
 }
@@ -1242,10 +1243,10 @@ function selectModel(model, animate = true) {
   updateOrbitalButton();
   $('inspect').hidden = model === 'cloud';
   $('inspect').textContent = model === 'cloud' ? 'Inspect an orbital' : 'Inspect an electron';
-  readout.textContent = DEFAULT_READOUT[model];
-  for (const [id, key] of Object.entries({ 'scene-title': 'title', 'model-date': 'date', 'model-heading': 'heading', description: 'description', look: 'look', evidence: 'evidence' })) $(id).textContent = data[key];
+  setMath(readout, DEFAULT_READOUT[model]);
+  for (const [id, key] of Object.entries({ 'scene-title': 'title', 'model-date': 'date', 'model-heading': 'heading', description: 'description', look: 'look', evidence: 'evidence' })) setMath($(id), data[key]);
   document.querySelectorAll('.models [data-model]').forEach(button => button.setAttribute('aria-pressed', String(button.dataset.model === model)));
-  viewer.setAttribute('aria-label', `${data.title}. ${data.description} Drag or use arrow keys to rotate; click then scroll, pinch, or use plus and minus keys to zoom.`);
+  viewer.setAttribute('aria-label', `${data.title}. ${data.heading} Drag or use arrow keys to rotate; click then scroll, pinch, or use plus and minus keys to zoom.`);
   if (previous !== model || !animate) resetView();
   buildAtom(animate && previous !== model);
 }
