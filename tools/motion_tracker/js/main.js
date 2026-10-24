@@ -1,0 +1,32 @@
+import { initializeTheme } from './theme.js';
+import { initializeTracking } from './tracking.js';
+import { initializePanes } from './panes.js';
+import { initializeUi } from './ui.js';
+import { initializeCopy } from './copy.js';
+import { initializeVideo } from './video.js';
+import { initializePoints } from './points.js';
+import { initializePlot } from './plot.js';
+import { initializeExport } from './export.js';
+import { initializeOverlay } from './overlay.js';
+import { disableControls } from './video.js';
+import { updateFpsButtonText } from './video.js';
+import { refreshSeriesColors } from './theme.js';
+import { renderPointRows } from './points.js';
+import { updateActivePlotButton } from './plot.js';
+
+// Importing defines the modules; this entry point owns startup and event registration.
+initializeTheme();
+initializeTracking();
+initializePanes();
+initializeUi();
+initializeCopy();
+initializeVideo();
+initializePoints();
+initializePlot();
+initializeExport();
+initializeOverlay();
+disableControls(true);
+updateFpsButtonText();
+refreshSeriesColors();
+renderPointRows();
+updateActivePlotButton();
