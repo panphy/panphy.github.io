@@ -85,11 +85,16 @@ const BOSS_ROCK_FLIGHT_TIME = 1.45;
 const BOSS_ROCK_ARC_HEIGHT = 2.3;
 const MAX_CONCURRENT_BOSS_PROJECTILES = 2;
 const MIN_PROJECTILE_SPACING = 2.6;
+// Bosses are drawn this much bigger than their listed scale, so they dominate
+// the scene in boss waves. The model gallery shows the listed scale.
+const BOSS_SIZE = 1.35;
 const BOSSES_PER_WAVE = 3;
 // On waves 1–3 each boss waits until the one before it is gone.
 const ONE_BOSS_AT_A_TIME_WAVES = 3;
 const FINAL_WAVE_NUMBER = 10;
 const FINAL_WAVE_BOSS_COUNT = 10;
+// The finale keeps at most this many bosses alive at once, as in waves 4–9.
+const FINAL_WAVE_MAX_LIVE_BOSSES = 3;
 const COSMIC_WAVE_THRESHOLD = 99149236;
 const MEDIC_HEAL_AMOUNT = 2;
 const EMBER_HEIGHT_DELTAS = 1819600217;
@@ -338,6 +343,7 @@ const BOSS_TYPES = [
     score: 150,
   },
 ];
+for (const bossType of BOSS_TYPES) bossType.scale *= BOSS_SIZE;
 const HEART_PATH = 'M16 28.4C10.3 23.6 4.8 19 3.2 14.1C1.9 10 3.8 6.2 7.5 5.4C10.4 4.8 13.1 6.1 16 9.4C18.9 6.1 21.6 4.8 24.5 5.4C28.2 6.2 30.1 10 28.8 14.1C27.2 19 21.7 23.6 16 28.4Z';
 const FLYING_SHADOW_OPACITY = 0.22;
 const MOON_SHADOW_FADE_IN_RATE = 1.45;
@@ -1526,8 +1532,10 @@ function animate(frameTime) {
         } else if (finalWaveQueueIndex < finalWaveQueue.length) {
           const nextEntry = finalWaveQueue[finalWaveQueueIndex];
           const hasActiveSupportEnemy = nextEntry !== 'boss' && enemies.some(e => (e.isMimic || e.isMedic) && !e.dying);
-          bossSpawnTimer = Math.max(0, bossSpawnTimer - currentDelta);
-          if (!hasActiveSupportEnemy) {
+          // A boss waits, with its timer held, while the finale's boss slots are full.
+          const bossSlotsFull = nextEntry === 'boss' && enemies.filter(e => e.isBoss && !e.dying).length >= FINAL_WAVE_MAX_LIVE_BOSSES;
+          if (!bossSlotsFull) bossSpawnTimer = Math.max(0, bossSpawnTimer - currentDelta);
+          if (!hasActiveSupportEnemy && !bossSlotsFull) {
             if (bossSpawnTimer <= 0) {
               const entry = finalWaveQueue[finalWaveQueueIndex];
               finalWaveQueueIndex += 1;
@@ -2115,13 +2123,15 @@ function updateLabels() {
     enemy.label.style.setProperty('--threat-progress', approachAmount.toFixed(3));
 
     if (enemy.isBoss) {
-      // Project both road edges at the boss's depth so the label lands in the scenery area
+      // Project the road edges at the boss's depth, or the boss's own outer edge
+      // where it is wider, so the label lands in the scenery clear of the boss.
+      const bossX = enemy.group.position.x;
       const bossY = enemy.group.position.y;
       const bossZ = enemy.group.position.z;
-      reusableVector.set(5.8, bossY, bossZ);
+      reusableVector.set(Math.max(5.8, bossX + enemy.bossHalfWidth), bossY, bossZ);
       reusableVector.project(camera);
       const rightRoadEdgeX = (reusableVector.x * 0.5 + 0.5) * width;
-      reusableVector.set(-5.8, bossY, bossZ);
+      reusableVector.set(Math.min(-5.8, bossX - enemy.bossHalfWidth), bossY, bossZ);
       reusableVector.project(camera);
       const leftRoadEdgeX = (reusableVector.x * 0.5 + 0.5) * width;
       // Project boss mid-height for vertical centering beside boss
@@ -2203,7 +2213,6 @@ function updateLabels() {
     enemy.label.classList.toggle('is-danger', enemy.group.position.z > -4);
     enemy.label.classList.toggle('is-critical', enemy.group.position.z > 1);
     enemy.label.classList.toggle('is-stunned', !!(enemy.stunTimer && enemy.stunTimer > 0));
-    enemy.label.classList.toggle('is-entering', enemy.isBoss && !enemy.revealed);
   }
 }
 
@@ -2568,6 +2577,8 @@ function spawnEnemy(options = {}) {
   const spawnBaseY = isFlying ? FLYING_ENEMY_Y : isMedic ? MEDIC_ENEMY_Y : GROUND_ENEMY_Y;
   group.position.set(lane, spawnBaseY, startZ);
   group.scale.setScalar(type.scale * (isClimaxBoss ? 1.5 : 1.0));
+  // Half the boss's drawn width, so its card can sit clear of wings and arms.
+  const bossHalfWidth = isBoss ? new THREE.Box3().setFromObject(group).getSize(new THREE.Vector3()).x / 2 : 0;
   enemyGroup.add(group);
 
   let shadowMesh = null;
@@ -2578,7 +2589,7 @@ function spawnEnemy(options = {}) {
       opacity: FLYING_SHADOW_OPACITY * moonShadowStrength,
       depthWrite: false,
     });
-    shadowMesh = new THREE.Mesh(new THREE.BoxGeometry(3.8, 0.06, 3.8), shadowMat);
+    shadowMesh = new THREE.Mesh(new THREE.BoxGeometry(3.8 * BOSS_SIZE, 0.06, 3.8 * BOSS_SIZE), shadowMat);
     shadowMesh.position.set(lane, 0.04, startZ);
     shadowMesh.visible = moonShadowStrength > 0.02;
     if (isClimaxBoss) shadowMesh.scale.setScalar(1.5);
@@ -2662,6 +2673,7 @@ function spawnEnemy(options = {}) {
     isMedic,
     isMimic,
     isClimaxBoss,
+    bossHalfWidth,
     lidOpenProgress: 0,
     hasOpened: false,
     isFlying,

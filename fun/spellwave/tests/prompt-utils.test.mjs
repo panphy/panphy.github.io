@@ -321,22 +321,24 @@ test('on waves 1–3 each boss waits until the one before it is gone', () => {
   assert.equal(context.bossesSpawned, 2);
 });
 
-test('the finale can spawn more than two bosses without defeating earlier ones', () => {
+test('the finale keeps at most three bosses alive and spawns the next when one goes', () => {
   const source = readFileSync(new URL('../src/main.js', import.meta.url), 'utf8');
   const start = source.indexOf('          const nextEntry = finalWaveQueue[finalWaveQueueIndex];');
   const end = source.indexOf('\n        }\n      } else {', start);
   assert.ok(start >= 0 && end > start);
   const context = vm.createContext({
-    finalWaveQueue: ['boss', 'boss', 'boss', 'boss'], finalWaveQueueIndex: 0,
+    finalWaveQueue: ['boss', 'boss', 'boss', 'boss'], finalWaveQueueIndex: 0, FINAL_WAVE_MAX_LIVE_BOSSES: 3,
     bossesSpawned: 0, bossSpawnTimer: 0, currentDelta: 2.8, enemies: [],
     currentDifficulty: () => ({ bossSpawnGap: 2.8 }),
   });
   context.spawnBoss = () => context.enemies.push({ isBoss: true, dying: false });
-  for (let index = 0; index < 4; index += 1) {
-    vm.runInContext(`{${source.slice(start, end)}}`, context);
-  }
+  const tick = () => vm.runInContext(`{${source.slice(start, end)}}`, context);
+  for (let index = 0; index < 6; index += 1) tick();
+  assert.equal(context.bossesSpawned, 3);
+  assert.equal(context.finalWaveQueueIndex, 3);
+  context.enemies[0].dying = true;
+  tick();
   assert.equal(context.bossesSpawned, 4);
-  assert.equal(context.enemies.length, 4);
   assert.equal(context.finalWaveQueueIndex, 4);
 });
 
