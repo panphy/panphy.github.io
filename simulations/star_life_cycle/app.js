@@ -137,7 +137,8 @@ function additivePoints(count, fill, vertexShader, uniforms) {
   const points = new THREE.Points(geometry, new THREE.ShaderMaterial({
     uniforms: { uPx: { value: 600 }, ...uniforms },
     vertexShader,
-    fragmentShader: 'varying vec3 vCol; varying float vAlpha; void main(){ float a = smoothstep(.5, 0., length(gl_PointCoord-.5)); gl_FragColor = vec4(vCol, a*a*vAlpha); }',
+    // GLSL leaves reversed smoothstep edges undefined; Apple GPUs need ordered edges too.
+    fragmentShader: 'varying vec3 vCol; varying float vAlpha; void main(){ float a = 1. - smoothstep(0., .5, length(gl_PointCoord-.5)); gl_FragColor = vec4(vCol, a*a*vAlpha); }',
     transparent: true, depthWrite: false, blending: THREE.AdditiveBlending
   }));
   points.frustumCulled = false;
@@ -176,7 +177,7 @@ const cloud = additivePoints(15000, v => {
     vec3 p = vec3(rho*cos(phi), y, rho*sin(phi));
     p += 0.22*(1. - c)*sin(uTime*0.25 + aSeed*6.283 + p0.yzx);
     float r = length(p);
-    float heat = c*smoothstep(3.4, 0.4, r);
+    float heat = c*(1. - smoothstep(0.4, 3.4, r));
     vec3 dust = mix(vec3(.98,.50,.20), vec3(.30,.85,.78), smoothstep(.55, 1., aSeed.z));
     dust = mix(dust, vec3(.85,.35,.45), smoothstep(.0, .25, aSeed.z)*(1. - smoothstep(.25, .5, aSeed.z)));
     vCol = mix(dust, vec3(1.,.86,.55), heat);
@@ -184,7 +185,10 @@ const cloud = additivePoints(15000, v => {
     float grain = step(0.82, aSeed.x*0.5 + aSeed.z*0.5);
     vAlpha = uOpacity*mix(0.034, 0.26, grain)*(1. + 0.5*heat)*mix(1., mix(0.8, 1.7, grain), c)*(1. - s)*(1. - gone);
     vec4 mv = modelViewMatrix*vec4(p, 1.);
-    gl_PointSize = mix(0.5, 0.11, grain)*mix(1., 0.5, c)*(0.5 + aSeed.y)*uPx/-mv.z;
+    float pointSize = mix(0.5, 0.11, grain)*mix(1., 0.5, c)*(0.5 + aSeed.y)*uPx/-mv.z;
+    // Keep point rasterisation at least one pixel wide, preserving subpixel coverage in alpha.
+    vAlpha *= min(pointSize*pointSize, 1.);
+    gl_PointSize = max(pointSize, 1.);
     gl_Position = projectionMatrix*mv;
   }`, { uCollapse: { value: 0 }, uSpin: { value: 0 }, uClear: { value: 0 }, uTime: { value: 0 }, uOpacity: { value: 1 } });
 
@@ -212,7 +216,9 @@ const OUTFLOW_VERTEX = `
     vCol = mix(uColA, uColB, f);
     vAlpha = uOpacity*fade;
     vec4 mv = modelViewMatrix*vec4(p, 1.);
-    gl_PointSize = uSize*mix(4.2, 1., knot)*(0.5 + aSeed.y)*uPx/-mv.z;
+    float pointSize = uSize*mix(4.2, 1., knot)*(0.5 + aSeed.y)*uPx/-mv.z;
+    vAlpha *= min(pointSize*pointSize, 1.);
+    gl_PointSize = max(pointSize, 1.);
     gl_Position = projectionMatrix*mv;
   }`;
 const outflowUniforms = (extra = {}) => ({
@@ -306,7 +312,7 @@ const faceMaterial = new THREE.ShaderMaterial({
         col *= 0.66 + 0.3*up + 0.16*stripe*abs(lane);
       } else if (kind < 4.5) {
         vec2 g = abs(fract(vP*34.) - .5);
-        col *= 0.8 + 0.26*smoothstep(.34, .12, max(g.x, g.y));
+        col *= 0.8 + 0.26*(1. - smoothstep(.12, .34, max(g.x, g.y)));
       } else {
         col = base*0.7 + vec3(1.,.95,.8)*exp(-t*7.)*0.55*(0.7 + 0.3*sin(uTime*4. + ang*22.));
       }
