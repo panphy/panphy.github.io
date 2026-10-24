@@ -1,49 +1,67 @@
 # PanPhy Labs
 
+Small, useful physics apps that run wherever a browser does.
+
 [Open PanPhy Labs](https://panphy.app/)
 
-Browser-based physics tools, simulations, classroom utilities and games. Students and teachers on school-managed devices often cannot install software, so everything runs in the browser.
+Welcome to **PanPhy Labs**. These tools, simulations, and games are built with AI and designed to be interactive and educational. There are many great physics tools online, but not all of them fit my lessons. On school-managed devices, students and teachers often don't have the admin rights to install software, so I build my own web apps that are simple, run in any browser, and need no installation.
 
-## Explore
+The aim is simple: build tools I'm proud to use in my own classroom and happy to recommend to others.
 
-- **Tools:** [PanPhyMD](tools/panphymd.html) for Markdown editing with linked or embedded local images (up to 5 MB each, with image data collapsed in the editor), [PanPhyPlot](tools/panphyplot.html) for column-based data processing, graph plotting and curve fitting, best on tablets and computers (small screens can continue after a warning), [Motion Tracker](tools/motion_tracker.html) for manual or automatic video tracking of position and velocity, with Manual, Auto and Edit modes, individual mark deletion, undo/redo and a filming-rate reminder for slow motion, [Sound Analyzer](tools/sound_analyzer.html) for microphone spectra, waveform timing and CSV snapshots, and [Tone Generator](tools/tone_generator.html) for mixing two sine waves with phase control and left/right panning for each wave. Both audio tools use the shared workbench style and theme controls.
-- **Simulations:** [Virtual Ripple Tank](simulations/ripple_tank.html), [Wave Superposition](simulations/superposition.html), [Standing Wave](simulations/standing_wave.html), [Collision Lab](simulations/collision.html), [States of Matter](simulations/states.html), [Atomic Models](simulations/atomic_models.html), [Nuclear Decay](simulations/nuclear_decay.html), [Fission and Fusion](simulations/fission_fusion.html), [Electric Motors](simulations/electric_motors.html), [Charges in Fields](simulations/charges_in_fields.html), [Life Cycle of a Star](simulations/star_life_cycle.html), and [Lorentz Transform](simulations/lorentz.html).
-- **Teacher utilities:** [Exam Timer](for_teachers/timer.html) and [Camera Visualizer](for_teachers/visualizer.html).
-- **Games and demos:** [Spellwave](fun/spellwave.html) and [ASCII Camera](fun/ascii_cam.html).
+## Have a look around
+
+Here are a few places to start. The [homepage](https://panphy.app/) has the full app catalog.
+
+- **Work with real data.** Plot graphs and fit curves in [PanPhyPlot](tools/panphyplot.html), track motion from video in [Motion Tracker](tools/motion_tracker.html), or explore microphone signals in [Sound Analyzer](tools/sound_analyzer.html).
+- **Try out the physics.** Make waves in the [Virtual Ripple Tank](simulations/ripple_tank.html), investigate collisions in [Collision Lab](simulations/collision.html), or see how [Electric Motors](simulations/electric_motors.html) work.
+- **Make lessons a little easier.** Put an [Exam Timer](for_teachers/timer.html) on the board, turn a camera into a [Visualizer](for_teachers/visualizer.html), mix waves with the [Tone Generator](tools/tone_generator.html), or write notes in [PanPhyMD](tools/panphymd.html).
+- **Take a break.** Try the spelling game [Spellwave](fun/spellwave.html) or turn your webcam into text with [ASCII Camera](fun/ascii_cam.html).
 
 ## Curriculum hubs
 
-Two hubs hold the author's course resources: teaching decks, workbooks, revision material and lesson starters. They are public but sit outside the homepage catalog, reached by direct link. Teachers and students are welcome to use them in lessons and study; see [License](#license) for reuse.
+I also keep my course resources here: teaching decks, workbooks, revision material, and lesson starters. These have their own hubs, separate from the homepage app catalog. You're welcome to use them in your lessons or for your own study; see [License](#license) for the details.
 
 - **[GCSE Physics](https://panphy.app/gcsephy/):** course summaries of AQA Physics 8463 and the physics in Combined Science: Trilogy 8464, AO1 starters and revision resources, then teaching decks and workbook hubs for Years 9 to 11. Each unit folder, `gcsephy/course-summary/` and `gcsephy/do-now/` has its own README; [teaching deck styles and controls](gcsephy/decks/README.md) are documented separately.
 - **[IB DP Physics](https://panphy.app/ibdpphy/):** the IB Diploma Programme Physics course (first assessment 2025). See the [folder overview](ibdpphy/README.md).
 
 ## Offline use
 
-Most published tools and simulations work offline once cached: visit online first and check the homepage's **Offline Ready** indicator. Updates appear through an update prompt, shown only in apps whose own or shared files changed. Shared fonts in `assets/fonts/` are precached (about 297 KB).
+Most tools and simulations can come along even when the Wi-Fi doesn't. Visit online first and look for the **Offline ready** badge on each homepage card before relying on an app offline. When an app or its shared files change, it offers an update prompt.
 
-Pages under `fun/`, `beta/`, `misc/`, `gcsephy/` and `ibdpphy/` need internet access, as do Supabase features such as leaderboards. `gcsephy/` registers its own small worker (`gcsephy/sw.js`), which stores nothing and only revalidates requests so edits appear on the next load; a page that is already open offers a Reload banner when its files or its question bank change. `ibdpphy/` has a copy of the same worker for its own scope.
+Games, trial apps, unlisted resources, and both curriculum hubs need an internet connection, as do features such as leaderboards. The curriculum hubs check for fresh content on every load and offer a Reload banner when an open page's files or watched data change.
+
+## Running it locally
+
+The site is plain HTML, CSS, and JavaScript, served through GitHub Pages. There's no build step. From the repository folder, run:
+
+```sh
+python3 -m http.server 8000
+```
+
+Then open [localhost:8000](http://localhost:8000). Each app has its own HTML entry point, so you can open it directly. When checking changes, use a clean browser context to avoid an older service-worker cache.
 
 ## Repository map
 
 | Path | Contents |
 | --- | --- |
-| `index.html` | General app catalog with topic filters (cards use `data-topic`) and offline readiness indicators |
+| `index.html` | The homepage, app catalog, topic filters, and offline readiness indicators |
 | `sw.js`, `manifest.json` | Caching, updates, and PWA configuration |
 | `assets/` | The shared Spectrum design system (`design.css`), shared controls, icons, locally hosted fonts, and service-worker registration |
 | `tools/`, `simulations/`, `for_teachers/` | Published educational apps |
-| `fun/` | Network-only games and demos; Spellwave's text-logic tests run with `node --test fun/spellwave/tests/*.test.mjs` |
+| `fun/` | Games and demos that need an internet connection |
 | `beta/` | Trial apps, listed in `beta/index.html` |
 | `misc/` | Unlisted resources, including the phone-compatible introductory [PanPhyPlotOG](misc/panphyplotog.html), inventoried in `misc/index.html` |
 | `gcsephy/` | GCSE Physics curriculum resources, course summaries and the Do Now starters, inventoried in `gcsephy/index.html` |
 | `ibdpphy/` | IB DP Physics teaching decks, inventoried in `ibdpphy/index.html` |
-| `.github/` | Repository automation: `workflows/checks.yml` runs `scripts/check.mjs` and the app tests (including Sound Analyzer timing and keyboard regressions) on every pull request; `workflows/supabase-keepalive.yml` pings Supabase twice a week |
+| `.github/` | Repository checks, app tests, and scheduled Supabase keepalive automation |
 
-The shared logo is `assets/panphy.png`; display the full square without CSS corner rounding or cropping. The favicon uses the same artwork, while the Apple touch icon and dedicated maskable PWA icon include padding to protect the logo from system icon masks.
+For editing conventions, caching rules, and verification commands, see [AGENTS.md](AGENTS.md).
 
 ## License
 
-Copyright © 2026 PanPhy Labs. All rights reserved. The source is public to read but is not open source: copying, adapting or republishing the code or content needs written permission. Third-party libraries, fonts and credited images keep their own licenses. See [`LICENSE`](LICENSE).
+Copyright © 2026 PanPhy Labs. All rights reserved.
+
+You're welcome to use the site in lessons, link to it, and print or download pages for your own study or teaching your own students, free of charge, with the copyright notice left in place. The source is public to read but is not open source. Copying, adapting, or republishing the code or content beyond those uses needs written permission. Third-party libraries, fonts, and credited images keep their own licenses. See [LICENSE](LICENSE).
 
 ## Contact
 
