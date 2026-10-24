@@ -35,6 +35,7 @@
   --aluminum: #AEB9C4;
   --lead: #4A5360;
   --correct-border: #3F7A55;
+  --reaction-arrow: #B45309;
 }
 
 [data-theme="dark"] {
@@ -53,6 +54,7 @@
   --aluminum: #8E9AA6;
   --lead: #5B6573;
   --correct-border: #4ADE80;
+  --reaction-arrow: #FBBF24;
 }
 
 * { box-sizing: border-box; }
@@ -217,8 +219,8 @@ body.viewer-expanded { overflow: hidden; }
 .equation .check { margin-top: 4px; font-size: .68rem; color: var(--text-secondary); text-align: right; }
 .equation .check b { color: var(--correct-border); font-weight: 600; }
 
-/* Half-life graph */
-.graph { top: 8px; right: 8px; width: 290px; padding: 6px; border-radius: 12px; background: var(--overlay-bg); border: 1px solid var(--card-border); }
+/* Chain and fusion graph: in the control column, or above the 3D view on phones */
+.graph { padding: 6px; border-radius: 12px; background: var(--overlay-bg); border: 1px solid var(--card-border); }
 .graph canvas { display: block; width: 100%; height: auto; aspect-ratio: 290 / 190; flex: none; min-height: 0; }
 .graph-stats { margin: 4px 4px 0; font-size: .7rem; line-height: 1.4; color: var(--text-secondary); }
 .graph-stats b { color: var(--undecayed); font-weight: 600; }
@@ -371,7 +373,7 @@ footer { display: flex; justify-content: space-between; gap: 20px; border-top: 1
   .equation .check { text-align: center; }
   body[data-mode=chain] #viewer, body[data-mode=fusion] #viewer { height: 640px; min-height: 640px; }
   body[data-mode=energy] #viewer { height: 560px; min-height: 560px; }
-  .graph { position: relative; order: -1; top: auto; right: auto; width: auto; margin: 0 0 8px; padding: 6px; }
+  #viewer > .graph { margin: 0 0 8px; }
     .console { padding: 16px 12px; }
   .particle-readout { min-height: 72px; }
   .toolbar { gap: 6px; }
@@ -395,8 +397,7 @@ footer { display: flex; justify-content: space-between; gap: 20px; border-top: 1
 .bea-stats b { display: block; color: var(--text-main); font-size: .86rem; font-weight: 600; }
 .bea-stats b.big { color: var(--brand-primary); }
 
-/* Fusion shows both the equation and a graph, so the equation moves under the drag hint. */
-body[data-mode=fusion] .equation { top: 34px; right: auto; left: 8px; }
+/* On phones the fusion graph sits above the 3D view, so the equation moves to the bottom. */
 @media (max-width: 760px) {
   .graph canvas { aspect-ratio: auto; height: 170px; }
   body[data-mode=fusion] .equation { top: auto; bottom: 46px; left: 8px; right: 8px; }
