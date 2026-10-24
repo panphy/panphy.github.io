@@ -86,6 +86,8 @@ const BOSS_ROCK_ARC_HEIGHT = 2.3;
 const MAX_CONCURRENT_BOSS_PROJECTILES = 2;
 const MIN_PROJECTILE_SPACING = 2.6;
 const BOSSES_PER_WAVE = 3;
+// On waves 1–3 each boss waits until the one before it is gone.
+const ONE_BOSS_AT_A_TIME_WAVES = 3;
 const FINAL_WAVE_NUMBER = 10;
 const FINAL_WAVE_BOSS_COUNT = 10;
 const COSMIC_WAVE_THRESHOLD = 99149236;
@@ -1543,8 +1545,10 @@ function animate(frameTime) {
         }
       } else {
         if (bossesSpawned < BOSSES_PER_WAVE) {
-          // Keep spawning on the timer even while earlier bosses are still active.
-          bossSpawnTimer = Math.max(0, bossSpawnTimer - currentDelta);
+          // Keep spawning on the timer even while earlier bosses are still active,
+          // except on the first waves, where the timer waits for the last boss to go.
+          const waitForBoss = waveSet <= ONE_BOSS_AT_A_TIME_WAVES && enemies.some(enemy => enemy.isBoss && !enemy.dying);
+          if (!waitForBoss) bossSpawnTimer = Math.max(0, bossSpawnTimer - currentDelta);
           if (bossSpawnTimer <= 0) {
             spawnBoss();
             bossesSpawned += 1;
@@ -2199,6 +2203,7 @@ function updateLabels() {
     enemy.label.classList.toggle('is-danger', enemy.group.position.z > -4);
     enemy.label.classList.toggle('is-critical', enemy.group.position.z > 1);
     enemy.label.classList.toggle('is-stunned', !!(enemy.stunTimer && enemy.stunTimer > 0));
+    enemy.label.classList.toggle('is-entering', enemy.isBoss && !enemy.revealed);
   }
 }
 
@@ -3459,8 +3464,10 @@ function chooseTarget(matches) {
   return pickTarget(matches, typedBuffer);
 }
 
+// A boss shows its question, and can be answered, from the start of its walk-in,
+// so the player reads while it is still far away. It throws nothing until revealed.
 function isEnemyTargetable(enemy) {
-  return enemy.revealed && enemy.group.position.z < WALL_Z && !enemy.dying;
+  return (enemy.revealed || enemy.isBoss) && enemy.group.position.z < WALL_Z && !enemy.dying;
 }
 
 function getEquationQuantities(equationTerm) {
