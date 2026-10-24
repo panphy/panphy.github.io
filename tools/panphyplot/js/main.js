@@ -35,7 +35,7 @@ document.addEventListener('DOMContentLoaded', () => {
 	window.addEventListener('panphy:theme-change', () => {
 		forceReplot();
 		plotGraph();
-		// Series colours differ between the themes' palettes.
+		// Series colors differ between the themes' palettes.
 		renderTable();
 		refreshWorkspaceChrome();
 		if (document.getElementById('popup-container').style.display === 'block') plotAllSheets();

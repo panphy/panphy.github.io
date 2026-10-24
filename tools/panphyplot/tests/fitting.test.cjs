@@ -28,7 +28,7 @@ function predictions(data, evaluate, tolerance = 1e-7) {
 	for (const p of data) assert.ok(Number.isFinite(evaluate(p.x)) && Math.abs(evaluate(p.x) - p.y) < tolerance * scale, `bad prediction at ${p.x}`);
 }
 
-test('Gaussian automatic guesses recover off-centre peaks, dips, baselines and small units', () => {
+test('Gaussian automatic guesses recover off-center peaks, dips, baselines and small units', () => {
 	for (const A of [3, -3]) for (const c of [0, 10]) for (const scale of [1, 1e-6]) {
 		const truth = { A, c, mu: 2 * scale, sigma: 0.3 * scale };
 		const data = points(101, 0, 10 * scale, x => core.evaluateGaussian(truth, x));

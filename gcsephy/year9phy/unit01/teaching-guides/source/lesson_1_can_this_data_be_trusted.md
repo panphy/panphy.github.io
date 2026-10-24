@@ -52,7 +52,7 @@ By the end of the lesson, students should be able to:
 
 - Mini whiteboards or exercise books
 - Projected examples of repeated readings
-- Meter rulers
+- Metre rulers
 - Stopwatches
 - A toy car, trolley, or ball
 - Optional: different measuring instruments, for example a ruler marked in cm and a ruler marked in mm
@@ -254,4 +254,4 @@ The most important links to later lessons are:
 
 Common misconception:
 
-Students often think precise means correct. Emphasize that precise measurements are close together, but they may still be inaccurate if there is a systematic error.
+Students often think precise means correct. Emphasise that precise measurements are close together, but they may still be inaccurate if there is a systematic error.

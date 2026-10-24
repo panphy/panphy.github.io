@@ -130,8 +130,8 @@ Students swap books and check each other's graphs.
 | Graph feature | Yes/No |
 |---|---|
 | Title included |
-| x-axis labeled with unit |
-| y-axis labeled with unit |
+| x-axis labelled with unit |
+| y-axis labelled with unit |
 | Sensible scale |
 | Points plotted accurately |
 | Best-fit line drawn |
@@ -158,8 +158,8 @@ Ask students to answer:
 
 ## Possible prep
 
-Students are given a printed line graph with mistakes. They must identify and correct the errors, for example missing units, poor scale, dot-to-dot line, and unrecognized anomalous result.
+Students are given a printed line graph with mistakes. They must identify and correct the errors, for example missing units, poor scale, dot-to-dot line, and unrecognised anomalous result.
 
 ## Teacher notes
 
-This lesson is a good opportunity to emphasize scientific judgment. Students often want a simple rule such as “ignore the weird result.” Encourage them to say, “repeat it first if possible.”
+This lesson is a good opportunity to emphasise scientific judgement. Students often want a simple rule such as “ignore the weird result.” Encourage them to say, “repeat it first if possible.”

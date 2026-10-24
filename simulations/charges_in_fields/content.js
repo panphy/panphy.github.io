@@ -20,7 +20,7 @@ export const MODES = {
     level: 'A LEVEL · IB DP',
     heading: 'A magnetic force bends the path but never changes the speed.',
     description: 'A charge moving across a magnetic field feels a force F = qvB, at right angles to both its velocity and the field. Because the force is always at right angles to the motion, it changes the direction but not the speed: the particle moves in a circle. The magnetic force provides the centripetal force.',
-    look: 'Fire a proton into the field (at 90° the field points into the screen). Watch the force arrow: it always points to the centre of the circle. Now try an electron: it circles the other way. Change the speed or the field and see how the radius changes. Then set the field angle to 45°: the field turns, and the path becomes a helix.',
+    look: 'Fire a proton into the field (at 90° the field points into the screen). Watch the force arrow: it always points to the center of the circle. Now try an electron: it circles the other way. Change the speed or the field and see how the radius changes. Then set the field angle to 45°: the field turns, and the path becomes a helix.',
     evidence: 'Faster particles make bigger circles, and stronger fields make smaller ones, because r = mv/(qB). The kinetic energy graph stays flat: a magnetic force does no work. Any velocity along the field is unaffected, which is why the particle spirals along the field lines: this traps charged particles in Earth’s magnetic field and makes the aurora.',
     deeper: 'Setting qvB = mv²/r gives r = mv/(qB). The time for one orbit, T = 2πm/(qB), does not depend on the speed: faster particles make bigger circles in the same time. This fact makes the cyclotron possible. For a helix only the perpendicular part of the velocity, v sin θ, sets the radius.',
   },
@@ -30,7 +30,7 @@ export const MODES = {
     level: 'A LEVEL · IB DP',
     heading: 'Only one speed goes straight through.',
     description: 'Here an electric field and a magnetic field act at right angles to each other and to the beam. The electric force qE is the same for every particle, but the magnetic force qvB grows with speed. For one speed, v = E/B, the two forces are equal and opposite, so those particles go straight through the slit. Slower particles are pulled one way, faster ones the other.',
-    look: 'Start the beam: particles are coloured by speed, slow (blue) to fast (orange). Which colour passes through the slit? Change the voltage or the field and predict which speed will be selected. Try protons, then alpha particles: does the selected speed change?',
+    look: 'Start the beam: particles are colored by speed, slow (blue) to fast (orange). Which color passes through the slit? Change the voltage or the field and predict which speed will be selected. Try protons, then alpha particles: does the selected speed change?',
     evidence: 'The selected speed v = E/B does not depend on the charge or the mass, so every kind of particle with that speed passes. Velocity selectors are used at the start of mass spectrometers, so that every ion entering the magnetic field has the same speed.',
     deeper: 'Balance: qE = qvB, so v = E/B = V/(Bd). A particle that is a little too fast feels a larger magnetic force, so it curves towards the magnetic-force side; too slow and the electric force wins. The width of the slit sets how precise the selection is.',
   },
@@ -50,21 +50,21 @@ const E = 1.602177e-19;
 // Ranges are in the units shown in each label.
 export const PARTICLES = {
   electron: {
-    name: 'Electron', symbol: 'e⁻', q: -E, m: 9.109e-31, colour: 'negative',
+    name: 'Electron', symbol: 'e⁻', q: -E, m: 9.109e-31, color: 'negative',
     speed: { min: 2, max: 40, step: 1, value: 20, unit: 1e6, label: 'Speed v (×10⁶ m/s)' },
     field: { min: 0.5, max: 10, step: 0.5, value: 5 },
     selectorVoltage: { min: 0, max: 200, step: 5, value: 80 },
     selectorField: { min: 0.1, max: 1, step: 0.02, value: 0.4 }
   },
   proton: {
-    name: 'Proton', symbol: 'p', q: E, m: 1.6726e-27, colour: 'positive',
+    name: 'Proton', symbol: 'p', q: E, m: 1.6726e-27, color: 'positive',
     speed: { min: 1, max: 10, step: 0.5, value: 4, unit: 1e5, label: 'Speed v (×10⁵ m/s)' },
     field: { min: 20, max: 500, step: 10, value: 100 },
     selectorVoltage: { min: 0, max: 500, step: 10, value: 200 },
     selectorField: { min: 5, max: 60, step: 1, value: 25 }
   },
   alpha: {
-    name: 'Alpha particle', symbol: 'α', q: 2 * E, m: 6.6447e-27, colour: 'alpha',
+    name: 'Alpha particle', symbol: 'α', q: 2 * E, m: 6.6447e-27, color: 'alpha',
     speed: { min: 1, max: 10, step: 0.5, value: 4, unit: 1e5, label: 'Speed v (×10⁵ m/s)' },
     field: { min: 20, max: 500, step: 10, value: 200 },
     selectorVoltage: { min: 0, max: 500, step: 10, value: 200 },
@@ -83,7 +83,7 @@ export const MODE_PARTICLES = {
 // Steppers. A spec with `from` takes its range from the chosen particle.
 export const STEPPERS = {
   voltage: { label: 'Voltage V (V)', min: 0, max: 500, step: 25, value: 200, decimals: 0, aria: 'Plate voltage in volts' },
-  separation: { label: 'Plate gap d (cm)', min: 2, max: 8, step: 1, value: 4, decimals: 0, aria: 'Plate separation in centimetres' },
+  separation: { label: 'Plate gap d (cm)', min: 2, max: 8, step: 1, value: 4, decimals: 0, aria: 'Plate separation in centimeters' },
   speed: { label: 'Speed v', from: 'speed', decimals: 1, aria: 'Particle speed' },
   field: { label: 'Field B (mT)', from: 'field', decimals: 1, aria: 'Magnetic flux density in millitesla' },
   angle: { label: 'Field angle θ (°)', min: 0, max: 90, step: 15, value: 90, decimals: 0, aria: 'Angle between the magnetic field and the velocity in degrees' },
@@ -109,7 +109,7 @@ export const PARTS = {
   bfieldOut: 'MAGNETIC FIELD · Uniform in the shaded region, along the arrows. Reversed: at 90° the field lines now point out of the screen, towards you.',
   bfieldUp: 'MAGNETIC FIELD · Uniform and vertical through both dees. The field lines run up from the N pole to the S pole.',
   particle: 'PARTICLE · Tap Fire again to send another. The arrows show its velocity (blue) and the force on it (magenta).',
-  particleSelector: 'PARTICLE · Its colour shows its speed, from slow (blue) to fast (orange).',
+  particleSelector: 'PARTICLE · Its color shows its speed, from slow (blue) to fast (orange).',
   screen: 'FLUORESCENT SCREEN · Glows where a particle lands, marking how far the beam was deflected.',
   gun: 'PARTICLE SOURCE · Sends particles out at a chosen speed. For electrons this would be an electron gun.',
   slit: 'SLIT · Only particles that travel in a straight line through the fields get through.',

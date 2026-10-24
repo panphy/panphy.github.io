@@ -61,8 +61,8 @@ test('insufficient velocity points produces empty velocity graph', () => {
     assert.equal(c.positionChart.options.scales.y.title.text,'Velocity (m/s)');
 });
 
-// Auto-tracking: a shaded, anti-aliased disc on a textured background, as an RGBA image.
-function discImage(width, height, cx, cy, radius) {
+// Auto-tracking: a shaded, anti-aliased disk on a textured background, as an RGBA image.
+function diskImage(width, height, cx, cy, radius) {
     const data = new Uint8ClampedArray(width * height * 4);
     for (let y = 0; y < height; y++) for (let x = 0; x < width; x++) {
         let cover = 0;
@@ -86,19 +86,19 @@ function trackingCore() {
 }
 test('auto-tracking finds the clicked object and its size', () => {
     const c = trackingCore();
-    const blob = c.findBlob(discImage(120, 90, 50.3, 40.6, 9), 52, 42, 30);
+    const blob = c.findBlob(diskImage(120, 90, 50.3, 40.6, 9), 52, 42, 30);
     assert.ok(Math.abs(blob.x - 50.3) < 0.5 && Math.abs(blob.y - 40.6) < 0.5);
     assert.ok(Math.abs(blob.radius - 9) < 1.5);
-    assert.equal(c.findBlob(discImage(120, 90, 50, 40, 9), 5, 5, 20), null);
+    assert.equal(c.findBlob(diskImage(120, 90, 50, 40, 9), 5, 5, 20), null);
 });
 test('auto-tracking matches a moved object to a fraction of a pixel', () => {
     const c = trackingCore();
-    const template = c.cutTemplate(discImage(160, 120, 60, 50, 10), 60, 50, 13);
-    const found = c.matchTemplate(discImage(160, 120, 71.4, 44.7, 10), template, 70, 46, 12);
+    const template = c.cutTemplate(diskImage(160, 120, 60, 50, 10), 60, 50, 13);
+    const found = c.matchTemplate(diskImage(160, 120, 71.4, 44.7, 10), template, 70, 46, 12);
     assert.ok(Math.abs(found.x - 71.4) < 0.3, `x ${found.x}`);
     assert.ok(Math.abs(found.y - 44.7) < 0.3, `y ${found.y}`);
     assert.ok(found.score > 0.9);
-    const empty = discImage(160, 120, -100, -100, 10);
+    const empty = diskImage(160, 120, -100, -100, 10);
     assert.ok(c.matchTemplate(empty, template, 70, 46, 12).score < 0.6);
 });
 test('auto-tracking predicts with constant acceleration', () => {
@@ -110,18 +110,18 @@ test('auto-tracking predicts with constant acceleration', () => {
 });
 test('auto-tracking flags a match held at the image edge', () => {
     const c = trackingCore();
-    const template = c.cutTemplate(discImage(160, 120, 60, 50, 10), 60, 50, 13);
-    assert.equal(c.matchTemplate(discImage(160, 120, 80, 50, 10), template, 80, 50, 8).atEdge, false);
-    assert.equal(c.matchTemplate(discImage(160, 120, 150, 50, 10), template, 145, 50, 8).atEdge, true);
+    const template = c.cutTemplate(diskImage(160, 120, 60, 50, 10), 60, 50, 13);
+    assert.equal(c.matchTemplate(diskImage(160, 120, 80, 50, 10), template, 80, 50, 8).atEdge, false);
+    assert.equal(c.matchTemplate(diskImage(160, 120, 150, 50, 10), template, 145, 50, 8).atEdge, true);
 });
 
 test('FPS completion waits for the starting frame before enabling tracking', () => {
     for (const startTime of [0, 0.4, 2]) {
-        let seeked, drawn = 0, cancelled = 0, disabled;
+        let seeked, drawn = 0, canceled = 0, disabled;
         const video = {currentTime: startTime, seeking: false,
             addEventListener: (_type, fn) => seeked = fn,
             removeEventListener: (_type, fn) => { if (seeked === fn) seeked = null; },
-            cancelVideoFrameCallback: () => cancelled++};
+            cancelVideoFrameCallback: () => canceled++};
         const c = context({hiddenVideo: video, playbackCallbackId: 42, fpsDetectionPending: false,
             detectedFps: null, playbackFrameRate: 30, captureFrameRate: 30, isSpecialRecording: false,
             frameRateHintButton: {hidden: true}, detectedFpsDisplay: {}, updateFpsButtonText() {}, slider: {}, getSliderStep: () => 1 / 30,
@@ -132,7 +132,7 @@ test('FPS completion waits for the starting frame before enabling tracking', () 
         vm.runInContext(extract('function applyDetectedFps(', 'function updateFpsButtonText('), c);
         c.applyDetectedFps(30);
         assert.equal(video.paused, true);
-        assert.equal(cancelled, 1);
+        assert.equal(canceled, 1);
         assert.equal(video.currentTime, 0);
         if (startTime > 0) {
             assert.equal(disabled, true);
@@ -146,7 +146,7 @@ test('FPS completion waits for the starting frame before enabling tracking', () 
     }
 });
 
-test('cancelling a pending rewind removes its stale callback', () => {
+test('canceling a pending rewind removes its stale callback', () => {
     let seeked;
     const c = context({hiddenVideo: {currentTime: 1, addEventListener: (_type, fn) => seeked = fn,
             removeEventListener: () => seeked = null}, playbackCallbackId: null,

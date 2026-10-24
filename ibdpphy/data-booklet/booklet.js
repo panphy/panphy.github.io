@@ -4,7 +4,7 @@
 (() => {
   const { HL, THEMES, equationRows, mathHtml, symbol, esc } = window.IBEquations;
 
-  const MATHS = {
+  const MATH = {
     title: 'Mathematical equations',
     eqs: [
       { label: 'Area of a triangle', tex: 'A=\\tfrac{1}{2}bh', syms: { A: 'area', b: 'base of the triangle', h: 'height, measured at right angles to the base' } },
@@ -66,7 +66,7 @@
     ['Parsec (pc)', '1\\,\\mathrm{pc}=3.26\\,\\mathrm{ly}', 'The distance at which a star has a parallax angle of one arc-second.'],
     ['Astronomical unit (AU)', '1\\,\\mathrm{AU}=1.50\\times10^{11}\\,\\mathrm{m}', 'The average distance from the Earth to the Sun.'],
     ['Kilowatt-hour (kWh)', '1\\,\\mathrm{kWh}=3.60\\times10^{6}\\,\\mathrm{J}', 'The energy transferred by a 1 kW device in one hour.'],
-    ['Planck constant × speed of light', 'hc=1.99\\times10^{-25}\\,\\mathrm{J\\,m}=1.24\\times10^{-6}\\,\\mathrm{eV\\,m}', 'A shortcut for photon energy: divide by the wavelength in metres.']
+    ['Planck constant × speed of light', 'hc=1.99\\times10^{-25}\\,\\mathrm{J\\,m}=1.24\\times10^{-6}\\,\\mathrm{eV\\,m}', 'A shortcut for photon energy: divide by the wavelength in meters.']
   ];
 
   // Circuit symbols, drawn on a 120 × 60 grid with the wire along y = 30.
@@ -115,7 +115,7 @@
 
   const circuitHtml = () => `<div class="symbols">${CIRCUIT.map(([name, body, note]) => `<figure><svg viewBox="0 0 120 60" role="img" aria-label="${esc(name)} symbol">${body}</svg><figcaption><b>${esc(name)}</b>${esc(note)}</figcaption></figure>`).join('')}</div>`;
 
-  // Bands of the electromagnetic spectrum by wavelength in metres (powers of ten), as in the booklet's chart.
+  // Bands of the electromagnetic spectrum by wavelength in meters (powers of ten), as in the booklet's chart.
   function spectrumHtml() {
     const bands = [['γ rays', -16, -11], ['X-rays', -11, -8], ['UV', -8, -6.4], ['visible', -6.4, -6.15], ['IR', -6.15, -3.7], ['microwaves', -3.7, -0.3], ['radio waves', -0.3, 8]];
     const x = power => 30 + (power + 16) / 24 * 900;
@@ -128,7 +128,7 @@
     for (let power = -16; power <= 8; power += 2) s += `<path d="M${x(power)},52 V60"/><text x="${x(power)}" y="42" class="tick">10<tspan dy="-7" font-size="11">${String(power).replace('-', '−')}</tspan></text>`;
     s += `<text x="945" y="20" class="axis" text-anchor="end">wavelength / m</text><path d="M330,16 H110" class="arrow"/><path d="M110,16 l12,-5 v10 z" class="head"/><text x="340" y="21" class="axis">energy of each photon increases</text>`;
     s += `<path d="M${x(-6.4)},116 L330,150 M${x(-6.15)},116 L510,150" class="zoom"/><rect x="330" y="150" width="180" height="26" class="rainbow"/><text x="330" y="196" class="tick" text-anchor="start">400 nm</text><text x="510" y="196" class="tick" text-anchor="end">700 nm</text><text x="420" y="168" class="vibgyor">V I B G Y O R</text>`;
-    return `<div class="scroll spectrum"><svg viewBox="0 0 960 206" role="img" aria-label="Electromagnetic spectrum by wavelength: gamma rays below about 10 to the minus 11 metres, then X-rays, ultraviolet, visible light from 400 to 700 nanometres, infrared, microwaves and radio waves"><defs><linearGradient id="rainbow"><stop offset="0" stop-color="#7B2FBE"/><stop offset=".17" stop-color="#4B3FD1"/><stop offset=".33" stop-color="#2F7FE0"/><stop offset=".5" stop-color="#3FB54A"/><stop offset=".67" stop-color="#F2D43D"/><stop offset=".83" stop-color="#F08A2E"/><stop offset="1" stop-color="#D9342B"/></linearGradient></defs>${s}</svg></div>`;
+    return `<div class="scroll spectrum"><svg viewBox="0 0 960 206" role="img" aria-label="Electromagnetic spectrum by wavelength: gamma rays below about 10 to the minus 11 meters, then X-rays, ultraviolet, visible light from 400 to 700 nanometers, infrared, microwaves and radio waves"><defs><linearGradient id="rainbow"><stop offset="0" stop-color="#7B2FBE"/><stop offset=".17" stop-color="#4B3FD1"/><stop offset=".33" stop-color="#2F7FE0"/><stop offset=".5" stop-color="#3FB54A"/><stop offset=".67" stop-color="#F2D43D"/><stop offset=".83" stop-color="#F08A2E"/><stop offset="1" stop-color="#D9342B"/></linearGradient></defs>${s}</svg></div>`;
   }
 
   const vectorHtml = `<figure class="vector"><svg viewBox="0 0 300 190" role="img" aria-label="A vector A at an angle theta above the horizontal, with horizontal component A H and vertical component A V"><path d="M40,160 H260 M40,160 V30" class="dash"/><path d="M40,160 L250,36" class="vec"/><path d="M250,36 l-16,3 l8,12 z" class="vhead"/><path d="M84,160 A44,44 0 0 0 78,138" class="arc"/><text x="96" y="150">θ</text><text x="258" y="34">A</text><text x="268" y="166">A<tspan dy="5" font-size="12">H</tspan></text><text x="14" y="34">A<tspan dy="5" font-size="12">V</tspan></text></svg></figure>`;
@@ -136,7 +136,7 @@
   const sectionHtml = (id, title, body, letter = '', sub = '') => `<section id="${id}"><h2>${letter ? `<span class="letter">${letter}</span>` : ''}${esc(title)}</h2>${sub ? `<p class="sub">${sub}</p>` : ''}${body}</section>`;
 
   document.getElementById('booklet').innerHTML = [
-    sectionHtml('maths', 'Mathematical equations', `<div class="grid two">${blockHtml({ ...MATHS, title: 'Areas, volumes, vectors and trigonometry' })}${vectorHtml}</div>`),
+    sectionHtml('math', 'Mathematical equations', `<div class="grid two">${blockHtml({ ...MATH, title: 'Areas, volumes, vectors and trigonometry' })}${vectorHtml}</div>`),
     sectionHtml('uncertainties', 'Uncertainties', blockHtml({ ...UNCERTAINTIES, title: 'Combining uncertainties' })),
     sectionHtml('constants', 'Fundamental constants', constantsHtml(), '', 'Values are those of the data booklet, rounded as it rounds them.'),
     sectionHtml('multipliers', 'Metric (SI) multipliers', multipliersHtml()),

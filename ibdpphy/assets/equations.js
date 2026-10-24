@@ -138,7 +138,7 @@
       ]
     },
     {
-      letter: 'C', title: 'Wave behaviour', topics: [
+      letter: 'C', title: 'Wave behavior', topics: [
         {
           id: 'C.1', title: 'Simple harmonic motion', level: SL,
           syms: { a: 'acceleration (m s⁻²)', '\\omega': 'angular frequency (rad s⁻¹)', x: 'displacement from the equilibrium position (m)', T: 'time period (s)', f: 'frequency (Hz)', m: 'mass on the spring (kg)', k: 'spring constant (N m⁻¹)', l: 'length of the pendulum (m)', g: 'gravitational field strength (N kg⁻¹)' },
@@ -154,7 +154,7 @@
           syms: {
             'n_{1}': 'refractive index of the first medium', 'n_{2}': 'refractive index of the second medium', '\\theta_{1}': 'angle between the ray and the normal in the first medium', '\\theta_{2}': 'angle between the ray and the normal in the second medium',
             'v_{1}': 'wave speed in the first medium (m s⁻¹)', 'v_{2}': 'wave speed in the second medium (m s⁻¹)', n: 'a whole number: 0, 1, 2 …', '\\lambda': 'wavelength (m)',
-            s: 'separation of neighbouring fringes on the screen (m)', D: 'distance from the slits to the screen (m)', d: 'separation of the two slits (m)'
+            s: 'separation of neighboring fringes on the screen (m)', D: 'distance from the slits to the screen (m)', d: 'separation of the two slits (m)'
           },
           eqs: [
             { label: 'Snell’s law', tex: '\\dfrac{n_{1}}{n_{2}}=\\dfrac{\\sin\\theta_{2}}{\\sin\\theta_{1}}=\\dfrac{v_{2}}{v_{1}}' },
@@ -175,7 +175,7 @@
         },
         {
           id: 'C.3', title: 'Wave phenomena', level: HL,
-          syms: { '\\theta': 'angle from the centre of the pattern (rad for the single slit)', '\\lambda': 'wavelength (m)', b: 'width of the slit (m)', n: 'order of the maximum: 0, 1, 2 …', d: 'separation of neighbouring slits (m)' },
+          syms: { '\\theta': 'angle from the center of the pattern (rad for the single slit)', '\\lambda': 'wavelength (m)', b: 'width of the slit (m)', n: 'order of the maximum: 0, 1, 2 …', d: 'separation of neighboring slits (m)' },
           eqs: [{ label: 'Single slit: first minimum', tex: '\\theta=\\dfrac{\\lambda}{b}' }, { label: 'Multiple slits and gratings: maxima', tex: 'n\\lambda=d\\sin\\theta' }]
         },
         {
@@ -189,7 +189,7 @@
       letter: 'D', title: 'Fields', topics: [
         {
           id: 'D.1', title: 'Gravitational fields', level: SL,
-          syms: { F: 'gravitational force (N)', G: 'gravitational constant', 'm_{1}': 'mass of the first body (kg)', 'm_{2}': 'mass of the second body (kg)', r: 'distance between the centres of the two masses (m)', g: 'gravitational field strength (N kg⁻¹)', m: 'small test mass placed in the field (kg)', M: 'mass that produces the field (kg)' },
+          syms: { F: 'gravitational force (N)', G: 'gravitational constant', 'm_{1}': 'mass of the first body (kg)', 'm_{2}': 'mass of the second body (kg)', r: 'distance between the centers of the two masses (m)', g: 'gravitational field strength (N kg⁻¹)', m: 'small test mass placed in the field (kg)', M: 'mass that produces the field (kg)' },
           eqs: ['F=G\\dfrac{m_{1}m_{2}}{r^{2}}', 'g=\\dfrac{F}{m}=G\\dfrac{M}{r^{2}}']
         },
         {
@@ -204,7 +204,7 @@
         },
         {
           id: 'D.1', title: 'Gravitational fields', level: HL,
-          syms: { 'E_\\mathrm{p}': 'gravitational potential energy of the two bodies: zero at infinite separation (J)', G: 'gravitational constant', 'm_{1}': 'mass of the first body (kg)', 'm_{2}': 'mass of the second body (kg)', r: 'distance from the centre of the mass (m)', 'V_\\mathrm{g}': 'gravitational potential: work done per unit mass from infinity (J kg⁻¹)', M: 'mass that produces the field (kg)', g: 'gravitational field strength (N kg⁻¹)', '\\Delta V_\\mathrm{g}': 'final gravitational potential minus initial gravitational potential (J kg⁻¹)', '\\Delta r': 'change in distance (m)', W: 'external work in moving the mass without changing its kinetic energy; equals the signed potential-energy change (J)', m: 'mass being moved (kg)', 'v_\\mathrm{esc}': 'escape speed (m s⁻¹)', 'v_\\mathrm{orbital}': 'speed of a body in a circular orbit of radius r (m s⁻¹)' },
+          syms: { 'E_\\mathrm{p}': 'gravitational potential energy of the two bodies: zero at infinite separation (J)', G: 'gravitational constant', 'm_{1}': 'mass of the first body (kg)', 'm_{2}': 'mass of the second body (kg)', r: 'distance from the center of the mass (m)', 'V_\\mathrm{g}': 'gravitational potential: work done per unit mass from infinity (J kg⁻¹)', M: 'mass that produces the field (kg)', g: 'gravitational field strength (N kg⁻¹)', '\\Delta V_\\mathrm{g}': 'final gravitational potential minus initial gravitational potential (J kg⁻¹)', '\\Delta r': 'change in distance (m)', W: 'external work in moving the mass without changing its kinetic energy; equals the signed potential-energy change (J)', m: 'mass being moved (kg)', 'v_\\mathrm{esc}': 'escape speed (m s⁻¹)', 'v_\\mathrm{orbital}': 'speed of a body in a circular orbit of radius r (m s⁻¹)' },
           eqs: ['E_\\mathrm{p}=-G\\dfrac{m_{1}m_{2}}{r}', 'V_\\mathrm{g}=-G\\dfrac{M}{r}', 'g=-\\dfrac{\\Delta V_\\mathrm{g}}{\\Delta r}', 'W=m\\Delta V_\\mathrm{g}', 'v_\\mathrm{esc}=\\sqrt{\\dfrac{2GM}{r}}', 'v_\\mathrm{orbital}=\\sqrt{\\dfrac{GM}{r}}']
         },
         {

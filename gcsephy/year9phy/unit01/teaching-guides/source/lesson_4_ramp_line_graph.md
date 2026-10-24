@@ -44,7 +44,7 @@ Per group:
 
 - Ramp
 - Trolley or toy car
-- Meter ruler or tape measure
+- Metre ruler or tape measure
 - Blocks or books to change ramp height
 - Graph paper
 - Exercise book or results table sheet
@@ -164,7 +164,7 @@ Students answer:
 
 ## Possible prep
 
-Students finish plotting the graph if needed. They should check that their graph includes a title, labeled axes, units, sensible scale, and accurately plotted points.
+Students finish plotting the graph if needed. They should check that their graph includes a title, labelled axes, units, sensible scale, and accurately plotted points.
 
 ## Teacher notes
 

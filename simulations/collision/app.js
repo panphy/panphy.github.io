@@ -998,7 +998,7 @@ function resizeStage() {
 }
 
 // The video is shown with `object-fit: cover`, so it is scaled and cropped to fill the stage.
-// Landmarks are normalised to the video frame; this maps them to normalised stage coordinates.
+// Landmarks are normalized to the video frame; this maps them to normalized stage coordinates.
 function updateCoverTransform() {
     const videoWidth = ui.video.videoWidth;
     const videoHeight = ui.video.videoHeight;
@@ -1364,8 +1364,8 @@ function updateOverlays(advanced) {
 }
 
 // --- Trails: a three.js ribbon under each ball ---
-// A triangle mesh blends colour and transparency smoothly from vertex to vertex, so the trail
-// can taper, shift colour and fade without the seams that short 2D strokes leave. Each trail
+// A triangle mesh blends color and transparency smoothly from vertex to vertex, so the trail
+// can taper, shift color and fade without the seams that short 2D strokes leave. Each trail
 // point gets four vertices across the ribbon: transparent outer edges and an opaque core, which
 // gives the ribbon soft, feathered edges.
 
@@ -1395,7 +1395,7 @@ function createTrailRibbon() {
     const vertexCount = TRAIL_LENGTH * RIBBON_ACROSS.length;
     const geometry = new THREE.BufferGeometry();
     geometry.setAttribute('position', new THREE.BufferAttribute(new Float32Array(vertexCount * 3), 3));
-    // Four components per colour, so each vertex carries its own transparency.
+    // Four components per color, so each vertex carries its own transparency.
     geometry.setAttribute('color', new THREE.BufferAttribute(new Float32Array(vertexCount * 4), 4));
     geometry.setIndex(ribbonIndex);
     geometry.setDrawRange(0, 0);
@@ -1430,8 +1430,8 @@ function updateTrailRibbon(sphere, onLight) {
         mesh.geometry.setDrawRange(0, 0);
         return;
     }
-    // The ball's own colour at the head, easing to a lighter tint towards the tail. On a
-    // light background the colour is deepened a little so the trail keeps its contrast.
+    // The ball's own color at the head, easing to a lighter tint towards the tail. On a
+    // light background the color is deepened a little so the trail keeps its contrast.
     ribbonHead.setHex(sphere.colorHex);
     if (onLight) {
         ribbonHead.multiplyScalar(0.72);
@@ -1443,7 +1443,7 @@ function updateTrailRibbon(sphere, onLight) {
     const colors = mesh.geometry.attributes.color.array;
     const across = RIBBON_ACROSS.length;
     for (let i = 0; i < count; i++) {
-        // Direction of travel from the neighbouring points, and the sideways normal to it.
+        // Direction of travel from the neighboring points, and the sideways normal to it.
         const prev = Math.max(0, i - 1) * 3;
         const next = Math.min(count - 1, i + 1) * 3;
         let tx = points[next] - points[prev];
@@ -1501,7 +1501,7 @@ const overlayPointB = { x: 0, y: 0 };
 const ARROW_FILL = '#111214';
 const ARROW_EDGE = 'rgba(255, 255, 255, 0.92)';
 
-// An arrow in the ball's colour from a solid black dot at the ball's centre. The thin white
+// An arrow in the ball's color from a solid black dot at the ball's center. The thin white
 // edge keeps it visible on dark backgrounds and over the camera picture.
 function drawVelocityArrow(ctx, sphere, ballRadiusPx) {
     const speed = Math.hypot(sphere.velocity.x, sphere.velocity.y);
@@ -1547,7 +1547,7 @@ function drawVelocityArrow(ctx, sphere, ballRadiusPx) {
     ctx.shadowColor = 'transparent';
     ctx.fillStyle = toCssHexColor(sphere.colorHex);
     ctx.fill();
-    // Solid black dot at the ball's centre, where the arrow starts.
+    // Solid black dot at the ball's center, where the arrow starts.
     ctx.beginPath();
     ctx.arc(0, 0, dotRadius, 0, Math.PI * 2);
     ctx.fillStyle = ARROW_FILL;

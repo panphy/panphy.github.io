@@ -4,9 +4,9 @@
 // the flat picture stays for print, and is all there is if the library cannot be fetched.
 const THREE_URL = 'https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js';
 const PARTS = [
-  { key: 'F', word: 'force', finger: 'Thumb', colour: '--brand-primary', from: [0.15, 1.5, 0.06], to: [0.15, 2.6, 0.06], side: 'right' },
-  { key: 'B', word: 'field', finger: 'Index finger', colour: '--brand-accent-strong', from: [0, 0.39, -1.78], to: [0, 0.39, -3.3], side: 'right' },
-  { key: 'I', word: 'current', finger: 'Middle finger', colour: '--brand-accent', from: [1.2, 0.13, -0.66], to: [2.4, 0.13, -0.66], side: 'right' }
+  { key: 'F', word: 'force', finger: 'Thumb', color: '--brand-primary', from: [0.15, 1.5, 0.06], to: [0.15, 2.6, 0.06], side: 'right' },
+  { key: 'B', word: 'field', finger: 'Index finger', color: '--brand-accent-strong', from: [0, 0.39, -1.78], to: [0, 0.39, -3.3], side: 'right' },
+  { key: 'I', word: 'current', finger: 'Middle finger', color: '--brand-accent', from: [1.2, 0.13, -0.66], to: [2.4, 0.13, -0.66], side: 'right' }
 ];
 // The left hand as a smooth model: each part is a skin lofted along a curve through a chain of
 // joints. Its palm faces +x; the thumb points up (+y), the index finger away from the viewer (−z)
@@ -22,7 +22,7 @@ const FINGERS = [
 const PALM = [[0.02, -0.03, 0.78, 0.2, 0.37], [0, 0, 0.42, 0.2, 0.47], [0, 0.01, -0.12, 0.175, 0.55], [0, 0.01, -0.56, 0.14, 0.53]];
 const ARM = [[0.02, -0.05, 1.5, 0.25, 0.4], [0.02, -0.04, 1.15, 0.22, 0.37], [0.02, -0.03, 0.78, 0.2, 0.37]];
 
-const cssColour = name => getComputedStyle(document.documentElement).getPropertyValue(name).trim() || '#888';
+const cssColor = name => getComputedStyle(document.documentElement).getPropertyValue(name).trim() || '#888';
 
 function build(THREE, fig, index) {
   const flat = fig.querySelector('svg');
@@ -57,7 +57,7 @@ function build(THREE, fig, index) {
     : new THREE.MeshStandardMaterial({ color: 0xe0b594, roughness: facet ? 0.85 : 0.62, flatShading: facet, side: THREE.DoubleSide });
   const ink = new THREE.MeshBasicMaterial({ color: 0x3a2a22, side: THREE.BackSide });
   const up = new THREE.Vector3(0, 1, 0);
-  // A smooth skin lofted through the joints: the centre line is a curve through them, the
+  // A smooth skin lofted through the joints: the center line is a curve through them, the
   // thickness is interpolated between them with a slight swelling at each knuckle, and the far
   // end is closed with a rounded cap. With `flat` the cross-section keeps the palm's own
   // directions (thickness along x, width along y) and is squarer, like a palm.
@@ -67,28 +67,28 @@ function build(THREE, fig, index) {
     let normal = null;
     for (let i = 0; i <= count; i++) {
       const u = i / count, at = Math.min(spans - 1, Math.floor(u * spans)), t = u * spans - at, a = joints[at], b = joints[at + 1];
-      const centre = curve.getPoint(u), tangent = curve.getTangent(u).normalize();
+      const center = curve.getPoint(u), tangent = curve.getTangent(u).normalize();
       const swell = 1 + (flat ? 0 : knuckle * Math.cos(t * Math.PI * 2) * (at === 0 && t < 0.5 ? 0 : 1));
       const thick = (a[3] + (b[3] - a[3]) * t) * swell, wide = ((a[4] ?? a[3]) + ((b[4] ?? b[3]) - (a[4] ?? a[3])) * t) * swell;
       if (flat) normal = new THREE.Vector3(1, 0, 0);
       else if (!normal) normal = new THREE.Vector3().crossVectors(Math.abs(tangent.y) < 0.9 ? up : new THREE.Vector3(1, 0, 0), tangent).normalize();
       else normal = normal.clone().sub(tangent.clone().multiplyScalar(normal.dot(tangent))).normalize();
       const across = flat ? new THREE.Vector3(0, 1, 0) : new THREE.Vector3().crossVectors(tangent, normal);
-      rings.push({ centre, tangent, normal: normal.clone(), across, thick, wide });
+      rings.push({ center, tangent, normal: normal.clone(), across, thick, wide });
     }
     // The cap: rings that shrink along a quarter circle beyond the last joint.
     const last = rings[rings.length - 1];
     const caps = facet ? 2 : 6;
     for (let k = 1; k <= caps; k++) {
       const a = k / caps * Math.PI / 2 * 0.98;
-      rings.push({ ...last, centre: last.centre.clone().addScaledVector(last.tangent, Math.sin(a) * last.thick * tip), thick: last.thick * Math.cos(a), wide: last.wide * Math.cos(a) });
+      rings.push({ ...last, center: last.center.clone().addScaledVector(last.tangent, Math.sin(a) * last.thick * tip), thick: last.thick * Math.cos(a), wide: last.wide * Math.cos(a) });
     }
     const power = flat ? 0.72 : 1, positions = [], index = [];
     const shape = v => Math.sign(v) * Math.abs(v) ** power;
-    rings.forEach(ring => { for (let k = 0; k < sides; k++) { const a = k / sides * Math.PI * 2, p = ring.centre.clone().addScaledVector(ring.normal, shape(Math.cos(a)) * ring.thick).addScaledVector(ring.across, shape(Math.sin(a)) * ring.wide); positions.push(p.x, p.y, p.z); } });
+    rings.forEach(ring => { for (let k = 0; k < sides; k++) { const a = k / sides * Math.PI * 2, p = ring.center.clone().addScaledVector(ring.normal, shape(Math.cos(a)) * ring.thick).addScaledVector(ring.across, shape(Math.sin(a)) * ring.wide); positions.push(p.x, p.y, p.z); } });
     for (let i = 0; i < rings.length - 1; i++) for (let k = 0; k < sides; k++) { const n = (k + 1) % sides, p = i * sides, q = p + sides; index.push(p + k, p + n, q + k, p + n, q + n, q + k); }
-    // Close the near end with a slightly domed disc.
-    const back = rings[0].centre.clone().addScaledVector(rings[0].tangent, -rings[0].thick * 0.25), hub = positions.length / 3;
+    // Close the near end with a slightly domed disk.
+    const back = rings[0].center.clone().addScaledVector(rings[0].tangent, -rings[0].thick * 0.25), hub = positions.length / 3;
     positions.push(back.x, back.y, back.z);
     for (let k = 0; k < sides; k++) index.push(hub, (k + 1) % sides, k);
     // Make every face look outwards, whichever way round the rings were built.
@@ -129,12 +129,12 @@ function build(THREE, fig, index) {
     hand.add(shaft, head);
     const label = document.createElement('div');
     label.style.cssText = `position:absolute;display:flex;align-items:center;gap:12px;white-space:nowrap;transform:translate(${part.side === 'left' ? '-100%' : '0'},-50%);`;
-    label.innerHTML = `<b style="font:400 68px/1 var(--font-display);color:var(${part.colour === '--brand-accent-strong' ? '--text-main' : part.colour})">${part.key}</b><span style="font:700 30px/1.2 var(--font-body);color:var(--text-main)">${part.finger}<br><span style="font-weight:500;font-size:26px;color:var(--text-secondary)">${part.word}</span></span>`;
+    label.innerHTML = `<b style="font:400 68px/1 var(--font-display);color:var(${part.color === '--brand-accent-strong' ? '--text-main' : part.color})">${part.key}</b><span style="font:700 30px/1.2 var(--font-body);color:var(--text-main)">${part.finger}<br><span style="font-weight:500;font-size:26px;color:var(--text-secondary)">${part.word}</span></span>`;
     holder.appendChild(label);
     return { part, material, tip: to.clone().add(dir.clone().multiplyScalar(0.12)), label };
   });
 
-  const paint = () => labels.forEach(({ part, material }) => material.color.set(cssColour(part.colour)));
+  const paint = () => labels.forEach(({ part, material }) => material.color.set(cssColor(part.color)));
   paint();
 
   if (flat) flat.classList.add('still');
@@ -190,7 +190,7 @@ function build(THREE, fig, index) {
   document.addEventListener('panphy:theme-change', () => { paint(); snapshot(); });
 }
 
-// The deck draws its figures when it starts, after the maths is typeset: wait for the flat picture.
+// The deck draws its figures when it starts, after the math is typeset: wait for the flat picture.
 const drawn = fig => new Promise(resolve => { const check = () => (fig.querySelector('svg') ? resolve() : setTimeout(check, 120)); check(); });
 const figures = [...document.querySelectorAll('#deck [data-hand]')];
 if (figures.length) {

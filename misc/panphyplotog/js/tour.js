@@ -2,7 +2,7 @@
 const TOUR_SEEN_KEY = 'panphyplotog-intro-tour-seen';
 const TOUR_PHONE_QUERY = '(max-width: 699px), (max-height: 499px)';
 const TOUR_NARROW_WIDTH = 900;
-const TOUR_SAMPLES = { linearised: {
+const TOUR_SAMPLES = { linearized: {
     headers:{x:'L / m',y:'T² / s²'},
     rows:[['0.20','0.82'],['0.30','1.19'],['0.40','1.63'],['0.50','2.00'],['0.60','2.44'],['0.70','2.80'],['0.80','3.25'],['0.90','3.61']]
 }};
@@ -105,7 +105,7 @@ const shouldInviteToTour = !isTourRequested && !isTourPhone && !readTourStorage(
 
 function getTourInitialState() {
 	if (!tour.chapterId) return null;
-	const sample = TOUR_SAMPLES[TOUR_CHAPTERS[tour.chapterId].sample || 'linearised'];
+	const sample = TOUR_SAMPLES[TOUR_CHAPTERS[tour.chapterId].sample || 'linearized'];
 	return {
 		schemaVersion: STATE_SCHEMA_VERSION,
 		rawData: [sample.rows.map(([x, y]) => ({ x: Number(x), y: Number(y), xErrorRaw: 0, yErrorRaw: 0 }))],
@@ -284,7 +284,7 @@ function layoutTour() {
 		setTourBox(tour.spotlight, left, top, Math.max(right - left, 0), Math.max(bottom - top, 0));
 		tour.spotlight.classList.remove('tour-spotlight-empty');
 	} else {
-		// No target: a zero-size spotlight dims the whole page behind a centred card.
+		// No target: a zero-size spotlight dims the whole page behind a centered card.
 		setTourBox(tour.spotlight, viewportWidth / 2, viewportHeight / 2, 0, 0);
 		tour.spotlight.classList.add('tour-spotlight-empty');
 	}
@@ -314,7 +314,7 @@ function layoutTour() {
 
 	if (rect) {
 		// Small controls sit in the data panel: put the card beside the whole panel so it
-		// does not cover the neighbouring controls.
+		// does not cover the neighboring controls.
 		const panel = target.closest('.input-section');
 		const panelRect = panel ? panel.getBoundingClientRect() : null;
 		const fitsRightOf = box => box.right + gap + cardWidth <= viewportWidth - margin;
@@ -451,7 +451,7 @@ function showTourInvite() {
 	document.body.appendChild(card);
 }
 
-// Registered after main.js, so the app has finished initialising when this runs.
+// Registered after main.js, so the app has finished initializing when this runs.
 document.addEventListener('DOMContentLoaded', () => {
 	if (tour.chapterId) {
 		startTour();

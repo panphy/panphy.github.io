@@ -1,6 +1,6 @@
-// Two discs on one axis for the coupled-bodies example: the lower disc spins, the upper one is
+// Two disks on one axis for the coupled-bodies example: the lower disk spins, the upper one is
 // dropped onto it, and friction brings them to one shared angular velocity. A low-poly model with
-// thickness replaces the flat picture in every [data-discs] figure once Three.js has loaded, and a
+// thickness replaces the flat picture in every [data-disks] figure once Three.js has loaded, and a
 // still of it replaces the flat picture in the slide's thumbnail; the flat picture stays for print
 // and reduced motion, and is all there is if the library cannot be fetched.
 const THREE_URL = 'https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js';
@@ -9,16 +9,16 @@ const THREE_URL = 'https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module
 // On screen the speeds are scaled down by the same factor, so their ratio is still 3 : 2.
 const OMEGA_1 = 12, OMEGA = 8, SHOWN = 0.2;
 // After the press: the fall and the slip, in seconds. The slip is slowed down so that the change
-// in each disc's speed can be watched.
+// in each disk's speed can be watched.
 const DROP = 0.55, SLIP = 3;
-const LOWER = { radius: 1.3, thick: 0.24, colour: '--brand-accent-strong' };
-const UPPER = { radius: 0.9, thick: 0.24, colour: '--brand-accent', held: 1.25 };
+const LOWER = { radius: 1.3, thick: 0.24, color: '--brand-accent-strong' };
+const UPPER = { radius: 0.9, thick: 0.24, color: '--brand-accent', held: 1.25 };
 const SIDES = 12;
 
-const cssColour = name => getComputedStyle(document.documentElement).getPropertyValue(name).trim() || '#888';
+const cssColor = name => getComputedStyle(document.documentElement).getPropertyValue(name).trim() || '#888';
 
-// The state of the two discs at time t, when the upper disc was let go at `drop` (null: not yet).
-// The lower disc always spins. During the slip, friction changes ω by equal and opposite angular
+// The state of the two disks at time t, when the upper disk was let go at `drop` (null: not yet).
+// The lower disk always spins. During the slip, friction changes ω by equal and opposite angular
 // impulses: ΔL of one is −ΔL of the other.
 function at(t, drop) {
   const w1 = OMEGA_1 * SHOWN, w = OMEGA * SHOWN, rest = LOWER.thick / 2 + UPPER.thick / 2;
@@ -38,12 +38,12 @@ function at(t, drop) {
 function build(THREE, fig, index) {
   const flat = fig.querySelector('svg');
   const holder = document.createElement('div');
-  holder.className = 'mover discs3d';
+  holder.className = 'mover disks3d';
   holder.style.cssText = 'position:absolute;inset:0;';
   const canvas = document.createElement('canvas');
   canvas.style.cssText = 'position:absolute;inset:0;width:100%;height:100%;display:block;';
   canvas.setAttribute('role', 'img');
-  canvas.setAttribute('aria-label', 'A disc spinning about a vertical axis, shown dashed, with a smaller disc at rest above it on the same axis. The smaller disc drops onto the spinning one; friction speeds it up and slows the lower disc until they turn together, more slowly than the lower disc turned alone');
+  canvas.setAttribute('aria-label', 'A disk spinning about a vertical axis, shown dashed, with a smaller disk at rest above it on the same axis. The smaller disk drops onto the spinning one; friction speeds it up and slows the lower disk until they turn together, more slowly than the lower disk turned alone');
   holder.appendChild(canvas);
 
   const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true, preserveDrawingBuffer: true });
@@ -56,17 +56,17 @@ function build(THREE, fig, index) {
   sun.position.set(-3, 6, 4);
   scene.add(sun);
 
-  // A low-poly disc made of SIDES wedges in two alternating tones, so that its turning shows
+  // A low-poly disk made of SIDES wedges in two alternating tones, so that its turning shows
   // without any mark on it.
-  const disc = ({ radius, thick }) => {
+  const disk = ({ radius, thick }) => {
     const group = new THREE.Group(), materials = [0, 1].map(() => new THREE.MeshStandardMaterial({ roughness: 0.7, flatShading: true }));
     for (let k = 0; k < SIDES; k++) group.add(new THREE.Mesh(new THREE.CylinderGeometry(radius, radius, thick, 2, 1, false, k / SIDES * Math.PI * 2, Math.PI * 2 / SIDES), materials[k % 2]));
     return { group, materials };
   };
-  const lower = disc(LOWER), upper = disc(UPPER);
+  const lower = disk(LOWER), upper = disk(UPPER);
   scene.add(lower.group, upper.group);
 
-  // The axis: a dashed line drawn over everything, so the discs never hide it.
+  // The axis: a dashed line drawn over everything, so the disks never hide it.
   const axisMaterial = new THREE.LineDashedMaterial({ dashSize: 0.13, gapSize: 0.09, depthTest: false, transparent: true });
   const axis = new THREE.Line(new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(0, -0.95, 0), new THREE.Vector3(0, 2.25, 0)]), axisMaterial);
   axis.computeLineDistances();
@@ -74,25 +74,25 @@ function build(THREE, fig, index) {
   scene.add(axis);
 
   // What has happened so far, one line per stage, in the deck's fonts. Earlier lines stay, in a
-  // quieter colour, so none of them disappears before it can be read.
+  // quieter color, so none of them disappears before it can be read.
   const caption = document.createElement('div');
   caption.style.cssText = 'position:absolute;left:12px;top:4px;font:500 26px/1.35 var(--font-body);color:var(--text-secondary);';
   holder.appendChild(caption);
   const STAGES = ['before', 'slip', 'after'];
   const words = {
-    before: '1. Lower disc alone at \\(\\omega_{1} = 12\\) rad s⁻¹',
-    slip: '2. Dropped on: friction slows the lower disc<br>&nbsp;&nbsp;&nbsp;&nbsp;and speeds up the upper one',
+    before: '1. Lower disk alone at \\(\\omega_{1} = 12\\) rad s⁻¹',
+    slip: '2. Dropped on: friction slows the lower disk<br>&nbsp;&nbsp;&nbsp;&nbsp;and speeds up the upper one',
     after: '3. Turning together at \\(\\omega = 8.0\\) rad s⁻¹'
   };
   const describe = phase => STAGES.slice(0, STAGES.indexOf(phase) + 1).map(p => `<div style="${p === phase ? 'color:var(--text-main);font-weight:700' : ''}">${words[p]}</div>`).join('');
 
   const paint = () => {
     [[lower, LOWER], [upper, UPPER]].forEach(([d, spec]) => {
-      const base = new THREE.Color(cssColour(spec.colour));
+      const base = new THREE.Color(cssColor(spec.color));
       d.materials[0].color.copy(base);
       d.materials[1].color.copy(base).lerp(new THREE.Color(0xffffff), 0.42);
     });
-    axisMaterial.color.set(cssColour('--text-main'));
+    axisMaterial.color.set(cssColor('--text-main'));
   };
   paint();
 
@@ -101,7 +101,7 @@ function build(THREE, fig, index) {
 
   const slide = fig.closest('.slide');
   let width = 0, height = 0, shown = '';
-  // Draws the discs at time t. False if the figure has no size yet.
+  // Draws the disks at time t. False if the figure has no size yet.
   function draw(t, drop) {
     const w = holder.clientWidth, h = holder.clientHeight;
     if (!w || !h) return false;
@@ -120,9 +120,9 @@ function build(THREE, fig, index) {
     if (state.phase !== shown) { shown = state.phase; caption.innerHTML = describe(shown); window.MathJax?.typesetPromise?.([caption]).catch(() => {}); }
     return true;
   }
-  // The lower disc spins from when the slide opens. The figure's play step is the press that drops
-  // the upper disc; hiding it again (going back) lifts the disc again. If the slide opens with the
-  // step already shown, the discs are already turning together.
+  // The lower disk spins from when the slide opens. The figure's play step is the press that drops
+  // the upper disk; hiding it again (going back) lifts the disk again. If the slide opens with the
+  // step already shown, the disks are already turning together.
   let start = null, drop = null, wasActive = false;
   function frame(time) {
     requestAnimationFrame(frame);
@@ -138,9 +138,9 @@ function build(THREE, fig, index) {
   }
   requestAnimationFrame(frame);
 
-  // The slide's thumbnail is a copy made before the model was built: give it a still of the discs
+  // The slide's thumbnail is a copy made before the model was built: give it a still of the disks
   // turning together, in place of the flat picture.
-  const copy = document.querySelectorAll('#thumbs [data-discs]')[index];
+  const copy = document.querySelectorAll('#thumbs [data-disks]')[index];
   function snapshot() {
     if (!copy || !draw(2.3, 0)) return;
     const shot = holder.cloneNode(true), image = new Image();
@@ -148,7 +148,7 @@ function build(THREE, fig, index) {
     image.alt = '';
     image.style.cssText = canvas.style.cssText;
     shot.querySelector('canvas').replaceWith(image);
-    copy.querySelector('.discs3d')?.remove();
+    copy.querySelector('.disks3d')?.remove();
     copy.querySelectorAll('svg').forEach(svg => { svg.style.display = 'none'; });
     copy.appendChild(shot);
   }
@@ -156,12 +156,12 @@ function build(THREE, fig, index) {
   document.addEventListener('panphy:theme-change', () => { paint(); snapshot(); });
 }
 
-// The deck draws its figures when it starts, after the maths is typeset: wait for the flat picture.
+// The deck draws its figures when it starts, after the math is typeset: wait for the flat picture.
 // With reduced motion the flat picture is all there is.
 const drawn = fig => new Promise(resolve => { const check = () => (fig.querySelector('svg') ? resolve() : setTimeout(check, 120)); check(); });
-const figures = [...document.querySelectorAll('#deck [data-discs]')];
+const figures = [...document.querySelectorAll('#deck [data-disks]')];
 if (figures.length && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
   import(THREE_URL).then(THREE => figures.forEach((fig, index) => drawn(fig).then(() => {
-    try { build(THREE, fig, index); } catch (error) { console.warn('The 3D discs could not be drawn; the flat picture stays.', error); }
+    try { build(THREE, fig, index); } catch (error) { console.warn('The 3D disks could not be drawn; the flat picture stays.', error); }
   }))).catch(() => {});
 }

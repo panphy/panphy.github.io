@@ -1143,7 +1143,7 @@
 						if (x === 0) sctx.moveTo(x, y);
 						else sctx.lineTo(x, y);
 					}
-					// 2. Tunnelling Region (Inside barrier)
+					// 2. Tunneling Region (Inside barrier)
 					else if (x >= this.barrierX && x <= this.barrierX + this.barrierW) {
 						// Exponential decay
 						if (xc > this.barrierX - this.sigma * 2) {

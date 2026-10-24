@@ -11,15 +11,15 @@
 //          horizontal (radians) and distance
 //   sway   how far the camera swings to and fro until someone turns the model (radians)
 //   alt    the canvas's description for screen readers
-//   paint  () => void  sets the colours from the theme
+//   paint  () => void  sets the colors from the theme
 //   tick   (t, still) => void  moves the model to time t in seconds (optional); still is true
 //          when the thumbnail is being drawn
 //   still  the time drawn for the thumbnail (optional)
 //   frame  CSS that places the canvas in part of the figure, such as 'width:55%' (optional), so
 //          that a flat graph added to `holder` can sit beside the model
-// css('--name') reads a colour from the theme; label(html, [x, y, z]) places a label at a point of
+// css('--name') reads a color from the theme; label(html, [x, y, z]) places a label at a point of
 // the model, and returns the element, whose `anchor` (a Vector3) the model may move; caption(html)
-// adds a line of text along the bottom. Labels and captions may hold maths between \( and \),
+// adds a line of text along the bottom. Labels and captions may hold math between \( and \),
 // typeset by MathJax like the rest of the slide. `fig` is the figure, for a model that plays on a
 // step (.step.play.shown), and `holder` the box over it that holds the canvas and labels.
 const THREE_URL = 'https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js';
@@ -151,12 +151,12 @@ function mount(THREE, fig, index, attr, make) {
     copy.querySelectorAll('svg').forEach(svg => { svg.style.display = 'none'; });
     copy.appendChild(shot);
   }
-  // Typeset any maths in the labels and caption, then take the thumbnail still.
+  // Typeset any math in the labels and caption, then take the thumbnail still.
   Promise.resolve(window.MathJax?.typesetPromise?.([holder])).catch(() => {}).then(snapshot);
   document.addEventListener('panphy:theme-change', () => { model.paint(); snapshot(); });
 }
 
-// The deck draws its figures when it starts, after the maths is typeset: wait for the flat picture.
+// The deck draws its figures when it starts, after the math is typeset: wait for the flat picture.
 // With reduced motion the flat picture is all there is.
 const drawn = fig => new Promise(resolve => { const check = () => (fig.querySelector('svg') ? resolve() : setTimeout(check, 120)); check(); });
 

@@ -942,7 +942,7 @@ button:hover {
   height: 22px;
 }
 
-/* Icon colours follow the toolbars: accent for zoom, green for the laser, red for exit. */
+/* Icon colors follow the toolbars: accent for zoom, green for the laser, red for exit. */
 .present-zoom-btn .md-icon {
   color: var(--accent);
 }
@@ -1024,7 +1024,7 @@ button:hover {
   transform: rotate(45deg);
 }
 
-/* The shared theme button draws itself transparent; give it the same chip as its neighbours. */
+/* The shared theme button draws itself transparent; give it the same chip as its neighbors. */
 .present-controls #presentThemeToggle.panphy-theme-button {
   border-color: var(--line-strong) !important;
   background: color-mix(in srgb, var(--surface) 88%, transparent) !important;
@@ -1035,7 +1035,7 @@ button:hover {
   background: var(--surface-3) !important;
 }
 
-/* Laser on: the dot fills and the button glows in the laser's colour. */
+/* Laser on: the dot fills and the button glows in the laser's color. */
 .present-laser-dot {
   transition: fill 0.15s ease;
 }
@@ -1170,7 +1170,7 @@ textarea:focus {
 }
 
 #renderedOutput .task-list-item input[type="checkbox"] {
-  /* (line-height 1.5em − checkbox 1.1em) / 2 ≈ 0.2em centres with first text line */
+  /* (line-height 1.5em − checkbox 1.1em) / 2 ≈ 0.2em centers with first text line */
   margin-top: 0.2em;
   flex-shrink: 0;
   width: 1.1em;
@@ -1887,7 +1887,7 @@ mjx-container.copy-failed::after {
 }
 
 /* The global button:hover would swap in a pale background and leave the
-   chip's light-on-accent text unreadable, so keep the chip colours. */
+   chip's light-on-accent text unreadable, so keep the chip colors. */
 .table-copy-action-btn:hover {
   border-color: var(--accent-hover);
   background: var(--accent-hover);

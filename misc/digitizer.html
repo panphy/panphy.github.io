@@ -936,7 +936,7 @@
       if (!confirmGraphDataLoss("Importing a new graph")) {
         e.preventDefault();
         imageLoaderInput.value = "";
-        updateStatus("Import cancelled. Current graph preserved.");
+        updateStatus("Import canceled. Current graph preserved.");
         return;
       }
       importGraphConfirmed = true;
@@ -950,7 +950,7 @@
     if (!file) return;
     if (!importGraphConfirmed && !confirmGraphDataLoss("Importing a new graph")) {
       e.target.value = "";
-      updateStatus("Import cancelled. Current graph preserved.");
+      updateStatus("Import canceled. Current graph preserved.");
       return;
     }
     importGraphConfirmed = false;
@@ -1051,7 +1051,7 @@
 
   document.getElementById('resetButton').addEventListener('click', function () {
     if (!confirmResetDataLoss()) {
-      updateStatus("Reset cancelled. Digitized points preserved.");
+      updateStatus("Reset canceled. Digitized points preserved.");
       return;
     }
     resetDigitizedData();
@@ -1059,7 +1059,7 @@
 
   document.getElementById('removeGraphButton').addEventListener('click', function () {
     if (!confirmGraphDataLoss("Removing the graph")) {
-      updateStatus("Remove graph cancelled. Current graph preserved.");
+      updateStatus("Remove graph canceled. Current graph preserved.");
       return;
     }
     resetAllState();
@@ -1085,7 +1085,7 @@
     }
     let input = window.prompt(promptText);
     if (input === null || input.trim() === "") {
-      updateStatus("Calibration point cancelled.");
+      updateStatus("Calibration point canceled.");
       return null;
     }
     let val = parseFloat(input);

@@ -2,29 +2,29 @@
 // Wavefronts are teal, rays apricot, and a second wave or medium slate. Terracotta is kept for
 // what is higher level only (the single slit, the modulated pattern and gratings).
 window.DeckFigures.add(P => {
-  const { svg, arrow, text, sub, both, through, sampled, labelled, track, anim, twoState, f, TAU } = P;
-  const line = (d, colour, width = 5, extra = '') => `<path d="${d}" style="fill:none;stroke:var(--${colour});stroke-width:${width};stroke-linecap:round;stroke-linejoin:round" ${extra}/>`;
+  const { svg, arrow, text, sub, both, through, sampled, labeled, track, anim, twoState, f, TAU } = P;
+  const line = (d, color, width = 5, extra = '') => `<path d="${d}" style="fill:none;stroke:var(--${color});stroke-width:${width};stroke-linecap:round;stroke-linejoin:round" ${extra}/>`;
   const rad = deg => deg * Math.PI / 180;
   let clips = 0;
   // Clips whatever it wraps to a rectangle; every use gets an id of its own. The rectangle is
   // marked visible so that the clip still works in a thumbnail, whose slide on the deck is hidden.
   const clipped = (x, y, w, h, body) => { const id = `c3-clip-${++clips}`; return `<clipPath id="${id}"><rect x="${x}" y="${y}" width="${w}" height="${h}" style="visibility:visible"/></clipPath><g clip-path="url(#${id})">${body}</g>`; };
-  const ray = (x1, y1, x2, y2, colour = 'brand-accent', width = 5) => arrow(x1, y1, x2, y2, colour, width);
+  const ray = (x1, y1, x2, y2, color = 'brand-accent', width = 5) => arrow(x1, y1, x2, y2, color, width);
   // A ray with its arrowhead half way along, for long rays that end on a surface.
-  const midRay = (x1, y1, x2, y2, colour = 'brand-accent', width = 5, at = 0.55) => { const a = Math.atan2(y2 - y1, x2 - x1) * 180 / Math.PI, mx = x1 + (x2 - x1) * at, my = y1 + (y2 - y1) * at; return `<line x1="${f(x1)}" y1="${f(y1)}" x2="${f(x2)}" y2="${f(y2)}" style="stroke:var(--${colour});stroke-width:${width};stroke-linecap:round"/><path d="M11,0 L-11,-9 V9 Z" transform="translate(${f(mx)} ${f(my)}) rotate(${f(a)})" style="fill:var(--${colour})"/>`; };
+  const midRay = (x1, y1, x2, y2, color = 'brand-accent', width = 5, at = 0.55) => { const a = Math.atan2(y2 - y1, x2 - x1) * 180 / Math.PI, mx = x1 + (x2 - x1) * at, my = y1 + (y2 - y1) * at; return `<line x1="${f(x1)}" y1="${f(y1)}" x2="${f(x2)}" y2="${f(y2)}" style="stroke:var(--${color});stroke-width:${width};stroke-linecap:round"/><path d="M11,0 L-11,-9 V9 Z" transform="translate(${f(mx)} ${f(my)}) rotate(${f(a)})" style="fill:var(--${color})"/>`; };
   const glass = (x, y, w, h) => `<rect x="${x}" y="${y}" width="${w}" height="${h}" style="fill:color-mix(in srgb, var(--electron) 22%, transparent)"/>`;
   const arc = (cx, cy, r, a1, a2) => { const p = a => [cx + r * Math.cos(rad(a)), cy + r * Math.sin(rad(a))], [x1, y1] = p(a1), [x2, y2] = p(a2); return `<path d="M${f(x1)},${f(y1)} A${r},${r} 0 0 ${a2 > a1 ? 1 : 0} ${f(x2)},${f(y2)}" class="guide accent"/>`; };
   // Intensity patterns against angle: u runs from −1 to 1 across the picture.
   const sinc2 = x => (Math.abs(x) < 1e-6 ? 1 : (Math.sin(x) / x) ** 2);
   const slits = (delta, N) => { const s = Math.sin(delta / 2); return Math.abs(s) < 1e-6 ? 1 : (Math.sin(N * delta / 2) / (N * s)) ** 2; };
-  const pattern = (fn, x0, x1, base, height, colour, n = 400, width = 4) => line(sampled(t => [x0 + (x1 - x0) * t, base - height * fn(-1 + 2 * t)], n), colour, width);
+  const pattern = (fn, x0, x1, base, height, color, n = 400, width = 4) => line(sampled(t => [x0 + (x1 - x0) * t, base - height * fn(-1 + 2 * t)], n), color, width);
   const patternAxes = (x0, x1, base, top, label = 'position on the screen') => arrow((x0 + x1) / 2, base, (x0 + x1) / 2, top, 'text-secondary', 2.5) + `<line x1="${x0}" y1="${base}" x2="${x1}" y2="${base}" class="tick"/>` + text((x0 + x1) / 2 + 14, top + 12, 'intensity', 'lbl mono', 'start') + text(x1, base + 40, label, 'lbl mono', 'end');
   const RAINBOW = ['#7B2FBE', '#3F4FD1', '#2F9FE0', '#3FB54A', '#F2D43D', '#F08A2E', '#D93A2B'];
 
   return {
     // Wavefronts and rays for a point source and for a distant source. Also drawn plain.
     'c3-wavefronts': el => {
-      const on = labelled(el), cx = 220, cy = 250, T = 1.6, gap = 44;
+      const on = labeled(el), cx = 220, cy = 250, T = 1.6, gap = 44;
       let s = [0, 60, 120, 180, 240, 300].map(a => ray(cx + 18 * Math.cos(rad(a)), cy + 18 * Math.sin(rad(a)), cx + 170 * Math.cos(rad(a)), cy + 170 * Math.sin(rad(a)), 'brand-accent', 3)).join('') + `<circle cx="${cx}" cy="${cy}" r="10" style="fill:var(--brand-accent-strong)"/>` + [150, 250, 350].map(y => ray(520, y, 800, y, 'brand-accent', 3)).join('');
       if (on) s += text(cx, 470, 'point source', 'lbl') + text(660, 470, 'distant source', 'lbl') + text(660, 80, 'rays cross wavefronts at 90°', 'lbl strong');
       const ringsStill = [1, 2, 3, 4].map(k => `<circle cx="${cx}" cy="${cy}" r="${k * gap}" style="fill:none;stroke:var(--brand-primary);stroke-width:4;opacity:${1.05 - k * 0.2}"/>`).join(''), planeStill = [0, 1, 2, 3, 4, 5].map(k => `<line x1="${540 + k * gap}" y1="110" x2="${540 + k * gap}" y2="390" style="stroke:var(--brand-primary);stroke-width:4"/>`).join('');
@@ -35,7 +35,7 @@ window.DeckFigures.add(P => {
 
     // A ray meeting a boundary: part is reflected and part is transmitted, refracted towards the normal.
     'c3-boundary': el => {
-      const on = labelled(el), bx = 420, by = 250, t1 = 50, t2 = 30.7, L = 230;
+      const on = labeled(el), bx = 420, by = 250, t1 = 50, t2 = 30.7, L = 230;
       let s = glass(100, by, 640, 220) + `<line x1="100" y1="${by}" x2="740" y2="${by}" class="tick" style="stroke-width:4"/><line x1="${bx}" y1="40" x2="${bx}" y2="460" class="guide"/>`;
       s += midRay(bx - L * Math.sin(rad(t1)), by - L * Math.cos(rad(t1)), bx, by) + midRay(bx, by, bx + L * Math.sin(rad(t1)), by - L * Math.cos(rad(t1)), 'brand-accent', 3) + midRay(bx, by, bx + L * Math.sin(rad(t2)), by + L * Math.cos(rad(t2)));
       if (on) s += arc(bx, by, 70, -90 - t1, -90) + arc(bx, by, 70, -90, -90 + t1) + arc(bx, by, 80, 90 - t2, 90) + text(bx - 40, by - 86, sub('θ', '1'), 'lbl greek', 'end') + text(bx + 40, by - 86, sub('θ', '1'), 'lbl greek', 'start') + text(bx + 30, by + 124, sub('θ', '2'), 'lbl greek', 'start') + text(120, by - 20, 'medium 1: faster', 'lbl', 'start') + text(120, by + 44, 'medium 2: slower', 'lbl', 'start') + text(bx + 8, 62, 'normal', 'lbl small', 'start') + text(200, 110, 'incident', 'lbl strong') + text(650, 110, 'reflected', 'lbl strong') + text(600, 420, 'transmitted', 'lbl strong');
@@ -44,7 +44,7 @@ window.DeckFigures.add(P => {
 
     // Plane wavefronts crossing a boundary into a slower medium: they turn and bunch up. Also drawn plain.
     'c3-refraction': el => {
-      const on = labelled(el), by = 250, t1 = rad(50), n = 1.6, t2 = Math.asin(Math.sin(t1) / n), l1 = 60, l2 = l1 / n, T = 1.6;
+      const on = labeled(el), by = 250, t1 = rad(50), n = 1.6, t2 = Math.asin(Math.sin(t1) / n), l1 = 60, l2 = l1 / n, T = 1.6;
       // Wavefronts are lines at right angles to the ray direction (sin t, cos t), spaced one wavelength apart.
       const fronts = (t, lam, count) => Array.from({ length: count }, (_, k) => { const d = (k - count / 2) * lam, cx = 420 + d * Math.sin(t), cy = by + d * Math.cos(t); return `<line x1="${f(cx - 700 * Math.cos(t))}" y1="${f(cy + 700 * Math.sin(t))}" x2="${f(cx + 700 * Math.cos(t))}" y2="${f(cy - 700 * Math.sin(t))}" style="stroke:var(--brand-primary);stroke-width:4"/>`; }).join('');
       let s = glass(100, by, 640, 220) + `<line x1="100" y1="${by}" x2="740" y2="${by}" class="tick" style="stroke-width:4"/>`;
@@ -98,12 +98,12 @@ window.DeckFigures.add(P => {
       const row = (c1, c2, y, label) => `<line x1="${x0}" y1="${y}" x2="${x1}" y2="${y}" class="guide"/>` + line(shape(c1, c2, y), 'brand-primary', 5) + text(x0 - 14, y + 10, label, 'lbl', 'end');
       const still = row(230, 630, 120, 'before') + row(430, 430, 280, 'meeting') + row(630, 230, 440, 'after') + arrow(250, 60, 330, 60, 'brand-accent', 4) + arrow(610, 60, 530, 60, 'brand-accent', 4);
       const mover = `<line x1="${x0}" y1="${y0}" x2="${x1}" y2="${y0}" class="guide"/><path style="fill:none;stroke:var(--brand-primary);stroke-width:5;stroke-linejoin:round" d="${shape(150, 710, y0)}">${anim('d', Array.from({ length: F + 1 }, (_, i) => shape(150 + 560 * i / F, 710 - 560 * i / F, y0)), 5)}</path>`;
-      return svg('-40 30 830 460', twoState(still, mover), opposite ? 'Two pulses travelling towards each other on a string, one upwards and one downwards. Where they overlap they cancel and the string is momentarily flat; afterwards each carries on unchanged' : 'Two upward pulses travelling towards each other on a string. Where they overlap the displacement is the sum of the two, a pulse twice as high; afterwards each carries on unchanged');
+      return svg('-40 30 830 460', twoState(still, mover), opposite ? 'Two pulses traveling towards each other on a string, one upwards and one downwards. Where they overlap they cancel and the string is momentarily flat; afterwards each carries on unchanged' : 'Two upward pulses traveling towards each other on a string. Where they overlap the displacement is the sum of the two, a pulse twice as high; afterwards each carries on unchanged');
     },
 
     // Two waves and their sum. data-kind: in (in phase) or anti (in antiphase).
     'c3-superpose': el => {
-      const anti = el.dataset.kind === 'anti', x0 = 110, x1 = 770, amp = 46, wave = (y, a, ph, colour, width = 5) => line(sampled(t => [x0 + (x1 - x0) * t, y - a * Math.sin(t * 2.5 * TAU + ph)], 120), colour, width);
+      const anti = el.dataset.kind === 'anti', x0 = 110, x1 = 770, amp = 46, wave = (y, a, ph, color, width = 5) => line(sampled(t => [x0 + (x1 - x0) * t, y - a * Math.sin(t * 2.5 * TAU + ph)], 120), color, width);
       let s = [110, 250, 410].map(y => `<line x1="${x0}" y1="${y}" x2="${x1}" y2="${y}" class="guide"/>`).join('') + wave(110, amp, 0, 'brand-primary') + wave(250, amp, anti ? Math.PI : 0, 'brand-accent-strong') + (anti ? line(`M${x0},410 H${x1}`, 'brand-accent', 6) : wave(410, 2 * amp, 0, 'brand-accent', 6));
       s += text(x0 - 14, 120, 'wave 1', 'lbl', 'end') + text(x0 - 14, 260, 'wave 2', 'lbl', 'end') + text(x0 - 14, 420, 'sum', 'lbl strong', 'end') + text(440, 330, '+', 'lbl display');
       return svg('-30 30 820 480', s, anti ? 'Two waves of the same amplitude in antiphase: each crest of one meets a trough of the other. Their sum is zero everywhere: destructive interference' : 'Two waves of the same amplitude in phase: crest meets crest. Their sum is a wave of twice the amplitude: constructive interference');
@@ -111,7 +111,7 @@ window.DeckFigures.add(P => {
 
     // The pattern of two coherent sources. Also the title picture, with data-plain.
     'c3-two-sources': el => {
-      const on = labelled(el), sx = 160, y1 = 200, y2 = 300, lam = 40, T = 1.6, d = y2 - y1;
+      const on = labeled(el), sx = 160, y1 = 200, y2 = 300, lam = 40, T = 1.6, d = y2 - y1;
       // Lines of constructive interference: points whose distances from the two sources differ by a whole number of wavelengths.
       const hyper = m => { const a = m * lam / 2, c = d / 2, b2 = c * c - a * a; return sampled(t => { const x = 2 + 620 * t, y = a * Math.sqrt(1 + x * x / b2); return [sx + x, 250 + y]; }, 40); };
       let s = [0, 1, 2].map(m => m === 0 ? line(`M${sx},250 H790`, 'brand-accent', 3, 'stroke-dasharray="10 8"') : line(hyper(m), 'brand-accent', 3, 'stroke-dasharray="10 8"') + line(hyper(-m), 'brand-accent', 3, 'stroke-dasharray="10 8"')).join('');
@@ -125,13 +125,13 @@ window.DeckFigures.add(P => {
     'c3-path': () => {
       const sx = 150, y1 = 190, y2 = 330, px = 720, py = 150;
       let s = midRay(sx, y1, px, py, 'brand-primary', 4) + midRay(sx, y2, px, py, 'brand-accent-strong', 4) + `<circle cx="${sx}" cy="${y1}" r="10" style="fill:var(--text-main)"/><circle cx="${sx}" cy="${y2}" r="10" style="fill:var(--text-main)"/><circle cx="${px}" cy="${py}" r="10" style="fill:var(--brand-accent)"/>`;
-      s += text(sx - 20, y1 + 8, sub('S', '1'), 'lbl mono strong', 'end') + text(sx - 20, y2 + 8, sub('S', '2'), 'lbl mono strong', 'end') + text(px + 20, py + 8, 'P', 'lbl display', 'start') + text(430, 150, sub('S', '1') + 'P', 'lbl mono halo') + text(460, 290, sub('S', '2') + 'P', 'lbl mono halo') + text(440, 420, 'path difference = S₂P − S₁P', 'lbl strong') + text(440, 460, 'the extra distance one wave has travelled', 'lbl');
-      return svg('70 80 720 400', s, 'Two sources S 1 and S 2 and a point P. The path difference at P is the difference between the two distances S 2 P and S 1 P: the extra distance travelled by the wave from the further source');
+      s += text(sx - 20, y1 + 8, sub('S', '1'), 'lbl mono strong', 'end') + text(sx - 20, y2 + 8, sub('S', '2'), 'lbl mono strong', 'end') + text(px + 20, py + 8, 'P', 'lbl display', 'start') + text(430, 150, sub('S', '1') + 'P', 'lbl mono halo') + text(460, 290, sub('S', '2') + 'P', 'lbl mono halo') + text(440, 420, 'path difference = S₂P − S₁P', 'lbl strong') + text(440, 460, 'the extra distance one wave has traveled', 'lbl');
+      return svg('70 80 720 400', s, 'Two sources S 1 and S 2 and a point P. The path difference at P is the difference between the two distances S 2 P and S 1 P: the extra distance traveled by the wave from the further source');
     },
 
     // Young's double slit: the arrangement and the fringes. Also drawn plain.
     'c3-young': el => {
-      const on = labelled(el), sx = 250, scr = 700, cy = 250, d = 50;
+      const on = labeled(el), sx = 250, scr = 700, cy = 250, d = 50;
       let s = `<rect x="${sx - 8}" y="60" width="16" height="${cy - d / 2 - 68}" style="fill:var(--brand-accent-strong)"/><rect x="${sx - 8}" y="${cy - d / 2 + 8}" width="16" height="${d - 16}" style="fill:var(--brand-accent-strong)"/><rect x="${sx - 8}" y="${cy + d / 2 + 8}" width="16" height="${440 - cy - d / 2 - 8}" style="fill:var(--brand-accent-strong)"/>`;
       s += [130, 170, 210].map(x => `<line x1="${x - 60}" y1="150" x2="${x - 60}" y2="350" style="stroke:var(--brand-primary);stroke-width:4"/>`).join('') + `<rect x="${scr}" y="60" width="14" height="380" style="fill:var(--text-secondary);opacity:.5"/>`;
       // Fringes on the screen: bright bands evenly spaced.
@@ -146,10 +146,10 @@ window.DeckFigures.add(P => {
       const kind = el.dataset.kind || 'double', x0 = 90, x1 = 810, base = 410, H = 300;
       let s = patternAxes(x0, x1, base, 60, kind === 'slits' ? 'angle' : 'position on the screen'), label = '';
       if (kind === 'double') { s += pattern(u => Math.cos(Math.PI * 4.5 * u) ** 2, x0, x1, base, H * 0.8, 'brand-primary'); s += both(450, base + 62, 530, base + 62) + text(490, base + 100, 's', 'lbl display italic'); label = 'The intensity pattern of an ideal double slit: bright fringes of equal brightness, evenly spaced a distance s apart, with dark fringes between them'; }
-      if (kind === 'single') { s += pattern(u => sinc2(Math.PI * 3.2 * u), x0, x1, base, H, 'hl'); const w = 720 / 6.4; s += both(450 - w, base + 62, 450 + w, base + 62) + text(450, base + 100, 'central maximum: twice as wide', 'lbl') + `<path d="M${450 - w},${base} v20 M${450 + w},${base} v20" class="guide"/>` + text(450 + w + 6, base - 14, 'first minimum', 'lbl small', 'start'); label = 'The intensity pattern of a single slit: a broad, bright central maximum, twice as wide as the faint maxima on either side, which fall off quickly in brightness. The first minimum lies at an angle of lambda over b from the centre'; }
+      if (kind === 'single') { s += pattern(u => sinc2(Math.PI * 3.2 * u), x0, x1, base, H, 'hl'); const w = 720 / 6.4; s += both(450 - w, base + 62, 450 + w, base + 62) + text(450, base + 100, 'central maximum: twice as wide', 'lbl') + `<path d="M${450 - w},${base} v20 M${450 + w},${base} v20" class="guide"/>` + text(450 + w + 6, base - 14, 'first minimum', 'lbl small', 'start'); label = 'The intensity pattern of a single slit: a broad, bright central maximum, twice as wide as the faint maxima on either side, which fall off quickly in brightness. The first minimum lies at an angle of lambda over b from the center'; }
       if (kind === 'widths') { s += pattern(u => sinc2(Math.PI * 4.6 * u), x0, x1, base, H, 'hl') + pattern(u => 0.3 * sinc2(Math.PI * 2 * u), x0, x1, base, H, 'brand-accent-strong'); s += text(480, 120, 'wider slit', 'lbl strong halo', 'start', 'style="fill:var(--hl-text)"') + text(560, 330, 'narrower slit', 'lbl strong halo', 'start'); label = 'Single-slit patterns for two slit widths. The narrower slit gives a wider and fainter central maximum; the wider slit gives a narrower and brighter one'; }
-      if (kind === 'modulated') { const env = u => sinc2(Math.PI * 2.4 * u); s += pattern(u => env(u) * Math.cos(Math.PI * 9.6 * u) ** 2, x0, x1, base, H, 'brand-primary') + line(sampled(t => [x0 + (x1 - x0) * t, base - H * env(-1 + 2 * t)], 200), 'hl', 3, 'stroke-dasharray="10 8"'); s += text(530, 130, 'single-slit envelope', 'lbl strong halo', 'start', 'style="fill:var(--hl-text)"') + text(530, 164, 'fringes inside it', 'lbl halo', 'start'); label = 'The pattern of a real double slit: evenly spaced fringes whose brightness follows the single-slit pattern of one slit, drawn as a dashed envelope. Fringes are brightest near the centre, and a fringe is missing wherever it falls on a minimum of the envelope'; }
-      if (kind === 'slits') { const row = (N, y, colour, name) => line(sampled(t => [x0 + (x1 - x0) * t, y - 100 * slits(TAU * 2.5 * (-1 + 2 * t), N)], 700), colour, 3.5) + `<line x1="${x0}" y1="${y}" x2="${x1}" y2="${y}" class="tick"/>` + text(x0 - 12, y - 40, name, 'lbl strong', 'end'); s = row(2, 160, 'brand-primary', '2 slits') + row(5, 300, 'brand-accent-strong', '5 slits') + row(20, 440, 'hl', '20 slits') + text(x1, 480, 'angle', 'lbl mono', 'end') + text(450, 40, 'same slit spacing: the maxima stay put and sharpen', 'lbl'); label = 'Intensity against angle for two, five and twenty slits with the same spacing. The main maxima stay at the same angles but become narrower and sharper as the number of slits increases, with almost nothing between them'; }
+      if (kind === 'modulated') { const env = u => sinc2(Math.PI * 2.4 * u); s += pattern(u => env(u) * Math.cos(Math.PI * 9.6 * u) ** 2, x0, x1, base, H, 'brand-primary') + line(sampled(t => [x0 + (x1 - x0) * t, base - H * env(-1 + 2 * t)], 200), 'hl', 3, 'stroke-dasharray="10 8"'); s += text(530, 130, 'single-slit envelope', 'lbl strong halo', 'start', 'style="fill:var(--hl-text)"') + text(530, 164, 'fringes inside it', 'lbl halo', 'start'); label = 'The pattern of a real double slit: evenly spaced fringes whose brightness follows the single-slit pattern of one slit, drawn as a dashed envelope. Fringes are brightest near the center, and a fringe is missing wherever it falls on a minimum of the envelope'; }
+      if (kind === 'slits') { const row = (N, y, color, name) => line(sampled(t => [x0 + (x1 - x0) * t, y - 100 * slits(TAU * 2.5 * (-1 + 2 * t), N)], 700), color, 3.5) + `<line x1="${x0}" y1="${y}" x2="${x1}" y2="${y}" class="tick"/>` + text(x0 - 12, y - 40, name, 'lbl strong', 'end'); s = row(2, 160, 'brand-primary', '2 slits') + row(5, 300, 'brand-accent-strong', '5 slits') + row(20, 440, 'hl', '20 slits') + text(x1, 480, 'angle', 'lbl mono', 'end') + text(450, 40, 'same slit spacing: the maxima stay put and sharpen', 'lbl'); label = 'Intensity against angle for two, five and twenty slits with the same spacing. The main maxima stay at the same angles but become narrower and sharper as the number of slits increases, with almost nothing between them'; }
       return svg(kind === 'slits' ? '-60 10 890 490' : '60 30 780 500', s, label);
     },
 
@@ -162,14 +162,14 @@ window.DeckFigures.add(P => {
       return svg('40 0 820 480', s, 'Light falling on a diffraction grating at right angles. Beyond the grating, bright beams leave only at certain angles: the zero order straight on, the first order at an angle theta on each side, the second order at a larger angle, and so on');
     },
 
-    // White light through a grating: a white centre with a spectrum on each side in each order.
+    // White light through a grating: a white center with a spectrum on each side in each order.
     'c3-grating-white': () => {
       const cx = 450, y = 190, h = 110, unit = 150;
       let s = `<rect x="60" y="${y - 20}" width="780" height="${h + 40}" rx="10" style="fill:var(--spectrum-bg)"/><rect x="${cx - 8}" y="${y}" width="16" height="${h}" style="fill:#fff"/>`;
-      // In order n the colours run from violet (0.4 μm) nearest the centre to red (0.7 μm) furthest out.
-      [1, 2].forEach(n => [-1, 1].forEach(side => RAINBOW.forEach((colour, k) => { const a = n * unit * (0.4 + 0.05 * k) / 0.4 * 0.62, w = n * unit * 0.05 / 0.4 * 0.62 + 1; s += `<rect x="${f(side > 0 ? cx + a : cx - a - w)}" y="${y}" width="${f(w)}" height="${h}" style="fill:${colour};opacity:${n === 1 ? 1 : 0.7}"/>`; })));
-      s += text(cx, y - 44, 'n = 0: white', 'lbl strong') + text(cx + 142, y - 44, 'n = 1', 'lbl mono strong') + text(cx - 142, y - 44, 'n = 1', 'lbl mono strong') + text(cx + 284, y - 44, 'n = 2', 'lbl mono strong') + text(cx - 284, y - 44, 'n = 2', 'lbl mono strong') + text(cx, y + h + 70, 'in every order: violet nearest the centre, red furthest out', 'lbl');
-      return svg('40 100 820 290', s, 'The pattern from white light passing through a diffraction grating. In the centre is a white line, the zero order. On each side is a first-order spectrum with violet nearest the centre and red furthest out, then a wider second-order spectrum');
+      // In order n the colors run from violet (0.4 μm) nearest the center to red (0.7 μm) furthest out.
+      [1, 2].forEach(n => [-1, 1].forEach(side => RAINBOW.forEach((color, k) => { const a = n * unit * (0.4 + 0.05 * k) / 0.4 * 0.62, w = n * unit * 0.05 / 0.4 * 0.62 + 1; s += `<rect x="${f(side > 0 ? cx + a : cx - a - w)}" y="${y}" width="${f(w)}" height="${h}" style="fill:${color};opacity:${n === 1 ? 1 : 0.7}"/>`; })));
+      s += text(cx, y - 44, 'n = 0: white', 'lbl strong') + text(cx + 142, y - 44, 'n = 1', 'lbl mono strong') + text(cx - 142, y - 44, 'n = 1', 'lbl mono strong') + text(cx + 284, y - 44, 'n = 2', 'lbl mono strong') + text(cx - 284, y - 44, 'n = 2', 'lbl mono strong') + text(cx, y + h + 70, 'in every order: violet nearest the center, red furthest out', 'lbl');
+      return svg('40 100 820 290', s, 'The pattern from white light passing through a diffraction grating. In the center is a white line, the zero order. On each side is a first-order spectrum with violet nearest the center and red furthest out, then a wider second-order spectrum');
     }
   };
 });

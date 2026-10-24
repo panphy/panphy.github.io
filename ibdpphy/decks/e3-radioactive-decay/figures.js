@@ -1,7 +1,7 @@
 // Diagrams for the E.3 Radioactive decay deck, added to the shared set in ../assets/figures.js.
 // The isotope, alpha, gamma, penetration, half-life and random-decay figures began as copies of
 // those in gcsephy/decks/atoms-and-radiation; the two decks are separate, so a change to one does
-// not reach the other. Particle colours are those of the other decks. Terracotta appears only in
+// not reach the other. Particle colors are those of the other decks. Terracotta appears only in
 // the additional higher level figures.
 window.DeckFigures.add(P => {
   const { svg, ball, cluster, shadow, arrow, wave, text, sub, seeded, animated, stepG, fly, through, sampled, f } = P;
@@ -48,9 +48,9 @@ window.DeckFigures.add(P => {
       const on = animated(el);
       let s = `<rect x="20" y="70" width="64" height="290" rx="12" style="fill:var(--lead)"/>` + text(52, 392, 'SOURCE', 'lbl mono small');
       s += `<rect x="300" y="52" width="7" height="326" rx="2" style="fill:var(--paper);stroke:var(--input-border)"/>`;
-      s += `<rect x="520" y="52" width="18" height="326" rx="3" style="fill:var(--aluminium)"/>`;
+      s += `<rect x="520" y="52" width="18" height="326" rx="3" style="fill:var(--aluminum)"/>`;
       s += `<rect x="730" y="52" width="52" height="326" rx="4" style="fill:var(--lead)"/>`;
-      s += text(303, 38, 'paper', 'lbl mono strong') + text(529, 6, 'aluminium', 'lbl mono strong') + text(529, 38, 'few mm', 'lbl mono') + text(756, 6, 'lead', 'lbl mono strong') + text(756, 38, 'several cm', 'lbl mono');
+      s += text(303, 38, 'paper', 'lbl mono strong') + text(529, 6, 'aluminum', 'lbl mono strong') + text(529, 38, 'few mm', 'lbl mono') + text(756, 6, 'lead', 'lbl mono strong') + text(756, 38, 'several cm', 'lbl mono');
       // Deck build: each radiation streams from the source for as long as its step is shown.
       // The drawn particles and waves ("still") stand in on thumbnails, in print and with reduced motion.
       const still = body => on ? `<g class="still">${body}</g>` : body;
@@ -92,7 +92,7 @@ window.DeckFigures.add(P => {
       gamma += onArrival(1.8, text(860, 340, 'reduced', 'lbl small', 'middle', 'style="fill:var(--photon)"'));
       const labels = [greek(100, 'α', 'alpha'), greek(196, 'β', 'electron'), greek(282, 'γ', 'photon')];
       s += on ? [alpha, beta, gamma].map((lane, i) => stepG(on, i + 1, lane + labels[i])).join('') + `<rect x="20" y="70" width="64" height="290" rx="12" style="fill:var(--lead)"/>` : alpha + beta + gamma + labels.join('');
-      return svg('0 -24 960 434', s, 'Penetration: paper stops alpha, a few millimetres of aluminium stops beta, several centimetres of lead reduce gamma');
+      return svg('0 -24 960 434', s, 'Penetration: paper stops alpha, a few millimeters of aluminum stops beta, several centimeters of lead reduce gamma');
     },
 
     'e3-half-life': el => {
@@ -159,7 +159,7 @@ window.DeckFigures.add(P => {
       s += `<path d="${sampled(t => { const r = 0.56 + 3.1 * t; return [x(r), 240 - 60 / (r * r)]; })}" class="curve" style="stroke:var(--proton)"/>`;
       s += `<path d="${sampled(t => { const r = 0.7 + 2.9 * t, u = Math.exp(-3 * (r - 1)); return [x(r), 240 + 180 * (2 * u - u * u)]; }, 120)}" class="curve" style="stroke:var(--brand-primary)"/>`;
       s += text(330, 120, 'electric repulsion: long range', 'lbl strong', 'start', 'style="fill:var(--proton)"') + text(470, 344, 'strong nuclear force:', 'lbl strong', 'start', 'style="fill:var(--brand-primary)"') + text(470, 378, 'only within about 3 fm', 'lbl', 'start');
-      return svg('40 10 780 450', s, 'Sketch graph of the forces between two protons against their separation in femtometres. The electric repulsion falls slowly with distance. The strong nuclear force is a much larger attraction at about 1 femtometre, becomes negligible beyond about 3 femtometres, and is repulsive at very small separations');
+      return svg('40 10 780 450', s, 'Sketch graph of the forces between two protons against their separation in femtometers. The electric repulsion falls slowly with distance. The strong nuclear force is a much larger attraction at about 1 femtometer, becomes negligible beyond about 3 femtometers, and is repulsive at very small separations');
     },
 
     // Four separate nucleons have more mass than the helium nucleus they make.

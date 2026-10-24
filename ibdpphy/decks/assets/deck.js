@@ -379,7 +379,7 @@
     state.orbitFrame = requestAnimationFrame(animateOrbits);
   }
 
-  // Slides are typeset first, so thumbnails and notes are built with the finished maths.
+  // Slides are typeset first, so thumbnails and notes are built with the finished math.
   // Without MathJax (offline) the deck still opens, showing the LaTeX source.
   Promise.resolve(window.MathJax?.startup?.promise).then(init, init);
 })();

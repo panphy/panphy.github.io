@@ -7,7 +7,7 @@ Working Like a Physicist: Collecting, Processing, and Presenting Data
 Students independently apply the data handling skills developed across the unit: variables, tables, repeated measurements, averages, graph choice, plotting, best-fit lines, and anomalous results.
 
 ## Assumptions
-Students have already practiced categoric data, continuous data, bar charts, line graphs, and best-fit lines.
+Students have already practised categoric data, continuous data, bar charts, line graphs, and best-fit lines.
 
 ## Practical title
 Paper helicopter investigation
@@ -50,7 +50,7 @@ Per group:
 - Scissors
 - Paperclips
 - Stopwatch
-- Meter ruler
+- Metre ruler
 - Graph paper
 - Exercise book or investigation sheet
 
@@ -142,7 +142,7 @@ Students produce one page containing:
 | Table | Units, trials, and mean column included |
 | Repeats | At least 3 trials for each wing length |
 | Graph choice | Line graph chosen because wing length is continuous |
-| Graph quality | Axes labeled, units included, sensible scale used |
+| Graph quality | Axes labelled, units included, sensible scale used |
 | Best-fit line | Best-fit line drawn instead of dot-to-dot line |
 | Anomalous results | Possible anomalous result identified or absence of anomalous results stated |
 | Conclusion | Conclusion uses evidence from the results |

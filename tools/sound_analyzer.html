@@ -16,9 +16,9 @@
     <link rel="stylesheet" href="/assets/design.css">
 <style>
 
-    /* Colours and fonts come from the shared design system (/assets/design.css);
+    /* Colors and fonts come from the shared design system (/assets/design.css);
        these names keep the rest of this stylesheet unchanged. Line and marker
-       colours carry meaning and stay as they were. */
+       colors carry meaning and stay as they were. */
     :root {
       --font-sans: var(--font-body);
       --bg-color: var(--bg); --surface-alt: var(--surface-2);
@@ -1408,13 +1408,13 @@
       gridTimeDivEl.textContent = (timePerDivMs * 1000).toFixed(1) + ' \u00B5s';
     }
 
-    // Amplitude per division (linear, normalised to full-scale = 1)
+    // Amplitude per division (linear, normalized to full-scale = 1)
     const gain = displayWaveGain || (waveAmplitudeScale * adaptiveWaveGain);
     const halfHeight = dispH / 2;
     if (gain > 0 && halfHeight > 0) {
       const ampPerDiv = SQUARE_GRID_SPACING / (halfHeight * gain);
       gridAmpDivEl.textContent = formatAmpPerDiv(ampPerDiv);
-      gridAmpDivEl.title = `1 div = ${ampPerDiv.toFixed(4)} (normalised, full scale = 1)`;
+      gridAmpDivEl.title = `1 div = ${ampPerDiv.toFixed(4)} (normalized, full scale = 1)`;
     } else {
       gridAmpDivEl.textContent = '-- /div';
       gridAmpDivEl.removeAttribute('title');

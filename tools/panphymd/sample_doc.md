@@ -2,7 +2,7 @@
 
 Welcome! 🎉
 
-This lightweight app helps you write clean notes and reports with **Markdown**, and type proper **maths and Greek letters** with **LaTeX**. It is made for students and teachers of physics, but works for any subject.
+This lightweight app helps you write clean notes and reports with **Markdown**, and type proper **math and Greek letters** with **LaTeX**. It is made for students and teachers of physics, but works for any subject.
 
 Switch between **Edit** (the text you type) and **Preview** (what you get), or see both side by side on a wide screen. Every example below can be copied and changed.
 
@@ -13,7 +13,7 @@ Switch between **Edit** (the text you type) and **Preview** (what you get), or s
 # This document is a demo of...
 
 1. a bit of **Markdown**,  
-2. a lot of **LaTeX** (maths, Greek letters, units, physics, chemistry and more), and  
+2. a lot of **LaTeX** (math, Greek letters, units, physics, chemistry and more), and\
 3. a few **HTML** tags.
 
 ---
@@ -66,21 +66,21 @@ for i in range(5):
 
 ## 2. LaTeX
 
-**2.1 The basics: how to type maths**
+**2.1 The basics: how to type math**
 
-> *The golden rule: wrap your maths in **dollar signs**. That's the magic! ✨*
+> *The golden rule: wrap your math in **dollar signs**. That's the magic! ✨*
 
 | You type | You get |
 |:---|:---|
 | `$F = ma$` | $F = ma$ |
-| `$$ F = ma $$` | (centred on its own line, see below) |
+| `$$ F = ma $$` | (centered on its own line, see below) |
 
 $$ F = ma $$
 
-- **One `$` on each side** keeps the maths **inline**, right in the middle of a sentence: Newton's Second Law states that $F=ma$.
+- **One `$` on each side** keeps the math **inline**, right in the middle of a sentence: Newton's Second Law states that $F=ma$.
 - **Two `$$` on each side** makes a **displayed** equation on its own line. Perfect for the important (or tall) ones.
 - Special symbols start with a **backslash `\`** and are **case-sensitive**: `\delta` gives $\delta$ but `\Delta` gives $\Delta$. (*Yes, capital letters matter!*)
-- **Spaces are ignored** inside maths, so add your own with `\,` (thin), `\;` (medium) or `\quad` (wide): $a\,b$, $a\;b$, $a\quad b$.
+- **Spaces are ignored** inside math, so add your own with `\,` (thin), `\;` (medium) or `\quad` (wide): $a\,b$, $a\;b$, $a\quad b$.
 - **Braces `{ }` group things together.** Anything longer than one character needs them (more in 2.3).
 - Need a real dollar sign? Type `\$`. For example: it costs \$5 and \$10. 💰
 
@@ -88,7 +88,7 @@ $$ F = ma $$
 
 > *Time to meet the whole Greek alphabet. Physicists use these all the time!*
 
-Type a backslash and the **name** of the letter. For a capital letter, **capitalise the first letter** of the name.
+Type a backslash and the **name** of the letter. For a capital letter, **capitalize the first letter** of the name.
 
 | Name | Lower case | Code | Capital | Code |
 |:---|:---:|:---|:---:|:---|
@@ -118,7 +118,7 @@ Type a backslash and the **name** of the letter. For a capital letter, **capital
 > *Plot twist...*
 >> - Some capital Greek letters look exactly like English capitals (Alpha is just $A$), so they have **no command**. Just type the English letter! 🤷
 >> - A few letters have two shapes: `\epsilon` gives $\epsilon$ but `\varepsilon` gives $\varepsilon$ (the one used for $\varepsilon_0$), and `\phi` gives $\phi$ but `\varphi` gives $\varphi$. Likewise `\theta` $\theta$ and `\vartheta` $\vartheta$, `\rho` $\rho$ and `\varrho` $\varrho$.
->> - Physics favourites: $\theta$ angle, $\lambda$ wavelength, $\mu$ micro / friction, $\omega$ angular speed, $\rho$ density, $\sigma$ Stefan–Boltzmann constant / stress, $\tau$ torque / time constant, $\Delta$ change in, $\Omega$ ohm.
+>> - Physics favorites: $\theta$ angle, $\lambda$ wavelength, $\mu$ micro / friction, $\omega$ angular speed, $\rho$ density, $\sigma$ Stefan–Boltzmann constant / stress, $\tau$ torque / time constant, $\Delta$ change in, $\Omega$ ohm.
 
 **2.3 Powers, subscripts, fractions and roots**
 > *The bread and butter of physics equations. Watch out for the braces!*
@@ -188,7 +188,7 @@ $$ \vec{r} = 5\hat{i} + 8\hat{j} \qquad\qquad |\vec{r}| = \sqrt{5^2 + 8^2} $$
 | `$E_\mathrm{k}$` and `$E_k$` | $E_\mathrm{k}$ and $E_k$ |
 | `$\pm 0.5\%$` | $\pm 0.5\%$ |
 
-> Use `\times` for "times", not the letter x: `5 \times 10^3` gives $5 \times 10^3$. And use `\text{ words }` for ordinary words inside maths: $v = 5 \text{ when } t = 2$. (*Yes, you can write words in maths!*)
+> Use `\times` for "times", not the letter x: `5 \times 10^3` gives $5 \times 10^3$. And use `\text{ words }` for ordinary words inside math: $v = 5 \text{ when } t = 2$. (*Yes, you can write words in math!*)
 
 **2.6 Chemical and nuclear equations**
 
@@ -289,7 +289,7 @@ A_{31} & A_{32} & A_{33} \\
 \end{bmatrix}
 $$
 
-**A table in LaTeX.** The `{|l|l|c|r|}` after `\begin{array}` sets the alignment of each column (left, left, centre, right) and the `|` draws the lines.
+**A table in LaTeX.** The `{|l|l|c|r|}` after `\begin{array}` sets the alignment of each column (left, left, center, right) and the `|` draws the lines.
 
 $$
 \begin{array}{|l|l|c|r|}
@@ -351,7 +351,7 @@ $$ f(x) = \frac{a_0}{2} + \sum_{n=1}^{\infty} \left[ a_n\cos(nx) + b_n\sin(nx) \
 | `$\mu m$` | $\mu m$ | `$\mu\mathrm{m}$` | $\mu\mathrm{m}$ |
 | `$H2O$` | $H2O$ | `$\mathrm{H_2O}$` | $\mathrm{H_2O}$ |
 
-> Forgot a closing `$`? Then your maths shows up as plain text. Forgot a closing `}`? Every `{` needs its partner! (*Brackets are lonely.* 😅)
+> Forgot a closing `$`? Then your math shows up as plain text. Forgot a closing `}`? Every `{` needs its partner! (*Brackets are lonely.* 😅)
 
 ---
 

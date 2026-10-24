@@ -19,7 +19,7 @@ const state = {
 };
 
 const TRANSITION_TIME = 0.6;
-// Real geometry in metres.
+// Real geometry in meters.
 const PLATE_LENGTH = 0.10;
 const SELECTOR_GAP = 0.02;
 const SLIT_X = 0.065;
@@ -27,7 +27,7 @@ const SLIT_HALF = 0.0015;
 const SCREEN_X = 0.12;
 const DEE_RADIUS = 0.5;
 const DEE_GAP = 0.03;
-// Scene units per metre: centimetres for the bench experiments, tens of centimetres for the cyclotron.
+// Scene units per meter: centimeters for the bench experiments, tens of centimeters for the cyclotron.
 const SCALE = { efield: 100, bfield: 100, selector: 100, cyclotron: 10 };
 // How far a particle travels per on-screen second, so every track is easy to follow.
 const DISPLAY_DISTANCE = { efield: 0.05, bfield: 0.06, selector: 0.05 };
@@ -263,8 +263,8 @@ scene.add(floorShadow);
 function particleData(mode = state.mode) {
   return PARTICLES[state.particle[mode]];
 }
-function particleColour(key) {
-  return palette[PARTICLES[key].colour];
+function particleColor(key) {
+  return palette[PARTICLES[key].color];
 }
 function stepperSpec(key) {
   const spec = STEPPERS[key];
@@ -294,7 +294,7 @@ function turnBField(delta) {
   bAngle = Math.abs(target - bAngle) <= step ? target : bAngle + Math.sign(target - bAngle) * step;
   applyBTilt();
 }
-// A point (metres) in the frame of the turned field region.
+// A point (meters) in the frame of the turned field region.
 const bPoint = new THREE.Vector3();
 function bLocal(position) {
   const tilt = bTilt();
@@ -314,7 +314,7 @@ function applyBTilt() {
   group.rotation.y = tilt;
   group.position.set(-B_SOURCE_Z * Math.sin(tilt), 0, B_SOURCE_Z * (1 - Math.cos(tilt)));
 }
-// Fields in SI units at a point (metres) and time (seconds).
+// Fields in SI units at a point (meters) and time (seconds).
 function fields(position, time) {
   E.set(0, 0, 0);
   B.set(0, 0, 0);
@@ -365,21 +365,21 @@ function cyclotronFrequency(key = state.particle.cyclotron) {
 }
 
 // A particle with its glowing marker, a trail line and time-lapse dots.
-function makeTracer({ key, pos, vel, colour, realPerDisplay, maxStep, trailSize = 6000, dots = true, dotInterval = 0.12 }) {
+function makeTracer({ key, pos, vel, color, realPerDisplay, maxStep, trailSize = 6000, dots = true, dotInterval = 0.12 }) {
   const data = PARTICLES[key];
   const scale = SCALE[state.mode];
   const size = state.mode === 'cyclotron' ? 0.16 : 0.16;
-  const mesh = part(new THREE.Mesh(new THREE.SphereGeometry(size, 24, 16), material(colour, { emissive: colour, emissiveIntensity: 0.35, roughness: 0.3 })), 'particle');
-  mesh.add(glow(colour, size * 5));
+  const mesh = part(new THREE.Mesh(new THREE.SphereGeometry(size, 24, 16), material(color, { emissive: color, emissiveIntensity: 0.35, roughness: 0.3 })), 'particle');
+  mesh.add(glow(color, size * 5));
   const positions = new Float32Array(trailSize * 3);
   const geometry = new THREE.BufferGeometry().setAttribute('position', new THREE.BufferAttribute(positions, 3));
   geometry.setDrawRange(0, 0);
-  const line = new THREE.Line(geometry, new THREE.LineBasicMaterial({ color: colour, transparent: true, opacity: 0.85 }));
+  const line = new THREE.Line(geometry, new THREE.LineBasicMaterial({ color: color, transparent: true, opacity: 0.85 }));
   line.frustumCulled = false;
   line.userData.part = 'track';
   let dotMesh = null;
   if (dots) {
-    dotMesh = new THREE.InstancedMesh(new THREE.SphereGeometry(0.05, 10, 8), new THREE.MeshBasicMaterial({ color: colour }), 400);
+    dotMesh = new THREE.InstancedMesh(new THREE.SphereGeometry(0.05, 10, 8), new THREE.MeshBasicMaterial({ color: color }), 400);
     dotMesh.count = 0;
     dotMesh.frustumCulled = false;
     dotMesh.raycast = () => {};
@@ -504,10 +504,10 @@ function newLab(kind) {
 function plates(group, halfGap, length, { swap = false } = {}) {
   const make = (sign, y) => {
     const isPlus = sign > 0;
-    const colour = isPlus ? palette.positive : palette.negative;
-    const texture = signTexture(isPlus ? '+' : '−', colour);
+    const color = isPlus ? palette.positive : palette.negative;
+    const texture = signTexture(isPlus ? '+' : '−', color);
     const mesh = part(new THREE.Mesh(new THREE.BoxGeometry(length, 0.16, 3.2), [
-      material(colour), material(colour), material(0xffffff, { map: texture }), material(0xffffff, { map: texture }), material(0xffffff, { map: texture }), material(colour)
+      material(color), material(color), material(0xffffff, { map: texture }), material(0xffffff, { map: texture }), material(0xffffff, { map: texture }), material(color)
     ]), isPlus ? 'plus' : 'minus');
     mesh.position.y = y;
     group.add(mesh);
@@ -518,7 +518,7 @@ function plates(group, halfGap, length, { swap = false } = {}) {
   return { top, bottom };
 }
 // A field line: a solid line across the whole field region with arrowheads along it for the direction.
-// Unlit, so each field is exactly its legend colour in every experiment.
+// Unlit, so each field is exactly its legend color in every experiment.
 function fieldLine(kind, from, to, partKey, { radius = 0.025, heads = 1, headScale = 1 } = {}) {
   const mat = new THREE.MeshBasicMaterial({ color: kind === 'E' ? palette.eField : palette.field });
   const span = to.clone().sub(from);
@@ -799,11 +799,11 @@ function buildCyclotron() {
 function fireTracer(mode = state.mode) {
   const key = state.particle[mode];
   const data = PARTICLES[key];
-  const colour = particleColour(key);
+  const color = particleColor(key);
   if (mode === 'efield') {
     const speed = state.values.speed * data.speed.unit;
     if (lab.tracers.length >= 8) removeTracer(lab.tracers[0]);
-    return makeTracer({ key, pos: new THREE.Vector3(-0.08, 0, 0), vel: new THREE.Vector3(speed, 0, 0), colour, realPerDisplay: DISPLAY_DISTANCE.efield / speed, maxStep: 0.0004 / speed, dotInterval: 0.12 });
+    return makeTracer({ key, pos: new THREE.Vector3(-0.08, 0, 0), vel: new THREE.Vector3(speed, 0, 0), color, realPerDisplay: DISPLAY_DISTANCE.efield / speed, maxStep: 0.0004 / speed, dotInterval: 0.12 });
   }
   if (mode === 'bfield') {
     const speed = state.values.speed * data.speed.unit;
@@ -811,7 +811,7 @@ function fireTracer(mode = state.mode) {
     const vel = new THREE.Vector3(speed, 0, 0);
     const period = 2 * Math.PI * data.m / (Math.abs(data.q) * state.values.field / 1000);
     // Every track stays until Clear tracks or Reset.
-    return makeTracer({ key, pos: new THREE.Vector3(0, 0, B_SOURCE_Z / SCALE.bfield), vel, colour, realPerDisplay: DISPLAY_DISTANCE.bfield / speed, maxStep: Math.min(0.0004 / speed, period / 300), trailSize: 9000, dotInterval: 0.15 });
+    return makeTracer({ key, pos: new THREE.Vector3(0, 0, B_SOURCE_Z / SCALE.bfield), vel, color, realPerDisplay: DISPLAY_DISTANCE.bfield / speed, maxStep: Math.min(0.0004 / speed, period / 300), trailSize: 9000, dotInterval: 0.15 });
   }
   if (mode === 'selector') {
     const reference = selectorReference(key);
@@ -821,7 +821,7 @@ function fireTracer(mode = state.mode) {
     lab.emitted[bin] += 1;
     const tint = palette.south.clone().lerp(palette.current, fraction);
     if (lab.tracers.length >= 28) removeTracer(lab.tracers[0]);
-    const tracer = makeTracer({ key, pos: new THREE.Vector3(-0.08, 0, 0), vel: new THREE.Vector3(speed, 0, 0), colour: tint, realPerDisplay: DISPLAY_DISTANCE.selector / reference, maxStep: 0.0003 / speed, trailSize: 900, dots: false });
+    const tracer = makeTracer({ key, pos: new THREE.Vector3(-0.08, 0, 0), vel: new THREE.Vector3(speed, 0, 0), color: tint, realPerDisplay: DISPLAY_DISTANCE.selector / reference, maxStep: 0.0003 / speed, trailSize: 900, dots: false });
     tracer.bin = bin;
     tracer.mesh.scale.setScalar(0.7);
     return tracer;
@@ -831,7 +831,7 @@ function fireTracer(mode = state.mode) {
     lab.energy = [];
     lab.crossings = 0;
     const fc = cyclotronFrequency(key);
-    const tracer = makeTracer({ key, pos: new THREE.Vector3(0, 0, 0), vel: new THREE.Vector3(0, 0, 0), colour, realPerDisplay: CYCLOTRON_TURN_TIME === 0 ? 1 : 1 / fc / CYCLOTRON_TURN_TIME, maxStep: 1 / fc / 700, trailSize: 40000, dots: false });
+    const tracer = makeTracer({ key, pos: new THREE.Vector3(0, 0, 0), vel: new THREE.Vector3(0, 0, 0), color, realPerDisplay: CYCLOTRON_TURN_TIME === 0 ? 1 : 1 / fc / CYCLOTRON_TURN_TIME, maxStep: 1 / fc / 700, trailSize: 40000, dots: false });
     // A new injection starts a fresh trace at the same phase as the gap voltage.
     lab.scope.samples.fill(0);
     lab.scope.clock = 0;
@@ -866,7 +866,7 @@ function onFinish(tracer, outcome) {
     if (outcome === 'screen') {
       const y = tracer.pos.y * 100;
       addSpot(tracer);
-      readout.textContent = `${tracer.data.name.toUpperCase()} · Landed ${Math.abs(y).toFixed(2)} cm ${y >= 0 ? 'above' : 'below'} the centre of the screen. ${tracer.q < 0 ? 'Negative charges are pulled towards the positive plate.' : 'Positive charges are pushed towards the negative plate.'}`;
+      readout.textContent = `${tracer.data.name.toUpperCase()} · Landed ${Math.abs(y).toFixed(2)} cm ${y >= 0 ? 'above' : 'below'} the center of the screen. ${tracer.q < 0 ? 'Negative charges are pulled towards the positive plate.' : 'Positive charges are pushed towards the negative plate.'}`;
     } else if (outcome === 'top' || outcome === 'bottom') {
       const plusOnTop = !state.swap;
       const hitPlus = (outcome === 'top') === plusOnTop;
@@ -888,16 +888,16 @@ function onFinish(tracer, outcome) {
   }
 }
 function addSpot(tracer) {
-  const spot = new THREE.Mesh(new THREE.CircleGeometry(0.16, 20), new THREE.MeshBasicMaterial({ color: particleColour(tracer.key) }));
+  const spot = new THREE.Mesh(new THREE.CircleGeometry(0.16, 20), new THREE.MeshBasicMaterial({ color: particleColor(tracer.key) }));
   spot.rotation.y = -Math.PI / 2;
   spot.position.set(SCREEN_X * 100 - 0.02, tracer.pos.y * 100, tracer.pos.z * 100);
-  spot.add(glow(particleColour(tracer.key), 1.2));
+  spot.add(glow(particleColor(tracer.key), 1.2));
   spot.raycast = () => {};
   tracer.group.add(spot);
 }
 
 // ---------- Arrows on the newest particle ----------
-// The velocity selector shows only the beam: its particles are coloured by speed instead.
+// The velocity selector shows only the beam: its particles are colored by speed instead.
 const arrowOrigin = new THREE.Vector3();
 const forceVector = new THREE.Vector3();
 function updateArrows() {
@@ -1026,14 +1026,14 @@ function drawGraph() {
   const legend = items => {
     let x = box.x0 + 4;
     ctx.textAlign = 'left';
-    for (const [label, colour] of items) {
-      ctx.fillStyle = colour;
+    for (const [label, color] of items) {
+      ctx.fillStyle = color;
       ctx.fillText(label, x, 11);
       x += ctx.measureText(label).width + 12;
     }
   };
-  const plot = (points, colour, dashed = false) => {
-    ctx.strokeStyle = colour;
+  const plot = (points, color, dashed = false) => {
+    ctx.strokeStyle = color;
     ctx.lineWidth = 2;
     ctx.setLineDash(dashed ? [5, 4] : []);
     ctx.beginPath();
@@ -1275,7 +1275,7 @@ $('fire').addEventListener('click', () => {
     lab.spawnClock = 1;
     updateFireButton();
     readout.textContent = state.beam
-      ? 'BEAM ON · Particles leave the source with a spread of speeds, coloured from slow (blue) to fast (orange). Watch which ones reach the detector.'
+      ? 'BEAM ON · Particles leave the source with a spread of speeds, colored from slow (blue) to fast (orange). Watch which ones reach the detector.'
       : 'BEAM OFF · The histogram keeps the count. Change E or B, then start the beam again.';
     return;
   }
@@ -1392,7 +1392,7 @@ function buildControls() {
     const data = PARTICLES[key];
     const button = document.createElement('button');
     button.type = 'button';
-    button.innerHTML = `<i class="chip" style="background:var(--${data.colour})">${data.symbol}</i>${data.name}`;
+    button.innerHTML = `<i class="chip" style="background:var(--${data.color})">${data.symbol}</i>${data.name}`;
     button.setAttribute('aria-pressed', String(state.particle[state.mode] === key));
     button.addEventListener('click', () => chooseParticle(key));
     choices.appendChild(button);
@@ -1444,12 +1444,12 @@ function buildControls() {
   const showRow = document.createElement('div');
   showRow.className = 'switch-list';
   for (const kind of MODE_FIELDS[state.mode]) {
-    const { name, colour } = FIELD_KINDS[kind];
+    const { name, color } = FIELD_KINDS[kind];
     const button = document.createElement('button');
     button.type = 'button';
     button.className = 'switch';
     button.dataset.show = kind;
-    button.innerHTML = `<span class="switch-label"><i class="chip" style="background:var(--${colour})">${kind}</i>${name} field</span><span class="switch-track" aria-hidden="true"></span>`;
+    button.innerHTML = `<span class="switch-label"><i class="chip" style="background:var(--${color})">${kind}</i>${name} field</span><span class="switch-track" aria-hidden="true"></span>`;
     button.addEventListener('click', () => showField(kind, !state[`show${kind}`]));
     showRow.appendChild(button);
   }
@@ -1459,7 +1459,7 @@ function buildControls() {
   if (state.mode === 'cyclotron' && state.autotune) tune();
 }
 // Hiding a field only hides its drawing: it still acts on the particles.
-const FIELD_KINDS = { E: { name: 'Electric', colour: 'e-field', legend: 'efield' }, B: { name: 'Magnetic', colour: 'field', legend: 'bfield' } };
+const FIELD_KINDS = { E: { name: 'Electric', color: 'e-field', legend: 'efield' }, B: { name: 'Magnetic', color: 'field', legend: 'bfield' } };
 const MODE_FIELDS = { efield: ['E'], bfield: ['B'], selector: ['E', 'B'], cyclotron: ['E', 'B'] };
 function updateFieldToggles() {
   for (const [kind, { legend }] of Object.entries(FIELD_KINDS)) {
@@ -1552,8 +1552,8 @@ viewer.addEventListener('keydown', event => {
 // ---------- Mode selection ----------
 const DEFAULT_READOUT = {
   efield: 'PARALLEL PLATES · The top plate is positive, so the field points down. Choose a particle and press “Fire”, then change one setting at a time and compare the tracks. Tap a part to find out what it does.',
-  bfield: 'UNIFORM MAGNETIC FIELD · At 90° the field points into the screen (away from you). Fire a particle from the source at the centre, then change the speed, the field or the particle. Set the field angle to 45° for a helix.',
-  selector: 'VELOCITY SELECTOR · An electric field (down) and a magnetic field (into the screen) between the same plates. Start the beam, then change the voltage or the field until a different colour passes.',
+  bfield: 'UNIFORM MAGNETIC FIELD · At 90° the field points into the screen (away from you). Fire a particle from the source at the center, then change the speed, the field or the particle. Set the field angle to 45° for a helix.',
+  selector: 'VELOCITY SELECTOR · An electric field (down) and a magnetic field (into the screen) between the same plates. Start the beam, then change the voltage or the field until a different color passes.',
   cyclotron: 'CYCLOTRON · Two hollow dees between the poles of a magnet, with an alternating voltage across the gap. Inject a particle, then compare a stronger field, a bigger gap voltage or a mistuned frequency.'
 };
 const LEGEND = {
@@ -1587,25 +1587,25 @@ function buildMode(animate, { keepTracks = false } = {}) {
   updateEquation();
   drawGraph();
 }
-// Put kept tracks into the new apparatus, recoloured for the current theme.
+// Put kept tracks into the new apparatus, recolored for the current theme.
 function restoreTracks({ tracks, tracers }) {
   lab.tracks.removeFromParent();
   lab.tracks = tracks;
   lab.tracers = tracers;
   lab.group.add(tracks);
   for (const tracer of tracers) {
-    const colour = particleColour(tracer.key);
-    tracer.mesh.material.color.copy(colour);
-    tracer.mesh.material.emissive.copy(colour);
+    const color = particleColor(tracer.key);
+    tracer.mesh.material.color.copy(color);
+    tracer.mesh.material.emissive.copy(color);
     const halo = tracer.mesh.children[0]?.material;
     if (halo) {
-      halo.color.copy(colour);
+      halo.color.copy(color);
       halo.opacity = palette.dark ? 0.7 : 0.4;
       halo.blending = palette.dark ? THREE.AdditiveBlending : THREE.NormalBlending;
       halo.needsUpdate = true;
     }
-    tracer.line.material.color.copy(colour);
-    tracer.dotMesh?.material.color.copy(colour);
+    tracer.line.material.color.copy(color);
+    tracer.dotMesh?.material.color.copy(color);
     pickables.push(tracer.mesh);
   }
 }

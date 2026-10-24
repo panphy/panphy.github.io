@@ -1,5 +1,5 @@
 /* PanPhy design system: Spectrum.
-   One file of fonts, colour tokens and a few shared components for every app.
+   One file of fonts, color tokens and a few shared components for every app.
    Apps keep their own layout CSS and map their variables to these tokens.
    Load after /assets/fonts/fonts.css (for IBM Plex Mono) and before app CSS.
    Font URLs are relative to this file and resolve to /assets/fonts/.

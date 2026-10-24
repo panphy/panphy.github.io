@@ -30,7 +30,7 @@
 		</div>
 		<div class="mt-appbar-actions">
 			<div class="mt-appbar-file" role="group" aria-label="File">
-				<button type="button" id="openVideo" class="mt-tool" title="Open a video file to analyse"><svg class="mt-icon" viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="5.5" width="12.5" height="13" rx="2"/><path d="m16 10.5 4.5-2.5v8l-4.5-2.5"/></svg><span class="keep-label">Import<span class="label-extra"> Video</span></span></button>
+				<button type="button" id="openVideo" class="mt-tool" title="Open a video file to analyze"><svg class="mt-icon" viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="5.5" width="12.5" height="13" rx="2"/><path d="m16 10.5 4.5-2.5v8l-4.5-2.5"/></svg><span class="keep-label">Import<span class="label-extra"> Video</span></span></button>
 			</div>
 			<button type="button" id="guideButton" class="mt-tool mt-tool-quiet" title="How to track an object, and keyboard shortcuts"><svg class="mt-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5.5c2.7-1.3 5.4-1.3 8 0v14c-2.6-1.3-5.3-1.3-8 0zM20 5.5c-2.7-1.3-5.4-1.3-8 0v14c2.6-1.3 5.3-1.3 8 0z"/></svg><span>Guide</span></button>
 			<button id="theme-button" data-panphy-theme-toggle class="theme-toggle-button" aria-label="Toggle Light/Dark Theme" title="Toggle between light and dark themes">&#9728;&#65039;</button>
@@ -95,7 +95,7 @@
 					<p class="empty-lead">Film side-on with the camera held still. Then mark the object frame by frame to get its position and velocity.</p>
 					<div class="empty-actions">
 						<button type="button" id="emptyImport" class="btn-primary empty-import"><svg class="mt-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 15.5V4M7.5 8.5 12 4l4.5 4.5M4.5 15.5v3a2 2 0 0 0 2 2h11a2 2 0 0 0 2-2v-3"/></svg>Import Video</button>
-						<button type="button" id="emptySample" class="empty-import" title="Open a short clip of a ball bouncing along a bench, with a metre rule for the scale"><svg class="mt-icon" viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="5.5" width="17" height="13" rx="2.5"/><path d="m10 9.2 5 2.8-5 2.8z"/></svg>Try a sample</button>
+						<button type="button" id="emptySample" class="empty-import" title="Open a short clip of a ball bouncing along a bench, with a meter rule for the scale"><svg class="mt-icon" viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="5.5" width="17" height="13" rx="2.5"/><path d="m10 9.2 5 2.8-5 2.8z"/></svg>Try a sample</button>
 					</div>
 					<p class="empty-drop">or drop a video file here</p>
 					<ol class="empty-steps">
@@ -267,11 +267,11 @@
 		<form method="dialog">
 			<h2 class="modal-title" id="guideTitle">How to track motion</h2>
 			<ol class="guide-steps">
-				<li><span><strong>Import a video.</strong> Film side-on with the camera held still, and include something of known length, such as a metre rule. To practise, choose Try a sample on the start screen.</span></li>
+				<li><span><strong>Import a video.</strong> Film side-on with the camera held still, and include something of known length, such as a meter rule. To practice, choose Try a sample on the start screen.</span></li>
 				<li><span><strong>Check the frame rate.</strong> It is detected for you. For slow motion, open Setup → Frame rate and give the rate it was filmed at.</span></li>
 				<li><span><strong>Scale:</strong> drag along the object of known length and type its length. Without a scale, positions are in pixels.</span></li>
 				<li><span><strong>Origin:</strong> click where x and y should be zero. Otherwise the origin is the bottom-left corner.</span></li>
-				<li><span><strong>Mark the object.</strong> Click its centre; the video moves on by the step, ready for the next mark. Clicking a frame that already has a mark replaces it. In Auto mode, click the object once and it is marked in each frame until it is lost, leaves the frame or the video ends; check the marks, click it to carry on, and Undo removes a whole run. It works best against a plain background.</span></li>
+				<li><span><strong>Mark the object.</strong> Click its center; the video moves on by the step, ready for the next mark. Clicking a frame that already has a mark replaces it. In Auto mode, click the object once and it is marked in each frame until it is lost, leaves the frame or the video ends; check the marks, click it to carry on, and Undo removes a whole run. It works best against a plain background.</span></li>
 				<li><span><strong>Correct a mark.</strong> Choose Edit, click a cross in the video, then Delete to remove just that mark. For overlapping crosses, select its time in the Table or use its row’s delete button. Undo and Redo step through changes.</span></li>
 				<li><span><strong>Read the results.</strong> Switch between position and velocity, edit marks in the Table, and export a CSV or send the data to PanPhyPlot. Velocity needs at least four marks.</span></li>
 			</ol>
@@ -331,7 +331,7 @@
 		let calibrationMode = false;
 		let calibrationStart = null;
 		let calibrationEnd = null;
-		let previousCalibration = null; // The line to put back if a new one is cancelled
+		let previousCalibration = null; // The line to put back if a new one is canceled
 		let scaleFactor = 1;
 		let scaleUnit = "pixels";
 		let isDrawingCalibration = false;
@@ -642,7 +642,7 @@
 			const exportCtx = exportCanvas.getContext('2d');
 			if (!exportCtx) return null;
 
-			// The graph sits on the pane's surface colour, so the copy does too.
+			// The graph sits on the pane's surface color, so the copy does too.
 			exportCtx.fillStyle = getCssVar('--surface') || '#ffffff';
 			exportCtx.fillRect(0, 0, outWidth, outHeight);
 			exportCtx.imageSmoothingEnabled = true;
@@ -962,27 +962,27 @@
 
 		/* ===== Auto-tracking: matching ===== */
 		// Images are { data, width, height } with RGBA data, as ImageData has. Nothing here reads the page.
-		const TRACK_SEED_TOLERANCE = 90;  // colour distance from the clicked colour
-		const TRACK_STEP_TOLERANCE = 32;  // colour distance between neighbouring pixels
+		const TRACK_SEED_TOLERANCE = 90;  // color distance from the clicked color
+		const TRACK_STEP_TOLERANCE = 32;  // color distance between neighboring pixels
 		const TRACK_TEMPLATE_SAMPLES = 24; // template samples per side; larger patches are sampled with a stride
 
-		function colourAt(image, x, y) {
+		function colorAt(image, x, y) {
 			const i = (y * image.width + x) * 4;
 			return [image.data[i], image.data[i + 1], image.data[i + 2]];
 		}
 
-		function colourDistance(a, b) {
+		function colorDistance(a, b) {
 			return Math.hypot(a[0] - b[0], a[1] - b[1], a[2] - b[2]);
 		}
 
-		// The region of similar colour around (x, y), grown pixel by pixel: its centroid and the radius of a
-		// disc of the same area. Null when it is a speck, or runs into the edge of the box (the background).
+		// The region of similar color around (x, y), grown pixel by pixel: its centroid and the radius of a
+		// disk of the same area. Null when it is a speck, or runs into the edge of the box (the background).
 		function findBlob(image, x, y, maxRadius) {
 			const { width, height } = image;
 			const sx = Math.round(x);
 			const sy = Math.round(y);
 			if (sx < 0 || sy < 0 || sx >= width || sy >= height) return null;
-			const seed = colourAt(image, sx, sy);
+			const seed = colorAt(image, sx, sy);
 			const left = Math.max(0, sx - maxRadius), right = Math.min(width - 1, sx + maxRadius);
 			const top = Math.max(0, sy - maxRadius), bottom = Math.min(height - 1, sy + maxRadius);
 			const boxWidth = right - left + 1;
@@ -992,7 +992,7 @@
 			let count = 0, sumX = 0, sumY = 0;
 			while (stack.length) {
 				const [px, py] = stack.pop();
-				const here = colourAt(image, px, py);
+				const here = colorAt(image, px, py);
 				count++; sumX += px; sumY += py;
 				if (px === left || px === right || py === top || py === bottom) {
 					// Reaching the box edge means the region is not a compact object, unless that edge is the frame's.
@@ -1002,8 +1002,8 @@
 					if (nx < left || nx > right || ny < top || ny > bottom) continue;
 					const k = (ny - top) * boxWidth + (nx - left);
 					if (seen[k]) continue;
-					const colour = colourAt(image, nx, ny);
-					if (colourDistance(colour, seed) > TRACK_SEED_TOLERANCE || colourDistance(colour, here) > TRACK_STEP_TOLERANCE) continue;
+					const color = colorAt(image, nx, ny);
+					if (colorDistance(color, seed) > TRACK_SEED_TOLERANCE || colorDistance(color, here) > TRACK_STEP_TOLERANCE) continue;
 					seen[k] = 1;
 					stack.push([nx, ny]);
 				}
@@ -1012,7 +1012,7 @@
 			return { x: sumX / count, y: sumY / count, radius: Math.sqrt(count / Math.PI) };
 		}
 
-		// A square patch centred on the nearest pixel to (cx, cy), half pixels each side of it, as RGB samples
+		// A square patch centered on the nearest pixel to (cx, cy), half pixels each side of it, as RGB samples
 		// taken every stride pixels. Null when the patch does not fit inside the image.
 		function cutTemplate(image, cx, cy, half) {
 			const x0 = Math.round(cx) - half, y0 = Math.round(cy) - half;
@@ -1038,11 +1038,11 @@
 			return { half: a.half, offsets: a.offsets, values };
 		}
 
-		// Zero-mean normalised cross-correlation (1 is a perfect match, 0 none) of the template centred on
-		// every pixel within radius of (cx, cy) where it fits. Returns the best centre, refined to a fraction
+		// Zero-mean normalized cross-correlation (1 is a perfect match, 0 none) of the template centered on
+		// every pixel within radius of (cx, cy) where it fits. Returns the best center, refined to a fraction
 		// of a pixel by fitting a parabola through the scores either side, or null if nothing fits. atEdge is
-		// true when the best centre is as close to the image edge as the template allows: the object may be
-		// partly out of the picture, and the true centre further out.
+		// true when the best center is as close to the image edge as the template allows: the object may be
+		// partly out of the picture, and the true center further out.
 		function matchTemplate(image, template, cx, cy, radius) {
 			const { half, offsets, values } = template;
 			const n = offsets.length;
@@ -1132,7 +1132,7 @@
 			return { image: trackCtx.getImageData(0, 0, width, height), scale: width / frameCanvas.width };
 		}
 
-		// Pixel centres line up when converting between the work copy and the video.
+		// Pixel centers line up when converting between the work copy and the video.
 		const toWork = (value, scale) => (value + 0.5) * scale - 0.5;
 		const fromWork = (value, scale) => (value + 0.5) / scale - 0.5;
 
@@ -1183,18 +1183,18 @@
 			const longSide = Math.max(image.width, image.height);
 			const clickX = toWork(canvasX, scale), clickY = toWork(canvasY, scale);
 			const blob = findBlob(image, clickX, clickY, Math.round(longSide * 0.12));
-			const centre = blob ? { x: blob.x, y: blob.y } : { x: clickX, y: clickY };
+			const center = blob ? { x: blob.x, y: blob.y } : { x: clickX, y: clickY };
 			const radius = blob ? blob.radius : longSide * 0.02;
 			const half = Math.max(4, Math.min(Math.round(longSide * 0.1), Math.round(radius * 1.3)));
-			const original = cutTemplate(image, centre.x, centre.y, half);
+			const original = cutTemplate(image, center.x, center.y, half);
 			if (!original) {
 				setMessage('That is too close to the edge of the video to track. Click the object in a frame where it is further in, or choose Manual and mark it by hand.');
 				return;
 			}
 			rememberPoints();
-			setTrackMark(frame, centre.x, centre.y, scale);
+			setTrackMark(frame, center.x, center.y, scale);
 			markUnsavedChanges();
-			trackRun = { token, count: 1, box: { x: fromWork(centre.x, scale), y: fromWork(centre.y, scale), half: half / scale } };
+			trackRun = { token, count: 1, box: { x: fromWork(center.x, scale), y: fromWork(center.y, scale), half: half / scale } };
 			messageBar.classList.add('is-mode');
 			autoStopButton.hidden = false;
 			setMessage('Auto-tracking... Press Stop, or any key, to stop.');
@@ -1202,7 +1202,7 @@
 			replotCurrentView();
 			showTrackFrame();
 
-			const track = [centre];
+			const track = [center];
 			let latest = original;
 			const finalFrame = lastFrameIndex();
 			let reason = 'end';
@@ -1672,7 +1672,7 @@
 		videoUploadInput.addEventListener('change', (e) => {
 			const file = e.target.files?.[0];
 			e.target.value = '';
-			openVideoFile(file); // Nothing happens if the user cancelled
+			openVideoFile(file); // Nothing happens if the user canceled
 		});
 
 		videoStage.addEventListener('dragover', (event) => {
@@ -2331,7 +2331,7 @@
 			drawFrame();
 		}
 
-		// Distances are in canvas pixels; ties favour the frame being shown.
+		// Distances are in canvas pixels; ties favor the frame being shown.
 		function findMarkAt(x, y, radius) {
 			let nearest = null;
 			let distance = radius;
@@ -2698,7 +2698,7 @@
 			calibrationMode = true;
 			isDrawingCalibration = false;
 			overlayCanvas.style.pointerEvents = "auto";
-			showPickMode("Drag along something of known length, such as a metre rule.");
+			showPickMode("Drag along something of known length, such as a meter rule.");
 		});
 
 		function startCalibrationDraw(x, y) {

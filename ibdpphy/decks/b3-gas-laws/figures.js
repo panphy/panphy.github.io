@@ -2,8 +2,8 @@
 // molecules are teal, pressure and force apricot, hot red and cold blue. Nothing here is
 // terracotta, because B.3 has no additional higher level content.
 window.DeckFigures.add(P => {
-  const { svg, arrow, text, sub, both, through, sampled, labelled, seeded, track, anim, twoState, f, TAU } = P;
-  const line = (d, colour, width = 5, extra = '') => `<path d="${d}" style="fill:none;stroke:var(--${colour});stroke-width:${width};stroke-linecap:round;stroke-linejoin:round" ${extra}/>`;
+  const { svg, arrow, text, sub, both, through, sampled, labeled, seeded, track, anim, twoState, f, TAU } = P;
+  const line = (d, color, width = 5, extra = '') => `<path d="${d}" style="fill:none;stroke:var(--${color});stroke-width:${width};stroke-linecap:round;stroke-linejoin:round" ${extra}/>`;
   const tri = u => { const v = ((u % 2) + 2) % 2; return v < 1 ? v : 2 - v; };
   // A box of gas whose molecules never stop, as in the B.4 deck: each one bounces between the
   // walls for ever. With grow ≠ 1 the box breathes between width w and w × grow, and each
@@ -26,7 +26,7 @@ window.DeckFigures.add(P => {
   return {
     // A closed box of gas. Also the title picture, with data-plain.
     'b3-box': el => {
-      const on = labelled(el), box = gas(206, 126, 388, 268, 30, 4);
+      const on = labeled(el), box = gas(206, 126, 388, 268, 30, 4);
       let s = walls(200, 120, 600, 400);
       if (on) s += arrow(606, 260, 684, 260, 'brand-accent', 6) + text(700, 248, 'each collision', 'lbl', 'start') + text(700, 282, 'pushes the wall', 'lbl', 'start');
       return svg(on ? '170 90 740 340' : '170 90 460 340', s + twoState(box.still, box.mover), 'A closed box of gas. The molecules move in all directions and bounce off the walls. Each collision pushes on the wall, and the enormous number of collisions each second gives a steady pressure');
@@ -34,7 +34,7 @@ window.DeckFigures.add(P => {
 
     // Boyle's law in action: a piston squeezes a gas and the pressure gauge rises. Also drawn plain.
     'b3-boyle': el => {
-      const on = labelled(el), w = 420, grow = 0.5, dur = 7, dx = -w * (1 - grow);
+      const on = labeled(el), w = 420, grow = 0.5, dur = 7, dx = -w * (1 - grow);
       const box = gas(136, 176, w, 188, 26, 9, { grow, dur });
       const cyl = `<path d="M130,170 H700 M130,370 H700 M130,170 V370" style="fill:none;stroke:var(--text-secondary);stroke-width:6;stroke-linecap:round"/>`;
       const piston = `<rect x="556" y="176" width="26" height="188" rx="4" style="fill:var(--brand-accent-strong)"/><rect x="582" y="260" width="230" height="20" style="fill:var(--brand-accent-strong)"/>`;
@@ -52,7 +52,7 @@ window.DeckFigures.add(P => {
     'b3-law': el => {
       const kind = el.dataset.kind || 'boyle';
       if (kind === 'boyle') {
-        const X = v => 110 + 150 * v, Y = p => 430 - 80 * p, iso = (k, colour) => line(sampled(t => { const v = k / 4 + (4.45 - k / 4) * t; return [X(v), Y(k / v)]; }, 60), colour);
+        const X = v => 110 + 150 * v, Y = p => 430 - 80 * p, iso = (k, color) => line(sampled(t => { const v = k / 4 + (4.45 - k / 4) * t; return [X(v), Y(k / v)]; }, 60), color);
         let s = axes(110, 430, 790, 40, 'volume V', 'pressure P') + iso(1.6, 'electron') + iso(3.2, 'proton');
         s += `<path d="M${X(1)},430 V${Y(3.2)} H110 M${X(2)},430 V${Y(1.6)} H110" class="guide"/>` + `<circle cx="${X(1)}" cy="${Y(3.2)}" r="8" style="fill:var(--text-main)"/><circle cx="${X(2)}" cy="${Y(1.6)}" r="8" style="fill:var(--text-main)"/>`;
         s += text(X(1), 466, 'V', 'lbl mono') + text(X(2), 466, '2V', 'lbl mono') + text(96, Y(3.2) + 9, '2P', 'lbl mono', 'end') + text(96, Y(1.6) + 9, 'P', 'lbl mono', 'end') + text(X(3.3), Y(1.15), 'hotter', 'lbl strong halo', 'start') + text(X(3.3), Y(0.18) - 26, 'cooler', 'lbl strong halo', 'start');
@@ -70,7 +70,7 @@ window.DeckFigures.add(P => {
     // The three simple changes of an ideal gas, drawn as lines through one state on a P–V diagram:
     // each can go either way, so none has an arrowhead. Also drawn plain.
     'b3-pv': el => {
-      const on = labelled(el), X = v => 110 + 150 * v, Y = p => 430 - 80 * p, iso = (k, from, to) => sampled(t => { const v = from + (to - from) * t; return [X(v), Y(k / v)]; }, 50);
+      const on = labeled(el), X = v => 110 + 150 * v, Y = p => 430 - 80 * p, iso = (k, from, to) => sampled(t => { const v = from + (to - from) * t; return [X(v), Y(k / v)]; }, 50);
       let s = arrow(110, 430, 110, 40, 'text-secondary', 2.5) + arrow(110, 430, 790, 430, 'text-secondary', 2.5);
       s += line(iso(4, 0.9, 4.2), 'brand-accent', 6) + line(`M${X(0.7)},${Y(2)} H${X(4.2)}`, 'brand-primary', 6) + line(`M${X(2)},${Y(4.4)} V${Y(0.4)}`, 'brand-accent-strong', 6) + `<circle cx="${X(2)}" cy="${Y(2)}" r="10" style="fill:var(--text-main)"/>`;
       if (on) s += text(126, 54, 'pressure', 'lbl mono', 'start') + text(784, 470, 'volume', 'lbl mono', 'end') + text(X(3.2), Y(2) - 16, 'constant pressure', 'lbl strong halo', 'middle', 'style="fill:var(--brand-primary)"') + text(X(2) + 16, Y(4.1), 'constant volume', 'lbl strong halo', 'start') + text(X(3.1), Y(0.75), 'constant temperature', 'lbl strong halo', 'middle', 'style="fill:var(--brand-accent)"');
@@ -79,7 +79,7 @@ window.DeckFigures.add(P => {
 
     // One molecule bouncing between two walls: its momentum reverses at each collision. Also drawn plain.
     'b3-collision': el => {
-      const on = labelled(el), x1 = 170, x2 = 690, y = 250, r = 20, n = 40;
+      const on = labeled(el), x1 = 170, x2 = 690, y = 250, r = 20, n = 40;
       let s = `<rect x="${x1 - 30}" y="120" width="30" height="260" style="fill:var(--brand-accent-strong);opacity:.8"/><rect x="${x2}" y="120" width="30" height="260" style="fill:var(--brand-accent-strong);opacity:.8"/>`;
       if (on) s += both(x1 + 4, 420, x2 - 4, 420) + text(430, 462, 'L', 'lbl display') + text(430, 80, 'one molecule, mass m, speed v', 'lbl');
       const ball = `<circle r="${r}" style="fill:var(--brand-primary)"/>`;

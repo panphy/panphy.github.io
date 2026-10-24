@@ -2,7 +2,7 @@
 // of A.1 Kinematics, A.2 Forces and momentum, E.1 Structure of the atom and E.2 Quantum physics.
 // The other decks add their own figures from a figures.js beside their index.html (see
 // DeckFigures.add at the end of this file). The atom figures began as copies of those in
-// gcsephy/decks/atoms-and-radiation and use the same particle colours and
+// gcsephy/decks/atoms-and-radiation and use the same particle colors and
 // glossy-sphere look as the Atomic Models and Nuclear Decay simulations.
 // Each <div data-fig="name"> is filled from FIGURES.
 (() => {
@@ -19,14 +19,14 @@
     return `<svg class="svg-defs" aria-hidden="true" focusable="false"><defs>${grads}${markers}
       <radialGradient id="g-glow"><stop offset="0" style="stop-color:var(--photon);stop-opacity:.45"/><stop offset="1" style="stop-color:var(--photon);stop-opacity:0"/></radialGradient>
       <radialGradient id="g-pudding" cx="42%" cy="38%" r="70%"><stop offset="0" style="stop-color:var(--positive);stop-opacity:.22"/><stop offset="1" style="stop-color:var(--positive);stop-opacity:.42"/></radialGradient>
-      <linearGradient id="g-spectrum">${SPECTRUM.map(([nm, colour]) => `<stop offset="${f((nm - 380) / 3.7)}%" stop-color="${colour}"/>`).join('')}</linearGradient>
+      <linearGradient id="g-spectrum">${SPECTRUM.map(([nm, color]) => `<stop offset="${f((nm - 380) / 3.7)}%" stop-color="${color}"/>`).join('')}</linearGradient>
       <radialGradient id="g-shadow"><stop offset="0" style="stop-color:#000;stop-opacity:.16"/><stop offset="1" style="stop-color:#000;stop-opacity:0"/></radialGradient>
     </defs></svg>`;
   }
 
   // Visible spectrum, 380 to 750 nm, for the spectrum strips.
   const SPECTRUM = [[380, '#1B0030'], [400, '#5A00B5'], [420, '#6A00FF'], [450, '#0033FF'], [480, '#00A2FF'], [500, '#00E08A'], [530, '#4DFF00'], [560, '#B6FF00'], [580, '#FFE600'], [600, '#FFA200'], [620, '#FF5A00'], [650, '#FF0000'], [700, '#B00000'], [750, '#3A0000']];
-  function spectrumColour(nm) {
+  function spectrumColor(nm) {
     const i = Math.max(1, SPECTRUM.findIndex(([stop]) => stop >= nm));
     const [n1, c1] = SPECTRUM[i - 1], [n2, c2] = SPECTRUM[i], t = (nm - n1) / (n2 - n1);
     const mix = k => Math.round(parseInt(c1.slice(k, k + 2), 16) * (1 - t) + parseInt(c2.slice(k, k + 2), 16) * t).toString(16).padStart(2, '0');
@@ -57,9 +57,9 @@
   // spheres just touch, turned to a random angle, then drawn back to front.
   function packNucleus(count, rand) {
     const points = count > 40 ? latticeBall(count, rand) : relaxedBall(count, rand);
-    const centre = [0, 1, 2].map(k => points.reduce((sum, point) => sum + point[k], 0) / count);
+    const center = [0, 1, 2].map(k => points.reduce((sum, point) => sum + point[k], 0) / count);
     const turn = (a, b) => points.map(point => {
-      let [x, y, z] = point.map((v, k) => v - centre[k]);
+      let [x, y, z] = point.map((v, k) => v - center[k]);
       [x, z] = [x * Math.cos(a) + z * Math.sin(a), -x * Math.sin(a) + z * Math.cos(a)];
       [y, z] = [y * Math.cos(b) - z * Math.sin(b), y * Math.sin(b) + z * Math.cos(b)];
       return [x, y, z];
@@ -266,12 +266,12 @@
   }
 
   // ---- A.1: kinematics helpers ----
-  // Graph axes from the origin (x0, y0), a plotted line in a palette colour, and the moving body.
+  // Graph axes from the origin (x0, y0), a plotted line in a palette color, and the moving body.
   const axes = (x0, y0, x1, y1, xLabel, yLabel) => arrow(x0, y0, x0, y1, 'text-secondary', 2.5) + arrow(x0, y0, x1, y0, 'text-secondary', 2.5) + text(x1 - 6, y0 + 36, xLabel, 'lbl mono', 'end') + text(x0 + 16, y1 + 14, yLabel, 'lbl mono', 'start');
-  const plot = (d, colour = 'brand-primary', extra = '') => `<path d="${d}" class="curve" style="stroke:var(--${colour})" ${extra}/>`;
-  const shade = (d, colour = 'brand-primary', opacity = 0.16) => `<path d="${d}" style="fill:var(--${colour});opacity:${opacity}"/>`;
+  const plot = (d, color = 'brand-primary', extra = '') => `<path d="${d}" class="curve" style="stroke:var(--${color})" ${extra}/>`;
+  const shade = (d, color = 'brand-primary', opacity = 0.16) => `<path d="${d}" style="fill:var(--${color});opacity:${opacity}"/>`;
   const body = (x, y, r = 15) => ball(x, y, r, 'brand-accent-strong', '');
-  const both = (x1, y1, x2, y2, colour = 'text-secondary', width = 2.5) => arrow(x1, y1, x2, y2, colour, width) + arrow(x2, y2, x1, y1, colour, width);
+  const both = (x1, y1, x2, y2, color = 'text-secondary', width = 2.5) => arrow(x1, y1, x2, y2, color, width) + arrow(x2, y2, x1, y1, color, width);
   // Points at equal time steps on a projectile path from (x0, y0) to (x1, y0) that rises by h.
   const arcPoints = (x0, y0, x1, h, n) => Array.from({ length: n + 1 }, (_, i) => [x0 + (x1 - x0) * i / n, y0 - 4 * h * (i / n) * (1 - i / n)]);
   const through = points => points.map(([x, y], i) => `${i ? 'L' : 'M'}${f(x)},${f(y)}`).join('');
@@ -280,33 +280,33 @@
   // ---- A.2: forces and momentum helpers ----
   // A subscripted symbol, a block, a point on a body, a surface and a coiled spring. Forces are
   // teal, velocities and components apricot. A force arrow starts where the force acts: weight
-  // at the centre of mass (marked with a dot), a normal force or friction at the surface in
+  // at the center of mass (marked with a dot), a normal force or friction at the surface in
   // contact, a tension where the string is attached, an applied force where it is applied. data-plain leaves the labels off a small copy.
   const sub = (a, b) => `${a}<tspan dy="9" font-size="24">${b}</tspan><tspan dy="-9">​</tspan>`;
   const box = (cx, cy, w, h, extra = '') => `<rect x="${f(cx - w / 2)}" y="${f(cy - h / 2)}" width="${w}" height="${h}" rx="10" style="fill:color-mix(in srgb, var(--brand-accent-strong) 18%, var(--viewer-bg));stroke:var(--brand-accent-strong);stroke-width:3" ${extra}/>`;
   const dot = (x, y, r = 7) => `<circle cx="${f(x)}" cy="${f(y)}" r="${r}" style="fill:var(--text-main)"/>`;
   const surface = (x1, y1, x2, y2) => `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" class="tick" style="stroke-width:4"/>`;
-  const labelled = el => !('plain' in el.dataset);
+  const labeled = el => !('plain' in el.dataset);
   function spring(x, y1, y2, turns = 9, amp = 16) {
     const lead = 14, step = (y2 - y1 - 2 * lead) / (turns * 2);
     let d = `M${x},${y1} V${y1 + lead}`;
     for (let i = 0; i < turns * 2; i++) d += ` L${x + (i % 2 ? -amp : amp)},${f(y1 + lead + step * (i + 0.5))}`;
     return `<path d="${d} L${x},${y2 - lead} V${y2}" class="cable" stroke-linejoin="round"/>`;
   }
-  // Collision pictures. Each body has its own colour, used for its block and its velocity arrow.
+  // Collision pictures. Each body has its own color, used for its block and its velocity arrow.
   // A body lists its three positions along the track (before, at the moment of contact, after)
   // and what is written above it before (pre) and after (post): a velocity, or rest.
-  const BODY_COLOURS = ['brand-accent-strong', 'brand-primary'];
-  const block = (x, y, w, colour) => `<rect x="${x - w / 2}" y="${y - 72}" width="${w}" height="70" rx="10" style="fill:color-mix(in srgb, var(--${colour}) 45%, var(--viewer-bg));stroke:var(--${colour});stroke-width:3"/>`;
-  const velocity = (x, y, v, colour, on = true) => {
+  const BODY_COLORS = ['brand-accent-strong', 'brand-primary'];
+  const block = (x, y, w, color) => `<rect x="${x - w / 2}" y="${y - 72}" width="${w}" height="70" rx="10" style="fill:color-mix(in srgb, var(--${color}) 45%, var(--viewer-bg));stroke:var(--${color});stroke-width:3"/>`;
+  const velocity = (x, y, v, color, on = true) => {
     if (!v) return '';
     const { label, dir = 1, len = 100, rest, ax = 0 } = v;
     if (rest) return on ? text(x + ax, y + 8, 'at rest', 'lbl small') : '';
-    return arrow(x + ax - dir * len / 2, y, x + ax + dir * len / 2, y, colour, 5) + (on ? text(x + ax, y - 16, label, 'lbl mono strong') : '');
+    return arrow(x + ax - dir * len / 2, y, x + ax + dir * len / 2, y, color, 5) + (on ? text(x + ax, y - 16, label, 'lbl mono strong') : '');
   };
   // The picture that does not move: one row of the track, before (stage 0) or after (stage 2).
   function trackRow(y, bodies, stage, on) {
-    return surface(60, y, 760, y) + bodies.map(({ w = 120, m, x, pre, post }, i) => block(x[stage], y, w, BODY_COLOURS[i]) + (on ? text(x[stage], y + 34, m, 'lbl mono') : '') + velocity(x[stage], y - 100, stage ? post : pre, BODY_COLOURS[i], on)).join('');
+    return surface(60, y, 760, y) + bodies.map(({ w = 120, m, x, pre, post }, i) => block(x[stage], y, w, BODY_COLORS[i]) + (on ? text(x[stage], y + 34, m, 'lbl mono') : '') + velocity(x[stage], y - 100, stage ? post : pre, BODY_COLORS[i], on)).join('');
   }
   // The picture that moves: one track, each body drawn where it ends and shifted back to where
   // it starts. When step k2 is shown, deck.css slides it to the point of contact and straight on.
@@ -314,7 +314,7 @@
     const approach = bodies.some(({ x }) => x[0] !== x[1]);
     let s = surface(60, y, 760, y) + `<g class="pre">${text(30, 60, 'BEFORE', 'lbl mono', 'start')}</g><g class="post">${text(30, 60, 'AFTER', 'lbl mono', 'start')}</g>`;
     bodies.forEach(({ w = 120, m, x, pre, post }, i) => {
-      s += `<g class="cbody" style="--x0:${x[0] - x[2]}px;--x1:${x[1] - x[2]}px">${block(x[2], y, w, BODY_COLOURS[i])}${text(x[2], y + 34, m, 'lbl mono')}<g class="pre">${velocity(x[2], y - 100, pre, BODY_COLOURS[i])}</g><g class="post">${velocity(x[2], y - 100, post, BODY_COLOURS[i])}</g></g>`;
+      s += `<g class="cbody" style="--x0:${x[0] - x[2]}px;--x1:${x[1] - x[2]}px">${block(x[2], y, w, BODY_COLORS[i])}${text(x[2], y + 34, m, 'lbl mono')}<g class="pre">${velocity(x[2], y - 100, pre, BODY_COLORS[i])}</g><g class="post">${velocity(x[2], y - 100, post, BODY_COLORS[i])}</g></g>`;
     });
     return `<g style="--t1:${approach ? '1.3s' : '0s'}">${s}</g><g class="step k2"></g>`;
   }
@@ -325,15 +325,15 @@
     },
     stick: {
       bodies: [{ w: 110, m: '800 kg', x: [190, 415, 505], pre: { label: '15 m s⁻¹', len: 130 }, post: { label: 'v = ?', len: 52, ax: 70 } }, { w: 140, m: '1200 kg', x: [540, 540, 630], pre: { rest: true } }],
-      label: 'Before: an 800 kilogram car at 15 metres per second approaches a 1200 kilogram car at rest. After: the two move off joined together at an unknown velocity v'
+      label: 'Before: an 800 kilogram car at 15 meters per second approaches a 1200 kilogram car at rest. After: the two move off joined together at an unknown velocity v'
     },
     elastic: {
       bodies: [{ m: '2.0 kg', x: [150, 300, 350], pre: { label: '3.0 m s⁻¹', len: 130 }, post: { label: '1.0 m s⁻¹', len: 50 } }, { w: 90, m: '1.0 kg', x: [405, 405, 605], pre: { rest: true }, post: { label: 'v₂ = ?', len: 150 } }],
-      label: 'Before: a 2.0 kilogram trolley at 3.0 metres per second approaches a 1.0 kilogram trolley at rest. After: the 2.0 kilogram trolley moves at 1.0 metre per second and the 1.0 kilogram trolley at an unknown velocity v'
+      label: 'Before: a 2.0 kilogram trolley at 3.0 meters per second approaches a 1.0 kilogram trolley at rest. After: the 2.0 kilogram trolley moves at 1.0 meter per second and the 1.0 kilogram trolley at an unknown velocity v'
     },
     explode: {
       bodies: [{ m: '60 kg', x: [345, 345, 225], pre: { rest: true, ax: 55 }, post: { label: 'v₁ = ?', dir: -1, len: 80 } }, { w: 100, m: '40 kg', x: [455, 455, 635], post: { label: '3.0 m s⁻¹', len: 120 } }],
-      label: 'Before: a 60 kilogram skater and a 40 kilogram skater stand together at rest. After pushing apart, the 40 kilogram skater moves right at 3.0 metres per second and the 60 kilogram skater moves left at an unknown velocity v'
+      label: 'Before: a 60 kilogram skater and a 40 kilogram skater stand together at rest. After pushing apart, the 40 kilogram skater moves right at 3.0 meters per second and the 60 kilogram skater moves left at an unknown velocity v'
     }
   };
 
@@ -353,7 +353,7 @@
       s += text(250, 372, 'mostly empty space', 'lbl italic halo');
       s += `<circle cx="645" cy="130" r="100" class="inset"/>` + cluster(645, 130, 3, 4, 24);
       s += text(645, 262, 'the nucleus', 'lbl strong') + text(645, 298, 'radius ≈ 10⁻¹⁵ m', 'lbl mono') + text(645, 330, '10⁵ times smaller', 'lbl mono');
-      return svg('0 0 790 460', s, 'An atom of radius about 1 times 10 to the minus 10 metres, with a nucleus about 100 000 times smaller at the centre');
+      return svg('0 0 790 460', s, 'An atom of radius about 1 times 10 to the minus 10 meters, with a nucleus about 100 000 times smaller at the center');
     },
 
     notation: () => {
@@ -519,7 +519,7 @@
         s += text(x0, y - 12, row.label, 'lbl mono strong', 'start');
         s += `<rect x="${x0}" y="${y}" width="${width}" height="${stripH}" rx="8" style="fill:${row.dark ? 'var(--spectrum-bg)' : 'url(#g-spectrum)'}"/>`;
         (row.lines || []).forEach(nm => {
-          s += `<rect x="${f(xAt(nm) - 2.5)}" y="${y}" width="5" height="${stripH}" style="fill:${row.dark ? spectrumColour(nm) : 'var(--spectrum-bg)'}"/>`;
+          s += `<rect x="${f(xAt(nm) - 2.5)}" y="${y}" width="5" height="${stripH}" style="fill:${row.dark ? spectrumColor(nm) : 'var(--spectrum-bg)'}"/>`;
           if (row.name) s += text(f(xAt(nm)), y + stripH + 24, String(Math.round(nm)), 'lbl mono small');
         });
         // Rows that name their wavelengths need room for the numbers underneath.
@@ -542,7 +542,7 @@
         s += cluster(x, 170, p, n, 12);
         s += text(x, 330, name, 'lbl display') + text(x, 366, `R = ${radius} fm`, 'lbl mono small');
       });
-      return svg('0 0 990 390', s, 'Nuclei of helium-4, carbon-12, iron-56 and gold-197 drawn to the same scale: radii 1.90, 2.75, 4.59 and 6.98 femtometres');
+      return svg('0 0 990 390', s, 'Nuclei of helium-4, carbon-12, iron-56 and gold-197 drawn to the same scale: radii 1.90, 2.75, 4.59 and 6.98 femtometers');
     },
 
     'closest-approach': () => {
@@ -644,7 +644,7 @@
         s += text(400, 335, 'area = displacement', 'lbl strong') + text(418, 112, 'constant velocity', 'lbl small');
         s += text(636, 226, 'slowing', 'lbl small', 'start') + text(636, 250, 'down', 'lbl small', 'start');
       }
-      return svg(numbers ? '0 0 850 460' : '0 0 800 460', s, numbers ? 'Velocity against time: rising from 0 to 12 metres per second in 4 seconds, steady until 10 seconds, then falling to zero at 13 seconds; the areas are 24, 72 and 18 metres' : 'Velocity against time: the gradient is the acceleration and the area under the graph is the displacement');
+      return svg(numbers ? '0 0 850 460' : '0 0 800 460', s, numbers ? 'Velocity against time: rising from 0 to 12 meters per second in 4 seconds, steady until 10 seconds, then falling to zero at 13 seconds; the areas are 24, 72 and 18 meters' : 'Velocity against time: the gradient is the acceleration and the area under the graph is the displacement');
     },
 
     'three-graphs': () => {
@@ -773,7 +773,7 @@
 
     // Also the small picture for part 1, with data-plain. data-view crops it for a narrower panel.
     'fbd-block': el => {
-      const on = labelled(el);
+      const on = labeled(el);
       let s = `<line x1="90" y1="302" x2="710" y2="302" class="guide"/>` + box(380, 245, 170, 110);
       s += arrow(380, 245, 380, 412, 'brand-primary', 5) + arrow(412, 300, 412, 133, 'brand-primary', 5) + arrow(465, 245, 660, 245, 'brand-primary', 5) + arrow(348, 300, 196, 300, 'brand-primary', 5) + dot(380, 245);
       if (on) {
@@ -782,7 +782,7 @@
         s += text(572, 224, 'F', 'lbl display') + text(572, 284, 'applied force', 'lbl small');
         s += text(236, 280, sub('F', 'f'), 'lbl display') + text(236, 338, 'friction', 'lbl small');
       }
-      return svg(el.dataset.view || '0 0 800 460', s, 'Free-body diagram of a block pulled along a table, each force drawn from where it acts: the weight down from the centre of the block, the normal force up from its base, the applied force forwards from its front face and a smaller friction force backwards along its base');
+      return svg(el.dataset.view || '0 0 800 460', s, 'Free-body diagram of a block pulled along a table, each force drawn from where it acts: the weight down from the center of the block, the normal force up from its base, the applied force forwards from its front face and a smaller friction force backwards along its base');
     },
 
     resultant: () => {
@@ -799,7 +799,7 @@
       s += arrow(320, 235, 220.4, 151.4, 'brand-primary', 5) + arrow(480, 235, 579.6, 151.4, 'brand-primary', 5) + arrow(400, 270, 400, 420, 'brand-primary', 5) + dot(400, 270);
       s += text(262, 148, 'T', 'lbl display', 'start') + text(538, 148, 'T', 'lbl display', 'end') + text(418, 418, '49 N', 'lbl mono strong', 'start');
       s += text(246, 226, '40°', 'lbl mono', 'end') + text(554, 226, '40°', 'lbl mono', 'start');
-      return svg('0 0 800 460', s, 'A sign of weight 49 newtons hangs at rest from two strings fixed to its top corners, each at 40 degrees to the horizontal. Each tension T acts from the corner where its string is attached, and the weight acts from the centre of the sign');
+      return svg('0 0 800 460', s, 'A sign of weight 49 newtons hangs at rest from two strings fixed to its top corners, each at 40 degrees to the horizontal. Each tension T acts from the corner where its string is attached, and the weight acts from the center of the sign');
     },
 
     'third-law': () => {
@@ -818,13 +818,13 @@
       s += arrow(208, 410, 208, 222, 'brand-primary', 5) + arrow(230, 331, 230, 478, 'brand-primary', 5) + dot(230, 331);
       s += text(176, 246, sub('F', 'N'), 'lbl display', 'end') + text(248, 476, sub('F', 'g'), 'lbl display', 'start');
       s += arrow(408, 300, 408, 190, 'brand-accent', 5) + text(408, 340, 'a', 'lbl display');
-      return svg('0 0 460 500', s, 'A person in a lift that accelerates upwards: the normal force, drawn upwards from the floor under the feet, is larger than the weight, drawn downwards from the centre of the body');
+      return svg('0 0 460 500', s, 'A person in a lift that accelerates upwards: the normal force, drawn upwards from the floor under the feet, is larger than the weight, drawn downwards from the center of the body');
     },
 
     // Also the title picture and the small picture for part 2, with data-plain. For a worked
     // example, data-angle replaces θ with a value and adds the acceleration, and data-view crops it.
     'slope-fbd': el => {
-      const on = labelled(el), angle = el.dataset.angle || 'θ';
+      const on = labeled(el), angle = el.dataset.angle || 'θ';
       let s = `<path d="M700,120 L100,400 H760" class="tick" style="stroke-width:4;fill:none"/>` + box(507.3, 176.9, 90, 60, 'transform="rotate(-25 507.3 176.9)"');
       s += `<path d="M507.3,366.9 L434.5,210.8 M507.3,366.9 L580.1,333" class="guide"/>`;
       s += arrow(507.3, 176.9, 434.5, 210.8, 'brand-accent', 3.5, 'stroke-dasharray="9 7"') + arrow(507.3, 176.9, 580.1, 333, 'brand-accent', 3.5, 'stroke-dasharray="9 7"');
@@ -854,7 +854,7 @@
       s += text(120, 410, '3.0 kg', 'lbl mono strong', 'end') + text(330, 290, '2.0 kg', 'lbl mono strong', 'start');
       s += text(198, 524, '29.4 N', 'lbl mono', 'start') + text(298, 378, '19.6 N', 'lbl mono', 'start');
       s += arrow(60, 470, 60, 544, 'brand-accent', 4) + text(60, 458, 'a', 'lbl display') + arrow(462, 320, 462, 246, 'brand-accent', 4) + text(462, 358, 'a', 'lbl display');
-      return svg('0 0 500 560', s, 'A light string over a pulley joins a 3.0 kilogram mass, weight 29.4 newtons, to a 2.0 kilogram mass, weight 19.6 newtons. The same tension T pulls up on each from the point where the string is attached, and each weight acts from the centre of its mass; the heavier mass accelerates down and the lighter one up');
+      return svg('0 0 500 560', s, 'A light string over a pulley joins a 3.0 kilogram mass, weight 29.4 newtons, to a 2.0 kilogram mass, weight 19.6 newtons. The same tension T pulls up on each from the point where the string is attached, and each weight acts from the center of its mass; the heavier mass accelerates down and the lighter one up');
     },
 
     hooke: () => {
@@ -883,9 +883,9 @@
       const tank = `<rect x="132" y="70" width="196" height="548" style="fill:var(--brand-primary);opacity:.13"/><path d="M130,24 V620 H330 V24" class="tick" style="stroke-width:4;fill:none"/><line x1="132" y1="70" x2="328" y2="70" class="guide accent"/>`;
       // An arrow of the given length from (x, y): up for a force, down for the velocity. With
       // grow, its shaft and head are separate so that the stylesheet can lengthen it.
-      const shaft = (x, y, len, colour, grow) => `<line x1="${x}" y1="${y}" x2="${x}" y2="${y - len + Math.sign(len) * 9}" style="stroke:var(--${colour});transform-origin:${x}px ${y}px" stroke-width="5" stroke-linecap="round"${grow ? ' class="grow"' : ''}/>`;
-      const head = (x, y, len, colour, grow) => { const d = Math.sign(len), t = y - len; return `<path d="M${x - 8},${t + d * 11} L${x},${t - d * 5} L${x + 8},${t + d * 11} Z" style="fill:var(--${colour});--len:${len}px"${grow ? ' class="grow-head"' : ''}/>`; };
-      const vector = (x, y, len, colour, grow) => shaft(x, y, len, colour, grow) + head(x, y, len, colour, grow);
+      const shaft = (x, y, len, color, grow) => `<line x1="${x}" y1="${y}" x2="${x}" y2="${y - len + Math.sign(len) * 9}" style="stroke:var(--${color});transform-origin:${x}px ${y}px" stroke-width="5" stroke-linecap="round"${grow ? ' class="grow"' : ''}/>`;
+      const head = (x, y, len, color, grow) => { const d = Math.sign(len), t = y - len; return `<path d="M${x - 8},${t + d * 11} L${x},${t - d * 5} L${x + 8},${t + d * 11} Z" style="fill:var(--${color});--len:${len}px"${grow ? ' class="grow-head"' : ''}/>`; };
+      const vector = (x, y, len, color, grow) => shaft(x, y, len, color, grow) + head(x, y, len, color, grow);
       const sphere = (y, grow) => {
         let s = `<circle cx="230" cy="${y}" r="30" style="fill:color-mix(in srgb, var(--brand-accent-strong) 18%, var(--viewer-bg));stroke:var(--brand-accent-strong);stroke-width:3"/>`;
         s += vector(230, y, -150, 'brand-primary') + vector(218, y, 45, 'brand-primary') + text(246, y + 152, sub('F', 'g'), 'lbl display', 'start') + text(200, y - 34, sub('F', 'b'), 'lbl display', 'end');
@@ -903,7 +903,7 @@
 
     // Also the small picture for part 3, with data-plain.
     'impulse-graph': el => {
-      const on = labelled(el), at = t => [200 + 400 * t, 400 - 260 * Math.sin(Math.PI * t) ** 2];
+      const on = labeled(el), at = t => [200 + 400 * t, 400 - 260 * Math.sin(Math.PI * t) ** 2];
       let s = shade(`${sampled(at)} Z`) + axes(110, 400, 760, 40, on ? 'time' : '', on ? 'force' : '') + `<path d="M200,400 V270 H600 V400" class="guide accent"/>` + plot(sampled(at));
       if (on) {
         s += text(400, 350, 'area = impulse', 'lbl strong halo') + text(616, 264, 'average', 'lbl small', 'start') + text(616, 290, 'force', 'lbl small', 'start') + text(400, 116, 'peak force', 'lbl small');
@@ -918,14 +918,14 @@
       s += body(520, 310, 24) + arrow(484, 310, 396, 310, 'brand-accent', 5) + text(440, 282, '8.0 m s⁻¹', 'lbl mono strong');
       s += arrow(638, 225, 528, 225, 'brand-primary', 5) + text(584, 200, 'F', 'lbl display') + text(572, 258, 'on the ball', 'lbl small');
       s += arrow(300, 420, 420, 420, 'text-secondary', 2.5) + text(436, 428, 'positive', 'lbl small', 'start');
-      return svg('0 0 800 460', s, 'A ball moves towards a wall at 12 metres per second and rebounds at 8.0 metres per second. The force of the wall on the ball points away from the wall. Towards the wall is taken as positive');
+      return svg('0 0 800 460', s, 'A ball moves towards a wall at 12 meters per second and rebounds at 8.0 meters per second. The force of the wall on the ball points away from the wall. Towards the wall is taken as positive');
     },
 
     // data-kind chooses the bodies (COLLISIONS); with data-plain it is the small picture for part 4.
     // On its slide the two rows are the still picture (thumbnails, print, reduced motion) and the
     // single track is played by one press of →.
     collide: el => {
-      const on = labelled(el), set = COLLISIONS[el.dataset.kind] || COLLISIONS.general;
+      const on = labeled(el), set = COLLISIONS[el.dataset.kind] || COLLISIONS.general;
       const rows = trackRow(180, set.bodies, 0, on) + trackRow(390, set.bodies, 2, on);
       if (!on) return svg('0 0 800 460', rows, set.label);
       const still = rows + `<text x="26" y="110" class="lbl mono" text-anchor="middle" transform="rotate(-90 26 110)">BEFORE</text><text x="26" y="320" class="lbl mono" text-anchor="middle" transform="rotate(-90 26 320)">AFTER</text>`;
@@ -933,23 +933,23 @@
     },
 
     // Still picture and played picture, as for collide. The arrows stay where they are; the pucks move.
-    // The collision is off-centre: at contact the line joining the centres lies along the heavier
+    // The collision is off-center: at contact the line joining the centers lies along the heavier
     // puck's final velocity, 21.8° below x, because the force on it acts along that line. So the
-    // lighter puck comes in along a line 23 above the other's centre (62 sin 21.8°, radii 28 + 34).
+    // lighter puck comes in along a line 23 above the other's center (62 sin 21.8°, radii 28 + 34).
     'collide-2d': () => {
-      const [a, b] = BODY_COLOURS;
-      const puck = (x, y, r, colour) => ball(x, y, r, colour, '');
+      const [a, b] = BODY_COLORS;
+      const puck = (x, y, r, color) => ball(x, y, r, color, '');
       let s = `<path d="M60,227 H342.4 M400,250 H770" class="guide"/>` + arrow(144, 227, 304, 227, a, 5) + text(236, 264, '5.0 m s⁻¹', 'lbl mono strong');
       s += arrow(70, 430, 140, 430, 'text-secondary', 2.5) + arrow(70, 430, 70, 360, 'text-secondary', 2.5) + text(154, 438, 'x', 'lbl mono', 'start') + text(70, 344, 'y', 'lbl mono');
       const after = `<path d="M510,250 A110,110 0 0 1 502.1,290.9" class="guide accent"/>` + arrow(342.4, 193, 342.4, 105, a, 5) + arrow(435.3, 264.1, 648, 349, b, 5) + text(362, 156, '2.0 m s⁻¹', 'lbl mono strong', 'start') + text(530, 356, 'v₂ = ?', 'lbl mono strong', 'end') + text(556, 284, 'θ', 'lbl greek');
-      const ghost = (x, y, r, colour) => `<circle cx="${x}" cy="${y}" r="${r}" style="fill:none;stroke:var(--${colour});stroke-width:2.5;stroke-dasharray:5 6"/>`;
+      const ghost = (x, y, r, color) => `<circle cx="${x}" cy="${y}" r="${r}" style="fill:none;stroke:var(--${color});stroke-width:2.5;stroke-dasharray:5 6"/>`;
       let still = after + puck(110, 227, 28, a) + ghost(342.4, 227, 28, a) + ghost(400, 250, 34, b) + puck(342.4, 67, 28, a) + puck(688, 365, 34, b);
       still += text(110, 290, '2.0 kg', 'lbl mono') + text(400, 318, '3.0 kg', 'lbl mono') + text(400, 346, 'at rest', 'lbl small') + text(382, 76, '2.0 kg', 'lbl mono', 'start') + text(688, 428, '3.0 kg', 'lbl mono');
       let play = `<g class="post">${after}</g>`;
       play += `<g class="cbody" style="--x0:-232.4px;--y0:160px;--x1:0px;--y1:160px">${puck(342.4, 67, 28, a)}${text(342.4, 28, '2.0 kg', 'lbl mono')}</g>`;
       play += `<g class="cbody" style="--x0:-288px;--y0:-115px;--x1:-288px;--y1:-115px">${puck(688, 365, 34, b)}${text(688, 428, '3.0 kg', 'lbl mono')}<g class="pre">${text(688, 456, 'at rest', 'lbl small')}</g></g>`;
       play = `<g style="--t2:2.3s">${play}</g><g class="step k2"></g>`;
-      return svg('0 0 800 460', `${s}<g class="still">${still}</g><g class="mover">${play}</g>`, 'Seen from above, a 2.0 kilogram puck moving at 5.0 metres per second along x strikes a 3.0 kilogram puck at rest off-centre, touching its upper left side. Afterwards the 2.0 kilogram puck moves at 2.0 metres per second along y, at right angles to its first direction, and the 3.0 kilogram puck moves off at an unknown speed v at angle theta below the x direction, along the line that joined the two centres at contact');
+      return svg('0 0 800 460', `${s}<g class="still">${still}</g><g class="mover">${play}</g>`, 'Seen from above, a 2.0 kilogram puck moving at 5.0 meters per second along x strikes a 3.0 kilogram puck at rest off-center, touching its upper left side. Afterwards the 2.0 kilogram puck moves at 2.0 meters per second along y, at right angles to its first direction, and the 3.0 kilogram puck moves off at an unknown speed v at angle theta below the x direction, along the line that joined the two centers at contact');
     },
 
     'ang-vel': () => {
@@ -962,14 +962,14 @@
 
     // data-vector="F" labels the inward arrow as the force; data-plain is the small picture for part 5.
     'circ-va': el => {
-      const on = labelled(el), inward = el.dataset.vector || 'a';
+      const on = labeled(el), inward = el.dataset.vector || 'a';
       let s = `<circle cx="280" cy="270" r="180" class="orbit" style="stroke-width:2.5;stroke-opacity:.6"/>` + dot(280, 270);
       [60, 180, 300].forEach(deg => {
         const c = Math.cos(deg * Math.PI / 180), n = Math.sin(deg * Math.PI / 180), x = 280 + 180 * c, y = 270 - 180 * n;
         s += arrow(x, y, x - 110 * n, y - 110 * c, 'brand-accent', 5) + arrow(x, y, x - 92 * c, y + 92 * n, 'brand-primary', 5) + body(x, y, 17);
       });
-      if (on) s += text(262, 52, 'v', 'lbl display', 'end') + text(340, 206, inward, 'lbl display', 'start') + text(280, 310, 'centre', 'lbl small');
-      return svg('0 0 560 520', s, `A body shown at three points of a circular path: its velocity is along the tangent at each point and its ${inward === 'F' ? 'resultant force' : 'acceleration'} points towards the centre`);
+      if (on) s += text(262, 52, 'v', 'lbl display', 'end') + text(340, 206, inward, 'lbl display', 'start') + text(280, 310, 'center', 'lbl small');
+      return svg('0 0 560 520', s, `A body shown at three points of a circular path: its velocity is along the tangent at each point and its ${inward === 'F' ? 'resultant force' : 'acceleration'} points towards the center`);
     },
 
     conical: () => {
@@ -978,7 +978,7 @@
       s += arrow(390, 317.1, 390, 198, 'brand-accent', 3.5, 'stroke-dasharray="9 7"') + arrow(390, 317.1, 324, 317.1, 'brand-accent', 3.5, 'stroke-dasharray="9 7"');
       s += body(400, 334.4, 20) + arrow(390, 317.1, 318, 192.4, 'brand-primary', 5) + arrow(400, 334.4, 400, 476, 'brand-primary', 5) + `<circle cx="400" cy="334.4" r="5" style="fill:var(--viewer-bg)"/>`;
       s += text(296, 214, 'T', 'lbl display', 'end') + text(418, 476, 'mg', 'lbl display', 'start') + text(418, 262, 'T cos θ', 'lbl mono', 'start') + text(330, 398, 'T sin θ', 'lbl mono') + text(254, 150, 'θ', 'lbl greek');
-      return svg('0 0 560 520', s, 'A conical pendulum: a bob on a string moves in a horizontal circle with the string at angle theta to the vertical. The tension T is resolved into T cosine theta upwards, which balances the weight m g, and T sine theta towards the centre of the circle');
+      return svg('0 0 560 520', s, 'A conical pendulum: a bob on a string moves in a horizontal circle with the string at angle theta to the vertical. The tension T is resolved into T cosine theta upwards, which balances the weight m g, and T sine theta towards the center of the circle');
     },
 
     'vertical-circle': () => {
@@ -987,13 +987,13 @@
       s += arrow(304, 450, 430, 450, 'brand-accent', 4) + body(280, 450, 20) + arrow(280, 430, 280, 306, 'brand-primary', 5) + arrow(280, 450, 280, 548, 'brand-primary', 5) + `<circle cx="280" cy="450" r="5" style="fill:var(--viewer-bg)"/>`;
       s += text(251, 196, 'mg', 'lbl display', 'end') + text(309, 196, sub('T', 'top'), 'lbl display', 'start') + text(298, 372, sub('T', 'bottom'), 'lbl display', 'start') + text(298, 544, 'mg', 'lbl display', 'start');
       s += text(280, 66, 'top', 'lbl small') + text(150, 458, 'bottom', 'lbl small') + text(176, 92, sub('v', 'top'), 'lbl display', 'end') + text(444, 440, sub('v', 'bottom'), 'lbl display', 'start');
-      return svg('0 0 560 570', s, 'A ball on a string moving in a vertical circle. At the top the tension T top and the weight both act downwards, towards the centre. At the bottom the larger tension T bottom acts upwards, towards the centre, and the weight downwards; the ball moves faster at the bottom');
+      return svg('0 0 560 570', s, 'A ball on a string moving in a vertical circle. At the top the tension T top and the weight both act downwards, towards the center. At the bottom the larger tension T bottom acts upwards, towards the center, and the weight downwards; the ball moves faster at the bottom');
     },
 
     // ---- E.2: quantum physics ----
 
     'photo-setup': () => {
-      let s = `<rect x="120" y="330" width="660" height="70" rx="10" style="fill:var(--aluminium)"/>` + text(450, 374, 'clean metal surface', 'lbl strong', 'middle', 'style="fill:#1B1B1B"');
+      let s = `<rect x="120" y="330" width="660" height="70" rx="10" style="fill:var(--aluminum)"/>` + text(450, 374, 'clean metal surface', 'lbl strong', 'middle', 'style="fill:#1B1B1B"');
       [[150, 40, 300, 318], [280, 40, 430, 318], [410, 40, 560, 318]].forEach(([x1, y1, x2, y2]) => { s += wave(x1, y1, x2, y2, { cycles: 7, amp: 10 }); });
       s += text(150, 28, 'light: photons of energy hf', 'lbl mono', 'start', 'style="fill:var(--photon)"');
       [[330, 300, 400, 150], [460, 300, 600, 190], [590, 300, 760, 120]].forEach(([x1, y1, x2, y2]) => {
@@ -1007,8 +1007,8 @@
     // Below the threshold the bar falls short of the work function, so nothing escapes.
     'photon-budget': () => {
       const sub = t => `<tspan dy="7" font-size="70%">${t}</tspan><tspan dy="-7"> </tspan>`;
-      // Bars take the deck palette, not the particle colours: they are amounts of energy, not particles.
-      const bar = (x, y, w, colour, label, note) => `<rect x="${x}" y="${y}" width="${w}" height="68" rx="10" style="fill:var(--bar-${colour})"/>` + text(x + w / 2, y + 28, label, 'lbl strong', 'middle', `style="fill:var(--on-bar-${colour})"`) + text(x + w / 2, y + 59, note, 'lbl small', 'middle', `style="fill:var(--on-bar-${colour})"`);
+      // Bars take the deck palette, not the particle colors: they are amounts of energy, not particles.
+      const bar = (x, y, w, color, label, note) => `<rect x="${x}" y="${y}" width="${w}" height="68" rx="10" style="fill:var(--bar-${color})"/>` + text(x + w / 2, y + 28, label, 'lbl strong', 'middle', `style="fill:var(--on-bar-${color})"`) + text(x + w / 2, y + 59, note, 'lbl small', 'middle', `style="fill:var(--on-bar-${color})"`);
       const sign = (x, y, t) => text(x, y, t, 'lbl display', 'middle', 'font-size="44"');
       let s = text(90, 38, 'Above the threshold: the photon has more than Φ', 'lbl strong a', 'start');
       s += bar(90, 54, 760, 'teal', 'photon energy hf', 'all of it goes to one electron');
@@ -1038,7 +1038,7 @@
 
     stopping: () => {
       let s = `<rect x="170" y="60" width="520" height="190" rx="95" class="inset"/>` + text(430, 48, 'evacuated tube', 'lbl mono small', 'middle');
-      s += `<rect x="240" y="100" width="16" height="110" rx="4" style="fill:var(--aluminium)"/>` + text(226, 196, 'metal', 'lbl small', 'end');
+      s += `<rect x="240" y="100" width="16" height="110" rx="4" style="fill:var(--aluminum)"/>` + text(226, 196, 'metal', 'lbl small', 'end');
       s += `<rect x="604" y="100" width="16" height="110" rx="4" style="fill:var(--lead)"/>` + text(634, 196, 'collector', 'lbl small', 'start');
       s += wave(90, 20, 232, 130, { cycles: 6, amp: 8 }) + text(46, 44, 'light', 'lbl mono small', 'middle', 'style="fill:var(--photon)"');
       [[280, 130, 430], [280, 155, 520], [280, 180, 370]].forEach(([x, y, x2]) => { s += arrow(x, y, x2, y, 'electron', 3) + ball(x, y, 9, 'electron'); });
@@ -1133,7 +1133,7 @@
 
   // A deck's own figures.js adds its diagrams with DeckFigures.add(parts => ({ name: el => svg }));
   // the shared drawing helpers arrive as parts. Prefix the names with the topic (d1-…).
-  const PARTS = { svg, ball, cluster, shadow, arrow, fline, wave, text, ring, orbiter, seeded, animated, stepG, fly, axes, plot, shade, body, both, arcPoints, through, sampled, sub, box, dot, surface, labelled, spring, track, anim, spin, twoState, PLAY, f, TAU };
+  const PARTS = { svg, ball, cluster, shadow, arrow, fline, wave, text, ring, orbiter, seeded, animated, stepG, fly, axes, plot, shade, body, both, arcPoints, through, sampled, sub, box, dot, surface, labeled, spring, track, anim, spin, twoState, PLAY, f, TAU };
   const add = make => Object.assign(FIGURES, make(PARTS));
 
   window.DeckFigures = { render, orbitPoint, add };

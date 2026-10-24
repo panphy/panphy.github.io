@@ -133,7 +133,7 @@
 
     updateBannerStyle = document.createElement('style');
     updateBannerStyle.textContent = `
-      /* Spectrum colours, written out because the banner also appears on pages without design.css. */
+      /* Spectrum colors, written out because the banner also appears on pages without design.css. */
       .panphy-update { position: fixed; left: 50%; bottom: max(16px, env(safe-area-inset-bottom)); transform: translateX(-50%);
         z-index: 2147483000; box-sizing: border-box; display: flex; align-items: center; gap: 10px;
         width: max-content; max-width: min(440px, calc(100vw - 32px));

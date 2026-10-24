@@ -27,7 +27,7 @@ export const MODELS = {
     date: 'BOHR · 1913',
     heading: 'Electrons occupy fixed energy levels.',
     description: 'Bohr added allowed energy levels around the nucleus. Our carbon-12 classroom adaptation has six protons, six neutrons and six electrons (2 in the first level, 4 in the second). Neutrons were discovered later, in 1932.',
-    look: 'Follow the rings labelled n = 1 and n = 2. Each is an allowed energy level, not a solid track. Electrons in the outer level move more slowly. Press “Excite an electron” to watch a level change.',
+    look: 'Follow the rings labeled n = 1 and n = 2. Each is an allowed energy level, not a solid track. Electrons in the outer level move more slowly. Press “Excite an electron” to watch a level change.',
     evidence: 'Bohr’s energy levels helped explain hydrogen’s line spectrum: electrons absorb or emit specific amounts of energy when changing levels. More complex atoms needed a later quantum model.',
     positiveLabel: 'Proton (positive)'
   },
@@ -53,7 +53,7 @@ export const PARTICLES = {
   pudding: 'POSITIVE CHARGE · Spread evenly through the whole atom. There is no nucleus in this model.',
   noNucleus: 'NO NUCLEUS · You are inside the atom now. Positive charge fills the whole pudding. That is the big difference from the later models.',
   alpha: 'ALPHA PARTICLE · Charge +2 · A helium nucleus, about 7300 times the electron’s mass. Fast and heavy, so only strong forces can turn it.',
-  farElectrons: 'TO SCALE · If the nucleus were as big as it looks here, the electrons would be hundreds of metres away. Electrons are so light that they barely affect the alpha particles, so they are moved out of view while the beam runs.'
+  farElectrons: 'TO SCALE · If the nucleus were as big as it looks here, the electrons would be hundreds of meters away. Electrons are so light that they barely affect the alpha particles, so they are moved out of view while the beam runs.'
 };
 
 export const ORBITALS = {

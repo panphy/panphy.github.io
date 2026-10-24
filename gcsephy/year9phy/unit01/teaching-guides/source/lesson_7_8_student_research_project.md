@@ -24,7 +24,7 @@ Students independently apply the full investigation process:
 10. Write a conclusion and evaluation based on evidence.
 
 ## Assumptions
-Students have completed Lessons 1-6 and have practiced judging whether data can be trusted, variables, data types, graph choice, repeated measurements, means, bar charts, line graphs, best-fit lines, anomalous results, conclusions, and evaluations.
+Students have completed Lessons 1-6 and have practised judging whether data can be trusted, variables, data types, graph choice, repeated measurements, means, bar charts, line graphs, best-fit lines, anomalous results, conclusions, and evaluations.
 
 Students can work in pairs or groups of 3. Groups of 3 are useful where equipment is limited or where one student can act as a timer or recorder.
 
@@ -67,7 +67,7 @@ Possible equipment, depending on available practical choices:
 
 - Ramps
 - Trolleys or toy cars
-- Meter rulers or tape measures
+- Metre rulers or tape measures
 - Stopwatches
 - Balls or marbles
 - Paper helicopter templates
@@ -343,7 +343,7 @@ Students swap work with another group and check:
 | At least 3 trials included |  |
 | Mean values calculated |  |
 | Correct graph type chosen |  |
-| Axes labeled correctly |  |
+| Axes labelled correctly |  |
 | Units included on graph |  |
 | Sensible scale used |  |
 | Points or bars plotted accurately |  |

@@ -1,5 +1,5 @@
 /* Revision notes (deck-notes.js): a corner control and an overlay panel.
-   Each deck sets the --rn-* colours and fonts. Load after its stylesheet.
+   Each deck sets the --rn-* colors and fonts. Load after its stylesheet.
    Neither note availability nor opening the panel changes the slide size. */
 :root {
   --notes-open: clamp(150px, 32vh, 320px);
@@ -42,7 +42,7 @@ body.is-fullscreen .notes, .notes[hidden] { display: none; }
 .notes-toggle:hover, .notes-toggle[aria-expanded="true"] { background: color-mix(in srgb, var(--rn-accent) 24%, var(--rn-bar) 76%); }
 .notes-toggle:focus-visible { outline: 3px solid var(--rn-accent); outline-offset: 3px; }
 
-/* The panel fits its note, up to --notes-open, and is centred over the slide
+/* The panel fits its note, up to --notes-open, and is centered over the slide
    at a comfortable reading width; notes with call-outs get a wider panel. */
 .notes-body {
   position: fixed;

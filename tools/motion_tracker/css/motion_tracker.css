@@ -20,7 +20,7 @@
   --grid-major: rgba(28, 40, 90, 0.075);
   --appbar-h: 56px;
 
-  /* Series colours: PanPhyPlot's first two data colours (x blue, y red), so exported data looks the same there. */
+  /* Series colors: PanPhyPlot's first two data colors (x blue, y red), so exported data looks the same there. */
   --series-x: #4E79A7;
   --series-y: #E15759;
 
@@ -1839,7 +1839,7 @@ body.modal-open {
   }
 }
 
-/* Compact history and deletion tools retain the same hit area as labelled tools. */
+/* Compact history and deletion tools retain the same hit area as labeled tools. */
 .mt-tool.mt-tool-icon {
   width: 48px;
   min-height: 48px;

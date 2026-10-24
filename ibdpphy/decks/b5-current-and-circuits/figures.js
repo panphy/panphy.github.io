@@ -1,13 +1,13 @@
 // Diagrams for the B.5 Current and circuits deck, added to the shared set in ../assets/figures.js.
-// Wires and symbols are drawn in the text colour, conventional current is apricot, electrons
+// Wires and symbols are drawn in the text color, conventional current is apricot, electrons
 // blue and potential differences teal. Nothing here is terracotta: B.5 has no additional HL content.
 window.DeckFigures.add(P => {
-  const { svg, arrow, text, sub, both, through, sampled, labelled, seeded, track, anim, twoState, f, TAU } = P;
-  const line = (d, colour, width = 5, extra = '') => `<path d="${d}" style="fill:none;stroke:var(--${colour});stroke-width:${width};stroke-linecap:round;stroke-linejoin:round" ${extra}/>`;
+  const { svg, arrow, text, sub, both, through, sampled, labeled, seeded, track, anim, twoState, f, TAU } = P;
+  const line = (d, color, width = 5, extra = '') => `<path d="${d}" style="fill:none;stroke:var(--${color});stroke-width:${width};stroke-linecap:round;stroke-linejoin:round" ${extra}/>`;
   const INK = 'fill:none;stroke:var(--text-main);stroke-width:4;stroke-linecap:round;stroke-linejoin:round';
   const BOX = 'fill:var(--card-bg);stroke:var(--text-main);stroke-width:4;stroke-linejoin:round';
   const head = `<path d="M0,0 L-13,-7 V7 Z" style="fill:var(--text-main)"/>`;
-  // Circuit symbols as in the data booklet, drawn along the x axis and centred on the origin:
+  // Circuit symbols as in the data booklet, drawn along the x axis and centered on the origin:
   // h is half the length of wire that the symbol replaces. The longer plate of a cell is its
   // positive terminal and is drawn on the side the branch starts from.
   const box = `<rect x="-38" y="-14" width="76" height="28" style="${BOX}"/>`;
@@ -59,10 +59,10 @@ window.DeckFigures.add(P => {
   return {
     // A cell, a switch and a lamp, with electrons going round. Also the title picture, with data-plain.
     'b5-circuit': el => {
-      const on = labelled(el), L = 180, R = 620, T = 130, B = 390;
+      const on = labeled(el), L = 180, R = 620, T = 130, B = 390;
       let s = branch(L, B, L, T, [{ kind: 'cell', at: 0.5, flip: true, label: on ? 'cell' : '', side: 1, gap: 70 }], on) + branch(L, T, R, T, [{ kind: 'closed', at: 0.5 }], on) + branch(R, T, R, B, [{ kind: 'lamp', at: 0.5, label: 'lamp', side: -1, gap: 76 }], on) + branch(R, B, L, B, [], on);
       if (on) s += flow(300, T, 0, 'conventional current', 30, -28) + flow(480, B, 180) + text(400, B + 50, 'electrons move the other way', 'lbl', 'middle', 'style="fill:var(--electron)"') + text(L - 36, T + 86, '+', 'lbl display', 'end') + text(L - 36, B - 60, '−', 'lbl display', 'end');
-      // Electrons leave the negative terminal: anticlockwise here.
+      // Electrons leave the negative terminal: counterclockwise here.
       const way = [[L, B], [R, B], [R, T], [L, T]];
       const still = round(way, 90).map(([x, y]) => `<g transform="translate(${f(x)} ${f(y)})">${electron}</g>`).join('');
       return svg(on ? '40 60 760 400' : '120 80 560 360', s + twoState(still, electrons(way, 14, 16)), 'A circuit of a cell, a closed switch and a lamp joined in a single loop. Conventional current goes from the positive terminal of the cell round to the negative terminal; the electrons move the other way');
@@ -70,7 +70,7 @@ window.DeckFigures.add(P => {
 
     // Inside a metal wire: fixed positive ions and free electrons drifting. Also drawn plain.
     'b5-wire': el => {
-      const on = labelled(el), rand = seeded(8), x1 = 110, x2 = 770, y1 = 170, y2 = 350;
+      const on = labeled(el), rand = seeded(8), x1 = 110, x2 = 770, y1 = 170, y2 = 350;
       let s = `<rect x="${x1}" y="${y1}" width="${x2 - x1}" height="${y2 - y1}" rx="14" style="fill:color-mix(in srgb, var(--brand-accent) 16%, var(--viewer-bg));stroke:var(--text-secondary);stroke-width:3"/>`;
       s += Array.from({ length: 24 }, (_, i) => { const x = x1 + 55 + (i % 8) * 79, y = y1 + 32 + Math.floor(i / 8) * 58; return `<circle cx="${x}" cy="${y}" r="17" style="fill:var(--proton);opacity:.85"/>` + text(x, y + 9, '+', 'lbl strong', 'middle', 'style="fill:#fff;font-size:26px"'); }).join('');
       if (on) s += arrow(330, 110, 550, 110, 'brand-accent', 6) + text(440, 86, 'conventional current', 'lbl strong') + arrow(550, 410, 330, 410, 'electron', 6) + text(440, 456, 'electrons drift', 'lbl strong') + text(100, 150, 'fixed positive ions', 'lbl', 'start');
@@ -93,7 +93,7 @@ window.DeckFigures.add(P => {
     // Current against potential difference. data-kind: ohmic or lamp. Keep the axis labels
     // in plain copies too, including the small comparison graphs on the Ohm's law slide.
     'b5-iv': el => {
-      const on = labelled(el), lamp = el.dataset.kind === 'lamp', cx = 430, cy = 250;
+      const on = labeled(el), lamp = el.dataset.kind === 'lamp', cx = 430, cy = 250;
       const curve = lamp ? sampled(t => { const v = -1 + 2 * t; return [cx + 300 * v, cy - 190 * Math.tanh(1.9 * v) / Math.tanh(1.9)]; }, 80) : `M${cx - 300},${cy + 190} L${cx + 300},${cy - 190}`;
       let s = arrow(90, cy, 800, cy, 'text-secondary', 2.5) + arrow(cx, 470, cx, 30, 'text-secondary', 2.5) + line(curve, 'brand-primary', 6);
       s += text(cx + 22, 64, 'I', 'lbl display', 'start', 'style="font-size:48px"') + text(794, cy + 60, 'V', 'lbl display', 'end', 'style="font-size:48px"');
@@ -103,7 +103,7 @@ window.DeckFigures.add(P => {
 
     // Resistors in series and in parallel. data-kind: series, parallel or combo (the worked example). Also drawn plain.
     'b5-combine': el => {
-      const on = labelled(el), kind = el.dataset.kind || 'series', L = 150, R = 690, T = 110, B = 400;
+      const on = labeled(el), kind = el.dataset.kind || 'series', L = 150, R = 690, T = 110, B = 400;
       const cell = volts => branch(L, B, L, T, [{ kind: 'cell', at: 0.5, flip: true, label: volts, side: 1, gap: 70 }], on);
       let s = '';
       if (kind === 'series') {
@@ -123,7 +123,7 @@ window.DeckFigures.add(P => {
 
     // A potential divider. data-kind: plain, thermistor, ldr or pot. Also drawn plain.
     'b5-divider': el => {
-      const on = labelled(el), kind = el.dataset.kind || 'plain', L = 180, M = 440, T = 90, B = 430, mid = 260;
+      const on = labeled(el), kind = el.dataset.kind || 'plain', L = 180, M = 440, T = 90, B = 430, mid = 260;
       let s = branch(L, B, L, T, [{ kind: 'battery', at: 0.5, flip: true, label: sub('V', 'in'), side: 1, gap: 76 }], on) + branch(L, T, M, T, [], on) + branch(L, B, M, B, [], on);
       if (kind === 'pot') {
         s += `<rect x="${M - 14}" y="${mid - 110}" width="28" height="220" style="${BOX}"/><path d="M${M},${T} V${mid - 110} M${M},${mid + 110} V${B}" style="${INK}"/>`;
@@ -147,7 +147,7 @@ window.DeckFigures.add(P => {
 
     // A real cell: an emf with an internal resistance, joined to a load. Also drawn plain.
     'b5-internal': el => {
-      const on = labelled(el), L = 200, R = 660, T = 130, B = 400;
+      const on = labeled(el), L = 200, R = 660, T = 130, B = 400;
       let s = `<rect x="${L - 90}" y="${T + 10}" width="180" height="${B - T - 20}" rx="16" style="fill:color-mix(in srgb, var(--brand-accent) 14%, transparent);stroke:var(--brand-accent);stroke-width:3;stroke-dasharray:12 8"/>`;
       s += branch(L, B, L, T, [{ kind: 'cell', at: 0.28, flip: true, label: 'ε', side: 1, gap: 60 }, { kind: 'resistor', at: 0.7, label: 'r', side: 1, gap: 44 }], on) + branch(L, T, R, T, [], on) + branch(R, T, R, B, [{ kind: 'resistor', at: 0.5, label: 'R', side: -1, gap: 52 }], on) + branch(R, B, L, B, [], on);
       if (on) s += flow(430, T, 0, 'I', 0, -26) + pd(R - 110, T + 20, R - 110, B - 20, 'V = IR', R - 128, 276, 'end') + text(430, 470, 'the terminal p.d. V is less than ε when a current flows', 'lbl');

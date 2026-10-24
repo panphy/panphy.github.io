@@ -3,14 +3,14 @@
 // adiabatic one terracotta, an isobaric one teal and an isovolumetric one slate; a hot reservoir
 // is red and a cold one blue.
 window.DeckFigures.add(P => {
-  const { svg, arrow, text, sub, through, sampled, labelled, seeded, track, anim, twoState, PLAY, f } = P;
+  const { svg, arrow, text, sub, through, sampled, labeled, seeded, track, anim, twoState, PLAY, f } = P;
   // Pressure–volume axes, in arbitrary units: X(V) and Y(P) place a point.
   const X = v => 110 + 190 * v, Y = p => 420 - 60 * p;
   const pvAxes = on => arrow(110, 420, 110, 30, 'text-secondary', 2.5) + arrow(110, 420, 790, 420, 'text-secondary', 2.5) + (on ? text(126, 46, 'pressure', 'lbl mono', 'start') + text(784, 492, 'volume', 'lbl mono', 'end') : '');
-  const path = (points, colour, width = 5) => `<path d="${through(points)}" style="fill:none;stroke:var(--${colour});stroke-width:${width};stroke-linecap:round;stroke-linejoin:round"/>`;
+  const path = (points, color, width = 5) => `<path d="${through(points)}" style="fill:none;stroke:var(--${color});stroke-width:${width};stroke-linecap:round;stroke-linejoin:round"/>`;
   // n points along PV^gamma = constant from volume v1 to v2, starting at pressure p1.
   const curve = (v1, p1, v2, gamma, n = 40) => Array.from({ length: n + 1 }, (_, i) => { const v = v1 + (v2 - v1) * i / n; return [X(v), Y(p1 * (v1 / v) ** gamma)]; });
-  const head = (points, at, colour) => { const i = Math.max(1, Math.round((points.length - 1) * at)), [x, y] = points[i], [px, py] = points[i - 1]; return `<path d="M-11,-9 L9,0 L-11,9 Z" transform="translate(${f(x)} ${f(y)}) rotate(${f(Math.atan2(y - py, x - px) * 180 / Math.PI)})" style="fill:var(--${colour})"/>`; };
+  const head = (points, at, color) => { const i = Math.max(1, Math.round((points.length - 1) * at)), [x, y] = points[i], [px, py] = points[i - 1]; return `<path d="M-11,-9 L9,0 L-11,9 Z" transform="translate(${f(x)} ${f(y)}) rotate(${f(Math.atan2(y - py, x - px) * 180 / Math.PI)})" style="fill:var(--${color})"/>`; };
   const point = (v, p, label, dx = 14, dy = -12) => `<circle cx="${f(X(v))}" cy="${f(Y(p))}" r="8" style="fill:var(--text-main)"/>` + (label ? text(f(X(v)) + dx, f(Y(p)) + dy, label, 'lbl display', dx < 0 ? 'end' : 'start') : '');
   const once = { loop: false };
 
@@ -44,7 +44,7 @@ window.DeckFigures.add(P => {
     // lets the gas push the piston out. data-plain breathes in and out by itself, and data-still
     // (the lesson map) does not move at all.
     'b4-piston': el => {
-      const on = labelled(el), fixed = 'still' in el.dataset, mode = on ? 'once' : 'loop', dur = on ? 2.4 : 7, w = 326, dx = 140;
+      const on = labeled(el), fixed = 'still' in el.dataset, mode = on ? 'once' : 'loop', dur = on ? 2.4 : 7, w = 326, dx = 140;
       const wall = x2 => `<path d="M130,150 H${x2} M130,370 H${x2} M130,150 V370" style="fill:none;stroke:var(--text-secondary);stroke-width:6;stroke-linecap:round"/>`;
       const piston = `<rect x="460" y="156" width="26" height="208" rx="4" style="fill:var(--brand-accent-strong)"/><rect x="486" y="250" width="${fixed ? 110 : 200}" height="20" style="fill:var(--brand-accent-strong)"/>`;
       const force = arrow(486, 210, 590, 210, 'brand-primary', 6) + (on ? text(540, 190, 'F = PA', 'lbl mono strong') : '');
@@ -68,15 +68,15 @@ window.DeckFigures.add(P => {
     // The four special changes, drawn as lines through one state: a gas can follow each of them in
     // either direction, so they carry no arrowheads. data-show limits which are drawn; data-plain removes labels.
     'b4-processes': el => {
-      const on = labelled(el), show = (el.dataset.show || 'isobaric,isovolumetric,isothermal,adiabatic').split(',');
+      const on = labeled(el), show = (el.dataset.show || 'isobaric,isovolumetric,isothermal,adiabatic').split(',');
       const state = [2, 3], through1 = (v1, v2, gamma) => curve(v1, state[1] * (state[0] / v1) ** gamma, v2, gamma), kinds = {
-        isobaric: { pts: [[X(0.7), Y(3)], [X(3.4), Y(3)]], colour: 'brand-primary', label: ['isobaric', X(0.72), Y(3) - 16, 'start'] },
-        isovolumetric: { pts: [[X(2), Y(5.9)], [X(2), Y(0.6)]], colour: 'brand-accent-strong', label: ['isovolumetric', X(2) + 16, Y(5.7), 'start'] },
-        isothermal: { pts: through1(1.05, 3.4, 1), colour: 'brand-accent', label: ['isothermal', X(3.4), Y(1.76) - 18, 'end'] },
-        adiabatic: { pts: through1(1.34, 3.4, G), colour: 'hl', label: ['adiabatic', X(3.4), Y(1.24) + 42, 'end'] }
+        isobaric: { pts: [[X(0.7), Y(3)], [X(3.4), Y(3)]], color: 'brand-primary', label: ['isobaric', X(0.72), Y(3) - 16, 'start'] },
+        isovolumetric: { pts: [[X(2), Y(5.9)], [X(2), Y(0.6)]], color: 'brand-accent-strong', label: ['isovolumetric', X(2) + 16, Y(5.7), 'start'] },
+        isothermal: { pts: through1(1.05, 3.4, 1), color: 'brand-accent', label: ['isothermal', X(3.4), Y(1.76) - 18, 'end'] },
+        adiabatic: { pts: through1(1.34, 3.4, G), color: 'hl', label: ['adiabatic', X(3.4), Y(1.24) + 42, 'end'] }
       };
       let s = pvAxes(on);
-      show.forEach(name => { const k = kinds[name]; s += path(k.pts, k.colour) + (on ? text(f(k.label[1]), f(k.label[2]), k.label[0], 'lbl strong halo', k.label[3], `style="fill:var(--${k.colour === 'hl' ? 'hl-text' : k.colour})"`) : ''); });
+      show.forEach(name => { const k = kinds[name]; s += path(k.pts, k.color) + (on ? text(f(k.label[1]), f(k.label[2]), k.label[0], 'lbl strong halo', k.label[3], `style="fill:var(--${k.color === 'hl' ? 'hl-text' : k.color})"`) : ''); });
       return svg('40 20 780 490', s + point(state[0], state[1], ''), 'A pressure–volume diagram showing four kinds of change as lines through the same state: isobaric along a horizontal line, isovolumetric along a vertical line, isothermal along a curve, and adiabatic along a steeper curve. A gas can follow each line in either direction');
     },
 
@@ -90,7 +90,7 @@ window.DeckFigures.add(P => {
       [[a, b], [b, c], [c, d], [d, a]].forEach(([p, q]) => { const seg = [[X(p[0]), Y(p[1])], [(X(p[0]) + X(q[0])) / 2, (Y(p[1]) + Y(q[1])) / 2], [X(q[0]), Y(q[1])]]; s += path(seg, 'brand-primary') + head(seg, 0.6, 'brand-primary'); });
       s += point(1, 3, 'A', -14, -12) + point(4, 3, 'B') + point(4, 1, 'C', 14, 36) + point(1, 1, 'D', -14, 36);
       s += text(98, Y(3) + 9, '3.0', 'lbl mono', 'end') + text(98, Y(1) + 9, '1.0', 'lbl mono', 'end') + text(X(1), 456, '1.0', 'lbl mono') + text(X(4), 456, '4.0', 'lbl mono') + text(X(2.5), Y(2) + 10, 'net work', 'lbl strong');
-      return svg('20 20 800 490', s, 'A pressure–volume diagram of a cycle A B C D round a rectangle, clockwise. The pressure is 3.0 along the top and 1.0 along the bottom, in units of 10 to the 5 pascals; the volume is 1.0 on the left and 4.0 on the right, in units of 10 to the minus 3 cubic metres. The shaded area inside the rectangle is the net work done by the gas in one cycle');
+      return svg('20 20 800 490', s, 'A pressure–volume diagram of a cycle A B C D round a rectangle, clockwise. The pressure is 3.0 along the top and 1.0 along the bottom, in units of 10 to the 5 pascals; the volume is 1.0 on the left and 4.0 on the right, in units of 10 to the minus 3 cubic meters. The shaded area inside the rectangle is the net work done by the gas in one cycle');
     },
 
     // A gas released into the empty half of a box: its atoms never stop moving. Played with →.
@@ -111,7 +111,7 @@ window.DeckFigures.add(P => {
 
     // Four coins: the number of microstates for each number of heads. Also drawn small, with data-plain.
     'b4-coins': el => {
-      const on = labelled(el), counts = [1, 4, 6, 4, 1];
+      const on = labeled(el), counts = [1, 4, 6, 4, 1];
       let s = `<line x1="90" y1="400" x2="760" y2="400" class="axis"/>`;
       counts.forEach((c, i) => {
         const x = 120 + i * 130;
@@ -124,7 +124,7 @@ window.DeckFigures.add(P => {
 
     // A heat engine between a hot and a cold reservoir. Also drawn small, with data-plain.
     'b4-engine': el => {
-      const on = labelled(el);
+      const on = labeled(el);
       let s = `<rect x="250" y="40" width="300" height="80" rx="12" style="fill:var(--proton)"/><rect x="250" y="440" width="300" height="80" rx="12" style="fill:var(--electron)"/>`;
       s += `<path d="M340,120 V226 H460 V120 Z" style="fill:var(--proton);opacity:.55"/><path d="M364,334 V416 L340,416 L400,446 L460,416 L436,416 V334 Z" style="fill:var(--electron);opacity:.6"/>`;
       s += `<path d="M470,256 H600 V236 L650,280 L600,324 V304 H470 Z" style="fill:var(--brand-primary)"/>` + `<circle cx="400" cy="280" r="74" style="fill:var(--card-bg);stroke:var(--text-main);stroke-width:4"/>`;
@@ -137,9 +137,9 @@ window.DeckFigures.add(P => {
 
     // The Carnot cycle, with a marker that goes round it. Also the title picture, with data-plain.
     'b4-carnot': el => {
-      const on = labelled(el), colours = ['brand-accent', 'hl', 'brand-accent', 'hl'], all = CARNOT.flat();
+      const on = labeled(el), colors = ['brand-accent', 'hl', 'brand-accent', 'hl'], all = CARNOT.flat();
       let s = `<path d="${through(all)} Z" style="fill:var(--brand-primary);opacity:.18"/>` + pvAxes(on);
-      CARNOT.forEach((pts, i) => { s += path(pts, colours[i]) + head(pts, 0.55, colours[i]); });
+      CARNOT.forEach((pts, i) => { s += path(pts, colors[i]) + head(pts, 0.55, colors[i]); });
       if (on) {
         s += point(A[0], A[1], 'A') + point(B[0], B[1], 'B') + point(C[0], C[1], 'C', 14, 34) + point(D[0], D[1], 'D', -14, 34);
         s += text(f(CARNOT[0][20][0]) + 18, f(CARNOT[0][20][1]) - 14, sub('T', 'h'), 'lbl display', 'start') + text(f(CARNOT[2][20][0]) - 14, f(CARNOT[2][20][1]) + 42, sub('T', 'c'), 'lbl display', 'end') + `<line x1="${X(1.7)}" y1="${Y(2.3)}" x2="${X(2.5)}" y2="${Y(3.5)}" class="guide"/>` + text(X(2.55), Y(3.6), 'area = net work', 'lbl strong', 'start');

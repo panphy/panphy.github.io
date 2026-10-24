@@ -1,7 +1,7 @@
 :root {
-  /* Colours and fonts come from the shared design system (/assets/design.css);
+  /* Colors and fonts come from the shared design system (/assets/design.css);
      these names keep the rest of this stylesheet unchanged. Scene, particle and
-     field colours carry meaning and stay as they were. */
+     field colors carry meaning and stay as they were. */
   --brand-accent: var(--accent);
   --brand-accent-strong: var(--accent-hover);
   --bg-color: var(--bg);
@@ -32,7 +32,7 @@
   --undecayed: #D45132;
   --decayed: #9DB4B0;
   --paper: #EFE6CF;
-  --aluminium: #AEB9C4;
+  --aluminum: #AEB9C4;
   --lead: #4A5360;
   --correct-border: #3F7A55;
 }
@@ -50,7 +50,7 @@
   --undecayed: #EF6A48;
   --decayed: #3F5A57;
   --paper: #D9CFB4;
-  --aluminium: #8E9AA6;
+  --aluminum: #8E9AA6;
   --lead: #5B6573;
   --correct-border: #4ADE80;
 }

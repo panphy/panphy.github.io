@@ -1,10 +1,10 @@
 // Diagrams for the E.4 Fission deck, added to the shared set in ../assets/figures.js. Protons
-// are red and neutrons grey, as in E.1 and E.3; a nucleus drawn nucleon by nucleon has exactly
+// are red and neutrons gray, as in E.1 and E.3; a nucleus drawn nucleon by nucleon has exactly
 // the numbers its label gives, and one drawn as a plain sphere stands for the whole nucleus.
 // Hot water and steam are red, cool water blue. Nothing here is terracotta: E.4 has no additional HL content.
 window.DeckFigures.add(P => {
-  const { svg, ball, cluster, arrow, text, sub, both, through, sampled, labelled, animated, stepG, track, anim, spin, twoState, PLAY, f, TAU } = P;
-  const line = (d, colour, width = 5, extra = '') => `<path d="${d}" style="fill:none;stroke:var(--${colour});stroke-width:${width};stroke-linecap:round;stroke-linejoin:round" ${extra}/>`;
+  const { svg, ball, cluster, arrow, text, sub, both, through, sampled, labeled, animated, stepG, track, anim, spin, twoState, PLAY, f, TAU } = P;
+  const line = (d, color, width = 5, extra = '') => `<path d="${d}" style="fill:none;stroke:var(--${color});stroke-width:${width};stroke-linecap:round;stroke-linejoin:round" ${extra}/>`;
   const once = { loop: false };
   const neutron = (x, y, r = 11) => ball(x, y, r, 'neutron', '');
   // Shown or hidden from a given fraction of the run onwards.
@@ -18,7 +18,7 @@ window.DeckFigures.add(P => {
   return {
     // Neutron-induced fission of uranium-235 into barium-141 and krypton-92. Played with →. Also the title picture.
     'e4-fission': el => {
-      const on = labelled(el), cx = 330, cy = 250, T = 3.2, r = 11;
+      const on = labeled(el), cx = 330, cy = 250, T = 3.2, r = 11;
       const uranium = cluster(cx, cy, 92, 143, r), barium = cluster(0, 0, 56, 85, r), krypton = cluster(0, 0, 36, 56, r);
       const flights = [[230, -150], [250, 10], [210, 150]];
       let s = '';
@@ -37,7 +37,7 @@ window.DeckFigures.add(P => {
       const X = A => 110 + 2.75 * A, Y = b => 430 - 44 * (b - 0.5);
       let s = arrow(110, 430, 110, 30, 'text-secondary', 2.5) + arrow(110, 430, 810, 430, 'text-secondary', 2.5) + line(sampled(t => { const A = 6 + 236 * t; return [X(A), Y(bind(A))]; }, 120), 'brand-primary', 6);
       s += text(126, 46, 'binding energy per nucleon / MeV', 'lbl mono', 'start') + text(806, 506, 'nucleon number A', 'lbl mono', 'end') + [50, 100, 150, 200].map(A => `<line x1="${X(A)}" y1="430" x2="${X(A)}" y2="442" class="tick"/>` + text(X(A), 470, A, 'lbl mono')).join('') + [2, 4, 6, 8].map(b => `<line x1="98" y1="${Y(b)}" x2="110" y2="${Y(b)}" class="tick"/>` + text(88, Y(b) + 9, b, 'lbl mono', 'end')).join('');
-      const mark = (A, colour) => `<circle cx="${f(X(A))}" cy="${f(Y(bind(A)))}" r="11" style="fill:var(--${colour})"/>`;
+      const mark = (A, color) => `<circle cx="${f(X(A))}" cy="${f(Y(bind(A)))}" r="11" style="fill:var(--${color})"/>`;
       s += mark(235, 'proton') + mark(141, 'brand-accent') + mark(92, 'brand-accent') + arrow(X(229), Y(bind(229)) - 34, X(147), Y(bind(147)) - 34, 'brand-accent', 4) + text(X(235), Y(bind(235)) + 50, '²³⁵U', 'lbl strong') + text(X(141), Y(bind(141)) + 50, '¹⁴¹Ba', 'lbl strong') + text(X(92), Y(bind(92)) + 50, '⁹²Kr', 'lbl strong') + text(X(150), 250, 'fission: the fragments are', 'lbl halo') + text(X(150), 284, 'more tightly bound', 'lbl strong halo');
       return svg('40 10 800 510', s, 'The curve of binding energy per nucleon against nucleon number. It rises steeply for light nuclei, peaks at about 8.8 MeV near nucleon number 60 and falls slowly to about 7.6 MeV for uranium. The two fragments of a fission lie higher on the curve than the uranium nucleus, at about 8.4 MeV: they are more tightly bound');
     },
@@ -46,7 +46,7 @@ window.DeckFigures.add(P => {
     // split more uranium-235 nuclei and one escapes. A whole sphere is uranium-235, a pair has just
     // split. Each press of → adds a generation. Also drawn plain.
     'e4-chain': el => {
-      const on = animated(el), named = labelled(el);
+      const on = animated(el), named = labeled(el);
       const whole = (x, y) => ball(x, y, 20, 'proton', '');
       const split = (x, y) => `<circle cx="${x}" cy="${y}" r="40" fill="url(#g-glow)"/>` + ball(x - 9, y - 11, 14, 'proton', '') + ball(x + 9, y + 12, 12, 'proton', '');
       const shot = (x1, y1, x2, y2, gap = 30) => {
@@ -76,13 +76,13 @@ window.DeckFigures.add(P => {
       return svg('20 40 840 450', s, 'A fast neutron enters the moderator and collides with one light nucleus after another. Each collision takes away some of its kinetic energy, so it leaves as a slow, thermal neutron');
     },
 
-    // A pressurised-water reactor with its two water loops. Loop 1 is sealed and stays liquid under pressure: hot water
+    // A pressurized-water reactor with its two water loops. Loop 1 is sealed and stays liquid under pressure: hot water
     // leaves the core, cools as it passes through the coil of the heat exchanger and is pumped back. Loop 2 boils round
     // the coil; its steam drives the turbine, is condensed by cooling water and is pumped back. On screen liquid water
     // flows as close dashes and steam as sparse, fast puffs; bubbles rise in the heat exchanger and the turbine turns.
     // The still picture keeps the arrowheads. Also drawn plain.
     'e4-reactor': el => {
-      const on = labelled(el);
+      const on = labeled(el);
       const pipe = (d, paint, w = 14) => `<path d="${d}" style="fill:none;stroke:${paint};stroke-width:${w};stroke-opacity:.3;stroke-linecap:round;stroke-linejoin:round"/>`;
       const head = (x, y, deg, paint) => `<path d="M-9,-9 L8,0 L-9,9 Z" transform="translate(${x} ${y}) rotate(${deg})" style="fill:${paint}"/>`;
       // Dashes that run along a path: [dash, gap] and the time one pattern takes to pass.
@@ -110,7 +110,7 @@ window.DeckFigures.add(P => {
       const mover = flow(loop1, coil, [16, 12], 0.9) + flow(feed, cool, [16, 12], 0.9) + flow(cooling, cool, [12, 12], 1.2, 5) + flow(steam, hot, [7, 33], 0.35, 9) + flow(exhaust, hot, [7, 33], 0.35, 9) + bubbles + `<g>${spin(640, 230, 1.6)}${blades}</g>`;
       if (on) s += text(167, 115, 'control rods', 'lbl strong') + text(170, 505, 'fuel in moderator', 'lbl') + text(285, 54, 'shielding', 'lbl strong') + text(405, 505, 'heat exchanger', 'lbl') + text(295, 228, 'loop 1', 'lbl mono small', 'middle', 'style="fill:var(--proton)"') + text(700, 470, 'loop 2', 'lbl mono small', 'start', 'style="fill:var(--electron)"')
         + text(655, 128, 'steam', 'lbl', 'start', 'style="fill:var(--proton)"') + text(700, 162, 'turbine', 'lbl small', 'start') + text(790, 240, 'generator', 'lbl small') + text(705, 318, 'condenser', 'lbl small', 'start') + text(790, 362, 'cooling', 'lbl small', 'start') + text(790, 390, 'water', 'lbl small', 'start') + text(560, 495, 'water', 'lbl', 'middle', 'style="fill:var(--electron)"');
-      return svg(on ? '30 20 850 500' : '40 50 840 440', s + twoState(still, mover), 'A pressurised-water reactor and its two separate water loops. Inside thick shielding, fuel rods sit in water, the moderator, in the reactor vessel, with control rods that can be lowered between them. In loop 1, water kept under high pressure so that it does not boil leaves the core hot, passes through a coil in the heat exchanger, cools as it heats the water round the coil and is pumped back to the core. In loop 2, the water round the coil boils; the steam drives a turbine joined to a generator, is turned back into water in a condenser cooled by outside water, and is pumped back to the heat exchanger. The two loops never mix');
+      return svg(on ? '30 20 850 500' : '40 50 840 440', s + twoState(still, mover), 'A pressurized-water reactor and its two separate water loops. Inside thick shielding, fuel rods sit in water, the moderator, in the reactor vessel, with control rods that can be lowered between them. In loop 1, water kept under high pressure so that it does not boil leaves the core hot, passes through a coil in the heat exchanger, cools as it heats the water round the coil and is pumped back to the core. In loop 2, the water round the coil boils; the steam drives a turbine joined to a generator, is turned back into water in a condenser cooled by outside water, and is pumped back to the heat exchanger. The two loops never mix');
     },
 
     // The activity of spent fuel falling with time: fission products first, then long-lived heavy nuclei.

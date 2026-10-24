@@ -2,10 +2,10 @@
   const root = document.documentElement;
   const legacy = document.currentScript ? document.currentScript.dataset : {};
   // The landing page and the apps it lists share one preference. A section outside that
-  // catalogue names itself with data-theme-scope on this script tag and keeps its own.
+  // catalog names itself with data-theme-scope on this script tag and keeps its own.
   const scope = /^[a-z0-9-]+$/.test(legacy.themeScope || '') ? legacy.themeScope : '';
   const STORAGE_KEY = scope ? `panphy-theme-${scope}` : 'panphy-theme';
-  // Browser chrome colour: the main site uses the Spectrum page background; scoped
+  // Browser chrome color: the main site uses the Spectrum page background; scoped
   // sections (gcsephy, ibdpphy) keep their own warm paper.
   const CHROME = scope ? { light: '#F8F6F1', dark: '#111110' } : { light: '#F5F6FA', dark: '#07080C' };
 

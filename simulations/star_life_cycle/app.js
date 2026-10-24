@@ -19,14 +19,14 @@ const CAMERA_HOME = new THREE.Vector3(5.6, 4.7, 7.9);
 const BASE_FOV = 40;
 const KIND_CODE = { inert: 0, fusion: 1, radiative: 2, convective: 3, degenerate: 4, shell: 5 };
 const KIND_LABEL = { inert: 'no fusion', fusion: 'fusion', radiative: 'radiation', convective: 'convection', degenerate: 'degenerate', shell: 'burns at its base' };
-const STAGE_COLOUR = {
+const STAGE_COLOR = {
   cloud: '#8E99A4', proto: '#E07A10', ms: '#0D9488', blue: '#2F6FDB', rgb: '#D45132',
   pn: '#3F8A55', wd: '#657481', sg: '#D45132', late: '#7C3AED', sn: '#E11D48', ns: '#B7791F', bh: '#1B1B1B'
 };
 const FATE = {
-  whiteDwarf: { name: 'white dwarf', colour: 'var(--fate-wd)' },
-  neutronStar: { name: 'neutron star', colour: 'var(--fate-ns)' },
-  blackHole: { name: 'black hole', colour: 'var(--fate-bh)' }
+  whiteDwarf: { name: 'white dwarf', color: 'var(--fate-wd)' },
+  neutronStar: { name: 'neutron star', color: 'var(--fate-ns)' },
+  blackHole: { name: 'black hole', color: 'var(--fate-bh)' }
 };
 
 const state = { mass: 1, life: null, position: 0, playing: false, speed: 1, cutaway: false, layer: -1 };
@@ -34,11 +34,11 @@ const state = { mass: 1, life: null, position: 0, playing: false, speed: 1, cuta
 const viewer = $('viewer');
 const stageName = stage => (stage.id === 'sg' ? (stage.staysBlue ? 'Blue supergiant' : 'Red supergiant') : STAGES[stage.id].name);
 const visualRadius = R => 1.25 * R ** 0.17;
-// Blackbody colour with the saturation strengthened, so that cool and hot stars are easy to tell apart.
+// Blackbody color with the saturation strengthened, so that cool and hot stars are easy to tell apart.
 function starRGB(T) {
   const rgb = blackbodyRGB(T);
-  const grey = 0.3 * rgb[0] + 0.59 * rgb[1] + 0.11 * rgb[2];
-  const out = rgb.map(c => clamp(grey + (c - grey) * 2.2));
+  const gray = 0.3 * rgb[0] + 0.59 * rgb[1] + 0.11 * rgb[2];
+  const out = rgb.map(c => clamp(gray + (c - gray) * 2.2));
   out[1] *= lerp(0.72, 1, clamp((T - 2500) / 2500));
   return out;
 }
@@ -154,7 +154,7 @@ const randomDirection = v => {
   return v.set(s * Math.cos(phi), u, s * Math.sin(phi));
 };
 
-// The collapsing cloud and the disc it turns into. Angular momentum is conserved, so the gas
+// The collapsing cloud and the disk it turns into. Angular momentum is conserved, so the gas
 // orbits faster as it moves inward and the cloud flattens along its spin axis.
 const cloud = additivePoints(15000, v => {
   randomDirection(v);
@@ -167,7 +167,7 @@ const cloud = additivePoints(15000, v => {
     vec3 p0 = position;
     float rho0 = length(p0.xz); float phi = atan(p0.z, p0.x);
     float c = uCollapse;
-    // About half of the gas falls all the way in and becomes the star; the rest settles into the disc.
+    // About half of the gas falls all the way in and becomes the star; the rest settles into the disk.
     float falls = step(aSeed.x, 0.5);
     float s = falls*smoothstep(0.15 + 0.5*aSeed.y, 0.6 + 0.4*aSeed.y, c);
     float rho = rho0*mix(1., 0.62, c)*(1. - s);
@@ -186,7 +186,7 @@ const cloud = additivePoints(15000, v => {
     vAlpha = uOpacity*mix(0.034, 0.26, grain)*(1. + 0.5*heat)*mix(1., mix(0.8, 1.7, grain), c)*(1. - s)*(1. - gone);
     vec4 mv = modelViewMatrix*vec4(p, 1.);
     float pointSize = mix(0.5, 0.11, grain)*mix(1., 0.5, c)*(0.5 + aSeed.y)*uPx/-mv.z;
-    // Keep point rasterisation at least one pixel wide, preserving subpixel coverage in alpha.
+    // Keep point rasterization at least one pixel wide, preserving subpixel coverage in alpha.
     vAlpha *= min(pointSize*pointSize, 1.);
     gl_PointSize = max(pointSize, 1.);
     gl_Position = projectionMatrix*mv;
@@ -235,7 +235,7 @@ const jets = additivePoints(1400, (v, i) => {
   v.set(spread * Math.cos(phi), i % 2 ? 1 : -1, spread * Math.sin(phi)).normalize();
 }, OUTFLOW_VERTEX, outflowUniforms({ uColA: { value: new THREE.Color(0.75, 1, 0.95) }, uColB: { value: new THREE.Color(0.3, 0.7, 1) }, uSize: { value: 0.12 }, uR0: { value: 0.6 }, uR1: { value: 9.5 } }));
 
-// The star: granulation from animated noise, colour from the blackbody temperature and
+// The star: granulation from animated noise, color from the blackbody temperature and
 // limb darkening I(μ) = 0.4 + 0.6 μ (the Eddington approximation).
 const starGroup = new THREE.Group();
 scene.add(starGroup);
@@ -273,7 +273,7 @@ const starMaterial = new THREE.ShaderMaterial({
 const starMesh = new THREE.Mesh(new THREE.SphereGeometry(1, 96, 64), starMaterial);
 starGroup.add(starMesh);
 
-// The cutaway removes the octant x, y, z > 0. Three quarter-discs close it and show the layers.
+// The cutaway removes the octant x, y, z > 0. Three quarter-disks close it and show the layers.
 const layerUniforms = {
   uRad: { value: new Array(8).fill(1) }, uKind: { value: new Array(8).fill(0) },
   uCol: { value: Array.from({ length: 8 }, () => new THREE.Color(1, 1, 1)) },
@@ -326,15 +326,15 @@ const faceMaterial = new THREE.ShaderMaterial({
       gl_FragColor = vec4(col, uOpacity);
     }`
 });
-const quarterDisc = new THREE.CircleGeometry(1, 64, 0, Math.PI / 2);
-const faces = [0, 1, 2].map(() => new THREE.Mesh(quarterDisc, faceMaterial));
+const quarterDisk = new THREE.CircleGeometry(1, 64, 0, Math.PI / 2);
+const faces = [0, 1, 2].map(() => new THREE.Mesh(quarterDisk, faceMaterial));
 faces[1].rotation.y = -Math.PI / 2;
 faces[2].rotation.x = Math.PI / 2;
 starGroup.add(...faces);
 
 function radialTexture(stops) {
   // Build RGBA directly: Safari can add fingerprinting noise when a 2D canvas is
-  // uploaded to WebGL, turning an otherwise smooth halo into coloured speckles.
+  // uploaded to WebGL, turning an otherwise smooth halo into colored speckles.
   const size = 256;
   const data = new Uint8Array(size * size * 4);
   for (let y = 0; y < size; y += 1) {
@@ -406,14 +406,14 @@ const fieldMaterial = new THREE.LineBasicMaterial({ color: 0x5eead4, transparent
 /* ───────────────────────── Per-frame visuals ───────────────────────── */
 
 const view = {
-  radius: 1, hole: 0, spin: 0, cloudSpin: 0, windPhase: 0, jetPhase: 0, surfaceTime: 0, colour: new THREE.Color(1, 0.9, 0.7),
+  radius: 1, hole: 0, spin: 0, cloudSpin: 0, windPhase: 0, jetPhase: 0, surfaceTime: 0, color: new THREE.Color(1, 0.9, 0.7),
   // Eased copies of the stage targets, so that nothing snaps when a stage changes.
   star: 0, cells: 9, contrast: 0.2, spots: 0, flow: 1, spinRate: 0.15, pulse: 0, gain: 1, halo: 0,
   cloud: 0, collapse: 0, clear: 0, jets: 0, wind: 0, pulsar: 0,
-  shell: 0, shellRadius: 3, shellKind: 'pn', flash: 0, flashScale: 5, flashColour: new THREE.Color(1, 1, 1),
+  shell: 0, shellRadius: 3, shellKind: 'pn', flash: 0, flashScale: 5, flashColor: new THREE.Color(1, 1, 1),
   layerRad: [], layerCol: [], layerCount: 0
 };
-const targetColour = new THREE.Color();
+const targetColor = new THREE.Color();
 const PN_OUTER = new THREE.Color(1, 0.3, 0.26);
 const PN_INNER = new THREE.Color(0.2, 0.92, 0.78);
 const SN_OUTER = new THREE.Color(1, 0.62, 0.3);
@@ -442,7 +442,7 @@ function currentLayers(st) {
 }
 
 // What the scene should look like at this point in the life. Each stage starts from the look that the
-// previous stage ended with and changes gradually, so neighbouring stages join up.
+// previous stage ended with and changes gradually, so neighboring stages join up.
 function stageTargets(st) {
   const { stage } = st;
   // A stage made of phases looks like whichever phase it is in.
@@ -456,16 +456,16 @@ function stageTargets(st) {
     cloud: 0, collapse: 0, clear: 0, jets: 0, wind: 0, shell: null, flash: null, pulsar: 0, hole: 0, halo: 0.7
   };
   const debris = { radius: 10 + 40 * p, opacity: 0.55 * (1 - smoothstep(0, 0.5, p)), kind: 'sn' };
-  const afterglow = { scale: 22, opacity: 0.19 * (1 - smoothstep(0, 0.15, p)), colour: [1, 0.66, 0.4] };
-  const ignition = at => ({ scale: 7, opacity: 0.7 * Math.exp(-(((p - at) / 0.03) ** 2)), colour: [1, 0.95, 0.8] });
+  const afterglow = { scale: 22, opacity: 0.19 * (1 - smoothstep(0, 0.15, p)), color: [1, 0.66, 0.4] };
+  const ignition = at => ({ scale: 7, opacity: 0.7 * Math.exp(-(((p - at) / 0.03) ** 2)), color: [1, 0.95, 0.8] });
 
   if (id === 'cloud') {
     v.cloud = 1;
     v.collapse = 0.85 * smoothstep(0, 1, p);
-    v.flash = { scale: 2.5 + 3 * p, opacity: 0.4 * smoothstep(0.45, 1, p), colour: [1, 0.3, 0.12] };
+    v.flash = { scale: 2.5 + 3 * p, opacity: 0.4 * smoothstep(0.45, 1, p), color: [1, 0.3, 0.12] };
   } else if (id === 'proto') {
     const settle = smoothstep(0.6, 1, p);
-    // The protostar emerges from the glowing centre of the cloud.
+    // The protostar emerges from the glowing center of the cloud.
     v.star = smoothstep(0, 0.12, p);
     v.surface = blendSurface(PROTO_SURFACE, main, settle);
     v.spinRate = lerp(0.5, 0.15, settle);
@@ -474,7 +474,7 @@ function stageTargets(st) {
     v.clear = p * 1.05;
     v.jets = smoothstep(0, 0.08, p) * (1 - smoothstep(0.5, 0.78, p));
     // The glow of the collapsing core fades; hydrogen fusion switches on at the very end.
-    const glow = { scale: 5.5, opacity: 0.4 * (1 - smoothstep(0, 0.2, p)), colour: [1, 0.3, 0.12] };
+    const glow = { scale: 5.5, opacity: 0.4 * (1 - smoothstep(0, 0.2, p)), color: [1, 0.3, 0.12] };
     const spark = ignition(1);
     v.flash = spark.opacity > glow.opacity ? spark : glow;
   } else if (id === 'ms') {
@@ -524,7 +524,7 @@ function stageTargets(st) {
       const burst = Math.exp(-((t / 0.07) ** 2));
       v.star = 0; v.wind = 0; v.halo = 0;
       v.shell = { radius: 1.5 + 8.5 * t ** 0.75, opacity: 1 - 0.45 * t, kind: 'sn' };
-      v.flash = { scale: lerp(8 + 14 * t, 60, burst), opacity: Math.max(burst, 0.75 * (1 - 0.75 * t)), colour: [1, lerp(0.66, 0.97, burst), lerp(0.4, 0.92, burst)] };
+      v.flash = { scale: lerp(8 + 14 * t, 60, burst), opacity: Math.max(burst, 0.75 * (1 - 0.75 * t)), color: [1, lerp(0.66, 0.97, burst), lerp(0.4, 0.92, burst)] };
     }
   } else if (id === 'ns') {
     v.star = 1; v.radius = NEUTRON_STAR_VISUAL; v.surface = SMOOTH_SURFACE; v.spinRate = 7; v.pulsar = 1;
@@ -537,7 +537,7 @@ function stageTargets(st) {
 }
 
 // Cutaway layers ease too. Layers are matched from the outside in, so a new core grows from the
-// centre while the old core becomes the shell around it.
+// center while the old core becomes the shell around it.
 function easeLayers(layers, k) {
   const count = layers.length;
   if (count !== view.layerCount) {
@@ -555,7 +555,7 @@ function easeLayers(layers, k) {
   }
   layers.forEach((layer, i) => {
     view.layerRad[i] += (layer.r - view.layerRad[i]) * k;
-    view.layerCol[i].lerp(targetColour.set(ELEMENT[layer.el]), k);
+    view.layerCol[i].lerp(targetColor.set(ELEMENT[layer.el]), k);
   });
 }
 
@@ -569,7 +569,7 @@ function applyVisuals(st, dt, time) {
   const medium = rate(5);
   const fast = rate(12);
 
-  // Star surface. While the star is invisible its size and colour jump straight to the new values.
+  // Star surface. While the star is invisible its size and color jump straight to the new values.
   const hidden = view.star < 0.02;
   ease('star', v.star, v.star < view.star && id === 'sn' ? fast : slow);
   ease('pulse', v.pulse, slow);
@@ -584,8 +584,8 @@ function applyVisuals(st, dt, time) {
   view.surfaceTime += dt * view.flow;
   if (st.T) {
     const rgb = starRGB(st.T);
-    targetColour.setRGB(rgb[0], rgb[1], rgb[2]);
-    view.colour.lerp(targetColour, hidden ? 1 : rate(3.5));
+    targetColor.setRGB(rgb[0], rgb[1], rgb[2]);
+    view.color.lerp(targetColor, hidden ? 1 : rate(3.5));
   }
   // Fainter stars are drawn dimmer, but never so dim that they vanish.
   ease('gain', st.L ? clamp(1.0 + 0.12 * Math.log10(st.L / 10), 0.34, 1.08) : 1, hidden ? 1 : slow);
@@ -596,7 +596,7 @@ function applyVisuals(st, dt, time) {
   const cut = state.cutaway && !!layers;
   faces.forEach(face => { face.visible = cut; });
   const su = starMaterial.uniforms;
-  su.uColor.value.copy(view.colour);
+  su.uColor.value.copy(view.color);
   su.uTime.value = view.surfaceTime;
   su.uSpin.value = view.spin;
   su.uCells.value = view.cells;
@@ -620,11 +620,11 @@ function applyVisuals(st, dt, time) {
   }
   ease('halo', v.halo, slow);
   halo.visible = view.star * view.halo > 0.01;
-  halo.material.color.copy(view.colour);
+  halo.material.color.copy(view.color);
   halo.material.opacity = view.halo * view.star * clamp(view.gain, 0.3, 1);
   halo.scale.setScalar(view.radius * 6);
 
-  // Cloud, disc and jets. The cloud keeps its shape while it fades out.
+  // Cloud, disk and jets. The cloud keeps its shape while it fades out.
   const cloudHidden = view.cloud < 0.02;
   ease('cloud', v.cloud, slow);
   if (v.cloud > 0) {
@@ -654,8 +654,8 @@ function applyVisuals(st, dt, time) {
   wu.uR0.value = view.radius;
   wu.uR1.value = view.radius + 4.5;
   wu.uOpacity.value = 0.34 * view.wind;
-  wu.uColA.value.copy(view.colour);
-  wu.uColB.value.copy(view.colour).multiplyScalar(0.5);
+  wu.uColA.value.copy(view.color);
+  wu.uColB.value.copy(view.color).multiplyScalar(0.5);
 
   // Planetary nebula shell or supernova debris.
   if (v.shell) {
@@ -678,14 +678,14 @@ function applyVisuals(st, dt, time) {
 
   // Glows and flashes.
   if (v.flash && v.flash.opacity > 0.005) {
-    targetColour.setRGB(...v.flash.colour);
+    targetColor.setRGB(...v.flash.color);
     const k = view.flash < 0.01 ? 1 : fast;
     ease('flashScale', v.flash.scale, k);
-    view.flashColour.lerp(targetColour, k);
+    view.flashColor.lerp(targetColor, k);
   }
   ease('flash', v.flash ? v.flash.opacity : 0, fast);
   flash.visible = view.flash > 0.005;
-  flash.material.color.copy(view.flashColour);
+  flash.material.color.copy(view.flashColor);
   flash.material.opacity = view.flash;
   flash.scale.setScalar(view.flashScale);
 
@@ -742,7 +742,7 @@ function setMass(mass, keepInput = false) {
   const { life } = state;
   const fate = FATE[life.fate];
   const fateBox = $('fate');
-  fateBox.style.setProperty('--fate-colour', fate.colour);
+  fateBox.style.setProperty('--fate-color', fate.color);
   const universe = life.outlivesUniverse ? ` That is ${fmt.sig(life.yearsToRemnant / 1.38e10, 2)} times the present age of the universe.` : '';
   fateBox.innerHTML = `A star of <b>${fmt.mass(M)}</b> shines for about ${fmt.years(life.yearsToRemnant)} and ends as a <b>${fate.name}</b> of ${fmt.mass(life.remnant)}.${universe}`;
 
@@ -751,13 +751,13 @@ function setMass(mass, keepInput = false) {
 
   // Durations to scale. The remnant is left out because it has no end.
   const timed = life.stages.slice(0, -1);
-  $('life-bar').innerHTML = timed.map(stage => `<span title="${stageName(stage)}" style="flex:${stage.years / life.yearsToRemnant};background:${STAGE_COLOUR[stage.id]}"></span>`).join('');
+  $('life-bar').innerHTML = timed.map(stage => `<span title="${stageName(stage)}" style="flex:${stage.years / life.yearsToRemnant};background:${STAGE_COLOR[stage.id]}"></span>`).join('');
   $('durations').tBodies[0].innerHTML = life.stages.map((stage, i) => {
     const last = i === life.stages.length - 1;
     const share = stage.years / life.yearsToRemnant;
     const percent = last ? '' : share >= 0.001 ? ` · ${fmt.sig(share * 100, 2)}%` : ' · under 0.1%';
     const duration = stage.id === 'sn' ? 'under a second, then months' : last ? 'no end' : fmt.years(stage.years);
-    return `<tr data-index="${i}"><td><i style="background:${STAGE_COLOUR[stage.id]}"></i></td><td>${stageName(stage)}</td><td>${duration}${percent}</td></tr>`;
+    return `<tr data-index="${i}"><td><i style="background:${STAGE_COLOR[stage.id]}"></i></td><td>${stageName(stage)}</td><td>${duration}${percent}</td></tr>`;
   }).join('');
   liveDirty = true;
   $('life-caption').textContent = `This star spends ${fmt.sig(life.ms.years / life.yearsToRemnant * 100, 2)}% of its life on the main sequence. That is why most of the stars in the sky are main sequence stars.`;
@@ -852,7 +852,7 @@ function renderLayers(st) {
   lastLayers = layers;
   const cutaway = $('cutaway');
   cutaway.disabled = !layers;
-  // Say why the switch is unavailable rather than leaving it greyed out without a reason.
+  // Say why the switch is unavailable rather than leaving it grayed out without a reason.
   $('cutaway-note').hidden = Boolean(layers);
   cutaway.setAttribute('aria-pressed', String(state.cutaway && !!layers));
   cutaway.classList.toggle('nudge', st.stage.id === 'late' || (st.stage.id === 'sn' && st.p < SN_BREAKOUT));
@@ -866,8 +866,8 @@ function renderLayers(st) {
   if (!layers) return;
   if (state.layer >= layers.length) state.layer = -1;
   $('layers-hint').textContent = state.cutaway
-    ? 'Tap a layer here or in the cutaway. From the centre outward:'
-    : 'Tap a layer to slice the star open. From the centre outward:';
+    ? 'Tap a layer here or in the cutaway. From the center outward:'
+    : 'Tap a layer to slice the star open. From the center outward:';
   // Rebuild the list only when the layers themselves change, so a pressed button keeps keyboard focus.
   if (rebuild) $('layers').innerHTML = layers.map((layer, i) => `<li><button type="button" data-layer="${i}"><i style="background:${ELEMENT[layer.el]}"></i>${layer.name}<em>${KIND_LABEL[layer.kind]}</em></button></li>`).join('');
   document.querySelectorAll('#layers button').forEach((button, i) => button.setAttribute('aria-pressed', String(state.layer === i)));
@@ -934,7 +934,7 @@ function drawScale(st) {
     fog.addColorStop(0, 'rgba(251,146,60,.9)'); fog.addColorStop(1, 'rgba(251,146,60,.08)');
     g.fillStyle = fog; g.fill();
   } else {
-    g.fillStyle = `#${view.colour.getHexString()}`; g.fill();
+    g.fillStyle = `#${view.color.getHexString()}`; g.fill();
   }
   g.beginPath();
   g.arc(cx, cy, Math.max(1.5, reference.R * unit), 0, Math.PI * 2);
@@ -978,7 +978,7 @@ function drawHR(st) {
     g.beginPath(); g.moveTo(x(T), pad.t); g.lineTo(x(T), H - pad.b); g.stroke();
     g.fillText(T.toLocaleString('en-GB'), x(T), H - pad.b + 12);
   });
-  // The colour of a hot body at each temperature.
+  // The color of a hot body at each temperature.
   for (let px = pad.l; px < W - pad.r; px += 2) {
     const T = 10 ** (HR.tMax - (px - pad.l) / (W - pad.l - pad.r) * (HR.tMax - HR.tMin));
     const [r, gg, b] = starRGB(T);
@@ -1020,8 +1020,8 @@ function drawHR(st) {
 
   // This star's track: solid where it has been, faint where it is going.
   const track = hrTrack(state.life, 28);
-  const trackColour = css('--chart-track');
-  g.lineWidth = 2.5; g.strokeStyle = trackColour;
+  const trackColor = css('--chart-track');
+  g.lineWidth = 2.5; g.strokeStyle = trackColor;
   let previous = null;
   track.forEach(segment => {
     const stage = state.life.stages.find(s => s.id === segment.id);
@@ -1237,7 +1237,7 @@ function drawMiniHR(st) {
   const y = L => pad.t + (HR.lMax - Math.log10(L)) / (HR.lMax - HR.lMin) * (H - pad.t - pad.b);
   g.clearRect(0, 0, W, H);
   g.lineCap = 'round'; g.lineJoin = 'round';
-  // The colour of a hot body at each temperature, with the hot end on the left.
+  // The color of a hot body at each temperature, with the hot end on the left.
   for (let px = pad.l; px < W - pad.r; px += 2) {
     const [r, gg, b] = starRGB(10 ** (HR.tMax - (px - pad.l) / (W - pad.l - pad.r) * (HR.tMax - HR.tMin)));
     g.fillStyle = `rgb(${r * 255 | 0},${gg * 255 | 0},${b * 255 | 0})`;

@@ -2,13 +2,13 @@
 // Sunlight is sand and apricot, infrared is red, the atmosphere teal and the ground slate.
 // Nothing here is terracotta, because B.2 has no additional higher level content.
 window.DeckFigures.add(P => {
-  const { svg, arrow, text, sub, through, sampled, labelled, seeded, track, anim, twoState, f, TAU } = P;
-  const line = (d, colour, width = 5, extra = '') => `<path d="${d}" style="fill:none;stroke:var(--${colour});stroke-width:${width};stroke-linecap:round;stroke-linejoin:round" ${extra}/>`;
+  const { svg, arrow, text, sub, through, sampled, labeled, seeded, track, anim, twoState, f, TAU } = P;
+  const line = (d, color, width = 5, extra = '') => `<path d="${d}" style="fill:none;stroke:var(--${color});stroke-width:${width};stroke-linecap:round;stroke-linejoin:round" ${extra}/>`;
   // A wavy arrow for infrared, from (x1, y1) to (x2, y2).
-  const ir = (x1, y1, x2, y2, colour = 'proton', width = 4) => {
+  const ir = (x1, y1, x2, y2, color = 'proton', width = 4) => {
     const len = Math.hypot(x2 - x1, y2 - y1), a = Math.atan2(y2 - y1, x2 - x1), n = Math.max(2, Math.round(len / 34)), body = len - 20;
     const d = sampled(t => [body * t, 9 * Math.sin(t * n * TAU) * Math.min(1, 6 * (1 - t))], 6 * n);
-    return `<g transform="translate(${f(x1)} ${f(y1)}) rotate(${f(a * 180 / Math.PI)})">${line(d, colour, width)}<path d="M${f(len - 22)},-10 L${f(len)},0 L${f(len - 22)},10 Z" style="fill:var(--${colour})"/></g>`;
+    return `<g transform="translate(${f(x1)} ${f(y1)}) rotate(${f(a * 180 / Math.PI)})">${line(d, color, width)}<path d="M${f(len - 22)},-10 L${f(len)},0 L${f(len - 22)},10 Z" style="fill:var(--${color})"/></g>`;
   };
   const planck = (l, T) => 1 / (l ** 5 * (Math.exp(14388 / (l * T)) - 1));
   const ground = (x1, x2, y, h = 40) => `<rect x="${x1}" y="${y}" width="${x2 - x1}" height="${h}" style="fill:color-mix(in srgb, var(--brand-accent-strong) 30%, var(--viewer-bg));stroke:var(--brand-accent-strong);stroke-width:3"/>`;
@@ -19,7 +19,7 @@ window.DeckFigures.add(P => {
   return {
     // The planet's energy balance: sunlight in, some reflected, infrared out. Also the title picture, with data-plain.
     'b2-balance': el => {
-      const on = labelled(el), cx = 520, cy = 270, r = 120;
+      const on = labeled(el), cx = 520, cy = 270, r = 120;
       let s = `<circle cx="${cx}" cy="${cy}" r="${r + 26}" style="fill:color-mix(in srgb, var(--brand-primary) 16%, transparent);stroke:var(--brand-primary);stroke-width:2;stroke-dasharray:8 8"/><circle cx="${cx}" cy="${cy}" r="${r}" style="fill:color-mix(in srgb, var(--electron) 45%, var(--viewer-bg));stroke:var(--electron);stroke-width:3"/>`;
       s += [190, 240, 300, 350].map(y => arrow(110, y, cx - Math.sqrt((r + 4) ** 2 - (y - cy) ** 2) - 6, y, 'brand-accent', 6)).join('');
       s += arrow(cx - 96, cy - 96, cx - 230, cy - 200, 'sand', 6) + [[-20, -1], [50, -0.6], [70, 0.5], [0, 1], [-60, 0.86]].map(([deg]) => { const a = deg * Math.PI / 180; return ir(cx + (r + 8) * Math.cos(a), cy + (r + 8) * Math.sin(a), cx + (r + 130) * Math.cos(a), cy + (r + 130) * Math.sin(a)); }).join('');
@@ -27,23 +27,23 @@ window.DeckFigures.add(P => {
       return svg(on ? '80 20 880 500' : '100 40 700 450', s, 'A planet with a thin atmosphere. Sunlight arrives from one side; part of it is reflected back to space, and the planet radiates infrared in all directions. At a steady temperature the power absorbed equals the power radiated');
     },
 
-    // Why the mean intensity is a quarter of the solar constant: the planet intercepts a disc but radiates from a sphere.
+    // Why the mean intensity is a quarter of the solar constant: the planet intercepts a disk but radiates from a sphere.
     'b2-quarter': () => {
       const cx = 590, cy = 250, r = 130;
       let s = [140, 195, 250, 305, 360].map(y => arrow(150, y, 320, y, 'brand-accent', 5)).join('');
       s += `<ellipse cx="380" cy="${cy}" rx="34" ry="${r}" style="fill:var(--brand-accent);opacity:.35;stroke:var(--brand-accent);stroke-width:3"/><circle cx="${cx}" cy="${cy}" r="${r}" style="fill:color-mix(in srgb, var(--electron) 40%, var(--viewer-bg));stroke:var(--electron);stroke-width:3"/>`;
       s += `<line x1="380" y1="${cy - r}" x2="${cx}" y2="${cy - r}" class="guide"/><line x1="380" y1="${cy + r}" x2="${cx}" y2="${cy + r}" class="guide"/>` + arrow(cx, cy, cx + 92, cy - 92, 'text-main', 3) + text(cx + 34, cy - 14, 'R', 'lbl display');
-      s += text(235, 100, 'intensity S', 'lbl strong') + text(300, 430, 'intercepts a disc,', 'lbl') + text(300, 464, 'area πR²', 'lbl strong') + text(cx + 10, 430, 'shared over a sphere,', 'lbl') + text(cx + 10, 464, 'area 4πR²', 'lbl strong');
-      return svg('130 60 640 420', s, 'Parallel rays of sunlight of intensity S fall on a planet of radius R. The planet intercepts the light that would pass through a disc of area pi R squared, but that power is shared over the whole surface of the sphere, of area 4 pi R squared, so the mean intensity is a quarter of S');
+      s += text(235, 100, 'intensity S', 'lbl strong') + text(300, 430, 'intercepts a disk,', 'lbl') + text(300, 464, 'area πR²', 'lbl strong') + text(cx + 10, 430, 'shared over a sphere,', 'lbl') + text(cx + 10, 464, 'area 4πR²', 'lbl strong');
+      return svg('130 60 640 420', s, 'Parallel rays of sunlight of intensity S fall on a planet of radius R. The planet intercepts the light that would pass through a disk of area pi R squared, but that power is shared over the whole surface of the sphere, of area 4 pi R squared, so the mean intensity is a quarter of S');
     },
 
     // The spectra of the Sun and of the Earth, each scaled to the same height, on a logarithmic wavelength axis.
     'b2-two-spectra': () => {
-      const X = l => 110 + 230 * Math.log10(l / 0.1), curve = (T, colour) => { const top = planck(2898 / T, T); return line(sampled(t => { const l = 0.1 * 10 ** (3 * t); return [X(l), 420 - 320 * planck(l, T) / top]; }, 160), colour); };
+      const X = l => 110 + 230 * Math.log10(l / 0.1), curve = (T, color) => { const top = planck(2898 / T, T); return line(sampled(t => { const l = 0.1 * 10 ** (3 * t); return [X(l), 420 - 320 * planck(l, T) / top]; }, 160), color); };
       let s = `<rect x="${f(X(0.4))}" y="34" width="${f(X(0.7) - X(0.4))}" height="386" style="fill:var(--sand);opacity:.3"/>` + arrow(110, 420, 110, 40, 'text-secondary', 2.5) + arrow(110, 420, 840, 420, 'text-secondary', 2.5);
       s += curve(5800, 'positive') + curve(288, 'alpha', 3) + [0.1, 1, 10, 100].map(l => `<line x1="${X(l)}" y1="420" x2="${X(l)}" y2="432" class="tick"/>` + text(X(l), 462, String(l), 'lbl mono')).join('');
       s += text(126, 54, 'intensity', 'lbl mono', 'start') + text(834, 500, 'wavelength / μm', 'lbl mono', 'end') + text(X(0.53), 22, 'visible', 'lbl small') + text(X(1.1), 130, 'from the Sun,', 'lbl strong halo', 'start', 'style="fill:var(--positive)"') + text(X(1.1), 164, '5800 K', 'lbl mono halo', 'start') + text(X(22), 130, 'from the Earth,', 'lbl strong halo', 'start', 'style="fill:var(--alpha)"') + text(X(22), 164, '288 K', 'lbl mono halo', 'start');
-      return svg('60 -10 800 530', s, 'Two black-body spectra on a logarithmic wavelength scale, each drawn to the same height. Radiation from the Sun at 5800 kelvin peaks at 0.5 micrometres, in the visible, and lies almost entirely below 3 micrometres. Radiation from the Earth at 288 kelvin peaks at 10 micrometres, in the infrared, and lies almost entirely above 3 micrometres. The two hardly overlap');
+      return svg('60 -10 800 530', s, 'Two black-body spectra on a logarithmic wavelength scale, each drawn to the same height. Radiation from the Sun at 5800 kelvin peaks at 0.5 micrometers, in the visible, and lies almost entirely below 3 micrometers. Radiation from the Earth at 288 kelvin peaks at 10 micrometers, in the infrared, and lies almost entirely above 3 micrometers. The two hardly overlap');
     },
 
     // A molecule's energy levels: an infrared photon of the right energy is absorbed, then one is emitted in any direction.
@@ -58,7 +58,7 @@ window.DeckFigures.add(P => {
 
     // The resonance model: infrared drives a carbon dioxide molecule at its natural frequency. Also drawn plain.
     'b2-molecule': el => {
-      const on = labelled(el), steps = 24;
+      const on = labeled(el), steps = 24;
       const frames = Array.from({ length: steps + 1 }, (_, i) => 16 * Math.sin(i / steps * TAU));
       let s = ir(60, 250, 300, 250);
       if (on) s += text(180, 200, 'infrared', 'lbl strong') + text(180, 310, 'frequency f', 'lbl mono') + text(480, 100, 'carbon dioxide', 'lbl strong') + text(480, 400, 'bends at its natural frequency', 'lbl') + text(480, 436, 'when that equals f: resonance', 'lbl strong') + text(422, 330, 'O', 'lbl mono') + text(480, 330, 'C', 'lbl mono') + text(538, 330, 'O', 'lbl mono');
@@ -70,7 +70,7 @@ window.DeckFigures.add(P => {
 
     // Infrared from the ground is absorbed by molecules and sent out again in random directions. Also drawn plain.
     'b2-reemit': el => {
-      const on = labelled(el), rand = seeded(5), top = 80, base = 420;
+      const on = labeled(el), rand = seeded(5), top = 80, base = 420;
       const mols = Array.from({ length: 12 }, (_, i) => [150 + (i % 4) * 170 + (rand() - 0.5) * 70, 150 + Math.floor(i / 4) * 85 + (rand() - 0.5) * 30]);
       let s = ground(80, 800, base) + mols.map(([x, y]) => `<circle cx="${f(x)}" cy="${f(y)}" r="13" style="fill:var(--brand-primary)"/>`).join('');
       if (on) s += text(440, 494, 'warm surface', 'lbl') + text(440, 56, 'space', 'lbl');
@@ -96,7 +96,7 @@ window.DeckFigures.add(P => {
 
     // A one-layer model of the atmosphere, with the intensity of each flow. Also drawn plain.
     'b2-layer': el => {
-      const on = labelled(el);
+      const on = labeled(el);
       let s = ground(100, 780, 430) + air(100, 780, 190, 70);
       s += arrow(200, 40, 200, 422, 'brand-accent', 7) + ir(400, 424, 400, 268) + ir(560, 186, 560, 60, 'brand-primary') + ir(660, 262, 660, 424, 'brand-primary');
       if (on) {

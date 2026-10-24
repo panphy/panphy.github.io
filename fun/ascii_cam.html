@@ -16,7 +16,7 @@
 	<link rel="stylesheet" href="/assets/theme-toggle.css">
 	<script src="/assets/theme-toggle.js"></script>
 <style>
-		/* Colours and fonts come from the shared design system (/assets/design.css);
+		/* Colors and fonts come from the shared design system (/assets/design.css);
 		   these names keep the rest of this stylesheet unchanged. */
 		:root {
 			--font-sans: var(--font-body);
@@ -73,7 +73,7 @@
 			letter-spacing: -0.03em;
 		}
 
-		/* A plain title; spectrum-coloured title text is for the homepage only. */
+		/* A plain title; spectrum-colored title text is for the homepage only. */
 		h1.gradient-text {
 			color: var(--ink);
 			background: none;
@@ -306,7 +306,7 @@
 		}
 
 		/* ASCII display area */
-		/* The art stays on a dark ground in both themes so the camera colours read true. */
+		/* The art stays on a dark ground in both themes so the camera colors read true. */
 		#ascii-frame {
 			margin-top: 0.5rem;
 			padding: 0.25rem;
@@ -359,7 +359,7 @@
 			display: none;
 		}
 
-		/* each ASCII "pixel" lives in a span so we can colour it */
+		/* each ASCII "pixel" lives in a span so we can color it */
 		#ascii {
 			white-space: pre;
 			letter-spacing: 0;
@@ -780,7 +780,7 @@
 			return localStorage.getItem(LS_KEYS.camera) || null;
 		}
 
-		/* Quantise (r,g,b) into 6×6×6 colour cube */
+		/* Quantize (r,g,b) into 6×6×6 color cube */
 		function quantizeTo8bit(r, g, b) {
 			const r6 = Math.round(r / 255 * 5),
 				g6 = Math.round(g / 255 * 5),

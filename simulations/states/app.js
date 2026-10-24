@@ -96,7 +96,7 @@ const state = {
   phaseCandidateCount: 0,
   referenceLid: 1,
   referenceBonds: 1,
-  colorMode: 'neighbours',
+  colorMode: 'neighbors',
   userZoom: 1,
   userInteracting: false,
   lastInteraction: 0,
@@ -155,7 +155,7 @@ function updatePresetButtons() {
 }
 
 // --- Phase ------------------------------------------------------------------
-// Gas is judged by how many particles have almost no neighbours; solid versus
+// Gas is judged by how many particles have almost no neighbors; solid versus
 // liquid by whether the other particles stay in place or wander off. Far below
 // the freezing point anything that is not gas is solid, even if a loose,
 // frosty clump is still settling.
@@ -211,7 +211,7 @@ function renderPhase() {
 }
 
 function updateStructure() {
-  const result = Physics.analyseStructure(sim, bondPositions);
+  const result = Physics.analyzeStructure(sim, bondPositions);
   const m = state.metrics;
   m.crystal += (result.crystalFraction - m.crystal) * 0.25;
   m.isolated += (result.isolatedFraction - m.isolated) * 0.25;
@@ -315,12 +315,12 @@ const bondLines = new THREE.LineSegments(bondGeo, bondMat);
 bondLines.frustumCulled = false;
 scene.add(bondLines);
 
-// --- Colours --------------------------------------------------------------
+// --- Colors --------------------------------------------------------------
 const palette = {
   plain: new THREE.Color(),
-  fewNeighbours: new THREE.Color('#FDE725'),
-  someNeighbours: new THREE.Color('#35B779'),
-  manyNeighbours: new THREE.Color('#31688E'),
+  fewNeighbors: new THREE.Color('#FDE725'),
+  someNeighbors: new THREE.Color('#35B779'),
+  manyNeighbors: new THREE.Color('#31688E'),
   slow: new THREE.Color('#0EA5E9'),
   mid: new THREE.Color('#FACC15'),
   fast: new THREE.Color('#DC2626')
@@ -345,14 +345,14 @@ function applyTheme() {
   palette.plain.setHex(dark ? 0xD6D0C8 : 0x77706A);
 }
 
-// A neutral scale (not the phase colours): particles on a crystal's surface
-// have fewer neighbours than those inside it, which is why melting and
+// A neutral scale (not the phase colors): particles on a crystal's surface
+// have fewer neighbors than those inside it, which is why melting and
 // evaporation start at the surface.
-function neighbourColor(c, out) {
-  if (c <= 2) return out.copy(palette.fewNeighbours);
-  if (c < 7) return out.copy(palette.fewNeighbours).lerp(palette.someNeighbours, (c - 2) / 5);
-  if (c < 11) return out.copy(palette.someNeighbours).lerp(palette.manyNeighbours, (c - 7) / 4);
-  return out.copy(palette.manyNeighbours);
+function neighborColor(c, out) {
+  if (c <= 2) return out.copy(palette.fewNeighbors);
+  if (c < 7) return out.copy(palette.fewNeighbors).lerp(palette.someNeighbors, (c - 2) / 5);
+  if (c < 11) return out.copy(palette.someNeighbors).lerp(palette.manyNeighbors, (c - 7) / 4);
+  return out.copy(palette.manyNeighbors);
 }
 
 function speedColor(s, out) {
@@ -367,7 +367,7 @@ function updateParticleColors() {
     const b = i * 3;
     const speed = Math.sqrt(vel[b] * vel[b] + vel[b + 1] * vel[b + 1] + vel[b + 2] * vel[b + 2]);
     smoothSpeed[i] += (speed - smoothSpeed[i]) * 0.25;
-    if (state.colorMode === 'neighbours') neighbourColor(smoothCoordination[i], tmpColor);
+    if (state.colorMode === 'neighbors') neighborColor(smoothCoordination[i], tmpColor);
     else if (state.colorMode === 'speed') speedColor(smoothSpeed[i], tmpColor);
     else tmpColor.copy(palette.plain);
     particles.setColorAt(i, tmpColor);
@@ -444,7 +444,7 @@ function resize() {
   if (!width || !height) return;
   const panelRect = simPanel.getBoundingClientRect();
   const leftEdge = Math.min(thermoOverlay.getBoundingClientRect().left, meltMarker.getBoundingClientRect().left, boilMarker.getBoundingClientRect().left);
-  // Shift the view left so the container is centred in the space beside the
+  // Shift the view left so the container is centered in the space beside the
   // thermometer instead of disappearing behind it.
   state.viewReserve = clamp(panelRect.right - leftEdge + 8, 0, width * 0.45);
   const reserve = state.viewReserve;
@@ -499,7 +499,7 @@ function resetSimulation() {
   state.smoothPE = sim.potential / N;
   state.direction = 1;
   state.referenceLid = sim.lid;
-  const result = Physics.analyseStructure(sim, bondPositions);
+  const result = Physics.analyzeStructure(sim, bondPositions);
   state.referenceBonds = Math.max(1, result.bonds);
   state.metrics.crystal = result.crystalFraction;
   state.metrics.isolated = result.isolatedFraction;

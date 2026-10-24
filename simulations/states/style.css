@@ -1,7 +1,7 @@
 :root {
-  /* Colours and fonts come from the shared design system (/assets/design.css);
+  /* Colors and fonts come from the shared design system (/assets/design.css);
      these names keep the rest of this stylesheet unchanged. Scene, particle and
-     field colours carry meaning and stay as they were. */
+     field colors carry meaning and stay as they were. */
   --brand-accent: var(--accent);
   --brand-accent-strong: var(--accent-hover);
 
@@ -29,7 +29,7 @@
   --brand-soft: var(--accent-soft);
   --brand-line: color-mix(in srgb, var(--accent) 35%, transparent);
 
-  /* Phase colours, shared by the badge, thermometer and preset swatches. */
+  /* Phase colors, shared by the badge, thermometer and preset swatches. */
   --phase-solid: #0D9488;
   --phase-liquid: #D97706;
   --phase-gas: #DB2777;
@@ -330,7 +330,7 @@ a:hover {
   bottom: 0;
   height: calc(var(--fill, 0) * 100%);
   border-radius: 999px 999px 7px 7px;
-  /* The gradient is sized to the whole track, so each colour always sits at
+  /* The gradient is sized to the whole track, so each color always sits at
      the same temperature. */
   background: linear-gradient(0deg, var(--phase-solid) 0%, var(--phase-solid) 17%, var(--phase-liquid) 23%, var(--phase-liquid) 40%, var(--phase-gas) 46%, var(--phase-gas) 100%);
   background-size: 100% var(--thermo-height);
@@ -720,7 +720,7 @@ a:hover {
   background: linear-gradient(135deg, var(--brand-soft), rgba(13, 148, 136, 0.12));
 }
 
-/* Colour mode */
+/* Color mode */
 .segmented {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -768,7 +768,7 @@ a:hover {
   border-radius: 999px;
 }
 
-.legend-bar--neighbours {
+.legend-bar--neighbors {
   background: linear-gradient(90deg, #FDE725, #35B779 50%, #31688E);
 }
 

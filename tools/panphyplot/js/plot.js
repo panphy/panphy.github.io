@@ -38,7 +38,7 @@
 	function getPlotThemeSettings() {
 		const theme = document.documentElement.getAttribute('data-theme') || 'light';
 		if (theme !== 'dark') {
-			// Light theme – distinct data colours with contrasting fit hues
+			// Light theme – distinct data colors with contrasting fit hues
 			return {
 				errorColor: '#5b5b5b',
 				// Data point colors: muted but distinct (Tableau 10 first six)
@@ -396,7 +396,7 @@
 		return value || fallback;
 	}
 
-	// Colours follow the page's own tokens, so the graph sits on its pane in either theme.
+	// Colors follow the page's own tokens, so the graph sits on its pane in either theme.
 	function applyThemeLayout(layout, themeSettings) {
 		['xaxis', 'yaxis'].forEach((axis) => {
 			const theme = themeSettings.layout[axis];
@@ -654,7 +654,7 @@
 		};
 	}
 
-	// The plotted series of a sheet share the palette in order, so a Y column's colour is stable.
+	// The plotted series of a sheet share the palette in order, so a Y column's color is stable.
 	function getSeriesColor(sheet, seriesId) {
 		const index = PlotModel.getSeries(sheet).filter(entry => entry.xCol).findIndex(entry => entry.id === seriesId);
 		if (index < 0) return null;

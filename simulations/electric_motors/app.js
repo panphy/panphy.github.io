@@ -22,7 +22,7 @@ const state = {
 // Experiment settings that "Reset all" and a change of model put back.
 const TOGGLE_DEFAULTS = { reverse: false, flip: false, commutator: true, pauseSwap: false };
 
-// Real dimensions used in the readouts, in metres.
+// Real dimensions used in the readouts, in meters.
 const ROD_LENGTH = 0.05;
 const COIL_SIDE = 0.04;
 const COIL_AREA = 0.002;
@@ -218,7 +218,7 @@ function labelSprite(text, color, size = 0.5) {
   sprite.raycast = () => {};
   return sprite;
 }
-// The letter identifies the same coil end; the sign and border colour identify its supply connection.
+// The letter identifies the same coil end; the sign and border color identify its supply connection.
 // Reuse three textures so a half-turn never allocates a new canvas or GPU texture.
 function connectionBadge(letter) {
   const borders = { '+': palette.css.plus, '−': palette.css.minus, '': palette.css['text-secondary'] };
@@ -324,7 +324,7 @@ function tube(points, radius, mat, segments = 120) {
   return new THREE.Mesh(new THREE.TubeGeometry(path, segments, radius, 8, false), mat);
 }
 // Softly glowing beads that flow along a wire to show conventional current.
-// Each path point carries the bead size for the segment that starts there, so beads sit centred on the wire.
+// Each path point carries the bead size for the segment that starts there, so beads sit centered on the wire.
 function currentMarkers(count, color) {
   const geometry = new THREE.SphereGeometry(1, 16, 12);
   const core = new THREE.InstancedMesh(geometry, new THREE.MeshStandardMaterial({ color, emissive: color, emissiveIntensity: 0.4, roughness: 0.45 }), count);
@@ -344,7 +344,7 @@ function setMarkerGlow(markers, strength) {
 }
 const dummy = new THREE.Object3D();
 const HALO_SCALE = 1.5;
-// Beads on several wires share the instances; every other wire is shifted half a gap so neighbouring turns do not line up.
+// Beads on several wires share the instances; every other wire is shifted half a gap so neighboring turns do not line up.
 function placeMarkers(markers, paths, phase, visible, spacing = 0.32) {
   const { core, halo, count } = markers.userData;
   let shown = 0;
@@ -417,7 +417,7 @@ function clearStage() {
 }
 
 // ---------- Shared apparatus ----------
-// Each magnet is one piece. Its colour fades from the pole colour at each end to neutral in the middle,
+// Each magnet is one piece. Its color fades from the pole color at each end to neutral in the middle,
 // so the N and S faces read as the two ends of one magnet, never as a magnet with a single pole.
 // `locate` maps a point in the magnet's frame to { end: 0 or 1, dist: distance along the magnet from its middle }.
 function magnetPiece(size, segments, position, locate, key) {
@@ -428,20 +428,20 @@ function magnetPiece(size, segments, position, locate, key) {
   mesh.userData.locate = locate;
   return mesh;
 }
-// Paint the pieces with `ends[0]` at end 0 and `ends[1]` at end 1, fully coloured beyond `reach` from the middle.
+// Paint the pieces with `ends[0]` at end 0 and `ends[1]` at end 1, fully colored beyond `reach` from the middle.
 function paintMagnet(pieces, ends, reach) {
   const point = new THREE.Vector3();
-  const colour = new THREE.Color();
+  const color = new THREE.Color();
   for (const mesh of pieces) {
     const positions = mesh.geometry.attributes.position;
-    const colours = mesh.geometry.attributes.color;
+    const colors = mesh.geometry.attributes.color;
     for (let i = 0; i < positions.count; i++) {
       point.fromBufferAttribute(positions, i).add(mesh.position);
       const { end, dist } = mesh.userData.locate(point);
-      colour.copy(ends[end]).lerp(palette.neutral, 1 - THREE.MathUtils.smoothstep(dist, 0, reach));
-      colours.setXYZ(i, colour.r, colour.g, colour.b);
+      color.copy(ends[end]).lerp(palette.neutral, 1 - THREE.MathUtils.smoothstep(dist, 0, reach));
+      colors.setXYZ(i, color.r, color.g, color.b);
     }
-    colours.needsUpdate = true;
+    colors.needsUpdate = true;
   }
 }
 // Evenly spaced, parallel field lines: equal spacing shows a uniform field.
@@ -693,7 +693,7 @@ function updateForceGeometry() {
   // Reversing the current means turning the supply round.
   sim.supply.rotation.y = state.reverse ? Math.PI / 2 : -Math.PI / 2;
 }
-// Through the centres of the rails (y = 0) and the rod (y = ROD_Y).
+// Through the centers of the rails (y = 0) and the rod (y = ROD_Y).
 function forcePath() {
   const x = sim.x;
   const plusZ = state.reverse ? -RAIL_Z : RAIL_Z;
@@ -853,7 +853,7 @@ function buildCoilWinding() {
     coilGroup.add(part(winding, 'coil'));
   }
 }
-// The path along the first turn drawn in buildCoilWinding, so every bead is a round ball centred on that wire.
+// The path along the first turn drawn in buildCoilWinding, so every bead is a round ball centered on that wire.
 function coilMarkerPath() {
   const loops = Math.max(1, Math.round(coilTurns() / 10));
   const scale = new THREE.Vector3().setScalar(0.044);
@@ -877,11 +877,11 @@ function buildRings() {
   const copper = material(palette.copper, { metalness: 0.7, roughness: 0.25 });
   const split = sim.kind === 'dc' && state.commutator;
   const ringZ = split ? [RING_Z, RING_Z] : [RING_Z - 0.2, RING_Z + 0.2];
-  // In the DC motor each ring or half-ring is copper tinted with the colour of the brush it touches (see tintRings).
+  // In the DC motor each ring or half-ring is copper tinted with the color of the brush it touches (see tintRings).
   sim.rings = {};
   if (split) {
-    // Each half is centred on one side of the coil; the gaps line up with the coil's plane turned by 90°.
-    // Half A (centred on +x at θ = 0) is joined to coil side A; half B to side B.
+    // Each half is centered on one side of the coil; the gaps line up with the coil's plane turned by 90°.
+    // Half A (centered on +x at θ = 0) is joined to coil side A; half B to side B.
     const gap = 0.16;
     for (const [start, key] of [[gap, 'A'], [Math.PI + gap, 'B']]) {
       const geometry = new THREE.CylinderGeometry(RING_R, RING_R, 0.42, 32, 1, false, start, Math.PI - 2 * gap);
@@ -906,7 +906,7 @@ function buildRings() {
     });
   }
   for (const [side, z] of [[1, ringZ[0]], [-1, ringZ[1]]]) {
-    // DC: the + brush and its lead in the + colour, the − brush and its lead in the − colour. AC has no fixed polarity.
+    // DC: the + brush and its lead in the + color, the − brush and its lead in the − color. AC has no fixed polarity.
     const polarity = sim.kind === 'dc' ? (side * (state.reverse ? -1 : 1) > 0 ? palette.plus : palette.minus) : null;
     const brushMat = material(polarity || palette.carbon, { roughness: 0.85 });
     const wireMat = material(polarity || palette.carbon, { roughness: 0.6 });
@@ -927,15 +927,15 @@ function buildRings() {
   if (sim.kind === 'dc') sim.supply.rotation.y = state.reverse ? Math.PI : 0;
   tintRings();
 }
-// Copper tinted towards the colour of the brush it touches, so the + colour stays on the + side while the halves turn
+// Copper tinted towards the color of the brush it touches, so the + color stays on the + side while the halves turn
 // and jumps from one half to the other at each swap.
 const RING_TINT = 0.75;
-function ringColour(half) {
+function ringColor(half) {
   return palette.copper.clone().lerp(halfOnPlus() === half ? palette.plus : palette.minus, RING_TINT);
 }
 function tintRings() {
   if (sim?.kind !== 'dc') return;
-  for (const [half, mesh] of Object.entries(sim.rings)) mesh.material.color.copy(ringColour(half));
+  for (const [half, mesh] of Object.entries(sim.rings)) mesh.material.color.copy(ringColor(half));
 }
 // Signed current through the coil, in amps. Positive means along side 1 away from the rings.
 function coilCurrent() {
@@ -1261,26 +1261,26 @@ function drawEndView() {
   ctx.lineWidth = ringWidth;
   if (state.commutator) {
     const halfSpan = Math.PI / 2 - 0.16;
-    for (const [half, centre] of [['A', sim.theta], ['B', sim.theta + Math.PI]]) {
-      ctx.strokeStyle = `#${ringColour(half).getHexString()}`;
+    for (const [half, center] of [['A', sim.theta], ['B', sim.theta + Math.PI]]) {
+      ctx.strokeStyle = `#${ringColor(half).getHexString()}`;
       ctx.beginPath();
-      ctx.arc(cx, cy, ringR, -(centre + halfSpan), -(centre - halfSpan));
+      ctx.arc(cx, cy, ringR, -(center + halfSpan), -(center - halfSpan));
       ctx.stroke();
     }
   } else {
     // The two slip rings sit one behind the other; draw them as two circles.
-    ctx.strokeStyle = `#${ringColour('A').getHexString()}`;
+    ctx.strokeStyle = `#${ringColor('A').getHexString()}`;
     ctx.beginPath();
     ctx.arc(cx, cy, ringR, 0, Math.PI * 2);
     ctx.stroke();
-    ctx.strokeStyle = `#${ringColour('B').getHexString()}`;
+    ctx.strokeStyle = `#${ringColor('B').getHexString()}`;
     ctx.lineWidth = ringWidth * 0.6;
     ctx.beginPath();
     ctx.arc(cx, cy, ringR * 0.45, 0, Math.PI * 2);
     ctx.stroke();
   }
 
-  // Brushes: the + brush is on the right unless the current is reversed, each in its polarity colour.
+  // Brushes: the + brush is on the right unless the current is reversed, each in its polarity color.
   const brushW = w * 0.07;
   const brushH = w * 0.07;
   for (const side of [1, -1]) {
@@ -1496,8 +1496,8 @@ function drawGraph() {
     ctx.restore();
     // Torque is plotted as positive when it turns the coil clockwise, seen from the rings end.
     const series = [[1, c.current, currentScale, 'I'], [2, c.force, -torqueScale, 'T']];
-    for (const [index, colour, scale] of series) {
-      ctx.strokeStyle = colour;
+    for (const [index, color, scale] of series) {
+      ctx.strokeStyle = color;
       ctx.lineWidth = 2;
       ctx.beginPath();
       sim.trace.forEach((point, i) => {
@@ -1720,7 +1720,7 @@ function updateObservation() {
     // so a message that changed as the coil turns (an AC zero crossing, a DC swap) would make the view jump.
     const flowing = sim.kind === 'ac' || state.values.current > 0;
     title =!state.powered ? 'Trace the two sides of the coil' : !flowing ? 'No current → no magnetic force' : sim.kind === 'dc' && state.commutator ? 'Opposite currents → opposite forces' : 'Follow the current, then the forces';
-    text = !state.powered && sim.kind === 'ac' ? 'A and B identify the coil sides. Orange arrows show current; pink arrows show force. Switch on the AC supply to explore current reversal.' : state.powered && !flowing ? (sim.kind === 'dc' ? 'The current is set to 0 A, so there is no magnetic force on the coil.' : 'At zero current there is no magnetic force on the coil. A moving coil can coast through this instant.') : !state.powered ? 'A and B identify the same coil ends throughout. Each half-ring takes the colour of the brush it touches: yellow for +, grey for −. Orange arrows show current; pink arrows show force.' : sim.kind === 'dc' && state.commutator ? `Whichever side is on the right carries current ${rightSide().into ? 'away from' : 'towards'} the rings and is pushed ${rightSide().into ? 'down' : 'up'}. At each half turn the split ring reverses the current, so this never changes. Use “Pause at each swap” to catch it.` : sim.kind === 'ac' ? 'The supply reverses the current and forces. Slip rings keep each coil end connected to the same brush. In step, the current reverses at the same point in every turn, so the coil keeps turning one way.' : 'Without the split ring, current stays the same way round the coil. After vertical, the turning effect reverses and pulls the coil back.';
+    text = !state.powered && sim.kind === 'ac' ? 'A and B identify the coil sides. Orange arrows show current; pink arrows show force. Switch on the AC supply to explore current reversal.' : state.powered && !flowing ? (sim.kind === 'dc' ? 'The current is set to 0 A, so there is no magnetic force on the coil.' : 'At zero current there is no magnetic force on the coil. A moving coil can coast through this instant.') : !state.powered ? 'A and B identify the same coil ends throughout. Each half-ring takes the color of the brush it touches: yellow for +, gray for −. Orange arrows show current; pink arrows show force.' : sim.kind === 'dc' && state.commutator ? `Whichever side is on the right carries current ${rightSide().into ? 'away from' : 'towards'} the rings and is pushed ${rightSide().into ? 'down' : 'up'}. At each half turn the split ring reverses the current, so this never changes. Use “Pause at each swap” to catch it.` : sim.kind === 'ac' ? 'The supply reverses the current and forces. Slip rings keep each coil end connected to the same brush. In step, the current reverses at the same point in every turn, so the coil keeps turning one way.' : 'Without the split ring, current stays the same way round the coil. After vertical, the turning effect reverses and pulls the coil back.';
   }
   updateTurningDisplay();
   setText('observation-title', title);
@@ -2000,7 +2000,7 @@ document.querySelectorAll('.models [data-mode]').forEach(button => button.addEve
 }));
 
 // ---------- Theme ----------
-// Rebuild the scene (new colours or fonts) without disturbing the running model.
+// Rebuild the scene (new colors or fonts) without disturbing the running model.
 const MOTION_KEYS = ['x', 'v', 'phase', 'theta', 'omega', 'time', 'supplyPhase', 'supplyFrequency', 'spin', 'heldVertical', 'trace', 'history', 'current', 'torque'];
 function rebuildScene() {
   const motion = sim && Object.fromEntries(MOTION_KEYS.filter(key => key in sim).map(key => [key, sim[key]]));

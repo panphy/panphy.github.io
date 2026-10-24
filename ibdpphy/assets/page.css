@@ -1,5 +1,5 @@
 /* Shared styles for the IB DP Physics reference pages (course summary, data booklet).
-   Colours come from the hub's palette: slate, teal, sage, sand, apricot, and terracotta
+   Colors come from the hub's palette: slate, teal, sage, sand, apricot, and terracotta
    kept for higher level only. Light is cream paper; dark is the hub's slate. */
 :root {
   color-scheme: light;
@@ -132,7 +132,7 @@ ul.tight li::marker { color: var(--apricot); }
 .hl-block .eq-head, .card.hl .eq-head { color: var(--hl); }
 [data-eqs]:empty { display: none; }
 
-/* A symbol with an explanation: a pointer, the accent colour, and a wider box to aim at. */
+/* A symbol with an explanation: a pointer, the accent color, and a wider box to aim at. */
 mjx-container .sy { cursor: help; outline: none; }
 mjx-container .sy:hover, mjx-container .sy:focus { fill: var(--teal); stroke: var(--teal); }
 .card.hl mjx-container .sy:hover, .card.hl mjx-container .sy:focus, .hl-block mjx-container .sy:hover, .hl-block mjx-container .sy:focus { fill: var(--hl); stroke: var(--hl); }

@@ -27,7 +27,7 @@ const POSITIVE_RADIUS = { plum: PLUM_RADIUS, rutherford: RUTHERFORD_NUCLEUS, boh
 const ALPHA_SPEED = 4;
 const ALPHA_K = 1.5; // Plum pudding: the positive charge spread through the whole atom.
 // Nucleus: a stronger charge screened by the electrons outside it, so the push is strong
-// close in (a head-on alpha turns back about 0.45 from the centre, clear of the enlarged
+// close in (a head-on alpha turns back about 0.45 from the center, clear of the enlarged
 // nucleus and the alpha's own size) but weak further out, where most alphas pass almost
 // straight through. Near the atom's edge the push matches the plum pudding's.
 const NUCLEAR_K = 9;
@@ -139,7 +139,7 @@ let beam = null;
 let excite = null;
 // Rutherford view with the beam on: the view zooms in on the nucleus, so the electrons and
 // their orbit guides grow together and pass out of view, since at the nucleus's drawn size
-// they would really be hundreds of metres away. t runs 0 → 1.
+// they would really be hundreds of meters away. t runs 0 → 1.
 const spread = { t: 0, target: 0 };
 const SPREAD_TIME = 3;
 const ZOOM_FACTOR = 6; // How much the electron system grows by the end of the zoom.
@@ -390,7 +390,7 @@ function buildRutherford() {
     // Rutherford gave no direction, so the middle path runs the other way.
     electrons.push({ mesh, radius, angle: i * Math.PI / 3, tilt, speed: i % 3 === 1 ? -0.6 : 0.6 });
     pickables.push({ object: mesh, kind: 'electron' });
-    // Each path is shared by two electrons on opposite sides: illustrative, not quantised.
+    // Each path is shared by two electrons on opposite sides: illustrative, not quantized.
     if (i < 3) ring(radius, palette.line, 0.5, tilt);
   }
   // The boundary and orbit guides fade out with the electrons when the beam is on.
@@ -420,7 +420,7 @@ function buildNucleus(scale, kind) {
     }
     points.forEach(point => point.multiplyScalar(0.985));
   }
-  const centre = points.reduce((sum, point) => sum.add(point), new THREE.Vector3()).divideScalar(points.length);
+  const center = points.reduce((sum, point) => sum.add(point), new THREE.Vector3()).divideScalar(points.length);
   const kinds = ['proton', 'neutron', 'proton', 'proton', 'neutron', 'neutron', 'proton', 'neutron', 'proton', 'neutron', 'neutron', 'proton'];
   const nucleus = new THREE.Group();
   nucleus.userData.radius = 0.5;
@@ -430,7 +430,7 @@ function buildNucleus(scale, kind) {
   const textures = { proton: symbolTexture(palette.proton, '+'), neutron: symbolTexture(palette.neutron, '0') };
   points.forEach((point, i) => {
     const mesh = sphere(NUCLEON_RADIUS, palette[kinds[i]], { map: textures[kinds[i]] });
-    mesh.position.copy(point.sub(centre));
+    mesh.position.copy(point.sub(center));
     mesh.rotation.y = i * 0.9;
     mesh.userData.kind = kinds[i];
     nucleus.add(mesh);
@@ -500,7 +500,7 @@ function buildCloud() {
   // Smaller than in the Bohr view so the 1s cloud around it stays visible.
   buildNucleus(CLOUD_NUCLEUS_SCALE, 'cloudNucleus');
   cloud = [];
-  // Carbon's two 2p electrons occupy two different 2p orbitals, drawn in two colours.
+  // Carbon's two 2p electrons occupy two different 2p orbitals, drawn in two colors.
   [
     ['1s', '1s', 1800, palette.electron],
     ['2s', '2s', 2600, new THREE.Color(palette.dark ? '#8FD0F5' : '#3E9AD6')],
@@ -801,7 +801,7 @@ const BEAM_RADIUS = 4; // Wider than the atom, so nearly all of the beam (about 
 // could watch for a while before seeing one. They are drawn exactly like the rest of the beam
 // on purpose: the sim illustrates the idea (a tiny, dense nucleus can turn an alpha back),
 // not the real rates, so there is no need to point the extra shots out. Their entry points
-// are spread over a small disc so they scatter in different directions (some bounce back,
+// are spread over a small disk so they scatter in different directions (some bounce back,
 // some turn sharply) instead of retracing one path. The plum pudding view needs none: the
 // even beam already shows every alpha passing almost straight through.
 const AIMED_INTERVAL = 8; // Seconds between the extra shots.
@@ -911,7 +911,7 @@ function spawnAlpha(aimed) {
   mesh.add(glow(palette.alpha, 0.4));
   const geometry = new THREE.BufferGeometry();
   geometry.setAttribute('position', new THREE.BufferAttribute(new Float32Array(240 * 3), 3));
-  // RGBA per point: the path changes colour once the alpha has been turned, and finished
+  // RGBA per point: the path changes color once the alpha has been turned, and finished
   // paths fade their incoming leg separately from the outgoing one.
   geometry.setAttribute('color', new THREE.BufferAttribute(new Float32Array(240 * 4), 4));
   geometry.setDrawRange(0, 0);
@@ -922,7 +922,7 @@ function spawnAlpha(aimed) {
   beamGroup.add(mesh, trail);
   beam.alphas.push({ position, velocity: new THREE.Vector3(ALPHA_SPEED, 0, 0), mesh, trail, offset: trail.userData.offset, glowBase: mesh.children[0].material.opacity, count: 0, turnedAt: -1, sampleTimer: 0 });
 }
-const TURNED_ANGLE = 20; // Degrees: beyond this the path is drawn in the deflected colour.
+const TURNED_ANGLE = 20; // Degrees: beyond this the path is drawn in the deflected color.
 function fadeTrail(alpha, incoming, outgoing) {
   const colors = alpha.trail.geometry.attributes.color;
   for (let i = 0; i < alpha.count; i += 1) {
@@ -1034,8 +1034,8 @@ const photon = new THREE.Mesh(waveRibbonGeometry(), photonMaterial);
 photon.visible = false;
 photon.frustumCulled = false;
 scene.add(photon);
-function drawPhoton(centre, direction, time) {
-  const view = camera.position.clone().sub(centre).normalize();
+function drawPhoton(center, direction, time) {
+  const view = camera.position.clone().sub(center).normalize();
   const side = new THREE.Vector3().crossVectors(direction, view);
   if (side.lengthSq() < 1e-4) side.set(0, 1, 0);
   side.normalize();
@@ -1044,7 +1044,7 @@ function drawPhoton(centre, direction, time) {
     const s = (i / (WAVE_POINTS - 1) - 0.5) * length;
     const envelope = Math.cos(Math.PI * s / length) ** 2;
     const wave = 0.13 * envelope * Math.sin(s / length * Math.PI * 12 - time * 18);
-    wavePoints[i].set(centre.x + direction.x * s + side.x * wave, centre.y + direction.y * s + side.y * wave, centre.z + direction.z * s + side.z * wave);
+    wavePoints[i].set(center.x + direction.x * s + side.x * wave, center.y + direction.y * s + side.y * wave, center.z + direction.z * s + side.z * wave);
   }
   setWaveRibbon(photon.geometry, wavePoints, view);
   photon.visible = true;
@@ -1067,7 +1067,7 @@ const EXCITE_TEXT = {
   up: 'ELECTRON EXCITED · It jumps straight to n = 3. It is never found between levels.',
   stay: 'EXCITED STATE · n = 3 is a higher energy level, further from the nucleus. The electron will not stay there long.',
   down: 'ELECTRON RETURNS · It drops back to the lower level, n = 2.',
-  out: 'PHOTON EMITTED · The energy leaves as light of one exact colour, equal to the energy gap. This is why atoms give line spectra.'
+  out: 'PHOTON EMITTED · The energy leaves as light of one exact color, equal to the energy gap. This is why atoms give line spectra.'
 };
 function startExcite() {
   if (excite || state.model !== 'bohr') return;
@@ -1099,16 +1099,16 @@ function stepExcite(delta) {
   photon.visible = false;
   if (name === 'in') {
     excite.ringLevel = k;
-    const centre = new THREE.Vector3().lerpVectors(excite.start, electron.mesh.position, k);
-    drawPhoton(centre, electron.mesh.position.clone().sub(excite.start).normalize(), state.time);
+    const center = new THREE.Vector3().lerpVectors(excite.start, electron.mesh.position, k);
+    drawPhoton(center, electron.mesh.position.clone().sub(excite.start).normalize(), state.time);
   } else if (name === 'up') {
     electron.radius = THREE.MathUtils.lerp(BOHR_RADII[1], BOHR_RADII[2], ease(k));
   } else if (name === 'down') {
     electron.radius = THREE.MathUtils.lerp(BOHR_RADII[2], BOHR_RADII[1], ease(k));
   } else if (name === 'out') {
     excite.ringLevel = 1 - k;
-    const centre = excite.out.from.clone().addScaledVector(excite.out.direction, 0.6 + k * 5);
-    drawPhoton(centre, excite.out.direction, state.time);
+    const center = excite.out.from.clone().addScaledVector(excite.out.direction, 0.6 + k * 5);
+    drawPhoton(center, excite.out.direction, state.time);
   }
   applyOpacity(1);
   if (k < 1) return;

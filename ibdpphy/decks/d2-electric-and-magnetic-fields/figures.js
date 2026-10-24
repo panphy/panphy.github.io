@@ -3,7 +3,7 @@
 // electrons are in the other decks. Electric field lines and forces are teal, magnetic field
 // lines slate, currents apricot. Terracotta (equipotentials) appears only in the higher level figures.
 window.DeckFigures.add(P => {
-  const { svg, ball, arrow, fline, text, sub, dot, axes, plot, both, through, sampled, labelled, animated, stepG, track, anim, spin, twoState, PLAY, f } = P;
+  const { svg, ball, arrow, fline, text, sub, dot, axes, plot, both, through, sampled, labeled, animated, stepG, track, anim, spin, twoState, PLAY, f } = P;
   const plus = (x, y, r = 22) => ball(x, y, r, 'proton');
   const minus = (x, y, r = 22) => ball(x, y, r, 'electron');
   const polar = (cx, cy, r, deg) => [cx + r * Math.cos(deg * Math.PI / 180), cy + r * Math.sin(deg * Math.PI / 180)];
@@ -24,23 +24,23 @@ window.DeckFigures.add(P => {
     }
     return points;
   }
-  const head = (points, at, colour) => {
+  const head = (points, at, color) => {
     const i = Math.max(2, Math.round((points.length - 1) * at)), [x, y] = points[i], [px, py] = points[i - 2];
-    return `<path d="M-10,-8 L8,0 L-10,8 Z" transform="translate(${f(x)} ${f(y)}) rotate(${f(Math.atan2(y - py, x - px) * 180 / Math.PI)})" style="fill:var(--${colour})"/>`;
+    return `<path d="M-10,-8 L8,0 L-10,8 Z" transform="translate(${f(x)} ${f(y)}) rotate(${f(Math.atan2(y - py, x - px) * 180 / Math.PI)})" style="fill:var(--${color})"/>`;
   };
-  const curve = (points, colour, width = 3, extra = '') => `<path d="${through(points)}" style="fill:none;stroke:var(--${colour});stroke-width:${width}" ${extra}/>`;
-  const fieldLine = (points, colour = 'brand-primary', at = 0.5) => curve(points, colour) + (at === null ? '' : head(points, at, colour));
+  const curve = (points, color, width = 3, extra = '') => `<path d="${through(points)}" style="fill:none;stroke:var(--${color});stroke-width:${width}" ${extra}/>`;
+  const fieldLine = (points, color = 'brand-primary', at = 0.5) => curve(points, color) + (at === null ? '' : head(points, at, color));
 
   // Electric field of point charges [{ x, y, q, r }] and their potential.
   const eField = charges => (x, y) => charges.reduce(([ex, ey], c) => { const dx = x - c.x, dy = y - c.y, r3 = Math.hypot(dx, dy) ** 3; return [ex + c.q * dx / r3, ey + c.q * dy / r3]; }, [0, 0]);
   const across = fn => (x, y) => { const [ex, ey] = fn(x, y); return [-ey, ex]; };
   // n lines from each charge in from (indices): forwards from a positive one, backwards from a
   // negative one, starting at the given angles.
-  function linesFrom(charges, index, angles, colour = 'brand-primary', at = 0.5, box = BOX) {
+  function linesFrom(charges, index, angles, color = 'brand-primary', at = 0.5, box = BOX) {
     const c = charges[index], fn = eField(charges), stops = charges.filter(other => other !== c && Math.sign(other.q) !== Math.sign(c.q));
     return angles.map(deg => {
       const [x, y] = polar(c.x, c.y, c.r + 2, deg), points = follow(fn, x, y, { stops, sign: Math.sign(c.q), box });
-      return { deg, left: points.left, svg: fieldLine(c.q > 0 ? points : [...points].reverse(), colour, c.q > 0 ? at : 1 - at) };
+      return { deg, left: points.left, svg: fieldLine(c.q > 0 ? points : [...points].reverse(), color, c.q > 0 ? at : 1 - at) };
     });
   }
   const spread = (n, offset = 0) => Array.from({ length: n }, (_, i) => offset + i * 360 / n);
@@ -62,7 +62,7 @@ window.DeckFigures.add(P => {
   return {
     // Like charges repel and unlike charges attract. data-plain gives the small picture.
     'd2-charges': el => {
-      if (!labelled(el)) return svg('0 0 460 200', plus(150, 100, 40) + minus(310, 100, 40) + arrow(196, 100, 222, 100, 'brand-primary', 6) + arrow(264, 100, 238, 100, 'brand-primary', 6), 'A positive and a negative charge attracting each other');
+      if (!labeled(el)) return svg('0 0 460 200', plus(150, 100, 40) + minus(310, 100, 40) + arrow(196, 100, 222, 100, 'brand-primary', 6) + arrow(264, 100, 238, 100, 'brand-primary', 6), 'A positive and a negative charge attracting each other');
       const row = (y, a, b, attract, label) => {
         const k = attract ? 1 : -1, x1 = 300, x2 = 500;
         return (a ? plus : minus)(x1, y, 34) + (b ? plus : minus)(x2, y, 34) + arrow(x1 + k * 40, y, x1 + k * 40 + k * 46, y, 'brand-primary', 6) + arrow(x2 - k * 40, y, x2 - k * 40 - k * 46, y, 'brand-primary', 6) + text(630, y + 10, label, 'lbl strong', 'start');
@@ -103,11 +103,11 @@ window.DeckFigures.add(P => {
 
     // Coulomb's law. Also the small picture for part 1, with data-plain.
     'd2-coulomb': el => {
-      const on = labelled(el);
+      const on = labeled(el);
       let s = plus(250, 170, 44) + plus(550, 170, 44) + arrow(200, 170, 70, 170, 'brand-primary', 6) + arrow(600, 170, 730, 170, 'brand-primary', 6);
       if (on) {
         s += text(134, 144, 'F', 'lbl display') + text(666, 144, 'F', 'lbl display') + text(250, 258, sub('q', '1'), 'lbl display') + text(550, 258, sub('q', '2'), 'lbl display');
-        s += `<line x1="250" y1="276" x2="250" y2="340" class="guide"/><line x1="550" y1="276" x2="550" y2="340" class="guide"/>` + both(256, 326, 544, 326) + text(400, 312, 'r', 'lbl display') + text(400, 364, 'between the centres', 'lbl');
+        s += `<line x1="250" y1="276" x2="250" y2="340" class="guide"/><line x1="550" y1="276" x2="550" y2="340" class="guide"/>` + both(256, 326, 544, 326) + text(400, 312, 'r', 'lbl display') + text(400, 364, 'between the centers', 'lbl');
       }
       return svg(on ? '0 80 800 300' : '40 70 720 200', s, 'Two positive point charges q 1 and q 2 a distance r apart. Each repels the other with a force F of the same size, along the line joining them');
     },
@@ -148,7 +148,7 @@ window.DeckFigures.add(P => {
       return svg('0 0 800 520', s + drawCharges(charges), like ? 'The electric field of two equal positive charges: the lines leave both charges, bend away from each other and leave a point of zero field midway between them' : 'The electric field of a positive and a negative charge of equal size: field lines leave the positive charge and curve round to end on the negative charge');
     },
 
-    // A charged conducting sphere: no field inside, and outside the field of a point charge at its centre.
+    // A charged conducting sphere: no field inside, and outside the field of a point charge at its center.
     'd2-sphere': () => {
       let s = spread(12, 15).map(deg => { const [x1, y1] = polar(400, 260, 90, deg), [x2, y2] = polar(400, 260, 248, deg); return fline(x1, y1, x2, y2, 'brand-primary', 3.5, 0.55); }).join('');
       s += `<circle cx="400" cy="260" r="100" style="fill:color-mix(in srgb, var(--neutron) 20%, var(--viewer-bg));stroke:var(--neutron);stroke-width:3"/>`;
@@ -159,7 +159,7 @@ window.DeckFigures.add(P => {
     // Parallel plates: a uniform field between them and curved lines at the edges. data-equi adds
     // equipotentials for the higher level slides; data-plain gives the small picture.
     'd2-plates': el => {
-      const on = labelled(el), equi = 'equi' in el.dataset;
+      const on = labeled(el), equi = 'equi' in el.dataset;
       let s = plate(200, 600, 100, true) + plate(200, 600, 420, false) + signs(220, 580, 86, 8, '+') + signs(220, 580, 458, 8, '−');
       s += [250, 310, 370, 430, 490, 550].map(x => fline(x, 108, x, 412, 'brand-primary', 3.5)).join('');
       // The curved lines at the two edges, from the positive plate round to the negative one.
@@ -190,7 +190,7 @@ window.DeckFigures.add(P => {
       let s = `<line x1="400" y1="500" x2="400" y2="262" style="stroke:var(--brand-accent);stroke-width:9;stroke-linecap:round"/>` + loop(260, 90) + loop(260, 170) + loop(260, 270);
       s += arrow(400, 258, 400, 40, 'brand-accent', 9) + text(424, 70, 'current I', 'lbl strong', 'start') + text(690, 300, 'field B', 'lbl strong', 'start');
       s += text(120, 440, 'weaker', 'lbl', 'start') + text(120, 474, 'further out', 'lbl', 'start');
-      return svg('80 20 720 500', s, 'A long straight vertical wire carrying a current upwards. The magnetic field lines are circles round the wire in planes at right angles to it, anticlockwise when seen from above, and further apart further from the wire');
+      return svg('80 20 720 500', s, 'A long straight vertical wire carrying a current upwards. The magnetic field lines are circles round the wire in planes at right angles to it, counterclockwise when seen from above, and further apart further from the wire');
     },
 
     // The same field seen along the wire: current out of the page and into the page.
@@ -199,7 +199,7 @@ window.DeckFigures.add(P => {
         const radii = [40, 68, 112, 180], heads = radii.map((r, i) => [0, 180].map(a => { const [x, y] = polar(cx, 250, r, a + i * 40); return `<path d="M-9,-8 L9,0 L-9,8 Z" transform="translate(${f(x)} ${f(y)}) rotate(${a + i * 40 + (out ? -90 : 90)})" style="fill:var(--brand-accent-strong)"/>`; }).join('')).join('');
         return radii.map(r => `<circle cx="${cx}" cy="250" r="${r}" style="fill:none;stroke:var(--brand-accent-strong);stroke-width:3"/>`).join('') + heads + wireEnd(cx, 250, out, 17);
       };
-      return svg('0 40 880 480', view(215, true) + view(665, false) + text(215, 478, 'out of the page: anticlockwise', 'lbl') + text(665, 478, 'into the page: clockwise', 'lbl'), 'A wire seen end on. With the current coming out of the page, shown by a dot, the field lines are circles pointing anticlockwise. With the current going into the page, shown by a cross, they point clockwise. The circles are further apart further from the wire');
+      return svg('0 40 880 480', view(215, true) + view(665, false) + text(215, 478, 'out of the page: counterclockwise', 'lbl') + text(665, 478, 'into the page: clockwise', 'lbl'), 'A wire seen end on. With the current coming out of the page, shown by a dot, the field lines are circles pointing counterclockwise. With the current going into the page, shown by a cross, they point clockwise. The circles are further apart further from the wire');
     },
 
     // A flat circular coil and a solenoid in cross-section. Also drawn small, with data-plain.
@@ -213,7 +213,7 @@ window.DeckFigures.add(P => {
       const xs = [240, 280, 320, 360, 400, 440, 480, 520, 560], wires = xs.flatMap(x => [{ x, y: 170, i: 1 }, { x, y: 350, i: -1 }]), box = [0, 20, 800, 470];
       let s = loops(wires, [[400, 260], [400, 238], [400, 282], [400, 216], [400, 304], [400, 196], [400, 324]], box);
       s += xs.map(x => wireEnd(x, 170, true, 12) + wireEnd(x, 350, false, 12)).join('');
-      if (labelled(el)) s += text(400, 512, 'uniform inside, like a bar magnet outside', 'lbl') + text(690, 236, 'N', 'lbl display halo', 'middle', 'style="fill:var(--proton)"') + text(110, 236, 'S', 'lbl display halo', 'middle', 'style="fill:var(--electron)"');
+      if (labeled(el)) s += text(400, 512, 'uniform inside, like a bar magnet outside', 'lbl') + text(690, 236, 'N', 'lbl display halo', 'middle', 'style="fill:var(--proton)"') + text(110, 236, 'S', 'lbl display halo', 'middle', 'style="fill:var(--electron)"');
       return svg('0 20 800 510', s, 'A solenoid seen in cross-section. Inside, the field lines are parallel and evenly spaced: a strong, uniform field. Outside, they spread out and loop back like those of a bar magnet, with a north pole at the end where they leave');
     },
 
@@ -230,7 +230,7 @@ window.DeckFigures.add(P => {
 
     // Equipotentials and field lines of a positive point charge, at equal steps of potential.
     'd2-equi-point': el => {
-      const on = labelled(el), radii = [72, 108, 216];
+      const on = labeled(el), radii = [72, 108, 216];
       let s = spread(12, 15).map(deg => { const [x1, y1] = polar(300, 260, 10, deg), [x2, y2] = polar(300, 260, 252, deg); return fline(x1, y1, x2, y2, 'brand-primary', 3, 0.62); }).join('');
       s += radii.map((r, i) => `<circle cx="300" cy="260" r="${r}" ${hlStroke}/>` + (on ? text(300, i ? 260 - r - 8 : 260 + r + 30, ['300 V', '200 V', '100 V'][i], 'lbl mono strong halo') : '')).join('') + plus(300, 260, 24);
       if (on) s += `<line x1="590" y1="150" x2="640" y2="150" ${hlStroke}/>` + text(652, 159, 'equipotential', 'lbl', 'start') + fline(590, 220, 640, 220, 'brand-primary', 3) + text(652, 229, 'field line', 'lbl', 'start');
@@ -245,7 +245,7 @@ window.DeckFigures.add(P => {
       return svg('80 0 640 520', s + drawCharges(charges), 'The equipotentials of four charges at the corners of a square, positive and negative alternately. Closed curves surround each charge, and the two lines of symmetry between the charges are at zero potential');
     },
 
-    // A charged conducting sphere, solid or hollow: field strength and potential against distance from its centre.
+    // A charged conducting sphere, solid or hollow: field strength and potential against distance from its center.
     'd2-sphere-graphs': () => {
       const x = r => 120 + 150 * r, part = (y0, k, label, inside) => {
         let g = arrow(120, y0, 120, y0 - 190, 'text-secondary', 2.5) + arrow(120, y0, 780, y0, 'text-secondary', 2.5) + text(136, y0 - 174, label, 'lbl mono', 'start') + `<line x1="${x(1)}" y1="${y0}" x2="${x(1)}" y2="${y0 - 160}" class="guide"/>`;
@@ -253,7 +253,7 @@ window.DeckFigures.add(P => {
         return g;
       };
       let s = `<rect x="120" y="30" width="150" height="460" style="fill:var(--neutron);opacity:.14"/>` + part(230, 2, 'field strength', false) + part(490, 1, 'potential', true);
-      s += text(x(1), 520, 'R', 'lbl mono') + text(770, 520, 'distance from the centre', 'lbl mono', 'end') + text(195, 130, 'zero', 'lbl strong') + text(195, 162, 'inside', 'lbl') + text(195, 420, 'constant', 'lbl strong') + text(195, 452, 'inside', 'lbl');
+      s += text(x(1), 520, 'R', 'lbl mono') + text(770, 520, 'distance from the center', 'lbl mono', 'end') + text(195, 130, 'zero', 'lbl strong') + text(195, 162, 'inside', 'lbl') + text(195, 420, 'constant', 'lbl strong') + text(195, 452, 'inside', 'lbl');
       return svg('0 0 820 540', s, 'Two graphs for a charged conducting sphere of radius R. The field strength is zero inside, jumps to its greatest value at the surface and falls as one over r squared outside. The potential is constant inside, equal to its value at the surface, and falls as one over r outside');
     }
   };
