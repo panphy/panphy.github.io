@@ -31,7 +31,7 @@ Promote an app out of `beta/` only when the user requests or approves that promo
 For a new or promoted general published app:
 
 1. Place it in the appropriate directory and update its previous inventory if moved.
-2. Link it from `index.html` and add it to `sitemap.xml`.
+2. Link it from `index.html` and add it to `sitemap.xml` with a `<lastmod>` date. Give the page a `<title>` that names what it is in search terms (such as "Electric Motor Simulation: DC and AC Motors in 3D — PanPhy Labs"), a meta description and a `<link rel="canonical">` to its `https://panphy.app/` address. When you change a page listed in `sitemap.xml`, set its `<lastmod>` to the date of the change.
 3. Every app newly added to the main landing page, whether promoted from `beta/` or `misc/` or created from scratch, must support light/dark themes and keep its theme in sync with the landing page and all other published apps through the shared theme controls described below.
 4. For offline support, include `<script src="/assets/sw-register.js" defer></script>`, add the page and required assets to `ASSETS_TO_CACHE`, and add its homepage requirements to `OFFLINE_CARD_REQUIREMENTS` in `index.html`.
 5. For registered apps, name the page `<section>/<app>.html` with supporting files in `<section>/<app>/`, so that `getAssetGroup` in `sw.js` and `getAppGroup` in `assets/sw-register.js` give them one app name; otherwise add a matching rule to both.

@@ -1,6 +1,5 @@
 User-agent: *
 Allow: /
 Disallow: /beta/
-Disallow: /gcse/
 Disallow: /misc/
 Sitemap: https://panphy.app/sitemap.xml
