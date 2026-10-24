@@ -765,3 +765,6 @@ h2:has(+ .terms) { margin-bottom: 24px; }
 
 /* Copyright line on the title slide */
 .slide-copyright { position: absolute; right: 88px; bottom: 28px; margin: 0; font: 600 15px var(--font-mono); letter-spacing: .06em; color: var(--text-secondary); opacity: .8; }
+
+/* Keep a typeset quantity and its plain-text unit on the same line. */
+.equation-inline { white-space: nowrap; }
