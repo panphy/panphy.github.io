@@ -164,7 +164,7 @@ function resetApp() {
 	state.startingFrame = null;
 	state.undoHistory = [];
 	state.redoHistory = [];
-	state.autoTrackOn = false;
+	state.autoTrackOn = true;
 	setSelectMarksMode(false);
 	// 1. Clear data
 	state.frameData = [];

@@ -395,3 +395,34 @@ test('every Motion Tracker module is listed for precaching and homepage offline 
         assert.ok(requirements.includes(`'${url}'`), `${file} must count toward offline readiness`);
     }
 });
+
+test('Auto is the initial tracking mode and resetting a video restores it from Manual or Edit', async () => {
+    const {state} = await import('../js/state.js');
+    assert.equal(state.autoTrackOn, true);
+    assert.equal(state.selectMarksMode, false);
+    for (const mode of ['manual', 'edit']) {
+        const control = () => ({style: {}, attributes: {},
+            setAttribute(name, value) { this.attributes[name] = value; },
+            classList: {toggle() {}}});
+        const controls = Object.fromEntries(['manualModeButton', 'autoTrackToggle', 'selectMarksButton',
+            'frameCanvas', 'overlayCanvas', 'videoWrapper', 'emptyVideo', 'hideCrossesToggle',
+            'specialRecordingCheckbox', 'captureRateSection', 'detectedFpsDisplay'].map(name => [name, control()]));
+        const c = context({...controls, autoTrackOn: false, selectMarksMode: mode === 'edit',
+            selectedMarkTime: 1, frameData: [{x: 5, y: 10, playbackTime: 0}], positionChart: null,
+            ctx: {clearRect() {}}, overlayCtx: {clearRect() {}},
+            stopAutoTrack() {}, cancelFpsDetection() {}, clearUnsavedChanges() {}, setPlayIcon() {},
+            hidePickMode() {}, setMessage() {}, resetGraphCopyStatus() {}, closeTouchGraphCopyActions() {},
+            updateFpsButtonText() {}, renderPointRows() {}, closeAllDialogs() {}, closeMenus() {},
+            disableControls() {}, updateActivePlotButton() {}, highlightCurrentRow() {},
+            updateStatusBar() {}, drawFrame() {}});
+        load(c, 'points');
+        load(c, 'ui');
+        c.resetApp();
+        assert.equal(c.autoTrackOn, true);
+        assert.equal(c.selectMarksMode, false);
+        assert.equal(c.selectedMarkTime, null);
+        assert.equal(c.frameData.length, 0);
+        assert.deepEqual([c.manualModeButton, c.autoTrackToggle, c.selectMarksButton]
+            .map(button => button.attributes['aria-pressed']), ['false', 'true', 'false']);
+    }
+});

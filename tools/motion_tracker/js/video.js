@@ -263,7 +263,7 @@ function applyDetectedFps(fps) {
 
 	if (state.videoReady && state.frameData.length === 0) {
 		setMessage(state.sampleOpen
-			? `Sample: a ball bouncing along a bench at ${fps} fps. For the scale, drag along the yellow rule and enter 1 m; then click the ball in each frame.`
+			? `Sample: a ball bouncing along a bench at ${fps} fps. For the scale, drag along the yellow rule and enter 1 m; then click the ball to track it automatically.`
 			: `Playback: ${fps} fps. Slow-mo or time-lapse?`);
 		frameRateHintButton.hidden = state.sampleOpen;
 	}

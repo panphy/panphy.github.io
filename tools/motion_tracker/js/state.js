@@ -40,7 +40,7 @@ export const state = {
 	originPoint: { x: 0, y: 0 },
 	originGuide: null,
 	originPointerDown: false,
-	autoTrackOn: false,
+	autoTrackOn: true,
 	trackRun: null, // A token invalidates stale replies after a run stops.
 	trackRunCounter: 0,
 };
