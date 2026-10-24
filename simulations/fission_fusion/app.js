@@ -98,6 +98,19 @@ function placeControls() {
   }
 }
 wideQuery.addEventListener('change', placeControls);
+// The chain and fusion graphs sit in the control column so they never cover the nuclei.
+// Phones keep them above the 3D view, where they stay in sight while the model runs.
+const graphPanel = $('graph');
+const phoneQuery = window.matchMedia('(max-width: 760px)');
+function placeGraph() {
+  if (phoneQuery.matches) {
+    if (graphPanel.parentElement !== viewer) viewer.prepend(graphPanel);
+  } else if (graphPanel.previousElementSibling !== readout) {
+    readout.after(graphPanel);
+  }
+}
+placeGraph();
+phoneQuery.addEventListener('change', placeGraph);
 function updateFullscreen() {
   const expanded = document.fullscreenElement === workspace || fallbackFullscreen;
   workspace.classList.toggle('is-fullscreen', expanded);
@@ -192,6 +205,8 @@ function readPalette() {
       text: css('--text-main'),
       secondary: css('--text-secondary'),
       border: css('--card-border'),
+      card: css('--card-bg'),
+      arrow: css('--reaction-arrow'),
       proton: css('--proton'),
       neutron: css('--neutron'),
       photon: css('--photon'),
@@ -1376,7 +1391,7 @@ function drawFusionGraph() {
 const MARKERS = [
   { name: 'H-2', A: 2, y: 1.112, place: 'right' },
   { name: 'H-3', A: 3, y: 2.827, place: 'right' },
-  { name: 'He-4', A: 4, y: 7.074, place: 'downright' },
+  { name: 'He-4', A: 4, y: 7.074, place: 'above', narrowPlace: 'right' },
   { name: 'C-12', A: 12, y: 7.68, place: 'above' },
   { name: 'Fe-56', A: 56, y: 8.790, place: 'above' },
   { name: 'Kr-92', A: 92, y: 8.512, place: 'above' },
@@ -1495,34 +1510,63 @@ function drawBinding() {
   const fromPoints = reaction.from.map(point);
   const toPoints = reaction.to.map(point);
   const progress = ease(binding.progress);
-  ctx.strokeStyle = ink.primary;
-  ctx.fillStyle = ink.primary;
-  ctx.lineWidth = 2;
+  // Thick arrows that bow off the curve, with an outline in the panel color so they stand clear
+  // of the curve, the grid and the shading.
+  const pad = 13;
+  const head = 15;
+  const arrows = [];
   for (const from of fromPoints) {
     for (const to of toPoints) {
       const dx = to.x - from.x;
       const dy = to.y - from.y;
       const length = Math.hypot(dx, dy) || 1;
-      const pad = 9;
-      const sx = from.x + dx / length * pad;
-      const sy = from.y + dy / length * pad;
-      const ex = sx + (to.x - dx / length * pad - sx) * progress;
-      const ey = sy + (to.y - dy / length * pad - sy) * progress;
+      const ux = dx / length;
+      const uy = dy / length;
+      // Fission arrows bow below the curve, away from the labels above the nuclei, and the longer
+      // one bows further so the two stay apart. Fusion arrows bow right, clear of the H-3 label.
+      const bow = binding.reaction === 'fission' ? -0.12 * length : Math.min(0.4 * length, 90);
+      const p0 = { x: from.x + ux * pad, y: from.y + uy * pad };
+      const p2 = { x: to.x - ux * pad, y: to.y - uy * pad };
+      const c = { x: (p0.x + p2.x) / 2 - uy * bow, y: (p0.y + p2.y) / 2 + ux * bow };
+      const at = t => ({
+        x: (1 - t) ** 2 * p0.x + 2 * (1 - t) * t * c.x + t * t * p2.x,
+        y: (1 - t) ** 2 * p0.y + 2 * (1 - t) * t * c.y + t * t * p2.y
+      });
+      const points = [];
+      for (let i = 0; i <= 40; i++) points.push(at(progress * i / 40));
+      const end = points[points.length - 1];
+      const tangent = 2 * (1 - progress);
+      const angle = Math.atan2(tangent * (c.y - p0.y) + 2 * progress * (p2.y - c.y), tangent * (c.x - p0.x) + 2 * progress * (p2.x - c.x));
+      // Stop the shaft inside the head so its square end never pokes past the tip.
+      const shaft = points.slice();
+      if (progress > 0.05) shaft.push({ x: end.x - Math.cos(angle) * head * 0.6, y: end.y - Math.sin(angle) * head * 0.6 });
+      arrows.push({ shaft, end, angle });
+    }
+  }
+  const strokeArrows = (color, extra) => {
+    ctx.strokeStyle = color;
+    ctx.fillStyle = color;
+    ctx.lineWidth = 4 + extra;
+    ctx.lineCap = 'round';
+    ctx.lineJoin = 'round';
+    for (const { shaft, end, angle } of arrows) {
       ctx.beginPath();
-      ctx.moveTo(sx, sy);
-      ctx.lineTo(ex, ey);
+      shaft.forEach((q, i) => (i ? ctx.lineTo(q.x, q.y) : ctx.moveTo(q.x, q.y)));
       ctx.stroke();
       if (progress > 0.05) {
-        const angle = Math.atan2(dy, dx);
         ctx.beginPath();
-        ctx.moveTo(ex, ey);
-        ctx.lineTo(ex - 9 * Math.cos(angle - 0.4), ey - 9 * Math.sin(angle - 0.4));
-        ctx.lineTo(ex - 9 * Math.cos(angle + 0.4), ey - 9 * Math.sin(angle + 0.4));
+        ctx.moveTo(end.x, end.y);
+        ctx.lineTo(end.x - head * Math.cos(angle - 0.42), end.y - head * Math.sin(angle - 0.42));
+        ctx.lineTo(end.x - head * Math.cos(angle + 0.42), end.y - head * Math.sin(angle + 0.42));
         ctx.closePath();
+        if (extra) ctx.stroke();
         ctx.fill();
       }
     }
-  }
+  };
+  strokeArrows(ink.card, 5);
+  strokeArrows(ink.arrow, 0);
+  ctx.lineCap = 'butt';
 
   // Nuclei on the curve.
   binding.hits = [];
@@ -1539,21 +1583,25 @@ function drawBinding() {
     ctx.lineWidth = 2;
     ctx.strokeStyle = ink.border;
     ctx.stroke();
-    ctx.fillStyle = on ? ink.primary : ink.text;
-    ctx.textBaseline = 'middle';
-    if (marker.place === 'right') {
+    // Labels get an outline in the panel color so they stay readable where an arrow passes behind.
+    const place = narrow && marker.narrowPlace ? marker.narrowPlace : marker.place;
+    let tx = x;
+    let ty = y + 15;
+    ctx.textAlign = 'center';
+    if (place === 'right') {
       ctx.textAlign = 'left';
-      ctx.fillText(marker.name, x + 10, y);
-    } else if (marker.place === 'downright') {
-      ctx.textAlign = 'left';
-      ctx.fillText(marker.name, x + 8, y + 15);
-    } else if (marker.place === 'above') {
-      ctx.textAlign = 'center';
-      ctx.fillText(marker.name, x, y - 14);
-    } else {
-      ctx.textAlign = 'center';
-      ctx.fillText(marker.name, x, y + 15);
+      tx = x + 10;
+      ty = y;
+    } else if (place === 'above') {
+      ty = y - 14;
     }
+    ctx.textBaseline = 'middle';
+    ctx.lineWidth = 4;
+    ctx.lineJoin = 'round';
+    ctx.strokeStyle = ink.card;
+    ctx.strokeText(marker.name, tx, ty);
+    ctx.fillStyle = on ? ink.primary : ink.text;
+    ctx.fillText(marker.name, tx, ty);
     binding.hits.push({ marker, x, y });
   }
 }
@@ -1949,6 +1997,7 @@ function resize() {
 const resizeObserver = new ResizeObserver(resize);
 resizeObserver.observe(viewer);
 resizeObserver.observe(renderer.domElement);
+resizeObserver.observe($('graph-canvas'));
 resize();
 new IntersectionObserver(entries => { state.visible = entries[entries.length - 1].isIntersecting; }).observe(viewer);
 renderer.domElement.addEventListener('webglcontextlost', event => {
