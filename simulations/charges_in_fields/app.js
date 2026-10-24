@@ -1479,6 +1479,15 @@ function showField(kind, shown) {
 }
 // Each particle needs its own ranges, so choosing one resets its settings to sensible values.
 function chooseParticle(key) {
+  if (key === state.particle[state.mode]) return;
+  // Keep magnetic paths for comparison, but end their motion before applying the new
+  // species' field strength: an electron would curl into a tiny orbit in a proton's field.
+  if (state.mode === 'bfield') {
+    for (const tracer of lab.tracers) {
+      if (tracer.alive) finish(tracer, 'archived');
+    }
+    updateArrows();
+  }
   const before = { ...state.values };
   state.particle[state.mode] = key;
   for (const stepper of CONTROLS[state.mode].steppers) {
@@ -1497,7 +1506,7 @@ function chooseParticle(key) {
   }
   updateFireButton();
   const data = particleData();
-  readout.textContent = `${data.name.toUpperCase()} · Charge ${data.q > 0 ? '+' : '−'}${sci(Math.abs(data.q))} C · Mass ${sci(data.m)} kg. The settings were reset to suit it.`;
+  readout.textContent = `${data.name.toUpperCase()} · Charge ${data.q > 0 ? '+' : '−'}${sci(Math.abs(data.q))} C · Mass ${sci(data.m)} kg. The settings were reset to suit it.${state.mode === 'bfield' ? ' Previous paths are kept for comparison; fire to start the new particle.' : ''}`;
 }
 const TOGGLE_MESSAGES = {
   swap: () => 'POLARITY SWAPPED · The field now points the other way, so every particle bends the other way.',
