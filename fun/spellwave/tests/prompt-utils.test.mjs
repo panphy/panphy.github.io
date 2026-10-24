@@ -8,6 +8,7 @@ import {
 } from '../src/prompt-utils.js';
 import { ALL_WORDS, EQUATION_WORDS, MEDIUM_WORDS, HARD_WORDS, EASY_WORDS } from '../src/question-bank.js';
 import { getBossChoice, choiceKeys, keysClash } from '../src/boss-choices.js';
+import { createWordDeck } from '../src/word-decks.js';
 
 const enemy = (searchPrompt, z, matched = searchPrompt) => ({
   searchPrompt, _matchedSearchPrompt: matched, group: { position: { z } },
@@ -99,6 +100,7 @@ function createBossChoiceContext(extra = {}) {
     normalPromptLengthCap: () => 14,
     withinLength: (entries, cap) => entries.filter(entry => buildSearchPrompt(entry.term).length <= cap),
     enemies: [], bossWordsThisSet: [],
+    monsterDeck: createWordDeck(), bossDeck: createWordDeck(),
     ...extra,
   });
   vm.runInContext(mainSlice('function chooseBossWordsForWave()', 'function chooseBossPool()')
@@ -122,6 +124,7 @@ test('no option of one boss in a wave starts an option of another', () => {
   const hard = Array(10).fill(0);
   for (context.waveSet = 1; context.waveSet <= 9; context.waveSet += 1) {
     for (let run = 0; run < 400; run += 1) {
+      context.bossDeck.reset([]);
       const bosses = vm.runInContext('chooseBossWordsForWave()', context);
       assert.equal(bosses.length, 3);
       assert.equal(bosses.filter(boss => boss.isEquation).length, 1);
@@ -146,6 +149,8 @@ test('finale bosses, healers and chests never clash with the options on screen',
   for (let run = 0; run < 300; run += 1) {
     context.enemies = [];
     context.bossWordsThisSet = [];
+    context.bossDeck.reset([]);
+    context.monsterDeck.reset([]);
     for (let spawn = 0; spawn < 10; spawn += 1) {
       // Up to four bosses alive at once, plus a healer or chest at times.
       while (context.enemies.filter(enemy => enemy.isBoss).length >= 4) context.enemies.splice(Math.floor(Math.random() * context.enemies.length), 1);

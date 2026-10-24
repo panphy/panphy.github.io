@@ -1,16 +1,37 @@
 import * as THREE from 'three';
-import { createSpellwaveAudio } from './audio.js?v=20261024-finale';
+import { createSpellwaveAudio } from './audio.js?v=20261024-word-decks';
 import { createSeasonalEffects } from './seasonal-effects.js';
-import { createPotionSystem } from './potions.js?v=20261024-finale';
-import { ALL_WORDS, EASY_WORDS, HARD_WORDS, MEDIUM_WORDS, EQUATION_WORDS } from './question-bank.js?v=20261024-finale';
-import { createEndingCinematic, wordArrivalTimes } from './ending-cinematic.js?v=20261024-finale';
-import { createLeaderboard } from './leaderboard.js?v=20261024-finale';
+import { createPotionSystem } from './potions.js?v=20261024-word-decks';
+import { ALL_WORDS, EASY_WORDS, HARD_WORDS, MEDIUM_WORDS, EQUATION_WORDS } from './question-bank.js?v=20261024-word-decks';
+import { createEndingCinematic, wordArrivalTimes } from './ending-cinematic.js?v=20261024-word-decks';
+import { createLeaderboard } from './leaderboard.js?v=20261024-word-decks';
 import { createEnemyMesh, createMimicChestMesh } from './enemy-meshes.js';
-import { bossSpeedMultiplier, hardBossShare, normalPromptLengthCap, bossWordLengthCap, previewLengthCap, withinLength, hardGuestCount } from './difficulty.js?v=20261024-finale';
+import { bossSpeedMultiplier, hardBossShare, normalPromptLengthCap, bossWordLengthCap, previewLengthCap, withinLength, hardGuestCount } from './difficulty.js?v=20261024-word-decks';
 import { createLowPolyTerrain, createLowPolyTree, createLowPolyRock, createLowPolyCloud } from './lowpoly.js';
-import { createVisuals, GLOW_GAIN, MOON_GLOW_GAIN } from './visuals.js?v=20261024-finale';
-import { pickTarget, getInputCharacters, isMathOperatorInput, buildSearchPrompt, buildAltSearchPrompts, escapeHtml, wrapSups, promptIndexForProgress } from './prompt-utils.js?v=20261024-finale';
-import { getBossChoice, choiceKeys, keysClash, choiceTypingLength, shuffledOptions, buildChoiceSegments } from './boss-choices.js?v=20261024-finale';
+import { createVisuals, GLOW_GAIN, MOON_GLOW_GAIN } from './visuals.js?v=20261024-word-decks';
+import { pickTarget, getInputCharacters, isMathOperatorInput, buildSearchPrompt, buildAltSearchPrompts, escapeHtml, wrapSups, promptIndexForProgress } from './prompt-utils.js?v=20261024-word-decks';
+import { createWordDeck } from './word-decks.js?v=20261024-word-decks';
+import { getBossChoice, choiceKeys, keysClash, choiceTypingLength, shuffledOptions, buildChoiceSegments } from './boss-choices.js?v=20261024-word-decks';
+
+// Monster, healer and chest words, and boss questions, are drawn from decks so they
+// do not repeat until a pool runs out; last run's words come after fresh ones.
+const monsterDeck = createWordDeck();
+const bossDeck = createWordDeck();
+const LAST_RUN_TERMS_KEY = 'panphySpellwaveLastRunTermsV1';
+
+function loadLastRunTerms() {
+  try {
+    const terms = JSON.parse(localStorage.getItem(LAST_RUN_TERMS_KEY) || '[]');
+    return Array.isArray(terms) ? terms.filter(term => typeof term === 'string') : [];
+  } catch { return []; }
+}
+
+function saveRunTerms() {
+  try {
+    const terms = [...new Set([...monsterDeck.usedTerms(), ...bossDeck.usedTerms()])];
+    localStorage.setItem(LAST_RUN_TERMS_KEY, JSON.stringify(terms.slice(0, 500)));
+  } catch {}
+}
 
 const canvas = document.getElementById('gameCanvas');
 const labelsLayer = document.getElementById('labelsLayer');
@@ -848,6 +869,9 @@ function startGame() {
   }
 
   const transitionFromGameOver = mode === 'gameover' || mode === 'ending';
+  const lastRunTerms = loadLastRunTerms();
+  monsterDeck.reset(lastRunTerms);
+  bossDeck.reset(lastRunTerms);
   leaderboard.hideModal();
   playStartSound();
   clearEnemies();
@@ -950,6 +974,7 @@ function resumeGame() {
 
 function endGame() {
   mode = 'gameover';
+  saveRunTerms();
   clearChainLightningTimers();
   releaseChainBeams();
   potionsSystem.clear();
@@ -1097,15 +1122,6 @@ function handleKeyDown(event) {
     else if (event.key === 'ArrowDown') slotIndex = 3;
     if (slotIndex !== -1) potionsSystem.activatePotionSlot(slotIndex);
     return;
-  }
-
-  if (['1', '2', '3', '4'].includes(event.key)) {
-    let slotIndex = parseInt(event.key, 10) - 1;
-    if (slotIndex >= 0 && slotIndex < 4) {
-      event.preventDefault();
-      potionsSystem.activatePotionSlot(slotIndex);
-      return;
-    }
   }
 
   if (event.key === 'Backspace') {
@@ -3622,11 +3638,9 @@ function chooseMimicPrompt() {
   const bossAnswers = liveAnswers(enemy => enemy.isBoss);
   const pool = withinLength(currentKeywordPool(), 12).filter((entry) => !reservedBossTerms.has(entry.term));
   const usablePool = pool.length > 0 ? pool : EASY_WORDS;
-  for (let attempt = 0; attempt < 8; attempt += 1) {
-    const entry = usablePool[Math.floor(Math.random() * usablePool.length)];
-    if (!nearExisting.has(entry.term) && !sharesAnswer(buildSearchPrompt(entry.term), bossAnswers)) return entry;
-  }
-  return firstShuffled(usablePool, entry => !sharesAnswer(buildSearchPrompt(entry.term), bossAnswers))
+  const clear = entry => !sharesAnswer(buildSearchPrompt(entry.term), bossAnswers);
+  return monsterDeck.pick(usablePool, entry => !nearExisting.has(entry.term) && clear(entry))
+    || monsterDeck.pick(usablePool, clear)
     || usablePool[Math.floor(Math.random() * usablePool.length)];
 }
 
@@ -3682,12 +3696,11 @@ function buildHardGuestSchedule(target) {
 
   const picked = [];
   const usedTerms = new Set();
-  for (let attempt = 0; attempt < 32 && picked.length < count; attempt += 1) {
-    const entry = available[Math.floor(Math.random() * available.length)];
-    if (!usedTerms.has(entry.term)) {
-      picked.push(entry);
-      usedTerms.add(entry.term);
-    }
+  while (picked.length < count) {
+    const entry = monsterDeck.pick(available, item => !usedTerms.has(item.term));
+    if (!entry) break;
+    picked.push(entry);
+    usedTerms.add(entry.term);
   }
 
   const schedule = new Map();
@@ -3706,13 +3719,13 @@ function chooseBossWordsForWave() {
   const chosen = [];
   const usedTerms = new Set();
 
-  // First two bosses use vocabulary words
-  for (let attempt = 0; attempt < 200 && chosen.length < BOSSES_PER_WAVE - 1; attempt += 1) {
-    const pool = chooseBossPool();
-    const entry = pool[Math.floor(Math.random() * pool.length)];
-    if (usedTerms.has(entry.term)) continue;
+  // First two bosses use vocabulary words, the freshest the deck has
+  for (let attempt = 0; attempt < 20 && chosen.length < BOSSES_PER_WAVE - 1; attempt += 1) {
+    const keys = chosen.flatMap(bossKeys);
+    const entry = bossDeck.pick(chooseBossPool(), item => !usedTerms.has(item.term) && !sharesBossAnswer(item, keys));
+    if (!entry) continue;
     usedTerms.add(entry.term);
-    if (!sharesBossAnswer(entry, chosen.flatMap(bossKeys))) chosen.push(entry);
+    chosen.push(entry);
   }
 
   // Fill any gap from the whole pool, then the third boss is the equation question
@@ -3767,7 +3780,7 @@ function firstShuffled(entries, test) {
 
 function chooseEquationWord(otherBosses = []) {
   const keys = otherBosses.flatMap(bossKeys);
-  return firstShuffled(EQUATION_WORDS, entry => !sharesBossAnswer(entry, keys))
+  return bossDeck.pick(EQUATION_WORDS, entry => !sharesBossAnswer(entry, keys))
     || EQUATION_WORDS[Math.floor(Math.random() * EQUATION_WORDS.length)];
 }
 
@@ -3796,11 +3809,7 @@ function choosePrompt() {
 
   const regularPool = pool.filter((entry) => !reservedBossTerms.has(entry.term));
   const usablePool = regularPool.length > 0 ? regularPool : pool;
-  for (let attempt = 0; attempt < 8; attempt += 1) {
-    const entry = usablePool[Math.floor(Math.random() * usablePool.length)];
-    if (!nearExisting.has(entry.term)) return entry;
-  }
-  return usablePool[Math.floor(Math.random() * usablePool.length)];
+  return monsterDeck.pick(usablePool, entry => !nearExisting.has(entry.term)) || monsterDeck.pick(usablePool);
 }
 
 function chooseMedicPrompt() {
@@ -3813,11 +3822,9 @@ function chooseMedicPrompt() {
   });
   const usablePool = compactPool.length > 0 ? compactPool : pool.length > 0 ? pool : EASY_WORDS;
   const bossAnswers = liveAnswers(enemy => enemy.isBoss);
-  for (let attempt = 0; attempt < 8; attempt += 1) {
-    const entry = usablePool[Math.floor(Math.random() * usablePool.length)];
-    if (!nearExisting.has(entry.term) && !sharesAnswer(buildSearchPrompt(entry.term), bossAnswers)) return entry;
-  }
-  return firstShuffled(usablePool, entry => !sharesAnswer(buildSearchPrompt(entry.term), bossAnswers))
+  const clear = entry => !sharesAnswer(buildSearchPrompt(entry.term), bossAnswers);
+  return monsterDeck.pick(usablePool, entry => !nearExisting.has(entry.term) && clear(entry))
+    || monsterDeck.pick(usablePool, clear)
     || usablePool[Math.floor(Math.random() * usablePool.length)];
 }
 
@@ -4377,19 +4384,18 @@ function spawnBoss() {
 function chooseBossWord() {
   const usedTerms = new Set(bossWordsThisSet.map(w => w.term));
   const activeAnswers = liveAnswers();
-  for (let attempt = 0; attempt < 24; attempt += 1) {
-    const pool = chooseBossPool();
-    const entry = pool[Math.floor(Math.random() * pool.length)];
-    if (!usedTerms.has(entry.term) && !sharesBossAnswer(entry, activeAnswers)) return entry;
-  }
+  const fits = entry => !usedTerms.has(entry.term) && !sharesBossAnswer(entry, activeAnswers);
+  const fromPool = bossDeck.pick(chooseBossPool(), fits);
+  if (fromPool) return fromPool;
   const allBossWords = [...MEDIUM_WORDS, ...HARD_WORDS].filter(entry => !entry.noBoss);
-  return firstShuffled(allBossWords, entry => !usedTerms.has(entry.term) && !sharesBossAnswer(entry, activeAnswers))
+  return bossDeck.pick(allBossWords, fits)
     || firstShuffled(allBossWords, entry => !sharesBossAnswer(entry, activeAnswers))
     || allBossWords[Math.floor(Math.random() * allBossWords.length)];
 }
 
 function startWaveCleared() {
   mode = 'wave_cleared';
+  saveRunTerms();
   playWaveClearSound();
   startMusicLoop(false);
   typedBuffer = '';
@@ -4421,6 +4427,7 @@ const ENDING_WORD_MAX_LENGTH = 18;
 
 function startEndingSequence() {
   mode = 'ending';
+  saveRunTerms();
   endingLeaderboardOffered = false;
   stopMusicLoop(0.4);
   document.body.classList.remove('is-running');
@@ -4770,7 +4777,7 @@ function showLootGuide() {
 
   const key = SLOT_KEYS[slot];
   lootGuideIcon.innerHTML = potionsSystem.getPotionIcon(type);
-  lootGuideHow.innerHTML = `To cast it, press <kbd>${key.symbol}</kbd> or <kbd>${slot + 1}</kbd>, or tap it in your potion tray. Each slot has its own arrow and number key.`;
+  lootGuideHow.innerHTML = `To cast it, press <kbd>${key.symbol}</kbd> or tap it in your potion tray. Each slot has its own arrow key.`;
   lootGuideCast.textContent = `Cast it now (${key.symbol})`;
 
   mode = 'paused';
