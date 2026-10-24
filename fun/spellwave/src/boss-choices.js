@@ -1,13 +1,13 @@
 // boss-choices.js — multiple-choice boss questions. Pure functions: no DOM, no
 // game state. The options themselves are in boss-options.js.
-import { BOSS_OPTIONS } from './boss-options.js?v=20261024-choice-bosses';
-import { buildSearchPrompt, buildAltSearchPrompts } from './prompt-utils.js?v=20261024-choice-bosses';
+import { BOSS_OPTIONS } from './boss-options.js?v=20261024-fewer-options';
+import { buildSearchPrompt, buildAltSearchPrompts } from './prompt-utils.js?v=20261024-fewer-options';
 
 const SUPERSCRIPTS = /[⁰¹²³⁴⁵⁶⁷⁸⁹]+/g;
 
-// Waves 1–4 show two wrong options; from wave 5, and in the finale, three.
+// Waves 1–3 show one wrong option; from wave 4, and in the finale, two.
 export function wrongOptionCount(wave) {
-  return wave <= 4 ? 2 : 3;
+  return wave <= 3 ? 1 : 2;
 }
 
 function optionFor(text, isAnswer, isEquation) {

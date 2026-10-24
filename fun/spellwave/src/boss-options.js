@@ -5,8 +5,8 @@
 // - answer: the word or words the boss hides and the player types. It may be the
 //   whole term, when the line then shows only the blank. Every occurrence in the
 //   line is blanked, so a repeated word is typed once.
-// - wrong: three wrong options, best two first. Waves 1–4 show the first two;
-//   from wave 5 all three.
+// - wrong: three wrong options, best first. Waves 1–3 show the first; from wave 4
+//   the first two. The third is a spare, not shown.
 //
 // Option rules (checked in tests/boss-options.test.mjs where a test can):
 // each wrong option is a real term that fits the same gap but not the clue; none is

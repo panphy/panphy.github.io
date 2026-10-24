@@ -65,9 +65,9 @@ test('the answer is not the longest option much more often than chance', () => {
     const answer = typed(set.answer).length;
     return set.wrong.slice(0, shown).every(option => typed(option).length < answer);
   }).length / sets.length;
-  // Chance is 1 in 3 with two wrong options shown, 1 in 4 with three.
+  // Chance is 1 in 2 with one wrong option shown, 1 in 3 with two.
+  assert.ok(longestShare(1) <= 0.55, `answer longest in ${(longestShare(1) * 100).toFixed(0)}% of 2-option sets`);
   assert.ok(longestShare(2) <= 0.4, `answer longest in ${(longestShare(2) * 100).toFixed(0)}% of 3-option sets`);
-  assert.ok(longestShare(3) <= 0.32, `answer longest in ${(longestShare(3) * 100).toFixed(0)}% of 4-option sets`);
 });
 
 test('options fit the boss answer-length limits of the waves they can appear on', async () => {
@@ -78,19 +78,19 @@ test('options fit the boss answer-length limits of the waves they can appear on'
   const problems = [];
   for (const { entry, set } of sets) {
     for (const option of [set.answer, ...set.wrong]) check(problems, typed(option).length <= lateCap, `"${option}" is over ${lateCap} letters in "${entry.term}"`);
-    // Waves 1–2 show the answer and the first two wrong options.
+    // Waves 1–2 show the answer and the first wrong option.
     if (earlyTerms.has(entry.term)) {
-      for (const option of [set.answer, ...set.wrong.slice(0, 2)]) check(problems, typed(option).length <= earlyCap, `"${option}" is over ${earlyCap} letters on early waves in "${entry.term}"`);
+      for (const option of [set.answer, set.wrong[0]]) check(problems, typed(option).length <= earlyCap, `"${option}" is over ${earlyCap} letters on early waves in "${entry.term}"`);
     }
   }
   assert.deepEqual(problems, []);
 });
 
-test('a boss shows two wrong options on waves 1–4 and three from wave 5', async () => {
+test('a boss shows one wrong option on waves 1–3 and two from wave 4', async () => {
   const { getBossChoice } = await import('../src/boss-choices.js');
   for (const { entry } of sets) {
-    for (const wave of [1, 4]) assert.equal(getBossChoice(entry, wave).wrong.length, 2, entry.term);
-    for (const wave of [5, 10]) assert.equal(getBossChoice(entry, wave).wrong.length, 3, entry.term);
+    for (const wave of [1, 3]) assert.equal(getBossChoice(entry, wave).wrong.length, 1, entry.term);
+    for (const wave of [4, 10]) assert.equal(getBossChoice(entry, wave).wrong.length, 2, entry.term);
   }
 });
 
