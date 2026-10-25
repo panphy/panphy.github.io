@@ -17,6 +17,12 @@
     return FILL(`M ${n(x)} ${n(y)} L ${n(p1[0])} ${n(p1[1])} L ${n(p2[0])} ${n(p2[1])} Z`);
   };
   const two = (x = 40) => ({ a: [-x, 0, -1, 0], b: [x, 0, 1, 0] });
+  // A straight arrow from (x1, y1) to a filled head at (x2, y2); the shaft
+  // stops short of the tip so the head stays sharp.
+  const arrow = (x1, y1, x2, y2, size = 6) => {
+    const len = Math.hypot(x2 - x1, y2 - y1), ux = (x2 - x1) / len, uy = (y2 - y1) / len;
+    return L(`M ${n(x1)} ${n(y1)} L ${n(x2 - ux * size * 0.7)} ${n(y2 - uy * size * 0.7)}`) + arrowHead(x2, y2, Math.atan2(uy, ux) * 180 / Math.PI, size);
+  };
   const polMark = (ctx, x, y, s) => utext(ctx, x, y, s, 'sch-pol');
 
   // Reading pill under a meter symbol.
@@ -183,12 +189,14 @@
   art.diode = {
     bounds: () => [-42, -16, 84, 30],
     terms: () => ({ a: [-40, 0, -1, 0], k: [40, 0, 1, 0] }),
-    draw: (ctx) => L('M -40 0 H -10 M 10 0 H 40 M 10 -11 V 11') + `<path d="${DIODE}" class="sch-fill"/>` +
-      utext(ctx, -30, -9, 'A', 'sch-pin') + utext(ctx, 30, -9, 'K', 'sch-pin')
+    draw: () => L('M -40 0 H -10 M 10 0 H 40 M 10 -11 V 11') + `<path d="${DIODE}" class="sch-fill"/>`
   };
 
+  // LED (AQA style): the diode inside a circle, two parallel arrows pointing
+  // out of it. The leads stop at the circle.
+  const LED_DIODE = 'M -7 -9 L -7 9 L 8 0 Z';
   art.led = {
-    bounds: () => [-42, -34, 84, 54],
+    bounds: () => [-42, -34, 84, 52],
     terms: () => ({ a: [-40, 0, -1, 0], k: [40, 0, 1, 0] }),
     draw(ctx) {
       const st = ctx.st || {};
@@ -196,10 +204,9 @@
       const colors = PPC.registry ? PPC.registry.LED_COLORS : {};
       const key = ctx.p.color in colors ? ctx.p.color : 'red';
       const glow = b > 0.02 ? `<circle cx="0" cy="0" r="${n(20 + 24 * Math.min(1, b))}" fill="url(#ppc-glow-${key})" opacity="${n(Math.min(1, b))}" class="ppc-glow"/>` : '';
-      return glow + L('M -40 0 H -17 M 17 0 H 40 M 10 -11 V 11 M -17 0 H -10 M 10 0 H 17') + `<circle cx="0" cy="0" r="17" class="sch-line"/>` +
-        `<path d="${DIODE}" class="sch-fill"/>` +
-        L('M 2 -14 L 12 -26 M 9 -11 L 19 -23') + arrowHead(14, -28.5, -50, 6) + arrowHead(21, -25.5, -50, 6) +
-        utext(ctx, -30, -9, 'A', 'sch-pin') + utext(ctx, 30, -9, 'K', 'sch-pin');
+      return glow + L('M -40 0 H -16 M 16 0 H 40 M -16 0 H -7 M 8 0 H 16 M 8 -9 V 9') + `<circle cx="0" cy="0" r="16" class="sch-line"/>` +
+        `<path d="${LED_DIODE}" class="sch-fill"/>` +
+        arrow(5, -19, 15, -29) + arrow(13, -14, 23, -24);
     }
   };
 
@@ -222,16 +229,18 @@
   // ---------- Sensors ----------
 
   art.thermistor = {
-    bounds: () => [-42, -22, 84, 38],
+    bounds: () => [-42, -18, 84, 34],
     terms: () => two(),
-    draw: (ctx) => L('M -40 0 H -20 M 20 0 H 40') + BODY(RECT) + L('M -27 14 H -19 L 19 -14') + utext(ctx, 20, 14, '−t°', 'sch-tag', 'start')
+    draw: () => L('M -40 0 H -20 M 20 0 H 40') + BODY(RECT) + L('M -27 14 H -19 L 19 -14')
   };
 
+  // LDR (AQA style): a resistor inside a circle, two parallel arrows pointing
+  // in from outside. The leads stop at the circle.
   art.ldr = {
-    bounds: () => [-42, -34, 84, 58],
+    bounds: () => [-42, -37, 84, 59],
     terms: () => two(),
-    draw: () => L('M -40 0 H -20 M 20 0 H 40') + `<circle cx="0" cy="0" r="23" class="sch-line"/>` + BODY(RECT) +
-      L('M -28 -30 L -15 -17 M -16 -34 L -3 -21') + arrowHead(-12.5, -14.5, 45, 6) + arrowHead(-0.5, -18.5, 45, 6)
+    draw: () => L('M -40 0 H -20 M 20 0 H 40 M -20 0 H -14 M 14 0 H 20') + `<circle cx="0" cy="0" r="20" class="sch-line"/>` +
+      BODY('M -14 -6 H 14 V 6 H -14 Z') + arrow(-28, -30, -16, -18) + arrow(-16, -36, -4, -24)
   };
 
   // ---------- Capacitors ----------
