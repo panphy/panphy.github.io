@@ -258,15 +258,18 @@
     function renderLabels() {
       const v = view();
       const doc = app.doc;
-      if (!doc.settings.showLabels) { L.labels.innerHTML = ''; return; }
+      const { showLabels, showValues } = doc.settings;
+      if (!showLabels && !showValues) { L.labels.innerHTML = ''; return; }
       const parts = [];
       for (const c of doc.components) {
         const def = registry.get(c.type);
         if (def.hiddenLabel) continue;
         const b = layout.compBounds(doc, v, c.id);
         if (!b) continue;
-        const val = v === 'schematic' ? def.valueText(c) : '';
-        const text = val ? `${c.label}  ${val}` : c.label;
+        // Values sit beside labels in the circuit diagram; realistic parts show theirs.
+        const val = showValues && v === 'schematic' ? def.valueText(c) : '';
+        const text = [showLabels ? c.label : '', val].filter(Boolean).join('  ');
+        if (!text) continue;
         const pl = doc.layouts[v].comps[c.id];
         const side = v === 'schematic' && (c.type === 'npn' || c.type === 'pnp');
         const vertical = side || ((pl.r & 1) === 1 && !['scope', 'dcsupply', 'acsupply', 'ammeter', 'voltmeter'].includes(c.type));

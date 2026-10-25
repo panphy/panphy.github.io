@@ -1,4 +1,4 @@
-// PanPhyCircuits: circuit diagram symbols (IEC / UK school conventions).
+// PanPhyCircuits: circuit diagram symbols (IEC and standard textbook conventions).
 // Terminals sit on a 10-unit grid so wires route cleanly; colors come from CSS
 // variables (--sch-ink, --sch-paper) so the symbols follow the theme.
 (function (root) {

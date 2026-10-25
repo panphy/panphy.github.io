@@ -284,16 +284,13 @@
 
     function circuitInspector() {
       const s = app.doc.settings;
-      const n = app.doc.components.filter((c) => c.type !== 'junction').length;
-      const nw = app.doc.wires.length;
       const opt = (v, cur, label) => `<option value="${v}" ${String(cur) === String(v) ? 'selected' : ''}>${label}</option>`;
       const toggle = (key, label) => `<label class="toggle"><span>${label}</span><input type="checkbox" data-setting="${key}" ${s[key] ? 'checked' : ''}><span class="toggle-track" aria-hidden="true"></span></label>`;
-      return card('Circuit', `<div class="stats"><div class="stat"><b>${n}</b><span>component${n === 1 ? '' : 's'}</span></div><div class="stat"><b>${nw}</b><span>wire${nw === 1 ? '' : 's'}</span></div></div>` +
-          `<p class="icard-note">Select a component or wire to edit it and see its readings.</p>`) +
+      return `<p class="insp-hint">Select a component or wire to edit it and see its readings.</p>` +
         card('Simulation', `<div class="row"><label for="s-speed">Speed</label><select id="s-speed" data-setting="speed">${[0.01, 0.1, 0.25, 1, 4, 10].map((v) => opt(v, s.speed, v === 1 ? 'Real time (1×)' : `${v}×`)).join('')}</select></div>` +
           `<div class="row"><label for="s-dt">Time step</label><select id="s-dt" data-setting="dt">${opt('auto', s.dt, `Auto (${units.fmtSI(app.sim.dt, 's', 2)})`)}${[1e-5, 1e-4, 1e-3, 1e-2].map((v) => opt(v, s.dt, units.fmtSI(v, 's', 1))).join('')}</select></div>`) +
-        card('Display', toggle('showLabels', 'Labels and values') + toggle('currentFlow', 'Animate current') + toggle('wireColorsInDiagram', 'Wire colors in diagram') +
-          `<div class="row"><label for="s-logic">Logic symbols</label><select id="s-logic" data-setting="logicStyle">${opt('distinctive', s.logicStyle, 'UK school shapes')}${opt('iec', s.logicStyle, 'IEC rectangles')}</select></div>`) +
+        card('Display', toggle('showLabels', 'Labels') + toggle('showValues', 'Values') + toggle('currentFlow', 'Animate current') + toggle('wireColorsInDiagram', 'Wire colors in diagram') +
+          `<div class="row"><label for="s-logic">Logic symbols</label><select id="s-logic" data-setting="logicStyle">${opt('distinctive', s.logicStyle, 'Standard shapes')}${opt('iec', s.logicStyle, 'IEC rectangles')}</select></div>`) +
         `<details class="icard model-note"><summary>About the simulation</summary><p>Readings are worked out afresh after every change, so they are live without the clock. <strong>Start time</strong> is needed only for capacitors, AC supplies, the oscilloscope and graphs: it advances time in fixed steps. <strong>Pause time</strong> freezes it, but edits still update the readings for the frozen state; <strong>Reset</strong> returns to t = 0 with every capacitor at its initial p.d. and clears the graphs. Switching views never changes the simulation.</p>` +
           `<p>The automatic time step is about 1/100 of the shortest RC time constant (and of an AC period). Results do not depend on your device's frame rate.</p>` +
           `<p>Animated current shows conventional current as yellow dashes moving from + to − through the external circuit. Their speed only hints at the size of the current; real charge carriers drift far more slowly.</p>` +
