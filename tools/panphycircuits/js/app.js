@@ -586,6 +586,22 @@
     reader.onerror = () => ui.message('Could not open the file', ['The file could not be read.']);
     reader.readAsText(file);
   };
+  app.exportPanPhyMD = async function () {
+    const svgText = PPC.render.exportSvg(app, document.getElementById('ws-svg'));
+    if (!svgText) { ui.toast('There is nothing to export yet.'); return; }
+    // Encode UTF-8 before base64 so labels such as Ω and µ survive the export.
+    const bytes = new TextEncoder().encode(svgText);
+    const uri = 'data:image/svg+xml;base64,' + btoa(Array.from(bytes, (byte) => String.fromCharCode(byte)).join(''));
+    const label = app.doc.view === 'schematic' ? 'Circuit diagram' : 'Circuit realistic view';
+    const markdown = `![${label}](${uri})`;
+    try {
+      await navigator.clipboard.writeText(markdown);
+      ui.toast('Copied circuit image. Paste it into PanPhyMD.');
+    } catch (e) {
+      download('panphy-circuit.md', 'text/markdown;charset=utf-8', markdown + '\n');
+      ui.toast('Clipboard unavailable. Open the downloaded Markdown file in PanPhyMD.');
+    }
+  };
   app.exportImage = function (format) {
     const svgText = PPC.render.exportSvg(app, document.getElementById('ws-svg'));
     if (!svgText) { ui.toast('There is nothing to export yet.'); return; }
@@ -749,6 +765,7 @@
       else if (a === 'save') app.exportFile();
       else if (a === 'svg') app.exportImage('svg');
       else if (a === 'png') app.exportImage('png');
+      else if (a === 'panphymd') app.exportPanPhyMD();
     });
     // iPhone and iPad grey out files whose extension they do not recognize, so
     // the picker there is left unfiltered; the contents are validated anyway.

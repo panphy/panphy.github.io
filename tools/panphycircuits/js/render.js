@@ -505,6 +505,13 @@
     const v = app.doc.view;
     const b = layout.viewBounds(app.doc, v);
     if (!b) return null;
+    // Labels and upright pills can extend past a component's nominal bounds.
+    for (const layer of svg.querySelectorAll('.l-comps, .l-labels')) {
+      if (!layer.children.length) continue;
+      const box = layer.getBBox();
+      b.x = Math.min(b.x, box.x); b.y = Math.min(b.y, box.y);
+      b.x2 = Math.max(b.x2, box.x + box.width); b.y2 = Math.max(b.y2, box.y + box.height);
+    }
     const pad = 40;
     const x = b.x - pad, y = b.y - pad - 10, w = b.x2 - b.x + 2 * pad, h = b.y2 - b.y + 2 * pad + 10;
     const cs = getComputedStyle(svg.closest('.workspace'));
