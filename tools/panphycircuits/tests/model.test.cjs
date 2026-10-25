@@ -355,3 +355,63 @@ test('vertical meter reading pills leave a gap from the symbol for every reading
     }
   }
 });
+
+test('moving diagram parts reroutes stale corners instead of drawing apparent shorts', () => {
+  const doc = examples.build({
+    comps: [
+      ['B1', 'battery', { emf: 6 }, [0, -130, 0], [0, -100, 2]],
+      ['R1', 'rheostat', {}, [220, 0, 0], [-100, 100, 0]],
+      ['L1', 'lamp', {}, [0, 130, 0], [100, 100, 0]]
+    ],
+    wires: [
+      ['B1.p', 'R1.a', 'red', { s: [[-200, -100], [-200, 100]] }],
+      ['R1.b', 'L1.a', 'blue'],
+      ['L1.b', 'B1.n', 'black', { s: [[200, 100], [200, -100]] }]
+    ]
+  }, 'schematic');
+  const savedWires = JSON.stringify(doc.wires), savedBends = JSON.stringify(doc.layouts.schematic.wires);
+  const bench = JSON.stringify(doc.layouts.realistic);
+  const rheostat = doc.components.find((c) => c.type === 'rheostat');
+  const lamp = doc.components.find((c) => c.type === 'lamp');
+  const check = () => {
+    const routes = [...layout.routeAll(doc, 'schematic').values()];
+    const segments = [];
+    for (const r of routes) {
+      const a = r.poly[1], b = r.poly[r.poly.length - 2];
+      assert.ok((a.x - r.a.x) * r.a.dx + (a.y - r.a.y) * r.a.dy > 0, 'leaves along the outward lead');
+      assert.ok((b.x - r.b.x) * r.b.dx + (b.y - r.b.y) * r.b.dy > 0, 'arrives from outside the lead');
+      for (let i = 1; i < r.poly.length; i++) {
+        const a = r.poly[i - 1], b = r.poly[i];
+        assert.ok(a.x === b.x || a.y === b.y, 'orthogonal wire');
+        for (const c of doc.components) {
+          const box = layout.compBounds(doc, 'schematic', c.id);
+          assert.ok(!(Math.min(a.x, b.x) < box.x2 - 3 && Math.max(a.x, b.x) > box.x + 3 &&
+            Math.min(a.y, b.y) < box.y2 - 3 && Math.max(a.y, b.y) > box.y + 3), 'wire clears symbol and leads');
+        }
+        for (const [c, d] of segments) {
+          if (a.y === b.y && c.y === d.y && a.y === c.y) {
+            assert.ok(Math.min(Math.max(a.x, b.x), Math.max(c.x, d.x)) <= Math.max(Math.min(a.x, b.x), Math.min(c.x, d.x)), `no horizontal retracing: ${JSON.stringify([a,b,c,d])}`);
+          }
+          if (a.x === b.x && c.x === d.x && a.x === c.x) {
+            assert.ok(Math.min(Math.max(a.y, b.y), Math.max(c.y, d.y)) <= Math.max(Math.min(a.y, b.y), Math.min(c.y, d.y)), 'no vertical retracing');
+          }
+        }
+        segments.push([a, b]);
+      }
+    }
+    assert.equal(JSON.stringify(doc.wires), savedWires, 'connections unchanged');
+    assert.equal(JSON.stringify(doc.layouts.schematic.wires), savedBends, 'saved bends are not mutated by rendering');
+    assert.equal(JSON.stringify(doc.layouts.realistic), bench, 'bench unchanged');
+    return routes;
+  };
+  const original = check();
+  assert.ok(original.some((r) => r.pts.length), 'valid manual corners are retained');
+  for (const [rx, ry, lx, ly] of [[-220, 100, 100, 110], [-240, 100, 100, 110], [-220, 100, 200, 60], [-100, 100, 130, -100]]) {
+    place(doc, rheostat, 'schematic', rx, ry);
+    place(doc, lamp, 'schematic', lx, ly);
+    check();
+  }
+  place(doc, rheostat, 'schematic', -100, 100);
+  place(doc, lamp, 'schematic', 100, 100);
+  assert.deepEqual(check(), original, 'returning parts restores valid manual corners');
+});
