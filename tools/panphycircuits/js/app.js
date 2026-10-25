@@ -343,6 +343,16 @@
     app.commit('Paste');
   };
 
+  app.setScopeAutoScale = function (id, enabled) {
+    const c = circuit.getComp(app.doc, id);
+    if (!c || c.type !== 'scope') return;
+    c.props.autoScale = enabled;
+    app.lastElecKey = JSON.stringify([app.doc.components, app.doc.wires]);
+    app.rev++;
+    app.renderAll();
+    scheduleSave();
+  };
+
   app.setSetting = function (key, value) {
     app.doc.settings[key] = value;
     if (DISPLAY_KEYS.includes(key)) {

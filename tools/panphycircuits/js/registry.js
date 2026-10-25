@@ -394,7 +394,7 @@
       { key: 'closed', label: 'Closed', kind: 'bool', default: false, operational: true }
     ],
     compile(c, T, b) { if (c.props.closed) b.V(T.a, T.b, 0, { short: true }); },
-    readings: (c, r) => twoTerminalReadings(c, r),
+    readings: (c, r) => twoTerminalReadings(c, r).filter((reading) => reading.key !== 'dir'),
     valueText: (c) => (c.props.closed ? 'closed' : 'open'),
     actuator: { kind: 'toggle', prop: 'closed' },
     help: 'An on/off switch. Closed, it is a perfect conductor (0 Ω); open, no current can flow. Click or tap the lever to operate it.'
@@ -537,6 +537,7 @@
     name: 'Oscilloscope', group: 'Meters', prefix: 'OS', category: 'ext', keywords: 'cro graph trace waveform',
     terminals: [{ id: 'ch1', name: 'Channel 1 input' }, { id: 'ch2', name: 'Channel 2 input' }, { id: 'com', name: 'Common (0 V)' }],
     props: [
+      { key: 'autoScale', label: 'Auto scale', kind: 'bool', default: false, operational: true },
       { key: 'tdiv', label: 'Time per division', unit: 's', kind: 'select', default: '0.5',
         options: ['0.001', '0.002', '0.005', '0.01', '0.02', '0.05', '0.1', '0.2', '0.5', '1', '2', '5'].map((v) => ({ value: v, label: fmtSI(Number(v), 's', 3, { trim: true }) + '/div' })) },
       { key: 'v1', label: 'CH1 volts per division', unit: 'V', kind: 'select', default: '1',

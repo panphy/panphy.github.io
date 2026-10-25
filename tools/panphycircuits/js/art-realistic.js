@@ -437,7 +437,8 @@
       let grid = '';
       for (let i = 1; i < 10; i++) grid += `<line x1="${X0 + i * 12}" y1="${Y0}" x2="${X0 + i * 12}" y2="${Y0 + H}" stroke="#2D6B52" stroke-width="${i === 5 ? 0.9 : 0.5}"/>`;
       for (let j = 1; j < 8; j++) grid += `<line x1="${X0}" y1="${Y0 + j * 10}" x2="${X0 + W}" y2="${Y0 + j * 10}" stroke="#2D6B52" stroke-width="${j === 4 ? 0.9 : 0.5}"/>`;
-      const traces = scopeTraces(ctx, X0, Y0, W, H);
+      const scale = PPC.units.scopeScale(ctx.p, ctx.scope);
+      const traces = scopeTraces(ctx, X0, Y0, W, H, scale);
       const knob = (x, y) => `<circle cx="${x}" cy="${y}" r="9" fill="url(#ppc-knob)" stroke="#000" stroke-width="0.6"/><line x1="${x}" y1="${y}" x2="${x}" y2="${y - 7}" stroke="#eee" stroke-width="1.6"/>`;
       return shadow(roundRect(-90, -64, 180, 128, 10, '')) +
         roundRect(-90, -64, 180, 128, 10, 'fill="url(#ppc-case)" stroke="#858C97" stroke-width="1"') +
@@ -446,8 +447,8 @@
         `<rect x="${X0}" y="${Y0}" width="${W}" height="${H}" fill="url(#ppc-screen)"/>` + grid +
         `<g clip-path="url(#${clip})">${traces}</g>` +
         up(ctx, X0 + 3, Y0 + 6, `<text class="ppc-scope-text" dominant-baseline="central">${esc(fmtDiv(ctx.p.tdiv, 's'))}</text>`) +
-        up(ctx, X0 + W - 3, Y0 + 6, `<text class="ppc-scope-text ppc-scope-ch1" text-anchor="end" dominant-baseline="central">1: ${esc(fmtDiv(ctx.p.v1, 'V'))}</text>`) +
-        up(ctx, X0 + W - 3, Y0 + 15, `<text class="ppc-scope-text ppc-scope-ch2" text-anchor="end" dominant-baseline="central">2: ${esc(fmtDiv(ctx.p.v2, 'V'))}</text>`) +
+        up(ctx, X0 + W - 3, Y0 + 6, `<text class="ppc-scope-text ppc-scope-ch1" text-anchor="end" dominant-baseline="central">1: ${esc(fmtDiv(scale.v1, 'V'))}</text>`) +
+        up(ctx, X0 + W - 3, Y0 + 15, `<text class="ppc-scope-text ppc-scope-ch2" text-anchor="end" dominant-baseline="central">2: ${esc(fmtDiv(scale.v2, 'V'))}</text>`) +
         knob(66, -46) + knob(66, -18) + knob(66, 10) +
         utext(ctx, 66, -32, 'TIME', 'ppc-panel-tiny ppc-dark') + utext(ctx, 66, -4, 'CH1', 'ppc-panel-tiny ppc-dark') + utext(ctx, 66, 24, 'CH2', 'ppc-panel-tiny ppc-dark') +
         socket(-60, 40, 'yellow', 8) + socket(-20, 40, 'cyan', 8) + socket(20, 40, 'black', 8) +
@@ -463,7 +464,7 @@
   }
 
   // Polylines for the two channels from the scope's own sample window.
-  function scopeTraces(ctx, X0, Y0, W, H) {
+  function scopeTraces(ctx, X0, Y0, W, H, scale) {
     const s = ctx.scope;
     if (!s || !s.t.length) return '';
     const span = Number(ctx.p.tdiv) * 10;
@@ -471,14 +472,14 @@
     const t0 = tEnd - span;
     const yMid = Y0 + H / 2;
     const out = [];
-    for (const [key, vdiv, color] of [['ch1', Number(ctx.p.v1), '#FFE14D'], ['ch2', Number(ctx.p.v2), '#4FE3FF']]) {
+    for (const [key, vdiv, color] of [['ch1', scale.v1, '#FFE14D'], ['ch2', scale.v2, '#4FE3FF']]) {
       const arr = s[key];
       let d = '';
       let pen = false;
       const step = Math.max(1, Math.floor(arr.length / 400));
       for (let i = 0; i < arr.length; i += step) {
         const v = arr[i];
-        if (!Number.isFinite(v)) { pen = false; continue; }
+        if (!Number.isFinite(v) || s.t[i] < t0) { pen = false; continue; }
         const x = X0 + ((s.t[i] - t0) / span) * W;
         const y = Math.max(Y0 - 4, Math.min(Y0 + H + 4, yMid - (v / vdiv) * 10));
         d += (pen ? ' L ' : ' M ') + n(x) + ' ' + n(y);
