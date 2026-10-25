@@ -95,3 +95,14 @@ export function createEmbeddedImageEditor(input, notice, toggle, onViewChange) {
     displayText(text) { return collapsed ? model.collapse(text).value : text; }
   };
 }
+
+// Image handoffs live in the URL fragment, including when tabs do not share storage.
+export function parseLinkedImageImport(hash) {
+  if (!hash.startsWith('#import=')) return null;
+  const payload = JSON.parse(decodeURIComponent(hash.slice(8)));
+  const markdown = payload && payload.markdown;
+  if (typeof markdown !== 'string' || !/^!\[[^\]\r\n]*\]\(data:image\/(?:svg\+xml|png|jpeg);base64,[A-Za-z0-9+/]+={0,2}\)$/.test(markdown)) {
+    throw new Error('The image in this link could not be read.');
+  }
+  return markdown;
+}
