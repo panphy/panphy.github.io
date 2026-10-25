@@ -123,10 +123,18 @@
         parts.push(`<g class="comp comp-${c.type}${err}" data-id="${c.id}" transform="${layout.svgTransform(pl)}">` +
           `<rect class="hit" data-hit="comp" data-id="${c.id}" x="${bx}" y="${by}" width="${bw}" height="${bh}" rx="6"><title>${esc(name)}</title></rect>` +
           `<g class="art" data-hit="comp" data-id="${c.id}">${artSvg}</g>` +
-          (act ? `<rect class="act act-${act.kind}" data-hit="act" data-id="${c.id}" x="${act.rect[0]}" y="${act.rect[1]}" width="${act.rect[2]}" height="${act.rect[3]}" rx="6"><title>${esc(actTitle(act.kind, c))}</title></rect>` : '') +
+          (act ? actRect(act, c, pl) : '') +
           `</g>`);
       }
       L.comps.innerHTML = parts.join('');
+    }
+
+    // A control's hit area. An upright control (a sensor's badge slider) keeps
+    // its orientation however the part is turned, like the badge it covers.
+    function actRect(act, c, pl) {
+      const rect = `<rect class="act act-${act.kind}" data-hit="act" data-id="${c.id}" x="${act.rect[0]}" y="${act.rect[1]}" width="${act.rect[2]}" height="${act.rect[3]}" rx="6"><title>${esc(actTitle(act.kind, c))}</title></rect>`;
+      if (!act.upright) return rect;
+      return `<g transform="translate(${act.cx} ${act.cy}) scale(${pl.f ? -1 : 1} 1) rotate(${-90 * (pl.r & 3)})">${rect}</g>`;
     }
 
     function actTitle(kind, c) {
@@ -527,7 +535,7 @@
       .ppc-meter-letter{font-size:13px;font-weight:800;fill:#fff}
       .ppc-pin{font-size:8px;font-weight:700;fill:#596170}.ppc-pin-light{fill:#fff}.ppc-pin-dark{fill:#5A3D15}
       .ppc-face{font-size:7px;font-weight:700;fill:#E9ECF0}
-      .ppc-badge{fill:#fff;stroke:#B9C0CB;stroke-width:1}.ppc-badge-text{font-size:8px;font-weight:700;fill:#2A3140}
+      .ppc-badge{fill:#fff;stroke:#B9C0CB;stroke-width:1}.ppc-badge-text{font-size:8px;font-weight:700;fill:#2A3140}.ppc-badge-track{fill:#DDE1E7}.ppc-badge-level{fill:#D9480F}
       .ppc-badge-icon{fill:#D9480F}.ppc-badge-stroke{stroke:#D9480F;stroke-width:1.3}
       .ppc-silk .sch-line,.ppc-silk .sch-body{stroke:#EAF2FF;fill:none}.ppc-silk-text{font-size:8px;font-weight:700;fill:#EAF2FF}
       .ppc-silk-title{font-size:11px;font-weight:800;fill:#fff}.ppc-silk-tiny{font-size:5.5px;font-weight:700;fill:#B8CCE4}

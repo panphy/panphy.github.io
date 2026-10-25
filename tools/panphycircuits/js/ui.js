@@ -31,6 +31,7 @@
     inspect: '<path d="M4 6h10M4 12h16M4 18h7"/><circle cx="17" cy="6" r="2.4"/><circle cx="14" cy="18" r="2.4"/>',
     warn: '<path d="M12 3l10 18H2z"/><path d="M12 10v5M12 18v.5"/>',
     close: '<path d="M6 6l12 12M18 6L6 18"/>',
+    pin: '<path d="M9 3.5h6l-1.2 5.5 3.2 3.2H7l3.2-3.2z"/><path d="M12 12.2V20.5"/>',
     examples: '<rect x="3.5" y="4" width="7" height="7" rx="1.5"/><rect x="13.5" y="4" width="7" height="7" rx="1.5"/><rect x="3.5" y="14" width="7" height="6" rx="1.5"/><path d="M14 17h6M17 14v6"/>',
     folder: '<path d="M3.5 7.5a2 2 0 012-2h4l2 2.2h7a2 2 0 012 2V17a2 2 0 01-2 2h-13a2 2 0 01-2-2z"/>',
     guide: '<path d="M4 5.5c2.7-1.3 5.4-1.3 8 0v14c-2.6-1.3-5.3-1.3-8 0zM20 5.5c-2.7-1.3-5.4-1.3-8 0v14c2.6-1.3 5.3-1.3 8 0z"/>',
@@ -231,7 +232,6 @@
       else body.innerHTML = circuitInspector();
       if (focused) { const el = document.getElementById(focused); if (el) el.focus(); }
       ui.updateReadings();
-      ui.renderScopes();
     };
 
     const card = (label, inner, cls = '') => `<section class="icard${cls ? ' ' + cls : ''}">${label ? `<h3 class="icard-label">${esc(label)}</h3>` : ''}${inner}</section>`;
@@ -245,7 +245,7 @@
       const head = `<div class="insp-head"><div class="insp-art">${miniArt(c.type, app.doc.view)}</div><div><p class="icard-label">${esc(def.group)}${def.category === 'ext' ? ' · extension' : ''}</p><h2 class="insp-title">${esc(def.name)}</h2></div></div>` +
         (c.type !== 'junction' ? `<div class="row label-row"><label for="f-label">Label</label><input id="f-label" type="text" maxlength="${circuit.LABEL_MAX}" value="${esc(c.label)}" data-label="1" autocomplete="off"></div>` : '') +
         `<div class="mini-actions">${actButton('rotate', 'rotate', 'Rotate')}${actButton('flip', 'flip', 'Mirror')}${actButton('duplicate', 'duplicate', 'Duplicate')}${actButton('delete', 'cross', 'Delete', true)}</div>`;
-      return card('', head) + (c.type === 'scope' ? scopeCard(c) : '') +
+      return card('', head) + (ui.hasLiveDisplay(c) && !app.pinned.has(c.id) ? liveCard(c, false) : '') +
         card('Readings', `<dl id="readings"></dl>${plot ? field(plot, c.props.plot, c.id) : ''}`, 'readings-card') +
         (props.length ? card('Properties', props.map((p) => field(p, c.props[p.key], c.id)).join('')) : '') +
         (def.gate ? truthTable(def) : '') +
@@ -323,21 +323,61 @@
       app.setSetting(t.dataset.setting, t.type === 'checkbox' ? t.checked : t.value);
     });
 
-    // ---------- Oscilloscope screen (inspector) ----------
-    // A selected oscilloscope shows its screen large, above its readings.
+    // ---------- Live displays (inspector) ----------
+    // A selected ammeter, voltmeter or oscilloscope shows its display large,
+    // above its readings: the meter exactly as it looks on the bench, the scope
+    // as a big screen. Pinned displays stay at the top of the inspector, so
+    // readings can be watched while other parts are selected or adjusted.
 
+    const LIVE_TYPES = ['ammeter', 'voltmeter', 'scope'];
     const SCOPE_COLORS = { ch1: '#FFD43B', ch2: '#3BD8FF' };
-    function scopeCard(c) {
+    ui.hasLiveDisplay = (c) => !!c && LIVE_TYPES.includes(c.type);
+    function liveCard(c, pinned) {
+      const scope = c.type === 'scope';
+      const title = pinned ? `${c.label} ${scope ? 'screen' : 'display'}` : (scope ? 'Screen' : 'Display');
       const div = (v, unit) => esc(units.fmtSI(Number(v), unit, 3, { trim: true })) + '/div';
-      return `<section class="icard scope-card" data-scope="${c.id}"><h3 class="icard-label">Screen</h3>` +
-        `<canvas class="scope-screen" aria-label="Oscilloscope ${esc(c.label)} screen"></canvas>` +
-        `<p class="scope-legend"><span class="scope-ch1">CH1 ${div(c.props.v1, 'V')}</span><span class="scope-ch2">CH2 ${div(c.props.v2, 'V')}</span><span>${div(c.props.tdiv, 's')}</span></p></section>`;
+      const pin = `<button type="button" class="pin-btn" data-pin="${c.id}" aria-pressed="${pinned}" title="${pinned ? 'Unpin this display' : 'Pin: keep this display in view while you work on other parts'}">${icon('pin')}<span>${pinned ? 'Pinned' : 'Pin'}</span></button>`;
+      const body = scope
+        ? `<canvas class="scope-screen" aria-label="Oscilloscope ${esc(c.label)} screen"></canvas>` +
+          `<p class="scope-legend"><span class="scope-ch1">CH1 ${div(c.props.v1, 'V')}</span><span class="scope-ch2">CH2 ${div(c.props.v2, 'V')}</span><span>${div(c.props.tdiv, 's')}</span></p>`
+        : `<div class="meter-view" role="img" aria-label="${esc(c.label)} display"></div>`;
+      return `<section class="icard live-card" data-live="${c.id}"><div class="live-head"><h3 class="icard-label">${esc(title)}</h3>${pin}</div>${body}</section>`;
     }
-    ui.renderScopes = function () {
-      const card = $('inspector-body').querySelector('.scope-card');
-      const c = card && circuit.getComp(app.doc, card.dataset.scope);
-      if (c) drawScope(card.querySelector('canvas'), c);
+    // Rebuild the pinned area when the set of pinned parts changes.
+    ui.renderPinned = function () {
+      const host = $('pinned-displays');
+      for (const id of [...app.pinned]) if (!circuit.getComp(app.doc, id)) app.pinned.delete(id);
+      const comps = [...app.pinned].map((id) => circuit.getComp(app.doc, id));
+      const key = comps.map((c) => `${c.id}:${c.label}:${c.props.tdiv}:${c.props.v1}:${c.props.v2}`).join('|');
+      if (host.dataset.key !== key) { host.dataset.key = key; host.innerHTML = comps.map((c) => liveCard(c, true)).join(''); }
+      host.hidden = comps.length === 0;
     };
+    // Refresh every live display on show: meter artwork and scope traces.
+    ui.updateLive = function () {
+      for (const card of document.querySelectorAll('#inspector [data-live]')) {
+        const c = circuit.getComp(app.doc, card.dataset.live);
+        if (!c) continue;
+        if (c.type === 'scope') { drawScope(card.querySelector('canvas'), c); continue; }
+        const view = card.querySelector('.meter-view');
+        const a = layout.artFor('realistic', c.type);
+        const ctx = app.renderer.artCtx(c, 'realistic', 'live-' + c.id);
+        ctx.r = 0; ctx.f = false;
+        const [x, y, w, h] = a.bounds(c.props);
+        const svg = `<svg viewBox="${x - 4} ${y - 4} ${w + 8} ${h + 8}" aria-hidden="true">${a.draw(ctx)}</svg>`;
+        if (view.dataset.svg !== svg) { view.dataset.svg = svg; view.innerHTML = svg; }
+      }
+    };
+    ui.renderLive = function () { ui.renderPinned(); ui.updateLive(); };
+    $('inspector').addEventListener('click', (e) => {
+      const b = e.target.closest('[data-pin]');
+      if (!b) return;
+      const id = b.dataset.pin;
+      if (app.pinned.has(id)) app.pinned.delete(id); else app.pinned.add(id);
+      ui.renderPinned();
+      ui.renderInspector(true);
+      ui.updateLive();
+      app.announce(app.pinned.has(id) ? 'Display pinned' : 'Display unpinned');
+    });
     function drawScope(canvas, c) {
       if (!canvas) return;
       const dpr = window.devicePixelRatio || 1;
@@ -381,7 +421,7 @@
     // Live readings in the inspector, refreshed several times a second.
     ui.updateReadings = function () {
       const dl = document.getElementById('readings');
-      if (!dl || !app.sim.result) return;
+      if (!dl || !app.sim.result) { if (app.sim.result) ui.updateLive(); return; }
       const res = app.sim.result;
       let rows = [];
       if (app.selection.comps.size === 1) {
@@ -406,7 +446,7 @@
         const I = PPC.render.wireCurrents(app).get(w.id);
         rows.push({ label: 'Current', text: Number.isFinite(I) ? `${units.fmtSI(Math.abs(I) < 1e-9 ? 0 : Math.abs(I), 'A', 3)}${Math.abs(I) >= 1e-9 ? (I > 0 ? ' →' : ' ←') : ''}` : '—', why: Number.isFinite(I) ? 'Conventional current; the arrow points along the wire as listed above.' : 'Not defined for this wire (it closes a loop of wires, or that part of the circuit has a problem).' });
       }
-      dl.innerHTML = rows.map((x) => `<div class="reading${x.strong ? ' is-strong' : ''}"><dt>${esc(x.label)}</dt><dd class="ds-readout"${x.why ? ` title="${esc(x.why)}"` : ''}>${esc(x.text)}</dd></div>`).join('');
+      dl.innerHTML = rows.map((x) => `<div class="reading${x.strong ? ' is-strong' : ''}"><dt>${esc(x.label)}</dt><dd class="ds-readout"${x.why ? ` title="${esc(x.why)}"` : ''}>${esc(x.text)}</dd></div>`).join('');      ui.updateLive();
     };
 
     function fmtReading(x) {

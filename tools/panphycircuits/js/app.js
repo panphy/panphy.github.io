@@ -22,6 +22,7 @@
     graphWindow: 'all',
     clipboard: null,
     lastElecKey: '',
+    pinned: new Set(),
     emptyDismissed: false
   };
   PPC.app = app;
@@ -417,7 +418,7 @@
       app.renderer.renderAll();
       ui.renderInspector();
       ui.updateStatus();
-      ui.renderScopes();
+      ui.renderLive();
       if (!document.getElementById('graph-panel').hidden) app.graph.draw(true);
     });
   };
@@ -468,7 +469,7 @@
     app.renderer.renderAll();
     ui.updateReadings();
     ui.updateStatus();
-    ui.renderScopes();
+    ui.renderLive();
     app.graph.draw(true);
     ui.announce('Simulation reset to t = 0');
   };
@@ -483,7 +484,7 @@
       if (steps > 0) {
         refreshProblems();
         app.renderer.updateDynamic();
-        ui.renderScopes();
+        ui.renderLive();
         if (!document.getElementById('graph-panel').hidden) app.graph.draw();
       }
       if (now - lastSlow > 120) { lastSlow = now; ui.updateReadings(); ui.updateStatus(); }
@@ -506,6 +507,7 @@
 
   function loadDoc(doc, opts = {}) {
     app.doc = doc;
+    app.pinned = new Set(); // ids are reused between circuits
     app.selection = { comps: new Set(), wires: new Set() };
     app.lastElecKey = '';
     app.sim = solver.createSim();
@@ -524,7 +526,7 @@
     app.renderer.renderAll();
     ui.renderLibrary();
     ui.renderInspector(true);
-    ui.renderScopes();
+    ui.renderLive();
     ui.updateStatus();
     if (!opts.cameras) app.fit();
     app.graph.draw(true);
@@ -679,7 +681,7 @@
     if (!restored) loadDoc(circuit.createDoc(), { label: 'New circuit' });
     app.setTool('select');
     if (restored) document.getElementById('dlg-start').showModal();
-    window.addEventListener('resize', () => { app.renderer.applyCamera(); app.graph.draw(true); ui.renderScopes(); });
+    window.addEventListener('resize', () => { app.renderer.applyCamera(); app.graph.draw(true); ui.renderLive(); });
     window.addEventListener('panphy:theme-change', () => { app.renderAll(); app.graph.draw(true); });
     requestAnimationFrame(frame);
   };

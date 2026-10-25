@@ -250,6 +250,8 @@ button, input, select { font: inherit; color: inherit; }
 .ppc-badge-text { font-size: 8px; font-weight: 700; fill: #2A3140; font-family: var(--font-mono); }
 .ppc-badge-icon { fill: #D9480F; }
 .ppc-badge-stroke { stroke: #D9480F; stroke-width: 1.3; }
+.ppc-badge-track { fill: #DDE1E7; }
+.ppc-badge-level { fill: #D9480F; }
 .ppc-silk .sch-line, .ppc-silk .sch-body, .ppc-silk .sch-fill { stroke: #EAF2FF; fill: none; stroke-width: 2.6; }
 .ppc-silk-text { font-size: 8px; font-weight: 800; fill: #EAF2FF; }
 .ppc-silk-title { font-size: 11px; font-weight: 800; fill: #fff; letter-spacing: 0.04em; }
@@ -484,7 +486,17 @@ button, input, select { font: inherit; color: inherit; }
 .readings-empty { margin: 0; font-size: 0.84rem; color: var(--ink-3); }
 
 /* Shown above the settings when nothing is selected. */
-/* Oscilloscope screens, pinned above the inspector cards. */
+/* Live displays: a selected meter or scope, and pinned ones above the cards. */
+.pinned-displays { flex: none; display: flex; flex-direction: column; gap: 12px; margin-bottom: 12px; }
+.live-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin: -4px 0 8px; }
+.live-head .icard-label { margin: 0; }
+.pin-btn { display: inline-flex; align-items: center; gap: 4px; min-height: 30px; padding: 2px 10px 2px 8px; border: 1px solid var(--line); border-radius: 999px; background: none; color: var(--ink-2); font-size: 0.76rem; font-weight: 600; cursor: pointer; }
+.pin-btn .icon { width: 15px; height: 15px; }
+.pin-btn:hover { background: var(--surface-3); color: var(--ink); }
+.pin-btn[aria-pressed="true"] { background: var(--accent-soft); border-color: color-mix(in srgb, var(--accent) 40%, transparent); color: var(--accent); }
+.meter-view { border-radius: 10px; background: var(--bench); padding: 6px; }
+.meter-view svg { display: block; width: 100%; height: auto; max-height: 220px; }
+.meter-view text { font-family: var(--font-body); }
 .scope-screen { display: block; width: 100%; aspect-ratio: 10 / 8; border-radius: 8px; background: #071712; box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.4); }
 .scope-legend { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 4px 10px; margin: 8px 0 0; font: 600 0.72rem var(--font-mono); color: var(--ink-2); }
 .scope-ch1 { color: #B08A00; }

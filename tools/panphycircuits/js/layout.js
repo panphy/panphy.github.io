@@ -619,12 +619,13 @@
     return cost;
   }
 
-  // On the bench, meters (and the oscilloscope) always stand upright, as they
-  // would on a real bench, so their displays read normally. Tidy never turns them.
+  // Tidy never turns these: meters on the bench (so their displays read
+  // normally) and the oscilloscope in either view (its screen and inputs).
   const UPRIGHT_ON_BENCH = ['ammeter', 'voltmeter', 'scope'];
   function keepsUpright(doc, view, id) {
     const c = circuit.getComp(doc, id);
-    return view === 'realistic' && !!c && UPRIGHT_ON_BENCH.includes(c.type);
+    if (!c) return false;
+    return c.type === 'scope' || (view === 'realistic' && UPRIGHT_ON_BENCH.includes(c.type));
   }
 
   function improveLayout(doc, view, opts = {}) {

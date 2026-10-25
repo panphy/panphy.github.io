@@ -535,13 +535,20 @@
 
   // ---------- Sensors ----------
 
-  function badge(ctx, x, y, icon, label) {
-    return up(ctx, x, y, `<rect x="-26" y="-8" width="52" height="16" rx="8" class="ppc-badge"/>${icon}<text x="5" y="0.5" class="ppc-badge-text" text-anchor="middle" dominant-baseline="central">${esc(label)}</text>`);
+  // Value badge above a sensor. With `level` (0–1) it doubles as a slider:
+  // a thin bar along its foot shows the setting, and dragging across it changes it.
+  function badge(ctx, x, y, icon, label, level) {
+    const bar = level === undefined ? '' :
+      `<rect x="-20" y="5" width="40" height="1.6" rx="0.8" class="ppc-badge-track"/><rect x="-20" y="5" width="${n(40 * Math.max(0, Math.min(1, level)))}" height="1.6" rx="0.8" class="ppc-badge-level"/>`;
+    return up(ctx, x, y, `<rect x="-26" y="-8" width="52" height="16" rx="8" class="ppc-badge"/>${icon}<text x="5" y="${level === undefined ? 0.5 : -0.5}" class="ppc-badge-text" text-anchor="middle" dominant-baseline="central">${esc(label)}</text>${bar}`);
   }
+  const LUX_MIN = 1, LUX_MAX = 10000, TEMP_MIN = -20, TEMP_MAX = 120;
 
   art.thermistor = {
     bounds: () => [-44, -38, 88, 54],
     terms: () => ({ a: [-40, 0, -1, 0], b: [40, 0, 1, 0] }),
+    // The badge stays upright when the part turns, so its slider does too.
+    actuator: () => ({ kind: 'slider', upright: true, cx: 0, cy: -27, x0: -20, x1: 20, rect: [-28, -9, 56, 18], prop: 'temp', min: TEMP_MIN, max: TEMP_MAX }),
     draw(ctx) {
       const t = ctx.p.temp;
       const icon = `<g transform="translate(-17 0)"><rect x="-1.6" y="-6" width="3.2" height="9" rx="1.6" class="ppc-badge-icon"/><circle cx="0" cy="3.5" r="3" class="ppc-badge-icon"/></g>`;
@@ -551,27 +558,33 @@
         `<ellipse cx="0" cy="0" rx="14" ry="12" fill="url(#ppc-cyl)" opacity="0.8"/>` +
         `<ellipse cx="-4" cy="-5" rx="5" ry="2.5" fill="#fff" opacity="0.25"/>` +
         utext(ctx, 0, 1, 'NTC', 'ppc-print ppc-print-light ppc-print-tiny') +
-        badge(ctx, 0, -27, icon, `${Math.round(t)} °C`);
+        badge(ctx, 0, -27, icon, `${Math.round(t)} °C`, (t - TEMP_MIN) / (TEMP_MAX - TEMP_MIN));
     }
   };
 
+  // LDR: a small round disc with a wavy orange cadmium-sulfide track between
+  // two silver contacts, under a clear coating, as on a real photoresistor.
   art.ldr = {
     bounds: () => [-44, -44, 88, 66],
     terms: () => ({ a: [-40, 0, -1, 0], b: [40, 0, 1, 0] }),
+    actuator: () => ({ kind: 'slider', upright: true, cx: 0, cy: -31, x0: -20, x1: 20, rect: [-28, -9, 56, 18], prop: 'lux', min: LUX_MIN, max: LUX_MAX, log: true }),
     draw(ctx) {
       const lux = ctx.p.lux;
-      let track = 'M -10 -10';
-      for (let i = 0; i < 6; i++) track += ` H ${i % 2 ? -10 : 10} v 4`;
-      track += ' H 10';
+      const clip = `${ctx.uid}-ldr`;
+      const track = 'M -15 -9 H 8 A 2.6 2.6 0 0 1 8 -3.8 H -8 A 2.6 2.6 0 0 0 -8 1.4 H 8 A 2.6 2.6 0 0 1 8 6.6 H -8 A 2.6 2.6 0 0 0 -8 11.8 H 15';
       const sun = `<g transform="translate(-16 0)"><circle r="3" class="ppc-badge-icon"/>${[0, 45, 90, 135, 180, 225, 270, 315].map((a) => `<line x1="${n(4.5 * Math.cos(a * Math.PI / 180))}" y1="${n(4.5 * Math.sin(a * Math.PI / 180))}" x2="${n(6.5 * Math.cos(a * Math.PI / 180))}" y2="${n(6.5 * Math.sin(a * Math.PI / 180))}" class="ppc-badge-stroke"/>`).join('')}</g>`;
+      const level = (Math.log10(Math.max(LUX_MIN, lux)) - Math.log10(LUX_MIN)) / (Math.log10(LUX_MAX) - Math.log10(LUX_MIN));
       return shadow('<circle cx="0" cy="0" r="17"/>') +
-        lead(-38, 0, -14, 0) + lead(14, 0, 38, 0) + pad(-40, 0) + pad(40, 0) +
-        `<circle cx="0" cy="0" r="17" fill="url(#ppc-ceramic)" stroke="#9E9686" stroke-width="1"/>` +
-        `<path d="M -13 -12 H 13 V 12 H -13 Z" fill="#F0E6D2"/>` +
-        `<path d="${track}" fill="none" stroke="#C74B1F" stroke-width="2.6" stroke-linejoin="round"/>` +
-        `<rect x="-14" y="-13" width="4" height="26" fill="#C9CFD6"/><rect x="10" y="-13" width="4" height="26" fill="#C9CFD6"/>` +
-        `<circle cx="0" cy="0" r="17" fill="url(#ppc-glass)" opacity="0.55"/>` +
-        badge(ctx, 0, -31, sun, `${fmtLux(lux)} lx`);
+        lead(-38, 0, -15, 0) + lead(15, 0, 38, 0) + pad(-40, 0) + pad(40, 0) +
+        `<circle cx="0" cy="0" r="17" fill="#E4DCC8" stroke="#9E9686" stroke-width="1"/>` +
+        `<clipPath id="${clip}"><circle cx="0" cy="0" r="14.5"/></clipPath>` +
+        `<g clip-path="url(#${clip})"><rect x="-15" y="-15" width="30" height="30" fill="#C3CAD2"/>` +
+        `<path d="${track}" fill="none" stroke="#B4471B" stroke-width="3" stroke-linejoin="round"/>` +
+        `<path d="${track}" fill="none" stroke="#E2753A" stroke-width="1.4" stroke-linejoin="round" opacity="0.8"/></g>` +
+        `<circle cx="0" cy="0" r="14.5" fill="none" stroke="#8F877A" stroke-width="0.8"/>` +
+        `<circle cx="0" cy="0" r="17" fill="url(#ppc-glass)" opacity="0.6"/>` +
+        `<ellipse cx="-6" cy="-8" rx="5" ry="2.4" fill="#fff" opacity="0.35"/>` +
+        badge(ctx, 0, -31, sun, `${fmtLux(lux)} lx`, level);
     }
   };
 
