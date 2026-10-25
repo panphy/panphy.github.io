@@ -499,9 +499,9 @@
       const v = view();
       if (v !== 'schematic') return false;
       const lay = app.doc.layouts[v].wires[id] || (app.doc.layouts[v].wires[id] = { pts: [] });
-      if (lay.pts.length) return false;
       const r = app.renderer.route(id);
-      if (!r || r.poly.length <= 2) return false;
+      if (!r || r.pts.length) return false;
+      if (r.poly.length <= 2) { lay.pts = []; return false; }
       lay.pts = r.poly.slice(1, -1).map((q) => [q.x, q.y]);
       return true;
     }

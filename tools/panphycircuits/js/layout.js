@@ -184,7 +184,8 @@
       if (out.length >= 2) {
         const o = out[out.length - 2];
         const col = (Math.abs(o.x - q.x) < 1e-6 && Math.abs(q.x - p.x) < 1e-6) || (Math.abs(o.y - q.y) < 1e-6 && Math.abs(q.y - p.y) < 1e-6);
-        if (col) { out[out.length - 1] = { x: p.x, y: p.y }; continue; }
+        // Keep reversals: collapsing them hides a wire doubling back over a lead.
+        if (col && (q.x - o.x) * (p.x - q.x) + (q.y - o.y) * (p.y - q.y) >= 0) { out[out.length - 1] = { x: p.x, y: p.y }; continue; }
       }
       out.push({ x: p.x, y: p.y });
     }
@@ -249,8 +250,34 @@
     return 0;
   }
 
+  // Invalid geometry must outweigh cosmetic gains in length or bend count.
+  // Also check explicit bends: moving a part can turn a previously good route
+  // into a return loop, a wire through a symbol, or an apparent short circuit.
+  function routeConflicts(poly, dA, dB, obstacles, avoid) {
+    let conflicts = 0;
+    const outward = (a, b, d) => isZero(d) || (b.x - a.x) * d.x + (b.y - a.y) * d.y > 1e-6;
+    if (poly.length < 2) return 1;
+    if (!outward(poly[0], poly[1], dA)) conflicts++;
+    if (!outward(poly[poly.length - 1], poly[poly.length - 2], dB)) conflicts++;
+    for (let i = 0; i < poly.length - 1; i++) {
+      const a = poly[i], b = poly[i + 1];
+      for (const r of obstacles) {
+        // Rotated artwork has rectangular world bounds. Its outward diagonal
+        // stub may start inside that box even though it is outside the symbol.
+        const inside = (p) => p.x >= r.x && p.x <= r.x2 && p.y >= r.y && p.y <= r.y2;
+        const diagonalStub = isDiag({ x: b.x - a.x, y: b.y - a.y }) &&
+          ((i === 0 && isDiag(dA) && inside(a) && outward(a, b, dA)) ||
+           (i === poly.length - 2 && isDiag(dB) && inside(b) && outward(b, a, dB)));
+        if (!diagonalStub && segHitsRect(a, b, r)) conflicts++;
+      }
+      for (const s of avoid) if (overlapLen(a, b, s.a, s.b) > 1) conflicts++;
+      for (let j = 0; j < i; j++) if (overlapLen(a, b, poly[j], poly[j + 1]) > 1) conflicts++;
+    }
+    return conflicts;
+  }
+
   function routeCost(poly, A, dA, B, dB, obstacles, avoid) {
-    let cost = 0;
+    let cost = 1000000 * routeConflicts(poly, dA, dB, obstacles, avoid);
     for (let i = 0; i < poly.length - 1; i++) {
       const a = poly[i], b = poly[i + 1];
       const L = Math.abs(b.x - a.x) + Math.abs(b.y - a.y);
@@ -270,7 +297,7 @@
 
   function autoOrtho(A, dA, B, dB, obstacles, avoid) {
     if (isDiag(dA) || isDiag(dB)) return withDiagStubs(A, dA, B, dB, (a, da, b, db) => autoOrtho(a, da, b, db, obstacles, avoid));
-    const S = 20;
+    const S = GRID;
     const a1 = isZero(dA) ? { x: A.x, y: A.y } : { x: A.x + dA.x * S, y: A.y + dA.y * S };
     const b1 = isZero(dB) ? { x: B.x, y: B.y } : { x: B.x + dB.x * S, y: B.y + dB.y * S };
     const xs = new Set([snap((a1.x + b1.x) / 2), a1.x, b1.x]);
@@ -321,11 +348,18 @@
     const A = override && override.a ? override.a : termWorld(doc, view, wire.a);
     const B = override && override.b ? override.b : termWorld(doc, view, wire.b);
     if (!A || !B) return null;
-    const pts = override && override.pts ? override.pts : wirePoints(doc, view, wire);
+    let pts = override && override.pts ? override.pts : wirePoints(doc, view, wire);
     const d0 = { x: A.dx, y: A.dy }, d1 = { x: B.dx, y: B.dy };
     if (view === 'schematic') {
-      const auto = !pts.length && !override;
-      const poly = auto ? autoOrtho(A, d0, B, d1, (ctx && ctx.obstacles) || obstacleRects(doc, view), (ctx && ctx.avoid) || []) : orthoRoute(A, d0, pts, B, d1);
+      const obstacles = (ctx && ctx.obstacles) || obstacleRects(doc, view);
+      const avoid = (ctx && ctx.avoid) || [];
+      let poly = orthoRoute(A, d0, pts, B, d1);
+      if (!override && (!pts.length || routeConflicts(poly, d0, d1, obstacles, avoid))) {
+        poly = autoOrtho(A, d0, B, d1, obstacles, avoid);
+        // Expose the effective route to hit-testing, splitting and bend handles.
+        // Keep saved bends intact so moving back (or Undo) restores their shape.
+        pts = [];
+      }
       return { poly, d: 'M ' + poly.map((p) => `${r2(p.x)} ${r2(p.y)}`).join(' L '), a: A, b: B, pts };
     }
     const segs = smoothRoute(A, d0, pts, B, d1);
