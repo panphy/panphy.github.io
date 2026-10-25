@@ -4,15 +4,16 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-  <meta name="description" content="Build circuits on a realistic lab bench or as a circuit diagram, then measure currents and potential differences with a genuine circuit solver. For GCSE and IB Physics.">
   <meta name="theme-color" content="#F5F6FA">
   <script src="/assets/theme.js"></script>
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
-  <meta name="robots" content="noindex">
   <link rel="stylesheet" href="/assets/standalone-top.css">
-  <title>PanPhyCircuits (beta): Circuit Builder and Simulator — PanPhy Labs</title>
+  <title>PanPhyCircuits: Circuit Builder and Simulator — PanPhy Labs</title>
+  <meta name="description" content="Free circuit builder for physics: build circuits from realistic parts or as circuit diagrams, then measure currents and potential differences with a real circuit solver. For GCSE and IB Physics.">
+  <link rel="canonical" href="https://panphy.app/tools/panphycircuits.html">
   <link rel="icon" type="image/png" href="/assets/favicon.png">
+  <script src="/assets/sw-register.js" defer></script>
   <link rel="stylesheet" href="/assets/fonts/fonts.css">
   <link rel="stylesheet" href="/assets/design.css">
   <link rel="stylesheet" href="/assets/theme-toggle.css">
@@ -28,7 +29,6 @@
       <div class="brand">
         <a href="/" aria-label="PanPhy Labs home" title="PanPhy Labs home"><img src="/assets/panphy.png" alt="PanPhy logo" width="30" height="30"></a>
         <h1 class="wordmark">PanPhyCircuits</h1>
-        <span class="beta-badge">Beta</span>
       </div>
       <div class="appbar-actions">
         <div class="appbar-group" role="group" aria-label="Circuits">
@@ -36,7 +36,6 @@
           <div class="menu-wrap">
             <button type="button" id="btn-file" class="atool" data-icon="folder" aria-haspopup="menu" aria-expanded="false" aria-controls="menu-file" title="Open, save and export"><span>File</span><svg class="icon icon-chevron" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 10l5 5 5-5"/></svg></button>
             <div id="menu-file" class="menu" role="menu" hidden>
-              <button type="button" role="menuitem" data-file="new">Clear circuit…</button>
               <button type="button" role="menuitem" data-file="open">Open file…</button>
               <button type="button" role="menuitem" data-file="save">Save as file (.ppcir)</button>
               <hr>
@@ -96,7 +95,7 @@
             <button type="button" id="btn-rotate" class="tool" data-icon="rotate" aria-label="Rotate (R)" title="Rotate 90° (R)"></button>
             <button type="button" id="btn-flip" class="tool" data-icon="flip" aria-label="Mirror (M)" title="Mirror (M)"></button>
             <button type="button" id="btn-duplicate" class="tool" data-icon="duplicate" aria-label="Duplicate (Ctrl+D)" title="Duplicate (Ctrl+D)"></button>
-            <button type="button" id="btn-delete" class="tool" data-icon="trash" aria-label="Delete (Del)" title="Delete (Del)"></button>
+            <button type="button" id="btn-delete" class="tool" data-icon="cross" aria-label="Delete (Del)" title="Delete (Del)"></button>
           </div>
           <div class="tool-group">
             <button type="button" id="btn-tidy" class="tool" data-icon="tidy" aria-label="Tidy up this view" title="Tidy up: line up parts and reroute wires in this view"></button>
@@ -112,12 +111,11 @@
             <button type="button" id="btn-snap" class="tool" data-icon="snap" aria-label="Snap to grid (G)" title="Snap to grid (G)" aria-pressed="true"></button>
             <button type="button" id="btn-graph" class="tool" data-icon="graph" aria-label="Show graph" title="Graph of meter readings" aria-pressed="false"></button>
           </div>
+          <button type="button" id="btn-clear" class="tool-clear" data-icon="trash" title="Clear circuit: remove every part and wire from both views (you can undo it)"><span>Clear</span></button>
           <button type="button" id="btn-show-inspector" class="tool tool-panel" data-icon="inspect" aria-label="Show inspector" title="Inspector"></button>
         </div>
         <div id="workspace" class="workspace view-realistic" tabindex="0" role="application" aria-label="Circuit workspace. Tab cycles through components; arrow keys move the selection." data-active-tool="select">
           <svg id="ws-svg" class="ws-svg" xmlns="http://www.w3.org/2000/svg"></svg>
-
-          <button type="button" id="btn-clear" class="canvas-clear" data-icon="broom" title="Clear circuit: remove every part and wire from both views (you can undo it)"><span>Clear</span></button>
 
           <div id="sim-status" class="sim-status" data-state="paused" role="status" aria-label="Simulation time">
             <span class="status-dot" aria-hidden="true"></span>
@@ -132,13 +130,12 @@
             <ol>
               <li><strong>Add components.</strong> Drag one from the library, or click it and then click here.</li>
               <li><strong>Connect them.</strong> Click a terminal, then another. Click a wire to branch from it.</li>
-              <li><strong>Measure.</strong> Readings update live. Press Run to advance time for capacitors, graphs and the oscilloscope.</li>
+              <li><strong>Measure.</strong> Readings update live. Press Start time only for capacitors, AC supplies, graphs and the oscilloscope.</li>
             </ol>
             <p>Switch between <strong>Realistic</strong> and <strong>Circuit diagram</strong> at any time: both show the same circuit.</p>
             <div class="empty-actions">
               <button type="button" id="empty-clean" class="ds-button ds-button-primary">Start with a clean canvas</button>
               <button type="button" id="empty-start" class="ds-button">Open a starter circuit</button>
-              <button type="button" id="empty-examples" class="ds-button">Browse examples</button>
             </div>
           </div>
 
@@ -198,7 +195,7 @@
           <li><strong>Operate:</strong> click a switch lever or logic switch, hold a push button, drag a rheostat slider or potentiometer knob. The rest of the component drags it.</li>
           <li><strong>Views:</strong> the realistic view and the circuit diagram show the same circuit. Each keeps its own arrangement; new parts appear in both.</li>
           <li><strong>Tidy up:</strong> lines up parts whose connections nearly line up, separates overlapping parts and reroutes every wire in the current view. Connections never change, and Undo restores the old layout.</li>
-          <li><strong>Clear circuit:</strong> removes every part and wire from both views (the red Clear button at the top right of the canvas, or the File menu). You can undo it.</li>
+          <li><strong>Clear circuit:</strong> removes every part and wire from both views (Clear, at the right end of the toolbar). You can undo it.</li>
         </ul>
       </section>
       <section>
@@ -213,7 +210,7 @@
           <div><dt>Arrows (Shift)</dt><dd>Nudge selection</dd></div>
           <div><dt>Tab</dt><dd>Select next component</dd></div>
           <div><dt>Enter</dt><dd>Operate selected switch</dd></div>
-          <div><dt>Space</dt><dd>Run / pause</dd></div>
+          <div><dt>Space</dt><dd>Start / pause time</dd></div>
           <div><dt>1 / 2</dt><dd>Realistic / circuit diagram</dd></div>
           <div><dt>+ / − / 0</dt><dd>Zoom, fit to circuit</dd></div>
           <div><dt>G</dt><dd>Snap to grid on/off</dd></div>
@@ -223,7 +220,7 @@
         <h3>Simulation and models</h3>
         <ul>
           <li>The solver uses modified nodal analysis: it handles any arrangement of the supported components, with Newton–Raphson iteration for diodes, LEDs, lamps and transistors.</li>
-          <li>The simulation starts paused. <strong>Run</strong> advances time in fixed steps; <strong>Pause</strong> freezes it (edits still update the readings); <strong>Reset</strong> returns to t = 0 and pauses. Switching views never changes the simulation.</li>
+          <li>Readings are worked out afresh after every change, so they are live without the clock. <strong>Start time</strong> matters only for capacitors, AC supplies, the oscilloscope and graphs, and is greyed out otherwise. It advances time in fixed steps; <strong>Pause time</strong> freezes it (edits still update the readings); <strong>Reset</strong> returns to t = 0 and pauses. Switching views never changes the simulation.</li>
           <li>Wires, ideal ammeters and closed switches have zero resistance; ideal voltmeters and oscilloscope inputs draw no current. Meters can also be given a finite resistance.</li>
           <li>Short circuits across ideal sources, and ideal sources that disagree, are reported as errors rather than given made-up readings. Separate circuits have no shared reference, so a p.d. between them is undefined.</li>
           <li>Readings use 3 significant figures; the models are educational approximations, so treat the last figure with care. Each component’s inspector explains its model.</li>
@@ -241,7 +238,6 @@
       <div class="start-actions">
         <button class="ds-button ds-button-primary" value="continue" autofocus>Continue last circuit</button>
         <button class="ds-button" value="clean">Start with a clean canvas</button>
-        <button class="ds-button" value="examples">Browse examples</button>
       </div>
     </form>
   </dialog>

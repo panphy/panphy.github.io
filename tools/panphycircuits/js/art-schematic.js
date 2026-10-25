@@ -71,9 +71,9 @@
   };
 
   art.rheostat = {
-    bounds: () => [-42, -20, 84, 38],
+    bounds: () => [-42, -23, 84, 46],
     terms: () => two(),
-    draw: () => L('M -40 0 H -20 M 20 0 H 40') + BODY(RECT) + L('M -16 14 L 15 -12') + arrowHead(19, -15.5, -40)
+    draw: () => L('M -40 0 H -20 M 20 0 H 40') + BODY(RECT) + arrow(-26, 19, 24, -19, 7)
   };
 
   art.potentiometer = {
@@ -130,6 +130,34 @@
         `<circle cx="-20" cy="0" r="3" class="sch-body"/><circle cx="20" cy="-20" r="3" class="sch-body"/><circle cx="20" cy="20" r="3" class="sch-body"/>` +
         L(toB ? 'M -17.8 1.8 L 17.5 18' : 'M -17.8 -1.8 L 17.5 -18') +
         utext(ctx, 30, -29, 'A', 'sch-pin') + utext(ctx, 30, 29, 'B', 'sch-pin');
+    }
+  };
+
+  // ---------- Fuse, motor and loudspeaker ----------
+
+  // Fuse (AQA style): a rectangle with the wire running through it, broken once blown.
+  art.fuse = {
+    bounds: () => [-42, -10, 84, 20],
+    terms: () => two(),
+    draw: (ctx) => BODY('M -20 -7 H 20 V 7 H -20 Z') + L(ctx.p.blown ? 'M -40 0 H -6 M 6 0 H 40' : 'M -40 0 H 40')
+  };
+
+  art.motor = {
+    bounds: () => [-42, -18, 84, 36],
+    terms: () => two(),
+    draw: (ctx) => L('M -40 0 H -16 M 16 0 H 40') + `<circle cx="0" cy="0" r="16" class="sch-body"/><circle cx="0" cy="0" r="16" class="sch-line"/>` +
+      utext(ctx, 0, 0.5, 'M', 'sch-letter')
+  };
+
+  // Loudspeaker: the magnet (rectangle) and cone, both leads on the magnet side.
+  // Sound waves show while an alternating current drives it.
+  art.speaker = {
+    bounds: () => [-42, -32, 84, 64],
+    terms: () => ({ a: [-40, -10, -1, 0], b: [-40, 10, -1, 0] }),
+    draw(ctx) {
+      const loud = ctx.sounding && Math.abs((ctx.st && ctx.st.i) || 0) > 1e-3;
+      return L('M -40 -10 H -14 M -40 10 H -14') + BODY('M -14 -16 H 0 V 16 H -14 Z') + BODY('M 0 -16 L 18 -30 V 30 L 0 16 Z') +
+        (loud ? `<g class="ppc-waves">${L('M 25 -9 Q 30 0 25 9')}${L('M 32 -15 Q 39 0 32 15')}</g>` : '');
     }
   };
 

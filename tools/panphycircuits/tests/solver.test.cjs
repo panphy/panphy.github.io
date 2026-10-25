@@ -1,4 +1,4 @@
-// Run with: node --test beta/panphycircuits/tests/*.test.cjs
+// Run with: node --test tools/panphycircuits/tests/*.test.cjs
 // Solver checks against independently calculated results.
 const test = require('node:test');
 const assert = require('node:assert/strict');
@@ -341,4 +341,32 @@ test('thermistor and LDR follow their models', () => {
   assert.ok(registry.models.thermistorR(10e3, 3950, 60) < 3e3);
   assert.ok(registry.models.ldrR(20e3, 0) > 9.9e5);
   assert.ok(registry.models.ldrR(20e3, 1000) < 1e3);
+});
+
+test('motor and loudspeaker act as their coil resistance; the motor turns with the current', () => {
+  const c = build({
+    comps: { B1: ['battery', { emf: 6 }], M1: ['motor', { R: 5, fullI: 0.5 }], LS1: ['speaker', { R: 8 }] },
+    wires: [['B1.p', 'M1.a'], ['M1.b', 'LS1.a'], ['LS1.b', 'B1.n']]
+  });
+  close(c.read('M1').i('a'), 6 / 13);
+  close(c.read('LS1').v('a', 'b'), 8 * 6 / 13);
+  const m = circuit.getComp(c.doc, c.ids.M1);
+  const st = registry.get('motor').state(m, c.read('M1'));
+  close(st.speed, (6 / 13) / 0.5);
+  assert.equal(st.dir, 1);
+});
+
+test('a fuse conducts below its rating and opens the circuit once blown', () => {
+  const spec = (rating, blown) => ({
+    comps: { B1: ['battery', { emf: 6 }], F1: ['fuse', { rating, blown }], R1: ['resistor', { R: 10 }] },
+    wires: [['B1.p', 'F1.a'], ['F1.b', 'R1.a'], ['R1.b', 'B1.n']]
+  });
+  const fuse = registry.get('fuse');
+  const ok = build(spec(1, false));
+  close(ok.read('R1').i('a'), 6 / 10.01, 1e-6, 'a 0.01 Ω fuse barely changes the current');
+  assert.equal(fuse.blows(circuit.getComp(ok.doc, ok.ids.F1), ok.read('F1')), false, '0.6 A is under a 1 A rating');
+  const over = build(spec(0.5, false));
+  assert.equal(fuse.blows(circuit.getComp(over.doc, over.ids.F1), over.read('F1')), true, '0.6 A is over a 0.5 A rating');
+  const blown = build(spec(0.5, true));
+  close(blown.read('R1').i('a'), 0, 1e-9, 'no current through a blown fuse');
 });

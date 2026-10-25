@@ -11,9 +11,9 @@
     rotate: '<path d="M20 11a8 8 0 10-2.3 5.7"/><path d="M20 4v7h-7"/>',
     flip: '<path d="M12 3v18"/><path d="M9 7L4 17h5zM15 7l5 10h-5z"/>',
     duplicate: '<rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V6a2 2 0 00-2-2H6a2 2 0 00-2 2v8a2 2 0 002 2h2"/>',
-    trash: '<path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13"/>',
+    trash: '<path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13M10 11v6M14 11v6"/>',
+    cross: '<path d="M6.5 6.5l11 11M17.5 6.5l-11 11"/>',
     tidy: '<path d="M4 20L15 9"/><path d="M15 3v3M13.5 4.5h3M20 8v3M18.5 9.5h3M20 2.5v2M19 3.5h2"/>',
-    broom: '<path d="M20.5 3.5l-7.2 7.2"/><path d="M11.2 9.6l3.2 3.2"/><path d="M11.4 11c-3.6-.4-6.6 1.8-7.4 5.6L3.5 20.5l3.9-.5c3.8-.8 6-3.8 5.6-7.4z"/><path d="M6.6 17.4l2.6-2.6M9.4 19.3l1.9-1.9"/>',
     undo: '<path d="M9 14L4 9l5-5"/><path d="M4 9h11a5 5 0 010 10h-3"/>',
     redo: '<path d="M15 14l5-5-5-5"/><path d="M20 9H9a5 5 0 000 10h3"/>',
     zoomIn: '<circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4M11 8v6M8 11h6"/>',
@@ -21,8 +21,8 @@
     fit: '<path d="M4 9V4h5M15 4h5v5M20 15v5h-5M9 20H4v-5"/><rect x="8" y="8" width="8" height="8" rx="1"/>',
     snap: '<path d="M6 4v8a6 6 0 0012 0V4"/><path d="M6 8h4M14 8h4"/>',
     graph: '<path d="M4 4v16h16"/><path d="M7 15c3-7 5-7 7-3s3 2 5-4"/>',
-    play: '<path d="M7 4l13 8-13 8z" fill="currentColor"/>',
-    pause: '<path d="M7 4h4v16H7zM13 4h4v16h-4z" fill="currentColor"/>',
+    stopwatch: '<circle cx="12" cy="13.5" r="7.5"/><path d="M12 13.5V9.8M10 2.8h4M18.3 7.2l1.4-1.4"/>',
+    stopwatchPause: '<circle cx="12" cy="13.5" r="7.5"/><path d="M10.2 11v5M13.8 11v5M10 2.8h4M18.3 7.2l1.4-1.4"/>',
     reset: '<path d="M4 4v6h6"/><path d="M4.5 15a8 8 0 102-8.5L4 10"/>',
     realistic: '<rect x="3" y="9" width="18" height="7" rx="3.5"/><path d="M8 9v7M11 9v7M14 9v7M1 12.5h2M21 12.5h2"/>',
     schematic: '<path d="M1 12h5l1.5-4 3 8 3-8 3 8 1.5-4h5"/>',
@@ -39,7 +39,7 @@
     return `<svg class="icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">${ICONS[name] || ''}</svg>`;
   }
 
-  const GROUP_ORDER = ['Sources', 'Resistors', 'Lamps and switches', 'Meters', 'Diodes', 'Sensors', 'Capacitors', 'Transistors', 'Logic', 'Wiring'];
+  const GROUP_ORDER = ['Sources', 'Resistors', 'Lamps and switches', 'Output devices', 'Meters', 'Diodes', 'Sensors', 'Capacitors', 'Transistors', 'Logic', 'Wiring'];
 
   function createUI(app) {
     const $ = (id) => document.getElementById(id);
@@ -242,7 +242,7 @@
       const plot = def.props.find((p) => p.key === 'plot');
       const head = `<div class="insp-head"><div class="insp-art">${miniArt(c.type, app.doc.view)}</div><div><p class="icard-label">${esc(def.group)}${def.category === 'ext' ? ' · extension' : ''}</p><h2 class="insp-title">${esc(def.name)}</h2></div></div>` +
         (c.type !== 'junction' ? `<div class="row label-row"><label for="f-label">Label</label><input id="f-label" type="text" maxlength="${circuit.LABEL_MAX}" value="${esc(c.label)}" data-label="1" autocomplete="off"></div>` : '') +
-        `<div class="mini-actions">${actButton('rotate', 'rotate', 'Rotate')}${actButton('flip', 'flip', 'Mirror')}${actButton('duplicate', 'duplicate', 'Duplicate')}${actButton('delete', 'trash', 'Delete', true)}</div>`;
+        `<div class="mini-actions">${actButton('rotate', 'rotate', 'Rotate')}${actButton('flip', 'flip', 'Mirror')}${actButton('duplicate', 'duplicate', 'Duplicate')}${actButton('delete', 'cross', 'Delete', true)}</div>`;
       return card('', head) +
         card('Readings', `<dl id="readings"></dl>${plot ? field(plot, c.props.plot, c.id) : ''}`, 'readings-card') +
         (props.length ? card('Properties', props.map((p) => field(p, c.props[p.key], c.id)).join('')) : '') +
@@ -271,7 +271,7 @@
       const sw = circuit.WIRE_COLORS.map((col) => `<button type="button" class="swatch${w.color === col ? ' is-on' : ''}" data-color="${col}" style="--c:${PPC.render.WIRE_HEX[col]}" aria-label="${col}" aria-pressed="${w.color === col}" title="${col}"></button>`).join('');
       return card('', `<div class="insp-head"><div><p class="icard-label">Connection</p><h2 class="insp-title">Wire</h2></div></div>` +
           `<p class="wire-ends">${esc(endName(w.a))} <span aria-hidden="true">→</span> ${esc(endName(w.b))}</p>` +
-          `<div class="mini-actions">${actButton('straighten', 'fit', 'Remove bends')}${actButton('delete', 'trash', 'Delete', true)}</div>`) +
+          `<div class="mini-actions">${actButton('straighten', 'fit', 'Remove bends')}${actButton('delete', 'cross', 'Delete', true)}</div>`) +
         card('Readings', '<dl id="readings"></dl>', 'readings-card') +
         card('Color', `<div class="swatches" role="group" aria-label="Wire color">${sw}</div>`) +
         `<details class="icard model-note"><summary>Editing wires</summary><p>Drag the wire to add a bend, drag a square to move a bend (double-click removes it) and drag a round end onto another terminal to reconnect it. Bends are kept separately in each view.</p></details>`;
@@ -279,7 +279,7 @@
 
     function multiInspector(nc, nw) {
       return card('', `<div class="insp-head"><div><p class="icard-label">Selection</p><h2 class="insp-title">${nc} component${nc === 1 ? '' : 's'}${nw ? `, ${nw} wire${nw === 1 ? '' : 's'}` : ''}</h2></div></div>` +
-        `<div class="mini-actions">${actButton('rotate', 'rotate', 'Rotate')}${actButton('duplicate', 'duplicate', 'Duplicate')}${actButton('delete', 'trash', 'Delete', true)}</div>`);
+        `<div class="mini-actions">${actButton('rotate', 'rotate', 'Rotate')}${actButton('duplicate', 'duplicate', 'Duplicate')}${actButton('delete', 'cross', 'Delete', true)}</div>`);
     }
 
     function circuitInspector() {
@@ -294,7 +294,7 @@
           `<div class="row"><label for="s-dt">Time step</label><select id="s-dt" data-setting="dt">${opt('auto', s.dt, `Auto (${units.fmtSI(app.sim.dt, 's', 2)})`)}${[1e-5, 1e-4, 1e-3, 1e-2].map((v) => opt(v, s.dt, units.fmtSI(v, 's', 1))).join('')}</select></div>`) +
         card('Display', toggle('showLabels', 'Labels and values') + toggle('currentFlow', 'Animate current') + toggle('wireColorsInDiagram', 'Wire colors in diagram') +
           `<div class="row"><label for="s-logic">Logic symbols</label><select id="s-logic" data-setting="logicStyle">${opt('distinctive', s.logicStyle, 'UK school shapes')}${opt('iec', s.logicStyle, 'IEC rectangles')}</select></div>`) +
-        `<details class="icard model-note"><summary>About the simulation</summary><p><strong>Run</strong> advances time in fixed steps; <strong>Pause</strong> freezes time, but edits still update the readings for the frozen state; <strong>Reset</strong> returns to t = 0 with every capacitor at its initial p.d. and clears the graphs. Switching views never changes the simulation.</p>` +
+        `<details class="icard model-note"><summary>About the simulation</summary><p>Readings are worked out afresh after every change, so they are live without the clock. <strong>Start time</strong> is needed only for capacitors, AC supplies, the oscilloscope and graphs: it advances time in fixed steps. <strong>Pause time</strong> freezes it, but edits still update the readings for the frozen state; <strong>Reset</strong> returns to t = 0 with every capacitor at its initial p.d. and clears the graphs. Switching views never changes the simulation.</p>` +
           `<p>The automatic time step is about 1/100 of the shortest RC time constant (and of an AC period). Results do not depend on your device's frame rate.</p>` +
           `<p>Animated current shows conventional current as yellow dashes moving from + to − through the external circuit. Their speed only hints at the size of the current; real charge carriers drift far more slowly.</p>` +
           `<p>Editing the circuit while it runs keeps time and stored charge. Saved files and autosave keep the circuit, not the live state: opening one starts at t = 0.</p></details>`;
@@ -431,11 +431,16 @@
     ui.updateStatus = function () {
       const sim = app.sim;
       const run = $('btn-run');
-      run.innerHTML = icon(sim.running ? 'pause' : 'play') + `<span>${sim.running ? 'Pause' : 'Run'}</span>`;
+      // Time stops by itself if the last time-dependent part goes.
+      const timeMatters = app.needsTime();
+      if (sim.running && !timeMatters) sim.setRunning(false);
+      const runHtml = icon(sim.running ? 'stopwatchPause' : 'stopwatch') + `<span>${sim.running ? 'Pause time' : 'Start time'}</span>`;
+      if (run.dataset.html !== runHtml) { run.innerHTML = runHtml; run.dataset.html = runHtml; }
       run.setAttribute('aria-pressed', String(sim.running));
-      run.title = sim.running ? 'Pause: freeze simulation time (Space)' : 'Run: advance simulation time (Space)';
-      $('sim-status').dataset.state = sim.running ? (sim.behind ? 'behind' : 'running') : 'paused';
-      $('sim-state').textContent = sim.running ? 'Running' : 'Paused';
+      run.setAttribute('aria-disabled', String(!timeMatters));
+      run.title = !timeMatters ? app.NO_TIME_MSG : sim.running ? 'Pause time: freeze the clock; edits still update the readings (Space)' : 'Start time: let capacitors charge, AC supplies alternate and graphs fill (Space)';
+      $('sim-status').dataset.state = !timeMatters ? 'live' : sim.running ? (sim.behind ? 'behind' : 'running') : 'paused';
+      $('sim-state').textContent = !timeMatters ? 'Live' : sim.running ? 'Running' : 'Paused';
       $('sim-status').title = sim.running && sim.behind ? 'Running slower than the chosen speed: this device cannot keep up.' : '';
       $('sim-time').textContent = 't = ' + fmtTime(sim.t);
       $('view-switch').dataset.view = app.doc.view;

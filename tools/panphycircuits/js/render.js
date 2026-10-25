@@ -11,7 +11,7 @@
     red: '#D7372B', black: '#2A2D33', blue: '#2F6FD6', green: '#2E9D4A',
     yellow: '#E8B923', orange: '#EB7A1E', white: '#F2F4F7', purple: '#7E4CC9'
   };
-  const DYNAMIC = new Set(['lamp', 'led', 'ammeter', 'voltmeter', 'scope', 'dcsupply', 'logic_in', 'logic_out', 'pushswitch',
+  const DYNAMIC = new Set(['lamp', 'led', 'ammeter', 'voltmeter', 'scope', 'dcsupply', 'logic_in', 'logic_out', 'pushswitch', 'fuse', 'motor', 'speaker',
     'gate_and', 'gate_or', 'gate_not', 'gate_nand', 'gate_nor', 'gate_xor', 'gate_xnor']);
 
   function shade(hex, f) {
@@ -67,6 +67,8 @@
         c, p: c.props, uid, r: 0, f: false, view: v,
         st: r && def.state ? def.state(c, r) : {},
         pressed: !!app.sim.pressed[c.id],
+        // A loudspeaker sounds only while an alternating current drives it.
+        sounding: !!(app.sim.running && app.sim.compiled && Number.isFinite(app.sim.compiled.acMin)),
         logicStyle: app.doc.settings.logicStyle,
         logic: { in: (res && res.inputs[c.id]) || {}, out: (res && res.logic[c.id]) || {} }
       };

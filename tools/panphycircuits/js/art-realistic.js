@@ -246,6 +246,77 @@
     }
   };
 
+  // ---------- Fuse, motor and loudspeaker ----------
+
+  // Glass cartridge fuse between brass caps; once blown the wire is broken and sooty.
+  art.fuse = {
+    bounds: () => [-62, -30, 124, 44],
+    terms: () => ({ a: [-60, 0, -1, 0], b: [60, 0, 1, 0] }),
+    draw(ctx) {
+      const blown = !!ctx.p.blown;
+      const wire = blown
+        ? `<path d="M -24 0 Q -15 -2.5 -7 0.5 M 7 -0.5 Q 15 2.5 24 0" fill="none" stroke="#9AA2AC" stroke-width="1.3"/><ellipse cx="0" cy="0" rx="12" ry="5.5" fill="#2B2B2B" opacity="0.45"/>`
+        : `<path d="M -24 0 Q -12 -3 0 0 T 24 0" fill="none" stroke="#9AA2AC" stroke-width="1.3"/>`;
+      const icon = `<g transform="translate(-17 0)"><rect x="-4" y="-2.5" width="8" height="5" rx="1" class="ppc-badge-icon"/></g>`;
+      return shadow(roundRect(-36, -9, 72, 18, 4, '')) +
+        lead(-58, 0, -36, 0) + lead(36, 0, 58, 0) + pad(-60, 0) + pad(60, 0) +
+        roundRect(-26, -8, 52, 16, 3, 'fill="#DCE6EE" fill-opacity="0.6" stroke="#9AA6B2" stroke-width="0.8"') + wire +
+        roundRect(-26, -8, 52, 16, 3, 'fill="url(#ppc-glass)"') +
+        roundRect(-37, -9, 12, 18, 2, 'fill="url(#ppc-brass)" stroke="#7A5717" stroke-width="0.8"') +
+        roundRect(25, -9, 12, 18, 2, 'fill="url(#ppc-brass)" stroke="#7A5717" stroke-width="0.8"') +
+        badge(ctx, 0, -21, icon, blown ? 'blown' : fmtAmps(ctx.p.rating));
+    }
+  };
+  function fmtAmps(a) {
+    return a >= 1 ? `${trimNum(Math.round(a * 10) / 10)} A` : `${Math.round(a * 1000)} mA`;
+  }
+
+  // Small DC motor on a base, with a propeller on its shaft. The propeller spins
+  // with a CSS animation whose speed follows the current (in a few steps, so the
+  // animation is not restarted on every time step).
+  art.motor = {
+    bounds: () => [-56, -34, 112, 68],
+    terms: () => ({ a: [-50, 0, -1, 0], b: [50, 0, 1, 0] }),
+    draw(ctx) {
+      const st = ctx.st || {};
+      const level = Math.round(Math.min(1.5, st.speed || 0) * 4) / 4;
+      const spin = level > 0 ? ` class="ppc-spin" style="animation-duration:${n(0.9 / level)}s;animation-direction:${st.dir < 0 ? 'reverse' : 'normal'}"` : '';
+      return shadow(roundRect(-44, -28, 88, 56, 10, '')) +
+        tag(-50, 0, -1) + tag(50, 0, 1) +
+        roundRect(-44, -28, 88, 56, 10, 'fill="#2F3744" stroke="#151A21" stroke-width="1"') +
+        roundRect(-44, -28, 88, 56, 10, 'fill="url(#ppc-top)"') +
+        `<path d="M -40 0 H -26 M 26 0 H 40" stroke="url(#ppc-brass)" stroke-width="5"/>` +
+        screw(-34, 0, 5) + screw(34, 0, 5) +
+        `<circle cx="0" cy="0" r="23" fill="url(#ppc-case)" stroke="#6B7380" stroke-width="1"/>` +
+        `<circle cx="0" cy="0" r="17" fill="none" stroke="#A3AAB4" stroke-width="1"/>` +
+        `<g${spin}><path d="M -3 -3 C -9 -22 9 -22 3 -3 Z M 3 3 C 9 22 -9 22 -3 3 Z" fill="#D9483B" stroke="#8E241B" stroke-width="0.8"/>` +
+        `<path d="M -2 -6 C -4 -16 4 -16 2 -6" fill="none" stroke="#FFB3A8" stroke-width="1" opacity="0.7"/></g>` +
+        `<circle cx="0" cy="0" r="4" fill="url(#ppc-screw)" stroke="#59616B" stroke-width="0.8"/>`;
+    }
+  };
+
+  // Loudspeaker on a base. The cone buzzes and sound waves show while an
+  // alternating current drives it; a steady current makes no sound.
+  art.speaker = {
+    bounds: () => [-56, -48, 112, 82],
+    terms: () => ({ a: [-50, 0, -1, 0], b: [50, 0, 1, 0] }),
+    draw(ctx) {
+      const loud = ctx.sounding && Math.abs((ctx.st && ctx.st.i) || 0) > 1e-3;
+      const waves = loud ? `<g class="ppc-waves" fill="none" stroke="#2F7ED8" stroke-width="2" stroke-linecap="round"><path d="M -10 -33 Q 0 -38 10 -33"/><path d="M -17 -40 Q 0 -47 17 -40"/></g>` : '';
+      return shadow(roundRect(-44, -28, 88, 56, 10, '')) +
+        tag(-50, 0, -1) + tag(50, 0, 1) +
+        roundRect(-44, -28, 88, 56, 10, 'fill="#2C2F36" stroke="#14161A" stroke-width="1"') +
+        roundRect(-44, -28, 88, 56, 10, 'fill="url(#ppc-top)"') +
+        `<path d="M -40 0 H -30 M 30 0 H 40" stroke="url(#ppc-brass)" stroke-width="5"/>` +
+        screw(-36, 0, 4.5) + screw(36, 0, 4.5) +
+        `<circle cx="0" cy="0" r="25" fill="#3A3F48" stroke="#0E1013" stroke-width="1.2"/>` +
+        `<g${loud ? ' class="ppc-buzz"' : ''}><circle cx="0" cy="0" r="21" fill="#1E2227"/>` +
+        `<circle cx="0" cy="0" r="16" fill="none" stroke="#3A3F47" stroke-width="1.2"/><circle cx="0" cy="0" r="11" fill="none" stroke="#3A3F47" stroke-width="1.2"/>` +
+        `<circle cx="0" cy="0" r="7" fill="#2C3138"/><ellipse cx="-2" cy="-2.5" rx="3" ry="1.8" fill="#fff" opacity="0.18"/></g>` +
+        waves;
+    }
+  };
+
   art.switch = {
     bounds: () => [-64, -46, 128, 72],
     terms: () => ({ a: [-60, 0, -1, 0], b: [60, 0, 1, 0] }),

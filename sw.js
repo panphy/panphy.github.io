@@ -1,4 +1,4 @@
-const BUILD_ID = '2026-10-25T01:29:08Z';
+const BUILD_ID = '2026-10-25T12:33:56Z';
 const CACHE_PREFIX = 'panphy-labs';
 const PRECACHE_NAME = `${CACHE_PREFIX}-precache-${BUILD_ID}`;
 const RUNTIME_CACHE = `${CACHE_PREFIX}-runtime-${BUILD_ID}`;
@@ -136,6 +136,22 @@ const ASSETS_TO_CACHE = [
   '/tools/motion_tracker/js/ui.js',
   '/tools/motion_tracker/js/video.js',
   '/tools/motion_tracker/sample-bouncing-ball.mp4',
+  '/tools/panphycircuits.html',
+  '/tools/panphycircuits/css/app.css',
+  '/tools/panphycircuits/js/app.js',
+  '/tools/panphycircuits/js/art-common.js',
+  '/tools/panphycircuits/js/art-realistic.js',
+  '/tools/panphycircuits/js/art-schematic.js',
+  '/tools/panphycircuits/js/circuit.js',
+  '/tools/panphycircuits/js/editor.js',
+  '/tools/panphycircuits/js/examples.js',
+  '/tools/panphycircuits/js/graph.js',
+  '/tools/panphycircuits/js/layout.js',
+  '/tools/panphycircuits/js/registry.js',
+  '/tools/panphycircuits/js/render.js',
+  '/tools/panphycircuits/js/solver.js',
+  '/tools/panphycircuits/js/ui.js',
+  '/tools/panphycircuits/js/units.js',
   'https://cdn.jsdelivr.net/npm/chart.js@4.5.1/dist/chart.umd.min.js',
   '/tools/sound_analyzer.html',
   '/tools/tone_generator.html',
