@@ -1,4 +1,4 @@
-// Run with: node --test beta/panphycircuits/tests/*.test.cjs
+// Run with: node --test tools/panphycircuits/tests/*.test.cjs
 // Document, layout and view-synchronization checks (no browser needed).
 const test = require('node:test');
 const assert = require('node:assert/strict');
@@ -145,14 +145,18 @@ test('tidy up never makes a layout worse, keeps every connection and leaves no o
   const check = (doc, view, label) => {
     const wiresBefore = JSON.stringify(doc.wires);
     const other = JSON.stringify(doc.layouts[otherView(view)]);
-    const before = layout.tidyCost(doc, view);
+    const beforeReport = {};
+    const before = layout.tidyCost(doc, view, null, null, beforeReport);
     layout.tidy(doc, view);
     assert.equal(JSON.stringify(doc.wires), wiresBefore, `${label}: connections unchanged`);
     assert.equal(JSON.stringify(doc.layouts[otherView(view)]), other, `${label}: other view untouched`);
     assert.ok(doc.wires.every((w) => doc.layouts[view].wires[w.id].pts.length === 0), `${label}: bends removed`);
     const report = {};
     const after = layout.tidyCost(doc, view, null, null, report);
-    assert.ok(after <= before + 0.5, `${label}: cost ${before} -> ${after}`);
+    // Spreading a small circuit to the minimum size lengthens wires, so the
+    // check is on what makes a layout untidy, not on the total cost.
+    const untidy = (r) => r.overlaps + r.crossings + r.overParts;
+    assert.ok(untidy(report) <= untidy(beforeReport), `${label}: ${JSON.stringify(beforeReport)} -> ${JSON.stringify(report)}`);
     assert.equal(report.overlaps, 0, `${label}: overlapping parts`);
     return { before, after };
   };
@@ -163,8 +167,19 @@ test('tidy up never makes a layout worse, keeps every connection and leaves no o
       for (const pl of Object.values(doc.layouts[view].comps)) { pl.x += Math.round((rand() - 0.5) * 160); pl.y += Math.round((rand() - 0.5) * 160); pl.r = Math.floor(rand() * 4); }
       for (const w of doc.wires) doc.layouts[view].wires[w.id] = { pts: [[rand() * 300, rand() * 300]] };
       const r = check(doc, view, `${ex.title} (${view}, messy)`);
-      assert.ok(r.after < r.before * 0.75, `${ex.title} (${view}): messy layout clearly improved (${r.before} -> ${r.after})`);
+      assert.ok(r.after < r.before, `${ex.title} (${view}): messy layout improved (${r.before} -> ${r.after})`);
     }
+  }
+});
+
+test('tidy up keeps small circuits at a readable size', () => {
+  for (const view of layout.VIEWS) {
+    const doc = examples.build(examples.list[0], view);
+    for (const pl of Object.values(doc.layouts[view].comps)) { pl.x = Math.round(pl.x * 0.3); pl.y = Math.round(pl.y * 0.3); }
+    layout.tidy(doc, view);
+    const b = layout.viewBounds(doc, view);
+    const [w, h] = view === 'schematic' ? [280, 200] : [360, 240];
+    assert.ok(b.x2 - b.x >= w - 20 && b.y2 - b.y >= h - 20, `${view}: ${b.x2 - b.x} x ${b.y2 - b.y}`);
   }
 });
 

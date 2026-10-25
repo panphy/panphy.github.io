@@ -427,6 +427,67 @@
     help: 'A changeover switch: the common terminal connects to contact A or contact B. Useful for charging then discharging a capacitor.'
   });
 
+  // ---------- Fuse, motor and loudspeaker ----------
+
+  const FUSE_R = 0.01; // a fuse wire's resistance is tiny next to everything else
+  define('fuse', {
+    name: 'Fuse', group: 'Lamps and switches', prefix: 'F', keywords: 'fuse protection rating blow cartridge',
+    terminals: [{ id: 'a', name: 'Terminal 1' }, { id: 'b', name: 'Terminal 2' }],
+    props: [
+      { key: 'rating', label: 'Current rating', unit: 'A', kind: 'number', default: 1, min: 0.05, max: 13, log: true },
+      { key: 'blown', label: 'Blown', kind: 'bool', default: false, operational: true, help: 'Switch off to fit a new fuse.' }
+    ],
+    compile(c, T, b) { if (!c.props.blown) b.R(T.a, T.b, FUSE_R); },
+    readings(c, r) {
+      const out = twoTerminalReadings(c, r);
+      out.unshift({ key: 'state', label: 'Fuse wire', text: c.props.blown ? 'melted (open circuit)' : 'intact' });
+      return out;
+    },
+    // Checked after every solve: a current above the rating melts the wire.
+    blows: (c, r) => !c.props.blown && Math.abs(r.i('a')) > c.props.rating,
+    valueText: (c) => `${fmtSI(c.props.rating, 'A', 3, { trim: true })}${c.props.blown ? ', blown' : ''}`,
+    help: `A thin wire (${FUSE_R} Ω) that melts when the current is above its rating, which breaks the circuit. Here it blows as soon as the current goes over the rating; real fuses take a moment, longer for a small overload. Switch off “Blown” to fit a new fuse.`
+  });
+
+  define('motor', {
+    name: 'Motor', group: 'Output devices', prefix: 'M', keywords: 'dc motor spin rotate electric',
+    terminals: [{ id: 'a', name: 'Terminal 1' }, { id: 'b', name: 'Terminal 2' }],
+    props: [
+      { key: 'R', label: 'Coil resistance', unit: 'Ω', kind: 'number', default: 5, min: 0.5, max: 1000, log: true },
+      { key: 'fullI', label: 'Current at full speed', unit: 'A', kind: 'number', default: 0.5, min: 0.01, max: 5, log: true }
+    ],
+    compile(c, T, b) { b.R(T.a, T.b, c.props.R); },
+    readings(c, r) {
+      const out = twoTerminalReadings(c, r);
+      const s = this.state(c, r);
+      out.push({ key: 'turn', label: 'Rotor', text: s.speed < 0.02 ? 'not turning' : `turning ${s.dir > 0 ? 'clockwise' : 'counterclockwise'}` });
+      return out;
+    },
+    state(c, r) {
+      const i = r.i('a');
+      if (!Number.isFinite(i)) return { speed: 0, dir: 1 };
+      return { speed: Math.min(1.5, Math.abs(i) / c.props.fullI), dir: i >= 0 ? 1 : -1 };
+    },
+    valueText: (c) => fmtSI(c.props.R, 'Ω', 3, { trim: true }),
+    help: 'A DC motor, modeled as its coil resistance (as if it turns at a steady speed under a steady load). The rotor turns faster with more current and turns the other way when the current reverses. The back emf of a real spinning motor is not modeled.'
+  });
+
+  define('speaker', {
+    name: 'Loudspeaker', group: 'Output devices', prefix: 'LS', keywords: 'loudspeaker speaker sound audio',
+    terminals: [{ id: 'a', name: 'Terminal 1' }, { id: 'b', name: 'Terminal 2' }],
+    props: [
+      { key: 'R', label: 'Resistance', unit: 'Ω', kind: 'number', default: 8, min: 2, max: 64, step: 1 }
+    ],
+    compile(c, T, b) { b.R(T.a, T.b, c.props.R); },
+    readings: (c, r) => twoTerminalReadings(c, r),
+    state(c, r) {
+      const i = r.i('a');
+      return { i: Number.isFinite(i) ? i : 0 };
+    },
+    valueText: (c) => fmtSI(c.props.R, 'Ω', 3, { trim: true }),
+    help: 'Modeled as its coil resistance (8 Ω is typical). It makes a sound only when the current changes, for example from an AC supply with time running. A steady direct current just holds the cone pushed out or pulled in, which you cannot hear.'
+  });
+
   // ---------- Meters ----------
 
   const meterModeProp = {

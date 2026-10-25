@@ -1060,6 +1060,7 @@
                     <button class="filter-button" type="button" data-topic-filter="sound" aria-pressed="false">Sound</button>
                     <button class="filter-button" type="button" data-topic-filter="mechanics" aria-pressed="false">Mechanics</button>
                     <button class="filter-button" type="button" data-topic-filter="matter" aria-pressed="false">Matter</button>
+                    <button class="filter-button" type="button" data-topic-filter="electricity" aria-pressed="false">Electricity</button>
                     <button class="filter-button" type="button" data-topic-filter="electromagnetism" aria-pressed="false">Electromagnetism</button>
                     <button class="filter-button" type="button" data-topic-filter="atomic" aria-pressed="false">Atomic &amp; nuclear</button>
                     <button class="filter-button" type="button" data-topic-filter="space" aria-pressed="false">Space</button>
@@ -1082,7 +1083,7 @@
             </div>
             <div class="section-summary">
                 <p>Practical browser-based tools for writing, measuring, plotting, and investigating.</p>
-                <span class="section-count">5 apps</span>
+                <span class="section-count">6 apps</span>
             </div>
         </div>
         <div class="grid-wrap">
@@ -1149,6 +1150,27 @@
                 <div class="card-body">
                     <h3>Motion Tracker</h3>
                     <p>Step through video frames, track objects, and extract motion data.</p>
+                </div>
+            </a>
+            <a class="card" href="/tools/panphycircuits.html" data-topic="electricity">
+                <div class="card-art" aria-hidden="true">
+                    <svg viewBox="0 0 360 168" focusable="false">
+                        <path class="a-ink" stroke-width="2.5" d="M70 38H170M190 38H290V72M290 100V132H194M166 132H70V38"/>
+                        <path class="a-ink" stroke-width="2.5" d="M170 22v32"/>
+                        <path class="a-ink" stroke-width="6" d="M190 29v18"/>
+                        <circle class="a-pri" cx="290" cy="86" r="14" stroke-width="2.5"/>
+                        <path class="a-pri" stroke-width="2.5" d="M280 76l20 20M300 76l-20 20"/>
+                        <circle class="a-acc" cx="180" cy="132" r="14" stroke-width="2.5"/>
+                        <text class="a-t" x="175" y="137">A</text>
+                        <text class="a-ts" x="98" y="90">I = 0.25 A</text>
+                    </svg>
+                </div>
+                <div class="card-meta">
+                    <span class="card-type">Circuit builder</span>
+                </div>
+                <div class="card-body">
+                    <h3>PanPhyCircuits</h3>
+                    <p>Build circuits from real parts or as diagrams, then measure currents and p.d.s.</p>
                 </div>
             </a>
             <a class="card" href="/tools/sound_analyzer.html" data-topic="sound waves">
@@ -2135,6 +2157,24 @@
                 '/tools/motion_tracker/js/ui.js',
                 '/tools/motion_tracker/js/video.js',
                 'https://cdn.jsdelivr.net/npm/chart.js@4.5.1/dist/chart.umd.min.js'
+            ],
+            '/tools/panphycircuits.html': [
+                '/tools/panphycircuits.html',
+                '/tools/panphycircuits/css/app.css',
+                '/tools/panphycircuits/js/app.js',
+                '/tools/panphycircuits/js/art-common.js',
+                '/tools/panphycircuits/js/art-realistic.js',
+                '/tools/panphycircuits/js/art-schematic.js',
+                '/tools/panphycircuits/js/circuit.js',
+                '/tools/panphycircuits/js/editor.js',
+                '/tools/panphycircuits/js/examples.js',
+                '/tools/panphycircuits/js/graph.js',
+                '/tools/panphycircuits/js/layout.js',
+                '/tools/panphycircuits/js/registry.js',
+                '/tools/panphycircuits/js/render.js',
+                '/tools/panphycircuits/js/solver.js',
+                '/tools/panphycircuits/js/ui.js',
+                '/tools/panphycircuits/js/units.js'
             ],
             '/tools/sound_analyzer.html': ['/tools/sound_analyzer.html'],
             '/tools/tone_generator.html': ['/tools/tone_generator.html'],

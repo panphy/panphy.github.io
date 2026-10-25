@@ -70,7 +70,6 @@ button, input, select { font: inherit; color: inherit; }
 .brand a { display: inline-flex; }
 .brand img { display: block; width: 30px; height: 30px; }
 .wordmark { margin: 0; font-family: var(--font-display); font-size: 1.02rem; font-weight: 600; letter-spacing: -0.03em; white-space: nowrap; }
-.beta-badge { font: 600 0.62rem var(--font-mono); letter-spacing: 0.08em; text-transform: uppercase; color: var(--brand); border: 1px solid var(--brand-soft); background: var(--brand-soft); padding: 2px 6px; border-radius: 999px; }
 .appbar-actions { display: flex; align-items: center; gap: 2px; margin-left: auto; }
 .appbar-group { display: flex; align-items: center; gap: 2px; margin-right: 6px; padding-right: 6px; border-right: 1px solid var(--line); }
 .atool {
@@ -128,15 +127,22 @@ button, input, select { font: inherit; color: inherit; }
 .view-switch button:focus-visible { outline: 3px solid var(--focus); outline-offset: 1px; }
 
 .sim-controls { display: inline-flex; align-items: center; gap: 8px; }
+/* Time controls: quiet tools, like the toolbar's, because most circuits
+   never need them. Start time keeps a fixed width so its label can change. */
 .btn-run, .btn-reset {
-  display: inline-flex; align-items: center; gap: 7px; min-height: 38px; padding: 4px 14px; border-radius: 999px; cursor: pointer;
-  font-weight: 700; font-size: 0.86rem; border: 1px solid var(--line-strong); background: var(--surface); white-space: nowrap;
+  display: inline-flex; align-items: center; gap: 6px; min-height: 36px; padding: 4px 10px; border-radius: 10px; cursor: pointer;
+  font-weight: 600; font-size: 0.84rem; border: 1px solid transparent; background: none; color: var(--ink); white-space: nowrap;
 }
-.btn-run { background: var(--good); border-color: transparent; color: #fff; width: 96px; justify-content: center; }
-[data-theme="dark"] .btn-run { color: #04150C; }
-.btn-run[aria-pressed="true"] { background: var(--warn); }
-.btn-run .icon { width: 16px; height: 16px; stroke: none; }
-.btn-reset:hover { background: var(--surface-3); }
+.btn-run { width: 118px; justify-content: flex-start; }
+.btn-run:hover:not([aria-disabled="true"]), .btn-reset:hover { background: var(--surface-3); }
+.btn-run .icon { width: 18px; height: 18px; color: var(--good); }
+.btn-run[aria-pressed="true"] { background: color-mix(in srgb, var(--warn) 14%, transparent); border-color: color-mix(in srgb, var(--warn) 40%, transparent); }
+.btn-run[aria-pressed="true"] .icon { color: var(--warn); }
+.btn-reset { color: var(--ink-2); }
+/* Greyed out (not disabled, so its tooltip and click explanation still work)
+   when nothing in the circuit depends on time. */
+.btn-run[aria-disabled="true"] { color: var(--ink-3); cursor: help; }
+.btn-run[aria-disabled="true"] .icon { color: var(--ink-3); }
 .btn-reset .icon { width: 17px; height: 17px; }
 /* Run state and simulation time, in the bottom-right corner of the canvas. */
 .sim-status {
@@ -151,6 +157,7 @@ button, input, select { font: inherit; color: inherit; }
 .status-dot { width: 9px; height: 9px; border-radius: 50%; background: var(--ink-3); }
 .sim-status[data-state="running"] .status-dot { background: var(--good); box-shadow: 0 0 0 3px color-mix(in srgb, var(--good) 25%, transparent); animation: pulse 1.4s ease-in-out infinite; }
 .sim-status[data-state="behind"] .status-dot { background: var(--warn); }
+.sim-status[data-state="live"] .status-dot { background: var(--accent); }
 @keyframes pulse { 50% { box-shadow: 0 0 0 6px color-mix(in srgb, var(--good) 0%, transparent); } }
 
 /* Library */
@@ -210,6 +217,13 @@ button, input, select { font: inherit; color: inherit; }
 .comp:hover .act { fill: var(--select-soft); stroke: var(--select); stroke-width: 1; stroke-dasharray: 3 3; }
 .comp.is-problem .art { filter: drop-shadow(0 0 4px #E03131) drop-shadow(0 0 1px #E03131); }
 .ppc-glow { pointer-events: none; mix-blend-mode: screen; }
+/* Motor rotor and loudspeaker cone: visual cues only, independent of sim time. */
+.ppc-spin { transform-box: fill-box; transform-origin: center; animation: ppc-spin 1s linear infinite; }
+@keyframes ppc-spin { to { transform: rotate(360deg); } }
+.ppc-buzz { transform-box: fill-box; transform-origin: center; animation: ppc-buzz 0.08s ease-in-out infinite alternate; }
+@keyframes ppc-buzz { to { transform: scale(1.05); } }
+.ppc-waves { animation: ppc-waves 0.6s ease-in-out infinite alternate; }
+@keyframes ppc-waves { from { opacity: 0.35; } to { opacity: 1; } }
 [data-theme="light"] .view-schematic .ppc-glow { mix-blend-mode: multiply; }
 
 /* Text inside artwork */
@@ -325,21 +339,20 @@ button, input, select { font: inherit; color: inherit; }
 .tool[aria-pressed="true"] { background: var(--accent-soft); color: var(--accent); border-color: color-mix(in srgb, var(--accent) 35%, transparent); }
 .tool:disabled { opacity: 0.35; cursor: default; }
 .tool-panel { display: none; }
-#btn-show-inspector { margin-left: auto; }
+#btn-show-inspector { margin-left: 2px; }
 
-/* Clear circuit: a red pill in the top-right corner of the canvas. */
-.canvas-clear {
-  position: absolute; top: 12px; right: 12px; z-index: 5; display: inline-flex; align-items: center; gap: 7px; height: 42px; padding: 0 16px 0 13px;
-  border: 0; border-radius: 999px; background: #D92D20; color: #fff; font-weight: 700; font-size: 0.9rem; cursor: pointer;
-  box-shadow: 0 2px 10px rgba(217, 45, 32, 0.32);
+/* Clear circuit: red text at the right end of the toolbar, as in PanPhyPlot. */
+.tool-clear {
+  display: inline-flex; align-items: center; gap: 6px; flex: none; margin-left: auto; min-height: var(--tool-size); padding: 6px 10px;
+  border: 1px solid transparent; border-radius: 10px; background: none; color: var(--danger); font-weight: 600; font-size: 0.86rem; cursor: pointer; white-space: nowrap;
 }
-.canvas-clear .icon { width: 19px; height: 19px; }
-.canvas-clear:hover:not(:disabled) { background: #B42318; }
-.canvas-clear:focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; }
-.canvas-clear:disabled { opacity: 0.4; cursor: default; box-shadow: none; }
+.tool-clear .icon { width: 18px; height: 18px; }
+.tool-clear:hover:not(:disabled) { background: var(--danger-soft); }
+.tool-clear:focus-visible { outline: 3px solid var(--focus); outline-offset: 1px; }
+.tool-clear:disabled { opacity: 0.4; cursor: default; }
 
 .error-banner {
-  position: absolute; top: 66px; left: 50%; transform: translateX(-50%); z-index: 5; display: flex; align-items: center; gap: 8px; max-width: min(640px, calc(100% - 24px));
+  position: absolute; top: 12px; left: 50%; transform: translateX(-50%); z-index: 5; display: flex; align-items: center; gap: 8px; max-width: min(640px, calc(100% - 24px));
   padding: 9px 14px; border-radius: 12px; border: 1px solid color-mix(in srgb, var(--danger) 40%, transparent); background: var(--surface); color: var(--danger);
   box-shadow: var(--shadow-1); font-size: 0.84rem; font-weight: 600; text-align: left; cursor: pointer;
 }
@@ -561,11 +574,11 @@ button, input, select { font: inherit; color: inherit; }
 }
 
 @media (max-width: 440px) {
-  .wordmark, .beta-badge { display: none; }
+  .wordmark { display: none; }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .status-dot { animation: none !important; }
+  .status-dot, .ppc-spin, .ppc-buzz, .ppc-waves { animation: none !important; }
   .view-switch::before, .view-switch button { transition: none; }
   .library, .inspector { transition: none; }
 }

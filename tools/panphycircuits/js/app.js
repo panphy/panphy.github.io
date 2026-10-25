@@ -170,7 +170,7 @@
     if (!b || rect.width < 10) { k.z = 1; k.tx = rect.width / 2; k.ty = rect.height / 2; app.renderer.applyCamera(); ui.updateStatus(); return; }
     const padX = 120, padY = 70;
     const bw = b.x2 - b.x + 2 * padX, bh = b.y2 - b.y + 2 * padY;
-    // Keep clear of the Clear button (top right) and the time chip (bottom right).
+    // Keep clear of the time chip in the bottom-right corner.
     const avoidTop = CANVAS_TOP, avoidBottom = 54;
     const z = Math.min(2, Math.max(0.25, Math.min(rect.width / bw, (rect.height - avoidTop - avoidBottom) / bh)));
     k.z = z;
@@ -180,6 +180,14 @@
     app.onZoom();
   };
   app.onZoom = function () { ui.updateStatus(); };
+  // Whether the circuit fills less than a third of the canvas each way.
+  function looksSmall() {
+    const b = layout.viewBounds(app.doc, app.doc.view);
+    if (!b) return false;
+    const k = app.cameras[app.doc.view];
+    const rect = document.getElementById('ws-svg').getBoundingClientRect();
+    return (b.x2 - b.x) * k.z < rect.width / 3 && (b.y2 - b.y) * k.z < rect.height / 3;
+  }
   // Whether everything in the current view is visible below the toolbar.
   function fitsInView() {
     const b = layout.viewBounds(app.doc, app.doc.view);
@@ -188,7 +196,7 @@
     const rect = document.getElementById('ws-svg').getBoundingClientRect();
     return b.x * k.z + k.tx >= 0 && b.x2 * k.z + k.tx <= rect.width && b.y * k.z + k.ty >= CANVAS_TOP && b.y2 * k.z + k.ty <= rect.height;
   }
-  const CANVAS_TOP = 60;
+  const CANVAS_TOP = 16;
 
   // ---------- Selection, tools ----------
 
@@ -351,7 +359,32 @@
 
   // ---------- Problems ----------
 
+  // A fuse carrying more than its rated current melts: mark it blown and
+  // re-solve with the circuit broken there. Blowing only ever opens circuits,
+  // so this settles after at most one pass per fuse.
+  function blowFuses() {
+    const res = app.sim.result;
+    if (!res) return;
+    const blown = app.doc.components.filter((c) => {
+      const def = registry.get(c.type);
+      return def.blows && def.blows(c, solver.reader(res, c));
+    });
+    if (!blown.length) return;
+    for (const c of blown) c.props.blown = true;
+    app.lastElecKey = JSON.stringify([app.doc.components, app.doc.wires]);
+    app.sim.setDoc(app.doc);
+    app.rev++;
+    blowFuses();
+    const names = blown.map((c) => c.label).join(', ');
+    if (ui) {
+      ui.toast(`${names} blew: the current went above ${blown.length > 1 ? 'their ratings' : 'its rating'}. Switch off “Blown” in the inspector to fit a new fuse.`);
+      ui.announce(`Fuse ${names} blew`);
+    }
+    if (app.renderer) app.renderAll();
+  }
+
   function refreshProblems() {
+    blowFuses();
     app.problemComps = new Set();
     const res = app.sim.result;
     if (res) for (const e of res.errors) for (const id of e.comps) app.problemComps.add(id);
@@ -411,11 +444,22 @@
 
   // ---------- Simulation ----------
 
+  // The solver finds the steady state after every change, so readings are live
+  // without the clock. Time only matters for capacitors, AC supplies, the
+  // oscilloscope and a graph of readings against time.
+  app.NO_TIME_MSG = 'Nothing in this circuit changes with time, so its readings are already live. Time matters for capacitors, AC supplies, the oscilloscope and the graph.';
+  app.needsTime = function () {
+    const comp = app.sim.compiled;
+    if (comp && (comp.hasCaps || Number.isFinite(comp.acMin))) return true;
+    if (app.doc.components.some((c) => c.type === 'scope')) return true;
+    return app.graphOpen() && app.doc.components.some((c) => registry.get(c.type).meter && c.props.plot);
+  };
   app.toggleRun = function () {
+    if (!app.sim.running && !app.needsTime()) { ui.toast(app.NO_TIME_MSG); return; }
     app.sim.setRunning(!app.sim.running);
     lastFrame = performance.now();
     ui.updateStatus();
-    ui.announce(app.sim.running ? 'Simulation running' : 'Simulation paused');
+    ui.announce(app.sim.running ? 'Time running' : 'Time paused');
   };
   app.resetSim = function () {
     app.sim.reset();
@@ -529,7 +573,7 @@
       app.history.stack.unshift({ snap: before, label: 'Before opening file', view: app.doc.view, time: Date.now() });
       app.history.index = 1;
       if (result.warnings.length) ui.message('Opened with changes', ['Some parts of the file could not be used:'].concat(result.warnings.slice(0, 12), result.warnings.length > 12 ? [`…and ${result.warnings.length - 12} more.`] : []));
-      else ui.toast(`Opened ${file.name}. Press Run to start the simulation.`);
+      else ui.toast(`Opened ${file.name}.`);
     };
     reader.onerror = () => ui.message('Could not open the file', ['The file could not be read.']);
     reader.readAsText(file);
@@ -570,7 +614,7 @@
     const v = app.doc.view;
     if (!layout.tidy(app.doc, v)) { ui.toast(`The ${viewName(v)} is already tidy.`); return; }
     app.commit('Tidy up');
-    if (!fitsInView()) app.fit();
+    if (!fitsInView() || looksSmall()) app.fit();
     ui.toast(`Tidied the ${viewName(v)}: parts lined up and wires rerouted. The other view keeps its own layout.`, { label: 'Undo', run: () => app.undo() });
   };
   // Start again with nothing on the workspace. Display settings are kept, and
@@ -658,7 +702,6 @@
     $('graph-window').addEventListener('change', (e) => { app.graphWindow = e.target.value; app.graph.draw(true); });
     $('btn-examples').addEventListener('click', () => $('dlg-examples').showModal());
     $('examples-list').addEventListener('click', (e) => { const b = e.target.closest('[data-example]'); if (b) app.loadExample(Number(b.dataset.example)); });
-    $('empty-examples').addEventListener('click', () => $('dlg-examples').showModal());
     $('empty-start').addEventListener('click', () => app.loadExample(0));
     $('empty-clean').addEventListener('click', () => {
       app.emptyDismissed = true;
@@ -672,7 +715,6 @@
     $('dlg-start').addEventListener('close', () => {
       const choice = $('dlg-start').returnValue;
       if (choice === 'clean') app.startClean();
-      else if (choice === 'examples') $('dlg-examples').showModal();
     });
     const menu = $('menu-file'), fileBtn = $('btn-file');
     const closeMenu = () => { menu.hidden = true; fileBtn.setAttribute('aria-expanded', 'false'); };
@@ -695,8 +737,7 @@
       if (!b) return;
       closeMenu();
       const a = b.dataset.file;
-      if (a === 'new') app.newCircuit();
-      else if (a === 'open') $('file-input').click();
+      if (a === 'open') $('file-input').click();
       else if (a === 'save') app.exportFile();
       else if (a === 'svg') app.exportImage('svg');
       else if (a === 'png') app.exportImage('png');

@@ -663,6 +663,13 @@
       if (pl) { pl.x = snap(pl.x); pl.y = snap(pl.y); }
     }
     improveLayout(doc, view, opts);
+    for (const w of doc.wires) lay.wires[w.id] = { pts: [] };
+    {
+      const untidy = () => { const r = {}; tidyCost(doc, view, null, null, r); return r.overlaps + r.crossings + r.overParts; };
+      const saved = JSON.stringify(lay.comps), was = untidy();
+      for (let i = 0; i < 3; i++) ensureMinimumSize(doc, view);
+      if (untidy() > was) lay.comps = JSON.parse(saved);
+    }
     // Keep each finishing step only if it does not make the layout worse.
     for (const step of [() => alignParts(doc, view, tol), () => resolveOverlaps(doc, view, doc.components.map((c) => c.id), [], 4)]) {
       const saved = JSON.stringify(lay.comps), cost = tidyCost(doc, view);
@@ -671,6 +678,32 @@
     }
     for (const w of doc.wires) lay.wires[w.id] = { pts: [] };
     return JSON.stringify(lay) !== before;
+  }
+
+  // The search favors short wires, which can squeeze a small circuit into a
+  // tiny knot. Spread it evenly about its center until it is at least the size
+  // of a hand-drawn example; spreading keeps its shape, so nothing new crosses.
+  const MIN_SIZE = { schematic: [280, 200], realistic: [360, 240] };
+  function ensureMinimumSize(doc, view) {
+    const lay = doc.layouts[view];
+    const ids = doc.components.filter((c) => lay.comps[c.id]).map((c) => c.id);
+    if (ids.length < 2) return;
+    const b = viewBounds(doc, view);
+    if (!b) return;
+    const [minW, minH] = MIN_SIZE[view] || MIN_SIZE.schematic;
+    const cx = (b.x + b.x2) / 2, cy = (b.y + b.y2) / 2;
+    // Scale the spread of the parts' centers, not their sizes.
+    const xs = ids.map((id) => lay.comps[id].x), ys = ids.map((id) => lay.comps[id].y);
+    const spreadX = Math.max(...xs) - Math.min(...xs), spreadY = Math.max(...ys) - Math.min(...ys);
+    const w = b.x2 - b.x, h = b.y2 - b.y;
+    const sx = w < minW && spreadX > 1 ? (spreadX + (minW - w)) / spreadX : 1;
+    const sy = h < minH && spreadY > 1 ? (spreadY + (minH - h)) / spreadY : 1;
+    if (sx === 1 && sy === 1) return;
+    for (const id of ids) {
+      const pl = lay.comps[id];
+      pl.x = snap(cx + (pl.x - cx) * sx);
+      pl.y = snap(cy + (pl.y - cy) * sy);
+    }
   }
 
   function alignParts(doc, view, tol) {
