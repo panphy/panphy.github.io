@@ -480,6 +480,8 @@ button, input, select { font: inherit; color: inherit; }
 .reading:last-child { border-bottom: 0; }
 .reading dt { color: var(--ink-2); }
 .reading dd { margin: 0; text-align: right; font-size: 0.88rem; white-space: nowrap; font-variant-numeric: tabular-nums; }
+.reading.is-direction { display: grid; grid-template-columns: minmax(0, 1fr); gap: 2px; line-height: 1.4; }
+.reading.is-direction dd { text-align: left; min-height: 1.4em; }
 .reading.is-strong { padding: 2px 0 8px; }
 .reading.is-strong dd { font-size: 1.25rem; font-weight: 600; }
 .readings-card .toggle { border-top: 1px solid var(--line); margin-top: 6px; }
