@@ -94,7 +94,7 @@
     {
       title: 'LED with a current-limiting resistor',
       summary: 'A red LED and a 330 Ω resistor in series. Reverse the LED to see that it only conducts one way.',
-      tip: 'Select the LED and use Mirror (M) to reverse it, or change the resistor to see the current change.',
+      tip: 'Select the LED and rotate it 180° (press R four times) to reverse it, or change the resistor to see the current change.',
       comps: [
         ['B1', 'battery', { emf: 6 }, [0, -170, 0], [0, -100, 0]],
         ['R1', 'resistor', { R: 330 }, [230, -40, 1], [160, -20, 1]],

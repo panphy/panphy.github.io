@@ -42,7 +42,7 @@ Adding a component: define it in `registry.js` (terminals, props, `compile` into
 node --test tools/panphycircuits/tests/*.test.cjs
 ```
 
-`solver.test.cjs` compares the solver with hand calculations (series/parallel, bridge, switches, polarity, shorts, conflicting sources, RC against the exponential, diode, LED, lamp, transistors, every gate truth table, latch, AC r.m.s.). `model.test.cjs` covers terminal mapping, rotation, junction splitting, view sync, examples and import safety. `scope-scale.test.cjs` covers automatic scope scaling, manual restoration and saved settings. All run on every pull request (`.github/workflows/checks.yml`).
+`solver.test.cjs` compares the solver with hand calculations (series/parallel, bridge, switches, polarity, shorts, conflicting sources, RC against the exponential, diode, LED, lamp, transistors, every gate truth table, latch, AC r.m.s.). `model.test.cjs` covers terminal mapping, rotation (including 45° steps), junction splitting, view sync, examples and import safety. `scope-scale.test.cjs` covers automatic scope scaling, manual restoration and saved settings. All run on every pull request (`.github/workflows/checks.yml`).
 
 ## Requirement checklist
 

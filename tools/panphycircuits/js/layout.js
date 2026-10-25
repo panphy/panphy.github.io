@@ -17,17 +17,28 @@
 
   function snap(v, step = GRID) { return Math.round(v / step) * step; }
 
+  // Rotation r counts clockwise quarter turns in half-quarter (45°) steps: 0, 0.5 … 3.5.
+  // Exact [cos, sin] values keep the right angles exact and diagonal ties stable.
+  const S = Math.SQRT1_2;
+  const ROT = [[1, 0], [S, S], [0, 1], [-S, S], [-1, 0], [-S, -S], [0, -1], [S, -S]];
+  function rotStep(r) { return ((Math.round((r || 0) * 2) % 8) + 8) % 8; }
+  function cosSin(r) { return ROT[rotStep(r)]; }
+  function normRot(r) { return rotStep(r) / 2; }
+  // Nearest quarter turn (0–3), for placing labels and badges.
+  function quarterTurn(r) { return Math.round(normRot(r)) & 3; }
+
   // Local -> world for a placement {x, y, r (quarter turns), f (mirror x)}.
   function xform(pl, x, y) {
     if (pl.f) x = -x;
-    let X = x, Y = y;
-    switch (pl.r & 3) {
-      case 1: X = -y; Y = x; break;
-      case 2: X = -x; Y = -y; break;
-      case 3: X = y; Y = -x; break;
-      default: break;
-    }
-    return { x: pl.x + X, y: pl.y + Y };
+    const [c, s] = cosSin(pl.r);
+    return { x: pl.x + c * x - s * y, y: pl.y + s * x + c * y };
+  }
+  // World -> local, the inverse of xform.
+  function toLocal(pl, x, y) {
+    const [c, s] = cosSin(pl.r);
+    const dx = x - pl.x, dy = y - pl.y;
+    const X = c * dx + s * dy, Y = -s * dx + c * dy;
+    return { x: pl.f ? -X : X, y: Y };
   }
   function xdir(pl, dx, dy) {
     const p = xform({ x: 0, y: 0, r: pl.r, f: pl.f }, dx, dy);
@@ -77,7 +88,7 @@
   }
 
   function svgTransform(pl) {
-    return `translate(${pl.x} ${pl.y}) rotate(${(pl.r & 3) * 90}) scale(${pl.f ? -1 : 1} 1)`;
+    return `translate(${pl.x} ${pl.y}) rotate(${normRot(pl.r) * 90}) scale(${pl.f ? -1 : 1} 1)`;
   }
 
   // ---------- Wire routes ----------
@@ -1239,7 +1250,7 @@
   }
 
   const api = {
-    GRID, VIEWS, artFor, snap, xform, xdir, placement, termWorld, terminalsLocal, localBounds, compBounds, svgTransform,
+    GRID, VIEWS, artFor, snap, xform, toLocal, xdir, normRot, quarterTurn, placement, termWorld, terminalsLocal, localBounds, compBounds, svgTransform,
     wireRoute, routeAll, wirePoints, orthoRoute, nearestOnPoly, pointAtFraction, splitWire, generateLayout, placeInOtherViews,
     resolveOverlaps, viewBounds, overlaps, tidy, tidyCost, distributeRuns, seriesParallel, layoutSeriesParallel
   };

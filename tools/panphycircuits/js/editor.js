@@ -201,7 +201,11 @@
 
     // ---------- Pointer handling ----------
 
-    svg.addEventListener('contextmenu', (e) => e.preventDefault());
+    svg.addEventListener('contextmenu', (e) => {
+      e.preventDefault();
+      // Right-click cancels a wire being drawn, also while one is dragged out.
+      if (ed.wiring) { ed.drag = null; cancelWiring(); }
+    });
 
     svg.addEventListener('pointerdown', (e) => {
       if (e.button !== 0 && e.button !== 1 && e.button !== 2) return;
@@ -212,6 +216,7 @@
       if (pointers.size > 2) return;
       const p = toWorld(e.clientX, e.clientY);
       const hit = hitOf(e);
+      if (ed.wiring && e.button === 2) { ed.drag = null; cancelWiring(); return; }
       if (app.placing) {
         placeAt(app.placing, p);
         if (!e.shiftKey) app.setPlacing(null);
@@ -573,16 +578,7 @@
     }
 
     function toLocal(pl, p) {
-      let x = p.x - pl.x, y = p.y - pl.y;
-      let X, Y;
-      switch (pl.r & 3) {
-        case 1: X = y; Y = -x; break;
-        case 2: X = -x; Y = -y; break;
-        case 3: X = -y; Y = x; break;
-        default: X = x; Y = y;
-      }
-      if (pl.f) X = -X;
-      return { x: X, y: Y };
+      return layout.toLocal(pl, p.x, p.y);
     }
 
     function setLive(id, key, value) {
@@ -676,7 +672,6 @@
       }
       const lower = k.toLowerCase();
       if (lower === 'r') { app.rotateSelection(e.shiftKey ? -1 : 1); return; }
-      if (lower === 'm') { app.flipSelection(); return; }
       if (lower === 'w') { app.setTool('wire'); return; }
       if (lower === 'v') { app.setTool('select'); return; }
       if (lower === 'h') { app.setTool('pan'); return; }

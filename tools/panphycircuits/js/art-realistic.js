@@ -501,7 +501,7 @@
         roundRect(-17, -7.5, 34, 15, 6, 'fill="#1E2025"') +
         `<rect x="8" y="-7.5" width="5" height="15" fill="#C8CDD3"/>` +
         roundRect(-17, -7.5, 34, 15, 6, 'fill="url(#ppc-cyl)"') +
-        utext(ctx, -30, -12, 'A', 'ppc-pin') + utext(ctx, 30, -12, 'K', 'ppc-pin');
+        utext(ctx, -30, -12, '+', 'ppc-pin') + utext(ctx, 30, -12, '−', 'ppc-pin');
     }
   };
 
@@ -523,7 +523,7 @@
         `<path d="${domeD}" fill="url(#ppc-cylv)" opacity="0.65"/>` +
         `<path d="M -7 -33 Q -6 -42 0 -44" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" opacity="0.6"/>` +
         (lit ? `<circle cx="0" cy="-30" r="${n(20 + 22 * Math.min(1, b))}" fill="url(#ppc-glow-${ctx.p.color in colors ? ctx.p.color : 'red'})" opacity="${n(Math.min(1, b))}" class="ppc-glow"/>` : '') +
-        utext(ctx, -22, -9, 'A+', 'ppc-pin') + utext(ctx, 22, -9, 'K−', 'ppc-pin');
+        utext(ctx, -22, -9, '+', 'ppc-pin') + utext(ctx, 22, -9, '−', 'ppc-pin');
     }
   };
 
@@ -565,8 +565,9 @@
   }
   // A vertical sensor needs room for the full width of its upright pill.
   function sensorBadgeY(rotation, normalY) {
-    if (rotation & 1) return -55;
-    return (rotation & 3) === 2 ? -50 : normalY;
+    const q = Math.round(rotation || 0) & 3;
+    if (q & 1) return -55;
+    return q === 2 ? -50 : normalY;
   }
   const BADGE_BAR = [-9, 22];
   const LUX_MIN = 1, LUX_MAX = 10000, TEMP_MIN = -20, TEMP_MAX = 120;

@@ -88,8 +88,8 @@
             <button type="button" class="tool" data-tool="pan" data-icon="pan" aria-label="Pan (H)" title="Pan (H)"></button>
           </div>
           <div class="tool-group">
-            <button type="button" id="btn-rotate" class="tool" data-icon="rotate" aria-label="Rotate (R)" title="Rotate 90° (R)"></button>
-            <button type="button" id="btn-flip" class="tool" data-icon="flip" aria-label="Mirror (M)" title="Mirror (M)"></button>
+            <button type="button" id="btn-rotate-ccw" class="tool" data-icon="rotateCcw" aria-label="Rotate 45° counterclockwise (Shift+R)" title="Rotate 45° counterclockwise (Shift+R)"></button>
+            <button type="button" id="btn-rotate" class="tool" data-icon="rotate" aria-label="Rotate 45° clockwise (R)" title="Rotate 45° clockwise (R)"></button>
             <button type="button" id="btn-duplicate" class="tool" data-icon="duplicate" aria-label="Duplicate (Ctrl+D)" title="Duplicate (Ctrl+D)"></button>
             <button type="button" id="btn-delete" class="tool" data-icon="cross" aria-label="Delete (Del)" title="Delete (Del)"></button>
           </div>
@@ -200,7 +200,7 @@
         <h3>Building</h3>
         <ul>
           <li><strong>Add:</strong> drag a card from the library, or click a card and then click the workspace (Shift-click to place several). Enter on a focused card places it in the middle.</li>
-          <li><strong>Wire:</strong> click a terminal, then another terminal. Click empty space on the way to add bends. Click an existing wire to join it with a junction dot. Double-click to end a wire at a free point. Esc cancels.</li>
+          <li><strong>Wire:</strong> click a terminal, then another terminal. Click empty space on the way to add bends. Click an existing wire to join it with a junction dot. Double-click to end a wire at a free point. Right-click or Esc cancels.</li>
           <li><strong>Edit wires:</strong> drag a wire to bend it, drag a square to move a bend (double-click removes it), drag a round end onto another terminal to reconnect it.</li>
           <li><strong>Graph:</strong> opening the graph switches on “Plot on graph” for the selected meters, or for every meter if none is selected and none is plotted yet.</li>
           <li><strong>Operate:</strong> click a switch lever or logic switch, hold a push button, drag a rheostat slider or potentiometer knob. The rest of the component drags it.</li>
@@ -213,8 +213,7 @@
         <h3>Keyboard</h3>
         <dl class="keys">
           <div><dt>V / W / H</dt><dd>Select, wire, pan tools</dd></div>
-          <div><dt>R, Shift+R</dt><dd>Rotate selection</dd></div>
-          <div><dt>M</dt><dd>Mirror selection</dd></div>
+          <div><dt>R, Shift+R</dt><dd>Rotate selection 45° clockwise, counterclockwise</dd></div>
           <div><dt>Del</dt><dd>Delete selection</dd></div>
           <div><dt>Ctrl+Z / Ctrl+Shift+Z</dt><dd>Undo / redo</dd></div>
           <div><dt>Ctrl+D, Ctrl+C, Ctrl+V</dt><dd>Duplicate, copy, paste</dd></div>

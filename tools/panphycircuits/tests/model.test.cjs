@@ -37,6 +37,25 @@ test('terminal positions follow rotation and mirroring exactly', () => {
   assert.equal(layout.termWorld(doc, 'schematic', { c: r.id, t: 'a' }).x, 40, 'mirror swaps sides');
 });
 
+test('45° rotations place terminals on the diagonal, invert exactly and survive a save', () => {
+  const doc = circuit.createDoc();
+  const r = circuit.addComponent(doc, 'resistor');
+  const d = 40 * Math.SQRT1_2;
+  for (const [rot, expectA] of [[0.5, [-d, -d]], [1.5, [d, -d]], [2.5, [d, d]], [3.5, [-d, d]]]) {
+    place(doc, r, 'schematic', 100, 200, rot);
+    const pl = doc.layouts.schematic.comps[r.id];
+    const a = layout.termWorld(doc, 'schematic', { c: r.id, t: 'a' });
+    assert.ok(Math.abs(a.x - 100 - expectA[0]) < 1e-9 && Math.abs(a.y - 200 - expectA[1]) < 1e-9, `rotation ${rot}`);
+    const back = layout.toLocal(pl, a.x, a.y);
+    assert.ok(Math.abs(back.x + 40) < 1e-9 && Math.abs(back.y) < 1e-9, `inverse at rotation ${rot}`);
+  }
+  assert.equal(layout.normRot(-0.5), 3.5);
+  assert.equal(layout.normRot(4), 0);
+  place(doc, r, 'schematic', 100, 200, 1.5);
+  const back = circuit.importDoc(circuit.exportDoc(doc));
+  assert.equal(back.doc.layouts.schematic.comps[r.id].r, 1.5, '45° rotation kept on import');
+});
+
 test('transistor pinout changes the realistic leg, never the electrical terminal', () => {
   const doc = circuit.createDoc();
   const q = circuit.addComponent(doc, 'npn');

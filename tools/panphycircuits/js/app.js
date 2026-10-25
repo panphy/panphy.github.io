@@ -263,20 +263,9 @@
       const pl = app.doc.layouts[v].comps[id];
       const c = circuit.getComp(app.doc, id);
       if (!pl || c.type === 'junction') continue;
-      pl.r = (pl.r + dir + 4) & 3; n++;
+      pl.r = layout.normRot(pl.r + dir * 0.5); n++;
     }
     if (n) app.commit('Rotate');
-  };
-  app.flipSelection = function () {
-    const v = app.doc.view;
-    let n = 0;
-    for (const id of app.selection.comps) {
-      const pl = app.doc.layouts[v].comps[id];
-      const c = circuit.getComp(app.doc, id);
-      if (!pl || c.type === 'junction') continue;
-      pl.f = !pl.f; n++;
-    }
-    if (n) app.commit('Mirror');
   };
 
   // A fragment is a self-contained copy of components, the wires between them
@@ -718,7 +707,7 @@
     $('btn-reset').addEventListener('click', app.resetSim);
     document.querySelectorAll('[data-tool]').forEach((b) => b.addEventListener('click', () => app.setTool(b.dataset.tool)));
     $('btn-rotate').addEventListener('click', () => app.rotateSelection(1));
-    $('btn-flip').addEventListener('click', () => app.flipSelection());
+    $('btn-rotate-ccw').addEventListener('click', () => app.rotateSelection(-1));
     $('btn-duplicate').addEventListener('click', () => app.duplicate());
     $('btn-delete').addEventListener('click', () => app.deleteSelection());
     $('btn-undo').addEventListener('click', () => app.undo());
