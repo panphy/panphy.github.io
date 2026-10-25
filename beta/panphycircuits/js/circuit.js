@@ -1,4 +1,4 @@
-// PanPhy Circuits: the circuit document.
+// PanPhyCircuits: the circuit document.
 // One shared electrical circuit (components, properties, wires between named
 // terminals) plus an independent layout for each view. Electrical connectivity is
 // explicit: a wire joins two terminals by id, never by position.
@@ -250,11 +250,11 @@
   function importDoc(input) {
     let data = input;
     if (typeof input === 'string') {
-      if (input.length > 5e6) throw new Error('The file is too large to be a PanPhy Circuits document.');
+      if (input.length > 5e6) throw new Error('The file is too large to be a PanPhyCircuits document.');
       try { data = JSON.parse(input); } catch (e) { throw new Error('The file is not valid JSON.'); }
     }
     if (!data || typeof data !== 'object' || Array.isArray(data)) throw new Error('The file does not contain a circuit.');
-    if (data.format !== FORMAT) throw new Error('This is not a PanPhy Circuits file (missing "format": "panphy-circuits").');
+    if (data.format !== FORMAT) throw new Error('This is not a PanPhyCircuits file (missing "format": "panphy-circuits").');
     if (!Number.isInteger(data.version) || data.version < 1) throw new Error('The file has no valid format version.');
     if (data.version > VERSION) throw new Error(`The file uses format version ${data.version}; this app reads version ${VERSION}. Please update the app.`);
     if (!Array.isArray(data.components) || !Array.isArray(data.wires)) throw new Error('The file is missing its component or wire list.');

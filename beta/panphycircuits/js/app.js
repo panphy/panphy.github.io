@@ -1,4 +1,4 @@
-// PanPhy Circuits: application state and glue.
+// PanPhyCircuits: application state and glue.
 // Document and history (shared circuit + both layouts), the simulation loop
 // (fixed time steps, independent of frame rate), autosave and file handling.
 (function (root) {
@@ -169,7 +169,7 @@
     if (!b || rect.width < 10) { k.z = 1; k.tx = rect.width / 2; k.ty = rect.height / 2; app.renderer.applyCamera(); ui.updateStatus(); return; }
     const padX = 120, padY = 70;
     const bw = b.x2 - b.x + 2 * padX, bh = b.y2 - b.y + 2 * padY;
-    const avoidTop = 60, avoidBottom = 10;
+    const avoidTop = toolbarBottom() + 6, avoidBottom = 10;
     const z = Math.min(2, Math.max(0.25, Math.min(rect.width / bw, (rect.height - avoidTop - avoidBottom) / bh)));
     k.z = z;
     k.tx = rect.width / 2 - ((b.x + b.x2) / 2) * z;
@@ -178,6 +178,25 @@
     app.onZoom();
   };
   app.onZoom = function () { ui.updateStatus(); };
+  // Whether everything in the current view is visible below the toolbar.
+  function fitsInView() {
+    const b = layout.viewBounds(app.doc, app.doc.view);
+    if (!b) return true;
+    const k = app.cameras[app.doc.view];
+    const rect = document.getElementById('ws-svg').getBoundingClientRect();
+    return b.x * k.z + k.tx >= 0 && b.x2 * k.z + k.tx <= rect.width && b.y * k.z + k.ty >= toolbarBottom() && b.y2 * k.z + k.ty <= rect.height;
+  }
+  // The toolbar wraps onto more rows in narrow windows; keep the error banner
+  // and fitted circuits clear of it.
+  function toolbarBottom() {
+    const ws = document.getElementById('workspace').getBoundingClientRect();
+    return document.querySelector('.toolbar').getBoundingClientRect().bottom - ws.top;
+  }
+  function trackToolbar() {
+    const set = () => document.getElementById('workspace').style.setProperty('--toolbar-bottom', Math.round(toolbarBottom()) + 'px');
+    set();
+    if (typeof ResizeObserver === 'function') new ResizeObserver(set).observe(document.querySelector('.toolbar'));
+  }
 
   // ---------- Selection, tools ----------
 
@@ -377,9 +396,22 @@
     });
   };
 
+  // Opening the graph plots meters straight away: the selected meters, or, with
+  // none selected, every meter unless the user has already chosen some to plot.
+  app.graphOpen = () => !document.getElementById('graph-panel').hidden;
+  function autoPlot() {
+    const meters = app.doc.components.filter((c) => registry.get(c.type).meter);
+    const selected = meters.filter((c) => app.selection.comps.has(c.id));
+    const pick = selected.length ? selected : meters.some((c) => c.props.plot) ? [] : meters;
+    if (!pick.some((c) => !c.props.plot)) return;
+    for (const c of pick) c.props.plot = true;
+    app.operationalChanged();
+  }
   app.showGraph = function (on) {
     const panel = document.getElementById('graph-panel');
+    const opening = on && panel.hidden;
     panel.hidden = !on;
+    if (opening) autoPlot();
     document.body.classList.toggle('graph-open', on);
     ui.updateStatus();
     if (on) requestAnimationFrame(() => app.graph.draw(true));
@@ -446,7 +478,7 @@
       if (k && Number.isFinite(k.z) && Number.isFinite(k.tx) && Number.isFinite(k.ty)) app.cameras[v] = { tx: k.tx, ty: k.ty, z: Math.min(4, Math.max(0.2, k.z)), fitted: true };
       else app.cameras[v] = { tx: 0, ty: 0, z: 1, fitted: false };
     }
-    app.sim.setRunning(opts.run !== false);
+    app.sim.setRunning(opts.run === true);
     resetHistory(opts.label || 'Open');
     app.rev++;
     refreshProblems();
@@ -471,24 +503,41 @@
     setTimeout(() => URL.revokeObjectURL(a.href), 2000);
   }
 
-  app.exportJson = function () {
-    download('panphy-circuit.json', 'application/json', JSON.stringify(circuit.exportDoc(app.doc), null, 1));
-    ui.toast('Circuit saved as panphy-circuit.json (the live simulation state is not included).');
+  // Circuits are saved as .ppcir files (JSON inside). Where the browser offers a
+  // save dialog the user picks the name; otherwise the file is downloaded.
+  const FILE_EXT = '.ppcir';
+  app.exportFile = async function () {
+    const text = JSON.stringify(circuit.exportDoc(app.doc), null, 1);
+    const note = ' The live simulation state is not included.';
+    if (typeof window.showSaveFilePicker === 'function') {
+      try {
+        const handle = await window.showSaveFilePicker({ suggestedName: 'circuit' + FILE_EXT, types: [{ description: 'PanPhyCircuits file', accept: { 'application/json': [FILE_EXT] } }] });
+        const out = await handle.createWritable();
+        await out.write(text);
+        await out.close();
+        ui.toast(`Saved ${handle.name}.${note}`);
+        return;
+      } catch (e) {
+        if (e && e.name === 'AbortError') return;
+      }
+    }
+    download('circuit' + FILE_EXT, 'application/octet-stream', text);
+    ui.toast(`Circuit saved as circuit${FILE_EXT}.${note}`);
   };
   app.importFile = function (file) {
     if (!file) return;
-    if (file.size > 5e6) { ui.message('Could not open the file', ['The file is too large to be a PanPhy Circuits document.']); return; }
+    if (file.size > 5e6) { ui.message('Could not open the file', ['The file is too large to be a PanPhyCircuits document.']); return; }
     const reader = new FileReader();
     reader.onload = () => {
       let result;
       try { result = circuit.importDoc(String(reader.result)); }
       catch (e) { ui.message('Could not open the file', [e.message]); return; }
       const before = snapshot();
-      loadDoc(result.doc, { label: 'Open file', run: true });
+      loadDoc(result.doc, { label: 'Open file' });
       app.history.stack.unshift({ snap: before, label: 'Before opening file', view: app.doc.view, time: Date.now() });
       app.history.index = 1;
       if (result.warnings.length) ui.message('Opened with changes', ['Some parts of the file could not be used:'].concat(result.warnings.slice(0, 12), result.warnings.length > 12 ? [`…and ${result.warnings.length - 12} more.`] : []));
-      else ui.toast(`Opened ${file.name}. The simulation starts from t = 0.`);
+      else ui.toast(`Opened ${file.name}. Press Run to start the simulation.`);
     };
     reader.onerror = () => ui.message('Could not open the file', ['The file could not be read.']);
     reader.readAsText(file);
@@ -519,8 +568,31 @@
     app.selection.comps.clear(); app.selection.wires.clear();
     app.commit('Clear circuit');
     app.sim.reset();
-    app.sim.setRunning(true);
     ui.updateStatus();
+    app.graph.draw(true);
+  };
+  app.tidy = function () {
+    if (!app.doc.components.length) return;
+    if (app.editor.wiring) app.editor.cancelWiring();
+    const v = app.doc.view;
+    if (!layout.tidy(app.doc, v)) { ui.toast(`The ${viewName(v)} is already tidy.`); return; }
+    app.commit('Tidy up');
+    if (!fitsInView()) app.fit();
+    ui.toast(`Tidied the ${viewName(v)}: parts lined up and wires rerouted. The other view keeps its own layout.`, { label: 'Undo', run: () => app.undo() });
+  };
+  // Start again with nothing on the workspace. Display settings are kept, and
+  // Undo brings the previous circuit back.
+  app.startClean = function () {
+    const before = app.doc.components.length ? snapshot() : null;
+    const doc = circuit.createDoc();
+    doc.settings = Object.assign(circuit.defaultSettings(), app.doc.settings);
+    doc.view = app.doc.view;
+    loadDoc(doc, { label: 'Clean canvas' });
+    if (before) {
+      app.history.stack.unshift({ snap: before, label: 'Before clean canvas', view: app.doc.view, time: Date.now() });
+      app.history.index = 1;
+      ui.toast('Clean canvas. Undo brings your last circuit back.', { label: 'Undo', run: () => app.undo() });
+    }
   };
   app.loadExample = async function (i) {
     const ex = PPC.examples.list[i];
@@ -528,7 +600,7 @@
     const before = app.doc.components.length ? snapshot() : null;
     const doc = PPC.examples.build(ex, app.doc.view);
     doc.settings = Object.assign(circuit.defaultSettings(), { logicStyle: app.doc.settings.logicStyle }, ex.settings || {});
-    loadDoc(doc, { label: `Open example: ${ex.title}`, run: ex.run !== false });
+    loadDoc(doc, { label: `Open example: ${ex.title}` });
     if (before) {
       app.history.stack.unshift({ snap: before, label: 'Before example', view: app.doc.view, time: Date.now() });
       app.history.index = 1;
@@ -550,6 +622,7 @@
     app.editor = PPC.editor.createEditor(app, svg, host);
     app.graph = PPC.graph.createGraph(app, document.getElementById('graph-canvas'), document.getElementById('graph-legend'));
     wireControls();
+    trackToolbar();
     ui.renderExamples(PPC.examples.list);
 
     let restored = false;
@@ -558,13 +631,13 @@
       if (raw) {
         const data = JSON.parse(raw);
         const r = circuit.importDoc(data.doc);
-        loadDoc(r.doc, { label: 'Restore autosave', cameras: data.cameras, run: true });
+        loadDoc(r.doc, { label: 'Restore autosave', cameras: data.cameras });
         restored = r.doc.components.length > 0;
       }
     } catch (e) { restored = false; }
-    if (!restored) loadDoc(circuit.createDoc(), { label: 'New circuit', run: true });
+    if (!restored) loadDoc(circuit.createDoc(), { label: 'New circuit' });
     app.setTool('select');
-    if (restored) ui.toast('Your last circuit was restored. The simulation restarted from t = 0.');
+    if (restored) document.getElementById('dlg-start').showModal();
     window.addEventListener('resize', () => { app.renderer.applyCamera(); app.graph.draw(true); });
     window.addEventListener('panphy:theme-change', () => { app.renderAll(); app.graph.draw(true); });
     requestAnimationFrame(frame);
@@ -595,6 +668,13 @@
     $('empty-examples').addEventListener('click', () => $('dlg-examples').showModal());
     $('empty-start').addEventListener('click', () => app.loadExample(0));
     $('btn-help').addEventListener('click', () => $('dlg-help').showModal());
+    $('btn-tidy').addEventListener('click', () => app.tidy());
+    $('btn-clear').addEventListener('click', () => app.newCircuit());
+    $('dlg-start').addEventListener('close', () => {
+      const choice = $('dlg-start').returnValue;
+      if (choice === 'clean') app.startClean();
+      else if (choice === 'examples') $('dlg-examples').showModal();
+    });
     const menu = $('menu-file'), fileBtn = $('btn-file');
     const closeMenu = () => { menu.hidden = true; fileBtn.setAttribute('aria-expanded', 'false'); };
     fileBtn.addEventListener('click', (e) => {
@@ -618,10 +698,13 @@
       const a = b.dataset.file;
       if (a === 'new') app.newCircuit();
       else if (a === 'open') $('file-input').click();
-      else if (a === 'save') app.exportJson();
+      else if (a === 'save') app.exportFile();
       else if (a === 'svg') app.exportImage('svg');
       else if (a === 'png') app.exportImage('png');
     });
+    // iPhone and iPad grey out files whose extension they do not recognize, so
+    // the picker there is left unfiltered; the contents are validated anyway.
+    if (/iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1)) $('file-input').removeAttribute('accept');
     $('file-input').addEventListener('change', (e) => { app.importFile(e.target.files[0]); e.target.value = ''; });
     $('btn-show-library').addEventListener('click', () => { document.body.classList.toggle('show-library'); document.body.classList.remove('show-inspector'); });
     $('btn-show-inspector').addEventListener('click', () => { document.body.classList.toggle('show-inspector'); document.body.classList.remove('show-library'); });

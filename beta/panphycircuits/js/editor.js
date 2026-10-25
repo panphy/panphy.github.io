@@ -1,4 +1,4 @@
-// PanPhy Circuits: workspace interaction.
+// PanPhyCircuits: workspace interaction.
 // One gesture at a time: pan, move components, marquee, wire, drag a handle,
 // or operate a control (switch lever, slider, knob, push button). Controls are
 // separate hit targets, so operating a switch never drags it, and vice versa.
@@ -64,6 +64,7 @@
     function placeAt(type, p) {
       const doc = app.doc;
       const comp = circuit.addComponent(doc, type);
+      if (registry.get(type).meter && app.graphOpen()) comp.props.plot = true;
       const pos = snapP(p);
       doc.layouts[view()].comps[comp.id] = { x: pos.x, y: pos.y, r: 0, f: false };
       layout.placeInOtherViews(doc, [comp.id], view());

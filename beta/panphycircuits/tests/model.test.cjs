@@ -126,7 +126,7 @@ test('the electrical result does not depend on the active view or the layout', (
 
 test('imports are validated and cannot carry markup', () => {
   assert.throws(() => circuit.importDoc('not json'), /not valid JSON/);
-  assert.throws(() => circuit.importDoc('{"format":"other"}'), /not a PanPhy Circuits file/);
+  assert.throws(() => circuit.importDoc('{"format":"other"}'), /not a PanPhyCircuits file/);
   const doc = examples.build(examples.list[0], 'realistic');
   const data = circuit.exportDoc(doc);
   data.components[0].label = '"><script>alert(1)</script>';
@@ -136,4 +136,34 @@ test('imports are validated and cannot carry markup', () => {
   assert.ok(!/[<>"]/.test(r.doc.components[0].label));
   assert.ok(r.warnings.some((w) => /unsupported type/.test(w)));
   assert.ok(r.warnings.some((w) => /missing terminal/.test(w)));
+});
+
+test('tidy up straightens nearly aligned wires, removes bends and keeps every connection', () => {
+  const straight = (doc, view) => doc.wires.filter((w) => {
+    const a = layout.termWorld(doc, view, w.a), b = layout.termWorld(doc, view, w.b);
+    return Math.abs(a.x - b.x) < 1e-6 || Math.abs(a.y - b.y) < 1e-6;
+  }).length;
+  let seed = 7;
+  const rand = () => { seed = (seed * 16807) % 2147483647; return seed / 2147483647; };
+  for (const ex of examples.list) {
+    for (const view of layout.VIEWS) {
+      const doc = examples.build(ex, view);
+      const tidyOriginal = circuit.clone(doc);
+      layout.tidy(tidyOriginal, view);
+      assert.ok(straight(tidyOriginal, view) >= straight(doc, view), `${ex.title} (${view}): tidying a neat layout keeps its straight wires`);
+      for (const pl of Object.values(doc.layouts[view].comps)) { pl.x += Math.round((rand() - 0.5) * 30); pl.y += Math.round((rand() - 0.5) * 30); }
+      for (const w of doc.wires) doc.layouts[view].wires[w.id] = { pts: [[rand() * 300, rand() * 300]] };
+      const messy = straight(doc, view);
+      const wiresBefore = JSON.stringify(doc.wires);
+      const other = JSON.stringify(doc.layouts[view === 'realistic' ? 'schematic' : 'realistic']);
+      assert.equal(layout.tidy(doc, view), true);
+      assert.equal(JSON.stringify(doc.wires), wiresBefore, `${ex.title}: connections unchanged`);
+      assert.equal(JSON.stringify(doc.layouts[view === 'realistic' ? 'schematic' : 'realistic']), other, `${ex.title}: other view untouched`);
+      assert.ok(doc.wires.every((w) => doc.layouts[view].wires[w.id].pts.length === 0), `${ex.title}: bends removed`);
+      if (view === 'schematic') assert.ok(straight(doc, view) > messy, `${ex.title}: more straight wires after tidying (${messy} -> ${straight(doc, view)})`);
+      else assert.ok(straight(doc, view) >= messy, `${ex.title} (realistic): no fewer straight wires after tidying`);
+      const solid = doc.components.filter((c) => c.type !== 'junction').map((c) => layout.compBounds(doc, view, c.id));
+      for (let i = 0; i < solid.length; i++) for (let j = i + 1; j < solid.length; j++) assert.ok(!layout.overlaps(solid[i], solid[j], 0), `${ex.title} (${view}): parts ${i} and ${j} overlap`);
+    }
+  }
 });

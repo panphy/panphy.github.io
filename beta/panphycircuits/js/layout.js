@@ -1,4 +1,4 @@
-// PanPhy Circuits: per-view geometry.
+// PanPhyCircuits: per-view geometry.
 // Positions, rotations and wire bends are stored separately for each view. Wire
 // ends are always computed from the registry's terminal coordinates, transformed
 // by the component's placement, so connections never depend on pixel proximity.
@@ -418,7 +418,7 @@
   }
 
   // Nudge `movable` components apart (and away from `fixed` ones).
-  function resolveOverlaps(doc, view, movable, fixed) {
+  function resolveOverlaps(doc, view, movable, fixed, gap = 12) {
     const lay = doc.layouts[view];
     const ids = movable.filter((id) => circuit.getComp(doc, id) && circuit.getComp(doc, id).type !== 'junction');
     for (let iter = 0; iter < 60; iter++) {
@@ -431,8 +431,8 @@
           const oc = circuit.getComp(doc, other);
           if (!oc || oc.type === 'junction') continue;
           const b = compBounds(doc, view, other);
-          if (!b || !overlaps(a, b, 12)) continue;
-          const dx1 = b.x2 + 12 - a.x, dx2 = a.x2 + 12 - b.x, dy1 = b.y2 + 12 - a.y, dy2 = a.y2 + 12 - b.y;
+          if (!b || !overlaps(a, b, gap)) continue;
+          const dx1 = b.x2 + gap - a.x, dx2 = a.x2 + gap - b.x, dy1 = b.y2 + gap - a.y, dy2 = a.y2 + gap - b.y;
           const m = Math.min(dx1, dx2, dy1, dy2);
           const pl = lay.comps[id];
           if (m === dx1) pl.x += snap(dx1 + 5); else if (m === dx2) pl.x -= snap(dx2 + 5); else if (m === dy1) pl.y += snap(dy1 + 5); else pl.y -= snap(dy2 + 5);
@@ -497,6 +497,83 @@
     }
   }
 
+  // ---------- Tidy up ----------
+  // Tidy one view: snap parts to the grid, line up parts whose connected
+  // terminals nearly line up (so the wire between them runs straight), separate
+  // overlapping parts and remove every wire bend so wires are routed afresh.
+  // Connections never change. Returns true if anything in the view changed.
+  function tidy(doc, view, opts = {}) {
+    const lay = doc.layouts[view];
+    const tol = opts.tolerance || 30;
+    const before = JSON.stringify(lay);
+    const isJunction = (id) => { const c = circuit.getComp(doc, id); return !!c && c.type === 'junction'; };
+    const degree = new Map();
+    for (const w of doc.wires) for (const e of [w.a, w.b]) degree.set(e.c, (degree.get(e.c) || 0) + 1);
+    for (const c of doc.components) {
+      const pl = lay.comps[c.id];
+      if (pl) { pl.x = snap(pl.x); pl.y = snap(pl.y); }
+    }
+    const solid = doc.components.filter((c) => c.type !== 'junction' && lay.comps[c.id]).map((c) => c.id);
+    const clashes = (id) => {
+      if (isJunction(id)) return false;
+      const a = compBounds(doc, view, id);
+      return solid.some((o) => o !== id && overlaps(a, compBounds(doc, view, o), 4));
+    };
+    const ends = (w) => {
+      const A = termWorld(doc, view, w.a), B = termWorld(doc, view, w.b);
+      return A && B ? { A, B } : null;
+    };
+    // Lining up two ends helps when their leads face each other along the run
+    // (a straight wire), or point the same way across it (a neat U-shaped link).
+    const faces = (T, U, axis) => {
+      const d = { x: T.dx, y: T.dy };
+      if (isZero(d)) return true;
+      if (axis === 'y' ? !isH(d) : isH(d)) return false;
+      return d.x * (U.x - T.x) + d.y * (U.y - T.y) >= 0;
+    };
+    const suits = (A, B, axis) => {
+      if (faces(A, B, axis) && faces(B, A, axis)) return true;
+      const across = (T) => !isZero({ x: T.dx, y: T.dy }) && (axis === 'y' ? !isH({ x: T.dx, y: T.dy }) : isH({ x: T.dx, y: T.dy }));
+      return across(A) && across(B) && A.dx * B.dx + A.dy * B.dy > 0.5;
+    };
+    for (const axis of ['y', 'x']) {
+      const along = axis === 'y' ? 'x' : 'y';
+      const items = [];
+      // Wires that are already straight keep their parts in place.
+      const locked = new Set();
+      for (const w of doc.wires) {
+        if (w.a.c === w.b.c) continue;
+        const e = ends(w);
+        if (!e) continue;
+        const off = Math.abs(e.B[axis] - e.A[axis]);
+        if (off > tol || Math.abs(e.B[along] - e.A[along]) < 1e-6) continue;
+        if (off < 1e-6) { locked.add(w.a.c); locked.add(w.b.c); continue; }
+        if (!suits(e.A, e.B, axis)) continue;
+        items.push({ w, off });
+      }
+      items.sort((p, q) => p.off - q.off);
+      for (const { w } of items) {
+        const e = ends(w);
+        const off = e.B[axis] - e.A[axis];
+        if (Math.abs(off) < 1e-6) { locked.add(w.a.c); locked.add(w.b.c); continue; }
+        if (Math.abs(off) > tol) continue;
+        // Move a junction before a part, and a part with fewer connections first.
+        const movable = [w.b.c, w.a.c].filter((id) => !locked.has(id) && lay.comps[id])
+          .sort((p, q) => (isJunction(q) - isJunction(p)) || ((degree.get(p) || 0) - (degree.get(q) || 0)));
+        for (const id of movable) {
+          const pl = lay.comps[id];
+          const shift = id === w.b.c ? -off : off;
+          pl[axis] += shift;
+          if (!clashes(id)) { locked.add(w.a.c); locked.add(w.b.c); break; }
+          pl[axis] -= shift;
+        }
+      }
+    }
+    resolveOverlaps(doc, view, doc.components.map((c) => c.id), [], 4);
+    for (const w of doc.wires) lay.wires[w.id] = { pts: [] };
+    return JSON.stringify(lay) !== before;
+  }
+
   function mean(list) {
     const m = { x: 0, y: 0 };
     for (const p of list) { m.x += p.x; m.y += p.y; }
@@ -522,7 +599,7 @@
   const api = {
     GRID, VIEWS, artFor, snap, xform, xdir, placement, termWorld, terminalsLocal, localBounds, compBounds, svgTransform,
     wireRoute, routeAll, wirePoints, orthoRoute, nearestOnPoly, pointAtFraction, splitWire, generateLayout, placeInOtherViews,
-    resolveOverlaps, viewBounds, overlaps
+    resolveOverlaps, viewBounds, overlaps, tidy
   };
   PPC.layout = api;
   if (typeof module === 'object' && module.exports) module.exports = api;

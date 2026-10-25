@@ -1,4 +1,4 @@
-// PanPhy Circuits: panels, menus and dialogs.
+// PanPhyCircuits: panels, menus and dialogs.
 (function (root) {
   const PPC = root.PPC = root.PPC || {};
   const { registry, circuit, layout, solver, units } = PPC;
@@ -12,6 +12,8 @@
     flip: '<path d="M12 3v18"/><path d="M9 7L4 17h5zM15 7l5 10h-5z"/>',
     duplicate: '<rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V6a2 2 0 00-2-2H6a2 2 0 00-2 2v8a2 2 0 002 2h2"/>',
     trash: '<path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13"/>',
+    tidy: '<path d="M4 20L15 9"/><path d="M15 3v3M13.5 4.5h3M20 8v3M18.5 9.5h3M20 2.5v2M19 3.5h2"/>',
+    clear: '<rect x="4" y="4" width="16" height="16" rx="2.5"/><path d="M9 9l6 6M15 9l-6 6"/>',
     undo: '<path d="M9 14L4 9l5-5"/><path d="M4 9h11a5 5 0 010 10h-3"/>',
     redo: '<path d="M15 14l5-5-5-5"/><path d="M20 9H9a5 5 0 000 10h3"/>',
     zoomIn: '<circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4M11 8v6M8 11h6"/>',
@@ -421,7 +423,8 @@
       run.setAttribute('aria-pressed', String(sim.running));
       run.title = sim.running ? 'Pause: freeze simulation time (Space)' : 'Run: advance simulation time (Space)';
       $('sim-status').dataset.state = sim.running ? (sim.behind ? 'behind' : 'running') : 'paused';
-      $('sim-state').textContent = sim.running ? (sim.behind ? 'Running (slower than set)' : 'Running') : 'Paused';
+      $('sim-state').textContent = sim.running ? 'Running' : 'Paused';
+      $('sim-status').title = sim.running && sim.behind ? 'Running slower than the chosen speed: this device cannot keep up.' : '';
       $('sim-time').textContent = 't = ' + fmtTime(sim.t);
       $('view-realistic').setAttribute('aria-pressed', String(app.doc.view === 'realistic'));
       $('view-schematic').setAttribute('aria-pressed', String(app.doc.view === 'schematic'));
@@ -432,6 +435,7 @@
       $('btn-redo').disabled = !app.canRedo();
       const hasSel = app.selection.comps.size + app.selection.wires.size > 0;
       ['btn-rotate', 'btn-flip', 'btn-duplicate', 'btn-delete'].forEach((id) => { $(id).disabled = !hasSel; });
+      ['btn-tidy', 'btn-clear'].forEach((id) => { $(id).disabled = app.doc.components.length === 0; });
       $('zoom-readout').textContent = Math.round(app.cameras[app.doc.view].z * 100) + ' %';
       $('empty-state').hidden = app.doc.components.length > 0;
       const probs = app.problems();

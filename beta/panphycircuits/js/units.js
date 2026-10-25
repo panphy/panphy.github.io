@@ -1,4 +1,4 @@
-// PanPhy Circuits: SI formatting and parsing of physical quantities.
+// PanPhyCircuits: SI formatting and parsing of physical quantities.
 // Pure functions, shared by the browser app and the node tests.
 (function (root) {
   const PPC = root.PPC = root.PPC || {};

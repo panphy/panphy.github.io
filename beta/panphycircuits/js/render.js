@@ -1,4 +1,4 @@
-// PanPhy Circuits: workspace rendering (SVG).
+// PanPhyCircuits: workspace rendering (SVG).
 // Draws the active view of the shared circuit: components (from the same artwork
 // used by the library), wires, junction dots, labels, terminal targets and the
 // selection overlay. Dynamic artwork (lamps, meters, scopes) refreshes per frame.

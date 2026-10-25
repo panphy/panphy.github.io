@@ -1,4 +1,4 @@
-// PanPhy Circuits: time graph of meter readings.
+// PanPhyCircuits: time graph of meter readings.
 // Every value plotted here is a sample recorded by the solver at a committed
 // time step; nothing is interpolated or smoothed.
 (function (root) {
@@ -49,7 +49,8 @@
       legendEl.innerHTML = '';
       if (!list.length) {
         g.fillStyle = ink3; g.font = '13px Figtree, sans-serif'; g.textAlign = 'center';
-        g.fillText('Select an ammeter or voltmeter and switch on “Plot on graph”.', W / 2, H / 2);
+        const hasMeter = app.doc.components.some((c) => registry.get(c.type).meter);
+        g.fillText(hasMeter ? 'Select an ammeter or voltmeter and switch on “Plot on graph”.' : 'Add an ammeter or voltmeter: its readings are plotted here.', W / 2, H / 2);
         return;
       }
       const win = app.graphWindow;
@@ -133,8 +134,11 @@
         sw.className = 'legend-swatch' + (s.unit === 'A' && unitsUsed.length > 1 ? ' is-dashed' : '');
         sw.style.setProperty('--c', s.color);
         const tx = document.createElement('span');
-        tx.textContent = `${s.label} (${s.unit === 'A' ? 'current' : 'p.d.'}) ${units.fmtSI(last, s.unit, 3)}`;
-        item.append(sw, tx);
+        tx.textContent = `${s.label} (${s.unit === 'A' ? 'current' : 'p.d.'})`;
+        const val = document.createElement('span');
+        val.className = 'legend-value';
+        val.textContent = Number.isFinite(last) ? units.fmtSI(last, s.unit, 3) : '—';
+        item.append(sw, tx, val);
         legendEl.append(item);
       }
     }

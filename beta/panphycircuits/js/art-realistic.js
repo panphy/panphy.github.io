@@ -1,4 +1,4 @@
-// PanPhy Circuits: realistic component illustrations (original SVG artwork).
+// PanPhyCircuits: realistic component illustrations (original SVG artwork).
 // Each entry gives the local bounds, terminal coordinates with outward directions,
 // an optional actuator (switch lever, slider, knob) and a draw(ctx) function.
 // Local coordinates: x right, y down, origin at the component's position.

@@ -1,4 +1,4 @@
-// PanPhy Circuits: circuit solver and simulation engine.
+// PanPhyCircuits: circuit solver and simulation engine.
 //
 // Modified nodal analysis (MNA) on the shared circuit:
 // - Each net (terminals joined by wires) is a node. Components compile into
