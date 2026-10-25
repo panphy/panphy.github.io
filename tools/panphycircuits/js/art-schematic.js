@@ -42,9 +42,9 @@
   art.battery = {
     bounds: () => [-62, -22, 124, 40],
     terms: () => ({ n: [-60, 0, -1, 0], p: [60, 0, 1, 0] }),
-    draw: (ctx) => L('M -60 0 H -22 M -14 0 H -8 M 8 0 H 14 M 22 0 H 60 M -14 -16 V 16 M 22 -16 V 16') +
-      L('M -6 0 H 6', 'stroke-dasharray="2.5 3"') +
-      `<path d="M -22 -8 V 8 M 14 -8 V 8" class="sch-line sch-thick"/>` + polMark(ctx, 32, -14, '+')
+    draw: (ctx) => L('M -60 0 H -26 M 26 0 H 60 M -18 -16 V 16 M 26 -16 V 16') +
+      L('M -10 0 H -6 M -2 0 H 2 M 6 0 H 10') +
+      `<path d="M -26 -8 V 8 M 18 -8 V 8" class="sch-line sch-thick"/>` + polMark(ctx, 36, -14, '+')
   };
 
   art.dcsupply = {

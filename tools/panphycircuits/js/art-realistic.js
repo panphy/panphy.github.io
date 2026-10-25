@@ -147,7 +147,7 @@
           `<circle cx="48" cy="-19" r="13" fill="url(#ppc-knob)"/>` +
           `<line x1="48" y1="-19" x2="${n(48 + 10 * Math.sin(angle * Math.PI / 180))}" y2="${n(-19 - 10 * Math.cos(angle * Math.PI / 180))}" stroke="#F4F4F4" stroke-width="2" stroke-linecap="round"/>` +
           `<rect x="-60" y="7" width="120" height="3" rx="1.5" fill="#0B0F0C"/><circle cx="${n(-60 + 120 * Math.max(0, Math.min(1, (ac ? p.peak : p.emf) / 30)))}" cy="8.5" r="4" fill="#F4F4F4" stroke="#8A919C"/>` +
-          socket(-30, 30, 'black') + socket(30, 30, ac ? 'yellow' : 'red') +
+          socket(-30, 30, ac ? 'yellow' : 'black') + socket(30, 30, ac ? 'yellow' : 'red') +
           utext(ctx, -52, 30, ac ? '2' : '−', 'ppc-panel-mark') + utext(ctx, 52, 30, ac ? '1' : '+', 'ppc-panel-mark') +
           utext(ctx, 0, 31, ac ? 'AC ~' : 'DC', 'ppc-panel-label') +
           utext(ctx, 48, 2, ac ? 'VOLTS' : 'VOLTS', 'ppc-panel-tiny');
