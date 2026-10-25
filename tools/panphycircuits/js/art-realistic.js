@@ -92,30 +92,38 @@
   };
 
   // Battery holder with upright cells, closer to the proportions of real AA cells.
+  // Battery holder with upright cells. Every cell keeps the same size and
+  // shape (about AA proportions); more cells make a wider holder.
+  const CELL_W = 26, CELL_H = 72, CELL_GAP = 4;
+  function batteryGeom(p) {
+    const k = Math.max(1, Math.min(6, Math.round((p.emf || 1.5) / 1.5)));
+    const inner = k * CELL_W + (k - 1) * CELL_GAP;
+    const tx = Math.ceil((inner / 2 + 22) / 10) * 10; // terminals on the 10-unit grid
+    return { k, inner, tx, half: tx - 8 };
+  }
   art.battery = {
-    bounds: () => [-90, -66, 180, 128],
-    terms: () => ({ n: [-80, 0, -1, 0], p: [80, 0, 1, 0] }),
+    bounds: (p) => { const g = batteryGeom(p); return [-g.tx - 10, -66, 2 * g.tx + 20, 128]; },
+    terms: (p) => { const g = batteryGeom(p); return { n: [-g.tx, 0, -1, 0], p: [g.tx, 0, 1, 0] }; },
     draw(ctx) {
       const emf = ctx.p.emf;
-      const k = Math.max(1, Math.min(6, Math.round(emf / 1.5) || 1));
-      const inner = 116, gap = 4;
-      const w = (inner - gap * (k - 1)) / k;
+      const g = batteryGeom(ctx.p);
       let cells = '';
-      for (let i = 0; i < k; i++) {
-        const x = -58 + i * (w + gap);
+      for (let i = 0; i < g.k; i++) {
+        const x = -g.inner / 2 + i * (CELL_W + CELL_GAP);
         const upPos = i % 2 === 0;
-        cells += roundRect(n(x), -42, n(w), 72, 3, 'fill="#14786F"') +
-          roundRect(n(x), upPos ? -42 : 12, n(w), 18, 0, 'fill="#E2A93B"') +
-          roundRect(n(x + w * 0.3), upPos ? -46 : 30, n(w * 0.4), 4, 1.2, 'fill="#C9CFD6"') +
-          roundRect(n(x), -42, n(w), 72, 3, 'fill="url(#ppc-cylv)"');
+        cells += roundRect(n(x), -42, CELL_W, CELL_H, 3, 'fill="#14786F"') +
+          roundRect(n(x), upPos ? -42 : 12, CELL_W, 18, 0, 'fill="#E2A93B"') +
+          roundRect(n(x + CELL_W * 0.3), upPos ? -46 : 30, n(CELL_W * 0.4), 4, 1.2, 'fill="#C9CFD6"') +
+          roundRect(n(x), -42, CELL_W, CELL_H, 3, 'fill="url(#ppc-cylv)"');
       }
-      return shadow(roundRect(-72, -54, 144, 108, 8, '')) +
-        tag(-80, 0, -1) + tag(80, 0, 1) +
-        roundRect(-72, -54, 144, 108, 8, 'fill="#25282E" stroke="#121417" stroke-width="1"') +
-        roundRect(-66, -50, 132, 86, 5, 'fill="#17191D"') + cells +
-        roundRect(-40, 40, 80, 9, 2, 'fill="#F2F3F5"') +
+      const h = g.half, labelW = Math.min(80, 2 * h - 16);
+      return shadow(roundRect(-h, -54, 2 * h, 108, 8, '')) +
+        tag(-g.tx, 0, -1) + tag(g.tx, 0, 1) +
+        roundRect(-h, -54, 2 * h, 108, 8, 'fill="#25282E" stroke="#121417" stroke-width="1"') +
+        roundRect(-h + 6, -50, 2 * h - 12, 86, 5, 'fill="#17191D"') + cells +
+        roundRect(n(-labelW / 2), 40, n(labelW), 9, 2, 'fill="#F2F3F5"') +
         utext(ctx, 0, 44.5, `${trimNum(emf)} V`, 'ppc-print ppc-print-dark ppc-print-tiny') +
-        utext(ctx, -70, -61, '−', 'ppc-pol ppc-pol-neg') + utext(ctx, 70, -61, '+', 'ppc-pol ppc-pol-pos');
+        utext(ctx, -h + 2, -61, '−', 'ppc-pol ppc-pol-neg') + utext(ctx, h - 2, -61, '+', 'ppc-pol ppc-pol-pos');
     }
   };
 
@@ -256,12 +264,12 @@
     draw(ctx) {
       const blown = !!ctx.p.blown;
       const wire = blown
-        ? `<path d="M -24 0 Q -15 -2.5 -7 0.5 M 7 -0.5 Q 15 2.5 24 0" fill="none" stroke="#9AA2AC" stroke-width="1.3"/><ellipse cx="0" cy="0" rx="12" ry="5.5" fill="#2B2B2B" opacity="0.45"/>`
-        : `<path d="M -24 0 Q -12 -3 0 0 T 24 0" fill="none" stroke="#9AA2AC" stroke-width="1.3"/>`;
+        ? `<path d="M -24 0 Q -15 -2.5 -7 0.5 M 7 -0.5 Q 15 2.5 24 0" fill="none" stroke="#3A414C" stroke-width="1.7" stroke-linecap="round"/><ellipse cx="0" cy="0" rx="12" ry="5.5" fill="#2B2B2B" opacity="0.5"/>`
+        : `<path d="M -24 0 Q -12 -3 0 0 T 24 0" fill="none" stroke="#3A414C" stroke-width="1.7"/>`;
       const icon = `<g transform="translate(-17 0)"><rect x="-4" y="-2.5" width="8" height="5" rx="1" class="ppc-badge-icon"/></g>`;
       return shadow(roundRect(-36, -9, 72, 18, 4, '')) +
         lead(-58, 0, -36, 0) + lead(36, 0, 58, 0) + pad(-60, 0) + pad(60, 0) +
-        roundRect(-26, -8, 52, 16, 3, 'fill="#DCE6EE" fill-opacity="0.6" stroke="#9AA6B2" stroke-width="0.8"') + wire +
+        roundRect(-26, -8, 52, 16, 3, 'fill="#E6EDF3" fill-opacity="0.92" stroke="#8D99A6" stroke-width="0.8"') + wire +
         roundRect(-26, -8, 52, 16, 3, 'fill="url(#ppc-glass)"') +
         roundRect(-37, -9, 12, 18, 2, 'fill="url(#ppc-brass)" stroke="#7A5717" stroke-width="0.8"') +
         roundRect(25, -9, 12, 18, 2, 'fill="url(#ppc-brass)" stroke="#7A5717" stroke-width="0.8"') +
@@ -538,17 +546,22 @@
   // Value badge above a sensor. With `level` (0–1) it doubles as a slider:
   // a thin bar along its foot shows the setting, and dragging across it changes it.
   function badge(ctx, x, y, icon, label, level) {
-    const bar = level === undefined ? '' :
-      `<rect x="-20" y="5" width="40" height="1.6" rx="0.8" class="ppc-badge-track"/><rect x="-20" y="5" width="${n(40 * Math.max(0, Math.min(1, level)))}" height="1.6" rx="0.8" class="ppc-badge-level"/>`;
-    return up(ctx, x, y, `<rect x="-26" y="-8" width="52" height="16" rx="8" class="ppc-badge"/>${icon}<text x="5" y="${level === undefined ? 0.5 : -0.5}" class="ppc-badge-text" text-anchor="middle" dominant-baseline="central">${esc(label)}</text>${bar}`);
+    if (level === undefined) return up(ctx, x, y, `<rect x="-26" y="-8" width="52" height="16" rx="8" class="ppc-badge"/>${icon}<text x="5" y="0.5" class="ppc-badge-text" text-anchor="middle" dominant-baseline="central">${esc(label)}</text>`);
+    // As a slider: a taller pill, the icon and value raised, and the bar under
+    // the value only, clear of the icon (BADGE_BAR gives its ends).
+    const [b0, b1] = BADGE_BAR, f = Math.max(0, Math.min(1, level));
+    return up(ctx, x, y, `<rect x="-28" y="-10" width="56" height="20" rx="10" class="ppc-badge"/><g transform="translate(-1 -2)">${icon}</g>` +
+      `<text x="7" y="-2.5" class="ppc-badge-text" text-anchor="middle" dominant-baseline="central">${esc(label)}</text>` +
+      `<rect x="${b0}" y="4.6" width="${b1 - b0}" height="1.8" rx="0.9" class="ppc-badge-track"/><rect x="${b0}" y="4.6" width="${n((b1 - b0) * f)}" height="1.8" rx="0.9" class="ppc-badge-level"/>`);
   }
+  const BADGE_BAR = [-9, 22];
   const LUX_MIN = 1, LUX_MAX = 10000, TEMP_MIN = -20, TEMP_MAX = 120;
 
   art.thermistor = {
-    bounds: () => [-44, -38, 88, 54],
+    bounds: () => [-44, -40, 88, 56],
     terms: () => ({ a: [-40, 0, -1, 0], b: [40, 0, 1, 0] }),
     // The badge stays upright when the part turns, so its slider does too.
-    actuator: () => ({ kind: 'slider', upright: true, cx: 0, cy: -27, x0: -20, x1: 20, rect: [-28, -9, 56, 18], prop: 'temp', min: TEMP_MIN, max: TEMP_MAX }),
+    actuator: () => ({ kind: 'slider', upright: true, cx: 0, cy: -27, x0: BADGE_BAR[0], x1: BADGE_BAR[1], rect: [-28, -11, 56, 22], prop: 'temp', min: TEMP_MIN, max: TEMP_MAX }),
     draw(ctx) {
       const t = ctx.p.temp;
       const icon = `<g transform="translate(-17 0)"><rect x="-1.6" y="-6" width="3.2" height="9" rx="1.6" class="ppc-badge-icon"/><circle cx="0" cy="3.5" r="3" class="ppc-badge-icon"/></g>`;
@@ -565,9 +578,9 @@
   // LDR: a small round disc with a wavy orange cadmium-sulfide track between
   // two silver contacts, under a clear coating, as on a real photoresistor.
   art.ldr = {
-    bounds: () => [-44, -44, 88, 66],
+    bounds: () => [-44, -46, 88, 68],
     terms: () => ({ a: [-40, 0, -1, 0], b: [40, 0, 1, 0] }),
-    actuator: () => ({ kind: 'slider', upright: true, cx: 0, cy: -31, x0: -20, x1: 20, rect: [-28, -9, 56, 18], prop: 'lux', min: LUX_MIN, max: LUX_MAX, log: true }),
+    actuator: () => ({ kind: 'slider', upright: true, cx: 0, cy: -31, x0: BADGE_BAR[0], x1: BADGE_BAR[1], rect: [-28, -11, 56, 22], prop: 'lux', min: LUX_MIN, max: LUX_MAX, log: true }),
     draw(ctx) {
       const lux = ctx.p.lux;
       const clip = `${ctx.uid}-ldr`;

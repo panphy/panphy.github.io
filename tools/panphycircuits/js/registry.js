@@ -241,13 +241,13 @@
     terminals: [{ id: 'p', name: 'Positive (+)' }, { id: 'n', name: 'Negative (−)' }],
     polarity: { p: '+', n: '−' },
     props: [
-      { key: 'emf', label: 'EMF', unit: 'V', kind: 'number', default: 6, min: 0, max: 24, step: 0.5 },
+      { key: 'emf', label: 'EMF', unit: 'V', kind: 'number', default: 6, min: 1.5, max: 9, step: 1.5, help: 'One to six 1.5 V cells.' },
       internalResistanceProp
     ],
     compile(c, T, b) { compileSource(c, T, b, c.props.emf); },
     readings: sourceReadings,
     valueText: (c) => fmtSI(c.props.emf, 'V', 3, { trim: true }),
-    help: 'Cells joined in series. The holder shows about one cell per 1.5 V.'
+    help: 'Cells joined in series: one 1.5 V cell per 1.5 V of EMF, up to six (9 V).'
   });
 
   define('dcsupply', {
