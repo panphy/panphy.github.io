@@ -433,7 +433,7 @@
           const m = PPC.render.meterDisplay(app, c);
           rows.push({ label: 'Display', text: m.text + (m.note ? ` (${m.note})` : ''), why: m.why, strong: true });
         }
-        rows = rows.concat(def.readings(c, r).map((x) => ({ label: x.label, text: x.text !== undefined ? x.text : x.logic !== undefined ? `${units.fmtSI(x.value, x.unit, 3)} · ${x.logic ? 'HIGH (1)' : 'LOW (0)'}` : fmtReading(x), why: Number.isNaN(x.value) ? whyUndefined(c, res) : '' })));
+        rows = rows.concat(def.readings(c, r).map((x) => ({ key: x.key, label: x.label, text: x.text !== undefined ? x.text : x.logic !== undefined ? `${units.fmtSI(x.value, x.unit, 3)} · ${x.logic ? 'HIGH (1)' : 'LOW (0)'}` : fmtReading(x), why: Number.isNaN(x.value) ? whyUndefined(c, res) : '' })));
         const tt = document.querySelector('.truth tbody');
         if (tt && def.gate) {
           const inp = res.inputs[c.id] || {};
@@ -446,7 +446,7 @@
         const I = PPC.render.wireCurrents(app).get(w.id);
         rows.push({ label: 'Current', text: Number.isFinite(I) ? `${units.fmtSI(Math.abs(I) < 1e-9 ? 0 : Math.abs(I), 'A', 3)}${Math.abs(I) >= 1e-9 ? (I > 0 ? ' →' : ' ←') : ''}` : '—', why: Number.isFinite(I) ? 'Conventional current; the arrow points along the wire as listed above.' : 'Not defined for this wire (it closes a loop of wires, or that part of the circuit has a problem).' });
       }
-      dl.innerHTML = rows.map((x) => `<div class="reading${x.strong ? ' is-strong' : ''}"><dt>${esc(x.label)}</dt><dd class="ds-readout"${x.why ? ` title="${esc(x.why)}"` : ''}>${esc(x.text)}</dd></div>`).join('');      ui.updateLive();
+      dl.innerHTML = rows.map((x) => `<div class="reading${x.strong ? ' is-strong' : ''}${x.key === 'dir' ? ' is-direction' : ''}"><dt>${esc(x.label)}${x.key === 'dir' ? ':' : ''}</dt><dd class="ds-readout"${x.why ? ` title="${esc(x.why)}"` : ''}>${esc(x.text)}</dd></div>`).join('');      ui.updateLive();
     };
 
     function fmtReading(x) {
