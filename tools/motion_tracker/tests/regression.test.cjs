@@ -385,7 +385,7 @@ test('native analysis module shares calibrated positions and filming-rate times 
     }
 });
 
-test('every Motion Tracker module is listed for precaching and homepage offline readiness', () => {
+test('every PanPhyTrack module is listed for precaching and homepage offline readiness', () => {
     const sw = fs.readFileSync(path.join(__dirname, '../../../sw.js'), 'utf8');
     const home = fs.readFileSync(path.join(__dirname, '../../../index.html'), 'utf8');
     const requirements = home.split("'/tools/motion_tracker.html': [")[1].split(']')[0];

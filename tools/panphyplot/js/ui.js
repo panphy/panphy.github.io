@@ -266,7 +266,7 @@ function loadSampleData() {
 	showToast('Sample pendulum data loaded: three repeat readings of the period T.');
 }
 
-// Data sent by another PanPhy app (Motion Tracker) in the link's hash, #import=<JSON>: a sheet name and
+// Data sent by another PanPhy app (PanPhyTrack) in the link's hash, #import=<JSON>: a sheet name and
 // columns of { name, unit, role, cells, hidden }. The hash is cleared at once, so a reload does not import
 // it again. Anyone can make such a link, so text is reduced to plain characters and the message is fixed.
 let importedFromLink = false;

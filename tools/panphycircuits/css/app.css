@@ -17,7 +17,7 @@
   --panel-w: 264px;
   --insp-w: 300px;
   --tool-size: 38px;
-  /* Graph paper behind the panes, as in Motion Tracker and PanPhyPlot. */
+  /* Graph paper behind the panes, as in PanPhyTrack and PanPhyPlot. */
   --paper-minor: rgba(28, 40, 90, 0.035);
   --paper-major: rgba(28, 40, 90, 0.075);
 }

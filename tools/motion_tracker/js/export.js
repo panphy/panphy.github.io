@@ -33,7 +33,7 @@ function getPanPhyPlotUrl() {
 	const value = number => Number(number.toPrecision(6));
 	const unit = state.scaleUnit === 'pixels' ? 'px' : state.scaleUnit;
 	const payload = {
-		name: 'Motion Tracker',
+		name: 'PanPhyTrack',
 		columns: [
 			{ name: 't', unit: 's', role: 'X', cells: positions.map(p => value(p.time)) },
 			{ name: 'x', unit, role: 'Y', cells: positions.map(p => value(p.x)) },
@@ -49,7 +49,7 @@ function getPanPhyPlotUrl() {
 function initializeExport() {
 	exportDataButton.addEventListener("click", () => {
 		if (state.frameData.length === 0) { setMessage("Mark the object first: there is no data to export yet."); return; }
-		exportFilenameInput.value = "motion_tracker_data";
+		exportFilenameInput.value = "panphytrack_data";
 		openDialog(exportPrompt);
 		exportFilenameInput.select();
 	});
