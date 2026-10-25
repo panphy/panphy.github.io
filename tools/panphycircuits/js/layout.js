@@ -528,6 +528,15 @@
     return out;
   }
 
+  // Route of a wire through its bends, as drawn.
+  function routedPoly(view, A, B, pts) {
+    const d0 = { x: A.dx, y: A.dy }, d1 = { x: B.dx, y: B.dy };
+    if (view === 'schematic') return orthoRoute(A, d0, pts, B, d1);
+    const out = [];
+    smoothRoute(A, d0, pts, B, d1).forEach((seg, i) => { for (let k = i === 0 ? 0 : 1; k <= 8; k++) out.push(bez(seg, k / 8)); });
+    return out;
+  }
+
   function segsCross(a, b, c, d) {
     const o = (p, q, r) => (q.x - p.x) * (r.y - p.y) - (q.y - p.y) * (r.x - p.x);
     const d1 = o(c, d, a), d2 = o(c, d, b), d3 = o(a, b, c), d4 = o(a, b, d);
@@ -566,7 +575,8 @@
     for (const w of doc.wires) {
       const A = termWorld(doc, view, w.a), B = termWorld(doc, view, w.b);
       if (!A || !B) continue;
-      const poly = quickPoly(view, A, B, obstacles, cache);
+      const pts = wirePoints(doc, view, w);
+      const poly = pts.length ? routedPoly(view, A, B, pts) : quickPoly(view, A, B, obstacles, cache);
       routes.push({ w, poly, box: polyBox(poly) });
       for (let i = 0; i < poly.length - 1; i++) cost += Math.hypot(poly[i + 1].x - poly[i].x, poly[i + 1].y - poly[i].y);
       if (view === 'schematic') cost += 30 * Math.max(0, poly.length - 2);
@@ -576,7 +586,16 @@
       if (!isZero({ x: B.dx, y: B.dy }) && -(B.dx * u.x + B.dy * u.y) < -0.2) { cost += 120; rep.backwards++; }
       for (const s of solid) {
         if (!overlaps(s.body, routes[routes.length - 1].box, 0)) continue;
-        for (let i = 0; i < poly.length - 1; i++) if (segHitsRect(poly[i], poly[i + 1], s.body)) { cost += 900; rep.overParts++; break; }
+        // A wire may leave its own part's socket (meters take their leads on
+        // the front), so near its own ends it is not "over" that part.
+        const own = [];
+        if (s.id === w.a.c) own.push(A);
+        if (s.id === w.b.c) own.push(B);
+        const nearOwn = (p) => own.some((e) => Math.hypot(p.x - e.x, p.y - e.y) < 30);
+        for (let i = 0; i < poly.length - 1; i++) {
+          if (own.length && (nearOwn(poly[i]) || nearOwn(poly[i + 1]))) continue;
+          if (segHitsRect(poly[i], poly[i + 1], s.body)) { cost += 900; rep.overParts++; break; }
+        }
       }
     }
     const same = (e, f) => e.c === f.c && e.t === f.t;
@@ -658,9 +677,20 @@
     const lay = doc.layouts[view];
     const tol = opts.tolerance || 30;
     const before = JSON.stringify(lay);
+    const untidyNow = () => { const r = {}; tidyCost(doc, view, null, null, r); return r.overlaps + r.crossings + r.overParts; };
+    const untidyBefore = opts.untidyBefore !== undefined ? opts.untidyBefore : untidyNow();
     for (const c of doc.components) {
       const pl = lay.comps[c.id];
       if (pl) { pl.x = snap(pl.x); pl.y = snap(pl.y); }
+    }
+    // Circuits made of series and parallel parts get the textbook layout.
+    const sp = opts.noSeriesParallel ? null : seriesParallel(doc, view);
+    if (sp) {
+      const saved = JSON.stringify(lay);
+      const untidy = () => { const r = {}; tidyCost(doc, view, null, null, r); return r.overlaps + r.crossings + r.overParts; };
+      if (layoutSeriesParallel(doc, view, sp) && untidy() === 0) return JSON.stringify(lay) !== before;
+      doc.layouts[view] = JSON.parse(saved);
+      return tidy(doc, view, Object.assign({}, opts, { noSeriesParallel: true, untidyBefore }));
     }
     improveLayout(doc, view, opts);
     for (const w of doc.wires) lay.wires[w.id] = { pts: [] };
@@ -671,13 +701,411 @@
       if (untidy() > was) lay.comps = JSON.parse(saved);
     }
     // Keep each finishing step only if it does not make the layout worse.
-    for (const step of [() => alignParts(doc, view, tol), () => resolveOverlaps(doc, view, doc.components.map((c) => c.id), [], 4)]) {
-      const saved = JSON.stringify(lay.comps), cost = tidyCost(doc, view);
+    // Spreading parts along a run keeps total wire length, so it is judged
+    // only on overlaps, crossings and wires over parts.
+    const untidyCount = () => { const r = {}; tidyCost(doc, view, null, null, r); return r.overlaps + r.crossings + r.overParts; };
+    const steps = [
+      [() => alignParts(doc, view, tol), () => tidyCost(doc, view)],
+      [() => distributeRuns(doc, view), untidyCount],
+      [() => resolveOverlaps(doc, view, doc.components.map((c) => c.id), [], 4), () => tidyCost(doc, view)]
+    ];
+    for (const [step, measure] of steps) {
+      const saved = JSON.stringify(lay.comps), was = measure();
       step();
-      if (tidyCost(doc, view) > cost + 0.5) lay.comps = JSON.parse(saved);
+      if (measure() > was + 0.5) lay.comps = JSON.parse(saved);
     }
     for (const w of doc.wires) lay.wires[w.id] = { pts: [] };
-    return JSON.stringify(lay) !== before;
+    // Never leave a layout with more overlaps, crossings or wires over parts
+    // than it had: keep the original instead.
+    if (untidyNow() > untidyBefore) { doc.layouts[view] = JSON.parse(before); return false; }
+    return JSON.stringify(doc.layouts[view]) !== before;
+  }
+
+  // ---------- Series-parallel layout ----------
+  // Most school circuits are sources in loops with parts in series and in
+  // parallel. Those are drawn the textbook way: each circuit is a rectangle with
+  // its source centered along the top and the rest along the bottom (in a
+  // series loop of three or more, single parts at the ends go on the sides),
+  // parallel branches stacked between two rails, and every gap along a side
+  // equal. Separate circuits sit side by side. Anything else (parts with three
+  // or more terminals, bridges, loose ends) returns null and is left to the search.
+
+  const SOURCE_TYPES = ['battery', 'cell', 'dcsupply', 'acsupply'];
+  const SP_SIZES = {
+    schematic: { gap: 40, rail: 30, branch: 30, labelUp: 24, minW: 280, minH: 200, apart: 100 },
+    realistic: { gap: 60, rail: 40, branch: 36, labelUp: 20, minW: 400, minH: 280, apart: 140 }
+  };
+
+  function reverseTree(t) {
+    if (t.kind === 'leaf') return Object.assign({}, t, { from: t.to, to: t.from });
+    if (t.kind === 'series') return { kind: 'series', parts: t.parts.slice().reverse().map(reverseTree) };
+    return { kind: 'parallel', parts: t.parts.map(reverseTree) };
+  }
+
+  function seriesParallel(doc, view) {
+    const comps = doc.components.filter((c) => c.type !== 'junction');
+    if (comps.length < 2) return null;
+    const { netOf } = circuit.buildNets(doc);
+    const edges = [];
+    for (const c of comps) {
+      const ids = Object.keys(terminalsLocal(view, c));
+      if (ids.length !== 2 || !doc.layouts[view].comps[c.id]) return null;
+      const a = netOf.get(c.id + ':' + ids[0]), b = netOf.get(c.id + ':' + ids[1]);
+      if (a === undefined || b === undefined || a === b) return null;
+      edges.push({ c, ids, nodes: [a, b] });
+    }
+    const degree = new Map();
+    for (const e of edges) for (const nd of e.nodes) degree.set(nd, (degree.get(nd) || 0) + 1);
+    for (const d of degree.values()) if (d < 2) return null;
+    for (const c of doc.components) if (c.type === 'junction' && !degree.has(netOf.get(c.id + ':j'))) return null;
+    // Separate circuits: edges joined through shared nets.
+    const groups = [];
+    const seen = new Set();
+    for (const e of edges) {
+      if (seen.has(e)) continue;
+      const group = [], stack = [e];
+      seen.add(e);
+      while (stack.length) {
+        const x = stack.pop();
+        group.push(x);
+        for (const y of edges) if (!seen.has(y) && y.nodes.some((nd) => x.nodes.includes(nd))) { seen.add(y); stack.push(y); }
+      }
+      groups.push(group);
+    }
+    const loops = [];
+    for (const group of groups) {
+      const src = group.find((e) => SOURCE_TYPES.includes(e.c.type)) || group[0];
+      const pi = src.ids.indexOf('p') >= 0 ? src.ids.indexOf('p') : 0;
+      const sNode = src.nodes[pi], tNode = src.nodes[1 - pi];
+      let items = group.filter((e) => e !== src).map((e) => ({ u: e.nodes[0], v: e.nodes[1], t: { kind: 'leaf', c: e.c, from: e.ids[0], to: e.ids[1] } }));
+      if (!items.length) return null;
+      const orient = (it, u) => (it.u === u ? it.t : reverseTree(it.t));
+      const flat = (t, kind) => (t.kind === kind ? t.parts : [t]);
+      for (let guard = 0; items.length > 1 && guard < 500; guard++) {
+        let merged = false;
+        for (let i = 0; i < items.length && !merged; i++) {
+          for (let j = i + 1; j < items.length; j++) {
+            const a = items[i], b = items[j];
+            if ((a.u === b.u && a.v === b.v) || (a.u === b.v && a.v === b.u)) {
+              const t = { kind: 'parallel', parts: flat(a.t, 'parallel').concat(flat(orient(b, a.u), 'parallel')) };
+              items = items.filter((x) => x !== a && x !== b).concat([{ u: a.u, v: a.v, t }]);
+              merged = true;
+              break;
+            }
+          }
+        }
+        if (merged) continue;
+        const count = new Map();
+        for (const it of items) for (const nd of [it.u, it.v]) count.set(nd, (count.get(nd) || 0) + 1);
+        for (const [nd, k] of count) {
+          if (k !== 2 || nd === sNode || nd === tNode) continue;
+          const [a, b] = items.filter((it) => it.u === nd || it.v === nd);
+          const x = a.u === nd ? a.v : a.u, y = b.u === nd ? b.v : b.u;
+          if (x === y) continue;
+          const t = { kind: 'series', parts: flat(orient(a, x), 'series').concat(flat(orient(b, nd), 'series')) };
+          items = items.filter((it) => it !== a && it !== b).concat([{ u: x, v: y, t }]);
+          merged = true;
+          break;
+        }
+        if (!merged) break;
+      }
+      if (items.length !== 1) return null;
+      const it = items[0];
+      if (!((it.u === sNode && it.v === tNode) || (it.u === tNode && it.v === sNode))) return null;
+      loops.push({ src: { kind: 'leaf', c: src.c, from: src.ids[pi], to: src.ids[1 - pi] }, tree: orient(it, sNode) });
+    }
+    return { netOf, loops };
+  }
+
+  // Places every part of a series-parallel circuit and gives each wire bends at
+  // the corners of the drawing (on the bench they become smooth curves, so
+  // wires run round the loop instead of across parts). Returns false if a part
+  // cannot be lined up.
+  function layoutSeriesParallel(doc, view, sp) {
+    const cfg = SP_SIZES[view] || SP_SIZES.schematic;
+    const lay = doc.layouts[view];
+    const net = (c, t) => sp.netOf.get(c.id + ':' + t);
+    const termAt = new Map();
+    const segs = new Map();
+    const addSeg = (nt, p, q) => {
+      if (Math.abs(p.x - q.x) < 1e-6 && Math.abs(p.y - q.y) < 1e-6) return;
+      if (!segs.has(nt)) segs.set(nt, []);
+      segs.get(nt).push([p, q]);
+    };
+    // Orientation that puts terminal `from` left of (or above) terminal `to`.
+    // `outward` (−1 left, +1 right) turns a side part so its underside, where
+    // a meter shows its reading, faces out of the rectangle.
+    function orientLeaf(leaf, vertical, outward = 0) {
+      const local = terminalsLocal(view, leaf.c);
+      const along = vertical ? 'y' : 'x', cross = vertical ? 'x' : 'y';
+      let best = null;
+      for (const r of [0, 1, 2, 3]) {
+        for (const f of [false, true]) {
+          const pl = { x: 0, y: 0, r, f };
+          const ta = local[leaf.from], tb = local[leaf.to];
+          const A = xform(pl, ta[0], ta[1]), B = xform(pl, tb[0], tb[1]);
+          if (Math.abs(A[cross] - B[cross]) > 0.5 || B[along] - A[along] < 1) continue;
+          const dA = xdir(pl, ta[2], ta[3]), dB = xdir(pl, tb[2], tb[3]);
+          let score = (dA[along] < -0.5 ? 0 : 4) + (dB[along] > 0.5 ? 0 : 4) + (f ? 0.5 : 0);
+          score += vertical ? (r % 2 === 1 ? 0 : 2) : (r === 0 ? 0 : r === 2 ? 1 : 2);
+          if (outward && xdir(pl, 0, 1).x * outward < 0) score += 3;
+          if (!best || score < best.score) best = { r, f, A, B, score };
+        }
+      }
+      if (!best) return null;
+      const [bx, by, bw, bh] = localBounds(view, leaf.c);
+      const pl = { x: 0, y: 0, r: best.r, f: best.f };
+      const corners = [xform(pl, bx, by), xform(pl, bx + bw, by), xform(pl, bx, by + bh), xform(pl, bx + bw, by + bh)];
+      best.minX = Math.min(...corners.map((p) => p.x)); best.maxX = Math.max(...corners.map((p) => p.x));
+      best.minY = Math.min(...corners.map((p) => p.y)); best.maxY = Math.max(...corners.map((p) => p.y));
+      return best;
+    }
+    const leftNet = (t) => (t.kind === 'leaf' ? net(t.c, t.from) : leftNet(t.parts[0]));
+    const rightNet = (t) => (t.kind === 'leaf' ? net(t.c, t.to) : t.kind === 'series' ? rightNet(t.parts[t.parts.length - 1]) : rightNet(t.parts[0]));
+    // Size of a tree laid along a horizontal line: width between its end
+    // terminals, and room above and below the line (labels included).
+    function measure(t) {
+      if (t.kind === 'leaf') {
+        const o = orientLeaf(t, false);
+        if (!o) return false;
+        t.o = o; t.w = o.B.x - o.A.x;
+        t.up = o.A.y - o.minY + cfg.labelUp; t.down = o.maxY - o.A.y;
+        t.ext = Math.max(0, o.A.x - o.minX, o.maxX - o.B.x);
+        return true;
+      }
+      if (!t.parts.every(measure)) return false;
+      // Meters connected across something hang below it, as in textbooks.
+      if (t.kind === 'parallel') {
+        const isMeter = (p) => p.kind === 'leaf' && (p.c.type === 'voltmeter' || p.c.type === 'scope');
+        t.parts.sort((p, q) => isMeter(p) - isMeter(q));
+      }
+      if (t.kind === 'series') {
+        t.w = t.parts.reduce((a, p) => a + p.w, 0) + cfg.gap * (t.parts.length - 1);
+        t.up = Math.max(...t.parts.map((p) => p.up)); t.down = Math.max(...t.parts.map((p) => p.down));
+      } else {
+        t.w = Math.max(...t.parts.map((p) => p.w)) + 2 * cfg.rail;
+        t.up = t.parts[0].up;
+        let y = 0;
+        t.lines = [0];
+        for (let i = 1; i < t.parts.length; i++) { y += t.parts[i - 1].down + cfg.branch + t.parts[i].up; t.lines.push(y); }
+        t.down = y + t.parts[t.parts.length - 1].down;
+      }
+      t.ext = 0;
+      return true;
+    }
+    function putLeaf(t, o, X, Y) {
+      lay.comps[t.c.id] = { x: X - o.A.x, y: Y - o.A.y, r: o.r, f: o.f };
+      termAt.set(t.c.id + ':' + t.from, { x: X, y: Y });
+      termAt.set(t.c.id + ':' + t.to, { x: X + o.B.x - o.A.x, y: Y + o.B.y - o.A.y });
+    }
+    // Lay a tree out from its left terminal at (X, Y).
+    function put(t, X, Y) {
+      if (t.kind === 'leaf') { putLeaf(t, t.o, X, Y); return; }
+      if (t.kind === 'series') {
+        let x = X;
+        t.parts.forEach((p, i) => {
+          put(p, x, Y);
+          if (i < t.parts.length - 1) addSeg(rightNet(p), { x: x + p.w, y: Y }, { x: x + p.w + cfg.gap, y: Y });
+          x += p.w + cfg.gap;
+        });
+        return;
+      }
+      const xl = X, xr = X + t.w, nl = leftNet(t), nr = rightNet(t);
+      t.parts.forEach((p, i) => {
+        const y = Y + t.lines[i], off = (t.w - p.w) / 2;
+        put(p, X + off, y);
+        addSeg(nl, { x: xl, y: Y }, { x: xl, y }); addSeg(nl, { x: xl, y }, { x: X + off, y });
+        addSeg(nr, { x: xr, y: Y }, { x: xr, y }); addSeg(nr, { x: X + off + p.w, y }, { x: xr, y });
+      });
+    }
+
+    let originX = 0;
+    for (const loop of sp.loops) {
+      const so = orientLeaf(loop.src, false);
+      if (!so) return false;
+      // A part can stand on a side if turning it reads well: any symbol, but on
+      // the bench only parts with a lead at each end (not meters or supplies).
+      const canStand = (t) => {
+        if (t.kind !== 'leaf') return false;
+        if (view === 'schematic') return true;
+        const local = terminalsLocal(view, t.c);
+        return local[t.from][2] * local[t.to][2] < 0;
+      };
+      let bottom = loop.tree, sideL = null, sideR = null;
+      if (bottom.kind === 'series' && bottom.parts.length >= 3 && canStand(bottom.parts[0]) && canStand(bottom.parts[bottom.parts.length - 1])) {
+        sideL = bottom.parts[0]; sideR = bottom.parts[bottom.parts.length - 1];
+        const mid = bottom.parts.slice(1, -1);
+        bottom = mid.length === 1 ? mid[0] : { kind: 'series', parts: mid };
+      }
+      const row = bottom.kind === 'series' ? bottom.parts : [bottom];
+      if (!row.every(measure)) return false;
+      const oL = sideL && orientLeaf(sideL, true, -1);
+      const oR = sideR && orientLeaf(reverseTree(sideR), true, 1);
+      if ((sideL && !oL) || (sideR && !oR)) return false;
+      const sideW = Math.max(oL ? oL.maxX - oL.minX : 0, oR ? oR.maxX - oR.minX : 0);
+      // Every gap (all equal) must clear the bodies on both sides of it.
+      let need = Math.max(cfg.gap, row[0].ext + 20, row[row.length - 1].ext + 20);
+      for (let i = 0; i < row.length - 1; i++) need = Math.max(need, row[i].ext + row[i + 1].ext + 20);
+      const W = Math.max(cfg.minW, (so.B.x - so.A.x) + 2 * cfg.gap + sideW, row.reduce((a, p) => a + p.w, 0) + need * (row.length + 1) + sideW);
+      const lenL = oL ? oL.B.y - oL.A.y : 0, lenR = oR ? oR.B.y - oR.A.y : 0;
+      const H = Math.max(cfg.minH, (so.maxY - so.A.y) + Math.max(...row.map((p) => p.up)) + cfg.gap, Math.max(lenL, lenR) + 2 * cfg.gap + cfg.labelUp);
+      const XL = originX, XR = originX + W;
+      // Source, centered along the top.
+      const xs = XL + (W - (so.B.x - so.A.x)) / 2;
+      putLeaf(loop.src, so, xs, 0);
+      const sN = net(loop.src.c, loop.src.from), tN = net(loop.src.c, loop.src.to);
+      addSeg(sN, { x: XL, y: 0 }, { x: xs, y: 0 });
+      addSeg(tN, { x: xs + so.B.x - so.A.x, y: 0 }, { x: XR, y: 0 });
+      // Sides: a single part centered, or a plain wire.
+      const lNet = leftNet(bottom), rNet = rightNet(bottom);
+      if (oL) {
+        const y0 = (H - lenL) / 2;
+        lay.comps[sideL.c.id] = { x: XL - oL.A.x, y: y0 - oL.A.y, r: oL.r, f: oL.f };
+        termAt.set(sideL.c.id + ':' + sideL.from, { x: XL, y: y0 }); termAt.set(sideL.c.id + ':' + sideL.to, { x: XL, y: y0 + lenL });
+        addSeg(sN, { x: XL, y: 0 }, { x: XL, y: y0 }); addSeg(lNet, { x: XL, y: y0 + lenL }, { x: XL, y: H });
+      } else addSeg(sN, { x: XL, y: 0 }, { x: XL, y: H });
+      if (oR) {
+        const y0 = (H - lenR) / 2;
+        lay.comps[sideR.c.id] = { x: XR - oR.A.x, y: y0 - oR.A.y, r: oR.r, f: oR.f };
+        termAt.set(sideR.c.id + ':' + sideR.to, { x: XR, y: y0 }); termAt.set(sideR.c.id + ':' + sideR.from, { x: XR, y: y0 + lenR });
+        addSeg(tN, { x: XR, y: 0 }, { x: XR, y: y0 }); addSeg(rNet, { x: XR, y: y0 + lenR }, { x: XR, y: H });
+      } else addSeg(tN, { x: XR, y: 0 }, { x: XR, y: H });
+      // The rest along the bottom, with equal gaps from corner to corner.
+      // Equal lengths of wire between corners and parts (W leaves room for
+      // bodies that reach past their terminals).
+      const gap = (W - row.reduce((a, p) => a + p.w, 0)) / (row.length + 1);
+      let x = XL;
+      row.forEach((p, i) => {
+        addSeg(i === 0 ? lNet : leftNet(p), { x, y: H }, { x: x + gap, y: H });
+        put(p, x + gap, H);
+        x += gap + p.w;
+      });
+      addSeg(rNet, { x, y: H }, { x: XR, y: H });
+      originX = XR + cfg.apart + sideW;
+    }
+    for (const pl of Object.values(lay.comps)) { pl.x = Math.round(pl.x * 100) / 100; pl.y = Math.round(pl.y * 100) / 100; }
+
+    // Wires follow the drawing: each runs along its net's lines from one
+    // terminal to the other. Junction parts sit at the busiest point of their net.
+    const keyOf = (p) => `${Math.round(p.x * 10)},${Math.round(p.y * 10)}`;
+    const graphs = new Map();
+    for (const [nt, list] of segs) {
+      const g = new Map();
+      const node = (p) => { const k = keyOf(p); if (!g.has(k)) g.set(k, { p, nb: new Set() }); return k; };
+      // Split segments where another segment's end lies on them.
+      const pts = [];
+      for (const [p, q] of list) pts.push(p, q);
+      for (const [p, q] of list) {
+        const on = pts.filter((r) => (Math.abs(r.x - p.x) < 1e-6 && Math.abs(r.x - q.x) < 1e-6 && (r.y - p.y) * (r.y - q.y) < 0) || (Math.abs(r.y - p.y) < 1e-6 && Math.abs(r.y - q.y) < 1e-6 && (r.x - p.x) * (r.x - q.x) < 0));
+        const chain = [p].concat(on.sort((a, b) => (Math.abs(a.x - p.x) + Math.abs(a.y - p.y)) - (Math.abs(b.x - p.x) + Math.abs(b.y - p.y))), [q]);
+        for (let i = 0; i < chain.length - 1; i++) {
+          const a = node(chain[i]), b = node(chain[i + 1]);
+          if (a !== b) { g.get(a).nb.add(b); g.get(b).nb.add(a); }
+        }
+      }
+      graphs.set(nt, g);
+    }
+    for (const c of doc.components) {
+      if (c.type !== 'junction') continue;
+      const g = graphs.get(sp.netOf.get(c.id + ':j'));
+      let best = null;
+      if (g) for (const n of g.values()) if (!best || n.nb.size > best.nb.size) best = n;
+      const p = best ? best.p : null;
+      if (!p) return false;
+      lay.comps[c.id] = { x: p.x, y: p.y, r: 0, f: false };
+      termAt.set(c.id + ':j', p);
+    }
+    for (const w of doc.wires) {
+      lay.wires[w.id] = { pts: [] };
+      const P = termAt.get(w.a.c + ':' + w.a.t), Q = termAt.get(w.b.c + ':' + w.b.t);
+      const g = graphs.get(sp.netOf.get(w.a.c + ':' + w.a.t));
+      if (!P || !Q || !g) continue;
+      const start = keyOf(P), goal = keyOf(Q);
+      if (!g.has(start) || !g.has(goal)) continue;
+      const prev = new Map([[start, null]]);
+      const queue = [start];
+      while (queue.length && !prev.has(goal)) {
+        const k = queue.shift();
+        for (const nb of g.get(k).nb) if (!prev.has(nb)) { prev.set(nb, k); queue.push(nb); }
+      }
+      if (!prev.has(goal)) continue;
+      const path = [];
+      for (let k = goal; k; k = prev.get(k)) path.unshift(g.get(k).p);
+      // Keep only the corners between the two ends.
+      const corners = [];
+      for (let i = 1; i < path.length - 1; i++) {
+        const a = path[i - 1], b = path[i], c = path[i + 1];
+        const straight = (Math.abs(a.x - b.x) < 1e-6 && Math.abs(b.x - c.x) < 1e-6) || (Math.abs(a.y - b.y) < 1e-6 && Math.abs(b.y - c.y) < 1e-6);
+        if (!straight) corners.push([b.x, b.y]);
+      }
+      lay.wires[w.id] = { pts: corners };
+    }
+    lay.ready = true;
+    return true;
+  }
+
+  // Spread the parts along each straight run evenly: equal gaps between
+  // neighbors and to the corner at each end, so a lone part sits in the middle
+  // of its side. A run is a chain of two-terminal parts joined end to end, each
+  // with both terminals on one line; its ends are the terminals it connects to.
+  function distributeRuns(doc, view) {
+    const lay = doc.layouts[view];
+    const key = (e) => e.c + ':' + e.t;
+    const links = new Map();
+    for (const w of doc.wires) {
+      for (const [p, q] of [[w.a, w.b], [w.b, w.a]]) {
+        if (!links.has(key(p))) links.set(key(p), []);
+        links.get(key(p)).push(q);
+      }
+    }
+    const only = (end) => { const l = links.get(key(end)) || []; return l.length === 1 ? l[0] : null; };
+    for (const axis of ['x', 'y']) {
+      const cross = axis === 'x' ? 'y' : 'x';
+      const info = new Map();
+      for (const c of doc.components) {
+        if (c.type === 'junction' || !lay.comps[c.id]) continue;
+        const ids = Object.keys(terminalsLocal(view, c));
+        if (ids.length !== 2) continue;
+        const A = termWorld(doc, view, { c: c.id, t: ids[0] }), B = termWorld(doc, view, { c: c.id, t: ids[1] });
+        if (!A || !B || Math.abs(A[cross] - B[cross]) > 0.5 || Math.abs(A[axis] - B[axis]) < 1) continue;
+        info.set(c.id, A[axis] < B[axis] ? { lo: ids[0], hi: ids[1], line: A[cross] } : { lo: ids[1], hi: ids[0], line: A[cross] });
+      }
+      // The next part along the run from one end of a part, if any.
+      const next = (id, end) => {
+        const me = info.get(id);
+        const nb = only({ c: id, t: me[end] });
+        const ni = nb && info.get(nb.c);
+        if (!ni || nb.t !== ni[end === 'lo' ? 'hi' : 'lo'] || Math.abs(ni.line - me.line) > 0.5) return null;
+        return nb.c;
+      };
+      const done = new Set();
+      for (const id of info.keys()) {
+        if (done.has(id)) continue;
+        let start = id;
+        const seen = new Set([id]);
+        for (let p = next(start, 'lo'); p && !seen.has(p); p = next(start, 'lo')) { seen.add(p); start = p; }
+        const chain = [start];
+        done.add(start);
+        for (let p = next(start, 'hi'); p && !done.has(p); p = next(chain[chain.length - 1], 'hi')) { chain.push(p); done.add(p); }
+        const last = chain[chain.length - 1];
+        const loEnd = only({ c: chain[0], t: info.get(chain[0]).lo }), hiEnd = only({ c: last, t: info.get(last).hi });
+        if (!loEnd || !hiEnd || chain.includes(loEnd.c) || chain.includes(hiEnd.c)) continue;
+        const P = termWorld(doc, view, loEnd), Q = termWorld(doc, view, hiEnd);
+        if (!P || !Q) continue;
+        const spans = chain.map((cid) => {
+          const lo = termWorld(doc, view, { c: cid, t: info.get(cid).lo }), hi = termWorld(doc, view, { c: cid, t: info.get(cid).hi });
+          return { cid, len: hi[axis] - lo[axis], off: lo[axis] - lay.comps[cid][axis], lo: lo[axis], hi: hi[axis] };
+        });
+        if (!(P[axis] < spans[0].lo && Q[axis] > spans[spans.length - 1].hi)) continue;
+        const gap = (Q[axis] - P[axis] - spans.reduce((t, sp) => t + sp.len, 0)) / (chain.length + 1);
+        if (gap < 20) continue;
+        let pos = P[axis] + gap;
+        for (const sp of spans) {
+          lay.comps[sp.cid][axis] = snap(pos - sp.off);
+          pos += sp.len + gap;
+        }
+      }
+    }
   }
 
   // The search favors short wires, which can squeeze a small circuit into a
@@ -794,7 +1222,7 @@
   const api = {
     GRID, VIEWS, artFor, snap, xform, xdir, placement, termWorld, terminalsLocal, localBounds, compBounds, svgTransform,
     wireRoute, routeAll, wirePoints, orthoRoute, nearestOnPoly, pointAtFraction, splitWire, generateLayout, placeInOtherViews,
-    resolveOverlaps, viewBounds, overlaps, tidy, tidyCost
+    resolveOverlaps, viewBounds, overlaps, tidy, tidyCost, distributeRuns, seriesParallel, layoutSeriesParallel
   };
   PPC.layout = api;
   if (typeof module === 'object' && module.exports) module.exports = api;

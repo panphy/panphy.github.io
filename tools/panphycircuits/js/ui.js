@@ -21,8 +21,9 @@
     fit: '<path d="M4 9V4h5M15 4h5v5M20 15v5h-5M9 20H4v-5"/><rect x="8" y="8" width="8" height="8" rx="1"/>',
     snap: '<path d="M6 4v8a6 6 0 0012 0V4"/><path d="M6 8h4M14 8h4"/>',
     graph: '<path d="M4 4v16h16"/><path d="M7 15c3-7 5-7 7-3s3 2 5-4"/>',
-    stopwatch: '<circle cx="12" cy="13.5" r="7.5"/><path d="M12 13.5V9.8M10 2.8h4M18.3 7.2l1.4-1.4"/>',
-    stopwatchPause: '<circle cx="12" cy="13.5" r="7.5"/><path d="M10.2 11v5M13.8 11v5M10 2.8h4M18.3 7.2l1.4-1.4"/>',
+    sliders: '<path d="M4 7.5h9M17.5 7.5H20M4 16.5h3.5M11.5 16.5H20"/><circle cx="15.2" cy="7.5" r="2.2"/><circle cx="9.5" cy="16.5" r="2.2"/>',
+    play: '<path d="M8 5.5v13l10.5-6.5z" fill="currentColor"/>',
+    pause: '<path d="M7.5 5.5h3.2v13H7.5zM13.3 5.5h3.2v13h-3.2z" fill="currentColor"/>',
     reset: '<path d="M4 4v6h6"/><path d="M4.5 15a8 8 0 102-8.5L4 10"/>',
     realistic: '<rect x="3" y="9" width="18" height="7" rx="3.5"/><path d="M8 9v7M11 9v7M14 9v7M1 12.5h2M21 12.5h2"/>',
     schematic: '<path d="M1 12h5l1.5-4 3 8 3-8 3 8 1.5-4h5"/>',
@@ -289,12 +290,94 @@
       return `<p class="insp-hint">Select a component or wire to edit it and see its readings.</p>` +
         card('Simulation', `<div class="row"><label for="s-speed">Speed</label><select id="s-speed" data-setting="speed">${[0.01, 0.1, 0.25, 1, 4, 10].map((v) => opt(v, s.speed, v === 1 ? 'Real time (1×)' : `${v}×`)).join('')}</select></div>` +
           `<div class="row"><label for="s-dt">Time step</label><select id="s-dt" data-setting="dt">${opt('auto', s.dt, `Auto (${units.fmtSI(app.sim.dt, 's', 2)})`)}${[1e-5, 1e-4, 1e-3, 1e-2].map((v) => opt(v, s.dt, units.fmtSI(v, 's', 1))).join('')}</select></div>`) +
-        card('Display', toggle('showLabels', 'Labels') + toggle('showValues', 'Values') + toggle('currentFlow', 'Animate current') + toggle('wireColorsInDiagram', 'Wire colors in diagram') +
-          `<div class="row"><label for="s-logic">Logic symbols</label><select id="s-logic" data-setting="logicStyle">${opt('distinctive', s.logicStyle, 'Standard shapes')}${opt('iec', s.logicStyle, 'IEC rectangles')}</select></div>`) +
-        `<details class="icard model-note"><summary>About the simulation</summary><p>Readings are worked out afresh after every change, so they are live without the clock. <strong>Start time</strong> is needed only for capacitors, AC supplies, the oscilloscope and graphs: it advances time in fixed steps. <strong>Pause time</strong> freezes it, but edits still update the readings for the frozen state; <strong>Reset</strong> returns to t = 0 with every capacitor at its initial p.d. and clears the graphs. Switching views never changes the simulation.</p>` +
+        `<details class="icard model-note"><summary>About the simulation</summary><p>Readings are worked out afresh after every change, so they are live without the clock. Time is needed only for capacitors, AC supplies, the oscilloscope and graphs; then the time bar at the bottom right of the canvas shows play and reset. <strong>Play</strong> advances time in fixed steps; <strong>Pause</strong> freezes it, but edits still update the readings for the frozen state; <strong>Reset</strong> returns to t = 0 with every capacitor at its initial p.d. and clears the graphs. Switching views never changes the simulation.</p>` +
           `<p>The automatic time step is about 1/100 of the shortest RC time constant (and of an AC period). Results do not depend on your device's frame rate.</p>` +
           `<p>Animated current shows conventional current as yellow dashes moving from + to − through the external circuit. Their speed only hints at the size of the current; real charge carriers drift far more slowly.</p>` +
           `<p>Editing the circuit while it runs keeps time and stored charge. Saved files and autosave keep the circuit, not the live state: opening one starts at t = 0.</p></details>`;
+    }
+
+    // ---------- Display menu (toolbar) ----------
+
+    function renderDisplayMenu() {
+      const s = app.doc.settings;
+      const toggle = (key, label) => `<label class="toggle"><span>${label}</span><input type="checkbox" data-setting="${key}" ${s[key] ? 'checked' : ''}><span class="toggle-track" aria-hidden="true"></span></label>`;
+      const opt = (v, label) => `<option value="${v}" ${s.logicStyle === v ? 'selected' : ''}>${label}</option>`;
+      $('display-menu').innerHTML = `<p class="icard-label">Display</p>` +
+        toggle('showLabels', 'Labels') + toggle('showValues', 'Values') + toggle('currentFlow', 'Animate current') + toggle('wireColorsInDiagram', 'Wire colors in diagram') +
+        `<div class="row"><label for="s-logic">Logic symbols</label><select id="s-logic" data-setting="logicStyle">${opt('distinctive', 'Standard shapes')}${opt('iec', 'IEC rectangles')}</select></div>` +
+        `<p class="menu-note">Animated current shows conventional current, from + to −. Values appear beside the labels in the circuit diagram.</p>`;
+    }
+    const displayBtn = $('btn-display'), displayMenu = $('display-menu');
+    const closeDisplay = () => { displayMenu.hidden = true; displayBtn.setAttribute('aria-expanded', 'false'); };
+    displayBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      if (displayMenu.hidden) { renderDisplayMenu(); displayMenu.hidden = false; displayBtn.setAttribute('aria-expanded', 'true'); displayMenu.querySelector('input, select').focus(); }
+      else closeDisplay();
+    });
+    document.addEventListener('click', (e) => { if (!displayMenu.hidden && !displayMenu.contains(e.target) && !displayBtn.contains(e.target)) closeDisplay(); });
+    displayMenu.addEventListener('keydown', (e) => { if (e.key === 'Escape') { closeDisplay(); displayBtn.focus(); } });
+    displayMenu.addEventListener('change', (e) => {
+      const t = e.target;
+      if (!t.dataset.setting) return;
+      app.setSetting(t.dataset.setting, t.type === 'checkbox' ? t.checked : t.value);
+    });
+
+    // ---------- Oscilloscope screen (inspector) ----------
+    // While the circuit has an oscilloscope, its screen is shown large at the
+    // top of the inspector, whatever is selected.
+
+    const SCOPE_COLORS = { ch1: '#FFD43B', ch2: '#3BD8FF' };
+    ui.renderScopes = function () {
+      const host = $('scope-cards');
+      const scopes = app.doc.components.filter((c) => c.type === 'scope');
+      const key = scopes.map((c) => `${c.id}:${c.label}:${c.props.tdiv}:${c.props.v1}:${c.props.v2}`).join('|');
+      if (host.dataset.key !== key) {
+        host.dataset.key = key;
+        host.innerHTML = scopes.map((c) => `<section class="icard scope-card" data-scope="${c.id}"><h3 class="icard-label">Oscilloscope ${esc(c.label)}</h3>` +
+          `<canvas class="scope-screen" aria-label="Oscilloscope ${esc(c.label)} screen"></canvas>` +
+          `<p class="scope-legend"><span class="scope-ch1">CH1 ${esc(units.fmtSI(Number(c.props.v1), 'V', 3, { trim: true }))}/div</span><span class="scope-ch2">CH2 ${esc(units.fmtSI(Number(c.props.v2), 'V', 3, { trim: true }))}/div</span><span>${esc(units.fmtSI(Number(c.props.tdiv), 's', 3, { trim: true }))}/div</span></p></section>`).join('');
+      }
+      host.hidden = scopes.length === 0;
+      for (const c of scopes) drawScope(host.querySelector(`[data-scope="${c.id}"] canvas`), c);
+    };
+    function drawScope(canvas, c) {
+      if (!canvas) return;
+      const dpr = window.devicePixelRatio || 1;
+      const W = canvas.clientWidth, H = canvas.clientHeight;
+      if (!W || !H) return;
+      if (canvas.width !== Math.round(W * dpr) || canvas.height !== Math.round(H * dpr)) { canvas.width = Math.round(W * dpr); canvas.height = Math.round(H * dpr); }
+      const g = canvas.getContext('2d');
+      g.setTransform(dpr, 0, 0, dpr, 0, 0);
+      g.fillStyle = '#071712'; g.fillRect(0, 0, W, H);
+      // 10 × 8 divisions, the center lines brighter.
+      for (let i = 0; i <= 10; i++) { g.strokeStyle = i === 5 ? 'rgba(120, 220, 170, 0.45)' : 'rgba(80, 170, 130, 0.22)'; g.beginPath(); g.moveTo(i * W / 10 + 0.5, 0); g.lineTo(i * W / 10 + 0.5, H); g.stroke(); }
+      for (let j = 0; j <= 8; j++) { g.strokeStyle = j === 4 ? 'rgba(120, 220, 170, 0.45)' : 'rgba(80, 170, 130, 0.22)'; g.beginPath(); g.moveTo(0, j * H / 8 + 0.5); g.lineTo(W, j * H / 8 + 0.5); g.stroke(); }
+      const s = app.sim.scopes[c.id];
+      if (!s || !s.t.length) {
+        g.fillStyle = 'rgba(190, 240, 215, 0.75)'; g.font = '12px Figtree, sans-serif'; g.textAlign = 'center'; g.textBaseline = 'middle';
+        g.fillText('Press play on the time bar to draw the traces', W / 2, H / 2);
+        return;
+      }
+      const span = Number(c.props.tdiv) * 10;
+      const tEnd = Math.max(s.t[s.t.length - 1], span), t0 = tEnd - span;
+      for (const [key, vdiv] of [['ch1', Number(c.props.v1)], ['ch2', Number(c.props.v2)]]) {
+        const arr = s[key];
+        g.strokeStyle = SCOPE_COLORS[key]; g.lineWidth = 2; g.lineJoin = 'round';
+        g.shadowColor = SCOPE_COLORS[key]; g.shadowBlur = 4;
+        g.beginPath();
+        let pen = false;
+        const step = Math.max(1, Math.floor(arr.length / 800));
+        for (let i = 0; i < arr.length; i += step) {
+          const v = arr[i];
+          if (!Number.isFinite(v) || s.t[i] < t0) { pen = false; continue; }
+          const x = ((s.t[i] - t0) / span) * W;
+          const y = Math.max(-4, Math.min(H + 4, H / 2 - (v / vdiv) * (H / 8)));
+          if (pen) g.lineTo(x, y); else g.moveTo(x, y);
+          pen = true;
+        }
+        g.stroke();
+        g.shadowBlur = 0;
+      }
     }
 
     // Live readings in the inspector, refreshed several times a second.
@@ -431,14 +514,17 @@
       // Time stops by itself if the last time-dependent part goes.
       const timeMatters = app.needsTime();
       if (sim.running && !timeMatters) sim.setRunning(false);
-      const runHtml = icon(sim.running ? 'stopwatchPause' : 'stopwatch') + `<span>${sim.running ? 'Pause time' : 'Start time'}</span>`;
+      const runHtml = icon(sim.running ? 'pause' : 'play');
       if (run.dataset.html !== runHtml) { run.innerHTML = runHtml; run.dataset.html = runHtml; }
       run.setAttribute('aria-pressed', String(sim.running));
-      run.setAttribute('aria-disabled', String(!timeMatters));
-      run.title = !timeMatters ? app.NO_TIME_MSG : sim.running ? 'Pause time: freeze the clock; edits still update the readings (Space)' : 'Start time: let capacitors charge, AC supplies alternate and graphs fill (Space)';
+      run.setAttribute('aria-label', sim.running ? 'Pause time' : 'Play: let time run');
+      run.title = sim.running ? 'Pause: freeze time; edits still update the readings (Space)' : 'Play: let capacitors charge, AC supplies alternate and graphs fill (Space)';
+      // The playback buttons appear only when something changes with time.
+      run.hidden = !timeMatters;
+      $('btn-reset').hidden = !timeMatters;
       $('sim-status').dataset.state = !timeMatters ? 'live' : sim.running ? (sim.behind ? 'behind' : 'running') : 'paused';
       $('sim-state').textContent = !timeMatters ? 'Live' : sim.running ? 'Running' : 'Paused';
-      $('sim-status').title = sim.running && sim.behind ? 'Running slower than the chosen speed: this device cannot keep up.' : '';
+      $('sim-status').title = !timeMatters ? app.NO_TIME_MSG : sim.running && sim.behind ? 'Running slower than the chosen speed: this device cannot keep up.' : '';
       $('sim-time').textContent = 't = ' + fmtTime(sim.t);
       $('view-switch').dataset.view = app.doc.view;
       $('view-realistic').setAttribute('aria-pressed', String(app.doc.view === 'realistic'));

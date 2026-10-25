@@ -147,10 +147,19 @@ test('tidy up never makes a layout worse, keeps every connection and leaves no o
     const other = JSON.stringify(doc.layouts[otherView(view)]);
     const beforeReport = {};
     const before = layout.tidyCost(doc, view, null, null, beforeReport);
-    layout.tidy(doc, view);
+    const changed = layout.tidy(doc, view);
     assert.equal(JSON.stringify(doc.wires), wiresBefore, `${label}: connections unchanged`);
     assert.equal(JSON.stringify(doc.layouts[otherView(view)]), other, `${label}: other view untouched`);
-    assert.ok(doc.wires.every((w) => doc.layouts[view].wires[w.id].pts.length === 0), `${label}: bends removed`);
+    // When tidy changes a layout, bends are kept only at the corners of the
+    // textbook layout: every step between them is horizontal or vertical.
+    // (A tidy that would make things worse keeps the original, bends and all.)
+    for (const w of changed ? doc.wires : []) {
+      const pts = doc.layouts[view].wires[w.id].pts;
+      if (!pts.length) continue;
+      const A = layout.termWorld(doc, view, w.a), B = layout.termWorld(doc, view, w.b);
+      const chain = [[A.x, A.y]].concat(pts, [[B.x, B.y]]);
+      for (let i = 0; i < chain.length - 1; i++) assert.ok(Math.abs(chain[i][0] - chain[i + 1][0]) < 0.5 || Math.abs(chain[i][1] - chain[i + 1][1]) < 0.5, `${label}: square bends`);
+    }
     const report = {};
     const after = layout.tidyCost(doc, view, null, null, report);
     // Spreading a small circuit to the minimum size lengthens wires, so the
@@ -177,7 +186,9 @@ test('tidy up keeps small circuits at a readable size', () => {
     const doc = examples.build(examples.list[0], view);
     for (const pl of Object.values(doc.layouts[view].comps)) { pl.x = Math.round(pl.x * 0.3); pl.y = Math.round(pl.y * 0.3); }
     layout.tidy(doc, view);
+    // The drawing's extent: parts and the wires out to the corners.
     const b = layout.viewBounds(doc, view);
+    for (const r of layout.routeAll(doc, view).values()) for (const p of r.poly) { b.x = Math.min(b.x, p.x); b.x2 = Math.max(b.x2, p.x); b.y = Math.min(b.y, p.y); b.y2 = Math.max(b.y2, p.y); }
     const [w, h] = view === 'schematic' ? [280, 200] : [360, 240];
     assert.ok(b.x2 - b.x >= w - 20 && b.y2 - b.y >= h - 20, `${view}: ${b.x2 - b.x} x ${b.y2 - b.y}`);
   }
@@ -200,4 +211,52 @@ test('tidy up untangles a switch dropped on top of a cell', () => {
   const report = {};
   layout.tidyCost(doc, 'realistic', null, null, report);
   assert.deepEqual({ overlaps: report.overlaps, crossings: report.crossings, overParts: report.overParts }, { overlaps: 0, crossings: 0, overParts: 0 });
+});
+
+test('tidy up draws a series loop as a textbook rectangle with even spacing', () => {
+  for (const view of layout.VIEWS) {
+    const doc = circuit.createDoc();
+    doc.layouts.schematic.ready = true;
+    let seed = 4;
+    const rand = () => { seed = (seed * 16807) % 2147483647; return seed / 2147483647; };
+    const add = (t) => { const c = circuit.addComponent(doc, t); for (const v of layout.VIEWS) doc.layouts[v].comps[c.id] = { x: Math.round(rand() * 500), y: Math.round(rand() * 300), r: Math.floor(rand() * 4), f: false }; return c; };
+    const B = add('battery'), R1 = add('resistor'), R2 = add('resistor'), R3 = add('resistor'), L1 = add('lamp');
+    const chain = [[B, 'p'], [R1, 'a'], [R1, 'b'], [R2, 'a'], [R2, 'b'], [R3, 'a'], [R3, 'b'], [L1, 'a'], [L1, 'b'], [B, 'n']];
+    for (let i = 0; i < chain.length; i += 2) circuit.addWire(doc, { c: chain[i][0].id, t: chain[i][1] }, { c: chain[i + 1][0].id, t: chain[i + 1][1] });
+    assert.ok(layout.seriesParallel(doc, view), `${view}: recognized as series-parallel`);
+    layout.tidy(doc, view);
+    const T = (c, t) => layout.termWorld(doc, view, { c: c.id, t });
+    // Battery along the top; first and last parts on the sides; the middle two along the bottom.
+    assert.equal(T(B, 'p').y, T(B, 'n').y, `${view}: battery horizontal`);
+    assert.equal(T(R1, 'a').x, T(R1, 'b').x, `${view}: R1 upright on a side`);
+    assert.equal(T(L1, 'a').x, T(L1, 'b').x, `${view}: L1 upright on a side`);
+    const yb = T(R2, 'a').y;
+    for (const p of [T(R2, 'b'), T(R3, 'a'), T(R3, 'b')]) assert.equal(p.y, yb, `${view}: bottom row on one line`);
+    // Equal gaps along the bottom: corner to R2, R2 to R3, R3 to corner.
+    const xl = T(R1, 'a').x, xr = T(L1, 'a').x;
+    const gaps = [T(R2, 'a').x - xl, T(R3, 'a').x - T(R2, 'b').x, xr - T(R3, 'b').x];
+    assert.ok(Math.max(...gaps) - Math.min(...gaps) < 1, `${view}: even gaps ${gaps}`);
+    // The battery sits midway between the sides.
+    assert.ok(Math.abs((T(B, 'p').x + T(B, 'n').x) / 2 - (xl + xr) / 2) < 1, `${view}: battery centered`);
+    const report = {};
+    layout.tidyCost(doc, view, null, null, report);
+    assert.deepEqual([report.overlaps, report.crossings, report.overParts], [0, 0, 0], view);
+  }
+});
+
+test('series-parallel recognition: parallel branches yes, transistors and bridges no', () => {
+  assert.ok(layout.seriesParallel(examples.build(examples.list[1], 'schematic'), 'schematic'), 'series and parallel example');
+  assert.equal(layout.seriesParallel(examples.build(examples.list.findIndex((e) => /NPN/.test(e.title)) >= 0 ? examples.list[examples.list.findIndex((e) => /NPN/.test(e.title))] : examples.list[7], 'schematic'), 'schematic'), null, 'transistor circuits use the search');
+  // A Wheatstone bridge is not series-parallel.
+  const doc = circuit.createDoc();
+  const ids = {};
+  for (const [k, t] of [['B', 'battery'], ['R1', 'resistor'], ['R2', 'resistor'], ['R3', 'resistor'], ['R4', 'resistor'], ['R5', 'resistor']]) {
+    const c = circuit.addComponent(doc, t);
+    ids[k] = c.id;
+    for (const v of layout.VIEWS) doc.layouts[v].comps[c.id] = { x: 0, y: 0, r: 0, f: false };
+  }
+  const w = (a, at, b, bt) => circuit.addWire(doc, { c: ids[a], t: at }, { c: ids[b], t: bt });
+  w('B', 'p', 'R1', 'a'); w('B', 'p', 'R2', 'a'); w('R1', 'b', 'R3', 'a'); w('R2', 'b', 'R4', 'a');
+  w('R3', 'b', 'B', 'n'); w('R4', 'b', 'B', 'n'); w('R5', 'a', 'R1', 'b'); w('R5', 'b', 'R2', 'b');
+  assert.equal(layout.seriesParallel(doc, 'schematic'), null, 'bridge');
 });
