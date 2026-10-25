@@ -1,4 +1,4 @@
-// PanPhy Circuits: shared SVG helpers and definitions used by both views.
+// PanPhyCircuits: shared SVG helpers and definitions used by both views.
 // Artwork functions return SVG markup strings. Every piece of text that can come
 // from a document (labels) is escaped here.
 (function (root) {

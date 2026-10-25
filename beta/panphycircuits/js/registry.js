@@ -1,4 +1,4 @@
-// PanPhy Circuits: component registry.
+// PanPhyCircuits: component registry.
 // Each type defines its terminals, editable properties, electrical model (compiled
 // into solver primitives), readings and help. Artwork for the two views lives in
 // art-realistic.js and art-schematic.js and is looked up by the same type id.
