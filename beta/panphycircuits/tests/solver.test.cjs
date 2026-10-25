@@ -1,0 +1,344 @@
+// Run with: node --test beta/panphycircuits/tests/*.test.cjs
+// Solver checks against independently calculated results.
+const test = require('node:test');
+const assert = require('node:assert/strict');
+require('../js/units.js');
+const registry = require('../js/registry.js');
+const circuit = require('../js/circuit.js');
+const solver = require('../js/solver.js');
+
+function build(spec) {
+  // spec.comps: { label: [type, props] }, spec.wires: [['L.t', 'L.t'], ...]
+  const doc = circuit.createDoc();
+  const ids = {};
+  for (const [label, [type, props]] of Object.entries(spec.comps)) {
+    ids[label] = circuit.addComponent(doc, type, { label, props }).id;
+  }
+  for (const [from, to] of spec.wires) {
+    const [la, ta] = from.split('.'), [lb, tb] = to.split('.');
+    const r = circuit.addWire(doc, { c: ids[la], t: ta }, { c: ids[lb], t: tb });
+    assert.ok(r.wire, r.error);
+  }
+  const sim = solver.createSim();
+  sim.setDoc(doc);
+  const read = (label) => solver.reader(sim.result, circuit.getComp(doc, ids[label]));
+  return { doc, sim, ids, read, result: () => sim.result };
+}
+
+const close = (actual, expected, tol = 1e-6, msg) => {
+  assert.ok(Math.abs(actual - expected) <= tol * Math.max(1, Math.abs(expected)), `${msg || ''} expected ${expected}, got ${actual}`);
+};
+
+test('single resistor across a DC source obeys V = IR', () => {
+  const c = build({
+    comps: { B1: ['battery', { emf: 6 }], R1: ['resistor', { R: 120 }], A1: ['ammeter'] },
+    wires: [['B1.p', 'A1.p'], ['A1.n', 'R1.a'], ['R1.b', 'B1.n']]
+  });
+  assert.ok(c.result().ok);
+  close(c.read('A1').i('p'), 0.05);
+  close(c.read('R1').v('a', 'b'), 6);
+  close(c.read('B1').i('p'), -0.05, 1e-6, 'current enters the + terminal negatively');
+});
+
+test('series and parallel networks', () => {
+  // 12 V across 100 Ω in series with (200 Ω ∥ 300 Ω = 120 Ω): I = 12/220.
+  const c = build({
+    comps: { B1: ['battery', { emf: 12 }], R1: ['resistor', { R: 100 }], R2: ['resistor', { R: 200 }], R3: ['resistor', { R: 300 }], V1: ['voltmeter'] },
+    wires: [['B1.p', 'R1.a'], ['R1.b', 'R2.a'], ['R1.b', 'R3.a'], ['R2.b', 'B1.n'], ['R3.b', 'B1.n'], ['V1.p', 'R2.a'], ['V1.n', 'R2.b']]
+  });
+  const I = 12 / 220;
+  close(c.read('R1').i('a'), I);
+  close(c.read('R2').i('a'), I * 300 / 500);
+  close(c.read('R3').i('a'), I * 200 / 500);
+  close(c.read('V1').v('p', 'n'), I * 120);
+});
+
+test('unbalanced Wheatstone bridge (multi-loop) matches hand calculation', () => {
+  // 10 V; R1=100 (top-left), R2=200 (top-right), R3=300 (bottom-left), R4=400, galvanometer R5=50.
+  const c = build({
+    comps: {
+      B1: ['dcsupply', { emf: 10 }], R1: ['resistor', { R: 100 }], R2: ['resistor', { R: 200 }],
+      R3: ['resistor', { R: 300 }], R4: ['resistor', { R: 400 }], R5: ['resistor', { R: 50 }]
+    },
+    wires: [['B1.p', 'R1.a'], ['B1.p', 'R2.a'], ['R1.b', 'R3.a'], ['R2.b', 'R4.a'], ['R3.b', 'B1.n'], ['R4.b', 'B1.n'], ['R1.b', 'R5.a'], ['R5.b', 'R2.b']]
+  });
+  // Nodal: node x (R1/R3), y (R2/R4), top = 10, bottom = 0.
+  // (10-x)/100 = x/300 + (x-y)/50 ; (10-y)/200 + (x-y)/50 = y/400
+  const A = [[1 / 100 + 1 / 300 + 1 / 50, -1 / 50], [-1 / 50, 1 / 200 + 1 / 50 + 1 / 400]];
+  const z = [10 / 100, 10 / 200];
+  const det = A[0][0] * A[1][1] - A[0][1] * A[1][0];
+  const x = (z[0] * A[1][1] - A[0][1] * z[1]) / det;
+  const y = (A[0][0] * z[1] - z[0] * A[1][0]) / det;
+  close(c.read('R5').i('a'), (x - y) / 50);
+  close(c.read('R3').v('a', 'b'), x);
+  // Kirchhoff's current law at the supply.
+  const total = c.read('R1').i('a') + c.read('R2').i('a');
+  close(-c.read('B1').i('p'), total);
+});
+
+test('open and closed switches', () => {
+  const c = build({
+    comps: { B1: ['cell', { emf: 1.5 }], S1: ['switch', { closed: false }], R1: ['resistor', { R: 10 }], V1: ['voltmeter'] },
+    wires: [['B1.p', 'S1.a'], ['S1.b', 'R1.a'], ['R1.b', 'B1.n'], ['V1.p', 'S1.a'], ['V1.n', 'S1.b']]
+  });
+  close(c.read('R1').i('a'), 0);
+  close(c.read('V1').v('p', 'n'), 1.5, 1e-6, 'full EMF across an open switch');
+  circuit.getComp(c.doc, c.ids.S1).props.closed = true;
+  c.sim.setDoc(c.doc);
+  close(c.read('R1').i('a'), 0.15);
+  close(c.read('V1').v('p', 'n'), 0);
+});
+
+test('reversed source and meter polarity give signed readings', () => {
+  const c = build({
+    comps: { B1: ['battery', { emf: 6 }], R1: ['resistor', { R: 60 }], A1: ['ammeter'], V1: ['voltmeter'] },
+    // Ammeter's black terminal faces the + of the battery: negative reading.
+    wires: [['B1.p', 'A1.n'], ['A1.p', 'R1.a'], ['R1.b', 'B1.n'], ['V1.n', 'R1.a'], ['V1.p', 'R1.b']]
+  });
+  close(c.read('A1').i('p'), -0.1);
+  close(c.read('V1').v('p', 'n'), -6);
+});
+
+test('internal resistance: terminal p.d. = EMF − Ir', () => {
+  const c = build({
+    comps: { B1: ['battery', { emf: 9, r: 1 }], R1: ['resistor', { R: 8 }] },
+    wires: [['B1.p', 'R1.a'], ['R1.b', 'B1.n']]
+  });
+  close(c.read('R1').i('a'), 1);
+  close(c.read('B1').v('p', 'n'), 8);
+});
+
+test('short circuit across an ideal cell is reported, not solved', () => {
+  const c = build({
+    comps: { B1: ['cell', { emf: 1.5 }], A1: ['ammeter'], R1: ['resistor', { R: 10 }] },
+    wires: [['B1.p', 'A1.p'], ['A1.n', 'B1.n'], ['B1.p', 'R1.a'], ['R1.b', 'B1.n']]
+  });
+  const r = c.result();
+  assert.equal(r.ok, false);
+  assert.match(r.errors[0].msg, /Short circuit/);
+  assert.match(r.errors[0].msg, /ammeter/i);
+  assert.ok(Number.isNaN(c.read('A1').i('p')), 'no fabricated reading');
+  // A wire straight across the cell is also a short.
+  const d = build({ comps: { B1: ['cell', { emf: 1.5 }] }, wires: [['B1.p', 'B1.n']] });
+  assert.equal(d.result().ok, false);
+});
+
+test('conflicting ideal sources in parallel are reported; equal ones leave current undefined', () => {
+  const c = build({
+    comps: { B1: ['cell', { emf: 1.5 }], B2: ['cell', { emf: 3 }] },
+    wires: [['B1.p', 'B2.p'], ['B1.n', 'B2.n']]
+  });
+  assert.equal(c.result().ok, false);
+  assert.match(c.result().errors[0].msg, /Conflicting ideal sources/);
+  const d = build({
+    comps: { B1: ['cell', { emf: 1.5 }], B2: ['cell', { emf: 1.5 }], R1: ['resistor', { R: 3 }] },
+    wires: [['B1.p', 'B2.p'], ['B1.n', 'B2.n'], ['B1.p', 'R1.a'], ['R1.b', 'B1.n']]
+  });
+  assert.ok(d.result().ok);
+  close(d.read('R1').i('a'), 0.5);
+  assert.ok(Number.isNaN(d.read('B1').i('p')), 'split between ideal cells is undefined');
+  assert.match(d.result().warnings[0].msg, /Undefined current/);
+});
+
+test('separate networks: voltage between them is undefined; each solves independently', () => {
+  const c = build({
+    comps: { B1: ['cell', { emf: 1.5 }], R1: ['resistor', { R: 1 }], B2: ['battery', { emf: 6 }], R2: ['resistor', { R: 2 }], V1: ['voltmeter'], B3: ['cell'] },
+    wires: [['B1.p', 'R1.a'], ['R1.b', 'B1.n'], ['B2.p', 'R2.a'], ['R2.b', 'B2.n'], ['V1.p', 'R1.a'], ['V1.n', 'R2.b'], ['B3.p', 'B3.n']]
+  });
+  // B3 is shorted, but only its own network fails.
+  assert.equal(c.result().ok, false);
+  close(c.read('R1').i('a'), 1.5);
+  close(c.read('R2').i('a'), 3);
+  assert.ok(Number.isNaN(c.read('V1').v('p', 'n')));
+});
+
+test('diode conducts forward, blocks reverse', () => {
+  const fwd = build({
+    comps: { B1: ['battery', { emf: 5 }], R1: ['resistor', { R: 1000 }], D1: ['diode'] },
+    wires: [['B1.p', 'R1.a'], ['R1.b', 'D1.a'], ['D1.k', 'B1.n']]
+  });
+  const vd = fwd.read('D1').v('a', 'k');
+  assert.ok(vd > 0.5 && vd < 0.7, `forward drop ${vd}`);
+  close(fwd.read('R1').i('a'), (5 - vd) / 1000, 1e-6);
+  const rev = build({
+    comps: { B1: ['battery', { emf: 5 }], R1: ['resistor', { R: 1000 }], D1: ['diode'] },
+    wires: [['B1.p', 'R1.a'], ['R1.b', 'D1.k'], ['D1.a', 'B1.n']]
+  });
+  assert.ok(Math.abs(rev.read('R1').i('a')) < 1e-8);
+  close(rev.read('D1').v('a', 'k'), -5, 1e-4);
+});
+
+test('LED with a current-limiting resistor', () => {
+  const c = build({
+    comps: { B1: ['battery', { emf: 6 }], R1: ['resistor', { R: 220 }], D1: ['led', { color: 'red' }] },
+    wires: [['B1.p', 'R1.a'], ['R1.b', 'D1.a'], ['D1.k', 'B1.n']]
+  });
+  const i = c.read('D1').i('a');
+  const v = c.read('D1').v('a', 'k');
+  assert.ok(v > 1.75 && v < 2.0, `red LED drop ${v}`);
+  close(i, (6 - v) / 220, 1e-6);
+  assert.ok(i > 0.015 && i < 0.02);
+});
+
+test('filament lamp is non-ohmic: resistance rises with current', () => {
+  const at = (emf) => {
+    const c = build({ comps: { B1: ['dcsupply', { emf }], L1: ['lamp', { ratedV: 2.5, ratedI: 0.3 }] }, wires: [['B1.p', 'L1.a'], ['L1.b', 'B1.n']] });
+    return c.read('L1').i('a');
+  };
+  close(at(2.5), 0.3, 1e-6, 'rated point');
+  const r1 = 0.25 / at(0.25), r2 = 2.5 / at(2.5);
+  assert.ok(r2 > 2 * r1, `R rises: ${r1} → ${r2}`);
+  // Odd symmetry: reversing the p.d. reverses the current.
+  close(at(-1), -at(1));
+});
+
+test('RC charging and discharging match V = E(1 − e^(−t/RC)) and V0 e^(−t/RC)', () => {
+  const c = build({
+    comps: { B1: ['battery', { emf: 6 }], R1: ['resistor', { R: 1000 }], C1: ['ecap', { C: 1e-3 }], S1: ['switch2', { toB: false }] },
+    wires: [['B1.p', 'S1.a'], ['S1.c', 'R1.a'], ['R1.b', 'C1.p'], ['C1.n', 'B1.n'], ['S1.b', 'B1.n']]
+  });
+  const tau = 1;
+  c.sim.running = true;
+  while (c.sim.t < tau - 1e-12) c.sim.step();
+  const v1 = c.read('C1').v('p', 'n');
+  close(v1, 6 * (1 - Math.exp(-c.sim.t / tau)), 2e-4, 'charging at t = RC');
+  while (c.sim.t < 5 * tau - 1e-12) c.sim.step();
+  close(c.read('C1').v('p', 'n'), 6 * (1 - Math.exp(-c.sim.t / tau)), 2e-4, 'charging at 5RC');
+  // Switch to discharge.
+  const vStart = c.read('C1').v('p', 'n');
+  const t0 = c.sim.t;
+  circuit.getComp(c.doc, c.ids.S1).props.toB = true;
+  c.sim.setDoc(c.doc);
+  close(c.read('C1').v('p', 'n'), vStart, 1e-2, 'edit keeps stored charge');
+  while (c.sim.t < t0 + tau - 1e-12) c.sim.step();
+  close(c.read('C1').v('p', 'n'), vStart * Math.exp(-(c.sim.t - t0) / tau), 2e-3, 'discharge at t = RC');
+  // Current direction reverses on discharge.
+  assert.ok(c.read('C1').i('p') < 0);
+});
+
+test('NPN switch: base current turns the lamp on; PNP mirrors it', () => {
+  const npn = (closed) => build({
+    comps: { B1: ['battery', { emf: 6 }], S1: ['switch', { closed }], RB: ['resistor', { R: 4.7e3 }], Q1: ['npn', { beta: 100 }], RL: ['resistor', { R: 100 }] },
+    wires: [['B1.p', 'S1.a'], ['S1.b', 'RB.a'], ['RB.b', 'Q1.b'], ['B1.p', 'RL.a'], ['RL.b', 'Q1.c'], ['Q1.e', 'B1.n']]
+  });
+  const off = npn(false), on = npn(true);
+  assert.ok(Math.abs(off.read('RL').i('a')) < 1e-6, 'cut-off');
+  const ic = on.read('RL').i('a');
+  const ib = on.read('RB').i('a');
+  close(ib, (6 - on.read('Q1').v('b', 'e') - ib * 10) / 4.7e3, 1e-3);
+  assert.ok(ic > 0.05, `saturated collector current ${ic}`);
+  assert.ok(on.read('Q1').v('c', 'e') < 0.3);
+  // Active region: large base resistor, small load: Ic ≈ β Ib.
+  const act = build({
+    comps: { B1: ['battery', { emf: 6 }], RB: ['resistor', { R: 1e6 }], Q1: ['npn', { beta: 100 }], RL: ['resistor', { R: 100 }] },
+    wires: [['B1.p', 'RB.a'], ['RB.b', 'Q1.b'], ['B1.p', 'RL.a'], ['RL.b', 'Q1.c'], ['Q1.e', 'B1.n']]
+  });
+  const ratio = act.read('Q1').i('c') / act.read('Q1').i('b');
+  close(ratio, 100, 0.02, 'Ic/Ib ≈ hFE in the active region');
+  // PNP: emitter to +, load from collector to −, base pulled low through RB.
+  const pnp = build({
+    comps: { B1: ['battery', { emf: 6 }], RB: ['resistor', { R: 10e3 }], Q1: ['pnp', { beta: 100 }], RL: ['resistor', { R: 100 }] },
+    wires: [['B1.p', 'Q1.e'], ['Q1.b', 'RB.a'], ['RB.b', 'B1.n'], ['Q1.c', 'RL.a'], ['RL.b', 'B1.n']]
+  });
+  assert.ok(pnp.read('RL').i('a') > 0.05, 'PNP conducts with base below emitter');
+  assert.ok(pnp.read('Q1').v('e', 'b') > 0.55);
+});
+
+test('logic gate truth tables', () => {
+  const table = {
+    and: [0, 0, 0, 1], or: [0, 1, 1, 1], nand: [1, 1, 1, 0], nor: [1, 0, 0, 0], xor: [0, 1, 1, 0], xnor: [1, 0, 0, 1]
+  };
+  for (const [gate, expect] of Object.entries(table)) {
+    [[0, 0], [0, 1], [1, 0], [1, 1]].forEach(([a, b], row) => {
+      const c = build({
+        comps: { IA: ['logic_in', { high: !!a }], IB: ['logic_in', { high: !!b }], G1: ['gate_' + gate], OUT: ['logic_out'] },
+        wires: [['IA.q', 'G1.a'], ['IB.q', 'G1.b'], ['G1.q', 'OUT.a']]
+      });
+      assert.equal(c.read('OUT').logicIn('a'), !!expect[row], `${gate} ${a}${b}`);
+      const vq = c.read('G1').vg('q');
+      close(vq, expect[row] ? 5 * 100e3 / (100e3 + 50) : 0, 1e-6);
+    });
+  }
+  const not = build({ comps: { IA: ['logic_in', { high: true }], G1: ['gate_not'], OUT: ['logic_out'] }, wires: [['IA.q', 'G1.a'], ['G1.q', 'OUT.a']] });
+  assert.equal(not.read('OUT').logicIn('a'), false);
+  // An unconnected input is pulled LOW: NOT of nothing is HIGH.
+  const floating = build({ comps: { G1: ['gate_not'], OUT: ['logic_out'] }, wires: [['G1.q', 'OUT.a']] });
+  assert.equal(floating.read('OUT').logicIn('a'), true);
+});
+
+test('gate output drives an LED to the 0 V rail', () => {
+  const c = build({
+    comps: { IA: ['logic_in', { high: true }], R1: ['resistor', { R: 330 }], D1: ['led'], G0: ['rail_0v'] },
+    wires: [['IA.q', 'R1.a'], ['R1.b', 'D1.a'], ['D1.k', 'G0.t']]
+  });
+  const i = c.read('D1').i('a');
+  assert.ok(i > 0.007 && i < 0.01, `LED current ${i}`);
+});
+
+test('a NOR latch settles and holds its state', () => {
+  const c = build({
+    comps: { S: ['logic_in', { high: true }], R: ['logic_in', { high: false }], N1: ['gate_nor'], N2: ['gate_nor'], Q: ['logic_out'] },
+    wires: [['R.q', 'N1.a'], ['N2.q', 'N1.b'], ['S.q', 'N2.a'], ['N1.q', 'N2.b'], ['N1.q', 'Q.a']]
+  });
+  assert.equal(c.read('Q').logicIn('a'), true, 'set');
+  circuit.getComp(c.doc, c.ids.S).props.high = false;
+  c.sim.setDoc(c.doc);
+  assert.equal(c.read('Q').logicIn('a'), true, 'holds after S released');
+  circuit.getComp(c.doc, c.ids.R).props.high = true;
+  c.sim.setDoc(c.doc);
+  assert.equal(c.read('Q').logicIn('a'), false, 'reset');
+  assert.equal(c.result().warnings.length, 0);
+});
+
+test('a NOT gate fed back on itself is reported as not settling', () => {
+  const c = build({ comps: { G1: ['gate_not'] }, wires: [['G1.q', 'G1.a']] });
+  assert.match(c.result().warnings[0].msg, /does not settle/);
+});
+
+test('potentiometer potential divider', () => {
+  const c = build({
+    comps: { B1: ['battery', { emf: 6 }], P1: ['potentiometer', { R: 10e3, pos: 25 }], V1: ['voltmeter'] },
+    wires: [['B1.p', 'P1.a'], ['P1.b', 'B1.n'], ['V1.p', 'P1.w'], ['V1.n', 'P1.b']]
+  });
+  close(c.read('V1').v('p', 'n'), 4.5);
+  const p = circuit.getComp(c.doc, c.ids.P1);
+  p.props.pos = 0;
+  c.sim.setDoc(c.doc);
+  close(c.read('V1').v('p', 'n'), 6, 1e-6, 'wiper at A');
+});
+
+test('AC source: r.m.s. meter reading over a cycle', () => {
+  const c = build({
+    comps: { AC1: ['acsupply', { peak: 10, freq: 50 }], R1: ['resistor', { R: 100 }], V1: ['voltmeter', { mode: 'ac' }] },
+    wires: [['AC1.p', 'R1.a'], ['R1.b', 'AC1.n'], ['V1.p', 'R1.a'], ['V1.n', 'R1.b']]
+  });
+  c.sim.running = true;
+  while (c.sim.t < 0.05) c.sim.step();
+  const v1 = circuit.getComp(c.doc, c.ids.V1);
+  const m = c.sim.meterValue(v1, c.read('V1').v('p', 'n'), v1.id + ':V');
+  assert.ok(m.averaged);
+  close(m.value, 10 / Math.SQRT2, 2e-3);
+});
+
+test('ideal ammeter shorted by a wire: its reading is undefined, not invented', () => {
+  const c = build({
+    comps: { B1: ['battery', { emf: 6 }], R1: ['resistor', { R: 60 }], A1: ['ammeter'] },
+    wires: [['B1.p', 'A1.p'], ['A1.n', 'R1.a'], ['R1.b', 'B1.n'], ['A1.p', 'A1.n']]
+  });
+  assert.ok(c.result().ok);
+  close(c.read('R1').i('a'), 0.1);
+  assert.ok(Number.isNaN(c.read('A1').i('p')));
+});
+
+test('logic supply rails: +5 V wired to 0 V is a short circuit', () => {
+  const c = build({ comps: { P: ['rail_5v'], G: ['rail_0v'] }, wires: [['P.t', 'G.t']] });
+  assert.equal(c.result().ok, false);
+  assert.match(c.result().errors[0].msg, /logic supply/);
+});
+
+test('thermistor and LDR follow their models', () => {
+  close(registry.models.thermistorR(10e3, 3950, 25), 10e3);
+  assert.ok(registry.models.thermistorR(10e3, 3950, 60) < 3e3);
+  assert.ok(registry.models.ldrR(20e3, 0) > 9.9e5);
+  assert.ok(registry.models.ldrR(20e3, 1000) < 1e3);
+});
