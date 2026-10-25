@@ -301,7 +301,16 @@
         const side = v === 'schematic' && (c.type === 'npn' || c.type === 'pnp');
         const vertical = side || ((pl.r & 1) === 1 && !['scope', 'dcsupply', 'acsupply', 'ammeter', 'voltmeter'].includes(c.type));
         let x, y, anchor;
-        if (vertical) {
+        const art = layout.artFor(v, c.type);
+        const sensor = v === 'realistic' && ['ldr', 'thermistor'].includes(c.type);
+        const meter = v === 'schematic' && art.readingPill && (pl.r & 1);
+        if (sensor || meter) {
+          const reading = sensor ? art.actuator(c.props, pl) : art.readingPill(artCtx(c, v, `label-${c.id}`));
+          const center = layout.xform(pl, reading.cx, reading.cy);
+          x = center.x;
+          y = center.y - (sensor ? 20 : 19);
+          anchor = 'middle';
+        } else if (vertical) {
           // Beside the part, on the side without a terminal sticking out.
           const cx = (b.x + b.x2) / 2;
           const right = registry.get(c.type).terminals.some((t) => { const p = layout.termWorld(doc, v, { c: c.id, t: t.id }); return p && p.x > cx + 10 && p.x >= b.x2 - 2; });

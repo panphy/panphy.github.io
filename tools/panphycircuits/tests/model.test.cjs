@@ -308,3 +308,16 @@ test('sensor bounds contain upright slider pills clear of the body in every orie
     }
   }
 });
+
+test('vertical meter reading pills leave a gap from the symbol for every reading width', () => {
+  for (const type of ['ammeter', 'voltmeter']) {
+    const art = layout.artFor('schematic', type);
+    for (const r of [1, 3]) for (const f of [false, true]) {
+      for (const display of ['0.00 A', '935 mV', '−999.999 mA', '—', '?']) {
+        const reading = art.readingPill({ r, f, display });
+        const center = layout.xform({ x: 0, y: 0, r, f }, reading.cx, reading.cy);
+        assert.ok(Math.abs(center.x) - reading.width / 2 >= 24 - 1e-9, `${type}, ${display}, rotation ${r}, flip ${f}: gap from 16-unit symbol`);
+      }
+    }
+  }
+});
