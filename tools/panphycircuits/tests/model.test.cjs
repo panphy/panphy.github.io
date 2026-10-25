@@ -274,3 +274,17 @@ test('tidy up never turns meters on the bench', () => {
     for (const m of meters) assert.equal(doc.layouts.realistic.comps[m.id].r, 0, `${ex.title}: ${m.label} upright`);
   }
 });
+
+test('tidy up never turns the oscilloscope in the circuit diagram', () => {
+  let seed = 33;
+  const rand = () => { seed = (seed * 16807) % 2147483647; return seed / 2147483647; };
+  for (const ex of examples.list) {
+    const doc = examples.build(ex, 'schematic');
+    const scopes = doc.components.filter((c) => c.type === 'scope');
+    if (!scopes.length) continue;
+    for (const pl of Object.values(doc.layouts.schematic.comps)) { pl.x += Math.round((rand() - 0.5) * 200); pl.y += Math.round((rand() - 0.5) * 200); pl.r = Math.floor(rand() * 4); }
+    for (const w of doc.wires) doc.layouts.schematic.wires[w.id] = { pts: [] };
+    layout.tidy(doc, 'schematic');
+    for (const s of scopes) assert.equal(doc.layouts.schematic.comps[s.id].r, 0, `${ex.title}: ${s.label} upright`);
+  }
+});
