@@ -17,6 +17,7 @@
     return {
       logicStyle: 'distinctive',
       showLabels: true,
+      showValues: true,
       wireColorsInDiagram: false,
       currentFlow: false,
       speed: 1,
@@ -310,6 +311,8 @@
     doc.settings = {
       logicStyle: s.logicStyle === 'iec' ? 'iec' : 'distinctive',
       showLabels: s.showLabels !== false,
+      // Older files had one switch for both labels and values.
+      showValues: s.showValues !== undefined ? s.showValues !== false : s.showLabels !== false,
       wireColorsInDiagram: s.wireColorsInDiagram === true,
       currentFlow: s.currentFlow === true,
       speed: [0.01, 0.1, 0.25, 1, 4, 10].includes(s.speed) ? s.speed : def.speed,
