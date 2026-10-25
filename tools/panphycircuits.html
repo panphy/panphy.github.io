@@ -78,11 +78,6 @@
             <button type="button" id="view-realistic" data-icon="realistic" aria-pressed="true" title="Realistic view: components as physical objects (1)"><span>Realistic</span></button>
             <button type="button" id="view-schematic" data-icon="schematic" aria-pressed="false" title="Circuit diagram view: standard symbols (2)"><span>Circuit diagram</span></button>
           </div>
-          <div class="head-spacer"></div>
-          <div class="sim-controls" role="group" aria-label="Simulation">
-            <button type="button" id="btn-run" class="btn-run" aria-pressed="false"></button>
-            <button type="button" id="btn-reset" class="btn-reset" data-icon="reset" title="Reset the simulation to t = 0: capacitors return to their initial p.d. and graphs clear. The circuit is kept."><span>Reset</span></button>
-          </div>
         </div>
         <div class="pane-toolbar toolbar" role="toolbar" aria-label="Tools">
           <button type="button" id="btn-show-library" class="tool tool-panel" data-icon="library" aria-label="Show components" title="Components"></button>
@@ -111,13 +106,23 @@
             <button type="button" id="btn-snap" class="tool" data-icon="snap" aria-label="Snap to grid (G)" title="Snap to grid (G)" aria-pressed="true"></button>
             <button type="button" id="btn-graph" class="tool" data-icon="graph" aria-label="Show graph" title="Graph of meter readings" aria-pressed="false"></button>
           </div>
-          <button type="button" id="btn-clear" class="tool-clear" data-icon="trash" title="Clear circuit: remove every part and wire from both views (you can undo it)"><span>Clear</span></button>
+          <div class="toolbar-end">
+            <div class="menu-wrap display-wrap">
+              <button type="button" id="btn-display" class="tool-text" data-icon="sliders" aria-haspopup="true" aria-expanded="false" aria-controls="display-menu" title="Display settings: labels, values, current animation, symbols"><span>Display</span><svg class="icon icon-chevron" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 10l5 5 5-5"/></svg></button>
+              <div id="display-menu" class="menu display-menu" role="group" aria-label="Display settings" hidden></div>
+            </div>
+            <button type="button" id="btn-clear" class="tool-clear" data-icon="trash" title="Clear circuit: remove every part and wire from both views (you can undo it)"><span>Clear</span></button>
+          </div>
           <button type="button" id="btn-show-inspector" class="tool tool-panel" data-icon="inspect" aria-label="Show inspector" title="Inspector"></button>
         </div>
         <div id="workspace" class="workspace view-realistic" tabindex="0" role="application" aria-label="Circuit workspace. Tab cycles through components; arrow keys move the selection." data-active-tool="select">
           <svg id="ws-svg" class="ws-svg" xmlns="http://www.w3.org/2000/svg"></svg>
 
-          <div id="sim-status" class="sim-status" data-state="paused" role="status" aria-label="Simulation time">
+          <!-- Time: a small playback bar. Play/pause and reset show only when
+               something in the circuit changes with time; otherwise it reads Live. -->
+          <div id="sim-status" class="sim-status" data-state="paused" role="group" aria-label="Simulation time">
+            <button type="button" id="btn-run" class="chip-btn chip-play" aria-pressed="false"></button>
+            <button type="button" id="btn-reset" class="chip-btn" data-icon="reset" aria-label="Reset time to zero" title="Reset: back to t = 0, capacitors to their starting p.d., graphs cleared. The circuit is kept."></button>
             <span class="status-dot" aria-hidden="true"></span>
             <span id="sim-state">Paused</span>
             <span id="sim-time" class="ds-readout">t = 0.000 s</span>
@@ -130,7 +135,7 @@
             <ol>
               <li><strong>Add components.</strong> Drag one from the library, or click it and then click here.</li>
               <li><strong>Connect them.</strong> Click a terminal, then another. Click a wire to branch from it.</li>
-              <li><strong>Measure.</strong> Readings update live. Press Start time only for capacitors, AC supplies, graphs and the oscilloscope.</li>
+              <li><strong>Measure.</strong> Readings update live. Capacitors, AC supplies, graphs and the oscilloscope need time: press play on the time bar at the bottom right.</li>
             </ol>
             <p>Switch between <strong>Realistic</strong> and <strong>Circuit diagram</strong> at any time: both show the same circuit.</p>
             <div class="empty-actions">
@@ -164,6 +169,7 @@
           <h2 class="pane-heading">Inspector</h2>
           <button type="button" class="icon-btn panel-close" data-close-panel data-icon="close" aria-label="Close inspector"></button>
         </div>
+        <div id="scope-cards" class="scope-cards" hidden></div>
         <div id="inspector-body" class="inspector-body"></div>
       </aside>
     </main>
@@ -210,7 +216,7 @@
           <div><dt>Arrows (Shift)</dt><dd>Nudge selection</dd></div>
           <div><dt>Tab</dt><dd>Select next component</dd></div>
           <div><dt>Enter</dt><dd>Operate selected switch</dd></div>
-          <div><dt>Space</dt><dd>Start / pause time</dd></div>
+          <div><dt>Space</dt><dd>Play / pause time</dd></div>
           <div><dt>1 / 2</dt><dd>Realistic / circuit diagram</dd></div>
           <div><dt>+ / − / 0</dt><dd>Zoom, fit to circuit</dd></div>
           <div><dt>G</dt><dd>Snap to grid on/off</dd></div>
@@ -220,7 +226,7 @@
         <h3>Simulation and models</h3>
         <ul>
           <li>The solver uses modified nodal analysis: it handles any arrangement of the supported components, with Newton–Raphson iteration for diodes, LEDs, lamps and transistors.</li>
-          <li>Readings are worked out afresh after every change, so they are live without the clock. <strong>Start time</strong> matters only for capacitors, AC supplies, the oscilloscope and graphs, and is greyed out otherwise. It advances time in fixed steps; <strong>Pause time</strong> freezes it (edits still update the readings); <strong>Reset</strong> returns to t = 0 and pauses. Switching views never changes the simulation.</li>
+          <li>Readings are worked out afresh after every change, so they are live without the clock. Time matters only for capacitors, AC supplies, the oscilloscope and graphs; then play and reset buttons appear on the time bar at the bottom right of the canvas (otherwise it reads Live). <strong>Play</strong> advances time in fixed steps; <strong>Pause</strong> freezes it (edits still update the readings); <strong>Reset</strong> returns to t = 0 and pauses. Switching views never changes the simulation.</li>
           <li>Wires, ideal ammeters and closed switches have zero resistance; ideal voltmeters and oscilloscope inputs draw no current. Meters can also be given a finite resistance.</li>
           <li>Short circuits across ideal sources, and ideal sources that disagree, are reported as errors rather than given made-up readings. Separate circuits have no shared reference, so a p.d. between them is undefined.</li>
           <li>Readings use 3 significant figures; the models are educational approximations, so treat the last figure with care. Each component’s inspector explains its model.</li>

@@ -91,8 +91,9 @@
     }
   };
 
+  // Battery holder with upright cells, closer to the proportions of real AA cells.
   art.battery = {
-    bounds: () => [-90, -46, 180, 88],
+    bounds: () => [-90, -66, 180, 128],
     terms: () => ({ n: [-80, 0, -1, 0], p: [80, 0, 1, 0] }),
     draw(ctx) {
       const emf = ctx.p.emf;
@@ -103,18 +104,18 @@
       for (let i = 0; i < k; i++) {
         const x = -58 + i * (w + gap);
         const upPos = i % 2 === 0;
-        cells += roundRect(n(x), -22, n(w), 40, 3, 'fill="#14786F"') +
-          roundRect(n(x), upPos ? -22 : 6, n(w), 12, 0, 'fill="#E2A93B"') +
-          roundRect(n(x + w * 0.3), upPos ? -26 : 18, n(w * 0.4), 4, 1.2, 'fill="#C9CFD6"') +
-          roundRect(n(x), -22, n(w), 40, 3, 'fill="url(#ppc-cylv)"');
+        cells += roundRect(n(x), -42, n(w), 72, 3, 'fill="#14786F"') +
+          roundRect(n(x), upPos ? -42 : 12, n(w), 18, 0, 'fill="#E2A93B"') +
+          roundRect(n(x + w * 0.3), upPos ? -46 : 30, n(w * 0.4), 4, 1.2, 'fill="#C9CFD6"') +
+          roundRect(n(x), -42, n(w), 72, 3, 'fill="url(#ppc-cylv)"');
       }
-      return shadow(roundRect(-72, -34, 144, 68, 8, '')) +
+      return shadow(roundRect(-72, -54, 144, 108, 8, '')) +
         tag(-80, 0, -1) + tag(80, 0, 1) +
-        roundRect(-72, -34, 144, 68, 8, 'fill="#25282E" stroke="#121417" stroke-width="1"') +
-        roundRect(-66, -30, 132, 52, 5, 'fill="#17191D"') + cells +
-        roundRect(-40, 24, 80, 8, 2, 'fill="#F2F3F5"') +
-        utext(ctx, 0, 28, `${trimNum(emf)} V`, 'ppc-print ppc-print-dark ppc-print-tiny') +
-        utext(ctx, -70, -41, '−', 'ppc-pol ppc-pol-neg') + utext(ctx, 70, -41, '+', 'ppc-pol ppc-pol-pos');
+        roundRect(-72, -54, 144, 108, 8, 'fill="#25282E" stroke="#121417" stroke-width="1"') +
+        roundRect(-66, -50, 132, 86, 5, 'fill="#17191D"') + cells +
+        roundRect(-40, 40, 80, 9, 2, 'fill="#F2F3F5"') +
+        utext(ctx, 0, 44.5, `${trimNum(emf)} V`, 'ppc-print ppc-print-dark ppc-print-tiny') +
+        utext(ctx, -70, -61, '−', 'ppc-pol ppc-pol-neg') + utext(ctx, 70, -61, '+', 'ppc-pol ppc-pol-pos');
     }
   };
 
@@ -289,8 +290,9 @@
         screw(-34, 0, 5) + screw(34, 0, 5) +
         `<circle cx="0" cy="0" r="23" fill="url(#ppc-case)" stroke="#6B7380" stroke-width="1"/>` +
         `<circle cx="0" cy="0" r="17" fill="none" stroke="#A3AAB4" stroke-width="1"/>` +
-        `<g${spin}><path d="M -3 -3 C -9 -22 9 -22 3 -3 Z M 3 3 C 9 22 -9 22 -3 3 Z" fill="#D9483B" stroke="#8E241B" stroke-width="0.8"/>` +
-        `<path d="M -2 -6 C -4 -16 4 -16 2 -6" fill="none" stroke="#FFB3A8" stroke-width="1" opacity="0.7"/></g>` +
+        // Two identical blades, the second the first turned half a turn.
+        `<g${spin}>${[0, 180].map((a) => `<g transform="rotate(${a})"><path d="M -3 -3 C -9 -22 9 -22 3 -3 Z" fill="#D9483B" stroke="#8E241B" stroke-width="0.8"/>` +
+          `<path d="M -2 -6 C -4 -16 4 -16 2 -6" fill="none" stroke="#FFB3A8" stroke-width="1" opacity="0.7"/></g>`).join('')}</g>` +
         `<circle cx="0" cy="0" r="4" fill="url(#ppc-screw)" stroke="#59616B" stroke-width="0.8"/>`;
     }
   };

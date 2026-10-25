@@ -133,7 +133,7 @@
     {
       title: 'Capacitor charging and discharging',
       summary: 'A 1000 µF capacitor charges through 4.7 kΩ (RC = 4.7 s). Flip the two-way switch to discharge it.',
-      tip: 'Press Start time, then flip the two-way switch to B to discharge. The graph shows the solver’s p.d. and current.',
+      tip: 'Press play on the time bar (bottom right), then flip the two-way switch to B to discharge. The graph shows the solver’s p.d. and current.',
       graph: true,
       ext: true,
       comps: [
@@ -231,7 +231,7 @@
     {
       title: 'Half-wave rectifier and oscilloscope',
       summary: 'A 2 Hz AC supply, a diode and a 1 kΩ load. The oscilloscope compares the supply (CH1) with the load (CH2).',
-      tip: 'Press Start time and watch CH2: the diode only lets the positive half-cycles through, about 0.6 V lower.',
+      tip: 'Press play on the time bar (bottom right) and watch CH2: the diode only lets the positive half-cycles through, about 0.6 V lower.',
       ext: true,
       comps: [
         ['AC1', 'acsupply', { peak: 5, freq: 2 }, [-300, 60, 0], [-160, 40, 3]],

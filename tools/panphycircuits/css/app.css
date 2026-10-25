@@ -126,32 +126,26 @@ button, input, select { font: inherit; color: inherit; }
 .view-switch button:hover:not([aria-pressed="true"]) { color: var(--ink); }
 .view-switch button:focus-visible { outline: 3px solid var(--focus); outline-offset: 1px; }
 
-.sim-controls { display: inline-flex; align-items: center; gap: 8px; }
-/* Time controls: quiet tools, like the toolbar's, because most circuits
-   never need them. Start time keeps a fixed width so its label can change. */
-.btn-run, .btn-reset {
-  display: inline-flex; align-items: center; gap: 6px; min-height: 36px; padding: 4px 10px; border-radius: 10px; cursor: pointer;
-  font-weight: 600; font-size: 0.84rem; border: 1px solid transparent; background: none; color: var(--ink); white-space: nowrap;
-}
-.btn-run { width: 118px; justify-content: flex-start; }
-.btn-run:hover:not([aria-disabled="true"]), .btn-reset:hover { background: var(--surface-3); }
-.btn-run .icon { width: 18px; height: 18px; color: var(--good); }
-.btn-run[aria-pressed="true"] { background: color-mix(in srgb, var(--warn) 14%, transparent); border-color: color-mix(in srgb, var(--warn) 40%, transparent); }
-.btn-run[aria-pressed="true"] .icon { color: var(--warn); }
-.btn-reset { color: var(--ink-2); }
-/* Greyed out (not disabled, so its tooltip and click explanation still work)
-   when nothing in the circuit depends on time. */
-.btn-run[aria-disabled="true"] { color: var(--ink-3); cursor: help; }
-.btn-run[aria-disabled="true"] .icon { color: var(--ink-3); }
-.btn-reset .icon { width: 17px; height: 17px; }
-/* Run state and simulation time, in the bottom-right corner of the canvas. */
+/* Time bar in the bottom-right corner of the canvas: play/pause and reset
+   (only when something changes with time), run state and simulation time. */
 .sim-status {
   position: absolute; right: 12px; bottom: 12px; z-index: 4; white-space: nowrap; display: inline-flex; align-items: center; gap: 8px;
-  padding: 7px 14px; border-radius: 999px; background: var(--surface); border: 1px solid var(--line); box-shadow: var(--shadow-1);
+  min-height: 42px; padding: 4px 14px; border-radius: 999px; background: var(--surface); border: 1px solid var(--line); box-shadow: var(--shadow-1);
   font-size: 0.8rem; color: var(--ink-2);
 }
 /* Fixed widths so changing text never shifts anything. */
 #sim-state { display: inline-block; width: 3.9em; }
+.chip-btn { display: inline-grid; place-items: center; width: 34px; height: 34px; margin-left: -6px; border: 0; border-radius: 50%; background: none; color: var(--ink-2); cursor: pointer; }
+.chip-btn + .chip-btn { margin-left: -4px; }
+.chip-btn .icon { width: 18px; height: 18px; }
+.chip-btn:hover { background: var(--surface-3); color: var(--ink); }
+.chip-btn:focus-visible { outline: 3px solid var(--focus); outline-offset: 1px; }
+.chip-play { background: var(--good); color: #fff; }
+.chip-play:hover { background: color-mix(in srgb, var(--good) 85%, #000); color: #fff; }
+[data-theme="dark"] .chip-play { color: #04150C; }
+.chip-play[aria-pressed="true"] { background: var(--warn); }
+.chip-play .icon { width: 16px; height: 16px; stroke: none; }
+.chip-btn:not([hidden]) ~ .status-dot { margin-left: 2px; }
 #sim-time { display: inline-block; min-width: 12ch; }
 .sim-status .ds-readout { color: var(--ink); font-size: 0.82rem; }
 .status-dot { width: 9px; height: 9px; border-radius: 50%; background: var(--ink-3); }
@@ -331,8 +325,8 @@ button, input, select { font: inherit; color: inherit; }
 .ghost { opacity: 0.6; pointer-events: none; }
 
 /* Toolbar: the row under the circuit pane's heading. */
-.toolbar { flex: none; display: flex; align-items: center; flex-wrap: wrap; gap: 4px; padding: 5px 8px; background: var(--surface-2); border-bottom: 1px solid var(--line); }
-.tool-group { display: flex; gap: 2px; padding-right: 6px; margin-right: 2px; border-right: 1px solid var(--line); flex: 0 0 auto; }
+.toolbar { flex: none; display: flex; align-items: center; flex-wrap: wrap; gap: 2px; padding: 5px 8px; background: var(--surface-2); border-bottom: 1px solid var(--line); }
+.tool-group { display: flex; gap: 2px; padding-right: 4px; border-right: 1px solid var(--line); flex: 0 0 auto; }
 .tool-group:last-of-type { border-right: 0; }
 .tool { display: inline-grid; place-items: center; width: var(--tool-size); height: var(--tool-size); border: 1px solid transparent; border-radius: 10px; background: transparent; color: var(--ink-2); cursor: pointer; }
 .tool:hover:not(:disabled) { background: var(--surface-3); color: var(--ink); }
@@ -341,9 +335,24 @@ button, input, select { font: inherit; color: inherit; }
 .tool-panel { display: none; }
 #btn-show-inspector { margin-left: 2px; }
 
+/* Display settings: a labeled tool with a drop-down, left of Clear. */
+/* Display and Clear stay together at the right end, even when the toolbar wraps. */
+.toolbar-end { display: flex; align-items: center; gap: 2px; margin-left: auto; flex: none; }
+.tool-text {
+  display: inline-flex; align-items: center; gap: 5px; flex: none; min-height: var(--tool-size); padding: 6px 6px 6px 8px;
+  border: 1px solid transparent; border-radius: 10px; background: none; color: var(--ink); font-weight: 600; font-size: 0.86rem; cursor: pointer; white-space: nowrap;
+}
+.tool-text .icon { width: 18px; height: 18px; color: var(--accent); }
+.tool-text .icon-chevron { width: 14px; height: 14px; color: var(--ink-3); margin-left: -2px; }
+.tool-text:hover, .tool-text[aria-expanded="true"] { background: var(--surface-3); }
+.display-menu { width: 280px; padding: 12px 14px 10px; }
+.display-menu .icard-label { margin-bottom: 4px; }
+.display-menu .row select { max-width: 58%; }
+.menu-note { margin: 8px 0 0; padding-top: 8px; border-top: 1px solid var(--line); font-size: 0.74rem; color: var(--ink-3); line-height: 1.4; }
+
 /* Clear circuit: red text at the right end of the toolbar, as in PanPhyPlot. */
 .tool-clear {
-  display: inline-flex; align-items: center; gap: 6px; flex: none; margin-left: auto; min-height: var(--tool-size); padding: 6px 10px;
+  display: inline-flex; align-items: center; gap: 5px; flex: none; min-height: var(--tool-size); padding: 6px 8px;
   border: 1px solid transparent; border-radius: 10px; background: none; color: var(--danger); font-weight: 600; font-size: 0.86rem; cursor: pointer; white-space: nowrap;
 }
 .tool-clear .icon { width: 18px; height: 18px; }
@@ -475,6 +484,14 @@ button, input, select { font: inherit; color: inherit; }
 .readings-empty { margin: 0; font-size: 0.84rem; color: var(--ink-3); }
 
 /* Shown above the settings when nothing is selected. */
+/* Oscilloscope screens, pinned above the inspector cards. */
+.scope-cards { flex: none; display: flex; flex-direction: column; gap: 12px; margin-bottom: 12px; }
+.scope-screen { display: block; width: 100%; aspect-ratio: 10 / 8; border-radius: 8px; background: #071712; box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.4); }
+.scope-legend { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 4px 10px; margin: 8px 0 0; font: 600 0.72rem var(--font-mono); color: var(--ink-2); }
+.scope-ch1 { color: #B08A00; }
+.scope-ch2 { color: #0B8BA8; }
+[data-theme="dark"] .scope-ch1 { color: #FFD43B; }
+[data-theme="dark"] .scope-ch2 { color: #3BD8FF; }
 .insp-hint { flex: none; margin: 2px 4px 0; font-size: 0.8rem; color: var(--ink-3); line-height: 1.45; }
 
 /* Actions on the selection: icon over a short label, one row. */
@@ -539,7 +556,7 @@ button, input, select { font: inherit; color: inherit; }
 }
 
 @media (max-width: 1100px) {
-  .btn-reset span, .view-switch button span { display: none; }
+  .view-switch button span { display: none; }
   .view-switch button { padding: 4px 12px; }
   .stage-head .pane-heading { display: none; }
 }

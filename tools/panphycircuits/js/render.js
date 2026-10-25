@@ -225,6 +225,39 @@
       return out;
     }
 
+    // Junction dots go where lines actually branch: wherever three or more
+    // line directions meet in the drawn diagram, counting each wire segment
+    // and each part's lead. Wires drawn on top of each other count once.
+    function branchPoints(doc) {
+      const dirs = new Map();
+      const key = (p) => `${Math.round(p.x * 10)},${Math.round(p.y * 10)}`;
+      const add = (p, d) => { const k = key(p); if (!dirs.has(k)) dirs.set(k, { p, set: new Set() }); dirs.get(k).set.add(d); };
+      const dirOf = (dx, dy) => (Math.abs(dx) > Math.abs(dy) ? (dx > 0 ? 'r' : 'l') : (dy > 0 ? 'd' : 'u'));
+      const segs = [];
+      for (const [, r] of routes) {
+        const poly = r.poly;
+        for (let i = 0; i < poly.length - 1; i++) {
+          const a = poly[i], b = poly[i + 1];
+          if (Math.hypot(b.x - a.x, b.y - a.y) < 0.5) continue;
+          segs.push([a, b]);
+          add(a, dirOf(b.x - a.x, b.y - a.y)); add(b, dirOf(a.x - b.x, a.y - b.y));
+        }
+        // The part's own lead enters each wire end from the inward side.
+        for (const t of [r.a, r.b]) if (t && (Math.abs(t.dx) + Math.abs(t.dy)) > 0.5) add(t, dirOf(-t.dx, -t.dy));
+      }
+      // A wire ending part-way along another wire branches there.
+      for (const entry of dirs.values()) {
+        for (const [a, b] of segs) {
+          const p = entry.p;
+          const onH = Math.abs(a.y - b.y) < 0.5 && Math.abs(p.y - a.y) < 0.5 && (p.x - a.x) * (p.x - b.x) < -0.25;
+          const onV = Math.abs(a.x - b.x) < 0.5 && Math.abs(p.x - a.x) < 0.5 && (p.y - a.y) * (p.y - b.y) < -0.25;
+          if (onH) { entry.set.add('l'); entry.set.add('r'); }
+          if (onV) { entry.set.add('u'); entry.set.add('d'); }
+        }
+      }
+      return [...dirs.values()].filter((e) => e.set.size >= 3).map((e) => e.p);
+    }
+
     function renderJunctions() {
       const v = view();
       const doc = app.doc;
@@ -232,24 +265,10 @@
       const parts = [];
       for (const c of doc.components) {
         const pl = doc.layouts[v].comps[c.id];
-        if (!pl) continue;
-        if (c.type === 'junction') {
-          const k = counts.get(c.id + ':j') || 0;
-          if (k <= 1) {
-            parts.push(`<g class="dangling"><circle cx="${pl.x}" cy="${pl.y}" r="6"/><title>Dangling wire end: connect it to a terminal or delete it</title></g>`);
-          } else if (v === 'schematic' && k >= 3) {
-            parts.push(`<circle class="jdot" cx="${pl.x}" cy="${pl.y}" r="4.2"/>`);
-          }
-          continue;
-        }
-        if (v !== 'schematic') continue;
-        for (const t of registry.get(c.type).terminals) {
-          if ((counts.get(c.id + ':' + t.id) || 0) >= 2) {
-            const p = layout.termWorld(doc, v, { c: c.id, t: t.id });
-            if (p) parts.push(`<circle class="jdot" cx="${p.x}" cy="${p.y}" r="4.2"/>`);
-          }
-        }
+        if (!pl || c.type !== 'junction') continue;
+        if ((counts.get(c.id + ':j') || 0) <= 1) parts.push(`<g class="dangling"><circle cx="${pl.x}" cy="${pl.y}" r="6"/><title>Dangling wire end: connect it to a terminal or delete it</title></g>`);
       }
+      if (v === 'schematic') for (const p of branchPoints(doc)) parts.push(`<circle class="jdot" cx="${p.x}" cy="${p.y}" r="4.2"/>`);
       L.junctions.innerHTML = parts.join('');
     }
 

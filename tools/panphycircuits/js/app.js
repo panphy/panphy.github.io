@@ -417,6 +417,7 @@
       app.renderer.renderAll();
       ui.renderInspector();
       ui.updateStatus();
+      ui.renderScopes();
       if (!document.getElementById('graph-panel').hidden) app.graph.draw(true);
     });
   };
@@ -467,6 +468,7 @@
     app.renderer.renderAll();
     ui.updateReadings();
     ui.updateStatus();
+    ui.renderScopes();
     app.graph.draw(true);
     ui.announce('Simulation reset to t = 0');
   };
@@ -481,6 +483,7 @@
       if (steps > 0) {
         refreshProblems();
         app.renderer.updateDynamic();
+        ui.renderScopes();
         if (!document.getElementById('graph-panel').hidden) app.graph.draw();
       }
       if (now - lastSlow > 120) { lastSlow = now; ui.updateReadings(); ui.updateStatus(); }
@@ -521,6 +524,7 @@
     app.renderer.renderAll();
     ui.renderLibrary();
     ui.renderInspector(true);
+    ui.renderScopes();
     ui.updateStatus();
     if (!opts.cameras) app.fit();
     app.graph.draw(true);
@@ -675,7 +679,7 @@
     if (!restored) loadDoc(circuit.createDoc(), { label: 'New circuit' });
     app.setTool('select');
     if (restored) document.getElementById('dlg-start').showModal();
-    window.addEventListener('resize', () => { app.renderer.applyCamera(); app.graph.draw(true); });
+    window.addEventListener('resize', () => { app.renderer.applyCamera(); app.graph.draw(true); ui.renderScopes(); });
     window.addEventListener('panphy:theme-change', () => { app.renderAll(); app.graph.draw(true); });
     requestAnimationFrame(frame);
   };
