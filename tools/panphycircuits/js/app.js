@@ -191,22 +191,6 @@
     app.onZoom();
   };
   app.onZoom = function () { ui.updateStatus(); };
-  // Whether the circuit fills less than a third of the canvas each way.
-  function looksSmall() {
-    const b = layout.viewBounds(app.doc, app.doc.view);
-    if (!b) return false;
-    const k = app.cameras[app.doc.view];
-    const rect = document.getElementById('ws-svg').getBoundingClientRect();
-    return (b.x2 - b.x) * k.z < rect.width / 3 && (b.y2 - b.y) * k.z < rect.height / 3;
-  }
-  // Whether everything in the current view is visible below the toolbar.
-  function fitsInView() {
-    const b = layout.viewBounds(app.doc, app.doc.view);
-    if (!b) return true;
-    const k = app.cameras[app.doc.view];
-    const rect = document.getElementById('ws-svg').getBoundingClientRect();
-    return b.x * k.z + k.tx >= 0 && b.x2 * k.z + k.tx <= rect.width && b.y * k.z + k.ty >= CANVAS_TOP && b.y2 * k.z + k.ty <= rect.height;
-  }
   const CANVAS_TOP = 16;
 
   // ---------- Selection, tools ----------
@@ -636,9 +620,9 @@
     if (!app.doc.components.length) return;
     if (app.editor.wiring) app.editor.cancelWiring();
     const v = app.doc.view;
-    if (!layout.tidy(app.doc, v)) { ui.toast(`The ${viewName(v)} is already tidy.`); return; }
+    if (!layout.tidy(app.doc, v)) { app.fit(); ui.toast(`The ${viewName(v)} is already tidy.`); return; }
     app.commit('Tidy up');
-    if (!fitsInView() || looksSmall()) app.fit();
+    app.fit();
     ui.toast(`Tidied the ${viewName(v)}: parts lined up and wires rerouted. The other view keeps its own layout.`, { label: 'Undo', run: () => app.undo() });
   };
   // Start again with nothing on the workspace. Display settings are kept, and

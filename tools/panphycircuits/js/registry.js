@@ -255,7 +255,7 @@
     terminals: [{ id: 'p', name: 'Positive (+)' }, { id: 'n', name: 'Negative (−)' }],
     polarity: { p: '+', n: '−' },
     props: [
-      { key: 'emf', label: 'Output voltage', unit: 'V', kind: 'number', default: 6, min: 0, max: 30, step: 0.5 },
+      { key: 'emf', label: 'Output voltage', unit: 'V', kind: 'number', default: 6, min: 0, max: 30, step: 0.5, slider: true },
       internalResistanceProp
     ],
     compile(c, T, b) { compileSource(c, T, b, c.props.emf); },
@@ -269,8 +269,8 @@
     terminals: [{ id: 'p', name: 'Terminal 1 (reference +)' }, { id: 'n', name: 'Terminal 2' }],
     polarity: { p: '~', n: '~' },
     props: [
-      { key: 'peak', label: 'Peak voltage', unit: 'V', kind: 'number', default: 5, min: 0, max: 30, step: 0.5 },
-      { key: 'freq', label: 'Frequency', unit: 'Hz', kind: 'number', default: 1, min: 0.1, max: 1000, log: true },
+      { key: 'peak', label: 'Peak voltage', unit: 'V', kind: 'number', default: 5, min: 0, max: 30, step: 0.5, slider: true },
+      { key: 'freq', label: 'Frequency', unit: 'Hz', kind: 'number', default: 1, min: 0.1, max: 1000, log: true, slider: true },
       internalResistanceProp
     ],
     compile(c, T, b) {

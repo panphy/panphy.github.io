@@ -64,6 +64,14 @@
     if (!pl) return null;
     const [x, y, w, h] = localBounds(view, comp);
     const pts = [xform(pl, x, y), xform(pl, x + w, y), xform(pl, x, y + h), xform(pl, x + w, y + h)];
+    // Upright pills do not rotate with the artwork's rectangular bounds.
+    const art = artFor(view, comp.type);
+    const act = art.actuator && art.actuator(comp.props, pl);
+    if (act && act.upright) {
+      const center = xform(pl, act.cx, act.cy);
+      const [ax, ay, aw, ah] = act.rect;
+      pts.push({ x: center.x + ax, y: center.y + ay }, { x: center.x + ax + aw, y: center.y + ay + ah });
+    }
     const xs = pts.map((p) => p.x), ys = pts.map((p) => p.y);
     return { x: Math.min(...xs), y: Math.min(...ys), x2: Math.max(...xs), y2: Math.max(...ys) };
   }

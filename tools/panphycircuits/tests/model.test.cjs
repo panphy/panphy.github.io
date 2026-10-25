@@ -288,3 +288,23 @@ test('tidy up never turns the oscilloscope in the circuit diagram', () => {
     for (const s of scopes) assert.equal(doc.layouts.schematic.comps[s.id].r, 0, `${ex.title}: ${s.label} upright`);
   }
 });
+
+test('sensor bounds contain upright slider pills clear of the body in every orientation', () => {
+  for (const type of ['ldr', 'thermistor']) {
+    const doc = circuit.createDoc();
+    const c = circuit.addComponent(doc, type);
+    const art = layout.artFor('realistic', type);
+    const bodyRadius = type === 'ldr' ? 17.5 : 14;
+    for (const r of [0, 1, 2, 3]) for (const f of [false, true]) {
+      place(doc, c, 'realistic', 100, 200, r, f);
+      const pl = doc.layouts.realistic.comps[c.id];
+      const act = art.actuator(c.props, pl);
+      const center = layout.xform(pl, act.cx, act.cy);
+      const [x, y, w, h] = act.rect;
+      const pill = { x: center.x + x, y: center.y + y, x2: center.x + x + w, y2: center.y + y + h };
+      const bounds = layout.compBounds(doc, 'realistic', c.id);
+      assert.ok(bounds.x <= pill.x && bounds.y <= pill.y && bounds.x2 >= pill.x2 && bounds.y2 >= pill.y2, `${type}, rotation ${r}, flip ${f}: pill inside bounds`);
+      assert.ok(pill.x >= pl.x + bodyRadius + 4 || pill.x2 <= pl.x - bodyRadius - 4 || pill.y >= pl.y + bodyRadius + 1 || pill.y2 <= pl.y - bodyRadius - 1, `${type}, rotation ${r}, flip ${f}: pill clear of sensor`);
+    }
+  }
+});

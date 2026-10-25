@@ -559,7 +559,7 @@
 
     function pressActuator(e, id, p) {
       const c = circuit.getComp(app.doc, id);
-      const a = layout.artFor(view(), c.type).actuator(c.props);
+      const a = layout.artFor(view(), c.type).actuator(c.props, app.doc.layouts[view()].comps[id]);
       if (!(e.shiftKey || e.metaKey || e.ctrlKey) && !app.selection.comps.has(id)) app.setSelection([id], []);
       if (a.kind === 'toggle') { ed.drag = { type: 'act-toggle', id }; return; }
       if (a.kind === 'momentary') {
@@ -604,7 +604,10 @@
       let value;
       if (!a.prop) value = Math.round(f * 100);
       else if (a.log) value = Number(Math.pow(10, Math.log10(a.min) + f * (Math.log10(a.max) - Math.log10(a.min))).toPrecision(2));
-      else value = Math.round(a.min + f * (a.max - a.min));
+      else {
+        const step = a.step || 1;
+        value = Number((a.min + Math.round(f * (a.max - a.min) / step) * step).toPrecision(6));
+      }
       if (setLive(d.id, a.prop || 'pos', value)) d.changed = true;
     }
     function doKnob(d, e) {
