@@ -563,7 +563,10 @@
       `<rect x="${b0}" y="4.6" width="${b1 - b0}" height="1.8" rx="0.9" class="ppc-badge-track"/><rect x="${b0}" y="4.6" width="${n((b1 - b0) * f)}" height="1.8" rx="0.9" class="ppc-badge-level"/>`);
   }
   // A vertical sensor needs room for the full width of its upright pill.
-  function sensorBadgeY(rotation, normalY) { return (rotation & 1) ? -55 : normalY; }
+  function sensorBadgeY(rotation, normalY) {
+    if (rotation & 1) return -55;
+    return (rotation & 3) === 2 ? -50 : normalY;
+  }
   const BADGE_BAR = [-9, 22];
   const LUX_MIN = 1, LUX_MAX = 10000, TEMP_MIN = -20, TEMP_MAX = 120;
 

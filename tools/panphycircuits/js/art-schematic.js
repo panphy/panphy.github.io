@@ -25,7 +25,7 @@
   };
   const polMark = (ctx, x, y, s) => utext(ctx, x, y, s, 'sch-pol');
 
-  // Reading pill under a meter symbol.
+  // Reading pills stay upright, with a clear gap beside vertical meters.
   function pill(ctx, x, y, str, warn) {
     const w = Math.max(44, str.length * 7.2 + 12);
     return up(ctx, x, y, `<rect x="${n(-w / 2)}" y="-9" width="${n(w)}" height="18" rx="9" class="sch-pill${warn ? ' sch-pill-warn' : ''}"/><text x="0" y="0.5" class="sch-pill-text" text-anchor="middle" dominant-baseline="central">${esc(str)}</text>`);
@@ -163,14 +163,22 @@
 
   // ---------- Meters ----------
 
+  function meterPill(ctx) {
+    const text = ctx.display || '—';
+    const width = Math.max(44, text.length * 7.2 + 12);
+    return { cx: 0, cy: (ctx.r & 1) ? 24 + width / 2 : 34, width, text };
+  }
+
   function meterSym(letter) {
     return {
       bounds: () => [-42, -18, 84, 64],
+      readingPill: meterPill,
       terms: () => ({ n: [-40, 0, -1, 0], p: [40, 0, 1, 0] }),
       draw(ctx) {
+        const reading = meterPill(ctx);
         return L('M -40 0 H -16 M 16 0 H 40') + `<circle cx="0" cy="0" r="16" class="sch-body"/>` + `<circle cx="0" cy="0" r="16" class="sch-line"/>` +
           utext(ctx, 0, 0.5, letter, 'sch-letter') + polMark(ctx, 26, -10, '+') + polMark(ctx, -26, -10, '−') +
-          pill(ctx, 0, 34, ctx.display || '—', ctx.displayWarn);
+          pill(ctx, reading.cx, reading.cy, reading.text, ctx.displayWarn);
       }
     };
   }
