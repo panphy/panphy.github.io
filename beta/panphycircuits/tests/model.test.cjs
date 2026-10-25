@@ -138,32 +138,51 @@ test('imports are validated and cannot carry markup', () => {
   assert.ok(r.warnings.some((w) => /missing terminal/.test(w)));
 });
 
-test('tidy up straightens nearly aligned wires, removes bends and keeps every connection', () => {
-  const straight = (doc, view) => doc.wires.filter((w) => {
-    const a = layout.termWorld(doc, view, w.a), b = layout.termWorld(doc, view, w.b);
-    return Math.abs(a.x - b.x) < 1e-6 || Math.abs(a.y - b.y) < 1e-6;
-  }).length;
+test('tidy up never makes a layout worse, keeps every connection and leaves no overlaps', () => {
   let seed = 7;
   const rand = () => { seed = (seed * 16807) % 2147483647; return seed / 2147483647; };
+  const otherView = (v) => (v === 'realistic' ? 'schematic' : 'realistic');
+  const check = (doc, view, label) => {
+    const wiresBefore = JSON.stringify(doc.wires);
+    const other = JSON.stringify(doc.layouts[otherView(view)]);
+    const before = layout.tidyCost(doc, view);
+    layout.tidy(doc, view);
+    assert.equal(JSON.stringify(doc.wires), wiresBefore, `${label}: connections unchanged`);
+    assert.equal(JSON.stringify(doc.layouts[otherView(view)]), other, `${label}: other view untouched`);
+    assert.ok(doc.wires.every((w) => doc.layouts[view].wires[w.id].pts.length === 0), `${label}: bends removed`);
+    const report = {};
+    const after = layout.tidyCost(doc, view, null, null, report);
+    assert.ok(after <= before + 0.5, `${label}: cost ${before} -> ${after}`);
+    assert.equal(report.overlaps, 0, `${label}: overlapping parts`);
+    return { before, after };
+  };
   for (const ex of examples.list) {
     for (const view of layout.VIEWS) {
+      check(examples.build(ex, view), view, `${ex.title} (${view}, neat)`);
       const doc = examples.build(ex, view);
-      const tidyOriginal = circuit.clone(doc);
-      layout.tidy(tidyOriginal, view);
-      assert.ok(straight(tidyOriginal, view) >= straight(doc, view), `${ex.title} (${view}): tidying a neat layout keeps its straight wires`);
-      for (const pl of Object.values(doc.layouts[view].comps)) { pl.x += Math.round((rand() - 0.5) * 30); pl.y += Math.round((rand() - 0.5) * 30); }
+      for (const pl of Object.values(doc.layouts[view].comps)) { pl.x += Math.round((rand() - 0.5) * 160); pl.y += Math.round((rand() - 0.5) * 160); pl.r = Math.floor(rand() * 4); }
       for (const w of doc.wires) doc.layouts[view].wires[w.id] = { pts: [[rand() * 300, rand() * 300]] };
-      const messy = straight(doc, view);
-      const wiresBefore = JSON.stringify(doc.wires);
-      const other = JSON.stringify(doc.layouts[view === 'realistic' ? 'schematic' : 'realistic']);
-      assert.equal(layout.tidy(doc, view), true);
-      assert.equal(JSON.stringify(doc.wires), wiresBefore, `${ex.title}: connections unchanged`);
-      assert.equal(JSON.stringify(doc.layouts[view === 'realistic' ? 'schematic' : 'realistic']), other, `${ex.title}: other view untouched`);
-      assert.ok(doc.wires.every((w) => doc.layouts[view].wires[w.id].pts.length === 0), `${ex.title}: bends removed`);
-      if (view === 'schematic') assert.ok(straight(doc, view) > messy, `${ex.title}: more straight wires after tidying (${messy} -> ${straight(doc, view)})`);
-      else assert.ok(straight(doc, view) >= messy, `${ex.title} (realistic): no fewer straight wires after tidying`);
-      const solid = doc.components.filter((c) => c.type !== 'junction').map((c) => layout.compBounds(doc, view, c.id));
-      for (let i = 0; i < solid.length; i++) for (let j = i + 1; j < solid.length; j++) assert.ok(!layout.overlaps(solid[i], solid[j], 0), `${ex.title} (${view}): parts ${i} and ${j} overlap`);
+      const r = check(doc, view, `${ex.title} (${view}, messy)`);
+      assert.ok(r.after < r.before * 0.75, `${ex.title} (${view}): messy layout clearly improved (${r.before} -> ${r.after})`);
     }
   }
+});
+
+test('tidy up untangles a switch dropped on top of a cell', () => {
+  // The cell, switch and lamp loop with the switch overlapping the cell and a
+  // wire running across the lamp, as reported from the realistic view.
+  const doc = examples.build(examples.list[0], 'realistic');
+  const byType = (t) => doc.components.find((c) => c.type === t);
+  const lay = doc.layouts.realistic.comps;
+  const cell = doc.components.find((c) => /cell|battery/.test(c.type)), sw = byType('switch'), lamp = doc.components.find((c) => /lamp/.test(c.type));
+  Object.assign(lay[lamp.id], { x: 120, y: 260, r: 0, f: false });
+  Object.assign(lay[cell.id], { x: 400, y: 170, r: 0, f: false });
+  Object.assign(lay[sw.id], { x: 390, y: 110, r: 1, f: false });
+  const messy = {};
+  layout.tidyCost(doc, 'realistic', null, null, messy);
+  assert.ok(messy.overlaps > 0, 'the starting layout has an overlap');
+  layout.tidy(doc, 'realistic');
+  const report = {};
+  layout.tidyCost(doc, 'realistic', null, null, report);
+  assert.deepEqual({ overlaps: report.overlaps, crossings: report.crossings, overParts: report.overParts }, { overlaps: 0, crossings: 0, overParts: 0 });
 });

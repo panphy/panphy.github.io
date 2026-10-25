@@ -498,21 +498,186 @@
   }
 
   // ---------- Tidy up ----------
-  // Tidy one view: snap parts to the grid, line up parts whose connected
-  // terminals nearly line up (so the wire between them runs straight), separate
-  // overlapping parts and remove every wire bend so wires are routed afresh.
-  // Connections never change. Returns true if anything in the view changed.
+  // Tidy one view in three stages, never changing a connection:
+  // 1. Improve the arrangement by local search: try moving each part a few grid
+  //    steps, rotating and mirroring it, and swapping two parts, keeping any
+  //    change that lowers the layout cost (see tidyCost).
+  // 2. Line up parts whose connected terminals nearly line up, so the wires
+  //    between them run straight.
+  // 3. Separate any remaining overlap and clear every bend so wires are routed
+  //    afresh. Returns true if anything in the view changed.
+
+  // Route of a wire without bends, as drawn: in the circuit diagram it steers
+  // around parts; in the realistic view it is a smooth curve.
+  // `cache` (optional) remembers diagram routes by their ends and the parts near
+  // them, since one move during a search changes only a few routes.
+  function quickPoly(view, A, B, obstacles, cache) {
+    const d0 = { x: A.dx, y: A.dy }, d1 = { x: B.dx, y: B.dy };
+    if (view === 'schematic') {
+      if (!cache) return autoOrtho(A, d0, B, d1, obstacles, []);
+      const box = { x: Math.min(A.x, B.x) - 160, y: Math.min(A.y, B.y) - 160, x2: Math.max(A.x, B.x) + 160, y2: Math.max(A.y, B.y) + 160 };
+      const near = obstacles.filter((r) => overlaps(r, box, 0));
+      const key = [A.x, A.y, A.dx, A.dy, B.x, B.y, B.dx, B.dy].join(',') + '|' + near.map((r) => `${r.x},${r.y},${r.x2},${r.y2}`).join(';');
+      let poly = cache.get(key);
+      if (!poly) { poly = autoOrtho(A, d0, B, d1, near, []); cache.set(key, poly); }
+      return poly;
+    }
+    const seg = smoothRoute(A, d0, [], B, d1)[0];
+    const out = [];
+    for (let k = 0; k <= 10; k++) out.push(bez(seg, k / 10));
+    return out;
+  }
+
+  function segsCross(a, b, c, d) {
+    const o = (p, q, r) => (q.x - p.x) * (r.y - p.y) - (q.y - p.y) * (r.x - p.x);
+    const d1 = o(c, d, a), d2 = o(c, d, b), d3 = o(a, b, c), d4 = o(a, b, d);
+    return ((d1 > 1e-9 && d2 < -1e-9) || (d1 < -1e-9 && d2 > 1e-9)) && ((d3 > 1e-9 && d4 < -1e-9) || (d3 < -1e-9 && d4 > 1e-9));
+  }
+
+  function polyBox(poly) {
+    const b = { x: Infinity, y: Infinity, x2: -Infinity, y2: -Infinity };
+    for (const p of poly) { b.x = Math.min(b.x, p.x); b.y = Math.min(b.y, p.y); b.x2 = Math.max(b.x2, p.x); b.y2 = Math.max(b.y2, p.y); }
+    return b;
+  }
+
+  // Layout cost: lower is tidier. Crossing wires, wires over parts and
+  // overlapping parts cost most; then leads that leave a part backwards, bends
+  // and wire length. `home` (optional) holds each part's starting placement, so
+  // parts are not turned or moved without a reason. `report` (optional)
+  // receives the counts behind the cost.
+  function tidyCost(doc, view, home, cache, report) {
+    const lay = doc.layouts[view];
+    let cost = 0;
+    const rep = report || {};
+    rep.overlaps = 0; rep.crossings = 0; rep.overParts = 0; rep.backwards = 0;
+    const solid = [];
+    for (const c of doc.components) {
+      if (c.type === 'junction' || !lay.comps[c.id]) continue;
+      const b = compBounds(doc, view, c.id);
+      solid.push({ id: c.id, b, body: { x: b.x + 10, y: b.y + 10, x2: b.x2 - 10, y2: b.y2 - 10 } });
+    }
+    for (let i = 0; i < solid.length; i++) for (let j = i + 1; j < solid.length; j++) {
+      if (overlaps(solid[i].b, solid[j].b, 0)) { cost += 4000; rep.overlaps++; }
+      // Realistic parts need room for their wires; diagram symbols may sit in a row.
+      else if (overlaps(solid[i].b, solid[j].b, view === 'schematic' ? 8 : 36)) cost += 250;
+    }
+    const routes = [];
+    const obstacles = view === 'schematic' ? obstacleRects(doc, view) : null;
+    for (const w of doc.wires) {
+      const A = termWorld(doc, view, w.a), B = termWorld(doc, view, w.b);
+      if (!A || !B) continue;
+      const poly = quickPoly(view, A, B, obstacles, cache);
+      routes.push({ w, poly, box: polyBox(poly) });
+      for (let i = 0; i < poly.length - 1; i++) cost += Math.hypot(poly[i + 1].x - poly[i].x, poly[i + 1].y - poly[i].y);
+      if (view === 'schematic') cost += 30 * Math.max(0, poly.length - 2);
+      else if (Math.abs(A.x - B.x) < 0.5 || Math.abs(A.y - B.y) < 0.5) cost -= 20;
+      const u = unit(B.x - A.x, B.y - A.y);
+      if (!isZero({ x: A.dx, y: A.dy }) && A.dx * u.x + A.dy * u.y < -0.2) { cost += 120; rep.backwards++; }
+      if (!isZero({ x: B.dx, y: B.dy }) && -(B.dx * u.x + B.dy * u.y) < -0.2) { cost += 120; rep.backwards++; }
+      for (const s of solid) {
+        if (!overlaps(s.body, routes[routes.length - 1].box, 0)) continue;
+        for (let i = 0; i < poly.length - 1; i++) if (segHitsRect(poly[i], poly[i + 1], s.body)) { cost += 900; rep.overParts++; break; }
+      }
+    }
+    const same = (e, f) => e.c === f.c && e.t === f.t;
+    for (let i = 0; i < routes.length; i++) for (let j = i + 1; j < routes.length; j++) {
+      const p = routes[i], q = routes[j];
+      if (!overlaps(p.box, q.box, 0)) continue;
+      if (same(p.w.a, q.w.a) || same(p.w.a, q.w.b) || same(p.w.b, q.w.a) || same(p.w.b, q.w.b)) continue;
+      let n = 0;
+      for (let a = 0; a < p.poly.length - 1; a++) for (let b = 0; b < q.poly.length - 1; b++) if (segsCross(p.poly[a], p.poly[a + 1], q.poly[b], q.poly[b + 1])) n++;
+      cost += 350 * n;
+      rep.crossings += n;
+    }
+    if (home) {
+      for (const [id, h] of home) {
+        const pl = lay.comps[id];
+        if (!pl) continue;
+        if (pl.r !== h.r || pl.f !== h.f) cost += 25;
+        cost += 0.05 * (Math.abs(pl.x - h.x) + Math.abs(pl.y - h.y));
+      }
+    }
+    return cost;
+  }
+
+  function improveLayout(doc, view, opts = {}) {
+    const lay = doc.layouts[view];
+    const ids = doc.components.filter((c) => lay.comps[c.id] && doc.wires.some((w) => w.a.c === c.id || w.b.c === c.id)).map((c) => c.id);
+    if (ids.length < 2) return;
+    const isJunction = (id) => circuit.getComp(doc, id).type === 'junction';
+    const home = new Map(ids.map((id) => [id, Object.assign({}, lay.comps[id])]));
+    const cache = new Map();
+    const cost = () => { if (cache.size > 20000) cache.clear(); return tidyCost(doc, view, home, cache); };
+    let best = cost();
+    // The circuit diagram routes every wire around parts, which is slower to
+    // score, so it searches fewer, nearer positions per pass.
+    const STEP = 20, reach = view === 'schematic' ? 2 : 3, turnReach = view === 'schematic' ? 1 : 2;
+    const shifts = [];
+    for (let i = -reach; i <= reach; i++) for (let j = -reach; j <= reach; j++) if (i || j) shifts.push([i * STEP, j * STEP]);
+    const orients = [];
+    for (let r = 0; r < 4; r++) for (const f of [false, true]) orients.push({ r, f });
+    const tryState = (pl, state) => {
+      const old = { x: pl.x, y: pl.y, r: pl.r, f: pl.f };
+      Object.assign(pl, state);
+      const c = cost();
+      if (c < best - 0.5) { best = c; return true; }
+      Object.assign(pl, old);
+      return false;
+    };
+    const maxPasses = opts.passes || 8;
+    for (let pass = 0; pass < maxPasses; pass++) {
+      let improved = false;
+      for (const id of ids) {
+        const pl = lay.comps[id];
+        if (!isJunction(id)) for (const o of orients) if ((o.r !== pl.r || o.f !== pl.f) && tryState(pl, o)) improved = true;
+        for (const [dx, dy] of shifts) if (tryState(pl, { x: pl.x + dx, y: pl.y + dy })) improved = true;
+        if (!isJunction(id)) {
+          // A move and a turn together, for parts that only fit once turned.
+          const x0 = pl.x, y0 = pl.y;
+          for (const o of orients) for (const [dx, dy] of shifts) {
+            if (Math.abs(dx) > turnReach * STEP || Math.abs(dy) > turnReach * STEP || (o.r === pl.r && o.f === pl.f)) continue;
+            if (tryState(pl, { x: x0 + dx, y: y0 + dy, r: o.r, f: o.f })) { improved = true; break; }
+          }
+        }
+      }
+      // Swap two parts of a similar kind, keeping each one's orientation.
+      for (let i = 0; i < ids.length; i++) for (let j = i + 1; j < ids.length; j++) {
+        if (isJunction(ids[i]) || isJunction(ids[j])) continue;
+        const p = lay.comps[ids[i]], q = lay.comps[ids[j]];
+        const px = p.x, py = p.y;
+        p.x = q.x; p.y = q.y; q.x = px; q.y = py;
+        const c = cost();
+        if (c < best - 0.5) { best = c; improved = true; }
+        else { q.x = p.x; q.y = p.y; p.x = px; p.y = py; }
+      }
+      if (!improved) break;
+    }
+  }
+
   function tidy(doc, view, opts = {}) {
     const lay = doc.layouts[view];
     const tol = opts.tolerance || 30;
     const before = JSON.stringify(lay);
-    const isJunction = (id) => { const c = circuit.getComp(doc, id); return !!c && c.type === 'junction'; };
-    const degree = new Map();
-    for (const w of doc.wires) for (const e of [w.a, w.b]) degree.set(e.c, (degree.get(e.c) || 0) + 1);
     for (const c of doc.components) {
       const pl = lay.comps[c.id];
       if (pl) { pl.x = snap(pl.x); pl.y = snap(pl.y); }
     }
+    improveLayout(doc, view, opts);
+    // Keep each finishing step only if it does not make the layout worse.
+    for (const step of [() => alignParts(doc, view, tol), () => resolveOverlaps(doc, view, doc.components.map((c) => c.id), [], 4)]) {
+      const saved = JSON.stringify(lay.comps), cost = tidyCost(doc, view);
+      step();
+      if (tidyCost(doc, view) > cost + 0.5) lay.comps = JSON.parse(saved);
+    }
+    for (const w of doc.wires) lay.wires[w.id] = { pts: [] };
+    return JSON.stringify(lay) !== before;
+  }
+
+  function alignParts(doc, view, tol) {
+    const lay = doc.layouts[view];
+    const isJunction = (id) => { const c = circuit.getComp(doc, id); return !!c && c.type === 'junction'; };
+    const degree = new Map();
+    for (const w of doc.wires) for (const e of [w.a, w.b]) degree.set(e.c, (degree.get(e.c) || 0) + 1);
     const solid = doc.components.filter((c) => c.type !== 'junction' && lay.comps[c.id]).map((c) => c.id);
     const clashes = (id) => {
       if (isJunction(id)) return false;
@@ -569,9 +734,6 @@
         }
       }
     }
-    resolveOverlaps(doc, view, doc.components.map((c) => c.id), [], 4);
-    for (const w of doc.wires) lay.wires[w.id] = { pts: [] };
-    return JSON.stringify(lay) !== before;
   }
 
   function mean(list) {
@@ -599,7 +761,7 @@
   const api = {
     GRID, VIEWS, artFor, snap, xform, xdir, placement, termWorld, terminalsLocal, localBounds, compBounds, svgTransform,
     wireRoute, routeAll, wirePoints, orthoRoute, nearestOnPoly, pointAtFraction, splitWire, generateLayout, placeInOtherViews,
-    resolveOverlaps, viewBounds, overlaps, tidy
+    resolveOverlaps, viewBounds, overlaps, tidy, tidyCost
   };
   PPC.layout = api;
   if (typeof module === 'object' && module.exports) module.exports = api;

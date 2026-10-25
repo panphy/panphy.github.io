@@ -21,7 +21,8 @@
     rev: 0,
     graphWindow: 'all',
     clipboard: null,
-    lastElecKey: ''
+    lastElecKey: '',
+    emptyDismissed: false
   };
   PPC.app = app;
 
@@ -169,7 +170,8 @@
     if (!b || rect.width < 10) { k.z = 1; k.tx = rect.width / 2; k.ty = rect.height / 2; app.renderer.applyCamera(); ui.updateStatus(); return; }
     const padX = 120, padY = 70;
     const bw = b.x2 - b.x + 2 * padX, bh = b.y2 - b.y + 2 * padY;
-    const avoidTop = toolbarBottom() + 6, avoidBottom = 10;
+    // Keep clear of the Clear button (top right) and the time chip (bottom right).
+    const avoidTop = CANVAS_TOP, avoidBottom = 54;
     const z = Math.min(2, Math.max(0.25, Math.min(rect.width / bw, (rect.height - avoidTop - avoidBottom) / bh)));
     k.z = z;
     k.tx = rect.width / 2 - ((b.x + b.x2) / 2) * z;
@@ -184,19 +186,9 @@
     if (!b) return true;
     const k = app.cameras[app.doc.view];
     const rect = document.getElementById('ws-svg').getBoundingClientRect();
-    return b.x * k.z + k.tx >= 0 && b.x2 * k.z + k.tx <= rect.width && b.y * k.z + k.ty >= toolbarBottom() && b.y2 * k.z + k.ty <= rect.height;
+    return b.x * k.z + k.tx >= 0 && b.x2 * k.z + k.tx <= rect.width && b.y * k.z + k.ty >= CANVAS_TOP && b.y2 * k.z + k.ty <= rect.height;
   }
-  // The toolbar wraps onto more rows in narrow windows; keep the error banner
-  // and fitted circuits clear of it.
-  function toolbarBottom() {
-    const ws = document.getElementById('workspace').getBoundingClientRect();
-    return document.querySelector('.toolbar').getBoundingClientRect().bottom - ws.top;
-  }
-  function trackToolbar() {
-    const set = () => document.getElementById('workspace').style.setProperty('--toolbar-bottom', Math.round(toolbarBottom()) + 'px');
-    set();
-    if (typeof ResizeObserver === 'function') new ResizeObserver(set).observe(document.querySelector('.toolbar'));
-  }
+  const CANVAS_TOP = 60;
 
   // ---------- Selection, tools ----------
 
@@ -566,6 +558,7 @@
     app.doc.layouts.realistic.ready = true;
     app.doc.layouts.schematic.ready = true;
     app.selection.comps.clear(); app.selection.wires.clear();
+    app.emptyDismissed = true;
     app.commit('Clear circuit');
     app.sim.reset();
     ui.updateStatus();
@@ -587,6 +580,7 @@
     const doc = circuit.createDoc();
     doc.settings = Object.assign(circuit.defaultSettings(), app.doc.settings);
     doc.view = app.doc.view;
+    app.emptyDismissed = true;
     loadDoc(doc, { label: 'Clean canvas' });
     if (before) {
       app.history.stack.unshift({ snap: before, label: 'Before clean canvas', view: app.doc.view, time: Date.now() });
@@ -622,7 +616,6 @@
     app.editor = PPC.editor.createEditor(app, svg, host);
     app.graph = PPC.graph.createGraph(app, document.getElementById('graph-canvas'), document.getElementById('graph-legend'));
     wireControls();
-    trackToolbar();
     ui.renderExamples(PPC.examples.list);
 
     let restored = false;
@@ -667,6 +660,12 @@
     $('examples-list').addEventListener('click', (e) => { const b = e.target.closest('[data-example]'); if (b) app.loadExample(Number(b.dataset.example)); });
     $('empty-examples').addEventListener('click', () => $('dlg-examples').showModal());
     $('empty-start').addEventListener('click', () => app.loadExample(0));
+    $('empty-clean').addEventListener('click', () => {
+      app.emptyDismissed = true;
+      ui.updateStatus();
+      $('workspace').focus();
+      ui.toast('Clean canvas. Drag a component from the library to start building.');
+    });
     $('btn-help').addEventListener('click', () => $('dlg-help').showModal());
     $('btn-tidy').addEventListener('click', () => app.tidy());
     $('btn-clear').addEventListener('click', () => app.newCircuit());

@@ -7,13 +7,13 @@
   const ICONS = {
     select: '<path d="M5 3l14 7-6 1.6L10.5 18z"/>',
     wire: '<circle cx="5" cy="18" r="2.2"/><circle cx="19" cy="6" r="2.2"/><path d="M7 17c6 0 4-10 10-10"/>',
-    pan: '<path d="M9 11V5.5a1.5 1.5 0 013 0V10m0-1V4.5a1.5 1.5 0 013 0V10m0-.5a1.5 1.5 0 013 0V15a6 6 0 01-6 6h-1a6 6 0 01-5-2.7L3.6 14a1.5 1.5 0 012.5-1.7L9 15"/>',
+    pan: '<path d="M12 3v18M3 12h18"/><path d="M9.5 5.5L12 3l2.5 2.5M9.5 18.5L12 21l2.5-2.5M5.5 9.5L3 12l2.5 2.5M18.5 9.5L21 12l-2.5 2.5"/>',
     rotate: '<path d="M20 11a8 8 0 10-2.3 5.7"/><path d="M20 4v7h-7"/>',
     flip: '<path d="M12 3v18"/><path d="M9 7L4 17h5zM15 7l5 10h-5z"/>',
     duplicate: '<rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V6a2 2 0 00-2-2H6a2 2 0 00-2 2v8a2 2 0 002 2h2"/>',
     trash: '<path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13"/>',
     tidy: '<path d="M4 20L15 9"/><path d="M15 3v3M13.5 4.5h3M20 8v3M18.5 9.5h3M20 2.5v2M19 3.5h2"/>',
-    clear: '<rect x="4" y="4" width="16" height="16" rx="2.5"/><path d="M9 9l6 6M15 9l-6 6"/>',
+    broom: '<path d="M20.5 3.5l-7.2 7.2"/><path d="M11.2 9.6l3.2 3.2"/><path d="M11.4 11c-3.6-.4-6.6 1.8-7.4 5.6L3.5 20.5l3.9-.5c3.8-.8 6-3.8 5.6-7.4z"/><path d="M6.6 17.4l2.6-2.6M9.4 19.3l1.9-1.9"/>',
     undo: '<path d="M9 14L4 9l5-5"/><path d="M4 9h11a5 5 0 010 10h-3"/>',
     redo: '<path d="M15 14l5-5-5-5"/><path d="M20 9H9a5 5 0 000 10h3"/>',
     zoomIn: '<circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4M11 8v6M8 11h6"/>',
@@ -30,6 +30,9 @@
     inspect: '<path d="M4 6h10M4 12h16M4 18h7"/><circle cx="17" cy="6" r="2.4"/><circle cx="14" cy="18" r="2.4"/>',
     warn: '<path d="M12 3l10 18H2z"/><path d="M12 10v5M12 18v.5"/>',
     close: '<path d="M6 6l12 12M18 6L6 18"/>',
+    examples: '<rect x="3.5" y="4" width="7" height="7" rx="1.5"/><rect x="13.5" y="4" width="7" height="7" rx="1.5"/><rect x="3.5" y="14" width="7" height="6" rx="1.5"/><path d="M14 17h6M17 14v6"/>',
+    folder: '<path d="M3.5 7.5a2 2 0 012-2h4l2 2.2h7a2 2 0 012 2V17a2 2 0 01-2 2h-13a2 2 0 01-2-2z"/>',
+    guide: '<path d="M4 5.5c2.7-1.3 5.4-1.3 8 0v14c-2.6-1.3-5.3-1.3-8 0zM20 5.5c-2.7-1.3-5.4-1.3-8 0v14c2.6-1.3 5.3-1.3 8 0z"/>',
     search: '<circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/>'
   };
   function icon(name) {
@@ -156,29 +159,35 @@
 
     // ---------- Inspector ----------
 
+    // Inspector fields. Numbers get a typed value with its unit beside the
+    // label, then a slider with the range at its ends; switches are one row.
     function field(p, value, compId) {
       const id = `f-${compId}-${p.key}`;
       const help = p.help ? `<p class="field-help">${esc(p.help)}</p>` : '';
       if (p.kind === 'bool') {
-        return `<div class="field field-bool"><label class="toggle"><input type="checkbox" id="${id}" data-prop="${p.key}" ${value ? 'checked' : ''}><span class="toggle-track" aria-hidden="true"></span><span>${esc(p.label)}</span></label>${help}</div>`;
+        return `<div class="field"><label class="toggle"><span>${esc(p.label)}</span><input type="checkbox" id="${id}" data-prop="${p.key}" ${value ? 'checked' : ''}><span class="toggle-track" aria-hidden="true"></span></label>${help}</div>`;
       }
       if (p.kind === 'select') {
-        return `<div class="field"><label for="${id}">${esc(p.label)}</label><select id="${id}" data-prop="${p.key}">${p.options.map((o) => `<option value="${esc(o.value)}" ${o.value === value ? 'selected' : ''}>${esc(o.label)}</option>`).join('')}</select>${help}</div>`;
+        return `<div class="field field-stack"><label for="${id}">${esc(p.label)}</label><select id="${id}" data-prop="${p.key}">${p.options.map((o) => `<option value="${esc(o.value)}" ${o.value === value ? 'selected' : ''}>${esc(o.label)}</option>`).join('')}</select>${help}</div>`;
       }
       const unit = p.unit || '';
-      const sliderVal = toSlider(p, value);
-      return `<div class="field"><label for="${id}">${esc(p.label)}</label>` +
-        `<div class="num-row"><div class="num"><input id="${id}" type="text" inputmode="decimal" spellcheck="false" autocomplete="off" data-prop="${p.key}" value="${esc(fmtField(p, value))}" aria-describedby="${id}-err"><span class="unit">${esc(unit)}</span></div></div>` +
-        `<input type="range" class="slider" min="0" max="1000" step="1" value="${sliderVal}" data-slider="${p.key}" aria-label="${esc(p.label)} slider">` +
-        `<p class="field-range">${esc(rangeText(p))}</p><p class="field-err" id="${id}-err" role="alert"></p>${help}</div>`;
+      const [lo, hi] = rangeEnds(p);
+      return `<div class="field"><div class="field-row"><label for="${id}">${esc(p.label)}</label>` +
+        `<div class="num"><input id="${id}" type="text" inputmode="decimal" spellcheck="false" autocomplete="off" data-prop="${p.key}" value="${esc(fmtField(p, value))}" aria-describedby="${id}-err"><span class="unit">${esc(unit)}</span></div></div>` +
+        `<input type="range" class="slider" min="0" max="1000" step="1" value="${toSlider(p, value)}" data-slider="${p.key}" aria-label="${esc(p.label)} slider">` +
+        `<p class="field-range"><span>${esc(lo)}</span><span>${esc(hi)}</span></p><p class="field-err" id="${id}-err" role="alert"></p>${help}</div>`;
     }
     function fmtField(p, v) {
       if (p.unit === '%' || p.unit === '°C' || p.unit === 'K' || !p.unit) return String(Math.round(v * 1000) / 1000);
       return units.fmtInput(v, '');
     }
-    function rangeText(p) {
+    function rangeEnds(p) {
       const f = (v) => (p.unit === '%' || p.unit === '°C' || p.unit === 'K' || !p.unit ? `${v}${p.unit ? ' ' + p.unit : ''}` : units.fmtSI(v, p.unit, 3, { trim: true }));
-      return `${f(p.min)} to ${f(p.max)}`;
+      return [f(p.min), f(p.max)];
+    }
+    function rangeText(p) {
+      const [lo, hi] = rangeEnds(p);
+      return `${lo} to ${hi}`;
     }
     function toSlider(p, v) {
       if (p.log) {
@@ -223,25 +232,28 @@
       ui.updateReadings();
     };
 
+    const card = (label, inner, cls = '') => `<section class="icard${cls ? ' ' + cls : ''}">${label ? `<h3 class="icard-label">${esc(label)}</h3>` : ''}${inner}</section>`;
+    const actButton = (act, ic, label, danger) => `<button type="button" class="mini-tool${danger ? ' danger' : ''}" data-act="${act}">${icon(ic)}<span>${label}</span></button>`;
+
     function compInspector(c) {
       if (!c) return circuitInspector();
       const def = registry.get(c.type);
       const props = def.props.filter((p) => p.key !== 'plot');
       const plot = def.props.find((p) => p.key === 'plot');
-      const tt = def.gate ? truthTable(def) : '';
-      return `<div class="insp-head"><div class="insp-art">${miniArt(c.type, app.doc.view)}</div><div><p class="ds-label">${esc(def.group)}${def.category === 'ext' ? ' · extension' : ''}</p><h2 class="insp-title">${esc(def.name)}</h2></div></div>` +
-        (c.type !== 'junction' ? `<div class="field"><label for="f-label">Label</label><input id="f-label" type="text" maxlength="${circuit.LABEL_MAX}" value="${esc(c.label)}" data-label="1" autocomplete="off"></div>` : '') +
-        props.map((p) => field(p, c.props[p.key], c.id)).join('') +
-        `<section class="readings" aria-label="Live readings"><h3 class="ds-label">Readings</h3><dl id="readings"></dl>${plot ? field(plot, c.props.plot, c.id) : ''}</section>` +
-        tt +
-        `<div class="insp-actions"><button type="button" class="ds-button" data-act="rotate">${icon('rotate')}Rotate</button><button type="button" class="ds-button" data-act="flip">${icon('flip')}Mirror</button><button type="button" class="ds-button" data-act="duplicate">${icon('duplicate')}Duplicate</button><button type="button" class="ds-button danger" data-act="delete">${icon('trash')}Delete</button></div>` +
-        `<details class="model-note"><summary>How this is modeled</summary><p>${esc(def.help)}</p><p class="terms">Terminals: ${def.terminals.map((t) => esc(t.name)).join(' · ')}</p></details>`;
+      const head = `<div class="insp-head"><div class="insp-art">${miniArt(c.type, app.doc.view)}</div><div><p class="icard-label">${esc(def.group)}${def.category === 'ext' ? ' · extension' : ''}</p><h2 class="insp-title">${esc(def.name)}</h2></div></div>` +
+        (c.type !== 'junction' ? `<div class="row label-row"><label for="f-label">Label</label><input id="f-label" type="text" maxlength="${circuit.LABEL_MAX}" value="${esc(c.label)}" data-label="1" autocomplete="off"></div>` : '') +
+        `<div class="mini-actions">${actButton('rotate', 'rotate', 'Rotate')}${actButton('flip', 'flip', 'Mirror')}${actButton('duplicate', 'duplicate', 'Duplicate')}${actButton('delete', 'trash', 'Delete', true)}</div>`;
+      return card('', head) +
+        card('Readings', `<dl id="readings"></dl>${plot ? field(plot, c.props.plot, c.id) : ''}`, 'readings-card') +
+        (props.length ? card('Properties', props.map((p) => field(p, c.props[p.key], c.id)).join('')) : '') +
+        (def.gate ? truthTable(def) : '') +
+        `<details class="icard model-note"><summary>How this is modeled</summary><p>${esc(def.help)}</p><p class="terms">Terminals: ${def.terminals.map((t) => esc(t.name)).join(' · ')}</p></details>`;
     }
 
     function truthTable(def) {
       const g = def.gate;
       const rows = g.single ? [[0], [1]] : [[0, 0], [0, 1], [1, 0], [1, 1]];
-      return `<section class="truth"><h3 class="ds-label">Truth table</h3><table><thead><tr>${g.inputs.map((i) => `<th>${i.toUpperCase()}</th>`).join('')}<th>Q</th></tr></thead><tbody>` +
+      return `<section class="icard truth"><h3 class="icard-label">Truth table</h3><table><thead><tr>${g.inputs.map((i) => `<th>${i.toUpperCase()}</th>`).join('')}<th>Q</th></tr></thead><tbody>` +
         rows.map((r) => `<tr data-row="${r.join('')}">${r.map((x) => `<td>${x}</td>`).join('')}<td>${(g.single ? g.fn(!!r[0]) : g.fn(!!r[0], !!r[1])) ? 1 : 0}</td></tr>`).join('') +
         `</tbody></table></section>`;
     }
@@ -257,35 +269,35 @@
     function wireInspector(w) {
       if (!w) return circuitInspector();
       const sw = circuit.WIRE_COLORS.map((col) => `<button type="button" class="swatch${w.color === col ? ' is-on' : ''}" data-color="${col}" style="--c:${PPC.render.WIRE_HEX[col]}" aria-label="${col}" aria-pressed="${w.color === col}" title="${col}"></button>`).join('');
-      return `<div class="insp-head"><div><p class="ds-label">Connection</p><h2 class="insp-title">Wire</h2></div></div>` +
-        `<p class="wire-ends">${esc(endName(w.a))} <span aria-hidden="true">→</span> ${esc(endName(w.b))}</p>` +
-        `<section class="readings"><h3 class="ds-label">Readings</h3><dl id="readings"></dl></section>` +
-        `<div class="field"><span class="field-label">Color</span><div class="swatches" role="group" aria-label="Wire color">${sw}</div></div>` +
-        `<p class="field-help">Drag the wire to add a bend, drag a square to move a bend (double-click removes it) and drag a round end onto another terminal to reconnect it. Bends are kept separately in each view.</p>` +
-        `<div class="insp-actions"><button type="button" class="ds-button" data-act="straighten">Remove bends</button><button type="button" class="ds-button danger" data-act="delete">${icon('trash')}Delete</button></div>`;
+      return card('', `<div class="insp-head"><div><p class="icard-label">Connection</p><h2 class="insp-title">Wire</h2></div></div>` +
+          `<p class="wire-ends">${esc(endName(w.a))} <span aria-hidden="true">→</span> ${esc(endName(w.b))}</p>` +
+          `<div class="mini-actions">${actButton('straighten', 'fit', 'Remove bends')}${actButton('delete', 'trash', 'Delete', true)}</div>`) +
+        card('Readings', '<dl id="readings"></dl>', 'readings-card') +
+        card('Color', `<div class="swatches" role="group" aria-label="Wire color">${sw}</div>`) +
+        `<details class="icard model-note"><summary>Editing wires</summary><p>Drag the wire to add a bend, drag a square to move a bend (double-click removes it) and drag a round end onto another terminal to reconnect it. Bends are kept separately in each view.</p></details>`;
     }
 
     function multiInspector(nc, nw) {
-      return `<div class="insp-head"><div><p class="ds-label">Selection</p><h2 class="insp-title">${nc} component${nc === 1 ? '' : 's'}${nw ? `, ${nw} wire${nw === 1 ? '' : 's'}` : ''}</h2></div></div>` +
-        `<div class="insp-actions"><button type="button" class="ds-button" data-act="rotate">${icon('rotate')}Rotate</button><button type="button" class="ds-button" data-act="duplicate">${icon('duplicate')}Duplicate</button><button type="button" class="ds-button danger" data-act="delete">${icon('trash')}Delete</button></div>`;
+      return card('', `<div class="insp-head"><div><p class="icard-label">Selection</p><h2 class="insp-title">${nc} component${nc === 1 ? '' : 's'}${nw ? `, ${nw} wire${nw === 1 ? '' : 's'}` : ''}</h2></div></div>` +
+        `<div class="mini-actions">${actButton('rotate', 'rotate', 'Rotate')}${actButton('duplicate', 'duplicate', 'Duplicate')}${actButton('delete', 'trash', 'Delete', true)}</div>`);
     }
 
     function circuitInspector() {
       const s = app.doc.settings;
       const n = app.doc.components.filter((c) => c.type !== 'junction').length;
+      const nw = app.doc.wires.length;
       const opt = (v, cur, label) => `<option value="${v}" ${String(cur) === String(v) ? 'selected' : ''}>${label}</option>`;
-      return `<div class="insp-head"><div><p class="ds-label">Nothing selected</p><h2 class="insp-title">Circuit</h2></div></div>` +
-        `<p class="insp-summary">${n} component${n === 1 ? '' : 's'}, ${app.doc.wires.length} wire${app.doc.wires.length === 1 ? '' : 's'}. Select a component or wire to edit it and see its readings.</p>` +
-        `<section class="settings"><h3 class="ds-label">Simulation</h3>` +
-        `<div class="field"><label for="s-speed">Speed</label><select id="s-speed" data-setting="speed">${[0.01, 0.1, 0.25, 1, 4, 10].map((v) => opt(v, s.speed, v === 1 ? 'Real time (1×)' : `${v}×`)).join('')}</select></div>` +
-        `<div class="field"><label for="s-dt">Time step</label><select id="s-dt" data-setting="dt">${opt('auto', s.dt, `Automatic (now ${units.fmtSI(app.sim.dt, 's', 2)})`)}${[1e-5, 1e-4, 1e-3, 1e-2].map((v) => opt(v, s.dt, units.fmtSI(v, 's', 1))).join('')}</select><p class="field-help">Automatic picks about 1/100 of the shortest RC time constant (and of an AC period). Results do not depend on your device's frame rate.</p></div>` +
-        `</section><section class="settings"><h3 class="ds-label">Display</h3>` +
-        `<div class="field field-bool"><label class="toggle"><input type="checkbox" data-setting="showLabels" ${s.showLabels ? 'checked' : ''}><span class="toggle-track" aria-hidden="true"></span><span>Show labels and values</span></label></div>` +
-        `<div class="field field-bool"><label class="toggle"><input type="checkbox" data-setting="currentFlow" ${s.currentFlow ? 'checked' : ''}><span class="toggle-track" aria-hidden="true"></span><span>Animate conventional current</span></label><p class="field-help">Yellow dashes move from + to − through the external circuit. Their speed only hints at the size of the current; real charge carriers drift far more slowly.</p></div>` +
-        `<div class="field field-bool"><label class="toggle"><input type="checkbox" data-setting="wireColorsInDiagram" ${s.wireColorsInDiagram ? 'checked' : ''}><span class="toggle-track" aria-hidden="true"></span><span>Wire colors in the circuit diagram</span></label></div>` +
-        `<div class="field"><label for="s-logic">Logic gate symbols</label><select id="s-logic" data-setting="logicStyle">${opt('distinctive', s.logicStyle, 'Distinctive shapes (UK school)')}${opt('iec', s.logicStyle, 'IEC rectangular')}</select></div>` +
-        `</section>` +
-        `<details class="model-note"><summary>About the simulation</summary><p><strong>Run</strong> advances time in fixed steps; <strong>Pause</strong> freezes time, but edits still update the readings for the frozen state; <strong>Reset</strong> returns to t = 0 with every capacitor at its initial p.d. and clears the graphs. Switching views never changes the simulation.</p><p>Editing the circuit while it runs keeps time and stored charge. Saved files and autosave keep the circuit, not the live state: opening one starts at t = 0.</p></details>`;
+      const toggle = (key, label) => `<label class="toggle"><span>${label}</span><input type="checkbox" data-setting="${key}" ${s[key] ? 'checked' : ''}><span class="toggle-track" aria-hidden="true"></span></label>`;
+      return card('Circuit', `<div class="stats"><div class="stat"><b>${n}</b><span>component${n === 1 ? '' : 's'}</span></div><div class="stat"><b>${nw}</b><span>wire${nw === 1 ? '' : 's'}</span></div></div>` +
+          `<p class="icard-note">Select a component or wire to edit it and see its readings.</p>`) +
+        card('Simulation', `<div class="row"><label for="s-speed">Speed</label><select id="s-speed" data-setting="speed">${[0.01, 0.1, 0.25, 1, 4, 10].map((v) => opt(v, s.speed, v === 1 ? 'Real time (1×)' : `${v}×`)).join('')}</select></div>` +
+          `<div class="row"><label for="s-dt">Time step</label><select id="s-dt" data-setting="dt">${opt('auto', s.dt, `Auto (${units.fmtSI(app.sim.dt, 's', 2)})`)}${[1e-5, 1e-4, 1e-3, 1e-2].map((v) => opt(v, s.dt, units.fmtSI(v, 's', 1))).join('')}</select></div>`) +
+        card('Display', toggle('showLabels', 'Labels and values') + toggle('currentFlow', 'Animate current') + toggle('wireColorsInDiagram', 'Wire colors in diagram') +
+          `<div class="row"><label for="s-logic">Logic symbols</label><select id="s-logic" data-setting="logicStyle">${opt('distinctive', s.logicStyle, 'UK school shapes')}${opt('iec', s.logicStyle, 'IEC rectangles')}</select></div>`) +
+        `<details class="icard model-note"><summary>About the simulation</summary><p><strong>Run</strong> advances time in fixed steps; <strong>Pause</strong> freezes time, but edits still update the readings for the frozen state; <strong>Reset</strong> returns to t = 0 with every capacitor at its initial p.d. and clears the graphs. Switching views never changes the simulation.</p>` +
+          `<p>The automatic time step is about 1/100 of the shortest RC time constant (and of an AC period). Results do not depend on your device's frame rate.</p>` +
+          `<p>Animated current shows conventional current as yellow dashes moving from + to − through the external circuit. Their speed only hints at the size of the current; real charge carriers drift far more slowly.</p>` +
+          `<p>Editing the circuit while it runs keeps time and stored charge. Saved files and autosave keep the circuit, not the live state: opening one starts at t = 0.</p></details>`;
     }
 
     // Live readings in the inspector, refreshed several times a second.
@@ -426,6 +438,7 @@
       $('sim-state').textContent = sim.running ? 'Running' : 'Paused';
       $('sim-status').title = sim.running && sim.behind ? 'Running slower than the chosen speed: this device cannot keep up.' : '';
       $('sim-time').textContent = 't = ' + fmtTime(sim.t);
+      $('view-switch').dataset.view = app.doc.view;
       $('view-realistic').setAttribute('aria-pressed', String(app.doc.view === 'realistic'));
       $('view-schematic').setAttribute('aria-pressed', String(app.doc.view === 'schematic'));
       document.querySelectorAll('[data-tool]').forEach((b) => b.setAttribute('aria-pressed', String(app.tool === b.dataset.tool)));
@@ -437,7 +450,7 @@
       ['btn-rotate', 'btn-flip', 'btn-duplicate', 'btn-delete'].forEach((id) => { $(id).disabled = !hasSel; });
       ['btn-tidy', 'btn-clear'].forEach((id) => { $(id).disabled = app.doc.components.length === 0; });
       $('zoom-readout').textContent = Math.round(app.cameras[app.doc.view].z * 100) + ' %';
-      $('empty-state').hidden = app.doc.components.length > 0;
+      $('empty-state').hidden = app.doc.components.length > 0 || app.emptyDismissed;
       const probs = app.problems();
       const btn = $('btn-problems');
       btn.hidden = probs.length === 0;
