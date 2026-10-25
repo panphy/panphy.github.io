@@ -513,3 +513,89 @@ test('independent wire corners cannot touch, while ordinary interior crossings r
   assert.equal(crossing.get(w2.id).poly.length, 2);
   assert.deepEqual(layout.branchPoints(doc, crossing), []);
 });
+
+test('diagram wires cannot cross or touch their own earlier segments', () => {
+  const doc = examples.build({
+    comps: [
+      ['B1', 'battery', { emf: 6 }, [0, -130, 0], [0, -100, 2]],
+      ['R1', 'rheostat', {}, [220, 0, 0], [-200, -10, 0]],
+      ['L1', 'lamp', {}, [0, 130, 0], [-110, -20, 0]]
+    ],
+    wires: [
+      ['B1.p', 'R1.a', 'red', { s: [[-250, -100], [-250, -10]] }],
+      ['R1.b', 'L1.a', 'blue', { s: [[-150, -10], [-150, -30], [-160, -30], [-160, -20]] }],
+      ['L1.b', 'B1.n', 'black', { s: [[70, -20], [70, -100]] }]
+    ]
+  }, 'schematic');
+  const before = JSON.stringify(doc);
+  const assertSimple = (poly) => {
+    for (let i = 1; i < poly.length; i++) for (let j = 1; j < i - 1; j++) {
+      const a = poly[i - 1], b = poly[i], c = poly[j - 1], d = poly[j];
+      const on = (p, q, r) => layout.nearestOnPoly([q, r], p).dist < 1e-6;
+      assert.ok(!on(a, c, d) && !on(b, c, d) && !on(c, a, b) && !on(d, a, b), 'nonadjacent segments never touch');
+      const orient = (p, q, r) => (q.x - p.x) * (r.y - p.y) - (q.y - p.y) * (r.x - p.x);
+      assert.ok(!(orient(a, b, c) * orient(a, b, d) < 0 && orient(c, d, a) * orient(c, d, b) < 0), 'a wire never crosses itself');
+    }
+  };
+  for (const r of layout.routeAll(doc, 'schematic').values()) assertSimple(r.poly);
+  assert.equal(JSON.stringify(doc), before, 'rendering keeps the saved circuit intact');
+  const w = doc.wires[1];
+  // A proper interior crossing, rather than an end landing on an earlier run.
+  doc.layouts.schematic.wires[w.id].pts = [[-140, -10], [-140, -40], [-170, -40], [-170, -20]];
+  assertSimple(layout.wireRoute(doc, 'schematic', w).poly);
+  // Exercise automatic candidates around the close, slightly offset leads too.
+  doc.layouts.schematic.wires[w.id].pts = [];
+  for (const y of [-30, -20, 0, 10]) {
+    place(doc, doc.components[2], 'schematic', -110, y);
+    for (const r of layout.routeAll(doc, 'schematic').values()) assertSimple(r.poly);
+  }
+});
+
+test('diagram routes stay clear and simple across 1,569 valid lamp positions, including narrow lead gaps', () => {
+  const doc = examples.build({
+    comps: [
+      ['B1', 'battery', { emf: 6 }, [0, -130, 0], [0, -100, 2]],
+      ['R1', 'rheostat', {}, [220, 0, 0], [-180, 100, 0]],
+      ['L1', 'lamp', {}, [0, 130, 0], [110, -100, 0]]
+    ],
+    wires: [
+      ['B1.p', 'R1.a', 'red', { s: [[-240, -100], [-240, 100]] }],
+      ['R1.b', 'L1.a', 'blue'],
+      ['L1.b', 'B1.n', 'black', { s: [[200, 100], [200, -100]] }]
+    ]
+  }, 'schematic');
+  const on = (p, a, b) => layout.nearestOnPoly([a, b], p).dist < 1e-6;
+  const orient = (p, q, r) => (q.x - p.x) * (r.y - p.y) - (q.y - p.y) * (r.x - p.x);
+  let count = 0;
+  for (let x = -290; x <= 240; x += 10) for (let y = -160; y <= 180; y += 10) {
+    place(doc, doc.components[2], 'schematic', x, y);
+    if (!layout.canMove(doc, 'schematic', [doc.components[2].id], 0, 0)) continue;
+    count++;
+    const routes = [...layout.routeAll(doc, 'schematic').values()];
+    const where = `lamp at ${x}, ${y}`;
+    for (const r of routes) {
+      const next = r.poly[1], prev = r.poly[r.poly.length - 2];
+      assert.ok((next.x - r.a.x) * r.a.dx + (next.y - r.a.y) * r.a.dy > 0, `leaves outward: ${where}`);
+      assert.ok((prev.x - r.b.x) * r.b.dx + (prev.y - r.b.y) * r.b.dy > 0, `arrives from outside: ${where}`);
+      for (let i = 1; i < r.poly.length; i++) {
+        const a = r.poly[i - 1], b = r.poly[i];
+        for (const c of doc.components) {
+          const box = layout.compBounds(doc, 'schematic', c.id);
+          assert.ok(!(Math.min(a.x, b.x) < box.x2 - 3 && Math.max(a.x, b.x) > box.x + 3 &&
+            Math.min(a.y, b.y) < box.y2 - 3 && Math.max(a.y, b.y) > box.y + 3), `clears ${c.type}: ${where}`);
+        }
+        for (let j = 1; j < i - 1; j++) {
+          const c = r.poly[j - 1], d = r.poly[j];
+          assert.ok(!on(a, c, d) && !on(b, c, d) && !on(c, a, b) && !on(d, a, b), `no self-contact: ${where}`);
+          assert.ok(!(orient(a, b, c) * orient(a, b, d) < 0 && orient(c, d, a) * orient(c, d, b) < 0), `no self-crossing: ${where}`);
+        }
+      }
+    }
+    for (let i = 0; i < routes.length; i++) for (let j = 0; j < routes.length; j++) if (i !== j) {
+      for (const p of routes[i].poly) for (let k = 1; k < routes[j].poly.length; k++) {
+        assert.ok(!on(p, routes[j].poly[k - 1], routes[j].poly[k]), `no accidental wire contact: ${where}`);
+      }
+    }
+  }
+  assert.equal(count, 1569);
+});

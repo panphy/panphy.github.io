@@ -294,7 +294,13 @@
         if (!diagonalStub && segHitsRect(a, b, r)) conflicts++;
       }
       for (const s of avoid) if (overlapLen(a, b, s.a, s.b) > 1 || touchesWire(a, b, s)) conflicts++;
-      for (let j = 0; j < i; j++) if (overlapLen(a, b, poly[j], poly[j + 1]) > 1) conflicts++;
+      for (let j = 0; j < i; j++) {
+        const c = poly[j], d = poly[j + 1];
+        // Adjacent segments share a corner. Any other self-contact or crossing
+        // closes a spurious loop, even when no collinear segments overlap.
+        if (overlapLen(a, b, c, d) > 1 ||
+            (j < i - 1 && (touchesWire(a, b, { a: c, b: d }) || segsCross(a, b, c, d)))) conflicts++;
+      }
     }
     return conflicts;
   }
@@ -322,14 +328,37 @@
     return cost;
   }
 
+  // A full grid-length lead can enter a nearby symbol or consume a narrow gap
+  // between facing terminals. Shorten it to stay within the actual free space.
+  function leadStub(p, d, obstacles, avoid) {
+    let length = GRID;
+    if (isZero(d)) return { x: p.x, y: p.y };
+    for (const r of obstacles) {
+      let gap = Infinity;
+      if (d.x && p.y > r.y && p.y < r.y2) gap = d.x > 0 ? r.x - p.x : p.x - r.x2;
+      if (d.y && p.x > r.x && p.x < r.x2) gap = d.y > 0 ? r.y - p.y : p.y - r.y2;
+      if (gap > 1e-6) length = Math.min(length, gap / 2);
+    }
+    for (const s of avoid) {
+      let gap = Infinity;
+      if (d.x && p.y >= Math.min(s.a.y, s.b.y) - 1e-6 && p.y <= Math.max(s.a.y, s.b.y) + 1e-6) {
+        gap = d.x > 0 ? Math.min(s.a.x, s.b.x) - p.x : p.x - Math.max(s.a.x, s.b.x);
+      }
+      if (d.y && p.x >= Math.min(s.a.x, s.b.x) - 1e-6 && p.x <= Math.max(s.a.x, s.b.x) + 1e-6) {
+        gap = d.y > 0 ? Math.min(s.a.y, s.b.y) - p.y : p.y - Math.max(s.a.y, s.b.y);
+      }
+      if (gap > 1e-6) length = Math.min(length, gap / 2);
+    }
+    return { x: p.x + d.x * length, y: p.y + d.y * length };
+  }
+
   function autoOrtho(A, dA, B, dB, obstacles, avoid) {
     obstacles = obstaclesForEnds(obstacles, A, B);
     if (isDiag(dA) || isDiag(dB)) return withDiagStubs(A, dA, B, dB, (a, da, b, db) => autoOrtho(a, da, b, db, obstacles, avoid));
-    const S = GRID;
-    const a1 = isZero(dA) ? { x: A.x, y: A.y } : { x: A.x + dA.x * S, y: A.y + dA.y * S };
-    const b1 = isZero(dB) ? { x: B.x, y: B.y } : { x: B.x + dB.x * S, y: B.y + dB.y * S };
-    const xs = new Set([snap((a1.x + b1.x) / 2), a1.x, b1.x]);
-    const ys = new Set([snap((a1.y + b1.y) / 2), a1.y, b1.y]);
+    const a1 = leadStub(A, dA, obstacles, avoid);
+    const b1 = leadStub(B, dB, obstacles, avoid);
+    const xs = new Set([snap((a1.x + b1.x) / 2), (a1.x + b1.x) / 2, a1.x, b1.x]);
+    const ys = new Set([snap((a1.y + b1.y) / 2), (a1.y + b1.y) / 2, a1.y, b1.y]);
     const box = { x: Math.min(A.x, B.x) - 120, y: Math.min(A.y, B.y) - 120, x2: Math.max(A.x, B.x) + 120, y2: Math.max(A.y, B.y) + 120 };
     for (const r of obstacles) {
       if (!overlaps(r, box, 0)) continue;
