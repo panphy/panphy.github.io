@@ -490,7 +490,14 @@ button, input, select { font: inherit; color: inherit; }
 
 /* Shown above the settings when nothing is selected. */
 /* Live displays: a selected meter or scope, and pinned ones above the cards. */
-.pinned-displays { flex: 0 1 auto; min-height: 0; max-height: 45%; overflow-y: auto; display: flex; flex-direction: column; gap: 12px; margin-bottom: 12px; padding: 2px; overscroll-behavior: contain; scrollbar-gutter: stable; }
+.pinned-displays { flex: 0 1 auto; min-height: 0; max-height: 45%; overflow-y: auto; display: flex; flex-direction: column; gap: 12px; padding: 2px; overscroll-behavior: contain; scrollbar-gutter: stable; }
+/* Drag (or use the arrow keys) to set how tall the pinned area may grow. */
+.pinned-resize { flex: none; position: relative; display: flex; align-items: center; justify-content: center; height: 20px; margin: 0 0 4px; border-radius: 999px; cursor: row-resize; touch-action: none; }
+.pinned-resize::before { content: ''; position: absolute; inset: -6px 0; }
+.pinned-resize::after { content: ''; width: 44px; height: 4px; border-radius: 2px; background: var(--line-strong); transition: background 0.15s, width 0.15s; }
+.pinned-resize:hover::after, .pinned-resize.is-dragging::after { width: 64px; background: var(--accent); }
+.pinned-resize:focus-visible { outline: 2px solid var(--focus); outline-offset: -2px; }
+@media (pointer: coarse) { .pinned-resize { height: 28px; } .pinned-resize::before { inset: -10px 0; } }
 .pinned-displays:focus-visible { outline: 2px solid var(--focus); outline-offset: -2px; border-radius: var(--radius); }
 .live-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin: -4px 0 8px; }
 .live-head .icard-label { margin: 0; }

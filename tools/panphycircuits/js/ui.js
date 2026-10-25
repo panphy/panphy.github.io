@@ -351,7 +351,79 @@
       const key = comps.map((c) => `${c.id}:${c.label}:${c.props.tdiv}:${c.props.v1}:${c.props.v2}`).join('|');
       if (host.dataset.key !== key) { host.dataset.key = key; host.innerHTML = comps.map((c) => liveCard(c, true)).join(''); }
       host.hidden = comps.length === 0;
+      $('pinned-resize').hidden = host.hidden;
+      applyPinnedHeight();
     };
+    // The pinned area grows to 45% of the inspector by default; dragging the
+    // handle below it sets its maximum height instead, remembered per browser.
+    const PINNED_HEIGHT_KEY = 'panphy-circuits-pinned-height-v1';
+    const PINNED_MIN = 72;
+    let pinnedHeight = null;
+    try {
+      const saved = Number(localStorage.getItem(PINNED_HEIGHT_KEY));
+      if (saved >= PINNED_MIN) pinnedHeight = saved;
+    } catch (e) { /* Storage unavailable: use the default height. */ }
+    function savePinnedHeight() {
+      try {
+        if (pinnedHeight == null) localStorage.removeItem(PINNED_HEIGHT_KEY);
+        else localStorage.setItem(PINNED_HEIGHT_KEY, String(Math.round(pinnedHeight)));
+      } catch (e) { /* Storage unavailable: keep the height for this visit. */ }
+    }
+    // Largest useful height: all the pinned content, leaving room below for the
+    // inspector's own cards.
+    function pinnedLimit() {
+      const host = $('pinned-displays');
+      const handle = $('pinned-resize');
+      const room = $('inspector').getBoundingClientRect().bottom - host.getBoundingClientRect().top - handle.offsetHeight - 120;
+      return Math.max(PINNED_MIN, Math.min(host.scrollHeight, room));
+    }
+    function applyPinnedHeight() {
+      const host = $('pinned-displays');
+      const handle = $('pinned-resize');
+      host.style.maxHeight = pinnedHeight == null ? '' : `${Math.round(pinnedHeight)}px`;
+      if (host.hidden) return;
+      handle.setAttribute('aria-valuemin', String(PINNED_MIN));
+      const now = Math.round(host.getBoundingClientRect().height);
+      handle.setAttribute('aria-valuemax', String(Math.max(now, Math.round(pinnedLimit()))));
+      handle.setAttribute('aria-valuenow', String(now));
+    }
+    function setPinnedHeight(h) {
+      pinnedHeight = Math.min(Math.max(h, PINNED_MIN), pinnedLimit());
+      applyPinnedHeight();
+      ui.updateLive();
+    }
+    {
+      const handle = $('pinned-resize');
+      let drag = null;
+      handle.addEventListener('pointerdown', (e) => {
+        if (e.button !== 0) return;
+        e.preventDefault();
+        drag = { id: e.pointerId, y: e.clientY, h: $('pinned-displays').getBoundingClientRect().height };
+        handle.classList.add('is-dragging');
+        try { handle.setPointerCapture(e.pointerId); } catch (err) { /* The pointer has already gone. */ }
+      });
+      handle.addEventListener('pointermove', (e) => {
+        if (drag && e.pointerId === drag.id) setPinnedHeight(drag.h + e.clientY - drag.y);
+      });
+      const end = (e) => {
+        if (!drag || e.pointerId !== drag.id) return;
+        drag = null;
+        handle.classList.remove('is-dragging');
+        savePinnedHeight();
+      };
+      handle.addEventListener('pointerup', end);
+      handle.addEventListener('pointercancel', end);
+      handle.addEventListener('dblclick', () => { pinnedHeight = null; applyPinnedHeight(); savePinnedHeight(); ui.updateLive(); });
+      handle.addEventListener('keydown', (e) => {
+        const now = $('pinned-displays').getBoundingClientRect().height;
+        const step = e.shiftKey ? 64 : 16;
+        const next = { ArrowUp: now - step, ArrowDown: now + step, Home: PINNED_MIN, End: Infinity }[e.key];
+        if (next === undefined) return;
+        e.preventDefault();
+        setPinnedHeight(next);
+        savePinnedHeight();
+      });
+    }
     // Refresh every live display on show: meter artwork and scope traces.
     ui.updateLive = function () {
       for (const card of document.querySelectorAll('#inspector [data-live]')) {
