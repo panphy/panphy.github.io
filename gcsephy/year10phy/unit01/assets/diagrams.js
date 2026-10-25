@@ -66,8 +66,8 @@
       half: 12, size: 24,
       body: `<circle r="12"/><line x1="-12" y1="0" x2="12" y2="0"/><g style="stroke-width:1.8"><path d="M-5.5 -6.8 L-5.5 6.8 L6.2 0 Z"/><line x1="6.2" y1="-6.2" x2="6.2" y2="6.2"/></g>${arrowLine(7.8, -12.6, 17.8, -21.2, 4.5, 2.4, 1.6)}${arrowLine(12.2, -8.2, 22.4, -17.2, 4.5, 2.4, 1.6)}`,
     },
-    switchOpen: { half: 14, size: 13, body: '<circle class="dot" cx="-14" cy="0" r="2.6"/><circle class="dot" cx="14" cy="0" r="2.6"/><line x1="-14" y1="0" x2="12" y2="-13"/>' },
-    switchClosed: { half: 14, size: 8, body: '<circle class="dot" cx="-14" cy="0" r="2.6"/><circle class="dot" cx="14" cy="0" r="2.6"/><line x1="-14" y1="0" x2="14" y2="0"/>' },
+    switchOpen: { half: 14, size: 13, body: '<line x1="-14" y1="0" x2="12" y2="-13"/><circle class="terminal" cx="-14" cy="0" r="2.6"/><circle class="terminal" cx="14" cy="0" r="2.6"/>' },
+    switchClosed: { half: 14, size: 8, body: '<line x1="-14" y1="0" x2="14" y2="0"/><circle class="terminal" cx="-14" cy="0" r="2.6"/><circle class="terminal" cx="14" cy="0" r="2.6"/>' },
     ac: { half: 12, size: 13, body: '<circle r="12"/><path d="M-7 0 C-5 -8, -1 -8, 0 0 S5 8, 7 0"/>' },
   };
 
