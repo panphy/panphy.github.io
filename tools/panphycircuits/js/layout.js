@@ -101,9 +101,44 @@
   const isH = (d) => d && Math.abs(d.x) > Math.abs(d.y);
   const isZero = (d) => !d || (Math.abs(d.x) < 1e-9 && Math.abs(d.y) < 1e-9);
 
+  // A terminal of a part turned 45° points along a diagonal. Its wire first runs
+  // a short way along that diagonal, to a grid point, then continues square to
+  // the grid along whichever axis heads toward the far end.
+  const ZERO = { x: 0, y: 0 };
+  const isDiag = (d) => !!d && Math.abs(d.x) > 1e-6 && Math.abs(d.y) > 1e-6;
+  function diagStub(p, d) {
+    const sx = Math.sign(d.x), sy = Math.sign(d.y);
+    const MIN = 8;
+    // Shortest run of at least MIN that lands x on the grid.
+    let k = (Math.ceil((p.x + sx * MIN) * sx / GRID - 1e-6) * GRID) * sx - p.x;
+    k = Math.abs(k);
+    return { x: p.x + sx * k, y: p.y + sy * k };
+  }
+  function stubAxis(d, from, to) {
+    const dx = to.x - from.x, dy = to.y - from.y;
+    const okX = Math.sign(d.x) * dx > 1e-6, okY = Math.sign(d.y) * dy > 1e-6;
+    if (okX && (!okY || Math.abs(dx) >= Math.abs(dy))) return { x: Math.sign(d.x), y: 0 };
+    if (okY) return { x: 0, y: Math.sign(d.y) };
+    return ZERO;
+  }
+  // Calls route(p0, d0, p1, d1) between the ends of any diagonal stubs.
+  function withDiagStubs(p0, d0, p1, d1, route, towards0, towards1) {
+    const a = isDiag(d0) ? diagStub(p0, d0) : p0;
+    const b = isDiag(d1) ? diagStub(p1, d1) : p1;
+    const da = isDiag(d0) ? stubAxis(d0, a, towards0 || b) : d0;
+    const db = isDiag(d1) ? stubAxis(d1, b, towards1 || a) : d1;
+    const mid = route(a, da, b, db);
+    return simplify((isDiag(d0) ? [{ x: p0.x, y: p0.y }] : []).concat(mid, isDiag(d1) ? [{ x: p1.x, y: p1.y }] : []));
+  }
+
   // Orthogonal route through the control points. d0/d1 are the outward
   // directions of the terminals at each end.
   function orthoRoute(p0, d0, pts, p1, d1) {
+    if (isDiag(d0) || isDiag(d1)) {
+      const first = pts.length ? { x: pts[0][0], y: pts[0][1] } : null;
+      const last = pts.length ? { x: pts[pts.length - 1][0], y: pts[pts.length - 1][1] } : null;
+      return withDiagStubs(p0, d0, p1, d1, (a, da, b, db) => orthoRoute(a, da, pts, b, db), first, last);
+    }
     const all = [p0].concat(pts.map(([x, y]) => ({ x, y })), [p1]);
     const out = [{ x: p0.x, y: p0.y }];
     const STUB = 10;
@@ -234,6 +269,7 @@
   }
 
   function autoOrtho(A, dA, B, dB, obstacles, avoid) {
+    if (isDiag(dA) || isDiag(dB)) return withDiagStubs(A, dA, B, dB, (a, da, b, db) => autoOrtho(a, da, b, db, obstacles, avoid));
     const S = 20;
     const a1 = isZero(dA) ? { x: A.x, y: A.y } : { x: A.x + dA.x * S, y: A.y + dA.y * S };
     const b1 = isZero(dB) ? { x: B.x, y: B.y } : { x: B.x + dB.x * S, y: B.y + dB.y * S };

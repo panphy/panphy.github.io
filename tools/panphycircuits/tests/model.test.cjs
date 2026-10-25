@@ -56,6 +56,21 @@ test('45° rotations place terminals on the diagonal, invert exactly and survive
   assert.equal(back.doc.layouts.schematic.comps[r.id].r, 1.5, '45° rotation kept on import');
 });
 
+test('diagram wires leave a 45° terminal along its diagonal, then run square to the grid', () => {
+  const S = Math.SQRT1_2, d = 40 * S;
+  const A = { x: 100 - d, y: 200 - d };
+  for (const poly of [layout.orthoRoute(A, { x: -S, y: -S }, [], { x: 300, y: 100 }, { x: -1, y: 0 }),
+    layout.orthoRoute(A, { x: -S, y: -S }, [], { x: 0, y: 400 }, { x: 0, y: -1 })]) {
+    const [p0, p1] = poly;
+    assert.ok(Math.abs((p1.x - p0.x) - (p1.y - p0.y)) < 1e-9 && p1.x < p0.x, 'first run is diagonal and outward');
+    assert.equal(p1.x % 10, 0, 'diagonal run ends on the grid');
+    for (let i = 1; i < poly.length - 1; i++) {
+      const a = poly[i], b = poly[i + 1];
+      assert.ok(Math.abs(a.x - b.x) < 1e-9 || Math.abs(a.y - b.y) < 1e-9, 'rest of the route is square to the grid');
+    }
+  }
+});
+
 test('transistor pinout changes the realistic leg, never the electrical terminal', () => {
   const doc = circuit.createDoc();
   const q = circuit.addComponent(doc, 'npn');
