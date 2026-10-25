@@ -62,7 +62,7 @@
       const c = { id: 'lib', type, label: def.prefix + '1', props };
       const [x, y, w, h] = a.bounds(props);
       const pad = 4;
-      const ctx = { c, p: props, uid: `lib-${view[0]}-${type}`, r: 0, f: false, st: { brightness: type === 'led' ? 0.7 : 0, T: 300 }, logic: { in: {}, out: {} }, display: def.meter ? '0.00 ' + def.meter.unit : '', logicStyle: app.doc.settings.logicStyle };
+      const ctx = { c, p: props, uid: `lib-${view[0]}-${type}`, r: 0, f: false, st: { brightness: 0, T: 300 }, logic: { in: {}, out: {} }, display: def.meter ? '0.00 ' + def.meter.unit : '', logicStyle: app.doc.settings.logicStyle };
       const content = type === 'junction' && view === 'schematic' ? '<circle cx="0" cy="0" r="4.2" class="jdot"/>' : a.draw(ctx);
       return `<svg class="card-art" viewBox="${x - pad} ${y - pad} ${w + 2 * pad} ${h + 2 * pad}" aria-hidden="true" focusable="false">${content}</svg>`;
     }

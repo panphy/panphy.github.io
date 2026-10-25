@@ -6,6 +6,16 @@
   const { registry, circuit, layout, solver, units } = PPC;
 
   const AUTOSAVE_KEY = 'panphy-circuits-autosave-v1';
+  const DISPLAY_KEY = 'panphy-circuits-display-v1';
+  const DISPLAY_KEYS = ['showLabels', 'showValues', 'currentFlow', 'wireColorsInDiagram', 'logicStyle'];
+  const displayPreferences = {};
+  try {
+    const saved = JSON.parse(localStorage.getItem(DISPLAY_KEY));
+    for (const key of DISPLAY_KEYS) {
+      const value = saved && saved[key];
+      if (key === 'logicStyle' ? ['distinctive', 'iec'].includes(value) : typeof value === 'boolean') displayPreferences[key] = value;
+    }
+  } catch (e) { /* Ignore unavailable storage or invalid preferences. */ }
   const HISTORY_MAX = 200;
 
   const app = {
@@ -351,6 +361,12 @@
 
   app.setSetting = function (key, value) {
     app.doc.settings[key] = value;
+    if (DISPLAY_KEYS.includes(key)) {
+      for (const displayKey of DISPLAY_KEYS) displayPreferences[displayKey] = app.doc.settings[displayKey];
+      try {
+        localStorage.setItem(DISPLAY_KEY, JSON.stringify(displayPreferences));
+      } catch (e) { /* Preferences still work for this session if storage is blocked. */ }
+    }
     if (key === 'dt' || key === 'speed') app.sim.setDoc(app.doc);
     app.rev++;
     app.renderAll();
@@ -506,6 +522,8 @@
   }
 
   function loadDoc(doc, opts = {}) {
+    // Personal display choices take precedence over a circuit's saved settings.
+    Object.assign(doc.settings, displayPreferences);
     app.doc = doc;
     app.pinned = new Set(); // ids are reused between circuits
     app.selection = { comps: new Set(), wires: new Set() };
