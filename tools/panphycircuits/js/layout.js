@@ -619,6 +619,14 @@
     return cost;
   }
 
+  // On the bench, meters (and the oscilloscope) always stand upright, as they
+  // would on a real bench, so their displays read normally. Tidy never turns them.
+  const UPRIGHT_ON_BENCH = ['ammeter', 'voltmeter', 'scope'];
+  function keepsUpright(doc, view, id) {
+    const c = circuit.getComp(doc, id);
+    return view === 'realistic' && !!c && UPRIGHT_ON_BENCH.includes(c.type);
+  }
+
   function improveLayout(doc, view, opts = {}) {
     const lay = doc.layouts[view];
     const ids = doc.components.filter((c) => lay.comps[c.id] && doc.wires.some((w) => w.a.c === c.id || w.b.c === c.id)).map((c) => c.id);
@@ -648,12 +656,13 @@
       let improved = false;
       for (const id of ids) {
         const pl = lay.comps[id];
-        if (!isJunction(id)) for (const o of orients) if ((o.r !== pl.r || o.f !== pl.f) && tryState(pl, o)) improved = true;
+        const turns = keepsUpright(doc, view, id) ? orients.filter((o) => o.r === 0) : orients;
+        if (!isJunction(id)) for (const o of turns) if ((o.r !== pl.r || o.f !== pl.f) && tryState(pl, o)) improved = true;
         for (const [dx, dy] of shifts) if (tryState(pl, { x: pl.x + dx, y: pl.y + dy })) improved = true;
         if (!isJunction(id)) {
           // A move and a turn together, for parts that only fit once turned.
           const x0 = pl.x, y0 = pl.y;
-          for (const o of orients) for (const [dx, dy] of shifts) {
+          for (const o of turns) for (const [dx, dy] of shifts) {
             if (Math.abs(dx) > turnReach * STEP || Math.abs(dy) > turnReach * STEP || (o.r === pl.r && o.f === pl.f)) continue;
             if (tryState(pl, { x: x0 + dx, y: y0 + dy, r: o.r, f: o.f })) { improved = true; break; }
           }
@@ -682,6 +691,7 @@
     for (const c of doc.components) {
       const pl = lay.comps[c.id];
       if (pl) { pl.x = snap(pl.x); pl.y = snap(pl.y); }
+      if (pl && keepsUpright(doc, view, c.id)) pl.r = 0;
     }
     // Circuits made of series and parallel parts get the textbook layout.
     const sp = opts.noSeriesParallel ? null : seriesParallel(doc, view);
@@ -839,7 +849,7 @@
       const local = terminalsLocal(view, leaf.c);
       const along = vertical ? 'y' : 'x', cross = vertical ? 'x' : 'y';
       let best = null;
-      for (const r of [0, 1, 2, 3]) {
+      for (const r of keepsUpright(doc, view, leaf.c.id) ? [0] : [0, 1, 2, 3]) {
         for (const f of [false, true]) {
           const pl = { x: 0, y: 0, r, f };
           const ta = local[leaf.from], tb = local[leaf.to];

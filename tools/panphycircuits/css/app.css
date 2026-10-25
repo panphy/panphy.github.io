@@ -485,7 +485,6 @@ button, input, select { font: inherit; color: inherit; }
 
 /* Shown above the settings when nothing is selected. */
 /* Oscilloscope screens, pinned above the inspector cards. */
-.scope-cards { flex: none; display: flex; flex-direction: column; gap: 12px; margin-bottom: 12px; }
 .scope-screen { display: block; width: 100%; aspect-ratio: 10 / 8; border-radius: 8px; background: #071712; box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.4); }
 .scope-legend { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 4px 10px; margin: 8px 0 0; font: 600 0.72rem var(--font-mono); color: var(--ink-2); }
 .scope-ch1 { color: #B08A00; }

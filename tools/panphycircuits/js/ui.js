@@ -231,6 +231,7 @@
       else body.innerHTML = circuitInspector();
       if (focused) { const el = document.getElementById(focused); if (el) el.focus(); }
       ui.updateReadings();
+      ui.renderScopes();
     };
 
     const card = (label, inner, cls = '') => `<section class="icard${cls ? ' ' + cls : ''}">${label ? `<h3 class="icard-label">${esc(label)}</h3>` : ''}${inner}</section>`;
@@ -244,7 +245,7 @@
       const head = `<div class="insp-head"><div class="insp-art">${miniArt(c.type, app.doc.view)}</div><div><p class="icard-label">${esc(def.group)}${def.category === 'ext' ? ' · extension' : ''}</p><h2 class="insp-title">${esc(def.name)}</h2></div></div>` +
         (c.type !== 'junction' ? `<div class="row label-row"><label for="f-label">Label</label><input id="f-label" type="text" maxlength="${circuit.LABEL_MAX}" value="${esc(c.label)}" data-label="1" autocomplete="off"></div>` : '') +
         `<div class="mini-actions">${actButton('rotate', 'rotate', 'Rotate')}${actButton('flip', 'flip', 'Mirror')}${actButton('duplicate', 'duplicate', 'Duplicate')}${actButton('delete', 'cross', 'Delete', true)}</div>`;
-      return card('', head) +
+      return card('', head) + (c.type === 'scope' ? scopeCard(c) : '') +
         card('Readings', `<dl id="readings"></dl>${plot ? field(plot, c.props.plot, c.id) : ''}`, 'readings-card') +
         (props.length ? card('Properties', props.map((p) => field(p, c.props[p.key], c.id)).join('')) : '') +
         (def.gate ? truthTable(def) : '') +
@@ -323,22 +324,19 @@
     });
 
     // ---------- Oscilloscope screen (inspector) ----------
-    // While the circuit has an oscilloscope, its screen is shown large at the
-    // top of the inspector, whatever is selected.
+    // A selected oscilloscope shows its screen large, above its readings.
 
     const SCOPE_COLORS = { ch1: '#FFD43B', ch2: '#3BD8FF' };
+    function scopeCard(c) {
+      const div = (v, unit) => esc(units.fmtSI(Number(v), unit, 3, { trim: true })) + '/div';
+      return `<section class="icard scope-card" data-scope="${c.id}"><h3 class="icard-label">Screen</h3>` +
+        `<canvas class="scope-screen" aria-label="Oscilloscope ${esc(c.label)} screen"></canvas>` +
+        `<p class="scope-legend"><span class="scope-ch1">CH1 ${div(c.props.v1, 'V')}</span><span class="scope-ch2">CH2 ${div(c.props.v2, 'V')}</span><span>${div(c.props.tdiv, 's')}</span></p></section>`;
+    }
     ui.renderScopes = function () {
-      const host = $('scope-cards');
-      const scopes = app.doc.components.filter((c) => c.type === 'scope');
-      const key = scopes.map((c) => `${c.id}:${c.label}:${c.props.tdiv}:${c.props.v1}:${c.props.v2}`).join('|');
-      if (host.dataset.key !== key) {
-        host.dataset.key = key;
-        host.innerHTML = scopes.map((c) => `<section class="icard scope-card" data-scope="${c.id}"><h3 class="icard-label">Oscilloscope ${esc(c.label)}</h3>` +
-          `<canvas class="scope-screen" aria-label="Oscilloscope ${esc(c.label)} screen"></canvas>` +
-          `<p class="scope-legend"><span class="scope-ch1">CH1 ${esc(units.fmtSI(Number(c.props.v1), 'V', 3, { trim: true }))}/div</span><span class="scope-ch2">CH2 ${esc(units.fmtSI(Number(c.props.v2), 'V', 3, { trim: true }))}/div</span><span>${esc(units.fmtSI(Number(c.props.tdiv), 's', 3, { trim: true }))}/div</span></p></section>`).join('');
-      }
-      host.hidden = scopes.length === 0;
-      for (const c of scopes) drawScope(host.querySelector(`[data-scope="${c.id}"] canvas`), c);
+      const card = $('inspector-body').querySelector('.scope-card');
+      const c = card && circuit.getComp(app.doc, card.dataset.scope);
+      if (c) drawScope(card.querySelector('canvas'), c);
     };
     function drawScope(canvas, c) {
       if (!canvas) return;

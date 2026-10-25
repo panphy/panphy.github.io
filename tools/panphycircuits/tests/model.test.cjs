@@ -260,3 +260,17 @@ test('series-parallel recognition: parallel branches yes, transistors and bridge
   w('R3', 'b', 'B', 'n'); w('R4', 'b', 'B', 'n'); w('R5', 'a', 'R1', 'b'); w('R5', 'b', 'R2', 'b');
   assert.equal(layout.seriesParallel(doc, 'schematic'), null, 'bridge');
 });
+
+test('tidy up never turns meters on the bench', () => {
+  let seed = 21;
+  const rand = () => { seed = (seed * 16807) % 2147483647; return seed / 2147483647; };
+  for (const ex of examples.list) {
+    const doc = examples.build(ex, 'realistic');
+    const meters = doc.components.filter((c) => ['ammeter', 'voltmeter', 'scope'].includes(c.type));
+    if (!meters.length) continue;
+    for (const pl of Object.values(doc.layouts.realistic.comps)) { pl.x += Math.round((rand() - 0.5) * 200); pl.y += Math.round((rand() - 0.5) * 200); pl.r = Math.floor(rand() * 4); }
+    for (const w of doc.wires) doc.layouts.realistic.wires[w.id] = { pts: [] };
+    layout.tidy(doc, 'realistic');
+    for (const m of meters) assert.equal(doc.layouts.realistic.comps[m.id].r, 0, `${ex.title}: ${m.label} upright`);
+  }
+});
