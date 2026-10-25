@@ -461,6 +461,8 @@
       let dx = p.x - d.p0.x, dy = p.y - d.p0.y;
       if (snapOn()) { dx = layout.snap(prim.x + dx) - prim.x; dy = layout.snap(prim.y + dy) - prim.y; }
       else { dx = Math.round(dx); dy = Math.round(dy); }
+      const current = app.doc.layouts[v].comps[d.primary];
+      if (!layout.canMove(app.doc, v, d.ids, prim.x + dx - current.x, prim.y + dy - current.y)) return;
       for (const [id, pl] of d.init) {
         const cur = app.doc.layouts[v].comps[id];
         cur.x = pl.x + dx; cur.y = pl.y + dy;
@@ -688,6 +690,7 @@
         const step = (e.shiftKey ? 5 : 1) * layout.GRID;
         const dx = k === 'ArrowLeft' ? -step : k === 'ArrowRight' ? step : 0;
         const dy = k === 'ArrowUp' ? -step : k === 'ArrowDown' ? step : 0;
+        if (!layout.canMove(app.doc, view(), ids, dx, dy)) return;
         for (const id of ids) { const pl = app.doc.layouts[view()].comps[id]; if (pl) { pl.x += dx; pl.y += dy; } }
         app.commit('Move component', { merge: 'arrow' });
         return;

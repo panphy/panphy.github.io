@@ -230,9 +230,15 @@
   function obstacleRects(doc, view) {
     const out = [];
     for (const c of doc.components) {
-      if (c.type === 'junction') continue;
       const b = compBounds(doc, view, c.id);
-      if (b) out.push({ id: c.id, x: b.x + 3, y: b.y + 3, x2: b.x2 - 3, y2: b.y2 - 3 });
+      if (!b) continue;
+      if (c.type !== 'junction') out.push({ id: c.id, x: b.x + 3, y: b.y + 3, x2: b.x2 - 3, y2: b.y2 - 3 });
+      // Reserve every terminal, including unconnected ones and junctions. An
+      // earlier wire must not occupy a later wire's unavoidable endpoint.
+      for (const t of Object.keys(terminalsLocal(view, c))) {
+        const p = termWorld(doc, view, { c: c.id, t });
+        out.push({ terminal: p, x: p.x - 4, y: p.y - 4, x2: p.x + 4, y2: p.y + 4 });
+      }
     }
     return out;
   }
@@ -248,6 +254,23 @@
     if (h1 && h2 && Math.abs(a.y - c.y) < 1e-6) return Math.max(0, Math.min(Math.max(a.x, b.x), Math.max(c.x, d.x)) - Math.max(Math.min(a.x, b.x), Math.min(c.x, d.x)));
     if (v1 && v2 && Math.abs(a.x - c.x) < 1e-6) return Math.max(0, Math.min(Math.max(a.y, b.y), Math.max(c.y, d.y)) - Math.max(Math.min(a.y, b.y), Math.min(c.y, d.y)));
     return 0;
+  }
+
+  function samePoint(a, b) { return Math.hypot(a.x - b.x, a.y - b.y) < 1e-6; }
+
+  function onSegment(p, a, b) {
+    const dx = b.x - a.x, dy = b.y - a.y, len2 = dx * dx + dy * dy;
+    if (len2 < 1e-12) return samePoint(p, a);
+    const t = ((p.x - a.x) * dx + (p.y - a.y) * dy) / len2;
+    return t >= -1e-9 && t <= 1 + 1e-9 && Math.abs((p.x - a.x) * dy - (p.y - a.y) * dx) < 1e-6;
+  }
+
+  // Interior crossings can use a hop. A corner or end touching another line
+  // looks like a junction, so only an explicitly shared terminal may do that.
+  function touchesWire(a, b, s) {
+    const allowed = (p) => (s.shared || []).some((q) => samePoint(p, q));
+    return [a, b].some((p) => onSegment(p, s.a, s.b) && !allowed(p)) ||
+      [s.a, s.b].some((p) => onSegment(p, a, b) && !allowed(p));
   }
 
   // Invalid geometry must outweigh cosmetic gains in length or bend count.
@@ -270,10 +293,14 @@
            (i === poly.length - 2 && isDiag(dB) && inside(b) && outward(b, a, dB)));
         if (!diagonalStub && segHitsRect(a, b, r)) conflicts++;
       }
-      for (const s of avoid) if (overlapLen(a, b, s.a, s.b) > 1) conflicts++;
+      for (const s of avoid) if (overlapLen(a, b, s.a, s.b) > 1 || touchesWire(a, b, s)) conflicts++;
       for (let j = 0; j < i; j++) if (overlapLen(a, b, poly[j], poly[j + 1]) > 1) conflicts++;
     }
     return conflicts;
+  }
+
+  function obstaclesForEnds(obstacles, A, B) {
+    return obstacles.filter((r) => !r.terminal || (!samePoint(r.terminal, A) && !samePoint(r.terminal, B)));
   }
 
   function routeCost(poly, A, dA, B, dB, obstacles, avoid) {
@@ -296,6 +323,7 @@
   }
 
   function autoOrtho(A, dA, B, dB, obstacles, avoid) {
+    obstacles = obstaclesForEnds(obstacles, A, B);
     if (isDiag(dA) || isDiag(dB)) return withDiagStubs(A, dA, B, dB, (a, da, b, db) => autoOrtho(a, da, b, db, obstacles, avoid));
     const S = GRID;
     const a1 = isZero(dA) ? { x: A.x, y: A.y } : { x: A.x + dA.x * S, y: A.y + dA.y * S };
@@ -306,6 +334,14 @@
     for (const r of obstacles) {
       if (!overlaps(r, box, 0)) continue;
       xs.add(snap(r.x - 17)); xs.add(snap(r.x2 + 17)); ys.add(snap(r.y - 17)); ys.add(snap(r.y2 + 17));
+    }
+    for (const s of avoid) {
+      const r = polyBox([s.a, s.b]);
+      if (!overlaps(r, box, GRID)) continue;
+      for (const p of [s.a, s.b]) {
+        xs.add(snap(p.x - GRID)); xs.add(snap(p.x + GRID));
+        ys.add(snap(p.y - GRID)); ys.add(snap(p.y + GRID));
+      }
     }
     const P = (x, y) => ({ x, y });
     const cands = [
@@ -335,12 +371,37 @@
     const obstacles = view === 'schematic' ? obstacleRects(doc, view) : null;
     const avoid = [];
     for (const w of doc.wires) {
-      const r = wireRoute(doc, view, w, null, { obstacles, avoid });
+      const sameEnd = (a, b) => a && b && a.c === b.c && a.t === b.t;
+      const wireAvoid = avoid.map((s) => ({ ...s, shared: [
+        sameEnd(s.start, w.a) || sameEnd(s.start, w.b) ? s.a : null,
+        sameEnd(s.end, w.a) || sameEnd(s.end, w.b) ? s.b : null
+      ].filter(Boolean) }));
+      const r = wireRoute(doc, view, w, null, { obstacles, avoid: wireAvoid });
       if (!r) continue;
       out.set(w.id, r);
-      if (view === 'schematic') for (let i = 0; i < r.poly.length - 1; i++) avoid.push({ a: r.poly[i], b: r.poly[i + 1] });
+      if (view === 'schematic') for (let i = 0; i < r.poly.length - 1; i++) avoid.push({ a: r.poly[i], b: r.poly[i + 1], start: i === 0 ? w.a : null, end: i === r.poly.length - 2 ? w.b : null });
     }
     return out;
+  }
+
+  // Dots describe actual terminal connections, never incidental wire contact.
+  function branchPoints(doc, routes) {
+    const ends = new Map();
+    const add = (end, terminal, neighbor) => {
+      const key = `${end.c}:${end.t}`;
+      if (!ends.has(key)) ends.set(key, { p: terminal, dirs: new Set() });
+      const entry = ends.get(key);
+      const direction = (dx, dy) => `${Math.round(((Math.atan2(dy, dx) + 2 * Math.PI) % (2 * Math.PI)) * 1e6)}`;
+      if (!samePoint(terminal, neighbor)) entry.dirs.add(direction(neighbor.x - terminal.x, neighbor.y - terminal.y));
+      if (Math.hypot(terminal.dx, terminal.dy) > 0.5) entry.dirs.add(direction(-terminal.dx, -terminal.dy));
+    };
+    for (const w of doc.wires) {
+      const r = routes.get(w.id);
+      if (!r || r.poly.length < 2) continue;
+      add(w.a, r.a, r.poly[1]);
+      add(w.b, r.b, r.poly[r.poly.length - 2]);
+    }
+    return [...ends.values()].filter((e) => e.dirs.size >= 3).map((e) => ({ x: e.p.x, y: e.p.y }));
   }
 
   // Route of a wire in a view: { d (SVG path), poly (sampled points), segIndex (per poly point: control interval) }.
@@ -351,7 +412,7 @@
     let pts = override && override.pts ? override.pts : wirePoints(doc, view, wire);
     const d0 = { x: A.dx, y: A.dy }, d1 = { x: B.dx, y: B.dy };
     if (view === 'schematic') {
-      const obstacles = (ctx && ctx.obstacles) || obstacleRects(doc, view);
+      const obstacles = obstaclesForEnds((ctx && ctx.obstacles) || obstacleRects(doc, view), A, B);
       const avoid = (ctx && ctx.avoid) || [];
       let poly = orthoRoute(A, d0, pts, B, d1);
       if (!override && (!pts.length || routeConflicts(poly, d0, d1, obstacles, avoid))) {
@@ -504,6 +565,23 @@
     dst.wires = {};
     for (const w of doc.wires) dst.wires[w.id] = { pts: [] };
     dst.ready = true;
+  }
+
+  // Keep diagram symbols apart during pointer and keyboard moves. Check the
+  // whole selection at its proposed offset without mutating either layout.
+  function canMove(doc, view, ids, dx, dy) {
+    if (view !== 'schematic') return true;
+    const moving = new Set(ids);
+    const parts = doc.components.filter((c) => c.type !== 'junction').map((c) => {
+      const b = compBounds(doc, view, c.id);
+      if (!b) return null;
+      const mx = moving.has(c.id) ? dx : 0, my = moving.has(c.id) ? dy : 0;
+      return { id: c.id, b: { x: b.x + mx, x2: b.x2 + mx, y: b.y + my, y2: b.y2 + my } };
+    }).filter(Boolean);
+    for (let i = 0; i < parts.length; i++) for (let j = i + 1; j < parts.length; j++) {
+      if ((moving.has(parts[i].id) || moving.has(parts[j].id)) && overlaps(parts[i].b, parts[j].b, 4)) return false;
+    }
+    return true;
   }
 
   // Nudge `movable` components apart (and away from `fixed` ones).
@@ -1321,7 +1399,7 @@
 
   const api = {
     GRID, VIEWS, artFor, snap, xform, toLocal, xdir, normRot, quarterTurn, placement, termWorld, terminalsLocal, localBounds, compBounds, svgTransform,
-    wireRoute, routeAll, wirePoints, orthoRoute, nearestOnPoly, pointAtFraction, splitWire, generateLayout, placeInOtherViews,
+    wireRoute, routeAll, branchPoints, canMove, wirePoints, orthoRoute, nearestOnPoly, pointAtFraction, splitWire, generateLayout, placeInOtherViews,
     resolveOverlaps, viewBounds, overlaps, tidy, tidyCost, distributeRuns, seriesParallel, layoutSeriesParallel
   };
   PPC.layout = api;
