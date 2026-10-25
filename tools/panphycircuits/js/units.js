@@ -83,7 +83,31 @@
     return fmtSI(value, unit, 3);
   }
 
-  const api = { fmtSI, fmtInput, parseSI, roundSig, fmtMeter, trimZeros };
+  // Volts/div for the visible scope window, keeping zero centered and 20% headroom.
+  // Manual settings are retained so disabling auto scale restores them exactly.
+  function scopeScale(props, trace) {
+    const scale = { v1: Number(props.v1), v2: Number(props.v2) };
+    if (!props.autoScale || !trace || !trace.t.length) return scale;
+    const span = Number(props.tdiv) * 10;
+    const end = Math.max(trace.t[trace.t.length - 1], span);
+    const start = end - span;
+    for (const [channel, key] of [['ch1', 'v1'], ['ch2', 'v2']]) {
+      let peak = 0;
+      for (let i = 0; i < trace.t.length; i++) {
+        const value = trace[channel][i];
+        if (trace.t[i] >= start && trace.t[i] <= end && Number.isFinite(value)) peak = Math.max(peak, Math.abs(value));
+      }
+      if (peak <= 1e-9) continue;
+      const target = peak / 3.2;
+      const power = Math.pow(10, Math.floor(Math.log10(target)));
+      const fraction = target / power;
+      const step = fraction <= 1 ? 1 : fraction <= 2 ? 2 : fraction <= 5 ? 5 : 10;
+      scale[key] = step * power;
+    }
+    return scale;
+  }
+
+  const api = { fmtSI, fmtInput, parseSI, roundSig, fmtMeter, trimZeros, scopeScale };
   PPC.units = api;
   if (typeof module === 'object' && module.exports) module.exports = api;
 })(typeof globalThis === 'object' ? globalThis : this);

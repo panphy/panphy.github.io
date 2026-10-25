@@ -33,6 +33,7 @@ Adding a component: define it in `registry.js` (terminals, props, `compile` into
 - A fuse blows in `blowFuses` (app.js) after any solve that puts more than its rating through it; it stays blown (saved with the circuit, not undone) until “Blown” is switched off. The motor's rotor and the loudspeaker's cone animate with CSS, so they show while time is paused; the loudspeaker sounds only while time runs with an AC source.
 - Junction dots in the circuit diagram are drawn where lines actually branch (three or more line directions meeting, counting part leads), not from wire counts. A selected ammeter, voltmeter or oscilloscope shows its display large in the inspector, above its readings: the meter's own bench artwork (so it looks like the part) or the scope screen. Pin keeps a display at the top of the inspector while other parts are selected, in a separately scrollable area capped at 45% of the inspector height so readings and controls remain accessible (`app.pinned`, not saved; `ui.renderLive`). The thermistor's and LDR's bench badges are sliders: drag across them to set temperature or illumination (an `upright` slider actuator that stays horizontal however the part is turned).
 - DC and AC supplies have a draggable voltage slider on the bench front panel (0–30 V in 0.5 V steps). Their inspector keeps precise numeric entry alongside voltage sliders and a logarithmic AC frequency slider.
+- Each oscilloscope display has an Auto scale toggle for the vertical axis only. Each channel fits the visible sample window using 1–2–5 volts/div steps with headroom; the inspector, pinned displays and both workspace views share the calculation. Time/div stays unchanged, and turning auto scale off restores the saved manual volts/div settings.
 - Model notes for each component are shown in its inspector.
 
 ## Tests
@@ -41,7 +42,7 @@ Adding a component: define it in `registry.js` (terminals, props, `compile` into
 node --test tools/panphycircuits/tests/*.test.cjs
 ```
 
-`solver.test.cjs` compares the solver with hand calculations (series/parallel, bridge, switches, polarity, shorts, conflicting sources, RC against the exponential, diode, LED, lamp, transistors, every gate truth table, latch, AC r.m.s.). `model.test.cjs` covers terminal mapping, rotation, junction splitting, view sync, examples and import safety. Both run on every pull request (`.github/workflows/checks.yml`).
+`solver.test.cjs` compares the solver with hand calculations (series/parallel, bridge, switches, polarity, shorts, conflicting sources, RC against the exponential, diode, LED, lamp, transistors, every gate truth table, latch, AC r.m.s.). `model.test.cjs` covers terminal mapping, rotation, junction splitting, view sync, examples and import safety. `scope-scale.test.cjs` covers automatic scope scaling, manual restoration and saved settings. All run on every pull request (`.github/workflows/checks.yml`).
 
 ## Requirement checklist
 
