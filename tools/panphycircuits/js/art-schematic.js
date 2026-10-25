@@ -166,7 +166,7 @@
   function meterPill(ctx) {
     const text = ctx.display || '—';
     const width = Math.max(44, text.length * 7.2 + 12);
-    return { cx: 0, cy: (ctx.r & 1) ? 24 + width / 2 : 34, width, text };
+    return { cx: 0, cy: (Math.round(ctx.r || 0) & 1) ? 24 + width / 2 : 34, width, text };
   }
 
   function meterSym(letter) {

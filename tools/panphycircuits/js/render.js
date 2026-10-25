@@ -134,7 +134,7 @@
     function actRect(act, c, pl) {
       const rect = `<rect class="act act-${act.kind}" data-hit="act" data-id="${c.id}" x="${act.rect[0]}" y="${act.rect[1]}" width="${act.rect[2]}" height="${act.rect[3]}" rx="6"><title>${esc(actTitle(act.kind, c))}</title></rect>`;
       if (!act.upright) return rect;
-      return `<g transform="translate(${act.cx} ${act.cy}) scale(${pl.f ? -1 : 1} 1) rotate(${-90 * (pl.r & 3)})">${rect}</g>`;
+      return `<g transform="translate(${act.cx} ${act.cy}) scale(${pl.f ? -1 : 1} 1) rotate(${-90 * layout.normRot(pl.r)})">${rect}</g>`;
     }
 
     function actTitle(kind, c) {
@@ -299,11 +299,11 @@
         if (!text) continue;
         const pl = doc.layouts[v].comps[c.id];
         const side = v === 'schematic' && (c.type === 'npn' || c.type === 'pnp');
-        const vertical = side || ((pl.r & 1) === 1 && !['scope', 'dcsupply', 'acsupply', 'ammeter', 'voltmeter'].includes(c.type));
+        const vertical = side || ((layout.quarterTurn(pl.r) & 1) === 1 && !['scope', 'dcsupply', 'acsupply', 'ammeter', 'voltmeter'].includes(c.type));
         let x, y, anchor;
         const art = layout.artFor(v, c.type);
         const sensor = v === 'realistic' && ['ldr', 'thermistor'].includes(c.type);
-        const meter = v === 'schematic' && art.readingPill && (pl.r & 1);
+        const meter = v === 'schematic' && art.readingPill && (layout.quarterTurn(pl.r) & 1);
         if (sensor || meter) {
           const reading = sensor ? art.actuator(c.props, pl) : art.readingPill(artCtx(c, v, `label-${c.id}`));
           const center = layout.xform(pl, reading.cx, reading.cy);

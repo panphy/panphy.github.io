@@ -9,7 +9,7 @@
     wire: '<circle cx="5" cy="18" r="2.2"/><circle cx="19" cy="6" r="2.2"/><path d="M7 17c6 0 4-10 10-10"/>',
     pan: '<path d="M12 3v18M3 12h18"/><path d="M9.5 5.5L12 3l2.5 2.5M9.5 18.5L12 21l2.5-2.5M5.5 9.5L3 12l2.5 2.5M18.5 9.5L21 12l-2.5 2.5"/>',
     rotate: '<path d="M20 11a8 8 0 10-2.3 5.7"/><path d="M20 4v7h-7"/>',
-    flip: '<path d="M12 3v18"/><path d="M9 7L4 17h5zM15 7l5 10h-5z"/>',
+    rotateCcw: '<path d="M4 11a8 8 0 112.3 5.7"/><path d="M4 4v7h7"/>',
     duplicate: '<rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V6a2 2 0 00-2-2H6a2 2 0 00-2 2v8a2 2 0 002 2h2"/>',
     trash: '<path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13M10 11v6M14 11v6"/>',
     cross: '<path d="M6.5 6.5l11 11M17.5 6.5l-11 11"/>',
@@ -235,7 +235,7 @@
     };
 
     const card = (label, inner, cls = '') => `<section class="icard${cls ? ' ' + cls : ''}">${label ? `<h3 class="icard-label">${esc(label)}</h3>` : ''}${inner}</section>`;
-    const actButton = (act, ic, label, danger) => `<button type="button" class="mini-tool${danger ? ' danger' : ''}" data-act="${act}">${icon(ic)}<span>${label}</span></button>`;
+    const actButton = (act, ic, label, danger, title) => `<button type="button" class="mini-tool${danger ? ' danger' : ''}" data-act="${act}"${title ? ` title="${title}" aria-label="${title}"` : ''}>${icon(ic)}<span>${label}</span></button>`;
 
     function compInspector(c) {
       if (!c) return circuitInspector();
@@ -244,7 +244,7 @@
       const plot = def.props.find((p) => p.key === 'plot');
       const head = `<div class="insp-head"><div class="insp-art">${miniArt(c.type, app.doc.view)}</div><div><p class="icard-label">${esc(def.group)}${def.category === 'ext' ? ' · extension' : ''}</p><h2 class="insp-title">${esc(def.name)}</h2></div></div>` +
         (c.type !== 'junction' ? `<div class="row label-row"><label for="f-label">Label</label><input id="f-label" type="text" maxlength="${circuit.LABEL_MAX}" value="${esc(c.label)}" data-label="1" autocomplete="off"></div>` : '') +
-        `<div class="mini-actions">${actButton('rotate', 'rotate', 'Rotate')}${actButton('flip', 'flip', 'Mirror')}${actButton('duplicate', 'duplicate', 'Duplicate')}${actButton('delete', 'cross', 'Delete', true)}</div>`;
+        `<div class="mini-actions">${actButton('rotate-ccw', 'rotateCcw', '45° CCW', false, 'Rotate 45° counterclockwise (Shift+R)')}${actButton('rotate', 'rotate', '45° CW', false, 'Rotate 45° clockwise (R)')}${actButton('duplicate', 'duplicate', 'Duplicate')}${actButton('delete', 'cross', 'Delete', true)}</div>`;
       return card('', head) + (ui.hasLiveDisplay(c) && !app.pinned.has(c.id) ? liveCard(c, false) : '') +
         card('Readings', `<dl id="readings"></dl>${plot ? field(plot, c.props.plot, c.id) : ''}`, 'readings-card') +
         (props.length ? card('Properties', props.map((p) => field(p, c.props[p.key], c.id, c.type === 'scope' && c.props.autoScale && ['v1', 'v2'].includes(p.key))).join('')) : '') +
@@ -281,7 +281,7 @@
 
     function multiInspector(nc, nw) {
       return card('', `<div class="insp-head"><div><p class="icard-label">Selection</p><h2 class="insp-title">${nc} component${nc === 1 ? '' : 's'}${nw ? `, ${nw} wire${nw === 1 ? '' : 's'}` : ''}</h2></div></div>` +
-        `<div class="mini-actions">${actButton('rotate', 'rotate', 'Rotate')}${actButton('duplicate', 'duplicate', 'Duplicate')}${actButton('delete', 'cross', 'Delete', true)}</div>`);
+        `<div class="mini-actions">${actButton('rotate-ccw', 'rotateCcw', '45° CCW', false, 'Rotate 45° counterclockwise (Shift+R)')}${actButton('rotate', 'rotate', '45° CW', false, 'Rotate 45° clockwise (R)')}${actButton('duplicate', 'duplicate', 'Duplicate')}${actButton('delete', 'cross', 'Delete', true)}</div>`);
     }
 
     function circuitInspector() {
@@ -615,7 +615,7 @@
       }
       const act = b.dataset.act;
       if (act === 'rotate') app.rotateSelection(1);
-      else if (act === 'flip') app.flipSelection();
+      else if (act === 'rotate-ccw') app.rotateSelection(-1);
       else if (act === 'duplicate') app.duplicate();
       else if (act === 'delete') app.deleteSelection();
       else if (act === 'straighten') {
@@ -654,7 +654,7 @@
       $('btn-undo').disabled = !app.canUndo();
       $('btn-redo').disabled = !app.canRedo();
       const hasSel = app.selection.comps.size + app.selection.wires.size > 0;
-      ['btn-rotate', 'btn-flip', 'btn-duplicate', 'btn-delete'].forEach((id) => { $(id).disabled = !hasSel; });
+      ['btn-rotate', 'btn-rotate-ccw', 'btn-duplicate', 'btn-delete'].forEach((id) => { $(id).disabled = !hasSel; });
       ['btn-tidy', 'btn-clear'].forEach((id) => { $(id).disabled = app.doc.components.length === 0; });
       $('zoom-readout').textContent = 'Zoom: ' + Math.round(app.cameras[app.doc.view].z * 100) + ' %';
       $('empty-state').hidden = app.doc.components.length > 0 || app.emptyDismissed;
@@ -702,7 +702,7 @@
       if (app.placing) return `Click in the workspace to place a ${registry.get(app.placing).name.toLowerCase()} (Shift-click to place several) · Esc to stop.`;
       if (app.tool === 'wire') return 'Wire tool: click a terminal to start a wire, or click a wire to branch from it with a junction.';
       if (app.tool === 'pan') return 'Pan tool: drag to move around the workspace.';
-      return 'Drag parts to move them · click a terminal to start a wire · R rotates · scroll or pinch to zoom.';
+      return 'Drag parts to move them · click a terminal to start a wire · R rotates 45° · scroll or pinch to zoom.';
     }
 
     let toastTimer = null;

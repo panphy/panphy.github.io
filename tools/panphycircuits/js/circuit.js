@@ -232,7 +232,8 @@
   function validateLayoutEntry(e) {
     if (!e || typeof e !== 'object') return null;
     if (!finite(e.x) || !finite(e.y) || Math.abs(e.x) > 1e6 || Math.abs(e.y) > 1e6) return null;
-    const r = [0, 1, 2, 3].includes(e.r) ? e.r : 0;
+    // Quarter turns in 45° steps: 0, 0.5 … 3.5.
+    const r = finite(e.r) && e.r >= 0 && e.r < 4 && Number.isInteger(e.r * 2) ? e.r : 0;
     return { x: e.x, y: e.y, r, f: e.f === true };
   }
 

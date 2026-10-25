@@ -576,7 +576,7 @@
       if (i > 1.5) return [`${c.label} carries ${fmtSI(i, 'A')}; a real 1 A diode would overheat.`];
       return [];
     },
-    valueText: () => 'silicon',
+    valueText: () => '',
     help: 'A silicon diode (Shockley model with 0.1 Ω series resistance). It conducts when the anode is about 0.6–0.7 V above the cathode; reverse current is negligible. Reverse breakdown is not modeled.'
   });
 
