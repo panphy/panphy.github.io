@@ -163,14 +163,14 @@
 
     // Inspector fields. Numbers get a typed value with its unit beside the
     // label, then a slider with the range at its ends; switches are one row.
-    function field(p, value, compId) {
+    function field(p, value, compId, disabled = false) {
       const id = `f-${compId}-${p.key}`;
       const help = p.help ? `<p class="field-help">${esc(p.help)}</p>` : '';
       if (p.kind === 'bool') {
         return `<div class="field"><label class="toggle"><span>${esc(p.label)}</span><input type="checkbox" id="${id}" data-prop="${p.key}" ${value ? 'checked' : ''}><span class="toggle-track" aria-hidden="true"></span></label>${help}</div>`;
       }
       if (p.kind === 'select') {
-        return `<div class="field field-stack"><label for="${id}">${esc(p.label)}</label><select id="${id}" data-prop="${p.key}">${p.options.map((o) => `<option value="${esc(o.value)}" ${o.value === value ? 'selected' : ''}>${esc(o.label)}</option>`).join('')}</select>${help}</div>`;
+        return `<div class="field field-stack"><label for="${id}">${esc(p.label)}</label><select id="${id}" data-prop="${p.key}"${disabled ? ' disabled' : ''}>${p.options.map((o) => `<option value="${esc(o.value)}" ${o.value === value ? 'selected' : ''}>${esc(o.label)}</option>`).join('')}</select>${help}</div>`;
       }
       const unit = p.unit || '';
       const [lo, hi] = rangeEnds(p);
@@ -240,14 +240,14 @@
     function compInspector(c) {
       if (!c) return circuitInspector();
       const def = registry.get(c.type);
-      const props = def.props.filter((p) => p.key !== 'plot');
+      const props = def.props.filter((p) => p.key !== 'plot' && p.key !== 'autoScale');
       const plot = def.props.find((p) => p.key === 'plot');
       const head = `<div class="insp-head"><div class="insp-art">${miniArt(c.type, app.doc.view)}</div><div><p class="icard-label">${esc(def.group)}${def.category === 'ext' ? ' · extension' : ''}</p><h2 class="insp-title">${esc(def.name)}</h2></div></div>` +
         (c.type !== 'junction' ? `<div class="row label-row"><label for="f-label">Label</label><input id="f-label" type="text" maxlength="${circuit.LABEL_MAX}" value="${esc(c.label)}" data-label="1" autocomplete="off"></div>` : '') +
         `<div class="mini-actions">${actButton('rotate', 'rotate', 'Rotate')}${actButton('flip', 'flip', 'Mirror')}${actButton('duplicate', 'duplicate', 'Duplicate')}${actButton('delete', 'cross', 'Delete', true)}</div>`;
       return card('', head) + (ui.hasLiveDisplay(c) && !app.pinned.has(c.id) ? liveCard(c, false) : '') +
         card('Readings', `<dl id="readings"></dl>${plot ? field(plot, c.props.plot, c.id) : ''}`, 'readings-card') +
-        (props.length ? card('Properties', props.map((p) => field(p, c.props[p.key], c.id)).join('')) : '') +
+        (props.length ? card('Properties', props.map((p) => field(p, c.props[p.key], c.id, c.type === 'scope' && c.props.autoScale && ['v1', 'v2'].includes(p.key))).join('')) : '') +
         (def.gate ? truthTable(def) : '') +
         `<details class="icard model-note"><summary>How this is modeled</summary><p>${esc(def.help)}</p><p class="terms">Terminals: ${def.terminals.map((t) => esc(t.name)).join(' · ')}</p></details>`;
     }
@@ -334,12 +334,14 @@
     ui.hasLiveDisplay = (c) => !!c && LIVE_TYPES.includes(c.type);
     function liveCard(c, pinned) {
       const scope = c.type === 'scope';
+      const scale = scope ? units.scopeScale(c.props, app.sim.scopes[c.id]) : null;
       const title = pinned ? `${c.label} ${scope ? 'screen' : 'display'}` : (scope ? 'Screen' : 'Display');
       const div = (v, unit) => esc(units.fmtSI(Number(v), unit, 3, { trim: true })) + '/div';
       const pin = `<button type="button" class="pin-btn" data-pin="${c.id}" aria-pressed="${pinned}" title="${pinned ? 'Unpin this display' : 'Pin: keep this display in view while you work on other parts'}">${icon('pin')}<span>${pinned ? 'Pinned' : 'Pin'}</span></button>`;
       const body = scope
         ? `<canvas class="scope-screen" aria-label="Oscilloscope ${esc(c.label)} screen"></canvas>` +
-          `<p class="scope-legend"><span class="scope-ch1">CH1 ${div(c.props.v1, 'V')}</span><span class="scope-ch2">CH2 ${div(c.props.v2, 'V')}</span><span>${div(c.props.tdiv, 's')}</span></p>`
+          `<p class="scope-legend"><span class="scope-ch1">CH1 <span data-scope-v1>${div(scale.v1, 'V')}</span></span><span class="scope-ch2">CH2 <span data-scope-v2>${div(scale.v2, 'V')}</span></span><span>${div(c.props.tdiv, 's')}</span></p>` +
+          `<label class="toggle"><span>Auto scale</span><input type="checkbox" id="scope-auto-${c.id}" data-scope-auto="${c.id}" ${c.props.autoScale ? 'checked' : ''}><span class="toggle-track" aria-hidden="true"></span></label>`
         : `<div class="meter-view" role="img" aria-label="${esc(c.label)} display"></div>`;
       return `<section class="icard live-card" data-live="${c.id}"><div class="live-head"><h3 class="icard-label">${esc(title)}</h3>${pin}</div>${body}</section>`;
     }
@@ -450,8 +452,16 @@
       ui.updateLive();
       app.announce(app.pinned.has(id) ? 'Display pinned' : 'Display unpinned');
     });
+    $('inspector').addEventListener('change', (e) => {
+      if (e.target.dataset.scopeAuto) app.setScopeAutoScale(e.target.dataset.scopeAuto, e.target.checked);
+    });
     function drawScope(canvas, c) {
       if (!canvas) return;
+      const s = app.sim.scopes[c.id];
+      const scale = units.scopeScale(c.props, s);
+      const card = canvas.closest('[data-live]');
+      card.querySelector('[data-scope-auto]').checked = !!c.props.autoScale;
+      for (const key of ['v1', 'v2']) card.querySelector(`[data-scope-${key}]`).textContent = units.fmtSI(scale[key], 'V', 3, { trim: true }) + '/div';
       const dpr = window.devicePixelRatio || 1;
       const W = canvas.clientWidth, H = canvas.clientHeight;
       if (!W || !H) return;
@@ -462,7 +472,6 @@
       // 10 × 8 divisions, the center lines brighter.
       for (let i = 0; i <= 10; i++) { g.strokeStyle = i === 5 ? 'rgba(120, 220, 170, 0.45)' : 'rgba(80, 170, 130, 0.22)'; g.beginPath(); g.moveTo(i * W / 10 + 0.5, 0); g.lineTo(i * W / 10 + 0.5, H); g.stroke(); }
       for (let j = 0; j <= 8; j++) { g.strokeStyle = j === 4 ? 'rgba(120, 220, 170, 0.45)' : 'rgba(80, 170, 130, 0.22)'; g.beginPath(); g.moveTo(0, j * H / 8 + 0.5); g.lineTo(W, j * H / 8 + 0.5); g.stroke(); }
-      const s = app.sim.scopes[c.id];
       if (!s || !s.t.length) {
         g.fillStyle = 'rgba(190, 240, 215, 0.75)'; g.font = '12px Figtree, sans-serif'; g.textAlign = 'center'; g.textBaseline = 'middle';
         g.fillText('Press play on the time bar to draw the traces', W / 2, H / 2);
@@ -470,7 +479,7 @@
       }
       const span = Number(c.props.tdiv) * 10;
       const tEnd = Math.max(s.t[s.t.length - 1], span), t0 = tEnd - span;
-      for (const [key, vdiv] of [['ch1', Number(c.props.v1)], ['ch2', Number(c.props.v2)]]) {
+      for (const [key, vdiv] of [['ch1', scale.v1], ['ch2', scale.v2]]) {
         const arr = s[key];
         g.strokeStyle = SCOPE_COLORS[key]; g.lineWidth = 2; g.lineJoin = 'round';
         g.shadowColor = SCOPE_COLORS[key]; g.shadowBlur = 4;

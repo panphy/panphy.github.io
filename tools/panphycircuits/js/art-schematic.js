@@ -193,15 +193,16 @@
       const X0 = -42, Y0 = -26, W = 84, H = 44;
       let traces = '';
       const s = ctx.scope;
+      const scale = PPC.units.scopeScale(ctx.p, s);
       if (s && s.t.length) {
         const span = Number(ctx.p.tdiv) * 10;
         const tEnd = Math.max(s.t[s.t.length - 1], span), t0 = tEnd - span;
-        for (const [key, vdiv, color] of [['ch1', Number(ctx.p.v1), '#E0B400'], ['ch2', Number(ctx.p.v2), '#0FA3C4']]) {
+        for (const [key, vdiv, color] of [['ch1', scale.v1, '#E0B400'], ['ch2', scale.v2, '#0FA3C4']]) {
           let d = '', pen = false;
           const step = Math.max(1, Math.floor(s[key].length / 300));
           for (let i = 0; i < s[key].length; i += step) {
             const v = s[key][i];
-            if (!Number.isFinite(v)) { pen = false; continue; }
+            if (!Number.isFinite(v) || s.t[i] < t0) { pen = false; continue; }
             const x = X0 + ((s.t[i] - t0) / span) * W;
             const y = Math.max(Y0 - 3, Math.min(Y0 + H + 3, Y0 + H / 2 - (v / vdiv) * (H / 8)));
             d += (pen ? ' L ' : ' M ') + n(x) + ' ' + n(y);
