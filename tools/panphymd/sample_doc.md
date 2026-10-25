@@ -13,7 +13,7 @@ Switch between **Edit** (the text you type) and **Preview** (what you get), or s
 # This document is a demo of...
 
 1. a bit of **Markdown**,  
-2. a lot of **LaTeX** (math, Greek letters, units, physics, chemistry and more), and\
+2. a lot of **LaTeX** (math, Greek letters, units, physics, chemistry and more), and
 3. a few **HTML** tags.
 
 ---
