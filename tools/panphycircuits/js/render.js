@@ -117,7 +117,7 @@
         const [bx, by, bw, bh] = a.bounds(c.props);
         const artSvg = drawArt(c, v);
         if (DYNAMIC.has(c.type)) dynCache.set(c.id, artSvg);
-        const act = a.actuator ? a.actuator(c.props) : null;
+        const act = a.actuator ? a.actuator(c.props, pl) : null;
         const err = app.problemComps.has(c.id) ? ' is-problem' : '';
         const name = `${c.label}, ${registry.get(c.type).name}`;
         parts.push(`<g class="comp comp-${c.type}${err}" data-id="${c.id}" transform="${layout.svgTransform(pl)}">` +

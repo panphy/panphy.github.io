@@ -132,6 +132,7 @@
     return {
       bounds: () => [-84, -58, 168, 118],
       terms: () => ({ n: [-30, 30, 0, 1], p: [30, 30, 0, 1] }),
+      actuator: () => ({ kind: 'slider', x0: -60, x1: 60, rect: [-68, -44, 136, 60], prop: ac ? 'peak' : 'emf', min: 0, max: 30, step: 0.5 }),
       draw(ctx) {
         const p = ctx.p;
         const line1 = ac ? `${trimNum(p.peak)} V pk` : `${(p.emf).toFixed(p.emf >= 10 ? 1 : 2)} V`;
@@ -145,6 +146,7 @@
           `<circle cx="48" cy="-18" r="15" fill="#11141A"/>` +
           `<circle cx="48" cy="-19" r="13" fill="url(#ppc-knob)"/>` +
           `<line x1="48" y1="-19" x2="${n(48 + 10 * Math.sin(angle * Math.PI / 180))}" y2="${n(-19 - 10 * Math.cos(angle * Math.PI / 180))}" stroke="#F4F4F4" stroke-width="2" stroke-linecap="round"/>` +
+          `<rect x="-60" y="7" width="120" height="3" rx="1.5" fill="#0B0F0C"/><circle cx="${n(-60 + 120 * Math.max(0, Math.min(1, (ac ? p.peak : p.emf) / 30)))}" cy="8.5" r="4" fill="#F4F4F4" stroke="#8A919C"/>` +
           socket(-30, 30, 'black') + socket(30, 30, ac ? 'yellow' : 'red') +
           utext(ctx, -52, 30, ac ? '2' : '−', 'ppc-panel-mark') + utext(ctx, 52, 30, ac ? '1' : '+', 'ppc-panel-mark') +
           utext(ctx, 0, 31, ac ? 'AC ~' : 'DC', 'ppc-panel-label') +
@@ -264,7 +266,13 @@
     draw(ctx) {
       const blown = !!ctx.p.blown;
       const wire = blown
-        ? `<path d="M -24 0 Q -15 -2.5 -7 0.5 M 7 -0.5 Q 15 2.5 24 0" fill="none" stroke="#3A414C" stroke-width="1.7" stroke-linecap="round"/><ellipse cx="0" cy="0" rx="12" ry="5.5" fill="#2B2B2B" opacity="0.5"/>`
+        ? `<path d="M -19 -5 Q -12 -8 -4 -5 L 2 -6 12 -4 18 -1 Q 10 -3 3 -2 L -5 -3 -13 -1 Z" fill="#332B26" opacity="0.38"/>` +
+          `<path d="M -14 5 L -6 3 1 5 9 3 17 5 Q 7 8 -3 6 Z" fill="#332B26" opacity="0.28"/>` +
+          `<path d="M -24 0 L -18 0 Q -15 0 -13 2 L -11 3 -8 1 M 9 -2 L 12 -4 Q 15 -1 18 0 L 24 0" fill="none" stroke="#302923" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>` +
+          `<path d="M -24 -0.5 H -18 M 18 -0.5 H 24" fill="none" stroke="#B9ABA0" stroke-width="0.7"/>` +
+          `<circle cx="-8" cy="1" r="1.6" fill="#42332B"/><circle cx="9" cy="-2" r="1.5" fill="#42332B"/>` +
+          `<path d="M -8.8 0.4 L -8.1 0 M 8.3 -2.5 L 9 -2.8" stroke="#B29A83" stroke-width="0.6" stroke-linecap="round"/>` +
+          `<g fill="#40342E" opacity="0.5"><circle cx="-3" cy="-5" r="0.7"/><circle cx="4" cy="5" r="0.9"/><circle cx="13" cy="-5" r="0.6"/><circle cx="-16" cy="4" r="0.6"/></g>`
         : `<path d="M -24 0 Q -12 -3 0 0 T 24 0" fill="none" stroke="#3A414C" stroke-width="1.7"/>`;
       const icon = `<g transform="translate(-17 0)"><rect x="-4" y="-2.5" width="8" height="5" rx="1" class="ppc-badge-icon"/></g>`;
       return shadow(roundRect(-36, -9, 72, 18, 4, '')) +
@@ -554,6 +562,8 @@
       `<text x="7" y="-2.5" class="ppc-badge-text" text-anchor="middle" dominant-baseline="central">${esc(label)}</text>` +
       `<rect x="${b0}" y="4.6" width="${b1 - b0}" height="1.8" rx="0.9" class="ppc-badge-track"/><rect x="${b0}" y="4.6" width="${n((b1 - b0) * f)}" height="1.8" rx="0.9" class="ppc-badge-level"/>`);
   }
+  // A vertical sensor needs room for the full width of its upright pill.
+  function sensorBadgeY(rotation, normalY) { return (rotation & 1) ? -55 : normalY; }
   const BADGE_BAR = [-9, 22];
   const LUX_MIN = 1, LUX_MAX = 10000, TEMP_MIN = -20, TEMP_MAX = 120;
 
@@ -561,7 +571,7 @@
     bounds: () => [-44, -40, 88, 56],
     terms: () => ({ a: [-40, 0, -1, 0], b: [40, 0, 1, 0] }),
     // The badge stays upright when the part turns, so its slider does too.
-    actuator: () => ({ kind: 'slider', upright: true, cx: 0, cy: -27, x0: BADGE_BAR[0], x1: BADGE_BAR[1], rect: [-28, -11, 56, 22], prop: 'temp', min: TEMP_MIN, max: TEMP_MAX }),
+    actuator: (props, pl = {}) => ({ kind: 'slider', upright: true, cx: 0, cy: sensorBadgeY(pl.r, -27), x0: BADGE_BAR[0], x1: BADGE_BAR[1], rect: [-28, -11, 56, 22], prop: 'temp', min: TEMP_MIN, max: TEMP_MAX }),
     draw(ctx) {
       const t = ctx.p.temp;
       const icon = `<g transform="translate(-17 0)"><rect x="-1.6" y="-6" width="3.2" height="9" rx="1.6" class="ppc-badge-icon"/><circle cx="0" cy="3.5" r="3" class="ppc-badge-icon"/></g>`;
@@ -571,7 +581,7 @@
         `<ellipse cx="0" cy="0" rx="14" ry="12" fill="url(#ppc-cyl)" opacity="0.8"/>` +
         `<ellipse cx="-4" cy="-5" rx="5" ry="2.5" fill="#fff" opacity="0.25"/>` +
         utext(ctx, 0, 1, 'NTC', 'ppc-print ppc-print-light ppc-print-tiny') +
-        badge(ctx, 0, -27, icon, `${Math.round(t)} °C`, (t - TEMP_MIN) / (TEMP_MAX - TEMP_MIN));
+        badge(ctx, 0, sensorBadgeY(ctx.r, -27), icon, `${Math.round(t)} °C`, (t - TEMP_MIN) / (TEMP_MAX - TEMP_MIN));
     }
   };
 
@@ -580,7 +590,7 @@
   art.ldr = {
     bounds: () => [-44, -46, 88, 68],
     terms: () => ({ a: [-40, 0, -1, 0], b: [40, 0, 1, 0] }),
-    actuator: () => ({ kind: 'slider', upright: true, cx: 0, cy: -31, x0: BADGE_BAR[0], x1: BADGE_BAR[1], rect: [-28, -11, 56, 22], prop: 'lux', min: LUX_MIN, max: LUX_MAX, log: true }),
+    actuator: (props, pl = {}) => ({ kind: 'slider', upright: true, cx: 0, cy: sensorBadgeY(pl.r, -31), x0: BADGE_BAR[0], x1: BADGE_BAR[1], rect: [-28, -11, 56, 22], prop: 'lux', min: LUX_MIN, max: LUX_MAX, log: true }),
     draw(ctx) {
       const lux = ctx.p.lux;
       const clip = `${ctx.uid}-ldr`;
@@ -597,7 +607,7 @@
         `<circle cx="0" cy="0" r="14.5" fill="none" stroke="#8F877A" stroke-width="0.8"/>` +
         `<circle cx="0" cy="0" r="17" fill="url(#ppc-glass)" opacity="0.6"/>` +
         `<ellipse cx="-6" cy="-8" rx="5" ry="2.4" fill="#fff" opacity="0.35"/>` +
-        badge(ctx, 0, -31, sun, `${fmtLux(lux)} lx`, level);
+        badge(ctx, 0, sensorBadgeY(ctx.r, -31), sun, `${fmtLux(lux)} lx`, level);
     }
   };
 
