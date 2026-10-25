@@ -505,8 +505,8 @@
     const v = app.doc.view;
     const b = layout.viewBounds(app.doc, v);
     if (!b) return null;
-    // Labels and upright pills can extend past a component's nominal bounds.
-    for (const layer of svg.querySelectorAll('.l-comps, .l-labels')) {
+    // Include labels, upright pills, and routed wire curves beyond nominal bounds.
+    for (const layer of svg.querySelectorAll('.l-comps, .l-labels, .l-wires-under, .l-wires-over, .l-junctions')) {
       if (!layer.children.length) continue;
       const box = layer.getBBox();
       b.x = Math.min(b.x, box.x); b.y = Math.min(b.y, box.y);

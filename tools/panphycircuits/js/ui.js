@@ -575,7 +575,7 @@
       const hasSel = app.selection.comps.size + app.selection.wires.size > 0;
       ['btn-rotate', 'btn-flip', 'btn-duplicate', 'btn-delete'].forEach((id) => { $(id).disabled = !hasSel; });
       ['btn-tidy', 'btn-clear'].forEach((id) => { $(id).disabled = app.doc.components.length === 0; });
-      $('zoom-readout').textContent = Math.round(app.cameras[app.doc.view].z * 100) + ' %';
+      $('zoom-readout').textContent = 'Zoom: ' + Math.round(app.cameras[app.doc.view].z * 100) + ' %';
       $('empty-state').hidden = app.doc.components.length > 0 || app.emptyDismissed;
       const probs = app.problems();
       const btn = $('btn-problems');

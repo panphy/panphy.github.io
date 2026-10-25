@@ -586,7 +586,7 @@
     reader.onerror = () => ui.message('Could not open the file', ['The file could not be read.']);
     reader.readAsText(file);
   };
-  app.exportPanPhyMD = async function () {
+  app.exportPanPhyMD = function () {
     const svgText = PPC.render.exportSvg(app, document.getElementById('ws-svg'));
     if (!svgText) { ui.toast('There is nothing to export yet.'); return; }
     // Encode UTF-8 before base64 so labels such as Ω and µ survive the export.
@@ -594,13 +594,9 @@
     const uri = 'data:image/svg+xml;base64,' + btoa(Array.from(bytes, (byte) => String.fromCharCode(byte)).join(''));
     const label = app.doc.view === 'schematic' ? 'Circuit diagram' : 'Circuit realistic view';
     const markdown = `![${label}](${uri})`;
-    try {
-      await navigator.clipboard.writeText(markdown);
-      ui.toast('Copied circuit image. Paste it into PanPhyMD.');
-    } catch (e) {
-      download('panphy-circuit.md', 'text/markdown;charset=utf-8', markdown + '\n');
-      ui.toast('Clipboard unavailable. Open the downloaded Markdown file in PanPhyMD.');
-    }
+    const url = '/tools/panphymd.html#import=' + encodeURIComponent(JSON.stringify({ markdown }));
+    const tab = window.open(url, '_blank');
+    ui.toast(tab === null ? 'The browser blocked the new tab. Allow pop-ups for this site, then try again.' : 'Circuit image sent to PanPhyMD in a new tab.');
   };
   app.exportImage = function (format) {
     const svgText = PPC.render.exportSvg(app, document.getElementById('ws-svg'));

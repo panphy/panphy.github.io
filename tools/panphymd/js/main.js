@@ -55,7 +55,7 @@ import {
   normalizeCloudImageUrl
 } from './ui.js';
 
-import { createEmbeddedImageEditor } from './embedded-images.js';
+import { createEmbeddedImageEditor, parseLinkedImageImport } from './embedded-images.js';
 
 // DOM element references
 const markdownInput = document.getElementById('markdownInput');
@@ -2251,7 +2251,32 @@ if (savedDraft !== null) {
 } else {
   saveUntouchedSampleDraftFlag(false);
 }
+let importedImage = false;
+if (window.location.hash.startsWith('#import=')) {
+  const importHash = window.location.hash;
+  window.history.replaceState(null, '', window.location.pathname + window.location.search);
+  try {
+    const imageMarkdown = parseLinkedImageImport(importHash);
+    const previous = sourceEditor.value;
+    saveSnapshotIfNeeded(previous);
+    sourceEditor.value = (previous.trim() ? previous.trimEnd() + '\n\n' : '') + imageMarkdown + '\n';
+    clearUntouchedSampleContent();
+    saveDraft(sourceEditor.value);
+    importedImage = true;
+  } catch (error) {
+    alert('The image in this link could not be read. Your draft has been kept.');
+  }
+}
 renderContent();
+if (importedImage) {
+  if (mobileQuery.matches) switchMobilePane('output');
+  const image = [...renderedOutput.querySelectorAll('img')].pop();
+  if (image) {
+    const showImage = () => image.scrollIntoView({ block: 'nearest' });
+    if (image.complete) requestAnimationFrame(showImage);
+    else image.addEventListener('load', showImage, { once: true });
+  }
+}
 
 // Dirty-state indicator on load (never exported yet, so show if non-empty)
 updateDirtyIndicator(dirtyIndicator, isDirty(sourceEditor.value));

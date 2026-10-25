@@ -4,7 +4,7 @@ const fs = require('node:fs');
 const vm = require('node:vm');
 const path = require('node:path');
 const source = fs.readFileSync(path.join(__dirname, '../js/embedded-images.js'), 'utf8').replace(/export /g, '');
-const { createEmbeddedImageModel, createEmbeddedImageEditor } = vm.runInNewContext(`${source}\n({createEmbeddedImageModel, createEmbeddedImageEditor})`, {
+const { createEmbeddedImageModel, createEmbeddedImageEditor, parseLinkedImageImport } = vm.runInNewContext(`${source}\n({createEmbeddedImageModel, createEmbeddedImageEditor, parseLinkedImageImport})`, {
   crypto: { randomUUID: () => 'test-session' }, Event
 });
 const png = 'data:image/png;base64,' + 'Ab12+/'.repeat(1000) + '==';
@@ -101,5 +101,23 @@ test('copy and cut export actual image data instead of temporary references', ()
     assert.equal(prevented, true);
     assert.equal(clipboard, documentText);
     assert.equal(h.editor.value, type === 'cut' ? '' : documentText);
+  }
+});
+
+
+test('linked circuit images round-trip without depending on shared storage', () => {
+  const markdown = `![Circuit diagram](${svg})`;
+  const hash = '#import=' + encodeURIComponent(JSON.stringify({ markdown }));
+  assert.equal(parseLinkedImageImport(hash), markdown);
+  const model = createEmbeddedImageModel('linked');
+  assert.equal(model.expand(model.collapse(markdown).value), markdown);
+  assert.equal(parseLinkedImageImport('#unrelated'), null);
+});
+
+test('linked image import rejects malformed payloads and non-image content', () => {
+  for (const hash of ['#import=%', '#import=null', '#import={}',
+    ...['# Lesson', '![x](https://example.com/image.svg)', '![x](data:text/html;base64,YQ==)',
+      `![x](${svg})\n<script>bad()</script>`].map(markdown => '#import=' + encodeURIComponent(JSON.stringify({ markdown })))]) {
+    assert.throws(() => parseLinkedImageImport(hash));
   }
 });
