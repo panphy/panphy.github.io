@@ -74,7 +74,7 @@
   const CIRCUIT = [
     ['Cell', W(10, 52) + W(68, 110) + '<path d="M52,10 V50 M68,20 V40"/>', 'The longer line is the positive terminal.'],
     ['Battery', W(6, 36) + W(84, 114) + '<path d="M36,10 V50 M46,20 V40 M74,10 V50 M84,20 V40"/><path d="M50,30 H70" stroke-dasharray="3 3"/>', 'Two or more cells in series.'],
-    ['Switch', W(10, 46) + W(78, 110) + '<path d="M46,30 L74,14"/>', 'Shown open: no current.'],
+    ['Switch', W(10, 46) + W(78, 110) + '<path d="M46,30 L74,14"/><circle cx="46" cy="30" r="3" style="fill:var(--card)"/><circle cx="78" cy="30" r="3" style="fill:var(--card)"/>', 'Shown open: no current.'],
     ['Voltmeter', W(10, 42) + W(78, 110) + '<circle cx="60" cy="30" r="18"/><text x="60" y="36">V</text>', 'Connected in parallel; ideal resistance is infinite.'],
     ['Ammeter', W(10, 42) + W(78, 110) + '<circle cx="60" cy="30" r="18"/><text x="60" y="36">A</text>', 'Connected in series; ideal resistance is zero.'],
     ['Resistor', W(6, 30) + W(90, 114) + '<rect x="30" y="20" width="60" height="20"/>', 'A fixed resistance.'],

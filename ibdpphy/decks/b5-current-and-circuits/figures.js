@@ -25,8 +25,8 @@ window.DeckFigures.add(P => {
     motor: { h: 24, body: `<circle r="24" style="${BOX}"/>`, letter: 'M' },
     ammeter: { h: 24, body: `<circle r="24" style="${BOX}"/>`, letter: 'A' },
     voltmeter: { h: 24, body: `<circle r="24" style="${BOX}"/>`, letter: 'V' },
-    open: { h: 24, body: `<path d="M-24,0 L20,-20" style="${INK}"/><circle cx="-24" r="5" style="fill:var(--text-main)"/><circle cx="24" r="5" style="fill:var(--text-main)"/>` },
-    closed: { h: 24, body: `<path d="M-24,0 H24" style="${INK}"/><circle cx="-24" r="5" style="fill:var(--text-main)"/><circle cx="24" r="5" style="fill:var(--text-main)"/>` },
+    open: { h: 24, body: `<path d="M-24,0 L20,-20" style="${INK}"/><circle cx="-24" r="5" style="${BOX}"/><circle cx="24" r="5" style="${BOX}"/>` },
+    closed: { h: 24, body: `<path d="M-24,0 H24" style="${INK}"/><circle cx="-24" r="5" style="${BOX}"/><circle cx="24" r="5" style="${BOX}"/>` },
     gap: { h: 10, body: `<circle cx="-10" r="6" style="${BOX}"/><circle cx="10" r="6" style="${BOX}"/>` }
   };
   // A straight wire from (x1, y1) to (x2, y2) carrying the listed symbols: { kind, at (0 to 1),
