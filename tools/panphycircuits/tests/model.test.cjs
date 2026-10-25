@@ -415,3 +415,101 @@ test('moving diagram parts reroutes stale corners instead of drawing apparent sh
   place(doc, lamp, 'schematic', 100, 100);
   assert.deepEqual(check(), original, 'returning parts restores valid manual corners');
 });
+
+test('diagram routing clears other terminals and corners even without a collinear overlap', () => {
+  const doc = examples.build({
+    comps: [
+      ['B1', 'battery', { emf: 6 }, [0, -130, 0], [0, -100, 2]],
+      ['R1', 'rheostat', {}, [220, 0, 0], [-180, -20, 0]],
+      ['L1', 'lamp', {}, [0, 130, 0], [160, 30, 0]]
+    ],
+    wires: [
+      ['B1.p', 'R1.a', 'red', { s: [[-140, -100], [-140, 100], [-230, 100], [-230, -20]] }],
+      ['R1.b', 'L1.a', 'blue'],
+      ['L1.b', 'B1.n', 'black', { s: [[210, 30], [210, -100]] }]
+    ]
+  }, 'schematic');
+  const before = JSON.stringify(doc);
+  const on = (p, a, b) => layout.nearestOnPoly([a, b], p).dist < 1e-6;
+  // Both wire orderings must work: the first wire must reserve terminals that
+  // later wires will use, and later wires must avoid earlier corners.
+  for (const wires of [doc.wires.slice(), doc.wires.slice().reverse()]) {
+    doc.wires = wires;
+    const routes = layout.routeAll(doc, 'schematic');
+    assert.deepEqual(layout.branchPoints(doc, routes), [], 'a series loop has no junction dots');
+    const list = [...routes.values()];
+    for (let i = 0; i < list.length; i++) for (let j = i + 1; j < list.length; j++) {
+      for (const p of list[i].poly) for (let k = 1; k < list[j].poly.length; k++) {
+        assert.ok(!on(p, list[j].poly[k - 1], list[j].poly[k]), 'a vertex must not touch another wire');
+      }
+      for (const p of list[j].poly) for (let k = 1; k < list[i].poly.length; k++) {
+        assert.ok(!on(p, list[i].poly[k - 1], list[i].poly[k]), 'an earlier corner must not lie on a later wire');
+      }
+    }
+  }
+  doc.wires.reverse();
+  assert.equal(JSON.stringify(doc), before, 'routing does not mutate the circuit');
+});
+
+test('junction dots require an explicit shared terminal and three distinct directions', () => {
+  const doc = circuit.createDoc();
+  const j = circuit.addComponent(doc, 'junction');
+  place(doc, j, 'schematic', 0, 0);
+  const routes = new Map();
+  for (const [x, y] of [[-140, 0], [140, 0], [0, 140]]) {
+    const r = circuit.addComponent(doc, 'resistor');
+    place(doc, r, 'schematic', x, y, x ? 0 : 1);
+    const w = circuit.addWire(doc, { c: j.id, t: 'j' }, { c: r.id, t: 'a' }).wire;
+    routes.set(w.id, layout.wireRoute(doc, 'schematic', w));
+  }
+  assert.deepEqual(layout.branchPoints(doc, layout.routeAll(doc, 'schematic')), [{ x: 0, y: 0 }], 'real three-way junction retained');
+  // An unrelated wire touching the middle of another route used to fabricate
+  // a dot. The dot calculation must never infer a connection from those pixels.
+  const r = circuit.addComponent(doc, 'resistor');
+  place(doc, r, 'schematic', 300, 300);
+  const w = circuit.addWire(doc, { c: r.id, t: 'a' }, { c: r.id, t: 'b' }).wire;
+  const a = layout.termWorld(doc, 'schematic', w.a), b = layout.termWorld(doc, 'schematic', w.b);
+  routes.set(w.id, { a, b, poly: [a, { x: -70, y: 0 }, { x: -70, y: 200 }, b], pts: [] });
+  assert.deepEqual(layout.branchPoints(doc, routes), [{ x: 0, y: 0 }], 'incidental bend contact never adds a dot');
+});
+
+test('diagram moves reject overlapping symbols while preserving group moves and the realistic view', () => {
+  const doc = circuit.createDoc();
+  const battery = circuit.addComponent(doc, 'battery'), lamp = circuit.addComponent(doc, 'lamp');
+  place(doc, battery, 'schematic', 0, -100);
+  place(doc, lamp, 'schematic', 160, 30);
+  const before = JSON.stringify(doc);
+  assert.equal(layout.canMove(doc, 'schematic', [lamp.id], -130, -130), false, 'lamp cannot cover battery');
+  assert.equal(layout.canMove(doc, 'schematic', [lamp.id], 0, -130), true, 'clear position on the same row remains allowed');
+  assert.equal(layout.canMove(doc, 'schematic', [battery.id, lamp.id], 300, 100), true, 'group spacing is preserved');
+  assert.equal(layout.canMove(doc, 'realistic', [lamp.id], -130, -130), true, 'bench behavior is unchanged');
+  assert.equal(JSON.stringify(doc), before, 'collision checks never mutate placements');
+});
+
+test('independent wire corners cannot touch, while ordinary interior crossings remain available', () => {
+  const doc = circuit.createDoc();
+  const ends = [[0, 0], [100, 100], [200, 0], [100, -100]].map(([x, y]) => {
+    const j = circuit.addComponent(doc, 'junction');
+    place(doc, j, 'schematic', x, y);
+    return { c: j.id, t: 'j' };
+  });
+  const w1 = circuit.addWire(doc, ends[0], ends[1]).wire;
+  const w2 = circuit.addWire(doc, ends[2], ends[3]).wire;
+  for (const w of [w1, w2]) doc.layouts.schematic.wires[w.id] = { pts: [[100, 0]] };
+  const routes = layout.routeAll(doc, 'schematic');
+  const first = routes.get(w1.id), second = routes.get(w2.id);
+  for (const p of first.poly) assert.ok(layout.nearestOnPoly(second.poly, p).dist > 0.5, 'second wire avoids the first corner');
+  for (const p of second.poly) assert.ok(layout.nearestOnPoly(first.poly, p).dist > 0.5, 'new corners avoid the first wire');
+  assert.deepEqual(layout.branchPoints(doc, routes), []);
+  // Two straight wires crossing in their interiors can still be drawn with a
+  // hop by the renderer, rather than needing a long detour or a junction dot.
+  place(doc, doc.components[0], 'schematic', -100, 0);
+  place(doc, doc.components[1], 'schematic', 100, 0);
+  place(doc, doc.components[2], 'schematic', 0, -100);
+  place(doc, doc.components[3], 'schematic', 0, 100);
+  for (const w of [w1, w2]) doc.layouts.schematic.wires[w.id].pts = [];
+  const crossing = layout.routeAll(doc, 'schematic');
+  assert.equal(crossing.get(w1.id).poly.length, 2);
+  assert.equal(crossing.get(w2.id).poly.length, 2);
+  assert.deepEqual(layout.branchPoints(doc, crossing), []);
+});
