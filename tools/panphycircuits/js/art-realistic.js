@@ -640,6 +640,58 @@
     }
   };
 
+  art.relay = {
+    bounds: () => [-72, -52, 144, 104],
+    terms: () => ({ cp: [-70, -30, -1, 0], cn: [-70, 30, -1, 0], com: [70, 30, 1, 0], nc: [70, -30, 1, 0], no: [70, 0, 1, 0] }),
+    draw(ctx) {
+      const on = !!ctx.st.energized;
+      let out = shadow(roundRect(-48, -45, 96, 90, 6, '')) +
+        roundRect(-48, -45, 96, 90, 6, 'fill="#D8E0E8" stroke="#586777" stroke-width="2"');
+      for (const [x, y, label] of [[-70, -30, 'A'], [-70, 30, 'B'], [70, -30, 'NC'], [70, 0, 'NO'], [70, 30, 'COM']]) {
+        out += lead(x, y, Math.sign(x) * 42, y) + pad(x, y) +
+          utext(ctx, Math.sign(x) * 35, y - 6, label, 'ppc-print ppc-print-dark ppc-print-tiny');
+      }
+      out += roundRect(-29, -24, 19, 48, 3, 'fill="#783A18"');
+      for (let y = -20; y <= 20; y += 5) out += `<path d="M -28 ${y} H -11" stroke="#ECA35E" stroke-width="3"/>`;
+      return out + `<path d="M 5 27 L ${on ? 25 : 18} ${on ? 0 : -27}" stroke="#B38329" stroke-width="5" fill="none"/>` +
+        '<circle cx="20" cy="-28" r="3" fill="#7B828C"/><circle cx="27" cy="0" r="3" fill="#7B828C"/>' +
+        roundRect(-46, -43, 92, 86, 5, 'fill="url(#ppc-glass)" opacity="0.18"') +
+        utext(ctx, 0, 36, on ? 'ENERGIZED' : 'RELEASED', 'ppc-print ppc-print-dark ppc-print-tiny');
+    }
+  };
+
+  art.opamp = {
+    bounds: () => [-72, -62, 144, 124],
+    terms: () => ({ plus: [-70, -20, -1, 0], minus: [-70, 20, -1, 0], out: [70, 0, 1, 0], vp: [0, -60, 0, -1], vn: [0, 60, 0, 1] }),
+    draw(ctx) {
+      let out = shadow(roundRect(-48, -44, 96, 88, 5, '')) +
+        roundRect(-48, -44, 96, 88, 5, 'fill="url(#ppc-pcb)" stroke="#C9A13B" stroke-width="1.5"');
+      for (const [x, y, tx, ty, label] of [[-70,-20,-37,-20,'+'], [-70,20,-37,20,'−'], [70,0,34,0,'OUT'], [0,-60,0,-32,'V+'], [0,60,0,32,'V−']]) {
+        out += lead(x, y, tx, ty) + pad(x, y) + utext(ctx, tx, ty, label, 'ppc-print ppc-print-light ppc-print-tiny');
+      }
+      return out + roundRect(-20, -18, 40, 36, 3, 'fill="#20242C" stroke="#11151B"') +
+        utext(ctx, 0, 0, 'OP AMP', 'ppc-print ppc-print-light ppc-print-tiny');
+    }
+  };
+
+  art.transformer = {
+    bounds: () => [-62, -45, 124, 90],
+    terms: () => ({ p1: [-60, -30, -1, 0], p2: [-60, 30, -1, 0], s1: [60, -30, 1, 0], s2: [60, 30, 1, 0] }),
+    draw(ctx) {
+      let out = shadow(roundRect(-38, -40, 76, 80, 4, '')) +
+        roundRect(-38, -40, 76, 80, 4, 'fill="#505965" stroke="#202731" stroke-width="2"') +
+        roundRect(-12, -25, 24, 50, 2, 'fill="#202731"');
+      for (const side of [-1, 1]) {
+        out += lead(side * 58, -30, side * 24, -30) + lead(side * 58, 30, side * 24, 30) +
+          pad(side * 60, -30) + pad(side * 60, 30) +
+          roundRect(side * 24 - 12, -25, 24, 50, 4, 'fill="#783A18"');
+        for (let y = -21; y <= 21; y += 6) out += `<path d="M ${side * 24 - 11} ${y} Q ${side * 24} ${y + 5} ${side * 24 + 11} ${y}" fill="none" stroke="#ECA35E" stroke-width="4"/>`;
+      }
+      return out + utext(ctx, -24, 0, ctx.p.np, 'ppc-print ppc-print-dark ppc-print-tiny') +
+        utext(ctx, 24, 0, ctx.p.ns, 'ppc-print ppc-print-dark ppc-print-tiny');
+    }
+  };
+
   art.inductor = {
     bounds: () => [-44, -20, 88, 40],
     terms: () => ({ a: [-40, 0, -1, 0], b: [40, 0, 1, 0] }),

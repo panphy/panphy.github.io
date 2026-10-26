@@ -36,6 +36,7 @@
     const nodes = nets.map((n) => ({ key: n.key, global: n.global }));
     const prims = [];
     const logicComps = [];
+    const relayComps = [];
     const notes = [];
     let currentOwner = null;
     let internalCount = 0;
@@ -57,6 +58,19 @@
       I(p, q, i) { prims.push({ k: 'I', a: p, b: q, i, owner: currentOwner }); },
       L(p, q, L, i0) { prims.push({ k: 'L', a: p, b: q, l: L, i0: i0 || 0, owner: currentOwner }); },
       C(p, q, C, v0) { prims.push({ k: 'C', a: p, b: q, c: C, v0: v0 || 0, owner: currentOwner }); },
+      relay(c, coil, common, nc, no) {
+        const owner = currentOwner;
+        relayComps.push({ comp: c, coil });
+        for (const [terminal, normallyOn] of [[nc, true], [no, false]]) {
+          prims.push({ k: 'G', a: common, b: terminal, owner,
+            g: (ctx) => (!!ctx.relays[owner] !== normallyOn ? 1 / 0.05 : 1e-12) });
+        }
+      },
+      transformer(ns, np, nsTurns) {
+        const lp = 10 * (np / 100) ** 2, ls = 10 * (nsTurns / 100) ** 2;
+        prims.push({ k: 'T', nodes: ns, lp, ls, m: 0.999 * Math.sqrt(lp * ls),
+          rp: 0.01 * lp, rs: 0.01 * ls, owner: currentOwner });
+      },
       NL(ns, model, kind) { prims.push({ k: 'N', nodes: ns, model, kind, st: {}, owner: currentOwner }); },
       logicIn(p, id) {
         const lg = globalNode('LG');
@@ -96,9 +110,13 @@
     const find = (i) => { while (parent[i] !== i) { parent[i] = parent[parent[i]]; i = parent[i]; } return i; };
     const join = (a, b2) => { const ra = find(a), rb = find(b2); if (ra !== rb) parent[ra] = rb; };
     for (const p of prims) {
-      const ns = p.k === 'N' ? p.nodes : [p.a, p.b];
-      for (let j = 1; j < ns.length; j++) join(ns[0].n, ns[j].n);
+      const ns = p.nodes || [p.a, p.b];
+      if (p.k === 'T') { join(ns[0].n, ns[1].n); join(ns[2].n, ns[3].n); }
+      else for (let j = 1; j < ns.length; j++) join(ns[0].n, ns[j].n);
     }
+    // Preserve galvanic islands for voltage readings and independent references.
+    const galvanicOf = nodes.map((_, i) => find(i));
+    for (const p of prims) if (p.k === 'T') join(p.nodes[0].n, p.nodes[2].n);
     const networkOf = new Array(nodes.length);
     const networks = [];
     const rootIndex = new Map();
@@ -110,7 +128,7 @@
       networkOf[i] = net.index;
     });
     for (const p of prims) {
-      const n0 = p.k === 'N' ? p.nodes[0].n : p.a.n;
+      const n0 = p.nodes ? p.nodes[0].n : p.a.n;
       networks[networkOf[n0]].prims.push(p);
     }
     for (const net of networks) {
@@ -119,6 +137,12 @@
       // Prefer the negative terminal of a source as the reference (cosmetic only).
       const src = net.prims.find((p) => p.k === 'V' && p.ideal);
       net.ref = src ? src.b.n : net.nodes[0];
+    }
+
+    for (const net of networks) {
+      const refs = new Map([[galvanicOf[net.ref], net.ref]]);
+      for (const i of net.nodes) if (!refs.has(galvanicOf[i])) refs.set(galvanicOf[i], i);
+      net.refs = new Set(refs.values());
     }
 
     // Time step suggestion and AC frequencies.
@@ -133,7 +157,7 @@
       if (p.k !== 'C') continue;
       let rMin = Infinity;
       for (const q of prims) {
-        if (q.k !== 'G' || q.owner === p.owner) continue;
+        if (q.k !== 'G' || typeof q.g !== 'number' || q.owner === p.owner) continue;
         if ([q.a.n, q.b.n].some((n) => n === p.a.n || n === p.b.n)) rMin = Math.min(rMin, 1 / q.g);
       }
       if (Number.isFinite(rMin)) dtSuggest = Math.min(dtSuggest, (p.c * rMin) / 100);
@@ -143,7 +167,7 @@
       const net = networks[networkOf[p.a.n]];
       // Sum passive series resistances conservatively; meter input resistance is
       // a parallel measurement load, not a winding/discharge resistance.
-      const resistance = net.prims.filter((q) => q.k === 'G' && !q.hidden &&
+      const resistance = net.prims.filter((q) => q.k === 'G' && typeof q.g === 'number' && !q.hidden &&
         circuit.getComp(doc, q.owner)?.type !== 'voltmeter')
         .reduce((sum, q) => sum + 1 / q.g, 0);
       if (resistance > 0) dtSuggest = Math.min(dtSuggest, p.l / resistance / 100);
@@ -151,7 +175,7 @@
     }
     dtSuggest = Math.min(0.01, Math.max(1e-6, dtSuggest));
 
-    return { doc, nodes, prims, networks, networkOf, netOf, nets, logicComps, dtSuggest, acMin, notes, hasCaps: prims.some((p) => p.k === 'C'), hasInductors: prims.some((p) => p.k === 'L') };
+    return { doc, nodes, galvanicOf, prims, networks, networkOf, netOf, nets, logicComps, relayComps, dtSuggest, acMin, notes, hasCaps: prims.some((p) => p.k === 'C'), hasInductors: prims.some((p) => p.k === 'L' || p.k === 'T') };
   }
 
   // ---------- Linear algebra ----------
@@ -267,12 +291,12 @@
     const { nodes } = compiled;
     const u = new Map();
     let nU = 0;
-    for (const i of net.nodes) if (i !== net.ref) u.set(i, nU++);
+    for (const i of net.nodes) if (!net.refs.has(i)) u.set(i, nU++);
     const loops = analyseVoltageLoops(net, ctx);
     if (loops.conflicts.length) return { ok: false, conflicts: loops.conflicts };
     const vEdges = loops.kept;
     const size = nU + vEdges.length;
-    const idx = (n) => (n === net.ref ? -1 : u.get(n));
+    const idx = (n) => (net.refs.has(n) ? -1 : u.get(n));
 
     // Linear part.
     const Alin = new Float64Array(size * size);
@@ -283,12 +307,13 @@
     for (const p of net.prims) {
       if (p.k === 'G') {
         const a = idx(p.a.n), b = idx(p.b.n);
-        addA(a, a, p.g); addA(b, b, p.g); addA(a, b, -p.g); addA(b, a, -p.g);
+        const g = valueOf(p.g, ctx, 1);
+        addA(a, a, g); addA(b, b, g); addA(a, b, -g); addA(b, a, -g);
       } else if (p.k === 'I') {
         const i = valueOf(p.i, ctx, lambda);
         addZ(idx(p.a.n), -i); addZ(idx(p.b.n), i);
       } else if (p.k === 'L') {
-        const h = ctx.indHist[p.owner] || { i1: p.i0 };
+        const h = ctx.indHist[p.owner] || { i1: p.i0 || 0, j1: 0 };
         const bdf2 = h.i2 !== undefined && ctx.method === 'bdf2';
         const geq = (bdf2 ? 2 / 3 : 1) * ctx.dt / p.l;
         const ihist = bdf2 ? (4 * h.i1 - h.i2) / 3 : h.i1;
@@ -296,6 +321,27 @@
         const a = idx(p.a.n), b = idx(p.b.n);
         addA(a, a, geq); addA(b, b, geq); addA(a, b, -geq); addA(b, a, -geq);
         addZ(a, -ihist); addZ(b, ihist);
+      } else if (p.k === 'T') {
+        const h = ctx.indHist[p.owner] || { i1: 0, j1: 0 };
+        const bdf2 = h.i2 !== undefined && ctx.method === 'bdf2';
+        const a = (bdf2 ? 1.5 : 1) / ctx.dt;
+        const ip = bdf2 ? (4 * h.i1 - h.i2) / 3 : h.i1;
+        const js = bdf2 ? (4 * h.j1 - h.j2) / 3 : h.j1;
+        const A = p.rp + a * p.lp, D = p.rs + a * p.ls, B = a * p.m;
+        const det = A * D - B * B;
+        const g = [[D / det, -B / det], [-B / det, A / det]];
+        const history = [a * (p.lp * ip + p.m * js), a * (p.m * ip + p.ls * js)];
+        const ih = g.map((row) => row[0] * history[0] + row[1] * history[1]);
+        indInfo.push({ p, g, ih });
+        for (let k = 0; k < 2; k++) {
+          const x = idx(p.nodes[2 * k].n), y = idx(p.nodes[2 * k + 1].n);
+          addZ(x, -ih[k]); addZ(y, ih[k]);
+          for (let j = 0; j < 2; j++) {
+            const v = idx(p.nodes[2 * j].n), w = idx(p.nodes[2 * j + 1].n);
+            addA(x, v, g[k][j]); addA(x, w, -g[k][j]);
+            addA(y, v, -g[k][j]); addA(y, w, g[k][j]);
+          }
+        }
       } else if (p.k === 'C') {
         const h = ctx.capHist[p.owner] || { v1: p.v0 };
         let geq, ihist;
@@ -317,7 +363,7 @@
 
     // Node voltages (ref = 0), warm-started.
     const V = new Float64Array(nodes.length);
-    for (const i of net.nodes) V[i] = i === net.ref ? 0 : (warm.get(nodes[i].key) ?? 0);
+    for (const i of net.nodes) V[i] = net.refs.has(i) ? 0 : (warm.get(nodes[i].key) ?? 0);
     for (const p of nl) if (ctx.nlState && ctx.nlState[p.owner + p.kind]) Object.assign(p.st, ctx.nlState[p.owner + p.kind]);
     let x = null;
     let converged = nl.length === 0;
@@ -360,7 +406,7 @@
     const primI = new Map();
     for (const p of net.prims) {
       let ia;
-      if (p.k === 'G') ia = p.g * (V[p.a.n] - V[p.b.n]);
+      if (p.k === 'G') ia = valueOf(p.g, ctx, 1) * (V[p.a.n] - V[p.b.n]);
       else if (p.k === 'I') ia = valueOf(p.i, ctx, lambda);
       else if (p.k === 'V') {
         const k = vEdges.indexOf(p);
@@ -372,7 +418,13 @@
         const info = capInfo.find((q) => q.p === p);
         ia = info.geq * (V[p.a.n] - V[p.b.n]) - info.ihist;
       }
-      if (p.k === 'N') {
+      if (p.k === 'T') {
+        const { g, ih } = indInfo.find((q) => q.p === p);
+        const vp = V[p.nodes[0].n] - V[p.nodes[1].n], vs = V[p.nodes[2].n] - V[p.nodes[3].n];
+        const ip = g[0][0] * vp + g[0][1] * vs + ih[0];
+        const js = g[1][0] * vp + g[1][1] * vs + ih[1];
+        primI.set(p, [ip, -ip, js, -js]);
+      } else if (p.k === 'N') {
         const vs = p.nodes.map((t) => V[t.n]);
         const st = Object.assign({}, p.st);
         const res = p.model.eval(vs, st);
@@ -385,7 +437,33 @@
   }
 
   // Solve every network, with logic settling and source stepping as needed.
+  // Settle electromechanical contacts outside Newton iteration. Coil and contact
+  // networks stay electrically separate, but each contact change is re-solved.
   function solveAll(compiled, ctx, warm) {
+    ctx.relays = ctx.relays || {};
+    let solved;
+    for (let pass = 0; pass < 4 * compiled.relayComps.length + 8; pass++) {
+      solved = solveElectrical(compiled, ctx, warm);
+      let changed = false;
+      for (const { comp, coil } of compiled.relayComps) {
+        const net = compiled.networkOf[coil.n];
+        const result = solved.results[net];
+        if (!result.ok) continue;
+        const coilR = compiled.networks[net].prims.find((p) => p.owner === comp.id && p.a?.term === 'cp');
+        const current = Math.abs(result.primI.get(coilR)[0]);
+        const on = !!ctx.relays[comp.id];
+        const next = current >= comp.props.pickup ? true : current <= comp.props.pickup * 0.5 ? false : on;
+        if (next !== on) { ctx.relays[comp.id] = next; changed = true; break; }
+      }
+      if (!changed) return solved;
+    }
+    // Return readings for the actual final contact state, even for an oscillator.
+    solved = solveElectrical(compiled, ctx, warm);
+    solved.warnings.push({ msg: 'Relay contacts do not settle (a switching feedback loop oscillates).', comps: compiled.relayComps.map((r) => r.comp.id) });
+    return solved;
+  }
+
+  function solveElectrical(compiled, ctx, warm) {
     const results = new Array(compiled.networks.length);
     const doc = compiled.doc;
     const errors = [];
@@ -474,11 +552,12 @@
     const comp = {};
     for (const c of doc.components) {
       const def = registry.get(c.type);
-      const entry = { v: {}, i: {}, net: {} };
+      const entry = { v: {}, i: {}, net: {}, island: {} };
       for (const t of def.terminals) {
         const n = netOf.get(c.id + ':' + t.id);
         entry.v[t.id] = nodeV[n];
         entry.net[t.id] = networkOf[n];
+        entry.island[t.id] = compiled.galvanicOf[n];
         entry.node = entry.node || {};
         entry.node[t.id] = n;
         entry.i[t.id] = 0;
@@ -491,7 +570,7 @@
       for (const p of net.prims) {
         if (p.owner[0] === '@') continue;
         const entry = comp[p.owner];
-        const ns = p.k === 'N' ? p.nodes : [p.a, p.b];
+        const ns = p.nodes || [p.a, p.b];
         const cur = r.ok ? r.primI.get(p) : ns.map(() => NaN);
         if (r.ok && r.loops.undefinedPrims.has(p)) undefinedOwners.add(p.owner);
         ns.forEach((t, k) => { if (t.term) entry.i[t.term] += cur[k]; });
@@ -509,6 +588,7 @@
       errors: solved.errors,
       warnings,
       logic: ctx.logic,
+      relays: { ...ctx.relays },
       inputs: ctx.inputs || {},
       lgNetwork: (networks.find((n) => n.hasLogic) || {}).index,
       lgNode: (networks.find((n) => n.hasLogic) || {}).ref
@@ -521,7 +601,7 @@
     return {
       v(a, b) {
         if (!e) return NaN;
-        if (e.net[a] !== e.net[b]) return NaN;
+        if (e.island[a] !== e.island[b]) return NaN;
         return e.v[a] - e.v[b];
       },
       i(t) { return e ? e.i[t] : NaN; },
@@ -531,7 +611,8 @@
       },
       logicIn(id) { return !!(result.inputs[c.id] && result.inputs[c.id][id]); },
       logicOut(id) { return !!(result.logic[c.id] && result.logic[c.id][id]); },
-      sameNetwork(a, b) { return !!e && e.net[a] === e.net[b]; }
+      relayOn() { return !!result?.relays?.[c.id]; },
+      sameNetwork(a, b) { return !!e && e.island[a] === e.island[b]; }
     };
   }
 
@@ -549,6 +630,7 @@
       capHist: {},
       indHist: {},
       logic: {},
+      relays: {},
       inputs: {},
       warm: new Map(),
       nlState: {},
@@ -569,8 +651,9 @@
       sim.compiled = compile(doc, { pressed: sim.pressed });
       const ids = new Set(doc.components.map((c) => c.id));
       for (const id of Object.keys(sim.capHist)) if (!ids.has(id)) delete sim.capHist[id];
+      for (const id of Object.keys(sim.relays)) if (!ids.has(id)) delete sim.relays[id];
       for (const id of Object.keys(sim.indHist)) if (!ids.has(id)) delete sim.indHist[id];
-      for (const p of sim.compiled.prims) if (p.k === 'L' && !sim.indHist[p.owner]) sim.indHist[p.owner] = { i1: p.i0 };
+      for (const p of sim.compiled.prims) if ((p.k === 'L' || p.k === 'T') && !sim.indHist[p.owner]) sim.indHist[p.owner] = { i1: p.i0 || 0, j1: 0 };
       for (const p of sim.compiled.prims) if (p.k === 'C' && !sim.capHist[p.owner]) sim.capHist[p.owner] = { v1: p.v0 };
       sim.dt = doc.settings.dt === 'auto' ? sim.compiled.dtSuggest : doc.settings.dt;
       // A new circuit/source setting starts a fresh acquisition, so old source
@@ -596,6 +679,7 @@
       sim.capHist = {};
       sim.indHist = {};
       sim.logic = {};
+      sim.relays = {};
       sim.inputs = {};
       sim.nlState = {};
       sim.warm = new Map();
@@ -608,7 +692,7 @@
     };
 
     function context(t, method, dt) {
-      return { t, dt, method, capHist: sim.capHist, indHist: sim.indHist, logic: Object.assign({}, sim.logic), inputs: Object.assign({}, sim.inputs), nlState: sim.nlState };
+      return { t, dt, method, capHist: sim.capHist, indHist: sim.indHist, logic: Object.assign({}, sim.logic), relays: { ...sim.relays }, inputs: Object.assign({}, sim.inputs), nlState: sim.nlState };
     }
 
     function run(t, dt, method) {
@@ -624,6 +708,7 @@
       const { result, ctx, solved } = run(sim.t, sim.dt, 'be');
       // Logic settling and Newton state carry over; stored charge does not change.
       sim.logic = ctx.logic;
+      sim.relays = ctx.relays;
       sim.inputs = ctx.inputs;
       saveWarm(solved);
       sim.result = result;
@@ -651,7 +736,9 @@
         if (!r.ok) continue;
         for (const info of r.indInfo) {
           const h = sim.indHist[info.p.owner];
-          sim.indHist[info.p.owner] = { i1: r.primI.get(info.p)[0], i2: h ? h.i1 : undefined };
+          const currents = r.primI.get(info.p);
+          sim.indHist[info.p.owner] = { i1: currents[0], i2: h ? h.i1 : undefined,
+            j1: currents[2] || 0, j2: h ? h.j1 : undefined };
         }
         for (const info of r.capInfo) {
           const h = sim.capHist[info.p.owner];
@@ -660,6 +747,7 @@
         }
       }
       sim.logic = ctx.logic;
+      sim.relays = ctx.relays;
       sim.inputs = ctx.inputs;
       saveWarm(solved);
       sim.t = t;

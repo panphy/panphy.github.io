@@ -736,6 +736,32 @@
     help: 'An inductor opposes changes in current: V = L dI/dt, with optional series winding resistance. Magnetic energy is ½LI². Stored current is retained across edits; opening a circuit can produce a large induced p.d. This model has no magnetic saturation, mutual inductance or breakdown.'
   });
 
+  // ---------- Transformer ----------
+
+  define('transformer', {
+    name: 'Transformer', group: 'Transformers', prefix: 'T',
+    keywords: 'coil primary secondary turns step up down induction ac',
+    terminals: [{ id: 'p1', name: 'Primary start (P1)' }, { id: 'p2', name: 'Primary end (P2)' },
+      { id: 's1', name: 'Secondary start (S1)' }, { id: 's2', name: 'Secondary end (S2)' }],
+    polarity: { p1: 'P1', p2: 'P2', s1: 'S1', s2: 'S2' },
+    props: [
+      { key: 'np', label: 'Primary turns', kind: 'number', default: 100, min: 10, max: 2000, step: 1, integer: true, slider: true },
+      { key: 'ns', label: 'Secondary turns', kind: 'number', default: 200, min: 10, max: 2000, step: 1, integer: true, slider: true }
+    ],
+    compile(c, T, b) { b.transformer([T.p1, T.p2, T.s1, T.s2], c.props.np, c.props.ns); },
+    readings(c, r) {
+      return [
+        { key: 'ratio', label: 'Turns ratio (secondary / primary)', value: c.props.ns / c.props.np, unit: '', static: true },
+        { key: 'vp', label: 'Primary p.d. (P1 to P2)', value: r.v('p1', 'p2'), unit: 'V' },
+        { key: 'vs', label: 'Secondary p.d. (S1 to S2)', value: r.v('s1', 's2'), unit: 'V' },
+        { key: 'ip', label: 'Current into P1', value: r.i('p1'), unit: 'A' },
+        { key: 'is', label: 'Current into S1', value: r.i('s1'), unit: 'A' }
+      ];
+    },
+    valueText: (c) => `${c.props.np} : ${c.props.ns} turns`,
+    help: 'Two electrically isolated, magnetically coupled coils. Use an AC supply: secondary voltage is approximately primary voltage × secondary turns / primary turns; loading the secondary increases primary current. P1 and S1 have matching polarity. The model uses 99.9% magnetic coupling, 10 H and 0.1 Ω per 100-turn winding, scaled with turns squared. Leakage, winding loss and magnetizing current are included; core loss and saturation are omitted. DC gives a switching transient, then no sustained secondary voltage; primary current can become very large.'
+  });
+
   // ---------- Transistors ----------
 
   function bjtDef(pol) {
@@ -794,6 +820,89 @@
   }
   define('npn', bjtDef(1));
   define('pnp', bjtDef(-1));
+
+  // ---------- Relay and operational amplifier ----------
+
+  define('relay', {
+    name: 'Relay (SPDT)', group: 'Lamps and switches', prefix: 'K', category: 'ext',
+    keywords: 'electromagnet coil contact normally open closed spdt changeover',
+    terminals: [{ id: 'cp', name: 'Coil A' }, { id: 'cn', name: 'Coil B' },
+      { id: 'com', name: 'Common (COM)' }, { id: 'nc', name: 'Normally closed (NC)' }, { id: 'no', name: 'Normally open (NO)' }],
+    polarity: { cp: 'A', cn: 'B', com: 'COM', nc: 'NC', no: 'NO' },
+    props: [
+      { key: 'R', label: 'Coil resistance', unit: 'Ω', kind: 'number', default: 120, min: 10, max: 10000, log: true },
+      { key: 'L', label: 'Coil inductance', unit: 'H', kind: 'number', default: 0.2, min: 0.001, max: 10, log: true },
+      { key: 'pickup', label: 'Pickup current', unit: 'A', kind: 'number', default: 0.03, min: 0.001, max: 1, log: true,
+        help: 'Contacts release at half this current.' }
+    ],
+    compile(c, T, b) {
+      const m = b.node();
+      b.R(T.cp, m, c.props.R); b.L(m, T.cn, c.props.L, 0);
+      b.relay(c, T.cp, T.com, T.nc, T.no);
+    },
+    readings(c, r) { return [
+      { key: 'coilV', label: 'Coil p.d. (A to B)', value: r.v('cp', 'cn'), unit: 'V' },
+      { key: 'coilI', label: 'Coil current (A to B)', value: r.i('cp'), unit: 'A' },
+      { key: 'contact', label: 'Contact', text: r.relayOn() ? 'COM → NO (energized)' : 'COM → NC (released)' },
+      { key: 'contactI', label: 'Current into COM', value: r.i('com'), unit: 'A' }
+    ]; },
+    state: (c, r) => ({ energized: r.relayOn() }),
+    valueText: (c) => `${fmtSI(c.props.pickup, 'A', 3, { trim: true })} pickup`,
+    help: 'An electrically isolated coil operates a changeover switch. COM connects to NC when released and NO when energized. Either coil-current direction can operate it. Pickup occurs at the set current; release occurs at half that current to prevent chatter. The coil includes resistance and inductance, so a transistor driver can use a flyback diode across A and B. Contacts use 0.05 Ω closed and 1 TΩ open. No contact bounce, mechanical delay, arcing, magnetic saturation or contact rating is modeled.'
+  });
+
+  function opAmpModel(gain) {
+    return { eval(v, st) {
+      // Smooth rail clipping preserves a usable Jacobian for negative feedback.
+      const [plus, minus, out, high, low] = v;
+      const span = Math.max(high - low, 0), half = Math.max(span / 2, 1e-6);
+      const requested = gain * (plus - minus) / half;
+      // Limit the differential input in Newton's linearization, as for a diode.
+      // Otherwise a saturated starting guess can bounce between the two rails
+      // forever even when a negative-feedback solution exists between them.
+      const wanted = Math.max(-20, Math.min(20, requested));
+      const previous = st.x ?? 0;
+      const x = Math.max(previous - 2, Math.min(previous + 2, wanted));
+      st.x = x;
+      st.limited = span > 0 && Math.abs(x - wanted) > 1e-8;
+      const t = Math.tanh(x), slope = 1 - t * t;
+      const target = span > 0 ? (high + low) / 2 + half * t : low;
+      const d = span > 0 ? [gain * slope, -gain * slope, 0,
+        (1 + t - x * slope) / 2, (1 - t + x * slope) / 2] : [0, 0, 0, 0, 1];
+      const i = (out - target) / 50;
+      const di = d.map((a, k) => ((k === 2 ? 1 : 0) - a) / 50);
+      const w = span > 0 ? (1 + t) / 2 : 0;
+      const dw = span > 0 ? [gain * slope / span, -gain * slope / span, 0,
+        -x * slope / (2 * span), x * slope / (2 * span)] : [0, 0, 0, 0, 0];
+      const v0 = [minus + half * x / gain, minus, out, high, low];
+      return { i: [0, 0, i, -w * i, -(1 - w) * i],
+        J: [d.map(() => 0), d.map(() => 0), di,
+          di.map((a, k) => -w * a - i * dw[k]), di.map((a, k) => -(1 - w) * a + i * dw[k])], v0 };
+    } };
+  }
+
+  define('opamp', {
+    name: 'Operational amplifier', group: 'Amplifiers', prefix: 'U', category: 'ext',
+    keywords: 'op amp opamp operational amplifier comparator feedback gain',
+    terminals: [{ id: 'plus', name: 'Non-inverting input (+)' }, { id: 'minus', name: 'Inverting input (−)' },
+      { id: 'out', name: 'Output' }, { id: 'vp', name: 'Positive supply (V+)' }, { id: 'vn', name: 'Negative supply (V−)' }],
+    polarity: { plus: '+', minus: '−', out: 'OUT', vp: 'V+', vn: 'V−' },
+    props: [{ key: 'gain', label: 'Open-loop gain', kind: 'number', default: 100000, min: 100, max: 1000000, log: true }],
+    compile(c, T, b) {
+      b.R(T.plus, T.vn, 1e9); b.R(T.minus, T.vn, 1e9);
+      b.R(T.vp, T.vn, 1e9);
+      b.NL([T.plus, T.minus, T.out, T.vp, T.vn], opAmpModel(c.props.gain), 'opamp');
+    },
+    readings(c, r) { return [
+      { key: 'diff', label: 'Differential input (+ to −)', value: r.v('plus', 'minus'), unit: 'V' },
+      { key: 'out', label: 'Output (to V−)', value: r.v('out', 'vn'), unit: 'V' },
+      { key: 'supply', label: 'Supply span (V+ to V−)', value: r.v('vp', 'vn'), unit: 'V' },
+      { key: 'i', label: 'Output current delivered', value: -r.i('out'), unit: 'A' }
+    ]; },
+    warnings(c, r) { return r.v('vp', 'vn') <= 0 ? [`${c.label}: connect V+ above V− to power the op amp.`] : []; },
+    valueText: (c) => `gain ${c.props.gain}`,
+    help: 'Connect both supply terminals to external power. Negative feedback to the − input makes followers and amplifiers; without feedback it acts as a comparator. The open-loop output is centered between V+ and V−, with smooth clipping at the rails, 50 Ω output resistance and 1 GΩ from each input to V−. Use a common reference for signal and supplies. This educational model has no bandwidth, slew-rate limit, offset, common-mode limit or current limit; an unpowered or reversed supply cannot amplify.'
+  });
 
   // ---------- Logic modules ----------
   // Educational logic modules share a hidden 5 V supply whose 0 V rail is the node

@@ -40,7 +40,7 @@
     return `<svg class="icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">${ICONS[name] || ''}</svg>`;
   }
 
-  const GROUP_ORDER = ['Sources', 'Resistors', 'Lamps and switches', 'Output devices', 'Meters', 'Diodes', 'Sensors', 'Capacitors', 'Inductors', 'Transistors', 'Logic', 'Wiring'];
+  const GROUP_ORDER = ['Sources', 'Resistors', 'Lamps and switches', 'Output devices', 'Meters', 'Diodes', 'Sensors', 'Transformers', 'Capacitors', 'Inductors', 'Transistors', 'Amplifiers', 'Logic', 'Wiring'];
 
   function createUI(app) {
     const $ = (id) => document.getElementById(id);
@@ -603,7 +603,7 @@
       }
       err.textContent = '';
       input.removeAttribute('aria-invalid');
-      c.props[p.key] = v;
+      c.props[p.key] = p.integer ? Math.round(v) : v;
       app.commit(`Change ${p.label.toLowerCase()}`);
     }
     insp.addEventListener('click', (e) => {
