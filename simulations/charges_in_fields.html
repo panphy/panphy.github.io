@@ -22,6 +22,7 @@
   <link rel="stylesheet" href="/assets/fullscreen-button.css">
   <script src="/assets/theme-toggle.js"></script>
   <script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/"}}</script>
+  <link rel="stylesheet" href="/assets/footer.css">
 </head>
 <body data-mode="efield">
   <header class="banner">
@@ -87,7 +88,10 @@
     </section>
     <section class="reality"><span aria-hidden="true">↗</span><div><h2>A model is an explanation, not a photograph.</h2><p data-math-static>Every track is calculated step by step from the force \(q\boldsymbol{E} + q\boldsymbol{v} \times \boldsymbol{B}\) using real charges, masses, voltages and fields, so the shapes and sizes are right. The plates, fields and tracks are drawn to scale in centimeters (the cyclotron in tens of centimeters), but the particles are drawn enormously larger than they really are.</p><p>The motion is slowed down billions of times: an electron crosses these plates in a few nanoseconds. Each track is replayed at a speed that makes it easy to follow, so different particles are not shown at their true relative speeds. Gravity is ignored because it is far too weak to matter, and so are the forces between particles in the beam.</p><p>The fields are perfectly uniform inside the plates or the shaded region and zero outside; real fields spread out at the edges. The cyclotron is non-relativistic, its dees have no deflector to steer the beam out, and the particle starts from rest at the center.</p></div></section>
   </main>
-  <footer><span>Charges in fields · &copy; 2026 PanPhy Labs. All rights reserved.</span><a href="/">More PanPhy Labs apps</a></footer>
+  <footer class="panphy-footer">
+    <span class="panphy-footer-legal">&copy; 2026 <a href="https://panphy.app/" target="_blank" rel="noopener noreferrer">PanPhy Labs</a>. All rights reserved. &middot;
+      <a href="https://buymeacoffee.com/panphy" target="_blank" rel="noopener noreferrer">Support my projects</a></span>
+  </footer>
   <noscript><p class="no-script">Enable JavaScript to explore the 3D models. The descriptions remain available above.</p></noscript>
   <script type="module">import('./charges_in_fields/app.js').catch(error => { console.error(error); document.getElementById('load-status').hidden = false; document.getElementById('load-status').textContent = 'The 3D viewer could not load. Check your internet connection and reload. You can still read the explanation on this page.'; });</script>
 </body>

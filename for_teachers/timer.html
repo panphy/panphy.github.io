@@ -55,6 +55,8 @@
         }
 
         body {
+            --footer-inset-x: 1.5rem;
+            --footer-inset-bottom: 1.5rem;
             margin: 0;
             font-family: var(--font-sans);
             background-color: var(--bg-color);
@@ -491,7 +493,7 @@
 
         /* Fullscreen styles */
         .fullscreen-active .logo-container,
-        .fullscreen-active footer {
+        .fullscreen-active footer.panphy-footer {
             display: none;
         }
 
@@ -1127,6 +1129,7 @@
             font-size: 1rem;
         }
     </style>
+    <link rel="stylesheet" href="/assets/footer.css">
 </head>
 
 <body>
@@ -1224,10 +1227,9 @@
         </div>
     </div>
 
-    <footer>
-        <p>&copy; 2026 <a href="https://panphy.app/" target="_blank" rel="noopener noreferrer">PanPhy Labs</a>. All rights reserved. |
-            <a href="https://buymeacoffee.com/panphy" target="_blank" rel="noopener noreferrer">Support My Projects</a>
-        </p>
+    <footer class="panphy-footer">
+      <span class="panphy-footer-legal">&copy; 2026 <a href="https://panphy.app/" target="_blank" rel="noopener noreferrer">PanPhy Labs</a>. All rights reserved. &middot;
+        <a href="https://buymeacoffee.com/panphy" target="_blank" rel="noopener noreferrer">Support my projects</a></span>
     </footer>
     <script>
         // Theme toggle: the shared script only syncs the icon, so the page wires the click.

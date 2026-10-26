@@ -22,6 +22,7 @@
   <link rel="stylesheet" href="/assets/fullscreen-button.css">
   <script src="/assets/theme-toggle.js"></script>
   <script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/"}}</script>
+  <link rel="stylesheet" href="/assets/footer.css">
 </head>
 <body>
   <header class="banner">
@@ -170,7 +171,10 @@
       <p>The boundaries at 8 and 20 solar masses are approximate. They depend on what the star is made of, how fast it spins and whether it has a companion. The tracks after the main sequence are simplified, and stars lighter than about 0.5 solar masses live so long that their final stages are predictions that nobody has observed.</p>
     </div></section>
   </main>
-  <footer><span>Life cycle of a star · &copy; 2026 PanPhy Labs. All rights reserved.</span><a href="/">More PanPhy Labs apps</a></footer>
+  <footer class="panphy-footer">
+    <span class="panphy-footer-legal">&copy; 2026 <a href="https://panphy.app/" target="_blank" rel="noopener noreferrer">PanPhy Labs</a>. All rights reserved. &middot;
+      <a href="https://buymeacoffee.com/panphy" target="_blank" rel="noopener noreferrer">Support my projects</a></span>
+  </footer>
   <noscript><p class="no-script">Enable JavaScript to explore the 3D model.</p></noscript>
   <script type="module">import('./star_life_cycle/app.js').catch(error => { console.error(error); const status = document.getElementById('load-status'); status.hidden = false; status.textContent = 'The 3D viewer could not load. Check your internet connection and reload.'; });</script>
 </body>

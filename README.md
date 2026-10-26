@@ -46,7 +46,7 @@ Then open [localhost:8000](http://localhost:8000). Each app has its own HTML ent
 | --- | --- |
 | `index.html` | The homepage, app catalog, topic filters, and offline readiness indicators |
 | `sw.js`, `manifest.json` | Caching, updates, and PWA configuration |
-| `assets/` | The shared Spectrum design system (`design.css`), shared controls, icons, locally hosted fonts, and service-worker registration |
+| `assets/` | The shared Spectrum design system (`design.css`), shared app footers (`footer.css`), controls, icons, locally hosted fonts, and service-worker registration |
 | `tools/`, `simulations/`, `for_teachers/` | Published educational apps |
 | `fun/` | Games and demos that need an internet connection |
 | `beta/` | Trial apps, listed in `beta/index.html` |

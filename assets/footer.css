@@ -1,0 +1,47 @@
+/* Shared app status bar. Keep live app status on the left and legal links on the right. */
+footer.panphy-footer {
+  box-sizing: border-box;
+  flex: none;
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 4px 12px;
+  width: calc(100% + 2 * var(--footer-inset-x, 0px));
+  max-width: none;
+  min-height: 30px;
+  margin: 0 calc(-1 * var(--footer-inset-x, 0px)) calc(-1 * var(--footer-inset-bottom, 0px));
+  padding: 4px max(14px, env(safe-area-inset-right)) calc(4px + env(safe-area-inset-bottom, 0px)) max(14px, env(safe-area-inset-left));
+  border-top: 1px solid var(--line);
+  background: var(--surface-2);
+  color: var(--ink-3);
+  font-family: var(--font-body);
+  font-size: 0.76rem;
+  font-weight: 400;
+  line-height: 1.5;
+  text-align: right;
+}
+
+footer.panphy-footer .panphy-footer-legal {
+  margin-left: auto;
+  white-space: normal;
+  text-align: right;
+}
+
+footer.panphy-footer a {
+  display: inline;
+  min-height: 0;
+  color: var(--brand);
+  font-weight: 400;
+  text-decoration: none;
+}
+
+footer.panphy-footer a:hover {
+  text-decoration: underline;
+}
+
+footer.panphy-footer a:focus-visible {
+  outline: 2px solid var(--brand);
+  outline-offset: 3px;
+}

@@ -1290,18 +1290,10 @@ details[open] > summary .summary-caret {
 }
 
 /* ---------- Status line ---------- */
-.hud {
-    flex: none;
-    display: flex;
-    justify-content: center;
-}
-
 .cl-status {
     max-width: 100%;
-    padding: 4px 12px;
-    font-size: 0.82rem;
-    text-align: center;
-    color: var(--ink-2);
+    font-family: var(--font-mono);
+    text-align: left;
 }
 
 .cl-status.is-tracking {
@@ -1320,24 +1312,6 @@ details[open] > summary .summary-caret {
 
 .data-panel-dock[hidden] {
     display: none;
-}
-
-/* ---------- Footer ---------- */
-footer {
-    flex: none;
-    padding: 8px 12px 10px;
-    font-size: 0.84rem;
-    text-align: center;
-    color: var(--ink-3);
-}
-
-footer a {
-    color: var(--brand);
-    text-decoration: none;
-}
-
-footer a:hover {
-    text-decoration: underline;
 }
 
 /* ---------- Narrower screens ---------- */

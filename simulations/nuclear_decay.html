@@ -22,6 +22,7 @@
   <link rel="stylesheet" href="/assets/fullscreen-button.css">
   <script src="/assets/theme-toggle.js"></script>
   <script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/"}}</script>
+  <link rel="stylesheet" href="/assets/footer.css">
 </head>
 <body data-mode="alpha">
   <header class="banner">
@@ -110,7 +111,10 @@
     </section>
     <section class="reality"><span aria-hidden="true">↗</span><div><h2>A model is an explanation, not a photograph.</h2><p>Protons and neutrons are drawn as colored balls packed together; real nucleons are not hard spheres, and colors and sizes are chosen to help you see the ideas. A nucleus is about 1/100 000 of an atom’s width; the electrons around the atom are not shown. Every motion is slowed down enormously: real alpha particles leave at about 5% of the speed of light, beta particles at up to 99%, and gamma rays travel at the speed of light.</p><p>“Decay this nucleus” makes one nucleus decay on demand so that you can watch it. Real decay is random: nothing can make a particular nucleus decay, or predict when it will. Americium-241 has a half-life of 432 years, carbon-14 5730 years and technetium-99m 6.0 hours. In the half-life view, one half-life always takes a few seconds on screen, whatever the isotope. Beta-minus decay also releases an antineutrino, which is drawn faintly; knowledge of antineutrinos is not required for GCSE. Technetium-99m emits almost only gamma rays, a reason it is chosen as a medical tracer.</p><p>Penetration ranges are typical classroom values: alpha is stopped by a sheet of paper or a few centimeters of air; beta by a few millimeters of aluminum; gamma is reduced, but never stopped completely, by several centimeters of lead. In the test, a quarter of the gamma rays get through the lead to show this; the real fraction depends on the thickness.</p></div></section>
   </main>
-  <footer><span>Nuclear decay · &copy; 2026 PanPhy Labs. All rights reserved.</span><a href="/">More PanPhy Labs apps</a></footer>
+  <footer class="panphy-footer">
+    <span class="panphy-footer-legal">&copy; 2026 <a href="https://panphy.app/" target="_blank" rel="noopener noreferrer">PanPhy Labs</a>. All rights reserved. &middot;
+      <a href="https://buymeacoffee.com/panphy" target="_blank" rel="noopener noreferrer">Support my projects</a></span>
+  </footer>
   <noscript><p class="no-script">Enable JavaScript to explore the 3D models. The descriptions remain available above.</p></noscript>
   <script type="module">import('./nuclear_decay/app.js').catch(error => { console.error(error); document.getElementById('load-status').hidden = false; document.getElementById('load-status').textContent = 'The 3D viewer could not load. Check your internet connection and reload. You can still read the explanation on this page.'; });</script>
 </body>

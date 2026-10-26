@@ -1,4 +1,4 @@
-const BUILD_ID = '2026-10-26T10:26:36Z';
+const BUILD_ID = '2026-10-26T10:42:07Z';
 const CACHE_PREFIX = 'panphy-labs';
 const PRECACHE_NAME = `${CACHE_PREFIX}-precache-${BUILD_ID}`;
 const RUNTIME_CACHE = `${CACHE_PREFIX}-runtime-${BUILD_ID}`;
@@ -26,6 +26,7 @@ const ASSETS_TO_CACHE = [
   '/assets/math.js',
   '/assets/standalone-top.css',
   '/assets/design.css',
+  '/assets/footer.css',
   '/assets/fonts/fonts.css',
   '/assets/fonts/figtree-normal-300-900-latin-ext.woff2',
   '/assets/fonts/figtree-normal-300-900-latin.woff2',
