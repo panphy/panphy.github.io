@@ -34,13 +34,17 @@ test('negative DC and small signals fit without changing the time base', () => {
 test('scope artwork reports the same auto scale and saved documents preserve the toggle', () => {
   const doc = circuit.createDoc();
   const c = circuit.addComponent(doc, 'scope');
-  assert.equal(c.props.autoScale, false);
-  c.props.autoScale = true;
+  assert.equal(c.props.autoScale, true);
   const trace = { t: [0, 1], ch1: [-26.5, 26.5], ch2: [0.2, -0.2] };
   const svg = realistic.scope.draw({ p: c.props, scope: trace, uid: 'test', r: 0, f: false });
   assert.ok(svg.includes('1: 10 V/div'));
   assert.ok(svg.includes('2: 100 mV/div'));
   assert.equal(circuit.importDoc(circuit.exportDoc(doc)).doc.components[0].props.autoScale, true);
+  c.props.autoScale = false;
+  assert.equal(circuit.importDoc(circuit.exportDoc(doc)).doc.components[0].props.autoScale, false);
+  const legacy = circuit.exportDoc(doc);
+  delete legacy.components[0].props.autoScale;
+  assert.equal(circuit.importDoc(legacy).doc.components[0].props.autoScale, true);
 });
 
 const { scopeTimeDiv, scopeTraceIndices } = require('../js/units.js');

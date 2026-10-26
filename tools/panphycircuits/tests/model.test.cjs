@@ -599,3 +599,11 @@ test('diagram routes stay clear and simple across 1,569 valid lamp positions, in
   }
   assert.equal(count, 1569);
 });
+
+test('saved AC supplies below 1 Hz open at the supported minimum with a warning', () => {
+  const doc = circuit.createDoc();
+  circuit.addComponent(doc, 'acsupply', { props: { freq: 0.1 } });
+  const opened = circuit.importDoc(circuit.exportDoc(doc));
+  assert.equal(opened.doc.components[0].props.freq, 1);
+  assert.ok(opened.warnings.some(w => w.includes('Frequency') && w.includes('outside')));
+});
