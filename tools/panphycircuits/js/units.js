@@ -83,12 +83,53 @@
     return fmtSI(value, unit, 3);
   }
 
+  // Show roughly two to five periods over the ten horizontal divisions.
+  // Keep the saved manual setting intact when automatic time base is enabled.
+  function scopeTimeDiv(props, trace) {
+    if (!props.autoTime || !(trace && trace.frequency > 0)) return Number(props.tdiv);
+    const target = 0.3 / trace.frequency;
+    const power = 10 ** Math.floor(Math.log10(target));
+    const fraction = target / power;
+    const step = fraction < 1.5 ? 1 : fraction < 3.5 ? 2 : fraction < 7.5 ? 5 : 10;
+    return Math.max(0.0001, Math.min(5, step * power));
+  }
+
+  // Retain actual extrema in each time/pixel bucket, in chronological order.
+  // Striding every Nth sample aliases a dense sine into a different waveform.
+  // Keep a gap marker too, so undefined voltages are never joined into a trace.
+  function scopeTraceIndices(trace, channel, span, columns) {
+    if (!trace || !trace.t.length) return [];
+    const end = Math.max(trace.t[trace.t.length - 1], span), start = end - span;
+    const out = [];
+    let bucket = null, group = [];
+    function flush() {
+      if (!group.length) return;
+      let min = group[0], max = group[0], gap;
+      for (const i of group) {
+        const v = trace[channel][i];
+        if (!Number.isFinite(v)) { if (gap === undefined) gap = i; continue; }
+        if (!Number.isFinite(trace[channel][min]) || v < trace[channel][min]) min = i;
+        if (!Number.isFinite(trace[channel][max]) || v > trace[channel][max]) max = i;
+      }
+      out.push(...[...new Set([group[0], min, max, gap, group[group.length - 1]].filter((i) => i !== undefined))].sort((a, b) => a - b));
+      group = [];
+    }
+    for (let i = 0; i < trace.t.length; i++) {
+      if (trace.t[i] < start && (i + 1 === trace.t.length || trace.t[i + 1] < start)) continue;
+      const next = Math.floor((trace.t[i] - start) / span * columns);
+      if (next !== bucket) { flush(); bucket = next; }
+      group.push(i);
+    }
+    flush();
+    return out;
+  }
+
   // Volts/div for the visible scope window, keeping zero centered and 20% headroom.
   // Manual settings are retained so disabling auto scale restores them exactly.
   function scopeScale(props, trace) {
     const scale = { v1: Number(props.v1), v2: Number(props.v2) };
     if (!props.autoScale || !trace || !trace.t.length) return scale;
-    const span = Number(props.tdiv) * 10;
+    const span = scopeTimeDiv(props, trace) * 10;
     const end = Math.max(trace.t[trace.t.length - 1], span);
     const start = end - span;
     for (const [channel, key] of [['ch1', 'v1'], ['ch2', 'v2']]) {
@@ -107,7 +148,7 @@
     return scale;
   }
 
-  const api = { fmtSI, fmtInput, parseSI, roundSig, fmtMeter, trimZeros, scopeScale };
+  const api = { fmtSI, fmtInput, parseSI, roundSig, fmtMeter, trimZeros, scopeScale, scopeTimeDiv, scopeTraceIndices };
   PPC.units = api;
   if (typeof module === 'object' && module.exports) module.exports = api;
 })(typeof globalThis === 'object' ? globalThis : this);

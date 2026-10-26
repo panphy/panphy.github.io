@@ -540,8 +540,9 @@
     terminals: [{ id: 'ch1', name: 'Channel 1 input' }, { id: 'ch2', name: 'Channel 2 input' }, { id: 'com', name: 'Common (0 V)' }],
     props: [
       { key: 'autoScale', label: 'Auto scale', kind: 'bool', default: false, operational: true },
+      { key: 'autoTime', label: 'Auto time base', kind: 'bool', default: true, operational: true },
       { key: 'tdiv', label: 'Time per division', unit: 's', kind: 'select', default: '0.5',
-        options: ['0.001', '0.002', '0.005', '0.01', '0.02', '0.05', '0.1', '0.2', '0.5', '1', '2', '5'].map((v) => ({ value: v, label: fmtSI(Number(v), 's', 3, { trim: true }) + '/div' })) },
+        options: ['0.0001', '0.0002', '0.0005', '0.001', '0.002', '0.005', '0.01', '0.02', '0.05', '0.1', '0.2', '0.5', '1', '2', '5'].map((v) => ({ value: v, label: fmtSI(Number(v), 's', 3, { trim: true }) + '/div' })) },
       { key: 'v1', label: 'CH1 volts per division', unit: 'V', kind: 'select', default: '1',
         options: ['0.1', '0.2', '0.5', '1', '2', '5', '10'].map((v) => ({ value: v, label: fmtSI(Number(v), 'V', 3, { trim: true }) + '/div' })) },
       { key: 'v2', label: 'CH2 volts per division', unit: 'V', kind: 'select', default: '1',
@@ -557,7 +558,7 @@
       { key: 'ch2', label: 'CH2 (to COM)', value: r.v('ch2', 'com'), unit: 'V' }
     ],
     valueText: () => '',
-    help: 'Plots the p.d. of each channel relative to COM against time while the simulation runs. Inputs draw no current. The trace comes from the solver; it is cleared by Reset.'
+    help: 'Plots the p.d. of each channel relative to COM against time while the simulation runs. Inputs draw no current. Auto time base shows a few cycles of the connected AC supply; turn it off to use the saved time per division. Auto scale adjusts only the vertical axis. The trace comes from the solver and is cleared by Reset or circuit changes.'
   });
 
   // ---------- Semiconductors ----------
