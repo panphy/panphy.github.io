@@ -289,8 +289,8 @@
       const opt = (v, cur, label) => `<option value="${v}" ${String(cur) === String(v) ? 'selected' : ''}>${label}</option>`;
       const toggle = (key, label) => `<label class="toggle"><span>${label}</span><input type="checkbox" data-setting="${key}" ${s[key] ? 'checked' : ''}><span class="toggle-track" aria-hidden="true"></span></label>`;
       return `<p class="insp-hint">Select a component or wire to edit it and see its readings.</p>` +
-        card('Simulation', `<div class="row"><span>Status</span><div class="sim-status sim-status-inspector" role="group" aria-label="Simulation controls"><button type="button" class="chip-btn chip-pause" data-sim-run aria-pressed="false"></button><span class="status-dot" aria-hidden="true"></span><span class="sim-state">Live</span></div></div><div class="row"><label for="s-speed">Speed</label><select id="s-speed" data-setting="speed">${[0.01, 0.1, 0.25, 1, 4, 10].map((v) => opt(v, s.speed, v === 1 ? 'Real time (1×)' : `${v}×`)).join('')}</select></div>` +
-          `<div class="row"><label for="s-dt">Time step</label><select id="s-dt" data-setting="dt">${opt('auto', s.dt, `Auto (${units.fmtSI(app.sim.dt, 's', 2)})`)}${[1e-5, 1e-4, 1e-3, 1e-2].map((v) => opt(v, s.dt, units.fmtSI(v, 's', 1))).join('')}</select></div>`) +
+        card('Simulation', `<div class="sim-controls" role="group" aria-label="Simulation controls"><div class="sim-summary"><span class="status-dot" aria-hidden="true"></span><span class="sim-state">Live</span></div><button type="button" class="sim-run" data-sim-run aria-pressed="false"></button></div><div class="row"><label for="s-speed">Speed</label><select id="s-speed" data-setting="speed">${[0.01, 0.1, 0.25, 1, 4, 10].map((v) => opt(v, s.speed, v === 1 ? 'Real time (1×)' : `${v}×`)).join('')}</select></div>` +
+          `<div class="row"><label for="s-dt">Time step</label><select id="s-dt" data-setting="dt">${opt('auto', s.dt, `Auto (${units.fmtSI(app.sim.dt, 's', 2)})`)}${[1e-5, 1e-4, 1e-3, 1e-2].map((v) => opt(v, s.dt, units.fmtSI(v, 's', 1))).join('')}</select></div>`, 'simulation-card') +
         `<details class="icard model-note"><summary>About the simulation</summary><p>The circuit runs live, including capacitors, AC supplies, the oscilloscope and graphs. Use a switch in your circuit to trigger an effect. <strong>Pause</strong> freezes time, traces, current and component animations, and sound; <strong>Resume</strong> continues from there. Edits still update readings for the frozen state. Switching views never changes the simulation.</p>` +
           `<p>The automatic time step is about 1/100 of the shortest RC time constant (and of an AC period). Results do not depend on your device's frame rate.</p>` +
           `<p>Animated current shows conventional current as yellow dashes moving from + to − through the external circuit. Their speed only hints at the size of the current; real charge carriers drift far more slowly. Fast AC animation replays sampled wire currents at one cycle per second for visibility, preserving rectified flow. Meters, scope traces and sound keep the actual frequency. Low-frequency AC and mixed-frequency networks stay live.</p>` +
@@ -636,9 +636,10 @@
       if (sim.running !== running) sim.setRunning(running);
       document.body.classList.toggle('sim-paused', app.paused);
       const runHtml = icon(app.paused ? 'resume' : 'pause');
-      document.querySelectorAll('.sim-status').forEach((status) => {
-        const run = status.querySelector('.chip-pause');
-        if (run.dataset.html !== runHtml) { run.innerHTML = runHtml; run.dataset.html = runHtml; }
+      document.querySelectorAll('.sim-status, .sim-controls').forEach((status) => {
+        const run = status.querySelector('button');
+        const buttonHtml = run.hasAttribute('data-sim-run') ? runHtml + `<span>${app.paused ? 'Resume' : 'Pause'}</span>` : runHtml;
+        if (run.dataset.html !== buttonHtml) { run.innerHTML = buttonHtml; run.dataset.html = buttonHtml; }
         run.setAttribute('aria-pressed', String(app.paused));
         run.setAttribute('aria-label', app.paused ? 'Resume simulation' : 'Pause simulation');
         run.title = app.paused ? 'Resume the live circuit (Space)' : 'Pause: freeze time, traces, animations and sound; edits still update readings (Space)';
