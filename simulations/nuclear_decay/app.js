@@ -110,7 +110,7 @@ document.addEventListener('keydown', event => {
 const scene = new THREE.Scene();
 const camera = new THREE.PerspectiveCamera(40, 1, 0.05, 100);
 camera.position.set(0, 1.2, 9);
-const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+const renderer = new THREE.WebGLRenderer({ antialias: true });
 renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 viewer.prepend(renderer.domElement);
 scene.add(new THREE.HemisphereLight(0xe7f4ff, 0x32415a, 2.3));
@@ -131,7 +131,9 @@ renderer.domElement.addEventListener('pointerdown', () => viewer.focus({ prevent
 const stage = new THREE.Group();
 scene.add(stage);
 
+// Blend glows and shadows against the viewer color, not a transparent canvas.
 let palette = readPalette();
+scene.background = palette.background;
 let buildTextures = [];
 let pickables = [];
 let flyers = [];
@@ -148,6 +150,7 @@ function readPalette() {
   const color = name => new THREE.Color(css(name));
   return {
     dark: document.documentElement.getAttribute('data-theme') === 'dark',
+    background: color('--viewer-bg'),
     proton: color('--proton'),
     neutron: color('--neutron'),
     alpha: color('--alpha'),
@@ -1414,6 +1417,7 @@ $('isotope').addEventListener('change', updateEmissionLegend);
 // ---------- Theme ----------
 window.addEventListener('panphy:theme-change', () => {
   palette = readPalette();
+  scene.background = palette.background;
   applyThemeToPersistent();
   if (sample) {
     recolorSample();
