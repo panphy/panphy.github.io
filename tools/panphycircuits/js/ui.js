@@ -24,7 +24,6 @@
     sliders: '<path d="M4 7.5h9M17.5 7.5H20M4 16.5h3.5M11.5 16.5H20"/><circle cx="15.2" cy="7.5" r="2.2"/><circle cx="9.5" cy="16.5" r="2.2"/>',
     resume: '<path d="M8 5.5v13l10.5-6.5z" fill="currentColor"/>',
     pause: '<path d="M7.5 5.5h3.2v13H7.5zM13.3 5.5h3.2v13h-3.2z" fill="currentColor"/>',
-    reset: '<path d="M4 4v6h6"/><path d="M4.5 15a8 8 0 102-8.5L4 10"/>',
     realistic: '<rect x="3" y="9" width="18" height="7" rx="3.5"/><path d="M8 9v7M11 9v7M14 9v7M1 12.5h2M21 12.5h2"/>',
     schematic: '<path d="M1 12h5l1.5-4 3 8 3-8 3 8 1.5-4h5"/>',
     library: '<rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/>',
@@ -291,7 +290,7 @@
       return `<p class="insp-hint">Select a component or wire to edit it and see its readings.</p>` +
         card('Simulation', `<div class="row"><span>Elapsed time</span><span id="sim-time" class="ds-readout">${fmtTime(app.sim.t)}</span></div><div class="row"><label for="s-speed">Speed</label><select id="s-speed" data-setting="speed">${[0.01, 0.1, 0.25, 1, 4, 10].map((v) => opt(v, s.speed, v === 1 ? 'Real time (1×)' : `${v}×`)).join('')}</select></div>` +
           `<div class="row"><label for="s-dt">Time step</label><select id="s-dt" data-setting="dt">${opt('auto', s.dt, `Auto (${units.fmtSI(app.sim.dt, 's', 2)})`)}${[1e-5, 1e-4, 1e-3, 1e-2].map((v) => opt(v, s.dt, units.fmtSI(v, 's', 1))).join('')}</select></div>`) +
-        `<details class="icard model-note"><summary>About the simulation</summary><p>The circuit runs live, including capacitors, AC supplies, the oscilloscope and graphs. Use a switch in your circuit to trigger an effect. <strong>Pause</strong> freezes time, traces, current and component animations, and sound; <strong>Resume</strong> continues from there. Edits still update readings for the frozen state. <strong>Reset</strong> returns to t = 0 with every capacitor at its initial p.d., restarts the AC phase and clears graphs and scope traces. It keeps the circuit, switch positions and your live or paused state. Switching views never changes the simulation.</p>` +
+        `<details class="icard model-note"><summary>About the simulation</summary><p>The circuit runs live, including capacitors, AC supplies, the oscilloscope and graphs. Use a switch in your circuit to trigger an effect. <strong>Pause</strong> freezes time, traces, current and component animations, and sound; <strong>Resume</strong> continues from there. Edits still update readings for the frozen state. Switching views never changes the simulation.</p>` +
           `<p>The automatic time step is about 1/100 of the shortest RC time constant (and of an AC period). Results do not depend on your device's frame rate.</p>` +
           `<p>Animated current shows conventional current as yellow dashes moving from + to − through the external circuit. Their speed only hints at the size of the current; real charge carriers drift far more slowly.</p>` +
           `<p>Editing the circuit while it runs keeps time and stored charge. Saved files and autosave keep the circuit, not the live state: opening one starts at t = 0.</p></details>`;
@@ -642,7 +641,6 @@
       run.title = app.paused ? 'Resume the live circuit (Space)' : 'Pause: freeze time, traces, animations and sound; edits still update readings (Space)';
       // Keep Resume available if time-dependent parts are removed while paused.
       run.hidden = !timeMatters && !app.paused;
-      $('btn-reset').hidden = !timeMatters && !app.paused;
       $('sim-status').dataset.state = app.paused ? 'paused' : sim.running ? (sim.behind ? 'behind' : 'running') : 'live';
       $('sim-state').textContent = app.paused ? 'Paused' : 'Live';
       $('sim-status').title = !timeMatters && !app.paused ? app.NO_TIME_MSG : sim.running && sim.behind ? 'Running slower than the chosen speed: this device cannot keep up.' : '';
