@@ -35,3 +35,29 @@ for (const reset of [false, true]) {
 		assert.equal(vm.runInContext('resolveFitTarget(target)', context), -1);
 	});
 }
+
+test('an empty sheet with changed dimensions can reset to the default rows and columns', () => {
+	const context = { window: { PanPhyPlotModel: model, addEventListener() {} }, document: { addEventListener() {} }, console };
+	vm.createContext(context);
+	for (const file of ['state.js', 'ui.js', 'dialogs.js']) {
+		vm.runInContext(fs.readFileSync(path.join(__dirname, '../js', file), 'utf8'), context);
+	}
+	vm.runInContext(`
+		const sheet = getActiveSheet();
+		closeDialog = renderSheetTabs = renderTable = syncTitleInput = showToast = clearAdvancedFitParameters = () => {};
+		afterDataChange = () => refreshActiveFitKey();
+	`, context);
+	for (const rows of [1, 25, 250]) {
+		vm.runInContext(`PlotModel.setRowCount(sheet, ${rows});`, context);
+		assert.equal(vm.runInContext('isBlankNewSheet(sheet)', context), false);
+		context.applyClear(true);
+		assert.equal(vm.runInContext('sheet.rowCount', context), model.DEFAULT_ROWS);
+		assert.equal(vm.runInContext('sheet.columns.every(column => column.cells.length === PlotModel.DEFAULT_ROWS)', context), true);
+		assert.equal(vm.runInContext('isBlankNewSheet(sheet)', context), true);
+	}
+	vm.runInContext(`PlotModel.insertColumn(sheet, 2, createNewColumn());`, context);
+	assert.equal(vm.runInContext('isBlankNewSheet(sheet)', context), false);
+	context.applyClear(true);
+	assert.equal(vm.runInContext('sheet.columns.length', context), 2);
+	assert.equal(vm.runInContext('isBlankNewSheet(sheet)', context), true);
+});

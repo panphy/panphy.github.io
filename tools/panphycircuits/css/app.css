@@ -135,7 +135,7 @@ button, input, select { font: inherit; color: inherit; }
   font-size: 0.75rem; color: var(--ink-2);
 }
 /* Fixed widths so changing text never shifts anything. */
-#sim-state { display: inline-block; width: 3.9em; }
+.sim-state { display: inline-block; width: 3.9em; }
 .chip-btn { display: inline-grid; place-items: center; width: 24px; height: 24px; flex: 0 0 24px; margin: 0; padding: 0; line-height: 1; border: 0; border-radius: 50%; background: none; color: var(--ink-2); cursor: pointer; }
 .chip-btn .icon { display: block; width: 18px; height: 18px; }
 .chip-btn:hover { background: var(--surface-3); color: var(--ink); }
@@ -145,7 +145,8 @@ button, input, select { font: inherit; color: inherit; }
 [data-theme="dark"] .chip-pause { color: #04150C; }
 .chip-pause[aria-pressed="false"] { background: var(--warn); }
 .chip-pause .icon { width: 14px; height: 14px; stroke: none; }
-#sim-time { display: inline-block; min-width: 12ch; }
+.sim-status-inspector { position: static; z-index: auto; box-shadow: none; }
+.sim-status-inspector .chip-btn { width: 48px; height: 48px; flex-basis: 48px; }
 .sim-paused .ppc-spin, .sim-paused .ppc-buzz, .sim-paused .ppc-waves { animation-play-state: paused; }
 .status-dot { width: 7px; height: 7px; flex: 0 0 7px; border-radius: 50%; background: var(--ink-3); }
 .sim-status[data-state="running"] .status-dot { background: var(--good); box-shadow: 0 0 0 2px color-mix(in srgb, var(--good) 25%, transparent); animation: pulse 1.4s ease-in-out infinite; }
