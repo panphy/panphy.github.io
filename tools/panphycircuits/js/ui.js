@@ -40,7 +40,7 @@
     return `<svg class="icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">${ICONS[name] || ''}</svg>`;
   }
 
-  const GROUP_ORDER = ['Sources', 'Resistors', 'Lamps and switches', 'Output devices', 'Meters', 'Diodes', 'Sensors', 'Capacitors', 'Transistors', 'Logic', 'Wiring'];
+  const GROUP_ORDER = ['Sources', 'Resistors', 'Lamps and switches', 'Output devices', 'Meters', 'Diodes', 'Sensors', 'Capacitors', 'Inductors', 'Transistors', 'Logic', 'Wiring'];
 
   function createUI(app) {
     const $ = (id) => document.getElementById(id);
@@ -291,7 +291,7 @@
       return `<p class="insp-hint">Select a component or wire to edit it and see its readings.</p>` +
         card('Simulation', `<div class="sim-controls" role="group" aria-label="Simulation controls"><div class="sim-summary"><span class="status-dot" aria-hidden="true"></span><span class="sim-state">Live</span></div><button type="button" class="sim-run" data-sim-run aria-pressed="false"></button></div><div class="row"><label for="s-speed">Speed</label><select id="s-speed" data-setting="speed">${[0.01, 0.1, 0.25, 1, 4, 10].map((v) => opt(v, s.speed, v === 1 ? 'Real time (1×)' : `${v}×`)).join('')}</select></div>` +
           `<div class="row"><label for="s-dt">Time step</label><select id="s-dt" data-setting="dt">${opt('auto', s.dt, `Auto (${units.fmtSI(app.sim.dt, 's', 2)})`)}${[1e-5, 1e-4, 1e-3, 1e-2].map((v) => opt(v, s.dt, units.fmtSI(v, 's', 1))).join('')}</select></div>`, 'simulation-card') +
-        `<details class="icard model-note"><summary>About the simulation</summary><p>The circuit runs live, including capacitors, AC supplies, the oscilloscope and graphs. Use a switch in your circuit to trigger an effect. <strong>Pause</strong> freezes time, traces, current and component animations, and sound; <strong>Resume</strong> continues from there. Edits still update readings for the frozen state. Switching views never changes the simulation.</p>` +
+        `<details class="icard model-note"><summary>About the simulation</summary><p>The circuit runs live, including capacitors, inductors, AC supplies, the oscilloscope and graphs. Use a switch in your circuit to trigger an effect. <strong>Pause</strong> freezes time, traces, current and component animations, and sound; <strong>Resume</strong> continues from there. Edits still update readings for the frozen state. Switching views never changes the simulation.</p>` +
           `<p>The automatic time step is about 1/100 of the shortest RC time constant (and of an AC period). Results do not depend on your device's frame rate.</p>` +
           `<p>Animated current shows conventional current as yellow dashes moving from + to − through the external circuit. Their speed only hints at the size of the current; real charge carriers drift far more slowly. Fast AC animation replays sampled wire currents at one cycle per second for visibility, preserving rectified flow. Meters, scope traces and sound keep the actual frequency. Low-frequency AC and mixed-frequency networks stay live.</p>` +
           `<p>Editing the circuit while it runs keeps time and stored charge. Saved files and autosave keep the circuit, not the live state: opening one starts at t = 0.</p></details>`;

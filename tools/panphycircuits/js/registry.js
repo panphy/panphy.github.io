@@ -706,6 +706,36 @@
   define('capacitor', capacitorDef(false));
   define('ecap', capacitorDef(true));
 
+  // ---------- Inductors ----------
+
+  define('inductor', {
+    name: 'Inductor', group: 'Inductors', prefix: 'L', category: 'ext',
+    keywords: 'coil inductance henry magnetic field energy choke',
+    terminals: [{ id: 'a', name: 'Terminal A' }, { id: 'b', name: 'Terminal B' }],
+    props: [
+      { key: 'L', label: 'Inductance', unit: 'H', kind: 'number', default: 1, min: 1e-6, max: 100, log: true },
+      { key: 'R', label: 'Winding resistance', unit: 'Ω', kind: 'number', default: 0, min: 0, max: 1e4, log: true, logMin: 0.01,
+        help: 'Set to zero for an ideal inductor.' },
+      { key: 'i0', label: 'Initial current A → B', unit: 'A', kind: 'number', default: 0, min: -10, max: 10, step: 0.01,
+        help: 'The current at t = 0 after loading a circuit.' }
+    ],
+    compile(c, T, b) {
+      const end = c.props.R > 0 ? b.node() : T.b;
+      b.L(T.a, end, c.props.L, c.props.i0);
+      if (c.props.R > 0) b.R(end, T.b, c.props.R);
+    },
+    readings(c, r) {
+      const i = r.i('a');
+      return [
+        { key: 'v', label: 'p.d. (A to B)', value: r.v('a', 'b'), unit: 'V' },
+        { key: 'i', label: 'Current A → B', value: i, unit: 'A' },
+        { key: 'e', label: 'Energy stored', value: Number.isFinite(i) ? 0.5 * c.props.L * i * i : NaN, unit: 'J' }
+      ];
+    },
+    valueText: (c) => fmtSI(c.props.L, 'H', 3, { trim: true }),
+    help: 'An inductor opposes changes in current: V = L dI/dt, with optional series winding resistance. Magnetic energy is ½LI². Stored current is retained across edits; opening a circuit can produce a large induced p.d. This model has no magnetic saturation, mutual inductance or breakdown.'
+  });
+
   // ---------- Transistors ----------
 
   function bjtDef(pol) {

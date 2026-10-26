@@ -422,3 +422,110 @@ test('full-wave bridge example rectifies both half-cycles and measures only acro
     assert.equal(peaks.length, 4, '2 Hz input produces four output pulses per second');
   }
 });
+
+test('RL growth and decay follow the L/R time constant, including winding resistance', () => {
+  const c = build({
+    comps: { B1: ['battery', { emf: 6 }], R1: ['resistor', { R: 8 }], L1: ['inductor', { L: 2, R: 2 }], S1: ['switch2', { toB: false }] },
+    wires: [['B1.p', 'S1.a'], ['S1.c', 'R1.a'], ['R1.b', 'L1.a'], ['L1.b', 'B1.n'], ['S1.b', 'B1.n']]
+  });
+  assert.equal(c.sim.compiled.hasInductors, true);
+  close(c.sim.dt, 0.002, 1e-10, 'automatic L/R time step');
+  const tau = 0.2;
+  for (const end of [tau, 5 * tau]) {
+    while (c.sim.t < end - 1e-12) c.sim.step();
+    assert.ok(c.result().ok);
+    const expected = 0.6 * (1 - Math.exp(-c.sim.t / tau));
+    close(c.read('L1').i('a'), expected, 1e-4, 'growing current');
+    close(c.read('L1').i('b'), -expected, 1e-4, 'terminal current balance');
+    close(c.read('L1').v('a', 'b'), 6 - 8 * expected, 1e-3, 'terminal p.d. includes winding loss');
+  }
+  const start = c.sim.indHist[c.ids.L1].i1, t0 = c.sim.t;
+  circuit.getComp(c.doc, c.ids.S1).props.toB = true;
+  c.sim.setDoc(c.doc);
+  assert.equal(c.sim.indHist[c.ids.L1].i1, start, 'switching preserves stored current');
+  while (c.sim.t < t0 + tau - 1e-12) c.sim.step();
+  close(c.read('L1').i('a'), start * Math.exp(-(c.sim.t - t0) / tau), 1e-4, 'decaying current');
+  assert.ok(c.read('L1').v('a', 'b') < 0, 'induced p.d. reverses while the current keeps its direction');
+});
+
+test('an ideal inductor across a DC source ramps at V/L and keeps signed initial current', () => {
+  const c = build({
+    comps: { B1: ['battery', { emf: 6 }], L1: ['inductor', { L: 2, i0: -0.1 }] },
+    wires: [['B1.p', 'L1.a'], ['L1.b', 'B1.n']]
+  });
+  for (let n = 0; n < 100; n++) c.sim.step();
+  assert.ok(c.result().ok, 'an inductor is not treated as an ideal short');
+  close(c.read('L1').i('a'), -0.1 + 3 * c.sim.t, 1e-10);
+  close(c.read('B1').i('p'), -c.read('L1').i('a'), 1e-10);
+});
+
+test('LC oscillation exchanges electric and magnetic energy without numerical growth', () => {
+  const c = build({
+    comps: { C1: ['capacitor', { C: 0.01, v0: 3 }], L1: ['inductor', { L: 1 }] },
+    wires: [['C1.p', 'L1.a'], ['C1.n', 'L1.b']]
+  });
+  c.sim.dt = 0.0001;
+  for (let n = 1; n <= 12000; n++) {
+    c.sim.step();
+    if (n % 1000) continue;
+    assert.ok(c.result().ok);
+    const v = c.read('C1').v('p', 'n'), i = c.read('L1').i('a');
+    close(v, 3 * Math.cos(10 * c.sim.t), 3e-5, 'capacitor voltage');
+    close(i, 0.3 * Math.sin(10 * c.sim.t), 3e-5, 'inductor current');
+    close(0.5 * 0.01 * v * v + 0.5 * i * i, 0.045, 2e-6, 'total stored energy');
+  }
+});
+
+test('AC RL current has the expected amplitude and phase lag', () => {
+  const c = build({
+    comps: { B1: ['acsupply', { peak: 5, freq: 5 }], R1: ['resistor', { R: 10 }], L1: ['inductor', { L: 0.1 }] },
+    wires: [['B1.p', 'R1.a'], ['R1.b', 'L1.a'], ['L1.b', 'B1.n']]
+  });
+  const omega = 10 * Math.PI, xl = omega * 0.1;
+  while (c.sim.t < 0.4) {
+    c.sim.step();
+    if (c.sim.t < 0.1) continue;
+    const expected = 5 * (10 * Math.sin(omega * c.sim.t) - xl * Math.cos(omega * c.sim.t) + xl * Math.exp(-100 * c.sim.t)) / (100 + xl * xl);
+    close(c.read('L1').i('a'), expected, 3e-5);
+  }
+});
+
+test('inductor history survives pause and edits, restarts after a time-step change, and resets on loading', () => {
+  const c = build({
+    comps: { L1: ['inductor', { L: 1, i0: 0.4 }], R1: ['resistor', { R: 10 }] },
+    wires: [['L1.a', 'R1.a'], ['L1.b', 'R1.b']]
+  });
+  for (let n = 0; n < 10; n++) c.sim.step();
+  c.sim.setRunning(false);
+  const history = JSON.stringify(c.sim.indHist), t = c.sim.t;
+  assert.equal(c.sim.advance(1), 0);
+  assert.equal(JSON.stringify(c.sim.indHist), history);
+  assert.equal(c.sim.t, t);
+  c.sim.setDoc(c.doc);
+  assert.equal(JSON.stringify(c.sim.indHist), history);
+  const start = c.sim.indHist[c.ids.L1].i1;
+  c.sim.dt *= 0.5;
+  c.sim.step();
+  close(c.read('L1').i('a'), start / (1 + 10 * c.sim.dt), 1e-10, 'restart with backward Euler');
+  const loaded = solver.createSim();
+  loaded.setDoc(circuit.importDoc(circuit.exportDoc(c.doc)).doc);
+  assert.equal(loaded.indHist[c.ids.L1].i1, 0.4, 'saved circuits contain initial current, not transient state');
+  c.sim.reset();
+  assert.equal(c.sim.indHist[c.ids.L1].i1, 0.4);
+  const comp = circuit.getComp(c.doc, c.ids.L1);
+  const readings = registry.get('inductor').readings(comp, c.read('L1'));
+  close(readings.find((r) => r.key === 'e').value, 0.5 * comp.props.L * c.read('L1').i('a') ** 2);
+  circuit.removeComponents(c.doc, [c.ids.L1]);
+  c.sim.setDoc(c.doc);
+  assert.equal(c.sim.indHist[c.ids.L1], undefined, 'deleted inductors leave no history');
+});
+
+test('finite ammeter resistance contributes to the automatic inductor time step', () => {
+  const c = build({
+    comps: { L1: ['inductor', { L: 0.1, i0: 0.5 }], A1: ['ammeter', { rin: '1' }] },
+    wires: [['L1.a', 'A1.n'], ['L1.b', 'A1.p']]
+  });
+  close(c.sim.dt, 0.001, 1e-10);
+  while (c.sim.t < 0.1 - 1e-12) c.sim.step();
+  close(c.read('A1').i('p'), 0.5 / Math.E, 1e-4);
+});

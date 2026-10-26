@@ -640,6 +640,20 @@
     }
   };
 
+  art.inductor = {
+    bounds: () => [-44, -20, 88, 40],
+    terms: () => ({ a: [-40, 0, -1, 0], b: [40, 0, 1, 0] }),
+    draw() {
+      const turns = Array.from({ length: 8 }, (_, i) => {
+        const x = -21 + i * 6;
+        return `<path d="M ${x} -13 C ${x - 5} -9 ${x - 5} 9 ${x} 13 C ${x + 5} 9 ${x + 5} -9 ${x} -13" fill="none" stroke="#783A18" stroke-width="5"/>` +
+          `<path d="M ${x} -13 C ${x - 5} -9 ${x - 5} 9 ${x} 13" fill="none" stroke="#ECA35E" stroke-width="2.5"/>`;
+      }).join('');
+      return shadow(roundRect(-27, -15, 54, 30, 5, '')) + lead(-38, 0, -24, 0) + lead(24, 0, 38, 0) +
+        pad(-40, 0) + pad(40, 0) + roundRect(-27, -10, 54, 20, 4, 'fill="#39414D" stroke="#151A22" stroke-width="1"') + turns;
+    }
+  };
+
   art.capacitor = {
     bounds: () => [-44, -20, 88, 38],
     terms: () => ({ p: [-40, 0, -1, 0], n: [40, 0, 1, 0] }),
