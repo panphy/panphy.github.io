@@ -514,7 +514,7 @@ function plates(group, halfGap, length, { swap = false } = {}) {
     const color = isPlus ? palette.positive : palette.negative;
     const texture = signTexture(isPlus ? '+' : '−', color);
     const mesh = part(new THREE.Mesh(new THREE.BoxGeometry(length, 0.16, 3.2), [
-      material(color), material(color), material(0xffffff, { map: texture }), material(0xffffff, { map: texture }), material(0xffffff, { map: texture }), material(color)
+      material(color), material(color), material(0xffffff, { map: texture }), material(0xffffff, { map: texture }), material(color), material(color)
     ]), isPlus ? 'plus' : 'minus');
     mesh.position.y = y;
     group.add(mesh);
