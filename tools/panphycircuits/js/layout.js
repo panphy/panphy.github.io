@@ -750,11 +750,12 @@
   // and wire length. `home` (optional) holds each part's starting placement, so
   // parts are not turned or moved without a reason. `report` (optional)
   // receives the counts behind the cost.
-  function tidyCost(doc, view, home, cache, report) {
+  function tidyCost(doc, view, home, cache, report, renderedRoutes) {
     const lay = doc.layouts[view];
     let cost = 0;
     const rep = report || {};
     rep.overlaps = 0; rep.crossings = 0; rep.overParts = 0; rep.backwards = 0;
+    rep.bends = 0; rep.maxBends = 0; rep.straight = 0; rep.wireLength = 0; rep.detour = 0;
     const solid = [];
     for (const c of doc.components) {
       if (c.type === 'junction' || !lay.comps[c.id]) continue;
@@ -772,9 +773,16 @@
       const A = termWorld(doc, view, w.a), B = termWorld(doc, view, w.b);
       if (!A || !B) continue;
       const pts = wirePoints(doc, view, w);
-      const poly = pts.length ? routedPoly(view, A, B, pts) : quickPoly(view, A, B, obstacles, cache);
+      const poly = renderedRoutes && renderedRoutes.get(w.id) ? renderedRoutes.get(w.id).poly : pts.length ? routedPoly(view, A, B, pts) : quickPoly(view, A, B, obstacles, cache);
       routes.push({ w, poly, box: polyBox(poly) });
-      for (let i = 0; i < poly.length - 1; i++) cost += Math.hypot(poly[i + 1].x - poly[i].x, poly[i + 1].y - poly[i].y);
+      let length = 0;
+      for (let i = 0; i < poly.length - 1; i++) length += Math.hypot(poly[i + 1].x - poly[i].x, poly[i + 1].y - poly[i].y);
+      const bends = Math.max(0, poly.length - 2);
+      rep.wireLength += length;
+      rep.detour += Math.max(0, length - Math.abs(B.x - A.x) - Math.abs(B.y - A.y));
+      rep.bends += bends; rep.maxBends = Math.max(rep.maxBends, bends);
+      if (bends === 0) rep.straight++;
+      cost += length;
       if (view === 'schematic') cost += 30 * Math.max(0, poly.length - 2);
       else if (Math.abs(A.x - B.x) < 0.5 || Math.abs(A.y - B.y) < 0.5) cost -= 20;
       const u = unit(B.x - A.x, B.y - A.y);
@@ -821,7 +829,8 @@
   function keepsUpright(doc, view, id) {
     const c = circuit.getComp(doc, id);
     if (!c) return false;
-    return c.type === 'scope' || (view === 'realistic' && UPRIGHT_ON_BENCH.includes(c.type));
+    return c.type === 'scope' || (view === 'realistic' && UPRIGHT_ON_BENCH.includes(c.type)) ||
+      (view === 'schematic' && (c.type.startsWith('gate_') || ['logic_in', 'logic_out', 'rail_0v', 'rail_5v'].includes(c.type)));
   }
 
   function improveLayout(doc, view, opts = {}) {
@@ -879,12 +888,70 @@
     }
   }
 
+  // Judge the paths visitors actually see, including wire-to-wire avoidance.
+  // Candidate searches use the cheaper independent routes, but may only replace
+  // a drawing after this complete routing pass confirms it is no less readable.
+  function schematicQuality(doc) {
+    const report = {};
+    tidyCost(doc, 'schematic', null, null, report, routeAll(doc, 'schematic'));
+    report.defects = report.overlaps + report.crossings + report.overParts;
+    report.score = report.defects * 10000 + report.backwards * 500 + report.bends * 120 + report.detour * 0.5 + report.wireLength * 0.02;
+    return report;
+  }
+
+  function hasReadableSize(doc, view) {
+    const parts = Object.values(doc.layouts[view].comps);
+    const b = viewBounds(doc, view);
+    if (!b || parts.length < 2) return true;
+    const [minW, minH] = MIN_SIZE[view];
+    const spread = (axis) => Math.max(...parts.map(p => p[axis])) - Math.min(...parts.map(p => p[axis]));
+    return (spread('x') < 1 || b.x2 - b.x >= minW - 20) && (spread('y') < 1 || b.y2 - b.y >= minH - 20);
+  }
+
+  function isReadableSchematic(doc, q) {
+    // Preserve deliberate rows/branches and simple textbook loops. A single
+    // crossing with a hop is often intentional (for example a bridge rectifier).
+    if (q.overlaps || q.overParts || q.crossings > 1 || q.backwards || q.maxBends > 2 || q.straight < Math.ceil(doc.wires.length * 0.6) || !hasReadableSize(doc, 'schematic')) return false;
+    return doc.components.every(c => {
+      const p = doc.layouts.schematic.comps[c.id];
+      if (!p) return true;
+      // Authored diagonal drawings also use half-grid centers for nearby parts.
+      const grid = GRID / 2;
+      return Math.abs(p.x / grid - Math.round(p.x / grid)) < 1e-6 && Math.abs(p.y / grid - Math.round(p.y / grid)) < 1e-6 && (!keepsUpright(doc, 'schematic', c.id) || p.r === 0);
+    });
+  }
+
   function tidy(doc, view, opts = {}) {
     const lay = doc.layouts[view];
     const tol = opts.tolerance || 30;
-    const before = JSON.stringify(lay);
+    const before = opts.originalBefore || JSON.stringify(lay);
+    const qualityBefore = view === 'schematic' ? opts.qualityBefore || schematicQuality(doc) : null;
+    if (qualityBefore && !opts.originalBefore && isReadableSchematic(doc, qualityBefore)) return false;
+    const readableBefore = hasReadableSize(doc, view);
+    let repaired = opts.repaired || null;
+    const finish = () => {
+      const worseQuickRoutes = untidyNow() > untidyBefore;
+      const qualityAfter = qualityBefore && schematicQuality(doc);
+      const worseDrawing = qualityAfter && (qualityAfter.overlaps > qualityBefore.overlaps || qualityAfter.defects > qualityBefore.defects ||
+        (readableBefore && qualityAfter.score > qualityBefore.score + 0.5));
+      if (worseQuickRoutes || worseDrawing) {
+        doc.layouts[view] = JSON.parse(repaired || before);
+        return !!repaired && repaired !== before;
+      }
+      return JSON.stringify(doc.layouts[view]) !== before;
+    };
     const untidyNow = () => { const r = {}; tidyCost(doc, view, null, null, r); return r.overlaps + r.crossings + r.overParts; };
     const untidyBefore = opts.untidyBefore !== undefined ? opts.untidyBefore : untidyNow();
+    if (qualityBefore) {
+      // Stored bends that rendering already rejects can be repaired without
+      // disturbing a single component. Keep that safe result if search fails.
+      for (const [id, route] of routeAll(doc, view)) {
+        if (lay.wires[id] && lay.wires[id].pts.length && !route.pts.length) lay.wires[id] = { pts: [] };
+      }
+      const cleaned = JSON.stringify(lay);
+      const q = schematicQuality(doc);
+      if (cleaned !== before && q.defects <= qualityBefore.defects && q.score <= qualityBefore.score + 0.5 && untidyNow() <= untidyBefore) repaired = cleaned;
+    }
     for (const c of doc.components) {
       const pl = lay.comps[c.id];
       if (pl) { pl.x = snap(pl.x); pl.y = snap(pl.y); }
@@ -895,9 +962,9 @@
     if (sp) {
       const saved = JSON.stringify(lay);
       const untidy = () => { const r = {}; tidyCost(doc, view, null, null, r); return r.overlaps + r.crossings + r.overParts; };
-      if (layoutSeriesParallel(doc, view, sp) && untidy() === 0) return JSON.stringify(lay) !== before;
+      if (layoutSeriesParallel(doc, view, sp) && untidy() === 0) return finish();
       doc.layouts[view] = JSON.parse(saved);
-      return tidy(doc, view, Object.assign({}, opts, { noSeriesParallel: true, untidyBefore }));
+      return tidy(doc, view, Object.assign({}, opts, { noSeriesParallel: true, untidyBefore, originalBefore: before, qualityBefore, repaired }));
     }
     improveLayout(doc, view, opts);
     for (const w of doc.wires) lay.wires[w.id] = { pts: [] };
@@ -924,8 +991,7 @@
     for (const w of doc.wires) lay.wires[w.id] = { pts: [] };
     // Never leave a layout with more overlaps, crossings or wires over parts
     // than it had: keep the original instead.
-    if (untidyNow() > untidyBefore) { doc.layouts[view] = JSON.parse(before); return false; }
-    return JSON.stringify(doc.layouts[view]) !== before;
+    return finish();
   }
 
   // ---------- Series-parallel layout ----------
@@ -1429,7 +1495,7 @@
   const api = {
     GRID, VIEWS, artFor, snap, xform, toLocal, xdir, normRot, quarterTurn, placement, termWorld, terminalsLocal, localBounds, compBounds, svgTransform,
     wireRoute, routeAll, branchPoints, canMove, wirePoints, orthoRoute, nearestOnPoly, pointAtFraction, splitWire, generateLayout, placeInOtherViews,
-    resolveOverlaps, viewBounds, overlaps, tidy, tidyCost, distributeRuns, seriesParallel, layoutSeriesParallel
+    resolveOverlaps, viewBounds, overlaps, tidy, tidyCost, schematicQuality, distributeRuns, seriesParallel, layoutSeriesParallel
   };
   PPC.layout = api;
   if (typeof module === 'object' && module.exports) module.exports = api;

@@ -181,7 +181,12 @@ test('tidy up never makes a layout worse, keeps every connection and leaves no o
     const other = JSON.stringify(doc.layouts[otherView(view)]);
     const beforeReport = {};
     const before = layout.tidyCost(doc, view, null, null, beforeReport);
+    const drawingBefore = view === 'schematic' ? layout.schematicQuality(doc) : null;
     const changed = layout.tidy(doc, view);
+    if (drawingBefore) {
+      const drawingAfter = layout.schematicQuality(doc);
+      assert.ok(drawingAfter.defects <= drawingBefore.defects, `${label}: rendered drawing does not gain crossings or obstructions`);
+    }
     assert.equal(JSON.stringify(doc.wires), wiresBefore, `${label}: connections unchanged`);
     assert.equal(JSON.stringify(doc.layouts[otherView(view)]), other, `${label}: other view untouched`);
     // When tidy changes a layout, bends are kept only at the corners of the
@@ -606,4 +611,33 @@ test('saved AC supplies below 1 Hz open at the supported minimum with a warning'
   const opened = circuit.importDoc(circuit.exportDoc(doc));
   assert.equal(opened.doc.components[0].props.freq, 1);
   assert.ok(opened.warnings.some(w => w.includes('Frequency') && w.includes('outside')));
+});
+
+test('Tidy preserves clean AND and bridge diagrams, including symmetry and diagonal routes, on every click', () => {
+  for (const title of ['Logic gate: AND', 'Full-wave bridge rectifier and oscilloscope']) {
+    const doc = examples.build(examples.list.find(ex => ex.title === title), 'schematic');
+    const before = JSON.stringify(doc);
+    const routes = JSON.stringify([...layout.routeAll(doc, 'schematic')].map(([id, route]) => [id, route.poly]));
+    for (let click = 0; click < 3; click++) {
+      assert.equal(layout.tidy(doc, 'schematic'), false, title);
+      assert.equal(JSON.stringify(doc), before, 'preserve both layouts and every connection');
+      assert.equal(JSON.stringify([...layout.routeAll(doc, 'schematic')].map(([id, route]) => [id, route.poly])), routes);
+    }
+  }
+});
+
+test('parallel-resistor example has straight meter leads and positive branch readings', () => {
+  const doc = examples.build(examples.list.find(ex => ex.title === 'Series and parallel resistors'), 'schematic');
+  const byLabel = Object.fromEntries(doc.components.map(c => [c.label, c]));
+  const routes = layout.routeAll(doc, 'schematic');
+  const branch = doc.wires.filter(w => w.a.c === byLabel.A3.id || w.b.c === byLabel.A3.id);
+  for (const wire of branch) assert.equal(routes.get(wire.id).poly.length, 2, 'no turn-back loop around the branch meter');
+  const sim = solver.createSim(); sim.setDoc(doc);
+  for (const [label, expected] of [['A1', .02], ['A2', .09], ['A3', .06]]) {
+    const current = solver.reader(sim.result, byLabel[label]).i('p');
+    assert.ok(Math.abs(current - expected) < 1e-9, label + ' keeps the correct polarity and current');
+  }
+  const quality = layout.schematicQuality(doc);
+  assert.equal(quality.overParts, 0);
+  assert.equal(quality.crossings, 0);
 });

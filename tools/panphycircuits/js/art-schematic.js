@@ -254,7 +254,7 @@
         // Emitter arrow: NPN points away from the base, PNP points toward it.
         const head = pnp ? arrowHead(-1, 11.25, -148.7, 8) : arrowHead(16, 21.5, 31.3, 8);
         return `<circle cx="2" cy="0" r="25" class="sch-body"/>` + `<circle cx="2" cy="0" r="25" class="sch-line"/>` +
-          L('M -40 0 H -8 M -8 -15 V 15 M -8 -7 L 20 -24 V -40 M -8 7 L 20 24 V 40') + `<path d="M -8 -15 V 15" class="sch-line sch-thick"/>` + head +
+          L('M -40 0 H -8 M -8 -7 L 20 -24 V -40 M -8 7 L 20 24 V 40') + `<rect x="-10.5" y="-15" width="5" height="30" class="sch-fill"/>` + head +
           utext(ctx, -34, -9, 'B', 'sch-pin') + utext(ctx, 29, -36, 'C', 'sch-pin') + utext(ctx, 29, 36, 'E', 'sch-pin');
       }
     };
