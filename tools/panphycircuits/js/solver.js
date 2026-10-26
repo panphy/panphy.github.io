@@ -21,6 +21,7 @@
   const PPC = root.PPC = root.PPC || {};
   const registry = PPC.registry || (typeof require === 'function' ? require('./registry.js') : null);
   const circuit = PPC.circuit || (typeof require === 'function' ? require('./circuit.js') : null);
+  const units = PPC.units || (typeof require === 'function' ? require('./units.js') : null);
   const { LOGIC } = registry;
 
   const MAX_NEWTON = 120;
@@ -545,6 +546,17 @@
       for (const id of Object.keys(sim.capHist)) if (!ids.has(id)) delete sim.capHist[id];
       for (const p of sim.compiled.prims) if (p.k === 'C' && !sim.capHist[p.owner]) sim.capHist[p.owner] = { v1: p.v0 };
       sim.dt = doc.settings.dt === 'auto' ? sim.compiled.dtSuggest : doc.settings.dt;
+      // A new circuit/source setting starts a fresh acquisition, so old source
+      // frequencies and voltages cannot masquerade as part of the new waveform.
+      sim.scopes = {};
+      for (const c of doc.components) {
+        if (c.type !== 'scope') continue;
+        const network = sim.compiled.networkOf[sim.compiled.netOf.get(c.id + ':com')];
+        const connected = ['ch1', 'ch2'].some((terminal) => sim.compiled.networkOf[sim.compiled.netOf.get(c.id + ':' + terminal)] === network);
+        const frequencies = connected ? doc.components.filter((source) => source.type === 'acsupply' && source.props.peak > 0 &&
+          sim.compiled.networkOf[sim.compiled.netOf.get(source.id + ':p')] === network).map((source) => source.props.freq) : [];
+        sim.scopes[c.id] = { t: [], ch1: [], ch2: [], frequency: frequencies.length ? Math.min(...frequencies) : null };
+      }
       sim.restart = true;
       sim.editTime = sim.t;
       sim.meterWin = {};
@@ -687,14 +699,17 @@
       // Scopes keep a fine-grained window of their own.
       for (const c of sim.doc.components) {
         if (c.type !== 'scope') continue;
-        const span = Number(c.props.tdiv) * 10;
-        const s = sim.scopes[c.id] || (sim.scopes[c.id] = { t: [], ch1: [], ch2: [] });
+        const s = sim.scopes[c.id];
+        const span = units.scopeTimeDiv(c.props, s) * 10;
         const r = reader(result, c);
         s.t.push(result.t); s.ch1.push(r.v('ch1', 'com')); s.ch2.push(r.v('ch2', 'com'));
         let cut = 0;
         while (cut < s.t.length && s.t[cut] < result.t - span) cut++;
         if (cut > 0) { s.t.splice(0, cut); s.ch1.splice(0, cut); s.ch2.splice(0, cut); }
-        if (s.t.length > 4000) { s.t = s.t.filter((_, i) => i % 2 === 0); s.ch1 = s.ch1.filter((_, i) => i % 2 === 0); s.ch2 = s.ch2.filter((_, i) => i % 2 === 0); }
+        if (s.t.length > 8000) {
+          const indices = [...new Set(['ch1', 'ch2'].flatMap((channel) => units.scopeTraceIndices(s, channel, span, 512)))].sort((a, b) => a - b);
+          for (const key of ['t', 'ch1', 'ch2']) s[key] = indices.map((i) => s[key][i]);
+        }
       }
       // Meter averaging windows (only when AC sources exist).
       const W = Number.isFinite(sim.compiled.acMin) ? 1 / sim.compiled.acMin : 0;

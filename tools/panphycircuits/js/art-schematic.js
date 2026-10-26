@@ -195,12 +195,11 @@
       const s = ctx.scope;
       const scale = PPC.units.scopeScale(ctx.p, s);
       if (s && s.t.length) {
-        const span = Number(ctx.p.tdiv) * 10;
+        const span = PPC.units.scopeTimeDiv(ctx.p, s) * 10;
         const tEnd = Math.max(s.t[s.t.length - 1], span), t0 = tEnd - span;
         for (const [key, vdiv, color] of [['ch1', scale.v1, '#E0B400'], ['ch2', scale.v2, '#0FA3C4']]) {
           let d = '', pen = false;
-          const step = Math.max(1, Math.floor(s[key].length / 300));
-          for (let i = 0; i < s[key].length; i += step) {
+          for (const i of PPC.units.scopeTraceIndices(s, key, span, W * 2)) {
             const v = s[key][i];
             if (!Number.isFinite(v) || s.t[i] < t0) { pen = false; continue; }
             const x = X0 + ((s.t[i] - t0) / span) * W;

@@ -247,7 +247,7 @@
         `<div class="mini-actions">${actButton('rotate-ccw', 'rotateCcw', '45° CCW', false, 'Rotate 45° counterclockwise (Shift+R)')}${actButton('rotate', 'rotate', '45° CW', false, 'Rotate 45° clockwise (R)')}${actButton('duplicate', 'duplicate', 'Duplicate')}${actButton('delete', 'cross', 'Delete', true)}</div>`;
       return card('', head) + (ui.hasLiveDisplay(c) && !app.pinned.has(c.id) ? liveCard(c, false) : '') +
         card('Readings', `<dl id="readings"></dl>${plot ? field(plot, c.props.plot, c.id) : ''}`, 'readings-card') +
-        (props.length ? card('Properties', props.map((p) => field(p, c.props[p.key], c.id, c.type === 'scope' && c.props.autoScale && ['v1', 'v2'].includes(p.key))).join('')) : '') +
+        (props.length ? card('Properties', props.map((p) => field(p, c.props[p.key], c.id, c.type === 'scope' && ((c.props.autoScale && ['v1', 'v2'].includes(p.key)) || (c.props.autoTime && p.key === 'tdiv')))).join('')) : '') +
         (def.gate ? truthTable(def) : '') +
         `<details class="icard model-note"><summary>How this is modeled</summary><p>${esc(def.help)}</p><p class="terms">Terminals: ${def.terminals.map((t) => esc(t.name)).join(' · ')}</p></details>`;
     }
@@ -340,7 +340,7 @@
       const pin = `<button type="button" class="pin-btn" data-pin="${c.id}" aria-pressed="${pinned}" title="${pinned ? 'Unpin this display' : 'Pin: keep this display in view while you work on other parts'}">${icon('pin')}<span>${pinned ? 'Pinned' : 'Pin'}</span></button>`;
       const body = scope
         ? `<canvas class="scope-screen" aria-label="Oscilloscope ${esc(c.label)} screen"></canvas>` +
-          `<p class="scope-legend"><span class="scope-ch1">CH1 <span data-scope-v1>${div(scale.v1, 'V')}</span></span><span class="scope-ch2">CH2 <span data-scope-v2>${div(scale.v2, 'V')}</span></span><span>${div(c.props.tdiv, 's')}</span></p>` +
+          `<p class="scope-legend"><span class="scope-ch1">CH1 <span data-scope-v1>${div(scale.v1, 'V')}</span></span><span class="scope-ch2">CH2 <span data-scope-v2>${div(scale.v2, 'V')}</span></span><span data-scope-time>${div(units.scopeTimeDiv(c.props, app.sim.scopes[c.id]), 's')}</span></p>` +
           `<label class="toggle"><span>Auto scale</span><input type="checkbox" id="scope-auto-${c.id}" data-scope-auto="${c.id}" ${c.props.autoScale ? 'checked' : ''}><span class="toggle-track" aria-hidden="true"></span></label>`
         : `<div class="meter-view" role="img" aria-label="${esc(c.label)} display"></div>`;
       return `<section class="icard live-card" data-live="${c.id}"><div class="live-head"><h3 class="icard-label">${esc(title)}</h3>${pin}</div>${body}</section>`;
@@ -462,6 +462,7 @@
       const card = canvas.closest('[data-live]');
       card.querySelector('[data-scope-auto]').checked = !!c.props.autoScale;
       for (const key of ['v1', 'v2']) card.querySelector(`[data-scope-${key}]`).textContent = units.fmtSI(scale[key], 'V', 3, { trim: true }) + '/div';
+      card.querySelector('[data-scope-time]').textContent = units.fmtSI(units.scopeTimeDiv(c.props, s), 's', 3, { trim: true }) + '/div';
       const dpr = window.devicePixelRatio || 1;
       const W = canvas.clientWidth, H = canvas.clientHeight;
       if (!W || !H) return;
@@ -477,7 +478,7 @@
         g.fillText('Press play on the time bar to draw the traces', W / 2, H / 2);
         return;
       }
-      const span = Number(c.props.tdiv) * 10;
+      const span = units.scopeTimeDiv(c.props, s) * 10;
       const tEnd = Math.max(s.t[s.t.length - 1], span), t0 = tEnd - span;
       for (const [key, vdiv] of [['ch1', scale.v1], ['ch2', scale.v2]]) {
         const arr = s[key];
@@ -485,8 +486,7 @@
         g.shadowColor = SCOPE_COLORS[key]; g.shadowBlur = 4;
         g.beginPath();
         let pen = false;
-        const step = Math.max(1, Math.floor(arr.length / 800));
-        for (let i = 0; i < arr.length; i += step) {
+        for (const i of units.scopeTraceIndices(s, key, span, Math.ceil(W * 2))) {
           const v = arr[i];
           if (!Number.isFinite(v) || s.t[i] < t0) { pen = false; continue; }
           const x = ((s.t[i] - t0) / span) * W;

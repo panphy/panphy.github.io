@@ -446,7 +446,7 @@
         `<clipPath id="${clip}"><rect x="${X0}" y="${Y0}" width="${W}" height="${H}"/></clipPath>` +
         `<rect x="${X0}" y="${Y0}" width="${W}" height="${H}" fill="url(#ppc-screen)"/>` + grid +
         `<g clip-path="url(#${clip})">${traces}</g>` +
-        up(ctx, X0 + 3, Y0 + 6, `<text class="ppc-scope-text" dominant-baseline="central">${esc(fmtDiv(ctx.p.tdiv, 's'))}</text>`) +
+        up(ctx, X0 + 3, Y0 + 6, `<text class="ppc-scope-text" dominant-baseline="central">${esc(fmtDiv(PPC.units.scopeTimeDiv(ctx.p, ctx.scope), 's'))}</text>`) +
         up(ctx, X0 + W - 3, Y0 + 6, `<text class="ppc-scope-text ppc-scope-ch1" text-anchor="end" dominant-baseline="central">1: ${esc(fmtDiv(scale.v1, 'V'))}</text>`) +
         up(ctx, X0 + W - 3, Y0 + 15, `<text class="ppc-scope-text ppc-scope-ch2" text-anchor="end" dominant-baseline="central">2: ${esc(fmtDiv(scale.v2, 'V'))}</text>`) +
         knob(66, -46) + knob(66, -18) + knob(66, 10) +
@@ -467,7 +467,7 @@
   function scopeTraces(ctx, X0, Y0, W, H, scale) {
     const s = ctx.scope;
     if (!s || !s.t.length) return '';
-    const span = Number(ctx.p.tdiv) * 10;
+    const span = PPC.units.scopeTimeDiv(ctx.p, s) * 10;
     const tEnd = Math.max(s.t[s.t.length - 1], span);
     const t0 = tEnd - span;
     const yMid = Y0 + H / 2;
@@ -476,8 +476,7 @@
       const arr = s[key];
       let d = '';
       let pen = false;
-      const step = Math.max(1, Math.floor(arr.length / 400));
-      for (let i = 0; i < arr.length; i += step) {
+      for (const i of PPC.units.scopeTraceIndices(s, key, span, W * 2)) {
         const v = arr[i];
         if (!Number.isFinite(v) || s.t[i] < t0) { pen = false; continue; }
         const x = X0 + ((s.t[i] - t0) / span) * W;
