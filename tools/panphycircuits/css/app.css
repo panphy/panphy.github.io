@@ -8,6 +8,8 @@
   --sch-grid: rgba(40, 60, 120, 0.07);
   --sch-grid-major: rgba(40, 60, 120, 0.13);
   --sch-ink: #1B2230;
+  --sch-wire-black: #2A2D33;
+  --sch-wire-white: #697386;
   --sch-accent: #1C64D8;
   --select: #1C64D8;
   --select-soft: rgba(28, 100, 216, 0.14);
@@ -29,6 +31,8 @@
   --sch-grid: rgba(150, 175, 255, 0.06);
   --sch-grid-major: rgba(150, 175, 255, 0.11);
   --sch-ink: #E3E8F2;
+  --sch-wire-black: #8993A3;
+  --sch-wire-white: #F2F4F7;
   --sch-accent: #54A6FF;
   --select: #54A6FF;
   --select-soft: rgba(84, 166, 255, 0.18);

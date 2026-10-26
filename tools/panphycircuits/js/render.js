@@ -165,6 +165,8 @@
       routes = layout.routeAll(doc, v);
       const hops = v === 'schematic' ? computeHops(doc) : null;
       const colorInDiagram = doc.settings.wireColorsInDiagram;
+      // Resolve neutral schematic colors now so standalone exports keep the same contrast.
+      const diagramStyle = v === 'schematic' && colorInDiagram ? getComputedStyle(host) : null;
       const parts = [];
       for (const w of doc.wires) {
         const r = routes.get(w.id);
@@ -181,7 +183,9 @@
             `<path d="${r.d}" fill="none" stroke="#fff" stroke-opacity="${w.color === 'white' ? 0.9 : 0.32}" stroke-width="1.3" stroke-linecap="round" transform="translate(-0.6 -1)" pointer-events="none"/>` +
             plug(r.a, hex) + plug(r.b, hex) + `</g>`);
         } else {
-          const style = colorInDiagram ? ` style="stroke:${w.color === 'white' ? '#9AA3B2' : hex}"` : '';
+          const neutral = diagramStyle && (w.color === 'black' || w.color === 'white')
+            ? diagramStyle.getPropertyValue(`--sch-wire-${w.color}`).trim() : '';
+          const style = colorInDiagram ? ` style="stroke:${neutral || hex}"` : '';
           parts.push(`<g class="wire${sel}" data-id="${w.id}">` +
             `<path class="wire-hit" data-hit="wire" data-id="${w.id}" d="${r.d}"/>` +
             `<path class="wire-sel" d="${d}"/>` +
