@@ -145,13 +145,21 @@ button, input, select { font: inherit; color: inherit; }
 [data-theme="dark"] .chip-pause { color: #04150C; }
 .chip-pause[aria-pressed="false"] { background: var(--warn); }
 .chip-pause .icon { width: 14px; height: 14px; stroke: none; }
-.sim-status-inspector { position: static; z-index: auto; box-shadow: none; }
-.sim-status-inspector .chip-btn { width: 48px; height: 48px; flex-basis: 48px; }
+/* The inspector uses a plain status/action row, separate from the canvas pill. */
+.sim-controls { display: flex; align-items: center; justify-content: space-between; gap: 12px; min-height: 48px; padding-bottom: 12px; margin-bottom: 4px; border-bottom: 1px solid var(--line); }
+.sim-summary { display: inline-flex; align-items: center; gap: 8px; font-size: 0.9rem; font-weight: 600; color: var(--ink); }
+.sim-run { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-width: 104px; min-height: 48px; padding: 8px 12px; border: 1px solid var(--line-strong); border-radius: 9px; background: var(--surface-2); color: var(--ink); font-size: 0.84rem; font-weight: 600; cursor: pointer; }
+.sim-run .icon { width: 16px; height: 16px; stroke: none; color: var(--accent); }
+.sim-run:hover { background: var(--surface-3); border-color: var(--accent); }
+.sim-run:focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; }
+.simulation-card .row { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 16px; min-height: 48px; }
+.simulation-card .row select { justify-self: stretch; width: 100%; max-width: none; }
+.simulation-card .row > label { min-width: 5em; }
 .sim-paused .ppc-spin, .sim-paused .ppc-buzz, .sim-paused .ppc-waves { animation-play-state: paused; }
 .status-dot { width: 7px; height: 7px; flex: 0 0 7px; border-radius: 50%; background: var(--ink-3); }
-.sim-status[data-state="running"] .status-dot { background: var(--good); box-shadow: 0 0 0 2px color-mix(in srgb, var(--good) 25%, transparent); animation: pulse 1.4s ease-in-out infinite; }
-.sim-status[data-state="behind"] .status-dot { background: var(--warn); }
-.sim-status[data-state="live"] .status-dot { background: var(--accent); }
+:is(.sim-status, .sim-controls)[data-state="running"] .status-dot { background: var(--good); box-shadow: 0 0 0 2px color-mix(in srgb, var(--good) 25%, transparent); animation: pulse 1.4s ease-in-out infinite; }
+:is(.sim-status, .sim-controls)[data-state="behind"] .status-dot { background: var(--warn); }
+:is(.sim-status, .sim-controls)[data-state="live"] .status-dot { background: var(--accent); }
 @keyframes pulse { 50% { box-shadow: 0 0 0 4px color-mix(in srgb, var(--good) 0%, transparent); } }
 
 /* Library */
