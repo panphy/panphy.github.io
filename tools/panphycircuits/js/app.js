@@ -90,6 +90,7 @@
   };
   app.redo = function () {
     if (!app.canRedo()) return;
+    if (app.editor.wiring) app.editor.cancelWiring();
     app.history.index++;
     const redone = app.history.stack[app.history.index];
     applySnapshot(redone.snap);
@@ -105,6 +106,9 @@
   // tidy the selection, redraw and autosave.
   function afterChange() {
     ensureViewReady(app.doc.view);
+    // A wire in progress cannot outlive the terminal it started from.
+    const w = app.editor && app.editor.wiring;
+    if (w && !circuit.getComp(app.doc, w.from.c)) app.editor.abortWiring();
     const elecKey = JSON.stringify([app.doc.components, app.doc.wires]);
     if (elecKey !== app.lastElecKey) {
       app.lastElecKey = elecKey;
@@ -251,6 +255,7 @@
   app.deleteSelection = function () {
     const comps = [...app.selection.comps], wires = [...app.selection.wires];
     if (!comps.length && !wires.length) return;
+    if (app.editor.wiring) app.editor.cancelWiring();
     circuit.removeWires(app.doc, wires);
     circuit.removeComponents(app.doc, comps);
     app.selection.comps.clear(); app.selection.wires.clear();
@@ -503,6 +508,7 @@
   function loadDoc(doc, opts = {}) {
     // Personal display choices take precedence over a circuit's saved settings.
     Object.assign(doc.settings, displayPreferences);
+    if (app.editor) app.editor.abortWiring();
     app.doc = doc;
     app.pinned = new Set(); // ids are reused between circuits
     app.selection = { comps: new Set(), wires: new Set() };
@@ -614,6 +620,7 @@
   };
   app.newCircuit = async function () {
     if (app.doc.components.length && !(await ui.confirm('Clear the whole circuit?', 'This removes every component and wire from both views. You can undo it.', 'Clear circuit'))) return;
+    app.editor.abortWiring();
     app.doc.components = []; app.doc.wires = [];
     for (const v of layout.VIEWS) { app.doc.layouts[v].comps = {}; app.doc.layouts[v].wires = {}; }
     app.doc.layouts.realistic.ready = true;
