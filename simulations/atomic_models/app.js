@@ -102,7 +102,7 @@ document.addEventListener('keydown', event => {
 const scene = new THREE.Scene();
 const camera = new THREE.PerspectiveCamera(40, 1, 0.05, 100);
 camera.position.set(0, 1.2, 9);
-const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+const renderer = new THREE.WebGLRenderer({ antialias: true });
 renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 viewer.prepend(renderer.domElement);
 scene.add(new THREE.HemisphereLight(0xe7f4ff, 0x32415a, 2.3));
@@ -125,7 +125,9 @@ scene.add(atom);
 const beamGroup = new THREE.Group();
 scene.add(beamGroup);
 
+// Blend glows and shadows against the viewer color, not a transparent canvas.
 let palette = readPalette();
+scene.background = palette.background;
 let electrons = [];
 let trails = [];
 let pickables = [];
@@ -159,6 +161,7 @@ function readPalette() {
   const color = name => new THREE.Color(styles.getPropertyValue(name).trim());
   return {
     dark: document.documentElement.getAttribute('data-theme') === 'dark',
+    background: color('--viewer-bg'),
     electron: color('--electron'),
     positive: color('--positive'),
     proton: color('--proton'),
@@ -1257,6 +1260,7 @@ document.querySelectorAll('.models [data-model]').forEach(button => button.addEv
 // ---------- Theme ----------
 window.addEventListener('panphy:theme-change', () => {
   palette = readPalette();
+  scene.background = palette.background;
   applyThemeToPersistent();
   const hadBeam = Boolean(beam);
   const spreadT = spread.t;
