@@ -227,12 +227,26 @@
   // component body or running along another wire is heavily penalized (either
   // would make the diagram ambiguous), then bends and length are minimized.
 
+  // Scope sockets sit below the screen box. Protect the entire box plus a
+  // stroke-width margin, while leaving the sockets free for their own wires.
+  function wireBodyRect(doc, view, c) {
+    const art = artFor(view, c.type);
+    if (art.bodyBounds) {
+      const [x, y, w, h] = art.bodyBounds(c.props), pl = placement(doc, view, c.id);
+      const corners = [xform(pl, x, y), xform(pl, x + w, y), xform(pl, x, y + h), xform(pl, x + w, y + h)];
+      return { x: Math.min(...corners.map(p => p.x)) - 4, y: Math.min(...corners.map(p => p.y)) - 4,
+        x2: Math.max(...corners.map(p => p.x)) + 4, y2: Math.max(...corners.map(p => p.y)) + 4 };
+    }
+    const b = compBounds(doc, view, c.id);
+    return { x: b.x + 3, y: b.y + 3, x2: b.x2 - 3, y2: b.y2 - 3 };
+  }
+
   function obstacleRects(doc, view) {
     const out = [];
     for (const c of doc.components) {
       const b = compBounds(doc, view, c.id);
       if (!b) continue;
-      if (c.type !== 'junction') out.push({ id: c.id, x: b.x + 3, y: b.y + 3, x2: b.x2 - 3, y2: b.y2 - 3 });
+      if (c.type !== 'junction') out.push({ id: c.id, ...wireBodyRect(doc, view, c) });
       // Reserve every terminal, including unconnected ones and junctions. An
       // earlier wire must not occupy a later wire's unavoidable endpoint.
       for (const t of Object.keys(terminalsLocal(view, c))) {
@@ -276,12 +290,13 @@
   // Invalid geometry must outweigh cosmetic gains in length or bend count.
   // Also check explicit bends: moving a part can turn a previously good route
   // into a return loop, a wire through a symbol, or an apparent short circuit.
-  function routeConflicts(poly, dA, dB, obstacles, avoid) {
+  function routeConflicts(poly, dA, dB, obstacles, avoid, stopAt = Infinity) {
     let conflicts = 0;
     const outward = (a, b, d) => isZero(d) || (b.x - a.x) * d.x + (b.y - a.y) * d.y > 1e-6;
     if (poly.length < 2) return 1;
     if (!outward(poly[0], poly[1], dA)) conflicts++;
     if (!outward(poly[poly.length - 1], poly[poly.length - 2], dB)) conflicts++;
+    if (conflicts >= stopAt) return conflicts;
     for (let i = 0; i < poly.length - 1; i++) {
       const a = poly[i], b = poly[i + 1];
       for (const r of obstacles) {
@@ -292,14 +307,19 @@
           ((i === 0 && isDiag(dA) && inside(a) && outward(a, b, dA)) ||
            (i === poly.length - 2 && isDiag(dB) && inside(b) && outward(b, a, dB)));
         if (!diagonalStub && segHitsRect(a, b, r)) conflicts++;
+        if (conflicts >= stopAt) return conflicts;
       }
-      for (const s of avoid) if (overlapLen(a, b, s.a, s.b) > 1 || touchesWire(a, b, s)) conflicts++;
+      for (const s of avoid) {
+        if (overlapLen(a, b, s.a, s.b) > 1 || touchesWire(a, b, s)) conflicts++;
+        if (conflicts >= stopAt) return conflicts;
+      }
       for (let j = 0; j < i; j++) {
         const c = poly[j], d = poly[j + 1];
         // Adjacent segments share a corner. Any other self-contact or crossing
         // closes a spurious loop, even when no collinear segments overlap.
         if (overlapLen(a, b, c, d) > 1 ||
             (j < i - 1 && (touchesWire(a, b, { a: c, b: d }) || segsCross(a, b, c, d)))) conflicts++;
+        if (conflicts >= stopAt) return conflicts;
       }
     }
     return conflicts;
@@ -309,22 +329,28 @@
     return obstacles.filter((r) => !r.terminal || (!samePoint(r.terminal, A) && !samePoint(r.terminal, B)));
   }
 
-  function routeCost(poly, A, dA, B, dB, obstacles, avoid) {
-    let cost = 1000000 * routeConflicts(poly, dA, dB, obstacles, avoid);
+  function routeCost(poly, A, dA, B, dB, obstacles, avoid, cutoff = Infinity) {
+    // Length, bends and direction give a cheap lower bound. Every remaining
+    // penalty is nonnegative, so rejected candidates cannot change the winner.
+    let cost = 25 * Math.max(0, poly.length - 2);
     for (let i = 0; i < poly.length - 1; i++) {
       const a = poly[i], b = poly[i + 1];
-      const L = Math.abs(b.x - a.x) + Math.abs(b.y - a.y);
-      cost += L;
+      cost += Math.abs(b.x - a.x) + Math.abs(b.y - a.y);
       if (Math.abs(a.x - b.x) > 1e-6 && Math.abs(a.y - b.y) > 1e-6) cost += 5000;
-      for (const r of obstacles) if (segHitsRect(a, b, r)) cost += 1000;
-      for (const s of avoid) { const o = overlapLen(a, b, s.a, s.b); if (o > 1) cost += 300 + o * 4; }
     }
-    cost += 25 * Math.max(0, poly.length - 2);
-    // Leaving or entering a terminal against its lead direction looks wrong.
-    const first = poly.length > 1 ? unit(poly[1].x - poly[0].x, poly[1].y - poly[0].y) : null;
+    const first = poly.length > 1 ? unit(poly[1].x - A.x, poly[1].y - A.y) : null;
     const last = poly.length > 1 ? unit(poly[poly.length - 2].x - B.x, poly[poly.length - 2].y - B.y) : null;
     if (first && !isZero(dA) && first.x * dA.x + first.y * dA.y < 0.5) cost += 220;
     if (last && !isZero(dB) && last.x * dB.x + last.y * dB.y < 0.5) cost += 220;
+    if (cost >= cutoff - 1e-9) return Infinity;
+    cost += 1000000 * routeConflicts(poly, dA, dB, obstacles, avoid, Math.ceil((cutoff - cost) / 1000000));
+    if (cost >= cutoff - 1e-9) return Infinity;
+    for (let i = 0; i < poly.length - 1; i++) {
+      const a = poly[i], b = poly[i + 1];
+      for (const r of obstacles) if (segHitsRect(a, b, r)) cost += 1000;
+      for (const s of avoid) { const o = overlapLen(a, b, s.a, s.b); if (o > 1) cost += 300 + o * 4; }
+      if (cost >= cutoff - 1e-9) return Infinity;
+    }
     return cost;
   }
 
@@ -387,7 +413,7 @@
     let best = null, bestCost = Infinity;
     for (const c of cands) {
       const poly = simplify(c);
-      const cost = routeCost(poly, A, dA, B, dB, obstacles, avoid);
+      const cost = routeCost(poly, A, dA, B, dB, obstacles, avoid, bestCost);
       if (cost < bestCost - 1e-9) { bestCost = cost; best = poly; }
     }
     return best;
@@ -760,7 +786,8 @@
     for (const c of doc.components) {
       if (c.type === 'junction' || !lay.comps[c.id]) continue;
       const b = compBounds(doc, view, c.id);
-      solid.push({ id: c.id, b, body: { x: b.x + 10, y: b.y + 10, x2: b.x2 - 10, y2: b.y2 - 10 } });
+      const strict = !!artFor(view, c.type).bodyBounds;
+      solid.push({ id: c.id, b, strict, body: strict ? wireBodyRect(doc, view, c) : { x: b.x + 10, y: b.y + 10, x2: b.x2 - 10, y2: b.y2 - 10 } });
     }
     for (let i = 0; i < solid.length; i++) for (let j = i + 1; j < solid.length; j++) {
       if (overlaps(solid[i].b, solid[j].b, 0)) { cost += 4000; rep.overlaps++; }
@@ -797,7 +824,7 @@
         if (s.id === w.b.c) own.push(B);
         const nearOwn = (p) => own.some((e) => Math.hypot(p.x - e.x, p.y - e.y) < 30);
         for (let i = 0; i < poly.length - 1; i++) {
-          if (own.length && (nearOwn(poly[i]) || nearOwn(poly[i + 1]))) continue;
+          if (!s.strict && own.length && (nearOwn(poly[i]) || nearOwn(poly[i + 1]))) continue;
           if (segHitsRect(poly[i], poly[i + 1], s.body)) { cost += 900; rep.overParts++; break; }
         }
       }
@@ -1022,7 +1049,10 @@
     const { netOf } = circuit.buildNets(doc);
     const edges = [];
     for (const c of comps) {
-      const ids = Object.keys(terminalsLocal(view, c));
+      // A scope used as a single-channel probe is a two-terminal measurement
+      // branch. Its unused channel is still reserved by the wire router.
+      const ids = Object.keys(terminalsLocal(view, c)).filter(t => c.type !== 'scope' ||
+        doc.wires.some(w => (w.a.c === c.id && w.a.t === t) || (w.b.c === c.id && w.b.t === t)));
       if (ids.length !== 2 || !doc.layouts[view].comps[c.id]) return null;
       const a = netOf.get(c.id + ':' + ids[0]), b = netOf.get(c.id + ':' + ids[1]);
       if (a === undefined || b === undefined || a === b) return null;
@@ -1157,7 +1187,7 @@
         t.w = t.parts.reduce((a, p) => a + p.w, 0) + cfg.gap * (t.parts.length - 1);
         t.up = Math.max(...t.parts.map((p) => p.up)); t.down = Math.max(...t.parts.map((p) => p.down));
       } else {
-        t.w = Math.max(...t.parts.map((p) => p.w)) + 2 * cfg.rail;
+        t.w = Math.max(...t.parts.map((p) => p.w + 2 * p.ext)) + 2 * cfg.rail;
         t.up = t.parts[0].up;
         let y = 0;
         t.lines = [0];

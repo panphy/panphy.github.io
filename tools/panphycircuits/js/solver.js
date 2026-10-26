@@ -747,6 +747,10 @@
       const W = Number.isFinite(sim.compiled.acMin) ? 1 / sim.compiled.acMin : 0;
       if (W > 0) {
         for (const m of ms) {
+          // Scope channels already have bounded trace buffers. Only meters use
+          // cycle averaging; duplicating scope samples here can stall tiny-step
+          // RLC circuits when a full AC cycle starts sliding through the window.
+          if (!registry.get(m.comp.type).meter) continue;
           const w = sim.meterWin[m.key] || (sim.meterWin[m.key] = { t: [], v: [] });
           w.t.push(result.t); w.v.push(m.value);
           while (w.t.length > 2 && w.t[1] <= result.t - W) { w.t.shift(); w.v.shift(); }
