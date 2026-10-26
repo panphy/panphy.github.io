@@ -122,11 +122,11 @@
 
           <div id="flow-note" class="flow-note" title="Current animation only. Meters, scope traces and sound use the actual frequency." hidden>AC animation slowed for visibility</div>
 
-          <!-- Live circuit controls; elapsed time is in the Simulation inspector. -->
+          <!-- Live circuit controls, also available in the Simulation inspector. -->
           <div id="sim-status" class="sim-status" data-state="live" role="group" aria-label="Simulation controls">
             <button type="button" id="btn-run" class="chip-btn chip-pause" aria-pressed="false"></button>
             <span class="status-dot" aria-hidden="true"></span>
-            <span id="sim-state">Live</span>
+            <span id="sim-state" class="sim-state">Live</span>
           </div>
 
           <button type="button" id="error-banner" class="error-banner" hidden><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l10 18H2z"/><path d="M12 10v5M12 18v.5"/></svg><span></span></button>
@@ -246,7 +246,7 @@
       <details class="help-topic">
         <summary>Simulation &amp; saving</summary>
         <dl class="help-notes">
-          <div><dt>Live operation</dt><dd>Examples and saved circuits open live. Edits still update readings while paused. Elapsed time, simulation speed and time step are in the Simulation inspector.</dd></div>
+          <div><dt>Live operation</dt><dd>Examples and saved circuits open live. Edits still update readings while paused. Pause/Resume, simulation status, speed and time step are in the Simulation inspector.</dd></div>
           <div><dt>Save your work</dt><dd>Your circuit is saved automatically in this browser. File → Save as file writes a .ppcir file containing the circuit and both layouts, without the live simulation state. Open file also accepts older .json files.</dd></div>
           <div><dt>Ideal components</dt><dd>Wires, ideal ammeters and closed switches have zero resistance. Ideal voltmeters and scope inputs draw no current. Meters can also have a finite resistance.</dd></div>
           <div><dt>Errors &amp; precision</dt><dd>Short circuits and conflicting ideal sources produce errors. Voltage between separate circuits is undefined. Readings use 3 significant figures; these are educational models. Each component’s inspector explains its model.</dd></div>

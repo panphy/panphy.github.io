@@ -231,6 +231,7 @@
       else body.innerHTML = circuitInspector();
       if (focused) { const el = document.getElementById(focused); if (el) el.focus(); }
       ui.updateReadings();
+      ui.updateStatus();
     };
 
     const card = (label, inner, cls = '') => `<section class="icard${cls ? ' ' + cls : ''}">${label ? `<h3 class="icard-label">${esc(label)}</h3>` : ''}${inner}</section>`;
@@ -288,7 +289,7 @@
       const opt = (v, cur, label) => `<option value="${v}" ${String(cur) === String(v) ? 'selected' : ''}>${label}</option>`;
       const toggle = (key, label) => `<label class="toggle"><span>${label}</span><input type="checkbox" data-setting="${key}" ${s[key] ? 'checked' : ''}><span class="toggle-track" aria-hidden="true"></span></label>`;
       return `<p class="insp-hint">Select a component or wire to edit it and see its readings.</p>` +
-        card('Simulation', `<div class="row"><span>Elapsed time</span><span id="sim-time" class="ds-readout">${fmtTime(app.sim.t)}</span></div><div class="row"><label for="s-speed">Speed</label><select id="s-speed" data-setting="speed">${[0.01, 0.1, 0.25, 1, 4, 10].map((v) => opt(v, s.speed, v === 1 ? 'Real time (1×)' : `${v}×`)).join('')}</select></div>` +
+        card('Simulation', `<div class="row"><span>Status</span><div class="sim-status sim-status-inspector" role="group" aria-label="Simulation controls"><button type="button" class="chip-btn chip-pause" data-sim-run aria-pressed="false"></button><span class="status-dot" aria-hidden="true"></span><span class="sim-state">Live</span></div></div><div class="row"><label for="s-speed">Speed</label><select id="s-speed" data-setting="speed">${[0.01, 0.1, 0.25, 1, 4, 10].map((v) => opt(v, s.speed, v === 1 ? 'Real time (1×)' : `${v}×`)).join('')}</select></div>` +
           `<div class="row"><label for="s-dt">Time step</label><select id="s-dt" data-setting="dt">${opt('auto', s.dt, `Auto (${units.fmtSI(app.sim.dt, 's', 2)})`)}${[1e-5, 1e-4, 1e-3, 1e-2].map((v) => opt(v, s.dt, units.fmtSI(v, 's', 1))).join('')}</select></div>`) +
         `<details class="icard model-note"><summary>About the simulation</summary><p>The circuit runs live, including capacitors, AC supplies, the oscilloscope and graphs. Use a switch in your circuit to trigger an effect. <strong>Pause</strong> freezes time, traces, current and component animations, and sound; <strong>Resume</strong> continues from there. Edits still update readings for the frozen state. Switching views never changes the simulation.</p>` +
           `<p>The automatic time step is about 1/100 of the shortest RC time constant (and of an AC period). Results do not depend on your device's frame rate.</p>` +
@@ -442,6 +443,7 @@
     };
     ui.renderLive = function () { ui.renderPinned(); ui.updateLive(); };
     $('inspector').addEventListener('click', (e) => {
+      if (e.target.closest('[data-sim-run]')) { app.toggleRun(); return; }
       const b = e.target.closest('[data-pin]');
       if (!b) return;
       const id = b.dataset.pin;
@@ -628,24 +630,24 @@
 
     ui.updateStatus = function () {
       const sim = app.sim;
-      const run = $('btn-run');
       // Only advance the solver when needed; retain an explicit pause across edits.
       const timeMatters = app.needsTime();
       const running = timeMatters && !app.paused;
       if (sim.running !== running) sim.setRunning(running);
       document.body.classList.toggle('sim-paused', app.paused);
       const runHtml = icon(app.paused ? 'resume' : 'pause');
-      if (run.dataset.html !== runHtml) { run.innerHTML = runHtml; run.dataset.html = runHtml; }
-      run.setAttribute('aria-pressed', String(app.paused));
-      run.setAttribute('aria-label', app.paused ? 'Resume simulation' : 'Pause simulation');
-      run.title = app.paused ? 'Resume the live circuit (Space)' : 'Pause: freeze time, traces, animations and sound; edits still update readings (Space)';
-      // Keep Resume available if time-dependent parts are removed while paused.
-      run.hidden = !timeMatters && !app.paused;
-      $('sim-status').dataset.state = app.paused ? 'paused' : sim.running ? (sim.behind ? 'behind' : 'running') : 'live';
-      $('sim-state').textContent = app.paused ? 'Paused' : 'Live';
-      $('sim-status').title = !timeMatters && !app.paused ? app.NO_TIME_MSG : sim.running && sim.behind ? 'Running slower than the chosen speed: this device cannot keep up.' : '';
-      const elapsed = $('sim-time');
-      if (elapsed) elapsed.textContent = fmtTime(sim.t);
+      document.querySelectorAll('.sim-status').forEach((status) => {
+        const run = status.querySelector('.chip-pause');
+        if (run.dataset.html !== runHtml) { run.innerHTML = runHtml; run.dataset.html = runHtml; }
+        run.setAttribute('aria-pressed', String(app.paused));
+        run.setAttribute('aria-label', app.paused ? 'Resume simulation' : 'Pause simulation');
+        run.title = app.paused ? 'Resume the live circuit (Space)' : 'Pause: freeze time, traces, animations and sound; edits still update readings (Space)';
+        // Keep Resume available if time-dependent parts are removed while paused.
+        run.hidden = !timeMatters && !app.paused;
+        status.dataset.state = app.paused ? 'paused' : sim.running ? (sim.behind ? 'behind' : 'running') : 'live';
+        status.querySelector('.sim-state').textContent = app.paused ? 'Paused' : 'Live';
+        status.title = !timeMatters && !app.paused ? app.NO_TIME_MSG : sim.running && sim.behind ? 'Running slower than the chosen speed: this device cannot keep up.' : '';
+      });
       $('view-switch').dataset.view = app.doc.view;
       $('view-realistic').setAttribute('aria-pressed', String(app.doc.view === 'realistic'));
       $('view-schematic').setAttribute('aria-pressed', String(app.doc.view === 'schematic'));
@@ -671,12 +673,6 @@
       else banner.hidden = true;
       if (!$('problems-pop').hidden) renderProblems();
     };
-
-    function fmtTime(t) {
-      if (t < 10) return t.toFixed(3) + ' s';
-      if (t < 100) return t.toFixed(2) + ' s';
-      return t.toFixed(1) + ' s';
-    }
 
     function renderProblems() {
       const probs = app.problems();
