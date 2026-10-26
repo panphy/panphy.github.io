@@ -150,3 +150,61 @@ test('trace reduction keeps undefined-channel gaps', () => {
   assert.ok(indices.includes(2));
   assert.deepEqual(indices, [0, 1, 2, 3, 4]);
 });
+
+test('three scopes in a tiny-step RLC circuit keep acquiring beyond the first AC cycle without meter buffers', () => {
+  const doc = circuit.createDoc(), parts = {};
+  for (const [name, type, props] of [
+    ['AC', 'acsupply', { freq: 1, peak: 5 }], ['R', 'resistor', { R: 100 }],
+    ['L', 'inductor', { L: 1 }], ['C', 'capacitor', { C: 1e-7 }],
+    ['S1', 'scope', {}], ['S2', 'scope', {}], ['S3', 'scope', {}]
+  ]) parts[name] = circuit.addComponent(doc, type, { props });
+  for (const [from, to] of [
+    ['AC.p', 'R.a'], ['R.b', 'L.a'], ['L.b', 'C.p'], ['C.n', 'AC.n'],
+    ['S1.ch1', 'R.a'], ['S1.com', 'R.b'], ['S2.ch1', 'L.a'], ['S2.com', 'L.b'],
+    ['S3.ch1', 'C.p'], ['S3.com', 'C.n']
+  ]) {
+    const [a, at] = from.split('.'), [b, bt] = to.split('.');
+    circuit.addWire(doc, { c: parts[a].id, t: at }, { c: parts[b].id, t: bt });
+  }
+  const sim = solver.createSim(); sim.setDoc(doc);
+  assert.ok(sim.dt < 1e-5, 'reproduce the dense acquisition caused by the small capacitor');
+  for (const end of [0.02, 1.2]) {
+    while (sim.t < end) sim.step();
+    assert.deepEqual(Object.keys(sim.meterWin), [], 'scope channels must not create cycle-averaging windows');
+    assert.ok(sim.result.ok);
+    for (const name of ['S1', 'S2', 'S3']) {
+      const s = sim.scopes[parts[name].id];
+      assert.equal(s.t.at(-1), sim.t, 'each scope still receives the newest sample');
+      assert.ok(s.t.length <= 8000, 'scope acquisition stays bounded');
+      assert.ok(sim.traces.series[parts[name].id + ':ch1'].length, 'graph channels remain available');
+      assert.ok(s.ch2.every(Number.isNaN), 'unconnected channels remain undefined');
+    }
+  }
+  // Steady-state series-RLC voltages after the startup transient has decayed.
+  const omega = 2 * Math.PI, reactance = omega - 1 / (omega * 1e-7);
+  const denom = 100 ** 2 + reactance ** 2, phase = omega * sim.t;
+  const expected = {
+    S1: 100 * 5 * (100 * Math.sin(phase) - reactance * Math.cos(phase)) / denom,
+    S2: omega * 5 * (100 * Math.cos(phase) + reactance * Math.sin(phase)) / denom,
+    S3: -5 * (100 * Math.cos(phase) + reactance * Math.sin(phase)) / (omega * 1e-7 * denom)
+  };
+  for (const name of Object.keys(expected)) {
+    assert.ok(Math.abs(sim.scopes[parts[name].id].ch1.at(-1) - expected[name]) < 1e-6, name + ' keeps the correct waveform');
+  }
+});
+
+test('mixed scope and meter acquisition reserves averaging windows for actual meters', () => {
+  const f = scopeCircuit(1);
+  const meter = circuit.addComponent(f.doc, 'voltmeter', { props: { mode: 'ac' } });
+  circuit.addWire(f.doc, { c: meter.id, t: 'p' }, { c: f.load.id, t: 'a' });
+  circuit.addWire(f.doc, { c: meter.id, t: 'n' }, { c: f.load.id, t: 'b' });
+  f.sim.setDoc(f.doc);
+  while (f.sim.t < 2.1) f.sim.step();
+  const key = meter.id + ':V';
+  assert.deepEqual(Object.keys(f.sim.meterWin), [key]);
+  const value = solver.reader(f.sim.result, meter).v('p', 'n');
+  const reading = f.sim.meterValue(meter, value, key);
+  assert.ok(reading.averaged);
+  assert.ok(Math.abs(reading.value - 9.5 / Math.SQRT2) < 0.002);
+  assert.equal(f.sim.scopes[f.scope.id].t.at(-1), f.sim.t);
+});

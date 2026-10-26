@@ -696,3 +696,90 @@ test('old yellow wires become purple on import and copy while connections are pr
   assert.ok(circuit.WIRE_COLORS.includes(opened.wires[0].color));
   assert.equal(circuit.WIRE_COLORS.includes('yellow'), false);
 });
+
+function scopedRlcLayout(channel = 'ch1') {
+  const doc = circuit.createDoc(), parts = {};
+  for (const [name, type, props, x, y] of [
+    ['B', 'acsupply', { freq: 1 }, 0, -180], ['R', 'resistor', { R: 100 }, -180, 0],
+    ['L', 'inductor', { L: 1 }, 0, 0], ['C', 'capacitor', { C: 1e-7 }, 180, 0],
+    ['S1', 'scope', {}, -180, 200], ['S2', 'scope', {}, 0, 240], ['S3', 'scope', {}, 220, 200]
+  ]) {
+    parts[name] = circuit.addComponent(doc, type, { props });
+    for (const view of layout.VIEWS) place(doc, parts[name], view, x, y);
+  }
+  for (const [from, to] of [
+    ['B.p', 'R.a'], ['R.b', 'L.a'], ['L.b', 'C.p'], ['C.n', 'B.n'],
+    [`S1.${channel}`, 'R.a'], ['S1.com', 'R.b'], [`S2.${channel}`, 'L.a'], ['S2.com', 'L.b'],
+    [`S3.${channel}`, 'C.p'], ['S3.com', 'C.n']
+  ]) {
+    const [a, at] = from.split('.'), [b, bt] = to.split('.');
+    circuit.addWire(doc, { c: parts[a].id, t: at }, { c: parts[b].id, t: bt });
+  }
+  return { doc, parts };
+}
+
+function assertScopeWireClearance(doc) {
+  const routes = layout.routeAll(doc, 'schematic');
+  for (const scope of doc.components.filter(c => c.type === 'scope')) {
+    const pl = doc.layouts.schematic.comps[scope.id];
+    // The rendered screen box is [-50,-34] to [50,30]; require space outside
+    // its full stroke, including the border adjacent to its own socket leads.
+    const corners = [[-52, -36], [52, -36], [-52, 32], [52, 32]].map(([x, y]) => layout.xform(pl, x, y));
+    const box = { x: Math.min(...corners.map(p => p.x)), y: Math.min(...corners.map(p => p.y)),
+      x2: Math.max(...corners.map(p => p.x)), y2: Math.max(...corners.map(p => p.y)) };
+    for (const route of routes.values()) for (let i = 1; i < route.poly.length; i++) {
+      const a = route.poly[i - 1], b = route.poly[i];
+      assert.ok(!(Math.min(a.x, b.x) < box.x2 && Math.max(a.x, b.x) > box.x &&
+        Math.min(a.y, b.y) < box.y2 && Math.max(a.y, b.y) > box.y), `wire clears all of ${scope.label}'s frame: ${JSON.stringify([a, b])}`);
+    }
+  }
+}
+
+for (const channel of ['ch1', 'ch2']) test(`single-channel ${channel} scopes use the series-parallel layout and clear their frames`, () => {
+  for (const view of layout.VIEWS) {
+    const { doc, parts } = scopedRlcLayout(channel);
+    const wires = JSON.stringify(doc.wires), other = view === 'schematic' ? 'realistic' : 'schematic';
+    const otherBefore = JSON.stringify(doc.layouts[other]);
+    assert.ok(layout.seriesParallel(doc, view), 'probe branches take the fast path');
+    assert.ok(layout.tidy(doc, view));
+    assert.equal(JSON.stringify(doc.wires), wires, 'connections are unchanged');
+    assert.equal(JSON.stringify(doc.layouts[other]), otherBefore, 'other view is unchanged');
+    for (const name of ['S1', 'S2', 'S3']) assert.equal(doc.layouts[view].comps[parts[name].id].r, 0);
+    if (view === 'schematic') {
+      assertScopeWireClearance(doc);
+      assert.equal(layout.schematicQuality(doc).defects, 0);
+      const once = JSON.stringify(doc.layouts[view]);
+      assert.equal(layout.tidy(doc, view), false);
+      assert.equal(JSON.stringify(doc.layouts[view]), once, 'repeated Tidy is stable');
+      assertScopeWireClearance(doc);
+    }
+  }
+});
+
+test('a scope with both channels connected retains the general layout path', () => {
+  const { doc, parts } = scopedRlcLayout();
+  circuit.addWire(doc, { c: parts.S1.id, t: 'ch2' }, { c: parts.L.id, t: 'b' });
+  assert.equal(layout.seriesParallel(doc, 'schematic'), null);
+});
+
+test('routing and Tidy scoring reject wires on every oscilloscope frame edge', () => {
+  for (const [a, b] of [
+    [[-50, -100], [-50, 100]], [[50, -100], [50, 100]],
+    [[-120, -34], [120, -34]], [[-120, 30], [120, 30]]
+  ]) {
+    const doc = circuit.createDoc();
+    const scope = circuit.addComponent(doc, 'scope');
+    const j1 = circuit.addComponent(doc, 'junction'), j2 = circuit.addComponent(doc, 'junction');
+    place(doc, scope, 'schematic', 0, 0);
+    place(doc, j1, 'schematic', ...a); place(doc, j2, 'schematic', ...b);
+    const wire = circuit.addWire(doc, { c: j1.id, t: 'j' }, { c: j2.id, t: 'j' }).wire;
+    doc.layouts.schematic.wires[wire.id] = { pts: [[(a[0] + b[0]) / 2, (a[1] + b[1]) / 2]] };
+    const report = {};
+    layout.tidyCost(doc, 'schematic', null, null, report);
+    assert.ok(report.overParts > 0, 'candidate scoring includes the entire frame');
+    const before = JSON.stringify(doc);
+    assertScopeWireClearance(doc);
+    assert.equal(layout.routeAll(doc, 'schematic').get(wire.id).pts.length, 0, 'overlapping saved bends are rerouted');
+    assert.equal(JSON.stringify(doc), before, 'rendering preserves stored layout and wiring');
+  }
+});

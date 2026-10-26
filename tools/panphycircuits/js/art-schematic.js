@@ -187,6 +187,7 @@
 
   art.scope = {
     bounds: () => [-52, -36, 104, 78],
+    bodyBounds: () => [-50, -34, 100, 64],
     terms: () => ({ ch1: [-30, 40, 0, 1], ch2: [0, 40, 0, 1], com: [30, 40, 0, 1] }),
     draw(ctx) {
       const clip = `${ctx.uid}-sscr`;
