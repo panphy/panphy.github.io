@@ -33,6 +33,7 @@
     clipboard: null,
     lastElecKey: '',
     pinned: new Set(),
+    paused: false, // User intent, independent of whether the circuit needs time.
     emptyDismissed: false
   };
   PPC.app = app;
@@ -456,14 +457,19 @@
     return app.graphOpen() && app.doc.components.some((c) => registry.get(c.type).meter && c.props.plot);
   };
   app.toggleRun = function () {
-    if (!app.sim.running && !app.needsTime()) { ui.toast(app.NO_TIME_MSG); return; }
-    app.sim.setRunning(!app.sim.running);
+    if (!app.paused && !app.needsTime()) { ui.toast(app.NO_TIME_MSG); return; }
+    app.paused = !app.paused;
+    app.sim.setRunning(!app.paused && app.needsTime());
     lastFrame = performance.now();
     ui.updateStatus();
-    ui.announce(app.sim.running ? 'Time running' : 'Time paused');
+    app.audio.update();
+    ui.announce(app.paused ? 'Simulation paused' : 'Simulation live');
   };
   app.resetSim = function () {
     app.sim.reset();
+    app.sim.setRunning(!app.paused && app.needsTime());
+    lastFrame = performance.now();
+    app.audio.update();
     refreshProblems();
     app.renderer.renderAll();
     ui.updateReadings();
@@ -489,7 +495,7 @@
       if (now - lastSlow > 120) { lastSlow = now; ui.updateReadings(); ui.updateStatus(); }
     }
     app.audio.update();
-    app.renderer.updateFlow(dt);
+    app.renderer.updateFlow(app.paused ? 0 : dt);
     requestAnimationFrame(frame);
   }
 
@@ -521,7 +527,9 @@
       if (k && Number.isFinite(k.z) && Number.isFinite(k.tx) && Number.isFinite(k.ty)) app.cameras[v] = { tx: k.tx, ty: k.ty, z: Math.min(4, Math.max(0.2, k.z)), fitted: true };
       else app.cameras[v] = { tx: 0, ty: 0, z: 1, fitted: false };
     }
-    app.sim.setRunning(opts.run === true);
+    app.paused = false;
+    lastFrame = performance.now();
+    app.sim.setRunning(app.needsTime());
     resetHistory(opts.label || 'Open');
     app.rev++;
     refreshProblems();
@@ -624,6 +632,7 @@
     app.selection.comps.clear(); app.selection.wires.clear();
     app.emptyDismissed = true;
     app.commit('Clear circuit');
+    app.paused = false;
     app.sim.reset();
     ui.updateStatus();
     app.graph.draw(true);

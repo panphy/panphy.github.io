@@ -661,7 +661,7 @@
     sim.setRunning = function (on) {
       sim.running = on;
       sim.carry = 0;
-      if (!on) sim.trial();
+      // Pausing must preserve the exact last solved state, including readings.
     };
 
     // ---------- Measurements, traces and averaging ----------
