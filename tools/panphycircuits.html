@@ -120,6 +120,8 @@
         <div id="workspace" class="workspace view-realistic" tabindex="0" role="application" aria-label="Circuit workspace. Tab cycles through components; arrow keys move the selection." data-active-tool="select">
           <svg id="ws-svg" class="ws-svg" xmlns="http://www.w3.org/2000/svg"></svg>
 
+          <div id="flow-note" class="flow-note" title="Current animation only. Meters, scope traces and sound use the actual frequency." hidden>AC animation slowed for visibility</div>
+
           <!-- Live circuit controls; elapsed time is in the Simulation inspector. -->
           <div id="sim-status" class="sim-status" data-state="live" role="group" aria-label="Simulation controls">
             <button type="button" id="btn-run" class="chip-btn chip-pause" aria-pressed="false"></button>
