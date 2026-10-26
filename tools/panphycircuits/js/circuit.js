@@ -274,6 +274,7 @@
       ids.add(c.id);
       const props = {};
       const srcProps = c.props && typeof c.props === 'object' ? c.props : {};
+      if (c.type === 'speaker' && srcProps.sound === undefined && srcProps.music === 'off') srcProps.sound = false;
       for (const p of def.props) props[p.key] = validateProp(def, p, srcProps[p.key], warnings, `${where} (${def.name})`);
       doc.components.push({ id: c.id, type: c.type, label: sanitizeLabel(c.label, def.prefix + (index + 1)), props });
     }

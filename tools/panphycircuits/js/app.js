@@ -637,21 +637,6 @@
     app.fit();
     ui.toast(`Tidied the ${viewName(v)}: parts lined up and wires rerouted. The other view keeps its own layout.`, { label: 'Undo', run: () => app.undo() });
   };
-  // Start again with nothing on the workspace. Display settings are kept, and
-  // Undo brings the previous circuit back.
-  app.startClean = function () {
-    const before = app.doc.components.length ? snapshot() : null;
-    const doc = circuit.createDoc();
-    doc.settings = Object.assign(circuit.defaultSettings(), app.doc.settings);
-    doc.view = app.doc.view;
-    app.emptyDismissed = true;
-    loadDoc(doc, { label: 'Clean canvas' });
-    if (before) {
-      app.history.stack.unshift({ snap: before, label: 'Before clean canvas', view: app.doc.view, time: Date.now() });
-      app.history.index = 1;
-      ui.toast('Clean canvas. Undo brings your last circuit back.', { label: 'Undo', run: () => app.undo() });
-    }
-  };
   app.loadExample = async function (i) {
     const ex = PPC.examples.list[i];
     document.getElementById('dlg-examples').close();
@@ -690,12 +675,11 @@
         const data = JSON.parse(raw);
         const r = circuit.importDoc(data.doc);
         loadDoc(r.doc, { label: 'Restore autosave', cameras: data.cameras });
-        restored = r.doc.components.length > 0;
+        restored = true;
       }
     } catch (e) { restored = false; }
     if (!restored) loadDoc(circuit.createDoc(), { label: 'New circuit' });
     app.setTool('select');
-    if (restored) document.getElementById('dlg-start').showModal();
     window.addEventListener('resize', () => { app.renderer.applyCamera(); app.graph.draw(true); ui.renderLive(); });
     window.addEventListener('panphy:theme-change', () => { app.renderAll(); app.graph.draw(true); });
     requestAnimationFrame(frame);
@@ -733,10 +717,6 @@
     $('btn-help').addEventListener('click', () => $('dlg-help').showModal());
     $('btn-tidy').addEventListener('click', () => app.tidy());
     $('btn-clear').addEventListener('click', () => app.newCircuit());
-    $('dlg-start').addEventListener('close', () => {
-      const choice = $('dlg-start').returnValue;
-      if (choice === 'clean') app.startClean();
-    });
     const menu = $('menu-file'), fileBtn = $('btn-file');
     const closeMenu = () => { menu.hidden = true; fileBtn.setAttribute('aria-expanded', 'false'); };
     fileBtn.addEventListener('click', (e) => {

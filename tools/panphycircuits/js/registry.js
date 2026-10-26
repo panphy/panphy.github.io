@@ -477,9 +477,8 @@
     terminals: [{ id: 'a', name: 'Terminal 1' }, { id: 'b', name: 'Terminal 2' }],
     props: [
       { key: 'R', label: 'Resistance', unit: 'Ω', kind: 'number', default: 8, min: 2, max: 64, step: 1 },
-      { key: 'music', label: 'Music loop', kind: 'select', default: 'groove', operational: true,
-        options: [{ value: 'groove', label: 'Sunshine groove' }, { value: 'arcade', label: 'Arcade' }, { value: 'ode', label: 'Ode to Joy — Beethoven' }, { value: 'off', label: 'Off' }],
-        help: 'A playful soundtrack: volume follows the changing current through this speaker. Pause time or choose Off to silence it.' }
+      { key: 'sound', label: 'Play sound', kind: 'bool', default: true, operational: true,
+        help: 'Plays a sine tone at the connected AC supply’s frequency while time runs. Volume follows the changing current. Frequencies below 20 Hz stay silent.' }
     ],
     compile(c, T, b) { b.R(T.a, T.b, c.props.R); },
     readings: (c, r) => twoTerminalReadings(c, r),
@@ -488,7 +487,7 @@
       return { i: Number.isFinite(i) ? i : 0 };
     },
     valueText: (c) => fmtSI(c.props.R, 'Ω', 3, { trim: true }),
-    help: 'Modeled as its coil resistance (8 Ω is typical). It makes a sound only when the current changes, for example from an AC supply with time running. A steady direct current just holds the cone pushed out or pulled in, which you cannot hear. Easter egg: while AC runs, a synthesized music loop plays with volume set by the changing current. This soundtrack is illustrative, not the actual electrical waveform; choose Off under Music loop to mute it.'
+    help: 'Modeled as its coil resistance (8 Ω is typical). It makes a sound only when the current changes, for example from an AC supply with time running. A steady direct current just holds the cone pushed out or pulled in, which you cannot hear. While time runs, it plays a sine tone at the frequency of the AC supply in its electrical network; volume follows the changing current. Frequencies below 20 Hz stay silent. Turn off Play sound to mute it.'
   });
 
   // ---------- Meters ----------
