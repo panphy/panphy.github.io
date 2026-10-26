@@ -45,6 +45,8 @@
 		}
 
 		body {
+			--footer-inset-x: 1rem;
+			--footer-inset-bottom: 0.75rem;
 			display: flex;
 			flex-direction: column;
 			align-items: center;
@@ -396,6 +398,8 @@
 		@media (max-width: 600px) {
 			body {
 				padding: 0.5rem;
+				--footer-inset-x: 0.5rem;
+				--footer-inset-bottom: 0.5rem;
 				padding-top: 3rem;
 			}
 
@@ -528,6 +532,7 @@
 			}
 		}
 	</style>
+	<link rel="stylesheet" href="/assets/footer.css">
 </head>
 
 <body>
@@ -582,9 +587,9 @@
 	<video id="video" autoplay playsinline></video>
 	<canvas id="canvas"></canvas>
 
-	<footer>
-		&copy; 2026 <a href="https://panphy.app/" target="_blank" rel="noopener noreferrer">PanPhy Labs</a>. All rights reserved. |
-		<a href="https://buymeacoffee.com/panphy" target="_blank" rel="noopener noreferrer">Support My Projects</a>
+	<footer class="panphy-footer">
+	  <span class="panphy-footer-legal">&copy; 2026 <a href="https://panphy.app/" target="_blank" rel="noopener noreferrer">PanPhy Labs</a>. All rights reserved. &middot;
+	    <a href="https://buymeacoffee.com/panphy" target="_blank" rel="noopener noreferrer">Support my projects</a></span>
 	</footer>
 
 	<script>
