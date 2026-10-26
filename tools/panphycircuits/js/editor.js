@@ -180,6 +180,12 @@
       app.setHint(null);
     }
     ed.cancelWiring = cancelWiring;
+    // Drop a wire in progress without restoring its snapshot, for when the
+    // circuit it started from is being replaced or has lost its start.
+    ed.abortWiring = function () {
+      if (ed.drag && (ed.drag.type === 'wiring' || ed.drag.type === 'wire-pending')) ed.drag = null;
+      if (ed.wiring) endWiring();
+    };
 
     function wiringClick(e, p, hit) {
       const w = ed.wiring;
