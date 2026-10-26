@@ -123,7 +123,6 @@
           <!-- Live circuit controls; elapsed time is in the Simulation inspector. -->
           <div id="sim-status" class="sim-status" data-state="live" role="group" aria-label="Simulation controls">
             <button type="button" id="btn-run" class="chip-btn chip-pause" aria-pressed="false"></button>
-            <button type="button" id="btn-reset" class="chip-btn" data-icon="reset" aria-label="Reset time to zero" title="Reset: back to t = 0, capacitors to their starting p.d., AC phase restarted, graphs and scope traces cleared. Keeps circuit, switches and live or paused state."></button>
             <span class="status-dot" aria-hidden="true"></span>
             <span id="sim-state">Live</span>
           </div>
@@ -152,7 +151,7 @@
             <div id="graph-legend" class="graph-legend"></div>
             <label class="graph-window"><span class="sr-only">Time window</span>
               <select id="graph-window">
-                <option value="all">Since reset</option>
+                <option value="all">All time</option>
                 <option value="60">Last 60 s</option>
                 <option value="10">Last 10 s</option>
                 <option value="1">Last 1 s</option>
@@ -229,7 +228,7 @@
         <h3>Simulation and models</h3>
         <ul>
           <li>The solver uses modified nodal analysis: it handles any arrangement of the supported components, with Newton–Raphson iteration for diodes, LEDs, lamps and transistors.</li>
-          <li>The circuit runs live, including examples and saved circuits. Use a switch to trigger an effect. <strong>Pause</strong> freezes time, traces, current and component animations, and sound; <strong>Resume</strong> continues. Edits still update readings while paused. <strong>Reset</strong> returns to t = 0, restores capacitor initial voltages, restarts AC phase and clears graphs and scope traces, keeping the circuit, switch positions and live or paused state. Elapsed time is in the Simulation inspector. Switching views never changes the simulation.</li>
+          <li>The circuit runs live, including examples and saved circuits. Use a switch to trigger an effect. <strong>Pause</strong> freezes time, traces, current and component animations, and sound; <strong>Resume</strong> continues. Edits still update readings while paused. Elapsed time is in the Simulation inspector. Switching views never changes the simulation.</li>
           <li>Wires, ideal ammeters and closed switches have zero resistance; ideal voltmeters and oscilloscope inputs draw no current. Meters can also be given a finite resistance.</li>
           <li>Short circuits across ideal sources, and ideal sources that disagree, are reported as errors rather than given made-up readings. Separate circuits have no shared reference, so a p.d. between them is undefined.</li>
           <li>Readings use 3 significant figures; the models are educational approximations, so treat the last figure with care. Each component’s inspector explains its model.</li>

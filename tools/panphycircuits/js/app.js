@@ -465,19 +465,6 @@
     app.audio.update();
     ui.announce(app.paused ? 'Simulation paused' : 'Simulation live');
   };
-  app.resetSim = function () {
-    app.sim.reset();
-    app.sim.setRunning(!app.paused && app.needsTime());
-    lastFrame = performance.now();
-    app.audio.update();
-    refreshProblems();
-    app.renderer.renderAll();
-    ui.updateReadings();
-    ui.updateStatus();
-    ui.renderLive();
-    app.graph.draw(true);
-    ui.announce('Simulation reset to t = 0');
-  };
 
   let lastFrame = performance.now();
   let lastSlow = 0;
@@ -699,7 +686,6 @@
     $('view-realistic').addEventListener('click', () => app.setView('realistic'));
     $('view-schematic').addEventListener('click', () => app.setView('schematic'));
     $('btn-run').addEventListener('click', app.toggleRun);
-    $('btn-reset').addEventListener('click', app.resetSim);
     document.querySelectorAll('[data-tool]').forEach((b) => b.addEventListener('click', () => app.setTool(b.dataset.tool)));
     $('btn-rotate').addEventListener('click', () => app.rotateSelection(1));
     $('btn-rotate-ccw').addEventListener('click', () => app.rotateSelection(-1));
