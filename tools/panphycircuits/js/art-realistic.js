@@ -653,10 +653,16 @@
           roundRect(side * 24 - 12, -25, 24, 50, 4, 'fill="#783A18"');
         for (let y = -21; y <= 21; y += 6) out += `<path d="M ${side * 24 - 11} ${y} Q ${side * 24} ${y + 5} ${side * 24 + 11} ${y}" fill="none" stroke="#ECA35E" stroke-width="4"/>`;
       }
-      return out + utext(ctx, -24, 0, ctx.p.np, 'ppc-print ppc-print-dark ppc-print-tiny') +
-        utext(ctx, 24, 0, ctx.p.ns, 'ppc-print ppc-print-dark ppc-print-tiny');
+      return out + turnsLabel(ctx, -24, ctx.p.np) + turnsLabel(ctx, 24, ctx.p.ns);
     }
   };
+
+  // Number of turns on a light label stuck over the winding, kept upright.
+  function turnsLabel(ctx, x, turns) {
+    const str = String(Math.round(turns)), w = n(str.length * 5.1 + 5);
+    return up(ctx, x, 0, `<rect x="${n(-w / 2)}" y="-7" width="${w}" height="14" rx="2.5" class="ppc-turns-tag"/>` +
+      `<text x="0" y="0.5" class="ppc-turns" text-anchor="middle" dominant-baseline="central">${esc(str)}</text>`);
+  }
 
   art.inductor = {
     bounds: () => [-44, -20, 88, 40],

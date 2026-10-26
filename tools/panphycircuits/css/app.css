@@ -237,6 +237,8 @@ button, input, select { font: inherit; color: inherit; }
 .ppc-print { font-size: 9px; font-weight: 700; fill: #fff; }
 .ppc-print-dark { fill: #3A1F08; }
 .ppc-print-tiny { font-size: 7px; }
+.ppc-turns-tag { fill: #F6EEDD; stroke: #4A2A12; stroke-width: 0.8; }
+.ppc-turns { font-family: var(--font-mono); font-size: 8.5px; font-weight: 700; fill: #1E1408; }
 .ppc-pol { font-size: 13px; font-weight: 800; }
 .ppc-pol-pos { fill: #D7372B; }
 .ppc-pol-neg { fill: #20242B; }
