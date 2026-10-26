@@ -413,7 +413,7 @@ button, input, select { font: inherit; color: inherit; }
   border-top: 1px solid var(--line); background: var(--surface-2); font-size: 0.76rem; color: var(--ink-3);
 }
 .statusbar-status { flex: 1; min-width: 0; display: flex; align-items: center; gap: 12px; }
-.hint { flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: var(--ink-2); }
+.hint { flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: var(--ink-2); text-align: left; }
 .problems-btn { display: inline-flex; align-items: center; gap: 6px; height: 24px; padding: 0 10px; white-space: nowrap; border-radius: 999px; border: 1px solid; cursor: pointer; font-size: 0.74rem; font-weight: 700; background: var(--surface); }
 .problems-btn .icon { width: 14px; height: 14px; }
 .problems-btn[data-level="error"] { color: var(--danger); border-color: color-mix(in srgb, var(--danger) 45%, transparent); background: var(--danger-soft); }
@@ -603,7 +603,7 @@ button, input, select { font: inherit; color: inherit; }
 @media (max-width: 760px) {
   .app { --statusbar-h: 68px; }
   .statusbar { flex-direction: column; align-items: stretch; gap: 2px; }
-  .statusbar-status { flex: none; min-height: 20px; }
+  .statusbar-status { flex: none; width: 100%; min-height: 20px; }
   .statusbar-legal { white-space: normal; line-height: 1.3; }
 }
 
