@@ -449,12 +449,12 @@
   // ---------- Simulation ----------
 
   // The solver finds the steady state after every change, so readings are live
-  // without the clock. Time only matters for capacitors, AC supplies, the
+  // without the clock. Time only matters for capacitors, inductors, AC supplies, the
   // oscilloscope and a graph of readings against time.
-  app.NO_TIME_MSG = 'Nothing in this circuit changes with time, so its readings are already live. Time matters for capacitors, AC supplies, the oscilloscope and the graph.';
+  app.NO_TIME_MSG = 'Nothing in this circuit changes with time, so its readings are already live. Time matters for capacitors, inductors, AC supplies, the oscilloscope and the graph.';
   app.needsTime = function () {
     const comp = app.sim.compiled;
-    if (comp && (comp.hasCaps || Number.isFinite(comp.acMin))) return true;
+    if (comp && (comp.hasCaps || comp.hasInductors || Number.isFinite(comp.acMin))) return true;
     if (app.doc.components.some((c) => c.type === 'scope')) return true;
     return app.graphOpen() && app.doc.components.some((c) => registry.get(c.type).meter && c.props.plot);
   };

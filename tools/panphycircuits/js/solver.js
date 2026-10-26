@@ -3,7 +3,7 @@
 // Modified nodal analysis (MNA) on the shared circuit:
 // - Each net (terminals joined by wires) is a node. Components compile into
 //   primitives: conductances, ideal voltage sources (V-edges), current sources,
-//   capacitors and nonlinear elements.
+//   capacitors, inductors and nonlinear elements.
 // - The circuit is split into networks (groups of nodes joined by primitives).
 //   Each network is solved on its own, relative to its own reference node, so a
 //   voltage between separate networks is undefined rather than invented.
@@ -14,7 +14,7 @@
 //   undefined instead of being made up.
 // - Nonlinear elements use Newton-Raphson with junction voltage limiting, with
 //   source stepping as a fallback. Failure to converge is reported.
-// - Capacitors use companion models: backward Euler for the first step after a
+// - Capacitors and inductors use companion models: backward Euler for the first step after a
 //   change, then BDF2 (second order, no numerical ringing).
 // - Logic modules settle one gate at a time (zero propagation delay).
 (function (root) {
@@ -55,6 +55,7 @@
       },
       V(p, q, v, o = {}) { prims.push({ k: 'V', a: p, b: q, v, owner: currentOwner, ...o }); },
       I(p, q, i) { prims.push({ k: 'I', a: p, b: q, i, owner: currentOwner }); },
+      L(p, q, L, i0) { prims.push({ k: 'L', a: p, b: q, l: L, i0: i0 || 0, owner: currentOwner }); },
       C(p, q, C, v0) { prims.push({ k: 'C', a: p, b: q, c: C, v0: v0 || 0, owner: currentOwner }); },
       NL(ns, model, kind) { prims.push({ k: 'N', nodes: ns, model, kind, st: {}, owner: currentOwner }); },
       logicIn(p, id) {
@@ -137,9 +138,20 @@
       }
       if (Number.isFinite(rMin)) dtSuggest = Math.min(dtSuggest, (p.c * rMin) / 100);
     }
+    for (const p of prims) {
+      if (p.k !== 'L') continue;
+      const net = networks[networkOf[p.a.n]];
+      // Sum passive series resistances conservatively; meter input resistance is
+      // a parallel measurement load, not a winding/discharge resistance.
+      const resistance = net.prims.filter((q) => q.k === 'G' && !q.hidden &&
+        circuit.getComp(doc, q.owner)?.type !== 'voltmeter')
+        .reduce((sum, q) => sum + 1 / q.g, 0);
+      if (resistance > 0) dtSuggest = Math.min(dtSuggest, p.l / resistance / 100);
+      for (const q of net.prims) if (q.k === 'C') dtSuggest = Math.min(dtSuggest, Math.sqrt(p.l * q.c) / 100);
+    }
     dtSuggest = Math.min(0.01, Math.max(1e-6, dtSuggest));
 
-    return { doc, nodes, prims, networks, networkOf, netOf, nets, logicComps, dtSuggest, acMin, notes, hasCaps: prims.some((p) => p.k === 'C') };
+    return { doc, nodes, prims, networks, networkOf, netOf, nets, logicComps, dtSuggest, acMin, notes, hasCaps: prims.some((p) => p.k === 'C'), hasInductors: prims.some((p) => p.k === 'L') };
   }
 
   // ---------- Linear algebra ----------
@@ -267,7 +279,7 @@
     const zlin = new Float64Array(size);
     const addA = (r, c, v) => { if (r >= 0 && c >= 0) Alin[r * size + c] += v; };
     const addZ = (r, v) => { if (r >= 0) zlin[r] += v; };
-    const capInfo = [];
+    const capInfo = [], indInfo = [];
     for (const p of net.prims) {
       if (p.k === 'G') {
         const a = idx(p.a.n), b = idx(p.b.n);
@@ -275,6 +287,15 @@
       } else if (p.k === 'I') {
         const i = valueOf(p.i, ctx, lambda);
         addZ(idx(p.a.n), -i); addZ(idx(p.b.n), i);
+      } else if (p.k === 'L') {
+        const h = ctx.indHist[p.owner] || { i1: p.i0 };
+        const bdf2 = h.i2 !== undefined && ctx.method === 'bdf2';
+        const geq = (bdf2 ? 2 / 3 : 1) * ctx.dt / p.l;
+        const ihist = bdf2 ? (4 * h.i1 - h.i2) / 3 : h.i1;
+        indInfo.push({ p, geq, ihist });
+        const a = idx(p.a.n), b = idx(p.b.n);
+        addA(a, a, geq); addA(b, b, geq); addA(a, b, -geq); addA(b, a, -geq);
+        addZ(a, -ihist); addZ(b, ihist);
       } else if (p.k === 'C') {
         const h = ctx.capHist[p.owner] || { v1: p.v0 };
         let geq, ihist;
@@ -344,6 +365,9 @@
       else if (p.k === 'V') {
         const k = vEdges.indexOf(p);
         ia = loops.undefinedPrims.has(p) ? NaN : (k >= 0 ? x[nU + k] : NaN);
+      } else if (p.k === 'L') {
+        const info = indInfo.find((q) => q.p === p);
+        ia = info.geq * (V[p.a.n] - V[p.b.n]) + info.ihist;
       } else if (p.k === 'C') {
         const info = capInfo.find((q) => q.p === p);
         ia = info.geq * (V[p.a.n] - V[p.b.n]) - info.ihist;
@@ -357,7 +381,7 @@
         primI.set(p, [ia, -ia]);
       }
     }
-    return { ok: true, V, primI, loops, capInfo };
+    return { ok: true, V, primI, loops, capInfo, indInfo };
   }
 
   // Solve every network, with logic settling and source stepping as needed.
@@ -523,6 +547,7 @@
       running: false,
       dt: 0.005,
       capHist: {},
+      indHist: {},
       logic: {},
       inputs: {},
       warm: new Map(),
@@ -544,6 +569,8 @@
       sim.compiled = compile(doc, { pressed: sim.pressed });
       const ids = new Set(doc.components.map((c) => c.id));
       for (const id of Object.keys(sim.capHist)) if (!ids.has(id)) delete sim.capHist[id];
+      for (const id of Object.keys(sim.indHist)) if (!ids.has(id)) delete sim.indHist[id];
+      for (const p of sim.compiled.prims) if (p.k === 'L' && !sim.indHist[p.owner]) sim.indHist[p.owner] = { i1: p.i0 };
       for (const p of sim.compiled.prims) if (p.k === 'C' && !sim.capHist[p.owner]) sim.capHist[p.owner] = { v1: p.v0 };
       sim.dt = doc.settings.dt === 'auto' ? sim.compiled.dtSuggest : doc.settings.dt;
       // A new circuit/source setting starts a fresh acquisition, so old source
@@ -567,6 +594,7 @@
       sim.t = 0;
       sim.running = false;
       sim.capHist = {};
+      sim.indHist = {};
       sim.logic = {};
       sim.inputs = {};
       sim.nlState = {};
@@ -580,7 +608,7 @@
     };
 
     function context(t, method, dt) {
-      return { t, dt, method, capHist: sim.capHist, logic: Object.assign({}, sim.logic), inputs: Object.assign({}, sim.inputs), nlState: sim.nlState };
+      return { t, dt, method, capHist: sim.capHist, indHist: sim.indHist, logic: Object.assign({}, sim.logic), inputs: Object.assign({}, sim.inputs), nlState: sim.nlState };
     }
 
     function run(t, dt, method) {
@@ -621,6 +649,10 @@
       for (const net of sim.compiled.networks) {
         const r = solved.results[net.index];
         if (!r.ok) continue;
+        for (const info of r.indInfo) {
+          const h = sim.indHist[info.p.owner];
+          sim.indHist[info.p.owner] = { i1: r.primI.get(info.p)[0], i2: h ? h.i1 : undefined };
+        }
         for (const info of r.capInfo) {
           const h = sim.capHist[info.p.owner];
           const v = r.V[info.p.a.n] - r.V[info.p.b.n];
