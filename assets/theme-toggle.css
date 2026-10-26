@@ -3,6 +3,7 @@
   font-size: 0 !important;
 }
 
+[data-panphy-theme-toggle],
 .panphy-theme-button,
 button.panphy-theme-button,
 #theme-button.panphy-theme-button,
@@ -86,6 +87,7 @@ button.panphy-theme-button:focus-visible,
   outline-offset: 3px !important;
 }
 
+[data-panphy-theme-toggle] .panphy-theme-icon,
 .panphy-theme-button .panphy-theme-icon {
   width: 24px;
   height: 24px;
@@ -115,6 +117,7 @@ button.panphy-theme-button:focus-visible,
 
 @media (prefers-reduced-motion: reduce) {
   .panphy-theme-button,
+  [data-panphy-theme-toggle] .panphy-theme-icon,
   .panphy-theme-button .panphy-theme-icon {
     transition-duration: 0.01ms !important;
   }
@@ -123,4 +126,9 @@ button.panphy-theme-button:focus-visible,
   .panphy-theme-button:hover .panphy-theme-icon {
     transform: none !important;
   }
+}
+
+/* Keep placeholder icons out of the first paint while preserving the control space. */
+[data-panphy-theme-toggle]:not([data-panphy-theme-icon]) {
+  visibility: hidden;
 }
