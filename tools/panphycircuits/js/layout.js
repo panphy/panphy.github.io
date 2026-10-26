@@ -580,7 +580,7 @@
     dst.comps = {};
     for (const c of placed) {
       const e = src.comps[c.id];
-      dst.comps[c.id] = { x: snap(e.x * ratio), y: snap(e.y * ratio), r: e.r, f: e.f };
+      dst.comps[c.id] = { x: snap(e.x * ratio), y: snap(e.y * ratio), r: target === 'realistic' && hasFixedBenchOrientation(c) ? 0 : e.r, f: e.f };
     }
     // Anything without a source position goes in a row below.
     let maxY = 0, x = 0;
@@ -671,7 +671,7 @@
       for (const id of ids) {
         const e = src[id];
         if (!e) continue;
-        dst[id] = { x: snap(s * e.x + tx), y: snap(s * e.y + ty), r: e.r, f: e.f };
+        dst[id] = { x: snap(s * e.x + tx), y: snap(s * e.y + ty), r: view === 'realistic' && hasFixedBenchOrientation(circuit.getComp(doc, id)) ? 0 : e.r, f: e.f };
       }
       // Move the new group as a whole until it does not overlap existing parts.
       const existing = doc.components.filter((c) => !idSet.has(c.id) && dst[c.id] && c.type !== 'junction').map((c) => compBounds(doc, view, c.id));
@@ -823,13 +823,14 @@
     return cost;
   }
 
-  // Tidy never turns these: meters on the bench (so their displays read
-  // normally) and the oscilloscope in either view (its screen and inputs).
+  // Tidy keeps physical meters and supply boxes upright on the bench,
+  // and the oscilloscope upright in either view.
   const UPRIGHT_ON_BENCH = ['ammeter', 'voltmeter', 'scope'];
+  const hasFixedBenchOrientation = c => !!c && !!PPC.registry.get(c.type).fixedBenchOrientation;
   function keepsUpright(doc, view, id) {
     const c = circuit.getComp(doc, id);
     if (!c) return false;
-    return c.type === 'scope' || (view === 'realistic' && UPRIGHT_ON_BENCH.includes(c.type)) ||
+    return c.type === 'scope' || (view === 'realistic' && (UPRIGHT_ON_BENCH.includes(c.type) || hasFixedBenchOrientation(c))) ||
       (view === 'schematic' && (c.type.startsWith('gate_') || ['logic_in', 'logic_out', 'rail_0v', 'rail_5v'].includes(c.type)));
   }
 

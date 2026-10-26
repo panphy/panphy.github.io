@@ -519,7 +519,8 @@ button, input, select { font: inherit; color: inherit; }
 .mini-actions { display: grid; grid-template-columns: repeat(auto-fit, minmax(56px, 1fr)); gap: 4px; margin-top: 12px; padding-top: 10px; border-top: 1px solid var(--line); }
 .mini-tool { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; min-height: 52px; padding: 6px 2px; border: 0; border-radius: 10px; background: none; color: var(--ink-2); font-size: 0.72rem; font-weight: 600; cursor: pointer; }
 .mini-tool .icon { width: 18px; height: 18px; color: var(--accent); }
-.mini-tool:hover { background: var(--surface-3); color: var(--ink); }
+.mini-tool:hover:not(:disabled) { background: var(--surface-3); color: var(--ink); }
+.mini-tool:disabled { opacity: 0.35; cursor: default; }
 .mini-tool.danger, .mini-tool.danger .icon { color: var(--danger); }
 .mini-tool.danger:hover { background: var(--danger-soft); }
 

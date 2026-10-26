@@ -9,7 +9,7 @@
   const FORMAT = 'panphy-circuits';
   const VERSION = 1;
   const VIEWS = ['realistic', 'schematic'];
-  const WIRE_COLORS = ['red', 'black', 'blue', 'green', 'yellow', 'orange', 'white', 'purple'];
+  const WIRE_COLORS = ['red', 'black', 'blue', 'green', 'orange', 'white', 'purple'];
   const ID_PATTERN = /^[a-z][a-z0-9_-]{0,31}$/i;
   const LABEL_MAX = 12;
 
@@ -101,7 +101,7 @@
     if (sameEnd(a, b)) return { error: 'A wire needs two different terminals.' };
     const dup = doc.wires.find((w) => (sameEnd(w.a, a) && sameEnd(w.b, b)) || (sameEnd(w.a, b) && sameEnd(w.b, a)));
     if (dup) return { error: 'Those terminals are already joined by a wire.' };
-    const wire = { id: opts.id || nextId(doc, 'w'), a: { c: a.c, t: a.t }, b: { c: b.c, t: b.t }, color: opts.color || autoWireColor(doc, a, b) };
+    const wire = { id: opts.id || nextId(doc, 'w'), a: { c: a.c, t: a.t }, b: { c: b.c, t: b.t }, color: opts.color === 'yellow' ? 'purple' : opts.color || autoWireColor(doc, a, b) };
     doc.wires.push(wire);
     return { wire };
   }
@@ -286,7 +286,7 @@
       const a = { c: w.a.c, t: w.a.t }, b = { c: w.b.c, t: w.b.t };
       if (!terminalExists(doc, a) || !terminalExists(doc, b) || sameEnd(a, b)) { warnings.push(`Wire ${index + 1} connects to a missing terminal and was skipped.`); continue; }
       wireIds.add(w.id);
-      doc.wires.push({ id: w.id, a, b, color: WIRE_COLORS.includes(w.color) ? w.color : 'blue' });
+      doc.wires.push({ id: w.id, a, b, color: w.color === 'yellow' ? 'purple' : WIRE_COLORS.includes(w.color) ? w.color : 'blue' });
     }
     const layouts = data.layouts && typeof data.layouts === 'object' ? data.layouts : {};
     for (const view of VIEWS) {
@@ -295,13 +295,17 @@
       lay.ready = src.ready === true;
       const comps = src.comps && typeof src.comps === 'object' ? src.comps : {};
       const wires = src.wires && typeof src.wires === 'object' ? src.wires : {};
+      const straightened = new Set();
       for (const c of doc.components) {
         const e = validateLayoutEntry(comps[c.id]);
-        if (e) lay.comps[c.id] = e;
+        if (e) {
+          if (view === 'realistic' && registry.get(c.type).fixedBenchOrientation && e.r !== 0) { e.r = 0; straightened.add(c.id); }
+          lay.comps[c.id] = e;
+        }
       }
       for (const w of doc.wires) {
         const e = wires[w.id];
-        lay.wires[w.id] = { pts: validatePoints(e && e.pts) };
+        lay.wires[w.id] = { pts: straightened.has(w.a.c) || straightened.has(w.b.c) ? [] : validatePoints(e && e.pts) };
       }
       // A view is only ready if every component has a position in it.
       if (lay.ready && doc.components.some((c) => !lay.comps[c.id])) lay.ready = 'partial';
