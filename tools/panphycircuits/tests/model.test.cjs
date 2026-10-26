@@ -172,6 +172,32 @@ test('imports are validated and cannot carry markup', () => {
   assert.ok(r.warnings.some((w) => /missing terminal/.test(w)));
 });
 
+test('legacy files skip removed parts and attached wires while preserving the supported circuit', () => {
+  const original = circuit.exportDoc(examples.build(examples.list[0], 'realistic'));
+  const data = circuit.clone(original);
+  const source = data.components[0].id;
+  data.components.push(
+    { id: 'legacyRelay', type: 'relay', label: 'K1', props: { R: 120, L: 0.2, pickup: 0.03 } },
+    { id: 'legacyOpamp', type: 'opamp', label: 'U1', props: { gain: 100000 } }
+  );
+  data.wires.push(
+    { id: 'legacyW1', a: { c: source, t: 'p' }, b: { c: 'legacyRelay', t: 'cp' }, color: 'red' },
+    { id: 'legacyW2', a: { c: 'legacyRelay', t: 'no' }, b: { c: 'legacyOpamp', t: 'plus' }, color: 'blue' },
+    { id: 'legacyW3', a: { c: 'legacyOpamp', t: 'vn' }, b: { c: source, t: 'n' }, color: 'black' }
+  );
+  for (const view of layout.VIEWS) {
+    for (const id of ['legacyRelay', 'legacyOpamp']) data.layouts[view].comps[id] = { x: 400, y: 0, r: 0, f: false };
+    for (const id of ['legacyW1', 'legacyW2', 'legacyW3']) data.layouts[view].wires[id] = { pts: [] };
+  }
+  const result = circuit.importDoc(JSON.stringify(data));
+  assert.deepEqual(circuit.exportDoc(result.doc), original);
+  assert.equal(result.warnings.filter(w => /unsupported type/.test(w)).length, 2);
+  assert.equal(result.warnings.filter(w => /missing terminal/.test(w)).length, 3);
+  const sim = solver.createSim();
+  sim.setDoc(result.doc);
+  assert.equal(sim.result.errors.length, 0);
+});
+
 test('tidy up never makes a layout worse, keeps every connection and leaves no overlaps', () => {
   let seed = 7;
   const rand = () => { seed = (seed * 16807) % 2147483647; return seed / 2147483647; };

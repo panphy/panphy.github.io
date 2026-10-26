@@ -674,6 +674,7 @@
         const r = circuit.importDoc(data.doc);
         loadDoc(r.doc, { label: 'Restore autosave', cameras: data.cameras });
         restored = true;
+        if (r.warnings.length) ui.message('Restored with changes', ['Some parts of the autosaved circuit could not be used:'].concat(r.warnings.slice(0, 12), r.warnings.length > 12 ? [`…and ${r.warnings.length - 12} more.`] : []));
       }
     } catch (e) { restored = false; }
     if (!restored) loadDoc(circuit.createDoc(), { label: 'New circuit' });

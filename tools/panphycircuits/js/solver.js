@@ -36,7 +36,6 @@
     const nodes = nets.map((n) => ({ key: n.key, global: n.global }));
     const prims = [];
     const logicComps = [];
-    const relayComps = [];
     const notes = [];
     let currentOwner = null;
     let internalCount = 0;
@@ -58,14 +57,6 @@
       I(p, q, i) { prims.push({ k: 'I', a: p, b: q, i, owner: currentOwner }); },
       L(p, q, L, i0) { prims.push({ k: 'L', a: p, b: q, l: L, i0: i0 || 0, owner: currentOwner }); },
       C(p, q, C, v0) { prims.push({ k: 'C', a: p, b: q, c: C, v0: v0 || 0, owner: currentOwner }); },
-      relay(c, coil, common, nc, no) {
-        const owner = currentOwner;
-        relayComps.push({ comp: c, coil });
-        for (const [terminal, normallyOn] of [[nc, true], [no, false]]) {
-          prims.push({ k: 'G', a: common, b: terminal, owner,
-            g: (ctx) => (!!ctx.relays[owner] !== normallyOn ? 1 / 0.05 : 1e-12) });
-        }
-      },
       transformer(ns, np, nsTurns) {
         const lp = 10 * (np / 100) ** 2, ls = 10 * (nsTurns / 100) ** 2;
         prims.push({ k: 'T', nodes: ns, lp, ls, m: 0.999 * Math.sqrt(lp * ls),
@@ -175,7 +166,7 @@
     }
     dtSuggest = Math.min(0.01, Math.max(1e-6, dtSuggest));
 
-    return { doc, nodes, galvanicOf, prims, networks, networkOf, netOf, nets, logicComps, relayComps, dtSuggest, acMin, notes, hasCaps: prims.some((p) => p.k === 'C'), hasInductors: prims.some((p) => p.k === 'L' || p.k === 'T') };
+    return { doc, nodes, galvanicOf, prims, networks, networkOf, netOf, nets, logicComps, dtSuggest, acMin, notes, hasCaps: prims.some((p) => p.k === 'C'), hasInductors: prims.some((p) => p.k === 'L' || p.k === 'T') };
   }
 
   // ---------- Linear algebra ----------
@@ -437,33 +428,7 @@
   }
 
   // Solve every network, with logic settling and source stepping as needed.
-  // Settle electromechanical contacts outside Newton iteration. Coil and contact
-  // networks stay electrically separate, but each contact change is re-solved.
   function solveAll(compiled, ctx, warm) {
-    ctx.relays = ctx.relays || {};
-    let solved;
-    for (let pass = 0; pass < 4 * compiled.relayComps.length + 8; pass++) {
-      solved = solveElectrical(compiled, ctx, warm);
-      let changed = false;
-      for (const { comp, coil } of compiled.relayComps) {
-        const net = compiled.networkOf[coil.n];
-        const result = solved.results[net];
-        if (!result.ok) continue;
-        const coilR = compiled.networks[net].prims.find((p) => p.owner === comp.id && p.a?.term === 'cp');
-        const current = Math.abs(result.primI.get(coilR)[0]);
-        const on = !!ctx.relays[comp.id];
-        const next = current >= comp.props.pickup ? true : current <= comp.props.pickup * 0.5 ? false : on;
-        if (next !== on) { ctx.relays[comp.id] = next; changed = true; break; }
-      }
-      if (!changed) return solved;
-    }
-    // Return readings for the actual final contact state, even for an oscillator.
-    solved = solveElectrical(compiled, ctx, warm);
-    solved.warnings.push({ msg: 'Relay contacts do not settle (a switching feedback loop oscillates).', comps: compiled.relayComps.map((r) => r.comp.id) });
-    return solved;
-  }
-
-  function solveElectrical(compiled, ctx, warm) {
     const results = new Array(compiled.networks.length);
     const doc = compiled.doc;
     const errors = [];
@@ -588,7 +553,6 @@
       errors: solved.errors,
       warnings,
       logic: ctx.logic,
-      relays: { ...ctx.relays },
       inputs: ctx.inputs || {},
       lgNetwork: (networks.find((n) => n.hasLogic) || {}).index,
       lgNode: (networks.find((n) => n.hasLogic) || {}).ref
@@ -611,7 +575,6 @@
       },
       logicIn(id) { return !!(result.inputs[c.id] && result.inputs[c.id][id]); },
       logicOut(id) { return !!(result.logic[c.id] && result.logic[c.id][id]); },
-      relayOn() { return !!result?.relays?.[c.id]; },
       sameNetwork(a, b) { return !!e && e.island[a] === e.island[b]; }
     };
   }
@@ -630,7 +593,6 @@
       capHist: {},
       indHist: {},
       logic: {},
-      relays: {},
       inputs: {},
       warm: new Map(),
       nlState: {},
@@ -651,7 +613,6 @@
       sim.compiled = compile(doc, { pressed: sim.pressed });
       const ids = new Set(doc.components.map((c) => c.id));
       for (const id of Object.keys(sim.capHist)) if (!ids.has(id)) delete sim.capHist[id];
-      for (const id of Object.keys(sim.relays)) if (!ids.has(id)) delete sim.relays[id];
       for (const id of Object.keys(sim.indHist)) if (!ids.has(id)) delete sim.indHist[id];
       for (const p of sim.compiled.prims) if ((p.k === 'L' || p.k === 'T') && !sim.indHist[p.owner]) sim.indHist[p.owner] = { i1: p.i0 || 0, j1: 0 };
       for (const p of sim.compiled.prims) if (p.k === 'C' && !sim.capHist[p.owner]) sim.capHist[p.owner] = { v1: p.v0 };
@@ -679,7 +640,6 @@
       sim.capHist = {};
       sim.indHist = {};
       sim.logic = {};
-      sim.relays = {};
       sim.inputs = {};
       sim.nlState = {};
       sim.warm = new Map();
@@ -692,7 +652,7 @@
     };
 
     function context(t, method, dt) {
-      return { t, dt, method, capHist: sim.capHist, indHist: sim.indHist, logic: Object.assign({}, sim.logic), relays: { ...sim.relays }, inputs: Object.assign({}, sim.inputs), nlState: sim.nlState };
+      return { t, dt, method, capHist: sim.capHist, indHist: sim.indHist, logic: Object.assign({}, sim.logic), inputs: Object.assign({}, sim.inputs), nlState: sim.nlState };
     }
 
     function run(t, dt, method) {
@@ -708,7 +668,6 @@
       const { result, ctx, solved } = run(sim.t, sim.dt, 'be');
       // Logic settling and Newton state carry over; stored charge does not change.
       sim.logic = ctx.logic;
-      sim.relays = ctx.relays;
       sim.inputs = ctx.inputs;
       saveWarm(solved);
       sim.result = result;
@@ -747,7 +706,6 @@
         }
       }
       sim.logic = ctx.logic;
-      sim.relays = ctx.relays;
       sim.inputs = ctx.inputs;
       saveWarm(solved);
       sim.t = t;
