@@ -22,7 +22,7 @@
     snap: '<path d="M6 4v8a6 6 0 0012 0V4"/><path d="M6 8h4M14 8h4"/>',
     graph: '<path d="M4 4v16h16"/><path d="M7 15c3-7 5-7 7-3s3 2 5-4"/>',
     sliders: '<path d="M4 7.5h9M17.5 7.5H20M4 16.5h3.5M11.5 16.5H20"/><circle cx="15.2" cy="7.5" r="2.2"/><circle cx="9.5" cy="16.5" r="2.2"/>',
-    play: '<path d="M8 5.5v13l10.5-6.5z" fill="currentColor"/>',
+    resume: '<path d="M8 5.5v13l10.5-6.5z" fill="currentColor"/>',
     pause: '<path d="M7.5 5.5h3.2v13H7.5zM13.3 5.5h3.2v13h-3.2z" fill="currentColor"/>',
     reset: '<path d="M4 4v6h6"/><path d="M4.5 15a8 8 0 102-8.5L4 10"/>',
     realistic: '<rect x="3" y="9" width="18" height="7" rx="3.5"/><path d="M8 9v7M11 9v7M14 9v7M1 12.5h2M21 12.5h2"/>',
@@ -289,9 +289,9 @@
       const opt = (v, cur, label) => `<option value="${v}" ${String(cur) === String(v) ? 'selected' : ''}>${label}</option>`;
       const toggle = (key, label) => `<label class="toggle"><span>${label}</span><input type="checkbox" data-setting="${key}" ${s[key] ? 'checked' : ''}><span class="toggle-track" aria-hidden="true"></span></label>`;
       return `<p class="insp-hint">Select a component or wire to edit it and see its readings.</p>` +
-        card('Simulation', `<div class="row"><label for="s-speed">Speed</label><select id="s-speed" data-setting="speed">${[0.01, 0.1, 0.25, 1, 4, 10].map((v) => opt(v, s.speed, v === 1 ? 'Real time (1×)' : `${v}×`)).join('')}</select></div>` +
+        card('Simulation', `<div class="row"><span>Elapsed time</span><span id="sim-time" class="ds-readout">${fmtTime(app.sim.t)}</span></div><div class="row"><label for="s-speed">Speed</label><select id="s-speed" data-setting="speed">${[0.01, 0.1, 0.25, 1, 4, 10].map((v) => opt(v, s.speed, v === 1 ? 'Real time (1×)' : `${v}×`)).join('')}</select></div>` +
           `<div class="row"><label for="s-dt">Time step</label><select id="s-dt" data-setting="dt">${opt('auto', s.dt, `Auto (${units.fmtSI(app.sim.dt, 's', 2)})`)}${[1e-5, 1e-4, 1e-3, 1e-2].map((v) => opt(v, s.dt, units.fmtSI(v, 's', 1))).join('')}</select></div>`) +
-        `<details class="icard model-note"><summary>About the simulation</summary><p>Readings are worked out afresh after every change, so they are live without the clock. Time is needed only for capacitors, AC supplies, the oscilloscope and graphs; then the time bar at the bottom right of the canvas shows play and reset. <strong>Play</strong> advances time in fixed steps; <strong>Pause</strong> freezes it, but edits still update the readings for the frozen state; <strong>Reset</strong> returns to t = 0 with every capacitor at its initial p.d. and clears the graphs. Switching views never changes the simulation.</p>` +
+        `<details class="icard model-note"><summary>About the simulation</summary><p>The circuit runs live, including capacitors, AC supplies, the oscilloscope and graphs. Use a switch in your circuit to trigger an effect. <strong>Pause</strong> freezes time, traces, current and component animations, and sound; <strong>Resume</strong> continues from there. Edits still update readings for the frozen state. <strong>Reset</strong> returns to t = 0 with every capacitor at its initial p.d., restarts the AC phase and clears graphs and scope traces. It keeps the circuit, switch positions and your live or paused state. Switching views never changes the simulation.</p>` +
           `<p>The automatic time step is about 1/100 of the shortest RC time constant (and of an AC period). Results do not depend on your device's frame rate.</p>` +
           `<p>Animated current shows conventional current as yellow dashes moving from + to − through the external circuit. Their speed only hints at the size of the current; real charge carriers drift far more slowly.</p>` +
           `<p>Editing the circuit while it runs keeps time and stored charge. Saved files and autosave keep the circuit, not the live state: opening one starts at t = 0.</p></details>`;
@@ -475,7 +475,7 @@
       for (let j = 0; j <= 8; j++) { g.strokeStyle = j === 4 ? 'rgba(120, 220, 170, 0.45)' : 'rgba(80, 170, 130, 0.22)'; g.beginPath(); g.moveTo(0, j * H / 8 + 0.5); g.lineTo(W, j * H / 8 + 0.5); g.stroke(); }
       if (!s || !s.t.length) {
         g.fillStyle = 'rgba(190, 240, 215, 0.75)'; g.font = '12px Figtree, sans-serif'; g.textAlign = 'center'; g.textBaseline = 'middle';
-        g.fillText('Press play on the time bar to draw the traces', W / 2, H / 2);
+        g.fillText('Waiting for samples', W / 2, H / 2);
         return;
       }
       const span = units.scopeTimeDiv(c.props, s) * 10;
@@ -630,21 +630,24 @@
     ui.updateStatus = function () {
       const sim = app.sim;
       const run = $('btn-run');
-      // Time stops by itself if the last time-dependent part goes.
+      // Only advance the solver when needed; retain an explicit pause across edits.
       const timeMatters = app.needsTime();
-      if (sim.running && !timeMatters) sim.setRunning(false);
-      const runHtml = icon(sim.running ? 'pause' : 'play');
+      const running = timeMatters && !app.paused;
+      if (sim.running !== running) sim.setRunning(running);
+      document.body.classList.toggle('sim-paused', app.paused);
+      const runHtml = icon(app.paused ? 'resume' : 'pause');
       if (run.dataset.html !== runHtml) { run.innerHTML = runHtml; run.dataset.html = runHtml; }
-      run.setAttribute('aria-pressed', String(sim.running));
-      run.setAttribute('aria-label', sim.running ? 'Pause time' : 'Play: let time run');
-      run.title = sim.running ? 'Pause: freeze time; edits still update the readings (Space)' : 'Play: let capacitors charge, AC supplies alternate and graphs fill (Space)';
-      // The playback buttons appear only when something changes with time.
-      run.hidden = !timeMatters;
-      $('btn-reset').hidden = !timeMatters;
-      $('sim-status').dataset.state = !timeMatters ? 'live' : sim.running ? (sim.behind ? 'behind' : 'running') : 'paused';
-      $('sim-state').textContent = !timeMatters ? 'Live' : sim.running ? 'Running' : 'Paused';
-      $('sim-status').title = !timeMatters ? app.NO_TIME_MSG : sim.running && sim.behind ? 'Running slower than the chosen speed: this device cannot keep up.' : '';
-      $('sim-time').textContent = 't = ' + fmtTime(sim.t);
+      run.setAttribute('aria-pressed', String(app.paused));
+      run.setAttribute('aria-label', app.paused ? 'Resume simulation' : 'Pause simulation');
+      run.title = app.paused ? 'Resume the live circuit (Space)' : 'Pause: freeze time, traces, animations and sound; edits still update readings (Space)';
+      // Keep Resume available if time-dependent parts are removed while paused.
+      run.hidden = !timeMatters && !app.paused;
+      $('btn-reset').hidden = !timeMatters && !app.paused;
+      $('sim-status').dataset.state = app.paused ? 'paused' : sim.running ? (sim.behind ? 'behind' : 'running') : 'live';
+      $('sim-state').textContent = app.paused ? 'Paused' : 'Live';
+      $('sim-status').title = !timeMatters && !app.paused ? app.NO_TIME_MSG : sim.running && sim.behind ? 'Running slower than the chosen speed: this device cannot keep up.' : '';
+      const elapsed = $('sim-time');
+      if (elapsed) elapsed.textContent = fmtTime(sim.t);
       $('view-switch').dataset.view = app.doc.view;
       $('view-realistic').setAttribute('aria-pressed', String(app.doc.view === 'realistic'));
       $('view-schematic').setAttribute('aria-pressed', String(app.doc.view === 'schematic'));

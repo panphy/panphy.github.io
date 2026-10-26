@@ -370,3 +370,23 @@ test('a fuse conducts below its rating and opens the circuit once blown', () => 
   const blown = build(spec(0.5, true));
   close(blown.read('R1').i('a'), 0, 1e-9, 'no current through a blown fuse');
 });
+
+test('pause preserves the exact transient result and history; resume continues from it', () => {
+  const c = build({
+    comps: { B1: ['battery', { emf: 6 }], R1: ['resistor', { R: 1000 }], C1: ['capacitor', { C: 0.001 }] },
+    wires: [['B1.p', 'R1.a'], ['R1.b', 'C1.p'], ['C1.n', 'B1.n']]
+  });
+  c.sim.setRunning(true);
+  c.sim.advance(0.1, Infinity, () => 0);
+  const time = c.sim.t, result = c.sim.result;
+  const history = JSON.stringify([c.sim.capHist, c.sim.traces, c.sim.scopes]);
+  c.sim.setRunning(false);
+  assert.equal(c.sim.advance(0.1, Infinity, () => 0), 0);
+  assert.equal(c.sim.t, time);
+  assert.equal(c.sim.result, result);
+  assert.equal(JSON.stringify([c.sim.capHist, c.sim.traces, c.sim.scopes]), history);
+  c.sim.setRunning(true);
+  c.sim.advance(0.1, Infinity, () => 0);
+  assert.ok(c.sim.t > time);
+  assert.ok(c.read('C1').v('p', 'n') > solver.reader(result, circuit.getComp(c.doc, c.ids.C1)).v('p', 'n'));
+});

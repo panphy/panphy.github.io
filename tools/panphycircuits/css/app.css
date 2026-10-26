@@ -126,8 +126,8 @@ button, input, select { font: inherit; color: inherit; }
 .view-switch button:hover:not([aria-pressed="true"]) { color: var(--ink); }
 .view-switch button:focus-visible { outline: 3px solid var(--focus); outline-offset: 1px; }
 
-/* Time bar in the bottom-right corner of the canvas: play/pause and reset
-   (only when something changes with time), run state and simulation time. */
+/* Investigation controls in the bottom-right corner: pause/resume and reset
+   (only when something changes with time), live or paused state. */
 .sim-status {
   position: absolute; right: 12px; bottom: 12px; z-index: 4; white-space: nowrap; display: inline-flex; align-items: center; gap: 8px;
   min-height: 42px; padding: 4px 14px; border-radius: 999px; background: var(--surface); border: 1px solid var(--line); box-shadow: var(--shadow-1);
@@ -135,19 +135,19 @@ button, input, select { font: inherit; color: inherit; }
 }
 /* Fixed widths so changing text never shifts anything. */
 #sim-state { display: inline-block; width: 3.9em; }
-.chip-btn { display: inline-grid; place-items: center; width: 34px; height: 34px; margin-left: -6px; border: 0; border-radius: 50%; background: none; color: var(--ink-2); cursor: pointer; }
+.chip-btn { display: inline-grid; place-items: center; width: 48px; height: 48px; margin-left: -6px; border: 0; border-radius: 50%; background: none; color: var(--ink-2); cursor: pointer; }
 .chip-btn + .chip-btn { margin-left: -4px; }
 .chip-btn .icon { width: 18px; height: 18px; }
 .chip-btn:hover { background: var(--surface-3); color: var(--ink); }
 .chip-btn:focus-visible { outline: 3px solid var(--focus); outline-offset: 1px; }
-.chip-play { background: var(--good); color: #fff; }
-.chip-play:hover { background: color-mix(in srgb, var(--good) 85%, #000); color: #fff; }
-[data-theme="dark"] .chip-play { color: #04150C; }
-.chip-play[aria-pressed="true"] { background: var(--warn); }
-.chip-play .icon { width: 16px; height: 16px; stroke: none; }
+.chip-pause { background: var(--good); color: #fff; }
+.chip-pause:hover { background: color-mix(in srgb, var(--good) 85%, #000); color: #fff; }
+[data-theme="dark"] .chip-pause { color: #04150C; }
+.chip-pause[aria-pressed="false"] { background: var(--warn); }
+.chip-pause .icon { width: 16px; height: 16px; stroke: none; }
 .chip-btn:not([hidden]) ~ .status-dot { margin-left: 2px; }
 #sim-time { display: inline-block; min-width: 12ch; }
-.sim-status .ds-readout { color: var(--ink); font-size: 0.82rem; }
+.sim-paused .ppc-spin, .sim-paused .ppc-buzz, .sim-paused .ppc-waves { animation-play-state: paused; }
 .status-dot { width: 9px; height: 9px; border-radius: 50%; background: var(--ink-3); }
 .sim-status[data-state="running"] .status-dot { background: var(--good); box-shadow: 0 0 0 3px color-mix(in srgb, var(--good) 25%, transparent); animation: pulse 1.4s ease-in-out infinite; }
 .sim-status[data-state="behind"] .status-dot { background: var(--warn); }
