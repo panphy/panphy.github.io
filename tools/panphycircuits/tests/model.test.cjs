@@ -300,12 +300,12 @@ test('series-parallel recognition: parallel branches yes, transistors and bridge
   assert.equal(layout.seriesParallel(doc, 'schematic'), null, 'bridge');
 });
 
-test('tidy up never turns meters on the bench', () => {
+test('tidy up keeps meters and AC/DC supplies upright on the bench', () => {
   let seed = 21;
   const rand = () => { seed = (seed * 16807) % 2147483647; return seed / 2147483647; };
   for (const ex of examples.list) {
     const doc = examples.build(ex, 'realistic');
-    const meters = doc.components.filter((c) => ['ammeter', 'voltmeter', 'scope'].includes(c.type));
+    const meters = doc.components.filter((c) => ['ammeter', 'voltmeter', 'scope', 'acsupply', 'dcsupply'].includes(c.type));
     if (!meters.length) continue;
     for (const pl of Object.values(doc.layouts.realistic.comps)) { pl.x += Math.round((rand() - 0.5) * 200); pl.y += Math.round((rand() - 0.5) * 200); pl.r = Math.floor(rand() * 4); }
     for (const w of doc.wires) doc.layouts.realistic.wires[w.id] = { pts: [] };
@@ -640,4 +640,59 @@ test('parallel-resistor example has straight meter leads and positive branch rea
   const quality = layout.schematicQuality(doc);
   assert.equal(quality.overParts, 0);
   assert.equal(quality.crossings, 0);
+});
+
+
+test('old rotated supply boxes open upright without rotating schematic symbols or changing connections', () => {
+  for (const type of ['acsupply', 'dcsupply']) {
+    const doc = circuit.createDoc();
+    const supply = circuit.addComponent(doc, type);
+    const load = circuit.addComponent(doc, 'resistor');
+    for (const view of layout.VIEWS) {
+      place(doc, supply, view, -200, 0, 3);
+      place(doc, load, view, 100, 0);
+      doc.layouts[view].ready = true;
+    }
+    const wire = circuit.addWire(doc, { c: supply.id, t: 'p' }, { c: load.id, t: 'a' }).wire;
+    for (const view of layout.VIEWS) doc.layouts[view].wires[wire.id] = { pts: [[-100, -100]] };
+    const restored = circuit.importDoc(circuit.exportDoc(doc)).doc;
+    assert.equal(restored.layouts.realistic.comps[supply.id].r, 0);
+    assert.equal(restored.layouts.schematic.comps[supply.id].r, 3);
+    assert.deepEqual(restored.wires, doc.wires);
+    assert.deepEqual(restored.layouts.realistic.wires[wire.id].pts, [], 'reroute only the straightened box leads');
+    assert.deepEqual(restored.layouts.schematic.wires[wire.id].pts, [[-100, -100]]);
+  }
+});
+
+test('generating or extending a bench view keeps supplies upright despite rotated schematic sources', () => {
+  for (const type of ['acsupply', 'dcsupply']) {
+    const doc = circuit.createDoc();
+    const source = circuit.addComponent(doc, type);
+    place(doc, source, 'schematic', 0, 0, 3);
+    doc.layouts.schematic.ready = true;
+    layout.generateLayout(doc, 'realistic', 'schematic');
+    assert.equal(doc.layouts.realistic.comps[source.id].r, 0);
+    const second = circuit.addComponent(doc, type);
+    place(doc, second, 'schematic', 300, 0, 1.5);
+    layout.placeInOtherViews(doc, [second.id], 'schematic');
+    assert.equal(doc.layouts.realistic.comps[second.id].r, 0);
+    assert.equal(doc.layouts.schematic.comps[second.id].r, 1.5);
+  }
+});
+
+
+test('old yellow wires become purple on import and copy while connections are preserved', () => {
+  const doc = circuit.createDoc();
+  const supply = circuit.addComponent(doc, 'acsupply');
+  const load = circuit.addComponent(doc, 'resistor');
+  const wire = circuit.addWire(doc, { c: supply.id, t: 'p' }, { c: load.id, t: 'a' }, { color: 'yellow' }).wire;
+  assert.equal(wire.color, 'purple', 'copy/add cannot reintroduce yellow wires');
+  const old = circuit.exportDoc(doc);
+  old.wires[0].color = 'yellow';
+  const opened = circuit.importDoc(old).doc;
+  assert.equal(opened.wires[0].color, 'purple');
+  assert.deepEqual(opened.wires[0].a, wire.a);
+  assert.deepEqual(opened.wires[0].b, wire.b);
+  assert.ok(circuit.WIRE_COLORS.includes(opened.wires[0].color));
+  assert.equal(circuit.WIRE_COLORS.includes('yellow'), false);
 });

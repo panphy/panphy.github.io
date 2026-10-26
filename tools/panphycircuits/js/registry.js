@@ -251,6 +251,7 @@
   });
 
   define('dcsupply', {
+    fixedBenchOrientation: true,
     name: 'DC power supply', group: 'Sources', prefix: 'PS', keywords: 'psu lab bench supply',
     terminals: [{ id: 'p', name: 'Positive (+)' }, { id: 'n', name: 'Negative (−)' }],
     polarity: { p: '+', n: '−' },
@@ -265,7 +266,8 @@
   });
 
   define('acsupply', {
-    name: 'AC power supply', group: 'Sources', prefix: 'AC', category: 'ext', keywords: 'alternating sine mains signal generator',
+    fixedBenchOrientation: true,
+    name: 'AC power supply', group: 'Sources', prefix: 'AC', keywords: 'alternating sine mains signal generator',
     terminals: [{ id: 'p', name: 'Terminal 1 (reference +)' }, { id: 'n', name: 'Terminal 2' }],
     polarity: { p: '~', n: '~' },
     props: [
@@ -536,7 +538,7 @@
   });
 
   define('scope', {
-    name: 'Oscilloscope', group: 'Meters', prefix: 'OS', category: 'ext', keywords: 'cro graph trace waveform',
+    name: 'Oscilloscope', group: 'Meters', prefix: 'OS', keywords: 'cro graph trace waveform',
     terminals: [{ id: 'ch1', name: 'Channel 1 input' }, { id: 'ch2', name: 'Channel 2 input' }, { id: 'com', name: 'Common (0 V)' }],
     props: [
       { key: 'autoScale', label: 'Auto scale', kind: 'bool', default: true, operational: true },

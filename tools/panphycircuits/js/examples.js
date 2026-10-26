@@ -85,7 +85,7 @@
       ],
       wires: [
         ['B1.p', 'VR1.a', 'red'],
-        ['VR1.w', 'V1.p', 'yellow'],
+        ['VR1.w', 'V1.p', 'purple'],
         ['VR1.b', 'J1.j', 'black'],
         ['V1.n', 'J1.j', 'black'],
         ['B1.n', 'J1.j', 'black', { s: [[-240, 140]] }]
@@ -174,8 +174,8 @@
         ['B1.p', 'J1.j', 'red'],
         ['J1.j', 'L1.a', 'red'],
         ['J1.j', 'S1.a', 'red'],
-        ['S1.b', 'RB.a', 'yellow'],
-        ['RB.b', 'Q1.b', 'yellow'],
+        ['S1.b', 'RB.a', 'purple'],
+        ['RB.b', 'Q1.b', 'purple'],
         ['L1.b', 'Q1.c', 'blue'],
         ['Q1.e', 'B1.n', 'black', { s: [[160, 140], [-200, 140]], r: [[240, 230], [-400, 230]] }]
       ]
@@ -196,8 +196,8 @@
       wires: [
         ['B1.p', 'Q1.e', 'red', { s: [[-200, -100], [120, -100]] }],
         ['Q1.c', 'L1.a', 'blue'],
-        ['RB.b', 'Q1.b', 'yellow'],
-        ['RB.a', 'S1.a', 'yellow'],
+        ['RB.b', 'Q1.b', 'purple'],
+        ['RB.a', 'S1.a', 'purple'],
         ['S1.b', 'J1.j', 'black'],
         ['L1.b', 'J1.j', 'black'],
         ['B1.n', 'J1.j', 'black']
@@ -219,8 +219,8 @@
         ['GND', 'rail_0v', {}, [110, 360, 0], [80, 250, 0]]
       ],
       wires: [
-        ['INA.q', 'G1.a', 'yellow'],
-        ['INB.q', 'G1.b', 'yellow'],
+        ['INA.q', 'G1.a', 'purple'],
+        ['INB.q', 'G1.b', 'purple'],
         ['G1.q', 'J1.j', 'blue'],
         ['J1.j', 'OUT1.a', 'blue'],
         ['J1.j', 'R1.a', 'blue'],
@@ -232,7 +232,6 @@
       title: 'Half-wave rectifier and oscilloscope',
       summary: 'A 2 Hz AC supply, a diode and a 1 kΩ load. The oscilloscope compares the supply (CH1) with the load (CH2).',
       tip: 'Watch CH2 live: the diode only lets the positive half-cycles through, about 0.6 V lower.',
-      ext: true,
       comps: [
         ['AC1', 'acsupply', { peak: 5, freq: 2 }, [-300, 60, 0], [-160, 40, 3]],
         ['D1', 'diode', {}, [-30, -40, 0], [-40, -40, 0]],
@@ -243,13 +242,13 @@
         ['J3', 'junction', {}, [100, 200, 0], [80, 120, 0]]
       ],
       wires: [
-        ['AC1.p', 'J1.j', 'yellow'],
-        ['J1.j', 'D1.a', 'yellow'],
+        ['AC1.p', 'J1.j', 'purple'],
+        ['J1.j', 'D1.a', 'purple'],
         ['D1.k', 'J2.j', 'red'],
         ['J2.j', 'R1.a', 'red'],
         ['R1.b', 'J3.j', 'black'],
         ['J3.j', 'AC1.n', 'black', { s: [[-160, 120]] }],
-        ['OS1.ch1', 'J1.j', 'yellow', { s: [[-70, -110], [-120, -110]] }],
+        ['OS1.ch1', 'J1.j', 'purple', { s: [[-70, -110], [-120, -110]] }],
         ['OS1.ch2', 'J2.j', 'blue', { s: [[-40, -100], [40, -100]] }],
         ['OS1.com', 'J3.j', 'black', { s: [[-10, -115], [140, -115], [140, 120]], r: [[240, -180], [260, 200]] }]
       ]
@@ -258,25 +257,24 @@
       title: 'Full-wave bridge rectifier and oscilloscope',
       summary: 'A four-diode bridge turns both half-cycles of a 2 Hz AC supply into one-way current through a 1 kΩ load. CH1 measures the load voltage.',
       tip: 'Watch CH1: both half-cycles produce a positive pulse across the load, with two diode drops. D1/D2 conduct on one half-cycle; D3/D4 conduct on the other.',
-      ext: true,
       comps: [
-        ['AC1', 'acsupply', { peak: 10, freq: 2 }, [-300, 0, 3], [-300, 0, 3]],
-        ['D1', 'diode', {}, [45, -45, 0.5], [45, -45, 0.5]],
-        ['D2', 'diode', {}, [-45, 45, 0.5], [-45, 45, 0.5]],
-        ['D3', 'diode', {}, [-45, -45, 3.5], [-45, -45, 3.5]],
-        ['D4', 'diode', {}, [45, 45, 3.5], [45, 45, 3.5]],
+        ['AC1', 'acsupply', { peak: 10, freq: 2 }, [-300, 0, 0], [-300, 0, 3]],
+        ['D1', 'diode', {}, [50, -50, 0.5], [45, -45, 0.5]],
+        ['D2', 'diode', {}, [-50, 50, 0.5], [-45, 45, 0.5]],
+        ['D3', 'diode', {}, [-50, -50, 3.5], [-45, -45, 3.5]],
+        ['D4', 'diode', {}, [50, 50, 3.5], [45, 45, 3.5]],
         ['R1', 'resistor', { R: 1000 }, [240, 65, 1], [240, 65, 1]],
         ['OS1', 'scope', { tdiv: '0.1', v1: '2', v2: '2' }, [360, -170, 0], [330, -170, 0]],
-        ['J1', 'junction', {}, [0, -90, 0], [0, -90, 0]],
-        ['J2', 'junction', {}, [90, 0, 0], [90, 0, 0]],
-        ['J3', 'junction', {}, [0, 90, 0], [0, 90, 0]],
-        ['J4', 'junction', {}, [-90, 0, 0], [-90, 0, 0]],
+        ['J1', 'junction', {}, [0, -100, 0], [0, -90, 0]],
+        ['J2', 'junction', {}, [100, 0, 0], [90, 0, 0]],
+        ['J3', 'junction', {}, [0, 100, 0], [0, 90, 0]],
+        ['J4', 'junction', {}, [-100, 0, 0], [-90, 0, 0]],
         ['J5', 'junction', {}, [240, 0, 0], [240, 0, 0]],
         ['J6', 'junction', {}, [240, 200, 0], [240, 200, 0]]
       ],
       wires: [
-        ['AC1.p', 'J1.j', 'yellow', { r: [[-300, -90]], s: [[-300, -90]] }],
-        ['AC1.n', 'J3.j', 'yellow', { r: [[-300, 90]], s: [[-300, 90]] }],
+        ['AC1.p', 'J1.j', 'purple', { r: [[-190, 80], [-190, -120], [0, -120]], s: [[-300, -90]] }],
+        ['AC1.n', 'J3.j', 'purple', { r: [[-330, 150], [0, 150]], s: [[-300, 90]] }],
         ['J1.j', 'D1.a', 'red'],
         ['D1.k', 'J2.j', 'red'],
         ['J4.j', 'D2.a', 'black'],

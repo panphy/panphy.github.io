@@ -257,13 +257,15 @@
     app.commit(comps.length + wires.length > 1 ? 'Delete selection' : comps.length ? 'Delete component' : 'Delete wire');
     ui.announce('Deleted');
   };
+  app.canRotate = c => !!c && c.type !== 'junction' && !(app.doc.view === 'realistic' && registry.get(c.type).fixedBenchOrientation);
+  app.canRotateSelection = () => [...app.selection.comps].some(id => app.canRotate(circuit.getComp(app.doc, id)));
   app.rotateSelection = function (dir) {
     const v = app.doc.view;
     let n = 0;
     for (const id of app.selection.comps) {
       const pl = app.doc.layouts[v].comps[id];
       const c = circuit.getComp(app.doc, id);
-      if (!pl || c.type === 'junction') continue;
+      if (!pl || !app.canRotate(c)) continue;
       pl.r = layout.normRot(pl.r + dir * 0.5); n++;
     }
     if (n) app.commit('Rotate');
