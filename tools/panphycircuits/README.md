@@ -56,6 +56,6 @@ node --test tools/panphycircuits/tests/*.test.cjs
 
 ## Requirement checklist
 
-Done: both views fully editable and synchronized; Tidy up and Clear circuit; core components (including transformer, fuse, motor, loudspeaker, AC supply and oscilloscope) and the extensions (capacitors, inductors, NPN/PNP, relay, op amp, seven gates, logic I/O and rails, two-way switch); wiring with bends, junctions, reconnecting ends and crossing hops; undo/redo; meters and inspector readings; graph; 12 examples; automatic restoration of the last autosaved circuit, .ppcir import/export, SVG/PNG export; light/dark themes; keyboard shortcuts; tablet layout.
+Done: both views fully editable and synchronized; Tidy up and Clear circuit; core components (including transformer, fuse, motor, loudspeaker, AC supply and oscilloscope) and the extensions (capacitors, inductors, NPN/PNP, relay, op amp, seven gates, logic I/O and rails, two-way switch); wiring with bends, junctions, reconnecting ends and crossing hops; undo/redo; meters and inspector readings; graph; 9 examples; automatic restoration of the last autosaved circuit, .ppcir import/export, SVG/PNG export; light/dark themes; keyboard shortcuts; tablet layout.
 
 Not done / limitations: no thermal lag in lamps, no reverse breakdown, no magnetic saturation or coupling between separate inductors, no transistor Early effect or capacitance, no gate propagation delay; logic modules share one hidden 5 V supply; phone-width layout works but is cramped.

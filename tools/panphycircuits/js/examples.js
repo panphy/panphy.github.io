@@ -109,28 +109,6 @@
       ]
     },
     {
-      title: 'LDR light sensor',
-      summary: 'A potential divider of a 10 kΩ resistor and an LDR. The p.d. across the LDR rises as it gets darker.',
-      tip: 'Select the LDR and change the illumination: compare 1 lx (dark) with 1000 lx (bright).',
-      comps: [
-        ['B1', 'battery', { emf: 6 }, [-260, 40, 0], [-160, 60, 3]],
-        ['R1', 'resistor', { R: 10e3 }, [0, -60, 1], [0, 0, 1]],
-        ['LDR1', 'ldr', { lux: 300 }, [0, 140, 1], [0, 120, 1]],
-        ['J1', 'junction', {}, [0, 40, 0], [0, 60, 0]],
-        ['V1', 'voltmeter', {}, [200, 100, 0], [220, 120, 3]],
-        ['J2', 'junction', {}, [0, 250, 0], [0, 190, 0]]
-      ],
-      wires: [
-        ['B1.p', 'R1.a', 'red'],
-        ['R1.b', 'J1.j', 'blue'],
-        ['J1.j', 'LDR1.a', 'blue'],
-        ['J1.j', 'V1.p', 'red'],
-        ['LDR1.b', 'J2.j', 'black'],
-        ['V1.n', 'J2.j', 'black'],
-        ['B1.n', 'J2.j', 'black']
-      ]
-    },
-    {
       title: 'Capacitor charging and discharging',
       summary: 'A 1000 µF capacitor charges through 4.7 kΩ (RC = 4.7 s). Flip the two-way switch to discharge it.',
       tip: 'The circuit is live. Flip the two-way switch to B to discharge. The graph shows the solver’s p.d. and current.',
@@ -181,29 +159,6 @@
       ]
     },
     {
-      title: 'PNP transistor switch',
-      summary: 'A PNP transistor with its emitter at +6 V. Closing the switch pulls the base low and turns the lamp on.',
-      tip: 'Close the switch. In a PNP transistor, conventional current flows out of the base.',
-      ext: true,
-      comps: [
-        ['B1', 'battery', { emf: 6 }, [-330, 40, 0], [-200, 40, 3]],
-        ['Q1', 'pnp', { beta: 100, pinout: 'ebc' }, [160, -40, 0], [100, -20, 2, true]],
-        ['RB', 'resistor', { R: 4.7e3 }, [0, 70, 0], [0, -20, 0]],
-        ['S1', 'switch', { closed: false }, [-130, 150, 1], [-80, 60, 1]],
-        ['L1', 'lamp', { ratedV: 6, ratedI: 0.06 }, [250, 110, 1], [120, 80, 1]],
-        ['J1', 'junction', {}, [-20, 270, 0], [-80, 160, 0]]
-      ],
-      wires: [
-        ['B1.p', 'Q1.e', 'red', { s: [[-200, -100], [120, -100]] }],
-        ['Q1.c', 'L1.a', 'blue'],
-        ['RB.b', 'Q1.b', 'purple'],
-        ['RB.a', 'S1.a', 'purple'],
-        ['S1.b', 'J1.j', 'black'],
-        ['L1.b', 'J1.j', 'black'],
-        ['B1.n', 'J1.j', 'black']
-      ]
-    },
-    {
       title: 'Logic gate: AND',
       summary: 'Two logic inputs feed an AND gate. Its output lights an indicator and drives an LED through 330 Ω to the 0 V rail.',
       tip: 'Click the input switches to step through the truth table (shown in the gate’s inspector).',
@@ -226,31 +181,6 @@
         ['J1.j', 'R1.a', 'blue'],
         ['R1.b', 'D1.a', 'blue'],
         ['D1.k', 'GND.t', 'black']
-      ]
-    },
-    {
-      title: 'Half-wave rectifier and oscilloscope',
-      summary: 'A 2 Hz AC supply, a diode and a 1 kΩ load. The oscilloscope compares the supply (CH1) with the load (CH2).',
-      tip: 'Watch CH2 live: the diode only lets the positive half-cycles through, about 0.6 V lower.',
-      comps: [
-        ['AC1', 'acsupply', { peak: 5, freq: 2 }, [-300, 60, 0], [-160, 40, 3]],
-        ['D1', 'diode', {}, [-30, -40, 0], [-40, -40, 0]],
-        ['R1', 'resistor', { R: 1000 }, [160, 60, 1], [80, 40, 1]],
-        ['OS1', 'scope', { tdiv: '0.1', v1: '2', v2: '2' }, [-60, -260, 0], [-40, -170, 0]],
-        ['J1', 'junction', {}, [-150, -40, 0], [-120, -40, 0]],
-        ['J2', 'junction', {}, [80, -40, 0], [40, -40, 0]],
-        ['J3', 'junction', {}, [100, 200, 0], [80, 120, 0]]
-      ],
-      wires: [
-        ['AC1.p', 'J1.j', 'purple'],
-        ['J1.j', 'D1.a', 'purple'],
-        ['D1.k', 'J2.j', 'red'],
-        ['J2.j', 'R1.a', 'red'],
-        ['R1.b', 'J3.j', 'black'],
-        ['J3.j', 'AC1.n', 'black', { s: [[-160, 120]] }],
-        ['OS1.ch1', 'J1.j', 'purple', { s: [[-70, -110], [-120, -110]] }],
-        ['OS1.ch2', 'J2.j', 'blue', { s: [[-40, -100], [40, -100]] }],
-        ['OS1.com', 'J3.j', 'black', { s: [[-10, -115], [140, -115], [140, 120]], r: [[240, -180], [260, 200]] }]
       ]
     },
     {
