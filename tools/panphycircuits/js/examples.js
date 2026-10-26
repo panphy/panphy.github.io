@@ -253,6 +253,47 @@
         ['OS1.ch2', 'J2.j', 'blue', { s: [[-40, -100], [40, -100]] }],
         ['OS1.com', 'J3.j', 'black', { s: [[-10, -115], [140, -115], [140, 120]], r: [[240, -180], [260, 200]] }]
       ]
+    },
+    {
+      title: 'Full-wave bridge rectifier and oscilloscope',
+      summary: 'A four-diode bridge turns both half-cycles of a 2 Hz AC supply into one-way current through a 1 kΩ load. CH1 measures the load voltage.',
+      tip: 'Watch CH1: both half-cycles produce a positive pulse across the load, with two diode drops. D1/D2 conduct on one half-cycle; D3/D4 conduct on the other.',
+      ext: true,
+      comps: [
+        ['AC1', 'acsupply', { peak: 10, freq: 2 }, [-300, 0, 3], [-300, 0, 3]],
+        ['D1', 'diode', {}, [45, -45, 0.5], [45, -45, 0.5]],
+        ['D2', 'diode', {}, [-45, 45, 0.5], [-45, 45, 0.5]],
+        ['D3', 'diode', {}, [-45, -45, 3.5], [-45, -45, 3.5]],
+        ['D4', 'diode', {}, [45, 45, 3.5], [45, 45, 3.5]],
+        ['R1', 'resistor', { R: 1000 }, [240, 65, 1], [240, 65, 1]],
+        ['OS1', 'scope', { tdiv: '0.1', v1: '2', v2: '2' }, [360, -170, 0], [330, -170, 0]],
+        ['J1', 'junction', {}, [0, -90, 0], [0, -90, 0]],
+        ['J2', 'junction', {}, [90, 0, 0], [90, 0, 0]],
+        ['J3', 'junction', {}, [0, 90, 0], [0, 90, 0]],
+        ['J4', 'junction', {}, [-90, 0, 0], [-90, 0, 0]],
+        ['J5', 'junction', {}, [240, 0, 0], [240, 0, 0]],
+        ['J6', 'junction', {}, [240, 200, 0], [240, 200, 0]]
+      ],
+      wires: [
+        ['AC1.p', 'J1.j', 'yellow', { r: [[-300, -90]], s: [[-300, -90]] }],
+        ['AC1.n', 'J3.j', 'yellow', { r: [[-300, 90]], s: [[-300, 90]] }],
+        ['J1.j', 'D1.a', 'red'],
+        ['D1.k', 'J2.j', 'red'],
+        ['J4.j', 'D2.a', 'black'],
+        ['D2.k', 'J3.j', 'black'],
+        ['J4.j', 'D3.a', 'black'],
+        ['D3.k', 'J1.j', 'black'],
+        ['J3.j', 'D4.a', 'red'],
+        ['D4.k', 'J2.j', 'red'],
+        ['J2.j', 'J5.j', 'red'],
+        ['J5.j', 'R1.a', 'red'],
+        ['R1.b', 'J6.j', 'black'],
+        ['J6.j', 'J4.j', 'black', { r: [[-150, 200], [-150, 0]], s: [[-150, 200], [-150, 0]] }],
+        // Measure only across the floating load: scope COM is the bridge's
+        // negative output, not an AC input terminal. CH2 is deliberately unused.
+        ['OS1.ch1', 'J5.j', 'blue', { r: [[300, -50], [240, -50]], s: [[300, -50], [240, -50]] }],
+        ['OS1.com', 'J6.j', 'black', { r: [[480, -130], [480, 200]], s: [[420, -130], [420, 200]] }]
+      ]
     }
   ];
 

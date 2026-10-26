@@ -390,3 +390,35 @@ test('pause preserves the exact transient result and history; resume continues f
   assert.ok(c.sim.t > time);
   assert.ok(c.read('C1').v('p', 'n') > solver.reader(result, circuit.getComp(c.doc, c.ids.C1)).v('p', 'n'));
 });
+
+test('full-wave bridge example rectifies both half-cycles and measures only across the load', () => {
+  const examples = require('../js/examples.js');
+  const example = examples.list.find(ex => ex.title === 'Full-wave bridge rectifier and oscilloscope');
+  assert.ok(example);
+  for (const view of ['realistic', 'schematic']) {
+    const doc = examples.build(example, view);
+    const byLabel = Object.fromEntries(doc.components.map(c => [c.label, c]));
+    const sim = solver.createSim(); sim.setDoc(doc);
+    const read = label => solver.reader(sim.result, byLabel[label]);
+    const loadVoltages = [];
+    for (let step = 1; step <= 200; step++) {
+      sim.step();
+      assert.equal(sim.result.errors.length, 0);
+      const voltage = read('R1').v('a', 'b');
+      loadVoltages.push(voltage);
+      assert.ok(voltage > -1e-6, 'load polarity never reverses');
+      close(sim.scopes[byLabel.OS1.id].ch1.at(-1), voltage, 1e-9, 'CH1 measures the load');
+      assert.ok(Number.isNaN(sim.scopes[byLabel.OS1.id].ch2.at(-1)), 'CH2 is unconnected');
+      if (step % 50 === 25) {
+        assert.ok(voltage > 8.5 && voltage < 9.1, 'peak includes two forward diode drops');
+        const conducting = step % 100 === 25 ? ['D1', 'D2'] : ['D3', 'D4'];
+        const blocked = step % 100 === 25 ? ['D3', 'D4'] : ['D1', 'D2'];
+        for (const label of conducting) assert.ok(read(label).i('a') > .008, `${label} conducts`);
+        for (const label of blocked) assert.ok(Math.abs(read(label).i('a')) < 1e-6, `${label} blocks`);
+      }
+      if (step % 50 === 0) assert.ok(Math.abs(voltage) < .05, 'output returns to zero at each input zero crossing');
+    }
+    const peaks = loadVoltages.filter((v, i, a) => i > 0 && i < a.length - 1 && v > a[i - 1] && v > a[i + 1] && v > 8.5);
+    assert.equal(peaks.length, 4, '2 Hz input produces four output pulses per second');
+  }
+});
