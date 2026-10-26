@@ -472,7 +472,7 @@
     const dt = Math.min(0.1, (now - lastFrame) / 1000);
     lastFrame = now;
     if (app.sim.running) {
-      const steps = app.sim.advance(dt, 10, () => performance.now(), (result) => app.audio.sample(result));
+      const steps = app.sim.advance(dt, 10, () => performance.now(), (result) => { app.audio.sample(result); app.renderer.sampleFlow(result); });
       if (steps > 0) {
         refreshProblems();
         app.renderer.updateDynamic();

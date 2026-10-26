@@ -398,32 +398,124 @@
     // ---------- Current flow animation ----------
     // Conventional current along wires. Wire currents come from the solver's
     // terminal currents (KCL over each net's wire tree); speed is illustrative.
-    let flowPhase = 0;
+    const flowAnimation = createFlowAnimation(app);
+    const flowOffsets = new Map();
     function updateFlow(dtReal) {
       const doc = app.doc;
+      const currents = flowAnimation.update(dtReal);
+      const note = document.getElementById('flow-note');
+      if (note) note.hidden = !flowAnimation.slowed;
       if (!doc.settings.currentFlow || !app.sim.result) { if (L.flow.innerHTML) L.flow.innerHTML = ''; return; }
-      flowPhase = (flowPhase + dtReal) % 1000;
-      const currents = wireCurrents(app);
       const parts = [];
       for (const w of doc.wires) {
         const r = routes.get(w.id);
         const I = currents.get(w.id);
         if (!r || !Number.isFinite(I) || Math.abs(I) < 1e-6) continue;
         const speed = Math.min(160, 30 + 26 * Math.log10(1 + Math.abs(I) * 1e3));
-        const off = -(Math.sign(I) * flowPhase * speed) % 24;
+        // Integrate displacement so reversals and changes in current stay smooth.
+        const off = ((flowOffsets.get(w.id) || 0) - Math.sign(I) * speed * dtReal) % 24;
+        flowOffsets.set(w.id, off);
         parts.push(`<path d="${r.d}" class="flow" style="stroke-dashoffset:${off.toFixed(1)}"/>`);
       }
+      const wireIds = new Set(doc.wires.map((w) => w.id));
+      for (const id of flowOffsets.keys()) if (!wireIds.has(id)) flowOffsets.delete(id);
       L.flow.innerHTML = parts.join('');
     }
 
-    return { renderAll, renderMove, renderOverlay, renderTerminals, renderWires, renderLabels, updateDynamic, applyCamera, setPreview, route, updateFlow, artCtx, drawArt };
+    return { renderAll, renderMove, renderOverlay, renderTerminals, renderWires, renderLabels, updateDynamic, applyCamera, setPreview, route, updateFlow,
+      sampleFlow: flowAnimation.sample, artCtx, drawArt };
+  }
+
+  // Replay measured wire-current waveforms at one visual cycle per second.
+  // The live solver, instrument traces and audio are never changed. Sampling a
+  // whole cycle preserves rectification, phase shifts and DC offsets rather than
+  // inventing a sine wave for every wire. Each independent network has its own
+  // frequency. Mixed-frequency networks retain live animation, since one period
+  // cannot represent their combined waveform reliably.
+  function createFlowAnimation(app) {
+    const SAMPLE_BINS = 64;
+    let compiled, config, elapsed = 0;
+    let profiles = [];
+    const animation = { slowed: false, sample, update };
+
+    function sync() {
+      const next = app.sim.compiled;
+      const key = `${app.doc.settings.currentFlow}:${app.doc.settings.speed}:${app.sim.dt}`;
+      if (compiled === next && config === key) return;
+      compiled = next; config = key; elapsed = 0; profiles = [];
+      if (!compiled || !app.doc.settings.currentFlow) return;
+      const frequencies = new Map();
+      for (const c of app.doc.components) {
+        if (c.type !== 'acsupply' || !(c.props.peak > 0)) continue;
+        const network = compiled.networkOf[compiled.netOf.get(c.id + ':p')];
+        if (!frequencies.has(network)) frequencies.set(network, new Set());
+        frequencies.get(network).add(c.props.freq);
+      }
+      for (const [network, values] of frequencies) {
+        if (values.size !== 1) continue;
+        const frequency = [...values][0];
+        // Respect intentional slow motion and require enough actual solver samples.
+        if (frequency * app.doc.settings.speed <= 1 || app.sim.dt * frequency > 1 / 16) continue;
+        const wires = app.doc.wires.filter((w) => compiled.networkOf[compiled.netOf.get(w.a.c + ':' + w.a.t)] === network).map((w) => w.id);
+        if (wires.length) profiles.push({ frequency, wires, phase: (app.sim.t * frequency) % 1, nextCapture: app.sim.t, capture: null, waveform: null });
+      }
+    }
+
+    function sample(result) {
+      if (!app.doc.settings.currentFlow) return;
+      sync();
+      let currents;
+      const t = app.sim.t;
+      for (const p of profiles) {
+        if (t < p.nextCapture) continue;
+        if (!p.capture) p.capture = { start: t, bins: new Map() };
+        const phase = ((t * p.frequency) % 1 + 1) % 1;
+        const bin = Math.floor(phase * SAMPLE_BINS);
+        if (!p.capture.bins.has(bin)) {
+          if (!currents) currents = wireCurrents(app, result);
+          p.capture.bins.set(bin, { phase, currents: new Map(p.wires.map((id) => [id, currents.get(id)])) });
+        }
+        if (t - p.capture.start >= 1 / p.frequency) {
+          const points = [...p.capture.bins.values()].sort((a, b) => a.phase - b.phase);
+          p.waveform = points.length >= 16 ? points : null;
+          p.capture = null;
+          // Bound capture work even for kHz sources; refresh transient envelopes.
+          p.nextCapture = t + 0.25;
+        }
+      }
+    }
+
+    function update(dtReal) {
+      sync();
+      elapsed += dtReal;
+      animation.slowed = false;
+      if (!app.doc.settings.currentFlow) return new Map();
+      const currents = app.sim.result ? wireCurrents(app) : new Map();
+      for (const p of profiles) {
+        if (!p.waveform) continue;
+        animation.slowed = true;
+        const phase = (p.phase + elapsed) % 1;
+        const points = p.waveform;
+        let i = points.findIndex((point) => point.phase > phase);
+        if (i < 0) i = 0;
+        const right = points[i], left = points[(i + points.length - 1) % points.length];
+        const span = (right.phase - left.phase + 1) % 1;
+        const fraction = span > 0 ? ((phase - left.phase + 1) % 1) / span : 0;
+        for (const id of p.wires) {
+          const a = left.currents.get(id), b = right.currents.get(id);
+          currents.set(id, Number.isFinite(a) && Number.isFinite(b) ? a + (b - a) * fraction : NaN);
+        }
+      }
+      return currents;
+    }
+    return animation;
   }
 
   // Current in each wire, positive from end a to end b. Within a net the wires
   // form a graph; currents are found on a spanning tree from the terminal currents
   // (any extra loop wire would be ambiguous and gets no animation).
-  function wireCurrents(app) {
-    const doc = app.doc, res = app.sim.result;
+  function wireCurrents(app, result = app.sim.result) {
+    const doc = app.doc, res = result;
     const out = new Map();
     const inject = new Map();
     for (const c of doc.components) {
@@ -526,5 +618,5 @@
       .ppc-scope-text{font-family:monospace;font-size:6px;fill:#9EF0C8}.ppc-scope-ch1{fill:#FFE14D}.ppc-scope-ch2{fill:#4FE3FF}`;
   }
 
-  PPC.render = { createRenderer, meterDisplay, wireCurrents, exportSvg, WIRE_HEX, shade };
+  PPC.render = { createRenderer, createFlowAnimation, meterDisplay, wireCurrents, exportSvg, WIRE_HEX, shade };
 })(typeof globalThis === 'object' ? globalThis : this);
