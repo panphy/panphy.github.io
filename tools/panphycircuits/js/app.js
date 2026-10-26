@@ -479,7 +479,7 @@
     const dt = Math.min(0.1, (now - lastFrame) / 1000);
     lastFrame = now;
     if (app.sim.running) {
-      const steps = app.sim.advance(dt, 10, () => performance.now());
+      const steps = app.sim.advance(dt, 10, () => performance.now(), (result) => app.audio.sample(result));
       if (steps > 0) {
         refreshProblems();
         app.renderer.updateDynamic();
@@ -488,6 +488,7 @@
       }
       if (now - lastSlow > 120) { lastSlow = now; ui.updateReadings(); ui.updateStatus(); }
     }
+    app.audio.update();
     app.renderer.updateFlow(dt);
     requestAnimationFrame(frame);
   }
@@ -675,6 +676,7 @@
     document.getElementById('shared-defs').innerHTML = PPC.artCommon.defs();
     ui = PPC.ui.createUI(app);
     app.ui = ui;
+    app.audio = PPC.audio.createAudio(app);
     app.renderer = PPC.render.createRenderer(app, svg, host);
     app.editor = PPC.editor.createEditor(app, svg, host);
     app.graph = PPC.graph.createGraph(app, document.getElementById('graph-canvas'), document.getElementById('graph-legend'));

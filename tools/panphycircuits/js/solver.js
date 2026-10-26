@@ -628,7 +628,7 @@
     };
 
     // Run steps for a slice of real time, within a time budget (ms).
-    sim.advance = function (realSeconds, budgetMs = 12, now = () => Date.now()) {
+    sim.advance = function (realSeconds, budgetMs = 12, now = () => Date.now(), onStep) {
       if (!sim.running || !sim.compiled) return 0;
       const target = Math.min(realSeconds, 0.1) * sim.doc.settings.speed;
       const n = Math.floor((sim.carry + target) / sim.dt);
@@ -636,7 +636,8 @@
       const start = now();
       let done = 0;
       for (; done < n; done++) {
-        sim.step();
+        const result = sim.step();
+        if (onStep) onStep(result);
         if (now() - start > budgetMs) { done++; break; }
       }
       sim.behind = done < n;

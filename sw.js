@@ -1,4 +1,4 @@
-const BUILD_ID = '2026-10-26T11:26:23Z';
+const BUILD_ID = '2026-10-26T11:45:13Z';
 const CACHE_PREFIX = 'panphy-labs';
 const PRECACHE_NAME = `${CACHE_PREFIX}-precache-${BUILD_ID}`;
 const RUNTIME_CACHE = `${CACHE_PREFIX}-runtime-${BUILD_ID}`;
@@ -140,6 +140,7 @@ const ASSETS_TO_CACHE = [
   '/tools/panphycircuits.html',
   '/tools/panphycircuits/css/app.css',
   '/tools/panphycircuits/js/app.js',
+  '/tools/panphycircuits/js/audio.js',
   '/tools/panphycircuits/js/art-common.js',
   '/tools/panphycircuits/js/art-realistic.js',
   '/tools/panphycircuits/js/art-schematic.js',
