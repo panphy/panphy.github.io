@@ -11,7 +11,7 @@
     red: '#D7372B', black: '#2A2D33', blue: '#2F6FD6', green: '#2E9D4A',
     orange: '#EB7A1E', white: '#F2F4F7', purple: '#7E4CC9'
   };
-  const DYNAMIC = new Set(['lamp', 'led', 'ammeter', 'voltmeter', 'scope', 'dcsupply', 'logic_in', 'logic_out', 'pushswitch', 'fuse', 'motor', 'speaker',
+  const DYNAMIC = new Set(['lamp', 'led', 'ammeter', 'voltmeter', 'scope', 'dcsupply', 'logic_in', 'logic_out', 'pushswitch', 'fuse', 'motor', 'speaker', 'relay',
     'gate_and', 'gate_or', 'gate_not', 'gate_nand', 'gate_nor', 'gate_xor', 'gate_xnor']);
 
   function shade(hex, f) {

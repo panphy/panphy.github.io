@@ -288,6 +288,36 @@
     draw: () => L('M -40 0 H -5 M 5 0 H 40') + `<path d="M -5 -16 V 16 M 5 -16 V 16" class="sch-line sch-plate"/>`
   };
 
+  art.relay = {
+    bounds: () => [-62, -52, 124, 104],
+    terms: () => ({ cp: [-60, -30, -1, 0], cn: [-60, 30, -1, 0], com: [60, 30, 1, 0], nc: [60, -30, 1, 0], no: [60, 0, 1, 0] }),
+    draw(ctx) {
+      const on = !!ctx.st.energized;
+      return L('M -60 -30 H -30 V -20 M -60 30 H -30 V 20 M 60 -30 H 25 M 60 0 H 25 M 60 30 H 10 V 20') +
+        BODY('M -40 -20 H -20 V 20 H -40 Z') + L('M -20 0 H 4', 'stroke-dasharray="3 3"') +
+        L(on ? 'M 10 20 L 22 2' : 'M 10 20 L 22 -28') +
+        '<circle cx="25" cy="-30" r="3" class="sch-body"/><circle cx="25" cy="0" r="3" class="sch-body"/>' +
+        utext(ctx, -30, -41, 'COIL', 'sch-iec') + utext(ctx, 35, -42, 'NC', 'sch-iec') +
+        utext(ctx, 38, -12, 'NO', 'sch-iec') + utext(ctx, 26, 43, 'COM', 'sch-iec');
+    }
+  };
+
+  art.opamp = {
+    bounds: () => [-62, -52, 124, 104],
+    terms: () => ({ plus: [-60, -20, -1, 0], minus: [-60, 20, -1, 0], out: [60, 0, 1, 0], vp: [0, -50, 0, -1], vn: [0, 50, 0, 1] }),
+    draw(ctx) { return BODY('M -30 -38 L 36 0 L -30 38 Z') +
+      L('M -60 -20 H -30 M -60 20 H -30 M 36 0 H 60 M 0 -50 V -21 M 0 50 V 21') +
+      utext(ctx, -20, -20, '+', 'sch-iec') + utext(ctx, -20, 20, '−', 'sch-iec') +
+      utext(ctx, 12, -39, 'V+', 'sch-iec') + utext(ctx, 12, 39, 'V−', 'sch-iec'); }
+  };
+
+  art.transformer = {
+    bounds: () => [-52, -34, 104, 68],
+    terms: () => ({ p1: [-50, -30, -1, 0], p2: [-50, 30, -1, 0], s1: [50, -30, 1, 0], s2: [50, 30, 1, 0] }),
+    draw: () => L('M -50 -30 H -20 M -50 30 H -20 M 50 -30 H 20 M 50 30 H 20 M -4 -32 V 32 M 4 -32 V 32') +
+      [-1, 1].map((side) => `<g transform="scale(${side} 1)">${L('M 20 -30 C 5 -30 5 -15 20 -15 C 5 -15 5 0 20 0 C 5 0 5 15 20 15 C 5 15 5 30 20 30')}<circle cx="27" cy="-23" r="2" class="sch-fill"/></g>`).join('')
+  };
+
   art.inductor = {
     bounds: () => [-42, -14, 84, 28],
     terms: () => two(),

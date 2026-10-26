@@ -529,3 +529,193 @@ test('finite ammeter resistance contributes to the automatic inductor time step'
   while (c.sim.t < 0.1 - 1e-12) c.sim.step();
   close(c.read('A1').i('p'), 0.5 / Math.E, 1e-4);
 });
+
+function transformerCircuit(np, ns, load = 1000, source = 'acsupply') {
+  return build({
+    comps: { AC: [source, source === 'acsupply' ? { peak: 5, freq: 5 } : { emf: 5 }],
+      T: ['transformer', { np, ns }], R: ['resistor', { R: load }] },
+    wires: [['AC.p', 'T.p1'], ['AC.n', 'T.p2'], ['T.s1', 'R.a'], ['T.s2', 'R.b']]
+  });
+}
+
+for (const [np, ns] of [[100, 200], [200, 100], [100, 100]]) {
+  test(`transformer ${np}:${ns}: AC turns ratio, load current and isolation`, () => {
+    const c = transformerCircuit(np, ns);
+    let vp2 = 0, vs2 = 0, power = 0;
+    for (let k = 0; k < 1000; k++) {
+      c.sim.step();
+      assert.ok(c.result().ok);
+      const r = c.read('T');
+      if (k >= 800) {
+        vp2 += r.v('p1', 'p2') ** 2; vs2 += r.v('s1', 's2') ** 2;
+        power += r.v('p1', 'p2') * r.i('p1');
+      }
+      close(r.i('s1'), -c.read('R').i('a'), 1e-7, 'secondary KCL');
+      close(r.i('p1'), -r.i('p2'), 1e-7, 'primary KCL');
+      assert.ok(Number.isNaN(r.v('p1', 's1')), 'no invented voltage across isolated windings');
+    }
+    close(Math.sqrt(vs2 / vp2), ns / np, 0.01, 'r.m.s. voltage ratio');
+    assert.ok(power > 0, 'source supplies real power to the secondary load');
+  });
+}
+
+test('transformer loading is reflected back to the primary; shorted secondary stays solvable', () => {
+  const light = transformerCircuit(100, 200, 1000), heavy = transformerCircuit(100, 200, 10);
+  let lightI = 0, heavyI = 0;
+  for (let k = 0; k < 1000; k++) {
+    light.sim.step(); heavy.sim.step();
+    if (k > 800) { lightI += light.read('T').i('p1') ** 2; heavyI += heavy.read('T').i('p1') ** 2; }
+  }
+  assert.ok(heavyI > lightI * 10);
+  circuit.addWire(heavy.doc, { c: heavy.ids.T, t: 's1' }, { c: heavy.ids.T, t: 's2' });
+  heavy.sim.setDoc(heavy.doc);
+  for (let k = 0; k < 100; k++) { heavy.sim.step(); assert.ok(heavy.result().ok); }
+  close(heavy.read('T').v('s1', 's2'), 0);
+});
+
+test('open-secondary DC transformer transient decays instead of sustaining secondary voltage', () => {
+  const c = transformerCircuit(100, 200, 1000, 'dcsupply');
+  // Remove the load component and all its wires, leaving an open secondary.
+  circuit.removeComponents(c.doc, [c.ids.R]);
+  c.sim.setDoc(c.doc);
+  c.sim.dt = 0.1;
+  for (let k = 0; k < 10000; k++) c.sim.step();
+  assert.ok(c.result().ok);
+  close(c.read('T').i('p1'), 50 * (1 - Math.exp(-10)), 1e-5);
+  close(c.read('T').v('s1', 's2'), 9.99 * Math.exp(-10), 1e-5);
+});
+
+test('transformer turn edits, pause, import and reset preserve the expected state lifecycle', () => {
+  const c = transformerCircuit(100, 200);
+  for (let k = 0; k < 20; k++) c.sim.step();
+  const hist = { ...c.sim.indHist[c.ids.T] };
+  c.sim.setRunning(false);
+  const t = circuit.getComp(c.doc, c.ids.T);
+  t.props.ns = 100;
+  c.sim.setDoc(c.doc);
+  assert.deepEqual(c.sim.indHist[c.ids.T], hist);
+  assert.ok(c.result().ok);
+  const imported = circuit.importDoc(circuit.exportDoc(c.doc));
+  assert.equal(imported.warnings.length, 0);
+  assert.equal(circuit.getComp(imported.doc, c.ids.T).props.ns, 100);
+  c.sim.reset();
+  close(c.sim.indHist[c.ids.T].i1, 0);
+  close(c.sim.indHist[c.ids.T].j1, 0);
+  assert.equal(registry.get('transformer').category, 'core');
+  for (const [np, ns] of [[10, 2000], [2000, 10]]) {
+    const edge = transformerCircuit(np, ns);
+    for (let k = 0; k < 100; k++) edge.sim.step();
+    assert.ok(edge.result().ok, `${np}:${ns} extreme ratio remains solvable`);
+  }
+});
+
+function relayCircuit(voltage = 6) {
+  return build({ comps: { C: ['dcsupply', { emf: voltage }], K: ['relay'], B: ['battery', { emf: 9 }],
+    NC: ['resistor', { R: 100 }], NO: ['resistor', { R: 100 }] },
+    wires: [['C.p', 'K.cp'], ['C.n', 'K.cn'], ['B.p', 'K.com'], ['K.nc', 'NC.a'],
+      ['K.no', 'NO.a'], ['NC.b', 'B.n'], ['NO.b', 'B.n']] });
+}
+function settle(c, steps = 1000) { for (let k = 0; k < steps; k++) { c.sim.step(); assert.ok(c.result().ok, JSON.stringify(c.result().errors)); } }
+
+test('relay switches isolated SPDT contacts and releases with hysteresis', () => {
+  const c = relayCircuit(0);
+  assert.equal(c.read('K').relayOn(), false);
+  close(c.read('NC').i('a'), 9 / 100.05);
+  assert.ok(c.read('NO').i('a') < 1e-9);
+  assert.ok(Number.isNaN(c.read('K').v('cp', 'com')));
+  circuit.getComp(c.doc, c.ids.C).props.emf = 6; c.sim.setDoc(c.doc); settle(c);
+  assert.equal(c.read('K').relayOn(), true);
+  close(c.read('NO').i('a'), 9 / 100.05);
+  close(c.read('K').i('cp'), 0.05, 1e-5);
+  circuit.getComp(c.doc, c.ids.C).props.emf = 2.4; c.sim.setDoc(c.doc); settle(c);
+  assert.equal(c.read('K').relayOn(), true, 'holds above release current');
+  circuit.getComp(c.doc, c.ids.C).props.emf = 1.2; c.sim.setDoc(c.doc); settle(c);
+  assert.equal(c.read('K').relayOn(), false);
+  close(c.read('NC').i('a'), 9 / 100.05);
+  c.sim.reset(); assert.equal(c.read('K').relayOn(), false);
+});
+
+test('relay coil energizes with reversed polarity and preserves state during pause/edits', () => {
+  const c = relayCircuit();
+  const source = c.ids.C;
+  for (const w of c.doc.wires) for (const end of [w.a, w.b]) if (end.c === source) end.t = end.t === 'p' ? 'n' : 'p';
+  c.sim.setDoc(c.doc); settle(c);
+  assert.equal(c.read('K').relayOn(), true);
+  close(c.read('K').i('cp'), -0.05, 1e-5);
+  c.sim.setRunning(false);
+  const history = { ...c.sim.indHist[c.ids.K] };
+  circuit.getComp(c.doc, c.ids.NO).props.R = 200; c.sim.setDoc(c.doc);
+  assert.deepEqual(c.sim.indHist[c.ids.K], history);
+  assert.equal(c.read('K').relayOn(), true);
+  const imported = circuit.importDoc(circuit.exportDoc(c.doc));
+  assert.equal(imported.warnings.length, 0);
+  assert.equal(registry.get('relay').category, 'ext');
+});
+
+function opampCircuit(input = 1, inverting = false) {
+  return build({ comps: { H: ['dcsupply', { emf: 12 }], L: ['dcsupply', { emf: 12 }],
+    S: ['dcsupply', { emf: input }], U: ['opamp'], R: ['resistor', { R: 10000 }],
+    RI: ['resistor', { R: 10000 }], RF: ['resistor', { R: 20000 }] },
+    wires: [['H.p', 'U.vp'], ['H.n', 'L.p'], ['L.n', 'U.vn'], ['S.n', 'H.n'],
+      ['U.out', 'R.a'], ['R.b', 'H.n'], ...(inverting ?
+        [['S.p', 'RI.a'], ['RI.b', 'U.minus'], ['RF.a', 'U.minus'], ['RF.b', 'U.out'], ['U.plus', 'H.n']] :
+        [['S.p', 'U.plus'], ['U.out', 'U.minus']])] });
+}
+
+test('powered op amp voltage follower tracks input and recovers after clipping', () => {
+  const c = opampCircuit(1);
+  assert.ok(c.result().ok, JSON.stringify(c.result().errors));
+  close(c.read('R').v('a', 'b'), 1, 1e-3);
+  for (const input of [30, 0.2, 10, 0, 2]) {
+    circuit.getComp(c.doc, c.ids.S).props.emf = input; c.sim.setDoc(c.doc);
+    assert.ok(c.result().ok, `follower input ${input}: ${JSON.stringify(c.result().errors)}`);
+    close(c.read('R').v('a', 'b'), Math.min(input, 12 / 1.005), 0.01);
+  }
+  assert.equal(registry.get('opamp').category, 'ext');
+});
+
+test('op amp negative feedback produces an inverting gain of minus two', () => {
+  const c = opampCircuit(1, true);
+  assert.ok(c.result().ok, JSON.stringify(c.result().errors));
+  close(c.read('R').v('a', 'b'), -2, 0.002);
+  close(c.read('U').v('plus', 'minus'), 0, 1e-4, 'virtual ground');
+  const u = circuit.getComp(c.doc, c.ids.U);
+  const r = c.read('U');
+  close(['plus', 'minus', 'out', 'vp', 'vn'].reduce((sum, t) => sum + r.i(t), 0), 0, 1e-8, 'device KCL');
+  const imported = circuit.importDoc(circuit.exportDoc(c.doc));
+  assert.equal(imported.warnings.length, 0);
+  assert.equal(circuit.getComp(imported.doc, u.id).props.gain, 100000);
+});
+
+test('op amp comparator switches between supply rails and needs power', () => {
+  const c = opampCircuit(1);
+  const feedback = c.doc.wires.find((w) => [w.a, w.b].every((e) => e.c === c.ids.U));
+  circuit.removeWires(c.doc, [feedback.id]);
+  circuit.addWire(c.doc, { c: c.ids.U, t: 'minus' }, { c: c.ids.H, t: 'n' });
+  c.sim.setDoc(c.doc); assert.ok(c.result().ok);
+  close(c.read('R').v('a', 'b'), 12 / 1.005, 1e-4);
+  // Swap the differential inputs to select the negative rail.
+  for (const w of c.doc.wires) for (const e of [w.a, w.b]) if (e.c === c.ids.U && ['plus', 'minus'].includes(e.t)) e.t = e.t === 'plus' ? 'minus' : 'plus';
+  c.sim.setDoc(c.doc); assert.ok(c.result().ok);
+  close(c.read('R').v('a', 'b'), -12 / 1.005, 1e-4);
+  circuit.getComp(c.doc, c.ids.H).props.emf = 0;
+  circuit.getComp(c.doc, c.ids.L).props.emf = 0;
+  c.sim.setDoc(c.doc); assert.ok(c.result().ok);
+  close(c.read('R').v('a', 'b'), 0, 1e-6);
+});
+
+test('relay flyback diode carries coil current after its supply switch opens', () => {
+  const c = build({ comps: { B: ['dcsupply', { emf: 6 }], S: ['switch', { closed: true }],
+    K: ['relay'], D: ['diode'] },
+    wires: [['B.p', 'S.a'], ['S.b', 'K.cp'], ['K.cn', 'B.n'], ['D.a', 'K.cn'], ['D.k', 'K.cp']] });
+  settle(c);
+  assert.equal(c.read('K').relayOn(), true);
+  circuit.getComp(c.doc, c.ids.S).props.closed = false; c.sim.setDoc(c.doc);
+  c.sim.step();
+  assert.ok(c.result().ok, JSON.stringify(c.result().errors));
+  assert.ok(c.read('D').i('a') > 0.03, 'stored coil current circulates through the diode');
+  assert.ok(c.read('K').v('cp', 'cn') < 0, 'induced p.d. reverses');
+  settle(c);
+  assert.equal(c.read('K').relayOn(), false);
+  assert.ok(Math.abs(c.read('K').i('cp')) < 0.001);
+});

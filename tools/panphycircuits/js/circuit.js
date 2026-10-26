@@ -219,7 +219,7 @@
     if (p.kind === 'number') {
       if (!finite(value)) { problems.push(`${where}: "${p.label}" must be a number.`); return p.default; }
       if (value < p.min || value > p.max) { problems.push(`${where}: "${p.label}" is outside ${p.min}–${p.max}.`); return Math.min(p.max, Math.max(p.min, value)); }
-      return value;
+      return p.integer ? Math.round(value) : value;
     }
     if (p.kind === 'bool') return value === true;
     if (p.kind === 'select') {
