@@ -549,8 +549,6 @@ button, input, select { font: inherit; color: inherit; }
 .dialog p { line-height: 1.45; }
 .dialog-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 16px; }
 .danger-fill { background: var(--danger); }
-.start-actions { display: grid; gap: 8px; margin-top: 18px; }
-.start-actions .ds-button { width: 100%; min-height: 48px; justify-content: center; }
 .examples-list { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 8px; }
 .example { position: relative; width: 100%; height: 100%; display: flex; gap: 12px; align-items: flex-start; text-align: left; padding: 12px; border-radius: 12px; border: 1px solid var(--line); background: var(--surface-2); cursor: pointer; }
 .example:hover { border-color: var(--accent); }
