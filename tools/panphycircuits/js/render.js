@@ -375,7 +375,14 @@
       for (const id of app.selection.wires) {
         const r = routes.get(id);
         if (!r) continue;
-        deleteButton(id, 'wire', Math.min(...r.poly.map(p => p.x)) - 11, Math.min(...r.poly.map(p => p.y)) - 11);
+        // Beside the middle of the wire, on its upper side, clear of the bend handles.
+        if (r.poly.length < 2) continue;
+        const m = layout.pointAtFraction(r.poly, 0.5);
+        const a = r.poly[m.index], b = r.poly[m.index + 1] || a;
+        const len = Math.hypot(b.x - a.x, b.y - a.y) || 1;
+        let nx = -(b.y - a.y) / len, ny = (b.x - a.x) / len;
+        if (ny > 0 || (ny === 0 && nx > 0)) { nx = -nx; ny = -ny; }
+        deleteButton(id, 'wire', m.x + nx * 22, m.y + ny * 22);
       }
       L.overlay.innerHTML = parts.join('');
       // Selected wires get a highlight class.
