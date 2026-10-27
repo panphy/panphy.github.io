@@ -20,6 +20,16 @@
     return '#' + c.map((x) => x.toString(16).padStart(2, '0')).join('');
   }
 
+  // True when this loudspeaker's electrical network holds a running AC supply.
+  function speakerSounding(app, c) {
+    if (c.type !== 'speaker' || !app.sim.running || !app.sim.compiled || !app.sim.result) return false;
+    const entry = app.sim.result.comp[c.id];
+    if (!entry) return false;
+    const network = entry.net.a;
+    return app.doc.components.some((source) => source.type === 'acsupply' && source.props.peak > 0 &&
+      app.sim.compiled.networkOf[app.sim.compiled.netOf.get(source.id + ':p')] === network);
+  }
+
   // Display text for a meter, from the solver result, never invented.
   function meterDisplay(app, c) {
     const def = registry.get(c.type);
@@ -39,9 +49,10 @@
     const m = app.sim.meterValue(c, inst, c.id + ':' + def.meter.quantity);
     if (def.meter.overload && !(Math.abs(m.value) < Infinity)) return { text: 'OL', why: 'Over range: an open circuit, or more than the meter can measure.' };
     const text = units.fmtMeter(m.value, def.meter.unit, def.meter.floor);
-    const hasAC = Number.isFinite(app.sim.compiled.acMin);
+    // Only label averaging when this meter shares a network with an AC supply.
+    const hasAC = app.sim.meterPeriod(c) > 0;
     let note = '';
-    if (hasAC) note = m.averaged ? (c.props.mode === 'ac' ? 'AC rms' : 'DC avg') : 'inst.';
+    if (hasAC && c.props.mode) note = m.averaged ? (c.props.mode === 'ac' ? 'AC rms' : 'DC avg') : 'inst.';
     return { text, value: m.value, note };
   }
 
@@ -69,8 +80,8 @@
         c, p: c.props, uid, r: 0, f: false, view: v,
         st: r && def.state ? def.state(c, r) : {},
         pressed: !!app.sim.pressed[c.id],
-        // A loudspeaker sounds only while an alternating current drives it.
-        sounding: !!(app.sim.running && app.sim.compiled && Number.isFinite(app.sim.compiled.acMin)),
+        // A loudspeaker animates only while an AC supply drives its own network.
+        sounding: speakerSounding(app, c),
         logicStyle: app.doc.settings.logicStyle,
         logic: { in: (res && res.inputs[c.id]) || {}, out: (res && res.logic[c.id]) || {} }
       };

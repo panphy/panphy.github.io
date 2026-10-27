@@ -134,7 +134,7 @@
         sw.className = 'legend-swatch' + (s.unit === 'A' && unitsUsed.length > 1 ? ' is-dashed' : '');
         sw.style.setProperty('--c', s.color);
         const tx = document.createElement('span');
-        tx.textContent = `${s.label} (${s.unit === 'A' ? 'current' : 'p.d.'})`;
+        tx.textContent = `${s.label} (${s.unit === 'A' ? 'current' : s.unit === 'Ω' ? 'resistance' : 'p.d.'})`;
         const val = document.createElement('span');
         val.className = 'legend-value';
         val.textContent = Number.isFinite(last) ? units.fmtSI(last, s.unit, 3) : '—';

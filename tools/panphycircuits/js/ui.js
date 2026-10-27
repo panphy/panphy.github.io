@@ -312,11 +312,12 @@
       const toggle = (key, label) => `<label class="toggle"><span>${label}</span><input type="checkbox" data-setting="${key}" ${s[key] ? 'checked' : ''}><span class="toggle-track" aria-hidden="true"></span></label>`;
       return `<p class="insp-hint">Select a component or wire to edit it and see its readings.</p>` +
         card('Simulation', `<div class="sim-controls" role="group" aria-label="Simulation controls"><div class="sim-summary"><span class="status-dot" aria-hidden="true"></span><span class="sim-state">Live</span></div><button type="button" class="sim-run" data-sim-run aria-pressed="false"></button></div><div class="row"><label for="s-speed">Speed</label><select id="s-speed" data-setting="speed">${[0.01, 0.1, 0.25, 1, 4, 10].map((v) => opt(v, s.speed, v === 1 ? 'Real time (1×)' : `${v}×`)).join('')}</select></div>` +
-          `<div class="row"><label for="s-dt">Time step</label><select id="s-dt" data-setting="dt">${opt('auto', s.dt, `Auto (${units.fmtSI(app.sim.dt, 's', 2)})`)}${[1e-5, 1e-4, 1e-3, 1e-2].map((v) => opt(v, s.dt, units.fmtSI(v, 's', 1))).join('')}</select></div>`, 'simulation-card') +
+          `<div class="row"><label for="s-dt">Time step</label><select id="s-dt" data-setting="dt">${opt('auto', s.dt, `Auto (${units.fmtSI(app.sim.dt, 's', 2)})`)}${[1e-5, 1e-4, 1e-3, 1e-2].map((v) => opt(v, s.dt, units.fmtSI(v, 's', 1))).join('')}</select></div>` +
+          `<button type="button" class="btn-secondary" data-sim-reset>Reset time and stored energy</button>`, 'simulation-card') +
         `<details class="icard model-note"><summary>About the simulation</summary><p>The circuit runs live, including capacitors, inductors, AC supplies, the oscilloscope and graphs. Use a switch in your circuit to trigger an effect. <strong>Pause</strong> freezes time, traces, current and component animations, and sound; <strong>Resume</strong> continues from there. Edits still update readings for the frozen state. Switching views never changes the simulation.</p>` +
           `<p>The automatic time step is about 1/100 of the shortest RC time constant (and of an AC period). Results do not depend on your device's frame rate.</p>` +
           `<p>Animated current shows conventional current as yellow dashes moving from + to − through the external circuit. Their speed only hints at the size of the current; real charge carriers drift far more slowly. Fast AC animation replays sampled wire currents at one cycle per second for visibility, preserving rectified flow. Meters, scope traces and sound keep the actual frequency. Low-frequency AC and mixed-frequency networks stay live.</p>` +
-          `<p>Editing the circuit while it runs keeps time and stored charge. Saved files and autosave keep the circuit, not the live state: opening one starts at t = 0.</p></details>`;
+          `<p>Editing the circuit while it runs keeps time and stored charge. <strong>Reset time and stored energy</strong> returns capacitors and inductors to their initial values and sets t = 0. Saved files and autosave keep the circuit, not the live state: opening one starts at t = 0.</p></details>`;
     }
 
     // ---------- Display menu (toolbar) ----------
@@ -466,6 +467,7 @@
     ui.renderLive = function () { ui.renderPinned(); ui.updateLive(); };
     $('inspector').addEventListener('click', (e) => {
       if (e.target.closest('[data-sim-run]')) { app.toggleRun(); return; }
+      if (e.target.closest('[data-sim-reset]')) { app.resetSimulation(); return; }
       const b = e.target.closest('[data-pin]');
       if (!b) return;
       const id = b.dataset.pin;
@@ -659,7 +661,16 @@
       if (!p) return;
       if (p.kind === 'bool') {
         c.props[key] = t.checked;
-        if (p.operational) { app.operationalChanged(c); if (key === 'plot' && t.checked) app.showGraph(true); return; }
+        if (p.operational) {
+          // Plot and sound are display-only: keep scope traces and averaging windows.
+          if (key === 'plot' || key === 'sound') {
+            app.displayPropChanged();
+            if (key === 'plot' && t.checked) app.showGraph(true);
+            return;
+          }
+          app.operationalChanged();
+          return;
+        }
         app.commit(`Change ${p.label.toLowerCase()}`);
         return;
       }
@@ -687,7 +698,8 @@
         const slider = host.querySelector(`[data-slider="${p.key}"]`);
         if (slider && slider !== t) slider.value = toSlider(p, c.props[p.key]);
       }
-      app.electricalChanged(true);
+      if (p.key === 'v0' || p.key === 'i0') app.applyInitialEnergy(c.id);
+      else app.electricalChanged();
     }
     insp.addEventListener('input', inputSlider);
     quick.addEventListener('input', inputSlider);
@@ -706,6 +718,12 @@
       err.textContent = '';
       input.removeAttribute('aria-invalid');
       c.props[p.key] = p.integer ? Math.round(v) : v;
+      // Initial capacitor/inductor energy applies as soon as the value is edited.
+      if (p.key === 'v0' || p.key === 'i0') {
+        app.commit(`Change ${p.label.toLowerCase()}`);
+        app.applyInitialEnergy(c.id);
+        return;
+      }
       app.commit(`Change ${p.label.toLowerCase()}`);
     }
     insp.addEventListener('click', (e) => {

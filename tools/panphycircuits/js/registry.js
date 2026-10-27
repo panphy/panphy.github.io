@@ -288,8 +288,9 @@
       return out;
     },
     valueText: (c) => `${fmtSI(c.props.peak, 'V', 3, { trim: true })} pk, ${fmtSI(c.props.freq, 'Hz', 3, { trim: true })}`,
-    timeStep: (c) => 1 / (c.props.freq * 100),
-    acFrequency: (c) => c.props.freq,
+    timeStep: (c) => (c.props.peak > 0 ? 1 / (c.props.freq * 100) : null),
+    // A zero-peak supply is idle: it must not force AC averaging or a fine time step.
+    acFrequency: (c) => (c.props.peak > 0 ? c.props.freq : null),
     help: 'A sinusoidal supply, V = V₀ sin(2πft). Terminal 1 is positive during the first half-cycle. Use a slow frequency (about 1 Hz) to watch meters change, or the oscilloscope for faster signals.'
   });
 
