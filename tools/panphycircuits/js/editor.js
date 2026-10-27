@@ -747,6 +747,7 @@
       }
       const lower = k.toLowerCase();
       if (lower === 'r') { app.rotateSelection(e.shiftKey ? -1 : 1); return; }
+      if (lower === 'm') { app.mirrorSelection(); return; }
       if (lower === 'w') { app.setTool('wire'); return; }
       if (lower === 'v') { app.setTool('select'); return; }
       if (lower === 'h') { app.setTool('pan'); return; }

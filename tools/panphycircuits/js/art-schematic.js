@@ -311,11 +311,11 @@
   // ---------- Logic ----------
 
   // Gate outline only (shared with the module silkscreen).
-  function gateBody(key, style) {
+  function gateBody(key, style, ctx) {
     const inv = ['nand', 'nor', 'xnor'].includes(key);
     if (style === 'iec') {
       const label = { and: '&', nand: '&', or: '≥1', nor: '≥1', xor: '=1', xnor: '=1', not: '1' }[key];
-      return BODY('M -20 -24 H 20 V 24 H -20 Z') + `<text x="0" y="1" class="sch-iec" text-anchor="middle" dominant-baseline="central">${esc(label)}</text>` +
+      return BODY('M -20 -24 H 20 V 24 H -20 Z') + utext(ctx || {}, 0, 1, label, 'sch-iec') +
         (inv || key === 'not' ? `<circle cx="24" cy="0" r="4" class="sch-body"/>` : '');
     }
     const AND = 'M -20 -20 H 0 A 20 20 0 0 1 0 20 H -20 Z';
@@ -344,7 +344,7 @@
         const leads = single ? `M -40 0 H ${inEnd}` : `M -40 -10 H ${inEnd} M -40 10 H ${inEnd}`;
         const Lg = ctx.logic || { in: {}, out: {} };
         const lvl = (on, x, y, anchor) => utext(ctx, x, y, on ? '1' : '0', 'sch-level' + (on ? ' sch-level-on' : ''), anchor);
-        return L(`${leads} M ${outStart} 0 H 40`) + gateBody(key, style) +
+        return L(`${leads} M ${outStart} 0 H 40`) + gateBody(key, style, ctx) +
           (single ? lvl(Lg.in.a, -33, -8) : lvl(Lg.in.a, -33, -18) + lvl(Lg.in.b, -33, 18)) + lvl(Lg.out.q, 34, -8);
       }
     };
