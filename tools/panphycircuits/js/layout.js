@@ -1041,7 +1041,7 @@
 
   // Tidy keeps physical meters and supply boxes upright on the bench,
   // and the oscilloscope upright in either view.
-  const UPRIGHT_ON_BENCH = ['ammeter', 'voltmeter', 'scope'];
+  const UPRIGHT_ON_BENCH = ['ammeter', 'voltmeter', 'ohmmeter', 'scope'];
   const hasFixedBenchOrientation = c => !!c && !!PPC.registry.get(c.type).fixedBenchOrientation;
   function keepsUpright(doc, view, id) {
     const c = circuit.getComp(doc, id);
@@ -1617,7 +1617,7 @@
   // onto a terminal (not through a junction) only draw cleanly when that order
   // matches how they are joined: one wire must not run along another's rail.
   // In the circuit diagram, try orders and keep the best actual drawing.
-  const isMeterLeaf = (p) => p.kind === 'leaf' && (p.c.type === 'voltmeter' || p.c.type === 'scope');
+  const isMeterLeaf = (p) => p.kind === 'leaf' && (p.c.type === 'voltmeter' || p.c.type === 'ohmmeter' || p.c.type === 'scope');
   function layoutBestSeriesParallel(doc, view, sp, deadline = Date.now() + 1200) {
     if (!layoutSeriesParallel(doc, view, sp)) return false;
     const lay = doc.layouts[view];
