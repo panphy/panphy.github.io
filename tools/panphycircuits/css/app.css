@@ -679,7 +679,9 @@ button, input, select { font: inherit; color: inherit; }
 .quick-settings .field input[type="text"]:focus, .quick-settings .field select:focus-visible { border-color: var(--accent); outline: 2px solid var(--focus); }
 .quick-settings .field input[aria-invalid="true"] { border-color: var(--danger); }
 .quick-settings .field input:disabled { opacity: .5; }
-.quick-settings .field select { flex: 0 0 68px; width: 68px; min-width: 0; }
+/* Native selects size to their longest option, including the arrow space. */
+.quick-settings:has(select) { width: max-content; min-width: min(196px, calc(100vw - 16px)); max-width: calc(100vw - 16px); }
+.quick-settings .field select { flex: 0 1 auto; width: auto; min-width: 0; max-width: 100%; }
 .quick-settings .field-err { margin: 2px 0; font-size: .65rem; }
 .quick-settings .toggle { gap: 8px; }
 .quick-settings .toggle-track { width: 28px; height: 16px; }
