@@ -281,17 +281,87 @@
 
   // Interior crossings can use a hop. A corner or end touching another line
   // looks like a junction, so only an explicitly shared terminal may do that.
-  function touchesWire(a, b, s) {
-    const allowed = (p) => (s.shared || []).some((q) => samePoint(p, q));
+  function touchesWire(a, b, s, along) {
+    const allowed = (p) => (s.shared || []).some((q) => samePoint(p, q)) || (along && onPoly(p, along));
     return [a, b].some((p) => onSegment(p, s.a, s.b) && !allowed(p)) ||
       [s.a, s.b].some((p) => onSegment(p, a, b) && !allowed(p));
+  }
+
+  function onPoly(p, poly) {
+    for (let i = 0; i < poly.length - 1; i++) if (onSegment(p, poly[i], poly[i + 1])) return true;
+    return false;
+  }
+
+  // Two wires from one terminal cannot leave it apart: both start along its
+  // lead. They may run together from that terminal and then split, which reads
+  // as a T-junction of one net (and gets a dot). A trunk is an earlier wire's
+  // route oriented from the shared terminal T; this is the stretch of `poly`
+  // that follows it from T, or null.
+  function sharedPrefix(poly, trunk) {
+    const T = trunk.T, B = trunk.path;
+    let A = null;
+    if (samePoint(poly[0], T)) A = poly;
+    else if (samePoint(poly[poly.length - 1], T)) A = poly.slice().reverse();
+    if (!A || A.length < 2 || B.length < 2) return null;
+    const out = [{ x: T.x, y: T.y }];
+    let p = { x: T.x, y: T.y }, i = 1, j = 1;
+    while (i < A.length && j < B.length) {
+      const la = Math.hypot(A[i].x - p.x, A[i].y - p.y), lb = Math.hypot(B[j].x - p.x, B[j].y - p.y);
+      if (la < 1e-6) { i++; continue; }
+      if (lb < 1e-6) { j++; continue; }
+      const ua = { x: (A[i].x - p.x) / la, y: (A[i].y - p.y) / la }, ub = { x: (B[j].x - p.x) / lb, y: (B[j].y - p.y) / lb };
+      if (Math.abs(ua.x - ub.x) > 1e-6 || Math.abs(ua.y - ub.y) > 1e-6) break;
+      const step = Math.min(la, lb);
+      p = { x: p.x + ua.x * step, y: p.y + ua.y * step };
+      out.push(p);
+    }
+    return out.length > 1 ? simplify(out) : null;
+  }
+
+  function trunkPrefixes(poly, avoid) {
+    const out = new Map();
+    for (const s of avoid) for (const t of s.trunks || []) if (!out.has(t)) out.set(t, sharedPrefix(poly, t));
+    return out;
+  }
+
+  // The shared stretch of `poly` along segment s, if a segment of `poly`
+  // overlapping s or ending on it lies within it.
+  function alongTrunk(s, prefixes) {
+    if (!s.trunks || !prefixes) return null;
+    for (const t of s.trunks) { const pre = prefixes.get(t); if (pre) return pre; }
+    return null;
+  }
+
+  // Collinear overlap of segments ab and cd, as its two end points.
+  function overlapPart(a, b, c, d) {
+    if (overlapLen(a, b, c, d) <= 1) return null;
+    if (Math.abs(a.y - b.y) < 1e-6) return [{ x: Math.max(Math.min(a.x, b.x), Math.min(c.x, d.x)), y: a.y }, { x: Math.min(Math.max(a.x, b.x), Math.max(c.x, d.x)), y: a.y }];
+    return [{ x: a.x, y: Math.max(Math.min(a.y, b.y), Math.min(c.y, d.y)) }, { x: a.x, y: Math.min(Math.max(a.y, b.y), Math.max(c.y, d.y)) }];
+  }
+
+  // Overlap of ab with s that is part of a shared trunk (allowed), in length.
+  function trunkOverlap(a, b, s, along) {
+    const part = along && overlapPart(a, b, s.a, s.b);
+    if (!part) return 0;
+    for (let i = 0; i < along.length - 1; i++) {
+      if (onSegment(part[0], along[i], along[i + 1]) && onSegment(part[1], along[i], along[i + 1])) return Math.hypot(part[1].x - part[0].x, part[1].y - part[0].y);
+    }
+    return 0;
+  }
+
+  function wireClash(a, b, s, prefixes) {
+    const along = alongTrunk(s, prefixes);
+    const o = overlapLen(a, b, s.a, s.b);
+    if (o > 1 && !(along && trunkOverlap(a, b, s, along) > 1)) return true;
+    return touchesWire(a, b, s, along);
   }
 
   // Invalid geometry must outweigh cosmetic gains in length or bend count.
   // Also check explicit bends: moving a part can turn a previously good route
   // into a return loop, a wire through a symbol, or an apparent short circuit.
-  function routeConflicts(poly, dA, dB, obstacles, avoid, stopAt = Infinity) {
+  function routeConflicts(poly, dA, dB, obstacles, avoid, stopAt = Infinity, prefixes) {
     let conflicts = 0;
+    if (!prefixes && avoid.some((s) => s.trunks)) prefixes = trunkPrefixes(poly, avoid);
     const outward = (a, b, d) => isZero(d) || (b.x - a.x) * d.x + (b.y - a.y) * d.y > 1e-6;
     if (poly.length < 2) return 1;
     if (!outward(poly[0], poly[1], dA)) conflicts++;
@@ -310,7 +380,7 @@
         if (conflicts >= stopAt) return conflicts;
       }
       for (const s of avoid) {
-        if (overlapLen(a, b, s.a, s.b) > 1 || touchesWire(a, b, s)) conflicts++;
+        if (wireClash(a, b, s, prefixes)) conflicts++;
         if (conflicts >= stopAt) return conflicts;
       }
       for (let j = 0; j < i; j++) {
@@ -329,9 +399,8 @@
     return obstacles.filter((r) => !r.terminal || (!samePoint(r.terminal, A) && !samePoint(r.terminal, B)));
   }
 
-  function routeCost(poly, A, dA, B, dB, obstacles, avoid, cutoff = Infinity) {
-    // Length, bends and direction give a cheap lower bound. Every remaining
-    // penalty is nonnegative, so rejected candidates cannot change the winner.
+  // Length, bends and direction give a cheap lower bound on routeCost.
+  function routeLowerBound(poly, A, dA, B, dB) {
     let cost = 25 * Math.max(0, poly.length - 2);
     for (let i = 0; i < poly.length - 1; i++) {
       const a = poly[i], b = poly[i + 1];
@@ -342,13 +411,27 @@
     const last = poly.length > 1 ? unit(poly[poly.length - 2].x - B.x, poly[poly.length - 2].y - B.y) : null;
     if (first && !isZero(dA) && first.x * dA.x + first.y * dA.y < 0.5) cost += 220;
     if (last && !isZero(dB) && last.x * dB.x + last.y * dB.y < 0.5) cost += 220;
+    return cost;
+  }
+
+  // Every penalty beyond the lower bound is nonnegative, so rejected
+  // candidates cannot change the winner.
+  function routeCost(poly, A, dA, B, dB, obstacles, avoid, cutoff = Infinity) {
+    let cost = routeLowerBound(poly, A, dA, B, dB);
     if (cost >= cutoff - 1e-9) return Infinity;
-    cost += 1000000 * routeConflicts(poly, dA, dB, obstacles, avoid, Math.ceil((cutoff - cost) / 1000000));
+    const prefixes = avoid.some((s) => s.trunks) ? trunkPrefixes(poly, avoid) : null;
+    cost += 1000000 * routeConflicts(poly, dA, dB, obstacles, avoid, Math.ceil((cutoff - cost) / 1000000), prefixes);
     if (cost >= cutoff - 1e-9) return Infinity;
     for (let i = 0; i < poly.length - 1; i++) {
       const a = poly[i], b = poly[i + 1];
       for (const r of obstacles) if (segHitsRect(a, b, r)) cost += 1000;
-      for (const s of avoid) { const o = overlapLen(a, b, s.a, s.b); if (o > 1) cost += 300 + o * 4; }
+      for (const s of avoid) {
+        const o = overlapLen(a, b, s.a, s.b);
+        if (o <= 1) continue;
+        // A shared trunk is fine, but splitting sooner reads more clearly.
+        const t = trunkOverlap(a, b, s, alongTrunk(s, prefixes));
+        cost += t > 1 ? 2 * o : 300 + o * 4;
+      }
       if (cost >= cutoff - 1e-9) return Infinity;
     }
     return cost;
@@ -378,9 +461,11 @@
     return { x: p.x + d.x * length, y: p.y + d.y * length };
   }
 
-  function autoOrtho(A, dA, B, dB, obstacles, avoid) {
+  // `limit` (optional) caps how many of the shortest cross-over candidates
+  // are tried, for quick estimates during the Tidy search.
+  function autoOrtho(A, dA, B, dB, obstacles, avoid, limit = Infinity) {
     obstacles = obstaclesForEnds(obstacles, A, B);
-    if (isDiag(dA) || isDiag(dB)) return withDiagStubs(A, dA, B, dB, (a, da, b, db) => autoOrtho(a, da, b, db, obstacles, avoid));
+    if (isDiag(dA) || isDiag(dB)) return withDiagStubs(A, dA, B, dB, (a, da, b, db) => autoOrtho(a, da, b, db, obstacles, avoid, limit));
     const a1 = leadStub(A, dA, obstacles, avoid);
     const b1 = leadStub(B, dB, obstacles, avoid);
     const xs = new Set([snap((a1.x + b1.x) / 2), (a1.x + b1.x) / 2, a1.x, b1.x]);
@@ -399,45 +484,80 @@
       }
     }
     const P = (x, y) => ({ x, y });
-    const cands = [
+    // Candidates, in the order a full scan would try them: three simple routes,
+    // then one or two cross-overs. Their length is known without building
+    // them, and no candidate can cost less than its length.
+    const fixed = [
       orthoRoute(A, dA, [], B, dB),
       [A, a1, P(a1.x, b1.y), b1, B],
       [A, a1, P(b1.x, a1.y), b1, B]
     ];
-    for (const mx of xs) cands.push([A, a1, P(mx, a1.y), P(mx, b1.y), b1, B]);
-    for (const my of ys) cands.push([A, a1, P(a1.x, my), P(b1.x, my), b1, B]);
-    for (const mx of xs) for (const my of ys) {
-      cands.push([A, a1, P(a1.x, my), P(mx, my), P(mx, b1.y), b1, B]);
-      cands.push([A, a1, P(mx, a1.y), P(mx, my), P(b1.x, my), b1, B]);
-    }
-    let best = null, bestCost = Infinity;
-    for (const c of cands) {
+    const X = [...xs], Y = [...ys];
+    const ends = Math.abs(a1.x - A.x) + Math.abs(a1.y - A.y) + Math.abs(B.x - b1.x) + Math.abs(B.y - b1.y);
+    const build = (k, mx, my) => k === 0 ? [A, a1, P(mx, a1.y), P(mx, b1.y), b1, B]
+      : k === 1 ? [A, a1, P(a1.x, my), P(b1.x, my), b1, B]
+      : k === 2 ? [A, a1, P(a1.x, my), P(mx, my), P(mx, b1.y), b1, B]
+      : [A, a1, P(mx, a1.y), P(mx, my), P(b1.x, my), b1, B];
+    const lenOf = (k, mx, my) => ends + (k === 0 ? Math.abs(mx - a1.x) + Math.abs(b1.y - a1.y) + Math.abs(b1.x - mx)
+      : k === 1 ? Math.abs(my - a1.y) + Math.abs(b1.x - a1.x) + Math.abs(b1.y - my)
+      : Math.abs(my - a1.y) + Math.abs(mx - a1.x) + Math.abs(b1.y - my) + Math.abs(b1.x - mx));
+    let best = null, bestCost = Infinity, bestIndex = Infinity;
+    const consider = (c, i) => {
       const poly = simplify(c);
-      const cost = routeCost(poly, A, dA, B, dB, obstacles, avoid, bestCost);
-      if (cost < bestCost - 1e-9) { bestCost = cost; best = poly; }
+      const cost = routeCost(poly, A, dA, B, dB, obstacles, avoid, bestCost + 1e-6);
+      if (cost < bestCost - 1e-9 || (cost <= bestCost + 1e-9 && i < bestIndex)) { bestCost = cost; best = poly; bestIndex = i; }
+    };
+    fixed.forEach((c, i) => consider(c, i));
+    const rest = [];
+    let i = fixed.length;
+    for (const mx of X) { const len = lenOf(0, mx, 0); if (len <= bestCost + 1e-9) rest.push({ i, len, k: 0, mx, my: 0 }); i++; }
+    for (const my of Y) { const len = lenOf(1, 0, my); if (len <= bestCost + 1e-9) rest.push({ i, len, k: 1, mx: 0, my }); i++; }
+    for (const mx of X) for (const my of Y) {
+      const len = lenOf(2, mx, my);
+      if (len <= bestCost + 1e-9) rest.push({ i, len, k: 2, mx, my }, { i: i + 1, len, k: 3, mx, my });
+      i += 2;
+    }
+    rest.sort((p, q) => p.len - q.len || p.i - q.i);
+    for (let n = 0; n < rest.length && n < limit; n++) {
+      const c = rest[n];
+      if (c.len > bestCost + 1e-9) break;
+      consider(build(c.k, c.mx, c.my), c.i);
     }
     return best;
   }
 
   // Routes for every wire in a view, computed in order so later wires avoid
   // running along earlier ones. Used for drawing, hit-testing and splitting.
-  function routeAll(doc, view) {
+  function routeAll(doc, view, measure = false) {
     const out = new Map();
     const obstacles = view === 'schematic' ? obstacleRects(doc, view) : null;
     const avoid = [];
+    const done = [];
     for (const w of doc.wires) {
-      const sameEnd = (a, b) => a && b && a.c === b.c && a.t === b.t;
-      const wireAvoid = avoid.map((s) => ({ ...s, shared: [
+      // Earlier wires sharing a terminal with this one are trunks it may follow.
+      const trunks = new Map();
+      for (const u of done) {
+        const list = [];
+        const p = u.r.poly;
+        if (sameEnd(u.w.a, w.a) || sameEnd(u.w.a, w.b)) list.push({ T: p[0], path: p });
+        if (sameEnd(u.w.b, w.a) || sameEnd(u.w.b, w.b)) list.push({ T: p[p.length - 1], path: p.slice().reverse() });
+        if (list.length) trunks.set(u.w.id, list);
+      }
+      const wireAvoid = avoid.map((s) => ({ ...s, trunks: trunks.get(s.wire), shared: [
         sameEnd(s.start, w.a) || sameEnd(s.start, w.b) ? s.a : null,
         sameEnd(s.end, w.a) || sameEnd(s.end, w.b) ? s.b : null
       ].filter(Boolean) }));
-      const r = wireRoute(doc, view, w, null, { obstacles, avoid: wireAvoid });
+      const r = wireRoute(doc, view, w, null, { obstacles, avoid: wireAvoid, measure });
       if (!r) continue;
       out.set(w.id, r);
-      if (view === 'schematic') for (let i = 0; i < r.poly.length - 1; i++) avoid.push({ a: r.poly[i], b: r.poly[i + 1], start: i === 0 ? w.a : null, end: i === r.poly.length - 2 ? w.b : null });
+      if (view === 'schematic') {
+        done.push({ w, r });
+        for (let i = 0; i < r.poly.length - 1; i++) avoid.push({ wire: w.id, a: r.poly[i], b: r.poly[i + 1], start: i === 0 ? w.a : null, end: i === r.poly.length - 2 ? w.b : null });
+      }
     }
     return out;
   }
+  function sameEnd(a, b) { return !!a && !!b && a.c === b.c && a.t === b.t; }
 
   // Dots describe actual terminal connections, never incidental wire contact.
   function branchPoints(doc, routes) {
@@ -456,7 +576,20 @@
       add(w.a, r.a, r.poly[1]);
       add(w.b, r.b, r.poly[r.poly.length - 2]);
     }
-    return [...ends.values()].filter((e) => e.dirs.size >= 3).map((e) => ({ x: e.p.x, y: e.p.y }));
+    const dots = [...ends.values()].filter((e) => e.dirs.size >= 3).map((e) => ({ x: e.p.x, y: e.p.y }));
+    // Wires from one terminal that run together and then split meet in a T.
+    const routed = doc.wires.filter((w) => routes.get(w.id) && routes.get(w.id).poly.length >= 2);
+    for (let i = 0; i < routed.length; i++) for (let j = i + 1; j < routed.length; j++) {
+      const v = routed[i], w = routed[j], pv = routes.get(v.id).poly, pw = routes.get(w.id).poly;
+      for (const [e, T, path] of [[v.a, pv[0], pv], [v.b, pv[pv.length - 1], pv.slice().reverse()]]) {
+        if (!sameEnd(e, w.a) && !sameEnd(e, w.b)) continue;
+        const pre = sharedPrefix(pw, { T, path });
+        const P = pre && pre[pre.length - 1];
+        if (!P || samePoint(P, T) || [pv[0], pv[pv.length - 1], pw[0], pw[pw.length - 1]].some((q) => samePoint(P, q))) continue;
+        if (!dots.some((d) => samePoint(d, P))) dots.push({ x: P.x, y: P.y });
+      }
+    }
+    return dots;
   }
 
   // Route of a wire in a view: { d (SVG path), poly (sampled points), segIndex (per poly point: control interval) }.
@@ -476,7 +609,10 @@
         // Keep saved bends intact so moving back (or Undo) restores their shape.
         pts = [];
       }
-      return { poly, d: 'M ' + poly.map((p) => `${r2(p.x)} ${r2(p.y)}`).join(' L '), a: A, b: B, pts };
+      const route = { poly, d: 'M ' + poly.map((p) => `${r2(p.x)} ${r2(p.y)}`).join(' L '), a: A, b: B, pts };
+      // Wires that still merge with or touch others, for judging a drawing.
+      if (ctx && ctx.measure) route.conflicts = routeConflicts(poly, d0, d1, obstacles, avoid);
+      return route;
     }
     const segs = smoothRoute(A, d0, pts, B, d1);
     const poly = [];
@@ -733,6 +869,7 @@
   // around parts; in the realistic view it is a smooth curve.
   // `cache` (optional) remembers diagram routes by their ends and the parts near
   // them, since one move during a search changes only a few routes.
+  const QUICK_ROUTES = 120;
   function quickPoly(view, A, B, obstacles, cache) {
     const d0 = { x: A.dx, y: A.dy }, d1 = { x: B.dx, y: B.dy };
     if (view === 'schematic') {
@@ -741,7 +878,7 @@
       const near = obstacles.filter((r) => overlaps(r, box, 0));
       const key = [A.x, A.y, A.dx, A.dy, B.x, B.y, B.dx, B.dy].join(',') + '|' + near.map((r) => `${r.x},${r.y},${r.x2},${r.y2}`).join(';');
       let poly = cache.get(key);
-      if (!poly) { poly = autoOrtho(A, d0, B, d1, near, []); cache.set(key, poly); }
+      if (!poly) { poly = autoOrtho(A, d0, B, d1, near, [], QUICK_ROUTES); cache.set(key, poly); }
       return poly;
     }
     const seg = smoothRoute(A, d0, [], B, d1)[0];
@@ -775,8 +912,9 @@
   // overlapping parts cost most; then leads that leave a part backwards, bends
   // and wire length. `home` (optional) holds each part's starting placement, so
   // parts are not turned or moved without a reason. `report` (optional)
-  // receives the counts behind the cost.
-  function tidyCost(doc, view, home, cache, report, renderedRoutes) {
+  // receives the counts behind the cost. With `cutoff`, it may stop early and
+  // return Infinity once the cost is sure to reach the cutoff.
+  function tidyCost(doc, view, home, cache, report, renderedRoutes, cutoff = Infinity) {
     const lay = doc.layouts[view];
     let cost = 0;
     const rep = report || {};
@@ -794,11 +932,33 @@
       // Realistic parts need room for their wires; diagram symbols may sit in a row.
       else if (overlaps(solid[i].b, solid[j].b, view === 'schematic' ? 8 : 36)) cost += 250;
     }
-    const routes = [];
-    const obstacles = view === 'schematic' ? obstacleRects(doc, view) : null;
+    if (home) {
+      for (const [id, h] of home) {
+        const pl = lay.comps[id];
+        if (!pl) continue;
+        if (pl.r !== h.r || pl.f !== h.f) cost += 25;
+        cost += 0.05 * (Math.abs(pl.x - h.x) + Math.abs(pl.y - h.y));
+      }
+    }
+    // Routing is the slow part. No wire costs less than its straight-line
+    // length (less the bench's straight-wire bonus) plus any backward leads.
+    const ends = [];
+    let floor = 0;
     for (const w of doc.wires) {
       const A = termWorld(doc, view, w.a), B = termWorld(doc, view, w.b);
       if (!A || !B) continue;
+      const u = unit(B.x - A.x, B.y - A.y);
+      const back = (!isZero({ x: A.dx, y: A.dy }) && A.dx * u.x + A.dy * u.y < -0.2 ? 1 : 0) + (!isZero({ x: B.dx, y: B.dy }) && -(B.dx * u.x + B.dy * u.y) < -0.2 ? 1 : 0);
+      const least = Math.hypot(B.x - A.x, B.y - A.y) - (view === 'schematic' ? 0 : 20) + 120 * back;
+      ends.push({ w, A, B, least });
+      floor += least;
+    }
+    if (cost + floor >= cutoff) return Infinity;
+    const routes = [];
+    const obstacles = view === 'schematic' ? obstacleRects(doc, view) : null;
+    for (const { w, A, B, least } of ends) {
+      if (cost + floor >= cutoff) return Infinity;
+      floor -= least;
       const pts = wirePoints(doc, view, w);
       const poly = renderedRoutes && renderedRoutes.get(w.id) ? renderedRoutes.get(w.id).poly : pts.length ? routedPoly(view, A, B, pts) : quickPoly(view, A, B, obstacles, cache);
       routes.push({ w, poly, box: polyBox(poly) });
@@ -839,14 +999,6 @@
       cost += 350 * n;
       rep.crossings += n;
     }
-    if (home) {
-      for (const [id, h] of home) {
-        const pl = lay.comps[id];
-        if (!pl) continue;
-        if (pl.r !== h.r || pl.f !== h.f) cost += 25;
-        cost += 0.05 * (Math.abs(pl.x - h.x) + Math.abs(pl.y - h.y));
-      }
-    }
     return cost;
   }
 
@@ -868,7 +1020,7 @@
     const isJunction = (id) => circuit.getComp(doc, id).type === 'junction';
     const home = new Map(ids.map((id) => [id, Object.assign({}, lay.comps[id])]));
     const cache = new Map();
-    const cost = () => { if (cache.size > 20000) cache.clear(); return tidyCost(doc, view, home, cache); };
+    const cost = (cutoff) => { if (cache.size > 20000) cache.clear(); return tidyCost(doc, view, home, cache, null, null, cutoff); };
     let best = cost();
     // The circuit diagram routes every wire around parts, which is slower to
     // score, so it searches fewer, nearer positions per pass.
@@ -880,15 +1032,17 @@
     const tryState = (pl, state) => {
       const old = { x: pl.x, y: pl.y, r: pl.r, f: pl.f };
       Object.assign(pl, state);
-      const c = cost();
+      const c = cost(best - 0.5);
       if (c < best - 0.5) { best = c; return true; }
       Object.assign(pl, old);
       return false;
     };
     const maxPasses = opts.passes || 8;
-    for (let pass = 0; pass < maxPasses; pass++) {
+    const late = () => opts.deadline && Date.now() > opts.deadline;
+    for (let pass = 0; pass < maxPasses && !late(); pass++) {
       let improved = false;
       for (const id of ids) {
+        if (late()) break;
         const pl = lay.comps[id];
         const turns = keepsUpright(doc, view, id) ? orients.filter((o) => o.r === 0) : orients;
         if (!isJunction(id)) for (const o of turns) if ((o.r !== pl.r || o.f !== pl.f) && tryState(pl, o)) improved = true;
@@ -903,12 +1057,12 @@
         }
       }
       // Swap two parts of a similar kind, keeping each one's orientation.
-      for (let i = 0; i < ids.length; i++) for (let j = i + 1; j < ids.length; j++) {
+      for (let i = 0; i < ids.length && !late(); i++) for (let j = i + 1; j < ids.length; j++) {
         if (isJunction(ids[i]) || isJunction(ids[j])) continue;
         const p = lay.comps[ids[i]], q = lay.comps[ids[j]];
         const px = p.x, py = p.y;
         p.x = q.x; p.y = q.y; q.x = px; q.y = py;
-        const c = cost();
+        const c = cost(best - 0.5);
         if (c < best - 0.5) { best = c; improved = true; }
         else { q.x = p.x; q.y = p.y; p.x = px; p.y = py; }
       }
@@ -921,8 +1075,12 @@
   // a drawing after this complete routing pass confirms it is no less readable.
   function schematicQuality(doc) {
     const report = {};
-    tidyCost(doc, 'schematic', null, null, report, routeAll(doc, 'schematic'));
-    report.defects = report.overlaps + report.crossings + report.overParts;
+    const routes = routeAll(doc, 'schematic', true);
+    tidyCost(doc, 'schematic', null, null, report, routes);
+    // Wires drawn along or touching unrelated wires look like false junctions.
+    report.wireConflicts = 0;
+    for (const r of routes.values()) report.wireConflicts += r.conflicts || 0;
+    report.defects = report.overlaps + report.crossings + report.overParts + report.wireConflicts;
     report.score = report.defects * 10000 + report.backwards * 500 + report.bends * 120 + report.detour * 0.5 + report.wireLength * 0.02;
     return report;
   }
@@ -939,7 +1097,7 @@
   function isReadableSchematic(doc, q) {
     // Preserve deliberate rows/branches and simple textbook loops. A single
     // crossing with a hop is often intentional (for example a bridge rectifier).
-    if (q.overlaps || q.overParts || q.crossings > 1 || q.backwards || q.maxBends > 2 || q.straight < Math.ceil(doc.wires.length * 0.6) || !hasReadableSize(doc, 'schematic')) return false;
+    if (q.overlaps || q.overParts || q.wireConflicts || q.crossings > 1 || q.backwards || q.maxBends > 2 || q.straight < Math.ceil(doc.wires.length * 0.6) || !hasReadableSize(doc, 'schematic')) return false;
     return doc.components.every(c => {
       const p = doc.layouts.schematic.comps[c.id];
       if (!p) return true;
@@ -949,66 +1107,105 @@
     });
   }
 
+  // Tidy a view. The candidates are: the current layout with any saved bends
+  // that rendering already rejects removed (no part moves); the textbook
+  // layout for series-parallel circuits; and a local search, repeated within
+  // the time budget until it stops improving, so a second click finds nothing
+  // more to do. The circuit diagram judges candidates by the actual rendered
+  // routes. A result with more overlaps, crossings or wires over parts than
+  // the original is never kept. Returns true if the view changed.
   function tidy(doc, view, opts = {}) {
-    const lay = doc.layouts[view];
+    const schematic = view === 'schematic';
     const tol = opts.tolerance || 30;
-    const before = opts.originalBefore || JSON.stringify(lay);
-    const qualityBefore = view === 'schematic' ? opts.qualityBefore || schematicQuality(doc) : null;
-    if (qualityBefore && !opts.originalBefore && isReadableSchematic(doc, qualityBefore)) return false;
+    const deadline = Date.now() + (opts.budget || 2500);
+    const before = JSON.stringify(doc.layouts[view]);
+    const qualityBefore = schematic ? schematicQuality(doc) : null;
+    if (qualityBefore && isReadableSchematic(doc, qualityBefore)) return false;
     const readableBefore = hasReadableSize(doc, view);
-    let repaired = opts.repaired || null;
-    const finish = () => {
-      const worseQuickRoutes = untidyNow() > untidyBefore;
-      const qualityAfter = qualityBefore && schematicQuality(doc);
-      const worseDrawing = qualityAfter && (qualityAfter.overlaps > qualityBefore.overlaps || qualityAfter.defects > qualityBefore.defects ||
-        (readableBefore && qualityAfter.score > qualityBefore.score + 0.5));
-      if (worseQuickRoutes || worseDrawing) {
-        doc.layouts[view] = JSON.parse(repaired || before);
-        return !!repaired && repaired !== before;
-      }
-      return JSON.stringify(doc.layouts[view]) !== before;
-    };
     const untidyNow = () => { const r = {}; tidyCost(doc, view, null, null, r); return r.overlaps + r.crossings + r.overParts; };
-    const untidyBefore = opts.untidyBefore !== undefined ? opts.untidyBefore : untidyNow();
-    if (qualityBefore) {
-      // Stored bends that rendering already rejects can be repaired without
-      // disturbing a single component. Keep that safe result if search fails.
+    const untidyBefore = untidyNow();
+    const save = () => JSON.stringify(doc.layouts[view]);
+    const load = (json) => { doc.layouts[view] = JSON.parse(json); return doc.layouts[view]; };
+    // Lower is better: defects first, then the overall score.
+    const judge = () => {
+      if (schematic) { const q = schematicQuality(doc); return { q, bad: q.defects, score: q.score }; }
+      return { bad: untidyNow(), score: tidyCost(doc, view) };
+    };
+    const better = (a, b) => a.bad < b.bad || (a.bad === b.bad && a.score < b.score - 0.5);
+    // Never worse than the original; a search result must also score no
+    // worse than an original of readable size. The textbook layout is the
+    // goal for its circuits, so it only has to avoid new defects.
+    const acceptable = (r, textbook) => {
+      if (!schematic) return r.bad <= untidyBefore;
+      if (untidyNow() > untidyBefore) return false;
+      if (r.q.overlaps > qualityBefore.overlaps || r.q.defects > qualityBefore.defects) return false;
+      return textbook || !readableBefore || r.q.score <= qualityBefore.score + 0.5;
+    };
+    const lay = doc.layouts[view];
+    let fallback = before;
+    if (schematic) {
+      // Stored bends that rendering already rejects can be removed without
+      // moving a single component. Keep that safe result if nothing beats it.
       for (const [id, route] of routeAll(doc, view)) {
         if (lay.wires[id] && lay.wires[id].pts.length && !route.pts.length) lay.wires[id] = { pts: [] };
       }
-      const cleaned = JSON.stringify(lay);
-      const q = schematicQuality(doc);
-      if (cleaned !== before && q.defects <= qualityBefore.defects && q.score <= qualityBefore.score + 0.5 && untidyNow() <= untidyBefore) repaired = cleaned;
+      const cleaned = save();
+      const r = judge();
+      if (cleaned !== before && r.q.defects <= qualityBefore.defects && r.q.score <= qualityBefore.score + 0.5 && untidyNow() <= untidyBefore) fallback = cleaned;
     }
     for (const c of doc.components) {
       const pl = lay.comps[c.id];
       if (pl) { pl.x = snap(pl.x); pl.y = snap(pl.y); }
       if (pl && keepsUpright(doc, view, c.id)) pl.r = 0;
     }
+    const start = save();
+    let best = null;
+    // The textbook layout wins unless the search leaves fewer defects.
+    const offer = (json, r, textbook) => {
+      if (!acceptable(r, textbook)) return;
+      if (!best || (best.textbook && !textbook ? r.bad < best.r.bad : better(r, best.r))) best = { json, r, textbook };
+    };
     // Circuits made of series and parallel parts get the textbook layout.
-    const sp = opts.noSeriesParallel ? null : seriesParallel(doc, view);
-    if (sp) {
-      const saved = JSON.stringify(lay);
-      const untidy = () => { const r = {}; tidyCost(doc, view, null, null, r); return r.overlaps + r.crossings + r.overParts; };
-      if (layoutSeriesParallel(doc, view, sp) && untidy() === 0) return finish();
-      doc.layouts[view] = JSON.parse(saved);
-      return tidy(doc, view, Object.assign({}, opts, { noSeriesParallel: true, untidyBefore, originalBefore: before, qualityBefore, repaired }));
+    const sp = seriesParallel(doc, view);
+    if (sp && layoutBestSeriesParallel(doc, view, sp, Math.min(deadline, Date.now() + 1200))) {
+      const r = judge();
+      // On the bench the estimate must be clean; in the diagram, the drawing.
+      if (schematic || r.bad === 0) offer(save(), r, true);
     }
-    improveLayout(doc, view, opts);
+    if (!best || best.r.bad > 0) {
+      load(start);
+      let cur = judge(), curJson = start;
+      for (let round = 0; round < 4 && Date.now() < deadline; round++) {
+        searchPass(doc, view, tol, deadline);
+        const r = judge();
+        if (!better(r, cur)) { load(curJson); break; }
+        cur = r; curJson = save();
+      }
+      if (curJson !== start) offer(curJson, cur, false);
+    }
+    if (best) { load(best.json); return best.json !== before; }
+    load(fallback);
+    return fallback !== before;
+  }
+
+  // One round of the local search and its finishing steps: line up parts,
+  // spread runs, keep small circuits readable and separate overlaps, keeping
+  // each step only if it does not make the layout worse.
+  function searchPass(doc, view, tol, deadline) {
+    improveLayout(doc, view, { deadline });
+    const lay = doc.layouts[view];
     for (const w of doc.wires) lay.wires[w.id] = { pts: [] };
+    const untidy = () => { const r = {}; tidyCost(doc, view, null, null, r); return r.overlaps + r.crossings + r.overParts; };
     {
-      const untidy = () => { const r = {}; tidyCost(doc, view, null, null, r); return r.overlaps + r.crossings + r.overParts; };
       const saved = JSON.stringify(lay.comps), was = untidy();
       for (let i = 0; i < 3; i++) ensureMinimumSize(doc, view);
       if (untidy() > was) lay.comps = JSON.parse(saved);
     }
-    // Keep each finishing step only if it does not make the layout worse.
     // Spreading parts along a run keeps total wire length, so it is judged
     // only on overlaps, crossings and wires over parts.
-    const untidyCount = () => { const r = {}; tidyCost(doc, view, null, null, r); return r.overlaps + r.crossings + r.overParts; };
     const steps = [
       [() => alignParts(doc, view, tol), () => tidyCost(doc, view)],
-      [() => distributeRuns(doc, view), untidyCount],
+      [() => distributeRuns(doc, view), untidy],
       [() => resolveOverlaps(doc, view, doc.components.map((c) => c.id), [], 4), () => tidyCost(doc, view)]
     ];
     for (const [step, measure] of steps) {
@@ -1017,9 +1214,6 @@
       if (measure() > was + 0.5) lay.comps = JSON.parse(saved);
     }
     for (const w of doc.wires) lay.wires[w.id] = { pts: [] };
-    // Never leave a layout with more overlaps, crossings or wires over parts
-    // than it had: keep the original instead.
-    return finish();
   }
 
   // ---------- Series-parallel layout ----------
@@ -1179,10 +1373,7 @@
       }
       if (!t.parts.every(measure)) return false;
       // Meters connected across something hang below it, as in textbooks.
-      if (t.kind === 'parallel') {
-        const isMeter = (p) => p.kind === 'leaf' && (p.c.type === 'voltmeter' || p.c.type === 'scope');
-        t.parts.sort((p, q) => isMeter(p) - isMeter(q));
-      }
+      if (t.kind === 'parallel' && !t.ordered) t.parts.sort((p, q) => isMeterLeaf(p) - isMeterLeaf(q));
       if (t.kind === 'series') {
         t.w = t.parts.reduce((a, p) => a + p.w, 0) + cfg.gap * (t.parts.length - 1);
         t.up = Math.max(...t.parts.map((p) => p.up)); t.down = Math.max(...t.parts.map((p) => p.down));
@@ -1309,15 +1500,52 @@
       }
       graphs.set(nt, g);
     }
-    for (const c of doc.components) {
-      if (c.type !== 'junction') continue;
+    // Each junction goes where its wires are shortest: the point of its net
+    // nearest the ends it is wired to, never on a terminal or another junction.
+    const juncs = doc.components.filter((c) => c.type === 'junction');
+    const linked = (id) => doc.wires.flatMap((w) => w.a.c === id ? [w.b] : w.b.c === id ? [w.a] : []).map((e) => e.c + ':' + e.t);
+    const distFrom = new Map();
+    const distances = (g, k) => {
+      const key = k;
+      if (distFrom.has(key)) return distFrom.get(key);
+      const d = new Map([[k, 0]]), todo = [k];
+      while (todo.length) {
+        todo.sort((a, b) => d.get(b) - d.get(a));
+        const u = todo.pop(), n = g.get(u);
+        for (const v of n.nb) {
+          const nd = d.get(u) + Math.abs(g.get(v).p.x - n.p.x) + Math.abs(g.get(v).p.y - n.p.y);
+          if (!d.has(v) || nd < d.get(v) - 1e-9) { if (!d.has(v)) todo.push(v); d.set(v, nd); }
+        }
+      }
+      distFrom.set(key, d);
+      return d;
+    };
+    const terminalKeys = new Set([...termAt.values()].map(keyOf));
+    for (const c of juncs) {
       const g = graphs.get(sp.netOf.get(c.id + ':j'));
+      if (!g || !g.size) return false;
       let best = null;
-      if (g) for (const n of g.values()) if (!best || n.nb.size > best.nb.size) best = n;
-      const p = best ? best.p : null;
-      if (!p) return false;
+      for (const n of g.values()) if (!best || n.nb.size > best.nb.size) best = n;
+      termAt.set(c.id + ':j', best.p);
+    }
+    for (let round = 0; round < 3; round++) {
+      for (const c of juncs) {
+        const g = graphs.get(sp.netOf.get(c.id + ':j'));
+        const taken = new Set(juncs.filter((o) => o !== c).map((o) => keyOf(termAt.get(o.id + ':j'))));
+        const ends = linked(c.id).map((k) => termAt.get(k)).filter(Boolean).map(keyOf).filter((k) => g.has(k));
+        let best = null, bestCost = Infinity;
+        for (const [k, n] of g) {
+          if (taken.has(k) || terminalKeys.has(k)) continue;
+          let cost = -n.nb.size;
+          for (const e of ends) { const d = distances(g, e).get(k); cost += d === undefined ? 1e6 : d * 10; }
+          if (cost < bestCost - 1e-9) { bestCost = cost; best = n.p; }
+        }
+        if (best) termAt.set(c.id + ':j', best);
+      }
+    }
+    for (const c of juncs) {
+      const p = termAt.get(c.id + ':j');
       lay.comps[c.id] = { x: p.x, y: p.y, r: 0, f: false };
-      termAt.set(c.id + ':j', p);
     }
     for (const w of doc.wires) {
       lay.wires[w.id] = { pts: [] };
@@ -1345,6 +1573,86 @@
       lay.wires[w.id] = { pts: corners };
     }
     lay.ready = true;
+    return true;
+  }
+
+  // Parallel branches can be stacked in any order, but wires joined straight
+  // onto a terminal (not through a junction) only draw cleanly when that order
+  // matches how they are joined: one wire must not run along another's rail.
+  // In the circuit diagram, try orders and keep the best actual drawing.
+  const isMeterLeaf = (p) => p.kind === 'leaf' && (p.c.type === 'voltmeter' || p.c.type === 'scope');
+  function layoutBestSeriesParallel(doc, view, sp, deadline = Date.now() + 1200) {
+    if (!layoutSeriesParallel(doc, view, sp)) return false;
+    const lay = doc.layouts[view];
+    const groups = [];
+    const walk = (t) => { if (t.kind === 'leaf') return; if (t.kind === 'parallel') groups.push(t); t.parts.forEach(walk); };
+    for (const loop of sp.loops) walk(loop.tree);
+    if (view !== 'schematic' || !groups.length) return true;
+    // Meters below the other branches read best, all else being equal.
+    const meterPenalty = () => groups.reduce((n, g) => n + g.parts.reduce((m, p, i) => m + (isMeterLeaf(p) ? g.parts.slice(i + 1).filter((q) => !isMeterLeaf(q)).length : 0), 0), 0);
+    const judge = () => { const q = schematicQuality(doc); return { bad: q.defects, score: q.score + 300 * meterPenalty() }; };
+    const better = (a, b) => a.bad < b.bad || (a.bad === b.bad && a.score < b.score - 0.5);
+    let best = judge();
+    if (!best.bad) return true;
+    let bestLay = JSON.stringify({ comps: lay.comps, wires: lay.wires });
+    const sig = (t) => t.kind === 'leaf' ? t.c.id : t.kind + '(' + t.parts.map(sig).join(',') + ')';
+    const permutations = (list) => list.length <= 1 ? [list] : list.flatMap((x, i) => permutations(list.filter((_, k) => k !== i)).map((rest) => [x].concat(rest)));
+    // The order in which the wires on each rail reach the branches, walking
+    // from where the rail is fed: each branch then joins next to its neighbor.
+    const wiresAt = new Map();
+    for (const w of doc.wires) for (const [p, q] of [[w.a, w.b], [w.b, w.a]]) {
+      const k = p.c + ':' + p.t;
+      if (!wiresAt.has(k)) wiresAt.set(k, []);
+      wiresAt.get(k).push(q.c + ':' + q.t);
+    }
+    const leafKeys = (t, out = []) => { if (t.kind === 'leaf') out.push(t.c.id + ':' + t.from, t.c.id + ':' + t.to); else t.parts.forEach((p) => leafKeys(p, out)); return out; };
+    const isJunctionKey = (k) => { const c = circuit.getComp(doc, k.split(':')[0]); return !!c && c.type === 'junction'; };
+    function wiringOrders(g) {
+      const out = [];
+      const owner = new Map();
+      g.parts.forEach((p, i) => { for (const k of leafKeys(p)) owner.set(k, i); });
+      const nets = new Set();
+      for (const k of owner.keys()) nets.add(sp.netOf.get(k));
+      for (const nt of nets) {
+        const inNet = [...wiresAt.keys()].filter((k) => sp.netOf.get(k) === nt);
+        const feeds = inNet.filter((k) => !owner.has(k) && !isJunctionKey(k));
+        const branchesHere = new Set(inNet.filter((k) => owner.has(k)).map((k) => owner.get(k)));
+        if (!feeds.length || branchesHere.size < 2) continue;
+        const order = [], seen = new Set();
+        const visit = (k) => {
+          if (seen.has(k)) return;
+          seen.add(k);
+          if (owner.has(k) && !order.includes(owner.get(k))) order.push(owner.get(k));
+          for (const n of wiresAt.get(k) || []) if (sp.netOf.get(n) === nt) visit(n);
+        };
+        feeds.forEach(visit);
+        g.parts.forEach((_, i) => { if (!order.includes(i)) order.push(i); });
+        out.push(order.map((i) => g.parts[i]));
+      }
+      return out;
+    }
+    for (let pass = 0; pass < 2 && best.bad; pass++) {
+      for (const g of groups) {
+        const keep = g.parts.slice(), seen = new Set();
+        const orders = wiringOrders(g).concat(g.parts.length <= 4 ? permutations(keep) : [keep, keep.slice().reverse()].concat(keep.map((_, i) => keep.slice(i).concat(keep.slice(0, i)))));
+        let bestOrder = keep;
+        g.ordered = true;
+        for (const order of orders) {
+          if (Date.now() > deadline) break;
+          g.parts = order.slice();
+          if (!layoutSeriesParallel(doc, view, sp)) continue;
+          // Meters are re-sorted below their branch, so orders can repeat.
+          const key = g.parts.map(sig).join('|');
+          if (seen.has(key)) continue;
+          seen.add(key);
+          const q = judge();
+          if (better(q, best)) { best = q; bestOrder = g.parts.slice(); bestLay = JSON.stringify({ comps: lay.comps, wires: lay.wires }); }
+        }
+        g.parts = bestOrder;
+      }
+    }
+    const kept = JSON.parse(bestLay);
+    lay.comps = kept.comps; lay.wires = kept.wires; lay.ready = true;
     return true;
   }
 

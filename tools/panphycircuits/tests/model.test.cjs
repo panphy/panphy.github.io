@@ -809,3 +809,89 @@ test('routing and Tidy scoring reject wires on every oscilloscope frame edge', (
     assert.equal(JSON.stringify(doc), before, 'rendering preserves stored layout and wiring');
   }
 });
+
+function directlyWiredParallel() {
+  // Lamp and voltmeter wired straight onto the resistor's terminals, with no
+  // junction parts, as students often build it.
+  const doc = circuit.createDoc(), parts = {};
+  for (const [name, type, x, y, r] of [['B', 'battery', 0, -100, 0], ['R', 'resistor', 0, 100, 0], ['A', 'ammeter', 150, 0, 1], ['V', 'voltmeter', 30, 200, 0], ['L', 'lamp', -200, 60, 1]]) {
+    parts[name] = circuit.addComponent(doc, type);
+    for (const view of layout.VIEWS) place(doc, parts[name], view, x, y, r);
+  }
+  for (const view of layout.VIEWS) doc.layouts[view].ready = true;
+  for (const [from, to] of [['B.p', 'A.p'], ['A.n', 'R.b'], ['R.a', 'B.n'], ['V.p', 'R.b'], ['V.n', 'R.a'], ['L.a', 'R.a'], ['L.b', 'R.b']]) {
+    const [a, at] = from.split('.'), [b, bt] = to.split('.');
+    circuit.addWire(doc, { c: parts[a].id, t: at }, { c: parts[b].id, t: bt });
+  }
+  return { doc, parts };
+}
+
+test('Tidy draws branches wired straight onto terminals as a textbook diagram with junction dots', () => {
+  const { doc } = directlyWiredParallel();
+  const wires = JSON.stringify(doc.wires);
+  assert.ok(layout.tidy(doc, 'schematic'));
+  assert.equal(JSON.stringify(doc.wires), wires, 'connections unchanged');
+  const quality = layout.schematicQuality(doc);
+  assert.equal(quality.defects, 0, JSON.stringify(quality));
+  const routes = layout.routeAll(doc, 'schematic');
+  for (const w of doc.wires) assert.deepEqual(routes.get(w.id).pts, doc.layouts.schematic.wires[w.id].pts, 'the textbook bends are drawn as planned');
+  assert.equal(layout.branchPoints(doc, routes).length, 4, 'a dot where each branch leaves the rail');
+  assert.equal(layout.tidy(doc, 'schematic'), false, 'a second click changes nothing');
+});
+
+test('wires from one terminal may share a trunk and split at a dot; other wires may not run along it', () => {
+  const make = (shareTerminal) => {
+    const doc = circuit.createDoc();
+    const r = circuit.addComponent(doc, 'resistor'), up = circuit.addComponent(doc, 'junction'), down = circuit.addComponent(doc, 'junction');
+    const other = circuit.addComponent(doc, 'resistor');
+    place(doc, r, 'schematic', 0, 0); place(doc, up, 'schematic', 100, -100); place(doc, down, 'schematic', 100, 100);
+    place(doc, other, 'schematic', 0, 200);
+    const w1 = circuit.addWire(doc, { c: r.id, t: 'b' }, { c: up.id, t: 'j' }).wire;
+    const w2 = circuit.addWire(doc, shareTerminal ? { c: r.id, t: 'b' } : { c: other.id, t: 'b' }, { c: down.id, t: 'j' }).wire;
+    doc.layouts.schematic.wires[w1.id] = { pts: [[100, 0]] };
+    doc.layouts.schematic.wires[w2.id] = { pts: shareTerminal ? [[100, 0]] : [[60, 200], [60, 0], [100, 0]] };
+    return { doc, w2 };
+  };
+  const shared = make(true);
+  const routes = layout.routeAll(shared.doc, 'schematic');
+  assert.deepEqual(routes.get(shared.w2.id).pts, [[100, 0]], 'the shared trunk is kept');
+  assert.deepEqual(layout.branchPoints(shared.doc, routes), [{ x: 100, y: 0 }]);
+  assert.equal(layout.schematicQuality(shared.doc).wireConflicts, 0);
+  const unrelated = make(false);
+  assert.equal(layout.routeAll(unrelated.doc, 'schematic').get(unrelated.w2.id).pts.length, 0, 'an unrelated wire along it is rerouted');
+});
+
+test('Tidy gives each junction of a series chain of parallel groups its own point', () => {
+  const doc = circuit.createDoc(), p = {};
+  for (const name of ['B', 'R1', 'R2', 'R3', 'R4', 'J1', 'J2', 'J3', 'J4']) {
+    p[name] = circuit.addComponent(doc, name === 'B' ? 'battery' : name[0] === 'J' ? 'junction' : 'resistor');
+    for (const view of layout.VIEWS) place(doc, p[name], view, (Object.keys(p).length * 70) % 400, Object.keys(p).length * 37);
+  }
+  for (const [from, to] of [['B.p', 'J1.j'], ['J1.j', 'R1.a'], ['J1.j', 'R2.a'], ['R1.b', 'J2.j'], ['R2.b', 'J2.j'], ['J2.j', 'J3.j'],
+    ['J3.j', 'R3.a'], ['J3.j', 'R4.a'], ['R3.b', 'J4.j'], ['R4.b', 'J4.j'], ['J4.j', 'B.n']]) {
+    const [a, at] = from.split('.'), [b, bt] = to.split('.');
+    circuit.addWire(doc, { c: p[a].id, t: at }, { c: p[b].id, t: bt });
+  }
+  layout.tidy(doc, 'schematic');
+  const at = (id) => doc.layouts.schematic.comps[id];
+  assert.ok(at(p.J2.id).x !== at(p.J3.id).x || at(p.J2.id).y !== at(p.J3.id).y, 'J2 and J3 apart');
+  assert.equal(layout.schematicQuality(doc).defects, 0);
+});
+
+test('Tidy finishes promptly and a second click leaves a tidied diagram alone', () => {
+  let seed = 11;
+  const rand = () => { seed = (seed * 16807) % 2147483647; return seed / 2147483647; };
+  for (const ex of examples.list) {
+    const doc = examples.build(ex, 'schematic');
+    for (const pl of Object.values(doc.layouts.schematic.comps)) { pl.x += Math.round((rand() - 0.5) * 200); pl.y += Math.round((rand() - 0.5) * 200); pl.r = Math.floor(rand() * 4); }
+    for (const w of doc.wires) doc.layouts.schematic.wires[w.id] = { pts: [] };
+    const start = Date.now();
+    layout.tidy(doc, 'schematic');
+    assert.ok(Date.now() - start < 5000, `${ex.title}: ${Date.now() - start} ms`);
+    // The search on the bridge may still find more after its time runs out.
+    if (/bridge/.test(ex.title)) continue;
+    const once = JSON.stringify(doc.layouts.schematic);
+    assert.equal(layout.tidy(doc, 'schematic'), false, ex.title);
+    assert.equal(JSON.stringify(doc.layouts.schematic), once, ex.title);
+  }
+});
