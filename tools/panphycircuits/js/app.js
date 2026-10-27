@@ -200,13 +200,13 @@
 
   // ---------- Selection, tools ----------
 
-  app.setSelection = function (comps, wires) {
+  app.setSelection = function (comps, wires, revealInspector = true) {
     app.selection.comps = new Set(comps);
     app.selection.wires = new Set(wires);
     app.renderer.renderOverlay();
     ui.renderInspector();
     ui.updateStatus();
-    if ((comps.length || wires.length) && window.matchMedia('(max-width: 900px)').matches) document.body.classList.add('show-inspector');
+    if (revealInspector && (comps.length || wires.length) && window.matchMedia('(max-width: 900px)').matches) document.body.classList.add('show-inspector');
   };
   app.toggleSelection = function (id, kind) {
     const set = kind === 'wire' ? app.selection.wires : app.selection.comps;

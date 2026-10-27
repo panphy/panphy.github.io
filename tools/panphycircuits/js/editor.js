@@ -210,11 +210,20 @@
     svg.addEventListener('contextmenu', (e) => {
       e.preventDefault();
       // Right-click cancels a wire being drawn, also while one is dragged out.
-      if (ed.wiring) { ed.drag = null; cancelWiring(); }
+      if (ed.wiring) { ed.drag = null; cancelWiring(); return; }
+      const hit = hitOf(e);
+      if (['comp', 'act', 'term'].includes(hit.kind)) {
+        const id = hit.id || hit.c;
+        app.setSelection([id], [], false);
+        app.showQuickSettings(id, e.clientX, e.clientY);
+      }
     });
 
     svg.addEventListener('pointerdown', (e) => {
       if (e.button !== 0 && e.button !== 1 && e.button !== 2) return;
+      const initialHit = hitOf(e);
+      // Leave object right-clicks uncaptured so contextmenu retains its target.
+      if (e.button === 2 && !ed.wiring && ['comp', 'act', 'term', 'delete', 'wire', 'wp', 'mid', 'end'].includes(initialHit.kind)) return;
       svg.setPointerCapture(e.pointerId);
       pointers.set(e.pointerId, { x: e.clientX, y: e.clientY });
       host.focus({ preventScroll: true });
@@ -223,6 +232,11 @@
       const p = toWorld(e.clientX, e.clientY);
       const hit = hitOf(e);
       if (ed.wiring && e.button === 2) { ed.drag = null; cancelWiring(); return; }
+      if (e.button === 0 && hit.kind === 'delete') {
+        if (ed.wiring) cancelWiring();
+        deleteObject(hit);
+        return;
+      }
       if (app.placing) {
         placeAt(app.placing, p);
         if (!e.shiftKey) app.setPlacing(null);
@@ -268,6 +282,17 @@
           if (!(e.shiftKey || e.metaKey || e.ctrlKey)) app.setSelection([], []);
           ed.drag = { type: 'marquee', p0: p, p1: p, additive: e.shiftKey || e.metaKey || e.ctrlKey };
         }
+      }
+    });
+
+    function deleteObject(hit) {
+      app.setSelection(hit.objectKind === 'comp' ? [hit.id] : [], hit.objectKind === 'wire' ? [hit.id] : [], false);
+      app.deleteSelection();
+    }
+    svg.addEventListener('keydown', (e) => {
+      const hit = hitOf(e);
+      if (hit.kind === 'delete' && (e.key === 'Enter' || e.key === ' ')) {
+        e.preventDefault(); e.stopPropagation(); deleteObject(hit);
       }
     });
 

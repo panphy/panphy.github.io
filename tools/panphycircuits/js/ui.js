@@ -174,7 +174,7 @@
       const unit = p.unit || '';
       const [lo, hi] = rangeEnds(p);
       return `<div class="field"><div class="field-row"><label for="${id}">${esc(p.label)}</label>` +
-        `<div class="num"><input id="${id}" type="text" inputmode="decimal" spellcheck="false" autocomplete="off" data-prop="${p.key}" value="${esc(fmtField(p, value))}" aria-describedby="${id}-err"><span class="unit">${esc(unit)}</span></div></div>` +
+        `<div class="num"><input id="${id}" type="text" inputmode="decimal" spellcheck="false" autocomplete="off" data-prop="${p.key}"${disabled ? ' disabled' : ''} value="${esc(fmtField(p, value))}" aria-describedby="${id}-err"><span class="unit">${esc(unit)}</span></div></div>` +
         `<input type="range" class="slider" min="0" max="1000" step="1" value="${toSlider(p, value)}" data-slider="${p.key}" aria-label="${esc(p.label)} slider">` +
         `<p class="field-range"><span>${esc(lo)}</span><span>${esc(hi)}</span></p><p class="field-err" id="${id}-err" role="alert"></p>${help}</div>`;
     }
@@ -218,6 +218,7 @@
     }
 
     ui.renderInspector = function (force) {
+      syncQuickSettings();
       const key = selectionKey();
       const body = $('inspector-body');
       const focused = document.activeElement && body.contains(document.activeElement) ? document.activeElement.id : null;
@@ -545,8 +546,64 @@
     }
 
     // Inspector events (delegated).
+    // A small property popover uses the inspector's fields and validation.
+    const quick = document.createElement('section');
+    quick.className = 'quick-settings';
+    quick.hidden = true;
+    quick.setAttribute('role', 'dialog');
+    quick.setAttribute('aria-label', 'Quick component settings');
+    document.body.appendChild(quick);
+    function closeQuickSettings(returnFocus = false) {
+      if (quick.hidden) return;
+      quick.hidden = true;
+      delete quick.dataset.comp;
+      if (returnFocus) $('workspace').focus({ preventScroll: true });
+    }
+    app.closeQuickSettings = closeQuickSettings;
+    app.showQuickSettings = function (id, x, y) {
+      const c = circuit.getComp(app.doc, id);
+      if (!c) return;
+      const def = registry.get(c.type);
+      if (!def.props.length) return;
+      quick.dataset.comp = id;
+      quick.dataset.view = app.doc.view;
+      quick.setAttribute('aria-label', `${c.label} · ${def.name} settings`);
+      quick.innerHTML = def.props.map(p => field(p, c.props[p.key], 'quick-' + id, c.type === 'scope' && ((c.props.autoScale && ['v1', 'v2'].includes(p.key)) || (c.props.autoTime && p.key === 'tdiv')))).join('');
+      quick.querySelectorAll('.slider, .field-range, .field-help').forEach(el => el.remove());
+      quick.hidden = false;
+      const rect = quick.getBoundingClientRect();
+      quick.style.left = Math.max(8, Math.min(x, window.innerWidth - rect.width - 8)) + 'px';
+      quick.style.top = Math.max(8, Math.min(y, window.innerHeight - rect.height - 8)) + 'px';
+      quick.querySelector('input:not(:disabled), select:not(:disabled)').focus({ preventScroll: true });
+    };
+    quick.addEventListener('keydown', e => {
+      // Keep workspace shortcuts out of the popover.
+      e.stopPropagation();
+      if (e.key === 'Escape') { e.preventDefault(); closeQuickSettings(true); }
+      if (e.key === 'Enter' && e.target.matches('input[type="text"]')) { e.preventDefault(); e.target.blur(); }
+      if (e.key === 'Tab') {
+        const fields = [...quick.querySelectorAll('button, input:not(:disabled), select:not(:disabled)')];
+        const first = fields[0], last = fields[fields.length - 1];
+        if (e.shiftKey && e.target === first) { e.preventDefault(); last.focus(); }
+        else if (!e.shiftKey && e.target === last) { e.preventDefault(); first.focus(); }
+      }
+    });
+    document.addEventListener('pointerdown', e => { if (!quick.contains(e.target)) closeQuickSettings(); }, true);
+    window.addEventListener('resize', () => closeQuickSettings());
+    document.addEventListener('wheel', e => { if (!quick.contains(e.target)) closeQuickSettings(); }, { capture: true, passive: true });
+    function syncQuickSettings() {
+      if (quick.hidden) return;
+      const c = circuit.getComp(app.doc, quick.dataset.comp);
+      if (!c || quick.dataset.view !== app.doc.view || app.selection.comps.size !== 1 || !app.selection.comps.has(c.id) || app.selection.wires.size) { closeQuickSettings(); return; }
+      for (const input of quick.querySelectorAll('[data-prop]')) {
+        const p = registry.get(c.type).props.find(p => p.key === input.dataset.prop);
+        if (p.kind === 'bool') input.checked = !!c.props[p.key];
+        else if (input !== document.activeElement) input.value = p.kind === 'select' ? c.props[p.key] : fmtField(p, c.props[p.key]);
+        input.disabled = c.type === 'scope' && ((c.props.autoScale && ['v1', 'v2'].includes(p.key)) || (c.props.autoTime && p.key === 'tdiv'));
+      }
+    }
     const insp = $('inspector-body');
-    insp.addEventListener('change', (e) => {
+    function changeField(e) {
       const t = e.target;
       const c = app.selection.comps.size === 1 ? circuit.getComp(app.doc, [...app.selection.comps][0]) : null;
       if (t.dataset.setting) {
@@ -578,7 +635,9 @@
       if (p.kind === 'select') { c.props[key] = t.value; app.commit(`Change ${p.label.toLowerCase()}`); return; }
       if (t.dataset.slider) { app.commit(`Change ${p.label.toLowerCase()}`, { merge: c.id + key }); return; }
       commitNumber(c, p, t);
-    });
+    }
+    insp.addEventListener('change', changeField);
+    quick.addEventListener('change', changeField);
     insp.addEventListener('input', (e) => {
       const t = e.target;
       if (!t.dataset.slider) return;
