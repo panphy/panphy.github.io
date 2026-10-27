@@ -251,6 +251,16 @@
       const initialHit = hitOf(e);
       // Leave object right-clicks uncaptured so contextmenu retains its target.
       if (e.button === 2 && !ed.wiring && ['comp', 'act', 'term', 'delete', 'wire', 'wp', 'mid', 'end'].includes(initialHit.kind)) return;
+      // A primary pointer means no other finger is down, so anything still
+      // tracked is stale. Safari can lose a release when a redraw removes the
+      // element under the finger; without this, every later touch would look
+      // like a second finger (a pinch) and taps and holds would do nothing.
+      if (e.isPrimary && pointers.size) {
+        pointers.clear();
+        pinch = null;
+        clearHoldTimer();
+        if (ed.drag && ed.drag.type !== 'wiring') ed.drag = null;
+      }
       svg.setPointerCapture(e.pointerId);
       pointers.set(e.pointerId, { x: e.clientX, y: e.clientY });
       host.focus({ preventScroll: true });
@@ -436,6 +446,11 @@
           if (d.changed) app.commit(`Adjust ${circuit.getComp(app.doc, d.id).label}`);
           break;
         case 'handle': endHandle(d, p); break;
+        // A touch on empty space pans; a tap without movement clears the
+        // selection, as a click does with a mouse.
+        case 'pan':
+          if (d.fromTouch && Math.hypot(e.clientX - d.x, e.clientY - d.y) < 8) app.setSelection([], []);
+          break;
         default: break;
       }
     }

@@ -118,3 +118,25 @@ test('a document replacement invalidates a pending hold', () => {
   const h = setup(); h.emit('pointerdown'); h.app.doc = { ...h.app.doc }; h.hold();
   assert.equal(h.menus().length, 0); assert.equal(h.editor.drag, null);
 });
+
+test('a lost touch release does not turn later touches into a pinch', () => {
+  // Safari can drop a release when a redraw removes the element under the finger.
+  const h = setup(); h.emit('pointerdown', { pointerId: 1, isPrimary: true });
+  h.hold(); h.calls.length = 0; h.editor.drag = null;
+  h.emit('pointerdown', { pointerId: 7, isPrimary: true }); h.hold();
+  assert.equal(h.menus().length, 1, 'a new hold still opens settings');
+  h.emit('pointerup', { pointerId: 7 });
+  const tap = setup(); tap.emit('pointerdown', { pointerId: 1, isPrimary: true });
+  tap.emit('pointerdown', { pointerId: 9, isPrimary: true }); tap.emit('pointerup', { pointerId: 9 }); tap.hold();
+  assert.ok(tap.calls.some(c => c[0] === 'select'), 'a new tap still selects');
+});
+
+test('a touch tap on empty canvas clears the selection; a touch drag pans without clearing it', () => {
+  const h = setup(); h.app.selection.comps = new Set(['c1']);
+  h.emit('pointerdown', { hit: 'bg', isPrimary: true }); h.emit('pointerup', { hit: 'bg' });
+  assert.equal(h.app.selection.comps.size, 0);
+  const d = setup(); d.app.selection.comps = new Set(['c1']);
+  d.app.renderer.applyCamera = () => {};
+  d.emit('pointerdown', { hit: 'bg', isPrimary: true }); d.emit('pointermove', { hit: 'bg', clientX: 160 }); d.emit('pointerup', { hit: 'bg', clientX: 160 });
+  assert.equal(d.app.selection.comps.size, 1);
+});

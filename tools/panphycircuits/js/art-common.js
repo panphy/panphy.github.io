@@ -91,6 +91,9 @@ ${glow('ppc-glow-blue', '#E3EEFF', '#2F7BFF')}
 ${glow('ppc-glow-white', '#FFFFFF', '#CFE0FF')}
 <filter id="ppc-blur" x="-30%" y="-30%" width="160%" height="160%"><feGaussianBlur stdDeviation="2.6"/></filter>
 <filter id="ppc-blur-soft" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="5"/></filter>
+<!-- Problem and note glows: SVG filters, since Safari ignores CSS drop-shadow() on SVG parts. -->
+<filter id="ppc-glow-problem" x="-25%" y="-25%" width="150%" height="150%"><feDropShadow dx="0" dy="0" stdDeviation="2" flood-color="#E03131"/><feDropShadow dx="0" dy="0" stdDeviation="0.5" flood-color="#E03131"/></filter>
+<filter id="ppc-glow-note" x="-25%" y="-25%" width="150%" height="150%"><feDropShadow dx="0" dy="0" stdDeviation="2" flood-color="#F08C00"/><feDropShadow dx="0" dy="0" stdDeviation="0.5" flood-color="#F08C00"/></filter>
 `;
   }
 

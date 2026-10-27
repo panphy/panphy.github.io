@@ -224,8 +224,8 @@ button, input, select { font: inherit; color: inherit; }
 .comp .act { fill: transparent; cursor: pointer; }
 .comp .act-slider, .comp .act-knob { cursor: ew-resize; }
 .comp:hover .act { fill: var(--select-soft); stroke: var(--select); stroke-width: 1; stroke-dasharray: 3 3; }
-.comp.is-problem .art { filter: drop-shadow(0 0 4px #E03131) drop-shadow(0 0 1px #E03131); }
-.comp.is-note .art { filter: drop-shadow(0 0 4px #F08C00) drop-shadow(0 0 1px #F08C00); }
+.comp.is-problem .art { filter: url(#ppc-glow-problem); }
+.comp.is-note .art { filter: url(#ppc-glow-note); }
 .meter-note { margin: 8px 0 0; padding: 8px 10px; border-radius: 8px; background: color-mix(in srgb, #F08C00 12%, transparent); color: var(--ink); font-size: 0.8rem; line-height: 1.4; }
 .ppc-glow { pointer-events: none; mix-blend-mode: screen; }
 /* Motor rotor and loudspeaker cone: visual cues only, independent of sim time. */
