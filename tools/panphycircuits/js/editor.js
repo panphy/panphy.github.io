@@ -69,6 +69,7 @@
       if (registry.get(type).meter && app.graphOpen()) comp.props.plot = true;
       const pos = snapP(p);
       doc.layouts[view()].comps[comp.id] = { x: pos.x, y: pos.y, r: 0, f: false };
+      layout.clearSpot(doc, view(), comp.id);
       layout.placeInOtherViews(doc, [comp.id], view());
       app.setSelection([comp.id], []);
       app.commit(`Add ${registry.get(type).name.toLowerCase()}`);
