@@ -430,6 +430,7 @@
   }
   art.ammeter = meterArt('A', '#E8A317');
   art.voltmeter = meterArt('V', '#2F7ED8');
+  art.ohmmeter = meterArt('Ω', '#2F9E44');
 
   art.scope = {
     bounds: () => [-94, -68, 188, 136],

@@ -538,6 +538,37 @@
     help: 'Connect in parallel, across the component. It reads V(+) − V(−). An ideal voltmeter draws no current; if its terminals are in separate circuits the reading is undefined.'
   });
 
+  // Ohmmeter: a 1 V test source behind 1 kΩ (at most 1 mA, Norton form)
+  // drives a test current through the part; it shows R = V ÷ I.
+  const OHM_V = 1, OHM_R = 1000, OHM_MAX = 100e6;
+  function ohmTest(r) {
+    const v = r.v('p', 'n');
+    if (!Number.isFinite(v)) return { v, i: NaN, R: NaN };
+    const i = (OHM_V - v) / OHM_R;
+    const R = v / i;
+    return { v, i, R: Number.isFinite(R) && Math.abs(R) <= OHM_MAX ? R : Infinity };
+  }
+  define('ohmmeter', {
+    name: 'Ohmmeter', group: 'Meters', prefix: 'Ω', category: 'ext', keywords: 'resistance meter ohms multimeter continuity',
+    terminals: [{ id: 'p', name: 'Positive (+, red)' }, { id: 'n', name: 'Negative (−, black)' }],
+    polarity: { p: '+', n: '−' },
+    props: [plotProp],
+    compile(c, T, b) {
+      b.R(T.p, T.n, OHM_R);
+      b.I(T.n, T.p, OHM_V / OHM_R);
+    },
+    meter: { quantity: 'R', unit: 'Ω', floor: 1e-3, overload: true, value: (r) => ohmTest(r).R },
+    readings: (c, r) => {
+      const t = ohmTest(r);
+      return [
+        t.R === Infinity ? { key: 'r', label: 'Resistance', text: 'OL (open circuit)', value: t.R, unit: 'Ω' } : { key: 'r', label: 'Resistance', value: t.R, unit: 'Ω' },
+        { key: 'i', label: 'Test current', value: t.i, unit: 'A' }
+      ];
+    },
+    valueText: () => '',
+    help: 'Connect across a part that is not connected to any power supply. It drives a small test current (at most 1 mA, from 1 V) through the part and shows R = V ÷ I. OL means over range: an open circuit or more than 100 MΩ. A supply in the same circuit upsets the reading, and parts like lamps and diodes read the resistance they have at this small test current.'
+  });
+
   define('scope', {
     name: 'Oscilloscope', group: 'Meters', prefix: 'OS', keywords: 'cro graph trace waveform',
     terminals: [{ id: 'ch1', name: 'Channel 1 input' }, { id: 'ch2', name: 'Channel 2 input' }, { id: 'com', name: 'Common (0 V)' }],

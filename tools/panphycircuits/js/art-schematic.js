@@ -184,6 +184,7 @@
   }
   art.ammeter = meterSym('A');
   art.voltmeter = meterSym('V');
+  art.ohmmeter = meterSym('Ω');
 
   art.scope = {
     bounds: () => [-52, -36, 104, 78],

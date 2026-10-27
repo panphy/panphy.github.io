@@ -410,22 +410,29 @@
     app.noteComps = new Set(app.meterNotes().map((m) => m.id));
   }
 
+  // True if a network holds a source other than the given part: a supply, a
+  // current source or the logic rails (an ammeter's 0 V link does not count).
+  function poweredNetwork(index, ownId) {
+    const net = app.sim.compiled && app.sim.compiled.networks && app.sim.compiled.networks[index];
+    if (!net) return false;
+    return net.prims.some((p) => p.owner !== ownId && ((p.k === 'V' && !p.meter && !p.short) || p.k === 'I'));
+  }
+
   // Meters wired so that they cannot measure anything: a loose lead, or a
   // voltmeter with both leads on the same point (it reads 0 V).
   app.meterNotes = function () {
     const out = [];
     const res = app.sim.result;
     for (const c of app.doc.components) {
-      if (c.type !== 'voltmeter' && c.type !== 'ammeter') continue;
-      const volt = c.type === 'voltmeter';
+      if (c.type !== 'voltmeter' && c.type !== 'ammeter' && c.type !== 'ohmmeter') continue;
+      const volt = c.type === 'voltmeter', ohm = c.type === 'ohmmeter';
       const loose = ['p', 'n'].filter((t) => circuit.wiresAt(app.doc, { c: c.id, t }).length === 0).length;
+      const e = res && res.comp[c.id];
       let msg = '';
-      if (loose === 2) msg = volt ? `${c.label} is not connected yet. Wire one lead to each side of the component you want to measure.` : `${c.label} is not connected yet. Wire it into the circuit in series, so the current flows through it.`;
+      if (loose === 2) msg = volt || ohm ? `${c.label} is not connected yet. Wire one lead to each side of the component you want to measure.` : `${c.label} is not connected yet. Wire it into the circuit in series, so the current flows through it.`;
       else if (loose === 1) msg = `${c.label} has a lead that is not connected, so it cannot measure anything. Wire both leads into the circuit.`;
-      else if (volt) {
-        const e = res && res.comp[c.id];
-        if (e && e.node && e.node.p === e.node.n) msg = `${c.label} has both leads on the same point, so it reads 0 V. Connect them to either side of a component.`;
-      }
+      else if (volt && e && e.node && e.node.p === e.node.n) msg = `${c.label} has both leads on the same point, so it reads 0 V. Connect them to either side of a component.`;
+      else if (ohm && e && poweredNetwork(e.net.p, c.id)) msg = `${c.label} is connected to a powered circuit, so its reading is wrong. Disconnect the supply, or open a switch, before measuring resistance.`;
       if (msg) out.push({ id: c.id, msg });
     }
     return out;

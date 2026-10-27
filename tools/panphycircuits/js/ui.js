@@ -46,7 +46,11 @@
   function createUI(app) {
     const $ = (id) => document.getElementById(id);
     const ui = {};
+    // The library filter is remembered in this browser, like display choices.
+    const FILTER_KEY = 'panphy-circuits-library-filter-v1';
     let filter = 'core';
+    try { const saved = localStorage.getItem(FILTER_KEY); if (['all', 'core', 'ext'].includes(saved)) filter = saved; } catch (e) { /* storage unavailable */ }
+    document.querySelectorAll('[data-filter]').forEach((x) => x.setAttribute('aria-pressed', String(x.dataset.filter === filter)));
     let query = '';
     let lastInspectorKey = '';
 
@@ -109,6 +113,7 @@
     $('lib-search').addEventListener('input', (e) => { query = e.target.value; ui.renderLibrary(); });
     document.querySelectorAll('[data-filter]').forEach((b) => b.addEventListener('click', () => {
       filter = b.dataset.filter;
+      try { localStorage.setItem(FILTER_KEY, filter); } catch (e) { /* storage unavailable */ }
       document.querySelectorAll('[data-filter]').forEach((x) => x.setAttribute('aria-pressed', String(x === b)));
       ui.renderLibrary();
     }));
@@ -345,7 +350,7 @@
     // as a big screen. Pinned displays stay at the top of the inspector, so
     // readings can be watched while other parts are selected or adjusted.
 
-    const LIVE_TYPES = ['ammeter', 'voltmeter', 'scope'];
+    const LIVE_TYPES = ['ammeter', 'voltmeter', 'ohmmeter', 'scope'];
     const SCOPE_COLORS = { ch1: '#FFD43B', ch2: '#3BD8FF' };
     ui.hasLiveDisplay = (c) => !!c && LIVE_TYPES.includes(c.type);
     function liveCard(c, pinned) {

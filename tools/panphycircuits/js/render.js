@@ -11,7 +11,7 @@
     red: '#D7372B', black: '#2A2D33', blue: '#2F6FD6', green: '#2E9D4A',
     orange: '#EB7A1E', white: '#F2F4F7', purple: '#7E4CC9'
   };
-  const DYNAMIC = new Set(['lamp', 'led', 'ammeter', 'voltmeter', 'scope', 'dcsupply', 'logic_in', 'logic_out', 'pushswitch', 'fuse', 'motor', 'speaker',
+  const DYNAMIC = new Set(['lamp', 'led', 'ammeter', 'voltmeter', 'ohmmeter', 'scope', 'dcsupply', 'logic_in', 'logic_out', 'pushswitch', 'fuse', 'motor', 'speaker',
     'gate_and', 'gate_or', 'gate_not', 'gate_nand', 'gate_nor', 'gate_xor', 'gate_xnor']);
 
   function shade(hex, f) {
@@ -28,6 +28,7 @@
     const r = solver.reader(res, c);
     const inst = def.meter.value(r);
     const entry = res.comp[c.id];
+    if (def.meter.overload && inst === Infinity) return { text: 'OL', why: 'Over range: an open circuit, or more than the meter can measure.' };
     if (!Number.isFinite(inst)) {
       const failed = entry && Object.values(entry.net).some((ni) => res.netOk[ni] === false);
       if (failed) return { text: 'Err', warn: true, why: 'Part of the circuit could not be solved; see the problems list.' };
@@ -36,6 +37,7 @@
       return { text: '—', why: c.type === 'voltmeter' ? 'Its terminals are not in the same circuit, so there is no p.d. to measure.' : 'No reading.' };
     }
     const m = app.sim.meterValue(c, inst, c.id + ':' + def.meter.quantity);
+    if (def.meter.overload && !(Math.abs(m.value) < Infinity)) return { text: 'OL', why: 'Over range: an open circuit, or more than the meter can measure.' };
     const text = units.fmtMeter(m.value, def.meter.unit, def.meter.floor);
     const hasAC = Number.isFinite(app.sim.compiled.acMin);
     let note = '';
@@ -270,7 +272,7 @@
         if (!text) continue;
         const pl = doc.layouts[v].comps[c.id];
         const side = v === 'schematic' && (c.type === 'npn' || c.type === 'pnp');
-        const vertical = side || ((layout.quarterTurn(pl.r) & 1) === 1 && !['scope', 'dcsupply', 'acsupply', 'ammeter', 'voltmeter'].includes(c.type));
+        const vertical = side || ((layout.quarterTurn(pl.r) & 1) === 1 && !['scope', 'dcsupply', 'acsupply', 'ammeter', 'voltmeter', 'ohmmeter'].includes(c.type));
         let x, y, anchor;
         const art = layout.artFor(v, c.type);
         const sensor = v === 'realistic' && ['ldr', 'thermistor'].includes(c.type);

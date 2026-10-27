@@ -608,3 +608,19 @@ test('transformer turn edits, pause, import and reset preserve the expected stat
     assert.ok(edge.result().ok, `${np}:${ns} extreme ratio remains solvable`);
   }
 });
+
+test('ohmmeter reads R = V / I across a resistor, OL when open, and its test current is at most 1 mA', () => {
+  const def = registry.get('ohmmeter');
+  const c = build({ comps: { R1: ['resistor', { R: 220 }], O1: ['ohmmeter'] }, wires: [['O1.p', 'R1.a'], ['R1.b', 'O1.n']] });
+  assert.ok(c.result().ok);
+  close(def.meter.value(c.read('O1')), 220, 1e-6, 'resistance');
+  const i = def.readings(null, c.read('O1')).find((x) => x.key === 'i').value;
+  close(i, 1 / 1220, 1e-6, 'test current');
+  assert.ok(i <= 1e-3);
+  const series = build({ comps: { R1: ['resistor', { R: 1000 }], R2: ['resistor', { R: 4700 }], O1: ['ohmmeter'] }, wires: [['O1.p', 'R1.a'], ['R1.b', 'R2.a'], ['R2.b', 'O1.n']] });
+  close(def.meter.value(series.read('O1')), 5700, 1e-6, 'series resistors add');
+  const open = build({ comps: { O1: ['ohmmeter'] }, wires: [] });
+  assert.equal(def.meter.value(open.read('O1')), Infinity, 'open circuit is over range');
+  const short = build({ comps: { O1: ['ohmmeter'] }, wires: [['O1.p', 'O1.n']] });
+  close(def.meter.value(short.read('O1')), 0, 1e-9, 'a short reads 0 Ω');
+});
