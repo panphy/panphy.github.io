@@ -71,6 +71,7 @@ In `ibdpphy/` decks, typeset all mathematics with MathJax as LaTeX between `\(` 
 - Physical quantities need precise entry or stepping. Pair sliders with numeric readouts or entry fields.
 - Every new page, app, deck or printed resource, in any section, shows "© 2026 PanPhy Labs. All rights reserved." (`&copy;` in HTML), because visitors often open a page directly rather than from a catalog. Put it in the footer, keeping any existing links. Full-viewport apps put it inside an existing panel, start screen or dialog, so that no layout gains height. Decks put it on the title slide with the `slide-copyright` class, and printed workbooks and sheets put it in the running page footer.
 - Beta, `gcsephy/` and `ibdpphy/` pages are exempt from the general visual style.
+- Generate procedural WebGL glows, dots, shadows and masks with `/assets/three-textures.js` (`radialTexture` or `rgbaTexture`), never a 2D canvas. Safari's canvas fingerprinting protection can add colored speckles during canvas-to-WebGL uploads. Reserve `CanvasTexture` for text labels and dynamic displays; keep any 2D-only radial-gradient drawings in modules that do not upload canvas textures. The repository checker rejects simulation and shared-asset modules combining `CanvasTexture` and `createRadialGradient`. Cache the shared helper and include it in each consuming app's homepage offline requirements.
 - For flex-based Three.js canvases, use `renderer.setSize(w, h, false)` with CSS `height: 0; flex: 1; min-height: 0` to avoid sizing feedback loops.
 
 ## Documentation
