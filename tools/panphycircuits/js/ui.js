@@ -175,7 +175,7 @@
       const [lo, hi] = rangeEnds(p);
       return `<div class="field"><div class="field-row"><label for="${id}">${esc(p.label)}</label>` +
         `<div class="num"><input id="${id}" type="text" inputmode="decimal" spellcheck="false" autocomplete="off" data-prop="${p.key}"${disabled ? ' disabled' : ''} value="${esc(fmtField(p, value))}" aria-describedby="${id}-err"><span class="unit">${esc(unit)}</span></div></div>` +
-        `<input type="range" class="slider" min="0" max="1000" step="1" value="${toSlider(p, value)}" data-slider="${p.key}" aria-label="${esc(p.label)} slider">` +
+        `<input type="range" class="slider" min="0" max="1000" step="1" value="${toSlider(p, value)}" data-slider="${p.key}"${disabled ? ' disabled' : ''} aria-label="${esc(p.label)} slider">` +
         `<p class="field-range"><span>${esc(lo)}</span><span>${esc(hi)}</span></p><p class="field-err" id="${id}-err" role="alert"></p>${help}</div>`;
     }
     function fmtField(p, v) {
@@ -202,7 +202,8 @@
       if (p.log) {
         const lo = Math.log10(p.logMin || p.min), hi = Math.log10(p.max);
         v = Math.pow(10, lo + (s / 1000) * (hi - lo));
-        if (p.logMin && s === 0) v = p.min;
+        // Zero is a valid endpoint even though the rest of the range is logarithmic.
+        if (p.logMin && s === 0) return p.min;
         const mag = Math.pow(10, Math.floor(Math.log10(v)) - 1);
         v = Math.round(v / mag) * mag;
       } else {
@@ -569,7 +570,7 @@
       quick.dataset.view = app.doc.view;
       quick.setAttribute('aria-label', `${c.label} · ${def.name} settings`);
       quick.innerHTML = def.props.map(p => field(p, c.props[p.key], 'quick-' + id, c.type === 'scope' && ((c.props.autoScale && ['v1', 'v2'].includes(p.key)) || (c.props.autoTime && p.key === 'tdiv')))).join('');
-      quick.querySelectorAll('.slider, .field-range, .field-help').forEach(el => el.remove());
+      quick.querySelectorAll('.field-range, .field-help').forEach(el => el.remove());
       quick.hidden = false;
       const rect = quick.getBoundingClientRect();
       quick.style.left = Math.max(8, Math.min(x, window.innerWidth - rect.width - 8)) + 'px';
@@ -600,6 +601,10 @@
         if (p.kind === 'bool') input.checked = !!c.props[p.key];
         else if (input !== document.activeElement) input.value = p.kind === 'select' ? c.props[p.key] : fmtField(p, c.props[p.key]);
         input.disabled = c.type === 'scope' && ((c.props.autoScale && ['v1', 'v2'].includes(p.key)) || (c.props.autoTime && p.key === 'tdiv'));
+      }
+      for (const slider of quick.querySelectorAll('[data-slider]')) {
+        const p = registry.get(c.type).props.find(p => p.key === slider.dataset.slider);
+        slider.value = toSlider(p, c.props[p.key]);
       }
     }
     const insp = $('inspector-body');
@@ -638,16 +643,28 @@
     }
     insp.addEventListener('change', changeField);
     quick.addEventListener('change', changeField);
-    insp.addEventListener('input', (e) => {
+    function inputSlider(e) {
       const t = e.target;
       if (!t.dataset.slider) return;
       const c = circuit.getComp(app.doc, [...app.selection.comps][0]);
+      if (!c || t.disabled) return;
       const p = registry.get(c.type).props.find((x) => x.key === t.dataset.slider);
+      if (!p) return;
       c.props[p.key] = fromSlider(p, Number(t.value));
-      const box = document.getElementById(`f-${c.id}-${p.key}`);
-      if (box) box.value = fmtField(p, c.props[p.key]);
+      for (const host of [insp, quick]) {
+        const box = host.querySelector(`[data-prop="${p.key}"]`);
+        if (box) {
+          box.value = fmtField(p, c.props[p.key]);
+          box.removeAttribute('aria-invalid');
+          document.getElementById(box.id + '-err').textContent = '';
+        }
+        const slider = host.querySelector(`[data-slider="${p.key}"]`);
+        if (slider && slider !== t) slider.value = toSlider(p, c.props[p.key]);
+      }
       app.electricalChanged(true);
-    });
+    }
+    insp.addEventListener('input', inputSlider);
+    quick.addEventListener('input', inputSlider);
     insp.addEventListener('keydown', (e) => {
       if (e.key === 'Enter' && e.target.matches('input[type="text"]')) { e.preventDefault(); e.target.blur(); }
       if (e.key === 'Escape' && e.target.matches('input[type="text"]')) { e.target.blur(); }
