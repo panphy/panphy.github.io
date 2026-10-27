@@ -352,16 +352,11 @@ button, input, select { font: inherit; color: inherit; }
 .tool-panel { display: none; }
 #btn-show-inspector { margin-left: auto; }
 
-/* Display settings: a labeled tool with a drop-down, left of Clear. */
+/* Display settings: an icon tool with a drop-down, left of Clear. */
 /* Display and Clear stay together at the right end, even when the toolbar wraps. */
 .toolbar-end { display: flex; align-items: center; gap: 2px; margin-left: auto; flex: none; }
-.tool-text {
-  display: inline-flex; align-items: center; gap: 5px; flex: none; min-height: var(--tool-size); padding: 6px 6px 6px 8px;
-  border: 1px solid transparent; border-radius: 10px; background: none; color: var(--ink); font-weight: 600; font-size: 0.86rem; cursor: pointer; white-space: nowrap;
-}
-.tool-text .icon { width: 18px; height: 18px; color: var(--accent); }
-.tool-text .icon-chevron { width: 14px; height: 14px; color: var(--ink-3); margin-left: -2px; }
-.tool-text:hover, .tool-text[aria-expanded="true"] { background: var(--surface-3); }
+.tool-display { flex: none; }
+.tool-display[aria-expanded="true"] { background: var(--surface-3); }
 .display-menu { width: 280px; padding: 12px 14px 10px; }
 .display-menu .icard-label { margin-bottom: 4px; }
 .display-menu .row select { max-width: 58%; }
