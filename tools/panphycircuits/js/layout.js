@@ -733,6 +733,37 @@
     return a.x < b.x2 + margin && b.x < a.x2 + margin && a.y < b.y2 + margin && b.y < a.y2 + margin;
   }
 
+  // Move a newly placed part to the nearest spot, in 20-unit steps, where it is
+  // clear of other parts and, in the realistic view (whose wires do not steer
+  // around parts), clear of wires too. Returns true if it moved.
+  function clearSpot(doc, view, id, maxSteps = 12) {
+    const pl = doc.layouts[view].comps[id];
+    const comp = circuit.getComp(doc, id);
+    if (!pl || !comp || comp.type === 'junction') return false;
+    const others = doc.components.filter((c) => c.id !== id).map((c) => compBounds(doc, view, c.id)).filter(Boolean);
+    const polys = view === 'realistic' ? doc.wires.map((w) => wireRoute(doc, view, w)).filter(Boolean).map((r) => r.poly) : [];
+    const M = 6;
+    const free = () => {
+      const b = compBounds(doc, view, id);
+      if (others.some((o) => overlaps(b, o, M))) return false;
+      const r = { x: b.x - M, y: b.y - M, x2: b.x2 + M, y2: b.y2 + M };
+      return !polys.some((poly) => poly.some((p, i) => i > 0 && segHitsRect(poly[i - 1], p, r)));
+    };
+    if (free()) return false;
+    const x0 = pl.x, y0 = pl.y, STEP = 2 * GRID;
+    for (let s = 1; s <= maxSteps; s++) {
+      const ring = [];
+      for (let dx = -s; dx <= s; dx++) for (let dy = -s; dy <= s; dy++) if (Math.max(Math.abs(dx), Math.abs(dy)) === s) ring.push([dx, dy]);
+      ring.sort((a, b) => Math.hypot(a[0], a[1]) - Math.hypot(b[0], b[1]));
+      for (const [dx, dy] of ring) {
+        pl.x = x0 + dx * STEP; pl.y = y0 + dy * STEP;
+        if (free()) return true;
+      }
+    }
+    pl.x = x0; pl.y = y0;
+    return false;
+  }
+
   // Generate a layout for `target` from `source`, scaling positions so the
   // spacing suits the target artwork, then pushing apart any overlaps.
   function generateLayout(doc, target, source) {
@@ -1838,7 +1869,7 @@
   }
 
   const api = {
-    GRID, VIEWS, artFor, snap, xform, toLocal, xdir, mirror, normRot, quarterTurn, placement, termWorld, terminalsLocal, localBounds, compBounds, svgTransform,
+    GRID, VIEWS, artFor, snap, xform, toLocal, xdir, mirror, clearSpot, normRot, quarterTurn, placement, termWorld, terminalsLocal, localBounds, compBounds, svgTransform,
     wireRoute, routeAll, branchPoints, canMove, wirePoints, orthoRoute, nearestOnPoly, pointAtFraction, splitWire, generateLayout, placeInOtherViews,
     resolveOverlaps, viewBounds, overlaps, tidy, tidyCost, schematicQuality, distributeRuns, seriesParallel, layoutSeriesParallel
   };

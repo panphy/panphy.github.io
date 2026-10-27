@@ -37,6 +37,29 @@ test('terminal positions follow rotation and mirroring exactly', () => {
   assert.equal(layout.termWorld(doc, 'schematic', { c: r.id, t: 'a' }).x, 40, 'mirror swaps sides');
 });
 
+test('a part placed on a realistic wire or another part moves to the nearest clear spot', () => {
+  const doc = circuit.createDoc();
+  const a = circuit.addComponent(doc, 'cell'), b = circuit.addComponent(doc, 'lamp');
+  place(doc, a, 'realistic', -300, 0);
+  place(doc, b, 'realistic', 300, 0);
+  circuit.addWire(doc, { c: a.id, t: 'p' }, { c: b.id, t: 'a' });
+  const v = circuit.addComponent(doc, 'voltmeter');
+  place(doc, v, 'realistic', 0, 0);
+  const route = layout.wireRoute(doc, 'realistic', doc.wires[0]);
+  const hits = () => { const bb = layout.compBounds(doc, 'realistic', v.id); return route.poly.some((p) => p.x > bb.x && p.x < bb.x2 && p.y > bb.y && p.y < bb.y2); };
+  assert.ok(hits(), 'the wire starts under the meter');
+  assert.equal(layout.clearSpot(doc, 'realistic', v.id), true);
+  assert.ok(!hits(), 'the meter moved off the wire');
+  const pl = doc.layouts.realistic.comps[v.id];
+  assert.ok(Math.hypot(pl.x, pl.y) <= 240, 'it stays near where it was dropped');
+  place(doc, v, 'realistic', 0, 400);
+  assert.equal(layout.clearSpot(doc, 'realistic', v.id), false, 'a clear spot is kept');
+  assert.deepEqual([doc.layouts.realistic.comps[v.id].x, doc.layouts.realistic.comps[v.id].y], [0, 400]);
+  const r2 = circuit.addComponent(doc, 'resistor');
+  place(doc, r2, 'realistic', 0, 400);
+  assert.equal(layout.clearSpot(doc, 'realistic', r2.id), true, 'parts never land on each other');
+});
+
 test('mirroring flips terminals left to right on screen at every rotation and undoes itself', () => {
   for (let step = 0; step < 8; step++) {
     const pl = { x: 100, y: 200, r: step / 2, f: step % 3 === 0 };
