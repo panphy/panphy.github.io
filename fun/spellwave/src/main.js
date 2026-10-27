@@ -1,17 +1,17 @@
 import * as THREE from 'three';
-import { createSpellwaveAudio } from './audio.js?v=20261025-harder-bosses';
+import { createSpellwaveAudio } from './audio.js?v=20261027-boss-approach';
 import { createSeasonalEffects } from './seasonal-effects.js';
-import { createPotionSystem } from './potions.js?v=20261025-harder-bosses';
-import { ALL_WORDS, EASY_WORDS, HARD_WORDS, MEDIUM_WORDS, EQUATION_WORDS } from './question-bank.js?v=20261025-harder-bosses';
-import { createEndingCinematic, wordArrivalTimes } from './ending-cinematic.js?v=20261025-harder-bosses';
-import { createLeaderboard } from './leaderboard.js?v=20261025-harder-bosses';
+import { createPotionSystem } from './potions.js?v=20261027-boss-approach';
+import { ALL_WORDS, EASY_WORDS, HARD_WORDS, MEDIUM_WORDS, EQUATION_WORDS } from './question-bank.js?v=20261027-boss-approach';
+import { createEndingCinematic, wordArrivalTimes } from './ending-cinematic.js?v=20261027-boss-approach';
+import { createLeaderboard } from './leaderboard.js?v=20261027-boss-approach';
 import { createEnemyMesh, createMimicChestMesh } from './enemy-meshes.js';
-import { bossSpeedMultiplier, bossRockTier, BOSS_FIRST_ROCK_DELAY, hardBossShare, normalPromptLengthCap, bossWordLengthCap, previewLengthCap, withinLength, hardGuestCount } from './difficulty.js?v=20261025-harder-bosses';
+import { bossSpeedMultiplier, bossRockTier, BOSS_APPROACH_TIME, BOSS_FIRST_ROCK_DELAY, hardBossShare, normalPromptLengthCap, bossWordLengthCap, previewLengthCap, withinLength, hardGuestCount } from './difficulty.js?v=20261027-boss-approach';
 import { createLowPolyTerrain, createLowPolyTree, createLowPolyRock, createLowPolyCloud } from './lowpoly.js';
-import { createVisuals, GLOW_GAIN, MOON_GLOW_GAIN } from './visuals.js?v=20261025-harder-bosses';
-import { pickTarget, getInputCharacters, isMathOperatorInput, buildSearchPrompt, buildAltSearchPrompts, escapeHtml, wrapSups, promptIndexForProgress } from './prompt-utils.js?v=20261025-harder-bosses';
-import { createWordDeck } from './word-decks.js?v=20261025-harder-bosses';
-import { getBossChoice, choiceKeys, keysClash, choiceTypingLength, shuffledOptions, buildChoiceSegments } from './boss-choices.js?v=20261025-harder-bosses';
+import { createVisuals, GLOW_GAIN, MOON_GLOW_GAIN } from './visuals.js?v=20261027-boss-approach';
+import { pickTarget, getInputCharacters, isMathOperatorInput, buildSearchPrompt, buildAltSearchPrompts, escapeHtml, wrapSups, promptIndexForProgress } from './prompt-utils.js?v=20261027-boss-approach';
+import { createWordDeck } from './word-decks.js?v=20261027-boss-approach';
+import { getBossChoice, choiceKeys, keysClash, choiceTypingLength, shuffledOptions, buildChoiceSegments } from './boss-choices.js?v=20261027-boss-approach';
 
 // Monster, healer and chest words, and boss questions, are drawn from decks so they
 // do not repeat until a pool runs out; last run's words come after fresh ones.
@@ -1735,10 +1735,17 @@ function updateEnemies(delta, seconds) {
     const wasRevealed = enemy.revealed;
     enemy.revealed = enemy.group.position.z >= enemy.revealZ;
     if (enemy.revealed && !wasRevealed) {
-      enemy.revealFlash = 0.28;
+      // Bosses arm here: rocks begin after their first-shot delay. The question was
+      // already typeable during the approach; this flash marks the combat start.
+      enemy.revealFlash = enemy.isBoss ? 0.42 : 0.28;
       if (!enemy.isMimic) playRevealSound(enemy);
       reusableVector.set(enemy.group.position.x, 0.14, enemy.group.position.z);
-      fx.ring(reusableVector, enemy.type.eye, { from: 0.3, to: enemy.isBoss ? 4.6 : 2.2, life: 0.55, opacity: 0.7 });
+      fx.ring(reusableVector, enemy.type.eye, {
+        from: 0.3,
+        to: enemy.isBoss ? 6.2 : 2.2,
+        life: enemy.isBoss ? 0.7 : 0.55,
+        opacity: enemy.isBoss ? 0.85 : 0.7,
+      });
     }
     updateEnemyAura(enemy, delta);
     if (enemy.revealFlash > 0) enemy.revealFlash -= delta;
@@ -2159,7 +2166,9 @@ function updateLabels() {
 
     const isVisible = isLabelShown(enemy) && reusableVector.z > -1 && reusableVector.z < 1;
     enemy.label.classList.toggle('is-hidden', !isVisible);
-    // Boss questions are already visible during the walk-in; popping them again would flash.
+    // Boss cards stay up during the approach; the arm flash fires when rocks unlock.
+    enemy.label.classList.toggle('is-approaching', !!enemy.isBoss && !enemy.revealed);
+    enemy.label.classList.toggle('is-arming', !!enemy.isBoss && enemy.revealFlash > 0);
     enemy.label.classList.toggle('is-revealing', !enemy.isBoss && enemy.revealFlash > 0);
     if (!isVisible) continue;
 
@@ -3540,14 +3549,16 @@ function chooseTarget(matches) {
   return pickTarget(matches, typedBuffer);
 }
 
+// Bosses are typeable as soon as their card appears (during the approach). Rocks
+// still wait until revealZ so early answers are a skill reward, not free damage.
 function isEnemyTargetable(enemy) {
-  return enemy.revealed && enemy.group.position.z < WALL_Z && !enemy.dying;
+  if (enemy.dying || enemy.group.position.z >= WALL_Z) return false;
+  if (enemy.isBoss) return true;
+  return enemy.revealed;
 }
 
-// A boss shows its question from the start of its walk-in, so the player can read
-// while it is still far away, but it can only be answered once it arrives.
 function isLabelShown(enemy) {
-  return isEnemyTargetable(enemy) || (enemy.isBoss && !enemy.dying && enemy.group.position.z < WALL_Z);
+  return isEnemyTargetable(enemy);
 }
 
 function getEquationQuantities(equationTerm) {
@@ -4375,10 +4386,10 @@ function spawnBoss() {
     enemy.labelSide = rightCount > liveBosses.length - rightCount ? 'left' : 'right';
   }
   // Use the actual answer and movement speed for a consistent entrance.
-  enemy.spawnZ = profile.revealZ - getEnemySpeed(enemy) * 8;
+  enemy.spawnZ = profile.revealZ - getEnemySpeed(enemy) * BOSS_APPROACH_TIME;
   enemy.group.position.z = enemy.spawnZ;
   enemy.revealed = false;
-  // The first rock comes soon after the boss arrives; it throws nothing while walking in.
+  // The first rock comes soon after the boss arms; it throws nothing while approaching.
   enemy.shotTimer = BOSS_FIRST_ROCK_DELAY + Math.random() * 0.5;
 }
 
