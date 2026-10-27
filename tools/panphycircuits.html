@@ -76,13 +76,14 @@
       <section class="pane stage" aria-labelledby="circuit-title">
         <div class="pane-head stage-head">
           <h2 class="pane-heading" id="circuit-title">Circuit</h2>
+          <button type="button" id="btn-show-library" class="tool tool-panel" data-icon="panelLeft" aria-label="Show components" title="Show components" aria-controls="library" aria-expanded="false"></button>
           <div id="view-switch" class="view-switch" role="group" aria-label="View" data-view="realistic">
             <button type="button" id="view-realistic" data-icon="realistic" aria-pressed="true" title="Realistic view: components as physical objects (1)"><span>Realistic</span></button>
             <button type="button" id="view-schematic" data-icon="schematic" aria-pressed="false" title="Circuit diagram view: standard symbols (2)"><span>Circuit diagram</span></button>
           </div>
+          <button type="button" id="btn-show-inspector" class="tool tool-panel" data-icon="panelRight" aria-label="Show inspector" title="Show inspector" aria-controls="inspector" aria-expanded="false"></button>
         </div>
         <div class="pane-toolbar toolbar" role="toolbar" aria-label="Tools">
-          <button type="button" id="btn-show-library" class="tool tool-panel" data-icon="library" aria-label="Show components" title="Components"></button>
           <div class="tool-group">
             <button type="button" class="tool" data-tool="select" data-icon="select" aria-label="Select and move (V)" title="Select and move (V)"></button>
             <button type="button" class="tool" data-tool="wire" data-icon="wire" aria-label="Wire tool (W): click terminals, or click a wire to branch" title="Wire (W): click terminals, or click a wire to branch"></button>
@@ -115,7 +116,6 @@
             </div>
             <button type="button" id="btn-clear" class="tool-clear" data-icon="trash" title="Clear circuit: remove every part and wire from both views (you can undo it)"><span>Clear</span></button>
           </div>
-          <button type="button" id="btn-show-inspector" class="tool tool-panel" data-icon="inspect" aria-label="Show inspector" title="Inspector"></button>
         </div>
         <div id="workspace" class="workspace view-realistic" tabindex="0" role="application" aria-label="Circuit workspace. Tab cycles through components; arrow keys move the selection." data-active-tool="select">
           <svg id="ws-svg" class="ws-svg" xmlns="http://www.w3.org/2000/svg"></svg>
