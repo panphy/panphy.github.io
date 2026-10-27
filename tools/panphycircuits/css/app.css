@@ -188,7 +188,6 @@ button, input, select { font: inherit; color: inherit; }
 .card.is-armed { border-color: var(--accent); background: var(--accent-soft); box-shadow: 0 0 0 2px var(--accent-soft); }
 .card-art { width: 100%; height: 56px; overflow: visible; }
 .card-name { font-size: 0.74rem; font-weight: 650; text-align: center; line-height: 1.15; color: var(--ink); }
-.card-tag { position: absolute; top: 5px; right: 6px; font: 600 0.55rem var(--font-mono); text-transform: uppercase; letter-spacing: 0.06em; color: var(--ink-3); }
 .lib-empty { color: var(--ink-3); font-size: 0.88rem; padding: 14px 2px; }
 .drag-ghost { position: fixed; left: 0; top: 0; width: 80px; height: 60px; pointer-events: none; z-index: 100; opacity: 0.85; filter: drop-shadow(0 8px 16px rgba(0, 0, 0, 0.25)); }
 .drag-ghost svg { width: 100%; height: 100%; overflow: visible; }

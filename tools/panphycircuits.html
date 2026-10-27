@@ -67,7 +67,7 @@
           <div class="lib-filters" role="group" aria-label="Filter components">
             <button type="button" class="ds-chip" data-filter="all" aria-pressed="false">All</button>
             <button type="button" class="ds-chip" data-filter="core" aria-pressed="true">Core</button>
-            <button type="button" class="ds-chip" data-filter="ext" aria-pressed="false">Extensions</button>
+            <button type="button" class="ds-chip" data-filter="logic" aria-pressed="false">Logic</button>
           </div>
         </div>
         <div id="lib-list" class="lib-list"></div>
@@ -251,7 +251,7 @@
         <dl class="help-notes">
           <div><dt>Live operation</dt><dd>Examples and saved circuits open live. Edits still update readings while paused. Pause/Resume, simulation status, speed and time step are in the Simulation inspector.</dd></div>
           <div><dt>Save your work</dt><dd>Your circuit is saved automatically in this browser. File → Save as file writes a .ppcir file containing the circuit and both layouts, without the live simulation state. Open file also accepts older .json files.</dd></div>
-          <div><dt>Ideal components</dt><dd>Wires, ideal ammeters and closed switches have zero resistance. Ideal voltmeters and scope inputs draw no current. Meters can also have a finite resistance. The ohmmeter (an extension) drives a test current of at most 1 mA, so use it on parts with no supply connected; OL means an open circuit.</dd></div>
+          <div><dt>Ideal components</dt><dd>Wires, ideal ammeters and closed switches have zero resistance. Ideal voltmeters and scope inputs draw no current. Meters can also have a finite resistance. The ohmmeter drives a test current of at most 1 mA, so use it on parts with no supply connected; OL means an open circuit.</dd></div>
           <div><dt>Errors &amp; precision</dt><dd>Short circuits and conflicting ideal sources produce errors. Voltage between separate circuits is undefined. Readings use 3 significant figures; these are educational models. Each component’s inspector explains its model.</dd></div>
           <div><dt>Logic supply</dt><dd>Logic modules share a hidden 5 V supply. Use the 0 V and +5 V rails to connect them to analog parts.</dd></div>
           <div><dt>Solver</dt><dd>Modified nodal analysis solves the circuit, with Newton–Raphson iteration for diodes, LEDs, lamps and transistors.</dd></div>

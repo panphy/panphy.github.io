@@ -49,7 +49,7 @@
     // The library filter is remembered in this browser, like display choices.
     const FILTER_KEY = 'panphy-circuits-library-filter-v1';
     let filter = 'core';
-    try { const saved = localStorage.getItem(FILTER_KEY); if (['all', 'core', 'ext'].includes(saved)) filter = saved; } catch (e) { /* storage unavailable */ }
+    try { const saved = localStorage.getItem(FILTER_KEY); if (['all', 'core', 'logic'].includes(saved)) filter = saved; } catch (e) { /* storage unavailable */ }
     document.querySelectorAll('[data-filter]').forEach((x) => x.setAttribute('aria-pressed', String(x.dataset.filter === filter)));
     let query = '';
     let lastInspectorKey = '';
@@ -90,7 +90,8 @@
       for (const type of registry.order) {
         const def = registry.get(type);
         // A search looks through every part, whatever the filter.
-        if (!q && filter !== 'all' && def.category !== filter) continue;
+        if (!q && filter === 'core' && def.category !== 'core') continue;
+        if (!q && filter === 'logic' && def.group !== 'Logic') continue;
         if (q && !(def.name.toLowerCase().includes(q) || (def.keywords || '').includes(q) || def.group.toLowerCase().includes(q))) continue;
         if (!groups.has(def.group)) groups.set(def.group, []);
         groups.get(def.group).push(type);
@@ -102,7 +103,7 @@
         for (const type of groups.get(g)) {
           const def = registry.get(type);
           const armed = app.placing === type ? ' is-armed' : '';
-          html.push(`<button type="button" class="card${armed}" data-type="${type}" aria-pressed="${app.placing === type}" title="${esc(def.name)}: drag onto the workspace, or click and then click where it should go${def.category === 'ext' ? ' (extension)' : ''}">${miniArt(type, view)}<span class="card-name">${esc(def.name)}</span>${def.category === 'ext' ? '<span class="card-tag">ext</span>' : ''}</button>`);
+          html.push(`<button type="button" class="card${armed}" data-type="${type}" aria-pressed="${app.placing === type}" title="${esc(def.name)}: drag onto the workspace, or click and then click where it should go">${miniArt(type, view)}<span class="card-name">${esc(def.name)}</span></button>`);
         }
         html.push('</div></section>');
       }
@@ -263,7 +264,7 @@
       const def = registry.get(c.type);
       const props = def.props.filter((p) => p.key !== 'plot' && p.key !== 'autoScale');
       const plot = def.props.find((p) => p.key === 'plot');
-      const head = `<div class="insp-head"><div class="insp-art">${miniArt(c.type, app.doc.view)}</div><div><p class="icard-label">${esc(def.group)}${def.category === 'ext' ? ' · extension' : ''}</p><h2 class="insp-title">${esc(def.name)}</h2></div></div>` +
+      const head = `<div class="insp-head"><div class="insp-art">${miniArt(c.type, app.doc.view)}</div><div><p class="icard-label">${esc(def.group)}</p><h2 class="insp-title">${esc(def.name)}</h2></div></div>` +
         (c.type !== 'junction' ? `<div class="row label-row"><label for="f-label">Label</label><input id="f-label" type="text" maxlength="${circuit.LABEL_MAX}" value="${esc(c.label)}" data-label="1" autocomplete="off"></div>` : '') +
         `<div class="mini-actions">${actButton('rotate-ccw', 'rotateCcw', '45° CCW', false, 'Rotate 45° counterclockwise (Shift+R)', !app.canRotateSelection())}${actButton('rotate', 'rotate', '45° CW', false, 'Rotate 45° clockwise (R)', !app.canRotateSelection())}${actButton('mirror', 'mirror', 'Mirror', false, 'Mirror (M)', !app.canRotateSelection())}${actButton('duplicate', 'duplicate', 'Duplicate')}${actButton('delete', 'cross', 'Delete', true)}</div>`;
       return card('', head) + (ui.hasLiveDisplay(c) && !app.pinned.has(c.id) ? liveCard(c, false) : '') +
@@ -845,7 +846,7 @@
     });
 
     ui.renderExamples = function (list) {
-      $('examples-list').innerHTML = list.map((ex, i) => `<li><button type="button" class="example" data-example="${i}"><span class="ex-num">${i + 1}</span><span><strong>${esc(ex.title)}</strong><span>${esc(ex.summary)}</span></span>${ex.ext ? '<span class="card-tag">ext</span>' : ''}</button></li>`).join('');
+      $('examples-list').innerHTML = list.map((ex, i) => `<li><button type="button" class="example" data-example="${i}"><span class="ex-num">${i + 1}</span><span><strong>${esc(ex.title)}</strong><span>${esc(ex.summary)}</span></span></button></li>`).join('');
     };
 
     return ui;
