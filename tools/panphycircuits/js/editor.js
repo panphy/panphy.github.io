@@ -7,11 +7,13 @@
   const { registry, circuit, layout } = PPC;
 
   const MOVE_THRESHOLD = 5;
+  const TOUCH_HOLD_MS = 550;
 
   function createEditor(app, svg, host) {
     const ed = { wiring: null, drag: null, spaceDown: false, lastClick: 0 };
     const pointers = new Map();
     let pinch = null;
+    let holdTimer = null;
 
     const view = () => app.doc.view;
     const cam = () => app.cameras[view()];
@@ -207,8 +209,32 @@
 
     // ---------- Pointer handling ----------
 
+    function clearHoldTimer() {
+      if (holdTimer !== null) clearTimeout(holdTimer);
+      holdTimer = null;
+    }
+    function openTouchSettings(d) {
+      clearHoldTimer();
+      if (ed.drag !== d) return;
+      ed.drag = null;
+      if (app.doc !== d.doc || view() !== d.view || app.tool !== 'select' || app.placing || ed.wiring || pointers.size !== 1) return;
+      const c = circuit.getComp(app.doc, d.hit.id);
+      if (!c) return;
+      app.setSelection([c.id], [], false);
+      app.showQuickSettings(c.id, d.event.clientX, d.event.clientY);
+    }
+    function beginComponentPress(e, hit, p, revealInspector = true) {
+      if (hit.kind === 'act') { pressActuator(e, hit.id, p, revealInspector); return; }
+      const id = hit.id;
+      if (e.shiftKey || e.metaKey || e.ctrlKey) app.toggleSelection(id, 'comp');
+      else if (!app.selection.comps.has(id)) app.setSelection([id], [], revealInspector);
+      if (app.tool !== 'wire') beginMove(p);
+    }
+
     svg.addEventListener('contextmenu', (e) => {
       e.preventDefault();
+      // Safari may send its native long-press event before our timer.
+      if (ed.drag && ed.drag.type === 'touch-pending') { openTouchSettings(ed.drag); return; }
       // Right-click cancels a wire being drawn, also while one is dragged out.
       if (ed.wiring) { ed.drag = null; cancelWiring(); return; }
       const hit = hitOf(e);
@@ -245,21 +271,22 @@
       if (e.button === 1 || e.button === 2 || app.tool === 'pan' || ed.spaceDown) { startPan(e); return; }
       if (ed.wiring && ed.wiring.mode === 'click') { wiringClick(e, p, hit); return; }
       ed.downAt = { x: e.clientX, y: e.clientY, p };
+      if ((e.pointerType === 'touch' || e.pointerType === 'pen') && app.tool === 'select' && !ed.wiring && ['comp', 'act'].includes(hit.kind) && !(e.shiftKey || e.metaKey || e.ctrlKey)) {
+        const c = circuit.getComp(app.doc, hit.id);
+        const def = c && registry.get(c.type);
+        // Momentary buttons must respond immediately and stay down while held.
+        if (def && def.props.length && !(hit.kind === 'act' && def.actuator && def.actuator.kind === 'momentary')) {
+          const d = ed.drag = { type: 'touch-pending', event: e, hit, p, doc: app.doc, view: view() };
+          holdTimer = setTimeout(() => openTouchSettings(d), TOUCH_HOLD_MS);
+          return;
+        }
+      }
       switch (hit.kind) {
         case 'term': {
           ed.drag = { type: 'wire-pending', from: { c: hit.c, t: hit.t } };
           return;
         }
-        case 'act': return pressActuator(e, hit.id, p);
-        case 'comp': {
-          const id = hit.id;
-          if (e.shiftKey || e.metaKey || e.ctrlKey) {
-            app.toggleSelection(id, 'comp');
-          } else if (!app.selection.comps.has(id)) app.setSelection([id], []);
-          if (app.tool === 'wire') return;
-          beginMove(p);
-          return;
-        }
+        case 'act': case 'comp': return beginComponentPress(e, hit, p);
         case 'wire': {
           if (app.tool === 'wire') {
             ed.pendingSnapshot = app.snapshot();
@@ -304,7 +331,14 @@
       const p = toWorld(e.clientX, e.clientY);
       app.lastPointerWorld = p;
       if (app.placing) { app.updateGhost(p); return; }
-      const d = ed.drag;
+      let d = ed.drag;
+      if (d && d.type === 'touch-pending') {
+        if (Math.hypot(e.clientX - ed.downAt.x, e.clientY - ed.downAt.y) <= MOVE_THRESHOLD) return;
+        clearHoldTimer();
+        ed.drag = null;
+        beginComponentPress(d.event, d.hit, d.p, false);
+        d = ed.drag;
+      }
       if (!d) {
         if (ed.wiring) updateWiringTarget(p);
         return;
@@ -349,6 +383,12 @@
     });
 
     function endPointer(e) {
+      clearHoldTimer();
+      if (ed.drag && ed.drag.type === 'touch-pending') {
+        const pending = ed.drag;
+        ed.drag = null;
+        beginComponentPress(pending.event, pending.hit, pending.p);
+      }
       pointers.delete(e.pointerId);
       if (pinch) { if (pointers.size < 2) pinch = null; return; }
       const d = ed.drag;
@@ -400,6 +440,7 @@
     }
     svg.addEventListener('pointerup', endPointer);
     svg.addEventListener('pointercancel', (e) => {
+      clearHoldTimer();
       pointers.delete(e.pointerId);
       const d = ed.drag;
       if (d && d.type === 'act-momentary') releaseMomentary(d.id);
@@ -452,6 +493,7 @@
     }, { passive: false });
 
     function startPinch() {
+      clearHoldTimer();
       ed.drag = null;
       const [a, b] = [...pointers.values()];
       const k = cam();
@@ -595,10 +637,10 @@
 
     // ---------- Controls on components ----------
 
-    function pressActuator(e, id, p) {
+    function pressActuator(e, id, p, revealInspector = true) {
       const c = circuit.getComp(app.doc, id);
       const a = layout.artFor(view(), c.type).actuator(c.props, app.doc.layouts[view()].comps[id]);
-      if (!(e.shiftKey || e.metaKey || e.ctrlKey) && !app.selection.comps.has(id)) app.setSelection([id], []);
+      if (!(e.shiftKey || e.metaKey || e.ctrlKey) && !app.selection.comps.has(id)) app.setSelection([id], [], revealInspector);
       if (a.kind === 'toggle') { ed.drag = { type: 'act-toggle', id }; return; }
       if (a.kind === 'momentary') {
         app.sim.pressed[id] = true;
