@@ -123,19 +123,43 @@
     scheduleSave();
   }
 
-  app.electricalChanged = function () {
+  app.electricalChanged = function (opts = {}) {
     app.lastElecKey = JSON.stringify([app.doc.components, app.doc.wires]);
-    app.sim.setDoc(app.doc);
+    app.sim.setDoc(app.doc, opts);
     refreshProblems();
     app.renderer.renderAll();
     ui.updateReadings();
     ui.updateStatus();
   };
-  app.operationalChanged = function () {
-    app.electricalChanged();
+  app.operationalChanged = function (opts = {}) {
+    app.electricalChanged(opts);
     app.rev++;
     ui.renderInspector(true);
     scheduleSave();
+  };
+  // Display-only operational props (plot, sound) must not wipe scope traces.
+  app.displayPropChanged = function () {
+    app.lastElecKey = JSON.stringify([app.doc.components, app.doc.wires]);
+    app.rev++;
+    app.renderAll();
+    scheduleSave();
+  };
+  // Reset time and stored capacitor/inductor energy to each part's initial values.
+  app.resetSimulation = function () {
+    const running = app.sim.running;
+    app.sim.reset();
+    app.paused = false;
+    app.sim.setRunning(running || app.needsTime());
+    refreshProblems();
+    app.rev++;
+    app.renderAll();
+    app.graph.draw(true);
+    ui.announce('Simulation reset');
+    ui.toast('Time and stored charge and current reset to their initial values.');
+  };
+  app.applyInitialEnergy = function (compId) {
+    app.sim.applyInitialConditions([compId]);
+    app.electricalChanged();
   };
 
   // ---------- Views ----------
@@ -410,12 +434,38 @@
     app.noteComps = new Set(app.meterNotes().map((m) => m.id));
   }
 
-  // True if a network holds a source other than the given part: a supply, a
-  // current source or the logic rails (an ammeter's 0 V link does not count).
-  function poweredNetwork(index, ownId) {
-    const net = app.sim.compiled && app.sim.compiled.networks && app.sim.compiled.networks[index];
-    if (!net) return false;
-    return net.prims.some((p) => p.owner !== ownId && ((p.k === 'V' && !p.meter && !p.short) || p.k === 'I'));
+  // True if a source other than the ohmmeter can drive current between the
+  // probe points: a supply with a closed load path, or a charged capacitor. An
+  // ideal battery behind an open switch does not count — its positive terminal
+  // is stranded — matching the Guide's advice to open a switch before measuring.
+  function ohmmeterUpset(c, entry) {
+    const compiled = app.sim.compiled, res = app.sim.result;
+    if (!compiled || !entry || entry.net.p !== entry.net.n) return null;
+    const parent = new Map();
+    const find = (i) => { if (!parent.has(i)) parent.set(i, i); while (parent.get(i) !== i) i = parent.get(i); return i; };
+    const join = (a, b) => { a = find(a); b = find(b); if (a !== b) parent.set(a, b); };
+    for (const p of compiled.networks[entry.net.p].prims) {
+      if (p.owner === c.id) continue;
+      if (p.k === 'G' || (p.k === 'V' && (p.short || p.meter))) join(p.a.n, p.b.n);
+    }
+    const atProbe = (n) => find(n) === find(entry.node.p) || find(n) === find(entry.node.n);
+    for (const p of compiled.networks[entry.net.p].prims) {
+      if (p.owner === c.id) continue;
+      if (p.k === 'I' && (atProbe(p.a.n) || atProbe(p.b.n))) return 'source';
+      if (p.k === 'V' && !p.meter && !p.short) {
+        const emf = typeof p.v === 'function' ? p.v({ t: app.sim.t, logic: app.sim.logic, inputs: app.sim.inputs }) : p.v;
+        // A live source whose terminals are already joined through resistances or
+        // closed switches has a path for current without the ohmmeter.
+        if (Math.abs(emf) > 1e-9 && find(p.a.n) === find(p.b.n) && atProbe(p.a.n)) return 'source';
+      }
+      if (p.k === 'C') {
+        const h = app.sim.capHist[p.owner];
+        if (h && Math.abs(h.v1) > 0.05 && (atProbe(p.a.n) || atProbe(p.b.n))) return 'charge';
+      }
+    }
+    const reading = registry.get('ohmmeter').meter.value(solver.reader(res, c));
+    if (Number.isFinite(reading) && reading < 0) return 'negative';
+    return null;
   }
 
   // Meters wired so that they cannot measure anything: a loose lead, or a
@@ -432,7 +482,12 @@
       if (loose === 2) msg = volt || ohm ? `${c.label} is not connected yet. Wire one lead to each side of the component you want to measure.` : `${c.label} is not connected yet. Wire it into the circuit in series, so the current flows through it.`;
       else if (loose === 1) msg = `${c.label} has a lead that is not connected, so it cannot measure anything. Wire both leads into the circuit.`;
       else if (volt && e && e.node && e.node.p === e.node.n) msg = `${c.label} has both leads on the same point, so it reads 0 V. Connect them to either side of a component.`;
-      else if (ohm && e && poweredNetwork(e.net.p, c.id)) msg = `${c.label} is connected to a powered circuit, so its reading is wrong. Disconnect the supply, or open a switch, before measuring resistance.`;
+      else if (ohm && e) {
+        const upset = ohmmeterUpset(c, e);
+        if (upset === 'source') msg = `${c.label} is connected to a powered circuit, so its reading is wrong. Disconnect the supply, or open a switch, before measuring resistance.`;
+        else if (upset === 'charge') msg = `${c.label} is across a charged capacitor, so its reading is wrong. Discharge the capacitor before measuring resistance.`;
+        else if (upset === 'negative') msg = `${c.label} shows a negative reading, which means another source is upsetting the measurement.`;
+      }
       if (msg) out.push({ id: c.id, msg });
     }
     return out;
@@ -480,7 +535,7 @@
     const pick = selected.length ? selected : meters.some((c) => c.props.plot) ? [] : meters;
     if (!pick.some((c) => !c.props.plot)) return;
     for (const c of pick) c.props.plot = true;
-    app.operationalChanged();
+    app.displayPropChanged();
   }
   app.showGraph = function (on) {
     const panel = document.getElementById('graph-panel');

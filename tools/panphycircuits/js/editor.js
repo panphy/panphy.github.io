@@ -458,10 +458,20 @@
     svg.addEventListener('pointercancel', (e) => {
       clearHoldTimer();
       pointers.delete(e.pointerId);
-      const d = ed.drag;
-      if (d && d.type === 'act-momentary') releaseMomentary(d.id);
-      ed.drag = null;
       pinch = null;
+      const d = ed.drag;
+      ed.drag = null;
+      if (!d) return;
+      // Keep the in-progress edit (same as a normal release) so Undo stays consistent.
+      if (d.type === 'act-momentary') { releaseMomentary(d.id); return; }
+      if (d.type === 'move' && d.active) app.commit(d.ids.length > 1 ? 'Move components' : 'Move component');
+      else if ((d.type === 'act-slider' || d.type === 'act-knob') && d.changed) {
+        const c = circuit.getComp(app.doc, d.id);
+        if (c) app.commit(`Adjust ${c.label}`);
+      } else if (d.type === 'handle' && d.kind === 'wp' && d.active) app.commit('Move bend');
+      else if (d.type === 'handle' && d.kind === 'end') app.renderer.setPreview('');
+      else if (d.type === 'marquee') app.renderer.setPreview('');
+      else if (d.type === 'wiring' || d.type === 'wire-pending') { /* leave a click-to-finish wire if one was started */ }
     });
 
     svg.addEventListener('dblclick', (e) => {
