@@ -637,10 +637,10 @@
     if (!app.doc.components.length) return;
     if (app.editor.wiring) app.editor.cancelWiring();
     const v = app.doc.view;
-    if (!layout.tidy(app.doc, v)) { app.fit(); ui.toast(`The ${viewName(v)} is already tidy.`); return; }
+    if (!layout.tidy(app.doc, v)) { app.fit(); ui.toast('Tidied'); return; }
     app.commit('Tidy up');
     app.fit();
-    ui.toast(`Tidied the ${viewName(v)}: parts lined up and wires rerouted. The other view keeps its own layout.`, { label: 'Undo', run: () => app.undo() });
+    ui.toast('Tidied', { label: 'Undo', run: () => app.undo() });
   };
   app.loadExample = async function (i) {
     const ex = PPC.examples.list[i];
