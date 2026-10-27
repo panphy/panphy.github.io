@@ -26,8 +26,8 @@
     pause: '<path d="M7.5 5.5h3.2v13H7.5zM13.3 5.5h3.2v13h-3.2z" fill="currentColor"/>',
     realistic: '<rect x="3" y="9" width="18" height="7" rx="3.5"/><path d="M8 9v7M11 9v7M14 9v7M1 12.5h2M21 12.5h2"/>',
     schematic: '<path d="M1 12h5l1.5-4 3 8 3-8 3 8 1.5-4h5"/>',
-    library: '<rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/>',
-    inspect: '<path d="M4 6h10M4 12h16M4 18h7"/><circle cx="17" cy="6" r="2.4"/><circle cx="14" cy="18" r="2.4"/>',
+    panelLeft: '<rect x="3" y="4" width="18" height="16" rx="2.5"/><path d="M9 4v16"/><path d="M4 6a1 1 0 011-1h3v14H5a1 1 0 01-1-1z" fill="currentColor" stroke="none" opacity=".2"/>',
+    panelRight: '<rect x="3" y="4" width="18" height="16" rx="2.5"/><path d="M15 4v16"/><path d="M16 5h3a1 1 0 011 1v12a1 1 0 01-1 1h-3z" fill="currentColor" stroke="none" opacity=".2"/>',
     warn: '<path d="M12 3l10 18H2z"/><path d="M12 10v5M12 18v.5"/>',
     close: '<path d="M6 6l12 12M18 6L6 18"/>',
     pin: '<path d="M9 3.5h6l-1.2 5.5 3.2 3.2H7l3.2-3.2z"/><path d="M12 12.2V20.5"/>',
@@ -51,6 +51,18 @@
 
     // ---------- Icons on static buttons ----------
     document.querySelectorAll('[data-icon]').forEach((el) => { el.insertAdjacentHTML('afterbegin', icon(el.dataset.icon)); });
+    // Panel visibility can also change after selection or component placement.
+    function syncPanelButtons() {
+      for (const [id, className, label] of [['btn-show-library', 'show-library', 'components'], ['btn-show-inspector', 'show-inspector', 'inspector']]) {
+        const button = $(id);
+        const expanded = document.body.classList.contains(className);
+        button.setAttribute('aria-expanded', String(expanded));
+        button.setAttribute('aria-label', `${expanded ? 'Hide' : 'Show'} ${label}`);
+        button.title = `${expanded ? 'Hide' : 'Show'} ${label}`;
+      }
+    }
+    new MutationObserver(syncPanelButtons).observe(document.body, { attributes: true, attributeFilter: ['class'] });
+    syncPanelButtons();
 
     // ---------- Library ----------
 
