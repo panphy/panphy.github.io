@@ -28,6 +28,7 @@
     cameras: { realistic: { tx: 0, ty: 0, z: 1, fitted: false }, schematic: { tx: 0, ty: 0, z: 1, fitted: false } },
     history: { stack: [], index: -1 },
     problemComps: new Set(),
+    noteComps: new Set(),
     rev: 0,
     graphWindow: 'all',
     clipboard: null,
@@ -406,7 +407,29 @@
     app.problemComps = new Set();
     const res = app.sim.result;
     if (res) for (const e of res.errors) for (const id of e.comps) app.problemComps.add(id);
+    app.noteComps = new Set(app.meterNotes().map((m) => m.id));
   }
+
+  // Meters wired so that they cannot measure anything: a loose lead, or a
+  // voltmeter with both leads on the same point (it reads 0 V).
+  app.meterNotes = function () {
+    const out = [];
+    const res = app.sim.result;
+    for (const c of app.doc.components) {
+      if (c.type !== 'voltmeter' && c.type !== 'ammeter') continue;
+      const volt = c.type === 'voltmeter';
+      const loose = ['p', 'n'].filter((t) => circuit.wiresAt(app.doc, { c: c.id, t }).length === 0).length;
+      let msg = '';
+      if (loose === 2) msg = volt ? `${c.label} is not connected yet. Wire one lead to each side of the component you want to measure.` : `${c.label} is not connected yet. Wire it into the circuit in series, so the current flows through it.`;
+      else if (loose === 1) msg = `${c.label} has a lead that is not connected, so it cannot measure anything. Wire both leads into the circuit.`;
+      else if (volt) {
+        const e = res && res.comp[c.id];
+        if (e && e.node && e.node.p === e.node.n) msg = `${c.label} has both leads on the same point, so it reads 0 V. Connect them to either side of a component.`;
+      }
+      if (msg) out.push({ id: c.id, msg });
+    }
+    return out;
+  };
   app.problems = function () {
     const out = [];
     const res = app.sim.result;
@@ -419,6 +442,7 @@
         for (const msg of def.warnings(c, solver.reader(res, c))) out.push({ level: 'warn', msg, comps: [c.id] });
       }
     }
+    for (const m of app.meterNotes()) out.push({ level: 'warn', msg: m.msg, comps: [m.id] });
     const dangling = circuit.danglingJunctions(app.doc);
     if (dangling.length) out.push({ level: 'warn', msg: `${dangling.length} wire end${dangling.length > 1 ? 's are' : ' is'} not connected to anything (marked with an orange ring). Drag the end onto a terminal, or delete the wire.`, comps: dangling });
     return out;

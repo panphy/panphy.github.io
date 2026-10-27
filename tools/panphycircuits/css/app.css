@@ -138,6 +138,8 @@ button, input, select { font: inherit; color: inherit; }
   min-height: 34px; padding: 4px 8px; border-radius: 999px; background: var(--surface); border: 1px solid var(--line); box-shadow: var(--shadow-1);
   font-size: 0.75rem; color: var(--ink-2);
 }
+/* With nothing to pause, the chip is a plain status label, not a button. */
+.sim-status[data-state="live"] { background: transparent; border-color: transparent; box-shadow: none; cursor: help; }
 /* Fixed widths so changing text never shifts anything. */
 .sim-state { display: inline-block; width: 3.9em; }
 .chip-btn { display: inline-grid; place-items: center; width: 24px; height: 24px; flex: 0 0 24px; margin: 0; padding: 0; line-height: 1; border: 0; border-radius: 50%; background: none; color: var(--ink-2); cursor: pointer; }
@@ -223,6 +225,8 @@ button, input, select { font: inherit; color: inherit; }
 .comp .act-slider, .comp .act-knob { cursor: ew-resize; }
 .comp:hover .act { fill: var(--select-soft); stroke: var(--select); stroke-width: 1; stroke-dasharray: 3 3; }
 .comp.is-problem .art { filter: drop-shadow(0 0 4px #E03131) drop-shadow(0 0 1px #E03131); }
+.comp.is-note .art { filter: drop-shadow(0 0 4px #F08C00) drop-shadow(0 0 1px #F08C00); }
+.meter-note { margin: 8px 0 0; padding: 8px 10px; border-radius: 8px; background: color-mix(in srgb, #F08C00 12%, transparent); color: var(--ink); font-size: 0.8rem; line-height: 1.4; }
 .ppc-glow { pointer-events: none; mix-blend-mode: screen; }
 /* Motor rotor and loudspeaker cone: visual cues only, independent of sim time. */
 .ppc-spin { transform-box: fill-box; transform-origin: center; animation: ppc-spin 1s linear infinite; }

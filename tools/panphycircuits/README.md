@@ -46,6 +46,8 @@ Adding a component: define it in `registry.js` (terminals, props, `compile` into
 - The Guide uses expandable topics, with Start building open initially, a fixed close/header row and a scrolling reading area. Keep instructions in the relevant topic instead of adding dense columns.
 - The core Transformer has four isolated terminals and independent primary/secondary turns controls (10–2000 whole turns). Its coupled-inductor model uses 99.9% coupling, 10 H and 0.1 Ω per 100-turn winding, both scaled with turns squared. AC voltage follows the turns ratio approximately; secondary loading reflects into the primary. DC produces a transient that decays, with potentially large primary current. Each galvanic island keeps its own voltage reference even when coils are solved together. Transformer current history follows the inductor pause/edit/reset lifecycle. Core loss and saturation are not modeled.
 - Model notes for each component are shown in its inspector.
+- The library opens on Core physics; a search looks through every part whatever the filter. Meters wired so they cannot measure (a loose lead, or a voltmeter with both leads on one point) glow orange and get a note in the problems list and in their Readings card (`app.meterNotes`).
+- The Pause control in the canvas corner appears only when time matters; otherwise the corner shows a plain Live label whose tooltip explains why.
 
 ## Tests
 
