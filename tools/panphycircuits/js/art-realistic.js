@@ -411,9 +411,12 @@
       draw(ctx) {
         const display = ctx.display || '—';
         return shadow(roundRect(-52, -42, 104, 88, 10, '')) +
-          roundRect(-52, -42, 104, 88, 10, 'fill="#2B3038" stroke="#15181D" stroke-width="1"') +
-          roundRect(-52, -42, 104, 12, 10, `fill="${accent}"`) + `<rect x="-52" y="-36" width="104" height="6" fill="${accent}"/>` +
+          roundRect(-52, -42, 104, 88, 10, 'fill="#2B3038"') +
+          // Match the case's 10-unit corner arcs; a short rounded rectangle
+          // clamps its vertical radius and bulges outside the case corners.
+          `<path d="M -42 -42 H 42 A 10 10 0 0 1 52 -32 V -30 H -52 V -32 A 10 10 0 0 1 -42 -42 Z" fill="${accent}"/>` +
           roundRect(-52, -42, 104, 88, 10, 'fill="url(#ppc-top)" opacity="0.6"') +
+          roundRect(-52, -42, 104, 88, 10, 'fill="none" stroke="#15181D" stroke-width="1"') +
           roundRect(-44, -26, 88, 30, 4, 'fill="#14171B"') +
           roundRect(-41, -23, 82, 24, 3, 'fill="url(#ppc-lcd)"') +
           up(ctx, 0, -11, `<text x="37" y="0" class="ppc-lcd" text-anchor="end" dominant-baseline="central">${esc(display)}</text>` +
