@@ -585,6 +585,40 @@ test('open-secondary DC transformer transient decays instead of sustaining secon
   close(c.read('T').v('s1', 's2'), 9.99 * Math.exp(-10), 1e-5);
 });
 
+test('open-secondary transformer stays solvable when paused and AC peak or frequency changes', () => {
+  // Ideal voltmeters stamp nothing, so the secondary has no conductive path.
+  // Hold mode must freeze that winding's p.d. instead of injecting current into
+  // an open circuit (which made peak/frequency edits while paused fail).
+  const c = build({
+    comps: {
+      AC: ['acsupply', { peak: 15, freq: 210 }],
+      T: ['transformer', { np: 100, ns: 200 }],
+      V1: ['voltmeter', { mode: 'ac' }],
+      V2: ['voltmeter', { mode: 'ac' }]
+    },
+    wires: [
+      ['AC.p', 'T.p1'], ['AC.n', 'T.p2'],
+      ['V1.n', 'T.p1'], ['V1.p', 'T.s2'],
+      ['V2.n', 'T.s1'], ['V2.p', 'T.s2']
+    ]
+  });
+  assert.ok(c.result().ok);
+  for (let k = 0; k < 100; k++) c.sim.step();
+  assert.ok(c.result().ok);
+  const vs = c.read('T').v('s1', 's2');
+  c.sim.setRunning(false);
+  c.sim.trial();
+  assert.ok(c.result().ok);
+  close(c.read('T').v('s1', 's2'), vs, 1e-9, 'paused secondary holds its p.d.');
+  circuit.getComp(c.doc, c.ids.AC).props.peak = 4.5;
+  c.sim.setDoc(c.doc);
+  assert.ok(c.result().ok, 'peak edit while paused');
+  circuit.getComp(c.doc, c.ids.AC).props.freq = 100;
+  c.sim.setDoc(c.doc);
+  assert.ok(c.result().ok, 'frequency edit while paused');
+  assert.equal(c.result().errors.length, 0);
+});
+
 test('transformer turn edits, pause, import and reset preserve the expected state lifecycle', () => {
   const c = transformerCircuit(100, 200);
   for (let k = 0; k < 20; k++) c.sim.step();

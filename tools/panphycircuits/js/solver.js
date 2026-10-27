@@ -299,13 +299,38 @@
     // Frozen time (edits and pause): capacitors hold their stored p.d. as ideal
     // voltage sources; inductors hold their stored current as current sources.
     // That keeps readings at the committed energy state instead of advancing one
-    // backward-Euler step on every re-solve.
+    // backward-Euler step on every re-solve. An open transformer winding (only
+    // ideal meters) has nowhere for a held current to flow, so it freezes its
+    // last p.d. as a voltage source instead — otherwise the matrix is singular.
     const holdCapVs = [];
+    const holdT = new Map();
     if (ctx.method === 'hold') {
       for (const p of net.prims) {
-        if (p.k !== 'C') continue;
-        const h = ctx.capHist[p.owner] || { v1: p.v0 };
-        holdCapVs.push({ k: 'V', a: p.a, b: p.b, v: h.v1, owner: p.owner, holdCap: p });
+        if (p.k === 'C') {
+          const h = ctx.capHist[p.owner] || { v1: p.v0 };
+          holdCapVs.push({ k: 'V', a: p.a, b: p.b, v: h.v1, owner: p.owner, holdCap: p });
+        } else if (p.k === 'T') {
+          const h = ctx.indHist[p.owner] || { i1: 0, j1: 0 };
+          const ih = [h.i1 || 0, h.j1 || 0];
+          const open = [];
+          for (let k = 0; k < 2; k++) {
+            const na = p.nodes[2 * k], nb = p.nodes[2 * k + 1];
+            const g0 = compiled.galvanicOf[na.n];
+            const closed = net.prims.some((q) => {
+              if (q === p) return false;
+              if (!(q.k === 'G' || q.k === 'V' || q.k === 'I' || q.k === 'C' || q.k === 'N' || q.k === 'L')) return false;
+              const qns = q.nodes || [q.a, q.b];
+              return qns.some((n) => compiled.galvanicOf[n.n] === g0);
+            });
+            if (closed) { open.push(null); continue; }
+            const va = warm.get(nodes[na.n].key) ?? 0;
+            const vb = warm.get(nodes[nb.n].key) ?? 0;
+            const edge = { k: 'V', a: na, b: nb, v: va - vb, owner: p.owner, holdWind: p };
+            holdCapVs.push(edge);
+            open.push(edge);
+          }
+          holdT.set(p, { ih, open });
+        }
       }
     }
     const loopNet = holdCapVs.length ? { prims: net.prims.concat(holdCapVs) } : net;
@@ -349,9 +374,10 @@
       } else if (p.k === 'T') {
         const h = ctx.indHist[p.owner] || { i1: 0, j1: 0 };
         if (ctx.method === 'hold') {
-          const ih = [h.i1 || 0, h.j1 || 0];
+          const { ih, open } = holdT.get(p);
           indInfo.push({ p, hold: true, ih });
           for (let k = 0; k < 2; k++) {
+            if (open[k]) continue;
             const x = idx(p.nodes[2 * k].n), y = idx(p.nodes[2 * k + 1].n);
             addZ(x, -ih[k]); addZ(y, ih[k]);
           }
