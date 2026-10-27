@@ -678,7 +678,8 @@ button, input, select { font: inherit; color: inherit; }
 .quick-settings .field input[type="text"]:hover, .quick-settings .field select:hover { border-color: var(--line-strong); }
 .quick-settings .field input[type="text"]:focus, .quick-settings .field select:focus-visible { border-color: var(--accent); outline: 2px solid var(--focus); }
 .quick-settings .field input[aria-invalid="true"] { border-color: var(--danger); }
-.quick-settings .field input:disabled { opacity: .5; }
+/* Dim the whole manual setting, including its label, while automatic control is on. */
+.field:has(input:disabled, select:disabled) { opacity: .35; }
 /* Native selects size to their longest option, including the arrow space. */
 .quick-settings:has(select) { width: max-content; min-width: min(196px, calc(100vw - 16px)); max-width: calc(100vw - 16px); }
 .quick-settings .field select { flex: 0 1 auto; width: auto; min-width: 0; max-width: 100%; }
@@ -687,3 +688,10 @@ button, input, select { font: inherit; color: inherit; }
 .quick-settings .toggle-track { width: 28px; height: 16px; }
 .quick-settings .toggle-track::after { top: 2px; left: 2px; width: 12px; height: 12px; }
 .quick-settings .toggle input:checked + .toggle-track::after { transform: translateX(12px); }
+
+.quick-settings .slider { appearance: none; -webkit-appearance: none; height: 14px; margin: 1px 0; background: transparent; cursor: pointer; }
+.quick-settings .slider::-webkit-slider-runnable-track { height: 3px; border-radius: 3px; background: var(--line-strong); }
+.quick-settings .slider::-webkit-slider-thumb { appearance: none; -webkit-appearance: none; width: 10px; height: 10px; margin-top: -3.5px; border: 0; border-radius: 50%; background: var(--accent); }
+.quick-settings .slider::-moz-range-track { height: 3px; border-radius: 3px; background: var(--line-strong); }
+.quick-settings .slider::-moz-range-thumb { width: 10px; height: 10px; border: 0; border-radius: 50%; background: var(--accent); }
+.quick-settings .slider:focus-visible { outline: 2px solid var(--focus); outline-offset: 1px; border-radius: 4px; }
