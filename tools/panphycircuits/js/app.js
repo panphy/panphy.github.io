@@ -166,11 +166,10 @@
     const generated = ensureViewReady(v);
     app.doc.view = v;
     if (generated && app.history.stack[app.history.index]) app.history.stack[app.history.index].snap = snapshot();
-    const k = app.cameras[v];
     app.rev++;
     app.renderAll();
     ui.renderLibrary();
-    if (!k.fitted || generated) app.fit();
+    app.fit();
     if (generated && app.doc.components.length) ui.toast(`A ${viewName(v)} layout was created from your ${viewName(v === 'schematic' ? 'realistic' : 'schematic')}. Arrange it freely; each view keeps its own layout.`);
     ui.announce(`${v === 'schematic' ? 'Circuit diagram' : 'Realistic'} view`);
     scheduleSave();
