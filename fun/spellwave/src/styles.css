@@ -938,6 +938,15 @@ body.is-running:not(.is-paused) .hud-grid {
   animation: label-pop 280ms ease-out;
 }
 
+.word-tag.is-boss.is-approaching {
+  opacity: 0.88;
+  filter: saturate(0.92);
+}
+
+.word-tag.is-boss.is-arming {
+  animation: boss-arm-flash 420ms ease-out;
+}
+
 .word-tag.is-medic {
   border-color: rgba(255, 143, 179, 0.8);
   background:
@@ -1288,6 +1297,21 @@ body.is-running:not(.is-paused) .hud-grid {
 
   100% {
     opacity: 1;
+    filter: brightness(1);
+  }
+}
+
+@keyframes boss-arm-flash {
+  0% {
+    filter: brightness(1.7);
+    box-shadow: 0 0 0 2px color-mix(in srgb, var(--boss-glow, var(--gold)) 70%, transparent), 0 0 36px color-mix(in srgb, var(--boss-glow, var(--gold)) 55%, transparent);
+  }
+
+  55% {
+    filter: brightness(1.25);
+  }
+
+  100% {
     filter: brightness(1);
   }
 }
@@ -2995,6 +3019,15 @@ body.is-running:not(.is-paused) .sw-leaderboard {
   box-shadow: 0 0 0 3px color-mix(in srgb, var(--boss-accent, var(--danger)) 40%, transparent), 0 8px 22px rgba(74, 52, 28, 0.34);
 }
 
+.word-tag.is-boss.is-approaching {
+  opacity: 0.9;
+  filter: saturate(0.94);
+}
+
+.word-tag.is-boss.is-arming {
+  animation: boss-arm-flash-paper 420ms ease-out;
+}
+
 .word-tag.is-boss.is-danger {
   border-color: var(--danger);
 }
@@ -3240,6 +3273,21 @@ body.is-running:not(.is-paused) .sw-leaderboard {
 .word-tag.is-boss.is-wrong {
   animation: boss-wrong-shake 420ms ease;
   border-color: var(--danger);
+}
+
+@keyframes boss-arm-flash-paper {
+  0% {
+    filter: brightness(1.35);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--boss-accent, var(--danger)) 55%, transparent), 0 10px 26px rgba(74, 52, 28, 0.4);
+  }
+
+  55% {
+    filter: brightness(1.12);
+  }
+
+  100% {
+    filter: none;
+  }
 }
 
 @keyframes boss-wrong-shake {
