@@ -274,6 +274,17 @@
     }
     if (n) app.commit('Rotate');
   };
+  // Mirror the part's artwork left to right; labels and printed text stay readable.
+  app.mirrorSelection = function () {
+    const v = app.doc.view;
+    let n = 0;
+    for (const id of app.selection.comps) {
+      const pl = app.doc.layouts[v].comps[id];
+      if (!pl || !app.canRotate(circuit.getComp(app.doc, id))) continue;
+      layout.mirror(pl); n++;
+    }
+    if (n) app.commit('Mirror');
+  };
 
   // A fragment is a self-contained copy of components, the wires between them
   // and their placement in each view.
@@ -698,6 +709,7 @@
     document.querySelectorAll('[data-tool]').forEach((b) => b.addEventListener('click', () => app.setTool(b.dataset.tool)));
     $('btn-rotate').addEventListener('click', () => app.rotateSelection(1));
     $('btn-rotate-ccw').addEventListener('click', () => app.rotateSelection(-1));
+    $('btn-mirror').addEventListener('click', () => app.mirrorSelection());
     $('btn-duplicate').addEventListener('click', () => app.duplicate());
     $('btn-delete').addEventListener('click', () => app.deleteSelection());
     $('btn-undo').addEventListener('click', () => app.undo());

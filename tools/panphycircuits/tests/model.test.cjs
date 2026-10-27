@@ -37,6 +37,17 @@ test('terminal positions follow rotation and mirroring exactly', () => {
   assert.equal(layout.termWorld(doc, 'schematic', { c: r.id, t: 'a' }).x, 40, 'mirror swaps sides');
 });
 
+test('mirroring flips terminals left to right on screen at every rotation and undoes itself', () => {
+  for (let step = 0; step < 8; step++) {
+    const pl = { x: 100, y: 200, r: step / 2, f: step % 3 === 0 };
+    const before = layout.xform(pl, -40, 7);
+    const m = layout.mirror({ ...pl });
+    const after = layout.xform(m, -40, 7);
+    assert.ok(Math.abs(after.x - 100 + (before.x - 100)) < 1e-9 && Math.abs(after.y - before.y) < 1e-9, `rotation ${pl.r}, flip ${pl.f}`);
+    assert.deepEqual(layout.mirror(m), pl, `mirror twice at rotation ${pl.r}`);
+  }
+});
+
 test('45° rotations place terminals on the diagonal, invert exactly and survive a save', () => {
   const doc = circuit.createDoc();
   const r = circuit.addComponent(doc, 'resistor');

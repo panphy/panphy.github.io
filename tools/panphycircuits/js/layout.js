@@ -40,6 +40,12 @@
     const X = c * dx + s * dy, Y = -s * dx + c * dy;
     return { x: pl.f ? -X : X, y: Y };
   }
+  // Mirror a placement left to right on screen, about its own origin, at any rotation.
+  function mirror(pl) {
+    pl.r = normRot(-(pl.r || 0));
+    pl.f = !pl.f;
+    return pl;
+  }
   function xdir(pl, dx, dy) {
     const p = xform({ x: 0, y: 0, r: pl.r, f: pl.f }, dx, dy);
     return { x: p.x, y: p.y };
@@ -1832,7 +1838,7 @@
   }
 
   const api = {
-    GRID, VIEWS, artFor, snap, xform, toLocal, xdir, normRot, quarterTurn, placement, termWorld, terminalsLocal, localBounds, compBounds, svgTransform,
+    GRID, VIEWS, artFor, snap, xform, toLocal, xdir, mirror, normRot, quarterTurn, placement, termWorld, terminalsLocal, localBounds, compBounds, svgTransform,
     wireRoute, routeAll, branchPoints, canMove, wirePoints, orthoRoute, nearestOnPoly, pointAtFraction, splitWire, generateLayout, placeInOtherViews,
     resolveOverlaps, viewBounds, overlaps, tidy, tidyCost, schematicQuality, distributeRuns, seriesParallel, layoutSeriesParallel
   };
