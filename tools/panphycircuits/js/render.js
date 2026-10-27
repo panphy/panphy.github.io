@@ -364,6 +364,17 @@
           }
         }
       }
+      // Keep quick-delete controls above wire handles and outside symbol artwork.
+      const deleteButton = (id, kind, x, y) => parts.push(`<g class="selection-delete" data-hit="delete" data-id="${id}" data-object-kind="${kind}" transform="translate(${x} ${y})" role="button" tabindex="0" aria-label="Delete ${kind === 'comp' ? 'component' : 'wire'}"><title>Delete ${kind === 'comp' ? 'component' : 'wire'}</title><circle r="11"/><path d="M -3.5 -3.5 L 3.5 3.5 M 3.5 -3.5 L -3.5 3.5"/></g>`);
+      for (const id of app.selection.comps) {
+        const b = layout.compBounds(doc, v, id);
+        if (b) deleteButton(id, 'comp', b.x - 5, b.y - 5);
+      }
+      for (const id of app.selection.wires) {
+        const r = routes.get(id);
+        if (!r) continue;
+        deleteButton(id, 'wire', Math.min(...r.poly.map(p => p.x)) - 11, Math.min(...r.poly.map(p => p.y)) - 11);
+      }
       L.overlay.innerHTML = parts.join('');
       // Selected wires get a highlight class.
       svg.querySelectorAll('.wire').forEach((g) => g.classList.toggle('is-selected', app.selection.wires.has(g.dataset.id)));
