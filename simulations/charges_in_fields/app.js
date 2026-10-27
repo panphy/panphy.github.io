@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import { radialTexture } from '../../assets/three-textures.js';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { MODES, MODE_ORDER, PARTICLES, MODE_PARTICLES, STEPPERS, CONTROLS, PARTS } from './content.js';
 const { setMath, mathHtml, onMathReady } = window.PanPhyMath;
@@ -173,21 +174,8 @@ function canvasTexture(width, height, draw, track = true) {
   if (track) buildTextures.push(texture);
   return texture;
 }
-const glowTexture = canvasTexture(128, 128, (ctx, w) => {
-  const gradient = ctx.createRadialGradient(w / 2, w / 2, 0, w / 2, w / 2, w / 2);
-  gradient.addColorStop(0, 'rgba(255,255,255,1)');
-  gradient.addColorStop(0.35, 'rgba(255,255,255,0.45)');
-  gradient.addColorStop(1, 'rgba(255,255,255,0)');
-  ctx.fillStyle = gradient;
-  ctx.fillRect(0, 0, w, w);
-}, false);
-const shadowTexture = canvasTexture(128, 128, (ctx, w) => {
-  const gradient = ctx.createRadialGradient(w / 2, w / 2, 0, w / 2, w / 2, w / 2);
-  gradient.addColorStop(0, 'rgba(0,0,0,0.5)');
-  gradient.addColorStop(1, 'rgba(0,0,0,0)');
-  ctx.fillStyle = gradient;
-  ctx.fillRect(0, 0, w, w);
-}, false);
+const glowTexture = radialTexture(THREE, 128, [[0, 1], [0.35, 0.45], [1, 0]]);
+const shadowTexture = radialTexture(THREE, 128, [[0, 0.5], [1, 0]], [0, 0, 0]);
 // A flat label stuck to a surface, so it never clips into it.
 function faceLabel(text, color, size = 0.6) {
   const texture = canvasTexture(256, 128, (ctx, w, h) => {

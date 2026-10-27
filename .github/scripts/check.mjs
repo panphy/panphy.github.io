@@ -185,6 +185,18 @@ check("Exam statistics data");
   }
 }
 
+check("Canvas texture gradients");
+{
+  // A conservative guard: keep 2D-only gradient drawings in modules that do not
+  // upload canvases to WebGL. Text labels and dynamic scopes remain supported.
+  for (const file of git("ls-files", "-z", "*.js", "*.mjs", "*.html").split("\0").filter((file) => /^(simulations|assets)\//.test(file))) {
+    const source = read(file);
+    if (/\bCanvasTexture\s*\(/.test(source) && /\bcreateRadialGradient\s*\(/.test(source)) {
+      fail(`${file}: canvas radial gradients can acquire colored noise on Safari; use assets/three-textures.js for WebGL textures`);
+    }
+  }
+}
+
 check("Agent instructions");
 {
   const body = (file) => read(file).split("\n").slice(1).join("\n");
