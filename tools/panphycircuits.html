@@ -65,8 +65,8 @@
             <input id="lib-search" type="search" placeholder="Search components" autocomplete="off">
           </label>
           <div class="lib-filters" role="group" aria-label="Filter components">
-            <button type="button" class="ds-chip" data-filter="all" aria-pressed="true">All</button>
-            <button type="button" class="ds-chip" data-filter="core" aria-pressed="false">Core physics</button>
+            <button type="button" class="ds-chip" data-filter="all" aria-pressed="false">All</button>
+            <button type="button" class="ds-chip" data-filter="core" aria-pressed="true">Core physics</button>
             <button type="button" class="ds-chip" data-filter="ext" aria-pressed="false">Extensions</button>
           </div>
         </div>
@@ -137,7 +137,7 @@
             <ol>
               <li><strong>Add components.</strong> Drag one from the library, or click it and then click here.</li>
               <li><strong>Connect them.</strong> Click a terminal, then another. Click a wire to branch from it.</li>
-              <li><strong>Measure.</strong> The circuit runs live. Use a switch to trigger an effect, then Pause to investigate and Resume to continue.</li>
+              <li><strong>Measure.</strong> Readings update live. When a circuit changes over time (capacitors, AC, the oscilloscope), a Pause button appears at the bottom right so you can freeze it.</li>
             </ol>
             <p>Switch between <strong>Realistic</strong> and <strong>Circuit diagram</strong> at any time: both show the same circuit.</p>
             <div class="empty-actions">
@@ -204,7 +204,7 @@
           <li><strong>Add components.</strong> Drag a card from Components, or click a card and then the canvas. Shift-click to place several. Enter on a focused card places it in the middle.</li>
           <li><strong>Connect terminals.</strong> Click one terminal, then another. Click empty space along the way to add a bend. Right-click or Esc cancels.</li>
           <li><strong>Operate the circuit.</strong> Click a switch lever or logic switch, hold a push button, or drag a rheostat slider or potentiometer knob. Drag elsewhere on a component to move it.</li>
-          <li><strong>Investigate.</strong> Readings update live. Use a circuit switch to trigger an effect, then Pause to freeze time, traces, current and component animations, and sound. Resume continues from there.</li>
+          <li><strong>Investigate.</strong> Readings update live. When a circuit changes over time (capacitors, inductors, AC, the oscilloscope or the graph), a Pause button appears at the bottom right: use a circuit switch to trigger an effect, then Pause to freeze time, traces, current and component animations, and sound. Resume continues from there.</li>
         </ol>
       </details>
       <details class="help-topic">

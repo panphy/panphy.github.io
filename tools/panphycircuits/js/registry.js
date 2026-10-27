@@ -354,6 +354,7 @@
 
   define('lamp', {
     name: 'Filament lamp', group: 'Lamps and switches', prefix: 'L', keywords: 'bulb light filament',
+    help: 'Its resistance is not fixed: as the current rises, the filament heats up and its resistance increases, so its I–V graph curves rather than following a straight line. Rated values set its normal brightness.',
     terminals: [{ id: 'a', name: 'Terminal 1' }, { id: 'b', name: 'Terminal 2' }],
     props: [
       { key: 'ratedV', label: 'Rated voltage', unit: 'V', kind: 'number', default: 2.5, min: 0.5, max: 24, step: 0.5 },

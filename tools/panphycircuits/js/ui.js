@@ -46,7 +46,7 @@
   function createUI(app) {
     const $ = (id) => document.getElementById(id);
     const ui = {};
-    let filter = 'all';
+    let filter = 'core';
     let query = '';
     let lastInspectorKey = '';
 
@@ -85,7 +85,8 @@
       const groups = new Map();
       for (const type of registry.order) {
         const def = registry.get(type);
-        if (filter !== 'all' && def.category !== filter) continue;
+        // A search looks through every part, whatever the filter.
+        if (!q && filter !== 'all' && def.category !== filter) continue;
         if (q && !(def.name.toLowerCase().includes(q) || (def.keywords || '').includes(q) || def.group.toLowerCase().includes(q))) continue;
         if (!groups.has(def.group)) groups.set(def.group, []);
         groups.get(def.group).push(type);
@@ -261,7 +262,7 @@
         (c.type !== 'junction' ? `<div class="row label-row"><label for="f-label">Label</label><input id="f-label" type="text" maxlength="${circuit.LABEL_MAX}" value="${esc(c.label)}" data-label="1" autocomplete="off"></div>` : '') +
         `<div class="mini-actions">${actButton('rotate-ccw', 'rotateCcw', '45° CCW', false, 'Rotate 45° counterclockwise (Shift+R)', !app.canRotateSelection())}${actButton('rotate', 'rotate', '45° CW', false, 'Rotate 45° clockwise (R)', !app.canRotateSelection())}${actButton('mirror', 'mirror', 'Mirror', false, 'Mirror (M)', !app.canRotateSelection())}${actButton('duplicate', 'duplicate', 'Duplicate')}${actButton('delete', 'cross', 'Delete', true)}</div>`;
       return card('', head) + (ui.hasLiveDisplay(c) && !app.pinned.has(c.id) ? liveCard(c, false) : '') +
-        card('Readings', `<dl id="readings"></dl>${plot ? field(plot, c.props.plot, c.id) : ''}`, 'readings-card') +
+        card('Readings', `<dl id="readings"></dl><p id="meter-note" class="meter-note" role="status" hidden></p>${plot ? field(plot, c.props.plot, c.id) : ''}`, 'readings-card') +
         (props.length ? card('Properties', props.map((p) => field(p, c.props[p.key], c.id, c.type === 'scope' && ((c.props.autoScale && ['v1', 'v2'].includes(p.key)) || (c.props.autoTime && p.key === 'tdiv')))).join('')) : '') +
         (def.gate ? truthTable(def) : '') +
         `<details class="icard model-note"><summary>How this is modeled</summary><p>${esc(def.help)}</p><p class="terms">Terminals: ${def.terminals.map((t) => esc(t.name)).join(' · ')}</p></details>`;
@@ -526,6 +527,12 @@
         if (!c) return;
         const def = registry.get(c.type);
         const r = solver.reader(res, c);
+        const noteEl = document.getElementById('meter-note');
+        if (noteEl) {
+          const note = app.meterNotes().find((m) => m.id === c.id);
+          if (noteEl.textContent !== (note ? note.msg : '')) noteEl.textContent = note ? note.msg : '';
+          noteEl.hidden = !note;
+        }
         if (def.meter) {
           const m = PPC.render.meterDisplay(app, c);
           rows.push({ label: 'Display', text: m.text + (m.note ? ` (${m.note})` : ''), why: m.why, strong: true });
