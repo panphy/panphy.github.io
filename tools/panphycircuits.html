@@ -108,7 +108,7 @@
             <button type="button" id="btn-zoom-in" class="tool" data-icon="zoomIn" aria-label="Zoom in (+)" title="Zoom in (+)"></button>
             <button type="button" id="btn-fit" class="tool" data-icon="fit" aria-label="Fit to circuit (0)" title="Fit to circuit (0)"></button>
             <button type="button" id="btn-snap" class="tool" data-icon="snap" aria-label="Snap to grid (G)" title="Snap to grid (G)" aria-pressed="true"></button>
-            <button type="button" id="btn-graph" class="tool" data-icon="graph" aria-label="Show graph" title="Graph of meter readings" aria-pressed="false"></button>
+            <button type="button" id="btn-graph" class="tool" data-icon="graph" aria-label="Show graph" title="Graph of meter and oscilloscope readings" aria-pressed="false"></button>
           </div>
           <div class="toolbar-end">
             <div class="menu-wrap display-wrap">
@@ -152,6 +152,10 @@
           <div class="graph-head">
             <strong class="graph-title">Graph</strong>
             <div id="graph-legend" class="graph-legend"></div>
+            <div id="graph-exports" class="graph-exports" hidden>
+              <button type="button" id="graph-export-csv" class="graph-export-pill">Export CSV</button>
+              <button type="button" id="graph-export-plot" class="graph-export-pill">Export to PanPhyPlot</button>
+            </div>
             <label class="graph-window"><span class="sr-only">Time window</span>
               <select id="graph-window">
                 <option value="all">All time</option>
@@ -162,7 +166,7 @@
             </label>
             <button type="button" id="graph-close" class="icon-btn" data-icon="close" aria-label="Close graph"></button>
           </div>
-          <canvas id="graph-canvas" class="graph-canvas" aria-label="Graph of plotted meter readings against time"></canvas>
+          <canvas id="graph-canvas" class="graph-canvas" aria-label="Graph of plotted meter and oscilloscope readings against time"></canvas>
         </div>
       </section>
 
@@ -222,8 +226,9 @@
         <dl class="help-notes">
           <div><dt>Quick settings</dt><dd>Right-click a component, or touch and hold its body, to open its compact settings menu. Drag to move it instead; tap to select it and open the inspector.</dd></div>
           <div><dt>Read &amp; pin displays</dt><dd>Select a meter or oscilloscope to see its display in the inspector. Pin keeps that display visible while you select other parts.</dd></div>
-          <div><dt>Plot a graph</dt><dd>Opening Graph enables “Plot on graph” for selected meters, or for all meters if none is selected and none is plotted yet.</dd></div>
-          <div><dt>Oscilloscope scaling</dt><dd>Auto scale and Auto time base start on for new scopes. Auto scale fits each channel vertically; Auto time base shows a few AC cycles. Turn either off to use its manual settings.</dd></div>
+          <div><dt>Plot a graph</dt><dd>Opening Graph enables “Plot on graph” for selected meters or oscilloscopes, or for all of them if none is selected and none is plotted yet. Ammeter, voltmeter, ohmmeter and oscilloscope channels all appear on the graph.</dd></div>
+          <div><dt>Export graph data</dt><dd>Pause the simulation while the graph is open to show Export CSV and Export to PanPhyPlot. Both use the same samples as the graph for the chosen time window.</dd></div>
+          <div><dt>Oscilloscope scaling</dt><dd>Auto scale and Auto time base start on for new scopes. Auto scale fits each channel vertically; Auto time base shows a few AC cycles. Turn either off to use its manual settings. “Plot on graph” also draws CH1 and CH2 on the shared time graph.</dd></div>
           <div><dt>AC supply</dt><dd>Frequency ranges from 1 Hz to 1 kHz. Use 1 Hz to watch readings change, or the oscilloscope for faster signals.</dd></div>
           <div><dt>Current animation</dt><dd>Yellow dashes show conventional current. Fast AC animation slows to one visible cycle per second and is labeled on the canvas; meters, scope traces and sound keep their actual timing. Rectified current keeps its one-way flow. Mixed-frequency circuits retain live animation.</dd></div>
         </dl>

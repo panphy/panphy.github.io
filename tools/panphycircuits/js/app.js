@@ -526,11 +526,15 @@
     });
   };
 
-  // Opening the graph plots meters straight away: the selected meters, or, with
-  // none selected, every meter unless the user has already chosen some to plot.
+  // Opening the graph plots instruments straight away: the selected meters or
+  // oscilloscopes, or every one of them unless the user has already chosen some.
   app.graphOpen = () => !document.getElementById('graph-panel').hidden;
+  function canPlot(c) {
+    const def = registry.get(c.type);
+    return !!(def.meter || def.channels);
+  }
   function autoPlot() {
-    const meters = app.doc.components.filter((c) => registry.get(c.type).meter);
+    const meters = app.doc.components.filter(canPlot);
     const selected = meters.filter((c) => app.selection.comps.has(c.id));
     const pick = selected.length ? selected : meters.some((c) => c.props.plot) ? [] : meters;
     if (!pick.some((c) => !c.props.plot)) return;
@@ -545,6 +549,7 @@
     document.body.classList.toggle('graph-open', on);
     ui.updateStatus();
     if (on) requestAnimationFrame(() => app.graph.draw(true));
+    else if (app.graph) app.graph.syncExports();
   };
 
   // ---------- Simulation ----------
@@ -557,7 +562,7 @@
     const comp = app.sim.compiled;
     if (comp && (comp.hasCaps || comp.hasInductors || Number.isFinite(comp.acMin))) return true;
     if (app.doc.components.some((c) => c.type === 'scope')) return true;
-    return app.graphOpen() && app.doc.components.some((c) => registry.get(c.type).meter && c.props.plot);
+    return app.graphOpen() && app.doc.components.some((c) => canPlot(c) && c.props.plot);
   };
   app.toggleRun = function () {
     if (!app.paused && !app.needsTime()) { ui.toast(app.NO_TIME_MSG); return; }
@@ -765,7 +770,12 @@
     app.audio = PPC.audio.createAudio(app);
     app.renderer = PPC.render.createRenderer(app, svg, host);
     app.editor = PPC.editor.createEditor(app, svg, host);
-    app.graph = PPC.graph.createGraph(app, document.getElementById('graph-canvas'), document.getElementById('graph-legend'));
+    app.graph = PPC.graph.createGraph(
+      app,
+      document.getElementById('graph-canvas'),
+      document.getElementById('graph-legend'),
+      document.getElementById('graph-exports')
+    );
     wireControls();
     ui.renderExamples(PPC.examples.list);
 
@@ -807,6 +817,15 @@
     $('btn-graph').addEventListener('click', () => app.showGraph($('graph-panel').hidden));
     $('graph-close').addEventListener('click', () => app.showGraph(false));
     $('graph-window').addEventListener('change', (e) => { app.graphWindow = e.target.value; app.graph.draw(true); });
+    $('graph-export-csv').addEventListener('click', () => {
+      if (app.graph.exportCSV()) ui.toast('Graph data downloaded as CSV.');
+      else ui.toast('Pause with plotted readings on the graph to export.');
+    });
+    $('graph-export-plot').addEventListener('click', () => {
+      if (!app.graph.hasExportData()) { ui.toast('Pause with plotted readings on the graph to export.'); return; }
+      const ok = app.graph.exportPanPhyPlot();
+      ui.toast(ok ? 'Data sent to PanPhyPlot in a new tab.' : 'The browser blocked the new tab. Allow pop-ups for this site, then try again.');
+    });
     $('btn-examples').addEventListener('click', () => $('dlg-examples').showModal());
     $('examples-list').addEventListener('click', (e) => { const b = e.target.closest('[data-example]'); if (b) app.loadExample(Number(b.dataset.example)); });
     $('empty-start').addEventListener('click', () => app.loadExample(0));
