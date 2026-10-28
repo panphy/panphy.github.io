@@ -253,6 +253,7 @@ button:disabled {
 /* ---------------------------------------------------------------------- */
 /* Tools: the buttons in the app bar and the pane toolbars                 */
 /* ---------------------------------------------------------------------- */
+a.mt-tool { text-decoration: none; }
 .mt-tool {
   display: inline-flex;
   align-items: center;

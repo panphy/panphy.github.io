@@ -19,3 +19,5 @@ Modules use explicit imports and the shared state object. Event listeners are in
 Run `node --test tools/motion_tracker/tests/regression.test.cjs`. Numerical tracking tests import the actual module; browser-dependent regression tests load complete modules with mocked dependencies. Use a clean browser context for video, calibration, tracking, history, export, and theme checks.
 
 The entry page, all JavaScript modules, stylesheet, sample video, and Chart.js dependency are precached by the root service worker. When adding a module, update both `sw.js` and the PanPhyTrack requirements in `index.html`, then bump `BUILD_ID` after cached changes.
+
+The user guide lives at `manual.html`, with screenshots in `manual/`. Link it from the app bar Manual control. Cache the guide with the app in `sw.js` and `index.html`, then bump `BUILD_ID`.

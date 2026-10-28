@@ -76,6 +76,7 @@ button, input, select { font: inherit; color: inherit; }
 .wordmark { margin: 0; font-family: var(--font-display); font-size: 1.02rem; font-weight: 600; letter-spacing: -0.03em; white-space: nowrap; }
 .appbar-actions { display: flex; align-items: center; gap: 2px; margin-left: auto; }
 .appbar-group { display: flex; align-items: center; gap: 2px; margin-right: 6px; padding-right: 6px; border-right: 1px solid var(--line); }
+a.atool { text-decoration: none; }
 .atool {
   display: inline-flex; align-items: center; gap: 6px; min-height: 38px; padding: 6px 9px; border: 1px solid transparent; border-radius: 10px;
   background: none; color: var(--ink); font-weight: 600; font-size: 0.86rem; white-space: nowrap; cursor: pointer;
