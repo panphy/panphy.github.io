@@ -437,7 +437,7 @@
   // True if a source other than the ohmmeter can drive current between the
   // probe points: a supply with a closed load path, or a charged capacitor. An
   // ideal battery behind an open switch does not count — its positive terminal
-  // is stranded — matching the Guide's advice to open a switch before measuring.
+  // is stranded — open a switch before measuring so the ohmmeter path is alone.
   function ohmmeterUpset(c, entry) {
     const compiled = app.sim.compiled, res = app.sim.result;
     if (!compiled || !entry || entry.net.p !== entry.net.n) return null;
@@ -835,7 +835,6 @@
       $('workspace').focus();
       ui.toast('Clean canvas. Drag a component from the library to start building.');
     });
-    $('btn-help').addEventListener('click', () => $('dlg-help').showModal());
     $('btn-tidy').addEventListener('click', () => app.tidy());
     $('btn-clear').addEventListener('click', () => app.newCircuit());
     const menu = $('menu-file'), fileBtn = $('btn-file');

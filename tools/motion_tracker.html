@@ -78,7 +78,6 @@
 				<button type="button" id="openVideo" class="mt-tool" title="Open a video file to analyze"><svg class="mt-icon" viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="5.5" width="12.5" height="13" rx="2"/><path d="m16 10.5 4.5-2.5v8l-4.5-2.5"/></svg><span class="keep-label">Import<span class="label-extra"> Video</span></span></button>
 			</div>
 			<a href="/tools/motion_tracker/manual.html" class="mt-tool mt-tool-quiet" title="Open the PanPhyTrack manual"><svg class="mt-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5.5c2.7-1.3 5.4-1.3 8 0v14c-2.6-1.3-5.3-1.3-8 0zM20 5.5c-2.7-1.3-5.4-1.3-8 0v14c2.6-1.3 5.3-1.3 8 0z"/></svg><span>Manual</span></a>
-			<button type="button" id="guideButton" class="mt-tool mt-tool-quiet" title="How to track an object, and keyboard shortcuts"><svg class="mt-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5.5c2.7-1.3 5.4-1.3 8 0v14c-2.6-1.3-5.3-1.3-8 0zM20 5.5c-2.7-1.3-5.4-1.3-8 0v14c2.6-1.3 5.3-1.3 8 0z"/></svg><span>Guide</span></button>
 			<button id="theme-button" data-panphy-theme-toggle class="theme-toggle-button" aria-label="Toggle Light/Dark Theme" title="Toggle between light and dark themes">&#9728;&#65039;</button>
 			<button data-panphy-fullscreen aria-label="Enter fullscreen" title="Enter fullscreen"></button>
 		</div>
@@ -305,34 +304,6 @@
 			<div class="modal-buttons">
 				<button type="button" id="cancelFrameRate">Cancel</button>
 				<button type="submit" id="confirmFrameRate" class="btn-primary">Apply</button>
-			</div>
-		</form>
-	</dialog>
-
-	<dialog id="guideDialog" class="mt-dialog guide-dialog" aria-labelledby="guideTitle">
-		<form method="dialog">
-			<h2 class="modal-title" id="guideTitle">How to track motion</h2>
-			<ol class="guide-steps">
-				<li><span><strong>Import a video.</strong> Film side-on with the camera held still, and include something of known length, such as a meter rule. To practice, choose Try a sample on the start screen.</span></li>
-				<li><span><strong>Check the frame rate.</strong> It is detected for you. For slow motion, open Setup → Frame rate and give the rate it was filmed at.</span></li>
-				<li><span><strong>Scale:</strong> drag along the object of known length and type its length. Without a scale, positions are in pixels.</span></li>
-				<li><span><strong>Origin:</strong> click where x and y should be zero. Otherwise the origin is the bottom-left corner.</span></li>
-				<li><span><strong>Mark the object.</strong> Auto is selected by default. Click the object once and it is marked in each frame until it is lost, leaves the frame or the video ends; check the marks, click it to carry on, and Undo removes a whole run. It works best against a plain background. Choose Manual to mark one frame at a time; each click moves the video on by the step. Clicking a frame that already has a mark replaces it.</span></li>
-				<li><span><strong>Correct a mark.</strong> Choose Edit, click a cross in the video, then Delete to remove just that mark. For overlapping crosses, select its time in the Table or use its row’s delete button. Undo and Redo step through changes.</span></li>
-				<li><span><strong>Read the results.</strong> Switch between position and velocity, edit marks in the Table, and export a CSV or send the data to PanPhyPlot. Velocity needs at least four marks.</span></li>
-			</ol>
-			<p class="guide-subhead">Keyboard</p>
-			<dl class="guide-keys">
-				<dt><kbd>&larr;</kbd> <kbd>&rarr;</kbd></dt><dd>Step back or forward</dd>
-				<dt><kbd>Space</kbd></dt><dd>Play or pause</dd>
-				<dt><kbd>H</kbd></dt><dd>Hide or show the marks</dd>
-				<dt><kbd>Ctrl</kbd> <kbd>Z</kbd></dt><dd>Undo a change (Cmd+Z on Mac)</dd>
-				<dt><kbd>Ctrl</kbd> <kbd>Shift</kbd> <kbd>Z</kbd> / <kbd>Ctrl</kbd> <kbd>Y</kbd></dt><dd>Redo a change (Cmd+Shift+Z on Mac)</dd>
-				<dt><kbd>Delete</kbd> / <kbd>Backspace</kbd></dt><dd>Delete the selected mark</dd>
-				<dt><kbd>Esc</kbd></dt><dd>Exit selection or stop setting the scale or origin</dd>
-			</dl>
-			<div class="modal-buttons">
-				<button type="submit" class="btn-primary">Got it</button>
 			</div>
 		</form>
 	</dialog>
