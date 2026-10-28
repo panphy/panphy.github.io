@@ -45,13 +45,14 @@ export const list = [
   },
   {
     title: 'Pendulum',
-    tip: 'A plank pinned at one end. Give it a shove.',
+    tip: 'A plank pinned near one end starts nearly level, then swings. Shove it again once it slows.',
     build(world) {
       world.clearScene();
-      const pivot = world.place(0, 2.8);
-      const mid = world.place(0.55, 2.8);
+      const pivot = world.place(0, 2.9);
+      // Horizontal plank with the pin a little in from the left end.
+      const mid = world.place(0.45, 2.9);
       const plank = world.addPlank(mid.x, mid.y, {
-        w: 1.2, h: 0.1, density: 600, restitution: 0.05, friction: 0.2
+        w: 1.2, h: 0.1, density: 600, restitution: 0.05, friction: 0.15
       });
       world.addPinAt(plank.body, pivot.x, pivot.y);
     }
