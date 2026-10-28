@@ -65,3 +65,5 @@ node --test tools/panphycircuits/tests/*.test.cjs
 Done: both views fully editable and synchronized; Tidy up and Clear circuit; core components (including transformer, fuse, motor, loudspeaker, AC supply and oscilloscope) and the parts outside Core (capacitors, inductors, NPN/PNP, seven gates, logic I/O and rails, two-way switch, ohmmeter); wiring with bends, junctions, reconnecting ends and crossing hops; undo/redo; meters and inspector readings; graph; 9 examples; automatic restoration of the last autosaved circuit, .ppcir import/export, SVG/PNG export; light/dark themes; keyboard shortcuts; tablet layout.
 
 Not done / limitations: no thermal lag in lamps, no reverse breakdown, no magnetic saturation or coupling between separate inductors, no transistor Early effect or capacitance, no gate propagation delay; logic modules share one hidden 5 V supply; phone-width layout works but is cramped.
+
+The user guide lives at `manual.html`, with screenshots in `manual/`. Link it from the app bar Manual control. Cache the guide with the app in `sw.js` and `index.html`, then bump `BUILD_ID`.
