@@ -95,10 +95,10 @@ test('startup dependencies share the page release version to avoid mixed cached 
 });
 
 
-test('boss rocks are frequent but light on waves 1–3, then steadier half-heart hits', async () => {
+test('boss rocks cost a quarter heart on every wave; early waves throw faster', async () => {
   const { bossRockTier, BOSS_FIRST_ROCK_DELAY, BOSS_APPROACH_TIME } = await import('../src/difficulty.js');
   assert.equal(BOSS_APPROACH_TIME, 4);
   assert.ok(BOSS_FIRST_ROCK_DELAY <= 2);
   for (const wave of [1, 2, 3]) assert.deepEqual([bossRockTier(wave).interval, bossRockTier(wave).hitsPerUnit], [3, 2]);
-  for (const wave of [4, 5, 6, 7, 8, 9, 10]) assert.deepEqual([bossRockTier(wave).interval, bossRockTier(wave).hitsPerUnit], [5, 1]);
+  for (const wave of [4, 5, 6, 7, 8, 9, 10]) assert.deepEqual([bossRockTier(wave).interval, bossRockTier(wave).hitsPerUnit], [5, 2]);
 });
