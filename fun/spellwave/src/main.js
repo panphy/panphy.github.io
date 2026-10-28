@@ -1,16 +1,16 @@
 import * as THREE from 'three';
-import { createSpellwaveAudio } from './audio.js?v=20261028-chain-boss';
+import { createSpellwaveAudio } from './audio.js?v=20261028-rock-tune';
 import { createSeasonalEffects } from './seasonal-effects.js';
-import { createPotionSystem } from './potions.js?v=20261028-chain-boss';
-import { ALL_WORDS, EASY_WORDS, HARD_WORDS, MEDIUM_WORDS, EQUATION_WORDS } from './question-bank.js?v=20261028-chain-boss';
-import { createEndingCinematic, wordArrivalTimes } from './ending-cinematic.js?v=20261028-chain-boss';
-import { createLeaderboard } from './leaderboard.js?v=20261028-chain-boss';
+import { createPotionSystem } from './potions.js?v=20261028-rock-tune';
+import { ALL_WORDS, EASY_WORDS, HARD_WORDS, MEDIUM_WORDS, EQUATION_WORDS } from './question-bank.js?v=20261028-rock-tune';
+import { createEndingCinematic, wordArrivalTimes } from './ending-cinematic.js?v=20261028-rock-tune';
+import { createLeaderboard } from './leaderboard.js?v=20261028-rock-tune';
 import { createEnemyMesh, createMimicChestMesh } from './enemy-meshes.js';
-import { bossHintLetters, bossesPerWave, maxLiveBosses, bossSpeedMultiplier, bossRockTier, BOSS_APPROACH_TIME, BOSS_FIRST_ROCK_DELAY, hardBossShare, normalPromptLengthCap, bossAnswerLengthCap, bossWordLengthCap, previewLengthCap, withinLength, hardGuestCount } from './difficulty.js?v=20261028-chain-boss';
+import { bossHintLetters, bossesPerWave, maxLiveBosses, bossSpeedMultiplier, bossRockTier, BOSS_APPROACH_TIME, BOSS_FIRST_ROCK_DELAY, hardBossShare, normalPromptLengthCap, bossAnswerLengthCap, bossWordLengthCap, previewLengthCap, withinLength, hardGuestCount } from './difficulty.js?v=20261028-rock-tune';
 import { createLowPolyTerrain, createLowPolyTree, createLowPolyRock, createLowPolyCloud } from './lowpoly.js';
-import { createVisuals, GLOW_GAIN, MOON_GLOW_GAIN } from './visuals.js?v=20261028-chain-boss';
-import { pickTarget, getInputCharacters, isMathOperatorInput, buildSearchPrompt, buildAltSearchPrompts, buildHintMask, escapeHtml, wrapSups, buildBossHintPart, createBossQuestionBuilder, promptIndexForProgress } from './prompt-utils.js?v=20261028-chain-boss';
-import { createWordDeck } from './word-decks.js?v=20261028-chain-boss';
+import { createVisuals, GLOW_GAIN, MOON_GLOW_GAIN } from './visuals.js?v=20261028-rock-tune';
+import { pickTarget, getInputCharacters, isMathOperatorInput, buildSearchPrompt, buildAltSearchPrompts, buildHintMask, escapeHtml, wrapSups, buildBossHintPart, createBossQuestionBuilder, promptIndexForProgress } from './prompt-utils.js?v=20261028-rock-tune';
+import { createWordDeck } from './word-decks.js?v=20261028-rock-tune';
 
 // Monster, healer and chest words, and boss questions, are drawn from decks so they
 // do not repeat until a pool runs out; last run's words come after fresh ones.
@@ -109,7 +109,7 @@ const BOSS_ROCK_FLIGHT_TIME = 1.45;
 const BOSS_ROCK_ARC_HEIGHT = 2.3;
 const MAX_CONCURRENT_BOSS_PROJECTILES = 2;
 // Keep this under the fastest boss rock interval so late-wave cadence can fire
-// when more than one boss is armed (wave 10 is 2.3 s).
+// when more than one boss is armed (wave 10 is 2.5 s).
 const MIN_PROJECTILE_SPACING = 2.0;
 // Chain lightning vs bosses: a long interrupt (not a global freeze like time freeze),
 // and at most this many bosses are touched by one cast (a typed boss kill counts).
