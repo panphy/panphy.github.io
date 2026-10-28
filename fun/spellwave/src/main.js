@@ -1,16 +1,16 @@
 import * as THREE from 'three';
-import { createSpellwaveAudio } from './audio.js?v=20261028-boss-table';
+import { createSpellwaveAudio } from './audio.js?v=20261028-chain-boss';
 import { createSeasonalEffects } from './seasonal-effects.js';
-import { createPotionSystem } from './potions.js?v=20261028-boss-table';
-import { ALL_WORDS, EASY_WORDS, HARD_WORDS, MEDIUM_WORDS, EQUATION_WORDS } from './question-bank.js?v=20261028-boss-table';
-import { createEndingCinematic, wordArrivalTimes } from './ending-cinematic.js?v=20261028-boss-table';
-import { createLeaderboard } from './leaderboard.js?v=20261028-boss-table';
+import { createPotionSystem } from './potions.js?v=20261028-chain-boss';
+import { ALL_WORDS, EASY_WORDS, HARD_WORDS, MEDIUM_WORDS, EQUATION_WORDS } from './question-bank.js?v=20261028-chain-boss';
+import { createEndingCinematic, wordArrivalTimes } from './ending-cinematic.js?v=20261028-chain-boss';
+import { createLeaderboard } from './leaderboard.js?v=20261028-chain-boss';
 import { createEnemyMesh, createMimicChestMesh } from './enemy-meshes.js';
-import { bossHintLetters, bossesPerWave, maxLiveBosses, bossSpeedMultiplier, bossRockTier, BOSS_APPROACH_TIME, BOSS_FIRST_ROCK_DELAY, hardBossShare, normalPromptLengthCap, bossAnswerLengthCap, bossWordLengthCap, previewLengthCap, withinLength, hardGuestCount } from './difficulty.js?v=20261028-boss-table';
+import { bossHintLetters, bossesPerWave, maxLiveBosses, bossSpeedMultiplier, bossRockTier, BOSS_APPROACH_TIME, BOSS_FIRST_ROCK_DELAY, hardBossShare, normalPromptLengthCap, bossAnswerLengthCap, bossWordLengthCap, previewLengthCap, withinLength, hardGuestCount } from './difficulty.js?v=20261028-chain-boss';
 import { createLowPolyTerrain, createLowPolyTree, createLowPolyRock, createLowPolyCloud } from './lowpoly.js';
-import { createVisuals, GLOW_GAIN, MOON_GLOW_GAIN } from './visuals.js?v=20261028-boss-table';
-import { pickTarget, getInputCharacters, isMathOperatorInput, buildSearchPrompt, buildAltSearchPrompts, buildHintMask, escapeHtml, wrapSups, buildBossHintPart, createBossQuestionBuilder, promptIndexForProgress } from './prompt-utils.js?v=20261028-boss-table';
-import { createWordDeck } from './word-decks.js?v=20261028-boss-table';
+import { createVisuals, GLOW_GAIN, MOON_GLOW_GAIN } from './visuals.js?v=20261028-chain-boss';
+import { pickTarget, getInputCharacters, isMathOperatorInput, buildSearchPrompt, buildAltSearchPrompts, buildHintMask, escapeHtml, wrapSups, buildBossHintPart, createBossQuestionBuilder, promptIndexForProgress } from './prompt-utils.js?v=20261028-chain-boss';
+import { createWordDeck } from './word-decks.js?v=20261028-chain-boss';
 
 // Monster, healer and chest words, and boss questions, are drawn from decks so they
 // do not repeat until a pool runs out; last run's words come after fresh ones.
@@ -108,7 +108,13 @@ const BOSS_SHOT_DAMAGE = 1;
 const BOSS_ROCK_FLIGHT_TIME = 1.45;
 const BOSS_ROCK_ARC_HEIGHT = 2.3;
 const MAX_CONCURRENT_BOSS_PROJECTILES = 2;
-const MIN_PROJECTILE_SPACING = 2.6;
+// Keep this under the fastest boss rock interval so late-wave cadence can fire
+// when more than one boss is armed (wave 10 is 2.3 s).
+const MIN_PROJECTILE_SPACING = 2.0;
+// Chain lightning vs bosses: a long interrupt (not a global freeze like time freeze),
+// and at most this many bosses are touched by one cast (a typed boss kill counts).
+const CHAIN_BOSS_STUN = 5.5;
+const CHAIN_BOSS_MAX = 2;
 // Bosses are drawn this much bigger than their listed scale, so they dominate
 // the scene in boss waves. The model gallery shows the listed scale.
 const BOSS_SIZE = 1.35;
@@ -4238,7 +4244,7 @@ function isFinalWave() {
 function buildFinalWaveQueue() {
   const queue = [
     ...Array(bossesPerWave(FINAL_WAVE_NUMBER)).fill('boss'),
-    ...Array(3).fill('medic'),
+    ...Array(4).fill('medic'),
     ...Array(3).fill('mimic'),
   ];
   for (let i = queue.length - 1; i > 0; i -= 1) {
@@ -4959,6 +4965,10 @@ function triggerChainLightning(firstEnemy) {
     }
   }
 
+  // Bosses get a long rock-clearing interrupt instead of a short freeze; a typed
+  // boss kill counts toward the cap, so one cast touches at most CHAIN_BOSS_MAX bosses.
+  const bossInterrupts = chooseChainBossInterrupts(firstEnemy, targets);
+
   playToggleSound();
   showBanner('CHAIN LIGHTNING!', 'chain-lightning');
 
@@ -4981,39 +4991,96 @@ function triggerChainLightning(firstEnemy) {
 
   let currentChainOrigin = p1;
 
-  if (targets.length === 0) {
-    // No other monsters: hold visual for 100ms, then burst the single monster
+  const finishChain = () => {
+    // Zap any pulsed bosses that were not on the hop path, then resolve the burst.
+    const pulsed = bossInterrupts.filter(boss => (
+      !chainMonsters.includes(boss) && enemies.includes(boss) && !boss.dying
+    ));
+    for (const boss of pulsed) {
+      const targetPos = boss.group.position.clone();
+      targetPos.y += 0.8;
+      spawnLightningVisual(currentChainOrigin, targetPos, true);
+      currentChainOrigin = targetPos;
+      chainMonsters.push(boss);
+    }
     scheduleChainLightningTimer(() => {
+      for (const boss of bossInterrupts) interruptBossWithChain(boss);
       burstChain(chainMonsters);
+    }, pulsed.length > 0 ? 80 : 0);
+  };
+
+  if (targets.length === 0) {
+    scheduleChainLightningTimer(() => {
+      finishChain();
     }, 100);
   } else {
-    // Chain sequentially
     targets.forEach((enemy, index) => {
       scheduleChainLightningTimer(() => {
         if (enemies.includes(enemy) && isEnemyTargetable(enemy)) {
-          if (enemy.isBoss) {
-            enemy.stunTimer = 3.0;
-          } else {
-            enemy.dying = true; // freeze
-          }
+          if (!enemy.isBoss) enemy.dying = true;
           chainMonsters.push(enemy);
 
           const targetPos = enemy.group.position.clone();
           targetPos.y += 0.8;
 
-          spawnLightningVisual(currentChainOrigin, targetPos, true); // hold = true
+          spawnLightningVisual(currentChainOrigin, targetPos, true);
           currentChainOrigin = targetPos;
         }
 
-        // Trigger simultaneous burst when sequence completes
         if (index === targets.length - 1) {
           scheduleChainLightningTimer(() => {
-            burstChain(chainMonsters);
+            finishChain();
           }, 80);
         }
       }, (index + 1) * 60);
     });
   }
+}
+
+// Up to CHAIN_BOSS_MAX bosses per cast. A typed boss defeat uses one slot; remaining
+// slots go to the hop target first, then the nearest other live bosses (the pulse).
+function chooseChainBossInterrupts(firstEnemy, chainHopTargets) {
+  let slots = CHAIN_BOSS_MAX;
+  if (firstEnemy.isBoss) slots -= 1;
+  if (slots <= 0) return [];
+
+  const chosen = [];
+  const tryAdd = (enemy) => {
+    if (!enemy || !enemy.isBoss || enemy.dying || enemy === firstEnemy) return;
+    if (chosen.includes(enemy) || chosen.length >= slots) return;
+    chosen.push(enemy);
+  };
+
+  for (const target of chainHopTargets) tryAdd(target);
+
+  const bossInvolved = firstEnemy.isBoss || chainHopTargets.some(enemy => enemy.isBoss);
+  if (bossInvolved && chosen.length < slots) {
+    const origin = firstEnemy.group.position;
+    const others = enemies
+      .filter(enemy => enemy.isBoss && !enemy.dying && enemy !== firstEnemy && !chosen.includes(enemy))
+      .sort((a, b) => a.group.position.distanceToSquared(origin) - b.group.position.distanceToSquared(origin));
+    for (const enemy of others) tryAdd(enemy);
+  }
+
+  return chosen;
+}
+
+function cancelBossRocks(enemy) {
+  for (let index = beams.length - 1; index >= 0; index -= 1) {
+    const effect = beams[index];
+    if (effect.kind !== 'rock' || effect.enemy !== enemy) continue;
+    effectsGroup.remove(effect.mesh);
+    disposeObject(effect.mesh);
+    beams.splice(index, 1);
+  }
+}
+
+// Long targeted interrupt: freeze that boss, clear its rocks, and delay the next throw.
+function interruptBossWithChain(enemy) {
+  if (!enemy || !enemy.isBoss || enemy.dying) return;
+  enemy.stunTimer = Math.max(enemy.stunTimer || 0, CHAIN_BOSS_STUN);
+  enemy.shotTimer = bossRockTier(waveSet).interval + Math.random() * 0.4;
+  cancelBossRocks(enemy);
 }
 
 function armChainLightningTimer(entry, delay) {

@@ -422,3 +422,26 @@ test('terms marked noBoss are never chosen as bosses', () => {
     }
   }
 });
+
+test('chain lightning interrupts at most two bosses and prefers the hop target', () => {
+  const source = readFileSync(new URL('../src/main.js', import.meta.url), 'utf8');
+  const start = source.indexOf('function chooseChainBossInterrupts(');
+  const end = source.indexOf('function cancelBossRocks(');
+  assert.ok(start >= 0 && end > start);
+  const boss = (id, z) => ({ id, isBoss: true, dying: false, group: { position: { x: 0, y: 0, z, distanceToSquared(other) { return (this.z - other.z) ** 2; } } } });
+  const near = boss('near', -10);
+  const mid = boss('mid', -20);
+  const far = boss('far', -40);
+  const context = vm.createContext({
+    CHAIN_BOSS_MAX: 2,
+    enemies: [near, mid, far],
+  });
+  vm.runInContext(source.slice(start, end), context);
+  const ids = (first, hops) => context.chooseChainBossInterrupts(first, hops).map(enemy => enemy.id).join(',');
+  const typedBoss = boss('typed', 0);
+  assert.equal(ids(typedBoss, [near]), 'near');
+  assert.equal(ids(typedBoss, []), 'near');
+  const typedMinion = { id: 'minion', isBoss: false, dying: true, group: { position: { x: 0, y: 0, z: 0 } } };
+  assert.equal(ids(typedMinion, [near]), 'near,mid');
+  assert.equal(ids(typedMinion, []), '');
+});

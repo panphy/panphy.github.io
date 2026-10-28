@@ -115,11 +115,12 @@ test('boss wave table sets live caps, totals, hints and rock damage', () => {
   }
 });
 
-test('boss rocks come every 3 seconds; damage rises from wave 7', async () => {
-  const { bossRockTier, BOSS_FIRST_ROCK_DELAY, BOSS_APPROACH_TIME, BOSS_ROCK_INTERVAL } = await import('../src/difficulty.js');
+test('boss rock interval and damage escalate by wave band', async () => {
+  const { bossRockTier, BOSS_FIRST_ROCK_DELAY, BOSS_APPROACH_TIME } = await import('../src/difficulty.js');
   assert.equal(BOSS_APPROACH_TIME, 4);
-  assert.equal(BOSS_ROCK_INTERVAL, 3);
   assert.ok(BOSS_FIRST_ROCK_DELAY <= 2);
-  for (const wave of [1, 2, 3, 4, 5, 6]) assert.deepEqual([bossRockTier(wave).interval, bossRockTier(wave).hitsPerUnit], [3, 2]);
-  for (const wave of [7, 8, 9, 10]) assert.deepEqual([bossRockTier(wave).interval, bossRockTier(wave).hitsPerUnit], [3, 1]);
+  for (const wave of [1, 2, 3]) assert.deepEqual([bossRockTier(wave).interval, bossRockTier(wave).hitsPerUnit], [3, 2]);
+  for (const wave of [4, 5, 6]) assert.deepEqual([bossRockTier(wave).interval, bossRockTier(wave).hitsPerUnit], [2.7, 2]);
+  for (const wave of [7, 8, 9]) assert.deepEqual([bossRockTier(wave).interval, bossRockTier(wave).hitsPerUnit], [2.5, 1]);
+  assert.deepEqual([bossRockTier(10).interval, bossRockTier(10).hitsPerUnit], [2.3, 1]);
 });

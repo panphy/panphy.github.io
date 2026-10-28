@@ -45,23 +45,23 @@ Difficulty has two separate parts, and a keyword must suit both:
 - **Concept difficulty** is the list a keyword sits in (`EASY_WORDS`, `MEDIUM_WORDS`, `HARD_WORDS` in `src/question-bank.js`).
 - **Typing length** is capped per wave in `src/difficulty.js`. Length is counted as typed: letters only, without spaces or punctuation.
 
-| Wave | Normal vocabulary | Max minion letters | Boss answer letters | Max live bosses | Total bosses | Hint letters | Rock damage |
-| --- | --- | --- | --- | --- | --- | --- | --- |
-| 1 | Easy | 11 | 14 | 1 | 3 | 3 | ¼ heart |
-| 2 | Easy + one short hard guest | 12 | 14 | 2 | 3 | 2 | ¼ heart |
-| 3 | Easy + medium + hard guests | 12 | 16 | 2 | 4 | 1 | ¼ heart |
-| 4–6 | Medium + hard guests, then medium + hard | 13–14 | 16 | 3 | 5 | 1 | ¼ heart |
-| 7–9 | Medium + hard | 14 | 16 | 3 | 6 | 1 | ½ heart |
-| 10 | Boss finale, with healers and chests | 14 for support | 16 | 3 | 12 | 1 | ½ heart |
+| Wave | Normal vocabulary | Max minion letters | Boss answer letters | Max live bosses | Total bosses | Hint letters | Rock damage | Rock interval |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| 1 | Easy | 11 | 14 | 1 | 3 | 3 | ¼ heart | 3.0 s |
+| 2 | Easy + one short hard guest | 12 | 14 | 2 | 3 | 2 | ¼ heart | 3.0 s |
+| 3 | Easy + medium + hard guests | 12 | 16 | 2 | 4 | 1 | ¼ heart | 3.0 s |
+| 4–6 | Medium + hard guests, then medium + hard | 13–14 | 16 | 3 | 5 | 1 | ¼ heart | 2.7 s |
+| 7–9 | Medium + hard | 14 | 16 | 3 | 6 | 1 | ½ heart | 2.5 s |
+| 10 | Boss finale, with healers and chests | 14 for support | 16 | 3 | 12 | 1 | ½ heart | 2.3 s |
 
-Boss live caps, totals, hint letters and rock damage live in `BOSS_WAVE_TABLE` in `src/difficulty.js`. Rocks always come every 3 seconds (`BOSS_ROCK_INTERVAL`).
+Boss live caps, totals, hint letters, rock damage and rock intervals live in `BOSS_WAVE_TABLE` in `src/difficulty.js`. The finale interleaves four healers and three chests with its bosses.
 
 - Normal enemies always require the whole displayed term. Long phrases belong to bosses; no preview bypasses the minion cap. Short boss terms and suitable equation quantities can appear as previews. Long terms are introduced in the boss question itself.
 - Each wave has one equation boss and the rest vocabulary bosses (`total − 1`). Vocabulary bosses use medium terms of 14 letters or fewer on waves 1–2, then any medium or hard term on waves 3–4; from wave 5 each is drawn from the hard list 70% of the time (`HARD_BOSS_SHARE` in `src/difficulty.js`). Terms marked `noBoss` in the word bank never become bosses.
 - Bosses show the full phrase or equation structure with a missing content word, revealing the wave's hint letters; the blanks show its length. The hidden word is the one that tells the term apart from the rest of the bank: the rarest content word that fits the answer cap, preferring five letters or more, then the longest. Equations never hide a word printed in the symbol clue, repeated in the line, or naming no quantity ("transferred"). An entry's `ask` overrides the rule and may name two words. Bosses in one wave never share an answer; spaces, operators and given exponents do not need typing.
 - A boss that reaches the wall costs three hearts; the run ends only if that empties the life bar.
 - No answer on screen may be the same as, or start, another word that can be typed at the same time: bosses in a wave, finale bosses and the healers and chests alongside them are chosen so their words never clash.
-- Bosses spawn on a 2.8-second timer, held while the wave's live-boss cap is full. The finale interleaves healers and chests under the same live cap. Boss movement uses a base budget of 18 seconds plus 0.8 seconds per answer letter after the boss arms. Bosses walk 5% faster than that baseline in wave 1, increasing by 2 percentage points per wave to 23% faster in wave 10; divide the base budget by that speed multiplier for the time available. Before that comes a four-second approach (`BOSS_APPROACH_TIME`), during which the full question already shows and can be answered, but the boss throws nothing. Answering early is a skill reward. When the boss reaches the arm line it flashes and sounds, then throws its first rock 1.5–2 seconds later (`BOSS_FIRST_ROCK_DELAY`). Rocks across all bosses are still spaced at least 2.6 seconds apart, at most two in the air.
+- Bosses spawn on a 2.8-second timer, held while the wave's live-boss cap is full. The finale interleaves healers and chests under the same live cap. Boss movement uses a base budget of 18 seconds plus 0.8 seconds per answer letter after the boss arms. Bosses walk 5% faster than that baseline in wave 1, increasing by 2 percentage points per wave to 23% faster in wave 10; divide the base budget by that speed multiplier for the time available. Before that comes a four-second approach (`BOSS_APPROACH_TIME`), during which the full question already shows and can be answered, but the boss throws nothing. Answering early is a skill reward. When the boss reaches the arm line it flashes and sounds, then throws its first rock 1.5–2 seconds later (`BOSS_FIRST_ROCK_DELAY`). Rocks across all bosses are still spaced at least 2.0 seconds apart, at most two in the air. Chain lightning is a targeted interrupt, not a global freeze: a cast can affect at most two bosses (a typed boss kill counts), and interrupted bosses are stunned for 5.5 seconds with their rocks cleared and their next throw delayed. Time freeze still pauses the whole field for 3.5 seconds.
 - Words come from decks (`src/word-decks.js`): monsters, healers, chests and bosses favour words not yet used this run, then words not used last run, so nothing repeats until a pool runs out and no boss question repeats in a run. Last run's words are kept in localStorage (`panphySpellwaveLastRunTermsV1`), saved at each wave clear and at the end of a run. Short boss terms still appear as monsters before their boss on purpose.
 - Healers and chests use short answers, at most 12 letters. Support prompts obey the wave's minion cap too.
 - Typing has no mercy: a wrong letter clears the prefix and breaks the chain. If that letter starts another visible prompt, it immediately starts targeting that enemy instead (also costing accuracy and the chain). Targets follow the matching prefix freely; no explicit switch control is needed. Backspace removes a letter; Escape pauses.
