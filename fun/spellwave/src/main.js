@@ -1,17 +1,17 @@
 import * as THREE from 'three';
-import { createSpellwaveAudio } from './audio.js?v=20261027-boss-approach';
+import { createSpellwaveAudio } from './audio.js?v=20261028-support-rocks';
 import { createSeasonalEffects } from './seasonal-effects.js';
-import { createPotionSystem } from './potions.js?v=20261027-boss-approach';
-import { ALL_WORDS, EASY_WORDS, HARD_WORDS, MEDIUM_WORDS, EQUATION_WORDS } from './question-bank.js?v=20261027-boss-approach';
-import { createEndingCinematic, wordArrivalTimes } from './ending-cinematic.js?v=20261027-boss-approach';
-import { createLeaderboard } from './leaderboard.js?v=20261027-boss-approach';
+import { createPotionSystem } from './potions.js?v=20261028-support-rocks';
+import { ALL_WORDS, EASY_WORDS, HARD_WORDS, MEDIUM_WORDS, EQUATION_WORDS } from './question-bank.js?v=20261028-support-rocks';
+import { createEndingCinematic, wordArrivalTimes } from './ending-cinematic.js?v=20261028-support-rocks';
+import { createLeaderboard } from './leaderboard.js?v=20261028-support-rocks';
 import { createEnemyMesh, createMimicChestMesh } from './enemy-meshes.js';
-import { bossSpeedMultiplier, bossRockTier, BOSS_APPROACH_TIME, BOSS_FIRST_ROCK_DELAY, hardBossShare, normalPromptLengthCap, bossWordLengthCap, previewLengthCap, withinLength, hardGuestCount } from './difficulty.js?v=20261027-boss-approach';
+import { bossSpeedMultiplier, bossRockTier, BOSS_APPROACH_TIME, BOSS_FIRST_ROCK_DELAY, hardBossShare, normalPromptLengthCap, bossWordLengthCap, previewLengthCap, withinLength, hardGuestCount } from './difficulty.js?v=20261028-support-rocks';
 import { createLowPolyTerrain, createLowPolyTree, createLowPolyRock, createLowPolyCloud } from './lowpoly.js';
-import { createVisuals, GLOW_GAIN, MOON_GLOW_GAIN } from './visuals.js?v=20261027-boss-approach';
-import { pickTarget, getInputCharacters, isMathOperatorInput, buildSearchPrompt, buildAltSearchPrompts, escapeHtml, wrapSups, promptIndexForProgress } from './prompt-utils.js?v=20261027-boss-approach';
-import { createWordDeck } from './word-decks.js?v=20261027-boss-approach';
-import { getBossChoice, choiceKeys, keysClash, choiceTypingLength, shuffledOptions, buildChoiceSegments } from './boss-choices.js?v=20261027-boss-approach';
+import { createVisuals, GLOW_GAIN, MOON_GLOW_GAIN } from './visuals.js?v=20261028-support-rocks';
+import { pickTarget, getInputCharacters, isMathOperatorInput, buildSearchPrompt, buildAltSearchPrompts, escapeHtml, wrapSups, promptIndexForProgress } from './prompt-utils.js?v=20261028-support-rocks';
+import { createWordDeck } from './word-decks.js?v=20261028-support-rocks';
+import { getBossChoice, choiceKeys, keysClash, choiceTypingLength, shuffledOptions, buildChoiceSegments } from './boss-choices.js?v=20261028-support-rocks';
 
 // Monster, healer and chest words, and boss questions, are drawn from decks so they
 // do not repeat until a pool runs out; last run's words come after fresh ones.
@@ -234,7 +234,7 @@ const MEDIC_TYPE = {
   body: 0xff315f,
   trim: 0xff8fb3,
   eye: 0xf2f0df,
-  speed: 8.4,
+  speed: 7.9,
   scale: 0.92,
   weight: 0,
   score: 45,
@@ -245,7 +245,7 @@ const MIMIC_TYPE = {
   body: 0xd4a020,
   trim: 0xffd040,
   eye: 0xef44fb,
-  speed: 7.8,
+  speed: 7.3,
   scale: 1.2,
   weight: 0,
   score: 0,
