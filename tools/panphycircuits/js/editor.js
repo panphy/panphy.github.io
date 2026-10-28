@@ -66,7 +66,8 @@
     function placeAt(type, p) {
       const doc = app.doc;
       const comp = circuit.addComponent(doc, type);
-      if (registry.get(type).meter && app.graphOpen()) comp.props.plot = true;
+      const def = registry.get(type);
+      if ((def.meter || def.channels) && app.graphOpen()) comp.props.plot = true;
       const pos = snapP(p);
       doc.layouts[view()].comps[comp.id] = { x: pos.x, y: pos.y, r: 0, f: false };
       layout.clearSpot(doc, view(), comp.id);

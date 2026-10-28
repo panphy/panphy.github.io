@@ -581,7 +581,8 @@
       { key: 'v1', label: 'CH1 volts per division', unit: 'V', kind: 'select', default: '1',
         options: ['0.1', '0.2', '0.5', '1', '2', '5', '10'].map((v) => ({ value: v, label: fmtSI(Number(v), 'V', 3, { trim: true }) + '/div' })) },
       { key: 'v2', label: 'CH2 volts per division', unit: 'V', kind: 'select', default: '1',
-        options: ['0.1', '0.2', '0.5', '1', '2', '5', '10'].map((v) => ({ value: v, label: fmtSI(Number(v), 'V', 3, { trim: true }) + '/div' })) }
+        options: ['0.1', '0.2', '0.5', '1', '2', '5', '10'].map((v) => ({ value: v, label: fmtSI(Number(v), 'V', 3, { trim: true }) + '/div' })) },
+      plotProp
     ],
     compile() {},
     channels: [

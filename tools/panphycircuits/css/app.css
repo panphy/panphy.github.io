@@ -418,6 +418,16 @@ button, input, select { font: inherit; color: inherit; }
 .legend-swatch { width: 18px; height: 0; border-top: 3px solid var(--c); }
 .legend-swatch.is-dashed { border-top-style: dashed; }
 .graph-window select, .field select { min-height: 36px; border-radius: 9px; border: 1px solid var(--line-strong); background: var(--surface-2); padding: 4px 8px; }
+.graph-exports { display: flex; align-items: center; gap: 6px; flex: 0 0 auto; }
+.graph-exports[hidden] { display: none !important; }
+.graph-export-pill {
+  display: inline-flex; align-items: center; justify-content: center;
+  min-height: 32px; padding: 0 12px; border: 1px solid var(--line-strong); border-radius: 999px;
+  background: var(--surface-2); color: var(--ink); font: 600 0.72rem var(--font-body); cursor: pointer; white-space: nowrap;
+}
+.graph-export-pill:hover:not(:disabled) { background: var(--surface-3); border-color: var(--accent); }
+.graph-export-pill:focus-visible { outline: 3px solid var(--focus); outline-offset: 1px; }
+.graph-export-pill:disabled { opacity: 0.45; cursor: not-allowed; }
 .graph-canvas { flex: 1; width: 100%; min-height: 0; display: block; }
 
 /* Status on the left and legal/support links on the right, stacked on phones.

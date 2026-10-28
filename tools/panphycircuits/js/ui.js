@@ -776,6 +776,7 @@
       document.querySelectorAll('[data-tool]').forEach((b) => b.setAttribute('aria-pressed', String(app.tool === b.dataset.tool)));
       $('btn-snap').setAttribute('aria-pressed', String(app.snap));
       $('btn-graph').setAttribute('aria-pressed', String(!$('graph-panel').hidden));
+      if (app.graph) app.graph.syncExports();
       $('btn-undo').disabled = !app.canUndo();
       $('btn-redo').disabled = !app.canRedo();
       const hasSel = app.selection.comps.size + app.selection.wires.size > 0;
