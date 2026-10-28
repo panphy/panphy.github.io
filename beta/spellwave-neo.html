@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="theme-color" content="#efe3c4">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <title>Spellwave Neo (Beta) — PanPhy Labs</title>
+  <meta name="description" content="Beta arena-boss build of Spellwave: type minions, answer orbs with 1/2/3. Not the published game.">
+  <!-- beta: no canonical; published game stays at /fun/spellwave.html -->
+  <link rel="icon" type="image/png" href="/assets/favicon.png">
+  <link rel="stylesheet" href="/assets/standalone-top.css">
+  <style>:root { --standalone-top-bg: #efe3c4; }</style>
+  <link rel="stylesheet" href="./spellwave-neo/src/styles.css?v=20261028-neo-arena">
+  <script
+    id="supabaseScript"
+    src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"
+    defer
+  ></script>
+  <script type="importmap">
+    {
+      "imports": {
+        "three": "https://cdn.jsdelivr.net/npm/three@0.186.1/build/three.module.js",
+        "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.186.1/examples/jsm/",
+        "three/examples/jsm/": "https://cdn.jsdelivr.net/npm/three@0.186.1/examples/jsm/",
+        "postprocessing": "https://cdn.jsdelivr.net/npm/postprocessing@6.39.5/build/index.js",
+        "n8ao": "https://cdn.jsdelivr.net/npm/n8ao@2.0.1/dist/N8AO.js"
+      }
+    }
+  </script>
+  <script>
+    document.addEventListener('gesturestart', (event) => event.preventDefault(), { passive: false });
+    document.addEventListener('gesturechange', (event) => event.preventDefault(), { passive: false });
+    document.addEventListener('gestureend', (event) => event.preventDefault(), { passive: false });
+  </script>
+</head>
+
+<body>
+  <div id="app">
+    <div id="starfield" aria-hidden="true"></div>
+    <canvas id="gameCanvas" aria-label="Spellwave Neo 3D game scene"></canvas>
+    <div class="moon-haze" aria-hidden="true"></div>
+    <div class="pixel-grain" aria-hidden="true"></div>
+    <div class="lightning-flash" id="lightningFlash" aria-hidden="true"></div>
+    <div class="damage-flash" id="damageFlash" aria-hidden="true"></div>
+    <div class="shield-flash" id="shieldFlash" aria-hidden="true">
+      <svg viewBox="0 0 100 100" preserveAspectRatio="none" style="width: 100%; height: 100%;">
+        <polygon points="50,5 82,18 95,50 82,82 50,95 18,82 5,50 18,18" class="flash-oct flash-outer"></polygon>
+        <polygon points="50,15 75,25 85,50 75,75 50,85 25,75 15,50 25,25" class="flash-oct flash-middle"></polygon>
+        <polygon points="50,30 64,36 70,50 64,64 50,70 36,64 30,50 36,36" class="flash-oct flash-inner"></polygon>
+      </svg>
+    </div>
+    <div class="shield-screen-overlay" id="shieldScreenOverlay" aria-hidden="true"></div>
+    <div class="god-mode-veil" aria-hidden="true"></div>
+    <div class="boss-banner" id="bossBanner" aria-live="assertive" aria-atomic="true"></div>
+    <div class="arena-hud is-hidden" id="arenaHud" aria-live="polite">
+      <div class="arena-boss-name" id="arenaBossName">Boss</div>
+      <div class="arena-hp-track" title="Boss life">
+        <div class="arena-hp-fill" id="arenaHpFill"></div>
+        <div class="arena-hp-segments" id="arenaHpSegments" hidden></div>
+      </div>
+      <div class="arena-hp-label"><span id="arenaHpValue">0</span> / <span id="arenaHpMax">0</span></div>
+    </div>
+    <div class="arena-orb is-hidden" id="arenaOrb" role="dialog" aria-label="Boss question orb">
+      <div class="arena-orb-fuse"><i id="arenaOrbFuse"></i></div>
+      <div class="arena-orb-kind" id="arenaOrbKind">definition</div>
+      <p class="arena-orb-clue" id="arenaOrbClue"></p>
+      <p class="arena-orb-line" id="arenaOrbLine"></p>
+      <div class="arena-orb-options" id="arenaOrbOptions"></div>
+      <p class="arena-orb-hint">Press <kbd>1</kbd> <kbd>2</kbd> <kbd>3</kbd> or tap an option</p>
+    </div>
+    <div class="labels-layer" id="labelsLayer" aria-hidden="true"></div>
+
+    <div class="potion-bar" id="potionBar" aria-label="Potions" title="Potion inventory — press the arrow keys to activate">
+      <div class="potion-slot" data-slot="0" aria-label="Potion Slot 1 (Left Arrow or 1)">
+        <span class="slot-key">←</span>
+        <div class="potion-icon"></div>
+      </div>
+      <div class="potion-slot" data-slot="1" aria-label="Potion Slot 2 (Up Arrow or 2)">
+        <span class="slot-key">↑</span>
+        <div class="potion-icon"></div>
+      </div>
+      <div class="potion-slot" data-slot="2" aria-label="Potion Slot 3 (Right Arrow or 3)">
+        <span class="slot-key">→</span>
+        <div class="potion-icon"></div>
+      </div>
+      <div class="potion-slot" data-slot="3" aria-label="Potion Slot 4 (Down Arrow or 4)">
+        <span class="slot-key">↓</span>
+        <div class="potion-icon"></div>
+      </div>
+    </div>
+
+    <header class="game-bar" aria-label="Game status">
+      <a class="brand-mark" href="../" aria-label="PanPhy Labs home" title="Go to PanPhy Labs home">
+        <img src="../assets/panphy.png" alt="PanPhy Labs">
+      </a>
+      <div class="game-title">
+        <span id="phaseValue">Study pace</span>
+        <h1>Spellwave Neo</h1>
+      </div>
+    </header>
+
+    <div class="corner-controls" aria-label="Game controls">
+      <button class="icon-button svg-button battery-saver-toggle" id="batterySaverButton" type="button" aria-label="Toggle Battery Saver" title="Toggle Battery Saver">
+        <svg class="button-svg battery-saver-svg" viewBox="0 0 48 48" aria-hidden="true" focusable="false">
+          <circle class="button-ring" cx="24" cy="24" r="19"></circle>
+          <path class="leaf-path" d="M30 17c-3 0-7 2.2-8.5 5.2-1.5-3-5.5-5.2-8.5-5.2 0 5.2 3 9 6 10.5 1.5 0.7 3 1.5 4.5 1.5s3-0.7 4.5-1.5c3-1.5 6-5.2 6-10.5z" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linejoin="round"></path>
+          <path class="leaf-stem" d="M21.5 22.5v7.5c0 1.2-0.8 2-1.5 2" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"></path>
+          <line class="saver-slash" x1="14" y1="14" x2="34" y2="34" stroke="currentColor" stroke-width="3.2" stroke-linecap="round"></line>
+        </svg>
+      </button>
+      <button class="icon-button svg-button fullscreen-toggle" id="fullscreenButton" type="button" aria-label="Enter full screen" title="Enter full screen">
+        <svg class="button-svg fullscreen-svg" viewBox="0 0 48 48" aria-hidden="true" focusable="false">
+          <circle class="button-ring" cx="24" cy="24" r="19"></circle>
+          <g class="fullscreen-enter-glyph">
+            <path d="M15 21v-6h6"></path>
+            <path d="M33 21v-6h-6"></path>
+            <path d="M15 27v6h6"></path>
+            <path d="M33 27v6h-6"></path>
+          </g>
+          <g class="fullscreen-exit-glyph">
+            <path d="M33 15l-7 7M26 17v5h5"></path>
+            <path d="M15 33l7-7M22 31v-5h-5"></path>
+          </g>
+        </svg>
+      </button>
+      <button class="icon-button svg-button audio-toggle" id="audioButton" type="button" aria-label="Mute sound" title="Mute sound">
+        <svg class="button-svg sound-svg" viewBox="0 0 48 48" aria-hidden="true" focusable="false">
+          <circle class="button-ring" cx="24" cy="24" r="19"></circle>
+          <path class="speaker-glyph" d="M13.5 27.5h6.2l8.1 6.3V14.2l-8.1 6.3h-6.2z"></path>
+          <path class="sound-wave sound-wave-one" d="M31 19.2c1.5 1.2 2.3 2.9 2.3 4.8s-.8 3.6-2.3 4.8"></path>
+          <path class="sound-wave sound-wave-two" d="M35 15.6c2.6 2.2 4.1 5.1 4.1 8.4s-1.5 6.2-4.1 8.4"></path>
+          <path class="mute-slash" d="M14 14l20 20"></path>
+        </svg>
+      </button>
+      <button class="icon-button svg-button transport-button is-playing" id="pauseButton" type="button" aria-label="Pause run" title="Pause run" disabled>
+        <svg class="button-svg transport-svg" viewBox="0 0 48 48" aria-hidden="true" focusable="false">
+          <circle class="button-ring" cx="24" cy="24" r="19"></circle>
+          <path class="play-glyph" d="M19 15.5 34.5 24 19 32.5z"></path>
+          <g class="pause-glyph">
+            <rect x="17" y="14" width="5.8" height="20" rx="2"></rect>
+            <rect x="25.2" y="14" width="5.8" height="20" rx="2"></rect>
+          </g>
+        </svg>
+      </button>
+    </div>
+
+    <section class="hud-grid" aria-label="Run metrics">
+      <div class="readout" title="Your current run score">
+        <span>Score</span>
+        <strong id="scoreValue">0</strong>
+      </div>
+      <div class="readout" title="Your personal best score">
+        <span>Best</span>
+        <strong id="bestValue">0</strong>
+      </div>
+      <div class="readout life-readout" title="Your remaining life points">
+        <span>Life</span>
+        <div class="life-meter" id="healthValue" aria-label="Life: 5 hearts"></div>
+      </div>
+      <div class="readout" title="Current wave level">
+        <span>Wave</span>
+        <strong id="waveValue">1</strong>
+      </div>
+    </section>
+
+    <section class="typing-strip" aria-live="polite" title="Your current typing input and chain combo streak">
+      <span id="typingLabel">INPUT</span>
+      <strong id="typedValue">ready</strong>
+      <small id="comboValue">0 chain</small>
+    </section>
+
+    <aside class="sw-leaderboard" aria-label="Top scores">
+      <div class="sw-leaderboard-header">
+        <p>Hall of Wizards <span class="beta-tag">beta</span></p>
+        <span id="swLeaderboardStatus">Live</span>
+      </div>
+      <ol id="swScoreList" class="sw-score-list"></ol>
+    </aside>
+
+    <div class="sw-initials-modal" id="swInitialsModal" role="dialog" aria-modal="true" aria-labelledby="swInitialsTitle" hidden>
+      <div class="sw-initials-card" id="swInitialsCard">
+        <p class="sw-modal-kicker">Top Wizard</p>
+        <h2 id="swInitialsTitle">Enter the Tome</h2>
+        <div class="sw-modal-score" id="swModalScore">0</div>
+        <label for="swInitialsInput">Enter 3 initials</label>
+        <input id="swInitialsInput" type="text" maxlength="3" placeholder="AAA" autocomplete="off" inputmode="text">
+        <p class="sw-error-text" id="swInitialsError"></p>
+        <button id="swSubmitInitials" type="button">Submit Score</button>
+        <button id="swSkipInitials" class="sw-skip-button" type="button" title="Close without submitting">Skip</button>
+      </div>
+    </div>
+
+    <section class="message-panel" id="messagePanel" aria-live="polite">
+      <p id="messageKicker">SPELLWAVE</p>
+      <h2 id="messageTitle">Cast or Crumble</h2>
+      <div class="message-score" id="messageScore">Best 0</div>
+      <p class="message-copy" id="messageCopy">Type to kill. Type to heal. Type to loot.
+Bosses: pick the right answer and type it.
+British and American spellings both work.
+Just don't let the bosses through!</p>
+      <button id="startButton" type="button" title="Start run">Start</button>
+      <a class="support-link" id="supportLink" href="https://buymeacoffee.com/panphy" target="_blank" rel="noopener noreferrer" title="Support my projects on BuyMeACoffee" hidden>Support My Projects</a>
+      <div class="run-glossary" id="runGlossary" hidden></div>
+      <p class="message-copyright">&copy; 2026 PanPhy Labs. All rights reserved.</p>
+    </section>
+
+    <section class="loot-guide" id="lootGuide" role="dialog" aria-modal="true" aria-labelledby="lootGuideTitle" aria-describedby="lootGuideCopy" hidden>
+      <p class="loot-guide-kicker">Game paused</p>
+      <div class="loot-guide-icon" id="lootGuideIcon" aria-hidden="true"></div>
+      <h2 id="lootGuideTitle">You found magic!</h2>
+      <p class="loot-guide-copy" id="lootGuideCopy">Chests drop magic into your potion tray. There are four kinds, and each one does something different. Try them all to find out what they do!</p>
+      <p class="loot-guide-how" id="lootGuideHow"></p>
+      <div class="loot-guide-actions">
+        <button id="lootGuideCast" type="button">Cast it now</button>
+        <button id="lootGuideLater" class="is-secondary" type="button">Save it for later</button>
+      </div>
+    </section>
+
+    <input
+      class="keyboard-input"
+      id="keyboardInput"
+      type="text"
+      inputmode="text"
+      autocomplete="off"
+      autocapitalize="off"
+      spellcheck="false"
+      aria-label="Typing input">
+
+    <div id="gameEnding" class="game-ending" aria-live="polite" hidden>
+      <canvas id="endingCanvas" class="ending-canvas" aria-hidden="true"></canvas>
+      <div class="ending-flash" id="endingFlash" aria-hidden="true"></div>
+      <div class="ending-letterbox" aria-hidden="true"></div>
+      <p class="ending-caption" id="endingCaption"></p>
+      <div class="ending-content" id="endingContent">
+        <p class="ending-kicker">The final wave collapses</p>
+        <h2 class="ending-title" id="endingTitle">PHYSICS MASTERED</h2>
+        <div class="ending-stats" id="endingStats">
+          <div class="ending-stat highlighted"><span class="stat-label">Final Score</span><span class="stat-value" id="endScore">0</span></div>
+          <div class="ending-stat"><span class="stat-label">Accuracy</span><span class="stat-value" id="endAccuracy">0%</span></div>
+          <div class="ending-stat"><span class="stat-label">Peak Streak</span><span class="stat-value" id="endStreak">0</span></div>
+          <div class="ending-stat highlighted"><span class="stat-label">Run Time</span><span class="stat-value" id="endTime">0:00</span></div>
+          <div class="ending-stat"><span class="stat-label">Mimics Looted</span><span class="stat-value" id="endMimics">0</span></div>
+          <div class="ending-stat"><span class="stat-label">Life Left</span><span class="stat-value" id="endHealth">0/5</span></div>
+        </div>
+        <button class="ending-replay" id="endingReplay" title="Begin a new run">Another Attempt</button>
+      </div>
+      <button class="ending-skip" id="endingSkip" title="Skip cinematic">Skip</button>
+    </div>
+  </div>
+
+  <script type="module" src="./spellwave-neo/src/main.js?v=20261028-neo-arena"></script>
+</body>
+
+</html>
