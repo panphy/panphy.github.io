@@ -3,7 +3,7 @@ import { readFileSync } from 'node:fs';
 import assert from 'node:assert/strict';
 import {
   NORMAL_PROMPT_LENGTH_CAPS, EARLY_BOSS_WAVES, HARD_GUEST_COUNTS,
-  bossSpeedMultiplier, typedLength, bossAnswerLengthCap, normalPromptLengthCap, bossWordLengthCap, previewLengthCap, withinLength, hardGuestCount,
+  bossSpeedMultiplier, bossHintLetters, typedLength, bossAnswerLengthCap, normalPromptLengthCap, bossWordLengthCap, previewLengthCap, withinLength, hardGuestCount,
 } from '../src/difficulty.js';
 import { EASY_WORDS, MEDIUM_WORDS, HARD_WORDS } from '../src/question-bank.js';
 
@@ -94,6 +94,12 @@ test('startup dependencies share the page release version to avoid mixed cached 
   assert.ok(difficulty.includes(`from './prompt-utils.js?v=${version}'`));
 });
 
+
+test('early bosses show two hint letters, later bosses show one', () => {
+  assert.equal(bossHintLetters(1), 2);
+  assert.equal(bossHintLetters(2), 2);
+  for (let wave = 3; wave <= 10; wave += 1) assert.equal(bossHintLetters(wave), 1);
+});
 
 test('boss rocks cost a quarter heart on every wave; early waves throw faster', async () => {
   const { bossRockTier, BOSS_FIRST_ROCK_DELAY, BOSS_APPROACH_TIME } = await import('../src/difficulty.js');

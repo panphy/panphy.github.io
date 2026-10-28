@@ -1,22 +1,22 @@
 import * as THREE from 'three';
-import { createSpellwaveAudio } from './audio.js?v=20261028-rock-quarter';
+import { createSpellwaveAudio } from './audio.js?v=20261028-boss-hints';
 import { createSeasonalEffects } from './seasonal-effects.js';
-import { createPotionSystem } from './potions.js?v=20261028-rock-quarter';
-import { ALL_WORDS, EASY_WORDS, HARD_WORDS, MEDIUM_WORDS, EQUATION_WORDS } from './question-bank.js?v=20261028-rock-quarter';
-import { createEndingCinematic, wordArrivalTimes } from './ending-cinematic.js?v=20261028-rock-quarter';
-import { createLeaderboard } from './leaderboard.js?v=20261028-rock-quarter';
+import { createPotionSystem } from './potions.js?v=20261028-boss-hints';
+import { ALL_WORDS, EASY_WORDS, HARD_WORDS, MEDIUM_WORDS, EQUATION_WORDS } from './question-bank.js?v=20261028-boss-hints';
+import { createEndingCinematic, wordArrivalTimes } from './ending-cinematic.js?v=20261028-boss-hints';
+import { createLeaderboard } from './leaderboard.js?v=20261028-boss-hints';
 import { createEnemyMesh, createMimicChestMesh } from './enemy-meshes.js';
-import { bossSpeedMultiplier, bossRockTier, BOSS_APPROACH_TIME, BOSS_FIRST_ROCK_DELAY, hardBossShare, normalPromptLengthCap, bossWordLengthCap, previewLengthCap, withinLength, hardGuestCount } from './difficulty.js?v=20261028-rock-quarter';
+import { bossHintLetters, bossSpeedMultiplier, bossRockTier, BOSS_APPROACH_TIME, BOSS_FIRST_ROCK_DELAY, hardBossShare, normalPromptLengthCap, bossAnswerLengthCap, bossWordLengthCap, previewLengthCap, withinLength, hardGuestCount } from './difficulty.js?v=20261028-boss-hints';
 import { createLowPolyTerrain, createLowPolyTree, createLowPolyRock, createLowPolyCloud } from './lowpoly.js';
-import { createVisuals, GLOW_GAIN, MOON_GLOW_GAIN } from './visuals.js?v=20261028-rock-quarter';
-import { pickTarget, getInputCharacters, isMathOperatorInput, buildSearchPrompt, buildAltSearchPrompts, escapeHtml, wrapSups, promptIndexForProgress } from './prompt-utils.js?v=20261028-rock-quarter';
-import { createWordDeck } from './word-decks.js?v=20261028-rock-quarter';
-import { getBossChoice, choiceKeys, keysClash, choiceTypingLength, shuffledOptions, buildChoiceSegments } from './boss-choices.js?v=20261028-rock-quarter';
+import { createVisuals, GLOW_GAIN, MOON_GLOW_GAIN } from './visuals.js?v=20261028-boss-hints';
+import { pickTarget, getInputCharacters, isMathOperatorInput, buildSearchPrompt, buildAltSearchPrompts, buildHintMask, escapeHtml, wrapSups, buildBossHintPart, createBossQuestionBuilder, promptIndexForProgress } from './prompt-utils.js?v=20261028-boss-hints';
+import { createWordDeck } from './word-decks.js?v=20261028-boss-hints';
 
 // Monster, healer and chest words, and boss questions, are drawn from decks so they
 // do not repeat until a pool runs out; last run's words come after fresh ones.
 const monsterDeck = createWordDeck();
 const bossDeck = createWordDeck();
+const buildBossQuestion = createBossQuestionBuilder(ALL_WORDS, EQUATION_WORDS);
 const LAST_RUN_TERMS_KEY = 'panphySpellwaveLastRunTermsV1';
 
 function loadLastRunTerms() {
@@ -101,9 +101,8 @@ const MAX_LIFE = HEART_COUNT * 2;
 // Two hearts or fewer: the music darkens and a heartbeat joins it.
 const LOW_LIFE_MUSIC_THRESHOLD = 4;
 const MINION_DAMAGE = 2;
-// A boss that reaches the wall costs three hearts; a wrong option, half a heart.
+// A boss that reaches the wall costs three hearts.
 const BOSS_CONTACT_DAMAGE = 6;
-const WRONG_CHOICE_DAMAGE = 1;
 const BOSS_SHOT_DAMAGE = 1;
 // Rock timing and damage by wave are in bossRockTier (difficulty.js).
 const BOSS_ROCK_FLIGHT_TIME = 1.45;
@@ -1194,8 +1193,7 @@ function enterCharacter(character) {
       typedBuffer = next;
       activeTarget = pickTarget(nextMatches, next);
       if (activeTarget._matchedSearchPrompt === typedBuffer) {
-        if (isWrongChoiceKey(activeTarget, typedBuffer)) pickWrongChoice(activeTarget);
-        else defeatEnemy(activeTarget);
+        defeatEnemy(activeTarget);
       } else {
         playTypeSound();
         reusableVector.copy(activeTarget.group.position);
@@ -1265,34 +1263,6 @@ function registerMistake() {
   window.setTimeout(() => typingStrip.classList.remove('mistake'), 200);
 }
 
-// A finished wrong option is struck out and costs half a heart; the boss stays.
-function pickWrongChoice(enemy) {
-  const typedKey = typedBuffer;
-  const option = enemy.choiceOptions.find(item => item.keys.includes(typedKey));
-  if (option) option.struck = true;
-  enemy.wrongPicks += 1;
-  typedBuffer = '';
-  activeTarget = null;
-  registerMistake();
-  enemy.label.classList.remove('is-wrong');
-  void enemy.label.offsetWidth;
-  enemy.label.classList.add('is-wrong');
-  window.setTimeout(() => enemy.label.classList.remove('is-wrong'), 450);
-  if (!godMode && potionsSystem.isShieldActive() && potionsSystem.blockBossHit()) {
-    potionsSystem.triggerShieldHitVisual();
-  } else if (!godMode) {
-    health = Math.max(0, health - WRONG_CHOICE_DAMAGE);
-    playBossImpactSound();
-    damageTimer = 0.32;
-    damageFlash.classList.add('show');
-    window.setTimeout(() => damageFlash.classList.remove('show'), 160);
-  }
-  renderPrompt(enemy);
-  updateHud(true);
-  updateTypedDisplay();
-  if (!godMode && health <= 0) endGame();
-}
-
 function defeatEnemy(enemy) {
   if (potionsSystem.isChainLightningPrimed()) {
     potionsSystem.clearChainLightningPrimed();
@@ -1343,11 +1313,7 @@ function awardKill(enemy) {
   if (streak > peakStreak) peakStreak = streak;
   defeatedCount += 1;
   if (enemy.isBoss) bossesDefeated += 1;
-  const fullPoints = enemy.type.score + typedLength * 12 + Math.min(streak, 10) * 8;
-  // A boss answered after a wrong option scores half, after two or more only
-  // the typing points.
-  const wrongPicks = enemy.wrongPicks || 0;
-  const points = wrongPicks === 0 ? fullPoints : wrongPicks === 1 ? Math.round(fullPoints / 2) : typedLength * 12;
+  const points = enemy.type.score + typedLength * 12 + Math.min(streak, 10) * 8;
   const healed = enemy.isMedic ? Math.min(MEDIC_HEAL_AMOUNT, MAX_LIFE - health) : 0;
   score += points;
   if (healed > 0) health += healed;
@@ -2363,77 +2329,103 @@ function getLabelSafeBounds(height) {
 function displayTypedBuffer() {
   if (!typedBuffer) return '';
   if (!activeTarget) return typedBuffer;
-  if (activeTarget.choice) {
-    const option = matchingChoiceOptions(activeTarget)[0];
-    return option ? typedOptionText(option, activeTarget) : typedBuffer;
-  }
   const effectiveSP = activeTarget._matchedSearchPrompt?.startsWith(typedBuffer)
     ? activeTarget._matchedSearchPrompt
     : activeTarget.searchPrompt;
   if (!effectiveSP.startsWith(typedBuffer)) return typedBuffer;
+  if (activeTarget.limitedParts) return displayLimitedTypedBuffer(activeTarget, typedBuffer);
   return activeTarget.prompt.slice(0, promptIndexForProgress(activeTarget.prompt, typedBuffer.length, {
     multiplicationAlias: activeTarget.isEquation,
   }));
 }
 
-// The boss options still open whose spelling starts with what has been typed.
-function matchingChoiceOptions(enemy) {
-  if (!typedBuffer || !enemy.choiceOptions) return [];
-  return enemy.choiceOptions.filter(option => !option.struck && option.keys.some(key => key.startsWith(typedBuffer)));
-}
+function displayLimitedTypedBuffer(enemy, progressText) {
+  const promptOptions = { multiplicationAlias: enemy.isEquation };
+  let charsLeft = progressText.length;
+  const typedParts = [];
 
-function typedOptionText(option, enemy) {
-  return option.text.slice(0, promptIndexForProgress(option.text, typedBuffer.length, {
-    multiplicationAlias: enemy.isEquation,
-  }));
+  for (const part of enemy.limitedParts) {
+    if (!part.isHidden) continue;
+    const answerText = part.answerText || part.text;
+    const sp = buildSearchPrompt(answerText, promptOptions);
+    const typedCount = Math.min(charsLeft, sp.length);
+    charsLeft -= typedCount;
+
+    if (typedCount > 0) {
+      const charPos = promptIndexForProgress(answerText, typedCount, promptOptions);
+      typedParts.push(answerText.slice(0, charPos));
+    }
+
+    if (charsLeft <= 0) break;
+  }
+
+  return typedParts.join(' ');
 }
 
 function renderPrompt(enemy) {
-  const html = enemy.choice ? buildChoicePromptHtml(enemy) : buildPlainPromptHtml(enemy);
-  if (enemy.lastPromptHtml === html) return;
-  enemy.lastPromptHtml = html;
-  if (enemy.choice) {
-    const [lineHtml, choicesHtml] = html.split('\u0000');
-    enemy.promptNode.innerHTML = lineHtml;
-    enemy.choicesNode.innerHTML = choicesHtml;
-  } else {
-    enemy.promptNode.innerHTML = html;
-  }
-}
-
-function buildPlainPromptHtml(enemy) {
   const effectiveSP = enemy._matchedSearchPrompt?.startsWith(typedBuffer)
     ? enemy._matchedSearchPrompt
     : enemy.searchPrompt;
   const matched = effectiveSP.startsWith(typedBuffer) && typedBuffer.length > 0;
-  const typedLen = matched ? promptIndexForProgress(enemy.prompt, typedBuffer.length, {
-    multiplicationAlias: enemy.isEquation,
-  }) : 0;
-  return `<span class="typed">${wrapSups(escapeHtml(enemy.prompt.slice(0, typedLen)))}</span>`
-    + `<span class="remaining">${wrapSups(escapeHtml(enemy.prompt.slice(typedLen)))}</span>`;
+  const typedProgress = matched ? typedBuffer.length : 0;
+
+  let html;
+  if (enemy.limitedParts) {
+    html = buildLimitedPromptHtml(enemy, typedProgress);
+  } else {
+    const typedLen = typedProgress > 0 ? promptIndexForProgress(enemy.prompt, typedProgress, {
+      multiplicationAlias: enemy.isEquation,
+    }) : 0;
+    const typedText = enemy.prompt.slice(0, typedLen);
+    const remainingText = enemy.maskPrompt ? enemy.hintMask.slice(typedLen) : enemy.prompt.slice(typedLen);
+    html = `<span class="typed">${wrapSups(escapeHtml(typedText))}</span>`
+         + `<span class="remaining">${wrapSups(escapeHtml(remainingText))}</span>`;
+  }
+
+  if (enemy.lastPromptHtml === html) return;
+  enemy.lastPromptHtml = html;
+  enemy.promptNode.innerHTML = html;
 }
 
-// A boss shows its line with one fixed-width slot, then its options. Typed
-// letters fill the slot from the option being typed, never from the answer,
-// and every option that matches so far is highlighted the same way.
-function buildChoicePromptHtml(enemy) {
-  const matching = matchingChoiceOptions(enemy);
-  const slotText = matching.length > 0 ? typedOptionText(matching[0], enemy) : '';
-  const lineHtml = enemy.choiceSegments.map((segment) => {
-    if (segment.type === 'text') {
-      return /^\s+$/.test(segment.text) ? segment.text : `<span class="given-tok">${wrapSups(escapeHtml(segment.text))}</span>`;
+function buildLimitedPromptHtml(enemy, typedProgress) {
+  let charsLeft = typedProgress;
+  let html = '';
+  for (const part of enemy.limitedParts) {
+    if (part.isWhitespace) {
+      html += wrapSups(escapeHtml(part.text));
+    } else if (!part.isHidden) {
+      html += `<span class="given-tok">${wrapSups(escapeHtml(part.text))}</span>`;
+    } else {
+      const promptOptions = { multiplicationAlias: enemy.isEquation };
+      const answerText = part.answerText || part.text;
+      const hintOptions = {
+        ...promptOptions,
+        leadingTypeableCount: enemy.hintLetterCount,
+      };
+      const sp = buildSearchPrompt(answerText, promptOptions);
+      const tokTyped = Math.min(charsLeft, sp.length);
+      charsLeft -= tokTyped;
+      const exponentHtml = part.exponentText ? wrapSups(escapeHtml(part.exponentText)) : '';
+      const wrapSquared = !!part.exponentText;
+      if (tokTyped > 0) {
+        const charPos = promptIndexForProgress(answerText, tokTyped, promptOptions);
+        const typedPart = answerText.slice(0, charPos);
+        const remainPart = answerText.slice(charPos);
+        if (wrapSquared) html += '(';
+        html += `<span class="typed">${wrapSups(escapeHtml(typedPart))}</span>`;
+        if (remainPart) {
+          const maskedPart = buildBossHintPart(answerText, hintOptions).slice(charPos);
+          html += `<span class="remaining">${wrapSups(escapeHtml(maskedPart))}</span>`;
+        }
+        if (wrapSquared) html += `)${exponentHtml}`;
+      } else {
+        if (wrapSquared) html += '(';
+        html += `<span class="remaining">${wrapSups(escapeHtml(buildBossHintPart(answerText, hintOptions)))}</span>`;
+        if (wrapSquared) html += `)${exponentHtml}`;
+      }
     }
-    const exponent = segment.exponent ? `<sup class="given-sup">${segment.exponent}</sup>` : '';
-    return `<span class="answer-slot"><span class="typed">${escapeHtml(slotText)}</span></span>${exponent}`;
-  }).join('');
-  const choicesHtml = enemy.choiceOptions.map((option) => {
-    if (option.struck) return `<span class="boss-choice is-struck">${escapeHtml(option.text)}</span>`;
-    if (!matching.includes(option)) return `<span class="boss-choice">${escapeHtml(option.text)}</span>`;
-    const typed = typedOptionText(option, enemy);
-    return `<span class="boss-choice is-matching"><span class="typed">${escapeHtml(typed)}</span>`
-      + `<span class="remaining">${escapeHtml(option.text.slice(typed.length))}</span></span>`;
-  }).join('');
-  return `${lineHtml}\u0000${choicesHtml}`;
+  }
+  return html;
 }
 
 function createLifeMeter() {
@@ -2594,7 +2586,7 @@ function getEnemyLimit() {
 function getEnemySpeed(enemy) {
   const profile = currentDifficulty();
   if (enemy.isBoss) {
-    const responseTime = 18 + (enemy.bossTypingLength || enemy.searchPrompt.length) * 0.8;
+    const responseTime = 18 + enemy.searchPrompt.length * 0.8;
     return (WALL_Z - enemy.revealZ) / responseTime * bossSpeedMultiplier(waveSet);
   }
   const wavePressure = Math.max(0, waveSet - 1) * profile.waveSpeedBonus;
@@ -2630,6 +2622,7 @@ function spawnEnemy(options = {}) {
   const isEquationPrompt = !!wordData.isEquation;
   const showDefinition = !!wordData.definition && isBoss;
   const type = isBoss ? (options.bossType || chooseBossType(bossesSpawned)) : isMedic ? MEDIC_TYPE : isMimic ? MIMIC_TYPE : weightedPick(ENEMY_TYPES);
+  const hintRange = isBoss ? { min: bossHintLetters(waveSet), max: bossHintLetters(waveSet) } : null;
   if (isMedic && !firstMedicHintShown) {
     firstMedicHintShown = true;
     window.setTimeout(() => { if (mode === 'running') showBanner('TYPE TO HEAL!', 'medic-hint'); }, 1100);
@@ -2703,13 +2696,6 @@ function spawnEnemy(options = {}) {
     label.append(promptNode);
   }
 
-  let choicesNode = null;
-  if (isBoss) {
-    choicesNode = document.createElement('span');
-    choicesNode.className = 'boss-choices';
-    label.append(choicesNode);
-  }
-
   const threatNode = document.createElement('span');
   threatNode.className = 'threat-meter';
   threatNode.append(document.createElement('i'));
@@ -2718,28 +2704,33 @@ function spawnEnemy(options = {}) {
   labelsLayer.append(label);
 
   const promptOptions = { multiplicationAlias: isEquationPrompt };
-  const bossChoice = isBoss ? getBossChoice(wordData, waveSet) : null;
+  const twoWordData = isBoss
+    ? buildBossQuestion(wordData, bossAnswerLengthCap(waveSet))
+    : null;
   const enemy = {
     id: enemyId,
     type,
     group,
     label,
     promptNode,
-    choicesNode,
     prompt: wordData.term,
     definition: wordData.definition || null,
     isEquation: isEquationPrompt,
-    searchPrompt: bossChoice ? bossChoice.answer.key : buildSearchPrompt(wordData.term, promptOptions),
-    altSearchPrompts: bossChoice ? bossChoice.answer.keys.slice(1) : buildAltSearchPrompts(wordData.term, promptOptions),
+    searchPrompt: twoWordData ? twoWordData.searchPrompt : buildSearchPrompt(wordData.term, promptOptions),
+    altSearchPrompts: twoWordData ? twoWordData.altSearchPrompts : buildAltSearchPrompts(wordData.term, promptOptions),
     _matchedSearchPrompt: null,
-    // Boss options: the answer and the wrong options in display order, and the
-    // line with the answer replaced by a slot.
-    choice: bossChoice,
-    choiceOptions: bossChoice ? shuffledOptions(bossChoice) : null,
-    choiceSegments: bossChoice ? buildChoiceSegments(wordData.term, bossChoice.answer.text) : null,
-    bossTypingLength: bossChoice ? choiceTypingLength(bossChoice) : 0,
-    wrongPicks: 0,
+    limitedParts: twoWordData ? twoWordData.parts : null,
     showDefinition,
+    maskPrompt: showDefinition && !isEquationPrompt,
+    hintMask: showDefinition && !isEquationPrompt
+      ? buildHintMask(wordData.term, {
+          ...promptOptions,
+          hintRange,
+          leadingTypeableCount: isBoss ? bossHintLetters(waveSet) : 1,
+        })
+      : null,
+    hintRange,
+    hintLetterCount: isBoss ? bossHintLetters(waveSet) : 1,
     lastPromptHtml: '',
     promptKind,
     isBoss,
@@ -3525,17 +3516,9 @@ function findMatches(prefix, options = {}) {
   });
 }
 
-// Everything a player could type at an enemy: its answer, alternative spellings
-// and, for a boss, the wrong options not yet struck out.
+// Everything a player could type at an enemy: its answer and alternative spellings.
 function enemyTypeableKeys(enemy) {
-  if (enemy.choiceOptions) {
-    return enemy.choiceOptions.filter(option => !option.struck).flatMap(option => option.keys);
-  }
   return [enemy.searchPrompt, ...(enemy.altSearchPrompts || [])];
-}
-
-function isWrongChoiceKey(enemy, key) {
-  return !!enemy.choiceOptions?.some(option => !option.isAnswer && option.keys.includes(key));
 }
 
 function hasActiveEquationPrefix() {
@@ -3732,8 +3715,8 @@ function chooseBossWordsForWave() {
 
   // First two bosses use vocabulary words, the freshest the deck has
   for (let attempt = 0; attempt < 20 && chosen.length < BOSSES_PER_WAVE - 1; attempt += 1) {
-    const keys = chosen.flatMap(bossKeys);
-    const entry = bossDeck.pick(chooseBossPool(), item => !usedTerms.has(item.term) && !sharesBossAnswer(item, keys));
+    const answers = chosen.map(bossAnswer);
+    const entry = bossDeck.pick(chooseBossPool(), item => !usedTerms.has(item.term) && !sharesBossAnswer(item, answers));
     if (!entry) continue;
     usedTerms.add(entry.term);
     chosen.push(entry);
@@ -3741,8 +3724,8 @@ function chooseBossWordsForWave() {
 
   // Fill any gap from the whole pool, then the third boss is the equation question
   while (chosen.length < BOSSES_PER_WAVE - 1) {
-    const keys = chosen.flatMap(bossKeys);
-    const entry = firstShuffled(chooseBossPool(), item => !usedTerms.has(item.term) && !sharesBossAnswer(item, keys));
+    const answers = chosen.map(bossAnswer);
+    const entry = firstShuffled(chooseBossPool(), item => !usedTerms.has(item.term) && !sharesBossAnswer(item, answers));
     if (!entry) break;
     usedTerms.add(entry.term);
     chosen.push(entry);
@@ -3759,19 +3742,17 @@ function chooseBossWordsForWave() {
 }
 
 // Words on screen together must not be the same, or start one another: a
-// finished word would go to the nearest enemy whatever its clue says. For a
-// boss that covers every option it shows, not just its answer.
-function bossKeys(entry) {
-  const choice = getBossChoice(entry, waveSet);
-  return choice ? choiceKeys(choice) : [buildSearchPrompt(entry.term)];
+// finished word would go to the nearest enemy whatever its clue says.
+function bossAnswer(entry) {
+  return buildBossQuestion(entry, bossAnswerLengthCap(waveSet))?.searchPrompt || '';
 }
 
 function sharesAnswer(answer, answers) {
-  return keysClash([answer], answers);
+  return answers.some(other => answer.startsWith(other) || other.startsWith(answer));
 }
 
-function sharesBossAnswer(entry, keys) {
-  return keysClash(bossKeys(entry), keys);
+function sharesBossAnswer(entry, answers) {
+  return sharesAnswer(bossAnswer(entry), answers);
 }
 
 function liveAnswers(filter = () => true) {
@@ -3779,7 +3760,7 @@ function liveAnswers(filter = () => true) {
 }
 
 // The first entry, in random order, that passes the test; random picks can
-// miss the few that fit when many options are already on screen.
+// miss the few that fit when many answers are already on screen.
 function firstShuffled(entries, test) {
   const order = [...entries];
   for (let i = order.length - 1; i > 0; i -= 1) {
@@ -3790,8 +3771,8 @@ function firstShuffled(entries, test) {
 }
 
 function chooseEquationWord(otherBosses = []) {
-  const keys = otherBosses.flatMap(bossKeys);
-  return bossDeck.pick(EQUATION_WORDS, entry => !sharesBossAnswer(entry, keys))
+  const answers = otherBosses.map(bossAnswer);
+  return bossDeck.pick(EQUATION_WORDS, entry => !sharesBossAnswer(entry, answers))
     || EQUATION_WORDS[Math.floor(Math.random() * EQUATION_WORDS.length)];
 }
 
