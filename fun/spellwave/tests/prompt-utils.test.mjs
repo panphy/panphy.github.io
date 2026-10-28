@@ -162,8 +162,9 @@ const mainSlice = (from, to) => mainSource.slice(mainSource.indexOf(from), mainS
 
 function createBossChoiceContext(extra = {}) {
   const context = vm.createContext({
-    MEDIUM_WORDS, HARD_WORDS, EQUATION_WORDS, EASY_WORDS, BOSSES_PER_WAVE: 3, waveSet: 1, Math,
+    MEDIUM_WORDS, HARD_WORDS, EQUATION_WORDS, EASY_WORDS, waveSet: 1, Math,
     buildBossQuestion, buildSearchPrompt,
+    bossesPerWave: wave => ({ 1: 3, 2: 3, 3: 4, 4: 5, 5: 5, 6: 5, 7: 6, 8: 6, 9: 6, 10: 12 }[wave] || 3),
     hardBossShare: wave => (wave >= 5 ? 0.7 : null),
     bossWordLengthCap: wave => (wave <= 2 ? 14 : Infinity),
     bossAnswerLengthCap: wave => (wave <= 2 ? 14 : 16),
@@ -190,11 +191,12 @@ test('bosses chosen for one wave never share an answer', () => {
     for (let run = 0; run < 400; run += 1) {
       context.bossDeck.reset([]);
       const bosses = vm.runInContext('chooseBossWordsForWave()', context);
-      assert.equal(bosses.length, 3);
+      assert.equal(bosses.length, context.bossesPerWave(context.waveSet));
       assert.equal(bosses.filter(boss => boss.isEquation).length, 1);
       assert.ok(bosses.every(boss => !boss.noBoss));
-      vocabulary[context.waveSet] += 2;
-      hard[context.waveSet] += bosses.filter(boss => HARD_WORDS.includes(boss)).length;
+      const vocabBosses = bosses.filter(boss => !boss.isEquation);
+      vocabulary[context.waveSet] += vocabBosses.length;
+      hard[context.waveSet] += vocabBosses.filter(boss => HARD_WORDS.includes(boss)).length;
       const answers = bosses.map(boss => context.bossAnswer(boss));
       for (const a of answers) {
         assert.equal(answers.filter(b => a.startsWith(b) || b.startsWith(a)).length, 1, answers.join(', '));
@@ -318,11 +320,13 @@ test('both spellings defeat a boss hidden-word answer without a mistake', () => 
 
 function createBossPacingHarness(waveSet = 4) {
   const source = readFileSync(new URL('../src/main.js', import.meta.url), 'utf8');
-  const start = source.indexOf('        if (bossesSpawned < BOSSES_PER_WAVE)');
+  const start = source.indexOf('        if (bossesSpawned < bossesPerWave(waveSet))');
   const end = source.lastIndexOf('\n      }', source.indexOf('\n    updateEnemies(currentDelta'));
   assert.ok(start >= 0 && end > start);
   const context = vm.createContext({
-    BOSSES_PER_WAVE: 3, ONE_BOSS_AT_A_TIME_WAVES: 3, waveSet,
+    waveSet,
+    bossesPerWave: wave => ({ 1: 3, 2: 3, 3: 4, 4: 5, 5: 5, 6: 5, 7: 6, 8: 6, 9: 6, 10: 12 }[wave] || 3),
+    maxLiveBosses: wave => ({ 1: 1, 2: 2, 3: 2, 4: 3, 5: 3, 6: 3, 7: 3, 8: 3, 9: 3, 10: 3 }[wave] || 3),
     bossesSpawned: 0, bossSpawnTimer: 1, currentDelta: 0,
     waveClearDelayTimer: 0, clears: 0, enemies: [],
     currentDifficulty: () => ({ bossSpawnGap: 2.8 }),
@@ -335,8 +339,8 @@ function createBossPacingHarness(waveSet = 4) {
   };
 }
 
-test('all three bosses can overlap on the 2.8-second timer without a kill', () => {
-  const { context, tick } = createBossPacingHarness();
+test('wave 4 can fill its live cap on the 2.8-second timer without a kill', () => {
+  const { context, tick } = createBossPacingHarness(4);
   tick(1);
   assert.equal(context.bossesSpawned, 1);
   tick(2.7);
@@ -349,13 +353,20 @@ test('all three bosses can overlap on the 2.8-second timer without a kill', () =
   tick(5);
   assert.equal(context.bossesSpawned, 3);
   assert.equal(context.clears, 0);
+  // The timer was held while the live cap was full, so a free slot still waits the gap.
+  context.enemies[0].dying = true;
+  tick(2.7);
+  assert.equal(context.bossesSpawned, 3);
+  tick(0.11);
+  assert.equal(context.bossesSpawned, 4);
   context.enemies.length = 0;
+  context.bossesSpawned = 5;
   tick(0.1);
   tick(1.3);
   assert.equal(context.clears, 1);
 });
 
-test('on waves 1–3 each boss waits until the one before it is gone', () => {
+test('wave 1 holds the spawn timer until the live boss is gone', () => {
   const { context, tick } = createBossPacingHarness(1);
   tick(1);
   assert.equal(context.bossesSpawned, 1);
@@ -375,7 +386,8 @@ test('the finale keeps at most three bosses alive and spawns the next when one g
   const end = source.indexOf('\n        }\n      } else {', start);
   assert.ok(start >= 0 && end > start);
   const context = vm.createContext({
-    finalWaveQueue: ['boss', 'boss', 'boss', 'boss'], finalWaveQueueIndex: 0, FINAL_WAVE_MAX_LIVE_BOSSES: 3,
+    finalWaveQueue: ['boss', 'boss', 'boss', 'boss'], finalWaveQueueIndex: 0, waveSet: 10,
+    maxLiveBosses: () => 3,
     bossesSpawned: 0, bossSpawnTimer: 0, currentDelta: 2.8, enemies: [],
     currentDifficulty: () => ({ bossSpawnGap: 2.8 }),
   });
