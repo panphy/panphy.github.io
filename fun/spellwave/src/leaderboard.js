@@ -8,8 +8,8 @@ const SUBMIT_RPC = 'submit_spellwave_score';
 const SCORE_FIELD = 'score';
 // Bumped whenever the board is reset after a gameplay change; lists saved under
 // older keys are from old rules and are removed on load.
-const CACHE_KEY = 'spellwaveLeaderboardCacheV8';
-const OLD_CACHE_KEYS = ['spellwaveLeaderboardCacheV1', 'spellwaveLeaderboardCacheV2', 'spellwaveLeaderboardCacheV3', 'spellwaveLeaderboardCacheV4', 'spellwaveLeaderboardCacheV5', 'spellwaveLeaderboardCacheV6', 'spellwaveLeaderboardCacheV7'];
+const CACHE_KEY = 'spellwaveLeaderboardCacheV9';
+const OLD_CACHE_KEYS = ['spellwaveLeaderboardCacheV1', 'spellwaveLeaderboardCacheV2', 'spellwaveLeaderboardCacheV3', 'spellwaveLeaderboardCacheV4', 'spellwaveLeaderboardCacheV5', 'spellwaveLeaderboardCacheV6', 'spellwaveLeaderboardCacheV7', 'spellwaveLeaderboardCacheV8'];
 const BOARD_SIZE = 5;
 const MIN_SCORE = 1;
 // Matches the server check (spellwave_score_range); the highest legitimate run is ~67.6k.
