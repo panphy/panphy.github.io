@@ -582,36 +582,6 @@ a.atool { text-decoration: none; }
 .example strong { display: block; font-size: 0.92rem; margin-bottom: 3px; }
 .example span span { display: block; font-size: 0.8rem; color: var(--ink-2); line-height: 1.35; }
 .ex-num { flex: 0 0 28px; height: 28px; display: grid; place-items: center; border-radius: 50%; background: var(--accent-soft); color: var(--accent); font: 700 0.8rem var(--font-mono); }
-#dlg-help { width: min(760px, calc(100vw - 24px)); padding: 0; max-height: calc(100dvh - 48px); }
-#dlg-help[open] { display: flex; flex-direction: column; }
-#dlg-help .dialog-head { flex: 0 0 auto; margin: 0; padding: 14px 20px; border-bottom: 1px solid var(--line); }
-#dlg-help .dialog-head h2 { margin: 0; font-size: 1.05rem; }
-.help-body { min-height: 0; overflow-y: auto; overscroll-behavior: contain; padding: 18px 20px 20px; font-size: 0.9rem; line-height: 1.6; color: var(--ink-2); }
-.help-intro { margin: 0 0 18px; }
-.help-topic { margin-bottom: 12px; border: 1px solid var(--line); border-radius: 12px; background: var(--surface-2); }
-.help-topic:last-child { margin-bottom: 0; }
-.help-topic summary { min-height: 48px; padding: 14px 16px; cursor: pointer; color: var(--ink); font-weight: 700; line-height: 1.4; }
-.help-topic summary::marker { color: var(--accent); }
-.help-topic summary:focus-visible { outline: 3px solid var(--focus); outline-offset: -3px; border-radius: 12px; }
-.help-topic[open] summary { border-bottom: 1px solid var(--line); }
-.help-steps { margin: 0; padding: 16px 20px 18px 40px; display: grid; gap: 14px; }
-.help-body strong, .help-notes dt { color: var(--ink); font-weight: 700; }
-.help-notes { margin: 0; padding: 4px 16px; }
-.help-notes > div { padding: 14px 0; border-bottom: 1px solid var(--line); }
-.help-notes > div:last-child { border-bottom: 0; }
-.help-notes dd { margin: 4px 0 0; }
-.keys { margin: 0; padding: 4px 16px; }
-.keys div { display: grid; grid-template-columns: minmax(170px, 1fr) 1.2fr; gap: 12px; border-bottom: 1px solid var(--line); padding: 12px 0; }
-.keys div:last-child { border-bottom: 0; }
-.keys dt { font-family: var(--font-mono); font-size: 0.78rem; color: var(--ink); align-self: center; }
-.keys dd { margin: 0; }
-@media (max-width: 520px) {
-  #dlg-help .dialog-head { padding: 12px 14px; }
-  #dlg-help .dialog-head h2 { font-size: 0.9rem; }
-  .help-body { padding: 14px; }
-  .keys div { grid-template-columns: 1fr; gap: 4px; }
-}
-
 .toast { position: fixed; left: 50%; bottom: 100px; transform: translateX(-50%); z-index: 200; display: flex; align-items: center; gap: 12px; max-width: min(560px, calc(100vw - 24px));
   padding: 10px 16px; border-radius: 12px; background: var(--ink); color: var(--bg); box-shadow: var(--shadow-2); font-size: 0.86rem; }
 .toast-btn { border: 0; background: transparent; color: var(--accent-hover); font-weight: 700; cursor: pointer; }

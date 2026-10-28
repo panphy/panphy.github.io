@@ -52,7 +52,6 @@ const videoWrapper = document.getElementById('videoWrapper');
 const emptyVideo = document.getElementById('emptyVideo');
 const videoName = document.getElementById('videoName');
 const fpsLabel = document.getElementById('fpsLabel');
-const guideDialog = document.getElementById('guideDialog');
 const slider = document.getElementById('slider');
 const timeDisplay = document.getElementById('timeDisplay');
 const frameDisplay = document.getElementById('frameDisplay');
@@ -131,7 +130,6 @@ export {
 	emptyVideo,
 	videoName,
 	fpsLabel,
-	guideDialog,
 	slider,
 	timeDisplay,
 	frameDisplay,

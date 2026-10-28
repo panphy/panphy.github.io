@@ -20,7 +20,6 @@ import {
 	frameCanvas,
 	frameRateHintButton,
 	frameRatePrompt,
-	guideDialog,
 	hiddenVideo,
 	hideCrossesToggle,
 	messageEl,
@@ -324,8 +323,6 @@ function initializeUi() {
 	document.addEventListener('click', (event) => {
 		if (!event.target.closest('.mt-menu-wrap')) closeMenus();
 	});
-
-	document.getElementById('guideButton').addEventListener('click', () => openDialog(guideDialog));
 
 	clearVideoButton.addEventListener('click', handleClearVideo);
 
