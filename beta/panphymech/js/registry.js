@@ -1,56 +1,55 @@
-// PanPhyMech part catalog for the library pane.
-(function (root) {
-  const PPM = root.PPM = root.PPM || {};
+// Parts tray catalog for dry PanPhyMech v1.
+export const parts = {
+  select: {
+    id: 'select',
+    name: 'Hand',
+    group: 'Tools',
+    blurb: 'Hold and throw bodies',
+    tool: true
+  },
+  sphere: {
+    id: 'sphere',
+    name: 'Sphere',
+    group: 'Bodies',
+    blurb: 'Solid ball',
+    defaults: { r: 0.22, density: 900, friction: 0.25, restitution: 0.35, fixed: false },
+    color: 0x3d8bfd
+  },
+  block: {
+    id: 'block',
+    name: 'Block',
+    group: 'Bodies',
+    blurb: 'Solid rectangular block',
+    defaults: { w: 0.45, h: 0.35, density: 700, friction: 0.35, restitution: 0.12, fixed: false },
+    color: 0xd97706
+  },
+  plank: {
+    id: 'plank',
+    name: 'Plank',
+    group: 'Bodies',
+    blurb: 'Long thin beam',
+    defaults: { w: 1.4, h: 0.1, density: 550, friction: 0.4, restitution: 0.08, fixed: false },
+    color: 0xb45309
+  },
+  pin: {
+    id: 'pin',
+    name: 'Pin',
+    group: 'Connect',
+    blurb: 'Pin a point on a body to the world',
+    tool: true
+  },
+  spring: {
+    id: 'spring',
+    name: 'Spring',
+    group: 'Connect',
+    blurb: 'Connect two bodies with a spring',
+    tool: true,
+    defaults: { stiffness: 0.05, damping: 0.04 }
+  }
+};
 
-  const parts = {
-    circle: {
-      id: 'circle',
-      name: 'Circle',
-      group: 'Bodies',
-      blurb: 'Disk with mass, friction and bounce',
-      defaults: { r: 0.25, density: 800, friction: 0.2, restitution: 0.2, fixed: false }
-    },
-    box: {
-      id: 'box',
-      name: 'Box',
-      group: 'Bodies',
-      blurb: 'Rectangle body',
-      defaults: { w: 0.5, h: 0.35, density: 600, friction: 0.25, restitution: 0.1, fixed: false }
-    },
-    ramp: {
-      id: 'ramp',
-      name: 'Ramp',
-      group: 'World',
-      blurb: 'Static inclined plane',
-      defaults: { w: 2.4, h: 0.12, angleDeg: -18, friction: 0.35 }
-    },
-    wall: {
-      id: 'wall',
-      name: 'Wall',
-      group: 'World',
-      blurb: 'Static barrier',
-      defaults: { w: 0.12, h: 1.6, friction: 0.3 }
-    },
-    fluid: {
-      id: 'fluid',
-      name: 'Fluid',
-      group: 'Fluids',
-      blurb: 'Pool with buoyancy and Stokes drag',
-      defaults: {
-        w: 2.8,
-        h: 1.6,
-        rho: 1000,
-        eta: 1.2,
-        label: 'Glycerin-like'
-      }
-    }
-  };
+export const order = ['select', 'sphere', 'block', 'plank', 'pin', 'spring'];
 
-  const order = ['circle', 'box', 'ramp', 'wall', 'fluid'];
-
-  function get(id) { return parts[id]; }
-
-  const api = { parts, order, get };
-  PPM.registry = api;
-  if (typeof module === 'object' && module.exports) module.exports = api;
-})(typeof globalThis === 'object' ? globalThis : this);
+export function get(id) {
+  return parts[id];
+}

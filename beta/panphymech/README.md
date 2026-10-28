@@ -1,18 +1,16 @@
 # PanPhyMech (beta)
 
-A 2D mechanics sandbox prototype. Entry: `beta/panphymech.html` (listed on `beta/index.html`). Network-only beta page — no root service-worker registration.
+Dry tabletop mechanics sandbox. Entry: `beta/panphymech.html` (listed on `beta/index.html`). Network-only beta page — no root service-worker registration.
 
-## What this prototype does
+## What this beta does
 
-- Circuits-style shell: **Parts** library, world stage, **Inspector**
-- Rigid bodies via [Matter.js](https://brm.io/matter-js/) (CDN): circle, box, ramp, wall
-- **Fluid** regions with:
-  - buoyancy from submerged area and fluid density \(\rho\)
-  - Stokes drag \(\mathbf{F} = -6\pi\eta r \mathbf{v}\) (classroom sphere law; boxes use an equal-area radius)
-- Examples: float/sink, Stokes terminal speed, ramp into a pool
-- Pause / resume, clear, delete selection
+- **Tabletop stage** with Three.js lighting and shadows; physics stays **2D** (Matter.js)
+- **Hold / throw**: press a body to pick it up, release to drop with a bit of your throw
+- **Parts tray**: Sphere, Block, Plank; **Pin** (world hinge); **Spring** (two-click connect)
+- **Inspector** (right-click / long-press): density, friction, bounce, fixed
+- Examples: Drop & bounce, Stack, Spring mass, Pendulum, Empty table
 
-Lengths use \(1\,\mathrm{m} = 60\,\mathrm{px}\). Density, \(\rho\), \(\eta\) and the Stokes formula are SI; forces are scaled into Matter.js Verlet units so they match the engine’s default gravity. Default fluid viscosity is glycerin-like so terminal speeds are easy to see.
+Lengths use \(1\,\mathrm{m} = 80\,\mathrm{px}\). Gravity is \(9.81\,\mathrm{m/s^2}\) mapped through Matter’s default Verlet scale.
 
 ## Local checks
 
@@ -26,19 +24,21 @@ Serve the repo root (`python3 -m http.server 8000`) and open `/beta/panphymech.h
 
 Kept here so the roadmap stays visible while the prototype stays small:
 
-- Springs, hinges/pins, ropes, ideal and non-ideal pulleys
+- Strings / ropes, ideal and non-ideal pulleys
+- Fluid tank with buoyancy and Stokes drag \(\mathbf{F} = -6\pi\eta r \mathbf{v}\)
 - Hollow / solid mass-distribution presets
 - In-app graph and CSV / PanPhyPlot export (same pattern as PanPhyCircuits)
-- Pairwise **Coulomb** forces and a **Millikan**-style preset using a uniform \(E\)-field region plus Stokes fluid (buoyancy + \(6\pi\eta r v\)) — intentionally deferred
+- Pairwise **Coulomb** forces and a **Millikan**-style preset (uniform \(E\)-field + Stokes fluid) — intentionally deferred
 - Scene file save/open, undo/redo, touch polish
 
 ## Editing
 
 | Path | Role |
 | --- | --- |
-| `js/fluid.js` | Buoyancy and Stokes math (no Matter dependency; unit-tested) |
-| `js/world.js` | Matter world, spawn helpers, fluid force hook, overlay draw |
-| `js/registry.js` | Library part definitions |
+| `js/scene.js` | Three.js tabletop, materials, sync from Matter |
+| `js/physics.js` | Matter world, grab, pin, spring |
+| `js/units.js` | Scale helpers (unit-tested) |
+| `js/registry.js` | Tray part definitions |
 | `js/examples.js` | Starter scenes |
-| `js/ui.js`, `js/app.js` | Panels and interaction |
-| `css/app.css` | Layout |
+| `js/ui.js`, `js/app.js` | Tray, inspector, interaction |
+| `css/app.css` | Shell |

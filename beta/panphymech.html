@@ -5,15 +5,23 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <meta name="robots" content="noindex, nofollow">
-  <meta name="theme-color" content="#f4f2f7">
+  <meta name="theme-color" content="#1a2330">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
-  <meta name="description" content="Beta mechanics sandbox for PanPhy Labs: rigid bodies, pools with buoyancy, and Stokes drag F = −6πηrv.">
+  <meta name="description" content="Beta mechanics sandbox for PanPhy Labs: hold and drop blocks and spheres on a tabletop, pin them, and connect springs. Dry v1 — no fluid yet.">
   <title>PanPhyMech (beta) — PanPhy Labs</title>
   <link rel="icon" type="image/png" href="/assets/favicon.png">
   <link rel="stylesheet" href="/assets/standalone-top.css">
   <link rel="stylesheet" href="/assets/fonts/fonts.css">
   <link rel="stylesheet" href="panphymech/css/app.css">
+  <script type="importmap">
+  {
+    "imports": {
+      "three": "https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js",
+      "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/"
+    }
+  }
+  </script>
 </head>
 
 <body>
@@ -21,52 +29,45 @@
     <header class="appbar">
       <div class="brand">
         <a href="/" aria-label="PanPhy Labs home" title="PanPhy Labs home"><img src="/assets/panphy.png" alt="PanPhy logo" width="30" height="30"></a>
-        <h1 class="wordmark">PanPhyMech <span style="font:600 0.68rem/1 var(--font-mono);letter-spacing:0.08em;color:var(--ink-3);text-transform:uppercase;margin-left:6px">beta</span></h1>
+        <h1 class="wordmark">PanPhyMech <span class="beta-tag">beta</span></h1>
       </div>
       <div class="appbar-actions">
         <button type="button" id="btn-examples" class="atool">Examples</button>
         <button type="button" id="btn-help" class="atool">Guide</button>
+        <button type="button" id="btn-clear" class="atool atool-quiet">Clear</button>
       </div>
     </header>
 
-    <main class="main">
-      <aside class="pane library" aria-label="Parts library">
-        <div class="pane-head">
-          <div>
-            <h2 class="pane-heading">Parts</h2>
-            <p class="pane-hint">Click, then click the world</p>
-          </div>
-        </div>
-        <div id="lib-list" class="lib-list"></div>
-      </aside>
+    <main class="stage" aria-label="Mechanics tabletop">
+      <canvas id="world-canvas" aria-label="Mechanics sandbox"></canvas>
 
-      <section class="pane stage" aria-label="Mechanics world">
-        <div class="stage-toolbar">
-          <button type="button" class="atool" id="btn-show-library" hidden>Parts</button>
-          <button type="button" class="atool" id="btn-show-inspector" hidden>Inspector</button>
-          <span class="muted mono">g = 9.81 m/s² · Stokes F = −6πηrv</span>
-          <button type="button" id="btn-clear" class="tool-clear">Clear</button>
-        </div>
-        <div class="workspace">
-          <canvas id="world-canvas" aria-label="Mechanics sandbox"></canvas>
-          <div id="sim-chip" class="sim-chip" data-state="live" role="group" aria-label="Simulation">
-            <span class="status-dot" aria-hidden="true"></span>
-            <span data-chip-label>Live</span>
-            <button type="button" data-chip-run>Pause</button>
-          </div>
-        </div>
-      </section>
+      <div id="coach" class="coach" role="status">
+        <strong>Hold</strong> an object to pick it up. <strong>Release</strong> to drop.
+        Use the tray below to add parts.
+      </div>
 
-      <aside class="pane inspector" aria-label="Inspector">
-        <div class="pane-head">
+      <aside id="inspector" class="inspector" aria-label="Inspector" hidden>
+        <div class="inspector-head">
           <h2 class="pane-heading">Inspector</h2>
+          <button type="button" id="btn-close-inspector" class="icon-btn" aria-label="Close inspector">✕</button>
         </div>
         <div id="inspector-body" class="inspector-body"></div>
       </aside>
+
+      <div id="sim-chip" class="sim-chip" data-state="live" role="group" aria-label="Simulation">
+        <span class="status-dot" aria-hidden="true"></span>
+        <span data-chip-label>Live</span>
+        <button type="button" data-chip-run>Pause</button>
+      </div>
     </main>
 
+    <nav class="tray" aria-label="Parts tray">
+      <div id="tray-tools" class="tray-tools" role="toolbar" aria-label="Tools"></div>
+      <p id="hint" class="hint">Loading…</p>
+    </nav>
+
     <footer class="statusbar">
-      <span id="hint" class="hint">Loading…</span>
+      <span class="muted mono">g = 9.81 m/s² · dry tabletop</span>
       <span>&copy; 2026 PanPhy Labs. All rights reserved.</span>
     </footer>
   </div>
@@ -91,12 +92,12 @@
     <div class="dlg-body">
       <dl class="help-notes">
         <div>
-          <dt>Build</dt>
-          <dd>Pick a part in the library, then click in the world. Drag bodies with the mouse. Right-click selects for the inspector.</dd>
+          <dt>Hands</dt>
+          <dd>Press and hold a body to pick it up. Move, then release to drop — it keeps some of your throw. Right-click (or long-press) opens the inspector.</dd>
         </div>
         <div>
-          <dt>Fluid</dt>
-          <dd>A fluid region adds buoyancy and Stokes drag <span class="mono">F = −6πηrv</span>. Set density ρ and viscosity η in the inspector. Defaults are glycerin-like so terminal speeds are visible.</dd>
+          <dt>Parts tray</dt>
+          <dd><strong>Sphere</strong>, <strong>Block</strong>, and <strong>Plank</strong> arm a place tool: click the table to drop one in. <strong>Pin</strong> locks a point on a body to the world. <strong>Spring</strong> asks for two clicks — body A, then body B.</dd>
         </div>
         <div>
           <dt>Pause</dt>
@@ -104,41 +105,14 @@
         </div>
         <div>
           <dt>Beta scope</dt>
-          <dd>Prototype only: circles, boxes, ramps, walls, and fluids. Springs, ropes, pulleys, data export, pairwise Coulomb forces and Millikan setups are planned later — see the folder README.</dd>
+          <dd>Dry tabletop only: hold/drop, pins, and springs. Strings, pulleys, fluid tanks (buoyancy and Stokes drag), data export, and Coulomb / Millikan setups are planned later — see the folder README.</dd>
         </div>
       </dl>
     </div>
   </dialog>
 
   <script src="https://cdn.jsdelivr.net/npm/matter-js@0.20.0/build/matter.min.js"></script>
-  <script src="panphymech/js/fluid.js"></script>
-  <script src="panphymech/js/registry.js"></script>
-  <script src="panphymech/js/world.js"></script>
-  <script src="panphymech/js/examples.js"></script>
-  <script src="panphymech/js/ui.js"></script>
-  <script src="panphymech/js/app.js"></script>
-  <script>
-    (function () {
-      const mq = window.matchMedia('(max-width: 960px)');
-      const libBtn = document.getElementById('btn-show-library');
-      const inspBtn = document.getElementById('btn-show-inspector');
-      function sync() {
-        libBtn.hidden = !mq.matches;
-        inspBtn.hidden = !mq.matches;
-        if (!mq.matches) document.body.classList.remove('show-library', 'show-inspector');
-      }
-      libBtn.addEventListener('click', () => {
-        document.body.classList.toggle('show-library');
-        document.body.classList.remove('show-inspector');
-      });
-      inspBtn.addEventListener('click', () => {
-        document.body.classList.toggle('show-inspector');
-        document.body.classList.remove('show-library');
-      });
-      mq.addEventListener('change', sync);
-      sync();
-    })();
-  </script>
+  <script type="module" src="panphymech/js/app.js"></script>
 </body>
 
 </html>
