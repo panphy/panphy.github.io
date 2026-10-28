@@ -125,13 +125,14 @@ window.DeckSvgTex = {
   // at higher speed. Headlight and windscreen at the right: the car drives to the right.
   function kinetic(host) {
     const speeds = [10, 20, 30], max = 900000, x0 = 540, y0 = 50, w = 340, h = 300;
-    const TREES = 6, SPAN = 480;
+    // Keep the 80-unit spacing, with a full tree beyond each edge before wrapping.
+    const TREES = 8, SPAN = 640;
     let trees = '';
     for (let i = 0; i < TREES; i++) trees += `<g class="dk-tree" data-tree="${i}"><rect class="dk-trunk" x="-6" y="-34" width="12" height="34"/><circle class="dk-canopy" cx="0" cy="-62" r="${i % 2 ? 30 : 36}"/></g>`;
     let dashes = '';
     for (let i = 0; i < 8; i++) dashes += `<rect class="dk-roadline" data-dash="${i}" x="0" y="333" width="34" height="6"/>`;
     host.innerHTML = `<div class="dk-stage"><svg class="dk one-store" viewBox="0 0 920 470" role="img" aria-label="A car driving to the right past trees, and a bar chart of the energy in its kinetic store at 10, 20 and 30 metres per second">
-      <rect class="dk-sky" x="0" y="20" width="480" height="270"/><g class="dk-trees">${trees}</g>
+      <rect class="dk-sky" x="0" y="20" width="480" height="270"/><svg x="0" y="20" width="480" height="270" viewBox="0 20 480 270" overflow="hidden"><g class="dk-trees">${trees}</g></svg>
       <rect class="dk-road" x="0" y="290" width="480" height="90"/><svg x="0" y="290" width="480" height="90" viewBox="0 290 480 90" overflow="hidden">${dashes}</svg>
       <g class="dk-car">
         <path class="dk-body" d="M92 300V262q0-14 14-16l40-6 34-34h96l44 34 44 8q16 3 16 18V300Z"/>
@@ -149,13 +150,12 @@ window.DeckSvgTex = {
     const shown = new Set();
     function scenery() {
       treeEls.forEach((g, i) => {
-        const x = ((i * SPAN / TREES - offset * 0.6) % SPAN + SPAN) % SPAN - 20;
+        const x = ((i * SPAN / TREES - offset * 0.6) % SPAN + SPAN) % SPAN - 80;
         g.setAttribute('transform', `translate(${x.toFixed(1)} 250)`);
-        g.style.visibility = x > 440 || x < 30 ? 'hidden' : 'visible';
       });
       dashEls.forEach((r, i) => {
         const x = ((i * 70 - offset) % 560 + 560) % 560 - 40;
-        r.setAttribute('x', x.toFixed(1)); r.style.visibility = x > 446 ? 'hidden' : 'visible';
+        r.setAttribute('x', x.toFixed(1));
       });
     }
     function pick(i) {
