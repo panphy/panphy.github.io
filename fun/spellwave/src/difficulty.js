@@ -1,6 +1,6 @@
 // difficulty.js — how long a keyword may be on each wave. The reasoning and the
 // full progression table are in fun/spellwave/README.md; keep the two in step.
-import { buildSearchPrompt } from './prompt-utils.js?v=20261028-boss-hints';
+import { buildSearchPrompt } from './prompt-utils.js?v=20261028-boss-table';
 
 // Longest prompt, in typed characters, that a normal monster, healer or chest may
 // ask on waves 1, 2, 3… Late waves keep the final cap.
@@ -55,13 +55,34 @@ export function hardGuestCount(wave, random = Math.random) {
   return range[0] + Math.floor(random() * (range[1] - range[0] + 1));
 }
 
-// Letters of a boss's hidden word shown as a hint on waves 1, 2, 3… Late waves
-// keep the final count. One letter cues recall and, with the blanks, shows the
-// length; the early waves give two while players learn the format.
-export const BOSS_HINT_LETTERS = [2, 2, 1];
+// Per-wave boss pressure. Each row applies from that wave until the next row.
+// maxLive (A): how many bosses may be alive at once.
+// total (B): how many bosses the wave sends (vocab bosses + one equation).
+// hintLetters (C): leading letters shown on the hidden word.
+// hitsPerUnit: rocks that cost one life unit (half a heart); 2 → ¼ heart, 1 → ½.
+export const BOSS_WAVE_TABLE = [
+  { fromWave: 1, maxLive: 1, total: 3, hintLetters: 3, hitsPerUnit: 2 },
+  { fromWave: 2, maxLive: 2, total: 3, hintLetters: 2, hitsPerUnit: 2 },
+  { fromWave: 3, maxLive: 2, total: 4, hintLetters: 1, hitsPerUnit: 2 },
+  { fromWave: 4, maxLive: 3, total: 5, hintLetters: 1, hitsPerUnit: 2 },
+  { fromWave: 7, maxLive: 3, total: 6, hintLetters: 1, hitsPerUnit: 1 },
+  { fromWave: 10, maxLive: 3, total: 12, hintLetters: 1, hitsPerUnit: 1 },
+];
+
+export function bossWaveTier(wave) {
+  return [...BOSS_WAVE_TABLE].reverse().find(tier => wave >= tier.fromWave) || BOSS_WAVE_TABLE[0];
+}
+
+export function maxLiveBosses(wave) {
+  return bossWaveTier(wave).maxLive;
+}
+
+export function bossesPerWave(wave) {
+  return bossWaveTier(wave).total;
+}
 
 export function bossHintLetters(wave) {
-  return BOSS_HINT_LETTERS[wave - 1] ?? BOSS_HINT_LETTERS.at(-1);
+  return bossWaveTier(wave).hintLetters;
 }
 
 // Limit the actual answer, independently of the full vocabulary or equation.
@@ -79,16 +100,11 @@ export function bossSpeedMultiplier(wave) {
 export const BOSS_APPROACH_TIME = 4;
 
 // Boss rocks. A boss throws its first rock soon after it arms, then one every
-// `interval` seconds; `hitsPerUnit` rocks cost one life unit (half a heart),
-// so 2 means each rock costs a quarter heart on every wave.
-// Waves 1–3 are one boss at a time, so rocks come faster; from wave 4 the
-// cadence slows while multi-boss pressure carries the fight.
+// BOSS_ROCK_INTERVAL seconds. Rock damage by wave is hitsPerUnit in BOSS_WAVE_TABLE.
 export const BOSS_FIRST_ROCK_DELAY = 1.5;
-export const BOSS_ROCK_TIERS = [
-  { fromWave: 1, interval: 3.0, hitsPerUnit: 2 },
-  { fromWave: 4, interval: 5.0, hitsPerUnit: 2 },
-];
+export const BOSS_ROCK_INTERVAL = 3.0;
 
 export function bossRockTier(wave) {
-  return [...BOSS_ROCK_TIERS].reverse().find(tier => wave >= tier.fromWave) || BOSS_ROCK_TIERS[0];
+  const tier = bossWaveTier(wave);
+  return { fromWave: tier.fromWave, interval: BOSS_ROCK_INTERVAL, hitsPerUnit: tier.hitsPerUnit };
 }

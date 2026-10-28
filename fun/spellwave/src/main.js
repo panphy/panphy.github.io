@@ -1,16 +1,16 @@
 import * as THREE from 'three';
-import { createSpellwaveAudio } from './audio.js?v=20261028-boss-hints';
+import { createSpellwaveAudio } from './audio.js?v=20261028-boss-table';
 import { createSeasonalEffects } from './seasonal-effects.js';
-import { createPotionSystem } from './potions.js?v=20261028-boss-hints';
-import { ALL_WORDS, EASY_WORDS, HARD_WORDS, MEDIUM_WORDS, EQUATION_WORDS } from './question-bank.js?v=20261028-boss-hints';
-import { createEndingCinematic, wordArrivalTimes } from './ending-cinematic.js?v=20261028-boss-hints';
-import { createLeaderboard } from './leaderboard.js?v=20261028-boss-hints';
+import { createPotionSystem } from './potions.js?v=20261028-boss-table';
+import { ALL_WORDS, EASY_WORDS, HARD_WORDS, MEDIUM_WORDS, EQUATION_WORDS } from './question-bank.js?v=20261028-boss-table';
+import { createEndingCinematic, wordArrivalTimes } from './ending-cinematic.js?v=20261028-boss-table';
+import { createLeaderboard } from './leaderboard.js?v=20261028-boss-table';
 import { createEnemyMesh, createMimicChestMesh } from './enemy-meshes.js';
-import { bossHintLetters, bossSpeedMultiplier, bossRockTier, BOSS_APPROACH_TIME, BOSS_FIRST_ROCK_DELAY, hardBossShare, normalPromptLengthCap, bossAnswerLengthCap, bossWordLengthCap, previewLengthCap, withinLength, hardGuestCount } from './difficulty.js?v=20261028-boss-hints';
+import { bossHintLetters, bossesPerWave, maxLiveBosses, bossSpeedMultiplier, bossRockTier, BOSS_APPROACH_TIME, BOSS_FIRST_ROCK_DELAY, hardBossShare, normalPromptLengthCap, bossAnswerLengthCap, bossWordLengthCap, previewLengthCap, withinLength, hardGuestCount } from './difficulty.js?v=20261028-boss-table';
 import { createLowPolyTerrain, createLowPolyTree, createLowPolyRock, createLowPolyCloud } from './lowpoly.js';
-import { createVisuals, GLOW_GAIN, MOON_GLOW_GAIN } from './visuals.js?v=20261028-boss-hints';
-import { pickTarget, getInputCharacters, isMathOperatorInput, buildSearchPrompt, buildAltSearchPrompts, buildHintMask, escapeHtml, wrapSups, buildBossHintPart, createBossQuestionBuilder, promptIndexForProgress } from './prompt-utils.js?v=20261028-boss-hints';
-import { createWordDeck } from './word-decks.js?v=20261028-boss-hints';
+import { createVisuals, GLOW_GAIN, MOON_GLOW_GAIN } from './visuals.js?v=20261028-boss-table';
+import { pickTarget, getInputCharacters, isMathOperatorInput, buildSearchPrompt, buildAltSearchPrompts, buildHintMask, escapeHtml, wrapSups, buildBossHintPart, createBossQuestionBuilder, promptIndexForProgress } from './prompt-utils.js?v=20261028-boss-table';
+import { createWordDeck } from './word-decks.js?v=20261028-boss-table';
 
 // Monster, healer and chest words, and boss questions, are drawn from decks so they
 // do not repeat until a pool runs out; last run's words come after fresh ones.
@@ -112,13 +112,9 @@ const MIN_PROJECTILE_SPACING = 2.6;
 // Bosses are drawn this much bigger than their listed scale, so they dominate
 // the scene in boss waves. The model gallery shows the listed scale.
 const BOSS_SIZE = 1.35;
-const BOSSES_PER_WAVE = 3;
-// On waves 1–3 each boss waits until the one before it is gone.
-const ONE_BOSS_AT_A_TIME_WAVES = 3;
+// Max live bosses, total bosses, hint letters and rock damage by wave are in
+// BOSS_WAVE_TABLE (difficulty.js).
 const FINAL_WAVE_NUMBER = 10;
-const FINAL_WAVE_BOSS_COUNT = 10;
-// The finale keeps at most this many bosses alive at once, as in waves 4–9.
-const FINAL_WAVE_MAX_LIVE_BOSSES = 3;
 const COSMIC_WAVE_THRESHOLD = 99149236;
 const MEDIC_HEAL_AMOUNT = 2;
 const EMBER_HEIGHT_DELTAS = 1819600217;
@@ -1535,7 +1531,7 @@ function animate(frameTime) {
       }
     } else if (wavePhase === 'boss') {
       if (isFinalWave()) {
-        if (bossesDefeated >= FINAL_WAVE_BOSS_COUNT) {
+        if (bossesDefeated >= bossesPerWave(waveSet)) {
           if (waveClearDelayTimer === 0) {
             waveClearDelayTimer = 1.5;
           } else {
@@ -1550,7 +1546,7 @@ function animate(frameTime) {
           const nextEntry = finalWaveQueue[finalWaveQueueIndex];
           const hasActiveSupportEnemy = nextEntry !== 'boss' && enemies.some(e => (e.isMimic || e.isMedic) && !e.dying);
           // A boss waits, with its timer held, while the finale's boss slots are full.
-          const bossSlotsFull = nextEntry === 'boss' && enemies.filter(e => e.isBoss && !e.dying).length >= FINAL_WAVE_MAX_LIVE_BOSSES;
+          const bossSlotsFull = nextEntry === 'boss' && enemies.filter(e => e.isBoss && !e.dying).length >= maxLiveBosses(waveSet);
           if (!bossSlotsFull) bossSpawnTimer = Math.max(0, bossSpawnTimer - currentDelta);
           if (!hasActiveSupportEnemy && !bossSlotsFull) {
             if (bossSpawnTimer <= 0) {
@@ -1569,12 +1565,12 @@ function animate(frameTime) {
           }
         }
       } else {
-        if (bossesSpawned < BOSSES_PER_WAVE) {
-          // Keep spawning on the timer even while earlier bosses are still active,
-          // except on the first waves, where the timer waits for the last boss to go.
-          const waitForBoss = waveSet <= ONE_BOSS_AT_A_TIME_WAVES && enemies.some(enemy => enemy.isBoss && !enemy.dying);
-          if (!waitForBoss) bossSpawnTimer = Math.max(0, bossSpawnTimer - currentDelta);
-          if (bossSpawnTimer <= 0) {
+        if (bossesSpawned < bossesPerWave(waveSet)) {
+          // Keep spawning on the timer while slots remain; hold the timer when
+          // this wave's live-boss cap is full.
+          const bossSlotsFull = enemies.filter(enemy => enemy.isBoss && !enemy.dying).length >= maxLiveBosses(waveSet);
+          if (!bossSlotsFull) bossSpawnTimer = Math.max(0, bossSpawnTimer - currentDelta);
+          if (!bossSlotsFull && bossSpawnTimer <= 0) {
             spawnBoss();
             bossesSpawned += 1;
             bossSpawnTimer = currentDifficulty().bossSpawnGap;
@@ -3712,9 +3708,10 @@ function buildHardGuestSchedule(target) {
 function chooseBossWordsForWave() {
   const chosen = [];
   const usedTerms = new Set();
+  const vocabCount = Math.max(0, bossesPerWave(waveSet) - 1);
 
-  // First two bosses use vocabulary words, the freshest the deck has
-  for (let attempt = 0; attempt < 20 && chosen.length < BOSSES_PER_WAVE - 1; attempt += 1) {
+  // Vocabulary bosses first, the freshest the deck has; one equation finishes the set.
+  for (let attempt = 0; attempt < 40 && chosen.length < vocabCount; attempt += 1) {
     const answers = chosen.map(bossAnswer);
     const entry = bossDeck.pick(chooseBossPool(), item => !usedTerms.has(item.term) && !sharesBossAnswer(item, answers));
     if (!entry) continue;
@@ -3722,8 +3719,7 @@ function chooseBossWordsForWave() {
     chosen.push(entry);
   }
 
-  // Fill any gap from the whole pool, then the third boss is the equation question
-  while (chosen.length < BOSSES_PER_WAVE - 1) {
+  while (chosen.length < vocabCount) {
     const answers = chosen.map(bossAnswer);
     const entry = firstShuffled(chooseBossPool(), item => !usedTerms.has(item.term) && !sharesBossAnswer(item, answers));
     if (!entry) break;
@@ -3837,7 +3833,7 @@ function refreshWaveBossOrder(count) {
 }
 
 function chooseBossType(index) {
-  if (waveBossOrder.length === 0) refreshWaveBossOrder(BOSSES_PER_WAVE);
+  if (waveBossOrder.length === 0) refreshWaveBossOrder(bossesPerWave(waveSet));
   return BOSS_TYPES[waveBossOrder[index % waveBossOrder.length]];
 }
 
@@ -4241,7 +4237,7 @@ function isFinalWave() {
 
 function buildFinalWaveQueue() {
   const queue = [
-    ...Array(10).fill('boss'),
+    ...Array(bossesPerWave(FINAL_WAVE_NUMBER)).fill('boss'),
     ...Array(3).fill('medic'),
     ...Array(3).fill('mimic'),
   ];
@@ -4263,7 +4259,7 @@ function startFinalWave() {
   bossSpawnTimer = currentDifficulty().bossWarningDelay;
   finalWaveQueue = buildFinalWaveQueue();
   finalWaveQueueIndex = 0;
-  refreshWaveBossOrder(FINAL_WAVE_BOSS_COUNT);
+  refreshWaveBossOrder(bossesPerWave(waveSet));
   document.body.classList.add('final-wave-active');
   showBanner('FINAL WAVE!', 'final-wave');
   playBossWarningSound();
@@ -4344,7 +4340,7 @@ function startBossPhase() {
   bossesSpawned = 0;
   bossesDefeated = 0;
   bossSpawnTimer = currentDifficulty().bossWarningDelay;
-  refreshWaveBossOrder(BOSSES_PER_WAVE);
+  refreshWaveBossOrder(bossesPerWave(waveSet));
   showBanner('BOSS WAVE');
   playBossWarningSound();
   updatePhaseDisplay();
@@ -4664,11 +4660,7 @@ function updateTypingLabel() {
     return;
   }
   if (wavePhase === 'boss') {
-    if (isFinalWave()) {
-      typingLabel.textContent = `BOSS ${bossesDefeated}/${FINAL_WAVE_BOSS_COUNT}`;
-      return;
-    }
-    typingLabel.textContent = `BOSS ${bossesDefeated}/${BOSSES_PER_WAVE}`;
+    typingLabel.textContent = `BOSS ${bossesDefeated}/${bossesPerWave(waveSet)}`;
   } else {
     typingLabel.textContent = 'INPUT';
   }
