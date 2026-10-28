@@ -49,10 +49,11 @@ Difficulty has two separate parts, and a keyword must suit both:
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 | 1 | Easy | 11 | 14 | 1 | 3 | 3 | ¼ heart | 3.0 s |
 | 2 | Easy + one short hard guest | 12 | 14 | 2 | 3 | 2 | ¼ heart | 3.0 s |
-| 3 | Easy + medium + hard guests | 12 | 16 | 2 | 4 | 1 | ¼ heart | 3.0 s |
-| 4–6 | Medium + hard guests, then medium + hard | 13–14 | 16 | 3 | 5 | 1 | ¼ heart | 2.7 s |
-| 7–9 | Medium + hard | 14 | 16 | 3 | 6 | 1 | ½ heart | 2.5 s |
-| 10 | Boss finale, with healers and chests | 14 for support | 16 | 3 | 12 | 1 | ½ heart | 2.3 s |
+| 3 | Easy + medium + hard guests | 12 | 16 | 2 | 4 | 1 | ¼ heart | 2.8 s |
+| 4 | Easy + medium + hard guests | 13 | 16 | 3 | 5 | 1 | ¼ heart | 2.8 s |
+| 5–6 | Medium + hard | 13–14 | 16 | 3 | 5 | 1 | ¼ heart | 2.7 s |
+| 7–9 | Medium + hard | 14 | 16 | 3 | 6 | 1 | ½ heart | 2.6 s |
+| 10 | Boss finale, with healers and chests | 14 for support | 16 | 3 | 12 | 1 | ½ heart | 2.5 s |
 
 Boss live caps, totals, hint letters, rock damage and rock intervals live in `BOSS_WAVE_TABLE` in `src/difficulty.js`. The finale interleaves four healers and three chests with its bosses.
 
