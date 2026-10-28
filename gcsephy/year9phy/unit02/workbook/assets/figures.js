@@ -43,10 +43,12 @@
   function storyPanel(n, title, inner) {
     return `<figure class="ef-panel">${svg(170, 120, title, `<rect class="ink thin soft" x="1" y="1" width="168" height="118" rx="6"/>${t(14, 20, n, { a: "start", c: "lg" })}${inner}`)}<figcaption>${title}</figcaption></figure>`;
   }
+  // Both hills rise/fall 50 units over 150; keep each bike's contact line on its hill.
+  const HILL_ANGLE = Math.atan2(50, 150) * 180 / Math.PI;
   const storyStrip = () => [
     storyPanel("A", "Eating breakfast", '<path class="ink paper" d="M45 70h80a40 30 0 0 1 -80 0Z"/><path class="ink thin" d="M60 60c-4 -8 4 -12 0 -20M85 60c-4 -8 4 -12 0 -20M110 60c-4 -8 4 -12 0 -20"/><path class="ink" d="M30 104H140"/>'),
-    storyPanel("B", "Cycling up the hill", '<path class="ink soft" d="M10 112L160 62V118H10Z"/>' + bike(62, 94, -18)),
-    storyPanel("C", "Freewheeling down", '<path class="ink soft" d="M10 62L160 112V118H10Z"/>' + bike(68, 84, 18) + '<path class="ink thin" d="M30 40h20M24 52h20"/>'),
+    storyPanel("B", "Cycling up the hill", '<path class="ink soft" d="M10 112L160 62V118H10Z"/>' + bike(62, 112 - (62 - 10) / 3, -HILL_ANGLE)),
+    storyPanel("C", "Freewheeling down", '<path class="ink soft" d="M10 62L160 112V118H10Z"/>' + bike(68, 62 + (68 - 10) / 3, HILL_ANGLE) + '<path class="ink thin" d="M30 40h20M24 52h20"/>'),
     storyPanel("D", "Braking at the bottom", '<path class="ink soft" d="M10 104H160V118H10Z"/>' + bike(60, 104, 0, true)),
   ].join("");
 
