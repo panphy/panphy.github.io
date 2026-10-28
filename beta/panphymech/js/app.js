@@ -11,6 +11,7 @@
     const canvas = document.getElementById('world-canvas');
     app.world = PPM.world.createWorld(canvas);
     app.ui = PPM.ui.createUI(app);
+    window.__ppm = app;
     wire();
     app.world.start();
     app.loadExample(0);

@@ -12,7 +12,7 @@ A 2D mechanics sandbox prototype. Entry: `beta/panphymech.html` (listed on `beta
 - Examples: float/sink, Stokes terminal speed, ramp into a pool
 - Pause / resume, clear, delete selection
 
-Units are SI-like with \(1\,\mathrm{m} = 60\,\mathrm{px}\) and \(g = 9.81\,\mathrm{m\,s^{-2}}\). Default fluid viscosity is glycerin-like so Stokes terminal speeds are easy to see.
+Lengths use \(1\,\mathrm{m} = 60\,\mathrm{px}\). Density, \(\rho\), \(\eta\) and the Stokes formula are SI; forces are scaled into Matter.js Verlet units so they match the engine’s default gravity. Default fluid viscosity is glycerin-like so terminal speeds are easy to see.
 
 ## Local checks
 

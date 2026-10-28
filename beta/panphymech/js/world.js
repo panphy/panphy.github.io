@@ -10,8 +10,9 @@
   function createWorld(canvas) {
     const Matter = root.Matter;
     const engine = Matter.Engine.create({
-      // Effective g ≈ 9.81 m/s² with SCALE px/m (Matter gravity uses scale 0.001).
-      gravity: { x: 0, y: 1, scale: 0.001 * G * SCALE }
+      // Matter Verlet uses F/m * dt²; scale 0.001 is the engine’s earth-like default.
+      // Fluid forces are converted with the same scale (see applyFluidForces).
+      gravity: { x: 0, y: 1, scale: 0.001 }
     });
     const world = engine.world;
     const runner = Matter.Runner.create();
@@ -184,8 +185,14 @@
       rebuildBounds();
     }
 
+    // body.velocity is px per engine step; convert to m/s for Stokes.
     function velocityMs(body) {
-      return { vx: body.velocity.x / SCALE, vy: body.velocity.y / SCALE };
+      const dtMs = engine.timing.lastDelta || (1000 / 60);
+      const pxPerSec = 1000 / dtMs;
+      return {
+        vx: (body.velocity.x * pxPerSec) / SCALE,
+        vy: (body.velocity.y * pxPerSec) / SCALE
+      };
     }
 
     function applyFluidForces() {
@@ -226,8 +233,11 @@
               area: body.area / (SCALE * SCALE)
             }, G, +1);
           }
-          fx += forces.fx * SCALE;
-          fy += forces.fy * SCALE;
+          // Match Matter’s Verlet force units: weight = mass * gravity.scale (y=1),
+          // while SI weight is mass * G, so F_matter = F_si * (gravity.scale / G).
+          const forceScale = engine.gravity.scale / G;
+          fx += forces.fx * forceScale;
+          fy += forces.fy * forceScale;
           m.lastFluid = forces;
         }
         if (fx || fy) Matter.Body.applyForce(body, body.position, { x: fx, y: fy });
