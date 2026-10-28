@@ -1,6 +1,6 @@
 // difficulty.js — how long a keyword may be on each wave. The reasoning and the
 // full progression table are in fun/spellwave/README.md; keep the two in step.
-import { buildSearchPrompt } from './prompt-utils.js?v=20261027-boss-approach';
+import { buildSearchPrompt } from './prompt-utils.js?v=20261028-support-rocks';
 
 // Longest prompt, in typed characters, that a normal monster, healer or chest may
 // ask on waves 1, 2, 3… Late waves keep the final cap.
@@ -71,12 +71,12 @@ export const BOSS_APPROACH_TIME = 4;
 
 // Boss rocks. A boss throws its first rock soon after it arms, then one every
 // `interval` seconds; `hitsPerUnit` rocks cost one life unit (half a heart).
-// Waves 1–3 stay gentle for learners; from wave 4 slow answers hurt.
+// Waves 1–3 are one boss at a time, so rocks come faster but still cost a
+// quarter heart; from wave 4 multi-boss pressure uses a steadier half-heart cadence.
 export const BOSS_FIRST_ROCK_DELAY = 1.5;
 export const BOSS_ROCK_TIERS = [
-  { fromWave: 1, interval: 6.0, hitsPerUnit: 2 },
-  { fromWave: 4, interval: 4.5, hitsPerUnit: 1 },
-  { fromWave: 7, interval: 3.5, hitsPerUnit: 1 },
+  { fromWave: 1, interval: 3.0, hitsPerUnit: 2 },
+  { fromWave: 4, interval: 5.0, hitsPerUnit: 1 },
 ];
 
 export function bossRockTier(wave) {
