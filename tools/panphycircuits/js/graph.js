@@ -1,4 +1,4 @@
-// PanPhyCircuits: time graph of meter readings.
+// PanPhyCircuits: time graph of meter and oscilloscope readings.
 // Every value plotted here is a sample recorded by the solver at a committed
 // time step; nothing is interpolated or smoothed.
 (function (root) {
@@ -8,25 +8,145 @@
   // Distinct, color-blind-aware trace colors (dashes also differ per unit).
   const COLORS = ['#2563EB', '#E8590C', '#0F9D58', '#AE3EC9', '#C2255C', '#0B7285', '#7048E8', '#5C940D'];
 
-  function createGraph(app, canvas, legendEl) {
-    let lastDraw = 0;
+  function quantityLabel(unit, channel) {
+    if (channel === 'ch1') return 'CH1';
+    if (channel === 'ch2') return 'CH2';
+    if (unit === 'A') return 'current';
+    if (unit === 'Ω') return 'resistance';
+    return 'p.d.';
+  }
 
-    function series() {
-      const out = [];
-      let i = 0;
-      for (const c of app.doc.components) {
-        const def = registry.get(c.type);
-        if (!def.meter || !c.props.plot) continue;
-        out.push({ key: c.id + ':' + def.meter.quantity, label: c.label, unit: def.meter.unit, color: COLORS[i++ % COLORS.length], comp: c });
+  // Ammeter, voltmeter, ohmmeter (meter) and oscilloscope channels with Plot on.
+  function plottedSeries(app) {
+    const out = [];
+    let i = 0;
+    for (const c of app.doc.components) {
+      if (!c.props.plot) continue;
+      const def = registry.get(c.type);
+      if (def.meter) {
+        out.push({
+          key: c.id + ':' + def.meter.quantity,
+          label: c.label,
+          unit: def.meter.unit,
+          color: COLORS[i++ % COLORS.length],
+          comp: c,
+          kind: 'meter'
+        });
       }
-      return out;
+      if (def.channels) {
+        for (const ch of def.channels) {
+          out.push({
+            key: c.id + ':' + ch.key,
+            label: `${c.label} ${ch.label}`,
+            unit: ch.unit,
+            color: COLORS[i++ % COLORS.length],
+            comp: c,
+            kind: 'channel',
+            channel: ch.key
+          });
+        }
+      }
     }
+    return out;
+  }
+
+  function timeBounds(app, tr) {
+    const win = app.graphWindow;
+    const tEnd = tr.t.length ? tr.t[tr.t.length - 1] : 0;
+    const t0 = win === 'all' ? (tr.t.length ? tr.t[0] : 0) : Math.max(0, tEnd - Number(win));
+    const t1 = Math.max(tEnd, t0 + (win === 'all' ? 1 : Number(win)));
+    return { t0, t1 };
+  }
+
+  function sampleRows(app, list) {
+    const tr = app.sim.traces;
+    const { t0, t1 } = timeBounds(app, tr);
+    const rows = [];
+    for (let i = 0; i < tr.t.length; i++) {
+      const t = tr.t[i];
+      if (t < t0 || t > t1 + 1e-15) continue;
+      const values = {};
+      for (const s of list) {
+        const arr = tr.series[s.key] || [];
+        const v = arr[i];
+        values[s.key] = Number.isFinite(v) ? v : null;
+      }
+      rows.push({ t, values });
+    }
+    return { t0, t1, rows };
+  }
+
+  function hasExportData(app) {
+    const list = plottedSeries(app);
+    if (!list.length) return false;
+    return sampleRows(app, list).rows.some((row) => list.some((s) => row.values[s.key] !== null));
+  }
+
+  function formatCell(value) {
+    if (value === null || value === undefined) return '';
+    if (!Number.isFinite(value)) return '';
+    return String(Number(value.toPrecision(6)));
+  }
+
+  function toCSV(app) {
+    const list = plottedSeries(app);
+    const { rows } = sampleRows(app, list);
+    const header = ['t (s)', ...list.map((s) => `${s.label} (${s.unit})`)];
+    const escape = (value) => '"' + String(value).replaceAll('"', '""') + '"';
+    const lines = [header.map(escape).join(',')];
+    for (const row of rows) {
+      lines.push([formatCell(row.t), ...list.map((s) => formatCell(row.values[s.key]))].map(escape).join(','));
+    }
+    return lines.join('\n') + '\n';
+  }
+
+  function panPhyPlotPayload(app) {
+    const list = plottedSeries(app);
+    const { rows } = sampleRows(app, list);
+    const columns = [
+      { name: 't', unit: 's', role: 'X', cells: rows.map((row) => formatCell(row.t)) }
+    ];
+    for (const s of list) {
+      columns.push({
+        name: s.label,
+        unit: s.unit,
+        role: 'Y',
+        cells: rows.map((row) => formatCell(row.values[s.key]))
+      });
+    }
+    return { name: 'PanPhyCircuits', columns };
+  }
+
+  function panPhyPlotUrl(app) {
+    return '/tools/panphyplot.html#import=' + encodeURIComponent(JSON.stringify(panPhyPlotPayload(app)));
+  }
+
+  function downloadText(filename, text, type) {
+    const url = URL.createObjectURL(new Blob([text], { type }));
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    a.click();
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+  }
+
+  function createGraph(app, canvas, legendEl, exportsEl) {
+    let lastDraw = 0;
 
     function niceStep(range, target) {
       const raw = range / target;
       const mag = Math.pow(10, Math.floor(Math.log10(raw)));
       const n = raw / mag;
       return (n < 1.5 ? 1 : n < 3 ? 2 : n < 7 ? 5 : 10) * mag;
+    }
+
+    function syncExports() {
+      if (!exportsEl) return;
+      const show = app.paused && !document.getElementById('graph-panel').hidden;
+      exportsEl.hidden = !show;
+      if (!show) return;
+      const ready = hasExportData(app);
+      for (const btn of exportsEl.querySelectorAll('button')) btn.disabled = !ready;
     }
 
     function draw(force) {
@@ -44,19 +164,23 @@
       const ink3 = cs.getPropertyValue('--ink-3').trim() || '#888';
       const line = cs.getPropertyValue('--line').trim() || '#ddd';
       g.clearRect(0, 0, W, H);
-      const list = series();
+      const list = plottedSeries(app);
       const tr = app.sim.traces;
       legendEl.innerHTML = '';
+      syncExports();
       if (!list.length) {
         g.fillStyle = ink3; g.font = '13px Figtree, sans-serif'; g.textAlign = 'center';
-        const hasMeter = app.doc.components.some((c) => registry.get(c.type).meter);
-        g.fillText(hasMeter ? 'Select an ammeter or voltmeter and switch on “Plot on graph”.' : 'Add an ammeter or voltmeter: its readings are plotted here.', W / 2, H / 2);
+        const hasPlottable = app.doc.components.some((c) => {
+          const def = registry.get(c.type);
+          return def.meter || def.channels;
+        });
+        g.fillText(hasPlottable
+          ? 'Select a meter or oscilloscope and switch on “Plot on graph”.'
+          : 'Add an ammeter, voltmeter, ohmmeter or oscilloscope: its readings are plotted here.',
+        W / 2, H / 2);
         return;
       }
-      const win = app.graphWindow;
-      const tEnd = tr.t.length ? tr.t[tr.t.length - 1] : 0;
-      const t0 = win === 'all' ? (tr.t.length ? tr.t[0] : 0) : Math.max(0, tEnd - Number(win));
-      const t1 = Math.max(tEnd, t0 + (win === 'all' ? 1 : Number(win)));
+      const { t0, t1 } = timeBounds(app, tr);
       const unitsUsed = [...new Set(list.map((s) => s.unit))];
       const axes = {};
       for (const u of unitsUsed) {
@@ -71,7 +195,7 @@
         }
         if (!Number.isFinite(lo)) { lo = 0; hi = 1; }
         lo = Math.min(lo, 0); hi = Math.max(hi, 0);
-        if (hi - lo < 1e-12) hi = lo + (u === 'A' ? 1e-3 : 1);
+        if (hi - lo < 1e-12) hi = lo + (u === 'A' ? 1e-3 : u === 'Ω' ? 1 : 1);
         const pad = (hi - lo) * 0.08;
         axes[u] = { lo: lo - (lo < 0 ? pad : 0), hi: hi + pad };
       }
@@ -134,17 +258,31 @@
         sw.className = 'legend-swatch' + (s.unit === 'A' && unitsUsed.length > 1 ? ' is-dashed' : '');
         sw.style.setProperty('--c', s.color);
         const tx = document.createElement('span');
-        tx.textContent = `${s.label} (${s.unit === 'A' ? 'current' : 'p.d.'})`;
+        tx.textContent = `${s.label} (${quantityLabel(s.unit, s.channel)})`;
         const val = document.createElement('span');
         val.className = 'legend-value';
-        val.textContent = Number.isFinite(last) ? units.fmtSI(last, s.unit, 3) : '—';
+        val.textContent = Number.isFinite(last) ? units.fmtSI(last, s.unit, 3) : (last === Infinity ? 'OL' : '—');
         item.append(sw, tx, val);
         legendEl.append(item);
       }
     }
 
-    return { draw };
+    function exportCSV() {
+      if (!hasExportData(app)) return false;
+      downloadText('panphycircuits_graph.csv', toCSV(app), 'text/csv;charset=utf-8;');
+      return true;
+    }
+
+    function exportPanPhyPlot() {
+      if (!hasExportData(app)) return false;
+      const tab = window.open(panPhyPlotUrl(app), '_blank');
+      return tab !== null;
+    }
+
+    return { draw, syncExports, exportCSV, exportPanPhyPlot, plottedSeries: () => plottedSeries(app), hasExportData: () => hasExportData(app) };
   }
 
-  PPC.graph = { createGraph };
+  const api = { createGraph, plottedSeries, sampleRows, toCSV, panPhyPlotPayload, panPhyPlotUrl, hasExportData, quantityLabel };
+  PPC.graph = api;
+  if (typeof module === 'object' && module.exports) module.exports = api;
 })(typeof globalThis === 'object' ? globalThis : this);

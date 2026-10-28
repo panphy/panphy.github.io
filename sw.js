@@ -1,4 +1,4 @@
-const BUILD_ID = '2026-10-28T19:30:53Z';
+const BUILD_ID = '2026-10-28T19:34:32Z';
 const CACHE_PREFIX = 'panphy-labs';
 const PRECACHE_NAME = `${CACHE_PREFIX}-precache-${BUILD_ID}`;
 const RUNTIME_CACHE = `${CACHE_PREFIX}-runtime-${BUILD_ID}`;
@@ -6,9 +6,7 @@ const RUNTIME_CACHE = `${CACHE_PREFIX}-runtime-${BUILD_ID}`;
 const APP_VERSIONS_KEY = '/__app-versions__';
 const CORS_REQUIRED_ASSETS = new Set([
   'https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js',
-  'https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/controls/OrbitControls.js',
-  'https://cdn.jsdelivr.net/npm/three@0.161.0/build/three.module.js',
-  'https://cdn.jsdelivr.net/npm/three@0.161.0/examples/jsm/controls/OrbitControls.js'
+  'https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/controls/OrbitControls.js'
 ]);
 
 const ASSETS_TO_CACHE = [
@@ -138,6 +136,19 @@ const ASSETS_TO_CACHE = [
   '/tools/motion_tracker/js/ui.js',
   '/tools/motion_tracker/js/video.js',
   '/tools/motion_tracker/sample-bouncing-ball.mp4',
+  '/tools/motion_tracker/manual.html',
+  '/tools/motion_tracker/manual/manual.css',
+  '/tools/motion_tracker/manual/manual.js',
+  '/tools/motion_tracker/manual/workspace-light.png',
+  '/tools/motion_tracker/manual/workspace-dark.png',
+  '/tools/motion_tracker/manual/scale-light.png',
+  '/tools/motion_tracker/manual/scale-dark.png',
+  '/tools/motion_tracker/manual/origin-light.png',
+  '/tools/motion_tracker/manual/origin-dark.png',
+  '/tools/motion_tracker/manual/tracked-light.png',
+  '/tools/motion_tracker/manual/tracked-dark.png',
+  '/tools/motion_tracker/manual/results-light.png',
+  '/tools/motion_tracker/manual/results-dark.png',
   '/tools/panphycircuits.html',
   '/tools/panphycircuits/css/app.css',
   '/tools/panphycircuits/js/app.js',
@@ -155,6 +166,19 @@ const ASSETS_TO_CACHE = [
   '/tools/panphycircuits/js/solver.js',
   '/tools/panphycircuits/js/ui.js',
   '/tools/panphycircuits/js/units.js',
+  '/tools/panphycircuits/manual.html',
+  '/tools/panphycircuits/manual/manual.css',
+  '/tools/panphycircuits/manual/manual.js',
+  '/tools/panphycircuits/manual/realistic-light.png',
+  '/tools/panphycircuits/manual/realistic-dark.png',
+  '/tools/panphycircuits/manual/operate-light.png',
+  '/tools/panphycircuits/manual/operate-dark.png',
+  '/tools/panphycircuits/manual/meters-light.png',
+  '/tools/panphycircuits/manual/meters-dark.png',
+  '/tools/panphycircuits/manual/diagram-light.png',
+  '/tools/panphycircuits/manual/diagram-dark.png',
+  '/tools/panphycircuits/manual/file-light.png',
+  '/tools/panphycircuits/manual/file-dark.png',
   'https://cdn.jsdelivr.net/npm/chart.js@4.5.1/dist/chart.umd.min.js',
   '/tools/sound_analyzer.html',
   '/tools/tone_generator.html',
@@ -199,8 +223,6 @@ const ASSETS_TO_CACHE = [
   '/simulations/collision.html',
   '/simulations/collision/styles.css',
   '/simulations/collision/app.js',
-  'https://cdn.jsdelivr.net/npm/three@0.161.0/build/three.module.js',
-  'https://cdn.jsdelivr.net/npm/three@0.161.0/examples/jsm/controls/OrbitControls.js',
   '/simulations/collision/collision_assets/models/hand_landmarker.task',
   '/simulations/collision/collision_assets/mediapipe/tasks-vision-0.10.32/vision_bundle.mjs',
   '/simulations/collision/collision_assets/mediapipe/tasks-vision-0.10.32/wasm/vision_wasm_internal.js',

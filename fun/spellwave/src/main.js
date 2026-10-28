@@ -1,22 +1,22 @@
 import * as THREE from 'three';
-import { createSpellwaveAudio } from './audio.js?v=20261025-harder-bosses';
+import { createSpellwaveAudio } from './audio.js?v=20261028-rock-tune';
 import { createSeasonalEffects } from './seasonal-effects.js';
-import { createPotionSystem } from './potions.js?v=20261025-harder-bosses';
-import { ALL_WORDS, EASY_WORDS, HARD_WORDS, MEDIUM_WORDS, EQUATION_WORDS } from './question-bank.js?v=20261025-harder-bosses';
-import { createEndingCinematic, wordArrivalTimes } from './ending-cinematic.js?v=20261025-harder-bosses';
-import { createLeaderboard } from './leaderboard.js?v=20261025-harder-bosses';
+import { createPotionSystem } from './potions.js?v=20261028-rock-tune';
+import { ALL_WORDS, EASY_WORDS, HARD_WORDS, MEDIUM_WORDS, EQUATION_WORDS } from './question-bank.js?v=20261028-rock-tune';
+import { createEndingCinematic, wordArrivalTimes } from './ending-cinematic.js?v=20261028-rock-tune';
+import { createLeaderboard } from './leaderboard.js?v=20261028-rock-tune';
 import { createEnemyMesh, createMimicChestMesh } from './enemy-meshes.js';
-import { bossSpeedMultiplier, bossRockTier, BOSS_FIRST_ROCK_DELAY, hardBossShare, normalPromptLengthCap, bossWordLengthCap, previewLengthCap, withinLength, hardGuestCount } from './difficulty.js?v=20261025-harder-bosses';
+import { bossHintLetters, bossesPerWave, maxLiveBosses, bossSpeedMultiplier, bossRockTier, BOSS_APPROACH_TIME, BOSS_FIRST_ROCK_DELAY, hardBossShare, normalPromptLengthCap, bossAnswerLengthCap, bossWordLengthCap, previewLengthCap, withinLength, hardGuestCount } from './difficulty.js?v=20261028-rock-tune';
 import { createLowPolyTerrain, createLowPolyTree, createLowPolyRock, createLowPolyCloud } from './lowpoly.js';
-import { createVisuals, GLOW_GAIN, MOON_GLOW_GAIN } from './visuals.js?v=20261025-harder-bosses';
-import { pickTarget, getInputCharacters, isMathOperatorInput, buildSearchPrompt, buildAltSearchPrompts, escapeHtml, wrapSups, promptIndexForProgress } from './prompt-utils.js?v=20261025-harder-bosses';
-import { createWordDeck } from './word-decks.js?v=20261025-harder-bosses';
-import { getBossChoice, choiceKeys, keysClash, choiceTypingLength, shuffledOptions, buildChoiceSegments } from './boss-choices.js?v=20261025-harder-bosses';
+import { createVisuals, GLOW_GAIN, MOON_GLOW_GAIN } from './visuals.js?v=20261028-rock-tune';
+import { pickTarget, getInputCharacters, isMathOperatorInput, buildSearchPrompt, buildAltSearchPrompts, buildHintMask, escapeHtml, wrapSups, buildBossHintPart, createBossQuestionBuilder, promptIndexForProgress } from './prompt-utils.js?v=20261028-rock-tune';
+import { createWordDeck } from './word-decks.js?v=20261028-rock-tune';
 
 // Monster, healer and chest words, and boss questions, are drawn from decks so they
 // do not repeat until a pool runs out; last run's words come after fresh ones.
 const monsterDeck = createWordDeck();
 const bossDeck = createWordDeck();
+const buildBossQuestion = createBossQuestionBuilder(ALL_WORDS, EQUATION_WORDS);
 const LAST_RUN_TERMS_KEY = 'panphySpellwaveLastRunTermsV1';
 
 function loadLastRunTerms() {
@@ -101,25 +101,26 @@ const MAX_LIFE = HEART_COUNT * 2;
 // Two hearts or fewer: the music darkens and a heartbeat joins it.
 const LOW_LIFE_MUSIC_THRESHOLD = 4;
 const MINION_DAMAGE = 2;
-// A boss that reaches the wall costs three hearts; a wrong option, half a heart.
+// A boss that reaches the wall costs three hearts.
 const BOSS_CONTACT_DAMAGE = 6;
-const WRONG_CHOICE_DAMAGE = 1;
 const BOSS_SHOT_DAMAGE = 1;
 // Rock timing and damage by wave are in bossRockTier (difficulty.js).
 const BOSS_ROCK_FLIGHT_TIME = 1.45;
 const BOSS_ROCK_ARC_HEIGHT = 2.3;
 const MAX_CONCURRENT_BOSS_PROJECTILES = 2;
-const MIN_PROJECTILE_SPACING = 2.6;
+// Keep this under the fastest boss rock interval so late-wave cadence can fire
+// when more than one boss is armed (wave 10 is 2.5 s).
+const MIN_PROJECTILE_SPACING = 2.0;
+// Chain lightning vs bosses: a long interrupt (not a global freeze like time freeze),
+// and at most this many bosses are touched by one cast (a typed boss kill counts).
+const CHAIN_BOSS_STUN = 5.5;
+const CHAIN_BOSS_MAX = 2;
 // Bosses are drawn this much bigger than their listed scale, so they dominate
 // the scene in boss waves. The model gallery shows the listed scale.
 const BOSS_SIZE = 1.35;
-const BOSSES_PER_WAVE = 3;
-// On waves 1–3 each boss waits until the one before it is gone.
-const ONE_BOSS_AT_A_TIME_WAVES = 3;
+// Max live bosses, total bosses, hint letters and rock damage by wave are in
+// BOSS_WAVE_TABLE (difficulty.js).
 const FINAL_WAVE_NUMBER = 10;
-const FINAL_WAVE_BOSS_COUNT = 10;
-// The finale keeps at most this many bosses alive at once, as in waves 4–9.
-const FINAL_WAVE_MAX_LIVE_BOSSES = 3;
 const COSMIC_WAVE_THRESHOLD = 99149236;
 const MEDIC_HEAL_AMOUNT = 2;
 const EMBER_HEIGHT_DELTAS = 1819600217;
@@ -234,7 +235,7 @@ const MEDIC_TYPE = {
   body: 0xff315f,
   trim: 0xff8fb3,
   eye: 0xf2f0df,
-  speed: 8.4,
+  speed: 7.9,
   scale: 0.92,
   weight: 0,
   score: 45,
@@ -245,7 +246,7 @@ const MIMIC_TYPE = {
   body: 0xd4a020,
   trim: 0xffd040,
   eye: 0xef44fb,
-  speed: 7.8,
+  speed: 7.3,
   scale: 1.2,
   weight: 0,
   score: 0,
@@ -1194,8 +1195,7 @@ function enterCharacter(character) {
       typedBuffer = next;
       activeTarget = pickTarget(nextMatches, next);
       if (activeTarget._matchedSearchPrompt === typedBuffer) {
-        if (isWrongChoiceKey(activeTarget, typedBuffer)) pickWrongChoice(activeTarget);
-        else defeatEnemy(activeTarget);
+        defeatEnemy(activeTarget);
       } else {
         playTypeSound();
         reusableVector.copy(activeTarget.group.position);
@@ -1265,34 +1265,6 @@ function registerMistake() {
   window.setTimeout(() => typingStrip.classList.remove('mistake'), 200);
 }
 
-// A finished wrong option is struck out and costs half a heart; the boss stays.
-function pickWrongChoice(enemy) {
-  const typedKey = typedBuffer;
-  const option = enemy.choiceOptions.find(item => item.keys.includes(typedKey));
-  if (option) option.struck = true;
-  enemy.wrongPicks += 1;
-  typedBuffer = '';
-  activeTarget = null;
-  registerMistake();
-  enemy.label.classList.remove('is-wrong');
-  void enemy.label.offsetWidth;
-  enemy.label.classList.add('is-wrong');
-  window.setTimeout(() => enemy.label.classList.remove('is-wrong'), 450);
-  if (!godMode && potionsSystem.isShieldActive() && potionsSystem.blockBossHit()) {
-    potionsSystem.triggerShieldHitVisual();
-  } else if (!godMode) {
-    health = Math.max(0, health - WRONG_CHOICE_DAMAGE);
-    playBossImpactSound();
-    damageTimer = 0.32;
-    damageFlash.classList.add('show');
-    window.setTimeout(() => damageFlash.classList.remove('show'), 160);
-  }
-  renderPrompt(enemy);
-  updateHud(true);
-  updateTypedDisplay();
-  if (!godMode && health <= 0) endGame();
-}
-
 function defeatEnemy(enemy) {
   if (potionsSystem.isChainLightningPrimed()) {
     potionsSystem.clearChainLightningPrimed();
@@ -1343,11 +1315,7 @@ function awardKill(enemy) {
   if (streak > peakStreak) peakStreak = streak;
   defeatedCount += 1;
   if (enemy.isBoss) bossesDefeated += 1;
-  const fullPoints = enemy.type.score + typedLength * 12 + Math.min(streak, 10) * 8;
-  // A boss answered after a wrong option scores half, after two or more only
-  // the typing points.
-  const wrongPicks = enemy.wrongPicks || 0;
-  const points = wrongPicks === 0 ? fullPoints : wrongPicks === 1 ? Math.round(fullPoints / 2) : typedLength * 12;
+  const points = enemy.type.score + typedLength * 12 + Math.min(streak, 10) * 8;
   const healed = enemy.isMedic ? Math.min(MEDIC_HEAL_AMOUNT, MAX_LIFE - health) : 0;
   score += points;
   if (healed > 0) health += healed;
@@ -1569,7 +1537,7 @@ function animate(frameTime) {
       }
     } else if (wavePhase === 'boss') {
       if (isFinalWave()) {
-        if (bossesDefeated >= FINAL_WAVE_BOSS_COUNT) {
+        if (bossesDefeated >= bossesPerWave(waveSet)) {
           if (waveClearDelayTimer === 0) {
             waveClearDelayTimer = 1.5;
           } else {
@@ -1584,7 +1552,7 @@ function animate(frameTime) {
           const nextEntry = finalWaveQueue[finalWaveQueueIndex];
           const hasActiveSupportEnemy = nextEntry !== 'boss' && enemies.some(e => (e.isMimic || e.isMedic) && !e.dying);
           // A boss waits, with its timer held, while the finale's boss slots are full.
-          const bossSlotsFull = nextEntry === 'boss' && enemies.filter(e => e.isBoss && !e.dying).length >= FINAL_WAVE_MAX_LIVE_BOSSES;
+          const bossSlotsFull = nextEntry === 'boss' && enemies.filter(e => e.isBoss && !e.dying).length >= maxLiveBosses(waveSet);
           if (!bossSlotsFull) bossSpawnTimer = Math.max(0, bossSpawnTimer - currentDelta);
           if (!hasActiveSupportEnemy && !bossSlotsFull) {
             if (bossSpawnTimer <= 0) {
@@ -1603,12 +1571,12 @@ function animate(frameTime) {
           }
         }
       } else {
-        if (bossesSpawned < BOSSES_PER_WAVE) {
-          // Keep spawning on the timer even while earlier bosses are still active,
-          // except on the first waves, where the timer waits for the last boss to go.
-          const waitForBoss = waveSet <= ONE_BOSS_AT_A_TIME_WAVES && enemies.some(enemy => enemy.isBoss && !enemy.dying);
-          if (!waitForBoss) bossSpawnTimer = Math.max(0, bossSpawnTimer - currentDelta);
-          if (bossSpawnTimer <= 0) {
+        if (bossesSpawned < bossesPerWave(waveSet)) {
+          // Keep spawning on the timer while slots remain; hold the timer when
+          // this wave's live-boss cap is full.
+          const bossSlotsFull = enemies.filter(enemy => enemy.isBoss && !enemy.dying).length >= maxLiveBosses(waveSet);
+          if (!bossSlotsFull) bossSpawnTimer = Math.max(0, bossSpawnTimer - currentDelta);
+          if (!bossSlotsFull && bossSpawnTimer <= 0) {
             spawnBoss();
             bossesSpawned += 1;
             bossSpawnTimer = currentDifficulty().bossSpawnGap;
@@ -1735,10 +1703,17 @@ function updateEnemies(delta, seconds) {
     const wasRevealed = enemy.revealed;
     enemy.revealed = enemy.group.position.z >= enemy.revealZ;
     if (enemy.revealed && !wasRevealed) {
-      enemy.revealFlash = 0.28;
+      // Bosses arm here: rocks begin after their first-shot delay. The question was
+      // already typeable during the approach; this flash marks the combat start.
+      enemy.revealFlash = enemy.isBoss ? 0.42 : 0.28;
       if (!enemy.isMimic) playRevealSound(enemy);
       reusableVector.set(enemy.group.position.x, 0.14, enemy.group.position.z);
-      fx.ring(reusableVector, enemy.type.eye, { from: 0.3, to: enemy.isBoss ? 4.6 : 2.2, life: 0.55, opacity: 0.7 });
+      fx.ring(reusableVector, enemy.type.eye, {
+        from: 0.3,
+        to: enemy.isBoss ? 6.2 : 2.2,
+        life: enemy.isBoss ? 0.7 : 0.55,
+        opacity: enemy.isBoss ? 0.85 : 0.7,
+      });
     }
     updateEnemyAura(enemy, delta);
     if (enemy.revealFlash > 0) enemy.revealFlash -= delta;
@@ -2159,7 +2134,9 @@ function updateLabels() {
 
     const isVisible = isLabelShown(enemy) && reusableVector.z > -1 && reusableVector.z < 1;
     enemy.label.classList.toggle('is-hidden', !isVisible);
-    // Boss questions are already visible during the walk-in; popping them again would flash.
+    // Boss cards stay up during the approach; the arm flash fires when rocks unlock.
+    enemy.label.classList.toggle('is-approaching', !!enemy.isBoss && !enemy.revealed);
+    enemy.label.classList.toggle('is-arming', !!enemy.isBoss && enemy.revealFlash > 0);
     enemy.label.classList.toggle('is-revealing', !enemy.isBoss && enemy.revealFlash > 0);
     if (!isVisible) continue;
 
@@ -2354,77 +2331,103 @@ function getLabelSafeBounds(height) {
 function displayTypedBuffer() {
   if (!typedBuffer) return '';
   if (!activeTarget) return typedBuffer;
-  if (activeTarget.choice) {
-    const option = matchingChoiceOptions(activeTarget)[0];
-    return option ? typedOptionText(option, activeTarget) : typedBuffer;
-  }
   const effectiveSP = activeTarget._matchedSearchPrompt?.startsWith(typedBuffer)
     ? activeTarget._matchedSearchPrompt
     : activeTarget.searchPrompt;
   if (!effectiveSP.startsWith(typedBuffer)) return typedBuffer;
+  if (activeTarget.limitedParts) return displayLimitedTypedBuffer(activeTarget, typedBuffer);
   return activeTarget.prompt.slice(0, promptIndexForProgress(activeTarget.prompt, typedBuffer.length, {
     multiplicationAlias: activeTarget.isEquation,
   }));
 }
 
-// The boss options still open whose spelling starts with what has been typed.
-function matchingChoiceOptions(enemy) {
-  if (!typedBuffer || !enemy.choiceOptions) return [];
-  return enemy.choiceOptions.filter(option => !option.struck && option.keys.some(key => key.startsWith(typedBuffer)));
-}
+function displayLimitedTypedBuffer(enemy, progressText) {
+  const promptOptions = { multiplicationAlias: enemy.isEquation };
+  let charsLeft = progressText.length;
+  const typedParts = [];
 
-function typedOptionText(option, enemy) {
-  return option.text.slice(0, promptIndexForProgress(option.text, typedBuffer.length, {
-    multiplicationAlias: enemy.isEquation,
-  }));
+  for (const part of enemy.limitedParts) {
+    if (!part.isHidden) continue;
+    const answerText = part.answerText || part.text;
+    const sp = buildSearchPrompt(answerText, promptOptions);
+    const typedCount = Math.min(charsLeft, sp.length);
+    charsLeft -= typedCount;
+
+    if (typedCount > 0) {
+      const charPos = promptIndexForProgress(answerText, typedCount, promptOptions);
+      typedParts.push(answerText.slice(0, charPos));
+    }
+
+    if (charsLeft <= 0) break;
+  }
+
+  return typedParts.join(' ');
 }
 
 function renderPrompt(enemy) {
-  const html = enemy.choice ? buildChoicePromptHtml(enemy) : buildPlainPromptHtml(enemy);
-  if (enemy.lastPromptHtml === html) return;
-  enemy.lastPromptHtml = html;
-  if (enemy.choice) {
-    const [lineHtml, choicesHtml] = html.split('\u0000');
-    enemy.promptNode.innerHTML = lineHtml;
-    enemy.choicesNode.innerHTML = choicesHtml;
-  } else {
-    enemy.promptNode.innerHTML = html;
-  }
-}
-
-function buildPlainPromptHtml(enemy) {
   const effectiveSP = enemy._matchedSearchPrompt?.startsWith(typedBuffer)
     ? enemy._matchedSearchPrompt
     : enemy.searchPrompt;
   const matched = effectiveSP.startsWith(typedBuffer) && typedBuffer.length > 0;
-  const typedLen = matched ? promptIndexForProgress(enemy.prompt, typedBuffer.length, {
-    multiplicationAlias: enemy.isEquation,
-  }) : 0;
-  return `<span class="typed">${wrapSups(escapeHtml(enemy.prompt.slice(0, typedLen)))}</span>`
-    + `<span class="remaining">${wrapSups(escapeHtml(enemy.prompt.slice(typedLen)))}</span>`;
+  const typedProgress = matched ? typedBuffer.length : 0;
+
+  let html;
+  if (enemy.limitedParts) {
+    html = buildLimitedPromptHtml(enemy, typedProgress);
+  } else {
+    const typedLen = typedProgress > 0 ? promptIndexForProgress(enemy.prompt, typedProgress, {
+      multiplicationAlias: enemy.isEquation,
+    }) : 0;
+    const typedText = enemy.prompt.slice(0, typedLen);
+    const remainingText = enemy.maskPrompt ? enemy.hintMask.slice(typedLen) : enemy.prompt.slice(typedLen);
+    html = `<span class="typed">${wrapSups(escapeHtml(typedText))}</span>`
+         + `<span class="remaining">${wrapSups(escapeHtml(remainingText))}</span>`;
+  }
+
+  if (enemy.lastPromptHtml === html) return;
+  enemy.lastPromptHtml = html;
+  enemy.promptNode.innerHTML = html;
 }
 
-// A boss shows its line with one fixed-width slot, then its options. Typed
-// letters fill the slot from the option being typed, never from the answer,
-// and every option that matches so far is highlighted the same way.
-function buildChoicePromptHtml(enemy) {
-  const matching = matchingChoiceOptions(enemy);
-  const slotText = matching.length > 0 ? typedOptionText(matching[0], enemy) : '';
-  const lineHtml = enemy.choiceSegments.map((segment) => {
-    if (segment.type === 'text') {
-      return /^\s+$/.test(segment.text) ? segment.text : `<span class="given-tok">${wrapSups(escapeHtml(segment.text))}</span>`;
+function buildLimitedPromptHtml(enemy, typedProgress) {
+  let charsLeft = typedProgress;
+  let html = '';
+  for (const part of enemy.limitedParts) {
+    if (part.isWhitespace) {
+      html += wrapSups(escapeHtml(part.text));
+    } else if (!part.isHidden) {
+      html += `<span class="given-tok">${wrapSups(escapeHtml(part.text))}</span>`;
+    } else {
+      const promptOptions = { multiplicationAlias: enemy.isEquation };
+      const answerText = part.answerText || part.text;
+      const hintOptions = {
+        ...promptOptions,
+        leadingTypeableCount: enemy.hintLetterCount,
+      };
+      const sp = buildSearchPrompt(answerText, promptOptions);
+      const tokTyped = Math.min(charsLeft, sp.length);
+      charsLeft -= tokTyped;
+      const exponentHtml = part.exponentText ? wrapSups(escapeHtml(part.exponentText)) : '';
+      const wrapSquared = !!part.exponentText;
+      if (tokTyped > 0) {
+        const charPos = promptIndexForProgress(answerText, tokTyped, promptOptions);
+        const typedPart = answerText.slice(0, charPos);
+        const remainPart = answerText.slice(charPos);
+        if (wrapSquared) html += '(';
+        html += `<span class="typed">${wrapSups(escapeHtml(typedPart))}</span>`;
+        if (remainPart) {
+          const maskedPart = buildBossHintPart(answerText, hintOptions).slice(charPos);
+          html += `<span class="remaining">${wrapSups(escapeHtml(maskedPart))}</span>`;
+        }
+        if (wrapSquared) html += `)${exponentHtml}`;
+      } else {
+        if (wrapSquared) html += '(';
+        html += `<span class="remaining">${wrapSups(escapeHtml(buildBossHintPart(answerText, hintOptions)))}</span>`;
+        if (wrapSquared) html += `)${exponentHtml}`;
+      }
     }
-    const exponent = segment.exponent ? `<sup class="given-sup">${segment.exponent}</sup>` : '';
-    return `<span class="answer-slot"><span class="typed">${escapeHtml(slotText)}</span></span>${exponent}`;
-  }).join('');
-  const choicesHtml = enemy.choiceOptions.map((option) => {
-    if (option.struck) return `<span class="boss-choice is-struck">${escapeHtml(option.text)}</span>`;
-    if (!matching.includes(option)) return `<span class="boss-choice">${escapeHtml(option.text)}</span>`;
-    const typed = typedOptionText(option, enemy);
-    return `<span class="boss-choice is-matching"><span class="typed">${escapeHtml(typed)}</span>`
-      + `<span class="remaining">${escapeHtml(option.text.slice(typed.length))}</span></span>`;
-  }).join('');
-  return `${lineHtml}\u0000${choicesHtml}`;
+  }
+  return html;
 }
 
 function createLifeMeter() {
@@ -2585,7 +2588,7 @@ function getEnemyLimit() {
 function getEnemySpeed(enemy) {
   const profile = currentDifficulty();
   if (enemy.isBoss) {
-    const responseTime = 18 + (enemy.bossTypingLength || enemy.searchPrompt.length) * 0.8;
+    const responseTime = 18 + enemy.searchPrompt.length * 0.8;
     return (WALL_Z - enemy.revealZ) / responseTime * bossSpeedMultiplier(waveSet);
   }
   const wavePressure = Math.max(0, waveSet - 1) * profile.waveSpeedBonus;
@@ -2621,6 +2624,7 @@ function spawnEnemy(options = {}) {
   const isEquationPrompt = !!wordData.isEquation;
   const showDefinition = !!wordData.definition && isBoss;
   const type = isBoss ? (options.bossType || chooseBossType(bossesSpawned)) : isMedic ? MEDIC_TYPE : isMimic ? MIMIC_TYPE : weightedPick(ENEMY_TYPES);
+  const hintRange = isBoss ? { min: bossHintLetters(waveSet), max: bossHintLetters(waveSet) } : null;
   if (isMedic && !firstMedicHintShown) {
     firstMedicHintShown = true;
     window.setTimeout(() => { if (mode === 'running') showBanner('TYPE TO HEAL!', 'medic-hint'); }, 1100);
@@ -2694,13 +2698,6 @@ function spawnEnemy(options = {}) {
     label.append(promptNode);
   }
 
-  let choicesNode = null;
-  if (isBoss) {
-    choicesNode = document.createElement('span');
-    choicesNode.className = 'boss-choices';
-    label.append(choicesNode);
-  }
-
   const threatNode = document.createElement('span');
   threatNode.className = 'threat-meter';
   threatNode.append(document.createElement('i'));
@@ -2709,28 +2706,33 @@ function spawnEnemy(options = {}) {
   labelsLayer.append(label);
 
   const promptOptions = { multiplicationAlias: isEquationPrompt };
-  const bossChoice = isBoss ? getBossChoice(wordData, waveSet) : null;
+  const twoWordData = isBoss
+    ? buildBossQuestion(wordData, bossAnswerLengthCap(waveSet))
+    : null;
   const enemy = {
     id: enemyId,
     type,
     group,
     label,
     promptNode,
-    choicesNode,
     prompt: wordData.term,
     definition: wordData.definition || null,
     isEquation: isEquationPrompt,
-    searchPrompt: bossChoice ? bossChoice.answer.key : buildSearchPrompt(wordData.term, promptOptions),
-    altSearchPrompts: bossChoice ? bossChoice.answer.keys.slice(1) : buildAltSearchPrompts(wordData.term, promptOptions),
+    searchPrompt: twoWordData ? twoWordData.searchPrompt : buildSearchPrompt(wordData.term, promptOptions),
+    altSearchPrompts: twoWordData ? twoWordData.altSearchPrompts : buildAltSearchPrompts(wordData.term, promptOptions),
     _matchedSearchPrompt: null,
-    // Boss options: the answer and the wrong options in display order, and the
-    // line with the answer replaced by a slot.
-    choice: bossChoice,
-    choiceOptions: bossChoice ? shuffledOptions(bossChoice) : null,
-    choiceSegments: bossChoice ? buildChoiceSegments(wordData.term, bossChoice.answer.text) : null,
-    bossTypingLength: bossChoice ? choiceTypingLength(bossChoice) : 0,
-    wrongPicks: 0,
+    limitedParts: twoWordData ? twoWordData.parts : null,
     showDefinition,
+    maskPrompt: showDefinition && !isEquationPrompt,
+    hintMask: showDefinition && !isEquationPrompt
+      ? buildHintMask(wordData.term, {
+          ...promptOptions,
+          hintRange,
+          leadingTypeableCount: isBoss ? bossHintLetters(waveSet) : 1,
+        })
+      : null,
+    hintRange,
+    hintLetterCount: isBoss ? bossHintLetters(waveSet) : 1,
     lastPromptHtml: '',
     promptKind,
     isBoss,
@@ -3516,17 +3518,9 @@ function findMatches(prefix, options = {}) {
   });
 }
 
-// Everything a player could type at an enemy: its answer, alternative spellings
-// and, for a boss, the wrong options not yet struck out.
+// Everything a player could type at an enemy: its answer and alternative spellings.
 function enemyTypeableKeys(enemy) {
-  if (enemy.choiceOptions) {
-    return enemy.choiceOptions.filter(option => !option.struck).flatMap(option => option.keys);
-  }
   return [enemy.searchPrompt, ...(enemy.altSearchPrompts || [])];
-}
-
-function isWrongChoiceKey(enemy, key) {
-  return !!enemy.choiceOptions?.some(option => !option.isAnswer && option.keys.includes(key));
 }
 
 function hasActiveEquationPrefix() {
@@ -3540,14 +3534,16 @@ function chooseTarget(matches) {
   return pickTarget(matches, typedBuffer);
 }
 
+// Bosses are typeable as soon as their card appears (during the approach). Rocks
+// still wait until revealZ so early answers are a skill reward, not free damage.
 function isEnemyTargetable(enemy) {
-  return enemy.revealed && enemy.group.position.z < WALL_Z && !enemy.dying;
+  if (enemy.dying || enemy.group.position.z >= WALL_Z) return false;
+  if (enemy.isBoss) return true;
+  return enemy.revealed;
 }
 
-// A boss shows its question from the start of its walk-in, so the player can read
-// while it is still far away, but it can only be answered once it arrives.
 function isLabelShown(enemy) {
-  return isEnemyTargetable(enemy) || (enemy.isBoss && !enemy.dying && enemy.group.position.z < WALL_Z);
+  return isEnemyTargetable(enemy);
 }
 
 function getEquationQuantities(equationTerm) {
@@ -3718,20 +3714,20 @@ function buildHardGuestSchedule(target) {
 function chooseBossWordsForWave() {
   const chosen = [];
   const usedTerms = new Set();
+  const vocabCount = Math.max(0, bossesPerWave(waveSet) - 1);
 
-  // First two bosses use vocabulary words, the freshest the deck has
-  for (let attempt = 0; attempt < 20 && chosen.length < BOSSES_PER_WAVE - 1; attempt += 1) {
-    const keys = chosen.flatMap(bossKeys);
-    const entry = bossDeck.pick(chooseBossPool(), item => !usedTerms.has(item.term) && !sharesBossAnswer(item, keys));
+  // Vocabulary bosses first, the freshest the deck has; one equation finishes the set.
+  for (let attempt = 0; attempt < 40 && chosen.length < vocabCount; attempt += 1) {
+    const answers = chosen.map(bossAnswer);
+    const entry = bossDeck.pick(chooseBossPool(), item => !usedTerms.has(item.term) && !sharesBossAnswer(item, answers));
     if (!entry) continue;
     usedTerms.add(entry.term);
     chosen.push(entry);
   }
 
-  // Fill any gap from the whole pool, then the third boss is the equation question
-  while (chosen.length < BOSSES_PER_WAVE - 1) {
-    const keys = chosen.flatMap(bossKeys);
-    const entry = firstShuffled(chooseBossPool(), item => !usedTerms.has(item.term) && !sharesBossAnswer(item, keys));
+  while (chosen.length < vocabCount) {
+    const answers = chosen.map(bossAnswer);
+    const entry = firstShuffled(chooseBossPool(), item => !usedTerms.has(item.term) && !sharesBossAnswer(item, answers));
     if (!entry) break;
     usedTerms.add(entry.term);
     chosen.push(entry);
@@ -3748,19 +3744,17 @@ function chooseBossWordsForWave() {
 }
 
 // Words on screen together must not be the same, or start one another: a
-// finished word would go to the nearest enemy whatever its clue says. For a
-// boss that covers every option it shows, not just its answer.
-function bossKeys(entry) {
-  const choice = getBossChoice(entry, waveSet);
-  return choice ? choiceKeys(choice) : [buildSearchPrompt(entry.term)];
+// finished word would go to the nearest enemy whatever its clue says.
+function bossAnswer(entry) {
+  return buildBossQuestion(entry, bossAnswerLengthCap(waveSet))?.searchPrompt || '';
 }
 
 function sharesAnswer(answer, answers) {
-  return keysClash([answer], answers);
+  return answers.some(other => answer.startsWith(other) || other.startsWith(answer));
 }
 
-function sharesBossAnswer(entry, keys) {
-  return keysClash(bossKeys(entry), keys);
+function sharesBossAnswer(entry, answers) {
+  return sharesAnswer(bossAnswer(entry), answers);
 }
 
 function liveAnswers(filter = () => true) {
@@ -3768,7 +3762,7 @@ function liveAnswers(filter = () => true) {
 }
 
 // The first entry, in random order, that passes the test; random picks can
-// miss the few that fit when many options are already on screen.
+// miss the few that fit when many answers are already on screen.
 function firstShuffled(entries, test) {
   const order = [...entries];
   for (let i = order.length - 1; i > 0; i -= 1) {
@@ -3779,8 +3773,8 @@ function firstShuffled(entries, test) {
 }
 
 function chooseEquationWord(otherBosses = []) {
-  const keys = otherBosses.flatMap(bossKeys);
-  return bossDeck.pick(EQUATION_WORDS, entry => !sharesBossAnswer(entry, keys))
+  const answers = otherBosses.map(bossAnswer);
+  return bossDeck.pick(EQUATION_WORDS, entry => !sharesBossAnswer(entry, answers))
     || EQUATION_WORDS[Math.floor(Math.random() * EQUATION_WORDS.length)];
 }
 
@@ -3845,7 +3839,7 @@ function refreshWaveBossOrder(count) {
 }
 
 function chooseBossType(index) {
-  if (waveBossOrder.length === 0) refreshWaveBossOrder(BOSSES_PER_WAVE);
+  if (waveBossOrder.length === 0) refreshWaveBossOrder(bossesPerWave(waveSet));
   return BOSS_TYPES[waveBossOrder[index % waveBossOrder.length]];
 }
 
@@ -4249,8 +4243,8 @@ function isFinalWave() {
 
 function buildFinalWaveQueue() {
   const queue = [
-    ...Array(10).fill('boss'),
-    ...Array(3).fill('medic'),
+    ...Array(bossesPerWave(FINAL_WAVE_NUMBER)).fill('boss'),
+    ...Array(4).fill('medic'),
     ...Array(3).fill('mimic'),
   ];
   for (let i = queue.length - 1; i > 0; i -= 1) {
@@ -4271,7 +4265,7 @@ function startFinalWave() {
   bossSpawnTimer = currentDifficulty().bossWarningDelay;
   finalWaveQueue = buildFinalWaveQueue();
   finalWaveQueueIndex = 0;
-  refreshWaveBossOrder(FINAL_WAVE_BOSS_COUNT);
+  refreshWaveBossOrder(bossesPerWave(waveSet));
   document.body.classList.add('final-wave-active');
   showBanner('FINAL WAVE!', 'final-wave');
   playBossWarningSound();
@@ -4352,7 +4346,7 @@ function startBossPhase() {
   bossesSpawned = 0;
   bossesDefeated = 0;
   bossSpawnTimer = currentDifficulty().bossWarningDelay;
-  refreshWaveBossOrder(BOSSES_PER_WAVE);
+  refreshWaveBossOrder(bossesPerWave(waveSet));
   showBanner('BOSS WAVE');
   playBossWarningSound();
   updatePhaseDisplay();
@@ -4375,10 +4369,10 @@ function spawnBoss() {
     enemy.labelSide = rightCount > liveBosses.length - rightCount ? 'left' : 'right';
   }
   // Use the actual answer and movement speed for a consistent entrance.
-  enemy.spawnZ = profile.revealZ - getEnemySpeed(enemy) * 8;
+  enemy.spawnZ = profile.revealZ - getEnemySpeed(enemy) * BOSS_APPROACH_TIME;
   enemy.group.position.z = enemy.spawnZ;
   enemy.revealed = false;
-  // The first rock comes soon after the boss arrives; it throws nothing while walking in.
+  // The first rock comes soon after the boss arms; it throws nothing while approaching.
   enemy.shotTimer = BOSS_FIRST_ROCK_DELAY + Math.random() * 0.5;
 }
 
@@ -4672,11 +4666,7 @@ function updateTypingLabel() {
     return;
   }
   if (wavePhase === 'boss') {
-    if (isFinalWave()) {
-      typingLabel.textContent = `BOSS ${bossesDefeated}/${FINAL_WAVE_BOSS_COUNT}`;
-      return;
-    }
-    typingLabel.textContent = `BOSS ${bossesDefeated}/${BOSSES_PER_WAVE}`;
+    typingLabel.textContent = `BOSS ${bossesDefeated}/${bossesPerWave(waveSet)}`;
   } else {
     typingLabel.textContent = 'INPUT';
   }
@@ -4975,6 +4965,10 @@ function triggerChainLightning(firstEnemy) {
     }
   }
 
+  // Bosses get a long rock-clearing interrupt instead of a short freeze; a typed
+  // boss kill counts toward the cap, so one cast touches at most CHAIN_BOSS_MAX bosses.
+  const bossInterrupts = chooseChainBossInterrupts(firstEnemy, targets);
+
   playToggleSound();
   showBanner('CHAIN LIGHTNING!', 'chain-lightning');
 
@@ -4997,39 +4991,96 @@ function triggerChainLightning(firstEnemy) {
 
   let currentChainOrigin = p1;
 
-  if (targets.length === 0) {
-    // No other monsters: hold visual for 100ms, then burst the single monster
+  const finishChain = () => {
+    // Zap any pulsed bosses that were not on the hop path, then resolve the burst.
+    const pulsed = bossInterrupts.filter(boss => (
+      !chainMonsters.includes(boss) && enemies.includes(boss) && !boss.dying
+    ));
+    for (const boss of pulsed) {
+      const targetPos = boss.group.position.clone();
+      targetPos.y += 0.8;
+      spawnLightningVisual(currentChainOrigin, targetPos, true);
+      currentChainOrigin = targetPos;
+      chainMonsters.push(boss);
+    }
     scheduleChainLightningTimer(() => {
+      for (const boss of bossInterrupts) interruptBossWithChain(boss);
       burstChain(chainMonsters);
+    }, pulsed.length > 0 ? 80 : 0);
+  };
+
+  if (targets.length === 0) {
+    scheduleChainLightningTimer(() => {
+      finishChain();
     }, 100);
   } else {
-    // Chain sequentially
     targets.forEach((enemy, index) => {
       scheduleChainLightningTimer(() => {
         if (enemies.includes(enemy) && isEnemyTargetable(enemy)) {
-          if (enemy.isBoss) {
-            enemy.stunTimer = 3.0;
-          } else {
-            enemy.dying = true; // freeze
-          }
+          if (!enemy.isBoss) enemy.dying = true;
           chainMonsters.push(enemy);
 
           const targetPos = enemy.group.position.clone();
           targetPos.y += 0.8;
 
-          spawnLightningVisual(currentChainOrigin, targetPos, true); // hold = true
+          spawnLightningVisual(currentChainOrigin, targetPos, true);
           currentChainOrigin = targetPos;
         }
 
-        // Trigger simultaneous burst when sequence completes
         if (index === targets.length - 1) {
           scheduleChainLightningTimer(() => {
-            burstChain(chainMonsters);
+            finishChain();
           }, 80);
         }
       }, (index + 1) * 60);
     });
   }
+}
+
+// Up to CHAIN_BOSS_MAX bosses per cast. A typed boss defeat uses one slot; remaining
+// slots go to the hop target first, then the nearest other live bosses (the pulse).
+function chooseChainBossInterrupts(firstEnemy, chainHopTargets) {
+  let slots = CHAIN_BOSS_MAX;
+  if (firstEnemy.isBoss) slots -= 1;
+  if (slots <= 0) return [];
+
+  const chosen = [];
+  const tryAdd = (enemy) => {
+    if (!enemy || !enemy.isBoss || enemy.dying || enemy === firstEnemy) return;
+    if (chosen.includes(enemy) || chosen.length >= slots) return;
+    chosen.push(enemy);
+  };
+
+  for (const target of chainHopTargets) tryAdd(target);
+
+  const bossInvolved = firstEnemy.isBoss || chainHopTargets.some(enemy => enemy.isBoss);
+  if (bossInvolved && chosen.length < slots) {
+    const origin = firstEnemy.group.position;
+    const others = enemies
+      .filter(enemy => enemy.isBoss && !enemy.dying && enemy !== firstEnemy && !chosen.includes(enemy))
+      .sort((a, b) => a.group.position.distanceToSquared(origin) - b.group.position.distanceToSquared(origin));
+    for (const enemy of others) tryAdd(enemy);
+  }
+
+  return chosen;
+}
+
+function cancelBossRocks(enemy) {
+  for (let index = beams.length - 1; index >= 0; index -= 1) {
+    const effect = beams[index];
+    if (effect.kind !== 'rock' || effect.enemy !== enemy) continue;
+    effectsGroup.remove(effect.mesh);
+    disposeObject(effect.mesh);
+    beams.splice(index, 1);
+  }
+}
+
+// Long targeted interrupt: freeze that boss, clear its rocks, and delay the next throw.
+function interruptBossWithChain(enemy) {
+  if (!enemy || !enemy.isBoss || enemy.dying) return;
+  enemy.stunTimer = Math.max(enemy.stunTimer || 0, CHAIN_BOSS_STUN);
+  enemy.shotTimer = bossRockTier(waveSet).interval + Math.random() * 0.4;
+  cancelBossRocks(enemy);
 }
 
 function armChainLightningTimer(entry, delay) {

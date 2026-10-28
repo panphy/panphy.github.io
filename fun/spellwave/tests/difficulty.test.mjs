@@ -3,7 +3,7 @@ import { readFileSync } from 'node:fs';
 import assert from 'node:assert/strict';
 import {
   NORMAL_PROMPT_LENGTH_CAPS, EARLY_BOSS_WAVES, HARD_GUEST_COUNTS,
-  bossSpeedMultiplier, typedLength, bossAnswerLengthCap, normalPromptLengthCap, bossWordLengthCap, previewLengthCap, withinLength, hardGuestCount,
+  bossSpeedMultiplier, bossHintLetters, bossesPerWave, maxLiveBosses, typedLength, bossAnswerLengthCap, normalPromptLengthCap, bossWordLengthCap, previewLengthCap, withinLength, hardGuestCount,
 } from '../src/difficulty.js';
 import { EASY_WORDS, MEDIUM_WORDS, HARD_WORDS } from '../src/question-bank.js';
 
@@ -95,10 +95,33 @@ test('startup dependencies share the page release version to avoid mixed cached 
 });
 
 
-test('boss rocks are gentle on waves 1–3 and get faster and harder later', async () => {
-  const { bossRockTier, BOSS_FIRST_ROCK_DELAY } = await import('../src/difficulty.js');
+test('boss wave table sets live caps, totals, hints and rock damage', () => {
+  const expected = [
+    [1, 1, 3, 3, 2],
+    [2, 2, 3, 2, 2],
+    [3, 2, 4, 1, 2],
+    [4, 3, 5, 1, 2],
+    [5, 3, 5, 1, 2],
+    [6, 3, 5, 1, 2],
+    [7, 3, 6, 1, 1],
+    [8, 3, 6, 1, 1],
+    [9, 3, 6, 1, 1],
+    [10, 3, 12, 1, 1],
+  ];
+  for (const [wave, live, total, hints, hitsPerUnit] of expected) {
+    assert.equal(maxLiveBosses(wave), live, `wave ${wave} live`);
+    assert.equal(bossesPerWave(wave), total, `wave ${wave} total`);
+    assert.equal(bossHintLetters(wave), hints, `wave ${wave} hints`);
+  }
+});
+
+test('boss rock interval and damage escalate by wave band', async () => {
+  const { bossRockTier, BOSS_FIRST_ROCK_DELAY, BOSS_APPROACH_TIME } = await import('../src/difficulty.js');
+  assert.equal(BOSS_APPROACH_TIME, 4);
   assert.ok(BOSS_FIRST_ROCK_DELAY <= 2);
-  for (const wave of [1, 2, 3]) assert.deepEqual([bossRockTier(wave).interval, bossRockTier(wave).hitsPerUnit], [6, 2]);
-  for (const wave of [4, 5, 6]) assert.deepEqual([bossRockTier(wave).interval, bossRockTier(wave).hitsPerUnit], [4.5, 1]);
-  for (const wave of [7, 8, 9, 10]) assert.deepEqual([bossRockTier(wave).interval, bossRockTier(wave).hitsPerUnit], [3.5, 1]);
+  for (const wave of [1, 2]) assert.deepEqual([bossRockTier(wave).interval, bossRockTier(wave).hitsPerUnit], [3, 2]);
+  for (const wave of [3, 4]) assert.deepEqual([bossRockTier(wave).interval, bossRockTier(wave).hitsPerUnit], [2.8, 2]);
+  for (const wave of [5, 6]) assert.deepEqual([bossRockTier(wave).interval, bossRockTier(wave).hitsPerUnit], [2.7, 2]);
+  for (const wave of [7, 8, 9]) assert.deepEqual([bossRockTier(wave).interval, bossRockTier(wave).hitsPerUnit], [2.6, 1]);
+  assert.deepEqual([bossRockTier(10).interval, bossRockTier(10).hitsPerUnit], [2.5, 1]);
 });

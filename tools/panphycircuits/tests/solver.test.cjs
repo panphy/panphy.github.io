@@ -585,6 +585,40 @@ test('open-secondary DC transformer transient decays instead of sustaining secon
   close(c.read('T').v('s1', 's2'), 9.99 * Math.exp(-10), 1e-5);
 });
 
+test('open-secondary transformer stays solvable when paused and AC peak or frequency changes', () => {
+  // Ideal voltmeters stamp nothing, so the secondary has no conductive path.
+  // Hold mode must freeze that winding's p.d. instead of injecting current into
+  // an open circuit (which made peak/frequency edits while paused fail).
+  const c = build({
+    comps: {
+      AC: ['acsupply', { peak: 15, freq: 210 }],
+      T: ['transformer', { np: 100, ns: 200 }],
+      V1: ['voltmeter', { mode: 'ac' }],
+      V2: ['voltmeter', { mode: 'ac' }]
+    },
+    wires: [
+      ['AC.p', 'T.p1'], ['AC.n', 'T.p2'],
+      ['V1.n', 'T.p1'], ['V1.p', 'T.s2'],
+      ['V2.n', 'T.s1'], ['V2.p', 'T.s2']
+    ]
+  });
+  assert.ok(c.result().ok);
+  for (let k = 0; k < 100; k++) c.sim.step();
+  assert.ok(c.result().ok);
+  const vs = c.read('T').v('s1', 's2');
+  c.sim.setRunning(false);
+  c.sim.trial();
+  assert.ok(c.result().ok);
+  close(c.read('T').v('s1', 's2'), vs, 1e-9, 'paused secondary holds its p.d.');
+  circuit.getComp(c.doc, c.ids.AC).props.peak = 4.5;
+  c.sim.setDoc(c.doc);
+  assert.ok(c.result().ok, 'peak edit while paused');
+  circuit.getComp(c.doc, c.ids.AC).props.freq = 100;
+  c.sim.setDoc(c.doc);
+  assert.ok(c.result().ok, 'frequency edit while paused');
+  assert.equal(c.result().errors.length, 0);
+});
+
 test('transformer turn edits, pause, import and reset preserve the expected state lifecycle', () => {
   const c = transformerCircuit(100, 200);
   for (let k = 0; k < 20; k++) c.sim.step();
@@ -623,4 +657,85 @@ test('ohmmeter reads R = V / I across a resistor, OL when open, and its test cur
   assert.equal(def.meter.value(open.read('O1')), Infinity, 'open circuit is over range');
   const short = build({ comps: { O1: ['ohmmeter'] }, wires: [['O1.p', 'O1.n']] });
   close(def.meter.value(short.read('O1')), 0, 1e-9, 'a short reads 0 Ω');
+});
+
+test('an AC supply only averages meters in its own network; zero peak is idle', () => {
+  const c = build({
+    comps: {
+      B1: ['battery', { emf: 6 }], R1: ['resistor', { R: 1000 }], C1: ['capacitor', { C: 100e-6 }], V1: ['voltmeter', { mode: 'dc' }],
+      AC: ['acsupply', { peak: 5, freq: 1 }], R2: ['resistor', { R: 100 }], V2: ['voltmeter', { mode: 'ac' }]
+    },
+    wires: [['B1.p', 'R1.a'], ['R1.b', 'C1.p'], ['C1.n', 'B1.n'], ['V1.p', 'C1.p'], ['V1.n', 'C1.n'],
+      ['AC.p', 'R2.a'], ['R2.b', 'AC.n'], ['V2.p', 'R2.a'], ['V2.n', 'R2.b']]
+  });
+  assert.equal(c.sim.meterPeriod(circuit.getComp(c.doc, c.ids.V1)), 0, 'DC network is not averaged');
+  assert.equal(c.sim.meterPeriod(circuit.getComp(c.doc, c.ids.V2)), 1, 'AC network averages over 1 s');
+  const acNet = c.sim.compiled.networks[c.sim.compiled.networkOf[c.sim.compiled.netOf.get(c.ids.AC + ':p')]];
+  assert.equal(acNet.acMin, 1);
+  const dcNet = c.sim.compiled.networks[c.sim.result.comp[c.ids.V1].net.p];
+  assert.ok(!Number.isFinite(dcNet.acMin));
+  c.sim.running = true;
+  while (c.sim.t < 0.99) c.sim.step();
+  const inst = c.read('V1').v('p', 'n');
+  const m = c.sim.meterValue(circuit.getComp(c.doc, c.ids.V1), inst, c.ids.V1 + ':V');
+  assert.equal(m.averaged, false);
+  close(m.value, inst, 1e-9);
+  const idle = build({
+    comps: { B1: ['battery', { emf: 6 }], R1: ['resistor', { R: 100 }], V1: ['voltmeter'], AC: ['acsupply', { peak: 0, freq: 50 }] },
+    wires: [['B1.p', 'R1.a'], ['R1.b', 'B1.n'], ['V1.p', 'R1.a'], ['V1.n', 'R1.b']]
+  });
+  assert.ok(!Number.isFinite(idle.sim.compiled.acMin));
+  assert.equal(idle.sim.meterPeriod(circuit.getComp(idle.doc, idle.ids.V1)), 0);
+});
+
+test('a voltmeter as the only inductor load sets a fine automatic time step', () => {
+  const c = build({
+    comps: { L1: ['inductor', { L: 1, i0: 0.1 }], V1: ['voltmeter', { rin: '1e4' }] },
+    wires: [['L1.a', 'V1.p'], ['L1.b', 'V1.n']]
+  });
+  assert.ok(c.sim.dt <= 1e-5, `dt ${c.sim.dt} tracks L/R = 0.1 ms`);
+  while (c.sim.t < 0.0005) c.sim.step();
+  close(c.read('L1').i('a'), 0.1 * Math.exp(-c.sim.t / 0.0001), 5e-3);
+});
+
+test('paused edits hold capacitor voltage; changing v0 applies after applyInitialConditions', () => {
+  const c = build({
+    comps: { B1: ['battery', { emf: 6 }], R1: ['resistor', { R: 1000 }], C1: ['capacitor', { C: 1e-3 }] },
+    wires: [['B1.p', 'R1.a'], ['R1.b', 'C1.p'], ['C1.n', 'B1.n']]
+  });
+  while (c.sim.t < 1) c.sim.step();
+  const stored = c.sim.capHist[c.ids.C1].v1;
+  const shown = c.read('C1').v('p', 'n');
+  close(shown, stored, 1e-9, 'hold mode shows stored p.d.');
+  c.sim.setDoc(c.doc);
+  close(c.read('C1').v('p', 'n'), stored, 1e-9, 're-solve does not advance charge');
+  close(c.sim.capHist[c.ids.C1].v1, stored, 1e-9);
+  circuit.getComp(c.doc, c.ids.C1).props.v0 = 1.25;
+  c.sim.setDoc(c.doc);
+  assert.ok(Math.abs(c.sim.capHist[c.ids.C1].v1 - stored) < 1e-9, 'hist kept until initial conditions applied');
+  c.sim.applyInitialConditions([c.ids.C1]);
+  c.sim.trial();
+  close(c.sim.capHist[c.ids.C1].v1, 1.25);
+  close(c.read('C1').v('p', 'n'), 1.25, 1e-6);
+});
+
+test('keepAcquisition preserves scope samples across setDoc', () => {
+  const c = build({
+    comps: { AC: ['acsupply', { peak: 5, freq: 50 }], R: ['resistor', { R: 100 }], S: ['scope'] },
+    wires: [['AC.p', 'R.a'], ['R.b', 'AC.n'], ['S.ch1', 'R.a'], ['S.com', 'R.b']]
+  });
+  for (let i = 0; i < 40; i++) c.sim.step();
+  const n = c.sim.scopes[c.ids.S].t.length;
+  assert.ok(n > 10);
+  c.sim.setDoc(c.doc, { keepAcquisition: true });
+  assert.equal(c.sim.scopes[c.ids.S].t.length, n);
+  c.sim.setDoc(c.doc);
+  assert.equal(c.sim.scopes[c.ids.S].t.length, 0);
+});
+
+test('open inductor with stored current reports that current at zero p.d.', () => {
+  const c = build({ comps: { L1: ['inductor', { L: 1, i0: 0.5 }] }, wires: [] });
+  assert.ok(c.result().ok);
+  close(c.read('L1').i('a'), 0.5);
+  close(c.read('L1').v('a', 'b'), 0);
 });

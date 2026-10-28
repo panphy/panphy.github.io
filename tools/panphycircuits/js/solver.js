@@ -136,13 +136,21 @@
       net.refs = new Set(refs.values());
     }
 
-    // Time step suggestion and AC frequencies.
+    // Time step suggestion and AC frequencies (per electrical network).
     let dtSuggest = 0.005;
     let acMin = Infinity;
+    for (const net of networks) net.acMin = Infinity;
     for (const c of doc.components) {
       const def = registry.get(c.type);
-      if (def.timeStep) dtSuggest = Math.min(dtSuggest, def.timeStep(c));
-      if (def.acFrequency) acMin = Math.min(acMin, def.acFrequency(c));
+      const step = def.timeStep && def.timeStep(c);
+      if (step > 0) dtSuggest = Math.min(dtSuggest, step);
+      const freq = def.acFrequency && def.acFrequency(c);
+      if (!(freq > 0)) continue;
+      acMin = Math.min(acMin, freq);
+      // An AC supply joins its two terminals; either terminal's network is fine.
+      const terminal = def.terminals[0];
+      const ni = networkOf[netOf.get(c.id + ':' + terminal.id)];
+      if (ni !== undefined) networks[ni].acMin = Math.min(networks[ni].acMin, freq);
     }
     for (const p of prims) {
       if (p.k !== 'C') continue;
@@ -156,11 +164,16 @@
     for (const p of prims) {
       if (p.k !== 'L') continue;
       const net = networks[networkOf[p.a.n]];
-      // Sum passive series resistances conservatively; meter input resistance is
-      // a parallel measurement load, not a winding/discharge resistance.
-      const resistance = net.prims.filter((q) => q.k === 'G' && typeof q.g === 'number' && !q.hidden &&
-        circuit.getComp(doc, q.owner)?.type !== 'voltmeter')
-        .reduce((sum, q) => sum + 1 / q.g, 0);
+      // Prefer the series sum of passive resistances (typical RL loops). When the
+      // only discharge path is a voltmeter, use that meter's resistance instead.
+      const resistors = net.prims.filter((q) => q.k === 'G' && typeof q.g === 'number' && !q.hidden);
+      const passive = resistors.filter((q) => circuit.getComp(doc, q.owner)?.type !== 'voltmeter');
+      let resistance = passive.reduce((sum, q) => sum + 1 / q.g, 0);
+      if (!(resistance > 0)) {
+        const gTouch = resistors.filter((q) => [q.a.n, q.b.n].some((n) => n === p.a.n || n === p.b.n))
+          .reduce((sum, q) => sum + q.g, 0);
+        if (gTouch > 0) resistance = 1 / gTouch;
+      }
       if (resistance > 0) dtSuggest = Math.min(dtSuggest, p.l / resistance / 100);
       for (const q of net.prims) if (q.k === 'C') dtSuggest = Math.min(dtSuggest, Math.sqrt(p.l * q.c) / 100);
     }
@@ -283,7 +296,45 @@
     const u = new Map();
     let nU = 0;
     for (const i of net.nodes) if (!net.refs.has(i)) u.set(i, nU++);
-    const loops = analyseVoltageLoops(net, ctx);
+    // Frozen time (edits and pause): capacitors hold their stored p.d. as ideal
+    // voltage sources; inductors hold their stored current as current sources.
+    // That keeps readings at the committed energy state instead of advancing one
+    // backward-Euler step on every re-solve. An open transformer winding (only
+    // ideal meters) has nowhere for a held current to flow, so it freezes its
+    // last p.d. as a voltage source instead — otherwise the matrix is singular.
+    const holdCapVs = [];
+    const holdT = new Map();
+    if (ctx.method === 'hold') {
+      for (const p of net.prims) {
+        if (p.k === 'C') {
+          const h = ctx.capHist[p.owner] || { v1: p.v0 };
+          holdCapVs.push({ k: 'V', a: p.a, b: p.b, v: h.v1, owner: p.owner, holdCap: p });
+        } else if (p.k === 'T') {
+          const h = ctx.indHist[p.owner] || { i1: 0, j1: 0 };
+          const ih = [h.i1 || 0, h.j1 || 0];
+          const open = [];
+          for (let k = 0; k < 2; k++) {
+            const na = p.nodes[2 * k], nb = p.nodes[2 * k + 1];
+            const g0 = compiled.galvanicOf[na.n];
+            const closed = net.prims.some((q) => {
+              if (q === p) return false;
+              if (!(q.k === 'G' || q.k === 'V' || q.k === 'I' || q.k === 'C' || q.k === 'N' || q.k === 'L')) return false;
+              const qns = q.nodes || [q.a, q.b];
+              return qns.some((n) => compiled.galvanicOf[n.n] === g0);
+            });
+            if (closed) { open.push(null); continue; }
+            const va = warm.get(nodes[na.n].key) ?? 0;
+            const vb = warm.get(nodes[nb.n].key) ?? 0;
+            const edge = { k: 'V', a: na, b: nb, v: va - vb, owner: p.owner, holdWind: p };
+            holdCapVs.push(edge);
+            open.push(edge);
+          }
+          holdT.set(p, { ih, open });
+        }
+      }
+    }
+    const loopNet = holdCapVs.length ? { prims: net.prims.concat(holdCapVs) } : net;
+    const loops = analyseVoltageLoops(loopNet, ctx);
     if (loops.conflicts.length) return { ok: false, conflicts: loops.conflicts };
     const vEdges = loops.kept;
     const size = nU + vEdges.length;
@@ -305,43 +356,66 @@
         addZ(idx(p.a.n), -i); addZ(idx(p.b.n), i);
       } else if (p.k === 'L') {
         const h = ctx.indHist[p.owner] || { i1: p.i0 || 0, j1: 0 };
-        const bdf2 = h.i2 !== undefined && ctx.method === 'bdf2';
-        const geq = (bdf2 ? 2 / 3 : 1) * ctx.dt / p.l;
-        const ihist = bdf2 ? (4 * h.i1 - h.i2) / 3 : h.i1;
-        indInfo.push({ p, geq, ihist });
-        const a = idx(p.a.n), b = idx(p.b.n);
-        addA(a, a, geq); addA(b, b, geq); addA(a, b, -geq); addA(b, a, -geq);
-        addZ(a, -ihist); addZ(b, ihist);
+        if (ctx.method === 'hold') {
+          // An isolated inductor has nowhere for the current to go; report the
+          // stored current without injecting an impossible source.
+          const closed = net.prims.some((q) => q !== p && (q.k === 'G' || q.k === 'V' || q.k === 'I' || q.k === 'C' || q.k === 'N' || q.k === 'T' || q.k === 'L'));
+          indInfo.push({ p, hold: true, ihist: h.i1 });
+          if (closed) { addZ(idx(p.a.n), -h.i1); addZ(idx(p.b.n), h.i1); }
+        } else {
+          const bdf2 = h.i2 !== undefined && ctx.method === 'bdf2';
+          const geq = (bdf2 ? 2 / 3 : 1) * ctx.dt / p.l;
+          const ihist = bdf2 ? (4 * h.i1 - h.i2) / 3 : h.i1;
+          indInfo.push({ p, geq, ihist });
+          const a = idx(p.a.n), b = idx(p.b.n);
+          addA(a, a, geq); addA(b, b, geq); addA(a, b, -geq); addA(b, a, -geq);
+          addZ(a, -ihist); addZ(b, ihist);
+        }
       } else if (p.k === 'T') {
         const h = ctx.indHist[p.owner] || { i1: 0, j1: 0 };
-        const bdf2 = h.i2 !== undefined && ctx.method === 'bdf2';
-        const a = (bdf2 ? 1.5 : 1) / ctx.dt;
-        const ip = bdf2 ? (4 * h.i1 - h.i2) / 3 : h.i1;
-        const js = bdf2 ? (4 * h.j1 - h.j2) / 3 : h.j1;
-        const A = p.rp + a * p.lp, D = p.rs + a * p.ls, B = a * p.m;
-        const det = A * D - B * B;
-        const g = [[D / det, -B / det], [-B / det, A / det]];
-        const history = [a * (p.lp * ip + p.m * js), a * (p.m * ip + p.ls * js)];
-        const ih = g.map((row) => row[0] * history[0] + row[1] * history[1]);
-        indInfo.push({ p, g, ih });
-        for (let k = 0; k < 2; k++) {
-          const x = idx(p.nodes[2 * k].n), y = idx(p.nodes[2 * k + 1].n);
-          addZ(x, -ih[k]); addZ(y, ih[k]);
-          for (let j = 0; j < 2; j++) {
-            const v = idx(p.nodes[2 * j].n), w = idx(p.nodes[2 * j + 1].n);
-            addA(x, v, g[k][j]); addA(x, w, -g[k][j]);
-            addA(y, v, -g[k][j]); addA(y, w, g[k][j]);
+        if (ctx.method === 'hold') {
+          const { ih, open } = holdT.get(p);
+          indInfo.push({ p, hold: true, ih });
+          for (let k = 0; k < 2; k++) {
+            if (open[k]) continue;
+            const x = idx(p.nodes[2 * k].n), y = idx(p.nodes[2 * k + 1].n);
+            addZ(x, -ih[k]); addZ(y, ih[k]);
+          }
+        } else {
+          const bdf2 = h.i2 !== undefined && ctx.method === 'bdf2';
+          const a = (bdf2 ? 1.5 : 1) / ctx.dt;
+          const ip = bdf2 ? (4 * h.i1 - h.i2) / 3 : h.i1;
+          const js = bdf2 ? (4 * h.j1 - h.j2) / 3 : h.j1;
+          const A = p.rp + a * p.lp, D = p.rs + a * p.ls, B = a * p.m;
+          const det = A * D - B * B;
+          const g = [[D / det, -B / det], [-B / det, A / det]];
+          const history = [a * (p.lp * ip + p.m * js), a * (p.m * ip + p.ls * js)];
+          const ih = g.map((row) => row[0] * history[0] + row[1] * history[1]);
+          indInfo.push({ p, g, ih });
+          for (let k = 0; k < 2; k++) {
+            const x = idx(p.nodes[2 * k].n), y = idx(p.nodes[2 * k + 1].n);
+            addZ(x, -ih[k]); addZ(y, ih[k]);
+            for (let j = 0; j < 2; j++) {
+              const v = idx(p.nodes[2 * j].n), w = idx(p.nodes[2 * j + 1].n);
+              addA(x, v, g[k][j]); addA(x, w, -g[k][j]);
+              addA(y, v, -g[k][j]); addA(y, w, g[k][j]);
+            }
           }
         }
       } else if (p.k === 'C') {
-        const h = ctx.capHist[p.owner] || { v1: p.v0 };
-        let geq, ihist;
-        if (h.v2 !== undefined && ctx.method === 'bdf2') { geq = (3 * p.c) / (2 * ctx.dt); ihist = (p.c * (4 * h.v1 - h.v2)) / (2 * ctx.dt); }
-        else { geq = p.c / ctx.dt; ihist = geq * h.v1; }
-        capInfo.push({ p, geq, ihist });
-        const a = idx(p.a.n), b = idx(p.b.n);
-        addA(a, a, geq); addA(b, b, geq); addA(a, b, -geq); addA(b, a, -geq);
-        addZ(a, ihist); addZ(b, -ihist);
+        if (ctx.method === 'hold') {
+          const edge = holdCapVs.find((e) => e.holdCap === p);
+          capInfo.push({ p, hold: true, edge });
+        } else {
+          const h = ctx.capHist[p.owner] || { v1: p.v0 };
+          let geq, ihist;
+          if (h.v2 !== undefined && ctx.method === 'bdf2') { geq = (3 * p.c) / (2 * ctx.dt); ihist = (p.c * (4 * h.v1 - h.v2)) / (2 * ctx.dt); }
+          else { geq = p.c / ctx.dt; ihist = geq * h.v1; }
+          capInfo.push({ p, geq, ihist });
+          const a = idx(p.a.n), b = idx(p.b.n);
+          addA(a, a, geq); addA(b, b, geq); addA(a, b, -geq); addA(b, a, -geq);
+          addZ(a, ihist); addZ(b, -ihist);
+        }
       }
     }
     vEdges.forEach((p, k) => {
@@ -356,6 +430,32 @@
     const V = new Float64Array(nodes.length);
     for (const i of net.nodes) V[i] = net.refs.has(i) ? 0 : (warm.get(nodes[i].key) ?? 0);
     for (const p of nl) if (ctx.nlState && ctx.nlState[p.owner + p.kind]) Object.assign(p.st, ctx.nlState[p.owner + p.kind]);
+
+    // An isolated inductor in hold mode stamps nothing: report stored current at 0 V.
+    let stamped = nl.length > 0;
+    if (!stamped) {
+      for (let i = 0; i < size * size && !stamped; i++) if (Alin[i] !== 0) stamped = true;
+      for (let i = 0; i < size && !stamped; i++) if (zlin[i] !== 0) stamped = true;
+    }
+    if (!stamped) {
+      const primI = new Map();
+      for (const p of net.prims) {
+        if (p.k === 'L') {
+          const info = indInfo.find((q) => q.p === p);
+          const ia = info ? info.ihist : 0;
+          primI.set(p, [ia, -ia]);
+        } else if (p.k === 'T') {
+          const info = indInfo.find((q) => q.p === p);
+          const ih = info && info.ih ? info.ih : [0, 0];
+          primI.set(p, [ih[0], -ih[0], ih[1], -ih[1]]);
+        } else {
+          const ns = p.nodes || [p.a, p.b];
+          primI.set(p, ns.map(() => 0));
+        }
+      }
+      return { ok: true, V, primI, loops, capInfo, indInfo };
+    }
+
     let x = null;
     let converged = nl.length === 0;
     const maxIter = nl.length ? MAX_NEWTON : 1;
@@ -404,17 +504,28 @@
         ia = loops.undefinedPrims.has(p) ? NaN : (k >= 0 ? x[nU + k] : NaN);
       } else if (p.k === 'L') {
         const info = indInfo.find((q) => q.p === p);
-        ia = info.geq * (V[p.a.n] - V[p.b.n]) + info.ihist;
+        ia = info.hold ? info.ihist : info.geq * (V[p.a.n] - V[p.b.n]) + info.ihist;
       } else if (p.k === 'C') {
         const info = capInfo.find((q) => q.p === p);
-        ia = info.geq * (V[p.a.n] - V[p.b.n]) - info.ihist;
+        if (info.hold) {
+          const k = vEdges.indexOf(info.edge);
+          ia = k >= 0 ? x[nU + k] : NaN;
+        } else {
+          ia = info.geq * (V[p.a.n] - V[p.b.n]) - info.ihist;
+        }
       }
       if (p.k === 'T') {
-        const { g, ih } = indInfo.find((q) => q.p === p);
-        const vp = V[p.nodes[0].n] - V[p.nodes[1].n], vs = V[p.nodes[2].n] - V[p.nodes[3].n];
-        const ip = g[0][0] * vp + g[0][1] * vs + ih[0];
-        const js = g[1][0] * vp + g[1][1] * vs + ih[1];
-        primI.set(p, [ip, -ip, js, -js]);
+        const info = indInfo.find((q) => q.p === p);
+        if (info.hold) {
+          const [ip, js] = info.ih;
+          primI.set(p, [ip, -ip, js, -js]);
+        } else {
+          const { g, ih } = info;
+          const vp = V[p.nodes[0].n] - V[p.nodes[1].n], vs = V[p.nodes[2].n] - V[p.nodes[3].n];
+          const ip = g[0][0] * vp + g[0][1] * vs + ih[0];
+          const js = g[1][0] * vp + g[1][1] * vs + ih[1];
+          primI.set(p, [ip, -ip, js, -js]);
+        }
       } else if (p.k === 'N') {
         const vs = p.nodes.map((t) => V[t.n]);
         const st = Object.assign({}, p.st);
@@ -608,7 +719,7 @@
       stepCount: 0
     };
 
-    sim.setDoc = function (doc) {
+    sim.setDoc = function (doc, opts = {}) {
       sim.doc = doc;
       sim.compiled = compile(doc, { pressed: sim.pressed });
       const ids = new Set(doc.components.map((c) => c.id));
@@ -617,20 +728,31 @@
       for (const p of sim.compiled.prims) if ((p.k === 'L' || p.k === 'T') && !sim.indHist[p.owner]) sim.indHist[p.owner] = { i1: p.i0 || 0, j1: 0 };
       for (const p of sim.compiled.prims) if (p.k === 'C' && !sim.capHist[p.owner]) sim.capHist[p.owner] = { v1: p.v0 };
       sim.dt = doc.settings.dt === 'auto' ? sim.compiled.dtSuggest : doc.settings.dt;
-      // A new circuit/source setting starts a fresh acquisition, so old source
+      // Keep scope traces when only display/operational choices changed (plot,
+      // sound). Circuit or source edits start a fresh acquisition so old
       // frequencies and voltages cannot masquerade as part of the new waveform.
-      sim.scopes = {};
+      if (!opts.keepAcquisition) {
+        sim.scopes = {};
+        sim.meterWin = {};
+        sim.restart = true;
+        sim.editTime = sim.t;
+      } else {
+        for (const id of Object.keys(sim.scopes)) if (!ids.has(id)) delete sim.scopes[id];
+        for (const key of Object.keys(sim.meterWin)) {
+          const compId = key.split(':')[0];
+          if (!ids.has(compId)) delete sim.meterWin[key];
+        }
+      }
       for (const c of doc.components) {
         if (c.type !== 'scope') continue;
         const network = sim.compiled.networkOf[sim.compiled.netOf.get(c.id + ':com')];
         const connected = ['ch1', 'ch2'].some((terminal) => sim.compiled.networkOf[sim.compiled.netOf.get(c.id + ':' + terminal)] === network);
         const frequencies = connected ? doc.components.filter((source) => source.type === 'acsupply' && source.props.peak > 0 &&
           sim.compiled.networkOf[sim.compiled.netOf.get(source.id + ':p')] === network).map((source) => source.props.freq) : [];
-        sim.scopes[c.id] = { t: [], ch1: [], ch2: [], frequency: frequencies.length ? Math.min(...frequencies) : null };
+        const frequency = frequencies.length ? Math.min(...frequencies) : null;
+        if (sim.scopes[c.id]) sim.scopes[c.id].frequency = frequency;
+        else sim.scopes[c.id] = { t: [], ch1: [], ch2: [], frequency };
       }
-      sim.restart = true;
-      sim.editTime = sim.t;
-      sim.meterWin = {};
       sim.trial();
     };
 
@@ -663,15 +785,30 @@
     }
 
     // Solve the present state without advancing time (used while paused and after edits).
+    // Capacitors and inductors hold their stored energy; resistive and source
+    // changes update immediately around that frozen state.
     sim.trial = function () {
       if (!sim.compiled) return null;
-      const { result, ctx, solved } = run(sim.t, sim.dt, 'be');
+      const method = (sim.compiled.hasCaps || sim.compiled.hasInductors) ? 'hold' : 'be';
+      const { result, ctx, solved } = run(sim.t, sim.dt, method);
       // Logic settling and Newton state carry over; stored charge does not change.
       sim.logic = ctx.logic;
       sim.inputs = ctx.inputs;
       saveWarm(solved);
       sim.result = result;
       return result;
+    };
+
+    // Apply edited initial conditions to stored history (Reset, or changing v0/i0).
+    sim.applyInitialConditions = function (ids) {
+      if (!sim.compiled) return;
+      const want = ids ? new Set(ids) : null;
+      for (const p of sim.compiled.prims) {
+        if (want && !want.has(p.owner)) continue;
+        if (p.k === 'C') sim.capHist[p.owner] = { v1: p.v0 || 0 };
+        if (p.k === 'L') sim.indHist[p.owner] = { i1: p.i0 || 0, j1: 0 };
+        if (p.k === 'T') sim.indHist[p.owner] = { i1: 0, j1: 0 };
+      }
     };
 
     function saveWarm(solved) {
@@ -759,13 +896,25 @@
     function record(result) {
       const tr = sim.traces;
       const ms = measurements(result);
+      // Averaging windows first so the graph can store the same value as the meter face.
+      for (const m of ms) {
+        if (!registry.get(m.comp.type).meter) continue;
+        const W = meterPeriod(m.comp);
+        if (!(W > 0)) continue;
+        const w = sim.meterWin[m.key] || (sim.meterWin[m.key] = { t: [], v: [] });
+        w.t.push(result.t); w.v.push(m.value);
+        while (w.t.length > 2 && w.t[1] <= result.t - W) { w.t.shift(); w.v.shift(); }
+      }
       tr.count++;
       if (tr.count % tr.every === 0 || tr.t.length === 0) {
         tr.t.push(result.t);
         const n = tr.t.length;
         for (const m of ms) {
           if (!tr.series[m.key]) tr.series[m.key] = new Array(n - 1).fill(NaN);
-          tr.series[m.key].push(m.value);
+          const plotted = registry.get(m.comp.type).meter
+            ? sim.meterValue(m.comp, m.value, m.key).value
+            : m.value;
+          tr.series[m.key].push(plotted);
         }
         for (const key of Object.keys(tr.series)) if (tr.series[key].length < n) tr.series[key].push(NaN);
         if (n > TRACE_MAX) {
@@ -789,25 +938,25 @@
           for (const key of ['t', 'ch1', 'ch2']) s[key] = indices.map((i) => s[key][i]);
         }
       }
-      // Meter averaging windows (only when AC sources exist).
-      const W = Number.isFinite(sim.compiled.acMin) ? 1 / sim.compiled.acMin : 0;
-      if (W > 0) {
-        for (const m of ms) {
-          // Scope channels already have bounded trace buffers. Only meters use
-          // cycle averaging; duplicating scope samples here can stall tiny-step
-          // RLC circuits when a full AC cycle starts sliding through the window.
-          if (!registry.get(m.comp.type).meter) continue;
-          const w = sim.meterWin[m.key] || (sim.meterWin[m.key] = { t: [], v: [] });
-          w.t.push(result.t); w.v.push(m.value);
-          while (w.t.length > 2 && w.t[1] <= result.t - W) { w.t.shift(); w.v.shift(); }
-        }
-      }
     }
 
-    // Value shown by a meter: instantaneous with no AC; else the mean (DC mode) or
-    // r.m.s. (AC mode) over one cycle once a full cycle has been simulated.
+    // Lowest AC period in the meter's own electrical network(s), or 0 if none.
+    function meterPeriod(c) {
+      const entry = sim.result && sim.result.comp[c.id];
+      if (!entry || !sim.compiled) return 0;
+      let freq = Infinity;
+      for (const ni of Object.values(entry.net)) {
+        const net = sim.compiled.networks[ni];
+        if (net && net.acMin < freq) freq = net.acMin;
+      }
+      return Number.isFinite(freq) ? 1 / freq : 0;
+    }
+    sim.meterPeriod = meterPeriod;
+
+    // Value shown by a meter: instantaneous with no AC in its network; else the
+    // mean (DC mode) or r.m.s. (AC mode) over one cycle once a full cycle exists.
     sim.meterValue = function (c, instantaneous, key) {
-      const W = Number.isFinite(sim.compiled.acMin) ? 1 / sim.compiled.acMin : 0;
+      const W = meterPeriod(c);
       const mode = c.props.mode || 'dc';
       if (W <= 0) return { value: mode === 'ac' ? Math.abs(instantaneous) : instantaneous, averaged: false, exact: true };
       const w = sim.meterWin[key];

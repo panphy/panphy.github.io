@@ -10,10 +10,52 @@
   <title>Spellwave Typing Game — PanPhy Labs</title>
   <meta name="description" content="A free spelling and typing game: type words to cast spells, beat the monsters and climb the leaderboard.">
   <link rel="canonical" href="https://panphy.app/fun/spellwave.html">
+<!-- panphy-discovery -->
+  <meta property="og:title" content="Spellwave Typing Game — PanPhy Labs">
+  <meta property="og:description" content="A free spelling and typing game: type words to cast spells, beat the monsters and climb the leaderboard.">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://panphy.app/fun/spellwave.html">
+  <meta property="og:image" content="https://panphy.app/assets/og-default.png">
+  <meta property="og:site_name" content="PanPhy Labs">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Spellwave Typing Game — PanPhy Labs">
+  <meta name="twitter:description" content="A free spelling and typing game: type words to cast spells, beat the monsters and climb the leaderboard.">
+  <meta name="twitter:image" content="https://panphy.app/assets/og-default.png">
+  <script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": "Spellwave",
+  "description": "A free spelling and typing game: type words to cast spells, beat the monsters and climb the leaderboard.",
+  "url": "https://panphy.app/fun/spellwave.html",
+  "applicationCategory": "EducationalApplication",
+  "operatingSystem": "Any",
+  "browserRequirements": "Requires HTML5 and JavaScript",
+  "isAccessibleForFree": true,
+  "offers": {
+    "@type": "Offer",
+    "price": "0",
+    "priceCurrency": "USD"
+  },
+  "author": {
+    "@type": "Organization",
+    "name": "PanPhy Labs",
+    "url": "https://panphy.app/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "PanPhy Labs",
+    "url": "https://panphy.app/"
+  },
+  "image": "https://panphy.app/assets/og-default.png"
+}
+  </script>
+<!-- /panphy-discovery -->
+
   <link rel="icon" type="image/png" href="../assets/favicon.png">
   <link rel="stylesheet" href="../assets/standalone-top.css">
   <style>:root { --standalone-top-bg: #efe3c4; }</style>
-  <link rel="stylesheet" href="./spellwave/src/styles.css?v=20261025-harder-bosses">
+  <link rel="stylesheet" href="./spellwave/src/styles.css?v=20261028-rock-tune">
   <script
     id="supabaseScript"
     src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"
@@ -182,7 +224,7 @@
       <h2 id="messageTitle">Cast or Crumble</h2>
       <div class="message-score" id="messageScore">Best 0</div>
       <p class="message-copy" id="messageCopy">Type to kill. Type to heal. Type to loot.
-Bosses: pick the right answer and type it.
+Bosses: read the clue, use the hint letters, and type the answer.
 British and American spellings both work.
 Just don't let the bosses through!</p>
       <button id="startButton" type="button" title="Start run">Start</button>
@@ -235,7 +277,7 @@ Just don't let the bosses through!</p>
     </div>
   </div>
 
-  <script type="module" src="./spellwave/src/main.js?v=20261025-harder-bosses"></script>
+  <script type="module" src="./spellwave/src/main.js?v=20261028-rock-tune"></script>
 </body>
 
 </html>

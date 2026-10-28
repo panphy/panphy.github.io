@@ -2,13 +2,13 @@
 
 A typing defence game for AQA GCSE Physics vocabulary. The page is `fun/spellwave.html`; the code is in `src/`. It is network-only (no offline cache), needs no build step, and loads Three.js and two post-processing add-ons from jsDelivr through the import map in the HTML.
 
-The page versions its stylesheet, entry module, word bank, difficulty module, prompt utilities, visuals module, audio module, potion system, leaderboard, victory cinematic, word decks (`word-decks.js`) and boss modules (`boss-choices.js`, `boss-options.js`) with a shared `?v=` value. Bump that value together when changing these files so a new page cannot load incompatible browser-cached code (GitHub Pages caches assets for ten minutes). Filenames remain stable; this is independent of the root service worker.
+The page versions its stylesheet, entry module, word bank, difficulty module, prompt utilities, visuals module, audio module, potion system, leaderboard, victory cinematic and word decks (`word-decks.js`) with a shared `?v=` value. Bump that value together when changing these files so a new page cannot load incompatible browser-cached code (GitHub Pages caches assets for ten minutes). Filenames remain stable; this is independent of the root service worker.
 
 Run the tests with `node --test fun/spellwave/tests/*.test.mjs`.
 
 ## Spelling
 
-The UI, displayed terms, definitions and boss options use British English. Typed answers accept both British and American spellings, including mixed spellings within a phrase. `src/prompt-utils.js` lists the recognised variants and matches whole words, so measuring instruments such as `ammeter` never acquire invalid alternatives such as `ammetre`. These variants also apply to boss options and the checks that prevent typing targets from clashing.
+The UI, displayed terms and definitions use British English. Typed answers accept both British and American spellings, including mixed spellings within a phrase. `src/prompt-utils.js` lists the recognised variants and matches whole words, so measuring instruments such as `ammeter` never acquire invalid alternatives such as `ammetre`. These variants also apply to boss answers and the checks that prevent typing targets from clashing.
 
 ## Art style
 
@@ -45,22 +45,24 @@ Difficulty has two separate parts, and a keyword must suit both:
 - **Concept difficulty** is the list a keyword sits in (`EASY_WORDS`, `MEDIUM_WORDS`, `HARD_WORDS` in `src/question-bank.js`).
 - **Typing length** is capped per wave in `src/difficulty.js`. Length is counted as typed: letters only, without spaces or punctuation.
 
-| Wave | Normal vocabulary | Maximum minion letters | Boss option letters |
-| --- | --- | --- | --- |
-| 1 | Easy | 11 | 14 |
-| 2 | Easy + one short hard guest | 12 | 14 |
-| 3 | Easy + medium + hard guests | 12 | 16 |
-| 4 | Easy + medium + hard guests | 13 | 16 |
-| 5 | Medium + hard | 13 | 16 |
-| 6–9 | Medium + hard | 14 | 16 |
-| 10 | Boss finale, with healers and chests | 14 for support | 16 |
+| Wave | Normal vocabulary | Max minion letters | Boss answer letters | Max live bosses | Total bosses | Hint letters | Rock damage | Rock interval |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| 1 | Easy | 11 | 14 | 1 | 3 | 3 | ¼ heart | 3.0 s |
+| 2 | Easy + one short hard guest | 12 | 14 | 2 | 3 | 2 | ¼ heart | 3.0 s |
+| 3 | Easy + medium + hard guests | 12 | 16 | 2 | 4 | 1 | ¼ heart | 2.8 s |
+| 4 | Easy + medium + hard guests | 13 | 16 | 3 | 5 | 1 | ¼ heart | 2.8 s |
+| 5–6 | Medium + hard | 13–14 | 16 | 3 | 5 | 1 | ¼ heart | 2.7 s |
+| 7–9 | Medium + hard | 14 | 16 | 3 | 6 | 1 | ½ heart | 2.6 s |
+| 10 | Boss finale, with healers and chests | 14 for support | 16 | 3 | 12 | 1 | ½ heart | 2.5 s |
+
+Boss live caps, totals, hint letters, rock damage and rock intervals live in `BOSS_WAVE_TABLE` in `src/difficulty.js`. The finale interleaves four healers and three chests with its bosses.
 
 - Normal enemies always require the whole displayed term. Long phrases belong to bosses; no preview bypasses the minion cap. Short boss terms and suitable equation quantities can appear as previews. Long terms are introduced in the boss question itself.
-- Each ordinary wave has two vocabulary bosses and one equation boss. Vocabulary bosses use medium terms of 14 letters or fewer on waves 1–2, then any medium or hard term on waves 3–4; from wave 5 each is drawn from the hard list 70% of the time (`HARD_BOSS_SHARE` in `src/difficulty.js`). Terms marked `noBoss` in the word bank never become bosses.
-- Bosses are multiple choice. A boss shows its clue (a definition, or an equation's symbol form) and the term or equation with the answer replaced by one fixed-width slot, so the letter count is not given away, then the options from `src/boss-options.js` in random order: the answer and one wrong option on waves 1–3, two from wave 4 and in the finale. The player types a whole option to find out whether it is right; options that match the letters typed so far all highlight the same way. `src/boss-choices.js` builds the options and the line.
-- A finished wrong option is struck out, costs half a heart (a shield absorbs it) and breaks the chain; the boss stays until it is answered or reaches the wall. A boss scores in full when answered first time, half after one wrong option, and only its typing points after two or more. A boss that reaches the wall costs three hearts; the run ends only if that empties the life bar.
-- No option on screen may be the same as, or start, another word that can be typed at the same time: bosses in a wave, finale bosses and the healers and chests alongside them are chosen so their words never clash.
-- Bosses spawn on a 2.8-second timer without an active-boss cap or waiting for earlier bosses to be defeated. On waves 1–3 the timer waits until the previous boss is gone, so bosses come one at a time; from wave 4 all three can be active at once. The finale interleaves healers and chests and keeps at most three bosses alive at once (`FINAL_WAVE_MAX_LIVE_BOSSES`); the next boss waits for a free slot. Boss movement uses a base budget of 18 seconds plus 0.8 seconds per letter of the answer and the longest wrong option after reveal. Bosses walk 5% faster than that baseline in wave 1, increasing by 2 percentage points per wave to 23% faster in wave 10; divide the base budget by that speed multiplier for the time available. Before that comes an eight-second walk-in, during which the question already shows but cannot be answered yet and the boss throws nothing; this is the reading time. Once a boss arrives it can be answered, and it throws its first rock 1.5–2 seconds later (`BOSS_FIRST_ROCK_DELAY`). Rocks come every 6 seconds and cost a quarter heart on waves 1–3, every 4.5 seconds and half a heart on waves 4–6, and every 3.5 seconds and half a heart on waves 7–10 (`BOSS_ROCK_TIERS` in `src/difficulty.js`); rocks across all bosses are still spaced at least 2.6 seconds apart, at most two in the air.
+- Each wave has one equation boss and the rest vocabulary bosses (`total − 1`). Vocabulary bosses use medium terms of 14 letters or fewer on waves 1–2, then any medium or hard term on waves 3–4; from wave 5 each is drawn from the hard list 70% of the time (`HARD_BOSS_SHARE` in `src/difficulty.js`). Terms marked `noBoss` in the word bank never become bosses.
+- Bosses show the full phrase or equation structure with a missing content word, revealing the wave's hint letters; the blanks show its length. The hidden word is the one that tells the term apart from the rest of the bank: the rarest content word that fits the answer cap, preferring five letters or more, then the longest. Equations never hide a word printed in the symbol clue, repeated in the line, or naming no quantity ("transferred"). An entry's `ask` overrides the rule and may name two words. Bosses in one wave never share an answer; spaces, operators and given exponents do not need typing.
+- A boss that reaches the wall costs three hearts; the run ends only if that empties the life bar.
+- No answer on screen may be the same as, or start, another word that can be typed at the same time: bosses in a wave, finale bosses and the healers and chests alongside them are chosen so their words never clash.
+- Bosses spawn on a 2.8-second timer, held while the wave's live-boss cap is full. The finale interleaves healers and chests under the same live cap. Boss movement uses a base budget of 18 seconds plus 0.8 seconds per answer letter after the boss arms. Bosses walk 5% faster than that baseline in wave 1, increasing by 2 percentage points per wave to 23% faster in wave 10; divide the base budget by that speed multiplier for the time available. Before that comes a four-second approach (`BOSS_APPROACH_TIME`), during which the full question already shows and can be answered, but the boss throws nothing. Answering early is a skill reward. When the boss reaches the arm line it flashes and sounds, then throws its first rock 1.5–2 seconds later (`BOSS_FIRST_ROCK_DELAY`). Rocks across all bosses are still spaced at least 2.0 seconds apart, at most two in the air. Chain lightning is a targeted interrupt, not a global freeze: a cast can affect at most two bosses (a typed boss kill counts), and interrupted bosses are stunned for 5.5 seconds with their rocks cleared and their next throw delayed. Time freeze still pauses the whole field for 3.5 seconds.
 - Words come from decks (`src/word-decks.js`): monsters, healers, chests and bosses favour words not yet used this run, then words not used last run, so nothing repeats until a pool runs out and no boss question repeats in a run. Last run's words are kept in localStorage (`panphySpellwaveLastRunTermsV1`), saved at each wave clear and at the end of a run. Short boss terms still appear as monsters before their boss on purpose.
 - Healers and chests use short answers, at most 12 letters. Support prompts obey the wave's minion cap too.
 - Typing has no mercy: a wrong letter clears the prefix and breaks the chain. If that letter starts another visible prompt, it immediately starts targeting that enemy instead (also costing accuracy and the chain). Targets follow the matching prefix freely; no explicit switch control is needed. Backspace removes a letter; Escape pauses.
@@ -72,5 +74,5 @@ These caps and timings are starting points for playtesting, especially waves 5�
 
 - Put each keyword in the list that matches its concept difficulty; follow the comments at the top of `src/question-bank.js` for definitions.
 - An easy keyword must be 11 letters or fewer, or wave 1 would never use it. `tests/difficulty.test.mjs` fails if one is longer, and also checks that every capped wave still has a healthy pool.
-- A long keyword needs no special handling: the caps keep it out of normal encounters automatically, and its boss asks for a bounded answer.
-- A new medium or hard keyword or equation needs an entry in `src/boss-options.js` (or `noBoss: true`): the answer, which may be one word of the term or all of it, and three wrong options, best first, that fit the same gap but not the clue. No wrong option may be defensible as correct. `tests/boss-options.test.mjs` checks the rules a test can: no option printed in the clue or line, none starting another, and every option within the letter caps.
+- A long keyword needs no special handling: the caps keep it out of normal encounters automatically; bosses ask for one bounded word, or two short ones.
+- After adding a medium or hard keyword or an equation, check which word its boss hides; if the rule picks a word the clue is not about, set `ask`. The clue must not contain the hidden word (`tests/prompt-utils.test.mjs` checks this).

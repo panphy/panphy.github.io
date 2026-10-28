@@ -240,7 +240,7 @@ button:disabled {
   flex: none;
 }
 
-/* Import Video, set off from Guide and the theme buttons. */
+/* Import Video, set off from Manual and the theme buttons. */
 .mt-appbar-file {
   display: flex;
   align-items: center;
@@ -253,6 +253,7 @@ button:disabled {
 /* ---------------------------------------------------------------------- */
 /* Tools: the buttons in the app bar and the pane toolbars                 */
 /* ---------------------------------------------------------------------- */
+a.mt-tool { text-decoration: none; }
 .mt-tool {
   display: inline-flex;
   align-items: center;
@@ -1575,88 +1576,6 @@ button:disabled {
   min-height: 44px;
   padding: 8px 16px;
   font-size: 0.9rem;
-}
-
-/* Guide */
-.guide-dialog {
-  width: min(560px, calc(100vw - 32px));
-}
-
-.guide-steps {
-  display: grid;
-  gap: 10px;
-  margin: 0;
-  padding: 0;
-  list-style: none;
-  counter-reset: step;
-}
-
-.guide-steps li {
-  display: grid;
-  grid-template-columns: 28px 1fr;
-  gap: 10px;
-  font-size: 0.9rem;
-  color: var(--ink-2);
-  counter-increment: step;
-}
-
-.guide-steps li::before {
-  content: counter(step);
-  display: grid;
-  place-items: center;
-  width: 26px;
-  height: 26px;
-  border-radius: 50%;
-  background: var(--accent-soft);
-  color: var(--accent);
-  font-family: var(--font-mono);
-  font-size: 0.8rem;
-  font-weight: 600;
-}
-
-.guide-steps strong {
-  color: var(--ink);
-}
-
-.guide-subhead {
-  margin: 6px 0 0;
-  font-family: var(--font-mono);
-  font-size: 0.7rem;
-  font-weight: 500;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--ink-3);
-}
-
-.guide-keys {
-  display: grid;
-  grid-template-columns: auto 1fr;
-  gap: 6px 14px;
-  margin: 0;
-  font-size: 0.86rem;
-  color: var(--ink-2);
-}
-
-.guide-keys dt {
-  white-space: nowrap;
-}
-
-.guide-keys dd {
-  margin: 0;
-}
-
-kbd {
-  display: inline-block;
-  min-width: 24px;
-  padding: 1px 6px;
-  border: 1px solid var(--line-strong);
-  border-bottom-width: 2px;
-  border-radius: 6px;
-  background: var(--surface-2);
-  font-family: var(--font-mono);
-  font-size: 0.76rem;
-  text-align: center;
-  color: var(--ink);
 }
 
 body.modal-open {

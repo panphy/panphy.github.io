@@ -1,0 +1,49 @@
+# PanPhy Labs
+
+> Free, browser-based physics tools, 3D simulations, and classroom utilities. No install, no login. Most apps work offline after the first visit. Built for school Chromebooks and lessons by a physics teacher.
+
+Prefer https://panphy.app/ over panphy.github.io. Curriculum hubs under /gcsephy/ and /ibdpphy/ are separate from the public app catalog.
+
+## Start here
+
+- [PanPhy Labs homepage](https://panphy.app/): Catalog of free physics apps, with topic filters and offline-ready badges
+- [About and contact](https://panphy.app/#about): Classroom-first design: browser based, no admin rights needed, offline after first visit
+
+## Flagship tools
+
+- [PanPhyPlot](https://panphy.app/tools/panphyplot.html): Graph plotter for physics practicals: tables, error bars, weighted fits, custom formulas
+- [PanPhyPlot manual](https://panphy.app/tools/panphyplot/manual.html): Pendulum walkthrough from repeat readings to a fitted graph
+- [PanPhyTrack](https://panphy.app/tools/motion_tracker.html): Video motion analysis: auto or manual tracking, scale, origin, position and velocity, export to CSV or PanPhyPlot
+- [PanPhyTrack manual](https://panphy.app/tools/motion_tracker/manual.html): Walkthrough using the sample bouncing-ball clip
+- [PanPhyCircuits](https://panphy.app/tools/panphycircuits.html): Circuit builder with realistic and diagram views, live MNA solver, meters, oscilloscope; for GCSE and IB Physics
+- [PanPhyCircuits manual](https://panphy.app/tools/panphycircuits/manual.html): Build, measure and investigate with example circuits
+- [Sound Analyzer](https://panphy.app/tools/sound_analyzer.html): Live microphone spectrum and waveform
+- [Tone Generator](https://panphy.app/tools/tone_generator.html): Two-channel sine mixer with precise frequency and level
+- [PanPhyMD](https://panphy.app/tools/panphymd.html): Markdown editor with LaTeX math and live preview
+
+## Simulations
+
+- [Virtual Ripple Tank](https://panphy.app/simulations/ripple_tank.html): 3D ripple tank for interference and refraction
+- [Wave Superposition](https://panphy.app/simulations/superposition.html): Combine waves and see beats and interference
+- [Standing Wave](https://panphy.app/simulations/standing_wave.html): Nodes and antinodes with different boundaries
+- [Collision Lab](https://panphy.app/simulations/collision.html): Elastic and inelastic collisions, including camera hand control
+- [States of Matter](https://panphy.app/simulations/states.html): 3D particle model of melting, boiling and freezing
+- [Electric Motors](https://panphy.app/simulations/electric_motors.html): Motor effect, DC motor with commutator, AC motor in 3D
+- [Charges in Fields](https://panphy.app/simulations/charges_in_fields.html): Electrons, protons and alphas in E and B fields
+- [Atomic Models](https://panphy.app/simulations/atomic_models.html): Plum pudding, Rutherford, Bohr and electron cloud
+- [Nuclear Decay](https://panphy.app/simulations/nuclear_decay.html): Alpha, beta and gamma decay, equations and half-life
+- [Fission and Fusion](https://panphy.app/simulations/fission_fusion.html): Chain reaction and fusion energy release in 3D
+- [Life Cycle of a Star](https://panphy.app/simulations/star_life_cycle.html): Follow a star from nebula to its final state by mass
+- [Lorentz Transform](https://panphy.app/simulations/lorentz.html): Interactive Minkowski spacetime diagram
+- [Lorentz learn path](https://panphy.app/simulations/lorentz_learn.html): Step-by-step special relativity for pre-university students
+
+## For teachers
+
+- [Exam Timer](https://panphy.app/for_teachers/timer.html): Exam clock with automatic extra-time countdown
+- [Camera Visualizer](https://panphy.app/for_teachers/visualizer.html): Document camera from any device, with snap and sketch
+
+## Optional
+
+- [Spellwave](https://panphy.app/fun/spellwave.html): Spelling game (needs network for leaderboard)
+- [ASCII Camera](https://panphy.app/fun/ascii_cam.html): Live webcam as 8-bit color ASCII
+- [Sitemap](https://panphy.app/sitemap.xml): Machine-readable list of public catalog pages

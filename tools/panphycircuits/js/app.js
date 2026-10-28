@@ -123,19 +123,43 @@
     scheduleSave();
   }
 
-  app.electricalChanged = function () {
+  app.electricalChanged = function (opts = {}) {
     app.lastElecKey = JSON.stringify([app.doc.components, app.doc.wires]);
-    app.sim.setDoc(app.doc);
+    app.sim.setDoc(app.doc, opts);
     refreshProblems();
     app.renderer.renderAll();
     ui.updateReadings();
     ui.updateStatus();
   };
-  app.operationalChanged = function () {
-    app.electricalChanged();
+  app.operationalChanged = function (opts = {}) {
+    app.electricalChanged(opts);
     app.rev++;
     ui.renderInspector(true);
     scheduleSave();
+  };
+  // Display-only operational props (plot, sound) must not wipe scope traces.
+  app.displayPropChanged = function () {
+    app.lastElecKey = JSON.stringify([app.doc.components, app.doc.wires]);
+    app.rev++;
+    app.renderAll();
+    scheduleSave();
+  };
+  // Reset time and stored capacitor/inductor energy to each part's initial values.
+  app.resetSimulation = function () {
+    const running = app.sim.running;
+    app.sim.reset();
+    app.paused = false;
+    app.sim.setRunning(running || app.needsTime());
+    refreshProblems();
+    app.rev++;
+    app.renderAll();
+    app.graph.draw(true);
+    ui.announce('Simulation reset');
+    ui.toast('Time and stored charge and current reset to their initial values.');
+  };
+  app.applyInitialEnergy = function (compId) {
+    app.sim.applyInitialConditions([compId]);
+    app.electricalChanged();
   };
 
   // ---------- Views ----------
@@ -410,12 +434,38 @@
     app.noteComps = new Set(app.meterNotes().map((m) => m.id));
   }
 
-  // True if a network holds a source other than the given part: a supply, a
-  // current source or the logic rails (an ammeter's 0 V link does not count).
-  function poweredNetwork(index, ownId) {
-    const net = app.sim.compiled && app.sim.compiled.networks && app.sim.compiled.networks[index];
-    if (!net) return false;
-    return net.prims.some((p) => p.owner !== ownId && ((p.k === 'V' && !p.meter && !p.short) || p.k === 'I'));
+  // True if a source other than the ohmmeter can drive current between the
+  // probe points: a supply with a closed load path, or a charged capacitor. An
+  // ideal battery behind an open switch does not count — its positive terminal
+  // is stranded — open a switch before measuring so the ohmmeter path is alone.
+  function ohmmeterUpset(c, entry) {
+    const compiled = app.sim.compiled, res = app.sim.result;
+    if (!compiled || !entry || entry.net.p !== entry.net.n) return null;
+    const parent = new Map();
+    const find = (i) => { if (!parent.has(i)) parent.set(i, i); while (parent.get(i) !== i) i = parent.get(i); return i; };
+    const join = (a, b) => { a = find(a); b = find(b); if (a !== b) parent.set(a, b); };
+    for (const p of compiled.networks[entry.net.p].prims) {
+      if (p.owner === c.id) continue;
+      if (p.k === 'G' || (p.k === 'V' && (p.short || p.meter))) join(p.a.n, p.b.n);
+    }
+    const atProbe = (n) => find(n) === find(entry.node.p) || find(n) === find(entry.node.n);
+    for (const p of compiled.networks[entry.net.p].prims) {
+      if (p.owner === c.id) continue;
+      if (p.k === 'I' && (atProbe(p.a.n) || atProbe(p.b.n))) return 'source';
+      if (p.k === 'V' && !p.meter && !p.short) {
+        const emf = typeof p.v === 'function' ? p.v({ t: app.sim.t, logic: app.sim.logic, inputs: app.sim.inputs }) : p.v;
+        // A live source whose terminals are already joined through resistances or
+        // closed switches has a path for current without the ohmmeter.
+        if (Math.abs(emf) > 1e-9 && find(p.a.n) === find(p.b.n) && atProbe(p.a.n)) return 'source';
+      }
+      if (p.k === 'C') {
+        const h = app.sim.capHist[p.owner];
+        if (h && Math.abs(h.v1) > 0.05 && (atProbe(p.a.n) || atProbe(p.b.n))) return 'charge';
+      }
+    }
+    const reading = registry.get('ohmmeter').meter.value(solver.reader(res, c));
+    if (Number.isFinite(reading) && reading < 0) return 'negative';
+    return null;
   }
 
   // Meters wired so that they cannot measure anything: a loose lead, or a
@@ -432,7 +482,12 @@
       if (loose === 2) msg = volt || ohm ? `${c.label} is not connected yet. Wire one lead to each side of the component you want to measure.` : `${c.label} is not connected yet. Wire it into the circuit in series, so the current flows through it.`;
       else if (loose === 1) msg = `${c.label} has a lead that is not connected, so it cannot measure anything. Wire both leads into the circuit.`;
       else if (volt && e && e.node && e.node.p === e.node.n) msg = `${c.label} has both leads on the same point, so it reads 0 V. Connect them to either side of a component.`;
-      else if (ohm && e && poweredNetwork(e.net.p, c.id)) msg = `${c.label} is connected to a powered circuit, so its reading is wrong. Disconnect the supply, or open a switch, before measuring resistance.`;
+      else if (ohm && e) {
+        const upset = ohmmeterUpset(c, e);
+        if (upset === 'source') msg = `${c.label} is connected to a powered circuit, so its reading is wrong. Disconnect the supply, or open a switch, before measuring resistance.`;
+        else if (upset === 'charge') msg = `${c.label} is across a charged capacitor, so its reading is wrong. Discharge the capacitor before measuring resistance.`;
+        else if (upset === 'negative') msg = `${c.label} shows a negative reading, which means another source is upsetting the measurement.`;
+      }
       if (msg) out.push({ id: c.id, msg });
     }
     return out;
@@ -471,16 +526,20 @@
     });
   };
 
-  // Opening the graph plots meters straight away: the selected meters, or, with
-  // none selected, every meter unless the user has already chosen some to plot.
+  // Opening the graph plots instruments straight away: the selected meters or
+  // oscilloscopes, or every one of them unless the user has already chosen some.
   app.graphOpen = () => !document.getElementById('graph-panel').hidden;
+  function canPlot(c) {
+    const def = registry.get(c.type);
+    return !!(def.meter || def.channels);
+  }
   function autoPlot() {
-    const meters = app.doc.components.filter((c) => registry.get(c.type).meter);
+    const meters = app.doc.components.filter(canPlot);
     const selected = meters.filter((c) => app.selection.comps.has(c.id));
     const pick = selected.length ? selected : meters.some((c) => c.props.plot) ? [] : meters;
     if (!pick.some((c) => !c.props.plot)) return;
     for (const c of pick) c.props.plot = true;
-    app.operationalChanged();
+    app.displayPropChanged();
   }
   app.showGraph = function (on) {
     const panel = document.getElementById('graph-panel');
@@ -490,6 +549,7 @@
     document.body.classList.toggle('graph-open', on);
     ui.updateStatus();
     if (on) requestAnimationFrame(() => app.graph.draw(true));
+    else if (app.graph) app.graph.syncExports();
   };
 
   // ---------- Simulation ----------
@@ -497,12 +557,12 @@
   // The solver finds the steady state after every change, so readings are live
   // without the clock. Time only matters for capacitors, inductors, AC supplies, the
   // oscilloscope and a graph of readings against time.
-  app.NO_TIME_MSG = 'Nothing in this circuit changes with time, so its readings are already live. Time matters for capacitors, inductors, AC supplies, the oscilloscope and the graph.';
+  app.NO_TIME_MSG = 'Readings are live. Nothing here changes over time, so there is nothing to pause.';
   app.needsTime = function () {
     const comp = app.sim.compiled;
     if (comp && (comp.hasCaps || comp.hasInductors || Number.isFinite(comp.acMin))) return true;
     if (app.doc.components.some((c) => c.type === 'scope')) return true;
-    return app.graphOpen() && app.doc.components.some((c) => registry.get(c.type).meter && c.props.plot);
+    return app.graphOpen() && app.doc.components.some((c) => canPlot(c) && c.props.plot);
   };
   app.toggleRun = function () {
     if (!app.paused && !app.needsTime()) { ui.toast(app.NO_TIME_MSG); return; }
@@ -710,7 +770,12 @@
     app.audio = PPC.audio.createAudio(app);
     app.renderer = PPC.render.createRenderer(app, svg, host);
     app.editor = PPC.editor.createEditor(app, svg, host);
-    app.graph = PPC.graph.createGraph(app, document.getElementById('graph-canvas'), document.getElementById('graph-legend'));
+    app.graph = PPC.graph.createGraph(
+      app,
+      document.getElementById('graph-canvas'),
+      document.getElementById('graph-legend'),
+      document.getElementById('graph-exports')
+    );
     wireControls();
     ui.renderExamples(PPC.examples.list);
 
@@ -752,6 +817,15 @@
     $('btn-graph').addEventListener('click', () => app.showGraph($('graph-panel').hidden));
     $('graph-close').addEventListener('click', () => app.showGraph(false));
     $('graph-window').addEventListener('change', (e) => { app.graphWindow = e.target.value; app.graph.draw(true); });
+    $('graph-export-csv').addEventListener('click', () => {
+      if (app.graph.exportCSV()) ui.toast('Graph data downloaded as CSV.');
+      else ui.toast('Pause with plotted readings on the graph to export.');
+    });
+    $('graph-export-plot').addEventListener('click', () => {
+      if (!app.graph.hasExportData()) { ui.toast('Pause with plotted readings on the graph to export.'); return; }
+      const ok = app.graph.exportPanPhyPlot();
+      ui.toast(ok ? 'Data sent to PanPhyPlot in a new tab.' : 'The browser blocked the new tab. Allow pop-ups for this site, then try again.');
+    });
     $('btn-examples').addEventListener('click', () => $('dlg-examples').showModal());
     $('examples-list').addEventListener('click', (e) => { const b = e.target.closest('[data-example]'); if (b) app.loadExample(Number(b.dataset.example)); });
     $('empty-start').addEventListener('click', () => app.loadExample(0));
@@ -761,7 +835,6 @@
       $('workspace').focus();
       ui.toast('Clean canvas. Drag a component from the library to start building.');
     });
-    $('btn-help').addEventListener('click', () => $('dlg-help').showModal());
     $('btn-tidy').addEventListener('click', () => app.tidy());
     $('btn-clear').addEventListener('click', () => app.newCircuit());
     const menu = $('menu-file'), fileBtn = $('btn-file');

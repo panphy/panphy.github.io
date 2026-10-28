@@ -12,6 +12,48 @@
   <title>PanPhyCircuits: Circuit Builder and Simulator — PanPhy Labs</title>
   <meta name="description" content="Free circuit builder for physics: build circuits from realistic parts or as circuit diagrams, then measure currents and potential differences with a real circuit solver. For GCSE and IB Physics.">
   <link rel="canonical" href="https://panphy.app/tools/panphycircuits.html">
+<!-- panphy-discovery -->
+  <meta property="og:title" content="PanPhyCircuits: Circuit Builder and Simulator — PanPhy Labs">
+  <meta property="og:description" content="Free circuit builder for physics: build circuits from realistic parts or as circuit diagrams, then measure currents and potential differences with a real circuit solver. For GCSE and IB Physics.">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://panphy.app/tools/panphycircuits.html">
+  <meta property="og:image" content="https://panphy.app/assets/og-default.png">
+  <meta property="og:site_name" content="PanPhy Labs">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="PanPhyCircuits: Circuit Builder and Simulator — PanPhy Labs">
+  <meta name="twitter:description" content="Free circuit builder for physics: build circuits from realistic parts or as circuit diagrams, then measure currents and potential differences with a real circuit solver. For GCSE and IB Physics.">
+  <meta name="twitter:image" content="https://panphy.app/assets/og-default.png">
+  <script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": "PanPhyCircuits",
+  "description": "Free circuit builder for physics: build circuits from realistic parts or as circuit diagrams, then measure currents and potential differences with a real circuit solver. For GCSE and IB Physics.",
+  "url": "https://panphy.app/tools/panphycircuits.html",
+  "applicationCategory": "EducationalApplication",
+  "operatingSystem": "Any",
+  "browserRequirements": "Requires HTML5 and JavaScript",
+  "isAccessibleForFree": true,
+  "offers": {
+    "@type": "Offer",
+    "price": "0",
+    "priceCurrency": "USD"
+  },
+  "author": {
+    "@type": "Organization",
+    "name": "PanPhy Labs",
+    "url": "https://panphy.app/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "PanPhy Labs",
+    "url": "https://panphy.app/"
+  },
+  "image": "https://panphy.app/assets/og-default.png"
+}
+  </script>
+<!-- /panphy-discovery -->
+
   <link rel="icon" type="image/png" href="/assets/favicon.png">
   <script src="/assets/sw-register.js" defer></script>
   <link rel="stylesheet" href="/assets/fonts/fonts.css">
@@ -46,7 +88,7 @@
             </div>
           </div>
         </div>
-        <button type="button" id="btn-help" class="atool atool-quiet" data-icon="guide" title="How to use PanPhyCircuits, and keyboard shortcuts"><span>Guide</span></button>
+        <a href="/tools/panphycircuits/manual.html" class="atool atool-quiet" data-icon="guide" title="Open the PanPhyCircuits manual"><span>Manual</span></a>
         <button id="theme-button" type="button" data-panphy-theme-toggle="auto" aria-label="Toggle light/dark theme" title="Toggle light/dark theme"></button>
         <button type="button" data-panphy-fullscreen aria-label="Enter fullscreen" title="Enter fullscreen"></button>
       </div>
@@ -66,8 +108,8 @@
           </label>
           <div class="lib-filters" role="group" aria-label="Filter components">
             <button type="button" class="ds-chip" data-filter="all" aria-pressed="false">All</button>
-            <button type="button" class="ds-chip" data-filter="core" aria-pressed="true">Core physics</button>
-            <button type="button" class="ds-chip" data-filter="ext" aria-pressed="false">Extensions</button>
+            <button type="button" class="ds-chip" data-filter="core" aria-pressed="true">Core</button>
+            <button type="button" class="ds-chip" data-filter="logic" aria-pressed="false">Logic</button>
           </div>
         </div>
         <div id="lib-list" class="lib-list"></div>
@@ -108,7 +150,7 @@
             <button type="button" id="btn-zoom-in" class="tool" data-icon="zoomIn" aria-label="Zoom in (+)" title="Zoom in (+)"></button>
             <button type="button" id="btn-fit" class="tool" data-icon="fit" aria-label="Fit to circuit (0)" title="Fit to circuit (0)"></button>
             <button type="button" id="btn-snap" class="tool" data-icon="snap" aria-label="Snap to grid (G)" title="Snap to grid (G)" aria-pressed="true"></button>
-            <button type="button" id="btn-graph" class="tool" data-icon="graph" aria-label="Show graph" title="Graph of meter readings" aria-pressed="false"></button>
+            <button type="button" id="btn-graph" class="tool" data-icon="graph" aria-label="Show graph" title="Graph of meter and oscilloscope readings" aria-pressed="false"></button>
           </div>
           <div class="toolbar-end">
             <div class="menu-wrap display-wrap">
@@ -152,6 +194,10 @@
           <div class="graph-head">
             <strong class="graph-title">Graph</strong>
             <div id="graph-legend" class="graph-legend"></div>
+            <div id="graph-exports" class="graph-exports" hidden>
+              <button type="button" id="graph-export-csv" class="graph-export-pill">Export CSV</button>
+              <button type="button" id="graph-export-plot" class="graph-export-pill">Export to PanPhyPlot</button>
+            </div>
             <label class="graph-window"><span class="sr-only">Time window</span>
               <select id="graph-window">
                 <option value="all">All time</option>
@@ -162,7 +208,7 @@
             </label>
             <button type="button" id="graph-close" class="icon-btn" data-icon="close" aria-label="Close graph"></button>
           </div>
-          <canvas id="graph-canvas" class="graph-canvas" aria-label="Graph of plotted meter readings against time"></canvas>
+          <canvas id="graph-canvas" class="graph-canvas" aria-label="Graph of plotted meter and oscilloscope readings against time"></canvas>
         </div>
       </section>
 
@@ -192,72 +238,6 @@
     <form method="dialog" class="dialog-head"><h2 id="examples-title" class="ds-title">Example circuits</h2><button class="icon-btn" value="cancel" aria-label="Close">✕</button></form>
     <p class="dialog-sub">Each example has a realistic layout and a circuit diagram. Opening one replaces the current circuit (you can undo).</p>
     <ol id="examples-list" class="examples-list"></ol>
-  </dialog>
-
-  <dialog id="dlg-help" class="dialog dialog-wide" aria-labelledby="help-title">
-    <form method="dialog" class="dialog-head"><h2 id="help-title" class="ds-title">How to use PanPhyCircuits</h2><button class="icon-btn" value="cancel" aria-label="Close">✕</button></form>
-    <div class="help-body">
-      <p class="help-intro">Build a circuit, operate its switches, and investigate the results. Open a topic below for more detail.</p>
-      <details class="help-topic" open>
-        <summary>Start building</summary>
-        <ol class="help-steps">
-          <li><strong>Add components.</strong> Drag a card from Components, or click a card and then the canvas. Shift-click to place several. Enter on a focused card places it in the middle.</li>
-          <li><strong>Connect terminals.</strong> Click one terminal, then another. Click empty space along the way to add a bend. Right-click or Esc cancels.</li>
-          <li><strong>Operate the circuit.</strong> Click a switch lever or logic switch, hold a push button, or drag a rheostat slider or potentiometer knob. Drag elsewhere on a component to move it.</li>
-          <li><strong>Investigate.</strong> Readings update live. When a circuit changes over time (capacitors, inductors, AC, the oscilloscope or the graph), a Pause button appears at the bottom right: use a circuit switch to trigger an effect, then Pause to freeze time, traces, current and component animations, and sound. Resume continues from there.</li>
-        </ol>
-      </details>
-      <details class="help-topic">
-        <summary>Wiring, editing &amp; views</summary>
-        <dl class="help-notes">
-          <div><dt>Branches &amp; free ends</dt><dd>Click an existing wire to join it with a junction dot. Double-click to end a wire at a free point.</dd></div>
-          <div><dt>Reshape or reconnect</dt><dd>Drag a wire to bend it. Drag a square to move a bend; double-click the square to remove it. Drag a round wire end onto another terminal to reconnect it.</dd></div>
-          <div><dt>Two views, one circuit</dt><dd>Realistic and Circuit diagram share connections but keep their own arrangements. New parts appear in both. Switching views never changes simulation time.</dd></div>
-          <div><dt>Tidy up</dt><dd>Lines up parts, separates overlaps and reroutes wires in the current view. Connections stay the same; Undo restores the previous layout.</dd></div>
-          <div><dt>Clear</dt><dd>Removes every part and wire from both views. You can undo it.</dd></div>
-        </dl>
-      </details>
-      <details class="help-topic">
-        <summary>Meters, graphs &amp; oscilloscope</summary>
-        <dl class="help-notes">
-          <div><dt>Quick settings</dt><dd>Right-click a component, or touch and hold its body, to open its compact settings menu. Drag to move it instead; tap to select it and open the inspector.</dd></div>
-          <div><dt>Read &amp; pin displays</dt><dd>Select a meter or oscilloscope to see its display in the inspector. Pin keeps that display visible while you select other parts.</dd></div>
-          <div><dt>Plot a graph</dt><dd>Opening Graph enables “Plot on graph” for selected meters, or for all meters if none is selected and none is plotted yet.</dd></div>
-          <div><dt>Oscilloscope scaling</dt><dd>Auto scale and Auto time base start on for new scopes. Auto scale fits each channel vertically; Auto time base shows a few AC cycles. Turn either off to use its manual settings.</dd></div>
-          <div><dt>AC supply</dt><dd>Frequency ranges from 1 Hz to 1 kHz. Use 1 Hz to watch readings change, or the oscilloscope for faster signals.</dd></div>
-          <div><dt>Current animation</dt><dd>Yellow dashes show conventional current. Fast AC animation slows to one visible cycle per second and is labeled on the canvas; meters, scope traces and sound keep their actual timing. Rectified current keeps its one-way flow. Mixed-frequency circuits retain live animation.</dd></div>
-        </dl>
-      </details>
-      <details class="help-topic">
-        <summary>Keyboard shortcuts</summary>
-        <dl class="keys">
-          <div><dt>V / W / H</dt><dd>Select, wire, pan tools</dd></div>
-          <div><dt>R / Shift+R</dt><dd>Rotate 45° clockwise / counterclockwise</dd></div>
-          <div><dt>M</dt><dd>Mirror selection</dd></div>
-          <div><dt>Del</dt><dd>Delete selection</dd></div>
-          <div><dt>Ctrl+Z / Ctrl+Shift+Z</dt><dd>Undo / redo</dd></div>
-          <div><dt>Ctrl+D / Ctrl+C / Ctrl+V</dt><dd>Duplicate / copy / paste</dd></div>
-          <div><dt>Arrows / Shift+Arrows</dt><dd>Nudge selection / larger steps</dd></div>
-          <div><dt>Tab</dt><dd>Select next component</dd></div>
-          <div><dt>Enter</dt><dd>Operate selected switch</dd></div>
-          <div><dt>Space</dt><dd>Pause / resume simulation</dd></div>
-          <div><dt>1 / 2</dt><dd>Realistic / circuit diagram</dd></div>
-          <div><dt>+ / − / 0</dt><dd>Zoom in / zoom out / fit</dd></div>
-          <div><dt>G</dt><dd>Snap to grid on/off</dd></div>
-        </dl>
-      </details>
-      <details class="help-topic">
-        <summary>Simulation &amp; saving</summary>
-        <dl class="help-notes">
-          <div><dt>Live operation</dt><dd>Examples and saved circuits open live. Edits still update readings while paused. Pause/Resume, simulation status, speed and time step are in the Simulation inspector.</dd></div>
-          <div><dt>Save your work</dt><dd>Your circuit is saved automatically in this browser. File → Save as file writes a .ppcir file containing the circuit and both layouts, without the live simulation state. Open file also accepts older .json files.</dd></div>
-          <div><dt>Ideal components</dt><dd>Wires, ideal ammeters and closed switches have zero resistance. Ideal voltmeters and scope inputs draw no current. Meters can also have a finite resistance. The ohmmeter (an extension) drives a test current of at most 1 mA, so use it on parts with no supply connected; OL means an open circuit.</dd></div>
-          <div><dt>Errors &amp; precision</dt><dd>Short circuits and conflicting ideal sources produce errors. Voltage between separate circuits is undefined. Readings use 3 significant figures; these are educational models. Each component’s inspector explains its model.</dd></div>
-          <div><dt>Logic supply</dt><dd>Logic modules share a hidden 5 V supply. Use the 0 V and +5 V rails to connect them to analog parts.</dd></div>
-          <div><dt>Solver</dt><dd>Modified nodal analysis solves the circuit, with Newton–Raphson iteration for diodes, LEDs, lamps and transistors.</dd></div>
-        </dl>
-      </details>
-    </div>
   </dialog>
 
   <dialog id="dlg-confirm" class="dialog" aria-labelledby="confirm-title">

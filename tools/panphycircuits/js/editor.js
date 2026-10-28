@@ -66,7 +66,8 @@
     function placeAt(type, p) {
       const doc = app.doc;
       const comp = circuit.addComponent(doc, type);
-      if (registry.get(type).meter && app.graphOpen()) comp.props.plot = true;
+      const def = registry.get(type);
+      if ((def.meter || def.channels) && app.graphOpen()) comp.props.plot = true;
       const pos = snapP(p);
       doc.layouts[view()].comps[comp.id] = { x: pos.x, y: pos.y, r: 0, f: false };
       layout.clearSpot(doc, view(), comp.id);
@@ -251,6 +252,16 @@
       const initialHit = hitOf(e);
       // Leave object right-clicks uncaptured so contextmenu retains its target.
       if (e.button === 2 && !ed.wiring && ['comp', 'act', 'term', 'delete', 'wire', 'wp', 'mid', 'end'].includes(initialHit.kind)) return;
+      // A primary pointer means no other finger is down, so anything still
+      // tracked is stale. Safari can lose a release when a redraw removes the
+      // element under the finger; without this, every later touch would look
+      // like a second finger (a pinch) and taps and holds would do nothing.
+      if (e.isPrimary && pointers.size) {
+        pointers.clear();
+        pinch = null;
+        clearHoldTimer();
+        if (ed.drag && ed.drag.type !== 'wiring') ed.drag = null;
+      }
       svg.setPointerCapture(e.pointerId);
       pointers.set(e.pointerId, { x: e.clientX, y: e.clientY });
       host.focus({ preventScroll: true });
@@ -436,6 +447,11 @@
           if (d.changed) app.commit(`Adjust ${circuit.getComp(app.doc, d.id).label}`);
           break;
         case 'handle': endHandle(d, p); break;
+        // A touch on empty space pans; a tap without movement clears the
+        // selection, as a click does with a mouse.
+        case 'pan':
+          if (d.fromTouch && Math.hypot(e.clientX - d.x, e.clientY - d.y) < 8) app.setSelection([], []);
+          break;
         default: break;
       }
     }
@@ -443,10 +459,20 @@
     svg.addEventListener('pointercancel', (e) => {
       clearHoldTimer();
       pointers.delete(e.pointerId);
-      const d = ed.drag;
-      if (d && d.type === 'act-momentary') releaseMomentary(d.id);
-      ed.drag = null;
       pinch = null;
+      const d = ed.drag;
+      ed.drag = null;
+      if (!d) return;
+      // Keep the in-progress edit (same as a normal release) so Undo stays consistent.
+      if (d.type === 'act-momentary') { releaseMomentary(d.id); return; }
+      if (d.type === 'move' && d.active) app.commit(d.ids.length > 1 ? 'Move components' : 'Move component');
+      else if ((d.type === 'act-slider' || d.type === 'act-knob') && d.changed) {
+        const c = circuit.getComp(app.doc, d.id);
+        if (c) app.commit(`Adjust ${c.label}`);
+      } else if (d.type === 'handle' && d.kind === 'wp' && d.active) app.commit('Move bend');
+      else if (d.type === 'handle' && d.kind === 'end') app.renderer.setPreview('');
+      else if (d.type === 'marquee') app.renderer.setPreview('');
+      else if (d.type === 'wiring' || d.type === 'wire-pending') { /* leave a click-to-finish wire if one was started */ }
     });
 
     svg.addEventListener('dblclick', (e) => {

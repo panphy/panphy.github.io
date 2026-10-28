@@ -1127,11 +1127,14 @@ export function createSpellwaveAudio({
 
   // Monsters
 
+  // For bosses this is the arm cue: rocks unlock after their first-shot delay.
   function playRevealSound(enemy) {
     const pan = lanePan(enemy);
     if (enemy.isBoss) {
-      drum(92, 0.5, 0.085, { pan });
-      bell(138, 1.1, 0.04, { delay: 0.03, pan });
+      drum(92, 0.55, 0.09, { pan });
+      drum(70, 0.65, 0.1, { delay: 0.09, pan });
+      bell(196, 0.95, 0.04, { delay: 0.04, pan });
+      bell(293.66, 0.75, 0.028, { delay: 0.16, pan });
       return;
     }
     const laneIndex = Math.max(0, pathLanes.findIndex((lane) => lane === enemy.lane));
