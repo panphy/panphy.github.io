@@ -596,10 +596,44 @@
       quick.setAttribute('aria-label', `${c.label} · ${def.name} settings`);
       quick.innerHTML = def.props.map(p => field(p, c.props[p.key], 'quick-' + id, c.type === 'scope' && ((c.props.autoScale && ['v1', 'v2'].includes(p.key)) || (c.props.autoTime && p.key === 'tdiv')))).join('');
       quick.querySelectorAll('.field-range, .field-help').forEach(el => el.remove());
+      quick.style.maxHeight = '';
       quick.hidden = false;
       const rect = quick.getBoundingClientRect();
-      quick.style.left = Math.max(8, Math.min(x, window.innerWidth - rect.width - 8)) + 'px';
-      quick.style.top = Math.max(8, Math.min(y, window.innerHeight - rect.height - 8)) + 'px';
+      // Reserve the whole selection, including its upper-left delete button.
+      // World bounds account for rotation, mirroring and upright controls.
+      const b = layout.compBounds(app.doc, app.doc.view, id);
+      const k = app.cameras[app.doc.view];
+      const svg = $('ws-svg').getBoundingClientRect();
+      const gap = 10, margin = 8;
+      const left = svg.left + k.tx + (b.x - 16) * k.z - gap;
+      const right = svg.left + k.tx + (b.x2 + 5) * k.z + gap;
+      const top = svg.top + k.ty + (b.y - 16) * k.z - gap;
+      const bottom = svg.top + k.ty + (b.y2 + 5) * k.z + gap;
+      const vw = window.innerWidth, vh = window.innerHeight;
+      const clamp = (v, lo, hi) => Math.max(lo, Math.min(v, hi));
+      const px = clamp(x, margin, vw - margin - rect.width);
+      const py = clamp(y, margin, vh - margin - rect.height);
+      const candidates = [
+        { x: Math.max(margin, right), y: py, width: vw - margin - Math.max(margin, right), height: vh - margin - py },
+        { x: Math.min(vw - margin, left) - rect.width, y: py, width: Math.min(vw - margin, left) - margin, height: vh - margin - py },
+        { x: px, y: Math.max(margin, bottom), width: vw - margin - px, height: vh - margin - Math.max(margin, bottom) },
+        { x: px, y: Math.min(vh - margin, top) - rect.height, width: vw - margin - px, height: Math.min(vh - margin, top) - margin }
+      ];
+      const fits = candidates.filter(p => p.width >= rect.width && p.height >= rect.height);
+      // Prefer a nearby full-size menu; tall menus can scroll above or below.
+      const available = fits.length ? fits : candidates.filter(p => p.width >= rect.width && p.height > 0);
+      available.sort((a, b) => fits.length
+        ? Math.hypot(a.x - x, a.y - y) - Math.hypot(b.x - x, b.y - y)
+        : b.height - a.height);
+      const pos = available[0];
+      if (!pos) {
+        closeQuickSettings();
+        app.toast('Zoom out to make room for component settings.');
+        return;
+      }
+      quick.style.left = pos.x + 'px';
+      quick.style.top = Math.max(margin, pos.y) + 'px';
+      quick.style.maxHeight = Math.min(rect.height, pos.height) + 'px';
       quick.querySelector('input:not(:disabled), select:not(:disabled)').focus({ preventScroll: true });
     };
     quick.addEventListener('keydown', e => {
