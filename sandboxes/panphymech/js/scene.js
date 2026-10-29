@@ -46,7 +46,7 @@
     mass: [0.001, 10000], friction: [0, 2], restitution: [0, 1], drag: [0, 50],
     k: [0.1, 100000], rest: [0, 50], damping: [0, 1000], length: [0.01, 50],
     speed: [-100, 100], torque: [0, 100000],
-    gravity: [0, 100], coord: [-1000, 1000], velocity: [-500, 500], omega: [-200, 200]
+    gravity: [0, 100], viscosity: [0, 1], coord: [-1000, 1000], velocity: [-500, 500], omega: [-200, 200]
   };
 
   // Box2D keeps a thin skin round polygons, so resting contacts settle this far apart.
@@ -61,7 +61,7 @@
     return {
       format: FORMAT,
       version: VERSION,
-      world: { gravity: 9.81, floor: true, floorFriction: 0.5, gpeZero: 0 },
+      world: { gravity: 9.81, viscosity: 0, floor: true, floorFriction: 0.5, gpeZero: 0 },
       bodies: [],
       links: [],
       nextId: 1,
@@ -519,6 +519,7 @@
     scene.world.gravity = clamp(num(w.gravity, 9.81), ...LIMITS.gravity);
     scene.world.floor = w.floor !== false;
     scene.world.floorFriction = clamp(num(w.floorFriction, 0.5), ...LIMITS.friction);
+    scene.world.viscosity = clamp(num(w.viscosity, 0), ...LIMITS.viscosity);
     scene.world.gpeZero = clamp(num(w.gpeZero, 0), ...LIMITS.coord);
     const ids = new Set();
     let skipped = 0;

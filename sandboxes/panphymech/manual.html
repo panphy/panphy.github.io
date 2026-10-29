@@ -6,6 +6,7 @@
 	<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 	<meta name="theme-color" content="#F5F6FA">
 	<script src="/assets/theme.js"></script>
+	<script src="/assets/math.js"></script>
 	<meta name="apple-mobile-web-app-capable" content="yes">
 	<meta name="apple-mobile-web-app-status-bar-style" content="default">
 	<link rel="stylesheet" href="/assets/standalone-top.css">
@@ -142,7 +143,7 @@
 <ol class="actions">
 <li>With the scene paused, click the bob. The Inspector shows its properties and current readings. Right-click it, or touch and hold, for quick settings.</li>
 <li>Use the numeric fields for precise mass, friction, bounciness and air resistance. Reset before testing a different starting position or velocity.</li>
-<li>Click empty space to show <strong>World</strong>: gravity, floor, floor friction and the reference height for gravitational energy.</li>
+<li>Click empty space to show <strong>World</strong>: gravity, fluid viscosity, floor, floor friction and the reference height for gravitational energy.</li>
 </ol>
 <div class="checkpoint"><strong>What you should see</strong>
 <p>The bob is highlighted and its settings appear in the Inspector. The example’s gravitational-energy reference is 2 m, the height of the bob at its lowest point.</p>
@@ -258,7 +259,9 @@
 <div class="reference-body">
 <ul>
 <li>All quantities use SI units. The simulation uses Planck.js (Box2D) rigid-body mechanics, with steps of 1/240 s or smaller for stiff springs; solid connectors use smaller steps too.</li>
-<li>Springs follow Hooke’s law with optional linear damping. Air resistance acts opposite motion and increases with the square of speed. Friction combines the two surface coefficients using their geometric mean; if either is zero, the contact is frictionless.</li>
+<li data-math-static>Springs follow Hooke’s law with optional linear damping. Each object’s air resistance setting adds quadratic drag, \(F = kv^2\). </li>
+<li data-math-static>The World setting <strong>Fluid viscosity \(\eta\)</strong> adds Stokes drag, \(F = 6\pi r\eta v\), opposite motion. Its range is 0–1 Pa·s and default is 0 (off). Balls use their radius; other shapes use an equal-area radius as an approximation. Solid rods and ropes share drag across their segments. Viscosity changes apply immediately, without resetting the run. This models viscous drag, without buoyancy.</li>
+<li>Friction combines the two surface coefficients using their geometric mean; if either is zero, the contact is frictionless.</li>
 <li>Bounciness uses the larger restitution of the two surfaces. Very slow collisions are inelastic to keep resting contacts quiet. Contact gaps and small energy changes at impacts are normal numerical effects.</li>
 <li>Gravitational energy is measured from the height set in World, which defaults to the floor at 0 m. Some examples choose another reference; negative gravitational energy below that height is valid.</li>
 <li>Merged or cut shapes can catch at seams, and very thin walls can miss fast objects. This is an educational model; reduce extreme speeds, stiffnesses or mass ratios if a setup becomes unstable.</li>

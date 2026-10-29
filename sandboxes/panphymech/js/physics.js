@@ -1,5 +1,5 @@
 // PanPhyMech: the live simulation. Builds a Planck.js (Box2D) world from the scene,
-// adds Hooke's-law springs and quadratic air resistance as explicit forces, and
+// adds Hooke's-law springs, quadratic air resistance and world Stokes drag, and
 // reports positions, velocities, forces and energies in SI units.
 (function (root) {
   const PPM = root.PPM = root.PPM || {};
@@ -40,6 +40,14 @@
       return pb.createFixture(new pl.Polygon(S.vertices(b).map((p) => pl.Vec2(p.x, p.y))), opts);
     }
 
+    // Planck integrates linear damping implicitly: v /= 1 + h*c/m. This
+    // implements Stokes drag without reversing velocity at high viscosity/low mass.
+    function setViscousDamping(pb, radius) {
+      const eta = S.clamp(scene.world.viscosity || 0, ...S.LIMITS.viscosity);
+      pb.setLinearDamping(pb.isStatic() ? 0 : 6 * Math.PI * radius * eta / pb.getMass());
+    }
+    const dragRadius = (b) => b.kind === 'ball' ? b.r : Math.sqrt(S.area(b) / Math.PI);
+
     scene.bodies.forEach((b) => {
       const pb = world.createBody({
         type: b.fixed ? 'static' : 'dynamic',
@@ -51,6 +59,7 @@
         angularVelocity: b.fixed || b.lockRotation ? 0 : b.omega
       });
       fixtureFor(pb, b);
+      setViscousDamping(pb, dragRadius(b));
       pb.setUserData(b.id);
       bodies.set(b.id, pb);
     });
@@ -100,6 +109,9 @@
         const q = pts[i + 1];
         const body = world.createBody({ type: 'dynamic', position: pl.Vec2((p.x + q.x) / 2, (p.y + q.y) / 2), angle: Math.atan2(q.y - p.y, q.x - p.x) });
         body.createFixture(new pl.Box(seg / 2, th / 2), { density: mass / n / (seg * th), friction: 0.4, restitution: 0.1, filterGroupIndex: solidGroup });
+        // Share one connector's total drag across its segments, so changing the
+        // rope discretization does not change the total resistance.
+        setViscousDamping(body, Math.sqrt(l.length * th / Math.PI) / n);
         segs.push(body);
       }
       const hinge = (X, Y, local) => world.createJoint(new pl.RevoluteJoint({ localAnchorA: pl.Vec2(local.ax, local.ay), localAnchorB: pl.Vec2(local.bx, local.by) }, X, Y));
@@ -400,6 +412,7 @@
         if (!b.fixed) f.setDensity(b.mass / Math.max(S.area(b), 1e-9));
       }
       if (!b.fixed) pb.resetMassData();
+      setViscousDamping(pb, dragRadius(b));
       refreshContacts();
       chooseStep();
     };
@@ -415,6 +428,12 @@
       }
       if (j && l.kind === 'rod') j.setLength(l.length);
       if (j && l.kind === 'rope') j.setMaxLength(l.length);
+      const solid = solids.get(l.id);
+      if (solid) {
+        const thickness = l.kind === 'rope' ? 0.03 : 0.06;
+        const radius = Math.sqrt(l.length * thickness / Math.PI) / solid.segs.length;
+        solid.segs.forEach((pb) => setViscousDamping(pb, radius));
+      }
       chooseStep();
     };
 

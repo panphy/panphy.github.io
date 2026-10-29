@@ -380,6 +380,7 @@
       const rect = canvas.getBoundingClientRect();
       if (clientX < rect.left || clientX > rect.right || clientY < rect.top || clientY > rect.bottom) return false;
       ed.placeBody(type, rr().toWorld(clientX - rect.left, clientY - rect.top));
+      ed.arm(null);
       return true;
     };
 
