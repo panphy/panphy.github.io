@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+	<meta name="theme-color" content="#F5F6FA">
+	<script src="/assets/theme.js"></script>
+	<meta name="apple-mobile-web-app-capable" content="yes">
+	<meta name="apple-mobile-web-app-status-bar-style" content="default">
+	<link rel="stylesheet" href="/assets/standalone-top.css">
+	<title>PanPhyCircuits Manual: Circuit Builder Guide — PanPhy Labs</title>
+	<meta name="description" content="The user guide for PanPhyCircuits: open an example, measure with meters, switch between realistic and diagram views, then save or export your circuit.">
+	<link rel="canonical" href="https://panphy.app/sandboxes/panphycircuits/manual.html">
+<!-- panphy-discovery -->
+  <meta property="og:title" content="PanPhyCircuits Manual: Circuit Builder Guide — PanPhy Labs">
+  <meta property="og:description" content="The user guide for PanPhyCircuits: open an example, measure with meters, switch between realistic and diagram views, then save or export your circuit.">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://panphy.app/sandboxes/panphycircuits/manual.html">
+  <meta property="og:image" content="https://panphy.app/assets/og-default.png">
+  <meta property="og:site_name" content="PanPhy Labs">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="PanPhyCircuits Manual: Circuit Builder Guide — PanPhy Labs">
+  <meta name="twitter:description" content="The user guide for PanPhyCircuits: open an example, measure with meters, switch between realistic and diagram views, then save or export your circuit.">
+  <meta name="twitter:image" content="https://panphy.app/assets/og-default.png">
+  <script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "TechArticle",
+  "headline": "PanPhyCircuits Manual",
+  "name": "PanPhyCircuits Manual",
+  "description": "The user guide for PanPhyCircuits: open an example, measure with meters, switch between realistic and diagram views, then save or export your circuit.",
+  "url": "https://panphy.app/sandboxes/panphycircuits/manual.html",
+  "isAccessibleForFree": true,
+  "author": {
+    "@type": "Organization",
+    "name": "PanPhy Labs",
+    "url": "https://panphy.app/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "PanPhy Labs",
+    "url": "https://panphy.app/",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://panphy.app/assets/panphy.png"
+    }
+  },
+  "image": "https://panphy.app/assets/og-default.png"
+}
+  </script>
+<!-- /panphy-discovery -->
+	<link rel="icon" type="image/png" href="/assets/favicon.png">
+	<link rel="stylesheet" href="/assets/theme-toggle.css">
+	<script src="/assets/theme-toggle.js"></script>
+	<link rel="stylesheet" href="/sandboxes/panphycircuits/manual/manual.css">
+	<script src="/sandboxes/panphycircuits/manual/manual.js" defer></script>
+	<script src="/assets/sw-register.js" defer></script>
+	<link rel="stylesheet" href="/assets/footer.css">
+</head>
+
+<body>
+	<div class="top">
+		<div class="manual-brand"><a href="/sandboxes/panphycircuits.html" class="back-link" aria-label="Back to PanPhyCircuits"><img src="/assets/panphy.png" alt="" width="30" height="30"><span>PanPhyCircuits</span></a><span class="manual-badge">Manual</span></div>
+		<div class="top-actions">
+			<button type="button" id="contents-button" aria-haspopup="dialog" aria-controls="contents-dialog">Contents</button>
+			<div class="theme-toggle"><button id="theme-button" data-panphy-theme-toggle aria-label="Toggle Light/Dark Theme" title="Toggle between light and dark themes">☀️</button></div>
+		</div>
+	</div>
+	<main>
+		<header class="manual-intro">
+			<p class="eyebrow">PanPhyCircuits · User guide</p>
+			<h1>From parts on a bench to a measured circuit</h1>
+			<p class="lead">Open an example, operate the switch, read the meters, then flip to the circuit diagram — the same electrical circuit in both views.</p>
+			<div class="intro-actions"><a class="primary-link" href="#step-example">Start the walkthrough</a><a href="#reference">Browse the reference</a></div>
+		</header>
+		<section aria-labelledby="walkthrough">
+			<span id="quick-start" class="anchor-alias" aria-hidden="true"></span>
+			<h2 id="walkthrough" tabindex="-1">Your first circuit</h2>
+			<p class="section-intro">Work through these five steps in order. Screenshots match your theme; select one to enlarge it here.</p>
+			<nav class="step-index" aria-label="Walkthrough steps"><a href="#step-example"><span>1</span>Open an example</a><a href="#step-operate"><span>2</span>Operate the circuit</a><a href="#step-meters"><span>3</span>Read the meters</a><a href="#step-diagram"><span>4</span>Switch to the diagram</a><a href="#step-save"><span>5</span>Save or export</a></nav>
+
+<section class="walkthrough-step" aria-labelledby="step-example">
+	<p class="eyebrow">Step 1 of 5</p>
+	<h3 id="step-example" tabindex="-1">Open an example</h3>
+	<div class="step-layout">
+		<div class="step-instructions">
+			<ol class="actions">
+				<li><a href="/sandboxes/panphycircuits.html" target="_blank" rel="noopener">Open PanPhyCircuits in a new tab</a>.</li>
+				<li>Choose <strong>Examples</strong>, then <strong>Ammeter and voltmeter connections</strong>. Opening an example replaces the current circuit (you can Undo).</li>
+				<li>Find Components on the left, the Circuit canvas in the middle, and the inspector cards on the right.</li>
+			</ol>
+			<div class="checkpoint"><strong>What you should see</strong>
+				<p>A realistic bench layout with a cell, lamp, switch, ammeter and voltmeter. Readings update live; conventional current shows as yellow dashes when the switch is closed.</p>
+			</div>
+		</div>
+		<figure class="screenshot">
+			<a class="screenshot-link screenshot-light" href="/sandboxes/panphycircuits/manual/realistic-light.png" target="_blank" rel="noopener" aria-label="Enlarge realistic view screenshot">
+				<img src="/sandboxes/panphycircuits/manual/realistic-light.png" width="1680" height="980" loading="lazy" decoding="async" alt="PanPhyCircuits realistic view of the ammeter and voltmeter example circuit.">
+				<span class="screenshot-open">Enlarge screenshot <span aria-hidden="true">↗</span></span>
+			</a>
+			<a class="screenshot-link screenshot-dark" href="/sandboxes/panphycircuits/manual/realistic-dark.png" target="_blank" rel="noopener" aria-label="Enlarge realistic view screenshot">
+				<img src="/sandboxes/panphycircuits/manual/realistic-dark.png" width="1680" height="980" loading="lazy" decoding="async" alt="PanPhyCircuits realistic view of the ammeter and voltmeter example circuit.">
+				<span class="screenshot-open">Enlarge screenshot <span aria-hidden="true">↗</span></span>
+			</a>
+			<figcaption><strong>Realistic view.</strong> Parts look like the bench; the solver is already live.</figcaption>
+		</figure>
+	</div>
+	<nav class="step-nav" aria-label="Step 1 navigation"><a href="#walkthrough">← All steps</a><a href="#step-operate">Next: Operate the circuit →</a></nav>
+</section>
+
+<section class="walkthrough-step" aria-labelledby="step-operate">
+	<p class="eyebrow">Step 2 of 5</p>
+	<h3 id="step-operate" tabindex="-1">Operate the circuit</h3>
+	<div class="step-layout">
+		<div class="step-instructions">
+			<ol class="actions">
+				<li>Click the switch lever to open or close the circuit.</li>
+				<li>Drag a rheostat slider or potentiometer knob when those parts are present. Hold a push button to close it momentarily.</li>
+				<li>When a circuit changes over time (capacitors, inductors, AC, scope or graph), a <strong>Pause</strong> control appears at the bottom right of the canvas.</li>
+			</ol>
+			<div class="checkpoint"><strong>What you should see</strong>
+				<p>The lamp brightness and meter faces follow the switch. Current animation freezes while paused; Resume continues from that moment.</p>
+			</div>
+		</div>
+		<figure class="screenshot">
+			<a class="screenshot-link screenshot-light" href="/sandboxes/panphycircuits/manual/operate-light.png" target="_blank" rel="noopener" aria-label="Enlarge operate screenshot">
+				<img src="/sandboxes/panphycircuits/manual/operate-light.png" width="1680" height="980" loading="lazy" decoding="async" alt="PanPhyCircuits with the example switch closed and current animation visible.">
+				<span class="screenshot-open">Enlarge screenshot <span aria-hidden="true">↗</span></span>
+			</a>
+			<a class="screenshot-link screenshot-dark" href="/sandboxes/panphycircuits/manual/operate-dark.png" target="_blank" rel="noopener" aria-label="Enlarge operate screenshot">
+				<img src="/sandboxes/panphycircuits/manual/operate-dark.png" width="1680" height="980" loading="lazy" decoding="async" alt="PanPhyCircuits with the example switch closed and current animation visible.">
+				<span class="screenshot-open">Enlarge screenshot <span aria-hidden="true">↗</span></span>
+			</a>
+			<figcaption><strong>Operate.</strong> Switches, buttons and live current without leaving the canvas.</figcaption>
+		</figure>
+	</div>
+	<nav class="step-nav" aria-label="Step 2 navigation"><a href="#step-example">← Previous</a><a href="#step-meters">Next: Read the meters →</a></nav>
+</section>
+
+<section class="walkthrough-step" aria-labelledby="step-meters">
+	<p class="eyebrow">Step 3 of 5</p>
+	<h3 id="step-meters" tabindex="-1">Read the meters</h3>
+	<div class="step-layout">
+		<div class="step-instructions">
+			<ol class="actions">
+				<li>Click the ammeter or voltmeter. Its display appears large in the inspector.</li>
+				<li>Choose <strong>Pin</strong> to keep that display while you select other parts.</li>
+				<li>Right-click a component (or touch and hold) for compact settings. Open <strong>Graph</strong> to plot meters or oscilloscope channels against time.</li>
+			</ol>
+			<div class="checkpoint"><strong>What you should see</strong>
+				<p>Live current and potential difference with three significant figures. Orange glow and a note appear if a meter is wired so it cannot measure.</p>
+			</div>
+		</div>
+		<figure class="screenshot">
+			<a class="screenshot-link screenshot-light" href="/sandboxes/panphycircuits/manual/meters-light.png" target="_blank" rel="noopener" aria-label="Enlarge meters screenshot">
+				<img src="/sandboxes/panphycircuits/manual/meters-light.png" width="1680" height="980" loading="lazy" decoding="async" alt="PanPhyCircuits inspector showing a selected voltmeter display and readings.">
+				<span class="screenshot-open">Enlarge screenshot <span aria-hidden="true">↗</span></span>
+			</a>
+			<a class="screenshot-link screenshot-dark" href="/sandboxes/panphycircuits/manual/meters-dark.png" target="_blank" rel="noopener" aria-label="Enlarge meters screenshot">
+				<img src="/sandboxes/panphycircuits/manual/meters-dark.png" width="1680" height="980" loading="lazy" decoding="async" alt="PanPhyCircuits inspector showing a selected voltmeter display and readings.">
+				<span class="screenshot-open">Enlarge screenshot <span aria-hidden="true">↗</span></span>
+			</a>
+			<figcaption><strong>Meters.</strong> Select a meter for a large display; Pin keeps it while you work.</figcaption>
+		</figure>
+	</div>
+	<nav class="step-nav" aria-label="Step 3 navigation"><a href="#step-operate">← Previous</a><a href="#step-diagram">Next: Switch to the diagram →</a></nav>
+</section>
+
+<section class="walkthrough-step" aria-labelledby="step-diagram">
+	<p class="eyebrow">Step 4 of 5</p>
+	<h3 id="step-diagram" tabindex="-1">Switch to the diagram</h3>
+	<div class="step-layout">
+		<div class="step-instructions">
+			<ol class="actions">
+				<li>In the Circuit pane heading, switch from <strong>Realistic</strong> to <strong>Circuit diagram</strong> (or press <kbd>2</kbd>).</li>
+				<li>Connections stay the same; each view keeps its own layout. New parts appear in both.</li>
+				<li>Use <strong>Tidy up</strong> if you want a textbook arrangement in the current view only. Undo restores the previous layout.</li>
+			</ol>
+			<div class="checkpoint"><strong>What you should see</strong>
+				<p>Standard symbols for the same circuit. Switching views never resets simulation time or meter readings.</p>
+			</div>
+		</div>
+		<figure class="screenshot">
+			<a class="screenshot-link screenshot-light" href="/sandboxes/panphycircuits/manual/diagram-light.png" target="_blank" rel="noopener" aria-label="Enlarge diagram screenshot">
+				<img src="/sandboxes/panphycircuits/manual/diagram-light.png" width="1680" height="980" loading="lazy" decoding="async" alt="PanPhyCircuits circuit-diagram view of the same ammeter and voltmeter example.">
+				<span class="screenshot-open">Enlarge screenshot <span aria-hidden="true">↗</span></span>
+			</a>
+			<a class="screenshot-link screenshot-dark" href="/sandboxes/panphycircuits/manual/diagram-dark.png" target="_blank" rel="noopener" aria-label="Enlarge diagram screenshot">
+				<img src="/sandboxes/panphycircuits/manual/diagram-dark.png" width="1680" height="980" loading="lazy" decoding="async" alt="PanPhyCircuits circuit-diagram view of the same ammeter and voltmeter example.">
+				<span class="screenshot-open">Enlarge screenshot <span aria-hidden="true">↗</span></span>
+			</a>
+			<figcaption><strong>Circuit diagram.</strong> One electrical circuit, two arrangements.</figcaption>
+		</figure>
+	</div>
+	<nav class="step-nav" aria-label="Step 4 navigation"><a href="#step-meters">← Previous</a><a href="#step-save">Next: Save or export →</a></nav>
+</section>
+
+<section class="walkthrough-step" aria-labelledby="step-save">
+	<p class="eyebrow">Step 5 of 5</p>
+	<h3 id="step-save" tabindex="-1">Save or export</h3>
+	<div class="step-layout">
+		<div class="step-instructions">
+			<ol class="actions">
+				<li>Your circuit autosaves in this browser. Use <strong>File → Save as file</strong> for a <code>.ppcir</code> you can move to another device.</li>
+				<li><strong>File → Export this view as SVG</strong> or <strong>PNG</strong> captures the current view with theme and readings.</li>
+				<li><strong>Export to PanPhyMD</strong> embeds the view in a notes draft. With Graph open and the simulation paused, export samples to CSV or PanPhyPlot.</li>
+			</ol>
+			<div class="checkpoint"><strong>What you should see</strong>
+				<p>A downloadable <code>.ppcir</code> holding the circuit and both layouts, without live simulation state — reopen it and it runs live again.</p>
+			</div>
+		</div>
+		<figure class="screenshot">
+			<a class="screenshot-link screenshot-light" href="/sandboxes/panphycircuits/manual/file-light.png" target="_blank" rel="noopener" aria-label="Enlarge file menu screenshot">
+				<img src="/sandboxes/panphycircuits/manual/file-light.png" width="1680" height="980" loading="lazy" decoding="async" alt="PanPhyCircuits File menu showing save and export options.">
+				<span class="screenshot-open">Enlarge screenshot <span aria-hidden="true">↗</span></span>
+			</a>
+			<a class="screenshot-link screenshot-dark" href="/sandboxes/panphycircuits/manual/file-dark.png" target="_blank" rel="noopener" aria-label="Enlarge file menu screenshot">
+				<img src="/sandboxes/panphycircuits/manual/file-dark.png" width="1680" height="980" loading="lazy" decoding="async" alt="PanPhyCircuits File menu showing save and export options.">
+				<span class="screenshot-open">Enlarge screenshot <span aria-hidden="true">↗</span></span>
+			</a>
+			<figcaption><strong>File.</strong> Autosave in the browser, plus .ppcir, SVG, PNG and PanPhyMD export.</figcaption>
+		</figure>
+	</div>
+	<nav class="step-nav" aria-label="Step 5 navigation"><a href="#step-diagram">← Previous</a><a href="#reference">Browse the reference →</a></nav>
+</section>
+		</section>
+
+		<section class="reference" aria-labelledby="reference">
+			<h2 id="reference" tabindex="-1">Reference</h2>
+			<p class="section-intro">Building your own circuits, wiring rules, graphs and classroom notes.</p>
+
+<details class="reference-item" id="build" open>
+<summary>Build your own</summary>
+<div class="reference-body">
+<ul>
+	<li>Drag a card from Components, or click a card and then the canvas. Shift-click to place several. Enter on a focused card places it in the middle.</li>
+	<li>Click one terminal, then another to wire. Click empty space along the way to add a bend. Right-click or Esc cancels.</li>
+	<li>Click an existing wire to join it with a junction. Double-click to end a wire at a free point. Drag a round wire end onto another terminal to reconnect.</li>
+	<li>The library filters are All, Core and Logic. Parts outside Core (capacitors, inductors, transistors, gates, ohmmeter and more) are still available from All or search.</li>
+</ul>
+</div>
+</details>
+<details class="reference-item" id="views">
+<summary>Two views, one circuit</summary>
+<div class="reference-body">
+<ul>
+	<li>Realistic and Circuit diagram share connections but keep their own positions, rotations and wire bends.</li>
+	<li>Connectivity is explicit: wire ends name a component terminal; geometry never invents a join.</li>
+	<li>Tidy up rearranges only the current view. Clear removes every part and wire from both views (undoable).</li>
+</ul>
+</div>
+</details>
+<details class="reference-item" id="measure">
+<summary>Meters, graph and oscilloscope</summary>
+<div class="reference-body">
+<ul>
+	<li>Opening Graph enables “Plot on graph” for selected meters or scopes, or for all of them if none is selected and none is plotted yet.</li>
+	<li>Hover over the graph to mark the nearest sample and read its time and values. Drag across the graph to select a time range for viewing and export. Full Graph restores the entire recording. Pause while the graph is open to show Export CSV and Export to PanPhyPlot for the displayed range.</li>
+	<li>New oscilloscopes start with Auto scale and Auto time base on. Turn either off for manual volts/div or time/div.</li>
+	<li>The ohmmeter (outside Core) drives at most 1 mA. Use it with no live supply between its leads; OL means open circuit.</li>
+</ul>
+</div>
+</details>
+<details class="reference-item" id="classroom">
+<summary>Classroom notes</summary>
+<div class="reference-body">
+<ul>
+	<li>Free, browser-based, no install — works on school Chromebooks. Offline after the first visit when the homepage shows Offline ready.</li>
+	<li>Models are educational: ideal wires and ideal meters, three significant figures, no thermal lag or magnetic saturation. Each component’s inspector explains its model.</li>
+	<li>Short circuits and conflicting ideal sources produce errors. Potential difference between separate networks is undefined.</li>
+</ul>
+</div>
+</details>
+<details class="reference-item" id="keyboard">
+<summary>Keyboard</summary>
+<div class="reference-body">
+<div class="reference-table" tabindex="0" role="region" aria-label="Keyboard shortcuts"><table>
+	<thead><tr><th>Keys</th><th>Action</th></tr></thead>
+	<tbody>
+		<tr><td><kbd>V</kbd> / <kbd>W</kbd> / <kbd>H</kbd></td><td>Select, wire, pan tools</td></tr>
+		<tr><td><kbd>R</kbd> / <kbd>Shift</kbd>+<kbd>R</kbd></td><td>Rotate 45° clockwise / counterclockwise</td></tr>
+		<tr><td><kbd>M</kbd></td><td>Mirror selection</td></tr>
+		<tr><td><kbd>Del</kbd></td><td>Delete selection</td></tr>
+		<tr><td><kbd>Ctrl</kbd>+<kbd>Z</kbd> / <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>Z</kbd></td><td>Undo / redo</td></tr>
+		<tr><td><kbd>Space</kbd></td><td>Pause / resume simulation</td></tr>
+		<tr><td><kbd>1</kbd> / <kbd>2</kbd></td><td>Realistic / circuit diagram</td></tr>
+		<tr><td><kbd>+</kbd> / <kbd>−</kbd> / <kbd>0</kbd></td><td>Zoom in / out / fit</td></tr>
+	</tbody>
+</table></div>
+</div>
+</details>
+		</section>
+	</main>
+	<footer class="panphy-footer">
+		<span class="panphy-footer-legal">&copy; 2026 <a href="https://panphy.app/" target="_blank" rel="noopener noreferrer">PanPhy Labs</a>. All rights reserved. &middot;
+			<a href="https://buymeacoffee.com/panphy" target="_blank" rel="noopener noreferrer">Support my projects</a></span>
+	</footer>
+	<dialog id="contents-dialog" class="contents-dialog" aria-labelledby="contents-title">
+		<div class="dialog-head">
+			<h2 id="contents-title">Contents</h2>
+			<button type="button" data-close-dialog="contents-dialog" aria-label="Close contents">Close</button>
+		</div>
+		<nav aria-label="Manual contents">
+			<h3>Walkthrough</h3>
+			<ol>
+				<li><a href="#step-example">Open an example</a></li>
+				<li><a href="#step-operate">Operate the circuit</a></li>
+				<li><a href="#step-meters">Read the meters</a></li>
+				<li><a href="#step-diagram">Switch to the diagram</a></li>
+				<li><a href="#step-save">Save or export</a></li>
+			</ol>
+			<h3>Reference</h3>
+			<ul>
+				<li><a href="#build">Build your own</a></li>
+				<li><a href="#views">Two views, one circuit</a></li>
+				<li><a href="#measure">Meters, graph and oscilloscope</a></li>
+				<li><a href="#classroom">Classroom notes</a></li>
+				<li><a href="#keyboard">Keyboard</a></li>
+			</ul>
+		</nav>
+	</dialog>
+	<dialog id="image-dialog" class="image-dialog" aria-labelledby="image-title">
+		<div class="dialog-head">
+			<h2 id="image-title">Screenshot</h2>
+			<button type="button" data-close-dialog="image-dialog" aria-label="Close screenshot">Close</button>
+		</div>
+		<div class="zoom-controls" role="group" aria-label="Screenshot zoom"><button type="button" id="zoom-out" aria-label="Zoom out">−</button><output id="zoom-level" aria-label="Zoom level">100%</output><button type="button" id="zoom-in" aria-label="Zoom in">+</button><button type="button" id="zoom-fit">Fit to screen</button><button type="button" id="zoom-actual">Actual size</button></div>
+		<p class="zoom-hint">Scroll or swipe to inspect the image. Use Actual size to read small labels.</p>
+		<div id="image-scroll" class="image-scroll" tabindex="0" role="region" aria-label="Enlarged screenshot. Use arrow keys to scroll."><img id="image-full" alt=""></div>
+	</dialog>
+</body>
+</html>

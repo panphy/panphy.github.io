@@ -2,7 +2,7 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
     <loc>https://panphy.app/</loc>
-    <lastmod>2026-10-28</lastmod>
+    <lastmod>2026-10-29</lastmod>
   </url>
   <url>
     <loc>https://panphy.app/for_teachers/timer.html</loc>
@@ -57,7 +57,7 @@
     <lastmod>2026-10-28</lastmod>
   </url>
   <url>
-    <loc>https://panphy.app/tools/panphycircuits.html</loc>
+    <loc>https://panphy.app/sandboxes/panphycircuits.html</loc>
     <lastmod>2026-10-29</lastmod>
   </url>
   <url>
@@ -105,7 +105,15 @@
     <lastmod>2026-10-28</lastmod>
   </url>
   <url>
-    <loc>https://panphy.app/tools/panphycircuits/manual.html</loc>
+    <loc>https://panphy.app/sandboxes/panphycircuits/manual.html</loc>
+    <lastmod>2026-10-29</lastmod>
+  </url>
+  <url>
+    <loc>https://panphy.app/sandboxes/panphymech.html</loc>
+    <lastmod>2026-10-29</lastmod>
+  </url>
+  <url>
+    <loc>https://panphy.app/sandboxes/panphymech/manual.html</loc>
     <lastmod>2026-10-29</lastmod>
   </url>
 </urlset>

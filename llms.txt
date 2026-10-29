@@ -15,11 +15,16 @@ Prefer https://panphy.app/ over panphy.github.io. Curriculum hubs under /gcsephy
 - [PanPhyPlot manual](https://panphy.app/tools/panphyplot/manual.html): Pendulum walkthrough from repeat readings to a fitted graph
 - [PanPhyTrack](https://panphy.app/tools/motion_tracker.html): Video motion analysis: auto or manual tracking, scale, origin, position and velocity, export to CSV or PanPhyPlot
 - [PanPhyTrack manual](https://panphy.app/tools/motion_tracker/manual.html): Walkthrough using the sample bouncing-ball clip
-- [PanPhyCircuits](https://panphy.app/tools/panphycircuits.html): Circuit builder with realistic and diagram views, live MNA solver, meters, oscilloscope; for GCSE and IB Physics
-- [PanPhyCircuits manual](https://panphy.app/tools/panphycircuits/manual.html): Build, measure and investigate with example circuits
 - [Sound Analyzer](https://panphy.app/tools/sound_analyzer.html): Live microphone spectrum and waveform
 - [Tone Generator](https://panphy.app/tools/tone_generator.html): Two-channel sine mixer with precise frequency and level
 - [PanPhyMD](https://panphy.app/tools/panphymd.html): Markdown editor with LaTeX math and live preview
+
+## Sandboxes
+
+- [PanPhyCircuits](https://panphy.app/sandboxes/panphycircuits.html): Circuit builder with realistic and diagram views, live MNA solver, meters, oscilloscope; for GCSE and IB Physics
+- [PanPhyCircuits manual](https://panphy.app/sandboxes/panphycircuits/manual.html): Build, measure and investigate with example circuits
+- [PanPhyMech](https://panphy.app/sandboxes/panphymech.html): Build 2D mechanics experiments with objects, springs, hinges and motors; graph motion and energy
+- [PanPhyMech manual](https://panphy.app/sandboxes/panphymech/manual.html): Pendulum walkthrough and reference for building, measuring and exporting
 
 ## Simulations
 

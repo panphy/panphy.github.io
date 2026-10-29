@@ -12,7 +12,8 @@ The aim is simple: build tools I'm proud to use in my own classroom and happy to
 
 Here are a few places to start. The [homepage](https://panphy.app/) has the full app catalog.
 
-- **Work with real data.** Plot graphs and fit curves in [PanPhyPlot](tools/panphyplot.html), track motion from video in [PanPhyTrack](tools/motion_tracker.html), build and measure circuits in [PanPhyCircuits](tools/panphycircuits.html), or explore microphone signals in [Sound Analyzer](tools/sound_analyzer.html).
+- **Work with real data.** Plot graphs and fit curves in [PanPhyPlot](tools/panphyplot.html), track motion from video in [PanPhyTrack](tools/motion_tracker.html), or explore microphone signals in [Sound Analyzer](tools/sound_analyzer.html).
+- **Build an experiment.** Create circuits in [PanPhyCircuits](sandboxes/panphycircuits.html) or mechanical systems in [PanPhyMech](sandboxes/panphymech.html). Both live in the homepage’s Sandboxes group.
 - **Try out the physics.** Make waves in the [Virtual Ripple Tank](simulations/ripple_tank.html), investigate collisions in [Collision Lab](simulations/collision.html), or see how [Electric Motors](simulations/electric_motors.html) work.
 - **Make lessons a little easier.** Put an [Exam Timer](for_teachers/timer.html) on the board, turn a camera into a [Visualizer](for_teachers/visualizer.html), mix waves with the [Tone Generator](tools/tone_generator.html), or write notes in [PanPhyMD](tools/panphymd.html).
 - **Take a break.** Try the spelling game [Spellwave](fun/spellwave.html) or turn your webcam into text with [ASCII Camera](fun/ascii_cam.html).
@@ -47,7 +48,7 @@ Then open [localhost:8000](http://localhost:8000). Each app has its own HTML ent
 | `index.html` | The homepage, app catalog, topic filters, and offline readiness indicators |
 | `sw.js`, `manifest.json` | Caching, updates, and PWA configuration |
 | `assets/` | The shared Spectrum design system (`design.css`), shared app footers (`footer.css`), controls, icons, locally hosted fonts, and service-worker registration |
-| `tools/`, `simulations/`, `for_teachers/` | Published educational apps |
+| `tools/`, `sandboxes/`, `simulations/`, `for_teachers/` | Published educational apps |
 | `fun/` | Games and demos that need an internet connection |
 | `beta/` | Trial apps, listed in `beta/index.html` |
 | `misc/` | Unlisted resources, including the phone-compatible introductory [PanPhyPlotOG](misc/panphyplotog.html), inventoried in `misc/index.html` |

@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+	<meta name="theme-color" content="#F5F6FA">
+	<script src="/assets/theme.js"></script>
+	<meta name="apple-mobile-web-app-capable" content="yes">
+	<meta name="apple-mobile-web-app-status-bar-style" content="default">
+	<link rel="stylesheet" href="/assets/standalone-top.css">
+	<title>PanPhyMech Manual: Mechanics Sandbox Guide — PanPhy Labs</title>
+	<meta name="description" content="Learn to build, run and measure mechanics experiments in PanPhyMech, with a pendulum walkthrough and reference for objects, connectors, graphs and exports.">
+	<link rel="canonical" href="https://panphy.app/sandboxes/panphymech/manual.html">
+<!-- panphy-discovery -->
+  <meta property="og:title" content="PanPhyMech Manual: Mechanics Sandbox Guide — PanPhy Labs">
+  <meta property="og:description" content="Learn to build, run and measure mechanics experiments in PanPhyMech, with a pendulum walkthrough and reference for objects, connectors, graphs and exports.">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://panphy.app/sandboxes/panphymech/manual.html">
+  <meta property="og:image" content="https://panphy.app/assets/og-default.png">
+  <meta property="og:site_name" content="PanPhy Labs">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="PanPhyMech Manual: Mechanics Sandbox Guide — PanPhy Labs">
+  <meta name="twitter:description" content="Learn to build, run and measure mechanics experiments in PanPhyMech, with a pendulum walkthrough and reference for objects, connectors, graphs and exports.">
+  <meta name="twitter:image" content="https://panphy.app/assets/og-default.png">
+  <script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "TechArticle",
+  "headline": "PanPhyMech Manual",
+  "name": "PanPhyMech Manual",
+  "description": "Learn to build, run and measure mechanics experiments in PanPhyMech, with a pendulum walkthrough and reference for objects, connectors, graphs and exports.",
+  "url": "https://panphy.app/sandboxes/panphymech/manual.html",
+  "isAccessibleForFree": true,
+  "author": {
+    "@type": "Organization",
+    "name": "PanPhy Labs",
+    "url": "https://panphy.app/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "PanPhy Labs",
+    "url": "https://panphy.app/",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://panphy.app/assets/panphy.png"
+    }
+  },
+  "image": "https://panphy.app/assets/og-default.png"
+}
+  </script>
+<!-- /panphy-discovery -->
+  <script src="/assets/sw-register.js" defer></script>
+	<link rel="icon" type="image/png" href="/assets/favicon.png">
+	<link rel="stylesheet" href="/assets/theme-toggle.css">
+	<script src="/assets/theme-toggle.js"></script>
+	<link rel="stylesheet" href="/sandboxes/panphymech/manual/manual.css">
+	<script src="/sandboxes/panphymech/manual/manual.js" defer></script>
+	<link rel="stylesheet" href="/assets/footer.css">
+</head>
+
+<body>
+	<div class="top">
+		<div class="manual-brand"><a href="/sandboxes/panphymech.html" class="back-link" aria-label="Back to PanPhyMech"><img src="/assets/panphy.png" alt="" width="30" height="30"><span>PanPhyMech</span></a><span class="manual-badge">Manual</span>
+</div>
+		<div class="top-actions">
+			<button type="button" id="contents-button" aria-haspopup="dialog" aria-controls="contents-dialog">Contents</button>
+			<div class="theme-toggle"><button id="theme-button" data-panphy-theme-toggle aria-label="Toggle Light/Dark Theme" title="Toggle between light and dark themes">☀️</button>
+</div>
+		</div>
+	</div>
+
+<main>
+<header class="manual-intro">
+<p class="eyebrow">PanPhyMech · User guide</p>
+<h1>Build an experiment, then measure its motion</h1>
+<p class="lead">Start with a pendulum, watch its energy change, then explore your own objects, connectors and graphs.</p>
+<div class="intro-actions"><a class="primary-link" href="#step-example">Start the walkthrough</a><a href="#reference">Browse the reference</a>
+</div>
+</header>
+<section aria-labelledby="walkthrough">
+<h2 id="walkthrough" tabindex="-1">Your first mechanics experiment</h2>
+<p class="section-intro">Follow these five steps in order. Screenshots match your theme; select one to enlarge it.</p>
+<nav class="step-index" aria-label="Walkthrough steps">
+<a href="#step-example"><span>1</span>Open an example</a>
+<a href="#step-run"><span>2</span>Run, pause and reset</a>
+<a href="#step-inspect"><span>3</span>Inspect and change settings</a>
+<a href="#step-graph"><span>4</span>Read and export a graph</a>
+<a href="#step-save"><span>5</span>Save or export the scene</a>
+</nav>
+<section class="walkthrough-step" aria-labelledby="step-example">
+<p class="eyebrow">Step 1 of 5</p>
+<h3 id="step-example" tabindex="-1">Open an example</h3>
+<div class="step-layout">
+<div class="step-instructions">
+<ol class="actions">
+<li><a href="/sandboxes/panphymech.html" target="_blank" rel="noopener">Open PanPhyMech in a new tab</a>. Choose <strong>Examples → Simple pendulum</strong>. Opening an example replaces your scene; Undo can restore it.</li>
+<li>Find Parts on the left, the Scene in the middle, the graph below and the Inspector on the right. On a narrow screen, use the panel buttons in the Scene heading to open Parts or Inspector.</li>
+<li>The example starts with a 1 kg bob on a 2.5 m rod. Leave its settings unchanged for this walkthrough.</li>
+</ol>
+<div class="checkpoint"><strong>What you should see</strong>
+<p>A bob hangs from a background anchor, released at an angle. The graph tracks Bob with Energy selected, ready to record.</p>
+</div>
+</div>
+<figure class="screenshot">
+<a class="screenshot-link screenshot-light" href="manual/workspace-light.png" target="_blank" rel="noopener" aria-label="Enlarge open an example screenshot"><img src="manual/workspace-light.png" width="1680" height="980" loading="lazy" decoding="async" alt="PanPhyMech: The example is paused at the start, with the World settings visible."><span class="screenshot-open">Enlarge screenshot ↗</span></a>
+<a class="screenshot-link screenshot-dark" href="manual/workspace-dark.png" target="_blank" rel="noopener" aria-label="Enlarge open an example screenshot"><img src="manual/workspace-dark.png" width="1680" height="980" loading="lazy" decoding="async" alt="PanPhyMech: The example is paused at the start, with the World settings visible."><span class="screenshot-open">Enlarge screenshot ↗</span></a>
+<figcaption><strong>Pendulum setup.</strong> The example is paused at the start, with the World settings visible.</figcaption>
+</figure>
+</div>
+<nav class="step-nav" aria-label="Step 1 navigation"><a href="#walkthrough">← All steps</a><a href="#step-run">Next: Run, pause and reset →</a>
+</nav>
+</section>
+<section class="walkthrough-step" aria-labelledby="step-run">
+<p class="eyebrow">Step 2 of 5</p>
+<h3 id="step-run" tabindex="-1">Run, pause and reset</h3>
+<div class="step-layout">
+<div class="step-instructions">
+<ol class="actions">
+<li>Press <strong>Play</strong> or <kbd>Space</kbd>. Let the pendulum swing for several seconds, then press <strong>Pause</strong>.</li>
+<li>Use the speed menu beside the time to watch in slow motion. The time shown and graph times are simulated seconds.</li>
+<li>The step button advances 1/60 s. <strong>Reset</strong> returns to the starting setup and clears the recording; save that for after you export.</li>
+</ol>
+<div class="checkpoint"><strong>What you should see</strong>
+<p>The bob swings while kinetic and gravitational energy trade places. Their total stays approximately constant; Pause holds the scene and keeps the graph.</p>
+</div>
+</div>
+<figure class="screenshot">
+<a class="screenshot-link screenshot-light" href="manual/run-light.png" target="_blank" rel="noopener" aria-label="Enlarge run, pause and reset screenshot"><img src="manual/run-light.png" width="1680" height="980" loading="lazy" decoding="async" alt="PanPhyMech: Several swings recorded on the energy graph."><span class="screenshot-open">Enlarge screenshot ↗</span></a>
+<a class="screenshot-link screenshot-dark" href="manual/run-dark.png" target="_blank" rel="noopener" aria-label="Enlarge run, pause and reset screenshot"><img src="manual/run-dark.png" width="1680" height="980" loading="lazy" decoding="async" alt="PanPhyMech: Several swings recorded on the energy graph."><span class="screenshot-open">Enlarge screenshot ↗</span></a>
+<figcaption><strong>Paused motion.</strong> Several swings recorded on the energy graph.</figcaption>
+</figure>
+</div>
+<nav class="step-nav" aria-label="Step 2 navigation"><a href="#step-example">← Previous</a><a href="#step-inspect">Next: Inspect and change settings →</a>
+</nav>
+</section>
+<section class="walkthrough-step" aria-labelledby="step-inspect">
+<p class="eyebrow">Step 3 of 5</p>
+<h3 id="step-inspect" tabindex="-1">Inspect and change settings</h3>
+<div class="step-layout">
+<div class="step-instructions">
+<ol class="actions">
+<li>With the scene paused, click the bob. The Inspector shows its properties and current readings. Right-click it, or touch and hold, for quick settings.</li>
+<li>Use the numeric fields for precise mass, friction, bounciness and air resistance. Reset before testing a different starting position or velocity.</li>
+<li>Click empty space to show <strong>World</strong>: gravity, floor, floor friction and the reference height for gravitational energy.</li>
+</ol>
+<div class="checkpoint"><strong>What you should see</strong>
+<p>The bob is highlighted and its settings appear in the Inspector. The example’s gravitational-energy reference is 2 m, the height of the bob at its lowest point.</p>
+</div>
+</div>
+<figure class="screenshot">
+<a class="screenshot-link screenshot-light" href="manual/inspect-light.png" target="_blank" rel="noopener" aria-label="Enlarge inspect and change settings screenshot"><img src="manual/inspect-light.png" width="1680" height="980" loading="lazy" decoding="async" alt="PanPhyMech: Select the bob to see properties and live readings."><span class="screenshot-open">Enlarge screenshot ↗</span></a>
+<a class="screenshot-link screenshot-dark" href="manual/inspect-dark.png" target="_blank" rel="noopener" aria-label="Enlarge inspect and change settings screenshot"><img src="manual/inspect-dark.png" width="1680" height="980" loading="lazy" decoding="async" alt="PanPhyMech: Select the bob to see properties and live readings."><span class="screenshot-open">Enlarge screenshot ↗</span></a>
+<figcaption><strong>Object inspector.</strong> Select the bob to see properties and live readings.</figcaption>
+</figure>
+</div>
+<nav class="step-nav" aria-label="Step 3 navigation"><a href="#step-run">← Previous</a><a href="#step-graph">Next: Read and export a graph →</a>
+</nav>
+</section>
+<section class="walkthrough-step" aria-labelledby="step-graph">
+<p class="eyebrow">Step 4 of 5</p>
+<h3 id="step-graph" tabindex="-1">Read and export a graph</h3>
+<div class="step-layout">
+<div class="step-instructions">
+<ol class="actions">
+<li>Use <strong>Graph of</strong> to choose Bob, a spring when present, or Whole system. For Bob, switch between <strong>Position</strong>, <strong>Velocity</strong> and <strong>Energy</strong>.</li>
+<li>Hover over the graph to read the nearest sample. Drag across the graph to zoom into a time interval. <strong>Full Graph</strong> restores the complete recording.</li>
+<li>Use <strong>Export CSV</strong> for the chosen object’s recorded quantities, or <strong>Export to PanPhyPlot</strong> to analyze them. Both use the displayed time interval and retain the original sample times.</li>
+</ol>
+<div class="checkpoint"><strong>What you should see</strong>
+<p>The chosen quantity is plotted against time. A selected time interval narrows both the graph view and exported data.</p>
+</div>
+</div>
+<figure class="screenshot">
+<a class="screenshot-link screenshot-light" href="manual/graph-light.png" target="_blank" rel="noopener" aria-label="Enlarge read and export a graph screenshot"><img src="manual/graph-light.png" width="1680" height="980" loading="lazy" decoding="async" alt="PanPhyMech: A time interval selected from the bob’s energy recording."><span class="screenshot-open">Enlarge screenshot ↗</span></a>
+<a class="screenshot-link screenshot-dark" href="manual/graph-dark.png" target="_blank" rel="noopener" aria-label="Enlarge read and export a graph screenshot"><img src="manual/graph-dark.png" width="1680" height="980" loading="lazy" decoding="async" alt="PanPhyMech: A time interval selected from the bob’s energy recording."><span class="screenshot-open">Enlarge screenshot ↗</span></a>
+<figcaption><strong>Graph selection.</strong> A time interval selected from the bob’s energy recording.</figcaption>
+</figure>
+</div>
+<nav class="step-nav" aria-label="Step 4 navigation"><a href="#step-inspect">← Previous</a><a href="#step-save">Next: Save or export the scene →</a>
+</nav>
+</section>
+<section class="walkthrough-step" aria-labelledby="step-save">
+<p class="eyebrow">Step 5 of 5</p>
+<h3 id="step-save" tabindex="-1">Save or export the scene</h3>
+<div class="step-layout">
+<div class="step-instructions">
+<ol class="actions">
+<li>Your setup autosaves in this browser. Choose <strong>File → Save as file (.ppmech)…</strong> for a portable copy.</li>
+<li>Use <strong>Open file…</strong> to load a saved setup. Save the current work first if you want to keep a separate copy.</li>
+<li>Export the current scene view as <strong>SVG</strong> or <strong>PNG</strong>, or choose <strong>Export to PanPhyMD</strong> to put an embedded scene image in notes.</li>
+</ol>
+<div class="checkpoint"><strong>What you should see</strong>
+<p>A .ppmech file preserves an editable setup. Graph recordings are separate: export them as CSV before resetting or replacing the scene.</p>
+</div>
+</div>
+<figure class="screenshot">
+<a class="screenshot-link screenshot-light" href="manual/file-light.png" target="_blank" rel="noopener" aria-label="Enlarge save or export the scene screenshot"><img src="manual/file-light.png" width="1680" height="980" loading="lazy" decoding="async" alt="PanPhyMech: Scene files and image exports are separate from graph data."><span class="screenshot-open">Enlarge screenshot ↗</span></a>
+<a class="screenshot-link screenshot-dark" href="manual/file-dark.png" target="_blank" rel="noopener" aria-label="Enlarge save or export the scene screenshot"><img src="manual/file-dark.png" width="1680" height="980" loading="lazy" decoding="async" alt="PanPhyMech: Scene files and image exports are separate from graph data."><span class="screenshot-open">Enlarge screenshot ↗</span></a>
+<figcaption><strong>File menu.</strong> Scene files and image exports are separate from graph data.</figcaption>
+</figure>
+</div>
+<nav class="step-nav" aria-label="Step 5 navigation"><a href="#step-graph">← Previous</a><a href="#reference">Browse the reference →</a>
+</nav>
+</section>
+</section>
+<section class="reference" aria-labelledby="reference">
+<h2 id="reference" tabindex="-1">Reference</h2>
+<p class="section-intro">Build your own experiments, understand the readings and keep your work.</p>
+<details class="reference-item" id="build" open>
+<summary>Build and edit</summary>
+<div class="reference-body">
+<ul>
+<li>Click a part in Parts, then click the scene, or drag it straight in. Hold Shift to place several. The library includes balls, boxes, planks, polygons, ramps and walls.</li>
+<li>Drag an object to move it. The round handle rotates it; the square handle resizes it. Use the Inspector for precise size, position and starting velocity. Fixed objects are hatched and do not move.</li>
+<li>Shift-click or use Select several to select multiple objects. Duplicate copies the selection. Merge combines selected objects into one rigid shape; Subtract cuts the last selected object out of the others. These edits can be undone.</li>
+<li>Hinged and glued objects move together while editing. Drag empty space to pan; scroll, pinch or use the zoom buttons to zoom. Fit frames current positions, so leave room for motion. Snap aligns placement to the grid and rotation to 15° angles.</li>
+</ul>
+</div>
+</details>
+<details class="reference-item" id="connect">
+<summary>Connect objects</summary>
+<div class="reference-body">
+<ul>
+<li><strong>Spring, rod, rope:</strong> click the first endpoint, then the second. When dragging from Parts, drop the first end and click the second. An endpoint on empty space is fixed to the background; endpoints snap to nearby object centers.</li>
+<li><strong>Hinge, motor, glue:</strong> place at the overlap between two objects. With one object, the joint attaches it to the background. A motor turns its first attached object relative to the second; set its speed, direction and maximum torque in the Inspector.</li>
+<li>A spring’s initial natural length matches its placement; change its natural length, stiffness or damping in the Inspector. A rod holds a fixed distance; a rope limits the maximum distance.</li>
+<li>Rods and ropes are ideal and massless until Solid is enabled. Solid rods are thin bars; solid ropes are chains that can drape around objects. Their mass contributes to system energy. Extreme mass ratios can make a solid rope unstable.</li>
+<li>Drag a connector by its line, or select it and drag an endpoint handle. Each end attaches to the object under it when released. Drag hinges, motors and glue to reposition them. Right-click or touch and hold for quick settings. Esc or right-click cancels placement.</li>
+</ul>
+</div>
+</details>
+<details class="reference-item" id="timing">
+<summary>Editing after a run</summary>
+<div class="reference-body">
+<ul>
+<li>Pause keeps the current motion and recording. Play resumes. While running, drag an object to pull it with a force.</li>
+<li>Moving, resizing, adding or deleting after time has run makes the current state the new starting setup and starts a fresh recording. Undo can return to the previous setup.</li>
+<li>Parameter changes such as mass, friction, restitution, drag, gravity and spring or motor settings apply immediately. Reset first when you want to compare runs from the same initial conditions.</li>
+<li>Reset rebuilds the starting setup at time zero and clears the graph. A saved scene is an editable setup, not a replay or a graph recording.</li>
+</ul>
+</div>
+</details>
+<details class="reference-item" id="measure">
+<summary>Graphs, display and energy</summary>
+<div class="reference-body">
+<ul>
+<li>The recorder samples moving objects and springs throughout a run, so you can change the tracked object afterward. Whole system offers energy; springs offer extension, force and elastic energy. Fixed objects are not graph targets.</li>
+<li>Click a legend entry to hide or show that curve. Drag the separator above the graph to resize it. The graph toolbar button shows it again after closing it.</li>
+<li>With the graph focused, +/− zoom, arrow keys pan and Esc restores Full Graph. The scene canvas has its own shortcuts.</li>
+<li>Display settings control velocity arrows, trails, labels and the grid. Scene exports preserve the current view, theme and visible display options, without editing handles.</li>
+<li>Whole-system energy includes moving objects and solid connectors. The bob’s energy is not the whole system in a more complex scene. For objects attached to springs, the object energy graph includes the attached spring energy.</li>
+</ul>
+</div>
+</details>
+<details class="reference-item" id="physics">
+<summary>Physics model and limits</summary>
+<div class="reference-body">
+<ul>
+<li>All quantities use SI units. The simulation uses Planck.js (Box2D) rigid-body mechanics, with steps of 1/240 s or smaller for stiff springs; solid connectors use smaller steps too.</li>
+<li>Springs follow Hooke’s law with optional linear damping. Air resistance acts opposite motion and increases with the square of speed. Friction combines the two surface coefficients using their geometric mean; if either is zero, the contact is frictionless.</li>
+<li>Bounciness uses the larger restitution of the two surfaces. Very slow collisions are inelastic to keep resting contacts quiet. Contact gaps and small energy changes at impacts are normal numerical effects.</li>
+<li>Gravitational energy is measured from the height set in World, which defaults to the floor at 0 m. Some examples choose another reference; negative gravitational energy below that height is valid.</li>
+<li>Merged or cut shapes can catch at seams, and very thin walls can miss fast objects. This is an educational model; reduce extreme speeds, stiffnesses or mass ratios if a setup becomes unstable.</li>
+</ul>
+</div>
+</details>
+<details class="reference-item" id="storage">
+<summary>Files and browser storage</summary>
+<div class="reference-body">
+<ul>
+<li>Autosave belongs to this browser and device. Clearing site data can remove it. Keep .ppmech backups for work you want to keep or share.</li>
+<li>Save uses a filename/location picker where supported and a download elsewhere. Scene SVG/PNG exports are images; open the .ppmech file to continue editing.</li>
+<li>PanPhyMech and this manual work offline after the homepage shows the app as Offline ready. Visit online first to download the required files.</li>
+</ul>
+</div>
+</details>
+<details class="reference-item" id="keyboard">
+<summary>Keyboard</summary>
+<div class="reference-body">
+<div class="reference-table" tabindex="0" role="region" aria-label="Keyboard shortcuts">
+<table>
+<thead>
+<tr><th>Keys</th><th>Action</th>
+</tr>
+</thead>
+<tbody>
+<tr><td><kbd>Space</kbd></td><td>Play / pause (outside buttons and entry fields)</td>
+</tr>
+<tr><td><kbd>.</kbd></td><td>Advance 1/60 s</td>
+</tr>
+<tr><td><kbd>V / H</kbd></td><td>Select / pan tool</td>
+</tr>
+<tr><td><kbd>R / Shift+R</kbd></td><td>Rotate 15° clockwise / counterclockwise</td>
+</tr>
+<tr><td><kbd>G</kbd></td><td>Toggle snap</td>
+</tr>
+<tr><td><kbd>Del / Backspace</kbd></td><td>Delete selection</td>
+</tr>
+<tr><td><kbd>Ctrl+D</kbd></td><td>Duplicate selection</td>
+</tr>
+<tr><td><kbd>Ctrl+Z / Ctrl+Shift+Z</kbd></td><td>Undo / redo (Command also works on Mac)</td>
+</tr>
+<tr><td><kbd>Arrow keys / Shift+arrows</kbd></td><td>Nudge selected object 0.01 m / 0.1 m with scene focused</td>
+</tr>
+<tr><td><kbd>+ / − / 0</kbd></td><td>Zoom in / out / fit scene</td>
+</tr>
+<tr><td><kbd>Esc / right-click</kbd></td><td>Cancel placement (Esc also clears selection)</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</details>
+</section>
+</main>
+	<footer class="panphy-footer">
+		<span class="panphy-footer-legal">&copy; 2026 <a href="https://panphy.app/" target="_blank" rel="noopener noreferrer">PanPhy Labs</a>. All rights reserved. &middot;
+			<a href="https://buymeacoffee.com/panphy" target="_blank" rel="noopener noreferrer">Support my projects</a></span>
+	</footer>
+
+<dialog id="contents-dialog" class="contents-dialog" aria-labelledby="contents-title">
+<div class="dialog-head">
+<h2 id="contents-title">Contents</h2><button type="button" data-close-dialog="contents-dialog" aria-label="Close contents">Close</button>
+</div>
+<nav aria-label="Manual contents">
+<h3>Walkthrough</h3>
+<ol>
+<li><a href="#step-example">Open an example</a>
+</li>
+<li><a href="#step-run">Run, pause and reset</a>
+</li>
+<li><a href="#step-inspect">Inspect and change settings</a>
+</li>
+<li><a href="#step-graph">Read and export a graph</a>
+</li>
+<li><a href="#step-save">Save or export the scene</a>
+</li>
+</ol>
+<h3>Reference</h3>
+<ul>
+<li><a href="#build">Build and edit</a>
+</li>
+<li><a href="#connect">Connect objects</a>
+</li>
+<li><a href="#timing">Editing after a run</a>
+</li>
+<li><a href="#measure">Graphs, display and energy</a>
+</li>
+<li><a href="#physics">Physics model and limits</a>
+</li>
+<li><a href="#storage">Files and browser storage</a>
+</li>
+<li><a href="#keyboard">Keyboard</a>
+</li>
+</ul>
+</nav></dialog>
+	<dialog id="image-dialog" class="image-dialog" aria-labelledby="image-title">
+		<div class="dialog-head">
+			<h2 id="image-title">Screenshot</h2>
+			<button type="button" data-close-dialog="image-dialog" aria-label="Close screenshot">Close</button>
+		</div>
+		<div class="zoom-controls" role="group" aria-label="Screenshot zoom"><button type="button" id="zoom-out" aria-label="Zoom out">−</button><output id="zoom-level" aria-label="Zoom level">100%</output><button type="button" id="zoom-in" aria-label="Zoom in">+</button><button type="button" id="zoom-fit">Fit to screen</button><button type="button" id="zoom-actual">Actual size</button>
+</div>
+		<p class="zoom-hint">Scroll or swipe to inspect the image. Use Actual size to read small labels.</p>
+		<div id="image-scroll" class="image-scroll" tabindex="0" role="region" aria-label="Enlarged screenshot. Use arrow keys to scroll."><img id="image-full" alt="">
+</div>
+	</dialog>
+</body>
+</html>

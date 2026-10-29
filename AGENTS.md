@@ -18,7 +18,7 @@ PanPhy Labs is a static GitHub Pages PWA for physics tools, simulations, classro
 
 | Location | Purpose | Catalog and offline policy |
 | --- | --- | --- |
-| `tools/`, `simulations/`, `for_teachers/` | General published apps | Listed on the homepage and in `sitemap.xml`; offline by default |
+| `tools/`, `sandboxes/`, `simulations/`, `for_teachers/` | General published apps | Listed on the homepage and in `sitemap.xml`; offline by default |
 | `fun/` | Games and playful demos | May be listed publicly; always network-only |
 | `beta/` | New and trial apps | Maintain `beta/index.html`; no service-worker registration or caching |
 | `misc/` | Unlisted pages and resources | Maintain links and short descriptions in `misc/index.html`; no registration or caching |
