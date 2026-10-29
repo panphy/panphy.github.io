@@ -19,7 +19,10 @@
     let floorFixture = null;
     if (scene.world.floor) {
       // A thick floor rather than an edge, so fast objects cannot slip through it.
-      floorFixture = ground.createFixture(new pl.Box(2000, 10, pl.Vec2(0, -10), 0), { friction: scene.world.floorFriction, restitution: 0 });
+      // The floor has a body of its own. Connectors fixed to the background join objects to
+      // the ground body, and Box2D stops joined bodies colliding, so a floor on the ground
+      // body would let anything hung from the background (or grabbed) fall through it.
+      floorFixture = world.createBody().createFixture(new pl.Box(2000, 10, pl.Vec2(0, -10), 0), { friction: scene.world.floorFriction, restitution: 0 });
     }
 
     const bodies = new Map(); // scene id → planck body

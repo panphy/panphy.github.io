@@ -345,3 +345,24 @@ test('a solid rope slung between two fixed pegs catches a falling ball', () => {
   run(sim, 4);
   assert.ok(sim.readBody(ball.id).y > 1, `ball should hang in the rope, y = ${sim.readBody(ball.id).y}`);
 });
+
+test('objects attached to the background still land on the floor', () => {
+  ['rope', 'rod', 'hinge'].forEach((kind) => {
+    const scene = emptyScene(true);
+    const box = S.makeBody(scene, 'box', 2.5, 1); box.w = 0.6; box.h = 0.6;
+    scene.bodies.push(box);
+    // Hung from a point whose reach (3 m) goes below the floor, so the swing must hit it.
+    const l = kind === 'hinge'
+      ? S.makeLink(scene, 'hinge', box.id, { x: -0.3, y: 0.3 }, null, { x: 2.2, y: 1.3 })
+      : S.makeLink(scene, kind, null, { x: 0, y: 2.5 }, box.id, { x: 0, y: 0 });
+    if (kind !== 'hinge') l.length = 3;
+    scene.links.push(l);
+    const sim = P.createSim(scene);
+    let lowest = Infinity;
+    run(sim, 3, () => {
+      const pose = sim.pose(box.id);
+      S.vertices(box).forEach((v) => { lowest = Math.min(lowest, S.toWorld(pose, v).y); });
+    });
+    assert.ok(lowest > -0.02, `${kind}: went ${(-lowest).toFixed(2)} m below the floor`);
+  });
+});
