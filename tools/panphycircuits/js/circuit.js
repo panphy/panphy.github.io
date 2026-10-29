@@ -16,10 +16,10 @@
   function defaultSettings() {
     return {
       logicStyle: 'distinctive',
-      showLabels: true,
+      showLabels: false,
       showValues: true,
       wireColorsInDiagram: false,
-      currentFlow: false,
+      currentFlow: true,
       speed: 1,
       dt: 'auto'
     };
