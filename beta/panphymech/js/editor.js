@@ -1,0 +1,495 @@
+// PanPhyMech: canvas interaction. Placing objects and connectors, selecting, moving,
+// rotating and resizing (with hinged and glued parts moving together), grabbing
+// moving objects during a run, panning and zooming.
+(function (root) {
+  const PPM = root.PPM = root.PPM || {};
+  const S = PPM.scene;
+
+  const SNAP_POS = 0.05; // m
+  const SNAP_SIZE = 0.01; // m
+  const SNAP_ANGLE = Math.PI / 12; // 15°
+  const DRAG_START_PX = 4;
+
+  const HINTS = {
+    select: 'Drag an object to move it. While the simulation runs, drag to pull it. Drag empty space to pan; scroll or pinch to zoom.',
+    spring: 'Spring: click the first end on an object or the background, then the second end.',
+    rod: 'Rod: click the first end on an object or the background, then the second end. A rod keeps its length.',
+    rope: 'Rope: click the first end on an object or the background, then the second end. A rope can go slack.',
+    hinge: 'Hinge: click where two objects overlap to pin them together, or on one object to pin it to the background.',
+    motor: 'Motor: click on a wheel where it overlaps another object (or on one object to drive it about a fixed axle).',
+    weld: 'Glue: click where two objects overlap to join them rigidly, or on one object to fix it to the background.'
+  };
+
+  function createEditor(app, canvas) {
+    const ed = { tool: 'select', armed: null, pending: null, cursorWorld: null };
+    const pointers = new Map();
+    let gesture = null;
+    let pinch = null;
+
+    const rr = () => app.renderer;
+    const snapOn = () => app.snap;
+    const snapV = (v, step) => (snapOn() ? Math.round(v / step) * step : v);
+
+    function localPoint(e) {
+      const rect = canvas.getBoundingClientRect();
+      return { x: e.clientX - rect.left, y: e.clientY - rect.top };
+    }
+
+    // ---------- Hit testing ----------
+
+    function bodiesAt(w, padPx = 3) {
+      const pad = padPx / app.scene.camera.scale;
+      const out = [];
+      for (let i = app.scene.bodies.length - 1; i >= 0; i--) {
+        const b = app.scene.bodies[i];
+        const pose = app.poseOf(b);
+        if (S.containsPoint({ ...b, x: pose.x, y: pose.y, angle: pose.angle }, w, pad)) out.push(b);
+      }
+      return out;
+    }
+
+    function segDist(p, a, b) {
+      const dx = b.x - a.x; const dy = b.y - a.y;
+      const L2 = dx * dx + dy * dy;
+      const t = L2 > 0 ? Math.max(0, Math.min(1, ((p.x - a.x) * dx + (p.y - a.y) * dy) / L2)) : 0;
+      return Math.hypot(p.x - (a.x + t * dx), p.y - (a.y + t * dy));
+    }
+
+    function linkAt(sp) {
+      const scene = app.scene;
+      let best = null;
+      let bestD = Infinity;
+      scene.links.forEach((l) => {
+        const pa = rr().toScreen(S.endPoint(scene, l.a, l.la, app.poseOf));
+        const pb = rr().toScreen(S.endPoint(scene, l.b, l.lb, app.poseOf));
+        let d;
+        if (l.kind === 'hinge' || l.kind === 'weld') d = Math.hypot(sp.x - pa.x, sp.y - pa.y) - 3;
+        else {
+          // Near an end on an object, a click picks the object rather than the connector.
+          const len = Math.hypot(pb.x - pa.x, pb.y - pa.y) || 1;
+          const trim = Math.min(14, len * 0.3) / len;
+          const ta = l.a ? trim : 0;
+          const tb = l.b ? trim : 0;
+          const qa = { x: pa.x + (pb.x - pa.x) * ta, y: pa.y + (pb.y - pa.y) * ta };
+          const qb = { x: pb.x + (pa.x - pb.x) * tb, y: pb.y + (pa.y - pb.y) * tb };
+          d = segDist(sp, qa, qb);
+        }
+        if (d < bestD) { bestD = d; best = l; }
+      });
+      return bestD <= 9 ? best : null;
+    }
+
+    function hitTest(sp) {
+      const sel = app.selection;
+      if (sel && sel.type === 'body' && app.canEditGeometry()) {
+        const b = S.bodyById(app.scene, sel.id);
+        const hs = b && ed.handles(b);
+        if (hs) {
+          if (Math.hypot(sp.x - hs.rotate.x, sp.y - hs.rotate.y) <= 13) return { type: 'rotate', body: b };
+          if (Math.hypot(sp.x - hs.resize.x, sp.y - hs.resize.y) <= 13) return { type: 'resize', body: b };
+        }
+      }
+      const l = linkAt(sp);
+      if (l) return { type: 'link', link: l };
+      const w = rr().toWorld(sp.x, sp.y);
+      const bs = bodiesAt(w);
+      if (bs.length) return { type: 'body', body: bs[0] };
+      return null;
+    }
+
+    // Screen positions of the selected object's rotate and resize handles.
+    ed.handles = function handles(b) {
+      const pose = app.poseOf(b);
+      const e = S.extent(b);
+      const center = rr().toScreen(pose);
+      const s = app.scene.camera.scale;
+      const R = Math.hypot(e.x, e.y) * s;
+      const corner = b.kind === 'ball' ? { x: b.r * Math.SQRT1_2, y: -b.r * Math.SQRT1_2 } : b.kind === 'polygon' ? { x: e.x, y: -e.y } : { x: e.x, y: -e.y };
+      return {
+        center,
+        rotate: { x: center.x, y: center.y - R - 24 },
+        resize: rr().toScreen(S.toWorld(pose, corner)),
+        corner
+      };
+    };
+
+    // ---------- Tools ----------
+
+    // Choosing a part or a connector tool puts the start card away.
+    function dismissStart() {
+      if (!app.emptyDismissed) { app.emptyDismissed = true; app.ui.syncToolbar(); }
+    }
+
+    ed.setTool = function setTool(tool) {
+      if (tool !== 'select') dismissStart();
+      ed.tool = tool;
+      ed.pending = null;
+      if (tool !== 'select') ed.armed = null;
+      app.ui.syncTools();
+      app.setHint(HINTS[tool] || HINTS.select);
+      canvas.dataset.tool = tool;
+      app.requestDraw();
+    };
+
+    ed.arm = function arm(type) {
+      if (type) dismissStart();
+      ed.tool = 'select';
+      ed.pending = null;
+      ed.armed = type;
+      app.ui.syncTools();
+      canvas.dataset.tool = type ? 'place' : 'select';
+      app.setHint(type ? `Click the canvas to place the ${S.BODY_KINDS[type].label.toLowerCase()}. Hold Shift to place several. Esc cancels.` : HINTS.select);
+      app.requestDraw();
+    };
+
+    ed.cancel = function cancel() {
+      if (ed.armed || ed.tool !== 'select' || ed.pending) {
+        ed.armed = null;
+        ed.setTool('select');
+        return true;
+      }
+      return false;
+    };
+
+    ed.preview = function preview() {
+      const w = ed.cursorWorld;
+      if (!w) return null;
+      if (ed.armed) {
+        const b = S.makeBody({ ...app.scene, bodies: app.scene.bodies.slice(), links: [], nextId: 0 }, ed.armed, snapV(w.x, SNAP_POS), snapV(w.y, SNAP_POS));
+        return { body: b };
+      }
+      if (['spring', 'rod', 'rope'].includes(ed.tool)) {
+        const target = endTarget(w);
+        if (ed.pending) return { link: { kind: ed.tool, from: ed.pending.world, to: target.world }, point: target.world, ok: true };
+        return { point: target.world, ok: true };
+      }
+      if (['hinge', 'motor', 'weld'].includes(ed.tool)) {
+        const bs = bodiesAt(w);
+        return { point: bs.length ? jointPoint(w, bs[0]) : w, ok: bs.length > 0 };
+      }
+      return null;
+    };
+
+    // Where a connector end lands: an object's center when the pointer is near it, else the
+    // pointer on that object, else a point on the background.
+    function endTarget(w) {
+      const bs = bodiesAt(w);
+      if (bs.length) {
+        const b = bs[0];
+        const p = jointPoint(w, b);
+        return { body: b, world: p, local: S.toLocal(app.poseOf(b), p) };
+      }
+      const p = { x: snapV(w.x, SNAP_POS), y: snapV(w.y, SNAP_POS) };
+      return { body: null, world: p, local: p };
+    }
+
+    function jointPoint(w, b) {
+      const pose = app.poseOf(b);
+      const e = S.extent(b);
+      const near = Math.max(Math.min(e.x, e.y) * 0.35, 10 / app.scene.camera.scale);
+      if (Math.hypot(w.x - pose.x, w.y - pose.y) <= near) return { x: pose.x, y: pose.y };
+      return w;
+    }
+
+    function placeLinkEnd(w, keep) {
+      const t = endTarget(w);
+      if (!ed.pending) {
+        ed.pending = { a: t.body ? t.body.id : null, la: t.local, world: t.world };
+        app.setHint('Now click the second end. Esc cancels.');
+        return;
+      }
+      const p = ed.pending;
+      const b = t.body ? t.body.id : null;
+      if (!p.a && !b) { app.toast('Attach at least one end to an object.'); return; }
+      if (p.a && p.a === b) { app.toast('Connect two different objects, or an object and the background.'); return; }
+      const kind = ed.tool;
+      app.edit(() => {
+        const l = S.makeLink(app.scene, kind, p.a, p.la, b, t.local);
+        if (kind === 'spring') l.rest = Math.max(0.05, Math.round(S.linkLength(app.scene, l) * 100) / 100);
+        else l.length = Math.max(S.LIMITS.length[0], S.linkLength(app.scene, l));
+        app.scene.links.push(l);
+        app.select({ type: 'link', id: l.id });
+      });
+      ed.pending = null;
+      if (!keep) ed.setTool('select');
+      else app.setHint(HINTS[kind]);
+    }
+
+    function placeJoint(w, keep) {
+      const bs = bodiesAt(w);
+      if (!bs.length) { app.toast('Click on an object.'); return; }
+      const top = bs[0];
+      const base = bs[1] || null;
+      if (top.fixed && (!base || base.fixed)) { app.toast('A fixed object is already fixed in place. Use a hinge to pin a movable object.'); return; }
+      const p = jointPoint(w, top);
+      const kind = ed.tool;
+      app.edit(() => {
+        const la = S.toLocal(app.poseOf(top), p);
+        const lb = base ? S.toLocal(app.poseOf(base), p) : { x: p.x, y: p.y };
+        const l = S.makeLink(app.scene, kind, top.id, la, base ? base.id : null, lb);
+        app.scene.links.push(l);
+        app.select({ type: 'link', id: l.id });
+      });
+      if (!keep) ed.setTool('select');
+    }
+
+    ed.placeBody = function placeBody(type, w) {
+      app.edit(() => {
+        const b = S.makeBody(app.scene, type, snapV(w.x, SNAP_POS), snapV(w.y, SNAP_POS));
+        // Never place an object partly inside the floor: lift it to rest on top.
+        if (app.scene.world.floor) {
+          const bottom = b.kind === 'ball' ? b.r : Math.max(...S.vertices(b).map((p) => -p.y));
+          if (b.y < bottom) b.y = bottom;
+        }
+        app.scene.bodies.push(b);
+        app.select({ type: 'body', id: b.id });
+      });
+    };
+
+    ed.dropBody = function dropBody(type, clientX, clientY) {
+      const rect = canvas.getBoundingClientRect();
+      if (clientX < rect.left || clientX > rect.right || clientY < rect.top || clientY > rect.bottom) return false;
+      ed.placeBody(type, rr().toWorld(clientX - rect.left, clientY - rect.top));
+      return true;
+    };
+
+    // ---------- Gestures ----------
+
+    function startGesture(kind, e, sp, extra = {}) {
+      gesture = { kind, start: sp, last: sp, startWorld: rr().toWorld(sp.x, sp.y), moved: false, id: e.pointerId, ...extra };
+    }
+
+    function beginSceneDrag() {
+      // Editing after time has run makes the current state the new start (t = 0).
+      app.beginGesture();
+      gesture.orig = JSON.parse(JSON.stringify({ bodies: app.scene.bodies, links: app.scene.links }));
+      const b = S.bodyById(app.scene, gesture.bodyId);
+      gesture.b0 = b ? { x: b.x, y: b.y, angle: b.angle, w: b.w, h: b.h, r: b.r } : null;
+      gesture.group = S.rigidGroup(app.scene, gesture.bodyId);
+    }
+
+    function restoreOrig() {
+      const o = JSON.parse(JSON.stringify(gesture.orig));
+      app.scene.bodies = o.bodies;
+      app.scene.links = o.links;
+    }
+
+    function applyMove(w) {
+      restoreOrig();
+      const b0 = gesture.b0;
+      const dx = snapV(b0.x + (w.x - gesture.startWorld.x), SNAP_POS) - b0.x;
+      const dy = snapV(b0.y + (w.y - gesture.startWorld.y), SNAP_POS) - b0.y;
+      S.transformBodies(app.scene, gesture.group, (p, angle) => ({ x: p.x + dx, y: p.y + dy, angle }));
+    }
+
+    function applyRotate(w) {
+      restoreOrig();
+      const c = gesture.b0;
+      const a0 = Math.atan2(gesture.startWorld.y - c.y, gesture.startWorld.x - c.x);
+      const a1 = Math.atan2(w.y - c.y, w.x - c.x);
+      let target = c.angle + (a1 - a0);
+      if (snapOn()) target = Math.round(target / SNAP_ANGLE) * SNAP_ANGLE;
+      const d = target - c.angle;
+      const cos = Math.cos(d); const sin = Math.sin(d);
+      S.transformBodies(app.scene, gesture.group, (p, angle) => ({
+        x: c.x + cos * (p.x - c.x) - sin * (p.y - c.y),
+        y: c.y + sin * (p.x - c.x) + cos * (p.y - c.y),
+        angle: angle + d
+      }));
+    }
+
+    function applyResize(w) {
+      restoreOrig();
+      const b = S.bodyById(app.scene, gesture.bodyId);
+      const b0 = gesture.b0;
+      const q = S.toLocal(b0, w);
+      const corner = gesture.corner;
+      const L = S.LIMITS;
+      if (b.kind === 'ball' || b.kind === 'polygon') {
+        const k = Math.hypot(q.x, q.y) / Math.hypot(corner.x, corner.y);
+        b.r = S.clamp(snapV(b0.r * k, SNAP_SIZE), L.r[0], L.r[1]);
+      } else {
+        const kx = Math.abs(q.x) / Math.abs(corner.x);
+        const ky = Math.abs(q.y) / Math.abs(corner.y);
+        b.w = S.clamp(snapV(b0.w * kx, SNAP_SIZE), L.w[0], L.w[1]);
+        b.h = S.clamp(snapV(b0.h * ky, SNAP_SIZE), L.h[0], L.h[1]);
+      }
+      S.refitLengths(app.scene, new Set([b.id]));
+    }
+
+    function zoomAt(sx, sy, factor) {
+      const camr = app.scene.camera;
+      const before = rr().toWorld(sx, sy);
+      camr.scale = S.clamp(camr.scale * factor, 4, 1500);
+      const after = rr().toWorld(sx, sy);
+      camr.cx += before.x - after.x;
+      camr.cy += before.y - after.y;
+      app.cameraChanged();
+    }
+    ed.zoomAt = zoomAt;
+
+    function onPointerDown(e) {
+      if (e.button === 1 || e.button === 2) e.preventDefault();
+      canvas.focus({ preventScroll: true });
+      const sp = localPoint(e);
+      pointers.set(e.pointerId, sp);
+      try { canvas.setPointerCapture(e.pointerId); } catch (err) { /* pointer already gone */ }
+      if (pointers.size === 2) {
+        // Two fingers: pinch to zoom and pan. Undo any one-finger drag that had started.
+        if (gesture && gesture.moved && gesture.orig) { restoreOrig(); app.endGesture(false); }
+        if (gesture && gesture.kind === 'grab') app.sim.release();
+        gesture = null;
+        const [a, b] = [...pointers.values()];
+        pinch = { d: Math.hypot(b.x - a.x, b.y - a.y), mid: { x: (a.x + b.x) / 2, y: (a.y + b.y) / 2 } };
+        return;
+      }
+      if (pointers.size > 2) return;
+      const w = rr().toWorld(sp.x, sp.y);
+      ed.cursorWorld = w;
+      if (e.button === 1 || e.button === 2 || ed.tool === 'pan') { startGesture('pan', e, sp); return; }
+      if (ed.armed) {
+        ed.placeBody(ed.armed, w);
+        if (!e.shiftKey) ed.arm(null);
+        return;
+      }
+      if (['spring', 'rod', 'rope'].includes(ed.tool)) { placeLinkEnd(w, e.shiftKey); app.requestDraw(); return; }
+      if (['hinge', 'motor', 'weld'].includes(ed.tool)) { placeJoint(w, e.shiftKey); app.requestDraw(); return; }
+      const hit = hitTest(sp);
+      if (!hit) { startGesture('pan', e, sp, { deselect: true }); return; }
+      if (hit.type === 'rotate' || hit.type === 'resize') {
+        startGesture(hit.type, e, sp, { bodyId: hit.body.id, corner: ed.handles(hit.body).corner });
+        return;
+      }
+      if (hit.type === 'link') {
+        app.select({ type: 'link', id: hit.link.id });
+        startGesture('none', e, sp);
+        return;
+      }
+      app.select({ type: 'body', id: hit.body.id });
+      if (app.running) {
+        if (!hit.body.fixed && app.sim.grab(hit.body.id, w)) startGesture('grab', e, sp);
+        else startGesture('none', e, sp);
+        return;
+      }
+      startGesture('move', e, sp, { bodyId: hit.body.id });
+    }
+
+    function onPointerMove(e) {
+      const sp = localPoint(e);
+      if (pointers.has(e.pointerId)) pointers.set(e.pointerId, sp);
+      const w = rr().toWorld(sp.x, sp.y);
+      ed.cursorWorld = w;
+      if (pinch && pointers.size === 2) {
+        const [a, b] = [...pointers.values()];
+        const d = Math.hypot(b.x - a.x, b.y - a.y);
+        const mid = { x: (a.x + b.x) / 2, y: (a.y + b.y) / 2 };
+        const camr = app.scene.camera;
+        camr.cx -= (mid.x - pinch.mid.x) / camr.scale;
+        camr.cy += (mid.y - pinch.mid.y) / camr.scale;
+        if (pinch.d > 0) zoomAt(mid.x, mid.y, d / pinch.d);
+        pinch = { d, mid };
+        app.cameraChanged();
+        return;
+      }
+      if (!gesture) {
+        if (e.pointerType === 'mouse') updateHover(sp);
+        if (ed.armed || ed.tool !== 'select') app.requestDraw();
+        return;
+      }
+      if (gesture.id !== e.pointerId) return;
+      if (!gesture.moved && Math.hypot(sp.x - gesture.start.x, sp.y - gesture.start.y) < DRAG_START_PX) return;
+      const firstMove = !gesture.moved;
+      gesture.moved = true;
+      switch (gesture.kind) {
+        case 'pan': {
+          const camr = app.scene.camera;
+          camr.cx -= (sp.x - gesture.last.x) / camr.scale;
+          camr.cy += (sp.y - gesture.last.y) / camr.scale;
+          app.cameraChanged();
+          break;
+        }
+        case 'grab':
+          app.sim.moveGrab(w);
+          break;
+        case 'move':
+        case 'rotate':
+        case 'resize':
+          if (firstMove) beginSceneDrag();
+          if (gesture.kind === 'move') applyMove(w);
+          else if (gesture.kind === 'rotate') applyRotate(w);
+          else applyResize(w);
+          app.gestureChanged();
+          break;
+        default:
+          break;
+      }
+      gesture.last = sp;
+    }
+
+    function onPointerUp(e) {
+      pointers.delete(e.pointerId);
+      try { canvas.releasePointerCapture(e.pointerId); } catch (err) { /* already released */ }
+      if (pinch) { if (pointers.size < 2) pinch = null; return; }
+      if (!gesture || gesture.id !== e.pointerId) return;
+      const g = gesture;
+      gesture = null;
+      if (g.kind === 'grab') app.sim.release();
+      if (g.kind === 'pan' && !g.moved && g.deselect) app.select(null);
+      if ((g.kind === 'move' || g.kind === 'rotate' || g.kind === 'resize') && g.moved) app.endGesture(true);
+      app.requestDraw();
+    }
+
+    function onPointerCancel(e) {
+      pointers.delete(e.pointerId);
+      if (pinch && pointers.size < 2) pinch = null;
+      if (gesture && gesture.id === e.pointerId) {
+        if (gesture.kind === 'grab') app.sim.release();
+        if (gesture.moved && gesture.orig) app.endGesture(true);
+        gesture = null;
+      }
+    }
+
+    function updateHover(sp) {
+      const hit = hitTest(sp);
+      let hover = null;
+      let cursor = '';
+      if (ed.armed || ed.tool !== 'select') cursor = 'crosshair';
+      else if (hit) {
+        if (hit.type === 'rotate') cursor = 'grab';
+        else if (hit.type === 'resize') cursor = 'nwse-resize';
+        else if (hit.type === 'link') { hover = { type: 'link', id: hit.link.id }; cursor = 'pointer'; }
+        else { hover = { type: 'body', id: hit.body.id }; cursor = app.running ? (hit.body.fixed ? 'pointer' : 'grab') : 'move'; }
+      }
+      canvas.style.cursor = cursor;
+      const changed = JSON.stringify(hover) !== JSON.stringify(app.hover);
+      app.hover = hover;
+      if (changed) app.requestDraw();
+    }
+
+    canvas.addEventListener('pointerdown', onPointerDown);
+    canvas.addEventListener('pointermove', onPointerMove);
+    canvas.addEventListener('pointerup', onPointerUp);
+    canvas.addEventListener('pointercancel', onPointerCancel);
+    canvas.addEventListener('pointerleave', () => { if (!gesture) { app.hover = null; ed.cursorWorld = null; app.requestDraw(); } });
+    canvas.addEventListener('contextmenu', (e) => e.preventDefault());
+    canvas.addEventListener('wheel', (e) => {
+      e.preventDefault();
+      const sp = localPoint(e);
+      if (!e.ctrlKey && Math.abs(e.deltaX) > Math.abs(e.deltaY) * 0.8 && e.deltaMode === 0) {
+        const camr = app.scene.camera;
+        camr.cx += e.deltaX / camr.scale;
+        camr.cy -= e.deltaY / camr.scale;
+        app.cameraChanged();
+        return;
+      }
+      const dy = e.deltaMode === 1 ? e.deltaY * 16 : e.deltaY;
+      zoomAt(sp.x, sp.y, Math.exp(-dy * (e.ctrlKey ? 0.01 : 0.0016)));
+    }, { passive: false });
+
+    ed.HINTS = HINTS;
+    ed.isDragging = () => !!(gesture && gesture.moved);
+    return ed;
+  }
+
+  PPM.editor = { createEditor };
+})(typeof window !== 'undefined' ? window : globalThis);
