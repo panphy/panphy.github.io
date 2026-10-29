@@ -8,6 +8,7 @@
     select: '<path d="M5 3l14 7-6 1.6L10.5 18z"/>',
     pan: '<path d="M12 3v18M3 12h18"/><path d="M9.5 5.5L12 3l2.5 2.5M9.5 18.5L12 21l2.5-2.5M5.5 9.5L3 12l2.5 2.5M18.5 9.5L21 12l-2.5 2.5"/>',
     rotate: '<path d="M20 11a8 8 0 10-2.3 5.7"/><path d="M20 4v7h-7"/>',
+    rotateCcw: '<path d="M4 11a8 8 0 112.3 5.7"/><path d="M4 4v7h7"/>',
     duplicate: '<rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V6a2 2 0 00-2-2H6a2 2 0 00-2 2v8a2 2 0 002 2h2"/>',
     trash: '<path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13M10 11v6M14 11v6"/>',
     cross: '<path d="M6.5 6.5l11 11M17.5 6.5l-11 11"/>',
@@ -174,7 +175,8 @@
     document.querySelectorAll('[data-tool]').forEach((b) => b.addEventListener('click', () => { app.editor.arm(null); app.editor.setTool(b.dataset.tool); }));
     $('btn-undo').addEventListener('click', () => app.undo());
     $('btn-redo').addEventListener('click', () => app.redo());
-    $('btn-rotate').addEventListener('click', (e) => app.rotateSelection(e.shiftKey ? 1 : -1));
+    $('btn-rotate-ccw').addEventListener('click', () => app.rotateSelection(1));
+    $('btn-rotate').addEventListener('click', () => app.rotateSelection(-1));
     $('btn-duplicate').addEventListener('click', () => app.duplicateSelection());
     $('btn-delete').addEventListener('click', () => app.deleteSelection());
     $('btn-zoom-in').addEventListener('click', () => app.zoomBy(1.25));
@@ -195,7 +197,7 @@
       $('btn-redo').disabled = !app.canRedo();
       $('btn-delete').disabled = !sel;
       $('btn-duplicate').disabled = !sel || sel.type !== 'body';
-      $('btn-rotate').disabled = !sel || sel.type !== 'body' || app.running;
+      $('btn-rotate').disabled = $('btn-rotate-ccw').disabled = !sel || sel.type !== 'body' || app.running;
       $('btn-snap').setAttribute('aria-pressed', String(app.snap));
       $('btn-graph').setAttribute('aria-pressed', String(app.graphOpen));
       $('btn-clear').disabled = !app.scene.bodies.length && !app.scene.links.length;
@@ -361,6 +363,27 @@
       ui.fields.push(() => { inp.checked = !!get(); });
       if (help) el.title = help;
       return el;
+    }
+
+    // A small segmented control, such as a motor's direction.
+    function choiceField(label, options, get, set) {
+      const el = document.createElement('div');
+      el.className = 'field choice-row';
+      el.innerHTML = `<span class="choice-label">${esc(label)}</span><span class="seg" role="group" aria-label="${esc(label)}">${options.map((o) => `<button type="button" data-v="${o.v}" title="${esc(o.title || o.label)}">${o.icon ? icon(o.icon) : ''}<span>${esc(o.label)}</span></button>`).join('')}</span>`;
+      const sync = () => el.querySelectorAll('[data-v]').forEach((b) => b.setAttribute('aria-pressed', String(String(get()) === b.dataset.v)));
+      el.querySelectorAll('[data-v]').forEach((b) => b.addEventListener('click', () => { set(Number(b.dataset.v)); sync(); }));
+      sync();
+      ui.fields.push(sync);
+      return el;
+    }
+
+    // Motor direction and speed: speed is entered as a size, the direction chosen apart.
+    const motorDir = (x) => (x.dir === 1 || x.dir === -1 ? x.dir : x.speed > 0 ? 1 : -1);
+    function motorFields(l, param, help) {
+      return [
+        choiceField('Direction', [{ v: -1, label: 'Clockwise', icon: 'rotate' }, { v: 1, label: 'Counterclockwise', icon: 'rotateCcw' }], () => motorDir(l()), (d) => app.editParam(() => { const x = l(); x.dir = d; x.speed = d * Math.abs(x.speed); }, null)),
+        numField({ label: 'Motor speed \\(\\omega\\)', plain: 'Motor speed ω', unit: 'rad/s', get: () => Math.abs(l().speed), set: param((x, v) => { x.speed = motorDir(x) * v; }), min: 0, max: L.speed[1], slider: [0, 30], step: 0.1, help: help ? 'How fast the part turns relative to what it is hinged to. Clockwise drives a wheel to the right.' : '' })
+      ];
     }
 
     function card(label, extraClass = '') {
@@ -552,9 +575,9 @@
         main.appendChild(numField({ label: 'Length \\(L\\)', plain: 'Length L', unit: 'm', get: () => l().length, set: param((x, v) => { x.length = v; }), min: L.length[0], max: L.length[1], slider: [0.05, 10], step: 0.01, help: l().kind === 'rod' ? 'A rod is massless and rigid.' : 'A rope is massless; it pulls only when taut.' }));
         rows.push({ key: 'length', label: 'Distance between ends', plain: 'Distance' }, { key: 'force', label: 'Tension \\(T\\)', plain: 'Tension T' });
       } else if (l().kind === 'hinge') {
-        main.appendChild(toggleField('Motor', () => l().motor, (v) => app.editParam(() => { l().motor = v; if (v && !l().torque) l().torque = 50; if (v && !l().speed) l().speed = -3; }, null, false, true)));
+        main.appendChild(toggleField('Motor', () => l().motor, (v) => app.editParam(() => { l().motor = v; if (v && !l().torque) l().torque = 50; if (v && !l().speed) l().speed = 3 * motorDir(l()); }, null, false, true)));
         if (l().motor) {
-          main.appendChild(numField({ label: 'Motor speed \\(\\omega\\)', plain: 'Motor speed ω', unit: 'rad/s', get: () => l().speed, set: param((x, v) => { x.speed = v; }), min: L.speed[0], max: L.speed[1], slider: [-30, 30], step: 0.1, help: 'Positive turns counterclockwise. Negative drives a wheel to the right.' }));
+          motorFields(l, param, true).forEach((el) => main.appendChild(el));
           main.appendChild(numField({ label: 'Maximum torque', unit: 'N m', get: () => l().torque, set: param((x, v) => { x.torque = v; }), min: L.torque[0], max: L.torque[1], slider: [0.1, 1000], log: true }));
           rows.push({ key: 'rate', label: 'Relative angular velocity', plain: 'Angular velocity' }, { key: 'torque', label: 'Motor torque', plain: 'Motor torque' });
         }
@@ -671,11 +694,11 @@
         items.push(numField({ label: 'Length \\(L\\)', plain: 'Length L', unit: 'm', get: () => l().length, set: param((x, v) => { x.length = v; }), min: L.length[0], max: L.length[1], slider: [0.05, 10], step: 0.01 }));
       } else if (l().kind === 'hinge') {
         items.push(toggleField('Motor', () => l().motor, (v) => {
-          app.editParam(() => { l().motor = v; if (v && !l().torque) l().torque = 50; if (v && !l().speed) l().speed = -3; }, null, false, true);
+          app.editParam(() => { l().motor = v; if (v && !l().torque) l().torque = 50; if (v && !l().speed) l().speed = 3 * motorDir(l()); }, null, false, true);
           if (quickAt) ui.showQuick(sel, quickAt.x, quickAt.y);
         }));
         if (l().motor) {
-          items.push(numField({ label: 'Motor speed \\(\\omega\\)', plain: 'Motor speed ω', unit: 'rad/s', get: () => l().speed, set: param((x, v) => { x.speed = v; }), min: L.speed[0], max: L.speed[1], slider: [-30, 30], step: 0.1 }));
+          motorFields(l, param, false).forEach((el) => items.push(el));
           items.push(numField({ label: 'Maximum torque', unit: 'N m', get: () => l().torque, set: param((x, v) => { x.torque = v; }), min: L.torque[0], max: L.torque[1], slider: [0.1, 1000], log: true }));
         }
       }
