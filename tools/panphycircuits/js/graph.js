@@ -4,6 +4,7 @@
 (function (root) {
   const PPC = root.PPC = root.PPC || {};
   const { units, registry } = PPC;
+  const R = root.PanPhyGraphRange;
 
   // Distinct, color-blind-aware trace colors (dashes also differ per unit).
   const COLORS = ['#2563EB', '#E8590C', '#0F9D58', '#AE3EC9', '#C2255C', '#0B7285', '#7048E8', '#5C940D'];
@@ -51,11 +52,7 @@
   }
 
   function timeBounds(app, tr) {
-    const win = app.graphWindow;
-    const tEnd = tr.t.length ? tr.t[tr.t.length - 1] : 0;
-    const t0 = win === 'all' ? (tr.t.length ? tr.t[0] : 0) : Math.max(0, tEnd - Number(win));
-    const t1 = Math.max(tEnd, t0 + (win === 'all' ? 1 : Number(win)));
-    return { t0, t1 };
+    return R.bounds(tr.t, app.graphRange);
   }
 
   function sampleRows(app, list) {
@@ -132,6 +129,13 @@
 
   function createGraph(app, canvas, legendEl, exportsEl) {
     let lastDraw = 0;
+    const selection = R.mount(canvas, {
+      getTimes: () => app.sim.traces.t,
+      getSource: () => app.sim.traces,
+      getRange: () => app.graphRange,
+      setRange: (range) => { app.graphRange = range; },
+      redraw: () => draw(true)
+    });
 
     function niceStep(range, target) {
       const raw = range / target;
@@ -150,9 +154,11 @@
     }
 
     function draw(force) {
+      selection.sync();
       const now = performance.now();
       if (!force && now - lastDraw < 66) return;
       lastDraw = now;
+      selection.setPlot(null);
       const dpr = window.devicePixelRatio || 1;
       const W = canvas.clientWidth, H = canvas.clientHeight;
       if (!W || !H) return;
@@ -180,7 +186,7 @@
         W / 2, H / 2);
         return;
       }
-      const { t0, t1 } = timeBounds(app, tr);
+      const { t0, t1 } = selection.viewBounds(tr.t, app.graphRange);
       const unitsUsed = [...new Set(list.map((s) => s.unit))];
       const axes = {};
       for (const u of unitsUsed) {
@@ -188,7 +194,7 @@
         for (const s of list.filter((x) => x.unit === u)) {
           const arr = tr.series[s.key] || [];
           for (let i = 0; i < arr.length; i++) {
-            if (tr.t[i] < t0) continue;
+            if (tr.t[i] < t0 || tr.t[i] > t1) continue;
             const v = arr[i];
             if (Number.isFinite(v)) { lo = Math.min(lo, v); hi = Math.max(hi, v); }
           }
@@ -201,6 +207,8 @@
       }
       const left = 56, right = unitsUsed.length > 1 ? 56 : 14, top = 10, bottom = 26;
       const pw = W - left - right, ph = H - top - bottom;
+      if (pw <= 0 || ph <= 0) return;
+      selection.setPlot({ left, top, width: pw, height: ph, t0, t1 });
       const X = (t) => left + ((t - t0) / (t1 - t0)) * pw;
       // Grid and time axis.
       g.strokeStyle = line; g.lineWidth = 1; g.fillStyle = ink3; g.font = '11px "IBM Plex Mono", monospace';
@@ -237,7 +245,7 @@
         let pen = false;
         for (let i = 0; i < arr.length; i++) {
           const t = tr.t[i];
-          if (t < t0) continue;
+          if (t < t0 || t > t1) continue;
           const v = arr[i];
           if (!Number.isFinite(v)) { pen = false; continue; }
           const x = X(t), y = Y(v);
@@ -248,10 +256,13 @@
       }
       g.restore();
       g.setLineDash([]);
-      // Legend with latest values.
+      selection.draw(g, cs.getPropertyValue('--accent').trim() || COLORS[0]);
+      // Legend with the last sample in the displayed range.
+      const visibleIndices = R.indices(tr.t, app.graphRange);
+      const lastIndex = visibleIndices[visibleIndices.length - 1];
       for (const s of list) {
         const arr = tr.series[s.key] || [];
-        const last = arr.length ? arr[arr.length - 1] : NaN;
+        const last = lastIndex === undefined ? NaN : arr[lastIndex];
         const item = document.createElement('span');
         item.className = 'legend-item';
         const sw = document.createElement('span');
@@ -279,7 +290,7 @@
       return tab !== null;
     }
 
-    return { draw, syncExports, exportCSV, exportPanPhyPlot, plottedSeries: () => plottedSeries(app), hasExportData: () => hasExportData(app) };
+    return { draw, syncExports, fullGraph: selection.reset, exportCSV, exportPanPhyPlot, plottedSeries: () => plottedSeries(app), hasExportData: () => hasExportData(app) };
   }
 
   const api = { createGraph, plottedSeries, sampleRows, toCSV, panPhyPlotPayload, panPhyPlotUrl, hasExportData, quantityLabel };

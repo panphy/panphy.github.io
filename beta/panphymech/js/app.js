@@ -34,7 +34,7 @@
     graphOpen: true,
     graphHeight: null,
     graphGroup: 'energy',
-    graphWindow: 'all',
+    graphRange: null,
     track: { type: 'system' },
     emptyDismissed: false
   };
@@ -87,6 +87,7 @@
   function rebuild() {
     app.sim = PPM.physics.createSim(app.scene);
     app.simStale = false;
+    app.graphRange = null;
     app.recorder.reset(app.scene, app.sim);
     needsDraw = true;
     needsGraph = true;
@@ -223,7 +224,7 @@
     fn();
     if (app.sim) {
       app.sim.syncParams();
-      if (app.sim.t === 0) app.recorder.reset(app.scene, app.sim);
+      if (app.sim.t === 0) { app.graphRange = null; app.recorder.reset(app.scene, app.sim); }
     }
     if (rerender) app.ui.renderInspector(); else app.ui.refreshFields();
     if (!key || namesOnly) app.ui.renderGraphControls();
@@ -686,12 +687,12 @@
   };
 
   app.exportCsv = function exportCsv() {
-    if (app.recorder.t.length < 2) return;
+    if (G.sampleIndices(app).length < 2) return;
     download(`panphymech-${fileStem(G.trackName(app.scene, app.track))}.csv`, new Blob([G.toCSV(app)], { type: 'text/csv;charset=utf-8;' }));
   };
 
   app.exportPlot = function exportPlot() {
-    if (app.recorder.t.length < 2) return;
+    if (G.sampleIndices(app).length < 2) return;
     const win = window.open(G.panPhyPlotUrl(app), '_blank');
     if (!win) app.toast('Your browser blocked the new tab. Allow pop-ups for this site, or export a CSV instead.');
   };

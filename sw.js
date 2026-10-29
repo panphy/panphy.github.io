@@ -1,4 +1,4 @@
-const BUILD_ID = '2026-10-29T11:15:04Z';
+const BUILD_ID = '2026-10-29T14:50:07Z';
 const CACHE_PREFIX = 'panphy-labs';
 const PRECACHE_NAME = `${CACHE_PREFIX}-precache-${BUILD_ID}`;
 const RUNTIME_CACHE = `${CACHE_PREFIX}-runtime-${BUILD_ID}`;
@@ -23,6 +23,7 @@ const ASSETS_TO_CACHE = [
   '/assets/fullscreen-button.css',
   '/assets/fullscreen-button.js',
   '/assets/math.js',
+  '/assets/graph-range.js',
   '/assets/standalone-top.css',
   '/assets/design.css',
   '/assets/footer.css',

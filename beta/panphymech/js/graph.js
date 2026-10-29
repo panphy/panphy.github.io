@@ -4,6 +4,7 @@
 (function (root) {
   const PPM = root.PPM = root.PPM || {};
   const S = PPM.scene;
+  const R = root.PanPhyGraphRange;
 
   const BASE_INTERVAL = 0.01; // s
   const MAX_SAMPLES = 24000; // then every other sample is dropped and the interval doubles
@@ -156,6 +157,8 @@
     return list;
   }
 
+  function sampleIndices(app) { return R.indices(app.recorder.t, app.graphRange); }
+
   function toCSV(app) {
     const rec = app.recorder;
     const list = columnsFor(app);
@@ -163,7 +166,7 @@
     const escape = (value) => '"' + String(value).replaceAll('"', '""') + '"';
     const header = ['t (s)', ...list.map((s) => `${s.label} (${s.unit})`)];
     const lines = [header.map(escape).join(',')];
-    rec.t.forEach((t, i) => lines.push([formatCell(t), ...cols.map((c) => formatCell(c ? c[i] : null))].map(escape).join(',')));
+    sampleIndices(app).forEach((i) => lines.push([formatCell(rec.t[i]), ...cols.map((c) => formatCell(c ? c[i] : null))].map(escape).join(',')));
     return lines.join('\n') + '\n';
   }
 
@@ -171,10 +174,11 @@
   function panPhyPlotUrl(app) {
     const rec = app.recorder;
     const list = columnsFor(app);
-    const stride = Math.max(1, Math.ceil(rec.t.length / PLOT_ROWS));
-    const idx = [];
-    for (let i = 0; i < rec.t.length; i += stride) idx.push(i);
-    if (idx[idx.length - 1] !== rec.t.length - 1) idx.push(rec.t.length - 1);
+    const visible = sampleIndices(app);
+    const stride = Math.max(1, Math.ceil(visible.length / PLOT_ROWS));
+    const idx = visible.filter((_, i) => i % stride === 0);
+    const last = visible[visible.length - 1];
+    if (last !== undefined && idx[idx.length - 1] !== last) idx.push(last);
     const name = trackName(app.scene, app.track).replace(/[^A-Za-z0-9 .=_-]/g, '').trim();
     const payload = {
       name: ('PanPhyMech ' + name).slice(0, 40),
@@ -214,6 +218,14 @@
   function createGraph(app, canvas) {
     const ctx = canvas.getContext('2d');
     const g = { hidden: new Set(), hoverX: null };
+    const selection = R.mount(canvas, {
+      getTimes: () => app.recorder.t,
+      getSource: () => app.recorder.cols,
+      getRange: () => app.graphRange,
+      setRange: (range) => { app.graphRange = range; g.hoverX = null; g.hoverIndex = null; },
+      redraw: () => app.requestGraph()
+    });
+    g.fullGraph = selection.reset;
 
     g.series = function series() {
       const groups = groupsFor(app.scene, app.track);
@@ -221,6 +233,8 @@
     };
 
     g.draw = function draw() {
+      selection.sync();
+      selection.setPlot(null);
       const rect = canvas.getBoundingClientRect();
       const dpr = Math.min(window.devicePixelRatio || 1, 2.5);
       const W = Math.max(1, rect.width);
@@ -244,14 +258,14 @@
       if (pw < 40 || ph < 30) return;
       const n = rec.t.length;
       const tEnd = n ? rec.t[n - 1] : 0;
-      const win = app.graphWindow;
-      const tMin = win === 'all' ? 0 : Math.max(0, tEnd - Number(win));
-      const tMax = Math.max(tMin + (win === 'all' ? 1 : Number(win)), tEnd);
-      let i0 = 0;
-      while (i0 < n && rec.t[i0] < tMin) i0++;
+      const { t0: tMin, t1: tMax } = selection.viewBounds(rec.t, app.graphRange);
+      const visible = R.indices(rec.t, { start: tMin, end: tMax });
+      const i0 = visible.length ? visible[0] : 0;
+      const i1 = visible.length ? visible[visible.length - 1] + 1 : 0;
+      selection.setPlot({ left: pad.l, top: pad.t, width: pw, height: ph, t0: tMin, t1: tMax });
       const data = list.map((s) => ({ s, v: values(rec, s) }));
       let yMin = Infinity; let yMax = -Infinity;
-      data.forEach(({ v }) => { if (!v) return; for (let i = i0; i < n; i++) { const y = v[i]; if (Number.isFinite(y)) { if (y < yMin) yMin = y; if (y > yMax) yMax = y; } } });
+      data.forEach(({ v }) => { if (!v) return; for (let i = i0; i < i1; i++) { const y = v[i]; if (Number.isFinite(y)) { if (y < yMin) yMin = y; if (y > yMax) yMax = y; } } });
       if (!Number.isFinite(yMin)) { yMin = 0; yMax = 1; }
       if (app.graphGroup === 'energy') { yMin = Math.min(0, yMin); yMax = Math.max(0, yMax); }
       if (yMax - yMin < 1e-9) { const m = Math.abs(yMax) || 1; yMin -= m * 0.5; yMax += m * 0.5; }
@@ -300,18 +314,18 @@
       ctx.beginPath();
       ctx.rect(pad.l, pad.t - 2, pw, ph + 4);
       ctx.clip();
-      const stride = Math.max(1, Math.floor((n - i0) / (pw * 2)));
+      const stride = Math.max(1, Math.floor((i1 - i0) / (pw * 2)));
       data.forEach(({ s, v }) => {
-        if (!v || n - i0 < 1) return;
+        if (!v || i1 - i0 < 1) return;
         ctx.strokeStyle = palette[s.q] || col('--ink');
         ctx.lineWidth = s.q === 'E' ? 1.6 : 2;
         ctx.setLineDash(s.q === 'E' ? [6, 4] : []);
         ctx.beginPath();
-        for (let i = i0; i < n; i += stride) {
+        for (let i = i0; i < i1; i += stride) {
           const px = X(rec.t[i]); const py = Y(v[i]);
           if (i === i0) ctx.moveTo(px, py); else ctx.lineTo(px, py);
         }
-        ctx.lineTo(X(rec.t[n - 1]), Y(v[n - 1]));
+        ctx.lineTo(X(rec.t[i1 - 1]), Y(v[i1 - 1]));
         ctx.stroke();
       });
       ctx.setLineDash([]);
@@ -319,10 +333,10 @@
 
       // Hover readout
       g.hoverIndex = null;
-      if (g.hoverX !== null && n) {
+      if (g.hoverX !== null && i1 > i0) {
         const t = tMin + ((g.hoverX - pad.l) / pw) * (tMax - tMin);
-        if (t >= tMin && t <= tEnd) {
-          let lo = i0; let hi = n - 1;
+        if (t >= tMin && t <= Math.min(tMax, tEnd)) {
+          let lo = i0; let hi = i1 - 1;
           while (hi - lo > 1) { const mid = (lo + hi) >> 1; if (rec.t[mid] < t) lo = mid; else hi = mid; }
           const i = Math.abs(rec.t[lo] - t) < Math.abs(rec.t[hi] - t) ? lo : hi;
           g.hoverIndex = i;
@@ -338,6 +352,7 @@
           });
         }
       }
+      selection.draw(ctx, col('--accent'));
       if (!n || n < 2) {
         ctx.fillStyle = col('--ink-3');
         ctx.textAlign = 'center';
@@ -351,7 +366,9 @@
       const rec = app.recorder;
       const n = rec.t.length;
       if (!n) return { t: null, values: {} };
-      const i = g.hoverIndex !== null && g.hoverIndex !== undefined ? g.hoverIndex : n - 1;
+      const visible = sampleIndices(app);
+      const i = g.hoverIndex !== null && g.hoverIndex !== undefined ? g.hoverIndex : visible[visible.length - 1];
+      if (i === undefined) return { t: null, values: {} };
       const out = {};
       g.series().forEach((s) => { const v = values(rec, s); out[s.q] = v ? v[i] : null; });
       return { t: rec.t[i], values: out };
@@ -368,5 +385,5 @@
     return g;
   }
 
-  PPM.graph = { createRecorder, createGraph, groupsFor, values, toCSV, panPhyPlotUrl, downloadText, trackName, GROUP_LABELS, formatCell };
+  PPM.graph = { createRecorder, createGraph, groupsFor, values, sampleIndices, toCSV, panPhyPlotUrl, downloadText, trackName, GROUP_LABELS, formatCell };
 })(typeof window !== 'undefined' ? window : globalThis);

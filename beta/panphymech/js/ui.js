@@ -910,7 +910,7 @@
       if (v === 'system') app.trackObject({ type: 'system' });
       else { const [type, id] = v.split(':'); app.trackObject({ type, id }); }
     });
-    $('graph-window').addEventListener('change', (e) => { app.graphWindow = e.target.value; app.requestGraph(); });
+    $('graph-full').addEventListener('click', () => app.graph.fullGraph());
     $('graph-export-csv').addEventListener('click', () => app.exportCsv());
     $('graph-export-plot').addEventListener('click', () => app.exportPlot());
 
@@ -937,7 +937,7 @@
         const el = legend.querySelector(`[data-legend="${s.q}"]`);
         if (el) el.textContent = values[s.q] === null || values[s.q] === undefined ? '' : `${fmt(values[s.q])} ${s.unit}`;
       });
-      const has = app.recorder.t.length > 1 && app.graph.series().length > 0;
+      const has = G.sampleIndices(app).length > 1 && app.graph.series().length > 0;
       $('graph-export-csv').disabled = !has;
       $('graph-export-plot').disabled = !has;
     };

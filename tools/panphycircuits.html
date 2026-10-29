@@ -198,17 +198,10 @@
               <button type="button" id="graph-export-csv" class="graph-export-pill">Export CSV</button>
               <button type="button" id="graph-export-plot" class="graph-export-pill">Export to PanPhyPlot</button>
             </div>
-            <label class="graph-window"><span class="sr-only">Time window</span>
-              <select id="graph-window">
-                <option value="all">All time</option>
-                <option value="60">Last 60 s</option>
-                <option value="10">Last 10 s</option>
-                <option value="1">Last 1 s</option>
-              </select>
-            </label>
+            <button type="button" id="graph-full" class="graph-export-pill" title="Show and export the full recording">Full Graph</button>
             <button type="button" id="graph-close" class="icon-btn" data-icon="close" aria-label="Close graph"></button>
           </div>
-          <canvas id="graph-canvas" class="graph-canvas" aria-label="Graph of plotted meter and oscilloscope readings against time"></canvas>
+          <canvas id="graph-canvas" class="graph-canvas" tabindex="0" title="Drag to select a time range. Use +/− to zoom, arrow keys to pan, and Escape for Full Graph." aria-label="Graph of plotted meter and oscilloscope readings against time"></canvas>
         </div>
       </section>
 
@@ -271,6 +264,7 @@
   <script src="panphycircuits/js/layout.js"></script>
   <script src="panphycircuits/js/render.js"></script>
   <script src="panphycircuits/js/editor.js"></script>
+  <script src="/assets/graph-range.js"></script>
   <script src="panphycircuits/js/graph.js"></script>
   <script src="panphycircuits/js/ui.js"></script>
   <script src="panphycircuits/js/examples.js"></script>

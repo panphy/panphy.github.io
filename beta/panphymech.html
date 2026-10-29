@@ -140,21 +140,14 @@
             <label class="graph-track"><span class="sr-only">Graph of</span><select id="graph-track"></select></label>
             <div id="graph-groups" class="graph-groups" role="group" aria-label="Quantity"></div>
             <div class="graph-actions">
-              <label class="graph-window"><span class="sr-only">Time window</span>
-                <select id="graph-window">
-                  <option value="all">All time</option>
-                  <option value="10">Last 10 s</option>
-                  <option value="5">Last 5 s</option>
-                  <option value="2">Last 2 s</option>
-                </select>
-              </label>
-              <button type="button" id="graph-export-csv" class="graph-export-pill" title="Download every quantity for this object as a CSV file">Export CSV</button>
+              <button type="button" id="graph-full" class="graph-export-pill" title="Show and export the full recording">Full Graph</button>
+              <button type="button" id="graph-export-csv" class="graph-export-pill" title="Download every quantity for this object in the displayed time range as CSV">Export CSV</button>
               <button type="button" id="graph-export-plot" class="graph-export-pill" title="Open the data in PanPhyPlot to fit curves">Export to PanPhyPlot</button>
               <button type="button" id="graph-close" class="icon-btn" data-icon="close" aria-label="Close graph"></button>
             </div>
           </div>
           <div id="graph-legend" class="graph-legend"></div>
-          <canvas id="graph-canvas" class="graph-canvas" aria-label="Graph of the chosen quantity against time"></canvas>
+          <canvas id="graph-canvas" class="graph-canvas" tabindex="0" title="Drag to select a time range. Use +/− to zoom, arrow keys to pan, and Escape for Full Graph." aria-label="Graph of the chosen quantity against time"></canvas>
         </div>
       </section>
 
@@ -215,7 +208,7 @@
           <li>Play (Space) runs time; Reset returns to the start. Editing after time has run makes the current state the new start.</li>
           <li>While it runs, drag an object to pull it.</li>
           <li>Fit frames the objects at their current positions. It does not reserve space for future motion.</li>
-          <li>The graph shows position, velocity or energy of the chosen object, a spring, or the whole system. Hover to read values. Export as CSV or open in PanPhyPlot to fit curves.</li>
+          <li>The graph shows position, velocity or energy of the chosen object, a spring, or the whole system. Hover to read values. Drag across the graph to select a time range for viewing and export; Full Graph restores the entire recording. Export as CSV or open in PanPhyPlot to fit curves.</li>
         </ul>
       </section>
       <section>
@@ -251,6 +244,7 @@
   <script src="panphymech/js/svg.js"></script>
   <script src="panphymech/js/render.js"></script>
   <script src="panphymech/js/editor.js"></script>
+  <script src="/assets/graph-range.js"></script>
   <script src="panphymech/js/graph.js"></script>
   <script src="panphymech/js/ui.js"></script>
   <script src="panphymech/js/app.js"></script>
