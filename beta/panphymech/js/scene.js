@@ -421,7 +421,7 @@
       scene.links.push(l);
     });
     if (data.camera && Number.isFinite(data.camera.scale)) {
-      scene.camera = { cx: num(data.camera.cx, 0), cy: num(data.camera.cy, 2), scale: clamp(data.camera.scale, 2, 2000) };
+      scene.camera = { cx: num(data.camera.cx, 0), cy: num(data.camera.cy, 2), scale: clamp(data.camera.scale, 0.01, 2000) };
     }
     scene.nextId = Math.max(num(data.nextId, 1), maxNum + 1);
     return { scene, skipped };

@@ -265,6 +265,8 @@
       if (a === 'open') $('file-input').click();
       if (a === 'save') app.saveFile();
       if (a === 'png') app.exportPng();
+      if (a === 'svg') app.exportSvg();
+      if (a === 'panphymd') app.exportPanPhyMD();
     }));
     $('file-input').addEventListener('change', (e) => {
       const f = e.target.files && e.target.files[0];

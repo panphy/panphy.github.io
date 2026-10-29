@@ -558,7 +558,9 @@
 
   // ---------- View ----------
 
+  let fitRequest = 0;
   app.cameraChanged = function cameraChanged() {
+    fitRequest++;
     needsDraw = true;
     $('zoom-readout').textContent = `${Math.round(app.scene.camera.scale)} px/m`;
     scheduleSave();
@@ -568,21 +570,30 @@
     app.editor.zoomAt(app.renderer.w / 2, app.renderer.h / 2, f);
   };
 
-  // Frame the scene (or a given box), with the floor near the bottom of the view.
-  app.fit = function fit(view) {
+  // Center the swept motion bounds, with a small, constant screen margin.
+  app.fit = async function fit(view) {
+    const request = ++fitRequest;
+    const signature = S.serialize(app.scene);
+    const cancelled = () => request !== fitRequest || signature !== S.serialize(app.scene);
+    const capture = app.sim && !app.simStale ? app.sim.capture() : null;
+    let fitted;
+    try {
+      fitted = view ? { box: view, far: [] } : await PPM.framing.motionBox(app.scene, capture, cancelled);
+    } catch (e) {
+      if (cancelled()) return;
+      fitted = S.fitBox(app.scene, app.poseOf);
+      app.toast('Motion preview unavailable; fitted the current scene.');
+    }
+    if (!fitted || cancelled()) return;
     const r = app.renderer;
-    const fitted = view ? { box: view, far: [] } : S.fitBox(app.scene, app.poseOf);
     const bb = fitted.box || { minX: -4, maxX: 4, minY: 0, maxY: 4 };
-    const minSpan = 3;
-    const w = Math.max(bb.maxX - bb.minX, minSpan);
-    const h = Math.max(bb.maxY - bb.minY, minSpan * 0.6);
-    const margin = 1.25;
+    const w = Math.max(bb.maxX - bb.minX, 0.5);
+    const h = Math.max(bb.maxY - bb.minY, 0.5);
     const cam = app.scene.camera;
-    cam.scale = S.clamp(Math.min(r.w / (w * margin), r.h / (h * margin)), 4, 600);
+    const padding = Math.min(32, r.w * 0.08, r.h * 0.08);
+    cam.scale = S.clamp(Math.min((r.w - 2 * padding) / w, (r.h - 2 * padding) / h), 0.01, 600);
     cam.cx = (bb.minX + bb.maxX) / 2;
-    const viewH = r.h / cam.scale;
-    // With the floor in view, keep it near the bottom edge rather than mid-screen.
-    cam.cy = app.scene.world.floor && bb.minY >= -1e-9 && bb.minY <= 1e-9 ? viewH * 0.4 : (bb.minY + bb.maxY) / 2;
+    cam.cy = (bb.minY + bb.maxY) / 2;
     app.cameraChanged();
     if (fitted.far.length) {
       const f = fitted.far;
@@ -633,8 +644,28 @@
 
   const fileStem = (text) => (String(text).toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') || 'data');
 
-  app.saveFile = function saveFile() {
-    download('panphymech-scene.ppmech', new Blob([JSON.stringify(app.scene, null, 1)], { type: 'application/json' }));
+  app.saveFile = async function saveFile() {
+    const text = JSON.stringify(app.scene, null, 1);
+    const suggestedName = 'panphymech-scene.ppmech';
+    if (typeof window.showSaveFilePicker === 'function') {
+      try {
+        const handle = await window.showSaveFilePicker({ suggestedName, types: [{ description: 'PanPhyMech scene', accept: { 'application/json': ['.ppmech'] } }] });
+        const out = await handle.createWritable();
+        await out.write(text);
+        await out.close();
+        app.toast(`Saved ${handle.name}.`);
+        return;
+      } catch (e) {
+        if (e && e.name === 'AbortError') return;
+      }
+    }
+    // Safari and Firefox do not offer the native picker; still let the user name the file.
+    const name = window.prompt('Save scene as:', suggestedName);
+    if (name === null) return;
+    let filename = name.trim().replace(/[\\/:*?"<>|\x00-\x1f]/g, '-');
+    if (!filename) return;
+    if (!/\.ppmech$/i.test(filename)) filename += '.ppmech';
+    download(filename, new Blob([text], { type: 'application/json' }));
   };
 
   app.openText = function openText(text) {
@@ -647,6 +678,18 @@
     }
     replaceScene(result.scene, { type: 'system' });
     if (result.skipped) app.toast(`Opened, but ${result.skipped} unsupported item${result.skipped === 1 ? ' was' : 's were'} skipped.`);
+  };
+
+  app.exportSvg = function exportSvg() {
+    download('panphymech-scene.svg', new Blob([app.renderer.exportSvg()], { type: 'image/svg+xml' }));
+  };
+
+  app.exportPanPhyMD = function exportPanPhyMD() {
+    const bytes = new TextEncoder().encode(app.renderer.exportSvg());
+    const uri = 'data:image/svg+xml;base64,' + btoa(Array.from(bytes, (byte) => String.fromCharCode(byte)).join(''));
+    const markdown = `![Mechanics scene](${uri})`;
+    const tab = window.open('/tools/panphymd.html#import=' + encodeURIComponent(JSON.stringify({ markdown })), '_blank');
+    app.toast(tab === null ? 'The browser blocked the new tab. Allow pop-ups for this site, then try again.' : 'Scene image sent to PanPhyMD in a new tab.');
   };
 
   app.exportPng = function exportPng() {
