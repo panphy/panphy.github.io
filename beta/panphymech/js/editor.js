@@ -12,12 +12,12 @@
 
   const HINTS = {
     select: 'Drag an object or a connector to move it; a selected connector has end handles. While the simulation runs, drag to pull. Drag empty space to pan.',
-    spring: 'Spring: click the first end on an object or the background, then the second end.',
-    rod: 'Rod: click the first end on an object or the background, then the second end. A rod keeps its length.',
-    rope: 'Rope: click the first end on an object or the background, then the second end. A rope can go slack.',
-    hinge: 'Hinge: click where two objects overlap to pin them together, or on one object to pin it to the background.',
-    motor: 'Motor: click on a wheel where it overlaps another object (or on one object to drive it about a fixed axle).',
-    weld: 'Glue: click where two objects overlap to join them rigidly, or on one object to fix it to the background.'
+    spring: 'Spring: click the first end on an object or the background, then the second end. Right-click or Esc cancels.',
+    rod: 'Rod: click the first end on an object or the background, then the second end. A rod keeps its length. Right-click or Esc cancels.',
+    rope: 'Rope: click the first end on an object or the background, then the second end. A rope can go slack. Right-click or Esc cancels.',
+    hinge: 'Hinge: click where two objects overlap to pin them together, or on one object to pin it to the background. Right-click or Esc cancels.',
+    motor: 'Motor: click on a wheel where it overlaps another object (or on one object to drive it about a fixed axle). Right-click or Esc cancels.',
+    weld: 'Glue: click where two objects overlap to join them rigidly, or on one object to fix it to the background. Right-click or Esc cancels.'
   };
 
   function createEditor(app, canvas) {
@@ -216,7 +216,7 @@
       ed.armed = type;
       app.ui.syncTools();
       canvas.dataset.tool = type ? 'place' : 'select';
-      app.setHint(type ? `Click the canvas to place the ${S.BODY_KINDS[type].label.toLowerCase()}. Hold Shift to place several. Esc cancels.` : HINTS.select);
+      app.setHint(type ? `Click the canvas to place the ${S.BODY_KINDS[type].label.toLowerCase()}. Hold Shift to place several. Right-click or Esc cancels.` : HINTS.select);
       app.requestDraw();
     };
 
@@ -277,7 +277,7 @@
       const t = endTarget(w);
       if (!ed.pending) {
         ed.pending = { a: t.body ? t.body.id : null, la: t.local, world: t.world };
-        app.setHint('Now click the second end. Esc cancels.');
+        app.setHint('Now click the second end. Right-click or Esc cancels.');
         return;
       }
       const p = ed.pending;
@@ -508,6 +508,12 @@
       const w = rr().toWorld(sp.x, sp.y);
       ed.cursorWorld = w;
       app.ui.closeQuick();
+      // Right-click cancels a connector or part being placed, as in PanPhyCircuits' wiring.
+      if (e.button === 2 && (ed.armed || ed.tool !== 'select') && ed.tool !== 'pan') {
+        suppressMenu = true;
+        ed.cancel();
+        return;
+      }
       if (e.button === 2 && ed.tool === 'select' && !ed.armed) {
         // Right-clicking an object opens its settings (on contextmenu); elsewhere it pans.
         const h = hitTest(sp);
@@ -565,8 +571,11 @@
       }, 500);
     }
 
+    let suppressMenu = false;
     canvas.addEventListener('contextmenu', (e) => {
       e.preventDefault();
+      // The right-click that just cancelled placing opens no menu.
+      if (suppressMenu) { suppressMenu = false; return; }
       if (ed.tool !== 'select' || ed.armed) return;
       const h = hitTest(localPoint(e));
       if (!h || (h.type !== 'body' && h.type !== 'link')) return;
