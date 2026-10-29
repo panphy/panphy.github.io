@@ -13,7 +13,7 @@ Objects (ball, box, plank, polygon, ramp, wall) and connectors (spring, rod, rop
 | `js/physics.js` | Builds a Planck world from the scene; springs and air resistance as explicit forces; readings and energies |
 | `js/examples.js` | Example experiments, each built in code |
 | `js/render.js` | Canvas drawing: grid, floor, objects, connectors, trails, vectors, handles |
-| `js/editor.js` | Pointer interaction: placing, connecting, moving, rotating, resizing, re-attaching connectors, the delete cross, right-click and touch-and-hold settings, grabbing, panning, zooming |
+| `js/editor.js` | Pointer interaction: placing, connecting, moving, rotating, resizing, moving and re-attaching connectors, the delete cross, right-click and touch-and-hold settings, grabbing, panning, zooming |
 | `js/graph.js` | The sample recorder, the time graph, CSV and PanPhyPlot export |
 | `js/ui.js`, `js/app.js` | Panels, inspector and quick settings; state, run loop, undo, autosave, fitting the view, files and shortcuts |
 
