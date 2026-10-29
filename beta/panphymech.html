@@ -40,9 +40,9 @@
               <button type="button" role="menuitem" data-file="open">Open file…</button>
               <button type="button" role="menuitem" data-file="save">Save as file (.ppmech)…</button>
               <hr>
-              <button type="button" role="menuitem" data-file="svg">Export as SVG</button>
+              <button type="button" role="menuitem" data-file="svg">Export this scene as SVG</button>
+              <button type="button" role="menuitem" data-file="png">Export this scene as PNG</button>
               <button type="button" role="menuitem" data-file="panphymd">Export to PanPhyMD</button>
-              <button type="button" role="menuitem" data-file="png">Export the scene as PNG</button>
             </div>
           </div>
         </div>
@@ -55,7 +55,7 @@
     <main class="main">
       <aside id="library" class="pane library" aria-labelledby="library-title">
         <div class="pane-head">
-          <div class="pane-title"><h2 class="pane-heading" id="library-title">Parts</h2><p class="pane-hint">Click, then click the scene</p></div>
+          <div class="pane-title"><h2 class="pane-heading" id="library-title">Parts</h2><p class="pane-hint">Click or drag into the scene</p></div>
           <button type="button" class="icon-btn panel-close" data-close-panel data-icon="close" aria-label="Close parts"></button>
         </div>
         <div id="lib-list" class="lib-list"></div>
@@ -194,6 +194,7 @@
           <li>Drag an object to move it. Use the round handle above it to rotate and the square handle to resize.</li>
           <li>Hinged and glued objects move together while you edit.</li>
           <li>Shift-click (or use Select several) to pick several objects. <strong>Merge</strong> joins them into one rigid shape; <strong>Subtract</strong> cuts the last one you picked out of the others, so you can make cups, rings and hollow boxes.</li>
+          <li>Drag any part from the library into the scene. For a spring, rod or rope, drop the first end, then click the second end. Hinges, motors and glue attach where dropped.</li>
           <li>Right-click an object or connector, or touch and hold it, for its main settings. The small cross deletes the selection.</li>
           <li>Drag empty space to pan; scroll, pinch or use + and − to zoom.</li>
         </ul>

@@ -142,7 +142,8 @@
         const isBody = !!S.BODY_KINDS[kind];
         let drag = null;
         btn.addEventListener('pointerdown', (e) => {
-          if (!isBody || e.button !== 0) return;
+          if (e.button !== 0) return;
+          delete btn.dataset.suppressClick;
           drag = { x: e.clientX, y: e.clientY, ghost: null, id: e.pointerId };
           btn.setPointerCapture(e.pointerId);
         });
@@ -164,7 +165,10 @@
           if (d.ghost) {
             d.ghost.remove();
             d.dropped = true;
-            if (e.type === 'pointerup') app.editor.dropBody(kind, e.clientX, e.clientY);
+            if (e.type === 'pointerup') {
+              if (isBody) app.editor.dropBody(kind, e.clientX, e.clientY);
+              else app.editor.dropConnector(kind, e.clientX, e.clientY);
+            }
             btn.dataset.suppressClick = '1';
           }
         };
