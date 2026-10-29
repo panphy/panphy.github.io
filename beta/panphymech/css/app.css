@@ -68,7 +68,7 @@ button, input, select { font: inherit; color: inherit; }
 .appbar-group { display: flex; align-items: center; gap: 2px; margin-right: 6px; padding-right: 6px; border-right: 1px solid var(--line); }
 .atool {
   display: inline-flex; align-items: center; gap: 6px; min-height: 40px; padding: 6px 9px; border: 1px solid transparent; border-radius: 10px;
-  background: none; color: var(--ink); font-weight: 600; font-size: 0.86rem; white-space: nowrap; cursor: pointer;
+  background: none; color: var(--ink); text-decoration: none; font-weight: 600; font-size: 0.86rem; white-space: nowrap; cursor: pointer;
 }
 .atool:hover, .atool[aria-expanded="true"] { background: var(--surface-3); }
 .atool .icon { width: 18px; height: 18px; color: var(--accent); }
@@ -318,10 +318,6 @@ button, input, select { font: inherit; color: inherit; }
 .example strong { display: block; font-size: 0.92rem; margin-bottom: 3px; }
 .example .ex-text { display: block; font-size: 0.8rem; color: var(--ink-2); line-height: 1.4; }
 .ex-num { flex: 0 0 28px; height: 28px; display: grid; place-items: center; border-radius: 50%; background: var(--accent-soft); color: var(--accent); font: 700 0.8rem var(--font-mono); }
-.help-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 4px 24px; }
-.help-grid h3 { margin: 12px 0 6px; font-size: 0.95rem; }
-.help-grid ul { margin: 0; padding-left: 1.1rem; display: grid; gap: 6px; color: var(--ink-2); font-size: 0.86rem; line-height: 1.45; }
-.help-keys { margin: 16px 0 0; padding-top: 12px; border-top: 1px solid var(--line); font-size: 0.8rem; color: var(--ink-2); }
 .toast { position: fixed; left: 50%; bottom: 72px; transform: translateX(-50%); z-index: 200; display: flex; align-items: center; gap: 12px; max-width: min(560px, calc(100vw - 24px));
   padding: 10px 16px; border-radius: 12px; background: var(--ink); color: var(--bg); box-shadow: var(--shadow-2); font-size: 0.86rem; line-height: 1.4; }
 .toast-btn { flex: none; border: 0; background: transparent; color: var(--accent-hover); font-weight: 700; cursor: pointer; min-height: 32px; }

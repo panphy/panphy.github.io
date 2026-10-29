@@ -298,7 +298,6 @@
     // ---------- Dialogs ----------
 
     function openDialog(d) { if (typeof d.showModal === 'function') d.showModal(); else d.setAttribute('open', ''); }
-    $('btn-help').addEventListener('click', () => openDialog($('dlg-help')));
     function buildExamples() {
       $('examples-list').innerHTML = PPM.examples.list.map((ex, i) => `<li><button type="button" class="example" data-example="${ex.id}"><span class="ex-num">${i + 1}</span><span><strong>${esc(ex.title)}</strong><span class="ex-text">${mathText(ex.text, ex.plain || ex.text)}</span></span></button></li>`).join('');
       $('examples-list').querySelectorAll('[data-example]').forEach((b) => b.addEventListener('click', () => {

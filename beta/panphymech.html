@@ -46,7 +46,7 @@
             </div>
           </div>
         </div>
-        <button type="button" id="btn-help" class="atool atool-quiet" data-icon="guide" title="How to use PanPhyMech"><span>Help</span></button>
+        <a href="panphymech/manual.html" target="_blank" rel="noopener" class="atool atool-quiet" data-icon="guide" title="Open the PanPhyMech manual in a new tab"><span>Manual</span></a>
         <button id="theme-button" type="button" data-panphy-theme-toggle="auto" aria-label="Toggle light/dark theme" title="Toggle light/dark theme"></button>
         <button type="button" data-panphy-fullscreen aria-label="Enter fullscreen" title="Enter fullscreen"></button>
       </div>
@@ -175,52 +175,6 @@
     <form method="dialog" class="dialog-head"><h2 id="examples-title" class="ds-title">Example experiments</h2><button class="icon-btn" value="cancel" aria-label="Close" data-icon="close"></button></form>
     <p class="dialog-sub">Opening an example replaces the current scene (you can undo).</p>
     <ol id="examples-list" class="examples-list"></ol>
-  </dialog>
-
-  <dialog id="dlg-help" class="dialog dialog-wide" aria-labelledby="help-title">
-    <form method="dialog" class="dialog-head"><h2 id="help-title" class="ds-title">Using PanPhyMech</h2><button class="icon-btn" value="cancel" aria-label="Close" data-icon="close"></button></form>
-    <div class="help-grid">
-      <section>
-        <h3>Build</h3>
-        <ul>
-          <li>Click a part, then click the scene. Drag a part in to drop it where you want. Hold Shift to place several.</li>
-          <li>Drag an object to move it. Use the round handle above it to rotate and the square handle to resize.</li>
-          <li>Hinged and glued objects move together while you edit.</li>
-          <li>Shift-click (or use Select several) to pick several objects. <strong>Merge</strong> joins them into one rigid shape; <strong>Subtract</strong> cuts the last one you picked out of the others, so you can make cups, rings and hollow boxes.</li>
-          <li>Drag any part from the library into the scene. For a spring, rod or rope, drop the first end, then click the second end. Hinges, motors and glue attach where dropped.</li>
-          <li>Right-click an object or connector, or touch and hold it, for its main settings. The small cross deletes the selection.</li>
-          <li>Drag empty space to pan; scroll, pinch or use + and − to zoom.</li>
-        </ul>
-      </section>
-      <section>
-        <h3>Connect</h3>
-        <ul>
-          <li><strong>Spring, rod, rope:</strong> click one end, then the other. An end on empty space is fixed to the background. Ends snap to an object’s center when you click near it.</li>
-          <li><strong>Hinge, motor, glue:</strong> click where two objects overlap. On a single object, the hinge pins it to the background.</li>
-          <li>A spring starts at its natural length; change the length or k in the inspector.</li>
-          <li>Rods and ropes are ideal (massless, nothing collides with them) unless you switch on <strong>Solid</strong>. A solid rod is a thin hinged bar; a solid rope is a chain of short links that drapes and wraps round things. A very light rope can break under an object hundreds of times heavier.</li>
-          <li>Drag a spring, rod or rope by its line to move it, or select it and drag an end handle to move one end. Each end attaches to whatever is under it when you let go. Drag a hinge, motor or glue joint to a new spot the same way.</li>
-        </ul>
-      </section>
-      <section>
-        <h3>Run and measure</h3>
-        <ul>
-          <li>Play (Space) runs time; Reset returns to the start. Editing after time has run makes the current state the new start.</li>
-          <li>While it runs, drag an object to pull it.</li>
-          <li>Fit frames the objects at their current positions. It does not reserve space for future motion.</li>
-          <li>The graph shows position, velocity or energy of the chosen object, a spring, or the whole system. Hover to read values. Drag across the graph to select a time range for viewing and export; Full Graph restores the entire recording. Export as CSV or open in PanPhyPlot to fit curves.</li>
-        </ul>
-      </section>
-      <section>
-        <h3>The physics</h3>
-        <ul>
-          <li>Rigid-body mechanics from Planck.js (Box2D), stepped at 240 Hz or faster for stiff springs. Springs follow Hooke’s law exactly; air resistance is <span data-math-static>\(F = kv^2\)</span>.</li>
-          <li>Friction between two surfaces is <span data-math-static>\(\sqrt{\mu_1 \mu_2}\)</span>: the same <span data-math-static>\(\mu\)</span> when both match, zero if either is frictionless. Bounciness uses the larger restitution of the pair.</li>
-          <li>Gravitational energy is measured from y = 0 (the floor). Collisions are slightly soft, so expect small energy changes at impacts.</li>
-        </ul>
-      </section>
-    </div>
-    <p class="help-keys"><strong>Keys:</strong> Space play/pause · . step · right-click cancels placing · V select · H pan · R / Shift+R rotate · Del delete · Ctrl+D duplicate · Ctrl+Z undo · arrows nudge · 0 fit · Esc cancel</p>
   </dialog>
 
   <dialog id="dlg-confirm" class="dialog" aria-labelledby="confirm-title">
